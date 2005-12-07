@@ -1148,7 +1148,7 @@ PERL_CALLCONV Signal_t	Perl_csighandler_va(int sig, ...);
 #endif
 PERL_CALLCONV Signal_t	Perl_sighandler(int sig);
 PERL_CALLCONV Signal_t	Perl_csighandler(int sig);
-PERL_CALLCONV SV**	Perl_stack_grow(pTHX_ SV** sp, SV**p, int n);
+PERL_CALLCONV SV**	Perl_stack_grow(pTHX_ SV** sp, SV** p, int n);
 PERL_CALLCONV I32	Perl_start_subparse(pTHX_ I32 is_format, U32 flags);
 PERL_CALLCONV void	Perl_sub_crush_depth(pTHX_ CV* cv);
 PERL_CALLCONV bool	Perl_sv_2bool(pTHX_ SV* sv);
@@ -1804,25 +1804,25 @@ STATIC void	S_reginsert(pTHX_ struct RExC_state_t *state, U8 op, regnode *opnd);
 STATIC void	S_regoptail(pTHX_ struct RExC_state_t *state, regnode *p, regnode *val);
 STATIC void	S_regtail(pTHX_ struct RExC_state_t *state, regnode *p, regnode *val);
 STATIC char*	S_regwhite(pTHX_ char *p, const char *e);
-STATIC char*	S_nextchar(pTHX_ struct RExC_state_t*);
+STATIC char*	S_nextchar(pTHX_ struct RExC_state_t *state);
 #  ifdef DEBUGGING
 STATIC regnode*	S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l);
 STATIC void	S_put_byte(pTHX_ SV* sv, int c);
 #  endif
-STATIC void	S_scan_commit(pTHX_ struct RExC_state_t*, struct scan_data_t *data);
-STATIC void	S_cl_anything(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl);
+STATIC void	S_scan_commit(pTHX_ struct RExC_state_t* state, struct scan_data_t *data);
+STATIC void	S_cl_anything(pTHX_ struct RExC_state_t* state, struct regnode_charclass_class *cl);
 STATIC int	S_cl_is_anything(pTHX_ const struct regnode_charclass_class *cl);
-STATIC void	S_cl_init(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl);
-STATIC void	S_cl_init_zero(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl);
+STATIC void	S_cl_init(pTHX_ struct RExC_state_t* state, struct regnode_charclass_class *cl);
+STATIC void	S_cl_init_zero(pTHX_ struct RExC_state_t* state, struct regnode_charclass_class *cl);
 STATIC void	S_cl_and(pTHX_ struct regnode_charclass_class *cl, const struct regnode_charclass_class *and_with);
-STATIC void	S_cl_or(pTHX_ struct RExC_state_t*, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with);
-STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t* pRExC_state, regnode **scanp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags);
-STATIC I32	S_add_data(pTHX_ struct RExC_state_t*, I32 n, const char *s);
+STATIC void	S_cl_or(pTHX_ struct RExC_state_t* state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with);
+STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t* state, regnode **scanp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags);
+STATIC I32	S_add_data(pTHX_ struct RExC_state_t* state, I32 n, const char *s);
 STATIC void	S_re_croak2(pTHX_ const char* pat1, const char* pat2, ...)
 			__attribute__noreturn__;
 
-STATIC I32	S_regpposixcc(pTHX_ struct RExC_state_t*, I32 value);
-STATIC void	S_checkposixcc(pTHX_ struct RExC_state_t*);
+STATIC I32	S_regpposixcc(pTHX_ struct RExC_state_t* state, I32 value);
+STATIC void	S_checkposixcc(pTHX_ struct RExC_state_t* state);
 #endif
 
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
@@ -1967,7 +1967,7 @@ STATIC char *	S_filter_gets(pTHX_ SV *sv, PerlIO *fp, STRLEN append)
 STATIC HV *	S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
 			__attribute__warn_unused_result__;
 
-STATIC char *	S_tokenize_use(pTHX_ int is_use, char*)
+STATIC char *	S_tokenize_use(pTHX_ int is_use, char *s)
 			__attribute__warn_unused_result__;
 
 STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv, const char *type);
