@@ -4926,8 +4926,15 @@ that doesn't implement setpriority(2).
 X<setsockopt>
 
 Sets the socket option requested.  Returns undefined if there is an
-error.  OPTVAL may be specified as C<undef> if you don't want to pass an
-argument.
+error.  Use integer constants provided by the C<Socket> module for
+LEVEL and OPNAME.  Values for LEVEL can also be obtained from
+getprotobyname.  OPTVAL might either be a packed string or an integer.
+An integer OPTVAL is shorthand for pack("i", OPTVAL).
+
+An example disabling the Nagle's algorithm for a socket:
+
+    use Socket qw(IPPROTO_TCP TCP_NODELAY);
+    setsockopt($socket, IPPROTO_TCP, TCP_NODELAY, 1);
 
 =item shift ARRAY
 X<shift>
