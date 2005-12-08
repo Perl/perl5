@@ -9047,18 +9047,24 @@ Perl_ptr_table_new(pTHX)
 
 /* map an existing pointer using a table */
 
-void *
-Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, const void *sv)
-{
+STATIC PTR_TBL_ENT_t *
+S_ptr_table_find(PTR_TBL_t *tbl, const void *sv) {
     PTR_TBL_ENT_t *tblent;
     const UV hash = PTR_TABLE_HASH(sv);
     assert(tbl);
     tblent = tbl->tbl_ary[hash & tbl->tbl_max];
     for (; tblent; tblent = tblent->next) {
 	if (tblent->oldval == sv)
-	    return tblent->newval;
+	    return tblent;
     }
-    return (void*)NULL;
+    return 0;
+}
+
+void *
+Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, const void *sv)
+{
+    PTR_TBL_ENT_t const *const tblent = S_ptr_table_find(tbl, sv);
+    return tblent ? tblent->newval : (void *) 0;
 }
 
 /* add a new entry to a pointer-mapping table */
@@ -9066,29 +9072,22 @@ Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, const void *sv)
 void
 Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, const void *oldsv, void *newsv)
 {
-    PTR_TBL_ENT_t *tblent, **otblent;
-    /* XXX this may be pessimal on platforms where pointers aren't good
-     * hash values e.g. if they grow faster in the most significant
-     * bits */
-    const UV hash = PTR_TABLE_HASH(oldsv);
-    bool empty = 1;
+    PTR_TBL_ENT_t *tblent = S_ptr_table_find(tbl, oldsv);
 
-    assert(tbl);
-    otblent = &tbl->tbl_ary[hash & tbl->tbl_max];
-    for (tblent = *otblent; tblent; empty=0, tblent = tblent->next) {
-	if (tblent->oldval == oldsv) {
-	    tblent->newval = newsv;
-	    return;
-	}
+    if (tblent) {
+	tblent->newval = newsv;
+    } else {
+	const UV entry = PTR_TABLE_HASH(oldsv) & tbl->tbl_max;
+
+	new_body_inline(tblent, sizeof(struct ptr_tbl_ent), PTE_SVSLOT);
+	tblent->oldval = oldsv;
+	tblent->newval = newsv;
+	tblent->next = tbl->tbl_ary[entry];
+	tbl->tbl_ary[entry] = tblent;
+	tbl->tbl_items++;
+	if (tblent->next && tbl->tbl_items > tbl->tbl_max)
+	    ptr_table_split(tbl);
     }
-    new_body_inline(tblent, sizeof(struct ptr_tbl_ent), PTE_SVSLOT);
-    tblent->oldval = oldsv;
-    tblent->newval = newsv;
-    tblent->next = *otblent;
-    *otblent = tblent;
-    tbl->tbl_items++;
-    if (!empty && tbl->tbl_items > tbl->tbl_max)
-	ptr_table_split(tbl);
 }
 
 /* double the hash bucket size of an existing ptr table */
