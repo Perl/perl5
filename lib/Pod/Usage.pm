@@ -531,6 +531,9 @@ sub pod2usage {
                      '(?:\s*(?:AND|\/)\s*(?:OPTIONS|ARGUMENTS))?';
         $parser->select( 'SYNOPSIS', $opt_re, "DESCRIPTION/$opt_re" );
     }
+    elsif ($opts{"-verbose"} == 2) {
+        $parser->select('.*');
+    }
     elsif ($opts{"-verbose"} == 99) {
         $parser->select( $opts{"-sections"} );
         $opts{"-verbose"} = 1;
@@ -591,7 +594,7 @@ sub seq_i { return $_[1] }
 # Note that the below is very, very specific to Pod::Text.
 sub _handle_element_end {
     my ($self, $element) = @_;
-    if ($element eq 'head1') {
+    if ($element eq 'head1' && $self->{USAGE_OPTIONS}->{-verbose} < 2) {
         $$self{USAGE_HEAD1} = $$self{PENDING}[-1][1];
         $$self{PENDING}[-1][1] =~ s/^\s*SYNOPSIS\s*$/USAGE/;
     } elsif ($element eq 'head2') {
@@ -610,11 +613,13 @@ sub _handle_element_end {
 
         # Try to do some lowercasing instead of all-caps in headings, and use
         # a colon to end all headings.
-        local $_ = $$self{PENDING}[-1][1];
-        s{([A-Z])([A-Z]+)}{((length($2) > 2) ? $1 : lc($1)) . lc($2)}ge;
-        s/\s*$/:/  unless (/:\s*$/);
-        $_ .= "\n";
-        $$self{PENDING}[-1][1] = $_;
+        if($self->{USAGE_OPTIONS}->{-verbose} < 2) {
+            local $_ = $$self{PENDING}[-1][1];
+            s{([A-Z])([A-Z]+)}{((length($2) > 2) ? $1 : lc($1)) . lc($2)}ge;
+            s/\s*$/:/  unless (/:\s*$/);
+            $_ .= "\n";
+            $$self{PENDING}[-1][1] = $_;
+        }
     }
     if ($$self{USAGE_SKIPPING}) {
         pop @{ $$self{PENDING} };
