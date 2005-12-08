@@ -249,7 +249,7 @@ sub shutdown {
 }
 
 sub setsockopt {
-    @_ == 4 or croak '$sock->setsockopt(LEVEL, OPTNAME)';
+    @_ == 4 or croak '$sock->setsockopt(LEVEL, OPTNAME, OPTVAL)';
     setsockopt($_[0],$_[1],$_[2],$_[3]);
 }
 
