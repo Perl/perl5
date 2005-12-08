@@ -2292,14 +2292,14 @@ pipe_exit_routine(pTHX)
 
     while (info) {
       int need_eof;
-      _ckvmssts(sys$setast(0));
+      _ckvmssts_noperl(sys$setast(0));
       if (info->in && !info->in->shut_on_empty) {
-        _ckvmssts(sys$qio(0,info->in->chan_in,IO$_WRITEOF,0,0,0,
+        _ckvmssts_noperl(sys$qio(0,info->in->chan_in,IO$_WRITEOF,0,0,0,
                           0, 0, 0, 0, 0, 0));
         info->waiting = 1;
         did_stuff = 1;
       }
-      _ckvmssts(sys$setast(1));
+      _ckvmssts_noperl(sys$setast(1));
       info = info->next;
     }
 
@@ -2310,11 +2310,11 @@ pipe_exit_routine(pTHX)
 
         info = open_pipes;
         while (info) {
-          _ckvmssts(sys$setast(0));
+          _ckvmssts_noperl(sys$setast(0));
           if (info->waiting && info->done) 
                 info->waiting = 0;
           nwait += info->waiting;
-          _ckvmssts(sys$setast(1));
+          _ckvmssts_noperl(sys$setast(1));
           info = info->next;
         }
         if (!nwait) break;
@@ -2324,13 +2324,13 @@ pipe_exit_routine(pTHX)
     did_stuff = 0;
     info = open_pipes;
     while (info) {
-      _ckvmssts(sys$setast(0));
+      _ckvmssts_noperl(sys$setast(0));
       if (!info->done) { /* Tap them gently on the shoulder . . .*/
         sts = sys$forcex(&info->pid,0,&abort);
-        if (!(sts&1) && sts != SS$_NONEXPR) _ckvmssts(sts); 
+        if (!(sts&1) && sts != SS$_NONEXPR) _ckvmssts_noperl(sts); 
         did_stuff = 1;
       }
-      _ckvmssts(sys$setast(1));
+      _ckvmssts_noperl(sys$setast(1));
       info = info->next;
     }
 
@@ -2341,11 +2341,11 @@ pipe_exit_routine(pTHX)
 
         info = open_pipes;
         while (info) {
-          _ckvmssts(sys$setast(0));
+          _ckvmssts_noperl(sys$setast(0));
           if (info->waiting && info->done) 
                 info->waiting = 0;
           nwait += info->waiting;
-          _ckvmssts(sys$setast(1));
+          _ckvmssts_noperl(sys$setast(1));
           info = info->next;
         }
         if (!nwait) break;
@@ -2354,12 +2354,12 @@ pipe_exit_routine(pTHX)
 
     info = open_pipes;
     while (info) {
-      _ckvmssts(sys$setast(0));
+      _ckvmssts_noperl(sys$setast(0));
       if (!info->done) {  /* We tried to be nice . . . */
         sts = sys$delprc(&info->pid,0);
-        if (!(sts&1) && sts != SS$_NONEXPR) _ckvmssts(sts); 
+        if (!(sts&1) && sts != SS$_NONEXPR) _ckvmssts_noperl(sts); 
       }
-      _ckvmssts(sys$setast(1));
+      _ckvmssts_noperl(sys$setast(1));
       info = info->next;
     }
 
@@ -2525,7 +2525,8 @@ pipe_tochild_setup(pTHX_ char *rmbx, char *wmbx)
     unsigned int dviitm = DVI$_DEVBUFSIZ;
     int j, n;
 
-    Newx(p, 1, Pipe);
+    n = sizeof(Pipe);
+    _ckvmssts(lib$get_vm(&n, &p));
 
     create_mbx(aTHX_ &p->chan_in , &d_mbx1);
     create_mbx(aTHX_ &p->chan_out, &d_mbx2);
@@ -2695,12 +2696,14 @@ pipe_infromchild_setup(pTHX_ char *rmbx, char *wmbx)
                                       DSC$K_CLASS_S, mbx2};
     unsigned int dviitm = DVI$_DEVBUFSIZ;
 
-    Newx(p, 1, Pipe);
+    int n = sizeof(Pipe);
+    _ckvmssts(lib$get_vm(&n, &p));
     create_mbx(aTHX_ &p->chan_in , &d_mbx1);
     create_mbx(aTHX_ &p->chan_out, &d_mbx2);
 
     _ckvmssts(lib$getdvi(&dviitm, &p->chan_in, 0, &p->bufsize));
-    Newx(p->buf, p->bufsize, char);
+    n = p->bufsize * sizeof(char);
+    _ckvmssts(lib$get_vm(&n, &p->buf));
     p->shut_on_empty = FALSE;
     p->info   = 0;
     p->type   = 0;
@@ -2818,11 +2821,13 @@ pipe_mbxtofd_setup(pTHX_ int fd, char *out)
         }
     }
 
-    Newx(p, 1, Pipe);
+    int n = sizeof(Pipe);
+    _ckvmssts(lib$get_vm(&n, &p));
     p->fd_out = dup(fd);
     create_mbx(aTHX_ &p->chan_in, &d_mbx);
     _ckvmssts(lib$getdvi(&dviitm, &p->chan_in, 0, &p->bufsize));
-    Newx(p->buf, p->bufsize+1, char);
+    n = (p->bufsize+1) * sizeof(char);
+    _ckvmssts(lib$get_vm(&n, &p->buf));
     p->shut_on_empty = FALSE;
     p->retry = 0;
     p->info  = 0;
@@ -3147,12 +3152,12 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
      * environment.  Hence we've switched to LOCAL symbol table.
      */
     unsigned int table = LIB$K_CLI_LOCAL_SYM;
-    int j, wait = 0;
+    int j, wait = 0, n;
     char *p, mode[10], symbol[MAX_DCL_SYMBOL+1], *vmspipe;
     char in[512], out[512], err[512], mbx[512];
     FILE *tpipe = 0;
     char tfilebuf[NAM$C_MAXRSS+1];
-    pInfo info;
+    pInfo info = NULL;
     char cmd_sym_name[20];
     struct dsc$descriptor_s d_symbol= {0, DSC$K_DTYPE_T,
                                       DSC$K_CLASS_S, symbol};
@@ -3239,7 +3244,8 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
       *psts = sts;
       return Nullfp; 
     }
-    Newx(info,1,Info);
+    n = sizeof(Info);
+    _ckvmssts(lib$get_vm(&n, &info));
         
     strcpy(mode,in_mode);
     info->mode = *mode;
@@ -3293,9 +3299,14 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
                 if (!done) _ckvmssts(sys$waitfr(pipe_ef));
             }
 
-            if (info->out->buf) Safefree(info->out->buf);
-            Safefree(info->out);
-            Safefree(info);
+            if (info->out->buf) {
+                n = info->out->bufsize * sizeof(char);
+                _ckvmssts(lib$free_vm(&n, &info->out->buf));
+            }
+            n = sizeof(Pipe);
+            _ckvmssts(lib$free_vm(&n, &info->out));
+            n = sizeof(Info);
+            _ckvmssts(lib$free_vm(&n, &info));
             *psts = RMS$_FNF;
             return Nullfp;
         }
@@ -3352,9 +3363,14 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
                 if (!done) _ckvmssts(sys$waitfr(pipe_ef));
             }
 
-            if (info->in->buf) Safefree(info->in->buf);
-            Safefree(info->in);
-            Safefree(info);
+            if (info->in->buf) {
+                n = info->in->bufsize * sizeof(char);
+                _ckvmssts(lib$free_vm(&n, &info->in->buf));
+            }
+            n = sizeof(Pipe);
+            _ckvmssts(lib$free_vm(&n, &info->in));
+            n = sizeof(Info);
+            _ckvmssts(lib$free_vm(&n, &info));
             *psts = RMS$_FNF;
             return Nullfp;
         }
@@ -3481,7 +3497,7 @@ I32 Perl_my_pclose(pTHX_ PerlIO *fp)
 {
     pInfo info, last = NULL;
     unsigned long int retsts;
-    int done, iss;
+    int done, iss, n;
     
     for (info = open_pipes; info != NULL; last = info, info = info->next)
         if (info->fp == fp) break;
@@ -3501,7 +3517,7 @@ I32 Perl_my_pclose(pTHX_ PerlIO *fp)
      */
      if (info->fp) {
         if (!info->useFILE) 
-     PerlIO_flush(info->fp);   /* first, flush data */
+            PerlIO_flush(info->fp);   /* first, flush data */
         else 
             fflush((FILE *)info->fp);
     }
@@ -3524,7 +3540,7 @@ I32 Perl_my_pclose(pTHX_ PerlIO *fp)
     _ckvmssts(sys$setast(1));
     if (info->fp) {
      if (!info->useFILE) 
-    PerlIO_close(info->fp);
+        PerlIO_close(info->fp);
      else 
         fclose((FILE *)info->fp);
     }
@@ -3552,18 +3568,31 @@ I32 Perl_my_pclose(pTHX_ PerlIO *fp)
     /* free buffers and structures */
 
     if (info->in) {
-        if (info->in->buf) Safefree(info->in->buf);
-        Safefree(info->in);
+        if (info->in->buf) {
+            n = info->in->bufsize * sizeof(char);
+            _ckvmssts(lib$free_vm(&n, &info->in->buf));
+        }
+        n = sizeof(Pipe);
+        _ckvmssts(lib$free_vm(&n, &info->in));
     }
     if (info->out) {
-        if (info->out->buf) Safefree(info->out->buf);
-        Safefree(info->out);
+        if (info->out->buf) {
+            n = info->out->bufsize * sizeof(char);
+            _ckvmssts(lib$free_vm(&n, &info->out->buf));
+        }
+        n = sizeof(Pipe);
+        _ckvmssts(lib$free_vm(&n, &info->out));
     }
     if (info->err) {
-        if (info->err->buf) Safefree(info->err->buf);
-        Safefree(info->err);
+        if (info->err->buf) {
+            n = info->err->bufsize * sizeof(char);
+            _ckvmssts(lib$free_vm(&n, &info->err->buf));
+        }
+        n = sizeof(Pipe);
+        _ckvmssts(lib$free_vm(&n, &info->err));
     }
-    Safefree(info);
+    n = sizeof(Info);
+    _ckvmssts(lib$free_vm(&n, &info));
 
     return retsts;
 
