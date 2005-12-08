@@ -531,7 +531,7 @@ sub pod2usage {
                      '(?:\s*(?:AND|\/)\s*(?:OPTIONS|ARGUMENTS))?';
         $parser->select( 'SYNOPSIS', $opt_re, "DESCRIPTION/$opt_re" );
     }
-    elsif ($opts{"-verbose"} == 2) {
+    elsif ($opts{"-verbose"} >= 2 && $opts{"-verbose"} != 99) {
         $parser->select('.*');
     }
     elsif ($opts{"-verbose"} == 99) {
