@@ -77,6 +77,9 @@ visual appeal of the HTML generated, and to avoid it having any validation
 errors. See also L</make HTML install work>, as the layout of installation tree
 is needed to improve the cross-linking.
 
+The addition of C<Pod::Simple> and its related modules may make this task
+easier to complete.
+
 =head2 Parallel testing
 
 The core regression test suite is getting ever more comprehensive, which has
