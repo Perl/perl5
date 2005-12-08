@@ -594,9 +594,11 @@ sub seq_i { return $_[1] }
 # Note that the below is very, very specific to Pod::Text.
 sub _handle_element_end {
     my ($self, $element) = @_;
-    if ($element eq 'head1' && $self->{USAGE_OPTIONS}->{-verbose} < 2) {
+    if ($element eq 'head1') {
         $$self{USAGE_HEAD1} = $$self{PENDING}[-1][1];
-        $$self{PENDING}[-1][1] =~ s/^\s*SYNOPSIS\s*$/USAGE/;
+        if ($self->{USAGE_OPTIONS}->{-verbose} < 2) {
+            $$self{PENDING}[-1][1] =~ s/^\s*SYNOPSIS\s*$/USAGE/;
+        }
     } elsif ($element eq 'head2') {
         $$self{USAGE_HEAD2} = $$self{PENDING}[-1][1];
     }
