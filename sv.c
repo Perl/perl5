@@ -9127,27 +9127,22 @@ Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl)
 void
 Perl_ptr_table_clear(pTHX_ PTR_TBL_t *tbl)
 {
-    register PTR_TBL_ENT_t **array;
-    UV riter = 0;
+    if (tbl && tbl->tbl_items) {
+	register PTR_TBL_ENT_t **array = tbl->tbl_ary;
+	UV riter = tbl->tbl_max;
 
-    if (!tbl || !tbl->tbl_items) {
-        return;
+	do {
+	    PTR_TBL_ENT_t *entry = array[riter];
+
+	    while (entry) {
+		PTR_TBL_ENT_t *oentry = entry;
+		entry = entry->next;
+		del_pte(oentry);
+	    }
+	} while (riter--);
+
+	tbl->tbl_items = 0;
     }
-
-    array = tbl->tbl_ary;
-    riter = tbl->tbl_max;
-
-    do {
-	PTR_TBL_ENT_t *entry = array[riter];
-
-	while (entry) {
-            PTR_TBL_ENT_t *oentry = entry;
-            entry = entry->next;
-            del_pte(oentry);
-        }
-    } while (riter--);
-
-    tbl->tbl_items = 0;
 }
 
 /* clear and free a ptr table */
