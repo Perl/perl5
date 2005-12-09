@@ -9128,31 +9128,24 @@ void
 Perl_ptr_table_clear(pTHX_ PTR_TBL_t *tbl)
 {
     register PTR_TBL_ENT_t **array;
-    register PTR_TBL_ENT_t *entry;
     UV riter = 0;
-    UV max;
 
     if (!tbl || !tbl->tbl_items) {
         return;
     }
 
     array = tbl->tbl_ary;
-    entry = array[0];
-    max = tbl->tbl_max;
+    riter = tbl->tbl_max;
 
-    for (;;) {
-        if (entry) {
+    do {
+	PTR_TBL_ENT_t *entry = array[riter];
+
+	while (entry) {
             PTR_TBL_ENT_t *oentry = entry;
             entry = entry->next;
             del_pte(oentry);
         }
-        if (!entry) {
-            if (++riter > max) {
-                break;
-            }
-            entry = array[riter];
-        }
-    }
+    } while (riter--);
 
     tbl->tbl_items = 0;
 }
