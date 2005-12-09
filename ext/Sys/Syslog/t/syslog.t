@@ -1,94 +1,94 @@
-#!./perl
+#!/usr/bin/perl -T
 
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
-    require Config; import Config;
-    if ($Config{'extensions'} !~ /\bSyslog\b/) {
-	print "1..0 # Skip: Sys::Syslog was not built\n";
-	exit 0;
-    }
-    if ($Config{'extensions'} !~ /\bSocket\b/) {
-	print "1..0 # Skip: Socket was not built\n";
-	exit 0;
-    }
-
-    require Socket;
-
-    # This code inspired by Sys::Syslog::connect():
-    require Sys::Hostname;
-    my ($host_uniq) = Sys::Hostname::hostname();
-    my ($host)      = $host_uniq =~ /([A-Za-z0-9_.-]+)/;
-
-    if (! defined Socket::inet_aton($host)) {
-        print "1..0 # Skip: Can't lookup $host\n";
-        exit 0;
+    if( $ENV{PERL_CORE} ) {
+        chdir 't';
+        @INC = '../lib';
     }
 }
+
+use strict;
+use Test::More;
+use Config;
+
+# check that the module is at least available
+plan skip_all => "Sys::Syslog was not build" 
+  unless $Config{'extensions'} =~ /\bSyslog\b/;
+
+# we also need Socket
+plan skip_all => "Socket was not build" 
+  unless $Config{'extensions'} =~ /\bSocket\b/;
 
 BEGIN {
-  eval {require Sys::Syslog} or do {
-    if ($@ =~ /Your vendor has not/) {
-      print "1..0 # Skip: missing macros\n";
-      exit 0;
+    plan tests => 16;
+
+    # ok, now loads them
+    eval 'use Socket';
+    use_ok('Sys::Syslog', ':DEFAULT', 'setlogsock');
+}
+
+# check that the documented functions are correctly provided
+can_ok( 'Sys::Syslog' => qw(openlog syslog syslog setlogmask setlogsock closelog) );
+
+
+# check the diagnostics
+# setlogsock()
+eval { setlogsock() };
+like( $@, qr/^Invalid argument passed to setlogsock; must be 'stream', 'unix', 'tcp', 'udp' or 'inet'/, 
+    "calling setlogsock() with no argument" );
+
+# syslog()
+eval { syslog() };
+like( $@, qr/^syslog: expecting argument \$priority/, 
+    "calling syslog() with no argument" );
+
+my $test_string = "uid $< is testing Perl $] syslog(3) capabilities";
+my $r = 0;
+
+# try to test using a Unix socket
+SKIP: {
+    skip "can't connect to Unix socket: _PATH_LOG unavailable", 6
+      unless -e Sys::Syslog::_PATH_LOG();
+
+    # The only known $^O eq 'svr4' that needs this is NCR MP-RAS,
+    # but assuming 'stream' in SVR4 is probably not that bad.
+    my $sock_type = $^O =~ /^(solaris|irix|svr4|powerux)$/ ? 'stream' : 'unix';
+
+    eval { setlogsock($sock_type) };
+    is( $@, '', "setlogsock() called with '$sock_type'" );
+    TODO: {
+        local $TODO = "minor bug";
+        ok( $r, "setlogsock() should return true but returned '$r'" );
     }
-  }
-}
 
-use Sys::Syslog qw(:DEFAULT setlogsock);
+    SKIP: {
+        $r = eval { openlog('perl', 'ndelay', 'local0') };
+        skip "can't connect to syslog", 4 if $@ =~ /^no connection to syslog available/;
+        is( $@, '', "openlog()" );
+        ok( $r, "openlog() should return true but returned '$r'" );
 
-# Test this to 1 if your syslog accepts udp connections.
-# Most don't (or at least shouldn't)
-my $Test_Syslog_INET = 0;
-
-my $test_string = "uid $< is testing perl $] syslog capabilities";
-
-print "1..6\n";
-
-if (Sys::Syslog::_PATH_LOG()) {
-    if (-e Sys::Syslog::_PATH_LOG()) {
-	# The only known $^O eq 'svr4' that needs this is NCR MP-RAS,
-	# but assuming 'stream' in SVR4 is probably not that bad.
-        if ($^O =~ /^(solaris|irix|svr4|powerux)$/) {
-            # we should check for stream support here, not for solaris/irix
-            print defined(eval { setlogsock('stream') }) ? "ok 1\n" : "not ok 1 # $!\n";
-        } else { 
-            print defined(eval { setlogsock('unix') }) ? "ok 1\n" : "not ok 1 # $!\n";
-        }
-        if (defined(eval { openlog('perl', 'ndelay', 'local0') })) {
-	    print "ok 2\n";
-	    print defined(eval { syslog('info', $test_string ) })
-		    ? "ok 3\n" : "not ok 3 # $!\n";
-	} else {
-	    if ($@ =~ /no connection to syslog available/) {
-		print "ok 2 # Skip: syslogd not running\n";
-	    } else {
-		print "not ok 2 # $@\n";
-	    }
-	    print "ok 3 # Skip: openlog failed\n";
-	}
-    } else {
-        for (1..3) {
-            print
-                "ok $_ # Skip: file ",
-                Sys::Syslog::_PATH_LOG(),
-                " does not exist\n";
-        }
+        $r = eval { syslog('info', "$test_string by connecting to a Unix socket") };
+        is( $@, '', "syslog()" );
+        ok( $r, "syslog() should return true but returned '$r'" );
     }
 }
-else {
-    for (1..3) { print "ok $_ # Skip: _PATH_LOG unavailable\n" }
+
+# try to test using a INET socket
+SKIP: {
+    skip "assuming syslog doesn't accept inet connections", 6 if 1;
+
+    my $sock_type = 'inet';
+
+    $r = eval { setlogsock('inet') };
+    is( $@, '', "setlogsock() called with '$sock_type'" );
+    ok( $r, "setlogsock() should return true but returned '$r'" );
+
+    $r = eval { openlog('perl', 'ndelay', 'local0') };
+    is( $@, '', "openlog()" );
+    ok( $r, " -> should return true but returned '$r'" );
+
+    $r = eval { syslog('info', "$test_string by connecting to a INET socket") };
+    is( $@, '', "syslog()" );
+    ok( $r, " -> should return true but returned '$r'" );
 }
 
-if( $Test_Syslog_INET ) {
-    print defined(eval { setlogsock('inet') }) ? "ok 4\n" 
-                                               : "not ok 4\n";
-    print defined(eval { openlog('perl', 'ndelay', 'local0') }) ? "ok 5\n" 
-                                                                : "not ok 5 # $!\n";
-    print defined(eval { syslog('info', $test_string ) }) ? "ok 6\n" 
-                                                   : "not ok 6 # $!\n";
-}
-else {
-    print "ok $_ # Skip: assuming syslog doesn't accept inet connections\n" 
-      foreach (4..6);
-}

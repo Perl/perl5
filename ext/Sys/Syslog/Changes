@@ -1,0 +1,17 @@
+Revision history for Sys-Syslog
+
+0.10    2005.12.08
+        [DOC] Improved documentation.
+        [TESTS] Added -T to t/syslog.t
+        [TESTS] Added t/constants.t to check the macros.
+        [TESTS] Added t/distchk.t, t/podspell.t, t/podcover.t, t/portfs.t
+
+0.09    2005.12.06
+        [CODE] Now setlogsock() really croak(), as documented.
+        [DIST] CPANized from blead@26281.
+        [DIST] Modified Makefile.PL so that ExtUtils::Constant is conditionaly 
+        used, with a fallback in the case it's not available.
+        [DIST] Bumped version to 0.09
+        [DOC] Added support and license information.
+        [TESTS] Rewrote and ported t/syslog.t to Test::More
+
