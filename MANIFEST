@@ -1961,11 +1961,8 @@ lib/Pod/Simple/t/corpus/french_latin1.txt	Pod::Simple test file
 lib/Pod/Simple/t/corpus/french_latin1.xml	Pod::Simple test file
 lib/Pod/Simple/t/corpus/greek_iso_8859_7.pod	Pod::Simple test file
 lib/Pod/Simple/t/corpus/greek_iso_8859_7.xml	Pod::Simple test file
-lib/Pod/Simple/t/corpus/haiku-iso2202jp.txt	Pod::Simple test file
 lib/Pod/Simple/t/corpus/haiku-iso2202jp.xml	Pod::Simple test file
-lib/Pod/Simple/t/corpus/haiku-iso2202jpx.txt	Pod::Simple test file
 lib/Pod/Simple/t/corpus/haiku-iso2202jpx.xml	Pod::Simple test file
-lib/Pod/Simple/t/corpus/haiku-iso2202jpy.txt	Pod::Simple test file
 lib/Pod/Simple/t/corpus/haiku-iso2202jpy.xml	Pod::Simple test file
 lib/Pod/Simple/t/corpus/haiku-iso2202jpz.txt	Pod::Simple test file
 lib/Pod/Simple/t/corpus/haiku-iso2202jpz.xml	Pod::Simple test file
@@ -1980,8 +1977,6 @@ lib/Pod/Simple/t/corpus/nonesuch.xml		Pod::Simple test file
 lib/Pod/Simple/t/corpus_not_yet_impl/fiqhakbar_iso6.txt	Pod::Simple test file
 lib/Pod/Simple/t/corpus_not_yet_impl/fiqhakbar_iso6.xml	Pod::Simple test file
 lib/Pod/Simple/t/corpus_not_yet_impl/polish_implicit_utf8.txt	Pod::Simple test file
-lib/Pod/Simple/t/corpus_not_yet_impl/polish_utf16be_bom.txt	Pod::Simple test file
-lib/Pod/Simple/t/corpus_not_yet_impl/polish_utf16le_bom.txt	Pod::Simple test file
 lib/Pod/Simple/t/corpus_not_yet_impl/polish_utf8_bom2.txt	Pod::Simple test file
 lib/Pod/Simple/t/corpus_not_yet_impl/polish_utf8_bom2.xml	Pod::Simple test file
 lib/Pod/Simple/t/corpus_not_yet_impl/polish_utf8_bom.txt	Pod::Simple test file
