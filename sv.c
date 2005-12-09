@@ -643,7 +643,7 @@ S_more_bodies (pTHX_ size_t size, svtype sv_type)
 
 #define new_body_inline(xpv, size, sv_type) \
     STMT_START { \
-	void **r3wt = &PL_body_roots[sv_type]; \
+	void ** const r3wt = &PL_body_roots[sv_type]; \
 	LOCK_SV_MUTEX; \
 	xpv = *((void **)(r3wt)) \
 	  ? *((void **)(r3wt)) : S_more_bodies(aTHX_ size, sv_type); \
@@ -672,7 +672,7 @@ S_new_body(pTHX_ size_t size, svtype sv_type)
 
 #define del_body(thing, root)			\
     STMT_START {				\
-	void **thing_copy = (void **)thing;	\
+	void ** const thing_copy = (void **)thing;\
 	LOCK_SV_MUTEX;				\
 	*thing_copy = *root;			\
 	*root = (void*)thing_copy;		\
@@ -1409,9 +1409,9 @@ S_not_a_number(pTHX_ SV *sv)
 	  /* each *s can expand to 4 chars + "...\0",
 	     i.e. need room for 8 chars */
 	
-	  const char *s, *end;
-	  for (s = SvPVX_const(sv), end = s + SvCUR(sv); s < end && d < limit;
-	       s++) {
+	  const char *s = SvPVX_const(sv);
+	  const char * const end = s + SvCUR(sv);
+	  for ( ; s < end && d < limit; s++ ) {
 	       int ch = *s & 0xFF;
 	       if (ch & 128 && !isPRINT_LC(ch)) {
 		    *d++ = 'M';
@@ -2167,11 +2167,10 @@ Perl_sv_2nv(pTHX_ register SV *sv)
                     if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
                         if (SvIVX(sv) == I_V(nv)) {
                             SvNOK_on(sv);
-                            SvIOK_on(sv);
                         } else {
-                            SvIOK_on(sv);
                             /* It had no "." so it must be integer.  */
                         }
+			SvIOK_on(sv);
                     } else {
                         /* between IV_MAX and NV(UV_MAX).
                            Could be slightly > UV_MAX */
@@ -2183,10 +2182,8 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 
                             if (value == nv_as_uv && SvUVX(sv) != UV_MAX) {
                                 SvNOK_on(sv);
-                                SvIOK_on(sv);
-                            } else {
-                                SvIOK_on(sv);
                             }
+			    SvIOK_on(sv);
                         }
                     }
                 }
@@ -2259,7 +2256,7 @@ S_uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
 
 static char *
 S_stringify_regexp(pTHX_ SV *sv, MAGIC *mg, STRLEN *lp) {
-    const regexp *re = (regexp *)mg->mg_obj;
+    const regexp * const re = (regexp *)mg->mg_obj;
 
     if (!mg->mg_ptr) {
 	const char *fptr = "msix";
@@ -2267,7 +2264,7 @@ S_stringify_regexp(pTHX_ SV *sv, MAGIC *mg, STRLEN *lp) {
 	char ch;
 	int left = 0;
 	int right = 4;
-	char need_newline = 0;
+	bool need_newline = 0;
 	U16 reganch = (U16)((re->reganch & PMf_COMPILETIME) >> 12);
 
 	while((ch = *fptr++)) {
@@ -2386,7 +2383,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    }
 	    if (SvROK(sv)) {	/* XXX Skip this when sv_pvn_force calls */
 		/* Sneaky stuff here */
-		SV *tsv = newSVpvn(tbuf, len);
+		SV * const tsv = newSVpvn(tbuf, len);
 
 		sv_2mortal(tsv);
 		if (lp)
@@ -2541,7 +2538,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	if (!PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP) && ckWARN(WARN_UNINITIALIZED))
 	    report_uninit();
 	if (lp)
-	*lp = 0;
+	    *lp = 0;
 	if (SvTYPE(sv) < SVt_PV)
 	    /* Typically the caller expects that sv_any is not NULL now.  */
 	    sv_upgrade(sv, SVt_PV);
@@ -2729,25 +2726,23 @@ Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 	 * had a FLAG in SVs to signal if there are any hibit
 	 * chars in the PV.  Given that there isn't such a flag
 	 * make the loop as fast as possible. */
-	const U8 *s = (U8 *) SvPVX_const(sv);
+	const U8 * const s = (U8 *) SvPVX_const(sv);
 	const U8 * const e = (U8 *) SvEND(sv);
 	const U8 *t = s;
-	int hibit = 0;
 	
 	while (t < e) {
 	    const U8 ch = *t++;
-	    if ((hibit = !NATIVE_IS_INVARIANT(ch)))
+	    /* Check for hi bit */
+	    if (!NATIVE_IS_INVARIANT(ch)) {
+		STRLEN len = SvCUR(sv) + 1; /* Plus the \0 */
+		U8 * const recoded = bytes_to_utf8((U8*)s, &len);
+
+		SvPV_free(sv); /* No longer using what was there before. */
+		SvPV_set(sv, (char*)recoded);
+		SvCUR_set(sv, len - 1);
+		SvLEN_set(sv, len); /* No longer know the real size. */
 		break;
-	}
-	if (hibit) {
-	    STRLEN len = SvCUR(sv) + 1; /* Plus the \0 */
-	    U8 * const recoded = bytes_to_utf8((U8*)s, &len);
-
-	    SvPV_free(sv); /* No longer using what was there before. */
-
-	    SvPV_set(sv, (char*)recoded);
-	    SvCUR_set(sv, len - 1);
-	    SvLEN_set(sv, len); /* No longer know the real size. */
+	    }
 	}
 	/* Mark as UTF-8 even if no hibit - saves scanning loop */
 	SvUTF8_on(sv);
@@ -3286,7 +3281,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    SvIV_set(dstr, SvIVX(sstr));
 	}
 	if ( SvVOK(sstr) ) {
-	    MAGIC *smg = mg_find(sstr,PERL_MAGIC_vstring);
+	    const MAGIC * const smg = mg_find(sstr,PERL_MAGIC_vstring);
 	    sv_magic(dstr, NULL, PERL_MAGIC_vstring,
 		     smg->mg_ptr, smg->mg_len);
 	    SvRMAGICAL_on(dstr);
@@ -3631,10 +3626,10 @@ and C<sv_catsv_nomg> are implemented in terms of this function.
 void
 Perl_sv_catsv_flags(pTHX_ SV *dsv, register SV *ssv, I32 flags)
 {
-    const char *spv;
-    STRLEN slen;
     if (ssv) {
-	if ((spv = SvPV_const(ssv, slen))) {
+	STRLEN slen;
+	const char *spv = SvPV_const(ssv, slen);
+	if (spv) {
 	    /*  sutf8 and dutf8 were type bool, but under USE_ITHREADS,
 		gcc version 2.95.2 20000220 (Debian GNU/Linux) for
 		Linux xxx 2.2.17 on sparc64 with gcc -O2, we erroneously
@@ -3652,7 +3647,7 @@ Perl_sv_catsv_flags(pTHX_ SV *dsv, register SV *ssv, I32 flags)
 	    if (dutf8 != sutf8) {
 		if (dutf8) {
 		    /* Not modifying source SV, so taking a temporary copy. */
-		    SV* csv = sv_2mortal(newSVpvn(spv, slen));
+		    SV* const csv = sv_2mortal(newSVpvn(spv, slen));
 
 		    sv_utf8_upgrade(csv);
 		    spv = SvPV_const(csv, slen);
@@ -5737,7 +5732,7 @@ thats_really_all_folks:
 
 screamer2:
 	if (rslen) {
-            register const STDCHAR *bpe = buf + sizeof(buf);
+            register const STDCHAR * const bpe = buf + sizeof(buf);
 	    bp = buf;
 	    while ((i = PerlIO_getc(fp)) != EOF && (*bp++ = (STDCHAR)i) != rslast && bp < bpe)
 		; /* keep reading */
@@ -8938,18 +8933,25 @@ Perl_ptr_table_new(pTHX)
 
 /* map an existing pointer using a table */
 
-void *
-Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, void *sv)
-{
+STATIC PTR_TBL_ENT_t *
+S_ptr_table_find(pTHX_ PTR_TBL_t *tbl, const void *sv) {
     PTR_TBL_ENT_t *tblent;
     const UV hash = PTR_TABLE_HASH(sv);
     assert(tbl);
     tblent = tbl->tbl_ary[hash & tbl->tbl_max];
     for (; tblent; tblent = tblent->next) {
 	if (tblent->oldval == sv)
-	    return tblent->newval;
+	    return tblent;
     }
-    return (void*)NULL;
+    return 0;
+}
+
+void *
+Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, void *sv)
+{
+    PTR_TBL_ENT_t const *const tblent
+	= S_ptr_table_find(aTHX_ tbl, (const void *)sv);
+    return tblent ? tblent->newval : (void *) 0;
 }
 
 /* add a new entry to a pointer-mapping table */
@@ -8957,29 +8959,22 @@ Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, void *sv)
 void
 Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldsv, void *newsv)
 {
-    PTR_TBL_ENT_t *tblent, **otblent;
-    /* XXX this may be pessimal on platforms where pointers aren't good
-     * hash values e.g. if they grow faster in the most significant
-     * bits */
-    const UV hash = PTR_TABLE_HASH(oldsv);
-    bool empty = 1;
+    PTR_TBL_ENT_t *tblent = S_ptr_table_find(aTHX_ tbl, (const void *)oldsv);
 
-    assert(tbl);
-    otblent = &tbl->tbl_ary[hash & tbl->tbl_max];
-    for (tblent = *otblent; tblent; empty=0, tblent = tblent->next) {
-	if (tblent->oldval == oldsv) {
-	    tblent->newval = newsv;
-	    return;
-	}
+    if (tblent) {
+	tblent->newval = newsv;
+    } else {
+	const UV entry = PTR_TABLE_HASH(oldsv) & tbl->tbl_max;
+
+	new_body_inline(tblent, sizeof(struct ptr_tbl_ent), PTE_SVSLOT);
+	tblent->oldval = oldsv;
+	tblent->newval = newsv;
+	tblent->next = tbl->tbl_ary[entry];
+	tbl->tbl_ary[entry] = tblent;
+	tbl->tbl_items++;
+	if (tblent->next && tbl->tbl_items > tbl->tbl_max)
+	    ptr_table_split(tbl);
     }
-    new_body_inline(tblent, sizeof(struct ptr_tbl_ent), PTE_SVSLOT);
-    tblent->oldval = oldsv;
-    tblent->newval = newsv;
-    tblent->next = *otblent;
-    *otblent = tblent;
-    tbl->tbl_items++;
-    if (!empty && tbl->tbl_items > tbl->tbl_max)
-	ptr_table_split(tbl);
 }
 
 /* double the hash bucket size of an existing ptr table */
@@ -9019,34 +9014,22 @@ Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl)
 void
 Perl_ptr_table_clear(pTHX_ PTR_TBL_t *tbl)
 {
-    register PTR_TBL_ENT_t **array;
-    register PTR_TBL_ENT_t *entry;
-    UV riter = 0;
-    UV max;
+    if (tbl && tbl->tbl_items) {
+	register PTR_TBL_ENT_t **array = tbl->tbl_ary;
+	UV riter = tbl->tbl_max;
 
-    if (!tbl || !tbl->tbl_items) {
-        return;
+	do {
+	    PTR_TBL_ENT_t *entry = array[riter];
+
+	    while (entry) {
+		PTR_TBL_ENT_t * const oentry = entry;
+		entry = entry->next;
+		del_pte(oentry);
+	    }
+	} while (riter--);
+
+	tbl->tbl_items = 0;
     }
-
-    array = tbl->tbl_ary;
-    entry = array[0];
-    max = tbl->tbl_max;
-
-    for (;;) {
-        if (entry) {
-            PTR_TBL_ENT_t *oentry = entry;
-            entry = entry->next;
-            del_pte(oentry);
-        }
-        if (!entry) {
-            if (++riter > max) {
-                break;
-            }
-            entry = array[riter];
-        }
-    }
-
-    tbl->tbl_items = 0;
 }
 
 /* clear and free a ptr table */
