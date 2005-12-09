@@ -19,7 +19,7 @@ use Carp 'croak';
 #   http://stein.cshl.org/WWW/software/CGI/
 
 $CGI::revision = '$Id: CGI.pm,v 1.194 2005/12/06 22:12:56 lstein Exp $';
-$CGI::VERSION='3.14_01';
+$CGI::VERSION='3.15_01';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -2631,8 +2631,8 @@ sub url {
     undef $path if $rewrite_in_use && $rewrite;  # path not valid when rewriting active
 
     my $uri         =  $rewrite && $request_uri ? $request_uri : $script_name;
-    $uri            =~ s/\?.+$//         if defined $query_str;
-    $uri            =~ s/$path$//        if defined $path;          # remove path from URI
+    $uri            =~ s/\?.*$//;                                 # remove query string
+    $uri            =~ s/$path$//      if defined $path;          # remove path
 
     if ($full) {
 	my $protocol = $self->protocol();

@@ -1,3 +1,6 @@
+  Version 3.15 Wed Dec  7 15:13:22 EST 2005
+   1. Remove extraneous "?" from self_url() when URI contains a ? but no query string.
+
   Version 3.14 Tue Dec  6 17:12:03 EST 2005
    1. Fixed broken scrolling_list() select attribute.
 	
