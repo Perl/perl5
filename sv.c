@@ -9031,11 +9031,8 @@ Perl_ptr_table_new(pTHX)
     return tbl;
 }
 
-#if (PTRSIZE == 8)
-#  define PTR_TABLE_HASH(ptr) (PTR2UV(ptr) >> 3)
-#else
-#  define PTR_TABLE_HASH(ptr) (PTR2UV(ptr) >> 2)
-#endif
+#define PTR_TABLE_HASH(ptr) \
+  ((PTR2UV(ptr) >> 3) ^ (PTR2UV(ptr) >> (3 + 7)) ^ (PTR2UV(ptr) >> (3 + 17)))
 
 /* 
    we use the PTE_SVSLOT 'reservation' made above, both here (in the
