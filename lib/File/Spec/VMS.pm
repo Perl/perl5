@@ -71,7 +71,7 @@ sub canonpath {
 	$path =~ s/\[[^\]\.]+\.-\./\[/g;	# [foo.-.	==> [
 	$path =~ s/\.[^\]\.]+\.-\]/\]/g;	# .foo.-]	==> ]
 	$path =~ s/\[[^\]\.]+\.-\]/\[000000\]/g;# [foo.-]       ==> [000000]
-	$path =~ s/\[\]//;			# []		==>
+	$path =~ s/\[\]// unless $path eq '[]';	# []		==>
 	return $path;
     }
 }
@@ -335,8 +335,10 @@ sub abs2rel {
 
     # Now, remove all leading components that are the same
     my @pathchunks = $self->splitdir( $path_directories );
+    my $pathchunks = @pathchunks;
     unshift(@pathchunks,'000000') unless $pathchunks[0] eq '000000';
     my @basechunks = $self->splitdir( $base_directories );
+    my $basechunks = @basechunks;
     unshift(@basechunks,'000000') unless $basechunks[0] eq '000000';
 
     while ( @pathchunks && 
@@ -347,11 +349,15 @@ sub abs2rel {
         shift @basechunks ;
     }
 
-    return $self->curdir unless @pathchunks || @basechunks;
-
     # @basechunks now contains the directories to climb out of,
     # @pathchunks now has the directories to descend in to.
-    $path_directories = join '.', ('-' x @basechunks, @pathchunks) ;
+    if ((@basechunks > 0) || ($basechunks != $pathchunks)) {
+      $path_directories = join '.', ('-' x @basechunks, @pathchunks) ;
+    }
+    else {
+      $path_directories = join '.', @pathchunks;
+    }
+    $path_directories = '['.$path_directories.']';
     return $self->canonpath( $self->catpath( '', $path_directories, $path_file ) ) ;
 }
 

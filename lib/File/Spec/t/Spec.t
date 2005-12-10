@@ -255,6 +255,8 @@ if ($^O eq 'MacOS') {
 [ "FakeWin32->abs2rel('A:/t1/t2/t3/t4','B:/t1/t2/t3')",  'A:\\t1\\t2\\t3\\t4' ],
 [ "FakeWin32->abs2rel('E:/foo/bar/baz')",            'E:\\foo\\bar\\baz'      ],
 [ "FakeWin32->abs2rel('C:/one/two/three')",          'three'                  ],
+[ "FakeWin32->abs2rel('C:\\Windows\\System32', 'C:\\')",  'Windows\System32'  ],
+[ "FakeWin32->abs2rel('\\\\computer2\\share3\\foo.txt', '\\\\computer2\\share3')",  'foo.txt' ],
 
 [ "FakeWin32->rel2abs('temp','C:/')",                       'C:\\temp'                        ],
 [ "FakeWin32->rel2abs('temp','C:/a')",                      'C:\\a\\temp'                     ],

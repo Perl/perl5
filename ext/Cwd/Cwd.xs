@@ -409,6 +409,19 @@ PPCODE:
 }
 
 void
+getcwd()
+PROTOTYPE: DISABLE
+PPCODE:
+{
+    dXSTARG;
+    getcwd_sv(TARG);
+    XSprePUSH; PUSHTARG;
+#ifndef INCOMPLETE_TAINTS
+    SvTAINTED_on(TARG);
+#endif
+}
+
+void
 abs_path(pathsv=Nullsv)
     SV *pathsv
 PROTOTYPE: DISABLE

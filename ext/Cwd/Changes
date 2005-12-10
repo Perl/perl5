@@ -1,5 +1,30 @@
 Revision history for Perl distribution PathTools.
 
+3.14_01  Fri Dec  9 22:45:49 CST 2005
+
+ - The Cwd::getcwd() function on *nix is now a direct pass-through to
+   the underlying getcwd() C library function when possible.  This is
+   safer and faster than the previous implementation, which just did
+   abs_path('.'). [Suggested by Nick Ing-Simmons]
+
+ - When Cwd searches for a 'pwd' executable in the $PATH, we now stop
+   after we find the first one rather than continuing the search.  We
+   also avoid the $PATH search altogether when a 'pwd' was already
+   found in a well-known and well-trusted location like /bin or
+   /usr/bin. [Suggested by Nick Ing-Simmons]
+
+ - On Win32 abs2rel($path, $base) was failing whenever $base is the
+   root of a volume (such as C:\ or \\share\dir).  This has been
+   fixed. [Reported by Bryan Daimler]
+
+ - In abs2rel() on VMS, we've fixed handling of directory trees so
+   that the test $file = File::Spec::VMS->abs2rel('[t1.t2.t3]file',
+   '[t1.t2.t3]') returns 'file' instead of an empty string. [John
+   E. Malmberg]
+
+ - In canonpath() on VMS, '[]' was totally optimized away instead of
+   just returning '[]'.  Now it's fixed. [John E. Malmberg]
+
 3.14  Thu Nov 17 18:08:44 CST 2005
 
  - canonpath() has some logic in it that avoids collapsing a

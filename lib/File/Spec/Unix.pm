@@ -369,9 +369,21 @@ sub abs2rel {
     my $path_directories = ($self->splitpath($path, 1))[1];
     my $base_directories = ($self->splitpath($base, 1))[1];
 
+    # For UNC paths, the user might give a volume like //foo/bar that
+    # strictly speaking has no directory portion.  Treat it as if it
+    # had the root directory for that volume.
+    if (!length($base_directories) and $self->file_name_is_absolute($base)) {
+      $base_directories = $self->rootdir;
+    }
+
     # Now, remove all leading components that are the same
     my @pathchunks = $self->splitdir( $path_directories );
     my @basechunks = $self->splitdir( $base_directories );
+
+    if ($base_directories eq $self->rootdir) {
+      shift @pathchunks;
+      return $self->canonpath( $self->catpath('', $self->catdir( @pathchunks ), '') );
+    }
 
     while (@pathchunks && @basechunks && $self->_same($pathchunks[0], $basechunks[0])) {
         shift @pathchunks ;
