@@ -171,7 +171,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.14_01';
+$VERSION = '3.14_02';
 
 @ISA = qw/ Exporter /;
 @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
@@ -360,6 +360,15 @@ unless ($METHOD_MAP{$^O}{cwd} or defined &cwd) {
 # set a reasonable (and very safe) default for fastgetcwd, in case it
 # isn't redefined later (20001212 rspier)
 *fastgetcwd = \&cwd;
+
+# By Brandon S. Allbery
+#
+# Usage: $cwd = getcwd();
+
+sub _perl_getcwd
+{
+    abs_path('.');
+}
 
 # By John Bazik
 #
@@ -704,6 +713,7 @@ if (exists $METHOD_MAP{$^O}) {
 
 # In case the XS version doesn't load.
 *abs_path = \&_perl_abs_path unless defined &abs_path;
+*getcwd = \&_perl_getcwd unless defined &getcwd;
 
 # added function alias for those of us more
 # used to the libc function.  --tchrist 27-Jan-00
