@@ -404,11 +404,18 @@ __END__
 >%*2*2$d<	>[12, 3]<	>%*2*2$d INVALID<
 >%*2$1d<	>[12, 3]<	>%*2$1d INVALID<
 >%0v2.2d<	>''<	><
->%vc,%d<	>[63, 64, 65]<	>?,64<
+>%vc,%d<	>[63, 64, 65]<	>%vc,63 INVALID<
+>%v%,%d<	>[63, 64, 65]<	>%v%,63 INVALID<
 >%vd,%d<	>[1, 2, 3]<	>49,2<
->%vf,%d<	>[1, 2, 3]<	>1.000000,2<
+>%vf,%d<	>[1, 2, 3]<	>%vf,1 INVALID<
+>%vF,%d<	>[1, 2, 3]<	>%vF,1 INVALID<
+>%ve,%d<	>[1, 2, 3]<	>%ve,1 INVALID<
+>%vE,%d<	>[1, 2, 3]<	>%vE,1 INVALID<
+>%vg,%d<	>[1, 2, 3]<	>%vg,1 INVALID<
+>%vG,%d<	>[1, 2, 3]<	>%vG,1 INVALID<
 >%vp<	>''<	>%vp INVALID<
->%vs,%d<	>[1, 2, 3]<	>1,2<
+>%vn<	>''<	>%vn INVALID<
+>%vs,%d<	>[1, 2, 3]<	>%vs,1 INVALID<
 >%v_<	>''<	>%v_ INVALID<
 >%v#x<	>''<	>%v#x INVALID<
 >%v02x<	>"foo\012"<	>66.6f.6f.0a<
