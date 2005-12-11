@@ -46,6 +46,9 @@ while (<DATA>) {
         $data   =~ s/([eE])\-101$/${1}-24/;  # larger exponents
         $result =~ s/([eE])\-102$/${1}-25/;  #  "       "
     }
+
+    $evalData = eval $data;
+    $data = ref $evalData ? $evalData : [$evalData];
     push @tests, [$template, $data, $result, $comment];
 }
 
@@ -63,10 +66,8 @@ $SIG{__WARN__} = sub {
 
 for ($i = 1; @tests; $i++) {
     ($template, $data, $result, $comment) = @{shift @tests};
-    $evalData = eval $data;
     $w = undef;
-    $x = sprintf(">$template<",
-                 defined @$evalData ? @$evalData : $evalData);
+    $x = sprintf(">$template<", @$data);
     substr($x, -1, 0) = $w if $w;
     # $x may have 3 exponent digits, not 2
     my $y = $x;
