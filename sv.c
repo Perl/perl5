@@ -8797,6 +8797,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		vec_utf8 = DO_UTF8(vecsv);
 	    }
 	    else {
+		vecsv = &PL_sv_undef;
 		vecstr = (U8*)"";
 		veclen = 0;
 	    }
