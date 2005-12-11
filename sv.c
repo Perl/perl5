@@ -7984,8 +7984,16 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    vecsv = svix < svmax ? svargs[svix++] : &PL_sv_undef;
 		}
 		dotstr = SvPV_const(vecsv, dotstrlen);
+		/* Keep the DO_UTF8 test *after* the SvPV call, else things go
+		   bad with tied or overloaded values that return UTF8.  */
 		if (DO_UTF8(vecsv))
 		    is_utf8 = TRUE;
+		else if (has_utf8) {
+		    vecsv = sv_mortalcopy(vecsv);
+		    sv_utf8_upgrade(vecsv);
+		    dotstr = SvPV_const(vecsv, dotstrlen);
+		    is_utf8 = TRUE;
+		}		    
 	    }
 	    if (args) {
 		VECTORIZE_ARGS
