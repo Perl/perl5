@@ -7977,9 +7977,12 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (vectorarg) {
 		if (args)
 		    vecsv = va_arg(*args, SV*);
-		else
-		    vecsv = (evix ? evix <= svmax : svix < svmax) ?
-			svargs[evix ? evix-1 : svix++] : &PL_sv_undef;
+		else if (evix) {
+		    vecsv = (evix > 0 && evix <= svmax)
+			? svargs[evix-1] : &PL_sv_undef;
+		} else {
+		    vecsv = svix < svmax ? svargs[svix++] : &PL_sv_undef;
+		}
 		dotstr = SvPV_const(vecsv, dotstrlen);
 		if (DO_UTF8(vecsv))
 		    is_utf8 = TRUE;
@@ -7987,7 +7990,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    if (args) {
 		VECTORIZE_ARGS
 	    }
-	    else if (efix ? efix <= svmax : svix < svmax) {
+	    else if (efix ? (efix > 0 && efix <= svmax) : svix < svmax) {
 		vecsv = svargs[efix ? efix-1 : svix++];
 		vecstr = (U8*)SvPV_const(vecsv,veclen);
 		vec_utf8 = DO_UTF8(vecsv);
