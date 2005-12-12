@@ -29,7 +29,59 @@ use Pod::Man;
 $loaded = 1;
 print "ok 1\n";
 
-my $n = 2;
+SKIP: {
+    if (defined $ENV{PERL_UNICODE}) {
+        print "not ok 2 # skip Unicode not yet supported\n"
+    } else {
+        my $pod = <<EOP;
+=head1 ACCENTS
+
+Beyoncé!  Beyoncé!  Beyoncé!!
+
+    Beyoncé!  Beyoncé!
+      Beyoncé!  Beyoncé!
+        Beyoncé!  Beyoncé!
+
+Older versions didn't convert Beyoncé in verbatim.
+EOP
+
+       my $expected = <<"EOM";
+.SH "ACCENTS"
+.IX Header "ACCENTS"
+Beyonce\\*'!  Beyonce\\*'!  Beyonce\\*'!!
+.PP
+.Vb 3
+\\&    Beyonce\\*'!  Beyonce\\*'!
+\\&      Beyonce\\*'!  Beyonce\\*'!
+\\&        Beyonce\\*'!  Beyonce\\*'!
+.Ve
+.PP
+Older versions didn't convert Beyonce\\*' in verbatim.
+EOM
+        $parser = Pod::Man->new or die "Cannot create parser\n";
+        open my $out_fh, ">", 'out.tmp' or die "Can't open \$out_fh:  $!";
+        $parser->output_fh($out_fh);
+        $parser->parse_string_document($pod);
+        close $out_fh;
+        open my $in_fh, "<", 'out.tmp' or die "Can't open \$in_fh:  $!";
+        while (<$in_fh>) { last if /^\.TH/; }
+        my $man;
+        {
+            local $/ = undef;
+            $man = <$in_fh>;
+        }
+        close $in_fh;
+        unlink 'out.tmp';
+        if ($man eq $expected) {
+            print "ok 2\n";
+        } else {
+            print "not ok 2\n";
+            print "Expected\n========\n$expected\nOutput\n======\n$man\n";
+        }
+    }
+}
+
+my $n = 3;
 while (<DATA>) {
     next until $_ eq "###\n";
     open (TMP, '> tmp.pod') or die "Cannot create tmp.pod: $!\n";
@@ -137,30 +189,6 @@ Also not a bullet.
 Not a bullet.
 .IP "*" 4
 Also not a bullet.
-###
-
-###
-=head1 ACCENTS
-
-Beyoncé!  Beyoncé!  Beyoncé!!
-
-    Beyoncé!  Beyoncé!
-      Beyoncé!  Beyoncé!
-        Beyoncé!  Beyoncé!
-
-Older versions didn't convert Beyoncé in verbatim.
-###
-.SH "ACCENTS"
-.IX Header "ACCENTS"
-Beyonce\*'!  Beyonce\*'!  Beyonce\*'!!
-.PP
-.Vb 3
-\&    Beyonce\*'!  Beyonce\*'!
-\&      Beyonce\*'!  Beyonce\*'!
-\&        Beyonce\*'!  Beyonce\*'!
-.Ve
-.PP
-Older versions didn't convert Beyonce\*' in verbatim.
 ###
 
 ###
