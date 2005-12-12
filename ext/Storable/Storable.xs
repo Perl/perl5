@@ -4283,19 +4283,14 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 		 * Hook not found.  Maybe they did not require the module where this
 		 * hook is defined yet?
 		 *
-		 * If the require below succeeds, we'll be able to find the hook.
+		 * If the load below succeeds, we'll be able to find the hook.
 		 * Still, it only works reliably when each class is defined in a
 		 * file of its own.
 		 */
 
-		SV *psv = newSVpvn("require ", 8);
-		sv_catpv(psv, classname);
-
 		TRACEME(("No STORABLE_thaw defined for objects of class %s", classname));
-		TRACEME(("Going to require module '%s' with '%s'", classname, SvPVX(psv)));
-
-		perl_eval_sv(psv, G_DISCARD);
-		sv_free(psv);
+		TRACEME(("Going to load module '%s'", classname));
+	        load_module(PERL_LOADMOD_NOIMPORT, newSVpv(classname, 0), Nullsv);
 
 		/*
 		 * We cache results of pkg_can, so we need to uncache before attempting
@@ -4540,15 +4535,10 @@ static SV *retrieve_overloaded(pTHX_ stcxt_t *cxt, const char *cname)
 		       PTR2UV(sv)));
 	}
 	if (!Gv_AMG(stash)) {
-		SV *psv = newSVpvn("require ", 8);
-		const char *package = HvNAME_get(stash);
-		sv_catpv(psv, package);
-
+	        const char *package = HvNAME_get(stash);
 		TRACEME(("No overloading defined for package %s", package));
-		TRACEME(("Going to require module '%s' with '%s'", package, SvPVX(psv)));
-
-		perl_eval_sv(psv, G_DISCARD);
-		sv_free(psv);
+		TRACEME(("Going to load module '%s'", package));
+		load_module(PERL_LOADMOD_NOIMPORT, newSVpv(package, 0), Nullsv);
 		if (!Gv_AMG(stash)) {
 			CROAK(("Cannot restore overloading on %s(0x%"UVxf
 			       ") (package %s) (even after a \"require %s;\")",
