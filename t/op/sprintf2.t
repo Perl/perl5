@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }   
 
-plan tests => 7;
+plan tests => 7 + 256;
 
 is(
     sprintf("%.40g ",0.01),
@@ -54,3 +54,17 @@ fresh_perl_is(
     is($bad,   0, "unexpected warnings");
 }
 
+{
+    foreach my $ord (0 .. 255) {
+	my $bad = 0;
+	local $SIG{__WARN__} = sub {
+	    unless ($_[0] =~ /^Invalid conversion in sprintf/ ||
+		    $_[0] =~ /^Use of uninitialized value in sprintf/) {
+		warn $_[0];
+		$bad++;
+	    }
+	};
+	my $r = eval {sprintf '%v' . chr $ord};
+	is ($bad, 0, "pattern '%v' . chr $ord");
+    }
+}
