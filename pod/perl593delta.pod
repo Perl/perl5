@@ -20,10 +20,10 @@ a number of misparsing issues when a global C<_> subroutine is defined.
 This used to report whether the C<foo::bar> package was created. Now it's
 always true, as a side-effect of a change to shrink the internal size of
 hash structures. Note that using C<defined> on hashes was deprecated
-anyway. To achieve the same result, you can use the following
-backwards-compatible idiom:
+anyway. To achieve the same result, you can use a symbolic reference
+instead (and this is backwards-compatible):
 
-    defined *foo::{HASH}->{'bar::'}
+    defined %{"foo::bar::"}
 
 =head1 Core Enhancements
 
