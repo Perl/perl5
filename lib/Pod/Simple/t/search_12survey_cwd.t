@@ -36,9 +36,9 @@ sub source_path {
 }
 
 my $here;
-if(     -e ($here = source_path('test^lib'))) {
+if(     -e ($here = source_path('test_lib'))) {
   chdir $here;
-} elsif(-e ($here = File::Spec->catdir($cwd, 't', 'test^lib'))) {
+} elsif(-e ($here = File::Spec->catdir($cwd, 't', 'test_lib'))) {
   chdir $here;
 } else {
   die "Can't find the test corpus";
@@ -61,12 +61,12 @@ print $p;
 
 {
 my $names = join "|", sort values %$where2name;
-ok $names, "Blorm|Zonk::Pronk|perlfliff|perlthang|squaa|squaa::Glunk|squaa::Vliff|zikzik";
+ok $names, "Blorm|Zonk::Pronk|hink_honk::Glunk|hink_honk::Vliff|perlfliff|perlthang|squaa|squaa::Glunk|squaa::Vliff|zikzik";
 }
 
 {
 my $names = join "|", sort keys %$name2where;
-ok $names, "Blorm|Zonk::Pronk|perlfliff|perlthang|squaa|squaa::Glunk|squaa::Vliff|zikzik";
+ok $names, "Blorm|Zonk::Pronk|hink_honk::Glunk|hink_honk::Vliff|perlfliff|perlthang|squaa|squaa::Glunk|squaa::Vliff|zikzik";
 }
 
 ok( ($name2where->{'squaa'} || 'huh???'), '/squaa\.pm$/');

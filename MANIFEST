@@ -2021,14 +2021,14 @@ lib/Pod/Simple/t/itemadapt.t		Pod::Simple test file
 lib/Pod/Simple/t/itemstar.t		Pod::Simple test file
 lib/Pod/Simple/t/items.t		Pod::Simple test file
 lib/Pod/Simple/t/linkclass.t		Pod::Simple test file
-lib/Pod/Simple/t/other^test^lib/hink^honk/Glunk.pod	Pod::Simple test file
-lib/Pod/Simple/t/other^test^lib/hink^honk/readme.txt	Pod::Simple test file
-lib/Pod/Simple/t/other^test^lib/hink^honk/Vliff.pm	Pod::Simple test file
-lib/Pod/Simple/t/other^test^lib/pod/perlthang.pod	Pod::Simple test file
-lib/Pod/Simple/t/other^test^lib/pod/perlzuk.pod		Pod::Simple test file
-lib/Pod/Simple/t/other^test^lib/Sizzlesuzzle.pm		Pod::Simple test file
-lib/Pod/Simple/t/other^test^lib/squaa/Vliff.pm		Pod::Simple test file
-lib/Pod/Simple/t/other^test^lib/squaa/Wowo.pod		Pod::Simple test file
+lib/Pod/Simple/t/other_test_lib/hink_honk/Glunk.pod	Pod::Simple test file
+lib/Pod/Simple/t/other_test_lib/hink_honk/readme.txt	Pod::Simple test file
+lib/Pod/Simple/t/other_test_lib/hink_honk/Vliff.pm	Pod::Simple test file
+lib/Pod/Simple/t/other_test_lib/pod/perlthang.pod	Pod::Simple test file
+lib/Pod/Simple/t/other_test_lib/pod/perlzuk.pod		Pod::Simple test file
+lib/Pod/Simple/t/other_test_lib/Sizzlesuzzle.pm		Pod::Simple test file
+lib/Pod/Simple/t/other_test_lib/squaa/Vliff.pm		Pod::Simple test file
+lib/Pod/Simple/t/other_test_lib/squaa/Wowo.pod		Pod::Simple test file
 lib/Pod/Simple/t/puller.t		Pod::Simple test file
 lib/Pod/Simple/t/pulltitle.t		Pod::Simple test file
 lib/Pod/Simple/TranscodeDumb.pm		Pod::Simple::TranscodeDumb
@@ -2052,19 +2052,19 @@ lib/Pod/Simple/t/test_junk1_out.txt	Pod::Simple test file
 lib/Pod/Simple/t/test_junk1.pod		Pod::Simple test file
 lib/Pod/Simple/t/test_junk2_out.txt	Pod::Simple test file
 lib/Pod/Simple/t/test_junk2.pod		Pod::Simple test file
-lib/Pod/Simple/t/test^lib/Blorm.pm		Pod::Simple test file
-lib/Pod/Simple/t/test^lib/hink^honk/Glunk.pod	Pod::Simple test file
-lib/Pod/Simple/t/test^lib/hink^honk/readme.txt	Pod::Simple test file
-lib/Pod/Simple/t/test^lib/hink^honk/Vliff.pm	Pod::Simple test file
-lib/Pod/Simple/t/test^lib/pod/perlfliff.pod	Pod::Simple test file
-lib/Pod/Simple/t/test^lib/pod/perlthang.pod	Pod::Simple test file
-lib/Pod/Simple/t/test^lib/squaa/Glunk.pod	Pod::Simple test file
-lib/Pod/Simple/t/test^lib/squaa.pm		Pod::Simple test file
-lib/Pod/Simple/t/test^lib/squaa/Vliff.pm	Pod::Simple test file
-lib/Pod/Simple/t/test^lib/zikzik.pod		Pod::Simple test file
-lib/Pod/Simple/t/test^lib/Zonk/Fiddle.txt	Pod::Simple test file
-lib/Pod/Simple/t/test^lib/Zonk/Pronk.pm		Pod::Simple test file
-lib/Pod/Simple/t/test^lib/Zonk/Veng.pm		Pod::Simple test file
+lib/Pod/Simple/t/test_lib/Blorm.pm		Pod::Simple test file
+lib/Pod/Simple/t/test_lib/hink_honk/Glunk.pod	Pod::Simple test file
+lib/Pod/Simple/t/test_lib/hink_honk/readme.txt	Pod::Simple test file
+lib/Pod/Simple/t/test_lib/hink_honk/Vliff.pm	Pod::Simple test file
+lib/Pod/Simple/t/test_lib/pod/perlfliff.pod	Pod::Simple test file
+lib/Pod/Simple/t/test_lib/pod/perlthang.pod	Pod::Simple test file
+lib/Pod/Simple/t/test_lib/squaa/Glunk.pod	Pod::Simple test file
+lib/Pod/Simple/t/test_lib/squaa.pm		Pod::Simple test file
+lib/Pod/Simple/t/test_lib/squaa/Vliff.pm	Pod::Simple test file
+lib/Pod/Simple/t/test_lib/zikzik.pod		Pod::Simple test file
+lib/Pod/Simple/t/test_lib/Zonk/Fiddle.txt	Pod::Simple test file
+lib/Pod/Simple/t/test_lib/Zonk/Pronk.pm		Pod::Simple test file
+lib/Pod/Simple/t/test_lib/Zonk/Veng.pm		Pod::Simple test file
 lib/Pod/Simple/t/test_old_perlcygwin_out.txt	Pod::Simple test file
 lib/Pod/Simple/t/test_old_perlcygwin.pod	Pod::Simple test file
 lib/Pod/Simple/t/test_old_perlfaq3_out.txt	Pod::Simple test file
@@ -2074,7 +2074,7 @@ lib/Pod/Simple/t/test_old_perlvar.pod	Pod::Simple test file
 lib/Pod/Simple/t/verbatim_formatted.t	Pod::Simple test file
 lib/Pod/Simple/t/verbatims.t		Pod::Simple test file
 lib/Pod/Simple/t/x_nixer.t		Pod::Simple test file
-lib/Pod/Simple/t/yet^another^test^lib/squaa/Vliff.pm	Pod::Simple test file
+lib/Pod/Simple/t/yet_another_test_lib/squaa/Vliff.pm	Pod::Simple test file
 lib/Pod/Simple/XMLOutStream.pm	turn Pod into XML
 lib/Pod/t/basic.cap		podlators test
 lib/Pod/t/basic.clr		podlators test

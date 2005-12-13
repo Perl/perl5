@@ -33,7 +33,7 @@ foreach my $t_maybe (
   next unless -e $t_maybe;
 
   $t_dir = $t_maybe;
-  $corpus_dir = File::Spec->catdir( $t_maybe, 'test^lib' );
+  $corpus_dir = File::Spec->catdir( $t_maybe, 'test_lib' );
   next unless -e $corpus_dir;
   last;
 }
