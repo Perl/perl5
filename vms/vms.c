@@ -47,9 +47,6 @@
 #include <uicdef.h>
 #include <stsdef.h>
 #include <rmsdef.h>
-#if __CRTL_VER >= 70300000 && !defined(__VAX)
-#include <utime.h>
-#endif
 
 /* Set the maximum filespec size here as it is larger for EFS file
  * specifications.
