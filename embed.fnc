@@ -1288,8 +1288,6 @@ po	|void	|sv_add_backref	|NN SV *tsv|NN SV *sv
 
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 nsR	|char *	|uiv_2buf	|NN char *buf|IV iv|UV uv|int is_uv|NN char **peob
-sR	|IV	|asIV		|NN SV* sv
-sR	|UV	|asUV		|NN SV* sv
 s	|void	|sv_unglob	|NN SV* sv
 s	|void	|not_a_number	|NN SV *sv
 s	|I32	|visit		|NN SVFUNC_t f|U32 flags|U32 mask

@@ -1317,8 +1317,6 @@
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define uiv_2buf		S_uiv_2buf
-#define asIV			S_asIV
-#define asUV			S_asUV
 #define sv_unglob		S_sv_unglob
 #define not_a_number		S_not_a_number
 #define visit			S_visit
@@ -3330,8 +3328,6 @@
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define uiv_2buf		S_uiv_2buf
-#define asIV(a)			S_asIV(aTHX_ a)
-#define asUV(a)			S_asUV(aTHX_ a)
 #define sv_unglob(a)		S_sv_unglob(aTHX_ a)
 #define not_a_number(a)		S_not_a_number(aTHX_ a)
 #define visit(a,b,c)		S_visit(aTHX_ a,b,c)

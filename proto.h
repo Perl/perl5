@@ -3590,14 +3590,6 @@ STATIC char *	S_uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(5);
 
-STATIC IV	S_asIV(pTHX_ SV* sv)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-
-STATIC UV	S_asUV(pTHX_ SV* sv)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-
 STATIC void	S_sv_unglob(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 
