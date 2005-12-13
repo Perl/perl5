@@ -976,6 +976,7 @@ ext/threads/shared/shared.xs	thread shared variables
 ext/threads/shared/t/0nothread.t	Tests for basic shared array functionality.
 ext/threads/shared/t/av_refs.t	Tests for arrays containing references
 ext/threads/shared/t/av_simple.t	Tests for basic shared array functionality.
+ext/threads/shared/t/blessed.t	Test blessed shared variables
 ext/threads/shared/t/cond.t	Test condition variables
 ext/threads/shared/t/disabled.t	Test threads::shared when threads are disabled.
 ext/threads/shared/t/hv_refs.t	Test shared hashes containing references
