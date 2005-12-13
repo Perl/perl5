@@ -79,8 +79,9 @@ eval {
   my $template = File::Spec->catfile(File::Spec->tmpdir, 'fcmpXXXX');
   my($tfh,$filename) = mkstemp($template);
   # NB. The trailing space is intentional (see [perl #37716])
-  open my $tfhCR, ">", "$filename "
-      or die "Could no open '$filename^M' for writing: $!";
+  open my $tfhSP, ">", "$filename "
+      or die "Could not open '$filename ' for writing: $!";
+  binmode($tfhSP);
   {
     local $/; #slurp
     my $fh;
@@ -89,8 +90,8 @@ eval {
     my $data = <$fh>;
     print $tfh $data;
     close($fh);
-    print $tfhCR $data;
-    close($tfhCR);
+    print $tfhSP $data;
+    close($tfhSP);
   }
   seek($tfh,0,0);
   $donetests[0] = compare($tfh, 'README');
