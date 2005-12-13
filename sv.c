@@ -1888,8 +1888,28 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 	if (SvNOKp(sv)) {
 	    return I_V(SvNVX(sv));
 	}
-	if (SvPOKp(sv) && SvLEN(sv))
-	    return asIV(sv);
+	if (SvPOKp(sv) && SvLEN(sv)) {
+	    UV value;
+	    const int numtype
+		= grok_number(SvPVX_const(sv), SvCUR(sv), &value);
+
+	    if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
+		== IS_NUMBER_IN_UV) {
+		/* It's definitely an integer */
+		if (numtype & IS_NUMBER_NEG) {
+		    if (value < (UV)IV_MIN)
+			return -(IV)value;
+		} else {
+		    if (value < (UV)IV_MAX)
+			return (IV)value;
+		}
+	    }
+	    if (!numtype) {
+		if (ckWARN(WARN_NUMERIC))
+		    not_a_number(sv);
+	    }
+	    return I_V(Atof(SvPVX_const(sv)));
+	}
 	if (!SvROK(sv)) {
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
@@ -1897,6 +1917,8 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 	    }
 	    return 0;
 	}
+	/* Else this will drop through into the SvROK case just below, which
+	   will return within the {} for all code paths.  */
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
@@ -1948,8 +1970,23 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
 	    return SvUVX(sv);
 	if (SvNOKp(sv))
 	    return U_V(SvNVX(sv));
-	if (SvPOKp(sv) && SvLEN(sv))
-	    return asUV(sv);
+	if (SvPOKp(sv) && SvLEN(sv)) {
+	    UV value;
+	    const int numtype
+		= grok_number(SvPVX_const(sv), SvCUR(sv), &value);
+
+	    if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
+		== IS_NUMBER_IN_UV) {
+		/* It's definitely an integer */
+		if (!(numtype & IS_NUMBER_NEG))
+		    return value;
+	    }
+	    if (!numtype) {
+		if (ckWARN(WARN_NUMERIC))
+		    not_a_number(sv);
+	    }
+	    return U_V(Atof(SvPVX_const(sv)));
+	}
 	if (!SvROK(sv)) {
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
@@ -1957,6 +1994,8 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
 	    }
 	    return 0;
 	}
+	/* Else this will drop through into the SvROK case just below, which
+	   will return within the {} for all code paths.  */
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
@@ -2023,6 +2062,8 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	    }
             return (NV)0;
         }
+	/* Else this will drop through into the SvROK case just below, which
+	   will return within the {} for all code paths.  */
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
@@ -2189,55 +2230,6 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     });
 #endif
     return SvNVX(sv);
-}
-
-/* asIV(): extract an integer from the string value of an SV.
- * Caller must validate PVX  */
-
-STATIC IV
-S_asIV(pTHX_ SV *sv)
-{
-    UV value;
-    const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
-
-    if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
-	== IS_NUMBER_IN_UV) {
-	/* It's definitely an integer */
-	if (numtype & IS_NUMBER_NEG) {
-	    if (value < (UV)IV_MIN)
-		return -(IV)value;
-	} else {
-	    if (value < (UV)IV_MAX)
-		return (IV)value;
-	}
-    }
-    if (!numtype) {
-	if (ckWARN(WARN_NUMERIC))
-	    not_a_number(sv);
-    }
-    return I_V(Atof(SvPVX_const(sv)));
-}
-
-/* asUV(): extract an unsigned integer from the string value of an SV
- * Caller must validate PVX  */
-
-STATIC UV
-S_asUV(pTHX_ SV *sv)
-{
-    UV value;
-    const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
-
-    if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
-	== IS_NUMBER_IN_UV) {
-	/* It's definitely an integer */
-	if (!(numtype & IS_NUMBER_NEG))
-	    return value;
-    }
-    if (!numtype) {
-	if (ckWARN(WARN_NUMERIC))
-	    not_a_number(sv);
-    }
-    return U_V(Atof(SvPVX_const(sv)));
 }
 
 /* uiv_2buf(): private routine for use by sv_2pv_flags(): print an IV or
@@ -2435,6 +2427,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		*lp = 0;
             return (char *)"";
         }
+	/* Else this will drop through into the SvROK case just below, which
+	   will return within the {} for all code paths.  */
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
