@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }   
 
-plan tests => 283;
+plan tests => 275;
 
 is(
     sprintf("%.40g ",0.01),
@@ -36,7 +36,7 @@ fresh_perl_is(
 );
 
 # check overflows
-for (int(~0/2+1), ~0, ~0 + 1, ~0 + 2, "9999999999999999999") {
+for (int(~0/2+1), ~0, "9999999999999999999") {
     is(eval {sprintf "%${_}d", 0}, undef, "no sprintf result expected %${_}d");
     like($@, qr/^Integer overflow in format string for sprintf /, "overflow in sprintf");
     is(eval {printf "%${_}d\n", 0}, undef, "no printf result expected %${_}d");
@@ -55,7 +55,7 @@ for (int(~0/2+1), ~0, ~0 + 1, ~0 + 2, "9999999999999999999") {
 	}
     };
 
-    my $fmt = join('', map("%$_\$s%" . int(~0/2+1-$_) . '$s', 1..20));
+    my $fmt = join('', map("%$_\$s%" . ((1 << 31)-$_) . '$s', 1..20));
     my $result = sprintf $fmt, qw(a b c d);
     is($result, "abcd", "only four valid values in $fmt");
     is($warn, 36, "expected warnings");
