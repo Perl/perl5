@@ -3657,7 +3657,7 @@ char *getlogin (void);
 /* Also rename() is affected by this */
 #ifdef UNLINK_ALL_VERSIONS /* Currently only makes sense for VMS */
 #define UNLINK unlnk
-I32 unlnk (const char*);
+I32 unlnk (pTHX_ const char*);
 #else
 #define UNLINK PerlLIO_unlink
 #endif
