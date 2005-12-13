@@ -378,6 +378,13 @@ Perl_sharedsv_associate(pTHX_ SV **psv, SV *ssv, shared_sv *data)
 				&sharedsv_scalar_vtbl, (char *)data, 0);
 		mg->mg_flags |= (MGf_COPY|MGf_DUP);
 		SvREFCNT_inc(ssv);
+		if(SvOBJECT(ssv)) {
+		  STRLEN len;
+		  char* stash_ptr = SvPV((SV*) SvSTASH(ssv), len);
+		  HV* stash = gv_stashpvn(stash_ptr, len, TRUE);
+		  SvOBJECT_on(sv);
+		  SvSTASH_set(sv, (HV*)SvREFCNT_inc(stash));
+		}
 	    }
 	    break;
 	}
