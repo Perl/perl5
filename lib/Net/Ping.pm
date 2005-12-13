@@ -16,7 +16,7 @@ use Carp;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.31_02";
+$VERSION = "2.31_03";
 
 sub SOL_IP { 0; };
 sub IP_TOS { 1; };
@@ -454,7 +454,7 @@ sub ping_icmp
   {
     $nfound = mselect((my $rout=$rbits), undef, undef, $timeout); # Wait for packet
     $timeout = $finish_time - &time();    # Get remaining time
-    if (!defined($nfound))                # Hmm, a strange error
+    if ($nfound == -1)                    # Hmm, a strange error
     {
       $ret = undef;
       $done = 1;
