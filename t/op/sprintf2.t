@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }   
 
-plan tests => 7 + 256;
+plan tests => 283;
 
 is(
     sprintf("%.40g ",0.01),
@@ -35,8 +35,15 @@ fresh_perl_is(
     q(%n should not be able to modify read-only constants),
 );
 
-# check %NNN$ for range bounds, especially negative 2's complement
+# check overflows
+for (int(~0/2+1), ~0, ~0 + 1, ~0 + 2, "9999999999999999999") {
+    is(eval {sprintf "%${_}d", 0}, undef, "no sprintf result expected %${_}d");
+    like($@, qr/^Integer overflow in format string for sprintf /, "overflow in sprintf");
+    is(eval {printf "%${_}d\n", 0}, undef, "no printf result expected %${_}d");
+    like($@, qr/^Integer overflow in format string for prtf /, "overflow in printf");
+}
 
+# check %NNN$ for range bounds
 {
     my ($warn, $bad) = (0,0);
     local $SIG{__WARN__} = sub {
@@ -47,9 +54,10 @@ fresh_perl_is(
 	    $bad++
 	}
     };
-    my $result = sprintf join('', map("%$_\$s%" . ~$_ . '$s', 1..20)),
-	qw(a b c d);
-    is($result, "abcd", "only four valid values");
+
+    my $fmt = join('', map("%$_\$s%" . int(~0/2+1-$_) . '$s', 1..20));
+    my $result = sprintf $fmt, qw(a b c d);
+    is($result, "abcd", "only four valid values in $fmt");
     is($warn, 36, "expected warnings");
     is($bad,   0, "unexpected warnings");
 }

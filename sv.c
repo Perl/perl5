@@ -7634,8 +7634,13 @@ S_expect_number(pTHX_ char** pattern)
     case '1': case '2': case '3':
     case '4': case '5': case '6':
     case '7': case '8': case '9':
-	while (isDIGIT(**pattern))
-	    var = var * 10 + (*(*pattern)++ - '0');
+	var = *(*pattern)++ - '0';
+	while (isDIGIT(**pattern)) {
+	    I32 tmp = var * 10 + (*(*pattern)++ - '0');
+	    if (tmp < var)
+		Perl_croak(aTHX_ "Integer overflow in format string for %s", (PL_op ? OP_NAME(PL_op) : "sv_vcatpvfn"));
+	    var = tmp;
+	}
     }
     return var;
 }

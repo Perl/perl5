@@ -1939,6 +1939,12 @@ transparently promotes all numbers to a floating point representation
 internally--subject to loss of precision errors in subsequent
 operations.
 
+=item Integer overflow in format string for %s
+
+(F) The indexes and widths specified in the format string of printf()
+or sprintf() are too large.  The numbers must not overflow the size of
+integers for your architecture.
+
 =item Integer overflow in version
 
 (F) Some portion of a version initialization is too large for the
