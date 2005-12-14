@@ -31,7 +31,7 @@ print "ok 1\n";
 
 SKIP: {
     if (defined $ENV{PERL_UNICODE}) {
-        print "not ok 2 # skip Unicode not yet supported\n"
+        print "not ok 2 # TODO Unicode not yet supported\n"
     } else {
         my $pod = <<EOP;
 =head1 ACCENTS
