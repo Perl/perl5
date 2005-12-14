@@ -1992,12 +1992,14 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
-	  SV* tmpstr;
 	return_rok:
-          if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
-                (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv))))
-	      return SvUV(tmpstr);
-	  return PTR2UV(SvRV(sv));
+	    if (SvAMAGIC(sv)) {
+		SV *const tmpstr = AMG_CALLun(sv,numer);
+		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
+		    return SvUV(tmpstr);
+		}
+	    }
+	    return PTR2UV(SvRV(sv));
 	}
 	if (SvIsCOW(sv)) {
 	    sv_force_normal_flags(sv, 0);
@@ -2057,12 +2059,14 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	   function. */
     } else if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
-	  SV* tmpstr;
 	return_rok:
-          if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
-                (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv))))
-	      return SvNV(tmpstr);
-	  return PTR2NV(SvRV(sv));
+	    if (SvAMAGIC(sv)) {
+		SV *const tmpstr = AMG_CALLun(sv,numer);
+                if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
+		    return SvNV(tmpstr);
+		}
+	    }
+	    return PTR2NV(SvRV(sv));
 	}
 	if (SvIsCOW(sv)) {
 	    sv_force_normal_flags(sv, 0);
@@ -2414,33 +2418,35 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	   function. */
     } else if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
-	    SV* tmpstr;
-
 	return_rok:
-            if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
-                (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
-		/* Unwrap this:  */
-		/* char *pv = lp ? SvPV(tmpstr, *lp) : SvPV_nolen(tmpstr); */
+            if (SvAMAGIC(sv)) {
+		SV *const tmpstr = AMG_CALLun(sv,string);
+		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
+		    /* Unwrap this:  */
+		    /* char *pv = lp ? SvPV(tmpstr, *lp) : SvPV_nolen(tmpstr);
+		     */
 
-                char *pv;
-		if ((SvFLAGS(tmpstr) & (SVf_POK)) == SVf_POK) {
-		    if (flags & SV_CONST_RETURN) {
-			pv = (char *) SvPVX_const(tmpstr);
+		    char *pv;
+		    if ((SvFLAGS(tmpstr) & (SVf_POK)) == SVf_POK) {
+			if (flags & SV_CONST_RETURN) {
+			    pv = (char *) SvPVX_const(tmpstr);
+			} else {
+			    pv = (flags & SV_MUTABLE_RETURN)
+				? SvPVX_mutable(tmpstr) : SvPVX(tmpstr);
+			}
+			if (lp)
+			    *lp = SvCUR(tmpstr);
 		    } else {
-			pv = (flags & SV_MUTABLE_RETURN)
-			    ? SvPVX_mutable(tmpstr) : SvPVX(tmpstr);
+			pv = sv_2pv_flags(tmpstr, lp, flags);
 		    }
-		    if (lp)
-			*lp = SvCUR(tmpstr);
-		} else {
-		    pv = sv_2pv_flags(tmpstr, lp, flags);
+		    if (SvUTF8(tmpstr))
+			SvUTF8_on(sv);
+		    else
+			SvUTF8_off(sv);
+		    return pv;
 		}
-                if (SvUTF8(tmpstr))
-                    SvUTF8_on(sv);
-                else
-                    SvUTF8_off(sv);
-                return pv;
-            } else {
+	    }
+	    {
 		SV *tsv;
 		MAGIC *mg;
 		const SV *const referent = (SV*)SvRV(sv);
