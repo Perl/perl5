@@ -9260,12 +9260,6 @@ Perl_my_localtime(pTHX_ const time_t *timep)
 static const long int utime_baseadjust[2] = { 0x4beb4000, 0x7c9567 };
 
 /*{{{int my_utime(const char *path, const struct utimbuf *utimes)*/
-#if __CRTL_VER >= 70300000 && !defined(__VAX)
-int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
-{
-    return utime(file, utimes);
-}
-#else
 int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
 {
   register int i;
@@ -9418,7 +9412,6 @@ int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
 
   return 0;
 }  /* end of my_utime() */
-#endif
 /*}}}*/
 
 /*
