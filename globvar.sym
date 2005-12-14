@@ -14,6 +14,7 @@ no_aelem
 no_dir_func
 no_func
 no_helem
+no_helem_sv
 no_localize_ref
 no_mem
 no_modify
@@ -69,5 +70,3 @@ warn_nl
 warn_nosemi
 warn_reserved
 warn_uninit
-watch_pvx
-no_helem_sv
