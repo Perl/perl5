@@ -2054,20 +2054,17 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 		return (NV)SvUVX(sv);
 	    else
 		return (NV)SvIVX(sv);
-	}	
-        if (!SvROK(sv)) {
-	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
-		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
-		    report_uninit(sv);
-	    }
-            return (NV)0;
-        }
-	/* Else this will drop through into the SvROK case just below, which
-	   will return within the {} for all code paths.  */
-    }
-    if (SvTHINKFIRST(sv)) {
+	}
+        if (SvROK(sv)) {
+	    goto return_rok;
+	}
+	assert(SvTYPE(sv) >= SVt_PVMG);
+	/* This falls through to the report_uninit near the end of the
+	   function. */
+    } else if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
 	  SV* tmpstr;
+	return_rok:
           if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
                 (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv))))
 	      return SvNV(tmpstr);
