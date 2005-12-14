@@ -1910,18 +1910,15 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 	    }
 	    return I_V(Atof(SvPVX_const(sv)));
 	}
-	if (!SvROK(sv)) {
-	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
-		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
-		    report_uninit(sv);
-	    }
-	    return 0;
+        if (SvROK(sv)) {
+	    goto return_rok;
 	}
-	/* Else this will drop through into the SvROK case just below, which
-	   will return within the {} for all code paths.  */
+	assert(SvTYPE(sv) >= SVt_PVMG);
+	/* This falls through to the report_uninit inside S_sv_2iuv_common.  */
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
+	return_rok:
 	    if (SvAMAGIC(sv)) {
 		SV * const tmpstr=AMG_CALLun(sv,numer);
 		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
@@ -1987,19 +1984,16 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
 	    }
 	    return U_V(Atof(SvPVX_const(sv)));
 	}
-	if (!SvROK(sv)) {
-	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
-		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
-		    report_uninit(sv);
-	    }
-	    return 0;
+        if (SvROK(sv)) {
+	    goto return_rok;
 	}
-	/* Else this will drop through into the SvROK case just below, which
-	   will return within the {} for all code paths.  */
+	assert(SvTYPE(sv) >= SVt_PVMG);
+	/* This falls through to the report_uninit inside S_sv_2iuv_common.  */
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
 	  SV* tmpstr;
+	return_rok:
           if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
                 (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv))))
 	      return SvUV(tmpstr);
@@ -2412,22 +2406,17 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		return memcpy(s, tbuf, len + 1);
 	    }
 	}
-        if (!SvROK(sv)) {
-	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
-		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
-		    report_uninit(sv);
-	    }
-	    if (lp)
-		*lp = 0;
-            return (char *)"";
-        }
-	/* Else this will drop through into the SvROK case just below, which
-	   will return within the {} for all code paths.  */
-    }
-    if (SvTHINKFIRST(sv)) {
+        if (SvROK(sv)) {
+	    goto return_rok;
+	}
+	assert(SvTYPE(sv) >= SVt_PVMG);
+	/* This falls through to the report_uninit near the end of the
+	   function. */
+    } else if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
 	    SV* tmpstr;
 
+	return_rok:
             if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
                 (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
 		/* Unwrap this:  */
