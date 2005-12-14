@@ -2083,10 +2083,8 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	}
     }
     if (SvTYPE(sv) < SVt_NV) {
-	if (SvTYPE(sv) == SVt_IV)
-	    sv_upgrade(sv, SVt_PVNV);
-	else
-	    sv_upgrade(sv, SVt_NV);
+	/* The logic to use SVt_PVNV if necessary is in sv_upgrade.  */
+	sv_upgrade(sv, SVt_NV);
 #ifdef USE_LONG_DOUBLE
 	DEBUG_c({
 	    STORE_NUMERIC_LOCAL_SET_STANDARD();
@@ -2207,11 +2205,10 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     else  {
 	if (!PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP) && ckWARN(WARN_UNINITIALIZED))
 	    report_uninit(sv);
-	if (SvTYPE(sv) < SVt_NV)
-	    /* Typically the caller expects that sv_any is not NULL now.  */
-	    /* XXX Ilya implies that this is a bug in callers that assume this
-	       and ideally should be fixed.  */
-	    sv_upgrade(sv, SVt_NV);
+	assert (SvTYPE(sv) >= SVt_NV);
+	/* Typically the caller expects that sv_any is not NULL now.  */
+	/* XXX Ilya implies that this is a bug in callers that assume this
+	   and ideally should be fixed.  */
 	return 0.0;
     }
 #if defined(USE_LONG_DOUBLE)
