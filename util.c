@@ -5055,7 +5055,7 @@ Perl_mem_log_alloc(const UV n, const UV typesize, const char *typename, Malloc_t
 				  " %s = %"IVdf": %"UVxf"\n",
 				  filename, linenumber, funcname, n, typesize,
 				  typename, n * typesize, PTR2UV(newalloc));
-    PerlLIO_write(2,  buf, len));
+    PerlLIO_write(2,  buf, len);
 #endif
     return newalloc;
 }
