@@ -11,8 +11,8 @@ $i = 1;
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 44;
-if ($Is_EBCDIC || $Is_UTF8) { $total_tests = 41; }
+my $total_tests = 45;
+if ($Is_EBCDIC || $Is_UTF8) { $total_tests = 42; }
 print "1..$total_tests\n";
 
 sub do_require {
@@ -194,6 +194,17 @@ sub bytes_to_utf16 {
 
 $i++; do_require(bytes_to_utf16('n', qq(print "ok $i\\n"; 1;\n), 1)); # BE
 $i++; do_require(bytes_to_utf16('v', qq(print "ok $i\\n"; 1;\n), 1)); # LE
+
+# Test for fix of RT #24404 : "require $scalar" may load a directory
+my $r = "threads";
+eval { require $r };
+$i++;
+if($@ =~ /Directory .*threads not allowed in require/) {
+    print "ok $i\n";
+} else {
+    print "not ok $i\n";
+}
+
 
 END {
     1 while unlink 'bleah.pm';
