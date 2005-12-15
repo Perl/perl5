@@ -1686,6 +1686,7 @@ PP(pp_sort)
 	    PL_stack_sp = newsp;
 	    POPSTACK;
 	    CATCH_SET(oldcatch);
+            SAVETMPS;
 	}
 	else {
 	    MEXTEND(SP, 20);	/* Can't afford stack realloc on signal. */
