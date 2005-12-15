@@ -3008,27 +3008,27 @@ S_doopen_pm(pTHX_ const char *name, const char *mode)
 	const char * const pmc = SvPV_nolen_const(pmcsv);
 	Stat_t pmcstat;
 	if (PerlLIO_stat(pmc, &pmcstat) < 0) {
-	    fp = check_type_and_open(aTHX_ name, mode);
+	    fp = check_type_and_open(name, mode);
 	}
 	else {
 	    Stat_t pmstat;
 	    if (PerlLIO_stat(name, &pmstat) < 0 ||
 	        pmstat.st_mtime < pmcstat.st_mtime)
 	    {
-		fp = check_type_and_open(aTHX_ pmc, mode);
+		fp = check_type_and_open(pmc, mode);
 	    }
 	    else {
-		fp = check_type_and_open(aTHX_ name, mode);
+		fp = check_type_and_open(name, mode);
 	    }
 	}
 	SvREFCNT_dec(pmcsv);
     }
     else {
-	fp = check_type_and_open(aTHX_ name, mode);
+	fp = check_type_and_open(name, mode);
     }
     return fp;
 #else
-    return check_type_and_open(aTHX_ name, mode);
+    return check_type_and_open(name, mode);
 #endif /* !PERL_DISABLE_PMC */
 }
 
