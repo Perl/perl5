@@ -29,6 +29,20 @@ a number of misparsing issues when a global C<_> subroutine is defined.
 
 =head1 Selected Bug Fixes
 
+=head2 C<defined $$x>
+
+C<use strict "refs"> was ignoring taking a hard reference in an argument
+to defined(), as in :
+
+    use strict "refs";
+    my $x = "foo";
+    if (defined $$x) {...}
+
+This now correctly produces the run-time error C<Can't use string as a
+SCALAR ref while "strict refs" in use>. (However, C<defined @$foo> and
+C<defined %$foo> are still allowed. Those constructs are discouraged
+anyway.)
+
 =head1 New or Changed Diagnostics
 
 =head1 Changed Internals

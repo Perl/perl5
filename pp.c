@@ -238,9 +238,14 @@ PP(pp_rv2sv)
 		if (SvROK(sv))
 		    goto wasref;
 	    }
+	    if (PL_op->op_private & HINT_STRICT_REFS) {
+		if (SvOK(sv))
+		    DIE(aTHX_ PL_no_symref_sv, sv, "a SCALAR");
+		else
+		    DIE(aTHX_ PL_no_usym, "a SCALAR");
+	    }
 	    if (!SvOK(sv)) {
-		if (PL_op->op_flags & OPf_REF ||
-		    PL_op->op_private & HINT_STRICT_REFS)
+		if (PL_op->op_flags & OPf_REF)
 		    DIE(aTHX_ PL_no_usym, "a SCALAR");
 		if (ckWARN(WARN_UNINITIALIZED))
 		    report_uninit(sv);
@@ -258,8 +263,6 @@ PP(pp_rv2sv)
 		}
 	    }
 	    else {
-		if (PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(aTHX_ PL_no_symref_sv, sv, "a SCALAR");
 		gv = (GV*)gv_fetchsv(sv, TRUE, SVt_PV);
 	    }
 	}
