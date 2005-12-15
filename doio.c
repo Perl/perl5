@@ -1565,7 +1565,7 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 {
     register I32 val;
     register I32 tot = 0;
-    const char *what;
+    const char *const what = PL_op_name[type];
     const char *s;
     SV ** const oldmark = mark;
 
@@ -1574,11 +1574,11 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
        platforms where kill was not defined.  */
 #ifndef HAS_KILL
     if (type == OP_KILL)
-	Perl_die(aTHX_ PL_no_func, "kill");
+	Perl_die(aTHX_ PL_no_func, what);
 #endif
 #ifndef HAS_CHOWN
     if (type == OP_CHOWN)
-	Perl_die(aTHX_ PL_no_func, "chown");
+	Perl_die(aTHX_ PL_no_func, what);
 #endif
 
 
@@ -1599,7 +1599,6 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
     }
     switch (type) {
     case OP_CHMOD:
-	what = "chmod";
 	APPLY_TAINT_PROPER();
 	if (++mark <= sp) {
 	    val = SvIVx(*mark);
@@ -1638,7 +1637,6 @@ Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 	break;
 #ifdef HAS_CHOWN
     case OP_CHOWN:
-	what = "chown";
 	APPLY_TAINT_PROPER();
 	if (sp - mark > 2) {
             register I32 val2;
@@ -1686,7 +1684,6 @@ nothing in the core.
 */
 #ifdef HAS_KILL
     case OP_KILL:
-	what = "kill";
 	APPLY_TAINT_PROPER();
 	if (mark == sp)
 	    break;
@@ -1756,7 +1753,6 @@ nothing in the core.
 	break;
 #endif
     case OP_UNLINK:
-	what = "unlink";
 	APPLY_TAINT_PROPER();
 	tot = sp - mark;
 	while (++mark <= sp) {
@@ -1778,7 +1774,6 @@ nothing in the core.
 	break;
 #if defined(HAS_UTIME) || defined(HAS_FUTIMES)
     case OP_UTIME:
-	what = "utime";
 	APPLY_TAINT_PROPER();
 	if (sp - mark > 2) {
 #if defined(HAS_FUTIMES)
