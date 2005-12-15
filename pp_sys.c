@@ -2182,7 +2182,7 @@ PP(pp_ioctl)
 	s = INT2PTR(char*,retval);		/* ouch */
     }
 
-    TAINT_PROPER(optype == OP_IOCTL ? "ioctl" : "fcntl");
+    TAINT_PROPER(PL_op_desc[optype]);
 
     if (optype == OP_IOCTL)
 #ifdef HAS_IOCTL
