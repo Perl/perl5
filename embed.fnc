@@ -1178,6 +1178,7 @@ sR	|I32	|dopoptosub	|I32 startingblock
 sR	|I32	|dopoptosub_at	|NN const PERL_CONTEXT* cxstk|I32 startingblock
 s	|void	|save_lines	|NULLOK AV *array|NN SV *sv
 sR	|OP*	|doeval		|int gimme|NULLOK OP** startop|NULLOK CV* outside|U32 seq
+sR	|PerlIO *|check_type_and_open|NN const char *name|NN const char *mode
 sR	|PerlIO *|doopen_pm	|NN const char *name|NN const char *mode
 sR	|bool	|path_is_absolute|NN const char *name
 sR	|I32	|run_user_filter|int idx|NN SV *buf_sv|int maxlen
