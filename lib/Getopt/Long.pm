@@ -6,8 +6,8 @@ package Getopt::Long;
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Thu Apr 28 21:14:19 2005
-# Update Count    : 1456
+# Last Modified On: Wed Dec 14 21:17:21 2005
+# Update Count    : 1458
 # Status          : Released
 
 ################ Copyright ################
@@ -35,10 +35,10 @@ use 5.004;
 use strict;
 
 use vars qw($VERSION);
-$VERSION        =  2.3404;
+$VERSION        =  2.35;
 # For testing versions only.
-use vars qw($VERSION_STRING);
-$VERSION_STRING = "2.34_04";
+#use vars qw($VERSION_STRING);
+#$VERSION_STRING = "2.35";
 
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK);
@@ -291,7 +291,7 @@ sub GetOptions(@) {
     # as it is really a hash underneath.
     $userlinkage = undef;
     if ( @optionlist && ref($optionlist[0]) and
-	 "$optionlist[0]" =~ /^(?:.*\=)?HASH\([^\(]*\)$/ ) {
+	 UNIVERSAL::isa($optionlist[0],'HASH') ) {
 	$userlinkage = shift (@optionlist);
 	print STDERR ("=> user linkage: $userlinkage\n") if $debug;
     }
@@ -314,6 +314,11 @@ sub GetOptions(@) {
     %opctl = ();
     while ( @optionlist ) {
 	my $opt = shift (@optionlist);
+
+	unless ( defined($opt) ) {
+	    $error .= "Undefined argument in option spec\n";
+	    next;
+	}
 
 	# Strip leading prefix so people can specify "--foo=i" if they like.
 	$opt = $+ if $opt =~ /^$prefix+(.*)$/s;
@@ -1477,12 +1482,15 @@ The C<+> form is now obsolete and strongly deprecated.
 
 =head1 Getting Started with Getopt::Long
 
-Getopt::Long is the Perl5 successor of C<newgetopt.pl>. This was
-the first Perl module that provided support for handling the new style
-of command line options, hence the name Getopt::Long. This module
-also supports single-character options and bundling. In this case, the
-options are restricted to alphabetic characters only, and the
-characters C<?> and C<->.
+Getopt::Long is the Perl5 successor of C<newgetopt.pl>. This was the
+first Perl module that provided support for handling the new style of
+command line options, hence the name Getopt::Long. This module also
+supports single-character options and bundling. Single character
+options may be any alphabetic character, a question mark, and a dash.
+Long options may consist of a series of letters, digits, and dashes.
+Although this is currently not enforced by Getopt::Long, multiple
+consecutive dashes are not allowed, and the option name must not end
+with a dash.
 
 To use Getopt::Long from a Perl program, you must include the
 following line in your Perl program:
@@ -1617,7 +1625,7 @@ destination:
 Used with the example above, C<@libfiles> (or C<@$libfiles>) would
 contain two strings upon completion: C<"lib/srdlib"> and
 C<"lib/extlib">, in that order. It is also possible to specify that
-only integer or floating point numbers are acceptible values.
+only integer or floating point numbers are acceptable values.
 
 Often it is useful to allow comma-separated lists of values as well as
 multiple occurrences of the options. This is easy using Perl's split()
@@ -1668,7 +1676,7 @@ When used with command line options:
 the hash C<%defines> (or C<%$defines>) will contain two keys, C<"os">
 with value C<"linux> and C<"vendor"> with value C<"redhat">. It is
 also possible to specify that only integer or floating point numbers
-are acceptible values. The keys are always taken to be strings.
+are acceptable values. The keys are always taken to be strings.
 
 =head2 User-defined subroutines to handle options
 
@@ -1698,7 +1706,7 @@ the desired error message as its argument. GetOptions() will catch the
 die(), issue the error message, and record that an error result must
 be returned upon completion.
 
-If the text of the error message starts with an exclamantion mark C<!>
+If the text of the error message starts with an exclamation mark C<!>
 it is interpreted specially by GetOptions(). There is currently one
 special command implemented: C<die("!FINISH")> will cause GetOptions()
 to stop processing options, as if it encountered a double dash C<-->.
@@ -1751,10 +1759,11 @@ The argument specification can be
 
 =item !
 
-The option does not take an argument and may be negated, i.e. prefixed
-by "no". E.g. C<"foo!"> will allow C<--foo> (a value of 1 will be
-assigned) and C<--nofoo> and C<--no-foo> (a value of 0 will be assigned). If the
-option has aliases, this applies to the aliases as well.
+The option does not take an argument and may be negated by prefixing
+it with "no" or "no-". E.g. C<"foo!"> will allow C<--foo> (a value of
+1 will be assigned) as well as C<--nofoo> and C<--no-foo> (a value of
+0 will be assigned). If the option has aliases, this applies to the
+aliases as well.
 
 Using negation on a single letter option when bundling is in effect is
 pointless and will result in a warning.
@@ -1910,7 +1919,7 @@ messages. For example:
 
 See L<Pod::Usage> for details.
 
-=head2 Storing options in a hash
+=head2 Storing option values in a hash
 
 Sometimes, for example when there are a lot of options, having a
 separate variable for each of them can be cumbersome. GetOptions()
@@ -1975,7 +1984,7 @@ The first level of bundling can be enabled with:
 
 Configured this way, single-character options can be bundled but long
 options B<must> always start with a double dash C<--> to avoid
-abiguity. For example, when C<vax>, C<a>, C<v> and C<x> are all valid
+ambiguity. For example, when C<vax>, C<a>, C<v> and C<x> are all valid
 options,
 
     -vax
@@ -2128,7 +2137,7 @@ is equivalent to
     --foo --bar arg1 arg2 arg3
 
 If an argument callback routine is specified, C<@ARGV> will always be
-empty upon succesful return of GetOptions() since all options have been
+empty upon successful return of GetOptions() since all options have been
 processed. The only exception is when C<--> is used:
 
     --foo arg1 --bar arg2 -- arg3
@@ -2165,7 +2174,7 @@ auto_abbrev enabled, possible arguments and option settings are:
     -al, -la, -ala, -all,...     a, l
     --al, --all                  all
 
-The suprising part is that C<--a> sets option C<a> (due to auto
+The surprising part is that C<--a> sets option C<a> (due to auto
 completion), not C<all>.
 
 Note: disabling C<bundling> also disables C<bundling_override>.
