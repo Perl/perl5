@@ -240,6 +240,7 @@ sub mselect
 	while (1) {
 	    $gran = $t if $gran > $t;
 	    my $nfound = select($_[0], $_[1], $_[2], $gran);
+	    undef $nfound if $nfound == -1;
 	    $t -= $gran;
 	    return $nfound if $nfound or !defined($nfound) or $t <= 0;
 
@@ -248,7 +249,9 @@ sub mselect
 	}
     }
     else {
-	return select($_[0], $_[1], $_[2], $_[3]);
+	my $nfound = select($_[0], $_[1], $_[2], $_[3]);
+	undef $nfound if $nfound == -1;
+	return $nfound;
     }
 }
 
@@ -454,7 +457,7 @@ sub ping_icmp
   {
     $nfound = mselect((my $rout=$rbits), undef, undef, $timeout); # Wait for packet
     $timeout = $finish_time - &time();    # Get remaining time
-    if ($nfound == -1)                    # Hmm, a strange error
+    if (!defined($nfound))                # Hmm, a strange error
     {
       $ret = undef;
       $done = 1;
