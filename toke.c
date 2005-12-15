@@ -5661,10 +5661,15 @@ S_pending_ident(pTHX)
     /* build ops for a bareword */
     yylval.opval = (OP*)newSVOP(OP_CONST, 0, newSVpv(PL_tokenbuf+1, 0));
     yylval.opval->op_private = OPpCONST_ENTERED;
-    gv_fetchpv(PL_tokenbuf+1, PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : TRUE,
-               ((PL_tokenbuf[0] == '$') ? SVt_PV
-                : (PL_tokenbuf[0] == '@') ? SVt_PVAV
-                : SVt_PVHV));
+    gv_fetchpv(
+	    PL_tokenbuf+1,
+	    PL_in_eval
+		? (GV_ADDMULTI | GV_ADDINEVAL)
+		/* if the identifier refers to a stash, don't autovivify it */
+		: !(*PL_tokenbuf == '%' && *(d = PL_tokenbuf + strlen(PL_tokenbuf) - 1) == ':' && d[-1] == ':'),
+	    ((PL_tokenbuf[0] == '$') ? SVt_PV
+	     : (PL_tokenbuf[0] == '@') ? SVt_PVAV
+	     : SVt_PVHV));
     return WORD;
 }
 
