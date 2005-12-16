@@ -179,6 +179,20 @@ $foo = eval  {require bleah}; delete $INC{"bleah.pm"}; ++$::i;
 @foo = eval  {require bleah}; delete $INC{"bleah.pm"}; ++$::i;
        eval  {require bleah};
 
+# Test for fix of RT #24404 : "require $scalar" may load a directory
+my $r = "threads";
+eval { require $r };
+$i++;
+if($@ =~ /Directory .*threads not allowed in require/) {
+    print "ok $i\n";
+} else {
+    print "not ok $i\n";
+}
+
+############################
+#### Add new tests here ####
+############################
+
 # UTF-encoded things - skipped on EBCDIC machines and on UTF-8 input
 
 if ($Is_EBCDIC || $Is_UTF8) { exit; }
@@ -194,17 +208,6 @@ sub bytes_to_utf16 {
 
 $i++; do_require(bytes_to_utf16('n', qq(print "ok $i\\n"; 1;\n), 1)); # BE
 $i++; do_require(bytes_to_utf16('v', qq(print "ok $i\\n"; 1;\n), 1)); # LE
-
-# Test for fix of RT #24404 : "require $scalar" may load a directory
-my $r = "threads";
-eval { require $r };
-$i++;
-if($@ =~ /Directory .*threads not allowed in require/) {
-    print "ok $i\n";
-} else {
-    print "not ok $i\n";
-}
-
 
 END {
     1 while unlink 'bleah.pm';
