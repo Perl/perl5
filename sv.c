@@ -9314,9 +9314,9 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	    case SVt_PVNV:
 	    case SVt_PVIV:
 	    case SVt_PV:
-		assert(sv_type_details->copy);
+		assert(sv_type_details->size);
 		if (sv_type_details->arena) {
-		    new_body_inline(new_body, sv_type_details->copy, sv_type);
+		    new_body_inline(new_body, sv_type_details->size, sv_type);
 		    new_body
 			= (void*)((char*)new_body - sv_type_details->offset);
 		} else {
