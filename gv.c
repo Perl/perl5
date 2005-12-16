@@ -433,7 +433,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
     HV* ostash = stash;
 
     if (stash && SvTYPE(stash) < SVt_PVHV)
-	stash = Nullhv;
+	stash = NULL;
 
     for (nend = name; *nend; nend++) {
 	if (*nend == '\'')
@@ -516,7 +516,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     if (stash) {
 	if (SvTYPE(stash) < SVt_PVHV) {
 	    packname = SvPV_const((SV*)stash, packname_len);
-	    stash = Nullhv;
+	    stash = NULL;
 	}
 	else {
 	    packname = HvNAME_get(stash);

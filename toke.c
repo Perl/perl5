@@ -10829,7 +10829,7 @@ Perl_yyerror(pTHX_ const char *s)
             OutCopFILE(PL_curcop));
     }
     PL_in_my = 0;
-    PL_in_my_stash = Nullhv;
+    PL_in_my_stash = NULL;
     return 0;
 }
 #ifdef __SC__

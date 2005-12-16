@@ -929,7 +929,7 @@ Data_Dumper_Dumpxs(href, ...)
 	{
 	    HV *hv;
 	    SV *retval, *valstr;
-	    HV *seenhv = Nullhv;
+	    HV *seenhv = NULL;
 	    AV *postav, *todumpav, *namesav;
 	    I32 level = 0;
 	    I32 indent, terse, i, imax, postlen;
@@ -966,7 +966,7 @@ Data_Dumper_Dumpxs(href, ...)
 	    }
 
 	    todumpav = namesav = NULL;
-	    seenhv = Nullhv;
+	    seenhv = NULL;
 	    val = pad = xpad = apad = sep = pair = varname
 		= freezer = toaster = bless = sortkeys = &PL_sv_undef;
 	    name = sv_newmortal();

@@ -94,7 +94,7 @@ dl_generic_private_init(pTHX)	/* called by dl_*.xs dl_private_init() */
     MY_CXT.x_dl_last_error = newSVpvn("", 0);
     dl_nonlazy = 0;
 #ifdef DL_LOADONCEONLY
-    dl_loaded_files = Nullhv;
+    dl_loaded_files = NULL;
 #endif
 #ifdef DEBUGGING
     {

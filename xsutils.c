@@ -265,7 +265,7 @@ usage:
 	sv_setsv(TARG, &PL_sv_no);	/* unblessed lexical */
 #endif
     else {
-	const HV *stash = Nullhv;
+	const HV *stash = NULL;
 	switch (SvTYPE(sv)) {
 	case SVt_PVCV:
 	    if (CvGV(sv) && isGV(CvGV(sv)) && GvSTASH(CvGV(sv)))

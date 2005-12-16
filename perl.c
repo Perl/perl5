@@ -950,13 +950,13 @@ perl_destruct(pTHXx)
     PL_DBassertion = Nullsv;
     PL_DBcv = Nullcv;
     PL_dbargs = NULL;
-    PL_debstash = Nullhv;
+    PL_debstash = NULL;
 
     SvREFCNT_dec(PL_argvout_stack);
     PL_argvout_stack = NULL;
 
     SvREFCNT_dec(PL_modglobal);
-    PL_modglobal = Nullhv;
+    PL_modglobal = NULL;
     SvREFCNT_dec(PL_preambleav);
     PL_preambleav = NULL;
     SvREFCNT_dec(PL_subname);
@@ -965,7 +965,7 @@ perl_destruct(pTHXx)
     PL_linestr = Nullsv;
 #ifdef PERL_USES_PL_PIDSTATUS
     SvREFCNT_dec(PL_pidstatus);
-    PL_pidstatus = Nullhv;
+    PL_pidstatus = NULL;
 #endif
     SvREFCNT_dec(PL_toptarget);
     PL_toptarget = Nullsv;
@@ -2383,7 +2383,7 @@ Perl_get_hv(pTHX_ const char *name, I32 create)
     	return GvHVn(gv);
     if (gv)
 	return GvHV(gv);
-    return Nullhv;
+    return NULL;
 }
 
 /*

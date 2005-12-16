@@ -259,7 +259,7 @@ Perl_allocmy(pTHX_ char *name)
 		    (PL_in_my == KEY_our 
 		        /* $_ is always in main::, even with our */
 			? (PL_curstash && !strEQ(name,"$_") ? PL_curstash : PL_defstash)
-			: Nullhv
+			: NULL
 		    ),
 		    0 /*  not fake */
     );
@@ -1695,7 +1695,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 	} else if (attrs) {
 	    GV * const gv = cGVOPx_gv(cUNOPo->op_first);
 	    PL_in_my = FALSE;
-	    PL_in_my_stash = Nullhv;
+	    PL_in_my_stash = NULL;
 	    apply_attrs(GvSTASH(gv),
 			(type == OP_RV2SV ? GvSV(gv) :
 			 type == OP_RV2AV ? (SV*)GvAV(gv) :
@@ -1719,7 +1719,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 	HV *stash;
 
 	PL_in_my = FALSE;
-	PL_in_my_stash = Nullhv;
+	PL_in_my_stash = NULL;
 
 	/* check for C<my Dog $spot> when deciding package */
 	stash = PAD_COMPNAME_TYPE(o->op_targ);
@@ -1761,7 +1761,7 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
 	    o = append_list(OP_LIST, (LISTOP*)o, (LISTOP*)rops);
     }
     PL_in_my = FALSE;
-    PL_in_my_stash = Nullhv;
+    PL_in_my_stash = NULL;
     return o;
 }
 
@@ -2015,7 +2015,7 @@ Perl_localize(pTHX_ OP *o, I32 lex)
     else
 	o = mod(o, OP_NULL);		/* a bit kludgey */
     PL_in_my = FALSE;
-    PL_in_my_stash = Nullhv;
+    PL_in_my_stash = NULL;
     return o;
 }
 

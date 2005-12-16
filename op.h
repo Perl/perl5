@@ -334,7 +334,7 @@ struct pmop {
 #  define PmopSTASHPV(o)	((o)->op_pmstashpv)
 #  define PmopSTASHPV_set(o,pv)	(PmopSTASHPV(o) = savesharedpv(pv))
 #  define PmopSTASH(o)		(PmopSTASHPV(o) \
-				 ? gv_stashpv(PmopSTASHPV(o),GV_ADD) : Nullhv)
+				 ? gv_stashpv(PmopSTASHPV(o),GV_ADD) : NULL)
 #  define PmopSTASH_set(o,hv)	PmopSTASHPV_set(o, ((hv) ? HvNAME_get(hv) : Nullch))
 #  define PmopSTASH_free(o)	PerlMemShared_free(PmopSTASHPV(o))
 

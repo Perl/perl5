@@ -827,9 +827,9 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 	new_offset = pad_add_name(
 	    SvPVX_const(*out_name_sv),
 	    (SvFLAGS(*out_name_sv) & SVpad_TYPED)
-		    ? SvSTASH(*out_name_sv) : Nullhv,
+		    ? SvSTASH(*out_name_sv) : NULL,
 	    (SvFLAGS(*out_name_sv) & SVpad_OUR)
-		    ? GvSTASH(*out_name_sv) : Nullhv,
+		    ? GvSTASH(*out_name_sv) : NULL,
 	    1  /* fake */
 	);
 
@@ -1627,7 +1627,7 @@ Perl_pad_compname_type(pTHX_ const PADOFFSET po)
     if ( SvFLAGS(*av) & SVpad_TYPED ) {
         return SvSTASH(*av);
     }
-    return Nullhv;
+    return NULL;
 }
 
 /*

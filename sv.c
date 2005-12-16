@@ -7261,7 +7261,7 @@ S_sv_unglob(pTHX_ SV *sv)
 	gp_free((GV*)sv);
     if (GvSTASH(sv)) {
 	sv_del_backref((SV*)GvSTASH(sv), sv);
-	GvSTASH(sv) = Nullhv;
+	GvSTASH(sv) = NULL;
     }
     sv_unmagic(sv, PERL_MAGIC_glob);
     Safefree(GvNAME(sv));
@@ -10580,7 +10580,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif
 
     /* swatch cache */
-    PL_last_swash_hv	= Nullhv;	/* reinits on demand */
+    PL_last_swash_hv	= NULL;	/* reinits on demand */
     PL_last_swash_klen	= 0;
     PL_last_swash_key[0]= '\0';
     PL_last_swash_tmps	= (U8*)NULL;
