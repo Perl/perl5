@@ -116,7 +116,7 @@ struct cv {
 };
 
 struct av {
-    _SV_HEAD(XPVAV*);		/* pointer to xpvcv body */
+    _SV_HEAD(XPVAV*);		/* pointer to xpvav body */
     _SV_HEAD_UNION;
 };
 
@@ -131,7 +131,7 @@ struct io {
 };
 
 #undef _SV_HEAD
-#undef _SV_HEAD_UNION		/* insure no pollution */
+#undef _SV_HEAD_UNION		/* ensure no pollution */
 
 /*
 =head1 SV Manipulation Functions
