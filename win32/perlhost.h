@@ -1693,6 +1693,7 @@ win32_start_child(LPVOID arg)
     PerlInterpreter *my_perl = (PerlInterpreter*)arg;
     GV *tmpgv;
     int status;
+    HWND parent_message_hwnd;
 #ifdef PERL_SYNC_FORK
     static long sync_fork_id = 0;
     long id = ++sync_fork_id;
@@ -1722,6 +1723,12 @@ win32_start_child(LPVOID arg)
 #ifdef PERL_USES_PL_PIDSTATUS    
     hv_clear(PL_pidstatus);
 #endif    
+
+    /* create message window and tell parent about it */
+    parent_message_hwnd = w32_message_hwnd;
+    w32_message_hwnd = win32_create_message_window();
+    if (parent_message_hwnd != NULL)
+        PostMessage(parent_message_hwnd, WM_USER_MESSAGE, w32_pseudo_id, (LONG)w32_message_hwnd);
 
     /* push a zero on the stack (we are the child) */
     {
@@ -1826,6 +1833,11 @@ PerlProcFork(struct IPerlProc* piPerl)
     id = win32_start_child((LPVOID)new_perl);
     PERL_SET_THX(aTHX);
 #  else
+    if (w32_message_hwnd == INVALID_HANDLE_VALUE)
+        w32_message_hwnd = win32_create_message_window();
+    new_perl->Isys_intern.message_hwnd = w32_message_hwnd;
+    w32_pseudo_child_message_hwnds[w32_num_pseudo_children] =
+        (w32_message_hwnd == NULL) ? NULL : INVALID_HANDLE_VALUE;
 #    ifdef USE_RTL_THREAD_API
     handle = (HANDLE)_beginthreadex((void*)NULL, 0, win32_start_child,
 				    (void*)new_perl, 0, (unsigned*)&id);

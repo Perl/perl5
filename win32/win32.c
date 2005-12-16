@@ -15,6 +15,9 @@
 #define Win32_Winsock
 #endif
 #include <windows.h>
+#ifndef HWND_MESSAGE
+#  define HWND_MESSAGE     ((HWND)-3)
+#endif
 /* GCC-2.95.2/Mingw32-1.1 forgot the WINAPI on CommandLineToArgvW() */
 #if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION==1)	
 #  include <shellapi.h>
@@ -113,7 +116,7 @@ HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
 char	w32_module_name[MAX_PATH+1];
 END_EXTERN_C
 
-static DWORD	w32_platform = (DWORD)-1;
+static OSVERSIONINFO g_osver = {0, 0, 0, 0, 0, ""};
 
 #define ONE_K_BUFSIZE	1024
 
@@ -130,13 +133,13 @@ _matherr(struct _exception *a)
 int
 IsWin95(void)
 {
-    return (win32_os_id() == VER_PLATFORM_WIN32_WINDOWS);
+    return (g_osver.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS);
 }
 
 int
 IsWinNT(void)
 {
-    return (win32_os_id() == VER_PLATFORM_WIN32_NT);
+    return (g_osver.dwPlatformId == VER_PLATFORM_WIN32_NT);
 }
 
 EXTERN_C void
@@ -426,15 +429,7 @@ Perl_my_pclose(pTHX_ PerlIO *fp)
 DllExport unsigned long
 win32_os_id(void)
 {
-    static OSVERSIONINFO osver;
-
-    if (osver.dwPlatformId != w32_platform) {
-	memset(&osver, 0, sizeof(OSVERSIONINFO));
-	osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-	GetVersionEx(&osver);
-	w32_platform = osver.dwPlatformId;
-    }
-    return (unsigned long)w32_platform;
+    return (unsigned long)g_osver.dwPlatformId;
 }
 
 DllExport int
@@ -1038,6 +1033,8 @@ remove_dead_pseudo_process(long child)
 	     (w32_num_pseudo_children-child-1), HANDLE);
 	Move(&w32_pseudo_child_pids[child+1], &w32_pseudo_child_pids[child],
 	     (w32_num_pseudo_children-child-1), DWORD);
+	Move(&w32_pseudo_child_message_hwnds[child+1], &w32_pseudo_child_message_hwnds[child],
+	     (w32_num_pseudo_children-child-1), HWND);
 	w32_num_pseudo_children--;
     }
 }
@@ -1055,11 +1052,13 @@ win32_kill(int pid, int sig)
 	/* it is a pseudo-forked child */
 	child = find_pseudo_pid(-pid);
 	if (child >= 0) {
+            HWND hwnd = w32_pseudo_child_message_hwnds[child];
 	    hProcess = w32_pseudo_child_handles[child];
 	    switch (sig) {
 	    case 0:
 		/* "Does process exist?" use of kill */
 		return 0;
+
 	    case 9:
                 /* kill -9 style un-graceful exit */
 	    	if (TerminateThread(hProcess, sig)) {
@@ -1067,16 +1066,30 @@ win32_kill(int pid, int sig)
 		    return 0;
 	    	}
 		break;
-	    default:
-	      /* We fake signals to pseudo-processes using Win32
-	       * message queue.  In Win9X the pids are negative already. */
-	      if (PostThreadMessage(IsWin95() ? pid : -pid,WM_USER,sig,0)) {
-		    /* It might be us ... */
-		    PERL_ASYNC_CHECK();
-		    return 0;
-		}
+
+	    default: {
+                int count = 0;
+                /* pseudo-process has not yet properly initialized if hwnd isn't set */
+                while (hwnd == INVALID_HANDLE_VALUE && count < 5) {
+                    /* Yield and wait for the other thread to send us its message_hwnd */
+                    Sleep(0);
+                    win32_async_check(aTHX);
+                    ++count;
+                }
+                if (hwnd != INVALID_HANDLE_VALUE) {
+                    /* We fake signals to pseudo-processes using Win32
+                     * message queue.  In Win9X the pids are negative already. */
+                    if ((hwnd != NULL && PostMessage(hwnd, WM_USER_KILL, sig, 0)) ||
+                        PostThreadMessage(IsWin95() ? pid : -pid, WM_USER_KILL, sig, 0))
+                    {
+                        /* It might be us ... */
+                        PERL_ASYNC_CHECK();
+                        return 0;
+                    }
+                }
 		break;
             }
+            } /* switch */
 	}
 	else if (IsWin95()) {
 	    pid = -pid;
@@ -1585,44 +1598,34 @@ win32_uname(struct utsname *name)
 {
     struct hostent *hep;
     STRLEN nodemax = sizeof(name->nodename)-1;
-    OSVERSIONINFO osver;
 
-    memset(&osver, 0, sizeof(OSVERSIONINFO));
-    osver.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-    if (GetVersionEx(&osver)) {
-	/* sysname */
-	switch (osver.dwPlatformId) {
-	case VER_PLATFORM_WIN32_WINDOWS:
-	    strcpy(name->sysname, "Windows");
-	    break;
-	case VER_PLATFORM_WIN32_NT:
-	    strcpy(name->sysname, "Windows NT");
-	    break;
-	case VER_PLATFORM_WIN32s:
-	    strcpy(name->sysname, "Win32s");
-	    break;
-	default:
-	    strcpy(name->sysname, "Win32 Unknown");
-	    break;
-	}
-
-	/* release */
-	sprintf(name->release, "%d.%d",
-		osver.dwMajorVersion, osver.dwMinorVersion);
-
-	/* version */
-	sprintf(name->version, "Build %d",
-		osver.dwPlatformId == VER_PLATFORM_WIN32_NT
-		? osver.dwBuildNumber : (osver.dwBuildNumber & 0xffff));
-	if (osver.szCSDVersion[0]) {
-	    char *buf = name->version + strlen(name->version);
-	    sprintf(buf, " (%s)", osver.szCSDVersion);
-	}
+    /* sysname */
+    switch (g_osver.dwPlatformId) {
+    case VER_PLATFORM_WIN32_WINDOWS:
+        strcpy(name->sysname, "Windows");
+        break;
+    case VER_PLATFORM_WIN32_NT:
+        strcpy(name->sysname, "Windows NT");
+        break;
+    case VER_PLATFORM_WIN32s:
+        strcpy(name->sysname, "Win32s");
+        break;
+    default:
+        strcpy(name->sysname, "Win32 Unknown");
+        break;
     }
-    else {
-	*name->sysname = '\0';
-	*name->version = '\0';
-	*name->release = '\0';
+
+    /* release */
+    sprintf(name->release, "%d.%d",
+            g_osver.dwMajorVersion, g_osver.dwMinorVersion);
+
+    /* version */
+    sprintf(name->version, "Build %d",
+            g_osver.dwPlatformId == VER_PLATFORM_WIN32_NT
+            ? g_osver.dwBuildNumber : (g_osver.dwBuildNumber & 0xffff));
+    if (g_osver.szCSDVersion[0]) {
+        char *buf = name->version + strlen(name->version);
+        sprintf(buf, " (%s)", g_osver.szCSDVersion);
     }
 
     /* nodename */
@@ -1757,65 +1760,60 @@ DllExport int
 win32_async_check(pTHX)
 {
     MSG msg;
-    int ours = 1;
+    HWND hwnd = w32_message_hwnd;
+
+    w32_poll_count = 0;
+
+    if (hwnd == INVALID_HANDLE_VALUE)
+        return 1;
+
     /* Passing PeekMessage -1 as HWND (2nd arg) only get PostThreadMessage() messages
      * and ignores window messages - should co-exist better with windows apps e.g. Tk
      */
-    while (PeekMessage(&msg, (HWND)-1, 0, 0, PM_REMOVE|PM_NOYIELD)) {
-	int sig;
-	switch(msg.message) {
+    if (hwnd == NULL)
+        hwnd = (HWND)-1;
 
-#if 0
-    /* Perhaps some other messages could map to signals ? ... */
-        case WM_CLOSE:
-        case WM_QUIT:
-	    /* Treat WM_QUIT like SIGHUP?  */
-	    sig = SIGHUP;
-	    goto Raise;
-	    break;
+    while (PeekMessage(&msg, hwnd, WM_TIMER,    WM_TIMER,    PM_REMOVE|PM_NOYIELD) ||
+           PeekMessage(&msg, hwnd, WM_USER_MIN, WM_USER_MAX, PM_REMOVE|PM_NOYIELD))
+    {
+	switch (msg.message) {
+#ifdef USE_ITHREADS
+        case WM_USER_MESSAGE: {
+            int child = find_pseudo_pid(msg.wParam);
+            if (child >= 0)
+                w32_pseudo_child_message_hwnds[child] = (HWND)msg.lParam;
+            break;
+        }
 #endif
 
-	/* We use WM_USER to fake kill() with other signals */
-	case WM_USER: {
-	    sig = msg.wParam;
-	Raise:
-	    if (do_raise(aTHX_ sig)) {
-		   sig_terminate(aTHX_ sig);
-	    }
+	case WM_USER_KILL: {
+            /* We use WM_USER to fake kill() with other signals */
+	    int sig = msg.wParam;
+	    if (do_raise(aTHX_ sig))
+                sig_terminate(aTHX_ sig);
 	    break;
 	}
 
 	case WM_TIMER: {
 	    /* alarm() is a one-shot but SetTimer() repeats so kill it */
 	    if (w32_timerid && w32_timerid==msg.wParam) {
-	    	KillTimer(NULL,w32_timerid);
+	    	KillTimer(w32_message_hwnd, w32_timerid);
 	    	w32_timerid=0;
-	    }
-            else
-		goto FallThrough;
-	    /* Now fake a call to signal handler */
-	    if (do_raise(aTHX_ 14)) {
-	    	sig_terminate(aTHX_ 14);
-	    }
-	    break;
-	}
 
-	/* Otherwise do normal Win32 thing - in case it is useful */
-	default:
-	FallThrough:
-	    TranslateMessage(&msg);
-	    DispatchMessage(&msg);
-	    ours = 0;
+                /* Now fake a call to signal handler */
+                if (do_raise(aTHX_ 14))
+                    sig_terminate(aTHX_ 14);
+            }
 	    break;
 	}
+        } /* switch */
     }
-    w32_poll_count = 0;
 
     /* Above or other stuff may have set a signal flag */
     if (PL_sig_pending) {
 	despatch_signals();
     }
-    return ours;
+    return 1;
 }
 
 /* This function will not return until the timeout has elapsed, or until
@@ -2028,13 +2026,22 @@ win32_alarm(unsigned int sec)
      * one of the supported codes in <signal.h>
      */
     dTHX;
+
+    if (w32_message_hwnd == INVALID_HANDLE_VALUE)
+        w32_message_hwnd = win32_create_message_window();
+
     if (sec) {
-	w32_timerid = SetTimer(NULL,w32_timerid,sec*1000,NULL);
+        if (w32_message_hwnd == NULL)
+            w32_timerid = SetTimer(NULL, w32_timerid, sec*1000, NULL);
+        else {
+  	    w32_timerid = 1;
+            SetTimer(w32_message_hwnd, w32_timerid, sec*1000, NULL);
+        }
     }
     else {
     	if (w32_timerid) {
-            KillTimer(NULL,w32_timerid);
-  	    w32_timerid=0;
+            KillTimer(w32_message_hwnd, w32_timerid);
+  	    w32_timerid = 0;
     	}
     }
     return 0;
@@ -4881,10 +4888,33 @@ win32_csighandler(int sig)
     /* Does nothing */
 }
 
+HWND
+win32_create_message_window()
+{
+    /* "message-only" windows have been implemented in Windows 2000 and later.
+     * On earlier versions we'll continue to post messages to a specific
+     * thread and use hwnd==NULL.  This is brittle when either an embedding
+     * application or an XS module is also posting messages to hwnd=NULL
+     * because once removed from the queue they cannot be delivered to the
+     * "right" place with DispatchMessage() anymore, as there is no WindowProc
+     * if there is no window handle.
+     */
+    if (g_osver.dwMajorVersion < 5)
+        return NULL;
+
+    return CreateWindow("Static", "", 0, 0, 0, 0, 0, HWND_MESSAGE, 0, 0, NULL);
+}
+
 void
 Perl_sys_intern_init(pTHX)
 {
     int i;
+
+    if (g_osver.dwOSVersionInfoSize == 0) {
+        g_osver.dwOSVersionInfoSize = sizeof(g_osver);
+        GetVersionEx(&g_osver);
+    }
+
     w32_perlshell_tokens	= Nullch;
     w32_perlshell_vec		= (char**)NULL;
     w32_perlshell_items		= 0;
@@ -4893,10 +4923,11 @@ Perl_sys_intern_init(pTHX)
     w32_num_children		= 0;
 #  ifdef USE_ITHREADS
     w32_pseudo_id		= 0;
-    Newx(w32_pseudo_children, 1, child_tab);
+    Newx(w32_pseudo_children, 1, pseudo_child_tab);
     w32_num_pseudo_children	= 0;
 #  endif
     w32_timerid                 = 0;
+    w32_message_hwnd            = INVALID_HANDLE_VALUE;
     w32_poll_count              = 0;
     for (i=0; i < SIG_SIZE; i++) {
     	w32_sighandler[i] = SIG_DFL;
@@ -4922,9 +4953,11 @@ Perl_sys_intern_clear(pTHX)
     /* NOTE: w32_fdpid is freed by sv_clean_all() */
     Safefree(w32_children);
     if (w32_timerid) {
-    	KillTimer(NULL,w32_timerid);
-    	w32_timerid=0;
+    	KillTimer(w32_message_hwnd, w32_timerid);
+    	w32_timerid = 0;
     }
+    if (w32_message_hwnd != NULL && w32_message_hwnd != INVALID_HANDLE_VALUE)
+        DestroyWindow(w32_message_hwnd);
 #  ifdef MULTIPLICITY
     if (my_perl == PL_curinterp) {
 #  else
@@ -4948,9 +4981,10 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     dst->fdpid			= newAV();
     Newxz(dst->children, 1, child_tab);
     dst->pseudo_id		= 0;
-    Newxz(dst->pseudo_children, 1, child_tab);
-    dst->timerid                 = 0;
-    dst->poll_count              = 0;
+    Newxz(dst->pseudo_children, 1, pseudo_child_tab);
+    dst->timerid                = 0;
+    w32_message_hwnd            = INVALID_HANDLE_VALUE;
+    dst->poll_count             = 0;
     Copy(src->sigtable,dst->sigtable,SIG_SIZE,Sighandler_t);
 }
 #  endif /* USE_ITHREADS */

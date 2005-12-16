@@ -304,6 +304,7 @@ typedef struct {
 } child_IO_table;
 
 DllExport void		win32_get_child_IO(child_IO_table* ptr);
+DllExport HWND		win32_create_message_window();
 
 #ifndef USE_SOCKETS_AS_HANDLES
 extern FILE *		my_fdopen(int, char *);
@@ -353,6 +354,16 @@ typedef  char *		caddr_t;	/* In malloc.c (core address). */
  * Now Win32 specific per-thread data stuff
  */
 
+/* Leave the first couple ids after WM_USER unused because they
+ * might be used by an embedding application, and on Windows
+ * version before 2000 we might end up eating those messages
+ * if they were not meant for us.
+ */
+#define WM_USER_MIN     (WM_USER+30)
+#define WM_USER_MESSAGE (WM_USER_MIN)
+#define WM_USER_KILL    (WM_USER_MIN+1)
+#define WM_USER_MAX     (WM_USER_MIN+1)
+
 struct thread_intern {
     /* XXX can probably use one buffer instead of several */
     char		Wstrerror_buffer[512];
@@ -375,6 +386,15 @@ typedef struct {
     HANDLE	handles[MAXIMUM_WAIT_OBJECTS];
 } child_tab;
 
+#ifdef USE_ITHREADS
+typedef struct {
+    long	num;
+    DWORD	pids[MAXIMUM_WAIT_OBJECTS];
+    HANDLE	handles[MAXIMUM_WAIT_OBJECTS];
+    HWND	message_hwnds[MAXIMUM_WAIT_OBJECTS];
+} pseudo_child_tab;
+#endif
+
 #ifndef Sighandler_t
 typedef Signal_t (*Sighandler_t) (int);
 #define Sighandler_t	Sighandler_t
@@ -388,10 +408,11 @@ struct interp_intern {
     child_tab *	children;
 #ifdef USE_ITHREADS
     DWORD	pseudo_id;
-    child_tab *	pseudo_children;
+    pseudo_child_tab * pseudo_children;
 #endif
     void *	internal_host;
     struct thread_intern	thr_intern;
+    HWND        message_hwnd;
     UINT	timerid;
     unsigned 	poll_count;
     Sighandler_t sigtable[SIG_SIZE];
@@ -415,8 +436,10 @@ DllExport int win32_async_check(pTHX);
 #define w32_num_pseudo_children		(w32_pseudo_children->num)
 #define w32_pseudo_child_pids		(w32_pseudo_children->pids)
 #define w32_pseudo_child_handles	(w32_pseudo_children->handles)
+#define w32_pseudo_child_message_hwnds	(w32_pseudo_children->message_hwnds)
 #define w32_internal_host		(PL_sys_intern.internal_host)
 #define w32_timerid			(PL_sys_intern.timerid)
+#define w32_message_hwnd		(PL_sys_intern.message_hwnd)
 #define w32_sighandler			(PL_sys_intern.sigtable)
 #define w32_poll_count			(PL_sys_intern.poll_count)
 #define w32_do_async			(w32_poll_count++ > WIN32_POLL_INTERVAL)
