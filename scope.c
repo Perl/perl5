@@ -676,7 +676,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_SVREF:			/* scalar reference */
 	    value = (SV*)SSPOPPTR;
 	    ptr = SSPOPPTR;
-	    av = Nullav; /* what to refcnt_dec */
+	    av = NULL; /* what to refcnt_dec */
 	restore_sv:
 	    sv = *(SV**)ptr;
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,

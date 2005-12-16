@@ -297,7 +297,7 @@ Perl_pad_undef(pTHX_ CV* cv)
 	if (!sv)
 	    continue;
 	if (sv == (SV*)PL_comppad_name)
-	    PL_comppad_name = Nullav;
+	    PL_comppad_name = NULL;
 	else if (sv == (SV*)PL_comppad) {
 	    PL_comppad = Null(PAD*);
 	    PL_curpad = Null(SV**);

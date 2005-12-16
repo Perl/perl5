@@ -1476,7 +1476,7 @@ PP(pp_sort)
     dVAR; dSP; dMARK; dORIGMARK;
     register SV **p1 = ORIGMARK+1, **p2;
     register I32 max, i;
-    AV* av = Nullav;
+    AV* av = NULL;
     HV *stash;
     GV *gv;
     CV *cv = 0;

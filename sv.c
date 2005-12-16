@@ -520,7 +520,7 @@ do_clean_all(pTHX_ SV *sv)
     DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%"UVxf"\n", PTR2UV(sv)) ));
     SvFLAGS(sv) |= SVf_BREAK;
     if (PL_comppad == (AV*)sv) {
-	PL_comppad = Nullav;
+	PL_comppad = NULL;
 	PL_curpad = Null(SV**);
     }
     SvREFCNT_dec(sv);
@@ -9555,7 +9555,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 					   : cv_dup(cx->blk_sub.cv,param));
 		ncx->blk_sub.argarray	= (cx->blk_sub.hasargs
 					   ? av_dup_inc(cx->blk_sub.argarray, param)
-					   : Nullav);
+					   : NULL);
 		ncx->blk_sub.savearray	= av_dup_inc(cx->blk_sub.savearray, param);
 		ncx->blk_sub.olddepth	= cx->blk_sub.olddepth;
 		ncx->blk_sub.hasargs	= cx->blk_sub.hasargs;

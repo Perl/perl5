@@ -840,7 +840,7 @@ perl_destruct(pTHXx)
         }
     }
     SvREFCNT_dec(PL_regex_padav);
-    PL_regex_padav = Nullav;
+    PL_regex_padav = NULL;
     PL_regex_pad = NULL;
 #endif
 
@@ -856,7 +856,7 @@ perl_destruct(pTHXx)
 
     /* Filters for program text */
     SvREFCNT_dec(PL_rsfp_filters);
-    PL_rsfp_filters = Nullav;
+    PL_rsfp_filters = NULL;
 
     /* switches */
     PL_preprocess   = FALSE;
@@ -923,12 +923,12 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_checkav);
     SvREFCNT_dec(PL_checkav_save);
     SvREFCNT_dec(PL_initav);
-    PL_beginav = Nullav;
-    PL_beginav_save = Nullav;
-    PL_endav = Nullav;
-    PL_checkav = Nullav;
-    PL_checkav_save = Nullav;
-    PL_initav = Nullav;
+    PL_beginav = NULL;
+    PL_beginav_save = NULL;
+    PL_endav = NULL;
+    PL_checkav = NULL;
+    PL_checkav_save = NULL;
+    PL_initav = NULL;
 
     /* shortcuts just get cleared */
     PL_envgv = Nullgv;
@@ -949,16 +949,16 @@ perl_destruct(pTHXx)
     PL_DBsignal = Nullsv;
     PL_DBassertion = Nullsv;
     PL_DBcv = Nullcv;
-    PL_dbargs = Nullav;
+    PL_dbargs = NULL;
     PL_debstash = Nullhv;
 
     SvREFCNT_dec(PL_argvout_stack);
-    PL_argvout_stack = Nullav;
+    PL_argvout_stack = NULL;
 
     SvREFCNT_dec(PL_modglobal);
     PL_modglobal = Nullhv;
     SvREFCNT_dec(PL_preambleav);
-    PL_preambleav = Nullav;
+    PL_preambleav = NULL;
     SvREFCNT_dec(PL_subname);
     PL_subname = Nullsv;
     SvREFCNT_dec(PL_linestr);
@@ -1082,7 +1082,7 @@ perl_destruct(pTHXx)
 
     AvREAL_off(PL_fdpid);		/* no surviving entries */
     SvREFCNT_dec(PL_fdpid);		/* needed in io_close() */
-    PL_fdpid = Nullav;
+    PL_fdpid = NULL;
 
 #ifdef HAVE_INTERP_INTERN
     sys_intern_clear();
@@ -2360,7 +2360,7 @@ Perl_get_av(pTHX_ const char *name, I32 create)
     	return GvAVn(gv);
     if (gv)
 	return GvAV(gv);
-    return Nullav;
+    return NULL;
 }
 
 /*

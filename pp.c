@@ -4404,7 +4404,7 @@ PP(pp_split)
     else if (gimme != G_ARRAY)
 	ary = GvAVn(PL_defgv);
     else
-	ary = Nullav;
+	ary = NULL;
     if (ary && (gimme != G_ARRAY || (pm->op_pmflags & PMf_ONCE))) {
 	realarray = 1;
 	PUTBACK;
