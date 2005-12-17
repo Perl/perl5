@@ -1170,6 +1170,8 @@ S_dopoptolabel(pTHX_ const char *label)
     return i;
 }
 
+
+
 I32
 Perl_dowantarray(pTHX)
 {
@@ -1661,7 +1663,7 @@ PP(pp_enteriter)
     register PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
     SV **svp;
-    U32 cxtype = CXt_LOOP;
+    U32 cxtype = CXt_LOOP | CXp_FOREACH;
 #ifdef USE_ITHREADS
     void *iterdata;
 #endif
@@ -1696,6 +1698,9 @@ PP(pp_enteriter)
 	iterdata = (void*)gv;
 #endif
     }
+
+    if (PL_op->op_private & OPpITER_DEF)
+	cxtype |= CXp_FOR_DEF;
 
     ENTER;
 

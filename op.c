@@ -4015,6 +4015,16 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
 	    iterpflags = sv->op_private & OPpOUR_INTRO; /* for our $x () */
 	    sv->op_type = OP_RV2GV;
 	    sv->op_ppaddr = PL_ppaddr[OP_RV2GV];
+
+	    /* The op_type check is needed to prevent a possible segfault
+	     * if the loop variable is undeclared and 'strict vars' is in
+	     * effect. This is illegal but is nonetheless parsed, so we
+	     * may reach this point with an OP_CONST where we're expecting
+	     * an OP_GV.
+	     */
+	    if (cUNOPx(sv)->op_first->op_type == OP_GV
+	     && cGVOPx_gv(cUNOPx(sv)->op_first) == PL_defgv)
+		iterpflags |= OPpITER_DEF;
 	}
 	else if (sv->op_type == OP_PADSV) { /* private variable */
 	    iterpflags = sv->op_private & OPpLVAL_INTRO; /* for my $x () */
@@ -4042,6 +4052,7 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
 #else
 	sv = newGVOP(OP_GV, 0, PL_defgv);
 #endif
+	iterpflags |= OPpITER_DEF;
     }
     if (expr->op_type == OP_RV2AV || expr->op_type == OP_PADAV) {
 	expr = mod(force_list(scalar(ref(expr, OP_ITER))), OP_GREPSTART);

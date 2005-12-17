@@ -656,8 +656,10 @@ struct context {
 #define CXp_REAL	0x00000100	/* truly eval'', not a lookalike */
 #define CXp_TRYBLOCK	0x00000200	/* eval{}, not eval'' or similar */
 
-#ifdef USE_ITHREADS
 /* private flags for CXt_LOOP */
+#define CXp_FOREACH	0x00000200	/* a foreach loop */
+#define CXp_FOR_DEF	0x00000400	/* foreach using $_ */
+#ifdef USE_ITHREADS
 #  define CXp_PADVAR	0x00000100	/* itervar lives on pad, iterdata
 					   has pad offset; if not set,
 					   iterdata holds GV* */
@@ -672,6 +674,10 @@ struct context {
 			 == (CXt_EVAL|CXp_REAL))
 #define CxTRYBLOCK(c)	(((c)->cx_type & (CXt_EVAL|CXp_TRYBLOCK))	\
 			 == (CXt_EVAL|CXp_TRYBLOCK))
+#define CxFOREACH(c)	(((c)->cx_type & (CXt_LOOP|CXp_FOREACH))	\
+                         == (CXt_LOOP|CXp_FOREACH))
+#define CxFOREACHDEF(c)	(((c)->cx_type & (CXt_LOOP|CXp_FOREACH|CXp_FOR_DEF))\
+			 == (CXt_LOOP|CXp_FOREACH|CXp_FOR_DEF))
 
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 
