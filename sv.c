@@ -1915,8 +1915,7 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 	}
 	assert(SvTYPE(sv) >= SVt_PVMG);
 	/* This falls through to the report_uninit inside S_sv_2iuv_common.  */
-    }
-    if (SvTHINKFIRST(sv)) {
+    } else if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
 	return_rok:
 	    if (SvAMAGIC(sv)) {
@@ -1989,8 +1988,7 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
 	}
 	assert(SvTYPE(sv) >= SVt_PVMG);
 	/* This falls through to the report_uninit inside S_sv_2iuv_common.  */
-    }
-    if (SvTHINKFIRST(sv)) {
+    } else if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
 	return_rok:
 	    if (SvAMAGIC(sv)) {
