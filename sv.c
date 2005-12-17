@@ -2494,10 +2494,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 
 	if (SvTYPE(sv) < SVt_PVIV)
 	    sv_upgrade(sv, SVt_PVIV);
-	if (isUIOK)
-	    ptr = uiv_2buf(buf, 0, SvUVX(sv), 1, &ebuf);
-	else
-	    ptr = uiv_2buf(buf, SvIVX(sv), 0, 0, &ebuf);
+ 	ptr = uiv_2buf(buf, SvIVX(sv), SvUVX(sv), isUIOK, &ebuf);
 	/* inlined from sv_setpvn */
 	SvGROW_mutable(sv, (STRLEN)(ebuf - ptr + 1));
 	Move(ptr,SvPVX_mutable(sv),ebuf - ptr,char);
