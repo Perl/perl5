@@ -282,6 +282,7 @@ Perl_newCONDOP
 Perl_newCONSTSUB
 Perl_newFORM
 Perl_newFOROP
+Perl_newGIVENOP
 Perl_newLOGOP
 Perl_newLOOPEX
 Perl_newLOOPOP
@@ -325,6 +326,7 @@ Perl_vnewSVpvf
 Perl_newSVrv
 Perl_newSVsv
 Perl_newUNOP
+Perl_newWHENOP
 Perl_newWHILEOP
 Perl_new_stackinfo
 Perl_scan_vstring

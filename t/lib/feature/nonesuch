@@ -1,0 +1,12 @@
+Test that non-existent features fail as expected.
+
+__END__
+use feature "nonesuch";
+EXPECT
+OPTIONS regex
+^Feature "nonesuch" is not supported by Perl [v0-9.]+ at - line 1
+########
+no feature "nonesuch";
+EXPECT
+OPTIONS regex
+^Feature "nonesuch" is not supported by Perl [v0-9.]+ at - line 1

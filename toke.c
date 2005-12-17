@@ -219,6 +219,7 @@ static struct debug_tokens { const int token, type; const char *name; }
     { BITOROP,		TOKENTYPE_OPNUM,	"BITOROP" },
     { COLONATTR,	TOKENTYPE_NONE,		"COLONATTR" },
     { CONTINUE,		TOKENTYPE_NONE,		"CONTINUE" },
+    { DEFAULT,		TOKENTYPE_NONE,		"DEFAULT" },
     { DO,		TOKENTYPE_NONE,		"DO" },
     { DOLSHARP,		TOKENTYPE_NONE,		"DOLSHARP" },
     { DORDOR,		TOKENTYPE_NONE,		"DORDOR" },
@@ -234,6 +235,7 @@ static struct debug_tokens { const int token, type; const char *name; }
     { FUNC0SUB,		TOKENTYPE_OPVAL,	"FUNC0SUB" },
     { FUNC1,		TOKENTYPE_OPNUM,	"FUNC1" },
     { FUNCMETH,		TOKENTYPE_OPVAL,	"FUNCMETH" },
+    { GIVEN,		TOKENTYPE_IVAL,		"GIVEN" },
     { HASHBRACK,	TOKENTYPE_NONE,		"HASHBRACK" },
     { IF,		TOKENTYPE_IVAL,		"IF" },
     { LABEL,		TOKENTYPE_PVAL,		"LABEL" },
@@ -269,6 +271,7 @@ static struct debug_tokens { const int token, type; const char *name; }
     { UNLESS,		TOKENTYPE_IVAL,		"UNLESS" },
     { UNTIL,		TOKENTYPE_IVAL,		"UNTIL" },
     { USE,		TOKENTYPE_IVAL,		"USE" },
+    { WHEN,		TOKENTYPE_IVAL,		"WHEN" },
     { WHILE,		TOKENTYPE_IVAL,		"WHILE" },
     { WORD,		TOKENTYPE_OPVAL,	"WORD" },
     { 0,		TOKENTYPE_NONE,		0 }
@@ -452,6 +455,20 @@ S_missingterm(pTHX_ char *s)
     }
     q = strchr(s,'"') ? '\'' : '"';
     Perl_croak(aTHX_ "Can't find string terminator %c%s%c anywhere before EOF",q,s,q);
+}
+
+#define FEATURE_IS_ENABLED(name, namelen)				\
+	((0 != (PL_hints & HINT_LOCALIZE_HH))				\
+	&& feature_is_enabled(name, namelen))
+/*
+ * S_feature_is_enabled
+ * Check whether the named feature is enabled.
+ */
+STATIC bool
+S_feature_is_enabled(pTHX_ char *name, STRLEN namelen)
+{
+    HV * const hinthv = GvHV(PL_hintgv);
+    return (hinthv && hv_exists(hinthv, name, namelen));
 }
 
 /*
@@ -3195,6 +3212,13 @@ Perl_yylex(pTHX)
 	PL_lex_brackets++;
 	/* FALL THROUGH */
     case '~':
+	if (s[1] == '~'
+	&& (PL_expect == XOPERATOR || PL_expect == XTERMORDORDOR)
+	&& FEATURE_IS_ENABLED("~~", 2))
+	{
+	    s += 2;
+	    Eop(OP_SMARTMATCH);
+	}
     case ',':
 	tmp = *s++;
 	OPERATOR(tmp);
@@ -4552,11 +4576,31 @@ Perl_yylex(pTHX)
 	case KEY_bless:
 	    LOP(OP_BLESS,XTERM);
 
+	case KEY_break:
+	    FUN0(OP_BREAK);
+
 	case KEY_chop:
 	    UNI(OP_CHOP);
 
 	case KEY_continue:
+	    /* When 'use switch' is in effect, continue has a dual
+	       life as a control operator. */
+	    {
+		if (!FEATURE_IS_ENABLED("switch", 6))
+		    PREBLOCK(CONTINUE);
+		else {
+		    /* We have to disambiguate the two senses of
+		      "continue". If the next token is a '{' then
+		      treat it as the start of a continue block;
+		      otherwise treat it as a control operator.
+		     */
+		    s = skipspace(s);
+		    if (*s == '{')
 	    PREBLOCK(CONTINUE);
+		    else
+			FUN0(OP_CONTINUE);
+		}
+	    }
 
 	case KEY_chdir:
 	    (void)gv_fetchpv("ENV",TRUE, SVt_PVHV);	/* may use HOME */
@@ -4600,6 +4644,9 @@ Perl_yylex(pTHX)
 
 	case KEY_chroot:
 	    UNI(OP_CHROOT);
+
+	case KEY_default:
+	    PREBLOCK(DEFAULT);
 
 	case KEY_do:
 	    s = skipspace(s);
@@ -4822,6 +4869,10 @@ Perl_yylex(pTHX)
 
 	case KEY_getlogin:
 	    FUN0(OP_GETLOGIN);
+
+	case KEY_given:
+	    yylval.ival = CopLINE(PL_curcop);
+	    OPERATOR(GIVEN);
 
 	case KEY_glob:
 	    set_csh();
@@ -5180,6 +5231,10 @@ Perl_yylex(pTHX)
 	    else
 		TOKEN(1);	/* force error */
 
+	case KEY_say:
+	    checkcomma(s,PL_tokenbuf,"filehandle");
+	    LOP(OP_SAY,XREF);
+
 	case KEY_chomp:
 	    UNI(OP_CHOMP);
 	
@@ -5494,6 +5549,10 @@ Perl_yylex(pTHX)
 
 	case KEY_vec:
 	    LOP(OP_VEC,XTERM);
+
+	case KEY_when:
+	    yylval.ival = CopLINE(PL_curcop);
+	    OPERATOR(WHEN);
 
 	case KEY_while:
 	    yylval.ival = CopLINE(PL_curcop);
@@ -5871,7 +5930,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
           goto unknown;
       }
 
-    case 3: /* 28 tokens of length 3 */
+    case 3: /* 29 tokens of length 3 */
       switch (name[0])
       {
         case 'E':
@@ -6096,6 +6155,14 @@ Perl_keyword (pTHX_ const char *name, I32 len)
         case 's':
           switch (name[1])
           {
+            case 'a':
+              if (name[2] == 'y')
+              {                                   /* say        */
+                return (FEATURE_IS_ENABLED("say", 3) ? -KEY_say : 0);
+              }
+
+              goto unknown;
+
             case 'i':
               if (name[2] == 'n')
               {                                   /* sin        */
@@ -6156,7 +6223,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
           goto unknown;
       }
 
-    case 4: /* 40 tokens of length 4 */
+    case 4: /* 41 tokens of length 4 */
       switch (name[0])
       {
         case 'C':
@@ -6586,8 +6653,9 @@ Perl_keyword (pTHX_ const char *name, I32 len)
           }
 
         case 'w':
-          if (name[1] == 'a')
+          switch (name[1])
           {
+            case 'a':
             switch (name[2])
             {
               case 'i':
@@ -6609,6 +6677,12 @@ Perl_keyword (pTHX_ const char *name, I32 len)
               default:
                 goto unknown;
             }
+
+            case 'h':
+              if (name[2] == 'e' &&
+                  name[3] == 'n')
+              {                                   /* when       */
+                return (FEATURE_IS_ENABLED("switch", 6) ? KEY_when : 0);
           }
 
           goto unknown;
@@ -6617,7 +6691,11 @@ Perl_keyword (pTHX_ const char *name, I32 len)
           goto unknown;
       }
 
-    case 5: /* 36 tokens of length 5 */
+        default:
+          goto unknown;
+      }
+
+    case 5: /* 38 tokens of length 5 */
       switch (name[0])
       {
         case 'B':
@@ -6670,8 +6748,10 @@ Perl_keyword (pTHX_ const char *name, I32 len)
           }
 
         case 'b':
-          if (name[1] == 'l' &&
-              name[2] == 'e' &&
+          switch (name[1])
+          {
+            case 'l':
+              if (name[2] == 'e' &&
               name[3] == 's' &&
               name[4] == 's')
           {                                       /* bless      */
@@ -6679,6 +6759,20 @@ Perl_keyword (pTHX_ const char *name, I32 len)
           }
 
           goto unknown;
+
+            case 'r':
+              if (name[2] == 'e' &&
+                  name[3] == 'a' &&
+                  name[4] == 'k')
+              {                                   /* break      */
+                return (FEATURE_IS_ENABLED("switch", 6) ? -KEY_break : 0);
+              }
+
+              goto unknown;
+
+            default:
+              goto unknown;
+          }
 
         case 'c':
           switch (name[1])
@@ -6792,6 +6886,17 @@ Perl_keyword (pTHX_ const char *name, I32 len)
             default:
               goto unknown;
           }
+
+        case 'g':
+          if (name[1] == 'i' &&
+              name[2] == 'v' &&
+              name[3] == 'e' &&
+              name[4] == 'n')
+          {                                       /* given      */
+            return (FEATURE_IS_ENABLED("switch", 6) ? KEY_given : 0);
+          }
+
+          goto unknown;
 
         case 'i':
           switch (name[1])
@@ -7529,7 +7634,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
           goto unknown;
       }
 
-    case 7: /* 28 tokens of length 7 */
+    case 7: /* 29 tokens of length 7 */
       switch (name[0])
       {
         case 'D':
@@ -7600,13 +7705,33 @@ Perl_keyword (pTHX_ const char *name, I32 len)
               goto unknown;
 
             case 'e':
-              if (name[2] == 'f' &&
-                  name[3] == 'i' &&
-                  name[4] == 'n' &&
+              if (name[2] == 'f')
+              {
+                switch (name[3])
+                {
+                  case 'a':
+                    if (name[4] == 'u' &&
+                        name[5] == 'l' &&
+                        name[6] == 't')
+                    {                             /* default    */
+                      return (FEATURE_IS_ENABLED("switch", 6) ? KEY_default : 0);
+                    }
+
+                    goto unknown;
+
+                  case 'i':
+                    if (name[4] == 'n' &&
                   name[5] == 'e' &&
                   name[6] == 'd')
               {                                   /* defined    */
                 return KEY_defined;
+              }
+
+              goto unknown;
+
+            default:
+              goto unknown;
+          }
               }
 
               goto unknown;
@@ -9020,7 +9145,7 @@ S_checkcomma(pTHX_ register char *s, const char *name, const char *what)
 	while (s < PL_bufend && isSPACE(*s))
 	    s++;
 	if (*s == ',') {
-	    int kw;
+	    I32 kw;
 	    *s = '\0'; /* XXX If we didn't do this, we could const a lot of toke.c */
 	    kw = keyword(w, s - w) || get_cv(w, FALSE) != 0;
 	    *s = ',';

@@ -41,6 +41,7 @@
 %token <pval> LABEL
 %token <ival> FORMAT SUB ANONSUB PACKAGE USE
 %token <ival> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
+%token <ival> GIVEN WHEN DEFAULT
 %token <ival> LOOPEX DOTDOT
 %token <ival> FUNC0 FUNC1 FUNC UNIOP LSTOP
 %token <ival> RELOP EQOP MULOP ADDOP
@@ -49,7 +50,7 @@
 %token COLONATTR
 
 %type <ival> prog decl format startsub startanonsub startformsub mintro
-%type <ival> progstart remember mremember '&' savescope
+%type <ival> progstart remember mremember '&' savescope mydefsv
 %type <opval> block mblock lineseq line loop cond else
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
 %type <opval> argexpr nexpr texpr iexpr mexpr mnexpr miexpr
@@ -57,6 +58,7 @@
 %type <opval> formname subname proto subbody cont my_scalar
 %type <opval> subattrlist myattrlist mysubrout myattrterm myterm
 %type <opval> termbinop termunop anonymous termdo
+%type <opval> switch case
 %type <pval> label
 
 %nonassoc PREC_LOW
@@ -109,6 +111,10 @@ remember:	/* NULL */	/* start a full lexical scope */
 			{ $$ = block_start(TRUE); }
 	;
 
+mydefsv:	/* NULL */	/* lexicalize $_ */
+			{ $$ = (I32) allocmy("$_"); }
+	;
+
 progstart:
 		{
 		    PL_expect = XSTATE; $$ = block_start(TRUE);
@@ -146,6 +152,10 @@ lineseq	:	/* NULL */
 line	:	label cond
 			{ $$ = newSTATEOP(0, $1, $2); }
 	|	loop	/* loops add their own labels */
+	|	switch  /* ... and so do switches */
+			{ $$ = $1; }
+	|	label case
+			{ $$ = newSTATEOP(0, $1, $2); }
 	|	label ';'
 			{ if ($1 != Nullch) {
 			      $$ = newSTATEOP(0, $1, newOP(OP_NULL, 0));
@@ -200,6 +210,14 @@ cond	:	IF '(' remember mexpr ')' mblock else
 				   newCONDOP(0, $4, scope($6), $7)); }
 	;
 
+/* Cases for a switch statement */
+case	:	WHEN '(' remember mexpr ')' mblock
+	{ $$ = block_end($3,
+		newWHENOP($4, scope($6))); }
+	|	DEFAULT block
+	{ $$ = newWHENOP(0, scope($2)); }
+	;
+
 /* Continue blocks */
 cont	:	/* NULL */
 			{ $$ = Nullop; }
@@ -251,6 +269,15 @@ loop	:	label WHILE '(' remember texpr ')' mintro mblock cont
 			{ $$ = newSTATEOP(0, $1,
 				 newWHILEOP(0, 1, (LOOP*)Nullop,
 					    NOLINE, Nullop, $2, $3, 0)); }
+	;
+
+/* Switch blocks */
+switch	:	label GIVEN '(' remember mydefsv mexpr ')' mblock
+			{ PL_copline = (line_t) $2;
+			    $$ = block_end($4,
+				newSTATEOP(0, $1,
+				    newGIVENOP($6, scope($8),
+					(PADOFFSET) $5) )); }
 	;
 
 /* determine whether there are any new my declarations */

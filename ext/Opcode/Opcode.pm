@@ -382,7 +382,7 @@ account the magical open of ARGV.
 
     formline enterwrite leavewrite
 
-    print sysread syswrite send recv
+    print say sysread syswrite send recv
 
     eof tell seek sysseek
 
@@ -415,6 +415,11 @@ These are a hotchpotch of opcodes still waiting to be considered
     getppid getpgrp setpgrp getpriority setpriority localtime gmtime
 
     entertry leavetry -- can be used to 'hide' fatal errors
+
+    entergiven leavegiven
+    enterwhen leavewhen
+    break continue
+    smartmatch
 
     custom -- where should this go
 

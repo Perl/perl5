@@ -386,6 +386,14 @@ EXTCONST char* const PL_op_name[] = {
 	"method_named",
 	"dor",
 	"dorassign",
+	"entergiven",
+	"leavegiven",
+	"enterwhen",
+	"leavewhen",
+	"break",
+	"continue",
+	"smartmatch",
+	"say",
 	"custom",
 };
 #endif
@@ -747,6 +755,14 @@ EXTCONST char* const PL_op_desc[] = {
 	"method with known name",
 	"defined or (//)",
 	"defined or assignment (//=)",
+	"given()",
+	"leave given block",
+	"when()",
+	"leave when block",
+	"break",
+	"continue",
+	"smart match",
+	"say",
 	"unknown custom operator",
 };
 #endif
@@ -1119,6 +1135,14 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_method_named),
 	MEMBER_TO_FPTR(Perl_pp_defined),	/* Perl_pp_dor */
 	MEMBER_TO_FPTR(Perl_pp_defined),	/* Perl_pp_dorassign */
+	MEMBER_TO_FPTR(Perl_pp_entergiven),
+	MEMBER_TO_FPTR(Perl_pp_leavegiven),
+	MEMBER_TO_FPTR(Perl_pp_enterwhen),
+	MEMBER_TO_FPTR(Perl_pp_leavewhen),
+	MEMBER_TO_FPTR(Perl_pp_break),
+	MEMBER_TO_FPTR(Perl_pp_continue),
+	MEMBER_TO_FPTR(Perl_pp_smartmatch),
+	MEMBER_TO_FPTR(Perl_pp_print),	/* Perl_pp_say */
 }
 #endif
 ;
@@ -1485,6 +1509,14 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* method_named */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* dor */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* dorassign */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* entergiven */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* leavegiven */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* enterwhen */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* leavewhen */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* break */
+	MEMBER_TO_FPTR(Perl_ck_null),	/* continue */
+	MEMBER_TO_FPTR(Perl_ck_smartmatch),	/* smartmatch */
+	MEMBER_TO_FPTR(Perl_ck_say),	/* say */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* custom */
 }
 #endif
@@ -1849,6 +1881,14 @@ EXT const U32 PL_opargs[] = {
 	0x00000c40,	/* method_named */
 	0x00000600,	/* dor */
 	0x00000604,	/* dorassign */
+	0x00000640,	/* entergiven */
+	0x00000200,	/* leavegiven */
+	0x00000640,	/* enterwhen */
+	0x00000200,	/* leavewhen */
+	0x00000000,	/* break */
+	0x00000000,	/* continue */
+	0x00000404,	/* smartmatch */
+	0x0005c815,	/* say */
 	0x00000000,	/* custom */
 };
 #endif

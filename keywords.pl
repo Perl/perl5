@@ -68,6 +68,7 @@ atan2
 bind
 binmode
 bless
+break
 caller
 chdir
 chmod
@@ -85,6 +86,7 @@ cos
 crypt
 dbmclose
 dbmopen
+default
 defined
 delete
 die
@@ -142,6 +144,7 @@ getservbyport
 getservent
 getsockname
 getsockopt
+given
 glob
 gmtime
 goto
@@ -219,6 +222,7 @@ rewinddir
 rindex
 rmdir
 s
+say
 scalar
 seek
 seekdir
@@ -289,6 +293,7 @@ wait
 waitpid
 wantarray
 warn
+when
 while
 write
 x

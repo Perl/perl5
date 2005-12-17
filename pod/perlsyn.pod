@@ -466,8 +466,8 @@ rather than merely terminating the inner one.  And it's faster because
 Perl executes a C<foreach> statement more rapidly than it would the
 equivalent C<for> loop.
 
-=head2 Basic BLOCKs and Switch Statements
-X<switch> X<block> X<case>
+=head2 Basic BLOCKs
+X<block>
 
 A BLOCK by itself (labeled or not) is semantically equivalent to a
 loop that executes once.  Thus you can use any of the loop control
@@ -476,7 +476,7 @@ I<NOT> true in C<eval{}>, C<sub{}>, or contrary to popular belief
 C<do{}> blocks, which do I<NOT> count as loops.)  The C<continue>
 block is optional.
 
-The BLOCK construct is particularly nice for doing case
+The BLOCK construct can be used to emulate case
 structures.
 
     SWITCH: {
@@ -486,133 +486,146 @@ structures.
 	$nothing = 1;
     }
 
-There is no official C<switch> statement in Perl, because there are
-already several ways to write the equivalent.
+Such constructs are quite frequently used, because older versions
+of Perl had no official C<switch> statement.
 
-However, starting from Perl 5.8 to get switch and case one can use
-the Switch extension and say:
 
-	use Switch;
+=head2 Switch statements
+X<switch> X<case> X<given> X<when> X<default>
 
-after which one has switch and case.  It is not as fast as it could be
-because it's not really part of the language (it's done using source
-filters) but it is available, and it's very flexible.
+Starting from Perl 5.10, you can say 
 
-In addition to the above BLOCK construct, you could write
+	use feature "switch";
 
-    SWITCH: {
-	$abc = 1, last SWITCH  if /^abc/;
-	$def = 1, last SWITCH  if /^def/;
-	$xyz = 1, last SWITCH  if /^xyz/;
-	$nothing = 1;
+which enables a switch feature that is closely based on the
+Perl 6 proposal.
+
+The keywords C<given> and C<when> are analogous
+to C<switch> and C<case> in other languages, so the code
+above could be written as
+
+	given($_) {
+	    when (/^abc/) { $abc = 1; }
+	    when (/^def/) { $def = 1; }
+	    when (/^xyz/) { $xyz = 1; }
+	    default { $nothing = 1; }
     }
 
-(That's actually not as strange as it looks once you realize that you can
-use loop control "operators" within an expression.  That's just the binary
-comma operator in scalar context.  See L<perlop/"Comma Operator">.)
+This construct is very flexible and powerful. For example:
 
-or
+	given() {
 
-    SWITCH: {
-	/^abc/ && do { $abc = 1; last SWITCH; };
-	/^def/ && do { $def = 1; last SWITCH; };
-	/^xyz/ && do { $xyz = 1; last SWITCH; };
-	$nothing = 1;
+	    xxxx
     }
 
-or formatted so it stands out more as a "proper" C<switch> statement:
+Most of its power comes from the implicit smart matching:
 
-    SWITCH: {
-	/^abc/ 	    && do {
-			    $abc = 1;
-			    last SWITCH;
-		       };
+	when($foo) ...
 
-	/^def/ 	    && do {
-			    $def = 1;
-			    last SWITCH;
-		       };
+is exactly equivalent to
 
-	/^xyz/ 	    && do {
-			    $xyz = 1;
-			    last SWITCH;
-		        };
-	$nothing = 1;
-    }
+	when($_ ~~ $foo) ...
 
-or
+(though you need to enable the "~~" feature before you
+can use the C<~~> operator directly). In fact C<when(EXPR)>
+is treated as an implicit smart match most of the time. The
+exceptions are that when EXPR is:
 
-    SWITCH: {
-	/^abc/ and $abc = 1, last SWITCH;
-	/^def/ and $def = 1, last SWITCH;
-	/^xyz/ and $xyz = 1, last SWITCH;
-	$nothing = 1;
-    }
+=over 4
 
-or even, horrors,
+=item o
 
-    if (/^abc/)
-	{ $abc = 1 }
-    elsif (/^def/)
-	{ $def = 1 }
-    elsif (/^xyz/)
-	{ $xyz = 1 }
-    else
-	{ $nothing = 1 }
+a subroutine or method call
 
-A common idiom for a C<switch> statement is to use C<foreach>'s aliasing to make
-a temporary assignment to C<$_> for convenient matching:
+=item o
 
-    SWITCH: for ($where) {
-		/In Card Names/     && do { push @flags, '-e'; last; };
-		/Anywhere/          && do { push @flags, '-h'; last; };
-		/In Rulings/        && do {                    last; };
-		die "unknown value for form variable where: `$where'";
-	    }
+a regular expression match, i.e. C</REGEX/> or C<$foo =~ /REGEX/>,
+or a negated regular expression match C<$foo !~ /REGEX/>.
 
-Another interesting approach to a switch statement is arrange
-for a C<do> block to return the proper value:
+=item o
 
-    $amode = do {
-	if     ($flag & O_RDONLY) { "r" }	# XXX: isn't this 0?
-	elsif  ($flag & O_WRONLY) { ($flag & O_APPEND) ? "a" : "w" }
-	elsif  ($flag & O_RDWR)   {
-	    if ($flag & O_CREAT)  { "w+" }
-	    else                  { ($flag & O_APPEND) ? "a+" : "r+" }
+a comparison (such as C<$_ E<lt> 10> or C<$x gt "abc">
+
+=item o
+
+C<defined(...)>, C<exists(...)>, or C<eof(...)>
+
+=item o
+
+A negated expression C<!(...)> or C<not (...)>, or a logical
+exclusive-or C<(...) xor (...)>.
+
+=back
+
+then the value of EXPR is used directly as a boolean.
+Furthermore:
+
+=over 4
+
+=item o
+
+If EXPR is C<... && ...> or C<... and ...>, the test
+is applied recursively to both arguments. If I<both>
+arguments pass the test, then the argument is treated
+as boolean.
+
+=item o
+
+If EXPR is C<... || ...> or C<... or ...>, the test
+is applied recursively to the first argument.
+
+=back
+
+These rules look complicated, but usually they will do what
+you want. For example you could write:
+
+	when (/^\d$/ && $_ < 75) { ... }
+
+C<default> behaves exactly like C<when(1 == 1)>, which is
+to say that it always matches.
+
+See L</"Smart matching in detail"> for more information
+on smart matching.
+
+=head3 Fall-through
+
+You can use the C<continue> keyword to fall through from one
+case to the next:
+
+	given($foo) {
+	    when (/x/) { print "\$foo contains an 'x'\n"; continue }
+	    when (/y/) { print "\$foo contains a 'y'\n" }
+	    default    { print "\$foo contains neither an 'x' nor a 'y' }
 	}
-    };
 
-Or 
+=head3 Switching in a loop
 
-        print do {
-            ($flags & O_WRONLY) ? "write-only"          :
-            ($flags & O_RDWR)   ? "read-write"          :
-                                  "read-only";
-        };
+Instead of using C<given()>, you can use a C<foreach()> loop.
+For example, here's one way to count how many times a particular
+string occurs in an array:
 
-Or if you are certain that all the C<&&> clauses are true, you can use
-something like this, which "switches" on the value of the
-C<HTTP_USER_AGENT> environment variable.
-
-    #!/usr/bin/perl 
-    # pick out jargon file page based on browser
-    $dir = 'http://www.wins.uva.nl/~mes/jargon';
-    for ($ENV{HTTP_USER_AGENT}) { 
-	$page  =    /Mac/            && 'm/Macintrash.html'
-		 || /Win(dows )?NT/  && 'e/evilandrude.html'
-		 || /Win|MSIE|WebTV/ && 'm/MicroslothWindows.html'
-		 || /Linux/          && 'l/Linux.html'
-		 || /HP-UX/          && 'h/HP-SUX.html'
-		 || /SunOS/          && 's/ScumOS.html'
-		 ||                     'a/AppendixB.html';
+	my $count = 0;
+	for (@array) {
+	    when ("foo") { ++$count }
     }
-    print "Location: $dir/$page\015\012\015\012";
+	print "\@array contains $count copies of 'foo'\n";
 
-That kind of switch statement only works when you know the C<&&> clauses
-will be true.  If you don't, the previous C<?:> example should be used.
+On exit from the C<when> block, there is an implicit C<next>.
+You can override that with an explicit C<last> if you're only
+interested in the first match.
 
-You might also consider writing a hash of subroutine references
-instead of synthesizing a C<switch> statement.
+This doesn't work if you explicitly specify a loop variable,
+as in C<for $item (@array)>. You have to use the default
+variable C<$_>. (You can use C<for my $_ (@array)>.)
+
+=head3 Smart matching in detail
+
+
+
+=head3 Custom matching via overloading
+
+You can change the way that an object is matched by overloading
+the C<'~~'> operator. This trumps the usual smart match semantics.
 
 =head2 Goto
 X<goto>

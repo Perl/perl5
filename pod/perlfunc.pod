@@ -134,7 +134,7 @@ X<I/O> X<input> X<output> X<dbm>
 
 C<binmode>, C<close>, C<closedir>, C<dbmclose>, C<dbmopen>, C<die>, C<eof>,
 C<fileno>, C<flock>, C<format>, C<getc>, C<print>, C<printf>, C<read>,
-C<readdir>, C<rewinddir>, C<seek>, C<seekdir>, C<select>, C<syscall>,
+C<readdir>, C<rewinddir>, C<say>, C<seek>, C<seekdir>, C<select>, C<syscall>,
 C<sysread>, C<sysseek>, C<syswrite>, C<tell>, C<telldir>, C<truncate>,
 C<warn>, C<write>
 
@@ -155,6 +155,13 @@ X<control flow>
 
 C<caller>, C<continue>, C<die>, C<do>, C<dump>, C<eval>, C<exit>,
 C<goto>, C<last>, C<next>, C<redo>, C<return>, C<sub>, C<wantarray>
+
+=item Keywords related to switch
+
+C<break>, C<continue>
+
+(These are only available if you enable the "switch" feature.
+See L<feature> and L<perlsyn/"Switch statements">.)
 
 =item Keywords related to scoping
 
@@ -592,6 +599,13 @@ that CLASSNAME is a true value.
 
 See L<perlmod/"Perl Modules">.
 
+=item break
+
+Break out of a C<given()> block.
+
+This keyword is enabled by the "switch" feature: see L<feature>
+for more information.
+
 =item caller EXPR
 X<caller> X<call stack> X<stack> X<stack trace>
 
@@ -890,6 +904,8 @@ L<perlipc/"Sockets: Client/Server Communication">.
 =item continue BLOCK
 X<continue>
 
+=item continue
+
 C<continue> is actually a flow control statement rather than a function.  If
 there is a C<continue> BLOCK attached to a BLOCK (typically in a C<while> or
 C<foreach>), it is always executed just before the conditional is about to
@@ -916,6 +932,12 @@ block, it may be more entertaining.
 Omitting the C<continue> section is semantically equivalent to using an
 empty one, logically enough.  In that case, C<next> goes directly back
 to check the condition at the top of the loop.
+
+If the "switch" feature is enabled, C<continue> is also a
+function that will break out of the current C<when> or C<default>
+block, and fall through to the next case. See L<feature> and
+L<perlsyn/"Switch statements"> for more information.
+
 
 =item cos EXPR
 X<cos> X<cosine> X<acos> X<arccosine>
@@ -4665,6 +4687,20 @@ sets C<$!> (errno).  If FILENAME is omitted, uses C<$_>.
 =item s///
 
 The substitution operator.  See L<perlop>.
+
+=item say FILEHANDLE LIST
+X<say>
+
+=item say LIST
+
+=item say
+
+Just like C<print>, but implicitly appends a newline.
+C<say LIST> is simply an abbreviation for C<print LIST, "\n">,
+and C<say()> works just like C<print($_, "\n")>.
+
+This keyword is only available when the "say" feature is
+enabled: see L<feature>.
 
 =item scalar EXPR
 X<scalar> X<context>

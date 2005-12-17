@@ -422,7 +422,7 @@ The dereference operators must be specified explicitly they will not be passed t
 
 =item * I<Special>
 
-    "nomethod", "fallback", "=",
+    "nomethod", "fallback", "=", "~~",
 
 see L<SPECIAL SYMBOLS FOR C<use overload>>.
 
@@ -516,6 +516,11 @@ unless C<"fallback"> was specified as a key in C<use overload> directive.
 The key C<"fallback"> governs what to do if a method for a particular
 operation is not found.  Three different cases are possible depending on
 the value of C<"fallback">:
+
+=head2 Smart Match
+
+The key C<"~~"> allows you to override the smart matching used by
+the switch construct. See L<feature>.
 
 =over 16
 

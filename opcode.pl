@@ -78,6 +78,7 @@ my @raw_alias = (
 		 Perl_pp_or => ['orassign'],
 		 Perl_pp_ucfirst => ['lcfirst'],
 		 Perl_pp_sle => [qw(slt sgt sge)],
+		 Perl_pp_print => ['say'],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {
@@ -1018,6 +1019,16 @@ method_named	method with known name	ck_null		d$
 
 dor		defined or (//)			ck_null		|
 dorassign	defined or assignment (//=)	ck_null		s|
+
+entergiven	given()			ck_null		d|
+leavegiven	leave given block	ck_null		1
+enterwhen	when()			ck_null		d|
+leavewhen	leave when block	ck_null		1
+break		break			ck_null		0
+continue	continue		ck_null		0
+smartmatch	smart match		ck_smartmatch	s2
+
+say		say			ck_say		ims@	F? L
 
 # Add new ops before this, the custom operator.
 

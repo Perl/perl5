@@ -6,5 +6,5 @@ BEGIN {
     $ENV{PERL5LIB} = '../lib';
 }
 
-our $pragma_name = "warnings";
+our $pragma_name = "feature";
 require "../t/lib/common.pl";

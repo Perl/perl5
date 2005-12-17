@@ -19,7 +19,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.72;
+$VERSION = 0.73;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -116,6 +116,11 @@ use warnings ();
 # - option to use Data::Dumper for constants
 # - more bug fixes
 # - discovered lots more bugs not yet fixed
+#
+# ...
+#
+# Changes between 0.72 and 0.73
+# - support new switch constructs
 
 # Todo:
 #  (See also BUGS section at the end of this file)
@@ -1632,6 +1637,38 @@ sub pp_ggrgid { unop(@_, "getgrgid") }
 
 sub pp_lock { unop(@_, "lock") }
 
+sub pp_continue { unop(@_, "continue"); }
+sub pp_break {
+    my ($self, $op) = @_;
+    return "" if $op->flags & OPf_SPECIAL;
+    unop(@_, "break");
+}
+
+sub givwhen {
+    my $self = shift;
+    my($op, $cx, $givwhen) = @_;
+
+    my $enterop = $op->first;
+    my ($head, $block);
+    if ($enterop->flags & OPf_SPECIAL) {
+	$head = "default";
+	$block = $self->deparse($enterop->first, 0);
+    }
+    else {
+	my $cond = $enterop->first;
+	my $cond_str = $self->deparse($cond, 1);
+	$head = "$givwhen ($cond_str)";
+	$block = $self->deparse($cond->sibling, 0);
+    }
+
+    return "$head {\n".
+	"\t$block\n".
+	"\b}\cK";
+}
+
+sub pp_leavegiven { givwhen(@_, "given"); }
+sub pp_leavewhen  { givwhen(@_, "when"); }
+
 sub pp_exists {
     my $self = shift;
     my($op, $cx) = @_;
@@ -2007,6 +2044,16 @@ sub pp_scmp { binop(@_, "cmp", 14) }
 
 sub pp_sassign { binop(@_, "=", 7, SWAP_CHILDREN) }
 sub pp_aassign { binop(@_, "=", 7, SWAP_CHILDREN | LIST_CONTEXT) }
+
+sub pp_smartmatch {
+    my ($self, $op, $cx) = @_;
+    if ($op->flags & OPf_SPECIAL) {
+	return $self->deparse($op->first, $cx);
+    }
+    else {
+	binop(@_, "~~", 14);
+    }
+}
 
 # `.' is special because concats-of-concats are optimized to save copying
 # by making all but the first concat stacked. The effect is as if the

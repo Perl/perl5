@@ -491,6 +491,13 @@ to compress something else.  See L<perlfunc/pack>.
 (F) Only hard references may be blessed.  This is how Perl "enforces"
 encapsulation of objects.  See L<perlobj>.
 
+=item Can't "break" in a loop topicaizer
+(F) You called C<break>, but you're in a C<foreach> block rather than
+a C<given> block. You probably meant to use C<next> or C<last>.
+
+=item Can't "break" outside a given block
+(F) You called C<break>, but you're not inside a C<given> block.
+
 =item Can't call method "%s" in empty package "%s"
 
 (F) You called a method correctly, and it correctly indicated a package
@@ -565,6 +572,10 @@ but then $foo no longer contains a glob.
 
 (F) Certain types of SVs, in particular real symbol table entries
 (typeglobs), can't be forced to stop being what they are.
+
+=item Can't "continue" outside a when block
+(F) You called C<continue>, but you're not inside a C<when>
+or C<default> block.
 
 =item Can't create pipe mailbox
 
@@ -1143,6 +1154,12 @@ backreference to a matched substring is valid only as part of a regular
 expression pattern.  Trying to do this in ordinary Perl code produces a
 value that prints out looking like SCALAR(0xdecaf).  Use the $1 form
 instead.
+
+=item Can't use "when" outside a topicalizer
+(F) You have used a when() block that is neither inside a C<foreach>
+loop nor a C<given> block. (Note that this error is issued on exit
+from the C<when> block, so you won't get the error if the match fails,
+or if you use an explicit C<continue>.)
 
 =item Can't weaken a nonreference
 

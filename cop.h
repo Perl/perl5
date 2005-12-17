@@ -419,6 +419,16 @@ struct block_loop {
 	if (cx->blk_loop.iterary && cx->blk_loop.iterary != PL_curstack)\
 	    SvREFCNT_dec(cx->blk_loop.iterary);
 
+/* given/when context */
+struct block_givwhen {
+	OP *leave_op;
+};
+
+#define PUSHGIVEN(cx)							\
+	cx->blk_givwhen.leave_op = cLOGOP->op_other;
+
+#define PUSHWHEN PUSHGIVEN
+
 /* context common to subroutines, evals and loops */
 struct block {
     I32		blku_oldsp;	/* stack pointer to copy stuff down to */
@@ -432,6 +442,7 @@ struct block {
 	struct block_sub	blku_sub;
 	struct block_eval	blku_eval;
 	struct block_loop	blku_loop;
+	struct block_givwhen	blku_givwhen;
     } blk_u;
 };
 #define blk_oldsp	cx_u.cx_blk.blku_oldsp
@@ -443,6 +454,7 @@ struct block {
 #define blk_sub		cx_u.cx_blk.blk_u.blku_sub
 #define blk_eval	cx_u.cx_blk.blk_u.blku_eval
 #define blk_loop	cx_u.cx_blk.blk_u.blku_loop
+#define blk_givwhen	cx_u.cx_blk.blk_u.blku_givwhen
 
 /* Enter a block. */
 #define PUSHBLOCK(cx,t,sp) CXINC, cx = &cxstack[cxstack_ix],		\
@@ -545,6 +557,8 @@ struct context {
 #define CXt_SUBST	4
 #define CXt_BLOCK	5
 #define CXt_FORMAT	6
+#define CXt_GIVEN	7
+#define CXt_WHEN	8
 
 /* private flags for CXt_SUB and CXt_NULL */
 #define CXp_MULTICALL	0x00000400	/* part of a multicall (so don't
@@ -554,8 +568,10 @@ struct context {
 #define CXp_REAL	0x00000100	/* truly eval'', not a lookalike */
 #define CXp_TRYBLOCK	0x00000200	/* eval{}, not eval'' or similar */
 
-#ifdef USE_ITHREADS
 /* private flags for CXt_LOOP */
+#define CXp_FOREACH	0x00000200	/* a foreach loop */
+#define CXp_FOR_DEF	0x00000400	/* foreach using $_ */
+#ifdef USE_ITHREADS
 #  define CXp_PADVAR	0x00000100	/* itervar lives on pad, iterdata
 					   has pad offset; if not set,
 					   iterdata holds GV* */
@@ -570,6 +586,10 @@ struct context {
 			 == (CXt_EVAL|CXp_REAL))
 #define CxTRYBLOCK(c)	(((c)->cx_type & (CXt_EVAL|CXp_TRYBLOCK))	\
 			 == (CXt_EVAL|CXp_TRYBLOCK))
+#define CxFOREACH(c)	(((c)->cx_type & (CXt_LOOP|CXp_FOREACH))	\
+                         == (CXt_LOOP|CXp_FOREACH))
+#define CxFOREACHDEF(c)	(((c)->cx_type & (CXt_LOOP|CXp_FOREACH|CXp_FOR_DEF))\
+			 == (CXt_LOOP|CXp_FOREACH|CXp_FOR_DEF))
 
 #define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 

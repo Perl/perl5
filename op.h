@@ -110,6 +110,9 @@ Deprecated.  Use C<GIMME_V> instead.
 				 *    (runtime property) */
 				/*  On OP_AELEMFAST, indiciates pad var */
 				/*  On OP_REQUIRE, was seen as CORE::require */
+				/*  On OP_ENTERWHEN, there's no condition */
+				/*  On OP_BREAK, an implicit break */
+				/*  On OP_SMARTMATCH, an implicit smartmatch */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST
@@ -183,6 +186,7 @@ Deprecated.  Use C<GIMME_V> instead.
 
 /* Private for OP_ENTERITER and OP_ITER */
 #define OPpITER_REVERSED	4	/* for (reverse ...) */
+#define OPpITER_DEF		8	/* for $_ or for my $_ */
 
 /* Private for OP_CONST */
 #define	OPpCONST_NOVER		2	/* no 6; */
@@ -224,7 +228,7 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpHUSH_VMSISH		64	/* hush DCL exit msg vmsish mode*/
 #define OPpEXIT_VMSISH		128	/* exit(0) vs. exit(1) vmsish mode*/
 
-/* Private of OP_FTXXX */
+/* Private for OP_FTXXX */
 #define OPpFT_ACCESS		2	/* use filetest 'access' */
 #define OPpFT_STACKED		4	/* stacked filetest, as in "-f -x $f" */
 #define OP_IS_FILETEST_ACCESS(op) 		\
@@ -237,6 +241,9 @@ Deprecated.  Use C<GIMME_V> instead.
 
 /* Private for OP_(MAP|GREP)(WHILE|START) */
 #define OPpGREP_LEX		2	/* iterate over lexical $_ */
+    
+/* Private for OP_ENTEREVAL */
+#define OPpEVAL_HAS_HH		2	/* Does it have a copy of %^H */
     
 struct op {
     BASEOP

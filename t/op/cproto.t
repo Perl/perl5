@@ -47,7 +47,7 @@ close (;*)
 closedir (*)
 cmp unknown
 connect (*$)
-continue unknown
+continue ()
 cos (;$)
 crypt ($$)
 dbmclose (\%)

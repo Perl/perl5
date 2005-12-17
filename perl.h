@@ -4019,6 +4019,9 @@ EXTCONST char* const PL_block_type[] = {
 	"LOOP",
 	"SUBST",
 	"BLOCK",
+	"FORMAT",
+	"GIVEN",
+	"WHEN"
 };
 #else
 EXTCONST char* PL_block_type[];
@@ -4133,6 +4136,9 @@ enum {		/* pass one of these to get_vtbl */
 /* assertions pragma */
 #define HINT_ASSERTING          0x01000000
 #define HINT_ASSERTIONSSEEN     0x02000000
+
+#define HINT_HH_FOR_EVAL	0x04000000 /* Squirrel a copy of %^H away
+					    * with every eval "string" */
 
 /* The following are stored in $sort::hints, not in PL_hints */
 #define HINT_SORT_SORT_BITS	0x000000FF /* allow 256 different ones */
@@ -4725,7 +4731,10 @@ enum {
   to_sv_amg,   to_av_amg,
   to_hv_amg,   to_gv_amg,
   to_cv_amg,   iter_amg,
-  int_amg,	DESTROY_amg,
+  int_amg,     smart_amg,
+
+  /* Note: Perl_Gv_AMupdate() assumes that DESTROY is the last entry */
+  DESTROY_amg,
   max_amg_code
   /* Do not leave a trailing comma here.  C9X allows it, C89 doesn't. */
 };
@@ -4772,7 +4781,8 @@ EXTCONST char * const PL_AMG_names[NofAMmeth] = {
   "(${}",	"(@{}",
   "(%{}",	"(*{}",
   "(&{}",	"(<>",
-  "(int",	"DESTROY",
+  "(int",	"(~~",
+  "DESTROY"
 };
 #else
 EXTCONST char * PL_AMG_names[NofAMmeth];

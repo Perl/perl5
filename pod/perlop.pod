@@ -41,7 +41,7 @@ values only, not array values.
     left	<< >>
     nonassoc	named unary operators
     nonassoc	< > <= >= lt gt le ge
-    nonassoc	== != <=> eq ne cmp
+    nonassoc	== != <=> eq ne cmp ~~
     left	&
     left	| ^
     left	&&
@@ -429,6 +429,12 @@ Binary "cmp" returns -1, 0, or 1 depending on whether the left
 argument is stringwise less than, equal to, or greater than the right
 argument.
 X<cmp>
+
+Binary "~~" does a smart match between its arguments. Smart matching
+is described in L<perlsyn/"Smart Matching in Detail">.
+This operator is only available if you enable the "~~" feature:
+see L<feature> for more information.
+X<~~>
 
 "lt", "le", "ge", "gt" and "cmp" use the collation (sort) order specified
 by the current locale if C<use locale> is in effect.  See L<perllocale>.

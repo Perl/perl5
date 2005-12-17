@@ -1540,6 +1540,8 @@ lib/ExtUtils/xsubpp		External subroutine preprocessor
 lib/fastcwd.pl			a faster but more dangerous getcwd
 lib/Fatal.pm			Make errors in functions/builtins fatal
 lib/Fatal.t			See if Fatal works
+lib/feature.pm			Pragma to enable new syntax
+lib/feature.t			See if features work
 lib/fields.pm			Set up object field names for pseudo-hash-using classes
 lib/File/Basename.pm		Emulate the basename program
 lib/File/Basename.t		See if File::Basename works
@@ -2937,12 +2939,14 @@ t/io/open.t			See if open works
 t/io/pipe.t			See if secure pipes work
 t/io/print.t			See if print commands work
 t/io/read.t			See if read works
+t/io/say.t			See if say works
 t/io/tell.t			See if file seeking works
 t/io/through.t			See if pipe passes data intact
 t/io/utf8.t			See if file seeking works
 t/japh/abigail.t		Obscure tests
 t/lib/1_compile.t		See if the various libraries and extensions compile
 t/lib/commonsense.t		See if configuration meets basic needs
+t/lib/common.pl			Helper for lib/{warnings,feature}.t
 t/lib/compmod.pl		Helper for 1_compile.t
 t/lib/contains_pod.xr		Pod-Parser test file
 t/lib/cygwin.t			Builtin cygwin function tests
@@ -2965,6 +2969,10 @@ t/lib/dprof/test7_v		Perl code profiler tests
 t/lib/dprof/test8_t		Perl code profiler tests
 t/lib/dprof/test8_v		Perl code profiler tests
 t/lib/dprof/V.pm		Perl code profiler tests
+t/lib/feature/nonesuch		Tests for enabling/disabling nonexistent feature
+t/lib/feature/say		Tests for enabling/disabling say feature
+t/lib/feature/smartmatch	Tests for enabling/disabling smartmatch feature
+t/lib/feature/switch		Tests for enabling/disabling switch feature
 t/lib/Filter/Simple/ExportTest.pm	Helper file for Filter::Simple tests
 t/lib/Filter/Simple/FilterOnlyTest.pm	Helper file for Filter::Simple tests
 t/lib/Filter/Simple/FilterTest.pm	Helper file for Filter::Simple tests
@@ -3183,6 +3191,7 @@ t/op/re_tests			Regular expressions for regexp.t
 t/op/reverse.t			See if reverse operator works
 t/op/runlevel.t			See if die() works from perl_call_*()
 t/op/sleep.t			See if sleep works
+t/op/smartmatch.t		See if the ~~ operator works
 t/op/sort.t			See if sort works
 t/op/splice.t			See if splice works
 t/op/split.t			See if split works
@@ -3199,6 +3208,7 @@ t/op/substr.t			See if substr works
 t/op/subst.t			See if substitution works
 t/op/subst_wamp.t		See if substitution works with $& present
 t/op/sub.t			See if subroutines work
+t/op/switch.t			See if switches (given/when) work
 t/op/sysio.t			See if sysread and syswrite work
 t/op/taint.t			See if tainting works
 t/op/threads.t			Misc. tests for perl features with threads

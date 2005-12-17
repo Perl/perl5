@@ -1383,6 +1383,12 @@ PERL_CALLCONV OP*	Perl_newFOROP(pTHX_ I32 flags, char* label, line_t forline, OP
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_5);
 
+PERL_CALLCONV OP*	Perl_newGIVENOP(pTHX_ OP* cond, OP* block, PADOFFSET defsv_off)
+			__attribute__malloc__
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
 PERL_CALLCONV OP*	Perl_newLOGOP(pTHX_ I32 optype, I32 flags, OP* left, OP* right)
 			__attribute__malloc__
 			__attribute__warn_unused_result__
@@ -1567,6 +1573,11 @@ PERL_CALLCONV SV*	Perl_newSVsv(pTHX_ SV* old)
 PERL_CALLCONV OP*	Perl_newUNOP(pTHX_ I32 type, I32 flags, OP* first)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
+
+PERL_CALLCONV OP*	Perl_newWHENOP(pTHX_ OP* cond, OP* block)
+			__attribute__malloc__
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV OP*	Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP* loop, I32 whileline, OP* expr, OP* block, OP* cont, I32 has_my)
 			__attribute__malloc__
@@ -3016,6 +3027,10 @@ PERL_CALLCONV OP*	Perl_ck_sassign(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
+PERL_CALLCONV OP*	Perl_ck_say(pTHX_ OP *o)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV OP*	Perl_ck_select(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -3124,6 +3139,13 @@ STATIC OP*	S_too_many_arguments(pTHX_ OP *o, const char* name)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
+STATIC bool	S_looks_like_bool(pTHX_ OP* o)
+			__attribute__nonnull__(pTHX_1);
+
+STATIC OP*	S_newGIVWHENOP(pTHX_ OP* cond, OP *block, I32 enter_opcode, I32 leave_opcode, PADOFFSET entertarg)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC OP*	S_ref_array_or_hash(pTHX_ OP* cond);
 #endif
 #if defined(PL_OP_SLAB_ALLOC)
 PERL_CALLCONV void*	Perl_Slab_Alloc(pTHX_ int m, size_t sz)
@@ -3265,6 +3287,9 @@ STATIC bool	S_num_overflow(NV value, I32 fldsize, I32 frcsize)
 STATIC I32	S_dopoptoeval(pTHX_ I32 startingblock)
 			__attribute__warn_unused_result__;
 
+STATIC I32	S_dopoptogiven(pTHX_ I32 startingblock)
+			__attribute__warn_unused_result__;
+
 STATIC I32	S_dopoptolabel(pTHX_ const char *label)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
@@ -3278,6 +3303,9 @@ STATIC I32	S_dopoptosub(pTHX_ I32 startingblock)
 STATIC I32	S_dopoptosub_at(pTHX_ const PERL_CONTEXT* cxstk, I32 startingblock)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
+
+STATIC I32	S_dopoptowhen(pTHX_ I32 startingblock)
+			__attribute__warn_unused_result__;
 
 STATIC void	S_save_lines(pTHX_ AV *array, SV *sv)
 			__attribute__nonnull__(pTHX_2);
@@ -3303,6 +3331,19 @@ STATIC I32	S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 
+STATIC PMOP*	S_make_matcher(pTHX_ regexp* re)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+
+STATIC bool	S_matcher_matches_sv(pTHX_ PMOP* matcher, SV* sv)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC void	S_destroy_matcher(pTHX_ PMOP* matcher)
+			__attribute__nonnull__(pTHX_1);
+
+STATIC OP*	S_do_smartmatch(pTHX_ HV* seen_this, HV* seen_other);
 #endif
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
@@ -3718,6 +3759,9 @@ STATIC void	S_checkcomma(pTHX_ char *s, const char *name, const char *what)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
+
+STATIC bool	S_feature_is_enabled(pTHX_ char* name, STRLEN namelen)
+			__attribute__nonnull__(pTHX_1);
 
 STATIC void	S_force_ident(pTHX_ const char *s, int kind)
 			__attribute__nonnull__(pTHX_1);
