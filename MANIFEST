@@ -3150,6 +3150,7 @@ t/op/mydef.t			See if "my $_" works
 t/op/my_stash.t			See if my Package works
 t/op/my.t			See if lexical scoping works
 t/op/not.t			See if not works
+t/op/negate.t			See if unary minus works
 t/op/numconvert.t		See if accessing fields does not change numeric values
 t/op/oct.t			See if oct and hex work
 t/op/ord.t			See if ord works
