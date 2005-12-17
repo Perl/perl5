@@ -3420,7 +3420,7 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
     $s = $1;
     $s = $2;
     ok($s eq 'cd',
-       "# TODO assigning to original string should not corrupt match vars");
+       "# assigning to original string should not corrupt match vars");
 }
 
 # last test 1195
