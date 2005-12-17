@@ -1019,22 +1019,22 @@ Perl_do_eof(pTHX_ GV *gv)
 	report_evil_fh(gv, io, OP_phoney_OUTPUT_ONLY);
 
     while (IoIFP(io)) {
-        int saverrno;
-	int ch;
-
         if (PerlIO_has_cntptr(IoIFP(io))) {	/* (the code works without this) */
 	    if (PerlIO_get_cnt(IoIFP(io)) > 0)	/* cheat a little, since */
 		return FALSE;			/* this is the most usual case */
         }
 
-	saverrno = errno; /* getc and ungetc can stomp on errno */
-	ch = PerlIO_getc(IoIFP(io));
-	if (ch != EOF) {
-	    (void)PerlIO_ungetc(IoIFP(io),ch);
+	{
+	     /* getc and ungetc can stomp on errno */
+	    const int saverrno = errno;
+	    const int ch = PerlIO_getc(IoIFP(io));
+	    if (ch != EOF) {
+		(void)PerlIO_ungetc(IoIFP(io),ch);
+		errno = saverrno;
+		return FALSE;
+	    }
 	    errno = saverrno;
-	    return FALSE;
 	}
-	errno = saverrno;
 
         if (PerlIO_has_cntptr(IoIFP(io)) && PerlIO_canset_cnt(IoIFP(io))) {
 	    if (PerlIO_get_cnt(IoIFP(io)) < -1)
@@ -1397,7 +1397,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
 		(really ? tmps : PL_Argv[0]), Strerror(errno));
 	if (do_report) {
-	    int e = errno;
+	    const int e = errno;
 
 	    PerlLIO_write(fd, (void*)&e, sizeof(int));
 	    PerlLIO_close(fd);
@@ -1547,7 +1547,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 		Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
 		    PL_Argv[0], Strerror(errno));
 	    if (do_report) {
-		int e = errno;
+		const int e = errno;
 		PerlLIO_write(fd, (void*)&e, sizeof(int));
 		PerlLIO_close(fd);
 	    }
