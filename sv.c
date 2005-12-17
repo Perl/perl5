@@ -2350,7 +2350,6 @@ char *
 Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 {
     register char *s;
-    int olderrno;
 
     if (!sv) {
 	if (lp)
@@ -2509,11 +2508,12 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    SvIsUV_on(sv);
     }
     else if (SvNOKp(sv)) {
+	const int olderrno = errno;
 	if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
 	/* The +20 is pure guesswork.  Configure test needed. --jhi */
 	s = SvGROW_mutable(sv, NV_DIG + 20);
-	olderrno = errno;	/* some Xenix systems wipe out errno here */
+	/* some Xenix systems wipe out errno here */
 #ifdef apollo
 	if (SvNVX(sv) == 0.0)
 	    (void)strcpy(s,"0");
