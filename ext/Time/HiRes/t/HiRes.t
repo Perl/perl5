@@ -577,7 +577,7 @@ if ($have_clock) {
     if ($clock[1] > $clock[0] &&
 	$clock[2] > $clock[1] &&
 	$clock[3] > $clock[2]) {
-	print "ok 32\n";
+	print "ok 33\n";
     } else {
 	print "not ok 33\n";
     }
