@@ -11,13 +11,17 @@ require DynaLoader;
 @EXPORT = qw( );
 @EXPORT_OK = qw (usleep sleep ualarm alarm gettimeofday time tv_interval
 		 getitimer setitimer nanosleep clock_gettime clock_getres
+		 clock clock_nanosleep
 		 CLOCK_HIGHRES CLOCK_MONOTONIC CLOCK_PROCESS_CPUTIME_ID
-		 CLOCK_REALTIME CLOCK_THREAD_CPUTIME_ID CLOCK_TIMEOFDAY
+		 CLOCK_REALTIME CLOCK_SOFTTIME CLOCK_THREAD_CPUTIME_ID
+		 CLOCK_TIMEOFDAY CLOCKS_PER_SEC
 		 ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF ITIMER_REALPROF
+		 TIMER_ABSTIME
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
-		 d_nanosleep d_clock_gettime d_clock_getres);
+		 d_nanosleep d_clock_gettime d_clock_getres
+		 d_clock d_clock_nanosleep);
 	
-$VERSION = '1.83';
+$VERSION = '1.85';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -42,11 +46,13 @@ sub AUTOLOAD {
 sub import {
     my $this = shift;
     for my $i (@_) {
-	if (($i eq 'clock_getres'  && !&d_clock_getres)  ||
-	    ($i eq 'clock_gettime' && !&d_clock_gettime) ||
-	    ($i eq 'nanosleep'     && !&d_nanosleep)     ||
-	    ($i eq 'usleep'        && !&d_usleep)        ||
-	    ($i eq 'ualarm'        && !&d_ualarm)) {
+	if (($i eq 'clock_getres'    && !&d_clock_getres)    ||
+	    ($i eq 'clock_gettime'   && !&d_clock_gettime)   ||
+	    ($i eq 'clock_nanosleep' && !&d_clock_nanosleep) ||
+	    ($i eq 'clock'           && !&d_clock)           ||
+	    ($i eq 'nanosleep'       && !&d_nanosleep)       ||
+	    ($i eq 'usleep'          && !&d_usleep)          ||
+	    ($i eq 'ualarm'          && !&d_ualarm)) {
 	    require Carp;
 	    Carp::croak("Time::HiRes::$i(): unimplemented in this platform");
 	}
@@ -77,7 +83,7 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
 =head1 SYNOPSIS
 
   use Time::HiRes qw( usleep ualarm gettimeofday tv_interval nanosleep
-		      clock_gettime clock_getres );
+		      clock_gettime clock_getres clock_nanosleep clock );
 
   usleep ($microseconds);
   nanosleep ($nanoseconds);
@@ -107,6 +113,10 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
 
   $realtime   = clock_gettime(CLOCK_REALTIME);
   $resolution = clock_getres(CLOCK_REALTIME);
+
+  clock_nanosleep(CLOCK_REALTIME, 1.5, TIMER_ABSTIME);
+
+  my $ticktock = clock();
 
 =head1 DESCRIPTION
 
@@ -156,8 +166,10 @@ seconds like C<Time::HiRes::time()> (see below).
 
 Sleeps for the number of microseconds (millionths of a second)
 specified.  Returns the number of microseconds actually slept.  Can
-sleep for more than one second, unlike the C<usleep> system call. See
-also C<Time::HiRes::usleep()> and C<Time::HiRes::sleep()>.
+sleep for more than one second, unlike the C<usleep> system call. Can
+also sleep for zero seconds, which often works like a I<thread yield>.
+See also C<Time::HiRes::usleep()>, C<Time::HiRes::sleep()>, and
+C<Time::HiRes::clock_nanosleep()>.
 
 Do not expect usleep() to be exact down to one microsecond.
 
@@ -166,8 +178,9 @@ Do not expect usleep() to be exact down to one microsecond.
 Sleeps for the number of nanoseconds (1e9ths of a second) specified.
 Returns the number of nanoseconds actually slept (accurate only to
 microseconds, the nearest thousand of them).  Can sleep for more than
-one second.  See also C<Time::HiRes::sleep()> and
-C<Time::HiRes::usleep()>.
+one second.  Can also sleep for zero seconds, which often works like a
+I<thread yield>.  See also C<Time::HiRes::sleep()>,
+C<Time::HiRes::usleep()>, and C<Time::HiRes::clock_nanosleep()>.
 
 Do not expect nanosleep() to be exact down to one nanosecond.
 Getting even accuracy of one thousand nanoseconds is good.
@@ -310,7 +323,38 @@ documentation for other possibly supported values.
 Return as seconds the resolution of the POSIX high resolution timer
 specified by C<$which>.  All implementations that support POSIX high
 resolution timers are supposed to support at least the C<$which> value
-of C<CLOCK_REALTIME>,  see L</clock_gettime>.
+of C<CLOCK_REALTIME>, see L</clock_gettime>.
+
+=item clock_nanosleep ( $which, $seconds, $flags = 0)
+
+Sleeps for the number of seconds (1e9ths of a second) specified.
+Returns the number of seconds actually slept.  The $which is the
+"clock id", as with clock_gettime() and clock_getres().  The flags
+default to zero but C<TIMER_ABSTIME> can specified (must be exported
+explicitly) which means that C<$nanoseconds> is not a time interval
+(as is the default) but instead an absolute time.  Can sleep for more
+than one second.  Can also sleep for zero seconds, which often works
+like a I<thread yield>.  See also C<Time::HiRes::sleep()>,
+C<Time::HiRes::usleep()>, and C<Time::HiRes::nanosleep()>.
+
+Do not expect clock_nanosleep() to be exact down to one nanosecond.
+Getting even accuracy of one thousand nanoseconds is good.
+
+=item clock()
+
+Return as seconds the I<process time> (user + system time) spent by
+the process since the first call to clock() (the definition is B<not>
+"since the start of the process", though if you are lucky these times
+may be quite close to each other, depending on the system).  What this
+means is that you probably need to store the result of your first call
+to clock(), and subtract that value from the following results of clock().
+
+The time returned also includes the process times of the terminated
+child processes for which wait() has been executed.  This value is
+somewhat like the second value returned by the times() of core Perl,
+but not necessarily identical.  Note that due to backward
+compatibility limitations the returned may wrap around at about 2147
+seconds or at about 36 minutes.
 
 =back
 
@@ -365,6 +409,16 @@ of C<CLOCK_REALTIME>,  see L</clock_gettime>.
   my $high = clock_getres(CLOCK_REALTIME);
   # But how accurate we can be, really?
   my $reso = clock_getres(CLOCK_REALTIME);
+
+  use Time::HiRes qw( clock_nanosleep TIMER_ABSTIME );
+  clock_nanosleep(CLOCK_REALTIME, 1e6);
+  clock_nanosleep(CLOCK_REALTIME, 2e9, TIMER_ABSTIME);
+
+  use Time::HiRes qw( clock );
+  my $clock0 = clock();
+  ... # Do something.
+  my $clock1 = clock();
+  my $clockd = $clock1 - $clock0;
 
 =head1 C API
 

@@ -1,5 +1,26 @@
 Revision history for Perl extension Time::HiRes.
 
+1.85	[2005-12-16]
+	- the interface to clock_nanosleep() is more natural
+	  when it is like (hires) time() (instead of like nanosleep),
+	  and the .xs implementation of clock_nanosleep() in 1.84
+	  was broken anyway
+	- the semantics of clock() are not quite so silly as I thought,
+	  but still somewhat odd, documented as such
+	- additional enhancements to the clock() documentation
+	- add test for clock_nanosleep() (I cannot test this
+	  since none of my systems have the function)
+	- add test for clock()
+
+1.84	[2005-12-16]
+	- add clock() which returns the processor time in
+	  (floating point) seconds since an arbitrary era
+	- add clock_nanosleep() which suspends the current
+	  thread until either absolute time or for relative time
+	- [rt.cpan.org #16486] printf missing value in HiRes.t
+	- add constants CLOCKS_PER_SEC, CLOCK_SOFTTIME, TIMER_ABSTIME
+	- tiny typo fixes
+
 1.83	[2005-11-19]
 	- has_symbol() was wrong since e.g. ITIMER_VIRTUAL is exported
 	  via @EXPORT_OK even when it is not available.  This is heinous.
@@ -175,7 +196,7 @@ Revision history for Perl extension Time::HiRes.
 
 1.63	[2004-09-01]
 	- Win32 and any ithread build: ppport.h didn't define
-	  MY_CXT_CLONE, which seems to be a Time-HiResism.
+	  MY_CXT_CLONE, which seems to be a Time-HiRes-ism.
 
 1.62	[2004-08-31]
 	- Skip testing if under PERL_CORE and Time::HiRes has not
@@ -427,7 +448,7 @@ Revision history for Perl extension Time::HiRes.
 	- 13422: XS segfault, from Marc Lehmann
 	- 13378: whether select() gets restarted on signals, depends
 	- 13354: timing constraints, again, from Andy Dougherty
-	- 13278: can't do subecond alarms with ualarm;
+	- 13278: can't do subsecond alarms with ualarm;
 		 break out early if alarms do not seem to be working
 	- 13266: test relaxation (cygwin gets lower hires
 		 times than lores ones)
@@ -598,7 +619,7 @@ Revision history for Perl extension Time::HiRes.
 	      - fix EXPORT_FAIL. 
 	  This work was all done by Roderick Schertler
 	  <roderick@argon.org>. If you run Linux or
-	  one of the other ualarm-less platoforms, and you like this 
+	  one of the other ualarm-less platforms, and you like this 
 	  module, let Roderick know; without him, it still wouldn't 
 	  be working on those boxes...
 	- Makefile.PL: figure out what routines the OS has and

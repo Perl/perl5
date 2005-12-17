@@ -12,7 +12,7 @@ BEGIN {
     }
 }
 
-BEGIN { $| = 1; print "1..31\n"; }
+BEGIN { $| = 1; print "1..33\n"; }
 
 END { print "not ok 1\n" unless $loaded }
 
@@ -24,12 +24,14 @@ print "ok 1\n";
 
 use strict;
 
-my $have_gettimeofday	= &Time::HiRes::d_gettimeofday;
-my $have_usleep		= &Time::HiRes::d_usleep;
-my $have_nanosleep	= &Time::HiRes::d_nanosleep;
-my $have_ualarm		= &Time::HiRes::d_ualarm;
-my $have_clock_gettime	= &Time::HiRes::d_clock_gettime;
-my $have_clock_getres	= &Time::HiRes::d_clock_getres;
+my $have_gettimeofday	 = &Time::HiRes::d_gettimeofday;
+my $have_usleep		 = &Time::HiRes::d_usleep;
+my $have_nanosleep	 = &Time::HiRes::d_nanosleep;
+my $have_ualarm		 = &Time::HiRes::d_ualarm;
+my $have_clock_gettime	 = &Time::HiRes::d_clock_gettime;
+my $have_clock_getres	 = &Time::HiRes::d_clock_getres;
+my $have_clock_nanosleep = &Time::HiRes::d_clock_nanosleep;
+my $have_clock           = &Time::HiRes::d_clock;
 
 sub has_symbol {
     my $symbol = shift;
@@ -39,12 +41,14 @@ sub has_symbol {
     return $@ eq '';
 }
 
-printf "# have_gettimeofday  = %d\n", $have_gettimeofday;
-printf "# have_usleep        = %d\n", $have_usleep;
-printf "# have_nanosleep     = %d\n", $have_nanosleep;
-printf "# have_ualarm        = %d\n", $have_ualarm;
-printf "# have_clock_gettime = %d\n", $have_clock_gettime;
-printf "# have_clock_getres  = %d\n", $have_clock_getres;
+printf "# have_gettimeofday    = %d\n", $have_gettimeofday;
+printf "# have_usleep          = %d\n", $have_usleep;
+printf "# have_nanosleep       = %d\n", $have_nanosleep;
+printf "# have_ualarm          = %d\n", $have_ualarm;
+printf "# have_clock_gettime   = %d\n", $have_clock_gettime;
+printf "# have_clock_getres    = %d\n", $have_clock_getres;
+printf "# have_clock_nanosleep = %d\n", $have_clock_nanosleep;
+printf "# have_clock           = %d\n", $have_clock;
 
 import Time::HiRes 'gettimeofday'	if $have_gettimeofday;
 import Time::HiRes 'usleep'		if $have_usleep;
@@ -52,6 +56,8 @@ import Time::HiRes 'nanosleep'		if $have_nanosleep;
 import Time::HiRes 'ualarm'		if $have_ualarm;
 import Time::HiRes 'clock_gettime'	if $have_clock_gettime;
 import Time::HiRes 'clock_getres'	if $have_clock_getres;
+import Time::HiRes 'clock_nanosleep'	if $have_clock_nanosleep;
+import Time::HiRes 'clock'		if $have_clock;
 
 use Config;
 
@@ -519,7 +525,7 @@ if ($have_clock_gettime &&
 		print "# Error: t0 = $t0, t1 = $t1\n";
 	    }
 	    my $r = rand() + rand();
-	    printf "# Sleeping for %.6f seconds...\n";
+	    printf "# Sleeping for %.6f seconds...\n", $r;
 	    sleep($r);
 	}
     }
@@ -535,14 +541,49 @@ if ($have_clock_gettime &&
 
 if ($have_clock_getres) {
     my $tr = clock_getres();
-   if ($tr > 0) {
-       print "ok 31 # tr = $tr\n";
-   } else {
-       print "not ok 31 # tr = $tr\n";
-   }
+    if ($tr > 0) {
+	print "ok 31 # tr = $tr\n";
+    } else {
+	print "not ok 31 # tr = $tr\n";
+    }
 } else {
     print "# No clock_getres\n";
     skip 31;
+}
+
+if ($have_clock_nanosleep &&
+    has_symbol('CLOCK_REALTIME')) {
+    my $s = 1.5;
+    my $t = clock_nanosleep(&CLOCK_REALTIME, $s);
+    my $r = abs(1 - $t / $s);
+    if ($r < 2 * $limit) {
+	print "ok 32\n";
+    } else {
+	print "not ok 32 # $t = $t, r = $r\n";
+    }
+} else {
+    print "# No clock_nanosleep\n";
+    skip 32;
+}
+
+if ($have_clock) {
+    my @clock = clock();
+    print "# clock = @clock\n";
+    for my $i (1..3) {
+	for (my $j = 0; $j < 1e6; $j++) { }
+	push @clock, clock();
+	print "# clock = @clock\n";
+    }
+    if ($clock[1] > $clock[0] &&
+	$clock[2] > $clock[1] &&
+	$clock[3] > $clock[2]) {
+	print "ok 32\n";
+    } else {
+	print "not ok 33\n";
+    }
+} else {
+    print "# No clock\n";
+    skip 33;
 }
 
 END {

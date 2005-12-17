@@ -272,7 +272,7 @@ EOM
     return 0;
 }
 
-sub has_clock_x_syscall {
+sub has_clock_xxx_syscall {
     my $x = shift;
     return 0 unless defined $SYSCALL_H;
     return 1 if
@@ -292,8 +292,8 @@ int main _((int argc, char** argv, char** env))
 EOM
 }
 
-sub has_clock_x {
-    my $x = shift;
+sub has_clock_xxx {
+    my $xxx = shift;
     return 1 if
     try_compile_and_link(<<EOM, run => 1);
 #include "EXTERN.h"
@@ -302,8 +302,42 @@ sub has_clock_x {
 int main _((int argc, char** argv, char** env))
 {
     struct timespec ts;
-    int ret = clock_$x(CLOCK_REALTIME, &ts); /* Many Linuxes get ENOSYS. */
+    int ret = clock_$xxx(CLOCK_REALTIME, &ts); /* Many Linuxes get ENOSYS. */
     /* All implementations are supposed to support CLOCK_REALTIME. */
+    ret == 0 ? exit(0) : exit(errno ? errno : -1);
+}
+EOM
+}
+
+sub has_clock {
+    return 1 if
+    try_compile_and_link(<<EOM, run => 1);
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+int main _((int argc, char** argv, char** env))
+{
+    clock_t tictoc;
+    clock_t ret = clock();
+    ret == (clock_t)-1 ? exit(errno ? errno : -1) : exit(0);
+}
+EOM
+}
+
+sub has_clock_nanosleep {
+    return 1 if
+    try_compile_and_link(<<EOM, run => 1);
+#include "EXTERN.h"
+#include "perl.h"
+#include "XSUB.h"
+int main _((int argc, char** argv, char** env))
+{
+    int ret;
+    struct timerspec ts1;
+    struct timerspec ts2;
+    ts1.tv_sec  = 0;
+    ts1.tv_nsec = 750000000;;
+    ret = clock_nanosleep(CLOCK_MONOTONIC, 0, &ts1, &ts2);
     ret == 0 ? exit(0) : exit(errno ? errno : -1);
 }
 EOM
@@ -485,10 +519,10 @@ EOD
     my $has_clock_gettime;
     if (exists $Config{d_clock_gettime}) {
         $has_clock_gettime++ if $Config{d_clock_gettime}; # Unlikely...
-    } elsif (has_clock_x('gettime')) {
+    } elsif (has_clock_xxx('gettime')) {
         $has_clock_gettime++;
 	$DEFINE .= ' -DTIME_HIRES_CLOCK_GETTIME';
-    } elsif (defined $SYSCALL_H && has_clock_x_syscall('gettime')) {
+    } elsif (defined $SYSCALL_H && has_clock_xxx_syscall('gettime')) {
         $has_clock_gettime++;
 	$DEFINE .= ' -DTIME_HIRES_CLOCK_GETTIME -DTIME_HIRES_CLOCK_GETTIME_SYSCALL';
     }
@@ -507,10 +541,10 @@ EOD
     my $has_clock_getres;
     if (exists $Config{d_clock_getres}) {
         $has_clock_getres++ if $Config{d_clock_getres}; # Unlikely...
-    } elsif (has_clock_x('getres')) {
+    } elsif (has_clock_xxx('getres')) {
         $has_clock_getres++;
 	$DEFINE .= ' -DTIME_HIRES_CLOCK_GETRES';
-    } elsif (defined $SYSCALL_H && has_clock_x_syscall('getres')) {
+    } elsif (defined $SYSCALL_H && has_clock_xxx_syscall('getres')) {
         $has_clock_getres++;
 	$DEFINE .= ' -DTIME_HIRES_CLOCK_GETRES -DTIME_HIRES_CLOCK_GETRES_SYSCALL';
     }
@@ -525,7 +559,38 @@ EOD
 	print "NOT found.\n";
     }
 
+    print "Looking for clock_nanosleep()... ";
+    my $has_clock_nanosleep;
+    if (exists $Config{d_clock_nanosleep}) {
+        $has_clock_nanosleep++ if $Config{d_clock_nanosleep}; # Unlikely...
+    } elsif (has_clock_nanosleep()) {
+        $has_clock_nanosleep++;
+	$DEFINE .= ' -DTIME_HIRES_CLOCK_NANOSLEEP';
+    }
+
+    if ($has_clock_nanosleep) {
+        print "found.\n";
+    } else {
+	print "NOT found.\n";
+    }
+
+    print "Looking for clock()... ";
+    my $has_clock;
+    if (exists $Config{d_clock}) {
+        $has_clock++ if $Config{d_clock}; # Unlikely...
+    } elsif (has_clock()) {
+        $has_clock++;
+	$DEFINE .= ' -DTIME_HIRES_CLOCK';
+    }
+
+    if ($has_clock) {
+        print "found.\n";
+    } else {
+	print "NOT found.\n";
+    }
+
     my $has_w32api_windows_h;
+
     if ($^O eq 'cygwin') {
         print "Looking for <w32api/windows.h>... ";
         if (has_include('w32api/windows.h')) {
@@ -590,14 +655,18 @@ sub doConstants {
 	my @names = (qw(CLOCK_HIGHRES CLOCK_MONOTONIC
 			CLOCK_PROCESS_CPUTIME_ID
 			CLOCK_REALTIME
+			CLOCK_SOFTTIME
 			CLOCK_THREAD_CPUTIME_ID
 			CLOCK_TIMEOFDAY
+			CLOCKS_PER_SEC
 			ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF
-			ITIMER_REALPROF));
+			ITIMER_REALPROF
+			TIMER_ABSTIME));
 	foreach (qw (d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
-		     d_nanosleep d_clock_gettime d_clock_getres)) {
+		     d_nanosleep d_clock_gettime d_clock_getres
+		     d_clock d_clock_nanosleep)) {
 	    my $macro = $_;
-	    if ($macro =~ /^(d_nanosleep|d_clock_gettime|d_clock_getres)$/) {
+	    if ($macro =~ /^(d_nanosleep|d_clock_gettime|d_clock_getres|d_clock|d_clock_nanosleep)$/) {
 		$macro =~ s/^d_(.+)/TIME_HIRES_\U$1/;
 	    } else {
 		$macro =~ s/^d_(.+)/HAS_\U$1/;
