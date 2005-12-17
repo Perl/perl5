@@ -989,7 +989,7 @@ S_modkids(pTHX_ OP *o, I32 type)
     return o;
 }
 
-/* Propagate lvalue ("modifiable") context to an op and it's children.
+/* Propagate lvalue ("modifiable") context to an op and its children.
  * 'type' represents the context type, roughly based on the type of op that
  * would do the modifying, although local() is represented by OP_NULL.
  * It's responsible for detecting things that can't be modified,  flag

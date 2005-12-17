@@ -2580,7 +2580,7 @@ typedef pthread_key_t	perl_key;
 #   define STATUS_NATIVE	PL_statusvalue_vms
 /*
  * vaxc$errno is only guaranteed to be valid if errno == EVMSERR, otherwise
- * it's contents can not be trusted.  Unfortunately, Perl seems to check
+ * its contents can not be trusted.  Unfortunately, Perl seems to check
  * it on exit, so it when PL_statusvalue_vms is updated, vaxc$errno should
  * be updated also.
  */
