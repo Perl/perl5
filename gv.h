@@ -24,7 +24,14 @@ struct gp {
 
 #define GvXPVGV(gv)	((XPVGV*)SvANY(gv))
 
-#define GvGP(gv)	(GvXPVGV(gv)->xgv_gp)
+#ifdef DEBUGGING
+#  define GvGP(gv)	(*(assert(SvTYPE(gv) == SVt_PVGV || \
+				  SvTYPE(gv) == SVt_PVLV), \
+			   &(GvXPVGV(gv)->xgv_gp)))
+#else
+#  define GvGP(gv)	(GvXPVGV(gv)->xgv_gp)
+#endif
+
 #define GvNAME(gv)	(GvXPVGV(gv)->xgv_name)
 #define GvNAMELEN(gv)	(GvXPVGV(gv)->xgv_namelen)
 #define GvSTASH(gv)	(GvXPVGV(gv)->xgv_stash)
