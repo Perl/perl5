@@ -21,7 +21,7 @@ require DynaLoader;
 		 d_nanosleep d_clock_gettime d_clock_getres
 		 d_clock d_clock_nanosleep);
 	
-$VERSION = '1.85';
+$VERSION = '1.86';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -114,7 +114,8 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
   $realtime   = clock_gettime(CLOCK_REALTIME);
   $resolution = clock_getres(CLOCK_REALTIME);
 
-  clock_nanosleep(CLOCK_REALTIME, 1.5, TIMER_ABSTIME);
+  clock_nanosleep(CLOCK_REALTIME, 1.5);
+  clock_nanosleep(CLOCK_REALTIME, time() + 10, TIMER_ABSTIME);
 
   my $ticktock = clock();
 
@@ -353,8 +354,8 @@ The time returned also includes the process times of the terminated
 child processes for which wait() has been executed.  This value is
 somewhat like the second value returned by the times() of core Perl,
 but not necessarily identical.  Note that due to backward
-compatibility limitations the returned may wrap around at about 2147
-seconds or at about 36 minutes.
+compatibility limitations the returned value may wrap around at about
+2147 seconds or at about 36 minutes.
 
 =back
 

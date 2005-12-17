@@ -574,7 +574,8 @@ if ($have_clock) {
 	push @clock, clock();
 	print "# clock = @clock\n";
     }
-    if ($clock[1] > $clock[0] &&
+    if ($clock[0] >= 0 &&
+        $clock[1] > $clock[0] &&
 	$clock[2] > $clock[1] &&
 	$clock[3] > $clock[2]) {
 	print "ok 33\n";

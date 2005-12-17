@@ -1,5 +1,10 @@
 Revision history for Perl extension Time::HiRes.
 
+1.86	[2005-12-17]
+	- HiRes.t:s/ok 32/ok 33/, from Dominic Dunlop
+	- tighten up the clock() test marginally by requiring non-negative
+	- clock_nanosleep() and clock() doc tweaks
+
 1.85	[2005-12-16]
 	- the interface to clock_nanosleep() is more natural
 	  when it is like (hires) time() (instead of like nanosleep),
