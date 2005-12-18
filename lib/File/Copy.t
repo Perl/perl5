@@ -108,10 +108,14 @@ for my $cross_partition_test (0..1) {
   open(R, "file-$$") or die; $foo = <R>; close(R);
   is $foo, "ok\n";
 
-  my $dest_mtime = (stat("file-$$"))[9];
-  is $dest_mtime, $mtime,
-    "mtime preserved by copy()". 
-    ($cross_partition_test ? " while testing cross-partition" : "");
+  TODO: {
+    local $TODO = 'mtime only preserved on ODS-5 with POSIX dates and DECC$EFS_FILE_TIMESTAMPS enabled' if $^O eq 'VMS';
+
+    my $dest_mtime = (stat("file-$$"))[9];
+    is $dest_mtime, $mtime,
+      "mtime preserved by copy()". 
+      ($cross_partition_test ? " while testing cross-partition" : "");
+  }
 
   copy "file-$$", "lib";
   open(R, "lib/file-$$") or die; $foo = <R>; close(R);
