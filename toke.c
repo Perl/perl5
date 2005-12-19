@@ -4086,6 +4086,9 @@ Perl_yylex(pTHX)
     case 'z': case 'Z':
 
       keylookup: {
+	assert (orig_keyword == 0);
+	assert (gv == 0);
+	assert (gvp == 0);
 	orig_keyword = 0;
 	gv = Nullgv;
 	gvp = 0;
