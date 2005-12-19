@@ -331,7 +331,7 @@ they aren't loops.  You can double the braces to make them such, though.
     }}
 
 This is caused by the fact that a block by itself acts as a loop that
-executes once, see L<"Basic BLOCKs and Switch Statements">.
+executes once, see L<"Basic BLOCKs">.
 
 The form C<while/if BLOCK BLOCK>, available in Perl 4, is no longer
 available.   Replace any occurrence of C<if BLOCK> by C<if (do BLOCK)>.
@@ -476,8 +476,7 @@ I<NOT> true in C<eval{}>, C<sub{}>, or contrary to popular belief
 C<do{}> blocks, which do I<NOT> count as loops.)  The C<continue>
 block is optional.
 
-The BLOCK construct can be used to emulate case
-structures.
+The BLOCK construct can be used to emulate case structures.
 
     SWITCH: {
 	if (/^abc/) { $abc = 1; last SWITCH; }
@@ -489,13 +488,12 @@ structures.
 Such constructs are quite frequently used, because older versions
 of Perl had no official C<switch> statement.
 
-
 =head2 Switch statements
 X<switch> X<case> X<given> X<when> X<default>
 
-Starting from Perl 5.10, you can say 
+Starting from Perl 5.10, you can say
 
-	use feature "switch";
+    use feature "switch";
 
 which enables a switch feature that is closely based on the
 Perl 6 proposal.
@@ -504,18 +502,17 @@ The keywords C<given> and C<when> are analogous
 to C<switch> and C<case> in other languages, so the code
 above could be written as
 
-	given($_) {
-	    when (/^abc/) { $abc = 1; }
-	    when (/^def/) { $def = 1; }
-	    when (/^xyz/) { $xyz = 1; }
-	    default { $nothing = 1; }
+    given($_) {
+	when (/^abc/) { $abc = 1; }
+	when (/^def/) { $def = 1; }
+	when (/^xyz/) { $xyz = 1; }
+	default { $nothing = 1; }
     }
 
 This construct is very flexible and powerful. For example:
 
-	given() {
-
-	    xxxx
+    given() {
+	xxxx
     }
 
 Most of its power comes from the implicit smart matching:
@@ -579,7 +576,7 @@ is applied recursively to the first argument.
 These rules look complicated, but usually they will do what
 you want. For example you could write:
 
-	when (/^\d$/ && $_ < 75) { ... }
+    when (/^\d$/ && $_ < 75) { ... }
 
 C<default> behaves exactly like C<when(1 == 1)>, which is
 to say that it always matches.
@@ -592,11 +589,11 @@ on smart matching.
 You can use the C<continue> keyword to fall through from one
 case to the next:
 
-	given($foo) {
-	    when (/x/) { print "\$foo contains an 'x'\n"; continue }
-	    when (/y/) { print "\$foo contains a 'y'\n" }
-	    default    { print "\$foo contains neither an 'x' nor a 'y' }
-	}
+    given($foo) {
+	when (/x/) { print "\$foo contains an 'x'\n"; continue }
+	when (/y/) { print "\$foo contains a 'y'\n" }
+	default    { print "\$foo contains neither an 'x' nor a 'y' }
+    }
 
 =head3 Switching in a loop
 
@@ -604,11 +601,11 @@ Instead of using C<given()>, you can use a C<foreach()> loop.
 For example, here's one way to count how many times a particular
 string occurs in an array:
 
-	my $count = 0;
-	for (@array) {
-	    when ("foo") { ++$count }
+    my $count = 0;
+    for (@array) {
+	when ("foo") { ++$count }
     }
-	print "\@array contains $count copies of 'foo'\n";
+    print "\@array contains $count copies of 'foo'\n";
 
 On exit from the C<when> block, there is an implicit C<next>.
 You can override that with an explicit C<last> if you're only
