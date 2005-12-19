@@ -1142,8 +1142,9 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	/* FALL THROUGH */
     default:
       nomod:
-	/* grep, foreach, subcalls, refgen */
-	if (type == OP_GREPSTART || type == OP_ENTERSUB || type == OP_REFGEN)
+	/* grep, foreach, subcalls, refgen, m//g */
+	if (type == OP_GREPSTART || type == OP_ENTERSUB || type == OP_REFGEN
+	    || type == OP_MATCH)
 	    break;
 	yyerror(Perl_form(aTHX_ "Can't modify %s in %s",
 		     (o->op_type == OP_NULL && (o->op_flags & OPf_SPECIAL)
@@ -1822,9 +1823,14 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
     }
     if (!(right->op_flags & OPf_STACKED) && ismatchop) {
 	right->op_flags |= OPf_STACKED;
-	if (right->op_type != OP_MATCH &&
-            ! (right->op_type == OP_TRANS &&
-               right->op_private & OPpTRANS_IDENTICAL))
+	/* s/// and tr/// modify their arg.
+	 * m//g also indirectly modifies the arg by setting pos magic on it */
+	if (   (right->op_type == OP_MATCH &&
+		    (cPMOPx(right)->op_pmflags & PMf_GLOBAL))
+	    || (right->op_type == OP_SUBST)
+	    || (right->op_type == OP_TRANS &&
+		! (right->op_private & OPpTRANS_IDENTICAL))
+	)
 	    left = mod(left, right->op_type);
 	if (right->op_type == OP_TRANS)
 	    o = newBINOP(OP_NULL, OPf_STACKED, scalar(left), right);
