@@ -675,7 +675,7 @@ checkOptree(note   => q{},
 # 3  <0> pushmark s
 # 4  <#> gv[*old] s
 # 5  <1> rv2av[t9] lK/1
-# 6  <@> sort lKS*
+# 6  <@> sort lKS*/STABLE
 # 7  <0> pushmark s
 # 8  <#> gv[*new] s
 # 9  <1> rv2av[t2] lKRM*/1
@@ -687,7 +687,7 @@ EOT_EOT
 # 3  <0> pushmark s
 # 4  <$> gv(*old) s
 # 5  <1> rv2av[t5] lK/1
-# 6  <@> sort lKS*
+# 6  <@> sort lKS*/STABLE
 # 7  <0> pushmark s
 # 8  <$> gv(*new) s
 # 9  <1> rv2av[t1] lKRM*/1

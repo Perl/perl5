@@ -317,9 +317,20 @@ Sort an array. Here is an example:
 
     sortsv(AvARRAY(av), av_len(av)+1, Perl_sv_cmp_locale);
 
-See lib/sort.pm for details about controlling the sorting algorithm.
+Currently this always uses mergesort. See sortsv_flags for a more
+flexible routine.
 
 	void	sortsv(SV** array, size_t num_elts, SVCOMPARE_t cmp)
+
+=for hackers
+Found in file pp_sort.c
+
+=item sortsv_flags
+X<sortsv_flags>
+
+Sort an array, with various options.
+
+	void	sortsv_flags(SV** array, size_t num_elts, SVCOMPARE_t cmp, U32 flags)
 
 =for hackers
 Found in file pp_sort.c

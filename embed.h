@@ -457,6 +457,7 @@
 #define qerror			Perl_qerror
 #endif
 #define sortsv			Perl_sortsv
+#define sortsv_flags		Perl_sortsv_flags
 #define mg_clear		Perl_mg_clear
 #define mg_copy			Perl_mg_copy
 #ifdef PERL_CORE
@@ -2502,6 +2503,7 @@
 #define qerror(a)		Perl_qerror(aTHX_ a)
 #endif
 #define sortsv(a,b,c)		Perl_sortsv(aTHX_ a,b,c)
+#define sortsv_flags(a,b,c,d)	Perl_sortsv_flags(aTHX_ a,b,c,d)
 #define mg_clear(a)		Perl_mg_clear(aTHX_ a)
 #define mg_copy(a,b,c,d)	Perl_mg_copy(aTHX_ a,b,c,d)
 #ifdef PERL_CORE

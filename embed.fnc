@@ -453,6 +453,7 @@ Afp	|SV*	|mess		|NN const char* pat|...
 Ap	|SV*	|vmess		|NN const char* pat|NULLOK va_list* args
 p	|void	|qerror		|NN SV* err
 Apd	|void	|sortsv		|NN SV** array|size_t num_elts|SVCOMPARE_t cmp
+Apd	|void	|sortsv_flags	|NN SV** array|size_t num_elts|SVCOMPARE_t cmp|U32 flags
 Apd	|int	|mg_clear	|NN SV* sv
 Apd	|int	|mg_copy	|NN SV* sv|NN SV* nsv|NULLOK const char* key|I32 klen
 pd	|void	|mg_localize	|NN SV* sv|NN SV* nsv

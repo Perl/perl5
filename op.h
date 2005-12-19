@@ -215,6 +215,9 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpSORT_REVERSE		4	/* Reversed sort */
 #define OPpSORT_INPLACE		8	/* sort in-place; eg @a = sort @a */
 #define OPpSORT_DESCEND		16	/* Descending sort */
+#define OPpSORT_QSORT		32	/* Use quicksort (not mergesort) */
+#define OPpSORT_STABLE		64	/* Use a stable algorithm */
+
 /* Private for OP_THREADSV */
 #define OPpDONE_SVREF		64	/* Been through newSVREF once */
 

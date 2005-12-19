@@ -6231,6 +6231,21 @@ Perl_ck_sort(pTHX_ OP *o)
 {
     OP *firstkid;
 
+    if (o->op_type == OP_SORT && (PL_hints & HINT_LOCALIZE_HH) != 0)
+    {
+	HV *hinthv = GvHV(PL_hintgv);
+	if (hinthv) {
+	    SV **svp = hv_fetch(hinthv, "sort", 4, 0);
+	    if (svp) {
+		I32 sorthints = (I32)SvIV(*svp);
+		if ((sorthints & HINT_SORT_QUICKSORT) != 0)
+		    o->op_private |= OPpSORT_QSORT;
+		if ((sorthints & HINT_SORT_STABLE) != 0)
+		    o->op_private |= OPpSORT_STABLE;
+	    }
+	}
+    }
+
     if (o->op_type == OP_SORT && o->op_flags & OPf_STACKED)
 	simplify_sort(o);
     firstkid = cLISTOPo->op_first->op_sibling;		/* get past pushmark */

@@ -36,12 +36,14 @@
 #define sv_cmp_static Perl_sv_cmp
 #define sv_cmp_locale_static Perl_sv_cmp_locale
 
-#define dSORTHINTS   SV *hintsv = GvSV(gv_fetchpv("sort::hints", GV_ADDMULTI, SVt_IV))
-#define SORTHINTS    (SvIOK(hintsv) ? ((I32)SvIV(hintsv)) : 0)
-
 #ifndef SMALLSORT
 #define	SMALLSORT (200)
 #endif
+
+/* Flags for qsortsv and mergesortsv */
+#define SORTf_DESC   1
+#define SORTf_STABLE 2
+#define SORTf_QSORT  4
 
 /*
  * The mergesort implementation is by Peter M. Mcilroy <pmcilroy@lucent.com>.
@@ -1339,10 +1341,7 @@ cmpindir_desc(pTHX_ gptr a, gptr b)
 STATIC void
 S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 {
-
-    dSORTHINTS;
-
-    if (SORTHINTS & HINT_SORT_STABLE) {
+    if ((flags & SORTf_STABLE) != 0) {
 	 register gptr **pp, *q;
 	 register size_t n, j, i;
 	 gptr *small[SMALLSORT], **indir, tmp;
@@ -1361,7 +1360,7 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 
 	 /* sort, with indirection */
 	 S_qsortsvu(aTHX_ (gptr *)indir, nmemb,
-		    flags ? cmpindir_desc : cmpindir);
+		    ((flags & SORTf_DESC) != 0 ? cmpindir_desc : cmpindir));
 
 	 pp = indir;
 	 q = list1;
@@ -1404,7 +1403,7 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 	 if (indir != small) { Safefree(indir); }
 	 /* restore prevailing comparison routine */
 	 PL_sort_RealCmp = savecmp;
-    } else if (flags) {
+    } else if ((flags & SORTf_DESC) != 0) {
 	 SVCOMPARE_t savecmp = PL_sort_RealCmp;	/* Save current comparison routine, if any */
 	 PL_sort_RealCmp = cmp;	/* Put comparison routine where cmp_desc can find it */
 	 cmp = cmp_desc;
@@ -1425,7 +1424,8 @@ Sort an array. Here is an example:
 
     sortsv(AvARRAY(av), av_len(av)+1, Perl_sv_cmp_locale);
 
-See lib/sort.pm for details about controlling the sorting algorithm.
+Currently this always uses mergesort. See sortsv_flags for a more
+flexible routine.
 
 =cut
 */
@@ -1433,38 +1433,23 @@ See lib/sort.pm for details about controlling the sorting algorithm.
 void
 Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 {
-    void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
-      = S_mergesortsv;
-    dSORTHINTS;
-    const I32 hints = SORTHINTS;
-    if (hints & HINT_SORT_QUICKSORT) {
-	sortsvp = S_qsortsv;
-    }
-    else {
-	/* The default as of 5.8.0 is mergesort */
-	sortsvp = S_mergesortsv;
-    }
-
-    sortsvp(aTHX_ array, nmemb, cmp, 0);
+    sortsv_flags(array, nmemb, cmp, 0);
 }
 
+/*
+=for apidoc sortsv_flags
 
-static void
-S_sortsv_desc(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
+Sort an array, with various options.
+
+=cut
+*/
+void
+Perl_sortsv_flags(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 {
     void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
-      = S_mergesortsv;
-    dSORTHINTS;
-    const I32 hints = SORTHINTS;
-    if (hints & HINT_SORT_QUICKSORT) {
-	sortsvp = S_qsortsv;
-    }
-    else {
-	/* The default as of 5.8.0 is mergesort */
-	sortsvp = S_mergesortsv;
-    }
+      = ((flags & SORTf_QSORT) != 0 ? S_qsortsv : S_mergesortsv);
 
-    sortsvp(aTHX_ array, nmemb, cmp, 1);
+    sortsvp(aTHX_ array, nmemb, cmp, flags);
 }
 
 #define SvNSIOK(sv) ((SvFLAGS(sv) & SVf_NOK) || ((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV)) == SVf_IOK))
@@ -1488,9 +1473,17 @@ PP(pp_sort)
     I32 sorting_av = 0;
     const U8 priv = PL_op->op_private;
     const U8 flags = PL_op->op_flags;
-    void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
-      = Perl_sortsv;
+    U32 sort_flags = 0;
+    void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
+      = Perl_sortsv_flags;
     I32 all_SIVs = 1;
+
+    if ((priv & OPpSORT_DESCEND) != 0)
+	sort_flags |= SORTf_DESC;
+    if ((priv & OPpSORT_QSORT) != 0)
+	sort_flags |= SORTf_QSORT;
+    if ((priv & OPpSORT_STABLE) != 0)
+	sort_flags |= SORTf_STABLE;
 
     if (gimme != G_ARRAY) {
 	SP = MARK;
@@ -1571,10 +1564,6 @@ PP(pp_sort)
 	p2 = MARK+1;
 	max = SP - MARK;
    }
-
-    if (priv & OPpSORT_DESCEND) {
-	sortsvp = S_sortsv_desc;
-    }
 
     /* shuffle stack down, removing optional initial cv (p1!=p2), plus
      * any nulls; also stringify or converting to integer or number as
@@ -1675,7 +1664,8 @@ PP(pp_sort)
 	    
 	    start = p1 - max;
 	    sortsvp(aTHX_ start, max,
-		    is_xsub ? S_sortcv_xsub : hasargs ? S_sortcv_stacked : S_sortcv);
+		    (is_xsub ? S_sortcv_xsub : hasargs ? S_sortcv_stacked : S_sortcv),
+		    sort_flags);
 
 	    if (!(flags & OPf_SPECIAL)) {
 		LEAVESUB(cv);
@@ -1699,9 +1689,10 @@ PP(pp_sort)
 			    ? ( overloading
 				? S_amagic_cmp_locale
 				: sv_cmp_locale_static)
-			    : ( overloading ? S_amagic_cmp : sv_cmp_static)));
+			    : ( overloading ? S_amagic_cmp : sv_cmp_static)),
+		    sort_flags);
 	}
-	if (priv & OPpSORT_REVERSE) {
+	if ((priv & OPpSORT_REVERSE) != 0) {
 	    SV **q = start+max-1;
 	    while (start < q) {
 		SV * const tmp = *start;

@@ -468,7 +468,10 @@ STATIC bool
 S_feature_is_enabled(pTHX_ char *name, STRLEN namelen)
 {
     HV * const hinthv = GvHV(PL_hintgv);
-    return (hinthv && hv_exists(hinthv, name, namelen));
+    char he_name[32] = "feature_";
+    (void) strncpy(&he_name[8], name, 24);
+    
+    return (hinthv && hv_exists(hinthv, he_name, 8 + namelen));
 }
 
 /*

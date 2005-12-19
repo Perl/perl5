@@ -5,9 +5,9 @@ $feature::hint_bits = 0x04020000; # HINT_LOCALIZE_HH | HINT_HH_FOR_EVAL
 
 # (feature name) => (internal name, used in %^H)
 my %feature = (
-    switch => 'switch',
-    "~~"   => "~~",
-    say    => "say",
+    switch => 'feature_switch',
+    "~~"   => "feature_~~",
+    say    => "feature_say",
 );
 
 

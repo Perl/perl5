@@ -1246,6 +1246,9 @@ PERL_CALLCONV void	Perl_qerror(pTHX_ SV* err)
 PERL_CALLCONV void	Perl_sortsv(pTHX_ SV** array, size_t num_elts, SVCOMPARE_t cmp)
 			__attribute__nonnull__(pTHX_1);
 
+PERL_CALLCONV void	Perl_sortsv_flags(pTHX_ SV** array, size_t num_elts, SVCOMPARE_t cmp, U32 flags)
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV int	Perl_mg_clear(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 
