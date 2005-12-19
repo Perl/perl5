@@ -116,9 +116,10 @@ if (@donetests == 3) {
     print "ok 12 # file/file [$donetests[1]]\n";
   }
   print "not " unless $donetests[2] == 0;
-  print "ok 13 # file/fileCR [$donetests[2]]\n";
+  print "ok 13 # ";
+  print "TODO" if $^O eq "cygwin"; # spaces after filename silently trunc'd
+  print " file/fileCR [$donetests[2]]\n";
 }
 else {
   print "ok 11# Skip\nok 12 # Skip\nok 13 # Skip Likely due to File::Temp\n";
 }
-
