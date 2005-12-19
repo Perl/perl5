@@ -1477,7 +1477,21 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
         if (CvROOT(sv) && dumpops)
 	    do_op_dump(level+1, file, CvROOT(sv));
 	Perl_dump_indent(aTHX_ level, file, "  XSUB = 0x%"UVxf"\n", PTR2UV(CvXSUB(sv)));
-	Perl_dump_indent(aTHX_ level, file, "  XSUBANY = %"IVdf"\n", (IV)CvXSUBANY(sv).any_i32);
+	{
+	    SV *constant = cv_const_sv((CV *)sv);
+
+
+	    if (constant) {
+		Perl_dump_indent(aTHX_ level, file, "  XSUBANY = 0x%"UVxf
+				 " (CONST SV)\n",
+				 PTR2UV(CvXSUBANY(sv).any_ptr));
+		do_sv_dump(level+1, file, constant, nest+1, maxnest, dumpops,
+			   pvlim);
+	    } else {
+		Perl_dump_indent(aTHX_ level, file, "  XSUBANY = %"IVdf"\n",
+				 (IV)CvXSUBANY(sv).any_i32);
+	    }
+	}
  	do_gvgv_dump(level, file, "  GVGV::GV", CvGV(sv));
 	Perl_dump_indent(aTHX_ level, file, "  FILE = \"%s\"\n", CvFILE(sv));
 	Perl_dump_indent(aTHX_ level, file, "  DEPTH = %"IVdf"\n", (IV)CvDEPTH(sv));

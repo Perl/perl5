@@ -12,7 +12,7 @@ BEGIN {
 
 use Devel::Peek;
 
-print "1..22\n";
+print "1..23\n";
 
 our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
@@ -465,3 +465,41 @@ do_test(22,
     CUR = 0
     LEN = 0
     STASH = $ADDR\s+"Foobar"');
+
+# Constant subroutines
+
+sub const () {
+    "Perl rules";
+}
+
+do_test(23,
+	\&const,
+'SV = RV\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(ROK\\)
+  RV = $ADDR
+  SV = PVCV\\($ADDR\\) at $ADDR
+    REFCNT = (2)
+    FLAGS = \\(POK,pPOK,CONST\\)
+    IV = 0
+    NV = 0
+    PROTOTYPE = ""
+    COMP_STASH = 0x0
+    ROOT = 0x0
+    XSUB = $ADDR
+    XSUBANY = $ADDR \\(CONST SV\\)
+    SV = PV\\($ADDR\\) at $ADDR
+      REFCNT = 1
+      FLAGS = \\(.*POK,READONLY,pPOK\\)
+      PV = $ADDR "Perl rules"\\\0
+      CUR = 10
+      LEN = \\d+
+    GVGV::GV = $ADDR\\t"main" :: "const"
+    FILE = ".*\\b(?i:peek\\.t)"
+    DEPTH = 0
+(?:    MUTEXP = $ADDR
+    OWNER = $ADDR
+)?    FLAGS = 0x200
+    OUTSIDE_SEQ = 0
+    PADLIST = 0x0
+    OUTSIDE = 0x0 \\(null\\)');	
