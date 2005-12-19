@@ -1,6 +1,6 @@
 package B::Lint;
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 =head1 NAME
 
@@ -120,6 +120,35 @@ include other package names whose subs are then checked by Lint.
 
 =back
 
+=head1 EXTENDING LINT
+
+Lint can be extended by registering plugins.
+
+The C<B::Lint->register_plugin( MyPlugin => \ @new_checks ) method
+adds the class C<MyPlugin> to the list of plugins. It also adds the
+list of C<@new_checks> to the list of valid checks.
+
+You must create a C<match( \ %checks )> method in your plugin class or
+one of its inheritence parents. It will be called on every op as a
+regular method call with a hash ref of checks as its parameter.
+
+You may not alter the check hash reference.
+
+The class methods C<B::Lint->file> and C<B::Lint->line> contain the
+current filename and line number.
+
+ package Sample;
+ use B::Lint;
+ B::Lint->register_plugin( Sample => [ 'good_taste' ] );
+ 
+ sub match {
+     my ( $op, $checks_href ) = shift;
+
+     if ( $checks_href->{good_taste} ) {
+         ...
+     }
+ }
+
 =head1 BUGS
 
 This is only a very preliminary version.
@@ -134,12 +163,16 @@ Malcolm Beattie, mbeattie@sable.ox.ac.uk.
 
 use strict;
 use B qw(walkoptree_slow main_root walksymtable svref_2object parents
+         class
          OPf_WANT_LIST OPf_WANT OPf_STACKED G_ARRAY SVf_POK
         );
 
 my $file = "unknown";		# shadows current filename
 my $line = 0;			# shadows current line number
 my $curstash = "main";		# shadows current stash
+
+sub file { $file }
+sub line { $line }
 
 # Lint checks
 my %check;
@@ -154,6 +187,7 @@ BEGIN {
 my @default_checks = qw(context);
 
 my %valid_check;
+my %plugin_valid_check;
 # All valid checks
 BEGIN {
     map($valid_check{$_}++,
@@ -184,7 +218,19 @@ sub gimme {
     return undef;
 }
 
-sub B::OP::lint {}
+my @plugins;
+
+sub B::OP::lint {
+    my $op = shift;
+    my $m;
+    $m = $_->can('match'), $op->$m( \ %check ) for @plugins;
+    return;
+}
+*$_ = *B::OP::lint
+  for \ ( *B::PADOP::lint,
+          *B::LOGOP::lint,
+          *B::BINOP::lint,
+          *B::LISTOP::lint );
 
 sub B::COP::lint {
     my $op = shift;
@@ -193,6 +239,10 @@ sub B::COP::lint {
 	$line = $op->line;
 	$curstash = $op->stash->NAME;
     }
+
+    my $m;
+    $m = $_->can('match'), $op->$m( \ %check ) for @plugins;
+    return;
 }
 
 sub B::UNOP::lint {
@@ -221,6 +271,10 @@ sub B::UNOP::lint {
 	    }
 	}
     }
+
+    my $m;
+    $m = $_->can('match'), $op->$m( \ %check ) for @plugins;
+    return;
 }
 
 sub B::PMOP::lint {
@@ -235,6 +289,10 @@ sub B::PMOP::lint {
 	    warning('Implicit substitution on $_');
 	}
     }
+
+    my $m;
+    $m = $_->can('match'), $op->$m( \ %check ) for @plugins;
+    return;
 }
 
 sub B::LOOP::lint {
@@ -247,6 +305,10 @@ sub B::LOOP::lint {
 	    }
 	}
     }
+    
+    my $m;
+    $m = $_->can('match'), $op->$m( \ %check ) for @plugins;
+    return;
 }
 
 sub B::SVOP::lint {
@@ -297,6 +359,10 @@ sub B::SVOP::lint {
 	    warning('Use of regexp variable $%s', $name);
 	}
     }
+    
+    my $m;
+    $m = $_->can('match'), $op->$m( \ %check ) for @plugins;
+    return;
 }
 
 sub B::GV::lintcv {
@@ -320,7 +386,11 @@ sub do_lint {
     for my $sym (keys %main::) {
 	next if $sym =~ /::$/;
 	*glob = $main::{$sym};
-        svref_2object(\*glob)->EGV->lintcv;
+	
+        # When is EGV a special value?
+        my $gv = svref_2object(\*glob)->EGV;
+        next if class( $gv ) eq 'SPECIAL';
+        $gv->lintcv;
     }
 
     # Now do subs in non-main packages given by -u options
@@ -369,7 +439,7 @@ sub compile {
     foreach $opt (@default_checks, @options) {
 	$opt =~ tr/-/_/;
 	if ($opt eq "all") {
-	    %check = %valid_check;
+            %check = ( %valid_check, %plugin_valid_check );
 	}
 	elsif ($opt eq "none") {
 	    %check = ();
@@ -381,12 +451,33 @@ sub compile {
 	    else {
 		$check{$opt} = 1;
 	    }
-	    warn "No such check: $opt\n" unless defined $valid_check{$opt};
+	    warn "No such check: $opt\n" unless defined $valid_check{$opt}
+                                             or defined $plugin_valid_check{$opt};
 	}
     }
     # Remaining arguments are things to check
     
     return \&do_lint;
+}
+
+sub register_plugin {
+    my ( undef, $plugin, $new_checks ) = @_;
+    
+    # Register the plugin
+    for my $check ( @$new_checks ) {
+        defined $check
+          or warn "Undefined value in checks.";
+        not $valid_check{ $check }
+          or warn "$check is already registered as a B::Lint feature.";
+        not $plugin_valid_check{ $check }
+          or warn "$check is already registered as a $plugin_valid_check{$check} feature.";
+         
+        $plugin_valid_check{$check} = $plugin;
+    }
+    
+    push @plugins, $plugin;
+    
+    return;
 }
 
 1;

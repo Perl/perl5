@@ -16,7 +16,7 @@ BEGIN {
     require 'test.pl';
 }
 
-plan tests => 15; # adjust also number of skipped tests !
+plan tests => 16; # adjust also number of skipped tests !
 
 # Runs a separate perl interpreter with the appropriate lint options
 # turned on
@@ -46,6 +46,15 @@ RESULT
 runlint 'implicit-write', 's/foo/bar/', <<'RESULT';
 Implicit substitution on $_ at -e line 1
 RESULT
+
+{
+    my $res = runperl(
+        switches => [ "-MB::Lint" ],
+        prog => "BEGIN{B::Lint->register_plugin(X=>[q[x]])};use O(qw[Lint x]);sub X::match{warn q[X ok.\n]};dummy()",
+	stderr => 1,
+    );
+    like( $res, qr/X ok\./, 'Lint plugin' );
+}
 
 SKIP : {
 
