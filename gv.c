@@ -129,6 +129,14 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     register GP *gp;
     const bool doproto = SvTYPE(gv) > SVt_NULL;
     const char * const proto = (doproto && SvPOK(gv)) ? SvPVX_const(gv) : NULL;
+    SV *const has_constant = doproto && SvROK(gv) ? SvRV(gv) : NULL;
+
+    assert (!(proto && has_constant));
+
+    if (has_constant) {
+	SvRV_set(gv, NULL);
+	SvROK_off(gv);
+    }
 
     sv_upgrade((SV*)gv, SVt_PVGV);
     if (SvLEN(gv)) {
@@ -163,9 +171,14 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     if (doproto) {			/* Replicate part of newSUB here. */
 	SvIOK_off(gv);
 	ENTER;
-	/* XXX unsafe for threads if eval_owner isn't held */
-	(void) start_subparse(0,0);	/* Create empty CV in compcv. */
-	GvCV(gv) = PL_compcv;
+	if (has_constant) {
+	    /* newCONSTSUB takes ownership of the reference from us.  */
+	    GvCV(gv) = newCONSTSUB(stash, name, has_constant);
+	} else {
+	    /* XXX unsafe for threads if eval_owner isn't held */
+	    (void) start_subparse(0,0);	/* Create empty CV in compcv. */
+	    GvCV(gv) = PL_compcv;
+	}
 	LEAVE;
 
 	PL_sub_generation++;
