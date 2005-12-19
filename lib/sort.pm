@@ -1,6 +1,6 @@
 package sort;
 
-our $VERSION = '1.02';
+our $VERSION = '2.00';
 
 # The hints for pp_sort are now stored in $^H{sort}; older versions
 # of perl used the global variable $sort::hints. -- rjh 2005-12-19
