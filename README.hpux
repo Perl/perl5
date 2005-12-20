@@ -440,6 +440,13 @@ reformatted output:
                                    Date: Apr  9 2001 10:01:06
   d3:/usr/lib 107 >
 
+If you choose for the PTH package, use swinstall to install pth in
+the default location (/opt/pth), and then make symbolic links to the
+libraries from /usr/lib
+
+  # cd /usr/lib
+  # ln -s /opt/pth/lib/libpth* .
+
 For building perl to support Oracle, it needs to be linked with libcl
 and libpthread. So even if your perl is an unthreaded build, these
 libraries might be required. See "Oracle on HP-UX" below.
@@ -448,28 +455,28 @@ libraries might be required. See "Oracle on HP-UX" below.
 
 Beginning with HP-UX 11.00, programs compiled under HP-UX can take
 advantage of the LP64 programming environment (LP64 means Longs and
-Pointers are 64 bits wide).
-
-Work is being performed on Perl to make it 64-bit compliant on all
-versions of Unix.  Once this is complete, scalar variables will be able
-to hold numbers larger than 2^32 with complete precision.
+Pointers are 64 bits wide), in which scalar variables will be able
+to hold numbers larger than 2^32 with complete precision.  Perl has
+proven to be consistent and reliable in 64bit mode since 5.8.1 on
+all HP-UX 11.xx.
 
 As of the date of this document, Perl is fully 64-bit compliant on
 HP-UX 11.00 and up for both cc- and gcc builds. If you are about to
 build a 64-bit perl with GNU gcc, please read the gcc section carefully.
 
-Should a user wish to experiment with compiling Perl in the LP64
-environment, use the -Duse64bitall flag to Configure.  This will force
-Perl to be compiled in a pure LP64 environment (with the +DD64 flag for
-HP C-ANSI-C, with no additional options for GNU gcc 64-bit on PA-RISC,
-and with -mlp64 for GNU gcc on Itanium).
+Should a user have the need for compiling Perl in the LP64 environment,
+use the -Duse64bitall flag to Configure.  This will force Perl to be
+compiled in a pure LP64 environment (with the +DD64 flag for HP C-ANSI-C,
+with no additional options for GNU gcc 64-bit on PA-RISC, and with
+-mlp64 for GNU gcc on Itanium).
 If you want to compile Perl using gcc, you will have to get a version of
 the compiler that supports 64-bit operations.)
 
 You can also use the -Duse64bitint flag to Configure.  Although there
 are some minor differences between compiling Perl with this flag versus
 the -Duse64bitall flag, they should not be noticeable from a Perl user's
-perspective.
+perspective. When configuring -Duse64bitint using a 64bit gcc on a
+pa-risc architecture, -Duse64bitint is silently promoted to -Duse64bitall.
 
 In both cases, it is strongly recommended that you use these flags when
 you run Configure.  If you do not use do this, but later answer the
@@ -579,6 +586,6 @@ With much assistance regarding shared libraries from Marc Sabatella.
 
 =head1 DATE
 
-Version 0.7.5: 2005-12-06
+Version 0.7.6: 2005-12-20
 
 =cut
