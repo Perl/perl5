@@ -4240,6 +4240,7 @@ Perl_yylex(pTHX)
 		SV *sv;
 		int pkgname = 0;
 		const char lastchar = (PL_bufptr == PL_oldoldbufptr ? 0 : PL_bufptr[-1]);
+		CV *cv;
 
 		/* Get the rest if it looks like a package qualifier */
 
@@ -4315,6 +4316,20 @@ Perl_yylex(pTHX)
 		if (len)
 		    goto safe_bareword;
 
+		/* Do the explicit type check so that we don't need to force
+		   the initialisation of the symbol table to have a real GV.
+		   Beware - gv may not really be a PVGV, cv may not really be
+		   a PVCV, (because of the space optimisations that gv_init
+		   understands) But they're true if for this symbol there is
+		   respectively a typeglob and a subroutine.
+		*/
+		cv = gv ? ((SvTYPE(gv) == SVt_PVGV)
+		    /* Real typeglob, so get the real subroutine: */
+			   ? GvCVu(gv)
+		    /* A proxy for a subroutine in this package? */
+			   : SvOK(gv) ? (CV *) gv : NULL)
+		    : NULL;
+
 		/* See if it's the indirect object for a list operator. */
 
 		if (PL_oldoldbufptr &&
@@ -4341,7 +4356,7 @@ Perl_yylex(pTHX)
 
 		    if (
 			( !immediate_paren && (PL_last_lop_op == OP_SORT ||
-                         ((!gv || !GvCVu(gv)) &&
+                         ((!gv || !cv) &&
                         (PL_last_lop_op != OP_MAPSTART &&
 			 PL_last_lop_op != OP_GREPSTART))))
 		       || (PL_tokenbuf[0] == '_' && PL_tokenbuf[1] == '\0'
@@ -4368,9 +4383,9 @@ Perl_yylex(pTHX)
 		/* If followed by a paren, it's certainly a subroutine. */
 		if (*s == '(') {
 		    CLINE;
-		    if (gv && GvCVu(gv)) {
+		    if (cv) {
 			for (d = s + 1; SPACE_OR_TAB(*d); d++) ;
-			if (*d == ')' && (sv = cv_const_sv(GvCV(gv)))) {
+			if (*d == ')' && (sv = cv_const_sv(cv))) {
 			    s = d + 1;
 			    goto its_constant;
 			}
@@ -4399,14 +4414,12 @@ Perl_yylex(pTHX)
 
 		/* Not a method, so call it a subroutine (if defined) */
 
-		if (gv && GvCVu(gv)) {
-		    CV* cv;
+		if (cv) {
 		    if (lastchar == '-' && ckWARN_d(WARN_AMBIGUOUS))
 			Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
 				"Ambiguous use of -%s resolved as -&%s()",
 				PL_tokenbuf, PL_tokenbuf);
 		    /* Check for a constant sub */
-		    cv = GvCV(gv);
 		    if ((sv = cv_const_sv(cv))) {
 		  its_constant:
 			SvREFCNT_dec(((SVOP*)yylval.opval)->op_sv);
