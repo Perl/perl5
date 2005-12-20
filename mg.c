@@ -1847,7 +1847,7 @@ Perl_magic_setglob(pTHX_ SV *sv, MAGIC *mg)
 
     if (!SvOK(sv))
 	return 0;
-    gv = gv_fetchsv(sv,TRUE, SVt_PVGV);
+    gv =  gv_fetchsv(sv, GV_ADD, SVt_PVGV);
     if (sv == (SV*)gv)
 	return 0;
     if (GvGP(sv))
@@ -2307,12 +2307,12 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case '^':
 	Safefree(IoTOP_NAME(GvIOp(PL_defoutgv)));
 	s = IoTOP_NAME(GvIOp(PL_defoutgv)) = savesvpv(sv);
-	IoTOP_GV(GvIOp(PL_defoutgv)) = gv_fetchsv(sv,TRUE, SVt_PVIO);
+	IoTOP_GV(GvIOp(PL_defoutgv)) =  gv_fetchsv(sv, GV_ADD, SVt_PVIO);
 	break;
     case '~':
 	Safefree(IoFMT_NAME(GvIOp(PL_defoutgv)));
 	s = IoFMT_NAME(GvIOp(PL_defoutgv)) = savesvpv(sv);
-	IoFMT_GV(GvIOp(PL_defoutgv)) = gv_fetchsv(sv,TRUE, SVt_PVIO);
+	IoFMT_GV(GvIOp(PL_defoutgv)) =  gv_fetchsv(sv, GV_ADD, SVt_PVIO);
 	break;
     case '=':
 	IoPAGE_LEN(GvIOp(PL_defoutgv)) = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));

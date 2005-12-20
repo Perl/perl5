@@ -6225,7 +6225,7 @@ Perl_save_re_context(pTHX)
 		GV *mgv;
 		char digits[TYPE_CHARS(long)];
 		const STRLEN len = my_sprintf(digits, "%lu", (long)i);
-		if ((mgv = gv_fetchpvn_flags(digits, len, FALSE, SVt_PV)))
+		if ((mgv = gv_fetchpvn_flags(digits, len, 0, SVt_PV)))
 		    save_scalar(mgv);
 	    }
 	}

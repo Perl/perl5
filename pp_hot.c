@@ -759,10 +759,10 @@ PP(pp_rv2av)
 		if ((PL_op->op_flags & OPf_SPECIAL) &&
 		    !(PL_op->op_flags & OPf_MOD))
 		{
-		    gv = (GV*)gv_fetchsv(sv, FALSE, SVt_PVAV);
+		    gv = (GV*)gv_fetchsv(sv, 0, SVt_PVAV);
 		    if (!gv
 			&& (!is_gv_magical_sv(sv,0)
-			    || !(gv = (GV*)gv_fetchsv(sv, TRUE, SVt_PVAV))))
+			    || !(gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PVAV))))
 		    {
 			RETSETUNDEF;
 		    }
@@ -770,7 +770,7 @@ PP(pp_rv2av)
 		else {
 		    if (PL_op->op_private & HINT_STRICT_REFS)
 			DIE(aTHX_ PL_no_symref_sv, sv, "an ARRAY");
-		    gv = (GV*)gv_fetchsv(sv, TRUE, SVt_PVAV);
+		    gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PVAV);
 		}
 	    }
 	    else {
@@ -886,10 +886,10 @@ PP(pp_rv2hv)
 		if ((PL_op->op_flags & OPf_SPECIAL) &&
 		    !(PL_op->op_flags & OPf_MOD))
 		{
-		    gv = (GV*)gv_fetchsv(sv, FALSE, SVt_PVHV);
+		    gv = (GV*)gv_fetchsv(sv, 0, SVt_PVHV);
 		    if (!gv
 			&& (!is_gv_magical_sv(sv,0)
-			    || !(gv = (GV*)gv_fetchsv(sv, TRUE, SVt_PVHV))))
+			    || !(gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PVHV))))
 		    {
 			RETSETUNDEF;
 		    }
@@ -897,7 +897,7 @@ PP(pp_rv2hv)
 		else {
 		    if (PL_op->op_private & HINT_STRICT_REFS)
 			DIE(aTHX_ PL_no_symref_sv, sv, "a HASH");
-		    gv = (GV*)gv_fetchsv(sv, TRUE, SVt_PVHV);
+		    gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PVHV);
 		}
 	    }
 	    else {
@@ -3021,7 +3021,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 
 	if (!SvOK(sv) ||
 	    !(packname) ||
-	    !(iogv = gv_fetchsv(sv, FALSE, SVt_PVIO)) ||
+	    !(iogv = gv_fetchsv(sv, 0, SVt_PVIO)) ||
 	    !(ob=(SV*)GvIO(iogv)))
 	{
 	    /* this isn't the name of a filehandle either */

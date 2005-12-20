@@ -191,10 +191,10 @@ PP(pp_rv2gv)
 	    if ((PL_op->op_flags & OPf_SPECIAL) &&
 		!(PL_op->op_flags & OPf_MOD))
 	    {
-		SV * const temp = (SV*)gv_fetchsv(sv, FALSE, SVt_PVGV);
+		SV * const temp = (SV*)gv_fetchsv(sv, 0, SVt_PVGV);
 		if (!temp
 		    && (!is_gv_magical_sv(sv,0)
-			|| !(sv = (SV*)gv_fetchsv(sv, TRUE, SVt_PVGV)))) {
+			|| !(sv = (SV*)gv_fetchsv(sv, GV_ADD, SVt_PVGV)))) {
 		    RETSETUNDEF;
 		}
 		sv = temp;
@@ -202,7 +202,7 @@ PP(pp_rv2gv)
 	    else {
 		if (PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(aTHX_ PL_no_symref_sv, sv, "a symbol");
-		sv = (SV*)gv_fetchsv(sv, TRUE, SVt_PVGV);
+		sv = (SV*)gv_fetchsv(sv, GV_ADD, SVt_PVGV);
 	    }
 	}
     }
@@ -254,16 +254,16 @@ PP(pp_rv2sv)
 	    if ((PL_op->op_flags & OPf_SPECIAL) &&
 		!(PL_op->op_flags & OPf_MOD))
 	    {
-		gv = (GV*)gv_fetchsv(sv, FALSE, SVt_PV);
+		gv = (GV*)gv_fetchsv(sv, 0, SVt_PV);
 		if (!gv
 		    && (!is_gv_magical_sv(sv, 0)
-			|| !(gv = (GV*)gv_fetchsv(sv, TRUE, SVt_PV))))
+			|| !(gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PV))))
 		{
 		    RETSETUNDEF;
 		}
 	    }
 	    else {
-		gv = (GV*)gv_fetchsv(sv, TRUE, SVt_PV);
+		gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PV);
 	    }
 	}
 	sv = GvSVn(gv);

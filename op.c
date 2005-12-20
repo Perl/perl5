@@ -2034,7 +2034,7 @@ Perl_jmaybe(pTHX_ OP *o)
 {
     if (o->op_type == OP_LIST) {
 	OP *o2;
-	o2 = newSVREF(newGVOP(OP_GV, 0, gv_fetchpv(";", TRUE, SVt_PV))),
+	o2 = newSVREF(newGVOP(OP_GV, 0, gv_fetchpv(";", GV_ADD, SVt_PV))),
 	o = convert(OP_JOIN, 0, prepend_elem(OP_LIST, o2, o));
     }
     return o;
@@ -3213,7 +3213,7 @@ Perl_dofile(pTHX_ OP *term, I32 force_builtin)
     GV *gv = Nullgv;
 
     if (!force_builtin) {
-	gv = gv_fetchpv("do", FALSE, SVt_PVCV);
+	gv = gv_fetchpv("do", 0, SVt_PVCV);
 	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
 	    GV * const * const gvp = (GV**)hv_fetch(PL_globalstash, "do", 2, FALSE);
 	    gv = gvp ? *gvp : Nullgv;
@@ -4935,8 +4935,8 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
     register CV *cv;
 
     GV * const gv = o
-	? gv_fetchsv(cSVOPo->op_sv, TRUE, SVt_PVFM)
-	: gv_fetchpv("STDOUT", TRUE, SVt_PVFM);
+	? gv_fetchsv(cSVOPo->op_sv, GV_ADD, SVt_PVFM)
+	: gv_fetchpv("STDOUT", GV_ADD, SVt_PVFM);
 
 #ifdef GV_UNIQUE_CHECK
     if (GvUNIQUE(gv)) {
@@ -5466,7 +5466,7 @@ Perl_ck_ftst(pTHX_ OP *o)
 
 	if (kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE)) {
 	    OP * const newop = newGVOP(type, OPf_REF,
-		gv_fetchsv(kid->op_sv, TRUE, SVt_PVIO));
+		gv_fetchsv(kid->op_sv, GV_ADD, SVt_PVIO));
 	    op_free(o);
 	    o = newop;
 	    return o;
@@ -5550,7 +5550,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		    (kid->op_private & OPpCONST_BARE))
 		{
 		    OP * const newop = newAVREF(newGVOP(OP_GV, 0,
-			gv_fetchsv(((SVOP*)kid)->op_sv, TRUE, SVt_PVAV) ));
+			gv_fetchsv(((SVOP*)kid)->op_sv, GV_ADD, SVt_PVAV) ));
 		    if (ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
 			Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 			    "Array @%"SVf" missing the @ in argument %"IVdf" of %s()",
@@ -5569,7 +5569,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		    (kid->op_private & OPpCONST_BARE))
 		{
 		    OP * const newop = newHVREF(newGVOP(OP_GV, 0,
-			gv_fetchsv(((SVOP*)kid)->op_sv, TRUE, SVt_PVHV) ));
+			gv_fetchsv(((SVOP*)kid)->op_sv, GV_ADD, SVt_PVHV) ));
 		    if (ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
 			Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 			    "Hash %%%"SVf" missing the %% in argument %"IVdf" of %s()",
@@ -5600,7 +5600,7 @@ Perl_ck_fun(pTHX_ OP *o)
 			(kid->op_private & OPpCONST_BARE))
 		    {
 			OP * const newop = newGVOP(OP_GV, 0,
-			    gv_fetchsv(((SVOP*)kid)->op_sv, TRUE, SVt_PVIO) );
+			    gv_fetchsv(((SVOP*)kid)->op_sv, GV_ADD, SVt_PVIO));
 			if (!(o->op_private & 1) && /* if not unop */
 			    kid == cLISTOPo->op_last)
 			    cLISTOPo->op_last = newop;
@@ -5746,10 +5746,10 @@ Perl_ck_glob(pTHX_ OP *o)
     if ((o->op_flags & OPf_KIDS) && !cLISTOPo->op_first->op_sibling)
 	append_elem(OP_GLOB, o, newDEFSVOP());
 
-    if (!((gv = gv_fetchpv("glob", FALSE, SVt_PVCV))
+    if (!((gv = gv_fetchpv("glob", 0, SVt_PVCV))
 	  && GvCVu(gv) && GvIMPORTED_CV(gv)))
     {
-	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
+	gv = gv_fetchpv("CORE::GLOBAL::glob", 0, SVt_PVCV);
     }
 
 #if !defined(PERL_EXTERNAL_GLOB)
@@ -5759,8 +5759,8 @@ Perl_ck_glob(pTHX_ OP *o)
 	ENTER;
 	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
 		newSVpvn("File::Glob", 10), Nullsv, Nullsv, Nullsv);
-	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
-	glob_gv = gv_fetchpv("File::Glob::csh_glob", FALSE, SVt_PVCV);
+	gv = gv_fetchpv("CORE::GLOBAL::glob", 0, SVt_PVCV);
+	glob_gv = gv_fetchpv("File::Glob::csh_glob", 0, SVt_PVCV);
 	GvCV(gv) = GvCV(glob_gv);
 	(void)SvREFCNT_inc((SV*)GvCV(gv));
 	GvIMPORTED_CV_on(gv);
@@ -6163,7 +6163,7 @@ Perl_ck_require(pTHX_ OP *o)
 
     if (!(o->op_flags & OPf_SPECIAL)) { /* Wasn't written as CORE::require */
 	/* handle override, if any */
-	gv = gv_fetchpv("require", FALSE, SVt_PVCV);
+	gv = gv_fetchpv("require", 0, SVt_PVCV);
 	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
 	    GV * const * const gvp = (GV**)hv_fetch(PL_globalstash, "require", 7, FALSE);
 	    gv = gvp ? *gvp : Nullgv;
@@ -6320,8 +6320,8 @@ S_simplify_sort(pTHX_ OP *o)
     const char *gvname;
     if (!(o->op_flags & OPf_STACKED))
 	return;
-    GvMULTI_on(gv_fetchpv("a", TRUE, SVt_PV));
-    GvMULTI_on(gv_fetchpv("b", TRUE, SVt_PV));
+    GvMULTI_on(gv_fetchpv("a", GV_ADD, SVt_PV));
+    GvMULTI_on(gv_fetchpv("b", GV_ADD, SVt_PV));
     kid = kUNOP->op_first;				/* get past null */
     if (kid->op_type != OP_SCOPE)
 	return;

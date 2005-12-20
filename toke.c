@@ -1022,7 +1022,7 @@ S_force_ident(pTHX_ register const char *s, int kind)
 	    /* XXX see note in pp_entereval() for why we forgo typo
 	       warnings if the symbol must be introduced in an eval.
 	       GSAR 96-10-12 */
-	    gv_fetchpv(s, PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : TRUE,
+	    gv_fetchpv(s, PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : GV_ADD,
 		kind == '$' ? SVt_PV :
 		kind == '@' ? SVt_PVAV :
 		kind == '%' ? SVt_PVHV :
@@ -2019,7 +2019,8 @@ S_intuit_more(pTHX_ register char *s)
 		weight -= seen[un_char] * 10;
 		if (isALNUM_lazy_if(s+1,UTF)) {
 		    scan_ident(s, send, tmpbuf, sizeof tmpbuf, FALSE);
-		    if ((int)strlen(tmpbuf) > 1 && gv_fetchpv(tmpbuf,FALSE, SVt_PV))
+		    if ((int)strlen(tmpbuf) > 1
+			&& gv_fetchpv(tmpbuf, 0, SVt_PV))
 			weight -= 100;
 		    else
 			weight -= 10;
@@ -2150,7 +2151,7 @@ S_intuit_method(pTHX_ char *start, GV *gv)
 	    tmpbuf[len] = '\0';
 	    goto bare_package;
 	}
-	indirgv = gv_fetchpv(tmpbuf, FALSE, SVt_PVCV);
+	indirgv = gv_fetchpv(tmpbuf, 0, SVt_PVCV);
 	if (indirgv && GvCVu(indirgv))
 	    return 0;
 	/* filehandle or package name makes it a method */
@@ -2344,13 +2345,13 @@ S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
 
     if (len > 2 &&
         (pkgname[len - 2] == ':' && pkgname[len - 1] == ':') &&
-        (gv = gv_fetchpv(pkgname, FALSE, SVt_PVHV)))
+        (gv = gv_fetchpv(pkgname, 0, SVt_PVHV)))
     {
         return GvHV(gv);			/* Foo:: */
     }
 
     /* use constant CLASS => 'MyClass' */
-    if ((gv = gv_fetchpv(pkgname, FALSE, SVt_PVCV))) {
+    if ((gv = gv_fetchpv(pkgname, 0, SVt_PVCV))) {
         SV *sv;
         if (GvCV(gv) && (sv = cv_const_sv(GvCV(gv)))) {
             pkgname = SvPV_nolen_const(sv);
@@ -2863,7 +2864,8 @@ Perl_yylex(pTHX)
 		     * at least, set argv[0] to the basename of the Perl
 		     * interpreter. So, having found "#!", we'll set it right.
 		     */
-		    SV * const x = GvSV(gv_fetchpv("\030", TRUE, SVt_PV)); /* $^X */
+		    SV * const x
+			= GvSV(gv_fetchpv("\030", GV_ADD, SVt_PV)); /* $^X */
 		    assert(SvPOK(x) || SvGMAGICAL(x));
 		    if (sv_eq(x, CopFILESV(PL_curcop))) {
 			sv_setpvn(x, ipath, ipathend - ipath);
@@ -3104,7 +3106,7 @@ Perl_yylex(pTHX)
 	    case 'T': ftst = OP_FTTEXT;		break;
 	    case 'B': ftst = OP_FTBINARY;	break;
 	    case 'M': case 'A': case 'C':
-		gv_fetchpv("\024",TRUE, SVt_PV);
+		gv_fetchpv("\024",GV_ADD, SVt_PV);
 		switch (tmp) {
 		case 'M': ftst = OP_FTMTIME;	break;
 		case 'A': ftst = OP_FTATIME;	break;
@@ -4074,7 +4076,7 @@ Perl_yylex(pTHX)
 		const char c = *start;
 		GV *gv;
 		*start = '\0';
-		gv = gv_fetchpv(s, FALSE, SVt_PVCV);
+		gv = gv_fetchpv(s, 0, SVt_PVCV);
 		*start = c;
 		if (!gv) {
 		    s = scan_num(s, &yylval);
@@ -4168,7 +4170,7 @@ Perl_yylex(pTHX)
 	    GV *hgv = Nullgv;	/* hidden (loser) */
 	    if (PL_expect != XOPERATOR && (*s != ':' || s[1] != ':')) {
 		CV *cv;
-		if ((gv = gv_fetchpv(PL_tokenbuf, FALSE, SVt_PVCV)) &&
+		if ((gv = gv_fetchpv(PL_tokenbuf, 0, SVt_PVCV)) &&
 		    (cv = GvCVu(gv)))
 		{
 		    if (GvIMPORTED_CV(gv))
@@ -4269,7 +4271,8 @@ Perl_yylex(pTHX)
 		if (len > 2 &&
 		    PL_tokenbuf[len - 2] == ':' && PL_tokenbuf[len - 1] == ':')
 		{
-		    if (ckWARN(WARN_BAREWORD) && ! gv_fetchpv(PL_tokenbuf, FALSE, SVt_PVHV))
+		    if (ckWARN(WARN_BAREWORD)
+			&& ! gv_fetchpv(PL_tokenbuf, 0, SVt_PVHV))
 			Perl_warner(aTHX_ packWARN(WARN_BAREWORD),
 		  	    "Bareword \"%s\" refers to nonexistent package",
 			     PL_tokenbuf);
@@ -4281,7 +4284,7 @@ Perl_yylex(pTHX)
 		else {
 		    len = 0;
 		    if (!gv)
-			gv = gv_fetchpv(PL_tokenbuf, FALSE, SVt_PVCV);
+			gv = gv_fetchpv(PL_tokenbuf, 0, SVt_PVCV);
 		}
 
 		/* if we saw a global override before, get the right name */
@@ -4493,7 +4496,8 @@ Perl_yylex(pTHX)
 		const char *pname = "main";
 		if (PL_tokenbuf[2] == 'D')
 		    pname = HvNAME_get(PL_curstash ? PL_curstash : PL_defstash);
-		gv = gv_fetchpv(Perl_form(aTHX_ "%s::DATA", pname), TRUE, SVt_PVIO);
+		gv = gv_fetchpv(Perl_form(aTHX_ "%s::DATA", pname), GV_ADD,
+				SVt_PVIO);
 		GvMULTI_on(gv);
 		if (!GvIO(gv))
 		    GvIOp(gv) = newIO();
@@ -4649,7 +4653,7 @@ Perl_yylex(pTHX)
 	    }
 
 	case KEY_chdir:
-	    (void)gv_fetchpv("ENV",TRUE, SVt_PVHV);	/* may use HOME */
+	    (void)gv_fetchpv("ENV", GV_ADD, SVt_PVHV);	/* may use HOME */
 	    UNI(OP_CHDIR);
 
 	case KEY_close:
@@ -5623,10 +5627,10 @@ Perl_yylex(pTHX)
 	    char ctl_l[2];
 	    ctl_l[0] = toCTRL('L');
 	    ctl_l[1] = '\0';
-	    gv_fetchpv(ctl_l,TRUE, SVt_PV);
+	    gv_fetchpv(ctl_l, GV_ADD, SVt_PV);
 	}
 #else
-	    gv_fetchpv("\f",TRUE, SVt_PV);      /* Make sure $^L is defined */
+	    gv_fetchpv("\f", GV_ADD, SVt_PV);    /* Make sure $^L is defined */
 #endif
 	    UNI(OP_ENTERWRITE);
 
@@ -5752,7 +5756,7 @@ S_pending_ident(pTHX)
        table.
     */
     if (pit == '@' && PL_lex_state != LEX_NORMAL && !PL_lex_brackets) {
-        GV *gv = gv_fetchpv(PL_tokenbuf+1, FALSE, SVt_PVAV);
+        GV *gv = gv_fetchpv(PL_tokenbuf+1, 0, SVt_PVAV);
         if ((!gv || ((PL_tokenbuf[0] == '@') ? !GvAV(gv) : !GvHV(gv)))
              && ckWARN(WARN_AMBIGUOUS))
         {
@@ -9971,7 +9975,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 	    Copy("ARGV",d,5,char);
 
 	/* Check whether readline() is overriden */
-	if (((gv_readline = gv_fetchpv("readline", FALSE, SVt_PVCV))
+	if (((gv_readline = gv_fetchpv("readline", 0, SVt_PVCV))
 		&& GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline))
 		||
 		((gvp = (GV**)hv_fetch(PL_globalstash, "readline", 8, FALSE))
@@ -10035,7 +10039,7 @@ intro_sym:
 	/* If it's none of the above, it must be a literal filehandle
 	   (<Foo::BAR> or <FOO>) so build a simple readline OP */
 	else {
-	    GV *gv = gv_fetchpv(d,TRUE, SVt_PVIO);
+	    GV *gv = gv_fetchpv(d, GV_ADD, SVt_PVIO);
 	    PL_lex_op = readline_overriden
 		? (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,
 			append_elem(OP_LIST,

@@ -1322,14 +1322,14 @@ PP(pp_leavewrite)
 		if (!IoFMT_NAME(io))
 		    IoFMT_NAME(io) = savepv(GvNAME(gv));
 		topname = sv_2mortal(Perl_newSVpvf(aTHX_ "%s_TOP", GvNAME(gv)));
-		topgv = gv_fetchsv(topname, FALSE, SVt_PVFM);
+		topgv = gv_fetchsv(topname, 0, SVt_PVFM);
 		if ((topgv && GvFORM(topgv)) ||
-		  !gv_fetchpv("top",FALSE,SVt_PVFM))
+		  !gv_fetchpv("top", 0, SVt_PVFM))
 		    IoTOP_NAME(io) = savesvpv(topname);
 		else
 		    IoTOP_NAME(io) = savepvn("top", 3);
 	    }
-	    topgv = gv_fetchpv(IoTOP_NAME(io),FALSE, SVt_PVFM);
+	    topgv = gv_fetchpv(IoTOP_NAME(io), 0, SVt_PVFM);
 	    if (!topgv || !GvFORM(topgv)) {
 		IoLINES_LEFT(io) = IoPAGE_LEN(io);
 		goto forget_top;
@@ -2078,7 +2078,7 @@ PP(pp_truncate)
 	IO *io;
 
 	if (PL_op->op_flags & OPf_SPECIAL) {
-	    tmpgv = gv_fetchsv(POPs, FALSE, SVt_PVIO);
+	    tmpgv = gv_fetchsv(POPs, 0, SVt_PVIO);
 
 	do_ftruncate_gv:
 	    if (!GvIO(tmpgv))
@@ -3109,7 +3109,7 @@ PP(pp_fttty)
     else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
 	gv = (GV*)SvRV(POPs);
     else
-	gv = gv_fetchsv(tmpsv = POPs, FALSE, SVt_PVIO);
+	gv = gv_fetchsv(tmpsv = POPs, 0, SVt_PVIO);
 
     if (GvIO(gv) && IoIFP(GvIOp(gv)))
 	fd = PerlIO_fileno(IoIFP(GvIOp(gv)));
@@ -3840,7 +3840,7 @@ PP(pp_fork)
     if (childpid < 0)
 	RETSETUNDEF;
     if (!childpid) {
-	GV * const tmpgv = gv_fetchpv("$", TRUE, SVt_PV);
+	GV * const tmpgv = gv_fetchpv("$", GV_ADD, SVt_PV);
 	if (tmpgv) {
             SvREADONLY_off(GvSV(tmpgv));
 	    sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());

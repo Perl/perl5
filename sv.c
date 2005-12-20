@@ -6704,7 +6704,7 @@ Perl_sv_2io(pTHX_ SV *sv)
 	    Perl_croak(aTHX_ PL_no_usym, "filehandle");
 	if (SvROK(sv))
 	    return sv_2io(SvRV(sv));
-	gv = gv_fetchsv(sv, FALSE, SVt_PVIO);
+	gv = gv_fetchsv(sv, 0, SVt_PVIO);
 	if (gv)
 	    io = GvIO(gv);
 	else
