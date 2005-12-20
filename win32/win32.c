@@ -4983,7 +4983,7 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     dst->pseudo_id		= 0;
     Newxz(dst->pseudo_children, 1, pseudo_child_tab);
     dst->timerid                = 0;
-    w32_message_hwnd            = INVALID_HANDLE_VALUE;
+    dst->message_hwnd		= INVALID_HANDLE_VALUE;
     dst->poll_count             = 0;
     Copy(src->sigtable,dst->sigtable,SIG_SIZE,Sighandler_t);
 }
