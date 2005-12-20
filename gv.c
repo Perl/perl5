@@ -122,6 +122,25 @@ Perl_gv_fetchfile(pTHX_ const char *name)
     return gv;
 }
 
+/*
+=for apidoc gv_const_sv
+
+If C<gv> is a typeglob whose subroutine entry is a constant sub eligible for
+inlining, or C<gv> is a placeholder reference that would be promoted to such
+a typeglob, then returns the value returned by the sub.  Otherwise, returns
+NULL.
+
+=cut
+*/
+
+SV *
+Perl_gv_const_sv(pTHX_ GV *gv)
+{
+    if (SvTYPE(gv) == SVt_PVGV)
+	return cv_const_sv(GvCVu(gv));
+    return SvROK(gv) ? SvRV(gv) : NULL;
+}
+
 void
 Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 {

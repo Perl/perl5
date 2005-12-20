@@ -290,6 +290,10 @@ PERL_CALLCONV void	Perl_cv_ckproto(pTHX_ const CV* cv, const GV* gv, const char*
 PERL_CALLCONV CV*	Perl_cv_clone(pTHX_ CV* proto)
 			__attribute__nonnull__(pTHX_1);
 
+PERL_CALLCONV SV*	Perl_gv_const_sv(pTHX_ GV* gv)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV SV*	Perl_cv_const_sv(pTHX_ CV* cv)
 			__attribute__warn_unused_result__;
 
@@ -3772,7 +3776,7 @@ STATIC void	S_force_ident(pTHX_ const char *s, int kind)
 STATIC void	S_incline(pTHX_ char *s)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC int	S_intuit_method(pTHX_ char *s, GV *gv)
+STATIC int	S_intuit_method(pTHX_ char *s, GV *gv, CV *cv)
 			__attribute__nonnull__(pTHX_1);
 
 STATIC int	S_intuit_more(pTHX_ char *s)

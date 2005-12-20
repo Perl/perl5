@@ -118,6 +118,7 @@
 #define cv_ckproto		Perl_cv_ckproto
 #define cv_clone		Perl_cv_clone
 #endif
+#define gv_const_sv		Perl_gv_const_sv
 #define cv_const_sv		Perl_cv_const_sv
 #ifdef PERL_CORE
 #define op_const_sv		Perl_op_const_sv
@@ -2167,6 +2168,7 @@
 #define cv_ckproto(a,b,c)	Perl_cv_ckproto(aTHX_ a,b,c)
 #define cv_clone(a)		Perl_cv_clone(aTHX_ a)
 #endif
+#define gv_const_sv(a)		Perl_gv_const_sv(aTHX_ a)
 #define cv_const_sv(a)		Perl_cv_const_sv(aTHX_ a)
 #ifdef PERL_CORE
 #define op_const_sv(a,b)	Perl_op_const_sv(aTHX_ a,b)
@@ -3420,7 +3422,7 @@
 #define feature_is_enabled(a,b)	S_feature_is_enabled(aTHX_ a,b)
 #define force_ident(a,b)	S_force_ident(aTHX_ a,b)
 #define incline(a)		S_incline(aTHX_ a)
-#define intuit_method(a,b)	S_intuit_method(aTHX_ a,b)
+#define intuit_method(a,b,c)	S_intuit_method(aTHX_ a,b,c)
 #define intuit_more(a)		S_intuit_more(aTHX_ a)
 #define lop(a,b,c)		S_lop(aTHX_ a,b,c)
 #define missingterm(a)		S_missingterm(aTHX_ a)

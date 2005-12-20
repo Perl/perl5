@@ -2109,7 +2109,7 @@ S_intuit_more(pTHX_ register char *s)
  */
 
 STATIC int
-S_intuit_method(pTHX_ char *start, GV *gv)
+S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 {
     char *s = start + (*start == '$');
     char tmpbuf[sizeof PL_tokenbuf];
@@ -2117,16 +2117,17 @@ S_intuit_method(pTHX_ char *start, GV *gv)
     GV* indirgv;
 
     if (gv) {
-	CV *cv;
-	if (GvIO(gv))
+	if (SvTYPE(gv) == SVt_PVGV && GvIO(gv))
 	    return 0;
-	if ((cv = GvCVu(gv))) {
-	    const char *proto = SvPVX_const(cv);
-	    if (proto) {
-		if (*proto == ';')
-		    proto++;
-		if (*proto == '*')
-		    return 0;
+	if (cv) {
+	    if (SvPOK(cv)) {
+		const char *proto = SvPVX_const(cv);
+		if (proto) {
+		    if (*proto == ';')
+			proto++;
+		    if (*proto == '*')
+			return 0;
+		}
 	    }
 	} else
 	    gv = 0;
@@ -4284,8 +4285,14 @@ Perl_yylex(pTHX)
 		}
 		else {
 		    len = 0;
-		    if (!gv)
-			gv = gv_fetchpv(PL_tokenbuf, 0, SVt_PVCV);
+		    if (!gv) {
+			/* Mustn't actually add anything to a symbol table.
+			   But also don't want to "initialise" any placeholder
+			   constants that might already be there into full
+			   blown PVGVs with attached PVCV.  */
+			gv = gv_fetchpv(PL_tokenbuf, GV_NOADD_NOINIT,
+					SVt_PVCV);
+		    }
 		}
 
 		/* if we saw a global override before, get the right name */
@@ -4347,7 +4354,8 @@ Perl_yylex(pTHX)
 
 		    /* Two barewords in a row may indicate method call. */
 
-		    if ((isIDFIRST_lazy_if(s,UTF) || *s == '$') && (tmp=intuit_method(s,gv)))
+		    if ((isIDFIRST_lazy_if(s,UTF) || *s == '$') &&
+			(tmp = intuit_method(s, gv, cv)))
 			return REPORT(tmp);
 
 		    /* If not a declared subroutine, it's an indirect object. */
@@ -4385,7 +4393,7 @@ Perl_yylex(pTHX)
 		    CLINE;
 		    if (cv) {
 			for (d = s + 1; SPACE_OR_TAB(*d); d++) ;
-			if (*d == ')' && (sv = cv_const_sv(cv))) {
+			if (*d == ')' && (sv = gv_const_sv(gv))) {
 			    s = d + 1;
 			    goto its_constant;
 			}
@@ -4399,7 +4407,7 @@ Perl_yylex(pTHX)
 
 		/* If followed by var or block, call it a method (unless sub) */
 
-		if ((*s == '$' || *s == '{') && (!gv || !GvCVu(gv))) {
+		if ((*s == '$' || *s == '{') && (!gv || !cv)) {
 		    PL_last_lop = PL_oldbufptr;
 		    PL_last_lop_op = OP_METHOD;
 		    PREBLOCK(METHOD);
@@ -4409,7 +4417,7 @@ Perl_yylex(pTHX)
 
 		if (!orig_keyword
 			&& (isIDFIRST_lazy_if(s,UTF) || *s == '$')
-			&& (tmp = intuit_method(s,gv)))
+			&& (tmp = intuit_method(s, gv, cv)))
 		    return REPORT(tmp);
 
 		/* Not a method, so call it a subroutine (if defined) */
@@ -4420,7 +4428,7 @@ Perl_yylex(pTHX)
 				"Ambiguous use of -%s resolved as -&%s()",
 				PL_tokenbuf, PL_tokenbuf);
 		    /* Check for a constant sub */
-		    if ((sv = cv_const_sv(cv))) {
+		    if ((sv = gv_const_sv(gv))) {
 		  its_constant:
 			SvREFCNT_dec(((SVOP*)yylval.opval)->op_sv);
 			((SVOP*)yylval.opval)->op_sv = SvREFCNT_inc(sv);
@@ -4429,6 +4437,14 @@ Perl_yylex(pTHX)
 		    }
 
 		    /* Resolve to GV now. */
+		    if (SvTYPE(gv) != SVt_PVGV) {
+			gv = gv_fetchpv(PL_tokenbuf, 0, SVt_PVCV);
+			assert (SvTYPE(gv) == SVt_PVGV);
+			/* cv must have been some sort of placeholder, so
+			   now needs replacing with a real code reference.  */
+			cv = GvCV(gv);
+		    }
+
 		    op_free(yylval.opval);
 		    yylval.opval = newCVREF(0, newGVOP(OP_GV, 0, gv));
 		    yylval.opval->op_private |= OPpENTERSUB_NOPAREN;
