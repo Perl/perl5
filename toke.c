@@ -2426,10 +2426,7 @@ Perl_yylex(pTHX)
     register char *s = PL_bufptr;
     register char *d;
     STRLEN len;
-    GV *gv = Nullgv;
-    GV **gvp = 0;
     bool bof = FALSE;
-    I32 orig_keyword = 0;
 
     DEBUG_T( {
 	SV* tmp = newSVpvn("", 0);
@@ -3235,7 +3232,7 @@ Perl_yylex(pTHX)
     case ':':
 	if (s[1] == ':') {
 	    len = 0;
-	    goto just_a_word;
+	    goto just_a_word_zero_gv;
 	}
 	s++;
 	switch (PL_expect) {
@@ -4123,12 +4120,9 @@ Perl_yylex(pTHX)
 
       keylookup: {
 	I32 tmp;
-	assert (orig_keyword == 0);
-	assert (gv == 0);
-	assert (gvp == 0);
-	orig_keyword = 0;
-	gv = Nullgv;
-	gvp = 0;
+	I32 orig_keyword = 0;
+	GV *gv = Nullgv;
+	GV **gvp = 0;
 
 	PL_bufptr = s;
 	s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
@@ -4231,6 +4225,15 @@ Perl_yylex(pTHX)
 	switch (tmp) {
 
 	default:			/* not a keyword */
+	    /* Trade off - by using this evil construction we can pull the
+	       variable gv into the block labelled keylookup. If not, then
+	       we have to give it function scope so that the goto from the
+	       earlier ':' case doesn't bypass the initialisation.  */
+	    if (0) {
+	    just_a_word_zero_gv:
+		gv = NULL;
+		gvp = NULL;
+	    }
 	  just_a_word: {
 		SV *sv;
 		int pkgname = 0;
