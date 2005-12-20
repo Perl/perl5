@@ -3831,10 +3831,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	
 
 #   define SM_SEEN_THIS(sv) hv_exists_ent(seen_this, \
-	sv_2mortal(newSViv((IV) sv)), 0)
+	sv_2mortal(newSViv(PTR2IV(sv))), 0)
 
 #   define SM_SEEN_OTHER(sv) hv_exists_ent(seen_other, \
-	sv_2mortal(newSViv((IV) sv)), 0)
+	sv_2mortal(newSViv(PTR2IV(sv))), 0)
 
     tryAMAGICbinSET(smart, 0);
     
@@ -4010,10 +4010,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		    }
 		    else {
 			hv_store_ent(seen_this,
-			    sv_2mortal(newSViv((IV) *this_elem)),
+			    sv_2mortal(newSViv(PTR2IV(*this_elem))),
 			    &PL_sv_undef, 0);
 			hv_store_ent(seen_other,
-			    sv_2mortal(newSViv((IV) *other_elem)),
+			    sv_2mortal(newSViv(PTR2IV(*other_elem))),
 			    &PL_sv_undef, 0);
 			PUSHs(*this_elem);
 			PUSHs(*other_elem);
