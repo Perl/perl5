@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 68 );
+plan( tests => 97 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -261,6 +261,34 @@ EOPROG
     like($output, qr/^Farewell M=SCALAR/, "DESTROY was called");
     unlike($output, qr/global destruction/,
            "unreferenced symbol tables should be cleaned up immediately");
+}
+
+# Possibly not the correct test file for these tests.
+# There are certain space optimisations implemented via promotion rules to
+# GVs
+
+ok(!exists $::{oonk}, "no symbols of any sort to start with");
+
+# A string in place of the typeglob is promoted to the function prototype
+$::{oonk} = "pie";
+my $proto = eval 'prototype \&oonk';
+die if $@;
+is ($proto, "pie", "String is promoted to prototype");
+
+
+# A reference to a value is used to generate a constant subroutine
+foreach my $value (3, "Perl rules", \42, qr/whatever/, [1,2,3], {1=>2},
+		   \*STDIN, \&ok, \undef) {
+    delete $::{oonk};
+    $::{oonk} = \$value;
+    $proto = eval 'prototype \&oonk';
+    die if $@;
+    is ($proto, '', "Prototype for a constant subroutine is empty");
+
+    my $got = eval 'oonk';
+    die if $@;
+    is (ref $got, ref $value, "Correct type of value");
+    is ($got, $value, "Value is correctly set");
 }
 __END__
 Perl
