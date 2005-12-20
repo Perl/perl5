@@ -105,7 +105,8 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On pushre, re is /\s+/ imp. by split " " */
 				/*  On regcomp, "use re 'eval'" was in scope */
 				/*  On OP_READLINE, was <$filehandle> */
-				/*  On RV2[SG]V, don't create GV--in defined()*/
+				/*  On RV2[ACGHS]V, don't create GV--in
+				    defined()*/
 				/*  On OP_DBSTATE, indicates breakpoint
 				 *    (runtime property) */
 				/*  On OP_AELEMFAST, indiciates pad var */
