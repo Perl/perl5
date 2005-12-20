@@ -480,6 +480,13 @@ See L<perlfunc/pack>.
 (F) An argument to pack("w",...) was negative.  The BER compressed integer
 format can only be used with positive integers.  See L<perlfunc/pack>.
 
+=item Cannot convert a reference to %s to typeglob
+
+(F) You manipulated Perl's symbol table directly, stored a reference in it,
+then tried to access that symbol via conventional Perl syntax. The access
+triggers Perl to autovivify that typeglob, but it there is no legal conversion
+from that type of reference to a typeglob.
+
 =item Can only compress unsigned integers in pack
 
 (F) An argument to pack("w",...) was not an integer.  The BER compressed

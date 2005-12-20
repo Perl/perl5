@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 97 );
+plan( tests => 105 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -278,7 +278,7 @@ is ($proto, "pie", "String is promoted to prototype");
 
 # A reference to a value is used to generate a constant subroutine
 foreach my $value (3, "Perl rules", \42, qr/whatever/, [1,2,3], {1=>2},
-		   \*STDIN, \&ok, \undef) {
+		   \*STDIN, \&ok, \undef, *STDOUT) {
     delete $::{oonk};
     $::{oonk} = \$value;
     $proto = eval 'prototype \&oonk';
@@ -287,8 +287,24 @@ foreach my $value (3, "Perl rules", \42, qr/whatever/, [1,2,3], {1=>2},
 
     my $got = eval 'oonk';
     die if $@;
-    is (ref $got, ref $value, "Correct type of value");
+    is (ref $got, ref $value, "Correct type of value (" . ref($value) . ")");
     is ($got, $value, "Value is correctly set");
+}
+
+format =
+.
+
+foreach my $value ([1,2,3], {1=>2}, *STDOUT{IO}, \&ok, *STDOUT{FORMAT}) {
+    # *STDOUT{IO} returns a reference to a PVIO. As it's blessed, ref returns
+    # IO::Handle, which isn't what we want.
+    my $type = $value;
+    $type =~ s/.*=//;
+    $type =~ s/\(.*//;
+    delete $::{oonk};
+    $::{oonk} = $value;
+    $proto = eval 'prototype \&oonk';
+    like ($@, qr/^Cannot convert a reference to $type to typeglob/,
+	  "Cannot upgrade ref-to-$type to typeglob");
 }
 __END__
 Perl

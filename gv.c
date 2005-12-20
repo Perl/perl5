@@ -134,6 +134,16 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     assert (!(proto && has_constant));
 
     if (has_constant) {
+	/* The constant has to be a simple scalar type.  */
+	switch (SvTYPE(has_constant)) {
+	case SVt_PVAV:
+	case SVt_PVHV:
+	case SVt_PVCV:
+	case SVt_PVFM:
+	case SVt_PVIO:
+            Perl_croak(aTHX_ "Cannot convert a reference to %s to typeglob",
+		       sv_reftype(has_constant, 0));
+	}
 	SvRV_set(gv, NULL);
 	SvROK_off(gv);
     }
