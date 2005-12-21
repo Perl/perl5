@@ -15,7 +15,7 @@ B<perl>	S<[ B<-sTtuUWX> ]>
 	S<[ B<-S> ]>
 	S<[ B<-x>[I<dir>] ]>
 	S<[ B<-i>[I<extension>] ]>
-	S<[ B<-e> I<'command'> ] [ B<--> ] [ I<programfile> ] [ I<argument> ]...>
+	S<[ B<-eE> I<'command'> ] [ B<--> ] [ I<programfile> ] [ I<argument> ]...>
 
 =head1 DESCRIPTION
 
@@ -30,7 +30,7 @@ places:
 
 =item 1.
 
-Specified line by line via B<-e> switches on the command line.
+Specified line by line via B<-e> or B<-E> switches on the command line.
 
 =item 2.
 
@@ -447,6 +447,12 @@ may be used to enter one line of program.  If B<-e> is given, Perl
 will not look for a filename in the argument list.  Multiple B<-e>
 commands may be given to build up a multi-line script.  Make sure
 to use semicolons where you would in a normal program.
+
+=item B<-E> I<commandline>
+X<-E>
+
+behaves just like B<-e>, except that it implicitly enables all
+optional features (in the main compilation unit). See L<feature>.
 
 =item B<-f>
 X<-f>

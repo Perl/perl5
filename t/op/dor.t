@@ -8,9 +8,10 @@ BEGIN {
 }
 
 package main;
+use feature "err";
 require './test.pl';
 
-plan( tests => 41 );
+plan( tests => 35 );
 
 my($x);
 
@@ -82,15 +83,3 @@ like( $@, qr/^Search pattern not terminated/ );
 is(0 // 2, 0, 		'	// : left-hand operand not optimized away');
 is('' // 2, '',		'	// : left-hand operand not optimized away');
 is(undef // 2, 2, 	'	// : left-hand operand optimized away');
-
-# [perl #32347] err should be a weak keyword
-
-package weakerr;
-
-sub err { "<@_>" }
-::is( (shift() err 42), 42,	'err as an operator' );
-::is( (shift err 42), 42,	'err as an operator, with ambiguity' );
-::is( (err 2), "<2>",		'err as a function without parens' );
-::is( err(2, 3), "<2 3>",	'err as a function with parens' );
-::is( err(), "<>",		'err as a function without arguments' );
-::is( err, "<>",		'err as a function without parens' );

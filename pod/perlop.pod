@@ -838,7 +838,9 @@ Then again, you could always use parentheses.
 Binary "err" is equivalent to C<//>--it's just like binary "or", except it tests
 its left argument's definedness instead of its truth.  There are two ways to 
 remember "err":  either because many functions return C<undef> on an B<err>or,
-or as a sort of correction:  C<$a=($b err 'default')>
+or as a sort of correction:  C<$a=($b err 'default')>. This keyword
+is only available when the 'err' feature is enabled: see L<feature>
+for more information.
 
 Binary "xor" returns the exclusive-OR of the two surrounding expressions.
 It cannot short circuit, of course.

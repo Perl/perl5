@@ -43,6 +43,8 @@ my %feature_kw = (
 	break   => 'switch',
 
 	say     => 'say',
+
+	err	=> 'err',
 	);
 
 my %pos = map { ($_ => 1) } @pos;

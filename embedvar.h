@@ -307,6 +307,7 @@
 #define PL_maxsysfd		(vTHX->Imaxsysfd)
 #define PL_mess_sv		(vTHX->Imess_sv)
 #define PL_min_intro_pending	(vTHX->Imin_intro_pending)
+#define PL_minus_E		(vTHX->Iminus_E)
 #define PL_minus_F		(vTHX->Iminus_F)
 #define PL_minus_a		(vTHX->Iminus_a)
 #define PL_minus_c		(vTHX->Iminus_c)
@@ -586,6 +587,7 @@
 #define PL_Imaxsysfd		PL_maxsysfd
 #define PL_Imess_sv		PL_mess_sv
 #define PL_Imin_intro_pending	PL_min_intro_pending
+#define PL_Iminus_E		PL_minus_E
 #define PL_Iminus_F		PL_minus_F
 #define PL_Iminus_a		PL_minus_a
 #define PL_Iminus_c		PL_minus_c

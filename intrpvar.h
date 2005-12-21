@@ -38,6 +38,7 @@ PERLVAR(Iminus_l,	bool)
 PERLVAR(Iminus_a,	bool)
 PERLVAR(Iminus_F,	bool)
 PERLVAR(Idoswitches,	bool)
+PERLVAR(Iminus_E,	bool)
 
 /*
 =head1 Global Variables

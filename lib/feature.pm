@@ -8,6 +8,11 @@ my %feature = (
     switch => 'feature_switch',
     "~~"   => "feature_~~",
     say    => "feature_say",
+    err    => "feature_err",
+);
+
+my %feature_bundle = (
+    "5.10" => [qw(switch ~~ say err)],
 );
 
 
@@ -31,13 +36,13 @@ feature - Perl pragma to enable new syntactic features
 
 =head1 SYNOPSIS
 
-    use feature 'switch';
+    use feature qw(switch say);
     given ($foo) {
-	when (1)	  { print "\$foo == 1\n" }
-	when ([2,3])	  { print "\$foo == 2 || \$foo == 3\n" }
-	when (/^a[bc]d$/) { print "\$foo eq 'abd' || \$foo eq 'acd'\n" }
-	when ($_ > 100)   { print "\$foo > 100\n" }
-	default		  { print "None of the above\n" }
+	when (1)	  { say "\$foo == 1" }
+	when ([2,3])	  { say "\$foo == 2 || \$foo == 3" }
+	when (/^a[bc]d$/) { say "\$foo eq 'abd' || \$foo eq 'acd'" }
+	when ($_ > 100)   { say "\$foo > 100" }
+	default		  { say "None of the above" }
     }
 
 =head1 DESCRIPTION
@@ -69,6 +74,22 @@ C<say> function from here to the end of the enclosing BLOCK.
 
 See L<perlfunc/say> for details.
 
+=head2 the 'err' feature
+
+C<use feature 'err'> tells the compiler to enable the C<err>
+operator from here to the end of the enclosing BLOCK.
+
+C<err> is a low-precedence variant of the C<//> operator:
+see C<perlop> for details.
+
+=head1 FEATURE BUNDLES
+
+It's possible to load a whole slew of features in one go, using
+a I<feature bundle>. The name of a feature bundle is prefixed with
+a colon, to distinguish it from an actual feature. At present, the
+only feature bundle is C<use feature ":5.10">, which is equivalent
+to C<use feature qw(switch ~~ say err)>.
+
 =cut
 
 sub import {
@@ -82,6 +103,16 @@ sub import {
     }
     while (@_) {
 	my $name = shift(@_);
+	if ($name =~ /^:(.*)/) {
+	    if (!exists $feature_bundle{$1}) {
+		require Carp;
+		Carp->import("croak");
+		croak(sprintf('Feature bundle "%s" is not supported by Perl %vd',
+		    $1, $^V));
+	    }
+	    unshift @_, @{$feature_bundle{$1}};
+	    next;
+	}
 	if (!exists $feature{$name}) {
 	    require Carp;
 	    Carp->import("croak");
@@ -96,7 +127,23 @@ sub unimport {
     my $class = shift;
 
     # A bare C<no feature> should disable *all* features
-    for my $name (@_) {
+    if (!@_) {
+	delete @^H{ values(%feature) };
+	return;
+    }
+
+    while (@_) {
+	my $name = shift;
+	if ($name =~ /^:(.*)/) {
+	    if (!exists $feature_bundle{$1}) {
+		require Carp;
+		Carp->import("croak");
+		croak(sprintf('Feature bundle "%s" is not supported by Perl %vd',
+		    $1, $^V));
+	    }
+	    unshift @_, @{$feature_bundle{$1}};
+	    next;
+	}
 	if (!exists($feature{$name})) {
 	    require Carp;
 	    Carp->import("croak");
@@ -106,10 +153,6 @@ sub unimport {
 	else {
 	    delete $^H{$feature{$name}};
 	}
-    }
-
-    if(!@_) {
-	delete @^H{ values(%feature) };
     }
 }
 

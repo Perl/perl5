@@ -459,7 +459,7 @@ S_missingterm(pTHX_ char *s)
 
 #define FEATURE_IS_ENABLED(name, namelen)				\
 	((0 != (PL_hints & HINT_LOCALIZE_HH))				\
-	&& feature_is_enabled(name, namelen))
+	    && feature_is_enabled(name, namelen) )
 /*
  * S_feature_is_enabled
  * Check whether the named feature is enabled.
@@ -2727,6 +2727,8 @@ Perl_yylex(pTHX)
 		        sv_catpv(PL_linestr,"our @F=split(' ');");
 		}
 	    }
+	    if (PL_minus_E)
+		sv_catpv(PL_linestr,"use feature ':5.10';");
 	    sv_catpvn(PL_linestr, "\n", 1);
 	    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
@@ -4197,16 +4199,6 @@ Perl_yylex(pTHX)
 		     && !hv_fetch(GvHVn(PL_incgv), "Thread.pm", 9, FALSE))
 	    {
 		tmp = 0;		/* any sub overrides "weak" keyword */
-	    }
-	    else if (gv && !gvp
-		    && tmp == -KEY_err
-		    && GvCVu(gv)
-		    && PL_expect != XOPERATOR
-		    && PL_expect != XTERMORDORDOR)
-	    {
-		/* any sub overrides the "err" keyword, except when really an
-		 * operator is expected */
-		tmp = 0;
 	    }
 	    else {			/* no override */
 		tmp = -tmp;
@@ -6098,7 +6090,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
             case 'r':
               if (name[2] == 'r')
               {                                   /* err        */
-                return -KEY_err;
+                return (FEATURE_IS_ENABLED("err", 3) ? -KEY_err : 0);
               }
 
               goto unknown;

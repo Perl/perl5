@@ -1,7 +1,7 @@
 #!./perl -w
 
 # Tests for the command-line switches:
-# -0, -c, -l, -s, -m, -M, -V, -v, -h, -z, -i
+# -0, -c, -l, -s, -m, -M, -V, -v, -h, -z, -i, -E
 # Some switches have their own tests, see MANIFEST.
 
 BEGIN {
@@ -11,7 +11,7 @@ BEGIN {
 
 require "./test.pl";
 
-plan(tests => 26);
+plan(tests => 30);
 
 use Config;
 
@@ -282,3 +282,26 @@ __EOF__
        "foo yada dada:bada foo bing:king kong foo",
        "-i backup file");
 }
+
+# Tests for -E
+
+$r = runperl(
+    switches	=> [ '-E', '"say q(Hello, world!)"']
+);
+is( $r, "Hello, world!\n", "-E say" );
+
+
+$r = runperl(
+    switches	=> [ '-E', '"undef err say q(Hello, world!)"']
+);
+is( $r, "Hello, world!\n", "-E err" );
+
+$r = runperl(
+    switches	=> [ '-E', '"undef ~~ undef and say q(Hello, world!)"']
+);
+is( $r, "Hello, world!\n", "-E ~~" );
+
+$r = runperl(
+    switches	=> [ '-E', '"given(undef) {when(undef) { say q(Hello, world!)"}}']
+);
+is( $r, "Hello, world!\n", "-E given" );

@@ -412,6 +412,8 @@ END_EXTERN_C
 #define PL_mess_sv		(*Perl_Imess_sv_ptr(aTHX))
 #undef  PL_min_intro_pending
 #define PL_min_intro_pending	(*Perl_Imin_intro_pending_ptr(aTHX))
+#undef  PL_minus_E
+#define PL_minus_E		(*Perl_Iminus_E_ptr(aTHX))
 #undef  PL_minus_F
 #define PL_minus_F		(*Perl_Iminus_F_ptr(aTHX))
 #undef  PL_minus_a

@@ -679,6 +679,7 @@ Value of readdir() operator can be "0"; test with defined() at - line 4.
 ########
 # op.c
 use warnings 'misc';
+use feature 'err';
 open FH, "<abc";
 $_ = <FH> err $_ = 1;
 ($_ = <FH>) // ($_ = 1);

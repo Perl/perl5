@@ -10,3 +10,13 @@ no feature "nonesuch";
 EXPECT
 OPTIONS regex
 ^Feature "nonesuch" is not supported by Perl [v0-9.]+ at - line 1
+########
+use feature ":nonesuch";
+EXPECT
+OPTIONS regex
+^Feature bundle "nonesuch" is not supported by Perl [v0-9.]+ at - line 1
+########
+no feature ":nonesuch";
+EXPECT
+OPTIONS regex
+^Feature bundle "nonesuch" is not supported by Perl [v0-9.]+ at - line 1
