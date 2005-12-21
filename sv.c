@@ -6721,6 +6721,7 @@ Perl_sv_2io(pTHX_ SV *sv)
 
 Using various gambits, try to get a CV from an SV; in addition, try if
 possible to set C<*st> and C<*gvp> to the stash and GV associated with it.
+The flags in C<lref> are passed to sv_fetchsv.
 
 =cut
 */

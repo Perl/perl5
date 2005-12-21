@@ -2664,7 +2664,7 @@ Perl_sighandler(int sig)
     if (!SvROK(PL_psig_ptr[sig]) || !(cv = (CV*)SvRV(PL_psig_ptr[sig]))
 	|| SvTYPE(cv) != SVt_PVCV) {
 	HV *st;
-	cv = sv_2cv(PL_psig_ptr[sig],&st,&gv,TRUE);
+	cv = sv_2cv(PL_psig_ptr[sig], &st, &gv, GV_ADD);
     }
 
     if (!cv || !CvROOT(cv)) {

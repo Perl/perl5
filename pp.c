@@ -340,7 +340,8 @@ PP(pp_rv2cv)
 
     /* We usually try to add a non-existent subroutine in case of AUTOLOAD. */
     /* (But not in defined().) */
-    CV *cv = sv_2cv(TOPs, &stash, &gv, !(PL_op->op_flags & OPf_SPECIAL));
+    CV *cv = sv_2cv(TOPs, &stash, &gv,
+		    (PL_op->op_flags & OPf_SPECIAL) ? 0 : GV_ADD);
     if (cv) {
 	if (CvCLONE(cv))
 	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
@@ -416,7 +417,7 @@ PP(pp_prototype)
 	    }
 	}
     }
-    cv = sv_2cv(TOPs, &stash, &gv, FALSE);
+    cv = sv_2cv(TOPs, &stash, &gv, 0);
     if (cv && SvPOK(cv))
 	ret = sv_2mortal(newSVpvn(SvPVX_const(cv), SvCUR(cv)));
   set:
@@ -3809,7 +3810,7 @@ PP(pp_exists)
     if (PL_op->op_private & OPpEXISTS_SUB) {
 	GV *gv;
 	SV * const sv = POPs;
-	CV * const cv = sv_2cv(sv, &hv, &gv, FALSE);
+	CV * const cv = sv_2cv(sv, &hv, &gv, 0);
 	if (cv)
 	    RETPUSHYES;
 	if (gv && isGV(gv) && GvCV(gv) && !GvCVGEN(gv))

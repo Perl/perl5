@@ -2622,7 +2622,7 @@ PP(pp_entersub)
 	/* This is overwhelming the most common case:  */
     case SVt_PVGV:
 	if (!(cv = GvCVu((GV*)sv)))
-	    cv = sv_2cv(sv, &stash, &gv, FALSE);
+	    cv = sv_2cv(sv, &stash, &gv, 0);
 	if (!cv) {
 	    ENTER;
 	    SAVETMPS;
