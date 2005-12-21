@@ -2621,8 +2621,10 @@ PP(pp_entersub)
     switch (SvTYPE(sv)) {
 	/* This is overwhelming the most common case:  */
     case SVt_PVGV:
-	if (!(cv = GvCVu((GV*)sv)))
+	if (!(cv = GvCVu((GV*)sv))) {
+	    HV *stash;
 	    cv = sv_2cv(sv, &stash, &gv, 0);
+	}
 	if (!cv) {
 	    ENTER;
 	    SAVETMPS;
