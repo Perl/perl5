@@ -2676,7 +2676,35 @@ PP(pp_entersub)
 
   retry:
     if (!CvROOT(cv) && !CvXSUB(cv)) {
-	goto fooey;
+	GV* autogv;
+	SV* sub_name;
+
+	/* anonymous or undef'd function leaves us no recourse */
+	if (CvANON(cv) || !(gv = CvGV(cv)))
+	    DIE(aTHX_ "Undefined subroutine called");
+
+	/* autoloaded stub? */
+	if (cv != GvCV(gv)) {
+	    cv = GvCV(gv);
+	}
+	/* should call AUTOLOAD now? */
+	else {
+try_autoload:
+	    if ((autogv = gv_autoload4(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
+				   FALSE)))
+	    {
+		cv = GvCV(autogv);
+	    }
+	    /* sorry */
+	    else {
+		sub_name = sv_newmortal();
+		gv_efullname3(sub_name, gv, Nullch);
+		DIE(aTHX_ "Undefined subroutine &%"SVf" called", sub_name);
+	    }
+	}
+	if (!cv)
+	    DIE(aTHX_ "Not a CODE reference");
+	goto retry;
     }
 
     gimme = GIMME_V;
@@ -2820,43 +2848,6 @@ PP(pp_entersub)
 	}
 	LEAVE;
 	return NORMAL;
-    }
-
-    /*NOTREACHED*/
-    assert (0); /* Cannot get here.  */
-    /* This is deliberately moved here as spaghetti code to keep it out of the
-       hot path.  */
-    {
-	GV* autogv;
-	SV* sub_name;
-
-      fooey:
-	/* anonymous or undef'd function leaves us no recourse */
-	if (CvANON(cv) || !(gv = CvGV(cv)))
-	    DIE(aTHX_ "Undefined subroutine called");
-
-	/* autoloaded stub? */
-	if (cv != GvCV(gv)) {
-	    cv = GvCV(gv);
-	}
-	/* should call AUTOLOAD now? */
-	else {
-try_autoload:
-	    if ((autogv = gv_autoload4(GvSTASH(gv), GvNAME(gv), GvNAMELEN(gv),
-				   FALSE)))
-	    {
-		cv = GvCV(autogv);
-	    }
-	    /* sorry */
-	    else {
-		sub_name = sv_newmortal();
-		gv_efullname3(sub_name, gv, Nullch);
-		DIE(aTHX_ "Undefined subroutine &%"SVf" called", sub_name);
-	    }
-	}
-	if (!cv)
-	    DIE(aTHX_ "Not a CODE reference");
-	goto retry;
     }
 }
 
