@@ -809,14 +809,14 @@ static const struct body_details bodies_by_type[] = {
     /* 8 bytes on most ILP32 with IEEE doubles */
     {sizeof(xpv_allocated),
      copy_length(XPV, xpv_len)
-     + relative_STRUCT_OFFSET(XPV, xpv_allocated, xpv_cur),
-     - relative_STRUCT_OFFSET(XPV, xpv_allocated, xpv_cur),
+     - relative_STRUCT_OFFSET(xpv_allocated, XPV, xpv_cur),
+     + relative_STRUCT_OFFSET(xpv_allocated, XPV, xpv_cur),
      FALSE, NONV, HASARENA},
     /* 12 */
     {sizeof(xpviv_allocated),
      copy_length(XPVIV, xiv_u)
-     + relative_STRUCT_OFFSET(XPVIV, xpviv_allocated, xpv_cur),
-     - relative_STRUCT_OFFSET(XPVIV, xpviv_allocated, xpv_cur),
+     - relative_STRUCT_OFFSET(xpviv_allocated, XPVIV, xpv_cur),
+     + relative_STRUCT_OFFSET(xpviv_allocated, XPVIV, xpv_cur),
      FALSE, NONV, HASARENA},
     /* 20 */
     {sizeof(XPVNV), copy_length(XPVNV, xiv_u), 0, FALSE, HADNV, HASARENA},
@@ -831,14 +831,14 @@ static const struct body_details bodies_by_type[] = {
     /* 20 */
     {sizeof(xpvav_allocated),
      copy_length(XPVAV, xmg_stash)
-     + relative_STRUCT_OFFSET(XPVAV, xpvav_allocated, xav_fill),
-     - relative_STRUCT_OFFSET(XPVAV, xpvav_allocated, xav_fill),
+     - relative_STRUCT_OFFSET(xpvav_allocated, XPVAV, xav_fill),
+     + relative_STRUCT_OFFSET(xpvav_allocated, XPVAV, xav_fill),
      TRUE, HADNV, HASARENA},
     /* 20 */
     {sizeof(xpvhv_allocated),
      copy_length(XPVHV, xmg_stash)
-     + relative_STRUCT_OFFSET(XPVHV, xpvhv_allocated, xhv_fill),
-     - relative_STRUCT_OFFSET(XPVHV, xpvhv_allocated, xhv_fill),
+     - relative_STRUCT_OFFSET(xpvhv_allocated, XPVHV, xhv_fill),
+     + relative_STRUCT_OFFSET(xpvhv_allocated, XPVHV, xhv_fill),
      TRUE, HADNV, HASARENA},
     /* 76 */
     {sizeof(XPVCV), sizeof(XPVCV), 0, TRUE, HADNV, HASARENA},
