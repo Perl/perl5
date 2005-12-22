@@ -2610,7 +2610,6 @@ PP(pp_entersub)
 {
     dVAR; dSP; dPOPss;
     GV *gv;
-    HV *stash;
     register CV *cv;
     register PERL_CONTEXT *cx;
     I32 gimme;
