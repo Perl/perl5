@@ -1,8 +1,8 @@
 package ExtUtils::Constant::ProxySubs;
 
 use strict;
-use vars qw($VERSION @ISA %type_to_struct %type_to_sv %type_to_C_value
-	    %type_is_a_problem %type_num_args);
+use vars qw($VERSION @ISA %type_to_struct %type_from_struct %type_to_sv
+	    %type_to_C_value %type_is_a_problem %type_num_args);
 use Carp;
 require ExtUtils::Constant::XS;
 use ExtUtils::Constant::Utils qw(C_stringify);
@@ -14,19 +14,44 @@ $VERSION = '0.01';
 %type_to_struct =
     (
      IV => '{const char *name; I32 namelen; IV value;}',
+     NV => '{const char *name; I32 namelen; NV value;}',
+     UV => '{const char *name; I32 namelen; UV value;}',
+     YES => '{const char *name; I32 namelen;}',
+     NO => '{const char *name; I32 namelen;}',
      '' => '{const char *name; I32 namelen;} ',
      );
 
+%type_from_struct =
+    (
+     IV => sub { $_[0] . '->value' },
+     NV => sub { $_[0] . '->value' },
+     UV => sub { $_[0] . '->value' },
+     YES => sub {},
+     NO => sub {},
+     '' => sub {},
+    );
+
 %type_to_sv = 
     (
-     IV => sub { 'newSViv(' . $_[0] . '->value)' },
+     IV => sub { "newSViv($_[0])" },
+     NV => sub { "newSVnv($_[0])" },
+     UV => sub { "newSVuv($_[0])" },
+     YES => sub { '&PL_sv_yes' },
+     NO => sub { '&PL_sv_no' },
      '' => sub { '&PL_sv_yes' },
      );
 
 %type_to_C_value = 
     (
+     YES => sub {},
+     NO => sub {},
      '' => sub {},
      );
+
+sub type_to_C_value {
+    my ($self, $type) = @_;
+    return $type_to_C_value{$type} || sub {return map {ref $_ ? @$_ : $_} @_};
+}
 
 %type_is_a_problem =
     (
@@ -34,7 +59,8 @@ $VERSION = '0.01';
      );
 
 while (my ($type, $value) = each %XS_TypeSet) {
-    $type_num_args{$type} = ref $value ? scalar @$value : 1;
+    $type_num_args{$type}
+	= defined $value ? ref $value ? scalar @$value : 1 : 0;
 }
 $type_num_args{''} = 0;
 
@@ -61,7 +87,8 @@ sub partition_names {
 		or !$self->macro_to_ifdef($self->macro_from_name($item));
 	}
 
-	if ($item->{pre} or $item->{post} or $type_is_a_problem{$item->{type}}) {
+	if ($item->{pre} or $item->{post} or $item->{not_constant}
+	    or $type_is_a_problem{$item->{type}}) {
 	    push @trouble, $item;
 	} else {
 	    push @{$found{$item->{type}}}, $item;
@@ -73,19 +100,40 @@ sub partition_names {
 
 sub boottime_iterator {
     my ($self, $type, $iterator, $hash, $subname) = @_;
+    my $extractor = $type_from_struct{$type};
+    die "Can't find extractor code for type $type"
+	unless defined $extractor;
     my $generator = $type_to_sv{$type};
     die "Can't find generator code for type $type"
 	unless defined $generator;
 
     my $athx = $self->C_constant_prefix_param();
 
-    return sprintf <<"EOBOOT", &$generator($iterator);
+    return sprintf <<"EOBOOT", &$generator(&$extractor($iterator));
         while ($iterator->name) {
 	    $subname($athx $hash, $iterator->name,
 				$iterator->namelen, %s);
 	    ++$iterator;
 	}
 EOBOOT
+}
+
+sub name_len_value_macro {
+    my ($self, $item) = @_;
+    my $name = $item->{name};
+    my $value = $item->{value};
+    $value = $item->{name} unless defined $value;
+
+    my $namelen = length $name;
+    if ($name =~ tr/\0-\377// != $namelen) {
+	# the hash API signals UTF-8 by passing the length negated.
+	utf8::encode($name);
+	$namelen = -length $name;
+    }
+    $name = C_stringify($name);
+
+    my $macro = $self->macro_from_name($item);
+    ($name, $namelen, $value, $macro);
 }
 
 sub WriteConstants {
@@ -114,18 +162,16 @@ sub WriteConstants {
     my ($found, $notfound, $trouble)
 	= $self->partition_names($default_type, @items);
 
-    die "Can't cope with trouble yet" if @$trouble;
-
     my $pthx = $self->C_constant_prefix_param_defintion();
     my $athx = $self->C_constant_prefix_param();
     my $symbol_table = C_stringify($package) . '::';
 
-    print $c_fh <<"EOADD";
+    print $c_fh $self->header(), <<"EOADD";
 void ${c_subname}_add_symbol($pthx HV *hash, const char *name, I32 namelen, SV *value) {
     SV *rv = newRV_noinc(value);
     if (!hv_store(hash, name, namelen, rv, TRUE)) {
 	SvREFCNT_dec(rv);
-	Perl_croak("Couldn't add key '%s' to %%%s", name, "$package");
+	Perl_croak($athx "Couldn't add key '%s' to %%%s::", name, "$package");
     }
 }
 
@@ -149,8 +195,7 @@ EOBOOT
 
     foreach my $type (sort keys %$found) {
 	my $struct = $type_to_struct{$type};
-	my $type_to_value = $type_to_C_value{$type}
-	    || sub {return map {ref $_ ? @$_ : $_} @_};
+	my $type_to_value = $self->type_to_C_value($type);
 	my $number_of_args = $type_num_args{$type};
 	die "Can't find structure definition for type $type"
 	    unless defined $struct;
@@ -167,19 +212,9 @@ EOBOOT
 
 
 	foreach my $item (@{$found->{$type}}) {
-	    my $name = $item->{name};
-	    my $value = $item->{value};
-	    $value = $item->{name} unless defined $value;
+            my ($name, $namelen, $value, $macro)
+                 = $self->name_len_value_macro($item);
 
-	    my $namelen = length $name;
-	    if ($name =~ tr/\0-\377// != $namelen) {
-		# the hash API signals UTF-8 by passing the length negated.
-		utf8::encode($name);
-		$namelen = -length $name;
-	    }
-	    $name = C_stringify($name);
-
-	    my $macro = $self->macro_from_name($item);
 	    my $ifdef = $self->macro_to_ifdef($macro);
 	    if (!$ifdef && $item->{invert_macro}) {
 		carp("Attempting to supply a default for '$name' which has no conditional macro");
@@ -220,14 +255,39 @@ EOBOOT
 	while (value_for_notfound->name) {
 	    if (!hv_store(${c_subname}_missing, value_for_notfound->name,
 			  value_for_notfound->namelen, &PL_sv_yes, TRUE))
-		Perl_croak("Couldn't add key '%s' to missing_hash",
+		Perl_croak($athx "Couldn't add key '%s' to missing_hash",
 			   value_for_notfound->name);
 	    ++value_for_notfound;
 	}
-  }
 EOBOOT
 
-   print $xs_fh <<EOCONSTANT
+    foreach my $item (@$trouble) {
+        my ($name, $namelen, $value, $macro)
+	    = $self->name_len_value_macro($item);
+        my $ifdef = $self->macro_to_ifdef($macro);
+        my $type = $item->{type};
+	my $type_to_value = $self->type_to_C_value($type);
+
+        print $xs_fh $ifdef;
+	if ($item->{invert_macro}) {
+	    print $xs_fh
+		 "        /* This is the default value: */\n" if $type;
+	    print $xs_fh "#else\n";
+	}
+	my $generator = $type_to_sv{$type};
+	die "Can't find generator code for type $type"
+	    unless defined $generator;
+
+	printf $xs_fh <<"EOBOOT", $name, &$generator(&$type_to_value($value));
+	${c_subname}_add_symbol($athx symbol_table, "%s",
+				$namelen, %s);
+EOBOOT
+
+        print $xs_fh $self->macro_to_endif($macro);
+    }
+
+    print $xs_fh <<EOCONSTANT
+  }
 
 void
 $xs_subname(sv)

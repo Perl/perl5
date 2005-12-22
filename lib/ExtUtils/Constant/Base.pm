@@ -682,7 +682,8 @@ sub normalise_items
         $item->{macro} = $macro if defined $macro;
         undef $value if defined $value and $value eq $name;
         $item->{value} = $value if defined $value;
-        foreach my $key (qw(default pre post def_pre def_post weight)) {
+        foreach my $key (qw(default pre post def_pre def_post weight
+			    not_constant)) {
           my $value = $orig->{$key};
           $item->{$key} = $value if defined $value;
           # warn "$key $value";

@@ -38,7 +38,7 @@ my @names =
       F_WRLCK HUPCL ICANON ICRNL IEXTEN IGNBRK IGNCR IGNPAR INLCR INPCK
       INT_MAX INT_MIN ISIG ISTRIP IXOFF IXON LC_ALL LC_COLLATE LC_CTYPE
       LC_MESSAGES LC_MONETARY LC_NUMERIC LC_TIME LINK_MAX LONG_MAX LONG_MIN
-      L_ctermid L_cuserid L_tmpnam MAX_CANON MAX_INPUT MB_CUR_MAX MB_LEN_MAX
+      L_ctermid L_cuserid L_tmpnam MAX_CANON MAX_INPUT MB_LEN_MAX
       NAME_MAX NCCS NGROUPS_MAX NOFLSH OPEN_MAX OPOST O_ACCMODE O_APPEND
       O_CREAT O_EXCL O_NOCTTY O_NONBLOCK O_RDONLY O_RDWR O_TRUNC O_WRONLY
       PARENB PARMRK PARODD PATH_MAX PIPE_BUF RAND_MAX R_OK SCHAR_MAX
@@ -57,6 +57,7 @@ my @names =
       _SC_ARG_MAX _SC_CHILD_MAX _SC_CLK_TCK _SC_JOB_CONTROL _SC_NGROUPS_MAX
       _SC_OPEN_MAX _SC_PAGESIZE _SC_SAVED_IDS _SC_STREAM_MAX _SC_TZNAME_MAX
       _SC_VERSION),
+   {name=>"MB_CUR_MAX", not_constant=>1},
    {name=>"EXIT_FAILURE", default=>["IV", "1"]},
    {name=>"EXIT_SUCCESS", default=>["IV", "0"]},
    {name=>"SIG_DFL", value=>"(IV)SIG_DFL"},
@@ -67,6 +68,7 @@ my @names =
    {name=>"NULL", value=>"0"},
    {name=>"_POSIX_JOB_CONTROL", type=>"YES", default=>["IV", "0"]},
    {name=>"_POSIX_SAVED_IDS", type=>"YES", default=>["IV", "0"]},
+   {name=>'FLT_ROUNDS', type=>"NV", not_constant=>1},
    {name=>"HUGE_VAL", type=>"NV",
     macro=>[<<'END', "#endif\n"],
 #if (defined(USE_LONG_DOUBLE) && defined(HUGE_VALL)) || defined(HUGE_VAL)
@@ -89,7 +91,6 @@ push @names, {name=>$_, type=>"NV"}
               DBL_MAX_EXP DBL_MIN DBL_MIN_10_EXP DBL_MIN_EXP
               FLT_DIG FLT_EPSILON FLT_MANT_DIG FLT_MAX FLT_MAX_10_EXP
               FLT_MAX_EXP FLT_MIN FLT_MIN_10_EXP FLT_MIN_EXP FLT_RADIX
-              FLT_ROUNDS
               LDBL_DIG LDBL_EPSILON LDBL_MANT_DIG LDBL_MAX LDBL_MAX_10_EXP
               LDBL_MAX_EXP LDBL_MIN LDBL_MIN_10_EXP LDBL_MIN_EXP));
 
@@ -102,6 +103,7 @@ push @names, {name=>$_, type=>"IV", default=>["IV", "0"]}
              ));
 
 WriteConstants(
+    PROXYSUBS => 1,
     NAME => 'POSIX',
     NAMES => \@names,
 );
