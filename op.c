@@ -631,7 +631,7 @@ Perl_scalarvoid(pTHX_ OP *o)
 {
     dVAR;
     OP *kid;
-    const char* useless = 0;
+    const char* useless = NULL;
     SV* sv;
     U8 want;
 
@@ -2430,7 +2430,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
     if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
 	SV* const listsv = newSVpvn("# comment\n",10);
-	SV* transv = 0;
+	SV* transv = NULL;
 	const U8* tend = t + tlen;
 	const U8* rend = r + rlen;
 	STRLEN ulen;
@@ -2886,7 +2886,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	else if (repl->op_type == OP_CONST)
 	    curop = repl;
 	else {
-	    OP *lastop = 0;
+	    OP *lastop = NULL;
 	    for (curop = LINKLIST(repl); curop!=repl; curop = LINKLIST(curop)) {
 		if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
 		    if (curop->op_type == OP_GV) {
@@ -3827,7 +3827,7 @@ whileline, OP *expr, OP *block, OP *cont, I32 has_my)
 {
     dVAR;
     OP *redo;
-    OP *next = 0;
+    OP *next = NULL;
     OP *listop;
     OP *o;
     U8 loopflags = 0;
@@ -4438,7 +4438,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     GV *gv;
     const char *ps;
     STRLEN ps_len;
-    register CV *cv=0;
+    register CV *cv = NULL;
     SV *const_sv;
     I32 gv_fetch_flags;
 
@@ -6469,13 +6469,13 @@ Perl_ck_subr(pTHX_ OP *o)
 	     ? cUNOPo : ((UNOP*)cUNOPo->op_first))->op_first;
     OP *o2 = prev->op_sibling;
     OP *cvop;
-    char *proto = 0;
-    CV *cv = 0;
-    GV *namegv = 0;
+    char *proto = NULL;
+    CV *cv = NULL;
+    GV *namegv = NULL;
     int optional = 0;
     I32 arg = 0;
     I32 contextclass = 0;
-    char *e = 0;
+    char *e = NULL;
     bool delete_op = 0;
 
     o->op_private |= OPpENTERSUB_HASTARG;
@@ -6758,7 +6758,7 @@ void
 Perl_peep(pTHX_ register OP *o)
 {
     dVAR;
-    register OP* oldop = 0;
+    register OP* oldop = NULL;
 
     if (!o || o->op_opt)
 	return;

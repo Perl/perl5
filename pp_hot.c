@@ -608,7 +608,7 @@ PP(pp_add)
 PP(pp_aelemfast)
 {
     dSP;
-    AV *av = PL_op->op_flags & OPf_SPECIAL ?
+    AV * const av = PL_op->op_flags & OPf_SPECIAL ?
 		(AV*)PAD_SV(PL_op->op_targ) : GvAV(cGVOP_gv);
     const U32 lval = PL_op->op_flags & OPf_MOD;
     SV** const svp = av_fetch(av, PL_op->op_private, lval);
@@ -1311,7 +1311,7 @@ PP(pp_match)
     if ((global = dynpm->op_pmflags & PMf_GLOBAL)) {
 	rx->startp[0] = -1;
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
-	    MAGIC* mg = mg_find(TARG, PERL_MAGIC_regex_global);
+	    MAGIC* const mg = mg_find(TARG, PERL_MAGIC_regex_global);
 	    if (mg && mg->mg_len >= 0) {
 		if (!(rx->reganch & ROPT_GPOS_SEEN))
 		    rx->endp[0] = rx->startp[0] = mg->mg_len;
@@ -1685,7 +1685,7 @@ Perl_do_readline(pTHX)
 		continue;
 	    }
 	} else if (SvUTF8(sv)) { /* OP_READLINE, OP_RCATLINE */
-	     const U8 *s = (const U8*)SvPVX_const(sv) + offset;
+	     const U8 * const s = (const U8*)SvPVX_const(sv) + offset;
 	     const STRLEN len = SvCUR(sv) - offset;
 	     const U8 *f;
 	     
@@ -1739,8 +1739,8 @@ PP(pp_helem)
     dSP;
     HE* he;
     SV **svp;
-    SV *keysv = POPs;
-    HV *hv = (HV*)POPs;
+    SV * const keysv = POPs;
+    HV * const hv = (HV*)POPs;
     const U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
     const U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     SV *sv;
@@ -1947,7 +1947,7 @@ PP(pp_iter)
 	    RETPUSHNO;
 
 	if (SvMAGICAL(av) || AvREIFY(av)) {
-	    SV ** const svp = av_fetch(av, --cx->blk_loop.iterix, FALSE);
+	    SV * const * const svp = av_fetch(av, --cx->blk_loop.iterix, FALSE);
 	    sv = svp ? *svp : Nullsv;
 	}
 	else {
@@ -1960,7 +1960,7 @@ PP(pp_iter)
 	    RETPUSHNO;
 
 	if (SvMAGICAL(av) || AvREIFY(av)) {
-	    SV ** const svp = av_fetch(av, ++cx->blk_loop.iterix, FALSE);
+	    SV * const * const svp = av_fetch(av, ++cx->blk_loop.iterix, FALSE);
 	    sv = svp ? *svp : Nullsv;
 	}
 	else {

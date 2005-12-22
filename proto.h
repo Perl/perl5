@@ -3690,6 +3690,14 @@ STATIC bool	S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i
 			__attribute__nonnull__(pTHX_6)
 			__attribute__nonnull__(pTHX_7);
 
+STATIC char *	S_stringify_regexp(pTHX_ SV *sv, MAGIC *mg, STRLEN *lp)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC char *	S_F0convert(NV nv, char *endbuf, STRLEN *len)
+			__attribute__nonnull__(2)
+			__attribute__nonnull__(3);
+
 #if defined(PERL_OLD_COPY_ON_WRITE)
 STATIC void	S_sv_release_COW(pTHX_ SV *sv, const char *pvx, STRLEN len, SV *after)
 			__attribute__nonnull__(pTHX_1)
@@ -3818,17 +3826,16 @@ STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *
 			__attribute__nonnull__(pTHX_3)
 			__attribute__nonnull__(pTHX_4);
 
-#  if defined(DEBUGGING)
-STATIC int	S_tokereport(pTHX_ I32 rv);
-#  endif
 STATIC int	S_ao(pTHX_ int toketype);
-STATIC void	S_depcom(pTHX);
 STATIC const char*	S_incl_perldb(pTHX);
 #  if defined(PERL_CR_FILTER)
 STATIC I32	S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 STATIC void	S_strip_return(pTHX_ SV *sv)
 			__attribute__nonnull__(pTHX_1);
 
+#  endif
+#  if defined(DEBUGGING)
+STATIC int	S_tokereport(pTHX_ I32 rv);
 #  endif
 #endif
 

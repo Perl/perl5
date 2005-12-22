@@ -1326,6 +1326,8 @@ s	|bool	|utf8_mg_pos	|NN SV *sv|NN MAGIC **mgp|NN STRLEN **cachep \
 s	|bool	|utf8_mg_pos_init	|NN SV *sv|NN MAGIC **mgp \
 				|NN STRLEN **cachep|I32 i|I32 offsetp \
 				|NN const U8 *s|NN const U8 *start
+s	|char *	|stringify_regexp|NN SV *sv|NN MAGIC *mg|NULLOK STRLEN *lp
+sn	|char *	|F0convert	|NV nv|NN char *endbuf|NN STRLEN *len
 #if defined(PERL_OLD_COPY_ON_WRITE)
 sM	|void	|sv_release_COW	|NN SV *sv|NN const char *pvx|STRLEN len|NN SV *after
 #endif
@@ -1371,15 +1373,14 @@ sR	|HV *	|find_in_my_stash|NN const char *pkgname|I32 len
 sR	|char *	|tokenize_use	|int is_use|NN char *s
 s	|SV*	|new_constant	|NULLOK const char *s|STRLEN len|NN const char *key|NN SV *sv \
 				|NULLOK SV *pv|NULLOK const char *type
-#  if defined(DEBUGGING)
-s	|int	|tokereport	|I32 rv
-#  endif
 s	|int	|ao		|int toketype
-s	|void	|depcom
 s	|const char*|incl_perldb
 #  if defined(PERL_CR_FILTER)
 s	|I32	|cr_textfilter	|int idx|NULLOK SV *sv|int maxlen
 s	|void	|strip_return	|NN SV *sv
+#  endif
+#  if defined(DEBUGGING)
+s	|int	|tokereport	|I32 rv
 #  endif
 #endif
 

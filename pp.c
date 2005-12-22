@@ -221,7 +221,7 @@ PP(pp_rv2gv)
 
 PP(pp_rv2sv)
 {
-    GV *gv = Nullgv;
+    GV *gv = NULL;
     dSP; dTOPss;
 
     if (SvROK(sv)) {
@@ -299,7 +299,7 @@ PP(pp_av2arylen)
     if (!*sv) {
 	*sv = NEWSV(0,0);
 	sv_upgrade(*sv, SVt_PVMG);
-	sv_magic(*sv, (SV*)av, PERL_MAGIC_arylen, Nullch, 0);
+	sv_magic(*sv, (SV*)av, PERL_MAGIC_arylen, NULL, 0);
     }
     SETs(*sv);
     RETURN;
@@ -312,7 +312,7 @@ PP(pp_pos)
     if (PL_op->op_flags & OPf_MOD || LVRET) {
 	if (SvTYPE(TARG) < SVt_PVLV) {
 	    sv_upgrade(TARG, SVt_PVLV);
-	    sv_magic(TARG, Nullsv, PERL_MAGIC_pos, Nullch, 0);
+	    sv_magic(TARG, NULL, PERL_MAGIC_pos, NULL, 0);
 	}
 
 	LvTYPE(TARG) = '.';
@@ -344,9 +344,11 @@ PP(pp_rv2cv)
     dSP;
     GV *gv;
     HV *stash;
-    I32 flags = (PL_op->op_flags & OPf_SPECIAL) ? 0
-	: ((PL_op->op_private & (OPpLVAL_INTRO|OPpMAY_RETURN_CONSTANT))
-	   == OPpMAY_RETURN_CONSTANT) ? GV_ADD|GV_NOEXPAND : GV_ADD;
+    const I32 flags = (PL_op->op_flags & OPf_SPECIAL)
+	? 0
+	: ((PL_op->op_private & (OPpLVAL_INTRO|OPpMAY_RETURN_CONSTANT)) == OPpMAY_RETURN_CONSTANT)
+	    ? GV_ADD|GV_NOEXPAND
+	    : GV_ADD;
     /* We usually try to add a non-existent subroutine in case of AUTOLOAD. */
     /* (But not in defined().) */
 
@@ -554,9 +556,9 @@ PP(pp_gelem)
     SV *sv = POPs;
     const char * const elem = SvPV_nolen_const(sv);
     GV * const gv = (GV*)POPs;
-    SV * tmpRef = Nullsv;
+    SV * tmpRef = NULL;
 
-    sv = Nullsv;
+    sv = NULL;
     if (elem) {
 	/* elem will always be NUL terminated.  */
 	const char * const second_letter = elem + 1;
@@ -597,7 +599,7 @@ PP(pp_gelem)
 	    break;
 	case 'P':
 	    if (strEQ(second_letter, "ACKAGE")) {
-		const HEK *hek = HvNAME_HEK(GvSTASH(gv));
+		const HEK * const hek = HvNAME_HEK(GvSTASH(gv));
 		sv = hek ? newSVhek(hek) : newSVpvn("__ANON__", 8);
 	    }
 	    break;
@@ -678,7 +680,7 @@ PP(pp_study)
 
     SvSCREAM_on(sv);
     /* piggyback on m//g magic */
-    sv_magic(sv, Nullsv, PERL_MAGIC_regex_global, Nullch, 0);
+    sv_magic(sv, NULL, PERL_MAGIC_regex_global, NULL, 0);
     RETPUSHYES;
 }
 
@@ -793,7 +795,7 @@ PP(pp_undef)
     default:
 	if (SvTYPE(sv) >= SVt_PV && SvPVX_const(sv) && SvLEN(sv)) {
 	    SvPV_free(sv);
-	    SvPV_set(sv, Nullch);
+	    SvPV_set(sv, NULL);
 	    SvLEN_set(sv, 0);
 	}
 	SvOK_off(sv);
@@ -1047,7 +1049,7 @@ PP(pp_multiply)
 	    } else if (!ahigh && !bhigh) {
 		/* eg 32 bit is at most 0xFFFF * 0xFFFF == 0xFFFE0001
 		   so the unsigned multiply cannot overflow.  */
-		UV product = alow * blow;
+		const UV product = alow * blow;
 		if (auvok == buvok) {
 		    /* -ve * -ve or +ve * +ve gives a +ve result.  */
 		    SP--;
@@ -1448,7 +1450,7 @@ PP(pp_repeat)
 	    if (count < 1)
 		SvCUR_set(TARG, 0);
 	    else {
-		STRLEN max = (UV)count * len;
+		const STRLEN max = (UV)count * len;
 		if (len > ((MEM_SIZE)~0)/count)
 		     Perl_croak(aTHX_ oom_string_extend);
 	        MEM_WRAP_CHECK_1(max, char, oom_string_extend);
@@ -1601,11 +1603,11 @@ PP(pp_left_shift)
     {
       const IV shift = POPi;
       if (PL_op->op_private & HINT_INTEGER) {
-	IV i = TOPi;
+	const IV i = TOPi;
 	SETi(i << shift);
       }
       else {
-	UV u = TOPu;
+	const UV u = TOPu;
 	SETu(u << shift);
       }
       RETURN;
@@ -2287,7 +2289,7 @@ PP(pp_negate)
 	    SETn(-SvNV(sv));
 	else if (SvPOKp(sv)) {
 	    STRLEN len;
-	    const char *s = SvPV_const(sv, len);
+	    const char * const s = SvPV_const(sv, len);
 	    if (isIDFIRST(*s)) {
 		sv_setpvn(TARG, "-", 1);
 		sv_catsv(TARG, sv);
@@ -3050,7 +3052,7 @@ PP(pp_substr)
 
 	    if (SvTYPE(TARG) < SVt_PVLV) {
 		sv_upgrade(TARG, SVt_PVLV);
-		sv_magic(TARG, Nullsv, PERL_MAGIC_substr, Nullch, 0);
+		sv_magic(TARG, NULL, PERL_MAGIC_substr, NULL, 0);
 	    }
 	    else
 		SvOK_off(TARG);
@@ -3084,7 +3086,7 @@ PP(pp_vec)
 	    TARG = sv_newmortal();
 	if (SvTYPE(TARG) < SVt_PVLV) {
 	    sv_upgrade(TARG, SVt_PVLV);
-	    sv_magic(TARG, Nullsv, PERL_MAGIC_vec, Nullch, 0);
+	    sv_magic(TARG, NULL, PERL_MAGIC_vec, NULL, 0);
 	}
 	LvTYPE(TARG) = 'v';
 	if (LvTARG(TARG) != src) {
@@ -3106,7 +3108,7 @@ PP(pp_index)
     dSP; dTARGET;
     SV *big;
     SV *little;
-    SV *temp = Nullsv;
+    SV *temp = NULL;
     I32 offset;
     I32 retval;
     const char *tmps;
@@ -3169,7 +3171,7 @@ PP(pp_rindex)
     dSP; dTARGET;
     SV *big;
     SV *little;
-    SV *temp = Nullsv;
+    SV *temp = NULL;
     STRLEN blen;
     STRLEN llen;
     I32 offset;

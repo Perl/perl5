@@ -1354,6 +1354,8 @@
 #ifdef PERL_CORE
 #define utf8_mg_pos		S_utf8_mg_pos
 #define utf8_mg_pos_init	S_utf8_mg_pos_init
+#define stringify_regexp	S_stringify_regexp
+#define F0convert		S_F0convert
 #endif
 #if defined(PERL_OLD_COPY_ON_WRITE)
 #ifdef PERL_CORE
@@ -1398,21 +1400,18 @@
 #define find_in_my_stash	S_find_in_my_stash
 #define tokenize_use		S_tokenize_use
 #define new_constant		S_new_constant
-#endif
-#  if defined(DEBUGGING)
-#ifdef PERL_CORE
-#define tokereport		S_tokereport
-#endif
-#  endif
-#ifdef PERL_CORE
 #define ao			S_ao
-#define depcom			S_depcom
 #define incl_perldb		S_incl_perldb
 #endif
 #  if defined(PERL_CR_FILTER)
 #ifdef PERL_CORE
 #define cr_textfilter		S_cr_textfilter
 #define strip_return		S_strip_return
+#endif
+#  endif
+#  if defined(DEBUGGING)
+#ifdef PERL_CORE
+#define tokereport		S_tokereport
 #endif
 #  endif
 #endif
@@ -3391,6 +3390,8 @@
 #ifdef PERL_CORE
 #define utf8_mg_pos(a,b,c,d,e,f,g,h,i)	S_utf8_mg_pos(aTHX_ a,b,c,d,e,f,g,h,i)
 #define utf8_mg_pos_init(a,b,c,d,e,f,g)	S_utf8_mg_pos_init(aTHX_ a,b,c,d,e,f,g)
+#define stringify_regexp(a,b,c)	S_stringify_regexp(aTHX_ a,b,c)
+#define F0convert		S_F0convert
 #endif
 #if defined(PERL_OLD_COPY_ON_WRITE)
 #ifdef PERL_CORE
@@ -3435,21 +3436,18 @@
 #define find_in_my_stash(a,b)	S_find_in_my_stash(aTHX_ a,b)
 #define tokenize_use(a,b)	S_tokenize_use(aTHX_ a,b)
 #define new_constant(a,b,c,d,e,f)	S_new_constant(aTHX_ a,b,c,d,e,f)
-#endif
-#  if defined(DEBUGGING)
-#ifdef PERL_CORE
-#define tokereport(a)		S_tokereport(aTHX_ a)
-#endif
-#  endif
-#ifdef PERL_CORE
 #define ao(a)			S_ao(aTHX_ a)
-#define depcom()		S_depcom(aTHX)
 #define incl_perldb()		S_incl_perldb(aTHX)
 #endif
 #  if defined(PERL_CR_FILTER)
 #ifdef PERL_CORE
 #define cr_textfilter(a,b,c)	S_cr_textfilter(aTHX_ a,b,c)
 #define strip_return(a)		S_strip_return(aTHX_ a)
+#endif
+#  endif
+#  if defined(DEBUGGING)
+#ifdef PERL_CORE
+#define tokereport(a)		S_tokereport(aTHX_ a)
 #endif
 #  endif
 #endif

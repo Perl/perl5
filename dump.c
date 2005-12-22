@@ -410,7 +410,7 @@ S_sequence(pTHX_ register const OP *o)
     SV      *op;
     const char *key;
     STRLEN   len;
-    const OP *oldop = 0;
+    const OP *oldop = NULL;
     OP      *l;
 
     if (!o)
@@ -941,7 +941,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 			 "  MAGIC = 0x%"UVxf"\n", PTR2UV(mg));
  	if (mg->mg_virtual) {
             const MGVTBL * const v = mg->mg_virtual;
- 	    const char *s = 0;
+ 	    const char *s = NULL;
  	    if      (v == &PL_vtbl_sv)         s = "sv";
             else if (v == &PL_vtbl_env)        s = "env";
             else if (v == &PL_vtbl_envelem)    s = "envelem";
@@ -984,7 +984,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 
 	{
 	    int n;
-	    const char *name = 0;
+	    const char *name = NULL;
 	    for (n = 0; magic_names[n].name; n++) {
 		if (mg->mg_type == magic_names[n].type) {
 		    name = magic_names[n].name;
@@ -1381,7 +1381,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    PerlIO_printf(file, "  (");
 	    Zero(freq, FREQ_MAX + 1, int);
 	    for (i = 0; (STRLEN)i <= HvMAX(sv); i++) {
-		HE* h; int count = 0;
+		HE* h;
+		int count = 0;
                 for (h = HvARRAY(sv)[i]; h; h = HeNEXT(h))
 		    count++;
 		if (count > FREQ_MAX)

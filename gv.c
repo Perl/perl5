@@ -179,7 +179,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     Newxz(gp, 1, GP);
     GvGP(gv) = gp_ref(gp);
 #ifdef PERL_DONT_CREATE_GVSV
-    GvSV(gv) = 0;
+    GvSV(gv) = NULL;
 #else
     GvSV(gv) = NEWSV(72,0);
 #endif
@@ -470,7 +470,7 @@ GV *
 Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 {
     register const char *nend;
-    const char *nsplit = 0;
+    const char *nsplit = NULL;
     GV* gv;
     HV* ostash = stash;
 
@@ -736,11 +736,11 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		       I32 sv_type)
 {
     register const char *name = nambeg;
-    register GV *gv = 0;
+    register GV *gv = NULL;
     GV**gvp;
     I32 len;
     register const char *namend;
-    HV *stash = 0;
+    HV *stash = NULL;
     const I32 no_init = flags & (GV_NOADD_NOINIT | GV_NOINIT);
     const I32 no_expand = flags & GV_NOEXPAND;
     const I32 add = flags & ~SVf_UTF8 & ~GV_NOADD_NOINIT & ~GV_NOEXPAND;

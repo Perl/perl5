@@ -39,7 +39,7 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
     GV* gv;
     GV** gvp;
     HV* hv = NULL;
-    SV* subgen = Nullsv;
+    SV* subgen = NULL;
     const char *hvname;
 
     /* A stash/class can go by many names (ie. User == main::User), so 
@@ -140,7 +140,7 @@ for class names as well as for objects.
 bool
 Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
 {
-    const char *type = Nullch;
+    const char *type = NULL;
     HV *stash = NULL;
     HV *name_stash;
 
@@ -341,7 +341,7 @@ XS(XS_UNIVERSAL_VERSION)
         sv = nsv;
 	if ( !sv_derived_from(sv, "version"))
 	    upg_version(sv);
-        undef = Nullch;
+        undef = NULL;
     }
     else {
         sv = (SV*)&PL_sv_undef;

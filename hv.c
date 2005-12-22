@@ -366,7 +366,7 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 lval)
 	flags = 0;
     }
     hek = hv_fetch_common (hv, NULL, key, klen, flags,
-			   HV_FETCH_JUST_SV | (lval ? HV_FETCH_LVALUE : 0),
+			   lval ? (HV_FETCH_JUST_SV | HV_FETCH_LVALUE) : HV_FETCH_JUST_SV,
 			   Nullsv, 0);
     return hek ? &HeVAL(hek) : NULL;
 }
@@ -760,7 +760,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 #endif
 
     if (!entry && SvREADONLY(hv) && !(action & HV_FETCH_ISEXISTS)) {
-	S_hv_notallowed(aTHX_ flags, key, klen,
+	hv_notallowed(flags, key, klen,
 			"Attempt to access disallowed key '%"SVf"' in"
 			" a restricted hash");
     }
@@ -1011,7 +1011,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return Nullsv;
 
     if (is_utf8) {
-	const char *keysave = key;
+	const char * const keysave = key;
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
 
         if (is_utf8)
