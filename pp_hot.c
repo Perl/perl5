@@ -132,7 +132,7 @@ PP(pp_sassign)
 	if (!got_coderef && gv_type != SVt_PVGV && GIMME_V == G_VOID) {
 	    /* Is the target symbol table currently empty?  */
 	    GV *gv = gv_fetchsv(right, GV_NOINIT, SVt_PVGV);
-	    if (!SvOK(gv)) {
+	    if (SvTYPE(gv) != SVt_PVGV && !SvOK(gv)) {
 		/* Good. Create a new proxy constant subroutine in the target.
 		   The gv becomes a(nother) reference to the constant.  */
 		SV *const value = SvRV(cv);
@@ -166,7 +166,6 @@ PP(pp_sassign)
 						 SvRV(cv)));
 	    SvREFCNT_dec(cv);
 	    LEAVE;
-	    PerlIO_debug("Unwrap CV\n");
 	}
 
     }

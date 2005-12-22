@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 105 );
+plan( tests => 132 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -196,7 +196,7 @@ is($j[0], 1);
 
 {
     my $w = '';
-    $SIG{__WARN__} = sub { $w = $_[0] };
+    local $SIG{__WARN__} = sub { $w = $_[0] };
     sub abc1 ();
     local *abc1 = sub { };
     is ($w, '');
@@ -267,7 +267,9 @@ EOPROG
 # There are certain space optimisations implemented via promotion rules to
 # GVs
 
-ok(!exists $::{oonk}, "no symbols of any sort to start with");
+foreach (qw (oonk ga_shloip)) {
+    ok(!exists $::{$_}, "no symbols of any sort to start with for $_");
+}
 
 # A string in place of the typeglob is promoted to the function prototype
 $::{oonk} = "pie";
@@ -290,6 +292,92 @@ foreach my $value (3, "Perl rules", \42, qr/whatever/, [1,2,3], {1=>2},
     is (ref $got, ref $value, "Correct type of value (" . ref($value) . ")");
     is ($got, $value, "Value is correctly set");
 }
+
+delete $::{oonk};
+$::{oonk} = \"Value";
+
+*{"ga_shloip"} = \&{"oonk"};
+
+is (ref $::{ga_shloip}, 'SCALAR', "Export of proxy constant as is");
+is (ref $::{oonk}, 'SCALAR', "Export doesn't affect original");
+is (eval 'ga_shloip', "Value", "Constant has correct value");
+is (ref $::{ga_shloip}, 'SCALAR',
+    "Inlining of constant doesn't change represenatation");
+
+delete $::{ga_shloip};
+
+eval 'sub ga_shloip (); 1' or die $@;
+is ($::{ga_shloip}, '', "Prototype is stored as an empty string");
+
+# Check that a prototype expands.
+*{"ga_shloip"} = \&{"oonk"};
+
+is (ref $::{oonk}, 'SCALAR', "Export doesn't affect original");
+is (eval 'ga_shloip', "Value", "Constant has correct value");
+is (ref \$::{ga_shloip}, 'GLOB', "Symbol table has full typeglob");
+
+
+@::zwot = ('Zwot!');
+
+# Check that assignment to an existing typeglob works
+{
+  my $w = '';
+  local $SIG{__WARN__} = sub { $w = $_[0] };
+  *{"zwot"} = \&{"oonk"};
+  is($w, '', "Should be no warning");
+}
+
+is (ref $::{oonk}, 'SCALAR', "Export doesn't affect original");
+is (eval 'zwot', "Value", "Constant has correct value");
+is (ref \$::{zwot}, 'GLOB', "Symbol table has full typeglob");
+is (join ('!', @::zwot), 'Zwot!', "Existing array still in typeglob");
+
+sub spritsits () {
+    "Traditional";
+}
+
+# Check that assignment to an existing subroutine works
+{
+  my $w = '';
+  local $SIG{__WARN__} = sub { $w = $_[0] };
+  *{"spritsits"} = \&{"oonk"};
+  like($w, qr/^Constant subroutine main::spritsits redefined/,
+       "Redefining a constant sub should warn");
+}
+
+is (ref $::{oonk}, 'SCALAR', "Export doesn't affect original");
+is (eval 'spritsits', "Value", "Constant has correct value");
+is (ref \$::{spritsits}, 'GLOB', "Symbol table has full typeglob");
+
+my $result;
+# Check that assignment to an existing typeglob works
+{
+  my $w = '';
+  local $SIG{__WARN__} = sub { $w = $_[0] };
+  $result = *{"plunk"} = \&{"oonk"};
+  is($w, '', "Should be no warning");
+}
+
+is (ref \$result, 'GLOB',
+    "Non void assignment should still return a typeglob");
+
+is (ref $::{oonk}, 'SCALAR', "Export doesn't affect original");
+is (eval 'plunk', "Value", "Constant has correct value");
+is (ref \$::{plunk}, 'GLOB', "Symbol table has full typeglob");
+
+my $gr = eval '\*plunk' or die;
+
+{
+  my $w = '';
+  local $SIG{__WARN__} = sub { $w = $_[0] };
+  $result = *{$gr} = \&{"oonk"};
+  like($w, qr/^Constant subroutine main::plunk redefined/,
+       "Redefining a constant sub should warn");
+}
+
+is (ref $::{oonk}, 'SCALAR', "Export doesn't affect original");
+is (eval 'plunk', "Value", "Constant has correct value");
+is (ref \$::{plunk}, 'GLOB', "Symbol table has full typeglob");
 
 format =
 .
