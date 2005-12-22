@@ -1447,6 +1447,7 @@ lib/ExtUtils/Command/MM.pm	Calling MM functions from the cmd line
 lib/ExtUtils/Command.pm		Utilities for Make on non-UNIX platforms
 lib/ExtUtils/Constant/Base.pm	generate XS code to import C header constants
 lib/ExtUtils/Constant.pm	generate XS code to import C header constants
+lib/ExtUtils/Constant/ProxySubs.pm	generate XS code for proxy constants
 lib/ExtUtils/Constant/Utils.pm	generate XS code to import C header constants
 lib/ExtUtils/Constant/XS.pm	generate XS code to import C header constants
 lib/ExtUtils/Embed.pm		Utilities for embedding Perl in C programs

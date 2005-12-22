@@ -1,6 +1,6 @@
 package ExtUtils::Constant;
 use vars qw (@ISA $VERSION @EXPORT_OK %EXPORT_TAGS);
-$VERSION = 0.17;
+$VERSION = 0.20;
 
 =head1 NAME
 
@@ -490,23 +490,40 @@ sub WriteConstants {
   # As this subroutine is intended to make code that isn't edited, there's no
   # need for the user to specify any types that aren't found in the list of
   # names.
-  my $types = {};
+  
+  if ($ARGS{PROXYSUBS}) {
+      require ExtUtils::Constant::ProxySubs;
+      ExtUtils::Constant::ProxySubs->WriteConstants({c_fh => $c_fh,
+						     xs_fh => $xs_fh,
+						     package => $ARGS{NAME},
+						     c_subname
+						     => $ARGS{C_SUBNAME},
+						     xs_subname
+						     => $ARGS{XS_SUBNAME},
+						     default_type
+						     => $ARGS{DEFAULT_TYPE},
+						    }, @{$ARGS{NAMES}});
+  } else {
+      my $types = {};
 
-  print $c_fh constant_types(); # macro defs
-  print $c_fh "\n";
+      print $c_fh constant_types(); # macro defs
+      print $c_fh "\n";
 
-  # indent is still undef. Until anyone implements indent style rules with it.
-  foreach (ExtUtils::Constant::XS->C_constant({package => $ARGS{NAME},
-					       subname => $ARGS{C_SUBNAME},
-					       default_type =>
-					       $ARGS{DEFAULT_TYPE},
-					       types => $types,
-					       breakout => $ARGS{BREAKOUT_AT}},
-					       @{$ARGS{NAMES}})) {
-    print $c_fh $_, "\n"; # C constant subs
+      # indent is still undef. Until anyone implements indent style rules with
+      # it.
+      foreach (ExtUtils::Constant::XS->C_constant({package => $ARGS{NAME},
+						   subname => $ARGS{C_SUBNAME},
+						   default_type =>
+						       $ARGS{DEFAULT_TYPE},
+						       types => $types,
+						       breakout =>
+						       $ARGS{BREAKOUT_AT}},
+						  @{$ARGS{NAMES}})) {
+	  print $c_fh $_, "\n"; # C constant subs
+      }
+      print $xs_fh XS_constant ($ARGS{NAME}, $types, $ARGS{XS_SUBNAME},
+				$ARGS{C_SUBNAME});
   }
-  print $xs_fh XS_constant ($ARGS{NAME}, $types, $ARGS{XS_SUBNAME},
-                            $ARGS{C_SUBNAME});
 
   close $c_fh or warn "Error closing $ARGS{C_FILE}: $!";
   close $xs_fh or warn "Error closing $ARGS{XS_FILE}: $!";
