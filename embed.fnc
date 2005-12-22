@@ -1307,6 +1307,8 @@ s	|void	|utf8_mg_pos_cache_update|NN SV *sv|NN MAGIC **mgp \
 s	|STRLEN	|sv_pos_b2u_forwards|NN const U8 *s|NN const U8 *const target
 s	|STRLEN	|sv_pos_b2u_midway|NN const U8 *s|NN const U8 *const target \
 		|NN const U8 *end|STRLEN endu
+s	|char *	|stringify_regexp|NN SV *sv|NN MAGIC *mg|NULLOK STRLEN *lp
+sn	|char *	|F0convert	|NV nv|NN char *endbuf|NN STRLEN *len
 s	|void	|reset_amagic	|NN SV *rv|const bool on
 #endif
 
@@ -1349,15 +1351,14 @@ sR	|HV *	|find_in_my_stash|NN const char *pkgname|I32 len
 sR	|char *	|tokenize_use	|int is_use|NN char*
 s	|SV*	|new_constant	|NULLOK const char *s|STRLEN len|NN const char *key|NN SV *sv \
 				|NULLOK SV *pv|NULLOK const char *type
-#  if defined(DEBUGGING)
-s	|int	|tokereport	|I32 rv
-#  endif
 s	|int	|ao		|int toketype
-s	|void	|depcom
 s	|const char*|incl_perldb
 #  if defined(PERL_CR_FILTER)
 s	|I32	|cr_textfilter	|int idx|NULLOK SV *sv|int maxlen
 s	|void	|strip_return	|NN SV *sv
+#  endif
+#  if defined(DEBUGGING)
+s	|int	|tokereport	|I32 rv
 #  endif
 #endif
 

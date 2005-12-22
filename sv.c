@@ -2456,7 +2456,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 				(SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
 			       == (SVs_OBJECT|SVs_SMG))
 			   && (mg = mg_find((SV *) referent, PERL_MAGIC_qr))) {
-		    return S_stringify_regexp(aTHX_ sv, mg, lp);
+		    return stringify_regexp(sv, mg, lp);
 		} else {
 		    const char *const typestr = sv_reftype((SV *) referent, 0);
 
@@ -7534,8 +7534,6 @@ Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     sv_vcatpvfn(sv, pat, patlen, args, svargs, svmax, maybe_tainted);
 }
 
-/* private function for use in sv_vcatpvfn via the EXPECT_NUMBER macro */
-
 STATIC I32
 S_expect_number(pTHX_ char** pattern)
 {
@@ -7549,10 +7547,9 @@ S_expect_number(pTHX_ char** pattern)
     }
     return var;
 }
-#define EXPECT_NUMBER(pattern, var) (var = S_expect_number(aTHX_ &pattern))
 
-static char *
-F0convert(NV nv, char *endbuf, STRLEN *len)
+STATIC char *
+S_F0convert(NV nv, char *endbuf, STRLEN *len)
 {
     const int neg = nv < 0;
     UV uv;
@@ -7703,7 +7700,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	STRLEN zeros = 0;
 	bool has_precis = FALSE;
 	STRLEN precis = 0;
-	I32 osvix = svix;
+	const I32 osvix = svix;
 	bool is_utf8 = FALSE;  /* is this item utf8?   */
 #ifdef HAS_LDBL_SPRINTF_BUG
 	/* This is to try to fix a bug with irix/nonstop-ux/powerux and
@@ -7767,7 +7764,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	[hlqLV]            size
     [%bcdefginopsux_DFOUX] format (mandatory)
 */
-	if (EXPECT_NUMBER(q, width)) {
+	if ( (width = expect_number(&q)) ) {
 	    if (*q == '$') {
 		++q;
 		efix = width;
@@ -7808,7 +7805,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
       tryasterisk:
 	if (*q == '*') {
 	    q++;
-	    if (EXPECT_NUMBER(q, ewix))
+	    if ( (ewix = expect_number(&q)) )
 		if (*q++ != '$')
 		    goto unknown;
 	    asterisk = TRUE;
@@ -7830,7 +7827,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	{
 	    if( *q == '0' ) 
 		fill = *q++;
-	    EXPECT_NUMBER(q, width);
+	    width = expect_number(&q);
 	}
 
 #ifdef CHECK_FORMAT
@@ -7894,7 +7891,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    q++;
 	    if (*q == '*') {
 		q++;
-		if (EXPECT_NUMBER(q, epix) && *q++ != '$')
+		if ( ((epix = expect_number(&q))) && (*q++ != '$') )
 		    goto unknown;
 		/* XXX: todo, support specified precision parameter */
 		if (epix)
@@ -8907,7 +8904,7 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
 		if (mg->mg_type == PERL_MAGIC_overload_table &&
 			AMT_AMAGIC((AMT*)mg->mg_ptr))
 		{
-		    AMT * const amtp = (AMT*)mg->mg_ptr;
+		    const AMT * const amtp = (AMT*)mg->mg_ptr;
 		    AMT * const namtp = (AMT*)nmg->mg_ptr;
 		    I32 i;
 		    for (i = 1; i < NofAMmeth; i++) {
@@ -9034,7 +9031,7 @@ void
 Perl_ptr_table_clear(pTHX_ PTR_TBL_t *tbl)
 {
     if (tbl && tbl->tbl_items) {
-	register PTR_TBL_ENT_t **array = tbl->tbl_ary;
+	register PTR_TBL_ENT_t * const * const array = tbl->tbl_ary;
 	UV riter = tbl->tbl_max;
 
 	do {
@@ -9442,8 +9439,8 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
     ptr_table_store(PL_ptr_table, cxs, ncxs);
 
     while (ix >= 0) {
-	PERL_CONTEXT *cx = &cxs[ix];
-	PERL_CONTEXT *ncx = &ncxs[ix];
+	PERL_CONTEXT * const cx = &cxs[ix];
+	PERL_CONTEXT * const ncx = &ncxs[ix];
 	ncx->cx_type	= cx->cx_type;
 	if (CxTYPE(cx) == CXt_SUBST) {
 	    Perl_croak(aTHX_ "Cloning substitution context is unimplemented");

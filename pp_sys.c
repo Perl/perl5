@@ -3315,7 +3315,7 @@ PP(pp_fttext)
 PP(pp_chdir)
 {
     dSP; dTARGET;
-    const char *tmps = 0;
+    const char *tmps = NULL;
     GV *gv = 0;
     SV **svp;
 

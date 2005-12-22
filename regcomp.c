@@ -712,7 +712,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		}
 		else if (stringok) {
 		    const int oldl = STR_LEN(scan);
-		    regnode *nnext = regnext(n);
+		    regnode * const nnext = regnext(n);
 
 		    if (oldl + STR_LEN(n) > U8_MAX)
 			break;
@@ -757,8 +757,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
    another valid sequence of UTF-8 bytes.
 
 */
-		 char *s0 = STRING(scan), *s, *t;
-		 char *s1 = s0 + STR_LEN(scan) - 1, *s2 = s1 - 4;
+		 char * const s0 = STRING(scan), *s, *t;
+		 char * const s1 = s0 + STR_LEN(scan) - 1;
+		 char * const s2 = s1 - 4;
 		 const char * const t0 = "\xcc\x88\xcc\x81";
 		 const char * const t1 = t0 + 3;
 
@@ -908,11 +909,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	}
 	else if (OP(scan) == EXACT) {
 	    I32 l = STR_LEN(scan);
-	    UV uc = *((U8*)STRING(scan));
+	    UV uc;
 	    if (UTF) {
 		const U8 * const s = (U8*)STRING(scan);
 		l = utf8_length((U8 *)s, (U8 *)s + l);
 		uc = utf8_to_uvchr((U8 *)s, NULL);
+	    } else {
+		uc = *((U8*)STRING(scan));
 	    }
 	    min += l;
 	    if (flags & SCF_DO_SUBSTR) { /* Update longest substr. */
@@ -1258,7 +1261,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		if (data && fl & (SF_HAS_PAR|SF_IN_PAR))
 		    pars++;
 		if (flags & SCF_DO_SUBSTR) {
-		    SV *last_str = Nullsv;
+		    SV *last_str = NULL;
 		    int counted = mincount != 0;
 
 		    if (data->last_end > 0 && mincount != 0) { /* Ends with a string. */
@@ -1786,7 +1789,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     REGC((U8)REG_MAGIC, (char*)RExC_emit);
 #endif
     if (reg(pRExC_state, 0, &flags) == NULL) {
-	RExC_precomp = Nullch;
+	RExC_precomp = NULL;
 	return(NULL);
     }
     DEBUG_r(PerlIO_printf(Perl_debug_log, "size %"IVdf" ", (IV)RExC_size));
@@ -1985,10 +1988,10 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 
 	    if (SvUTF8(data.longest_float)) {
 		r->float_utf8 = data.longest_float;
-		r->float_substr = Nullsv;
+		r->float_substr = NULL;
 	    } else {
 		r->float_substr = data.longest_float;
-		r->float_utf8 = Nullsv;
+		r->float_utf8 = NULL;
 	    }
 	    r->float_min_offset = data.offset_float_min;
 	    r->float_max_offset = data.offset_float_max;
@@ -1999,7 +2002,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	}
 	else {
 	  remove_float:
-	    r->float_substr = r->float_utf8 = Nullsv;
+	    r->float_substr = r->float_utf8 = NULL;
 	    SvREFCNT_dec(data.longest_float);
 	    longest_float_length = 0;
 	}
@@ -2013,10 +2016,10 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 
 	    if (SvUTF8(data.longest_fixed)) {
 		r->anchored_utf8 = data.longest_fixed;
-		r->anchored_substr = Nullsv;
+		r->anchored_substr = NULL;
 	    } else {
 		r->anchored_substr = data.longest_fixed;
-		r->anchored_utf8 = Nullsv;
+		r->anchored_utf8 = NULL;
 	    }
 	    r->anchored_offset = data.offset_fixed;
 	    t = (data.flags & SF_FIX_BEFORE_EOL /* Can't have SEOL and MULTI */
@@ -2025,7 +2028,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    fbm_compile(data.longest_fixed, t ? FBMcf_TAIL : 0);
 	}
 	else {
-	    r->anchored_substr = r->anchored_utf8 = Nullsv;
+	    r->anchored_substr = r->anchored_utf8 = NULL;
 	    SvREFCNT_dec(data.longest_fixed);
 	    longest_fixed_length = 0;
 	}
@@ -2089,7 +2092,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	data.last_closep = &last_close;
 	minlen = study_chunk(pRExC_state, &scan, &fake, scan + RExC_size, &data, SCF_DO_STCLASS_AND|SCF_WHILEM_VISITED_POS);
 	r->check_substr = r->check_utf8 = r->anchored_substr = r->anchored_utf8
-		= r->float_substr = r->float_utf8 = Nullsv;
+		= r->float_substr = r->float_utf8 = NULL;
 	if (!(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class))
 	{
@@ -2638,7 +2641,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
     if (op == '{' && regcurly(RExC_parse)) {
         parse_start = RExC_parse; /* MJD */
 	next = RExC_parse + 1;
-	maxpos = Nullch;
+	maxpos = NULL;
 	while (isDIGIT(*next) || *next == ',') {
 	    if (*next == ',') {
 		if (maxpos)
@@ -3576,7 +3579,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
     IV namedclass;
     char *rangebegin = 0;
     bool need_class = 0;
-    SV *listsv = Nullsv;
+    SV *listsv = NULL;
     register char *e;
     UV n;
     bool optimize_invert   = TRUE;
@@ -4586,7 +4589,7 @@ void
 Perl_regdump(pTHX_ regexp *r)
 {
 #ifdef DEBUGGING
-    SV *sv = sv_newmortal();
+    SV * const sv = sv_newmortal();
 
     (void)dumpuntil(r->program, r->program + 1, NULL, sv, 0);
 
@@ -4840,7 +4843,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 
 		{
 		    char *s = savesvpv(lv);
-		    char *origs = s;
+		    char * const origs = s;
 		
 		    while(*s && *s != '\n') s++;
 		
@@ -4899,13 +4902,13 @@ void
 Perl_pregfree(pTHX_ struct regexp *r)
 {
 #ifdef DEBUGGING
-    SV *dsv = PERL_DEBUG_PAD_ZERO(0);
+    SV * const dsv = PERL_DEBUG_PAD_ZERO(0);
 #endif
 
     if (!r || (--r->refcnt > 0))
 	return;
     DEBUG_r({
-        const char *s = (r->reganch & ROPT_UTF8)
+        const char * const s = (r->reganch & ROPT_UTF8)
             ? pv_uni_display(dsv, (U8*)r->precomp, r->prelen, 60, UNI_DISPLAY_REGEX)
             : pv_display(dsv, r->precomp, r->prelen, 0, 60);
         const int len = SvCUR(dsv);
@@ -4959,8 +4962,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
 		    Perl_croak(aTHX_ "panic: pregfree comppad");
 		PAD_SAVE_LOCAL(old_comppad,
 		    /* Watch out for global destruction's random ordering. */
-		    (SvTYPE(new_comppad) == SVt_PVAV) ?
-		    		new_comppad : Null(PAD *)
+		    (SvTYPE(new_comppad) == SVt_PVAV) ? new_comppad : NULL
 		);
 		OP_REFCNT_LOCK;
 		refcnt = OpREFCNT_dec((OP_4tree*)r->data->data[n]);
@@ -5098,28 +5100,27 @@ Perl_save_re_context(pTHX)
 
     PL_reg_start_tmp = 0;
     PL_reg_start_tmpl = 0;
-    PL_reg_oldsaved = Nullch;
+    PL_reg_oldsaved = NULL;
     PL_reg_oldsavedlen = 0;
     PL_reg_maxiter = 0;
     PL_reg_leftiter = 0;
-    PL_reg_poscache = Nullch;
+    PL_reg_poscache = NULL;
     PL_reg_poscache_size = 0;
 
-    {
-	/* Save $1..$n (#18107: UTF-8 s/(\w+)/uc($1)/e); AMS 20021106. */
-	REGEXP *rx;
-
-	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
+    /* Save $1..$n (#18107: UTF-8 s/(\w+)/uc($1)/e); AMS 20021106. */
+    if (PL_curpm) {
+	const REGEXP * const rx = PM_GETRE(PL_curpm);
+	if (rx) {
 	    U32 i;
 	    for (i = 1; i <= rx->nparens; i++) {
-		GV *mgv;
 		char digits[TYPE_CHARS(long)];
 #ifdef USE_SNPRINTF
 		const STRLEN len = snprintf(digits, sizeof(digits), "%lu", (long)i);
 #else
 		const STRLEN len = my_sprintf(digits, "%lu", (long)i);
 #endif /* #ifdef USE_SNPRINTF */
-		if ((mgv = gv_fetchpvn_flags(digits, len, 0, SVt_PV)))
+		GV * const mgv = gv_fetchpvn_flags(digits, len, 0, SVt_PV);
+		if (mgv)
 		    save_scalar(mgv);
 	    }
 	}

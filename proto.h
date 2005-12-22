@@ -207,8 +207,7 @@ PERL_CALLCONV int	Perl_printf_nocontext(const char* fmt, ...)
 PERL_CALLCONV void	Perl_cv_ckproto(pTHX_ CV* cv, GV* gv, char* p);
 PERL_CALLCONV CV*	Perl_cv_clone(pTHX_ CV* proto);
 PERL_CALLCONV SV*	Perl_gv_const_sv(pTHX_ GV* gv)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__warn_unused_result__;
 
 PERL_CALLCONV SV*	Perl_cv_const_sv(pTHX_ CV* cv)
 			__attribute__warn_unused_result__;
@@ -1671,6 +1670,7 @@ STATIC void	S_run_body(pTHX_ I32 oldscope)
 
 STATIC void	S_call_body(pTHX_ const OP *myop, bool is_eval);
 STATIC void*	S_call_list_body(pTHX_ CV *cv);
+STATIC SV *	S_incpush_if_exists(pTHX_ SV *dir);
 #if defined(PERL_FLEXIBLE_EXCEPTIONS)
 STATIC void*	S_vparse_body(pTHX_ va_list args);
 STATIC void*	S_vrun_body(pTHX_ va_list args);
@@ -1680,9 +1680,6 @@ STATIC void*	S_vcall_list_body(pTHX_ va_list args);
 #  if defined(USE_5005THREADS)
 STATIC struct perl_thread *	S_init_main_thread(pTHX);
 #  endif
-STATIC SV *	S_incpush_if_exists(pTHX_ SV *dir)
-			__attribute__nonnull__(pTHX_1);
-
 #endif
 
 #if defined(PERL_IN_PP_C) || defined(PERL_DECL_PROT)
@@ -1704,8 +1701,7 @@ STATIC int	S_div128(pTHX_ SV *pnum, bool *done);
 STATIC const char *	S_group_end(pTHX_ const char *pat, const char *patend, char ender);
 STATIC const char *	S_get_num(pTHX_ const char *ppat, I32 *lenptr);
 STATIC char *	S_sv_exp_grow(pTHX_ SV *sv, STRLEN needed)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__warn_unused_result__;
 
 #endif
 
@@ -1755,8 +1751,7 @@ STATIC bool	S_path_is_absolute(pTHX_ const char *name)
 			__attribute__warn_unused_result__;
 
 STATIC I32	S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_2);
+			__attribute__warn_unused_result__;
 
 #endif
 
@@ -1772,42 +1767,15 @@ STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp)
 #endif
 
 #if defined(PERL_IN_PP_SORT_C) || defined(PERL_DECL_PROT)
-STATIC I32	S_sv_ncmp(pTHX_ SV *a, SV *b)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-
-STATIC I32	S_sv_i_ncmp(pTHX_ SV *a, SV *b)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-
-STATIC I32	S_amagic_ncmp(pTHX_ SV *a, SV *b)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-
-STATIC I32	S_amagic_i_ncmp(pTHX_ SV *a, SV *b)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-
-STATIC I32	S_amagic_cmp(pTHX_ SV *a, SV *b)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-
-STATIC I32	S_amagic_cmp_locale(pTHX_ SV *a, SV *b)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-
-STATIC I32	S_sortcv(pTHX_ SV *a, SV *b)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-
-STATIC I32	S_sortcv_xsub(pTHX_ SV *a, SV *b)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-
-STATIC I32	S_sortcv_stacked(pTHX_ SV *a, SV *b)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-
+STATIC I32	S_sv_ncmp(pTHX_ SV *a, SV *b);
+STATIC I32	S_sv_i_ncmp(pTHX_ SV *a, SV *b);
+STATIC I32	S_amagic_ncmp(pTHX_ SV *a, SV *b);
+STATIC I32	S_amagic_i_ncmp(pTHX_ SV *a, SV *b);
+STATIC I32	S_amagic_cmp(pTHX_ SV *a, SV *b);
+STATIC I32	S_amagic_cmp_locale(pTHX_ SV *a, SV *b);
+STATIC I32	S_sortcv(pTHX_ SV *a, SV *b);
+STATIC I32	S_sortcv_xsub(pTHX_ SV *a, SV *b);
+STATIC I32	S_sortcv_stacked(pTHX_ SV *a, SV *b);
 #endif
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
@@ -1899,8 +1867,6 @@ STATIC void	S_to_byte_substr(pTHX_ regexp * prog);
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 STATIC CV*	S_deb_curcv(pTHX_ I32 ix);
 STATIC void	S_debprof(pTHX_ const OP *o);
-STATIC void	S_sequence(pTHX_ const OP *o);
-STATIC UV	S_sequence_num(pTHX_ const OP *o);
 #endif
 
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
@@ -1932,6 +1898,8 @@ STATIC STRLEN	S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const sta
 STATIC void	S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8, STRLEN blen);
 STATIC STRLEN	S_sv_pos_b2u_forwards(pTHX_ const U8 *s, const U8 *const target);
 STATIC STRLEN	S_sv_pos_b2u_midway(pTHX_ const U8 *s, const U8 *const target, const U8 *end, STRLEN endu);
+STATIC char *	S_stringify_regexp(pTHX_ SV *sv, MAGIC *mg, STRLEN *lp);
+STATIC char *	S_F0convert(NV nv, char *endbuf, STRLEN *len);
 STATIC void	S_reset_amagic(pTHX_ SV *rv, const bool on);
 #endif
 
@@ -2004,17 +1972,14 @@ STATIC char *	S_tokenize_use(pTHX_ int is_use, char*)
 			__attribute__warn_unused_result__;
 
 STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv, const char *type);
-#  if defined(DEBUGGING)
-STATIC int	S_tokereport(pTHX_ I32 rv);
-#  endif
 STATIC int	S_ao(pTHX_ int toketype);
-STATIC void	S_depcom(pTHX);
 STATIC const char*	S_incl_perldb(pTHX);
 #  if defined(PERL_CR_FILTER)
 STATIC I32	S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen);
-STATIC void	S_strip_return(pTHX_ SV *sv)
-			__attribute__nonnull__(pTHX_1);
-
+STATIC void	S_strip_return(pTHX_ SV *sv);
+#  endif
+#  if defined(DEBUGGING)
+STATIC int	S_tokereport(pTHX_ I32 rv);
 #  endif
 #endif
 
@@ -2046,8 +2011,7 @@ STATIC bool	S_is_utf8_common(pTHX_ const U8 *const p, SV **swash, const char * c
 			__attribute__warn_unused_result__;
 
 STATIC SV*	S_swash_get(pTHX_ SV* swash, UV start, UV span)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__warn_unused_result__;
 
 #endif
 

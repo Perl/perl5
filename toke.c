@@ -27,6 +27,7 @@
 #define yylval	PL_yylval
 
 static const char ident_too_long[] = "Identifier too long";
+static const char commaless_variable_list[] = "comma-less variable list";
 
 static void restore_rsfp(pTHX_ void *f);
 #ifndef PERL_NO_UTF16_FILTER
@@ -488,17 +489,6 @@ Perl_deprecate_old(pTHX_ char *s)
     if (ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
 	Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 			"Use of %s is deprecated", s);
-}
-
-/*
- * depcom
- * Deprecate a comma-less variable list.
- */
-
-STATIC void
-S_depcom(pTHX)
-{
-    deprecate_old("comma-less variable list");
 }
 
 /*
@@ -3716,7 +3706,7 @@ Perl_yylex(pTHX)
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
-		depcom();
+		deprecate_old(commaless_variable_list);
 		return REPORT(','); /* grandfather non-comma-format format */
 	    }
 	}
@@ -3945,7 +3935,7 @@ Perl_yylex(pTHX)
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
-		depcom();
+		deprecate_old(commaless_variable_list);
 		return REPORT(','); /* grandfather non-comma-format format */
 	    }
 	    else
@@ -3962,7 +3952,7 @@ Perl_yylex(pTHX)
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
-		depcom();
+		deprecate_old(commaless_variable_list);
 		return REPORT(','); /* grandfather non-comma-format format */
 	    }
 	    else

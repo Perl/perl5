@@ -161,7 +161,7 @@ PP(pp_substcont)
     register char *m = cx->sb_m;
     char *orig = cx->sb_orig;
     register REGEXP * const rx = cx->sb_rx;
-    SV *nsv = Nullsv;
+    SV *nsv = NULL;
     REGEXP *old = PM_GETRE(pm);
     if(old != rx) {
 	if(old)
@@ -246,7 +246,7 @@ PP(pp_substcont)
 	if (SvTYPE(sv) < SVt_PVMG)
 	    (void)SvUPGRADE(sv, SVt_PVMG);
 	if (!(mg = mg_find(sv, PERL_MAGIC_regex_global))) {
-	    sv_magic(sv, Nullsv, PERL_MAGIC_regex_global, Nullch, 0);
+	    sv_magic(sv, NULL, PERL_MAGIC_regex_global, NULL, 0);
 	    mg = mg_find(sv, PERL_MAGIC_regex_global);
 	}
 	i = m - orig;
@@ -276,7 +276,7 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
 	*rsp = (void*)p;
     }
 
-    *p++ = PTR2UV(RX_MATCH_COPIED(rx) ? rx->subbeg : Nullch);
+    *p++ = PTR2UV(RX_MATCH_COPIED(rx) ? rx->subbeg : NULL);
     RX_MATCH_COPIED_off(rx);
 
     *p++ = rx->nparens;
@@ -337,14 +337,14 @@ PP(pp_formline)
     register char *t;
     const char *f;
     register I32 arg;
-    register SV *sv = Nullsv;
-    const char *item = Nullch;
+    register SV *sv = NULL;
+    const char *item = NULL;
     I32 itemsize  = 0;
     I32 fieldsize = 0;
     I32 lines = 0;
-    bool chopspace = (strchr(PL_chopset, ' ') != Nullch);
-    const char *chophere = Nullch;
-    char *linemark = Nullch;
+    bool chopspace = (strchr(PL_chopset, ' ') != NULL);
+    const char *chophere = NULL;
+    char *linemark = NULL;
     NV value;
     bool gotsome = FALSE;
     STRLEN len;
@@ -352,7 +352,7 @@ PP(pp_formline)
 			? (SvCUR(tmpForm) * (IN_BYTES ? 1 : 3) + 1) : 0;
     bool item_is_utf8 = FALSE;
     bool targ_is_utf8 = FALSE;
-    SV * nsv = Nullsv;
+    SV * nsv = NULL;
     OP * parseres = 0;
     const char *fmt;
     bool oneline;
@@ -1330,7 +1330,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 	    if (PL_in_eval & EVAL_KEEPERR) {
                 static const char prefix[] = "\t(in cleanup) ";
 		SV * const err = ERRSV;
-                const char *e = Nullch;
+		const char *e = NULL;
 		if (!SvPOK(err))
 		    sv_setpvn(err,"",0);
 		else if (SvCUR(err) >= sizeof(prefix)+msglen-1) {
@@ -1338,7 +1338,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 		    e = SvPV_const(err, len);
 		    e += len - msglen;
 		    if (*e != *message || strNE(e,message))
-			e = Nullch;
+			e = NULL;
 		}
 		if (!e) {
 		    SvGROW(err, SvCUR(err)+sizeof(prefix)+msglen);
@@ -1493,7 +1493,7 @@ PP(pp_caller)
 	/* So is ccstack[dbcxix]. */
 	if (isGV(cvgv)) {
 	    SV * const sv = NEWSV(49, 0);
-	    gv_efullname3(sv, cvgv, Nullch);
+	    gv_efullname3(sv, cvgv, NULL);
 	    PUSHs(sv_2mortal(sv));
 	    PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
 	}
@@ -1912,7 +1912,7 @@ PP(pp_return)
 	POPSUB(cx,sv);	/* release CV and @_ ... */
     }
     else
-	sv = Nullsv;
+	sv = NULL;
     PL_curpm = newpm;	/* ... and pop $1 et al */
 
     LEAVESUB(sv);
@@ -1933,7 +1933,7 @@ PP(pp_last)
     SV **newsp;
     PMOP *newpm;
     SV **mark;
-    SV *sv = Nullsv;
+    SV *sv = NULL;
 
 
     if (PL_op->op_flags & OPf_SPECIAL) {
@@ -2163,7 +2163,7 @@ PP(pp_goto)
 		    if (autogv && (cv = GvCV(autogv)))
 			goto retry;
 		    tmpstr = sv_newmortal();
-		    gv_efullname3(tmpstr, (GV *) gv, Nullch);
+		    gv_efullname3(tmpstr, (GV *) gv, NULL);
 		    DIE(aTHX_ "Goto undefined subroutine &%"SVf"",tmpstr);
 		}
 		DIE(aTHX_ "Goto undefined subroutine");
@@ -2361,7 +2361,7 @@ PP(pp_goto)
 			(void)SvIOK_on(sv);
 			SvIV_set(sv, PTR2IV(cv)); /* Do it the quickest way */
 		    } else {
-			gv_efullname3(sv, CvGV(cv), Nullch);
+			gv_efullname3(sv, CvGV(cv), NULL);
 		    }
 		    if (PERLDB_GOTO) {
 			CV * const gotocv = get_cv("DB::goto", FALSE);
@@ -2930,8 +2930,7 @@ STATIC PerlIO *
 S_check_type_and_open(pTHX_ const char *name, const char *mode)
 {
     Stat_t st;
-    int st_rc;
-    st_rc = PerlLIO_stat(name, &st);
+    const int st_rc = PerlLIO_stat(name, &st);
     if (st_rc < 0) {
 	return NULL;
     }
@@ -2986,8 +2985,8 @@ PP(pp_require)
     SV *sv;
     const char *name;
     STRLEN len;
-    const char *tryname = Nullch;
-    SV *namesv = Nullsv;
+    const char *tryname = NULL;
+    SV *namesv = NULL;
     const I32 gimme = GIMME_V;
     int filter_has_file = 0;
     PerlIO *tryrsfp = NULL;
@@ -3121,7 +3120,7 @@ PP(pp_require)
 	I32 i;
 #ifdef VMS
 	char *unixname;
-	if ((unixname = tounixspec(name, Nullch)) != Nullch)
+	if ((unixname = tounixspec(name, NULL)) != NULL)
 #endif
 	{
 	    namesv = NEWSV(806, 0);
@@ -3141,7 +3140,7 @@ PP(pp_require)
 		    Perl_sv_setpvf(aTHX_ namesv, "/loader/0x%"UVxf"/%s",
 				   PTR2UV(SvRV(dirsv)), name);
 		    tryname = SvPVX_const(namesv);
-		    tryrsfp = 0;
+		    tryrsfp = NULL;
 
 		    ENTER;
 		    SAVETMPS;
@@ -3230,11 +3229,11 @@ PP(pp_require)
 		    }
 		    if (filter_state) {
 			SvREFCNT_dec(filter_state);
-			filter_state = 0;
+			filter_state = NULL;
 		    }
 		    if (filter_sub) {
 			SvREFCNT_dec(filter_sub);
-			filter_sub = 0;
+			filter_sub = NULL;
 		    }
 		}
 		else {
@@ -3256,7 +3255,7 @@ PP(pp_require)
 #else
 #  ifdef VMS
 		    char *unixdir;
-		    if ((unixdir = tounixpath(dir, Nullch)) == Nullch)
+		    if ((unixdir = tounixpath(dir, NULL)) == NULL)
 			continue;
 		    sv_setpv(namesv, unixdir);
 		    sv_catpv(namesv, unixname);
@@ -3362,10 +3361,10 @@ PP(pp_require)
     else
         PL_compiling.cop_warnings = pWARN_STD ;
     SAVESPTR(PL_compiling.cop_io);
-    PL_compiling.cop_io = Nullsv;
+    PL_compiling.cop_io = NULL;
 
     if (filter_sub || filter_cache) {
-	SV * const datasv = filter_add(S_run_user_filter, Nullsv);
+	SV * const datasv = filter_add(S_run_user_filter, NULL);
 	IoLINES(datasv) = filter_has_file;
 	IoTOP_GV(datasv) = (GV *)filter_state;
 	IoBOTTOM_GV(datasv) = (GV *)filter_sub;
@@ -3392,7 +3391,7 @@ PP(pp_require)
 
     /* Store and reset encoding. */
     encoding = PL_encoding;
-    PL_encoding = Nullsv;
+    PL_encoding = NULL;
 
     op = DOCATCH(doeval(gimme, NULL, Nullcv, PL_curcop->cop_seq));
 
@@ -3599,7 +3598,6 @@ PP(pp_entertry)
 PP(pp_leavetry)
 {
     dSP;
-    register SV **mark;
     SV **newsp;
     PMOP *newpm;
     OP* retop;
@@ -3616,6 +3614,7 @@ PP(pp_leavetry)
     if (gimme == G_VOID)
 	SP = newsp;
     else if (gimme == G_SCALAR) {
+	register SV **mark;
 	MARK = newsp + 1;
 	if (MARK <= SP) {
 	    if (SvFLAGS(TOPs) & (SVs_PADTMP|SVs_TEMP))
@@ -3631,6 +3630,7 @@ PP(pp_leavetry)
     }
     else {
 	/* in case LEAVE wipes old return values */
+	register SV **mark;
 	for (mark = newsp + 1; mark <= SP; mark++) {
 	    if (!(SvFLAGS(*mark) & (SVs_PADTMP|SVs_TEMP))) {
 		*mark = sv_mortalcopy(*mark);
@@ -3650,8 +3650,8 @@ S_doparseform(pTHX_ SV *sv)
 {
     STRLEN len;
     register char *s = SvPV_force(sv, len);
-    register char *send = s + len;
-    register char *base = Nullch;
+    register char * const send = s + len;
+    register char *base = NULL;
     register I32 skipspaces = 0;
     bool noblank   = FALSE;
     bool repeat    = FALSE;
@@ -3673,7 +3673,7 @@ S_doparseform(pTHX_ SV *sv)
 	    maxops += 10;
     }
     s = base;
-    base = Nullch;
+    base = NULL;
 
     Newx(fops, maxops, U32);
     fpc = fops;
@@ -3854,7 +3854,7 @@ S_doparseform(pTHX_ SV *sv)
     }
     Copy(fops, s, arg, U32);
     Safefree(fops);
-    sv_magic(sv, Nullsv, PERL_MAGIC_fm, Nullch, 0);
+    sv_magic(sv, NULL, PERL_MAGIC_fm, NULL, 0);
     SvCOMPILED_on(sv);
 
     if (unchopnum && repeat)
@@ -3895,7 +3895,6 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
     SV * const datasv = FILTER_DATA(idx);
     const int filter_has_file = IoLINES(datasv);
-    GV * const filter_child_proc = (GV *)IoFMT_GV(datasv);
     SV * const filter_state = (SV *)IoTOP_GV(datasv);
     SV * const filter_sub = (SV *)IoBOTTOM_GV(datasv);
     int status = 0;
