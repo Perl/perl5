@@ -16,12 +16,17 @@
 #    define USE_UTF8_IN_NAMES (PL_hints & HINT_UTF8)
 #endif
 
+/* Source backward compatibility. */
+#define uvuni_to_utf8(d, uv)		uvuni_to_utf8_flags(d, uv, 0)
+#define is_utf8_string_loc(s, len, ep)	is_utf8_string_loclen(s, len, ep, 0)
+
 #ifdef EBCDIC
 /* The equivalent of these macros but implementing UTF-EBCDIC
    are in the following header file:
  */
 
 #include "utfebcdic.h"
+
 #else
 START_EXTERN_C
 
@@ -331,8 +336,5 @@ encoded character.
 	 (n) == 4 ? IS_UTF8_CHAR_4(p) : 0)
 
 #define IS_UTF8_CHAR_FAST(n) ((n) <= 4)
-
-#define uvuni_to_utf8(d, uv)		uvuni_to_utf8_flags(d, uv, 0)
-#define is_utf8_string_loc(s, len, ep)	is_utf8_string_loclen(s, len, ep, 0)
 
 #endif /* IS_UTF8_CHAR() for UTF-8 */
