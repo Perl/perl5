@@ -5,7 +5,6 @@ use vars qw($VERSION $is_perl56);
 use Carp;
 use Text::Wrap;
 use ExtUtils::Constant::Utils qw(C_stringify perl_stringify);
-
 $VERSION = '0.02';
 
 $is_perl56 = ($] < 5.007 && $] > 5.005_50);
@@ -67,6 +66,29 @@ sub return_statement_for_notfound;
 # "#if 1" is true to a C pre-processor
 sub macro_from_name {
   1;
+}
+
+sub macro_to_ifdef {
+    my ($self, $macro) = @_;
+    if (ref $macro) {
+	return $macro->[0];
+    }
+    if (defined $macro && $macro ne "" && $macro ne "1") {
+	return "#ifdef $macro\n";
+    }
+    return "";
+}
+
+sub macro_to_endif {
+    my ($self, $macro) = @_;
+
+    if (ref $macro) {
+	return $macro->[1];
+    }
+    if (defined $macro && $macro ne "" && $macro ne "1") {
+	return "#endif\n";
+    }
+    return "";
 }
 
 sub name_param {
@@ -353,22 +375,14 @@ sub return_clause {
     = @$item{qw (name value macro default pre post def_pre def_post type)};
   $value = $name unless defined $value;
   $macro = $self->macro_from_name($item) unless defined $macro;
-  # "#if 1" is true to a C pre-processor
-  $macro = 1 if !defined $macro or $macro eq '';
   $indent = ' ' x ($indent || 6);
   unless (defined $type) {
     # use Data::Dumper; print STDERR Dumper ($item);
     confess "undef \$type";
   }
 
-  my $clause;
-
   ##ifdef thingy
-  if (ref $macro) {
-    $clause = $macro->[0];
-  } elsif ($macro ne "1") {
-    $clause = "#ifdef $macro\n";
-  }
+  my $clause = $self->macro_to_ifdef($macro);
 
   #      *iv_return = thingy;
   #      return PERL_constant_ISIV;
@@ -376,7 +390,7 @@ sub return_clause {
     .= $self->assign ({indent=>$indent, type=>$type, pre=>$pre, post=>$post,
 		       item=>$item}, ref $value ? @$value : $value);
 
-  if (ref $macro or $macro ne "1") {
+  if (defined $macro && $macro ne "" && $macro ne "1") {
     ##else
     $clause .= "#else\n";
 
@@ -390,14 +404,10 @@ sub return_clause {
       $clause .= $self->assign ({indent=>$indent, type=>$type, pre=>$pre,
 				 post=>$post, item=>$item}, @default);
     }
-
-    ##endif
-    if (ref $macro) {
-      $clause .= $macro->[1];
-    } else {
-      $clause .= "#endif\n";
-    }
   }
+  ##endif
+  $clause .= $self->macro_to_endif($macro);
+
   return $clause;
 }
 
@@ -643,7 +653,7 @@ sub dogfood {
   ''
 }
 
-=item normalise_items default_type, seen_types, seen_items, ITEM...
+=item normalise_items args, default_type, seen_types, seen_items, ITEM...
 
 Convert the items to a normalised form. For 8 bit and Unicode values converts
 the item to an array of 1 or 2 items, both 8 bit and UTF-8 encoded.
@@ -653,6 +663,7 @@ the item to an array of 1 or 2 items, both 8 bit and UTF-8 encoded.
 sub normalise_items
 {
     my $self = shift;
+    my $args = shift;
     my $default_type = shift;
     my $what = shift;
     my $items = shift;
@@ -687,7 +698,8 @@ sub normalise_items
       # tr///c is broken on 5.6.1 for utf8, so my original tr/\0-\177//c
       # doesn't work. Upgrade to 5.8
       # if ($name !~ tr/\0-\177//c || $] < 5.005_50) {
-      if ($name =~ tr/\0-\177// == length $name || $] < 5.005_50) {
+      if ($name =~ tr/\0-\177// == length $name || $] < 5.005_50
+	 || $args->{disable_utf8_duplication}) {
         # No characters outside 7 bit ASCII.
         if (exists $items->{$name}) {
           die "Multiple definitions for macro $name";
@@ -882,7 +894,7 @@ sub C_constant {
       # Figure out what types we're dealing with, and assign all unknowns to the
       # default type
     }
-    @items = $self->normalise_items ($default_type, $what, $items, @items);
+    @items = $self->normalise_items ({}, $default_type, $what, $items, @items);
     # use Data::Dumper; print Dumper @items;
   }
   my $params = $self->params ($what);
