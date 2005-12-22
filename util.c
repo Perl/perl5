@@ -303,9 +303,11 @@ Perl_instr(pTHX_ register const char *big, register const char *little)
 	for (x=big,s=little; *s; /**/ ) {
 	    if (!*x)
 		return Nullch;
-	    if (*s++ != *x++) {
-		s--;
+	    if (*s != *x)
 		break;
+	    else {
+		s++;
+		x++;
 	    }
 	}
 	if (!*s)
@@ -332,9 +334,11 @@ Perl_ninstr(pTHX_ register const char *big, register const char *bigend, const c
 	if (*big++ != first)
 	    continue;
 	for (x=big,s=little; s < littleend; /**/ ) {
-	    if (*s++ != *x++) {
-		s--;
+	    if (*s != *x)
 		break;
+	    else {
+		s++;
+		x++;
 	    }
 	}
 	if (s >= littleend)
@@ -361,9 +365,11 @@ Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *lit
 	if (*big-- != first)
 	    continue;
 	for (x=big+2,s=little; s < littleend; /**/ ) {
-	    if (*s++ != *x++) {
-		s--;
+	    if (*s != *x)
 		break;
+	    else {
+		x++;
+		s++;
 	    }
 	}
 	if (s >= littleend)
