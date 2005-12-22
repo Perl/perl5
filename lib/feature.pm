@@ -1,7 +1,7 @@
 package feature;
 
 our $VERSION = '1.00';
-$feature::hint_bits = 0x04020000; # HINT_LOCALIZE_HH | HINT_HH_FOR_EVAL
+$feature::hint_bits = 0x00020000; # HINT_LOCALIZE_HH
 
 # (feature name) => (internal name, used in %^H)
 my %feature = (

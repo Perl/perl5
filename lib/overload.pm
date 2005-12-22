@@ -783,9 +783,6 @@ From these methods they may be called as
 	  overload::constant integer => sub {Math::BigInt->new(shift)};
 	}
 
-B<BUGS> Currently overloaded-ness of constants does not propagate
-into C<eval '...'>.
-
 =head1 IMPLEMENTATION
 
 What follows is subject to change RSN.
