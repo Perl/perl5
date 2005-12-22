@@ -1119,6 +1119,19 @@ Return the SV from the GV.
 =for hackers
 Found in file gv.h
 
+=item gv_const_sv
+X<gv_const_sv>
+
+If C<gv> is a typeglob whose subroutine entry is a constant sub eligible for
+inlining, or C<gv> is a placeholder reference that would be promoted to such
+a typeglob, then returns the value returned by the sub.  Otherwise, returns
+NULL.
+
+	SV*	gv_const_sv(GV* gv)
+
+=for hackers
+Found in file gv.c
+
 =item gv_fetchmeth
 X<gv_fetchmeth>
 
@@ -4554,6 +4567,7 @@ X<sv_2cv>
 
 Using various gambits, try to get a CV from an SV; in addition, try if
 possible to set C<*st> and C<*gvp> to the stash and GV associated with it.
+The flags in C<lref> are passed to sv_fetchsv.
 
 	CV*	sv_2cv(SV* sv, HV** st, GV** gvp, I32 lref)
 
