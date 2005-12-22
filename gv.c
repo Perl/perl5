@@ -742,7 +742,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     register const char *namend;
     HV *stash = 0;
     const I32 no_init = flags & (GV_NOADD_NOINIT | GV_NOINIT);
-    const I32 add = flags & ~SVf_UTF8 & ~ GV_NOADD_NOINIT;
+    const I32 no_expand = flags & GV_NOEXPAND;
+    const I32 add = flags & ~SVf_UTF8 & ~GV_NOADD_NOINIT & ~GV_NOEXPAND;
 
     PERL_UNUSED_ARG(full_len);
 
@@ -908,6 +909,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	}
 	return gv;
     } else if (no_init) {
+	return gv;
+    } else if (no_expand && SvROK(gv)) {
 	return gv;
     }
 

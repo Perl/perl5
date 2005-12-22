@@ -140,6 +140,7 @@ Deprecated.  Use C<GIMME_V> instead.
 
 /* Private for OP_SASSIGN */
 #define OPpASSIGN_BACKWARDS	64	/* Left & right switched. */
+#define OPpASSIGN_CV_TO_GV	128	/* Possible optimisation for constants. */
 
 /* Private for OP_MATCH and OP_SUBST{,CONST} */
 #define OPpRUNTIME		64	/* Pattern coming in on the stack */
@@ -180,6 +181,14 @@ Deprecated.  Use C<GIMME_V> instead.
   /* OP_RV2[AH]V, OP_PAD[AH]V, OP_[AH]ELEM */
 #define OPpMAYBE_LVSUB		8	/* We might be an lvalue to return */
   /* for OP_RV2?V, lower bits carry hints (currently only HINT_STRICT_REFS) */
+
+  /* OP_RV2GV only */
+#define OPpDONT_INIT_GV		8	/* Call gv_fetchpv with GV_NOINIT */
+/* (Therefore will return whatever is currently in the symbol table, not
+   guaranteed to be a PVGV)  */
+
+  /* OP_RV2CV only */
+#define OPpMAY_RETURN_CONSTANT	1	/* If a constant sub, return the constant */
 
 /* Private for OPs with TARGLEX */
   /* (lower bits may carry MAXARG) */

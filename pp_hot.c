@@ -116,6 +116,60 @@ PP(pp_sassign)
     }
     if (PL_tainting && PL_tainted && !SvTAINTED(left))
 	TAINT_NOT;
+    if (PL_op->op_private & OPpASSIGN_CV_TO_GV) {
+	SV *cv = SvRV(left);
+	const U32 cv_type = SvTYPE(cv);
+	const U32 gv_type = SvTYPE(right);
+	bool got_coderef = cv_type == SVt_PVCV || cv_type == SVt_PVFM;
+
+	if (!got_coderef) {
+	    assert(SvROK(cv));
+	}
+
+	/* Can do the optimisation if right (LVAUE) is not a typeglob,
+	   left (RVALUE) is a reference to something, and we're in void
+	   context. */
+	if (!got_coderef && gv_type != SVt_PVGV && GIMME_V == G_VOID) {
+	    /* Is the target symbol table currently empty?  */
+	    GV *gv = gv_fetchsv(right, GV_NOINIT, SVt_PVGV);
+	    if (!SvOK(gv)) {
+		/* Good. Create a new proxy constant subroutine in the target.
+		   The gv becomes a(nother) reference to the constant.  */
+		SV *const value = SvRV(cv);
+
+		SvUPGRADE((SV *)gv, SVt_RV);
+		SvROK_on(gv);
+		SvRV_set(gv, value);
+		SvREFCNT_inc(value);
+		SETs(right);
+		RETURN;
+	    }
+	}
+
+	/* Need to fix things up.  */
+	if (gv_type != SVt_PVGV) {
+	    /* Need to fix GV.  */
+	    right = (SV*)gv_fetchsv(right, GV_ADD, SVt_PVGV);
+	}
+
+	if (!got_coderef) {
+	    /* We've been returned a constant rather than a full subroutine,
+	       but they expect a subroutine reference to apply.  */
+	    ENTER;
+	    SvREFCNT_inc(SvRV(cv));
+	    /* newCONSTSUB takes a reference count on the passed in SV
+	       from us.  We set the name to NULL, otherwise we get into
+	       all sorts of fun as the reference to our new sub is
+	       donated to the GV that we're about to assign to.
+	    */
+	    SvRV_set(left, (SV *)newCONSTSUB(GvSTASH(right), NULL,
+						 SvRV(cv)));
+	    SvREFCNT_dec(cv);
+	    LEAVE;
+	    PerlIO_debug("Unwrap CV\n");
+	}
+
+    }
     SvSetMagicSV(right, left);
     SETs(right);
     RETURN;

@@ -95,7 +95,7 @@ use Carp;
 use Test::More tests => ( 1 * !!$Config::Config{useithreads}
 			  + 3 * ($] > 5.009)
 			  + 14 * ($] >= 5.009003)
-			  + 777 );
+			  + 780 );
 
 require_ok("B::Concise");
 

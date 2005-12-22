@@ -202,6 +202,13 @@ PP(pp_rv2gv)
 	    else {
 		if (PL_op->op_private & HINT_STRICT_REFS)
 		    DIE(aTHX_ PL_no_symref_sv, sv, "a symbol");
+		if ((PL_op->op_private & (OPpLVAL_INTRO|OPpDONT_INIT_GV))
+		    == OPpDONT_INIT_GV) {
+		    /* We are the target of a coderef assignment.  Return
+		       the scalar unchanged, and let pp_sasssign deal with
+		       things.  */
+		    RETURN;
+		}
 		sv = (SV*)gv_fetchsv(sv, GV_ADD, SVt_PVGV);
 	    }
 	}
@@ -337,11 +344,13 @@ PP(pp_rv2cv)
     dSP;
     GV *gv;
     HV *stash;
-
+    I32 flags = (PL_op->op_flags & OPf_SPECIAL) ? 0
+	: ((PL_op->op_private & (OPpLVAL_INTRO|OPpMAY_RETURN_CONSTANT))
+	   == OPpMAY_RETURN_CONSTANT) ? GV_ADD|GV_NOEXPAND : GV_ADD;
     /* We usually try to add a non-existent subroutine in case of AUTOLOAD. */
     /* (But not in defined().) */
-    CV *cv = sv_2cv(TOPs, &stash, &gv,
-		    (PL_op->op_flags & OPf_SPECIAL) ? 0 : GV_ADD);
+
+    CV *cv = sv_2cv(TOPs, &stash, &gv, flags);
     if (cv) {
 	if (CvCLONE(cv))
 	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
@@ -352,6 +361,9 @@ PP(pp_rv2cv)
 		DIE(aTHX_ "Can't modify non-lvalue subroutine call");
 	}
     }
+    else if ((flags == (GV_ADD|GV_NOEXPAND)) && gv && SvROK(gv)) {
+	cv = (CV*)gv;
+    }    
     else
 	cv = (CV*)&PL_sv_undef;
     SETs((SV*)cv);

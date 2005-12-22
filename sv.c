@@ -6778,6 +6778,11 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	    *st = NULL;
 	    return Nullcv;
 	}
+	/* Some flags to gv_fetchsv mean don't really create the GV  */
+	if (SvTYPE(gv) != SVt_PVGV) {
+	    *st = NULL;
+	    return NULL;
+	}
 	*st = GvESTASH(gv);
     fix_gv:
 	if (lref && !GvCVu(gv)) {

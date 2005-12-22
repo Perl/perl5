@@ -166,6 +166,7 @@ Return the SV from the GV.
    table into full PVGVs with attached constant subroutines.  */
 #define GV_NOADD_NOINIT	0x20	/* Don't add the symbol if it's not there.
 				   Don't init it if it is there but ! PVGV */
+#define GV_NOEXPAND	0x40	/* Don't expand SvOK() entries to PVGV */
 
 /*      SVf_UTF8 (more accurately the return value from SvUTF8) is also valid
 	as a flag to gv_fetch_pvn_flags, so ensure it lies outside this range.
