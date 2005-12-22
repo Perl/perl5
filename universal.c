@@ -140,29 +140,29 @@ for class names as well as for objects.
 bool
 Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
 {
-    const char *type = NULL;
-    HV *stash = NULL;
-    HV *name_stash;
+    HV *stash;
 
     SvGETMAGIC(sv);
 
     if (SvROK(sv)) {
+	const char *type;
         sv = SvRV(sv);
         type = sv_reftype(sv,0);
-        if (SvOBJECT(sv))
-            stash = SvSTASH(sv);
+	if (type && strEQ(type,name))
+	    return TRUE;
+	stash = SvOBJECT(sv) ? SvSTASH(sv) : NULL;
     }
     else {
         stash = gv_stashsv(sv, FALSE);
     }
 
-    name_stash = gv_stashpv(name, FALSE);
+    if (stash) {
+	HV * const name_stash = gv_stashpv(name, FALSE);
+	return isa_lookup(stash, name, name_stash, strlen(name), 0) == &PL_sv_yes;
+    }
+    else
+	return FALSE;
 
-    return (type && strEQ(type,name)) ||
-            (stash && isa_lookup(stash, name, name_stash, strlen(name), 0) 
-             == &PL_sv_yes)
-        ? TRUE
-        : FALSE ;
 }
 
 #include "XSUB.h"
