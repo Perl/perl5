@@ -3334,9 +3334,9 @@ PP(pp_require)
 	if (PL_op->op_type == OP_REQUIRE) {
 	    const char *msgstr = name;
 	    if(errno == EMFILE) {
-		SV * const msg = sv_2mortal(newSVpv(msgstr,0));
-		sv_catpv(msg, ":  "); 
-		sv_catpv(msg, Strerror(errno));
+		SV * const msg
+		    = sv_2mortal(Perl_newSVpvf(aTHX_ "%s:   %s", msgstr,
+					       Strerror(errno)));
 		msgstr = SvPV_nolen_const(msg);
 	    } else {
 	        if (namesv) {			/* did we lookup @INC? */
