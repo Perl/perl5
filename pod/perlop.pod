@@ -588,9 +588,12 @@ As a scalar operator:
 
     if (101 .. 200) { print; } # print 2nd hundred lines, short for
                                #   if ($. == 101 .. $. == 200) ...
-    next line if (1 .. /^$/);  # skip header lines, short for
+
+    next LINE if (1 .. /^$/);  # skip header lines, short for
                                #   ... if ($. == 1 .. /^$/);
-    s/^/> / if (/^$/ .. eof());	# quote body
+                               # (typically in a loop labeled LINE)
+
+    s/^/> / if (/^$/ .. eof());  # quote body
 
     # parse mail messages
     while (<>) {
@@ -613,16 +616,14 @@ the two range operators:
               "1  - Baz",
               "   - Quux");
 
-    foreach(@lines)
-    {
-        if (/0/ .. /1/)
-        {
+    foreach (@lines) {
+        if (/0/ .. /1/) {
             print "$_\n";
         }
     }
 
-This program will print only the line containing "Bar". If 
-the range operator is changed to C<...>, it will also print the 
+This program will print only the line containing "Bar". If
+the range operator is changed to C<...>, it will also print the
 "Baz" line.
 
 And now some examples as a list operator:
@@ -715,9 +716,9 @@ might trigger, such as from tie().  Other assignment operators work similarly.
 The following are recognized:
 
     **=    +=    *=    &=    <<=    &&=
-           -=    /=    |=    >>=    ||=    
-           .=    %=    ^=           //= 
-	         x=
+           -=    /=    |=    >>=    ||=
+           .=    %=    ^=           //=
+                 x=
 
 Although these are grouped by family, they all have the precedence
 of assignment.
@@ -835,12 +836,12 @@ takes higher precedence.
 
 Then again, you could always use parentheses.
 
-Binary "err" is equivalent to C<//>--it's just like binary "or", except it tests
-its left argument's definedness instead of its truth.  There are two ways to 
-remember "err":  either because many functions return C<undef> on an B<err>or,
-or as a sort of correction:  C<$a=($b err 'default')>. This keyword
-is only available when the 'err' feature is enabled: see L<feature>
-for more information.
+Binary "err" is equivalent to C<//>--it's just like binary "or", except it
+tests its left argument's definedness instead of its truth.  There are two
+ways to remember "err":  either because many functions return C<undef> on
+an B<err>or, or as a sort of correction:  C<$a = ($b err 'default')>. This
+keyword is only available when the 'err' feature is enabled: see
+L<feature> for more information.
 
 Binary "xor" returns the exclusive-OR of the two surrounding expressions.
 It cannot short circuit, of course.
@@ -879,7 +880,7 @@ function as operators, providing various kinds of interpolating and
 pattern matching capabilities.  Perl provides customary quote characters
 for these behaviors, but also provides a way for you to choose your
 quote character for any of them.  In the following table, a C<{}> represents
-any pair of delimiters you choose.  
+any pair of delimiters you choose.
 
     Customary  Generic        Meaning	     Interpolates
 	''	 q{}	      Literal		  no
@@ -896,11 +897,11 @@ any pair of delimiters you choose.
 
 Non-bracketing delimiters use the same character fore and aft, but the four
 sorts of brackets (round, angle, square, curly) will all nest, which means
-that 
+that
 
-	q{foo{bar}baz} 
+	q{foo{bar}baz}
 
-is the same as 
+is the same as
 
 	'foo{bar}baz'
 
