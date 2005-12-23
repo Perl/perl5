@@ -667,6 +667,14 @@ case "$usemallocwrap" in
 '') usemallocwrap='define' ;;
 esac
 
+# ctime_r() and asctime_r() seem to have issues for versions before
+# HP-UX 11
+if [ $xxOsRevMajor -lt 11 ]; then
+    d_ctime_r="$undef"
+    d_asctime_r="$undef"
+    fi
+
+
 # fpclassify() is a macro, the library call is Fpclassify
 # Similarly with the others below.
 d_fpclassify='define'
