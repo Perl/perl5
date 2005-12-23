@@ -2,7 +2,7 @@ package POSIX;
 
 our(@ISA, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD, %SIGRT) = ();
 
-our $VERSION = "1.09";
+our $VERSION = "1.10";
 
 use AutoLoader;
 
@@ -958,8 +958,12 @@ sub load_imports {
 );
 
 # Exporter::export_tags();
-for (values %EXPORT_TAGS) {
-  push @EXPORT, @$_;
+{
+  # De-duplicate the export list: 
+  my %seen;
+  for (values %EXPORT_TAGS) {
+    push @EXPORT, grep {!$seen{$_}++} @$_;
+  }
 }
 
 @EXPORT_OK = qw(
