@@ -2,7 +2,8 @@ package ExtUtils::Constant::ProxySubs;
 
 use strict;
 use vars qw($VERSION @ISA %type_to_struct %type_from_struct %type_to_sv
-	    %type_to_C_value %type_is_a_problem %type_num_args);
+	    %type_to_C_value %type_is_a_problem %type_num_args
+	    %type_temporary);
 use Carp;
 require ExtUtils::Constant::XS;
 use ExtUtils::Constant::Utils qw(C_stringify);
@@ -60,6 +61,8 @@ sub type_to_C_value {
      SV => 1,
      );
 
+$type_temporary{$_} = $_ foreach qw(IV UV NV SV);
+     
 while (my ($type, $value) = each %XS_TypeSet) {
     $type_num_args{$type}
 	= defined $value ? ref $value ? scalar @$value : 1 : 0;
@@ -280,9 +283,16 @@ EOBOOT
 	die "Can't find generator code for type $type"
 	    unless defined $generator;
 
-	print $xs_fh "        {\n";
+	print $xs_fh <<"EOBOOT";
+        {
+    	    $type_temporary{$type} temp;
+EOBOOT
 	print $xs_fh "        $item->{pre}\n" if $item->{pre};
-	printf $xs_fh <<"EOBOOT", $name, &$generator(&$type_to_value($value));
+	# We need to use a temporary value because some really troublesome
+	# items use C pre processor directives in their values, and in turn
+	# these don't fit nicely in the macro-ised generator functions
+	printf $xs_fh <<"EOBOOT", &$type_to_value($value), $name, &$generator('temp');
+	    temp = %s;
 	    ${c_subname}_add_symbol($athx symbol_table, "%s",
 				    $namelen, %s);
 EOBOOT

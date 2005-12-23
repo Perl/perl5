@@ -44,7 +44,7 @@ my @names =
       PARENB PARMRK PARODD PATH_MAX PIPE_BUF RAND_MAX R_OK SCHAR_MAX
       SCHAR_MIN SEEK_CUR SEEK_END SEEK_SET SHRT_MAX SHRT_MIN SIGABRT SIGALRM
       SIGCHLD SIGCONT SIGFPE SIGHUP SIGILL SIGINT SIGKILL SIGPIPE SIGQUIT
-      SIGRTMAX SIGRTMIN SIGSEGV SIGSTOP SIGTERM SIGTSTP SIGTTIN SIGTTOU
+      SIGSEGV SIGSTOP SIGTERM SIGTSTP SIGTTIN SIGTTOU
       SIGUSR1 SIGUSR2 SIG_BLOCK SIG_SETMASK SIG_UNBLOCK SSIZE_MAX
       STDERR_FILENO STDIN_FILENO STDOUT_FILENO STREAM_MAX
       S_IRGRP S_IROTH S_IRUSR S_IRWXG S_IRWXO S_IRWXU S_ISGID S_ISUID
@@ -58,6 +58,8 @@ my @names =
       _SC_OPEN_MAX _SC_PAGESIZE _SC_SAVED_IDS _SC_STREAM_MAX _SC_TZNAME_MAX
       _SC_VERSION),
    {name=>"MB_CUR_MAX", not_constant=>1},
+   {name=>"SIGRTMAX", not_constant=>1},
+   {name=>"SIGRTMIN", not_constant=>1},
    {name=>"EXIT_FAILURE", default=>["IV", "1"]},
    {name=>"EXIT_SUCCESS", default=>["IV", "0"]},
    {name=>"SIG_DFL", value=>"(IV)SIG_DFL"},
@@ -69,7 +71,7 @@ my @names =
    {name=>"_POSIX_JOB_CONTROL", type=>"YES", default=>["IV", "0"]},
    {name=>"_POSIX_SAVED_IDS", type=>"YES", default=>["IV", "0"]},
    {name=>'FLT_ROUNDS', type=>"NV", not_constant=>1},
-   {name=>"HUGE_VAL", type=>"NV",
+   {name=>"HUGE_VAL", type=>"NV", not_constant=>1,
     macro=>[<<'END', "#endif\n"],
 #if (defined(USE_LONG_DOUBLE) && defined(HUGE_VALL)) || defined(HUGE_VAL)
 	/* HUGE_VALL is admittedly non-POSIX but if we are using long doubles
@@ -86,13 +88,16 @@ END
 push @names, {name=>$_, type=>"UV"}
   foreach (qw(SA_NOCLDSTOP SA_NOCLDWAIT SA_NODEFER SA_ONSTACK SA_RESETHAND
              SA_RESTART SA_SIGINFO UCHAR_MAX UINT_MAX ULONG_MAX USHRT_MAX));
+push @names, {name=>$_, type=>"NV", not_constant=>1}
+  foreach (qw(LDBL_MAX LDBL_MIN LDBL_EPSILON));
+
 push @names, {name=>$_, type=>"NV"}
   foreach (qw(DBL_DIG DBL_EPSILON DBL_MANT_DIG DBL_MAX DBL_MAX_10_EXP
               DBL_MAX_EXP DBL_MIN DBL_MIN_10_EXP DBL_MIN_EXP
               FLT_DIG FLT_EPSILON FLT_MANT_DIG FLT_MAX FLT_MAX_10_EXP
               FLT_MAX_EXP FLT_MIN FLT_MIN_10_EXP FLT_MIN_EXP FLT_RADIX
-              LDBL_DIG LDBL_EPSILON LDBL_MANT_DIG LDBL_MAX LDBL_MAX_10_EXP
-              LDBL_MAX_EXP LDBL_MIN LDBL_MIN_10_EXP LDBL_MIN_EXP));
+              LDBL_DIG LDBL_MANT_DIG LDBL_MAX_10_EXP
+              LDBL_MAX_EXP LDBL_MIN_10_EXP LDBL_MIN_EXP));
 
 push @names, {name=>$_, type=>"IV", default=>["IV", "0"]}
   foreach (qw(_POSIX_ARG_MAX _POSIX_CHILD_MAX _POSIX_CHOWN_RESTRICTED
