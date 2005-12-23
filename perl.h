@@ -138,8 +138,6 @@
 
 #define pVAR    register struct perl_vars* my_vars PERL_UNUSED_DECL
 
-typedef struct interpreter PerlInterpreter;
-
 #ifdef PERL_GLOBAL_STRUCT
 #  define dVAR		pVAR    = (struct perl_vars*)PERL_GET_VARS()
 #else
@@ -151,14 +149,6 @@ typedef struct interpreter PerlInterpreter;
 #    define MULTIPLICITY
 #  endif
 #  define tTHX	PerlInterpreter*
-
-struct perl_memory_debug_header {
-  tTHX	interpreter;
-};
-
-#  define sTHX	(sizeof(struct perl_memory_debug_header) + \
-	(MEM_ALIGNBYTES - sizeof(struct perl_memory_debug_header) \
-	 %MEM_ALIGNBYTES) % MEM_ALIGNBYTES)
 #  define pTHX	register tTHX my_perl PERL_UNUSED_DECL
 #  define aTHX	my_perl
 #  ifdef PERL_GLOBAL_STRUCT
@@ -2164,6 +2154,8 @@ typedef struct padop PADOP;
 typedef struct pvop PVOP;
 typedef struct loop LOOP;
 
+typedef struct interpreter PerlInterpreter;
+
 /* Amdahl's <ksync.h> has struct sv */
 /* SGI's <sys/sema.h> has struct sv */
 #if defined(UTS) || defined(__sgi)
@@ -3732,6 +3724,24 @@ typedef Sighandler_t Sigsave_t;
 #else
 #  define MALLOC_INIT
 #  define MALLOC_TERM
+#endif
+
+#if defined(PERL_IMPLICIT_CONTEXT)
+struct perl_memory_debug_header {
+  tTHX	interpreter;
+#  ifdef PERL_POISON
+  MEM_SIZE size;
+  U8 in_use;
+#  endif
+
+#define PERL_POISON_INUSE 29
+#define PERL_POISON_FREE 159
+};
+
+#  define sTHX	(sizeof(struct perl_memory_debug_header) + \
+	(MEM_ALIGNBYTES - sizeof(struct perl_memory_debug_header) \
+	 %MEM_ALIGNBYTES) % MEM_ALIGNBYTES)
+
 #endif
 
 

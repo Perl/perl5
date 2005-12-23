@@ -94,6 +94,10 @@ Perl_safesysmalloc(MEM_SIZE size)
     if (ptr != Nullch) {
 #ifdef PERL_TRACK_MEMPOOL
         ((struct perl_memory_debug_header *)ptr)->interpreter = aTHX;
+#  ifdef PERL_POISON
+        ((struct perl_memory_debug_header *)ptr)->size = size;
+        ((struct perl_memory_debug_header *)ptr)->in_use = PERL_POISON_INUSE;
+#  endif
         ptr = (Malloc_t)((char*)ptr+sTHX);
 #endif
 	return ptr;
@@ -138,6 +142,10 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	/* int *nowhere = NULL; *nowhere = 0; */
         Perl_croak_nocontext("panic: realloc from wrong pool");
     }
+#  ifdef PERL_POISON
+    ((struct perl_memory_debug_header *)where)->size = size;
+    /* FIXME poison the end if it gets shorter.  */
+#  endif
 #endif
 #ifdef DEBUGGING
     if ((long)size < 0)
@@ -180,6 +188,21 @@ Perl_safesysfree(Malloc_t where)
 	    /* int *nowhere = NULL; *nowhere = 0; */
             Perl_croak_nocontext("panic: free from wrong pool");
 	}
+#  ifdef PERL_POISON
+	{
+	    if (((struct perl_memory_debug_header *)where)->in_use
+		== PERL_POISON_FREE) {
+		Perl_croak_nocontext("panic: duplicate free");
+	    }
+	    if (((struct perl_memory_debug_header *)where)->in_use
+		!= PERL_POISON_INUSE) {
+		Perl_croak_nocontext("panic: bad free ");
+	    }
+	    ((struct perl_memory_debug_header *)where)->in_use
+		= PERL_POISON_FREE;
+	}
+	Poison(where, ((struct perl_memory_debug_header *)where)->size, char);
+#  endif
 #endif
 	PerlMem_free(where);
     }
@@ -215,6 +238,10 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 	memset((void*)ptr, 0, size);
 #ifdef PERL_TRACK_MEMPOOL
         ((struct perl_memory_debug_header *)ptr)->interpreter = aTHX;
+#  ifdef PERL_POISON
+        ((struct perl_memory_debug_header *)ptr)->size = size;
+        ((struct perl_memory_debug_header *)ptr)->in_use = PERL_POISON_INUSE;
+#  endif
         ptr = (Malloc_t)((char*)ptr+sTHX);
 #endif
 	return ptr;
