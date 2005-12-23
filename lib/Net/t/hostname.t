@@ -48,5 +48,11 @@ my @dummy = grep { defined hostname() and hostname() eq $_ } @domain;
   ? print "ok 3\n"
   : print "not ok 3\n";
 
-hostfqdn() eq hostname() . "." . hostdomain() ? print "ok 4\n" : print "not ok 4\n";
-domainname() eq hostname() . "." . hostdomain() ? print "ok 5\n" : print "not ok 5\n";
+my $name = hostname();
+my $domain = hostdomain();
+if(defined $domain && defined $name && $name ne "" && $domain ne "") {
+    hostfqdn() eq $name . "." . $domain ? print "ok 4\n" : print "not ok 4\n";
+    domainname() eq $name . "." . $domain ? print "ok 5\n" : print "not ok 5\n";} else {
+    print "ok 4 # SKIP domain not fully defined\n";
+    print "ok 5 # SKIP domain not fully defined\n";
+}
