@@ -307,9 +307,6 @@ typedef uLong FAR uLongf;
 
 #if defined(__MVS__)
 #  define NO_vsnprintf
-#  ifdef FAR
-#    undef FAR
-#  endif
 #endif
 
 /* MVS linker does not support external names larger than 8 bytes */
