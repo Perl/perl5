@@ -143,8 +143,13 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
         Perl_croak_nocontext("panic: realloc from wrong pool");
     }
 #  ifdef PERL_POISON
+    if (((struct perl_memory_debug_header *)where)->size > size) {
+	const MEM_SIZE freed_up =
+	    ((struct perl_memory_debug_header *)where)->size - size;
+	char *start_of_freed = ((char *)where) + size;
+	Poison(start_of_freed, freed_up, char);
+    }
     ((struct perl_memory_debug_header *)where)->size = size;
-    /* FIXME poison the end if it gets shorter.  */
 #  endif
 #endif
 #ifdef DEBUGGING
