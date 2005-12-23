@@ -40,11 +40,14 @@ tie.
 #include "perl.h"
 
 #if defined(HAS_GETGROUPS) || defined(HAS_SETGROUPS)
-#  ifndef NGROUPS
-#    define NGROUPS 32
-#  endif
 #  ifdef I_GRP
 #    include <grp.h>
+#  endif
+#endif
+
+#if defined(HAS_SETGROUPS)
+#  ifndef NGROUPS
+#    define NGROUPS 32
 #  endif
 #endif
 
@@ -942,10 +945,14 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
       add_groups:
 #ifdef HAS_GETGROUPS
 	{
-	    Groups_t gary[NGROUPS];
-	    I32 j = getgroups(NGROUPS,gary);
-	    while (--j >= 0)
-		Perl_sv_catpvf(aTHX_ sv, " %"Gid_t_f, (long unsigned int)gary[j]);
+	    Groups_t *gary = NULL;
+	    I32 num_groups = getgroups(0, gary);
+            Newx(gary, num_groups, Groups_t);
+            num_groups = getgroups(num_groups, gary);
+	    while (--num_groups >= 0)
+		Perl_sv_catpvf(aTHX_ sv, " %"Gid_t_f,
+                    (long unsigned int)gary[num_groups]);
+            Safefree(gary);
 	}
 #endif
 	(void)SvIOK_on(sv);	/* what a wonderful hack! */
@@ -2418,22 +2425,28 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #ifdef HAS_SETGROUPS
 	{
 	    const char *p = SvPV_const(sv, len);
-	    Groups_t gary[NGROUPS];
+            Groups_t *gary = NULL;
 
-	    while (isSPACE(*p))
-		++p;
-	    PL_egid = Atol(p);
-	    for (i = 0; i < NGROUPS; ++i) {
-		while (*p && !isSPACE(*p))
-		    ++p;
-		while (isSPACE(*p))
-		    ++p;
-		if (!*p)
-		    break;
-		gary[i] = Atol(p);
-	    }
-	    if (i)
-		(void)setgroups(i, gary);
+            while (isSPACE(*p))
+                ++p;
+            PL_egid = Atol(p);
+            for (i = 0; i < NGROUPS; ++i) {
+                while (*p && !isSPACE(*p))
+                    ++p;
+                while (isSPACE(*p))
+                    ++p;
+                if (!*p)
+                    break;
+                if(!gary)
+                    Newx(gary, i + 1, Groups_t);
+                else
+                    Renew(gary, i + 1, Groups_t);
+                gary[i] = Atol(p);
+            }
+            if (i)
+                (void)setgroups(i, gary);
+            if (gary)
+                Safefree(gary);
 	}
 #else  /* HAS_SETGROUPS */
 	PL_egid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
