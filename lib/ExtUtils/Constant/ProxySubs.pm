@@ -61,7 +61,8 @@ sub type_to_C_value {
      SV => 1,
      );
 
-$type_temporary{$_} = $_ foreach qw(IV UV NV SV);
+$type_temporary{SV} = 'SV *';
+$type_temporary{$_} = $_ foreach qw(IV UV NV);
      
 while (my ($type, $value) = each %XS_TypeSet) {
     $type_num_args{$type}
@@ -173,10 +174,17 @@ sub WriteConstants {
 
     print $c_fh $self->header(), <<"EOADD";
 void ${c_subname}_add_symbol($pthx HV *hash, const char *name, I32 namelen, SV *value) {
-    SV *rv = newRV_noinc(value);
-    if (!hv_store(hash, name, namelen, rv, TRUE)) {
-	SvREFCNT_dec(rv);
-	Perl_croak($athx "Couldn't add key '%s' to %%%s::", name, "$package");
+    SV **sv = hv_fetch(hash, name, namelen, TRUE);
+    if (!sv) {
+        Perl_croak($athx "Couldn't add key '%s' to %%%s::", name, "$package");
+    }
+    if (SvOK(*sv) || SvTYPE(*sv) == SVt_PVGV) {
+	/* Someone has been here before us - have to make a real sub.  */
+	newCONSTSUB(hash, name, value);
+    } else {
+	SvUPGRADE(*sv, SVt_RV);
+	SvRV_set(*sv, value);
+	SvROK_on(*sv);
     }
 }
 
@@ -259,7 +267,7 @@ EOBOOT
 	${c_subname}_missing = newHV();
 	while (value_for_notfound->name) {
 	    if (!hv_store(${c_subname}_missing, value_for_notfound->name,
-			  value_for_notfound->namelen, &PL_sv_yes, TRUE))
+			  value_for_notfound->namelen, &PL_sv_yes, 0))
 		Perl_croak($athx "Couldn't add key '%s' to missing_hash",
 			   value_for_notfound->name);
 	    ++value_for_notfound;
