@@ -50,7 +50,7 @@ RESULT
 {
     my $res = runperl(
         switches => [ "-MB::Lint" ],
-        prog => "BEGIN{B::Lint->register_plugin(X=>[q[x]])};use O(qw[Lint x]);sub X::match{warn q[X ok.\n]};dummy()",
+        prog => 'BEGIN{B::Lint->register_plugin(X=>[q[x]])};use O(qw[Lint x]);sub X::match{warn qq[X ok.\n]};dummy()',
 	stderr => 1,
     );
     like( $res, qr/X ok\./, 'Lint plugin' );
