@@ -371,8 +371,7 @@ my $gr = eval '\*plunk' or die;
   my $w = '';
   local $SIG{__WARN__} = sub { $w = $_[0] };
   $result = *{$gr} = \&{"oonk"};
-  like($w, qr/^Constant subroutine main::plunk redefined/,
-       "Redefining a constant sub should warn");
+  is($w, '', "Redefining a constant sub to another constant sub with the same underlying value should not warn (It's just re-exporting, and that was always legal)");
 }
 
 is (ref $::{oonk}, 'SCALAR', "Export doesn't affect original");
