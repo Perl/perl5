@@ -39,6 +39,7 @@ $VERSION = '0.01';
      YES => sub { '&PL_sv_yes' },
      NO => sub { '&PL_sv_no' },
      '' => sub { '&PL_sv_yes' },
+     SV => sub {"SvREFCNT_inc($_[0])"},
      );
 
 %type_to_C_value = 
@@ -55,6 +56,7 @@ sub type_to_C_value {
 
 %type_is_a_problem =
     (
+     # The documentation says *mortal SV*, but we now need a non-mortal copy.
      SV => 1,
      );
 
@@ -278,10 +280,14 @@ EOBOOT
 	die "Can't find generator code for type $type"
 	    unless defined $generator;
 
+	print $xs_fh "        {\n";
+	print $xs_fh "        $item->{pre}\n" if $item->{pre};
 	printf $xs_fh <<"EOBOOT", $name, &$generator(&$type_to_value($value));
-	${c_subname}_add_symbol($athx symbol_table, "%s",
-				$namelen, %s);
+	    ${c_subname}_add_symbol($athx symbol_table, "%s",
+				    $namelen, %s);
 EOBOOT
+	print $xs_fh "        $item->{post}\n" if $item->{post};
+	print $xs_fh "        }\n";
 
         print $xs_fh $self->macro_to_endif($macro);
     }
