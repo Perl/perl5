@@ -52,7 +52,7 @@ my $last = $have_setlocale ? &last : &last_without_setlocale;
 
 print "1..$last\n";
 
-use vars qw(&LC_ALL);
+sub LC_ALL ();
 
 $a = 'abc %';
 
