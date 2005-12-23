@@ -17,6 +17,7 @@ $VERSION = '0.01';
      IV => '{const char *name; I32 namelen; IV value;}',
      NV => '{const char *name; I32 namelen; NV value;}',
      UV => '{const char *name; I32 namelen; UV value;}',
+     PV => '{const char *name; I32 namelen; const char *value;}',
      YES => '{const char *name; I32 namelen;}',
      NO => '{const char *name; I32 namelen;}',
      '' => '{const char *name; I32 namelen;} ',
@@ -27,6 +28,7 @@ $VERSION = '0.01';
      IV => sub { $_[0] . '->value' },
      NV => sub { $_[0] . '->value' },
      UV => sub { $_[0] . '->value' },
+     PV => sub { $_[0] . '->value' },
      YES => sub {},
      NO => sub {},
      '' => sub {},
@@ -37,6 +39,7 @@ $VERSION = '0.01';
      IV => sub { "newSViv($_[0])" },
      NV => sub { "newSVnv($_[0])" },
      UV => sub { "newSVuv($_[0])" },
+     PV => sub { "newSVpv($_[0], 0)" },
      YES => sub { '&PL_sv_yes' },
      NO => sub { '&PL_sv_no' },
      '' => sub { '&PL_sv_yes' },
@@ -55,13 +58,20 @@ sub type_to_C_value {
     return $type_to_C_value{$type} || sub {return map {ref $_ ? @$_ : $_} @_};
 }
 
+# TODO - figure out if there is a clean way for the type_to_sv code to
+# attempt s/sv_2mortal// and if it succeeds tell type_to_sv not to add
+# SvREFCNT_inc
 %type_is_a_problem =
     (
      # The documentation says *mortal SV*, but we now need a non-mortal copy.
      SV => 1,
      );
 
-$type_temporary{SV} = 'SV *';
+%type_temporary =
+    (
+     SV => 'SV *',
+     PV => 'const char *',
+     );
 $type_temporary{$_} = $_ foreach qw(IV UV NV);
      
 while (my ($type, $value) = each %XS_TypeSet) {
