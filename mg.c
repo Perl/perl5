@@ -1006,10 +1006,14 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
       add_groups:
 #ifdef HAS_GETGROUPS
 	{
-	    Groups_t gary[NGROUPS];
-	    I32 j = getgroups(NGROUPS,gary);
-	    while (--j >= 0)
-		Perl_sv_catpvf(aTHX_ sv, " %"Gid_t_f, (long unsigned int)gary[j]);
+	    Groups_t *gary = NULL;
+	    I32 num_groups = getgroups(0, gary);
+            Newx(gary, num_groups, Groups_t);
+            num_groups = getgroups(num_groups, gary);
+	    while (--num_groups >= 0)
+		Perl_sv_catpvf(aTHX_ sv, " %"Gid_t_f,
+                    (long unsigned int)gary[num_groups]);
+            Safefree(gary);
 	}
 #endif
 	(void)SvIOK_on(sv);	/* what a wonderful hack! */
