@@ -138,6 +138,8 @@
 
 #define pVAR    register struct perl_vars* my_vars PERL_UNUSED_DECL
 
+typedef struct interpreter PerlInterpreter;
+
 #ifdef PERL_GLOBAL_STRUCT
 #  define dVAR		pVAR    = (struct perl_vars*)PERL_GET_VARS()
 #else
@@ -149,7 +151,14 @@
 #    define MULTIPLICITY
 #  endif
 #  define tTHX	PerlInterpreter*
-#  define sTHX	(sizeof(tTHX) + (MEM_ALIGNBYTES - sizeof(tTHX)%MEM_ALIGNBYTES) % MEM_ALIGNBYTES)
+
+struct perl_memory_debug_header {
+  tTHX	interpreter;
+};
+
+#  define sTHX	(sizeof(struct perl_memory_debug_header) + \
+	(MEM_ALIGNBYTES - sizeof(struct perl_memory_debug_header) \
+	 %MEM_ALIGNBYTES) % MEM_ALIGNBYTES)
 #  define pTHX	register tTHX my_perl PERL_UNUSED_DECL
 #  define aTHX	my_perl
 #  ifdef PERL_GLOBAL_STRUCT
@@ -2154,8 +2163,6 @@ typedef struct svop SVOP;
 typedef struct padop PADOP;
 typedef struct pvop PVOP;
 typedef struct loop LOOP;
-
-typedef struct interpreter PerlInterpreter;
 
 /* Amdahl's <ksync.h> has struct sv */
 /* SGI's <sys/sema.h> has struct sv */

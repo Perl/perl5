@@ -93,7 +93,7 @@ Perl_safesysmalloc(MEM_SIZE size)
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) malloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
     if (ptr != Nullch) {
 #ifdef PERL_TRACK_MEMPOOL
-        *(tTHX*)ptr = aTHX;
+        ((struct perl_memory_debug_header *)ptr)->interpreter = aTHX;
         ptr = (Malloc_t)((char*)ptr+sTHX);
 #endif
 	return ptr;
@@ -134,7 +134,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 #ifdef PERL_TRACK_MEMPOOL
     where = (Malloc_t)((char*)where-sTHX);
     size += sTHX;
-    if (*(tTHX*)where != aTHX) {
+    if (((struct perl_memory_debug_header *)where)->interpreter != aTHX) {
 	/* int *nowhere = NULL; *nowhere = 0; */
         Perl_croak_nocontext("panic: realloc from wrong pool");
     }
@@ -176,7 +176,7 @@ Perl_safesysfree(Malloc_t where)
     if (where) {
 #ifdef PERL_TRACK_MEMPOOL
         where = (Malloc_t)((char*)where-sTHX);
-        if (*(tTHX*)where != aTHX) {
+        if (((struct perl_memory_debug_header *)where)->interpreter != aTHX) {
 	    /* int *nowhere = NULL; *nowhere = 0; */
             Perl_croak_nocontext("panic: free from wrong pool");
 	}
@@ -214,7 +214,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     if (ptr != Nullch) {
 	memset((void*)ptr, 0, size);
 #ifdef PERL_TRACK_MEMPOOL
-        *(tTHX*)ptr = aTHX;
+        ((struct perl_memory_debug_header *)ptr)->interpreter = aTHX;
         ptr = (Malloc_t)((char*)ptr+sTHX);
 #endif
 	return ptr;
