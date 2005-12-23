@@ -18,8 +18,10 @@ $VERSION = '0.01';
      NV => '{const char *name; I32 namelen; NV value;}',
      UV => '{const char *name; I32 namelen; UV value;}',
      PV => '{const char *name; I32 namelen; const char *value;}',
+     PVN => '{const char *name; I32 namelen; const char *value; STRLEN len;}',
      YES => '{const char *name; I32 namelen;}',
      NO => '{const char *name; I32 namelen;}',
+     UNDEF => '{const char *name; I32 namelen;}',
      '' => '{const char *name; I32 namelen;} ',
      );
 
@@ -29,8 +31,10 @@ $VERSION = '0.01';
      NV => sub { $_[0] . '->value' },
      UV => sub { $_[0] . '->value' },
      PV => sub { $_[0] . '->value' },
+     PVN => sub { $_[0] . '->value', $_[0] . '->len' },
      YES => sub {},
      NO => sub {},
+     UNDEF => sub {},
      '' => sub {},
     );
 
@@ -40,6 +44,7 @@ $VERSION = '0.01';
      NV => sub { "newSVnv($_[0])" },
      UV => sub { "newSVuv($_[0])" },
      PV => sub { "newSVpv($_[0], 0)" },
+     PVN => sub { "newSVpvn($_[0], $_[1])" },
      YES => sub { '&PL_sv_yes' },
      NO => sub { '&PL_sv_no' },
      '' => sub { '&PL_sv_yes' },
@@ -69,10 +74,11 @@ sub type_to_C_value {
 
 %type_temporary =
     (
-     SV => 'SV *',
-     PV => 'const char *',
+     SV => ['SV *'],
+     PV => ['const char *'],
+     PVN => ['const char *', 'STRLEN'],
      );
-$type_temporary{$_} = $_ foreach qw(IV UV NV);
+$type_temporary{$_} = [$_] foreach qw(IV UV NV);
      
 while (my ($type, $value) = each %XS_TypeSet) {
     $type_num_args{$type}
@@ -301,16 +307,24 @@ EOBOOT
 	die "Can't find generator code for type $type"
 	    unless defined $generator;
 
-	print $xs_fh <<"EOBOOT";
-        {
-    	    $type_temporary{$type} temp;
-EOBOOT
-	print $xs_fh "        $item->{pre}\n" if $item->{pre};
+	print $xs_fh "        {\n";
 	# We need to use a temporary value because some really troublesome
 	# items use C pre processor directives in their values, and in turn
 	# these don't fit nicely in the macro-ised generator functions
-	printf $xs_fh <<"EOBOOT", &$type_to_value($value), $name, &$generator('temp');
-	    temp = %s;
+	my $counter = 0;
+	printf $xs_fh "            %s temp%d;\n", $_, $counter++
+	    foreach @{$type_temporary{$type}};
+
+	print $xs_fh "            $item->{pre}\n" if $item->{pre};
+
+	# And because the code in pre might be both declarations and
+	# statements, we can't declare and assign to the temporaries in one.
+	$counter = 0;
+	printf $xs_fh "            temp%d = %s;\n", $counter++, $_
+	    foreach &$type_to_value($value);
+
+	my @tempvarnames = map {sprintf 'temp%d', $_} 0 .. $counter - 1;
+	printf $xs_fh <<"EOBOOT", $name, &$generator(@tempvarnames);
 	    ${c_subname}_add_symbol($athx symbol_table, "%s",
 				    $namelen, %s);
 EOBOOT
