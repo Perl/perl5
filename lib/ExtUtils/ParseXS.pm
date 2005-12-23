@@ -18,7 +18,7 @@ my(@XSStack);	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
 use vars qw($VERSION);
-$VERSION = '2.15';
+$VERSION = '2.15_01';
 
 use vars qw(%input_expr %output_expr $ProtoUsed @InitFileCode $FH $proto_re $Overload $errors $Fallback
 	    $cplusplus $hiertype $WantPrototypes $WantVersionChk $except $WantLineNumbers
@@ -1438,6 +1438,7 @@ sub INCLUDE_handler ()
 		    Line            => \@line,
 		    LineNo          => \@line_no,
 		    Filename        => $filename,
+		    Filepathname    => $filepathname,
 		    Handle          => $FH,
 		   }) ;
 
@@ -1452,7 +1453,7 @@ sub INCLUDE_handler ()
 #
 EOF
 
-    $filename = $_ ;
+    $filepathname = $filename = $_ ;
 
     # Prime the pump by reading the first
     # non-blank line
@@ -1481,7 +1482,11 @@ sub PopFile()
     close $FH ;
 
     $FH         = $data->{Handle} ;
+    # $filename is the leafname, which for some reason isused for diagnostic
+    # messages, whereas $filepathname is the full pathname, and is used for
+    # #line directives.
     $filename   = $data->{Filename} ;
+    $filepathname = $data->{Filepathname} ;
     $lastline   = $data->{LastLine} ;
     $lastline_no = $data->{LastLineNo} ;
     @line       = @{ $data->{Line} } ;
