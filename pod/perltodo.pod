@@ -556,16 +556,6 @@ program if you pass the process ID. It would be good to do this with the Perl
 debugger on a running Perl program, although I'm not sure how it would be
 done." ssh and screen do this with named pipes in /tmp. Maybe we can too.
 
-=head2 inlining autoloaded constants
-
-Currently the optimiser can inline constants when expressed as subroutines
-with prototype ($) that return a constant. Likewise, many packages wrapping
-C libraries export lots of constants as subroutines which are AUTOLOADed on
-demand. However, these have no prototypes, so can't be seen as constants by
-the optimiser. Some way of cheaply (low syntax, low memory overhead) to the
-perl compiler that a name is a constant would be great, so that it knows to
-call the AUTOLOAD routine at compile time, and then inline the constant.
-
 =head2 Constant folding
 
 The peephole optimiser should trap errors during constant folding, and give
