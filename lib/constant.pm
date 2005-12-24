@@ -30,6 +30,7 @@ sub import {
     return unless @_;			# Ignore 'use constant;'
     my $constants;
     my $multiple  = ref $_[0];
+    my $pkg = caller;
 
     if ( $multiple ) {
 	if (ref $_[0] ne 'HASH') {
@@ -46,7 +47,6 @@ sub import {
 	    require Carp;
 	    Carp::croak("Can't use undef as constant name");
 	}
-	my $pkg = caller;
 
 	# Normal constant name
 	if ($name =~ /^_?[^\W_0-9]\w*\z/ and !$forbidden{$name}) {
