@@ -7319,6 +7319,10 @@ Perl_peep(pTHX_ register OP *o)
 
 	    o->op_opt = 1;
 
+
+	    if ((o->op_flags && OPf_WANT) != OPf_WANT_VOID)
+		break;
+
 	    if ((o->op_private & ~OPpASSIGN_BACKWARDS) != 2)
 		break;
 
