@@ -9,13 +9,12 @@ package IO::Socket::INET;
 use strict;
 our(@ISA, $VERSION);
 use IO::Socket;
-use Socket;
 use Carp;
 use Exporter;
 use Errno;
 
 @ISA = qw(IO::Socket);
-$VERSION = "1.29_01";
+$VERSION = "1.29_02";
 
 my $EINVAL = exists(&Errno::EINVAL) ? Errno::EINVAL() : 1;
 
