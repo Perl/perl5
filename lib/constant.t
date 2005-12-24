@@ -6,7 +6,7 @@ BEGIN {
 }
 
 use warnings;
-use vars qw{ @warnings };
+use vars qw{ @warnings $fagwoosh $putt $kloong};
 BEGIN {				# ...and save 'em for later
     $SIG{'__WARN__'} = sub { push @warnings, @_ }
 }
@@ -14,7 +14,7 @@ END { print STDERR @warnings }
 
 
 use strict;
-use Test::More tests => 75;
+use Test::More tests => 95;
 my $TB = Test::More->builder;
 
 BEGIN { use_ok('constant'); }
@@ -241,4 +241,74 @@ is THREE**3, SPIT->(@{+FAMILY}**3);
         use constant _1_2_3 => 'allowed';
     };
     ok( $@ eq '' );
+}
+
+sub slotch ();
+
+{
+    my @warnings;
+    local $SIG{'__WARN__'} = sub { push @warnings, @_ };
+    eval 'use constant slotch => 3; 1' or die $@;
+
+    is ("@warnings", "", "No warnings if a prototype exists");
+
+    my $value = eval 'slotch';
+    is ($@, '');
+    is ($value, 3);
+}
+
+sub zit;
+
+{
+    my @warnings;
+    local $SIG{'__WARN__'} = sub { push @warnings, @_ };
+    eval 'use constant zit => 4; 1' or die $@;
+
+    is(scalar @warnings, 1, "1 warning");
+    like ($warnings[0], qr/^Prototype mismatch: sub main::zit: none vs \(\)/,
+	  "about the prototype mismatch");
+
+    my $value = eval 'zit';
+    is ($@, '');
+    is ($value, 4);
+}
+
+$fagwoosh = 'geronimo';
+$putt = 'leutwein';
+$kloong = 'schlozhauer';
+
+{
+    my @warnings;
+    local $SIG{'__WARN__'} = sub { push @warnings, @_ };
+    eval 'use constant fagwoosh => 5; 1' or die $@;
+
+    is ("@warnings", "", "No warnings if the typeglob exists already");
+
+    my $value = eval 'fagwoosh';
+    is ($@, '');
+    is ($value, 5);
+
+    my @value = eval 'fagwoosh';
+    is ($@, '');
+    is_deeply (\@value, [5]);
+
+    eval 'use constant putt => 6, 7; 1' or die $@;
+
+    is ("@warnings", "", "No warnings if the typeglob exists already");
+
+    @value = eval 'putt';
+    is ($@, '');
+    is_deeply (\@value, [6, 7]);
+
+    eval 'use constant "klong"; 1' or die $@;
+
+    is ("@warnings", "", "No warnings if the typeglob exists already");
+
+    $value = eval 'klong';
+    is ($@, '');
+    is ($value, undef);
+
+    @value = eval 'klong';
+    is ($@, '');
+    is_deeply (\@value, []);
 }
