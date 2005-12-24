@@ -5,7 +5,7 @@ use 5.006_00;
 use warnings::register;
 
 our($VERSION, %declared);
-$VERSION = '1.05';
+$VERSION = '1.06';
 
 #=======================================================================
 
@@ -28,7 +28,7 @@ my %forbidden = (%keywords, %forced_into_main);
 sub import {
     my $class = shift;
     return unless @_;			# Ignore 'use constant;'
-    my %constants = ();
+    my $constants;
     my $multiple  = ref $_[0];
 
     if ( $multiple ) {
@@ -36,12 +36,12 @@ sub import {
 	    require Carp;
 	    Carp::croak("Invalid reference type '".ref(shift)."' not 'HASH'");
 	}
-	%constants = %{+shift};
+	$constants = shift;
     } else {
-	$constants{+shift} = undef;
+	$constants->{+shift} = undef;
     }
 
-    foreach my $name ( keys %constants ) {
+    foreach my $name ( keys %$constants ) {
 	unless (defined $name) {
 	    require Carp;
 	    Carp::croak("Can't use undef as constant name");
@@ -95,7 +95,7 @@ sub import {
 	    my $full_name = "${pkg}::$name";
 	    $declared{$full_name}++;
 	    if ($multiple) {
-		my $scalar = $constants{$name};
+		my $scalar = $constants->{$name};
 		*$full_name = sub () { $scalar };
 	    } else {
 		if (@_ == 1) {
