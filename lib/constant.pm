@@ -5,7 +5,7 @@ use 5.006_00;
 use warnings::register;
 
 our($VERSION, %declared);
-$VERSION = '1.06';
+$VERSION = '1.07';
 
 #=======================================================================
 
@@ -31,6 +31,12 @@ sub import {
     my $constants;
     my $multiple  = ref $_[0];
     my $pkg = caller;
+    my $symtab;
+
+    if ($] > 5.009002) {
+	no strict 'refs';
+	$symtab = \%{$pkg . '::'};
+    };
 
     if ( $multiple ) {
 	if (ref $_[0] ne 'HASH') {
@@ -94,19 +100,26 @@ sub import {
 	    no strict 'refs';
 	    my $full_name = "${pkg}::$name";
 	    $declared{$full_name}++;
-	    if ($multiple) {
-		my $scalar = $constants->{$name};
-		*$full_name = sub () { $scalar };
-	    } else {
-		if (@_ == 1) {
-		    my $scalar = $_[0];
-		    *$full_name = sub () { $scalar };
-		} elsif (@_) {
-		    my @list = @_;
-		    *$full_name = sub () { @list };
+	    if ($multiple || @_ == 1) {
+		my $scalar = $multiple ? $constants->{$name} : $_[0];
+		if ($symtab && !exists $symtab->{$name}) {
+		    # No typeglob yet, so we can use a reference as space-
+		    # efficient proxy for a constant subroutine
+		    # The check in Perl_ck_rvconst knows that inlinable
+		    # constants from cv_const_sv are read only. So we have to:
+		    Internals::SvREADONLY($scalar, 1);
+		    $symtab->{$name} = \$scalar;
 		} else {
-		    *$full_name = sub () { };
+		    if(!exists $symtab->{$name}) {
+			print STDERR "$name $scalar\n";
+		    }
+		    *$full_name = sub () { $scalar };
 		}
+	    } elsif (@_) {
+		my @list = @_;
+		*$full_name = sub () { @list };
+	    } else {
+		*$full_name = sub () { };
 	    }
 	}
     }
