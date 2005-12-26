@@ -1928,9 +1928,6 @@ Perl_ingroup(pTHX_ Gid_t testgid, bool effective)
     if (testgid == (effective ? PL_egid : PL_gid))
 	return TRUE;
 #ifdef HAS_GETGROUPS
-#ifndef NGROUPS
-#define NGROUPS 32
-#endif
     {
 	Groups_t *gary = NULL;
 	I32 anum;
