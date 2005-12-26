@@ -1,5 +1,6 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN::Mirrored::By;
+use strict;
 
 sub new { 
     my($self,@arg) = @_;
@@ -18,7 +19,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec;
 use vars qw($VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 231 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 286 $,4)/100;
 
 =head1 NAME
 
@@ -322,7 +323,7 @@ by ENTER.
     my(@path) = split /$Config{'path_sep'}/, $ENV{'PATH'};
     local $^W = $old_warn;
     my $progname;
-    for $progname (qw/gzip tar unzip make
+    for $progname (qw/bzip2 gzip tar unzip make
                       curl lynx wget ncftpget ncftp ftp
                       gpg/)
     {
@@ -382,6 +383,25 @@ by ENTER.
 
     $CPAN::Frontend->myprint( qq{
 
+When you have Module::Build installed and a module comes with both a
+Makefile.PL and a Build.PL, which shall have precedence? The two
+installer modules we have are the old and well established
+ExtUtils::MakeMaker (for short: EUMM) understands the Makefile.PL and
+the next generation installer Module::Build (MB) works with the
+Build.PL.
+
+});
+
+    $default = $CPAN::Config->{prefer_installer} || "";
+    do {
+      $ans =
+	  prompt("In case you could choose, which installer would you prefer (EUMM or MB)?",
+		 $default);
+    } while (uc $ans ne 'MB' && uc $ans ne 'EUMM');
+    $CPAN::Config->{prefer_installer} = $ans;
+
+    $CPAN::Frontend->myprint( qq{
+
 Every Makefile.PL is run by perl in a separate process. Likewise we
 run \'make\' and \'make install\' in separate processes. If you have
 any parameters \(e.g. PREFIX, LIB, UNINST or the like\) you want to
@@ -396,14 +416,14 @@ If you don\'t understand this question, just press ENTER.
 	prompt("Parameters for the 'perl Makefile.PL' command?
 Typical frequently used settings:
 
-    PREFIX=~/perl       non-root users (please see manual for more hints)
+    PREFIX=~/perl    # non-root users (please see manual for more hints)
 
 Your choice: ",$default);
     $default = $CPAN::Config->{make_arg} || "";
     $CPAN::Config->{make_arg} = prompt("Parameters for the 'make' command?
 Typical frequently used setting:
 
-    -j3              dual processor system
+    -j3              # dual processor system
 
 Your choice: ",$default);
 
@@ -423,7 +443,53 @@ or some such. Your choice: ",$default);
 	prompt("Parameters for the 'make install' command?
 Typical frequently used setting:
 
-    UNINST=1         to always uninstall potentially conflicting files
+    UNINST=1         # to always uninstall potentially conflicting files
+
+Your choice: ",$default);
+
+    $CPAN::Frontend->myprint( qq{
+
+The next questions deal with Module::Build support.
+
+A Build.PL is run by perl in a separate process. Likewise we run
+'./Build' and './Build install' in separate processes. If you have any
+parameters you want to pass to the calls, please specify them here.
+
+});
+
+    $default = $CPAN::Config->{mbuildpl_arg} || "";
+    $CPAN::Config->{mbuildpl_arg} =
+	prompt("Parameters for the 'perl Build.PL' command?
+Typical frequently used settings:
+
+    --install_base /home/xxx             # different installation directory
+
+Your choice: ",$default);
+    $default = $CPAN::Config->{mbuild_arg} || "";
+    $CPAN::Config->{mbuild_arg} = prompt("Parameters for the './Build' command?
+Setting might be:
+
+    --extra_linker_flags -L/usr/foo/lib  # non-standard library location
+
+Your choice: ",$default);
+
+    $default = $CPAN::Config->{mbuild_install_build_command} || "./Build";
+    $CPAN::Config->{mbuild_install_build_command} =
+	prompt("Do you want to use a different command for './Build install'?
+Sudo users will probably prefer:
+
+    sudo ./Build
+or
+    /path1/to/sudo -u admin_account ./Build
+
+or some such. Your choice: ",$default);
+
+    $default = $CPAN::Config->{mbuild_install_arg} || "";
+    $CPAN::Config->{mbuild_install_arg} =
+	prompt("Parameters for the './Build install' command?
+Typical frequently used setting:
+
+    --uninst 1                           # uninstall conflicting files
 
 Your choice: ",$default);
 
@@ -445,7 +511,7 @@ the default and recommended setting.
 
     $default = $CPAN::Config->{inactivity_timeout} || 0;
     $CPAN::Config->{inactivity_timeout} =
-	prompt("Timeout for inactivity during Makefile.PL?",$default);
+	prompt("Timeout for inactivity during {Makefile,Build}.PL?",$default);
 
     # Proxies
 
@@ -511,7 +577,7 @@ be echoed to the terminal!
     $CPAN::Config->{'getcwd'} = 'cwd';
 
     $CPAN::Frontend->myprint("\n\n");
-    CPAN::Config->commit($configpm);
+    CPAN::HandleConfig->commit($configpm);
 }
 
 sub conf_sites {
