@@ -1201,6 +1201,13 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 
 }
 
+{
+    my $twenty_three = 23;
+    # Check that constant overloading propagates into evals
+    BEGIN { overload::constant integer => sub { 23 } }
+    test(eval "17", $twenty_three);
+}
+
 
 # Last test is:
-sub last {497}
+sub last {498}
