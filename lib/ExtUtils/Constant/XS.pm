@@ -143,6 +143,13 @@ sub macro_from_name {
   $macro;
 }
 
+sub macro_from_item {
+  my ($self, $item) = @_;
+  my $macro = $item->{macro};
+  $macro = $self->macro_from_name($item) unless defined $macro;
+  $macro;
+}
+
 # Keep to the traditional perl source macro
 sub memEQ {
   "memEQ";

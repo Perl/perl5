@@ -68,6 +68,10 @@ sub macro_from_name {
   1;
 }
 
+sub macro_from_item {
+  1;
+}
+
 sub macro_to_ifdef {
     my ($self, $macro) = @_;
     if (ref $macro) {
@@ -371,10 +375,10 @@ sub return_clause {
   my ($self, $args, $item) = @_;
   my $indent = $args->{indent};
 
-  my ($name, $value, $macro, $default, $pre, $post, $def_pre, $def_post, $type)
-    = @$item{qw (name value macro default pre post def_pre def_post type)};
+  my ($name, $value, $default, $pre, $post, $def_pre, $def_post, $type)
+    = @$item{qw (name value default pre post def_pre def_post type)};
   $value = $name unless defined $value;
-  $macro = $self->macro_from_name($item) unless defined $macro;
+  my $macro = $self->macro_from_item($item);
   $indent = ' ' x ($indent || 6);
   unless (defined $type) {
     # use Data::Dumper; print STDERR Dumper ($item);
