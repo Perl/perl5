@@ -1932,13 +1932,21 @@ Perl_ingroup(pTHX_ Gid_t testgid, bool effective)
 #define NGROUPS 32
 #endif
     {
-	Groups_t gary[NGROUPS];
+	Groups_t *gary = NULL;
 	I32 anum;
+        bool rc = FALSE;
 
-	anum = getgroups(NGROUPS,gary);
+	anum = getgroups(0, gary);
+        Newx(gary, anum, Groups_t);
+        anum = getgroups(anum, gary);
 	while (--anum >= 0)
-	    if (gary[anum] == testgid)
-		return TRUE;
+	    if (gary[anum] == testgid) {
+                rc = TRUE;
+                break;
+            }
+
+        Safefree(gary);
+        return rc;
     }
 #endif
     return FALSE;
