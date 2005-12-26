@@ -432,6 +432,11 @@ for each group with this number or more names in.
 An array of constants' names, either scalars containing names, or hashrefs
 as detailed in L<"C_constant">.
 
+=item C_FH
+
+A filehandle to write the C code to.  If not given, then I<C_FILE> is opened
+for writing.
+
 =item C_FILE
 
 The name of the file to write containing the C code.  The default is
@@ -439,6 +444,11 @@ C<const-c.inc>.  The C<-> in the name ensures that the file can't be
 mistaken for anything related to a legitimate perl package name, and
 not naming the file C<.c> avoids having to override Makefile.PL's
 C<.xs> to C<.c> rules.
+
+=item XS_FH
+
+A filehandle to write the XS code to.  If not given, then I<XS_FILE> is opened
+for writing.
 
 =item XS_FILE
 
@@ -474,18 +484,28 @@ sub WriteConstants {
 
   croak "Module name not specified" unless length $ARGS{NAME};
 
-  my ($c_fh, $xs_fh);
-  if ($] <= 5.008) {
-      # We need these little games, rather than doing things unconditionally,
-      # because we're used in core Makefile.PLs before IO is available (needed
-      # by filehandle), but also we want to work on older perls where undefined
-      # scalars do not automatically turn into anonymous file handles.
-      require FileHandle;
-      $c_fh = FileHandle->new();
-      $xs_fh = FileHandle->new();
+  my $c_fh = $ARGS{C_FH};
+  if (!$c_fh) {
+      if ($] <= 5.008) {
+	  # We need these little games, rather than doing things
+	  # unconditionally, because we're used in core Makefile.PLs before
+	  # IO is available (needed by filehandle), but also we want to work on
+	  # older perls where undefined scalars do not automatically turn into
+	  # anonymous file handles.
+	  require FileHandle;
+	  $c_fh = FileHandle->new();
+      }
+      open $c_fh, ">$ARGS{C_FILE}" or die "Can't open $ARGS{C_FILE}: $!";
   }
-  open $c_fh, ">$ARGS{C_FILE}" or die "Can't open $ARGS{C_FILE}: $!";
-  open $xs_fh, ">$ARGS{XS_FILE}" or die "Can't open $ARGS{XS_FILE}: $!";
+
+  my $xs_fh = $ARGS{XS_FH};
+  if (!$xs_fh) {
+      if ($] <= 5.008) {
+	  require FileHandle;
+	  $xs_fh = FileHandle->new();
+      }
+      open $xs_fh, ">$ARGS{XS_FILE}" or die "Can't open $ARGS{XS_FILE}: $!";
+  }
 
   # As this subroutine is intended to make code that isn't edited, there's no
   # need for the user to specify any types that aren't found in the list of
@@ -525,8 +545,8 @@ sub WriteConstants {
 				$ARGS{C_SUBNAME});
   }
 
-  close $c_fh or warn "Error closing $ARGS{C_FILE}: $!";
-  close $xs_fh or warn "Error closing $ARGS{XS_FILE}: $!";
+  close $c_fh or warn "Error closing $ARGS{C_FILE}: $!" unless $ARGS{C_FH};
+  close $xs_fh or warn "Error closing $ARGS{XS_FILE}: $!" unless $ARGS{XS_FH};
 }
 
 1;

@@ -85,6 +85,30 @@ END {
 chdir $dir or die $!;
 push @INC, '../../lib', '../../../lib';
 
+package TieOut;
+
+sub TIEHANDLE {
+    my $class = shift;
+    bless(\( my $ref = ''), $class);
+}
+
+sub PRINT {
+    my $self = shift;
+    $$self .= join('', @_);
+}
+
+sub PRINTF {
+    my $self = shift;
+    $$self .= sprintf shift, @_;
+}
+
+sub read {
+    my $self = shift;
+    return substr($$self, 0, length($$self), '');
+}
+
+package main;
+
 sub check_for_bonus_files {
   my $dir = shift;
   my %expect = map {($^O eq 'VMS' ? lc($_) : $_), 1} @_;
@@ -322,14 +346,26 @@ sub MANIFEST {
 sub write_and_run_extension {
   my ($name, $items, $export_names, $package, $header, $testfile, $num_tests)
     = @_;
-  my $types = {};
-  my $constant_types = constant_types(); # macro defs
-  my $C_constant = join "\n",
-    C_constant ($package, undef, "IV", $types, undef, undef, @$items);
-  my $XS_constant = XS_constant ($package, $types); # XS for ExtTest::constant
 
-  my $expect = $constant_types . $C_constant .
-    "\n#### XS Section:\n" . $XS_constant;
+  my $c = tie *C, 'TieOut';
+  my $xs = tie *XS, 'TieOut';
+
+  ExtUtils::Constant::WriteConstants(C_FH => \*C, 
+				     XS_FH => \*XS,
+				     NAME => $package,
+				     NAMES => $items,
+				     );
+
+  my $C_code = $c->read();
+  my $XS_code = $xs->read();
+
+  undef $c;
+  undef $xs;
+
+  untie *C;
+  untie *XS;
+
+  my $expect = $C_code . "\n#### XS Section:\n" . $XS_code;
 
   print "# $name\n# $dir/$subdir being created...\n";
   mkdir $subdir, 0777 or die "mkdir: $!\n";
@@ -345,23 +381,23 @@ sub write_and_run_extension {
   close FH or die "close $header_name: $!\n";
 
   ################ XS
-  my $xs = "$package.xs";
-  push @files, $xs;
-  open FH, ">$xs" or die "open >$xs: $!\n";
+  my $xs_name = "$package.xs";
+  push @files, $xs_name;
+  open FH, ">$xs_name" or die "open >$xs_name: $!\n";
 
-  print FH <<'EOT';
+  print FH <<"EOT";
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include "$header_name"
+
+
+$C_code
+MODULE = $package		PACKAGE = $package
+PROTOTYPES: ENABLE
+$XS_code;
 EOT
 
-  # XXX Here doc these:
-  print FH "#include \"$header_name\"\n\n";
-  print FH $constant_types;
-  print FH $C_constant, "\n";
-  print FH "MODULE = $package		PACKAGE = $package\n";
-  print FH "PROTOTYPES: ENABLE\n";
-  print FH $XS_constant;
   close FH or die "close $xs: $!\n";
 
   ################ PM
@@ -435,6 +471,7 @@ EOT
   chdir $updir or die "chdir '$updir': $!";
   ++$subdir;
 }
+
 # Tests are arrayrefs of the form
 # $name, [items], [export_names], $package, $header, $testfile, $num_tests
 my @tests;
