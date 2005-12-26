@@ -201,6 +201,7 @@ void ${c_subname}_add_symbol($pthx HV *hash, const char *name, I32 namelen, SV *
 	SvUPGRADE(*sv, SVt_RV);
 	SvRV_set(*sv, value);
 	SvROK_on(*sv);
+	SvREADONLY_on(value);
     }
 }
 
