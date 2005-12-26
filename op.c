@@ -6794,6 +6794,18 @@ Perl_peep(pTHX_ register OP *o)
 		    SvREADONLY_on(PAD_SVl(ix));
 		    SvREFCNT_dec(cSVOPo->op_sv);
 		}
+		else if (o->op_type == OP_CONST
+			 && cSVOPo->op_sv == &PL_sv_undef) {
+		    /* PL_sv_undef is hack - it's unsafe to store it in the
+		       AV that is the pad, because av_fetch treats values of
+		       PL_sv_undef as a "free" AV entry and will merrily
+		       replace them with a new SV, causing pad_alloc to think
+		       that this pad slot is free. (When, clearly, it is not)
+		    */
+		    SvOK_off(PAD_SVl(ix));
+		    SvPADTMP_on(PAD_SVl(ix));
+		    SvREADONLY_on(PAD_SVl(ix));
+		}
 		else {
 		    SvREFCNT_dec(PAD_SVl(ix));
 		    SvPADTMP_on(cSVOPo->op_sv);
