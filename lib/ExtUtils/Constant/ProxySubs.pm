@@ -47,6 +47,7 @@ $VERSION = '0.01';
      PVN => sub { "newSVpvn($_[0], $_[1])" },
      YES => sub { '&PL_sv_yes' },
      NO => sub { '&PL_sv_no' },
+     UNDEF => sub { '&PL_sv_undef' },
      '' => sub { '&PL_sv_yes' },
      SV => sub {"SvREFCNT_inc($_[0])"},
      );
@@ -55,6 +56,7 @@ $VERSION = '0.01';
     (
      YES => sub {},
      NO => sub {},
+     UNDEF => sub {},
      '' => sub {},
      );
 
@@ -106,7 +108,7 @@ sub partition_names {
 	    # It can be "not found" unless it's the default (invert the macro)
 	    # or the "macro" is an empty string (ie no macro)
 	    push @notfound, $item unless $item->{invert_macro}
-		or !$self->macro_to_ifdef($self->macro_from_name($item));
+		or !$self->macro_to_ifdef($self->macro_from_item($item));
 	}
 
 	if ($item->{pre} or $item->{post} or $item->{not_constant}
@@ -154,7 +156,7 @@ sub name_len_value_macro {
     }
     $name = C_stringify($name);
 
-    my $macro = $self->macro_from_name($item);
+    my $macro = $self->macro_from_item($item);
     ($name, $namelen, $value, $macro);
 }
 
