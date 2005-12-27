@@ -398,17 +398,19 @@ and C<PUSHu>.
 #define AMGf_unary	8
 
 #define tryAMAGICbinW_var(meth_enum,assign,set) STMT_START { \
-          if (PL_amagic_generation) { \
-	    SV* tmpsv; \
-	    SV* const right= *(sp); SV* const left= *(sp-1);\
-	    if ((SvAMAGIC(left)||SvAMAGIC(right))&&\
-		(tmpsv=amagic_call(left, \
+	if (PL_amagic_generation) { \
+	    SV* const left = *(sp-1); \
+	    SV* const right = *(sp); \
+	    if ((SvAMAGIC(left)||SvAMAGIC(right))) {\
+		SV * const tmpsv = amagic_call(left, \
 				   right, \
 				   meth_enum, \
-				   (assign)? AMGf_assign: 0))) {\
-	       SPAGAIN;	\
-	       (void)POPs; set(tmpsv); RETURN; } \
-	  } \
+				   (assign)? AMGf_assign: 0); \
+		if (tmpsv) { \
+		    SPAGAIN; \
+		    (void)POPs; set(tmpsv); RETURN; } \
+		} \
+	    } \
 	} STMT_END
 
 #define tryAMAGICbinW(meth,assign,set) \

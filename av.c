@@ -334,7 +334,7 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
     ary[key] = val;
     if (SvSMAGICAL(av)) {
 	if (val != &PL_sv_undef) {
-	    MAGIC* mg = SvMAGIC(av);
+	    const MAGIC* const mg = SvMAGIC(av);
 	    sv_magic(val, (SV*)av, toLOWER(mg->mg_type), 0, key);
 	}
 	mg_set((SV*)av);
@@ -412,6 +412,7 @@ Perl_av_clear(pTHX_ register AV *av)
 {
     register I32 key;
 
+/* XXX Should av_clear really be NN? */
 #ifdef DEBUGGING
     if (SvREFCNT(av) == 0 && ckWARN_d(WARN_DEBUGGING)) {
 	Perl_warner(aTHX_ packWARN(WARN_DEBUGGING), "Attempt to clear deleted array");
@@ -731,7 +732,7 @@ Perl_av_fill(pTHX_ register AV *av, I32 fill)
     }
     if (fill <= AvMAX(av)) {
 	I32 key = AvFILLp(av);
-	SV** ary = AvARRAY(av);
+	SV** const ary = AvARRAY(av);
 
 	if (AvREAL(av)) {
 	    while (key > fill) {
@@ -767,7 +768,7 @@ Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
     SV *sv;
 
     if (!av)
-	return Nullsv;
+	return NULL;
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
 
@@ -790,7 +791,7 @@ Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
                 if (adjust_index) {
                     key += AvFILL(av) + 1;
                     if (key < 0)
-                        return Nullsv;
+			return NULL;
                 }
             }
             svp = av_fetch(av, key, TRUE);
@@ -801,7 +802,7 @@ Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
                     sv_unmagic(sv, PERL_MAGIC_tiedelem); /* No longer an element */
                     return sv;
                 }
-                return Nullsv;     
+		return NULL;
             }
         }
     }
@@ -809,11 +810,11 @@ Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
     if (key < 0) {
 	key += AvFILL(av) + 1;
 	if (key < 0)
-	    return Nullsv;
+	    return NULL;
     }
 
     if (key > AvFILLp(av))
-	return Nullsv;
+	return NULL;
     else {
 	if (!AvREAL(av) && AvREIFY(av))
 	    av_reify(av);
@@ -831,7 +832,7 @@ Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
     }
     if (flags & G_DISCARD) {
 	SvREFCNT_dec(sv);
-	sv = Nullsv;
+	sv = NULL;
     }
     else if (AvREAL(av))
 	sv = sv_2mortal(sv);
@@ -858,7 +859,7 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
     if (SvRMAGICAL(av)) {
         const MAGIC * const tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
         if (tied_magic || mg_find((SV*)av, PERL_MAGIC_regdata)) {
-            SV *sv = sv_newmortal();
+	    SV * const sv = sv_newmortal();
             MAGIC *mg;
             /* Handle negative array indices 20020222 MJD */
             if (key < 0) {

@@ -2640,11 +2640,12 @@ Perl_sv_2bool(pTHX_ register SV *sv)
     if (!SvOK(sv))
 	return 0;
     if (SvROK(sv)) {
-	SV* tmpsv;
-        if (SvAMAGIC(sv) && (tmpsv=AMG_CALLun(sv,bool_)) &&
-                (!SvROK(tmpsv) || (SvRV(tmpsv) != SvRV(sv))))
-	    return (bool)SvTRUE(tmpsv);
-      return SvRV(sv) != 0;
+	if (SvAMAGIC(sv)) {
+	    SV * const tmpsv = AMG_CALLun(sv,bool_);
+	    if (tmpsv && (!SvROK(tmpsv) || (SvRV(tmpsv) != SvRV(sv))))
+		return (bool)SvTRUE(tmpsv);
+	}
+	return SvRV(sv) != 0;
     }
     if (SvPOKp(sv)) {
 	register XPV* const Xpvtmp = (XPV*)SvANY(sv);
@@ -3857,7 +3858,7 @@ void
 Perl_sv_catpvn_flags(pTHX_ register SV *dsv, register const char *sstr, register STRLEN slen, I32 flags)
 {
     STRLEN dlen;
-    const char *dstr = SvPV_force_flags(dsv, dlen, flags);
+    const char * const dstr = SvPV_force_flags(dsv, dlen, flags);
 
     SvGROW(dsv, dlen + slen + 1);
     if (sstr == dstr)

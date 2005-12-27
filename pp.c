@@ -378,9 +378,8 @@ PP(pp_prototype)
     CV *cv;
     HV *stash;
     GV *gv;
-    SV *ret;
+    SV *ret = &PL_sv_undef;
 
-    ret = &PL_sv_undef;
     if (SvPOK(TOPs) && SvCUR(TOPs) >= 7) {
 	const char * const s = SvPVX_const(TOPs);
 	if (strnEQ(s, "CORE::", 6)) {

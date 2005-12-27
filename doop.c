@@ -100,7 +100,6 @@ S_do_trans_count(pTHX_ SV *sv)
     const U8 *send;
     I32 matches = 0;
     STRLEN len;
-    const I32 complement = PL_op->op_private & OPpTRANS_COMPLEMENT;
 
     const short * const tbl = (short*)cPVOP->op_pv;
     if (!tbl)
@@ -114,7 +113,8 @@ S_do_trans_count(pTHX_ SV *sv)
             if (tbl[*s++] >= 0)
                 matches++;
 	}
-    else
+    else {
+	const I32 complement = PL_op->op_private & OPpTRANS_COMPLEMENT;
 	while (s < send) {
 	    STRLEN ulen;
 	    const UV c = utf8n_to_uvchr(s, send - s, &ulen, 0);
@@ -125,6 +125,7 @@ S_do_trans_count(pTHX_ SV *sv)
 		matches++;
 	    s += ulen;
 	}
+    }
 
     return matches;
 }
@@ -138,9 +139,6 @@ S_do_trans_complex(pTHX_ SV *sv)
     U8 *dstart;
     I32 isutf8;
     I32 matches = 0;
-    const I32 grows = PL_op->op_private & OPpTRANS_GROWS;
-    const I32 complement = PL_op->op_private & OPpTRANS_COMPLEMENT;
-    const I32 del = PL_op->op_private & OPpTRANS_DELETE;
     STRLEN len, rlen = 0;
 
     const short * const tbl = (short*)cPVOP->op_pv;
@@ -188,6 +186,10 @@ S_do_trans_complex(pTHX_ SV *sv)
 	SvCUR_set(sv, d - dstart);
     }
     else { /* isutf8 */
+	const I32 complement = PL_op->op_private & OPpTRANS_COMPLEMENT;
+	const I32 grows = PL_op->op_private & OPpTRANS_GROWS;
+	const I32 del = PL_op->op_private & OPpTRANS_DELETE;
+
 	if (grows)
 	    Newx(d, len*2+1, U8);
 	else
@@ -321,11 +323,12 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)
 	const U8 * const e = s + len;
 	while (t < e) {
 	    const U8 ch = *t++;
-	    if ((hibit = !NATIVE_IS_INVARIANT(ch)))
+	    hibit = !NATIVE_IS_INVARIANT(ch);
+	    if (hibit) {
+		s = bytes_to_utf8(s, &len);
 		break;
+	    }
 	}
-	if (hibit)
-	    s = bytes_to_utf8(s, &len);
     }
     send = s + len;
     start = s;
@@ -413,11 +416,12 @@ S_do_trans_count_utf8(pTHX_ SV *sv)
 	const U8 * const e = s + len;
 	while (t < e) {
 	    const U8 ch = *t++;
-	    if ((hibit = !NATIVE_IS_INVARIANT(ch)))
+	    hibit = !NATIVE_IS_INVARIANT(ch);
+	    if (hibit) {
+		start = s = bytes_to_utf8(s, &len);
 		break;
+	    }
 	}
-	if (hibit)
-	    start = s = bytes_to_utf8(s, &len);
     }
     send = s + len;
 
@@ -460,11 +464,12 @@ S_do_trans_complex_utf8(pTHX_ SV *sv)
 	const U8 * const e = s + len;
 	while (t < e) {
 	    const U8 ch = *t++;
-	    if ((hibit = !NATIVE_IS_INVARIANT(ch)))
+	    hibit = !NATIVE_IS_INVARIANT(ch);
+	    if (hibit) {
+		s = bytes_to_utf8(s, &len);
 		break;
+	    }
 	}
-	if (hibit)
-	    s = bytes_to_utf8(s, &len);
     }
     send = s + len;
     start = s;

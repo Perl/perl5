@@ -267,6 +267,7 @@ Perl_hv_store(pTHX_ HV *hv, const char *key, I32 klen_i32, SV *val, U32 hash)
     return hek ? &HeVAL(hek) : NULL;
 }
 
+/* XXX This looks like an ideal candidate to inline */
 SV**
 Perl_hv_store_flags(pTHX_ HV *hv, const char *key, I32 klen, SV *val,
                  register U32 hash, int flags)
@@ -305,6 +306,7 @@ information on how to use this function on tied hashes.
 =cut
 */
 
+/* XXX This looks like an ideal candidate to inline */
 HE *
 Perl_hv_store_ent(pTHX_ HV *hv, SV *keysv, SV *val, U32 hash)
 {
@@ -381,6 +383,7 @@ computed.
 =cut
 */
 
+/* XXX This looks like an ideal candidate to inline */
 bool
 Perl_hv_exists_ent(pTHX_ HV *hv, SV *keysv, U32 hash)
 {
@@ -936,6 +939,7 @@ precomputed hash value, or 0 to ask for it to be computed.
 =cut
 */
 
+/* XXX This looks like an ideal candidate to inline */
 SV *
 Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 hash)
 {

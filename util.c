@@ -1021,12 +1021,12 @@ S_closest_cop(pTHX_ COP *cop, const OP *o)
 {
     /* Look for PL_op starting from o.  cop is the last COP we've seen. */
 
-    if (!o || o == PL_op) return cop;
+    if (!o || o == PL_op)
+	return cop;
 
     if (o->op_flags & OPf_KIDS) {
 	OP *kid;
-	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling)
-	{
+	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
 	    COP *new_cop;
 
 	    /* If the OP_NEXTSTATE has been optimised away we can still use it
@@ -1038,7 +1038,8 @@ S_closest_cop(pTHX_ COP *cop, const OP *o)
 	    /* Keep searching, and return when we've found something. */
 
 	    new_cop = closest_cop(cop, kid);
-	    if (new_cop) return new_cop;
+	    if (new_cop)
+		return new_cop;
 	}
     }
 
@@ -2585,8 +2586,7 @@ Perl_rsignal(pTHX_ int signo, Sighandler_t handler)
     return PerlProc_signal(signo, handler);
 }
 
-static
-Signal_t
+static Signal_t
 sig_trap(int signo)
 {
     dVAR;
