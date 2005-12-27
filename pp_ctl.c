@@ -3340,23 +3340,22 @@ PP(pp_require)
 		msgstr = SvPV_nolen_const(msg);
 	    } else {
 	        if (namesv) {			/* did we lookup @INC? */
-		    SV * const msg = sv_2mortal(newSVpv(msgstr,0));
-		    SV * const dirmsgsv = NEWSV(0, 0);
 		    AV * const ar = GvAVn(PL_incgv);
 		    I32 i;
-		    sv_catpvn(msg, " in @INC", 8);
-		    if (instr(SvPVX_const(msg), ".h "))
-		        sv_catpv(msg, " (change .h to .ph maybe?)");
-		    if (instr(SvPVX_const(msg), ".ph "))
-		        sv_catpv(msg, " (did you run h2ph?)");
-		    sv_catpv(msg, " (@INC contains:");
+		    SV * const msg = sv_2mortal(Perl_newSVpvf(aTHX_ 
+			"%s in @INC%s%s (@INC contains:",
+			msgstr,
+			(instr(msgstr, ".h ")
+			 ? " (change .h to .ph maybe?)" : ""),
+			(instr(msgstr, ".ph ")
+			 ? " (did you run h2ph?)" : "")
+							      ));
+		    
 		    for (i = 0; i <= AvFILL(ar); i++) {
-		        const char *dir = SvPVx_nolen_const(*av_fetch(ar, i, TRUE));
-		        Perl_sv_setpvf(aTHX_ dirmsgsv, " %s", dir);
-		        sv_catsv(msg, dirmsgsv);
+			sv_catpvn(msg, " ", 1);
+			sv_catsv(msg, *av_fetch(ar, i, TRUE));
 		    }
 		    sv_catpvn(msg, ")", 1);
-		    SvREFCNT_dec(dirmsgsv);
 		    msgstr = SvPV_nolen_const(msg);
 		}    
 	    }
