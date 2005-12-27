@@ -449,7 +449,7 @@ package Maintainers;
 	'Pod::Escapes' =>
                 {
                 'MAINTAINER'    => 'sburke',
-                'FILES'         => q[lib/Pod/Escapes.pm lib/Pod/Escapes]
+                'FILES'         => q[lib/Pod/Escapes.pm lib/Pod/Escapes],
                 'CPAN'          => 1,
                 },
 
@@ -460,8 +460,9 @@ package Maintainers;
 		},
 
         'Pod::Simple' =>
+                {
 		'MAINTAINER'	=> 'arandal',
-		'FILES'		=> q[lib/Pod/Simple.pm lib/Pod/Simple.pod lib/Pod/Simple]
+		'FILES'		=> q[lib/Pod/Simple.pm lib/Pod/Simple.pod lib/Pod/Simple],
 		'CPAN'		=> 1,
 		},
 
