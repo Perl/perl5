@@ -243,17 +243,23 @@ EOT
   $xs .= ', &sv' if $params->{SV};
   $xs .= ");\n";
 
+  # If anyone is insane enough to suggest a package name containing %
+  my $package_sprintf_safe = $package;
+  $package_sprintf_safe =~ s/%/%%/g;
+
   $xs .= << "EOT";
       /* Return 1 or 2 items. First is error message, or undef if no error.
            Second, if present, is found value */
         switch (type) {
         case PERL_constant_NOTFOUND:
-          sv = sv_2mortal(newSVpvf("%s is not a valid $package macro", s));
+          sv =
+	    sv_2mortal(newSVpvf("%s is not a valid $package_sprintf_safe macro", s));
           PUSHs(sv);
           break;
         case PERL_constant_NOTDEF:
           sv = sv_2mortal(newSVpvf(
-	    "Your vendor has not defined $package macro %s, used", s));
+	    "Your vendor has not defined $package_sprintf_safe macro %s, used",
+				   s));
           PUSHs(sv);
           break;
 EOT
@@ -283,7 +289,7 @@ EOT
   $xs .= << "EOT";
         default:
           sv = sv_2mortal(newSVpvf(
-	    "Unexpected return type %d while processing $package macro %s, used",
+	    "Unexpected return type %d while processing $package_sprintf_safe macro %s, used",
                type, s));
           PUSHs(sv);
         }

@@ -173,7 +173,9 @@ sub WriteConstants {
 
     $xs_subname ||= 'constant';
 
-    croak("Package name '$package' contains % characters") if $package =~ /%/;
+    # If anyone is insane enough to suggest a package name containing %
+    my $package_sprintf_safe = $package;
+    $package_sprintf_safe =~ s/%/%%/g;
 
     # All the types we see
     my $what = {};
@@ -199,7 +201,8 @@ sub WriteConstants {
 void ${c_subname}_add_symbol($pthx HV *hash, const char *name, I32 namelen, SV *value) {
     SV **sv = hv_fetch(hash, name, namelen, TRUE);
     if (!sv) {
-        Perl_croak($athx "Couldn't add key '%s' to %%%s::", name, "$package");
+        Perl_croak($athx "Couldn't add key '%s' to %%$package_sprintf_safe\::",
+		   name);
     }
     if (SvOK(*sv) || SvTYPE(*sv) == SVt_PVGV) {
 	/* Someone has been here before us - have to make a real sub.  */
@@ -220,8 +223,9 @@ static int
 Im_sorry_Dave(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_UNUSED_ARG(mg);
-    Perl_croak(aTHX_ "Your vendor has not defined $package macro %"SVf" used",
-	       sv);
+    Perl_croak(aTHX_
+	       "Your vendor has not defined $package_sprintf_safe macro %"SVf
+	       " used", sv);
     NORETURN_FUNCTION_END;
 }
 
@@ -344,8 +348,9 @@ EXPLODE
 	    SV **sv = hv_fetch(symbol_table, value_for_notfound->name,
 			       value_for_notfound->namelen, TRUE);
 	    if (!sv) {
-		Perl_croak($athx "Couldn't add key '%s' to %%%s::",
-			   value_for_notfound->name, "$package");
+		Perl_croak($athx
+			   "Couldn't add key '%s' to %%$package_sprintf_safe\::",
+			   value_for_notfound->name);
 	    }
 	    if (!SvOK(*sv) && SvTYPE(*sv) != SVt_PVGV) {
 		/* Nothing was here before, so mark a prototype of ""  */
@@ -435,7 +440,7 @@ $xs_subname(sv)
     INPUT:
 	SV *		sv;
     PPCODE:
-	sv = newSVpvf("Your vendor has not defined $package macro %" SVf
+	sv = newSVpvf("Your vendor has not defined $package_sprintf_safe macro %" SVf
 			  ", used", sv);
         PUSHs(sv_2mortal(sv));
 EXPLODE
@@ -449,10 +454,11 @@ $xs_subname(sv)
         const char *	s = SvPV(sv, len);
     PPCODE:
 	if (hv_exists(${c_subname}_missing, s, SvUTF8(sv) ? -len : len)) {
-	    sv = newSVpvf("Your vendor has not defined $package macro %" SVf
+	    sv = newSVpvf("Your vendor has not defined $package_sprintf_safe macro %" SVf
 			  ", used", sv);
 	} else {
-	    sv = newSVpvf("%" SVf " is not a valid $package macro", sv);
+	    sv = newSVpvf("%"SVf" is not a valid $package_sprintf_safe macro",
+			  sv);
 	}
         PUSHs(sv_2mortal(sv));
 DONT
