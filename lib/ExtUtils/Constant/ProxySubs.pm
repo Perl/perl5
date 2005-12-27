@@ -162,10 +162,14 @@ sub name_len_value_macro {
 
 sub WriteConstants {
     my $self = shift;
-    my $ARGS = shift;
+    my $ARGS = {@_};
 
     my ($c_fh, $xs_fh, $c_subname, $xs_subname, $default_type, $package)
-	= @{$ARGS}{qw(c_fh xs_fh c_subname xs_subname default_type package)};
+	= @{$ARGS}{qw(C_FH XS_FH C_SUBNAME XS_SUBNAME DEFAULT_TYPE NAME)};
+
+    my $options = $ARGS->{PROXYSUBS};
+    $options = {} unless ref $options;
+    my $explosives = $options->{croak_on_read};
 
     $xs_subname ||= 'constant';
 
@@ -177,7 +181,8 @@ sub WriteConstants {
     my $items = {};
 
     my @items = $self->normalise_items ({disable_utf8_duplication => 1},
-					$default_type, $what, $items, @_);
+					$default_type, $what, $items,
+					@{$ARGS->{NAMES}});
 
     # Partition the values by type. Also include any defaults in here
     # Everything that doesn't have a default needs alternative code for
@@ -207,9 +212,34 @@ void ${c_subname}_add_symbol($pthx HV *hash, const char *name, I32 namelen, SV *
     }
 }
 
+EOADD
+
+    print $c_fh $explosives ? <<"EXPLODE" : <<"DONT";
+
+static int
+Im_sorry_Dave(pTHX_ SV *sv, MAGIC *mg)
+{
+    PERL_UNUSED_ARG(mg);
+    Perl_croak(aTHX_ "Your vendor has not defined $package macro %"SVf" used",
+	       sv);
+    NORETURN_FUNCTION_END;
+}
+
+static MGVTBL not_defined_vtbl = {
+ Im_sorry_Dave, /* get - I'm afraid I can't do that */
+ Im_sorry_Dave, /* set */
+ 0, /* len */
+ 0, /* clear */
+ 0, /* free */
+ 0, /* copy */
+ 0, /* dup */
+};
+
+EXPLODE
+
 static HV *${c_subname}_missing = NULL;
 
-EOADD
+DONT
 
     print $xs_fh <<"EOBOOT";
 BOOT:
@@ -276,19 +306,73 @@ EOBOOT
     }
 
     delete $found->{''};
+
+    my $add_symbol_subname = $c_subname . '_add_symbol';
     foreach my $type (sort keys %$found) {
 	print $xs_fh $self->boottime_iterator($type, $iterator{$type}, 
 					      'symbol_table',
-					      "${c_subname}_add_symbol");
+					      $add_symbol_subname);
     }
-    print $xs_fh <<"EOBOOT";
-
+    print $xs_fh "\n", $explosives ? "" : <<"EOBOOT";
 	${c_subname}_missing = newHV();
+EOBOOT
+
+    print $xs_fh <<"EOBOOT";
 	while (value_for_notfound->name) {
+EOBOOT
+
+    print $xs_fh $explosives ? <<"EXPLODE" : << "DONT";
+	    SV *tripwire = newSV(0);
+	    
+	    sv_magicext(tripwire, 0, PERL_MAGIC_ext, &not_defined_vtbl, 0, 0);
+	    SvPV_set(tripwire, (char *)value_for_notfound->name);
+	    if(value_for_notfound->namelen >= 0) {
+		SvCUR_set(tripwire, value_for_notfound->namelen);
+	    } else {
+		SvCUR_set(tripwire, -value_for_notfound->namelen);
+		SvUTF8_on(tripwire);
+	    }
+	    SvPOKp_on(tripwire);
+	    SvREADONLY_on(tripwire);
+	    assert(SvLEN(tripwire) == 0);
+
+	    $add_symbol_subname($athx symbol_table, value_for_notfound->name,
+				value_for_notfound->namelen, tripwire);
+EXPLODE
+
+	    /* Need to add prototypes, else parsing will vary by platform.  */
+	    SV **sv = hv_fetch(symbol_table, value_for_notfound->name,
+			       value_for_notfound->namelen, TRUE);
+	    if (!sv) {
+		Perl_croak($athx "Couldn't add key '%s' to %%%s::",
+			   value_for_notfound->name, "$package");
+	    }
+	    if (!SvOK(*sv) && SvTYPE(*sv) != SVt_PVGV) {
+		/* Nothing was here before, so mark a prototype of ""  */
+		sv_setpvn(*sv, "", 0);
+	    } else if (SvPOK(*sv) && SvCUR(*sv) == 0) {
+		/* There is already a prototype of "" - do nothing  */
+	    } else {
+		/* Someone has been here before us - have to make a real
+		   typeglob.  */
+		/* It turns out to be incredibly hard to deal with all the
+		   corner cases of sub foo (); and reporting errors correctly,
+		   so lets cheat a bit.  Start with a constant subroutine  */
+		CV *cv = newCONSTSUB(symbol_table, value_for_notfound->name,
+				     &PL_sv_yes);
+		/* and then turn it into a non constant declaration only.  */
+		CvCONST_off(cv);
+		CvXSUB(cv) = NULL;
+	    }
+
 	    if (!hv_store(${c_subname}_missing, value_for_notfound->name,
 			  value_for_notfound->namelen, &PL_sv_yes, 0))
 		Perl_croak($athx "Couldn't add key '%s' to missing_hash",
 			   value_for_notfound->name);
+DONT
+
+    print $xs_fh <<"EOBOOT";
+
 	    ++value_for_notfound;
 	}
 EOBOOT
@@ -337,11 +421,24 @@ EOBOOT
         print $xs_fh $self->macro_to_endif($macro);
     }
 
-    print $xs_fh <<EOCONSTANT
+    print $xs_fh <<EOBOOT;
     /* As we've been creating subroutines, we better invalidate any cached
        methods  */
     ++PL_sub_generation;
   }
+EOBOOT
+
+    print $xs_fh $explosives ? <<"EXPLODE" : <<"DONT";
+
+void
+$xs_subname(sv)
+    INPUT:
+	SV *		sv;
+    PPCODE:
+	sv = newSVpvf("Your vendor has not defined $package macro %" SVf
+			  ", used", sv);
+        PUSHs(sv_2mortal(sv));
+EXPLODE
 
 void
 $xs_subname(sv)
@@ -358,7 +455,8 @@ $xs_subname(sv)
 	    sv = newSVpvf("%" SVf " is not a valid $package macro", sv);
 	}
         PUSHs(sv_2mortal(sv));
-EOCONSTANT
+DONT
+
 }
 
 1;

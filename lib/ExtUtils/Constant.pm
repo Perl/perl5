@@ -513,16 +513,9 @@ sub WriteConstants {
   
   if ($ARGS{PROXYSUBS}) {
       require ExtUtils::Constant::ProxySubs;
-      ExtUtils::Constant::ProxySubs->WriteConstants({c_fh => $c_fh,
-						     xs_fh => $xs_fh,
-						     package => $ARGS{NAME},
-						     c_subname
-						     => $ARGS{C_SUBNAME},
-						     xs_subname
-						     => $ARGS{XS_SUBNAME},
-						     default_type
-						     => $ARGS{DEFAULT_TYPE},
-						    }, @{$ARGS{NAMES}});
+      $ARGS{C_FH} = $c_fh;
+      $ARGS{XS_FH} = $xs_fh;
+      ExtUtils::Constant::ProxySubs->WriteConstants(%ARGS);
   } else {
       my $types = {};
 
