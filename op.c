@@ -4440,8 +4440,14 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     STRLEN ps_len;
     register CV *cv = NULL;
     SV *const_sv;
-    I32 gv_fetch_flags;
-
+    /* If the subroutine has no body, no attributes, and no builtin attributes
+       then it's just a sub declaration, and we may be able to get away with
+       storing with a placeholder scalar in the symbol table, rather than a
+       full GV and CV.  If anything is present then it will take a full CV to
+       store it.  */
+    const I32 gv_fetch_flags
+	= (block || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS))
+	? GV_ADDMULTI : GV_ADDMULTI | GV_NOINIT;
     const char * const name = o ? SvPVx_nolen_const(cSVOPo->op_sv) : Nullch;
 
     if (proto) {
@@ -4461,8 +4467,6 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     else
 	aname = Nullch;
 
-    gv_fetch_flags = (block || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS))
-	? GV_ADDMULTI : GV_ADDMULTI | GV_NOINIT;
     gv = name ? gv_fetchsv(cSVOPo->op_sv, gv_fetch_flags, SVt_PVCV)
 	: gv_fetchpv(aname ? aname
 		     : (PL_curstash ? "__ANON__" : "__ANON__::__ANON__"),
