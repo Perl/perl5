@@ -338,6 +338,9 @@ EOBOOT
     }
 
     print $xs_fh <<EOCONSTANT
+    /* As we've been creating subroutines, we better invalidate any cached
+       methods  */
+    ++PL_sub_generation;
   }
 
 void

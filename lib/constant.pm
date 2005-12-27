@@ -109,6 +109,7 @@ sub import {
 		    # constants from cv_const_sv are read only. So we have to:
 		    Internals::SvREADONLY($scalar, 1);
 		    $symtab->{$name} = \$scalar;
+		    Internals::inc_sub_generation;
 		} else {
 		    if(!exists $symtab->{$name}) {
 			print STDERR "$name $scalar\n";
