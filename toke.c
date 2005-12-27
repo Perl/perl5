@@ -3706,7 +3706,7 @@ Perl_yylex(pTHX)
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
-		deprecate_old(commaless_variable_list);
+		deprecate_old((char *)commaless_variable_list);
 		return REPORT(','); /* grandfather non-comma-format format */
 	    }
 	}
@@ -3935,7 +3935,7 @@ Perl_yylex(pTHX)
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
-		deprecate_old(commaless_variable_list);
+		deprecate_old((char *)commaless_variable_list);
 		return REPORT(','); /* grandfather non-comma-format format */
 	    }
 	    else
@@ -3952,7 +3952,7 @@ Perl_yylex(pTHX)
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
-		deprecate_old(commaless_variable_list);
+		deprecate_old((char *)commaless_variable_list);
 		return REPORT(','); /* grandfather non-comma-format format */
 	    }
 	    else

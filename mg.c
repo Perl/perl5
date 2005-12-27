@@ -851,7 +851,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 
 	      getrx:
 		if (i >= 0) {
-		    int oldtainted = PL_tainted;
+		    const int oldtainted = PL_tainted;
 		    TAINT_NOT;
 		    sv_setpvn(sv, s, i);
 		    PL_tainted = oldtainted;
@@ -1057,20 +1057,17 @@ Perl_magic_getuvar(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 {
-    const char *s;
-    const char *ptr;
     STRLEN len, klen;
-
-    s = SvPV_const(sv,len);
-    ptr = MgPV_const(mg,klen);
+    const char *s = SvPV_const(sv,len);
+    const char * const ptr = MgPV_const(mg,klen);
     my_setenv((char *)ptr, (char *)s);
 
 #ifdef DYNAMIC_ENV_FETCH
      /* We just undefd an environment var.  Is a replacement */
      /* waiting in the wings? */
     if (!len) {
-	SV **valp;
-	if ((valp = hv_fetch(GvHVn(PL_envgv), ptr, klen, FALSE)))
+	SV ** const valp = hv_fetch(GvHVn(PL_envgv), ptr, klen, FALSE);
+	if (valp)
 	    s = SvPV_const(*valp, len);
     }
 #endif
@@ -1803,7 +1800,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
     if (!mg) {
 	if (!SvOK(sv))
 	    return 0;
-	sv_magic(lsv, (SV*)0, PERL_MAGIC_regex_global, Nullch, 0);
+	sv_magic(lsv, NULL, PERL_MAGIC_regex_global, NULL, 0);
 	mg = mg_find(lsv, PERL_MAGIC_regex_global);
     }
     else if (!SvOK(sv)) {
@@ -2900,7 +2897,6 @@ S_unwind_handler_stack(pTHX_ const void *p)
 
     if (flags & 1)
 	PL_savestack_ix -= 5; /* Unprotect save in progress. */
-    /* cxstack_ix-- Not needed, die already unwound it. */
 #if !defined(PERL_IMPLICIT_CONTEXT)
     if (flags & 64)
 	SvREFCNT_dec(PL_sig_sv);
