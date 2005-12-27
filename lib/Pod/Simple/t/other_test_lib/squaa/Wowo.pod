@@ -1,7 +1,7 @@
 
 =head1 NAME
 
-squaa::Glunk -- blorpoesu
+squaa::Wowo -- blorpoesu
 
 =head1 DESCRIPTION
 

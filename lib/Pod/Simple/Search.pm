@@ -4,7 +4,7 @@ package Pod::Simple::Search;
 use strict;
 
 use vars qw($VERSION $MAX_VERSION_WITHIN $SLEEPY);
-$VERSION = 2.03;   ## Current version of this package
+$VERSION = 2.03_01;   ## Current version of this package
 
 BEGIN { *DEBUG = sub () {0} unless defined &DEBUG; }   # set DEBUG level
 use Carp ();
@@ -67,14 +67,7 @@ sub survey {
       $try = File::Spec->catfile( $cwd ,$try);
     }
     # simplify path
-    # on VMS canonpath will vmsify:[the.path], but File::Find::find
-    # wants /unixy/paths
-    #     (Is that irrelevent now htat we don't use File::Find? -- SMB)
-    if( $^O eq 'VMS' ) {
-      $try = VMS::Filespec::unixify($try);
-    } else {
-      $try =  File::Spec->canonpath($try);
-    }
+    $try =  File::Spec->canonpath($try);
 
     my $start_in;
     my $modname_prefix;
@@ -243,9 +236,11 @@ sub _path2modname {
   # * remove e.g. "i586-linux" (from 'archname')
   # * remove e.g. 5.00503
   # * remove pod/ if followed by perl*.pod (e.g. in pod/perlfunc.pod)
+  # * dig into the file for case-preserved name if not already mixed case
 
   my @m = @$modname_bits;
   my $x;
+  my $verbose = $self->verbose;
 
   # Shaving off leading naughty-bits
   while(@m
@@ -258,6 +253,36 @@ sub _path2modname {
 
   my $name = join '::', @m, $shortname;
   $self->_simplify_base($name);
+
+  if ($name eq lc($name) || $name eq uc($name)) {
+      open PODFILE, "<$file" or die "_path2modname: Can't open $file: $!";
+      my $in_pod = 0;
+      my $in_name = 0;
+      while (<PODFILE>) {
+        chomp;
+        $in_pod = 1 if m/^=\w/;
+        $in_pod = 0 if m/^=cut/;
+        next unless $in_pod;         # skip non-pod text
+        next if m/^\s*\z/;           # and blank lines
+        next if ($in_pod && m/^X</); # and commands
+        if ($in_name) {
+          if( m/(\w+::)?(\w+)/) {
+            # substitute case-preserved version of name
+            my $podname = $2;
+            my $prefix = $1;
+            $verbose and print "Attempting case restore of '$name' from '$prefix$podname'\n";
+            unless ($name =~ s/$prefix$podname/$prefix$podname/i) {
+              $verbose and print "Attempting case restore of '$name' from '$podname'\n";
+              $name =~ s/$podname/$podname/i;
+            }
+            last;
+          }
+        }
+        $in_name = 1 if m/^=head1 NAME/;
+    }
+    close PODFILE;
+  }
+
   return $name;
 }
 
@@ -308,6 +333,7 @@ sub _recurse_dir {
         $callback->(          $i_full, $i, 0, $modname_bits );
 
       } elsif(-d _) {
+        $i =~ s/\.DIR\z//i if $^O eq 'VMS';
         $_ = $i;
         my $rv = $callback->( $i_full, $i, 1, $modname_bits ) || '';
 
