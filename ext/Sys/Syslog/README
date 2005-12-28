@@ -37,6 +37,7 @@ INSTALLATION
       - Perl 5.6.1 i386-freebsd (custom build)
       - Perl 5.8.7 i386-freebsd (custom build)
       - Perl 5.6.0 darwin (vendor build)
+      - Perl 5.8.7 cygwin-thread-multi-64int (vendor build)
 
     See also the corresponding CPAN Testers page:
         http://testers.cpan.org/show/Net-Pcap.html

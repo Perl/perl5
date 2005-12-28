@@ -53,3 +53,4 @@ Failover
 logopts
 pathname
 syslogd
+logmask

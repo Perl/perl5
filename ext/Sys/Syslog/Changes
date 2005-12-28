@@ -1,5 +1,16 @@
 Revision history for Sys-Syslog
 
+0.11    2005.12.28
+        [BUGFIX] setlogmask() now behaves liek its C counterpart.
+        [CODE] Can now export and use the macros. 
+        [CODE] Support for three Exporter tags.
+        [CODE] XSLoader is now optional.
+        [CODE] No longer "use"s Sys::Hostname as it was "require"d where needed.
+        [CODE] RT#16604: Use local timestamp.
+        [DIST] Merged change from blead@26343
+        [DOC] Improved documentation.
+        [TESTS] Added more tests to t/syslog.t in order to increase code coverage.
+
 0.10    2005.12.08
         [DOC] Improved documentation.
         [TESTS] Added -T to t/syslog.t

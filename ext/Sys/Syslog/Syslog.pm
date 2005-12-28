@@ -4,10 +4,31 @@ use Carp;
 require 5.006;
 require Exporter;
 
+our $VERSION = '0.11';
 our @ISA = qw(Exporter);
-our @EXPORT = qw(openlog closelog setlogmask syslog);
-our @EXPORT_OK = qw(setlogsock);
-our $VERSION = '0.10';
+
+our %EXPORT_TAGS = (
+    standard => [qw(openlog syslog closelog setlogmask)],
+    extended => [qw(setlogsock)],
+    macros => [qw(
+        LOG_ALERT LOG_AUTH LOG_AUTHPRIV LOG_CONS LOG_CRIT LOG_CRON
+        LOG_DAEMON LOG_DEBUG LOG_EMERG LOG_ERR LOG_FACMASK LOG_FTP
+        LOG_INFO LOG_KERN LOG_LFMT LOG_LOCAL0 LOG_LOCAL1 LOG_LOCAL2
+        LOG_LOCAL3 LOG_LOCAL4 LOG_LOCAL5 LOG_LOCAL6 LOG_LOCAL7 LOG_LPR
+        LOG_MAIL LOG_NDELAY LOG_NEWS LOG_NFACILITIES LOG_NOTICE
+        LOG_NOWAIT LOG_ODELAY LOG_PERROR LOG_PID LOG_PRIMASK LOG_SYSLOG
+        LOG_USER LOG_UUCP LOG_WARNING
+    )],
+);
+
+our @EXPORT = (
+    @{$EXPORT_TAGS{standard}}, 
+);
+
+our @EXPORT_OK = (
+    @{$EXPORT_TAGS{extended}}, 
+    @{$EXPORT_TAGS{macros}}, 
+);
 
 # it would be nice to try stream/unix first, since that will be
 # most efficient. However streams are dodgy - see _syslog_send_stream
@@ -24,7 +45,7 @@ my $fail_time = undef;
 our ($connected, @fallbackMethods, $syslog_send, $host);
 
 use Socket ':all';
-use Sys::Hostname;
+use POSIX qw(strftime setlocale LC_TIME);
 
 =head1 NAME
 
@@ -32,12 +53,13 @@ Sys::Syslog - Perl interface to the UNIX syslog(3) calls
 
 =head1 VERSION
 
-Version 0.10
+Version 0.11
 
 =head1 SYNOPSIS
 
     use Sys::Syslog;                          # all except setlogsock(), or:
     use Sys::Syslog qw(:DEFAULT setlogsock);  # default set, plus setlogsock()
+    use Sys::Syslog qw(:standard :macros);    # standard functions, plus macros
 
     setlogsock $sock_type;
     openlog $ident, $logopt, $facility;       # don't forget this
@@ -55,12 +77,30 @@ just like C<syslog(3)>.
 
 =head1 EXPORTS
 
-By default, C<Sys::Syslog> exports the following symbols: 
+C<Sys::Syslog> exports the following C<Exporter> tags: 
+
+=over 4
+
+=item *
+
+C<:standard> exports the standard C<syslog(3)> functions: 
 
     openlog closelog setlogmask syslog
 
-as well as the symbols corresponding to most of your C<syslog(3)> macros.
-The symbol C<setlogsock> can be exported on demand. 
+=item *
+
+C<:extended> exports the Perl specific functions for C<syslog(3)>: 
+
+    setlogsock
+
+=item *
+
+C<:macros> exports the symbols corresponding to most of your C<syslog(3)> 
+macros. See L<"CONSTANTS"> for the supported constants and their meaning. 
+
+=back
+
+By default, C<Sys::Syslog> exports the symbols from the C<:standard> tag. 
 
 
 =head1 FUNCTIONS
@@ -76,36 +116,100 @@ ignored, since the failover mechanism will drop down to the console
 automatically if all other media fail.  C<$facility> specifies the
 part of the system to report about, for example C<LOG_USER> or C<LOG_LOCAL0>:
 see your C<syslog(3)> documentation for the facilities available in
-your system. This function will croak if it can't connect to the syslog
-daemon.
+your system. Facility can be given as a string or a numeric macro. 
+
+This function will croak if it can't connect to the syslog daemon.
 
 Note that C<openlog()> now takes three arguments, just like C<openlog(3)>.
 
 B<You should use openlog() before calling syslog().>
+
+B<Options>
+
+=over 4
+
+=item *
+
+C<ndelay> - Open the connection immediately (normally, the connection is
+opened when the first message is logged).
+
+=item *
+
+C<nowait> - Don't wait for child processes that may have been created 
+while logging the message.  (The GNU C library does not create a child
+process, so this option has no effect on Linux.)
+
+=item *
+
+C<pid> - Include PID with each message.
+
+=back
+
+B<Examples>
+
+Open the syslog with options C<ndelay> and C<pid>, and with facility C<LOCAL0>: 
+
+    openlog($name, "ndelay,pid", "local0");
+
+Same thing, but this time using the macro corresponding to C<LOCAL0>: 
+
+    openlog($name, "ndelay,pid", LOG_LOCAL0);
+
 
 =item B<syslog($priority, $message)>
 
 =item B<syslog($priority, $format, @args)>
 
 If C<$priority> permits, logs C<$message> or C<sprintf($format, @args)>
-with the addition that C<%m> in $message or $format is replaced with
-C<"$!"> (the latest error message).
+with the addition that C<%m> in $message or C<$format> is replaced with
+C<"$!"> (the latest error message). 
 
-If you didn't use C<openlog()> before using C<syslog()>, syslog will 
+C<$priority> can specify a level, or a level and a facility.  Levels and 
+facilities can be given as strings or as macros.
+
+If you didn't use C<openlog()> before using C<syslog()>, C<syslog()> will 
 try to guess the C<$ident> by extracting the shortest prefix of 
 C<$format> that ends in a C<":">.
 
-Note that C<Sys::Syslog> version v0.07 and older passed the C<$message> 
-as the formatting string to C<sprintf()> even when no formatting arguments
-were provided.  If the code calling C<syslog()> might execute with older
-versions of this module, make sure to call the function as
+B<Examples>
+
+    syslog("info", $message);           # informational level
+    syslog(LOG_INFO, $message);         # informational level
+
+    syslog("info|local0", $message);        # information level, Local0 facility
+    syslog(LOG_INFO|LOG_LOCAL0, $message);  # information level, Local0 facility
+
+=over 4
+
+=item B<Note>
+
+C<Sys::Syslog> version v0.07 and older passed the C<$message> as the 
+formatting string to C<sprintf()> even when no formatting arguments
+were provided.  If the code calling C<syslog()> might execute with 
+older versions of this module, make sure to call the function as
 C<syslog($priority, "%s", $message)> instead of C<syslog($priority,
 $message)>.  This protects against hostile formatting sequences that
 might show up if $message contains tainted data.
 
+=back
+
+
 =item B<setlogmask($mask_priority)>
 
-Sets log mask C<$mask_priority> and returns the old mask.
+Sets the log mask for the current process to C<$mask_priority> and 
+returns the old mask.  If the mask argument is 0, the current log mask 
+is not modified.  See L<"Levels"> for the list of available levels. 
+
+B<Examples>
+
+Only log errors: 
+
+    setlogmask(LOG_ERR);
+
+Log critical messages, errors and warnings: 
+
+    setlogmask(LOG_CRIT|LOG_ERR|LOG_WARNING);
+
 
 =item B<setlogsock($sock_type)>
 
@@ -135,9 +239,10 @@ The default is to try C<tcp>, C<udp>, C<unix>, C<stream>, C<console>.
 
 Giving an invalid value for C<$sock_type> will croak.
 
+
 =item B<closelog()>
 
-Closes the log file.
+Closes the log file and return true on success.
 
 =back
 
@@ -245,7 +350,7 @@ C<LOG_CRIT> - critical conditions
 
 =item *
 
-C<-LOG_ERR> - error conditions
+C<LOG_ERR> - error conditions
 
 =item *
 
@@ -280,17 +385,17 @@ B<(F)> C<syslog()> failed to connect to the specified socket.
 
 =item stream passed to setlogsock, but %s is not writable
 
-B<(F)> You asked C<setlogsock()> to use a stream socket, but the given 
+B<(W)> You asked C<setlogsock()> to use a stream socket, but the given 
 path is not writable. 
 
 =item stream passed to setlogsock, but could not find any device
 
-B<(F)> You asked C<setlogsock()> to use a stream socket, but didn't 
+B<(W)> You asked C<setlogsock()> to use a stream socket, but didn't 
 provide a path, and C<Sys::Syslog> was unable to find an appropriate one.
 
 =item tcp passed to setlogsock, but tcp service unavailable
 
-B<(F)> You asked C<setlogsock()> to use a TCP socket, but the service 
+B<(W)> You asked C<setlogsock()> to use a TCP socket, but the service 
 is not available on the system. 
 
 =item syslog: expecting argument %s
@@ -316,12 +421,12 @@ B<(F)> You forgot to specify a level.
 
 =item udp passed to setlogsock, but udp service unavailable
 
-B<(F)> You asked C<setlogsock()> to use a UDP socket, but the service 
+B<(W)> You asked C<setlogsock()> to use a UDP socket, but the service 
 is not available on the system. 
 
 =item unix passed to setlogsock, but path not available
 
-B<(F)> You asked C<setlogsock()> to use a UNIX socket, but C<Sys::Syslog> 
+B<(W)> You asked C<setlogsock()> to use a UNIX socket, but C<Sys::Syslog> 
 was unable to find an appropriate an appropriate device.
 
 =back
@@ -401,22 +506,26 @@ under the same terms as Perl itself.
 sub AUTOLOAD {
     # This AUTOLOAD is used to 'autoload' constants from the constant()
     # XS function.
-    
     my $constname;
     our $AUTOLOAD;
     ($constname = $AUTOLOAD) =~ s/.*:://;
     croak "&Sys::Syslog::constant not defined" if $constname eq 'constant';
     my ($error, $val) = constant($constname);
-    if ($error) {
-	croak $error;
-    }
+	croak $error if $error;
     no strict 'refs';
     *$AUTOLOAD = sub { $val };
     goto &$AUTOLOAD;
 }
 
-require XSLoader;
-XSLoader::load('Sys::Syslog', $VERSION);
+eval {
+    require XSLoader;
+    XSLoader::load('Sys::Syslog', $VERSION);
+    1
+} or do {
+    require DynaLoader;
+    push @ISA, 'DynaLoader';
+    bootstrap Sys::Syslog $VERSION;
+};
 
 our $maskpri = &LOG_UPTO(&LOG_DEBUG);
 
@@ -436,7 +545,7 @@ sub closelog {
 
 sub setlogmask {
     my $oldmask = $maskpri;
-    $maskpri = shift;
+    $maskpri = shift unless $_[0] == 0;
     $oldmask;
 }
  
@@ -461,11 +570,11 @@ sub setlogsock {
 		    last;
 		}
 	    }
-	    croak "stream passed to setlogsock, but could not find any device"
-		unless defined $syslog_path;
+	    carp "stream passed to setlogsock, but could not find any device"
+		unless defined $syslog_path
         }
 	unless (-w $syslog_path) {
-	    croak "stream passed to setlogsock, but $syslog_path is not writable";
+	    carp "stream passed to setlogsock, but $syslog_path is not writable";
 	    return undef;
 	} else {
 	    @connectMethods = ( 'stream' );
@@ -475,21 +584,21 @@ sub setlogsock {
 	    $syslog_path = _PATH_LOG();
 	    @connectMethods = ( 'unix' );
         } else {
-	    croak 'unix passed to setlogsock, but path not available';
+	    carp 'unix passed to setlogsock, but path not available';
 	    return undef;
         }
     } elsif (lc($setsock) eq 'tcp') {
 	if (getservbyname('syslog', 'tcp') || getservbyname('syslogng', 'tcp')) {
 	    @connectMethods = ( 'tcp' );
 	} else {
-	    croak "tcp passed to setlogsock, but tcp service unavailable";
+	    carp "tcp passed to setlogsock, but tcp service unavailable";
 	    return undef;
 	}
     } elsif (lc($setsock) eq 'udp') {
 	if (getservbyname('syslog', 'udp')) {
 	    @connectMethods = ( 'udp' );
 	} else {
-	    croak "udp passed to setlogsock, but udp service unavailable";
+	    carp "udp passed to setlogsock, but udp service unavailable";
 	    return undef;
 	}
     } elsif (lc($setsock) eq 'inet') {
@@ -497,7 +606,7 @@ sub setlogsock {
     } elsif (lc($setsock) eq 'console') {
 	@connectMethods = ( 'console' );
     } else {
-        croak "Invalid argument passed to setlogsock; must be 'stream', 'unix', 'tcp', 'udp' or 'inet'";
+        croak "Invalid argument passed to setlogsock; must be 'stream', 'unix', 'tcp', 'udp' or 'inet'"
     }
     return 1;
 }
@@ -510,16 +619,16 @@ sub syslog {
     our $facility;
     local($facility) = $facility;	# may need to change temporarily.
 
-    croak "syslog: expecting argument \$priority" unless $priority;
-    croak "syslog: expecting argument \$format"   unless $mask;
+    croak "syslog: expecting argument \$priority" unless defined $priority;
+    croak "syslog: expecting argument \$format"   unless defined $mask;
 
     @words = split(/\W+/, $priority, 2);# Allow "level" or "level|facility".
     undef $numpri;
     undef $numfac;
     foreach (@words) {
 	$num = &xlate($_);		# Translate word to number.
-	if (/^kern$/ || $num < 0) {
-	    croak "syslog: invalid level/facility: $_";
+	if ($_ eq 'kern' || $num <= 0) {
+	    croak "syslog: invalid level/facility: $_"
 	}
 	elsif ($num <= &LOG_PRIMASK) {
 	    croak "syslog: too many levels given: $_" if defined($numpri);
@@ -569,7 +678,11 @@ sub syslog {
     $message = @_ ? sprintf($mask, @_) : $mask;
 
     $sum = $numpri + $numfac;
-    my $buf = "<$sum>$whoami: $message\0";
+    my $oldlocale = setlocale(LC_TIME);
+    setlocale(LC_TIME, 'C');
+    my $timestamp = strftime "%b %e %T", localtime;
+    setlocale(LC_TIME, $oldlocale);
+    my $buf = "<$sum>$timestamp $whoami: $message\0";
 
     # it's possible that we'll get an error from sending
     # (e.g. if method is UDP and there is no UDP listener,
@@ -845,9 +958,9 @@ sub connection_ok {
 }
 
 sub disconnect {
-    close SYSLOG;
     $connected = 0;
     $syslog_send = undef;
+    return close SYSLOG;
 }
 
 1;
