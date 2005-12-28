@@ -1,11 +1,13 @@
 Revision history for Perl distribution PathTools.
 
-3.14_01  Fri Dec  9 22:45:49 CST 2005
+3.15  Tue Dec 27 14:17:39 CST 2005
 
  - The Cwd::getcwd() function on *nix is now a direct pass-through to
    the underlying getcwd() C library function when possible.  This is
    safer and faster than the previous implementation, which just did
-   abs_path('.'). [Suggested by Nick Ing-Simmons]
+   abs_path('.').  The pure-perl version has been kept for cases in
+   which the XS version can't load, such as when running under
+   miniperl. [Suggested by Nick Ing-Simmons]
 
  - When Cwd searches for a 'pwd' executable in the $PATH, we now stop
    after we find the first one rather than continuing the search.  We
