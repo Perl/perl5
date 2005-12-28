@@ -9706,7 +9706,6 @@ S_scan_heredoc(pTHX_ register char *s)
     I32 len;
     SV *tmpstr;
     char term;
-    const char newline[] = "\n";
     const char *found_newline;
     register char *d;
     register char *e;
@@ -9768,7 +9767,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	s = olds;
     }
 #endif
-    if ( outer || !(found_newline = ninstr(s,PL_bufend,newline,newline+1)) ) {
+    if ( outer || !(found_newline = memchr(s, '\n', PL_bufend - s)) ) {
         herewas = newSVpvn(s,PL_bufend-s);
     }
     else {
