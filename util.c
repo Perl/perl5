@@ -351,30 +351,24 @@ Perl_instr(pTHX_ register const char *big, register const char *little)
 /* same as instr but allow embedded nulls */
 
 char *
-Perl_ninstr(pTHX_ register const char *big, register const char *bigend, const char *little, const char *lend)
+Perl_ninstr(pTHX_ const char *big, const char *bigend, const char *little, const char *lend)
 {
-    register const I32 first = *little;
-    register const char * const littleend = lend;
-
-    if (little >= littleend)
-	return (char*)big;
-    if (bigend - big < littleend - little)
-	return Nullch;
-    bigend -= littleend - little++;
-    while (big <= bigend) {
-	register const char *s, *x;
-	if (*big++ != first)
-	    continue;
-	for (x=big,s=little; s < littleend; /**/ ) {
-	    if (*s != *x)
-		break;
-	    else {
-		s++;
-		x++;
-	    }
-	}
-	if (s >= littleend)
-	    return (char*)(big-1);
+    if (little >= lend)
+        return (char*)big;
+    {
+        char first = *little++;
+        const char *s, *x;
+        bigend -= lend - little;
+    OUTER:
+        while (big <= bigend) {
+            if (*big++ != first)
+                goto OUTER;
+            for (x=big,s=little; s < lend; x++,s++) {
+                if (*s != *x)
+                    goto OUTER;
+            }
+            return (char*)(big-1);
+        }
     }
     return Nullch;
 }
