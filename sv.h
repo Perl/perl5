@@ -169,7 +169,7 @@ perform the upgrade if necessary.  See C<svtype>.
     })
 #else
 #  define SvREFCNT_inc(sv)	\
-	((PL_Sv=(SV*)(sv)), (PL_Sv && ++(SvREFCNT(PL_Sv))), (SV*)PL_Sv)
+	((PL_Sv=(SV*)(sv)) ? ((++(SvREFCNT(PL_Sv))),(PL_Sv)) : NULL)
 #endif
 
 #if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
