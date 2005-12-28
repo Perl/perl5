@@ -6276,7 +6276,7 @@ Perl_sv_2mortal(pTHX_ register SV *sv)
 {
     dVAR;
     if (!sv)
-	return sv;
+	return NULL;
     if (SvREADONLY(sv) && SvIMMORTAL(sv))
 	return sv;
     EXTEND_MORTAL(1);
@@ -6578,7 +6578,7 @@ Perl_newSVsv(pTHX_ register SV *old)
     register SV *sv;
 
     if (!old)
-	return Nullsv;
+	return NULL;
     if (SvTYPE(old) == SVTYPEMASK) {
         if (ckWARN_d(WARN_INTERNAL))
 	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "semi-panic: attempt to dup freed string");
@@ -10288,20 +10288,20 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_regex_padav = newAV();
     {
 	const I32 len = av_len((AV*)proto_perl->Iregex_padav);
-	SV** const regexen = AvARRAY((AV*)proto_perl->Iregex_padav);
+	SV* const * const regexen = AvARRAY((AV*)proto_perl->Iregex_padav);
 	IV i;
 	av_push(PL_regex_padav,
 		sv_dup_inc(regexen[0],param));
 	for(i = 1; i <= len; i++) {
-            if(SvREPADTMP(regexen[i])) {
-	      av_push(PL_regex_padav, sv_dup_inc(regexen[i], param));
-            } else {
-	        av_push(PL_regex_padav,
-                    SvREFCNT_inc(
-                        newSViv(PTR2IV(re_dup(INT2PTR(REGEXP *,
-                             SvIVX(regexen[i])), param)))
-                       ));
-	    }
+	    const SV * const regex = regexen[i];
+	    SV * const sv =
+		SvREPADTMP(regex)
+		    ? sv_dup_inc(regex, param)
+		    : SvREFCNT_inc(
+			newSViv(PTR2IV(re_dup(
+				INT2PTR(REGEXP *, SvIVX(regex)), param))))
+		;
+	    av_push(PL_regex_padav, sv);
 	}
     }
     PL_regex_pad = AvARRAY(PL_regex_padav);

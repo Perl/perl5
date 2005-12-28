@@ -123,10 +123,15 @@ PERL_CALLCONV void	Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv, co
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
-PERL_CALLCONV void	Perl_av_clear(pTHX_ AV* ar);
-PERL_CALLCONV SV*	Perl_av_delete(pTHX_ AV* ar, I32 key, I32 flags);
+PERL_CALLCONV void	Perl_av_clear(pTHX_ AV* ar)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV SV*	Perl_av_delete(pTHX_ AV* ar, I32 key, I32 flags)
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV bool	Perl_av_exists(pTHX_ AV* ar, I32 key)
-			__attribute__warn_unused_result__;
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV void	Perl_av_extend(pTHX_ AV* ar, I32 key)
 			__attribute__nonnull__(pTHX_1);
@@ -136,7 +141,8 @@ PERL_CALLCONV AV*	Perl_av_fake(pTHX_ I32 size, SV** svp)
 			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV SV**	Perl_av_fetch(pTHX_ AV* ar, I32 key, I32 lval)
-			__attribute__warn_unused_result__;
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV void	Perl_av_fill(pTHX_ AV* ar, I32 fill)
 			__attribute__nonnull__(pTHX_1);
@@ -149,19 +155,29 @@ PERL_CALLCONV AV*	Perl_av_make(pTHX_ I32 size, SV** svp)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV SV*	Perl_av_pop(pTHX_ AV* ar);
+PERL_CALLCONV SV*	Perl_av_pop(pTHX_ AV* ar)
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV void	Perl_av_push(pTHX_ AV* ar, SV* val)
+			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV void	Perl_av_reify(pTHX_ AV* ar)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV SV*	Perl_av_shift(pTHX_ AV* ar)
-			__attribute__warn_unused_result__;
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV SV**	Perl_av_store(pTHX_ AV* ar, I32 key, SV* val);
-PERL_CALLCONV void	Perl_av_undef(pTHX_ AV* ar);
-PERL_CALLCONV void	Perl_av_unshift(pTHX_ AV* ar, I32 num);
+PERL_CALLCONV SV**	Perl_av_store(pTHX_ AV* ar, I32 key, SV* val)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV void	Perl_av_undef(pTHX_ AV* ar)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV void	Perl_av_unshift(pTHX_ AV* ar, I32 num)
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV SV**	Perl_av_arylen_p(pTHX_ AV* av)
 			__attribute__nonnull__(pTHX_1);
 

@@ -10338,7 +10338,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
 	/* update debugger info */
 	if (PERLDB_LINE && PL_curstash != PL_debstash) {
-	    SV *sv = NEWSV(88,0);
+	    SV * const sv = NEWSV(88,0);
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);

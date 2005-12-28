@@ -1168,7 +1168,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	{
 	    SV * const sv = GvSVn(gv);
 	    if (!sv_derived_from(PL_patchlevel, "version"))
-		(void *)upg_version(PL_patchlevel);
+		upg_version(PL_patchlevel);
 	    GvSV(gv) = vnumify(PL_patchlevel);
 	    SvREADONLY_on(GvSV(gv));
 	    SvREFCNT_dec(sv);

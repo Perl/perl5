@@ -62,9 +62,11 @@ extended.
 void
 Perl_av_extend(pTHX_ AV *av, I32 key)
 {
+    MAGIC *mg;
+
     assert(av);
 
-    MAGIC * const mg = SvTIED_mg((SV*)av, PERL_MAGIC_tied);
+    mg = SvTIED_mg((SV*)av, PERL_MAGIC_tied);
     if (mg) {
 	dSP;
 	ENTER;
@@ -416,8 +418,6 @@ Perl_av_clear(pTHX_ register AV *av)
     register I32 key;
 
     assert(av);
-
-/* XXX Should av_clear really be NN? */
 #ifdef DEBUGGING
     if (SvREFCNT(av) == 0 && ckWARN_d(WARN_DEBUGGING)) {
 	Perl_warner(aTHX_ packWARN(WARN_DEBUGGING), "Attempt to clear deleted array");

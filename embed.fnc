@@ -95,22 +95,22 @@ p	|OP*	|append_elem	|I32 optype|NULLOK OP* first|NULLOK OP* last
 p	|OP*	|append_list	|I32 optype|NULLOK LISTOP* first|NULLOK LISTOP* last
 p	|I32	|apply		|I32 type|NN SV** mark|NN SV** sp
 ApM	|void	|apply_attrs_string|NN const char *stashpv|NN CV *cv|NN const char *attrstr|STRLEN len
-Apd	|void	|av_clear	|NULLOK AV* ar
-Apd	|SV*	|av_delete	|NULLOK AV* ar|I32 key|I32 flags
-ApdR	|bool	|av_exists	|NULLOK AV* ar|I32 key
+Apd	|void	|av_clear	|NN AV* ar
+Apd	|SV*	|av_delete	|NN AV* ar|I32 key|I32 flags
+ApdR	|bool	|av_exists	|NN AV* ar|I32 key
 Apd	|void	|av_extend	|NN AV* ar|I32 key
 pR	|AV*	|av_fake	|I32 size|NN SV** svp
-ApdR	|SV**	|av_fetch	|NULLOK AV* ar|I32 key|I32 lval
+ApdR	|SV**	|av_fetch	|NN AV* ar|I32 key|I32 lval
 Apd	|void	|av_fill	|NN AV* ar|I32 fill
 ApdR	|I32	|av_len		|NN const AV* ar
 ApdR	|AV*	|av_make	|I32 size|NN SV** svp
-Apd	|SV*	|av_pop		|NULLOK AV* ar
-Apd	|void	|av_push	|NULLOK AV* ar|NN SV* val
+Apd	|SV*	|av_pop		|NN AV* ar
+Apd	|void	|av_push	|NN AV* ar|NN SV* val
 p	|void	|av_reify	|NN AV* ar
-ApdR	|SV*	|av_shift	|NULLOK AV* ar
-Apd	|SV**	|av_store	|NULLOK AV* ar|I32 key|NULLOK SV* val
-Apd	|void	|av_undef	|NULLOK AV* ar
-Apd	|void	|av_unshift	|NULLOK AV* ar|I32 num
+ApdR	|SV*	|av_shift	|NN AV* ar
+Apd	|SV**	|av_store	|NN AV* ar|I32 key|NULLOK SV* val
+Apd	|void	|av_undef	|NN AV* ar
+Apd	|void	|av_unshift	|NN AV* ar|I32 num
 Apo	|SV**	|av_arylen_p	|NN AV* av
 pR	|OP*	|bind_match	|I32 type|NN OP* left|NN OP* pat
 pR	|OP*	|block_end	|I32 floor|NULLOK OP* seq

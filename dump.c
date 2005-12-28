@@ -1441,7 +1441,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	}
 	if (nest < maxnest && !HvEITER_get(sv)) { /* Try to preserve iterator */
 	    HE *he;
-	    HV *hv = (HV*)sv;
+	    HV * const hv = (HV*)sv;
 	    int count = maxnest - nest;
 
 	    hv_iterinit(hv);
@@ -1450,7 +1450,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		SV *elt, *keysv;
                 const char *keypv;
 		STRLEN len;
-		U32 hash = HeHASH(he);
+		const U32 hash = HeHASH(he);
 
 		keysv = hv_iterkeysv(he);
 		keypv = SvPV_const(keysv, len);
