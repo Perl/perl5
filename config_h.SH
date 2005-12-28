@@ -3860,6 +3860,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_aintl HAS_AINTL		/**/
 
+/* HAS_BUILTIN_CHOOSE_EXPR:
+ *	Can we handle GCC builtin for compile-time ternary-like expressions
+ */
+/* HAS_BUILTIN_EXPECT:
+ *	Can we handle GCC builtin for telling that certain values are more
+ *	likely
+ */
+#$d_builtin_expect HAS_BUILTIN_EXPECT	/**/
+#$d_builtin_choose_expr HAS_BUILTIN_CHOOSE_EXPR	/**/
+
 /* HAS_CLEARENV:
  *	This symbol, if defined, indicates that the clearenv () routine is
  *	available for use.

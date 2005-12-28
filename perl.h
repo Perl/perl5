@@ -2962,13 +2962,16 @@ typedef pthread_key_t	perl_key;
 #  define NORETURN_FUNCTION_END /* NOTREACHED */ return 0
 #endif
 
-#ifdef HASBUILTIN_EXPECT
+#ifdef HAS_BUILTIN_EXPECT
 #  define EXPECT(expr,val)                  __builtin_expect(expr,val)
 #else
 #  define EXPECT(expr,val)                  (expr)
 #endif
 #define LIKELY(cond)                        EXPECT(cond,1)
 #define UNLIKELY(cond)                      EXPECT(cond,0)
+#ifdef HAS_BUILTIN_CHOOSE_EXPR
+/* placeholder */
+#endif
 
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define

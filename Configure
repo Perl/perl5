@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Fri Mar  3 08:34:32 CET 2006 [metaconfig 3.0 PL70]
+# Generated on Fri Mar  3 17:34:44 CET 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -354,6 +354,8 @@ d_attribute_unused=''
 d_attribute_warn_unused_result=''
 d_bcmp=''
 d_bcopy=''
+d_builtin_choose_expr=''
+d_builtin_expect=''
 d_bzero=''
 d_casti32=''
 castflags=''
@@ -10241,6 +10243,71 @@ esac
 set d_bsdsetpgrp
 eval $setvar
 $rm -f try try.*
+: Look for GCC-style __builtin_choose_expr
+case "$d_builtin_choose_expr" in
+'')
+    echo " "
+    echo "Checking whether your compiler can handle __builtin_choose_expr ..." >&4
+    $cat >try.c <<'EOCP'
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#define SYRINX(x) __builtin_choose_expr( x, (1056*2), (103*50) )
+
+int main(void) {
+    assert( SYRINX(1) == 2112 );
+    assert( SYRINX(1) != 5150 );
+    assert( SYRINX(0) == 5150 );
+    assert( SYRINX(0) != 2112 );
+    puts( "All good!" );
+    exit(0);
+}
+
+EOCP
+    set try
+    if eval $compile; then
+	echo "Your C compiler supports __builtin_choose_expr."
+	val="$define"
+    else
+	echo "Your C compiler doesn't seem to understand __builtin_choose_expr."
+	val="$undef"
+    fi
+;;
+*) val="$d_builtin_choose_expr" ;;
+esac
+
+set d_builtin_choose_expr
+eval $setvar
+$rm -f try.* try core core.try.*
+
+: Look for GCC-style __builtin_expect
+case "$d_builtin_expect" in
+'')
+    echo " "
+    echo "Checking whether your compiler can handle __builtin_expect ..." >&4
+    $cat >builtin.c <<'EOCP'
+int main(void) {
+    int n = 50;
+    if ( __builtin_expect(n, 0) ) n = 1;
+}
+EOCP
+    set try
+    if eval $compile; then
+	echo "Your C compiler supports __builtin_choose_expr."
+	val="$define"
+    else
+	echo "Your C compiler doesn't seem to understand __builtin_choose_expr."
+	val="$undef"
+    fi
+    ;;
+*) val="$d_builtin_expect" ;;
+esac
+
+set d_builtin_expect
+eval $setvar
+$rm -f try.* try core core.try.*
+
 : see if bzero exists
 set bzero d_bzero
 eval $inlibc
@@ -21172,6 +21239,8 @@ d_bcopy='$d_bcopy'
 d_bsd='$d_bsd'
 d_bsdgetpgrp='$d_bsdgetpgrp'
 d_bsdsetpgrp='$d_bsdsetpgrp'
+d_builtin_choose_expr='$d_builtin_choose_expr'
+d_builtin_expect='$d_builtin_expect'
 d_bzero='$d_bzero'
 d_casti32='$d_casti32'
 d_castneg='$d_castneg'
