@@ -26,6 +26,8 @@ Perl_av_reify(pTHX_ AV *av)
 {
     I32 key;
 
+    assert(av);
+
     if (AvREAL(av))
 	return;
 #ifdef DEBUGGING
@@ -60,6 +62,8 @@ extended.
 void
 Perl_av_extend(pTHX_ AV *av, I32 key)
 {
+    assert(av);
+
     MAGIC * const mg = SvTIED_mg((SV*)av, PERL_MAGIC_tied);
     if (mg) {
 	dSP;
@@ -187,8 +191,7 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
 {
     SV *sv;
 
-    if (!av)
-	return 0;
+    assert(av);
 
     if (SvRMAGICAL(av)) {
         const MAGIC * const tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
@@ -273,8 +276,8 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
 {
     SV** ary;
 
-    if (!av)
-	return 0;
+    assert(av);
+
     if (!val)
 	val = &PL_sv_undef;
 
@@ -412,14 +415,14 @@ Perl_av_clear(pTHX_ register AV *av)
 {
     register I32 key;
 
+    assert(av);
+
 /* XXX Should av_clear really be NN? */
 #ifdef DEBUGGING
     if (SvREFCNT(av) == 0 && ckWARN_d(WARN_DEBUGGING)) {
 	Perl_warner(aTHX_ packWARN(WARN_DEBUGGING), "Attempt to clear deleted array");
     }
 #endif
-    if (!av)
-	return;
 
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
@@ -461,8 +464,7 @@ Undefines the array.  Frees the memory used by the array itself.
 void
 Perl_av_undef(pTHX_ register AV *av)
 {
-    if (!av)
-	return;
+    assert(av);
 
     /* Give any tie a chance to cleanup first */
     if (SvTIED_mg((SV*)av, PERL_MAGIC_tied)) 
@@ -493,8 +495,8 @@ Perl_av_push(pTHX_ register AV *av, SV *val)
 {             
     dVAR;
     MAGIC *mg;
-    if (!av)
-	return;
+    assert(av);
+
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
 
@@ -531,8 +533,8 @@ Perl_av_pop(pTHX_ register AV *av)
     SV *retval;
     MAGIC* mg;
 
-    if (!av)
-      return &PL_sv_undef;
+    assert(av);
+
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
     if ((mg = SvTIED_mg((SV*)av, PERL_MAGIC_tied))) {
@@ -577,8 +579,8 @@ Perl_av_unshift(pTHX_ register AV *av, register I32 num)
     register I32 i;
     MAGIC* mg;
 
-    if (!av)
-	return;
+    assert(av);
+
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
 
@@ -649,8 +651,8 @@ Perl_av_shift(pTHX_ register AV *av)
     SV *retval;
     MAGIC* mg;
 
-    if (!av)
-	return &PL_sv_undef;
+    assert(av);
+
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
     if ((mg = SvTIED_mg((SV*)av, PERL_MAGIC_tied))) {
@@ -694,6 +696,7 @@ empty.
 I32
 Perl_av_len(pTHX_ register const AV *av)
 {
+    assert(av);
     return AvFILL(av);
 }
 
@@ -710,8 +713,9 @@ Perl_av_fill(pTHX_ register AV *av, I32 fill)
 {
     dVAR;
     MAGIC *mg;
-    if (!av)
-	Perl_croak(aTHX_ "panic: null array");
+
+    assert(av);
+
     if (fill < 0)
 	fill = -1;
     if ((mg = SvTIED_mg((SV*)av, PERL_MAGIC_tied))) {
@@ -767,8 +771,8 @@ Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
 {
     SV *sv;
 
-    if (!av)
-	return NULL;
+    assert(av);
+
     if (SvREADONLY(av))
 	Perl_croak(aTHX_ PL_no_modify);
 
@@ -852,9 +856,7 @@ C<&PL_sv_undef>.
 bool
 Perl_av_exists(pTHX_ AV *av, I32 key)
 {
-    if (!av)
-	return FALSE;
-
+    assert(av);
 
     if (SvRMAGICAL(av)) {
         const MAGIC * const tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
@@ -908,7 +910,11 @@ Perl_av_exists(pTHX_ AV *av, I32 key)
 SV **
 Perl_av_arylen_p(pTHX_ AV *av) {
     dVAR;
-    MAGIC *mg = mg_find((SV*)av, PERL_MAGIC_arylen_p);
+    MAGIC *mg;
+
+    assert(av);
+
+    mg = mg_find((SV*)av, PERL_MAGIC_arylen_p);
 
     if (!mg) {
 	mg = sv_magicext((SV*)av, 0, PERL_MAGIC_arylen_p, &PL_vtbl_arylen_p,

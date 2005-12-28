@@ -2961,10 +2961,6 @@ references to an object.
 
 (P) Something tried to allocate more memory than possible.
 
-=item panic: null array
-
-(P) One of the internal array routines was passed a null AV pointer.
-
 =item panic: pad_alloc
 
 (P) The compiler got confused about which scratch pad it was allocating
