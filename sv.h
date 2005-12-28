@@ -236,7 +236,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #    define SvREFCNT_inc_void(sv) SvREFCNT_inc(sv)
 #  else
 #    define SvREFCNT_inc(sv)	\
-	((PL_Sv=(SV*)(sv)), (PL_Sv && ATOMIC_INC(SvREFCNT(PL_Sv))), (SV*)PL_Sv)
+	((PL_Sv=(SV*)(sv)) ? (ATOMIC_INC(SvREFCNT(PL_Sv)), (SV*)PL_Sv) : NULL)
 #    define SvREFCNT_inc_simple(sv) \
 	((sv) ? (ATOMIC_INC(SvREFCNT(sv)),(SV*)(sv)) : NULL)
 #    define SvREFCNT_inc_NN(sv) \
