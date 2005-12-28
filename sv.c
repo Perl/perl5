@@ -4355,6 +4355,7 @@ Perl_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 	av = (AV*)mg->mg_obj;
     else {
 	av = newAV();
+	AvREAL_off(av);
 	sv_magic(tsv, (SV*)av, PERL_MAGIC_backref, NULL, 0);
 	/* av now has a refcnt of 2, which avoids it getting freed
 	 * before us during global cleanup. The extra ref is removed
@@ -8997,6 +8998,7 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
 	    SV **svp;
 	    I32 i;
 	    (void)SvREFCNT_inc(nmg->mg_obj = (SV*)newAV());
+	    AvREAL_off((AV*)nmg->mg_obj);
 	    svp = AvARRAY(av);
 	    for (i = AvFILLp(av); i >= 0; i--) {
 		if (!svp[i]) continue;
