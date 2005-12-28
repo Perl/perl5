@@ -85,7 +85,7 @@ filter_call(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    }
 	    else {
 		/* want lines */
-                if ((p = ninstr(out_ptr, out_ptr + n - 1, nl, nl))) {
+                if ((p = ninstr(out_ptr, out_ptr + n, nl, nl + 1))) {
 
 	            sv_catpvn(buf_sv, out_ptr, p - out_ptr + 1);
 
