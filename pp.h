@@ -398,7 +398,6 @@ and C<PUSHu>.
 #define AMGf_unary	8
 
 #define tryAMAGICbinW_var(meth_enum,assign,set) STMT_START { \
-	if (PL_amagic_generation) { \
 	    SV* const left = *(sp-1); \
 	    SV* const right = *(sp); \
 	    if ((SvAMAGIC(left)||SvAMAGIC(right))) {\
@@ -410,7 +409,6 @@ and C<PUSHu>.
 		    SPAGAIN; \
 		    (void)POPs; set(tmpsv); RETURN; } \
 		} \
-	    } \
 	} STMT_END
 
 #define tryAMAGICbinW(meth,assign,set) \
@@ -428,7 +426,6 @@ and C<PUSHu>.
             amagic_call(left,right,CAT2(meth,_amg),AMGf_noright)
 
 #define tryAMAGICunW(meth,set,shift,ret) STMT_START { \
-          if (PL_amagic_generation) { \
 	    SV* tmpsv; \
 	    SV* arg= sp[shift]; \
           if(0) goto am_again;  /* shut up unused warning */ \
@@ -437,7 +434,6 @@ and C<PUSHu>.
 		(tmpsv=AMG_CALLun(arg,meth))) {\
 	       SPAGAIN; if (shift) sp += shift; \
 	       set(tmpsv); ret; } \
-	  } \
 	} STMT_END
 
 #define FORCE_SETs(sv) STMT_START { sv_setsv(TARG, (sv)); SETTARG; } STMT_END
