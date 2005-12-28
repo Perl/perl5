@@ -919,10 +919,7 @@ Perl_av_arylen_p(pTHX_ AV *av) {
     if (!mg) {
 	mg = sv_magicext((SV*)av, 0, PERL_MAGIC_arylen_p, &PL_vtbl_arylen_p,
 			 0, 0);
-
-	if (!mg) {
-	    Perl_die(aTHX_ "panic: av_arylen_p");
-	}
+	assert(mg);
 	/* sv_magicext won't set this for us because we pass in a NULL obj  */
 	mg->mg_flags |= MGf_REFCOUNTED;
     }
