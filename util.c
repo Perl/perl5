@@ -356,7 +356,7 @@ Perl_ninstr(pTHX_ register const char *big, register const char *bigend, const c
     register const I32 first = *little;
     register const char * const littleend = lend;
 
-    if (!first && little >= littleend)
+    if (little >= littleend)
 	return (char*)big;
     if (bigend - big < littleend - little)
 	return Nullch;
@@ -388,7 +388,7 @@ Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *lit
     register const I32 first = *little;
     register const char * const littleend = lend;
 
-    if (!first && little >= littleend)
+    if (little >= littleend)
 	return (char*)bigend;
     bigbeg = big;
     big = bigend - (littleend - little++);
