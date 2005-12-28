@@ -60,7 +60,9 @@ extended.
 void
 Perl_av_extend(pTHX_ AV *av, I32 key)
 {
-    MAGIC * const mg = SvTIED_mg((SV*)av, PERL_MAGIC_tied);
+    MAGIC *mg;
+
+    mg = SvTIED_mg((SV*)av, PERL_MAGIC_tied);
     if (mg) {
 	dSP;
 	ENTER;
