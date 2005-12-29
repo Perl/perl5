@@ -3,6 +3,37 @@
 #include "perl.h"
 #include "XSUB.h"
 
+
+/* for my_cxt tests */
+
+#define MY_CXT_KEY "XS::APItest::_guts" XS_VERSION
+
+typedef struct {
+    int i;
+    SV *sv;
+} my_cxt_t;
+
+START_MY_CXT
+
+/* indirect functions to test the [pa]MY_CXT macros */
+int
+my_cxt_getint_p(pMY_CXT)
+{
+    return MY_CXT.i;
+}
+void
+my_cxt_setint_p(pMY_CXT_ int i)
+{
+    MY_CXT.i = i;
+}
+void
+my_cxt_setsv_p(SV* sv _pMY_CXT)
+{
+    MY_CXT.sv = sv;
+}
+
+
+
 /* from exception.c */
 int exception(int);
 
@@ -193,6 +224,19 @@ sub CLEAR    { %{$_[0]} = () }
 MODULE = XS::APItest		PACKAGE = XS::APItest
 
 PROTOTYPES: DISABLE
+
+BOOT:
+{
+    MY_CXT_INIT;
+    MY_CXT.i  = 99;
+    MY_CXT.sv = newSVpv("initial",0);
+}                              
+
+void
+CLONE(...)
+    CODE:
+    MY_CXT_CLONE;
+    MY_CXT.sv = newSVpv("initial_clone",0);
 
 void
 print_double(val)
@@ -414,3 +458,35 @@ strtab()
    RETVAL = newRV_inc((SV*)PL_strtab);
    OUTPUT:
    RETVAL
+
+int
+my_cxt_getint()
+    CODE:
+	dMY_CXT;
+	RETVAL = my_cxt_getint_p(aMY_CXT);
+    OUTPUT:
+        RETVAL
+
+void
+my_cxt_setint(i)
+    int i;
+    CODE:
+	dMY_CXT;
+	my_cxt_setint_p(aMY_CXT_ i);
+
+void
+my_cxt_getsv()
+    PPCODE:
+	dMY_CXT;
+	EXTEND(SP, 1);
+	ST(0) = MY_CXT.sv;
+	XSRETURN(1);
+
+void
+my_cxt_setsv(sv)
+    SV *sv;
+    CODE:
+	dMY_CXT;
+	SvREFCNT_dec(MY_CXT.sv);
+	my_cxt_setsv_p(sv _aMY_CXT);
+	SvREFCNT_inc(sv);
