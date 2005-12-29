@@ -985,8 +985,8 @@ Apa	|PerlIO*|fp_dup		|NULLOK PerlIO* fp|char type|NN CLONE_PARAMS* param
 Apa	|DIR*	|dirp_dup	|NULLOK DIR* dp
 Apa	|GP*	|gp_dup		|NULLOK GP* gp|NN CLONE_PARAMS* param
 Apa	|MAGIC*	|mg_dup		|NULLOK MAGIC* mg|NN CLONE_PARAMS* param
-Apa	|SV*	|sv_dup		|NULLOK SV* sstr|NN CLONE_PARAMS* param
-Ap	|void	|rvpv_dup	|NN SV* dstr|NN SV *sstr|NN CLONE_PARAMS* param
+Apa	|SV*	|sv_dup		|NULLOK const SV* sstr|NN CLONE_PARAMS* param
+Ap	|void	|rvpv_dup	|NN SV* dstr|NN const SV *sstr|NN CLONE_PARAMS* param
 Apa	|PTR_TBL_t*|ptr_table_new
 Apa	|void*	|ptr_table_fetch|NN PTR_TBL_t *tbl|NN const void *sv
 Ap	|void	|ptr_table_store|NN PTR_TBL_t *tbl|NULLOK const void *oldsv|NN void *newsv

@@ -2765,12 +2765,12 @@ PERL_CALLCONV MAGIC*	Perl_mg_dup(pTHX_ MAGIC* mg, CLONE_PARAMS* param)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV SV*	Perl_sv_dup(pTHX_ SV* sstr, CLONE_PARAMS* param)
+PERL_CALLCONV SV*	Perl_sv_dup(pTHX_ const SV* sstr, CLONE_PARAMS* param)
 			__attribute__malloc__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV void	Perl_rvpv_dup(pTHX_ SV* dstr, SV *sstr, CLONE_PARAMS* param)
+PERL_CALLCONV void	Perl_rvpv_dup(pTHX_ SV* dstr, const SV *sstr, CLONE_PARAMS* param)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);

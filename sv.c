@@ -9179,7 +9179,7 @@ Perl_ptr_table_free(pTHX_ PTR_TBL_t *tbl)
 
 
 void
-Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
+Perl_rvpv_dup(pTHX_ SV *dstr, const SV *sstr, CLONE_PARAMS* param)
 {
     if (SvROK(sstr)) {
 	SvRV_set(dstr, SvWEAKREF(sstr)
@@ -9225,7 +9225,7 @@ Perl_rvpv_dup(pTHX_ SV *dstr, SV *sstr, CLONE_PARAMS* param)
 /* duplicate an SV of any type (including AV, HV etc) */
 
 SV *
-Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
+Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 {
     dVAR;
     SV *dstr;
@@ -9240,12 +9240,11 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
     if(param->flags & CLONEf_JOIN_IN) {
         /** We are joining here so we don't want do clone
 	    something that is bad **/
-	const char *hvname;
-
-        if(SvTYPE(sstr) == SVt_PVHV &&
-	   (hvname = HvNAME_get(sstr))) {
-	    /** don't clone stashes if they already exist **/
-	    return (SV*)gv_stashpv(hvname,0);
+	if (SvTYPE(sstr) == SVt_PVHV) {
+	    const char * const hvname = HvNAME_get(sstr);
+	    if (hvname)
+		/** don't clone stashes if they already exist **/
+		return (SV*)gv_stashpv(hvname,0);
         }
     }
 
