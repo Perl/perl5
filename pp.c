@@ -598,7 +598,8 @@ PP(pp_gelem)
 	    break;
 	case 'P':
 	    if (strEQ(second_letter, "ACKAGE")) {
-		const HEK * const hek = HvNAME_HEK(GvSTASH(gv));
+		const HV * const stash = GvSTASH(gv);
+		const HEK * const hek = stash ? HvNAME_HEK(stash) : NULL;
 		sv = hek ? newSVhek(hek) : newSVpvn("__ANON__", 8);
 	    }
 	    break;
