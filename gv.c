@@ -675,7 +675,7 @@ package does not exist then NULL is returned.
 HV*
 Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 create)
 {
-    char smallbuf[256];
+    char smallbuf[128];
     char *tmpbuf;
     HV *stash;
     GV *tmpgv;
@@ -761,7 +761,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 
 	    len = namend - name;
 	    if (len > 0) {
-		char smallbuf[256];
+		char smallbuf[128];
 		char *tmpbuf;
 
 		if (len + 3 < sizeof (smallbuf))
