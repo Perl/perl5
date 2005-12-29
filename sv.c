@@ -9128,12 +9128,11 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
     if(param->flags & CLONEf_JOIN_IN) {
         /** We are joining here so we don't want do clone
 	    something that is bad **/
-	const char *hvname;
-
-        if(SvTYPE(sstr) == SVt_PVHV &&
-	   (hvname = HvNAME_get(sstr))) {
-	    /** don't clone stashes if they already exist **/
-	    return (SV*)gv_stashpv(hvname,0);
+	if (SvTYPE(sstr) == SVt_PVHV) {
+	    const char * const hvname = HvNAME_get(sstr);
+	    if (hvname)
+		/** don't clone stashes if they already exist **/
+		return (SV*)gv_stashpv(hvname,0);
         }
     }
 
