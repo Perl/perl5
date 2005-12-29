@@ -45,7 +45,7 @@ if(eval {require ExtUtils::Constant; 1}) {
     );
 
     ExtUtils::Constant::WriteConstants(
-        ($] > 5.0090002 ? (PROXYSUBS => 1) : ()),
+        ($] > 5.009002 ? (PROXYSUBS => 1) : ()),
         NAME => 'Sys::Syslog',
         NAMES => \@names,
     );
