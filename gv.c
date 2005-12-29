@@ -688,7 +688,7 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 create)
     tmpbuf[namelen++] = ':';
     tmpbuf[namelen++] = ':';
     tmpbuf[namelen] = '\0';
-    tmpgv = gv_fetchpv(tmpbuf, create, SVt_PVHV);
+    tmpgv = gv_fetchpvn_flags(tmpbuf, namelen, create, SVt_PVHV);
     if (tmpbuf != smallbuf)
 	Safefree(tmpbuf);
     if (!tmpgv)
@@ -887,7 +887,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    if (USE_UTF8_IN_NAMES)
 		SvUTF8_on(err);
 	    qerror(err);
-	    stash = GvHV(gv_fetchpv("<none>::", GV_ADDMULTI, SVt_PVHV));
+	    stash = GvHV(gv_fetchpvn_flags("<none>::", 8, GV_ADDMULTI, SVt_PVHV));
 	}
 	else
 	    return Nullgv;
@@ -1235,10 +1235,10 @@ Perl_newIO(pTHX)
     SvOBJECT_on(io);
     /* Clear the stashcache because a new IO could overrule a package name */
     hv_clear(PL_stashcache);
-    iogv = gv_fetchpv("FileHandle::", 0, SVt_PVHV);
+    iogv = gv_fetchpvn_flags("FileHandle::", 12, 0, SVt_PVHV);
     /* unless exists($main::{FileHandle}) and defined(%main::FileHandle::) */
     if (!(iogv && GvHV(iogv) && HvARRAY(GvHV(iogv))))
-      iogv = gv_fetchpv("IO::Handle::", TRUE, SVt_PVHV);
+      iogv = gv_fetchpvn_flags("IO::Handle::", 12, TRUE, SVt_PVHV);
     SvSTASH_set(io, (HV*)SvREFCNT_inc(GvHV(iogv)));
     return io;
 }
