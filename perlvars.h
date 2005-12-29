@@ -124,4 +124,9 @@ PERLVARI(Gop_seq, UV, 0) /* dump.c */
 PERLVAR(Gtimesbase, struct tms)
 #endif
 
+/* allocate a unique index to every module that calls MY_CXT_INIT */
 
+#ifdef PERL_IMPLICIT_CONTEXT
+PERLVAR(Gmy_ctx_mutex, perl_mutex)
+PERLVARI(Gmy_cxt_index, int, 0)
+#endif

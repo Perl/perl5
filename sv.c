@@ -10394,6 +10394,14 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     }
     else
 	PL_exitlist	= (PerlExitListEntry*)NULL;
+
+    PL_my_cxt_size = proto_perl->Imy_cxt_size;
+    if (PL_my_cxt_size) {
+	Newx(PL_my_cxt_list, PL_my_cxt_size, void *);
+	Copy(proto_perl->Imy_cxt_list, PL_my_cxt_list, PL_my_cxt_size, void *);
+    }
+    else
+	PL_my_cxt_list	= (void**)NULL;
     PL_modglobal	= hv_dup_inc(proto_perl->Imodglobal, param);
     PL_custom_op_names  = hv_dup_inc(proto_perl->Icustom_op_names,param);
     PL_custom_op_descs  = hv_dup_inc(proto_perl->Icustom_op_descs,param);

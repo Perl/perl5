@@ -5199,6 +5199,46 @@ Perl_my_clearenv(pTHX)
 #endif /* PERL_MICRO */
 }
 
+#ifdef PERL_IMPLICIT_CONTEXT
+
+/* implements the MY_CXT_INIT macro. The first time a module is loaded,
+the global PL_my_cxt_index is incremented, and that value is assigned to
+that module's static my_cxt_index (who's address is passed as an arg).
+Then, for each interpreter this function is called for, it makes sure a
+void* slot is available to hang the static data off, by allocating or
+extending the interpreter's PL_my_cxt_list array */
+
+void *
+Perl_my_cxt_init(pTHX_ int *index, size_t size)
+{
+    void *p;
+    if (*index == -1) {
+	/* this module hasn't been allocated an index yet */
+	MUTEX_LOCK(&PL_my_ctx_mutex);
+	*index = PL_my_cxt_index++;
+	MUTEX_UNLOCK(&PL_my_ctx_mutex);
+    }
+    
+    /* make sure the array is big enough */
+    if (PL_my_cxt_size < *index + 1) {
+	if (PL_my_cxt_list) {
+	    while (PL_my_cxt_size < *index + 1)
+		PL_my_cxt_size *= 2;
+	    Renew(PL_my_cxt_list, PL_my_cxt_size, void *);
+	}
+	else {
+	    PL_my_cxt_size = 16;
+	    Newx(PL_my_cxt_list, PL_my_cxt_size, void *);
+	}
+    }
+    /* newSV() allocates one more than needed */
+    p = (void*)SvPVX(newSV(size-1));
+    PL_my_cxt_list[*index] = p;
+    Zero(p, size, char);
+    return p;
+}
+#endif
+
 /*
  * Local variables:
  * c-indentation-style: bsd

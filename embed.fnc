@@ -1609,6 +1609,11 @@ Apnod	|int	|my_sprintf	|NN char *buffer|NN const char *pat|...
 
 px	|void	|my_clearenv
 
+#ifdef PERL_IMPLICIT_CONTEXT
+po	|void*	|my_cxt_init	|NN int *index|size_t size
+#endif
+
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

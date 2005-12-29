@@ -16,22 +16,36 @@ typedef struct {
 START_MY_CXT
 
 /* indirect functions to test the [pa]MY_CXT macros */
+
 int
 my_cxt_getint_p(pMY_CXT)
 {
     return MY_CXT.i;
 }
+
 void
 my_cxt_setint_p(pMY_CXT_ int i)
 {
     MY_CXT.i = i;
 }
+
+SV*
+my_cxt_getsv_interp()
+{
+#ifdef PERL_IMPLICIT_CONTEXT
+    dTHX;
+    dMY_CXT_INTERP(my_perl);
+#else
+    dMY_CXT;
+#endif
+    return MY_CXT.sv;
+}
+
 void
 my_cxt_setsv_p(SV* sv _pMY_CXT)
 {
     MY_CXT.sv = sv;
 }
-
 
 
 /* from exception.c */
@@ -477,9 +491,8 @@ my_cxt_setint(i)
 void
 my_cxt_getsv()
     PPCODE:
-	dMY_CXT;
 	EXTEND(SP, 1);
-	ST(0) = MY_CXT.sv;
+	ST(0) = my_cxt_getsv_interp();
 	XSRETURN(1);
 
 void

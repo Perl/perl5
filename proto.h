@@ -4206,6 +4206,13 @@ PERL_CALLCONV int	Perl_my_sprintf(char *buffer, const char *pat, ...)
 
 PERL_CALLCONV void	Perl_my_clearenv(pTHX);
 
+#ifdef PERL_IMPLICIT_CONTEXT
+PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *index, size_t size)
+			__attribute__nonnull__(pTHX_1);
+
+#endif
+
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

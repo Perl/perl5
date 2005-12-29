@@ -320,6 +320,8 @@
 #define PL_multi_open		(vTHX->Imulti_open)
 #define PL_multi_start		(vTHX->Imulti_start)
 #define PL_multiline		(vTHX->Imultiline)
+#define PL_my_cxt_list		(vTHX->Imy_cxt_list)
+#define PL_my_cxt_size		(vTHX->Imy_cxt_size)
 #define PL_nexttoke		(vTHX->Inexttoke)
 #define PL_nexttype		(vTHX->Inexttype)
 #define PL_nextval		(vTHX->Inextval)
@@ -600,6 +602,8 @@
 #define PL_Imulti_open		PL_multi_open
 #define PL_Imulti_start		PL_multi_start
 #define PL_Imultiline		PL_multiline
+#define PL_Imy_cxt_list		PL_my_cxt_list
+#define PL_Imy_cxt_size		PL_my_cxt_size
 #define PL_Inexttoke		PL_nexttoke
 #define PL_Inexttype		PL_nexttype
 #define PL_Inextval		PL_nextval
@@ -862,6 +866,10 @@
 #define PL_Gmalloc_mutex	(my_vars->Gmalloc_mutex)
 #define PL_mmap_page_size	(my_vars->Gmmap_page_size)
 #define PL_Gmmap_page_size	(my_vars->Gmmap_page_size)
+#define PL_my_ctx_mutex		(my_vars->Gmy_ctx_mutex)
+#define PL_Gmy_ctx_mutex	(my_vars->Gmy_ctx_mutex)
+#define PL_my_cxt_index		(my_vars->Gmy_cxt_index)
+#define PL_Gmy_cxt_index	(my_vars->Gmy_cxt_index)
 #define PL_op_mutex		(my_vars->Gop_mutex)
 #define PL_Gop_mutex		(my_vars->Gop_mutex)
 #define PL_op_seq		(my_vars->Gop_seq)
@@ -915,6 +923,8 @@
 #define PL_Ghexdigit		PL_hexdigit
 #define PL_Gmalloc_mutex	PL_malloc_mutex
 #define PL_Gmmap_page_size	PL_mmap_page_size
+#define PL_Gmy_ctx_mutex	PL_my_ctx_mutex
+#define PL_Gmy_cxt_index	PL_my_cxt_index
 #define PL_Gop_mutex		PL_op_mutex
 #define PL_Gop_seq		PL_op_seq
 #define PL_Gop_sequence		PL_op_sequence

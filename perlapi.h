@@ -438,6 +438,10 @@ END_EXTERN_C
 #define PL_multi_start		(*Perl_Imulti_start_ptr(aTHX))
 #undef  PL_multiline
 #define PL_multiline		(*Perl_Imultiline_ptr(aTHX))
+#undef  PL_my_cxt_list
+#define PL_my_cxt_list		(*Perl_Imy_cxt_list_ptr(aTHX))
+#undef  PL_my_cxt_size
+#define PL_my_cxt_size		(*Perl_Imy_cxt_size_ptr(aTHX))
 #undef  PL_nexttoke
 #define PL_nexttoke		(*Perl_Inexttoke_ptr(aTHX))
 #undef  PL_nexttype
@@ -926,6 +930,10 @@ END_EXTERN_C
 #define PL_malloc_mutex		(*Perl_Gmalloc_mutex_ptr(NULL))
 #undef  PL_mmap_page_size
 #define PL_mmap_page_size	(*Perl_Gmmap_page_size_ptr(NULL))
+#undef  PL_my_ctx_mutex
+#define PL_my_ctx_mutex		(*Perl_Gmy_ctx_mutex_ptr(NULL))
+#undef  PL_my_cxt_index
+#define PL_my_cxt_index		(*Perl_Gmy_cxt_index_ptr(NULL))
 #undef  PL_op_mutex
 #define PL_op_mutex		(*Perl_Gop_mutex_ptr(NULL))
 #undef  PL_op_seq

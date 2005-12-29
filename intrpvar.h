@@ -517,6 +517,12 @@ PERLVARI(Isuidscript, int, -1)	/* fd for suid script */
 /* File descriptor to talk to the child which dumps scalars.  */
 PERLVARI(Idumper_fd, int, -1)
 #endif
+
+#ifdef PERL_IMPLICIT_CONTEXT
+PERLVARI(Imy_cxt_size, int, -1)		/* size of PL_my_cxt_list */
+PERLVARI(Imy_cxt_list, void **, NULL) /* per-module array of MY_CXT pointers */
+#endif
+
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
  * (Don't forget to add your variable also to perl_clone()!)

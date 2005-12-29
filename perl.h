@@ -5094,6 +5094,7 @@ typedef struct am_table_short AMTS;
  * Code that uses these macros is responsible for the following:
  * 1. #define MY_CXT_KEY to a unique string, e.g.
  *    "DynaLoader::_guts" XS_VERSION
+ *    XXX in the current implementation, this string is ignored.
  * 2. Declare a typedef named my_cxt_t that is a structure that contains
  *    all the data that needs to be interpreter-local.
  * 3. Use the START_MY_CXT macro after the declaration of my_cxt_t.
@@ -5110,35 +5111,30 @@ typedef struct am_table_short AMTS;
 /* This must appear in all extensions that define a my_cxt_t structure,
  * right after the definition (i.e. at file scope).  The non-threads
  * case below uses it to declare the data as static. */
-#define START_MY_CXT
-
-/* Fetches the SV that keeps the per-interpreter data. */
-#define dMY_CXT_SV \
-	SV *my_cxt_sv = *hv_fetch(PL_modglobal, MY_CXT_KEY,		\
-				  sizeof(MY_CXT_KEY)-1, TRUE)
+#define START_MY_CXT static int my_cxt_index = -1;
 
 /* This declaration should be used within all functions that use the
  * interpreter-local data. */
 #define dMY_CXT	\
-	dMY_CXT_SV;							\
-	my_cxt_t *my_cxtp = INT2PTR(my_cxt_t*, SvUV(my_cxt_sv))
+	my_cxt_t *my_cxtp = (my_cxt_t *)PL_my_cxt_list[my_cxt_index]
+#define dMY_CXT_INTERP(my_perl)	\
+	my_cxt_t *my_cxtp = (my_cxt_t *)(my_perl)->Imy_cxt_list[my_cxt_index]
 
 /* Creates and zeroes the per-interpreter data.
  * (We allocate my_cxtp in a Perl SV so that it will be released when
  * the interpreter goes away.) */
 #define MY_CXT_INIT \
-	dMY_CXT_SV;							\
-	/* newSV() allocates one more than needed */			\
-	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
-	Zero(my_cxtp, 1, my_cxt_t);					\
-	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
+	my_cxt_t *my_cxtp = \
+	    (my_cxt_t*)Perl_my_cxt_init(aTHX_ &my_cxt_index, sizeof(my_cxt_t))
+#define MY_CXT_INIT_INTERP(my_perl) \
+	my_cxt_t *my_cxtp = \
+	    (my_cxt_t*)Perl_my_cxt_init(my_perl, &my_cxt_index, sizeof(my_cxt_t))
 
 /* Clones the per-interpreter data. */
 #define MY_CXT_CLONE \
-	dMY_CXT_SV;							\
 	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
-	Copy(INT2PTR(my_cxt_t*, SvUV(my_cxt_sv)), my_cxtp, 1, my_cxt_t);\
-	sv_setuv(my_cxt_sv, PTR2UV(my_cxtp))
+	Copy(PL_my_cxt_list[my_cxt_index], my_cxtp, 1, my_cxt_t);\
+	PL_my_cxt_list[my_cxt_index] = my_cxtp				\
 
 /* This macro must be used to access members of the my_cxt_t structure.
  * e.g. MYCXT.some_data */
@@ -5153,7 +5149,7 @@ typedef struct am_table_short AMTS;
 #define aMY_CXT_	aMY_CXT,
 #define _aMY_CXT	,aMY_CXT
 
-#else /* USE_ITHREADS */
+#else /* PERL_IMPLICIT_CONTEXT */
 
 #define START_MY_CXT	static my_cxt_t my_cxt;
 #define dMY_CXT_SV	dNOOP
@@ -5169,7 +5165,7 @@ typedef struct am_table_short AMTS;
 #define aMY_CXT_
 #define _aMY_CXT
 
-#endif /* !defined(USE_ITHREADS) */
+#endif /* !defined(PERL_IMPLICIT_CONTEXT) */
 
 #ifdef I_FCNTL
 #  include <fcntl.h>

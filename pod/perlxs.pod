@@ -1926,7 +1926,6 @@ Below is an example module that makes use of the macros.
 	CODE:
 	MY_CXT_CLONE;
 
-
 B<REFERENCE>
 
 =over 5
@@ -2013,7 +2012,18 @@ my_cxt_t structure. Calling C<MY_CXT_CLONE> (typically via the package's
 C<CLONE()> function), causes a byte-for-byte copy of the structure to be
 taken, and any future dMY_CXT will cause the copy to be accessed instead.
 
+=item MY_CXT_INIT_INTERP(my_perl)
+
+=item dMY_CXT_INTERP(my_perl)
+
+These are versions of the macros which take an explicit interpreter as an
+argument.
+
 =back
+
+Note that these macros will only work together within the I<same> source
+file; that is, a dMY_CTX in one source file will access a different structure
+than a dMY_CTX in another source file.
 
 =head1 EXAMPLES
 
