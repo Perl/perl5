@@ -1329,6 +1329,8 @@
 #endif
 #if defined(PERL_IN_GV_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_PAD_C) || defined(PERL_DECL_PROT)
 #endif
+#if defined(PERL_IN_HV_C) || defined(PERL_IN_MG_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+#endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define uiv_2buf		S_uiv_2buf
@@ -1537,6 +1539,8 @@
 #define save_set_svflags	Perl_save_set_svflags
 #define hv_scalar		Perl_hv_scalar
 #define hv_name_set		Perl_hv_name_set
+#if defined(PERL_IN_DUMP_C) || defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+#endif
 #define hv_clear_placeholders	Perl_hv_clear_placeholders
 #ifdef PERL_CORE
 #define magic_scalarpack	Perl_magic_scalarpack
@@ -3367,6 +3371,10 @@
 #ifdef PERL_CORE
 #endif
 #endif
+#if defined(PERL_IN_HV_C) || defined(PERL_IN_MG_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#endif
+#endif
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define uiv_2buf		S_uiv_2buf
@@ -3575,6 +3583,12 @@
 #define save_set_svflags(a,b,c)	Perl_save_set_svflags(aTHX_ a,b,c)
 #define hv_scalar(a)		Perl_hv_scalar(aTHX_ a)
 #define hv_name_set(a,b,c,d)	Perl_hv_name_set(aTHX_ a,b,c,d)
+#ifdef PERL_CORE
+#endif
+#if defined(PERL_IN_DUMP_C) || defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#endif
+#endif
 #define hv_clear_placeholders(a)	Perl_hv_clear_placeholders(aTHX_ a)
 #ifdef PERL_CORE
 #define magic_scalarpack(a,b)	Perl_magic_scalarpack(aTHX_ a,b)

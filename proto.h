@@ -3653,6 +3653,13 @@ PERL_CALLCONV void	Perl_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 
 #endif
 
+#if defined(PERL_IN_HV_C) || defined(PERL_IN_MG_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+PERL_CALLCONV int	Perl_sv_kill_backrefs(pTHX_ SV *sv, AV *av)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+#endif
+
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 STATIC char *	S_uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
 			__attribute__warn_unused_result__
@@ -4077,6 +4084,14 @@ PERL_CALLCONV void	Perl_hv_eiter_set(pTHX_ HV* hv, HE* eiter)
 PERL_CALLCONV void	Perl_hv_name_set(pTHX_ HV* hv, const char *name, I32 len, int flags)
 			__attribute__nonnull__(pTHX_1);
 
+PERL_CALLCONV AV**	Perl_hv_backreferences_p(pTHX_ HV* hv)
+			__attribute__nonnull__(pTHX_1);
+
+#if defined(PERL_IN_DUMP_C) || defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+PERL_CALLCONV void	Perl_hv_kill_backrefs(pTHX_ HV* hv)
+			__attribute__nonnull__(pTHX_1);
+
+#endif
 PERL_CALLCONV void	Perl_hv_clear_placeholders(pTHX_ HV* hb)
 			__attribute__nonnull__(pTHX_1);
 

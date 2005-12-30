@@ -38,6 +38,7 @@ struct shared_he {
 */
 struct xpvhv_aux {
     HEK		*xhv_name;	/* name, if a symbol table */
+    AV		*xhv_backreferences; /* back references for weak references */
     HE		*xhv_eiter;	/* current entry of iterator */
     I32		xhv_riter;	/* current root of iterator */
 };

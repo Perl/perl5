@@ -1303,6 +1303,10 @@ s	|SV*	|save_scalar_at	|NN SV **sptr
 po	|void	|sv_add_backref	|NN SV *tsv|NN SV *sv
 #endif
 
+#if defined(PERL_IN_HV_C) || defined(PERL_IN_MG_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+poM	|int	|sv_kill_backrefs	|NN SV *sv|NN AV *av
+#endif
+
 #if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 nsR	|char *	|uiv_2buf	|NN char *buf|IV iv|UV uv|int is_uv|NN char **peob
 s	|void	|sv_unglob	|NN SV* sv
@@ -1499,6 +1503,10 @@ ApoR	|HE**	|hv_eiter_p	|NN HV* hv
 Apo	|void	|hv_riter_set	|NN HV* hv|I32 riter
 Apo	|void	|hv_eiter_set	|NN HV* hv|NULLOK HE* eiter
 Ap	|void	|hv_name_set	|NN HV* hv|NULLOK const char *name|I32 len|int flags
+poM	|AV**	|hv_backreferences_p	|NN HV* hv
+#if defined(PERL_IN_DUMP_C) || defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+poM	|void	|hv_kill_backrefs	|NN HV* hv
+#endif
 Apd	|void	|hv_clear_placeholders	|NN HV* hb
 ApoR	|I32*	|hv_placeholders_p	|NN HV* hv
 ApoR	|I32	|hv_placeholders_get	|NN HV* hv

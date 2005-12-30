@@ -1658,6 +1658,21 @@ S_hfreeentries(pTHX_ HV *hv)
 
     iter =  SvOOK(hv) ? HvAUX(hv) : 0;
 
+    /* If there are weak references to this HV, we need to avoid freeing them
+       up here.
+    */
+    if (iter) {
+	if (iter->xhv_backreferences) {
+	    /* So donate them to regular backref magic to keep them safe. The
+	       sv_magic will increase the reference count of the AV, so we need
+	       to drop it first.  */
+	    SvREFCNT_dec(iter->xhv_backreferences);
+	    sv_magic((SV*)hv, (SV*)iter->xhv_backreferences,
+		     PERL_MAGIC_backref, NULL, 0);
+	    iter->xhv_backreferences = 0;
+	}
+    }
+
     riter = 0;
     max = HvMAX(hv);
     array = HvARRAY(hv);
@@ -1726,6 +1741,7 @@ Perl_hv_undef(pTHX_ HV *hv)
 {
     register XPVHV* xhv;
     const char *name;
+
     if (!hv)
 	return;
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
@@ -1767,7 +1783,7 @@ S_hv_auxinit(pTHX_ HV *hv) {
     iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
     iter->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
     iter->xhv_name = 0;
-
+    iter->xhv_backreferences = 0;
     return iter;
 }
 
@@ -1890,6 +1906,29 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, I32 len, int flags)
     }
     PERL_HASH(hash, name, len);
     iter->xhv_name = name ? share_hek(name, len, hash) : 0;
+}
+
+AV **
+Perl_hv_backreferences_p(pTHX_ HV *hv) {
+    struct xpvhv_aux *iter;
+
+    iter = SvOOK(hv) ? HvAUX(hv) : S_hv_auxinit(aTHX_ hv);
+    return &(iter->xhv_backreferences);
+}
+
+void
+Perl_hv_kill_backrefs(pTHX_ HV *hv) {
+    AV *av;
+
+    if (!SvOOK(hv))
+	return;
+
+    av = HvAUX(hv)->xhv_backreferences;
+
+    if (av) {
+	HvAUX(hv)->xhv_backreferences = 0;
+	Perl_sv_kill_backrefs(aTHX_ (SV*) hv, av);
+    }
 }
 
 /*

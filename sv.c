@@ -4305,7 +4305,8 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
     }
     if (!SvMAGIC(sv)) {
 	SvMAGICAL_off(sv);
-       SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+	SvFLAGS(sv) |= (SvFLAGS(sv) & (SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+	SvMAGIC_set(sv, NULL);
     }
 
     return 0;
@@ -4350,16 +4351,44 @@ void
 Perl_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 {
     AV *av;
-    MAGIC *mg;
-    if (SvMAGICAL(tsv) && (mg = mg_find(tsv, PERL_MAGIC_backref)))
-	av = (AV*)mg->mg_obj;
-    else {
-	av = newAV();
-	AvREAL_off(av);
-	sv_magic(tsv, (SV*)av, PERL_MAGIC_backref, NULL, 0);
-	/* av now has a refcnt of 2, which avoids it getting freed
-	 * before us during global cleanup. The extra ref is removed
-	 * by magic_killbackrefs() when tsv is being freed */
+
+    if (SvTYPE(tsv) == SVt_PVHV) {
+	AV **const avp = Perl_hv_backreferences_p(aTHX_ (HV*)tsv);
+
+	av = *avp;
+	if (!av) {
+	    /* There is no AV in the offical place - try a fixup.  */
+	    MAGIC *const mg = mg_find(tsv, PERL_MAGIC_backref);
+
+	    if (mg) {
+		/* Aha. They've got it stowed in magic.  Bring it back.  */
+		av = (AV*)mg->mg_obj;
+		/* Stop mg_free decreasing the refernce count.  */
+		mg->mg_obj = NULL;
+		/* Stop mg_free even calling the destructor, given that
+		   there's no AV to free up.  */
+		mg->mg_virtual = 0;
+		sv_unmagic(tsv, PERL_MAGIC_backref);
+	    } else {
+		av = newAV();
+		AvREAL_off(av);
+		SvREFCNT_inc(av);
+	    }
+	    *avp = av;
+	}
+    } else {
+	const MAGIC *const mg
+	    = SvMAGICAL(tsv) ? mg_find(tsv, PERL_MAGIC_backref) : NULL;
+	if (mg)
+	    av = (AV*)mg->mg_obj;
+	else {
+	    av = newAV();
+	    AvREAL_off(av);
+	    sv_magic(tsv, (SV*)av, PERL_MAGIC_backref, NULL, 0);
+	    /* av now has a refcnt of 2, which avoids it getting freed
+	     * before us during global cleanup. The extra ref is removed
+	     * by magic_killbackrefs() when tsv is being freed */
+	}
     }
     if (AvFILLp(av) >= AvMAX(av)) {
         av_extend(av, AvFILLp(av)+1);
@@ -4374,17 +4403,28 @@ Perl_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 STATIC void
 S_sv_del_backref(pTHX_ SV *tsv, SV *sv)
 {
-    AV *av;
+    AV *av = NULL;
     SV **svp;
     I32 i;
-    MAGIC *mg = NULL;
-    if (!SvMAGICAL(tsv) || !(mg = mg_find(tsv, PERL_MAGIC_backref))) {
+
+    if (SvTYPE(tsv) == SVt_PVHV && SvOOK(tsv)) {
+	av = *Perl_hv_backreferences_p(aTHX_ (HV*)tsv);
+    }
+    if (!av) {
+	const MAGIC *const mg
+	    = SvMAGICAL(tsv) ? mg_find(tsv, PERL_MAGIC_backref) : NULL;
+	if (mg)
+	    av = (AV *)mg->mg_obj;
+    }
+    if (!av) {
 	if (PL_in_clean_all)
 	    return;
-    }
-    if (!SvMAGICAL(tsv) || !(mg = mg_find(tsv, PERL_MAGIC_backref)))
 	Perl_croak(aTHX_ "panic: del_backref");
-    av = (AV *)mg->mg_obj;
+    }
+
+    if (SvIS_FREED(av))
+	return;
+
     svp = AvARRAY(av);
     /* We shouldn't be in here more than once, but for paranoia reasons lets
        not assume this.  */
@@ -4403,6 +4443,47 @@ S_sv_del_backref(pTHX_ SV *tsv, SV *sv)
 	    AvFILLp(av) = fill - 1;
 	}
     }
+}
+
+int
+Perl_sv_kill_backrefs(pTHX_ SV *sv, AV *av)
+{
+    SV **svp = AvARRAY(av);
+
+    PERL_UNUSED_ARG(sv);
+
+    /* Not sure why the av can get freed ahead of its sv, but somehow it does
+       in ext/B/t/bytecode.t test 15 (involving print <DATA>)  */
+    if (svp && !SvIS_FREED(av)) {
+	SV *const *const last = svp + AvFILLp(av);
+
+	while (svp <= last) {
+	    if (*svp) {
+		SV *const referrer = *svp;
+		if (SvWEAKREF(referrer)) {
+		    /* XXX Should we check that it hasn't changed? */
+		    SvRV_set(referrer, 0);
+		    SvOK_off(referrer);
+		    SvWEAKREF_off(referrer);
+		} else if (SvTYPE(referrer) == SVt_PVGV ||
+			   SvTYPE(referrer) == SVt_PVLV) {
+		    /* You lookin' at me?  */
+		    assert(GvSTASH(referrer));
+		    assert(GvSTASH(referrer) == (HV*)sv);
+		    GvSTASH(referrer) = 0;
+		} else {
+		    Perl_croak(aTHX_
+			       "panic: magic_killbackrefs (flags=%"UVxf")",
+			       (UV)SvFLAGS(referrer));
+		}
+
+		*svp = Nullsv;
+	    }
+	    svp++;
+	}
+    }
+    SvREFCNT_dec(av); /* remove extra count added by sv_add_backref() */
+    return 0;
 }
 
 /*
@@ -4686,6 +4767,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	cv_undef((CV*)sv);
 	goto freescalar;
     case SVt_PVHV:
+	Perl_hv_kill_backrefs(aTHX_ (HV*)sv);
 	hv_undef((HV*)sv);
 	break;
     case SVt_PVAV:
@@ -9482,6 +9564,12 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 			    daux->xhv_eiter = saux->xhv_eiter
 				? he_dup(saux->xhv_eiter,
 					 (bool)!!HvSHAREKEYS(sstr), param) : 0;
+			    daux->xhv_backreferences = saux->xhv_backreferences
+				? (AV*) SvREFCNT_inc(
+						     sv_dup((SV*)saux->
+							    xhv_backreferences,
+							    param))
+				: 0;
 			}
 		    }
 		    else {
