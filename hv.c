@@ -1664,11 +1664,16 @@ S_hfreeentries(pTHX_ HV *hv)
     if (iter) {
 	if (iter->xhv_backreferences) {
 	    /* So donate them to regular backref magic to keep them safe. The
-	       sv_magic will increase the reference count of the AV, so we need
-	       to drop it first.  */
+	       sv_magic will increase the reference count of the AV, so we
+	       need to drop it first. */
 	    SvREFCNT_dec(iter->xhv_backreferences);
-	    sv_magic((SV*)hv, (SV*)iter->xhv_backreferences,
-		     PERL_MAGIC_backref, NULL, 0);
+	    if (AvFILLp(iter->xhv_backreferences) == -1) {
+		/* Turns out that the array is empty. Just free it.  */
+		SvREFCNT_dec(iter->xhv_backreferences);
+	    } else {
+		sv_magic((SV*)hv, (SV*)iter->xhv_backreferences,
+			 PERL_MAGIC_backref, NULL, 0);
+	    }
 	    iter->xhv_backreferences = 0;
 	}
     }
