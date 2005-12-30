@@ -2332,9 +2332,8 @@ STATIC HEK *
 S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 {
     register HE *entry;
-    register HE **oentry;
-    I32 found = 0;
     const int flags_masked = flags & HVhek_MASK;
+    const U32 hindex = hash & (I32) HvMAX(PL_strtab);
 
     /* what follows is the moral equivalent of:
 
@@ -2347,8 +2346,8 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
     register XPVHV * const xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */
     LOCK_STRTAB_MUTEX;
-    oentry = &(HvARRAY(PL_strtab))[hash & (I32) HvMAX(PL_strtab)];
-    for (entry = *oentry; entry; entry = HeNEXT(entry)) {
+    entry = (HvARRAY(PL_strtab))[hindex];
+    for (;entry; entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
 	if (HeKLEN(entry) != len)
@@ -2357,17 +2356,18 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	    continue;
 	if (HeKFLAGS(entry) != flags_masked)
 	    continue;
-	found = 1;
 	break;
     }
-    if (!found) {
+
+    if (!entry) {
 	/* What used to be head of the list.
 	   If this is NULL, then we're the first entry for this slot, which
 	   means we need to increate fill.  */
-	const HE *old_first = *oentry;
 	struct shared_he *new_entry;
 	HEK *hek;
 	char *k;
+	HE **const head = &HvARRAY(PL_strtab)[hindex];
+	HE *const next = *head;
 
 	/* We don't actually store a HE from the arena and a regular HEK.
 	   Instead we allocate one chunk of memory big enough for both,
@@ -2391,11 +2391,11 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	   we're up to.  */
 	HeKEY_hek(entry) = hek;
 	HeVAL(entry) = Nullsv;
-	HeNEXT(entry) = *oentry;
-	*oentry = entry;
+	HeNEXT(entry) = next;
+	*head = entry;
 
 	xhv->xhv_keys++; /* HvKEYS(hv)++ */
-	if (!old_first) {			/* initial entry? */
+	if (!next) {			/* initial entry? */
 	    xhv->xhv_fill++; /* HvFILL(hv)++ */
 	} else if (xhv->xhv_keys > (IV)xhv->xhv_max /* HvKEYS(hv) > HvMAX(hv) */) {
 		hsplit(PL_strtab);
