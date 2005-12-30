@@ -322,6 +322,11 @@ S_mul128(pTHX_ SV *sv, U8 m)
 #  define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, l, long, void)
 #  define DO_BO_UNPACK_PC(var)	DO_BO_UNPACK_PTR(var, l, long, char)
 #  define DO_BO_PACK_PC(var)	DO_BO_PACK_PTR(var, l, long, char)
+# elif PTRSIZE == IVSIZE
+#  define DO_BO_UNPACK_P(var)	DO_BO_UNPACK_PTR(var, l, IV, void)
+#  define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, l, IV, void)
+#  define DO_BO_UNPACK_PC(var)	DO_BO_UNPACK_PTR(var, l, IV, char)
+#  define DO_BO_PACK_PC(var)	DO_BO_PACK_PTR(var, l, IV, char)
 # else
 #  define DO_BO_UNPACK_P(var)	BO_CANT_DOIT(unpack, pointer)
 #  define DO_BO_PACK_P(var)	BO_CANT_DOIT(pack, pointer)
