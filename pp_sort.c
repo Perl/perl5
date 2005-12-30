@@ -1464,7 +1464,7 @@ PP(pp_sort)
     AV* av = NULL;
     HV *stash;
     GV *gv;
-    CV *cv = 0;
+    CV *cv = NULL;
     I32 gimme = GIMME;
     OP* const nextop = PL_op->op_next;
     I32 overloading = 0;

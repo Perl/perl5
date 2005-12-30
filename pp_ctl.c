@@ -407,7 +407,7 @@ PP(pp_formline)
     bool item_is_utf8 = FALSE;
     bool targ_is_utf8 = FALSE;
     SV * nsv = NULL;
-    OP * parseres = 0;
+    OP * parseres = NULL;
     const char *fmt;
     bool oneline;
 
@@ -2250,12 +2250,12 @@ S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit)
 PP(pp_goto)
 {
     dVAR; dSP;
-    OP *retop = 0;
+    OP *retop = NULL;
     I32 ix;
     register PERL_CONTEXT *cx;
 #define GOTO_DEPTH 64
     OP *enterops[GOTO_DEPTH];
-    const char *label = 0;
+    const char *label = NULL;
     const bool do_dump = (PL_op->op_type == OP_DUMP);
     static const char must_have_label[] = "goto must have label";
 
@@ -2488,10 +2488,10 @@ PP(pp_goto)
 	label = cPVOP->op_pv;
 
     if (label && *label) {
-	OP *gotoprobe = 0;
+	OP *gotoprobe = NULL;
 	bool leaving_eval = FALSE;
 	bool in_block = FALSE;
-        PERL_CONTEXT *last_eval_cx = 0;
+	PERL_CONTEXT *last_eval_cx = NULL;
 
 	/* find label */
 
@@ -4275,7 +4275,7 @@ S_doparseform(pTHX_ SV *sv)
     bool postspace = FALSE;
     U32 *fops;
     register U32 *fpc;
-    U32 *linepc = 0;
+    U32 *linepc = NULL;
     register I32 arg;
     bool ischop;
     bool unchopnum = FALSE;

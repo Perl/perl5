@@ -1036,7 +1036,7 @@ PP(pp_aassign)
     I32 i;
     int magic;
     int duplicates = 0;
-    SV **firsthashrelem = 0;	/* "= 0" keeps gcc 2.95 quiet  */
+    SV **firsthashrelem = NULL;	/* "= 0" keeps gcc 2.95 quiet  */
 
 
     PL_delaymagic = DM_DELAY;		/* catch simultaneous items */
@@ -1419,9 +1419,11 @@ play_it_again:
     }
     else {
 	if (global) {
-	    MAGIC* mg = 0;
+	    MAGIC* mg;
 	    if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG))
 		mg = mg_find(TARG, PERL_MAGIC_regex_global);
+	    else
+		mg = NULL;
 	    if (!mg) {
 		sv_magic(TARG, (SV*)0, PERL_MAGIC_regex_global, Nullch, 0);
 		mg = mg_find(TARG, PERL_MAGIC_regex_global);

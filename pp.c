@@ -2918,7 +2918,7 @@ PP(pp_substr)
     const char *tmps;
     const I32 arybase = PL_curcop->cop_arybase;
     SV *repl_sv = NULL;
-    const char *repl = 0;
+    const char *repl = NULL;
     STRLEN repl_len;
     const int num_args = PL_op->op_private & 7;
     bool repl_need_utf8_upgrade = FALSE;
@@ -4018,7 +4018,7 @@ PP(pp_splice)
     I32 newlen;
     I32 after;
     I32 diff;
-    SV **tmparyval = 0;
+    SV **tmparyval = NULL;
     const MAGIC * const mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied);
 
     if (mg) {

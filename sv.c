@@ -3085,7 +3085,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	if (dtype >= SVt_PV) {
 	    if (dtype == SVt_PVGV) {
 		SV * const sref = SvREFCNT_inc(SvRV(sstr));
-		SV *dref = 0;
+		SV *dref = NULL;
 		const int intro = GvINTRO(dstr);
 
 #ifdef GV_UNIQUE_CHECK
@@ -5197,15 +5197,13 @@ Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
     start = (U8*)SvPV_const(sv, len);
     if (len) {
 	STRLEN boffset = 0;
-	STRLEN *cache = 0;
+	STRLEN *cache = NULL;
 	const U8 *s = start;
 	I32 uoffset = *offsetp;
 	const U8 * const send = s + len;
-	MAGIC *mg = 0;
-	bool found = FALSE;
+	MAGIC *mg = NULL;
+	bool found = utf8_mg_pos(sv, &mg, &cache, 0, offsetp, *offsetp, &s, start, send);
 
-         if (utf8_mg_pos(sv, &mg, &cache, 0, offsetp, *offsetp, &s, start, send))
-             found = TRUE;
 	 if (!found && uoffset > 0) {
 	      while (s < send && uoffset--)
 		   s += UTF8SKIP(s);
@@ -5955,7 +5953,7 @@ thats_really_all_folks:
     {
        /*The big, slow, and stupid way. */
 #ifdef USE_HEAP_INSTEAD_OF_STACK	/* Even slower way. */
-	STDCHAR *buf = 0;
+	STDCHAR *buf = NULL;
 	Newx(buf, 8192, STDCHAR);
 	assert(buf);
 #else
@@ -9528,7 +9526,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		break;
 	    case SVt_PVHV:
 		{
-		    HEK *hvname = 0;
+		    HEK *hvname = NULL;
 
 		    if (HvARRAY((HV*)sstr)) {
 			STRLEN i = 0;

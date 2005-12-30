@@ -879,7 +879,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
         s = find_byclass(prog, prog->regstclass, s, endpos, 1);
 	if (!s) {
 #ifdef DEBUGGING
-	    const char *what = 0;
+	    const char *what = NULL;
 #endif
 	    if (endpos == strend) {
 		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
@@ -2400,8 +2400,8 @@ S_regmatch(pTHX_ regnode *prog)
     I32 unwind = 0;
 
     /* used by the trie code */
-    SV                 *sv_accept_buff = 0;  /* accepting states we have traversed */
-    reg_trie_accepted  *accept_buff = 0;     /* "" */
+    SV                 *sv_accept_buff = NULL; /* accepting states we have traversed */
+    reg_trie_accepted  *accept_buff = NULL;  /* "" */
     reg_trie_data      *trie;                /* what trie are we using right now */
     U32 accepted = 0;                        /* how many accepting states we have seen*/
 

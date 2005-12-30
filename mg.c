@@ -1206,7 +1206,7 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
     register const char * const s = MgPV_nolen_const(mg);
     PERL_UNUSED_ARG(sv);
     if (*s == '_') {
-	SV** svp = 0;
+	SV** svp = NULL;
 	if (strEQ(s,"__DIE__"))
 	    svp = &PL_diehook;
 	else if (strEQ(s,"__WARN__"))
@@ -1215,7 +1215,7 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
 	    Perl_croak(aTHX_ "No such hook: %s", s);
 	if (svp && *svp) {
             SV * const to_dec = *svp;
-	    *svp = 0;
+	    *svp = NULL;
     	    SvREFCNT_dec(to_dec);
 	}
     }
@@ -1345,12 +1345,12 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
     I32 i;
-    SV** svp = 0;
+    SV** svp = NULL;
     /* Need to be careful with SvREFCNT_dec(), because that can have side
      * effects (due to closures). We must make sure that the new disposition
      * is in place before it is called.
      */
-    SV* to_dec = 0;
+    SV* to_dec = NULL;
     STRLEN len;
 #ifdef HAS_SIGPROCMASK
     sigset_t set, save;
@@ -1368,7 +1368,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	i = 0;
 	if (*svp) {
 	    to_dec = *svp;
-	    *svp = 0;
+	    *svp = NULL;
 	}
     }
     else {

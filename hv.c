@@ -2257,7 +2257,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     bool is_utf8 = FALSE;
     int k_flags = 0;
     const char * const save = str;
-    struct shared_he *he = 0;
+    struct shared_he *he = NULL;
 
     if (hek) {
 	/* Find the shared he which is just before us in memory.  */

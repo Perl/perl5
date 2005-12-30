@@ -3215,18 +3215,21 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
     register regnode *ret;		/* Will be the head of the group. */
     register regnode *br;
     register regnode *lastbr;
-    register regnode *ender = 0;
+    register regnode *ender = NULL;
     register I32 parno = 0;
-    I32 flags, oregflags = RExC_flags, have_branch = 0, open = 0;
+    I32 flags;
+    const I32 oregflags = RExC_flags;
+    I32 have_branch = 0;
+    I32 open = 0;
 
     /* for (?g), (?gc), and (?o) warnings; warning
        about (?c) will warn about (?g) -- japhy    */
 
-    I32 wastedflags = 0x00,
-        wasted_o    = 0x01,
-        wasted_g    = 0x02,
-        wasted_gc   = 0x02 | 0x04,
-        wasted_c    = 0x04;
+    I32 wastedflags = 0x00;
+    const I32 wasted_o  = 0x01;
+    const I32 wasted_g  = 0x02;
+    const I32 wasted_gc = 0x02 | 0x04;
+    const I32 wasted_c  = 0x04;
 
     char * parse_start = RExC_parse; /* MJD */
     char * const oregcomp_parse = RExC_parse;
@@ -3868,7 +3871,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
 STATIC regnode *
 S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
 {
-    register regnode *ret = 0;
+    register regnode *ret = NULL;
     I32 flags;
     char *parse_start = RExC_parse;
 
@@ -4650,13 +4653,13 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
     register regnode *ret;
     STRLEN numlen;
     IV namedclass;
-    char *rangebegin = 0;
+    char *rangebegin = NULL;
     bool need_class = 0;
     SV *listsv = NULL;
     register char *e;
     UV n;
     bool optimize_invert   = TRUE;
-    AV* unicode_alternate  = 0;
+    AV* unicode_alternate  = NULL;
 #ifdef EBCDIC
     UV literal_endpoint = 0;
 #endif

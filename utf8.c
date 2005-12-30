@@ -2235,9 +2235,12 @@ Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const
 {
      register const U8 *p1  = (const U8*)s1;
      register const U8 *p2  = (const U8*)s2;
-     register const U8 *f1 = 0, *f2 = 0;
-     register U8 *e1 = 0, *q1 = 0;
-     register U8 *e2 = 0, *q2 = 0;
+     register const U8 *f1 = NULL;
+     register U8 *f2 = NULL;
+     register U8 *e1 = NULL;
+     register U8 *q1 = NULL;
+     register U8 *e2 = NULL;
+     register U8 *q2 = NULL;
      STRLEN n1 = 0, n2 = 0;
      U8 foldbuf1[UTF8_MAXBYTES_CASE+1];
      U8 foldbuf2[UTF8_MAXBYTES_CASE+1];

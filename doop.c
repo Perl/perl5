@@ -399,7 +399,8 @@ STATIC I32
 S_do_trans_count_utf8(pTHX_ SV *sv)
 {
     const U8 *s;
-    const U8 *start = 0, *send;
+    const U8 *start = NULL;
+    const U8 *send;
     I32 matches = 0;
     STRLEN len;
 
