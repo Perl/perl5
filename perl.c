@@ -3450,12 +3450,19 @@ S_init_main_stash(pTHX)
     GV *gv;
 
     PL_curstash = PL_defstash = newHV();
-    PL_curstname = newSVpvn("main",4);
+    /* We know that the string "main" will be in the global shared string
+       table, so it's a small saving to use it rather than allocate another
+       8 bytes.  */
+    PL_curstname = newSVpvn_share("main", 4, 0);
     gv = gv_fetchpv("main::",TRUE, SVt_PVHV);
+    /* If we hadn't caused another reference to "main" to be in the shared
+       string table above, then it would be worth reordering these two,
+       because otherwise all we do is delete "main" from it as a consequence
+       of the SvREFCNT_dec, only to add it again with hv_name_set */
     SvREFCNT_dec(GvHV(gv));
+    hv_name_set(PL_defstash, "main", 4, 0);
     GvHV(gv) = (HV*)SvREFCNT_inc(PL_defstash);
     SvREADONLY_on(gv);
-    hv_name_set(PL_defstash, "main", 4, 0);
     PL_incgv = gv_HVadd(gv_AVadd(gv_fetchpv("INC",TRUE, SVt_PVAV)));
     SvREFCNT_inc(PL_incgv); /* Don't allow it to be freed */
     GvMULTI_on(PL_incgv);
