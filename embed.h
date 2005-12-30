@@ -3730,8 +3730,6 @@
 #define my_clearenv()		Perl_my_clearenv(aTHX)
 #endif
 #ifdef PERL_IMPLICIT_CONTEXT
-#ifdef PERL_CORE
-#endif
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
