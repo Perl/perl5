@@ -115,7 +115,7 @@ following functions (specified as [function that calls visit()] / [function
 called by visit() for each SV]):
 
     sv_report_used() / do_report_used()
-    			dump all remaining SVs (debugging aid)
+			dump all remaining SVs (debugging aid)
 
     sv_clean_objs() / do_clean_objs(),do_clean_named_objs()
 			Attempt to free all objects pointed to by RVs,
@@ -1121,7 +1121,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 #endif
 
 	if (new_type == SVt_PVIO)
-	    IoPAGE_LEN(sv)	= 60;
+	    IoPAGE_LEN(sv) = 60;
 	break;
     default:
 	Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu", new_type);
@@ -1723,7 +1723,7 @@ S_sv_2iuv_common(pTHX_ SV *sv) {
 	} else if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
 
-	/* If NV preserves UV then we only use the UV value if we know that
+	/* If NVs preserve UVs then we only use the UV value if we know that
 	   we aren't going to call atof() below. If NVs don't preserve UVs
 	   then the value returned may have more precision than atof() will
 	   return, even though value isn't perfectly accurate.  */
