@@ -159,6 +159,9 @@ S_init_tls_and_interp(PerlInterpreter *my_perl)
 	OP_REFCNT_INIT;
 	MUTEX_INIT(&PL_dollarzero_mutex);
 #  endif
+#ifdef PERL_IMPLICIT_CONTEXT
+	MUTEX_INIT(&PL_my_ctx_mutex);
+#  endif
     }
     else {
 	PERL_SET_THX(my_perl);

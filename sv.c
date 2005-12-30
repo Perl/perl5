@@ -10483,7 +10483,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	PL_exitlist	= (PerlExitListEntry*)NULL;
 
     PL_my_cxt_size = proto_perl->Imy_cxt_size;
-    if (PL_my_cxt_size) {
+    if (PL_my_cxt_size != -1) {
 	Newx(PL_my_cxt_list, PL_my_cxt_size, void *);
 	Copy(proto_perl->Imy_cxt_list, PL_my_cxt_list, PL_my_cxt_size, void *);
     }
