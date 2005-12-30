@@ -711,6 +711,41 @@ You can change the way that an object is matched by overloading
 the C<~~> operator. This trumps the usual smart match semantics.
 See L<overload>.
 
+=head3 Differences from Perl 6
+
+The Perl 5 smart match and C<given>/C<when> constructs are not
+absolutely identical to their Perl 6 analogues. The most visible
+difference is that, in Perl 5, parentheses are required around
+the argument to C<given()> and C<when()>. Parentheses in Perl 6
+are always optional in a control construct such as C<if()>,
+C<while()>, or C<when()>; they can't be made optional in Perl
+5 without a great deal of potential confusion, because Perl 5
+would parse the expression
+
+  given $foo {
+    ...
+  }
+
+as though the argument to C<given> were an element of the hash
+C<%foo>, interpreting the braces as hash-element syntax.
+
+The table of smart matches is not identical to that proposed
+by the Perl 6 specification Synopsis 4. Some of the differences
+are simply a consequence of Perl 5's different data model, while
+other changes have been made to address problems with the Perl 6
+proposal. For example, the Perl 6 specification implies that
+C<$string ~~ qr/regex/> would test string equality, rather than
+doing a regular expression match. On the other hand, informal
+examples elsewhere make it clear that a regular expression
+match is the intended behaviour. Thus the Synopsis 4 smart
+match specification cannot yet be regarded as definitive.
+
+In Perl 6, C<when()> will always do an implicit smart match
+with its argument, whilst it is convenient in Perl 5 to
+suppress this implicit smart match in certain situations,
+as documented above. (The difference is largely because Perl 5
+does not, even internally, have a boolean type.)
+
 =head2 Goto
 X<goto>
 
