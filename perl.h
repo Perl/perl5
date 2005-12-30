@@ -3502,7 +3502,7 @@ Gid_t getegid (void);
 #ifndef assert  /* <assert.h> might have been included somehow */
 #define assert(what)	PERL_DEB( 					\
 	((what) ? ((void) 0) :						\
-	    (Perl_croak(aTHX_ "Assertion %s failed: file \"" __FILE__ 	\
+	    (Perl_croak_nocontext("Assertion %s failed: file \"" __FILE__ \
 			"\", line %d", STRINGIFY(what), __LINE__),	\
 	    PerlProc_exit(1),						\
 	    (void) 0)))
