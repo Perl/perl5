@@ -16,7 +16,7 @@ use Carp;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(pingecho);
-$VERSION = "2.31_03";
+$VERSION = "2.31_04";
 
 sub SOL_IP { 0; };
 sub IP_TOS { 1; };
@@ -35,11 +35,11 @@ $syn_forking = 0;
 if ($^O =~ /Win32/i) {
   # Hack to avoid this Win32 spewage:
   # Your vendor has not defined POSIX macro ECONNREFUSED
-  *ECONNREFUSED = sub {10061;}; # "Unknown Error" Special Win32 Response?
-  *ENOTCONN     = sub {10057;};
-  *ECONNRESET   = sub {10054;};
-  *EINPROGRESS  = sub {10036;};
-  *EWOULDBLOCK  = sub {10035;};
+  *ECONNREFUSED = sub() {10061;}; # "Unknown Error" Special Win32 Response?
+  *ENOTCONN     = sub() {10057;};
+  *ECONNRESET   = sub() {10054;};
+  *EINPROGRESS  = sub() {10036;};
+  *EWOULDBLOCK  = sub() {10035;};
 #  $syn_forking = 1;    # XXX possibly useful in < Win2K ?
 };
 
