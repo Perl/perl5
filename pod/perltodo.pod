@@ -25,22 +25,14 @@ programming languages offer you 1 line of immortality?
 The roadmap to 5.10 envisages feature based releases, as various items in this
 TODO are completed.
 
-=head2 Needed for a 5.9.3 release
-
-=over
-
-=item *
-Implement L</lexical pragmas>
-
-=back
-
 =head2 Needed for a 5.9.4 release
 
 =over
 
 =item *
-Review assertions. Review syntax to combine assertions. Can assertions  take
-advantage of the lexical pragams work? L</What hooks would assertions need?>
+
+Review assertions. Review syntax to combine assertions. Assertions could take
+advantage of the lexical pragmas work. L</What hooks would assertions need?>
 
 =back
 
@@ -544,10 +536,8 @@ or a willingness to learn.
 
 =head2 lexical pragmas
 
-Reimplement the mechanism of lexical pragmas to be more extensible. Fix
-current pragmas that don't work well (or at all) with lexical scopes or in
-run-time eval(STRING) (C<sort>, C<re>, C<encoding> for example). MJD has a
-preliminary patch that implements this.
+Document the new support for lexical pragmas in 5.9.3 and how %^H works.
+Maybe C<re>, C<encoding>, maybe other pragmas could be made lexical.
 
 =head2 Attach/detach debugger from running program
 

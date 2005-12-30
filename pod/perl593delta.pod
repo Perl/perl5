@@ -15,17 +15,91 @@ L<perl592delta> for the differences between 5.8.0 and 5.9.2.
 C<_> is now forced to be a bareword after a filetest operator. This solves
 a number of misparsing issues when a global C<_> subroutine is defined.
 
+=head2 C<mkdir()>
+
+C<mkdir()> without arguments now defaults to C<$_>.
+
+=head2 Magic goto and eval
+
+The construct C<eval { goto &foo }> is now disallowed. (Note that the
+similar construct, but with C<eval("")> instead, was already forbidden.)
+
+=head2 C<$#> has been removed
+
+The deprecated C<$#> variable (output format for numbers) has been
+removed. A new warning, C<$# is no longer supported>, has been added.
+
+=head2 C<:unique>
+
+The C<:unique> attribute has been made a now-op, since its current
+implementation was fundamentally flawed and not threadsafe.
+
 =head1 Core Enhancements
+
+=head2 Switch and Smart Match operator
+
+=head2 C<say()>
+
+=head2 C<CLONE_SKIP()>
+
+Perl has now support for the C<CLONE_SKIP> special subroutine. Like
+C<CLONE>, C<CLONE_SKIP> is called once per package; however, it is called
+just before cloning starts, and in the context of the parent thread. If it
+returns a true value, then no objects of that class will be cloned. See
+L<perlmod> for details.
+
+=head2 C<${^CHILD_ERROR_NATIVE}>
+
+A new internal variable, C<${^CHILD_ERROR_NATIVE}>, gives the native
+status returned by the last pipe close, backtick command, successful call
+to wait() or waitpid(), or from the system() operator. See L<perlrun> for
+details.
+
+=head2 Assertions
+
+The support for assertions, introduced in perl 5.9.0, has been improved.
+The syntax for the C<-A> command-line switch has changed; it now accepts
+an optional module name, defaulting to C<assertions::activate>. See
+L<assertions> and L<perlrun>.
+
+=head2 Unicode Character Database 4.1.0
+
+The copy of the Unicode Character Database included in Perl 5.9 has
+been updated to 4.1.0.
 
 =head1 Modules and Pragmata
 
+=head2 C<feature>
+
+=head2 C<assertions::compat>
+
+=head2 C<Math::BigInt::FastCalc>
+
+=head2 C<Compress::Zlib>
+
+=head2 C<IO::Zlib>
+
+=head2 C<Archive::Tar>
+
 =head1 Utility Changes
+
+=head2 C<ptar>
 
 =head1 Documentation
 
 =head1 Performance Enhancements
 
 =head1 Installation and Configuration Improvements
+
+=head2 New Or Improved Platforms
+
+Perl is being ported to Symbian OS. See L<perlsymbian> for more
+information.
+
+=head2 Module auxiliary files
+
+README files and changelogs for CPAN modules bundled with perl are no
+longer installed.
 
 =head1 Selected Bug Fixes
 
@@ -43,9 +117,69 @@ SCALAR ref while "strict refs" in use>. (However, C<defined @$foo> and
 C<defined %$foo> are still allowed. Those constructs are discouraged
 anyway.)
 
+=head2 Smaller fixes
+
+=over 4
+
+=item *
+
+C<FindBin> now works better with directories where access rights are more
+restrictive than usual.
+
+=item *
+
+Several memory leaks in ithreads were closed.
+
+=item *
+
+C<PerlIO::scalar> now works better with non-default C<$/> settings.
+
+=item *
+
+You can now use the C<x> operator to demultiply a C<qw//> list. This used
+to raise a syntax error.
+
+=back
+
+=head2 More Unicode Fixes
+
+=over 4
+
+=item *
+
+chr() on a negative value now gives C<\x{FFFD}>, the Unicode replacement
+character, unless when the C<bytes> pragma is in effect, where the low
+eight bytes of the value are used.
+
+=back
+
 =head1 New or Changed Diagnostics
 
+=head2 Attempt to set length of freed array
+
+This is a new warning, produced in situations like the following one:
+
+    $r = do {my @a; \$#a};
+    $$r = 503;
+
+=head2 Search pattern not terminated or ternary operator parsed as search pattern
+
+This syntax error indicates that the lexer couldn't find the final
+delimiter of a C<?PATTERN?> construct. Mentioning the ternary operator in
+this error message makes syntax diagnostic easier.
+
 =head1 Changed Internals
+
+XXX consting
+
+XXX mathoms
+
+The C<AvFLAGS> macro has been removed.
+
+=head2 B:: modules inheritance changed
+
+The inheritance hierarchy of C<B::> modules has changed; C<B::NV> now
+inherits from C<B::SV> (it used to inherit from C<B::IV>).
 
 =head1 Known Problems
 
