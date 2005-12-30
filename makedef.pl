@@ -762,6 +762,7 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 		    Perl_sv_setpvf_nocontext
 		    Perl_sv_catpvf_mg_nocontext
 		    Perl_sv_setpvf_mg_nocontext
+		    Perl_my_cxt_init
 		    )];
 }
 
