@@ -9076,16 +9076,9 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
 	    nmg->mg_obj	= (SV*)re_dup((REGEXP*)mg->mg_obj, param);
 	}
 	else if(mg->mg_type == PERL_MAGIC_backref) {
-	    const AV * const av = (AV*) mg->mg_obj;
-	    SV **svp;
-	    I32 i;
-	    (void)SvREFCNT_inc(nmg->mg_obj = (SV*)newAV());
-	    AvREAL_off((AV*)nmg->mg_obj);
-	    svp = AvARRAY(av);
-	    for (i = AvFILLp(av); i >= 0; i--) {
-		if (!svp[i]) continue;
-		av_push((AV*)nmg->mg_obj,sv_dup(svp[i],param));
-	    }
+	    /* The backref AV has its reference count deliberately bumped by
+	       1.  */
+	    nmg->mg_obj = SvREFCNT_inc(av_dup_inc((AV*) mg->mg_obj, param));
 	}
 	else if (mg->mg_type == PERL_MAGIC_symtab) {
 	    nmg->mg_obj	= mg->mg_obj;
