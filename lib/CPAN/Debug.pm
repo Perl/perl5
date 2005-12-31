@@ -2,7 +2,7 @@ package CPAN::Debug;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = sprintf "%.2f", substr(q$Rev: 286 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 299 $,4)/100;
 # module is internal to CPAN.pm
 
 %CPAN::DEBUG = qw[
@@ -35,7 +35,8 @@ sub debug {
     ($caller) = caller(0);
     $caller =~ s/.*:://;
     $arg = "" unless defined $arg;
-    my $rest = join "|", map { defined $_ ? $_ : "UNDEF" } @rest;
+    pop @rest while @rest > 5;
+    my $rest = join ",", map { defined $_ ? $_ : "UNDEF" } @rest;
     if ($CPAN::DEBUG{$caller} & $CPAN::DEBUG){
         if ($arg and ref $arg) {
             eval { require Data::Dumper };

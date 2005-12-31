@@ -3,7 +3,8 @@ package CPAN::Tarzip;
 use strict;
 use vars qw($VERSION @ISA $BUGHUNTING);
 use CPAN::Debug;
-$VERSION = sprintf "%.2f", substr(q$Rev: 281 $,4)/100;
+use File::Basename ();
+$VERSION = sprintf "%.2f", substr(q$Rev: 319 $,4)/100;
 # module is internal to CPAN.pm
 
 @ISA = qw(CPAN::Debug);
@@ -12,8 +13,9 @@ $BUGHUNTING = 0; # released code must have turned off
 # it's ok if file doesn't exist, it just matters if it is .gz or .bz2
 sub new {
   my($class,$file) = @_;
-  die "new called without arg" unless defined $file;
-  die "file[$file] doesn't match /\\.(bz2|gz|zip)\$/" unless $file =~ /\.(bz2|gz|zip)$/i;
+  $CPAN::Frontend->mydie("new called without arg") unless defined $file;
+  $CPAN::Frontend->mydie("file[$file] doesn't match /\\.(bz2|gz|zip|tgz)\$/")
+      unless $file =~ /\.(bz2|gz|zip|tgz)$/i;
   my $me = { FILE => $file };
   if (0) {
   } elsif ($file =~ /\.bz2$/i) {
@@ -55,7 +57,7 @@ sub gzip {
     $fhw->close;
     return 1;
   } else {
-    system("$self->{UNGZIPPRG} -c $read > $write")==0;
+    system(qq{$self->{UNGZIPPRG} -c "$read" > "$write"})==0;
   }
 }
 
@@ -77,7 +79,7 @@ sub gunzip {
     $fhw->close;
     return 1;
   } else {
-    system("$self->{UNGZIPPRG} -dc $read > $write")==0;
+    system(qq{$self->{UNGZIPPRG} -dc "$read" > "$write"})==0;
   }
 }
 
@@ -108,7 +110,7 @@ sub gtest {
     CPAN->debug("err[$err]success[$success]") if $CPAN::DEBUG;
     return $success;
   } else {
-      return system("$self->{UNGZIPPRG} -dt $read")==0;
+      return system(qq{$self->{UNGZIPPRG} -dt "$read"})==0;
   }
 }
 
@@ -207,24 +209,26 @@ installed. Can't continue.
     my($system);
     my $is_compressed = $self->gtest();
     if ($is_compressed) {
-      $system = "$self->{UNGZIPPRG} -dc " .
-          "< $file | $CPAN::Config->{tar} xvf -";
+      $system = qq{$self->{UNGZIPPRG} -dc }.
+          qq{< "$file" | $CPAN::Config->{tar} xvf -};
     } else {
-      $system = "$CPAN::Config->{tar} xvf $file";
+      $system = qq{$CPAN::Config->{tar} xvf "$file"};
     }
     if (system($system) != 0) {
       # people find the most curious tar binaries that cannot handle
       # pipes
       if ($is_compressed) {
         (my $ungzf = $file) =~ s/\.gz(?!\n)\Z//;
-        if (CPAN::Tarzip->gunzip($file, $ungzf)) {
+        $ungzf = File::Basename::basename($ungzf);
+        my $ct = CPAN::Tarzip->new($file);
+        if ($ct->gunzip($ungzf)) {
           $CPAN::Frontend->myprint(qq{Uncompressed $file successfully\n});
         } else {
           $CPAN::Frontend->mydie(qq{Couldn\'t uncompress $file\n});
         }
         $file = $ungzf;
       }
-      $system = "$CPAN::Config->{tar} xvf $file";
+      $system = qq{$CPAN::Config->{tar} xvf "$file"};
       $CPAN::Frontend->myprint(qq{Using Tar:$system:\n});
       if (system($system)==0) {
         $CPAN::Frontend->myprint(qq{Untarred $file successfully\n});
@@ -265,7 +269,8 @@ installed. Can't continue.
         push @af, $af;
         return if $CPAN::Signal;
       }
-      $tar->extract(@af);
+      $tar->extract(@af) or
+          $CPAN::Frontend->mydie("Could not untar with Archive::Tar.");
     }
 
     Mac::BuildTools::convert_files([$tar->list_files], 1)
