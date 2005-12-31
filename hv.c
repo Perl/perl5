@@ -1652,6 +1652,7 @@ S_hfreeentries(pTHX_ HV *hv)
     I32 riter;
     I32 max;
     struct xpvhv_aux *iter;
+    AV *new_backrefs = NULL;
 
     if (!HvARRAY(hv))
 	return;
@@ -1670,6 +1671,7 @@ S_hfreeentries(pTHX_ HV *hv)
 	    if (AvFILLp(iter->xhv_backreferences) == -1) {
 		/* Turns out that the array is empty. Just free it.  */
 		SvREFCNT_dec(iter->xhv_backreferences);
+
 	    } else {
 		sv_magic((SV*)hv, (SV*)iter->xhv_backreferences,
 			 PERL_MAGIC_backref, NULL, 0);
@@ -1708,8 +1710,21 @@ S_hfreeentries(pTHX_ HV *hv)
 	   the array set to 0.  */
 	assert(HvARRAY(hv));
 
-	if (HvAUX(hv)->xhv_name)
+	if(HvAUX(hv)->xhv_backreferences) {
+	    if (iter) {
+		/* Erk. They caused the backreference AV to be put back
+		   into the hash aux structure */
+		assert (!iter->xhv_backreferences);
+		iter->xhv_backreferences = HvAUX(hv)->xhv_backreferences;
+	    } else {
+		/* Erk. They created a backreference array when there was none
+		   before.  */
+		new_backrefs = HvAUX(hv)->xhv_backreferences;
+	    }
+	}
+	if (HvAUX(hv)->xhv_name) {
 	    unshare_hek_or_pvn(HvAUX(hv)->xhv_name, 0, 0, 0);
+	}
 	/* SvOOK_off calls sv_backoff, which isn't correct.  */
 
 	Safefree(HvARRAY(hv));
@@ -1731,6 +1746,11 @@ S_hfreeentries(pTHX_ HV *hv)
     }
 
     HvARRAY(hv) = array;
+
+    if (new_backrefs) {
+	/* Don't lose the backreferences array  */
+	*Perl_hv_backreferences_p(aTHX_ hv) = new_backrefs;
+    }
 }
 
 /*
