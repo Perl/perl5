@@ -5220,9 +5220,9 @@ Perl_my_cxt_init(pTHX_ int *index, size_t size)
     }
     
     /* make sure the array is big enough */
-    if (PL_my_cxt_size < *index + 1) {
-	if (PL_my_cxt_list) {
-	    while (PL_my_cxt_size < *index + 1)
+    if (PL_my_cxt_size <= *index) {
+	if (PL_my_cxt_size) {
+	    while (PL_my_cxt_size <= *index)
 		PL_my_cxt_size *= 2;
 	    Renew(PL_my_cxt_list, PL_my_cxt_size, void *);
 	}
