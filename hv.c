@@ -1612,9 +1612,6 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 	HE **oentry = &(HvARRAY(hv))[i];
 	HE *entry = *oentry;
 
-	if (!entry)
-	    continue;
-
 	for (; entry; entry = *oentry) {
 	    if (HeVAL(entry) == &PL_sv_placeholder) {
 		*oentry = HeNEXT(entry);
@@ -1677,15 +1674,14 @@ S_hfreeentries(pTHX_ HV *hv)
 	   it's the original array.  (Hopefully there will only be 1 time
 	   round) */
 	HE **array = HvARRAY(hv);
-	register HE *entry;
-	I32 riter = 0;
-	I32 max = HvMAX(hv);
+	I32 i = HvMAX(hv);
 
 	/* Because we have taken xhv_name out, the only allocated pointer
 	   in the aux structure that might exist is the backreference array.
 	*/
 
 	if (SvOOK(hv)) {
+	    HE *entry;
 	    struct xpvhv_aux *iter = HvAUX(hv);
 	    /* If there are weak references to this HV, we need to avoid
 	       freeing them up here.  In particular we need to keep the AV
@@ -1729,19 +1725,17 @@ S_hfreeentries(pTHX_ HV *hv)
 	HvFILL(hv) = 0;
 	((XPVHV*) SvANY(hv))->xhv_keys = 0;
 
-	entry = array[0];
-	for (;;) {
-	    if (entry) {
+
+	do {
+	    /* Loop down the linked list heads  */
+	    HE *entry = array[i];
+
+	    while (entry) {
 		register HE * const oentry = entry;
 		entry = HeNEXT(entry);
 		hv_free_ent(hv, oentry);
 	    }
-	    if (!entry) {
-		if (++riter > max)
-		    break;
-		entry = array[riter];
-	    }
-	}
+	} while (--i >= 0);
 
 	/* As there are no allocated pointers in the aux structure, it's now
 	   safe to free the array we just cleaned up, if it's not the one we're
