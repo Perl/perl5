@@ -2921,6 +2921,13 @@ data.
 (P) We popped the context stack to a context with the specified label,
 and then discovered it wasn't a context we know how to do a goto in.
 
+=item panic: hfreeentries failed to free hash
+
+(P) The internal routine used to clear a hashes entries tried repeatedly,
+but each time something added more entries to the hash. Most likely the hash
+contains an object with a reference back to the hash and a destructor that
+adds a new object to the hash.
+
 =item panic: INTERPCASEMOD
 
 (P) The lexer got into a bad state at a case modifier.

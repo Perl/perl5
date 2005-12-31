@@ -1647,109 +1647,139 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 STATIC void
 S_hfreeentries(pTHX_ HV *hv)
 {
-    register HE **array;
-    register HE *entry;
-    I32 riter;
-    I32 max;
-    struct xpvhv_aux *iter;
-    AV *new_backrefs = NULL;
+    /* This is the array that we're going to restore  */
+    HE **orig_array;
+    HEK *name;
+    int attempts = 100;
 
     if (!HvARRAY(hv))
 	return;
 
-    iter =  SvOOK(hv) ? HvAUX(hv) : 0;
-
-    /* If there are weak references to this HV, we need to avoid freeing them
-       up here.
-    */
-    if (iter) {
-	if (iter->xhv_backreferences) {
-	    /* So donate them to regular backref magic to keep them safe. The
-	       sv_magic will increase the reference count of the AV, so we
-	       need to drop it first. */
-	    SvREFCNT_dec(iter->xhv_backreferences);
-	    if (AvFILLp(iter->xhv_backreferences) == -1) {
-		/* Turns out that the array is empty. Just free it.  */
-		SvREFCNT_dec(iter->xhv_backreferences);
-
-	    } else {
-		sv_magic((SV*)hv, (SV*)iter->xhv_backreferences,
-			 PERL_MAGIC_backref, NULL, 0);
-	    }
-	    iter->xhv_backreferences = 0;
-	}
-    }
-
-    riter = 0;
-    max = HvMAX(hv);
-    array = HvARRAY(hv);
-    /* make everyone else think the array is empty, so that the destructors
-     * called for freed entries can't recusively mess with us */
-    HvARRAY(hv) = Null(HE**); 
-    SvFLAGS(hv) &= ~SVf_OOK;
-
-    HvFILL(hv) = 0;
-    ((XPVHV*) SvANY(hv))->xhv_keys = 0;
-
-    entry = array[0];
-    for (;;) {
-	if (entry) {
-	    register HE * const oentry = entry;
-	    entry = HeNEXT(entry);
-	    hv_free_ent(hv, oentry);
-	}
-	if (!entry) {
-	    if (++riter > max)
-		break;
-	    entry = array[riter];
-	}
-    }
-
     if (SvOOK(hv)) {
-	/* Someone attempted to iterate or set the hash name while we had
-	   the array set to 0.  */
-	assert(HvARRAY(hv));
+	/* If the hash is actually a symbol table with a name, look after the
+	   name.  */
+	struct xpvhv_aux *iter = HvAUX(hv);
 
-	if(HvAUX(hv)->xhv_backreferences) {
-	    if (iter) {
-		/* Erk. They caused the backreference AV to be put back
-		   into the hash aux structure */
-		assert (!iter->xhv_backreferences);
-		iter->xhv_backreferences = HvAUX(hv)->xhv_backreferences;
-	    } else {
-		/* Erk. They created a backreference array when there was none
-		   before.  */
-		new_backrefs = HvAUX(hv)->xhv_backreferences;
+	name = iter->xhv_name;
+	iter->xhv_name = NULL;
+    } else {
+	name = NULL;
+    }
+
+    orig_array = HvARRAY(hv);
+    /* orig_array remains unchanged throughout the loop. If after freeing all
+       the entries it turns out that one of the little blighters has triggered
+       an action that has caused HvARRAY to be re-allocated, then we set
+       array to the new HvARRAY, and try again.  */
+
+    while (1) {
+	/* This is the one we're going to try to empty.  First time round
+	   it's the original array.  (Hopefully there will only be 1 time
+	   round) */
+	HE **array = HvARRAY(hv);
+	register HE *entry;
+	I32 riter = 0;
+	I32 max = HvMAX(hv);
+
+	/* Because we have taken xhv_name out, the only allocated pointer
+	   in the aux structure that might exist is the backreference array.
+	*/
+
+	if (SvOOK(hv)) {
+	    struct xpvhv_aux *iter = HvAUX(hv);
+	    /* If there are weak references to this HV, we need to avoid
+	       freeing them up here.  In particular we need to keep the AV
+	       visible as what we're deleting might well have weak references
+	       back to this HV, so the for loop below may well trigger
+	       the removal of backreferences from this array.  */
+
+	    if (iter->xhv_backreferences) {
+		/* So donate them to regular backref magic to keep them safe.
+		   The sv_magic will increase the reference count of the AV,
+		   so we need to drop it first. */
+		SvREFCNT_dec(iter->xhv_backreferences);
+		if (AvFILLp(iter->xhv_backreferences) == -1) {
+		    /* Turns out that the array is empty. Just free it.  */
+		    SvREFCNT_dec(iter->xhv_backreferences);
+
+		} else {
+		    sv_magic((SV*)hv, (SV*)iter->xhv_backreferences,
+			     PERL_MAGIC_backref, NULL, 0);
+		}
+		iter->xhv_backreferences = NULL;
+	    }
+
+	    entry = iter->xhv_eiter; /* HvEITER(hv) */
+	    if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
+		HvLAZYDEL_off(hv);
+		hv_free_ent(hv, entry);
+	    }
+	    iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
+	    iter->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
+
+	    /* There are now no allocated pointers in the aux structure.  */
+
+	    SvFLAGS(hv) &= ~SVf_OOK; /* Goodbye, aux structure.  */
+	    /* What aux structure?  */
+	}
+
+	/* make everyone else think the array is empty, so that the destructors
+	 * called for freed entries can't recusively mess with us */
+	HvARRAY(hv) = NULL;
+	HvFILL(hv) = 0;
+	((XPVHV*) SvANY(hv))->xhv_keys = 0;
+
+	entry = array[0];
+	for (;;) {
+	    if (entry) {
+		register HE * const oentry = entry;
+		entry = HeNEXT(entry);
+		hv_free_ent(hv, oentry);
+	    }
+	    if (!entry) {
+		if (++riter > max)
+		    break;
+		entry = array[riter];
 	    }
 	}
-	if (HvAUX(hv)->xhv_name) {
-	    unshare_hek_or_pvn(HvAUX(hv)->xhv_name, 0, 0, 0);
-	}
-	/* SvOOK_off calls sv_backoff, which isn't correct.  */
 
-	Safefree(HvARRAY(hv));
-	HvARRAY(hv) = 0;
-	SvFLAGS(hv) &= ~SVf_OOK;
-    }
-
-    /* FIXME - things will still go horribly wrong (or at least leak) if
-       people attempt to add elements to the hash while we're undef()ing it  */
-    if (iter) {
-	entry = iter->xhv_eiter; /* HvEITER(hv) */
-	if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
-	    HvLAZYDEL_off(hv);
-	    hv_free_ent(hv, entry);
+	/* As there are no allocated pointers in the aux structure, it's now
+	   safe to free the array we just cleaned up, if it's not the one we're
+	   going to put back.  */
+	if (array != orig_array) {
+	    Safefree(array);
 	}
-	iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
-	iter->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
+
+	if (!HvARRAY(hv)) {
+	    /* Good. No-one added anything this time round.  */
+	    break;
+	}
+
+	if (SvOOK(hv)) {
+	    /* Someone attempted to iterate or set the hash name while we had
+	       the array set to 0.  We'll catch backferences on the next time
+	       round the while loop.  */
+	    assert(HvARRAY(hv));
+
+	    if (HvAUX(hv)->xhv_name) {
+		unshare_hek_or_pvn(HvAUX(hv)->xhv_name, 0, 0, 0);
+	    }
+	}
+
+	if (--attempts == 0) {
+	    Perl_die(aTHX_ "panic: hfreeentries failed to free hash - something is repeatedly re-creating entries");
+	}
+    };
+	
+    HvARRAY(hv) = orig_array;
+
+    /* If the hash was actually a symbol table, put the name back.  */
+    if (name) {
+	/* We have restored the original array.  If name is non-NULL, then
+	   the original array had an aux structure at the end. So this is
+	   valid:  */
 	SvFLAGS(hv) |= SVf_OOK;
-    }
-
-    HvARRAY(hv) = array;
-
-    if (new_backrefs) {
-	/* Don't lose the backreferences array  */
-	*Perl_hv_backreferences_p(aTHX_ hv) = new_backrefs;
+	HvAUX(hv)->xhv_name = name;
     }
 }
 
