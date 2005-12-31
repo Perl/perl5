@@ -1610,9 +1610,9 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 	/* Loop down the linked list heads  */
 	bool first = 1;
 	HE **oentry = &(HvARRAY(hv))[i];
-	HE *entry = *oentry;
+	HE *entry;
 
-	for (; entry; entry = *oentry) {
+	while ((entry = *oentry)) {
 	    if (HeVAL(entry) == &PL_sv_placeholder) {
 		*oentry = HeNEXT(entry);
 		if (first && !*oentry)
