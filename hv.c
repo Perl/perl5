@@ -1617,7 +1617,7 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 		*oentry = HeNEXT(entry);
 		if (first && !*oentry)
 		    HvFILL(hv)--; /* This linked list is now empty.  */
-		if (HvEITER_get(hv))
+		if (entry == HvEITER_get(hv))
 		    HvLAZYDEL_on(hv);
 		else
 		    hv_free_ent(hv, entry);
