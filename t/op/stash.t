@@ -7,7 +7,7 @@ BEGIN {
 
 require "./test.pl";
 
-plan( tests => 8 );
+plan( tests => 9 );
 
 # Used to segfault (bug #15479)
 fresh_perl_is(
@@ -36,3 +36,17 @@ ok( defined %{"bongo::shaftsbury::"}, q(- work with hard refs too) );
 
 package tyrone::slothrop;
 $bongo::shaftsbury::scalar = 1;
+
+package main;
+
+# Used to warn
+# Unbalanced string table refcount: (1) for "A::" during global destruction.
+# for ithreads.
+{
+    local $ENV{PERL_DESTRUCT_LEVEL} = 2;
+    fresh_perl_is(
+		  'package A; sub a { // }; %::=""',
+		  '',
+		  '',
+		  );
+}
