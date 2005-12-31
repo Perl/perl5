@@ -52,6 +52,15 @@ typedef struct ithread_s {
 #endif
 } ithread;
 
+#define MY_CXT_KEY "threads::_guts" XS_VERSION
+
+typedef struct {
+    ithread *thread;
+} my_cxt_t;
+
+START_MY_CXT
+
+
 ithread *threads;
 
 /* Macros to supply the aTHX_ in an embed.h like manner */
@@ -71,18 +80,13 @@ I32 active_threads = 0;
 
 void Perl_ithread_set (pTHX_ ithread* thread)
 {
-  SV* thread_sv = newSViv(PTR2IV(thread));
-  if(!hv_store(PL_modglobal, "threads::self", 12, thread_sv,0)) {
-    croak("%s\n","Internal error, couldn't set TLS");
-  }
+    dMY_CXT;
+    MY_CXT.thread = thread;
 }
 
 ithread* Perl_ithread_get (pTHX) {
-  SV** thread_sv = hv_fetch(PL_modglobal, "threads::self",12,0);
-  if(!thread_sv) {
-    croak("%s\n","Internal error, couldn't get TLS");
-  }
-  return INT2PTR(ithread*,SvIV(*thread_sv));
+    dMY_CXT;
+    return MY_CXT.thread;
 }
 
 
@@ -445,6 +449,8 @@ Perl_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* param
 	{
 	    dTHXa(thread->interp);
 
+	    MY_CXT_CLONE;
+
             /* Here we remove END blocks since they should only run
 	       in the thread they are created
             */
@@ -765,6 +771,7 @@ ithread_DESTROY(SV *thread)
 
 BOOT:
 {
+        MY_CXT_INIT;
 #ifdef USE_ITHREADS
 	ithread* thread;
 	PL_perl_destruct_level = 2;
