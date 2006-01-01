@@ -458,9 +458,9 @@ S_missingterm(pTHX_ char *s)
     Perl_croak(aTHX_ "Can't find string terminator %c%s%c anywhere before EOF",q,s,q);
 }
 
-#define FEATURE_IS_ENABLED(name, namelen)				\
+#define FEATURE_IS_ENABLED(name)				        \
 	((0 != (PL_hints & HINT_LOCALIZE_HH))				\
-	    && feature_is_enabled(name, namelen) )
+	    && feature_is_enabled((name ""), sizeof(name)-1))
 /*
  * S_feature_is_enabled
  * Check whether the named feature is enabled.
@@ -3214,7 +3214,7 @@ Perl_yylex(pTHX)
     case '~':
 	if (s[1] == '~'
 	&& (PL_expect == XOPERATOR || PL_expect == XTERMORDORDOR)
-	&& FEATURE_IS_ENABLED("~~", 2))
+	&& FEATURE_IS_ENABLED("~~"))
 	{
 	    s += 2;
 	    Eop(OP_SMARTMATCH);
@@ -4647,7 +4647,7 @@ Perl_yylex(pTHX)
 	    /* When 'use switch' is in effect, continue has a dual
 	       life as a control operator. */
 	    {
-		if (!FEATURE_IS_ENABLED("switch", 6))
+		if (!FEATURE_IS_ENABLED("switch"))
 		    PREBLOCK(CONTINUE);
 		else {
 		    /* We have to disambiguate the two senses of
@@ -6080,7 +6080,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
             case 'r':
               if (name[2] == 'r')
               {                                   /* err        */
-                return (FEATURE_IS_ENABLED("err", 3) ? -KEY_err : 0);
+                return (FEATURE_IS_ENABLED("err") ? -KEY_err : 0);
               }
 
               goto unknown;
@@ -6219,7 +6219,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
             case 'a':
               if (name[2] == 'y')
               {                                   /* say        */
-                return (FEATURE_IS_ENABLED("say", 3) ? -KEY_say : 0);
+                return (FEATURE_IS_ENABLED("say") ? -KEY_say : 0);
               }
 
               goto unknown;
@@ -6743,7 +6743,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
               if (name[2] == 'e' &&
                   name[3] == 'n')
               {                                   /* when       */
-                return (FEATURE_IS_ENABLED("switch", 6) ? KEY_when : 0);
+                return (FEATURE_IS_ENABLED("switch") ? KEY_when : 0);
           }
 
           goto unknown;
@@ -6826,7 +6826,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
                   name[3] == 'a' &&
                   name[4] == 'k')
               {                                   /* break      */
-                return (FEATURE_IS_ENABLED("switch", 6) ? -KEY_break : 0);
+                return (FEATURE_IS_ENABLED("switch") ? -KEY_break : 0);
               }
 
               goto unknown;
@@ -6954,7 +6954,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
               name[3] == 'e' &&
               name[4] == 'n')
           {                                       /* given      */
-            return (FEATURE_IS_ENABLED("switch", 6) ? KEY_given : 0);
+            return (FEATURE_IS_ENABLED("switch") ? KEY_given : 0);
           }
 
           goto unknown;
@@ -7775,7 +7775,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
                         name[5] == 'l' &&
                         name[6] == 't')
                     {                             /* default    */
-                      return (FEATURE_IS_ENABLED("switch", 6) ? KEY_default : 0);
+                      return (FEATURE_IS_ENABLED("switch") ? KEY_default : 0);
                     }
 
                     goto unknown;
