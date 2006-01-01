@@ -586,6 +586,3 @@ PERLVAR(Ipte_arenaroot,	XPV*)		/* list of allocated pte areas */
 /* File descriptor to talk to the child which dumps scalars.  */
 PERLVARI(Idumper_fd, int, -1)
 #endif
-
-PERLVAR(Ixpvgv_root,	XPVGV *)	/* free xpvgv list */
-PERLVAR(Ixpvgv_arenaroot,XPVGV*)	/* list of allocated xpvgv areas */

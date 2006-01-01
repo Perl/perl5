@@ -1232,7 +1232,6 @@ s	|XPVCV*	|new_xpvcv
 s	|XPVAV*	|new_xpvav
 s	|XPVHV*	|new_xpvhv
 s	|XPVMG*	|new_xpvmg
-s	|XPVGV*	|new_xpvgv
 s	|XPVLV*	|new_xpvlv
 s	|XPVBM*	|new_xpvbm
 s	|XRV*	|new_xrv
@@ -1245,7 +1244,6 @@ s	|void	|del_xpvcv	|XPVCV* p
 s	|void	|del_xpvav	|XPVAV* p
 s	|void	|del_xpvhv	|XPVHV* p
 s	|void	|del_xpvmg	|XPVMG* p
-s	|void	|del_xpvgv	|XPVGV* p
 s	|void	|del_xpvlv	|XPVLV* p
 s	|void	|del_xpvbm	|XPVBM* p
 s	|void	|del_xrv	|XRV* p
