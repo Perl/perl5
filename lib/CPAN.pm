@@ -1,6 +1,6 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.80_57';
+$VERSION = '1.80_58';
 $VERSION = eval $VERSION;
 use strict;
 
@@ -4870,7 +4870,7 @@ sub prereq_pm {
             }
             my $areq;
             my $do_replace;
-            while (my($k,$v) = each %$req) {
+            while (my($k,$v) = each %{$req||{}}) {
                 if ($v =~ /\d/) {
                     $areq->{$k} = $v;
                 } elsif ($k =~ /[A-Za-z]/ &&
