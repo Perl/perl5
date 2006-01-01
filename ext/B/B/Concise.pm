@@ -163,6 +163,11 @@ sub concise_cv_obj {
     # name is either a string, or a CODE ref (copy of $cv arg??)
 
     $curcv = $cv;
+
+    if (ref($cv->XSUBANY) =~ /B::([INP]V)/) {
+	print $walkHandle "$name is a constant sub, optimized to a $1\n";
+	return;
+    }
     if ($cv->XSUB) {
 	print $walkHandle "$name is XS code\n";
 	return;
