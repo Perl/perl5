@@ -4830,7 +4830,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts)
           else retspec = __fileify_retbuf;
           cp1 = esa;
           cp2 = retspec;
-          while (*cp1 != ':') *(cp2++) = *(cp1++);
+          while ((*cp1 != ':')  && (*cp1 != '\0')) *(cp2++) = *(cp1++);
           strcpy(cp2,":[000000]");
           cp1 += 2;
           strcpy(cp2+9,cp1);
