@@ -79,6 +79,12 @@ my %map = reverse (
 		   "p5-authors\100crystalflame.net"
 		   => "perl\100crystalflame.net",
 		   "stef\100mongueurs.net" => "stef\100payrard.net",
+		   "kstar\100wolfetech.com" => "kstar\100cpan.org",
+		   "7k8lrvf02\100sneakemail.com" =>
+		   "kjx9zthh3001\100sneakemail.com",
+		   "mgjv\100comdyn.com.au" => "mgjv\100tradingpost.com.au",
+		   "thomas.dorner\100start.de" => "tdorner\100amadeus.net",
+		   "ajohnson\100nvidia.com" => "ajohnson\100wischip.com",
 		   # Maybe we should special case this to get real names out?
 		   "perlbug\100perl.org" => "perlbug-followup\100perl.org",
 		  );
@@ -131,6 +137,8 @@ $map{"konovalo\100mail.wplus.net"} = $map{"vadim\100vkonovalov.ru"}
   = "vkonovalov\100spb.lucent.com";
 $map{"kane\100cpan.org"} = "kane\100dwim.org";
 $map{"rs\100crystalflame.net"} = "p5-authors\100crystalflame.net";
+$map{"(srezic\100iconmobile.com)"} = "slaven\100rezic.de";
+$map{"perl\100dellah.anu.edu.au"} = "spoon\100cpan.org";
 
 $map{"hv\100crypt.org"} = "hv";
 $map{"gisle\100aas.no"} = "gisle";
