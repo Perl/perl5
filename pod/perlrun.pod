@@ -883,11 +883,11 @@ for details.
 X<-U>
 
 allows Perl to do unsafe operations.  Currently the only "unsafe"
-operations are the unlinking of directories while running as superuser,
-and running setuid programs with fatal taint checks turned into
-warnings.  Note that the B<-w> switch (or the C<$^W> variable) must
-be used along with this option to actually I<generate> the
-taint-check warnings.
+operations are attempting to unlink directories while running as 
+superuser, and running setuid programs with fatal taint checks turned
+into warnings.  Note that the B<-w> switch (or the C<$^W> variable) 
+must be used along with this option to actually I<generate> the
+taint-check warnings.  
 
 =item B<-v>
 X<-v>

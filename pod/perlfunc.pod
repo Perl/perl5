@@ -6606,10 +6606,11 @@ deleted.
     unlink @goners;
     unlink <*.bak>;
 
-Note: C<unlink> will not delete directories unless you are superuser and
-the B<-U> flag is supplied to Perl.  Even if these conditions are
+Note: C<unlink> will not attempt to delete directories unless you are superuser
+and the B<-U> flag is supplied to Perl.  Even if these conditions are
 met, be warned that unlinking a directory can inflict damage on your
-filesystem.  Use C<rmdir> instead.
+filesystem.  Finally, using C<unlink> on directories is not supported on 
+many operating systems.  Use C<rmdir> instead.
 
 If LIST is omitted, uses C<$_>.
 
