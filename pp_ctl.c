@@ -1,7 +1,7 @@
 /*    pp_ctl.c
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, 2004, 2005, by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2004, 2005, 2006, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -3300,25 +3300,32 @@ PP(pp_require)
     if (!tryrsfp) {
 	if (PL_op->op_type == OP_REQUIRE) {
 	    const char *msgstr = name;
-	    if (namesv) {			/* did we lookup @INC? */
+	    if(errno == EMFILE) {
 		SV *msg = sv_2mortal(newSVpv(msgstr,0));
-		SV *dirmsgsv = NEWSV(0, 0);
-		AV *ar = GvAVn(PL_incgv);
-		I32 i;
-		sv_catpvn(msg, " in @INC", 8);
-		if (instr(SvPVX_const(msg), ".h "))
-		    sv_catpv(msg, " (change .h to .ph maybe?)");
-		if (instr(SvPVX_const(msg), ".ph "))
-		    sv_catpv(msg, " (did you run h2ph?)");
-		sv_catpv(msg, " (@INC contains:");
-		for (i = 0; i <= AvFILL(ar); i++) {
-		    const char *dir = SvPVx_nolen_const(*av_fetch(ar, i, TRUE));
-		    Perl_sv_setpvf(aTHX_ dirmsgsv, " %s", dir);
-		    sv_catsv(msg, dirmsgsv);
-		}
-		sv_catpvn(msg, ")", 1);
-		SvREFCNT_dec(dirmsgsv);
+		sv_catpv(msg, ":  "); 
+		sv_catpv(msg, Strerror(errno));
 		msgstr = SvPV_nolen_const(msg);
+	    } else {
+	        if (namesv) {			/* did we lookup @INC? */
+		    SV *msg = sv_2mortal(newSVpv(msgstr,0));
+		    SV *dirmsgsv = NEWSV(0, 0);
+		    AV *ar = GvAVn(PL_incgv);
+		    I32 i;
+		    sv_catpvn(msg, " in @INC", 8);
+		    if (instr(SvPVX_const(msg), ".h "))
+		        sv_catpv(msg, " (change .h to .ph maybe?)");
+		    if (instr(SvPVX_const(msg), ".ph "))
+		        sv_catpv(msg, " (did you run h2ph?)");
+		    sv_catpv(msg, " (@INC contains:");
+		    for (i = 0; i <= AvFILL(ar); i++) {
+		        const char *dir = SvPVx_nolen_const(*av_fetch(ar, i, TRUE));
+		        Perl_sv_setpvf(aTHX_ dirmsgsv, " %s", dir);
+		        sv_catsv(msg, dirmsgsv);
+		    }
+		    sv_catpvn(msg, ")", 1);
+		    SvREFCNT_dec(dirmsgsv);
+		    msgstr = SvPV_nolen_const(msg);
+		}    
 	    }
 	    DIE(aTHX_ "Can't locate %s", msgstr);
 	}

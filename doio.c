@@ -1,7 +1,7 @@
 /*    doio.c
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, 2004, 2005, by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2004, 2005, 2006, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -407,7 +407,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 			else
 			    was_fdopen = TRUE;
 			if (!(fp = PerlIO_openn(aTHX_ type,mode,fd,0,0,NULL,num_svs,svp))) {
-			    if (dodup)
+			    if (dodup && fd >= 0)
 				PerlLIO_close(fd);
 			}
 		    }

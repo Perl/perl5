@@ -3816,7 +3816,7 @@ static char *mp_do_tovmsspec(pTHX_ char *path, char *buf, int ts) {
 
   if (path == NULL) return NULL;
   if (buf) rslt = buf;
-  else if (ts) Newx(rslt,strlen(path)+9,char);
+  else if (ts) Newx(rslt,NAM$C_MAXRSS+1,char);
   else rslt = __tovmsspec_retbuf;
   if (strpbrk(path,"]:>") ||
       (dirend = strrchr(path,'/')) == NULL) {
@@ -3842,7 +3842,6 @@ static char *mp_do_tovmsspec(pTHX_ char *path, char *buf, int ts) {
 
     while (*(cp2+1) == '/') cp2++;  /* Skip multiple /s */
     if (!*(cp2+1)) {
-      if (!buf & ts) Renew(rslt,18,char);
       strcpy(rslt,"sys$disk:[000000]");
       return rslt;
     }
@@ -3865,8 +3864,10 @@ static char *mp_do_tovmsspec(pTHX_ char *path, char *buf, int ts) {
         if (!buf && ts) Renew(rslt,strlen(path)-strlen(rslt)+trnend+4,char);
         strcpy(rslt,trndev);
         cp1 = rslt + trnend;
-        *(cp1++) = '.';
-        cp2++;
+	if (*cp2 != 0) {
+          *(cp1++) = '.';
+          cp2++;
+        }
       }
       else {
         *(cp1++) = ':';
@@ -5323,7 +5324,7 @@ setup_cmddsc(pTHX_ char *cmd, int check_img, int *suggest_quote,
       *s = '\0';
 
       /* check that it's really not DCL with no file extension */
-      fp = fopen(resspec,"r","ctx=bin,shr=get");
+      fp = fopen(resspec,"r","ctx=bin","shr=get");
       if (fp) {
         char b[4] = {0,0,0,0};
         read(fileno(fp),b,4);
@@ -6906,7 +6907,16 @@ int
 Perl_flex_fstat(pTHX_ int fd, Stat_t *statbufp)
 {
   if (!fstat(fd,(stat_t *) statbufp)) {
-    if (statbufp == (Stat_t *) &PL_statcache) *namecache == '\0';
+    if (statbufp == (Stat_t *) &PL_statcache) {
+    char *cptr;
+
+	/* Save name for cando by name in VMS format */
+	cptr = getname(fd, namecache, 1);
+
+	/* This should not happen, but just in case */
+	if (cptr == NULL)
+	   namecache[0] = '\0';
+    }
     statbufp->st_dev = encode_dev(aTHX_ statbufp->st_devnam);
 #   ifdef RTL_USES_UTC
 #   ifdef VMSISH_TIME

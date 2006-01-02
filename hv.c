@@ -1,7 +1,7 @@
 /*    hv.c
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, 2004, 2005, by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2004, 2005, 2006, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1752,8 +1752,17 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	return Null(HE*);
     }
 #ifdef DYNAMIC_ENV_FETCH  /* set up %ENV for iteration */
-    if (!entry && SvRMAGICAL((SV*)hv) && mg_find((SV*)hv, PERL_MAGIC_env))
+    if (!entry && SvRMAGICAL((SV*)hv) && mg_find((SV*)hv, PERL_MAGIC_env)) {
 	prime_env_iter();
+#ifdef VMS
+	/* The prime_env_iter() on VMS just loaded up new hash values
+	 * so the iteration count needs to be reset back to the beginning
+	 */
+	hv_iterinit(hv);
+	iter = HvAUX(hv);
+	oldentry = entry = iter->xhv_eiter; /* HvEITER(hv) */
+#endif
+    }
 #endif
 
     if (!xhv->xhv_array /* !HvARRAY(hv) */)

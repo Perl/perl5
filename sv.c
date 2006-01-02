@@ -3390,7 +3390,7 @@ char *
 Perl_sv_2pvutf8(pTHX_ register SV *sv, STRLEN *lp)
 {
     sv_utf8_upgrade(sv);
-    return SvPV(sv,*lp);
+    return lp ? SvPV(sv,*lp) : SvPV_nolen(sv);
 }
 
 /*
@@ -4316,7 +4316,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	    SvFAKE_off(sv);
 	    SvREADONLY_off(sv);
 	    SvGROW(sv, len + 1);
-	    Move(pvx,SvPVX_const(sv),len,char);
+	    Move(pvx,SvPVX(sv),len,char);
 	    *SvEND(sv) = '\0';
 	    unsharepvn(pvx, SvUTF8(sv) ? -(I32)len : len, hash);
 	}
@@ -4374,7 +4374,7 @@ Perl_sv_chop(pTHX_ register SV *sv, register char *ptr)
 	    const char *pvx = SvPVX_const(sv);
 	    const STRLEN len = SvCUR(sv);
 	    SvGROW(sv, len + 1);
-	    Move(pvx,SvPVX_const(sv),len,char);
+	    Move(pvx,SvPVX(sv),len,char);
 	    *SvEND(sv) = '\0';
 	}
 	SvIV_set(sv, 0);
@@ -7591,7 +7591,7 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 		sv_unref(sv);
 	    (void)SvUPGRADE(sv, SVt_PV);		/* Never FALSE */
 	    SvGROW(sv, len + 1);
-	    Move(s,SvPVX_const(sv),len,char);
+	    Move(s,SvPVX(sv),len,char);
 	    SvCUR_set(sv, len);
 	    *SvEND(sv) = '\0';
 	}

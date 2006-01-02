@@ -843,6 +843,8 @@ perl_destruct(pTHXx)
 	 */
 	sv_clean_objs();
 	PL_sv_objcount = 0;
+	if (PL_defoutgv && !SvREFCNT(PL_defoutgv))
+	    PL_defoutgv = Nullgv; /* may have been freed */
     }
 
     /* unhook hooks which will soon be, or use, destroyed data */
@@ -3696,8 +3698,11 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
 #endif /* IAMSUID */
     if (!PL_rsfp) {
 	/* PSz 16 Sep 03  Keep neat error message */
-	Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
-		CopFILE(PL_curcop), Strerror(errno));
+	if (PL_e_script)
+	    Perl_croak(aTHX_ "Can't open "BIT_BUCKET": %s\n", Strerror(errno));
+	else
+	    Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
+		    CopFILE(PL_curcop), Strerror(errno));
     }
 }
 
