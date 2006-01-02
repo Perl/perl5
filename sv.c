@@ -9333,11 +9333,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
     dstr->sv_debug_line = sstr->sv_debug_line;
     dstr->sv_debug_inpad = sstr->sv_debug_inpad;
     dstr->sv_debug_cloned = 1;
-#  ifdef NETWARE
     dstr->sv_debug_file = savepv(sstr->sv_debug_file);
-#  else
-    dstr->sv_debug_file = savesharedpv(sstr->sv_debug_file);
-#  endif
 #endif
 
     ptr_table_store(PL_ptr_table, sstr, dstr);
