@@ -430,15 +430,12 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv)
 	    continue;
 	}
 		
-	if ((mg->mg_flags & MGf_COPY) && vtbl->svt_copy) {
-	    /* XXX calling the copy method is probably not correct. DAPM */
-	    (void)CALL_FPTR(vtbl->svt_copy)(aTHX_ sv, mg, nsv,
-				    mg->mg_ptr, mg->mg_len);
-	}
-	else {
+	if ((mg->mg_flags & MGf_LOCAL) && vtbl->svt_local)
+	    (void)CALL_FPTR(vtbl->svt_local)(aTHX_ nsv, mg);
+	else
 	    sv_magicext(nsv, mg->mg_obj, mg->mg_type, vtbl,
 			    mg->mg_ptr, mg->mg_len);
-	}
+
 	/* container types should remain read-only across localization */
 	SvFLAGS(nsv) |= SvREADONLY(sv);
     }

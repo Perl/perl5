@@ -196,6 +196,7 @@ MGVTBL sharedsv_shared_vtbl = {
  sharedsv_shared_mg_free,	/* free */
  0,				/* copy */
  0,				/* dup */
+ 0				/* local */
 };
 
 /* Access to shared things is heavily based on MAGIC - in mg.h/mg.c/sv.c sense */
@@ -376,7 +377,7 @@ Perl_sharedsv_associate(pTHX_ SV **psv, SV *ssv, shared_sv *data)
 		}
 		mg = sv_magicext(sv, Nullsv, PERL_MAGIC_shared_scalar,
 				&sharedsv_scalar_vtbl, (char *)data, 0);
-		mg->mg_flags |= (MGf_COPY|MGf_DUP);
+		mg->mg_flags |= (MGf_COPY|MGf_DUP|MGf_LOCAL);
 		SvREFCNT_inc(ssv);
 		if(SvOBJECT(ssv)) {
 		  STRLEN len;
@@ -605,6 +606,28 @@ sharedsv_scalar_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
     return 0;
 }
 
+
+/*
+ * Called during local $shared
+ */
+int
+sharedsv_scalar_mg_local(pTHX_ SV* nsv, MAGIC *mg)
+{
+    MAGIC *nmg;
+    shared_sv *shared = (shared_sv *) mg->mg_ptr;
+    if (shared) {
+	ENTER_LOCK;
+	SvREFCNT_inc(SHAREDSvPTR(shared));
+	LEAVE_LOCK;
+    }
+    nmg = sv_magicext(nsv, mg->mg_obj, mg->mg_type, mg->mg_virtual,
+			    mg->mg_ptr, mg->mg_len);
+    nmg->mg_flags   = mg->mg_flags;
+    nmg->mg_private = mg->mg_private;
+
+    return 0;
+}
+
 MGVTBL sharedsv_scalar_vtbl = {
  sharedsv_scalar_mg_get,	/* get */
  sharedsv_scalar_mg_set,	/* set */
@@ -612,7 +635,8 @@ MGVTBL sharedsv_scalar_vtbl = {
  sharedsv_scalar_mg_clear,	/* clear */
  sharedsv_scalar_mg_free,	/* free */
  0,				/* copy */
- sharedsv_scalar_mg_dup		/* dup */
+ sharedsv_scalar_mg_dup,	/* dup */
+ sharedsv_scalar_mg_local	/* local */
 };
 
 /* Now the arrays/hashes stuff */
@@ -753,7 +777,8 @@ MGVTBL sharedsv_elem_vtbl = {
  sharedsv_elem_mg_DELETE,	/* clear */
  sharedsv_elem_mg_free,		/* free */
  0,				/* copy */
- sharedsv_elem_mg_dup		/* dup */
+ sharedsv_elem_mg_dup,		/* dup */
+ 0				/* local */
 };
 
 U32
@@ -832,7 +857,8 @@ MGVTBL sharedsv_array_vtbl = {
  sharedsv_array_mg_CLEAR,	/* clear */
  sharedsv_array_mg_free,	/* free */
  sharedsv_array_mg_copy,	/* copy */
- sharedsv_array_mg_dup		/* dup */
+ sharedsv_array_mg_dup,		/* dup */
+ 0				/* local */
 };
 
 =for apidoc sharedsv_unlock
