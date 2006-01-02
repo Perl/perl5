@@ -164,7 +164,7 @@ sub concise_cv_obj {
 
     $curcv = $cv;
 
-    if (ref($cv->XSUBANY) =~ /B::([INP]V)/) {
+    if (ref($cv->XSUBANY) =~ /B::(\w+)/) {
 	print $walkHandle "$name is a constant sub, optimized to a $1\n";
 	return;
     }

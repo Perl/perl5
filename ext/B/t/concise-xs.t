@@ -115,21 +115,22 @@ BEGIN {
 
 use Getopt::Std;
 use Carp;
-use Test::More tests => ( 0 * !!$Config::Config{useithreads}
+use Test::More tests => ( # per-pkg tests (function ct + require_ok)
+			  40 + 16	# Data::Dumper, Digest::MD5
+			  + 511 + 233	# B::Deparse, B
+			  + 589 + 189	# POSIX, IO::Socket
 			  + 3 * ($] > 5.009)
 			  + 14 * ($] >= 5.009003)
-			  + 780 + 588 );
+			  - 22);	# fudge
 
 require_ok("B::Concise");
 
 my %matchers = 
     ( constant	=> qr{ (?-x: is a constant sub, optimized to a \w+)
 		      |(?-x: exists in stash, but has no START) }x,
-      XS	=> qr{ (?-x: is XS code)
-		      |(?-x: exists in stash, but has no START) }x,
-      perl	=> qr{ (?-x: (next|db)state)
-		      |(?-x: exists in stash, but has no START) }x,
-      noSTART	=> qr/exists in stash, but has no START/,
+      XS	=> qr/ is XS code/,
+      perl	=> qr/ (next|db)state/,
+      noSTART	=> qr/ exists in stash, but has no START/,
 );
 
 my $testpkgs = {
@@ -199,9 +200,26 @@ my $testpkgs = {
 		      fmod floor dup2 dup difftime cuserid ctime
 		      ctermid cosh constant close clock ceil
 		      bootstrap atan asin asctime acos access abort
-		      _exit _POSIX_SAVED_IDS _POSIX_JOB_CONTROL
+		      _exit
 		      /],
 	       },
+
+    IO::Socket => { dflt => 'constant',		# 157/188
+
+		    perl => [qw/ timeout socktype sockopt sockname
+			     socketpair socket sockdomain sockaddr_un
+			     sockaddr_in shutdown setsockopt send
+			     register_domain recv protocol peername
+			     new listen import getsockopt croak
+			     connected connect configure confess close
+			     carp bind atmark accept
+			     /],
+
+		    XS => [qw/ unpack_sockaddr_un unpack_sockaddr_in
+			   sockatmark sockaddr_family pack_sockaddr_un
+			   pack_sockaddr_in inet_ntoa inet_aton
+			   /],
+		},
 };
 
 ############

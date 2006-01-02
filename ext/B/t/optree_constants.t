@@ -19,7 +19,7 @@ BEGIN {
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
 use Config;
 
-my $tests = 18;
+my $tests = 23;
 plan tests => $tests;
 SKIP: {
 skip "no perlio in this build", $tests unless $Config::Config{useperlio};
@@ -34,6 +34,9 @@ use constant {		# see also t/op/gv.t line 282
     myglob => \*STDIN,
     myaref => [ 1,2,3 ],
     myhref => { a => 1 },
+    myundef => undef,
+    mysub => \&ok,
+    mysub => \&nosuch,
 };
 
 use constant WEEKDAYS
@@ -86,45 +89,72 @@ EONT_EONT
 
 checkOptree ( name	=> 'myrex() as coderef',
 	      code	=> \&myrex,
-	      todo	=> '- currently renders as XS code',
 	      noanchors => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
- is XS code
+ is a constant sub, optimized to a RV
 EOT_EOT
- is XS code
+ is a constant sub, optimized to a RV
 EONT_EONT
 
 
 checkOptree ( name	=> 'myglob() as coderef',
 	      code	=> \&myglob,
-	      todo	=> '- currently renders as XS code',
 	      noanchors => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
- is XS code
+ is a constant sub, optimized to a RV
 EOT_EOT
- is XS code
+ is a constant sub, optimized to a RV
 EONT_EONT
 
 
 checkOptree ( name	=> 'myaref() as coderef',
 	      code	=> \&myaref,
-	      todo	=> '- currently renders as XS code',
 	      noanchors => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
- is XS code
+ is a constant sub, optimized to a RV
 EOT_EOT
- is XS code
+ is a constant sub, optimized to a RV
 EONT_EONT
 
 
 checkOptree ( name	=> 'myhref() as coderef',
 	      code	=> \&myhref,
-	      todo	=> '- currently renders as XS code',
 	      noanchors => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
- is XS code
+ is a constant sub, optimized to a RV
 EOT_EOT
- is XS code
+ is a constant sub, optimized to a RV
+EONT_EONT
+
+
+checkOptree ( name	=> 'myundef() as coderef',
+	      code	=> \&myundef,
+	      noanchors => 1,
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+ is a constant sub, optimized to a NULL
+EOT_EOT
+ is a constant sub, optimized to a NULL
+EONT_EONT
+
+
+checkOptree ( name	=> 'mysub() as coderef',
+	      code	=> \&mysub,
+	      noanchors => 1,
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+ is a constant sub, optimized to a RV
+EOT_EOT
+ is a constant sub, optimized to a RV
+EONT_EONT
+
+
+checkOptree ( name	=> 'myunsub() as coderef',
+	      todo	=> '- may prove only that sub is unformed',
+	      code	=> \&myunsub,
+	      noanchors => 1,
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+ has no START
+EOT_EOT
+ has no START
 EONT_EONT
 
 
@@ -245,6 +275,37 @@ EOT_EOT
 EONT_EONT
 
 
+checkOptree ( name	=> 'call myundef',
+	      code	=> 'myundef',
+	      noanchors => 1,
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->3
+# 1        <;> nextstate(main 771 (eval 35):1) v ->2
+# 2        <$> const[NULL ] s ->3
+EOT_EOT
+# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->3
+# 1        <;> nextstate(main 771 (eval 35):1) v ->2
+# 2        <$> const(NULL ) s ->3
+EONT_EONT
+
+
+checkOptree ( name	=> 'call mysub',
+	      code	=> 'mysub',
+	      noanchors => 1,
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->3
+# 1        <;> nextstate(main 771 (eval 35):1) v ->2
+# 2        <$> const[RV \\] s ->3
+EOT_EOT
+# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->3
+# 1        <;> nextstate(main 771 (eval 35):1) v ->2
+# 2        <$> const(RV \\) s ->3
+EONT_EONT
+
 ##################
 
 # test constant sub defined w/o 'use constant'
@@ -259,7 +320,7 @@ EOT_EOT
 EONT_EONT
 
 
-checkOptree ( name	=> 'constant subs returning lists are not optimized',
+checkOptree ( name	=> 'constant sub returning list',
 	      code	=> \&WEEKDAYS,
 	      noanchors => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
@@ -280,7 +341,7 @@ sub printem {
 	, myint, mystr, myfl, pi;
 }
 
-checkOptree ( name	=> 'call em all in a print statement',
+checkOptree ( name	=> 'call many in a print statement',
 	      code	=> \&printem,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 9  <1> leavesub[1 ref] K/REFC,1 ->(end)
