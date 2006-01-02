@@ -2321,6 +2321,17 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$usesitecustomize	USE_SITECUSTOMIZE		/**/
 
+/* HAS_SNPRINTF:
+ *	This symbol, if defined, indicates that the snprintf () library
+ *	function is available for use.
+ */
+/* HAS_VSNPRINTF:
+ *	This symbol, if defined, indicates that the vsnprintf () library
+ *	function is available for use.
+ */
+#$d_snprintf HAS_SNPRINTF	/**/
+#$d_vsnprintf HAS_VSNPRINTF	/**/
+
 /* HAS_SOCKET:
  *	This symbol, if defined, indicates that the BSD socket interface is
  *	supported.
