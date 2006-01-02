@@ -7,7 +7,7 @@ BEGIN {
 
 require "./test.pl";
 
-plan( tests => 9 );
+plan( tests => 11 );
 
 # Used to segfault (bug #15479)
 fresh_perl_is(
@@ -50,3 +50,9 @@ package main;
 		  '',
 		  );
 }
+
+# now tests with strictures
+
+use strict;
+ok( !defined %pig::, q(referencing a non-existent stash doesn't produce stricture errors) );
+ok( !exists $pig::{bodine}, q(referencing a non-existent stash element doesn't produce stricture errors) );
