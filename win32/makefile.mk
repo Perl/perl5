@@ -1,9 +1,9 @@
 #
 # Makefile to build perl on Windows NT using DMAKE.
 # Supported compilers:
-#	Visual C++ 2.0 through 6.0 (and possibly newer versions)
-#	Borland C++ 5.02
-#	Mingw32 with gcc-2.95.2 or better  **experimental**
+#	Visual C++ 2.0 through 7.0 (and possibly newer versions)
+#	Borland C++ 5.02 or better
+#	Mingw32 with gcc-2.95.2 or better
 #	MS Platform SDK 64-bit compiler and tools **experimental**
 #
 # This is set up to build a perl.exe that runs off a shared library
@@ -106,8 +106,12 @@ USE_LARGE_FILES	*= define
 #CCTYPE		*= MSVC20
 # Visual C++ > 2.x and < 6.x
 #CCTYPE		*= MSVC
-# Visual C++ >= 6.x
+# Visual C++ 6.x (aka Visual Studio 98)
 #CCTYPE		*= MSVC60
+# Visual C++ Toolkit 2003 (free version of Visual C++ 7.x command-line tools)
+#CCTYPE		*= MSVC70FREE
+# Visual C++ 7.x (aka Visual Studio .NET 2003) (full version)
+#CCTYPE		*= MSVC70
 # Borland 5.02 or later
 #CCTYPE		*= BORLAND
 # MinGW with gcc-2.95.2 or later
@@ -349,19 +353,11 @@ ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)
 ARCHNAME	!:= $(ARCHNAME)-thread
 .ENDIF
 
-# Visual Studio 98 specific
-.IF "$(CCTYPE)" == "MSVC60"
-
-# VC 6.0 can load the socket dll on demand.  Makes the test suite
-# run in about 10% less time.
+# Visual Studio 98 and .NET 2003 specific
+# VC++ 6.x and 7.x can load DLL's on demand.  Makes the test suite run in
+# about 10% less time.  (The free version of 7.x can't do this, however.)
+.IF "$(CCTYPE)" == "MSVC60" || "$(CCTYPE)" == "MSVC70"
 DELAYLOAD	*= -DELAYLOAD:ws2_32.dll -DELAYLOAD:shell32.dll delayimp.lib
-
-.IF "$(CFG)" == "Debug"
-.ELSE
-# VC 6.0 seems capable of compiling perl correctly with optimizations
-# enabled.  Anything earlier fails tests.
-CFG		*= Optimize
-.ENDIF
 .ENDIF
 
 ARCHDIR		= ..\lib\$(ARCHNAME)
@@ -427,6 +423,7 @@ OPTIMIZE	= -O2 -D_RTLDLL
 LINK_DBG	=
 .ENDIF
 
+EXTRACFLAGS	=
 CFLAGS		= -w -g0 -tWM -tWD $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)" \
@@ -483,6 +480,7 @@ OPTIMIZE	= -s -O2
 LINK_DBG	= -s
 .ENDIF
 
+EXTRACFLAGS	=
 CFLAGS		= $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
 LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(CCLIBDIR)"
 OBJOUT_FLAG	= -o
@@ -549,6 +547,14 @@ DEFINES		+= -DWIN64 -DCONSERVATIVE
 OPTIMIZE	+= -Wp64 -Op
 .ENDIF
 
+# the string-pooling option -Gf is deprecated in VC++ 7.x and will be removed
+# in later versions, so use read-only string-pooling (-GF) instead
+.IF "$(CCTYPE)" == "MSVC70FREE" || "$(CCTYPE)" == "MSVC70"
+STRPOOL		= -GF
+.ELSE
+STRPOOL		= -Gf
+.ENDIF
+
 .IF "$(USE_PERLCRT)" != "define"
 BUILDOPT	+= -DPERL_MSVCRT_READFIX
 .ENDIF
@@ -567,7 +573,8 @@ LIBBASEFILES	+= odbc32.lib odbccp32.lib
 # we add LIBC here, since we may be using PerlCRT.dll
 LIBFILES	= $(LIBBASEFILES) $(LIBC)
 
-CFLAGS		= -nologo -Gf -W3 $(INCLUDES) $(DEFINES) $(LOCDEFS) \
+EXTRACFLAGS	= -nologo $(STRPOOL) -W3
+CFLAGS		= $(EXTRACFLAGS) $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS	= -nologo -nodefaultlib $(LINK_DBG) \
 		-libpath:"$(INST_COREDIR)" \
@@ -916,7 +923,7 @@ CFG_VARS	=					\
 		archname=$(ARCHNAME)		~	\
 		cc=$(CC)			~	\
 		ld=$(LINK32)			~	\
-		ccflags=$(OPTIMIZE) $(DEFINES) $(BUILDOPT)	~	\
+		ccflags=$(EXTRACFLAGS) $(OPTIMIZE) $(DEFINES) $(BUILDOPT)	~	\
 		cf_email=$(EMAIL)		~	\
 		d_crypt=$(D_CRYPT)		~	\
 		d_mymalloc=$(PERL_MALLOC)	~	\
