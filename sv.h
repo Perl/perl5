@@ -1,7 +1,7 @@
 /*    sv.h
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, 2004, 2005 by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2004, 2005, 2006 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -771,8 +771,10 @@ and leaves the UTF-8 status as it was.
 #define SvUVX(sv) ((XPVUV*)  SvANY(sv))->xuv_uv
 #define SvNVX(sv)  ((XPVNV*)SvANY(sv))->xnv_nv
 #define SvPVX(sv)  ((XPV*)  SvANY(sv))->xpv_pv
-#define SvPVX_mutable(sv)	SvPVX(sv)
-#define SvPVX_const(sv)	((const char*)SvPVX(sv))
+/* Given that these two are new, there can't be any existing code using them
+ *  as LVALUEs  */
+#define SvPVX_mutable(sv)	(0 + SvPVX(sv))
+#define SvPVX_const(sv)	((const char*) (0 + SvPVX(sv)))
 #define SvCUR(sv) ((XPV*)  SvANY(sv))->xpv_cur
 #define SvLEN(sv) ((XPV*)  SvANY(sv))->xpv_len
 #define SvEND(sv)(((XPV*)  SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur)

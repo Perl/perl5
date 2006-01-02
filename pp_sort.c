@@ -1,7 +1,7 @@
 /*    pp_sort.c
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, 2004, 2005, by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2004, 2005, 2006, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -269,7 +269,7 @@ dynprep(pTHX_ gptr *list1, gptr *list2, size_t nmemb, SVCOMPARE_t cmp)
  * problem is subdivided into smaller and smaller parts, the parts
  * fit into smaller (and faster) caches.  So it doesn't matter how
  * many levels of cache exist, quicksort will "find" them, and,
- * as long as smaller is faster, take advanatge of them.
+ * as long as smaller is faster, take advantage of them.
  *
  * By contrast, consider how the original mergesort algorithm worked.
  * Suppose we have five runs (each typically of length 2 after dynprep).

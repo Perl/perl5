@@ -136,9 +136,7 @@ typedef struct {
     long long	start_cnt;
 #endif
 #ifdef PERL_IMPLICIT_CONTEXT
-#  define register
-    pTHX;
-#  undef register
+    PerlInterpreter *my_perl;
 #endif
 } prof_state_t;
 
@@ -170,7 +168,7 @@ prof_state_t g_prof_state;
 #define g_default_perldb	g_prof_state.default_perldb
 #define g_depth			g_prof_state.depth
 #ifdef PERL_IMPLICIT_CONTEXT
-#  define g_THX			g_prof_state.aTHX
+#  define g_THX			g_prof_state.my_perl
 #endif
 #ifdef OS2
 #  define g_frequ		g_prof_state.frequ

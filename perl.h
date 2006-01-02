@@ -1,7 +1,7 @@
 /*    perl.h
  *
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, 2004, 2005 by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2004, 2005, 2006 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -1451,20 +1451,25 @@ typedef UVTYPE UV;
 #else
 #  if PTRSIZE == LONGSIZE
 #    define PTRV		unsigned long
+#    define PTR2ul(p)		(unsigned long)(p)
 #  else
 #    define PTRV		unsigned
 #  endif
+#endif
+
+#ifndef INT2PTR
 #  define INT2PTR(any,d)	(any)(PTRV)(d)
 #endif
+
+#ifndef PTR2ul
+#  define PTR2ul(p)	INT2PTR(unsigned long,p)	
+#endif
+
 #define NUM2PTR(any,d)	(any)(PTRV)(d)
 #define PTR2IV(p)	INT2PTR(IV,p)
 #define PTR2UV(p)	INT2PTR(UV,p)
 #define PTR2NV(p)	NUM2PTR(NV,p)
-#if PTRSIZE == LONGSIZE
-#  define PTR2ul(p)	(unsigned long)(p)
-#else
-#  define PTR2ul(p)	INT2PTR(unsigned long,p)	
-#endif
+#define PTR2nat(p)	(PTRV)(p)	/* pointer to integer of PTRSIZE */
 
 /* According to strict ANSI C89 one cannot freely cast between
  * data pointers and function (code) pointers.  There are at least
@@ -1476,8 +1481,8 @@ typedef UVTYPE UV;
  * The only feasible use is probably temporarily storing
  * function pointers in a data pointer (such as a void pointer). */
 
-#define DPTR2FPTR(t,p) ((t)(PTRV)(p)) /* data pointer to function pointer */
-#define FPTR2DPTR(t,p) ((t)(PTRV)(p)) /* function pointer to data pointer */
+#define DPTR2FPTR(t,p) ((t)PTR2nat(p))	/* data pointer to function pointer */
+#define FPTR2DPTR(t,p) ((t)PTR2nat(p))	/* function pointer to data pointer */
 
 #ifdef USE_LONG_DOUBLE
 #  if defined(HAS_LONG_DOUBLE) && LONG_DOUBLESIZE == DOUBLESIZE
