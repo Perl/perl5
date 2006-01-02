@@ -65,6 +65,20 @@ my %map = reverse (
 		   "kane\100dwim.org" => "kane\100xs4all.net",
 		   "allens\100cpan.org" => "easmith\100beatrice.rutgers.edu",
 		   "spoon\100cpan.org" => "spoon\100dellah.org",
+		   "ben_tilly\100operamail.com" => "btilly\100gmail.com",
+		   "mbarbon\100dsi.unive.it" => "mattia.barbon\100libero.it",
+		   "tassilo.parseval\100post.rwth-aachen.de" =>
+		   "tassilo.von.parseval\100rwth-aachen.de",
+		   "dcd\100tc.fluke.com" => "david.dyck\100fluke.com",
+		   "kroepke\100dolphin-services.de"
+		   => "kay\100dolphin-services.de",
+		   "sebastien\100aperghis.net" => "maddingue\100free.fr",
+		   "radu\100netsoft.ro" => "rgreab\100fx.ro",
+		   "rick\100consumercontact.com"
+		   => "rick.delaney\100rogers.com",
+		   "p5-authors\100crystalflame.net"
+		   => "perl\100crystalflame.net",
+		   "stef\100mongueurs.net" => "stef\100payrard.net",
 		   # Maybe we should special case this to get real names out?
 		   "perlbug\100perl.org" => "perlbug-followup\100perl.org",
 		  );
@@ -109,11 +123,14 @@ $map{"rmbarker\100cpan.org"} = "robin.barker\100npl.co.uk";
 $map{"h.m.brand\100hccnet.nl"} = $map{"merijn\100l1.procura.nl"} = "merijn";
 
 $map{"yves.orton\100de.mci.com"} = $map{"yves.orton\100mciworldcom.de"}
-  = "demerphq\100hotmail.com";
+  = "demerphq\100gmail.com";
 $map{"jim.cromie\100gmail.com"} = "jcromie\100divsol.com";
 $map{"perl_dummy\100bloodgate.com"} = "nospam-abuse\100bloodgate.com";
 $map{"paul.marquess\100ntlworld.com"} = "paul.marquess\100btinternet.com";
-$map{"vadim\100vkonovalov.ru"} = "vkonovalov\100spb.lucent.com";
+$map{"konovalo\100mail.wplus.net"} = $map{"vadim\100vkonovalov.ru"}
+  = "vkonovalov\100spb.lucent.com";
+$map{"kane\100cpan.org"} = "kane\100dwim.org";
+$map{"rs\100crystalflame.net"} = "p5-authors\100crystalflame.net";
 
 $map{"hv\100crypt.org"} = "hv";
 $map{"gisle\100aas.no"} = "gisle";
