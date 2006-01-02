@@ -38,6 +38,7 @@ my %map = reverse (
 		   sky => "sky\100nanisky.com", 
 		   steveh => "steve.hay\100uk.radan.com",
 		   stevep => "steve\100fisharerojo.org",
+		   gisle => "gisle\100activestate.com",
 		   "abigail\100abigail.nl"=> "abigail\100foad.org",
 		   "chromatic\100wgz.org" => "chromatic\100rmci.net",
 		   "slaven\100rezic.de" => "slaven.rezic\100berlin.de",
@@ -49,10 +50,23 @@ my %map = reverse (
 		   "wolfgang.laun\100alcatel.at",
 		   "t.jenness\100jach.hawaii.edu" => "timj\100jach.hawaii.edu",
 		   "abe\100ztreet.demon.nl" => "abeltje\100cpan.org",
-		   "perl_dummy\100bloodgate.com" => "tels\100bloodgate.com",
+		   "nospam-abuse\100bloodgate.com" => "tels\100bloodgate.com",
 		   "jfriedl\100yahoo.com" => "jfriedl\100yahoo-inc.com",
 		   "japhy\100pobox.com" => "japhy\100pobox.org",
 		   "gellyfish\100gellyfish.com" => "jns\100gellyfish.com",
+		   "jcromie\100divsol.com" => "jcromie\100cpan.org",
+		   "demerphq\100gmail.com" => "demerphq\100hotmail.com",
+		   "rick\100consumercontact.com" => "rick\100bort.ca",
+		   "vkonovalov\100spb.lucent.com"
+		   => "vkonovalov\100peterstar.ru",
+		   "rjk\100linguist.dartmouth.edu"
+		   => "rjk\100linguist.thayer.dartmouth.edu",
+		   "domo\100computer.org" => "shouldbedomo\100mac.com",
+		   "kane\100dwim.org" => "kane\100xs4all.net",
+		   "allens\100cpan.org" => "easmith\100beatrice.rutgers.edu",
+		   "spoon\100cpan.org" => "spoon\100dellah.org",
+		   # Maybe we should special case this to get real names out?
+		   "perlbug\100perl.org" => "perlbug-followup\100perl.org",
 		  );
 
 # Make sure these are all lower case.
@@ -64,15 +78,17 @@ $map{"autrijus\100egb.elixus.org"} = $map{"autrijus\100geb.elixus.org"}
 $map{"craig.berry\100psinetcs.com"} = $map{"craig.berry\100metamorgs.com"}
   = $map{"craig.berry\100signaltreesolutions.com"}
   = $map{"craigberry\100mac.com"} = "craigb";
-$map{"davem\100fdgroup.co.uk"} = "davem";
+$map{"davem\100iabyn.nospamdeletethisbit.com" }
+  = $map{"davem\100fdgroup.co.uk"} = "davem";
 $map{"ilya\100math.ohio-state.edu"} = $map{"ilya\100math.berkeley.edu"}
   = $map{"ilya\100math.berkeley.edu"} = "nospam-abuse\100ilyaz.org";
-$map{"jhi\100kosh.hut.fi"} = $map{"jhi\100cc.hut.fi"} = "jhi";
+$map{"jhietaniemi\100gmail.com"} = $map{"jhi\100kosh.hut.fi"}
+  = $map{"jhi\100cc.hut.fi"} = "jhi";
 $map{"nick\100ccl4.org"} = $map{"nick\100talking.bollo.cx"}
   = $map{"nick\100plum.flirble.org"} = $map{"nick\100babyhippo.co.uk"}
   = $map{"nick\100bagpuss.unfortu.net"} = "nicholas";
 $map{"philip.newton\100gmx.net"} = $map{"philip.newton\100datenrevision.de"}
-  = "pnewton\100gmx.de",
+  = $map{"pnewton\100gmx.de"} = "pne\100cpan.org",
 $map{"rgarciasuarez\100mandrakesoft.com"}
   = $map{"rgarciasuarez\100mandriva.com"}
   = $map{"raphel.garcia-suarez\100hexaflux.com"} = "rgs";
@@ -91,6 +107,16 @@ $map{"japhy\100perlmonk.org"} = $map{"japhy\100cpan.org"}
 $map{"rmbarker\100cpan.org"} = "robin.barker\100npl.co.uk";
 
 $map{"h.m.brand\100hccnet.nl"} = $map{"merijn\100l1.procura.nl"} = "merijn";
+
+$map{"yves.orton\100de.mci.com"} = $map{"yves.orton\100mciworldcom.de"}
+  = "demerphq\100hotmail.com";
+$map{"jim.cromie\100gmail.com"} = "jcromie\100divsol.com";
+$map{"perl_dummy\100bloodgate.com"} = "nospam-abuse\100bloodgate.com";
+$map{"paul.marquess\100ntlworld.com"} = "paul.marquess\100btinternet.com";
+$map{"vadim\100vkonovalov.ru"} = "vkonovalov\100spb.lucent.com";
+
+$map{"hv\100crypt.org"} = "hv";
+$map{"gisle\100aas.no"} = "gisle";
 
 if (@authors) {
   my %raw;
