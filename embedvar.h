@@ -3,7 +3,7 @@
  *    embedvar.h
  *
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, 2004, 2005, by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2004, 2005, 2006, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -485,8 +485,6 @@
 #define PL_xpvbm_root		(PERL_GET_INTERP->Ixpvbm_root)
 #define PL_xpvcv_arenaroot	(PERL_GET_INTERP->Ixpvcv_arenaroot)
 #define PL_xpvcv_root		(PERL_GET_INTERP->Ixpvcv_root)
-#define PL_xpvgv_arenaroot	(PERL_GET_INTERP->Ixpvgv_arenaroot)
-#define PL_xpvgv_root		(PERL_GET_INTERP->Ixpvgv_root)
 #define PL_xpvhv_arenaroot	(PERL_GET_INTERP->Ixpvhv_arenaroot)
 #define PL_xpvhv_root		(PERL_GET_INTERP->Ixpvhv_root)
 #define PL_xpviv_arenaroot	(PERL_GET_INTERP->Ixpviv_arenaroot)
