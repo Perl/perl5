@@ -1,5 +1,6 @@
 # B::Deparse.pm
-# Copyright (c) 1998-2000, 2002, 2003 Stephen McCamant. All rights reserved.
+# Copyright (c) 1998-2000, 2002, 2003, 2004, 2005, 2006 Stephen McCamant.
+# All rights reserved.
 # This module is free software; you can redistribute and/or modify
 # it under the same terms as Perl itself.
 
@@ -1188,6 +1189,7 @@ sub deparse_root {
     local(@$self{qw'curstash warnings hints'})
       = @$self{qw'curstash warnings hints'};
     my @kids;
+    return if null $op->first; # Can happen, e.g., for Bytecode without -k
     for (my $kid = $op->first->sibling; !null($kid); $kid = $kid->sibling) {
 	push @kids, $kid;
     }
