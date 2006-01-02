@@ -2626,46 +2626,6 @@ PP(pp_exit)
     RETURN;
 }
 
-#ifdef NOTYET
-PP(pp_nswitch)
-{
-    dSP;
-    const NV value = SvNVx(GvSV(cCOP->cop_gv));
-    register I32 match = I_32(value);
-
-    if (value < 0.0) {
-	if (((NV)match) > value)
-	    --match;		/* was fractional--truncate other way */
-    }
-    match -= cCOP->uop.scop.scop_offset;
-    if (match < 0)
-	match = 0;
-    else if (match > cCOP->uop.scop.scop_max)
-	match = cCOP->uop.scop.scop_max;
-    PL_op = cCOP->uop.scop.scop_next[match];
-    RETURNOP(PL_op);
-}
-
-PP(pp_cswitch)
-{
-    dSP;
-    register I32 match;
-
-    if (PL_multiline)
-	PL_op = PL_op->op_next;			/* can't assume anything */
-    else {
-	match = *(SvPVx_nolen_const(GvSV(cCOP->cop_gv))) & 255;
-	match -= cCOP->uop.scop.scop_offset;
-	if (match < 0)
-	    match = 0;
-	else if (match > cCOP->uop.scop.scop_max)
-	    match = cCOP->uop.scop.scop_max;
-	PL_op = cCOP->uop.scop.scop_next[match];
-    }
-    RETURNOP(PL_op);
-}
-#endif
-
 /* Eval. */
 
 STATIC void
