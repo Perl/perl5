@@ -462,10 +462,12 @@ sub pod2html {
 END_OF_BLOCK
 
     print HTML <<END_OF_HEAD;
+<?xml version="1.0" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>$Title</title>$csslink
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <link rev="made" href="mailto:$Config{perladmin}" />
 </head>
 
@@ -1406,7 +1408,7 @@ sub inIS_text($){
 sub process_puretext {
     my($text, $quote, $notinIS) = @_;
 
-    ## Guessing at func() or [$@%&]*var references in plain text is destined
+    ## Guessing at func() or [\$\@%&]*var references in plain text is destined
     ## to produce some strange looking ref's. uncomment to disable:
     ## $notinIS = 0;
 
@@ -2070,7 +2072,7 @@ sub fragment_id {
 	return $1 if $text =~ /->\s*(\w+)\s*\(?/;
 
 	# a variable name?
-	return $1 if $text =~ /^([$@%*]\S+)/;
+	return $1 if $text =~ /^([\$\@%*]\S+)/;
 
 	# some pattern matching operator?
 	return $1 if $text =~ m|^(\w+/).*/\w*$|;

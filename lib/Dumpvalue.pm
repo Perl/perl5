@@ -616,7 +616,7 @@ given quote char.  Possible values are C<auto>, C<'> and C<">.
 
 =item set_unctrl
 
-  $d->set_unctrl('"');
+  $d->set_unctrl('unctrl');
 
 Sets C<unctrl> option with checking for an invalid argument.
 Possible values are C<unctrl> and C<quote>.

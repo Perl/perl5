@@ -125,7 +125,7 @@ use Exporter ();
 use strict;
 use warnings;
 
-our $VERSION = "1.07";
+our $VERSION = "1.08";
 our @ISA = qw( Exporter );
 our @EXPORT = qw( mkpath rmtree );
 
@@ -165,7 +165,7 @@ sub mkpath {
 	unless (mkdir($path,$mode)) {
 	    my $e = $!;
 	    # allow for another process to have created it meanwhile
-	    croak "mkdir $path: $e" unless -d $path;
+	    $! = $e, croak ("mkdir $path: $e") unless -d $path;
 	}
 	push(@created, $path);
     }
