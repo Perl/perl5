@@ -927,7 +927,10 @@ ____________________________________________________________________________
 	   ! sv.c
 ____________________________________________________________________________
 [ 26314] By: craigb                                on 2005/12/09  21:13:50
-        Log: Subject: patch@26310 - Major step for > 256 char paths on VMS	From: "John E. Malmberg" <wb8tyw@qsl.net>	Date: Fri, 09 Dec 2005 14:08:53 -0500	Message-id: <4399D645.8070803@qsl.net>
+        Log: Subject: patch@26310 - Major step for > 256 char paths on VMS
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
+             Date: Fri, 09 Dec 2005 14:08:53 -0500
+             Message-id: <4399D645.8070803@qsl.net>
      Branch: perl
 	   ! vms/vms.c
 ____________________________________________________________________________
@@ -1039,7 +1042,9 @@ ____________________________________________________________________________
 	   ! pod/perlfunc.pod
 ____________________________________________________________________________
 [ 26298] By: craigb                                on 2005/12/08  04:34:42
-        Log: Subject: patch@26253 Allow embedded new lines passed through to commands	From: "John E. Malmberg" <wb8tyw@qsl.net>	Date: Wed, 07 Dec 2005 22:26:21 -0500
+        Log: Subject: patch@26253 Allow embedded new lines passed through to commands
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
+             Date: Wed, 07 Dec 2005 22:26:21 -0500
              Message-id: <4397A7DD.8030403@qsl.net>
      Branch: perl
 	   ! vms/vms.c
@@ -4026,7 +4031,10 @@ ____________________________________________________________________________
 	   ! Porting/checkAUTHORS.pl
 ____________________________________________________________________________
 [ 25827] By: craigb                                on 2005/10/23  22:17:44
-        Log: Subject: [patch@25825] Fix st_ino compare to use real data.	From: "John E. Malmberg" <wb8tyw@qsl.net>	Date: Sun, 23 Oct 2005 17:46:46 -0400	Message-id: <435C04C6.2090405@qsl.net>
+        Log: Subject: [patch@25825] Fix st_ino compare to use real data.
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
+             Date: Sun, 23 Oct 2005 17:46:46 -0400
+             Message-id: <435C04C6.2090405@qsl.net>
      Branch: perl
 	   ! vms/vms.c
 ____________________________________________________________________________
@@ -4133,8 +4141,10 @@ ____________________________________________________________________________
 	   ! x2p/a2p.h
 ____________________________________________________________________________
 [ 25810] By: craigb                                on 2005/10/20  22:38:36
-        Log: Subject: [patch@25809]restore documented exit behavior	From: "John E. Malmberg" <wb8tyw@qsl.net>
-             Date: Thu, 20 Oct 2005 18:21:20 -0400	Message-id: <43581860.3020108@qsl.net>
+        Log: Subject: [patch@25809]restore documented exit behavior
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
+             Date: Thu, 20 Oct 2005 18:21:20 -0400
+             Message-id: <43581860.3020108@qsl.net>
      Branch: perl
 	   ! mg.c perl.c perl.h t/op/exec.t vms/perlvms.pod vms/vms.c
 ____________________________________________________________________________
@@ -4185,8 +4195,10 @@ ____________________________________________________________________________
 	   ! autodoc.pl embed.h pod/perlapi.pod pod/perlintern.pod proto.h
 ____________________________________________________________________________
 [ 25801] By: craigb                                on 2005/10/19  00:29:00
-        Log: Subject: [patch@25784] enable open(FOO, "child.pl foo|") on VMS	From: "John E. Malmberg" <wb8tyw@qsl.net>
-             Date: Tue, 18 Oct 2005 14:43:29 -0400	Message-id: <43554251.5020704@qsl.net>
+        Log: Subject: [patch@25784] enable open(FOO, "child.pl foo|") on VMS
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
+             Date: Tue, 18 Oct 2005 14:43:29 -0400
+             Message-id: <43554251.5020704@qsl.net>
      Branch: perl
 	   ! vms/vms.c vms/vmsish.h
 ____________________________________________________________________________
@@ -4354,7 +4366,9 @@ ____________________________________________________________________________
 	   ! lib/CPAN.pm
 ____________________________________________________________________________
 [ 25772] By: craigb                                on 2005/10/16  19:10:56
-        Log: Subject: [patch@25763] Fix VMS error/exit handling, update kill function	From: "John E. Malmberg" <wb8tyw@qsl.net>	Message-id: <4351F393.8030809@qsl.net>
+        Log: Subject: [patch@25763] Fix VMS error/exit handling, update kill function
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
+             Message-id: <4351F393.8030809@qsl.net>
              Date: Sun, 16 Oct 2005 02:30:43 -0400
      Branch: perl
 	   ! perl.c perl.h t/run/exit.t vms/vms.c vms/vmsish.h
@@ -4412,14 +4426,17 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 25761] By: craigb                                on 2005/10/15  03:59:44
         Log: Subject: [patch@blead] perlport.pod
-             From: "John E. Malmberg" <wb8tyw@qsl.net>	Date: Fri, 14 Oct 2005 23:48:20 -0400	Message-id: <43507C04.8050003@qsl.net>
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
+             Date: Fri, 14 Oct 2005 23:48:20 -0400
+             Message-id: <43507C04.8050003@qsl.net>
      Branch: perl
 	   ! pod/perlport.pod
 ____________________________________________________________________________
 [ 25760] By: craigb                                on 2005/10/15  03:43:30
         Log: Subject: patch for blead - Perlvms.pod update
              From: "John E. Malmberg" <wb8tyw@qsl.net>
-             Date: Fri, 14 Oct 2005 21:15:26 -0400	Message-id: <4350582E.4070209@qsl.net>
+             Date: Fri, 14 Oct 2005 21:15:26 -0400
+             Message-id: <4350582E.4070209@qsl.net>
      Branch: perl
 	   ! vms/perlvms.pod
 ____________________________________________________________________________
