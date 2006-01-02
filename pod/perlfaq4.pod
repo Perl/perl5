@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.67 $, $Date: 2005/08/10 15:55:49 $)
+perlfaq4 - Data Manipulation ($Revision: 1.69 $, $Date: 2005/10/14 15:34:06 $)
 
 =head1 DESCRIPTION
 
@@ -1212,6 +1212,8 @@ same thing.
 
 =head2 How can I tell whether a certain element is contained in a list or array?
 
+(portions of this answer contributed by Anno Siegel)
+
 Hearing the word "in" is an I<in>dication that you probably should have
 used a hash, not a list or array, to store your data.  Hashes are
 designed to answer this question quickly and efficiently.  Arrays aren't.
@@ -1247,28 +1249,35 @@ quite a lot of space by using bit strings instead:
 
 Now check whether C<vec($read,$n,1)> is true for some C<$n>.
 
-Please do not use
+These methods guarantee fast individual tests but require a re-organization
+of the original list or array.  They only pay off if you have to test
+multiple values against the same array.
 
-    ($is_there) = grep $_ eq $whatever, @array;
+If you are testing only once, the standard module List::Util exports
+the function C<first> for this purpose.  It works by stopping once it
+finds the element. It's written in C for speed, and its Perl equivalant
+looks like this subroutine:
 
-or worse yet
-
-    ($is_there) = grep /$whatever/, @array;
-
-These are slow (checks every element even if the first matches),
-inefficient (same reason), and potentially buggy (what if there are
-regex characters in $whatever?).  If you're only testing once, then
-use:
-
-    $is_there = 0;
-    foreach $elt (@array) {
-	if ($elt eq $elt_to_find) {
-	    $is_there = 1;
-	    last;
+	sub first (&@) {
+		my $code = shift;
+		foreach (@_) {
+			return $_ if &{$code}();
+		}
+		undef;
 	}
-    }
-    if ($is_there) { ... }
 
+If speed is of little concern, the common idiom uses grep in scalar context
+(which returns the number of items that passed its condition) to traverse the
+entire list. This does have the benefit of telling you how many matches it
+found, though.
+
+	my $is_there = grep $_ eq $whatever, @array;
+
+If you want to actually extract the matching elements, simply use grep in
+list context.
+
+	my @matches = grep $_ eq $whatever, @array;
+	
 =head2 How do I compute the difference of two arrays?  How do I compute the intersection of two arrays?
 
 Use a hash.  Here's code to do both and more.  It assumes that
@@ -1982,8 +1991,18 @@ in L<perltoot>.
 
 =head2 How can I use a reference as a hash key?
 
-You can't do this directly, but you could use the standard Tie::RefHash
-module distributed with Perl.
+(contributed by brian d foy)
+
+Hash keys are strings, so you can't really use a reference as the key.
+When you try to do that, perl turns the reference into its stringified
+form (for instance, C<HASH(0xDEADBEEF)>). From there you can't get back
+the reference from the stringified form, at least without doing some
+extra work on your own. Also remember that hash keys must be unique, but
+two different variables can store the same reference (and those variables
+can change later).
+
+The Tie::RefHash module, which is distributed with perl, might be what
+you want. It handles that extra work.
 
 =head1 Data: Misc
 

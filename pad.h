@@ -77,7 +77,7 @@ Save a pad slot (used to restore after an iteration)
 
 XXX DAPM it would make more sense to make the arg a PADOFFSET
 =for apidoc m|void|SAVECLEARSV	|SV **svp
-Clear the pointed to pad value on scope exit. (ie the runtime action of 'my')
+Clear the pointed to pad value on scope exit. (i.e. the runtime action of 'my')
 
 =for apidoc m|void|SAVECOMPPAD
 save PL_comppad and PL_curpad

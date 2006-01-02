@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 1.23 $, $Date: 2005/08/10 15:54:54 $)
+perlfaq9 - Networking ($Revision: 1.24 $, $Date: 2005/10/13 19:43:13 $)
 
 =head1 DESCRIPTION
 
@@ -366,9 +366,9 @@ C<param()> function.
 
 	use CGI qw(:standard);
 
-	my $total = param( "price" ) + param( "shipping" );
+	my $total = param( 'price' ) + param( 'shipping' );
 
-	my @items = param( "item ); # multiple values, same field name
+	my @items = param( 'item' ); # multiple values, same field name
 
 If you want an object-oriented approach, CGI.pm can do that too.
 
@@ -376,9 +376,9 @@ If you want an object-oriented approach, CGI.pm can do that too.
 
 	my $cgi = CGI->new();
 
-	my $total = $cgi->param( "price" ) + $cgi->param( "shipping" );
+	my $total = $cgi->param( 'price' ) + $cgi->param( 'shipping' );
 
-	my @items = $cgi->param( "item" );
+	my @items = $cgi->param( 'item' );
 
 You might also try CGI::Minimal which is a lightweight version
 of the same thing.  Other CGI::* modules on CPAN might work better

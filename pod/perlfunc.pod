@@ -2349,7 +2349,7 @@ functions will serve you better than will int().
 
 Implements the ioctl(2) function.  You'll probably first have to say
 
-    require "sys/ioctl.ph";	# probably in $Config{archlib}/ioctl.ph
+    require "sys/ioctl.ph";	# probably in $Config{archlib}/sys/ioctl.ph
 
 to get the correct function definitions.  If F<sys/ioctl.ph> doesn't
 exist or doesn't have the correct definitions you'll have to roll your
@@ -3898,7 +3898,8 @@ LIST.  Has the same effect as
 	$ARRAY[++$#ARRAY] = $value;
     }
 
-but is more efficient.  Returns the new number of elements in the array.
+but is more efficient.  Returns the number of elements in the array following
+the completed C<push>.
 
 =item q/STRING/
 
@@ -4169,10 +4170,10 @@ version should be used instead.
     require 5.6.1;	# ditto
     require 5.006_001;	# ditto; preferred for backwards compatibility
 
-Otherwise, C<ref> demands that a library file be included if it hasn't already
-been included.  The file is included via the do-FILE mechanism, which is
-essentially just a variety of C<eval>.  Has semantics similar to the
-following subroutine:
+Otherwise, C<require> demands that a library file be included if it
+hasn't already been included.  The file is included via the do-FILE
+mechanism, which is essentially just a variety of C<eval>.  Has
+semantics similar to the following subroutine:
 
     sub require {
        my ($filename) = @_;

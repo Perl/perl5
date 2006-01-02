@@ -147,18 +147,14 @@ Framework Redistributable" to be installed first.  This can be downloaded and
 installed separately, but is included in the "Visual C++ Toolkit 2003" anyway.
 
 These packages can all be downloaded by searching in the Download Center at
-http://www.microsoft.com/downloads/search.aspx?displaylang=en
+http://www.microsoft.com/downloads/search.aspx?displaylang=en.  (Providing exact
+links to these packages has proven a pointless task because the links keep on
+changing so often.)
 
-The Platform SDK packages can also be obtained from the Platform SDK Update
-site: http://www.microsoft.com/msdownload/platformsdk/sdkupdate  Note that this
-site requires Internet Explorer 5.0 or later to function, but the site's home
-page currently gives links to two download pages for users of other browsers:
-
-For Windows XP Service Pack 2:
-http://www.microsoft.com/msdownload/platformsdk/sdkupdate/XPSP2FULLInstall.htm
-
-For Windows Server 2003:
-http://www.microsoft.com/msdownload/platformsdk/sdkupdate/psdk-full.htm
+Try to obtain the latest version of the Platform SDK.  Sometimes these packages
+contain a particular Windows OS version in their name, but actually work on
+other OS versions too.  For example, the "Windows Server 2003 SP1 Platform SDK"
+also runs on Windows XP SP2 and Windows 2000.
 
 According to the download pages the Toolkit and the .NET Framework SDK are only
 supported on Windows 2000/XP/2003, so trying to use these tools on Windows
