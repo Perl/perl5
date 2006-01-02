@@ -523,7 +523,7 @@ ____________________________________________________________________________
 [ 26370] By: rgs                                   on 2005/12/15  17:12:01
         Log: Don't autovivify stashes as soon as the lexer sees them.
              This makes defined %foo::bar:: work again.
-             Add tests for it, remove not in perldelta about having broken it.
+             Add tests for it, remove note in perldelta about having broken it.
      Branch: perl
 	   ! pod/perl593delta.pod t/op/stash.t toke.c
 ____________________________________________________________________________
