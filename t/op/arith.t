@@ -289,18 +289,22 @@ tryeq_sloppy $T++, 18446744073709551616/9223372036854775808, 2;
   try $T++, abs($t1000 -1000 * $t) <= 2000;
 }
 
-if ($^O eq 'vos') {
-  print "not ok ", $T++, " # TODO VOS raises SIGFPE instead of producing infinity.\n";
-} 
-elsif ($^O eq 'VMS') {
+my $vms_no_ieee;
+if ($^O eq 'VMS') {
   use vars '%Config';
   eval {require Config; import Config};
-  print $T++, " # SKIP -- the IEEE infinity model is unavailable in this configuration.\n"
-    unless defined($Config{useieee});
-} 
+  $vms_no_ieee = 1 unless defined($Config{useieee});
+}
+
+if ($^O eq 'vos') {
+  print "not ok ", $T++, " # TODO VOS raises SIGFPE instead of producing infinity.\n";
+}
+elsif ($vms_no_ieee) {
+ print $T++, " # SKIP -- the IEEE infinity model is unavailable in this configuration.\n"
+}
 elsif ($^O eq 'ultrix') {
   print "not ok ", $T++, " # TODO Ultrix enters deep nirvana instead of producing infinity.\n";
-} 
+}
 else {
   # The computation of $v should overflow and produce "infinity"
   # on any system whose max exponent is less than 10**1506.

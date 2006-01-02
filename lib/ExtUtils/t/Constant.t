@@ -45,10 +45,16 @@ my $make = $Config{make};
 $make = $ENV{MAKE} if exists $ENV{MAKE};
 if ($^O eq 'MSWin32' && $make eq 'nmake') { $make .= " -nologo"; }
 
+# VMS may be using something other than MMS/MMK
+my $mms_or_mmk = 0;
+if ($^O eq 'VMS') {
+   $mms_or_mmk = 1 if (($make eq 'MMK') || ($make eq 'MMS'));
+}
+
 # Renamed by make clean
-my $makefile = ($^O eq 'VMS' ? 'descrip' : 'Makefile');
-my $makefile_ext = ($^O eq 'VMS' ? '.mms' : '');
-my $makefile_rename = $makefile . ($^O eq 'VMS' ? '.mms' : '.old');
+my $makefile = ($mms_or_mmk ? 'descrip' : 'Makefile');
+my $makefile_ext = ($mms_or_mmk ? '.mms' : '');
+my $makefile_rename = $makefile . ($mms_or_mmk ? '.mms_old' : '.old');
 
 my $output = "output";
 my $package = "ExtTest";
@@ -250,8 +256,8 @@ sub build_and_run {
 
   check_for_bonus_files ('.', @$files, $output, $makefile_rename, '.', '..');
 
-  rename $makefile_rename, $makefile
-    or die "Can't rename '$makefile_rename' to '$makefile': $!";
+  rename $makefile_rename, $makefile . $makefile_ext
+    or die "Can't rename '$makefile_rename' to '$makefile$makefile_ext': $!";
 
   unlink $output or warn "Can't unlink '$output': $!";
 

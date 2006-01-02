@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 99;
+plan tests => 100;
 
 my $Is_EBCDIC = (ord('i') == 0x89 & ord('J') == 0xd1);
 
@@ -383,3 +383,7 @@ is( scalar keys %foo, 0,   "    doesn't extend the hash");
 $x = \"foo";
 is( $x =~ tr/A/A/, 2, 'non-modifying tr/// on a scalar ref' );
 is( ref $x, 'SCALAR', "    doesn't stringify its argument" );
+
+# rt.perl.org 36622.  Perl didn't like a y/// at end of file.  No trailing
+# newline allowed.
+fresh_perl_is(q[$_ = "foo"; y/A-Z/a-z/], '');
