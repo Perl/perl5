@@ -62,7 +62,7 @@ Object interface:
   require File::Temp;
   use File::Temp ();
 
-  $fh = new File::Temp($template);
+  $fh = new File::Temp( TEMPLATE => $template );
   $fname = $fh->filename;
 
   $tmp = new File::Temp( UNLINK => 0, SUFFIX => '.dat' );
@@ -183,7 +183,7 @@ Exporter::export_tags('POSIX','mktemp');
 
 # Version number
 
-$VERSION = '0.16';
+$VERSION = '0.16_01';
 
 # This is a list of characters that can be used in random filenames
 
