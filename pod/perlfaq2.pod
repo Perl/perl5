@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.35 $, $Date: 2005/10/13 19:43:13 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.38 $, $Date: 2005/12/31 00:54:37 $)
 
 =head1 DESCRIPTION
 
@@ -351,9 +351,19 @@ Recommended books on (or mostly on) Perl follow.
 
 =item Special Topics
 
+	Perl Best Practices
+	by Damian Conway
+	ISBN: 0-596-00173-8 [1st edition July 2005]
+	http://www.oreilly.com/catalog/perlbp/
+
+	Higher Order Perl
+	by Mark-Jason Dominus
+	ISBN: 1558607013 [1st edition March 2005]
+	http://hop.perl.plover.com/
+
 	Perl 6 Now: The Core Ideas Illustrated with Perl 5
 	by Scott Walters
-	ISBN 1-59059-395-2 [1st edition December 2004
+	ISBN 1-59059-395-2 [1st edition December 2004]
 	http://apress.com/book/bookDisplay.html?bID=355
 
 	Mastering Regular Expressions
@@ -516,7 +526,7 @@ the I<What is CPAN?> question earlier in this document.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2006 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

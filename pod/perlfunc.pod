@@ -2182,12 +2182,12 @@ C<File::Glob> extension.  See L<File::Glob> for details.
 
 =item gmtime
 
-Converts a time as returned by the time function to an 8-element list
+Converts a time as returned by the time function to an 9-element list
 with the time localized for the standard Greenwich time zone.
 Typically used as follows:
 
-    #  0    1    2     3     4    5     6     7
-    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday) =
+    #  0    1    2     3     4    5     6     7     8
+    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
 					    gmtime(time);
 
 All list elements are numeric, and come straight out of the C `struct
@@ -2197,7 +2197,8 @@ itself, in the range C<0..11> with 0 indicating January and 11
 indicating December.  $year is the number of years since 1900.  That
 is, $year is C<123> in year 2023.  $wday is the day of the week, with
 0 indicating Sunday and 3 indicating Wednesday.  $yday is the day of
-the year, in the range C<0..364> (or C<0..365> in leap years.)
+the year, in the range C<0..364> (or C<0..365> in leap years).  $isdst
+is always C<0>.
 
 Note that the $year element is I<not> simply the last two digits of
 the year.  If you assume it is then you create non-Y2K-compliant
@@ -4373,9 +4374,9 @@ C<readdir> routine on DIRHANDLE.
 
 =item rindex STR,SUBSTR
 
-Works just like index() except that it returns the position of the LAST
+Works just like index() except that it returns the position of the I<last>
 occurrence of SUBSTR in STR.  If POSITION is specified, returns the
-last occurrence at or before that position.
+last occurrence beginning at or before that position.
 
 =item rmdir FILENAME
 
@@ -4637,8 +4638,15 @@ that doesn't implement setpriority(2).
 =item setsockopt SOCKET,LEVEL,OPTNAME,OPTVAL
 
 Sets the socket option requested.  Returns undefined if there is an
-error.  OPTVAL may be specified as C<undef> if you don't want to pass an
-argument.
+error.  Use integer constants provided by the C<Socket> module for
+LEVEL and OPNAME.  Values for LEVEL can also be obtained from
+getprotobyname.  OPTVAL might either be a packed string or an integer.
+An integer OPTVAL is shorthand for pack("i", OPTVAL).
+
+An example disabling the Nagle's algorithm for a socket:
+
+    use Socket qw(IPPROTO_TCP TCP_NODELAY);
+    setsockopt($socket, IPPROTO_TCP, TCP_NODELAY, 1);
 
 =item shift ARRAY
 
@@ -5200,12 +5208,13 @@ For example:
 
 =item vector flag
 
-The vector flag C<v>, optionally specifying the join string to use.
-This flag tells perl to interpret the supplied string as a vector
-of integers, one for each character in the string, separated by
-a given string (a dot C<.> by default). This can be useful for
-displaying ordinal values of characters in arbitrary strings:
+This flag tells perl to interpret the supplied string as a vector of
+integers, one for each character in the string. Perl applies the format to
+each integer in turn, then joins the resulting strings with a separator (a
+dot C<.> by default). This can be useful for displaying ordinal values of
+characters in arbitrary strings:
 
+  printf "%vd", "AB\x{100}";           # prints "65.66.256"
   printf "version is v%vd\n", $^V;     # Perl's version
 
 Put an asterisk C<*> before the C<v> to override the string to
@@ -6211,10 +6220,11 @@ deleted.
     unlink @goners;
     unlink <*.bak>;
 
-Note: C<unlink> will not delete directories unless you are superuser and
-the B<-U> flag is supplied to Perl.  Even if these conditions are
+Note: C<unlink> will not attempt to delete directories unless you are superuser
+and the B<-U> flag is supplied to Perl.  Even if these conditions are
 met, be warned that unlinking a directory can inflict damage on your
-filesystem.  Use C<rmdir> instead.
+filesystem.  Finally, using C<unlink> on directories is not supported on 
+many operating systems.  Use C<rmdir> instead.
 
 If LIST is omitted, uses C<$_>.
 

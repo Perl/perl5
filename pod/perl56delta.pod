@@ -165,13 +165,13 @@ as requiring an automatic lock() when it is entered, you had to declare
 that with a C<use attrs> pragma in the body of the subroutine.
 That can now be accomplished with declaration syntax, like this:
 
-    sub mymethod : locked method ;
+    sub mymethod : locked method;
     ...
     sub mymethod : locked method {
 	...
     }
 
-    sub othermethod :locked :method ;
+    sub othermethod :locked :method;
     ...
     sub othermethod :locked :method {
 	...

@@ -1222,7 +1222,7 @@ Someday, perl will have a switch to cache-on-demand the string
 representation of a compiled piece of code, I hope.  If you have prior
 knowledge of all the code refs that your data structures are likely
 to have, you can use the C<Seen> method to pre-seed the internal reference
-table and make the dumped output point to them, instead.  See L<EXAMPLES>
+table and make the dumped output point to them, instead.  See L</EXAMPLES>
 above.
 
 The C<Useqq> and C<Deparse> flags makes Dump() run slower, since the

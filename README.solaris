@@ -508,6 +508,19 @@ make sure that it includes the directory with the 'ar' command.  This
 is a common problem on Solaris, where 'ar' is in the /usr/ccs/bin/
 directory.
 
+=item warning: dead part of constant expression is nonconstant
+
+If you are using the Sun Studio 10 compilers ('cc -V' reports "Sun C 5.7") you
+may see lots of these errors while building perl.  This is an erroneous warning
+from the compiler, if you are interested in the details the Sun bug id is
+6344975.  The warnings can safely be ignored, but if they bother you they may
+be suppressed by adding "-Accflags=-erroff=E_DEAD_NONCONST" to your Configure
+command-line.  Note however that earlier versions of the compiler don't have the
+ability to report this warning and will complain about a bad message tag if you
+specify that you want the compiler to suppress the warning.  Note also that the
+erroff option embedded into Config.pm and will be used for building any XSUB
+modules post-install.
+
 =back
 
 =head1 MAKE TEST
@@ -688,7 +701,3 @@ drawing heavily on advice from Alan Burlison, Nick Ing-Simmons, Tim Bunce,
 and many other Solaris users over the years.
 
 Please report any errors, updates, or suggestions to F<perlbug@perl.org>.
-
-=head1 LAST MODIFIED
-
-$Id: README.solaris,v 1.4 2000/11/11 20:29:58 doughera Exp $

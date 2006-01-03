@@ -1127,7 +1127,7 @@ references are disallowed.  See L<perlref>.
 
 (F) The compiler tried to interpret a bracketed expression as a
 subscript.  But to the left of the brackets was an expression that
-didn't look like an array reference, or anything else subscriptable.
+didn't look like a hash or array reference, or anything else subscriptable.
 
 =item Can't use \%c to mean $%c in expression
 
@@ -4205,7 +4205,7 @@ L<perlref> for more on this.
 This warning will not be issued for numerical constants equal to 0 or 1
 since they are often used in statements like
 
-    1 while sub_with_side_effects() ;
+    1 while sub_with_side_effects();
 
 String constants that would normally evaluate to 0 or 1 are warned
 about.

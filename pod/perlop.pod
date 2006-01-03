@@ -516,9 +516,12 @@ As a scalar operator:
 
     if (101 .. 200) { print; } # print 2nd hundred lines, short for
                                #   if ($. == 101 .. $. == 200) ...
-    next line if (1 .. /^$/);  # skip header lines, short for
+
+    next LINE if (1 .. /^$/);  # skip header lines, short for
                                #   ... if ($. == 1 .. /^$/);
-    s/^/> / if (/^$/ .. eof());	# quote body
+                               # (typically in a loop labeled LINE)
+
+    s/^/> / if (/^$/ .. eof());  # quote body
 
     # parse mail messages
     while (<>) {
@@ -541,16 +544,14 @@ the two range operators:
               "1  - Baz",
               "   - Quux");
 
-    foreach(@lines)
-    {
-        if (/0/ .. /1/)
-        {
+    foreach (@lines) {
+        if (/0/ .. /1/) {
             print "$_\n";
         }
     }
 
-This program will print only the line containing "Bar". If 
-the range operator is changed to C<...>, it will also print the 
+This program will print only the line containing "Bar". If
+the range operator is changed to C<...>, it will also print the
 "Baz" line.
 
 And now some examples as a list operator:
@@ -641,7 +642,7 @@ The following are recognized:
     **=    +=    *=    &=    <<=    &&=
            -=    /=    |=    >>=    ||=
            .=    %=    ^=
-	         x=
+                 x=
 
 Although these are grouped by family, they all have the precedence
 of assignment.
@@ -783,7 +784,7 @@ function as operators, providing various kinds of interpolating and
 pattern matching capabilities.  Perl provides customary quote characters
 for these behaviors, but also provides a way for you to choose your
 quote character for any of them.  In the following table, a C<{}> represents
-any pair of delimiters you choose.  
+any pair of delimiters you choose.
 
     Customary  Generic        Meaning	     Interpolates
 	''	 q{}	      Literal		  no
@@ -800,11 +801,11 @@ any pair of delimiters you choose.
 
 Non-bracketing delimiters use the same character fore and aft, but the four
 sorts of brackets (round, angle, square, curly) will all nest, which means
-that 
+that
 
-	q{foo{bar}baz} 
+	q{foo{bar}baz}
 
-is the same as 
+is the same as
 
 	'foo{bar}baz'
 
@@ -2093,8 +2094,8 @@ you're supplying bitstrings: If an operand is a number, that will imply
 a B<numeric> bitwise operation.  You may explicitly show which type of
 operation you intend by using C<""> or C<0+>, as in the examples below.
 
-    $foo =  150  |  105 ;	# yields 255  (0x96 | 0x69 is 0xFF)
-    $foo = '150' |  105 ;	# yields 255
+    $foo =  150  |  105;	# yields 255  (0x96 | 0x69 is 0xFF)
+    $foo = '150' |  105;	# yields 255
     $foo =  150  | '105';	# yields 255
     $foo = '150' | '105';	# yields string '155' (under ASCII)
 

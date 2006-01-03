@@ -738,8 +738,6 @@ supports dynamic loading, you can also test static loading with
 You can also hand-tweak your config.h to try out different #ifdef
 branches.
 
-=head2 Other tests
-
 =over 4
 
 =item CHECK_FORMAT

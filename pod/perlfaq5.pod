@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.38 $, $Date: 2005/10/13 19:49:13 $)
+perlfaq5 - Files and Formats ($Revision: 1.42 $, $Date: 2005/12/31 00:54:37 $)
 
 =head1 DESCRIPTION
 
@@ -56,7 +56,7 @@ thing you do with them.  You can use IO::Handle:
 or IO::Socket:
 
     use IO::Socket;		  # this one is kinda a pipe?
-	my $sock = IO::Socket::INET->new( 'www.example.com:80' ) ;
+	my $sock = IO::Socket::INET->new( 'www.example.com:80' );
 
     $sock->autoflush();
 
@@ -499,7 +499,7 @@ only version of open() and so it is prevalent in old code and books.
 Unless you have a particular reason to use the two argument form you
 should use the three argument form of open() which does not treat any
 charcters in the filename as special.
-     
+
 	open FILE, "<", "  file  ";  # filename is "   file   "
 	open FILE, ">", ">file";     # filename is ">file"
 
@@ -663,7 +663,7 @@ Don't forget them or you'll be quite sorry.
 
 If you want to retrieve the time at which the file was last
 read, written, or had its meta-data (owner, etc) changed,
-you use the B<-M>, B<-A>, or B<-C> file test operations as
+you use the B<-A>, B<-M>, or B<-C> file test operations as
 documented in L<perlfunc>.  These retrieve the age of the
 file (measured against the start-time of your program) in
 days as a floating point number. Some platforms may not have
@@ -1071,7 +1071,7 @@ If your array contains lines, just print them:
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2006 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

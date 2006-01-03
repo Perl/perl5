@@ -216,8 +216,8 @@ changed.  The current state of the main trunk of repository, and patches
 that describe the individual changes that have happened since the last
 public release are available at this location:
 
-    http://public.activestate.com/gsar/APC/
-    ftp://ftp.linux.activestate.com/pub/staff/gsar/APC/
+    http://public.activestate.com/pub/apc/
+    ftp://public.activestate.com/pub/apc/
 
 If you're looking for a particular change, or a change that affected
 a particular set of files, you may find the B<Perl Repository Browser>
@@ -256,7 +256,7 @@ Presuming you are in the directory where your perl source resides
 and you have rsync installed and available, you can "upgrade" to
 the bleadperl using:
 
- # rsync -avz rsync://ftp.linux.activestate.com/perl-current/ .
+ # rsync -avz rsync://public.activestate.com/perl-current/ .
 
 This takes care of updating every single item in the source tree to
 the latest applied patch level, creating files that are new (to your
@@ -267,7 +267,7 @@ Note that this will not delete any files that were in '.' before
 the rsync. Once you are sure that the rsync is running correctly,
 run it with the --delete and the --dry-run options like this:
 
- # rsync -avz --delete --dry-run rsync://ftp.linux.activestate.com/perl-current/ .
+ # rsync -avz --delete --dry-run rsync://public.activestate.com/perl-current/ .
 
 This will I<simulate> an rsync run that also deletes files not
 present in the bleadperl master copy. Observe the results from
@@ -354,7 +354,7 @@ yourself to the source files.
 Presuming you are in a directory where your patches reside, you can
 get them in sync with
 
- # rsync -avz rsync://ftp.linux.activestate.com/perl-current-diffs/ .
+ # rsync -avz rsync://public.activestate.com/perl-current-diffs/ .
 
 This makes sure the latest available patch is downloaded to your
 patch directory.
@@ -362,7 +362,7 @@ patch directory.
 It's then up to you to apply these patches, using something like
 
  # last=`ls -t *.gz | sed q`
- # rsync -avz rsync://ftp.linux.activestate.com/perl-current-diffs/ .
+ # rsync -avz rsync://public.activestate.com/perl-current-diffs/ .
  # find . -name '*.gz' -newer $last -exec gzcat {} \; >blead.patch
  # cd ../perl-current
  # patch -p1 -N <../perl-current-diffs/blead.patch

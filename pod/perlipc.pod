@@ -1012,7 +1012,7 @@ differ from the system on which it's being run:
 	my $rtime = '    ';
 	read(SOCKET, $rtime, 4);
 	close(SOCKET);
-	my $histime = unpack("N", $rtime) - $SECS_of_70_YEARS ;
+	my $histime = unpack("N", $rtime) - $SECS_of_70_YEARS;
 	printf "%8d %s\n", $histime - time, ctime($histime);
     }
 
@@ -1516,7 +1516,7 @@ with TCP, you'd have to use a different socket handle for each host.
 	($hispaddr = recv(SOCKET, $rtime, 4, 0)) 	|| die "recv: $!";
 	($port, $hisiaddr) = sockaddr_in($hispaddr);
 	$host = gethostbyaddr($hisiaddr, AF_INET);
-	$histime = unpack("N", $rtime) - $SECS_of_70_YEARS ;
+	$histime = unpack("N", $rtime) - $SECS_of_70_YEARS;
 	printf "%-12s ", $host;
 	printf "%8d %s\n", $histime - time, scalar localtime($histime);
 	$count--;

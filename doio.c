@@ -371,7 +371,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 #ifdef USE_SFIO
 			    /* sfio fails to clear error on next
 			       sfwrite, contrary to documentation.
-			       -- Nick Clark */
+			       -- Nicholas Clark */
 			    if (PerlIO_seek(that_fp, 0, SEEK_CUR) == -1)
 				PerlIO_clearerr(that_fp);
 #endif
