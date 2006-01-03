@@ -3353,6 +3353,11 @@ are outside the range which can be represented by integers internally.
 One possible workaround is to force Perl to use magical string increment
 by prepending "0" to your numbers.
 
+=item readdir() attempted on invalid dirhandle %s
+
+(W io) The dirhandle you're reading from is either closed or not really 
+a dirhandle.  Check your control flow.
+
 =item readline() on closed filehandle %s
 
 (W closed) The filehandle you're reading from got itself closed sometime

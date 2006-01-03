@@ -3689,8 +3689,13 @@ PP(pp_readdir)
     register const Direntry_t *dp;
     register IO * const io = GvIOn(gv);
 
-    if (!io || !IoDIRP(io))
-	goto nope;
+    if (!io || !IoDIRP(io)) {
+        if(ckWARN(WARN_IO)) {
+            Perl_warner(aTHX_ packWARN(WARN_IO),
+                "readdir() attempted on invalid dirhandle %s", GvENAME(gv));
+        }
+        goto nope;
+    }
 
     do {
         dp = (Direntry_t *)PerlDir_read(IoDIRP(io));
