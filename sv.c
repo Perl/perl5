@@ -1124,8 +1124,11 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 
 #ifndef NV_ZERO_IS_ALLBITS_ZERO
 	/* If NV 0.0 is stores as all bits 0 then Zero() already creates a
-	 * correct 0.0 for us. */
-	if (old_type_details->zero_nv)
+	 * correct 0.0 for us.  Otherwise, if the old body didn't have an
+	 * NV slot, but the new one does, then we need to initialise the
+	 * freshly created NV slot with whatever the correct bit pattern is
+	 * for 0.0  */
+	if (old_type_details->zero_nv && !new_type_details->zero_nv)
 	    SvNV_set(sv, 0);
 #endif
 
