@@ -2,7 +2,7 @@
 
 # $RCSfile: mod.t,v $$Revision: 4.1 $$Date: 92/08/07 18:27:11 $
 
-print "1..12\n";
+print "1..13\n";
 
 print "ok 1\n" if 1;
 print "not ok 1\n" unless 1;
@@ -52,3 +52,6 @@ print "not ok 11\n" unless $x < 0;
 print "ok 12\n" unless $x > 0;
 print "not ok 12\n" if $x > 0;
 
+# This used to cause a segfault
+$x = "".("".do{"foo" for (1)});
+print "ok 13\n";

@@ -66,17 +66,22 @@ static I32 utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 
 /* #define LEX_NOTPARSING		11 is done in perl.h. */
 
-#define LEX_NORMAL		10
-#define LEX_INTERPNORMAL	 9
-#define LEX_INTERPCASEMOD	 8
-#define LEX_INTERPPUSH		 7
-#define LEX_INTERPSTART		 6
-#define LEX_INTERPEND		 5
-#define LEX_INTERPENDMAYBE	 4
-#define LEX_INTERPCONCAT	 3
-#define LEX_INTERPCONST		 2
-#define LEX_FORMLINE		 1
-#define LEX_KNOWNEXT		 0
+#define LEX_NORMAL		10 /* normal code (ie not within "...")     */
+#define LEX_INTERPNORMAL	 9 /* code within a string, eg "$foo[$x+1]" */
+#define LEX_INTERPCASEMOD	 8 /* expecting a \U, \Q or \E etc          */
+#define LEX_INTERPPUSH		 7 /* starting a new sublex parse level     */
+#define LEX_INTERPSTART		 6 /* expecting the start of a $var         */
+
+				   /* at end of code, eg "$x" followed by:  */
+#define LEX_INTERPEND		 5 /* ... eg not one of [, { or ->          */
+#define LEX_INTERPENDMAYBE	 4 /* ... eg one of [, { or ->              */
+
+#define LEX_INTERPCONCAT	 3 /* expecting anything, eg at start of
+				        string or after \E, $foo, etc       */
+#define LEX_INTERPCONST		 2 /* NOT USED */
+#define LEX_FORMLINE		 1 /* expecting a format line               */
+#define LEX_KNOWNEXT		 0 /* next token known; just return it      */
+
 
 #ifdef DEBUGGING
 static const char* const lex_state_names[] = {
@@ -325,23 +330,33 @@ S_tokereport(pTHX_ const char* s, I32 rv)
 	    Perl_sv_catpvf(aTHX_ report, "(pval=\"%s\")", yylval.pval);
 	    break;
 	case TOKENTYPE_OPVAL:
-	    if (yylval.opval)
+	    if (yylval.opval) {
 		Perl_sv_catpvf(aTHX_ report, "(opval=op_%s)",
 				    PL_op_name[yylval.opval->op_type]);
+		if (yylval.opval->op_type == OP_CONST) {
+		    Perl_sv_catpvf(aTHX_ report, " %s",
+			SvPEEK(cSVOPx_sv(yylval.opval)));
+		}
+
+	    }
 	    else
 		Perl_sv_catpv(aTHX_ report, "(opval=null)");
 	    break;
 	}
-        Perl_sv_catpvf(aTHX_ report, " at line %d [", CopLINE(PL_curcop));
-        if (s - PL_bufptr > 0)
-            sv_catpvn(report, PL_bufptr, s - PL_bufptr);
-        else {
-            if (PL_oldbufptr && *PL_oldbufptr)
-                sv_catpv(report, PL_tokenbuf);
-        }
-        PerlIO_printf(Perl_debug_log, "### %s]\n", SvPV_nolen_const(report));
+        PerlIO_printf(Perl_debug_log, "### %s\n\n", SvPV_nolen_const(report));
     };
     return (int)rv;
+}
+
+
+/* print the buffer with suitable escapes */
+
+STATIC void
+S_printbuf(pTHX_ const char* fmt, const char* s)
+{
+    SV* tmp = newSVpvn("", 0);
+    PerlIO_printf(Perl_debug_log, fmt, pv_display(tmp, s, strlen(s), 0, 60));
+    SvREFCNT_dec(tmp);
 }
 
 #endif
@@ -672,6 +687,43 @@ S_incline(pTHX_ char *s)
     ch = *t;
     *t = '\0';
     if (t - s > 0) {
+#ifndef USE_ITHREADS
+	const char *cf = CopFILE(PL_curcop);
+	if (cf && strlen(cf) > 7 && strnEQ(cf, "(eval ", 6)) {
+	    /* must copy *{"::_<(eval N)[oldfilename:L]"}
+	     * to *{"::_<newfilename"} */
+	    char smallbuf[256], smallbuf2[256];
+	    char *tmpbuf, *tmpbuf2;
+	    GV **gvp, *gv2;
+	    STRLEN tmplen = strlen(cf);
+	    STRLEN tmplen2 = strlen(s);
+	    if (tmplen + 3 < sizeof smallbuf)
+		tmpbuf = smallbuf;
+	    else
+		Newx(tmpbuf, tmplen + 3, char);
+	    if (tmplen2 + 3 < sizeof smallbuf2)
+		tmpbuf2 = smallbuf2;
+	    else
+		Newx(tmpbuf2, tmplen2 + 3, char);
+	    tmpbuf[0] = tmpbuf2[0] = '_';
+	    tmpbuf[1] = tmpbuf2[1] = '<';
+	    memcpy(tmpbuf + 2, cf, ++tmplen);
+	    memcpy(tmpbuf2 + 2, s, ++tmplen2);
+	    ++tmplen; ++tmplen2;
+	    gvp = (GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, FALSE);
+	    if (gvp) {
+		gv2 = *(GV**)hv_fetch(PL_defstash, tmpbuf2, tmplen2, TRUE);
+		if (!isGV(gv2))
+		    gv_init(gv2, PL_defstash, tmpbuf2, tmplen2, FALSE);
+		/* adjust ${"::_<newfilename"} to store the new file name */
+		GvSV(gv2) = newSVpvn(tmpbuf2 + 2, tmplen2 - 2);
+		GvHV(gv2) = (HV*)SvREFCNT_inc(GvHV(*gvp));
+		GvAV(gv2) = (AV*)SvREFCNT_inc(GvAV(*gvp));
+	    }
+	    if (tmpbuf != smallbuf) Safefree(tmpbuf);
+	    if (tmpbuf2 != smallbuf2) Safefree(tmpbuf2);
+	}
+#endif
 	CopFILE_free(PL_curcop);
 	CopFILE_set(PL_curcop, s);
     }
@@ -2356,8 +2408,13 @@ Perl_yylex(pTHX)
     I32 orig_keyword = 0;
 
     DEBUG_T( {
-	PerlIO_printf(Perl_debug_log, "### LEX_%s\n",
-					lex_state_names[PL_lex_state]);
+	SV* tmp = newSVpvn("", 0);
+	PerlIO_printf(Perl_debug_log, "### %"IVdf":LEX_%s/X%s %s\n",
+	    (IV)CopLINE(PL_curcop),
+	    lex_state_names[PL_lex_state],
+	    exp_name[PL_expect],
+	    pv_display(tmp, s, strlen(s), 0, 60));
+	SvREFCNT_dec(tmp);
     } );
     /* check if there's an identifier for us to look at */
     if (PL_pending_ident)
@@ -2381,10 +2438,6 @@ Perl_yylex(pTHX)
 	    PL_expect = PL_lex_expect;
 	    PL_lex_defer = LEX_NORMAL;
 	}
-	DEBUG_T({ PerlIO_printf(Perl_debug_log,
-              "### Next token after '%s' was known, type %"IVdf"\n", PL_bufptr,
-              (IV)PL_nexttype[PL_nexttoke]); });
-
 	return REPORT(PL_nexttype[PL_nexttoke]);
 
     /* interpolated case modifiers like \L \U, including \Q and \E.
@@ -2416,7 +2469,7 @@ Perl_yylex(pTHX)
 	}
 	else {
 	    DEBUG_T({ PerlIO_printf(Perl_debug_log,
-              "### Saw case modifier at '%s'\n", PL_bufptr); });
+              "### Saw case modifier\n"); });
 	    s = PL_bufptr + 1;
 	    if (s[1] == '\\' && s[2] == 'E') {
 	        PL_bufptr = s + 3;
@@ -2469,7 +2522,7 @@ Perl_yylex(pTHX)
 	if (PL_bufptr == PL_bufend)
 	    return REPORT(sublex_done());
 	DEBUG_T({ PerlIO_printf(Perl_debug_log,
-              "### Interpolated variable at '%s'\n", PL_bufptr); });
+              "### Interpolated variable\n"); });
 	PL_expect = XTERM;
 	PL_lex_dojoin = (*PL_bufptr == '@');
 	PL_lex_state = LEX_INTERPNORMAL;
@@ -2566,10 +2619,6 @@ Perl_yylex(pTHX)
     s = PL_bufptr;
     PL_oldoldbufptr = PL_oldbufptr;
     PL_oldbufptr = s;
-    DEBUG_T( {
-	PerlIO_printf(Perl_debug_log, "### Tokener expecting %s at [%s]\n",
-		      exp_name[PL_expect], s);
-    } );
 
   retry:
     switch (*s) {
@@ -2993,8 +3042,8 @@ Perl_yylex(pTHX)
 
 	    if (strnEQ(s,"=>",2)) {
 		s = force_word(PL_bufptr,WORD,FALSE,FALSE,FALSE);
-                DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                            "### Saw unary minus before =>, forcing word '%s'\n", s);
+                DEBUG_T( { S_printbuf(aTHX_
+			"### Saw unary minus before =>, forcing word %s\n", s);
                 } );
 		OPERATOR('-');		/* unary minus */
 	    }
@@ -3039,7 +3088,7 @@ Perl_yylex(pTHX)
 	    if (ftst) {
 		PL_last_lop_op = (OPCODE)ftst;
 		DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                        "### Saw file test %c\n", (int)ftst);
+                        "### Saw file test %c\n", (int)tmp);
 		} );
 		FTST(ftst);
 	    }
@@ -3832,18 +3881,14 @@ Perl_yylex(pTHX)
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
 	s = scan_num(s, &yylval);
-        DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                    "### Saw number before '%s'\n", s);
-        } );
+	DEBUG_T( { S_printbuf(aTHX_ "### Saw number in %s\n", s); } );
 	if (PL_expect == XOPERATOR)
 	    no_op("Number",s);
 	TERM(THING);
 
     case '\'':
 	s = scan_str(s,FALSE,FALSE);
-        DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                    "### Saw string before '%s'\n", s);
-        } );
+	DEBUG_T( { S_printbuf(aTHX_ "### Saw string before %s\n", s); } );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
@@ -3860,9 +3905,7 @@ Perl_yylex(pTHX)
 
     case '"':
 	s = scan_str(s,FALSE,FALSE);
-        DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                    "### Saw string before '%s'\n", s);
-        } );
+	DEBUG_T( { S_printbuf(aTHX_ "### Saw string before %s\n", s); } );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
@@ -3887,9 +3930,7 @@ Perl_yylex(pTHX)
 
     case '`':
 	s = scan_str(s,FALSE,FALSE);
-        DEBUG_T( { PerlIO_printf(Perl_debug_log,
-                    "### Saw backtick string before '%s'\n", s);
-        } );
+	DEBUG_T( { S_printbuf(aTHX_ "### Saw backtick string before %s\n", s); } );
 	if (PL_expect == XOPERATOR)
 	    no_op("Backticks",s);
 	if (!s)
@@ -5445,7 +5486,7 @@ S_pending_ident(pTHX)
     PL_pending_ident = 0;
 
     DEBUG_T({ PerlIO_printf(Perl_debug_log,
-          "### Tokener saw identifier '%s'\n", PL_tokenbuf); });
+          "### Pending identifier '%s'\n", PL_tokenbuf); });
 
     /* if we're in a my(), we can't allow dynamics here.
        $foo'bar has already been turned into $foo::bar, so

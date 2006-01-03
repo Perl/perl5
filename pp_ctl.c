@@ -1665,13 +1665,24 @@ PP(pp_dbstate)
 	hasargs = 0;
 	SPAGAIN;
 
-	push_return(PL_op->op_next);
-	PUSHBLOCK(cx, CXt_SUB, SP);
-	PUSHSUB_DB(cx);
-	CvDEPTH(cv)++;
-	SAVECOMPPAD();
-	PAD_SET_CUR_NOSAVE(CvPADLIST(cv), 1);
-	RETURNOP(CvSTART(cv));
+	if (CvXSUB(cv)) {
+	    CvDEPTH(cv)++;
+	    PUSHMARK(SP);
+	    (void)(*CvXSUB(cv))(aTHX_ cv);
+
+	    CvDEPTH(cv)--;
+	    FREETMPS;
+	    LEAVE;
+	    return NORMAL;
+	} else {
+	    push_return(PL_op->op_next);
+	    PUSHBLOCK(cx, CXt_SUB, SP);
+	    PUSHSUB_DB(cx);
+	    CvDEPTH(cv)++;
+	    SAVECOMPPAD();
+	    PAD_SET_CUR_NOSAVE(CvPADLIST(cv), 1);
+	    RETURNOP(CvSTART(cv));
+	}
     }
     else
 	return NORMAL;
