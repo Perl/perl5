@@ -19,7 +19,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec;
 use vars qw($VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 286 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 331 $,4)/100;
 
 =head1 NAME
 
@@ -432,6 +432,8 @@ Your choice: ",$default);
 	prompt("Do you want to use a different make command for 'make install'?
 Cautious people will probably prefer:
 
+    su root -c make
+or
     sudo make
 or
     /path1/to/sudo -u admin_account /path2/to/make
@@ -478,6 +480,8 @@ Your choice: ",$default);
 	prompt("Do you want to use a different command for './Build install'?
 Sudo users will probably prefer:
 
+    su root -c ./Build
+or
     sudo ./Build
 or
     /path1/to/sudo -u admin_account ./Build
