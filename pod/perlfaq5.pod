@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 1.40 $, $Date: 2005/11/10 16:06:07 $)
+perlfaq5 - Files and Formats ($Revision: 1.42 $, $Date: 2005/12/31 00:54:37 $)
 
 =head1 DESCRIPTION
 
@@ -516,7 +516,7 @@ only version of open() and so it is prevalent in old code and books.
 Unless you have a particular reason to use the two argument form you
 should use the three argument form of open() which does not treat any
 charcters in the filename as special.
-     
+
 	open FILE, "<", "  file  ";  # filename is "   file   "
 	open FILE, ">", ">file";     # filename is ">file"
 
@@ -1106,7 +1106,7 @@ If your array contains lines, just print them:
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2006 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

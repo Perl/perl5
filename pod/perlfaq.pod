@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq - frequently asked questions about Perl ($Date: 2005/11/10 00:36:18 $)
+perlfaq - frequently asked questions about Perl ($Date: 2005/12/30 15:04:07 $)
 
 =head1 DESCRIPTION
 
@@ -45,7 +45,7 @@ Several people have contributed answers, corrections, and comments.
 
 =head1 Author and Copyright Information
 
-Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and 
+Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and
 other contributors noted in the answers.
 
 All rights reserved.

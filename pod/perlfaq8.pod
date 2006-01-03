@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 1.25 $, $Date: 2005/06/04 04:12:40 $)
+perlfaq8 - System Interaction ($Revision: 1.27 $, $Date: 2005/12/31 00:54:37 $)
 
 =head1 DESCRIPTION
 
@@ -35,25 +35,26 @@ How you access/control keyboards, screens, and pointing devices
 
 =item Keyboard
 
-    Term::Cap			Standard perl distribution
-    Term::ReadKey		CPAN
-    Term::ReadLine::Gnu		CPAN
-    Term::ReadLine::Perl	CPAN
-    Term::Screen		CPAN
+	Term::Cap               Standard perl distribution
+	Term::ReadKey           CPAN
+	Term::ReadLine::Gnu     CPAN
+	Term::ReadLine::Perl    CPAN
+	Term::Screen            CPAN
 
 =item Screen
 
-    Term::Cap			Standard perl distribution
-    Curses			CPAN
-    Term::ANSIColor		CPAN
+	Term::Cap               Standard perl distribution
+	Curses                  CPAN
+	Term::ANSIColor         CPAN
 
 =item Mouse
 
-    Tk				CPAN
+	Tk                      CPAN
 
 =back
 
-Some of these specific cases are shown below.
+Some of these specific cases are shown as examples in other answers
+in this section of the perlfaq.
 
 =head2 How do I print something out in color?
 
@@ -1252,7 +1253,7 @@ but other times it is not.  Modern programs C<use Socket;> instead.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2006 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

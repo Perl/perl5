@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.54 $, $Date: 2005/11/17 17:22:02 $)
+perlfaq3 - Programming Tools ($Revision: 1.56 $, $Date: 2005/12/31 00:54:37 $)
 
 =head1 DESCRIPTION
 
@@ -85,11 +85,11 @@ with File::Find which is part of the standard library.
     my @files;
 
     find(
-      sub { 
-      	push @files, $File::Find::name 
-      		if -f $File::Find::name && /\.pm$/ 
+      sub {
+      	push @files, $File::Find::name
+      		if -f $File::Find::name && /\.pm$/
       	},
-      	
+
       @INC
       );
 
@@ -941,7 +941,7 @@ solved their problems.
 
 You might not need all the power of XS. The Inline::C module lets
 you put C code directly in your Perl source. It handles all the
-magic to make it work. You still have to learn at least some of 
+magic to make it work. You still have to learn at least some of
 the perl API but you won't have to deal with the complexity of the
 XS support files.
 
@@ -977,7 +977,7 @@ information, see L<ExtUtils::MakeMaker>.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2006 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

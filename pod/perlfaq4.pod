@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.71 $, $Date: 2005/11/23 07:46:45 $)
+perlfaq4 - Data Manipulation ($Revision: 1.73 $, $Date: 2005/12/31 00:54:37 $)
 
 =head1 DESCRIPTION
 
@@ -484,20 +484,20 @@ Use one of the Date modules. The C<DateTime> module makes it simple, and
 give you the same time of day, only the day before.
 
 	use DateTime;
-	
+
 	my $yesterday = DateTime->now->subtract( days => 1 );
-	
+
 	print "Yesterday was $yesterday\n";
 
 You can also use the C<Date::Calc> module using its Today_and_Now
 function.
 
 	use Date::Calc qw( Today_and_Now Add_Delta_DHMS );
-	
+
 	my @date_time = Add_Delta_DHMS( Today_and_Now(), -1, 0, 0, 0 );
-	
+
 	print "@date\n";
-	
+
 Most people try to use the time rather than the calendar to figure out
 dates, but that assumes that days are twenty-four hours each.  For
 most people, there are two days a year when they aren't: the switch to
@@ -589,11 +589,11 @@ does not show up next to itself
 
 This is documented in L<perlref>, and although it's not the easiest
 thing to read, it does work. In each of these examples, we call the
-function inside the braces of used to dereference a reference. If we
+function inside the braces used to dereference a reference. If we
 have a more than one return value, we can construct and dereference an
 anonymous array. In this case, we call the function in list context.
 
-    print "The time values are @{ [localtime] }.\n";
+	print "The time values are @{ [localtime] }.\n";
 
 If we want to call the function in scalar context, we have to do a bit
 more work. We can really have any code we like inside the braces, so
@@ -601,18 +601,26 @@ we simply have to end with the scalar reference, although how you do
 that is up to you, and you can use code inside the braces.
 
 	print "The time is ${\(scalar localtime)}.\n"
-	
+
 	print "The time is ${ my $x = localtime; \$x }.\n";
-	
+
 If your function already returns a reference, you don't need to create
 the reference yourself.
 
 	sub timestamp { my $t = localtime; \$t }
-	
+
 	print "The time is ${ timestamp() }.\n";
-	
-In most cases, it is probably easier to simply use string
-concatenation, which also forces scalar context.
+
+The C<Interpolation> module can also do a lot of magic for you. You can
+specify a variable name, in this case C<E>, to set up a tied hash that
+does the interpolation for you. It has several other methods to do this
+as well.
+
+	use Interpolation E => 'eval';
+	print "The time values are $E{localtime()}.\n";
+
+In most cases, it is probably easier to simply use string concatenation,
+which also forces scalar context.
 
 	print "The time is " . localtime . ".\n";
 
@@ -1277,7 +1285,7 @@ If you want to actually extract the matching elements, simply use grep in
 list context.
 
 	my @matches = grep $_ eq $whatever, @array;
-	
+
 =head2 How do I compute the difference of two arrays?  How do I compute the intersection of two arrays?
 
 Use a hash.  Here's code to do both and more.  It assumes that
@@ -1795,25 +1803,25 @@ in ASCIIbetical order. Once we have the keys, we can go through them to
 create a report which lists the keys in ASCIIbetical order.
 
 	my @keys = sort { $a cmp $b } keys %hash;
-	
+
 	foreach my $key ( @keys )
 		{
 		printf "%-20s %6d\n", $key, $hash{$value};
 		}
 
-We could get more fancy in the C<sort()> block though. Instead of 
+We could get more fancy in the C<sort()> block though. Instead of
 comparing the keys, we can compute a value with them and use that
-value as the comparison.  
+value as the comparison.
 
 For instance, to make our report order case-insensitive, we use
-the C<\L> sequence in a double-quoted string to make everything 
+the C<\L> sequence in a double-quoted string to make everything
 lowercase. The C<sort()> block then compares the lowercased
 values to determine in which order to put the keys.
 
 	my @keys = sort { "\L$a" cmp "\L$b" } keys %hash;
-	
+
 Note: if the computation is expensive or the hash has many elements,
-you may want to look at the Schwartzian Transform to cache the 
+you may want to look at the Schwartzian Transform to cache the
 computation results.
 
 If we want to sort by the hash value instead, we use the hash key
@@ -1825,8 +1833,8 @@ are ordered by their value.
 From there we can get more complex. If the hash values are the same,
 we can provide a secondary sort on the hash key.
 
-	my @keys = sort { 
-		$hash{$a} <=> $hash{$b} 
+	my @keys = sort {
+		$hash{$a} <=> $hash{$b}
 			or
 		"\L$a" cmp "\L$b"
 		} keys %hash;
@@ -2147,7 +2155,7 @@ the PDL module from CPAN instead--it makes number-crunching easy.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2006 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

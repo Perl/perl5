@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regular Expressions ($Revision: 1.36 $, $Date: 2005/10/13 19:49:13 $)
+perlfaq6 - Regular Expressions ($Revision: 1.38 $, $Date: 2005/12/31 00:54:37 $)
 
 =head1 DESCRIPTION
 
@@ -873,9 +873,9 @@ a valid regular expression, trap the exception this way:
 
     if (eval { $line =~ /$pattern/ }) { }
 
-If all you really want to search for a string, not a pattern,
+If all you really want is to search for a string, not a pattern,
 then you should either use the index() function, which is made for
-string searching, or if you can't be disabused of using a pattern
+string searching, or, if you can't be disabused of using a pattern
 match on a non-pattern, then be sure to use C<\Q>...C<\E>, documented
 in L<perlre>.
 
@@ -889,7 +889,7 @@ in L<perlre>.
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2006 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it

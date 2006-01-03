@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 1.26 $, $Date: 2005/11/21 17:43:13 $)
+perlfaq9 - Networking ($Revision: 1.28 $, $Date: 2005/12/31 00:54:37 $)
 
 =head1 DESCRIPTION
 
@@ -606,14 +606,14 @@ in perl5.7.3, can get you the fully qualified domain name (FQDN), the host
 name, or the domain name.
 
 	use Net::Domain qw(hostname hostfqdn hostdomain);
-	
+
 	my $host = hostfqdn();
 
 The C<Sys::Hostname> module, included in the standard distribution since
 perl5.6, can also get the hostname.
 
 	use Sys::Hostname;
-	
+
 	$host = hostname();
 
 To get the IP address, you can use the C<gethostbyname> built-in function
@@ -622,8 +622,8 @@ form (a.b.c.d) that most people expect, use the C<inet_ntoa> function
 from the <Socket> module, which also comes with perl.
 
     use Socket;
-    
-    my $address = inet_ntoa( 
+
+    my $address = inet_ntoa(
     	scalar gethostbyname( $host || 'localhost' )
     	);
 
@@ -649,7 +649,7 @@ http://search.cpan.org/search?query=RPC&mode=all ).
 
 =head1 AUTHOR AND COPYRIGHT
 
-Copyright (c) 1997-2005 Tom Christiansen, Nathan Torkington, and
+Copyright (c) 1997-2006 Tom Christiansen, Nathan Torkington, and
 other authors as noted. All rights reserved.
 
 This documentation is free; you can redistribute it and/or modify it
