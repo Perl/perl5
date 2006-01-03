@@ -118,7 +118,7 @@ use Carp;
 use Test::More tests => ( # per-pkg tests (function ct + require_ok)
 			  40 + 16	# Data::Dumper, Digest::MD5
 			  + 511 + 233	# B::Deparse, B
-			  + 589 + 189	# POSIX, IO::Socket
+			  + 588 + 189	# POSIX, IO::Socket
 			  + 3 * ($] > 5.009)
 			  + 14 * ($] >= 5.009003)
 			  - 22);	# fudge
@@ -182,7 +182,8 @@ my $testpkgs = {
 		     /],
 		 },
 
-    POSIX => { dflt => 'constant',	# all but 252/589
+    POSIX => { dflt => 'constant',			# all but 252/589
+	       skip => [qw/ _POSIX_JOB_CONTROL /],	# platform varying
 	       perl => [qw/ import croak AUTOLOAD /],
 
 	       XS => [qw/ write wctomb wcstombs uname tzset tzname

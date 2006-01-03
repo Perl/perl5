@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.66";
+our $VERSION   = "0.67";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -950,9 +950,8 @@ sophisticated and flexible.
 
 =head1 EXAMPLE
 
-Here's an example of 2 outputs (aka 'renderings'), using the
--exec and -basic (i.e. default) formatting conventions on the same code
-snippet.
+Here's two outputs (or 'renderings'), using the -exec and -basic
+(i.e. default) formatting conventions on the same code snippet.
 
     % perl -MO=Concise,-exec -e '$a = $b + 42'
     1  <0> enter
@@ -964,21 +963,22 @@ snippet.
     7  <2> sassign vKS/2
     8  <@> leave[1 ref] vKP/REFC
 
-Each line corresponds to an opcode. The opcode marked with '*' is used
-in a few examples below.
+In this -exec rendering, each opcode is executed in the order shown.
+The add opcode, marked with '*', is discussed in more detail.
 
 The 1st column is the op's sequence number, starting at 1, and is
-displayed in base 36 by default.  This rendering is in -exec (i.e.
-execution) order.
+displayed in base 36 by default.  Here they're purely linear; the
+sequences are very helpful when looking at code with loops and
+branches.
 
 The symbol between angle brackets indicates the op's type, for
 example; <2> is a BINOP, <@> a LISTOP, and <#> is a PADOP, which is
 used in threaded perls. (see L</"OP class abbreviations">).
 
-The opname, as in B<'add[t1]'>, which may be followed by op-specific
+The opname, as in B<'add[t1]'>, may be followed by op-specific
 information in parentheses or brackets (ex B<'[t1]'>).
 
-The op-flags (ex B<'sK/2'>) follow, and are described in (L</"OP flags
+The op-flags (ex B<'sK/2'>) are described in (L</"OP flags
 abbreviations">).
 
     % perl -MO=Concise -e '$a = $b + 42'
@@ -1495,6 +1495,40 @@ variable.
 The numeric value of the OP's type, in decimal.
 
 =back
+
+=head1 One-Liner Command tips
+
+=over 4
+
+=item perl -MO=Concise,bar foo.pl
+
+Renders only bar() from foo.pl.  To see main, drop the ',bar'.  To see
+both, add ',-main'
+
+=item perl -MDigest::MD5=md5 -MO=Concise,md5 -e1
+
+Identifies md5 as an XS function.  The export is needed so that BC can
+find it in main.
+
+=item perl -MPOSIX -MO=Concise,_POSIX_ARG_MAX -e1
+
+Identifies _POSIX_ARG_MAX as a constant sub, optimized to an IV.
+Although POSIX isn't entirely consistent across platforms, this is
+likely to be present in virtually all of them.
+
+=item perl -MPOSIX -MO=Concise,a -e 'print _POSIX_SAVED_IDS'
+
+This renders a print statement, which includes a call to the function.
+It's identical to rendering a file with a use call and that single
+statement, except for the filename which appears in the nextstate ops.
+
+=item perl -MPOSIX -MO=Concise,a -e 'sub a{_POSIX_SAVED_IDS}'
+
+This is B<very> similar to previous, only the first two ops differ.  This
+subroutine rendering is more representative, insofar as a single main
+program will have many subs.
+
+
 
 =head1 Using B::Concise outside of the O framework
 

@@ -19,7 +19,7 @@ BEGIN {
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
 use Config;
 
-my $tests = 23;
+my $tests = 30;
 plan tests => $tests;
 SKIP: {
 skip "no perlio in this build", $tests unless $Config::Config{useperlio};
@@ -27,23 +27,44 @@ skip "no perlio in this build", $tests unless $Config::Config{useperlio};
 #################################
 
 use constant {		# see also t/op/gv.t line 282
-    myint => 42,
-    mystr => 'hithere',
-    myfl => 3.14159,
-    myrex => qr/foo/,
-    myglob => \*STDIN,
-    myaref => [ 1,2,3 ],
-    myhref => { a => 1 },
-    myundef => undef,
-    mysub => \&ok,
-    mysub => \&nosuch,
+    myaref	=> [ 1,2,3 ],
+    myfl	=> 1.414213,
+    myglob	=> \*STDIN,
+    myhref	=> { a	=> 1 },
+    myint	=> 42,
+    myrex	=> qr/foo/,
+    mystr	=> 'hithere',
+    mysub	=> \&ok,
+    myundef	=> undef,
+    myunsub	=> \&nosuch,
+};
+
+sub myyes() { 1==1 }
+sub myno () { return 1!=1 }
+sub pi () { 3.14159 };
+
+my $want = {	# expected types, how value renders in-line, todos (maybe)
+    myfl	=> [ 'NV', myfl ],
+    myint	=> [ 'IV', myint ],
+    mystr	=> [ 'PV', '"'.mystr.'"' ],
+    myhref	=> [ 'RV', '\\\\HASH'],
+    myundef	=> [ 'NULL', ],
+    pi		=> [ 'NV', pi ],
+    # these have todos, since they render as a bare backslash
+    myaref	=> [ 'RV', '\\\\', ' - should render as \\ARRAY' ],
+    myglob	=> [ 'RV', '\\\\', ' - should render as \\GV' ],
+    myrex	=> [ 'RV', '\\\\', ' - should render as ??' ],
+    mysub	=> [ 'RV', '\\\\', ' - should render as \\CV' ],
+    myunsub	=> [ 'RV', '\\\\', ' - should render as \\CV' ],
+    # these are not inlined, at least not per BC::Concise
+    #myyes	=> [ 'RV', ],
+    #myno	=> [ 'RV', ],
 };
 
 use constant WEEKDAYS
     => qw ( Sunday Monday Tuesday Wednesday Thursday Friday Saturday );
 
 
-sub pi () { 3.14159 };
 $::{napier} = \2.71828;	# counter-example (doesn't get optimized).
 eval "sub napier ();";
 
@@ -55,268 +76,94 @@ INIT {
 };
 
 #################################
-pass("CONSTANT SUBS RETURNING SCALARS");
+pass("RENDER CONSTANT SUBS RETURNING SCALARS");
 
-checkOptree ( name	=> 'myint() as coderef',
-	      code	=> \&myint,
-	      noanchors => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
- is a constant sub, optimized to a IV
+for $func (sort keys %$want) {
+    # no strict 'refs';	# why not needed ?
+    checkOptree ( name      => "$func() as a coderef",
+		  code      => \&{$func},
+		  noanchors => 1,
+		  expect    => <<EOT_EOT, expect_nt => <<EONT_EONT);
+ is a constant sub, optimized to a $want->{$func}[0]
 EOT_EOT
- is a constant sub, optimized to a IV
+ is a constant sub, optimized to a $want->{$func}[0]
 EONT_EONT
 
+}
 
-checkOptree ( name	=> 'mystr() as coderef',
-	      code	=> \&mystr,
-	      noanchors => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
- is a constant sub, optimized to a PV
+pass("RENDER CALLS TO THOSE CONSTANT SUBS");
+
+for $func (sort keys %$want) {
+    # print "# doing $func\n";
+    checkOptree ( name    => "call $func",
+		  code    => "$func",
+		  ($want->{$func}[2]) ? ( todo => $want->{$func}[2]) : (),
+		  bc_opts => '-nobanner',
+		  expect  => <<EOT_EOT, expect_nt => <<EONT_EONT);
+3  <1> leavesub[2 refs] K/REFC,1 ->(end)
+-     <\@> lineseq KP ->3
+1        <;> dbstate(main 1163 OptreeCheck.pm:511]:1) v ->2
+2        <\$> const[$want->{$func}[0] $want->{$func}[1]] s ->3
 EOT_EOT
- is a constant sub, optimized to a PV
+3  <1> leavesub[2 refs] K/REFC,1 ->(end)
+-     <\@> lineseq KP ->3
+1        <;> dbstate(main 1163 OptreeCheck.pm:511]:1) v ->2
+2        <\$> const($want->{$func}[0] $want->{$func}[1]) s ->3
 EONT_EONT
 
-
-checkOptree ( name	=> 'myfl() as coderef',
-	      code	=> \&myfl,
-	      noanchors => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
- is a constant sub, optimized to a NV
-EOT_EOT
- is a constant sub, optimized to a NV
-EONT_EONT
-
-
-checkOptree ( name	=> 'myrex() as coderef',
-	      code	=> \&myrex,
-	      noanchors => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
- is a constant sub, optimized to a RV
-EOT_EOT
- is a constant sub, optimized to a RV
-EONT_EONT
-
-
-checkOptree ( name	=> 'myglob() as coderef',
-	      code	=> \&myglob,
-	      noanchors => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
- is a constant sub, optimized to a RV
-EOT_EOT
- is a constant sub, optimized to a RV
-EONT_EONT
-
-
-checkOptree ( name	=> 'myaref() as coderef',
-	      code	=> \&myaref,
-	      noanchors => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
- is a constant sub, optimized to a RV
-EOT_EOT
- is a constant sub, optimized to a RV
-EONT_EONT
-
-
-checkOptree ( name	=> 'myhref() as coderef',
-	      code	=> \&myhref,
-	      noanchors => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
- is a constant sub, optimized to a RV
-EOT_EOT
- is a constant sub, optimized to a RV
-EONT_EONT
-
-
-checkOptree ( name	=> 'myundef() as coderef',
-	      code	=> \&myundef,
-	      noanchors => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
- is a constant sub, optimized to a NULL
-EOT_EOT
- is a constant sub, optimized to a NULL
-EONT_EONT
-
-
-checkOptree ( name	=> 'mysub() as coderef',
-	      code	=> \&mysub,
-	      noanchors => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
- is a constant sub, optimized to a RV
-EOT_EOT
- is a constant sub, optimized to a RV
-EONT_EONT
-
-
-checkOptree ( name	=> 'myunsub() as coderef',
-	      todo	=> '- may prove only that sub is unformed',
-	      code	=> \&myunsub,
-	      noanchors => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
- has no START
-EOT_EOT
- has no START
-EONT_EONT
-
+}
 
 ##############
+pass("MORE TESTS");
 
-checkOptree ( name	=> 'call myint',
-	      code	=> 'myint',
-	      bc_opts	=> '-nobanner',
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-3  <1> leavesub[2 refs] K/REFC,1 ->(end)
--     <@> lineseq KP ->3
-1        <;> dbstate(main 1163 OptreeCheck.pm:511]:1) v ->2
-2        <$> const[IV 42] s ->3
-EOT_EOT
-3  <1> leavesub[2 refs] K/REFC,1 ->(end)
--     <@> lineseq KP ->3
-1        <;> dbstate(main 1163 OptreeCheck.pm:511]:1) v ->2
-2        <$> const(IV 42) s ->3
-EONT_EONT
-
-
-checkOptree ( name	=> 'call mystr',
-	      code	=> 'mystr',
-	      bc_opts	=> '-nobanner',
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-3  <1> leavesub[2 refs] K/REFC,1 ->(end)
--     <@> lineseq KP ->3
-1        <;> dbstate(main 1163 OptreeCheck.pm:511]:1) v ->2
-2        <$> const[PV "hithere"] s ->3
-EOT_EOT
-3  <1> leavesub[2 refs] K/REFC,1 ->(end)
--     <@> lineseq KP ->3
-1        <;> dbstate(main 1163 OptreeCheck.pm:511]:1) v ->2
-2        <$> const(PV "hithere") s ->3
-EONT_EONT
-
-
-checkOptree ( name	=> 'call myfl',
-	      code	=> 'myfl',
-	      bc_opts	=> '-nobanner',
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-3  <1> leavesub[2 refs] K/REFC,1 ->(end)
--     <@> lineseq KP ->3
-1        <;> dbstate(main 1163 OptreeCheck.pm:511]:1) v ->2
-2        <$> const[NV 3.14159] s ->3
-EOT_EOT
-3  <1> leavesub[2 refs] K/REFC,1 ->(end)
--     <@> lineseq KP ->3
-1        <;> dbstate(main 1163 OptreeCheck.pm:511]:1) v ->2
-2        <$> const(NV 3.14159) s ->3
-EONT_EONT
-
-
-checkOptree ( name	=> 'call myrex',
-	      code	=> 'myrex',
-	      todo	=> '- RV value is bare backslash',
+checkOptree ( name	=> 'myyes() as coderef',
+	      code	=> sub () { 1==1 },
 	      noanchors => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->3
-# 1        <;> nextstate(main 753 (eval 27):1) v ->2
-# 2        <$> const[RV \\] s ->3
+ is a constant sub, optimized to a SPECIAL
 EOT_EOT
-# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->3
-# 1        <;> nextstate(main 753 (eval 27):1) v ->2
-# 2        <$> const(RV \\) s ->3
+ is a constant sub, optimized to a SPECIAL
 EONT_EONT
 
 
-checkOptree ( name	=> 'call myglob',
-	      code	=> 'myglob',
-	      todo	=> '- RV value is bare backslash',
+checkOptree ( name	=> 'myyes() as coderef',
+	      code	=> 'sub a() { 1==1 }; print a',
 	      noanchors => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->3
-# 1        <;> nextstate(main 753 (eval 27):1) v ->2
-# 2        <$> const[RV \\] s ->3
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 810 (eval 47):1) v ->2
+# 4        <@> print sK ->5
+# 2           <0> pushmark s ->3
+# 3           <$> const[SPECIAL sv_yes] s ->4
 EOT_EOT
-# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->3
-# 1        <;> nextstate(main 753 (eval 27):1) v ->2
-# 2        <$> const(RV \\) s ->3
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 810 (eval 47):1) v ->2
+# 4        <@> print sK ->5
+# 2           <0> pushmark s ->3
+# 3           <$> const(SPECIAL sv_yes) s ->4
 EONT_EONT
 
 
-checkOptree ( name	=> 'call myaref',
-	      code	=> 'myaref',
-	      todo	=> '- RV value is bare backslash',
+checkOptree ( name	=> 'myno() as coderef',
+	      code	=> 'sub a() { 1!=1 }; print a',
 	      noanchors => 1,
+	      todo	=> '- SPECIAL sv_no renders as PVNV 0',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->3
-# 1        <;> nextstate(main 758 (eval 29):1) v ->2
-# 2        <$> const[RV \\] s ->3
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 810 (eval 47):1) v ->2
+# 4        <@> print sK ->5
+# 2           <0> pushmark s ->3
+# 3           <$> const[PVNV 0] s ->4
 EOT_EOT
-# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->3
-# 1        <;> nextstate(main 758 (eval 29):1) v ->2
-# 2        <$> const(RV \\) s ->3
-EONT_EONT
-
-
-checkOptree ( name	=> 'call myhref',
-	      code	=> 'myhref',
-	      noanchors => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->3
-# 1        <;> nextstate(main 763 (eval 31):1) v ->2
-# 2        <$> const[RV \\HASH] s ->3
-EOT_EOT
-# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->3
-# 1        <;> nextstate(main 763 (eval 31):1) v ->2
-# 2        <$> const(RV \\HASH) s ->3
-EONT_EONT
-
-
-checkOptree ( name	=> 'call myundef',
-	      code	=> 'myundef',
-	      noanchors => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->3
-# 1        <;> nextstate(main 771 (eval 35):1) v ->2
-# 2        <$> const[NULL ] s ->3
-EOT_EOT
-# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->3
-# 1        <;> nextstate(main 771 (eval 35):1) v ->2
-# 2        <$> const(NULL ) s ->3
-EONT_EONT
-
-
-checkOptree ( name	=> 'call mysub',
-	      code	=> 'mysub',
-	      noanchors => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->3
-# 1        <;> nextstate(main 771 (eval 35):1) v ->2
-# 2        <$> const[RV \\] s ->3
-EOT_EOT
-# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->3
-# 1        <;> nextstate(main 771 (eval 35):1) v ->2
-# 2        <$> const(RV \\) s ->3
-EONT_EONT
-
-##################
-
-# test constant sub defined w/o 'use constant'
-
-checkOptree ( name	=> "pi(), defined w/o 'use constant'",
-	      code	=> \&pi,
-	      noanchors => 1,
-	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
- is a constant sub, optimized to a NV
-EOT_EOT
- is a constant sub, optimized to a NV
+# 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->5
+# 1        <;> nextstate(main 810 (eval 47):1) v ->2
+# 4        <@> print sK ->5
+# 2           <0> pushmark s ->3
+# 3           <$> const(PVNV 0) s ->4
 EONT_EONT
 
 
@@ -352,7 +199,7 @@ checkOptree ( name	=> 'call many in a print statement',
 # 3           <$> const[PV "myint %d mystr %s myfl %f pi %f\n"] s ->4
 # 4           <$> const[IV 42] s ->5
 # 5           <$> const[PV "hithere"] s ->6
-# 6           <$> const[NV 3.14159] s ->7
+# 6           <$> const[NV 1.414213] s ->7
 # 7           <$> const[NV 3.14159] s ->8
 EOT_EOT
 # 9  <1> leavesub[1 ref] K/REFC,1 ->(end)
@@ -363,7 +210,7 @@ EOT_EOT
 # 3           <$> const(PV "myint %d mystr %s myfl %f pi %f\n") s ->4
 # 4           <$> const(IV 42) s ->5
 # 5           <$> const(PV "hithere") s ->6
-# 6           <$> const(NV 3.14159) s ->7
+# 6           <$> const(NV 1.414213) s ->7
 # 7           <$> const(NV 3.14159) s ->8
 EONT_EONT
 
