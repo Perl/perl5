@@ -8,7 +8,7 @@ use Digest ();
 
 use vars qw($VERSION @ISA @EXPORT_OK);
 
-$VERSION = "0.01";
+$VERSION = "1.00";
 @ISA = qw(Exporter);
 @EXPORT_OK = qw(digest_file_ctx digest_file digest_file_hex digest_file_base64);
 
@@ -49,7 +49,7 @@ Digest::file - Calculate digests of files
   # Poor mans "md5sum" command
   use Digest::file qw(digest_file_hex);
   for (@ARGV) {
-      print digest_file_hex($_, "MD5"), "  $_\n";e
+      print digest_file_hex($_, "MD5"), "  $_\n";
   }
 
 =head1 DESCRIPTION

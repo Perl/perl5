@@ -1,5 +1,9 @@
 Revision history for Perl module Unicode::Collate.
 
+0.52  Thu Oct 13 21:51:09 2005
+    - The Unicode::Collate->new method does not destroy user's $_ any longer.
+      (thanks to Jon Warbrick for bug report)
+
 0.51  Sun May 29 20:21:19 2005
     - Added the latest DUCET (for Unicode 4.1.0) as Collate/allkeys.txt,
       which is not required to test this module.

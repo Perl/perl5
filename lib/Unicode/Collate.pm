@@ -14,7 +14,7 @@ use File::Spec;
 
 no warnings 'utf8';
 
-our $VERSION = '0.51';
+our $VERSION = '0.52';
 our $PACKAGE = __PACKAGE__;
 
 my @Path = qw(Unicode Collate);
@@ -305,29 +305,30 @@ sub read_table {
 	croak("$PACKAGE: Can't locate $f in \@INC (\@INC contains: @INC)");
     }
 
-    while (<$fh>) {
-	next if /^\s*#/;
-	unless (s/^\s*\@//) {
-	    $self->parseEntry($_);
+    while (my $line = <$fh>) {
+	next if $line =~ /^\s*#/;
+	unless ($line =~ s/^\s*\@//) {
+	    $self->parseEntry($line);
 	    next;
 	}
 
-	if (/^version\s*(\S*)/) {
+	# matched ^\s*\@
+	if ($line =~ /^version\s*(\S*)/) {
 	    $self->{versionTable} ||= $1;
 	}
-	elsif (/^variable\s+(\S*)/) { # since UTS #10-9
+	elsif ($line =~ /^variable\s+(\S*)/) { # since UTS #10-9
 	    $self->{variableTable} ||= $1;
 	}
-	elsif (/^alternate\s+(\S*)/) { # till UTS #10-8
+	elsif ($line =~ /^alternate\s+(\S*)/) { # till UTS #10-8
 	    $self->{alternateTable} ||= $1;
 	}
-	elsif (/^backwards\s+(\S*)/) {
+	elsif ($line =~ /^backwards\s+(\S*)/) {
 	    push @{ $self->{backwardsTable} }, $1;
 	}
-	elsif (/^forwards\s+(\S*)/) { # parhaps no use
+	elsif ($line =~ /^forwards\s+(\S*)/) { # parhaps no use
 	    push @{ $self->{forwardsTable} }, $1;
 	}
-	elsif (/^rearrange\s+(.*)/) { # (\S*) is NG
+	elsif ($line =~ /^rearrange\s+(.*)/) { # (\S*) is NG
 	    push @{ $self->{rearrangeTable} }, _getHexArray($1);
 	}
     }
@@ -706,17 +707,17 @@ sub getSortKey
 
     # modification of tertiary weights
     if ($self->{upper_before_lower}) {
-	foreach (@{ $ret[2] }) {
-	    if    (0x8 <= $_ && $_ <= 0xC) { $_ -= 6 } # lower
-	    elsif (0x2 <= $_ && $_ <= 0x6) { $_ += 6 } # upper
-	    elsif ($_ == 0x1C)             { $_ += 1 } # square upper
-	    elsif ($_ == 0x1D)             { $_ -= 1 } # square lower
+	foreach my $w (@{ $ret[2] }) {
+	    if    (0x8 <= $w && $w <= 0xC) { $w -= 6 } # lower
+	    elsif (0x2 <= $w && $w <= 0x6) { $w += 6 } # upper
+	    elsif ($w == 0x1C)             { $w += 1 } # square upper
+	    elsif ($w == 0x1D)             { $w -= 1 } # square lower
 	}
     }
     if ($self->{katakana_before_hiragana}) {
-	foreach (@{ $ret[2] }) {
-	    if    (0x0F <= $_ && $_ <= 0x13) { $_ -= 2 } # katakana
-	    elsif (0x0D <= $_ && $_ <= 0x0E) { $_ += 5 } # hiragana
+	foreach my $w (@{ $ret[2] }) {
+	    if    (0x0F <= $w && $w <= 0x13) { $w -= 2 } # katakana
+	    elsif (0x0D <= $w && $w <= 0x0E) { $w += 5 } # hiragana
 	}
     }
 
@@ -1790,8 +1791,8 @@ to use this module easily, it is recommended to install a table file
 in the UCA format, by copying it under the directory
 <a place in @INC>/Unicode/Collate.
 
-The most preferable one is "The Default Unicode Collation Element Table",
-available from the Unicode Consortium's website:
+The most preferable one is "The Default Unicode Collation Element Table"
+(aka DUCET), available from the Unicode Consortium's website:
 
    http://www.unicode.org/Public/UCA/
 
@@ -1841,9 +1842,9 @@ This module is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 The file Unicode/Collate/allkeys.txt was copied directly
-from http://www.unicode.org/Public/UCA/4.1.0/allkeys.txt (aka DUCET).
+from L<http://www.unicode.org/Public/UCA/4.1.0/allkeys.txt>.
 This file is Copyright (c) 1991-2005 Unicode, Inc. All rights reserved.
-Distributed under the Terms of Use in http://www.unicode.org/copyright.html
+Distributed under the Terms of Use in L<http://www.unicode.org/copyright.html>.
 
 =head1 SEE ALSO
 

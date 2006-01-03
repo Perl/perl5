@@ -6,10 +6,10 @@ require Exporter;
 @EXPORT = qw(wrap fill);
 @EXPORT_OK = qw($columns $break $huge);
 
-$VERSION = 2001.09293;
+$VERSION = 2005.0824_01;
 
 use vars qw($VERSION $columns $debug $break $huge $unexpand $tabstop
-	$separator);
+	$separator $separator2);
 use strict;
 
 BEGIN	{
@@ -20,6 +20,7 @@ BEGIN	{
 	$unexpand = 1;
 	$tabstop = 8;
 	$separator = "\n";
+	$separator2 = undef;
 }
 
 use Text::Tabs qw(expand unexpand);
@@ -52,7 +53,7 @@ sub wrap
 			$r .= $unexpand 
 				? unexpand($nl . $lead . $1)
 				: $nl . $lead . $1;
-			$remainder = $separator;
+			$remainder = defined($separator2) ? $separator2 : $separator;
 		} elsif ($huge eq 'overflow' && $t =~ /\G([^\n]*?)($break|\z)/xmgc) {
 			$r .= $unexpand 
 				? unexpand($nl . $lead . $1)
@@ -66,7 +67,11 @@ sub wrap
 			
 		$lead = $xp;
 		$ll = $nll;
-		$nl = $separator;
+		$nl = defined($separator2)
+			? ($remainder eq "\n"
+				? "\n"
+				: $separator2)
+			: $separator;
 	}
 	$r .= $remainder;
 
@@ -188,7 +193,10 @@ want to use 8-character tabstops, set C<$Text::Wrap::tabstop> to
 the number of characters you do want for your tabstops.
 
 If you want to separate your lines with something other than C<\n>
-then set C<$Text::Wrap::separator> to your preference.
+then set C<$Text::Wrap::separator> to your preference.  This replaces
+all newlines with C<$Text::Wrap::separator>.  If you just to preserve
+existing newlines but add new breaks with something else, set 
+C<$Text::Wrap::separator2> instead.
 
 When words that are longer than C<$columns> are encountered, they
 are broken up.  C<wrap()> adds a C<"\n"> at column C<$columns>.
@@ -205,8 +213,11 @@ C<$huge>.  Now, 'wrap' is the default value.
 	print wrap("\t","","This is a bit of text that forms 
 		a normal book-style paragraph");
 
-=head1 AUTHOR
+=head1 LICENSE
 
 David Muir Sharnoff <muir@idiom.com> with help from Tim Pierce and
-many many others.  
+many many others.  Copyright (C) 1996-2002 David Muir Sharnoff.  
+This module may be modified, used, copied, and redistributed at
+your own risk.  Publicly redistributed modified versions must use 
+a different name.
 

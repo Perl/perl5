@@ -12,7 +12,7 @@ BEGIN {
 }
 
 use Test;
-BEGIN { plan tests => 107 };
+BEGIN { plan tests => 113 };
 
 use strict;
 use warnings;
@@ -360,6 +360,40 @@ $Collator->change(level => 4);
 
 ok($Collator->gt("!\x{300}", ""));
 ok($Collator->eq("!\x{300}", "!"));
+
+##### 108..113
+
+$_ = 'Foo';
+
+my $c = Unicode::Collate->new(
+  table => 'keys.txt',
+  normalization => undef,
+  upper_before_lower => 1,
+);
+
+ok($_, 'Foo'); # fixed at v. 0.52; no longer clobber $_
+
+my($temp, @temp); # Not the result but the side effect matters.
+
+$_ = 'Foo';
+$temp = $c->getSortKey("abc");
+ok($_, 'Foo');
+
+$_ = 'Foo';
+$temp = $c->viewSortKey("abc");
+ok($_, 'Foo');
+
+$_ = 'Foo';
+@temp = $c->sort("abc", "xyz", "def");
+ok($_, 'Foo');
+
+$_ = 'Foo';
+@temp = $c->index("perl5", "RL");
+ok($_, 'Foo');
+
+$_ = 'Foo';
+@temp = $c->index("perl5", "LR");
+ok($_, 'Foo');
 
 #####
 
