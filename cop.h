@@ -167,6 +167,8 @@ struct cop {
 				 ? GvSV(gv_fetchfile(CopFILE(c))) : Nullsv)
 #  define CopFILEAV(c)		(CopFILE(c) \
 				 ? GvAV(gv_fetchfile(CopFILE(c))) : NULL)
+#  define CopFILEAVx(c)		(assert(CopFILE(c)), \
+				   GvAV(gv_fetchfile(CopFILE(c))))
 #  define CopSTASHPV(c)		((c)->cop_stashpv)
 
 #  ifdef NETWARE
@@ -192,6 +194,7 @@ struct cop {
 #  define CopFILE_set(c,pv)	CopFILEGV_set((c), gv_fetchfile(pv))
 #  define CopFILESV(c)		(CopFILEGV(c) ? GvSV(CopFILEGV(c)) : Nullsv)
 #  define CopFILEAV(c)		(CopFILEGV(c) ? GvAV(CopFILEGV(c)) : NULL)
+#  define CopFILEAVx(c)		(assert(CopFILEGV(c)), GvAV(CopFILEGV(c)))
 #  define CopFILE(c)		(CopFILESV(c) ? SvPVX(CopFILESV(c)) : Nullch)
 #  define CopSTASH(c)		((c)->cop_stash)
 #  define CopSTASH_set(c,hv)	((c)->cop_stash = (hv))
