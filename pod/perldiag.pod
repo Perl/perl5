@@ -361,6 +361,12 @@ by setting environment variable C<PERL_BADFREE> to 1.
 (P) An internal request asked to add an array entry to something that
 wasn't a symbol table entry.
 
+=item Bad symbol for dirhandle
+
+(P) An internal request asked to add a dirhandle entry to something
+that wasn't a symbol table entry.
+
+
 =item Bad symbol for filehandle
 
 (P) An internal request asked to add a filehandle entry to something
