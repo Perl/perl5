@@ -1,5 +1,13 @@
 Revision history for Perl distribution PathTools.
 
+3.12  Mon Oct  3 22:09:12 CDT 2005
+
+ - Fixed a testing error on OS/2 in which a drive letter for the root
+   directory was confusing things. [Ilya Zakharevich]
+
+ - Integrated a patch from bleadperl for fixing path() on
+   Win32. [Gisle Aas]
+
 3.11  Sat Aug 27 20:12:55 CDT 2005
 
  - Fixed a couple of typos in the documentation for

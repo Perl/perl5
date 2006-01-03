@@ -5,7 +5,7 @@ use strict;
 use vars qw(@ISA $VERSION);
 require File::Spec::Unix;
 
-$VERSION = '1.5';
+$VERSION = '1.6';
 
 @ISA = qw(File::Spec::Unix);
 
@@ -108,9 +108,10 @@ sub catdir {
 }
 
 sub path {
-    my $path = $ENV{'PATH'} || $ENV{'Path'} || $ENV{'path'};
-    my @path = split(';',$path);
-    foreach (@path) { $_ = '.' if $_ eq '' }
+    my @path = split(';', $ENV{PATH});
+    s/"//g for @path;
+    @path = grep length, @path;
+    unshift(@path, ".");
     return @path;
 }
 
