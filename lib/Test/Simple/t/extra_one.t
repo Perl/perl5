@@ -18,20 +18,13 @@ my($out, $err) = Test::Simple::Catch::caught();
 # Can't use Test.pm, that's a 5.005 thing.
 package My::Test;
 
-print "1..2\n";
+# This has to be a require or else the END block below runs before
+# Test::Builder's own and the ending diagnostics don't come out right.
+require Test::Builder;
+my $TB = Test::Builder->create;
+$TB->plan(tests => 2);
 
-my $test_num = 1;
-# Utility testing functions.
-sub ok ($;$) {
-    my($test, $name) = @_;
-    my $ok = '';
-    $ok .= "not " unless $test;
-    $ok .= "ok $test_num";
-    $ok .= " - $name" if defined $name;
-    $ok .= "\n";
-    print $ok;
-    $test_num++;
-}
+sub is { $TB->is_eq(@_) }
 
 
 package main;
@@ -43,14 +36,14 @@ ok(1);
 ok(1);
 
 END {
-    My::Test::ok($$out eq <<OUT);
+    My::Test::is($$out, <<OUT);
 1..1
 ok 1
 ok 2
 ok 3
 OUT
 
-    My::Test::ok($$err eq <<ERR);
+    My::Test::is($$err, <<ERR);
 # Looks like you planned 1 test but ran 2 extra.
 ERR
 

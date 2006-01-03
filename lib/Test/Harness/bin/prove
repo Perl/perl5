@@ -32,8 +32,8 @@ GetOptions(
     'b|blib'        => \$blib,
     'd|debug'       => \$Test::Harness::debug,
     'D|dry'         => \$dry,
-    'h|help|?'      => sub {pod2usage({-verbose => 1, -input => \*DATA}); exit},
-    'H|man'         => sub {pod2usage({-verbose => 2, -input => \*DATA}); exit},
+    'h|help|?'      => sub {pod2usage({-verbose => 1}); exit},
+    'H|man'         => sub {pod2usage({-verbose => 2}); exit},
     'I=s@'          => \@includes,
     'l|lib'         => \$lib,
     'r|recurse'     => \$recurse,
@@ -96,7 +96,9 @@ sub all_in {
 
     local *DH;
     if ( opendir( DH, $start ) ) {
-        while ( my $file = readdir DH ) {
+        my @files = sort readdir DH;
+        closedir DH;
+        for my $file ( @files ) {
             next if $file eq File::Spec->updir || $file eq File::Spec->curdir;
             next if $file eq ".svn";
             next if $file eq "CVS";

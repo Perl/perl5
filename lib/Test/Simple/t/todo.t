@@ -7,19 +7,7 @@ BEGIN {
     }
 }
 
-require Test::Harness;
 use Test::More;
-
-# Shut up a "used only once" warning in 5.5.4.
-my $th_version  = $Test::Harness::VERSION = $Test::Harness::VERSION;
-$th_version =~ s/_//;   # for X.Y_Z alpha versions
-
-# TODO requires a fairly new version of Test::Harness
-if( $th_version < 2.03 ) {
-    plan tests => 1;
-    fail "Need Test::Harness 2.03 or up.  You have $th_version.";
-    exit;
-}
 
 plan tests => 18;
 
