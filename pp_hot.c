@@ -201,8 +201,8 @@ PP(pp_concat)
     dPOPTOPssrl;
     bool lbyte;
     STRLEN rlen;
-    const char *rpv;
-    bool rbyte;
+    const char *rpv = 0;
+    bool rbyte = FALSE;
     bool rcopied = FALSE;
 
     if (TARG == right && right != left) {
