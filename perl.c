@@ -3453,7 +3453,7 @@ S_init_main_stash(pTHX)
     /* We know that the string "main" will be in the global shared string
        table, so it's a small saving to use it rather than allocate another
        8 bytes.  */
-    PL_curstname = newSVpvn_share("main", 4, 0);
+    PL_curstname = newSVpvs_share("main");
     gv = gv_fetchpv("main::",TRUE, SVt_PVHV);
     /* If we hadn't caused another reference to "main" to be in the shared
        string table above, then it would be worth reordering these two,
