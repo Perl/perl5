@@ -236,6 +236,9 @@ typedef U64TYPE U64;
 
 #define Ctl(ch) ((ch) & 037)
 
+/* concatenating with "" ensures that only literal strings are accepted as agument */
+#define STR_WITH_LEN(s)  (s ""), (sizeof(s)-1)
+
 /*
 =head1 Miscellaneous Functions
 
