@@ -3053,7 +3053,7 @@ Perl_moreswitches(pTHX_ char *s)
 	Safefree(PL_inplace);
 #if defined(__CYGWIN__) /* do backup extension automagically */
 	if (*(s+1) == '\0') {
-	PL_inplace = savepv(".bak");
+	PL_inplace = savepvn(STR_WITH_LEN(".bak"));
 	return s+1;
 	}
 #endif /* __CYGWIN__ */
@@ -3505,7 +3505,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
     PL_suidscript = -1;
 
     if (PL_e_script) {
-	PL_origfilename = savepvn("-e", 2);
+	PL_origfilename = savepvn(STR_WITH_LEN("-e"));
     }
     else {
 	/* if find_script() returns, it returns a malloc()-ed value */
