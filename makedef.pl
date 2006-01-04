@@ -749,6 +749,10 @@ unless ($define{'USE_ITHREADS'}) {
 
 unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
     skip_symbols [qw(
+		    PL_my_ctx_mutex
+		    PL_my_cxt_index
+		    PL_my_cxt_list
+		    PL_my_cxt_size
 		    Perl_croak_nocontext
 		    Perl_die_nocontext
 		    Perl_deb_nocontext
