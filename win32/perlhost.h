@@ -1837,7 +1837,7 @@ PerlProcFork(struct IPerlProc* piPerl)
         w32_message_hwnd = win32_create_message_window();
     new_perl->Isys_intern.message_hwnd = w32_message_hwnd;
     w32_pseudo_child_message_hwnds[w32_num_pseudo_children] =
-        (w32_message_hwnd == NULL) ? NULL : INVALID_HANDLE_VALUE;
+        (w32_message_hwnd == NULL) ? (HWND)NULL : (HWND)INVALID_HANDLE_VALUE;
 #    ifdef USE_RTL_THREAD_API
     handle = (HANDLE)_beginthreadex((void*)NULL, 0, win32_start_child,
 				    (void*)new_perl, 0, (unsigned*)&id);
