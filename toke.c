@@ -2696,11 +2696,8 @@ Perl_yylex(pTHX)
 			else {
 			    /* "q\0${splitstr}\0" is legal perl. Yes, even NUL
 			       bytes can be used as quoting characters.  :-) */
-			    /* The count here deliberately includes the NUL
-			       that terminates the C string constant.  This
-			       embeds the opening NUL into the string.  */
 			    const char *splits = PL_splitstr;
-			    sv_catpvn(PL_linestr, "our @F=split(q", 15);
+			    sv_catpvs(PL_linestr, "our @F=split(q\0");
 			    do {
 				/* Need to \ \s  */
 				if (*splits == '\\')
