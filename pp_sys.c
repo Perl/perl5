@@ -3743,8 +3743,13 @@ PP(pp_telldir)
     GV * const gv = (GV*)POPs;
     register IO * const io = GvIOn(gv);
 
-    if (!io || !IoDIRP(io))
-	goto nope;
+    if (!io || !IoDIRP(io)) {
+        if(ckWARN(WARN_IO)) {
+            Perl_warner(aTHX_ packWARN(WARN_IO),
+	        "telldir() attempted on invalid dirhandle %s", GvENAME(gv));
+        }
+        goto nope;
+    }
 
     PUSHi( PerlDir_tell(IoDIRP(io)) );
     RETURN;
@@ -3765,9 +3770,13 @@ PP(pp_seekdir)
     GV * const gv = (GV*)POPs;
     register IO * const io = GvIOn(gv);
 
-    if (!io || !IoDIRP(io))
-	goto nope;
-
+    if (!io || !IoDIRP(io)) {
+	if(ckWARN(WARN_IO)) {
+	    Perl_warner(aTHX_ packWARN(WARN_IO),
+                "seekdir() attempted on invalid dirhandle %s", GvENAME(gv));
+        }
+        goto nope;
+    }
     (void)PerlDir_seek(IoDIRP(io), along);
 
     RETPUSHYES;
@@ -3787,9 +3796,13 @@ PP(pp_rewinddir)
     GV * const gv = (GV*)POPs;
     register IO * const io = GvIOn(gv);
 
-    if (!io || !IoDIRP(io))
+    if (!io || !IoDIRP(io)) {
+	if(ckWARN(WARN_IO)) {
+	    Perl_warner(aTHX_ packWARN(WARN_IO),
+	        "rewinddir() attempted on invalid dirhandle %s", GvENAME(gv));
+	}
 	goto nope;
-
+    }
     (void)PerlDir_rewind(IoDIRP(io));
     RETPUSHYES;
 nope:
@@ -3808,9 +3821,13 @@ PP(pp_closedir)
     GV * const gv = (GV*)POPs;
     register IO * const io = GvIOn(gv);
 
-    if (!io || !IoDIRP(io))
-	goto nope;
-
+    if (!io || !IoDIRP(io)) {
+	if(ckWARN(WARN_IO)) {
+	    Perl_warner(aTHX_ packWARN(WARN_IO),
+                "closedir() attempted on invalid dirhandle %s", GvENAME(gv));
+        }
+        goto nope;
+    }
 #ifdef VOID_CLOSEDIR
     PerlDir_close(IoDIRP(io));
 #else

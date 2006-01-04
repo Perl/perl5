@@ -1271,6 +1271,11 @@ uses the character values modulus 256 instead, as if you had provided:
 
 (W unopened) You tried to close a filehandle that was never opened.
 
+=item closedir() attempted on invalid dirhandle %s
+
+(W io) The dirhandle you tried to close is either closed or not really
+a dirhandle.  Check your control flow.
+
 =item Code missing after '/'
 
 (F) You had a (sub-)template that ends with a '/'. There must be another
@@ -3450,6 +3455,11 @@ terminates. You might use ^# instead.  See L<perlform>.
 (W syntax) You wrote your assignment operator backwards.  The = must
 always comes last, to avoid ambiguity with subsequent unary operators.
 
+=item rewinddir() attempted on invalid dirhandle %s
+
+(W io) The dirhandle you tried to do a rewinddir() on is either closed or not
+really a dirhandle.  Check your control flow.
+
 =item Runaway format
 
 (F) Your format contained the ~~ repeat-until-blank sequence, but it
@@ -3525,6 +3535,11 @@ the conditional expression, i.e. C<(foo) ? 0 : 1>.
 
 (W unopened) You tried to use the seek() or sysseek() function on a
 filehandle that was either never opened or has since been closed.
+
+=item seekdir() attempted on invalid dirhandle %s
+
+(W io) The dirhandle you are doing a seekdir() on is either closed or not
+really a dirhandle.  Check your control flow.
 
 =item select not implemented
 
@@ -3882,6 +3897,11 @@ for Perl to reach.  Perl is doing you a favor by refusing.
 
 (W unopened) You tried to use the tell() function on a filehandle that
 was either never opened or has since been closed.
+
+=item telldir() attempted on invalid dirhandle %s
+
+(W io) The dirhandle you tried to telldir() is either closed or not really
+a dirhandle.  Check your control flow.
 
 =item That use of $[ is unsupported
 
