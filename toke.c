@@ -9629,7 +9629,7 @@ S_scan_subst(pTHX_ char *start)
 	    sv_catpv(repl, es ? "eval " : "do ");
 	sv_catpvn(repl, "{ ", 2);
 	sv_catsv(repl, PL_lex_repl);
-	sv_catpvn(repl, " };", 2);
+	sv_catpvn(repl, " }", 2);
 	SvEVALED_on(repl);
 	SvREFCNT_dec(PL_lex_repl);
 	PL_lex_repl = repl;
