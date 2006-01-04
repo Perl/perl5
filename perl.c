@@ -1860,7 +1860,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 			/* break the line before that space */
 
 			opts = space - pv;
-			sv_insert(opts_prog, opts, 0,
+			Perl_sv_insert(aTHX_ opts_prog, opts, 0,
 				  STR_WITH_LEN("\\n                       "));
 		    }
 
@@ -3505,7 +3505,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
     PL_suidscript = -1;
 
     if (PL_e_script) {
-	PL_origfilename = savepvn(STR_WITH_LEN("-e"));
+	PL_origfilename = savepvs("-e");
     }
     else {
 	/* if find_script() returns, it returns a malloc()-ed value */

@@ -1444,7 +1444,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	 * tell whether HINT_STRICT_REFS is in force or not.
 	 */
 	if (!strchr(s,':') && !strchr(s,'\''))
-	    sv_insert(sv, 0, 0, STR_WITH_LEN("main::"));
+	    Perl_sv_insert(aTHX_ sv, 0, 0, STR_WITH_LEN("main::"));
 	if (i)
 	    (void)rsignal(i, PL_csighandlerp);
 	else

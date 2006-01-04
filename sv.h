@@ -1425,9 +1425,11 @@ Like C<sv_catsv> but doesn't process magic.
 #define sv_2iv(sv) sv_2iv_flags(sv, SV_GMAGIC)
 #define sv_2uv(sv) sv_2uv_flags(sv, SV_GMAGIC)
 
-#define newSVpvs(str) newSVpvn(STR_WITH_LEN(str))
-#define newSVpvs_share(str) newSVpvn_share(STR_WITH_LEN(str), 0)
-#define sv_catpvs(sv, str) sv_catpvn_flags(sv, STR_WITH_LEN(str), SV_GMAGIC)
+#define newSVpvs(str) Perl_newSVpvn(aTHX_ STR_WITH_LEN(str))
+#define newSVpvs_share(str) Perl_newSVpvn_share(aTHX_ STR_WITH_LEN(str), 0)
+#define sv_catpvs(sv, str) Perl_sv_catpvn_flags(aTHX_ sv, STR_WITH_LEN(str), SV_GMAGIC)
+#define savepvs(str) Perl_savepvn(aTHX_ STR_WITH_LEN(str))
+#define gv_stashpvs(str, create) Perl_gv_stashpvn(aTHX_ STR_WITH_LEN(str), create)
 
 /* Should be named SvCatPVN_utf8_upgrade? */
 #define sv_catpvn_utf8_upgrade(dsv, sstr, slen, nsv)	\

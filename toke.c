@@ -460,7 +460,7 @@ S_missingterm(pTHX_ char *s)
 
 #define FEATURE_IS_ENABLED(name)				        \
 	((0 != (PL_hints & HINT_LOCALIZE_HH))				\
-	    && feature_is_enabled(STR_WITH_LEN(name)))
+	    && S_feature_is_enabled(aTHX_ STR_WITH_LEN(name)))
 /*
  * S_feature_is_enabled
  * Check whether the named feature is enabled.

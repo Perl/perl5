@@ -1327,7 +1327,7 @@ PP(pp_leavewrite)
 		  !gv_fetchpv("top", 0, SVt_PVFM))
 		    IoTOP_NAME(io) = savesvpv(topname);
 		else
-		    IoTOP_NAME(io) = savepvn(STR_WITH_LEN("top"));
+		    IoTOP_NAME(io) = savepvs("top");
 	    }
 	    topgv = gv_fetchpv(IoTOP_NAME(io), 0, SVt_PVFM);
 	    if (!topgv || !GvFORM(topgv)) {

@@ -11175,7 +11175,7 @@ S_varname(pTHX_ GV *gv, const char gvtype, PADOFFSET targ,
 	Perl_sv_catpvf(aTHX_ name, "[%"IVdf"]", (IV)aindex);
     }
     else if (subscript_type == FUV_SUBSCRIPT_WITHIN)
-	sv_insert(name, 0, 0,  STR_WITH_LEN("within "));
+	Perl_sv_insert(aTHX_ name, 0, 0,  STR_WITH_LEN("within "));
 
     return name;
 }

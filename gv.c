@@ -292,7 +292,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     /* UNIVERSAL methods should be callable without a stash */
     if (!stash) {
 	level = -1;  /* probably appropriate */
-	if(!(stash = gv_stashpvn(STR_WITH_LEN("UNIVERSAL"), FALSE)))
+	if(!(stash = gv_stashpvs("UNIVERSAL", FALSE)))
 	    return 0;
     }
 
@@ -375,7 +375,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     /* if at top level, try UNIVERSAL */
 
     if (level == 0 || level == -1) {
-	HV* const lastchance = gv_stashpvn(STR_WITH_LEN("UNIVERSAL"), FALSE);
+	HV* const lastchance = gv_stashpvs("UNIVERSAL", FALSE);
 
 	if (lastchance) {
 	    if ((gv = gv_fetchmeth(lastchance, name, len,
@@ -639,7 +639,7 @@ STATIC void
 S_require_errno(pTHX_ GV *gv)
 {
     dVAR;
-    HV* stash = gv_stashpvn(STR_WITH_LEN("Errno"), FALSE);
+    HV* stash = gv_stashpvs("Errno", FALSE);
 
     if (!stash || !(gv_fetchmethod(stash, "TIEHASH"))) {
 	dSP;
@@ -650,7 +650,7 @@ S_require_errno(pTHX_ GV *gv)
                          newSVpvs("Errno"), Nullsv);
 	LEAVE;
 	SPAGAIN;
-	stash = gv_stashpvn(STR_WITH_LEN("Errno"), FALSE);
+	stash = gv_stashpvs("Errno", FALSE);
 	if (!stash || !(gv_fetchmethod(stash, "TIEHASH")))
 	    Perl_croak(aTHX_ "Can't use %%! because Errno.pm is not available");
     }
