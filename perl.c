@@ -1861,7 +1861,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
 			opts = space - pv;
 			sv_insert(opts_prog, opts, 0,
-				  "\\n                       ", 25);
+				  STR_WITH_LEN("\\n                       "));
 		    }
 
 		    sv_catpvs(opts_prog,"\\n\",");

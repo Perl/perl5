@@ -499,23 +499,23 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 	 codeset = nl_langinfo(CODESET);
 #endif
 	 if (codeset)
-	      utf8locale = (ibcmp(codeset,  "UTF-8", 5) == 0 ||
- 			    ibcmp(codeset,  "UTF8",  4) == 0);
+	      utf8locale = (ibcmp(codeset, STR_WITH_LEN("UTF-8")) == 0 ||
+ 			    ibcmp(codeset, STR_WITH_LEN("UTF8") ) == 0);
 #if defined(USE_LOCALE)
 	 else { /* nl_langinfo(CODESET) is supposed to correctly
 		 * interpret the locale environment variables,
 		 * but just in case it fails, let's do this manually. */ 
 	      if (lang)
-		   utf8locale = (ibcmp(lang,     "UTF-8", 5) == 0 ||
-			         ibcmp(lang,     "UTF8",  4) == 0);
+		   utf8locale = (ibcmp(lang, STR_WITH_LEN("UTF-8")) == 0 ||
+			         ibcmp(lang, STR_WITH_LEN("UTF8") ) == 0);
 #ifdef USE_LOCALE_CTYPE
 	      if (curctype)
-		   utf8locale = (ibcmp(curctype,     "UTF-8", 5) == 0 ||
-			         ibcmp(curctype,     "UTF8",  4) == 0);
+		   utf8locale = (ibcmp(curctype, STR_WITH_LEN("UTF-8")) == 0 ||
+			         ibcmp(curctype, STR_WITH_LEN("UTF8") ) == 0);
 #endif
 	      if (lc_all)
-		   utf8locale = (ibcmp(lc_all,   "UTF-8", 5) == 0 ||
-			         ibcmp(lc_all,   "UTF8",  4) == 0);
+		   utf8locale = (ibcmp(lc_all, STR_WITH_LEN("UTF-8")) == 0 ||
+			         ibcmp(lc_all, STR_WITH_LEN("UTF8") ) == 0);
 	 }
 #endif /* USE_LOCALE */
 	 if (utf8locale)

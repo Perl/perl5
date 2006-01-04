@@ -1414,20 +1414,20 @@ PerlIO_layer_from_ref(pTHX_ SV *sv)
      * For any scalar type load the handler which is bundled with perl
      */
     if (SvTYPE(sv) < SVt_PVAV)
-	return PerlIO_find_layer(aTHX_ "scalar", 6, 1);
+	return PerlIO_find_layer(aTHX_ STR_WITH_LEN("scalar"), 1);
 
     /*
      * For other types allow if layer is known but don't try and load it
      */
     switch (SvTYPE(sv)) {
     case SVt_PVAV:
-	return PerlIO_find_layer(aTHX_ "Array", 5, 0);
+	return PerlIO_find_layer(aTHX_ STR_WITH_LEN("Array"), 0);
     case SVt_PVHV:
-	return PerlIO_find_layer(aTHX_ "Hash", 4, 0);
+	return PerlIO_find_layer(aTHX_ STR_WITH_LEN("Hash"), 0);
     case SVt_PVCV:
-	return PerlIO_find_layer(aTHX_ "Code", 4, 0);
+	return PerlIO_find_layer(aTHX_ STR_WITH_LEN("Code"), 0);
     case SVt_PVGV:
-	return PerlIO_find_layer(aTHX_ "Glob", 4, 0);
+	return PerlIO_find_layer(aTHX_ STR_WITH_LEN("Glob"), 0);
     }
     return NULL;
 }
