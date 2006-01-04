@@ -2664,6 +2664,12 @@
 #define HAS_VPRINTF	/**/
 /*#define USE_CHAR_VSPRINTF 	/**/
 
+/* HAS_VSNPRINTF:
+ *      This symbol, if defined, indicates that the vsnprintf routine is
+ *      available for use.
+ */
+#define HAS_VSNPRINTF   /**/
+
 /* HAS_WRITEV:
  *	This symbol, if defined, indicates that the writev routine is
  *	available to do scatter writes.
@@ -3935,6 +3941,12 @@
  *	of the calling process.
  */
 /*#define HAS_SIGPROCMASK		/**/
+
+/* HAS_SNPRINTF:
+ *      This symbol, if defined, indicates that the snprintf() library
+ *      function is available for use.
+ */
+#define HAS_SNPRINTF            /**/
 
 /* HAS_SOCKATMARK:
  *	This symbol, if defined, indicates that the sockatmark routine is
