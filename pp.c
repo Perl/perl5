@@ -600,7 +600,7 @@ PP(pp_gelem)
 	    if (strEQ(second_letter, "ACKAGE")) {
 		const HV * const stash = GvSTASH(gv);
 		const HEK * const hek = stash ? HvNAME_HEK(stash) : NULL;
-		sv = hek ? newSVhek(hek) : newSVpvn("__ANON__", 8);
+		sv = hek ? newSVhek(hek) : newSVpvs("__ANON__");
 	    }
 	    break;
 	case 'S':

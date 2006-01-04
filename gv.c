@@ -626,7 +626,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     LEAVE;
     varsv = GvSVn(vargv);
     sv_setpvn(varsv, packname, packname_len);
-    sv_catpvn(varsv, "::", 2);
+    sv_catpvs(varsv, "::");
     sv_catpvn(varsv, name, len);
     SvTAINTED_off(varsv);
     return gv;
@@ -647,7 +647,7 @@ S_require_errno(pTHX_ GV *gv)
 	ENTER;
 	save_scalar(gv); /* keep the value of $! */
         Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-                         newSVpvn("Errno",5), Nullsv);
+                         newSVpvs("Errno"), Nullsv);
 	LEAVE;
 	SPAGAIN;
 	stash = gv_stashpvn("Errno",5,FALSE);
@@ -1222,7 +1222,7 @@ Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
 
     if (keepmain || strNE(name, "main")) {
 	sv_catpvn(sv,name,namelen);
-	sv_catpvn(sv,"::", 2);
+	sv_catpvs(sv,"::");
     }
     sv_catpvn(sv,GvNAME(gv),GvNAMELEN(gv));
 }

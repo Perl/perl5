@@ -549,7 +549,7 @@ XS(XS_version_boolean)
      SP -= items;
     if (sv_derived_from(ST(0), "version")) {
 	SV * const lobj = SvRV(ST(0));
-	SV * const rs = newSViv( vcmp(lobj,new_version(newSVpvn("0",1))) );
+	SV * const rs = newSViv( vcmp(lobj,new_version(newSVpvs("0"))) );
 	PUSHs(sv_2mortal(rs));
 	PUTBACK;
 	return;
@@ -900,7 +900,7 @@ XS(XS_PerlIO_get_layers)
 			    const IV flags = SvIVX(*flgsvp);
 
 			    if (flags & PERLIO_F_UTF8) {
-				 XPUSHs(newSVpvn("utf8", 4));
+				 XPUSHs(newSVpvs("utf8"));
 				 nitem++;
 			    }
 		       }

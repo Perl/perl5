@@ -2429,7 +2429,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
         o->op_private |= OPpTRANS_TO_UTF;
 
     if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
-	SV* const listsv = newSVpvn("# comment\n",10);
+	SV* const listsv = newSVpvs("# comment\n");
 	SV* transv = NULL;
 	const U8* tend = t + tlen;
 	const U8* rend = r + rlen;
@@ -2474,7 +2474,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    UV nextmin = 0;
 	    Newx(cp, 2*tlen, UV);
 	    i = 0;
-	    transv = newSVpvn("",0);
+	    transv = newSVpvs("");
 	    while (t < tend) {
 		cp[2*i] = utf8n_to_uvuni(t, tend-t, &ulen, 0);
 		t += ulen;
@@ -4296,12 +4296,12 @@ Perl_cv_ckproto(pTHX_ const CV *cv, const GV *gv, const char *p)
 	if (SvPOK(cv))
 	    Perl_sv_catpvf(aTHX_ msg, " (%"SVf")", (const SV *)cv);
 	else
-	    Perl_sv_catpv(aTHX_ msg, ": none");
-	sv_catpv(msg, " vs ");
+	    sv_catpvs(msg, ": none");
+	sv_catpvs(msg, " vs ");
 	if (p)
 	    Perl_sv_catpvf(aTHX_ msg, "(%s)", p);
 	else
-	    sv_catpv(msg, "none");
+	    sv_catpvs(msg, "none");
 	Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "%"SVf, msg);
     }
 }
@@ -5784,7 +5784,7 @@ Perl_ck_glob(pTHX_ OP *o)
 	GV *glob_gv;
 	ENTER;
 	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-		newSVpvn("File::Glob", 10), Nullsv, Nullsv, Nullsv);
+		newSVpvs("File::Glob"), Nullsv, Nullsv, Nullsv);
 	gv = gv_fetchpv("CORE::GLOBAL::glob", 0, SVt_PVCV);
 	glob_gv = gv_fetchpv("File::Glob::csh_glob", 0, SVt_PVCV);
 	GvCV(gv) = GvCV(glob_gv);
@@ -5987,7 +5987,7 @@ Perl_ck_say(pTHX_ OP *o)
     o = ck_listiob(o);
     o->op_type = OP_PRINT;
     cLISTOPo->op_last = cLISTOPo->op_last->op_sibling
-    	= newSVOP(OP_CONST, 0, newSVpvn("\n", 1));
+    	= newSVOP(OP_CONST, 0, newSVpvs("\n"));
     return o;
 }
 
@@ -6182,7 +6182,7 @@ Perl_ck_require(pTHX_ OP *o)
 		    SvCUR_set(sv, SvCUR(sv) - 1);
 		}
 	    }
-	    sv_catpvn(sv, ".pm", 3);
+	    sv_catpvs(sv, ".pm");
 	    SvFLAGS(sv) |= was_readonly;
 	}
     }
@@ -6421,7 +6421,7 @@ Perl_ck_split(pTHX_ OP *o)
     op_free(cLISTOPo->op_first);
     cLISTOPo->op_first = kid;
     if (!kid) {
-	cLISTOPo->op_first = kid = newSVOP(OP_CONST, 0, newSVpvn(" ", 1));
+	cLISTOPo->op_first = kid = newSVOP(OP_CONST, 0, newSVpvs(" "));
 	cLISTOPo->op_last = kid; /* There was only one element previously */
     }
 
@@ -6588,7 +6588,7 @@ Perl_ck_subr(pTHX_ OP *o)
 			    {
 				GV * const gv = cGVOPx_gv(gvop);
 				OP * const sibling = o2->op_sibling;
-				SV * const n = newSVpvn("",0);
+				SV * const n = newSVpvs("");
 				op_free(o2);
 				gv_fullname4(n, gv, "", FALSE);
 				o2 = newSVOP(OP_CONST, 0, n);

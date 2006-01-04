@@ -1408,7 +1408,7 @@ S_not_a_number(pTHX_ SV *sv)
      const char *pv;
 
      if (DO_UTF8(sv)) {
-          dsv = sv_2mortal(newSVpvn("", 0));
+          dsv = sv_2mortal(newSVpvs(""));
           pv = sv_uni_display(dsv, sv, 10, 0);
      } else {
 	  char *d = tmpbuf;
@@ -2452,7 +2452,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		const SV *const referent = (SV*)SvRV(sv);
 
 		if (!referent) {
-		    tsv = sv_2mortal(newSVpvn("NULLREF", 7));
+		    tsv = sv_2mortal(newSVpvs("NULLREF"));
 		} else if (SvTYPE(referent) == SVt_PVMG
 			   && ((SvFLAGS(referent) &
 				(SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
@@ -8733,7 +8733,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 				       "\"%%\\%03"UVof"\"",
 				       (UV)c & 0xFF);
 		} else
-		    sv_catpv(msg, "end of string");
+		    sv_catpvs(msg, "end of string");
 		Perl_warner(aTHX_ packWARN(WARN_PRINTF), "%"SVf, msg); /* yes, this is reentrant */
 	    }
 
@@ -11449,7 +11449,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
     case OP_SCHOMP:
     case OP_CHOMP:
 	if (SvROK(PL_rs) && uninit_sv == SvRV(PL_rs))
-	    return sv_2mortal(newSVpvn("${$/}", 5));
+	    return sv_2mortal(newSVpvs("${$/}"));
 	/* FALL THROUGH */
 
     default:

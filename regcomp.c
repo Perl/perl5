@@ -3020,9 +3020,9 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	*/
 	minlen = 0;
 
-	data.longest_fixed = newSVpvn("",0);
-	data.longest_float = newSVpvn("",0);
-	data.last_found = newSVpvn("",0);
+	data.longest_fixed = newSVpvs("");
+	data.longest_float = newSVpvs("");
+	data.last_found = newSVpvs("");
 	data.longest = &(data.longest_fixed);
 	first = scan;
 	if (!r->regstclass) {
@@ -3315,7 +3315,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		    if (RExC_parse - 1 - s)
 			sv = newSVpvn(s, RExC_parse - 1 - s);
 		    else
-			sv = newSVpvn("", 0);
+			sv = newSVpvs("");
 
 		    ENTER;
 		    Perl_save_re_context(aTHX);
@@ -4685,7 +4685,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	if (LOC)
 	    ANYOF_FLAGS(ret) |= ANYOF_LOCALE;
 	ANYOF_BITMAP_ZERO(ret);
-	listsv = newSVpvn("# comment\n", 10);
+	listsv = newSVpvs("# comment\n");
     }
 
     nextvalue = RExC_parse < RExC_end ? UCHARAT(RExC_parse) : 0;
@@ -5781,7 +5781,7 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
     k = PL_regkind[(U8)OP(o)];
 
     if (k == EXACT) {
-	SV * const dsv = sv_2mortal(newSVpvn("", 0));
+	SV * const dsv = sv_2mortal(newSVpvs(""));
 	/* Using is_utf8_string() is a crude hack but it may
 	 * be the best for now since we have no flag "this EXACTish
 	 * node was UTF-8" --jhi */
@@ -5858,12 +5858,12 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
 	};
 
 	if (flags & ANYOF_LOCALE)
-	    sv_catpv(sv, "{loc}");
+	    sv_catpvs(sv, "{loc}");
 	if (flags & ANYOF_FOLD)
-	    sv_catpv(sv, "{i}");
+	    sv_catpvs(sv, "{i}");
 	Perl_sv_catpvf(aTHX_ sv, "[%s", PL_colors[0]);
 	if (flags & ANYOF_INVERT)
-	    sv_catpv(sv, "^");
+	    sv_catpvs(sv, "^");
 	for (i = 0; i <= 256; i++) {
 	    if (i < 256 && ANYOF_BITMAP_TEST(o,i)) {
 		if (rangestart == -1)
@@ -5874,7 +5874,7 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
 			put_byte(sv, rangestart);
 		else {
 		    put_byte(sv, rangestart);
-		    sv_catpv(sv, "-");
+		    sv_catpvs(sv, "-");
 		    put_byte(sv, i - 1);
 		}
 		rangestart = -1;
@@ -5887,9 +5887,9 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
 		    sv_catpv(sv, anyofs[i]);
 
 	if (flags & ANYOF_UNICODE)
-	    sv_catpv(sv, "{unicode}");
+	    sv_catpvs(sv, "{unicode}");
 	else if (flags & ANYOF_UNICODE_ALL)
-	    sv_catpv(sv, "{unicode_all}");
+	    sv_catpvs(sv, "{unicode_all}");
 
 	{
 	    SV *lv;
@@ -5918,7 +5918,7 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
 				U8 *p;
 				for (p = s; p < e; p++)
 				    put_byte(sv, *p);
-				sv_catpvn(sv, "-", 1);
+				sv_catpvs(sv, "-");
 				e = uvchr_to_utf8(s, i-1);
 				for (p = s; p < e; p++)
 				    put_byte(sv, *p);
@@ -5927,7 +5927,7 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
 			    }
 			}
 			
-		    sv_catpv(sv, "..."); /* et cetera */
+		    sv_catpvs(sv, "..."); /* et cetera */
 		}
 
 		{

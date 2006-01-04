@@ -287,7 +287,7 @@ S_tokereport(pTHX_ I32 rv)
 	const char *name = Nullch;
 	enum token_type type = TOKENTYPE_NONE;
 	const struct debug_tokens *p;
-	SV* const report = newSVpvn("<== ", 4);
+	SV* const report = newSVpvs("<== ");
 
 	for (p = debug_tokens; p->token; p++) {
 	    if (p->token == (int)rv) {
@@ -301,7 +301,7 @@ S_tokereport(pTHX_ I32 rv)
 	else if ((char)rv > ' ' && (char)rv < '~')
 	    Perl_sv_catpvf(aTHX_ report, "'%c'", (char)rv);
 	else if (!rv)
-	    Perl_sv_catpv(aTHX_ report, "EOF");
+	    sv_catpvs(report, "EOF");
 	else
 	    Perl_sv_catpvf(aTHX_ report, "?? %"IVdf, (IV)rv);
 	switch (type) {
@@ -329,7 +329,7 @@ S_tokereport(pTHX_ I32 rv)
 
 	    }
 	    else
-		Perl_sv_catpv(aTHX_ report, "(opval=null)");
+		sv_catpvs(report, "(opval=null)");
 	    break;
 	}
         PerlIO_printf(Perl_debug_log, "### %s\n\n", SvPV_nolen_const(report));
@@ -343,7 +343,7 @@ S_tokereport(pTHX_ I32 rv)
 STATIC void
 S_printbuf(pTHX_ const char* fmt, const char* s)
 {
-    SV* const tmp = newSVpvn("", 0);
+    SV* const tmp = newSVpvs("");
     PerlIO_printf(Perl_debug_log, fmt, pv_display(tmp, s, strlen(s), 0, 60));
     SvREFCNT_dec(tmp);
 }
@@ -609,7 +609,7 @@ Perl_lex_start(pTHX_ SV *line)
     if (!len || s[len-1] != ';') {
 	if (!(SvFLAGS(PL_linestr) & SVs_TEMP))
 	    PL_linestr = sv_2mortal(newSVsv(PL_linestr));
-	sv_catpvn(PL_linestr, "\n;", 2);
+	sv_catpvs(PL_linestr, "\n;");
     }
     SvTEMP_off(PL_linestr);
     PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = SvPVX(PL_linestr);
@@ -1290,7 +1290,7 @@ S_sublex_done(pTHX)
 {
     dVAR;
     if (!PL_lex_starts++) {
-	SV * const sv = newSVpvn("",0);
+	SV * const sv = newSVpvs("");
 	if (SvUTF8(PL_linestr))
 	    SvUTF8_on(sv);
 	PL_expect = XOPERATOR;
@@ -2421,7 +2421,7 @@ Perl_yylex(pTHX)
     bool bof = FALSE;
 
     DEBUG_T( {
-	SV* tmp = newSVpvn("", 0);
+	SV* tmp = newSVpvs("");
 	PerlIO_printf(Perl_debug_log, "### %"IVdf":LEX_%s/X%s %s\n",
 	    (IV)CopLINE(PL_curcop),
 	    lex_state_names[PL_lex_state],
@@ -2672,21 +2672,21 @@ Perl_yylex(pTHX)
 	    PL_preambled = TRUE;
 	    sv_setpv(PL_linestr,incl_perldb());
 	    if (SvCUR(PL_linestr))
-		sv_catpvn(PL_linestr,";", 1);
+		sv_catpvs(PL_linestr,";");
 	    if (PL_preambleav){
 		while(AvFILLp(PL_preambleav) >= 0) {
 		    SV *tmpsv = av_shift(PL_preambleav);
 		    sv_catsv(PL_linestr, tmpsv);
-		    sv_catpvn(PL_linestr, ";", 1);
+		    sv_catpvs(PL_linestr, ";");
 		    sv_free(tmpsv);
 		}
 		sv_free((SV*)PL_preambleav);
 		PL_preambleav = NULL;
 	    }
 	    if (PL_minus_n || PL_minus_p) {
-		sv_catpv(PL_linestr, "LINE: while (<>) {");
+		sv_catpvs(PL_linestr, "LINE: while (<>) {");
 		if (PL_minus_l)
-		    sv_catpv(PL_linestr,"chomp;");
+		    sv_catpvs(PL_linestr,"chomp;");
 		if (PL_minus_a) {
 		    if (PL_minus_F) {
 			if ((*PL_splitstr == '/' || *PL_splitstr == '\''
@@ -2710,16 +2710,16 @@ Perl_yylex(pTHX)
 			    /* This loop will embed the trailing NUL of
 			       PL_linestr as the last thing it does before
 			       terminating.  */
-			    sv_catpvn(PL_linestr, ");", 2);
+			    sv_catpvs(PL_linestr, ");");
 			}
 		    }
 		    else
-		        sv_catpv(PL_linestr,"our @F=split(' ');");
+		        sv_catpvs(PL_linestr,"our @F=split(' ');");
 		}
 	    }
 	    if (PL_minus_E)
-		sv_catpv(PL_linestr,"use feature ':5.10';");
-	    sv_catpvn(PL_linestr, "\n", 1);
+		sv_catpvs(PL_linestr,"use feature ':5.10';");
+	    sv_catpvs(PL_linestr, "\n");
 	    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	    PL_last_lop = PL_last_uni = Nullch;
@@ -4281,7 +4281,7 @@ Perl_yylex(pTHX)
 		/* if we saw a global override before, get the right name */
 
 		if (gvp) {
-		    sv = newSVpvn("CORE::GLOBAL::",14);
+		    sv = newSVpvs("CORE::GLOBAL::");
 		    sv_catpv(sv,PL_tokenbuf);
 		}
 		else {
@@ -5438,7 +5438,7 @@ Perl_yylex(pTHX)
 			sv_setpv(PL_subname, tmpbuf);
 		    else {
 			sv_setsv(PL_subname,PL_curstname);
-			sv_catpvn(PL_subname,"::",2);
+			sv_catpvs(PL_subname,"::");
 			sv_catpvn(PL_subname,tmpbuf,len);
 		    }
 		    s = skipspace(d);
@@ -5724,7 +5724,7 @@ S_pending_ident(pTHX)
 		HV *  const stash = PAD_COMPNAME_OURSTASH(tmp);
 		HEK * const stashname = HvNAME_HEK(stash);
 		SV *  const sym = newSVhek(stashname);
-                sv_catpvn(sym, "::", 2);
+                sv_catpvs(sym, "::");
                 sv_catpv(sym, PL_tokenbuf+1);
                 yylval.opval = (OP*)newSVOP(OP_CONST, 0, sym);
                 yylval.opval->op_private = OPpCONST_ENTERED;
@@ -9292,7 +9292,7 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv,
 
     /* Check the eval first */
     if (!PL_in_eval && SvTRUE(ERRSV)) {
- 	sv_catpv(ERRSV, "Propagated");
+ 	sv_catpvs(ERRSV, "Propagated");
 	yyerror(SvPV_nolen_const(ERRSV)); /* Duplicates the message inside eval */
 	(void)POPs;
  	res = SvREFCNT_inc(sv);
@@ -9624,12 +9624,12 @@ S_scan_subst(pTHX_ char *start)
 	PL_sublex_info.super_bufend = PL_bufend;
 	PL_multi_end = 0;
 	pm->op_pmflags |= PMf_EVAL;
-	repl = newSVpvn("",0);
+	repl = newSVpvs("");
 	while (es-- > 0)
 	    sv_catpv(repl, es ? "eval " : "do ");
-	sv_catpvn(repl, "{ ", 2);
+	sv_catpvs(repl, "{ ");
 	sv_catsv(repl, PL_lex_repl);
-	sv_catpvn(repl, " }", 2);
+	sv_catpvs(repl, " }");
 	SvEVALED_on(repl);
 	SvREFCNT_dec(PL_lex_repl);
 	PL_lex_repl = repl;
@@ -10008,7 +10008,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 		    HV *stash = PAD_COMPNAME_OURSTASH(tmp);
 		    HEK *stashname = HvNAME_HEK(stash);
 		    SV *sym = sv_2mortal(newSVhek(stashname));
-		    sv_catpvn(sym, "::", 2);
+		    sv_catpvs(sym, "::");
 		    sv_catpv(sym, d+1);
 		    d = SvPVX(sym);
 		    goto intro_sym;
@@ -10790,7 +10790,7 @@ S_scan_formline(pTHX_ register char *s)
 {
     register char *eol;
     register char *t;
-    SV *stuff = newSVpvn("",0);
+    SV *stuff = newSVpvs("");
     bool needargs = FALSE;
     bool eofmt = FALSE;
 
@@ -10980,7 +10980,7 @@ Perl_yyerror(pTHX_ const char *s)
 	    where = "within string";
     }
     else {
-	SV *where_sv = sv_2mortal(newSVpvn("next char ", 10));
+	SV *where_sv = sv_2mortal(newSVpvs("next char "));
 	if (yychar < 32)
 	    Perl_sv_catpvf(aTHX_ where_sv, "^%c", toCTRL(yychar));
 	else if (isPRINT_LC(yychar))

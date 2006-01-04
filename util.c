@@ -432,7 +432,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 
     if (flags & FBMcf_TAIL) {
 	MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : NULL;
-	sv_catpvn(sv, "\n", 1);		/* Taken into account in fbm_instr() */
+	sv_catpvs(sv, "\n");		/* Taken into account in fbm_instr() */
 	if (mg && mg->mg_len >= 0)
 	    mg->mg_len++;
     }
@@ -914,7 +914,7 @@ S_mess_alloc(pTHX)
     XPVMG *any;
 
     if (!PL_dirty)
-	return sv_2mortal(newSVpvn("",0));
+	return sv_2mortal(newSVpvs(""));
 
     if (PL_mess_sv)
 	return PL_mess_sv;
@@ -4308,14 +4308,14 @@ Perl_vnumify(pTHX_ SV *vs)
 
     /* attempt to retrieve the version array */
     if ( !(av = (AV *)SvRV(*hv_fetch((HV*)vs, "version", 7, FALSE)) ) ) {
-	sv_catpvn(sv,"0",1);
+	sv_catpvs(sv,"0");
 	return sv;
     }
 
     len = av_len(av);
     if ( len == -1 )
     {
-	sv_catpvn(sv,"0",1);
+	sv_catpvs(sv,"0");
 	return sv;
     }
 
@@ -4338,12 +4338,12 @@ Perl_vnumify(pTHX_ SV *vs)
     {
 	digit = SvIV(*av_fetch(av, len, 0));
 	if ( alpha && width == 3 ) /* alpha version */
-	    sv_catpvn(sv,"_",1);
+	    sv_catpvs(sv,"_");
 	Perl_sv_catpvf(aTHX_ sv, "%0*d", width, (int)digit);
     }
     else /* len == 0 */
     {
-	sv_catpvn(sv,"000",3);
+	sv_catpvs(sv, "000");
     }
     return sv;
 }
@@ -4382,7 +4382,7 @@ Perl_vnormal(pTHX_ SV *vs)
     len = av_len(av);
     if ( len == -1 )
     {
-	sv_catpvn(sv,"",0);
+	sv_catpvs(sv,"");
 	return sv;
     }
     digit = SvIV(*av_fetch(av, 0, 0));
@@ -4404,7 +4404,7 @@ Perl_vnormal(pTHX_ SV *vs)
 
     if ( len <= 2 ) { /* short version, must be at least three */
 	for ( len = 2 - len; len != 0; len-- )
-	    sv_catpvn(sv,".0",2);
+	    sv_catpvs(sv,".0");
     }
     return sv;
 }

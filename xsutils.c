@@ -217,21 +217,21 @@ usage:
     case SVt_PVCV:
 	cvflags = CvFLAGS((CV*)sv);
 	if (cvflags & CVf_LOCKED)
-	    XPUSHs(sv_2mortal(newSVpvn("locked", 6)));
+	    XPUSHs(sv_2mortal(newSVpvs("locked")));
 #ifdef CVf_LVALUE
 	if (cvflags & CVf_LVALUE)
-	    XPUSHs(sv_2mortal(newSVpvn("lvalue", 6)));
+	    XPUSHs(sv_2mortal(newSVpvs("lvalue")));
 #endif
 	if (cvflags & CVf_METHOD)
-	    XPUSHs(sv_2mortal(newSVpvn("method", 6)));
+	    XPUSHs(sv_2mortal(newSVpvs("method")));
         if (GvUNIQUE(CvGV((CV*)sv)))
-	    XPUSHs(sv_2mortal(newSVpvn("unique", 6)));
+	    XPUSHs(sv_2mortal(newSVpvs("unique")));
 	if (cvflags & CVf_ASSERTION)
-	    XPUSHs(sv_2mortal(newSVpvn("assertion", 9)));
+	    XPUSHs(sv_2mortal(newSVpvs("assertion")));
 	break;
     case SVt_PVGV:
 	if (GvUNIQUE(sv))
-	    XPUSHs(sv_2mortal(newSVpvn("unique", 6)));
+	    XPUSHs(sv_2mortal(newSVpvs("unique")));
 	break;
     default:
 	break;

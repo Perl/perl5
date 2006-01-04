@@ -179,7 +179,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
   char           *t;
 
   if (!strnEQ(s, "0000", 4)) {  /* need to grow sv */
-    SV * const tmpNew = newSVpvn("0000000000", 10);
+    SV * const tmpNew = newSVpvs("0000000000");
 
     sv_catsv(tmpNew, sv);
     SvREFCNT_dec(sv);		/* free old sv */

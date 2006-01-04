@@ -276,7 +276,7 @@ perl_construct(pTHXx)
 #endif
     }
 
-    PL_rs = newSVpvn("\n", 1);
+    PL_rs = newSVpvs("\n");
 
     init_stacks();
 
@@ -301,7 +301,7 @@ perl_construct(pTHXx)
 
     PL_fdpid = newAV();			/* for remembering popen pids by fd */
     PL_modglobal = newHV();		/* pointers to per-interpreter module globals */
-    PL_errors = newSVpvn("",0);
+    PL_errors = newSVpvs("");
     sv_setpvn(PERL_DEBUG_PAD(0), "", 0);	/* For regex debugging. */
     sv_setpvn(PERL_DEBUG_PAD(1), "", 0);	/* ext/re needs these */
     sv_setpvn(PERL_DEBUG_PAD(2), "", 0);	/* even without DEBUGGING. */
@@ -1601,7 +1601,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     PL_fdscript = -1;
     PL_suidscript = -1;
     sv_setpvn(PL_linestr,"",0);
-    sv = newSVpvn("",0);		/* first used for -I flags */
+    sv = newSVpvs("");		/* first used for -I flags */
     SAVEFREESV(sv);
     init_main_stash();
 
@@ -1679,7 +1679,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #endif
 	    forbid_setid("-e");
 	    if (!PL_e_script) {
-		PL_e_script = newSVpvn("",0);
+		PL_e_script = newSVpvs("");
 		filter_add(read_e_script, NULL);
 	    }
 	    if (*++s)
@@ -1690,7 +1690,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    }
 	    else
 		Perl_croak(aTHX_ "No code specified for -%c", *s);
-	    sv_catpv(PL_e_script, "\n");
+	    sv_catpvs(PL_e_script, "\n");
 	    break;
 
 	case 'f':
@@ -1709,9 +1709,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		STRLEN len = strlen(s);
 		const char * const p = savepvn(s, len);
 		incpush(p, TRUE, TRUE, FALSE, FALSE);
-		sv_catpvn(sv, "-I", 2);
+		sv_catpvs(sv, "-I");
 		sv_catpvn(sv, p, len);
-		sv_catpvn(sv, " ", 1);
+		sv_catpvs(sv, " ");
 		Safefree(p);
 	    }
 	    else
@@ -1734,15 +1734,15 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		if (!PL_preambleav)
 		    PL_preambleav = newAV();
 		av_push(PL_preambleav,
-			newSVpv("use Config;",0));
+			newSVpvs("use Config;"));
 		if (*++s != ':')  {
 		    STRLEN opts;
 		
-		    opts_prog = newSVpv("print Config::myconfig(),",0);
+		    opts_prog = newSVpvs("print Config::myconfig(),");
 #ifdef VMS
-		    sv_catpv(opts_prog,"\"\\nCharacteristics of this PERLSHR image: \\n\",");
+		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this PERLSHR image: \\n\",");
 #else
-		    sv_catpv(opts_prog,"\"\\nCharacteristics of this binary (from libperl): \\n\",");
+		    sv_catpvs(opts_prog,"\"\\nCharacteristics of this binary (from libperl): \\n\",");
 #endif
 		    opts = SvCUR(opts_prog);
 
@@ -1864,12 +1864,12 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 				  "\\n                       ", 25);
 		    }
 
-		    sv_catpv(opts_prog,"\\n\",");
+		    sv_catpvs(opts_prog,"\\n\",");
 
 #if defined(LOCAL_PATCH_COUNT)
 		    if (LOCAL_PATCH_COUNT > 0) {
 			int i;
-			sv_catpv(opts_prog,
+			sv_catpvs(opts_prog,
 				 "\"  Locally applied patches:\\n\",");
 			for (i = 1; i <= LOCAL_PATCH_COUNT; i++) {
 			    if (PL_localpatches[i])
@@ -1890,14 +1890,14 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 				   __DATE__);
 #  endif
 #endif
-		    sv_catpv(opts_prog, "; $\"=\"\\n    \"; "
+		    sv_catpvs(opts_prog, "; $\"=\"\\n    \"; "
 			     "@env = map { \"$_=\\\"$ENV{$_}\\\"\" } "
 			     "sort grep {/^PERL/} keys %ENV; ");
 #ifdef __CYGWIN__
-		    sv_catpv(opts_prog,
+		    sv_catpvs(opts_prog,
 			     "push @env, \"CYGWIN=\\\"$ENV{CYGWIN}\\\"\";");
 #endif
-		    sv_catpv(opts_prog, 
+		    sv_catpvs(opts_prog, 
 			     "print \"  \\%ENV:\\n    @env\\n\" if @env;"
 			     "print \"  \\@INC:\\n    @INC\\n\";");
 		}
@@ -2959,7 +2959,7 @@ Perl_moreswitches(pTHX_ char *s)
 		   numlen = 0;
 		   s--;
 	      }
-	      PL_rs = newSVpvn("", 0);
+	      PL_rs = newSVpvs("");
 	      SvGROW(PL_rs, (STRLEN)(UNISKIP(rschar) + 1));
 	      tmps = (U8*)SvPVX(PL_rs);
 	      uvchr_to_utf8(tmps, rschar);
@@ -2972,7 +2972,7 @@ Perl_moreswitches(pTHX_ char *s)
 	      if (rschar & ~((U8)~0))
 		   PL_rs = &PL_sv_undef;
 	      else if (!rschar && numlen >= 2)
-		   PL_rs = newSVpvn("", 0);
+		   PL_rs = newSVpvs("");
 	      else {
 		   char ch = (char)rschar;
 		   PL_rs = newSVpvn(&ch, 1);
@@ -3014,7 +3014,7 @@ Perl_moreswitches(pTHX_ char *s)
 	   in the fashion that -MSome::Mod does. */
 	if (*s == ':' || *s == '=') {
             const char *start;
-	    SV * const sv = newSVpv("use Devel::", 0);
+	    SV * const sv = newSVpvs("use Devel::");
 	    start = ++s;
 	    /* We now allow -d:Module=Foo,Bar */
 	    while(isALNUM(*s) || *s==':') ++s;
@@ -3101,14 +3101,14 @@ Perl_moreswitches(pTHX_ char *s)
 	if (isDIGIT(*s)) {
             I32 flags = 0;
 	    STRLEN numlen;
-	    PL_ors_sv = newSVpvn("\n",1);
+	    PL_ors_sv = newSVpvs("\n");
 	    numlen = 3 + (*s == '0');
 	    *SvPVX(PL_ors_sv) = (char)grok_oct(s, &numlen, &flags, NULL);
 	    s += numlen;
 	}
 	else {
 	    if (RsPARA(PL_rs)) {
-		PL_ors_sv = newSVpvn("\n\n",2);
+		PL_ors_sv = newSVpvs("\n\n");
 	    }
 	    else {
 		PL_ors_sv = newSVsv(PL_rs);
@@ -3122,10 +3122,10 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	{
 	    char * const start = s;
-	    SV * const sv = newSVpv("use assertions::activate", 24);
+	    SV * const sv = newSVpvs("use assertions::activate");
 	    while(isALNUM(*s) || *s == ':') ++s;
 	    if (s != start) {
-		sv_catpvn(sv, "::", 2);
+		sv_catpvs(sv, "::");
 		sv_catpvn(sv, start, s-start);
 	    }
 	    if (*s == '=') {
@@ -3160,17 +3160,17 @@ Perl_moreswitches(pTHX_ char *s)
 		if (*(start-1) == 'm') {
 		    if (*s != '\0')
 			Perl_croak(aTHX_ "Can't use '%c' after -mname", *s);
-		    sv_catpv( sv, " ()");
+		    sv_catpvs( sv, " ()");
 		}
 	    } else {
                 if (s == start)
                     Perl_croak(aTHX_ "Module name required with -%c option",
 			       s[-1]);
 		sv_catpvn(sv, start, s-start);
-		sv_catpv(sv, " split(/,/,q");
-		sv_catpvn(sv, "\0)", 1);        /* Use NUL as q//-delimiter. */
+		sv_catpvs(sv, " split(/,/,q");
+		sv_catpvs(sv, "\0");        /* Use NUL as q//-delimiter. */
 		sv_catpv(sv, ++s);
-		sv_catpvn(sv,  "\0)", 2);
+		sv_catpvs(sv,  "\0)");
 	    }
 	    s += strlen(s);
 	    if (!PL_preambleav)
@@ -3382,9 +3382,9 @@ Perl_my_unexec(pTHX)
     extern int etext;
 
     prog = newSVpv(BIN_EXP, 0);
-    sv_catpv(prog, "/perl");
+    sv_catpvs(prog, "/perl");
     file = newSVpv(PL_origfilename, 0);
-    sv_catpv(file, ".perldump");
+    sv_catpvs(file, ".perldump");
 
     unexec(SvPVX(file), SvPVX(prog), &etext, sbrk(0), 0);
     /* unexec prints msg to stderr in case of failure */
@@ -3575,7 +3575,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
 #else /* IAMSUID */
     else if (PL_preprocess) {
 	const char * const cpp_cfg = CPPSTDIN;
-	SV * const cpp = newSVpvn("",0);
+	SV * const cpp = newSVpvs("");
 	SV * const cmd = NEWSV(0,0);
 
 	if (cpp_cfg[0] == 0) /* PERL_MICRO? */
@@ -3585,7 +3585,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
 	sv_catpv(cpp, cpp_cfg);
 
 #       ifndef VMS
-	    sv_catpvn(sv, "-I", 2);
+	    sv_catpvs(sv, "-I");
 	    sv_catpv(sv,PRIVLIB_EXP);
 #       endif
 
@@ -4461,7 +4461,7 @@ S_init_lexer(pTHX)
     PL_rsfp = Nullfp;
     lex_start(PL_linestr);
     PL_rsfp = tmpfp;
-    PL_subname = newSVpvn("main",4);
+    PL_subname = newSVpvs("main");
 }
 
 STATIC void
@@ -4816,7 +4816,7 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 	if (usesep) {
 	    while ( *p == PERLLIB_SEP ) {
 		/* Uncomment the next line for PATH semantics */
-		/* av_push(GvAVn(PL_incgv), newSVpvn(".", 1)); */
+		/* av_push(GvAVn(PL_incgv), newSVpvs(".")); */
 		p++;
 	    }
 	}
@@ -4837,7 +4837,7 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 	    sv_setpv(libdir, MacPerl_CanonDir(SvPVX(libdir), buf, 0));
 	}
 	if (SvPVX(libdir)[SvCUR(libdir)-1] != ':')
-	    sv_catpv(libdir, ":");
+	    sv_catpvs(libdir, ":");
 #endif
 
 	/* Do the if() outside the #ifdef to avoid warnings about an unused
@@ -5074,7 +5074,7 @@ S_init_main_thread(pTHX)
     sv_upgrade(PL_bodytarget, SVt_PVFM);
     sv_setpvn(PL_bodytarget, "", 0);
     PL_formtarget = PL_bodytarget;
-    thr->errsv = newSVpvn("", 0);
+    thr->errsv = newSVpvs("");
     (void) find_threadsv("@");	/* Ensure $@ is initialised early */
 
     PL_maxscream = -1;
@@ -5130,7 +5130,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 		PL_curcop = &PL_compiling;
 		CopLINE_set(PL_curcop, oldline);
 		if (paramList == PL_beginav)
-		    sv_catpv(atsv, "BEGIN failed--compilation aborted");
+		    sv_catpvs(atsv, "BEGIN failed--compilation aborted");
 		else
 		    Perl_sv_catpvf(aTHX_ atsv,
 				   "%s failed--call queue aborted",

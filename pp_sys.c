@@ -403,7 +403,7 @@ PP(pp_glob)
     PL_last_in_gv = (GV*)*PL_stack_sp--;
 
     SAVESPTR(PL_rs);		/* This is not permanent, either. */
-    PL_rs = sv_2mortal(newSVpvn("\000", 1));
+    PL_rs = sv_2mortal(newSVpvs("\000"));
 #ifndef DOSISH
 #ifndef CSH
     *SvPVX(PL_rs) = '\n';
@@ -445,12 +445,12 @@ PP(pp_warn)
   	SV * const error = ERRSV;
 	SvUPGRADE(error, SVt_PV);
 	if (SvPOK(error) && SvCUR(error))
-	    sv_catpv(error, "\t...caught");
+	    sv_catpvs(error, "\t...caught");
 	tmpsv = error;
 	tmps = SvPV_const(tmpsv, len);
     }
     if (!tmps || !len)
-	tmpsv = sv_2mortal(newSVpvn("Warning: something's wrong", 26));
+	tmpsv = sv_2mortal(newSVpvs("Warning: something's wrong"));
 
     Perl_warn(aTHX_ "%"SVf, tmpsv);
     RETSETYES;
@@ -505,7 +505,7 @@ PP(pp_die)
 	}
 	else {
 	    if (SvPOK(error) && SvCUR(error))
-		sv_catpv(error, "\t...propagated");
+		sv_catpvs(error, "\t...propagated");
 	    tmpsv = error;
 	    if (SvOK(tmpsv))
 		tmps = SvPV_const(tmpsv, len);
@@ -514,7 +514,7 @@ PP(pp_die)
 	}
     }
     if (!tmps || !len)
-	tmpsv = sv_2mortal(newSVpvn("Died", 4));
+	tmpsv = sv_2mortal(newSVpvs("Died"));
 
     DIE(aTHX_ "%"SVf, tmpsv);
 }
@@ -2813,7 +2813,7 @@ PP(pp_stat)
 #ifdef USE_STAT_RDEV
 	PUSHs(sv_2mortal(newSViv(PL_statcache.st_rdev)));
 #else
-	PUSHs(sv_2mortal(newSVpvn("", 0)));
+	PUSHs(sv_2mortal(newSVpvs("")));
 #endif
 #if Off_t_size > IVSIZE
 	PUSHs(sv_2mortal(newSVnv((NV)PL_statcache.st_size)));
@@ -2833,8 +2833,8 @@ PP(pp_stat)
 	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_blksize)));
 	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_blocks)));
 #else
-	PUSHs(sv_2mortal(newSVpvn("", 0)));
-	PUSHs(sv_2mortal(newSVpvn("", 0)));
+	PUSHs(sv_2mortal(newSVpvs("")));
+	PUSHs(sv_2mortal(newSVpvs("")));
 #endif
     }
     RETURN;
@@ -4565,7 +4565,7 @@ PP(pp_ghostent)
 	for (elem = hent->h_aliases; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
-		sv_catpvn(sv, " ", 1);
+		sv_catpvs(sv, " ");
 	}
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)hent->h_addrtype);
@@ -4657,7 +4657,7 @@ PP(pp_gnetent)
 	for (elem = nent->n_aliases; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
-		sv_catpvn(sv, " ", 1);
+		sv_catpvs(sv, " ");
 	}
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)nent->n_addrtype);
@@ -4727,7 +4727,7 @@ PP(pp_gprotoent)
 	for (elem = pent->p_aliases; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
-		sv_catpvn(sv, " ", 1);
+		sv_catpvs(sv, " ");
 	}
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)pent->p_proto);
@@ -4805,7 +4805,7 @@ PP(pp_gservent)
 	for (elem = sent->s_aliases; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
-		sv_catpvn(sv, " ", 1);
+		sv_catpvs(sv, " ");
 	}
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef HAS_NTOHS
@@ -5232,7 +5232,7 @@ PP(pp_ggrent)
 	for (elem = grent->gr_mem; elem && *elem; elem++) {
 	    sv_catpv(sv, *elem);
 	    if (elem[1])
-		sv_catpvn(sv, " ", 1);
+		sv_catpvs(sv, " ");
 	}
 #endif
     }

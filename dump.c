@@ -128,12 +128,12 @@ Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pv
 	    break;
         }
 	switch (*pv) {
-	case '\t': sv_catpvn(dsv, "\\t", 2);  break;
-	case '\n': sv_catpvn(dsv, "\\n", 2);  break;
-	case '\r': sv_catpvn(dsv, "\\r", 2);  break;
-	case '\f': sv_catpvn(dsv, "\\f", 2);  break;
-	case '"':  sv_catpvn(dsv, "\\\"", 2); break;
-	case '\\': sv_catpvn(dsv, "\\\\", 2); break;
+	case '\t': sv_catpvs(dsv, "\\t");  break;
+	case '\n': sv_catpvs(dsv, "\\n");  break;
+	case '\r': sv_catpvs(dsv, "\\r");  break;
+	case '\f': sv_catpvs(dsv, "\\f");  break;
+	case '"':  sv_catpvs(dsv, "\\\""); break;
+	case '\\': sv_catpvs(dsv, "\\\\"); break;
 	default:
 	    if (isPRINT(*pv))
 		sv_catpvn(dsv, pv, 1);
@@ -143,11 +143,11 @@ Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pv
 		Perl_sv_catpvf(aTHX_ dsv, "\\%o", (U8)*pv);
         }
     }
-    sv_catpvn(dsv, "\"", 1);
+    sv_catpvs(dsv, "\"");
     if (truncated)
-	sv_catpvn(dsv, "...", 3);
+	sv_catpvs(dsv, "...");
     if (nul_terminated)
-	sv_catpvn(dsv, "\\0", 2);
+	sv_catpvs(dsv, "\\0");
 
     return SvPVX(dsv);
 }
@@ -301,7 +301,7 @@ Perl_sv_peek(pTHX_ SV *sv)
 	if (!SvPVX_const(sv))
 	    sv_catpv(t, "(null)");
 	else {
-	    SV *tmp = newSVpvn("", 0);
+	    SV *tmp = newSVpvs("");
 	    sv_catpv(t, "(");
 	    if (SvOOK(sv))
 		Perl_sv_catpvf(aTHX_ t, "[%s]", pv_display(tmp, SvPVX_const(sv)-SvIVX(sv), SvIVX(sv), 0, 127));
@@ -361,7 +361,7 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 	op_dump(pm->op_pmreplroot);
     }
     if (pm->op_pmflags || (PM_GETRE(pm) && PM_GETRE(pm)->check_substr)) {
-	SV *tmpsv = newSVpvn("", 0);
+	SV *tmpsv = newSVpvs("");
 	if (pm->op_pmdynflags & PMdf_USED)
 	    sv_catpv(tmpsv, ",USED");
 	if (pm->op_pmdynflags & PMdf_TAINTED)
@@ -555,7 +555,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     Perl_dump_indent(aTHX_ level, file, "ADDR = 0x%"UVxf" => 0x%"UVxf"\n", (UV)o, (UV)o->op_next);
 #endif
     if (o->op_flags) {
-	SV *tmpsv = newSVpvn("", 0);
+	SV *tmpsv = newSVpvs("");
 	switch (o->op_flags & OPf_WANT) {
 	case OPf_WANT_VOID:
 	    sv_catpv(tmpsv, ",VOID");
@@ -586,7 +586,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	SvREFCNT_dec(tmpsv);
     }
     if (o->op_private) {
-	SV *tmpsv = newSVpvn("", 0);
+	SV *tmpsv = newSVpvs("");
 	if (PL_opargs[o->op_type] & OA_TARGLEX) {
 	    if (o->op_private & OPpTARGET_MY)
 		sv_catpv(tmpsv, ",TARGET_MY");
@@ -1023,7 +1023,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 	    Perl_dump_indent(aTHX_ level, file, "    MG_PTR = 0x%"UVxf, PTR2UV(mg->mg_ptr));
 	    if (mg->mg_len >= 0) {
 		if (mg->mg_type != PERL_MAGIC_utf8) {
-		    SV *sv = newSVpvn("", 0);
+		    SV *sv = newSVpvs("");
 		    PerlIO_printf(file, " %s", pv_display(sv, mg->mg_ptr, mg->mg_len, 0, pvlim));
 		    SvREFCNT_dec(sv);
 		}

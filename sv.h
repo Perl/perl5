@@ -1425,6 +1425,9 @@ Like C<sv_catsv> but doesn't process magic.
 #define sv_2iv(sv) sv_2iv_flags(sv, SV_GMAGIC)
 #define sv_2uv(sv) sv_2uv_flags(sv, SV_GMAGIC)
 
+#define newSVpvs(str) newSVpvn(STR_WITH_LEN(str))
+#define sv_catpvs(sv, str) sv_catpvn_flags(sv, STR_WITH_LEN(str), SV_GMAGIC)
+
 /* Should be named SvCatPVN_utf8_upgrade? */
 #define sv_catpvn_utf8_upgrade(dsv, sstr, slen, nsv)	\
 	STMT_START {					\

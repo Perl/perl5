@@ -533,12 +533,12 @@ malformed:
     }
 
     if (dowarn) {
-	SV* const sv = sv_2mortal(newSVpv("Malformed UTF-8 character ", 0));
+	SV* const sv = sv_2mortal(newSVpvs("Malformed UTF-8 character "));
 
 	switch (warning) {
 	case 0: /* Intentionally empty. */ break;
 	case UTF8_WARN_EMPTY:
-	    Perl_sv_catpv(aTHX_ sv, "(empty string)");
+	    sv_catpvs(sv, "(empty string)");
 	    break;
 	case UTF8_WARN_CONTINUATION:
 	    Perl_sv_catpvf(aTHX_ sv, "(unexpected continuation byte 0x%02"UVxf", with no preceding start byte)", uv);
@@ -577,7 +577,7 @@ malformed:
 	    Perl_sv_catpvf(aTHX_ sv, "(character 0x%04"UVxf")", uv);
 	    break;
 	default:
-	    Perl_sv_catpv(aTHX_ sv, "(unknown reason)");
+	    sv_catpvs(sv, "(unknown reason)");
 	    break;
 	}
 	
@@ -1777,7 +1777,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     }
 
     /* create and initialize $swatch */
-    swatch = newSVpvn("",0);
+    swatch = newSVpvs("");
     scur   = octets ? (span * octets) : (span + 7) / 8;
     SvGROW(swatch, scur + 1);
     s = (U8*)SvPVX(swatch);
@@ -2181,7 +2181,7 @@ Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len, STRLEN pvlim, UV f
 	     Perl_sv_catpvf(aTHX_ dsv, "\\x{%"UVxf"}", u);
     }
     if (truncated)
-	 sv_catpvn(dsv, "...", 3);
+	 sv_catpvs(dsv, "...");
     
     return SvPVX(dsv);
 }

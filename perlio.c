@@ -480,7 +480,7 @@ PerlIO_debug(const char *fmt, ...)
 #else
 	const char *s = CopFILE(PL_curcop);
 	STRLEN len;
-	SV * const sv = newSVpvn("", 0);
+	SV * const sv = newSVpvs("");
 	Perl_sv_catpvf(aTHX_ sv, "%s:%" IVdf " ", s ? s : "(none)",
 		       (IV) CopLINE(PL_curcop));
 	Perl_sv_vcatpvf(aTHX_ sv, fmt, &ap);
@@ -760,7 +760,7 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
 	    Perl_croak(aTHX_ "Recursive call to Perl_load_module in PerlIO_find_layer");
 	    return NULL;
 	} else {
-	    SV * const pkgsv = newSVpvn("PerlIO", 6);
+	    SV * const pkgsv = newSVpvs("PerlIO");
 	    SV * const layer = newSVpvn(name, len);
 	    CV * const cv    = get_cv("PerlIO::Layer::NoWarnings", FALSE);
 	    ENTER;
@@ -4855,7 +4855,7 @@ int
 PerlIO_vprintf(PerlIO *f, const char *fmt, va_list ap)
 {
     dTHX;
-    SV * const sv = newSVpvn("", 0);
+    SV * const sv = newSVpvs("");
     const char *s;
     STRLEN len;
     SSize_t wrote;
@@ -4909,7 +4909,7 @@ PerlIO_tmpfile(void)
 	  f = PerlIO_fdopen(fd, "w+b");
 #else /* WIN32 */
 #    if defined(HAS_MKSTEMP) && ! defined(VMS) && ! defined(OS2)
-     SV * const sv = newSVpv("/tmp/PerlIO_XXXXXX", 0);
+     SV * const sv = newSVpvs("/tmp/PerlIO_XXXXXX");
      /*
       * I have no idea how portable mkstemp() is ... NI-S
       */
