@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Jan  3 16:44:36 CET 2006 [metaconfig 3.0 PL70]
+# Generated on Thu Jan  5 22:03:19 CET 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -16545,6 +16545,63 @@ eval $inlibc
 : see if vsnprintf exists
 set vsnprintf d_vsnprintf
 eval $inlibc
+
+case "$d_snprintf-$d_vsnprintf" in
+"$define-$define")
+    $cat <<EOM
+Checking whether your snprintf() and vsnprintf() work okay...
+EOM
+    $cat >try.c <<'EOCP'
+/* v?snprintf testing logic courtesy of Russ Allbery.
+ * According to C99:
+ * - if the buffer is too short it still must be \0-terminated
+ * - if the buffer is too short the potentially required length
+ *   must be returned and not -1
+ * - if the buffer is NULL the potentially required length
+ *   must be returned and not -1 or core dump
+ */
+#include <stdio.h>
+#include <stdarg.h>
+
+char buf[2];
+
+int test (char *format, ...)
+{
+    va_list args;
+    int count;
+
+    va_start (args, format);
+    count = vsnprintf (buf, sizeof buf, format, args);
+    va_end (args);
+    return count;
+}
+
+int main ()
+{
+    return ((test ("%s", "abcd") == 4 && buf[0] == 'a' && buf[1] == '\0'
+             && snprintf (NULL, 0, "%s", "abcd") == 4) ? 0 : 1);
+}
+EOCP
+    set try
+    if eval $compile; then
+	`$run ./try`
+	case "$?" in
+	0) echo "Your snprintf() and vsnprintf() seem to be working okay." ;;
+	*) cat <<EOM >&4
+Your snprintf() and snprintf() don't seem to be working okay.
+EOM
+	   d_snprintf="$undef"
+	   d_vsnprintf="$undef"
+	   ;;
+	esac
+    else
+	echo "(I can't seem to compile the test program--assuming they don't)"
+	d_snprintf="$undef"
+	d_vsnprintf="$undef"
+    fi
+    $rm -f try.* try core core.try.*
+    ;;
+esac
 
 : see if sockatmark exists
 set sockatmark d_sockatmark
