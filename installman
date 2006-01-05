@@ -187,6 +187,10 @@ sub pod2man {
     foreach my $page (@to_process) {
 	my($pod, $tmp, $manpage) = @$page;
 
+        my $parser = Pod::Man->new( section => $manext,
+                                    official=> 1,
+                                    center  => 'Perl Programmers Reference Guide'
+                                  );
 	my $xmanpage = $manpage;
 	$xmanpage =~ s/^\Q$opts{'destdir'}\E// if $opts{'destdir'};
         print "  $xmanpage\n";
