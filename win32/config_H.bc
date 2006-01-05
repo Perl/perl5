@@ -2297,6 +2297,17 @@
  */
 /*#define	USE_SITECUSTOMIZE		/**/
 
+/* HAS_SNPRINTF:
+ *	This symbol, if defined, indicates that the snprintf () library
+ *	function is available for use.
+ */
+/* HAS_VSNPRINTF:
+ *	This symbol, if defined, indicates that the vsnprintf () library
+ *	function is available for use.
+ */
+#define HAS_SNPRINTF	/**/
+#define HAS_VSNPRINTF	/**/
+
 /* HAS_SOCKET:
  *	This symbol, if defined, indicates that the BSD socket interface is
  *	supported.
@@ -2663,12 +2674,6 @@
  */
 #define HAS_VPRINTF	/**/
 /*#define USE_CHAR_VSPRINTF 	/**/
-
-/* HAS_VSNPRINTF:
- *      This symbol, if defined, indicates that the vsnprintf routine is
- *      available for use.
- */
-#define HAS_VSNPRINTF   /**/
 
 /* HAS_WRITEV:
  *	This symbol, if defined, indicates that the writev routine is
@@ -3941,12 +3946,6 @@
  *	of the calling process.
  */
 /*#define HAS_SIGPROCMASK		/**/
-
-/* HAS_SNPRINTF:
- *      This symbol, if defined, indicates that the snprintf() library
- *      function is available for use.
- */
-#define HAS_SNPRINTF            /**/
 
 /* HAS_SOCKATMARK:
  *	This symbol, if defined, indicates that the sockatmark routine is
