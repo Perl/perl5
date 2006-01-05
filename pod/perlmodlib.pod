@@ -115,6 +115,10 @@ Allows you to write your script in non-ascii or non-utf8
 
 Warn on implicit encoding conversions
 
+=item feature
+
+Enable new syntactic features
+
 =item fields
 
 Compile-time class fields
@@ -153,7 +157,7 @@ Restrict unsafe operations when compiling
 
 =item overload
 
-Package for overloading perl operations
+Package for overloading Perl operations
 
 =item re
 
@@ -369,6 +373,10 @@ Utility for CPAN::Config file Initialization
 
 Wrapper around CPAN.pm without using any XS module
 
+=item CPAN::Version
+
+Utility functions to compare CPAN versions
+
 =item Carp
 
 Warn of errors (from perspective of caller)
@@ -388,6 +396,10 @@ Declare struct-like datatypes as Perl classes
 =item Compress::Zlib
 
 Interface to zlib compression library
+
+=item Compress::Zlib::pod::FAQ
+
+Frequently Asked Questions about Compress::Zlib 
 
 =item Config
 
@@ -743,7 +755,7 @@ Load the C Fcntl.h defines
 
 =item File::Basename
 
-Split a pathname into pieces
+Parse file paths into directory, filename and suffix.
 
 =item File::CheckTree
 
@@ -768,6 +780,10 @@ Traverse a directory tree.
 =item File::Glob
 
 Perl extension for BSD glob routine
+
+=item File::GlobMapper
+
+Extend File Glob to Allow Input and Output Files
 
 =item File::Path
 
@@ -877,6 +893,18 @@ Query locale information
 
 Load various IO modules
 
+=item IO::Compress::Deflate
+
+Perl interface to write RFC 1950 files/buffers
+
+=item IO::Compress::Gzip
+
+Perl interface to write RFC 1952 files/buffers
+
+=item IO::Compress::RawDeflate
+
+Perl interface to write RFC 1951 files/buffers
+
 =item IO::Dir
 
 Supply object methods for directory handles
@@ -916,6 +944,22 @@ Object interface for AF_INET domain sockets
 =item IO::Socket::UNIX
 
 Object interface for AF_UNIX domain sockets
+
+=item IO::Uncompress::AnyInflate
+
+Perl interface to read RFC 1950, 1951 & 1952 files/buffers
+
+=item IO::Uncompress::Gunzip
+
+Perl interface to read RFC 1952 files/buffers
+
+=item IO::Uncompress::Inflate
+
+Perl interface to read RFC 1950 files/buffers
+
+=item IO::Uncompress::RawInflate
+
+Perl interface to read RFC 1951 files/buffers
 
 =item IO::Zlib
 
@@ -1157,6 +1201,10 @@ PerlIO layer for quoted-printable strings
 
 Check pod documents for syntax errors
 
+=item Pod::Escapes
+
+For resolving Pod EE<lt>...E<gt> sequences
+
 =item Pod::Find
 
 Find POD documents in directory trees
@@ -1236,6 +1284,90 @@ Perl extension for converting Pod to old style Pod.
 =item Pod::Select
 
 Extract selected sections of POD from input
+
+=item Pod::Simple
+
+Framework for parsing Pod
+
+=item Pod::Simple::Checker
+
+Check the Pod syntax of a document
+
+=item Pod::Simple::Debug
+
+Put Pod::Simple into trace/debug mode
+
+=item Pod::Simple::DumpAsText
+
+Dump Pod-parsing events as text
+
+=item Pod::Simple::DumpAsXML
+
+Turn Pod into XML
+
+=item Pod::Simple::HTML
+
+Convert Pod to HTML
+
+=item Pod::Simple::HTMLBatch
+
+Convert several Pod files to several HTML files
+
+=item Pod::Simple::LinkSection
+
+Represent "section" attributes of L codes
+
+=item Pod::Simple::Methody
+
+Turn Pod::Simple events into method calls
+
+=item Pod::Simple::PullParser
+
+A pull-parser interface to parsing Pod
+
+=item Pod::Simple::PullParserEndToken
+
+End-tokens from Pod::Simple::PullParser
+
+=item Pod::Simple::PullParserStartToken
+
+Start-tokens from Pod::Simple::PullParser
+
+=item Pod::Simple::PullParserTextToken
+
+Text-tokens from Pod::Simple::PullParser
+
+=item Pod::Simple::PullParserToken
+
+Tokens from Pod::Simple::PullParser
+
+=item Pod::Simple::RTF
+
+Format Pod as RTF
+
+=item Pod::Simple::Search
+
+Find POD documents in directory trees
+
+=item Pod::Simple::SimpleTree
+
+Parse Pod into a simple parse tree 
+
+=item Pod::Simple::Subclassing
+
+Write a formatter as a Pod::Simple subclass
+
+=item Pod::Simple::Text
+
+Format Pod as plaintext
+
+=item Pod::Simple::TextContent
+
+Get the text content of Pod
+
+=item Pod::Simple::XMLOutStream
+
+Turn Pod into XML
 
 =item Pod::Text
 
@@ -1332,6 +1464,18 @@ Provides a simple framework for writing test scripts
 =item Test::Builder
 
 Backend for building test libraries
+
+=item Test::Builder::Module
+
+Base class for test modules
+
+=item Test::Builder::Tester
+
+Test testsuites that have been built with
+
+=item Test::Builder::Tester::Color
+
+Turn on colour in Test::Builder::Tester
 
 =item Test::Harness
 
