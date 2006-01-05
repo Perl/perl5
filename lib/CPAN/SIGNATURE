@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.50.
+signed via the Module::Signature module, version 0.51.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -14,33 +14,33 @@ not run its Makefile.PL or Build.PL.
 -----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
-SHA1 7c6258e0d5e189256598559147bd86bce9c3d7af ChangeLog
+SHA1 a6c7343a7937488434d7b0254f94787b129df8bd ChangeLog
 SHA1 9b97524a7a91c815e46b19302a33829d3c26bbbf ChangeLog.old
 SHA1 a029ffa2f2252bb8914eb658666244710994d256 Changes.old
-SHA1 f720e1eca4c8e92b1e949cd520baa1dbb708f685 MANIFEST
+SHA1 0fbd0f7751c77f99d1020a10ca82be0b63fe06c1 MANIFEST
 SHA1 c4090d00f577a0c5b562899afb75abc626805eb6 MANIFEST.SKIP
-SHA1 dfd45cc52c5b9e6574002e4c9269a861afe58a13 META.yml
-SHA1 df595c56dc91149309ebdc8590626e19bc3f0c3b Makefile.PL
+SHA1 42cbf3182f3f290d920d9fcbc4081b4d8776b186 META.yml
+SHA1 7e95a16dc2e04fb32ab9a058d8b25b720377e6c1 Makefile.PL
 SHA1 37e858c51409a297ef5d3fb35dc57cd3b57f9a4d PAUSE2003.pub
 SHA1 af016003ad503ed078c5f8254521d13a3e0c494f PAUSE2005.pub
-SHA1 f32ed86a7fd57f43d1915275016b8c58d5dab10d README
-SHA1 16f430bdc4e303de4b52e9d21f4cafdbbeb8a581 Releasenotes
-SHA1 deb5f988eb8a4b0149157aeded3f64df4c187a6a Todo
+SHA1 fc1836c23a1fae2e86169bbc57058f06fd3ad457 README
+SHA1 b0baafdce51037288ca925516501bfe21ff2b0c7 Releasenotes
+SHA1 6c9eb4b95e9acb5928464b09e7d94a4368d63bbd Todo
 SHA1 efbe8e6882a2caa0d741b113959a706830ab5882 inc/Test/Builder.pm
 SHA1 ae1d68262bedc2475e2c6fd478d99b259b4fb109 inc/Test/More.pm
-SHA1 0dd15d5aa14da1d474253f876cbc18712658a03d lib/Bundle/CPAN.pm
-SHA1 7f915c43ffab0e34eb2ee38f1ceffcf041bba2e3 lib/CPAN.pm
+SHA1 06a0406535e8ae4057e374d4ea8cd5b105483803 lib/Bundle/CPAN.pm
+SHA1 7494410d1d146437bffd50467b54463e264f7515 lib/CPAN.pm
 SHA1 104fd2b39fdba692143655b53bcf01d36c8ebf68 lib/CPAN/Admin.pm
-SHA1 740ad22af61bdfb5029dd30762f8e080a0835ccf lib/CPAN/Debug.pm
-SHA1 ab0b2844394944dca091459ca1779174e94f3c5c lib/CPAN/FirstTime.pm
-SHA1 3710247a21e8a890acd5310c2107f99949a96f7f lib/CPAN/HandleConfig.pm
+SHA1 0dc9b34d14c199a57f26d4d4d9ff7653ca3c5834 lib/CPAN/Debug.pm
+SHA1 a1622c2ff6534ee904d7a70a852f6bedadd2344e lib/CPAN/FirstTime.pm
+SHA1 515c0c0d9e5b453827b72210e6f7f380df0880fa lib/CPAN/HandleConfig.pm
 SHA1 4fa9695417b54fc8d4e29684ad61689bc108274b lib/CPAN/Nox.pm
-SHA1 c0c762668625d72055f5943501f3d4f81e5469e3 lib/CPAN/Tarzip.pm
+SHA1 e85202a30802f3cd86e67af649ba219d97b0925c lib/CPAN/Tarzip.pm
 SHA1 174b3501753423eb90914fb5be043b79e405af28 lib/CPAN/Version.pm
-SHA1 bdaa092be8b158a7c2141c873b2dbd76066f3f8f scripts/cpan
+SHA1 77d2d606c0ce30eac1b8e22933d91d6e219203be scripts/cpan
 SHA1 67e80e1cfc3530932de7743dd0c833b2c387609d t/Nox.t
 SHA1 215dace24b507de20011d36cbe2d16ddea78bcf3 t/loadme.t
-SHA1 9e7950a79a153b532c5094c7091757d51040b218 t/mirroredby.t
+SHA1 325d8a2f72d59c4cd2400c72403c05cd614c3abc t/mirroredby.t
 SHA1 6a79f15a10337bd3450604abf39d4462df2a550b t/pod.t
 SHA1 952e77e7944637eed1b5d202afa98baef8a4c64c t/signature.t
 SHA1 d773586d80dbd79605a4b08c3ef310379c4d09c5 t/vcmp.t
@@ -48,7 +48,7 @@ SHA1 b505a0db80ed4c835ad5676e9d1cbf09c86e6c34 t/version.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v1.4.2 (GNU/Linux)
 
-iD8DBQFDqUWy7IA58KMXwV0RAp6WAKDSRjfNMC4GE7FhVB6LFmwZjUnkRQCfWwFs
-Fsap/ZxE2SC6ljZk5c0jlQE=
-=3CCb
+iD8DBQFDvNKJ7IA58KMXwV0RAvsnAJ9cWtGhEMl4wa5n0Xfeu1WLYBba/wCfQxnO
+RhsZ8JzeCu60s+x3kCqZ4es=
+=RU5L
 -----END PGP SIGNATURE-----
