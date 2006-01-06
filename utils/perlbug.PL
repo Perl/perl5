@@ -28,10 +28,8 @@ open PATCH_LEVEL, "<" . catfile(updir, "patchlevel.h")
     or die "Can't open patchlevel.h: $!";
 
 my $patchlevel_date = (stat PATCH_LEVEL)[9];
-my $patchnum = "";
 
 while (<PATCH_LEVEL>) {
-    $patchnum = $1 if /#define PERL_PATCHNUM\s+(\d+)/;
     last if $_ =~ /^\s*static\s+(?:const\s+)?char.*?local_patches\[\]\s*=\s*{\s*$/;
 }
 
@@ -44,7 +42,6 @@ while (<PATCH_LEVEL>) {
     last if /^\s*}/;
     chomp;
     s/^\s+,?\s*"?//;
-    s/"\s+STRINGIFY\(PERL_PATCHNUM\)/$patchnum"/;
     s/"?\s*,?$//;
     s/(['\\])/\\$1/g;
     push @patches, $_ unless $_ eq 'NULL';

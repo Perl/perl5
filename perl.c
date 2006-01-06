@@ -3219,7 +3219,11 @@ Perl_moreswitches(pTHX_ char *s)
 	    upg_version(PL_patchlevel);
 #if !defined(DGUX)
 	PerlIO_printf(PerlIO_stdout(),
-		Perl_form(aTHX_ "\nThis is perl, %"SVf" built for %s",
+		Perl_form(aTHX_ "\nThis is perl, %"SVf
+#ifdef PERL_PATCHNUM
+			  " DEVEL" STRINGIFY(PERL_PATCHNUM)
+#endif
+			  " built for %s",
 		    vstringify(PL_patchlevel),
 		    ARCHNAME));
 #else /* DGUX */
