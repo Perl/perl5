@@ -453,7 +453,7 @@ $xs_subname(sv)
 	SV *		sv;
         const char *	s = SvPV(sv, len);
     PPCODE:
-	if (hv_exists(${c_subname}_missing, s, SvUTF8(sv) ? -len : len)) {
+	if (hv_exists(${c_subname}_missing, s, SvUTF8(sv) ? -(I32)len : len)) {
 	    sv = newSVpvf("Your vendor has not defined $package_sprintf_safe macro %" SVf
 			  ", used", sv);
 	} else {
