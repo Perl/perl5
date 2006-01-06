@@ -355,7 +355,8 @@ STATIC void
 S_printbuf(pTHX_ const char* fmt, const char* s)
 {
     SV* tmp = newSVpvn("", 0);
-    PerlIO_printf(Perl_debug_log, fmt, pv_display(tmp, s, strlen(s), 0, 60));
+    PerlIO_printf(Perl_debug_log, fmt,
+		  pv_display(tmp, (char *)s, strlen(s), 0, 60));
     SvREFCNT_dec(tmp);
 }
 
