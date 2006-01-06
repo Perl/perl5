@@ -3053,7 +3053,7 @@ Perl_moreswitches(pTHX_ char *s)
 	Safefree(PL_inplace);
 #if defined(__CYGWIN__) /* do backup extension automagically */
 	if (*(s+1) == '\0') {
-	PL_inplace = savepvn(STR_WITH_LEN(".bak"));
+	PL_inplace = savepvs(".bak");
 	return s+1;
 	}
 #endif /* __CYGWIN__ */
