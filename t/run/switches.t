@@ -11,7 +11,7 @@ BEGIN {
 
 require "./test.pl";
 
-plan(tests => 30);
+plan(tests => 31);
 
 use Config;
 
@@ -125,8 +125,24 @@ $r = runperl(
 );
 is( $r, '21-', '-s switch parsing' );
 
-# Bug ID 20011106.084
 $filename = 'swstest.tmp';
+SKIP: {
+    open my $f, ">$filename" or skip( "Can't write temp file $filename: $!" );
+    print $f <<'SWTEST';
+#!perl -s
+BEGIN { print $x,$y; exit }
+SWTEST
+    close $f or die "Could not close: $!";
+    $r = runperl(
+	progfile    => $filename,
+	args	    => [ '-x=foo -y' ],
+    );
+    is( $r, 'foo1', '-s on the shebang line' );
+    push @tmpfiles, $filename;
+}
+
+# Bug ID 20011106.084
+$filename = 'swsntest.tmp';
 SKIP: {
     open my $f, ">$filename" or skip( "Can't write temp file $filename: $!" );
     print $f <<'SWTEST';
@@ -138,7 +154,7 @@ SWTEST
 	progfile    => $filename,
 	args	    => [ '-x=foo' ],
     );
-    is( $r, 'foo', '-s on the shebang line' );
+    is( $r, 'foo', '-sn on the shebang line' );
     push @tmpfiles, $filename;
 }
 
