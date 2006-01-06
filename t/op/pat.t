@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1186\n";
+print "1..1187\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3375,4 +3375,16 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
     ok($latin1 =~ /(abc|$utf8)/i, "# latin/utf8 trie runtime");
 }
 
-# last test 1186
+# [perl #37038] Global regular matches generate invalid pointers
+
+{
+    my $s = "abcd";
+    $s =~ /(..)(..)/g;
+    $s = $1;
+    $s = $2;
+    ok($s eq 'cd',
+       "# assigning to original string should not corrupt match vars");
+}
+
+# last test 1187
+

@@ -1920,14 +1920,11 @@ PP(pp_iter)
 	    RETPUSHNO;
 
 	if (SvMAGICAL(av) || AvREIFY(av)) {
-	    SV **svp = av_fetch(av, cx->blk_loop.iterix--, FALSE);
-	    if (svp)
-		sv = *svp;
-	    else
-		sv = Nullsv;
+	    SV ** const svp = av_fetch(av, --cx->blk_loop.iterix, FALSE);
+	    sv = svp ? *svp : Nullsv;
 	}
 	else {
-	    sv = AvARRAY(av)[cx->blk_loop.iterix--];
+	    sv = AvARRAY(av)[--cx->blk_loop.iterix];
 	}
     }
     else {
