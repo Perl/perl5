@@ -4031,6 +4031,9 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 	pos++;
     }
 
+    if ( alpha && !saw_period )
+	Perl_croak(aTHX_ "Invalid version format (alpha without decimal)");
+
     if ( saw_period > 1 )
 	qv = 1; /* force quoted version processing */
 

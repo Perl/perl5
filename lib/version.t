@@ -4,7 +4,7 @@
 
 #########################
 
-use Test::More tests => 202;
+use Test::More qw(no_plan);
 
 diag "Tests with base class" unless $ENV{PERL_CORE};
 
@@ -94,6 +94,10 @@ sub BaseTests {
 	like($@, qr/underscores before decimal/,
 	    "Invalid version format (underscores before decimal)");
 	
+	eval {my $version = $CLASS->new("1_2")};
+	like($@, qr/alpha without decimal/,
+	    "Invalid version format (alpha without decimal)");
+
 	$version = $CLASS->new("99 and 44/100 pure");
 	ok ("$version" eq "99.000", '$version eq "99.000"');
 	ok ($version->numify == 99.0, '$version->numify == 99.0');

@@ -8166,6 +8166,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		 */
 		if (sv_derived_from(vecsv, "version")) {
 		    char *version = savesvpv(vecsv);
+		    if ( hv_exists((HV*)SvRV(vecsv), "alpha", 5 ) ) {
+			Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
+			"vector argument not supported with alpha versions");
+			goto unknown;
+		    }
 		    vecsv = sv_newmortal();
 		    /* scan_vstring is expected to be called during
 		     * tokenization, so we need to fake up the end

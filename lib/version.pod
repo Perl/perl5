@@ -55,13 +55,24 @@ and to not rely on hidden behavior of the parser.
 =item * Be careful
 
 If you are using Module::Build or ExtUtils::MakeMaker, so that you can
-release your module to CPAN, you have to recognize that none of those
-programs currently handles version objects natively (yet).  That also
-goes for the CPAN indexer (PAUSE).  Although there are modules on CPAN
-that employ the version module internally, the support for assigning a
-module $VERSION scalar is still lacking.  Both Module::Build and the 
-PAUSE indexer will [hopefully soon] include support for version 
-objects.
+release your module to CPAN, you have to recognize that neither of those
+programs completely handles version objects natively (yet).  If you use
+version objects with Module::Build, you should add an explicit dependency
+to the release of version.pm in your Build.PL:
+
+  my $builder = Module::Build->new(
+     ...
+     requires => {
+         ... ,
+         'version'    => 0.50,
+	 ...,
+     },
+     ...
+  );
+
+and it should Just Work(TM).  Module::Build will [hopefully soon] 
+include full support for version objects; there are no current plans 
+to patch ExtUtils::MakeMaker to support version objects.
 
 =head2 What IS a version
 
