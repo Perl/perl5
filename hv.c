@@ -1757,8 +1757,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	 * so the iteration count needs to be reset back to the beginning
 	 */
 	hv_iterinit(hv);
-	iter = HvAUX(hv);
-	oldentry = entry = iter->xhv_eiter; /* HvEITER(hv) */
+	oldentry = entry = xhv->xhv_eiter; /* HvEITER(hv) */
 #endif
     }
 #endif
