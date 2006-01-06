@@ -177,6 +177,7 @@ Public API:
 void
 Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
 {
+    dVAR;
     void *new_chunk;
     U32 new_chunk_size;
     LOCK_SV_MUTEX;
@@ -236,6 +237,7 @@ Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
 STATIC SV*
 S_more_sv(pTHX)
 {
+    dVAR;
     SV* sv;
 
     if (PL_nice_chunk) {
@@ -314,6 +316,7 @@ S_new_SV(pTHX)
 STATIC void
 S_del_sv(pTHX_ SV *p)
 {
+    dVAR;
     if (DEBUG_D_TEST) {
 	SV* sva;
 	bool ok = 0;
@@ -357,6 +360,7 @@ and split it into a list of free SVs.
 void
 Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
 {
+    dVAR;
     SV* const sva = (SV*)ptr;
     register SV* sv;
     register SV* svend;
@@ -394,6 +398,7 @@ Perl_sv_add_arena(pTHX_ char *ptr, U32 size, U32 flags)
 STATIC I32
 S_visit(pTHX_ SVFUNC_t f, U32 flags, U32 mask)
 {
+    dVAR;
     SV* sva;
     I32 visited = 0;
 
@@ -448,6 +453,7 @@ Perl_sv_report_used(pTHX)
 static void
 do_clean_objs(pTHX_ SV *ref)
 {
+    dVAR;
     if (SvROK(ref)) {
 	SV * const target = SvRV(ref);
 	if (SvOBJECT(target)) {
@@ -473,6 +479,7 @@ do_clean_objs(pTHX_ SV *ref)
 static void
 do_clean_named_objs(pTHX_ SV *sv)
 {
+    dVAR;
     if (SvTYPE(sv) == SVt_PVGV && GvGP(sv)) {
 	if ((
 #ifdef PERL_DONT_CREATE_GVSV
@@ -503,6 +510,7 @@ Attempt to destroy all objects not yet freed
 void
 Perl_sv_clean_objs(pTHX)
 {
+    dVAR;
     PL_in_clean_objs = TRUE;
     visit(do_clean_objs, SVf_ROK, SVf_ROK);
 #ifndef DISABLE_DESTRUCTOR_KLUDGE
@@ -517,6 +525,7 @@ Perl_sv_clean_objs(pTHX)
 static void
 do_clean_all(pTHX_ SV *sv)
 {
+    dVAR;
     DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning loops: SV at 0x%"UVxf"\n", PTR2UV(sv)) ));
     SvFLAGS(sv) |= SVf_BREAK;
     if (PL_comppad == (AV*)sv) {
@@ -539,6 +548,7 @@ SVs which are in complex self-referential hierarchies.
 I32
 Perl_sv_clean_all(pTHX)
 {
+    dVAR;
     I32 cleaned;
     PL_in_clean_all = TRUE;
     cleaned = visit(do_clean_all, 0,0);
@@ -573,6 +583,7 @@ heads and bodies within the arenas must already have been freed.
 void
 Perl_sv_free_arenas(pTHX)
 {
+    dVAR;
     SV* sva;
     SV* svanext;
     int i;
@@ -640,6 +651,7 @@ Perl_sv_free_arenas(pTHX)
 STATIC void *
 S_more_bodies (pTHX_ size_t size, svtype sv_type)
 {
+    dVAR;
     void ** const arena_root	= &PL_body_arenaroots[sv_type];
     void ** const root		= &PL_body_roots[sv_type];
     char *start;
@@ -693,6 +705,7 @@ S_more_bodies (pTHX_ size_t size, svtype sv_type)
 STATIC void *
 S_new_body(pTHX_ size_t size, svtype sv_type)
 {
+    dVAR;
     void *xpv;
     new_body_inline(xpv, size, sv_type);
     return xpv;
@@ -930,6 +943,7 @@ You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 void
 Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 {
+    dVAR;
     void*	old_body;
     void*	new_body;
     const U32	old_type = SvTYPE(sv);
@@ -1255,6 +1269,7 @@ Does not handle 'set' magic.  See also C<sv_setiv_mg>.
 void
 Perl_sv_setiv(pTHX_ register SV *sv, IV i)
 {
+    dVAR;
     SV_CHECK_THINKFIRST_COW_DROP(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
@@ -1355,6 +1370,7 @@ Does not handle 'set' magic.  See also C<sv_setnv_mg>.
 void
 Perl_sv_setnv(pTHX_ register SV *sv, NV num)
 {
+    dVAR;
     SV_CHECK_THINKFIRST_COW_DROP(sv);
     switch (SvTYPE(sv)) {
     case SVt_NULL:
@@ -1403,6 +1419,7 @@ Perl_sv_setnv_mg(pTHX_ register SV *sv, NV num)
 STATIC void
 S_not_a_number(pTHX_ SV *sv)
 {
+     dVAR;
      SV *dsv;
      char tmpbuf[64];
      const char *pv;
@@ -1584,6 +1601,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
 STATIC int
 S_sv_2iuv_non_preserve(pTHX_ register SV *sv, I32 numtype)
 {
+    dVAR;
     DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2iuv_non '%s', IV=0x%"UVxf" NV=%"NVgf" inttype=%"UVXf"\n", SvPVX_const(sv), SvIVX(sv), SvNVX(sv), (UV)numtype));
     if (SvNVX(sv) < (NV)IV_MIN) {
 	(void)SvIOKp_on(sv);
@@ -1630,6 +1648,7 @@ S_sv_2iuv_non_preserve(pTHX_ register SV *sv, I32 numtype)
 
 STATIC bool
 S_sv_2iuv_common(pTHX_ SV *sv) {
+    dVAR;
     if (SvNOKp(sv)) {
 	/* erm. not sure. *should* never get NOKp (without NOK) from sv_2nv
 	 * without also getting a cached IV/UV from it at the same time
@@ -1881,6 +1900,7 @@ Normally used via the C<SvIV(sv)> and C<SvIVx(sv)> macros.
 IV
 Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 {
+    dVAR;
     if (!sv)
 	return 0;
     if (SvGMAGICAL(sv)) {
@@ -1960,6 +1980,7 @@ Normally used via the C<SvUV(sv)> and C<SvUVx(sv)> macros.
 UV
 Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
 {
+    dVAR;
     if (!sv)
 	return 0;
     if (SvGMAGICAL(sv)) {
@@ -2034,6 +2055,7 @@ macros.
 NV
 Perl_sv_2nv(pTHX_ register SV *sv)
 {
+    dVAR;
     if (!sv)
 	return 0.0;
     if (SvGMAGICAL(sv)) {
@@ -2263,6 +2285,7 @@ S_uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
 
 static char *
 S_stringify_regexp(pTHX_ SV *sv, MAGIC *mg, STRLEN *lp) {
+    dVAR;
     const regexp * const re = (regexp *)mg->mg_obj;
 
     if (!mg->mg_ptr) {
@@ -2352,6 +2375,7 @@ usually end up here too.
 char *
 Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 {
+    dVAR;
     register char *s;
 
     if (!sv) {
@@ -2638,6 +2662,7 @@ sv_true() or its macro equivalent.
 bool
 Perl_sv_2bool(pTHX_ register SV *sv)
 {
+    dVAR;
     SvGETMAGIC(sv);
 
     if (!SvOK(sv))
@@ -2701,6 +2726,7 @@ use the Encode extension for that.
 STRLEN
 Perl_sv_utf8_upgrade_flags(pTHX_ register SV *sv, I32 flags)
 {
+    dVAR;
     if (sv == &PL_sv_undef)
 	return 0;
     if (!SvPOK(sv)) {
@@ -2770,6 +2796,7 @@ use the Encode extension for that.
 bool
 Perl_sv_utf8_downgrade(pTHX_ register SV* sv, bool fail_ok)
 {
+    dVAR;
     if (SvPOKp(sv) && SvUTF8(sv)) {
         if (SvCUR(sv)) {
 	    U8 *s;
@@ -2900,6 +2927,7 @@ copy-ish functions and macros use this underneath.
 void
 Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 {
+    dVAR;
     register U32 sflags;
     register int dtype;
     register int stype;
@@ -3531,6 +3559,7 @@ undefined.  Does not handle 'set' magic.  See C<sv_setpvn_mg>.
 void
 Perl_sv_setpvn(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
 {
+    dVAR;
     register char *dptr;
 
     SV_CHECK_THINKFIRST_COW_DROP(sv);
@@ -3581,6 +3610,7 @@ handle 'set' magic.  See C<sv_setpv_mg>.
 void
 Perl_sv_setpv(pTHX_ register SV *sv, register const char *ptr)
 {
+    dVAR;
     register STRLEN len;
 
     SV_CHECK_THINKFIRST_COW_DROP(sv);
@@ -3630,6 +3660,7 @@ See C<sv_usepvn_mg>.
 void
 Perl_sv_usepvn(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
 {
+    dVAR;
     STRLEN allocate;
     SV_CHECK_THINKFIRST_COW_DROP(sv);
     SvUPGRADE(sv, SVt_PV);
@@ -3731,6 +3762,7 @@ with flags set to 0.
 void
 Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 {
+    dVAR;
 #ifdef PERL_OLD_COPY_ON_WRITE
     if (SvREADONLY(sv)) {
         /* At this point I believe I should acquire a global SV mutex.  */
@@ -3860,6 +3892,7 @@ in terms of this function.
 void
 Perl_sv_catpvn_flags(pTHX_ register SV *dsv, register const char *sstr, register STRLEN slen, I32 flags)
 {
+    dVAR;
     STRLEN dlen;
     const char * const dstr = SvPV_force_flags(dsv, dlen, flags);
 
@@ -3894,6 +3927,7 @@ and C<sv_catsv_nomg> are implemented in terms of this function.
 void
 Perl_sv_catsv_flags(pTHX_ SV *dsv, register SV *ssv, I32 flags)
 {
+    dVAR;
     if (ssv) {
 	STRLEN slen;
 	const char *spv = SvPV_const(ssv, slen);
@@ -3942,6 +3976,7 @@ valid UTF-8.  Handles 'get' magic, but not 'set' magic.  See C<sv_catpv_mg>.
 void
 Perl_sv_catpv(pTHX_ register SV *sv, register const char *ptr)
 {
+    dVAR;
     register STRLEN len;
     STRLEN tlen;
     char *junk;
@@ -3987,6 +4022,7 @@ macro.
 SV *
 Perl_newSV(pTHX_ STRLEN len)
 {
+    dVAR;
     register SV *sv;
 
     new_SV(sv);
@@ -4019,6 +4055,7 @@ MAGIC *
 Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, const MGVTBL *vtable,
 		 const char* name, I32 namlen)
 {
+    dVAR;
     MAGIC* mg;
 
     if (SvTYPE(sv) < SVt_PVMG) {
@@ -4103,6 +4140,7 @@ to add more than one instance of the same 'how'.
 void
 Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 namlen)
 {
+    dVAR;
     const MGVTBL *vtable;
     MAGIC* mg;
 
@@ -4353,6 +4391,7 @@ Perl_sv_rvweaken(pTHX_ SV *sv)
 void
 Perl_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 {
+    dVAR;
     AV *av;
 
     if (SvTYPE(tsv) == SVt_PVHV) {
@@ -4406,6 +4445,7 @@ Perl_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 STATIC void
 S_sv_del_backref(pTHX_ SV *tsv, SV *sv)
 {
+    dVAR;
     AV *av = NULL;
     SV **svp;
     I32 i;
@@ -4505,6 +4545,7 @@ the Perl substr() function.
 void
 Perl_sv_insert(pTHX_ SV *bigstr, STRLEN offset, STRLEN len, const char *little, STRLEN littlelen)
 {
+    dVAR;
     register char *big;
     register char *mid;
     register char *midend;
@@ -4602,6 +4643,7 @@ time you'll want to use C<sv_setsv> or one of its many macro front-ends.
 void
 Perl_sv_replace(pTHX_ register SV *sv, register SV *nsv)
 {
+    dVAR;
     const U32 refcnt = SvREFCNT(sv);
     SV_CHECK_THINKFIRST_COW_DROP(sv);
     if (SvREFCNT(nsv) != 1) {
@@ -5388,6 +5430,7 @@ coerce its args to strings if necessary.
 I32
 Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 {
+    dVAR;
     const char *pv1;
     STRLEN cur1;
     const char *pv2;
@@ -5483,6 +5526,7 @@ coerce its args to strings if necessary.  See also C<sv_cmp_locale>.
 I32
 Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 {
+    dVAR;
     STRLEN cur1, cur2;
     const char *pv1, *pv2;
     char *tpv = Nullch;
@@ -5566,6 +5610,7 @@ if necessary.  See also C<sv_cmp_locale>.  See also C<sv_cmp>.
 I32
 Perl_sv_cmp_locale(pTHX_ register SV *sv1, register SV *sv2)
 {
+    dVAR;
 #ifdef USE_LOCALE_COLLATE
 
     char *pv1, *pv2;
@@ -5630,6 +5675,7 @@ settings.
 char *
 Perl_sv_collxfrm(pTHX_ SV *sv, STRLEN *nxp)
 {
+    dVAR;
     MAGIC *mg;
 
     mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_collxfrm) : (MAGIC *) NULL;
@@ -5686,6 +5732,7 @@ appending to the currently-stored string.
 char *
 Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 {
+    dVAR;
     const char *rsptr;
     STRLEN rslen;
     register STDCHAR rslast;
@@ -6041,6 +6088,7 @@ if necessary. Handles 'get' magic.
 void
 Perl_sv_inc(pTHX_ register SV *sv)
 {
+    dVAR;
     register char *d;
     int flags;
 
@@ -6197,6 +6245,7 @@ if necessary. Handles 'get' magic.
 void
 Perl_sv_dec(pTHX_ register SV *sv)
 {
+    dVAR;
     int flags;
 
     if (!sv)
@@ -6313,6 +6362,7 @@ statement boundaries.  See also C<sv_newmortal> and C<sv_2mortal>.
 SV *
 Perl_sv_mortalcopy(pTHX_ SV *oldstr)
 {
+    dVAR;
     register SV *sv;
 
     new_SV(sv);
@@ -6337,6 +6387,7 @@ See also C<sv_mortalcopy> and C<sv_2mortal>.
 SV *
 Perl_sv_newmortal(pTHX)
 {
+    dVAR;
     register SV *sv;
 
     new_SV(sv);
@@ -6385,6 +6436,7 @@ strlen().  For efficiency, consider using C<newSVpvn> instead.
 SV *
 Perl_newSVpv(pTHX_ const char *s, STRLEN len)
 {
+    dVAR;
     register SV *sv;
 
     new_SV(sv);
@@ -6406,6 +6458,7 @@ C<len> bytes long.  If the C<s> argument is NULL the new SV will be undefined.
 SV *
 Perl_newSVpvn(pTHX_ const char *s, STRLEN len)
 {
+    dVAR;
     register SV *sv;
 
     new_SV(sv);
@@ -6427,6 +6480,7 @@ SV if the hek is NULL.
 SV *
 Perl_newSVhek(pTHX_ const HEK *hek)
 {
+    dVAR;
     if (!hek) {
 	SV *sv;
 
@@ -6485,6 +6539,7 @@ hash lookup will avoid string compare.
 SV *
 Perl_newSVpvn_share(pTHX_ const char *src, I32 len, U32 hash)
 {
+    dVAR;
     register SV *sv;
     bool is_utf8 = FALSE;
     if (len < 0) {
@@ -6555,6 +6610,7 @@ Perl_newSVpvf(pTHX_ const char* pat, ...)
 SV *
 Perl_vnewSVpvf(pTHX_ const char* pat, va_list* args)
 {
+    dVAR;
     register SV *sv;
     new_SV(sv);
     sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
@@ -6573,6 +6629,7 @@ The reference count for the SV is set to 1.
 SV *
 Perl_newSVnv(pTHX_ NV n)
 {
+    dVAR;
     register SV *sv;
 
     new_SV(sv);
@@ -6592,6 +6649,7 @@ SV is set to 1.
 SV *
 Perl_newSViv(pTHX_ IV i)
 {
+    dVAR;
     register SV *sv;
 
     new_SV(sv);
@@ -6611,6 +6669,7 @@ The reference count for the SV is set to 1.
 SV *
 Perl_newSVuv(pTHX_ UV u)
 {
+    dVAR;
     register SV *sv;
 
     new_SV(sv);
@@ -6630,6 +6689,7 @@ SV is B<not> incremented.
 SV *
 Perl_newRV_noinc(pTHX_ SV *tmpRef)
 {
+    dVAR;
     register SV *sv;
 
     new_SV(sv);
@@ -6647,6 +6707,7 @@ Perl_newRV_noinc(pTHX_ SV *tmpRef)
 SV *
 Perl_newRV(pTHX_ SV *tmpRef)
 {
+    dVAR;
     return newRV_noinc(SvREFCNT_inc(tmpRef));
 }
 
@@ -6662,6 +6723,7 @@ Creates a new SV which is an exact duplicate of the original SV.
 SV *
 Perl_newSVsv(pTHX_ register SV *old)
 {
+    dVAR;
     register SV *sv;
 
     if (!old)
@@ -6964,7 +7026,7 @@ C<SvPV_force> and C<SvPV_force_nomg>
 char *
 Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 {
-
+    dVAR;
     if (SvTHINKFIRST(sv) && !SvROK(sv))
         sv_force_normal_flags(sv, 0);
 
@@ -7162,6 +7224,7 @@ reference count is 1.
 SV*
 Perl_newSVrv(pTHX_ SV *rv, const char *classname)
 {
+    dVAR;
     SV *sv;
 
     new_SV(sv);
@@ -7217,6 +7280,7 @@ Note that C<sv_setref_pvn> copies the string while this copies the pointer.
 SV*
 Perl_sv_setref_pv(pTHX_ SV *rv, const char *classname, void *pv)
 {
+    dVAR;
     if (!pv) {
 	sv_setsv(rv, &PL_sv_undef);
 	SvSETMAGIC(rv);
@@ -7318,6 +7382,7 @@ of the SV is unaffected.
 SV*
 Perl_sv_bless(pTHX_ SV *sv, HV *stash)
 {
+    dVAR;
     SV *tmpRef;
     if (!SvROK(sv))
         Perl_croak(aTHX_ "Can't bless non-reference value");
@@ -7357,6 +7422,7 @@ Perl_sv_bless(pTHX_ SV *sv, HV *stash)
 STATIC void
 S_sv_unglob(pTHX_ SV *sv)
 {
+    dVAR;
     void *xpvmg;
 
     assert(SvTYPE(sv) == SVt_PVGV);
@@ -7714,6 +7780,7 @@ Perl_sv_vsetpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 STATIC I32
 S_expect_number(pTHX_ char** pattern)
 {
+    dVAR;
     I32 var = 0;
     switch (**pattern) {
     case '1': case '2': case '3':
@@ -7781,6 +7848,7 @@ Usually used via one of its frontends C<sv_vcatpvf> and C<sv_vcatpvf_mg>.
 void
 Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV **svargs, I32 svmax, bool *maybe_tainted)
 {
+    dVAR;
     char *p;
     char *q;
     const char *patend;
@@ -11100,6 +11168,7 @@ S_find_hash_subscript(pTHX_ HV *hv, SV* val)
 STATIC I32
 S_find_array_subscript(pTHX_ AV *av, SV* val)
 {
+    dVAR;
     SV** svp;
     I32 i;
     if (!av || SvMAGICAL(av) || !AvARRAY(av) ||
@@ -11506,6 +11575,7 @@ Print appropriate "Use of uninitialized variable" warning
 void
 Perl_report_uninit(pTHX_ SV* uninit_sv)
 {
+    dVAR;
     if (PL_op) {
 	SV* varname = Nullsv;
 	if (uninit_sv) {

@@ -581,6 +581,7 @@ Perl_do_exec(pTHX_ const char *cmd)
 void
 Perl_do_pipe(pTHX_ SV *sv, GV *rgv, GV *wgv)
 {
+    dVAR;
     register IO *rstio;
     register IO *wstio;
     int fd[2];
@@ -674,21 +675,25 @@ PP(pp_mapstart)
 /* These ops all have the same body as pp_null.  */
 PP(pp_scalar)
 {
+    dVAR;
     return NORMAL;
 }
 
 PP(pp_regcmaybe)
 {
+    dVAR;
     return NORMAL;
 }
 
 PP(pp_lineseq)
 {
+    dVAR;
     return NORMAL;
 }
 
 PP(pp_scope)
 {
+    dVAR;
     return NORMAL;
 }
 

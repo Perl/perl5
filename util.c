@@ -60,6 +60,7 @@ int putenv(char *);
 static char *
 S_write_no_mem(pTHX)
 {
+    dVAR;
     /* Can't use PerlIO to write as it allocates memory */
     PerlLIO_write(PerlIO_fileno(Perl_error_log),
 		  PL_no_mem, strlen(PL_no_mem));
@@ -180,9 +181,10 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 Free_t
 Perl_safesysfree(Malloc_t where)
 {
-    dVAR;
 #if defined(PERL_IMPLICIT_SYS) || defined(PERL_TRACK_MEMPOOL)
     dTHX;
+#else
+    dVAR;
 #endif
     DEBUG_m( PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) free\n",PTR2UV(where),(long)PL_an++));
     if (where) {
@@ -424,6 +426,7 @@ Analyses the string in order to make fast searches on it using fbm_instr()
 void
 Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 {
+    dVAR;
     register const U8 *s;
     register U32 i;
     STRLEN len;
@@ -691,6 +694,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 char *
 Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift, I32 *old_posp, I32 last)
 {
+    dVAR;
     register const unsigned char *big;
     register I32 pos;
     register I32 previous;
@@ -910,6 +914,7 @@ Perl_savesvpv(pTHX_ SV *sv)
 STATIC SV *
 S_mess_alloc(pTHX)
 {
+    dVAR;
     SV *sv;
     XPVMG *any;
 
@@ -1011,6 +1016,7 @@ Perl_mess(pTHX_ const char *pat, ...)
 STATIC COP*
 S_closest_cop(pTHX_ COP *cop, const OP *o)
 {
+    dVAR;
     /* Look for PL_op starting from o.  cop is the last COP we've seen. */
 
     if (!o || o == PL_op)
@@ -1043,6 +1049,7 @@ S_closest_cop(pTHX_ COP *cop, const OP *o)
 SV *
 Perl_vmess(pTHX_ const char *pat, va_list *args)
 {
+    dVAR;
     SV * const sv = mess_alloc();
     static const char dgd[] = " during global destruction.\n";
 
@@ -1128,6 +1135,7 @@ Perl_write_to_stderr(pTHX_ const char* message, int msglen)
 STATIC void
 S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8)
 {
+    dVAR;
     HV *stash;
     GV *gv;
     CV *cv;
@@ -1200,6 +1208,7 @@ S_vdie_croak_common(pTHX_ const char* pat, va_list* args, STRLEN* msglen,
 OP *
 Perl_vdie(pTHX_ const char* pat, va_list *args)
 {
+    dVAR;
     const char *message;
     const int was_in_eval = PL_in_eval;
     STRLEN msglen;
@@ -1249,6 +1258,7 @@ Perl_die(pTHX_ const char* pat, ...)
 void
 Perl_vcroak(pTHX_ const char* pat, va_list *args)
 {
+    dVAR;
     const char *message;
     STRLEN msglen;
     I32 utf8 = 0;
@@ -1441,6 +1451,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 bool
 Perl_ckwarn(pTHX_ U32 w)
 {
+    dVAR;
     return
 	(
 	       isLEXWARN_on
@@ -1468,6 +1479,7 @@ Perl_ckwarn(pTHX_ U32 w)
 bool
 Perl_ckwarn_d(pTHX_ U32 w)
 {
+    dVAR;
     return
 	   isLEXWARN_off
 	|| PL_curcop->cop_warnings == pWARN_ALL
@@ -2071,6 +2083,7 @@ PerlIO *
 Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
 {
 #if (!defined(DOSISH) || defined(HAS_FORK) || defined(AMIGAOS)) && !defined(OS2) && !defined(VMS) && !defined(__OPEN_VM) && !defined(EPOC) && !defined(MACOS_TRADITIONAL) && !defined(NETWARE)
+    dVAR;
     int p[2];
     register I32 This, that;
     register Pid_t pid;
@@ -2204,6 +2217,7 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
 PerlIO *
 Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 {
+    dVAR;
     int p[2];
     register I32 This, that;
     register Pid_t pid;
@@ -2636,6 +2650,7 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 I32
 Perl_my_pclose(pTHX_ PerlIO *ptr)
 {
+    dVAR;
     Sigsave_t hstat, istat, qstat;
     int status;
     SV **svp;
@@ -2692,6 +2707,7 @@ Perl_my_pclose(pTHX_ PerlIO *ptr)
 I32
 Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
 {
+    dVAR;
     I32 result = 0;
     if (!pid)
 	return -1;
@@ -2877,6 +2893,7 @@ char*
 Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 		 const char *const *const search_ext, I32 flags)
 {
+    dVAR;
     const char *xfound = Nullch;
     char *xfailed = Nullch;
     char tmpbuf[MAXPATHLEN];
@@ -3803,7 +3820,7 @@ int
 Perl_getcwd_sv(pTHX_ register SV *sv)
 {
 #ifndef PERL_MICRO
-
+    dVAR;
 #ifndef INCOMPLETE_TAINTS
     SvTAINTED_on(sv);
 #endif
@@ -4131,6 +4148,7 @@ want to upgrade the SV.
 SV *
 Perl_new_version(pTHX_ SV *ver)
 {
+    dVAR;
     SV * const rv = newSV(0);
     if ( sv_derived_from(ver,"version") ) /* can just copy directly */
     {
@@ -4864,6 +4882,7 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
 U32
 Perl_seed(pTHX)
 {
+    dVAR;
     /*
      * This is really just a quick hack which grabs various garbage
      * values.  It really should be a real hash algorithm which
@@ -4945,6 +4964,7 @@ Perl_seed(pTHX)
 UV
 Perl_get_hash_seed(pTHX)
 {
+    dVAR;
      const char *s = PerlEnv_getenv("PERL_HASH_SEED");
      UV myseed = 0;
 
@@ -5209,6 +5229,7 @@ extending the interpreter's PL_my_cxt_list array */
 void *
 Perl_my_cxt_init(pTHX_ int *index, size_t size)
 {
+    dVAR;
     void *p;
     if (*index == -1) {
 	/* this module hasn't been allocated an index yet */

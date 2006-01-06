@@ -774,13 +774,16 @@ END_EXTERN_C
 START_EXTERN_C
 
 #ifdef PERL_GLOBAL_STRUCT_INIT
+#  define PERL_PPADDR_INITED
 static const Perl_ppaddr_t Gppaddr[]
 #else
 #  ifndef PERL_GLOBAL_STRUCT
+#    define PERL_PPADDR_INITED
 EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 #  endif
 #endif /* PERL_GLOBAL_STRUCT */
 #if (defined(DOINIT) && !defined(PERL_GLOBAL_STRUCT)) || defined(PERL_GLOBAL_STRUCT_INIT)
+#  define PERL_PPADDR_INITED
 = {
 	MEMBER_TO_FPTR(Perl_pp_null),
 	MEMBER_TO_FPTR(Perl_pp_stub),
@@ -1145,16 +1148,21 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_print),	/* Perl_pp_say */
 }
 #endif
+#ifdef PERL_PPADDR_INITED
 ;
+#endif
 
 #ifdef PERL_GLOBAL_STRUCT_INIT
+#  define PERL_CHECK_INITED
 static const Perl_check_t Gcheck[]
 #else
 #  ifndef PERL_GLOBAL_STRUCT
+#    define PERL_CHECK_INITED
 EXT Perl_check_t PL_check[] /* or perlvars.h */
 #  endif
 #endif
 #if (defined(DOINIT) && !defined(PERL_GLOBAL_STRUCT)) || defined(PERL_GLOBAL_STRUCT_INIT)
+#  define PERL_CHECK_INITED
 = {
 	MEMBER_TO_FPTR(Perl_ck_null),	/* null */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* stub */
@@ -1520,7 +1528,9 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* custom */
 }
 #endif
+#ifdef PERL_CHECK_INITED
 ;
+#endif /* #ifdef PERL_CHECK_INITED */
 
 #ifndef PERL_GLOBAL_STRUCT_INIT
 

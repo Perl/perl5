@@ -83,6 +83,7 @@ struct magic_state {
 STATIC void
 S_save_magic(pTHX_ I32 mgs_ix, SV *sv)
 {
+    dVAR;
     MGS* mgs;
     assert(SvMAGICAL(sv));
 #ifdef PERL_OLD_COPY_ON_WRITE
@@ -139,6 +140,7 @@ Do magic after a value is retrieved from the SV.  See C<sv_magic>.
 int
 Perl_mg_get(pTHX_ SV *sv)
 {
+    dVAR;
     const I32 mgs_ix = SSNEW(sizeof(MGS));
     const bool was_temp = (bool)SvTEMP(sv);
     int have_new = 0;
@@ -219,6 +221,7 @@ Do magic after a value is assigned to the SV.  See C<sv_magic>.
 int
 Perl_mg_set(pTHX_ SV *sv)
 {
+    dVAR;
     const I32 mgs_ix = SSNEW(sizeof(MGS));
     MAGIC* mg;
     MAGIC* nextmg;
@@ -251,6 +254,7 @@ Report on the SV's length.  See C<sv_magic>.
 U32
 Perl_mg_length(pTHX_ SV *sv)
 {
+    dVAR;
     MAGIC* mg;
     STRLEN len;
 
@@ -402,6 +406,7 @@ doesn't (eg taint, pos).
 void
 Perl_mg_localize(pTHX_ SV *sv, SV *nsv)
 {
+    dVAR;
     MAGIC *mg;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	const MGVTBL* const vtbl = mg->mg_virtual;
@@ -485,6 +490,7 @@ Perl_mg_free(pTHX_ SV *sv)
 U32
 Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     PERL_UNUSED_ARG(sv);
 
     if (PL_curpm) {
@@ -502,6 +508,7 @@ Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     if (PL_curpm) {
 	register const REGEXP * const rx = PM_GETRE(PL_curpm);
 	if (rx) {
@@ -544,6 +551,7 @@ Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
 U32
 Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     register I32 paren;
     register I32 i;
     register const REGEXP *rx;
@@ -1124,6 +1132,7 @@ Perl_magic_clearenv(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_set_all_env(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     PERL_UNUSED_ARG(mg);
 #if defined(VMS)
     Perl_die(aTHX_ "Can't make list assignment to %%ENV on this system");
@@ -1168,6 +1177,7 @@ restore_sigmask(pTHX_ SV *save_sv)
 int
 Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     /* Are we fetching a signal entry? */
     const I32 i = whichsig(MgPV_nolen_const(mg));
     if (i > 0) {
@@ -1262,6 +1272,7 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
 static void
 S_raise_signal(pTHX_ int sig)
 {
+    dVAR;
     /* Set a flag to say this signal is pending */
     PL_psig_pend[sig]++;
     /* And one to say _a_ signal is pending */
@@ -1324,6 +1335,7 @@ Perl_csighandler_init(void)
 void
 Perl_despatch_signals(pTHX)
 {
+    dVAR;
     int sig;
     PL_sig_pending = 0;
     for (sig = 1; sig < SIG_SIZE; sig++) {
@@ -1463,6 +1475,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(mg);
     PL_sub_generation++;
@@ -1472,6 +1485,7 @@ Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setamagic(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(mg);
     /* HV_badAMAGIC_on(Sv_STASH(sv)); */
@@ -1515,6 +1529,7 @@ Perl_magic_setnkeys(pTHX_ SV *sv, MAGIC *mg)
 STATIC int
 S_magic_methcall(pTHX_ SV *sv, const MAGIC *mg, const char *meth, I32 flags, int n, SV *val)
 {
+    dVAR;
     dSP;
 
     PUSHMARK(SP);
@@ -1691,6 +1706,7 @@ Perl_magic_scalarpack(pTHX_ HV *hv, MAGIC *mg)
 int
 Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     GV * const gv = PL_DBline;
     const I32 i = SvTRUE(sv);
     SV ** const svp = av_fetch(GvAV(gv),
@@ -1711,6 +1727,7 @@ Perl_magic_setdbline(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_getarylen(pTHX_ SV *sv, const MAGIC *mg)
 {
+    dVAR;
     const AV * const obj = (AV*)mg->mg_obj;
     if (obj) {
 	sv_setiv(sv, AvFILL(obj) + PL_curcop->cop_arybase);
@@ -1723,6 +1740,7 @@ Perl_magic_getarylen(pTHX_ SV *sv, const MAGIC *mg)
 int
 Perl_magic_setarylen(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     AV * const obj = (AV*)mg->mg_obj;
     if (obj) {
 	av_fill(obj, SvIV(sv) - PL_curcop->cop_arybase);
@@ -1737,6 +1755,7 @@ Perl_magic_setarylen(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_freearylen_p(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     PERL_UNUSED_ARG(sv);
     /* during global destruction, mg_obj may already have been freed */
     if (PL_in_clean_all)
@@ -1758,6 +1777,7 @@ Perl_magic_freearylen_p(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     SV* const lsv = LvTARG(sv);
 
     if (SvTYPE(lsv) >= SVt_PVMG && SvMAGIC(lsv)) {
@@ -1777,6 +1797,7 @@ Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     SV* const lsv = LvTARG(sv);
     SSize_t pos;
     STRLEN len;
@@ -1882,6 +1903,7 @@ Perl_magic_getsubstr(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     STRLEN len;
     const char *tmps = SvPV_const(sv, len);
     SV * const lsv = LvTARG(sv);
@@ -1915,6 +1937,7 @@ Perl_magic_setsubstr(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_gettaint(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     PERL_UNUSED_ARG(sv);
     TAINT_IF((PL_localizing != 1) && (mg->mg_len & 1));
     return 0;
@@ -1923,6 +1946,7 @@ Perl_magic_gettaint(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_settaint(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     PERL_UNUSED_ARG(sv);
     /* update taint status unless we're restoring at scope exit */
     if (PL_localizing != 2) {
@@ -1960,6 +1984,7 @@ Perl_magic_setvec(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_getdefelem(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     SV *targ = Nullsv;
     if (LvTARGLEN(sv)) {
 	if (mg->mg_obj) {
@@ -2005,6 +2030,7 @@ Perl_magic_setdefelem(pTHX_ SV *sv, MAGIC *mg)
 void
 Perl_vivify_defelem(pTHX_ SV *sv)
 {
+    dVAR;
     MAGIC *mg;
     SV *value = Nullsv;
 
@@ -2090,6 +2116,7 @@ Perl_magic_setregexp(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_freeregexp(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     regexp * const re = (regexp *)mg->mg_obj;
     PERL_UNUSED_ARG(sv);
 
@@ -2129,6 +2156,7 @@ Perl_magic_setutf8(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 {
+    dVAR;
     register const char *s;
     I32 i;
     STRLEN len;
@@ -2741,6 +2769,7 @@ cleanup:
 static void
 S_restore_magic(pTHX_ const void *p)
 {
+    dVAR;
     MGS* const mgs = SSPTR(PTR2IV(p), MGS*);
     SV* const sv = mgs->mgs_sv;
 

@@ -59,20 +59,21 @@
 #  endif
 #endif
 
-#if defined(MULTIPLICITY)
-#  ifndef PERL_IMPLICIT_CONTEXT
-#    define PERL_IMPLICIT_CONTEXT
-#  endif
-#endif
-
 #ifdef PERL_GLOBAL_STRUCT_PRIVATE
 #  ifndef PERL_GLOBAL_STRUCT
 #    define PERL_GLOBAL_STRUCT
 #  endif
 #endif
+
 #ifdef PERL_GLOBAL_STRUCT
 #  ifndef MULTIPLICITY
 #    define MULTIPLICITY
+#  endif
+#endif
+
+#ifdef MULTIPLICITY
+#  ifndef PERL_IMPLICIT_CONTEXT
+#    define PERL_IMPLICIT_CONTEXT
 #  endif
 #endif
 

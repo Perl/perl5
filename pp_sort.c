@@ -341,12 +341,14 @@ typedef struct {
 static I32
 cmp_desc(pTHX_ gptr a, gptr b)
 {
+    dVAR;
     return -PL_sort_RealCmp(aTHX_ a, b);
 }
 
 STATIC void
 S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 {
+    dVAR;
     IV i, run, offset;
     I32 sense, level;
     register gptr *f1, *f2, *t, *b, *p;
@@ -1314,6 +1316,7 @@ S_qsortsvu(pTHX_ SV ** array, size_t num_elts, SVCOMPARE_t compare)
 static I32
 cmpindir(pTHX_ gptr a, gptr b)
 {
+    dVAR;
     gptr * const ap = (gptr *)a;
     gptr * const bp = (gptr *)b;
     const I32 sense = PL_sort_RealCmp(aTHX_ *ap, *bp);
@@ -1326,6 +1329,7 @@ cmpindir(pTHX_ gptr a, gptr b)
 static I32
 cmpindir_desc(pTHX_ gptr a, gptr b)
 {
+    dVAR;
     gptr * const ap = (gptr *)a;
     gptr * const bp = (gptr *)b;
     const I32 sense = PL_sort_RealCmp(aTHX_ *ap, *bp);
@@ -1341,6 +1345,7 @@ cmpindir_desc(pTHX_ gptr a, gptr b)
 STATIC void
 S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 {
+    dVAR;
     if ((flags & SORTf_STABLE) != 0) {
 	 register gptr **pp, *q;
 	 register size_t n, j, i;
@@ -1842,6 +1847,7 @@ S_sv_i_ncmp(pTHX_ SV *a, SV *b)
 static I32
 S_amagic_ncmp(pTHX_ register SV *a, register SV *b)
 {
+    dVAR;
     SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp);
     if (tmpsv) {
         if (SvIOK(tmpsv)) {
@@ -1863,6 +1869,7 @@ S_amagic_ncmp(pTHX_ register SV *a, register SV *b)
 static I32
 S_amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
 {
+    dVAR;
     SV * const tmpsv = tryCALL_AMAGICbin(a,b,ncmp);
     if (tmpsv) {
         if (SvIOK(tmpsv)) {
@@ -1884,6 +1891,7 @@ S_amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
 static I32
 S_amagic_cmp(pTHX_ register SV *str1, register SV *str2)
 {
+    dVAR;
     SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp);
     if (tmpsv) {
         if (SvIOK(tmpsv)) {
@@ -1905,6 +1913,7 @@ S_amagic_cmp(pTHX_ register SV *str1, register SV *str2)
 static I32
 S_amagic_cmp_locale(pTHX_ register SV *str1, register SV *str2)
 {
+    dVAR;
     SV * const tmpsv = tryCALL_AMAGICbin(str1,str2,scmp);
     if (tmpsv) {
         if (SvIOK(tmpsv)) {

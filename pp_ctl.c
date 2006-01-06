@@ -40,6 +40,7 @@
 
 PP(pp_wantarray)
 {
+    dVAR;
     dSP;
     I32 cxix;
     EXTEND(SP, 1);
@@ -60,6 +61,7 @@ PP(pp_wantarray)
 
 PP(pp_regcreset)
 {
+    dVAR;
     /* XXXX Should store the old value to allow for tie/overload - and
        restore in regcomp, where marked with XXXX. */
     PL_reginterp_cnt = 0;
@@ -69,6 +71,7 @@ PP(pp_regcreset)
 
 PP(pp_regcomp)
 {
+    dVAR;
     dSP;
     register PMOP *pm = (PMOP*)cLOGOP->op_other;
     SV *tmpstr;
@@ -180,6 +183,7 @@ PP(pp_regcomp)
 
 PP(pp_substcont)
 {
+    dVAR;
     dSP;
     register PERL_CONTEXT *cx = &cxstack[cxstack_ix];
     register PMOP * const pm = (PMOP*) cLOGOP->op_other;
@@ -385,7 +389,7 @@ Perl_rxres_free(pTHX_ void **rsp)
 
 PP(pp_formline)
 {
-    dSP; dMARK; dORIGMARK;
+    dVAR; dSP; dMARK; dORIGMARK;
     register SV * const tmpForm = *++MARK;
     register U32 *fpc;
     register char *t;
@@ -1047,6 +1051,7 @@ PP(pp_mapwhile)
 
 PP(pp_range)
 {
+    dVAR;
     if (GIMME == G_ARRAY)
 	return NORMAL;
     if (SvTRUEx(PAD_SV(PL_op->op_targ)))
@@ -1057,6 +1062,7 @@ PP(pp_range)
 
 PP(pp_flip)
 {
+    dVAR;
     dSP;
 
     if (GIMME == G_ARRAY) {
@@ -1111,7 +1117,7 @@ PP(pp_flip)
 
 PP(pp_flop)
 {
-    dSP;
+    dVAR; dSP;
 
     if (GIMME == G_ARRAY) {
 	dPOPPOPssrl;
@@ -1201,6 +1207,7 @@ static const char * const context_name[] = {
 STATIC I32
 S_dopoptolabel(pTHX_ const char *label)
 {
+    dVAR;
     register I32 i;
 
     for (i = cxstack_ix; i >= 0; i--) {
@@ -1237,6 +1244,7 @@ S_dopoptolabel(pTHX_ const char *label)
 I32
 Perl_dowantarray(pTHX)
 {
+    dVAR;
     const I32 gimme = block_gimme();
     return (gimme == G_VOID) ? G_SCALAR : gimme;
 }
@@ -1244,6 +1252,7 @@ Perl_dowantarray(pTHX)
 I32
 Perl_block_gimme(pTHX)
 {
+    dVAR;
     const I32 cxix = dopoptosub(cxstack_ix);
     if (cxix < 0)
 	return G_VOID;
@@ -1265,6 +1274,7 @@ Perl_block_gimme(pTHX)
 I32
 Perl_is_lvalue_sub(pTHX)
 {
+    dVAR;
     const I32 cxix = dopoptosub(cxstack_ix);
     assert(cxix >= 0);  /* We should only be called from inside subs */
 
@@ -1277,12 +1287,14 @@ Perl_is_lvalue_sub(pTHX)
 STATIC I32
 S_dopoptosub(pTHX_ I32 startingblock)
 {
+    dVAR;
     return dopoptosub_at(cxstack, startingblock);
 }
 
 STATIC I32
 S_dopoptosub_at(pTHX_ const PERL_CONTEXT *cxstk, I32 startingblock)
 {
+    dVAR;
     I32 i;
     for (i = startingblock; i >= 0; i--) {
 	register const PERL_CONTEXT * const cx = &cxstk[i];
@@ -1302,6 +1314,7 @@ S_dopoptosub_at(pTHX_ const PERL_CONTEXT *cxstk, I32 startingblock)
 STATIC I32
 S_dopoptoeval(pTHX_ I32 startingblock)
 {
+    dVAR;
     I32 i;
     for (i = startingblock; i >= 0; i--) {
 	register const PERL_CONTEXT *cx = &cxstack[i];
@@ -1319,6 +1332,7 @@ S_dopoptoeval(pTHX_ I32 startingblock)
 STATIC I32
 S_dopoptoloop(pTHX_ I32 startingblock)
 {
+    dVAR;
     I32 i;
     for (i = startingblock; i >= 0; i--) {
 	register const PERL_CONTEXT * const cx = &cxstack[i];
@@ -1345,6 +1359,7 @@ S_dopoptoloop(pTHX_ I32 startingblock)
 STATIC I32
 S_dopoptogiven(pTHX_ I32 startingblock)
 {
+    dVAR;
     I32 i;
     for (i = startingblock; i >= 0; i--) {
 	register const PERL_CONTEXT *cx = &cxstack[i];
@@ -1367,6 +1382,7 @@ S_dopoptogiven(pTHX_ I32 startingblock)
 STATIC I32
 S_dopoptowhen(pTHX_ I32 startingblock)
 {
+    dVAR;
     I32 i;
     for (i = startingblock; i >= 0; i--) {
 	register const PERL_CONTEXT *cx = &cxstack[i];
@@ -1384,6 +1400,7 @@ S_dopoptowhen(pTHX_ I32 startingblock)
 void
 Perl_dounwind(pTHX_ I32 cxix)
 {
+    dVAR;
     I32 optype;
 
     while (cxstack_ix > cxix) {
@@ -1420,6 +1437,7 @@ Perl_dounwind(pTHX_ I32 cxix)
 void
 Perl_qerror(pTHX_ SV *err)
 {
+    dVAR;
     if (PL_in_eval)
 	sv_catsv(ERRSV, err);
     else if (PL_errors)
@@ -1527,7 +1545,7 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 
 PP(pp_xor)
 {
-    dSP; dPOPTOPssrl;
+    dVAR; dSP; dPOPTOPssrl;
     if (SvTRUE(left) != SvTRUE(right))
 	RETSETYES;
     else
@@ -1536,6 +1554,7 @@ PP(pp_xor)
 
 PP(pp_caller)
 {
+    dVAR;
     dSP;
     register I32 cxix = dopoptosub(cxstack_ix);
     register const PERL_CONTEXT *cx;
@@ -1700,6 +1719,7 @@ PP(pp_caller)
 
 PP(pp_reset)
 {
+    dVAR;
     dSP;
     const char * const tmps = (MAXARG < 1) ? "" : POPpconstx;
     sv_reset(tmps, CopSTASH(PL_curcop));
@@ -2203,6 +2223,7 @@ PP(pp_redo)
 STATIC OP *
 S_dofindlabel(pTHX_ OP *o, const char *label, OP **opstack, OP **oplimit)
 {
+    dVAR;
     OP **ops = opstack;
     static const char too_deep[] = "Target of goto is too deeply nested";
 
@@ -2607,6 +2628,7 @@ PP(pp_goto)
 
 PP(pp_exit)
 {
+    dVAR;
     dSP;
     I32 anum;
 
@@ -2655,6 +2677,7 @@ S_save_lines(pTHX_ AV *array, SV *sv)
 STATIC void
 S_docatch_body(pTHX)
 {
+    dVAR;
     CALLRUNOPS(aTHX);
     return;
 }
@@ -2662,6 +2685,7 @@ S_docatch_body(pTHX)
 STATIC OP *
 S_docatch(pTHX_ OP *o)
 {
+    dVAR;
     int ret;
     OP * const oldop = PL_op;
     dJMPENV;
@@ -2819,6 +2843,7 @@ than in the scope of the debugger itself).
 CV*
 Perl_find_runcv(pTHX_ U32 *db_seqp)
 {
+    dVAR;
     PERL_SI	 *si;
 
     if (db_seqp)
@@ -3669,6 +3694,7 @@ STATIC
 PMOP *
 S_make_matcher(pTHX_ regexp *re)
 {
+    dVAR;
     PMOP *matcher = (PMOP *) newPMOP(OP_MATCH, OPf_WANT_SCALAR | OPf_STACKED);
     PM_SETRE(matcher, ReREFCNT_inc(re));
     
@@ -3682,6 +3708,7 @@ STATIC
 bool
 S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
 {
+    dVAR;
     dSP;
     
     PL_op = (OP *) matcher;
@@ -3696,6 +3723,7 @@ STATIC
 void
 S_destroy_matcher(pTHX_ PMOP *matcher)
 {
+    dVAR;
     PERL_UNUSED_ARG(matcher);
     FREETMPS;
     LEAVE;
@@ -3748,6 +3776,7 @@ STATIC
 OP *
 S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 {
+    dVAR;
     dSP;
     
     SV *e = TOPs;	/* e is for 'expression' */

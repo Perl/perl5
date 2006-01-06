@@ -56,6 +56,7 @@ Perl_boot_core_xsutils(pTHX)
 static int
 modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 {
+    dVAR;
     SV *attr;
     int nret;
 
@@ -159,6 +160,7 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 
 XS(XS_attributes_bootstrap)
 {
+    dVAR;
     dXSARGS;
     const char file[] = __FILE__;
 
@@ -176,6 +178,7 @@ XS(XS_attributes_bootstrap)
 
 XS(XS_attributes__modify_attrs)
 {
+    dVAR;
     dXSARGS;
     SV *rv, *sv;
 
@@ -197,6 +200,7 @@ usage:
 
 XS(XS_attributes__fetch_attrs)
 {
+    dVAR;
     dXSARGS;
     SV *rv, *sv;
     cv_flags_t cvflags;
@@ -242,6 +246,7 @@ usage:
 
 XS(XS_attributes__guess_stash)
 {
+    dVAR;
     dXSARGS;
     SV *rv, *sv;
     dXSTARG;
@@ -294,6 +299,7 @@ usage:
 
 XS(XS_attributes_reftype)
 {
+    dVAR;
     dXSARGS;
     SV *rv, *sv;
     dXSTARG;
@@ -318,6 +324,7 @@ usage:
 
 XS(XS_attributes__warn_reserved)
 {
+    dVAR;
     dXSARGS;
 
     if (items != 0) {

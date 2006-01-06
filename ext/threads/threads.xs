@@ -771,8 +771,8 @@ ithread_DESTROY(SV *thread)
 
 BOOT:
 {
-        MY_CXT_INIT;
 #ifdef USE_ITHREADS
+        MY_CXT_INIT;
 	ithread* thread;
 	PL_perl_destruct_level = 2;
 	MUTEX_INIT(&create_destruct_mutex);

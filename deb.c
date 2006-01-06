@@ -53,6 +53,7 @@ void
 Perl_vdeb(pTHX_ const char *pat, va_list *args)
 {
 #ifdef DEBUGGING
+    dVAR;
     char* file = OutCopFILE(PL_curcop);
 
     PerlIO_printf(Perl_debug_log, "(%s:%ld)\t", (file ? file : "<free>"),
@@ -68,6 +69,7 @@ I32
 Perl_debstackptrs(pTHX)
 {
 #ifdef DEBUGGING
+    dVAR;
     PerlIO_printf(Perl_debug_log,
 		  "%8"UVxf" %8"UVxf" %8"IVdf" %8"IVdf" %8"IVdf"\n",
 		  PTR2UV(PL_curstack), PTR2UV(PL_stack_base),
@@ -97,6 +99,7 @@ S_deb_stack_n(pTHX_ SV** stack_base, I32 stack_min, I32 stack_max,
 	I32 mark_min, I32 mark_max)
 {
 #ifdef DEBUGGING
+    dVAR;
     register I32 i = stack_max - 30;
     const I32 *markscan = PL_markstack + mark_min;
     if (i < stack_min)
@@ -143,6 +146,7 @@ I32
 Perl_debstack(pTHX)
 {
 #ifndef SKIP_DEBUGGING
+    dVAR;
     if (CopSTASH_eq(PL_curcop, PL_debstash) && !DEBUG_J_TEST_)
 	return 0;
 
@@ -182,6 +186,7 @@ void
 Perl_deb_stack_all(pTHX)
 {
 #ifdef DEBUGGING
+    dVAR;
     I32 si_ix;
     const PERL_SI *si;
 

@@ -41,6 +41,7 @@ Perl_dump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 void
 Perl_dump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
 {
+    dVAR;
     PerlIO_printf(file, "%*s", (int)(level*PL_dumpindent), "");
     PerlIO_vprintf(file, pat, *args);
 }
@@ -48,6 +49,7 @@ Perl_dump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
 void
 Perl_dump_all(pTHX)
 {
+    dVAR;
     PerlIO_setlinebuf(Perl_debug_log);
     if (PL_main_root)
 	op_dump(PL_main_root);
@@ -57,6 +59,7 @@ Perl_dump_all(pTHX)
 void
 Perl_dump_packsubs(pTHX_ const HV *stash)
 {
+    dVAR;
     I32	i;
 
     if (!HvARRAY(stash))
@@ -112,6 +115,7 @@ Perl_dump_form(pTHX_ const GV *gv)
 void
 Perl_dump_eval(pTHX)
 {
+    dVAR;
     op_dump(PL_eval_root);
 }
 
@@ -1097,6 +1101,7 @@ Perl_do_gvgv_dump(pTHX_ I32 level, PerlIO *file, const char *name, GV *sv)
 void
 Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 {
+    dVAR;
     SV *d;
     const char *s;
     U32 flags;
@@ -1586,12 +1591,14 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 void
 Perl_sv_dump(pTHX_ SV *sv)
 {
+    dVAR;
     do_sv_dump(0, Perl_debug_log, sv, 0, 0, 0, 0);
 }
 
 int
 Perl_runops_debug(pTHX)
 {
+    dVAR;
     if (!PL_op) {
 	if (ckWARN_d(WARN_DEBUGGING))
 	    Perl_warner(aTHX_ packWARN(WARN_DEBUGGING), "NULL OP IN RUN");
@@ -1630,6 +1637,7 @@ Perl_runops_debug(pTHX)
 I32
 Perl_debop(pTHX_ const OP *o)
 {
+    dVAR;
     if (CopSTASH_eq(PL_curcop, PL_debstash) && !DEBUG_J_TEST_)
 	return 0;
 
@@ -1678,6 +1686,7 @@ Perl_debop(pTHX_ const OP *o)
 STATIC CV*
 S_deb_curcv(pTHX_ I32 ix)
 {
+    dVAR;
     const PERL_CONTEXT *cx = &cxstack[ix];
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT)
         return cx->blk_sub.cv;
@@ -1694,6 +1703,7 @@ S_deb_curcv(pTHX_ I32 ix)
 void
 Perl_watch(pTHX_ char **addr)
 {
+    dVAR;
     PL_watchaddr = addr;
     PL_watchok = *addr;
     PerlIO_printf(Perl_debug_log, "WATCHING, %"UVxf" is currently %"UVxf"\n",
@@ -1703,6 +1713,7 @@ Perl_watch(pTHX_ char **addr)
 STATIC void
 S_debprof(pTHX_ const OP *o)
 {
+    dVAR;
     if (CopSTASH_eq(PL_curcop, PL_debstash) && !DEBUG_J_TEST_)
 	return;
     if (!PL_profiledata)
@@ -1713,6 +1724,7 @@ S_debprof(pTHX_ const OP *o)
 void
 Perl_debprofdump(pTHX)
 {
+    dVAR;
     unsigned i;
     if (!PL_profiledata)
 	return;

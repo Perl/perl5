@@ -67,6 +67,7 @@ print <<END;
 I32
 Perl_keyword (pTHX_ const char *name, I32 len)
 {
+    dVAR;
 $switch
 unknown:
   return 0;

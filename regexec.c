@@ -178,6 +178,7 @@ static void restore_pos(pTHX_ void *arg);
 STATIC CHECKPOINT
 S_regcppush(pTHX_ I32 parenfloor)
 {
+    dVAR;
     const int retval = PL_savestack_ix;
 #define REGCP_PAREN_ELEMS 4
     const int paren_elems_to_push = (PL_regsize - parenfloor) * REGCP_PAREN_ELEMS;
@@ -222,6 +223,7 @@ S_regcppush(pTHX_ I32 parenfloor)
 STATIC char *
 S_regcppop(pTHX)
 {
+    dVAR;
     I32 i;
     U32 paren = 0;
     char *input;
@@ -286,6 +288,7 @@ S_regcppop(pTHX)
 STATIC char *
 S_regcp_set_to(pTHX_ I32 ss)
 {
+    dVAR;
     const I32 tmp = PL_savestack_ix;
 
     PL_savestack_ix = ss;
@@ -344,6 +347,7 @@ Perl_pregexec(pTHX_ register regexp *prog, char *stringarg, register char *stren
 STATIC void
 S_cache_re(pTHX_ regexp *prog)
 {
+    dVAR;
     PL_regprecomp = prog->precomp;		/* Needed for FAIL. */
 #ifdef DEBUGGING
     PL_regprogram = prog->program;
@@ -403,6 +407,7 @@ char *
 Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		     char *strend, U32 flags, re_scream_pos_data *data)
 {
+    dVAR;
     register I32 start_shift = 0;
     /* Should be nonnegative! */
     register I32 end_shift   = 0;
@@ -1633,6 +1638,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 /* data: May be used for some additional optimizations. */
 /* nosave: For optimizations. */
 {
+    dVAR;
     register char *s;
     register regnode *c;
     register char *startpos = stringarg;
@@ -2102,6 +2108,7 @@ phooey:
 STATIC I32			/* 0 failure, 1 success */
 S_regtry(pTHX_ regexp *prog, char *startpos)
 {
+    dVAR;
     register I32 i;
     register I32 *sp;
     register I32 *ep;
@@ -4601,6 +4608,7 @@ S_regrepeat(pTHX_ const regnode *p, I32 max)
 STATIC I32
 S_regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
 {
+    dVAR;
     register char *scan = Nullch;
     register char *start;
     register char *loceol = PL_regeol;
@@ -4651,6 +4659,7 @@ S_regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
 SV *
 Perl_regclass_swash(pTHX_ register const regnode* node, bool doinit, SV** listsvp, SV **altsvp)
 {
+    dVAR;
     SV *sw  = NULL;
     SV *si  = NULL;
     SV *alt = NULL;
@@ -4826,12 +4835,14 @@ S_reginclass(pTHX_ register const regnode *n, register const U8* p, STRLEN* lenp
 STATIC U8 *
 S_reghop(pTHX_ U8 *s, I32 off)
 {
+    dVAR;
     return S_reghop3(aTHX_ s, off, (U8*)(off >= 0 ? PL_regeol : PL_bostr));
 }
 
 STATIC U8 *
 S_reghop3(pTHX_ U8 *s, I32 off, U8* lim)
 {
+    dVAR;
     if (off >= 0) {
 	while (off-- && s < lim) {
 	    /* XXX could check well-formedness here */
@@ -4856,12 +4867,14 @@ S_reghop3(pTHX_ U8 *s, I32 off, U8* lim)
 STATIC U8 *
 S_reghopmaybe(pTHX_ U8 *s, I32 off)
 {
+    dVAR;
     return S_reghopmaybe3(aTHX_ s, off, (U8*)(off >= 0 ? PL_regeol : PL_bostr));
 }
 
 STATIC U8 *
 S_reghopmaybe3(pTHX_ U8* s, I32 off, U8* lim)
 {
+    dVAR;
     if (off >= 0) {
 	while (off-- && s < lim) {
 	    /* XXX could check well-formedness here */
@@ -4892,6 +4905,7 @@ S_reghopmaybe3(pTHX_ U8* s, I32 off, U8* lim)
 static void
 restore_pos(pTHX_ void *arg)
 {
+    dVAR;
     PERL_UNUSED_ARG(arg);
     if (PL_reg_eval_set) {
 	if (PL_reg_oldsaved) {
@@ -4934,6 +4948,7 @@ S_to_utf8_substr(pTHX_ register regexp *prog)
 STATIC void
 S_to_byte_substr(pTHX_ register regexp *prog)
 {
+    dVAR;
     if (prog->float_utf8 && !prog->float_substr) {
 	SV* sv;
 	prog->float_substr = sv = newSVsv(prog->float_utf8);

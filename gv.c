@@ -73,6 +73,7 @@ Perl_gv_HVadd(pTHX_ register GV *gv)
 GV *
 Perl_gv_IOadd(pTHX_ register GV *gv)
 {
+    dVAR;
     if (!gv || SvTYPE((SV*)gv) != SVt_PVGV) {
 
         /*
@@ -102,6 +103,7 @@ Perl_gv_IOadd(pTHX_ register GV *gv)
 GV *
 Perl_gv_fetchfile(pTHX_ const char *name)
 {
+    dVAR;
     char smallbuf[256];
     char *tmpbuf;
     STRLEN tmplen;
@@ -282,6 +284,7 @@ obtained from the GV with the C<GvCV> macro.
 GV *
 Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 {
+    dVAR;
     AV* av;
     GV* topgv;
     GV* gv;
@@ -482,6 +485,7 @@ C<call_sv> apply equally to these functions.
 GV *
 Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 {
+    dVAR;
     register const char *nend;
     const char *nsplit = NULL;
     GV* gv;
@@ -748,6 +752,7 @@ GV *
 Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		       I32 sv_type)
 {
+    dVAR;
     register const char *name = nambeg;
     register GV *gv = NULL;
     GV**gvp;
@@ -1237,6 +1242,7 @@ Perl_gv_efullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain
 IO *
 Perl_newIO(pTHX)
 {
+    dVAR;
     GV *iogv;
     IO * const io = (IO*)NEWSV(0,0);
 
@@ -1259,6 +1265,7 @@ Perl_newIO(pTHX)
 void
 Perl_gv_check(pTHX_ HV *stash)
 {
+    dVAR;
     register I32 i;
 
     if (!HvARRAY(stash))
@@ -1310,6 +1317,7 @@ Perl_gv_check(pTHX_ HV *stash)
 GV *
 Perl_newGVgen(pTHX_ const char *pack)
 {
+    dVAR;
     return gv_fetchpv(Perl_form(aTHX_ "%s::_GEN_%ld", pack, (long)PL_gensym++),
 		      TRUE, SVt_PVGV);
 }
@@ -1319,6 +1327,7 @@ Perl_newGVgen(pTHX_ const char *pack)
 GP*
 Perl_gp_ref(pTHX_ GP *gp)
 {
+    dVAR;
     if (!gp)
 	return (GP*)NULL;
     gp->gp_refcnt++;
@@ -1340,6 +1349,7 @@ Perl_gp_ref(pTHX_ GP *gp)
 void
 Perl_gp_free(pTHX_ GV *gv)
 {
+    dVAR;
     GP* gp;
 
     if (!gv || !(gp = GvGP(gv)))
@@ -1404,6 +1414,7 @@ Perl_magic_freeovrld(pTHX_ SV *sv, MAGIC *mg)
 bool
 Perl_Gv_AMupdate(pTHX_ HV *stash)
 {
+  dVAR;
   MAGIC* const mg = mg_find((SV*)stash, PERL_MAGIC_overload_table);
   AMT * const amtp = (mg) ? (AMT*)mg->mg_ptr: (AMT *) NULL;
   AMT amt;
@@ -1526,6 +1537,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 CV*
 Perl_gv_handler(pTHX_ HV *stash, I32 id)
 {
+    dVAR;
     MAGIC *mg;
     AMT *amtp;
 

@@ -24,6 +24,7 @@
 void
 Perl_av_reify(pTHX_ AV *av)
 {
+    dVAR;
     I32 key;
 
     assert(av);
@@ -62,6 +63,7 @@ extended.
 void
 Perl_av_extend(pTHX_ AV *av, I32 key)
 {
+    dVAR;
     MAGIC *mg;
 
     assert(av);
@@ -191,6 +193,7 @@ more information on how to use this function on tied arrays.
 SV**
 Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
 {
+    dVAR;
     SV *sv;
 
     assert(av);
@@ -276,6 +279,7 @@ more information on how to use this function on tied arrays.
 SV**
 Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
 {
+    dVAR;
     SV** ary;
 
     assert(av);
@@ -415,6 +419,7 @@ array itself.
 void
 Perl_av_clear(pTHX_ register AV *av)
 {
+    dVAR;
     register I32 key;
 
     assert(av);
@@ -769,6 +774,7 @@ and null is returned.
 SV *
 Perl_av_delete(pTHX_ AV *av, I32 key, I32 flags)
 {
+    dVAR;
     SV *sv;
 
     assert(av);
@@ -856,6 +862,7 @@ C<&PL_sv_undef>.
 bool
 Perl_av_exists(pTHX_ AV *av, I32 key)
 {
+    dVAR;
     assert(av);
 
     if (SvRMAGICAL(av)) {

@@ -208,6 +208,7 @@ S_no_bareword_allowed(pTHX_ const OP *o)
 PADOFFSET
 Perl_allocmy(pTHX_ char *name)
 {
+    dVAR;
     PADOFFSET off;
     const bool is_our = (PL_in_my == KEY_our);
 
@@ -546,6 +547,7 @@ Perl_scalarkids(pTHX_ OP *o)
 STATIC OP *
 S_scalarboolean(pTHX_ OP *o)
 {
+    dVAR;
     if (o->op_type == OP_SASSIGN && cBINOPo->op_first->op_type == OP_CONST) {
 	if (ckWARN(WARN_SYNTAX)) {
 	    const line_t oldline = CopLINE(PL_curcop);
@@ -963,6 +965,7 @@ Perl_list(pTHX_ OP *o)
 OP *
 Perl_scalarseq(pTHX_ OP *o)
 {
+    dVAR;
     if (o) {
 	if (o->op_type == OP_LINESEQ ||
 	     o->op_type == OP_SCOPE ||
@@ -1536,6 +1539,7 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 STATIC OP *
 S_dup_attrlist(pTHX_ OP *o)
 {
+    dVAR;
     OP *rop;
 
     /* An attrlist is either a simple OP_CONST or an OP_LIST with kids,
@@ -1599,6 +1603,7 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
 STATIC void
 S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 {
+    dVAR;
     OP *pack, *imop, *arg;
     SV *meth, *stashsv;
 
@@ -1690,6 +1695,7 @@ Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv,
 STATIC OP *
 S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 {
+    dVAR;
     I32 type;
 
     if (!o || PL_error_count)
@@ -1751,6 +1757,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 OP *
 Perl_my_attrs(pTHX_ OP *o, OP *attrs)
 {
+    dVAR;
     OP *rops;
     int maybe_scalar = 0;
 
@@ -1899,6 +1906,7 @@ Perl_scope(pTHX_ OP *o)
 int
 Perl_block_start(pTHX_ int full)
 {
+    dVAR;
     const int retval = PL_savestack_ix;
     pad_block_start(full);
     SAVEHINTS();
@@ -1919,6 +1927,7 @@ Perl_block_start(pTHX_ int full)
 OP*
 Perl_block_end(pTHX_ I32 floor, OP *seq)
 {
+    dVAR;
     const int needblockscope = PL_hints & HINT_BLOCK_SCOPE;
     OP* const retval = scalarseq(seq);
     LEAVE_SCOPE(floor);
@@ -1932,6 +1941,7 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
 STATIC OP *
 S_newDEFSVOP(pTHX)
 {
+    dVAR;
     const I32 offset = pad_findmy("$_");
     if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS(offset) & SVpad_OUR) {
 	return newSVREF(newGVOP(OP_GV, 0, PL_defgv));
@@ -1946,6 +1956,7 @@ S_newDEFSVOP(pTHX)
 void
 Perl_newPROG(pTHX_ OP *o)
 {
+    dVAR;
     if (PL_in_eval) {
 	if (PL_eval_root)
 		return;
@@ -1991,6 +2002,7 @@ Perl_newPROG(pTHX_ OP *o)
 OP *
 Perl_localize(pTHX_ OP *o, I32 lex)
 {
+    dVAR;
     if (o->op_flags & OPf_PARENS)
 /* [perl #17376]: this appears to be premature, and results in code such as
    C< our(%x); > executing in list mode rather than void mode */
@@ -2410,6 +2422,7 @@ static int uvcompare(const void *a, const void *b)
 OP *
 Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 {
+    dVAR;
     SV * const tstr = ((SVOP*)expr)->op_sv;
     SV * const rstr = ((SVOP*)repl)->op_sv;
     STRLEN tlen;
@@ -3030,6 +3043,7 @@ Perl_newPVOP(pTHX_ I32 type, I32 flags, char *pv)
 void
 Perl_package(pTHX_ OP *o)
 {
+    dVAR;
     const char *name;
     STRLEN len;
 
@@ -3049,6 +3063,7 @@ Perl_package(pTHX_ OP *o)
 void
 Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 {
+    dVAR;
     OP *pack;
     OP *imop;
     OP *veop;
@@ -3180,6 +3195,7 @@ Perl_load_module_nocontext(U32 flags, SV *name, SV *ver, ...)
 void
 Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
 {
+    dVAR;
     OP *veop, *imop;
 
     OP * const modname = newSVOP(OP_CONST, 0, name);
@@ -3220,6 +3236,7 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
 OP *
 Perl_dofile(pTHX_ OP *term, I32 force_builtin)
 {
+    dVAR;
     OP *doop;
     GV *gv = Nullgv;
 
@@ -3294,6 +3311,7 @@ S_is_list_assignment(pTHX_ register const OP *o)
 OP *
 Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 {
+    dVAR;
     OP *o;
 
     if (optype) {
@@ -3767,6 +3785,7 @@ Perl_newRANGE(pTHX_ I32 flags, OP *left, OP *right)
 OP *
 Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 {
+    dVAR;
     OP* listop;
     OP* o;
     const bool once = block && block->op_flags & OPf_SPECIAL &&
@@ -4033,6 +4052,7 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
 OP*
 Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 {
+    dVAR;
     OP *o;
 
     if (type != OP_GOTO || label->op_type == OP_CONST) {
@@ -4092,6 +4112,7 @@ S_newGIVWHENOP(pTHX_ OP *cond, OP *block,
 		   I32 enter_opcode, I32 leave_opcode,
 		   PADOFFSET entertarg)
 {
+    dVAR;
     LOGOP *enterop;
     OP *o;
 
@@ -4144,6 +4165,7 @@ STATIC
 bool
 S_looks_like_bool(pTHX_ OP *o)
 {
+    dVAR;
     switch(o->op_type) {
 	case OP_OR:
 	    return looks_like_bool(cLOGOPo->op_first);
@@ -4199,6 +4221,7 @@ S_looks_like_bool(pTHX_ OP *o)
 OP *
 Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
 {
+    dVAR;
     assert( cond );
     return newGIVWHENOP(
     	ref_array_or_hash(cond),
@@ -4359,6 +4382,7 @@ Perl_cv_const_sv(pTHX_ CV *cv)
 SV *
 Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 {
+    dVAR;
     SV *sv = Nullsv;
 
     if (!o)
@@ -4840,6 +4864,7 @@ Used by C<xsubpp> to hook up XSUBs as Perl subs.
 CV *
 Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
 {
+    dVAR;
     GV * const gv = gv_fetchpv(name ? name :
 			(PL_curstash ? "__ANON__" : "__ANON__::__ANON__"),
 			GV_ADDMULTI, SVt_PVCV);
@@ -4949,6 +4974,7 @@ done:
 void
 Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 {
+    dVAR;
     register CV *cv;
 
     GV * const gv = o
@@ -5147,6 +5173,7 @@ Perl_ck_anoncode(pTHX_ OP *o)
 OP *
 Perl_ck_bitop(pTHX_ OP *o)
 {
+    dVAR;
 #define OP_IS_NUMCOMPARE(op) \
 	((op) == OP_LT   || (op) == OP_I_LT || \
 	 (op) == OP_GT   || (op) == OP_I_GT || \
@@ -5253,6 +5280,7 @@ Perl_ck_die(pTHX_ OP *o)
 OP *
 Perl_ck_eof(pTHX_ OP *o)
 {
+    dVAR;
     const I32 type = o->op_type;
 
     if (o->op_flags & OPf_KIDS) {
@@ -5349,6 +5377,7 @@ Perl_ck_exec(pTHX_ OP *o)
 OP *
 Perl_ck_exists(pTHX_ OP *o)
 {
+    dVAR;
     o = ck_fun(o);
     if (o->op_flags & OPf_KIDS) {
 	OP * const kid = cUNOPo->op_first;
@@ -5523,6 +5552,7 @@ Perl_ck_ftst(pTHX_ OP *o)
 OP *
 Perl_ck_fun(pTHX_ OP *o)
 {
+    dVAR;
     const int type = o->op_type;
     register I32 oa = PL_opargs[type] >> OASHIFT;
 
@@ -5998,6 +6028,7 @@ Perl_ck_say(pTHX_ OP *o)
 OP *
 Perl_ck_smartmatch(pTHX_ OP *o)
 {
+    dVAR;
     if (0 == (o->op_flags & OPf_SPECIAL)) {
 	OP *first  = cBINOPo->op_first;
 	OP *second = first->op_sibling;
@@ -6055,6 +6086,7 @@ Perl_ck_sassign(pTHX_ OP *o)
 OP *
 Perl_ck_match(pTHX_ OP *o)
 {
+    dVAR;
     if (o->op_type != OP_QR && PL_compcv) {
 	const I32 offset = pad_findmy("$_");
 	if (offset != NOT_IN_PAD && !(PAD_COMPNAME_FLAGS(offset) & SVpad_OUR)) {
@@ -6098,6 +6130,7 @@ Perl_ck_null(pTHX_ OP *o)
 OP *
 Perl_ck_open(pTHX_ OP *o)
 {
+    dVAR;
     HV * const table = GvHV(PL_hintgv);
     if (table) {
 	SV **svp = hv_fetch(table, "open_IN", 7, FALSE);
@@ -6158,6 +6191,7 @@ Perl_ck_repeat(pTHX_ OP *o)
 OP *
 Perl_ck_require(pTHX_ OP *o)
 {
+    dVAR;
     GV* gv = Nullgv;
 
     if (o->op_flags & OPf_KIDS) {	/* Shall we supply missing .pm? */
@@ -6217,6 +6251,7 @@ Perl_ck_require(pTHX_ OP *o)
 OP *
 Perl_ck_return(pTHX_ OP *o)
 {
+    dVAR;
     if (CvLVALUE(PL_compcv)) {
         OP *kid;
 	for (kid = cLISTOPo->op_first->op_sibling; kid; kid = kid->op_sibling)
@@ -6249,6 +6284,7 @@ Perl_ck_select(pTHX_ OP *o)
 OP *
 Perl_ck_shift(pTHX_ OP *o)
 {
+    dVAR;
     const I32 type = o->op_type;
 
     if (!(o->op_flags & OPf_KIDS)) {
@@ -6265,6 +6301,7 @@ Perl_ck_shift(pTHX_ OP *o)
 OP *
 Perl_ck_sort(pTHX_ OP *o)
 {
+    dVAR;
     OP *firstkid;
 
     if (o->op_type == OP_SORT && (PL_hints & HINT_LOCALIZE_HH) != 0)
@@ -6343,6 +6380,7 @@ Perl_ck_sort(pTHX_ OP *o)
 STATIC void
 S_simplify_sort(pTHX_ OP *o)
 {
+    dVAR;
     register OP *kid = cLISTOPo->op_first->op_sibling;	/* get past pushmark */
     OP *k;
     int descending;
@@ -6484,6 +6522,7 @@ Perl_ck_join(pTHX_ OP *o)
 OP *
 Perl_ck_subr(pTHX_ OP *o)
 {
+    dVAR;
     OP *prev = ((cUNOPo->op_first->op_sibling)
 	     ? cUNOPo : ((UNOP*)cUNOPo->op_first))->op_first;
     OP *o2 = prev->op_sibling;
@@ -7403,6 +7442,7 @@ Perl_peep(pTHX_ register OP *o)
 char*
 Perl_custom_op_name(pTHX_ const OP* o)
 {
+    dVAR;
     const IV index = PTR2IV(o->op_ppaddr);
     SV* keysv;
     HE* he;
@@ -7422,6 +7462,7 @@ Perl_custom_op_name(pTHX_ const OP* o)
 char*
 Perl_custom_op_desc(pTHX_ const OP* o)
 {
+    dVAR;
     const IV index = PTR2IV(o->op_ppaddr);
     SV* keysv;
     HE* he;
@@ -7444,6 +7485,7 @@ Perl_custom_op_desc(pTHX_ const OP* o)
 static void
 const_sv_xsub(pTHX_ CV* cv)
 {
+    dVAR;
     dXSARGS;
     if (items != 0) {
 #if 0

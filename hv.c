@@ -39,6 +39,7 @@ static const char S_strtab_error[]
 STATIC void
 S_more_he(pTHX)
 {
+    dVAR;
     HE* he;
     HE* heend;
     Newx(he, PERL_ARENA_SIZE/sizeof(HE), HE);
@@ -64,6 +65,7 @@ S_more_he(pTHX)
 STATIC HE*
 S_new_he(pTHX)
 {
+    dVAR;
     HE* he;
     void ** const root = &PL_body_roots[HE_SVSLOT];
 
@@ -115,6 +117,7 @@ S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
 void
 Perl_free_tied_hv_pool(pTHX)
 {
+    dVAR;
     HE *he = PL_hv_fetch_ent_mh;
     while (he) {
 	HE * const ohe = he;
@@ -1126,6 +1129,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 STATIC void
 S_hsplit(pTHX_ HV *hv)
 {
+    dVAR;
     register XPVHV* xhv = (XPVHV*)SvANY(hv);
     const I32 oldsize = (I32) xhv->xhv_max+1; /* HvMAX(hv)+1 (sick) */
     register I32 newsize = oldsize * 2;
@@ -1295,6 +1299,7 @@ S_hsplit(pTHX_ HV *hv)
 void
 Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 {
+    dVAR;
     register XPVHV* xhv = (XPVHV*)SvANY(hv);
     const I32 oldsize = (I32) xhv->xhv_max+1; /* HvMAX(hv)+1 (sick) */
     register I32 newsize;
@@ -1489,6 +1494,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 void
 Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
 {
+    dVAR;
     SV *val;
 
     if (!entry)
@@ -1511,6 +1517,7 @@ Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
 void
 Perl_hv_delayfree_ent(pTHX_ HV *hv, register HE *entry)
 {
+    dVAR;
     if (!entry)
 	return;
     /* SvREFCNT_inc to counter the SvREFCNT_dec in hv_free_ent  */
@@ -1788,6 +1795,7 @@ Undefines the hash.
 void
 Perl_hv_undef(pTHX_ HV *hv)
 {
+    dVAR;
     register XPVHV* xhv;
     const char *name;
 
@@ -1937,6 +1945,7 @@ Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter) {
 void
 Perl_hv_name_set(pTHX_ HV *hv, const char *name, I32 len, int flags)
 {
+    dVAR;
     struct xpvhv_aux *iter;
     U32 hash;
 
@@ -2249,6 +2258,7 @@ Perl_unshare_hek(pTHX_ HEK *hek)
 STATIC void
 S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 {
+    dVAR;
     register XPVHV* xhv;
     HE *entry;
     register HE **oentry;
@@ -2380,6 +2390,7 @@ Perl_share_hek(pTHX_ const char *str, I32 len, register U32 hash)
 STATIC HEK *
 S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 {
+    dVAR;
     register HE *entry;
     const int flags_masked = flags & HVhek_MASK;
     const U32 hindex = hash & (I32) HvMAX(PL_strtab);

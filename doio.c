@@ -722,6 +722,7 @@ say_false:
 PerlIO *
 Perl_nextargv(pTHX_ register GV *gv)
 {
+    dVAR;
     register SV *sv;
 #ifndef FLEXFILENAMES
     int filedev;
@@ -941,6 +942,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 bool
 Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 {
+    dVAR;
     bool retval;
     IO *io;
 
@@ -973,6 +975,7 @@ Perl_do_close(pTHX_ GV *gv, bool not_implicit)
 bool
 Perl_io_close(pTHX_ IO *io, bool not_implicit)
 {
+    dVAR;
     bool retval = FALSE;
 
     if (IoIFP(io)) {
@@ -1011,6 +1014,7 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
 bool
 Perl_do_eof(pTHX_ GV *gv)
 {
+    dVAR;
     register IO * const io = GvIO(gv);
 
     if (!io)
@@ -1053,6 +1057,7 @@ Perl_do_eof(pTHX_ GV *gv)
 Off_t
 Perl_do_tell(pTHX_ GV *gv)
 {
+    dVAR;
     register IO *io = NULL;
     register PerlIO *fp;
 
@@ -1072,6 +1077,7 @@ Perl_do_tell(pTHX_ GV *gv)
 bool
 Perl_do_seek(pTHX_ GV *gv, Off_t pos, int whence)
 {
+    dVAR;
     register IO *io = NULL;
     register PerlIO *fp;
 
@@ -1091,6 +1097,7 @@ Perl_do_seek(pTHX_ GV *gv, Off_t pos, int whence)
 Off_t
 Perl_do_sysseek(pTHX_ GV *gv, Off_t pos, int whence)
 {
+    dVAR;
     register IO *io = NULL;
     register PerlIO *fp;
 
@@ -1215,6 +1222,7 @@ my_chsize(int fd, Off_t length)
 bool
 Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 {
+    dVAR;
     register const char *tmps;
     STRLEN len;
 
@@ -1266,6 +1274,7 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 I32
 Perl_my_stat(pTHX)
 {
+    dVAR;
     dSP;
     IO *io;
     GV* gv;
@@ -1324,6 +1333,7 @@ Perl_my_stat(pTHX)
 I32
 Perl_my_lstat(pTHX)
 {
+    dVAR;
     static const char no_prev_lstat[] = "The stat preceding -l _ wasn't an lstat";
     dSP;
     SV *sv;
@@ -1411,6 +1421,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 void
 Perl_do_execfree(pTHX)
 {
+    dVAR;
     Safefree(PL_Argv);
     PL_Argv = Null(char **);
     Safefree(PL_Cmd);
@@ -1563,6 +1574,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 I32
 Perl_apply(pTHX_ I32 type, register SV **mark, register SV **sp)
 {
+    dVAR;
     register I32 val;
     register I32 tot = 0;
     const char *const what = PL_op_name[type];
@@ -1869,6 +1881,7 @@ Perl_cando(pTHX_ Mode_t mode, bool effective, register const Stat_t *statbufp)
  *  is in the list of groups returned from getgroups().
  */
 {
+    dVAR;
 #ifdef DOSISH
     /* [Comments and code from Len Reed]
      * MS-DOS "user" is similar to UNIX's "superuser," but can't write
@@ -1925,6 +1938,7 @@ Perl_ingroup(pTHX_ Gid_t testgid, bool effective)
     /* This is simply not correct for AppleShare, but fix it yerself. */
     return TRUE;
 #else
+    dVAR;
     if (testgid == (effective ? PL_egid : PL_gid))
 	return TRUE;
 #ifdef HAS_GETGROUPS
@@ -1955,6 +1969,7 @@ Perl_ingroup(pTHX_ Gid_t testgid, bool effective)
 I32
 Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 {
+    dVAR;
     const key_t key = (key_t)SvNVx(*++mark);
     const I32 n = (optype == OP_MSGGET) ? 0 : SvIVx(*++mark);
     const I32 flags = SvIVx(*++mark);
@@ -1986,6 +2001,7 @@ Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 I32
 Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 {
+    dVAR;
     char *a;
     I32 ret = -1;
     const I32 id  = SvIVx(*++mark);
@@ -2108,6 +2124,7 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
 I32
 Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
 {
+    dVAR;
 #ifdef HAS_MSG
     STRLEN len;
     const I32 id = SvIVx(*++mark);
@@ -2131,6 +2148,7 @@ I32
 Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_MSG
+    dVAR;
     char *mbuf;
     long mtype;
     I32 msize, flags, ret;
@@ -2167,6 +2185,7 @@ I32
 Perl_do_semop(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_SEM
+    dVAR;
     STRLEN opsize;
     const I32 id = SvIVx(*++mark);
     SV * const opstr = *++mark;
@@ -2218,6 +2237,7 @@ I32
 Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 {
 #ifdef HAS_SHM
+    dVAR;
     char *shm;
     struct shmid_ds shmds;
     const I32 id = SvIVx(*++mark);

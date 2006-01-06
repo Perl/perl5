@@ -37,6 +37,7 @@
 
 PP(pp_const)
 {
+    dVAR;
     dSP;
     XPUSHs(cSVOP_sv);
     RETURN;
@@ -44,6 +45,7 @@ PP(pp_const)
 
 PP(pp_nextstate)
 {
+    dVAR;
     PL_curcop = (COP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
@@ -53,6 +55,7 @@ PP(pp_nextstate)
 
 PP(pp_gvsv)
 {
+    dVAR;
     dSP;
     EXTEND(SP,1);
     if (PL_op->op_private & OPpLVAL_INTRO)
@@ -64,24 +67,27 @@ PP(pp_gvsv)
 
 PP(pp_null)
 {
+    dVAR;
     return NORMAL;
 }
 
 PP(pp_setstate)
 {
+    dVAR;
     PL_curcop = (COP*)PL_op;
     return NORMAL;
 }
 
 PP(pp_pushmark)
 {
+    dVAR;
     PUSHMARK(PL_stack_sp);
     return NORMAL;
 }
 
 PP(pp_stringify)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     sv_copypv(TARG,TOPs);
     SETTARG;
     RETURN;
@@ -89,14 +95,14 @@ PP(pp_stringify)
 
 PP(pp_gv)
 {
-    dSP;
+    dVAR; dSP;
     XPUSHs((SV*)cGVOP_gv);
     RETURN;
 }
 
 PP(pp_and)
 {
-    dSP;
+    dVAR; dSP;
     if (!SvTRUE(TOPs))
 	RETURN;
     else {
@@ -108,7 +114,7 @@ PP(pp_and)
 
 PP(pp_sassign)
 {
-    dSP; dPOPTOPssrl;
+    dVAR; dSP; dPOPTOPssrl;
 
     if (PL_op->op_private & OPpASSIGN_BACKWARDS) {
 	SV * const temp = left;
@@ -176,7 +182,7 @@ PP(pp_sassign)
 
 PP(pp_cond_expr)
 {
-    dSP;
+    dVAR; dSP;
     if (SvTRUEx(POPs))
 	RETURNOP(cLOGOP->op_other);
     else
@@ -185,6 +191,7 @@ PP(pp_cond_expr)
 
 PP(pp_unstack)
 {
+    dVAR;
     I32 oldsave;
     TAINT_NOT;		/* Each statement is presumed innocent */
     PL_stack_sp = PL_stack_base + cxstack[cxstack_ix].blk_oldsp;
@@ -196,7 +203,7 @@ PP(pp_unstack)
 
 PP(pp_concat)
 {
-  dSP; dATARGET; tryAMAGICbin(concat,opASSIGN);
+  dVAR; dSP; dATARGET; tryAMAGICbin(concat,opASSIGN);
   {
     dPOPTOPssrl;
     bool lbyte;
@@ -262,7 +269,7 @@ PP(pp_concat)
 
 PP(pp_padsv)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     XPUSHs(TARG);
     if (PL_op->op_flags & OPf_MOD) {
 	if (PL_op->op_private & OPpLVAL_INTRO)
@@ -278,6 +285,7 @@ PP(pp_padsv)
 
 PP(pp_readline)
 {
+    dVAR;
     tryAMAGICunTARGET(iter, 0);
     PL_last_in_gv = (GV*)(*PL_stack_sp--);
     if (SvTYPE(PL_last_in_gv) != SVt_PVGV) {
@@ -296,7 +304,7 @@ PP(pp_readline)
 
 PP(pp_eq)
 {
-    dSP; tryAMAGICbinSET(eq,0);
+    dVAR; dSP; tryAMAGICbinSET(eq,0);
 #ifndef NV_PRESERVES_UV
     if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
         SP--;
@@ -363,7 +371,7 @@ PP(pp_eq)
 
 PP(pp_preinc)
 {
-    dSP;
+    dVAR; dSP;
     if (SvTYPE(TOPs) >= SVt_PVGV && SvTYPE(TOPs) != SVt_PVLV)
 	DIE(aTHX_ PL_no_modify);
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
@@ -380,7 +388,7 @@ PP(pp_preinc)
 
 PP(pp_or)
 {
-    dSP;
+    dVAR; dSP;
     if (SvTRUE(TOPs))
 	RETURN;
     else {
@@ -392,7 +400,7 @@ PP(pp_or)
 
 PP(pp_defined)
 {
-    dSP;
+    dVAR; dSP;
     register SV* sv = NULL;
     bool defined = FALSE;
     const int op_type = PL_op->op_type;
@@ -445,7 +453,7 @@ PP(pp_defined)
 
 PP(pp_add)
 {
-    dSP; dATARGET; bool useleft; tryAMAGICbin(add,opASSIGN);
+    dVAR; dSP; dATARGET; bool useleft; tryAMAGICbin(add,opASSIGN);
     useleft = USE_LEFT(TOPm1s);
 #ifdef PERL_PRESERVE_IVUV
     /* We must see if we can perform the addition with integers if possible,
@@ -607,7 +615,7 @@ PP(pp_add)
 
 PP(pp_aelemfast)
 {
-    dSP;
+    dVAR; dSP;
     AV * const av = PL_op->op_flags & OPf_SPECIAL ?
 		(AV*)PAD_SV(PL_op->op_targ) : GvAV(cGVOP_gv);
     const U32 lval = PL_op->op_flags & OPf_MOD;
@@ -622,7 +630,7 @@ PP(pp_aelemfast)
 
 PP(pp_join)
 {
-    dSP; dMARK; dTARGET;
+    dVAR; dSP; dMARK; dTARGET;
     MARK++;
     do_join(TARG, *MARK, MARK, SP);
     SP = MARK;
@@ -632,7 +640,7 @@ PP(pp_join)
 
 PP(pp_pushre)
 {
-    dSP;
+    dVAR; dSP;
 #ifdef DEBUGGING
     /*
      * We ass_u_me that LvTARGOFF() comes first, and that two STRLENs
@@ -749,7 +757,7 @@ PP(pp_print)
 
 PP(pp_rv2av)
 {
-    dSP; dTOPss;
+    dVAR; dSP; dTOPss;
     AV *av;
 
     if (SvROK(sv)) {
@@ -875,7 +883,7 @@ PP(pp_rv2av)
 
 PP(pp_rv2hv)
 {
-    dSP; dTOPss;
+    dVAR; dSP; dTOPss;
     HV *hv;
     const I32 gimme = GIMME_V;
     static const char return_hash_to_lvalue_scalar[] = "Can't return hash to lvalue scalar context";
@@ -987,6 +995,7 @@ PP(pp_rv2hv)
 STATIC void
 S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
 {
+    dVAR;
     if (*relem) {
 	SV *tmpstr;
         const HE *didstore;
@@ -1238,7 +1247,7 @@ PP(pp_aassign)
 
 PP(pp_qr)
 {
-    dSP;
+    dVAR; dSP;
     register PMOP * const pm = cPMOP;
     SV * const rv = sv_newmortal();
     SV * const sv = newSVrv(rv, "Regexp");
@@ -1250,7 +1259,7 @@ PP(pp_qr)
 
 PP(pp_match)
 {
-    dSP; dTARG;
+    dVAR; dSP; dTARG;
     register PMOP *pm = cPMOP;
     PMOP *dynpm = pm;
     register const char *t;
@@ -1738,7 +1747,7 @@ PP(pp_enter)
 
 PP(pp_helem)
 {
-    dSP;
+    dVAR; dSP;
     HE* he;
     SV **svp;
     SV * const keysv = POPs;
@@ -1879,7 +1888,7 @@ PP(pp_leave)
 
 PP(pp_iter)
 {
-    dSP;
+    dVAR; dSP;
     register PERL_CONTEXT *cx;
     SV *sv, *oldsv;
     AV* av;
@@ -2008,7 +2017,7 @@ PP(pp_iter)
 
 PP(pp_subst)
 {
-    dSP; dTARG;
+    dVAR; dSP; dTARG;
     register PMOP *pm = cPMOP;
     PMOP *rpm = pm;
     register SV *dstr;
@@ -2626,6 +2635,7 @@ PP(pp_leavesublv)
 STATIC CV *
 S_get_db_sub(pTHX_ SV **svp, CV *cv)
 {
+    dVAR;
     SV * const dbsv = GvSVn(PL_DBsub);
 
     save_item(dbsv);
@@ -2922,7 +2932,7 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
 
 PP(pp_aelem)
 {
-    dSP;
+    dVAR; dSP;
     SV** svp;
     SV* const elemsv = POPs;
     IV elem = SvIV(elemsv);
@@ -3010,7 +3020,7 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 
 PP(pp_method)
 {
-    dSP;
+    dVAR; dSP;
     SV* const sv = TOPs;
 
     if (SvROK(sv)) {
@@ -3027,7 +3037,7 @@ PP(pp_method)
 
 PP(pp_method_named)
 {
-    dSP;
+    dVAR; dSP;
     SV* const sv = cSVOP_sv;
     U32 hash = SvSHARED_HASH(sv);
 
@@ -3038,6 +3048,7 @@ PP(pp_method_named)
 STATIC SV *
 S_method_common(pTHX_ SV* meth, U32* hashp)
 {
+    dVAR;
     SV* ob;
     GV* gv;
     HV* stash;

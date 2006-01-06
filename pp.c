@@ -47,6 +47,7 @@ extern Pid_t getpid (void);
 
 PP(pp_stub)
 {
+    dVAR;
     dSP;
     if (GIMME_V == G_SCALAR)
 	XPUSHs(&PL_sv_undef);
@@ -57,7 +58,7 @@ PP(pp_stub)
 
 PP(pp_padav)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     I32 gimme;
     if (PL_op->op_private & OPpLVAL_INTRO)
 	SAVECLEARSV(PAD_SVl(PL_op->op_targ));
@@ -98,7 +99,7 @@ PP(pp_padav)
 
 PP(pp_padhv)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     I32 gimme;
 
     XPUSHs(TARG);
@@ -126,7 +127,7 @@ PP(pp_padhv)
 
 PP(pp_rv2gv)
 {
-    dSP; dTOPss;
+    dVAR; dSP; dTOPss;
 
     if (SvROK(sv)) {
       wasref:
@@ -221,8 +222,8 @@ PP(pp_rv2gv)
 
 PP(pp_rv2sv)
 {
+    dVAR; dSP; dTOPss;
     GV *gv = NULL;
-    dSP; dTOPss;
 
     if (SvROK(sv)) {
       wasref:
@@ -293,7 +294,7 @@ PP(pp_rv2sv)
 
 PP(pp_av2arylen)
 {
-    dSP;
+    dVAR; dSP;
     AV * const av = (AV*)TOPs;
     SV ** const sv = Perl_av_arylen_p(aTHX_ (AV*)av);
     if (!*sv) {
@@ -307,7 +308,7 @@ PP(pp_av2arylen)
 
 PP(pp_pos)
 {
-    dSP; dTARGET; dPOPss;
+    dVAR; dSP; dTARGET; dPOPss;
 
     if (PL_op->op_flags & OPf_MOD || LVRET) {
 	if (SvTYPE(TARG) < SVt_PVLV) {
@@ -341,7 +342,7 @@ PP(pp_pos)
 
 PP(pp_rv2cv)
 {
-    dSP;
+    dVAR; dSP;
     GV *gv;
     HV *stash;
     const I32 flags = (PL_op->op_flags & OPf_SPECIAL)
@@ -374,7 +375,7 @@ PP(pp_rv2cv)
 
 PP(pp_prototype)
 {
-    dSP;
+    dVAR; dSP;
     CV *cv;
     HV *stash;
     GV *gv;
@@ -440,7 +441,7 @@ PP(pp_prototype)
 
 PP(pp_anoncode)
 {
-    dSP;
+    dVAR; dSP;
     CV* cv = (CV*)PAD_SV(PL_op->op_targ);
     if (CvCLONE(cv))
 	cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
@@ -451,14 +452,14 @@ PP(pp_anoncode)
 
 PP(pp_srefgen)
 {
-    dSP;
+    dVAR; dSP;
     *SP = refto(*SP);
     RETURN;
 }
 
 PP(pp_refgen)
 {
-    dSP; dMARK;
+    dVAR; dSP; dMARK;
     if (GIMME != G_ARRAY) {
 	if (++MARK <= SP)
 	    *MARK = *SP;
@@ -477,6 +478,7 @@ PP(pp_refgen)
 STATIC SV*
 S_refto(pTHX_ SV *sv)
 {
+    dVAR;
     SV* rv;
 
     if (SvTYPE(sv) == SVt_PVLV && LvTYPE(sv) == 'y') {
@@ -508,7 +510,7 @@ S_refto(pTHX_ SV *sv)
 
 PP(pp_ref)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     const char *pv;
     SV * const sv = POPs;
 
@@ -525,7 +527,7 @@ PP(pp_ref)
 
 PP(pp_bless)
 {
-    dSP;
+    dVAR; dSP;
     HV *stash;
 
     if (MAXARG == 1)
@@ -550,7 +552,7 @@ PP(pp_bless)
 
 PP(pp_gelem)
 {
-    dSP;
+    dVAR; dSP;
 
     SV *sv = POPs;
     const char * const elem = SvPV_nolen_const(sv);
@@ -623,7 +625,7 @@ PP(pp_gelem)
 
 PP(pp_study)
 {
-    dSP; dPOPss;
+    dVAR; dSP; dPOPss;
     register unsigned char *s;
     register I32 pos;
     register I32 ch;
@@ -686,7 +688,7 @@ PP(pp_study)
 
 PP(pp_trans)
 {
-    dSP; dTARG;
+    dVAR; dSP; dTARG;
     SV *sv;
 
     if (PL_op->op_flags & OPf_STACKED)
@@ -706,7 +708,7 @@ PP(pp_trans)
 
 PP(pp_schop)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     do_chop(TARG, TOPs);
     SETTARG;
     RETURN;
@@ -714,7 +716,7 @@ PP(pp_schop)
 
 PP(pp_chop)
 {
-    dSP; dMARK; dTARGET; dORIGMARK;
+    dVAR; dSP; dMARK; dTARGET; dORIGMARK;
     while (MARK < SP)
 	do_chop(TARG, *++MARK);
     SP = ORIGMARK;
@@ -724,14 +726,14 @@ PP(pp_chop)
 
 PP(pp_schomp)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     SETi(do_chomp(TOPs));
     RETURN;
 }
 
 PP(pp_chomp)
 {
-    dSP; dMARK; dTARGET;
+    dVAR; dSP; dMARK; dTARGET;
     register I32 count = 0;
 
     while (SP > MARK)
@@ -742,7 +744,7 @@ PP(pp_chomp)
 
 PP(pp_undef)
 {
-    dSP;
+    dVAR; dSP;
     SV *sv;
 
     if (!PL_op->op_private) {
@@ -807,7 +809,7 @@ PP(pp_undef)
 
 PP(pp_predec)
 {
-    dSP;
+    dVAR; dSP;
     if (SvTYPE(TOPs) >= SVt_PVGV && SvTYPE(TOPs) != SVt_PVLV)
 	DIE(aTHX_ PL_no_modify);
     if (!SvREADONLY(TOPs) && SvIOK_notUV(TOPs) && !SvNOK(TOPs) && !SvPOK(TOPs)
@@ -824,7 +826,7 @@ PP(pp_predec)
 
 PP(pp_postinc)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     if (SvTYPE(TOPs) >= SVt_PVGV && SvTYPE(TOPs) != SVt_PVLV)
 	DIE(aTHX_ PL_no_modify);
     sv_setsv(TARG, TOPs);
@@ -846,7 +848,7 @@ PP(pp_postinc)
 
 PP(pp_postdec)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     if (SvTYPE(TOPs) >= SVt_PVGV && SvTYPE(TOPs) != SVt_PVLV)
 	DIE(aTHX_ PL_no_modify);
     sv_setsv(TARG, TOPs);
@@ -867,7 +869,7 @@ PP(pp_postdec)
 
 PP(pp_pow)
 {
-    dSP; dATARGET;
+    dVAR; dSP; dATARGET;
 #ifdef PERL_PRESERVE_IVUV
     bool is_int = 0;
 #endif
@@ -996,7 +998,7 @@ PP(pp_pow)
 
 PP(pp_multiply)
 {
-    dSP; dATARGET; tryAMAGICbin(mult,opASSIGN);
+    dVAR; dSP; dATARGET; tryAMAGICbin(mult,opASSIGN);
 #ifdef PERL_PRESERVE_IVUV
     SvIV_please(TOPs);
     if (SvIOK(TOPs)) {
@@ -1114,7 +1116,7 @@ PP(pp_multiply)
 
 PP(pp_divide)
 {
-    dSP; dATARGET; tryAMAGICbin(div,opASSIGN);
+    dVAR; dSP; dATARGET; tryAMAGICbin(div,opASSIGN);
     /* Only try to do UV divide first
        if ((SLOPPYDIVIDE is true) or
            (PERL_PRESERVE_IVUV is true and one or both SV is a UV too large
@@ -1229,7 +1231,7 @@ PP(pp_divide)
 
 PP(pp_modulo)
 {
-    dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
+    dVAR; dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
     {
 	UV left  = 0;
 	UV right = 0;
@@ -1357,7 +1359,7 @@ PP(pp_modulo)
 
 PP(pp_repeat)
 {
-  dSP; dATARGET; tryAMAGICbin(repeat,opASSIGN);
+  dVAR; dSP; dATARGET; tryAMAGICbin(repeat,opASSIGN);
   {
     register IV count;
     dPOPss;
@@ -1482,7 +1484,7 @@ PP(pp_repeat)
 
 PP(pp_subtract)
 {
-    dSP; dATARGET; bool useleft; tryAMAGICbin(subtr,opASSIGN);
+    dVAR; dSP; dATARGET; bool useleft; tryAMAGICbin(subtr,opASSIGN);
     useleft = USE_LEFT(TOPm1s);
 #ifdef PERL_PRESERVE_IVUV
     /* See comments in pp_add (in pp_hot.c) about Overflow, and how
@@ -1599,7 +1601,7 @@ PP(pp_subtract)
 
 PP(pp_left_shift)
 {
-    dSP; dATARGET; tryAMAGICbin(lshift,opASSIGN);
+    dVAR; dSP; dATARGET; tryAMAGICbin(lshift,opASSIGN);
     {
       const IV shift = POPi;
       if (PL_op->op_private & HINT_INTEGER) {
@@ -1616,7 +1618,7 @@ PP(pp_left_shift)
 
 PP(pp_right_shift)
 {
-    dSP; dATARGET; tryAMAGICbin(rshift,opASSIGN);
+    dVAR; dSP; dATARGET; tryAMAGICbin(rshift,opASSIGN);
     {
       const IV shift = POPi;
       if (PL_op->op_private & HINT_INTEGER) {
@@ -1633,7 +1635,7 @@ PP(pp_right_shift)
 
 PP(pp_lt)
 {
-    dSP; tryAMAGICbinSET(lt,0);
+    dVAR; dSP; tryAMAGICbinSET(lt,0);
 #ifdef PERL_PRESERVE_IVUV
     SvIV_please(TOPs);
     if (SvIOK(TOPs)) {
@@ -1708,7 +1710,7 @@ PP(pp_lt)
 
 PP(pp_gt)
 {
-    dSP; tryAMAGICbinSET(gt,0);
+    dVAR; dSP; tryAMAGICbinSET(gt,0);
 #ifdef PERL_PRESERVE_IVUV
     SvIV_please(TOPs);
     if (SvIOK(TOPs)) {
@@ -1784,7 +1786,7 @@ PP(pp_gt)
 
 PP(pp_le)
 {
-    dSP; tryAMAGICbinSET(le,0);
+    dVAR; dSP; tryAMAGICbinSET(le,0);
 #ifdef PERL_PRESERVE_IVUV
     SvIV_please(TOPs);
     if (SvIOK(TOPs)) {
@@ -1860,7 +1862,7 @@ PP(pp_le)
 
 PP(pp_ge)
 {
-    dSP; tryAMAGICbinSET(ge,0);
+    dVAR; dSP; tryAMAGICbinSET(ge,0);
 #ifdef PERL_PRESERVE_IVUV
     SvIV_please(TOPs);
     if (SvIOK(TOPs)) {
@@ -1936,7 +1938,7 @@ PP(pp_ge)
 
 PP(pp_ne)
 {
-    dSP; tryAMAGICbinSET(ne,0);
+    dVAR; dSP; tryAMAGICbinSET(ne,0);
 #ifndef NV_PRESERVES_UV
     if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
         SP--;
@@ -2005,7 +2007,7 @@ PP(pp_ne)
 
 PP(pp_ncmp)
 {
-    dSP; dTARGET; tryAMAGICbin(ncmp,0);
+    dVAR; dSP; dTARGET; tryAMAGICbin(ncmp,0);
 #ifndef NV_PRESERVES_UV
     if (SvROK(TOPs) && !SvAMAGIC(TOPs) && SvROK(TOPm1s) && !SvAMAGIC(TOPm1s)) {
 	const UV right = PTR2UV(SvRV(POPs));
@@ -2109,7 +2111,7 @@ PP(pp_ncmp)
 
 PP(pp_sle)
 {
-    dSP;
+    dVAR; dSP;
 
     int amg_type = sle_amg;
     int multiplier = 1;
@@ -2147,7 +2149,7 @@ PP(pp_sle)
 
 PP(pp_seq)
 {
-    dSP; tryAMAGICbinSET(seq,0);
+    dVAR; dSP; tryAMAGICbinSET(seq,0);
     {
       dPOPTOPssrl;
       SETs(boolSV(sv_eq(left, right)));
@@ -2157,7 +2159,7 @@ PP(pp_seq)
 
 PP(pp_sne)
 {
-    dSP; tryAMAGICbinSET(sne,0);
+    dVAR; dSP; tryAMAGICbinSET(sne,0);
     {
       dPOPTOPssrl;
       SETs(boolSV(!sv_eq(left, right)));
@@ -2167,7 +2169,7 @@ PP(pp_sne)
 
 PP(pp_scmp)
 {
-    dSP; dTARGET;  tryAMAGICbin(scmp,0);
+    dVAR; dSP; dTARGET;  tryAMAGICbin(scmp,0);
     {
       dPOPTOPssrl;
       const int cmp = (IN_LOCALE_RUNTIME
@@ -2180,7 +2182,7 @@ PP(pp_scmp)
 
 PP(pp_bit_and)
 {
-    dSP; dATARGET; tryAMAGICbin(band,opASSIGN);
+    dVAR; dSP; dATARGET; tryAMAGICbin(band,opASSIGN);
     {
       dPOPTOPssrl;
       SvGETMAGIC(left);
@@ -2205,7 +2207,7 @@ PP(pp_bit_and)
 
 PP(pp_bit_xor)
 {
-    dSP; dATARGET; tryAMAGICbin(bxor,opASSIGN);
+    dVAR; dSP; dATARGET; tryAMAGICbin(bxor,opASSIGN);
     {
       dPOPTOPssrl;
       SvGETMAGIC(left);
@@ -2230,7 +2232,7 @@ PP(pp_bit_xor)
 
 PP(pp_bit_or)
 {
-    dSP; dATARGET; tryAMAGICbin(bor,opASSIGN);
+    dVAR; dSP; dATARGET; tryAMAGICbin(bor,opASSIGN);
     {
       dPOPTOPssrl;
       SvGETMAGIC(left);
@@ -2255,7 +2257,7 @@ PP(pp_bit_or)
 
 PP(pp_negate)
 {
-    dSP; dTARGET; tryAMAGICun(neg);
+    dVAR; dSP; dTARGET; tryAMAGICun(neg);
     {
 	dTOPss;
 	const int flags = SvFLAGS(sv);
@@ -2325,14 +2327,14 @@ PP(pp_negate)
 
 PP(pp_not)
 {
-    dSP; tryAMAGICunSET(not);
+    dVAR; dSP; tryAMAGICunSET(not);
     *PL_stack_sp = boolSV(!SvTRUE(*PL_stack_sp));
     return NORMAL;
 }
 
 PP(pp_complement)
 {
-    dSP; dTARGET; tryAMAGICun(compl);
+    dVAR; dSP; dTARGET; tryAMAGICun(compl);
     {
       dTOPss;
       SvGETMAGIC(sv);
@@ -2429,7 +2431,7 @@ PP(pp_complement)
 
 PP(pp_i_multiply)
 {
-    dSP; dATARGET; tryAMAGICbin(mult,opASSIGN);
+    dVAR; dSP; dATARGET; tryAMAGICbin(mult,opASSIGN);
     {
       dPOPTOPiirl;
       SETi( left * right );
@@ -2439,7 +2441,7 @@ PP(pp_i_multiply)
 
 PP(pp_i_divide)
 {
-    dSP; dATARGET; tryAMAGICbin(div,opASSIGN);
+    dVAR; dSP; dATARGET; tryAMAGICbin(div,opASSIGN);
     {
       dPOPiv;
       if (value == 0)
@@ -2471,7 +2473,7 @@ PP(pp_i_modulo_1)
      /* This is the i_modulo with the workaround for the _moddi3 bug
       * in (at least) glibc 2.2.5 (the PERL_ABS() the workaround).
       * See below for pp_i_modulo. */
-     dVAR; dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
+     dVAR; dVAR; dSP; dATARGET; tryAMAGICbin(modulo,opASSIGN);
      {
 	  dPOPTOPiirl;
 	  if (!right)
@@ -2524,7 +2526,7 @@ PP(pp_i_modulo)
 
 PP(pp_i_add)
 {
-    dSP; dATARGET; tryAMAGICbin(add,opASSIGN);
+    dVAR; dSP; dATARGET; tryAMAGICbin(add,opASSIGN);
     {
       dPOPTOPiirl_ul;
       SETi( left + right );
@@ -2534,7 +2536,7 @@ PP(pp_i_add)
 
 PP(pp_i_subtract)
 {
-    dSP; dATARGET; tryAMAGICbin(subtr,opASSIGN);
+    dVAR; dSP; dATARGET; tryAMAGICbin(subtr,opASSIGN);
     {
       dPOPTOPiirl_ul;
       SETi( left - right );
@@ -2544,7 +2546,7 @@ PP(pp_i_subtract)
 
 PP(pp_i_lt)
 {
-    dSP; tryAMAGICbinSET(lt,0);
+    dVAR; dSP; tryAMAGICbinSET(lt,0);
     {
       dPOPTOPiirl;
       SETs(boolSV(left < right));
@@ -2554,7 +2556,7 @@ PP(pp_i_lt)
 
 PP(pp_i_gt)
 {
-    dSP; tryAMAGICbinSET(gt,0);
+    dVAR; dSP; tryAMAGICbinSET(gt,0);
     {
       dPOPTOPiirl;
       SETs(boolSV(left > right));
@@ -2564,7 +2566,7 @@ PP(pp_i_gt)
 
 PP(pp_i_le)
 {
-    dSP; tryAMAGICbinSET(le,0);
+    dVAR; dSP; tryAMAGICbinSET(le,0);
     {
       dPOPTOPiirl;
       SETs(boolSV(left <= right));
@@ -2574,7 +2576,7 @@ PP(pp_i_le)
 
 PP(pp_i_ge)
 {
-    dSP; tryAMAGICbinSET(ge,0);
+    dVAR; dSP; tryAMAGICbinSET(ge,0);
     {
       dPOPTOPiirl;
       SETs(boolSV(left >= right));
@@ -2584,7 +2586,7 @@ PP(pp_i_ge)
 
 PP(pp_i_eq)
 {
-    dSP; tryAMAGICbinSET(eq,0);
+    dVAR; dSP; tryAMAGICbinSET(eq,0);
     {
       dPOPTOPiirl;
       SETs(boolSV(left == right));
@@ -2594,7 +2596,7 @@ PP(pp_i_eq)
 
 PP(pp_i_ne)
 {
-    dSP; tryAMAGICbinSET(ne,0);
+    dVAR; dSP; tryAMAGICbinSET(ne,0);
     {
       dPOPTOPiirl;
       SETs(boolSV(left != right));
@@ -2604,7 +2606,7 @@ PP(pp_i_ne)
 
 PP(pp_i_ncmp)
 {
-    dSP; dTARGET; tryAMAGICbin(ncmp,0);
+    dVAR; dSP; dTARGET; tryAMAGICbin(ncmp,0);
     {
       dPOPTOPiirl;
       I32 value;
@@ -2622,7 +2624,7 @@ PP(pp_i_ncmp)
 
 PP(pp_i_negate)
 {
-    dSP; dTARGET; tryAMAGICun(neg);
+    dVAR; dSP; dTARGET; tryAMAGICun(neg);
     SETi(-TOPi);
     RETURN;
 }
@@ -2631,7 +2633,7 @@ PP(pp_i_negate)
 
 PP(pp_atan2)
 {
-    dSP; dTARGET; tryAMAGICbin(atan2,0);
+    dVAR; dSP; dTARGET; tryAMAGICbin(atan2,0);
     {
       dPOPTOPnnrl;
       SETn(Perl_atan2(left, right));
@@ -2641,7 +2643,7 @@ PP(pp_atan2)
 
 PP(pp_sin)
 {
-    dSP; dTARGET; tryAMAGICun(sin);
+    dVAR; dSP; dTARGET; tryAMAGICun(sin);
     {
       const NV value = POPn;
       XPUSHn(Perl_sin(value));
@@ -2651,7 +2653,7 @@ PP(pp_sin)
 
 PP(pp_cos)
 {
-    dSP; dTARGET; tryAMAGICun(cos);
+    dVAR; dSP; dTARGET; tryAMAGICun(cos);
     {
       const NV value = POPn;
       XPUSHn(Perl_cos(value));
@@ -2676,7 +2678,7 @@ extern double drand48 (void);
 
 PP(pp_rand)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     NV value;
     if (MAXARG < 1)
 	value = 1.0;
@@ -2695,7 +2697,7 @@ PP(pp_rand)
 
 PP(pp_srand)
 {
-    dSP;
+    dVAR; dSP;
     const UV anum = (MAXARG < 1) ? seed() : POPu;
     (void)seedDrand01((Rand_seed_t)anum);
     PL_srand_called = TRUE;
@@ -2705,7 +2707,7 @@ PP(pp_srand)
 
 PP(pp_exp)
 {
-    dSP; dTARGET; tryAMAGICun(exp);
+    dVAR; dSP; dTARGET; tryAMAGICun(exp);
     {
       NV value;
       value = POPn;
@@ -2717,7 +2719,7 @@ PP(pp_exp)
 
 PP(pp_log)
 {
-    dSP; dTARGET; tryAMAGICun(log);
+    dVAR; dSP; dTARGET; tryAMAGICun(log);
     {
       const NV value = POPn;
       if (value <= 0.0) {
@@ -2731,7 +2733,7 @@ PP(pp_log)
 
 PP(pp_sqrt)
 {
-    dSP; dTARGET; tryAMAGICun(sqrt);
+    dVAR; dSP; dTARGET; tryAMAGICun(sqrt);
     {
       const NV value = POPn;
       if (value < 0.0) {
@@ -2745,7 +2747,7 @@ PP(pp_sqrt)
 
 PP(pp_int)
 {
-    dSP; dTARGET; tryAMAGICun(int);
+    dVAR; dSP; dTARGET; tryAMAGICun(int);
     {
       const IV iv = TOPi; /* attempt to convert to IV if possible. */
       /* XXX it's arguable that compiler casting to IV might be subtly
@@ -2784,7 +2786,7 @@ PP(pp_int)
 
 PP(pp_abs)
 {
-    dSP; dTARGET; tryAMAGICun(abs);
+    dVAR; dSP; dTARGET; tryAMAGICun(abs);
     {
       /* This will cache the NV value if string isn't actually integer  */
       const IV iv = TOPi;
@@ -2822,7 +2824,7 @@ PP(pp_abs)
 
 PP(pp_hex)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     const char *tmps;
     I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
     STRLEN len;
@@ -2852,7 +2854,7 @@ PP(pp_hex)
 
 PP(pp_oct)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     const char *tmps;
     I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
     STRLEN len;
@@ -2894,7 +2896,7 @@ PP(pp_oct)
 
 PP(pp_length)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     SV * const sv = TOPs;
 
     if (DO_UTF8(sv))
@@ -2906,7 +2908,7 @@ PP(pp_length)
 
 PP(pp_substr)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     SV *sv;
     I32 len = 0;
     STRLEN curlen;
@@ -3074,7 +3076,7 @@ PP(pp_substr)
 
 PP(pp_vec)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     register const IV size   = POPi;
     register const IV offset = POPi;
     register SV * const src = POPs;
@@ -3105,7 +3107,7 @@ PP(pp_vec)
 
 PP(pp_index)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     SV *big;
     SV *little;
     SV *temp = NULL;
@@ -3168,7 +3170,7 @@ PP(pp_index)
 
 PP(pp_rindex)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     SV *big;
     SV *little;
     SV *temp = NULL;
@@ -3237,7 +3239,7 @@ PP(pp_rindex)
 
 PP(pp_sprintf)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    dVAR; dSP; dMARK; dORIGMARK; dTARGET;
     do_sprintf(TARG, SP-MARK, MARK+1);
     TAINT_IF(SvTAINTED(TARG));
     SP = ORIGMARK;
@@ -3247,7 +3249,7 @@ PP(pp_sprintf)
 
 PP(pp_ord)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     SV *argsv = POPs;
     STRLEN len;
     const U8 *s = (U8*)SvPV_const(argsv, len);
@@ -3268,7 +3270,7 @@ PP(pp_ord)
 
 PP(pp_chr)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     char *tmps;
     UV value;
 
@@ -3325,7 +3327,7 @@ PP(pp_chr)
 PP(pp_crypt)
 {
 #ifdef HAS_CRYPT
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     dPOPTOPssrl;
     STRLEN len;
     const char *tmps = SvPV_const(left, len);
@@ -3373,6 +3375,7 @@ PP(pp_crypt)
 
 PP(pp_ucfirst)
 {
+    dVAR;
     dSP;
     SV *sv = TOPs;
     const U8 *s;
@@ -3441,6 +3444,7 @@ PP(pp_ucfirst)
 
 PP(pp_uc)
 {
+    dVAR;
     dSP;
     SV *sv = TOPs;
     STRLEN len;
@@ -3525,6 +3529,7 @@ PP(pp_uc)
 
 PP(pp_lc)
 {
+    dVAR;
     dSP;
     SV *sv = TOPs;
     STRLEN len;
@@ -3629,7 +3634,7 @@ PP(pp_lc)
 
 PP(pp_quotemeta)
 {
-    dSP; dTARGET;
+    dVAR; dSP; dTARGET;
     SV * const sv = TOPs;
     STRLEN len;
     register const char *s = SvPV_const(sv,len);
@@ -3682,7 +3687,7 @@ PP(pp_quotemeta)
 
 PP(pp_aslice)
 {
-    dSP; dMARK; dORIGMARK;
+    dVAR; dSP; dMARK; dORIGMARK;
     register AV* const av = (AV*)POPs;
     register const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
 
@@ -3727,6 +3732,7 @@ PP(pp_aslice)
 
 PP(pp_each)
 {
+    dVAR;
     dSP;
     HV * const hash = (HV*)POPs;
     HE *entry;
@@ -3758,6 +3764,7 @@ PP(pp_each)
 
 PP(pp_delete)
 {
+    dVAR;
     dSP;
     const I32 gimme = GIMME_V;
     const I32 discard = (gimme == G_VOID) ? G_DISCARD : 0;
@@ -3817,6 +3824,7 @@ PP(pp_delete)
 
 PP(pp_exists)
 {
+    dVAR;
     dSP;
     SV *tmpsv;
     HV *hv;
@@ -3851,7 +3859,7 @@ PP(pp_exists)
 
 PP(pp_hslice)
 {
-    dSP; dMARK; dORIGMARK;
+    dVAR; dSP; dMARK; dORIGMARK;
     register HV * const hv = (HV*)POPs;
     register const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
     const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
@@ -3913,7 +3921,7 @@ PP(pp_hslice)
 
 PP(pp_list)
 {
-    dSP; dMARK;
+    dVAR; dSP; dMARK;
     if (GIMME != G_ARRAY) {
 	if (++MARK <= SP)
 	    *MARK = *SP;		/* unwanted list, return last item */
@@ -3926,6 +3934,7 @@ PP(pp_list)
 
 PP(pp_lslice)
 {
+    dVAR;
     dSP;
     SV ** const lastrelem = PL_stack_sp;
     SV ** const lastlelem = PL_stack_base + POPMARK;
@@ -3979,7 +3988,7 @@ PP(pp_lslice)
 
 PP(pp_anonlist)
 {
-    dSP; dMARK; dORIGMARK;
+    dVAR; dSP; dMARK; dORIGMARK;
     const I32 items = SP - MARK;
     SV * const av = sv_2mortal((SV*)av_make(items, MARK+1));
     SP = ORIGMARK;		/* av_make() might realloc stack_sp */
@@ -3989,7 +3998,7 @@ PP(pp_anonlist)
 
 PP(pp_anonhash)
 {
-    dSP; dMARK; dORIGMARK;
+    dVAR; dSP; dMARK; dORIGMARK;
     HV* const hv = (HV*)sv_2mortal((SV*)newHV());
 
     while (MARK < SP) {
@@ -4245,6 +4254,7 @@ PP(pp_push)
 
 PP(pp_pop)
 {
+    dVAR;
     dSP;
     AV * const av = (AV*)POPs;
     SV * const sv = av_pop(av);
@@ -4256,6 +4266,7 @@ PP(pp_pop)
 
 PP(pp_shift)
 {
+    dVAR;
     dSP;
     AV * const av = (AV*)POPs;
     SV * const sv = av_shift(av);
@@ -4298,7 +4309,7 @@ PP(pp_unshift)
 
 PP(pp_reverse)
 {
-    dSP; dMARK;
+    dVAR; dSP; dMARK;
     SV ** const oldsp = SP;
 
     if (GIMME == G_ARRAY) {
@@ -4672,6 +4683,7 @@ PP(pp_split)
 
 PP(pp_lock)
 {
+    dVAR;
     dSP;
     dTOPss;
     SV *retsv = sv;
@@ -4687,6 +4699,7 @@ PP(pp_lock)
 
 PP(unimplemented_op)
 {
+    dVAR;
     DIE(aTHX_ "panic: unimplemented op %s (#%d) called", OP_NAME(PL_op),
 	PL_op->op_type);
 }

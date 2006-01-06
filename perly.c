@@ -250,6 +250,7 @@ yystpcpy (pTHX_ char *yydest, const char *yysrc)
 int
 Perl_yyparse (pTHX)
 {
+    dVAR;
     int yychar; /* The lookahead symbol.  */
     YYSTYPE yylval; /* The semantic value of the lookahead symbol.  */
     int yynerrs; /* Number of syntax errors so far.  */

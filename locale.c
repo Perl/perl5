@@ -81,6 +81,7 @@ void
 Perl_set_numeric_radix(pTHX)
 {
 #ifdef USE_LOCALE_NUMERIC
+    dVAR;
 # ifdef HAS_LOCALECONV
     const struct lconv* const lc = localeconv();
 
@@ -109,6 +110,7 @@ void
 Perl_new_numeric(pTHX_ const char *newnum)
 {
 #ifdef USE_LOCALE_NUMERIC
+    dVAR;
 
     if (! newnum) {
 	Safefree(PL_numeric_name);
@@ -134,6 +136,7 @@ void
 Perl_set_numeric_standard(pTHX)
 {
 #ifdef USE_LOCALE_NUMERIC
+    dVAR;
 
     if (! PL_numeric_standard) {
 	setlocale(LC_NUMERIC, "C");
@@ -149,6 +152,7 @@ void
 Perl_set_numeric_local(pTHX)
 {
 #ifdef USE_LOCALE_NUMERIC
+    dVAR;
 
     if (! PL_numeric_local) {
 	setlocale(LC_NUMERIC, PL_numeric_name);
@@ -190,6 +194,7 @@ void
 Perl_new_collate(pTHX_ const char *newcoll)
 {
 #ifdef USE_LOCALE_COLLATE
+    dVAR;
 
     if (! newcoll) {
 	if (PL_collation_name) {
@@ -242,6 +247,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      */
 
 #if defined(USE_LOCALE)
+    dVAR;
 
 #ifdef USE_LOCALE_CTYPE
     char *curctype   = NULL;
@@ -555,6 +561,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 char *
 Perl_mem_collxfrm(pTHX_ const char *s, STRLEN len, STRLEN *xlen)
 {
+    dVAR;
     char *xbuf;
     STRLEN xAlloc, xin, xout; /* xalloc is a reserved word in VC */
 

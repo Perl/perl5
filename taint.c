@@ -25,6 +25,7 @@ void
 Perl_taint_proper(pTHX_ const char *f, const char *s)
 {
 #if defined(HAS_SETEUID) && defined(DEBUGGING)
+    dVAR;
 #   if Uid_t_size == 1
     {
 	const UV  uid = PL_uid;
@@ -72,6 +73,7 @@ Perl_taint_proper(pTHX_ const char *f, const char *s)
 void
 Perl_taint_env(pTHX)
 {
+    dVAR;
     SV** svp;
     MAGIC* mg;
     const char* const *e;

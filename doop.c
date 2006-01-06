@@ -28,6 +28,7 @@
 STATIC I32
 S_do_trans_simple(pTHX_ SV *sv)
 {
+    dVAR;
     U8 *s;
     U8 *d;
     const U8 *send;
@@ -96,6 +97,7 @@ S_do_trans_simple(pTHX_ SV *sv)
 STATIC I32
 S_do_trans_count(pTHX_ SV *sv)
 {
+    dVAR;
     const U8 *s;
     const U8 *send;
     I32 matches = 0;
@@ -133,6 +135,7 @@ S_do_trans_count(pTHX_ SV *sv)
 STATIC I32
 S_do_trans_complex(pTHX_ SV *sv)
 {
+    dVAR;
     U8 *s;
     U8 *send;
     U8 *d;
@@ -298,6 +301,7 @@ S_do_trans_complex(pTHX_ SV *sv)
 STATIC I32
 S_do_trans_simple_utf8(pTHX_ SV *sv)
 {
+    dVAR;
     U8 *s;
     U8 *send;
     U8 *d;
@@ -398,6 +402,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)
 STATIC I32
 S_do_trans_count_utf8(pTHX_ SV *sv)
 {
+    dVAR;
     const U8 *s;
     const U8 *start = NULL;
     const U8 *send;
@@ -441,6 +446,7 @@ S_do_trans_count_utf8(pTHX_ SV *sv)
 STATIC I32
 S_do_trans_complex_utf8(pTHX_ SV *sv)
 {
+    dVAR;
     U8 *start, *send;
     U8 *d;
     I32 matches = 0;
@@ -602,6 +608,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv)
 I32
 Perl_do_trans(pTHX_ SV *sv)
 {
+    dVAR;
     STRLEN len;
     const I32 hasutf = (PL_op->op_private &
                     (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF));
@@ -650,6 +657,7 @@ Perl_do_trans(pTHX_ SV *sv)
 void
 Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **sp)
 {
+    dVAR;
     SV ** const oldmark = mark;
     register I32 items = sp - mark;
     register STRLEN len;
@@ -706,6 +714,7 @@ Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **s
 void
 Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
 {
+    dVAR;
     STRLEN patlen;
     const char * const pat = SvPV_const(*sarg, patlen);
     bool do_taint = FALSE;
@@ -723,6 +732,7 @@ Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
 UV
 Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 {
+    dVAR;
     STRLEN srclen, len;
     const unsigned char *s = (const unsigned char *) SvPV_const(sv, srclen);
     UV retnum = 0;
@@ -861,6 +871,7 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 void
 Perl_do_vecset(pTHX_ SV *sv)
 {
+    dVAR;
     register I32 offset;
     register I32 size;
     register unsigned char *s;
@@ -942,6 +953,7 @@ Perl_do_vecset(pTHX_ SV *sv)
 void
 Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 {
+    dVAR;
     STRLEN len;
     char *s;
 
@@ -1017,6 +1029,7 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
 I32
 Perl_do_chomp(pTHX_ register SV *sv)
 {
+    dVAR;
     register I32 count;
     STRLEN len;
     char *s;
@@ -1152,6 +1165,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
 void
 Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 {
+    dVAR;
 #ifdef LIBERAL
     register long *dl;
     register long *ll;
@@ -1343,6 +1357,7 @@ finish:
 OP *
 Perl_do_kv(pTHX)
 {
+    dVAR;
     dSP;
     HV * const hv = (HV*)POPs;
     HV *keys;

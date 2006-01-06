@@ -399,6 +399,7 @@ Most code should use utf8_to_uvchr() rather than call this directly.
 UV
 Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
 {
+    dVAR;
     const U8 *s0 = s;
     UV uv = *s, ouv = 0;
     STRLEN len = 1;
@@ -655,6 +656,7 @@ up past C<e>, croaks.
 STRLEN
 Perl_utf8_length(pTHX_ const U8 *s, const U8 *e)
 {
+    dVAR;
     STRLEN len = 0;
 
     /* Note: cannot use UTF8_IS_...() too eagerly here since e.g.
@@ -698,6 +700,7 @@ same UTF-8 buffer.
 IV
 Perl_utf8_distance(pTHX_ const U8 *a, const U8 *b)
 {
+    dVAR;
     IV off = 0;
 
     /* Note: cannot use UTF8_IS_...() too eagerly here since  e.g.
@@ -1240,6 +1243,7 @@ static bool
 S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
 		 const char *const swashname)
 {
+    dVAR;
     if (!is_utf8_char(p))
 	return FALSE;
     if (!*swash)
@@ -1250,6 +1254,7 @@ S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
 bool
 Perl_is_utf8_alnum(pTHX_ const U8 *p)
 {
+    dVAR;
     /* NOTE: "IsWord", not "IsAlnum", since Alnum is a true
      * descendant of isalnum(3), in other words, it doesn't
      * contain the '_'. --jhi */
@@ -1259,12 +1264,14 @@ Perl_is_utf8_alnum(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_alnumc(pTHX_ const U8 *p)
 {
+    dVAR;
     return S_is_utf8_common(aTHX_ p, &PL_utf8_alnumc, "IsAlnumC");
 }
 
 bool
 Perl_is_utf8_idfirst(pTHX_ const U8 *p) /* The naming is historical. */
 {
+    dVAR;
     if (*p == '_')
 	return TRUE;
     /* is_utf8_idstart would be more logical. */
@@ -1274,6 +1281,7 @@ Perl_is_utf8_idfirst(pTHX_ const U8 *p) /* The naming is historical. */
 bool
 Perl_is_utf8_idcont(pTHX_ const U8 *p)
 {
+    dVAR;
     if (*p == '_')
 	return TRUE;
     return S_is_utf8_common(aTHX_ p, &PL_utf8_idcont, "IdContinue");
@@ -1282,72 +1290,84 @@ Perl_is_utf8_idcont(pTHX_ const U8 *p)
 bool
 Perl_is_utf8_alpha(pTHX_ const U8 *p)
 {
+    dVAR;
     return S_is_utf8_common(aTHX_ p, &PL_utf8_alpha, "IsAlpha");
 }
 
 bool
 Perl_is_utf8_ascii(pTHX_ const U8 *p)
 {
+    dVAR;
     return S_is_utf8_common(aTHX_ p, &PL_utf8_ascii, "IsAscii");
 }
 
 bool
 Perl_is_utf8_space(pTHX_ const U8 *p)
 {
+    dVAR;
     return S_is_utf8_common(aTHX_ p, &PL_utf8_space, "IsSpacePerl");
 }
 
 bool
 Perl_is_utf8_digit(pTHX_ const U8 *p)
 {
+    dVAR;
     return S_is_utf8_common(aTHX_ p, &PL_utf8_digit, "IsDigit");
 }
 
 bool
 Perl_is_utf8_upper(pTHX_ const U8 *p)
 {
+    dVAR;
     return S_is_utf8_common(aTHX_ p, &PL_utf8_upper, "IsUppercase");
 }
 
 bool
 Perl_is_utf8_lower(pTHX_ const U8 *p)
 {
+    dVAR;
     return S_is_utf8_common(aTHX_ p, &PL_utf8_lower, "IsLowercase");
 }
 
 bool
 Perl_is_utf8_cntrl(pTHX_ const U8 *p)
 {
+    dVAR;
     return S_is_utf8_common(aTHX_ p, &PL_utf8_cntrl, "IsCntrl");
 }
 
 bool
 Perl_is_utf8_graph(pTHX_ const U8 *p)
 {
+    dVAR;
     return S_is_utf8_common(aTHX_ p, &PL_utf8_graph, "IsGraph");
 }
 
 bool
 Perl_is_utf8_print(pTHX_ const U8 *p)
 {
+    dVAR;
     return S_is_utf8_common(aTHX_ p, &PL_utf8_print, "IsPrint");
 }
 
 bool
 Perl_is_utf8_punct(pTHX_ const U8 *p)
 {
+    dVAR;
     return S_is_utf8_common(aTHX_ p, &PL_utf8_punct, "IsPunct");
 }
 
 bool
 Perl_is_utf8_xdigit(pTHX_ const U8 *p)
 {
+    dVAR;
     return S_is_utf8_common(aTHX_ p, &PL_utf8_xdigit, "Isxdigit");
 }
 
 bool
 Perl_is_utf8_mark(pTHX_ const U8 *p)
 {
+    dVAR;
     return S_is_utf8_common(aTHX_ p, &PL_utf8_mark, "IsM");
 }
 
@@ -1380,6 +1400,7 @@ UV
 Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
 			SV **swashp, const char *normal, const char *special)
 {
+    dVAR;
     U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
     STRLEN len = 0;
 
@@ -1480,6 +1501,7 @@ The first character of the uppercased version is returned
 UV
 Perl_to_utf8_upper(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
 {
+    dVAR;
     return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
                              &PL_utf8_toupper, "ToUpper", "utf8::ToSpecUpper");
 }
@@ -1500,6 +1522,7 @@ The first character of the titlecased version is returned
 UV
 Perl_to_utf8_title(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
 {
+    dVAR;
     return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
                              &PL_utf8_totitle, "ToTitle", "utf8::ToSpecTitle");
 }
@@ -1520,6 +1543,7 @@ The first character of the lowercased version is returned
 UV
 Perl_to_utf8_lower(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
 {
+    dVAR;
     return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
                              &PL_utf8_tolower, "ToLower", "utf8::ToSpecLower");
 }
@@ -1541,6 +1565,7 @@ The first character of the foldcased version is returned
 UV
 Perl_to_utf8_fold(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp)
 {
+    dVAR;
     return Perl_to_utf8_case(aTHX_ p, ustrp, lenp,
                              &PL_utf8_tofold, "ToFold", "utf8::ToSpecFold");
 }
@@ -2233,6 +2258,7 @@ http://www.unicode.org/unicode/reports/tr21/ (Case Mappings).
 I32
 Perl_ibcmp_utf8(pTHX_ const char *s1, char **pe1, register UV l1, bool u1, const char *s2, char **pe2, register UV l2, bool u2)
 {
+     dVAR;
      register const U8 *p1  = (const U8*)s1;
      register const U8 *p2  = (const U8*)s2;
      register const U8 *f1 = NULL;

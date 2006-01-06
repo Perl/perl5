@@ -1335,6 +1335,7 @@ perl_fini(void)
 void
 Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr)
 {
+    dVAR;
     Renew(PL_exitlist, PL_exitlistlen+1, PerlExitListEntry);
     PL_exitlist[PL_exitlistlen].fn = fn;
     PL_exitlist[PL_exitlistlen].ptr = ptr;
@@ -1378,6 +1379,7 @@ S_procself_val(pTHX_ SV *sv, const char *arg0)
 
 STATIC void
 S_set_caret_X(pTHX) {
+    dVAR;
     GV* tmpgv = gv_fetchpv("\030",TRUE, SVt_PV); /* $^X */
     if (tmpgv) {
 #ifdef HAS_PROCSELFEXE
@@ -2220,6 +2222,7 @@ Tells a Perl interpreter to run.  See L<perlembed>.
 int
 perl_run(pTHXx)
 {
+    dVAR;
     I32 oldscope;
     int ret = 0;
     dJMPENV;
@@ -2273,6 +2276,7 @@ perl_run(pTHXx)
 STATIC void
 S_run_body(pTHX_ I32 oldscope)
 {
+    dVAR;
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%s $` $& $' support.\n",
                     PL_sawampersand ? "Enabling" : "Omitting"));
 
@@ -2442,6 +2446,7 @@ Perl_call_argv(pTHX_ const char *sub_name, I32 flags, register char **argv)
           		/* See G_* flags in cop.h */
                      	/* null terminated arg list */
 {
+    dVAR;
     dSP;
 
     PUSHMARK(SP);
@@ -2647,6 +2652,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 STATIC void
 S_call_body(pTHX_ const OP *myop, bool is_eval)
 {
+    dVAR;
     if (PL_op == myop) {
 	if (is_eval)
 	    PL_op = Perl_pp_entereval(aTHX);	/* this doesn't do a POPMARK */
@@ -2672,6 +2678,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 
           		/* See G_* flags in cop.h */
 {
+    dVAR;
     dSP;
     UNOP myop;		/* fake syntax tree node */
     volatile I32 oldmark = SP - PL_stack_base;
@@ -2764,6 +2771,7 @@ Tells Perl to C<eval> the given string and return an SV* result.
 SV*
 Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
 {
+    dVAR;
     dSP;
     SV* sv = newSVpv(p, 0);
 
@@ -2797,8 +2805,9 @@ implemented that way; consider using load_module instead.
 void
 Perl_require_pv(pTHX_ const char *pv)
 {
-    SV* sv;
+    dVAR;
     dSP;
+    SV* sv;
     PUSHSTACKi(PERLSI_REQUIRE);
     PUTBACK;
     sv = Perl_newSVpvf(aTHX_ "require q%c%s%c", 0, pv, 0);
@@ -3407,7 +3416,7 @@ Perl_my_unexec(pTHX)
 STATIC void
 S_init_interp(pTHX)
 {
-
+    dVAR;
 #ifdef MULTIPLICITY
 #  define PERLVAR(var,type)
 #  define PERLVARA(var,n,type)
@@ -3451,6 +3460,7 @@ S_init_interp(pTHX)
 STATIC void
 S_init_main_stash(pTHX)
 {
+    dVAR;
     GV *gv;
 
     PL_curstash = PL_defstash = newHV();
@@ -4208,6 +4218,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 STATIC void
 S_find_beginning(pTHX)
 {
+    dVAR;
     register char *s;
     register const char *s2;
 #ifdef MACOS_TRADITIONAL
@@ -4277,6 +4288,7 @@ S_find_beginning(pTHX)
 STATIC void
 S_init_ids(pTHX)
 {
+    dVAR;
     PL_uid = PerlProc_getuid();
     PL_euid = PerlProc_geteuid();
     PL_gid = PerlProc_getgid();
@@ -4339,6 +4351,7 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
 STATIC void
 S_forbid_setid(pTHX_ const char *s)
 {
+    dVAR;
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
     if (PL_euid != PL_uid)
         Perl_croak(aTHX_ "No %s allowed while running setuid", s);
@@ -4378,6 +4391,7 @@ S_forbid_setid(pTHX_ const char *s)
 void
 Perl_init_debugger(pTHX)
 {
+    dVAR;
     HV * const ostash = PL_curstash;
 
     PL_curstash = PL_debstash;
@@ -4406,6 +4420,7 @@ Perl_init_debugger(pTHX)
 void
 Perl_init_stacks(pTHX)
 {
+    dVAR;
     /* start with 128-item stack and 8K cxstack */
     PL_curstackinfo = new_stackinfo(REASONABLE(128),
 				 REASONABLE(8192/sizeof(PERL_CONTEXT) - 1));
@@ -4442,6 +4457,7 @@ Perl_init_stacks(pTHX)
 STATIC void
 S_nuke_stacks(pTHX)
 {
+    dVAR;
     while (PL_curstackinfo->si_next)
 	PL_curstackinfo = PL_curstackinfo->si_next;
     while (PL_curstackinfo) {
@@ -4460,6 +4476,7 @@ S_nuke_stacks(pTHX)
 STATIC void
 S_init_lexer(pTHX)
 {
+    dVAR;
     PerlIO *tmpfp;
     tmpfp = PL_rsfp;
     PL_rsfp = Nullfp;
@@ -4471,6 +4488,7 @@ S_init_lexer(pTHX)
 STATIC void
 S_init_predump_symbols(pTHX)
 {
+    dVAR;
     GV *tmpgv;
     IO *io;
 
@@ -4512,6 +4530,7 @@ S_init_predump_symbols(pTHX)
 void
 Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 {
+    dVAR;
     argc--,argv++;	/* skip name of script */
     if (PL_doswitches) {
 	for (; argc > 0 && **argv == '-'; argc--,argv++) {
@@ -4645,6 +4664,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 STATIC void
 S_init_perllib(pTHX)
 {
+    dVAR;
     char *s;
     if (!PL_tainting) {
 #ifndef VMS
@@ -4789,6 +4809,7 @@ S_init_perllib(pTHX)
 STATIC SV *
 S_incpush_if_exists(pTHX_ SV *dir)
 {
+    dVAR;
     Stat_t tmpstatbuf;
     if (PerlLIO_stat(SvPVX_const(dir), &tmpstatbuf) >= 0 &&
 	S_ISDIR(tmpstatbuf.st_mode)) {
@@ -4802,6 +4823,7 @@ STATIC void
 S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 	  bool canrelocate)
 {
+    dVAR;
     SV *subdir = Nullsv;
     const char *p = dir;
 
@@ -5188,6 +5210,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 STATIC void *
 S_call_list_body(pTHX_ CV *cv)
 {
+    dVAR;
     PUSHMARK(PL_stack_sp);
     call_sv((SV*)cv, G_EVAL|G_DISCARD);
     return NULL;
@@ -5196,6 +5219,7 @@ S_call_list_body(pTHX_ CV *cv)
 void
 Perl_my_exit(pTHX_ U32 status)
 {
+    dVAR;
     DEBUG_S(PerlIO_printf(Perl_debug_log, "my_exit: thread %p, status %lu\n",
 			  thr, (unsigned long) status));
     switch (status) {
@@ -5215,6 +5239,7 @@ Perl_my_exit(pTHX_ U32 status)
 void
 Perl_my_failure_exit(pTHX)
 {
+    dVAR;
 #ifdef VMS
      /* We have been called to fall on our sword.  The desired exit code
       * should be already set in STATUS_UNIX, but could be shifted over
@@ -5314,6 +5339,7 @@ S_my_exit_jump(pTHX)
 static I32
 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
+    dVAR;
     const char * const p  = SvPVX_const(PL_e_script);
     const char *nl = strchr(p, '\n');
 

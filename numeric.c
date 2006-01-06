@@ -498,6 +498,7 @@ bool
 Perl_grok_numeric_radix(pTHX_ const char **sp, const char *send)
 {
 #ifdef USE_LOCALE_NUMERIC
+    dVAR;
     if (PL_numeric_radix_sv && IN_LOCALE) { 
         STRLEN len;
         const char * const radix = SvPV(PL_numeric_radix_sv, len);
@@ -803,6 +804,7 @@ Perl_my_atof(pTHX_ const char* s)
 {
     NV x = 0.0;
 #ifdef USE_LOCALE_NUMERIC
+    dVAR;
     if (PL_numeric_local && IN_LOCALE) {
 	NV y;
 
