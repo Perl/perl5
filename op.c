@@ -209,10 +209,11 @@ PADOFFSET
 Perl_allocmy(pTHX_ char *name)
 {
     PADOFFSET off;
+    const bool is_our = (PL_in_my == KEY_our);
 
     /* complain about "my $<special_var>" etc etc */
     if (*name &&
-	!(PL_in_my == KEY_our ||
+	!(is_our ||
 	  isALPHA(name[1]) ||
 	  (USE_UTF8_IN_NAMES && UTF8_IS_START(name[1])) ||
 	  (name[1] == '_' && (*name == '$' || name[2]))))
@@ -241,22 +242,19 @@ Perl_allocmy(pTHX_ char *name)
     }
 
     /* check for duplicate declaration */
-    pad_check_dup(name,
-		(bool)(PL_in_my == KEY_our),
-		(PL_curstash ? PL_curstash : PL_defstash)
-    );
+    pad_check_dup(name, is_our, (PL_curstash ? PL_curstash : PL_defstash));
 
     if (PL_in_my_stash && *name != '$') {
 	yyerror(Perl_form(aTHX_
 		    "Can't declare class for non-scalar %s in \"%s\"",
-		     name, PL_in_my == KEY_our ? "our" : "my"));
+		     name, is_our ? "our" : "my"));
     }
 
     /* allocate a spare slot and store the name in that slot */
 
     off = pad_add_name(name,
 		    PL_in_my_stash,
-		    (PL_in_my == KEY_our 
+		    (is_our
 		        /* $_ is always in main::, even with our */
 			? (PL_curstash && !strEQ(name,"$_") ? PL_curstash : PL_defstash)
 			: NULL
@@ -507,19 +505,25 @@ Perl_op_refcnt_unlock(pTHX)
 OP *
 Perl_linklist(pTHX_ OP *o)
 {
+    OP *first;
 
     if (o->op_next)
 	return o->op_next;
 
     /* establish postfix order */
-    if (cUNOPo->op_first) {
+    first = cUNOPo->op_first;
+    if (first) {
         register OP *kid;
-	o->op_next = LINKLIST(cUNOPo->op_first);
-	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
-	    if (kid->op_sibling)
+	o->op_next = LINKLIST(first);
+	kid = first;
+	for (;;) {
+	    if (kid->op_sibling) {
 		kid->op_next = LINKLIST(kid->op_sibling);
-	    else
+		kid = kid->op_sibling;
+	    } else {
 		kid->op_next = o;
+		break;
+	    }
 	}
     }
     else
