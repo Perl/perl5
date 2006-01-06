@@ -2993,14 +2993,6 @@ Perl_yylex(pTHX)
 				(void)gv_fetchfile(PL_origfilename);
 			    goto retry;
 			}
-			if (PL_doswitches && !switches_done) {
-			    int argc = PL_origargc;
-			    char **argv = PL_origargv;
-			    do {
-				argc--,argv++;
-			    } while (argc && argv[0][0] == '-' && argv[0][1]);
-			    init_argv_symbols(argc,argv);
-			}
 		    }
 		}
 	    }
