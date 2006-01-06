@@ -433,7 +433,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     int masked_flags;
 
     if (!hv)
-	return 0;
+	return NULL;
 
     if (keysv) {
 	if (flags & HVhek_FREEKEY)

@@ -130,7 +130,7 @@ Perl_taint_env(pTHX)
   }
 #endif /* VMS */
 
-    svp = hv_fetch(GvHVn(PL_envgv),"PATH",4,FALSE);
+    svp = hv_fetchs(GvHVn(PL_envgv),"PATH",FALSE);
     if (svp && *svp) {
 	if (SvTAINTED(*svp)) {
 	    TAINT;
@@ -144,7 +144,7 @@ Perl_taint_env(pTHX)
 
 #ifndef VMS
     /* tainted $TERM is okay if it contains no metachars */
-    svp = hv_fetch(GvHVn(PL_envgv),"TERM",4,FALSE);
+    svp = hv_fetchs(GvHVn(PL_envgv),"TERM",FALSE);
     if (svp && *svp && SvTAINTED(*svp)) {
 	STRLEN len;
 	const bool was_tainted = PL_tainted;

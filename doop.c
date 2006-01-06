@@ -313,7 +313,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)
 
     SV* const  rv = (SV*)cSVOP->op_sv;
     HV* const  hv = (HV*)SvRV(rv);
-    SV* const * svp = hv_fetch(hv, "NONE", 4, FALSE);
+    SV* const * svp = hv_fetchs(hv, "NONE", FALSE);
     const UV none = svp ? SvUV(*svp) : 0x7fffffff;
     const UV extra = none + 1;
     UV final = 0;
@@ -337,7 +337,7 @@ S_do_trans_simple_utf8(pTHX_ SV *sv)
     send = s + len;
     start = s;
 
-    svp = hv_fetch(hv, "FINAL", 5, FALSE);
+    svp = hv_fetchs(hv, "FINAL", FALSE);
     if (svp)
 	final = SvUV(*svp);
 
@@ -411,7 +411,7 @@ S_do_trans_count_utf8(pTHX_ SV *sv)
 
     SV* const rv = (SV*)cSVOP->op_sv;
     HV* const hv = (HV*)SvRV(rv);
-    SV* const * const svp = hv_fetch(hv, "NONE", 4, FALSE);
+    SV* const * const svp = hv_fetchs(hv, "NONE", FALSE);
     const UV none = svp ? SvUV(*svp) : 0x7fffffff;
     const UV extra = none + 1;
     U8 hibit = 0;
@@ -455,7 +455,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv)
     const I32 grows    = PL_op->op_private & OPpTRANS_GROWS;
     SV * const rv = (SV*)cSVOP->op_sv;
     HV * const hv = (HV*)SvRV(rv);
-    SV * const *svp = hv_fetch(hv, "NONE", 4, FALSE);
+    SV * const *svp = hv_fetchs(hv, "NONE", FALSE);
     const UV none = svp ? SvUV(*svp) : 0x7fffffff;
     const UV extra = none + 1;
     UV final = 0;
@@ -481,7 +481,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv)
     send = s + len;
     start = s;
 
-    svp = hv_fetch(hv, "FINAL", 5, FALSE);
+    svp = hv_fetchs(hv, "FINAL", FALSE);
     if (svp) {
 	final = SvUV(*svp);
 	havefinal = TRUE;

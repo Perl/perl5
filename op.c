@@ -1577,8 +1577,7 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
 
     if (for_my) {
 	/* Don't force the C<use> if we don't need it. */
-	SV * const * const svp = hv_fetch(GvHVn(PL_incgv), ATTRSMODULE_PM,
-		       sizeof(ATTRSMODULE_PM)-1, 0);
+	SV * const * const svp = hv_fetchs(GvHVn(PL_incgv), ATTRSMODULE_PM, FALSE);
 	if (svp && *svp != &PL_sv_undef)
 	    ; 		/* already in %INC */
 	else
@@ -3243,7 +3242,7 @@ Perl_dofile(pTHX_ OP *term, I32 force_builtin)
     if (!force_builtin) {
 	gv = gv_fetchpv("do", 0, SVt_PVCV);
 	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
-	    GV * const * const gvp = (GV**)hv_fetch(PL_globalstash, "do", 2, FALSE);
+	    GV * const * const gvp = (GV**)hv_fetchs(PL_globalstash, "do", FALSE);
 	    gv = gvp ? *gvp : Nullgv;
 	}
     }
@@ -5350,7 +5349,7 @@ Perl_ck_exit(pTHX_ OP *o)
 #ifdef VMS
     HV * const table = GvHV(PL_hintgv);
     if (table) {
-       SV * const * const svp = hv_fetch(table, "vmsish_exit", 11, FALSE);
+       SV * const * const svp = hv_fetchs(table, "vmsish_exit", FALSE);
        if (svp && *svp && SvTRUE(*svp))
            o->op_private |= OPpEXIT_VMSISH;
     }
@@ -5707,7 +5706,7 @@ Perl_ck_fun(pTHX_ OP *o)
 				     || kid->op_type == OP_HELEM)
 			    {
 				 OP *op = ((BINOP*)kid)->op_first;
-				 name = 0;
+				 name = NULL;
 				 if (op) {
 				      SV *tmpstr = Nullsv;
 				      const char * const a =
@@ -6105,10 +6104,11 @@ Perl_ck_method(pTHX_ OP *o)
     OP * const kid = cUNOPo->op_first;
     if (kid->op_type == OP_CONST) {
 	SV* sv = kSVOP->op_sv;
-	if (!(strchr(SvPVX_const(sv), ':') || strchr(SvPVX_const(sv), '\''))) {
+	const char * const method = SvPVX_const(sv);
+	if (!(strchr(method, ':') || strchr(method, '\''))) {
 	    OP *cmop;
 	    if (!SvREADONLY(sv) || !SvFAKE(sv)) {
-		sv = newSVpvn_share(SvPVX_const(sv), SvCUR(sv), 0);
+		sv = newSVpvn_share(method, SvCUR(sv), 0);
 	    }
 	    else {
 		kSVOP->op_sv = Nullsv;
@@ -6133,7 +6133,7 @@ Perl_ck_open(pTHX_ OP *o)
     dVAR;
     HV * const table = GvHV(PL_hintgv);
     if (table) {
-	SV **svp = hv_fetch(table, "open_IN", 7, FALSE);
+	SV **svp = hv_fetchs(table, "open_IN", FALSE);
 	if (svp && *svp) {
 	    const I32 mode = mode_from_discipline(*svp);
 	    if (mode & O_BINARY)
@@ -6142,7 +6142,7 @@ Perl_ck_open(pTHX_ OP *o)
 		o->op_private |= OPpOPEN_IN_CRLF;
 	}
 
-	svp = hv_fetch(table, "open_OUT", 8, FALSE);
+	svp = hv_fetchs(table, "open_OUT", FALSE);
 	if (svp && *svp) {
 	    const I32 mode = mode_from_discipline(*svp);
 	    if (mode & O_BINARY)
@@ -6229,7 +6229,7 @@ Perl_ck_require(pTHX_ OP *o)
 	/* handle override, if any */
 	gv = gv_fetchpv("require", 0, SVt_PVCV);
 	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
-	    GV * const * const gvp = (GV**)hv_fetch(PL_globalstash, "require", 7, FALSE);
+	    GV * const * const gvp = (GV**)hv_fetchs(PL_globalstash, "require", FALSE);
 	    gv = gvp ? *gvp : Nullgv;
 	}
     }
@@ -6306,11 +6306,11 @@ Perl_ck_sort(pTHX_ OP *o)
 
     if (o->op_type == OP_SORT && (PL_hints & HINT_LOCALIZE_HH) != 0)
     {
-	HV *hinthv = GvHV(PL_hintgv);
+	HV * const hinthv = GvHV(PL_hintgv);
 	if (hinthv) {
-	    SV **svp = hv_fetch(hinthv, "sort", 4, 0);
+	    SV ** const svp = hv_fetchs(hinthv, "sort", FALSE);
 	    if (svp) {
-		I32 sorthints = (I32)SvIV(*svp);
+		const I32 sorthints = (I32)SvIV(*svp);
 		if ((sorthints & HINT_SORT_QUICKSORT) != 0)
 		    o->op_private |= OPpSORT_QSORT;
 		if ((sorthints & HINT_SORT_STABLE) != 0)
@@ -7097,7 +7097,7 @@ Perl_peep(pTHX_ register OP *o)
 	    lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
 	    if (!(SvFLAGS(lexname) & SVpad_TYPED))
 		break;
-	    fields = (GV**)hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
+	    fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
 	    if (!fields || !GvHV(*fields))
 		break;
 	    key = SvPV_const(*svp, keylen);
@@ -7146,7 +7146,7 @@ Perl_peep(pTHX_ register OP *o)
 	    lexname = *av_fetch(PL_comppad_name, rop->op_targ, TRUE);
 	    if (!(SvFLAGS(lexname) & SVpad_TYPED))
 		break;
-	    fields = (GV**)hv_fetch(SvSTASH(lexname), "FIELDS", 6, FALSE);
+	    fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
 	    if (!fields || !GvHV(*fields))
 		break;
 	    /* Again guessing that the pushmark can be jumped over.... */

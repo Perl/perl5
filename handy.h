@@ -250,6 +250,7 @@ typedef U64TYPE U64;
 #define sv_catpvs(sv, str) Perl_sv_catpvn_flags(aTHX_ sv, STR_WITH_LEN(str), SV_GMAGIC)
 #define savepvs(str) Perl_savepvn(aTHX_ STR_WITH_LEN(str))
 #define gv_stashpvs(str, create) Perl_gv_stashpvn(aTHX_ STR_WITH_LEN(str), create)
+#define hv_fetchs(hv,key,lval) Perl_hv_fetch(aTHX_ hv, STR_WITH_LEN(key), lval)
 
 /*
 =head1 Miscellaneous Functions
