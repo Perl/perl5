@@ -1,6 +1,6 @@
 /*    shared.xs
  *
- *    Copyright (c) 2001-2002, Larry Wall
+ *    Copyright (c) 2001-2002, 2006 Larry Wall
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -438,7 +438,7 @@ Perl_sharedsv_associate(pTHX_ SV *sv, SV *ssv)
 	    }
 	    mg = sv_magicext(sv, Nullsv, PERL_MAGIC_shared_scalar,
 			    &sharedsv_scalar_vtbl, (char *)ssv, 0);
-	    mg->mg_flags |= (MGf_COPY|MGf_DUP|MGf_LOCAL);
+	    mg->mg_flags |= (MGf_DUP|MGf_LOCAL);
 	    SvREFCNT_inc(ssv);
 	    if(SvOBJECT(ssv)) {
 	      STRLEN len;
@@ -870,15 +870,6 @@ sharedsv_elem_mg_DELETE(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
-/* free magic for PERL_MAGIC_tiedelem(p) */
-
-int
-sharedsv_elem_mg_free(pTHX_ SV *sv, MAGIC *mg)
-{
-    S_sharedsv_dec(aTHX_ S_sharedsv_from_obj(aTHX_ mg->mg_obj));
-    return 0;
-}
-
 /* Called during cloning of PERL_MAGIC_tiedelem(p) magic in new
  * thread */
 
@@ -895,7 +886,7 @@ MGVTBL sharedsv_elem_vtbl = {
  sharedsv_elem_mg_STORE,	/* set */
  0,				/* len */
  sharedsv_elem_mg_DELETE,	/* clear */
- sharedsv_elem_mg_free,		/* free */
+ 0,				/* free */
  0,				/* copy */
  sharedsv_elem_mg_dup,		/* dup */
  0				/* local */
@@ -962,9 +953,6 @@ sharedsv_array_mg_copy(pTHX_ SV *sv, MAGIC* mg,
     MAGIC *nmg = sv_magicext(nsv,mg->mg_obj,
 			    toLOWER(mg->mg_type),&sharedsv_elem_vtbl,
 			    name, namlen);
-    ENTER_LOCK;
-    SvREFCNT_inc((SV*)mg->mg_ptr);
-    LEAVE_LOCK;
     nmg->mg_flags |= MGf_DUP;
     return 1;
 }
