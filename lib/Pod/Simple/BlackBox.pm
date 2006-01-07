@@ -1675,7 +1675,7 @@ sub _treelet_from_formatting_codes {
         |
         (               # $6: stuff containing no start-codes or end-codes
           (?:
-            [^A-Z\s>]+
+            [^A-Z\s>]
             |
             (?:
               [A-Z](?!<)
