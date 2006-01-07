@@ -4815,14 +4815,13 @@ $  d_lstat = "undef"
 $  d_readlink = "undef"
 $  d_symlink = "undef"
 $  d_realpath = "undef"
-$  tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
 $!
 $! Hard link support has been present since 7.3-1 except for the
 $! easy to use DCL test to see if hardlinks are enabled on the build
 $! disk.  That would require more work to test, and I am only testing
 $! this on 8.2, so that is why the 8.2 test.
 $!
-$  IF (tmp .GES. "8.2") .AND. (f$getsyi("HW_MODEL") .GE. 1024)
+$  IF (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
 $  THEN
 $   IF f$getdvi("SYS$DISK","HARDLINKS_SUPPORTED")
 $   THEN
@@ -4834,13 +4833,13 @@ $	echo "I Found 64 bit OpenVMS 8.2 or later, and hard links disabled on build di
 $	echo "I will not build with hard link support."
 $   ENDIF
 $  ELSE
-$    echo4 "I can not dected if your CRTL and build disk support hard links."
+$    echo4 "I can not detect if your CRTL and build disk support hard links."
 $    echo4 "I am disabling hard link support."
 $  ENDIF
 $!
 $  IF uselargefiles .OR. uselargefiles .eqs. "define"
 $  THEN
-$    IF (tmp .GES. "8.2") .AND. (f$getsyi("HW_MODEL") .GE. 1024)
+$    IF (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
 $    THEN
 $      echo4 -
    "Looking for the realpath() function to indicate symbolic link support..."
@@ -4880,9 +4879,9 @@ $       echo4 "Your system does not support symbolic links."
 $       echo4 "I am disabling symbolic link support."
 $    ENDIF
 $  ELSE
-$    IF (tmp .GES. "8.2") .AND. (f$getsyi("HW_MODEL") .GE. 1024)
+$    IF (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
 $    THEN
-$       echo4 "-duselargefiles is required for symbolic link support."
+$       echo4 "-Duselargefiles is required for symbolic link support."
 $       echo4 "You did not specify that, so I am disabling symbolic link support."
 $    ENDIF
 $  ENDIF
@@ -4896,7 +4895,6 @@ $ i_grp = tmp
 $!
 $! VMS V7.3-2 powered options
 $! We know that it is only available for V7.3-2 and later on 64 bit platforms.
-$! Only implementing right now on 8.2 because that is what I am testing.
 $!
 $  d_getgrgid_r = "undef"
 $  getgrgid_r_proto = "0"
@@ -4913,10 +4911,11 @@ $  getpwuid_r_proto = "0"
 $  d_setgrent = "undef"
 $  d_ttyname_r = "undef"
 $  ttyname_r_proto = "0"
-$  tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
-$  if (tmp .GES. "8.2") .AND. (f$getsyi("HW_MODEL") .GE. 1024)
+$  d_snprintf = "undef"
+$  d_vsnprintf = "undef"
+$  if (vms_ver .GES. "7.3-2") .AND. (archname .NES. "VMS_VAX")
 $  then
-$    echo "Found 64 bit OpenVMS 8.2, will build with V7.3-2 routines"
+$    echo "Found 64 bit OpenVMS ''vms_ver' -- will build with V7.3-2 routines"
 $    d_getgrgid_r = "define"
 $    getgrgid_r_proto = "1"
 $    d_getgrnam_r = "define"
@@ -4930,6 +4929,8 @@ $    endif
 $    d_setgrent = "define"
 $    d_ttyname_r = "define"
 $    ttyname_r_proto = "1"
+$    d_snprintf = "define"
+$    d_vsnprintf = "define"
 $  endif
 $!
 $! VMS V7.3-2 powered options
@@ -4945,11 +4946,11 @@ $  d_setpgrp = "undef"
 $  d_setregid = "undef"
 $  d_setreuid = "undef"
 $  d_setsid = "undef"
-$!  tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
-$tmp = "" ! Disable this section for now.
-$  if (tmp .GES. "8.2") .AND. (f$getsyi("HW_MODEL") .GE. 1024)
+$  ! Disable this section for now.
+$!$  if (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
+$  if .NOT. 1
 $  then
-$    echo "Found 64 bit OpenVMS 8.2, will build with V7.3-2 UID setting routines"
+$    echo "Found 64 bit OpenVMS ''vms_ver' -- will build with V7.3-2 UID setting routines"
 $    d_seteuid = "define"
 $    d_setpgid = "define"
 $    d_setpgrp = "define"
@@ -4964,10 +4965,9 @@ $!
 $  d_fstatvfs = "undef"
 $!  d_statvfs = "undef"
 $  i_sysstatvfs = "undef"
-$  tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
-$  if (tmp .GES. "8.2") .AND. (f$getsyi("HW_MODEL") .GE. 1024)
+$  if (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
 $  then
-$    echo "Found 64 bit OpenVMS 8.2, will build with 8.2 routines"
+$    echo "Found 64 bit OpenVMS ''vms_ver' -- will build with 8.2 routines"
 $    d_fstatvfs = "define"
 $!    d_statvfs = "define"
 $    i_sysstatvfs = "define"
@@ -5227,8 +5227,7 @@ $   d_vms_do_sockets="define"
 $   d_htonl="define"
 $   d_socket="define"
 $   d_sockpair = "undef"
-$   tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
-$   if (tmp .GES. "8.2") .AND. (f$getsyi("HW_MODEL") .GE. 1024)
+$   if (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
 $   then
 $     echo "Found 64 bit OpenVMS 8.2, will build with socketpair support"
 $     d_sockpair = "define"
@@ -5671,12 +5670,11 @@ $ WC "d_dbl_dig='define'"
 $ WC "d_dbminitproto='undef'"
 $ WC "d_difftime='define'"
 $ WC "d_dirfd='undef'"
-$ tmp = f$extract(1,3,f$edit(f$getsyi("VERSION"),"TRIM,COLLAPSE"))
-$ IF (tmp .GES. "8.2") .AND. (f$getsyi("HW_MODEL") .GE. 1024)
+$ if (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
 $ then
 $! Sorry, CRTL does not have this, and in order to support
 $! POSIX filespecifications, the CRTL readdir() structures
-$! need to be used globaly for now.
+$! need to be used globally for now.
 $  echo "Building for OpenVMS 8.2 uses CRTL dirent.h, so no dirnamlen member"
 $   WC "d_dirnamlen='undef'"
 $ else
@@ -5987,7 +5985,7 @@ $ WC "d_vms_do_sockets='" + d_vms_do_sockets + "'" ! VMS
 $ WC "d_void_closedir='define'"
 $ WC "d_volatile='define'"
 $ WC "d_vprintf='define'"
-$ WC "d_vsnprintf='undef'"
+$ WC "d_vsnprintf='" + d_vsnprintf + "'"
 $ WC "d_wait4='" + d_wait4 + "'"
 $ WC "d_waitpid='define'"
 $ WC "d_wcstombs='" + d_wcstombs + "'"
@@ -6404,7 +6402,7 @@ $ WC "d_setnetent_r='undef'"
 $ WC "d_setprotoent_r='undef'"
 $ WC "d_setpwent_r='undef'"
 $ WC "d_setservent_r='undef'"
-$ WC "d_snprintf='undef'"
+$ WC "d_snprintf='" + d_snprintf + "'"
 $ WC "d_srand48_r='undef'"
 $ WC "d_srandom_r='undef'"
 $ WC "d_strerror_r='undef'"
