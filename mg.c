@@ -1003,13 +1003,13 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '(':
 	sv_setiv(sv, (IV)PL_gid);
 #ifdef HAS_GETGROUPS
-	Perl_sv_setpvf(aTHX_ sv, "%"Gid_t_f, (long unsigned int)PL_gid);
+	Perl_sv_setpvf(aTHX_ sv, "%"Gid_t_f, PL_gid);
 #endif
 	goto add_groups;
     case ')':
 	sv_setiv(sv, (IV)PL_egid);
 #ifdef HAS_GETGROUPS
-	Perl_sv_setpvf(aTHX_ sv, "%"Gid_t_f, (long unsigned int)PL_egid);
+	Perl_sv_setpvf(aTHX_ sv, "%"Gid_t_f, PL_egid);
 #endif
       add_groups:
 #ifdef HAS_GETGROUPS
@@ -1020,7 +1020,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             num_groups = getgroups(num_groups, gary);
 	    while (--num_groups >= 0)
 		Perl_sv_catpvf(aTHX_ sv, " %"Gid_t_f,
-                    (long unsigned int)gary[num_groups]);
+			       gary[num_groups]);
             Safefree(gary);
 	}
 #endif

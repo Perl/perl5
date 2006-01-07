@@ -1152,7 +1152,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	    SvPV_set(sv, 0);
 	break;
     default:
-	Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu", new_type);
+	Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
+		   (unsigned long)new_type);
     }
 
     if (old_type_details->size) {

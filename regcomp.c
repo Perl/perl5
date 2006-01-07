@@ -3847,7 +3847,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
     if (!SIZE_ONLY && !(flags&HASWIDTH) && max > REG_INFTY/3 && ckWARN(WARN_REGEXP)) {
 	vWARN3(RExC_parse,
 	       "%.*s matches null string many times",
-	       RExC_parse - origparse,
+	       (int)(RExC_parse >= origparse ? RExC_parse - origparse : 0),
 	       origparse);
     }
 
@@ -4850,12 +4850,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    /* a bad range like a-\d, a-[:digit:] ? */
 	    if (range) {
 		if (!SIZE_ONLY) {
-		    if (ckWARN(WARN_REGEXP))
+		    if (ckWARN(WARN_REGEXP)) {
+			int w =
+			    RExC_parse >= rangebegin ?
+			    RExC_parse - rangebegin : 0;
 			vWARN4(RExC_parse,
 			       "False [] range \"%*.*s\"",
-			       RExC_parse - rangebegin,
-			       RExC_parse - rangebegin,
+			       w,
+			       w,
 			       rangebegin);
+		    }
 		    if (prevvalue < 256) {
 			ANYOF_BITMAP_SET(ret, prevvalue);
 			ANYOF_BITMAP_SET(ret, '-');
@@ -5259,12 +5263,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 
 		/* a bad range like \w-, [:word:]- ? */
 		if (namedclass > OOB_NAMEDCLASS) {
-		    if (ckWARN(WARN_REGEXP))
+		    if (ckWARN(WARN_REGEXP)) {
+			int w =
+			    RExC_parse >= rangebegin ?
+			    RExC_parse - rangebegin : 0;
 			vWARN4(RExC_parse,
 			       "False [] range \"%*.*s\"",
-			       RExC_parse - rangebegin,
-			       RExC_parse - rangebegin,
+			       w,
+			       w,
 			       rangebegin);
+		    }
 		    if (!SIZE_ONLY)
 			ANYOF_BITMAP_SET(ret, '-');
 		} else
