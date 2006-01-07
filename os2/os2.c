@@ -1538,7 +1538,7 @@ do_spawn_nowait(pTHX_ char *cmd)
 }
 
 bool
-Perl_do_exec(pTHX_ char *cmd)
+Perl_do_exec(pTHX_ const char *cmd)
 {
     do_spawn3(aTHX_ cmd, EXECF_EXEC, 0);
     return FALSE;
