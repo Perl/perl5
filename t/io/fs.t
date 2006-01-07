@@ -47,7 +47,7 @@ $needs_fh_reopen = 1 if (defined &Win32::IsWin95 && Win32::IsWin95());
 my $skip_mode_checks =
     $^O eq 'cygwin' && $ENV{CYGWIN} !~ /ntsec/;
 
-plan tests => 42;
+plan tests => 44;
 
 
 if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
@@ -78,10 +78,10 @@ SKIP: {
     is((umask(0)&0777), 022, 'umask'),
 }
 
-open(fh,'>x') || die "Can't create x";
-close(fh);
-open(fh,'>a') || die "Can't create a";
-close(fh);
+open(FH,'>x') || die "Can't create x";
+close(FH);
+open(FH,'>a') || die "Can't create a";
+close(FH);
 
 my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,$atime,$mtime,$ctime,
     $blksize,$blocks);
@@ -171,10 +171,16 @@ SKIP: {
     ok(open(my $fh, "<", "a"), "open a");
     is(chmod(0, $fh), 1, "fchmod");
     $mode = (stat "a")[2];
-    is($mode & 0777, 0, "perm reset");
+    SKIP: {
+        skip "no mode checks", 1 if $skip_mode_checks;
+        is($mode & 0777, 0, "perm reset");
+    }
     is(chmod($newmode, "a"), 1, "fchmod");
     $mode = (stat $fh)[2];
-    is($mode & 0777, $newmode, "perm restored");
+    SKIP: { 
+        skip "no mode checks", 1 if $skip_mode_checks;
+        is($mode & 0777, $newmode, "perm restored");
+    }
 }
 
 SKIP: {
@@ -380,8 +386,8 @@ SKIP: {
       if $^O eq 'cygwin';
 
     chdir './tmp';
-    open(fh,'>x') || die "Can't create x";
-    close(fh);
+    open(FH,'>x') || die "Can't create x";
+    close(FH);
     rename('x', 'X');
 
     # this works on win32 only, because fs isn't casesensitive
@@ -402,6 +408,17 @@ if ($^O eq 'VMS') {
 }
 
 ok(-d 'tmp1', "rename on directories working");
+
+{
+    # Change 26011: Re: A surprising segfault
+    # to make sure only that these obfuscated sentences will not crash.
+
+    map chmod(+()), ('')x68;
+    ok(1, "extend sp in pp_chmod");
+
+    map chown(+()), ('')x68;
+    ok(1, "extend sp in pp_chown");
+}
 
 # need to remove 'tmp' if rename() in test 28 failed!
 END { rmdir 'tmp1'; rmdir 'tmp'; 1 while unlink "Iofs.tmp"; }

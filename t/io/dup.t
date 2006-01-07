@@ -7,6 +7,7 @@ BEGIN {
 }
 
 use Config;
+no warnings 'once';
 
 my $test = 1;
 print "1..26\n";

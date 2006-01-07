@@ -258,6 +258,7 @@ sub like_yn ($$$@) {
 	unshift(@mess, "#      got '$got'\n",
 		"# expected /$expected/\n");
     }
+    local $Level = 2;
     _ok($pass, _where(), $name, @mess);
 }
 
@@ -296,7 +297,7 @@ sub todo_skip {
     my $n   = @_ ? shift : 1;
 
     for (1..$n) {
-        print STDOUT "ok $test # TODO & SKIP: $why\n";
+        print STDOUT "not ok $test # TODO & SKIP: $why\n";
         $test++;
     }
     local $^W = 0;

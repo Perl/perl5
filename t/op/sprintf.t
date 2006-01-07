@@ -12,27 +12,10 @@ BEGIN {
 }
 use warnings;
 use Config;
+use strict;
 
-# strictness
 my @tests = ();
 my ($i, $template, $data, $result, $comment, $w, $x, $evalData, $n, $p);
-
-while (<DATA>) {
-    s/^\s*>//; s/<\s*$//;
-    push @tests, [split(/<\s*>/, $_, 4)];
-}
-
-print '1..', scalar @tests, "\n";
-
-$SIG{__WARN__} = sub {
-    if ($_[0] =~ /^Invalid conversion/) {
-	$w = ' INVALID';
-    } elsif ($_[0] =~ /^Use of uninitialized value/) {
-	$w = ' UNINIT';
-    } else {
-	warn @_;
-    }
-};
 
 my $Is_VMS_VAX = 0;
 # We use HW_MODEL since ARCH_NAME was not in VMS V5.*
@@ -45,8 +28,9 @@ if ($^O eq 'VMS') {
 # No %Config.
 my $Is_Ultrix_VAX = $^O eq 'ultrix' && `uname -m` =~ /^VAX$/;
 
-for ($i = 1; @tests; $i++) {
-    ($template, $data, $result, $comment) = @{shift @tests};
+while (<DATA>) {
+    s/^\s*>//; s/<\s*$//;
+    ($template, $data, $result, $comment) = split(/<\s*>/, $_, 4);
     if ($^O eq 'os390' || $^O eq 's390') { # non-IEEE (s390 is UTS)
         $data   =~ s/([eE])96$/${1}63/;      # smaller exponents
         $result =~ s/([eE]\+)102$/${1}69/;   #  "       "
@@ -62,10 +46,28 @@ for ($i = 1; @tests; $i++) {
         $data   =~ s/([eE])\-101$/${1}-24/;  # larger exponents
         $result =~ s/([eE])\-102$/${1}-25/;  #  "       "
     }
+
     $evalData = eval $data;
+    $data = ref $evalData ? $evalData : [$evalData];
+    push @tests, [$template, $data, $result, $comment];
+}
+
+print '1..', scalar @tests, "\n";
+
+$SIG{__WARN__} = sub {
+    if ($_[0] =~ /^Invalid conversion/) {
+	$w = ' INVALID';
+    } elsif ($_[0] =~ /^Use of uninitialized value/) {
+	$w = ' UNINIT';
+    } else {
+	warn @_;
+    }
+};
+
+for ($i = 1; @tests; $i++) {
+    ($template, $data, $result, $comment) = @{shift @tests};
     $w = undef;
-    $x = sprintf(">$template<",
-                 defined @$evalData ? @$evalData : $evalData);
+    $x = sprintf(">$template<", @$data);
     substr($x, -1, 0) = $w if $w;
     # $x may have 3 exponent digits, not 2
     my $y = $x;

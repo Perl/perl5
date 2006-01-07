@@ -49,10 +49,11 @@ $Is_MPE      = $^O eq 'mpeix';
 $Is_miniperl = $ENV{PERL_CORE_MINITEST};
 $Is_BeOS     = $^O eq 'beos';
 
-$PERL = ($Is_NetWare            ? 'perl'   :
-	 ($Is_MacOS || $Is_VMS) ? $^X      :
-	 $Is_MSWin32            ? '.\perl' :
-	 './perl');
+$PERL = $ENV{PERL}
+    || ($Is_NetWare           ? 'perl'   :
+       ($Is_MacOS || $Is_VMS) ? $^X      :
+       $Is_MSWin32            ? '.\perl' :
+       './perl');
 
 eval '$ENV{"FOO"} = "hi there";';	# check that ENV is inited inside eval
 # cmd.exe will echo 'variable=value' but 4nt will echo just the value

@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 137;
+plan tests => 139;
 
 $_ = 'abc';
 $c = do foo();
@@ -231,4 +231,15 @@ foreach my $start (@chars) {
     is(chop($utf), "\0", "chopping utf8 NUL");
     is($asc, "perl", "chopped ascii NUL");
     is($utf, "perl", "chopped utf8 NUL");
+}
+
+{
+    # Change 26011: Re: A surprising segfault
+    # to make sure only that these obfuscated sentences will not crash.
+
+    map chop(+()), ('')x68;
+    ok(1, "extend sp in pp_chop");
+
+    map chomp(+()), ('')x68;
+    ok(1, "extend sp in pp_chomp");
 }
