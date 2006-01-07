@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 238;
+plan tests => 239;
 
 
 $| = 1;
@@ -1106,3 +1106,17 @@ TERNARY_CONDITIONALS: {
         test not any_tainted @bar;
     }
 }
+
+# [perl #8262] //g loops infinitely on tainted data
+
+{
+    my @a;
+    $a[0] = $^X;
+    my $i = 0;
+    while($a[0]=~ m/(.)/g ) {
+	last if $i++ > 10000;
+    }
+    test $i < 10000, "infinite m//g";
+    
+}
+
