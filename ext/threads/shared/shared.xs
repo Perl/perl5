@@ -417,13 +417,6 @@ Perl_sharedsv_associate(pTHX_ SV *sv, SV *ssv)
 	    mg->mg_flags |= (MGf_COPY|MGf_DUP);
 	    SvREFCNT_inc(ssv);
 	    SvREFCNT_dec(obj);
-	    if (SvOBJECT(ssv)) {
-		STRLEN len;
-		char* stash_ptr = SvPV((SV*) SvSTASH(ssv), len);
-		HV* stash = gv_stashpvn(stash_ptr, len, TRUE);
-		SvOBJECT_on(sv);
-		SvSTASH_set(sv, (HV*)SvREFCNT_inc(stash));
-	    }
 	}
 	break;
 
@@ -440,13 +433,6 @@ Perl_sharedsv_associate(pTHX_ SV *sv, SV *ssv)
 			    &sharedsv_scalar_vtbl, (char *)ssv, 0);
 	    mg->mg_flags |= (MGf_DUP|MGf_LOCAL);
 	    SvREFCNT_inc(ssv);
-	    if(SvOBJECT(ssv)) {
-	      STRLEN len;
-	      char* stash_ptr = SvPV((SV*) SvSTASH(ssv), len);
-	      HV* stash = gv_stashpvn(stash_ptr, len, TRUE);
-	      SvOBJECT_on(sv);
-	      SvSTASH_set(sv, (HV*)SvREFCNT_inc(stash));
-	    }
 	}
 	break;
     }
@@ -611,6 +597,53 @@ Perl_sharedsv_cond_timedwait(perl_cond *cond, perl_mutex *mut, double abs)
 #endif /* NETWARE || FAKE_THREADS || I_MACH_CTHREADS */
 }
 
+
+/* given a shared RV, copy it's value to a private RV, also coping the
+ * object status of the referent.
+ * If the private side is already an appropriate RV->SV combination, keep
+ * it if possible.
+ */
+
+STATIC void
+S_get_RV(pTHX_ SV *sv, SV *ssv) {
+    SV *sobj = SvRV(ssv);
+    SV *obj;
+    if ( ! (   SvROK(sv)
+	    && ((obj = SvRV(sv)))
+	    && (Perl_sharedsv_find(aTHX_ obj) == sobj)
+	    && (SvTYPE(obj) == SvTYPE(sobj))
+	    )
+	)
+    {
+    	/* can't reuse obj */
+	if (SvROK(sv))  {
+	    SvREFCNT_dec(SvRV(sv));
+	}
+	else {
+	    assert(SvTYPE(sv) >= SVt_RV);
+	    sv_setsv_nomg(sv, &PL_sv_undef);
+	    SvROK_on(sv);
+	}
+	obj = S_sharedsv_new_private(aTHX_ SvRV(ssv));
+	SvRV_set(sv, obj);
+    }
+
+    if (SvOBJECT(obj)) {
+	/* remove any old blessing */
+	SvREFCNT_dec(SvSTASH(obj));
+	SvOBJECT_off(obj);
+    }
+    if (SvOBJECT(sobj)) {
+	/* add any new old blessing */
+	STRLEN len;
+	char* stash_ptr = SvPV((SV*) SvSTASH(sobj), len);
+	HV* stash = gv_stashpvn(stash_ptr, len, TRUE);
+	SvOBJECT_on(obj);
+	SvSTASH_set(obj, (HV*)SvREFCNT_inc(stash));
+    }
+}
+
+
 /* ------------ PERL_MAGIC_shared_scalar(n) functions -------------- */
 
 /* get magic for PERL_MAGIC_shared_scalar(n) */
@@ -623,10 +656,7 @@ sharedsv_scalar_mg_get(pTHX_ SV *sv, MAGIC *mg)
 
     ENTER_LOCK;
     if (SvROK(ssv)) {
-	SV *obj = S_sharedsv_new_private(aTHX_ SvRV(ssv));
-	sv_setsv_nomg(sv, &PL_sv_undef);
-	SvRV_set(sv, obj);
-	SvROK_on(sv);
+	S_get_RV(aTHX_ sv, ssv);
     }
     else {
 	sv_setsv_nomg(sv, ssv);
@@ -784,11 +814,7 @@ sharedsv_elem_mg_FETCH(pTHX_ SV *sv, MAGIC *mg)
     if (svp) {
 	/* Exists in the array */
 	if (SvROK(*svp)) {
-	    SV *obj = S_sharedsv_new_private(aTHX_ SvRV(*svp));
-	    sv_setsv_nomg(sv, &PL_sv_undef);
-	    SvRV_set(sv, obj);
-	    SvROK_on(sv);
-	    SvSETMAGIC(sv);
+	    S_get_RV(aTHX_ sv, *svp);
 	}
 	else {
 	    /* XXX can this branch ever happen? DAPM */
