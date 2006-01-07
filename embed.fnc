@@ -525,7 +525,7 @@ Apa	|OP*	|newRANGE	|I32 flags|NN OP* left|NN OP* right
 Apa	|OP*	|newSLICEOP	|I32 flags|NULLOK OP* subscript|NULLOK OP* listop
 Apa	|OP*	|newSTATEOP	|I32 flags|NULLOK char* label|NULLOK OP* o
 Ap	|CV*	|newSUB		|I32 floor|NULLOK OP* o|NULLOK OP* proto|NULLOK OP* block
-Apd	|CV*	|newXS		|NN char* name|NN XSUBADDR_t f|NN char* filename
+Apd	|CV*	|newXS		|NULLOK char* name|NN XSUBADDR_t f|NN char* filename
 Apda	|AV*	|newAV
 Apa	|OP*	|newAVREF	|NN OP* o
 Apa	|OP*	|newBINOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
@@ -1132,6 +1132,7 @@ sR	|I32	|dopoptosub	|I32 startingblock
 sR	|I32	|dopoptosub_at	|NN const PERL_CONTEXT* cxstk|I32 startingblock
 s	|void	|save_lines	|NULLOK AV *array|NN SV *sv
 sR	|OP*	|doeval		|int gimme|NULLOK OP** startop|NULLOK CV* outside|U32 seq
+sR	|PerlIO *|check_type_and_open|NN const char *name|NN const char *mode
 sR	|PerlIO *|doopen_pm	|NN const char *name|NN const char *mode
 sR	|bool	|path_is_absolute|NN const char *name
 #endif

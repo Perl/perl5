@@ -147,7 +147,7 @@ XS(Cygwin_cwd)
 	Perl_croak(aTHX_ "Usage: Cwd::cwd()");
     if((cwd = getcwd(NULL, -1))) {
 	ST(0) = sv_2mortal(newSVpv(cwd, 0));
-	safesysfree(cwd);
+	free(cwd);
 #ifndef INCOMPLETE_TAINTS
 	SvTAINTED_on(ST(0));
 #endif

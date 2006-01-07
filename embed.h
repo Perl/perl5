@@ -1194,6 +1194,7 @@
 #define dopoptosub_at		S_dopoptosub_at
 #define save_lines		S_save_lines
 #define doeval			S_doeval
+#define check_type_and_open	S_check_type_and_open
 #define doopen_pm		S_doopen_pm
 #define path_is_absolute	S_path_is_absolute
 #endif
@@ -3230,6 +3231,7 @@
 #define dopoptosub_at(a,b)	S_dopoptosub_at(aTHX_ a,b)
 #define save_lines(a,b)		S_save_lines(aTHX_ a,b)
 #define doeval(a,b,c,d)		S_doeval(aTHX_ a,b,c,d)
+#define check_type_and_open(a,b)	S_check_type_and_open(aTHX_ a,b)
 #define doopen_pm(a,b)		S_doopen_pm(aTHX_ a,b)
 #define path_is_absolute(a)	S_path_is_absolute(aTHX_ a)
 #endif

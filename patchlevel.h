@@ -100,6 +100,7 @@ while (<PLIN>) {
 }
 close PLOUT or die "Couldn't close filehandle writing to patchlevel.new : $!";
 close PLIN or die "Couldn't close filehandle reading from patchlevel.h : $!";
+close DATA; # needed to allow unlink to work win32.
 unlink "patchlevel.bak" or warn "Couldn't unlink patchlevel.bak : $!"
   if -e "patchlevel.bak";
 rename "patchlevel.h", "patchlevel.bak" or

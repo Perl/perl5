@@ -1420,7 +1420,6 @@ PERL_CALLCONV OP*	Perl_newSTATEOP(pTHX_ I32 flags, char* label, OP* o)
 
 PERL_CALLCONV CV*	Perl_newSUB(pTHX_ I32 floor, OP* o, OP* proto, OP* block);
 PERL_CALLCONV CV*	Perl_newXS(pTHX_ char* name, XSUBADDR_t f, char* filename)
-			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
@@ -3042,6 +3041,11 @@ STATIC void	S_save_lines(pTHX_ AV *array, SV *sv)
 
 STATIC OP*	S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 			__attribute__warn_unused_result__;
+
+STATIC PerlIO *	S_check_type_and_open(pTHX_ const char *name, const char *mode)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 
 STATIC PerlIO *	S_doopen_pm(pTHX_ const char *name, const char *mode)
 			__attribute__warn_unused_result__

@@ -8729,8 +8729,16 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    vecsv = svix < svmax ? svargs[svix++] : &PL_sv_undef;
 		}
 		dotstr = SvPV_const(vecsv, dotstrlen);
+		/* Keep the DO_UTF8 test *after* the SvPV call, else things go
+		   bad with tied or overloaded values that return UTF8.  */
 		if (DO_UTF8(vecsv))
 		    is_utf8 = TRUE;
+		else if (has_utf8) {
+		    vecsv = sv_mortalcopy(vecsv);
+		    sv_utf8_upgrade(vecsv);
+		    dotstr = SvPV_const(vecsv, dotstrlen);
+		    is_utf8 = TRUE;
+		}		    
 	    }
 	    if (args) {
 		vecsv = va_arg(*args, SV*);
@@ -11527,6 +11535,20 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     else {
 	init_stacks();
 	ENTER;			/* perl_destruct() wants to LEAVE; */
+
+	/* although we're not duplicating the tmps stack, we should still
+	 * add entries for any SVs on the tmps stack that got cloned by a
+	 * non-refcount means (eg a temp in @_); otherwise they will be
+	 * orphaned
+	 */
+	for (i = 0; i<= proto_perl->Ttmps_ix; i++) {
+	    SV *nsv = (SV*)ptr_table_fetch(PL_ptr_table,
+		    proto_perl->Ttmps_stack[i]);
+	    if (nsv && !SvREFCNT(nsv)) {
+		EXTEND_MORTAL(1);
+		PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc(nsv);
+	    }
+	}
     }
 
     PL_start_env	= proto_perl->Tstart_env;	/* XXXXXX */

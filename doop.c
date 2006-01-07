@@ -967,6 +967,13 @@ Perl_do_chop(pTHX_ register SV *astr, register SV *sv)
         if (SvREADONLY(sv))
             Perl_croak(aTHX_ PL_no_modify);
     }
+
+    if (PL_encoding && !SvUTF8(sv)) {
+	/* like in do_chomp(), utf8-ize the sv as a side-effect
+	 * if we're using encoding. */
+	sv_recode_to_utf8(sv, PL_encoding);
+    }
+
     s = SvPV(sv, len);
     if (len && !SvPOK(sv))
 	s = SvPV_force(sv, len);
