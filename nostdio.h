@@ -1,6 +1,6 @@
 /*    nostdio.h
  *
- *    Copyright (C) 1996, 2000, 2001, by Larry Wall and others
+ *    Copyright (C) 1996, 2000, 2001, 2005, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
