@@ -28,6 +28,62 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.8		Maintenance release working toward v5.8.8
 --------------
 ____________________________________________________________________________
+[ 26746] By: nicholas                              on 2006/01/08  22:41:08
+        Log: Integrate:
+             [ 26744]
+             Grr.  #26690 broke handling of old ODS-2 style names
+             on current versions of VMS
+     Branch: maint-5.8/perl
+	  !> configure.com
+____________________________________________________________________________
+[ 26742] By: nicholas                              on 2006/01/08  22:06:18
+        Log: Integrate:
+             [ 26707]
+             Subject: [PATCH] hints/dec_osf.sh (Re: blead@26701 compilation warning from tru64 cc)
+             From: Jarkko Hietaniemi <jhietaniemi@gmail.com>
+             Date: Sun, 08 Jan 2006 11:38:34 +0200
+             Message-ID: <43C0DD9A.9080809@gmail.com>
+     Branch: maint-5.8/perl
+	  !> hints/dec_osf.sh
+____________________________________________________________________________
+[ 26741] By: nicholas                              on 2006/01/08  21:47:32
+        Log: For some reason change 26009/26011 merged as 26627 still segfaults
+             after all the tests have completed in scope.c:
+             
+             143         const I32 oldsave = PL_scopestack[--PL_scopestack_ix];
+             (gdb) p my_perl->Tscopestack_ix
+             $1 = 136787683
+             
+             So don't run the troublesome tests for now.
+     Branch: maint-5.8/perl
+	   ! t/io/fs.t
+____________________________________________________________________________
+[ 26738] By: nicholas                              on 2006/01/08  21:30:11
+        Log: Integrate:
+             [ 26644]
+             Update copyright year.
+             
+             [ 26736]
+             Update the copyright years in the generated files, and nostdio.h
+             
+             [ 26737]
+             Update copyright with the 2 years where changes were made.
+             
+             
+             plus some manual copyright edits where the blead changes were tied up
+             with as yet unintegrated patches.
+     Branch: maint-5.8/perl
+	   ! utf8.h
+	  !> av.c doop.c gv.c gv.h handy.h keywords.h keywords.pl nostdio.h
+	  !> numeric.c op.c opcode.pl opnames.h pad.c pad.h patchlevel.h
+	  !> pp.c pp_hot.c pp_sys.c regcomp.c regexec.c toke.c universal.c
+	  !> utf8.c util.c xsutils.c
+____________________________________________________________________________
+[ 26731] By: nicholas                              on 2006/01/08  19:13:32
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 26730] By: nicholas                              on 2006/01/08  18:40:54
         Log: Integrate:
              [ 26498]
