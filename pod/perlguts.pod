@@ -126,11 +126,11 @@ Also remember that C doesn't allow you to safely say C<foo(SvPV(s, len),
 len);>. It might work with your compiler, but it won't work for everyone.
 Break this sort of statement up into separate assignments:
 
-	SV *s;
-	STRLEN len;
-	char * ptr;
-	ptr = SvPV(s, len);
-	foo(ptr, len);
+    SV *s;
+    STRLEN len;
+    char * ptr;
+    ptr = SvPV(s, len);
+    foo(ptr, len);
 
 If you want to know if the scalar value is TRUE, you can use:
 
@@ -2184,16 +2184,18 @@ after that are the arguments. The first column is a set of flags:
 
 =item A
 
-This function is a part of the public API.
+This function is a part of the public API. All such functions should also
+have 'd', very few do not.
 
 =item p
 
-This function has a C<Perl_> prefix; i.e. it is defined as C<Perl_av_fetch>
+This function has a C<Perl_> prefix; i.e. it is defined as
+C<Perl_av_fetch>.
 
 =item d
 
 This function has documentation using the C<apidoc> feature which we'll
-look at in a second.
+look at in a second.  Some functions have 'd' but not 'A'; docs are good.
 
 =back
 
@@ -2203,12 +2205,13 @@ Other available flags are:
 
 =item s
 
-This is a static function and is defined as C<S_whatever>, and usually
-called within the sources as C<whatever(...)>.
+This is a static function and is defined as C<STATIC S_whatever>, and
+usually called within the sources as C<whatever(...)>.
 
 =item n
 
-This does not use C<aTHX_> and C<pTHX> to pass interpreter context. (See
+This does not need a interpreter context, so the definition has no
+C<pTHX>, and it follows that callers don't use C<aTHX>.  (See
 L<perlguts/Background and PERL_IMPLICIT_CONTEXT>.)
 
 =item r
@@ -2252,6 +2255,10 @@ This function is visible to extensions included in the Perl core.
 
 Binary backward compatibility; this function is a macro but also has
 a C<Perl_> implementation (which is exported).
+
+=item others
+
+See the comments at the top of C<embed.fnc> for others.
 
 =back
 
@@ -2596,7 +2603,7 @@ define your own ops. This is primarily to allow the building of
 interpreters for other languages in the Perl core, but it also allows
 optimizations through the creation of "macro-ops" (ops which perform the
 functions of multiple ops which are usually executed together, such as
-C<gvsv, gvsv, add>.) 
+C<gvsv, gvsv, add>.)
 
 This feature is implemented as a new op type, C<OP_CUSTOM>. The Perl
 core does not "know" anything special about this op type, and so it will
