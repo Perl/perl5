@@ -38,6 +38,7 @@ package Maintainers;
 	'marekr'	=> 'Marek Rouchal <marekr@cpan.org>',
 	'mhx'		=> 'Marcus Holland-Moritz <mhx@cpan.org>',
 	'mjd'		=> 'Mark-Jason Dominus <mjd@plover.com>',
+	'mshelor'	=> 'Mark Shelor <mshelor@cpan.org>',
 	'muir'		=> 'David Muir Sharnoff <muir@cpan.org>',
 	'neilb'		=> 'Neil Bowers <neilb@cpan.org>',
 	'ni-s'		=> 'Nick Ing-Simmons <nick@ing-simmons.net>',
@@ -178,6 +179,13 @@ package Maintainers;
 		'FILES'		=> q[ext/Digest/MD5],
 		'CPAN'		=> 1,
 		},
+
+        'Digest::SHA' =>
+                {
+                'MAINTAINER'    => 'mshelor',
+                'FILES'         => q[ext/Digest/SHA],
+                'CPAN'          => 1,
+                },
 
 	'Encode' =>
 		{

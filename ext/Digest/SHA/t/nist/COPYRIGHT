@@ -1,0 +1,17 @@
+The files in this directory were extracted from the "sha1-vectors.zip"
+archive, which is publicly available through the National Institute
+of Standards and Technology (NIST) website at the following URL:
+
+	http://csrc.nist.gov/cryptval/shs.html
+
+The files have been truncated to include only the first 10 test
+cases for bit and byte messages.  This was done solely to decrease
+the size of the module distribution, thereby making downloads much
+quicker for users.  If a more extensive test run is desired, simply
+replace these files by the originals from the above URL.
+
+NIST advises that the archive file describes "tests and vectors
+that can be used to informally verify the correctness of an SHA-1
+implementation.  However, use of these vectors does not take the
+place of validation obtained through the Cryptographic Module
+Validation Program."

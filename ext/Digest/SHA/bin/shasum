@@ -1,0 +1,212 @@
+#!perl -w
+
+	# shasum: filter for computing SHA digests (analogous to md5sum)
+	#
+	# Copyright (C) 2003-2005 Mark Shelor, All Rights Reserved
+	#
+	# Version: 5.32
+	# Fri Dec  2 02:32:20 MST 2005
+
+=head1 NAME
+
+shasum - Print or Check SHA Checksums
+
+=head1 SYNOPSIS
+
+ Usage: shasum [OPTION] [FILE]...
+    or: shasum [OPTION] --check [FILE]
+ Print or check SHA checksums.
+ With no FILE, or when FILE is -, read standard input.
+
+  -a, --algorithm    1 (default), 224, 256, 384, 512
+  -b, --binary       read files in binary mode (default on DOS/Windows)
+  -c, --check        check SHA sums against given list
+  -t, --text         read files in text mode (default)
+
+ The following two options are useful only when verifying checksums:
+
+      --status       don't output anything, status code shows success
+  -w, --warn         warn about improperly formatted SHA checksum lines
+
+      --help         display this help and exit
+      --version      output version information and exit
+
+The sums are computed as described in FIPS PUB 180-2.  When checking,
+the input should be a former output of this program.  The default
+mode is to print a line with checksum, a character indicating type
+(`*' for binary, ` ' for text), and name for each FILE.
+
+=head1 AUTHOR
+
+Copyright (c) 2003-2005 Mark Shelor <mshelor@cpan.org>.
+
+=head1 SEE ALSO
+
+Shasum is implemented using the Perl module L<Digest::SHA> or
+L<Digest::SHA::PurePerl>.
+
+=cut
+
+use strict;
+use Getopt::Long;
+
+my $VERSION = "5.32";
+
+
+	# Try to use Digest::SHA, since it's faster.  If not installed,
+	# use Digest::SHA::PurePerl instead.
+
+my $MOD_PREFER = "Digest::SHA";
+my $MOD_SECOND = "Digest::SHA::PurePerl";
+
+my $module = $MOD_PREFER;
+eval "require $module";
+if ($@) {
+	$module = $MOD_SECOND;
+	eval "require $module";
+	die "Unable to find $MOD_PREFER or $MOD_SECOND\n" if $@;
+}
+
+
+	# Usage statement adapted from Ulrich Drepper's md5sum.
+	# Include an "-a" option for algorithm selection.
+
+sub usage {
+	my($err) = @_;
+
+	my $stream = $err ? *STDERR : *STDOUT;
+	print $stream <<'END_OF_USAGE';
+Usage: shasum [OPTION] [FILE]...
+   or: shasum [OPTION] --check [FILE]
+Print or check SHA checksums.
+With no FILE, or when FILE is -, read standard input.
+
+  -a, --algorithm    1 (default), 224, 256, 384, 512
+  -b, --binary       read files in binary mode (default on DOS/Windows)
+  -c, --check        check SHA sums against given list
+  -t, --text         read files in text mode (default)
+
+The following two options are useful only when verifying checksums:
+      --status       don't output anything, status code shows success
+  -w, --warn         warn about improperly formatted SHA checksum lines
+
+      --help         display this help and exit
+      --version      output version information and exit
+
+The sums are computed as described in FIPS PUB 180-2.  When checking,
+the input should be a former output of this program.  The default
+mode is to print a line with checksum, a character indicating type
+(`*' for binary, ` ' for text), and name for each FILE.
+
+Report bugs to <mshelor@cpan.org>.
+END_OF_USAGE
+	exit($err);
+}
+
+
+	# Collect options from command line
+
+my ($alg, $binary, $check, $text, $status, $warn, $help, $version);
+
+GetOptions(
+	'binary' => \$binary, 'check' => \$check,
+	'text' => \$text, 'algorithm=i' => \$alg,
+	'status' => \$status, 'warn' => \$warn,
+	'help' => \$help, 'version' => \$version
+) or usage(1);
+
+
+	# Deal with help requests and incorrect uses
+
+usage(0) if $help;
+usage(1) if $binary and $text;
+usage(1) if $warn and not $check;
+usage(1) if $status and not $check;
+
+
+	# Default to SHA-1 unless overriden by command line option
+
+$alg = 1 unless $alg;
+grep { $_ == $alg } (1, 224, 256, 384, 512) or usage(1);
+
+
+	# Display version information if requested
+
+if ($version) {
+	print "$VERSION\n";
+	exit(0);
+}
+
+
+	# Try to figure out if the OS is DOS-like.  If it is,
+	# default to binary mode when reading files, unless
+	# explicitly overriden by command line "text" option.
+
+my $isDOSish = ($^O =~ /^(MSWin\d\d|os2|dos|mint|cygwin)$/);
+if ($isDOSish) { $binary = 1 unless $text }
+
+
+	# Read from STDIN (-) if no files listed on command line
+
+@ARGV = ("-") unless @ARGV;
+
+
+	# sumfile($file): computes SHA digest of $file
+
+sub sumfile {
+	my($file) = @_;
+	my($fh, $digest);
+
+	unless (open($fh, "<$file")) {
+		print STDERR "shasum: $file: No such file or directory\n";
+		return;
+	}
+	binmode($fh) if $binary;
+	$digest = $module->new($alg)->addfile($fh)->hexdigest;
+	close($fh);
+	return($digest);
+}
+
+
+	# %len2alg: maps hex digest length to SHA algorithm
+
+my %len2alg = (40 => 1, 56 => 224, 64 => 256, 96 => 384, 128 => 512);
+
+
+	# Verify checksums if requested
+
+if ($check) {
+	my $checkfile = shift(@ARGV);
+	my $err = 0;
+	my ($fh, $sum, $fname, $rsp);
+
+	die "shasum: $checkfile: No such file or directory\n"
+		unless open($fh, "<$checkfile");
+	while (<$fh>) {
+		s/\s+$//;
+		($sum, $binary, $fname) = /^(\S+)\s+(\*?)(.*)$/;
+		unless ($alg = $len2alg{length($sum)}) {
+			print STDERR "shasum: $checkfile: $.: improperly ",
+				"formatted SHA checksum line\n" if $warn;
+			next;
+		}
+		$rsp = "$fname: ";
+		if (lc($sum) eq sumfile($fname)) { $rsp .= "OK\n" }
+		else { $rsp .= "FAILED\n"; $err = 1 }
+		print $rsp unless $status;
+	}
+	close($fh);
+	exit($err);
+}
+
+
+	# Compute and display SHA checksums of requested files
+
+for (@ARGV) {
+	if (-d $_) {
+		print STDERR "shasum: $_: Is a directory\n";
+		next;
+	}
+	next unless my $digest = sumfile($_);
+	print "$digest ", $binary ? "\*" : " ", "$_\n";
+}

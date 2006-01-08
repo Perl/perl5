@@ -5,9 +5,9 @@ REALPERL = ../perl
 # Files to be built with variable substitution after miniperl is
 # available.  Dependencies handled manually below (for now).
 
-pl = c2ph.PL cpan.PL corelist.PL h2ph.PL h2xs.PL instmodsh.PL perlbug.PL perldoc.PL perlivp.PL pl2pm.PL prove.PL ptar.PL splain.PL perlcc.PL dprofpp.PL libnetcfg.PL piconv.PL enc2xs.PL xsubpp.PL
-plextract = c2ph cpan corelist h2ph h2xs instmodsh perlbug perldoc perlivp pl2pm prove ptar splain perlcc dprofpp libnetcfg piconv enc2xs xsubpp
-plextractexe = ./c2ph ./cpan ./corelist ./h2ph ./h2xs ./instmodsh ./perlbug ./perldoc ./perlivp ./pl2pm ./prove ./ptar ./splain ./perlcc ./dprofpp ./libnetcfg ./piconv ./enc2xs ./xsubpp
+pl = c2ph.PL cpan.PL corelist.PL h2ph.PL h2xs.PL instmodsh.PL perlbug.PL perldoc.PL perlivp.PL pl2pm.PL prove.PL ptar.PL shasum.PL splain.PL perlcc.PL dprofpp.PL libnetcfg.PL piconv.PL enc2xs.PL xsubpp.PL
+plextract = c2ph cpan corelist h2ph h2xs instmodsh perlbug perldoc perlivp pl2pm prove ptar shasum splain perlcc dprofpp libnetcfg piconv enc2xs xsubpp
+plextractexe = ./c2ph ./cpan ./corelist ./h2ph ./h2xs ./instmodsh ./perlbug ./perldoc ./perlivp ./pl2pm ./prove ./ptar ./shasum ./splain ./perlcc ./dprofpp ./libnetcfg ./piconv ./enc2xs ./xsubpp
 
 all: $(plextract) 
 
@@ -50,6 +50,8 @@ prove:		prove.PL ../config.sh
 ptar:		ptar.PL ../config.sh
 
 pl2pm:		pl2pm.PL ../config.sh
+
+shasum:		shasum.PL ../config.sh
 
 splain:		splain.PL ../config.sh ../lib/diagnostics.pm
 
