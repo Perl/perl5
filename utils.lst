@@ -22,6 +22,7 @@ utils/piconv
 utils/pl2pm
 utils/prove
 utils/ptar
+utils/shasum
 utils/splain
 utils/xsubpp
 x2p/a2p         # pod = x2p/a2p.pod
