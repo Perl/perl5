@@ -1458,6 +1458,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_ftello HAS_FTELLO		/**/
 
+/* HAS_FUTIMES:
+ *	This symbol, if defined, indicates that the futimes routine is
+ *	available to change file descriptor time stamps with struct timevals.
+ */
+#$d_futimes HAS_FUTIMES		/**/
+
 /* Gconvert:
  *	This preprocessor macro is defined to convert a floating point
  *	number to a string without a trailing decimal point.  This
@@ -1947,6 +1953,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to map a file into memory.
  */
 #$d_madvise HAS_MADVISE		/**/
+
+/* HAS_MALLOC_SIZE:
+ *	This symbol, if defined, indicates that the malloc_size
+ *	routine is available for use.
+ */
+#$d_malloc_size HAS_MALLOC_SIZE		/**/
+
+/* HAS_MALLOC_GOOD_SIZE:
+ *	This symbol, if defined, indicates that the malloc_good_size
+ *	routine is available for use.
+ */
+#$d_malloc_good_size HAS_MALLOC_GOOD_SIZE	/**/
 
 /* HAS_MEMCHR:
  *	This symbol, if defined, indicates that the memchr routine is available
@@ -3901,18 +3919,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_libm_lib_version LIBM_LIB_VERSION		/**/
 
-/* HAS_MALLOC_SIZE:
- *	This symbol, if defined, indicates that the malloc_size
- *	routine is available for use.
- */
-#$d_malloc_size HAS_MALLOC_SIZE		/**/
-
-/* HAS_MALLOC_GOOD_SIZE:
- *	This symbol, if defined, indicates that the malloc_good_size
- *	routine is available for use.
- */
-#$d_malloc_good_size HAS_MALLOC_GOOD_SIZE	/**/
-
 /* HAS_NL_LANGINFO:
  *	This symbol, if defined, indicates that the nl_langinfo routine is
  *	available to return local data.  You will also need <langinfo.h>
@@ -3967,6 +3973,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *		extern int sockatmark(int);
  */
 #$d_sockatmarkproto	HAS_SOCKATMARK_PROTO	/**/
+
+/* SPRINTF_RETURNS_STRLEN:
+ *	This variable defines whether sprintf returns the length of the string
+ *	(as per the ANSI spec). Some C libraries retain compatibility with
+ *	pre-ANSI C and return a pointer to the passed in buffer; for these
+ *	this variable will be undef.
+ */
+#$d_sprintf_returns_strlen SPRINTF_RETURNS_STRLEN	/**/
 
 /* HAS_SETRESGID_PROTO:
  *	This symbol, if defined, indicates that the system provides

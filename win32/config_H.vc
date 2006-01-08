@@ -1045,7 +1045,7 @@
 #endif /* NeXT */
 
 /* CAT2:
- *	This macro catenates 2 tokens together.
+ *	This macro concatenates 2 tokens together.
  */
 /* STRINGIFY:
  *	This macro surrounds its token with double quotes.
@@ -1433,6 +1433,12 @@
  *	available to ftell beyond 32 bits (useful for ILP32 hosts).
  */
 /*#define HAS_FTELLO		/**/
+
+/* HAS_FUTIMES:
+ *	This symbol, if defined, indicates that the futimes routine is
+ *	available to change file descriptor time stamps with struct timevals.
+ */
+/*#define HAS_FUTIMES		/**/
 
 /* Gconvert:
  *	This preprocessor macro is defined to convert a floating point
@@ -1923,6 +1929,18 @@
  *	available to map a file into memory.
  */
 /*#define HAS_MADVISE		/**/
+
+/* HAS_MALLOC_SIZE:
+ *	This symbol, if defined, indicates that the malloc_size
+ *	routine is available for use.
+ */
+/*#define HAS_MALLOC_SIZE		/**/
+
+/* HAS_MALLOC_GOOD_SIZE:
+ *	This symbol, if defined, indicates that the malloc_good_size
+ *	routine is available for use.
+ */
+/*#define HAS_MALLOC_GOOD_SIZE	/**/
 
 /* HAS_MEMCHR:
  *	This symbol, if defined, indicates that the memchr routine is available
@@ -3872,22 +3890,10 @@
 /*#define HAS_ILOGBL		/**/
 
 /* LIBM_LIB_VERSION:
- *    This symbol, if defined, indicates that libm exports _LIB_VERSION
- *    and that math.h defines the enum to manipulate it.
+ *	This symbol, if defined, indicates that libm exports _LIB_VERSION
+ *	and that math.h defines the enum to manipulate it.
  */
 /*#define LIBM_LIB_VERSION         /**/
-
-/* HAS_MALLOC_SIZE:
- *	This symbol, if defined, indicates that the malloc_size
- *	routine is available for use.
- */
-/*#define HAS_MALLOC_SIZE		/**/
-
-/* HAS_MALLOC_GOOD_SIZE:
- *	This symbol, if defined, indicates that the malloc_good_size
- *	routine is available for use.
- */
-/*#define HAS_MALLOC_GOOD_SIZE	/**/
 
 /* HAS_NL_LANGINFO:
  *	This symbol, if defined, indicates that the nl_langinfo routine is
@@ -3944,6 +3950,14 @@
  */
 /*#define	HAS_SOCKATMARK_PROTO	/**/
 
+/* SPRINTF_RETURNS_STRLEN:
+ *	This variable defines whether sprintf returns the length of the string
+ *	(as per the ANSI spec). Some C libraries retain compatibility with
+ *	pre-ANSI C and return a pointer to the passed in buffer; for these
+ *	this variable will be undef.
+ */
+#define SPRINTF_RETURNS_STRLEN       /**/
+
 /* HAS_SETRESGID_PROTO:
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the setresgid() function.  Otherwise, it is up
@@ -3968,13 +3982,13 @@
 
 /* HAS_STRLCAT:
  *	This symbol, if defined, indicates that the strlcat () routine is
- *      available to do string concatenation.
+ *	available to do string concatenation.
  */
 /*#define HAS_STRLCAT			/**/
 
 /* HAS_STRLCPY:
  *	This symbol, if defined, indicates that the strlcpy () routine is
- *      available to do string copying.
+ *	available to do string copying.
  */
 /*#define HAS_STRLCPY			/**/
 

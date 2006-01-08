@@ -810,6 +810,10 @@ d_ftime (d_ftime.U):
 	that the ftime() routine exists.  The ftime() routine is basically
 	a sub-second accuracy clock.
 
+d_futimes (f_futimes.U):
+	This variable conditionally defines the HAS_FUTIMES symbol, which
+	indicates to the C program that the futimes() routine is available.
+
 d_Gconvert (d_gconvert.U):
 	This variable holds what Gconvert is defined as to convert
 	floating point numbers into strings.  By default, Configure
@@ -1917,6 +1921,12 @@ d_sockpair (d_socket.U):
 d_socks5_init (d_socks5_init.U):
 	This variable conditionally defines the HAS_SOCKS5_INIT symbol, which
 	indicates to the C program that the socks5_init() routine is available.
+
+d_sprintf_returns_strlen (d_sprintf_returns_strlen.U):
+	This variable defines whether sprintf returns the length of the string
+	(as per the ANSI spec). Some C libraries retain compatibility with
+	pre-ANSI C and return a pointer to the passed in buffer; for these
+	this variable will be undef.
 
 d_sqrtl (d_sqrtl.U):
 	This variable conditionally defines the HAS_SQRTL symbol, which

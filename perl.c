@@ -1797,6 +1797,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef DEBUGGING
 			     " DEBUGGING"
 #  endif
+#  ifdef DEBUG_LEAKING_SCALARS
+			     " DEBUG_LEAKING_SCALARS"
+#  endif
 #  ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 			     " DEBUG_LEAKING_SCALARS_FORK_DUMP"
 #  endif
@@ -1833,11 +1836,17 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef PERL_OLD_COPY_ON_WRITE
 			     " PERL_OLD_COPY_ON_WRITE"
 #  endif
+#  ifdef PERL_TRACK_MEMPOOL
+			     " PERL_TRACK_MEMPOOL"
+#  endif
 #  ifdef PERL_USE_SAFE_PUTENV
 			     " PERL_USE_SAFE_PUTENV"
 #  endif
 #  ifdef PL_OP_SLAB_ALLOC
 			     " PL_OP_SLAB_ALLOC"
+#  endif
+#  ifdef SPRINTF_RETURNS_STRLEN
+			     " SPRINTF_RETURNS_STRLEN"
 #  endif
 #  ifdef THREADS_HAVE_PIDS
 			     " THREADS_HAVE_PIDS"
