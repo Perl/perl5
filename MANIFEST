@@ -143,13 +143,6 @@ ext/ByteLoader/byterun.c	Runtime support for bytecode loader
 ext/ByteLoader/byterun.h	Header for byterun.c
 ext/ByteLoader/hints/sunos.pl	Hints for named architecture
 ext/ByteLoader/Makefile.PL	Bytecode loader makefile writer
-ext/Cwd/Changes			Cwd extension Changelog
-ext/Cwd/Cwd.xs			Cwd extension external subroutines
-ext/Cwd/Makefile.PL		Cwd extension makefile maker
-ext/Cwd/ppport.h		portability header for Cwd
-ext/Cwd/t/cwd.t			See if Cwd works
-ext/Cwd/t/taint.t		See if Cwd works with taint
-ext/Cwd/t/win32.t		See if Cwd works on Win32
 ext/Compress/Zlib/Changes	Compress::Zlib
 ext/Compress/Zlib/config.in	Compress::Zlib
 ext/Compress/Zlib/examples/filtdef	Compress::Zlib
@@ -224,6 +217,13 @@ ext/Compress/Zlib/zlib-src/zlib.h	Compress::Zlib
 ext/Compress/Zlib/zlib-src/zutil.c	Compress::Zlib
 ext/Compress/Zlib/zlib-src/zutil.h	Compress::Zlib
 ext/Compress/Zlib/Zlib.xs	Compress::Zlib
+ext/Cwd/Changes			Cwd extension Changelog
+ext/Cwd/Cwd.xs			Cwd extension external subroutines
+ext/Cwd/Makefile.PL		Cwd extension makefile maker
+ext/Cwd/ppport.h		portability header for Cwd
+ext/Cwd/t/cwd.t			See if Cwd works
+ext/Cwd/t/taint.t		See if Cwd works with taint
+ext/Cwd/t/win32.t		See if Cwd works on Win32
 ext/Data/Dumper/Changes		Data pretty printer, changelog
 ext/Data/Dumper/Dumper.pm	Data pretty printer, module
 ext/Data/Dumper/Dumper.xs	Data pretty printer, externals
@@ -398,17 +398,17 @@ ext/Digest/MD5/typemap		Digest::MD5 extension
 ext/Digest/SHA/bin/shasum	shasum script
 ext/Digest/SHA/Changes		Digest::SHA changes
 ext/Digest/SHA/Makefile.PL	Digest::SHA Makefile.PL
+ext/Digest/SHA/ppport.h		Digest::SHA extension
 ext/Digest/SHA/README		Digest::SHA README
 ext/Digest/SHA/SHA.pm		Digest::SHA extension
 ext/Digest/SHA/SHA.xs		Digest::SHA extension
-ext/Digest/SHA/ppport.h		Digest::SHA extension
 ext/Digest/SHA/src/hmac.c	Digest::SHA extension
 ext/Digest/SHA/src/hmac.h	Digest::SHA extension
 ext/Digest/SHA/src/hmacxtra.c	Digest::SHA extension
-ext/Digest/SHA/src/sha.c	Digest::SHA extension
-ext/Digest/SHA/src/sha.h	Digest::SHA extension
 ext/Digest/SHA/src/sha64bit.c	Digest::SHA extension
 ext/Digest/SHA/src/sha64bit.h	Digest::SHA extension
+ext/Digest/SHA/src/sha.c	Digest::SHA extension
+ext/Digest/SHA/src/sha.h	Digest::SHA extension
 ext/Digest/SHA/src/shaxtra.c	Digest::SHA extension
 ext/Digest/SHA/t/0-pod-coverage.t	See if Digest::SHA works
 ext/Digest/SHA/t/0-pod.t	See if Digest::SHA works
@@ -436,12 +436,12 @@ ext/Digest/SHA/t/6-dump-load.t	See if Digest::SHA works
 ext/Digest/SHA/t/7-ireland.t	See if Digest::SHA works
 ext/Digest/SHA/t/gillogly/state.011	See if Digest::SHA works
 ext/Digest/SHA/t/gillogly/state.110	See if Digest::SHA works
-ext/Digest/SHA/t/nist/COPYRIGHT	See if Digest::SHA works
-ext/Digest/SHA/t/nist/Readme.txt	See if Digest::SHA works
 ext/Digest/SHA/t/nist/bit-hashes.sha1	See if Digest::SHA works
 ext/Digest/SHA/t/nist/bit-messages.sha1	See if Digest::SHA works
 ext/Digest/SHA/t/nist/byte-hashes.sha1	See if Digest::SHA works
 ext/Digest/SHA/t/nist/byte-messages.sha1	See if Digest::SHA works
+ext/Digest/SHA/t/nist/COPYRIGHT	See if Digest::SHA works
+ext/Digest/SHA/t/nist/Readme.txt	See if Digest::SHA works
 ext/Digest/SHA/t/state/state.1	See if Digest::SHA works
 ext/Digest/SHA/t/state/state.256	See if Digest::SHA works
 ext/Digest/SHA/t/state/state.384	See if Digest::SHA works
@@ -512,8 +512,8 @@ ext/Encode/lib/Encode/Guess.pm	Encode Extension
 ext/Encode/lib/Encode/JP/H2Z.pm	Encode extension
 ext/Encode/lib/Encode/JP/JIS7.pm	Encode extension
 ext/Encode/lib/Encode/KR/2022_KR.pm	 Encode extension
-ext/Encode/lib/Encode/MIME/Header.pm	Encode extension
 ext/Encode/lib/Encode/MIME/Header/ISO_2022_JP.pm	Encode extension
+ext/Encode/lib/Encode/MIME/Header.pm	Encode extension
 ext/Encode/lib/Encode/PerlIO.pod	Documents for Encode & PerlIO
 ext/Encode/lib/Encode/Supported.pod	Documents for supported encodings
 ext/Encode/lib/Encode/Unicode/UTF7.pm	Encode extension
@@ -554,8 +554,8 @@ ext/Encode/t/jisx0212.utf	test data
 ext/Encode/t/jperl.t		test script
 ext/Encode/t/ksc5601.enc	test data
 ext/Encode/t/ksc5601.utf	test data
-ext/Encode/t/mime-header.t	test script
 ext/Encode/t/mime_header_iso2022jp.t	test script
+ext/Encode/t/mime-header.t	test script
 ext/Encode/t/Mod_EUCJP.pm	module that t/enc_module.enc uses
 ext/Encode/t/perlio.t		test script
 ext/Encode/t/rt.pl		test script
@@ -988,18 +988,18 @@ ext/Sys/Hostname/Hostname.xs	Sys::Hostname extension external subroutines
 ext/Sys/Hostname/Makefile.PL	Sys::Hostname extension makefile writer
 ext/Sys/Hostname/t/Hostname.t	See if Sys::Hostname works
 ext/Sys/Syslog/Changes		Changlog for Sys::Syslog
+ext/Sys/Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
+ext/Sys/Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
 ext/Sys/Syslog/Makefile.PL	Sys::Syslog extension makefile writer
 ext/Sys/Syslog/README		README for Sys::Syslog
 ext/Sys/Syslog/Syslog.pm	Sys::Syslog extension Perl module
 ext/Sys/Syslog/Syslog.xs	Sys::Syslog extension external subroutines
-ext/Sys/Syslog/fallback/const-c.inc	Sys::Syslog constants fallback file
-ext/Sys/Syslog/fallback/const-xs.inc	Sys::Syslog constants fallback file
 ext/Sys/Syslog/t/00-load.t	test for Sys::Syslog
 ext/Sys/Syslog/t/constants.t	test for Sys::Syslog
 ext/Sys/Syslog/t/distchk.t	test for Sys::Syslog
-ext/Sys/Syslog/t/pod.t		test for Sys::Syslog
 ext/Sys/Syslog/t/podcover.t	test for Sys::Syslog
 ext/Sys/Syslog/t/podspell.t	test for Sys::Syslog
+ext/Sys/Syslog/t/pod.t		test for Sys::Syslog
 ext/Sys/Syslog/t/portfs.t	test for Sys::Syslog
 ext/Sys/Syslog/t/syslog.t	See if Sys::Syslog works
 ext/Thread/create.tx		Test thread creation
@@ -1103,9 +1103,9 @@ ext/XS/APItest/Makefile.PL	XS::APItest extension
 ext/XS/APItest/MANIFEST		XS::APItest extension
 ext/XS/APItest/README		XS::APItest extension
 ext/XS/APItest/t/call.t		XS::APItest extension
-ext/XS/APItest/t/my_cxt.t	XS::APItest: test MY_CXT interface
 ext/XS/APItest/t/exception.t	XS::APItest extension
 ext/XS/APItest/t/hash.t		XS::APItest extension
+ext/XS/APItest/t/my_cxt.t	XS::APItest: test MY_CXT interface
 ext/XS/APItest/t/printf.t	XS::APItest extension
 ext/XS/APItest/t/push.t		XS::APItest extension
 ext/XS/Typemap/Makefile.PL	XS::Typemap extension
@@ -1284,21 +1284,21 @@ keywords.pl			Program to write keywords.h
 lib/abbrev.pl			An abbreviation table builder
 lib/AnyDBM_File.pm		Perl module to emulate dbmopen
 lib/AnyDBM_File.t		See if AnyDBM_File works
-lib/assertions/activate.pm	assertions activate/deactivate
-lib/assertions/compat.pm	assertions compatibility for earlier perls
-lib/assertions.pm		module support for -A flag
-lib/assert.pl			assertion and panic with stack trace
-lib/Archive/Tar/Constant.pm	Archive::Tar
-lib/Archive/Tar/File.pm		Archive::Tar
 lib/Archive/Tar/bin/ptar	the ptar utility
 lib/Archive/Tar/bin/ptardiff	the ptardiff utility
+lib/Archive/Tar/Constant.pm	Archive::Tar
+lib/Archive/Tar/File.pm		Archive::Tar
+lib/Archive/Tar.pm		Archive::Tar
 lib/Archive/Tar/t/00_setup.t	Archive::Tar test setup
 lib/Archive/Tar/t/01_use.t	Archive::Tar tests
 lib/Archive/Tar/t/02_methods.t	Archive::Tar tests
 lib/Archive/Tar/t/03_file.t	Archive::Tar tests
 lib/Archive/Tar/t/04_resolved_issues.t	Archive::Tar tests
 lib/Archive/Tar/t/99_clean.t	Archive::Tar test cleanup
-lib/Archive/Tar.pm		Archive::Tar
+lib/assertions/activate.pm	assertions activate/deactivate
+lib/assertions/compat.pm	assertions compatibility for earlier perls
+lib/assertions.pm		module support for -A flag
+lib/assert.pl			assertion and panic with stack trace
 lib/Attribute/Handlers/Changes	Attribute::Handlers
 lib/Attribute/Handlers/demo/demo2.pl	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/demo3.pl	Attribute::Handlers demo
@@ -1428,15 +1428,15 @@ lib/CPAN/HandleConfig.pm	helper package for CPAN.pm
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
 lib/CPAN/PAUSE2003.pub		CPAN public key
 lib/CPAN/PAUSE2005.pub		CPAN public key
+lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
 lib/CPAN/SIGNATURE		CPAN public key
 lib/CPAN/Tarzip.pm		helper package for CPAN.pm
-lib/CPAN/Version.pm		Simple math with different flavors of version strings
-lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
 lib/CPAN/t/loadme.t		See if CPAN the module works
 lib/CPAN/t/mirroredby.t		See if CPAN::Mirrored::By works
 lib/CPAN/t/Nox.t		See if CPAN::Nox works
 lib/CPAN/t/vcmp.t		See if CPAN the module works
 lib/CPAN/t/version.t		See if CPAN::Version works
+lib/CPAN/Version.pm		Simple math with different flavors of version strings
 lib/ctime.pl			A ctime workalike
 lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)
 lib/DBM_Filter/Changes		DBM Filter Change history
@@ -1941,11 +1941,11 @@ lib/PerlIO/via/t/QuotedPrint.t	PerlIO::via::QuotedPrint
 lib/ph.t			See if h2ph works
 lib/Pod/Checker.pm		Pod-Parser - check POD documents for syntax errors
 lib/Pod/Escapes/ChangeLog	ChangeLog for Pod::Escapes
+lib/Pod/Escapes.pm		Pod::Escapes
 lib/Pod/Escapes/README		README for Pod::Escapes
 lib/Pod/Escapes/t/01_about_verbose.t	test Pod::Escapes
 lib/Pod/Escapes/t/10_main.t	test Pod::Escapes
 lib/Pod/Escapes/t/15_name2charnum.t	test Pod::Escapes
-lib/Pod/Escapes.pm		Pod::Escapes
 lib/Pod/Find.pm			used by pod/splitpod
 lib/Pod/Functions.pm		used by pod/splitpod
 lib/Pod/Html.pm			Convert POD data to HTML
@@ -2080,8 +2080,12 @@ lib/Pod/Simple/t/html-styles.t		Pod::Simple test file
 lib/Pod/Simple/t/html-title.t		Pod::Simple test file
 lib/Pod/Simple/TiedOutFH.pm	Pod::Simple::TiedOutFH
 lib/Pod/Simple/t/itemadapt.t		Pod::Simple test file
-lib/Pod/Simple/t/itemstar.t		Pod::Simple test file
 lib/Pod/Simple/t/items.t		Pod::Simple test file
+lib/Pod/Simple/t/itemstar.t		Pod::Simple test file
+lib/Pod/Simple/t/junk1_out.txt	Pod::Simple test file
+lib/Pod/Simple/t/junk1.pod	Pod::Simple test file
+lib/Pod/Simple/t/junk2_out.txt	Pod::Simple test file
+lib/Pod/Simple/t/junk2.pod	Pod::Simple test file
 lib/Pod/Simple/t/linkclass.t		Pod::Simple test file
 lib/Pod/Simple/t/other_test_lib/hink_honk/Glunk.pod	Pod::Simple test file
 lib/Pod/Simple/t/other_test_lib/hink_honk/readme.txt	Pod::Simple test file
@@ -2091,6 +2095,12 @@ lib/Pod/Simple/t/other_test_lib/pod/perlzuk.pod		Pod::Simple test file
 lib/Pod/Simple/t/other_test_lib/Sizzlesuzzle.pm		Pod::Simple test file
 lib/Pod/Simple/t/other_test_lib/squaa/Vliff.pm		Pod::Simple test file
 lib/Pod/Simple/t/other_test_lib/squaa/Wowo.pod		Pod::Simple test file
+lib/Pod/Simple/t/perlcyg_out.txt	Pod::Simple test file
+lib/Pod/Simple/t/perlcyg.pod	Pod::Simple test file
+lib/Pod/Simple/t/perlfaq3_out.txt	Pod::Simple test file
+lib/Pod/Simple/t/perlfaq3.pod	Pod::Simple test file
+lib/Pod/Simple/t/perlvar_out.txt	Pod::Simple test file
+lib/Pod/Simple/t/perlvar.pod	Pod::Simple test file
 lib/Pod/Simple/t/puller.t		Pod::Simple test file
 lib/Pod/Simple/t/pulltitle.t		Pod::Simple test file
 lib/Pod/Simple/TranscodeDumb.pm		Pod::Simple::TranscodeDumb
@@ -2110,10 +2120,6 @@ lib/Pod/Simple/t/search_28_glob_z_kleene_k.t	Pod::Simple test file
 lib/Pod/Simple/t/search_29_glob_z_qmark_k.t	Pod::Simple test file
 lib/Pod/Simple/t/search_50survey_inc.t	Pod::Simple test file
 lib/Pod/Simple/t/stree.t		Pod::Simple test file
-lib/Pod/Simple/t/junk1_out.txt	Pod::Simple test file
-lib/Pod/Simple/t/junk1.pod	Pod::Simple test file
-lib/Pod/Simple/t/junk2_out.txt	Pod::Simple test file
-lib/Pod/Simple/t/junk2.pod	Pod::Simple test file
 lib/Pod/Simple/t/test_lib/Blorm.pm		Pod::Simple test file
 lib/Pod/Simple/t/test_lib/hink_honk/Glunk.pod	Pod::Simple test file
 lib/Pod/Simple/t/test_lib/hink_honk/readme.txt	Pod::Simple test file
@@ -2127,12 +2133,6 @@ lib/Pod/Simple/t/test_lib/zikzik.pod		Pod::Simple test file
 lib/Pod/Simple/t/test_lib/Zonk/Fiddle.txt	Pod::Simple test file
 lib/Pod/Simple/t/test_lib/Zonk/Pronk.pm		Pod::Simple test file
 lib/Pod/Simple/t/test_lib/Zonk/Veng.pm		Pod::Simple test file
-lib/Pod/Simple/t/perlcyg_out.txt	Pod::Simple test file
-lib/Pod/Simple/t/perlcyg.pod	Pod::Simple test file
-lib/Pod/Simple/t/perlfaq3_out.txt	Pod::Simple test file
-lib/Pod/Simple/t/perlfaq3.pod	Pod::Simple test file
-lib/Pod/Simple/t/perlvar_out.txt	Pod::Simple test file
-lib/Pod/Simple/t/perlvar.pod	Pod::Simple test file
 lib/Pod/Simple/t/verbatim_formatted.t	Pod::Simple test file
 lib/Pod/Simple/t/verbatims.t		Pod::Simple test file
 lib/Pod/Simple/t/x_nixer.t		Pod::Simple test file
@@ -2212,10 +2212,10 @@ lib/Term/Complete.pm		A command completion subroutine
 lib/Term/Complete.t		See if Term::Complete works
 lib/Term/ReadLine.pm		Stub readline library
 lib/Term/ReadLine.t		See if Term::ReadLine works
-lib/Test/Builder.pm		For writing new test libraries
 lib/Test/Builder/Module.pm	Base class for test modules
-lib/Test/Builder/Tester.pm	For testing Test::Builder based classes
+lib/Test/Builder.pm		For writing new test libraries
 lib/Test/Builder/Tester/Color.pm	Turn on color in Test::Builder::Tester
+lib/Test/Builder/Tester.pm	For testing Test::Builder based classes
 lib/Test/Harness/Assert.pm	Test::Harness::Assert (internal use only)
 lib/Test/Harness/bin/prove	The prove harness utility
 lib/Test/Harness/Changes	Test::Harness
@@ -2723,7 +2723,7 @@ pod/perlfilter.pod		Perl source filters
 pod/perlfork.pod		Perl fork() information
 pod/perlform.pod		Perl formats
 pod/perlfunc.pod		Perl built-in functions
-pod/perlglossary.pod		Perl glossary
+pod/perlglossary.pod		Perl Glossary
 pod/perlgpl.pod			GNU General Public License
 pod/perlguts.pod		Perl internal functions for those doing extensions
 pod/perlhack.pod		Perl hackers guide
@@ -3004,8 +3004,8 @@ t/io/through.t			See if pipe passes data intact
 t/io/utf8.t			See if file seeking works
 t/japh/abigail.t		Obscure tests
 t/lib/1_compile.t		See if the various libraries and extensions compile
-t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/common.pl			Helper for lib/{warnings,feature}.t
+t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/compmod.pl		Helper for 1_compile.t
 t/lib/contains_pod.xr		Pod-Parser test file
 t/lib/cygwin.t			Builtin cygwin function tests
@@ -3099,8 +3099,8 @@ t/lib/Test/Simple/sample_tests/one_fail.plx		for exit.t
 t/lib/Test/Simple/sample_tests/pre_plan_death.plx		for exit.t
 t/lib/Test/Simple/sample_tests/require.plx		for exit.t
 t/lib/Test/Simple/sample_tests/success.plx		for exit.t
-t/lib/Test/Simple/sample_tests/too_few.plx		for exit.t
 t/lib/Test/Simple/sample_tests/too_few_fail.plx		for exit.t
+t/lib/Test/Simple/sample_tests/too_few.plx		for exit.t
 t/lib/Test/Simple/sample_tests/two_fail.plx		for exit.t
 t/lib/TieIn.pm			Testing library for dummy input handles
 t/lib/TieOut.pm			Testing library to capture prints
@@ -3217,8 +3217,8 @@ t/op/mkdir.t			See if mkdir works
 t/op/mydef.t			See if "my $_" works
 t/op/my_stash.t			See if my Package works
 t/op/my.t			See if lexical scoping works
-t/op/not.t			See if not works
 t/op/negate.t			See if unary minus works
+t/op/not.t			See if not works
 t/op/numconvert.t		See if accessing fields does not change numeric values
 t/op/oct.t			See if oct and hex work
 t/op/ord.t			See if ord works
@@ -3241,8 +3241,8 @@ t/op/recurse.t			See if deep recursion works
 t/op/ref.t			See if refs and objects work
 t/op/regexp_noamp.t		See if regular expressions work with optimizations
 t/op/regexp_notrie.t		See if regular expressions work without trie optimisation
-t/op/regexp_qr.t		See if regular expressions work as qr//
 t/op/regexp_qr_embed.t		See if regular expressions work with embedded qr//
+t/op/regexp_qr.t		See if regular expressions work as qr//
 t/op/regexp.t			See if regular expressions work
 t/op/regexp_trielist.t		See if regular expressions work with trie optimisation
 t/op/regmesg.t			See if one can get regular expression errors
@@ -3310,8 +3310,8 @@ t/pod/nested_seqs.xr		Expected results for nested_seqs.t
 t/pod/oneline_cmds.t		Test single paragraph ==cmds
 t/pod/oneline_cmds.xr		Expected results for oneline_cmds.t
 t/pod/plainer.t			Test Pod::Plainer
-t/pod/pod2usage.t		Test Pod::Usage
 t/pod/pod2usage2.t		Test Pod::Usage
+t/pod/pod2usage.t		Test Pod::Usage
 t/pod/pod2usage.xr		Expected results for pod2usage.t
 t/pod/poderrs.t			Test POD errors
 t/pod/poderrs.xr		Expected results for poderrs.t

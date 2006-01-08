@@ -10806,6 +10806,36 @@ semantics
 
 =back
 
+=head2 c, constant - Perl pragma to declare constants
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTES
+
+=over 4
+
+=item List constants
+
+=item Defining multiple constants at once
+
+=item Magic constants
+
+=back
+
+=item TECHNICAL NOTES
+
+=item BUGS
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
 =head2 charnames - define character names for C<\N{named}> string literal
 escapes
 
@@ -15022,6 +15052,59 @@ perl 5.005, perl 5.004_05, perl 5.004_04, perl 5.004
 
 =back
 
+=head2 Devel::Size - Perl extension for finding the memory usage of Perl
+variables
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item FUNCTIONS
+
+=over 4
+
+=item size($ref)
+
+=item total_size($ref)
+
+=back
+
+=item EXPORT
+
+=item UNDERSTANDING MEMORY ALLOCATION
+
+=over 4
+
+=item The C library
+
+=item Perl
+
+=back
+
+=item DANGERS
+
+=item Messages: texts originating from this module.
+
+=over 4
+
+=item Errors
+
+=item warnings
+
+=back
+
+=item BUGS
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=item SEE ALSO
+
+=back
+
 =head2 Digest - Modules that calculate message digests
 
 =over 4
@@ -15073,6 +15156,52 @@ $md5->add_bits($bitstring), $md5->digest, $md5->hexdigest, $md5->b64digest
 =item COPYRIGHT
 
 =item AUTHORS
+
+=back
+
+=head2 Digest::SHA - Perl extension for SHA-1/224/256/384/512
+
+=over 4
+
+=item SYNOPSIS (SHA)
+
+=item SYNOPSIS (HMAC-SHA)
+
+=item ABSTRACT
+
+=item DESCRIPTION
+
+=item NIST STATEMENT ON SHA-1
+
+=item EXPORT
+
+=item EXPORTABLE FUNCTIONS
+
+B<sha1($data, ...)>, B<sha224($data, ...)>, B<sha256($data, ...)>,
+B<sha384($data, ...)>, B<sha512($data, ...)>, B<sha1_hex($data, ...)>,
+B<sha224_hex($data, ...)>, B<sha256_hex($data, ...)>, B<sha384_hex($data,
+...)>, B<sha512_hex($data, ...)>, B<sha1_base64($data, ...)>,
+B<sha224_base64($data, ...)>, B<sha256_base64($data, ...)>,
+B<sha384_base64($data, ...)>, B<sha512_base64($data, ...)>, B<new($alg)>,
+B<reset($alg)>, B<hashsize>, B<algorithm>, B<clone>, B<add($data, ...)>,
+B<add_bits($data, $nbits)>, B<add_bits($bits)>, B<addfile(*FILE)>,
+B<dump($filename)>, B<load($filename)>, B<digest>, B<hexdigest>,
+B<b64digest>, B<hmac_sha1($data, $key)>, B<hmac_sha224($data, $key)>,
+B<hmac_sha256($data, $key)>, B<hmac_sha384($data, $key)>,
+B<hmac_sha512($data, $key)>, B<hmac_sha1_hex($data, $key)>,
+B<hmac_sha224_hex($data, $key)>, B<hmac_sha256_hex($data, $key)>,
+B<hmac_sha384_hex($data, $key)>, B<hmac_sha512_hex($data, $key)>,
+B<hmac_sha1_base64($data, $key)>, B<hmac_sha224_base64($data, $key)>,
+B<hmac_sha256_base64($data, $key)>, B<hmac_sha384_base64($data, $key)>,
+B<hmac_sha512_base64($data, $key)>
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item ACKNOWLEDGMENTS
+
+=item COPYRIGHT AND LICENSE
 
 =back
 
@@ -17474,6 +17603,20 @@ errors()
 =back
 
 =head2 Fcntl - load the C Fcntl.h defines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTE
+
+=item EXPORTED SYMBOLS
+
+=back
+
+=head2 Fcntl2 - load the C Fcntl2.h defines
 
 =over 4
 
