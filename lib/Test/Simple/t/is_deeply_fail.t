@@ -364,7 +364,7 @@ ERR
     ok !is_deeply( $glob1, $glob2 ), 'typeglobs';
     is( $out, "not ok 28\n" );
     like( $err, <<ERR,	     '  right diagnostic' );
-#   Failed test in $0 at line 357.
+#   Failed test in $Filename at line 357.
 #     Structures begin differing at:
 #          \\\$got = GLOB\\(0x[0-9a-f]+\\)
 #     \\\$expected = GLOB\\(0x[0-9a-f]+\\)
