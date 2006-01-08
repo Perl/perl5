@@ -790,6 +790,12 @@ C<fred.com> if you don't backslash the C<@>.
 See http://www.plover.com/~mjd/perl/at-error.html for more details
 about the history here.
 
+=head2 @- and @+ provide starting/ending offsets of regex matches
+
+The new magic variables @- and @+ provide the starting and ending
+offsets, respectively, of $&, $1, $2, etc.  See L<perlvar> for
+details.
+
 =head1 Modules and Pragmata
 
 =head2 Modules
