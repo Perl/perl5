@@ -73,7 +73,7 @@ ok   $fil->gzeof() ;
 ok ! $fil->gzclose ;
 ok   $fil->gzeof() ;
 
-unlink $name ;
+1 while unlink $name ;
 
 ok $hello eq $uncomp ;
 
@@ -109,7 +109,7 @@ ok   $fil->gzeof() ;
 ok $gzerrno == 0
     or print "# gzerrno is $gzerrno\n" ;
 
-unlink $name ;
+1 while unlink $name ;
 
 ok $number == $uncomp ;
 ok $number eq $uncomp ;
@@ -148,7 +148,7 @@ ok $contents eq $uncompressed
 ok $f->gzeof() ;
 ok ! $f->gzclose ;
 
-unlink($file) ;
+1 while unlink($file) ;
 
 # gzip - readline tests
 # ======================
@@ -193,7 +193,7 @@ is $fil->gzreadline($line), 0;
 ok   $fil->gzeof() ;
 ok ! $fil->gzclose ;
 ok   $fil->gzeof() ;
-unlink($name) ;
+1 while unlink($name) ;
 
 # a text file with a very long line (bigger than the internal buffer)
 my $line1 = ("abcdefghijklmnopq" x 2000) . "\n" ;
@@ -220,7 +220,7 @@ ok   $fil->gzeof() ;
 ok ! $fil->gzclose ;
 ok   $fil->gzeof() ;
 
-unlink $name ;
+1 while unlink $name ;
 
 # a text file which is not termined by an EOL
 
@@ -246,7 +246,7 @@ is $got[1], $line2 ;
 ok   $fil->gzeof() ;
 ok ! $fil->gzclose ;
 
-unlink $name ;
+1 while unlink $name ;
 
 {
 
@@ -293,8 +293,6 @@ unlink $name ;
     my $hello = "hello" ;
     my $len = length $hello ;
 
-    unlink $name ;
-
     my $f = new IO::File ">$name" ;
     ok $f;
 
@@ -316,7 +314,6 @@ unlink $name ;
     ok ! $fil->gzclose ;
     ok   $fil->gzeof() ;
 
-    unlink $name ;
 
     is $uncomp, $hello, "got expected output" ;
 
@@ -331,8 +328,6 @@ unlink $name ;
 
     my $hello = "hello" ;
     my $len = length $hello ;
-
-    unlink $name ;
 
     open F, ">$name" ;
 
@@ -354,8 +349,6 @@ unlink $name ;
     ok ! $fil->gzclose ;
     ok   $fil->gzeof() ;
 
-    unlink $name ;
-
     is $uncomp, $hello ;
 
 
@@ -372,8 +365,6 @@ foreach my $stdio ( ['-', '-'], [*STDIN, *STDOUT])
 
     my $hello = "hello" ;
     my $len = length $hello ;
-
-    unlink $name ;
 
     ok open(SAVEOUT, ">&STDOUT"), "  save STDOUT";
     my $dummy = fileno SAVEOUT;
@@ -407,8 +398,6 @@ foreach my $stdio ( ['-', '-'], [*STDIN, *STDOUT])
 
        open(STDIN, "<&SAVEIN");
 
-    unlink $name ;
-
     is $uncomp, $hello ;
 
 
@@ -419,8 +408,6 @@ foreach my $stdio ( ['-', '-'], [*STDIN, *STDOUT])
     my $lex = new LexFile my $name ;
 
     my $fil;
-
-    unlink $name ;
 
     # missing parameters
     eval ' $fil = gzopen()  ' ;
@@ -474,8 +461,7 @@ foreach my $stdio ( ['-', '-'], [*STDIN, *STDOUT])
 
     SKIP:
     {
-        my $name ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
         writeFile($name, "abc");
         chmod 0444, $name ;
 
@@ -494,8 +480,7 @@ foreach my $stdio ( ['-', '-'], [*STDIN, *STDOUT])
 
     SKIP:
     {
-        my $name ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
         writeFile($name, "abc");
         chmod 0222, $name ;
 
@@ -516,8 +501,7 @@ foreach my $stdio ( ['-', '-'], [*STDIN, *STDOUT])
     title "gzseek" ;
 
     my $buff ;
-    my $name ;
-    my $lex = new LexFile $name ;
+    my $lex = new LexFile my $name ;
 
     my $first = "beginning" ;
     my $last  = "the end" ;

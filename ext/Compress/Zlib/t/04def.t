@@ -235,8 +235,7 @@ EOM
         #========================================
 
 
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         my $hello = <<EOM ;
 hello world
@@ -273,8 +272,7 @@ EOM
         #========================================
 
 
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         my $hello = <<EOM ;
 hello world
@@ -357,8 +355,7 @@ EOM
     }
 
     {
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         my $hello = <<EOM ;
 hello world
@@ -521,8 +518,7 @@ EOM
         #================================
 
 
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         my $hello = <<EOM ;
 hello world
@@ -570,8 +566,7 @@ EOM
         # Write
         # these tests come almost 100% from IO::String
 
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         my $io = $CompressClass->new($name);
 
@@ -639,8 +634,7 @@ and a single line.
 
 EOT
 
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         my %opts = () ;
         %opts = (CRC32 => 1, Adler32 => 1)
@@ -773,8 +767,7 @@ and a single line.
 
 EOT
 
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         writeFile($name, $str);
         my @tmp;
@@ -905,8 +898,7 @@ EOT
                 {
                     title "Read Tests - buf length $bufsize, Transparent $trans, Append $append" ;
 
-                    my $name = "testz.gz" ;
-                    my $lex = new LexFile $name ;
+                    my $lex = new LexFile my $name ;
 
                     if ($trans) {
                         writeFile($name, $str) ;
@@ -950,8 +942,7 @@ EOT
 
             my $buffer ;
             my $buff ;
-            my $name = "test.gz" ;
-            my $lex = new LexFile $name ;
+            my $lex = new LexFile my $name ;
 
             my $first = "beginning" ;
             my $last  = "the end" ;
@@ -1055,8 +1046,7 @@ EOT
             {
                 title "$CompressClass -- Append $append, Output to $fb" ;
 
-                my $name = "test.gz" ;
-                my $lex = new LexFile $name ;
+                my $lex = new LexFile my $name ;
 
                 my $already = 'already';
                 my $buffer = $already;
@@ -1128,8 +1118,7 @@ EOT
         my $comp_len = length $compressed;
         $compressed .= $appended;
 
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
         my $input ;
         writeFile ($name, $compressed);
 
@@ -1171,8 +1160,7 @@ EOT
     {
         title "$UncompressClass -- Append $append" ;
 
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         my $string = "appended";
         my $compressed ; 
@@ -1207,8 +1195,7 @@ EOT
         {
             title "ungetc, File $file, Transparent $trans" ;
 
-            my $name = "test.gz" ;
-            my $lex = new LexFile $name ;
+            my $lex = new LexFile my $name ;
 
             my $string = 'abcdeABCDE';
             my $b ;
@@ -1372,8 +1359,7 @@ EOT
     {
         title "write tests - invalid data" ;
 
-        #my $name1 = "test.gz" ;
-        #my $lex = new LexFile $name1 ;
+        #my $lex = new LexFile my $name1 ;
         my $Answer ;
 
         #ok ! -e $name1, "  File $name1 does not exist";

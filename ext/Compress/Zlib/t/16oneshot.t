@@ -84,11 +84,10 @@ foreach my $bit ('IO::Compress::Gzip',
     like $@, mkErr("^$TopType: input filename is undef or null string"), 
         '  Input filename empty' ;
 
-    $in = 'abc';    
-    my $lex1 = new LexFile($in) ;
-    writeFile($in, "abc");
-    my $out = $in ;
-    eval { $a = $Func->($in, $out) ;} ;
+    my $lex1 = new LexFile my $in1 ;
+    writeFile($in1, "abc");
+    my $out = $in1 ;
+    eval { $a = $Func->($in1, $out) ;} ;
     like $@, mkErr("^$TopType: input and output filename are identical"),
         '  Input and Output filename are the same';
 
@@ -96,8 +95,7 @@ foreach my $bit ('IO::Compress::Gzip',
     like $@, mkErr("^$TopType: input and output buffer are identical"),
         '  Input and Output buffer are the same';
         
-    my $out_file = "abcde.out";
-    my $lex = new LexFile($out_file) ;
+    my $lex = new LexFile my $out_file ;
     open OUT, ">$out_file" ;
     eval { $a = $Func->(\*OUT, \*OUT) ;} ;
     like $@, mkErr("^$TopType: input and output handle are identical"),
@@ -1166,8 +1164,8 @@ foreach my $bit ('IO::Uncompress::Gunzip',
 
     my $incumbent = "incumbent data" ;
 
-    my ($file1, $file2) = ("file1", "file2");
-    my $lex = new LexFile($file1, $file2) ;
+    #my ($file1, $file2) = ("file1", "file2");
+    my $lex = new LexFile(my $file1, my $file2) ;
 
     writeFile($file1, compressBuffer($TopType,"data1"));
     writeFile($file2, compressBuffer($TopType,"data2"));
@@ -1339,10 +1337,7 @@ foreach my $TopType ('IO::Compress::Gzip::gzip',
 
     title "More write tests" ;
 
-    my $file1 = "file1" ;
-    my $file2 = "file2" ;
-    my $file3 = "file3" ;
-    my $lex = new LexFile $file1, $file2, $file3 ;
+    my $lex = new LexFile(my $file1, my $file2, my $file3) ;
 
     writeFile($file1, "F1");
     writeFile($file2, "F2");
@@ -1438,8 +1433,7 @@ sub gzipGetHeader
 {
     title "Check gzip header default NAME & MTIME settings" ;
 
-    my $file1 = "file1" ;
-    my $lex = new LexFile $file1;
+    my $lex = new LexFile my $file1;
 
     my $content = "hello ";
     my $hdr ;

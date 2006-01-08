@@ -37,8 +37,7 @@ BEGIN {
 
 my $ThisOS_code = $Compress::Zlib::gzip_os_code;
 
-my $name = "test.gz" ;
-my $lex = new LexFile $name ;
+my $lex = new LexFile my $name ;
 
 {
     title "Check Defaults";
@@ -706,8 +705,7 @@ EOM
     ok $x->close ;
 
     substr($truncated, $index) = '' ;
-    #my $name = "trunc.gz" ;
-    #my $lex = new LexFile $name ;
+    #my $lex = new LexFile my $name ;
     #writeFile($name, $truncated) ;
 
     #my $g = new IO::Uncompress::Gunzip $name, -Transparent => 0; 
@@ -758,8 +756,7 @@ EOM
     ok $x->close ;
 
     substr($truncated, $index) = '' ;
-    #my $name = "trunc.gz" ;
-    #my $lex = new LexFile $name ;
+    #my $lex = new LexFile my $name ;
     #writeFile($name, $truncated) ;
 
     #my $g = new IO::Uncompress::Gunzip $name, -Transparent => 0; 
@@ -784,8 +781,7 @@ EOM
     ok $x->close ;
 
     substr($truncated, $index) = '' ;
-    my $name = "trunc.gz" ;
-    my $lex = new LexFile $name ;
+    my $lex = new LexFile my $name ;
     writeFile($name, $truncated) ;
 
     my $g = new IO::Uncompress::Gunzip $name, -Transparent => 0; 

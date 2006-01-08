@@ -36,7 +36,7 @@ sub like_eval
                 unless defined $_;
         }
         chmod 0777, @_;
-        unlink @_ ;
+        for (@_) { 1 while unlink $_ } ;
         bless [ @_ ], $self ;
     }
 
@@ -44,7 +44,7 @@ sub like_eval
     {
         my $self = shift ;
         chmod 0777, @{ $self } ;
-        unlink @{ $self } ;
+        for (@$self) { 1 while unlink $_ } ;
     }
 
 }

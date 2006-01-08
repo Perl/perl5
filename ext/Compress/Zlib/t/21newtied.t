@@ -99,8 +99,7 @@ foreach my $CompressClass ('IO::Compress::Gzip',
         # Write
         # these tests come almost 100% from IO::String
 
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         my $io = $CompressClass->new($name);
 
@@ -167,8 +166,7 @@ and a single line.
 
 EOT
 
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         my $iow = new $CompressClass $name ;
         print $iow $str ;
@@ -299,8 +297,7 @@ EOT
     {
         title "seek tests" ;
 
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         my $first = "beginning" ;
         my $last  = "the end" ;
@@ -360,8 +357,7 @@ EOT
     {
         title 'fileno' ;
 
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         my $hello = <<EOM ;
 hello world

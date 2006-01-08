@@ -56,8 +56,7 @@ is Compress::Zlib::zlib_version, ZLIB_VERSION,
 
     my ($input, $err, $answer, $X, $status, $Answer);
      
-    my $name = "test.gz" ;
-    unlink $name ;
+    my $lex = new LexFile my $name;
     ok my $x = gzopen($name, "wb");
 
     $input .= $hello;
@@ -90,7 +89,6 @@ is Compress::Zlib::zlib_version, ZLIB_VERSION,
     ok $k->gzeof ;
     ok ! $k->gzclose ;
     ok $k->gzeof  ;
-    unlink $name;
 }
 
 

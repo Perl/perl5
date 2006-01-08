@@ -363,7 +363,7 @@ EOM
 
     ok $uncomp eq $buffer ;
  
-    unlink $name ;
+    1 while unlink $name ;
 
     # now check that memGunzip can deal with it.
     my $ungzip = Compress::Zlib::memGunzip($dest) ;
@@ -442,7 +442,7 @@ EOM
     ok ! defined $ungzip ;
 
  
-    unlink $name ;
+    1 while unlink $name ;
 
     # check corrupt header -- too short
     $dest = "x" ;
@@ -538,7 +538,7 @@ EOM
     my $unc = Compress::Zlib::memGunzip($compr) ;
     ok defined $unc ;
     ok $buffer eq $unc ;
-    unlink $name ;
+    1 while unlink $name ;
 }
 
 {

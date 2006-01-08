@@ -99,9 +99,7 @@ foreach my $CompressClass ('IO::Compress::Gzip',
             for my $useBuf (0 .. 1)
             {
                 print "#\n# BlockSize $blocksize, Length $i, Buffer $useBuf\n#\n" ;
-                my $name = "test.gz" ;
-                unlink $name ;
-                my $lex = new LexFile $name ;
+                my $lex = new LexFile my $name ;
         
                 my $prime = substr($compressed, 0, $i);
                 my $rest = substr($compressed, $i);

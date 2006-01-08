@@ -101,9 +101,7 @@ foreach my $CompressClass ('IO::Compress::Gzip', 'IO::Compress::Deflate')
         title "Fingerprint Truncation";
         foreach my $i (1)
         {
-            my $name = "test.gz" ;
-            unlink $name ;
-            my $lex = new LexFile $name ;
+            my $lex = new LexFile my $name ;
         
             ok 1, "Length $i" ;
             my $part = substr($compressed, 0, $i);
@@ -134,9 +132,7 @@ foreach my $CompressClass ('IO::Compress::Gzip', 'IO::Compress::Deflate')
         #
         foreach my $i (2 .. $header_size -1)
         {
-            my $name = "test.gz" ;
-            unlink $name ;
-            my $lex = new LexFile $name ;
+            my $lex = new LexFile my $name ;
         
             ok 1, "Length $i" ;
             my $part = substr($compressed, 0, $i);
@@ -151,9 +147,7 @@ foreach my $CompressClass ('IO::Compress::Gzip', 'IO::Compress::Deflate')
         foreach my $i ($header_size .. length($compressed) - 1 - $trailer_size)
         {
         
-            my $name = "test.gz" ;
-            unlink $name ;
-            my $lex = new LexFile $name ;
+            my $lex = new LexFile my $name ;
         
             ok 1, "Length $i" ;
             my $part = substr($compressed, 0, $i);
@@ -178,9 +172,7 @@ foreach my $CompressClass ('IO::Compress::Gzip', 'IO::Compress::Deflate')
         {
             foreach my $lax (0, 1)
             {
-                my $name = "test.gz" ;
-                unlink $name ;
-                my $lex = new LexFile $name ;
+                my $lex = new LexFile my $name ;
             
                 ok 1, "Length $i, Lax $lax" ;
                 my $part = substr($compressed, 0, $i);
@@ -257,9 +249,7 @@ foreach my $CompressClass ( 'IO::Compress::RawDeflate')
         foreach my $i (0 .. $blocksize)
         {
         
-            my $name = "test.gz" ;
-            unlink $name ;
-            my $lex = new LexFile $name ;
+            my $lex = new LexFile my $name ;
         
             ok 1, "Length $i" ;
             my $part = substr($compressed, 0, $i);
@@ -284,9 +274,7 @@ foreach my $CompressClass ( 'IO::Compress::RawDeflate')
         foreach my $i ($blocksize+1 .. length($compressed)-1)
         {
         
-            my $name = "test.gz" ;
-            unlink $name ;
-            my $lex = new LexFile $name ;
+            my $lex = new LexFile my $name ;
         
             ok 1, "Length $i" ;
             my $part = substr($compressed, 0, $i);

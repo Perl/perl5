@@ -68,9 +68,9 @@ my @hello2 = grep(s/$/\n/, split(/\n/, $hello2)) ;
 my $file1 = "hello1.gz" ;
 my $file2 = "hello2.gz" ;
 my $stderr = "err.out" ;
-unlink $stderr ;
 
-unlink $file1, $file2 ;
+for ($file1, $file2, $stderr) { 1 while unlink $_ } ;
+
 
 my $gz = gzopen($file1, "wb");
 $gz->gzwrite($hello1);
@@ -86,7 +86,7 @@ sub check
     my $expected = shift ;
 
     my $stderr = 'err.out';
-    unlink $stderr;
+    1 while unlink $stderr;
 
     my $cmd = "$command 2>$stderr";
     my $stdout = `$cmd` ;
@@ -106,7 +106,7 @@ sub check
         diag "Test called from $file, line $line";
     }
 
-    unlink $stderr;
+    1 while unlink $stderr;
 }
 
 # gzcat
@@ -129,7 +129,7 @@ title "gzgrep";
 check "$Perl  ${examples}/gzgrep the $file1 $file2",
         join('', grep(/the/, @hello1, @hello2));
 
-unlink $file1, $file2 ;
+for ($file1, $file2) { 1 while unlink $_ } ;
 
 
 # filtdef/filtinf

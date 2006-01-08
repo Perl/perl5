@@ -78,8 +78,7 @@ foreach my $CompressClass ( map { "IO::Compress::$_" } qw( Gzip RawDeflate Defla
         else  
           { title "$CompressClass - Merge to filehandle that isn't writable" }
 
-        my $out_file = 'abcde.out';
-        my $lex = new LexFile($out_file) ;
+        my $lex = new LexFile my $out_file ;
 
         # create empty file
         open F, ">$out_file" ; print F "x"; close F;
@@ -129,8 +128,7 @@ foreach my $CompressClass ( map { "IO::Compress::$_" } qw( Gzip RawDeflate Defla
 
     my $Error = getErrorRef($CompressClass);
 
-    my $out_file = 'abcde.out';
-    my $lex = new LexFile($out_file) ;
+    my $lex = new LexFile my $out_file ;
 
     foreach my $to_file ( qw(buffer file handle ) )
     {
@@ -172,8 +170,7 @@ foreach my $CompressClass ( map { "IO::Compress::$_" } qw( Gzip RawDeflate Defla
 
     my $Error = getErrorRef($CompressClass);
 
-    my $out_file = 'abcde.out';
-    my $lex = new LexFile($out_file) ;
+    my $lex = new LexFile my $out_file ;
 
     foreach my $to_file ( qw(buffer file handle ) )
     {
@@ -219,8 +216,7 @@ foreach my $CompressClass ( map { "IO::Compress::$_" } qw( Gzip RawDeflate Defla
 
     title "$CompressClass - Merge to file that doesn't exist";
 
-    my $out_file = 'abcd.out';
-    my $lex = new LexFile($out_file) ;
+    my $lex = new LexFile my $out_file ;
     
     ok ! -e $out_file, "  Destination file, '$out_file', does not exist";
 
@@ -240,8 +236,7 @@ foreach my $CompressClass ( map { "IO::Compress::$_" } qw( Gzip RawDeflate Defla
 {
     my $Error = getErrorRef($CompressClass);
 
-    my $out_file = 'abcde.out';
-    my $lex = new LexFile($out_file) ;
+    my $lex = new LexFile my $out_file ;
 
     foreach my $to_file ( qw( buffer file handle ) )
     {
@@ -322,8 +317,7 @@ foreach my $CompressClass ( map { "IO::Compress::$_" } qw( Gzip RawDeflate Defla
 
     my $buffer ;
 
-    my $out_file = 'abcde.out';
-    my $lex = new LexFile($out_file) ;
+    my $lex = new LexFile my $out_file ;
 
     foreach my $to_file (0, 1)
     {

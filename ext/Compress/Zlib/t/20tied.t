@@ -152,8 +152,7 @@ foreach my $CompressClass ('IO::Compress::Gzip',
         # Write
         # these tests come almost 100% from IO::String
 
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         my $io = $CompressClass->new($name);
 
@@ -216,8 +215,7 @@ and a single line.
 
 EOT
 
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         my $iow = new $CompressClass $name ;
         print $iow $str ;
@@ -348,8 +346,7 @@ and a single line.
 
 EOT
 
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         writeFile($name, $str);
         my @tmp;
@@ -480,8 +477,7 @@ EOT
                 {
                     title "Read Tests - buf length $bufsize, Transparent $trans, Append $append" ;
 
-                    my $name = "testz.gz" ;
-                    my $lex = new LexFile $name ;
+                    my $lex = new LexFile my $name ;
 
                     if ($trans) {
                         writeFile($name, $str) ;

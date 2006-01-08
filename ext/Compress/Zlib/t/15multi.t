@@ -81,8 +81,7 @@ foreach my $CompressClass ('IO::Compress::Gzip',
 
             }
 
-            my $name = "test.gz" ;
-            my $lex = new LexFile $name ;
+            my $lex = new LexFile my $name ;
             my $output ;
             if ($fb eq 'buffer')
             {

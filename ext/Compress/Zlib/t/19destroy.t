@@ -43,9 +43,7 @@ foreach my $CompressClass ('IO::Compress::Gzip',
     {
         # Check that the class destructor will call close
 
-        my $name = "test.gz" ;
-        unlink $name ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         my $hello = <<EOM ;
 hello world
@@ -66,8 +64,7 @@ EOM
         # Tied filehandle destructor
 
 
-        my $name = "test.gz" ;
-        my $lex = new LexFile $name ;
+        my $lex = new LexFile my $name ;
 
         my $hello = <<EOM ;
 hello world

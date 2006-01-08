@@ -91,8 +91,7 @@ My::testParseParameters();
 {
     title "whatIsInput" ;
 
-    my $out_file = "abc";
-    my $lex = new LexFile($out_file) ;
+    my $lex = new LexFile my $out_file ;
     open FH, ">$out_file" ;
     is whatIsInput(*FH), 'handle', "Match filehandle" ;
     close FH ;
@@ -111,8 +110,7 @@ My::testParseParameters();
 {
     title "whatIsOutput" ;
 
-    my $out_file = "abc";
-    my $lex = new LexFile($out_file) ;
+    my $lex = new LexFile my $out_file ;
     open FH, ">$out_file" ;
     is whatIsOutput(*FH), 'handle', "Match filehandle" ;
     close FH ;

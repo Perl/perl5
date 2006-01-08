@@ -107,8 +107,7 @@ sub printHeaderInfo
 # Check the Deflate Header Parameters
 #========================================
 
-my $name = "test.gz" ;
-my $lex = new LexFile $name ;
+my $lex = new LexFile my $name ;
 
 {
     title "Check default header settings" ;
