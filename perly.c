@@ -1,6 +1,6 @@
 /*    perly.c
  *
- *    Copyright (c) 2004 Larry Wall
+ *    Copyright (c) 2004, 2005, 2006 Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
