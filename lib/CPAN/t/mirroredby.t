@@ -21,3 +21,9 @@ is( $cmb->continent(), 'continent',
 	'continent() should return continent entry' );
 is( $cmb->country(), 'country', 'country() should return country entry' );
 is( $cmb->url(), 'url', 'url() should return url entry' );
+
+__END__
+# Local Variables:
+# mode: cperl
+# cperl-indent-level: 2
+# End:
