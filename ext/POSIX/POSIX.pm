@@ -960,10 +960,11 @@ sub load_imports {
 # Exporter::export_tags();
 {
   # De-duplicate the export list: 
-  my %seen;
-  for (values %EXPORT_TAGS) {
-    push @EXPORT, grep {!$seen{$_}++} @$_;
-  }
+  my %export;
+  @export{map {@$_} values %EXPORT_TAGS} = ();
+  # Doing the de-dup with a temporary hash has the advantage that the SVs in
+  # @EXPORT are actually shared hash key sacalars, which will save some memory.
+  push @EXPORT, keys %export;
 }
 
 @EXPORT_OK = qw(
