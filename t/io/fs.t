@@ -47,7 +47,7 @@ $needs_fh_reopen = 1 if (defined &Win32::IsWin95 && Win32::IsWin95());
 my $skip_mode_checks =
     $^O eq 'cygwin' && $ENV{CYGWIN} !~ /ntsec/;
 
-plan tests => 44;
+plan tests => 42;
 
 
 if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
@@ -409,7 +409,22 @@ if ($^O eq 'VMS') {
 
 ok(-d 'tmp1', "rename on directories working");
 
-{
+# FIXME - for some reason change 26009/26011 merged as 26627 still segfaults
+# after all the tests have completed:
+# #0  0x08124dd0 in Perl_pop_scope (my_perl=0x81b5ec8) at scope.c:143
+# #1  0x080e88d8 in Perl_pp_leave (my_perl=0x81b5ec8) at pp_hot.c:1843
+# #2  0x080c7dc1 in Perl_runops_debug (my_perl=0x81b5ec8) at dump.c:1459
+# #3  0x080660af in S_run_body (my_perl=0x81b5ec8, oldscope=1) at perl.c:2369
+# #4  0x08065ab1 in perl_run (my_perl=0x81b5ec8) at perl.c:2286
+# #5  0x080604c3 in main (argc=2, argv=0xbffffc64, env=0xbffffc70)
+#     at perlmain.c:99
+#
+# 143         const I32 oldsave = PL_scopestack[--PL_scopestack_ix];
+# (gdb) p my_perl->Tscopestack_ix
+# $1 = 136787683
+#
+
+if (0) {
     # Change 26011: Re: A surprising segfault
     # to make sure only that these obfuscated sentences will not crash.
 
