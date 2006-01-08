@@ -970,13 +970,19 @@ C<MGVTBL>, which is a structure of function pointers and stands for
 "Magic Virtual Table" to handle the various operations that might be
 applied to that variable.
 
-The C<MGVTBL> has five pointers to the following routine types:
+The C<MGVTBL> has five (or sometimes eight) pointers to the following
+routine types:
 
     int  (*svt_get)(SV* sv, MAGIC* mg);
     int  (*svt_set)(SV* sv, MAGIC* mg);
     U32  (*svt_len)(SV* sv, MAGIC* mg);
     int  (*svt_clear)(SV* sv, MAGIC* mg);
     int  (*svt_free)(SV* sv, MAGIC* mg);
+
+    int  (*svt_copy)(SV *sv, MAGIC* mg, SV *nsv, const char *name, int namlen);
+    int  (*svt_dup)(MAGIC *mg, CLONE_PARAMS *param);
+    int  (*svt_local)(SV *nsv, MAGIC *mg);
+
 
 This MGVTBL structure is set at compile-time in F<perl.h> and there are
 currently 19 types (or 21 with overloading turned on).  These different
@@ -991,6 +997,10 @@ actions depending on which function is being called.
     svt_clear		Clear something the SV represents.
     svt_free            Free any extra storage associated with the SV.
 
+    svt_copy		copy tied variable magic to a tied element
+    svt_dup		duplicate a magic structure during thread cloning
+    svt_local		copy magic to local value during 'local'
+
 For instance, the MGVTBL structure called C<vtbl_sv> (which corresponds
 to an C<mg_type> of C<PERL_MAGIC_sv>) contains:
 
@@ -1001,6 +1011,13 @@ if a get operation is being performed, the routine C<magic_get> is
 called.  All the various routines for the various magical types begin
 with C<magic_>.  NOTE: the magic routines are not considered part of
 the Perl API, and may not be exported by the Perl library.
+
+The last three slots are a recent addition, and for source code
+compatibility they are only checked for if one of the three flags
+MGf_COPY, MGf_DUP or MGf_LOCAL is set in mg_flags. This means that most
+code can continue declaring a vtable as a 5-element value. These three are
+currently used exclusively by the threading code, and are highly subject
+to change.
 
 The current kinds of Magic Virtual Tables are:
 
