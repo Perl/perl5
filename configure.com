@@ -510,8 +510,8 @@ $       ELSE
 $         file_2_find = "[-]" + file_2_find
 $       ENDIF
 $!
-$       tmp = f$parse(file_2_find + ";",,,,"SYNTAX_ONLY")
-$       IF tmp .NES. "" THEN file_2_find = tmp
+$       tmp = F$PARSE(file_2_find + ";",,,,"SYNTAX_ONLY")
+$       IF F$SEARCH(tmp) .NES. "" THEN file_2_find = tmp
 $       dirname = F$EXTRACT(0,F$LOCATE("]",file_2_find),file_2_find) + "]"
 $       file_2_find = file_2_find - dirname
 $!
