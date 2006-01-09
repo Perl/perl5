@@ -1494,11 +1494,11 @@ control-character name that begins with C<^_> will acquire a special
 meaning in any future version of Perl; such names may therefore be
 used safely in programs.  C<$^_> itself, however, I<is> reserved.
 
-Perl identifiers that consist of all digits, or begin with control
-characters, or are a single punctuation character, are exempt from the
-effects of the C<package> declaration and are always forced to be in
-package C<main>; they are also exempt from C<strict 'vars'> errors. A
-few other names are also exempt in these ways:
+Perl identifiers that begin with digits, control characters, or
+punctuation characters are exempt from the effects of the C<package>
+declaration and are always forced to be in package C<main>; they are
+also exempt from C<strict 'vars'> errors.  A few other names are also
+exempt in these ways:
 
 	ENV		STDIN
 	INC		STDOUT
