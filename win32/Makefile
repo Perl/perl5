@@ -740,6 +740,7 @@ STORABLE		= $(EXTDIR)\Storable\Storable
 FILTER			= $(EXTDIR)\Filter\Util\Call\Call
 ENCODE			= $(EXTDIR)\Encode\Encode
 MD5			= $(EXTDIR)\Digest\MD5\MD5
+SHA			= $(EXTDIR)\Digest\SHA\SHA
 PERLIOSCALAR		= $(EXTDIR)\PerlIO\scalar\scalar
 MIMEBASE64		= $(EXTDIR)\MIME\Base64\Base64
 TIMEHIRES		= $(EXTDIR)\Time\HiRes\HiRes
@@ -773,6 +774,7 @@ STORABLE_DLL		= $(AUTODIR)\Storable\Storable.dll
 FILTER_DLL		= $(AUTODIR)\Filter\Util\Call\Call.dll
 ENCODE_DLL		= $(AUTODIR)\Encode\Encode.dll
 MD5_DLL			= $(AUTODIR)\Digest\MD5\MD5.dll
+SHA_DLL			= $(AUTODIR)\Digest\SHA\SHA.dll
 PERLIOSCALAR_DLL	= $(AUTODIR)\PerlIO\scalar\scalar.dll
 MIMEBASE64_DLL		= $(AUTODIR)\MIME\Base64\Base64.dll
 TIMEHIRES_DLL		= $(AUTODIR)\Time\HiRes\HiRes.dll
@@ -807,6 +809,7 @@ EXTENSION_C	= 		\
 		$(FILTER).c	\
 		$(ENCODE).c	\
 		$(MD5).c	\
+		$(SHA).c	\
 		$(PERLIOSCALAR).c	\
 		$(MIMEBASE64).c	\
 		$(TIMEHIRES).c	\
@@ -841,6 +844,7 @@ EXTENSION_DLL	= 		\
 		$(FILTER_DLL)   \
 		$(ENCODE_DLL)   \
 		$(MD5_DLL)	\
+		$(SHA_DLL)	\
 		$(PERLIOSCALAR_DLL) \
 		$(MIMEBASE64_DLL) \
 		$(TIMEHIRES_DLL)  \
@@ -1150,6 +1154,7 @@ distclean: realclean
 	-del /f $(LIBDIR)\File\Glob.pm
 	-del /f $(LIBDIR)\Storable.pm
 	-del /f $(LIBDIR)\Digest\MD5.pm
+	-del /f $(LIBDIR)\Digest\SHA.pm
 	-del /f $(LIBDIR)\PerlIO\encoding.pm
 	-del /f $(LIBDIR)\PerlIO\scalar.pm
 	-del /f $(LIBDIR)\PerlIO\via.pm
