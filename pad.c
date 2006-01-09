@@ -411,6 +411,7 @@ Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype)
     SV *sv;
     I32 retval;
 
+    PERL_UNUSED_ARG(optype);
     ASSERT_CURPAD_ACTIVE("pad_alloc");
 
     if (AvARRAY(PL_comppad) != PL_curpad)

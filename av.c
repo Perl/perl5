@@ -367,7 +367,7 @@ Perl_newAV(pTHX)
     sv_upgrade((SV *)av, SVt_PVAV);
     /* sv_upgrade does AvREAL_only()  */
     AvALLOC(av) = 0;
-    SvPV_set(av, (char*)0);
+    SvPV_set(av, NULL);
     AvMAX(av) = AvFILLp(av) = -1;
     return av;
 }
@@ -482,7 +482,7 @@ Perl_av_undef(pTHX_ register AV *av)
     }
     Safefree(AvALLOC(av));
     AvALLOC(av) = 0;
-    SvPV_set(av, (char*)0);
+    SvPV_set(av, NULL);
     AvMAX(av) = AvFILLp(av) = -1;
 }
 

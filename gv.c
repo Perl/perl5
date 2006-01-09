@@ -435,20 +435,20 @@ Perl_gv_fetchmeth_autoload(pTHX_ HV *stash, const char *name, STRLEN len, I32 le
 	GV **gvp;
 
 	if (!stash)
-	    return Nullgv;	/* UNIVERSAL::AUTOLOAD could cause trouble */
+	    return NULL;	/* UNIVERSAL::AUTOLOAD could cause trouble */
 	if (len == S_autolen && strnEQ(name, S_autoload, S_autolen))
-	    return Nullgv;
+	    return NULL;
 	if (!(gv = gv_fetchmeth(stash, S_autoload, S_autolen, FALSE)))
-	    return Nullgv;
+	    return NULL;
 	cv = GvCV(gv);
 	if (!(CvROOT(cv) || CvXSUB(cv)))
-	    return Nullgv;
+	    return NULL;
 	/* Have an autoload */
 	if (level < 0)	/* Cannot do without a stub */
 	    gv_fetchmeth(stash, name, len, 0);
 	gvp = (GV**)hv_fetch(stash, name, len, (level >= 0));
 	if (!gvp)
-	    return Nullgv;
+	    return NULL;
 	return *gvp;
     }
     return gv;
@@ -1458,9 +1458,9 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
     for (i = 1; i < lim; i++)
 	amt.table[i] = Nullcv;
     for (; i < NofAMmeth; i++) {
-	const char *cooky = PL_AMG_names[i];
+	const char * const cooky = PL_AMG_names[i];
 	/* Human-readable form, for debugging: */
-	const char *cp = (i >= DESTROY_amg ? cooky : AMG_id2name(i));
+	const char * const cp = (i >= DESTROY_amg ? cooky : AMG_id2name(i));
 	const STRLEN l = strlen(cooky);
 
 	DEBUG_o( Perl_deb(aTHX_ "Checking overloading of \"%s\" in package \"%.256s\"\n",
@@ -1484,7 +1484,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 		/* This is a hack to support autoloading..., while
 		   knowing *which* methods were declared as overloaded. */
 		/* GvSV contains the name of the method. */
-		GV *ngv = Nullgv;
+		GV *ngv = NULL;
 		SV *gvsv = GvSV(gv);
 
 		DEBUG_o( Perl_deb(aTHX_ "Resolving method \"%"SVf256\

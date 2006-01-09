@@ -447,8 +447,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
-	if (SvRMAGICAL(hv) && !(action & (HV_FETCH_ISSTORE|HV_FETCH_ISEXISTS)))
-	  {
+	if (SvRMAGICAL(hv) && !(action & (HV_FETCH_ISSTORE|HV_FETCH_ISEXISTS))) {
 	    if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
 		sv = sv_newmortal();
 
@@ -553,7 +552,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		/* Will need to free this, so set FREEKEY flag.  */
 		key = savepvn(key,klen);
 		key = (const char*)strupr((char*)key);
-		is_utf8 = 0;
+		is_utf8 = FALSE;
 		hash = 0;
 		keysv = 0;
 
@@ -596,7 +595,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		    /* Will need to free this, so set FREEKEY flag.  */
 		    key = savepvn(key,klen);
 		    key = (const char*)strupr((char*)key);
-		    is_utf8 = 0;
+		    is_utf8 = FALSE;
 		    hash = 0;
 		    keysv = 0;
 
@@ -696,7 +695,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		    /* Need to swap the key we have for a key with the flags we
 		       need. As keys are shared we can't just write to the
 		       flag, so we share the new one, unshare the old one.  */
-		    HEK *new_hek = share_hek_flags(key, klen, hash,
+		    HEK * const new_hek = share_hek_flags(key, klen, hash,
 						   masked_flags);
 		    unshare_hek (HeKEY_hek(entry));
 		    HeKEY_hek(entry) = new_hek;
@@ -920,13 +919,14 @@ SV *
 Perl_hv_delete(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 flags)
 {
     STRLEN klen;
-    int k_flags = 0;
+    int k_flags;
 
     if (klen_i32 < 0) {
 	klen = -klen_i32;
-	k_flags |= HVhek_UTF8;
+	k_flags = HVhek_UTF8;
     } else {
 	klen = klen_i32;
+	k_flags = 0;
     }
     return hv_delete_common(hv, NULL, key, klen, k_flags, flags, 0);
 }
@@ -958,7 +958,6 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     register HE *entry;
     register HE **oentry;
     HE *const *first_entry;
-    SV *sv;
     bool is_utf8;
     int masked_flags;
 
@@ -981,6 +980,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	hv_magic_check (hv, &needs_copy, &needs_store);
 
 	if (needs_copy) {
+	    SV *sv;
 	    entry = hv_fetch_common(hv, keysv, key, klen,
 				    k_flags & ~HVhek_FREEKEY, HV_FETCH_LVALUE,
 				    Nullsv, hash);
@@ -1051,6 +1051,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     first_entry = oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)];
     entry = *oentry;
     for (; entry; oentry = &HeNEXT(entry), entry = *oentry) {
+	SV *sv;
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
 	if (HeKLEN(entry) != (I32)klen)
@@ -1067,13 +1068,12 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	}
 
 	/* if placeholder is here, it's already been deleted.... */
-	if (HeVAL(entry) == &PL_sv_placeholder)
-	{
-	  if (k_flags & HVhek_FREEKEY)
-            Safefree(key);
-	  return Nullsv;
+	if (HeVAL(entry) == &PL_sv_placeholder) {
+	    if (k_flags & HVhek_FREEKEY)
+		Safefree(key);
+	    return NULL;
 	}
-	else if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
+	if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
 	    S_hv_notallowed(aTHX_ k_flags, key, klen,
 			    "Attempt to delete readonly key '%"SVf"' from"
 			    " a restricted hash");
@@ -1368,8 +1368,9 @@ Perl_hv_ksplit(pTHX_ HV *hv, IV newmax)
 	if (!*aep)				/* non-existent */
 	    continue;
 	for (oentry = aep, entry = *aep; entry; entry = *oentry) {
-	    register I32 j;
-	    if ((j = (HeHASH(entry) & newsize)) != i) {
+	    register I32 j = (HeHASH(entry) & newsize);
+
+	    if (j != i) {
 		j -= i;
 		*oentry = HeNEXT(entry);
 		if (!(HeNEXT(entry) = aep[j]))
@@ -1433,7 +1434,7 @@ Perl_newHVhv(pTHX_ HV *ohv)
 
 	/* In each bucket... */
 	for (i = 0; i <= hv_max; i++) {
-	    HE *prev = NULL, *ent = NULL;
+	    HE *prev = NULL;
 	    HE *oent = oents[i];
 
 	    if (!oent) {
@@ -1447,8 +1448,8 @@ Perl_newHVhv(pTHX_ HV *ohv)
 		const char * const key = HeKEY(oent);
 		const STRLEN len = HeKLEN(oent);
 		const int flags  = HeKFLAGS(oent);
+		HE * const ent   = new_HE();
 
-		ent = new_HE();
 		HeVAL(ent)     = newSVsv(HeVAL(oent));
 		HeKEY_hek(ent)
                     = shared ? share_hek_flags(key, len, hash, flags)
@@ -1557,7 +1558,7 @@ Perl_hv_clear(pTHX_ HV *hv)
 		/* not already placeholder */
 		if (HeVAL(entry) != &PL_sv_placeholder) {
 		    if (HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
-			SV* keysv = hv_iterkeysv(entry);
+			SV* const keysv = hv_iterkeysv(entry);
 			Perl_croak(aTHX_
 	"Attempt to delete readonly key '%"SVf"' from a restricted hash",
 				   keysv);
@@ -1615,7 +1616,7 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
     i = HvMAX(hv);
     do {
 	/* Loop down the linked list heads  */
-	bool first = 1;
+	bool first = TRUE;
 	HE **oentry = &(HvARRAY(hv))[i];
 	HE *entry;
 
@@ -1639,7 +1640,7 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 		}
 	    } else {
 		oentry = &HeNEXT(entry);
-		first = 0;
+		first = FALSE;
 	    }
 	}
     } while (--i >= 0);
@@ -1680,7 +1681,7 @@ S_hfreeentries(pTHX_ HV *hv)
 	/* This is the one we're going to try to empty.  First time round
 	   it's the original array.  (Hopefully there will only be 1 time
 	   round) */
-	HE **array = HvARRAY(hv);
+	HE ** const array = HvARRAY(hv);
 	I32 i = HvMAX(hv);
 
 	/* Because we have taken xhv_name out, the only allocated pointer
@@ -1770,7 +1771,7 @@ S_hfreeentries(pTHX_ HV *hv)
 	if (--attempts == 0) {
 	    Perl_die(aTHX_ "panic: hfreeentries failed to free hash - something is repeatedly re-creating entries");
 	}
-    };
+    }
 	
     HvARRAY(hv) = orig_array;
 
@@ -1866,7 +1867,7 @@ Perl_hv_iterinit(pTHX_ HV *hv)
 	Perl_croak(aTHX_ "Bad hash");
 
     if (SvOOK(hv)) {
-	struct xpvhv_aux *iter = HvAUX(hv);
+	struct xpvhv_aux * const iter = HvAUX(hv);
 	HE * const entry = iter->xhv_eiter; /* HvEITER(hv) */
 	if (entry && HvLAZYDEL(hv)) {	/* was deleted earlier? */
 	    HvLAZYDEL_off(hv);
@@ -1875,7 +1876,7 @@ Perl_hv_iterinit(pTHX_ HV *hv)
 	iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
 	iter->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
     } else {
-	S_hv_auxinit(aTHX_ hv);
+	hv_auxinit(hv);
     }
 
     /* used to be xhv->xhv_fill before 5.004_65 */
@@ -1889,7 +1890,7 @@ Perl_hv_riter_p(pTHX_ HV *hv) {
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
 
-    iter = SvOOK(hv) ? HvAUX(hv) : S_hv_auxinit(aTHX_ hv);
+    iter = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
     return &(iter->xhv_riter);
 }
 
@@ -1900,7 +1901,7 @@ Perl_hv_eiter_p(pTHX_ HV *hv) {
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
 
-    iter = SvOOK(hv) ? HvAUX(hv) : S_hv_auxinit(aTHX_ hv);
+    iter = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
     return &(iter->xhv_eiter);
 }
 
@@ -1917,7 +1918,7 @@ Perl_hv_riter_set(pTHX_ HV *hv, I32 riter) {
 	if (riter == -1)
 	    return;
 
-	iter = S_hv_auxinit(aTHX_ hv);
+	iter = hv_auxinit(hv);
     }
     iter->xhv_riter = riter;
 }
@@ -1937,7 +1938,7 @@ Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter) {
 	if (!eiter)
 	    return;
 
-	iter = S_hv_auxinit(aTHX_ hv);
+	iter = hv_auxinit(hv);
     }
     iter->xhv_eiter = eiter;
 }
@@ -1960,7 +1961,7 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, I32 len, int flags)
 	if (name == 0)
 	    return;
 
-	iter = S_hv_auxinit(aTHX_ hv);
+	iter = hv_auxinit(hv);
     }
     PERL_HASH(hash, name, len);
     iter->xhv_name = name ? share_hek(name, len, hash) : 0;
@@ -1968,9 +1969,7 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, I32 len, int flags)
 
 AV **
 Perl_hv_backreferences_p(pTHX_ HV *hv) {
-    struct xpvhv_aux *iter;
-
-    iter = SvOOK(hv) ? HvAUX(hv) : S_hv_auxinit(aTHX_ hv);
+    struct xpvhv_aux * const iter = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
     return &(iter->xhv_backreferences);
 }
 

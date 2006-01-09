@@ -1278,7 +1278,6 @@ ERs	|bool	|reginclass	|NN const regnode *n|NN const U8 *p|NULLOK STRLEN *lenp\
 				|bool do_utf8sv_is_utf8
 Es	|CHECKPOINT|regcppush	|I32 parenfloor
 Es	|char*|regcppop
-Es	|char*|regcp_set_to	|I32 ss
 Es	|void	|cache_re	|NN regexp *prog
 ERs	|U8*	|reghop		|NN U8 *pos|I32 off
 ERs	|U8*	|reghop3	|NN U8 *pos|I32 off|NN U8 *lim

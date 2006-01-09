@@ -792,9 +792,10 @@ Perl_scalarvoid(pTHX_ OP *o)
                      built upon these three nroff macros being used in
                      void context. The pink camel has the details in
                      the script wrapman near page 319. */
-		    if (strnEQ(SvPVX_const(sv), "di", 2) ||
-			strnEQ(SvPVX_const(sv), "ds", 2) ||
-			strnEQ(SvPVX_const(sv), "ig", 2))
+		    const char * const maybe_macro = SvPVX_const(sv);
+		    if (strnEQ(maybe_macro, "di", 2) ||
+			strnEQ(maybe_macro, "ds", 2) ||
+			strnEQ(maybe_macro, "ig", 2))
 			    useless = 0;
 		}
 	    }
@@ -1582,13 +1583,12 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
 	    ; 		/* already in %INC */
 	else
 	    Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-			     newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1),
-			     Nullsv);
+			     newSVpvs(ATTRSMODULE), NULL);
     }
     else {
 	Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
-			 newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1),
-			 Nullsv,
+			 newSVpvs(ATTRSMODULE),
+			 NULL,
 			 prepend_elem(OP_LIST,
 				      newSVOP(OP_CONST, 0, stashsv),
 				      prepend_elem(OP_LIST,
@@ -1617,7 +1617,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
     apply_attrs(stash, PAD_SV(target->op_targ), attrs, TRUE);
 
     /* Need package name for method call. */
-    pack = newSVOP(OP_CONST, 0, newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1));
+    pack = newSVOP(OP_CONST, 0, newSVpvs(ATTRSMODULE));
 
     /* Build up the real arg-list. */
     stashsv = stash ? newSVhek(HvNAME_HEK(stash)) : &PL_sv_no;
@@ -1682,7 +1682,7 @@ Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv,
     }
 
     Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
-                     newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1),
+		     newSVpvs(ATTRSMODULE),
                      Nullsv, prepend_elem(OP_LIST,
 				  newSVOP(OP_CONST, 0, newSVpv(stashpv,0)),
 				  prepend_elem(OP_LIST,
@@ -2055,8 +2055,7 @@ OP *
 Perl_jmaybe(pTHX_ OP *o)
 {
     if (o->op_type == OP_LIST) {
-	OP *o2;
-	o2 = newSVREF(newGVOP(OP_GV, 0, gv_fetchpv(";", GV_ADD, SVt_PV))),
+	OP * const o2 = newSVREF(newGVOP(OP_GV, 0, gv_fetchpv(";", GV_ADD, SVt_PV)));
 	o = convert(OP_JOIN, 0, prepend_elem(OP_LIST, o2, o));
     }
     return o;
@@ -2827,7 +2826,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 
     if (expr->op_type == OP_CONST) {
 	STRLEN plen;
-	SV *pat = ((SVOP*)expr)->op_sv;
+	SV * const pat = ((SVOP*)expr)->op_sv;
 	const char *p = SvPV_const(pat, plen);
 	if ((o->op_flags & OPf_SPECIAL) && (*p == ' ' && p[1] == '\0')) {
 	    U32 was_readonly = SvREADONLY(pat);
@@ -2895,7 +2894,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
     if (repl) {
 	OP *curop;
 	if (pm->op_pmflags & PMf_EVAL) {
-	    curop = 0;
+	    curop = NULL;
 	    if (CopLINE(PL_curcop) < (line_t)PL_multi_end)
 		CopLINE_set(PL_curcop, (line_t)PL_multi_end);
 	}
@@ -2906,7 +2905,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	    for (curop = LINKLIST(repl); curop!=repl; curop = LINKLIST(curop)) {
 		if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
 		    if (curop->op_type == OP_GV) {
-			GV *gv = cGVOPx_gv(curop);
+			GV * const gv = cGVOPx_gv(curop);
 			repl_has_vars = 1;
 			if (strchr("&`'123456789+-\016\022", *GvENAME(gv)))
 			    break;

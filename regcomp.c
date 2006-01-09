@@ -282,27 +282,6 @@ static const scan_data_t zero_scan_data =
 } STMT_END
 
 /*
- * Calls SAVEDESTRUCTOR_X if needed, then calls Perl_croak with the given
- * args. Show regex, up to a maximum length. If it's too long, chop and add
- * "...".
- */
-#define	FAIL2(pat,msg) STMT_START {					\
-    const char *ellipses = "";						\
-    IV len = RExC_end - RExC_precomp;					\
-									\
-    if (!SIZE_ONLY)							\
-	SAVEDESTRUCTOR_X(clear_re,(void*)RExC_rx);			\
-    if (len > RegexLengthToShowInErrorMessages) {			\
-	/* chop 10 shorter than the max, to ensure meaning of "..." */	\
-	len = RegexLengthToShowInErrorMessages - 10;			\
-	ellipses = "...";						\
-    }									\
-    S_re_croak2(aTHX_ pat, " in regex m/%.*s%s/",			\
-	    msg, (int)len, RExC_precomp, ellipses);			\
-} STMT_END
-
-
-/*
  * Simple_vFAIL -- like FAIL, but marks the current location in the scan
  */
 #define	Simple_vFAIL(m) STMT_START {					\
@@ -765,7 +744,7 @@ and would end up looking like:
     DEBUG_TRIE_COMPILE_r({                                                 \
 	SV *tmp;                                                           \
 	if ( UTF ) {                                                       \
-	    tmp = newSVpvn( "", 0 );                                       \
+	    tmp = newSVpvs( "" );                                          \
 	    pv_uni_display( tmp, uc, len, 60, UNI_DISPLAY_REGEX );         \
 	} else {                                                           \
 	    tmp = Perl_newSVpvf_nocontext( "%c", (int)uvc );               \
@@ -2051,7 +2030,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 	    if (flags & SCF_DO_SUBSTR)
 		scan_commit(pRExC_state, data);
 	    if (UTF) {
-		U8 *s = (U8 *)STRING(scan);
+		const U8 * const s = (U8 *)STRING(scan);
 		l = utf8_length(s, s + l);
 		uc = utf8_to_uvchr(s, NULL);
 	    }
@@ -3222,21 +3201,20 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
     register I32 parno = 0;
     I32 flags;
     const I32 oregflags = RExC_flags;
-    I32 have_branch = 0;
-    I32 open = 0;
+    bool have_branch = 0;
+    bool is_open = 0;
 
     /* for (?g), (?gc), and (?o) warnings; warning
        about (?c) will warn about (?g) -- japhy    */
 
+#define WASTED_O  0x01
+#define WASTED_G  0x02
+#define WASTED_C  0x04
+#define WASTED_GC (0x02|0x04)
     I32 wastedflags = 0x00;
-    const I32 wasted_o  = 0x01;
-    const I32 wasted_g  = 0x02;
-    const I32 wasted_gc = 0x02 | 0x04;
-    const I32 wasted_c  = 0x04;
 
     char * parse_start = RExC_parse; /* MJD */
     char * const oregcomp_parse = RExC_parse;
-    char c;
 
     *flagp = 0;				/* Tentatively. */
 
@@ -3246,7 +3224,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 	if (*RExC_parse == '?') { /* (?...) */
 	    U32 posflags = 0, negflags = 0;
 	    U32 *flagsp = &posflags;
-	    int logical = 0;
+	    bool is_logical = 0;
 	    const char * const seqstart = RExC_parse;
 
 	    RExC_parse++;
@@ -3283,7 +3261,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		    vWARNdep(RExC_parse, "(?p{}) is deprecated - use (??{})");
 		/* FALL THROUGH*/
 	    case '?':           /* (??...) */
-		logical = 1;
+		is_logical = 1;
 		if (*RExC_parse != '{')
 		    goto unknown;
 		paren = *RExC_parse++;
@@ -3293,32 +3271,28 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		I32 count = 1, n = 0;
 		char c;
 		char *s = RExC_parse;
-		SV *sv;
-		OP_4tree *sop, *rop;
 
 		RExC_seen_zerolen++;
 		RExC_seen |= REG_SEEN_EVAL;
 		while (count && (c = *RExC_parse)) {
-		    if (c == '\\' && RExC_parse[1])
-			RExC_parse++;
+		    if (c == '\\') {
+			if (RExC_parse[1])
+			    RExC_parse++;
+		    }
 		    else if (c == '{')
 			count++;
 		    else if (c == '}')
 			count--;
 		    RExC_parse++;
 		}
-		if (*RExC_parse != ')')
-		{
+		if (*RExC_parse != ')') {
 		    RExC_parse = s;		
 		    vFAIL("Sequence (?{...}) not terminated or not {}-balanced");
 		}
 		if (!SIZE_ONLY) {
 		    PAD *pad;
-		
-		    if (RExC_parse - 1 - s)
-			sv = newSVpvn(s, RExC_parse - 1 - s);
-		    else
-			sv = newSVpvs("");
+		    OP_4tree *sop, *rop;
+		    SV * const sv = newSVpvn(s, RExC_parse - 1 - s);
 
 		    ENTER;
 		    Perl_save_re_context(aTHX);
@@ -3347,7 +3321,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		}
 
 		nextchar(pRExC_state);
-		if (logical) {
+		if (is_logical) {
 		    ret = reg_node(pRExC_state, LOGICAL);
 		    if (!SIZE_ONLY)
 			ret->flags = 2;
@@ -3377,6 +3351,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		}
 		else if (RExC_parse[0] >= '1' && RExC_parse[0] <= '9' ) {
                     /* (?(1)...) */
+		    char c;
 		    parno = atoi(RExC_parse++);
 
 		    while (isDIGIT(*RExC_parse))
@@ -3434,7 +3409,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 
 		    if (*RExC_parse == 'o' || *RExC_parse == 'g') {
 			if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
-			    I32 wflagbit = *RExC_parse == 'o' ? wasted_o : wasted_g;
+			    const I32 wflagbit = *RExC_parse == 'o' ? WASTED_O : WASTED_G;
 			    if (! (wastedflags & wflagbit) ) {
 				wastedflags |= wflagbit;
 				vWARN5(
@@ -3450,8 +3425,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 		    }
 		    else if (*RExC_parse == 'c') {
 			if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
-			    if (! (wastedflags & wasted_c) ) {
-				wastedflags |= wasted_gc;
+			    if (! (wastedflags & WASTED_C) ) {
+				wastedflags |= WASTED_GC;
 				vWARN3(
 				    RExC_parse + 1,
 				    "Useless (%sc) - %suse /gc modifier",
@@ -3494,7 +3469,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 	    ret = reganode(pRExC_state, OPEN, parno);
             Set_Node_Length(ret, 1); /* MJD */
             Set_Node_Offset(ret, RExC_parse); /* MJD */
-	    open = 1;
+	    is_open = 1;
 	}
     }
     else                        /* ! paren */
@@ -3523,7 +3498,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
     else if (paren == ':') {
 	*flagp |= flags&SIMPLE;
     }
-    if (open) {				/* Starts with OPEN. */
+    if (is_open) {				/* Starts with OPEN. */
 	regtail(pRExC_state, ret, br);		/* OPEN -> first. */
     }
     else if (paren != '?')		/* Not Conditional */

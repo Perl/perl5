@@ -643,7 +643,8 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 
 #define SvRTRIM(sv) STMT_START { \
     STRLEN len = SvCUR(sv); \
-    while (len > 0 && isSPACE(SvPVX(sv)[len-1])) \
+    char * const p = SvPVX(sv); \
+    while (len > 0 && isSPACE(p[len-1])) \
 	--len; \
     SvCUR_set(sv, len); \
 } STMT_END
@@ -1257,7 +1258,7 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
     		PL_psig_name[i]=0;
     	    }
     	    if(PL_psig_ptr[i]) {
-                SV *to_dec=PL_psig_ptr[i];
+		SV * const to_dec=PL_psig_ptr[i];
     		PL_psig_ptr[i]=0;
 		LEAVE;
     		SvREFCNT_dec(to_dec);
@@ -1964,12 +1965,11 @@ Perl_magic_getvec(pTHX_ SV *sv, MAGIC *mg)
     SV * const lsv = LvTARG(sv);
     PERL_UNUSED_ARG(mg);
 
-    if (!lsv) {
+    if (lsv)
+	sv_setuv(sv, do_vecget(lsv, LvTARGOFF(sv), LvTARGLEN(sv)));
+    else
 	SvOK_off(sv);
-	return 0;
-    }
 
-    sv_setuv(sv, do_vecget(lsv, LvTARGOFF(sv), LvTARGLEN(sv)));
     return 0;
 }
 

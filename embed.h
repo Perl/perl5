@@ -1303,7 +1303,6 @@
 #define reginclass		S_reginclass
 #define regcppush		S_regcppush
 #define regcppop		S_regcppop
-#define regcp_set_to		S_regcp_set_to
 #define cache_re		S_cache_re
 #define reghop			S_reghop
 #define reghop3			S_reghop3
@@ -3343,7 +3342,6 @@
 #define reginclass(a,b,c,d)	S_reginclass(aTHX_ a,b,c,d)
 #define regcppush(a)		S_regcppush(aTHX_ a)
 #define regcppop()		S_regcppop(aTHX)
-#define regcp_set_to(a)		S_regcp_set_to(aTHX_ a)
 #define cache_re(a)		S_cache_re(aTHX_ a)
 #define reghop(a,b)		S_reghop(aTHX_ a,b)
 #define reghop3(a,b,c)		S_reghop3(aTHX_ a,b,c)

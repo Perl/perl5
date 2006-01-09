@@ -878,6 +878,9 @@ S_check_uni(pTHX)
     for (s = PL_last_uni; isALNUM_lazy_if(s,UTF) || *s == '-'; s++) ;
     if ((t = strchr(s, '(')) && t < PL_bufptr)
 	return;
+
+    /* XXX Things like this are just so nasty.  We shouldn't be modifying
+    source code, even if we realquick set it back. */
     if (ckWARN_d(WARN_AMBIGUOUS)){
 	const char ch = *s;
         *s = '\0';
@@ -9384,15 +9387,13 @@ STATIC char *
 S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRLEN destlen, I32 ck_uni)
 {
     dVAR;
-    register char *d;
-    register char *e;
-    char *bracket = Nullch;
+    char *bracket = NULL;
     char funny = *s++;
+    register char *d = dest;
+    register char * const e = d + destlen + 3;    /* two-character token, ending NUL */
 
     if (isSPACE(*s))
 	s = skipspace(s);
-    d = dest;
-    e = d + destlen - 3;	/* two-character token, ending NUL */
     if (isDIGIT(*s)) {
 	while (isDIGIT(*s)) {
 	    if (d >= e)
@@ -9467,15 +9468,15 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
 	if (isIDFIRST_lazy_if(d,UTF)) {
 	    d++;
 	    if (UTF) {
-		e = s;
-		while ((e < send && isALNUM_lazy_if(e,UTF)) || *e == ':') {
-		    e += UTF8SKIP(e);
-		    while (e < send && UTF8_IS_CONTINUED(*e) && is_utf8_mark((U8*)e))
-			e += UTF8SKIP(e);
+		char *end = s;
+		while ((end < send && isALNUM_lazy_if(end,UTF)) || *end == ':') {
+		    end += UTF8SKIP(end);
+		    while (end < send && UTF8_IS_CONTINUED(*end) && is_utf8_mark((U8*)end))
+			end += UTF8SKIP(end);
 		}
-		Copy(s, d, e - s, char);
-		d += e - s;
-		s = e;
+		Copy(s, d, end - s, char);
+		d += end - s;
+		s = end;
 	    }
 	    else {
 		while ((isALNUM(*s) || *s == ':') && d < e)
@@ -9563,9 +9564,10 @@ S_scan_pat(pTHX_ char *start, I32 type)
     dVAR;
     PMOP *pm;
     char *s = scan_str(start,FALSE,FALSE);
+    const char * const valid_flags = (type == OP_QR) ? "iomsx" : "iogcmsx";
 
     if (!s) {
-	char * const delimiter = skipspace(start);
+	const char * const delimiter = skipspace(start);
 	Perl_croak(aTHX_ *delimiter == '?'
 		   ? "Search pattern not terminated or ternary operator parsed as search pattern"
 		   : "Search pattern not terminated" );
@@ -9574,14 +9576,8 @@ S_scan_pat(pTHX_ char *start, I32 type)
     pm = (PMOP*)newPMOP(type, 0);
     if (PL_multi_open == '?')
 	pm->op_pmflags |= PMf_ONCE;
-    if(type == OP_QR) {
-	while (*s && strchr("iomsx", *s))
-	    pmflag(&pm->op_pmflags,*s++);
-    }
-    else {
-	while (*s && strchr("iogcmsx", *s))
-	    pmflag(&pm->op_pmflags,*s++);
-    }
+    while (*s && strchr(valid_flags, *s))
+	pmflag(&pm->op_pmflags,*s++);
     /* issue a warning if /c is specified,but /g is not */
     if ((pm->op_pmflags & PMf_CONTINUE) && !(pm->op_pmflags & PMf_GLOBAL)
 	    && ckWARN(WARN_REGEXP))
@@ -9643,12 +9639,12 @@ S_scan_subst(pTHX_ char *start)
     }
 
     if (es) {
-	SV *repl;
+	SV * const repl = newSVpvs("");
+
 	PL_sublex_info.super_bufptr = s;
 	PL_sublex_info.super_bufend = PL_bufend;
 	PL_multi_end = 0;
 	pm->op_pmflags |= PMf_EVAL;
-	repl = newSVpvs("");
 	while (es-- > 0)
 	    sv_catpv(repl, es ? "eval " : "do ");
 	sv_catpvs(repl, "{ ");
@@ -9819,8 +9815,8 @@ S_scan_heredoc(pTHX_ register char *s)
     PL_multi_open = PL_multi_close = '<';
     term = *PL_tokenbuf;
     if (PL_lex_inwhat == OP_SUBST && PL_in_eval && !PL_rsfp) {
-	char *bufptr = PL_sublex_info.super_bufptr;
-	char *bufend = PL_sublex_info.super_bufend;
+	char * const bufptr = PL_sublex_info.super_bufptr;
+	char * const bufend = PL_sublex_info.super_bufend;
 	char * const olds = s - SvCUR(herewas);
 	s = strchr(bufptr, '\n');
 	if (!s)
@@ -9892,7 +9888,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	    PL_bufend[-1] = '\n';
 #endif
 	if (PERLDB_LINE && PL_curstash != PL_debstash) {
-	    SV *sv = NEWSV(88,0);
+	    SV * const sv = NEWSV(88,0);
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);
@@ -9951,13 +9947,12 @@ S_scan_inputsymbol(pTHX_ char *start)
 {
     dVAR;
     register char *s = start;		/* current position in buffer */
-    register char *d;
-    const char *e;
     char *end;
     I32 len;
 
-    d = PL_tokenbuf;			/* start of temp holding space */
-    e = PL_tokenbuf + sizeof PL_tokenbuf;	/* end of temp holding space */
+    char *d = PL_tokenbuf;					/* start of temp holding space */
+    const char * const e = PL_tokenbuf + sizeof PL_tokenbuf;	/* end of temp holding space */
+
     end = strchr(s, '\n');
     if (!end)
 	end = PL_bufend;
@@ -10003,7 +9998,7 @@ S_scan_inputsymbol(pTHX_ char *start)
     }
     else {
 	bool readline_overriden = FALSE;
-	GV *gv_readline = Nullgv;
+	GV *gv_readline;
 	GV **gvp;
     	/* we're in a filehandle read situation */
 	d = PL_tokenbuf;
@@ -10013,7 +10008,8 @@ S_scan_inputsymbol(pTHX_ char *start)
 	    Copy("ARGV",d,5,char);
 
 	/* Check whether readline() is overriden */
-	if (((gv_readline = gv_fetchpv("readline", 0, SVt_PVCV))
+	gv_readline = gv_fetchpv("readline", 0, SVt_PVCV);
+	if ((gv_readline
 		&& GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline))
 		||
 		((gvp = (GV**)hv_fetch(PL_globalstash, "readline", 8, FALSE))
@@ -10032,16 +10028,16 @@ S_scan_inputsymbol(pTHX_ char *start)
 	    */
 	    if ((tmp = pad_findmy(d)) != NOT_IN_PAD) {
 		if (PAD_COMPNAME_FLAGS(tmp) & SVpad_OUR) {
-		    HV *stash = PAD_COMPNAME_OURSTASH(tmp);
-		    HEK *stashname = HvNAME_HEK(stash);
-		    SV *sym = sv_2mortal(newSVhek(stashname));
+		    HV * const stash = PAD_COMPNAME_OURSTASH(tmp);
+		    HEK * const stashname = HvNAME_HEK(stash);
+		    SV * const sym = sv_2mortal(newSVhek(stashname));
 		    sv_catpvs(sym, "::");
 		    sv_catpv(sym, d+1);
 		    d = SvPVX(sym);
 		    goto intro_sym;
 		}
 		else {
-		    OP *o = newOP(OP_PADSV, 0);
+		    OP * const o = newOP(OP_PADSV, 0);
 		    o->op_targ = tmp;
 		    PL_lex_op = readline_overriden
 			? (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,
@@ -10077,7 +10073,7 @@ intro_sym:
 	/* If it's none of the above, it must be a literal filehandle
 	   (<Foo::BAR> or <FOO>) so build a simple readline OP */
 	else {
-	    GV *gv = gv_fetchpv(d, GV_ADD, SVt_PVIO);
+	    GV * const gv = gv_fetchpv(d, GV_ADD, SVt_PVIO);
 	    PL_lex_op = readline_overriden
 		? (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,
 			append_elem(OP_LIST,
@@ -10200,8 +10196,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		int offset = s - SvPVX_const(PL_linestr);
 		const bool found = sv_cat_decode(sv, PL_encoding, PL_linestr,
 					   &offset, (char*)termstr, termlen);
-		const char *ns = SvPVX_const(PL_linestr) + offset;
-		char *svlast = SvEND(sv) - 1;
+		const char * const ns = SvPVX_const(PL_linestr) + offset;
+		char * const svlast = SvEND(sv) - 1;
 
 		for (; s < ns; s++) {
 		    if (*s == '\n' && !PL_rsfp)
@@ -10767,7 +10763,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
 	if (!floatit) {
     	    UV uv;
-            int flags = grok_number (PL_tokenbuf, d - PL_tokenbuf, &uv);
+	    const int flags = grok_number (PL_tokenbuf, d - PL_tokenbuf, &uv);
 
             if (flags == IS_NUMBER_IN_UV) {
               if (uv <= IV_MAX)
@@ -10820,7 +10816,7 @@ S_scan_formline(pTHX_ register char *s)
     dVAR;
     register char *eol;
     register char *t;
-    SV *stuff = newSVpvs("");
+    SV * const stuff = newSVpvs("");
     bool needargs = FALSE;
     bool eofmt = FALSE;
 
@@ -10924,7 +10920,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 {
     dVAR;
     const I32 oldsavestack_ix = PL_savestack_ix;
-    CV* outsidecv = PL_compcv;
+    CV* const outsidecv = PL_compcv;
 
     if (PL_compcv) {
 	assert(SvTYPE(PL_compcv) == SVt_PVCV);
@@ -11014,7 +11010,7 @@ Perl_yyerror(pTHX_ const char *s)
 	    where = "within string";
     }
     else {
-	SV *where_sv = sv_2mortal(newSVpvs("next char "));
+	SV * const where_sv = sv_2mortal(newSVpvs("next char "));
 	if (yychar < 32)
 	    Perl_sv_catpvf(aTHX_ where_sv, "^%c", toCTRL(yychar));
 	else if (isPRINT_LC(yychar))

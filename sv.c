@@ -1090,14 +1090,14 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 
 	/* Could put this in the else clause below, as PVMG must have SvPVX
 	   0 already (the assertion above)  */
-	SvPV_set(sv, (char*)0);
+	SvPV_set(sv, NULL);
 
 	if (old_type >= SVt_PVMG) {
 	    SvMAGIC_set(sv, ((XPVMG*)old_body)->xmg_magic);
 	    SvSTASH_set(sv, ((XPVMG*)old_body)->xmg_stash);
 	} else {
-	    SvMAGIC_set(sv, 0);
-	    SvSTASH_set(sv, 0);
+	    SvMAGIC_set(sv, NULL);
+	    SvSTASH_set(sv, NULL);
 	}
 	break;
 
@@ -1149,7 +1149,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	if (new_type == SVt_PVIO)
 	    IoPAGE_LEN(sv) = 60;
 	if (old_type < SVt_RV)
-	    SvPV_set(sv, 0);
+	    SvPV_set(sv, NULL);
 	break;
     default:
 	Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
@@ -3394,7 +3394,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 
                 SvTEMP_off(dstr);
                 (void)SvOK_off(sstr);	/* NOTE: nukes most SvFLAGS on sstr */
-                SvPV_set(sstr, Nullch);
+                SvPV_set(sstr, NULL);
                 SvLEN_set(sstr, 0);
                 SvCUR_set(sstr, 0);
                 SvTEMP_off(sstr);
@@ -3781,7 +3781,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
             SvFAKE_off(sv);
             SvREADONLY_off(sv);
             /* This SV doesn't own the buffer, so need to Newx() a new one:  */
-            SvPV_set(sv, (char*)0);
+            SvPV_set(sv, NULL);
             SvLEN_set(sv, 0);
             if (flags & SV_COW_DROP_PV) {
                 /* OK, so we don't need to copy our buffer.  */
@@ -8939,8 +8939,8 @@ ptr_table_* functions.
 #define io_dup_inc(s,t)	(IO*)SvREFCNT_inc(sv_dup((SV*)s,t))
 #define gv_dup(s,t)	(GV*)sv_dup((SV*)s,t)
 #define gv_dup_inc(s,t)	(GV*)SvREFCNT_inc(sv_dup((SV*)s,t))
-#define SAVEPV(p)	(p ? savepv(p) : Nullch)
-#define SAVEPVN(p,n)	(p ? savepvn(p,n) : Nullch)
+#define SAVEPV(p)	((p) ? savepv(p) : NULL)
+#define SAVEPVN(p,n)	((p) ? savepvn(p,n) : NULL)
 
 
 /* Duplicate a regexp. Required reading: pregcomp() and pregfree() in
@@ -9372,7 +9372,7 @@ Perl_rvpv_dup(pTHX_ SV *dstr, const SV *sstr, CLONE_PARAMS* param)
 	if (SvTYPE(dstr) == SVt_RV)
 	    SvRV_set(dstr, NULL);
 	else
-	    SvPV_set(dstr, 0);
+	    SvPV_set(dstr, NULL);
     }
 }
 
@@ -9385,7 +9385,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
     SV *dstr;
 
     if (!sstr || SvTYPE(sstr) == SVTYPEMASK)
-	return Nullsv;
+	return NULL;
     /* look for it in the table first */
     dstr = (SV*)ptr_table_fetch(PL_ptr_table, sstr);
     if (dstr)
@@ -10851,7 +10851,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	 * orphaned
 	 */
 	for (i = 0; i<= proto_perl->Ttmps_ix; i++) {
-	    SV *nsv = (SV*)ptr_table_fetch(PL_ptr_table,
+	    SV * const nsv = (SV*)ptr_table_fetch(PL_ptr_table,
 		    proto_perl->Ttmps_stack[i]);
 	    if (nsv && !SvREFCNT(nsv)) {
 		EXTEND_MORTAL(1);

@@ -123,10 +123,10 @@ PP(pp_sassign)
     if (PL_tainting && PL_tainted && !SvTAINTED(left))
 	TAINT_NOT;
     if (PL_op->op_private & OPpASSIGN_CV_TO_GV) {
-	SV *cv = SvRV(left);
+	SV * const cv = SvRV(left);
 	const U32 cv_type = SvTYPE(cv);
 	const U32 gv_type = SvTYPE(right);
-	bool got_coderef = cv_type == SVt_PVCV || cv_type == SVt_PVFM;
+	const bool got_coderef = cv_type == SVt_PVCV || cv_type == SVt_PVFM;
 
 	if (!got_coderef) {
 	    assert(SvROK(cv));
@@ -137,7 +137,7 @@ PP(pp_sassign)
 	   context. */
 	if (!got_coderef && gv_type != SVt_PVGV && GIMME_V == G_VOID) {
 	    /* Is the target symbol table currently empty?  */
-	    GV *gv = gv_fetchsv(right, GV_NOINIT, SVt_PVGV);
+	    GV * const gv = gv_fetchsv(right, GV_NOINIT, SVt_PVGV);
 	    if (SvTYPE(gv) != SVt_PVGV && !SvOK(gv)) {
 		/* Good. Create a new proxy constant subroutine in the target.
 		   The gv becomes a(nother) reference to the constant.  */
@@ -401,11 +401,12 @@ PP(pp_or)
 PP(pp_defined)
 {
     dVAR; dSP;
-    register SV* sv = NULL;
-    bool defined = FALSE;
+    register SV* sv;
+    bool defined;
     const int op_type = PL_op->op_type;
+    const int is_dor = (op_type == OP_DOR || op_type == OP_DORASSIGN);
 
-    if(op_type == OP_DOR || op_type == OP_DORASSIGN) {
+    if (is_dor) {
         sv = TOPs;
         if (!sv || !SvANY(sv)) {
 	    if (op_type == OP_DOR)
@@ -419,6 +420,7 @@ PP(pp_defined)
     } else
         DIE(aTHX_ "panic:  Invalid op (%s) in pp_defined()", OP_NAME(PL_op));
 
+    defined = FALSE;
     switch (SvTYPE(sv)) {
     case SVt_PVAV:
 	if (AvMAX(sv) >= 0 || SvGMAGICAL(sv) || (SvRMAGICAL(sv) && mg_find(sv, PERL_MAGIC_tied)))
@@ -436,9 +438,10 @@ PP(pp_defined)
 	SvGETMAGIC(sv);
 	if (SvOK(sv))
 	    defined = TRUE;
+	break;
     }
-    
-    if(op_type == OP_DOR || op_type == OP_DORASSIGN) {
+
+    if (is_dor) {
         if(defined) 
             RETURN; 
         if(op_type == OP_DOR)
@@ -1105,10 +1108,8 @@ PP(pp_aassign)
 
 		while (relem < lastrelem) {	/* gobble up all the rest */
 		    HE *didstore;
-		    if (*relem)
-			sv = *(relem++);
-		    else
-			sv = &PL_sv_no, relem++;
+		    sv = *relem ? *relem : &PL_sv_no;
+		    relem++;
 		    tmpstr = NEWSV(29,0);
 		    if (*relem)
 			sv_setsv(tmpstr,*relem);	/* value */
@@ -1400,11 +1401,11 @@ play_it_again:
 	}
 	if (global) {
 	    if (dynpm->op_pmflags & PMf_CONTINUE) {
-		MAGIC* mg = 0;
+		MAGIC* mg = NULL;
 		if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG))
 		    mg = mg_find(TARG, PERL_MAGIC_regex_global);
 		if (!mg) {
-		    sv_magic(TARG, (SV*)0, PERL_MAGIC_regex_global, Nullch, 0);
+		    sv_magic(TARG, NULL, PERL_MAGIC_regex_global, NULL, 0);
 		    mg = mg_find(TARG, PERL_MAGIC_regex_global);
 		}
 		if (rx->startp[0] != -1) {
@@ -1434,7 +1435,7 @@ play_it_again:
 	    else
 		mg = NULL;
 	    if (!mg) {
-		sv_magic(TARG, (SV*)0, PERL_MAGIC_regex_global, Nullch, 0);
+		sv_magic(TARG, NULL, PERL_MAGIC_regex_global, NULL, 0);
 		mg = mg_find(TARG, PERL_MAGIC_regex_global);
 	    }
 	    if (rx->startp[0] != -1) {
@@ -1459,7 +1460,7 @@ yup:					/* Confirmed by INTUIT */
     if (RX_MATCH_COPIED(rx))
 	Safefree(rx->subbeg);
     RX_MATCH_COPIED_off(rx);
-    rx->subbeg = Nullch;
+    rx->subbeg = NULL;
     if (global) {
 	/* FIXME - should rx->subbeg be const char *?  */
 	rx->subbeg = (char *) truebase;
@@ -1513,7 +1514,7 @@ nope:
 ret_no:
     if (global && !(dynpm->op_pmflags & PMf_CONTINUE)) {
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
-	    MAGIC* mg = mg_find(TARG, PERL_MAGIC_regex_global);
+	    MAGIC* const mg = mg_find(TARG, PERL_MAGIC_regex_global);
 	    if (mg)
 		mg->mg_len = -1;
 	}
@@ -1535,22 +1536,24 @@ Perl_do_readline(pTHX)
     register IO * const io = GvIO(PL_last_in_gv);
     register const I32 type = PL_op->op_type;
     const I32 gimme = GIMME_V;
-    MAGIC *mg;
 
-    if (io && (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) {
-	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)io, mg));
-	PUTBACK;
-	ENTER;
-	call_method("READLINE", gimme);
-	LEAVE;
-	SPAGAIN;
-	if (gimme == G_SCALAR) {
-	    SV* result = POPs;
-	    SvSetSV_nosteal(TARG, result);
-	    PUSHTARG;
+    if (io) {
+	MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	if (mg) {
+	    PUSHMARK(SP);
+	    XPUSHs(SvTIED_obj((SV*)io, mg));
+	    PUTBACK;
+	    ENTER;
+	    call_method("READLINE", gimme);
+	    LEAVE;
+	    SPAGAIN;
+	    if (gimme == G_SCALAR) {
+		SV* const result = POPs;
+		SvSetSV_nosteal(TARG, result);
+		PUSHTARG;
+	    }
+	    RETURN;
 	}
-	RETURN;
     }
     fp = Nullfp;
     if (io) {
@@ -1677,11 +1680,10 @@ Perl_do_readline(pTHX)
 	SPAGAIN;
 	XPUSHs(sv);
 	if (type == OP_GLOB) {
-	    char *tmps;
 	    const char *t1;
 
 	    if (SvCUR(sv) > 0 && SvCUR(PL_rs) > 0) {
-		tmps = SvEND(sv) - 1;
+		char * const tmps = SvEND(sv) - 1;
 		if (*tmps == *SvPVX_const(PL_rs)) {
 		    *tmps = '\0';
 		    SvCUR_set(sv, SvCUR(sv) - 1);
@@ -1779,7 +1781,7 @@ PP(pp_helem)
 
 	}
 	he = hv_fetch_ent(hv, keysv, lval && !defer, hash);
-	svp = he ? &HeVAL(he) : 0;
+	svp = he ? &HeVAL(he) : NULL;
     }
     else {
 	RETPUSHUNDEF;
@@ -1794,7 +1796,7 @@ PP(pp_helem)
 	    lv = sv_newmortal();
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
-	    sv_magic(lv, key2 = newSVsv(keysv), PERL_MAGIC_defelem, Nullch, 0);
+	    sv_magic(lv, key2 = newSVsv(keysv), PERL_MAGIC_defelem, NULL, 0);
 	    SvREFCNT_dec(key2);	/* sv_magic() increments refcount */
 	    LvTARG(lv) = SvREFCNT_inc(hv);
 	    LvTARGLEN(lv) = 1;
@@ -2000,7 +2002,7 @@ PP(pp_iter)
 	    lv = cx->blk_loop.iterlval = NEWSV(26, 0);
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
-	    sv_magic(lv, Nullsv, PERL_MAGIC_defelem, Nullch, 0);
+	    sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
 	}
 	LvTARG(lv) = SvREFCNT_inc(av);
 	LvTARGOFF(lv) = cx->blk_loop.iterix;
@@ -2143,7 +2145,7 @@ PP(pp_subst)
 	}
     }
     else {
-        c = Nullch;
+	c = NULL;
 	doutf8 = FALSE;
     }
     
@@ -2329,7 +2331,7 @@ PP(pp_subst)
 	SvCUR_set(TARG, SvCUR(dstr));
 	SvLEN_set(TARG, SvLEN(dstr));
 	doutf8 |= DO_UTF8(dstr);
-	SvPV_set(dstr, (char*)0);
+	SvPV_set(dstr, NULL);
 	sv_free(dstr);
 
 	TAINT_IF(rxtainted & 1);
@@ -2654,7 +2656,7 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 	    SvREFCNT_dec(tmp);
 	}
 	else {
-	    gv_efullname3(dbsv, gv, Nullch);
+	    gv_efullname3(dbsv, gv, NULL);
 	}
     }
     else {
@@ -2707,7 +2709,7 @@ PP(pp_entersub)
 		mg_get(sv);
 		if (SvROK(sv))
 		    goto got_rv;
-		sym = SvPOKp(sv) ? SvPVX_const(sv) : Nullch;
+		sym = SvPOKp(sv) ? SvPVX_const(sv) : NULL;
 	    }
 	    else {
 		sym = SvPV_nolen_const(sv);
@@ -2764,7 +2766,7 @@ try_autoload:
 	    /* sorry */
 	    else {
 		sub_name = sv_newmortal();
-		gv_efullname3(sub_name, gv, Nullch);
+		gv_efullname3(sub_name, gv, NULL);
 		DIE(aTHX_ "Undefined subroutine &%"SVf" called", sub_name);
 	    }
 	}
@@ -2924,7 +2926,7 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
 	Perl_warner(aTHX_ packWARN(WARN_RECURSION), "Deep recursion on anonymous subroutine");
     else {
 	SV* const tmpstr = sv_newmortal();
-	gv_efullname3(tmpstr, CvGV(cv), Nullch);
+	gv_efullname3(tmpstr, CvGV(cv), NULL);
 	Perl_warner(aTHX_ packWARN(WARN_RECURSION), "Deep recursion on subroutine \"%"SVf"\"",
 		tmpstr);
     }
@@ -2969,7 +2971,7 @@ PP(pp_aelem)
 	    lv = sv_newmortal();
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
-	    sv_magic(lv, Nullsv, PERL_MAGIC_defelem, Nullch, 0);
+	    sv_magic(lv, Nullsv, PERL_MAGIC_defelem, NULL, 0);
 	    LvTARG(lv) = SvREFCNT_inc(av);
 	    LvTARGOFF(lv) = elem;
 	    LvTARGLEN(lv) = 1;
@@ -3053,7 +3055,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     GV* gv;
     HV* stash;
     STRLEN namelen;
-    const char* packname = Nullch;
+    const char* packname = NULL;
     SV *packsv = Nullsv;
     STRLEN packlen;
     const char * const name = SvPV_const(meth, namelen);
@@ -3144,7 +3146,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	   don't want that.
 	*/
 	const char* leaf = name;
-	const char* sep = Nullch;
+	const char* sep = NULL;
 	const char* p;
 
 	for (p = name; *p; p++) {

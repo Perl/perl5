@@ -1932,8 +1932,6 @@ PP(pp_eof)
 {
     dVAR; dSP;
     GV *gv;
-    IO *io;
-    MAGIC *mg;
 
     if (MAXARG == 0) {
 	if (PL_op->op_flags & OPf_SPECIAL) {	/* eof() */
@@ -1958,17 +1956,19 @@ PP(pp_eof)
     else
 	gv = PL_last_in_gv = (GV*)POPs;		/* eof(FH) */
 
-    if (gv && (io = GvIO(gv))
-	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
-    {
-	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)io, mg));
-	PUTBACK;
-	ENTER;
-	call_method("EOF", G_SCALAR);
-	LEAVE;
-	SPAGAIN;
-	RETURN;
+    if (gv) {
+	IO * const io = GvIO(gv);
+	MAGIC * mg;
+	if (io && (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar))) {
+	    PUSHMARK(SP);
+	    XPUSHs(SvTIED_obj((SV*)io, mg));
+	    PUTBACK;
+	    ENTER;
+	    call_method("EOF", G_SCALAR);
+	    LEAVE;
+	    SPAGAIN;
+	    RETURN;
+	}
     }
 
     PUSHs(boolSV(!gv || do_eof(gv)));
@@ -3543,7 +3543,7 @@ S_dooneliner(pTHX_ const char *cmd, const char *filename)
 		 ; e++)
 	    {
 		/* you don't see this */
-		char *errmsg =
+		const char * const errmsg =
 #ifdef HAS_SYS_ERRLIST
 		    sys_errlist[e]
 #else
@@ -5194,18 +5194,16 @@ PP(pp_ggrent)
 {
 #ifdef HAS_GROUP
     dVAR; dSP;
-    I32 which = PL_op->op_type;
-    register char **elem;
-    register SV *sv;
-    struct group *grent;
+    const I32 which = PL_op->op_type;
+    const struct group *grent;
 
     if (which == OP_GGRNAM) {
 	const char* const name = POPpbytex;
-	grent = (struct group *)getgrnam(name);
+	grent = (const struct group *)getgrnam(name);
     }
     else if (which == OP_GGRGID) {
 	const Gid_t gid = POPi;
-	grent = (struct group *)getgrgid(gid);
+	grent = (const struct group *)getgrgid(gid);
     }
     else
 #ifdef HAS_GETGRENT
@@ -5216,7 +5214,9 @@ PP(pp_ggrent)
 
     EXTEND(SP, 4);
     if (GIMME != G_ARRAY) {
-	PUSHs(sv = sv_newmortal());
+	SV * const sv = sv_newmortal();
+
+	PUSHs(sv);
 	if (grent) {
 	    if (which == OP_GGRNAM)
 		sv_setiv(sv, (IV)grent->gr_gid);
@@ -5227,6 +5227,8 @@ PP(pp_ggrent)
     }
 
     if (grent) {
+	SV *sv;
+	char **elem;
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, grent->gr_name);
 

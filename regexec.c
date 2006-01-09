@@ -285,18 +285,6 @@ S_regcppop(pTHX)
     return input;
 }
 
-STATIC char *
-S_regcp_set_to(pTHX_ I32 ss)
-{
-    dVAR;
-    const I32 tmp = PL_savestack_ix;
-
-    PL_savestack_ix = ss;
-    regcppop();
-    PL_savestack_ix = tmp;
-    return Nullch;
-}
-
 typedef struct re_cc_state
 {
     I32 ss;
@@ -1193,8 +1181,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, const char *strend, I32
 		if (s == PL_bostr)
 		    tmp = '\n';
 		else {
-		    U8 *r = reghop3((U8*)s, -1, (U8*)PL_bostr);
-		
+		    U8 * const r = reghop3((U8*)s, -1, (U8*)PL_bostr);
 		    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, 0);
 		}
 		tmp = ((OP(c) == BOUND ?
@@ -1236,8 +1223,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, const char *strend, I32
 		if (s == PL_bostr)
 		    tmp = '\n';
 		else {
-		    U8 *r = reghop3((U8*)s, -1, (U8*)PL_bostr);
-		
+		    U8 * const r = reghop3((U8*)s, -1, (U8*)PL_bostr);
 		    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, 0);
 		}
 		tmp = ((OP(c) == NBOUND ?
@@ -1651,8 +1637,8 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     const bool do_utf8 = DO_UTF8(sv);
     const I32 multiline = prog->reganch & PMf_MULTILINE;
 #ifdef DEBUGGING
-    SV *dsv0 = PERL_DEBUG_PAD_ZERO(0);
-    SV *dsv1 = PERL_DEBUG_PAD_ZERO(1);
+    SV * const dsv0 = PERL_DEBUG_PAD_ZERO(0);
+    SV * const dsv1 = PERL_DEBUG_PAD_ZERO(1);
 #endif
 
     GET_RE_DEBUG_FLAGS_DECL;
@@ -2417,9 +2403,9 @@ S_regmatch(pTHX_ regnode *prog)
 #endif
     register const bool do_utf8 = PL_reg_match_utf8;
 #ifdef DEBUGGING
-    SV *dsv0 = PERL_DEBUG_PAD_ZERO(0);
-    SV *dsv1 = PERL_DEBUG_PAD_ZERO(1);
-    SV *dsv2 = PERL_DEBUG_PAD_ZERO(2);
+    SV * const dsv0 = PERL_DEBUG_PAD_ZERO(0);
+    SV * const dsv1 = PERL_DEBUG_PAD_ZERO(1);
+    SV * const dsv2 = PERL_DEBUG_PAD_ZERO(2);
 
     SV *re_debug_flags = NULL;
 #endif
@@ -2438,7 +2424,7 @@ S_regmatch(pTHX_ regnode *prog)
     while (scan != NULL) {
 
         DEBUG_EXECUTE_r( {
-	    SV *prop = sv_newmortal();
+	    SV * const prop = sv_newmortal();
 	    const int docolor = *PL_colors[0];
 	    const int taill = (docolor ? 10 : 7); /* 3 chars for "> <" */
 	    int l = (PL_regeol - locinput) > taill ? taill : (PL_regeol - locinput);
@@ -2762,7 +2748,7 @@ S_regmatch(pTHX_ regnode *prog)
 				    best = cur;
 			}
 			DEBUG_EXECUTE_r({
-		            SV **tmp = av_fetch( trie->words, accept_buff[ best ].wordnum - 1, 0 );
+			    SV ** const tmp = av_fetch( trie->words, accept_buff[ best ].wordnum - 1, 0 );
     			    PerlIO_printf( Perl_debug_log, "%*s  %strying alternation #%d <%s> at 0x%p%s\n",
     			        REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
     			        accept_buff[best].wordnum,
@@ -3204,11 +3190,11 @@ S_regmatch(pTHX_ regnode *prog)
 	case EVAL:
 	{
 	    dSP;
-	    OP_4tree *oop = PL_op;
-	    COP *ocurcop = PL_curcop;
+	    OP_4tree * const oop = PL_op;
+	    COP * const ocurcop = PL_curcop;
 	    PAD *old_comppad;
 	    SV *ret;
-	    struct regexp *oreg = PL_reg_re;
+	    struct regexp * const oreg = PL_reg_re;
 	
 	    n = ARG(scan);
 	    PL_op = (OP_4tree*)PL_regdata->data[n];
@@ -3217,7 +3203,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    PL_regendp[0] = PL_reg_magic->mg_len = locinput - PL_bostr;
 
 	    {
-		SV **before = SP;
+		SV ** const before = SP;
 		CALLRUNOPS(aTHX);			/* Scalar context. */
 		SPAGAIN;
 		if (SP == before)
@@ -3234,7 +3220,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (logical) {
 		if (logical == 2) {	/* Postponed subexpression. */
 		    regexp *re;
-		    MAGIC *mg = Null(MAGIC*);
+		    MAGIC *mg = NULL;
 		    re_cc_state state;
 		    CHECKPOINT cp, lastcp;
                     int toggleutf;
@@ -3255,7 +3241,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    }
 		    else {
 			STRLEN len;
-			const char *t = SvPV_const(ret, len);
+			const char * const t = SvPV_const(ret, len);
 			PMOP pm;
 			char * const oprecomp = PL_regprecomp;
 			const I32 osize = PL_regsize;
@@ -3494,7 +3480,7 @@ S_regmatch(pTHX_ regnode *prog)
 
 		CHECKPOINT cp, lastcp;
 		CURCUR* cc = PL_regcc;
-		char *lastloc = cc->lastloc; /* Detection of 0-len. */
+		char * const lastloc = cc->lastloc; /* Detection of 0-len. */
 		I32 cache_offset = 0, cache_bit = 0;
 		
 		n = cc->cur + 1;	/* how many we know we matched */
@@ -3698,12 +3684,10 @@ S_regmatch(pTHX_ regnode *prog)
 		    next = inner;	/* Avoid recursion. */
 		else {
 		    const I32 lastparen = *PL_reglastparen;
-		    I32 unwind1;
-		    re_unwind_branch_t *uw;
-
 		    /* Put unwinding data on stack */
-		    unwind1 = SSNEWt(1,re_unwind_branch_t);
-		    uw = SSPTRt(unwind1,re_unwind_branch_t);
+		    const I32 unwind1 = SSNEWt(1,re_unwind_branch_t);
+		    re_unwind_branch_t * const uw = SSPTRt(unwind1,re_unwind_branch_t);
+
 		    uw->prev = unwind;
 		    unwind = unwind1;
 		    uw->type = ((c1 == BRANCH)
@@ -4152,14 +4136,22 @@ S_regmatch(pTHX_ regnode *prog)
 		re_cc_state *cur_call_cc = PL_reg_call_cc;
 		CURCUR *cctmp = PL_regcc;
 		regexp *re = PL_reg_re;
-		CHECKPOINT cp, lastcp;
-		
-		cp = regcppush(0);	/* Save *all* the positions. */
+		CHECKPOINT lastcp;
+		I32 tmp;
+
+		/* Save *all* the positions. */
+		const CHECKPOINT cp = regcppush(0);
 		REGCP_SET(lastcp);
-		regcp_set_to(PL_reg_call_cc->ss); /* Restore parens of
-						    the caller. */
-		PL_reginput = locinput;	/* Make position available to
-					   the callcc. */
+
+		/* Restore parens of the caller. */
+		tmp = PL_savestack_ix;
+		PL_savestack_ix = PL_reg_call_cc->ss;
+		regcppop();
+		PL_savestack_ix = tmp;
+
+		/* Make position available to the callcc. */
+		PL_reginput = locinput;
+
 		cache_re(PL_reg_call_cc->re);
 		PL_regcc = PL_reg_call_cc->cc;
 		PL_reg_call_cc = PL_reg_call_cc->prev;
@@ -4298,13 +4290,13 @@ no:
 no_final:
 do_no:
     if (unwind) {
-	re_unwind_t *uw = SSPTRt(unwind,re_unwind_t);
+	re_unwind_t * const uw = SSPTRt(unwind,re_unwind_t);
 
 	switch (uw->type) {
 	case RE_UNWIND_BRANCH:
 	case RE_UNWIND_BRANCHJ:
 	{
-	    re_unwind_branch_t *uwb = &(uw->branch);
+	    re_unwind_branch_t * const uwb = &(uw->branch);
 	    const I32 lastparen = uwb->lastparen;
 	
 	    REGCP_UNWIND(uwb->lastcp);
@@ -4586,7 +4578,7 @@ S_regrepeat(pTHX_ const regnode *p, I32 max)
 
     DEBUG_r({
 	        SV *re_debug_flags = NULL;
-		SV *prop = sv_newmortal();
+		SV * const prop = sv_newmortal();
                 GET_RE_DEBUG_FLAGS;
                 DEBUG_EXECUTE_r({
 		regprop(prop, p);
