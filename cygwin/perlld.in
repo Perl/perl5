@@ -79,7 +79,7 @@ close DEBUGFILE if $DEBUG;
 #---------------------------------------------------------------------------
 sub shellexec {
   my $command = shift;
-  print STDERR $command;
+  print $command;
   print DEBUGFILE $command if $DEBUG;
   system($command) == 0
     or die "perlld: *** system() failed to execute\n$command\n";
