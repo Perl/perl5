@@ -5,6 +5,13 @@ use Digest::SHA qw(sha384_hex sha512_hex);
 use File::Basename qw(dirname);
 use File::Spec;
 
+BEGIN {
+        if ($ENV{PERL_CORE}) {
+                chdir 't' if -d 't';
+                @INC = '../lib';
+        }
+}
+
 my(@sharsp);
 
 BEGIN { 

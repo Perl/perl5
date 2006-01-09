@@ -9,6 +9,13 @@ use File::Basename qw(dirname);
 use File::Spec;
 use Digest::SHA;
 
+BEGIN {
+        if ($ENV{PERL_CORE}) {
+                chdir 't' if -d 't';
+                @INC = '../lib';
+        }
+}
+
 #	SHA-1 Test Vectors
 #
 #	In the following we use the notation bitstring#n to mean a bitstring

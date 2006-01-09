@@ -2,6 +2,12 @@ use Test;
 use Digest::SHA qw(sha1);
 use strict;
 use integer;
+BEGIN {
+        if ($ENV{PERL_CORE}) {
+                chdir 't' if -d 't';
+                @INC = '../lib';
+        }
+}
 
 my(@vec, @rsp);
 

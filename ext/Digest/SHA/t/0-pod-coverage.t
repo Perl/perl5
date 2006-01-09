@@ -1,4 +1,8 @@
 BEGIN {
+        if ($ENV{PERL_CORE}) {
+                chdir 't' if -d 't';
+                @INC = '../lib';
+        }
 	eval "use Test::More";
 	if ($@) {
 		print "1..0 # Skipped: Test::More not installed\n";

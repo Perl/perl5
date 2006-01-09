@@ -3,6 +3,13 @@ use strict;
 use integer;
 use Digest::SHA;
 
+BEGIN {
+        if ($ENV{PERL_CORE}) {
+                chdir 't' if -d 't';
+                @INC = '../lib';
+        }
+}
+
 BEGIN { plan tests => 1 }
 
 my $reps = 8000000;
