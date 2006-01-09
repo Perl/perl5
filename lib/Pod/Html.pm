@@ -3,7 +3,7 @@ use strict;
 require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION = 1.0504;
+$VERSION = 1.06;
 @ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
 @EXPORT_OK = qw(anchorify);
@@ -1821,10 +1821,9 @@ sub page_sect($$) {
 	    $section = "#$section" if $section;
             ### print STDERR "...section=$section\n";
 
-	    # check if there is a .pod with the page name
-	    if ($Pages{$page} =~ /([^:]*)\.pod:/) {
-		$link = "$Htmlroot/$1.html$section";
-	    } elsif ($Pages{$page} =~ /([^:]*)\.pm:/) {
+	    # check if there is a .pod with the page name.
+	    # for L<Foo>, Foo.(pod|pm) is preferred to A/Foo.(pod|pm)
+	    if ($Pages{$page} =~ /([^:]*)\.(?:pod|pm):/) {
 		$link = "$Htmlroot/$1.html$section";
 	    } else {
 		$link = "";
