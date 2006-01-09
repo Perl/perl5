@@ -8,6 +8,11 @@ use AutoLoader;
 
 use XSLoader ();
 
+use Fcntl qw(FD_CLOEXEC F_DUPFD F_GETFD F_GETFL F_GETLK F_RDLCK F_SETFD
+	     F_SETFL F_SETLK F_SETLKW F_UNLCK F_WRLCK O_ACCMODE O_APPEND
+	     O_CREAT O_EXCL O_NOCTTY O_NONBLOCK O_RDONLY O_RDWR O_TRUNC
+	     O_WRONLY);
+
 # Grandfather old foo_h form to new :foo_h form
 my $loaded;
 
