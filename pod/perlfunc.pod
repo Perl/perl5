@@ -3108,9 +3108,9 @@ L<PerlIO> for more details). For example
   open(FH, "<:utf8", "file")
 
 will open the UTF-8 encoded file containing Unicode characters,
-see L<perluniintro>. (Note that if layers are specified in the
-three-arg form then default layers set by the C<open> pragma are
-ignored.)
+see L<perluniintro>. Note that if layers are specified in the
+three-arg form then default layers stored in ${^OPEN} (see L<perlvar>;
+usually set by the B<open> pragma or the switch B<-CioD>) are ignored.
 
 Open returns nonzero upon success, the undefined value otherwise.  If
 the C<open> involved a pipe, the return value happens to be the pid of

@@ -169,9 +169,8 @@ The C<open> pragma serves as one of the interfaces to declare default
 "layers" (also known as "disciplines") for all I/O. Any two-argument
 open(), readpipe() (aka qx//) and similar operators found within the
 lexical scope of this pragma will use the declared defaults.
-Three-argument opens are not affected by this pragma since there you
-(can) explicitly specify the layers and are supposed to know what you
-are doing.
+Even three-argument opens may be affected by this pragma
+when they don't specify IO layers in MODE.
 
 With the C<IN> subpragma you can declare the default layers
 of input streams, and with the C<OUT> subpragma you can declare
@@ -180,7 +179,7 @@ you can control both input and output streams simultaneously.
 
 If you have a legacy encoding, you can use the C<:encoding(...)> tag.
 
-if you want to set your encoding layers based on your
+If you want to set your encoding layers based on your
 locale environment variables, you can use the C<:locale> tag.
 For example:
 
