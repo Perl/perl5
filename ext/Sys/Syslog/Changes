@@ -1,7 +1,16 @@
 Revision history for Sys-Syslog
 
+0.12    2006.01.07
+        [CODE] Merged some modifications from bleadperl.
+        [DOC] Added a link to an article about Sys::Syslog.
+        [TESTS] Removed optional dependency on Test::Exception.
+        [TESTS] Improved t/constant.t
+        [TESTS] Rewrote t/constants.t because future versions of 
+        ExtUtils::Constant will prevent the constant() function from 
+        being directly called.
+
 0.11    2005.12.28
-        [BUGFIX] setlogmask() now behaves liek its C counterpart.
+        [BUGFIX] setlogmask() now behaves like its C counterpart.
         [CODE] Can now export and use the macros. 
         [CODE] Support for three Exporter tags.
         [CODE] XSLoader is now optional.

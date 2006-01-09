@@ -4,7 +4,7 @@ use Carp;
 require 5.006;
 require Exporter;
 
-our $VERSION = '0.11';
+our $VERSION = '0.12';
 our @ISA = qw(Exporter);
 
 our %EXPORT_TAGS = (
@@ -53,7 +53,7 @@ Sys::Syslog - Perl interface to the UNIX syslog(3) calls
 
 =head1 VERSION
 
-Version 0.11
+Version 0.12
 
 =head1 SYNOPSIS
 
@@ -435,6 +435,8 @@ was unable to find an appropriate an appropriate device.
 =head1 SEE ALSO
 
 L<syslog(3)>
+
+I<Syslogging with Perl>, L<http://lexington.pm.org/meetings/022001.html>
 
 
 =head1 AUTHOR

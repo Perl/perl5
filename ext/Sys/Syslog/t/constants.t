@@ -1,46 +1,41 @@
 #!/usr/bin/perl -T
 use strict;
+use File::Spec;
 use Test::More;
-my @names;
-BEGIN {
-    if(open(MACROS, 'macros.all')) {
-        @names = map {chomp;$_} <MACROS>;
-        close(MACROS);
-        plan tests => @names + 3;
-    } else {
-        plan skip_all => "can't read 'macros.all': $!"
-    }
-}
-use Sys::Syslog;
 
-eval "use Test::Exception"; my $has_test_exception = !$@;
+my $macrosall = $ENV{PERL_CORE} ? File::Spec->catfile(qw(.. ext Sys Syslog macros.all))
+                                : 'macros.all';
+open(MACROS, $macrosall) or plan skip_all => "can't read '$macrosall': $!";
+my @names = map {chomp;$_} <MACROS>;
+close(MACROS);
+plan tests => @names * 2 + 2;
 
-# Testing error messages
-SKIP: {
-    skip "Test::Exception not available", 1 unless $has_test_exception;
+my $callpack = my $testpack = 'Sys::Syslog';
+eval "use $callpack";
 
-    # constant() errors
-    throws_ok(sub {
-        Sys::Syslog::constant()
-    }, '/^Usage: Sys::Syslog::constant\(sv\)/',
-       "calling constant() with no argument");
-}
+eval "${callpack}::This()";
+like( $@, "/^This is not a valid $testpack macro/", "trying a non-existing macro");
 
-# Testing constant()
-like( Sys::Syslog::constant('This'), 
-    '/^This is not a valid Sys::Syslog macro/', 
-    "calling constant() with a non existing name" );
-
-like( Sys::Syslog::constant('NOSUCHNAME'), 
-    '/^NOSUCHNAME is not a valid Sys::Syslog macro/', 
-    "calling constant() with a non existing name" );
+eval "${callpack}::NOSUCHNAME()";
+like( $@, "/^NOSUCHNAME is not a valid $testpack macro/", "trying a non-existing macro");
 
 # Testing all macros
 if(@names) {
     for my $name (@names) {
-        like( Sys::Syslog::constant($name), 
-              '/^(?:\d+|Your vendor has not defined Sys::Syslog macro '.$name.', used)$/', 
-              "checking that $name is a number (".Sys::Syslog::constant($name).")" );
+        SKIP: {
+            $name =~ /^(\w+)$/ or skip "invalid name '$name'", 2;
+            $name = $1;
+            my $v = eval "${callpack}::$name()";
+
+            if($v =~ /^\d+$/) {
+                is( $@, '', "calling the constant $name as a function" );
+                like( $v, '/^\d+$/', "checking that $name is a number ($v)" );
+
+            } else {
+                like( $@, "/^Your vendor has not defined $testpack macro $name/", 
+                    "calling the constant via its name" );
+                skip "irrelevant test in this case", 1
+            }
+        }
     }
 }
-
