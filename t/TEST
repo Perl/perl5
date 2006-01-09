@@ -481,6 +481,9 @@ EOT
 			die "FAILED--Further testing stopped" . ($1 ? ": $1\n" : ".\n");
 		    }
 		    else {
+			# module tests are allowed extra output,
+			# because Test::Harness allows it
+			next if $test =~ /^\W*(ext|lib)\b/;
 			$failure = "FAILED--unexpected output at test $next";
 			last;
 		    }
