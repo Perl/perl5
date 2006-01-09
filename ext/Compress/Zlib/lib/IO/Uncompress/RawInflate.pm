@@ -3,33 +3,325 @@ package IO::Uncompress::RawInflate ;
 
 use strict ;
 use warnings;
-use IO::Uncompress::Gunzip;
+
+use Compress::Zlib 2 ;
+use Compress::Zlib::Common qw(:Status createSelfTiedObject);
+use Compress::Zlib::ParseParameters ;
+
+use IO::Uncompress::Base ;
+use UncompressPlugin::Inflate ;
+
+
+
 
 require Exporter ;
-our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $RawInflateError);
+our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $RawInflateError);
 
-$VERSION = '2.000_05';
+$VERSION = '2.000_07';
 $RawInflateError = '';
 
-@ISA    = qw(Exporter IO::BaseInflate);
+@ISA    = qw( Exporter IO::Uncompress::Base );
 @EXPORT_OK = qw( $RawInflateError rawinflate ) ;
-%EXPORT_TAGS = %IO::BaseInflate::EXPORT_TAGS ;
+%DEFLATE_CONSTANTS = ();
+%EXPORT_TAGS = %IO::Uncompress::Base::EXPORT_TAGS ;
 push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
 Exporter::export_ok_tags('all');
 
 
 
-
 sub new
 {
-    my $pkg = shift ;
-    return IO::BaseInflate::new($pkg, 'rfc1951', undef, \$RawInflateError, 0, @_);
+    my $class = shift ;
+    my $obj = createSelfTiedObject($class, \$RawInflateError);
+    $obj->_create(undef, 0, @_);
 }
 
 sub rawinflate
 {
-    return IO::BaseInflate::_inf(__PACKAGE__, 'rfc1951', \$RawInflateError, @_);
+    my $obj = createSelfTiedObject(undef, \$RawInflateError);
+    return $obj->_inf(@_);
 }
+
+sub getExtraParams
+{
+    return ();
+}
+
+sub ckParams
+{
+    my $self = shift ;
+    my $got = shift ;
+
+    return 1;
+}
+
+sub mkUncomp
+{
+    my $self = shift ;
+    my $class = shift ;
+    my $got = shift ;
+
+    my ($obj, $errstr, $errno) = UncompressPlugin::Inflate::mkUncompObject(
+                                                                $got->value('CRC32'),
+                                                                $got->value('ADLER32'),
+                                                                $got->value('Scan'),
+                                                            );
+
+    return $self->saveErrorString(undef, $errstr, $errno)
+        if ! defined $obj;
+
+    *$self->{Uncomp} = $obj;
+
+     my $magic = $self->ckMagic()
+        or return 0;
+
+    *$self->{Info} = $self->readHeader($magic)
+        or return undef ;
+
+    return 1;
+
+}
+
+
+sub ckMagic
+{
+    my $self = shift;
+
+    return $self->_isRaw() ;
+}
+
+sub readHeader
+{
+    my $self = shift;
+    my $magic = shift ;
+
+    return {
+        'Type'          => 'rfc1951',
+        'FingerprintLength'  => 0,
+        'HeaderLength'  => 0,
+        'TrailerLength' => 0,
+        'Header'        => ''
+        };
+}
+
+sub chkTrailer
+{
+    return 1 ;
+}
+
+sub _isRaw
+{
+    my $self   = shift ;
+
+    my $got = $self->_isRawx(@_);
+
+    if ($got) {
+        *$self->{Pending} = *$self->{HeaderPending} ;
+    }
+    else {
+        $self->pushBack(*$self->{HeaderPending});
+        *$self->{Uncomp}->reset();
+    }
+    *$self->{HeaderPending} = '';
+
+    return $got ;
+}
+
+sub _isRawx
+{
+    my $self   = shift ;
+    my $magic = shift ;
+
+    $magic = '' unless defined $magic ;
+
+    my $buffer = '';
+
+    $self->smartRead(\$buffer, *$self->{BlockSize}) >= 0  
+        or return $self->saveErrorString(undef, "No data to read");
+
+    my $temp_buf = $magic . $buffer ;
+    *$self->{HeaderPending} = $temp_buf ;    
+    $buffer = '';
+    my $status = *$self->{Uncomp}->uncompr(\$temp_buf, \$buffer, $self->smartEof()) ;
+    return $self->saveErrorString(undef, *$self->{Uncomp}{Error}, STATUS_ERROR)
+        if $status == STATUS_ERROR;
+
+    my $buf_len = *$self->{Uncomp}->count();
+
+    if ($status == STATUS_ENDSTREAM) {
+        if (*$self->{MultiStream} 
+                    && (length $temp_buf || ! $self->smartEof())){
+            *$self->{NewStream} = 1 ;
+            *$self->{EndStream} = 0 ;
+            $self->pushBack($temp_buf);
+        }
+        else {
+            *$self->{EndStream} = 1 ;
+            $self->pushBack($temp_buf);
+        }
+    }
+    *$self->{HeaderPending} = $buffer ;    
+    *$self->{InflatedBytesRead} = $buf_len ;    
+    *$self->{TotalInflatedBytesRead} += $buf_len ;    
+    *$self->{Type} = 'rfc1951';
+
+    $self->saveStatus(STATUS_OK);
+
+    return {
+        'Type'          => 'rfc1951',
+        'HeaderLength'  => 0,
+        'TrailerLength' => 0,
+        'Header'        => ''
+        };
+}
+
+
+sub inflateSync
+{
+    my $self = shift ;
+
+    # inflateSync is a no-op in Plain mode
+    return 1
+        if *$self->{Plain} ;
+
+    return 0 if *$self->{Closed} ;
+    #return G_EOF if !length *$self->{Pending} && *$self->{EndStream} ;
+    return 0 if ! length *$self->{Pending} && *$self->{EndStream} ;
+
+    # Disable CRC check
+    *$self->{Strict} = 0 ;
+
+    my $status ;
+    while (1)
+    {
+        my $temp_buf ;
+
+        if (length *$self->{Pending} )
+        {
+            $temp_buf = *$self->{Pending} ;
+            *$self->{Pending} = '';
+        }
+        else
+        {
+            $status = $self->smartRead(\$temp_buf, *$self->{BlockSize}) ;
+            return $self->saveErrorString(0, "Error Reading Data")
+                if $status < 0  ;
+
+            if ($status == 0 ) {
+                *$self->{EndStream} = 1 ;
+                return $self->saveErrorString(0, "unexpected end of file", STATUS_ERROR);
+            }
+        }
+        
+        $status = *$self->{Uncomp}->sync($temp_buf) ;
+
+        if ($status == STATUS_OK)
+        {
+            *$self->{Pending} .= $temp_buf ;
+            return 1 ;
+        }
+
+        last unless $status == STATUS_ERROR ;
+    }
+
+    return 0;
+}
+
+#sub performScan
+#{
+#    my $self = shift ;
+#
+#    my $status ;
+#    my $end_offset = 0;
+#
+#    $status = $self->scan() 
+#    #or return $self->saveErrorString(undef, "Error Scanning: $$error_ref", $self->errorNo) ;
+#        or return $self->saveErrorString(G_ERR, "Error Scanning: $status")
+#
+#    $status = $self->zap($end_offset) 
+#        or return $self->saveErrorString(G_ERR, "Error Zapping: $status");
+#    #or return $self->saveErrorString(undef, "Error Zapping: $$error_ref", $self->errorNo) ;
+#
+#    #(*$obj->{Deflate}, $status) = $inf->createDeflate();
+#
+##    *$obj->{Header} = *$inf->{Info}{Header};
+##    *$obj->{UnCompSize_32bit} = 
+##        *$obj->{BytesWritten} = *$inf->{UnCompSize_32bit} ;
+##    *$obj->{CompSize_32bit} = *$inf->{CompSize_32bit} ;
+#
+#
+##    if ( $outType eq 'buffer') 
+##      { substr( ${ *$self->{Buffer} }, $end_offset) = '' }
+##    elsif ($outType eq 'handle' || $outType eq 'filename') {
+##        *$self->{FH} = *$inf->{FH} ;
+##        delete *$inf->{FH};
+##        *$obj->{FH}->flush() ;
+##        *$obj->{Handle} = 1 if $outType eq 'handle';
+##
+##        #seek(*$obj->{FH}, $end_offset, SEEK_SET) 
+##        *$obj->{FH}->seek($end_offset, SEEK_SET) 
+##            or return $obj->saveErrorString(undef, $!, $!) ;
+##    }
+#    
+#}
+
+sub scan
+{
+    my $self = shift ;
+
+    return 1 if *$self->{Closed} ;
+    return 1 if !length *$self->{Pending} && *$self->{EndStream} ;
+
+    my $buffer = '' ;
+    my $len = 0;
+
+    $len = $self->_raw_read(\$buffer, 1) 
+        while ! *$self->{EndStream} && $len >= 0 ;
+
+    #return $len if $len < 0 ? $len : 0 ;
+    return $len < 0 ? 0 : 1 ;
+}
+
+sub zap
+{
+    my $self  = shift ;
+
+    my $headerLength = *$self->{Info}{HeaderLength};
+    my $block_offset =  $headerLength + *$self->{Uncomp}->getLastBlockOffset();
+    $_[0] = $headerLength + *$self->{Uncomp}->getEndOffset();
+    #printf "# End $_[0], headerlen $headerLength \n";;
+    #printf "# block_offset $block_offset %x\n", $block_offset;
+    my $byte ;
+    ( $self->smartSeek($block_offset) &&
+      $self->smartRead(\$byte, 1) ) 
+        or return $self->saveErrorString(0, $!, $!); 
+
+    #printf "#byte is %x\n", unpack('C*',$byte);
+    *$self->{Uncomp}->resetLastBlockByte($byte);
+    #printf "#to byte is %x\n", unpack('C*',$byte);
+
+    ( $self->smartSeek($block_offset) && 
+      $self->smartWrite($byte) )
+        or return $self->saveErrorString(0, $!, $!); 
+
+    #$self->smartSeek($end_offset, 1);
+
+    return 1 ;
+}
+
+sub createDeflate
+{
+    my $self  = shift ;
+    my ($def, $status) = *$self->{Uncomp}->createDeflateStream(
+                                    -AppendOutput   => 1,
+                                    -WindowBits => - MAX_WBITS,
+                                    -CRC32      => *$self->{Params}->value('CRC32'),
+                                    -ADLER32    => *$self->{Params}->value('ADLER32'),
+                                );
+    
+    return wantarray ? ($status, $def) : $def ;                                
+}
+
 
 1; 
 
@@ -104,34 +396,34 @@ B<WARNING -- This is a Beta release>.
 
 
 
-This module provides a Perl interface that allows the reading of 
+This module provides a Perl interface that allows the reading of
 files/buffers that conform to RFC 1951.
 
-For writing RFC 1951 files/buffers, see the companion module 
-IO::Compress::RawDeflate.
+For writing RFC 1951 files/buffers, see the companion module IO::Compress::RawDeflate.
 
 
 
 =head1 Functional Interface
 
-A top-level function, C<rawinflate>, is provided to carry out "one-shot"
-uncompression between buffers and/or files. For finer control over the uncompression process, see the L</"OO Interface"> section.
+A top-level function, C<rawinflate>, is provided to carry out
+"one-shot" uncompression between buffers and/or files. For finer
+control over the uncompression process, see the L</"OO Interface">
+section.
 
     use IO::Uncompress::RawInflate qw(rawinflate $RawInflateError) ;
 
     rawinflate $input => $output [,OPTS] 
         or die "rawinflate failed: $RawInflateError\n";
 
-    rawinflate \%hash [,OPTS] 
-        or die "rawinflate failed: $RawInflateError\n";
+
 
 The functional interface needs Perl5.005 or better.
 
 
 =head2 rawinflate $input => $output [, OPTS]
 
-If the first parameter is not a hash reference C<rawinflate> expects
-at least two parameters, C<$input> and C<$output>.
+
+C<rawinflate> expects at least two parameters, C<$input> and C<$output>.
 
 =head3 The C<$input> parameter
 
@@ -161,13 +453,15 @@ from C<$$input>.
 
 =item An array reference 
 
-If C<$input> is an array reference, the input data will be read from each
-element of the array in turn. The action taken by C<rawinflate> with
-each element of the array will depend on the type of data stored
-in it. You can mix and match any of the types defined in this list,
-excluding other array or hash references. 
+If C<$input> is an array reference, each element in the array must be a
+filename.
+
+The input data will be read from each file in turn. 
+
 The complete array will be walked to ensure that it only
-contains valid data types before any data is uncompressed.
+contains valid filenames before any data is uncompressed.
+
+
 
 =item An Input FileGlob string
 
@@ -195,36 +489,28 @@ uncompressed data. This parameter can take one of these forms.
 
 =item A filename
 
-If the C<$output> parameter is a simple scalar, it is assumed to be a filename.
-This file will be opened for writing and the uncompressed data will be
-written to it.
+If the C<$output> parameter is a simple scalar, it is assumed to be a
+filename.  This file will be opened for writing and the uncompressed
+data will be written to it.
 
 =item A filehandle
 
-If the C<$output> parameter is a filehandle, the uncompressed data will
-be written to it.  
+If the C<$output> parameter is a filehandle, the uncompressed data
+will be written to it.
 The string '-' can be used as an alias for standard output.
 
 
 =item A scalar reference 
 
-If C<$output> is a scalar reference, the uncompressed data will be stored
-in C<$$output>.
+If C<$output> is a scalar reference, the uncompressed data will be
+stored in C<$$output>.
 
-
-=item A Hash Reference
-
-If C<$output> is a hash reference, the uncompressed data will be written
-to C<$output{$input}> as a scalar reference.
-
-When C<$output> is a hash reference, C<$input> must be either a filename or
-list of filenames. Anything else is an error.
 
 
 =item An Array Reference
 
-If C<$output> is an array reference, the uncompressed data will be pushed
-onto the array.
+If C<$output> is an array reference, the uncompressed data will be
+pushed onto the array.
 
 =item An Output FileGlob
 
@@ -239,60 +525,13 @@ string. Anything else is an error.
 
 If the C<$output> parameter is any other type, C<undef> will be returned.
 
-=head2 rawinflate \%hash [, OPTS]
 
-If the first parameter is a hash reference, C<\%hash>, this will be used to
-define both the source of compressed data and to control where the
-uncompressed data is output. Each key/value pair in the hash defines a
-mapping between an input filename, stored in the key, and an output
-file/buffer, stored in the value. Although the input can only be a filename,
-there is more flexibility to control the destination of the uncompressed
-data. This is determined by the type of the value. Valid types are
-
-=over 5
-
-=item undef
-
-If the value is C<undef> the uncompressed data will be written to the
-value as a scalar reference.
-
-=item A filename
-
-If the value is a simple scalar, it is assumed to be a filename. This file will
-be opened for writing and the uncompressed data will be written to it.
-
-=item A filehandle
-
-If the value is a filehandle, the uncompressed data will be
-written to it. 
-The string '-' can be used as an alias for standard output.
-
-
-=item A scalar reference 
-
-If the value is a scalar reference, the uncompressed data will be stored
-in the buffer that is referenced by the scalar.
-
-
-=item A Hash Reference
-
-If the value is a hash reference, the uncompressed data will be written
-to C<$hash{$input}> as a scalar reference.
-
-=item An Array Reference
-
-If C<$output> is an array reference, the uncompressed data will be pushed
-onto the array.
-
-=back
-
-Any other type is a error.
 
 =head2 Notes
 
 When C<$input> maps to multiple files/buffers and C<$output> is a single
-file/buffer the uncompressed input files/buffers will all be stored in
-C<$output> as a single uncompressed stream.
+file/buffer the uncompressed input files/buffers will all be stored
+in C<$output> as a single uncompressed stream.
 
 
 
@@ -306,8 +545,8 @@ L</"Constructor Options"> section below.
 
 =item AutoClose =E<gt> 0|1
 
-This option applies to any input or output data streams to C<rawinflate>
-that are filehandles.
+This option applies to any input or output data streams to 
+C<rawinflate> that are filehandles.
 
 If C<AutoClose> is specified, and the value is true, it will result in all
 input and/or output filehandles being closed once C<rawinflate> has
@@ -317,9 +556,26 @@ This parameter defaults to 0.
 
 
 
+=item BinModeOut =E<gt> 0|1
+
+When writing to a file or filehandle, set C<binmode> before writing to the
+file.
+
+Defaults to 0.
+
+
+
+
+
 =item -Append =E<gt> 0|1
 
 TODO
+
+=item -MultiStream =E<gt> 0|1
+
+Creates a new stream after each file.
+
+Defaults to 1.
 
 
 
@@ -393,11 +649,11 @@ The format of the constructor for IO::Uncompress::RawInflate is shown below
 Returns an C<IO::Uncompress::RawInflate> object on success and undef on failure.
 The variable C<$RawInflateError> will contain an error message on failure.
 
-If you are running Perl 5.005 or better the object, C<$z>, returned from 
-IO::Uncompress::RawInflate can be used exactly like an L<IO::File|IO::File> filehandle. 
-This means that all normal input file operations can be carried out with C<$z>. 
-For example, to read a line from a compressed file/buffer you can use either 
-of these forms
+If you are running Perl 5.005 or better the object, C<$z>, returned from
+IO::Uncompress::RawInflate can be used exactly like an L<IO::File|IO::File> filehandle.
+This means that all normal input file operations can be carried out with
+C<$z>.  For example, to read a line from a compressed file/buffer you can
+use either of these forms
 
     $line = $z->getline();
     $line = <$z>;
@@ -465,8 +721,9 @@ input file/buffer.
 
 This option can be useful when the compressed data is embedded in another
 file/data structure and it is not possible to work out where the compressed
-data begins without having to read the first few bytes. If this is the case,
-the uncompression can be I<primed> with these bytes using this option.
+data begins without having to read the first few bytes. If this is the
+case, the uncompression can be I<primed> with these bytes using this
+option.
 
 =item -Transparent =E<gt> 0|1
 
@@ -477,20 +734,21 @@ This option defaults to 1.
 
 =item -BlockSize =E<gt> $num
 
-When reading the compressed input data, IO::Uncompress::RawInflate will read it in blocks
-of C<$num> bytes.
+When reading the compressed input data, IO::Uncompress::RawInflate will read it in
+blocks of C<$num> bytes.
 
 This option defaults to 4096.
 
 =item -InputLength =E<gt> $size
 
-When present this option will limit the number of compressed bytes read from
-the input file/buffer to C<$size>. This option can be used in the situation
-where there is useful data directly after the compressed data stream and you
-know beforehand the exact length of the compressed data stream. 
+When present this option will limit the number of compressed bytes read
+from the input file/buffer to C<$size>. This option can be used in the
+situation where there is useful data directly after the compressed data
+stream and you know beforehand the exact length of the compressed data
+stream. 
 
-This option is mostly used when reading from a filehandle, in which case the
-file pointer will be left pointing to the first byte directly after the
+This option is mostly used when reading from a filehandle, in which case
+the file pointer will be left pointing to the first byte directly after the
 compressed data stream.
 
 
@@ -501,11 +759,11 @@ This option defaults to off.
 
 This option controls what the C<read> method does with uncompressed data.
 
-If set to 1, all uncompressed data will be appended to the output parameter of
-the C<read> method.
+If set to 1, all uncompressed data will be appended to the output parameter
+of the C<read> method.
 
-If set to 0, the contents of the output parameter of the C<read> method will be
-overwritten by the uncompressed data.
+If set to 0, the contents of the output parameter of the C<read> method
+will be overwritten by the uncompressed data.
 
 Defaults to 0.
 
@@ -535,12 +793,12 @@ Usage is
 
 Reads a block of compressed data (the size the the compressed block is
 determined by the C<Buffer> option in the constructor), uncompresses it and
-writes any uncompressed data into C<$buffer>. If the C<Append> parameter is set
-in the constructor, the uncompressed data will be appended to the C<$buffer>
-parameter. Otherwise C<$buffer> will be overwritten.
+writes any uncompressed data into C<$buffer>. If the C<Append> parameter is
+set in the constructor, the uncompressed data will be appended to the
+C<$buffer> parameter. Otherwise C<$buffer> will be overwritten.
 
-Returns the number of uncompressed bytes written to C<$buffer>, zero if eof or
-a negative number on error.
+Returns the number of uncompressed bytes written to C<$buffer>, zero if eof
+or a negative number on error.
 
 =head2 read
 
@@ -554,13 +812,13 @@ Usage is
 
 Attempt to read C<$length> bytes of uncompressed data into C<$buffer>.
 
-The main difference between this form of the C<read> method and the previous
-one, is that this one will attempt to return I<exactly> C<$length> bytes. The
-only circumstances that this function will not is if end-of-file or an IO error
-is encountered.
+The main difference between this form of the C<read> method and the
+previous one, is that this one will attempt to return I<exactly> C<$length>
+bytes. The only circumstances that this function will not is if end-of-file
+or an IO error is encountered.
 
-Returns the number of uncompressed bytes written to C<$buffer>, zero if eof or
-a negative number on error.
+Returns the number of uncompressed bytes written to C<$buffer>, zero if eof
+or a negative number on error.
 
 
 =head2 getline
@@ -605,17 +863,12 @@ TODO
 
 Usage is
 
-    $hdr = $z->getHeaderInfo()
+    $hdr  = $z->getHeaderInfo();
+    @hdrs = $z->getHeaderInfo();
 
-TODO
-
-
-
-
-
-
-
-
+This method returns either a hash reference (in scalar context) or a list
+or hash references (in array context) that contains information about each
+of the header fields in the compressed data stream(s).
 
 
 
@@ -768,7 +1021,7 @@ See the Changes file.
 =head1 COPYRIGHT AND LICENSE
  
 
-Copyright (c) 2005 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 

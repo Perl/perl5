@@ -1,7 +1,7 @@
 BEGIN {
     if ($ENV{PERL_CORE}) {
 	chdir 't' if -d 't';
-	@INC = ("../lib", "lib");
+	@INC = ("../lib", "lib/compress");
     }
 }
 
@@ -314,10 +314,7 @@ ok ! $fil->gzclose ;
     ok ! $fil->gzclose ;
     ok   $fil->gzeof() ;
 
-
     is $uncomp, $hello, "got expected output" ;
-
-
 }
 
 

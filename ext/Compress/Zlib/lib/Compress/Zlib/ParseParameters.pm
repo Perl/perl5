@@ -7,7 +7,7 @@ use Carp;
 
 require Exporter;
 our ($VERSION, @ISA, @EXPORT);
-$VERSION = '2.000_05';
+$VERSION = '2.000_07';
 @ISA = qw(Exporter);
 
 use constant Parse_any      => 0x01;
@@ -23,6 +23,8 @@ use constant OFF_PARSED     => 0 ;
 use constant OFF_TYPE       => 1 ;
 use constant OFF_DEFAULT    => 2 ;
 use constant OFF_FIXED      => 3 ;
+use constant OFF_FIRST_ONLY => 4 ;
+use constant OFF_STICKY     => 5 ;
 
 push @EXPORT, qw( ParseParameters 
                   Parse_any Parse_unsigned Parse_signed 
@@ -46,6 +48,7 @@ sub ParseParameters
 sub new
 {
     my $class = shift ;
+
     my $obj = { Error => '',
                 Got   => {},
               } ;
@@ -75,6 +78,9 @@ sub parse
     my $self = shift ;
 
     my $default = shift ;
+
+    my $got = $self->{Got} ;
+    my $firstTime = keys %{ $got } == 0 ;
 
     my (@Bad) ;
     my @entered = () ;
@@ -106,14 +112,23 @@ sub parse
     }
 
 
-    my %got = () ;
     while (my ($key, $v) = each %$default)
     {
-        my ($type, $value) = @$v ;
+        croak "need 4 params [@$v]"
+            if @$v != 4 ;
+
+        my ($first_only, $sticky, $type, $value) = @$v ;
         my $x ;
         $self->_checkType($key, \$value, $type, 0, \$x) 
             or return undef ;
-        $got{lc $key} = [0, $type, $value, $x] ;
+
+        $key = lc $key;
+
+        if ($firstTime || ! $sticky) {
+            $got->{$key} = [0, $type, $value, $x, $first_only, $sticky] ;
+        }
+
+        $got->{$key}[OFF_PARSED] = 0 ;
     }
 
     for my $i (0.. @entered / 2 - 1) {
@@ -124,16 +139,18 @@ sub parse
         #print defined $$value ? "[$$value]\n" : "[undef]\n";
 
         $key =~ s/^-// ;
+        my $canonkey = lc $key;
  
-        if ($got{lc $key})
+        if ($got->{$canonkey} && ($firstTime ||
+                                  ! $got->{$canonkey}[OFF_FIRST_ONLY]  ))
         {
-            my $type = $got{lc $key}[OFF_TYPE] ;
+            my $type = $got->{$canonkey}[OFF_TYPE] ;
             my $s ;
             $self->_checkType($key, $value, $type, 1, \$s)
                 or return undef ;
             #$value = $$value unless $type & Parse_store_ref ;
             $value = $$value ;
-            $got{lc $key} = [1, $type, $value, $s] ;
+            $got->{$canonkey} = [1, $type, $value, $s] ;
         }
         else
           { push (@Bad, $key) }
@@ -143,8 +160,6 @@ sub parse
         my ($bad) = join(", ", @Bad) ;
         return $self->setError("unknown key value(s) @Bad") ;
     }
-
-    $self->{Got} = { %got } ;
 
     return 1;
 }
@@ -179,7 +194,7 @@ sub _checkType
     }
     elsif ($type & Parse_unsigned)
     {
-        return $self->setError("Parameter '$key' must be an unsigned int, got undef")
+        return $self->setError("Parameter '$key' must be an unsigned int, got 'undef'")
             if $validate && ! defined $value ;
         return $self->setError("Parameter '$key' must be an unsigned int, got '$value'")
             if $validate && $value !~ /^\d+$/;
@@ -189,7 +204,7 @@ sub _checkType
     }
     elsif ($type & Parse_signed)
     {
-        return $self->setError("Parameter '$key' must be a signed int, got undef")
+        return $self->setError("Parameter '$key' must be a signed int, got 'undef'")
             if $validate && ! defined $value ;
         return $self->setError("Parameter '$key' must be a signed int, got '$value'")
             if $validate && $value !~ /^-?\d+$/;
@@ -199,6 +214,8 @@ sub _checkType
     }
     elsif ($type & Parse_boolean)
     {
+        return $self->setError("Parameter '$key' must be an int, got '$value'")
+            if $validate && defined $value && $value !~ /^\d*$/;
         $$output =  defined $value ? $value != 0 : 0 ;    
         return 1;
     }
@@ -256,6 +273,22 @@ sub wantValue
 
     return defined $self->{Got}{lc $name}[OFF_DEFAULT] ;
 
+}
+
+sub clone
+{
+    my $self = shift ;
+    my $obj = { };
+    my %got ;
+
+    while (my ($k, $v) = each %{ $self->{Got} }) {
+        $got{$k} = [ @$v ];
+    }
+
+    $obj->{Error} = $self->{Error};
+    $obj->{Got} = \%got ;
+
+    return bless $obj ;
 }
 
 1;

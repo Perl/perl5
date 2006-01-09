@@ -1,7 +1,7 @@
 BEGIN {
     if ($ENV{PERL_CORE}) {
 	chdir 't' if -d 't';
-	@INC = ("../lib", "lib");
+	@INC = ("../lib", "lib/compress");
     }
 }
 
@@ -56,7 +56,7 @@ is Compress::Zlib::zlib_version, ZLIB_VERSION,
 
     my ($input, $err, $answer, $X, $status, $Answer);
      
-    my $lex = new LexFile my $name;
+    my $lex = new LexFile my $name ;
     ok my $x = gzopen($name, "wb");
 
     $input .= $hello;

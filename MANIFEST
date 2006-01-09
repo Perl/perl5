@@ -154,17 +154,27 @@ ext/Compress/Zlib/examples/gzstream	Compress::Zlib
 ext/Compress/Zlib/fallback/constants.h	Compress::Zlib
 ext/Compress/Zlib/fallback/constants.xs	Compress::Zlib
 ext/Compress/Zlib/lib/Compress/Gzip/Constants.pm	Compress::Zlib
+ext/Compress/Zlib/lib/CompressPlugin/Deflate.pm	Compress::Zlib
+ext/Compress/Zlib/lib/CompressPlugin/Identity.pm	Compress::Zlib
+ext/Compress/Zlib/lib/Compress/Zip/Constants.pm	Compress::Zlib
 ext/Compress/Zlib/lib/Compress/Zlib/Common.pm	Compress::Zlib
 ext/Compress/Zlib/lib/Compress/Zlib/FileConstants.pm	Compress::Zlib
 ext/Compress/Zlib/lib/Compress/Zlib/ParseParameters.pm	Compress::Zlib
 ext/Compress/Zlib/lib/File/GlobMapper.pm	Compress::Zlib
+ext/Compress/Zlib/lib/IO/Compress/Base.pm	Compress::Zlib
 ext/Compress/Zlib/lib/IO/Compress/Deflate.pm	Compress::Zlib
 ext/Compress/Zlib/lib/IO/Compress/Gzip.pm	Compress::Zlib
 ext/Compress/Zlib/lib/IO/Compress/RawDeflate.pm	Compress::Zlib
+ext/Compress/Zlib/lib/IO/Compress/Zip.pm	Compress::Zlib
 ext/Compress/Zlib/lib/IO/Uncompress/AnyInflate.pm	Compress::Zlib
+ext/Compress/Zlib/lib/IO/Uncompress/AnyUncompress.pm	Compress::Zlib
+ext/Compress/Zlib/lib/IO/Uncompress/Base.pm	Compress::Zlib
 ext/Compress/Zlib/lib/IO/Uncompress/Gunzip.pm	Compress::Zlib
 ext/Compress/Zlib/lib/IO/Uncompress/Inflate.pm	Compress::Zlib
 ext/Compress/Zlib/lib/IO/Uncompress/RawInflate.pm	Compress::Zlib
+ext/Compress/Zlib/lib/IO/Uncompress/Unzip.pm	Compress::Zlib
+ext/Compress/Zlib/lib/UncompressPlugin/Identity.pm	Compress::Zlib
+ext/Compress/Zlib/lib/UncompressPlugin/Inflate.pm	Compress::Zlib
 ext/Compress/Zlib/Makefile.PL	Compress::Zlib
 ext/Compress/Zlib/pod/FAQ.pod	Compress::Zlib
 ext/Compress/Zlib/ppport.h	Compress::Zlib
@@ -172,7 +182,14 @@ ext/Compress/Zlib/README	Compress::Zlib
 ext/Compress/Zlib/t/01version.t	Compress::Zlib
 ext/Compress/Zlib/t/02zlib.t	Compress::Zlib
 ext/Compress/Zlib/t/03zlib-v1.t	Compress::Zlib
-ext/Compress/Zlib/t/04def.t	Compress::Zlib
+ext/Compress/Zlib/t/04generic-deflate.t	Compress::Zlib
+ext/Compress/Zlib/t/04generic-gzip.t	Compress::Zlib
+ext/Compress/Zlib/t/04generic-rawdeflate.t	Compress::Zlib
+ext/Compress/Zlib/t/04generic-zip.t	Compress::Zlib
+ext/Compress/Zlib/t/04zlib-generic-deflate.t	Compress::Zlib
+ext/Compress/Zlib/t/04zlib-generic-gzip.t	Compress::Zlib
+ext/Compress/Zlib/t/04zlib-generic-rawdeflate.t	Compress::Zlib
+ext/Compress/Zlib/t/04zlib-generic-zip.t	Compress::Zlib
 ext/Compress/Zlib/t/05examples.t	Compress::Zlib
 ext/Compress/Zlib/t/06gzsetp.t	Compress::Zlib
 ext/Compress/Zlib/t/07bufsize.t	Compress::Zlib
@@ -180,18 +197,51 @@ ext/Compress/Zlib/t/08encoding.t	Compress::Zlib
 ext/Compress/Zlib/t/09gziphdr.t	Compress::Zlib
 ext/Compress/Zlib/t/10defhdr.t	Compress::Zlib
 ext/Compress/Zlib/t/11truncate.t	Compress::Zlib
-ext/Compress/Zlib/t/12any.t	Compress::Zlib
-ext/Compress/Zlib/t/13prime.t	Compress::Zlib
+ext/Compress/Zlib/t/12any-deflate.t	Compress::Zlib
+ext/Compress/Zlib/t/12any-gzip.t	Compress::Zlib
+ext/Compress/Zlib/t/12any-rawdeflate.t	Compress::Zlib
+ext/Compress/Zlib/t/12any-transparent.t	Compress::Zlib
+ext/Compress/Zlib/t/12any-zip.t	Compress::Zlib
+ext/Compress/Zlib/t/13prime-deflate.t	Compress::Zlib
+ext/Compress/Zlib/t/13prime-gzip.t	Compress::Zlib
+ext/Compress/Zlib/t/13prime-rawdeflate.t	Compress::Zlib
+ext/Compress/Zlib/t/13prime-zip.t	Compress::Zlib
 ext/Compress/Zlib/t/14gzopen.t	Compress::Zlib
-ext/Compress/Zlib/t/15multi.t	Compress::Zlib
-ext/Compress/Zlib/t/16oneshot.t	Compress::Zlib
+ext/Compress/Zlib/t/15multi-deflate.t	Compress::Zlib
+ext/Compress/Zlib/t/15multi-gzip.t	Compress::Zlib
+ext/Compress/Zlib/t/15multi-rawdeflate.t	Compress::Zlib
+ext/Compress/Zlib/t/15multi-zip.t	Compress::Zlib
+ext/Compress/Zlib/t/16oneshot-deflate.t	Compress::Zlib
+ext/Compress/Zlib/t/16oneshot-gzip-only.t	Compress::Zlib
+ext/Compress/Zlib/t/16oneshot-gzip.t	Compress::Zlib
+ext/Compress/Zlib/t/16oneshot-rawdeflate.t	Compress::Zlib
+ext/Compress/Zlib/t/16oneshot-zip-only.t	Compress::Zlib
+ext/Compress/Zlib/t/16oneshot-zip.t	Compress::Zlib
 ext/Compress/Zlib/t/17isize.t	Compress::Zlib
 ext/Compress/Zlib/t/18lvalue.t	Compress::Zlib
-ext/Compress/Zlib/t/19destroy.t	Compress::Zlib
-ext/Compress/Zlib/t/20tied.t	Compress::Zlib
-ext/Compress/Zlib/t/21newtied.t	Compress::Zlib
-ext/Compress/Zlib/t/22merge.t	Compress::Zlib
+ext/Compress/Zlib/t/19destroy-deflate.t	Compress::Zlib
+ext/Compress/Zlib/t/19destroy-gzip.t	Compress::Zlib
+ext/Compress/Zlib/t/19destroy-rawdeflate.t	Compress::Zlib
+ext/Compress/Zlib/t/19destroy-zip.t	Compress::Zlib
+ext/Compress/Zlib/t/20tied-deflate.t	Compress::Zlib
+ext/Compress/Zlib/t/20tied-gzip.t	Compress::Zlib
+ext/Compress/Zlib/t/20tied-rawdeflate.t	Compress::Zlib
+ext/Compress/Zlib/t/20tied-zip.t	Compress::Zlib
+ext/Compress/Zlib/t/21newtied-deflate.t	Compress::Zlib
+ext/Compress/Zlib/t/21newtied-gzip.t	Compress::Zlib
+ext/Compress/Zlib/t/21newtied-rawdeflate.t	Compress::Zlib
+ext/Compress/Zlib/t/21newtied-zip.t	Compress::Zlib
+ext/Compress/Zlib/t/22merge-deflate.t	Compress::Zlib
+ext/Compress/Zlib/t/22merge-gzip.t	Compress::Zlib
+ext/Compress/Zlib/t/22merge-rawdeflate.t	Compress::Zlib
+ext/Compress/Zlib/t/22merge-zip.t	Compress::Zlib
 ext/Compress/Zlib/t/23misc.t	Compress::Zlib
+ext/Compress/Zlib/t/25anyunc-deflate.t	Compress::Zlib
+ext/Compress/Zlib/t/25anyunc-gzip.t	Compress::Zlib
+ext/Compress/Zlib/t/25anyunc-rawdeflate.t	Compress::Zlib
+ext/Compress/Zlib/t/25anyunc-transparent.t	Compress::Zlib
+ext/Compress/Zlib/t/25anyunc-zip.t	Compress::Zlib
+ext/Compress/Zlib/t/99pod.t	Compress::Zlib
 ext/Compress/Zlib/t/globmapper.t	Compress::Zlib
 ext/Compress/Zlib/typemap	Compress::Zlib
 ext/Compress/Zlib/Zlib.pm	Compress::Zlib
@@ -3007,6 +3057,19 @@ t/lib/1_compile.t		See if the various libraries and extensions compile
 t/lib/common.pl			Helper for lib/{warnings,feature}.t
 t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/compmod.pl		Helper for 1_compile.t
+t/lib/compress/ZlibTestUtils.pm	Compress::Zlib
+t/lib/compress/any.pl		Compress::Zlib
+t/lib/compress/anyunc.pl	Compress::Zlib
+t/lib/compress/destroy.pl	Compress::Zlib
+t/lib/compress/generic.pl	Compress::Zlib
+t/lib/compress/merge.pl		Compress::Zlib
+t/lib/compress/multi.pl		Compress::Zlib
+t/lib/compress/newtied.pl	Compress::Zlib
+t/lib/compress/oneshot.pl	Compress::Zlib
+t/lib/compress/prime.pl		Compress::Zlib
+t/lib/compress/tied.pl		Compress::Zlib
+t/lib/compress/truncate.pl	Compress::Zlib
+t/lib/compress/zlib-generic.pl	Compress::Zlib
 t/lib/contains_pod.xr		Pod-Parser test file
 t/lib/cygwin.t			Builtin cygwin function tests
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
@@ -3140,7 +3203,6 @@ t/lib/warnings/toke		Tests for toke.c for warnings.t
 t/lib/warnings/universal	Tests for universal.c for warnings.t
 t/lib/warnings/utf8		Tests for utf8.c for warnings.t
 t/lib/warnings/util		Tests for util.c for warnings.t
-t/lib/ZlibTestUtils.pm		Compress::Zlib
 Todo.micro			The Wishlist for microperl
 toke.c				The tokener
 t/op/64bitint.t			See if 64 bit integers work

@@ -12,14 +12,14 @@ BEGIN
     { 
         require File::BSDGlob; import File::BSDGlob qw(:glob) ;
         $CSH_GLOB = File::BSDGlob::GLOB_CSH() ;
-        *globber = \&File::BSDGlob::glob;
+        *globber = \&File::BSDGlob::csh_glob;
     }  
     else
     { 
         require File::Glob; import File::Glob qw(:glob) ;
         $CSH_GLOB = File::Glob::GLOB_CSH() ;
         #*globber = \&File::Glob::bsd_glob;
-        *globber = \&File::Glob::glob;
+        *globber = \&File::Glob::csh_glob;
     }  
 }
 
@@ -424,7 +424,7 @@ useful include, file renaming, file copying and file compression.
 To help explain what C<File::GlobMapper> does, consider what code you
 would write if you wanted to rename all files in the current directory
 that ended in C<.tar.gz> to C<.tgz>. So say these files are in the
-current directoty
+current directory
 
     alpha.tar.gz
     beta.tar.gz
@@ -474,11 +474,11 @@ Behind the scenes the C<globmap> function does a combination of a
 file glob to match existing filenames followed by a substitute
 to create the new filenames. 
 
-Notice how both parameters to C<globmap> are strings that are delimired by <>.
+Notice how both parameters to C<globmap> are strings that are delimited by <>.
 This is done to make them look more like file globs - it is just syntactic
 sugar, but it can be handy when you want the strings to be visually
 distinctive. The enclosing <> are optional, so you don't have to use them - in
-fact the first thing globmap will do is remove these delimeters if they are
+fact the first thing globmap will do is remove these delimiters if they are
 present.
 
 The first parameter to C<globmap>, C<*.tar.gz>, is an I<Input File Glob>. 
@@ -528,7 +528,7 @@ derived from the I<from> filename.
 
 C<File::GlobMapper> has been kept simple deliberately, so it isn't intended to
 solve all filename mapping operations. Under the hood C<File::Glob> (or for
-older verions of Perl, C<File::BSDGlob>) is used to match the files, so you
+older versions of Perl, C<File::BSDGlob>) is used to match the files, so you
 will never have the flexibility of full Perl regular expression.
 
 =head2 Input File Glob
@@ -624,7 +624,7 @@ Output FileGlobs take the
 
 =item "*"
 
-The "*" chanacter will be replaced with the complete input filename.
+The "*" character will be replaced with the complete input filename.
 
 =item #1
 
@@ -668,7 +668,7 @@ Here is an example that renames all c files to cpp.
 
 =head2 A few example globmaps
 
-Below are a few examles of globmaps
+Below are a few examples of globmaps
 
 To copy all your .c file to a backup directory
 

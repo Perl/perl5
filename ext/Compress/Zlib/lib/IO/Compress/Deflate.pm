@@ -2,34 +2,161 @@ package IO::Compress::Deflate ;
 
 use strict ;
 use warnings;
+
 require Exporter ;
 
-use IO::Compress::Gzip ;
+use IO::Compress::RawDeflate;
+
+use Compress::Zlib 2 ;
+use Compress::Zlib::FileConstants;
+use Compress::Zlib::Common qw(createSelfTiedObject);
 
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $DeflateError);
 
-$VERSION = '2.000_05';
+$VERSION = '2.000_07';
 $DeflateError = '';
 
-@ISA = qw(Exporter IO::BaseDeflate);
+@ISA    = qw(Exporter IO::Compress::RawDeflate);
 @EXPORT_OK = qw( $DeflateError deflate ) ;
-%EXPORT_TAGS = %IO::BaseDeflate::EXPORT_TAGS ;
+%EXPORT_TAGS = %IO::Compress::RawDeflate::DEFLATE_CONSTANTS ;
 push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
 Exporter::export_ok_tags('all');
 
 
-
 sub new
 {
-    my $pkg = shift ;
-    return IO::BaseDeflate::new($pkg, 'rfc1950', undef, \$DeflateError, @_);
+    my $class = shift ;
+
+    my $obj = createSelfTiedObject($class, \$DeflateError);
+    return $obj->_create(undef, @_);
 }
 
 sub deflate
 {
-    return IO::BaseDeflate::_def(__PACKAGE__, 'rfc1950', \$DeflateError, @_);
+    my $obj = createSelfTiedObject(undef, \$DeflateError);
+    return $obj->_def(@_);
 }
+
+
+sub bitmask($$$$)
+{
+    my $into  = shift ;
+    my $value  = shift ;
+    my $offset = shift ;
+    my $mask   = shift ;
+
+    return $into | (($value & $mask) << $offset ) ;
+}
+
+sub mkDeflateHdr($$$;$)
+{
+    my $method = shift ;
+    my $cinfo  = shift;
+    my $level  = shift;
+    my $fdict_adler = shift  ;
+
+    my $cmf = 0;
+    my $flg = 0;
+    my $fdict = 0;
+    $fdict = 1 if defined $fdict_adler;
+
+    $cmf = bitmask($cmf, $method, ZLIB_CMF_CM_OFFSET,    ZLIB_CMF_CM_BITS);
+    $cmf = bitmask($cmf, $cinfo,  ZLIB_CMF_CINFO_OFFSET, ZLIB_CMF_CINFO_BITS);
+
+    $flg = bitmask($flg, $fdict,  ZLIB_FLG_FDICT_OFFSET, ZLIB_FLG_FDICT_BITS);
+    $flg = bitmask($flg, $level,  ZLIB_FLG_LEVEL_OFFSET, ZLIB_FLG_LEVEL_BITS);
+
+    my $fcheck = 31 - ($cmf * 256 + $flg) % 31 ;
+    $flg = bitmask($flg, $fcheck, ZLIB_FLG_FCHECK_OFFSET, ZLIB_FLG_FCHECK_BITS);
+
+    my $hdr =  pack("CC", $cmf, $flg) ;
+    $hdr .= pack("N", $fdict_adler) if $fdict ;
+
+    return $hdr;
+}
+
+sub mkHeader 
+{
+    my $self = shift ;
+    my $param = shift ;
+
+    my $level = $param->value('Level');
+    my $strategy = $param->value('Strategy');
+
+    my $lflag ;
+    $level = 6 
+        if $level == Z_DEFAULT_COMPRESSION ;
+
+    if (ZLIB_VERNUM >= 0x1210)
+    {
+        if ($strategy >= Z_HUFFMAN_ONLY || $level < 2)
+         {  $lflag = ZLIB_FLG_LEVEL_FASTEST }
+        elsif ($level < 6)
+         {  $lflag = ZLIB_FLG_LEVEL_FAST }
+        elsif ($level == 6)
+         {  $lflag = ZLIB_FLG_LEVEL_DEFAULT }
+        else
+         {  $lflag = ZLIB_FLG_LEVEL_SLOWEST }
+    }
+    else
+    {
+        $lflag = ($level - 1) >> 1 ;
+        $lflag = 3 if $lflag > 3 ;
+    }
+
+     #my $wbits = (MAX_WBITS - 8) << 4 ;
+    my $wbits = 7;
+    mkDeflateHdr(ZLIB_CMF_CM_DEFLATED, $wbits, $lflag);
+}
+
+sub ckParams
+{
+    my $self = shift ;
+    my $got = shift;
+    
+    $got->value('ADLER32' => 1);
+    return 1 ;
+}
+
+
+sub mkTrailer
+{
+    my $self = shift ;
+    return pack("N", *$self->{Compress}->adler32()) ;
+}
+
+sub mkFinalTrailer
+{
+    return '';
+}
+
+#sub newHeader
+#{
+#    my $self = shift ;
+#    return *$self->{Header};
+#}
+
+sub getExtraParams
+{
+    my $self = shift ;
+    return $self->getZlibParams(),
+}
+
+sub getInverseClass
+{
+    return ('IO::Uncompress::Inflate',
+                \$IO::Uncompress::Inflate::InflateError);
+}
+
+sub getFileInfo
+{
+    my $self = shift ;
+    my $params = shift;
+    my $file = shift ;
+    
+}
+
 
 
 1;
@@ -61,7 +188,7 @@ IO::Compress::Deflate     - Perl interface to write RFC 1950 files/buffers
     $z->seek($position, $whence);
     $z->binmode();
     $z->fileno();
-    $z->newStream();
+    $z->newStream( [OPTS] );
     $z->deflateParams();
     $z->close() ;
 
@@ -114,24 +241,25 @@ L<IO::Uncompress::Inflate|IO::Uncompress::Inflate>.
 
 =head1 Functional Interface
 
-A top-level function, C<deflate>, is provided to carry out "one-shot"
-compression between buffers and/or files. For finer control over the compression process, see the L</"OO Interface"> section.
+A top-level function, C<deflate>, is provided to carry out
+"one-shot" compression between buffers and/or files. For finer
+control over the compression process, see the L</"OO Interface">
+section.
 
     use IO::Compress::Deflate qw(deflate $DeflateError) ;
 
     deflate $input => $output [,OPTS] 
         or die "deflate failed: $DeflateError\n";
 
-    deflate \%hash [,OPTS] 
-        or die "deflate failed: $DeflateError\n";
+
 
 The functional interface needs Perl5.005 or better.
 
 
 =head2 deflate $input => $output [, OPTS]
 
-If the first parameter is not a hash reference C<deflate> expects
-at least two parameters, C<$input> and C<$output>.
+
+C<deflate> expects at least two parameters, C<$input> and C<$output>.
 
 =head3 The C<$input> parameter
 
@@ -161,13 +289,15 @@ from C<$$input>.
 
 =item An array reference 
 
-If C<$input> is an array reference, the input data will be read from each
-element of the array in turn. The action taken by C<deflate> with
-each element of the array will depend on the type of data stored
-in it. You can mix and match any of the types defined in this list,
-excluding other array or hash references. 
+If C<$input> is an array reference, each element in the array must be a
+filename.
+
+The input data will be read from each file in turn. 
+
 The complete array will be walked to ensure that it only
-contains valid data types before any data is compressed.
+contains valid filenames before any data is compressed.
+
+
 
 =item An Input FileGlob string
 
@@ -195,36 +325,28 @@ compressed data. This parameter can take one of these forms.
 
 =item A filename
 
-If the C<$output> parameter is a simple scalar, it is assumed to be a filename.
-This file will be opened for writing and the compressed data will be
-written to it.
+If the C<$output> parameter is a simple scalar, it is assumed to be a
+filename.  This file will be opened for writing and the compressed
+data will be written to it.
 
 =item A filehandle
 
-If the C<$output> parameter is a filehandle, the compressed data will
-be written to it.  
+If the C<$output> parameter is a filehandle, the compressed data
+will be written to it.
 The string '-' can be used as an alias for standard output.
 
 
 =item A scalar reference 
 
-If C<$output> is a scalar reference, the compressed data will be stored
-in C<$$output>.
+If C<$output> is a scalar reference, the compressed data will be
+stored in C<$$output>.
 
-
-=item A Hash Reference
-
-If C<$output> is a hash reference, the compressed data will be written
-to C<$output{$input}> as a scalar reference.
-
-When C<$output> is a hash reference, C<$input> must be either a filename or
-list of filenames. Anything else is an error.
 
 
 =item An Array Reference
 
-If C<$output> is an array reference, the compressed data will be pushed
-onto the array.
+If C<$output> is an array reference, the compressed data will be
+pushed onto the array.
 
 =item An Output FileGlob
 
@@ -239,60 +361,13 @@ string. Anything else is an error.
 
 If the C<$output> parameter is any other type, C<undef> will be returned.
 
-=head2 deflate \%hash [, OPTS]
 
-If the first parameter is a hash reference, C<\%hash>, this will be used to
-define both the source of uncompressed data and to control where the
-compressed data is output. Each key/value pair in the hash defines a
-mapping between an input filename, stored in the key, and an output
-file/buffer, stored in the value. Although the input can only be a filename,
-there is more flexibility to control the destination of the compressed
-data. This is determined by the type of the value. Valid types are
-
-=over 5
-
-=item undef
-
-If the value is C<undef> the compressed data will be written to the
-value as a scalar reference.
-
-=item A filename
-
-If the value is a simple scalar, it is assumed to be a filename. This file will
-be opened for writing and the compressed data will be written to it.
-
-=item A filehandle
-
-If the value is a filehandle, the compressed data will be
-written to it. 
-The string '-' can be used as an alias for standard output.
-
-
-=item A scalar reference 
-
-If the value is a scalar reference, the compressed data will be stored
-in the buffer that is referenced by the scalar.
-
-
-=item A Hash Reference
-
-If the value is a hash reference, the compressed data will be written
-to C<$hash{$input}> as a scalar reference.
-
-=item An Array Reference
-
-If C<$output> is an array reference, the compressed data will be pushed
-onto the array.
-
-=back
-
-Any other type is a error.
 
 =head2 Notes
 
 When C<$input> maps to multiple files/buffers and C<$output> is a single
-file/buffer the compressed input files/buffers will all be stored in
-C<$output> as a single compressed stream.
+file/buffer the compressed input files/buffers will all be stored
+in C<$output> as a single compressed stream.
 
 
 
@@ -306,14 +381,24 @@ L</"Constructor Options"> section below.
 
 =item AutoClose =E<gt> 0|1
 
-This option applies to any input or output data streams to C<deflate>
-that are filehandles.
+This option applies to any input or output data streams to 
+C<deflate> that are filehandles.
 
 If C<AutoClose> is specified, and the value is true, it will result in all
 input and/or output filehandles being closed once C<deflate> has
 completed.
 
 This parameter defaults to 0.
+
+
+
+=item BinModeIn =E<gt> 0|1
+
+When reading from a file or filehandle, set C<binmode> before reading.
+
+Defaults to 0.
+
+
 
 
 
@@ -437,9 +522,9 @@ C<OPTS> is any combination of the following options:
 =item -AutoClose =E<gt> 0|1
 
 This option is only valid when the C<$output> parameter is a filehandle. If
-specified, and the value is true, it will result in the C<$output> being closed
-once either the C<close> method is called or the C<IO::Compress::Deflate> object is
-destroyed.
+specified, and the value is true, it will result in the C<$output> being
+closed once either the C<close> method is called or the C<IO::Compress::Deflate>
+object is destroyed.
 
 This parameter defaults to 0.
 
@@ -447,27 +532,27 @@ This parameter defaults to 0.
 
 Opens C<$output> in append mode. 
 
-The behaviour of this option is dependant on the type of C<$output>.
+The behaviour of this option is dependent on the type of C<$output>.
 
 =over 5
 
 =item * A Buffer
 
-If C<$output> is a buffer and C<Append> is enabled, all compressed data will be
-append to the end if C<$output>. Otherwise C<$output> will be cleared before
-any data is written to it.
+If C<$output> is a buffer and C<Append> is enabled, all compressed data
+will be append to the end if C<$output>. Otherwise C<$output> will be
+cleared before any data is written to it.
 
 =item * A Filename
 
-If C<$output> is a filename and C<Append> is enabled, the file will be opened
-in append mode. Otherwise the contents of the file, if any, will be truncated
-before any compressed data is written to it.
+If C<$output> is a filename and C<Append> is enabled, the file will be
+opened in append mode. Otherwise the contents of the file, if any, will be
+truncated before any compressed data is written to it.
 
 =item * A Filehandle
 
-If C<$output> is a filehandle, the file pointer will be positioned to the end
-of the file via a call to C<seek> before any compressed data is written to it.
-Otherwise the file pointer will not be moved.
+If C<$output> is a filehandle, the file pointer will be positioned to the
+end of the file via a call to C<seek> before any compressed data is written
+to it.  Otherwise the file pointer will not be moved.
 
 =back
 
@@ -481,8 +566,8 @@ data stream stored in C<$output>.
 
 
 
-It is a fatal error to attempt to use this option when C<$output> is not an RFC
-1950 data stream.
+It is a fatal error to attempt to use this option when C<$output> is not an
+RFC 1950 data stream.
 
 
 
@@ -492,8 +577,9 @@ There are a number of other limitations with the C<Merge> option:
 
 =item 1
 
-This module needs to have been built with zlib 1.2.1 or better to work. A fatal
-error will be thrown if C<Merge> is used with an older version of zlib.  
+This module needs to have been built with zlib 1.2.1 or better to work. A
+fatal error will be thrown if C<Merge> is used with an older version of
+zlib.  
 
 =item 2
 
@@ -564,7 +650,7 @@ Usage is
     print $z $data
 
 Compresses and outputs the contents of the C<$data> parameter. This
-has the same behavior as the C<print> built-in.
+has the same behaviour as the C<print> built-in.
 
 Returns true if successful.
 
@@ -727,13 +813,24 @@ underlying file will also be closed.
 
 
 
-=head2 newStream
+=head2 newStream([OPTS])
 
 Usage is
 
-    $z->newStream
+    $z->newStream( [OPTS] )
 
-TODO
+Closes the current compressed data stream and starts a new one.
+
+OPTS consists of the following sub-set of the the options that are
+available when creating the C<$z> object,
+
+=over 5
+
+=item * Level
+
+=item * TODO
+
+=back
 
 =head2 deflateParams
 
@@ -843,7 +940,7 @@ See the Changes file.
 =head1 COPYRIGHT AND LICENSE
  
 
-Copyright (c) 2005 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 

@@ -1,7 +1,7 @@
 BEGIN {
     if ($ENV{PERL_CORE}) {
 	chdir 't' if -d 't';
-	@INC = ("../lib", "lib");
+	@INC = ("../lib", "lib/compress");
     }
 }
 
@@ -325,7 +325,7 @@ EOM
         like $IO::Uncompress::Inflate::InflateError,'/Trailer Error: CRC mismatch/',
             "Trailer Error: CRC mismatch";
         ok $gunz->eof() ;
-        ok ! ${ $gunz->trailingData() } ;
+        ok ! $gunz->trailingData() ;
         ok $uncomp eq $string;
         ok $gunz->close ;
     }
@@ -341,7 +341,7 @@ EOM
         my $uncomp ;
         ok $gunz->read($uncomp) >= 0  ;
         ok $gunz->eof() ;
-        ok ! ${ $gunz->trailingData() } ;
+        ok ! $gunz->trailingData() ;
         ok $uncomp eq $string;
         ok $gunz->close ;
     }

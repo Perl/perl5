@@ -33,6 +33,14 @@
 
 #include <zlib.h> 
 
+/* zlib prior to 1.06 doesn't know about z_off_t */
+#ifndef z_off_t
+#  define z_off_t   long
+#endif
+
+#if  ! defined(ZLIB_VERNUM) || ZLIB_VERNUM < 0x1200
+#  define NEED_DUMMY_BYTE_AT_END 
+#endif
 
 #if  defined(ZLIB_VERNUM) && ZLIB_VERNUM >= 0x1210
 #  define MAGIC_APPEND
@@ -56,11 +64,6 @@
 
 #else
 
-/* zlib prior to 1.06 doesn't know about z_off_t */
-#ifndef z_off_t
-#  define z_off_t   long
-#endif
-
 #  ifndef PERL_VERSION
 #    include "patchlevel.h"
 #    define PERL_REVISION       5
@@ -81,14 +84,9 @@
 #      define newSVuv   newSViv
 #  endif
 
-#endif
 
 
-#if PERL_REVISION == 5 && (PERL_VERSION >= 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 4 ))
-#    define UTF8_AVAILABLE
-#endif
-
-#if PERL_REVISION == 5 && (PERL_VERSION < 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 4 ))
+#  if PERL_REVISION == 5 && (PERL_VERSION < 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 4 ))
 
 #    ifdef SvPVbyte_force
 #        undef SvPVbyte_force
@@ -96,42 +94,57 @@
 
 #    define SvPVbyte_force(sv,lp) SvPV_force(sv,lp)
 
-#endif
+#  endif
 
-#ifndef SvPVbyte_nolen
+#  ifndef SvPVbyte_nolen
 #    define SvPVbyte_nolen SvPV_nolen
-#endif
+#  endif
 
-#ifndef SvPVbyte
+#  ifndef SvPVbyte
 #    define SvPVbyte SvPV
-#endif
+#  endif
 
-#ifndef dTHX
+#  ifndef dTHX
 #    define dTHX 
-#endif
+#  endif
 
-#ifndef SvPV_nolen
+#  ifndef SvPV_nolen
 
-#define sv_2pv_nolen(a) my_sv_2pv_nolen(a)
+#  define sv_2pv_nolen(a) my_sv_2pv_nolen(a)
 
 static char *
 my_sv_2pv_nolen(register SV *sv)
 {   
+  dTHX;
   STRLEN n_a;
   return sv_2pv(sv, &n_a);
 }
 
 
 /* SvPV_nolen depends on sv_2pv_nolen */
-#define SvPV_nolen(sv) \
+#  define SvPV_nolen(sv) \
           ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
            ? SvPVX(sv) : sv_2pv_nolen(sv))
 
 
+#  endif
+
+#  ifndef SvGETMAGIC
+#    define SvGETMAGIC(x)                  STMT_START { if (SvGMAGICAL(x)) mg_get(x); } STMT_END
+#  endif
+
 #endif
 
-#ifndef SvGETMAGIC
-#  define SvGETMAGIC(x)                  STMT_START { if (SvGMAGICAL(x)) mg_get(x); } STMT_END
+#  ifndef SvPVbyte_nolen
+#    define SvPVbyte_nolen SvPV_nolen
+#  endif
+
+#  ifndef SvPVbyte_force
+#    define SvPVbyte_force(sv,lp) SvPV_force(sv,lp)
+#  endif
+
+#if PERL_REVISION == 5 && (PERL_VERSION >= 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 4 ))
+#    define UTF8_AVAILABLE
 #endif
 
 typedef int                     DualType ;
@@ -167,6 +180,8 @@ typedef struct di_stream {
     int      MemLevel;
     int      Strategy;
     uLong    bytesInflated ;
+    uLong    compressedBytes ;
+    uLong    uncompressedBytes ;
 #ifdef MAGIC_APPEND
 
 #define WINDOW_SIZE 32768U
@@ -333,6 +348,7 @@ SetGzErrorNo(error_no)
 int error_no ;
 #endif
 {
+    dTHX;
     char * errstr ;
     SV * gzerror_sv = perl_get_sv(GZERRNO, FALSE) ;
   
@@ -583,6 +599,8 @@ PostInitStream(s, flags, bufsize, windowBits)
 {
     s->bufsize = bufsize ;
     s->bufinc  = bufsize ;
+    s->compressedBytes =
+    s->uncompressedBytes =
     s->last_error = 0 ;
     s->flags    = flags ;
     s->zip_mode = (windowBits < 0) ;
@@ -697,49 +715,6 @@ BOOT:
         sv_setpv(gzerror_sv, "") ;
         SvIOK_on(gzerror_sv) ;
     }
-
-
-int
-_readonly_ref(sv)
-    SV* sv
-    CODE:
-        if (SvROK(sv)) 
-            RETVAL = SvREADONLY(SvRV(sv)) ;
-        else 
-            RETVAL = SvREADONLY(sv) ;
-    OUTPUT:
-        RETVAL
-
-void
-_dualvar(num,str)
-    SV *        num
-    SV *        str
-PROTOTYPE: $$
-CODE:
-{
-    STRLEN len;
-    char *ptr = SvPVbyte(str,len); 
-    ST(0) = sv_newmortal();
-    SvUPGRADE(ST(0),SVt_PVNV);
-    sv_setpvn(ST(0),ptr,len);
-    if(SvNOK(num) || SvPOK(num) || SvMAGICAL(num)) {
-        SvNV_set(ST(0), SvNV(num));
-        SvNOK_on(ST(0));
-    }
-#ifdef SVf_IVisUVXXXX
-    else if (SvUOK(num)) {
-        SvUVX(ST(0)) = SvUV(num);
-        SvIOK_on(ST(0));
-        SvIsUV_on(ST(0));
-    }
-#endif
-    else {
-        SvIV_set(ST(0), SvIV(num));
-        SvIOK_on(ST(0));
-    }
-    XSRETURN(1);
-}
-
 
 #define Zip_zlib_version()	(char*)zlib_version
 char*
@@ -986,6 +961,7 @@ deflate (s, buf, output)
     SV * 	output 
     uInt	cur_length = NO_INIT
     uInt	increment = NO_INIT
+    uInt	prefix    = NO_INIT
     int		RETVAL = 0;
   CODE:
 
@@ -998,7 +974,7 @@ deflate (s, buf, output)
          croak("Wide character in Compress::Zlib::Deflate::deflate input parameter");
 #endif         
     s->stream.next_in = (Bytef*)SvPVbyte_nolen(buf) ;
-    s->stream.avail_in = SvCUR(buf) ; 
+    s->stream.avail_in = SvCUR(buf) ;
     
     if (s->flags & FLAG_CRC32)
         s->crc32 = crc32(s->crc32, s->stream.next_in, s->stream.avail_in) ;
@@ -1017,7 +993,7 @@ deflate (s, buf, output)
         SvCUR_set(output, 0);
         /* sv_setpvn(output, "", 0); */
     }
-    cur_length =  SvCUR(output) ;
+    prefix = cur_length =  SvCUR(output) ;
     s->stream.next_out = (Bytef*) SvPVbyte_nolen(output) + cur_length;
     increment =  SvLEN(output) -  cur_length;
     s->stream.avail_out =  increment;
@@ -1066,6 +1042,9 @@ deflate (s, buf, output)
             break;
     }
 
+    s->compressedBytes += cur_length + increment - prefix - s->stream.avail_out ;
+    s->uncompressedBytes  += SvCUR(buf) - s->stream.avail_in  ;
+
     s->last_error = RETVAL ;
     if (RETVAL == Z_OK) {
         SvPOK_only(output);
@@ -1097,6 +1076,7 @@ flush(s, output, f=Z_FINISH)
     int  f
     uInt	cur_length = NO_INIT
     uInt	increment = NO_INIT
+    uInt	prefix    = NO_INIT
   CODE:
   
     s->stream.avail_in = 0; /* should be zero already anyway */
@@ -1111,7 +1091,7 @@ flush(s, output, f=Z_FINISH)
         SvCUR_set(output, 0);
         /* sv_setpvn(output, "", 0); */
     }
-    cur_length =  SvCUR(output) ;
+    prefix = cur_length =  SvCUR(output) ;
     s->stream.next_out = (Bytef*) SvPVbyte_nolen(output) + cur_length;
     increment =  SvLEN(output) -  cur_length;
     s->stream.avail_out =  increment;
@@ -1165,6 +1145,8 @@ flush(s, output, f=Z_FINISH)
   
     RETVAL =  (RETVAL == Z_STREAM_END ? Z_OK : RETVAL) ;
     s->last_error = RETVAL ;
+
+    s->compressedBytes    += cur_length + increment - prefix - s->stream.avail_out ;
   
     if (RETVAL == Z_OK) {
         SvPOK_only(output);
@@ -1279,6 +1261,22 @@ adler32(s)
 	RETVAL
 
 uLong
+compressedBytes(s)
+    Compress::Zlib::deflateStream	s
+    CODE:
+        RETVAL = s->compressedBytes;
+  OUTPUT:
+	RETVAL
+
+uLong
+uncompressedBytes(s)
+    Compress::Zlib::deflateStream	s
+    CODE:
+        RETVAL = s->uncompressedBytes;
+  OUTPUT:
+	RETVAL
+
+uLong
 total_in(s)
         Compress::Zlib::deflateStream   s
     CODE:
@@ -1340,14 +1338,15 @@ inflateReset(s)
       RETVAL
 
 DualType 
-inflate (s, buf, output)
+inflate (s, buf, output, eof=FALSE)
     Compress::Zlib::inflateStream	s
     SV *	buf
     SV * 	output 
+    bool 	eof 
     uInt	cur_length = 0;
     uInt	prefix_length = 0;
     uInt	increment = 0;
-    STRLEN  stmp   = NO_INIT
+    STRLEN  stmp    = NO_INIT
   PREINIT:
 #ifdef UTF8_AVAILABLE    
     bool	out_utf8  = FALSE;
@@ -1365,7 +1364,7 @@ inflate (s, buf, output)
     
     /* initialise the input buffer */
     s->stream.next_in = (Bytef*)SvPVbyte_force(buf, stmp) ;
-    s->stream.avail_in = SvCUR(buf) ; 
+    s->stream.avail_in = SvCUR(buf) ;
 	
     /* and retrieve the output buffer */
     output = deRef_l(output, "inflate") ;
@@ -1403,6 +1402,9 @@ inflate (s, buf, output)
 
         RETVAL = inflate(&(s->stream), Z_SYNC_FLUSH);
 
+        if (RETVAL == Z_STREAM_ERROR || RETVAL == Z_MEM_ERROR ||
+            RETVAL == Z_DATA_ERROR  || RETVAL == Z_STREAM_END )
+            break ;
 
         if (RETVAL == Z_BUF_ERROR) {
             if (s->stream.avail_out == 0)
@@ -1423,12 +1425,35 @@ inflate (s, buf, output)
         if (RETVAL != Z_OK) 
             break;
     }
-
+#ifdef NEED_DUMMY_BYTE_AT_END 
+    if (eof && RETVAL == Z_OK) {
+        Bytef* nextIn =  s->stream.next_in;
+        uInt availIn =  s->stream.avail_in;
+        s->stream.next_in = (Bytef*) " ";
+        s->stream.avail_in = 1;
+        if (s->stream.avail_out == 0) {
+	    /* out of space in the output buffer so make it bigger */
+            Sv_Grow(output, SvLEN(output) + s->bufinc) ;
+            cur_length += increment ;
+            s->stream.next_out = (Bytef*) SvPVbyte_nolen(output) + cur_length ;
+            increment = s->bufinc ;
+            s->stream.avail_out = increment;
+            s->bufinc *= 2 ;
+        }
+        RETVAL = inflate(&(s->stream), Z_SYNC_FLUSH);
+        s->stream.next_in = nextIn ;
+        s->stream.avail_in  = availIn ;
+    }
+#endif
+    
     s->last_error = RETVAL ;
     if (RETVAL == Z_OK || RETVAL == Z_STREAM_END || RETVAL == Z_DATA_ERROR) {
 	unsigned in ;
 
         s->bytesInflated = cur_length + increment - s->stream.avail_out - prefix_length;
+        s->uncompressedBytes += s->bytesInflated ;
+        s->compressedBytes   += SvCUR(buf) - s->stream.avail_in  ;
+
         SvPOK_only(output);
         SvCUR_set(output, prefix_length + s->bytesInflated) ;
 	*SvEND(output) = '\0';
@@ -1467,6 +1492,22 @@ inflateCount(s)
     Compress::Zlib::inflateStream	s
     CODE:
         RETVAL = s->bytesInflated;
+  OUTPUT:
+	RETVAL
+
+uLong
+compressedBytes(s)
+    Compress::Zlib::inflateStream	s
+    CODE:
+        RETVAL = s->compressedBytes;
+  OUTPUT:
+	RETVAL
+
+uLong
+uncompressedBytes(s)
+    Compress::Zlib::inflateStream	s
+    CODE:
+        RETVAL = s->uncompressedBytes;
   OUTPUT:
 	RETVAL
 
@@ -1628,18 +1669,28 @@ DispStream(s, message=NULL)
     Compress::Zlib::inflateScanStream   s
     char *  message
 
+DualType
+inflateReset(s)
+    Compress::Zlib::inflateScanStream   s
+  CODE:
+      RETVAL = inflateReset(&(s->stream)) ;
+      if (RETVAL == Z_OK) {
+	  PostInitStream(s, s->flags, s->bufsize, s->WindowBits) ;
+      }
+    OUTPUT:
+      RETVAL
+
 DualType 
-scan(s, buf, out=NULL)
+scan(s, buf, out=NULL, eof=FALSE)
     Compress::Zlib::inflateScanStream	s
     SV *	buf
     SV *	out
+    bool	eof
+    bool	eof_mode = FALSE;
     int    start_len = NO_INIT
-    STRLEN  stmp   = NO_INIT
-  ALIAS:
-    inflate = 1
+    STRLEN stmp      = NO_INIT
   CODE:
     /* If the input buffer is a reference, dereference it */
-    ix = ix ; /* warning suppression */
 #ifndef MAGIC_APPEND
         buf = buf;
         croak("scan needs zlib 1.2.1 or better");
@@ -1649,10 +1700,9 @@ scan(s, buf, out=NULL)
     if (DO_UTF8(buf) && !sv_utf8_downgrade(buf, 1))
         croak("Wide character in Compress::Zlib::InflateScan::scan input parameter");
 #endif         
-    
     /* initialise the input buffer */
     s->stream.next_in = (Bytef*)SvPVbyte_force(buf, stmp) ;
-    s->stream.avail_in = SvCUR(buf) ; 
+    s->stream.avail_in = SvCUR(buf) ;
     start_len = s->stream.avail_in ;
     s->bytesInflated = 0 ; 
     do
@@ -1671,8 +1721,7 @@ scan(s, buf, out=NULL)
         /* inflate and check for errors */
         RETVAL = inflate(&(s->stream), Z_BLOCK);
 
-
-        if (start_len > 1)
+        if (start_len > 1 && ! eof_mode)
             s->window_lastByte = *(s->stream.next_in - 1 ) ;
 
         if (RETVAL == Z_STREAM_ERROR || RETVAL == Z_MEM_ERROR ||
@@ -1687,6 +1736,7 @@ scan(s, buf, out=NULL)
             s->adler32 = adler32(s->adler32, s->window + s->window_have, 
                                  WINDOW_SIZE - s->window_have - s->stream.avail_out);
 
+        s->uncompressedBytes =
         s->bytesInflated += WINDOW_SIZE - s->window_have - s->stream.avail_out;
 
         if (s->stream.avail_out)
@@ -1711,6 +1761,7 @@ scan(s, buf, out=NULL)
 
     s->last_error = RETVAL ;
     s->window_lastoff = s->stream.total_in ;
+    s->compressedBytes += SvCUR(buf) - s->stream.avail_in  ;
 
     if (RETVAL == Z_STREAM_END)
     {
@@ -1766,6 +1817,22 @@ inflateCount(s)
 #else
         RETVAL = s->bytesInflated;
 #endif
+  OUTPUT:
+	RETVAL
+
+uLong
+compressedBytes(s)
+    Compress::Zlib::inflateStream	s
+    CODE:
+        RETVAL = s->compressedBytes;
+  OUTPUT:
+	RETVAL
+
+uLong
+uncompressedBytes(s)
+    Compress::Zlib::inflateStream	s
+    CODE:
+        RETVAL = s->uncompressedBytes;
   OUTPUT:
 	RETVAL
 

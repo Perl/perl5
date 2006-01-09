@@ -26,11 +26,14 @@ my $WALL = '' ;
 my $GZIP_OS_CODE = -1 ;
 
 #$WALL = ' -pedantic ' if $Config{'cc'} =~ /gcc/ ;
-$WALL = ' -Wall -Wno-comment ' if $Config{'cc'} =~ /gcc/ ;
+#$WALL = ' -Wall -Wno-comment ' if $Config{'cc'} =~ /gcc/ ;
 
-my $PERL_CORE = grep { $_ eq 'PERL_CORE=1' } @ARGV;
+unless($ENV{PERL_CORE}) {
+    $ENV{PERL_CORE} = 1 if grep { $_ eq 'PERL_CORE=1' } @ARGV;
+}
+
 # don't ask if MM_USE_DEFAULT is set -- enables perl core building on cygwin
-if ($^O =~ /cygwin/i and not ($ENV{PERL_MM_USE_DEFAULT} || $PERL_CORE))
+if ($^O =~ /cygwin/i and not ($ENV{PERL_MM_USE_DEFAULT} or $ENV{PERL_CORE}))
 {
     print <<EOM ;
 
@@ -67,26 +70,31 @@ ParseCONFIG() ;
 
 my @files = ('Zlib.pm', 't/ZlibTestUtils.pm',
              glob("t/*.t"), 
+             glob("t/*.pl"), 
+             glob("lib/CompressPlugin/*.pm"),
+             glob("lib/UncompressPlugin/*.pm"),
              glob("lib/IO/Compress/*.pm"),
              glob("lib/IO/Uncompress/*.pm"),
              glob("lib/Compress/Zlib/*.pm"),
              glob("lib/Compress/Gzip/*.pm"),
              glob("lib/File/*.pm"),
+             glob("bzip2/*.pm"),
              grep(!/\.bak$/,  glob("examples/*"))) ;
 
-UpDowngrade(@files) unless $PERL_CORE;
+UpDowngrade(@files) unless $ENV{PERL_CORE};
 
 WriteMakefile(	
 	NAME   	 	=> 'Compress::Zlib',
-	VERSION_FROM => 'Zlib.pm',
+	VERSION_FROM    => 'Zlib.pm',
+    #OPTIMIZE	=> '-g',
 	INC      	=> "-I$ZLIB_INCLUDE" ,
 	DEFINE   	=> "$OLD_ZLIB $WALL -DGZIP_OS_CODE=$GZIP_OS_CODE" ,
-	XS	 	    => { 'Zlib.xs'    => 'Zlib.c' },
-	$PERL_CORE
+        XS	        => { 'Zlib.xs'    => 'Zlib.c'},
+	$ENV{PERL_CORE}
 	    ? (MAN3PODS    => {})
 	    : (PREREQ_PM   => { 'Scalar::Util'  => 0,
 		    $] >= 5.005 && $] < 5.006   ? ('File::BSDGlob' => 0) : () }
-	    ),
+	      ),
 	'depend' 	=> { 'Makefile'	  => 'config.in' },
 	'clean' 	=> { FILES        => '*.c constants.h constants.xs' },
 	'dist'	 	=> { COMPRESS     => 'gzip', 
@@ -97,11 +105,11 @@ WriteMakefile(
           ? zlib_files($ZLIB_LIB)
 	  : (LIBS	=> [ "-L$ZLIB_LIB -lz " ])
 	),  
-	($] >= 5.005
+	$] >= 5.005
 	    ? (ABSTRACT_FROM	=> 'Zlib.pm',
 	       AUTHOR  => 'Paul Marquess <pmqs@cpan.org>')
-	    : ()
-	),
+	    : (),
+	
     ) ;
 
 my @names = qw(
@@ -175,6 +183,7 @@ if (eval {require ExtUtils::Constant; 1}) {
                                      NAMES => \@names,
                                      C_FILE  => 'constants.h',
                                      XS_FILE  => 'constants.xs',
+                                                                       
                                     );
 } 
 else {
@@ -193,7 +202,7 @@ sub MY::libscan
 
     return undef
         if $path =~ /(~|\.bak|_bak)$/ ||
-           $path =~ /\..*\.swp$/ ||
+           $path =~ /\..*\.sw(o|p)$/ ||
            $path =~ /\B\.svn\b/;
 
     return $path;
@@ -237,13 +246,9 @@ longcover:
 	@echo Running test suite with Devel::Cover
 	HARNESS_PERL_SWITCHES=-MDevel::Cover $(MAKE) test COMPRESS_ZLIB_RUN_ALL=1 
 
-test-utf8:
-	@echo Running test suite with utf-8 enabled
-	env LC_ALL=en_GB.UTF-8 $(MAKE) test	
-
-test-utf8de:
-	@echo Running test suite with utf-8 and non-english enabled
-	env LC_ALL=de_DE.UTF-8 $(MAKE) test	
+test-unicode:
+	@echo Running test suite with unicode support enabled
+	env PERL_UNICODE=63 $(MAKE) test	
 
 EOM
 
@@ -251,13 +256,13 @@ EOM
 
 gcov:
 	@echo Running test suite with gcov and Devel::Cover [needs gcc 3.4?]
-	#@test  "${CC}" = "gcc" || (echo 'gcov' needs gcc, you have ${CC} ; exit 1)
 	rm -f *.o *.gcov *.da *.bbg *.bb *.gcno 
-	$(MAKE) OPTIMIZE=-g DEFINE="-fprofile-arcs -ftest-coverage"
-	HARNESS_PERL_SWITCHES=-MDevel::Cover $(MAKE) test
-    #gcov Zlib.xs
-    #gcov2perl -db cover_db Zlib.xs.gcov
-
+	HARNESS_PERL_SWITCHES=-MDevel::Cover $(MAKE) test \
+       OPTIMIZE=-g \
+       CCFLAGS=-O0\ -fprofile-arcs\ -ftest-coverage \
+       OTHERLDFLAGS=-fprofile-arcs\ -ftest-coverage
+	gcov Zlib.xs
+	gcov2perl -db cover_db Zlib.xs.gcov
 EOM
 
     return $postamble;

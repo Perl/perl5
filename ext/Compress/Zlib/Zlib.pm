@@ -8,7 +8,7 @@ use Carp ;
 use IO::Handle ;
 use Scalar::Util qw(dualvar);
 
-use Compress::Zlib::Common;
+use Compress::Zlib::Common ;
 use Compress::Zlib::ParseParameters;
 
 use strict ;
@@ -16,7 +16,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.000_06';
+$VERSION = '2.000_07';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -72,6 +72,7 @@ $VERSION = eval $VERSION;
         Z_UNKNOWN
         Z_VERSION_ERROR
 );
+
 
 sub AUTOLOAD {
     my($constname);
@@ -181,14 +182,15 @@ sub gzopen($$)
 
     if ($writing) {
         $gz = new IO::Compress::Gzip($file, Minimal => 1, AutoClose => 1, 
-                                            %defOpts) 
+                                     %defOpts) 
             or $Compress::Zlib::gzerrno = $IO::Compress::Gzip::GzipError;
     }
     else {
         $gz = new IO::Uncompress::Gunzip($file, 
-                                            Transparent => 1,
-                                            Append => 0, 
-                                            AutoClose => 1, Strict => 0) 
+                                         Transparent => 1,
+                                         Append => 0, 
+                                         AutoClose => 1, 
+                                         Strict => 0) 
             or $Compress::Zlib::gzerrno = $IO::Uncompress::Gunzip::GunzipError;
     }
 
@@ -313,7 +315,7 @@ sub Compress::Zlib::gzFile::gzsetparams
     return _set_gzerr(Z_STREAM_ERROR())
         if $self->[1] ne 'deflate';
  
-    my $status = *$gz->{Deflate}->deflateParams(-Level    => $level, 
+    my $status = *$gz->{Compress}->deflateParams(-Level   => $level, 
                                                 -Strategy => $strategy);
     _save_gzerr($gz);
     return $status ;
@@ -332,17 +334,17 @@ sub Compress::Zlib::Deflate::new
     my $pkg = shift ;
     my ($got) = ParseParameters(0,
             {
-                'AppendOutput'  => [Parse_boolean,  0],
-                'CRC32'         => [Parse_boolean,  0],
-                'ADLER32'       => [Parse_boolean,  0],
-                'Bufsize'       => [Parse_unsigned, 4096],
+                'AppendOutput'  => [1, 1, Parse_boolean,  0],
+                'CRC32'         => [1, 1, Parse_boolean,  0],
+                'ADLER32'       => [1, 1, Parse_boolean,  0],
+                'Bufsize'       => [1, 1, Parse_unsigned, 4096],
  
-                'Level'         => [Parse_signed,   Z_DEFAULT_COMPRESSION()],
-                'Method'        => [Parse_unsigned, Z_DEFLATED()],
-                'WindowBits'    => [Parse_signed,   MAX_WBITS()],
-                'MemLevel'      => [Parse_unsigned, MAX_MEM_LEVEL()],
-                'Strategy'      => [Parse_unsigned, Z_DEFAULT_STRATEGY()],
-                'Dictionary'    => [Parse_any,      ""],
+                'Level'         => [1, 1, Parse_signed,   Z_DEFAULT_COMPRESSION()],
+                'Method'        => [1, 1, Parse_unsigned, Z_DEFLATED()],
+                'WindowBits'    => [1, 1, Parse_signed,   MAX_WBITS()],
+                'MemLevel'      => [1, 1, Parse_unsigned, MAX_MEM_LEVEL()],
+                'Strategy'      => [1, 1, Parse_unsigned, Z_DEFAULT_STRATEGY()],
+                'Dictionary'    => [1, 1, Parse_any,      ""],
             }, @_) ;
 
 
@@ -371,14 +373,14 @@ sub Compress::Zlib::Inflate::new
     my $pkg = shift ;
     my ($got) = ParseParameters(0,
                     {
-                        'AppendOutput'  => [Parse_boolean,  0],
-                        'CRC32'         => [Parse_boolean,  0],
-                        'ADLER32'       => [Parse_boolean,  0],
-                        'ConsumeInput'  => [Parse_boolean,  1],
-                        'Bufsize'       => [Parse_unsigned, 4096],
+                        'AppendOutput'  => [1, 1, Parse_boolean,  0],
+                        'CRC32'         => [1, 1, Parse_boolean,  0],
+                        'ADLER32'       => [1, 1, Parse_boolean,  0],
+                        'ConsumeInput'  => [1, 1, Parse_boolean,  1],
+                        'Bufsize'       => [1, 1, Parse_unsigned, 4096],
                  
-                        'WindowBits'    => [Parse_signed,   MAX_WBITS()],
-                        'Dictionary'    => [Parse_any,      ""],
+                        'WindowBits'    => [1, 1, Parse_signed,   MAX_WBITS()],
+                        'Dictionary'    => [1, 1, Parse_any,      ""],
             }, @_) ;
 
 
@@ -401,12 +403,12 @@ sub Compress::Zlib::InflateScan::new
     my $pkg = shift ;
     my ($got) = ParseParameters(0,
                     {
-                        'CRC32'         => [Parse_boolean,  0],
-                        'ADLER32'       => [Parse_boolean,  0],
-                        'Bufsize'       => [Parse_unsigned, 4096],
+                        'CRC32'         => [1, 1, Parse_boolean,  0],
+                        'ADLER32'       => [1, 1, Parse_boolean,  0],
+                        'Bufsize'       => [1, 1, Parse_unsigned, 4096],
                  
-                        'WindowBits'    => [Parse_signed,   -MAX_WBITS()],
-                        'Dictionary'    => [Parse_any,      ""],
+                        'WindowBits'    => [1, 1, Parse_signed,   -MAX_WBITS()],
+                        'Dictionary'    => [1, 1, Parse_any,      ""],
             }, @_) ;
 
 
@@ -429,16 +431,16 @@ sub Compress::Zlib::inflateScanStream::createDeflateStream
     my $pkg = shift ;
     my ($got) = ParseParameters(0,
             {
-                'AppendOutput'  => [Parse_boolean,  0],
-                'CRC32'         => [Parse_boolean,  0],
-                'ADLER32'       => [Parse_boolean,  0],
-                'Bufsize'       => [Parse_unsigned, 4096],
+                'AppendOutput'  => [1, 1, Parse_boolean,  0],
+                'CRC32'         => [1, 1, Parse_boolean,  0],
+                'ADLER32'       => [1, 1, Parse_boolean,  0],
+                'Bufsize'       => [1, 1, Parse_unsigned, 4096],
  
-                'Level'         => [Parse_signed,   Z_DEFAULT_COMPRESSION()],
-                'Method'        => [Parse_unsigned, Z_DEFLATED()],
-                'WindowBits'    => [Parse_signed,   - MAX_WBITS()],
-                'MemLevel'      => [Parse_unsigned, MAX_MEM_LEVEL()],
-                'Strategy'      => [Parse_unsigned, Z_DEFAULT_STRATEGY()],
+                'Level'         => [1, 1, Parse_signed,   Z_DEFAULT_COMPRESSION()],
+                'Method'        => [1, 1, Parse_unsigned, Z_DEFLATED()],
+                'WindowBits'    => [1, 1, Parse_signed,   - MAX_WBITS()],
+                'MemLevel'      => [1, 1, Parse_unsigned, MAX_MEM_LEVEL()],
+                'Strategy'      => [1, 1, Parse_unsigned, Z_DEFAULT_STRATEGY()],
             }, @_) ;
 
     croak "Compress::Zlib::InflateScan::createDeflateStream: Bufsize must be >= 1, you specified " . 
@@ -461,14 +463,30 @@ sub Compress::Zlib::inflateScanStream::createDeflateStream
 
 }
 
+sub Compress::Zlib::inflateScanStream::inflate
+{
+    my $self = shift ;
+    my $buffer = $_[1];
+    my $eof = $_[2];
+
+    my $status = $self->scan(@_);
+
+    if ($status == Z_OK() && $_[2]) {
+        my $byte = ' ';
+        
+        $status = $self->scan(\$byte, $_[1]) ;
+    }
+    
+    return $status ;
+}
 
 sub Compress::Zlib::deflateStream::deflateParams
 {
     my $self = shift ;
     my ($got) = ParseParameters(0, {
-                'Level'      => [Parse_signed,   undef],
-                'Strategy'   => [Parse_unsigned, undef],
-                'Bufsize'    => [Parse_unsigned, undef],
+                'Level'      => [1, 1, Parse_signed,   undef],
+                'Strategy'   => [1, 1, Parse_unsigned, undef],
+                'Bufsize'    => [1, 1, Parse_unsigned, undef],
                 }, 
                 @_) ;
 
@@ -545,23 +563,23 @@ sub deflateInit(@)
 {
     my ($got) = ParseParameters(0,
                 {
-                'Bufsize'       => [Parse_unsigned, 4096],
-                'Level'         => [Parse_signed,   Z_DEFAULT_COMPRESSION()],
-                'Method'        => [Parse_unsigned, Z_DEFLATED()],
-                'WindowBits'    => [Parse_signed,   MAX_WBITS()],
-                'MemLevel'      => [Parse_unsigned, MAX_MEM_LEVEL()],
-                'Strategy'      => [Parse_unsigned, Z_DEFAULT_STRATEGY()],
-                'Dictionary'    => [Parse_any,      ""],
+                'Bufsize'       => [1, 1, Parse_unsigned, 4096],
+                'Level'         => [1, 1, Parse_signed,   Z_DEFAULT_COMPRESSION()],
+                'Method'        => [1, 1, Parse_unsigned, Z_DEFLATED()],
+                'WindowBits'    => [1, 1, Parse_signed,   MAX_WBITS()],
+                'MemLevel'      => [1, 1, Parse_unsigned, MAX_MEM_LEVEL()],
+                'Strategy'      => [1, 1, Parse_unsigned, Z_DEFAULT_STRATEGY()],
+                'Dictionary'    => [1, 1, Parse_any,      ""],
                 }, @_ ) ;
 
     croak "Compress::Zlib::deflateInit: Bufsize must be >= 1, you specified " . 
             $got->value('Bufsize')
         unless $got->value('Bufsize') >= 1;
 
-    my (%obj) = () ;
+    my $obj ;
  
     my $status = 0 ;
-    ($obj{def}, $status) = 
+    ($obj, $status) = 
       _deflateInit(0,
                 $got->value('Level'), 
                 $got->value('Method'), 
@@ -571,7 +589,7 @@ sub deflateInit(@)
                 $got->value('Bufsize'),
                 $got->value('Dictionary')) ;
 
-    my $x = ($status == Z_OK() ? bless \%obj, "Zlib::OldDeflate"  : undef) ;
+    my $x = ($status == Z_OK() ? bless $obj, "Zlib::OldDeflate"  : undef) ;
     return wantarray ? ($x, $status) : $x ;
 }
  
@@ -579,9 +597,9 @@ sub inflateInit(@)
 {
     my ($got) = ParseParameters(0,
                 {
-                'Bufsize'       => [Parse_unsigned, 4096],
-                'WindowBits'    => [Parse_signed,   MAX_WBITS()],
-                'Dictionary'    => [Parse_any,      ""],
+                'Bufsize'       => [1, 1, Parse_unsigned, 4096],
+                'WindowBits'    => [1, 1, Parse_signed,   MAX_WBITS()],
+                'Dictionary'    => [1, 1, Parse_any,      ""],
                 }, @_) ;
 
 
@@ -590,27 +608,29 @@ sub inflateInit(@)
         unless $got->value('Bufsize') >= 1;
 
     my $status = 0 ;
-    my (%obj) = () ;
-    ($obj{def}, $status) = _inflateInit(FLAG_CONSUME_INPUT,
+    my $obj ;
+    ($obj, $status) = _inflateInit(FLAG_CONSUME_INPUT,
                                 $got->value('WindowBits'), 
                                 $got->value('Bufsize'), 
                                 $got->value('Dictionary')) ;
 
-    my $x = ($status == Z_OK() ? bless \%obj, "Zlib::OldInflate"  : undef) ;
+    my $x = ($status == Z_OK() ? bless $obj, "Zlib::OldInflate"  : undef) ;
 
     wantarray ? ($x, $status) : $x ;
 }
 
 package Zlib::OldDeflate ;
 
+our (@ISA);
+@ISA = qw(Compress::Zlib::deflateStream);
+
+
 sub deflate
 {
     my $self = shift ;
     my $output ;
-    #my (@rest) = @_ ;
 
-    my $status = $self->{def}->deflate($_[0], $output) ;
-
+    my $status = $self->SUPER::deflate($_[0], $output) ;
     wantarray ? ($output, $status) : $output ;
 }
 
@@ -619,104 +639,23 @@ sub flush
     my $self = shift ;
     my $output ;
     my $flag = shift || Compress::Zlib::Z_FINISH();
-    my $status = $self->{def}->flush($output, $flag) ;
+    my $status = $self->SUPER::flush($output, $flag) ;
     
     wantarray ? ($output, $status) : $output ;
 }
 
-sub deflateParams
-{
-    my $self = shift ;
-    $self->{def}->deflateParams(@_) ;
-}
-
-sub msg
-{
-    my $self = shift ;
-    $self->{def}->msg() ;
-}
-
-sub total_in
-{
-    my $self = shift ;
-    $self->{def}->total_in() ;
-}
-
-sub total_out
-{
-    my $self = shift ;
-    $self->{def}->total_out() ;
-}
-
-sub dict_adler
-{
-    my $self = shift ;
-    $self->{def}->dict_adler() ;
-}
-
-sub get_Level
-{
-    my $self = shift ;
-    $self->{def}->get_Level() ;
-}
-
-sub get_Strategy
-{
-    my $self = shift ;
-    $self->{def}->get_Strategy() ;
-}
-
-#sub DispStream
-#{
-#    my $self = shift ;
-#    $self->{def}->DispStream($_[0]) ;
-#}
-
 package Zlib::OldInflate ;
+
+our (@ISA);
+@ISA = qw(Compress::Zlib::inflateStream);
 
 sub inflate
 {
     my $self = shift ;
     my $output ;
-    my $status = $self->{def}->inflate($_[0], $output) ;
+    my $status = $self->SUPER::inflate($_[0], $output) ;
     wantarray ? ($output, $status) : $output ;
 }
-
-sub inflateSync
-{
-    my $self = shift ;
-    $self->{def}->inflateSync($_[0]) ;
-}
-
-sub msg
-{
-    my $self = shift ;
-    $self->{def}->msg() ;
-}
-
-sub total_in
-{
-    my $self = shift ;
-    $self->{def}->total_in() ;
-}
-
-sub total_out
-{
-    my $self = shift ;
-    $self->{def}->total_out() ;
-}
-
-sub dict_adler
-{
-    my $self = shift ;
-    $self->{def}->dict_adler() ;
-}
-
-#sub DispStream
-#{
-#    my $self = shift ;
-#    $self->{def}->DispStream($_[0]) ;
-#}
 
 package Compress::Zlib ;
 
@@ -875,7 +814,7 @@ Compress::Zlib - Interface to zlib compression library
     $d->get_BufSize();
 
     ($i, $status) = new Compress::Zlib::Inflate( [OPT] ) ;
-    $status = $i->inflate($input, $output) ;
+    $status = $i->inflate($input, $output [, $eof]) ;
     $status = $i->inflateSync($input) ;
     $i->dict_adler() ;
     $d->crc32() ;
@@ -967,7 +906,7 @@ have been made to the C<gzopen> interface:
 
 =item 1
 
-If you want to to open either STDIN or STDOUT with C<gzopen>, you can
+If you want to to open either STDIN or STDOUT with C<gzopen>, you can now
 optionally use the special filename "C<->" as a synonym for C<\*STDIN> and
 C<\*STDOUT>.
 
@@ -984,8 +923,8 @@ stream that is embedded in a larger file, without having to resort to opening
 and closing the file multiple times. 
 
 In C<Compress::Zlib> version 2.x, the C<gzopen> interface has been completely
-rewritten to use the L<IO::Compress::Gzip|IO::Compress::Gzip> for writing gzip files and
-L<IO::Uncompress::Gunzip|IO::Uncompress::Gunzip> for reading gzip files.
+rewritten to use the L<IO::Gzip|IO::Gzip> for writing gzip files and
+L<IO::Gunzip|IO::Gunzip> for reading gzip files.
 
 =item 3
 
@@ -997,9 +936,9 @@ Added C<gztell>.
 
 =back
 
-A more complete and flexible interface for reading/writing gzip files/buffers
-is included with this module.  See L<IO::Compress::Gzip|IO::Compress::Gzip> and
-L<IO::Uncompress::Gunzip|IO::Uncompress::Gunzip> for more details.
+A more complete and flexible interface for reading/writing gzip
+files/buffers is included with this module.  See L<IO::Gzip|IO::Gzip> and
+L<IO::Gunzip|IO::Gunzip> for more details.
 
 =over 5
 
@@ -1007,14 +946,14 @@ L<IO::Uncompress::Gunzip|IO::Uncompress::Gunzip> for more details.
 
 =item B<$gz = gzopen($filehandle, $mode)>
 
-This function opens either the I<gzip> file C<$filename> for reading or writing
-or attaches to the opened filehandle, C<$filehandle>. It returns an object on
-success and C<undef> on failure.
+This function opens either the I<gzip> file C<$filename> for reading or
+writing or attaches to the opened filehandle, C<$filehandle>. 
+It returns an object on success and C<undef> on failure.
 
 When writing a gzip file this interface will always create the smallest
-possible gzip header (exactly 10 bytes). If you want control over the
-information stored in the gzip header (like the original filename or a comment)
-use L<IO::Compress::Gzip|IO::Compress::Gzip> instead.
+possible gzip header (exactly 10 bytes). If you want greater control over
+the information stored in the gzip header (like the original filename or a
+comment) use L<IO::Gzip|IO::Gzip> instead.
 
 The second parameter, C<$mode>, is used to specify whether the file is
 opened for reading or writing and to optionally specify a compression
@@ -1089,8 +1028,6 @@ Returns 1 on success, 0 on failure.
 Returns the uncompressed file offset.
 
 =item B<$status = $gz-E<gt>gzseek($offset, $whence) ;>
-
-Sets the file position of the 
 
 Provides a sub-set of the C<seek> functionality, with the restriction
 that it is only legal to seek forward in the compressed file.
@@ -1261,7 +1198,7 @@ undef.
 
 The C<$buffer> parameter can either be a scalar or a scalar reference.
 
-See L<IO::Compress::Gzip|IO::Compress::Gzip> for an alternative way to carry out in-memory gzip
+See L<IO::Gzip|IO::Gzip> for an alternative way to carry out in-memory gzip
 compression.
 
 =head2 Compress::Zlib::memGunzip
@@ -1276,7 +1213,7 @@ returns undef.
 The C<$buffer> parameter can either be a scalar or a scalar reference. The
 contents of the C<$buffer> parameter are destroyed after calling this function.
 
-See L<IO::Uncompress::Gunzip|IO::Uncompress::Gunzip> for an alternative way to carry out in-memory gzip
+See L<IO::Gunzip|IO::Gunzip> for an alternative way to carry out in-memory gzip
 uncompression.
 
 =head1 COMPRESS/UNCOMPRESS
@@ -1312,7 +1249,7 @@ The source buffer can either be a scalar or a scalar reference.
 Please note: the two functions defined above are I<not> compatible with
 the Unix commands of the same name.
 
-See L<IO::Compress::Deflate|IO::Compress::Deflate> and L<IO::Uncompress::Inflate|IO::Uncompress::Inflate> included with
+See L<IO::Deflate|IO::Deflate> and L<IO::Inflate|IO::Inflate> included with
 this distribution for an alternative interface for reading/writing RFC 1950
 files/buffers.
 
@@ -1671,8 +1608,12 @@ Here is a list of the valid options:
 
 =item B<-WindowBits>
 
-For a definition of the meaning and valid values for C<WindowBits>
-refer to the I<zlib> documentation for I<inflateInit2>.
+To uncompress an RFC1950 data stream, set C<WindowBits> to a positive number.
+
+To uncompress an RFC1951 data stream, set C<WindowBits> to C<-MAX_WBITS>.
+
+For a full definition of the meaning and valid values for C<WindowBits> refer
+to the I<zlib> documentation for I<inflateInit2>.
 
 Defaults to C<-WindowBits =E<gt>MAX_WBITS>.
 
@@ -1734,7 +1675,7 @@ buffer size.
 
     my ($i, $status) = new Compress::Zlib::Inflate( -Bufsize => 300 ) ;
 
-=head2 B< $status = $i-E<gt>inflate($input, $output) >
+=head2 B< $status = $i-E<gt>inflate($input, $output [,$eof]) >
 
 Inflates the complete contents of C<$input> and writes the uncompressed
 data to C<$output>. The C<$input> and C<$output> parameters can either be
@@ -1762,6 +1703,45 @@ If the C<AppendOutput> option is set to true in the constructor for
 this object, the uncompressed data will be appended to C<$output>. If
 it is false, C<$output> will be truncated before any uncompressed data
 is written to it.
+
+The C<$eof> parameter needs a bit of explanation. 
+
+Prior to version 1.2.0, zlib assumed that there was at least one trailing
+byte immediately after the compressed data stream when it was carrying out
+decompression. This normally isn't a problem because the majority of zlib
+applications guarantee that there will be data directly after the
+compressed data stream.  For example, both gzip (RFC1950) and zip both
+define trailing data that follows the compressed data stream.
+
+The C<$eof> parameter only needs to be used if B<all> of the following
+conditions apply
+
+=over 5
+
+=item 1 
+
+You are either using a copy of zlib that is older than version 1.2.0 or you
+want your application code to be able to run with as many different
+versions of zlib as possible.
+
+=item 2
+
+You have set the C<WindowBits> parameter to C<-MAX_WBITS> in the constructor
+for this object, i.e. you are uncompressing a raw deflated data stream
+(RFC1951).
+
+=item 3
+
+There is no data immediately after the compressed data stream.
+
+=back
+
+If B<all> of these are the case, then you need to set the C<$eof> parameter to
+true on the final call (and only the final call) to C<$i-E<gt>inflate>. 
+
+If you have built this module with zlib >= 1.2.0, the C<$eof> parameter is
+ignored. You can still set it if you want, but it won't be used behind the
+scenes.
 
 =head2 B<$status = $i-E<gt>inflateSync($input)>
 
@@ -1899,8 +1879,12 @@ the default) is C<-Method =E<gt>Z_DEFLATED>.
 
 =item B<-WindowBits>
 
-For a definition of the meaning and valid values for C<WindowBits>
-refer to the I<zlib> documentation for I<deflateInit2>.
+To create an RFC1950 data stream, set C<WindowBits> to a positive number.
+
+To create an RFC1951 data stream, set C<WindowBits> to C<-MAX_WBITS>.
+
+For a full definition of the meaning and valid values for C<WindowBits> refer
+to the I<zlib> documentation for I<deflateInit2>.
 
 Defaults to C<-WindowBits =E<gt>MAX_WBITS>.
 
@@ -2065,7 +2049,7 @@ Here is a definition of the interface:
 
 =head2 B<($i, $status) = inflateInit()>
 
-Initialises an inflation stream. 
+Initializes an inflation stream. 
 
 In a list context it returns the inflation stream, C<$i>, and the
 I<zlib> status code (C<$status>). In a scalar context it returns the
@@ -2093,8 +2077,12 @@ Here is a list of the valid options:
 
 =item B<-WindowBits>
 
-For a definition of the meaning and valid values for C<WindowBits>
-refer to the I<zlib> documentation for I<inflateInit2>.
+To uncompress an RFC1950 data stream, set C<WindowBits> to a positive number.
+
+To uncompress an RFC1951 data stream, set C<WindowBits> to C<-MAX_WBITS>.
+
+For a full definition of the meaning and valid values for C<WindowBits> refer
+to the I<zlib> documentation for I<inflateInit2>.
 
 Defaults to C<-WindowBits =E<gt>MAX_WBITS>.
 
@@ -2247,7 +2235,7 @@ See the Changes file.
 =head1 COPYRIGHT AND LICENSE
  
 
-Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
+Copyright (c) 1995-2006 Paul Marquess. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 

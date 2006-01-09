@@ -1,7 +1,7 @@
 BEGIN {
     if ($ENV{PERL_CORE}) {
 	chdir 't' if -d 't';
-	@INC = ("../lib", "lib");
+	@INC = ("../lib", "lib/compress");
     }
 }
 
@@ -129,7 +129,8 @@ title "gzgrep";
 check "$Perl  ${examples}/gzgrep the $file1 $file2",
         join('', grep(/the/, @hello1, @hello2));
 
-for ($file1, $file2) { 1 while unlink $_ } ;
+for ($file1, $file2, $stderr) { 1 while unlink $_ } ;
+
 
 
 # filtdef/filtinf

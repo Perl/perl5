@@ -4,33 +4,242 @@ package IO::Compress::RawDeflate ;
 #
 use strict ;
 use warnings;
-use IO::Uncompress::RawInflate;
+
+
+use IO::Compress::Base;
+use CompressPlugin::Deflate ;
 
 require Exporter ;
+use Compress::Zlib::Common qw(:Status createSelfTiedObject);
 
-our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $RawDeflateError);
 
-$VERSION = '2.000_05';
+our ($VERSION, @ISA, @EXPORT_OK, %DEFLATE_CONSTANTS, %EXPORT_TAGS, $RawDeflateError);
+
+$VERSION = '2.000_07';
 $RawDeflateError = '';
 
-@ISA = qw(Exporter IO::BaseDeflate);
+@ISA = qw(Exporter IO::Compress::Base);
 @EXPORT_OK = qw( $RawDeflateError rawdeflate ) ;
-%EXPORT_TAGS = %IO::BaseDeflate::EXPORT_TAGS ;
 push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
-Exporter::export_ok_tags('all');
 
+%EXPORT_TAGS = ( flush     => [qw{  
+                                    Z_NO_FLUSH
+                                    Z_PARTIAL_FLUSH
+                                    Z_SYNC_FLUSH
+                                    Z_FULL_FLUSH
+                                    Z_FINISH
+                                    Z_BLOCK
+                              }],
+                 level     => [qw{  
+                                    Z_NO_COMPRESSION
+                                    Z_BEST_SPEED
+                                    Z_BEST_COMPRESSION
+                                    Z_DEFAULT_COMPRESSION
+                              }],
+                 strategy  => [qw{  
+                                    Z_FILTERED
+                                    Z_HUFFMAN_ONLY
+                                    Z_RLE
+                                    Z_FIXED
+                                    Z_DEFAULT_STRATEGY
+                              }],
+
+              );
+
+{
+    my %seen;
+    foreach (keys %EXPORT_TAGS )
+    {
+        push @{$EXPORT_TAGS{constants}}, 
+                 grep { !$seen{$_}++ } 
+                 @{ $EXPORT_TAGS{$_} }
+    }
+    $EXPORT_TAGS{all} = $EXPORT_TAGS{constants} ;
+}
+
+%DEFLATE_CONSTANTS = %EXPORT_TAGS;
+
+Exporter::export_ok_tags('all');
+              
 
 
 sub new
 {
-    my $pkg = shift ;
-    return IO::BaseDeflate::new($pkg, 'rfc1951', undef, \$RawDeflateError, @_);
+    my $class = shift ;
+
+    my $obj = createSelfTiedObject($class, \$RawDeflateError);
+
+    return $obj->_create(undef, @_);
 }
 
 sub rawdeflate
 {
-    return IO::BaseDeflate::_def(__PACKAGE__, 'rfc1951', \$RawDeflateError, @_);
+    my $obj = createSelfTiedObject(undef, \$RawDeflateError);
+    return $obj->_def(@_);
 }
+
+sub ckParams
+{
+    my $self = shift ;
+    my $got = shift;
+
+    return 1 ;
+}
+
+sub mkComp
+{
+    my $self = shift ;
+    my $class = shift ;
+    my $got = shift ;
+
+    #return CompressPlugin::Deflate::mkCompObject($self, $class, $got)
+    my ($obj, $errstr, $errno) = CompressPlugin::Deflate::mkCompObject(
+                                                 $got->value('CRC32'),
+                                                 $got->value('Adler32'),
+                                                 $got->value('Level'),
+                                                 $got->value('Strategy')
+                                                 );
+
+   return $self->saveErrorString(undef, $errstr, $errno)
+       if ! defined $obj;
+
+   return $obj;    
+}
+
+
+sub mkHeader
+{
+    my $self = shift ;
+    return '';
+}
+
+sub mkTrailer
+{
+    my $self = shift ;
+    return '';
+}
+
+sub mkFinalTrailer
+{
+    return '';
+}
+
+
+#sub newHeader
+#{
+#    my $self = shift ;
+#    return '';
+#}
+
+sub getExtraParams
+{
+    my $self = shift ;
+    return $self->getZlibParams();
+}
+
+sub getZlibParams
+{
+    my $self = shift ;
+
+    use Compress::Zlib::ParseParameters;
+    use Compress::Zlib qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+
+    
+    return (
+        
+            # zlib behaviour
+            #'Method'   => [0, 1, Parse_unsigned,  Z_DEFLATED],
+            'Level'     => [0, 1, Parse_signed,    Z_DEFAULT_COMPRESSION],
+            'Strategy'  => [0, 1, Parse_signed,    Z_DEFAULT_STRATEGY],
+
+            'CRC32'     => [0, 1, Parse_boolean,   0],
+            'ADLER32'   => [0, 1, Parse_boolean,   0],
+            'Merge'     => [1, 1, Parse_boolean,   0],
+        );
+    
+    
+}
+
+sub getInverseClass
+{
+    return ('IO::Uncompress::RawInflate', 
+                \$IO::Uncompress::RawInflate::RawInflateError);
+}
+
+sub getFileInfo
+{
+    my $self = shift ;
+    my $params = shift;
+    my $file = shift ;
+    
+}
+
+use IO::Seekable qw(SEEK_SET);
+
+sub createMerge
+{
+    my $self = shift ;
+    my $outValue = shift ;
+    my $outType = shift ;
+
+    my ($invClass, $error_ref) = $self->getInverseClass();
+    eval "require $invClass" 
+        or die "aaaahhhh" ;
+
+    my $inf = $invClass->new( $outValue, 
+                             Transparent => 0, 
+                             #Strict     => 1,
+                             AutoClose   => 0,
+                             Scan        => 1)
+       or return $self->saveErrorString(undef, "Cannot create InflateScan object: $$error_ref" ) ;
+
+    my $end_offset = 0;
+    $inf->scan() 
+        or return $self->saveErrorString(undef, "Error Scanning: $$error_ref", $inf->errorNo) ;
+    $inf->zap($end_offset) 
+        or return $self->saveErrorString(undef, "Error Zapping: $$error_ref", $inf->errorNo) ;
+
+    my $def = *$self->{Compress} = $inf->createDeflate();
+
+    *$self->{Header} = *$inf->{Info}{Header};
+    *$self->{UnCompSize_32bit} = 
+        *$self->{BytesWritten} = *$inf->{UnCompSize_32bit} ;
+
+
+    if ( $outType eq 'buffer') 
+      { substr( ${ *$self->{Buffer} }, $end_offset) = '' }
+    elsif ($outType eq 'handle' || $outType eq 'filename') {
+        *$self->{FH} = *$inf->{FH} ;
+        delete *$inf->{FH};
+        *$self->{FH}->flush() ;
+        *$self->{Handle} = 1 if $outType eq 'handle';
+
+        #seek(*$self->{FH}, $end_offset, SEEK_SET) 
+        *$self->{FH}->seek($end_offset, SEEK_SET) 
+            or return $self->saveErrorString(undef, $!, $!) ;
+    }
+
+    return $def ;
+}
+
+#### zlib specific methods
+
+sub deflateParams 
+{
+    my $self = shift ;
+
+    my $level = shift ;
+    my $strategy = shift ;
+
+    my $status = *$self->{Compress}->deflateParams(Level => $level, Strategy => $strategy) ;
+    return $self->saveErrorString(0, *$self->{Compress}{Error}, *$self->{Compress}{ErrorNo})
+        if $status == STATUS_ERROR;
+
+    return 1;    
+}
+
+
+
 
 1;
 
@@ -61,7 +270,7 @@ IO::Compress::RawDeflate     - Perl interface to write RFC 1951 files/buffers
     $z->seek($position, $whence);
     $z->binmode();
     $z->fileno();
-    $z->newStream();
+    $z->newStream( [OPTS] );
     $z->deflateParams();
     $z->close() ;
 
@@ -117,24 +326,25 @@ L<IO::Uncompress::RawInflate|IO::Uncompress::RawInflate>.
 
 =head1 Functional Interface
 
-A top-level function, C<rawdeflate>, is provided to carry out "one-shot"
-compression between buffers and/or files. For finer control over the compression process, see the L</"OO Interface"> section.
+A top-level function, C<rawdeflate>, is provided to carry out
+"one-shot" compression between buffers and/or files. For finer
+control over the compression process, see the L</"OO Interface">
+section.
 
     use IO::Compress::RawDeflate qw(rawdeflate $RawDeflateError) ;
 
     rawdeflate $input => $output [,OPTS] 
         or die "rawdeflate failed: $RawDeflateError\n";
 
-    rawdeflate \%hash [,OPTS] 
-        or die "rawdeflate failed: $RawDeflateError\n";
+
 
 The functional interface needs Perl5.005 or better.
 
 
 =head2 rawdeflate $input => $output [, OPTS]
 
-If the first parameter is not a hash reference C<rawdeflate> expects
-at least two parameters, C<$input> and C<$output>.
+
+C<rawdeflate> expects at least two parameters, C<$input> and C<$output>.
 
 =head3 The C<$input> parameter
 
@@ -164,13 +374,15 @@ from C<$$input>.
 
 =item An array reference 
 
-If C<$input> is an array reference, the input data will be read from each
-element of the array in turn. The action taken by C<rawdeflate> with
-each element of the array will depend on the type of data stored
-in it. You can mix and match any of the types defined in this list,
-excluding other array or hash references. 
+If C<$input> is an array reference, each element in the array must be a
+filename.
+
+The input data will be read from each file in turn. 
+
 The complete array will be walked to ensure that it only
-contains valid data types before any data is compressed.
+contains valid filenames before any data is compressed.
+
+
 
 =item An Input FileGlob string
 
@@ -198,36 +410,28 @@ compressed data. This parameter can take one of these forms.
 
 =item A filename
 
-If the C<$output> parameter is a simple scalar, it is assumed to be a filename.
-This file will be opened for writing and the compressed data will be
-written to it.
+If the C<$output> parameter is a simple scalar, it is assumed to be a
+filename.  This file will be opened for writing and the compressed
+data will be written to it.
 
 =item A filehandle
 
-If the C<$output> parameter is a filehandle, the compressed data will
-be written to it.  
+If the C<$output> parameter is a filehandle, the compressed data
+will be written to it.
 The string '-' can be used as an alias for standard output.
 
 
 =item A scalar reference 
 
-If C<$output> is a scalar reference, the compressed data will be stored
-in C<$$output>.
+If C<$output> is a scalar reference, the compressed data will be
+stored in C<$$output>.
 
-
-=item A Hash Reference
-
-If C<$output> is a hash reference, the compressed data will be written
-to C<$output{$input}> as a scalar reference.
-
-When C<$output> is a hash reference, C<$input> must be either a filename or
-list of filenames. Anything else is an error.
 
 
 =item An Array Reference
 
-If C<$output> is an array reference, the compressed data will be pushed
-onto the array.
+If C<$output> is an array reference, the compressed data will be
+pushed onto the array.
 
 =item An Output FileGlob
 
@@ -242,60 +446,13 @@ string. Anything else is an error.
 
 If the C<$output> parameter is any other type, C<undef> will be returned.
 
-=head2 rawdeflate \%hash [, OPTS]
 
-If the first parameter is a hash reference, C<\%hash>, this will be used to
-define both the source of uncompressed data and to control where the
-compressed data is output. Each key/value pair in the hash defines a
-mapping between an input filename, stored in the key, and an output
-file/buffer, stored in the value. Although the input can only be a filename,
-there is more flexibility to control the destination of the compressed
-data. This is determined by the type of the value. Valid types are
-
-=over 5
-
-=item undef
-
-If the value is C<undef> the compressed data will be written to the
-value as a scalar reference.
-
-=item A filename
-
-If the value is a simple scalar, it is assumed to be a filename. This file will
-be opened for writing and the compressed data will be written to it.
-
-=item A filehandle
-
-If the value is a filehandle, the compressed data will be
-written to it. 
-The string '-' can be used as an alias for standard output.
-
-
-=item A scalar reference 
-
-If the value is a scalar reference, the compressed data will be stored
-in the buffer that is referenced by the scalar.
-
-
-=item A Hash Reference
-
-If the value is a hash reference, the compressed data will be written
-to C<$hash{$input}> as a scalar reference.
-
-=item An Array Reference
-
-If C<$output> is an array reference, the compressed data will be pushed
-onto the array.
-
-=back
-
-Any other type is a error.
 
 =head2 Notes
 
 When C<$input> maps to multiple files/buffers and C<$output> is a single
-file/buffer the compressed input files/buffers will all be stored in
-C<$output> as a single compressed stream.
+file/buffer the compressed input files/buffers will all be stored
+in C<$output> as a single compressed stream.
 
 
 
@@ -309,14 +466,24 @@ L</"Constructor Options"> section below.
 
 =item AutoClose =E<gt> 0|1
 
-This option applies to any input or output data streams to C<rawdeflate>
-that are filehandles.
+This option applies to any input or output data streams to 
+C<rawdeflate> that are filehandles.
 
 If C<AutoClose> is specified, and the value is true, it will result in all
 input and/or output filehandles being closed once C<rawdeflate> has
 completed.
 
 This parameter defaults to 0.
+
+
+
+=item BinModeIn =E<gt> 0|1
+
+When reading from a file or filehandle, set C<binmode> before reading.
+
+Defaults to 0.
+
+
 
 
 
@@ -440,9 +607,9 @@ C<OPTS> is any combination of the following options:
 =item -AutoClose =E<gt> 0|1
 
 This option is only valid when the C<$output> parameter is a filehandle. If
-specified, and the value is true, it will result in the C<$output> being closed
-once either the C<close> method is called or the C<IO::Compress::RawDeflate> object is
-destroyed.
+specified, and the value is true, it will result in the C<$output> being
+closed once either the C<close> method is called or the C<IO::Compress::RawDeflate>
+object is destroyed.
 
 This parameter defaults to 0.
 
@@ -450,27 +617,27 @@ This parameter defaults to 0.
 
 Opens C<$output> in append mode. 
 
-The behaviour of this option is dependant on the type of C<$output>.
+The behaviour of this option is dependent on the type of C<$output>.
 
 =over 5
 
 =item * A Buffer
 
-If C<$output> is a buffer and C<Append> is enabled, all compressed data will be
-append to the end if C<$output>. Otherwise C<$output> will be cleared before
-any data is written to it.
+If C<$output> is a buffer and C<Append> is enabled, all compressed data
+will be append to the end if C<$output>. Otherwise C<$output> will be
+cleared before any data is written to it.
 
 =item * A Filename
 
-If C<$output> is a filename and C<Append> is enabled, the file will be opened
-in append mode. Otherwise the contents of the file, if any, will be truncated
-before any compressed data is written to it.
+If C<$output> is a filename and C<Append> is enabled, the file will be
+opened in append mode. Otherwise the contents of the file, if any, will be
+truncated before any compressed data is written to it.
 
 =item * A Filehandle
 
-If C<$output> is a filehandle, the file pointer will be positioned to the end
-of the file via a call to C<seek> before any compressed data is written to it.
-Otherwise the file pointer will not be moved.
+If C<$output> is a filehandle, the file pointer will be positioned to the
+end of the file via a call to C<seek> before any compressed data is written
+to it.  Otherwise the file pointer will not be moved.
 
 =back
 
@@ -484,8 +651,8 @@ data stream stored in C<$output>.
 
 
 
-It is a fatal error to attempt to use this option when C<$output> is not an RFC
-1951 data stream.
+It is a fatal error to attempt to use this option when C<$output> is not an
+RFC 1951 data stream.
 
 
 
@@ -495,8 +662,9 @@ There are a number of other limitations with the C<Merge> option:
 
 =item 1
 
-This module needs to have been built with zlib 1.2.1 or better to work. A fatal
-error will be thrown if C<Merge> is used with an older version of zlib.  
+This module needs to have been built with zlib 1.2.1 or better to work. A
+fatal error will be thrown if C<Merge> is used with an older version of
+zlib.  
 
 =item 2
 
@@ -567,7 +735,7 @@ Usage is
     print $z $data
 
 Compresses and outputs the contents of the C<$data> parameter. This
-has the same behavior as the C<print> built-in.
+has the same behaviour as the C<print> built-in.
 
 Returns true if successful.
 
@@ -730,13 +898,24 @@ underlying file will also be closed.
 
 
 
-=head2 newStream
+=head2 newStream([OPTS])
 
 Usage is
 
-    $z->newStream
+    $z->newStream( [OPTS] )
 
-TODO
+Closes the current compressed data stream and starts a new one.
+
+OPTS consists of the following sub-set of the the options that are
+available when creating the C<$z> object,
+
+=over 5
+
+=item * Level
+
+=item * TODO
+
+=back
 
 =head2 deflateParams
 
@@ -846,7 +1025,7 @@ See the Changes file.
 =head1 COPYRIGHT AND LICENSE
  
 
-Copyright (c) 2005 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 

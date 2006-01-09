@@ -1,7 +1,7 @@
 BEGIN {
     if ($ENV{PERL_CORE}) {
 	chdir 't' if -d 't';
-	@INC = ("../lib", "lib");
+	@INC = ("../lib", "lib/compress");
     }
 }
 
@@ -114,7 +114,6 @@ if(0)
     ok ! $fil->gzclose, "gzclose ok" ;
 
     is $s, Encode::decode_utf8($uncomp), "  decode_utf8 ok" ;
-
 }
 
 # Add tests that check that the module traps use of wide chars

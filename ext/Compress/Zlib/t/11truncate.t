@@ -1,7 +1,7 @@
 BEGIN {
     if ($ENV{PERL_CORE}) {
 	chdir 't' if -d 't';
-	@INC = ("../lib", "lib");
+	@INC = ("../lib", "lib/compress");
     }
 }
 
@@ -9,6 +9,8 @@ use lib 't';
 use strict;
 use warnings;
 use bytes;
+
+# TODO -- split out & add zip/bzip2
 
 use Test::More ;
 use ZlibTestUtils;
@@ -261,8 +263,8 @@ foreach my $CompressClass ( 'IO::Compress::RawDeflate')
                 ok $gz;
                 ok ! $gz->error() ;
                 my $buff = '';
-                ok $gz->read($buff) == length $part ;
-                ok $buff eq $part ;
+                is $gz->read($buff), length $part ;
+                is $buff, $part ;
                 ok $gz->eof() ;
                 $gz->close();
             }

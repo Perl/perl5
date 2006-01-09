@@ -11,21 +11,21 @@ Common questions answered.
 
 =head2 Compatibility with Unix compress/uncompress.
 
-Although C<Compress::Zlib> has a pair of functions called C<compress>
-and C<uncompress>, they are I<not> the same as the Unix programs of the
-same name. The C<Compress::Zlib> library is not compatible with Unix
+Although C<Compress::Zlib> has a pair of functions called C<compress> and
+C<uncompress>, they are I<not> the same as the Unix programs of the same
+name. The C<Compress::Zlib> library is not compatible with Unix
 C<compress>.
 
-If you have the C<uncompress> program available, you can use this to
-read compressed files
+If you have the C<uncompress> program available, you can use this to read
+compressed files
 
     open F, "uncompress -c $filename |";
     while (<F>)
     {
         ...
 
-If you have the C<gunzip> program available, you can use this to read
-compressed files
+Alternatively, if you have the C<gunzip> program available, you can use
+this to read compressed files
 
     open F, "gunzip -c $filename |";
     while (<F>)
@@ -42,14 +42,14 @@ available
 
 =head2 Accessing .tar.Z files
 
-The C<Archive::Tar> module can optionally use C<Compress::Zlib> (via
-the C<IO::Zlib> module) to access tar files that have been compressed
-with C<gzip>. Unfortunately tar files compressed with the Unix C<compress>
+The C<Archive::Tar> module can optionally use C<Compress::Zlib> (via the
+C<IO::Zlib> module) to access tar files that have been compressed with
+C<gzip>. Unfortunately tar files compressed with the Unix C<compress>
 utility cannot be read by C<Compress::Zlib> and so cannot be directly
 accesses by C<Archive::Tar>.
 
-If the C<uncompress> or C<gunzip> programs are available, you can use
-one of these workarounds to read C<.tar.Z> files from C<Archive::Tar>
+If the C<uncompress> or C<gunzip> programs are available, you can use one
+of these workarounds to read C<.tar.Z> files from C<Archive::Tar>
 
 Firstly with C<uncompress>
 
@@ -88,6 +88,9 @@ write a C<.tar.Z> file
 
 =head2 Accessing Zip Files
 
+
+
+
 Although it is possible (with some effort on your part) to use this
 module to access .zip files, there is a module on CPAN that will do all
 the hard work for you. Check out the C<Archive::Zip> module on CPAN at
@@ -102,12 +105,14 @@ be aware of.
 
 =item 1.
 
-When calling B<inflateInit> or B<deflateInit> the B<WindowBits> parameter
-must be set to C<-MAX_WBITS>. This disables the creation of the zlib
-header.
+When calling B<Compress::Zlib::Inflate::new> or
+B<Compress::Zlib::Deflate::new> the B<WindowBits> parameter must be set to
+C<-MAX_WBITS>. This enables the creation of an RFC1951 compressed data
+stream.
 
 =item 2.
 
+If you are using zlib older than 1.2.0, 
 The zlib function B<inflate>, and so the B<inflate> method supplied in
 this module, assume that there is at least one trailing byte after the
 compressed data stream. Normally this isn't a problem because both
@@ -129,8 +134,9 @@ after the compressed data stream.
 
 =head2 Zlib Library Version Support
 
-By default C<Compress::Zlib> will build with a private copy of version 1.2.3 of the zlib library. (See the F<README> file for details of how
-to override this behavior)
+By default C<Compress::Zlib> will build with a private copy of version
+1.2.3 of the zlib library. (See the F<README> file for details of
+how to override this behaviour)
 
 If you decide to use a different version of the zlib library, you need to be
 aware of the following issues
@@ -143,8 +149,9 @@ First off, you must have zlib 1.0.5 or better.
 
 =item *
 
-You need to have zlib 1.2.1 or better if you want to use the C<-Merge> option
-with C<IO::Compress::Gzip>, C<IO::Compress::Deflate> and C<IO::Compress::RawDeflate>.
+You need to have zlib 1.2.1 or better if you want to use the C<-Merge>
+option with C<IO::Compress::Gzip>, C<IO::Compress::Deflate> and
+C<IO::Compress::RawDeflate>.
 
 
 
@@ -188,7 +195,7 @@ See the Changes file.
 =head1 COPYRIGHT AND LICENSE
  
 
-Copyright (c) 2005 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 

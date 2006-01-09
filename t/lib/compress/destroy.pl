@@ -1,9 +1,3 @@
-BEGIN {
-    if ($ENV{PERL_CORE}) {
-	chdir 't' if -d 't';
-	@INC = ("../lib", "lib");
-    }
-}
 
 use lib 't';
 use strict;
@@ -23,22 +17,20 @@ BEGIN
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 23 + $extra ;
+    plan tests => 7 + $extra ;
 
-    use_ok('IO::Compress::Gzip', qw($GzipError)) ;
-    use_ok('IO::Compress::Deflate', qw($DeflateError)) ;
-    use_ok('IO::Uncompress::AnyInflate', qw($AnyInflateError)) ;
-    use_ok('IO::Compress::RawDeflate', qw($RawDeflateError)) ;
     use_ok('IO::File') ;
 }
 
-
-foreach my $CompressClass ('IO::Compress::Gzip',     
-                           'IO::Compress::Deflate', 
-                           'IO::Compress::RawDeflate')
+sub run
 {
-    title "Testing $CompressClass";
 
+    my $CompressClass   = identify();
+    my $UncompressClass = getInverse($CompressClass);
+    my $Error           = getErrorRef($CompressClass);
+    my $UnError         = getErrorRef($UncompressClass);
+
+    title "Testing $CompressClass";
 
     {
         # Check that the class destructor will call close
@@ -83,3 +75,4 @@ EOM
     }
 }
 
+1;

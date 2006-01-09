@@ -6,89 +6,12 @@ require 5.004 ;
 use strict ;
 use warnings;
 
-# create RFC1952
 
-require Exporter ;
-
-our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $GzipError);
-
-$VERSION = '2.000_05';
-$GzipError = '' ;
-
-@ISA    = qw(Exporter IO::BaseDeflate);
-@EXPORT_OK = qw( $GzipError gzip ) ;
-%EXPORT_TAGS = %IO::BaseDeflate::EXPORT_TAGS ;
-push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
-Exporter::export_ok_tags('all');
-
-sub new
-{
-    my $pkg = shift ;
-    return IO::BaseDeflate::new($pkg, 'rfc1952', undef, \$GzipError, @_);
-}
-
-
-sub gzip
-{
-    return IO::BaseDeflate::_def(__PACKAGE__, 'rfc1952', \$GzipError, @_);
-}
-
-package IO::BaseDeflate;
-
+use IO::Compress::RawDeflate;
 
 use Compress::Zlib 2 ;
-use Compress::Zlib::Common;
-use Compress::Zlib::FileConstants;
-use Compress::Zlib::ParseParameters;
+use Compress::Zlib::Common qw(:Status createSelfTiedObject);
 use Compress::Gzip::Constants;
-use IO::Uncompress::Gunzip;
-
-use IO::File ;
-#use File::Glob;
-require Exporter ;
-use Carp ;
-use Symbol;
-use bytes;
-
-our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS, $got_encode);
-@ISA    = qw(Exporter IO::File);
-%EXPORT_TAGS = ( flush     => [qw{  
-                                    Z_NO_FLUSH
-                                    Z_PARTIAL_FLUSH
-                                    Z_SYNC_FLUSH
-                                    Z_FULL_FLUSH
-                                    Z_FINISH
-                                    Z_BLOCK
-                              }],
-                 level     => [qw{  
-                                    Z_NO_COMPRESSION
-                                    Z_BEST_SPEED
-                                    Z_BEST_COMPRESSION
-                                    Z_DEFAULT_COMPRESSION
-                              }],
-                 strategy  => [qw{  
-                                    Z_FILTERED
-                                    Z_HUFFMAN_ONLY
-                                    Z_RLE
-                                    Z_FIXED
-                                    Z_DEFAULT_STRATEGY
-                              }],
-
-              );
-
-{
-    my %seen;
-    foreach (keys %EXPORT_TAGS )
-    {
-        push @{$EXPORT_TAGS{constants}}, 
-                 grep { !$seen{$_}++ } 
-                 @{ $EXPORT_TAGS{$_} }
-    }
-    $EXPORT_TAGS{all} = $EXPORT_TAGS{constants} ;
-}
-
-Exporter::export_ok_tags('all');
-              
 
 BEGIN
 {
@@ -97,125 +20,180 @@ BEGIN
     else
       { *noUTF8 = sub {} }  
 }
- 
 
-$VERSION = '2.000_03';
+require Exporter ;
 
-#Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
+our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $GzipError);
 
-#$got_encode = 0;
-#eval
+$VERSION = '2.000_07';
+$GzipError = '' ;
+
+@ISA    = qw(Exporter IO::Compress::RawDeflate);
+@EXPORT_OK = qw( $GzipError gzip ) ;
+%EXPORT_TAGS = %IO::Compress::RawDeflate::DEFLATE_CONSTANTS ;
+push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
+Exporter::export_ok_tags('all');
+
+sub new
+{
+    my $class = shift ;
+
+    my $obj = createSelfTiedObject($class, \$GzipError);
+
+    $obj->_create(undef, @_);
+}
+
+
+sub gzip
+{
+    my $obj = createSelfTiedObject(undef, \$GzipError);
+    return $obj->_def(@_);
+}
+
+#sub newHeader
 #{
-#    require Encode;
-#    Encode->import('encode', 'find_encoding');
-#};
-#
-#$got_encode = 1 unless $@;
+#    my $self = shift ;
+#    #return GZIP_MINIMUM_HEADER ;
+#    return $self->mkHeader(*$self->{Got});
+#}
 
-sub saveStatus
+sub getExtraParams
 {
-    my $self   = shift ;
-    ${ *$self->{ErrorNo} } = shift() + 0 ;
-    ${ *$self->{Error} } = '' ;
+    my $self = shift ;
 
-    return ${ *$self->{ErrorNo} } ;
+    use Compress::Zlib::ParseParameters;
+    
+    return (
+            # zlib behaviour
+            $self->getZlibParams(),
+
+            # Gzip header fields
+            'Minimal'   => [0, 1, Parse_boolean,   0],
+            'Comment'   => [0, 1, Parse_any,       undef],
+            'Name'      => [0, 1, Parse_any,       undef],
+            'Time'      => [0, 1, Parse_any,       undef],
+            'TextFlag'  => [0, 1, Parse_boolean,   0],
+            'HeaderCRC' => [0, 1, Parse_boolean,   0],
+            'OS_Code'   => [0, 1, Parse_unsigned,  $Compress::Zlib::gzip_os_code],
+            'ExtraField'=> [0, 1, Parse_string,    undef],
+            'ExtraFlags'=> [0, 1, Parse_any,       undef],
+
+        );
 }
 
 
-sub saveErrorString
+sub ckParams
 {
-    my $self   = shift ;
-    my $retval = shift ;
-    ${ *$self->{Error} } = shift ;
-    ${ *$self->{ErrorNo} } = shift() + 0 if @_ ;
+    my $self = shift ;
+    my $got = shift ;
 
-    return $retval;
-}
+    # gzip always needs crc32
+    $got->value('CRC32' => 1);
 
-sub error
-{
-    my $self   = shift ;
-    return ${ *$self->{Error} } ;
-}
+    return 1
+        if $got->value('Merge') ;
 
-sub errorNo
-{
-    my $self   = shift ;
-    return ${ *$self->{ErrorNo} } ;
-}
+    my $lax = ! $got->value('Strict') ;
 
-sub bitmask($$$$)
-{
-    my $into  = shift ;
-    my $value  = shift ;
-    my $offset = shift ;
-    my $mask   = shift ;
 
-    return $into | (($value & $mask) << $offset ) ;
-}
-
-sub mkDeflateHdr($$$;$)
-{
-    my $method = shift ;
-    my $cinfo  = shift;
-    my $level  = shift;
-    my $fdict_adler = shift  ;
-
-    my $cmf = 0;
-    my $flg = 0;
-    my $fdict = 0;
-    $fdict = 1 if defined $fdict_adler;
-
-    $cmf = bitmask($cmf, $method, ZLIB_CMF_CM_OFFSET,    ZLIB_CMF_CM_BITS);
-    $cmf = bitmask($cmf, $cinfo,  ZLIB_CMF_CINFO_OFFSET, ZLIB_CMF_CINFO_BITS);
-
-    $flg = bitmask($flg, $fdict,  ZLIB_FLG_FDICT_OFFSET, ZLIB_FLG_FDICT_BITS);
-    $flg = bitmask($flg, $level,  ZLIB_FLG_LEVEL_OFFSET, ZLIB_FLG_LEVEL_BITS);
-
-    my $fcheck = 31 - ($cmf * 256 + $flg) % 31 ;
-    $flg = bitmask($flg, $fcheck, ZLIB_FLG_FCHECK_OFFSET, ZLIB_FLG_FCHECK_BITS);
-
-    my $hdr =  pack("CC", $cmf, $flg) ;
-    $hdr .= pack("N", $fdict_adler) if $fdict ;
-
-    return $hdr;
-}
-
-sub mkDeflateHeader ($)
-{
-    my $param = shift ;
-
-    my $level = $param->value('Level');
-    my $strategy = $param->value('Strategy');
-
-    my $lflag ;
-    $level = 6 
-        if $level == Z_DEFAULT_COMPRESSION ;
-
-    if (ZLIB_VERNUM >= 0x1210)
     {
-        if ($strategy >= Z_HUFFMAN_ONLY || $level < 2)
-         {  $lflag = ZLIB_FLG_LEVEL_FASTEST }
-        elsif ($level < 6)
-         {  $lflag = ZLIB_FLG_LEVEL_FAST }
-        elsif ($level == 6)
-         {  $lflag = ZLIB_FLG_LEVEL_DEFAULT }
-        else
-         {  $lflag = ZLIB_FLG_LEVEL_SLOWEST }
-    }
-    else
-    {
-        $lflag = ($level - 1) >> 1 ;
-        $lflag = 3 if $lflag > 3 ;
+        if (! $got->parsed('Time') ) {
+            # Modification time defaults to now.
+            $got->value('Time' => time) ;
+        }
+
+        # Check that the Name & Comment don't have embedded NULLs
+        # Also check that they only contain ISO 8859-1 chars.
+        if ($got->parsed('Name') && defined $got->value('Name')) {
+            my $name = $got->value('Name');
+                
+            return $self->saveErrorString(undef, "Null Character found in Name",
+                                                Z_DATA_ERROR)
+                if ! $lax && $name =~ /\x00/ ;
+
+            return $self->saveErrorString(undef, "Non ISO 8859-1 Character found in Name",
+                                                Z_DATA_ERROR)
+                if ! $lax && $name =~ /$GZIP_FNAME_INVALID_CHAR_RE/o ;
+        }
+
+        if ($got->parsed('Comment') && defined $got->value('Comment')) {
+            my $comment = $got->value('Comment');
+
+            return $self->saveErrorString(undef, "Null Character found in Comment",
+                                                Z_DATA_ERROR)
+                if ! $lax && $comment =~ /\x00/ ;
+
+            return $self->saveErrorString(undef, "Non ISO 8859-1 Character found in Comment",
+                                                Z_DATA_ERROR)
+                if ! $lax && $comment =~ /$GZIP_FCOMMENT_INVALID_CHAR_RE/o;
+        }
+
+        if ($got->parsed('OS_Code') ) {
+            my $value = $got->value('OS_Code');
+
+            return $self->saveErrorString(undef, "OS_Code must be between 0 and 255, got '$value'")
+                if $value < 0 || $value > 255 ;
+            
+        }
+
+        # gzip only supports Deflate at present
+        $got->value('Method' => Z_DEFLATED) ;
+
+        if ( ! $got->parsed('ExtraFlags')) {
+            $got->value('ExtraFlags' => 2) 
+                if $got->value('Level') == Z_BEST_SPEED ;
+            $got->value('ExtraFlags' => 4) 
+                if $got->value('Level') == Z_BEST_COMPRESSION ;
+        }
+
+        if ($got->parsed('ExtraField')) {
+
+            my $bad = $self->parseExtraField($got, $lax) ;
+            return $self->saveErrorString(undef, $bad, Z_DATA_ERROR)
+                if $bad ;
+
+            my $len = length $got->value('ExtraField') ;
+            return $self->saveErrorString(undef, ExtraFieldError("Too Large"), 
+                                                        Z_DATA_ERROR)
+                if $len > GZIP_FEXTRA_MAX_SIZE;
+        }
     }
 
-     #my $wbits = (MAX_WBITS - 8) << 4 ;
-    my $wbits = 7;
-    mkDeflateHdr(ZLIB_CMF_CM_DEFLATED, $wbits, $lflag);
+    return 1;
 }
 
-sub mkGzipHeader
+sub mkTrailer
 {
+    my $self = shift ;
+    return pack("V V", *$self->{Compress}->crc32(), 
+                       *$self->{UnCompSize_32bit});
+}
+
+sub getInverseClass
+{
+    return ('IO::Uncompress::Gunzip',
+                \$IO::Uncompress::Gunzip::GunzipError);
+}
+
+sub getFileInfo
+{
+    my $self = shift ;
+    my $params = shift;
+    my $filename = shift ;
+
+    my $defaultTime = (stat($filename))[9] ;
+
+    $params->value('Name' => $filename)
+        if ! $params->parsed('Name') ;
+
+    $params->value('Time' => $defaultTime) 
+        if ! $params->parsed('Time') ;
+}
+
+
+sub mkHeader
+{
+    my $self = shift ;
     my $param = shift ;
 
     # stort-circuit if a minimal header is requested.
@@ -440,1083 +418,10 @@ sub parseExtraField
     return undef;
 }
 
-sub checkParams
+sub mkFinalTrailer
 {
-    my $class = shift ;
-    my $type = shift ;
-
-    my $rfc1952 = ($type eq 'rfc1952');
-    my $rfc1950 = ($type eq 'rfc1950');
-
-    my $got = Compress::Zlib::ParseParameters::new();
-
-    $got->parse(
-        $rfc1952 ? 
-        {
-            'AutoClose'=> [Parse_boolean,   0],
-            #'Encoding'=> [Parse_any,       undef],
-            'Strict'   => [Parse_boolean,   1],
-            'Append'   => [Parse_boolean,   0],
-            'Merge'    => [Parse_boolean,   0],
-            'BinModeIn' => [Parse_boolean,   0],
-
-            # zlib behaviour
-            #'Method'   => [Parse_unsigned,  Z_DEFLATED],
-            'Level'     => [Parse_signed,    Z_DEFAULT_COMPRESSION],
-            'Strategy'  => [Parse_signed,    Z_DEFAULT_STRATEGY],
-
-            # Gzip header fields
-            'Minimal'   => [Parse_boolean,   0],
-            'Comment'   => [Parse_any,       undef],
-            'Name'      => [Parse_any,       undef],
-            'Time'      => [Parse_any,       undef],
-            'TextFlag'  => [Parse_boolean,   0],
-            'HeaderCRC' => [Parse_boolean,   0],
-            'OS_Code'   => [Parse_unsigned,  $Compress::Zlib::gzip_os_code],
-            'ExtraField'=> [Parse_string,    undef],
-            'ExtraFlags'=> [Parse_any,       undef],
-        } 
-        :
-        {
-            'AutoClose' => [Parse_boolean,   0],
-            #'Encoding' => [Parse_any,       undef],
-            'CRC32'     => [Parse_boolean,   0],
-            'ADLER32'   => [Parse_boolean,   0],
-            'Strict'    => [Parse_boolean,   1],
-            'Append'    => [Parse_boolean,   0],
-            'Merge'     => [Parse_boolean,   0],
-            'BinModeIn' => [Parse_boolean,   0],
-
-            # zlib behaviour
-            #'Method'   => [Parse_unsigned,  Z_DEFLATED],
-            'Level'     => [Parse_signed,    Z_DEFAULT_COMPRESSION],
-            'Strategy'  => [Parse_signed,    Z_DEFAULT_STRATEGY],
-        }, 
-        @_) or croak "${class}: $got->{Error}"  ;
-
-    return $got ;
+    return '';
 }
-
-sub new
-{
-    my $class = shift ;
-    my $type = shift ;
-    my $got = shift;
-    my $error_ref = shift ;
-
-    croak("$class: Missing Output parameter")
-        if ! @_ && ! $got ;
-
-    my $outValue = shift ;
-    my $oneShot = 1 ;
-
-    if (! $got)
-    {
-        $oneShot = 0 ;
-        $got = checkParams($class, $type, @_)
-            or return undef ;
-    }
-
-    my $rfc1952 = ($type eq 'rfc1952');
-    my $rfc1950 = ($type eq 'rfc1950');
-    my $rfc1951 = ($type eq 'rfc1951');
-
-    my $obj = bless Symbol::gensym(), ref($class) || $class;
-    tie *$obj, $obj if $] >= 5.005;
-
-    *$obj->{Closed} = 1 ;
-    $$error_ref = '' ;
-    *$obj->{Error} = $error_ref ;
-
-    my $lax = ! $got->value('Strict') ;
-
-    my $outType = whatIsOutput($outValue);
-
-    ckOutputParam($class, $outValue, $error_ref)
-        or return undef ;
-
-    if ($outType eq 'buffer') {
-        *$obj->{Buffer} = $outValue;
-    }
-    else {
-        my $buff = "" ;
-        *$obj->{Buffer} = \$buff ;
-    }
-
-    # Merge implies Append
-    my $merge = $got->value('Merge') ;
-    my $appendOutput = $got->value('Append') || $merge ;
-
-    if ($merge)
-    {
-        # Switch off Merge mode if output file/buffer is empty/doesn't exist
-        if (($outType eq 'buffer' && length $$outValue == 0 ) ||
-            ($outType ne 'buffer' && (! -e $outValue || (-w _ && -z _))) )
-          { $merge = 0 }
-    }
-
-    # If output is a file, check that it is writable
-    if ($outType eq 'filename' && -e $outValue && ! -w _)
-      { return $obj->saveErrorString(undef, "Output file '$outValue' is not writable" ) }
-
-    elsif ($outType eq 'handle'  && ! -w $outValue)
-      { return $obj->saveErrorString(undef, "Output filehandle is not writable" ) }
-
-
-#    TODO - encoding
-#    if ($got->parsed('Encoding')) { 
-#        croak("$class: Encode module needed to use -Encoding")
-#            if ! $got_encode;
-#
-#        my $want_encoding = $got->value('Encoding');
-#        my $encoding = find_encoding($want_encoding);
-#
-#        croak("$class: Encoding '$want_encoding' is not available")
-#           if ! $encoding;
-#
-#        *$obj->{Encoding} = $encoding;
-#    }
-
-    if ($rfc1952 && ! $merge) {
-
-        if (! $got->parsed('Time') ) {
-            # Modification time defaults to now.
-            $got->value('Time' => time) ;
-        }
-
-        # Check that the Name & Comment don't have embedded NULLs
-        # Also check that they only contain ISO 8859-1 chars.
-        if ($got->parsed('Name') && defined $got->value('Name')) {
-            my $name = $got->value('Name');
-                
-            return $obj->saveErrorString(undef, "Null Character found in Name",
-                                                Z_DATA_ERROR)
-                if ! $lax && $name =~ /\x00/ ;
-
-            return $obj->saveErrorString(undef, "Non ISO 8859-1 Character found in Name",
-                                                Z_DATA_ERROR)
-                if ! $lax && $name =~ /$GZIP_FNAME_INVALID_CHAR_RE/o ;
-        }
-
-        if ($got->parsed('Comment') && defined $got->value('Comment')) {
-            my $comment = $got->value('Comment');
-
-            return $obj->saveErrorString(undef, "Null Character found in Comment",
-                                                Z_DATA_ERROR)
-                if ! $lax && $comment =~ /\x00/ ;
-
-            return $obj->saveErrorString(undef, "Non ISO 8859-1 Character found in Comment",
-                                                Z_DATA_ERROR)
-                if ! $lax && $comment =~ /$GZIP_FCOMMENT_INVALID_CHAR_RE/o;
-        }
-
-        if ($got->parsed('OS_Code') ) {
-            my $value = $got->value('OS_Code');
-
-            return $obj->saveErrorString(undef, "OS_Code must be between 0 and 255, got '$value'")
-                if $value < 0 || $value > 255 ;
-            
-        }
-
-        # gzip only supports Deflate at present
-        $got->value('Method' => Z_DEFLATED) ;
-
-        if ( ! $got->parsed('ExtraFlags')) {
-            $got->value('ExtraFlags' => 2) 
-                if $got->value('Level') == Z_BEST_SPEED ;
-            $got->value('ExtraFlags' => 4) 
-                if $got->value('Level') == Z_BEST_COMPRESSION ;
-        }
-
-        if ($got->parsed('ExtraField')) {
-
-            my $bad = $obj->parseExtraField($got, $lax) ;
-            return $obj->saveErrorString(undef, $bad, Z_DATA_ERROR)
-                if $bad ;
-
-            my $len = length $got->value('ExtraField') ;
-            return $obj->saveErrorString(undef, ExtraFieldError("Too Large"), 
-                                                        Z_DATA_ERROR)
-                if $len > GZIP_FEXTRA_MAX_SIZE;
-        }
-    }
-
-    $obj->saveStatus(Z_OK) ;
-
-    my $end_offset = 0;
-    my $status ;
-    if (! $merge)
-    {
-        (*$obj->{Deflate}, $status) = new Compress::Zlib::Deflate
-                        -AppendOutput   => 1,
-                        -CRC32          => $rfc1952 || $got->value('CRC32'),
-                        -ADLER32        => $rfc1950 || $got->value('ADLER32'),
-                        -Level          => $got->value('Level'),
-                        -Strategy       => $got->value('Strategy'),
-                        -WindowBits     => - MAX_WBITS;
-        return $obj->saveErrorString(undef, "Cannot create Deflate object: $status" ) 
-            if $obj->saveStatus($status) != Z_OK ;
-
-        *$obj->{BytesWritten} = 0 ;
-        *$obj->{ISize} = 0 ;
-
-        *$obj->{Header} = mkDeflateHeader($got) 
-            if $rfc1950 ;
-        *$obj->{Header} = ''
-            if $rfc1951 ;
-        *$obj->{Header} = mkGzipHeader($got) 
-            if $rfc1952 ;
-
-        if ( $outType eq 'buffer') {
-            ${ *$obj->{Buffer} }  = ''
-                unless $appendOutput ;
-            ${ *$obj->{Buffer} } .= *$obj->{Header};
-        }
-        else {
-            if ($outType eq 'handle') {
-                $outValue->flush() ;
-                *$obj->{FH} = $outValue ;
-                setBinModeOutput(*$obj->{FH}) ;
-                *$obj->{Handle} = 1 ;
-                if ($appendOutput)
-                {
-                    seek(*$obj->{FH}, 0, SEEK_END)
-                        or return $obj->saveErrorString(undef, "Cannot seek to end of output filehandle: $!", $!) ;
-
-                }
-            }
-            elsif ($outType eq 'filename') {    
-                my $mode = '>' ;
-                $mode = '>>'
-                    if $appendOutput;
-                *$obj->{FH} = new IO::File "$mode $outValue" 
-                    or return $obj->saveErrorString(undef, "cannot open file '$outValue': $!", $!) ;
-                *$obj->{StdIO} = ($outValue eq '-'); 
-                setBinModeOutput(*$obj->{FH}) ;
-            }
-
-            if (!$rfc1951) {
-                defined *$obj->{FH}->write(*$obj->{Header}, length(*$obj->{Header}))
-                    or return $obj->saveErrorString(undef, $!, $!) ;
-            }
-        }
-    }
-    else
-    {
-        my %mapping = ( 'rfc1952'  => ['IO::Uncompress::Gunzip',     \$IO::Uncompress::Gunzip::GunzipError],
-                        'rfc1950'  => ['IO::Uncompress::Inflate',    \$IO::Uncompress::Inflate::InflateError],
-                        'rfc1951'  => ['IO::Uncompress::RawInflate', \$IO::Uncompress::RawInflate::RawInflateError],
-                      );
-
-        my $inf = IO::BaseInflate::new($mapping{$type}[0],
-                                   $type, undef, 
-                                   $error_ref, 0, $outValue, 
-                                   Transparent => 0, 
-                                   #Strict      => 1,
-                                   AutoClose   => 0,
-                                   Scan        => 1);
-
-        return $obj->saveErrorString(undef, "Cannot create InflateScan object: $$error_ref" ) 
-            if ! defined $inf ;
-
-        $inf->scan() 
-            or return $obj->saveErrorString(undef, "Error Scanning: $$error_ref", $inf->errorNo) ;
-        $inf->zap($end_offset) 
-            or return $obj->saveErrorString(undef, "Error Zapping: $$error_ref", $inf->errorNo) ;
-
-        (*$obj->{Deflate}, $status) = $inf->createDeflate();
-
-        *$obj->{Header} = *$inf->{Info}{Header};
-        *$obj->{ISize} = 
-        *$obj->{ISize} = *$obj->{BytesWritten} = *$inf->{ISize} ;
-
-        if ( $outType eq 'buffer') 
-          { substr( ${ *$obj->{Buffer} }, $end_offset) = '' }
-        elsif ($outType eq 'handle' || $outType eq 'filename') {
-            *$obj->{FH} = *$inf->{FH} ;
-            delete *$inf->{FH};
-            *$obj->{FH}->flush() ;
-            *$obj->{Handle} = 1 if $outType eq 'handle';
-
-            #seek(*$obj->{FH}, $end_offset, SEEK_SET) 
-            *$obj->{FH}->seek($end_offset, SEEK_SET) 
-                or return $obj->saveErrorString(undef, $!, $!) ;
-        }
-    }
-
-    *$obj->{Closed} = 0 ;
-    *$obj->{AutoClose} = $got->value('AutoClose') ;
-    *$obj->{OutputGzip} = $rfc1952;
-    *$obj->{OutputDeflate} = $rfc1950;
-    *$obj->{OutputRawDeflate} = $rfc1951;
-    *$obj->{Output} = $outValue;
-    *$obj->{ClassName} = $class;
-    *$obj->{Got} = $got;
-
-    return $obj ;
-}
-
-sub _def
-{
-    my $class     = shift ;
-    my $type      = shift ;
-    my $error_ref = shift ;
-    
-    my $name = (caller(1))[3] ;
-
-    croak "$name: expected at least 1 parameters\n"
-        unless @_ >= 1 ;
-
-    my $input = shift ;
-    my $haveOut = @_ ;
-    my $output = shift ;
-
-    my $x = new Validator($class, $type, $error_ref, $name, $input, $output)
-        or return undef ;
-
-    push @_, $output if $haveOut && $x->{Hash};
-
-    my $got = checkParams($name, $type, @_)
-        or return undef ;
-
-    $x->{Got} = $got ;
-    $x->{ParsedTime} = $got->parsed('Time') ;
-    $x->{ParsedName} = $got->parsed('Name') ;
-
-    if ($x->{Hash})
-    {
-        while (my($k, $v) = each %$input)
-        {
-            $v = \$input->{$k} 
-                unless defined $v ;
-
-            _singleTarget($x, 1, $k, $v, @_)
-                or return undef ;
-        }
-
-        return keys %$input ;
-    }
-
-    if ($x->{GlobMap})
-    {
-        $x->{oneInput} = 1 ;
-        foreach my $pair (@{ $x->{Pairs} })
-        {
-            my ($from, $to) = @$pair ;
-            _singleTarget($x, 1, $from, $to, @_)
-                or return undef ;
-        }
-
-        return scalar @{ $x->{Pairs} } ;
-    }
-
-    if (! $x->{oneOutput} )
-    {
-        my $inFile = ($x->{inType} eq 'filenames' 
-                        || $x->{inType} eq 'filename');
-
-        $x->{inType} = $inFile ? 'filename' : 'buffer';
-        
-        foreach my $in ($x->{oneInput} ? $input : @$input)
-        {
-            my $out ;
-            $x->{oneInput} = 1 ;
-
-            _singleTarget($x, $inFile, $in, \$out, @_)
-                or return undef ;
-
-            if ($x->{outType} eq 'array')
-              { push @$output, \$out }
-            else
-              { $output->{$in} = \$out }
-        }
-
-        return 1 ;
-    }
-
-    # finally the 1 to 1 and n to 1
-    return _singleTarget($x, 1, $input, $output, @_);
-
-    croak "should not be here" ;
-}
-
-sub _singleTarget
-{
-    my $x               = shift ;
-    my $inputIsFilename = shift;
-    my $input           = shift;
-    
-
-    # For gzip, if input is simple filename, populate Name & Time in
-    # gzip header from filename by default.
-    if ($x->{Type} eq 'rfc1952' and isaFilename($input) and $inputIsFilename)
-    {
-        my $defaultTime = (stat($input))[8] ;
-
-        $x->{Got}->value('Name' => $input)
-            if ! $x->{ParsedName};
-
-        $x->{Got}->value('Time' => $defaultTime) 
-            if ! $x->{ParsedTime};
-    }
-
-    my $gzip = new($x->{Class}, $x->{Type}, $x->{Got}, $x->{Error}, @_)
-        or return undef ;
-
-
-    if ($x->{oneInput})
-    {
-        defined $gzip->_wr2($input, $inputIsFilename) 
-            or return undef ;
-    }
-    else
-    {
-        my $afterFirst = 0 ;
-        my $inputIsFilename = ($x->{inType} ne 'array');
-
-        for my $element ( ($x->{inType} eq 'hash') ? keys %$input : @$input)
-        {
-            if ( $afterFirst ++ )
-            {
-                defined addInterStream($gzip, $x, $element, $inputIsFilename)
-                    or return undef ;
-            }
-
-            defined $gzip->_wr2($element, $inputIsFilename) 
-                or return undef ;
-        }
-    }
-
-    return $gzip->close() ;
-}
-
-sub _wr2
-{
-    my $self = shift ;
-
-    my $source = shift ;
-    my $inputIsFilename = shift;
-
-    my $input = $source ;
-    if (! $inputIsFilename)
-    {
-        $input = \$source 
-            if ! ref $source;
-    }
-
-    if ( ref $input && ref $input eq 'SCALAR' )
-    {
-        return $self->syswrite($input, @_) ;
-    }
-
-    if ( ! ref $input  || isaFilehandle($input))
-    {
-        my $isFilehandle = isaFilehandle($input) ;
-
-        my $fh = $input ;
-
-        if ( ! $isFilehandle )
-        {
-            $fh = new IO::File "<$input"
-                or return $self->saveErrorString(undef, "cannot open file '$input': $!", $!) ;
-        }
-        binmode $fh if *$self->{Got}->valueOrDefault('BinModeIn') ;
-
-        my $status ;
-        my $buff ;
-        my $count = 0 ;
-        while (($status = read($fh, $buff, 4096)) > 0) {
-            $count += length $buff;
-            defined $self->syswrite($buff, @_) 
-                or return undef ;
-        }
-
-        return $self->saveErrorString(undef, $!, $!) 
-            if $status < 0 ;
-
-        if ( (!$isFilehandle || *$self->{AutoClose}) && $input ne '-')
-        {    
-            $fh->close() 
-                or return undef ;
-        }
-
-        return $count ;
-    }
-
-    croak "Should no be here";
-    return undef;
-}
-
-sub addInterStream
-{
-    my $gzip = shift ;
-    my $x = shift ;
-    my $input = shift ;
-    my $inputIsFilename = shift ;
-
-    if ($x->{Got}->value('MultiStream'))
-    {
-        # For gzip, if input is simple filename, populate Name & Time in
-        # gzip header from filename by default.
-        if ($x->{Type} eq 'rfc1952' and isaFilename($input) and $inputIsFilename)
-        {
-            my $defaultTime = (stat($input))[8] ;
-
-            $x->{Got}->value('Name' => $input)
-                if ! $x->{ParsedName};
-
-            $x->{Got}->value('Time' => $defaultTime) 
-                if ! $x->{ParsedTime};
-        }
-
-        # TODO -- newStream needs to allow gzip header to be modified
-        return $gzip->newStream();
-    }
-    elsif ($x->{Got}->value('AutoFlush'))
-    {
-        return $gzip->flush(Z_FULL_FLUSH);
-    }
-
-    return 1 ;
-}
-
-sub TIEHANDLE
-{
-    return $_[0] if ref($_[0]);
-    die "OOPS\n" ;
-}
-  
-sub UNTIE
-{
-    my $self = shift ;
-}
-
-sub DESTROY
-{
-    my $self = shift ;
-    $self->close() ;
-
-    # TODO - memory leak with 5.8.0 - this isn't called until 
-    #        global destruction
-    #
-    %{ *$self } = () ;
-    undef $self ;
-}
-
-
-#sub validateInput
-#{
-#    my $class = shift ;
-#
-#    #local $Carp::CarpLevel = 1;
-#
-#    if ( ! ref $_[0]             ||
-#           ref $_[0] eq 'SCALAR' ||
-#          #ref $_[0] eq 'CODE'   ||
-#           isaFilehandle($_[0]) )
-#    {
-#        my $inType  = whatIs($_[0]);
-#        my $outType = whatIs($_[1]);
-#
-#        if ($inType eq 'filename' )
-#        {
-#            croak "$class: input filename is undef or null string"
-#                if ! defined $_[0] || $_[0] eq ''  ;
-#
-#            if ($_[0] ne '-' && ! -e $_[0] )
-#            {
-#                ${$_[2]} = "input file '$_[0]' does not exist";
-#                $_[3] = $!;
-#                return undef;
-#            }
-#
-#            if (! -r $_[0] )
-#            {
-#                ${$_[2]} = "cannot open file '$_[0]': $!";
-#                $_[3] = $!;
-#                return undef;
-#            }
-#        }
-#        elsif ($inType eq 'fileglob' )
-#        {
-#            # whatever...
-#        }
-#        
-#        croak("$class: input and output $inType are identical")
-#            if defined $outType && $inType eq $outType && $_[0] eq $_[1] ;
-#        
-#        return 1 ;
-#    }
-#
-#    croak "$class: input parameter not a filename, filehandle, array ref or scalar ref"
-#        unless ref $_[0] eq 'ARRAY' ;
-#
-#    my $array = shift @_ ;    
-#    foreach my $element ( @{ $array } )
-#    {
-#        return undef 
-#            unless validateInput($class, $element, @_);
-#    }
-#
-#    return 1 ;
-#}
-
-
-#sub write
-#{
-#    my $self = shift ;
-#
-#    if ( isaFilehandle $_[0] )
-#    {
-#        return $self->_wr(@_);    
-#    }
-#
-#    if ( ref $_[0]) 
-#    {
-#        if ( ref $_[0] eq 'SCALAR' )
-#          { return $self->syswrite(@_) }
-#
-#        if ( ref $_[0] eq 'ARRAY' )
-#        {
-#            my ($str, $num);
-#            validateInput(*$self->{ClassName} . "::write", $_[0], *$self->{Output}, \$str, $num)
-#                or return $self->saveErrorString(undef, $str, $num);
-#
-#            return $self->_wr(@_);    
-#        }
-#
-#        croak *$self->{ClassName} . "::write: input parameter not a filename, filehandle, array ref or scalar ref";
-#    }
-#
-#    # Not a reference or a filehandle
-#    return $self->syswrite(@_) ;
-#}
-#
-#sub _wr
-#{
-#    my $self = shift ;
-#
-#    if ( ref $_[0] && ref $_[0] eq 'SCALAR' )
-#    {
-#        return $self->syswrite(@_) ;
-#    }
-#
-#    if ( ! ref $_[0]  || isaFilehandle($_[0]))
-#    {
-#        my $item = shift @_ ;
-#        my $isFilehandle = isaFilehandle($item) ;
-#
-#        my $fh = $item ;
-#
-#        if ( ! $isFilehandle )
-#        {
-#            $fh = new IO::File "<$item"
-#                or return $self->saveErrorString(undef, "cannot open file '$item': $!", $!) ;
-#        }
-#
-#        my $status ;
-#        my $buff ;
-#        my $count = 0 ;
-#        while (($status = read($fh, $buff, 4096)) > 0) {
-#            $count += length $buff;
-#            defined $self->syswrite($buff, @_) 
-#                or return undef ;
-#        }
-#
-#        return $self->saveErrorString(undef, $!, $!) 
-#            if $status < 0 ;
-#
-#
-#        if ( !$isFilehandle || *$self->{AutoClose} )
-#        {    
-#            $fh->close() 
-#                or return undef ;
-#        }
-#
-#        return $count ;
-#    }
-#
-#    #if ref $_[0] eq 'CODE' ;
-#
-#    # then must be ARRAY ref
-#    my $count = 0 ;
-#    my $array = shift @_ ;
-#    foreach my $element ( @{ $array } )
-#    {
-#        my $got = $self->_wr($element, @_) ;
-#
-#        return undef 
-#            unless defined $got ;
-#
-#        $count += $got ;    
-#    }
-#
-#    return $count ;
-#}
-
-
-sub syswrite
-{
-    my $self = shift ;
-
-    my $buffer ;
-    if (ref $_[0] ) {
-        croak *$self->{ClassName} . "::write: not a scalar reference" 
-            unless ref $_[0] eq 'SCALAR' ;
-        $buffer = $_[0] ;
-    }
-    else {
-        $buffer = \$_[0] ;
-    }
-
-    if (@_ > 1) {
-        my $slen = defined $$buffer ? length($$buffer) : 0;
-        my $len = $slen;
-        my $offset = 0;
-        $len = $_[1] if $_[1] < $len;
-
-        if (@_ > 2) {
-            $offset = $_[2] || 0;
-            croak *$self->{ClassName} . "::write: offset outside string" if $offset > $slen;
-            if ($offset < 0) {
-                $offset += $slen;
-                croak *$self->{ClassName} . "::write: offset outside string" if $offset < 0;
-            }
-            my $rem = $slen - $offset;
-            $len = $rem if $rem < $len;
-        }
-
-        $buffer = \substr($$buffer, $offset, $len) ;
-    }
-
-    my $buffer_length = defined $$buffer ? length($$buffer) : 0 ;
-    *$self->{BytesWritten} += $buffer_length ;
-    my $rest = GZIP_ISIZE_MAX - *$self->{ISize} ;
-    if ($buffer_length > $rest) {
-        *$self->{ISize} = $buffer_length - $rest - 1;
-    }
-    else {
-        *$self->{ISize} += $buffer_length ;
-    }
-
-#    if (*$self->{Encoding}) {
-#        $$buffer = *$self->{Encoding}->encode($$buffer);
-#    }
-
-    #my $length = length $$buffer;
-    my $status = *$self->{Deflate}->deflate($buffer, *$self->{Buffer}) ;
-
-    return $self->saveErrorString(undef,"Deflate Error: $status") 
-        if $self->saveStatus($status) != Z_OK ;
-
-    if ( defined *$self->{FH} and length ${ *$self->{Buffer} }) {
-        defined *$self->{FH}->write( ${ *$self->{Buffer} }, length ${ *$self->{Buffer} } )
-          or return $self->saveErrorString(undef, $!, $!); 
-        ${ *$self->{Buffer} } = '' ;
-    }
-
-    return $buffer_length;
-}
-
-sub print
-{
-    my $self = shift;
-
-    #if (ref $self) {
-    #    $self = *$self{GLOB} ;
-    #}
-
-    if (defined $\) {
-        if (defined $,) {
-            defined $self->syswrite(join($,, @_) . $\);
-        } else {
-            defined $self->syswrite(join("", @_) . $\);
-        }
-    } else {
-        if (defined $,) {
-            defined $self->syswrite(join($,, @_));
-        } else {
-            defined $self->syswrite(join("", @_));
-        }
-    }
-}
-
-sub printf
-{
-    my $self = shift;
-    my $fmt = shift;
-    defined $self->syswrite(sprintf($fmt, @_));
-}
-
-
-
-sub flush
-{
-    my $self = shift ;
-    my $opt = shift || Z_FINISH ;
-    my $status = *$self->{Deflate}->flush(*$self->{Buffer}, $opt) ;
-    return $self->saveErrorString(0,"Deflate Error: $status") 
-        if $self->saveStatus($status) != Z_OK ;
-
-    if ( defined *$self->{FH} ) {
-        *$self->{FH}->clearerr();
-        defined *$self->{FH}->write(${ *$self->{Buffer} }, length ${ *$self->{Buffer} })
-            or return $self->saveErrorString(0, $!, $!); 
-        ${ *$self->{Buffer} } = '' ;
-    }
-
-    return 1;
-}
-
-sub newStream
-{
-    my $self = shift ;
-
-    $self->_writeTrailer(GZIP_MINIMUM_HEADER)
-        or return 0 ;
-
-    my $status = *$self->{Deflate}->deflateReset() ;
-    return $self->saveErrorString(0,"Deflate Error: $status") 
-        if $self->saveStatus($status) != Z_OK ;
-
-    *$self->{BytesWritten} = 0 ;
-    *$self->{ISize} = 0 ;
-
-    return 1 ;
-}
-
-sub _writeTrailer
-{
-    my $self = shift ;
-    my $nextHeader = shift || '' ;
-
-    my $status = *$self->{Deflate}->flush(*$self->{Buffer}) ;
-    return $self->saveErrorString(0,"Deflate Error: $status") 
-        if $self->saveStatus($status) != Z_OK ;
-
-    if (*$self->{OutputGzip}) {
-        ${ *$self->{Buffer} } .= pack("V V", *$self->{Deflate}->crc32(), 
-                                             *$self->{ISize} );
-        ${ *$self->{Buffer} } .= $nextHeader ;
-    }
-
-    if (*$self->{OutputDeflate}) {
-        ${ *$self->{Buffer} } .= pack("N", *$self->{Deflate}->adler32() );
-        ${ *$self->{Buffer} } .= *$self->{Header} ;
-    }
-
-    return 1 if ! defined *$self->{FH} ;
-
-    defined *$self->{FH}->write(${ *$self->{Buffer} }, length ${ *$self->{Buffer} })
-      or return $self->saveErrorString(0, $!, $!); 
-
-    ${ *$self->{Buffer} } = '' ;
-
-    return 1;
-}
-
-sub close
-{
-    my $self = shift ;
-
-    return 1 if *$self->{Closed} || ! *$self->{Deflate} ;
-    *$self->{Closed} = 1 ;
-
-    untie *$self 
-        if $] >= 5.008 ;
-
-    if (0) {
-        $self->_writeTrailer()
-            or return 0 ;
-    }
-    else {
-
-  
-    my $status = *$self->{Deflate}->flush(*$self->{Buffer}) ;
-    return $self->saveErrorString(0,"Deflate Error: $status") 
-        if $self->saveStatus($status) != Z_OK ;
-
-    if (*$self->{OutputGzip}) {
-        ${ *$self->{Buffer} } .= pack("V V", *$self->{Deflate}->crc32(), 
-                                             *$self->{ISize} );
-    }
-
-    if (*$self->{OutputDeflate}) {
-        ${ *$self->{Buffer} } .= pack("N", *$self->{Deflate}->adler32() );
-    }
-
-
-    return 1 if ! defined *$self->{FH} ;
-
-    defined *$self->{FH}->write(${ *$self->{Buffer} }, length( ${ *$self->{Buffer} } ))
-      or return $self->saveErrorString(0, $!, $!); 
-
-    ${ *$self->{Buffer} } = '' ;
-  }
-
-    if (defined *$self->{FH}) {
-        #if (! *$self->{Handle} || *$self->{AutoClose}) {
-        if ((! *$self->{Handle} || *$self->{AutoClose}) && ! *$self->{StdIO}) {
-            $! = 0 ;
-            *$self->{FH}->close()
-                or return $self->saveErrorString(0, $!, $!); 
-        }
-        delete *$self->{FH} ;
-        # This delete can set $! in older Perls, so reset the errno
-        $! = 0 ;
-    }
-  
-    return 1;
-}
-
-sub deflateParams 
-{
-    my $self = shift ;
-    my $level = shift ;
-    my $strategy = shift ;
-
-    my $status = *$self->{Deflate}->deflateParams(-Level => $level, 
-                                                  -Strategy => $strategy) ;
-    return $self->saveErrorString(0,"deflateParams Error: $status") 
-        if $self->saveStatus($status) != Z_OK ;
-
-    return 1;    
-}
-
-
-#sub total_in
-#sub total_out
-#sub msg
-#
-#sub crc
-#{
-#    my $self = shift ;
-#    return *$self->{Deflate}->crc32() ;
-#}
-#
-#sub msg
-#{
-#    my $self = shift ;
-#    return *$self->{Deflate}->msg() ;
-#}
-#
-#sub dict_adler
-#{
-#    my $self = shift ;
-#    return *$self->{Deflate}->dict_adler() ;
-#}
-#
-#sub get_Level
-#{
-#    my $self = shift ;
-#    return *$self->{Deflate}->get_Level() ;
-#}
-#
-#sub get_Strategy
-#{
-#    my $self = shift ;
-#    return *$self->{Deflate}->get_Strategy() ;
-#}
-
-
-sub tell
-{
-    my $self = shift ;
-
-    #return *$self->{Deflate}->total_in();
-    return *$self->{BytesWritten} ;
-}
-
-sub eof
-{
-    my $self = shift ;
-
-    return *$self->{Closed} ;
-}
-
-
-sub seek
-{
-    my $self     = shift ;
-    my $position = shift;
-    my $whence   = shift ;
-
-    my $here = $self->tell() ;
-    my $target = 0 ;
-
-    #use IO::Handle qw(SEEK_SET SEEK_CUR SEEK_END);
-    use IO::Handle ;
-
-    if ($whence == IO::Handle::SEEK_SET) {
-        $target = $position ;
-    }
-    elsif ($whence == IO::Handle::SEEK_CUR || $whence == IO::Handle::SEEK_END) {
-        $target = $here + $position ;
-    }
-    else {
-        croak *$self->{ClassName} . "::seek: unknown value, $whence, for whence parameter";
-    }
-
-    # short circuit if seeking to current offset
-    return 1 if $target == $here ;    
-
-    # Outlaw any attempt to seek backwards
-    croak *$self->{ClassName} . "::seek: cannot seek backwards"
-        if $target < $here ;
-
-    # Walk the file to the new offset
-    my $offset = $target - $here ;
-
-    my $buffer ;
-    defined $self->syswrite("\x00" x $offset)
-        or return 0;
-
-    return 1 ;
-}
-
-sub binmode
-{
-    1;
-#    my $self     = shift ;
-#    return defined *$self->{FH} 
-#            ? binmode *$self->{FH} 
-#            : 1 ;
-}
-
-sub fileno
-{
-    my $self     = shift ;
-    return defined *$self->{FH} 
-            ? *$self->{FH}->fileno() 
-            : undef ;
-}
-
-sub _notAvailable
-{
-    my $name = shift ;
-    return sub { croak "$name Not Available: File opened only for output" ; } ;
-}
-
-*read     = _notAvailable('read');
-*READ     = _notAvailable('read');
-*readline = _notAvailable('readline');
-*READLINE = _notAvailable('readline');
-*getc     = _notAvailable('getc');
-*GETC     = _notAvailable('getc');
-
-*FILENO   = \&fileno;
-*PRINT    = \&print;
-*PRINTF   = \&printf;
-*WRITE    = \&syswrite;
-*write    = \&syswrite;
-*SEEK     = \&seek; 
-*TELL     = \&tell;
-*EOF      = \&eof;
-*CLOSE    = \&close;
-*BINMODE  = \&binmode;
-
-#*sysread  = \&_notAvailable;
-#*syswrite = \&_write;
 
 1; 
 
@@ -1547,7 +452,7 @@ IO::Compress::Gzip     - Perl interface to write RFC 1952 files/buffers
     $z->seek($position, $whence);
     $z->binmode();
     $z->fileno();
-    $z->newStream();
+    $z->newStream( [OPTS] );
     $z->deflateParams();
     $z->close() ;
 
@@ -1603,24 +508,25 @@ L<IO::Uncompress::Gunzip|IO::Uncompress::Gunzip>.
 
 =head1 Functional Interface
 
-A top-level function, C<gzip>, is provided to carry out "one-shot"
-compression between buffers and/or files. For finer control over the compression process, see the L</"OO Interface"> section.
+A top-level function, C<gzip>, is provided to carry out
+"one-shot" compression between buffers and/or files. For finer
+control over the compression process, see the L</"OO Interface">
+section.
 
     use IO::Compress::Gzip qw(gzip $GzipError) ;
 
     gzip $input => $output [,OPTS] 
         or die "gzip failed: $GzipError\n";
 
-    gzip \%hash [,OPTS] 
-        or die "gzip failed: $GzipError\n";
+
 
 The functional interface needs Perl5.005 or better.
 
 
 =head2 gzip $input => $output [, OPTS]
 
-If the first parameter is not a hash reference C<gzip> expects
-at least two parameters, C<$input> and C<$output>.
+
+C<gzip> expects at least two parameters, C<$input> and C<$output>.
 
 =head3 The C<$input> parameter
 
@@ -1650,13 +556,15 @@ from C<$$input>.
 
 =item An array reference 
 
-If C<$input> is an array reference, the input data will be read from each
-element of the array in turn. The action taken by C<gzip> with
-each element of the array will depend on the type of data stored
-in it. You can mix and match any of the types defined in this list,
-excluding other array or hash references. 
+If C<$input> is an array reference, each element in the array must be a
+filename.
+
+The input data will be read from each file in turn. 
+
 The complete array will be walked to ensure that it only
-contains valid data types before any data is compressed.
+contains valid filenames before any data is compressed.
+
+
 
 =item An Input FileGlob string
 
@@ -1680,10 +588,11 @@ two of the gzip header fields created by this function will be sourced
 from that file -- the NAME gzip header field will be populated with
 the filename itself, and the MTIME header field will be set to the
 modification time of the file.
-The intention here is to mirror part of the behavior of the gzip
+The intention here is to mirror part of the behaviour of the gzip
 executable.
 If you do not want to use these defaults they can be overridden by
-explicitly setting the C<Name> and C<Time> options.
+explicitly setting the C<Name> and C<Time> options or by setting the
+C<Minimal> parameter.
 
 
 
@@ -1696,36 +605,28 @@ compressed data. This parameter can take one of these forms.
 
 =item A filename
 
-If the C<$output> parameter is a simple scalar, it is assumed to be a filename.
-This file will be opened for writing and the compressed data will be
-written to it.
+If the C<$output> parameter is a simple scalar, it is assumed to be a
+filename.  This file will be opened for writing and the compressed
+data will be written to it.
 
 =item A filehandle
 
-If the C<$output> parameter is a filehandle, the compressed data will
-be written to it.  
+If the C<$output> parameter is a filehandle, the compressed data
+will be written to it.
 The string '-' can be used as an alias for standard output.
 
 
 =item A scalar reference 
 
-If C<$output> is a scalar reference, the compressed data will be stored
-in C<$$output>.
+If C<$output> is a scalar reference, the compressed data will be
+stored in C<$$output>.
 
-
-=item A Hash Reference
-
-If C<$output> is a hash reference, the compressed data will be written
-to C<$output{$input}> as a scalar reference.
-
-When C<$output> is a hash reference, C<$input> must be either a filename or
-list of filenames. Anything else is an error.
 
 
 =item An Array Reference
 
-If C<$output> is an array reference, the compressed data will be pushed
-onto the array.
+If C<$output> is an array reference, the compressed data will be
+pushed onto the array.
 
 =item An Output FileGlob
 
@@ -1740,60 +641,13 @@ string. Anything else is an error.
 
 If the C<$output> parameter is any other type, C<undef> will be returned.
 
-=head2 gzip \%hash [, OPTS]
 
-If the first parameter is a hash reference, C<\%hash>, this will be used to
-define both the source of uncompressed data and to control where the
-compressed data is output. Each key/value pair in the hash defines a
-mapping between an input filename, stored in the key, and an output
-file/buffer, stored in the value. Although the input can only be a filename,
-there is more flexibility to control the destination of the compressed
-data. This is determined by the type of the value. Valid types are
-
-=over 5
-
-=item undef
-
-If the value is C<undef> the compressed data will be written to the
-value as a scalar reference.
-
-=item A filename
-
-If the value is a simple scalar, it is assumed to be a filename. This file will
-be opened for writing and the compressed data will be written to it.
-
-=item A filehandle
-
-If the value is a filehandle, the compressed data will be
-written to it. 
-The string '-' can be used as an alias for standard output.
-
-
-=item A scalar reference 
-
-If the value is a scalar reference, the compressed data will be stored
-in the buffer that is referenced by the scalar.
-
-
-=item A Hash Reference
-
-If the value is a hash reference, the compressed data will be written
-to C<$hash{$input}> as a scalar reference.
-
-=item An Array Reference
-
-If C<$output> is an array reference, the compressed data will be pushed
-onto the array.
-
-=back
-
-Any other type is a error.
 
 =head2 Notes
 
 When C<$input> maps to multiple files/buffers and C<$output> is a single
-file/buffer the compressed input files/buffers will all be stored in
-C<$output> as a single compressed stream.
+file/buffer the compressed input files/buffers will all be stored
+in C<$output> as a single compressed stream.
 
 
 
@@ -1807,14 +661,24 @@ L</"Constructor Options"> section below.
 
 =item AutoClose =E<gt> 0|1
 
-This option applies to any input or output data streams to C<gzip>
-that are filehandles.
+This option applies to any input or output data streams to 
+C<gzip> that are filehandles.
 
 If C<AutoClose> is specified, and the value is true, it will result in all
 input and/or output filehandles being closed once C<gzip> has
 completed.
 
 This parameter defaults to 0.
+
+
+
+=item BinModeIn =E<gt> 0|1
+
+When reading from a file or filehandle, set C<binmode> before reading.
+
+Defaults to 0.
+
+
 
 
 
@@ -1938,9 +802,9 @@ C<OPTS> is any combination of the following options:
 =item -AutoClose =E<gt> 0|1
 
 This option is only valid when the C<$output> parameter is a filehandle. If
-specified, and the value is true, it will result in the C<$output> being closed
-once either the C<close> method is called or the C<IO::Compress::Gzip> object is
-destroyed.
+specified, and the value is true, it will result in the C<$output> being
+closed once either the C<close> method is called or the C<IO::Compress::Gzip>
+object is destroyed.
 
 This parameter defaults to 0.
 
@@ -1948,27 +812,27 @@ This parameter defaults to 0.
 
 Opens C<$output> in append mode. 
 
-The behaviour of this option is dependant on the type of C<$output>.
+The behaviour of this option is dependent on the type of C<$output>.
 
 =over 5
 
 =item * A Buffer
 
-If C<$output> is a buffer and C<Append> is enabled, all compressed data will be
-append to the end if C<$output>. Otherwise C<$output> will be cleared before
-any data is written to it.
+If C<$output> is a buffer and C<Append> is enabled, all compressed data
+will be append to the end if C<$output>. Otherwise C<$output> will be
+cleared before any data is written to it.
 
 =item * A Filename
 
-If C<$output> is a filename and C<Append> is enabled, the file will be opened
-in append mode. Otherwise the contents of the file, if any, will be truncated
-before any compressed data is written to it.
+If C<$output> is a filename and C<Append> is enabled, the file will be
+opened in append mode. Otherwise the contents of the file, if any, will be
+truncated before any compressed data is written to it.
 
 =item * A Filehandle
 
-If C<$output> is a filehandle, the file pointer will be positioned to the end
-of the file via a call to C<seek> before any compressed data is written to it.
-Otherwise the file pointer will not be moved.
+If C<$output> is a filehandle, the file pointer will be positioned to the
+end of the file via a call to C<seek> before any compressed data is written
+to it.  Otherwise the file pointer will not be moved.
 
 =back
 
@@ -1982,8 +846,8 @@ data stream stored in C<$output>.
 
 
 
-It is a fatal error to attempt to use this option when C<$output> is not an RFC
-1952 data stream.
+It is a fatal error to attempt to use this option when C<$output> is not an
+RFC 1952 data stream.
 
 
 
@@ -1993,8 +857,9 @@ There are a number of other limitations with the C<Merge> option:
 
 =item 1
 
-This module needs to have been built with zlib 1.2.1 or better to work. A fatal
-error will be thrown if C<Merge> is used with an older version of zlib.  
+This module needs to have been built with zlib 1.2.1 or better to work. A
+fatal error will be thrown if C<Merge> is used with an older version of
+zlib.  
 
 =item 2
 
@@ -2041,7 +906,7 @@ The default is Z_DEFAULT_STRATEGY.
 
 
 
-=item -Mimimal =E<gt> 0|1
+=item -Minimal =E<gt> 0|1
 
 If specified, this option will force the creation of the smallest possible
 compliant gzip header (which is exactly 10 bytes long) as defined in
@@ -2089,29 +954,29 @@ if this option is not specified.
 
 =item -TextFlag =E<gt> 0|1
 
-This parameter controls the setting of the FLG.FTEXT bit in the gzip header. It
-is used to signal that the data stored in the gzip file/buffer is probably
-text.
+This parameter controls the setting of the FLG.FTEXT bit in the gzip
+header. It is used to signal that the data stored in the gzip file/buffer
+is probably text.
 
 The default is 0. 
 
 =item -HeaderCRC =E<gt> 0|1
 
-When true this parameter will set the FLG.FHCRC bit to 1 in the gzip header and
-set the CRC16 header field to the CRC of the complete gzip header except the
-CRC16 field itself.
+When true this parameter will set the FLG.FHCRC bit to 1 in the gzip header
+and set the CRC16 header field to the CRC of the complete gzip header
+except the CRC16 field itself.
 
-B<Note> that gzip files created with the C<HeaderCRC> flag set to 1 cannot be
-read by most, if not all, of the the standard gunzip utilities, most notably
-gzip version 1.2.4. You should therefore avoid using this option if you want to
-maximise the portability of your gzip files.
+B<Note> that gzip files created with the C<HeaderCRC> flag set to 1 cannot
+be read by most, if not all, of the the standard gunzip utilities, most
+notably gzip version 1.2.4. You should therefore avoid using this option if
+you want to maximize the portability of your gzip files.
 
 This parameter defaults to 0.
 
 =item -OS_Code =E<gt> $value
 
-Stores C<$value> in the gzip OS header field. A number between 0 and
-255 is valid.
+Stores C<$value> in the gzip OS header field. A number between 0 and 255 is
+valid.
 
 If not specified, this parameter defaults to the OS code of the Operating
 System this module was built on. The value 3 is used as a catch-all for all
@@ -2119,10 +984,10 @@ Unix variants and unknown Operating Systems.
 
 =item -ExtraField =E<gt> $data
 
-This parameter allows additional metadata to be stored in the ExtraField in the
-gzip header. An RFC1952 compliant ExtraField consists of zero or more
-subfields. Each subfield consists of a two byte header followed by the subfield
-data.
+This parameter allows additional metadata to be stored in the ExtraField in
+the gzip header. An RFC1952 compliant ExtraField consists of zero or more
+subfields. Each subfield consists of a two byte header followed by the
+subfield data.
 
 The list of subfields can be supplied in any of the following formats
 
@@ -2161,8 +1026,8 @@ The maximum size of the Extra Field 65535 bytes.
 
 Sets the XFL byte in the gzip header to C<$value>.
 
-If this option is not present, the value stored in XFL field will be determined
-by the setting of the C<Level> option.
+If this option is not present, the value stored in XFL field will be
+determined by the setting of the C<Level> option.
 
 If C<Level =E<gt> Z_BEST_SPEED> has been specified then XFL is set to 2.
 If C<Level =E<gt> Z_BEST_COMPRESSION> has been specified then XFL is set to 4.
@@ -2179,7 +1044,7 @@ to ensure they are compliant with RFC1952.
 
 This option is enabled by default.
 
-If C<Strict> is enabled the following behavior will be policed:
+If C<Strict> is enabled the following behaviour will be policed:
 
 =over 5
 
@@ -2211,7 +1076,7 @@ value 0x00.
 
 =back
 
-When C<Strict> is disabled the following behavior will be policed:
+When C<Strict> is disabled the following behaviour will be policed:
 
 =over 5
 
@@ -2261,7 +1126,7 @@ Usage is
     print $z $data
 
 Compresses and outputs the contents of the C<$data> parameter. This
-has the same behavior as the C<print> built-in.
+has the same behaviour as the C<print> built-in.
 
 Returns true if successful.
 
@@ -2424,13 +1289,24 @@ underlying file will also be closed.
 
 
 
-=head2 newStream
+=head2 newStream([OPTS])
 
 Usage is
 
-    $z->newStream
+    $z->newStream( [OPTS] )
 
-TODO
+Closes the current compressed data stream and starts a new one.
+
+OPTS consists of the following sub-set of the the options that are
+available when creating the C<$z> object,
+
+=over 5
+
+=item * Level
+
+=item * TODO
+
+=back
 
 =head2 deflateParams
 
@@ -2540,7 +1416,7 @@ See the Changes file.
 =head1 COPYRIGHT AND LICENSE
  
 
-Copyright (c) 2005 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 

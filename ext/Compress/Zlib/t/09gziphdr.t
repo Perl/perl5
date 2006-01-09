@@ -1,7 +1,7 @@
 BEGIN {
     if ($ENV{PERL_CORE}) {
 	chdir 't' if -d 't';
-	@INC = ("../lib", "lib");
+	@INC = ("../lib", "lib/compress");
     }
 }
 
@@ -20,7 +20,7 @@ BEGIN {
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
 
-    plan tests => 920 + $extra ;
+    plan tests => 942 + $extra ;
 
     use_ok('Compress::Zlib', 2) ;
     use_ok('Compress::Gzip::Constants') ;
@@ -249,7 +249,7 @@ for my $value ( "0D", "0A", "0A0D", "0D0A", "0A0A", "0D0D")
 
     for my $code ( -1, undef, '', 'fred' )
     {
-        my $code_name = defined $code ? "'$code'" : 'undef';
+        my $code_name = defined $code ? "'$code'" : "'undef'";
         eval { new IO::Compress::Gzip $name, -OS_Code => $code } ;
         like $@, mkErr("^IO::Compress::Gzip: Parameter 'OS_Code' must be an unsigned int, got $code_name"),
             " Trap OS Code $code_name";
@@ -257,8 +257,10 @@ for my $value ( "0D", "0A", "0A0D", "0D0A", "0A0A", "0D0D")
 
     for my $code ( qw( 256 ) )
     {
-        ok ! new IO::Compress::Gzip($name, OS_Code => $code) ;
-        like $GzipError, "/^OS_Code must be between 0 and 255, got '$code'/",
+        eval { ok ! new IO::Compress::Gzip($name, OS_Code => $code) };
+        like $@, mkErr("OS_Code must be between 0 and 255, got '$code'"),
+            " Trap OS Code $code";
+        like $GzipError, "/OS_Code must be between 0 and 255, got '$code'/",
             " Trap OS Code $code";
     }
 
@@ -327,7 +329,7 @@ for my $value ( "0D", "0A", "0A0D", "0D0A", "0A0A", "0D0D")
         my $extra = $hdr->{ExtraField} ;
 
         if ($order) {
-            eq_array $extra, $result
+            eq_array $extra, $result;
         } else {
             eq_set $extra, $result;
         } 
@@ -363,9 +365,11 @@ for my $value ( "0D", "0A", "0A0D", "0D0A", "0A0A", "0D0D")
     foreach my $test (@tests) {
         my ($input, $string) = @$test ;
         my $buffer ;
-        my $x = new IO::Compress::Gzip \$buffer, -ExtraField  => $input;
+        my $x ;
+        eval { $x = new IO::Compress::Gzip \$buffer, -ExtraField  => $input; };
+        like $@, mkErr("$prefix$string");  
+        like $GzipError, "/$prefix$string/";  
         ok ! $x ;
-        like $GzipError, "/^$prefix$string/";  
 
     }
 
@@ -414,10 +418,13 @@ for my $value ( "0D", "0A", "0A0D", "0D0A", "0A0A", "0D0D")
         #hexDump(\$input);
 
         my $buffer ;
-        my $x = new IO::Compress::Gzip \$buffer, -ExtraField  => $input, Strict => 1;
+        my $x ;
+        eval {$x = new IO::Compress::Gzip \$buffer, -ExtraField  => $input, Strict => 1; };
+        like $@, mkErr("$gzip_error"), "  $name";  
+        like $GzipError, "/$gzip_error/", "  $name";  
 
         ok ! $x, "  IO::Compress::Gzip fails";
-        like $GzipError, "/^$gzip_error/", "  $name";  
+        like $GzipError, "/$gzip_error/", "  $name";  
 
         foreach my $check (0, 1)    
         {
@@ -429,6 +436,7 @@ for my $value ( "0D", "0A", "0A0D", "0D0A", "0A0A", "0D0D")
             is anyUncompress(\$buffer), $string ;
 
             $x = new IO::Uncompress::Gunzip \$buffer, Strict => 0,
+                                       Transparent => 0,
                                        ParseExtra => $check;
             if ($check) {
                 ok ! $x ;
@@ -587,8 +595,8 @@ EOM
 {
     title "Header Corruption - ExtraField too big";
     my $x;
-    ok ! new IO::Compress::Gzip(\$x,
-			-ExtraField => "x" x (GZIP_FEXTRA_MAX_SIZE + 1)) ;
+    eval { new IO::Compress::Gzip(\$x, -ExtraField => "x" x (GZIP_FEXTRA_MAX_SIZE + 1)) ;};
+    like $@, mkErr('Error with ExtraField Parameter: Too Large');
     like $GzipError, '/Error with ExtraField Parameter: Too Large/';
 }
 
@@ -596,8 +604,8 @@ EOM
     title "Header Corruption - Create Name with Illegal Chars";
 
     my $x;
-    ok ! new IO::Compress::Gzip \$x,
-		      -Name => "fred\x02" ;
+    eval { new IO::Compress::Gzip \$x, -Name => "fred\x02" };
+    like $@, mkErr('Non ISO 8859-1 Character found in Name');
     like $GzipError, '/Non ISO 8859-1 Character found in Name/';
 
     ok  my $gz = new IO::Compress::Gzip \$x,
@@ -606,6 +614,7 @@ EOM
     ok $gz->close();                          
 
     ok ! new IO::Uncompress::Gunzip \$x,
+                        -Transparent => 0,
                         -Strict => 1;
 
     like $GunzipError, '/Header Error: Non ISO 8859-1 Character found in Name/';                    
@@ -621,12 +630,12 @@ EOM
 {
     title "Header Corruption - Null Chars in Name";
     my $x;
-    ok ! new IO::Compress::Gzip \$x,
-		      -Name => "\x00" ;
+    eval { new IO::Compress::Gzip \$x, -Name => "\x00" };
+    like $@, mkErr('Null Character found in Name');
     like $GzipError, '/Null Character found in Name/';
 
-    ok ! new IO::Compress::Gzip \$x,
-		      -Name => "abc\x00" ;
+    eval { new IO::Compress::Gzip \$x, -Name => "abc\x00" };
+    like $@, mkErr('Null Character found in Name');
     like $GzipError, '/Null Character found in Name/';
 
     ok my $gz = new IO::Compress::Gzip \$x,
@@ -646,8 +655,8 @@ EOM
     title "Header Corruption - Create Comment with Illegal Chars";
 
     my $x;
-    ok ! new IO::Compress::Gzip \$x,
-		      -Comment => "fred\x02" ;
+    eval { new IO::Compress::Gzip \$x, -Comment => "fred\x02" };
+    like $@, mkErr('Non ISO 8859-1 Character found in Comment');
     like $GzipError, '/Non ISO 8859-1 Character found in Comment/';
 
     ok  my $gz = new IO::Compress::Gzip \$x,
@@ -655,7 +664,8 @@ EOM
 		                      -Comment => "fred\x02" ;
     ok $gz->close();                          
 
-    ok ! new IO::Uncompress::Gunzip \$x, Strict => 1;
+    ok ! new IO::Uncompress::Gunzip \$x, Strict => 1,
+                        -Transparent => 0;
 
     like $GunzipError, '/Header Error: Non ISO 8859-1 Character found in Comment/';
     ok my $gunzip = new IO::Uncompress::Gunzip \$x, Strict => 0;
@@ -669,12 +679,12 @@ EOM
 {
     title "Header Corruption - Null Char in Comment";
     my $x;
-    ok ! new IO::Compress::Gzip \$x,
-		      -Comment => "\x00" ;
+    eval { new IO::Compress::Gzip \$x, -Comment => "\x00" };
+    like $@, mkErr('Null Character found in Comment');
     like $GzipError, '/Null Character found in Comment/';
 
-    ok ! new IO::Compress::Gzip \$x,
-		      -Comment => "abc\x00" ;
+    eval { new IO::Compress::Gzip \$x, -Comment => "abc\x00" } ;
+    like $@, mkErr('Null Character found in Comment');
     like $GzipError, '/Null Character found in Comment/';
 
     ok my $gz = new IO::Compress::Gzip \$x,
@@ -842,7 +852,7 @@ EOM
                 ok   $gunz->read($uncomp) > 0 ;
                 ok ! $GunzipError ;
                 my $expected = substr($buffer, - $got);
-                is  ${ $gunz->trailingData() },  $expected_trailing;
+                is  $gunz->trailingData(),  $expected_trailing;
             }
             ok $gunz->eof() ;
             ok $uncomp eq $string;
@@ -875,7 +885,7 @@ EOM
                 ok ! $GunzipError ;
                 #is   $gunz->trailingData(), substr($buffer, - $got) ;
             }
-            ok ! ${ $gunz->trailingData() } ;
+            ok ! $gunz->trailingData() ;
             ok $gunz->eof() ;
             ok $uncomp eq $string;
             ok $gunz->close ;
@@ -905,7 +915,7 @@ EOM
                 ok   $gunz->read($uncomp) > 0 ;
                 ok ! $GunzipError ;
             }
-            ok ! ${ $gunz->trailingData() } ;
+            ok ! $gunz->trailingData() ;
             ok $gunz->eof() ;
             ok $uncomp eq $string;
             ok $gunz->close ;

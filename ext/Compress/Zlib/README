@@ -1,11 +1,11 @@
 
                                  Compress::Zlib
 
-                                Version 2.000_05
+                                Version 2.000_07
 
-                                   4 Oct 2005 
+                                  9 Jan 2006 
 
-       Copyright (c) 1995-2005 Paul Marquess. All rights reserved.
+       Copyright (c) 1995-2006 Paul Marquess. All rights reserved.
              This program is free software; you can redistribute it
              and/or modify it under the same terms as Perl itself.
 
@@ -28,8 +28,8 @@ DESCRIPTION
 -----------
 
 This module provides a Perl interface to most of the zlib compression
-library.  For more details see the pod documentation embedded in the
-file Zlib.pm.
+library.  For more details see the pod documentation embedded in the file
+Zlib.pm.
 
 If you have downloaded this module in the expectation of manipulating the
 contents of .zip files, you will need to fetch and build the Archive::Zip
@@ -131,13 +131,13 @@ before building this module.
   --------
   
   For option 2, fetch a copy of the zlib source distribution from
-  http://www.zlib.org and unpack it into the Compress::Zlib source
-  directory. Assuming you have fetched zlib 1.2.3, it will create a
+  http://www.zlib.org and unpack it into the Compress::Zlib source directory.
+  Assuming you have fetched zlib 1.2.3, it will create a
   directory called zlib-1.2.3. 
   
   Now set the variables in the file config.in as follows (if the version
-  you have fetched isn't 1.2.3, change the INCLUDE and LIB variables
-  appropriately):
+  you have fetched isn't 1.2.3, change the INCLUDE and LIB
+  variables appropriately):
   
       BUILD_ZLIB   = True
       INCLUDE      = ./zlib-1.2.3
@@ -178,34 +178,34 @@ before building this module.
 Setting the Gzip OS Code
 ------------------------
 
-Every gzip stream stores a byte in its header to identify the Operating System
-that was used to create the gzip stream. When you build Compress::Zlib it will
-attempt to determine the value that is correct for your Operating System. This
-will then be used by IO::Gzip as the default value for the OS byte in all gzip
-headers it creates. 
+Every gzip stream stores a byte in its header to identify the Operating
+System that was used to create the gzip stream. When you build
+Compress::Zlib it will attempt to determine the value that is correct for
+your Operating System. This will then be used by IO::Gzip as the default
+value for the OS byte in all gzip headers it creates. 
  
-The variable GZIP_OS_CODE in the config.in file controls the setting of this
-value when building Compress::Zlib. If GZIP_OS_CODE is set to AUTO_DETECT,
-Compress::Zlib will attempt to determine the correct value for your Operating
-System.
+The variable GZIP_OS_CODE in the config.in file controls the setting of
+this value when building Compress::Zlib. If GZIP_OS_CODE is set to
+AUTO_DETECT, Compress::Zlib will attempt to determine the correct value for
+your Operating System.
 
 Alternatively, you can override auto-detection of the default OS code and
-explicitly set it yourself. Set the GZIP_OS_CODE variable in the config.in file
-to be a number between 0 and 255. For example
+explicitly set it yourself. Set the GZIP_OS_CODE variable in the config.in
+file to be a number between 0 and 255. For example
  
     GZIP_OS_CODE = 3
 
 See RFC 1952 for valid OS codes that can be used.
 
-If you are running one of the less popular Operating Systems, it could be that
-the default value picked by this module is incorrect or the default value (3)
-is used when there is a better value available. When Compress::Zlib cannot
-determine what operating system you are running, it will use the default value
-3 for the OS code.
+If you are running one of the less popular Operating Systems, it could be
+that the default value picked by this module is incorrect or the default
+value (3) is used when there is a better value available. When
+Compress::Zlib cannot determine what operating system you are running, it
+will use the default value 3 for the OS code.
 
 If you find you have to change this value, because you think the value auto
-detected is incorrect, please take a few moments to contact the author of this
-module.
+detected is incorrect, please take a few moments to contact the author of
+this module.
 
 
 TROUBLESHOOTING
@@ -327,7 +327,7 @@ really want to run them, you need to execute "make longtest".
 Be warned though -- this test suite can take hours to run on a slow box.
 
 Also, due to the way the tests are constructed, some architectures will
-run out of memory during these test. This should not be considered a bug
+run out of memory during this test. This should not be considered a bug
 in the Compress::Zlib module.
 
 
