@@ -432,7 +432,7 @@ do_test(21,
     MG_PTR = $ADDR (?:"(?i:PATH)"|=> HEf_SVKEY
     SV = PV(?:IV)?\\($ADDR\\) at $ADDR
       REFCNT = \d+
-      FLAGS = \\(TEMP,POK,(?:FAKE,READONLY,)pPOK\\)
+      FLAGS = \\(TEMP,POK,(?:FAKE,READONLY,)?pPOK\\)
 (?:      IV = 0
 )?      PV = $ADDR "(?i:PATH)"(?:\\\0)?
       CUR = \d+
