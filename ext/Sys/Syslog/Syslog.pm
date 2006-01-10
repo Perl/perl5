@@ -916,6 +916,10 @@ sub connect_unix {
         push(@{$errs}, "_PATH_LOG not available in syslog.h");
 	return 0;
     }
+    if (! -S $syslog_path) {
+	push(@{$errs}, "$syslog_path is not a socket");
+	return 0;
+    }
     my $that = sockaddr_un($syslog_path);
     if (!$that) {
 	push(@{$errs}, "can't locate $syslog_path");

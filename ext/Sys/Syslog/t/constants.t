@@ -27,7 +27,7 @@ if(@names) {
             $name = $1;
             my $v = eval "${callpack}::$name()";
 
-            if($v =~ /^\d+$/) {
+            if(defined($v) && $v =~ /^\d+$/) {
                 is( $@, '', "calling the constant $name as a function" );
                 like( $v, '/^\d+$/', "checking that $name is a number ($v)" );
 
