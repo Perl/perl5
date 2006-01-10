@@ -42,7 +42,7 @@ my $transmit_ok = 0;
 my $current_proto = undef;
 my $failed = undef;
 my $fail_time = undef;
-our ($connected, @fallbackMethods, $syslog_send);
+our ($connected, @fallbackMethods, $syslog_send, $host);
 
 use Socket ':all';
 use POSIX qw(strftime setlocale LC_TIME);
@@ -821,7 +821,18 @@ sub connect_tcp {
     }
 
     my $this = sockaddr_in($syslog, INADDR_ANY);
-    my $that = sockaddr_in($syslog, INADDR_LOOPBACK);
+    my $that;
+    if (defined $host) {
+	$that = inet_aton($host);
+	if (!$that) {
+	    push(@{$errs}, "can't lookup $host");
+	    return 0;
+	}
+    } else {
+	$that = INADDR_LOOPBACK;
+    }
+    $that = sockaddr_in($syslog, $that);
+
     if (!socket(SYSLOG,AF_INET,SOCK_STREAM,$tcp)) {
 	push(@{$errs}, "tcp socket: $!");
 	return 0;
@@ -849,7 +860,18 @@ sub connect_udp {
 	return 0;
     }
     my $this = sockaddr_in($syslog, INADDR_ANY);
-    my $that = sockaddr_in($syslog, INADDR_LOOPBACK);
+    my $that;
+    if (defined $host) {
+	$that = inet_aton($host);
+	if (!$that) {
+	    push(@{$errs}, "can't lookup $host");
+	    return 0;
+	}
+    } else {
+	$that = INADDR_LOOPBACK;
+    }
+    $that = sockaddr_in($syslog, $that);
+
     if (!socket(SYSLOG,AF_INET,SOCK_DGRAM,$udp)) {
 	push(@{$errs}, "udp socket: $!");
 	return 0;
