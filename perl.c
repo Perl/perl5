@@ -1487,7 +1487,7 @@ setuid perl scripts securely.\n");
 	      }
 	 }
 	 /* Can we grab env area too to be used as the area for $0? */
-	 if (PL_origenviron) {
+	 if (s && PL_origenviron) {
 	      if ((PL_origenviron[0] == s + 1
 #ifdef OS2
 		   || (PL_origenviron[0] == s + 9 && (s += 8))
@@ -1523,7 +1523,7 @@ setuid perl scripts securely.\n");
 		   }
 	      }
 	 }
-	 PL_origalen = s - PL_origargv[0] + 1;
+	 PL_origalen = s ? s - PL_origargv[0] + 1 : 0;
     }
 
     if (PL_do_undump) {
