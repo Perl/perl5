@@ -4,7 +4,7 @@ use Carp;
 require 5.006;
 require Exporter;
 
-our $VERSION = '0.12';
+our $VERSION = '0.13';
 our @ISA = qw(Exporter);
 
 our %EXPORT_TAGS = (
@@ -42,7 +42,7 @@ my $transmit_ok = 0;
 my $current_proto = undef;
 my $failed = undef;
 my $fail_time = undef;
-our ($connected, @fallbackMethods, $syslog_send, $host);
+our ($connected, @fallbackMethods, $syslog_send);
 
 use Socket ':all';
 use POSIX qw(strftime setlocale LC_TIME);
@@ -808,11 +808,6 @@ sub connect {
 
 sub connect_tcp {
     my ($errs) = @_;
-    unless ($host) {
-	require Sys::Hostname;
-	my($host_uniq) = Sys::Hostname::hostname();
-	($host) = $host_uniq =~ /([A-Za-z0-9_.-]+)/; # allow FQDN (inc _)
-    }
     my $tcp = getprotobyname('tcp');
     if (!defined $tcp) {
 	push(@{$errs}, "getprotobyname failed for tcp");
@@ -826,11 +821,7 @@ sub connect_tcp {
     }
 
     my $this = sockaddr_in($syslog, INADDR_ANY);
-    my $that = sockaddr_in($syslog, inet_aton($host));
-    if (!$that) {
-	push(@{$errs}, "can't lookup $host");
-	return 0;
-    }
+    my $that = sockaddr_in($syslog, INADDR_LOOPBACK);
     if (!socket(SYSLOG,AF_INET,SOCK_STREAM,$tcp)) {
 	push(@{$errs}, "tcp socket: $!");
 	return 0;
@@ -847,11 +838,6 @@ sub connect_tcp {
 
 sub connect_udp {
     my ($errs) = @_;
-    unless ($host) {
-	require Sys::Hostname;
-	my($host_uniq) = Sys::Hostname::hostname();
-	($host) = $host_uniq =~ /([A-Za-z0-9_.-]+)/; # allow FQDN (inc _)
-    }
     my $udp = getprotobyname('udp');
     if (!defined $udp) {
 	push(@{$errs}, "getprotobyname failed for udp");
@@ -863,11 +849,7 @@ sub connect_udp {
 	return 0;
     }
     my $this = sockaddr_in($syslog, INADDR_ANY);
-    my $that = sockaddr_in($syslog, inet_aton($host));
-    if (!$that) {
-	push(@{$errs}, "can't lookup $host");
-	return 0;
-    }
+    my $that = sockaddr_in($syslog, INADDR_LOOPBACK);
     if (!socket(SYSLOG,AF_INET,SOCK_DGRAM,$udp)) {
 	push(@{$errs}, "udp socket: $!");
 	return 0;
