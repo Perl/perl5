@@ -4240,6 +4240,7 @@ Perl_yylex(pTHX)
 	    just_a_word_zero_gv:
 		gv = NULL;
 		gvp = NULL;
+		orig_keyword = 0;
 	    }
 	  just_a_word: {
 		SV *sv;
