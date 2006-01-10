@@ -570,7 +570,7 @@ The XSUB-writer's interface to the C C<malloc> function.
 
 In 5.9.3, Newx() and friends replace the older New() API, and drops
 the first parameter, I<x>, a debug aid which allowed callers to identify
-themselves.  This aid has been superceded by a new build option,
+themselves.  This aid has been superseded by a new build option,
 PERL_MEM_LOG (see L<perlhack/PERL_MEM_LOG>).  The older API is still
 there for use in XS modules supporting older perls.
 
