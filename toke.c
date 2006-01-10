@@ -2985,15 +2985,15 @@ Perl_yylex(pTHX)
 		}
 #endif
 		if (d) {
-		    const U32 oldpdb = PL_perldb;
-		    const bool oldn = PL_minus_n;
-		    const bool oldp = PL_minus_p;
-
 		    while (*d && !isSPACE(*d)) d++;
 		    while (SPACE_OR_TAB(*d)) d++;
 
 		    if (*d++ == '-') {
 			const bool switches_done = PL_doswitches;
+			const U32 oldpdb = PL_perldb;
+			const bool oldn = PL_minus_n;
+			const bool oldp = PL_minus_p;
+
 			do {
 			    if (*d == 'M' || *d == 'm' || *d == 'C') {
 				const char * const m = d;
