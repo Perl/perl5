@@ -342,7 +342,7 @@ int main ()
 {
     struct rlimit rl;
     int i = getrlimit (RLIMIT_DATA, &rl);
-    printf ("%d\n", rl.rlim_cur / (1024 * 1024));
+    printf ("%d\n", (int)(rl.rlim_cur / (1024 * 1024)));
     } /* main */
 EOF
 $cc -o try $ccflags $ldflags try.c
@@ -410,15 +410,24 @@ case "$ccisgcc" in
 	    *)      opt="$optimize"
 		    ;;
 	    esac
+	case "$archname" in
+	    IA64*)
+		case "$ccversion" in
+		    B3910B*A.06.0[12345])
+			# > cc --version
+			# cc: HP aC++/ANSI C B3910B A.06.05 [Jul 25 2005]
+			# Has optimizing problems with -O2 and up for both
+			# maint (5.8.8+) and blead (5.9.3+)
+			# -O1/+O1 passed all tests (m)'05 [ 10 Jan 2005 ]
+			optimize="$opt"			;;
+		    *)  doop_cflags="optimize=\"$opt\""	;;
+		    esac
+		;;
+	    esac
 	if [ $maxdsiz -le 64 ]; then
 	    toke_cflags="$toke_cflags;optimize=\"$opt\""
 	    regexec_cflags="optimize=\"$opt\""
 	    fi
-	case "$archname" in
-	    IA64*)
-		doop_cflags="optimize=\"$opt\""
-		;;
-	    esac
 	ld=/usr/bin/ld
 	cccdlflags='+Z'
 	lddlflags='-b +vnocompatwarnings'
