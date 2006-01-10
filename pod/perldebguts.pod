@@ -753,8 +753,7 @@ The B<-DL> command-line switch is obsolete since circa Perl 5.6.0
 (it was available only if Perl was built with C<-DDEBUGGING>).
 The switch was used to track Perl's memory allocations and possible
 memory leaks.  These days the use of malloc debugging tools like
-F<Purify> or F<valgrind> is suggested instead.  See also
-L<perlhack/PERL_MEM_LOG>.
+F<Purify> or F<valgrind> is suggested instead.
 
 One way to find out how much memory is being used by Perl data
 structures is to install the Devel::Size module from CPAN: it gives
