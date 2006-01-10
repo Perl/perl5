@@ -11,7 +11,7 @@
 :	d		function has documentation with its source
 :	s		static function, should have an S_ prefix in
 :			source file; for macros (m), suffix the usage
-:			example	with a semicolon
+:			example with a semicolon
 :	n		has no implicit interpreter/thread context argument
 :	p		function has a Perl_ prefix
 :	f		function takes printf style format string, varargs
@@ -28,6 +28,7 @@
 :	R		Return value must not be ignored.
 :	P		pure function: no effects except the return value;
 :			return value depends only on parms and/or globals
+: (see also L<perlguts/Internal Functions> for those flags.)
 :
 : Pointer parameters that must not be passed NULLs should be prefixed with NN.
 :
