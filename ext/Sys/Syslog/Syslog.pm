@@ -821,7 +821,7 @@ sub connect_tcp {
     my $syslog = getservbyname('syslog','tcp');
     $syslog = getservbyname('syslogng','tcp') unless (defined $syslog);
     if (!defined $syslog) {
-	push(@{$errs}, "getservbyname failed for tcp");
+	push(@{$errs}, "getservbyname failed for syslog/tcp and syslogng/tcp");
 	return 0;
     }
 
@@ -859,7 +859,7 @@ sub connect_udp {
     }
     my $syslog = getservbyname('syslog','udp');
     if (!defined $syslog) {
-	push(@{$errs}, "getservbyname failed for udp");
+	push(@{$errs}, "getservbyname failed for syslog/udp");
 	return 0;
     }
     my $this = sockaddr_in($syslog, INADDR_ANY);
