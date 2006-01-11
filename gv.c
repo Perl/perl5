@@ -330,7 +330,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	    return 0;  /* cache indicates sub doesn't exist */
     }
 
-    gvp = (GV**)hv_fetch(stash, "ISA", 3, FALSE);
+    gvp = (GV**)hv_fetchs(stash, "ISA", FALSE);
     av = (gvp && (gv = *gvp) && gv != (GV*)&PL_sv_undef) ? GvAV(gv) : NULL;
 
     /* create and re-create @.*::SUPER::ISA on demand */
@@ -342,9 +342,9 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 
 	    packlen -= 7;
 	    basestash = gv_stashpvn(hvname, packlen, TRUE);
-	    gvp = (GV**)hv_fetch(basestash, "ISA", 3, FALSE);
+	    gvp = (GV**)hv_fetchs(basestash, "ISA", FALSE);
 	    if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (av = GvAV(gv))) {
-		gvp = (GV**)hv_fetch(stash, "ISA", 3, TRUE);
+		gvp = (GV**)hv_fetchs(stash, "ISA", TRUE);
 		if (!gvp || !(gv = *gvp))
 		    Perl_croak(aTHX_ "Cannot create %s::ISA", hvname);
 		if (SvTYPE(gv) != SVt_PVGV)
@@ -815,7 +815,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    namend++;
 	    name = namend;
 	    if (!*name)
-		return gv ? gv : (GV*)*hv_fetch(PL_defstash, "main::", 6, TRUE);
+		return gv ? gv : (GV*)*hv_fetchs(PL_defstash, "main::", TRUE);
 	}
     }
     len = namend - name;

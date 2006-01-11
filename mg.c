@@ -818,7 +818,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		 * it could have been extended by warnings::register */
 		SV **bits_all;
 		HV * const bits=get_hv("warnings::Bits", FALSE);
-		if (bits && (bits_all=hv_fetch(bits, "all", 3, FALSE))) {
+		if (bits && (bits_all=hv_fetchs(bits, "all", FALSE))) {
 		    sv_setsv(sv, *bits_all);
 		}
 	        else {

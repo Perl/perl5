@@ -1784,11 +1784,11 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     STRLEN lcur, xcur, scur;
 
     HV* const hv = (HV*)SvRV(swash);
-    SV** const listsvp = hv_fetch(hv, "LIST", 4, FALSE);
-    SV** const typesvp = hv_fetch(hv, "TYPE", 4, FALSE);
-    SV** const bitssvp = hv_fetch(hv, "BITS", 4, FALSE);
-    SV** const nonesvp = hv_fetch(hv, "NONE", 4, FALSE);
-    SV** const extssvp = hv_fetch(hv, "EXTRAS", 6, FALSE);
+    SV** const listsvp = hv_fetchs(hv, "LIST", FALSE);
+    SV** const typesvp = hv_fetchs(hv, "TYPE", FALSE);
+    SV** const bitssvp = hv_fetchs(hv, "BITS", FALSE);
+    SV** const nonesvp = hv_fetchs(hv, "NONE", FALSE);
+    SV** const extssvp = hv_fetchs(hv, "EXTRAS", FALSE);
     const U8* const typestr = (U8*)SvPV_nolen(*typesvp);
     const int  typeto  = typestr[0] == 'T' && typestr[1] == 'o';
     const STRLEN bits  = SvUV(*bitssvp);
@@ -1991,7 +1991,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 
 	othersvp = hv_fetch(hv, (char *)namestr, namelen, FALSE);
 	otherhv = (HV*)SvRV(*othersvp);
-	otherbitssvp = hv_fetch(otherhv, "BITS", 4, FALSE);
+	otherbitssvp = hv_fetchs(otherhv, "BITS", FALSE);
 	otherbits = (STRLEN)SvUV(*otherbitssvp);
 	if (bits < otherbits)
 	    Perl_croak(aTHX_ "panic: swash_get found swatch size mismatch");

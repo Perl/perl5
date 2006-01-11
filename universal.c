@@ -60,7 +60,7 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
 	Perl_croak(aTHX_ "Recursive inheritance detected in package '%s'",
 		   hvname);
 
-    gvp = (GV**)hv_fetch(stash, "::ISA::CACHE::", 14, FALSE);
+    gvp = (GV**)hv_fetchs(stash, "::ISA::CACHE::", FALSE);
 
     if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (subgen = GvSV(gv))
 	&& (hv = GvHV(gv)))
@@ -82,11 +82,11 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
 	}
     }
 
-    gvp = (GV**)hv_fetch(stash,"ISA",3,FALSE);
+    gvp = (GV**)hv_fetchs(stash, "ISA", FALSE);
 
     if (gvp && (gv = *gvp) != (GV*)&PL_sv_undef && (av = GvAV(gv))) {
 	if (!hv || !subgen) {
-	    gvp = (GV**)hv_fetch(stash, "::ISA::CACHE::", 14, TRUE);
+	    gvp = (GV**)hv_fetchs(stash, "::ISA::CACHE::", TRUE);
 
 	    gv = *gvp;
 
@@ -342,7 +342,7 @@ XS(XS_UNIVERSAL_VERSION)
         pkg = gv_stashsv(ST(0), FALSE);
     }
 
-    gvp = pkg ? (GV**)hv_fetch(pkg,"VERSION",7,FALSE) : Null(GV**);
+    gvp = pkg ? (GV**)hv_fetchs(pkg, "VERSION", FALSE) : Null(GV**);
 
     if (gvp && isGV(gv = *gvp) && (sv = GvSV(gv)) && SvOK(sv)) {
         SV * const nsv = sv_newmortal();

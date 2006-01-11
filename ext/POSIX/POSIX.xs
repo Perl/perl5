@@ -1317,7 +1317,7 @@ sigaction(sig, optaction, oldaction = 0)
 
 	    /* Remember old disposition if desired. */
 	    if (oldaction) {
-		svp = hv_fetch(oldaction, "HANDLER", 7, TRUE);
+		svp = hv_fetchs(oldaction, "HANDLER", TRUE);
 		if(!svp)
 		    croak("Can't supply an oldaction without a HANDLER");
 		if(SvTRUE(*sigsvp)) { /* TBD: what if "0"? */
@@ -1330,7 +1330,7 @@ sigaction(sig, optaction, oldaction = 0)
 		if(RETVAL == -1)
                    XSRETURN_UNDEF;
 		/* Get back the mask. */
-		svp = hv_fetch(oldaction, "MASK", 4, TRUE);
+		svp = hv_fetchs(oldaction, "MASK", TRUE);
 		if (sv_isa(*svp, "POSIX::SigSet")) {
 		    IV tmp = SvIV((SV*)SvRV(*svp));
 		    sigset = INT2PTR(sigset_t*, tmp);
@@ -1342,11 +1342,11 @@ sigaction(sig, optaction, oldaction = 0)
 		*sigset = oact.sa_mask;
 
 		/* Get back the flags. */
-		svp = hv_fetch(oldaction, "FLAGS", 5, TRUE);
+		svp = hv_fetchs(oldaction, "FLAGS", TRUE);
 		sv_setiv(*svp, oact.sa_flags);
 
 		/* Get back whether the old handler used safe signals. */
-		svp = hv_fetch(oldaction, "SAFE", 4, TRUE);
+		svp = hv_fetchs(oldaction, "SAFE", TRUE);
 		sv_setiv(*svp,
 		/* compare incompatible pointers by casting to integer */
 		    PTR2nat(oact.sa_handler) == PTR2nat(PL_csighandlerp));
@@ -1356,7 +1356,7 @@ sigaction(sig, optaction, oldaction = 0)
 		/* Safe signals use "csighandler", which vectors through the
 		   PL_sighandlerp pointer when it's safe to do so.
 		   (BTW, "csighandler" is very different from "sighandler".) */
-		svp = hv_fetch(action, "SAFE", 4, FALSE);
+		svp = hv_fetchs(action, "SAFE", FALSE);
 		act.sa_handler =
 			DPTR2FPTR(
 			    void (*)(),
@@ -1366,7 +1366,7 @@ sigaction(sig, optaction, oldaction = 0)
 
 		/* Vector new Perl handler through %SIG.
 		   (The core signal handlers read %SIG to dispatch.) */
-		svp = hv_fetch(action, "HANDLER", 7, FALSE);
+		svp = hv_fetchs(action, "HANDLER", FALSE);
 		if (!svp)
 		    croak("Can't supply an action without a HANDLER");
 		sv_setsv(*sigsvp, *svp);
@@ -1389,7 +1389,7 @@ sigaction(sig, optaction, oldaction = 0)
 		}
 
 		/* Set up any desired mask. */
-		svp = hv_fetch(action, "MASK", 4, FALSE);
+		svp = hv_fetchs(action, "MASK", FALSE);
 		if (svp && sv_isa(*svp, "POSIX::SigSet")) {
 		    IV tmp = SvIV((SV*)SvRV(*svp));
 		    sigset = INT2PTR(sigset_t*, tmp);
@@ -1399,7 +1399,7 @@ sigaction(sig, optaction, oldaction = 0)
 		    sigemptyset(& act.sa_mask);
 
 		/* Set up any desired flags. */
-		svp = hv_fetch(action, "FLAGS", 5, FALSE);
+		svp = hv_fetchs(action, "FLAGS", FALSE);
 		act.sa_flags = svp ? SvIV(*svp) : 0;
 
 		/* Don't worry about cleaning up *sigsvp if this fails,

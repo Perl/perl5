@@ -1703,7 +1703,7 @@ PP(pp_caller)
 	     * it could have been extended by warnings::register */
 	    SV **bits_all;
 	    HV * const bits = get_hv("warnings::Bits", FALSE);
-	    if (bits && (bits_all=hv_fetch(bits, "all", 3, FALSE))) {
+	    if (bits && (bits_all=hv_fetchs(bits, "all", FALSE))) {
 		mask = newSVsv(*bits_all);
 	    }
 	    else {

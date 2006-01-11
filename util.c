@@ -4154,11 +4154,11 @@ Perl_new_version(pTHX_ SV *ver)
 	
 	if ( hv_exists((HV*)ver, "width", 5 ) )
 	{
-	    const I32 width = SvIV(*hv_fetch((HV*)ver, "width", 5, FALSE));
+	    const I32 width = SvIV(*hv_fetchs((HV*)ver, "width", FALSE));
 	    hv_store((HV *)hv, "width", 5, newSViv(width), 0);
 	}
 
-	sav = (AV *)SvRV(*hv_fetch((HV*)ver, "version", 7, FALSE));
+	sav = (AV *)SvRV(*hv_fetchs((HV*)ver, "version", FALSE));
 	/* This will get reblessed later if a derived class*/
 	for ( key = 0; key <= av_len(sav); key++ )
 	{
@@ -4265,7 +4265,7 @@ Perl_vverify(pTHX_ SV *vs)
     /* see if the appropriate elements exist */
     if ( SvTYPE(vs) == SVt_PVHV
 	 && hv_exists((HV*)vs, "version", 7)
-	 && (sv = SvRV(*hv_fetch((HV*)vs, "version", 7, FALSE)))
+	 && (sv = SvRV(*hv_fetchs((HV*)vs, "version", FALSE)))
 	 && SvTYPE(sv) == SVt_PVAV )
 	return TRUE;
     else
@@ -4304,13 +4304,13 @@ Perl_vnumify(pTHX_ SV *vs)
     if ( hv_exists((HV*)vs, "alpha", 5 ) )
 	alpha = TRUE;
     if ( hv_exists((HV*)vs, "width", 5 ) )
-	width = SvIV(*hv_fetch((HV*)vs, "width", 5, FALSE));
+	width = SvIV(*hv_fetchs((HV*)vs, "width", FALSE));
     else
 	width = 3;
 
 
     /* attempt to retrieve the version array */
-    if ( !(av = (AV *)SvRV(*hv_fetch((HV*)vs, "version", 7, FALSE)) ) ) {
+    if ( !(av = (AV *)SvRV(*hv_fetchs((HV*)vs, "version", FALSE)) ) ) {
 	sv_catpvs(sv,"0");
 	return sv;
     }
@@ -4380,7 +4380,7 @@ Perl_vnormal(pTHX_ SV *vs)
 
     if ( hv_exists((HV*)vs, "alpha", 5 ) )
 	alpha = TRUE;
-    av = (AV *)SvRV(*hv_fetch((HV*)vs, "version", 7, FALSE));
+    av = (AV *)SvRV(*hv_fetchs((HV*)vs, "version", FALSE));
 
     len = av_len(av);
     if ( len == -1 )
@@ -4468,12 +4468,12 @@ Perl_vcmp(pTHX_ SV *lhv, SV *rhv)
 	Perl_croak(aTHX_ "Invalid version object");
 
     /* get the left hand term */
-    lav = (AV *)SvRV(*hv_fetch((HV*)lhv, "version", 7, FALSE));
+    lav = (AV *)SvRV(*hv_fetchs((HV*)lhv, "version", FALSE));
     if ( hv_exists((HV*)lhv, "alpha", 5 ) )
 	lalpha = TRUE;
 
     /* and the right hand term */
-    rav = (AV *)SvRV(*hv_fetch((HV*)rhv, "version", 7, FALSE));
+    rav = (AV *)SvRV(*hv_fetchs((HV*)rhv, "version", FALSE));
     if ( hv_exists((HV*)rhv, "alpha", 5 ) )
 	ralpha = TRUE;
 

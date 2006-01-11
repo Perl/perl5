@@ -4208,7 +4208,7 @@ Perl_yylex(pTHX)
 	    else if (gv && !gvp
 		     && -tmp==KEY_lock	/* XXX generalizable kludge */
 		     && GvCVu(gv)
-		     && !hv_fetch(GvHVn(PL_incgv), "Thread.pm", 9, FALSE))
+		     && !hv_fetchs(GvHVn(PL_incgv), "Thread.pm", FALSE))
 	    {
 		tmp = 0;		/* any sub overrides "weak" keyword */
 	    }
@@ -10013,7 +10013,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 	if ((gv_readline
 		&& GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline))
 		||
-		((gvp = (GV**)hv_fetch(PL_globalstash, "readline", 8, FALSE))
+		((gvp = (GV**)hv_fetchs(PL_globalstash, "readline", FALSE))
 		&& (gv_readline = *gvp) != (GV*)&PL_sv_undef
 		&& GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline)))
 	    readline_overriden = TRUE;
