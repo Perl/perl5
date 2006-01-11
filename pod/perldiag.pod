@@ -4711,6 +4711,11 @@ are automatically rebound to the current values of such variables.
 its equivalent C<BEGIN> block found an internal inconsistency with
 the version number.
 
+=item Version string '%s' contains invalid data; ignoring: '%s'
+
+(W misc) The version string contains invalid characters, so it is
+being ignored.
+
 =item v-string in use/require is non-portable
 
 (W portable) The use of v-strings is non-portable to older, pre-5.6, Perls.

@@ -4246,9 +4246,11 @@ Perl_upg_version(pTHX_ SV *ver)
 	version = savepv(SvPV_nolen(ver));
     }
     s = scan_version(version, ver, qv);
-    if ( *s != '\0' )
-	Perl_warn(aTHX_ "Version string '%s' contains invalid data; "
-	      "ignoring: '%s'", version, s);
+    if ( *s != '\0' ) 
+        if(ckWARN(WARN_MISC))
+	    Perl_warner(aTHX_ packWARN(WARN_MISC), 
+                "Version string '%s' contains invalid data; "
+	        "ignoring: '%s'", version, s);
     Safefree(version);
     return ver;
 }
