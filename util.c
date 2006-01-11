@@ -4225,7 +4225,7 @@ Returns a pointer to the upgraded SV.
 SV *
 Perl_upg_version(pTHX_ SV *ver)
 {
-    char *version;
+    const char *version, *s;
     bool qv = 0;
 
     if ( SvNOK(ver) ) /* may get too much accuracy */ 
@@ -4245,7 +4245,10 @@ Perl_upg_version(pTHX_ SV *ver)
     {
 	version = savepv(SvPV_nolen(ver));
     }
-    (void)scan_version(version, ver, qv);
+    s = scan_version(version, ver, qv);
+    if ( *s != '\0' )
+	Perl_warn(aTHX_ "Version string '%s' contains invalid data; "
+	      "ignoring: '%s'", version, s);
     Safefree(version);
     return ver;
 }
