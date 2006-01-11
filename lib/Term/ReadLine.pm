@@ -289,7 +289,7 @@ sub Features { \%features }
 
 package Term::ReadLine;		# So late to allow the above code be defined?
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 my ($which) = exists $ENV{PERL_RL} ? split /\s+/, $ENV{PERL_RL} : undef;
 if ($which) {

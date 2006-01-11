@@ -1,6 +1,6 @@
 package PerlIO;
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 # Map layer name to package that defines it
 our %alias;
@@ -35,7 +35,7 @@ PerlIO - On demand loader for PerlIO layers and root of PerlIO::* name space
 
 =head1 SYNOPSIS
 
-  open($fh,"<:crlf", "my.txt"); # portably open a text file for reading
+  open($fh,"<:crlf", "my.txt"); # support native and Windows text files
 
   open($fh,"<","his.jpg");      # portably open a binary file for reading
   binmode($fh);

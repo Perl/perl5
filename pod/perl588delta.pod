@@ -15,6 +15,330 @@ There are no changes incompatible with 5.8.7.
 
 =head1 Modules and Pragmata
 
+=item *
+
+Attribute::Handlers upgraded to version
+
+=item *
+
+attrs::attrs upgraded to version
+
+=item *
+
+autouse upgraded to version
+
+=item *
+
+B::B upgraded to version
+
+=item *
+
+blib upgraded to version
+
+=item *
+
+ByteLoader::ByteLoader upgraded to version
+
+=item *
+
+CGI upgraded to version
+
+=item *
+
+charnames upgraded to version
+
+=item *
+
+CPAN upgraded to version
+
+=item *
+
+Cwd upgraded to version
+
+=item *
+
+Data::Dumper upgraded to version
+
+=item *
+
+DB upgraded to version
+
+=item *
+
+DB::File upgraded to version
+
+=item *
+
+Devel::DProf::DProf upgraded to version
+
+=item *
+
+Devel::Peek::Peek upgraded to version
+
+=item *
+
+Devel::PPPort upgraded to version
+
+=item *
+
+diagnostics upgraded to version
+
+=item *
+
+Digest upgraded to version
+
+=item *
+
+Digest upgraded to version
+
+=item *
+
+Digest::MD5 upgraded to version
+
+=item *
+
+Dumpvalue upgraded to version
+
+=item *
+
+Encode upgraded to version
+
+=item *
+
+English upgraded to version
+
+=item *
+
+ExtUtils::Constant upgraded to version
+
+=item *
+
+ExtUtils::Embed upgraded to version
+
+=item *
+
+ExtUtils::MakeMaker upgraded to version
+
+=item *
+
+File::Basename upgraded to version
+
+=item *
+
+File::Copy upgraded to version
+
+=item *
+
+File::Find upgraded to version
+
+=item *
+
+File::Glob::Glob upgraded to version
+
+=item *
+
+File::Path upgraded to version
+
+=item *
+
+File::Spec upgraded to version
+
+=item *
+
+FileCache upgraded to version
+
+=item *
+
+Filter::Simple upgraded to version
+
+=item *
+
+FindBin upgraded to version
+
+=item *
+
+GDBM_File::GDBM_File upgraded to version
+
+=item *
+
+Getopt::Long upgraded to version
+
+=item *
+
+if upgraded to version
+
+=item *
+
+IO upgraded to version
+
+=item *
+
+IPC::Open2 upgraded to version
+
+=item *
+
+IPC::Open3 upgraded to version
+
+=item *
+
+Math::Complex upgraded to version
+
+=item *
+
+Math::Trig upgraded to version
+
+=item *
+
+MIME::Base64 upgraded to version
+
+=item *
+
+NDBM_File::NDBM_File upgraded to version
+
+=item *
+
+Opcode::Opcode upgraded to version
+
+=item *
+
+open upgraded to version
+
+=item *
+
+overload upgraded to version
+
+=item *
+
+PerlIO upgraded to version
+
+=item *
+
+perlio-doc upgraded to version
+
+=item *
+
+Pod::Functions upgraded to version
+
+=item *
+
+Pod::Html upgraded to version
+
+=item *
+
+Pod::Parser upgraded to version
+
+=item *
+
+POSIX::POSIX upgraded to version
+
+=item *
+
+re::re upgraded to version
+
+=item *
+
+Scalar-List-Utils upgraded to version
+
+=item *
+
+SDBM_File::SDBM_File upgraded to version
+
+=item *
+
+Socket::Socket upgraded to version
+
+=item *
+
+Storable upgraded to version
+
+=item *
+
+Switch upgraded to version
+
+=item *
+
+Sys::Syslog::Syslog upgraded to version
+
+=item *
+
+TabsWrap upgraded to version
+
+=item *
+
+Term::ANSIColor upgraded to version
+
+=item *
+
+Term::ReadLine upgraded to version
+
+=item *
+
+Test::Builder upgraded to version
+
+=item *
+
+Test::Builder::Module upgraded to version
+
+=item *
+
+Test::Builder::Tester upgraded to version
+
+=item *
+
+Test::Builder::Tester::Color upgraded to version
+
+=item *
+
+Test::Harness upgraded to version
+
+=item *
+
+Test::More upgraded to version
+
+=item *
+
+Test::Simple upgraded to version
+
+=item *
+
+threads upgraded to version
+
+=item *
+
+Tie::Hash upgraded to version
+
+=item *
+
+Time::HiRes upgraded to version
+
+=item *
+
+Unicode::Collate upgraded to version
+
+=item *
+
+Unicode::UCD upgraded to version
+
+=item *
+
+User::grent upgraded to version
+
+=item *
+
+vmsish upgraded to version
+
+=item *
+
+warnings upgraded to version
+
+=item *
+
+XS::APItest::APItest upgraded to version
+
+=item *
+
+XS::Typemap::Typemap upgraded to version
+
 =head1 Utility Changes
 
 =head1 New Documentation
