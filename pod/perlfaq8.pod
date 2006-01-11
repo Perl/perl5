@@ -666,8 +666,8 @@ files:
     use IPC::Open3;
     use Symbol qw(gensym);
     use IO::File;
-    local *CATCHOUT = IO::File->new_tempfile;
-    local *CATCHERR = IO::File->new_tempfile;
+    local *CATCHOUT = IO::File->new_tmpfile;
+    local *CATCHERR = IO::File->new_tmpfile;
     my $pid = open3(gensym, ">&CATCHOUT", ">&CATCHERR", "cmd");
     waitpid($pid, 0);
     seek $_, 0, 0 for \*CATCHOUT, \*CATCHERR;
@@ -680,7 +680,7 @@ should work just as well, without deadlocking:
     use IPC::Open3;
     use Symbol qw(gensym);
     use IO::File;
-    local *CATCHERR = IO::File->new_tempfile;
+    local *CATCHERR = IO::File->new_tmpfile;
     my $pid = open3(gensym, \*CATCHOUT, ">&CATCHERR", "cmd");
     while( <CATCHOUT> ) {}
     waitpid($pid, 0);
