@@ -4713,8 +4713,8 @@ the version number.
 
 =item Version string '%s' contains invalid data; ignoring: '%s'
 
-(W misc) The version string contains invalid characters, so it is
-being ignored.
+(W misc) The version string contains invalid characters at the end, which
+are being ignored.
 
 =item v-string in use/require is non-portable
 
