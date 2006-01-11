@@ -647,6 +647,7 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
     while (len > 0 && isSPACE(p[len-1])) \
 	--len; \
     SvCUR_set(sv, len); \
+    p[len] = '\0'; \
 } STMT_END
 
 int
