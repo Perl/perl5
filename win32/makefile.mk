@@ -1335,6 +1335,10 @@ distclean: realclean
 	-if exist $(LIBDIR)\IO\Socket rmdir /s $(LIBDIR)\IO\Socket
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B
 	-if exist $(LIBDIR)\B rmdir /s $(LIBDIR)\B
+	-if exist $(LIBDIR)\Compress rmdir /s /q $(LIBDIR)\Compress
+	-if exist $(LIBDIR)\Compress rmdir /s $(LIBDIR)\Compress
+	-if exist $(LIBDIR)\CompressPlugin rmdir /s /q $(LIBDIR)\CompressPlugin
+	-if exist $(LIBDIR)\CompressPlugin rmdir /s $(LIBDIR)\CompressPlugin
 	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data
 	-if exist $(LIBDIR)\Data rmdir /s $(LIBDIR)\Data
 	-if exist $(LIBDIR)\Encode rmdir /s /q $(LIBDIR)\Encode
@@ -1351,6 +1355,8 @@ distclean: realclean
 	-if exist $(LIBDIR)\Sys rmdir /s $(LIBDIR)\Sys
 	-if exist $(LIBDIR)\threads rmdir /s /q $(LIBDIR)\threads
 	-if exist $(LIBDIR)\threads rmdir /s $(LIBDIR)\threads
+	-if exist $(LIBDIR)\UncompressPlugin rmdir /s /q $(LIBDIR)\UncompressPlugin
+	-if exist $(LIBDIR)\UncompressPlugin rmdir /s $(LIBDIR)\UncompressPlugin
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-if exist $(LIBDIR)\XS rmdir /s $(LIBDIR)\XS
 	-cd $(PODDIR) && del /f *.html *.bat checkpods \
