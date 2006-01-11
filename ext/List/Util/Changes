@@ -1,3 +1,15 @@
+1.18 -- Fri Nov 25 09:30:29 CST 2005
+
+Bug Fixes
+  * Fix pure-perl version of refaddr to avoid blessing an un-blessed reference
+  * Fix memory leak in first() and reduce()
+  * Pure perl version of looks_like_number now matches XS version for
+    references and undef. It will now return undef
+
+Enhancements
+  * Support for using XSLoader instead of DynaLoader
+  * Use new multicall API
+
 1.17 -- Mon May 23 08:55:26 CDT 2005
 
 Bug Fixes
