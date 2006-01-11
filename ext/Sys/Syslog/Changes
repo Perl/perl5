@@ -1,5 +1,18 @@
 Revision history for Sys-Syslog
 
+0.13    2006.01.11
+        [CODE] Merged blead@26768: If getservbyname fails tell what service 
+        the lookup attempt tried to use.
+        [CODE] Merged blead@26769: suppress Sys::Hostname usage and directly 
+        use INADDR_LOOPBACK.
+        [CODE] Merged blead@26772: $host needs to stay in case the user sets it.
+        [CODE] Merged blead@26773: check that $syslog_path is a socket.
+        [TESTS] RT#16980 (Alan Burlison): Sys::Syslog blows up rather 
+        spectacularly on Solaris. Corrected by previous patches. 
+        [TESTS] Applied Gisle Aas patch for a better handling of error messages,
+        then optimized it. 
+        [TESTS] RT#16974: Failed test in t/podspell. This test is now skipped.
+
 0.12    2006.01.07
         [CODE] Merged some modifications from bleadperl.
         [DOC] Added a link to an article about Sys::Syslog.

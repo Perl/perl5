@@ -53,7 +53,7 @@ Sys::Syslog - Perl interface to the UNIX syslog(3) calls
 
 =head1 VERSION
 
-Version 0.12
+Version 0.13
 
 =head1 SYNOPSIS
 
@@ -799,10 +799,7 @@ sub connect {
         my($old) = select(SYSLOG); $| = 1; select($old);
     } else {
 	@fallbackMethods = ();
-	foreach my $err (@errs) {
-	    carp $err;
-	}
-	croak "no connection to syslog available";
+	croak join "\n\t- ", "no connection to syslog available", @errs
     }
 }
 
