@@ -1439,7 +1439,10 @@ setuid perl scripts securely.\n");
     PL_origargc = argc;
     PL_origargv = argv;
 
-    {
+    if (PL_origalen != 0) {
+	PL_origalen = 1; /* don't use old PL_origalen if perl_parse() is called again */
+    }
+    else {
 	/* Set PL_origalen be the sum of the contiguous argv[]
 	 * elements plus the size of the env in case that it is
 	 * contiguous with the argv[].  This is used in mg.c:Perl_magic_set()

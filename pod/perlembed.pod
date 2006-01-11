@@ -793,6 +793,7 @@ with L<perlfunc/my> whenever possible.
      }
      perl_construct(my_perl);
 
+     PL_origalen = 1; /* don't let $0 assignment update the proctitle or embedding[0] */
      exitstatus = perl_parse(my_perl, NULL, 2, embedding, NULL);
      PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
      if(!exitstatus) {
@@ -851,6 +852,21 @@ This causes problems for applications that never call perl_run. Since
 perl 5.7.2 you can specify C<PL_exit_flags |= PERL_EXIT_DESTRUCT_END>
 to get the new behaviour. This also enables the running of END blocks if
 the perl_parse fails and C<perl_destruct> will return the exit value.
+
+=head2 $0 assignments
+
+When a perl script assigns a value to $0 then the perl runtime will
+try to make this value show up as the program name reported by "ps" by
+updating the memory pointed to by the argv passed to perl_parse() and
+also calling API functions like setproctitle() where available.  This
+behaviour might not be appropriate when embedding perl and can be
+disabled by assigning the value C<1> to the variable C<PL_origalen>
+before perl_parse() is called.
+
+The F<persistent.c> example above is for instance likely to segfault
+when $0 is assigned to if the C<PL_origalen = 1;> assignment is
+removed.  This because perl will try to write to the read only memory
+of the C<embedding[]> strings.
 
 =head2 Maintaining multiple interpreter instances
 

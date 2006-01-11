@@ -2540,7 +2540,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	/* The BSDs don't show the argv[] in ps(1) output, they
 	 * show a string from the process struct and provide
 	 * the setproctitle() routine to manipulate that. */
-	{
+	if (PL_origalen != 1) {
 	    s = SvPV_const(sv, len);
 #   if __FreeBSD_version > 410001
 	    /* The leading "-" removes the "perl: " prefix,
@@ -2561,7 +2561,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 #endif
 #if defined(__hpux) && defined(PSTAT_SETCMD)
-	{
+	if (PL_origalen != 1) {
 	     union pstun un;
 	     s = SvPV_const(sv, len);
 	     un.pst_command = (char *)s;
