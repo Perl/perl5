@@ -1130,23 +1130,25 @@ Perl_write_to_stderr(pTHX_ const char* message, int msglen)
     }
 }
 
-/* Common code used by vcroak, vdie and vwarner  */
+/* Common code used by vcroak, vdie, vwarn and vwarner  */
 
-STATIC void
-S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8)
+STATIC bool
+S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8, bool warn)
 {
     dVAR;
     HV *stash;
     GV *gv;
     CV *cv;
-    /* sv_2cv might call Perl_croak() */
-    SV * const olddiehook = PL_diehook;
+    SV **const hook = warn ? &PL_warnhook : &PL_diehook;
+    /* sv_2cv might call Perl_croak() or Perl_warner() */
+    SV * const oldhook = *hook;
 
-    assert(PL_diehook);
+    assert(oldhook);
+
     ENTER;
-    SAVESPTR(PL_diehook);
-    PL_diehook = Nullsv;
-    cv = sv_2cv(olddiehook, &stash, &gv, 0);
+    SAVESPTR(*hook);
+    *hook = NULL;
+    cv = sv_2cv(oldhook, &stash, &gv, 0);
     LEAVE;
     if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
 	dSP;
@@ -1154,7 +1156,11 @@ S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8)
 
 	ENTER;
 	save_re_context();
-	if (message) {
+	if (warn) {
+	    SAVESPTR(*hook);
+	    *hook = NULL;
+	}
+	if (warn || message) {
 	    msg = newSVpvn(message, msglen);
 	    SvFLAGS(msg) |= utf8;
 	    SvREADONLY_on(msg);
@@ -1164,14 +1170,16 @@ S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8)
 	    msg = ERRSV;
 	}
 
-	PUSHSTACKi(PERLSI_DIEHOOK);
+	PUSHSTACKi(warn ? PERLSI_WARNHOOK : PERLSI_DIEHOOK);
 	PUSHMARK(SP);
 	XPUSHs(msg);
 	PUTBACK;
 	call_sv((SV*)cv, G_DISCARD);
 	POPSTACK;
 	LEAVE;
+	return TRUE;
     }
+    return FALSE;
 }
 
 STATIC const char *
@@ -1200,7 +1208,7 @@ S_vdie_croak_common(pTHX_ const char* pat, va_list* args, STRLEN* msglen,
 			  "%p: die/croak: message = %s\ndiehook = %p\n",
 			  thr, message, PL_diehook));
     if (PL_diehook) {
-	S_vdie_common(aTHX_ message, *msglen, *utf8);
+	S_vdie_common(aTHX_ message, *msglen, *utf8, FALSE);
     }
     return message;
 }
@@ -1330,39 +1338,8 @@ Perl_vwarn(pTHX_ const char* pat, va_list *args)
     const char * const message = SvPV_const(msv, msglen);
 
     if (PL_warnhook) {
-	/* sv_2cv might call Perl_warn() */
-	SV * const oldwarnhook = PL_warnhook;
-	CV * cv;
-	HV * stash;
-	GV * gv;
-
-	ENTER;
-	SAVESPTR(PL_warnhook);
-	PL_warnhook = Nullsv;
-	cv = sv_2cv(oldwarnhook, &stash, &gv, 0);
-	LEAVE;
-	if (cv && !CvDEPTH(cv) && (CvROOT(cv) || CvXSUB(cv))) {
-	    dSP;
-	    SV *msg;
-
-	    ENTER;
-	    SAVESPTR(PL_warnhook);
-	    PL_warnhook = Nullsv;
-	    save_re_context();
-	    msg = newSVpvn(message, msglen);
-	    SvFLAGS(msg) |= utf8;
-	    SvREADONLY_on(msg);
-	    SAVEFREESV(msg);
-
-	    PUSHSTACKi(PERLSI_WARNHOOK);
-	    PUSHMARK(SP);
-	    XPUSHs(msg);
-	    PUTBACK;
-	    call_sv((SV*)cv, G_DISCARD);
-	    POPSTACK;
-	    LEAVE;
+	if (vdie_common(message, msglen, utf8, TRUE))
 	    return;
-	}
     }
 
     write_to_stderr(message, msglen);
@@ -1431,7 +1408,7 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
 
 	if (PL_diehook) {
 	    assert(message);
-	    S_vdie_common(aTHX_ message, msglen, utf8);
+	    S_vdie_common(aTHX_ message, msglen, utf8, FALSE);
 	}
 	if (PL_in_eval) {
 	    PL_restartop = die_where(message, msglen);

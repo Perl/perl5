@@ -3476,7 +3476,7 @@
 #define closest_cop(a,b)	S_closest_cop(aTHX_ a,b)
 #define mess_alloc()		S_mess_alloc(aTHX)
 #define vdie_croak_common(a,b,c,d)	S_vdie_croak_common(aTHX_ a,b,c,d)
-#define vdie_common(a,b,c)	S_vdie_common(aTHX_ a,b,c)
+#define vdie_common(a,b,c,d)	S_vdie_common(aTHX_ a,b,c,d)
 #define write_no_mem()		S_write_no_mem(aTHX)
 #endif
 #endif
