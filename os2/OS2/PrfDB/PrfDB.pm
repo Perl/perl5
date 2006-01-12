@@ -14,7 +14,7 @@ our @ISA = qw(Exporter Tie::Hash);
 our @EXPORT = qw(
 		 AnyIni UserIni SystemIni
 		);
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 XSLoader::load 'OS2::PrfDB', $VERSION;
 

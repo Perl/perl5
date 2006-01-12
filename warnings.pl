@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-$VERSION = '1.02_01';
+$VERSION = '1.02_02';
 
 BEGIN {
   push @INC, './lib';
@@ -432,7 +432,7 @@ __END__
 
 package warnings;
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 =head1 NAME
 

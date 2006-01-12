@@ -23,7 +23,7 @@ sub mv;
 # package has not yet been updated to work with Perl 5.004, and so it
 # would be a Bad Thing for the CPAN module to grab it and replace this
 # module.  Therefore, we set this module's version higher than 2.0.
-$VERSION = '2.08_01';
+$VERSION = '2.09';
 
 require Exporter;
 @ISA = qw(Exporter);

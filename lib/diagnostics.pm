@@ -185,7 +185,7 @@ use 5.006;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = 1.14;
+our $VERSION = 1.15;
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
