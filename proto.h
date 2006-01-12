@@ -2711,12 +2711,10 @@ PERL_CALLCONV OP *	Perl_my_attrs(pTHX_ OP *o, OP *attrs)
 PERL_CALLCONV void	Perl_boot_core_xsutils(pTHX);
 #if defined(USE_ITHREADS)
 PERL_CALLCONV PERL_CONTEXT*	Perl_cx_dup(pTHX_ PERL_CONTEXT* cx, I32 ix, I32 max, CLONE_PARAMS* param)
-			__attribute__malloc__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_4);
 
 PERL_CALLCONV PERL_SI*	Perl_si_dup(pTHX_ PERL_SI* si, CLONE_PARAMS* param)
-			__attribute__malloc__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 
@@ -2727,46 +2725,36 @@ PERL_CALLCONV ANY*	Perl_ss_dup(pTHX_ PerlInterpreter* proto_perl, CLONE_PARAMS* 
 			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV void*	Perl_any_dup(pTHX_ void* v, const PerlInterpreter* proto_perl)
-			__attribute__malloc__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV HE*	Perl_he_dup(pTHX_ const HE* e, bool shared, CLONE_PARAMS* param)
-			__attribute__malloc__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_3);
 
 PERL_CALLCONV HEK*	Perl_hek_dup(pTHX_ HEK* e, CLONE_PARAMS* param)
-			__attribute__malloc__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV REGEXP*	Perl_re_dup(pTHX_ const REGEXP* r, CLONE_PARAMS* param)
-			__attribute__malloc__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV PerlIO*	Perl_fp_dup(pTHX_ PerlIO* fp, char type, CLONE_PARAMS* param)
-			__attribute__malloc__
-			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_3);
 
 PERL_CALLCONV DIR*	Perl_dirp_dup(pTHX_ DIR* dp)
-			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV GP*	Perl_gp_dup(pTHX_ GP* gp, CLONE_PARAMS* param)
-			__attribute__malloc__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV MAGIC*	Perl_mg_dup(pTHX_ MAGIC* mg, CLONE_PARAMS* param)
-			__attribute__malloc__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV SV*	Perl_sv_dup(pTHX_ const SV* sstr, CLONE_PARAMS* param)
-			__attribute__malloc__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_2);
 
@@ -2780,7 +2768,6 @@ PERL_CALLCONV PTR_TBL_t*	Perl_ptr_table_new(pTHX)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV void*	Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, const void *sv)
-			__attribute__malloc__
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
