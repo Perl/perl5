@@ -883,8 +883,8 @@ directive, and cannot influence the behavior of any other file.
 Its use is highly discouraged.
 
 Note that, unlike other compile-time directives (such as L<strict>),
-assignment to $[ can be seen from outer lexical scopes in the same file.
-However, you can use local() on it to strictly bound its value to a
+assignment to C<$[> can be seen from outer lexical scopes in the same file.
+However, you can use local() on it to strictly bind its value to a
 lexical block.
 
 =item $]
