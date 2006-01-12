@@ -2381,10 +2381,6 @@ PP(pp_bind)
 {
 #ifdef HAS_SOCKET
     dVAR; dSP;
-#ifdef MPE /* Requires PRIV mode to bind() to ports < 1024 */
-    extern void GETPRIVMODE();
-    extern void GETUSERMODE();
-#endif
     SV * const addrsv = POPs;
     /* OK, so on what platform does bind modify addr?  */
     const char *addr;
@@ -2392,35 +2388,16 @@ PP(pp_bind)
     register IO * const io = GvIOn(gv);
     STRLEN len;
     int bind_ok = 0;
-#ifdef MPE
-    int mpeprivmode = 0;
-#endif
 
     if (!io || !IoIFP(io))
 	goto nuts;
 
     addr = SvPV_const(addrsv, len);
     TAINT_PROPER("bind");
-#ifdef MPE /* Deal with MPE bind() peculiarities */
-    if (((struct sockaddr *)addr)->sa_family == AF_INET) {
-        /* The address *MUST* stupidly be zero. */
-        ((struct sockaddr_in *)addr)->sin_addr.s_addr = INADDR_ANY;
-        /* PRIV mode is required to bind() to ports < 1024. */
-        if (((struct sockaddr_in *)addr)->sin_port < 1024 &&
-            ((struct sockaddr_in *)addr)->sin_port > 0) {
-            GETPRIVMODE(); /* If this fails, we are aborted by MPE/iX. */
-	    mpeprivmode = 1;
-	}
-    }
-#endif /* MPE */
     if (PerlSock_bind(PerlIO_fileno(IoIFP(io)),
 		      (struct sockaddr *)addr, len) >= 0)
 	bind_ok = 1;
 
-#ifdef MPE /* Switch back to USER mode */
-    if (mpeprivmode)
-	GETUSERMODE();
-#endif /* MPE */
 
     if (bind_ok)
 	RETPUSHYES;
