@@ -354,6 +354,7 @@ while (defined (my $file = next_file())) {
 		use re "eval";
 		my $typelist = join '|', keys %isatype;
 		$new =~ s['
+		  (?:(?:__)?const(?:__)?\s+)?
 		  (?:(?:un)?signed\s+)?
 		  (?:long\s+)?
 		  (?:$typelist)\s+
@@ -362,6 +363,7 @@ while (defined (my $file = next_file())) {
 		  ']
 		 [my \$$1]gx;
 		$new =~ s['
+		  (?:(?:__)?const(?:__)?\s+)?
 		  (?:(?:un)?signed\s+)?
 		  (?:long\s+)?
 		  (?:$typelist)\s+
