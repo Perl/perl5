@@ -70,7 +70,7 @@ sub zipGetHeader
     my $mtime ;
 
     writeFile($file1, $content);
-    $mtime = (stat($file1))[8];
+    $mtime = (stat($file1))[9];
     # make sure that the zip file isn't created in the same
     # second as the input file
     sleep 3 ; 
@@ -82,7 +82,7 @@ sub zipGetHeader
     title "Override Name" ;
 
     writeFile($file1, $content);
-    $mtime = (stat($file1))[8];
+    $mtime = (stat($file1))[9];
     sleep 3 ; 
     $hdr = zipGetHeader($file1, $content, Name => "abcde");
 
