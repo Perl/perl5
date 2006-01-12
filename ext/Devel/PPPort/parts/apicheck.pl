@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 11 $
+#  $Revision: 13 $
 #  $Author: mhx $
-#  $Date: 2005/01/31 08:10:51 +0100 $
+#  $Date: 2005/06/25 16:47:31 +0200 $
 #
 ################################################################################
 #
@@ -85,18 +85,22 @@ my %ignorerv = (
 );
 
 my %stack = (
-  ORIGMARK  => ['dORIGMARK;'],
-  POPpx     => ['STRLEN n_a;'],
-  POPpbytex => ['STRLEN n_a;'],
-  PUSHp     => ['dTARG;'],
-  PUSHn     => ['dTARG;'],
-  PUSHi     => ['dTARG;'],
-  PUSHu     => ['dTARG;'],
-  XPUSHp    => ['dTARG;'],
-  XPUSHn    => ['dTARG;'],
-  XPUSHi    => ['dTARG;'],
-  XPUSHu    => ['dTARG;'],
-  UNDERBAR  => ['dUNDERBAR;'],
+  ORIGMARK       => ['dORIGMARK;'],
+  POPpx          => ['STRLEN n_a;'],
+  POPpbytex      => ['STRLEN n_a;'],
+  PUSHp          => ['dTARG;'],
+  PUSHn          => ['dTARG;'],
+  PUSHi          => ['dTARG;'],
+  PUSHu          => ['dTARG;'],
+  XPUSHp         => ['dTARG;'],
+  XPUSHn         => ['dTARG;'],
+  XPUSHi         => ['dTARG;'],
+  XPUSHu         => ['dTARG;'],
+  UNDERBAR       => ['dUNDERBAR;'],
+  XCPT_TRY_START => ['dXCPT;'],
+  XCPT_TRY_END   => ['dXCPT;'],
+  XCPT_CATCH     => ['dXCPT;'],
+  XCPT_RETHROW   => ['dXCPT;'],
 );
 
 my %postcode = (
@@ -136,6 +140,8 @@ print OUT <<HEAD;
 
 #include "EXTERN.h"
 #include "perl.h"
+
+#define NO_XSLOCKS
 #include "XSUB.h"
 
 #ifndef DPPP_APICHECK_NO_PPPORT_H
@@ -192,7 +198,11 @@ for $f (@f) {
       push @arg, qw(VARarg1 VARarg2 VARarg3);
       last;
     }
-    my($n, $p, $d) = $a =~ /^(\w+(?:\s+\w+)*)\s*(\**)((?:\[[^\]]*\])*)$/ or die;
+    my($n, $p, $d) = $a =~ /^ (\w+(?:\s+\w+)*)\s*  # type name  => $n
+                              (\**)                # pointer    => $p
+                              ((?:\[[^\]]*\])*)    # dimension  => $d
+                            $/x
+                     or die "$0 - cannot parse argument: [$a]\n";
     if (exists $amap{$n}) {
       push @arg, $amap{$n};
       next;

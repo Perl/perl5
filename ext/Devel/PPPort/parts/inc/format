@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 3 $
+##  $Revision: 4 $
 ##  $Author: mhx $
-##  $Date: 2005/01/31 08:10:51 +0100 $
+##  $Date: 2005/03/10 18:08:37 +0100 $
 ##
 ################################################################################
 ##
@@ -41,7 +41,7 @@
 
 #ifndef NVef
 #  if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE) && \
-      defined(PERL_PRIfldbl) /* Not very likely, but let's try anyway. */ 
+      defined(PERL_PRIfldbl) /* Not very likely, but let's try anyway. */
 #    define NVef          PERL_PRIeldbl
 #    define NVff          PERL_PRIfldbl
 #    define NVgf          PERL_PRIgldbl

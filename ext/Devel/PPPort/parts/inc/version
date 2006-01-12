@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 4 $
+##  $Revision: 5 $
 ##  $Author: mhx $
-##  $Date: 2005/01/31 08:10:54 +0100 $
+##  $Date: 2005/03/10 18:08:42 +0100 $
 ##
 ################################################################################
 ##
@@ -48,7 +48,7 @@ PERL_PATCHLEVEL_H_IMPLICIT
 
 #define PERL_BCDVERSION ((PERL_REVISION * 0x1000000L) + (PERL_VERSION * 0x1000L) + PERL_SUBVERSION)
 
-/* It is very unlikely that anyone will try to use this with Perl 6 
+/* It is very unlikely that anyone will try to use this with Perl 6
    (or greater), but who knows.
  */
 #if PERL_REVISION != 5

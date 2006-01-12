@@ -1,3 +1,13 @@
+3.06_01 - 2005-06-25
+
+    * fix --compat-version argument checking
+    * filter files passed on the command line by default
+      to make sure 'perl ppport.h *' does something useful
+    * add --nofilter option to override the filtering
+    * testsuite now hopefully supports MacOS Classic
+    * check definedness of PERL_UNUSED_DECL
+    * update API info
+
 3.06 - 2005-02-02
 
     * fix cpan #11327: make fails with syntax error

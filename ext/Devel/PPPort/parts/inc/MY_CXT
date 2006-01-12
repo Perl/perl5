@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 10 $
+##  $Revision: 11 $
 ##  $Author: mhx $
-##  $Date: 2005/01/31 08:10:52 +0100 $
+##  $Date: 2005/03/10 18:08:41 +0100 $
 ##
 ################################################################################
 ##
@@ -139,13 +139,13 @@ _aMY_CXT
 =xsmisc
 
 #define MY_CXT_KEY "Devel::PPPort::_guts" XS_VERSION
- 
+
 typedef struct {
   /* Put Global Data in here */
-  int dummy;          
+  int dummy;
 } my_cxt_t;
- 
-START_MY_CXT     
+
+START_MY_CXT
 
 =xsboot
 
