@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.38 $, $Date: 2005/12/31 00:54:37 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.39 $, $Date: 2006/01/08 14:27:07 $)
 
 =head1 DESCRIPTION
 
@@ -404,7 +404,7 @@ Recommended books on (or mostly on) Perl follow.
 
 =back
 
-=head2 Perl in Magazines
+=head2 Which magazines have Perl content?
 
 The first (and for a long time, only) periodical devoted to All Things Perl,
 I<The Perl Journal> contains tutorials, demonstrations, case studies,
@@ -427,16 +427,6 @@ http://www.stonehenge.com/merlyn/WebTechniques/ ,
 http://www.stonehenge.com/merlyn/UnixReview/ , and
 http://www.stonehenge.com/merlyn/LinuxMag/ .
 
-=head2 Perl on the Net: FTP and WWW Access
-
-To get the best performance, pick a site from the list at
-http://www.cpan.org/SITES.html . From there you can find the quickest
-site for you.
-
-You may also use xx.cpan.org where "xx" is the 2-letter country code
-for your domain; e.g. Australia would use au.cpan.org. [Note: This
-only applies to countries that host at least one mirror.]
-
 =head2 What mailing lists are there for Perl?
 
 Most of the major modules (Tk, CGI, libwww-perl) have their own
@@ -447,7 +437,7 @@ A comprehensive list of Perl related mailing lists can be found at:
 
 	http://lists.perl.org/
 
-=head2 Archives of comp.lang.perl.misc
+=head2 Where are the archives for comp.lang.perl.misc?
 
 The Google search engine now carries archived and searchable newsgroup
 content.
