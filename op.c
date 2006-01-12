@@ -1037,6 +1037,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
     case OP_CONST:
 	if (!(o->op_private & (OPpCONST_ARYBASE)))
 	    goto nomod;
+	localize = 0;
 	if (PL_eval_start && PL_eval_start->op_type == OP_CONST) {
 	    PL_compiling.cop_arybase = (I32)SvIV(cSVOPx(PL_eval_start)->op_sv);
 	    PL_eval_start = 0;

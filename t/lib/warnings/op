@@ -1023,6 +1023,7 @@ local(pos($x));		# OP_POS
 local(vec($x,0,1));	# OP_VEC
 local($a[$b]);		# OP_AELEM		ok
 local($a{$b});		# OP_HELEM		ok
+local($[);		# OP_CONST
 
 no warnings 'syntax';
 EXPECT
