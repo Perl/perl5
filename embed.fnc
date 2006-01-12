@@ -1019,24 +1019,24 @@ Apr	|void	|newMYSUB	|I32 floor|NULLOK OP *o|NULLOK OP *proto|NULLOK OP *attrs|NU
 p	|OP *	|my_attrs	|NN OP *o|NULLOK OP *attrs
 p	|void	|boot_core_xsutils
 #if defined(USE_ITHREADS)
-Apa	|PERL_CONTEXT*|cx_dup	|NULLOK PERL_CONTEXT* cx|I32 ix|I32 max|NN CLONE_PARAMS* param
-Apa	|PERL_SI*|si_dup	|NULLOK PERL_SI* si|NN CLONE_PARAMS* param
+ApR	|PERL_CONTEXT*|cx_dup	|NULLOK PERL_CONTEXT* cx|I32 ix|I32 max|NN CLONE_PARAMS* param
+ApR	|PERL_SI*|si_dup	|NULLOK PERL_SI* si|NN CLONE_PARAMS* param
 Apa	|ANY*	|ss_dup		|NN PerlInterpreter* proto_perl|NN CLONE_PARAMS* param
-Apa	|void*	|any_dup	|NULLOK void* v|NN PerlInterpreter* proto_perl
-Apa	|HE*	|he_dup		|NULLOK HE* e|bool shared|NN CLONE_PARAMS* param
+ApR	|void*	|any_dup	|NULLOK void* v|NN PerlInterpreter* proto_perl
+ApR	|HE*	|he_dup		|NULLOK HE* e|bool shared|NN CLONE_PARAMS* param
 Apa	|REGEXP*|re_dup		|NULLOK REGEXP* r|NN CLONE_PARAMS* param
-Apa	|PerlIO*|fp_dup		|NULLOK PerlIO* fp|char type|NN CLONE_PARAMS* param
-Apa	|DIR*	|dirp_dup	|NULLOK DIR* dp
-Apa	|GP*	|gp_dup		|NULLOK GP* gp|NN CLONE_PARAMS* param
-Apa	|MAGIC*	|mg_dup		|NULLOK MAGIC* mg|NN CLONE_PARAMS* param
-Apa	|SV*	|sv_dup		|NULLOK SV* sstr|NN CLONE_PARAMS* param
+ApR	|PerlIO*|fp_dup		|NULLOK PerlIO* fp|char type|NN CLONE_PARAMS* param
+ApR	|DIR*	|dirp_dup	|NULLOK DIR* dp
+ApR	|GP*	|gp_dup		|NULLOK GP* gp|NN CLONE_PARAMS* param
+ApR	|MAGIC*	|mg_dup		|NULLOK MAGIC* mg|NN CLONE_PARAMS* param
+ApR	|SV*	|sv_dup		|NULLOK SV* sstr|NN CLONE_PARAMS* param
 Ap	|void	|rvpv_dup	|NN SV* dstr|NN SV *sstr|NN CLONE_PARAMS* param
 #if defined(HAVE_INTERP_INTERN)
 Ap	|void	|sys_intern_dup	|NN struct interp_intern* src \
 				|NN struct interp_intern* dst
 #endif
 Apa	|PTR_TBL_t*|ptr_table_new
-Apa	|void*	|ptr_table_fetch|NN PTR_TBL_t *tbl|NN void *sv
+ApaR	|void*	|ptr_table_fetch|NN PTR_TBL_t *tbl|NN void *sv
 Ap	|void	|ptr_table_store|NN PTR_TBL_t *tbl|NULLOK void *oldsv|NN void *newsv
 Ap	|void	|ptr_table_split|NN PTR_TBL_t *tbl
 Ap	|void	|ptr_table_clear|NULLOK PTR_TBL_t *tbl
