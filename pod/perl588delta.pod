@@ -134,7 +134,7 @@ Devel::Peek upgraded to version 1.03
 
 =item *
 
-Devel::PPPort upgraded to version 3.06
+Devel::PPPort upgraded to version 3.06_01
 
 =item *
 
@@ -312,6 +312,14 @@ re upgraded to version 0.05
 
 =item *
 
+Safe upgraded to version 2.12
+
+=item *
+
+Scalar::Util upgraded to version 1.18
+
+=item *
+
 SDBM_File upgraded to version 1.05
 
 =item *
@@ -330,7 +338,7 @@ Switch upgraded to version 2.10_01
 
 =item *
 
-Sys::Syslog upgraded to version 0.11
+Sys::Syslog upgraded to version 0.13
 
 =item *
 
@@ -388,11 +396,22 @@ User::grent upgraded to version 1.01
 
 =item *
 
+utf8 upgraded to version 1.06, which has minor documentation fixes.
+
+=item *
+
 vmsish upgraded to version 1.02
 
 =item *
 
 warnings upgraded to version 1.05
+
+=item *
+
+Win32 upgraded to version 0.2601, which provides Windows Vista support to
+C<Win32::GetOSName>.
+
+=for cynics And how many perl 5.8.x versions can I release ahead of Vista?
 
 =back
 
@@ -508,6 +527,17 @@ it proves stable.
 
 =item *
 
+Training spaces are now trimmed from C<$!> and C<$^E>.
+
+=item *
+
+Operations that require perl to read a process' list of groups, such as reads
+of C<$(> and C<$)>, now dynamically allocate memory rather than using a
+fixed sized array. The fixed size array could cause C stack exhaustion on
+systems configured to use large numbers of groups.
+
+=item *
+
 C<PerlIO::scalar> now works better with non-default C<$/> settings.
 
 =item *
@@ -576,12 +606,12 @@ select(), instead of a bitmask.
 
     # Wrong, will now warn
     $rin = fileno(STDIN);
-    ($nfound,$timeleft) = select($rout=$rin, udnef, undef, $timeout);
+    ($nfound,$timeleft) = select($rout=$rin, undef, undef, $timeout);
     
     # Should be
     $rin = '';
     vec($rin,fileno(STDIN),1) = 1;
-    ($nfound,$timeleft) = select($rout=$rin, udnef, undef, $timeout);
+    ($nfound,$timeleft) = select($rout=$rin, undef, undef, $timeout);
 
 =head2 Search pattern not terminated or ternary operator parsed as search pattern
 
