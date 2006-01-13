@@ -3042,8 +3042,8 @@ sub processPL {
 
 	foreach my $target (@$list) {
             if( $Is_VMS ) {
-                $plfile = vmsify($plfile);
-                $target = vmsify($target);
+                $plfile = vmsify($self->eliminate_macros($plfile));
+                $target = vmsify($self->eliminate_macros($target));
             }
 
 	    # Normally a .PL file runs AFTER pm_to_blib so it can have

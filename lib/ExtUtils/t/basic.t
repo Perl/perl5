@@ -30,6 +30,9 @@ delete @ENV{qw(PREFIX LIB MAKEFLAGS MAKE_JOBS_FIFO)};
 my $perl = which_perl();
 my $Is_VMS = $^O eq 'VMS';
 
+# GNV logical interferes with testing
+$ENV{'bin'} = '[.bin]' if $Is_VMS;
+
 chdir 't';
 
 perl_lib;

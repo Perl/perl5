@@ -447,10 +447,20 @@ sub init_others {
     $self->{NOOP}               = 'Continue';
     $self->{NOECHO}             ||= '@ ';
 
-    $self->{MAKEFILE}           ||= 'Descrip.MMS';
+    $self->{MAKEFILE}		||= $self->{FIRST_MAKEFILE} || 'Descrip.MMS';
     $self->{FIRST_MAKEFILE}     ||= $self->{MAKEFILE};
     $self->{MAKE_APERL_FILE}    ||= 'Makeaperl.MMS';
-    $self->{MAKEFILE_OLD}       ||= '$(FIRST_MAKEFILE)_old';
+    $self->{MAKEFILE_OLD}       ||= $self->eliminate_macros('$(FIRST_MAKEFILE)_old');
+#
+#   If an extension is not specified, then MMS/MMK assumes an
+#   an extension of .MMS.  If there really is no extension,
+#   then a trailing "." needs to be appended to specify a
+#   a null extension.
+#
+    $self->{MAKEFILE} .= '.' unless $self->{MAKEFILE} =~ m/\./;
+    $self->{FIRST_MAKEFILE} .= '.' unless $self->{FIRST_MAKEFILE} =~ m/\./;
+    $self->{MAKE_APERL_FILE} .= '.' unless $self->{MAKE_APERL_FILE} =~ m/\./;
+    $self->{MAKEFILE_OLD} .= '.' unless $self->{MAKEFILE_OLD} =~ m/\./;
 
     $self->{MACROSTART}         ||= '/Macro=(';
     $self->{MACROEND}           ||= ')';
