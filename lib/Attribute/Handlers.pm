@@ -2,7 +2,7 @@ package Attribute::Handlers;
 use 5.006;
 use Carp;
 use warnings;
-$VERSION = '0.78_01';
+$VERSION = '0.78_02';
 # $DB::single=1;
 
 my %symcache;
