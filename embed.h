@@ -912,7 +912,9 @@
 #define vivify_ref		Perl_vivify_ref
 #define wait4pid		Perl_wait4pid
 #define parse_unicode_opts	Perl_parse_unicode_opts
+#endif
 #define seed			Perl_seed
+#ifdef PERL_CORE
 #define get_hash_seed		Perl_get_hash_seed
 #define report_evil_fh		Perl_report_evil_fh
 #define report_uninit		Perl_report_uninit
@@ -2955,7 +2957,9 @@
 #define vivify_ref(a,b)		Perl_vivify_ref(aTHX_ a,b)
 #define wait4pid(a,b,c)		Perl_wait4pid(aTHX_ a,b,c)
 #define parse_unicode_opts(a)	Perl_parse_unicode_opts(aTHX_ a)
+#endif
 #define seed()			Perl_seed(aTHX)
+#ifdef PERL_CORE
 #define get_hash_seed()		Perl_get_hash_seed(aTHX)
 #define report_evil_fh(a,b,c)	Perl_report_evil_fh(aTHX_ a,b,c)
 #define report_uninit()		Perl_report_uninit(aTHX)
