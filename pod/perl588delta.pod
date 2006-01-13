@@ -15,329 +15,321 @@ There are no changes incompatible with 5.8.7.
 
 =head1 Modules and Pragmata
 
-=item *
-
-Attribute::Handlers upgraded to version
-
-=item *
-
-attrs::attrs upgraded to version
+=over
 
 =item *
 
-autouse upgraded to version
+Attribute::Handlers upgraded to version 0.78_02
 
 =item *
 
-B::B upgraded to version
+attrs upgraded to version 1.02
 
 =item *
 
-blib upgraded to version
+autouse upgraded to version 1.05
 
 =item *
 
-ByteLoader::ByteLoader upgraded to version
+B upgraded to version 1.09_01
 
 =item *
 
-CGI upgraded to version
+blib upgraded to version 1.03
 
 =item *
 
-charnames upgraded to version
+ByteLoader upgraded to version 0.06
 
 =item *
 
-CPAN upgraded to version
+CGI upgraded to version 3.15
 
 =item *
 
-Cwd upgraded to version
+charnames upgraded to version 1.05
 
 =item *
 
-Data::Dumper upgraded to version
+CPAN upgraded to version 1.83
 
 =item *
 
-DB upgraded to version
+Cwd upgraded to version 3.12
 
 =item *
 
-DB::File upgraded to version
+Data::Dumper upgraded to version 2.121_08
 
 =item *
 
-Devel::DProf::DProf upgraded to version
+DB upgraded to version 1.01
 
 =item *
 
-Devel::Peek::Peek upgraded to version
+DB_File upgraded to version 1.814
 
 =item *
 
-Devel::PPPort upgraded to version
+Devel::DProf upgraded to version 20050603.00
 
 =item *
 
-diagnostics upgraded to version
+Devel::Peek upgraded to version 1.03
 
 =item *
 
-Digest upgraded to version
+Devel::PPPort upgraded to version 3.06
 
 =item *
 
-Digest upgraded to version
+diagnostics upgraded to version 1.15
 
 =item *
 
-Digest::MD5 upgraded to version
+Digest upgraded to version 1.14
 
 =item *
 
-Dumpvalue upgraded to version
+Digest::file upgraded to version 1.00
 
 =item *
 
-Encode upgraded to version
+Digest::MD5 upgraded to version 2.36
 
 =item *
 
-English upgraded to version
+Dumpvalue upgraded to version 1.12
 
 =item *
 
-ExtUtils::Constant upgraded to version
+Encode upgraded to version 2.12
 
 =item *
 
-ExtUtils::Embed upgraded to version
+English upgraded to version 1.02
 
 =item *
 
-ExtUtils::MakeMaker upgraded to version
+ExtUtils::Constant upgraded to version 0.17
 
 =item *
 
-File::Basename upgraded to version
+ExtUtils::MakeMaker upgraded to version 6.30
 
 =item *
 
-File::Copy upgraded to version
+File::Basename upgraded to version 2.74
 
 =item *
 
-File::Find upgraded to version
+File::Copy upgraded to version 2.09
 
 =item *
 
-File::Glob::Glob upgraded to version
+File::Find upgraded to version 1.10
 
 =item *
 
-File::Path upgraded to version
+File::Glob upgraded to version 1.05
 
 =item *
 
-File::Spec upgraded to version
+File::Path upgraded to version 1.08
 
 =item *
 
-FileCache upgraded to version
+File::Spec upgraded to version 3.12
 
 =item *
 
-Filter::Simple upgraded to version
+FileCache upgraded to version 1.06
 
 =item *
 
-FindBin upgraded to version
+Filter::Simple upgraded to version 0.82
 
 =item *
 
-GDBM_File::GDBM_File upgraded to version
+FindBin upgraded to version 1.47
 
 =item *
 
-Getopt::Long upgraded to version
+GDBM_File upgraded to version 1.08
 
 =item *
 
-if upgraded to version
+Getopt::Long upgraded to version 2.35
 
 =item *
 
-IO upgraded to version
+if upgraded to version 0.05
 
 =item *
 
-IPC::Open2 upgraded to version
+IO upgraded to version 1.22
 
 =item *
 
-IPC::Open3 upgraded to version
+IPC::Open2 upgraded to version 1.02
 
 =item *
 
-Math::Complex upgraded to version
+IPC::Open3 upgraded to version 1.02
 
 =item *
 
-Math::Trig upgraded to version
+List::Util upgraded to version 1.18
 
 =item *
 
-MIME::Base64 upgraded to version
+Math::Complex upgraded to version 1.35
 
 =item *
 
-NDBM_File::NDBM_File upgraded to version
+Math::Trig upgraded to version 1.03
 
 =item *
 
-Opcode::Opcode upgraded to version
+MIME::Base64 upgraded to version 3.07
 
 =item *
 
-open upgraded to version
+NDBM_File upgraded to version 1.06
 
 =item *
 
-overload upgraded to version
+ODBM_File upgraded to version 1.06
 
 =item *
 
-PerlIO upgraded to version
+Opcode upgraded to version 1.06
 
 =item *
 
-perlio-doc upgraded to version
+open upgraded to version 1.05
 
 =item *
 
-Pod::Functions upgraded to version
+overload upgraded to version 1.04
 
 =item *
 
-Pod::Html upgraded to version
+PerlIO upgraded to version 1.04
 
 =item *
 
-Pod::Parser upgraded to version
+PerlIO::encoding upgraded to version 0.09
 
 =item *
 
-POSIX::POSIX upgraded to version
+PerlIO::scalar upgraded to version 0.04
 
 =item *
 
-re::re upgraded to version
+PerlIO::via upgraded to version 0.03
 
 =item *
 
-Scalar-List-Utils upgraded to version
+Pod::Functions upgraded to version 1.03
 
 =item *
 
-SDBM_File::SDBM_File upgraded to version
+Pod::Html upgraded to version 1.0504
 
 =item *
 
-Socket::Socket upgraded to version
+Pod::Parser upgraded to version 1.32
 
 =item *
 
-Storable upgraded to version
+POSIX upgraded to version 1.09
 
 =item *
 
-Switch upgraded to version
+re upgraded to version 0.05
 
 =item *
 
-Sys::Syslog::Syslog upgraded to version
+SDBM_File upgraded to version 1.05
 
 =item *
 
-TabsWrap upgraded to version
+Socket upgraded to version 1.78
 
 =item *
 
-Term::ANSIColor upgraded to version
+Storable upgraded to version 2.15
 
 =item *
 
-Term::ReadLine upgraded to version
+Switch upgraded to version 2.10_01
 
 =item *
 
-Test::Builder upgraded to version
+Sys::Syslog upgraded to version 0.11
 
 =item *
 
-Test::Builder::Module upgraded to version
+Term::ANSIColor upgraded to version 1.10
 
 =item *
 
-Test::Builder::Tester upgraded to version
+Term::ReadLine upgraded to version 1.02
 
 =item *
 
-Test::Builder::Tester::Color upgraded to version
+Test::Harness upgraded to version 2.56
 
 =item *
 
-Test::Harness upgraded to version
+Test::Simple upgraded to version 0.62
 
 =item *
 
-Test::More upgraded to version
+Text::Tabs upgraded to version 2005.0824
 
 =item *
 
-Test::Simple upgraded to version
+Text::Wrap upgraded to version 2005.082401
 
 =item *
 
-threads upgraded to version
+threads upgraded to version 1.07
 
 =item *
 
-Tie::Hash upgraded to version
+threads::shared upgraded to version 0.94
 
 =item *
 
-Time::HiRes upgraded to version
+Tie::Hash upgraded to version 1.02
 
 =item *
 
-Unicode::Collate upgraded to version
+Time::HiRes upgraded to version 1.86
 
 =item *
 
-Unicode::UCD upgraded to version
+Unicode::Collate upgraded to version 0.52
 
 =item *
 
-User::grent upgraded to version
+Unicode::UCD upgraded to version 0.24
 
 =item *
 
-vmsish upgraded to version
+User::grent upgraded to version 1.01
 
 =item *
 
-warnings upgraded to version
+vmsish upgraded to version 1.02
 
 =item *
 
-XS::APItest::APItest upgraded to version
-
-=item *
+warnings upgraded to version 1.05
 
-XS::Typemap::Typemap upgraded to version
+=back
 
 =head1 Utility Changes
 
