@@ -47,10 +47,6 @@ The following pragmas are defined (and have their own documentation).
 
 =over 12
 
-=item assertions::compat
-
-Assertions for pre-5.9 versions of perl
-
 =item attributes
 
 Get/set subroutine or variable attributes
@@ -65,7 +61,7 @@ Postpone load of modules until a function is used
 
 =item base
 
-Establish IS-A relationship with base class at compile time
+Establish IS-A relationship with base classes at compile time
 
 =item bigint
 
@@ -141,7 +137,7 @@ Restrict unsafe operations when compiling
 
 =item overload
 
-Package for overloading perl operations
+Package for overloading Perl operations
 
 =item re
 
@@ -208,14 +204,6 @@ don't have the gdbm library.
 =item AnyDBM_File
 
 Provide framework for multiple DBMs
-
-=item Archive::Tar
-
-Module for manipulations of tar archives
-
-=item Archive::Tar::File
-
-A subclass for in-memory extracted file from Archive::Tar
 
 =item Attribute::Handlers
 
@@ -353,13 +341,17 @@ Utility for CPAN::Config file Initialization
 
 Wrapper around CPAN.pm without using any XS module
 
+=item CPAN::Version
+
+Utility functions to compare CPAN versions
+
 =item Carp
 
 Warn of errors (from perspective of caller)
 
 =item Carp::Heavy
 
-No user serviceable parts inside
+Heavy machinery, no user serviceable parts inside
 
 =item Class::ISA
 
@@ -368,10 +360,6 @@ Report the search path for a class's ISA tree
 =item Class::Struct
 
 Declare struct-like datatypes as Perl classes
-
-=item Compress::Zlib
-
-Interface to zlib compression library
 
 =item Config
 
@@ -384,6 +372,10 @@ Get pathname of current working directory
 =item DB
 
 Programmatic interface to the Perl debugging API (draft, subject to
+
+=item DBM_Filter
+
+Filter DBM keys/values 
 
 =item DB_File
 
@@ -420,6 +412,10 @@ Perl interface to the MD5 Algorithm
 =item Digest::base
 
 Digest base class
+
+=item Digest::file
+
+Calculate digests of files
 
 =item DirHandle
 
@@ -545,14 +541,6 @@ Implements default import method for modules
 
 Exporter guts
 
-=item ExtUtils::CBuilder
-
-Compile and link C code for Perl modules
-
-=item ExtUtils::CBuilder::Platform::Windows
-
-Builder class for Windows platforms
-
 =item ExtUtils::Command
 
 Utilities to replace common UNIX commands in Makefiles etc.
@@ -564,6 +552,18 @@ Commands for the MM's to use in Makefiles
 =item ExtUtils::Constant
 
 Generate XS code to import C header constants
+
+=item ExtUtils::Constant::Base
+
+Base class for ExtUtils::Constant objects
+
+=item ExtUtils::Constant::Utils
+
+Helper functions for ExtUtils::Constant
+
+=item ExtUtils::Constant::XS
+
+Base class for ExtUtils::Constant objects
 
 =item ExtUtils::Embed
 
@@ -607,7 +607,7 @@ DOS specific subclass of ExtUtils::MM_Unix
 
 =item ExtUtils::MM_MacOS
 
-Methods to override UN*X behaviour in ExtUtils::MakeMaker
+Once produced Makefiles for MacOS Classic
 
 =item ExtUtils::MM_NW5
 
@@ -689,10 +689,6 @@ Write linker options files for dynamic extension
 
 Manage .packlist files
 
-=item ExtUtils::ParseXS
-
-Converts Perl XS code into C code
-
 =item ExtUtils::testlib
 
 Add blib/* directories to @INC
@@ -707,7 +703,7 @@ Load the C Fcntl.h defines
 
 =item File::Basename
 
-Split a pathname into pieces
+Parse file paths into directory, filename and suffix.
 
 =item File::CheckTree
 
@@ -825,6 +821,10 @@ Compare 8-bit scalar data according to the current locale
 
 Functions for dealing with RFC3066-style language tags
 
+=item I18N::LangTags::Detect
+
+Detect the user's language preferences
+
 =item I18N::LangTags::List
 
 Tags and names for human languages
@@ -876,10 +876,6 @@ Object interface for AF_INET domain sockets
 =item IO::Socket::UNIX
 
 Object interface for AF_UNIX domain sockets
-
-=item IO::Zlib
-
-IO:: style interface to L<Compress::Zlib>
 
 =item IPC::Open2
 
@@ -953,13 +949,13 @@ Arbitrary size integer/float math package
 
 Pure Perl module to support Math::BigInt
 
-=item Math::BigInt::FastCalc
+=item Math::BigInt::CalcEmu
 
-Math::BigInt::Calc with some XS for more speed
+Emulate low-level math with BigInt code
 
 =item Math::BigRat
 
-Arbitrarily big rationals
+Arbitrary big rational numbers
 
 =item Math::Complex
 
@@ -1285,6 +1281,18 @@ Provides a simple framework for writing test scripts
 
 Backend for building test libraries
 
+=item Test::Builder::Module
+
+Base class for test modules
+
+=item Test::Builder::Tester
+
+Test testsuites that have been built with
+
+=item Test::Builder::Tester::Color
+
+Turn on colour in Test::Builder::Tester
+
 =item Test::Harness
 
 Run Perl standard test scripts with statistics
@@ -1304,6 +1312,10 @@ Object for tracking a single test point
 =item Test::Harness::Straps
 
 Detailed analysis of test results
+
+=item Test::Harness::TAP
+
+Documentation for the TAP format
 
 =item Test::More
 
@@ -1436,10 +1448,6 @@ By-name interface to Perl's built-in getgr*() functions
 =item User::pwent
 
 By-name interface to Perl's built-in getpw*() functions
-
-=item Win32
-
-Interfaces to some Win32 API Functions
 
 =item XS::APItest
 
