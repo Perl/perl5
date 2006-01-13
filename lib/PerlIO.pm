@@ -35,7 +35,7 @@ PerlIO - On demand loader for PerlIO layers and root of PerlIO::* name space
 
 =head1 SYNOPSIS
 
-  open($fh,"<:crlf", "my.txt"); # support native and Windows text files
+  open($fh,"<:crlf", "my.txt"); # support platform-native and CRLF text files
 
   open($fh,"<","his.jpg");      # portably open a binary file for reading
   binmode($fh);
@@ -288,7 +288,7 @@ The following table summarizes the default layers on UNIX-like and
 DOS-like platforms and depending on the setting of the C<$ENV{PERLIO}>:
 
  PERLIO     UNIX-like                   DOS-like
- 
+ ------     ---------                   --------
  unset / "" unix perlio / stdio [1]     unix crlf
  stdio      unix perlio / stdio [1]     stdio
  perlio     unix perlio                 unix perlio
@@ -338,4 +338,3 @@ L<perlfunc/"binmode">, L<perlfunc/"open">, L<perlunicode>, L<perliol>,
 L<Encode>
 
 =cut
-

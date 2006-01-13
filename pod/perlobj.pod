@@ -456,6 +456,11 @@ manipulating C<$_[0]> within the destructor.  The object itself (i.e.
 the thingy the reference points to, namely C<${$_[0]}>, C<@{$_[0]}>, 
 C<%{$_[0]}> etc.) is not similarly constrained.
 
+Since DESTROY methods can be called at unpredictable times, it is
+important that you localise any global variables that the method may
+update.  In particular, localise C<$@> if you use C<eval {}> and
+localise C<$?> if you use C<system> or backticks.
+
 If you arrange to re-bless the reference before the destructor returns,
 perl will again call the DESTROY method for the re-blessed object after
 the current one returns.  This can be used for clean delegation of
