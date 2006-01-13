@@ -4,7 +4,7 @@ use Carp;
 require 5.006;
 require Exporter;
 
-our $VERSION = '0.11';
+our $VERSION = '0.13';
 our @ISA = qw(Exporter);
 
 our %EXPORT_TAGS = (
@@ -53,7 +53,7 @@ Sys::Syslog - Perl interface to the UNIX syslog(3) calls
 
 =head1 VERSION
 
-Version 0.11
+Version 0.13
 
 =head1 SYNOPSIS
 
@@ -436,6 +436,8 @@ was unable to find an appropriate an appropriate device.
 
 L<syslog(3)>
 
+I<Syslogging with Perl>, L<http://lexington.pm.org/meetings/022001.html>
+
 
 =head1 AUTHOR
 
@@ -797,20 +799,12 @@ sub connect {
         my($old) = select(SYSLOG); $| = 1; select($old);
     } else {
 	@fallbackMethods = ();
-	foreach my $err (@errs) {
-	    carp $err;
-	}
-	croak "no connection to syslog available";
+	croak join "\n\t- ", "no connection to syslog available", @errs
     }
 }
 
 sub connect_tcp {
     my ($errs) = @_;
-    unless ($host) {
-	require Sys::Hostname;
-	my($host_uniq) = Sys::Hostname::hostname();
-	($host) = $host_uniq =~ /([A-Za-z0-9_.-]+)/; # allow FQDN (inc _)
-    }
     my $tcp = getprotobyname('tcp');
     if (!defined $tcp) {
 	push(@{$errs}, "getprotobyname failed for tcp");
@@ -819,16 +813,23 @@ sub connect_tcp {
     my $syslog = getservbyname('syslog','tcp');
     $syslog = getservbyname('syslogng','tcp') unless (defined $syslog);
     if (!defined $syslog) {
-	push(@{$errs}, "getservbyname failed for tcp");
+	push(@{$errs}, "getservbyname failed for syslog/tcp and syslogng/tcp");
 	return 0;
     }
 
     my $this = sockaddr_in($syslog, INADDR_ANY);
-    my $that = sockaddr_in($syslog, inet_aton($host));
-    if (!$that) {
-	push(@{$errs}, "can't lookup $host");
-	return 0;
+    my $that;
+    if (defined $host) {
+	$that = inet_aton($host);
+	if (!$that) {
+	    push(@{$errs}, "can't lookup $host");
+	    return 0;
+	}
+    } else {
+	$that = INADDR_LOOPBACK;
     }
+    $that = sockaddr_in($syslog, $that);
+
     if (!socket(SYSLOG,AF_INET,SOCK_STREAM,$tcp)) {
 	push(@{$errs}, "tcp socket: $!");
 	return 0;
@@ -845,11 +846,6 @@ sub connect_tcp {
 
 sub connect_udp {
     my ($errs) = @_;
-    unless ($host) {
-	require Sys::Hostname;
-	my($host_uniq) = Sys::Hostname::hostname();
-	($host) = $host_uniq =~ /([A-Za-z0-9_.-]+)/; # allow FQDN (inc _)
-    }
     my $udp = getprotobyname('udp');
     if (!defined $udp) {
 	push(@{$errs}, "getprotobyname failed for udp");
@@ -857,15 +853,22 @@ sub connect_udp {
     }
     my $syslog = getservbyname('syslog','udp');
     if (!defined $syslog) {
-	push(@{$errs}, "getservbyname failed for udp");
+	push(@{$errs}, "getservbyname failed for syslog/udp");
 	return 0;
     }
     my $this = sockaddr_in($syslog, INADDR_ANY);
-    my $that = sockaddr_in($syslog, inet_aton($host));
-    if (!$that) {
-	push(@{$errs}, "can't lookup $host");
-	return 0;
+    my $that;
+    if (defined $host) {
+	$that = inet_aton($host);
+	if (!$that) {
+	    push(@{$errs}, "can't lookup $host");
+	    return 0;
+	}
+    } else {
+	$that = INADDR_LOOPBACK;
     }
+    $that = sockaddr_in($syslog, $that);
+
     if (!socket(SYSLOG,AF_INET,SOCK_DGRAM,$udp)) {
 	push(@{$errs}, "udp socket: $!");
 	return 0;
@@ -908,6 +911,10 @@ sub connect_unix {
 	$syslog_path = _PATH_LOG();
     } else {
         push(@{$errs}, "_PATH_LOG not available in syslog.h");
+	return 0;
+    }
+    if (! -S $syslog_path) {
+	push(@{$errs}, "$syslog_path is not a socket");
 	return 0;
     }
     my $that = sockaddr_un($syslog_path);

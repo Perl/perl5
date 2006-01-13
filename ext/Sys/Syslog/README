@@ -26,7 +26,7 @@ INSTALLATION
 
       - Linux 2.6, gcc 3.4.1
       - FreeBSD 4.7, gcc 2.95.4
-      - Mac OS X 10.2.6, gcc 3.1
+      - Mac OS X 10.4, gcc 4.0.1
 
     Sys::Syslog should on any Perl since 5.6.0. This module has been 
     tested by the author to check that it works with the following
@@ -36,11 +36,10 @@ INSTALLATION
       - Perl 5.8.5 i386-linux-thread-multi (vendor build)
       - Perl 5.6.1 i386-freebsd (custom build)
       - Perl 5.8.7 i386-freebsd (custom build)
-      - Perl 5.6.0 darwin (vendor build)
-      - Perl 5.8.7 cygwin-thread-multi-64int (vendor build)
+      - Perl 5.8.6 darwin-thread-multi-2level (vendor build)
 
     See also the corresponding CPAN Testers page:
-        http://testers.cpan.org/show/Net-Pcap.html
+        http://testers.cpan.org/show/Sys-Syslog.html
 
 
 SUPPORT AND DOCUMENTATION
