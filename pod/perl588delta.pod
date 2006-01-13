@@ -9,7 +9,8 @@ the 5.8.8 release.
 
 =head1 Incompatible Changes
 
-There are no changes incompatible with 5.8.7.
+There are no changes intentionally incompatible with 5.8.7. If any exist,
+they are bugs and reports are welcome.
 
 =head1 Core Enhancements
 
@@ -31,7 +32,9 @@ autouse upgraded to version 1.05
 
 =item *
 
-B upgraded to version 1.09_01
+B upgraded to version 1.09_01. The inheritance hierarchy of the C<B::>
+modules has been corrected; C<B::NV> now inherits from C<B::SV> (instead of
+C<B::IV>).
 
 =item *
 
@@ -51,7 +54,59 @@ charnames upgraded to version 1.05
 
 =item *
 
-CPAN upgraded to version 1.83
+CPAN upgraded to version 1.83. This provides
+
+=over 4
+
+=item *
+
+Support for C<Module::Build>
+
+=item *
+
+Support for C<bzip2>
+
+=item *
+
+Support for Module::Signature
+
+=item *
+
+Support for C<SHA256>
+
+=item *
+
+Support for C<curl>
+
+=item *
+
+Support for C<sudo>
+
+=item *
+
+new pragma C<notest>
+
+=item *
+
+New commands C<recent> and C<perldoc>
+
+=item *
+
+New feature <show_upload_date>
+
+=item *
+
+C<CPAN::Version> (improved support for multidot version notation)
+
+=item *
+
+Improved config variable handling
+
+=item *
+
+Improved C<wget> support on Win32
+
+=back
 
 =item *
 
@@ -103,6 +158,10 @@ Dumpvalue upgraded to version 1.12
 
 =item *
 
+DynaLoader now implements C<dl_unload_file> on Win32
+
+=item *
+
 Encode upgraded to version 2.12
 
 =item *
@@ -151,7 +210,8 @@ Filter::Simple upgraded to version 0.82
 
 =item *
 
-FindBin upgraded to version 1.47
+FindBin upgraded to version 1.47. C<FindBin> now works better with
+directories where access rights are more restrictive than usual.
 
 =item *
 
@@ -235,7 +295,8 @@ Pod::Functions upgraded to version 1.03
 
 =item *
 
-Pod::Html upgraded to version 1.0504
+Pod::Html upgraded to version 1.0504. HTML output will now correctly link
+to C<=item>s on the same page, and should be valid XHTML.
 
 =item *
 
@@ -259,7 +320,9 @@ Socket upgraded to version 1.78
 
 =item *
 
-Storable upgraded to version 2.15
+Storable upgraded to version 2.15. This includes C<STORABLE_attach> hook
+functionality added by Adam Kennedy, and more memory frugal storing under
+ithreads, by utilising the ithreads cloning tracking code.
 
 =item *
 
@@ -299,7 +362,9 @@ threads upgraded to version 1.07
 
 =item *
 
-threads::shared upgraded to version 0.94
+threads::shared upgraded to version 0.94, which is solely documentation
+changes. An improved implementation of C<threads::shared> is available on
+CPAN - this will be merged into 5.8.9 if it proves stable.
 
 =item *
 
@@ -335,15 +400,225 @@ warnings upgraded to version 1.05
 
 =head1 New Documentation
 
+The L<perlglossary> manpage is a glossary of terms used in the Perl
+documentation, technical and otherwise, kindly provided by O'Reilly Media,
+inc.
+
 =head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+The default since perl 5.000 has been for perl to create an empty scalar
+with every new typeglob. The increased use of lexical variables means that
+most are now unused. Perl can now be compiled with C<-DPERL_DONT_CREATE_GVSV>
+to avoid creating these empty scalars. This will significantly decrease the
+number of scalars allocated for all configurations, and the number of scalars
+that need to be copied for ithread creation. Whilst this option is not
+binary incompatible with existing perl installations, it does change a
+long-standing previous assumption about the internals, hence it is not enabled
+by default, as some third party code may rely on the old behaviour.
+
+We would recommend testing with this configuration on new deployments of
+perl, particularly for multithreaded servers, to see whether all third party
+code is compatible with it, as this configuration may give useful performance
+improvements. For existing installations we would not recommend changing to
+this configuration unless thorough testing is performed before deployment.
+
+=item *
+
+C<chdir>, C<chmod> and C<chown> can now work on filehandles as well as
+filenames, if the system supports respectively C<fchdir>, C<fchmod> and
+C<fchown>, thanks to a patch provided by Gisle Aas.
+
+=item *
+
+Weak reference creation is now I<O(1)> rather than I<O(n)>. Weak reference
+deletion remains I<O(n)>, but if deletion only happens at program exit, it
+may be skipped completely.
+
+=item *
+
+Salvador Fandiño provided improvements to reduce the memory usage of C<sort>
+and to speed up some cases.
+
+=item *
+
+Jarkko Hietaniemi and Andy Lester worked to mark as much data as possible in
+the C source files as C<static>, to increase the proportion of the executable
+file that the operating system can share between process, and thus reduce
+real memory usage on mutli-user systems.
+
+=back
 
 =head1 Installation and Configuration Improvements
 
+Parallel makes should work properly now, although there may still be problems
+with if C<make test> is instructed to run in parallel.
+
+Building with Borland's compilers on Win32 should work more smoothly. In
+particular Steve Hay has worked to side step many warnings emitted by their
+compilers and at least one C compiler internal error.
+
+C<Configure> will now probe for the presence of C<futimes> and whether
+C<sprintf> correctly returns the length of the formatted string, which will
+both be used in perl 5.8.9.
+
 =head1 Selected Bug Fixes
+
+=head2 Remove over-optimisation
+
+Perl 5.8.4 introduced a change so that assignments of C<undef> to a
+scalar, or of an empty list to an array or a hash, were optimised out. As
+this could cause problems when C<goto> jumps were involved, this change
+was backed out.
+
+=head2 sprintf() fixes
+
+Using the sprintf() function with some formats could lead to a buffer
+overflow in some specific cases. This has been fixed, along with several
+other bugs, notably in bound checking.
+
+In related fixes, it was possible for badly written code that did not follow
+the documentation of C<Sys::Syslog> to have formatting vulnerabilities.
+C<Sys::Syslog> has been changed to protect people from poor quality third
+party code.
+
+=head2 Debugger and Unicode slowdown
+
+It had been reported that running under perl's debugger when processing
+Unicode data could cause unexpectedly large slowdowns. The most likely cause
+of this has been identified and fixed.
+
+=head2 Smaller fixes
+
+=over 4
+
+=item *
+
+C<FindBin> now works better with directories where access rights are more
+restrictive than usual.
+
+=item *
+
+Several memory leaks in ithreads were closed. An improved implementation of
+C<threads::shared> is available on CPAN - this will be merged into 5.8.9 if
+it proves stable.
+
+=item *
+
+C<PerlIO::scalar> now works better with non-default C<$/> settings.
+
+=item *
+
+You can now use the C<x> operator to demultiply a C<qw//> list. This used
+to raise a syntax error.
+
+=item *
+
+The debugger now traces correctly execution in eval("")uated code that
+contains #line directives.
+
+=item *
+
+The value of the C<open> pragma is no longer ignored for three-argument
+opens.
+
+=item *
+
+C<//g> matches used to loop infinitely on tainted data. Dave Mitchell
+resolved this.
+
+=item *
+
+The optimisation of C<for (reverse @a)> introduced in perl 5.8.6 could
+misbehave when the array had undefined elements and was used in LVALUE
+context. Dave Mitchell provided a fix.
+
+=item *
+
+Some case insensitive matches between UTF-8 encoded data and 8 bit regexps,
+and vice versa, could give malformed character warnings. These have been
+fixed by Dave Mitchell and Yves Orton.
+
+=item *
+
+C<lcfirst> and C<ucfirst> could corrupt the string for certain cases where
+the length UTF-8 encoding of the string in lower case, upper case or title
+case differed.
+
+=item *
+
+Perl will now use the C library calls C<unsetenv> and C<clearenv> if present
+to delete keys from C<%ENV> and delete C<%ENV> entirely,
+
+=item *
+
+The commandline flag C<-f> is now invalid when perl was compiled without
+C<USE_SITECUSTOMIZE> defined; which remains the default configuration.
+
+=back
 
 =head1 New or Changed Diagnostics
 
+=head2 Attempt to set length of freed array
+
+This is a new warning, produced in situations such as this:
+
+    $r = do {my @a; \$#a};
+    $$r = 503;
+
+=head2 Non-string passed as bitmask
+
+This is a new warning, produced when number has been passed as a argument to
+select(), instead of a bitmask.
+
+    # Wrong, will now warn
+    $rin = fileno(STDIN);
+    ($nfound,$timeleft) = select($rout=$rin, udnef, undef, $timeout);
+    
+    # Should be
+    $rin = '';
+    vec($rin,fileno(STDIN),1) = 1;
+    ($nfound,$timeleft) = select($rout=$rin, udnef, undef, $timeout);
+
+=head2 Search pattern not terminated or ternary operator parsed as search pattern
+
+This syntax error indicates that the lexer couldn't find the final
+delimiter of a C<?PATTERN?> construct. Mentioning the ternary operator in
+this error message makes syntax diagnostic easier.
+
 =head1 Changed Internals
+
+There has been a fair amount of refactoring of the C<C> source code, partly to
+make it tidier and more maintainable. The resulting object code and the
+C<perl> binary may well be smaller than 5.8.7, in particular due to a change
+contributed by Dave Mitchell which reworked the warnings code to be
+significantly smaller. Apart from being smaller and possibly faster, there
+should be no user-detectable changes.
+
+Andy Lester supplied many improvements to determine which function
+parameters and local variables could actually be declared C<const> to the C
+compiler. Steve Peters provided new *_set macros and reworked the core to
+use these rather than assigning to macros in LVALUE context.
+
+Dave Mitchell improved the lexer debugging output under C<-DT>
+
+String buffer allocation is now rounded up to the next multiple of 4 (or
+8 on platforms with 64 bit pointers). This should reduce the number of calls
+to C<realloc> without actually using any extra memory.
+
+The C<HV>'s array of C<HE*>s is now allocated at the correct (minimal) size.
+Compile with C<-DPERL_USE_LARGE_HV_ALLOC> to use the old, sloppier, default.
+
+For XS or embedding debugging purposes, if perl is compiled with
+C<-DDEBUG_LEAKING_SCALARS_FORK_DUMP> in addition to
+C<-DDEBUG_LEAKING_SCALARS> then a child process is C<fork>ed just before
+global destruction, which is used to display the values of any scalars
+found to have leaked at the end of global destruction. Without this, the
+scalars have already been freed sufficiently at the point of detection that
+it is impossible to produce any meaningful dump of their contents.
 
 =head1 New Tests
 
