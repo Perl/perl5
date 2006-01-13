@@ -34,11 +34,36 @@ removed. A new warning, C<$# is no longer supported>, has been added.
 The C<:unique> attribute has been made a no-op, since its current
 implementation was fundamentally flawed and not threadsafe.
 
+=head2 Scoping of the C<sort> pragma
+
+The C<sort> pragma is now lexically scoped. Its effect used to be global.
+
 =head1 Core Enhancements
+
+=head2 The C<feature> pragma
+
+The C<feature> pragma is used to enable new syntax that would break Perl's
+backward-compatibility with older releases of the language. It's a lexical
+pragma, like C<strict> or C<warnings>.
+
+Currently the following new features are available: C<switch> (adds a
+switch statement), C<~~> (adds a Perl 6-like smart match operator), C<say>
+(adds a C<say> built-in function), and C<err> (adds an C<err> keyword).
+Those features are described below.
+
+Note that C<err> low-precedence defined-or operator used to be enabled by
+default, but as a weak keyword. It's now only recognized when explicitely
+turned on.
 
 =head2 Switch and Smart Match operator
 
+XXX
+
 =head2 C<say()>
+
+say() is a new built-in, only avaiable when C<use feature 'say'> is in
+effect, that is similar to print(), but that implicitly appends a newline
+to the printed string. See L<perlfunc/say>.
 
 =head2 C<CLONE_SKIP()>
 
@@ -72,9 +97,30 @@ been updated to 4.1.0.
 You can now use C<no> followed by a version number to specify that you
 want to use a version of perl inferior to the specified one.
 
+=head2 Recursive sort subs
+
+You can now use recursive subroutines with sort().
+
+=head2 Effect of pragmas in eval
+
+The compile-time value of the C<%^H> hint variable can now propagate into
+eval("")uated code. This makes it more useful to implement lexical
+pragmas.
+
+As a side-effect of this, the overloaded-ness of constants now propagates
+into eval("").
+
+=head2 New B<-E> command-line switch
+
+B<-E> is equivalent to B<-e>, but it implicitly enables all
+optional features.
+
 =head1 Modules and Pragmata
 
 =head2 C<feature>
+
+This new module implements the C<feature> pragma; see above in
+L</"Core Enhancements">.
 
 =head2 C<assertions::compat>
 
@@ -99,12 +145,32 @@ documentation, technical and otherwise.
 
 =head1 Performance Enhancements
 
+=head2 XS-assisted SWASHGET
+
+Some pure-perl code that perl was using to retrieve Unicode properties and
+transliteration mappings has been retrieved in XS.
+
+=head2 Constants subroutines
+
+XXX
+
 =head1 Installation and Configuration Improvements
 
 =head2 New Or Improved Platforms
 
 Perl is being ported to Symbian OS. See L<perlsymbian> for more
 information.
+
+The VMS port has been improved. See L<perlvms>.
+
+DynaLoader::dl_unload_file() now works on Windows.
+
+Portability of Perl on various recent compilers on Windows has been
+improved (Borland C++, Visual C++ 7.0).
+
+=head2 New probes
+
+Perl will detect and use internally futimes(2) if available.
 
 =head2 Module auxiliary files
 
@@ -127,6 +193,36 @@ SCALAR ref while "strict refs" in use>. (However, C<defined @$foo> and
 C<defined %$foo> are still allowed. Those constructs are discouraged
 anyway.)
 
+=head2 Calling CORE::require()
+
+CORE::require() and CORE::do() were always parsed as require() and do()
+when they were overriden. This is now fixed.
+
+=head2 Subscripts of slices
+
+You can now use a non-arrowed form for chained subscripts after a list
+slice, like in:
+
+    ({foo => "bar"})[0]{foo}
+
+This used to be a syntax error; a C<< -> >> was required.
+
+=head2 Remove over-optimisation
+
+Perl 5.9.2 introduced a change so that assignments of C<undef> to a
+scalar, or of an empty list to an array or a hash, were optimised out. As
+this could cause problems when C<goto> jumps were involved, this change
+was backed out.
+
+=head2 sprintf() fixes
+
+Using the sprintf() function with some formats could lead to a buffer
+overflow in some specific cases. This has been fixed, along with several
+other bugs, notably in bound checking.
+
+In related fixes, a format string injection vulnerability has been fixed
+in Sys::Syslog.
+
 =head2 Smaller fixes
 
 =over 4
@@ -138,7 +234,8 @@ restrictive than usual.
 
 =item *
 
-Several memory leaks in ithreads were closed.
+Several memory leaks in ithreads were closed. Also, ithreads were made
+less memory-intensive.
 
 =item *
 
@@ -148,6 +245,20 @@ C<PerlIO::scalar> now works better with non-default C<$/> settings.
 
 You can now use the C<x> operator to demultiply a C<qw//> list. This used
 to raise a syntax error.
+
+=item *
+
+The debugger now traces correctly execution in eval("")uated code that
+contains #line directives.
+
+=item *
+
+The value of the C<open> pragma is no longer ignored for three-argument
+opens.
+
+=item *
+
+C<//g> matches used to loop infinitely on tainted data.
 
 =back
 
@@ -193,11 +304,19 @@ On the other hand, the following :
 
 now gives a C<"our" variable %s redeclared> warning.
 
+=head2 readdir()/closedir()/etc. attempted on invalid dirhandle
+
+These new warnings are now emitted when a dirhandle is used but is
+either closed or not really a dirhandle.
+
 =head1 Changed Internals
 
 XXX consting
 
-XXX mathoms
+A new file, F<mathoms.c>, has been added. It contains functions that are
+no longer used in the perl core, but that remain available for binary or
+source compatibility reasons. However, those functions will not be
+compiled in if you add C<-DNO_MATHOM> in the compiler flags.
 
 The C<AvFLAGS> macro has been removed.
 
