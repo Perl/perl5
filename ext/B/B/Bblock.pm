@@ -1,6 +1,6 @@
 package B::Bblock;
 
-our $VERSION = '1.02';
+our $VERSION = '1.02_01';
 
 use Exporter ();
 @ISA = "Exporter";
