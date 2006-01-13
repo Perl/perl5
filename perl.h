@@ -2977,8 +2977,8 @@ typedef pthread_key_t	perl_key;
 #	define IOCPARM_LEN(x)  (((x) >> 16) & IOCPARM_MASK)
 #   else
 #	if defined(_IOC_SIZE) && defined(__GLIBC__)
-	/* on Linux systems we're safe */
-#	    define IOCPARM_LEN(x) _IOC_SIZE(x)
+	/* on Linux systems we're safe; except when we're not [perl #38223] */
+#	    define IOCPARM_LEN(x) (_IOC_SIZE(x) < 256 ? 256 : _IOC_SIZE(x))
 #	else
 	/* otherwise guess at what's safe */
 #	    define IOCPARM_LEN(x)	256
