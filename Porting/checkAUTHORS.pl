@@ -221,6 +221,7 @@ sub display_ordered {
   }
 
   my $i = @sorted;
+  return unless $i;
   while (--$i) {
     next unless $sorted[$i];
     print wrap ("$i:\t", "\t", join (" ", sort @{$sorted[$i]}), "\n");
