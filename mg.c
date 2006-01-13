@@ -574,9 +574,11 @@ Perl_magic_len(pTHX_ SV *sv, MAGIC *mg)
 
 #define SvRTRIM(sv) STMT_START { \
     STRLEN len = SvCUR(sv); \
-    while (len > 0 && isSPACE(SvPVX(sv)[len-1])) \
+    char * const p = SvPVX(sv); \
+    while (len > 0 && isSPACE(p[len-1])) \
 	--len; \
     SvCUR_set(sv, len); \
+    p[len] = '\0'; \
 } STMT_END
 
 int
