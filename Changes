@@ -28,6 +28,421 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.8		Maintenance release working toward v5.8.8
 --------------
 ____________________________________________________________________________
+[ 26840] By: nicholas                              on 2006/01/13  21:53:22
+        Log: Integrate:
+             [ 26824]
+             $utf8::VERSION++ # Documentation.
+     Branch: maint-5.8/perl
+	  !> lib/utf8.pm
+____________________________________________________________________________
+[ 26839] By: nicholas                              on 2006/01/13  21:52:38
+        Log: Integrate:
+             [ 26809]
+             Upgrade to Devel::PPPort 3.06_01
+     Branch: maint-5.8/perl
+	  !> (integrate 32 files)
+____________________________________________________________________________
+[ 26837] By: nicholas                              on 2006/01/13  21:31:41
+        Log: First draft of 5.8.8's perldelta.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26836] By: nicholas                              on 2006/01/13  21:16:08
+        Log: Integrate:
+             [ 26069]
+             Make Perl_seed public
+             
+             Fixes Win32 linker error in List::Util introduced by change #26054
+     Branch: maint-5.8/perl
+	  !> embed.fnc embed.h global.sym
+____________________________________________________________________________
+[ 26834] By: nicholas                              on 2006/01/13  19:10:42
+        Log: Integrate:
+             [ 26807]
+             Subject: Re: Today's compiling adventure
+             From: Ken Hirsch <kenhirsch@ftml.net>
+             Date: Thu, 12 Jan 2006 13:26:16 -0500
+             Message-ID: <43C69F48.7090600@ftml.net>
+             
+             [ 26808]
+             Add new mpeix file from #26807
+             
+             [ 26831]
+             Subject: Re: Today's compiling adventure
+             From: Ken Hirsch <kenhirsch@ftml.net>
+             Message-ID: <43C69F48.7090600@ftml.net>
+             Date: Thu, 12 Jan 2006 13:26:16 -0500
+     Branch: maint-5.8/perl
+	  +> mpeix/mpeix_setjmp.c
+	  !> MANIFEST README.mpeix hints/mpeix.sh mpeix/mpeix.c
+	  !> mpeix/mpeixish.h pp_sys.c
+____________________________________________________________________________
+[ 26833] By: nicholas                              on 2006/01/13  18:27:46
+        Log: Integrate:
+             [ 26815]
+             Fix [perl #38223]; _IOC_SIZE() not always safe.
+     Branch: maint-5.8/perl
+	  !> perl.h
+____________________________________________________________________________
+[ 26832] By: nicholas                              on 2006/01/13  18:16:27
+        Log: Integrate:
+             [ 26812]
+             Make h2ph recognize (and skip) const and __const__ in C function
+             prototypes. This makes it produce better files on linux-sparc64.
+     Branch: maint-5.8/perl
+	  !> utils/h2ph.PL
+____________________________________________________________________________
+[ 26830] By: nicholas                              on 2006/01/13  17:56:30
+        Log: Integrate:
+             [ 26781]
+             Gisle notes that SvRTRIM should also write a new '\0' at the end.
+     Branch: maint-5.8/perl
+	   ! mg.c
+____________________________________________________________________________
+[ 26829] By: nicholas                              on 2006/01/13  17:45:49
+        Log: Integrate:
+             [ 26713]
+             Add an option 'opened' which reports on the maintainers of all files
+             perforce currently has open.
+             
+             [ 26747]
+             Cope with change entries that are \r terminated
+     Branch: maint-5.8/perl
+	  !> Porting/Maintainers.pm Porting/genlog
+____________________________________________________________________________
+[ 26828] By: nicholas                              on 2006/01/13  17:45:00
+        Log: Integrate:
+             [ 26752]
+             Upgrade to Sys::Syslog 0.12
+             
+             [ 26766]
+             Remove Syslog tests that use external modules
+             
+             [ 26768]
+             If getservbyname fails tell what service the lookup
+             attempt tried to use.
+             
+             [ 26769]
+             Why should Syslog jump through hoops to look up the hostname so it can
+             immediately convert it to an IP address, when all it really wants is
+             a connection to the loopback device?
+             
+             [ 26772]
+             Gisle is correct - $host needs to stay in case the user sets it
+             themselves. But if the user doesn't, default to INADDR_LOOPBACK.
+             
+             [ 26773]
+             Subject: Re: Sys::Syslog blows up rather spectacularly on Solaris
+             From: Alan Burlison <Alan.Burlison@sun.com>
+             Message-ID: <43C3D80E.20704@sun.com>
+             Date: Tue, 10 Jan 2006 15:51:42 +0000
+             
+             [ 26782]
+             Subject: Fw: CPAN Upload: S/SA/SAPER/Sys-Syslog-0.13.tar.gz
+             From: Sébastien Aperghis-Tramoni <maddingue@free.fr>
+             Date: Wed, 11 Jan 2006 02:13:31 +0100
+             Message-ID: <1136942011.43c45bbb82dce@imp1-g19.free.fr>
+     Branch: maint-5.8/perl
+	   - ext/Sys/Syslog/t/distchk.t ext/Sys/Syslog/t/pod.t
+	   - ext/Sys/Syslog/t/podcover.t ext/Sys/Syslog/t/portfs.t
+	  !> MANIFEST ext/Sys/Syslog/Changes ext/Sys/Syslog/README
+	  !> ext/Sys/Syslog/Syslog.pm ext/Sys/Syslog/t/constants.t
+____________________________________________________________________________
+[ 26827] By: nicholas                              on 2006/01/13  17:35:26
+        Log: Integrate:
+             [ 26759]
+             Make FAKE,READONLY optional on VMS in test 21
+     Branch: maint-5.8/perl
+	  !> ext/Devel/Peek/t/Peek.t
+____________________________________________________________________________
+[ 26825] By: nicholas                              on 2006/01/13  17:08:30
+        Log: Integrate:
+             [ 26691]
+             Don't code the absolute number of tests for the UTF8/EBCDIC case; much
+             better to subtract the number of tests that don't get run.
+             
+             [ 26789]
+             Subject: Re: [PATCH] Mac OS X 10.4.4 (Darwin 8.4.0) still does not fix locale issue
+             From: Dominic Dunlop <domo@computer.org>
+             Date: Wed, 11 Jan 2006 19:52:20 +0100
+             Message-Id: <FD99F9D3-16DB-484C-BC0A-702F60DAACA4@computer.org>
+             
+             [ 26798]
+             Test comment fix by Dominic Dunlop
+     Branch: maint-5.8/perl
+	  !> lib/locale.t t/comp/require.t
+____________________________________________________________________________
+[ 26823] By: nicholas                              on 2006/01/13  16:54:50
+        Log: Regenerated perlmodlib.pod.
+     Branch: maint-5.8/perl
+	   ! pod/perlmodlib.pod
+____________________________________________________________________________
+[ 26822] By: nicholas                              on 2006/01/13  16:47:13
+        Log: Integrate:
+             [ 26625]
+             Subject: Re: [perl #38034] A combination eval, DESTROY method and $@ - dangerous - bug
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Tue, 03 Jan 2006 19:18:41 +0000 
+             Message-Id: <E1Etrg9-0005XE-LZ@libra.cus.cam.ac.uk> 
+             
+             [ 26669]
+             Improve description of the -s switch.
+             I found the "This means you can have switches
+             with two leading dashes." sentence introduced by
+             change 7144 really confusing.  The note after
+             the example should make it clear enough that double
+             dash switches can be used for those that insist.
+             
+             [ 26797]
+             Typo fix.
+             
+             [ 26801]
+             FAQ sync.
+             
+             [ 26802]
+             Subject: [perl #38205] misleading typo in perlfaq8
+             From: erik@cs.uni-jena.de (via RT) <perlbug-followup@perl.org>
+             Date: Wed, 11 Jan 2006 14:56:28 -0800
+             Message-ID: <rt-3.0.11-38205-127890.10.340635502974@perl.org>
+             
+             [ 26814]
+             Add a link to the Opcode doc in Safe.
+             (see RT CPAN ticket #8579)
+             
+             [ 26816]
+             Better wording for change 26796. Plus, make podchecker happy.
+             
+             [ 26819]
+             Fix internal links in POD.
+     Branch: maint-5.8/perl
+	  !> ext/Opcode/Safe.pm lib/PerlIO.pm lib/utf8.pm pod/perlfaq.pod
+	  !> pod/perlfaq2.pod pod/perlfaq8.pod pod/perlobj.pod
+	  !> pod/perlrun.pod pod/perlvar.pod
+____________________________________________________________________________
+[ 26821] By: nicholas                              on 2006/01/13  15:53:21
+        Log: This is what the section on upgrade module versions was supposed to
+             look like.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26820] By: nicholas                              on 2006/01/13  15:22:43
+        Log: As B is currently in a bit of a forked state, just bump the VERSIONs
+             locally in maint for now.
+     Branch: maint-5.8/perl
+	   ! ext/B/B.pm ext/B/B/Asmdata.pm ext/B/B/Bblock.pm
+	   ! ext/B/B/Bytecode.pm ext/B/B/C.pm ext/B/B/CC.pm
+	   ! ext/B/B/Debug.pm ext/B/B/Terse.pm
+____________________________________________________________________________
+[ 26818] By: nicholas                              on 2006/01/13  14:46:10
+        Log: Integrate:
+             [ 26804]
+             Bump $VERSION in many modules that have changed.
+             
+             (just the warnings parts)
+             
+             [ 26817]
+             More $VERSION bumps.
+     Branch: maint-5.8/perl
+	  !> ext/PerlIO/via/via.pm lib/Attribute/Handlers.pm lib/Switch.pm
+	  !> lib/warnings.pm warnings.pl
+____________________________________________________________________________
+[ 26811] By: nicholas                              on 2006/01/12  21:35:24
+        Log: Integrate:
+             [ 26778]
+             Bleadperl's Win32::Win32 is more recent than the current CPAN release
+             of libwin32 (0.26), so bump the $VERSION a little
+     Branch: maint-5.8/perl
+	  !> win32/ext/Win32/Win32.pm
+____________________________________________________________________________
+[ 26810] By: nicholas                              on 2006/01/12  20:34:45
+        Log: Integrate:
+             [ 25842]
+             Subject: [PATCH] remove mv-if-diff
+             From: Rafael Garcia-Suarez <rgarciasuarez@mandriva.com>
+             Message-ID: <20051024193257.2022ea0d@grubert.mandrakesoft.com>
+             Date: Mon, 24 Oct 2005 19:32:57 +0200
+             
+             (with tweak to add rm for opmini.c, remove mv-if-diff, and reflect
+             this removal in MANIFEST)
+             
+             [ 25843]
+             Oops. the trick is to edit Makefile.SH
+             
+             [ 25844]
+             Remove remaining references to mv-if-diff
+             
+             [ 25846]
+             Rediff the Makefile.SH patch for cross-compilation.
+             (this doesn't mean it works, though.)
+     Branch: maint-5.8/perl
+	   - mv-if-diff
+	  !> Cross/Makefile.SH.patch MANIFEST Makefile.SH os2/Makefile.SHs
+	  !> pod/Makefile.SH pod/perlmodlib.PL
+____________________________________________________________________________
+[ 26806] By: nicholas                              on 2006/01/12  19:23:34
+        Log: Integrate:
+             [ 26796]
+             Subject: [PATCH] fix for :crlf example 
+             From: Xavier Noria <fxn@hashref.com> 
+             Message-Id: <0F64C146-3A80-4FDF-8149-AFB35B3C4D3B@hashref.com> 
+             Date: Wed, 11 Jan 2006 23:11:49 +0100 
+             
+             plus bump its $VERSION
+             
+             [ 26804]
+             Bump $VERSION in many modules that have changed.
+             
+             [ 26805]
+             $Socket::VERSION++; # You always miss one.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+	  !> (integrate 32 files)
+____________________________________________________________________________
+[ 26794] By: nicholas                              on 2006/01/11  21:07:15
+        Log: Integrate the ext/List/Utils/... parts of:
+             [ 25953]
+             Subject: [PATCH] sort/multicall patch
+             From: Robin Houston <robin@cpan.org>
+             Date: Sat, 29 Oct 2005 21:33:07 +0100
+             Message-ID: <20051029203307.GA8869@rpc142.cs.man.ac.uk>
+             
+             [ 25955]
+             Add missing file from change 25953
+             
+             [ 26054]
+             Subject: [PATCH] Re: [perl #32383] DProf breaks List::Util::shuffle
+             From: Robin Houston <robin@cpan.org>
+             Date: Tue, 8 Nov 2005 19:02:34 +0000
+             Message-ID: <20051108190234.GA25953@rpc142.cs.man.ac.uk>
+             
+             [ 26062]
+             Subject: Re: [PATCH] Re: [perl #32383] DProf breaks List::Util::shuffle
+             From: Graham Barr <gbarr@pobox.com>
+             Date: Wed, 9 Nov 2005 06:09:48 -0600
+             Message-Id: <6CAD749E-AE29-415A-9ACB-BA8F6FB8279E@pobox.com>
+             
+             [ 26212]
+             Upgrade to Scalar-List-Utils-1.18
+     Branch: maint-5.8/perl
+	  +> ext/List/Util/multicall.h ext/List/Util/t/00version.t
+	  !> MANIFEST ext/List/Util/Changes ext/List/Util/Util.xs
+	  !> ext/List/Util/lib/List/Util.pm
+	  !> ext/List/Util/lib/Scalar/Util.pm ext/List/Util/t/first.t
+	  !> ext/List/Util/t/lln.t ext/List/Util/t/p_blessed.t
+	  !> ext/List/Util/t/p_first.t ext/List/Util/t/p_lln.t
+	  !> ext/List/Util/t/p_max.t ext/List/Util/t/p_maxstr.t
+	  !> ext/List/Util/t/p_min.t ext/List/Util/t/p_minstr.t
+	  !> ext/List/Util/t/p_openhan.t ext/List/Util/t/p_readonly.t
+	  !> ext/List/Util/t/p_reduce.t ext/List/Util/t/p_refaddr.t
+	  !> ext/List/Util/t/p_reftype.t ext/List/Util/t/p_shuffle.t
+	  !> ext/List/Util/t/p_sum.t ext/List/Util/t/p_tainted.t
+	  !> ext/List/Util/t/reduce.t ext/List/Util/t/refaddr.t
+	  !> ext/List/Util/t/tainted.t
+____________________________________________________________________________
+[ 26788] By: nicholas                              on 2006/01/11  17:19:22
+        Log: Integrate:
+             [ 26480]
+             Subject: Re: [perl #37907] Perl_magic_get reqires ridiculous amounts of stackmemory
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Date: Fri, 23 Dec 2005 13:24:29 -0700
+             Message-ID: <43AC5CFD.3060200@gmail.com>
+             
+             Includes a change in variable names from "j" to "num_groups".
+             
+             [ 26486]
+             Obviously, Perl_ingroup() is also using 256k of stack memory on Linux.
+             Adapt change #26480 to reduce memory usage here as well.
+             
+             [ 26489]
+             Subject: chg 26486 removes last use of NGROUPS, so remove the macro-def
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Date: Mon, 26 Dec 2005 07:57:51 -0700
+             Message-ID: <43B004EF.8060500@gmail.com>
+             
+             [ 26492]
+             In this, the last tale of the NGROUPS saga, a former pumpking prods
+             a mere committer to remove the last of the NGROUPS-sized arrays...
+             
+             Perl_magic_set() was using the last of these arrays to do the 
+             lvalue work on $).  Instead of an array, a pointer is used and 
+             re-sized as needed.  
+     Branch: maint-5.8/perl
+	  !> doio.c mg.c
+____________________________________________________________________________
+[ 26776] By: nicholas                              on 2006/01/10  18:28:31
+        Log: Steve Hay notes that there's a reference PERL_MEM_LOG here, which is
+             inconsistent as PERL_MEM_LOG isn't (yet) merged to maint.
+     Branch: maint-5.8/perl
+	   ! pod/perldebguts.pod
+____________________________________________________________________________
+[ 26775] By: nicholas                              on 2006/01/10  18:19:43
+        Log: Integrate:
+             [ 25111]
+             Subject: [patch hv.h doc] HvNAME
+             From: Stas Bekman <stas@stason.org>
+             Date: Fri, 08 Jul 2005 13:52:13 +0300
+             Message-ID: <42CE5ADD.3020003@stason.org>
+             
+             Subject: Re: [patch hv.h doc] HvNAME
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Sat, 9 Jul 2005 15:23:51 +0100
+             Message-ID: <20050709142351.GT15833@plum.flirble.org>
+             
+             [ 26739]
+             Subject: Re: [perl #38181] Default IO Layer is ignored in 3-argument open call 
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Mon, 09 Jan 2006 01:29:30 +0900
+             Message-Id: <20060109012103.F20A.BQW10602@nifty.com>
+             
+             [ 26749]
+             Subject:  [PATCH] identifiers always in main (was: defining a _ function breaks File::Find)
+             From:  Xavier Noria <fxn@hashref.com>
+             Date:  Sun, 23 Oct 2005 09:47:37 +0200
+             Message-Id:  <D3867DED-313E-4D39-A85F-1178FE7F7A5E@hashref.com>
+             
+             clarify which variables are always forced into main::
+             
+             [ 26750]
+             Revert change 26749
+             
+             [ 26756]
+             Subject: [patch] more about embed.fnc in perlguts
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Date: Sun, 08 Jan 2006 11:35:46 -0700
+             Message-ID: <43C15B82.9090309@gmail.com>
+             
+             (with a few nits)
+             
+             [ 26762]
+             Remove stale date.
+     Branch: maint-5.8/perl
+	  !> embed.fnc hv.h lib/open.pm pod/perlembed.pod pod/perlfunc.pod
+	  !> pod/perlguts.pod pod/perlvar.pod
+____________________________________________________________________________
+[ 26771] By: nicholas                              on 2006/01/10  16:09:53
+        Log: Integrate:
+             [ 26770]
+             1. Make HP C-ANSI-C work on Itanium2 (HP-UX 11.23)
+             broken optimizer
+             2. Remove a compiler warning in a try program
+     Branch: maint-5.8/perl
+	  !> hints/hpux.sh
+____________________________________________________________________________
+[ 26763] By: nicholas                              on 2006/01/10  10:44:50
+        Log: Integrate:
+             [ 24925]
+             Trim trailing whitespace from $! and $^E
+             
+             (Fixes lib/Test/Simple/t/fail-more.t with bcc32 on Win32, and is
+             good for consistency anyway)
+     Branch: maint-5.8/perl
+	  !> mg.c
+____________________________________________________________________________
+[ 26748] By: nicholas                              on 2006/01/08  22:56:02
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 26746] By: nicholas                              on 2006/01/08  22:41:08
         Log: Integrate:
              [ 26744]
