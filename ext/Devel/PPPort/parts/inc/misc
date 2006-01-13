@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 20 $
+##  $Revision: 22 $
 ##  $Author: mhx $
-##  $Date: 2005/02/02 19:17:33 +0100 $
+##  $Date: 2005/06/11 09:37:31 +0200 $
 ##
 ################################################################################
 ##
@@ -119,7 +119,7 @@ typedef NVTYPE NV;
 #  if PTRSIZE == LONGSIZE
 #    define PTR2ul(p)     (unsigned long)(p)
 #  else
-#    define PTR2ul(p)     INT2PTR(unsigned long,p)        
+#    define PTR2ul(p)     INT2PTR(unsigned long,p)
 #  endif
 
 #endif /* !INT2PTR */

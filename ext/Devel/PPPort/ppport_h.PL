@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 4 $
+#  $Revision: 5 $
 #  $Author: mhx $
-#  $Date: 2005/01/31 08:10:54 +0100 $
+#  $Date: 2005/03/10 18:45:41 +0100 $
 #
 ################################################################################
 #
@@ -19,8 +19,8 @@
 #
 ################################################################################
 
-package Devel::PPPort; 
-sub bootstrap {}; 
+package Devel::PPPort;
+sub bootstrap {};
 require "PPPort.pm";
 rename 'ppport.h', 'ppport.old' if -f 'ppport.h';
 unlink "ppport.old" if WriteFile("ppport.h") && -f 'ppport.h';

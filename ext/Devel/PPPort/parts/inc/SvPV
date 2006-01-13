@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 10 $
+##  $Revision: 11 $
 ##  $Author: mhx $
-##  $Date: 2005/01/31 08:10:54 +0100 $
+##  $Date: 2005/03/10 18:08:41 +0100 $
 ##
 ################################################################################
 ##
@@ -32,7 +32,7 @@ sv_pvn_force
 
 char *
 sv_2pv_nolen(pTHX_ register SV *sv)
-{   
+{
   STRLEN n_a;
   return sv_2pv(sv, &n_a);
 }
@@ -63,7 +63,7 @@ sv_2pv_nolen(pTHX_ register SV *sv)
 
 char *
 sv_2pvbyte(pTHX_ register SV *sv, STRLEN *lp)
-{   
+{
   sv_utf8_downgrade(sv,0);
   return SvPV(sv,*lp);
 }

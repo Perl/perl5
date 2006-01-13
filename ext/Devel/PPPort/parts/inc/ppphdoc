@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 20 $
+##  $Revision: 21 $
 ##  $Author: mhx $
-##  $Date: 2005/01/31 08:10:53 +0100 $
+##  $Date: 2005/02/27 21:13:25 +0100 $
 ##
 ################################################################################
 ##
@@ -33,7 +33,9 @@ ppport.h - Perl/Pollution/Portability version __VERSION__
 
 =head1 SYNOPSIS
 
-  perl ppport.h [options] [files]
+  perl ppport.h [options] [source files]
+
+  Searches current directory for files if no [source files] are given
 
   --help                      show short help
 
@@ -48,6 +50,7 @@ ppport.h - Perl/Pollution/Portability version __VERSION__
   --nodiag                    don't show diagnostics
   --nohints                   don't show hints
   --nochanges                 don't suggest changes
+  --nofilter                  don't filter input files
 
   --list-provided             list provided API
   --list-unsupported          list unsupported API
@@ -119,6 +122,11 @@ notes.
 
 Don't suggest any changes. Only give diagnostic output and hints
 unless these are also deactivated.
+
+=head2 --nofilter
+
+Don't filter the list of input files. By default, files not looking
+like source code (i.e. not *.xs, *.c, *.cc, *.cpp or *.h) are skipped.
 
 =head2 --list-provided
 

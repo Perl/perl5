@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 6 $
+#  $Revision: 7 $
 #  $Author: mhx $
-#  $Date: 2005/01/31 08:10:49 +0100 $
+#  $Date: 2005/03/10 18:21:59 +0100 $
 #
 ################################################################################
 #
@@ -64,7 +64,7 @@ fi
 if isperlroot $PERLROOT; then
   grep -hr '^=for apidoc' $PERLROOT | sed -e 's/=for apidoc //' | grep '|' | sort | uniq \
      | perl -e'$f=pop;open(F,$f)||die"$f:$!";while(<F>){(split/\|/)[2]=~/(\w+)/;$h{$1}++}
-               while(<>){(split/\|/)[2]=~/(\w+)/;$h{$1}||print}' $EMBED >$OUTPUT
+               while(<>){s/[ \t]+$//;(split/\|/)[2]=~/(\w+)/;$h{$1}||print}' $EMBED >$OUTPUT
 else
   usage
 fi

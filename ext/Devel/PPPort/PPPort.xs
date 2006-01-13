@@ -87,13 +87,13 @@ XS(XS_Devel__PPPort_dXSTARG)
 
 /* ---- from parts/inc/MY_CXT ---- */
 #define MY_CXT_KEY "Devel::PPPort::_guts" XS_VERSION
- 
+
 typedef struct {
   /* Put Global Data in here */
-  int dummy;          
+  int dummy;
 } my_cxt_t;
- 
-START_MY_CXT     
+
+START_MY_CXT
 
 /* ---- from parts/inc/newCONSTSUB ---- */
 void call_newCONSTSUB_1(void)

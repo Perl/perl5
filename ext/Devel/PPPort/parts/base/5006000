@@ -7,6 +7,7 @@ SvIOK_notUV                    # U
 SvIOK_only_UV                  # U
 SvNV                           # E
 SvNVX                          # E
+SvNV_set                       # E
 SvNVx                          # E
 SvPOK_only_UTF8                # U
 SvPV_nolen                     # E
@@ -263,7 +264,6 @@ newSVrv                        # E (Perl_newSVrv)
 newSVsv                        # E (Perl_newSVsv)
 newSVuv                        # E
 newUNOP                        # E (Perl_newUNOP)
-newWHILEOP                     # E (Perl_newWHILEOP)
 newXS                          # E (Perl_newXS)
 newXSproto                     # E
 new_collate                    # E (perl_new_collate)
