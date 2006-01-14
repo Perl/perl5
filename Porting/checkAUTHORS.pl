@@ -5,14 +5,16 @@ $Text::Wrap::columns = 80;
 my ($committer, $patch, $log);
 use Getopt::Long;
 
-my ($rank, @authors, %authors, %untraced, %patchers);
-my $result = GetOptions ("rank" => \$rank,			# rank authors
-			 "acknowledged=s"   => \@authors);	# authors files
+my ($rank, $ta, @authors, %authors, %untraced, %patchers, %committers);
+my $result = GetOptions ("rank" => \$rank,		    # rank authors
+			 "thanks-applied" => \$ta,	    # ranks committers
+			 "acknowledged=s"   => \@authors);  # authors files
 
-if (!$result or !($rank xor @authors) or !@ARGV) {
+if (!$result or (($rank||0) + ($ta||0) + (@authors ? 1 : 0) != 1) or !@ARGV) {
   die <<"EOS";
 $0 --rank Changelogs                        # rank authors by patches
 $0 --acknowledged <authors file> Changelogs # Display unacknowledged authors
+$0 --thanks-applied Changelogs		    # ranks committers
 Specify stdin as - if needs be. Remember that option names can be abbreviated.
 EOS
 }
@@ -212,7 +214,9 @@ while (<>) {
 &process ($committer, $patch, $log);
 
 if ($rank) {
-  &display_ordered;
+  &display_ordered(\%patchers);
+} elsif ($ta) {
+  &display_ordered(\%committers);
 } elsif (%authors) {
   my %missing;
   foreach (sort keys %patchers) {
@@ -229,8 +233,9 @@ if ($rank) {
 }
 
 sub display_ordered {
+  my $what = shift;
   my @sorted;
-  while (my ($name, $count) = each %patchers) {
+  while (my ($name, $count) = each %$what) {
     push @{$sorted[$count]}, $name;
   }
 
@@ -255,6 +260,7 @@ sub process {
       $patchers{$map{$_} || $_}++;
     }
     # print "$patch: @authors\n";
+    ++$committers{$committer};
   } else {
     # print "$patch: $committer\n";
     # Not entirely fair as this means that the maint pumpking scores for
