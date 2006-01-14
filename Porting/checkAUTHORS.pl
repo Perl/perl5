@@ -85,6 +85,7 @@ my %map = reverse (
 		   "mgjv\100comdyn.com.au" => "mgjv\100tradingpost.com.au",
 		   "thomas.dorner\100start.de" => "tdorner\100amadeus.net",
 		   "ajohnson\100nvidia.com" => "ajohnson\100wischip.com",
+		   "phil\100perkpartners.com" => "phil\100finchcomputer.com",
 		   # Maybe we should special case this to get real names out?
 		   "perlbug\100perl.org" => "perlbug-followup\100perl.org",
 		  );
