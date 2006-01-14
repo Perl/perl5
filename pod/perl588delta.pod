@@ -122,7 +122,7 @@ DB upgraded to version 1.01
 
 =item *
 
-DB_File upgraded to version 1.814
+DB_File upgraded to version 1.814, which adds support for Berkeley DB 4.4.
 
 =item *
 
@@ -434,10 +434,10 @@ with every new typeglob. The increased use of lexical variables means that
 most are now unused. Perl can now be compiled with C<-DPERL_DONT_CREATE_GVSV>
 to avoid creating these empty scalars. This will significantly decrease the
 number of scalars allocated for all configurations, and the number of scalars
-that need to be copied for ithread creation. Whilst this option is not
-binary incompatible with existing perl installations, it does change a
-long-standing previous assumption about the internals, hence it is not enabled
-by default, as some third party code may rely on the old behaviour.
+that need to be copied for ithread creation. Whilst this option is binary
+compatible with existing perl installations, it does change a long-standing
+previous assumption about the internals, hence it is not enabled by default,
+as some third party code may rely on the old behaviour.
 
 We would recommend testing with this configuration on new deployments of
 perl, particularly for multithreaded servers, to see whether all third party
@@ -480,9 +480,13 @@ Building with Borland's compilers on Win32 should work more smoothly. In
 particular Steve Hay has worked to side step many warnings emitted by their
 compilers and at least one C compiler internal error.
 
-C<Configure> will now probe for the presence of C<futimes> and whether
-C<sprintf> correctly returns the length of the formatted string, which will
-both be used in perl 5.8.9.
+C<Configure> will now detect C<clearenv> and C<unsetenv>, thanks to a patch
+from Alan Burlison. It will also probe for C<futimes> and whether C<sprintf>
+correctly returns the length of the formatted string, which will both be used
+in perl 5.8.9.
+
+There are improved hints for next-3.0, vmesa, IX, Darwin, Solaris, Linux,
+DEC/OSF, HP-UX and MPE/iX
 
 =head1 Selected Bug Fixes
 
@@ -527,7 +531,7 @@ it proves stable.
 
 =item *
 
-Training spaces are now trimmed from C<$!> and C<$^E>.
+Trailing spaces are now trimmed from C<$!> and C<$^E>.
 
 =item *
 
@@ -655,6 +659,10 @@ it is impossible to produce any meaningful dump of their contents.
 =head1 Known Problems
 
 =head1 Platform Specific Problems
+
+The optimiser on HP-UX 11.23 (Itanium 2) is currently partly disabled (scaled 
+down to +O1) when using HP C-ANSI-C; the cause of problems at higher
+optimisation levels is still unclear.
 
 =head1 Reporting Bugs
 
