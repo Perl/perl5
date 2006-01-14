@@ -10870,10 +10870,12 @@ static int set_features
     int dflt;
     char* str;
     char val_str[10];
+#if defined(JPI$_CASE_LOOKUP_PERM) && !defined(__VAX)
     const unsigned long int jpicode1 = JPI$_CASE_LOOKUP_PERM;
     const unsigned long int jpicode2 = JPI$_CASE_LOOKUP_IMAGE;
     unsigned long case_perm;
     unsigned long case_image;
+#endif
 
     /* hacks to see if known bugs are still present for testing */
 
@@ -11053,7 +11055,7 @@ static int set_features
     }
 #endif
 
-#ifndef __VAX
+#if defined(JPI$_CASE_LOOKUP_PERM) && !defined(__VAX)
 
      /* Report true case tolerance */
     /*----------------------------*/
