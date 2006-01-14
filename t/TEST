@@ -367,7 +367,7 @@ EOT
 		my $valgrind = $ENV{VALGRIND} // 'valgrind';
 		$perl = "$valgrind --suppressions=perl.supp --leak-check=yes "
 			        . "--leak-resolution=high --show-reachable=yes "
-			        . "--num-callers=50 --logfile-fd=3 $perl";
+			        . "--num-callers=50 --log-fd=3 $perl";
 		$redir = "3>$valgrind_log";
 	    }
 	    my $run = "$perl" . _quote_args("$testswitch $switch $utf8")
