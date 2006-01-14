@@ -245,7 +245,7 @@ sub display_ordered {
 sub process {
   my ($committer, $patch, $log) = @_;
   return unless $committer;
-  my @authors = $log =~ /From:.+\s+([^\@ \t\n]+\@[^\@ \t\n]+)/gm;
+  my @authors = $log =~ /From:\s+.*?([^"\@ \t\n]+\@[^"\@ \t\n]+)/gm;
 
   if (@authors) {
     foreach (@authors) {
