@@ -52,7 +52,7 @@ switch statement), C<~~> (adds a Perl 6-like smart match operator), C<say>
 Those features are described below.
 
 Note that C<err> low-precedence defined-or operator used to be enabled by
-default, but as a weak keyword. It's now only recognized when explicitely
+default, but as a weak keyword. It's now only recognized when explicitly
 turned on.
 
 =head2 Switch and Smart Match operator
@@ -148,7 +148,7 @@ documentation, technical and otherwise.
 =head2 XS-assisted SWASHGET
 
 Some pure-perl code that perl was using to retrieve Unicode properties and
-transliteration mappings has been retrieved in XS.
+transliteration mappings has been reimplemented in XS.
 
 =head2 Constants subroutines
 
@@ -243,8 +243,8 @@ C<PerlIO::scalar> now works better with non-default C<$/> settings.
 
 =item *
 
-You can now use the C<x> operator to demultiply a C<qw//> list. This used
-to raise a syntax error.
+You can now use the C<x> operator to repeat a C<qw//> list. This used
+to raise a syntax error. For example: C<qw(foo bar) x 3>.
 
 =item *
 
@@ -316,7 +316,7 @@ XXX consting
 A new file, F<mathoms.c>, has been added. It contains functions that are
 no longer used in the perl core, but that remain available for binary or
 source compatibility reasons. However, those functions will not be
-compiled in if you add C<-DNO_MATHOM> in the compiler flags.
+compiled in if you add C<-DNO_MATHOMS> in the compiler flags.
 
 The C<AvFLAGS> macro has been removed.
 
