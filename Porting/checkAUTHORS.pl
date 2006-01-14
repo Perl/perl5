@@ -86,6 +86,18 @@ my %map = reverse (
 		   "thomas.dorner\100start.de" => "tdorner\100amadeus.net",
 		   "ajohnson\100nvidia.com" => "ajohnson\100wischip.com",
 		   "phil\100perkpartners.com" => "phil\100finchcomputer.com",
+		   "tom.horsley\100mail.ccur.com" => "tom.horsley\100ccur.com",
+		   "rootbeer\100teleport.com" => "rootbeer\100redcat.com",
+		   "cp\100onsitetech.com" => "publiustemp-p5p\100yahoo.com",
+		   "epeschko\100den-mdev1" => "esp5\100pge.com",
+		   "pimlott\100idiomtech.com" => "andrew\100pimlott.net",
+		   "fugazi\100zyx.net" => "larrysh\100cpan.org",
+		   "merijnb\100iloquent.nl" => "merijnb\100iloquent.com",
+		   "whatever\100davidnicol.com" => "davidnicol\100gmail.com",
+		   "rmgiroux\100acm.org" => "rmgiroux\100hotmail.com",
+		   "smcc\100mit.edu" => "smcc\100ocf.berkeley.edu",
+		   "steven\100accognoscere.org" => "schubiger\100cpan.org",
+		   "!" => "me-02\100ton.iguana.be",
 		   # Maybe we should special case this to get real names out?
 		   "perlbug\100perl.org" => "perlbug-followup\100perl.org",
 		  );
@@ -95,7 +107,7 @@ my %map = reverse (
 $map{"alan.burlison\100uk.sun.com"} = "alanbur";
 $map{"artur\100contiller.se"} = $map{"arthur\100contiller.se"} = "sky";
 $map{"autrijus\100egb.elixus.org"} = $map{"autrijus\100geb.elixus.org"}
-  = "autrijus\100autrijus.org";
+  = $map{"autrijus\100gmail.com"} = "autrijus\100autrijus.org";
 $map{"craig.berry\100psinetcs.com"} = $map{"craig.berry\100metamorgs.com"}
   = $map{"craig.berry\100signaltreesolutions.com"}
   = $map{"craigberry\100mac.com"} = "craigb";
@@ -140,7 +152,8 @@ $map{"kane\100cpan.org"} = "kane\100dwim.org";
 $map{"rs\100crystalflame.net"} = "p5-authors\100crystalflame.net";
 $map{"(srezic\100iconmobile.com)"} = "slaven\100rezic.de";
 $map{"perl\100dellah.anu.edu.au"} = "spoon\100cpan.org";
-
+$map{"rjk-perl-p5p\100tamias.net"} = "rjk\100linguist.dartmouth.edu";
+$map{"sts\100accognoscere.org"} = "steven\100accognoscere.org";
 $map{"hv\100crypt.org"} = "hv";
 $map{"gisle\100aas.no"} = "gisle";
 
@@ -168,6 +181,7 @@ if (@authors) {
     $_ = lc $_;
     $authors{$map{$_} || $_}++;
   }
+  $authors{'!'}++;
 }
 
 while (<>) {
