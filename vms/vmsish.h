@@ -54,9 +54,6 @@
 #include <processes.h> /* for vfork() */
 #include <unixio.h>
 #include <unixlib.h>
-#if __CRTL_VER >= 80200000 && !defined(__VAX)
-#include <dirent.h>
-#endif
 #include <file.h>  /* it's not <sys/file.h>, so don't use I_SYS_FILE */
 #if (defined(__DECC) && defined(__DECC_VER) && __DECC_VER > 20000000) || defined(__DECCXX)
 #  include <unistd.h> /* DECC has this; gcc doesn't */
@@ -130,9 +127,7 @@
 #define pathify_dirspec		Perl_pathify_dirspec
 #define pathify_dirspec_ts	Perl_pathify_dirspec_ts
 #define trim_unixpath		Perl_trim_unixpath
-#ifndef DONT_MASK_RTL_CALLS
 #define opendir			Perl_opendir
-#endif
 #define rmscopy			Perl_rmscopy
 #define my_mkdir		Perl_my_mkdir
 #define vms_do_aexec		Perl_vms_do_aexec
@@ -143,9 +138,7 @@
 #define my_utime		Perl_my_utime
 #define my_chdir		Perl_my_chdir
 #define do_aspawn		Perl_do_aspawn
-#ifndef DONT_MASK_RTL_CALLS
 #define seekdir			Perl_seekdir
-#endif
 #define my_gmtime		Perl_my_gmtime
 #define my_localtime		Perl_my_localtime
 #define my_time			Perl_my_time
@@ -181,9 +174,7 @@
 #define rmsexpand(a,b,c,d)	Perl_rmsexpand(aTHX_ a,b,c,d)
 #define rmsexpand_ts(a,b,c,d)	Perl_rmsexpand_ts(aTHX_ a,b,c,d)
 #define trim_unixpath(a,b,c)	Perl_trim_unixpath(aTHX_ a,b,c)
-#ifndef DONT_MASK_RTL_CALLS
 #define opendir(a)		Perl_opendir(aTHX_ a)
-#endif
 #define rmscopy(a,b,c)		Perl_rmscopy(aTHX_ a,b,c)
 #define my_mkdir(a,b)		Perl_my_mkdir(aTHX_ a,b)
 #define vms_do_aexec(a,b,c)	Perl_vms_do_aexec(aTHX_ a,b,c)
@@ -194,9 +185,7 @@
 #define my_utime(a,b)		Perl_my_utime(aTHX_ a,b)
 #define my_chdir(a)		Perl_my_chdir(aTHX_ a)
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)
-#ifndef DONT_MASK_RTL_CALLS
 #define seekdir(a,b)		Perl_seekdir(aTHX_ a,b)
-#endif
 #define my_gmtime(a)		Perl_my_gmtime(aTHX_ a)
 #define my_localtime(a)		Perl_my_localtime(aTHX_ a)
 #define my_time(a)		Perl_my_time(aTHX_ a)
@@ -207,16 +196,12 @@
 #define my_getpwnam(a)		Perl_my_getpwnam(aTHX_ a)
 #define my_getpwuid(a)		Perl_my_getpwuid(aTHX_ a)
 #define my_flush(a)		Perl_my_flush(aTHX_ a)
-#ifndef DONT_MASK_RTL_CALLS
 #define readdir(a)		Perl_readdir(aTHX_ a)
 #define readdir_r(a,b,c)	Perl_readdir_r(aTHX_ a,b,c)
 #endif
-#endif
 #define my_gconvert		Perl_my_gconvert
-#ifndef DONT_MASK_RTL_CALLS
 #define telldir			Perl_telldir
 #define closedir		Perl_closedir
-#endif
 #define vmsreaddirversions	Perl_vmsreaddirversions
 #define my_sigemptyset        Perl_my_sigemptyset
 #define my_sigfillset         Perl_my_sigfillset
@@ -593,21 +578,11 @@ struct utimbuf {
  * vmsreaddirversions(), and preprocessor stuff on which these depend:
  *    Written by Rich $alz, <rsalz@bbn.com> in August, 1990.
  *
- * Feb 2005 - POSIX filespecs need real opendir() structures.
- *            rename to remove conflicts.  J. Malmberg (HP OpenVMS)
  */
 
     /* Data structure returned by READDIR(). */
-struct my_dirent {
+struct dirent {
     char	d_name[256];		/* File name		*/
-#   if defined _XOPEN_SOURCE || !defined _POSIX_C_SOURCE
-#if !_USE_STD_STAT
-	/* 3 word array */
-	__ino_t d_ino[3];	    /*  file serial number (vms-style inode) */
-	unsigned short fill;
-#else	/* quadword */
-	__ino_t d_ino;
-#endif
     int		d_namlen;		/* Length of d_name */
     int		vms_verscount;		/* Number of versions	*/
     int		vms_versions[20];	/* Version numbers	*/
@@ -615,26 +590,18 @@ struct my_dirent {
 
     /* Handle returned by opendir(), used by the other routines.  You
      * are not supposed to care what's inside this structure. */
-typedef struct my_dirdesc {
-#if __CRTL_VER >= 80200000 && !defined(__VAX)
-    int				flags;
-    DIR				*vms_dirdesc;
-#endif
+typedef struct _dirdesc {
     long			context;
     int				vms_wantversions;
     unsigned long int           count;
     char			*pattern;
-    struct my_dirent		entry;
+    struct dirent		entry;
     struct dsc$descriptor_s	pat;
     void			*mutex;
-} MY_DIR;
+} DIR;
 
 
-#ifndef DONT_MASK_RTL_CALLS
-#define DIR MY_DIR
-#define dirent my_dirent
 #define rewinddir(dirp)		seekdir((dirp), 0)
-#endif
 
 /* used for our emulation of getpw* */
 struct passwd {
@@ -711,8 +678,6 @@ struct mystat
 #define st_fab_rat crtl_stat.st_fab_rat
 #define st_fab_fsz crtl_stat.st_fab_fsz
 #define st_fab_mrs crtl_stat_st_fab_mrs
-
-#endif /* defined(USE_LARGE_FILES) */
 
 #if defined(__DECC) || defined(__DECCXX)
 #  pragma __member_alignment __restore
@@ -807,7 +772,7 @@ char *	Perl_pathify_dirspec_ts (const char *, char *);
 char *	Perl_rmsexpand (const char *, char *, const char *, unsigned);
 char *	Perl_rmsexpand_ts (const char *, char *, const char *, unsigned);
 int	Perl_trim_unixpath (char *, const char*, int);
-MY_DIR  * Perl_opendir (const char *);
+DIR  * Perl_opendir (const char *);
 int	Perl_rmscopy (const char *, const char *, int);
 int	Perl_my_mkdir (const char *, Mode_t);
 bool	Perl_vms_do_aexec (SV *, SV **, SV **);
@@ -830,7 +795,7 @@ char *	Perl_pathify_dirspec_ts (pTHX_ const char *, char *);
 char *	Perl_rmsexpand (pTHX_ const char *, char *, const char *, unsigned);
 char *	Perl_rmsexpand_ts (pTHX_ const char *, char *, const char *, unsigned);
 int	Perl_trim_unixpath (pTHX_ char *, const char*, int);
-MY_DIR * Perl_opendir (pTHX_ const char *);
+DIR * Perl_opendir (pTHX_ const char *);
 int	Perl_rmscopy (pTHX_ const char *, const char *, int);
 int	Perl_my_mkdir (pTHX_ const char *, Mode_t);
 bool	Perl_vms_do_aexec (pTHX_ SV *, SV **, SV **);
@@ -855,12 +820,12 @@ void	Perl_csighandler_init (void);
 #endif
 int	Perl_my_utime (pTHX_ const char *, const struct utimbuf *);
 void	Perl_vms_image_init (int *, char ***);
-struct my_dirent *	Perl_readdir (pTHX_ MY_DIR *);
-int	Perl_readdir_r(pTHX_ MY_DIR *, struct my_dirent *, struct my_dirent **);
-long	Perl_telldir (MY_DIR *);
-void	Perl_seekdir (pTHX_ MY_DIR *, long);
-void	Perl_closedir (MY_DIR *);
-void	vmsreaddirversions (MY_DIR *, int);
+struct dirent *	Perl_readdir (pTHX_ DIR *);
+int	Perl_readdir_r(pTHX_ DIR *, struct dirent *, struct dirent **);
+long	Perl_telldir (DIR *);
+void	Perl_seekdir (pTHX_ DIR *, long);
+void	Perl_closedir (DIR *);
+void	vmsreaddirversions (DIR *, int);
 struct tm *	Perl_my_gmtime (pTHX_ const time_t *);
 struct tm *	Perl_my_localtime (pTHX_ const time_t *);
 time_t	Perl_my_time (pTHX_ time_t *);

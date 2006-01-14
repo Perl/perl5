@@ -5670,16 +5670,7 @@ $ WC "d_dbl_dig='define'"
 $ WC "d_dbminitproto='undef'"
 $ WC "d_difftime='define'"
 $ WC "d_dirfd='undef'"
-$ if (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
-$ then
-$! Sorry, CRTL does not have this, and in order to support
-$! POSIX filespecifications, the CRTL readdir() structures
-$! need to be used globally for now.
-$  echo "Building for OpenVMS 8.2 uses CRTL dirent.h, so no dirnamlen member"
-$   WC "d_dirnamlen='undef'"
-$ else
-$   WC "d_dirnamlen='define'"
-$ endif
+$ WC "d_dirnamlen='define'"
 $ WC "d_dlerror='undef'"
 $ WC "d_dlsymun='undef'"
 $ WC "d_dosuid='undef'"

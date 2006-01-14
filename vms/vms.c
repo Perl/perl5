@@ -7491,10 +7491,10 @@ Perl_trim_unixpath(pTHX_ char *fspec, const char *wildspec, int opts)
  *  Open a directory, return a handle for later use.
  */
 /*{{{ DIR *opendir(char*name) */
-MY_DIR *
+DIR *
 Perl_opendir(pTHX_ const char *name)
 {
-    MY_DIR *dd;
+    DIR *dd;
     char dir[NAM$C_MAXRSS+1];
     Stat_t sb;
 
@@ -7514,7 +7514,7 @@ Perl_opendir(pTHX_ const char *name)
       return NULL;
     }
     /* Get memory for the handle, and the pattern. */
-    Newx(dd,1,MY_DIR);
+    Newx(dd,1,DIR);
     Newx(dd->pattern,strlen(dir)+sizeof "*.*" + 1,char);
 
     /* Fill in the fields; mainly playing with the descriptor. */
@@ -7542,7 +7542,7 @@ Perl_opendir(pTHX_ const char *name)
  */
 /*{{{ void vmsreaddirversions(DIR *dd, int flag)*/
 void
-vmsreaddirversions(MY_DIR *dd, int flag)
+vmsreaddirversions(DIR *dd, int flag)
 {
     dd->vms_wantversions = flag;
 }
@@ -7553,7 +7553,7 @@ vmsreaddirversions(MY_DIR *dd, int flag)
  */
 /*{{{ void closedir(DIR *dd)*/
 void
-Perl_closedir(MY_DIR *dd)
+Perl_closedir(DIR *dd)
 {
     int sts;
 
@@ -7571,11 +7571,11 @@ Perl_closedir(MY_DIR *dd)
  *  Collect all the version numbers for the current file.
  */
 static void
-collectversions(pTHX_ MY_DIR *dd)
+collectversions(pTHX_ DIR *dd)
 {
     struct dsc$descriptor_s	pat;
     struct dsc$descriptor_s	res;
-    struct my_dirent *e;
+    struct dirent *e;
     char *p, *text, buff[sizeof dd->entry.d_name];
     int i;
     unsigned long context, tmpsts;
@@ -7624,8 +7624,8 @@ collectversions(pTHX_ MY_DIR *dd)
  *  Read the next entry from the directory.
  */
 /*{{{ struct dirent *readdir(DIR *dd)*/
-struct my_dirent *
-Perl_readdir(pTHX_ MY_DIR *dd)
+struct dirent *
+Perl_readdir(pTHX_ DIR *dd)
 {
     struct dsc$descriptor_s	res;
     char *p, buff[sizeof dd->entry.d_name];
@@ -7690,7 +7690,7 @@ Perl_readdir(pTHX_ MY_DIR *dd)
  */
 /*{{{ int readdir_r(DIR *dd, struct dirent *entry, struct dirent **result)*/
 int
-Perl_readdir_r(pTHX_ MY_DIR *dd, struct my_dirent *entry, struct my_dirent **result)
+Perl_readdir_r(pTHX_ DIR *dd, struct dirent *entry, struct dirent **result)
 {
     int retval;
 
@@ -7712,7 +7712,7 @@ Perl_readdir_r(pTHX_ MY_DIR *dd, struct my_dirent *entry, struct my_dirent **res
  */
 /*{{{ long telldir(DIR *dd)*/
 long
-Perl_telldir(MY_DIR *dd)
+Perl_telldir(DIR *dd)
 {
     return dd->count;
 }
@@ -7723,7 +7723,7 @@ Perl_telldir(MY_DIR *dd)
  */
 /*{{{ void seekdir(DIR *dd,long count)*/
 void
-Perl_seekdir(pTHX_ MY_DIR *dd, long count)
+Perl_seekdir(pTHX_ DIR *dd, long count)
 {
     int vms_wantversions;
 
