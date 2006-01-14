@@ -1,6 +1,6 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.83';
+$VERSION = '1.83_55';
 $VERSION = eval $VERSION;
 use strict;
 
@@ -81,9 +81,10 @@ sub shell {
     $Suppress_readline = ! -t STDIN unless defined $Suppress_readline;
     CPAN::HandleConfig->load unless $CPAN::Config_loaded++;
 
-    my $oprompt = shift || "cpan> ";
+    my $oprompt = shift || CPAN::Prompt->new;
     my $prompt = $oprompt;
     my $commandline = shift || "";
+    $CPAN::CurrentCommandId ||= 1;
 
     local($^W) = 1;
     unless ($Suppress_readline) {
@@ -190,9 +191,13 @@ ReadLine support %s
 	    my $command = shift @line;
 	    eval { CPAN::Shell->$command(@line) };
 	    warn $@ if $@;
+            if ($command =~ /^(make|test|install|force|notest)$/) {
+                CPAN::Shell->failed($CPAN::CurrentCommandId,1);
+            }
             soft_chdir_with_alternatives(\@cwd);
 	    $CPAN::Frontend->myprint("\n");
 	    $continuation = "";
+            $CPAN::CurrentCommandId++;
 	    $prompt = $oprompt;
 	}
     } continue {
@@ -319,6 +324,56 @@ sub as_string {
     "\nRecursive dependency detected:\n    " .
         join("\n => ", @{$self->{deps}}) .
             ".\nCannot continue.\n";
+}
+
+package CPAN::Prompt; use overload '""' => "as_string";
+our $prompt = "cpan> ";
+$CPAN::CurrentCommandId ||= 0;
+sub as_randomly_capitalized_string {
+    # pure fun variant
+    substr($prompt,$_,1)=rand()<0.5 ?
+        uc(substr($prompt,$_,1)) :
+            lc(substr($prompt,$_,1)) for 0..3;
+    $prompt;
+}
+sub new {
+    bless {}, shift;
+}
+sub as_string {
+    if ($CPAN::Config->{commandnumber_in_prompt}) {
+        sprintf "cpan[%d]> ", $CPAN::CurrentCommandId;
+    } else {
+        "cpan> ";
+    }
+}
+
+package CPAN::Distrostatus;
+use overload '""' => "as_string",
+    fallback => 1;
+sub new {
+    my($class,$arg) = @_;
+    bless {
+           TEXT => $arg,
+           FAILED => substr($arg,0,2) eq "NO",
+           COMMANDID => $CPAN::CurrentCommandId,
+          }, $class;
+}
+sub commandid { shift->{COMMANDID} }
+sub failed { shift->{FAILED} }
+sub text {
+    my($self,$set) = @_;
+    if (defined $set) {
+        $self->{TEXT} = $set;
+    }
+    $self->{TEXT};
+}
+sub as_string {
+    my($self) = @_;
+    if (0) { # called from rematein during install?
+        require Carp;
+        Carp::cluck("HERE");
+    }
+    $self->{TEXT};
 }
 
 package CPAN::Shell;
@@ -512,7 +567,7 @@ sub checklock {
     my $lockfile = File::Spec->catfile($CPAN::Config->{cpan_home},".lock");
     if (-f $lockfile && -M _ > 0) {
 	my $fh = FileHandle->new($lockfile) or
-            $CPAN::Frontend->mydie("Could not open $lockfile: $!");
+            $CPAN::Frontend->mydie("Could not open lockfile '$lockfile': $!");
 	my $otherpid  = <$fh>;
 	my $otherhost = <$fh>;
 	$fh->close;
@@ -526,7 +581,7 @@ sub checklock {
 	if (defined $otherhost && defined $thishost &&
 	    $otherhost ne '' && $thishost ne '' &&
 	    $otherhost ne $thishost) {
-            $CPAN::Frontend->mydie(sprintf("CPAN.pm panic: Lockfile $lockfile\n".
+            $CPAN::Frontend->mydie(sprintf("CPAN.pm panic: Lockfile '$lockfile'\n".
                                            "reports other host $otherhost and other process $otherpid.\n".
                                            "Cannot proceed.\n"));
 	}
@@ -546,20 +601,20 @@ You may want to kill it and delete the lockfile, maybe. On UNIX try:
 		my($ans) =
 		    ExtUtils::MakeMaker::prompt
 			(qq{Other job not responding. Shall I overwrite }.
-			 qq{the lockfile? (Y/N)},"y");
+			 qq{the lockfile '$lockfile'? (Y/n)},"y");
 		$CPAN::Frontend->myexit("Ok, bye\n")
 		    unless $ans =~ /^y/i;
 	    } else {
 		Carp::croak(
-			    qq{Lockfile $lockfile not writeable by you. }.
+			    qq{Lockfile '$lockfile' not writeable by you. }.
 			    qq{Cannot proceed.\n}.
 			    qq{    On UNIX try:\n}.
-			    qq{    rm $lockfile\n}.
+			    qq{    rm '$lockfile'\n}.
 			    qq{  and then rerun us.\n}
 			   );
 	    }
 	} else {
-            $CPAN::Frontend->mydie(sprintf("CPAN.pm panic: Lockfile $lockfile\n".
+            $CPAN::Frontend->mydie(sprintf("CPAN.pm panic: Lockfile '$lockfile'\n".
                                            "reports other process with ID ".
                                            "$otherpid. Cannot proceed.\n"));
         }
@@ -1099,8 +1154,9 @@ sub h {
     if (defined $about) {
 	$CPAN::Frontend->myprint("Detailed help not yet implemented\n");
     } else {
-	$CPAN::Frontend->myprint(q{
-Display Information
+        my $filler = " " x (80 - 28 - length($CPAN::VERSION));
+	$CPAN::Frontend->myprint(qq{
+Display Information $filler (ver $CPAN::VERSION)
  command  argument          description
  a,b,d,m  WORD or /REGEXP/  about authors, bundles, distributions, modules
  i        WORD or /REGEXP/  about any of the above
@@ -1140,7 +1196,7 @@ sub a {
 }
 
 sub handle_ls {
-    my($self,$pragma,$s) = @_;
+    my($self,$pragmas,$s) = @_;
     # ls is really very different, but we had it once as an ordinary
     # command in the Shell (upto rev. 321) and we could not handle
     # force well then
@@ -1199,7 +1255,18 @@ sub handle_ls {
             }
             $CPAN::Frontend->myprint($ad);
         }
+        for my $pragma (@$pragmas) {
+            if ($author->can($pragma)) {
+                $author->$pragma();
+            }
+        }
         $author->ls($pathglob,$silent); # silent if more than one author
+        for my $pragma (@$pragmas) {
+            my $meth = "un$pragma";
+            if ($author->can($meth)) {
+                $author->$meth();
+            }
+        }
     }
 }
 
@@ -1274,6 +1341,7 @@ sub i {
 # should have been called set and 'o debug' maybe 'set debug'
 sub o {
     my($self,$o_type,@o_what) = @_;
+    $DB::single = 1;
     $o_type ||= "";
     CPAN->debug("o_type[$o_type] o_what[".join(" | ",@o_what)."]\n");
     if ($o_type eq 'conf') {
@@ -1605,25 +1673,32 @@ sub u {
 # XXX intentionally undocumented because not considered enough
 #-> sub CPAN::Shell::failed ;
 sub failed {
-    my($self) = @_;
+    my($self,$only_id,$silent) = @_;
     my $print = "";
   DIST: for my $d ($CPAN::META->all_objects("CPAN::Distribution")) {
         my $failed = "";
-        for my $nosayer (qw(make make_test make_install)) {
+        for my $nosayer (qw(signature_verify make make_test install)) {
             next unless exists $d->{$nosayer};
-            next unless substr($d->{$nosayer},0,2) eq "NO";
+            next unless $d->{$nosayer}->failed;
             $failed = $nosayer;
             last;
         }
         next DIST unless $failed;
+        next DIST if $only_id && $only_id != $d->{$failed}->commandid;
         my $id = $d->id;
         $id =~ s|^./../||;
-        $print .= sprintf " %-45s: %s %s\n", $id, $failed, $d->{$failed};
+        $print .= sprintf(
+                          "  %-45s: %s %s\n",
+                          $id,
+                          $failed,
+                          $d->{$failed}->text,
+                          );
     }
+    my $scope = $only_id ? "command" : "session";
     if ($print) {
-        $CPAN::Frontend->myprint("Failed installations in this session:\n$print");
-    } else {
-        $CPAN::Frontend->myprint("No installations failed in this session\n");
+        $CPAN::Frontend->myprint("Failed installations in this $scope:\n$print");
+    } elsif (!$only_id || !$silent) {
+        $CPAN::Frontend->myprint("No installations failed in this $scope\n");
     }
 }
 
@@ -1945,6 +2020,11 @@ sub mydie {
     die "\n";
 }
 
+sub mysleep {
+    my($self, $sleep) = @_;
+    sleep $sleep;
+}
+
 sub setup_output {
     return if -t STDOUT;
     my $odef = select STDERR;
@@ -2197,31 +2277,38 @@ use strict;
 
 #-> sub CPAN::FTP::ftp_get ;
 sub ftp_get {
-  my($class,$host,$dir,$file,$target) = @_;
-  $class->debug(
-		qq[Going to fetch file [$file] from dir [$dir]
+    my($class,$host,$dir,$file,$target) = @_;
+    $class->debug(
+                  qq[Going to fetch file [$file] from dir [$dir]
 	on host [$host] as local [$target]\n]
-		      ) if $CPAN::DEBUG;
-  my $ftp = Net::FTP->new($host);
-  return 0 unless defined $ftp;
-  $ftp->debug(1) if $CPAN::DEBUG{'FTP'} & $CPAN::DEBUG;
-  $class->debug(qq[Going to login("anonymous","$Config::Config{cf_email}")]);
-  unless ( $ftp->login("anonymous",$Config::Config{'cf_email'}) ){
-    warn "Couldn't login on $host";
-    return;
-  }
-  unless ( $ftp->cwd($dir) ){
-    warn "Couldn't cwd $dir";
-    return;
-  }
-  $ftp->binary;
-  $class->debug(qq[Going to ->get("$file","$target")\n]) if $CPAN::DEBUG;
-  unless ( $ftp->get($file,$target) ){
-    warn "Couldn't fetch $file from $host\n";
-    return;
-  }
-  $ftp->quit; # it's ok if this fails
-  return 1;
+                 ) if $CPAN::DEBUG;
+    my $ftp = Net::FTP->new($host);
+    unless ($ftp) {
+        $CPAN::Frontend->mywarn("  Could not connect to host '$host' with Net::FTP\n");
+        return;
+    }
+    return 0 unless defined $ftp;
+    $ftp->debug(1) if $CPAN::DEBUG{'FTP'} & $CPAN::DEBUG;
+    $class->debug(qq[Going to login("anonymous","$Config::Config{cf_email}")]);
+    unless ( $ftp->login("anonymous",$Config::Config{'cf_email'}) ){
+        my $msg = $ftp->message;
+        $CPAN::Frontend->mywarn("  Couldn't login on $host: $msg");
+        return;
+    }
+    unless ( $ftp->cwd($dir) ){
+        my $msg = $ftp->message;
+        $CPAN::Frontend->mywarn("  Couldn't cwd $dir: $msg");
+        return;
+    }
+    $ftp->binary;
+    $class->debug(qq[Going to ->get("$file","$target")\n]) if $CPAN::DEBUG;
+    unless ( $ftp->get($file,$target) ){
+        my $msg = $ftp->message;
+        $CPAN::Frontend->mywarn("  Couldn't fetch $file from $host: $msg");
+        return;
+    }
+    $ftp->quit; # it's ok if this fails
+    return 1;
 }
 
 # If more accuracy is wanted/needed, Chris Leach sent me this patch...
@@ -3228,21 +3315,40 @@ happen.\a
                       $last_updated);
         $DATE_OF_02 = $last_updated;
 
+        my $age = time;
         if ($CPAN::META->has_inst('HTTP::Date')) {
             require HTTP::Date;
-            my($age) = (time - HTTP::Date::str2time($last_updated))/3600/24;
-            if ($age > 30) {
-
-                $CPAN::Frontend
-                    ->mywarn(sprintf
-                             qq{Warning: This index file is %d days old.
-  Please check the host you chose as your CPAN mirror for staleness.
-  I'll continue but problems seem likely to happen.\a\n},
-                             $age);
-
-            }
+            $age -= HTTP::Date::str2time($last_updated);
         } else {
             $CPAN::Frontend->myprint("  HTTP::Date not available\n");
+            require Time::Local;
+            my(@d) = $last_updated =~ / (\d+) (\w+) (\d+) (\d+):(\d+):(\d+) /;
+            $d[1] = index("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec", $d[1])/4;
+            $age -= $d[1]>=0 ? Time::Local::timegm(@d[5,4,3,0,1,2]) : 0;
+        }
+        $age /= 3600*24;
+        if ($age > 30) {
+
+            $CPAN::Frontend
+                ->mywarn(sprintf
+                         qq{Warning: This index file is %d days old.
+  Please check the host you chose as your CPAN mirror for staleness.
+  I'll continue but problems seem likely to happen.\a\n},
+                         $age);
+
+        } elsif ($age < -1) {
+
+            $CPAN::Frontend
+                ->mywarn(sprintf
+                         qq{Warning: Your system date is %d days behind this index file!
+  System time:          %s
+  Timestamp index file: %s
+  Please fix your system time, problems with the make command expected.\n},
+                         -$age,
+                         scalar gmtime,
+                         $DATE_OF_02,
+                        );
+
         }
     }
 
@@ -3597,6 +3703,18 @@ sub dump {
 package CPAN::Author;
 use strict;
 
+#-> sub CPAN::Author::force
+sub force {
+    my $self = shift;
+    $self->{force}++;
+}
+
+#-> sub CPAN::Author::force
+sub unforce {
+    my $self = shift;
+    delete $self->{force};
+}
+
 #-> sub CPAN::Author::id
 sub id {
     my $self = shift;
@@ -3685,9 +3803,9 @@ sub dir_listing {
 
     local($") = "/";
     # connect "force" argument with "index_expire".
-    my $force = 0;
+    my $force = $self->{force};
     if (my @stat = stat $lc_want) {
-        $force = $stat[9] + $CPAN::Config->{index_expire}*86400 <= time;
+        $force ||= $stat[9] + $CPAN::Config->{index_expire}*86400 <= time;
     }
     my $lc_file;
     if ($may_ftp) {
@@ -4073,17 +4191,22 @@ sub get {
                                         );
 
                 my $wrap =
-                    sprintf(qq{I\'d recommend removing %s. Its signature
+                    sprintf(qq{I'd recommend removing %s. Its signature
 is invalid. Maybe you have configured your 'urllist' with
 a bad URL. Please check this array with 'o conf urllist', and
 retry. For more information, try opening a subshell with
   look %s
 and there run
-  cpansign -v},
+  cpansign -v
+},
                             $self->{localfile},
                             $self->pretty_id,
                            );
-                $CPAN::Frontend->mydie(Text::Wrap::wrap("","",$wrap));
+                $self->{signature_verify} = CPAN::Distrostatus->new("NO");
+                $CPAN::Frontend->mywarn(Text::Wrap::wrap("","",$wrap));
+                $CPAN::Frontend->mysleep(5) if $CPAN::Frontend->can("mysleep");
+            } else {
+                $self->{signature_verify} = CPAN::Distrostatus->new("YES");
             }
         } else {
             $CPAN::Frontend->myprint(qq{Package came without SIGNATURE\n\n});
@@ -4253,9 +4376,13 @@ Could not determine which directory to use for looking at $dist.
     my $pwd  = CPAN::anycwd();
     $self->safe_chdir($dir);
     $CPAN::Frontend->myprint(qq{Working directory is $dir\n});
-    unless (system($CPAN::Config->{'shell'}) == 0) {
-        my $code = $? >> 8;
-        $CPAN::Frontend->mywarn("Subprocess shell exit code $code\n");
+    {
+	local $ENV{CPAN_SHELL_LEVEL} = $ENV{CPAN_SHELL_LEVEL}||0;
+        $ENV{CPAN_SHELL_LEVEL} += 1;
+	unless (system($CPAN::Config->{'shell'}) == 0) {
+	    my $code = $? >> 8;
+	    $CPAN::Frontend->mywarn("Subprocess shell exit code $code\n");
+	}
     }
     $self->safe_chdir($pwd);
 }
@@ -4535,7 +4662,7 @@ sub force {
  )) {
     delete $self->{$att};
   }
-  if ($method && $method eq "install") {
+  if ($method && $method =~ /make|test|install/) {
     $self->{"force_update"}++; # name should probably have been force_install
   }
 }
@@ -4627,7 +4754,12 @@ or
         "Is neither a tar nor a zip archive.";
 
         !$self->{unwrapped} || $self->{unwrapped} eq "NO" and push @e,
-        "had problems unarchiving. Please build manually";
+        "Had problems unarchiving. Please build manually";
+
+        unless ($self->{force_update}) {
+            exists $self->{signature_verify} and $self->{signature_verify}->failed
+                and push @e, "Did not pass the signature test.";
+        }
 
         exists $self->{writemakefile} &&
             $self->{writemakefile} =~ m/ ^ NO\s* ( .* ) /sx and push @e,
@@ -4728,16 +4860,20 @@ or
     if ($self->{modulebuild}) {
         $system = "./Build $CPAN::Config->{mbuild_arg}";
     } else {
-        $system = join " ", $CPAN::Config->{'make'}, $CPAN::Config->{make_arg};
+        $system = join " ", _make_command(), $CPAN::Config->{make_arg};
     }
     if (system($system) == 0) {
 	 $CPAN::Frontend->myprint("  $system -- OK\n");
-	 $self->{'make'} = "YES";
+	 $self->{'make'} = CPAN::Distrostatus->new("YES");
     } else {
 	 $self->{writemakefile} ||= "YES";
-	 $self->{'make'} = "NO";
+	 $self->{'make'} = CPAN::Distrostatus->new("NO");
 	 $CPAN::Frontend->myprint("  $system -- NOT OK\n");
     }
+}
+
+sub _make_command {
+    return $CPAN::Config->{'make'} || $Config::Config{make} || 'make';
 }
 
 sub follow_prereqs {
@@ -4939,6 +5075,10 @@ sub prereq_pm {
                 }
                 last;
             }
+        } elsif (-f "Build") {
+            if ($CPAN::META->has_inst("Module::Build")) {
+                $req = Module::Build->current->requires();
+            }
         }
     }
     $self->{prereq_pm_detected}++;
@@ -4970,7 +5110,7 @@ sub test {
 	"Make had some problems, maybe interrupted? Won't test";
 
 	exists $self->{'make'} and
-	    $self->{'make'} eq 'NO' and
+	    $self->{'make'}->failed and
 		push @e, "Can't test without successful make";
 
 	exists $self->{build_dir} or push @e, "Has no own directory";
@@ -5002,14 +5142,14 @@ sub test {
     if ($self->{modulebuild}) {
         $system = "./Build test";
     } else {
-        $system = join " ", $CPAN::Config->{'make'}, "test";
+        $system = join " ", _make_command(), "test";
     }
     if (system($system) == 0) {
 	 $CPAN::Frontend->myprint("  $system -- OK\n");
 	 $CPAN::META->is_tested($self->{'build_dir'});
-	 $self->{make_test} = "YES";
+	 $self->{make_test} = CPAN::Distrostatus->new("YES");
     } else {
-	 $self->{make_test} = "NO";
+	 $self->{make_test} = CPAN::Distrostatus->new("NO");
          $self->{badtestcnt}++;
 	 $CPAN::Frontend->myprint("  $system -- NOT OK\n");
     }
@@ -5043,7 +5183,7 @@ sub clean {
     if ($self->{modulebuild}) {
         $system = "./Build clean";
     } else {
-        $system  = join " ", $CPAN::Config->{'make'}, "clean";
+        $system  = join " ", _make_command(), "clean";
     }
     if (system($system) == 0) {
       $CPAN::Frontend->myprint("  $system -- OK\n");
@@ -5096,17 +5236,21 @@ sub install {
 	"Make had some problems, maybe interrupted? Won't install";
 
 	exists $self->{'make'} and
-	    $self->{'make'} eq 'NO' and
+	    $self->{'make'}->failed and
 		push @e, "make had returned bad status, install seems impossible";
 
-	push @e, "make test had returned bad status, ".
-	    "won't install without force"
-	    if exists $self->{'make_test'} and
-	    $self->{'make_test'} eq 'NO' and
-	    ! $self->{'force_update'};
-
+        if (exists $self->{make_test} and
+	    $self->{make_test}->failed){
+	    if ($self->{force_update}) {
+                $self->{make_test}->text("FAILED but failure ignored because ".
+                                         "'force' in effect");
+            } else {
+                push @e, "make test had returned bad status, ".
+                    "won't install without force"
+            }
+        }
 	exists $self->{'install'} and push @e,
-	$self->{'install'} eq "YES" ?
+	$self->{'install'}->text eq "YES" ?
 	    "Already done" : "Already tried without success";
 
         exists $self->{later} and length($self->{later}) and
@@ -5135,7 +5279,7 @@ sub install {
                       );
     } else {
         my($make_install_make_command) = $CPAN::Config->{'make_install_make_command'} ||
-            $CPAN::Config->{'make'};
+            _make_command();
         $system = join(" ",
                        $make_install_make_command,
                        "install",
@@ -5154,9 +5298,9 @@ sub install {
     if ($?==0) {
 	 $CPAN::Frontend->myprint("  $system -- OK\n");
 	 $CPAN::META->is_installed($self->{'build_dir'});
-	 return $self->{'install'} = "YES";
+	 return $self->{'install'} = CPAN::Distrostatus->new("YES");
     } else {
-	 $self->{'install'} = "NO";
+	 $self->{'install'} = CPAN::Distrostatus->new("NO");
 	 $CPAN::Frontend->myprint("  $system -- NOT OK\n");
 	 if (
              $makeout =~ /permission/s
@@ -5695,7 +5839,11 @@ sub userid {
     return $ro->{userid} || $ro->{CPAN_USERID};
 }
 # sub CPAN::Module::description
-sub description { shift->ro->{description} }
+sub description {
+    my $self = shift;
+    my $ro = $self->ro or return "";
+    $ro->{description}
+}
 
 sub undelay {
     my $self = shift;
@@ -5825,7 +5973,7 @@ sub as_string {
 		     $stats{$ro->{stats}},
 		     $statl{$ro->{statl}},
 		     $stati{$ro->{stati}}
-		    ) if $ro->{statd};
+		    ) if $ro && $ro->{statd};
     my $local_file = $self->inst_file;
     unless ($self->{MANPAGE}) {
         if ($local_file) {
@@ -6336,6 +6484,12 @@ globbing as in the following examples:
 
 The last example is very slow and outputs extra progress indicators
 that break the alignment of the result.
+
+=item failed
+
+The C<failed> command reports all distributions that failed on one of
+C<make>, C<test> or C<install> for some reason in the currently
+running shell session.
 
 =item Signals
 
@@ -7100,6 +7254,12 @@ keyservers, like pgp.mit.edu, and their port 11731 (the HKP protocol).
 Most functions in package CPAN are exported per default. The reason
 for this is that the primary use is intended for the cpan shell or for
 one-liners.
+
+=head1 ENVIRONMENT
+
+When the CPAN shell enters a subshell via the look command, it sets
+the environment CPAN_SHELL_LEVEL to 1 or increments it if it is
+already set.
 
 =head1 POPULATE AN INSTALLATION WITH LOTS OF MODULES
 

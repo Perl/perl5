@@ -1,28 +1,8 @@
-package CPAN::Config;
-use strict;
-use vars qw($AUTOLOAD);
-
-# formerly CPAN::HandleConfig was known as CPAN::Config
-sub AUTOLOAD {
-  my($l) = $AUTOLOAD;
-  $CPAN::Frontend->mywarn("Dispatching deprecated method '$l' to CPAN::HandleConfig");
-  $l =~ s/.*:://;
-  CPAN::HandleConfig->$l(@_);
-}
-
-# note: J. Nick Koston wrote me that they are using
-# CPAN::Config->commit although undocumented. I suggested
-# CPAN::Shell->o("conf","commit") even when ugly it is at least
-# documented
-
-# that's why I added the CPAN::Config class with autoload and
-# deprecated warning
-
 package CPAN::HandleConfig;
 use strict;
 use vars qw(%can %keys $dot_cpan $VERSION);
 
-$VERSION = sprintf "%.2f", substr(q$Rev: 337 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 423 $,4)/100;
 
 %can = (
   'commit' => "Commit changes to disk",
@@ -32,7 +12,7 @@ $VERSION = sprintf "%.2f", substr(q$Rev: 337 $,4)/100;
 
 %keys = map { $_ => undef } qw(
     build_cache build_dir bzip2
-    cache_metadata cpan_home curl
+    cache_metadata commandnumber_in_prompt cpan_home curl
     dontload_hash
     ftp ftp_proxy
     getcwd gpg gzip
@@ -57,8 +37,9 @@ sub edit {
     CPAN->debug("self[$self]args[".join(" | ",@args)."]");
     my($o,$str,$func,$args,$key_exists);
     $o = shift @args;
+    $DB::single = 1;
     if($can{$o}) {
-	$self->$o(@args);
+	$self->$o(args => \@args);
 	return 1;
     } else {
         CPAN->debug("o[$o]") if $CPAN::DEBUG;
@@ -109,12 +90,15 @@ sub prettyprint {
   my($self,$k) = @_;
   my $v = $CPAN::Config->{$k};
   if (ref $v) {
-    my(@report) = ref $v eq "ARRAY" ?
-        @$v :
-            map { sprintf("   %-18s => [%s]\n",
-                          map { "[$_]" } $_,
-                          defined $v->{$_} ? $v->{$_} : "UNDEFINED"
-                         )} keys %$v;
+    my(@report);
+    if (ref $v eq "ARRAY") {
+      @report = map {"\t[$_]\n"} @$v;
+    } else {
+      @report = map { sprintf("\t%-18s => %s\n",
+                              map { "[$_]" } $_,
+                              defined $v->{$_} ? $v->{$_} : "UNDEFINED"
+                             )} keys %$v;
+    }
     $CPAN::Frontend->myprint(
                              join(
                                   "",
@@ -122,7 +106,7 @@ sub prettyprint {
                                           "    %-18s\n",
                                           $k
                                          ),
-                                  map {"\t[$_]\n"} @report
+                                  @report
                                  )
                             );
   } elsif (defined $v) {
@@ -133,7 +117,15 @@ sub prettyprint {
 }
 
 sub commit {
-    my($self,$configpm) = @_;
+    my($self,@args) = @_;
+    my $configpm;
+    if (@args) {
+      if ($args[0] eq "args") {
+        # we have not signed that contract
+      } else {
+        $configpm = $args[0];
+      }
+    }
     unless (defined $configpm){
 	$configpm ||= $INC{"CPAN/MyConfig.pm"};
 	$configpm ||= $INC{"CPAN/Config.pm"};
@@ -180,7 +172,7 @@ EOF
     #$mode = 0444 | ( $mode & 0111 ? 0111 : 0 );
     #chmod $mode, $configpm;
 ###why was that so?    $self->defaults;
-    $CPAN::Frontend->myprint("commit: wrote $configpm\n");
+    $CPAN::Frontend->myprint("commit: wrote '$configpm'\n");
     1;
 }
 
@@ -193,13 +185,13 @@ sub defaults {
 }
 
 sub init {
-    my($self) = @_;
+    my($self,@args) = @_;
     undef $CPAN::Config->{'inhibit_startup_message'}; # lazy trick to
                                                       # have the least
                                                       # important
                                                       # variable
                                                       # undefined
-    $self->load;
+    $self->load(@args);
     1;
 }
 
@@ -239,12 +231,12 @@ sub load {
 
     my(@miss);
     use Carp;
-    eval {require CPAN::Config;};       # We eval because of some
-                                        # MakeMaker problems
+    unless ($INC{"CPAN/MyConfig.pm"}) { # this guy has settled his needs already
+      eval {require CPAN::Config;}; # not everybody has one
+    }
     unless ($dot_cpan++){
       unshift @INC, File::Spec->catdir($ENV{HOME},".cpan");
-      eval {require CPAN::MyConfig;};   # where you can override
-                                        # system wide settings
+      eval {require CPAN::MyConfig;}; # override system wide settings
       shift @INC;
     }
     return unless @miss = $self->missing_config_data;
@@ -378,6 +370,29 @@ sub cpl {
             keys %$CPAN::Config,
                 keys %keys;
     return grep /^\Q$word\E/, @o_conf;
+}
+
+
+package ####::###### #hide from indexer
+    CPAN::Config;
+# note: J. Nick Koston wrote me that they are using
+# CPAN::Config->commit although undocumented. I suggested
+# CPAN::Shell->o("conf","commit") even when ugly it is at least
+# documented
+
+# that's why I added the CPAN::Config class with autoload and
+# deprecated warning
+
+use strict;
+use vars qw($AUTOLOAD $VERSION);
+$VERSION = sprintf "%.2f", substr(q$Rev: 423 $,4)/100;
+
+# formerly CPAN::HandleConfig was known as CPAN::Config
+sub AUTOLOAD {
+  my($l) = $AUTOLOAD;
+  $CPAN::Frontend->mywarn("Dispatching deprecated method '$l' to CPAN::HandleConfig");
+  $l =~ s/.*:://;
+  CPAN::HandleConfig->$l(@_);
 }
 
 1;

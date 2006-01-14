@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: cpan,v 1.5 2005/12/24 00:59:08 comdog Exp $
+# $Id: cpan,v 1.7 2006/01/11 06:22:32 comdog Exp $
 use strict;
 
 =head1 NAME
@@ -158,7 +158,7 @@ brian d foy, C<< <bdfoy@cpan.org> >>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2001-2005, brian d foy, All Rights Reserved.
+Copyright (c) 2001-2006, brian d foy, All Rights Reserved.
 
 You may redistribute this under the same terms as Perl itself.
 
@@ -168,7 +168,7 @@ use CPAN ();
 use Getopt::Std;
 
 my $VERSION =
-	sprintf "%d.%02d", q$Revision: 296 $ =~ m/ (\d+) \. (\d+) /xg;
+	sprintf "%d.%d", q$Revision: 403 $ =~ m/ (\d+) \. (\d+) /xg;
 
 if( 0 == @ARGV ) { CPAN::shell(); exit 0 }
 
@@ -230,6 +230,9 @@ Getopt::Std::getopts(
 
 my $option_count = grep { $options{$_} } @option_order;
 $option_count -= $options{'f'}; # don't count force
+
+# if there are no options, set -i (this line fixes RT ticket 16915)
+$options{i}++ unless $option_count;
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
 # try each of the possible switches until we find one to handle
