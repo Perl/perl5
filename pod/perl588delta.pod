@@ -236,69 +236,254 @@ internal cleanup
 
 Data::Dumper upgraded to version 2.121_08
 
+=over
+
+=item *
+
+problem where Data::Dumper would sometimes update the iterator state
+of hashes has been fixed
+
+=item *
+
+numeric labels now work
+
+=item *
+
+internal cleanup
+
+=back
+
 =item *
 
 DB upgraded to version 1.01
 
+=over
+
 =item *
 
-DB_File upgraded to version 1.814, which adds support for Berkeley DB 4.4.
+problem where regex state would sometimes get clobbered when running
+under the debugger has been fixed
+
+=back
+
+=item *
+
+DB_File upgraded to version 1.814
+
+=over
+
+=item * 
+
+adds support for Berkeley DB 4.4.
+
+=back
 
 =item *
 
 Devel::DProf upgraded to version 20050603.00
 
+=over
+
+=item *
+
+internal cleanup
+
+=back
+
 =item *
 
 Devel::Peek upgraded to version 1.03
+
+=over
+
+=item *
+
+internal cleanup
+
+=back
 
 =item *
 
 Devel::PPPort upgraded to version 3.06_01
 
+=over
+
+=item *
+
+C<--compat-version> argument checking has been improved
+
+=item *
+
+files passed on the command line are filtered by default
+
+=item *
+
+C<--nofilter> option to override the filtering has been added
+
+=item *
+
+enhanced documentation
+
+=back
+
 =item *
 
 diagnostics upgraded to version 1.15
+
+=over
+
+=item *
+
+documentation typo fix
+
+=back
 
 =item *
 
 Digest upgraded to version 1.14
 
+=over
+
 =item *
 
-Digest::file upgraded to version 1.00
+constructor now knows which module implement SHA-224
+
+=item *
+
+documentation tweaks and typo fixes
+
+=back
 
 =item *
 
 Digest::MD5 upgraded to version 2.36
 
+=over
+
+=item *
+
+XSLoader is now used for faster loading
+
+=item *
+
+enhanced documentation including MD5 weaknesses discovered lately
+
+=back
+
 =item *
 
 Dumpvalue upgraded to version 1.12
 
+=over
+
 =item *
 
-DynaLoader now implements C<dl_unload_file> on Win32
+documenation fix
+
+=back
+
+=item *
+
+DynaLoader upgraded but unfortunately we're not able to increment its version number :-(
+
+=over
+
+=item *
+
+implements C<dl_unload_file> on Win32
+
+=item *
+
+internal cleanup
+
+=item *
+
+XSLoader 0.06 incorporated; small optimisation for calling
+bootstrap_inherit() and documentation enhancements.
+
+=back
 
 =item *
 
 Encode upgraded to version 2.12
 
+=over
+
+=item *
+
+coderef now acceptable for CHECK!
+
+=item *
+
+3 new characters added to the ISO-8859-7 encoding
+
+=item *
+
+new encodings C<MIME-Header-ISO_2022_JP> added
+
+=item *
+
+problem with partial character and C<< encoding(utf-8-strict) >> fixed.
+
+=item *
+
+documentation enhancements and typo fixes
+
+=back
+
 =item *
 
 English upgraded to version 1.02
+
+=over
+
+=item *
+
+the C<< $COMPILING >> variable has been added
+
+=back
+
+=item *
+
+Errno upgraded to version XXX
+
+=over
+
+=item *
+
+Cygwin fix
+
+=back
 
 =item *
 
 ExtUtils::Constant upgraded to version 0.17
 
+=over
+
 =item *
 
-ExtUtils::MakeMaker upgraded to version 6.30
+improved compatibility with older versions of perl
+
+=back
+
+=item *
+
+ExtUtils::MakeMaker upgraded to version 6.30 (was 6.17)
+
+=over
+
+=item *
+
+Too much to list here;  see L<http://search.cpan.org/src/MSCHWERN/ExtUtils-MakeMaker-6.30/Changes>
+
+=back
 
 =item *
 
 File::Basename upgraded to version 2.74
+
+
 
 =item *
 
@@ -330,8 +515,16 @@ Filter::Simple upgraded to version 0.82
 
 =item *
 
-FindBin upgraded to version 1.47. C<FindBin> now works better with
-directories where access rights are more restrictive than usual.
+FindBin upgraded to version 1.47
+
+=over
+
+=item *
+
+now works better with directories where access rights are more
+restrictive than usual.
+
+=back
 
 =item *
 
@@ -415,8 +608,16 @@ Pod::Functions upgraded to version 1.03
 
 =item *
 
-Pod::Html upgraded to version 1.0504. HTML output will now correctly link
+Pod::Html upgraded to version 1.0504
+
+=over
+
+=item *
+
+HTML output will now correctly link
 to C<=item>s on the same page, and should be valid XHTML.
+
+=back
 
 =item *
 
@@ -448,9 +649,17 @@ Socket upgraded to version 1.78
 
 =item *
 
-Storable upgraded to version 2.15. This includes C<STORABLE_attach> hook
-functionality added by Adam Kennedy, and more memory frugal storing under
-ithreads, by utilising the ithreads cloning tracking code.
+Storable upgraded to version 2.15
+
+=over
+
+=item *
+
+This includes C<STORABLE_attach> hook functionality added by
+Adam Kennedy, and more memory frugal storing under ithreads, by
+utilising the ithreads cloning tracking code.
+
+=back
 
 =item *
 
@@ -460,7 +669,7 @@ Switch upgraded to version 2.10_01
 
 Sys::Syslog upgraded to version 0.13
 
-=over 4
+=over
 
 =item *
 
@@ -523,48 +732,182 @@ threads upgraded to version 1.07
 
 =item *
 
-threads::shared upgraded to version 0.94, which is solely documentation
-changes. An improved implementation of C<threads::shared> is available on
+threads::shared upgraded to version 0.94
+
+=over
+
+=item *
+
+documentation changes only
+
+=item *
+
+Note: An improved implementation of C<threads::shared> is available on
 CPAN - this will be merged into 5.8.9 if it proves stable.
+
+=back
 
 =item *
 
 Tie::Hash upgraded to version 1.02
 
+=over
+
 =item *
 
-Time::HiRes upgraded to version 1.86
+documentation typo fixed
+
+=back
+
+=item *
+
+Time::HiRes upgraded to version 1.86 (was 1.66)
+
+=over
+
+=item *
+
+clock_nanosleep() and clock() functions added
+
+=item *
+
+support for the POSIX clock_gettime() and clock_getres() has been added
+
+=item *
+
+return undef or an empty if the C gettimeofday() fails
+
+=item *
+
+improved nanosleep detection
+
+=item *
+
+internal cleanup
+
+=item *
+
+enhanced documentation
+
+=back
 
 =item *
 
 Unicode::Collate upgraded to version 0.52
 
+=over
+
+=item *
+
+Now implements UCA Revision 14 (based on Unicode 4.1.0).
+
+=item *
+
+Unicode::Collate->new method does not destroy user's $_ any longer
+
+=item *
+
+enhanced documentation
+
+=back
+
 =item *
 
 Unicode::UCD upgraded to version 0.24
+
+=over
+
+=item *
+
+documentation typos fixed
+
+=back
 
 =item *
 
 User::grent upgraded to version 1.01
 
+=over
+
 =item *
 
-utf8 upgraded to version 1.06, which has minor documentation fixes.
+documentation typo fixed
+
+=back
+
+=item *
+
+utf8 upgraded to version 1.06
+
+=over
+
+=item *
+
+documentation typos fixed
+
+=back
 
 =item *
 
 vmsish upgraded to version 1.02
 
+=over
+
+=item *
+
+documentation typos fixed
+
+=back
+
 =item *
 
 warnings upgraded to version 1.05
 
+=over
+
 =item *
 
-Win32 upgraded to version 0.2601, which provides Windows Vista support to
-C<Win32::GetOSName>.
+gentler messing with Carp:: internals
+
+=item *
+
+internal cleanup
+
+=item *
+
+documentation update
+
+=back
+
+=item *
+
+Win32 upgraded to version 0.2601
 
 =for cynics And how many perl 5.8.x versions can I release ahead of Vista?
+
+=over
+
+=item *
+
+provides Windows Vista support to C<Win32::GetOSName>
+
+=item *
+
+documentation enhancements
+
+=back
+
+=item *
+
+XS::Typemap upgraded to version 0.02
+
+=over
+
+=item *
+
+internal cleanup
+
+=back
 
 =back
 
