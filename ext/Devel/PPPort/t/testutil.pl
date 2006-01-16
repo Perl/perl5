@@ -14,7 +14,7 @@
       } elsif (!defined $result) {
         $ok = 0;
       } elsif (ref($expected) eq 'Regexp') {
-        $ok = $result =~ /$expected/;
+        die "using regular expression objects is not backwards compatible";
       } else {
         $ok = $result eq $expected;
       }

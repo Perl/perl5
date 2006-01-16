@@ -1,12 +1,12 @@
 ################################################################################
 ##
-##  $Revision: 21 $
+##  $Revision: 25 $
 ##  $Author: mhx $
-##  $Date: 2005/02/27 21:13:25 +0100 $
+##  $Date: 2006/01/14 18:08:00 +0100 $
 ##
 ################################################################################
 ##
-##  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
+##  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
 ##  Version 2.x, Copyright (C) 2001, Paul Marquess.
 ##  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 ##
@@ -21,6 +21,8 @@
 
 NEED_function
 NEED_function_GLOBAL
+NEED_variable
+NEED_variable_GLOBAL
 DPPP_NAMESPACE
 
 =implementation
@@ -51,6 +53,9 @@ ppport.h - Perl/Pollution/Portability version __VERSION__
   --nohints                   don't show hints
   --nochanges                 don't suggest changes
   --nofilter                  don't filter input files
+
+  --strip                     strip all script and doc functionality from
+                              ppport.h (this, obviously, cannot be undone)
 
   --list-provided             list provided API
   --list-unsupported          list unsupported API
@@ -95,7 +100,7 @@ Tell F<ppport.h> to check for compatibility with the given
 Perl version. The default is to check for compatibility with Perl
 version __MIN_PERL__. You can use this option to reduce the output
 of F<ppport.h> if you intend to be backward compatible only
-up to a certain Perl version.
+down to a certain Perl version.
 
 =head2 --cplusplus
 
@@ -127,6 +132,13 @@ unless these are also deactivated.
 
 Don't filter the list of input files. By default, files not looking
 like source code (i.e. not *.xs, *.c, *.cc, *.cpp or *.h) are skipped.
+
+=head2 --strip
+
+Strip all script and documentation functionality from F<ppport.h>.
+This reduces the size of F<ppport.h> dramatically and may be useful
+if you want to include F<ppport.h> in smaller modules without
+increasing their distribution size too much.
 
 =head2 --list-provided
 
@@ -173,33 +185,38 @@ will provide wrappers for older Perl versions.
 
 =item *
 
-If you use one of a few functions that were not present in earlier
-versions of Perl, and that can't be provided using a macro, you have
-to explicitly request support for these functions by adding one or
+If you use one of a few functions or variables that were not present in
+earlier versions of Perl, and that can't be provided using a macro, you
+have to explicitly request support for these functions by adding one or
 more C<#define>s in your source code before the inclusion of F<ppport.h>.
 
-These functions will be marked C<explicit> in the list shown by
-C<--list-provided>.
+These functions or variables will be marked C<explicit> in the list shown
+by C<--list-provided>.
 
 Depending on whether you module has a single or multiple files that
-use such functions, you want either C<static> or global variants.
+use such functions or variables, you want either C<static> or global
+variants.
 
-For a C<static> function, use:
+For a C<static> function or variable (used only in a single source
+file), use:
 
     #define NEED_function
+    #define NEED_variable
 
-For a global function, use:
+For a global function or variable (used in multiple source files),
+use:
 
     #define NEED_function_GLOBAL
+    #define NEED_variable_GLOBAL
 
-Note that you mustn't have more than one global request for one
-function in your project.
+Note that you mustn't have more than one global request for the
+same function or variable in your project.
 
     __EXPLICIT_API__
 
 To avoid namespace conflicts, you can change the namespace of the
-explicitly exported functions using the C<DPPP_NAMESPACE> macro.
-Just C<#define> the macro before including C<ppport.h>:
+explicitly exported functions / variables using the C<DPPP_NAMESPACE>
+macro. Just C<#define> the macro before including C<ppport.h>:
 
     #define DPPP_NAMESPACE MyOwnNamespace_
     #include "ppport.h"
@@ -302,7 +319,7 @@ module from CPAN.
 
 =head1 COPYRIGHT
 
-Version 3.x, Copyright (c) 2004-2005, Marcus Holland-Moritz.
+Version 3.x, Copyright (c) 2004-2006, Marcus Holland-Moritz.
 
 Version 2.x, Copyright (C) 2001, Paul Marquess.
 

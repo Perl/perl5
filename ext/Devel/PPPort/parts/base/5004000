@@ -21,11 +21,13 @@ SvUV                           # U
 SvUVX                          # U
 SvUVx                          # U
 XPUSHu                         # U
+do_open                        # E (Perl_do_open)
 gv_efullname3                  # U
 gv_fullname3                   # U
 my_memcmp                      # U
 newRV_inc                      # E
 sv_2uv                         # U
+sv_taint                       # U
 PERL_INT_MAX                   # added by devel/scanprov
 PERL_INT_MIN                   # added by devel/scanprov
 PERL_LONG_MAX                  # added by devel/scanprov

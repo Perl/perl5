@@ -1,0 +1,30 @@
+5.009003
+MULTICALL                      # E
+POP_MULTICALL                  # E
+PUSH_MULTICALL                 # E
+SvSTASH_set                    # E
+av_arylen_p                    # E
+ckwarn                         # U
+ckwarn_d                       # U
+csighandler                    # E (Perl_csighandler)
+dMULTICALL                     # E
+doref                          # E
+gv_const_sv                    # E
+hv_eiter_p                     # E
+hv_eiter_set                   # U
+hv_name_set                    # U
+hv_placeholders_get            # U
+hv_placeholders_p              # E
+hv_placeholders_set            # U
+hv_riter_p                     # E
+hv_riter_set                   # U
+is_utf8_string_loclen          # U
+my_sprintf                     # U
+newGIVENOP                     # E
+newSVhek                       # E
+newWHENOP                      # E
+newWHILEOP                     # E (Perl_newWHILEOP)
+ref                            # E (Perl_ref)
+sortsv_flags                   # U
+stashpv_hvname_match           # U
+vverify                        # U

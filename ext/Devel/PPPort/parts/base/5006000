@@ -68,7 +68,6 @@ do_hv_dump                     # E
 do_join                        # E (Perl_do_join)
 do_magic_dump                  # E
 do_op_dump                     # E
-do_open                        # E (Perl_do_open)
 do_open9                       # E
 do_pmop_dump                   # E
 do_sprintf                     # E (Perl_do_sprintf)
@@ -111,7 +110,6 @@ gv_dump                        # E
 gv_efullname                   # E (Perl_gv_efullname)
 gv_fetchfile                   # E (Perl_gv_fetchfile)
 gv_fetchmeth                   # E (Perl_gv_fetchmeth)
-gv_fetchmethod                 # E (Perl_gv_fetchmethod)
 gv_fetchmethod_autoload        # E (Perl_gv_fetchmethod_autoload)
 gv_fetchpv                     # E (Perl_gv_fetchpv)
 gv_fullname                    # E (Perl_gv_fullname)
@@ -131,11 +129,9 @@ hv_free_ent                    # E (Perl_hv_free_ent)
 hv_iterinit                    # E (Perl_hv_iterinit)
 hv_iterkey                     # E (Perl_hv_iterkey)
 hv_iterkeysv                   # E (Perl_hv_iterkeysv)
-hv_iternext                    # E (Perl_hv_iternext)
 hv_iternextsv                  # E (Perl_hv_iternextsv)
 hv_iterval                     # E (Perl_hv_iterval)
 hv_ksplit                      # E (Perl_hv_ksplit)
-hv_magic                       # E (Perl_hv_magic)
 hv_store                       # E (Perl_hv_store)
 hv_store_ent                   # E (Perl_hv_store_ent)
 hv_undef                       # E (Perl_hv_undef)
@@ -343,6 +339,7 @@ set_context                    # U
 set_numeric_local              # E (perl_set_numeric_local)
 set_numeric_radix              # E
 set_numeric_standard           # E (perl_set_numeric_standard)
+share_hek                      # E (Perl_share_hek)
 stack_grow                     # E (Perl_stack_grow)
 start_subparse                 # E (Perl_start_subparse)
 str_to_version                 # E
@@ -362,8 +359,6 @@ sv_catpv                       # E (Perl_sv_catpv)
 sv_catpv_mg                    # E (Perl_sv_catpv_mg)
 sv_catpvf                      # E (Perl_sv_catpvf)
 sv_catpvf_mg                   # E (Perl_sv_catpvf_mg)
-sv_catpvn_mg                   # E (Perl_sv_catpvn_mg)
-sv_catsv_mg                    # E (Perl_sv_catsv_mg)
 sv_chop                        # E (Perl_sv_chop)
 sv_clear                       # E (Perl_sv_clear)
 sv_cmp                         # E (Perl_sv_cmp)
@@ -373,7 +368,7 @@ sv_dec                         # E (Perl_sv_dec)
 sv_derived_from                # E (Perl_sv_derived_from)
 sv_dump                        # E (Perl_sv_dump)
 sv_eq                          # E (Perl_sv_eq)
-sv_force_normal                # E
+sv_force_normal                # U
 sv_free                        # E (Perl_sv_free)
 sv_gets                        # E (Perl_sv_gets)
 sv_grow                        # E (Perl_sv_grow)
@@ -422,11 +417,9 @@ sv_setref_pvn                  # E (Perl_sv_setref_pvn)
 sv_setsv_mg                    # E (Perl_sv_setsv_mg)
 sv_setuv                       # E (Perl_sv_setuv)
 sv_setuv_mg                    # E (Perl_sv_setuv_mg)
-sv_taint                       # E (Perl_sv_taint)
 sv_tainted                     # E (Perl_sv_tainted)
 sv_true                        # E (Perl_sv_true)
 sv_unmagic                     # E (Perl_sv_unmagic)
-sv_unref                       # E (Perl_sv_unref)
 sv_untaint                     # E (Perl_sv_untaint)
 sv_upgrade                     # E (Perl_sv_upgrade)
 sv_usepvn                      # E (Perl_sv_usepvn)
@@ -492,6 +485,7 @@ UVTYPE                         # added by devel/scanprov
 UVof                           # added by devel/scanprov
 UVuf                           # added by devel/scanprov
 UVxf                           # added by devel/scanprov
+XSprePUSH                      # added by devel/scanprov
 aTHX                           # added by devel/scanprov
 aTHX_                          # added by devel/scanprov
 dNOOP                          # added by devel/scanprov

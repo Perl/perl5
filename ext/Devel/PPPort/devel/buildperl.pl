@@ -5,13 +5,13 @@
 #
 ################################################################################
 #
-#  $Revision: 6 $
+#  $Revision: 8 $
 #  $Author: mhx $
-#  $Date: 2005/03/10 18:10:17 +0100 $
+#  $Date: 2006/01/14 22:41:11 +0100 $
 #
 ################################################################################
 #
-#  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
+#  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -27,13 +27,18 @@ use File::Find;
 use File::Path;
 use Data::Dumper;
 use IO::File;
+use Archive::Tar;
 use Cwd;
 
+# TODO: - extra arguments to Configure
+
 my %opt = (
-  prefix => '/tmp/perl/install/<config>/<perl>',
-  build  => '/tmp/perl/build/<config>',
-  source => '/tmp/perl/source',
-  force  => 0,
+  prefix  => '/tmp/perl/install/<config>/<perl>',
+  build   => '/tmp/perl/build/<config>',
+  source  => '/tmp/perl/source',
+  force   => 0,
+  test    => 0,
+  install => 1,
 );
 
 my %config = (
@@ -42,11 +47,11 @@ my %config = (
                  },
   thread      => {
 	           config_args     => '-des -Dusethreads',
-	           masked_versions => [ qr/^perl5\.00[01234]/ ],
+	           masked_versions => [ qr/^5\.00[01234]/ ],
                  },
   thread5005  => {
 	           config_args     => '-des -Duse5005threads',
-	           masked_versions => [ qr/^perl5\.00[012345]|^perl-5.(9|\d\d)/ ],
+	           masked_versions => [ qr/^5\.00[012345]|^5.(9|\d\d)/ ],
                  },
   debug       => {
 	           config_args => '-des -Doptimize=-g',
@@ -56,12 +61,12 @@ my %config = (
 my @patch = (
   {
     perl => [
-              qr/^perl5\.00[01234]/,
+              qr/^5\.00[01234]/,
               qw/
-                perl5.005
-                perl5.005_01
-                perl5.005_02
-                perl5.005_03
+                5.005
+                5.005_01
+                5.005_02
+                5.005_03
               /,
             ],
     subs => [
@@ -71,13 +76,13 @@ my @patch = (
   {
     perl => [
      	      qw/
-                perl-5.6.0
-                perl-5.6.1
-                perl-5.7.0
-                perl-5.7.1
-                perl-5.7.2
-                perl-5.7.3
-                perl-5.8.0
+                5.6.0
+                5.6.1
+                5.7.0
+                5.7.1
+                5.7.2
+                5.7.3
+                5.8.0
      	      /,
             ],
     subs => [
@@ -86,7 +91,7 @@ my @patch = (
   },
   {
     perl => [
-              qr/^perl5\.004_0[1234]/,
+              qr/^5\.004_0[1234]/,
             ],
     subs => [
               [ \&patch_doio ],
@@ -99,9 +104,12 @@ my(%perl, @perls);
 GetOptions(\%opt, qw(
   config=s@
   prefix=s
+  build=s
   source=s
   perl=s@
   force
+  test
+  install!
 )) or pod2usage(2);
 
 if (exists $opt{config}) {
@@ -114,8 +122,8 @@ else {
 }
 
 find(sub {
-  /^(perl-?(5\..*))\.tar.gz$/ or return;
-  $perl{$1} = { version => $2, source => $File::Find::name };
+  /^(perl-?(5\..*))\.tar\.(gz|bz2)$/ or return;
+  $perl{$1} = { version => $2, source => $File::Find::name, compress => $3 };
 }, $opt{source});
 
 if (exists $opt{perl}) {
@@ -131,16 +139,14 @@ else {
   @perls = sort keys %perl;
 }
 
-$ENV{PATH} = "~/bin:$ENV{PATH}";  # use ccache
-
 my %current;
 
 for my $cfg (@{$opt{config}}) {
   for my $perl (@perls) {
     my $config = $config{$cfg};
-    %current = (config => $cfg, perl => $perl);
+    %current = (config => $cfg, perl => $perl, version => $perl{$perl}{version});
 
-    if (is($config->{masked_versions}, $perl)) {
+    if (is($config->{masked_versions}, $current{version})) {
       print STDERR "skipping $perl for configuration $cfg (masked)\n";
       next;
     }
@@ -196,7 +202,7 @@ sub buildperl
   my $d = extract_source($perl{$perl});
   chdir $d or die "chdir $d: $!\n";
 
-  patch_source($perl);
+  patch_source($perl{$perl}{version});
 
   build_and_install($perl{$perl});
 }
@@ -204,35 +210,39 @@ sub buildperl
 sub extract_source
 {
   my $perl = shift;
-  my $target = "perl-$perl->{version}";
 
-  for my $dir ("perl$perl->{version}", "perl-$perl->{version}") {
-    if (-d $dir) {
-      print "removing old build directory $dir\n";
-      rmtree($dir);
-    }
+  print "reading $perl->{source}\n";
+
+  my $target;
+
+  for my $f (Archive::Tar->list_archive($perl->{source})) {
+    my($t) = $f =~ /^([^\\\/]+)/ or die "ooops, should always match...\n";
+    die "refusing to extract $perl->{source}, as it would not extract to a single directory\n"
+        if defined $target and $target ne $t;
+    $target = $t;
+  }
+
+  if (-d $target) {
+    print "removing old build directory $target\n";
+    rmtree($target);
   }
 
   print "extracting $perl->{source}\n";
 
-  run_or_die("tar xzf $perl->{source}");
+  Archive::Tar->extract_archive($perl->{source})
+      or die "extract failed: " . Archive::Tar->error() . "\n";
 
-  if ($perl->{version} !~ /^\d+\.\d+\.\d+/ && -d "perl-$perl->{version}") {
-    $target = "perl$perl->{version}";
-    rename "perl-$perl->{version}", $target or die "rename: $!\n";
-  }
-
-  -d $target or die "$target not found\n";
+  -d $target or die "oooops, $target not found\n";
 
   return $target;
 }
 
 sub patch_source
 {
-  my $perl = shift;
+  my $version = shift;
 
   for my $p (@patch) {
-    if (is($p->{perl}, $perl)) {
+    if (is($p->{perl}, $version)) {
       for my $s (@{$p->{subs}}) {
         my($sub, @args) = @$s;
         $sub->(@args);
@@ -251,8 +261,13 @@ sub build_and_install
   run_or_die("./Configure $config{$current{config}}{config_args} -Dusedevel -Uinstallusrbinperl -Dprefix=$prefix");
   run_or_die("sed -i -e '/^.*<built-in>/d' -e '/^.*<command line>/d' makefile x2p/makefile");
   run_or_die("make all");
-  # run("make test");
-  run_or_die("make install");
+  run("make test") if $opt{test};
+  if ($opt{install}) {
+    run_or_die("make install");
+  }
+  else {
+    print "\n*** NOT INSTALLING PERL ***\n\n";
+  }
 }
 
 sub patch_db
@@ -315,3 +330,77 @@ sub run
   # print "[running @_]\n";
   system "@_" and warn "@_: $?\n";
 }
+
+__END__
+
+=head1 NAME
+
+buildperl.pl - build/install perl distributions
+
+=head1 SYNOPSIS
+
+  perl buildperl.pl [options]
+
+  --help                      show this help
+
+  --source=directory          directory containing source tarballs
+                              [default: /tmp/perl/source]
+
+  --build=directory           directory used for building perls [EXPAND]
+                              [default: /tmp/perl/build/<config>]
+
+  --prefix=directory          use this installation prefix [EXPAND]
+                              [default: /tmp/perl/install/<config>/<perl>]
+
+  --config=configuration      build this configuration [MULTI]
+                              [default: all possible configurations]
+
+  --perl=version              build this version of perl [MULTI]
+                              [default: all possible versions]
+
+  --force                     rebuild and install already installed versions
+
+  --test                      run test suite after building
+
+  --noinstall                 don't install after building
+
+  options tagged with [MULTI] can be given multiple times
+
+  options tagged with [EXPAND] expand the following items
+
+    <perl>      versioned perl directory  (e.g. 'perl-5.6.1')
+    <version>   perl version              (e.g. '5.6.1')
+    <config>    name of the configuration (e.g. 'default')
+
+=head1 EXAMPLES
+
+The following examples assume that your Perl source tarballs are
+in F</tmp/perl/source>. If they are somewhere else, use the C<--source>
+option to specify a different source directory.
+
+To build a default configuration of perl5.004_05 and install it
+to F</opt/perl5.004_05>, you would say:
+
+  buildperl.pl --prefix='/opt/<perl>' --perl=5.004_05 --config=default
+
+To build debugging configurations of all perls in the source directory
+and install them to F</opt>, use:
+
+  buildperl.pl --prefix='/opt/<perl>' --config=debug
+
+To build all configurations for perl-5.8.5 and perl-5.8.6, test them
+and don't install them, run:
+
+  buildperl.pl --perl=5.8.5 --perl=5.8.6 --test --noinstall
+
+=head1 COPYRIGHT
+
+Copyright (c) 2004-2005, Marcus Holland-Moritz.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+See L<Devel::PPPort>.
+

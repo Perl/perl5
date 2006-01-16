@@ -6,6 +6,7 @@ packlist                       # U
 save_bool                      # U
 savestack_grow_cnt             # U
 scan_vstring                   # E
+seed                           # U
 sv_cat_decode                  # U
 sv_compile_2op                 # E (Perl_sv_compile_2op)
 sv_setpviv                     # U

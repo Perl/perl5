@@ -8,13 +8,13 @@
 #
 ################################################################################
 #
-#  $Revision: 36 $
+#  $Revision: 41 $
 #  $Author: mhx $
-#  $Date: 2005/06/25 17:56:28 +0200 $
+#  $Date: 2006/01/14 18:07:56 +0100 $
 #
 ################################################################################
 #
-#  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
+#  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -133,6 +133,7 @@ in older Perl releases:
     CopSTASHPV_set
     CopyD
     dAX
+    dAXMARK
     DEFSV
     dITEMS
     dMY_CXT
@@ -194,6 +195,9 @@ in older Perl releases:
     newRV_noinc
     newSVpvn
     newSVuv
+    Newx
+    Newxc
+    Newxz
     NOOP
     NUM2PTR
     NVef
@@ -254,6 +258,7 @@ in older Perl releases:
     PERL_SCAN_SILENT_ILLDIGIT
     PERL_SHORT_MAX
     PERL_SHORT_MIN
+    PERL_SIGNALS_UNSAFE_FLAG
     PERL_SUBVERSION
     PERL_UCHAR_MAX
     PERL_UCHAR_MIN
@@ -288,6 +293,7 @@ in older Perl releases:
     PL_ppaddr
     PL_rsfp
     PL_rsfp_filters
+    PL_signals
     PL_stack_base
     PL_stack_sp
     PL_stdingv
@@ -346,12 +352,18 @@ in older Perl releases:
     sv_vsetpvf_mg
     SvGETMAGIC
     SvIV_nomg
+    SvMAGIC_set
     SvPV_force_nomg
     SvPV_nolen
     SvPV_nomg
     SvPVbyte
+    SvPVX_const
+    SvPVX_mutable
+    SvRV_set
+    SvSTASH_set
     SvUV
     SvUV_nomg
+    SvUV_set
     SvUVX
     SvUVx
     SvUVXx
@@ -369,6 +381,8 @@ in older Perl releases:
     XCPT_TRY_START
     XPUSHmortal
     XPUSHu
+    XSprePUSH
+    XSRETURN
     XSRETURN_UV
     XST_mUV
     ZeroD
@@ -386,12 +400,17 @@ Perl below which it is unsupported:
 
 =item perl 5.9.3
 
-  SvMAGIC_set
-  SvRV_set
+  MULTICALL
+  POP_MULTICALL
+  PUSH_MULTICALL
   SvSTASH_set
-  SvUV_set
   av_arylen_p
-  dAXMARK
+  ckwarn
+  ckwarn_d
+  csighandler
+  dMULTICALL
+  doref
+  gv_const_sv
   hv_eiter_p
   hv_eiter_set
   hv_name_set
@@ -401,9 +420,15 @@ Perl below which it is unsupported:
   hv_riter_p
   hv_riter_set
   is_utf8_string_loclen
+  my_sprintf
+  newGIVENOP
   newSVhek
+  newWHENOP
   newWHILEOP
+  ref
+  sortsv_flags
   stashpv_hvname_match
+  vverify
 
 =item perl 5.9.2
 
@@ -448,6 +473,7 @@ Perl below which it is unsupported:
   save_bool
   savestack_grow_cnt
   scan_vstring
+  seed
   sv_cat_decode
   sv_compile_2op
   sv_setpviv
@@ -552,7 +578,6 @@ Perl below which it is unsupported:
   POPpbytex
   SvUOK
   bytes_from_utf8
-  csighandler
   despatch_signals
   do_openn
   gv_handler
@@ -569,9 +594,7 @@ Perl below which it is unsupported:
   utf8_length
   utf8_to_uvchr
   utf8_to_uvuni
-  utf8n_to_uvchr
   utf8n_to_uvuni
-  uvchr_to_utf8
   uvuni_to_utf8
 
 =item perl 5.6.1
@@ -832,6 +855,7 @@ Perl below which it is unsupported:
   rsignal_state
   save_I16
   save_gp
+  share_hek
   start_subparse
   sv_catpvf
   sv_catpvf_mg
@@ -880,7 +904,7 @@ Version 3.x was ported back to CPAN by Marcus Holland-Moritz.
 
 =head1 COPYRIGHT
 
-Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
+Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
 
 Version 2.x, Copyright (C) 2001, Paul Marquess.
 
@@ -901,7 +925,7 @@ require DynaLoader;
 use strict;
 use vars qw($VERSION @ISA $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.06_01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.07 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 @ISA = qw(DynaLoader);
 
@@ -983,6 +1007,9 @@ SKIP
 |>  --nochanges                 don't suggest changes
 |>  --nofilter                  don't filter input files
 |>
+|>  --strip                     strip all script and doc functionality from
+|>                              ppport.h (this, obviously, cannot be undone)
+|>
 |>  --list-provided             list provided API
 |>  --list-unsupported          list unsupported API
 |>  --api-info=name             show Perl API portability information
@@ -1026,7 +1053,7 @@ SKIP
 |>Perl version. The default is to check for compatibility with Perl
 |>version 5.003. You can use this option to reduce the output
 |>of F<ppport.h> if you intend to be backward compatible only
-|>up to a certain Perl version.
+|>down to a certain Perl version.
 |>
 |>=head2 --cplusplus
 |>
@@ -1058,6 +1085,13 @@ SKIP
 |>
 |>Don't filter the list of input files. By default, files not looking
 |>like source code (i.e. not *.xs, *.c, *.cc, *.cpp or *.h) are skipped.
+|>
+|>=head2 --strip
+|>
+|>Strip all script and documentation functionality from F<ppport.h>.
+|>This reduces the size of F<ppport.h> dramatically and may be useful
+|>if you want to include F<ppport.h> in smaller modules without
+|>increasing their distribution size too much.
 |>
 |>=head2 --list-provided
 |>
@@ -1104,30 +1138,36 @@ SKIP
 |>
 |>=item *
 |>
-|>If you use one of a few functions that were not present in earlier
-|>versions of Perl, and that can't be provided using a macro, you have
-|>to explicitly request support for these functions by adding one or
+|>If you use one of a few functions or variables that were not present in
+|>earlier versions of Perl, and that can't be provided using a macro, you
+|>have to explicitly request support for these functions by adding one or
 |>more C<#define>s in your source code before the inclusion of F<ppport.h>.
 |>
-|>These functions will be marked C<explicit> in the list shown by
-|>C<--list-provided>.
+|>These functions or variables will be marked C<explicit> in the list shown
+|>by C<--list-provided>.
 |>
 |>Depending on whether you module has a single or multiple files that
-|>use such functions, you want either C<static> or global variants.
+|>use such functions or variables, you want either C<static> or global
+|>variants.
 |>
-|>For a C<static> function, use:
+|>For a C<static> function or variable (used only in a single source
+|>file), use:
 |>
 |>    #define NEED_function
+|>    #define NEED_variable
 |>
-|>For a global function, use:
+|>For a global function or variable (used in multiple source files),
+|>use:
 |>
 |>    #define NEED_function_GLOBAL
+|>    #define NEED_variable_GLOBAL
 |>
-|>Note that you mustn't have more than one global request for one
-|>function in your project.
+|>Note that you mustn't have more than one global request for the
+|>same function or variable in your project.
 |>
-|>    Function                  Static Request               Global Request
+|>    Function / Variable       Static Request               Global Request
 |>    -----------------------------------------------------------------------------------------
+|>    PL_signals                NEED_PL_signals              NEED_PL_signals_GLOBAL
 |>    eval_pv()                 NEED_eval_pv                 NEED_eval_pv_GLOBAL
 |>    grok_bin()                NEED_grok_bin                NEED_grok_bin_GLOBAL
 |>    grok_hex()                NEED_grok_hex                NEED_grok_hex_GLOBAL
@@ -1145,8 +1185,8 @@ SKIP
 |>    vnewSVpvf()               NEED_vnewSVpvf               NEED_vnewSVpvf_GLOBAL
 |>
 |>To avoid namespace conflicts, you can change the namespace of the
-|>explicitly exported functions using the C<DPPP_NAMESPACE> macro.
-|>Just C<#define> the macro before including C<ppport.h>:
+|>explicitly exported functions / variables using the C<DPPP_NAMESPACE>
+|>macro. Just C<#define> the macro before including C<ppport.h>:
 |>
 |>    #define DPPP_NAMESPACE MyOwnNamespace_
 |>    #include "ppport.h"
@@ -1249,7 +1289,7 @@ SKIP
 |>
 |>=head1 COPYRIGHT
 |>
-|>Version 3.x, Copyright (c) 2004-2005, Marcus Holland-Moritz.
+|>Version 3.x, Copyright (c) 2004-2006, Marcus Holland-Moritz.
 |>
 |>Version 2.x, Copyright (C) 2001, Paul Marquess.
 |>
@@ -1273,6 +1313,7 @@ my %opt = (
   changes   => 1,
   cplusplus => 0,
   filter    => 1,
+  strip     => 0,
 );
 
 my($ppport) = $0 =~ /([\w.]+)$/;
@@ -1282,7 +1323,7 @@ my $HS = "[ \t]";             # horizontal whitespace
 eval {
   require Getopt::Long;
   Getopt::Long::GetOptions(\%opt, qw(
-    help quiet diag! filter! hints! changes! cplusplus
+    help quiet diag! filter! hints! changes! cplusplus strip
     patch=s copy=s diff=s compat-version=s
     list-provided list-unsupported api-info=s
   )) or usage();
@@ -1294,6 +1335,7 @@ if ($@ and grep /^-/, @ARGV) {
 }
 
 usage() if $opt{help};
+strip() if $opt{strip};
 
 if (exists $opt{'compat-version'}) {
   my($r,$v,$s) = eval { parse_version($opt{'compat-version'}) };
@@ -1350,6 +1392,7 @@ ENTER|||
 ERRSV|5.004050||p
 EXTEND|||
 EXTERN_C|5.005000||p
+F0convert|||n
 FREETMPS|||
 GIMME_V||5.004000|n
 GIMME|||n
@@ -1390,6 +1433,7 @@ IVdf|5.006000||p
 LEAVE|||
 LVRET|||
 MARK|||
+MULTICALL||5.009003|
 MY_CXT_CLONE|5.009002||p
 MY_CXT_INIT|5.007003||p
 MY_CXT|5.007003||p
@@ -1402,9 +1446,9 @@ NVTYPE|5.006000||p
 NVef|5.006001||p
 NVff|5.006001||p
 NVgf|5.006001||p
-Newc|||
-Newz|||
-New|||
+Newxc|5.009003||p
+Newxz|5.009003||p
+Newx|5.009003||p
 Nullav|||
 Nullch|||
 Nullcv|||
@@ -1481,6 +1525,7 @@ PERL_SCAN_GREATER_THAN_UV_MAX|5.007003||p
 PERL_SCAN_SILENT_ILLDIGIT|5.008001||p
 PERL_SHORT_MAX|5.004000||p
 PERL_SHORT_MIN|5.004000||p
+PERL_SIGNALS_UNSAFE_FLAG|5.008001||p
 PERL_SUBVERSION|5.006000||p
 PERL_UCHAR_MAX|5.004000||p
 PERL_UCHAR_MIN|5.004000||p
@@ -1521,6 +1566,7 @@ PL_ppaddr|5.006000||p
 PL_rsfp_filters|5.004050||p
 PL_rsfp|5.004050||p
 PL_rs|||n
+PL_signals|5.008001||p
 PL_stack_base|5.004050||p
 PL_stack_sp|5.004050||p
 PL_stdingv|5.004050||p
@@ -1530,6 +1576,7 @@ PL_sv_undef|5.004050||pn
 PL_sv_yes|5.004050||pn
 PL_tainted|5.004050||p
 PL_tainting|5.004050||p
+POP_MULTICALL||5.009003|
 POPi|||n
 POPl|||n
 POPn|||n
@@ -1543,6 +1590,7 @@ PTR2UV|5.006000||p
 PTR2ul|5.007001||p
 PTRV|5.006000||p
 PUSHMARK|||
+PUSH_MULTICALL||5.009003|
 PUSHi|||
 PUSHmortal|5.009002||p
 PUSHn|||
@@ -1622,7 +1670,7 @@ SvIsCOW||5.008003|
 SvLEN_set|||
 SvLEN|||
 SvLOCK||5.007003|
-SvMAGIC_set||5.009003|
+SvMAGIC_set|5.009003||p
 SvNIOK_off|||
 SvNIOKp|||
 SvNIOK|||
@@ -1643,6 +1691,8 @@ SvPOK_only|||
 SvPOK_on|||
 SvPOKp|||
 SvPOK|||
+SvPVX_const|5.009003||p
+SvPVX_mutable|5.009003||p
 SvPVX|||
 SvPV_force_nomg|5.007002||p
 SvPV_force|||
@@ -1667,11 +1717,11 @@ SvREFCNT|||
 SvROK_off|||
 SvROK_on|||
 SvROK|||
-SvRV_set||5.009003|
+SvRV_set|5.009003||p
 SvRV|||
 SvSETMAGIC|||
 SvSHARE||5.007003|
-SvSTASH_set||5.009003|
+SvSTASH_set|5.009003|5.009003|p
 SvSTASH|||
 SvSetMagicSV_nosteal||5.004000|
 SvSetMagicSV||5.004000|
@@ -1692,7 +1742,7 @@ SvUTF8||5.006000|
 SvUVXx|5.004000||p
 SvUVX|5.004000||p
 SvUV_nomg|5.009001||p
-SvUV_set||5.009003|
+SvUV_set|5.009003||p
 SvUVx|5.004000||p
 SvUV|5.004000||p
 SvVOK||5.008001|
@@ -1722,7 +1772,7 @@ XSRETURN_PV|||
 XSRETURN_UNDEF|||
 XSRETURN_UV|5.008001||p
 XSRETURN_YES|||
-XSRETURN|||
+XSRETURN|||p
 XST_mIV|||
 XST_mNO|||
 XST_mNV|||
@@ -1732,6 +1782,7 @@ XST_mUV|5.008001||p
 XST_mYES|||
 XS_VERSION_BOOTCHECK|||
 XS_VERSION|||
+XSprePUSH|5.006000||p
 XS|||
 ZeroD|5.009002||p
 Zero|||
@@ -1744,6 +1795,10 @@ aTHX|5.006000||p
 add_data|||
 allocmy|||
 amagic_call|||
+amagic_cmp_locale|||
+amagic_cmp|||
+amagic_i_ncmp|||
+amagic_ncmp|||
 any_dup|||
 ao|||
 append_elem|||
@@ -1752,8 +1807,6 @@ apply_attrs_my|||
 apply_attrs_string||5.006001|
 apply_attrs|||
 apply|||
-asIV|||
-asUV|||
 atfork_lock||5.007003|n
 atfork_unlock||5.007003|n
 av_arylen_p||5.009003|
@@ -1800,6 +1853,7 @@ cast_i32||5.006000|
 cast_iv||5.006000|
 cast_ulong||5.006000|
 cast_uv||5.006000|
+check_type_and_open|||
 check_uni|||
 checkcomma|||
 checkposixcc|||
@@ -1834,6 +1888,7 @@ ck_return|||
 ck_rfun|||
 ck_rvconst|||
 ck_sassign|||
+ck_say|||
 ck_select|||
 ck_shift|||
 ck_sort|||
@@ -1844,6 +1899,8 @@ ck_substr|||
 ck_svconst|||
 ck_trunc|||
 ck_unpack|||
+ckwarn_d||5.009003|
+ckwarn||5.009003|
 cl_and|||
 cl_anything|||
 cl_init_zero|||
@@ -1856,7 +1913,7 @@ cop_free|||
 cr_textfilter|||
 croak_nocontext|||vn
 croak|||v
-csighandler||5.007001|n
+csighandler||5.009003|n
 custom_op_desc||5.007003|
 custom_op_name||5.007003|
 cv_ckproto|||
@@ -1867,10 +1924,11 @@ cv_undef|||
 cx_dump||5.005000|
 cx_dup|||
 cxinc|||
-dAXMARK||5.009003|
+dAXMARK|5.009003||p
 dAX|5.007002||p
 dITEMS|5.007002||p
 dMARK|||
+dMULTICALL||5.009003|
 dMY_CXT_SV|5.007003||p
 dMY_CXT|5.007003||p
 dNOOP|5.006000||p
@@ -1895,13 +1953,12 @@ debprof|||
 debstackptrs||5.007003|
 debstack||5.007003|
 deb||5.007003|v
-del_he|||
 del_sv|||
 delimcpy||5.004000|
-depcom|||
 deprecate_old|||
 deprecate|||
 despatch_signals||5.007001|
+destroy_matcher|||
 die_nocontext|||vn
 die_where|||
 die|||v
@@ -1942,6 +1999,7 @@ do_readline|||
 do_seek|||
 do_semop|||
 do_shmio|||
+do_smartmatch|||
 do_spawn_nowait|||
 do_spawn|||
 do_sprintf|||
@@ -1969,10 +2027,13 @@ dooneliner|||
 doopen_pm|||
 doparseform|||
 dopoptoeval|||
+dopoptogiven|||
 dopoptolabel|||
 dopoptoloop|||
 dopoptosub_at|||
 dopoptosub|||
+dopoptowhen|||
+doref||5.009003|
 dounwind|||
 dowantarray|||
 dump_all||5.006000|
@@ -1983,6 +2044,7 @@ dump_indent||5.006000|v
 dump_mstats|||
 dump_packsubs||5.006000|
 dump_sub||5.006000|
+dump_sv_child|||
 dump_vindent||5.006000|
 dumpuntil|||
 dup_attrlist|||
@@ -1993,6 +2055,7 @@ expect_number|||
 fbm_compile||5.005000|
 fbm_instr||5.005000|
 fd_on_nosuid_fs|||
+feature_is_enabled|||
 filter_add|||
 filter_del|||
 filter_gets|||
@@ -2004,6 +2067,7 @@ find_runcv|||
 find_rundefsvoffset||5.009002|
 find_script|||
 find_uninit_var|||
+first_symbol|||n
 fold_constants|||
 forbid_setid|||
 force_ident|||
@@ -2049,8 +2113,10 @@ group_end|||
 gv_AVadd|||
 gv_HVadd|||
 gv_IOadd|||
+gv_SVadd|||
 gv_autoload4||5.004000|
 gv_check|||
+gv_const_sv||5.009003|
 gv_dump||5.006000|
 gv_efullname3||5.004000|
 gv_efullname4||5.006001|
@@ -2070,7 +2136,6 @@ gv_fullname|||
 gv_handler||5.007001|
 gv_init_sv|||
 gv_init|||
-gv_share|||
 gv_stashpvn|5.006000||p
 gv_stashpv|||
 gv_stashsv|||
@@ -2080,6 +2145,7 @@ hfreeentries|||
 hsplit|||
 hv_assert||5.009001|
 hv_auxinit|||
+hv_backreferences_p|||
 hv_clear_placeholders||5.009001|
 hv_clear|||
 hv_delayfree_ent||5.004000|
@@ -2101,6 +2167,7 @@ hv_iternext_flags||5.008000|
 hv_iternextsv|||
 hv_iternext|||
 hv_iterval|||
+hv_kill_backrefs|||
 hv_ksplit||5.004000|
 hv_magic_check|||
 hv_magic|||
@@ -2121,6 +2188,7 @@ ibcmp_utf8||5.007003|
 ibcmp|||
 incl_perldb|||
 incline|||
+incpush_if_exists|||
 incpush|||
 ingroup|||
 init_argv_symbols|||
@@ -2190,6 +2258,7 @@ is_utf8_ascii||5.006000|
 is_utf8_char_slow|||
 is_utf8_char||5.006000|
 is_utf8_cntrl||5.006000|
+is_utf8_common|||
 is_utf8_digit||5.006000|
 is_utf8_graph||5.006000|
 is_utf8_idcont||5.008000|
@@ -2218,6 +2287,7 @@ list|||
 load_module_nocontext|||vn
 load_module||5.006000|v
 localize|||
+looks_like_bool|||
 looks_like_number|||
 lop|||
 mPUSHi|5.009002||p
@@ -2284,10 +2354,12 @@ magic_set|||
 magic_sizepack|||
 magic_wipepack|||
 magicname|||
+make_matcher|||
 make_trie|||
 malloced_size|||n
 malloc||5.007002|n
 markstack_grow|||
+matcher_matches_sv|||
 measure_struct|||
 memEQ|5.004000||p
 memNE|5.004000||p
@@ -2328,6 +2400,8 @@ my_betohl|||n
 my_betohs|||n
 my_bzero|||n
 my_chsize|||
+my_clearenv|||
+my_cxt_init|||
 my_exit_jump|||
 my_exit|||
 my_failure_exit||5.004000|
@@ -2362,12 +2436,14 @@ my_popen_list||5.007001|
 my_popen||5.004000|
 my_setenv|||
 my_socketpair||5.007003|n
+my_sprintf||5.009003|vn
 my_stat|||
 my_strftime||5.007002|
 my_swabn|||n
 my_swap|||
 my_unexec|||
 my|||
+need_utf8|||n
 newANONATTRSUB||5.006000|
 newANONHASH|||
 newANONLIST|||
@@ -2383,6 +2459,8 @@ newCVREF|||
 newDEFSVOP|||
 newFORM|||
 newFOROP|||
+newGIVENOP||5.009003|
+newGIVWHENOP|||
 newGVOP|||
 newGVREF|||
 newGVgen|||
@@ -2423,6 +2501,7 @@ newSVsv|||
 newSVuv|5.006000||p
 newSV|||
 newUNOP|||
+newWHENOP||5.009003|
 newWHILEOP||5.009003|
 newXSproto||5.006000|
 newXS||5.006000|
@@ -2445,6 +2524,7 @@ not_a_number|||
 nothreadhook||5.008000|
 nuke_stacks|||
 num_overflow|||n
+offer_nice_chunk|||
 oopsAV|||
 oopsCV|||
 oopsHV|||
@@ -2528,16 +2608,16 @@ reentrant_free|||
 reentrant_init|||
 reentrant_retry|||vn
 reentrant_size|||
+ref_array_or_hash|||
 refkids|||
 refto|||
-ref|||
+ref||5.009003|
 reg_node|||
 reganode|||
 regatom|||
 regbranch|||
 regclass_swash||5.007003|
 regclass|||
-regcp_set_to|||
 regcppop|||
 regcppush|||
 regcurly|||
@@ -2568,12 +2648,14 @@ report_evil_fh|||
 report_uninit|||
 require_errno|||
 require_pv||5.006000|
+restore_magic|||
 rninstr|||
 rsignal_restore|||
 rsignal_save|||
 rsignal_state||5.004000|
 rsignal||5.004000|
 run_body|||
+run_user_filter|||
 runops_debug||5.005000|
 runops_standard||5.005000|
 rvpv_dup|||
@@ -2661,7 +2743,9 @@ scan_vstring||5.008001|
 scan_word|||
 scope|||
 screaminstr||5.005000|
-seed|||
+seed||5.008001|
+sequence_num|||
+sequence|||
 set_context||5.006000|n
 set_csh|||
 set_numeric_local||5.006000|
@@ -2670,11 +2754,15 @@ set_numeric_standard||5.006000|
 setdefout|||
 setenv_getix|||
 share_hek_flags|||
-share_hek|||
+share_hek||5.004000|
 si_dup|||
 sighandler|||n
 simplify_sort|||
 skipspace|||
+sortcv_stacked|||
+sortcv_xsub|||
+sortcv|||
+sortsv_flags||5.009003|
 sortsv||5.007003|
 ss_dup|||
 stack_grow|||
@@ -2689,6 +2777,8 @@ strLE|||
 strLT|||
 strNE|||
 str_to_version||5.006000|
+stringify_regexp|||
+strip_return|||
 strnEQ|||
 strnNE|||
 study_chunk|||
@@ -2724,12 +2814,12 @@ sv_catpvf_mg|5.006000|5.004000|pv
 sv_catpvf_nocontext|||vn
 sv_catpvf||5.004000|v
 sv_catpvn_flags||5.007002|
-sv_catpvn_mg|5.006000||p
+sv_catpvn_mg|5.004050||p
 sv_catpvn_nomg|5.007002||p
 sv_catpvn|||
 sv_catpv|||
 sv_catsv_flags||5.007002|
-sv_catsv_mg|5.006000||p
+sv_catsv_mg|5.004050||p
 sv_catsv_nomg|5.007002||p
 sv_catsv|||
 sv_chop|||
@@ -2747,6 +2837,7 @@ sv_derived_from||5.004000|
 sv_dump|||
 sv_dup|||
 sv_eq|||
+sv_exp_grow|||
 sv_force_normal_flags||5.007001|
 sv_force_normal||5.006000|
 sv_free2|||
@@ -2754,16 +2845,19 @@ sv_free_arenas|||
 sv_free|||
 sv_gets||5.004000|
 sv_grow|||
+sv_i_ncmp|||
 sv_inc|||
 sv_insert|||
 sv_isa|||
 sv_isobject|||
 sv_iv||5.005000|
+sv_kill_backrefs|||
 sv_len_utf8||5.006000|
 sv_len|||
 sv_magicext||5.007003|
 sv_magic|||
 sv_mortalcopy|||
+sv_ncmp|||
 sv_newmortal|||
 sv_newref|||
 sv_nolocking||5.007003|
@@ -2845,6 +2939,7 @@ sv_vsetpvf|5.006000|5.004000|p
 svtype|||
 swallow_bom|||
 swash_fetch||5.007002|
+swash_get|||
 swash_init||5.006000|
 sys_intern_clear|||
 sys_intern_dup|||
@@ -2868,10 +2963,12 @@ to_utf8_lower||5.007003|
 to_utf8_substr|||
 to_utf8_title||5.007003|
 to_utf8_upper||5.007003|
+tokenize_use|||
 tokeq|||
 tokereport|||
 too_few_arguments|||
 too_many_arguments|||
+uiv_2buf|||n
 unlnk|||
 unpack_rec|||
 unpack_str||5.007003|
@@ -2879,12 +2976,11 @@ unpackstring||5.008001|
 unshare_hek_or_pvn|||
 unshare_hek|||
 unsharepvn||5.004000|
+unwind_handler_stack|||
 upg_version||5.009000|
 usage|||
-utf16_textfilter|||
 utf16_to_utf8_reversed||5.006001|
 utf16_to_utf8||5.006001|
-utf16rev_textfilter|||
 utf8_distance||5.006000|
 utf8_hop||5.006000|
 utf8_length||5.007001|
@@ -2893,11 +2989,11 @@ utf8_mg_pos|||
 utf8_to_bytes||5.006001|
 utf8_to_uvchr||5.007001|
 utf8_to_uvuni||5.007001|
-utf8n_to_uvchr||5.007001|
+utf8n_to_uvchr|||
 utf8n_to_uvuni||5.007001|
 utilize|||
 uvchr_to_utf8_flags||5.007003|
-uvchr_to_utf8||5.007001|
+uvchr_to_utf8|||
 uvuni_to_utf8_flags||5.007003|
 uvuni_to_utf8||5.007001|
 validate_suid|||
@@ -2905,6 +3001,8 @@ varname|||
 vcmp||5.009000|
 vcroak||5.006000|
 vdeb||5.007003|
+vdie_common|||
+vdie_croak_common|||
 vdie|||
 vform||5.006000|
 visit|||
@@ -2916,6 +3014,7 @@ vnewSVpvf|5.006000|5.004000|p
 vnormal||5.009002|
 vnumify||5.009000|
 vstringify||5.009000|
+vverify||5.009003|
 vwarner||5.006000|
 vwarn||5.006000|
 wait4pid|||
@@ -2925,6 +3024,7 @@ warner||5.006000|v
 warn|||v
 watch|||
 whichsig|||
+write_no_mem|||
 write_to_stderr|||
 yyerror|||
 yylex|||
@@ -3559,6 +3659,35 @@ ENDUSAGE
   exit 2;
 }
 
+sub strip
+{
+  my $self = do { local(@ARGV,$/)=($0); <> };
+  $self =~ s/^$HS+Do NOT edit.*?(?=^-)//ms;
+  $self =~ s/^SKIP.*(?=^__DATA__)/SKIP
+if (\@ARGV && \$ARGV[0] eq '--unstrip') {
+  eval { require Devel::PPPort };
+  \$@ and die "Cannot require Devel::PPPort, please install.\\n";
+  Devel::PPPort::WriteFile(\$0);
+  exit 0;
+}
+print <<END;
+
+Sorry, but this is a stripped version of \$0.
+
+To be able to use its original script and doc functionality,
+please try to regenerate this file using:
+
+  \$^X \$0 --unstrip
+
+END
+/ms;
+
+  open OUT, ">$0" or die "cannot strip $0: $!\n";
+  print OUT $self;
+
+  exit 0;
+}
+
 __DATA__
 */
 
@@ -3936,20 +4065,18 @@ __DATA__
 #ifndef UVSIZE
 #  define UVSIZE                         IVSIZE
 #endif
-
 #ifndef sv_setuv
-#  define sv_setuv(sv, uv)                  \
-   STMT_START {                             \
-       UV TeMpUv = uv;                      \
-       if (TeMpUv <= IV_MAX)                \
-           sv_setiv(sv, TeMpUv);            \
-       else                                 \
-           sv_setnv(sv, (double)TeMpUv);    \
-   } STMT_END
+#  define sv_setuv(sv, uv)               \
+               STMT_START {                         \
+                 UV TeMpUv = uv;                    \
+                 if (TeMpUv <= IV_MAX)              \
+                   sv_setiv(sv, TeMpUv);            \
+                 else                               \
+                   sv_setnv(sv, (double)TeMpUv);    \
+               } STMT_END
 #endif
-
 #ifndef newSVuv
-#  define newSVuv(uv) ((uv) <= IV_MAX ? newSViv((IV)uv) : newSVnv((NV)uv))
+#  define newSVuv(uv)                    ((uv) <= IV_MAX ? newSViv((IV)uv) : newSVnv((NV)uv))
 #endif
 #ifndef sv_2uv
 #  define sv_2uv(sv)                     ((PL_Sv = (sv)), (UV) (SvNOK(PL_Sv) ? SvNV(PL_Sv) : sv_2nv(PL_Sv)))
@@ -3992,7 +4119,60 @@ __DATA__
 #  define XPUSHu(u)                      STMT_START { sv_setuv(TARG, (UV)(u)); XPUSHTARG; } STMT_END
 #endif
 
-#if (PERL_VERSION < 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION <= 5))
+#ifdef HAS_MEMCMP
+#ifndef memNE
+#  define memNE(s1,s2,l)                 (memcmp(s1,s2,l))
+#endif
+
+#ifndef memEQ
+#  define memEQ(s1,s2,l)                 (!memcmp(s1,s2,l))
+#endif
+
+#else
+#ifndef memNE
+#  define memNE(s1,s2,l)                 (bcmp(s1,s2,l))
+#endif
+
+#ifndef memEQ
+#  define memEQ(s1,s2,l)                 (!bcmp(s1,s2,l))
+#endif
+
+#endif
+#ifndef MoveD
+#  define MoveD(s,d,n,t)                 memmove((char*)(d),(char*)(s), (n) * sizeof(t))
+#endif
+
+#ifndef CopyD
+#  define CopyD(s,d,n,t)                 memcpy((char*)(d),(char*)(s), (n) * sizeof(t))
+#endif
+
+#ifdef HAS_MEMSET
+#ifndef ZeroD
+#  define ZeroD(d,n,t)                   memzero((char*)(d), (n) * sizeof(t))
+#endif
+
+#else
+#ifndef ZeroD
+#  define ZeroD(d,n,t)                   ((void)memzero((char*)(d), (n) * sizeof(t)), d)
+#endif
+
+#endif
+#ifndef Poison
+#  define Poison(d,n,t)                  (void)memset((char*)(d), 0xAB, (n) * sizeof(t))
+#endif
+#ifndef Newx
+#  define Newx(v,n,t)                    New(0,v,n,t)
+#endif
+
+#ifndef Newxc
+#  define Newxc(v,n,t,c)                 Newc(0,v,n,t,c)
+#endif
+
+#ifndef Newxz
+#  define Newxz(v,n,t)                   Newz(0,v,n,t)
+#endif
+
+#if ((PERL_VERSION < 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION <= 5)))
 /* Replace: 1 */
 #  define PL_DBsingle               DBsingle
 #  define PL_DBsub                  DBsub
@@ -4170,48 +4350,6 @@ typedef NVTYPE NV;
 #endif
 
 /* Replace: 0 */
-
-#ifdef HAS_MEMCMP
-#ifndef memNE
-#  define memNE(s1,s2,l)                 (memcmp(s1,s2,l))
-#endif
-
-#ifndef memEQ
-#  define memEQ(s1,s2,l)                 (!memcmp(s1,s2,l))
-#endif
-
-#else
-#ifndef memNE
-#  define memNE(s1,s2,l)                 (bcmp(s1,s2,l))
-#endif
-
-#ifndef memEQ
-#  define memEQ(s1,s2,l)                 (!bcmp(s1,s2,l))
-#endif
-
-#endif
-#ifndef MoveD
-#  define MoveD(s,d,n,t)                 memmove((char*)(d),(char*)(s), (n) * sizeof(t))
-#endif
-
-#ifndef CopyD
-#  define CopyD(s,d,n,t)                 memcpy((char*)(d),(char*)(s), (n) * sizeof(t))
-#endif
-
-#ifdef HAS_MEMSET
-#ifndef ZeroD
-#  define ZeroD(d,n,t)                   memzero((char*)(d), (n) * sizeof(t))
-#endif
-
-#else
-#ifndef ZeroD
-#  define ZeroD(d,n,t)                   ((void)memzero((char*)(d), (n) * sizeof(t)),d)
-#endif
-
-#endif
-#ifndef Poison
-#  define Poison(d,n,t)                  (void)memset((char*)(d), 0xAB, (n) * sizeof(t))
-#endif
 #ifndef dUNDERBAR
 #  define dUNDERBAR                      dNOOP
 #endif
@@ -4228,6 +4366,37 @@ typedef NVTYPE NV;
 #endif
 #ifndef dXSTARG
 #  define dXSTARG                        SV * targ = sv_newmortal()
+#endif
+#ifndef dAXMARK
+#  define dAXMARK                        I32 ax = POPMARK; \
+                               register SV ** const mark = PL_stack_base + ax++
+#endif
+#ifndef XSprePUSH
+#  define XSprePUSH                      (sp = PL_stack_base + ax - 1)
+#endif
+
+#if ((PERL_VERSION < 5) || ((PERL_VERSION == 5) && (PERL_SUBVERSION < 0)))
+#  undef XSRETURN
+#  define XSRETURN(off)                                   \
+      STMT_START {                                        \
+          PL_stack_sp = PL_stack_base + ax + ((off) - 1); \
+          return;                                         \
+      } STMT_END
+#endif
+
+#ifndef PERL_SIGNALS_UNSAFE_FLAG
+
+#define PERL_SIGNALS_UNSAFE_FLAG 0x0001
+
+#if defined(NEED_PL_signals)
+static U32 DPPP_(my_PL_signals) = PERL_SIGNALS_UNSAFE_FLAG;
+#elif defined(NEED_PL_signals_GLOBAL)
+U32 DPPP_(my_PL_signals) = PERL_SIGNALS_UNSAFE_FLAG;
+#else
+extern U32 DPPP_(my_PL_signals);
+#endif
+#define PL_signals DPPP_(my_PL_signals)
+
 #endif
 #ifndef dTHR
 #  define dTHR                           dNOOP
@@ -4475,7 +4644,7 @@ DPPP_(my_newCONSTSUB)(HV *stash, char *name, SV *sv)
  * case below uses it to declare the data as static. */
 #define START_MY_CXT
 
-#if (PERL_VERSION < 4 || (PERL_VERSION == 4 && PERL_SUBVERSION < 68 ))
+#if ((PERL_VERSION < 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION < 68)))
 /* Fetches the SV that keeps the per-interpreter data. */
 #define dMY_CXT_SV \
 	SV *my_cxt_sv = get_sv(MY_CXT_KEY, FALSE)
@@ -4688,6 +4857,62 @@ DPPP_(my_sv_2pvbyte)(pTHX_ register SV *sv, STRLEN *lp)
  */
 #ifndef sv_pvn_force
 #  define sv_pvn_force(sv, len)          SvPV_force(sv, len)
+#endif
+#ifndef SvMAGIC_set
+#  define SvMAGIC_set(sv, val)           \
+                STMT_START { assert(SvTYPE(sv) >= SVt_PVMG); \
+                (((XPVMG*) SvANY(sv))->xmg_magic = (val)); } STMT_END
+#endif
+
+#if ((PERL_VERSION < 9) || ((PERL_VERSION == 9) && (PERL_SUBVERSION < 3)))
+#ifndef SvPVX_const
+#  define SvPVX_const(sv)                ((const char*) (0 + SvPVX(sv)))
+#endif
+
+#ifndef SvPVX_mutable
+#  define SvPVX_mutable(sv)              (0 + SvPVX(sv))
+#endif
+#ifndef SvRV_set
+#  define SvRV_set(sv, val)              \
+                STMT_START { assert(SvTYPE(sv) >=  SVt_RV); \
+                (((XRV*) SvANY(sv))->xrv_rv = (val)); } STMT_END
+#endif
+
+#else
+#ifndef SvPVX_const
+#  define SvPVX_const(sv)                ((const char*)((sv)->sv_u.svu_pv))
+#endif
+
+#ifndef SvPVX_mutable
+#  define SvPVX_mutable(sv)              ((sv)->sv_u.svu_pv)
+#endif
+#ifndef SvRV_set
+#  define SvRV_set(sv, val)              \
+                STMT_START { assert(SvTYPE(sv) >=  SVt_RV); \
+                ((sv)->sv_u.svu_rv = (val)); } STMT_END
+#endif
+
+#endif
+#ifndef SvSTASH_set
+#  define SvSTASH_set(sv, val)           \
+                STMT_START { assert(SvTYPE(sv) >= SVt_PVMG); \
+                (((XPVMG*) SvANY(sv))->xmg_stash = (val)); } STMT_END
+#endif
+
+#if ((PERL_VERSION < 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION < 0)))
+#ifndef SvUV_set
+#  define SvUV_set(sv, val)              \
+                STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
+                (((XPVIV*) SvANY(sv))->xiv_iv = (IV) (val)); } STMT_END
+#endif
+
+#else
+#ifndef SvUV_set
+#  define SvUV_set(sv, val)              \
+                STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
+                (((XPVUV*) SvANY(sv))->xuv_uv = (val)); } STMT_END
+#endif
+
 #endif
 
 #if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0))) && !defined(vnewSVpvf)
@@ -5345,7 +5570,7 @@ DPPP_(my_grok_numeric_radix)(pTHX_ const char **sp, const char *send)
             return TRUE;
         }
     }
-#endif /* PERL_VERSION */
+#endif
 #endif /* USE_LOCALE_NUMERIC */
     /* always try "." if numeric radix didn't match because
      * we may have data from different locales mixed */

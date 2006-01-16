@@ -1,12 +1,12 @@
 ################################################################################
 ##
-##  $Revision: 28 $
+##  $Revision: 31 $
 ##  $Author: mhx $
-##  $Date: 2005/03/10 18:08:41 +0100 $
+##  $Date: 2006/01/14 18:08:02 +0100 $
 ##
 ################################################################################
 ##
-##  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
+##  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
 ##  Version 2.x, Copyright (C) 2001, Paul Marquess.
 ##  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 ##
@@ -30,6 +30,7 @@ my %opt = (
   changes   => 1,
   cplusplus => 0,
   filter    => 1,
+  strip     => 0,
 );
 
 my($ppport) = $0 =~ /([\w.]+)$/;
@@ -39,7 +40,7 @@ my $HS = "[ \t]";             # horizontal whitespace
 eval {
   require Getopt::Long;
   Getopt::Long::GetOptions(\%opt, qw(
-    help quiet diag! filter! hints! changes! cplusplus
+    help quiet diag! filter! hints! changes! cplusplus strip
     patch=s copy=s diff=s compat-version=s
     list-provided list-unsupported api-info=s
   )) or usage();
@@ -51,6 +52,7 @@ if ($@ and grep /^-/, @ARGV) {
 }
 
 usage() if $opt{help};
+strip() if $opt{strip};
 
 if (exists $opt{'compat-version'}) {
   my($r,$v,$s) = eval { parse_version($opt{'compat-version'}) };
@@ -709,4 +711,33 @@ See perldoc $0 for details.
 ENDUSAGE
 
   exit 2;
+}
+
+sub strip
+{
+  my $self = do { local(@ARGV,$/)=($0); <> };
+  $self =~ s/^$HS+Do NOT edit.*?(?=^-)//ms;
+  $self =~ s/^SKIP.*(?=^__DATA__)/SKIP
+if (\@ARGV && \$ARGV[0] eq '--unstrip') {
+  eval { require Devel::PPPort };
+  \$@ and die "Cannot require Devel::PPPort, please install.\\n";
+  Devel::PPPort::WriteFile(\$0);
+  exit 0;
+}
+print <<END;
+
+Sorry, but this is a stripped version of \$0.
+
+To be able to use its original script and doc functionality,
+please try to regenerate this file using:
+
+  \$^X \$0 --unstrip
+
+END
+/ms;
+
+  open OUT, ">$0" or die "cannot strip $0: $!\n";
+  print OUT $self;
+
+  exit 0;
 }

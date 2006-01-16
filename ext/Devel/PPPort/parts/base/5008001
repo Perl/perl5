@@ -7,6 +7,7 @@ packlist                       # U
 save_bool                      # U
 savestack_grow_cnt             # U
 scan_vstring                   # E
+seed                           # U
 sv_cat_decode                  # U
 sv_compile_2op                 # E (Perl_sv_compile_2op)
 sv_setpviv                     # U
@@ -17,4 +18,6 @@ PERL_GCC_BRACE_GROUPS_FORBIDDEN # added by devel/scanprov
 PERL_MAGIC_utf8                # added by devel/scanprov
 PERL_MAGIC_vstring             # added by devel/scanprov
 PERL_SCAN_SILENT_ILLDIGIT      # added by devel/scanprov
+PERL_SIGNALS_UNSAFE_FLAG       # added by devel/scanprov
+PL_signals                     # added by devel/scanprov
 XST_mUV                        # added by devel/scanprov

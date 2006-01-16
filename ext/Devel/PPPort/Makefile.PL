@@ -4,13 +4,13 @@
 #
 ################################################################################
 #
-#  $Revision: 15 $
+#  $Revision: 17 $
 #  $Author: mhx $
-#  $Date: 2005/01/31 08:10:50 +0100 $
+#  $Date: 2006/01/14 18:07:57 +0100 $
 #
 ################################################################################
 #
-#  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
+#  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
 #  Version 2.x, Copyright (C) 2001, Paul Marquess.
 #  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 #
@@ -28,11 +28,11 @@ unless ($ENV{'PERL_CORE'}) {
 
 if ($ENV{'PERL_CORE'}) {
   # Pods will be built by installman.
-  @coreopts = ( MAN3PODS => {} );
+  @moreopts = ( MAN3PODS => {} );
 }
 else {
   # Devel::PPPort is in the core since 5.7.3
-  @coreopts = ( INSTALLDIRS => ($] >= 5.007003 ? 'perl' : 'site') );
+  @moreopts = ( INSTALLDIRS => ($] >= 5.007003 ? 'perl' : 'site') );
 }
 
 @ARGV = map { /^--with-(.*)/ && ++$opt{$1} ? () : $_ } @ARGV;
@@ -49,6 +49,11 @@ if ($opt{'apicheck'}) {
   push @clean,   qw{ apicheck.c };
 }
 
+if (eval $ExtUtils::MakeMaker::VERSION >= 6.30_01) {
+  print "Setting license tag...\n";
+  push @moreopts, LICENSE => 'perl';
+}
+
 WriteMakefile(
   NAME          => 'Devel::PPPort',
   VERSION_FROM  => 'PPPort_pm.PL',
@@ -60,7 +65,7 @@ WriteMakefile(
   XSPROTOARG    => '-noprototypes',
   clean         => { FILES => "@clean" },
   depend        => { '$(OBJECT)' => '$(H_FILES)' },
-  @coreopts,
+  @moreopts,
 );
 
 sub MY::postamble {

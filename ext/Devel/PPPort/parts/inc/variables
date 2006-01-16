@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 5 $
+##  $Revision: 4 $
 ##  $Author: mhx $
-##  $Date: 2006/01/14 18:08:00 +0100 $
+##  $Date: 2006/01/14 18:07:58 +0100 $
 ##
 ################################################################################
 ##
@@ -17,41 +17,46 @@
 
 =provides
 
-__UNDEFINED__
+PL_signals
+PERL_SIGNALS_UNSAFE_FLAG
 
 =implementation
 
-__UNDEFINED__  dTHR       dNOOP
+#ifndef PERL_SIGNALS_UNSAFE_FLAG
 
-__UNDEFINED__  dTHX       dNOOP
-__UNDEFINED__  dTHXa(x)   dNOOP
+#define PERL_SIGNALS_UNSAFE_FLAG 0x0001
 
-__UNDEFINED__  pTHX       void
-__UNDEFINED__  pTHX_
-__UNDEFINED__  aTHX
-__UNDEFINED__  aTHX_
+__NEED_VAR__ U32 PL_signals = PERL_SIGNALS_UNSAFE_FLAG;
 
-__UNDEFINED__  dTHXoa(x)  dTHXa(x)
+#endif
+
+=xsinit
+
+#define NEED_PL_signals
+
+=xsmisc
+
+U32 get_PL_signals_1(void)
+{
+  return PL_signals;
+}
+
+extern U32 get_PL_signals_2(void);
+extern U32 get_PL_signals_3(void);
 
 =xsubs
 
-IV
-no_THX_arg(sv)
-	SV *sv
+int
+compare_PL_signals()
 	CODE:
-		RETVAL = 1 + sv_2iv(sv);
+		{
+		  U32 ref = get_PL_signals_1();
+		  RETVAL = ref == get_PL_signals_2() && ref == get_PL_signals_3();
+		}
 	OUTPUT:
 		RETVAL
 
-void
-with_THX_arg(error)
-	char *error
-	PPCODE:
-		Perl_croak(aTHX_ "%s", error);
+=tests plan => 1
 
-=tests plan => 2
-
-ok(&Devel::PPPort::no_THX_arg("42"), 43);
-eval { &Devel::PPPort::with_THX_arg("yes\n"); };
-ok($@ =~ /^yes/);
+ok(Devel::PPPort::compare_PL_signals());
 

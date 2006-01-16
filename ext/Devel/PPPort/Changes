@@ -1,3 +1,42 @@
+3.07 - 2006-01-16
+
+    * improve internals documentation in HACKERS
+    * minor internal cleanups
+    * thanks to Steve Peters for adding support for
+      the following API
+        SvMAGIC_set
+        SvPVX_const
+        SvPVX_mutable
+        SvRV_set
+        SvSTASH_set
+        SvUV_set
+
+3.06_04 - 2005-10-30
+
+    * add --strip / --unstrip options
+    * added support for the following API
+        Newx
+        Newxc
+        Newxz
+        XSRETURN
+
+3.06_03 - 2005-10-18
+
+    * fix extra ')' in PPPort_pm.PL
+    * fix compiler warnings
+    * fix test for PL_signals
+    * fix API listing
+    * more tests
+
+3.06_02 - 2005-10-18
+
+    * improve devel/buildperl.pl utility
+    * added support for the following API
+        dAXMARK
+        PL_signals
+        PERL_SIGNALS_UNSAFE_FLAG
+        XSprePUSH
+
 3.06_01 - 2005-06-25
 
     * fix --compat-version argument checking

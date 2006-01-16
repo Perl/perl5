@@ -44,6 +44,7 @@ rsignal                        # E
 rsignal_state                  # E
 save_I16                       # U
 save_gp                        # U
+share_hek                      # E
 start_subparse                 # E (Perl_start_subparse)
 sv_catpvf                      # U
 sv_catpvf_mg                   # U

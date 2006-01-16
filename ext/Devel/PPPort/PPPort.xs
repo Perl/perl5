@@ -8,13 +8,13 @@
 *
 ********************************************************************************
 *
-*  $Revision: 8 $
+*  $Revision: 9 $
 *  $Author: mhx $
-*  $Date: 2005/01/31 08:10:55 +0100 $
+*  $Date: 2006/01/14 18:07:55 +0100 $
 *
 ********************************************************************************
 *
-*  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
+*  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
 *  Version 2.x, Copyright (C) 2001, Paul Marquess.
 *  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 *
@@ -62,6 +62,9 @@
 #define NEED_sv_2pv_nolen
 #define NEED_sv_2pvbyte
 
+/* ---- from parts/inc/variables ---- */
+#define NEED_PL_signals
+
 /* =========== END XSINIT =================================================== */
 
 #include "ppport.h"
@@ -82,6 +85,19 @@ XS(XS_Devel__PPPort_dXSTARG)
   SP -= items;
   iv = SvIV(ST(0)) + 1;
   PUSHi(iv);
+  XSRETURN(1);
+}
+
+XS(XS_Devel__PPPort_dAXMARK);  /* prototype */
+XS(XS_Devel__PPPort_dAXMARK)
+{
+  dSP;
+  dAXMARK;
+  dITEMS;
+  IV iv;
+  SP -= items;
+  iv = SvIV(ST(0)) - 1;
+  PUSHs(sv_2mortal(newSViv(iv)));
   XSRETURN(1);
 }
 
@@ -146,6 +162,15 @@ static void test_sv_vsetpvf(pTHX_ SV *sv, const char *pat, ...)
   va_end(args);
 }
 
+/* ---- from parts/inc/variables ---- */
+U32 get_PL_signals_1(void)
+{
+  return PL_signals;
+}
+
+extern U32 get_PL_signals_2(void);
+extern U32 get_PL_signals_3(void);
+
 /* =========== END XSMISC =================================================== */
 
 MODULE = Devel::PPPort		PACKAGE = Devel::PPPort
@@ -153,6 +178,7 @@ MODULE = Devel::PPPort		PACKAGE = Devel::PPPort
 BOOT:
 	/* ---- from parts/inc/misc ---- */
 	newXS("Devel::PPPort::dXSTARG", XS_Devel__PPPort_dXSTARG, file);
+	newXS("Devel::PPPort::dAXMARK", XS_Devel__PPPort_dAXMARK, file);
 	
 	/* ---- from parts/inc/MY_CXT ---- */
 	{
@@ -538,6 +564,40 @@ sv_usepvn_mg(sv, sv2)
 		sv_usepvn_mg(sv, copy, len);
 
 ##----------------------------------------------------------------------
+##  XSUBs from parts/inc/memory
+##----------------------------------------------------------------------
+
+int
+checkmem()
+  PREINIT:
+    char *p;
+
+  CODE:
+    RETVAL = 0;
+    Newx(p, 6, char);
+    CopyD("Hello", p, 6, char);
+    if (memEQ(p, "Hello", 6))
+      RETVAL++;
+    ZeroD(p, 6, char);
+    if (memEQ(p, "\0\0\0\0\0\0", 6))
+      RETVAL++;
+    Poison(p, 6, char);
+    if (memNE(p, "\0\0\0\0\0\0", 6))
+      RETVAL++;
+    Safefree(p);
+
+    Newxz(p, 6, char);
+    if (memEQ(p, "\0\0\0\0\0\0", 6))
+      RETVAL++;
+    Safefree(p);
+
+    Newxc(p, 3, short, char);
+    Safefree(p);
+
+  OUTPUT:
+    RETVAL
+
+##----------------------------------------------------------------------
 ##  XSUBs from parts/inc/misc
 ##----------------------------------------------------------------------
 
@@ -595,6 +655,18 @@ newSVpvn()
 		XPUSHs(newSVpvn(NULL, 2));
 		XPUSHs(newSVpvn(NULL, 0));
 		XSRETURN(5);
+
+void
+xsreturn(two)
+	int two
+	PPCODE:
+		XPUSHs(newSVpvn("test1", 5));
+		if (two)
+		  XPUSHs(newSVpvn("test2", 5));
+		if (two)
+		  XSRETURN(2);
+		else
+		  XSRETURN(1);
 
 SV *
 PL_sv_undef()
@@ -657,6 +729,16 @@ UNDERBAR()
 		}
 	OUTPUT:
 		RETVAL
+
+void
+prepush()
+	CODE:
+		{
+		  dXSTARG;
+		  XSprePUSH;
+		  PUSHi(42);
+		  XSRETURN(1);
+		}
 
 ##----------------------------------------------------------------------
 ##  XSUBs from parts/inc/mPUSH
@@ -802,6 +884,36 @@ newRV_noinc_REFCNT()
 		RETVAL
 
 ##----------------------------------------------------------------------
+##  XSUBs from parts/inc/Sv_set
+##----------------------------------------------------------------------
+
+IV
+TestSvUV_set(sv, val)
+	SV *sv
+	UV val
+	CODE:
+		SvUV_set(sv, val);
+		RETVAL = SvUVX(sv) == val ? 42 : -1;
+	OUTPUT:
+		RETVAL
+
+IV
+TestSvPVX_const(sv)
+        SV *sv
+        CODE:
+                RETVAL = strEQ(SvPVX_const(sv), "mhx") ? 43 : -1;
+        OUTPUT:
+                RETVAL
+
+IV
+TestSvPVX_mutable(sv)
+        SV *sv
+        CODE:
+                RETVAL = strEQ(SvPVX_mutable(sv), "mhx") ? 44 : -1;
+        OUTPUT:
+                RETVAL
+
+##----------------------------------------------------------------------
 ##  XSUBs from parts/inc/sv_xpvf
 ##----------------------------------------------------------------------
 
@@ -898,7 +1010,7 @@ SvPVbyte(sv)
 		const char *str;
 	CODE:
 		str = SvPVbyte(sv, len);
-		RETVAL = strEQ(str, "mhx") ? len : -1;
+		RETVAL = strEQ(str, "mhx") ? (IV) len : (IV) -1;
 	OUTPUT:
 		RETVAL
 
@@ -992,3 +1104,17 @@ XPUSHu()
 		TARG = sv_newmortal();
 		XPUSHu(43);
 		XSRETURN(1);
+
+##----------------------------------------------------------------------
+##  XSUBs from parts/inc/variables
+##----------------------------------------------------------------------
+
+int
+compare_PL_signals()
+	CODE:
+		{
+		  U32 ref = get_PL_signals_1();
+		  RETVAL = ref == get_PL_signals_2() && ref == get_PL_signals_3();
+		}
+	OUTPUT:
+		RETVAL

@@ -88,6 +88,7 @@ Ams||dAX
 Ams||dAXMARK
 Ams||dITEMS
 Ams||dMARK
+Ams||dMULTICALL
 Ams||dORIGMARK
 Ams||dSP
 Ams||dUNDERBAR
@@ -97,6 +98,9 @@ Ams||dXSI32
 Ams||ENTER
 Ams||FREETMPS
 Ams||LEAVE
+Ams||MULTICALL
+Ams||POP_MULTICALL
+Ams||PUSH_MULTICALL
 Ams||PUTBACK
 Ams||SAVETMPS
 Ams||SPAGAIN
@@ -170,9 +174,9 @@ Am|void|mXPUSHi|IV iv
 Am|void|mXPUSHn|NV nv
 Am|void|mXPUSHp|char* str|STRLEN len
 Am|void|mXPUSHu|UV uv
-Am|void|Newc|int id|void* ptr|int nitems|type|cast
-Am|void|New|int id|void* ptr|int nitems|type
-Am|void|Newz|int id|void* ptr|int nitems|type
+Am|void|Newxc|void* ptr|int nitems|type|cast
+Am|void|Newx|void* ptr|int nitems|type
+Am|void|Newxz|void* ptr|int nitems|type
 Am|void|Poison|void* dest|int nitems|type
 Am|void|PUSHi|IV iv
 Am|void|PUSHMARK|SP

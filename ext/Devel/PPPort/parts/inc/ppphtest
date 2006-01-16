@@ -1,12 +1,12 @@
 ################################################################################
 ##
-##  $Revision: 26 $
+##  $Revision: 29 $
 ##  $Author: mhx $
-##  $Date: 2005/06/24 19:03:21 +0200 $
+##  $Date: 2006/01/14 23:01:37 +0100 $
 ##
 ################################################################################
 ##
-##  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
+##  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
 ##  Version 2.x, Copyright (C) 2001, Paul Marquess.
 ##  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 ##
@@ -15,7 +15,16 @@
 ##
 ################################################################################
 
-=tests plan => 197
+=tests plan => 202
+
+BEGIN {
+  if ($ENV{'SKIP_PPPHTEST'}) {
+    for (1 .. 202) {
+      ok(1);
+    }
+    exit 0;
+  }
+}
 
 use File::Path qw/rmtree mkpath/;
 use Config;
@@ -736,4 +745,30 @@ newSViv();
 ---------------------------- Makefile.PL --------------------------------------
 
 newSViv();
+
+===============================================================================
+
+# check if explicit variables are handled propery
+
+my $o = ppport(qw(--copy=a));
+ok($o =~ /^Needs to include.*ppport\.h/m);
+ok($o =~ /^Uses PL_signals/m);
+ok($o =~ /^File needs PL_signals, adding static request/m);
+ok(eq_files('MyExt.xsa', 'MyExt.ra'));
+
+unlink qw(MyExt.xsa);
+
+---------------------------- MyExt.xs -----------------------------------------
+
+PL_signals = 123;
+if (PL_signals == 42)
+  foo();
+
+---------------------------- MyExt.ra -----------------------------------------
+
+#define NEED_PL_signals
+#include "ppport.h"
+PL_signals = 123;
+if (PL_signals == 42)
+  foo();
 

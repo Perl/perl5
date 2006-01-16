@@ -1,0 +1,40 @@
+5.009003
+MULTICALL                      # E
+Newx                           # E
+Newxc                          # E
+Newxz                          # E
+POP_MULTICALL                  # E
+PUSH_MULTICALL                 # E
+SvMAGIC_set                    # U
+SvRV_set                       # U
+SvSTASH_set                    # E
+SvUV_set                       # U
+av_arylen_p                    # E
+ckwarn                         # U
+ckwarn_d                       # U
+csighandler                    # E (Perl_csighandler)
+dAXMARK                        # E
+dMULTICALL                     # E
+doref                          # E
+gv_const_sv                    # E
+hv_eiter_p                     # E
+hv_eiter_set                   # U
+hv_name_set                    # U
+hv_placeholders_get            # U
+hv_placeholders_p              # E
+hv_placeholders_set            # U
+hv_riter_p                     # E
+hv_riter_set                   # U
+is_utf8_string_loclen          # U
+my_sprintf                     # U
+newGIVENOP                     # E
+newSVhek                       # E
+newWHENOP                      # E
+newWHILEOP                     # E (Perl_newWHILEOP)
+ref                            # E (Perl_ref)
+sortsv_flags                   # U
+stashpv_hvname_match           # U
+vverify                        # U
+PERL_BCDVERSION                # added by devel/scanprov
+SvPVX_const                    # added by devel/scanprov
+SvPVX_mutable                  # added by devel/scanprov

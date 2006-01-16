@@ -24,10 +24,10 @@ BEGIN {
   eval "use Test";
   if ($@) {
     require 'testutil.pl';
-    print "1..32\n";
+    print "1..38\n";
   }
   else {
-    plan(tests => 32);
+    plan(tests => 38);
   }
 }
 
@@ -56,6 +56,18 @@ ok(!&Devel::PPPort::boolSV(0));
 $_ = "Fred";
 ok(&Devel::PPPort::DEFSV(), "Fred");
 ok(&Devel::PPPort::UNDERBAR(), "Fred");
+
+if ($] >= 5.009002) {
+  eval q{
+    my $_ = "Tony";
+    ok(&Devel::PPPort::DEFSV(), "Fred");
+    ok(&Devel::PPPort::UNDERBAR(), "Tony");
+  };
+}
+else {
+  ok(1);
+  ok(1);
+}
 
 eval { 1 };
 ok(!&Devel::PPPort::ERRSV());
@@ -87,4 +99,10 @@ ok(!&Devel::PPPort::get_cv('not_my_cv', 0));
 ok(&Devel::PPPort::get_cv('not_my_cv', 1));
 
 ok(Devel::PPPort::dXSTARG(42), 43);
+ok(Devel::PPPort::dAXMARK(4711), 4710);
+
+ok(Devel::PPPort::prepush(), 42);
+
+ok(join(':', Devel::PPPort::xsreturn(0)), 'test1');
+ok(join(':', Devel::PPPort::xsreturn(1)), 'test1:test2');
 

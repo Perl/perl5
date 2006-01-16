@@ -4,13 +4,13 @@
 *
 ********************************************************************************
 *
-*  $Revision: 6 $
+*  $Revision: 8 $
 *  $Author: mhx $
-*  $Date: 2005/02/02 21:47:34 +0100 $
+*  $Date: 2006/01/14 18:07:56 +0100 $
 *
 ********************************************************************************
 *
-*  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
+*  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
 *  Version 2.x, Copyright (C) 2001, Paul Marquess.
 *  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 *
@@ -59,3 +59,7 @@ void call_newCONSTSUB_3(void)
   newCONSTSUB(gv_stashpv("Devel::PPPort", FALSE), "test_value_3", newSViv(3));
 }
 
+U32 get_PL_signals_3(void)
+{
+  return PL_signals;
+}
