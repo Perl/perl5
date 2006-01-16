@@ -38,6 +38,7 @@ sub new {
 
 sub DESTROY {
     my ($dh) = @_;
+    no warnings 'io';
     closedir($dh);
 }
 
