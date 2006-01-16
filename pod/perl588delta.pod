@@ -483,8 +483,6 @@ Too much to list here;  see L<http://search.cpan.org/src/MSCHWERN/ExtUtils-MakeM
 
 File::Basename upgraded to version 2.74
 
-
-
 =item *
 
 File::Copy upgraded to version 2.09
@@ -665,6 +663,14 @@ utilising the ithreads cloning tracking code.
 
 Switch upgraded to version 2.10_01
 
+=over
+
+=item *
+
+documentation typos fixed
+
+=back
+
 =item *
 
 Sys::Syslog upgraded to version 0.13
@@ -705,6 +711,19 @@ Improved documentation.
 =item *
 
 Term::ANSIColor upgraded to version 1.10
+ 
+=over 4
+
+=item *
+
+Fixes a bug in C<colored> when C<$EACHLINE> is set that caused it to not color
+lines consisting solely of 0.
+
+=item *
+
+Improved tests.
+
+=back
 
 =item *
 
@@ -721,10 +740,27 @@ Test::Simple upgraded to version 0.62
 =item *
 
 Text::Tabs upgraded to version 2005.0824
+ 
+=over 4
+
+=item *
+
+Provides a faster implementation of C<expand>
+
+=back
 
 =item *
 
 Text::Wrap upgraded to version 2005.082401
+ 
+=over 4
+
+=item *
+
+Adds C<$Text::Wrap::separator2>, which allows you to preserve existing newlines
+but add linebreaks with some other string.
+
+=back
 
 =item *
 
@@ -803,7 +839,7 @@ Now implements UCA Revision 14 (based on Unicode 4.1.0).
 
 =item *
 
-Unicode::Collate->new method does not destroy user's $_ any longer
+Unicode::Collate->new method no longer destroys user's $_
 
 =item *
 
