@@ -22,35 +22,135 @@ they are bugs and reports are welcome.
 
 Attribute::Handlers upgraded to version 0.78_02
 
+=over
+
+=item *
+
+documentation typo fix
+
+=back
+
 =item *
 
 attrs upgraded to version 1.02
+
+=over
+
+=item *
+
+internal cleanup only
+
+=back
 
 =item *
 
 autouse upgraded to version 1.05
 
+=over
+
 =item *
 
-B upgraded to version 1.09_01. The inheritance hierarchy of the C<B::>
-modules has been corrected; C<B::NV> now inherits from C<B::SV> (instead of
-C<B::IV>).
+simplified implemenation
+
+=back
+
+=item *
+
+B upgraded to version 1.09_01
+
+=over
+
+=item *
+
+The inheritance hierarchy of the C<B::> modules has been corrected;
+C<B::NV> now inherits from C<B::SV> (instead of C<B::IV>).
+
+=back
 
 =item *
 
 blib upgraded to version 1.03
 
+=over
+
+=item *
+
+documentation typo fix
+
+=back
+
 =item *
 
 ByteLoader upgraded to version 0.06
+
+=over
+
+=item *
+
+internal cleanup
+
+=back
 
 =item *
 
 CGI upgraded to version 3.15
 
+=over
+
+=item *
+
+Extraneous "?" from self_url() removed
+
+=item *
+
+scrolling_list() select attribute fixed
+
+=item *
+
+virtual_port now works properly with https protocol
+
+=item *
+
+upload_hook() and append() now works in function-oriented mode
+
+=item *
+
+POST_MAX doesn't cause client to hang any more
+
+=item *
+
+automatic tab indexes are now disabled and new C<-tabindex> pragma has
+been added to turn automatic indexes back on
+
+=item *
+
+end_form() doesn't emit empty (and non-validating) <div>
+
+=item *
+
+CGI::Carp works better in certain mod_perl configurations
+
+=item *
+
+Setting $CGI::TMPDIRECTORY  is now effective
+
+=item *
+
+enhanced documentation
+
+=back
+
 =item *
 
 charnames upgraded to version 1.05
+
+=over
+
+=item *
+
+viacode() now accept hex strings and is better optimized.
+
+=back
 
 =item *
 
@@ -111,6 +211,26 @@ Improved C<wget> support on Win32
 =item *
 
 Cwd upgraded to version 3.12
+
+=over
+
+=item *
+
+canonpath() on Win32 now collapses F<foo\..> sections correctly.
+
+=item *
+
+Improved behaviour on Symbian OS.
+
+=item *
+
+enhanced documenation and typo fixes
+
+=item *
+
+internal cleanup
+
+=back
 
 =item *
 
@@ -340,6 +460,39 @@ Switch upgraded to version 2.10_01
 
 Sys::Syslog upgraded to version 0.13
 
+=over 4
+
+=item *
+
+Now provides numeric macros and meaningful C<Exporter> tags.
+
+=item *
+
+No longer uses C<Sys::Hostname> as it may provide useless values in
+unconfigured network environments, so instead directly uses C<INADDR_LOOPBACK>.
+
+=item *
+
+C<syslog()> now uses local timestamp.
+
+=item *
+
+C<setlogmask()> now behaves like its C counterpart.
+
+=item *
+
+C<setlogsock()> will now C<croak()> as documented.
+
+=item *
+
+Improved error and warnings messages.
+
+=item *
+
+Improved documentation.
+
+=back
+
 =item *
 
 Term::ANSIColor upgraded to version 1.10
@@ -416,6 +569,20 @@ C<Win32::GetOSName>.
 =back
 
 =head1 Utility Changes
+
+=head2 h2xs enhancements
+
+C<h2xs> implements new option C<--use-xsloader> to force use of
+C<XSLoader> even in backward compatible modules.
+
+The handling of author's names that had apostrophes has been fixed.
+
+Any enums with negative values are now skipped.
+
+=head2 perlivp enhancements
+
+C<perlivp> implement new option C<-a> and will not check for F<*.ph>
+files by default any more.  Use the C<-a> option to run I<all> tests.
 
 =head1 New Documentation
 
@@ -501,7 +668,7 @@ was backed out.
 
 Using the sprintf() function with some formats could lead to a buffer
 overflow in some specific cases. This has been fixed, along with several
-other bugs, notably in bound checking.
+other bugs, notably in bounds checking.
 
 In related fixes, it was possible for badly written code that did not follow
 the documentation of C<Sys::Syslog> to have formatting vulnerabilities.
@@ -546,7 +713,7 @@ C<PerlIO::scalar> now works better with non-default C<$/> settings.
 
 =item *
 
-You can now use the C<x> operator to demultiply a C<qw//> list. This used
+You can now use the C<x> operator to repeat a C<qw//> list. This used
 to raise a syntax error.
 
 =item *
@@ -586,11 +753,6 @@ case differed.
 
 Perl will now use the C library calls C<unsetenv> and C<clearenv> if present
 to delete keys from C<%ENV> and delete C<%ENV> entirely,
-
-=item *
-
-The commandline flag C<-f> is now invalid when perl was compiled without
-C<USE_SITECUSTOMIZE> defined; which remains the default configuration.
 
 =back
 
