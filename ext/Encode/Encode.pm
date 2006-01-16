@@ -1,9 +1,9 @@
 #
-# $Id: Encode.pm,v 2.12 2005/09/08 14:17:17 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.14 2006/01/15 15:43:36 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.12 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.14 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
@@ -183,11 +183,10 @@ sub from_to($$$;$)
 	require Carp;
 	Carp::croak("Unknown encoding '$to'");
     }
-    my $uni = $f->decode($string,$check);
-    return undef if ($check && length($string));
-    $string =  $t->encode($uni,$check);
+    my $uni = $f->decode($string);
+    $_[0] = $string =  $t->encode($uni,$check);
     return undef if ($check && length($uni));
-    return defined($_[0] = $string) ? length($string) : undef ;
+    return defined($_[0]) ? length($string) : undef ;
 }
 
 sub encode_utf8($)
@@ -200,6 +199,7 @@ sub encode_utf8($)
 sub decode_utf8($;$)
 {
     my ($str, $check) = @_;
+    return $str if is_utf8($str);
     if ($check){
 	return decode("utf8", $str, $check);
     }else{

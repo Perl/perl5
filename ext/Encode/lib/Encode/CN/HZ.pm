@@ -3,7 +3,7 @@ package Encode::CN::HZ;
 use strict;
 
 use vars qw($VERSION);
-$VERSION = do { my @r = (q$Revision: 2.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+$VERSION = do { my @r = (q$Revision: 2.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 use Encode qw(:fallbacks);
 
@@ -45,6 +45,7 @@ sub decode ($$;$)
 	    }
 	}
 	else { # GB mode; the byte ranges are as in RFC 1843.
+	    no warnings 'uninitialized';
 	    if ($str =~ s/^((?:[\x21-\x77][\x21-\x7E])+)//) {
 		$ret .= $GB->decode($1, $chk);
 	    }

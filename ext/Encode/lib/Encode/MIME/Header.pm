@@ -1,7 +1,7 @@
 package Encode::MIME::Header;
 use strict;
 # use warnings;
-our $VERSION = do { my @r = (q$Revision: 2.1 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION = do { my @r = (q$Revision: 2.2 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 use Encode qw(find_encoding encode_utf8 decode_utf8);
 use MIME::Base64;
 use Carp;
@@ -47,10 +47,15 @@ sub decode($$;$){
     $str =~ s/\?=\s+=\?/\?==\?/gos;
     # multi-line header to single line
     $str =~ s/(:?\r|\n|\r\n)[ \t]//gos;
+
+    1 while ($str =~ s/(\=\?[0-9A-Za-z\-_]+\?[Qq]\?)(.*?)\?\=\1(.*?)\?\=/$1$2$3\?\=/);  # Concat consecutive QP encoded mime headers
+                                                                                        # Fixes breaking inside multi-byte characters
+
     $str =~
 	s{
 	    =\?                  # begin encoded word
 		([0-9A-Za-z\-_]+) # charset (encoding)
+                (?:\*[A-Za-z]{1,8}(?:-[A-Za-z]{1,8})*)? # language (RFC 2231)
 		\?([QqBb])\?     # delimiter
 		(.*?)            # Base64-encodede contents
 		\?=              # end encoded word      
@@ -96,6 +101,7 @@ my $re_encoded_word =
        (?:
 	=\?               # begin encoded word
 	(?:[0-9A-Za-z\-_]+) # charset (encoding)
+        (?:\*\w+(?:-\w+)*)? # language (RFC 2231)
 	\?(?:[QqBb])\?      # delimiter
 	(?:.*?)             # Base64-encodede contents
 	\?=                 # end encoded word

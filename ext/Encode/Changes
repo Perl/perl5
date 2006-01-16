@@ -1,8 +1,42 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.12 2005/09/08 14:17:17 dankogai Exp dankogai $
+# $Id: Changes,v 2.14 2006/01/15 15:43:36 dankogai Exp dankogai $
 #
-$Revision: 2.12 $ $Date: 2005/09/08 14:17:17 $
+
+$Revision: 2.14 $ $Date: 2006/01/15 15:43:36 $
+2.14  2006/01/15 15:06:36 $
+! Makefile.PL 
+  Change 26295: Don't build manpages for Encode and Unicode::Normalize
+  Message-Id: <200512071540.jB7Fe4Gt017960@smtp3.ActiveState.com>
+! Encode.pm
+  Change 26081: Pod nit in Encode.pm, found by Marc Lehmann in RT #36949. 
+  Message-Id: <200511110357.jAB3vZcP023647@smtp3.ActiveState.com>
+! Encode.xs Encode/encode.h bin/enc2xs encengine.c
+  Change 25821: Mark more static Encode data structures as const.
+  Change 25823: use more 'const' in the Encode data structures.
+  Message-Id: <200510221243.j9MChTSu027711@smtp3.ActiveState.com>
+  Message-Id: <200510221343.j9MDhTk9001245@smtp3.ActiveState.com>
+
+2.13 2006/01/15 15:06:36
+! AUTHORS
+  Miyagawa's mail address updated
+  Message-Id: <693254b90601150535o767e10bai4f4732c275b4ebe0@mail.gmail.com>
+! lib/Encode/MIME/Header.pm
+  #16413: Encode::MIME::Headers patch to solve what is probably someone else's bug
+  http://rt.cpan.org/NoAuth/Bug.html?id=16413
+! lib/Encode/MIME/Header.pm t/mime-header.t
+  Applied: RT #16258: Support for RFC 2184 language tag
+  http://rt.cpan.org/NoAuth/Bug.html?id=16258
+! Encode.pm
+  Fixed RT #14559: fix for #8872 introduces new "bug"
+  http://rt.cpan.org/NoAuth/Bug.html?id=14559  
+! Encode.pm
++ t/from_to.t
+  from_to() now makes use of $check more naturally.
+  Message-Id: <693254b90601150535o767e10bai4f4732c275b4ebe0@mail.gmail.com>
+  <B10B4DE2-9BAF-4344-B3BE-2119977D817A@dan.co.jp>
+
+2.12 2005/09/08 14:17:17
 ! Encode.xs Encode.pm t/fallback.t
   Now accepts coderef for CHECK!
 ! ucm/8859-7.ucm
