@@ -7,7 +7,7 @@ BEGIN {
 
 require "./test.pl";
 
-plan( tests => 11 );
+plan( tests => 13 );
 
 # Used to segfault (bug #15479)
 fresh_perl_is(
@@ -50,6 +50,11 @@ package main;
 		  '',
 		  );
 }
+
+# now tests in eval
+
+ok( !eval  { defined %achtfaden:: },   'works in eval{}' );
+ok( !eval q{ defined %schoenmaker:: }, 'works in eval("")' );
 
 # now tests with strictures
 
