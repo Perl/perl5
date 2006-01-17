@@ -443,10 +443,6 @@ the C<< $COMPILING >> variable has been added
 
 =back
 
-=item *
-
-Errno upgraded to version XXX
-
 =over
 
 =item *
@@ -1402,7 +1398,7 @@ internal cleanup
 C<h2xs> implements new option C<--use-xsloader> to force use of
 C<XSLoader> even in backward compatible modules.
 
-The handling of author's names that had apostrophes has been fixed.
+The handling of authors' names that had apostrophes has been fixed.
 
 Any enums with negative values are now skipped.
 
