@@ -943,7 +943,7 @@ Pod::Parser upgraded to version 1.32
 
 =item *
 
-allow fixes that start with =head on the first line
+allow files that start with =head on the first line
 
 =item *
 
