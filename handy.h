@@ -620,7 +620,7 @@ hopefully catches attempts to access uninitialized memory.
 #define MEM_WRAP_CHECK(n,t) \
 	(void)((sizeof(t)>1?(n):1)>((MEM_SIZE)~0)/sizeof(t)?(Perl_croak_nocontext(PL_memory_wrap),0):0)
 #define MEM_WRAP_CHECK_1(n,t,a) \
-	(void)((sizeof(t)>1?(n):1)>((MEM_SIZE)~0)/sizeof(t)?(Perl_croak_nocontext(a),0):0)
+	(void)(sizeof(t) > 1 && (n) > ((MEM_SIZE)~0)/sizeof(t) && (Perl_croak_nocontext(a),0))
 #define MEM_WRAP_CHECK_2(n,t,a,b) \
 	(void)((sizeof(t)>1?(n):1)>((MEM_SIZE)~0)/sizeof(t)?(Perl_croak_nocontext(a,b),0):0)
 #define MEM_WRAP_CHECK_(n,t) MEM_WRAP_CHECK(n,t),
