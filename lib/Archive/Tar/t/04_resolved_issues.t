@@ -25,7 +25,7 @@ use_ok( $Class );
     local $Archive::Tar::DO_NOT_USE_PREFIX = 1;
     local $Archive::Tar::DO_NOT_USE_PREFIX = 1;
     
-    my $dir =   'Catalyst-Helper-Controller-Scaffold-HTML-Template-0.03/' . 
+    my $dir =   'Catalyst-Helper-Controller-Scaffold-HTML-Template-0_03/' . 
                 'lib/Catalyst/Helper/Controller/Scaffold/HTML/';
     my $file =  'Template.pm';
     my $out =   $$ . '.tar';
