@@ -11,7 +11,7 @@ $i = 1;
 
 my $Is_EBCDIC = (ord('A') == 193) ? 1 : 0;
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 45;
+my $total_tests = 46;
 if ($Is_EBCDIC || $Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
 
@@ -208,6 +208,15 @@ sub bytes_to_utf16 {
 
 $i++; do_require(bytes_to_utf16('n', qq(print "ok $i\\n"; 1;\n), 1)); # BE
 $i++; do_require(bytes_to_utf16('v', qq(print "ok $i\\n"; 1;\n), 1)); # LE
+
+write_file('bleah.pm', qq(die "This is an expected error";\n));
+delete $INC{"bleah.pm"}; ++$::i;
+eval { CORE::require bleah; };
+if ($@ =~ /^This is an expected error/) {
+    print "ok $i\n";
+} else {
+    print "not ok $i\n";
+}
 
 END {
     1 while unlink 'bleah.pm';
