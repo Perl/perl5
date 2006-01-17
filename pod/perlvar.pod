@@ -1012,15 +1012,16 @@ inplace editing.  (Mnemonic: value of B<-i> switch.)
 By default, running out of memory is an untrappable, fatal error.
 However, if suitably built, Perl can use the contents of C<$^M>
 as an emergency memory pool after die()ing.  Suppose that your Perl
-were compiled with -DPERL_EMERGENCY_SBRK and used Perl's malloc.
+were compiled with C<-DPERL_EMERGENCY_SBRK> and used Perl's malloc.
 Then
 
     $^M = 'a' x (1 << 16);
 
 would allocate a 64K buffer for use in an emergency.  See the
 F<INSTALL> file in the Perl distribution for information on how to
-enable this option.  To discourage casual use of this advanced
-feature, there is no L<English|English> long name for this variable.
+add custom C compilation flags when compiling perl.  To discourage casual
+use of this advanced feature, there is no L<English|English> long name for
+this variable.
 
 =item $OSNAME
 
