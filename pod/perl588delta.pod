@@ -154,9 +154,9 @@ viacode() now accept hex strings and is better optimized.
 
 =item *
 
-CPAN upgraded to version 1.83. This provides
+CPAN upgraded to version 1.83
 
-=over 4
+=over
 
 =item *
 
@@ -487,17 +487,58 @@ File::Basename upgraded to version 2.74
 
 File::Copy upgraded to version 2.09
 
+=over
+
+=item *
+
+copy a file onto itself used to fail.
+
+=item *
+
+moving a file between file systems now preserves the access and
+modification time stamps
+
+=back
+
 =item *
 
 File::Find upgraded to version 1.10
+
+=over
+
+=item *
+
+windows portability fixes
+
+=item *
+
+enhanced documentation
+
+=back
 
 =item *
 
 File::Glob upgraded to version 1.05
 
+=over
+
+=item *
+
+internal cleanup
+
+=back
+
 =item *
 
 File::Path upgraded to version 1.08
+
+=over
+
+=item *
+
+mkpath now preserves errno when mkdir fails
+
+=back
 
 =item *
 
@@ -506,6 +547,14 @@ File::Spec upgraded to version 3.12
 =item *
 
 FileCache upgraded to version 1.06
+
+=over
+
+=item *
+
+POD formatting error in documentation fixed
+
+=back
 
 =item *
 
@@ -528,29 +577,116 @@ restrictive than usual.
 
 GDBM_File upgraded to version 1.08
 
+=over
+
+=item *
+
+internal cleanup
+
+=back
+
 =item *
 
 Getopt::Long upgraded to version 2.35
+
+=over
+
+=item *
+
+C<prefix_pattern> has now been complemented by a new configuration
+option C<long_prefix_pattern> that allows the user to specify what
+prefix patterns should have long option style sematics applied.
+
+=item *
+
+options can now take multiple values at once (experimental)
+
+=item *
+
+various bug fixes
+
+=back
 
 =item *
 
 if upgraded to version 0.05
 
+=over
+
+=item *
+
+give more meaningful error messages from if.pm when invoked with a
+condition in list context.
+
+=item *
+
+restore backwards compatibility with earlier versions of perl
+
+=back
+
 =item *
 
 IO upgraded to version 1.22
+
+=over
+
+=item *
+
+enhanched documentation
+
+=item *
+
+internal cleanup
+
+=back
 
 =item *
 
 IPC::Open2 upgraded to version 1.02
 
+=over
+
+=item *
+
+enhanced documentation
+
+=back
+
 =item *
 
 IPC::Open3 upgraded to version 1.02
 
+=over
+
 =item *
 
-List::Util upgraded to version 1.18
+enhanced documentation
+
+=back
+
+=item *
+
+List::Util upgraded to version 1.18 (was 1.14)
+
+=over
+
+=item *
+
+fix pure-perl version of refaddr to avoid blessing an un-blessed reference
+
+=item *
+
+use XSLoader for faster loading
+
+=item *
+
+fixed various memory leaks
+
+=item *
+
+internal cleanup and portability fixes
+
+=back
 
 =item *
 
@@ -564,45 +700,129 @@ Math::Trig upgraded to version 1.03
 
 MIME::Base64 upgraded to version 3.07
 
+=over
+
+=item *
+
+use XSLoader for faster loading
+
+=item *
+
+enhanced documentation
+
+=item *
+
+internal cleanup
+
+=back
+
 =item *
 
 NDBM_File upgraded to version 1.06
+
+=over
+
+=item *
+
+enhanced documentation
+
+=back
 
 =item *
 
 ODBM_File upgraded to version 1.06
 
+=over
+
+=item *
+
+documentation typo fixed
+
+=item *
+
+internal cleanup
+
+=back
+
 =item *
 
 Opcode upgraded to version 1.06
+
+=over
+
+=item *
+
+enhanced documentation
+
+=item *
+
+internal cleanup
+
+=back
 
 =item *
 
 open upgraded to version 1.05
 
+=over
+
+=item *
+
+enhanced documentation
+
+=back
+
 =item *
 
 overload upgraded to version 1.04
+
+=over
+
+=item *
+
+enhanced documentation
+
+=back
 
 =item *
 
 PerlIO upgraded to version 1.04
 
-=item *
-
-PerlIO::encoding upgraded to version 0.09
+=over
 
 =item *
 
-PerlIO::scalar upgraded to version 0.04
+PerlIO::via iterate over layers properly now
 
 =item *
 
-PerlIO::via upgraded to version 0.03
+PerlIO::scalar understands C<< $/ = "" >> now
+
+=item *
+
+encoding(utf-8-strict) with partial characters now work
+
+=item *
+
+enhanced documentation
+
+=item *
+
+internal cleanup
+
+=back
 
 =item *
 
 Pod::Functions upgraded to version 1.03
+
+=over
+
+=item *
+
+documentation typos fixed
+
+=back
 
 =item *
 
@@ -615,35 +835,115 @@ Pod::Html upgraded to version 1.0504
 HTML output will now correctly link
 to C<=item>s on the same page, and should be valid XHTML.
 
+=item *
+
+Variable names are recognized as intended
+
+=item *
+
+documentation typos fixed
+
 =back
 
 =item *
 
 Pod::Parser upgraded to version 1.32
 
+=over
+
+=item *
+
+allow fixes that start with =head on the first line
+
+=item *
+
+windows portability fix
+
+=item *
+
+exit status of pod2usage fixed
+
+=item *
+
+New C<-noperldoc> switch to pod2usage
+
+=item *
+
+arbitrary URL schemes now allowed
+
+=item *
+
+documentation typos fixed
+
+=back
+
 =item *
 
 POSIX upgraded to version 1.09
+
+=over
+
+=item *
+
+documentation typos fixed
+
+=item *
+
+internal cleanup
+
+=back
 
 =item *
 
 re upgraded to version 0.05
 
+=over
+
+=item *
+
+documentation typo fixed
+
+=back
+
 =item *
 
 Safe upgraded to version 2.12
 
+=over
+
 =item *
 
-Scalar::Util upgraded to version 1.18
+minor documentation enhancement
+
+=back
 
 =item *
 
 SDBM_File upgraded to version 1.05
 
+=over
+
+=item *
+
+documentation typo fixed
+
+=item *
+
+internal cleanup
+
+=back
+
 =item *
 
 Socket upgraded to version 1.78
+
+=over
+
+=item *
+
+internal cleanup
+
+=back
 
 =item *
 
@@ -712,7 +1012,7 @@ Improved documentation.
 
 Term::ANSIColor upgraded to version 1.10
  
-=over 4
+=over
 
 =item *
 
@@ -729,19 +1029,59 @@ Improved tests.
 
 Term::ReadLine upgraded to version 1.02
 
-=item *
-
-Test::Harness upgraded to version 2.56
+=over
 
 =item *
 
-Test::Simple upgraded to version 0.62
+documentation tweaks
+
+=back
+
+=item *
+
+Test::Harness upgraded to version 2.56 (was 2.48)
+
+=over
+
+=item *
+
+The Test::Harness timer is now off by default.
+
+=item *
+
+Now shows elapsed time in 1000ths of a second.
+
+=item *
+
+various bug fixes
+
+=back
+
+=item *
+
+Test::Simple upgraded to version 0.62 (was 0.54)
+
+=over
+
+=item *
+
+is_deeply() failed to work for many cases
+
+=item *
+
+various minor bug fixes
+
+=item *
+
+documentation enhancements
+
+=back
 
 =item *
 
 Text::Tabs upgraded to version 2005.0824
  
-=over 4
+=over
 
 =item *
 
@@ -753,7 +1093,7 @@ Provides a faster implementation of C<expand>
 
 Text::Wrap upgraded to version 2005.082401
  
-=over 4
+=over
 
 =item *
 
@@ -765,6 +1105,18 @@ but add linebreaks with some other string.
 =item *
 
 threads upgraded to version 1.07
+
+=over
+
+=item *
+
+various bugfixes
+
+=item *
+
+internal cleanup
+
+=back
 
 =item *
 
