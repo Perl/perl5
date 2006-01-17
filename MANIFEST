@@ -3003,6 +3003,7 @@ vos/configure_full_perl.sh	VOS shell script to configure "full" perl before buil
 vos/configure_perl.cm		VOS command macro to configure "mini" perl before building
 vos/install_perl.cm		VOS command macro to install "mini" perl after building
 vos/Makefile			A helper for maintaining the config.*.* in UNIX
+vos/mv-if-diff			Script to mv a file if it changed
 vos/make_full_perl.sh	VOS shell script to build and test "full" perl
 vos/perl.bind			VOS bind control file
 vos/test_vos_dummies.c		Test program for "vos_dummies.c"
