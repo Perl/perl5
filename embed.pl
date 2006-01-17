@@ -199,7 +199,12 @@ sub write_protos {
 		    our $unflagged_pointers;
 		    ++$unflagged_pointers;
 		}
-		push( @nonnull, $n ) if ( $arg =~ s/\s*\bNN\b\s+// );
+		# Given the bugs fixed by changes 25822 and 26253, for now
+		# strip NN with no effect, until I'm confident that there are
+		# no similar bugs lurking.
+		# push( @nonnull, $n ) if ( $arg =~ s/\s*\bNN\b\s+// );
+		$arg =~ s/\s*\bNN\b\s+//;
+
 		$arg =~ s/\s*\bNULLOK\b\s+//; # strip NULLOK with no effect
 	    }
 	    $ret .= join ", ", @args;
