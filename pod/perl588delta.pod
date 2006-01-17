@@ -1484,7 +1484,8 @@ case differed. This was fixed by Nicholas Clark.
 =item *
 
 Perl will now use the C library calls C<unsetenv> and C<clearenv> if present
-to delete keys from C<%ENV> and delete C<%ENV> entirely,
+to delete keys from C<%ENV> and delete C<%ENV> entirely, thanks to a patch
+from Alan Burlison.
 
 =back
 
