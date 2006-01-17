@@ -481,7 +481,33 @@ Too much to list here;  see L<http://search.cpan.org/src/MSCHWERN/ExtUtils-MakeM
 
 =item *
 
-File::Basename upgraded to version 2.74
+File::Basename upgraded to version 2.74, with changes contributed by Schwern.
+
+=over
+
+=item *
+
+Documentation clarified and errors corrected.
+
+=item *
+
+C<basename> now strips trailing path seperators before processing the name.
+
+=item *
+
+C<basename> now returns C</> for parameter C</>, which makes C<basename>
+consistent with the shell utility of the same name.
+
+=item *
+
+The suffix is now not stripped if it is identical to the remaining characters
+in the name, again for consistency with the shell utility.
+
+=item *
+
+Some internal code cleanup.
+
+=back
 
 =item *
 
@@ -543,6 +569,33 @@ mkpath now preserves errno when mkdir fails
 =item *
 
 File::Spec upgraded to version 3.12
+
+=over
+
+=item *
+
+File::Spec->rootdir() now returns C<\> on Win32, instead of C</>
+
+=item *
+
+C<$^O> could sometimes become tainted. This has been fixed.
+
+=item *
+
+C<canonpath> on Win32 now collapses C<foo/..> (or C<foo\..>) sections
+correctly, rather than doing the "misguided" work it was previously doing.
+Note that C<canonpath> on Unix still does B<not> collapse these sections, as
+doing so would be incorrect.
+
+=item *
+
+Some documentation improvements
+
+=item *
+
+Some internal code cleanup
+
+=back
 
 =item *
 
@@ -692,9 +745,46 @@ internal cleanup and portability fixes
 
 Math::Complex upgraded to version 1.35
 
+=over
+
+=item *
+
+atan2(0, i) now works, as do all the (computable) complex argument cases
+
+=item *
+
+fixes for certain bugs in C<make> and C<emake>
+
+=item *
+
+support returning the I<k>th root directly
+
+=item *
+
+support [2,-3pi/8] in C<emake>
+
+=item *
+
+support 'inf' for C<make>/C<emake>
+
+=item *
+
+document C<make>/C<emake> more visibly
+
+=back
+
 =item *
 
 Math::Trig upgraded to version 1.03
+
+=over
+
+=item *
+
+add more great circle routines: C<great_circle_waypoint> an
+C<great_circle_destination>
+
+=back
 
 =item *
 
@@ -1110,11 +1200,17 @@ threads upgraded to version 1.07
 
 =item *
 
-various bugfixes
+threads will now honour C<no warnings 'threads'>
 
 =item *
 
-internal cleanup
+A thread's interpreter is now freed after C<$t->join()> rather than after
+C<undef $t>, which should fix some ithreads memory leaks. (Fixed by Dave
+Mitchell)
+
+=item *
+
+Some documentation typo fixes.
 
 =back
 
