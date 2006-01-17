@@ -977,13 +977,14 @@ inc.
 
 The default since perl 5.000 has been for perl to create an empty scalar
 with every new typeglob. The increased use of lexical variables means that
-most are now unused. Perl can now be compiled with C<-DPERL_DONT_CREATE_GVSV>
-to avoid creating these empty scalars. This will significantly decrease the
-number of scalars allocated for all configurations, and the number of scalars
-that need to be copied for ithread creation. Whilst this option is binary
-compatible with existing perl installations, it does change a long-standing
-previous assumption about the internals, hence it is not enabled by default,
-as some third party code may rely on the old behaviour.
+most are now unused. Thanks to Nicholas Clark's efforts, Perl can now be
+compiled with C<-DPERL_DONT_CREATE_GVSV> to avoid creating these empty scalars.
+This will significantly decrease the number of scalars allocated for all
+configurations, and the number of scalars that need to be copied for ithread
+creation. Whilst this option is binary compatible with existing perl
+installations, it does change a long-standing previous assumption about the
+internals, hence it is not enabled by default, as some third party code may
+rely on the old behaviour.
 
 We would recommend testing with this configuration on new deployments of
 perl, particularly for multithreaded servers, to see whether all third party
@@ -999,9 +1000,9 @@ C<fchown>, thanks to a patch provided by Gisle Aas.
 
 =item *
 
-Weak reference creation is now I<O(1)> rather than I<O(n)>. Weak reference
-deletion remains I<O(n)>, but if deletion only happens at program exit, it
-may be skipped completely.
+Weak reference creation is now I<O(1)> rather than I<O(n)>, courtesy of
+Nicholas Clark. Weak reference deletion remains I<O(n)>, but if deletion only
+happens at program exit, it may be skipped completely.
 
 =item *
 
@@ -1058,7 +1059,7 @@ party code.
 
 It had been reported that running under perl's debugger when processing
 Unicode data could cause unexpectedly large slowdowns. The most likely cause
-of this has been identified and fixed.
+of this was identified and fixed by Nicholas Clark.
 
 =head2 Smaller fixes
 
@@ -1126,7 +1127,7 @@ fixed by Dave Mitchell and Yves Orton.
 
 C<lcfirst> and C<ucfirst> could corrupt the string for certain cases where
 the length UTF-8 encoding of the string in lower case, upper case or title
-case differed.
+case differed. This was fixed by Nicholas Clark.
 
 =item *
 
@@ -1180,12 +1181,14 @@ use these rather than assigning to macros in LVALUE context.
 
 Dave Mitchell improved the lexer debugging output under C<-DT>
 
-String buffer allocation is now rounded up to the next multiple of 4 (or
-8 on platforms with 64 bit pointers). This should reduce the number of calls
-to C<realloc> without actually using any extra memory.
+Nicholas Clark changed the string buffer allocation so that it is now rounded
+up to the next multiple of 4 (or 8 on platforms with 64 bit pointers). This
+should reduce the number of calls to C<realloc> without actually using any
+extra memory.
 
-The C<HV>'s array of C<HE*>s is now allocated at the correct (minimal) size.
-Compile with C<-DPERL_USE_LARGE_HV_ALLOC> to use the old, sloppier, default.
+The C<HV>'s array of C<HE*>s is now allocated at the correct (minimal) size,
+thanks to another change by Nicholas Clark. Compile with
+C<-DPERL_USE_LARGE_HV_ALLOC> to use the old, sloppier, default.
 
 For XS or embedding debugging purposes, if perl is compiled with
 C<-DDEBUG_LEAKING_SCALARS_FORK_DUMP> in addition to
@@ -1193,7 +1196,9 @@ C<-DDEBUG_LEAKING_SCALARS> then a child process is C<fork>ed just before
 global destruction, which is used to display the values of any scalars
 found to have leaked at the end of global destruction. Without this, the
 scalars have already been freed sufficiently at the point of detection that
-it is impossible to produce any meaningful dump of their contents.
+it is impossible to produce any meaningful dump of their contents.  This
+feature was implemented by the indefatigable Nicholas Clark, based on an idea
+by Mike Giroux.
 
 =head1 New Tests
 
