@@ -50,7 +50,7 @@ autouse upgraded to version 1.05
 
 =item *
 
-simplified implemenation
+simplified implementation
 
 =back
 
@@ -196,7 +196,7 @@ New feature <show_upload_date>
 
 =item *
 
-C<CPAN::Version> (improved support for multidot version notation)
+C<CPAN::Version> (improved support for multi-dot version notation)
 
 =item *
 
@@ -224,7 +224,7 @@ Improved behaviour on Symbian OS.
 
 =item *
 
-enhanced documenation and typo fixes
+enhanced documentation and typo fixes
 
 =item *
 
@@ -378,7 +378,7 @@ Dumpvalue upgraded to version 1.12
 
 =item *
 
-documenation fix
+documentation fix
 
 =back
 
@@ -595,7 +595,7 @@ Getopt::Long upgraded to version 2.35
 
 C<prefix_pattern> has now been complemented by a new configuration
 option C<long_prefix_pattern> that allows the user to specify what
-prefix patterns should have long option style sematics applied.
+prefix patterns should have long option style semantics applied.
 
 =item *
 
@@ -632,7 +632,7 @@ IO upgraded to version 1.22
 
 =item *
 
-enhanched documentation
+enhanced documentation
 
 =item *
 
@@ -1049,7 +1049,7 @@ The Test::Harness timer is now off by default.
 
 =item *
 
-Now shows elapsed time in 1000ths of a second.
+Now shows elapsed time in milliseconds.
 
 =item *
 
@@ -1098,7 +1098,7 @@ Text::Wrap upgraded to version 2005.082401
 =item *
 
 Adds C<$Text::Wrap::separator2>, which allows you to preserve existing newlines
-but add linebreaks with some other string.
+but add line-breaks with some other string.
 
 =back
 
@@ -1339,7 +1339,7 @@ internals, hence it is not enabled by default, as some third party code may
 rely on the old behaviour.
 
 We would recommend testing with this configuration on new deployments of
-perl, particularly for multithreaded servers, to see whether all third party
+perl, particularly for multi-threaded servers, to see whether all third party
 code is compatible with it, as this configuration may give useful performance
 improvements. For existing installations we would not recommend changing to
 this configuration unless thorough testing is performed before deployment.
@@ -1366,7 +1366,7 @@ and to speed up some cases.
 Jarkko Hietaniemi and Andy Lester worked to mark as much data as possible in
 the C source files as C<static>, to increase the proportion of the executable
 file that the operating system can share between process, and thus reduce
-real memory usage on mutli-user systems.
+real memory usage on multi-user systems.
 
 =back
 
