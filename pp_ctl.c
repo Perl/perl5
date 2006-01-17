@@ -2922,7 +2922,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     PL_error_count = 0;
     PL_curcop = &PL_compiling;
     PL_curcop->cop_arybase = 0;
-    if (saveop && saveop->op_flags & OPf_SPECIAL)
+    if (saveop && saveop->op_type != OP_REQUIRE && saveop->op_flags & OPf_SPECIAL)
 	PL_in_eval |= EVAL_KEEPERR;
     else
 	sv_setpvn(ERRSV,"",0);
