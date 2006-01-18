@@ -1471,6 +1471,10 @@ in perl 5.8.9.
 There are improved hints for next-3.0, vmesa, IX, Darwin, Solaris, Linux,
 DEC/OSF, HP-UX and MPE/iX
 
+Perl extensions on Windows now can be statically built into the Perl DLL,
+thanks to a work by Vadim Konovalov. (This improvement was actually in 5.8.7,
+but was accidentally omitted from L<perl587delta>)
+
 =head1 Selected Bug Fixes
 
 =head2 Remove over-optimisation
