@@ -1627,7 +1627,7 @@ PP(pp_caller)
 	GV * const cvgv = CvGV(ccstack[cxix].blk_sub.cv);
 	/* So is ccstack[dbcxix]. */
 	if (isGV(cvgv)) {
-	    SV * const sv = NEWSV(49, 0);
+	    SV * const sv = newSV(0);
 	    gv_efullname3(sv, cvgv, NULL);
 	    PUSHs(sv_2mortal(sv));
 	    PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
@@ -1819,7 +1819,7 @@ PP(pp_enteriter)
 	GV * const gv = (GV*)POPs;
 	svp = &GvSV(gv);			/* symbol table variable */
 	SAVEGENERICSV(*svp);
-	*svp = NEWSV(0,0);
+	*svp = newSV(0);
 #ifdef USE_ITHREADS
 	iterdata = (void*)gv;
 #endif
@@ -2659,7 +2659,7 @@ S_save_lines(pTHX_ AV *array, SV *sv)
 
     while (s && s < send) {
 	const char *t;
-	SV * const tmpstr = NEWSV(85,0);
+	SV * const tmpstr = newSV(0);
 
 	sv_upgrade(tmpstr, SVt_PVMG);
 	t = strchr(s, '\n');
@@ -2889,7 +2889,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     PUSHMARK(SP);
 
     SAVESPTR(PL_compcv);
-    PL_compcv = (CV*)NEWSV(1104,0);
+    PL_compcv = (CV*)newSV(0);
     sv_upgrade((SV *)PL_compcv, SVt_PVCV);
     CvEVAL_on(PL_compcv);
     assert(CxTYPE(&cxstack[cxstack_ix]) == CXt_EVAL);
@@ -3144,7 +3144,7 @@ PP(pp_require)
 	if ((unixname = tounixspec(name, NULL)) != NULL)
 #endif
 	{
-	    namesv = NEWSV(806, 0);
+	    namesv = newSV(0);
 	    for (i = 0; i <= AvFILL(ar); i++) {
 		SV *dirsv = *av_fetch(ar, i, TRUE);
 

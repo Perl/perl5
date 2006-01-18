@@ -163,7 +163,7 @@ S_save_scalar_at(pTHX_ SV **sptr)
 {
     dVAR;
     SV * const osv = *sptr;
-    register SV * const sv = *sptr = NEWSV(0,0);
+    register SV * const sv = *sptr = newSV(0);
 
     if (SvTYPE(osv) >= SVt_PVMG && SvMAGIC(osv) && SvTYPE(osv) != SVt_PVGV) {
 	if (SvGMAGICAL(osv)) {
@@ -281,7 +281,7 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 	    IoFLAGS(gp->gp_io) |= IOf_ARGV|IOf_START;
 	}
 	GvGP(gv) = gp_ref(gp);
-	GvSV(gv) = NEWSV(72,0);
+	GvSV(gv) = newSV(0);
 	GvLINE(gv) = CopLINE(PL_curcop);
 	/* XXX Ideally this cast would be replaced with a change to const char*
 	   in the struct.  */
@@ -563,7 +563,7 @@ Perl_save_list(pTHX_ register SV **sarg, I32 maxsarg)
     register I32 i;
 
     for (i = 1; i <= maxsarg; i++) {
-	register SV * const sv = NEWSV(0,0);
+	register SV * const sv = newSV(0);
 	sv_setsv(sv,sarg[i]);
 	SSCHECK(3);
 	SSPUSHPTR(sarg[i]);		/* remember the pointer */
@@ -909,7 +909,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		switch (SvTYPE(sv)) {	/* Console ourselves with a new value */
 		case SVt_PVAV:	*(SV**)ptr = (SV*)newAV();	break;
 		case SVt_PVHV:	*(SV**)ptr = (SV*)newHV();	break;
-		default:	*(SV**)ptr = NEWSV(0,0);	break;
+		default:	*(SV**)ptr = newSV(0);		break;
 		}
 		SvREFCNT_dec(sv);	/* Cast current value to the winds. */
 		/* preserve pad nature, but also mark as not live

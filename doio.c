@@ -2308,7 +2308,7 @@ PerlIO *
 Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 {
     dVAR;
-    SV * const tmpcmd = NEWSV(55, 0);
+    SV * const tmpcmd = newSV(0);
     PerlIO *fp;
     ENTER;
     SAVEFREESV(tmpcmd);

@@ -311,8 +311,8 @@ Perl_yyparse (pTHX)
     PL_yycharp = &yychar; /* so PL_yyerror() can access it */
     PL_yylvalp = &yylval; /* so various functions in toke.c can access it */
 
-    yyss_sv = NEWSV(73, YYINITDEPTH * sizeof(short));
-    yyvs_sv = NEWSV(73, YYINITDEPTH * sizeof(YYSTYPE));
+    yyss_sv = newSV(YYINITDEPTH * sizeof(short));
+    yyvs_sv = newSV(YYINITDEPTH * sizeof(YYSTYPE));
     SAVEFREESV(yyss_sv);
     SAVEFREESV(yyvs_sv);
     yyss = (short *) SvPVX(yyss_sv);
@@ -321,7 +321,7 @@ Perl_yyparse (pTHX)
     yyssp = yyss;
     yyvsp = yyvs;
 #ifdef DEBUGGING
-    yyns_sv = NEWSV(73, YYINITDEPTH * sizeof(char *));
+    yyns_sv = newSV(YYINITDEPTH * sizeof(char *));
     SAVEFREESV(yyns_sv);
     /* XXX This seems strange to cast char * to char ** */
     yyns = (const char **) SvPVX(yyns_sv);

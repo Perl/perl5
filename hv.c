@@ -509,7 +509,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 			       call optimise.  */
 			    entry = hv_fetch_common(hv, keysv, key, klen,
 						    flags, HV_FETCH_ISSTORE,
-						    NEWSV(61,0), hash);
+						    newSV(0), hash);
 			} else {
 			    if (flags & HVhek_FREEKEY)
 				Safefree(key);
@@ -729,7 +729,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 			break;
 		    }
 		    /* LVAL fetch which actaully needs a store.  */
-		    val = NEWSV(61,0);
+		    val = newSV(0);
 		    HvPLACEHOLDERS(hv)--;
 		} else {
 		    /* store */
@@ -776,7 +776,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return 0;
     }
     if (action & HV_FETCH_LVALUE) {
-	val = NEWSV(61,0);
+	val = newSV(0);
 	if (SvMAGICAL(hv)) {
 	    /* At this point the old hv_fetch code would call to hv_store,
 	       which in turn might do some tied magic. So we need to make that
@@ -1398,7 +1398,7 @@ HV *
 Perl_newHV(pTHX)
 {
     register XPVHV* xhv;
-    HV * const hv = (HV*)NEWSV(502,0);
+    HV * const hv = (HV*)newSV(0);
 
     sv_upgrade((SV *)hv, SVt_PVHV);
     xhv = (XPVHV*)SvANY(hv);

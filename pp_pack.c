@@ -1537,7 +1537,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		break;
 	    }
 
-	    sv = sv_2mortal(NEWSV(35, len ? len : 1));
+	    sv = sv_2mortal(newSV(len ? len : 1));
 	    SvPOK_on(sv);
 	    str = SvPVX(sv);
 	    if (datumtype == 'b') {
@@ -1574,7 +1574,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    /* Preliminary length estimate, acceptable for utf8 too */
 	    if (howlen == e_star || len > (strend - s) * 2)
 		len = (strend - s) * 2;
-	    sv = sv_2mortal(NEWSV(35, len ? len : 1));
+	    sv = sv_2mortal(newSV(len ? len : 1));
 	    SvPOK_on(sv);
 	    str = SvPVX(sv);
 	    if (datumtype == 'h') {
@@ -2143,7 +2143,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
             }
 	    {
                 const STRLEN l = (STRLEN) (strend - s) * 3 / 4;
-		sv = sv_2mortal(NEWSV(42, l));
+		sv = sv_2mortal(newSV(l));
 		if (l) SvPOK_on(sv);
 	    }
 	    if (utf8) {

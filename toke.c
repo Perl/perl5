@@ -844,7 +844,7 @@ S_skipspace(pTHX_ register char *s)
 	 * so store the line into the debugger's array of lines
 	 */
 	if (PERLDB_LINE && PL_curstash != PL_debstash) {
-	    SV * const sv = NEWSV(85,0);
+	    SV * const sv = newSV(0);
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setpvn(sv,PL_bufptr,PL_bufend-PL_bufptr);
@@ -1439,7 +1439,7 @@ S_scan_const(pTHX_ char *start)
 {
     dVAR;
     register char *send = PL_bufend;		/* end of the constant */
-    SV *sv = NEWSV(93, send - start);		/* sv for the constant */
+    SV *sv = newSV(send - start);		/* sv for the constant */
     register char *s = start;			/* start of the constant */
     register char *d = SvPVX(sv);		/* destination for copies */
     bool dorange = FALSE;			/* are we in a translit range? */
@@ -2237,7 +2237,7 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
     if (!PL_rsfp_filters)
 	PL_rsfp_filters = newAV();
     if (!datasv)
-	datasv = NEWSV(255,0);
+	datasv = newSV(0);
     SvUPGRADE(datasv, SVt_PVIO);
     IoANY(datasv) = FPTR2DPTR(void *, funcp); /* stash funcp into spare field */
     IoFLAGS(datasv) |= IOf_FAKE_DIRP;
@@ -2753,7 +2753,7 @@ Perl_yylex(pTHX)
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	    PL_last_lop = PL_last_uni = Nullch;
 	    if (PERLDB_LINE && PL_curstash != PL_debstash) {
-		SV * const sv = NEWSV(85,0);
+		SV * const sv = newSV(0);
 
 		sv_upgrade(sv, SVt_PVMG);
 		sv_setsv(sv,PL_linestr);
@@ -2840,7 +2840,7 @@ Perl_yylex(pTHX)
 	} while (PL_doextract);
 	PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = s;
 	if (PERLDB_LINE && PL_curstash != PL_debstash) {
-	    SV * const sv = NEWSV(85,0);
+	    SV * const sv = newSV(0);
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);
@@ -9800,7 +9800,7 @@ S_scan_heredoc(pTHX_ register char *s)
     }
     s += SvCUR(herewas);
 
-    tmpstr = NEWSV(87,79);
+    tmpstr = newSV(79);
     sv_upgrade(tmpstr, SVt_PVIV);
     if (term == '\'') {
 	op_type = OP_CONST;
@@ -9889,7 +9889,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	    PL_bufend[-1] = '\n';
 #endif
 	if (PERLDB_LINE && PL_curstash != PL_debstash) {
-	    SV * const sv = NEWSV(88,0);
+	    SV * const sv = newSV(0);
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);
@@ -10178,9 +10178,9 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
     PL_multi_close = term;
 
-    /* create a new SV to hold the contents.  87 is leak category, I'm
-       assuming.  79 is the SV's initial length.  What a random number. */
-    sv = NEWSV(87,79);
+    /* create a new SV to hold the contents.  79 is the SV's initial length.
+       What a random number. */
+    sv = newSV(79);
     sv_upgrade(sv, SVt_PVIV);
     SvIV_set(sv, termcode);
     (void)SvPOK_only(sv);		/* validate pointer */
@@ -10364,7 +10364,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
 	/* update debugger info */
 	if (PERLDB_LINE && PL_curstash != PL_debstash) {
-	    SV * const sv = NEWSV(88,0);
+	    SV * const sv = newSV(0);
 
 	    sv_upgrade(sv, SVt_PVMG);
 	    sv_setsv(sv,PL_linestr);
@@ -10602,7 +10602,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 		    Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Misplaced _ in number");
 	    }
 
-	    sv = NEWSV(92,0);
+	    sv = newSV(0);
 	    if (overflowed) {
 		if (n > 4294967295.0 && ckWARN(WARN_PORTABLE))
 		    Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
@@ -10755,7 +10755,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 
 
 	/* make an sv from the string */
-	sv = NEWSV(92,0);
+	sv = newSV(0);
 
 	/*
            We try to do an integer conversion first if no characters
@@ -10796,7 +10796,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     /* if it starts with a v, it could be a v-string */
     case 'v':
 vstring:
-		sv = NEWSV(92,5); /* preallocate storage space */
+		sv = newSV(5); /* preallocate storage space */
 		s = scan_vstring(s,sv);
 	break;
     }
@@ -10930,7 +10930,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     save_item(PL_subname);
     SAVESPTR(PL_compcv);
 
-    PL_compcv = (CV*)NEWSV(1104,0);
+    PL_compcv = (CV*)newSV(0);
     sv_upgrade((SV *)PL_compcv, is_format ? SVt_PVFM : SVt_PVCV);
     CvFLAGS(PL_compcv) |= flags;
 
@@ -11218,7 +11218,7 @@ vstring, as well as updating the passed in sv.
 
 Function must be called like
 
-	sv = NEWSV(92,5);
+	sv = newSV(5);
 	s = scan_vstring(s,sv);
 
 The sv should already be large enough to store the vstring

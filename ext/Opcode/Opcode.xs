@@ -132,7 +132,7 @@ new_opset(pTHX_ SV *old_opset)
 	opset = newSVsv(old_opset);
     }
     else {
-	opset = NEWSV(1156, opset_len);
+	opset = newSV(opset_len);
 	Zero(SvPVX_const(opset), opset_len + 1, char);
 	SvCUR_set(opset, opset_len);
 	(void)SvPOK_only(opset);

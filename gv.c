@@ -45,7 +45,7 @@ Perl_gv_SVadd(pTHX_ GV *gv)
     if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
 	Perl_croak(aTHX_ "Bad symbol for scalar");
     if (!GvSV(gv))
-	GvSV(gv) = NEWSV(72,0);
+	GvSV(gv) = newSV(0);
     return gv;
 }
 #endif
@@ -196,7 +196,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 #ifdef PERL_DONT_CREATE_GVSV
     GvSV(gv) = NULL;
 #else
-    GvSV(gv) = NEWSV(72,0);
+    GvSV(gv) = newSV(0);
 #endif
     GvLINE(gv) = CopLINE(PL_curcop);
     /* XXX Ideally this cast would be replaced with a change to const char*
@@ -624,7 +624,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     if (!isGV(vargv)) {
 	gv_init(vargv, varstash, S_autoload, S_autolen, FALSE);
 #ifdef PERL_DONT_CREATE_GVSV
-	GvSV(vargv) = NEWSV(72,0);
+	GvSV(vargv) = newSV(0);
 #endif
     }
     LEAVE;
@@ -1244,7 +1244,7 @@ Perl_newIO(pTHX)
 {
     dVAR;
     GV *iogv;
-    IO * const io = (IO*)NEWSV(0,0);
+    IO * const io = (IO*)newSV(0);
 
     sv_upgrade((SV *)io,SVt_PVIO);
     /* This used to read SvREFCNT(io) = 1;

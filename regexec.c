@@ -2315,8 +2315,7 @@ typedef union re_unwind_t {
 	    ENTER;                                                       \
 	    SAVETMPS;                                                    \
 	    bufflen = TRIE_INITAL_ACCEPT_BUFFLEN ;                       \
-	    sv_accept_buff=NEWSV( 1234,                                  \
-	      bufflen * sizeof(reg_trie_accepted) - 1 );                 \
+	    sv_accept_buff=newSV(bufflen * sizeof(reg_trie_accepted) - 1 );\
 	    SvCUR_set( sv_accept_buff, sizeof(reg_trie_accepted) );      \
 	    SvPOK_on( sv_accept_buff );                                  \
 	    sv_2mortal( sv_accept_buff );                                \

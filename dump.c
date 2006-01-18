@@ -769,7 +769,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 #else
 	if ( ! PL_op->op_flags & OPf_SPECIAL) { /* not lexical */
 	    if (cSVOPo->op_sv) {
-		SV *tmpsv = NEWSV(0,0);
+		SV *tmpsv = newSV(0);
 		ENTER;
 		SAVEFREESV(tmpsv);
 		gv_fullname3(tmpsv, (GV*)cSVOPo->op_sv, Nullch);
@@ -1649,7 +1649,7 @@ Perl_debop(pTHX_ const OP *o)
     case OP_GVSV:
     case OP_GV:
 	if (cGVOPo_gv) {
-	    SV *sv = NEWSV(0,0);
+	    SV *sv = newSV(0);
 	    gv_fullname3(sv, cGVOPo_gv, Nullch);
 	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV_nolen_const(sv));
 	    SvREFCNT_dec(sv);

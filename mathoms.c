@@ -510,7 +510,7 @@ AV *
 Perl_av_fake(pTHX_ register I32 size, register SV **strp)
 {
     register SV** ary;
-    register AV * const av = (AV*)NEWSV(9,0);
+    register AV * const av = (AV*)newSV(0);
 
     sv_upgrade((SV *)av, SVt_PVAV);
     Newx(ary,size+1,SV*);

@@ -239,13 +239,13 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
     if (key > AvFILLp(av)) {
 	if (!lval)
 	    return 0;
-	sv = NEWSV(5,0);
+	sv = newSV(0);
 	return av_store(av,key,sv);
     }
     if (AvARRAY(av)[key] == &PL_sv_undef) {
     emptyness:
 	if (lval) {
-	    sv = NEWSV(6,0);
+	    sv = newSV(0);
 	    return av_store(av,key,sv);
 	}
 	return 0;
@@ -362,7 +362,7 @@ Creates a new AV.  The reference count is set to 1.
 AV *
 Perl_newAV(pTHX)
 {
-    register AV * const av = (AV*)NEWSV(3,0);
+    register AV * const av = (AV*)newSV(0);
 
     sv_upgrade((SV *)av, SVt_PVAV);
     /* sv_upgrade does AvREAL_only()  */
@@ -385,7 +385,7 @@ will have a reference count of 1.
 AV *
 Perl_av_make(pTHX_ register I32 size, register SV **strp)
 {
-    register AV * const av = (AV*)NEWSV(8,0);
+    register AV * const av = (AV*)newSV(0);
 
     sv_upgrade((SV *) av,SVt_PVAV);
     /* sv_upgrade does AvREAL_only()  */
@@ -399,7 +399,7 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
 	AvMAX(av) = size - 1;
 	for (i = 0; i < size; i++) {
 	    assert (*strp);
-	    ary[i] = NEWSV(7,0);
+	    ary[i] = newSV(0);
 	    sv_setsv(ary[i], *strp);
 	    strp++;
 	}

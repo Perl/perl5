@@ -1679,7 +1679,7 @@ strxfrm(src)
           STRLEN dstlen;
           char *p = SvPV(src,srclen);
           srclen++;
-          ST(0) = sv_2mortal(NEWSV(800,srclen*4+1));
+          ST(0) = sv_2mortal(newSV(srclen*4+1));
           dstlen = strxfrm(SvPVX(ST(0)), p, (size_t)srclen);
           if (dstlen > srclen) {
               dstlen++;

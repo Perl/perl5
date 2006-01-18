@@ -554,15 +554,6 @@ typedef U32 line_t;
 
 
 /*
-=head1 SV Manipulation Functions
-
-=for apidoc Am|SV*|NEWSV|int id|STRLEN len
-Creates a new SV.  A non-zero C<len> parameter indicates the number of
-bytes of preallocated string space the SV should have.  An extra byte for a
-tailing NUL is also reserved.  (SvPOK is not set for the SV even if string
-space is allocated.)  The reference count for the new SV is set to 1.
-C<id> is an integer id between 0 and 1299 (used to identify leaks).
-
 =head1 Memory Management
 
 =for apidoc Am|void|Newx|void* ptr|int nitems|type
@@ -631,7 +622,10 @@ hopefully catches attempts to access uninitialized memory.
 
 =cut */
 
+/* Maintained for backwards-compatibility only. Use newSV() instead. */
+#ifndef PERL_CORE
 #define NEWSV(x,len)	newSV(len)
+#endif
 
 #ifdef PERL_MALLOC_WRAP
 #define MEM_WRAP_CHECK(n,t) MEM_WRAP_CHECK_1(n,t,PL_memory_wrap)

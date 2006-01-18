@@ -333,7 +333,7 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
 {
     dVAR;
     const PADOFFSET offset = pad_alloc(OP_PADSV, SVs_PADMY);
-    SV* const namesv = NEWSV(1102, 0);
+    SV* const namesv = newSV(0);
 
     ASSERT_CURPAD_ACTIVE("pad_add_name");
 
@@ -469,7 +469,7 @@ Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type)
 {
     dVAR;
     PADOFFSET ix;
-    SV* const name = NEWSV(1106, 0);
+    SV* const name = newSV(0);
     sv_upgrade(name, SVt_PVNV);
     sv_setpvn(name, "&", 1);
     SvIV_set(name, -1);
@@ -1081,7 +1081,7 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
     /* if pad tmps aren't shared between ops, then there's no need to
      * create a new tmp when an existing op is freed */
 #ifdef USE_BROKEN_PAD_RESET
-    PL_curpad[po] = NEWSV(1107,0);
+    PL_curpad[po] = newSV(0);
     SvPADTMP_on(PL_curpad[po]);
 #else
     PL_curpad[po] = &PL_sv_undef;
@@ -1439,7 +1439,7 @@ Perl_cv_clone(pTHX_ CV *proto)
     ENTER;
     SAVESPTR(PL_compcv);
 
-    cv = PL_compcv = (CV*)NEWSV(1104, 0);
+    cv = PL_compcv = (CV*)newSV(0);
     sv_upgrade((SV *)cv, SvTYPE(proto));
     CvFLAGS(cv) = CvFLAGS(proto) & ~(CVf_CLONE|CVf_WEAKOUTSIDE);
     CvCLONED_on(cv);
@@ -1500,7 +1500,7 @@ Perl_cv_clone(pTHX_ CV *proto)
                 else if (sigil == '%')
 		    sv = (SV*)newHV();
 		else
-		    sv = NEWSV(0, 0);
+		    sv = newSV(0);
 		SvPADMY_on(sv);
 	    }
 	}
@@ -1508,7 +1508,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 	    sv = SvREFCNT_inc(ppad[ix]);
 	}
 	else {
-	    sv = NEWSV(0, 0);
+	    sv = newSV(0);
 	    SvPADTMP_on(sv);
 	}
 	PL_curpad[ix] = sv;
@@ -1616,7 +1616,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 		    else if (sigil == '%')
 			sv = (SV*)newHV();
 		    else
-			sv = NEWSV(0, 0);
+			sv = newSV(0);
 		    av_store(newpad, ix, sv);
 		    SvPADMY_on(sv);
 		}
@@ -1626,7 +1626,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 	    }
 	    else {
 		/* save temporaries on recursion? */
-		SV * const sv = NEWSV(0, 0);
+		SV * const sv = newSV(0);
 		av_store(newpad, ix, sv);
 		SvPADTMP_on(sv);
 	    }

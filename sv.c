@@ -4013,9 +4013,16 @@ Perl_sv_catpv_mg(pTHX_ register SV *sv, register const char *ptr)
 /*
 =for apidoc newSV
 
-Create a new null SV, or if len > 0, create a new empty SVt_PV type SV
-with an initial PV allocation of len+1. Normally accessed via the C<NEWSV>
-macro.
+Creates a new SV.  A non-zero C<len> parameter indicates the number of
+bytes of preallocated string space the SV should have.  An extra byte for a
+trailing NUL is also reserved.  (SvPOK is not set for the SV even if string
+space is allocated.)  The reference count for the new SV is set to 1.
+
+In 5.9.3, newSV() replaces the older NEWSV() API, and drops the first
+parameter, I<x>, a debug aid which allowed callers to identify themselves.
+This aid has been superseded by a new build option, PERL_MEM_LOG (see
+L<perlhack/PERL_MEM_LOG>).  The older API is still there for use in XS
+modules supporting older perls.
 
 =cut
 */
@@ -5761,7 +5768,7 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
 		sv_pos_u2b(sv,&append,0);
 	    }
 	} else if (SvUTF8(sv)) {
-	    SV * const tsv = NEWSV(0,0);
+	    SV * const tsv = newSV(0);
 	    sv_gets(tsv, fp, 0);
 	    sv_utf8_upgrade_nomg(tsv);
 	    SvCUR_set(sv,append);
@@ -6951,7 +6958,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	if (lref && !GvCVu(gv)) {
 	    SV *tmpsv;
 	    ENTER;
-	    tmpsv = NEWSV(704,0);
+	    tmpsv = newSV(0);
 	    gv_efullname3(tmpsv, gv, Nullch);
 	    /* XXX this is probably not what they think they're getting.
 	     * It has the same effect as "sub name;", i.e. just a forward
@@ -10644,7 +10651,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	PL_linestart	= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
     }
     else {
-        PL_linestr = NEWSV(65,79);
+        PL_linestr = newSV(79);
         sv_upgrade(PL_linestr,SVt_PVIV);
         sv_setpvn(PL_linestr,"",0);
 	PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart = SvPVX(PL_linestr);
@@ -11239,7 +11246,7 @@ S_varname(pTHX_ GV *gv, const char gvtype, PADOFFSET targ,
     }
 
     if (subscript_type == FUV_SUBSCRIPT_HASH) {
-	SV * const sv = NEWSV(0,0);
+	SV * const sv = newSV(0);
 	*SvPVX(name) = '$';
 	Perl_sv_catpvf(aTHX_ name, "{%s}",
 	    pv_display(sv,SvPVX_const(keyname), SvCUR(keyname), 0, 32));

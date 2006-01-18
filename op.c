@@ -4724,7 +4724,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	const char * const tname = (name ? name : aname);
 
 	if (PERLDB_SUBLINE && PL_curstash != PL_debstash) {
-	    SV * const sv = NEWSV(0,0);
+	    SV * const sv = newSV(0);
 	    SV * const tmpstr = sv_newmortal();
 	    GV * const db_postponed = gv_fetchpv("DB::postponed", GV_ADDMULTI, SVt_PVHV);
 	    HV *hv;
@@ -4908,7 +4908,7 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
     if (cv)				/* must reuse cv if autoloaded */
 	cv_undef(cv);
     else {
-	cv = (CV*)NEWSV(1105,0);
+	cv = (CV*)newSV(0);
 	sv_upgrade((SV *)cv, SVt_PVCV);
 	if (name) {
 	    GvCV(gv) = cv;

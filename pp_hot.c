@@ -1017,7 +1017,7 @@ S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
 	    Perl_warner(aTHX_ packWARN(WARN_MISC), err);
 	}
 
-        tmpstr = NEWSV(29,0);
+        tmpstr = newSV(0);
         didstore = hv_store_ent(hash,*relem,tmpstr,0);
         if (SvMAGICAL(hash)) {
             if (SvSMAGICAL(tmpstr))
@@ -1110,7 +1110,7 @@ PP(pp_aassign)
 		    HE *didstore;
 		    sv = *relem ? *relem : &PL_sv_no;
 		    relem++;
-		    tmpstr = NEWSV(29,0);
+		    tmpstr = newSV(0);
 		    if (*relem)
 			sv_setsv(tmpstr,*relem);	/* value */
 		    *(relem++) = tmpstr;
@@ -1624,7 +1624,7 @@ Perl_do_readline(pTHX)
 	}
     }
     else {
-	sv = sv_2mortal(NEWSV(57, 80));
+	sv = sv_2mortal(newSV(80));
 	offset = 0;
     }
 
@@ -1713,7 +1713,7 @@ Perl_do_readline(pTHX)
 	    if (SvLEN(sv) - SvCUR(sv) > 20) {
 		SvPV_shrink_to_cur(sv);
 	    }
-	    sv = sv_2mortal(NEWSV(58, 80));
+	    sv = sv_2mortal(newSV(80));
 	    continue;
 	}
 	else if (gimme == G_SCALAR && !tmplen && SvLEN(sv) - SvCUR(sv) > 80) {
@@ -1999,7 +1999,7 @@ PP(pp_iter)
 	if (lv)
 	    SvREFCNT_dec(LvTARG(lv));
 	else {
-	    lv = cx->blk_loop.iterlval = NEWSV(26, 0);
+	    lv = cx->blk_loop.iterlval = newSV(0);
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
 	    sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
@@ -3006,7 +3006,7 @@ Perl_vivify_ref(pTHX_ SV *sv, U32 to_what)
 	}
 	switch (to_what) {
 	case OPpDEREF_SV:
-	    SvRV_set(sv, NEWSV(355,0));
+	    SvRV_set(sv, newSV(0));
 	    break;
 	case OPpDEREF_AV:
 	    SvRV_set(sv, (SV*)newAV());

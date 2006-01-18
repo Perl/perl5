@@ -190,7 +190,7 @@ typedef char *pvindex;
 		sv = (SV*)newHV();			\
 		break;					\
 	    default:					\
-		sv = NEWSV(0,0);			\
+		sv = newSV(0);				\
 		SvUPGRADE(sv, (arg));			\
 	    }
 #define BSET_newsvx(sv, arg) STMT_START {		\

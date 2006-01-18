@@ -83,7 +83,7 @@ IV *pval;
 static SV *
 newFH(PerlIO *fp, char type) {
     SV *rv;
-    GV **stashp, *gv = (GV *)NEWSV(0,0);
+    GV **stashp, *gv = (GV *)newSV(0);
     HV *stash;
     IO *io;
 

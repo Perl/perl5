@@ -3474,26 +3474,19 @@ SV is B<not> incremented.
 =for hackers
 Found in file sv.c
 
-=item NEWSV
-X<NEWSV>
-
-Creates a new SV.  A non-zero C<len> parameter indicates the number of
-bytes of preallocated string space the SV should have.  An extra byte for a
-tailing NUL is also reserved.  (SvPOK is not set for the SV even if string
-space is allocated.)  The reference count for the new SV is set to 1.
-C<id> is an integer id between 0 and 1299 (used to identify leaks).
-
-	SV*	NEWSV(int id, STRLEN len)
-
-=for hackers
-Found in file handy.h
-
 =item newSV
 X<newSV>
 
-Create a new null SV, or if len > 0, create a new empty SVt_PV type SV
-with an initial PV allocation of len+1. Normally accessed via the C<NEWSV>
-macro.
+Creates a new SV.  A non-zero C<len> parameter indicates the number of
+bytes of preallocated string space the SV should have.  An extra byte for a
+trailing NUL is also reserved.  (SvPOK is not set for the SV even if string
+space is allocated.)  The reference count for the new SV is set to 1.
+
+In 5.9.3, newSV() replaces the older NEWSV() API, and drops the first
+parameter, I<x>, a debug aid which allowed callers to identify themselves.
+This aid has been superseded by a new build option, PERL_MEM_LOG (see
+L<perlhack/PERL_MEM_LOG>).  The older API is still there for use in XS
+modules supporting older perls.
 
 	SV*	newSV(STRLEN len)
 

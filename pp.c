@@ -163,7 +163,7 @@ PP(pp_rv2gv)
 			STRLEN len;
 			SV * const namesv = PAD_SV(cUNOP->op_targ);
 			const char * const name = SvPV(namesv, len);
-			gv = (GV*)NEWSV(0,0);
+			gv = (GV*)newSV(0);
 			gv_init(gv, CopSTASH(PL_curcop), name, len, 0);
 		    }
 		    else {
@@ -298,7 +298,7 @@ PP(pp_av2arylen)
     AV * const av = (AV*)TOPs;
     SV ** const sv = Perl_av_arylen_p(aTHX_ (AV*)av);
     if (!*sv) {
-	*sv = NEWSV(0,0);
+	*sv = newSV(0);
 	sv_upgrade(*sv, SVt_PVMG);
 	sv_magic(*sv, (SV*)av, PERL_MAGIC_arylen, NULL, 0);
     }
@@ -788,7 +788,7 @@ PP(pp_undef)
 	    gp_free((GV*)sv);
 	    Newxz(gp, 1, GP);
 	    GvGP(sv) = gp_ref(gp);
-	    GvSV(sv) = NEWSV(72,0);
+	    GvSV(sv) = newSV(0);
 	    GvLINE(sv) = CopLINE(PL_curcop);
 	    GvEGV(sv) = (GV*)sv;
 	    GvMULTI_on(sv);
@@ -4003,7 +4003,7 @@ PP(pp_anonhash)
 
     while (MARK < SP) {
 	SV * const key = *++MARK;
-	SV * const val = NEWSV(46, 0);
+	SV * const val = newSV(0);
 	if (MARK < SP)
 	    sv_setsv(val, *++MARK);
 	else if (ckWARN(WARN_MISC))
@@ -4241,7 +4241,7 @@ PP(pp_push)
     }
     else {
 	for (++MARK; MARK <= SP; MARK++) {
-	    SV * const sv = NEWSV(51, 0);
+	    SV * const sv = newSV(0);
 	    if (*MARK)
 		sv_setsv(sv, *MARK);
 	    av_store(ary, AvFILLp(ary)+1, sv);
