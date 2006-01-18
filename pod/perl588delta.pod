@@ -479,7 +479,7 @@ Documentation clarified and errors corrected.
 
 =item *
 
-C<basename> now strips trailing path seperators before processing the name.
+C<basename> now strips trailing path separators before processing the name.
 
 =item *
 
