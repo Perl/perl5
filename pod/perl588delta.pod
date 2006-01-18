@@ -1544,11 +1544,6 @@ opens.
 
 =item *
 
-C<//g> matches used to loop infinitely on tainted data. Dave Mitchell
-resolved this.
-
-=item *
-
 The optimisation of C<for (reverse @a)> introduced in perl 5.8.6 could
 misbehave when the array had undefined elements and was used in LVALUE
 context. Dave Mitchell provided a fix.
