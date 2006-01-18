@@ -15,7 +15,7 @@
 
 #define PERL_REVISION	5		/* age */
 #define PERL_VERSION	8		/* epoch */
-#define PERL_SUBVERSION	7		/* generation */
+#define PERL_SUBVERSION	8		/* generation */
 
 /* The following numbers describe the earliest compatible version of
    Perl ("compatibility" here being defined as sufficient binary/API
@@ -121,7 +121,7 @@ hunk.
 #if !defined(PERL_PATCHLEVEL_H_IMPLICIT) && !defined(LOCAL_PATCH_COUNT)
 static const char *local_patches[] = {
 	NULL
-	,"MAINT26907"
+	,"RC1"
 	,NULL
 };
 
