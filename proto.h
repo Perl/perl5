@@ -940,10 +940,7 @@ PERL_CALLCONV SV*	Perl_vnewSVpvf(pTHX_ const char* pat, va_list* args)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
-PERL_CALLCONV SV*	Perl_newSVrv(pTHX_ SV* rv, const char* classname)
-			__attribute__malloc__
-			__attribute__warn_unused_result__;
-
+PERL_CALLCONV SV*	Perl_newSVrv(pTHX_ SV* rv, const char* classname);
 PERL_CALLCONV SV*	Perl_newSVsv(pTHX_ SV* old)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;

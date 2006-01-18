@@ -556,7 +556,7 @@ Apda	|SV*	|newSVpvn	|NULLOK const char* s|STRLEN len
 Apda	|SV*	|newSVpvn_share	|NULLOK const char* s|I32 len|U32 hash
 Afpda	|SV*	|newSVpvf	|NN const char* pat|...
 Apa	|SV*	|vnewSVpvf	|NN const char* pat|NULLOK va_list* args
-Apda	|SV*	|newSVrv	|NN SV* rv|NULLOK const char* classname
+Apd	|SV*	|newSVrv	|NN SV* rv|NULLOK const char* classname
 Apda	|SV*	|newSVsv	|NULLOK SV* old
 Apa	|OP*	|newUNOP	|I32 type|I32 flags|NULLOK OP* first
 Apa	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|NULLOK LOOP* loop \
