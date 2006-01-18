@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1195\n";
+print "1..1196\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3423,5 +3423,16 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
        "# assigning to original string should not corrupt match vars");
 }
 
-# last test 1195
+{
+    package wooosh;
+    sub gloople {
+      "!";
+    }
+    package main;
+    
+    my $aeek = bless {}, 'wooosh';
+    eval {$aeek->gloople() =~ /(.)/g;};
+    ok($@ eq "", "# TODO 26410 caused a regression") or print "# $@\n";
+}
 
+# last test 1196
