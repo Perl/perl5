@@ -105,16 +105,8 @@ print "# problem '$@' when testing with a temporary file\n" if $@;
 if (@donetests == 3) {
   print "not " unless $donetests[0] == 0;
   print "ok 11 # fh/file [$donetests[0]]\n";
-  if ($^O eq 'VMS') {
-    # The open attempt on FROM in File::Compare::compare should fail
-    # on this OS since files are not shared by default.
-    print "not " unless $donetests[1] == -1;
-    print "ok 12 # file/file [$donetests[1]]\n";
-  }
-  else {
-    print "not " unless $donetests[1] == 0;
-    print "ok 12 # file/file [$donetests[1]]\n";
-  }
+  print "not " unless $donetests[1] == 0;
+  print "ok 12 # file/file [$donetests[1]]\n";
   print "not " unless $donetests[2] == 0;
   print "ok 13 # ";
   print "TODO" if $^O eq "cygwin"; # spaces after filename silently trunc'd
