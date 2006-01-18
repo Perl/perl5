@@ -189,6 +189,16 @@ if($@ =~ /Directory .*threads not allowed in require/) {
     print "not ok $i\n";
 }
 
+
+write_file('bleah.pm', qq(die "This is an expected error";\n));
+delete $INC{"bleah.pm"}; ++$::i;
+eval { CORE::require bleah; };
+if ($@ =~ /^This is an expected error/) {
+    print "ok $i\n";
+} else {
+    print "not ok $i\n";
+}
+
 ############################
 #### Add new tests here ####
 ############################
@@ -208,15 +218,6 @@ sub bytes_to_utf16 {
 
 $i++; do_require(bytes_to_utf16('n', qq(print "ok $i\\n"; 1;\n), 1)); # BE
 $i++; do_require(bytes_to_utf16('v', qq(print "ok $i\\n"; 1;\n), 1)); # LE
-
-write_file('bleah.pm', qq(die "This is an expected error";\n));
-delete $INC{"bleah.pm"}; ++$::i;
-eval { CORE::require bleah; };
-if ($@ =~ /^This is an expected error/) {
-    print "ok $i\n";
-} else {
-    print "not ok $i\n";
-}
 
 END {
     1 while unlink 'bleah.pm';
