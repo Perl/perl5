@@ -7,7 +7,7 @@
 $| = 1;
 
 # please update note at bottom of file when you change this
-print "1..1231\n";
+print "1..1235\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3420,6 +3420,48 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
        "# assigning to original string should not corrupt match vars");
 }
 
+{
+    package wooosh;
+    sub gloople {
+      "!";
+    }
+    package main;
+    
+    my $aeek = bless {}, 'wooosh';
+    eval {$aeek->gloople() =~ /(.)/g;};
+    ok($@ eq "", "//g match against return value of sub") or print "# $@\n";
+}
+
+{
+    sub gloople {
+      "!";
+    }
+    eval {gloople() =~ /(.)/g;};
+    ok($@ eq "", "# 26410 didn't affect sub calls for some reason")
+	or print "# $@\n";
+}
+
+{
+    package lv;
+    $var = "abc";
+    sub variable : lvalue { $var }
+
+    package main;
+    my $o = bless [], "lv";
+    my $f = "";
+    eval { for (1..2) { $f .= $1 if $o->variable =~ /(.)/g } };
+    ok($f eq "ab", "pos retained between calls # TODO") or print "# $@\n";
+}
+
+{
+    $var = "abc";
+    sub variable : lvalue { $var }
+
+    my $f = "";
+    eval { for (1..2) { $f .= $1 if variable() =~ /(.)/g } };
+    ok($f eq "ab", "pos retained between calls # TODO") or print "# $@\n";
+}
+
 { # related to [perl #27940]
     ok("\0-A"  =~ /\c@-A/, '@- should not be interpolated in a pattern');
     ok("\0\0A" =~ /\c@+A/, '@+ should not be interpolated in a pattern');
@@ -3536,4 +3578,4 @@ sub iseq($$;$) {
 }
 
 
-# last test 1231
+# last test 1235

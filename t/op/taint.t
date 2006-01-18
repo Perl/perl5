@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 255;
+plan tests => 256;
 
 $| = 1;
 
@@ -1089,6 +1089,19 @@ TERNARY_CONDITIONALS: {
     elsif ( my @bar = $foo =~ /([$valid_chars]+)/o ) {
         test not any_tainted @bar;
     }
+}
+
+# [perl #8262] //g loops infinitely on tainted data
+
+{
+    my @a;
+    local $::TODO = 1;
+    $a[0] = $^X;
+    my $i = 0;
+    while($a[0]=~ m/(.)/g ) {
+	last if $i++ > 10000;
+    }
+    cmp_ok $i, '<', 10000, "infinite m//g";
 }
 
 # at scope exit, a restored localised value should have its old
