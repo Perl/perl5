@@ -30,7 +30,7 @@ ok(Digest::SHA->new($NSA), undef);
 
 	# test OO methods using first two SHA-256 vectors from NIST
 
-my $temp = dirname($0) . "/oo.tmp";
+my $temp = File::Spec->catfile(dirname($0), "oo.tmp");
 my $file = File::Spec->canonpath($temp);
 open(FILE, ">$file");
 binmode(FILE);
