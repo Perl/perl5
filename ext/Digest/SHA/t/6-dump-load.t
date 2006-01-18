@@ -27,7 +27,7 @@ BEGIN {
 my @ext = (1, 256, 384, 512);
 my $data = "a" x 990000;
 my $skip;
-my $tmpname = dirname($0) . "/dumpload.tmp";
+my $tmpname = File::Spec->catfile(dirname($0), "dumpload.tmp");
 my $tmpfile = File::Spec->canonpath($tmpname);
 
 for (my $i = 0; $i < @sharsp; $i++) {
