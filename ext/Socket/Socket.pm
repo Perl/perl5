@@ -337,7 +337,10 @@ use XSLoader ();
 
 @EXPORT_OK = qw(CR LF CRLF $CR $LF $CRLF
 
+	       IPPROTO_ICMP
 	       IPPROTO_TCP
+	       IPPROTO_UDP
+
 	       TCP_KEEPALIVE
 	       TCP_MAXRT
 	       TCP_MAXSEG
