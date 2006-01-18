@@ -443,14 +443,6 @@ the C<< $COMPILING >> variable has been added
 
 =back
 
-=over
-
-=item *
-
-Cygwin fix
-
-=back
-
 =item *
 
 ExtUtils::Constant upgraded to version 0.17
