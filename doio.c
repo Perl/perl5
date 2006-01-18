@@ -1957,8 +1957,9 @@ Perl_ingroup(pTHX_ Gid_t testgid, bool effective)
         Safefree(gary);
         return rc;
     }
-#endif
+#else
     return FALSE;
+#endif
 #endif
 }
 
