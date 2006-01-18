@@ -28,6 +28,245 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.8		Maintenance release working toward v5.8.8
 --------------
 ____________________________________________________________________________
+[ 26907] By: nicholas                              on 2006/01/18  19:18:34
+        Log: Integrate:
+             [ 26885]
+             Gisle points out that it's ok to ignore the return value of newSVrv.
+             Due to how embed.pl is implemented, this also has the unfortunate
+             side-effect of removing __attribute__malloc__ from the attributes of
+             this function, but given that the new pointer is stored elsewhere
+             anyway, this shouldn't impact what gcc could have optimized.
+     Branch: maint-5.8/perl
+	  !> embed.fnc proto.h
+____________________________________________________________________________
+[ 26906] By: nicholas                              on 2006/01/18  19:00:58
+        Log: Integrate:
+             [ 26877]
+             Subject: Re: [PATCH] Updated README.macosx
+             From: Sherm Pendley <sherm@dot-app.org>
+             Date: Mon, 16 Jan 2006 16:53:23 -0500
+             Message-Id: <619C9A5D-972F-4B90-A99A-B4B6D04C584D@dot-app.org>
+             
+             [ 26878]
+             Make the description of $^M in perlvar a bit more clear
+             w.r.t. cross-references to the INSTALL document. (spotted
+             by Stas Bekman)
+     Branch: maint-5.8/perl
+	  !> README.macosx pod/perlvar.pod
+____________________________________________________________________________
+[ 26905] By: nicholas                              on 2006/01/18  18:55:09
+        Log: Perl extensions on Windows now can be statically built into Perl DLL
+             (Vadim Konovalov spotted that I'd failed to mention this for 5.8.7.
+             Better late than never, I feel)
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26898] By: nicholas                              on 2006/01/18  12:37:26
+        Log: Integrate:
+             [ 26838]
+             checkAUTHORS.pl --rank would loop infinitely on an empty results array.
+             
+             [ 26850]
+             e-mail update from Phil Lobbes
+             
+             [ 26852]
+             Add Ken Hirsch to AUTHORS.
+             
+             [ 26853]
+             Teach checkAUTHORS.pl about everyone in Changes5.8.[2-8], adding to
+             AUTHORS where necessary.
+             
+             [ 26854]
+             Some reordering and one new address for Stéphane Payrard
+             
+             [ 26855]
+             Oops. When the e-mail address came first, or there was no name with it,
+             checkAUTHORS.pl wasn't recognising it, which caused the change to be
+             attributed to the committer rather than the author. This now reveals
+             several people "missing" from the AUTHORS file.
+             
+             [ 26856]
+             Can now count the patches committed with --thanks-applied.
+             Changes5.8's top 3:
+             3332:   jhi
+             321:    ams
+             60:     nick
+             
+             [ 26861]
+             Teach checkAUTHORS about all the authors in 5.8.2-5.8.8, and any others
+             whose e-mail address I recognise.
+     Branch: maint-5.8/perl
+	  !> AUTHORS Porting/checkAUTHORS.pl
+____________________________________________________________________________
+[ 26896] By: nicholas                              on 2006/01/18  11:23:54
+        Log: Spelling fix.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26895] By: nicholas                              on 2006/01/18  11:20:27
+        Log: Remove the entry corresponding to change 26696
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26894] By: nicholas                              on 2006/01/18  11:19:10
+        Log: Revert change 26696 for now (Integrate 26410, [perl #8262] //g loops
+             infinitely on tainted data), because it breaks $o->m() =~ //;
+     Branch: maint-5.8/perl
+	   ! op.c t/op/taint.t
+____________________________________________________________________________
+[ 26890] By: gisle                                 on 2006/01/18  09:28:04
+        Log: Remove spurious =over block, left over from the Errno
+             deleted in change 26882.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26888] By: nicholas                              on 2006/01/17  23:07:16
+        Log: vos header generation still expects mv-if-diff, and needs various new
+             config.sh variables to be set to undef.
+     Branch: maint-5.8/perl
+	  +> vos/mv-if-diff
+	   ! MANIFEST vos/Makefile vos/config.alpha.def vos/config.ga.def
+____________________________________________________________________________
+[ 26887] By: nicholas                              on 2006/01/17  22:13:14
+        Log: Integrate the MALLOC_WRAP change from:
+             [ 26505]
+             Subject: [PATCH] pre-likely cleanup
+             From: Andy Lester <andy@petdance.com> 
+             Date: Tue, 27 Dec 2005 14:39:39 -0600
+             Message-ID: <20051227203939.GC1781@petdance.com> 
+             
+             Includes a small fix to the changes in tryAMAGICbinW_var() in pp.h.
+     Branch: maint-5.8/perl
+	  !> handy.h
+____________________________________________________________________________
+[ 26886] By: nicholas                              on 2006/01/17  21:58:39
+        Log: Given the bugs fixed by changes 25822 and 26253, for now strip NN
+             with no effect, as an erroneously present NN can introduce strange
+             bugs at higher optimisation levels (and on future compilers not yet
+             written), which is too risky.
+     Branch: maint-5.8/perl
+	   ! embed.pl proto.h
+____________________________________________________________________________
+[ 26884] By: nicholas                              on 2006/01/17  21:35:36
+        Log: Integrate:
+             [ 26871]
+             More readable MEM_WRAP_CHECK_1() macro.
+             This form also avoids the "dead part of constant expression is nonconstant"
+             warning from the Sun Studio 10 compiler.
+     Branch: maint-5.8/perl
+	  !> README.solaris handy.h
+____________________________________________________________________________
+[ 26882] By: nicholas                              on 2006/01/17  19:38:54
+        Log: Handle our apostrophe correctly in the section on authors' names,
+             as spotted by Paul Johnson. Remove Errno from the list of upgraded
+             modules, because the actual installed code hasn't changed, merely the
+             generator.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26880] By: gisle                                 on 2006/01/17  17:32:16
+        Log: Trivial typo fix.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26879] By: nicholas                              on 2006/01/17  16:40:16
+        Log: Details for File::Basename, File::Spec, Math::Complex, Math::Trig
+             and threads. This just leaves Filter::Simple.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26876] By: nicholas                              on 2006/01/17  15:14:40
+        Log: Subject: Re: Perl 5.8.8's perldelta
+             From: David Landgren <david@landgren.net>
+             Message-ID: <43CD0494.3010905@landgren.net>
+             Date: Tue, 17 Jan 2006 15:52:04 +0100
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26875] By: nicholas                              on 2006/01/17  14:55:33
+        Log: Alan did the implementation for using unsetenv and clearenv (in
+             addition to the probes)
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26874] By: nicholas                              on 2006/01/17  12:18:22
+        Log: Subject: Re: Perl 5.8.8's perldelta
+             From: Gisle Aas <gisle@ActiveState.com>
+             Message-ID: <lrek37f5r2.fsf@caliper.activestate.com>
+             Date: 17 Jan 2006 03:33:53 -0800
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26873] By: steveh                                on 2006/01/17  12:00:00
+        Log: Give Nicholas Clark some credit for his work
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26872] By: nicholas                              on 2006/01/17  11:51:11
+        Log: Add in all missing NNs/NULLOKs
+     Branch: maint-5.8/perl
+	   ! embed.fnc proto.h
+____________________________________________________________________________
+[ 26865] By: nicholas                              on 2006/01/16  16:15:26
+        Log: Some more module descriptions.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26864] By: nicholas                              on 2006/01/16  16:10:49
+        Log: Subject: Re: Perl 5.8.8's perldelta
+             From: Gisle Aas <gisle@ActiveState.com>
+             Message-ID: <lr8xtggoac.fsf@caliper.activestate.com>
+             Date: 16 Jan 2006 07:55:55 -0800
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26862] By: nicholas                              on 2006/01/16  14:03:56
+        Log: Changes and improvements from Gisle Aas, Sébastien Aperghis-Tramoni
+             and David Landgren.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26860] By: nicholas                              on 2006/01/16  12:51:43
+        Log: Integrate:
+             [ 26315]
+             A better hash for PTR_TABLE_HASH (?)
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 26851] By: nicholas                              on 2006/01/14  11:51:00
+        Log: Recover the description for change 24146 (it integrates 24027)
+             Tweak one other line to make checkAUTHORS.pl happy.
+     Branch: maint-5.8/perl
+	   ! Changes5.8.7
+____________________________________________________________________________
+[ 26848] By: nicholas                              on 2006/01/14  10:13:28
+        Log: Improvements from Glenn Linderman, Dave Mitchell, H.Merijn Brand and
+             Paul Marquess.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26847] By: nicholas                              on 2006/01/14  09:52:42
+        Log: s/Autrijus/Audrey/
+     Branch: maint-5.8/perl
+	   ! AUTHORS Porting/Maintainers.pl
+____________________________________________________________________________
+[ 26843] By: nicholas                              on 2006/01/13  22:23:45
+        Log: Perldelta ready for review.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26842] By: nicholas                              on 2006/01/13  22:14:31
+        Log: Hateful version control system. When I integrate the addition of a
+             file and then the removal of the same file, I expect the net effect
+             to be nothing. You are exceeding my expectations in a negative way.
+     Branch: maint-5.8/perl
+	   - ext/Sys/Syslog/t/podspell.t
+____________________________________________________________________________
+[ 26841] By: nicholas                              on 2006/01/13  22:05:34
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 26840] By: nicholas                              on 2006/01/13  21:53:22
         Log: Integrate:
              [ 26824]
