@@ -49,9 +49,9 @@ use Config;
 
 my $tmp = 'ppptmp';
 my $inc = '';
-my $perl = find_perl();
 my $isVMS = $^O eq 'VMS';
 my $isMAC = $^O eq 'MacOS';
+my $perl = find_perl();
 
 rmtree($tmp) if -d $tmp;
 mkpath($tmp) or die "mkpath $tmp: $!\n";
