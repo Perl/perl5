@@ -43,7 +43,8 @@ for (my $i = 0; $i < @sharsp; $i++) {
 		my $state;
 		my $file;
 		my $filename;
-		$filename = dirname($0) . "/state/state.$ext[$i]";
+		$filename = File::Spec->catfile(dirname($0), 
+                   "state", "state." . $ext[$i]);
 		$file = File::Spec->canonpath($filename);
 		unless ($state = Digest::SHA->load($file)) {
 			$state = Digest::SHA->new($ext[$i]);
