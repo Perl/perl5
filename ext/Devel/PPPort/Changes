@@ -1,3 +1,8 @@
+3.08 - 2006-01-19
+
+    * thanks to Craig Berry for fixing my broken ppphtest
+    * add AUTHOR and ABSTRACT_FROM to Makefile.PL
+
 3.07 - 2006-01-16
 
     * improve internals documentation in HACKERS

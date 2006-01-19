@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 17 $
+#  $Revision: 19 $
 #  $Author: mhx $
-#  $Date: 2006/01/14 18:07:57 +0100 $
+#  $Date: 2006/01/19 19:35:25 +0100 $
 #
 ################################################################################
 #
@@ -47,6 +47,13 @@ if ($opt{'apicheck'}) {
   $PL_FILES{'apicheck_c.PL'} = 'apicheck.c';
   push @C_FILES, qw{ apicheck.c };
   push @clean,   qw{ apicheck.c };
+}
+
+if (eval $ExtUtils::MakeMaker::VERSION >= 6) {
+  push @moreopts, AUTHOR => 'Marcus Holland-Moritz <mhx@cpan.org>';
+  if (-f 'PPPort.pm') {
+    push @moreopts, ABSTRACT_FROM => 'PPPort.pm';
+  }
 }
 
 if (eval $ExtUtils::MakeMaker::VERSION >= 6.30_01) {
