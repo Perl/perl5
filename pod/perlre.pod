@@ -224,8 +224,17 @@ X<character class>
 
     [:class:]
 
-is also available.  The available classes and their backslash
-equivalents (if available) are as follows:
+is also available.  Note that the C<[> and C<]> braces are I<literal>;
+they must always be used within a character class expression.
+
+    # this is correct:
+    $string =~ /[[:alpha:]]/;
+
+    # this is not, and will generate a warning:
+    $string =~ /[:alpha:]/;
+
+The available classes and their backslash equivalents (if available) are
+as follows:
 X<character class>
 X<alpha> X<alnum> X<ascii> X<blank> X<cntrl> X<digit> X<graph>
 X<lower> X<print> X<punct> X<space> X<upper> X<word> X<xdigit>
@@ -274,7 +283,7 @@ The following equivalences to Unicode \p{} constructs and equivalent
 backslash character classes (if available), will hold:
 X<character class> X<\p> X<\p{}>
 
-    [:...:]	\p{...}		backslash
+    [[:...:]]	\p{...}		backslash
 
     alpha       IsAlpha
     alnum       IsAlnum
@@ -292,7 +301,7 @@ X<character class> X<\p> X<\p{}>
     word        IsWord
     xdigit      IsXDigit
 
-For example C<[:lower:]> and C<\p{IsLower}> are equivalent.
+For example C<[[:lower:]]> and C<\p{IsLower}> are equivalent.
 
 If the C<utf8> pragma is not used but the C<locale> pragma is, the
 classes correlate with the usual isalpha(3) interface (except for
@@ -339,11 +348,11 @@ You can negate the [::] character classes by prefixing the class name
 with a '^'. This is a Perl extension.  For example:
 X<character class, negation>
 
-    POSIX	traditional Unicode
+    POSIX         traditional  Unicode
 
-    [:^digit:]      \D      \P{IsDigit}
-    [:^space:]	    \S	    \P{IsSpace}
-    [:^word:]	    \W	    \P{IsWord}
+    [[:^digit:]]    \D         \P{IsDigit}
+    [[:^space:]]    \S         \P{IsSpace}
+    [[:^word:]]	    \W         \P{IsWord}
 
 Perl respects the POSIX standard in that POSIX character classes are
 only supported within a character class.  The POSIX character classes
