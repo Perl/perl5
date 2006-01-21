@@ -150,8 +150,16 @@ is_deeply( [sort map { lc } @copies], [sort map { lc } keys %$files] );
 foreach my $orig (@copies) {
     my $copy = "copy/$orig";
     ok( -r $copy,               "$copy: must be readable" );
-    is( -w $copy, -w $orig,     "       writable if original was" );
-    is( -x $copy, -x $orig,     "       executable if original was" );
+
+  SKIP: {
+    skip "       original was not writable", 1 unless -w $orig;
+    ok(-w $copy, "       writable if original was" );
+  }
+
+  SKIP: {
+    skip "       original was not executable", 1 unless -x $orig;
+    ok(-x $copy, "       executable if original was" );
+  }
 }
 rmtree('copy');
 
