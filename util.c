@@ -4183,8 +4183,7 @@ Perl_new_version(pTHX_ SV *ver)
 #ifdef SvVOK
     }
 #endif
-    upg_version(rv);
-    return rv;
+    return upg_version(rv);
 }
 
 /*

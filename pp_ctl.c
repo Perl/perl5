@@ -3091,7 +3091,7 @@ PP(pp_require)
 
 	sv = new_version(sv);
 	if (!sv_derived_from(PL_patchlevel, "version"))
-	    (void *)upg_version(PL_patchlevel);
+	    upg_version(PL_patchlevel);
 	if (cUNOP->op_first->op_type == OP_CONST && cUNOP->op_first->op_private & OPpCONST_NOVER) {
 	    if ( vcmp(sv,PL_patchlevel) < 0 )
 		DIE(aTHX_ "Perls since %"SVf" too modern--this is %"SVf", stopped",
