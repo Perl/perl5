@@ -3432,7 +3432,7 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
     
     my $aeek = bless {}, 'wooosh';
     eval {$aeek->gloople() =~ /(.)/g;};
-    ok($@ eq "", "# TODO 26410 caused a regression") or print "# $@\n";
+    ok($@ eq "", "//g match against return value of sub") or print "# $@\n";
 }
 
 {
@@ -3445,8 +3445,6 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
 }
 
 {
-    # Prior to change 26410 this did not work:
-
     package lv;
     $var = "abc";
     sub variable : lvalue { $var }
@@ -3455,18 +3453,16 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
     my $o = bless [], "lv";
     my $f = "";
     eval { for (1..2) { $f .= $1 if $o->variable =~ /(.)/g } };
-    ok($f eq "ab", "# pos retained between calls") or print "# $@\n";
+    ok($f eq "ab", "pos retained between calls # TODO") or print "# $@\n";
 }
 
 {
-    # Prior to change 26410 this did not work:
-
     $var = "abc";
     sub variable : lvalue { $var }
 
     my $f = "";
     eval { for (1..2) { $f .= $1 if variable() =~ /(.)/g } };
-    ok($f eq "ab", "# pos retained between calls") or print "# $@\n";
+    ok($f eq "ab", "pos retained between calls # TODO") or print "# $@\n";
 }
 
 # last test 1199
