@@ -272,7 +272,7 @@ DB_File upgraded to version 1.814
 
 =over
 
-=item * 
+=item *
 
 adds support for Berkeley DB 4.4.
 
@@ -1089,7 +1089,7 @@ Improved documentation.
 =item *
 
 Term::ANSIColor upgraded to version 1.10
- 
+
 =over
 
 =item *
@@ -1158,7 +1158,7 @@ documentation enhancements
 =item *
 
 Text::Tabs upgraded to version 2005.0824
- 
+
 =over
 
 =item *
@@ -1170,7 +1170,7 @@ Provides a faster implementation of C<expand>
 =item *
 
 Text::Wrap upgraded to version 2005.082401
- 
+
 =over
 
 =item *
@@ -1192,7 +1192,7 @@ threads will now honour C<no warnings 'threads'>
 
 =item *
 
-A thread's interpreter is now freed after C<$t->join()> rather than after
+A thread's interpreter is now freed after C<< $t->join() >> rather than after
 C<undef $t>, which should fix some ithreads memory leaks. (Fixed by Dave
 Mitchell)
 
@@ -1642,7 +1642,7 @@ by Mike Giroux.
 
 =head1 Platform Specific Problems
 
-The optimiser on HP-UX 11.23 (Itanium 2) is currently partly disabled (scaled 
+The optimiser on HP-UX 11.23 (Itanium 2) is currently partly disabled (scaled
 down to +O1) when using HP C-ANSI-C; the cause of problems at higher
 optimisation levels is still unclear.
 
