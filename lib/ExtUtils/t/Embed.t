@@ -60,6 +60,12 @@ if ($^O eq 'VMS') {
    else {
     push(@cmd,$cc,'-o' => $exe);
    }
+   if ($^O eq 'dec_osf' && !defined $Config{usedl}) {
+       # The -non_shared is needed in case of -Uusedl or otherwise
+       # the test application will try to use libperl.so
+       # instead of libperl.a.
+       push @cmd, "-non_shared";
+   }
    push(@cmd,"-I$inc",ccopts(),'embed_test.c');
    if ($^O eq 'MSWin32') {
     $inc = File::Spec->catdir($inc,'win32');
