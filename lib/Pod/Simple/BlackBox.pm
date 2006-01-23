@@ -1901,5 +1901,23 @@ sub pretty { # adopted from Class::Classless
 }
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+# A rather unsubtle method of blowing away all the state information
+# from a parser object so it can be reused. Provided as a utility for
+# backward compatibilty in Pod::Man, etc. but not recommended for
+# general use.
+
+sub reinit {
+  my $self = shift;
+  foreach (qw(source_dead source_filename doc_has_started
+start_of_pod_block content_seen last_was_blank paras curr_open
+line_count pod_para_count in_pod ~tried_gen_errata errata errors_seen
+Title)) {
+
+    delete $self->{$_};
+  }
+}
+
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 1;
 

@@ -4,7 +4,7 @@ package Pod::Simple::Search;
 use strict;
 
 use vars qw($VERSION $MAX_VERSION_WITHIN $SLEEPY);
-$VERSION = 2.03_01;   ## Current version of this package
+$VERSION = 3.04;   ## Current version of this package
 
 BEGIN { *DEBUG = sub () {0} unless defined &DEBUG; }   # set DEBUG level
 use Carp ();
@@ -254,22 +254,26 @@ sub _path2modname {
   my $name = join '::', @m, $shortname;
   $self->_simplify_base($name);
 
-  if ($name eq lc($name) || $name eq uc($name)) {
+  # On VMS, case-preserved document names can't be constructed from
+  # filenames, so try to extract them from the "=head1 NAME" tag in the
+  # file instead.
+  if ($^O eq 'VMS' && ($name eq lc($name) || $name eq uc($name))) {
       open PODFILE, "<$file" or die "_path2modname: Can't open $file: $!";
       my $in_pod = 0;
       my $in_name = 0;
-      while (<PODFILE>) {
-        chomp;
-        $in_pod = 1 if m/^=\w/;
-        $in_pod = 0 if m/^=cut/;
+      my $line;
+      while ($line = <PODFILE>) {
+        chomp $line;
+        $in_pod = 1 if ($line =~ m/^=\w/);
+        $in_pod = 0 if ($line =~ m/^=cut/);
         next unless $in_pod;         # skip non-pod text
-        next if m/^\s*\z/;           # and blank lines
-        next if ($in_pod && m/^X</); # and commands
+        next if ($line =~ m/^\s*\z/);           # and blank lines
+        next if ($in_pod && ($line =~ m/^X</)); # and commands
         if ($in_name) {
-          if( m/(\w+::)?(\w+)/) {
+          if ($line =~ m/(\w+::)?(\w+)/) {
             # substitute case-preserved version of name
             my $podname = $2;
-            my $prefix = $1;
+            my $prefix = $1 || '';
             $verbose and print "Attempting case restore of '$name' from '$prefix$podname'\n";
             unless ($name =~ s/$prefix$podname/$prefix$podname/i) {
               $verbose and print "Attempting case restore of '$name' from '$podname'\n";
@@ -278,7 +282,7 @@ sub _path2modname {
             last;
           }
         }
-        $in_name = 1 if m/^=head1 NAME/;
+        $in_name = 1 if ($line =~ m/^=head1 NAME/);
     }
     close PODFILE;
   }
