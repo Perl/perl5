@@ -99,7 +99,7 @@ want to use a version of perl inferior to the specified one.
 
 =head2 Recursive sort subs
 
-You can now use recursive subroutines with sort().
+You can now use recursive subroutines with sort(), thanks to Robin Houston.
 
 =head2 Effect of pragmas in eval
 
@@ -114,6 +114,12 @@ into eval("").
 
 B<-E> is equivalent to B<-e>, but it implicitly enables all
 optional features.
+
+=head2 C<chdir>, C<chmod> and C<chown> on filehandles
+
+C<chdir>, C<chmod> and C<chown> can now work on filehandles as well as
+filenames, if the system supports respectively C<fchdir>, C<fchmod> and
+C<fchown>, thanks to a patch provided by Gisle Aas.
 
 =head1 Modules and Pragmata
 
@@ -153,6 +159,24 @@ transliteration mappings has been reimplemented in XS.
 =head2 Constants subroutines
 
 XXX
+
+=head2 C<PERL_DONT_CREATE_GVSV>
+
+The new compilation flag C<PERL_DONT_CREATE_GVSV>, introduced as an option
+in perl 5.8.8, is turned on by default in perl 5.9.3. It prevents perl
+from creating an empty scalar with every new typeglob. See L<perl588delta>
+for details.
+
+=head2 Weak references are cheaper
+
+Weak reference creation is now I<O(1)> rather than I<O(n)>, courtesy of
+Nicholas Clark. Weak reference deletion remains I<O(n)>, but if deletion only
+happens at program exit, it may be skipped completely.
+
+=head2 sort() enhancements
+
+Salvador Fandiño provided improvements to reduce the memory usage of C<sort>
+and to speed up some cases.
 
 =head1 Installation and Configuration Improvements
 
@@ -239,6 +263,17 @@ less memory-intensive.
 
 =item *
 
+Trailing spaces are now trimmed from C<$!> and C<$^E>.
+
+=item *
+
+Operations that require perl to read a process' list of groups, such as reads
+of C<$(> and C<$)>, now dynamically allocate memory rather than using a
+fixed sized array. The fixed size array could cause C stack exhaustion on
+systems configured to use large numbers of groups.
+
+=item *
+
 C<PerlIO::scalar> now works better with non-default C<$/> settings.
 
 =item *
@@ -258,7 +293,9 @@ opens.
 
 =item *
 
-C<//g> matches used to loop infinitely on tainted data.
+Perl will now use the C library calls C<unsetenv> and C<clearenv> if present
+to delete keys from C<%ENV> and delete C<%ENV> entirely, thanks to a patch
+from Alan Burlison.
 
 =back
 
@@ -271,6 +308,18 @@ C<//g> matches used to loop infinitely on tainted data.
 chr() on a negative value now gives C<\x{FFFD}>, the Unicode replacement
 character, unless when the C<bytes> pragma is in effect, where the low
 eight bytes of the value are used.
+
+=item *
+
+Some case insensitive matches between UTF-8 encoded data and 8 bit regexps,
+and vice versa, could give malformed character warnings. These have been
+fixed by Dave Mitchell and Yves Orton.
+
+=item *
+
+C<lcfirst> and C<ucfirst> could corrupt the string for certain cases where
+the length UTF-8 encoding of the string in lower case, upper case or title
+case differed. This was fixed by Nicholas Clark.
 
 =back
 
@@ -319,6 +368,9 @@ source compatibility reasons. However, those functions will not be
 compiled in if you add C<-DNO_MATHOMS> in the compiler flags.
 
 The C<AvFLAGS> macro has been removed.
+
+The C<av_*()> functions, used to manipulate arrays, no longer accept null
+C<AV*> parameters.
 
 =head2 B:: modules inheritance changed
 
