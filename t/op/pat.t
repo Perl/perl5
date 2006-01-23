@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1196\n";
+print "1..1199\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3435,4 +3435,38 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
     ok($@ eq "", "# TODO 26410 caused a regression") or print "# $@\n";
 }
 
-# last test 1196
+{
+    sub gloople {
+      "!";
+    }
+    eval {gloople() =~ /(.)/g;};
+    ok($@ eq "", "# 26410 didn't affect sub calls for some reason")
+	or print "# $@\n";
+}
+
+{
+    # Prior to change 26410 this did not work:
+
+    package lv;
+    $var = "abc";
+    sub variable : lvalue { $var }
+
+    package main;
+    my $o = bless [], "lv";
+    my $f = "";
+    eval { for (1..2) { $f .= $1 if $o->variable =~ /(.)/g } };
+    ok($f eq "ab", "# pos retained between calls") or print "# $@\n";
+}
+
+{
+    # Prior to change 26410 this did not work:
+
+    $var = "abc";
+    sub variable : lvalue { $var }
+
+    my $f = "";
+    eval { for (1..2) { $f .= $1 if variable() =~ /(.)/g } };
+    ok($f eq "ab", "# pos retained between calls") or print "# $@\n";
+}
+
+# last test 1199

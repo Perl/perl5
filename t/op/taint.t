@@ -1145,7 +1145,7 @@ TERNARY_CONDITIONALS: {
     while($a[0]=~ m/(.)/g ) {
 	last if $i++ > 10000;
     }
-    test $i < 10000, "infinite m//g";
+    cmp_ok $i, '<', 10000, "infinite m//g";
     
 }
 
