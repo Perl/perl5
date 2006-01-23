@@ -4060,7 +4060,7 @@ to contain an C<SV*> and is stored as-is with its REFCNT incremented.
 =cut
 */
 MAGIC *	
-Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, const MGVTBL *vtable,
+Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
 		 const char* name, I32 namlen)
 {
     dVAR;
@@ -4149,7 +4149,7 @@ void
 Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 namlen)
 {
     dVAR;
-    const MGVTBL *vtable;
+    MGVTBL *vtable;
     MAGIC* mg;
 
 #ifdef PERL_OLD_COPY_ON_WRITE

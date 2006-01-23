@@ -409,7 +409,7 @@ Perl_mg_localize(pTHX_ SV *sv, SV *nsv)
     dVAR;
     MAGIC *mg;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
-	const MGVTBL* const vtbl = mg->mg_virtual;
+	MGVTBL* const vtbl = mg->mg_virtual;
 	switch (mg->mg_type) {
 	/* value magic types: don't copy */
 	case PERL_MAGIC_bm:

@@ -26,7 +26,7 @@ struct mgvtbl {
 
 struct magic {
     MAGIC*	mg_moremagic;
-    const MGVTBL* mg_virtual;	/* pointer to magic functions */
+    MGVTBL*	mg_virtual;	/* pointer to magic functions */
     U16		mg_private;
     char	mg_type;
     U8		mg_flags;
