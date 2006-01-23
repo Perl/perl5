@@ -412,14 +412,14 @@ CODE:
     /* 
      * PerlIO check -- we assume the object is of PerlIO if renewed
      */
-    int renewed = 0;
+    bool renewed = 0;
     dSP; ENTER; SAVETMPS;
     PUSHMARK(sp);
     XPUSHs(obj);
     PUTBACK;
     if (call_method("renewed",G_SCALAR) == 1) {
 	SPAGAIN;
-	renewed = POPi;
+	renewed = (bool)POPi;
 	PUTBACK; 
 #if 0
 	fprintf(stderr, "renewed == %d\n", renewed);
