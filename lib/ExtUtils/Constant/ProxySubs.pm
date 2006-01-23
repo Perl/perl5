@@ -198,7 +198,8 @@ sub WriteConstants {
     my $symbol_table = C_stringify($package) . '::';
 
     print $c_fh $self->header(), <<"EOADD";
-void ${c_subname}_add_symbol($pthx HV *hash, const char *name, I32 namelen, SV *value) {
+static void
+${c_subname}_add_symbol($pthx HV *hash, const char *name, I32 namelen, SV *value) {
     SV **sv = hv_fetch(hash, name, namelen, TRUE);
     if (!sv) {
         Perl_croak($athx "Couldn't add key '%s' to %%$package_sprintf_safe\::",
