@@ -14,6 +14,16 @@ they are bugs and reports are welcome.
 
 =head1 Core Enhancements
 
+=over
+
+=item *
+
+C<chdir>, C<chmod> and C<chown> can now work on filehandles as well as
+filenames, if the system supports respectively C<fchdir>, C<fchmod> and
+C<fchown>, thanks to a patch provided by Gisle Aas.
+
+=back
+
 =head1 Modules and Pragmata
 
 =over
@@ -1396,7 +1406,7 @@ Any enums with negative values are now skipped.
 
 =head2 perlivp enhancements
 
-C<perlivp> implement new option C<-a> and will not check for F<*.ph>
+C<perlivp> implements new option C<-a> and will not check for F<*.ph>
 files by default any more.  Use the C<-a> option to run I<all> tests.
 
 =head1 New Documentation
@@ -1427,12 +1437,6 @@ perl, particularly for multi-threaded servers, to see whether all third party
 code is compatible with it, as this configuration may give useful performance
 improvements. For existing installations we would not recommend changing to
 this configuration unless thorough testing is performed before deployment.
-
-=item *
-
-C<chdir>, C<chmod> and C<chown> can now work on filehandles as well as
-filenames, if the system supports respectively C<fchdir>, C<fchmod> and
-C<fchown>, thanks to a patch provided by Gisle Aas.
 
 =item *
 
