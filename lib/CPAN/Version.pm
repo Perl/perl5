@@ -6,9 +6,13 @@ CPAN::Version - utility functions to compare CPAN versions
 
   use CPAN::Version;
 
-  CPAN::Version->vgt("1.1","1.1.1");    # 1
+  CPAN::Version->vgt("1.1","1.1.1");    # 1 bc. 1.1 > 1.001001
 
-  CPAN::Version->vcmp("1.1","1.1.1");   # 1
+  CPAN::Version->vlt("1.1","1.1");      # 0 bc. 1.1 not < 1.1
+
+  CPAN::Version->vcmp("1.1","1.1.1");   # 1 bc. first is larger
+
+  CPAN::Version->vcmp("1.1.1","1.1");   # -1 bc. first is smaller
 
   CPAN::Version->readable(v1.2.3);      # "v1.2.3"
 
@@ -32,7 +36,7 @@ package CPAN::Version;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 254 $,4)/100;
+$VERSION = "2.55";
 
 # CPAN::Version::vcmp courtesy Jost Krieger
 sub vcmp {
@@ -70,6 +74,11 @@ sub vcmp {
 sub vgt {
   my($self,$l,$r) = @_;
   $self->vcmp($l,$r) > 0;
+}
+
+sub vlt {
+  my($self,$l,$r) = @_;
+  0 + ($self->vcmp($l,$r) < 0);
 }
 
 sub vstring {

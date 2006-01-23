@@ -2,7 +2,7 @@ package CPAN::HandleConfig;
 use strict;
 use vars qw(%can %keys $dot_cpan $VERSION);
 
-$VERSION = sprintf "%.2f", substr(q$Rev: 423 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 431 $,4)/100;
 
 %can = (
   'commit' => "Commit changes to disk",
@@ -179,8 +179,11 @@ EOF
 *default = \&defaults;
 sub defaults {
     my($self) = @_;
-    $self->unload;
-    $self->load;
+    my $done;
+    for my $config (qw(CPAN/MyConfig.pm CPAN/Config.pm)) {
+      CPAN::Shell->reload_this($config) and $done++;
+      last if $done;
+    }
     1;
 }
 
@@ -255,20 +258,26 @@ sub load {
 	my($path_to_cpan) = File::Basename::dirname($INC{"CPAN.pm"});
 	my($configpmdir) = File::Spec->catdir($path_to_cpan,"CPAN");
 	my($configpmtest) = File::Spec->catfile($configpmdir,"Config.pm");
+        my $inc_key;
 	if (-d $configpmdir or File::Path::mkpath($configpmdir)) {
-	    $configpm = _configpmtest($configpmdir,$configpmtest); 
+	    $configpm = _configpmtest($configpmdir,$configpmtest);
+            $inc_key = "CPAN/Config.pm";
 	}
 	unless ($configpm) {
 	    $configpmdir = File::Spec->catdir($ENV{HOME},".cpan","CPAN");
 	    File::Path::mkpath($configpmdir);
 	    $configpmtest = File::Spec->catfile($configpmdir,"MyConfig.pm");
-	    $configpm = _configpmtest($configpmdir,$configpmtest); 
-	    unless ($configpm) {
-			my $text = qq{WARNING: CPAN.pm is unable to } .
-			  qq{create a configuration file.}; 
-			output($text, 'confess');
-	    }
+	    $configpm = _configpmtest($configpmdir,$configpmtest);
+            $inc_key = "CPAN/MyConfig.pm";
 	}
+        if ($configpm) {
+          $INC{$inc_key} = $configpm;
+        } else {
+          my $text = qq{WARNING: CPAN.pm is unable to } .
+              qq{create a configuration file.};
+          output($text, 'confess');
+        }
+
     }
     local($") = ", ";
     $CPAN::Frontend->myprint(<<END) if $redo && ! $theycalled;
@@ -317,11 +326,6 @@ sub missing_config_data {
 	push @miss, $_ unless defined $CPAN::Config->{$_};
     }
     return @miss;
-}
-
-sub unload {
-    delete $INC{'CPAN/MyConfig.pm'};
-    delete $INC{'CPAN/Config.pm'};
 }
 
 sub help {
@@ -385,7 +389,7 @@ package ####::###### #hide from indexer
 
 use strict;
 use vars qw($AUTOLOAD $VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 423 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 431 $,4)/100;
 
 # formerly CPAN::HandleConfig was known as CPAN::Config
 sub AUTOLOAD {

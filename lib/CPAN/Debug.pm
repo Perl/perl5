@@ -2,7 +2,7 @@ package CPAN::Debug;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = sprintf "%.2f", substr(q$Rev: 299 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 444 $,4)/100;
 # module is internal to CPAN.pm
 
 %CPAN::DEBUG = qw[
@@ -22,6 +22,7 @@ $VERSION = sprintf "%.2f", substr(q$Rev: 299 $,4)/100;
                   Tarzip         8192
                   Version       16384
                   Queue         32768
+                  FirstTime     65536
 ];
 
 $CPAN::DEBUG ||= 0;

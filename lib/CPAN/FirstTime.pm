@@ -2,7 +2,7 @@
 package CPAN::Mirrored::By;
 use strict;
 use vars qw($VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 399 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 450 $,4)/100;
 
 sub new { 
     my($self,@arg) = @_;
@@ -21,7 +21,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec;
 use vars qw($VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 399 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 450 $,4)/100;
 
 =head1 NAME
 
@@ -33,8 +33,9 @@ CPAN::FirstTime::init()
 
 =head1 DESCRIPTION
 
-The init routine asks a few questions and writes a CPAN::Config
-file. Nothing special.
+The init routine asks a few questions and writes a CPAN/Config.pm or
+CPAN/MyConfig.pm file (depending on what it is currently using).
+
 
 =cut
 
@@ -45,6 +46,7 @@ sub init {
     use Config;
     # extra arg in 'o conf init make' selects only $item =~ /make/
     my $matcher = $args{args} && @{$args{args}} ? $args{args}[0] : '';
+    CPAN->debug("matcher[$matcher]") if $CPAN::DEBUG;
 
     unless ($CPAN::VERSION) {
 	require CPAN::Nox;
@@ -60,9 +62,6 @@ sub init {
     #
     # Files, directories
     #
-
-    # not just yet
-    # if (!@sections or grep /^(files|dirs)$/, @sections) {
 
     print $prompts{manual_config};
 
@@ -96,26 +95,25 @@ sub init {
 	};
       }
     }
-    # if ('config_intro' ~= $matcher) {
 
-    $CPAN::Frontend->myprint($prompts{config_intro});
-
-    #}
-
+    $CPAN::Frontend->myprint($prompts{config_intro})
+      if !$matcher or 'config_intro' =~ /$matcher/;
 
     my $cpan_home = $CPAN::Config->{cpan_home}
 	|| File::Spec->catdir($ENV{HOME}, ".cpan");
 
     if (-d $cpan_home) {
-	$CPAN::Frontend->myprint(qq{
+	if (!$matcher or 'config_intro' =~ /$matcher/) {
+	    $CPAN::Frontend->myprint(qq{
 
 I see you already have a  directory
     $cpan_home
 Shall we use it as the general CPAN build and cache directory?
 
 });
-
+	}
     } else {
+	# no cpan-home, must prompt and get one
 	$CPAN::Frontend->myprint($prompts{cpan_home_where});
     }
 
@@ -155,7 +153,8 @@ Shall we use it as the general CPAN build and cache directory?
     # Cache size, Index expire
     #
 
-    $CPAN::Frontend->myprint($prompts{build_cache_intro});
+    $CPAN::Frontend->myprint($prompts{build_cache_intro})
+      if !$matcher or 'build_cache_intro' =~ /$matcher/;
 
     # large enough to build large dists like Tk
     my_dflt_prompt(build_cache => 100, $matcher);
@@ -163,26 +162,31 @@ Shall we use it as the general CPAN build and cache directory?
     # XXX This the time when we refetch the index files (in days)
     $CPAN::Config->{'index_expire'} = 1;
 
-    $CPAN::Frontend->myprint($prompts{scan_cache_intro});
+    $CPAN::Frontend->myprint($prompts{scan_cache_intro})
+      if !$matcher or 'build_cache_intro' =~ /$matcher/;
+
     my_prompt_loop(scan_cache => 'atstart', $matcher, 'atstart|never');
 
     #
     # cache_metadata
     #
 
-    $CPAN::Frontend->myprint($prompts{cache_metadata});
+    if (!$matcher or 'build_cache_intro' =~ /$matcher/) {
 
-    defined($default = $CPAN::Config->{cache_metadata}) or $default = 1;
-    do {
-        $ans = prompt("Cache metadata (yes/no)?", ($default ? 'yes' : 'no'));
-    } while ($ans !~ /^[yn]/i);
-    $CPAN::Config->{cache_metadata} = ($ans =~ /^y/i ? 1 : 0);
+	$CPAN::Frontend->myprint($prompts{cache_metadata});
 
+	defined($default = $CPAN::Config->{cache_metadata}) or $default = 1;
+	do {
+	    $ans = prompt("Cache metadata (yes/no)?", ($default ? 'yes' : 'no'));
+	} while ($ans !~ /^[yn]/i);
+	$CPAN::Config->{cache_metadata} = ($ans =~ /^y/i ? 1 : 0);
+    }
     #
     # term_is_latin
     #
 
-    $CPAN::Frontend->myprint($prompts{term_is_latin});
+    $CPAN::Frontend->myprint($prompts{term_is_latin})
+      if !$matcher or 'term_is_latin' =~ /$matcher/;
 
     defined($default = $CPAN::Config->{term_is_latin}) or $default = 1;
     do {
@@ -192,10 +196,10 @@ Shall we use it as the general CPAN build and cache directory?
     $CPAN::Config->{term_is_latin} = ($ans =~ /^y/i ? 1 : 0);
 
     #
-    # save history in file histfile
+    # save history in file 'histfile'
     #
 
-    $CPAN::Frontend->myprint($prompts{histfile});
+    $CPAN::Frontend->myprint($prompts{histfile_intro});
 
     defined($default = $CPAN::Config->{histfile}) or
         $default = File::Spec->catfile($CPAN::Config->{cpan_home},"histfile");
@@ -227,7 +231,8 @@ Shall we use it as the general CPAN build and cache directory?
     # Do we follow PREREQ_PM?
     #
 
-    $CPAN::Frontend->myprint($prompts{prerequisites_policy_intro});
+    $CPAN::Frontend->myprint($prompts{prerequisites_policy_intro})
+      if !$matcher or 'prerequisites_policy_intro' =~ /$matcher/;
 
     my_prompt_loop(prerequisites_policy => 'ask', $matcher,
 		   'follow|ask|ignore');
@@ -237,7 +242,8 @@ Shall we use it as the general CPAN build and cache directory?
     # External programs
     #
 
-    $CPAN::Frontend->myprint($prompts{external_progs});
+    $CPAN::Frontend->myprint($prompts{external_progs})
+      if !$matcher or 'external_progs' =~ /$matcher/;
 
     my $old_warn = $^W;
     local $^W if $^O eq 'MacOS';
@@ -292,9 +298,7 @@ Shall we use it as the general CPAN build and cache directory?
 	$path = "";
     }
     $path ||= $ENV{SHELL};
-    if (!$path && $^O eq 'MSWin32') {
-	$path = Win32::IsWinNT() ? "cmd.exe" : "command.com";
-    }
+    $path ||= $ENV{COMSPEC} if $^O eq "MSWin32";
     if ($^O eq 'MacOS') {
         $CPAN::Config->{'shell'} = 'not_here';
     } else {
@@ -307,12 +311,14 @@ Shall we use it as the general CPAN build and cache directory?
     # Arguments to make etc.
     #
 
-    $CPAN::Frontend->myprint($prompts{prefer_installer_intro});
+    $CPAN::Frontend->myprint($prompts{prefer_installer_intro})
+      if !$matcher or 'prerequisites_policy_intro' =~ /$matcher/;
 
     my_prompt_loop(prefer_installer => 'EUMM', $matcher, 'MB|EUMM');
 
 
-    $CPAN::Frontend->myprint($prompts{makepl_arg_intro});
+    $CPAN::Frontend->myprint($prompts{makepl_arg_intro})
+      if !$matcher or 'makepl_arg_intro' =~ /$matcher/;
 
     my_dflt_prompt(makepl_arg => "", $matcher);
 
@@ -324,7 +330,8 @@ Shall we use it as the general CPAN build and cache directory?
     my_dflt_prompt(make_install_arg => $CPAN::Config->{make_arg} || "", 
 		   $matcher);
 
-    $CPAN::Frontend->myprint($prompts{mbuildpl_arg_intro});
+    $CPAN::Frontend->myprint($prompts{mbuildpl_arg_intro})
+      if !$matcher or 'mbuildpl_arg_intro' =~ /$matcher/;
 
     my_dflt_prompt(mbuildpl_arg => "", $matcher);
 
@@ -338,7 +345,8 @@ Shall we use it as the general CPAN build and cache directory?
     # Alarm period
     #
 
-    $CPAN::Frontend->myprint($prompts{inactivity_timeout_intro});
+    $CPAN::Frontend->myprint($prompts{inactivity_timeout_intro})
+      if !$matcher or 'inactivity_timeout_intro' =~ /$matcher/;
 
     # my_dflt_prompt(inactivity_timeout => 0);
 
@@ -348,9 +356,12 @@ Shall we use it as the general CPAN build and cache directory?
 
     # Proxies
 
-    $CPAN::Frontend->myprint($prompts{proxies});
+    $CPAN::Frontend->myprint($prompts{proxy_intro})
+      if !$matcher or 'proxy_intro' =~ /$matcher/;
 
     for (qw/ftp_proxy http_proxy no_proxy/) {
+	next if $matcher and $_ =~ /$matcher/;
+
 	$default = $CPAN::Config->{$_} || $ENV{$_};
 	$CPAN::Config->{$_} = prompt("Your $_?",$default);
     }
@@ -752,7 +763,7 @@ anyway. If you answer no, names will be output in UTF-8.
 
 },
 
-histfile => qq{
+histfile_intro => qq{
 
 If you have one of the readline packages (Term::ReadLine::Perl,
 Term::ReadLine::Gnu, possibly others) installed, the interactive CPAN
@@ -761,6 +772,8 @@ filename of the history file and with its size. If you do not want to
 set this variable, please hit SPACE RETURN to the following question.
 
 },
+
+histfile => qq{File to save your history?},
 
 show_upload_date_intro => qq{
 
@@ -787,7 +800,7 @@ policy to one of the three values.
 },
 
 prerequisites_policy =>
-               qq{Policy on building prerequisites (follow, ask or ignore)?},
+"Policy on building prerequisites (follow, ask or ignore)?",
 
 external_progs => qq{
 
@@ -921,7 +934,7 @@ inactivity_timeout =>
 qq{Timeout for inactivity during {Makefile,Build}.PL? },
 
 
-proxies => qq{
+proxy_intro => qq{
 
 If you\'re accessing the net via proxies, you can specify them in the
 CPAN configuration or via environment variables. The variable in
