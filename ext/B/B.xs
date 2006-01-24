@@ -112,9 +112,20 @@ cc_opclass(pTHX_ const OP *o)
     if (o->op_type == OP_SASSIGN)
 	return ((o->op_private & OPpASSIGN_BACKWARDS) ? OPc_UNOP : OPc_BINOP);
 
+    if (o->op_type == OP_AELEMFAST) {
+	if (o->op_flags & OPf_SPECIAL)
+	    return OPc_BASEOP;
+	else
+#ifdef USE_ITHREADS
+	    return OPc_PADOP;
+#else
+	    return OPc_SVOP;
+#endif
+    }
+    
 #ifdef USE_ITHREADS
     if (o->op_type == OP_GV || o->op_type == OP_GVSV ||
-	o->op_type == OP_AELEMFAST || o->op_type == OP_RCATLINE)
+	o->op_type == OP_RCATLINE)
 	return OPc_PADOP;
 #endif
 
