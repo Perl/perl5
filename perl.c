@@ -3951,11 +3951,13 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
 	PL_doswitches = FALSE;		/* -s is insecure in suid */
 	/* PSz 13 Nov 03  But -s was caught elsewhere ... so unsetting it here is useless(?!) */
 	CopLINE_inc(PL_curcop);
-	linestr = SvPV_nolen_const(PL_linestr);
-	if (sv_gets(PL_linestr, PL_rsfp, 0) == Nullch ||
-	  strnNE(linestr,"#!",2) )	/* required even on Sys V */
+	if (sv_gets(PL_linestr, PL_rsfp, 0) == Nullch)
 	    Perl_croak(aTHX_ "No #! line");
-	linestr+=2;
+	linestr = SvPV_nolen_const(PL_linestr);
+	/* required even on Sys V */
+	if (!*linestr || !linestr[1] || strnNE(linestr,"#!",2))
+	    Perl_croak(aTHX_ "No #! line");
+	linestr += 2;
 	s = linestr;
 	/* PSz 27 Feb 04 */
 	/* Sanity check on line length */
