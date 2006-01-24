@@ -288,6 +288,7 @@ if ($PLATFORM eq 'win32') {
 		     Perl_getenv_len
 		     Perl_my_pclose
 		     Perl_my_popen
+		     Perl_my_sprintf
 		     )];
 }
 else {
@@ -364,6 +365,7 @@ if ($PLATFORM eq 'wince') {
 		     Perl_getenv_len
 		     Perl_my_pclose
 		     Perl_my_popen
+		     Perl_my_sprintf
 		     )];
 }
 elsif ($PLATFORM eq 'aix') {
