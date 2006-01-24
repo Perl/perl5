@@ -409,16 +409,10 @@ sub printf {
     printf $this @_;
 }
 
-if ($] >= 5.009003) {
-    *say = eval q{ sub {
-	@_ or croak 'usage: $io->say(ARGS)';
-	my $this = shift;
-	use feature 'say';
-	say $this @_;
-    }};
-}
-else {
-    *say = sub { croak "say() is not implemented for this version of perl\n" };
+sub say {
+    @_ or croak 'usage: $io->say(ARGS)';
+    my $this = shift;
+    print $this @_, "\n";
 }
 
 sub getline {
