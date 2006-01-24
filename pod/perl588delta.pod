@@ -1481,6 +1481,15 @@ but was accidentally omitted from L<perl587delta>).
 
 =head1 Selected Bug Fixes
 
+=head2 no warnings 'category' works correctly with -w
+
+Previously when running with warnings enabled globally via C<-w>, selective
+disabling of specific warning categories would actually turn off all warnings.
+This is now fixed; now C<no warnings 'io';> will only turn off warnings in the
+C<io> class. Previously it would erroneously turn off all warnings.
+
+This bug fix may cause some programs to start correctly issuing warnings.
+
 =head2 Remove over-optimisation
 
 Perl 5.8.4 introduced a change so that assignments of C<undef> to a
