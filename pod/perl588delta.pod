@@ -202,7 +202,7 @@ New commands C<recent> and C<perldoc>
 
 =item *
 
-New feature <show_upload_date>
+New feature C<show_upload_date>
 
 =item *
 
