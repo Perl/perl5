@@ -30,43 +30,43 @@ C<fchown>, thanks to a patch provided by Gisle Aas.
 
 =item *
 
-Attribute::Handlers upgraded to version 0.78_02
+C<Attribute::Handlers> upgraded to version 0.78_02
 
 =over
 
 =item *
 
-documentation typo fix
+Documentation typo fix
 
 =back
 
 =item *
 
-attrs upgraded to version 1.02
+C<attrs> upgraded to version 1.02
 
 =over
 
 =item *
 
-internal cleanup only
+Internal cleanup only
 
 =back
 
 =item *
 
-autouse upgraded to version 1.05
+C<autouse> upgraded to version 1.05
 
 =over
 
 =item *
 
-simplified implementation
+Simplified implementation
 
 =back
 
 =item *
 
-B upgraded to version 1.09_01
+C<B> upgraded to version 1.09_01
 
 =over
 
@@ -79,92 +79,92 @@ C<B::NV> now inherits from C<B::SV> (instead of C<B::IV>).
 
 =item *
 
-blib upgraded to version 1.03
+C<blib> upgraded to version 1.03
 
 =over
 
 =item *
 
-documentation typo fix
+Documentation typo fix
 
 =back
 
 =item *
 
-ByteLoader upgraded to version 0.06
+C<ByteLoader> upgraded to version 0.06
 
 =over
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =back
 
 =item *
 
-CGI upgraded to version 3.15
+C<CGI> upgraded to version 3.15
 
 =over
 
 =item *
 
-Extraneous "?" from self_url() removed
+Extraneous "?" from C<self_url()> removed
 
 =item *
 
-scrolling_list() select attribute fixed
+C<scrolling_list()> select attribute fixed
 
 =item *
 
-virtual_port now works properly with https protocol
+C<virtual_port> now works properly with the https protocol
 
 =item *
 
-upload_hook() and append() now works in function-oriented mode
+C<upload_hook()> and C<append()> now works in function-oriented mode
 
 =item *
 
-POST_MAX doesn't cause client to hang any more
+C<POST_MAX> doesn't cause the client to hang any more
 
 =item *
 
-automatic tab indexes are now disabled and new C<-tabindex> pragma has
+Automatic tab indexes are now disabled and new C<-tabindex> pragma has
 been added to turn automatic indexes back on
 
 =item *
 
-end_form() doesn't emit empty (and non-validating) <div>
+C<end_form()> doesn't emit empty (and non-validating) C<< <div> >>
 
 =item *
 
-CGI::Carp works better in certain mod_perl configurations
+C<CGI::Carp> works better in certain mod_perl configurations
 
 =item *
 
-Setting $CGI::TMPDIRECTORY  is now effective
+Setting C<$CGI::TMPDIRECTORY> is now effective
 
 =item *
 
-enhanced documentation
+Enhanced documentation
 
 =back
 
 =item *
 
-charnames upgraded to version 1.05
+C<charnames> upgraded to version 1.05
 
 =over
 
 =item *
 
-viacode() now accept hex strings and is better optimized.
+C<viacode()> now accept hex strings and has been optimized.
 
 =back
 
 =item *
 
-CPAN upgraded to version 1.83
+C<CPAN> upgraded to version 1.83
 
 =over
 
@@ -178,7 +178,7 @@ Support for C<bzip2>
 
 =item *
 
-Support for Module::Signature
+Support for C<Module::Signature>
 
 =item *
 
@@ -220,13 +220,13 @@ Improved C<wget> support on Win32
 
 =item *
 
-Cwd upgraded to version 3.12
+C<Cwd> upgraded to version 3.12
 
 =over
 
 =item *
 
-canonpath() on Win32 now collapses F<foo\..> sections correctly.
+C<canonpath()> on Win32 now collapses F<foo\..> sections correctly.
 
 =item *
 
@@ -234,87 +234,87 @@ Improved behaviour on Symbian OS.
 
 =item *
 
-enhanced documentation and typo fixes
+Enhanced documentation and typo fixes
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =back
 
 =item *
 
-Data::Dumper upgraded to version 2.121_08
+C<Data::Dumper> upgraded to version 2.121_08
 
 =over
 
 =item *
 
-problem where Data::Dumper would sometimes update the iterator state
+A problem where C<Data::Dumper> would sometimes update the iterator state
 of hashes has been fixed
 
 =item *
 
-numeric labels now work
+Numeric labels now work
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =back
 
 =item *
 
-DB upgraded to version 1.01
+C<DB> upgraded to version 1.01
 
 =over
 
 =item *
 
-problem where regex state would sometimes get clobbered when running
-under the debugger has been fixed
+A problem where the state of the regexp engine would sometimes get clobbered when running
+under the debugger has been fixed.
 
 =back
 
 =item *
 
-DB_File upgraded to version 1.814
+C<DB_File> upgraded to version 1.814
 
 =over
 
 =item *
 
-adds support for Berkeley DB 4.4.
+Adds support for Berkeley DB 4.4.
 
 =back
 
 =item *
 
-Devel::DProf upgraded to version 20050603.00
+C<Devel::DProf> upgraded to version 20050603.00
 
 =over
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =back
 
 =item *
 
-Devel::Peek upgraded to version 1.03
+C<Devel::Peek> upgraded to version 1.03
 
 =over
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =back
 
 =item *
 
-Devel::PPPort upgraded to version 3.06_01
+C<Devel::PPPort> upgraded to version 3.06_01
 
 =over
 
@@ -324,7 +324,7 @@ C<--compat-version> argument checking has been improved
 
 =item *
 
-files passed on the command line are filtered by default
+Files passed on the command line are filtered by default
 
 =item *
 
@@ -332,96 +332,96 @@ C<--nofilter> option to override the filtering has been added
 
 =item *
 
-enhanced documentation
+Enhanced documentation
 
 =back
 
 =item *
 
-diagnostics upgraded to version 1.15
+C<diagnostics> upgraded to version 1.15
 
 =over
 
 =item *
 
-documentation typo fix
+Documentation typo fix
 
 =back
 
 =item *
 
-Digest upgraded to version 1.14
+C<Digest> upgraded to version 1.14
 
 =over
 
 =item *
 
-constructor now knows which module implement SHA-224
+The constructor now knows which module implements SHA-224
 
 =item *
 
-documentation tweaks and typo fixes
+Documentation tweaks and typo fixes
 
 =back
 
 =item *
 
-Digest::MD5 upgraded to version 2.36
+C<Digest::MD5> upgraded to version 2.36
 
 =over
 
 =item *
 
-XSLoader is now used for faster loading
+C<XSLoader> is now used for faster loading
 
 =item *
 
-enhanced documentation including MD5 weaknesses discovered lately
+Enhanced documentation including MD5 weaknesses discovered lately
 
 =back
 
 =item *
 
-Dumpvalue upgraded to version 1.12
+C<Dumpvalue> upgraded to version 1.12
 
 =over
 
 =item *
 
-documentation fix
+Documentation fix
 
 =back
 
 =item *
 
-DynaLoader upgraded but unfortunately we're not able to increment its version number :-(
+C<DynaLoader> upgraded but unfortunately we're not able to increment its version number :-(
 
 =over
 
 =item *
 
-implements C<dl_unload_file> on Win32
+Implements C<dl_unload_file> on Win32
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =item *
 
-XSLoader 0.06 incorporated; small optimisation for calling
-bootstrap_inherit() and documentation enhancements.
+C<XSLoader> 0.06 incorporated; small optimisation for calling
+C<bootstrap_inherit()> and documentation enhancements.
 
 =back
 
 =item *
 
-Encode upgraded to version 2.12
+C<Encode> upgraded to version 2.12
 
 =over
 
 =item *
 
-coderef now acceptable for CHECK!
+A coderef is now acceptable for C<CHECK>!
 
 =item *
 
@@ -429,21 +429,21 @@ coderef now acceptable for CHECK!
 
 =item *
 
-new encodings C<MIME-Header-ISO_2022_JP> added
+New encoding C<MIME-Header-ISO_2022_JP> added
 
 =item *
 
-problem with partial character and C<< encoding(utf-8-strict) >> fixed.
+Problem with partial characters and C<< encoding(utf-8-strict) >> fixed.
 
 =item *
 
-documentation enhancements and typo fixes
+Documentation enhancements and typo fixes
 
 =back
 
 =item *
 
-English upgraded to version 1.02
+C<English> upgraded to version 1.02
 
 =over
 
@@ -455,19 +455,19 @@ the C<< $COMPILING >> variable has been added
 
 =item *
 
-ExtUtils::Constant upgraded to version 0.17
+C<ExtUtils::Constant> upgraded to version 0.17
 
 =over
 
 =item *
 
-improved compatibility with older versions of perl
+Improved compatibility with older versions of perl
 
 =back
 
 =item *
 
-ExtUtils::MakeMaker upgraded to version 6.30 (was 6.17)
+C<ExtUtils::MakeMaker> upgraded to version 6.30 (was 6.17)
 
 =over
 
@@ -479,7 +479,7 @@ Too much to list here;  see L<http://search.cpan.org/src/MSCHWERN/ExtUtils-MakeM
 
 =item *
 
-File::Basename upgraded to version 2.74, with changes contributed by Schwern.
+C<File::Basename> upgraded to version 2.74, with changes contributed by Michael Schwern.
 
 =over
 
@@ -493,12 +493,12 @@ C<basename> now strips trailing path separators before processing the name.
 
 =item *
 
-C<basename> now returns C</> for parameter C</>, which makes C<basename>
+C<basename> now returns C</> for parameter C</>, to make C<basename>
 consistent with the shell utility of the same name.
 
 =item *
 
-The suffix is now not stripped if it is identical to the remaining characters
+The suffix is no longer stripped if it is identical to the remaining characters
 in the name, again for consistency with the shell utility.
 
 =item *
@@ -509,70 +509,70 @@ Some internal code cleanup.
 
 =item *
 
-File::Copy upgraded to version 2.09
+C<File::Copy> upgraded to version 2.09
 
 =over
 
 =item *
 
-copy a file onto itself used to fail.
+Copying a file onto itself used to fail.
 
 =item *
 
-moving a file between file systems now preserves the access and
+Moving a file between file systems now preserves the access and
 modification time stamps
 
 =back
 
 =item *
 
-File::Find upgraded to version 1.10
+C<File::Find> upgraded to version 1.10
 
 =over
 
 =item *
 
-windows portability fixes
+Win32 portability fixes
 
 =item *
 
-enhanced documentation
+Enhanced documentation
 
 =back
 
 =item *
 
-File::Glob upgraded to version 1.05
+C<File::Glob> upgraded to version 1.05
 
 =over
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =back
 
 =item *
 
-File::Path upgraded to version 1.08
+C<File::Path> upgraded to version 1.08
 
 =over
 
 =item *
 
-mkpath now preserves errno when mkdir fails
+C<mkpath> now preserves C<errno> when C<mkdir> fails
 
 =back
 
 =item *
 
-File::Spec upgraded to version 3.12
+C<File::Spec> upgraded to version 3.12
 
 =over
 
 =item *
 
-File::Spec->rootdir() now returns C<\> on Win32, instead of C</>
+C<File::Spec->rootdir()> now returns C<\> on Win32, instead of C</>
 
 =item *
 
@@ -597,48 +597,48 @@ Some internal code cleanup
 
 =item *
 
-FileCache upgraded to version 1.06
+C<FileCache> upgraded to version 1.06
 
 =over
 
 =item *
 
-POD formatting error in documentation fixed
+POD formatting errors in the documentation fixed
 
 =back
 
 =item *
 
-Filter::Simple upgraded to version 0.82
+C<Filter::Simple> upgraded to version 0.82
 
 =item *
 
-FindBin upgraded to version 1.47
+C<FindBin> upgraded to version 1.47
 
 =over
 
 =item *
 
-now works better with directories where access rights are more
+Now works better with directories where access rights are more
 restrictive than usual.
 
 =back
 
 =item *
 
-GDBM_File upgraded to version 1.08
+C<GDBM_File> upgraded to version 1.08
 
 =over
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =back
 
 =item *
 
-Getopt::Long upgraded to version 2.35
+C<Getopt::Long> upgraded to version 2.35
 
 =over
 
@@ -650,271 +650,271 @@ prefix patterns should have long option style semantics applied.
 
 =item *
 
-options can now take multiple values at once (experimental)
+Options can now take multiple values at once (experimental)
 
 =item *
 
-various bug fixes
+Various bug fixes
 
 =back
 
 =item *
 
-if upgraded to version 0.05
+C<if> upgraded to version 0.05
 
 =over
 
 =item *
 
-give more meaningful error messages from if.pm when invoked with a
+Give more meaningful error messages from C<if> when invoked with a
 condition in list context.
 
 =item *
 
-restore backwards compatibility with earlier versions of perl
+Restore backwards compatibility with earlier versions of perl
 
 =back
 
 =item *
 
-IO upgraded to version 1.22
+C<IO> upgraded to version 1.22
 
 =over
 
 =item *
 
-enhanced documentation
+Enhanced documentation
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =back
 
 =item *
 
-IPC::Open2 upgraded to version 1.02
+C<IPC::Open2> upgraded to version 1.02
 
 =over
 
 =item *
 
-enhanced documentation
+Enhanced documentation
 
 =back
 
 =item *
 
-IPC::Open3 upgraded to version 1.02
+C<IPC::Open3> upgraded to version 1.02
 
 =over
 
 =item *
 
-enhanced documentation
+Enhanced documentation
 
 =back
 
 =item *
 
-List::Util upgraded to version 1.18 (was 1.14)
+C<List::Util> upgraded to version 1.18 (was 1.14)
 
 =over
 
 =item *
 
-fix pure-perl version of refaddr to avoid blessing an un-blessed reference
+Fix pure-perl version of C<refaddr> to avoid blessing an un-blessed reference
 
 =item *
 
-use XSLoader for faster loading
+Use C<XSLoader> for faster loading
 
 =item *
 
-fixed various memory leaks
+Fixed various memory leaks
 
 =item *
 
-internal cleanup and portability fixes
+Internal cleanup and portability fixes
 
 =back
 
 =item *
 
-Math::Complex upgraded to version 1.35
+C<Math::Complex> upgraded to version 1.35
 
 =over
 
 =item *
 
-atan2(0, i) now works, as do all the (computable) complex argument cases
+C<atan2(0, i)> now works, as do all the (computable) complex argument cases
 
 =item *
 
-fixes for certain bugs in C<make> and C<emake>
+Fixes for certain bugs in C<make> and C<emake>
 
 =item *
 
-support returning the I<k>th root directly
+Support returning the I<k>th root directly
 
 =item *
 
-support [2,-3pi/8] in C<emake>
+Support C<[2,-3pi/8]> in C<emake>
 
 =item *
 
-support 'inf' for C<make>/C<emake>
+Support C<inf> for C<make>/C<emake>
 
 =item *
 
-document C<make>/C<emake> more visibly
+Document C<make>/C<emake> more visibly
 
 =back
 
 =item *
 
-Math::Trig upgraded to version 1.03
+C<Math::Trig> upgraded to version 1.03
 
 =over
 
 =item *
 
-add more great circle routines: C<great_circle_waypoint> an
+Add more great circle routines: C<great_circle_waypoint> and
 C<great_circle_destination>
 
 =back
 
 =item *
 
-MIME::Base64 upgraded to version 3.07
+C<MIME::Base64> upgraded to version 3.07
 
 =over
 
 =item *
 
-use XSLoader for faster loading
+Use C<XSLoader> for faster loading
 
 =item *
 
-enhanced documentation
+Enhanced documentation
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =back
 
 =item *
 
-NDBM_File upgraded to version 1.06
+C<NDBM_File> upgraded to version 1.06
 
 =over
 
 =item *
 
-enhanced documentation
+Enhanced documentation
 
 =back
 
 =item *
 
-ODBM_File upgraded to version 1.06
+C<ODBM_File> upgraded to version 1.06
 
 =over
 
 =item *
 
-documentation typo fixed
+Documentation typo fixed
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =back
 
 =item *
 
-Opcode upgraded to version 1.06
+C<Opcode> upgraded to version 1.06
 
 =over
 
 =item *
 
-enhanced documentation
+Enhanced documentation
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =back
 
 =item *
 
-open upgraded to version 1.05
+C<open> upgraded to version 1.05
 
 =over
 
 =item *
 
-enhanced documentation
+Enhanced documentation
 
 =back
 
 =item *
 
-overload upgraded to version 1.04
+C<overload> upgraded to version 1.04
 
 =over
 
 =item *
 
-enhanced documentation
+Enhanced documentation
 
 =back
 
 =item *
 
-PerlIO upgraded to version 1.04
+C<PerlIO> upgraded to version 1.04
 
 =over
 
 =item *
 
-PerlIO::via iterate over layers properly now
+C<PerlIO::via> iterate over layers properly now
 
 =item *
 
-PerlIO::scalar understands C<< $/ = "" >> now
+C<PerlIO::scalar> understands C<< $/ = "" >> now
 
 =item *
 
-encoding(utf-8-strict) with partial characters now work
+C<encoding(utf-8-strict)> with partial characters now works
 
 =item *
 
-enhanced documentation
+Enhanced documentation
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =back
 
 =item *
 
-Pod::Functions upgraded to version 1.03
+C<Pod::Functions> upgraded to version 1.03
 
 =over
 
 =item *
 
-documentation typos fixed
+Documentation typos fixed
 
 =back
 
 =item *
 
-Pod::Html upgraded to version 1.0504
+C<Pod::Html> upgraded to version 1.0504
 
 =over
 
@@ -929,139 +929,139 @@ Variable names are recognized as intended
 
 =item *
 
-documentation typos fixed
+Documentation typos fixed
 
 =back
 
 =item *
 
-Pod::Parser upgraded to version 1.32
+C<Pod::Parser> upgraded to version 1.32
 
 =over
 
 =item *
 
-allow files that start with =head on the first line
+Allow files that start with C<=head> on the first line
 
 =item *
 
-windows portability fix
+Win32 portability fix
 
 =item *
 
-exit status of pod2usage fixed
+Exit status of C<pod2usage> fixed
 
 =item *
 
-New C<-noperldoc> switch to pod2usage
+New C<-noperldoc> switch for C<pod2usage>
 
 =item *
 
-arbitrary URL schemes now allowed
+Arbitrary URL schemes now allowed
 
 =item *
 
-documentation typos fixed
+Documentation typos fixed
 
 =back
 
 =item *
 
-POSIX upgraded to version 1.09
+C<POSIX> upgraded to version 1.09
 
 =over
 
 =item *
 
-documentation typos fixed
+Documentation typos fixed
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =back
 
 =item *
 
-re upgraded to version 0.05
+C<re> upgraded to version 0.05
 
 =over
 
 =item *
 
-documentation typo fixed
+Documentation typo fixed
 
 =back
 
 =item *
 
-Safe upgraded to version 2.12
+C<Safe> upgraded to version 2.12
 
 =over
 
 =item *
 
-minor documentation enhancement
+Minor documentation enhancement
 
 =back
 
 =item *
 
-SDBM_File upgraded to version 1.05
+C<SDBM_File> upgraded to version 1.05
 
 =over
 
 =item *
 
-documentation typo fixed
+Documentation typo fixed
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =back
 
 =item *
 
-Socket upgraded to version 1.78
+C<Socket> upgraded to version 1.78
 
 =over
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =back
 
 =item *
 
-Storable upgraded to version 2.15
+C<Storable> upgraded to version 2.15
 
 =over
 
 =item *
 
-This includes C<STORABLE_attach> hook functionality added by
-Adam Kennedy, and more memory frugal storing under ithreads, by
-utilising the ithreads cloning tracking code.
+This includes the C<STORABLE_attach> hook functionality added by
+Adam Kennedy, and more frugal memory requirements when storing under C<ithreads>, by
+using the C<ithreads> cloning tracking code.
 
 =back
 
 =item *
 
-Switch upgraded to version 2.10_01
+C<Switch> upgraded to version 2.10_01
 
 =over
 
 =item *
 
-documentation typos fixed
+Documentation typos fixed
 
 =back
 
 =item *
 
-Sys::Syslog upgraded to version 0.13
+C<Sys::Syslog> upgraded to version 0.13
 
 =over
 
@@ -1072,7 +1072,7 @@ Now provides numeric macros and meaningful C<Exporter> tags.
 =item *
 
 No longer uses C<Sys::Hostname> as it may provide useless values in
-unconfigured network environments, so instead directly uses C<INADDR_LOOPBACK>.
+unconfigured network environments, so instead uses C<INADDR_LOOPBACK> directly.
 
 =item *
 
@@ -1098,14 +1098,14 @@ Improved documentation.
 
 =item *
 
-Term::ANSIColor upgraded to version 1.10
+C<Term::ANSIColor> upgraded to version 1.10
 
 =over
 
 =item *
 
 Fixes a bug in C<colored> when C<$EACHLINE> is set that caused it to not color
-lines consisting solely of 0.
+lines consisting solely of 0 (literal zero).
 
 =item *
 
@@ -1115,25 +1115,25 @@ Improved tests.
 
 =item *
 
-Term::ReadLine upgraded to version 1.02
+C<Term::ReadLine> upgraded to version 1.02
 
 =over
 
 =item *
 
-documentation tweaks
+Documentation tweaks
 
 =back
 
 =item *
 
-Test::Harness upgraded to version 2.56 (was 2.48)
+C<Test::Harness> upgraded to version 2.56 (was 2.48)
 
 =over
 
 =item *
 
-The Test::Harness timer is now off by default.
+The C<Test::Harness> timer is now off by default.
 
 =item *
 
@@ -1141,33 +1141,33 @@ Now shows elapsed time in milliseconds.
 
 =item *
 
-various bug fixes
+Various bug fixes
 
 =back
 
 =item *
 
-Test::Simple upgraded to version 0.62 (was 0.54)
+C<Test::Simple> upgraded to version 0.62 (was 0.54)
 
 =over
 
 =item *
 
-is_deeply() failed to work for many cases
+C<is_deeply()> no longer fails to work for many cases
 
 =item *
 
-various minor bug fixes
+Various minor bug fixes
 
 =item *
 
-documentation enhancements
+Documentation enhancements
 
 =back
 
 =item *
 
-Text::Tabs upgraded to version 2005.0824
+C<Text::Tabs> upgraded to version 2005.0824
 
 =over
 
@@ -1179,7 +1179,7 @@ Provides a faster implementation of C<expand>
 
 =item *
 
-Text::Wrap upgraded to version 2005.082401
+C<Text::Wrap> upgraded to version 2005.082401
 
 =over
 
@@ -1192,18 +1192,18 @@ but add line-breaks with some other string.
 
 =item *
 
-threads upgraded to version 1.07
+C<threads> upgraded to version 1.07
 
 =over
 
 =item *
 
-threads will now honour C<no warnings 'threads'>
+C<threads> will now honour C<no warnings 'threads'>
 
 =item *
 
 A thread's interpreter is now freed after C<< $t->join() >> rather than after
-C<undef $t>, which should fix some ithreads memory leaks. (Fixed by Dave
+C<undef $t>, which should fix some C<ithreads> memory leaks. (Fixed by Dave
 Mitchell)
 
 =item *
@@ -1214,13 +1214,13 @@ Some documentation typo fixes.
 
 =item *
 
-threads::shared upgraded to version 0.94
+C<threads::shared> upgraded to version 0.94
 
 =over
 
 =item *
 
-documentation changes only
+Documentation changes only
 
 =item *
 
@@ -1231,51 +1231,51 @@ CPAN - this will be merged into 5.8.9 if it proves stable.
 
 =item *
 
-Tie::Hash upgraded to version 1.02
+C<Tie::Hash> upgraded to version 1.02
 
 =over
 
 =item *
 
-documentation typo fixed
+Documentation typo fixed
 
 =back
 
 =item *
 
-Time::HiRes upgraded to version 1.86 (was 1.66)
+C<Time::HiRes> upgraded to version 1.86 (was 1.66)
 
 =over
 
 =item *
 
-clock_nanosleep() and clock() functions added
+C<clock_nanosleep()> and C<clock()> functions added
 
 =item *
 
-support for the POSIX clock_gettime() and clock_getres() has been added
+Support for the POSIX C<clock_gettime()> and C<clock_getres()> has been added
 
 =item *
 
-return undef or an empty if the C gettimeofday() fails
+Return C<undef> or an empty list if the C C<gettimeofday()> function fails
 
 =item *
 
-improved nanosleep detection
+Improved C<nanosleep> detection
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =item *
 
-enhanced documentation
+Enhanced documentation
 
 =back
 
 =item *
 
-Unicode::Collate upgraded to version 0.52
+C<Unicode::Collate> upgraded to version 0.52
 
 =over
 
@@ -1285,85 +1285,85 @@ Now implements UCA Revision 14 (based on Unicode 4.1.0).
 
 =item *
 
-Unicode::Collate->new method no longer destroys user's $_
+C<Unicode::Collate->new> method no longer overwrites user's C<$_>
 
 =item *
 
-enhanced documentation
+Enhanced documentation
 
 =back
 
 =item *
 
-Unicode::UCD upgraded to version 0.24
+C<Unicode::UCD> upgraded to version 0.24
 
 =over
 
 =item *
 
-documentation typos fixed
+Documentation typos fixed
 
 =back
 
 =item *
 
-User::grent upgraded to version 1.01
+C<User::grent> upgraded to version 1.01
 
 =over
 
 =item *
 
-documentation typo fixed
+Documentation typo fixed
 
 =back
 
 =item *
 
-utf8 upgraded to version 1.06
+C<utf8> upgraded to version 1.06
 
 =over
 
 =item *
 
-documentation typos fixed
+Documentation typos fixed
 
 =back
 
 =item *
 
-vmsish upgraded to version 1.02
+C<vmsish> upgraded to version 1.02
 
 =over
 
 =item *
 
-documentation typos fixed
+Documentation typos fixed
 
 =back
 
 =item *
 
-warnings upgraded to version 1.05
+C<warnings> upgraded to version 1.05
 
 =over
 
 =item *
 
-gentler messing with Carp:: internals
+Gentler messing with C<Carp::> internals
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =item *
 
-documentation update
+Documentation update
 
 =back
 
 =item *
 
-Win32 upgraded to version 0.2601
+C<Win32> upgraded to version 0.2601
 
 =for cynics And how many perl 5.8.x versions can I release ahead of Vista?
 
@@ -1371,23 +1371,23 @@ Win32 upgraded to version 0.2601
 
 =item *
 
-provides Windows Vista support to C<Win32::GetOSName>
+Provides Windows Vista support to C<Win32::GetOSName>
 
 =item *
 
-documentation enhancements
+Documentation enhancements
 
 =back
 
 =item *
 
-XS::Typemap upgraded to version 0.02
+C<XS::Typemap> upgraded to version 0.02
 
 =over
 
 =item *
 
-internal cleanup
+Internal cleanup
 
 =back
 
@@ -1395,16 +1395,16 @@ internal cleanup
 
 =head1 Utility Changes
 
-=head2 h2xs enhancements
+=head2 C<h2xs> enhancements
 
 C<h2xs> implements new option C<--use-xsloader> to force use of
-C<XSLoader> even in backward compatible modules.
+C<XSLoader> even in backwards compatible modules.
 
 The handling of authors' names that had apostrophes has been fixed.
 
 Any enums with negative values are now skipped.
 
-=head2 perlivp enhancements
+=head2 C<perlivp> enhancements
 
 C<perlivp> implements new option C<-a> and will not check for F<*.ph>
 files by default any more.  Use the C<-a> option to run I<all> tests.
@@ -1428,7 +1428,7 @@ compiled with C<-DPERL_DONT_CREATE_GVSV> to avoid creating these empty scalars.
 This will significantly decrease the number of scalars allocated for all
 configurations, and the number of scalars that need to be copied for ithread
 creation. Whilst this option is binary compatible with existing perl
-installations, it does change a long-standing previous assumption about the
+installations, it does change a long-standing assumption about the
 internals, hence it is not enabled by default, as some third party code may
 rely on the old behaviour.
 
@@ -1461,7 +1461,7 @@ real memory usage on multi-user systems.
 =head1 Installation and Configuration Improvements
 
 Parallel makes should work properly now, although there may still be problems
-with if C<make test> is instructed to run in parallel.
+if C<make test> is instructed to run in parallel.
 
 Building with Borland's compilers on Win32 should work more smoothly. In
 particular Steve Hay has worked to side step many warnings emitted by their
@@ -1477,16 +1477,16 @@ DEC/OSF, HP-UX and MPE/iX
 
 Perl extensions on Windows now can be statically built into the Perl DLL,
 thanks to a work by Vadim Konovalov. (This improvement was actually in 5.8.7,
-but was accidentally omitted from L<perl587delta>)
+but was accidentally omitted from L<perl587delta>).
 
 =head1 Selected Bug Fixes
 
 =head2 Remove over-optimisation
 
 Perl 5.8.4 introduced a change so that assignments of C<undef> to a
-scalar, or of an empty list to an array or a hash, were optimised out. As
+scalar, or of an empty list to an array or a hash, were optimised away. As
 this could cause problems when C<goto> jumps were involved, this change
-was backed out.
+has been backed out.
 
 =head2 sprintf() fixes
 
@@ -1603,7 +1603,7 @@ select(), instead of a bitmask.
 
 This syntax error indicates that the lexer couldn't find the final
 delimiter of a C<?PATTERN?> construct. Mentioning the ternary operator in
-this error message makes syntax diagnostic easier.
+this error message makes it easier to diagnose syntax errors.
 
 =head1 Changed Internals
 
@@ -1616,7 +1616,7 @@ should be no user-detectable changes.
 
 Andy Lester supplied many improvements to determine which function
 parameters and local variables could actually be declared C<const> to the C
-compiler. Steve Peters provided new *_set macros and reworked the core to
+compiler. Steve Peters provided new C<*_set> macros and reworked the core to
 use these rather than assigning to macros in LVALUE context.
 
 Dave Mitchell improved the lexer debugging output under C<-DT>
