@@ -64,7 +64,7 @@ Robin Houston.
 
 Perl 5 now has a switch statement. It's available when C<use feature
 'switch'> is in effect. This feature introduces three new keywords,
-C<given>, C<when>, and C<default> :
+C<given>, C<when>, and C<default>:
 
     given ($foo) {
 	when (/^abc/) { $abc = 1; }
@@ -161,7 +161,7 @@ Enhancements">.
 
 =item *
 
-C<assertions::compat>, also available on CPAN, allows to use assertions on
+C<assertions::compat>, also available on CPAN, allows the use of assertions on
 perl versions prior to 5.9.0 (that is the first one to natively support
 them).
 
@@ -205,7 +205,7 @@ with the new C<Digest::SHA> module.
 
 =head2 C<h2xs> enhancements
 
-C<h2xs> implements new option C<--use-xsloader> to force use of
+C<h2xs> implements a new option C<--use-xsloader> to force use of
 C<XSLoader> even in backwards compatible modules.
 
 The handling of authors' names that had apostrophes has been fixed.
@@ -223,7 +223,7 @@ option to run I<all> tests.
 
 The L<perlglossary> manpage is a glossary of terms used in the Perl
 documentation, technical and otherwise, kindly provided by O'Reilly Media,
-inc.
+Inc.
 
 =head1 Performance Enhancements
 
@@ -461,7 +461,7 @@ of the declarations involved is a C<my> variable:
     my $x;  our $x;	# warns
     our $x;  my $x;	# warns
 
-On the other hand, the following :
+On the other hand, the following:
 
     our $x; our $x;
 
