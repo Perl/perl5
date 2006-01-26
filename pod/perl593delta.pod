@@ -12,8 +12,9 @@ L<perl592delta> for the differences between 5.8.0 and 5.9.2.
 
 =head2 Parsing of C<-f _>
 
-C<_> is now forced to be a bareword after a filetest operator. This solves
-a number of misparsing issues when a global C<_> subroutine is defined.
+The identifier C<_> is now forced to be a bareword after a filetest
+operator. This solves a number of misparsing issues when a global C<_>
+subroutine is defined.
 
 =head2 C<mkdir()>
 
@@ -43,7 +44,7 @@ The C<sort> pragma is now lexically scoped. Its effect used to be global.
 =head2 The C<feature> pragma
 
 The C<feature> pragma is used to enable new syntax that would break Perl's
-backward-compatibility with older releases of the language. It's a lexical
+backwards-compatibility with older releases of the language. It's a lexical
 pragma, like C<strict> or C<warnings>.
 
 Currently the following new features are available: C<switch> (adds a
@@ -52,12 +53,33 @@ switch statement), C<~~> (adds a Perl 6-like smart match operator), C<say>
 Those features are described below.
 
 Note that C<err> low-precedence defined-or operator used to be enabled by
-default, but as a weak keyword. It's now only recognized when explicitly
-turned on.
+default (although as a weak keyword, meaning that any function would
+override it). It's now only recognized when explicitly turned on (and is
+then a regular keyword).
+
+Those features, and the C<feature> pragma itself, have been contributed by
+Robin Houston.
 
 =head2 Switch and Smart Match operator
 
-XXX
+Perl 5 now has a switch statement. It's available when C<use feature
+'switch'> is in effect. This feature introduces three new keywords,
+C<given>, C<when>, and C<default> :
+
+    given ($foo) {
+	when (/^abc/) { $abc = 1; }
+	when (/^def/) { $def = 1; }
+	when (/^xyz/) { $xyz = 1; }
+	default { $nothing = 1; }
+    }
+
+A more complete description of how Perl matches the switch variable
+against the C<when> conditions is given in L<perlsyn/"Switch statements">.
+
+This kind of match is called I<smart match>, and it's also possible to use
+it outside of switch statements, via the new C<~~> operator (enabled via
+the C<use feature '~~'> directive). See L<perlsyn/"Smart matching in
+detail">.
 
 =head2 C<say()>
 
@@ -71,21 +93,21 @@ Perl has now support for the C<CLONE_SKIP> special subroutine. Like
 C<CLONE>, C<CLONE_SKIP> is called once per package; however, it is called
 just before cloning starts, and in the context of the parent thread. If it
 returns a true value, then no objects of that class will be cloned. See
-L<perlmod> for details.
+L<perlmod> for details. (Contributed by Dave Mitchell.)
 
 =head2 C<${^CHILD_ERROR_NATIVE}>
 
 A new internal variable, C<${^CHILD_ERROR_NATIVE}>, gives the native
 status returned by the last pipe close, backtick command, successful call
 to wait() or waitpid(), or from the system() operator. See L<perlrun> for
-details.
+details. (Contributed by Gisle Aas.)
 
 =head2 Assertions
 
 The support for assertions, introduced in perl 5.9.0, has been improved.
 The syntax for the C<-A> command-line switch has changed; it now accepts
 an optional module name, defaulting to C<assertions::activate>. See
-L<assertions> and L<perlrun>.
+L<assertions> and L<perlrun>. (Contributed by Salvador Fandiño García.)
 
 =head2 Unicode Character Database 4.1.0
 
@@ -113,7 +135,7 @@ into eval("").
 =head2 New B<-E> command-line switch
 
 B<-E> is equivalent to B<-e>, but it implicitly enables all
-optional features.
+optional features (like C<use feature ":5.10">).
 
 =head2 C<chdir>, C<chmod> and C<chown> on filehandles
 
@@ -121,33 +143,87 @@ C<chdir>, C<chmod> and C<chown> can now work on filehandles as well as
 filenames, if the system supports respectively C<fchdir>, C<fchmod> and
 C<fchown>, thanks to a patch provided by Gisle Aas.
 
+=head2 OS groups
+
+C<$(> and C<$)> now return groups in the order where the OS returns them,
+thanks to Gisle Aas. This wasn't previously the case.
+
 =head1 Modules and Pragmata
 
-=head2 C<feature>
+=head2 New Core Modules
 
-This new module implements the C<feature> pragma; see above in
-L</"Core Enhancements">.
+=over 4
 
-=head2 C<assertions::compat>
+=item *
 
-=head2 C<Math::BigInt::FastCalc>
+A new pragma, C<feature>, has been added; see above in L</"Core
+Enhancements">.
 
-=head2 C<Compress::Zlib>
+=item *
 
-=head2 C<IO::Zlib>
+C<assertions::compat>, also available on CPAN, allows to use assertions on
+perl versions prior to 5.9.0 (that is the first one to natively support
+them).
 
-=head2 C<Archive::Tar>
+=item *
+
+C<Math::BigInt::FastCalc> is an XS-enabled, and thus faster, version of
+C<Math::BigInt::Calc>.
+
+=item *
+
+C<Compress::Zlib> is an interface to the zlib compression library. It
+comes with a bundled version of zlib, so having a working zlib is not a
+prerequisite to install it. It's used by C<Archive::Tar> (see below).
+
+=item *
+
+C<IO::Zlib> is an C<IO::>-style interface to C<Compress::Zlib>.
+
+=item *
+
+C<Archive::Tar> is a module to manipulate C<tar> archives.
+
+=item *
+
+C<Digest::SHA> is a module used to calculate many types of SHA digests,
+has been included for SHA support in the CPAN module.
+
+=back
 
 =head1 Utility Changes
 
 =head2 C<ptar>
+
+C<ptar> is a pure perl implementation of C<tar>, that comes with
+C<Archive::Tar>.
+
+=head2 C<shasum>
+
+This command-line utility, used to print or to check SHA digests, comes
+with the new C<Digest::SHA> module.
+
+=head2 C<h2xs> enhancements
+
+C<h2xs> implements new option C<--use-xsloader> to force use of
+C<XSLoader> even in backwards compatible modules.
+
+The handling of authors' names that had apostrophes has been fixed.
+
+Any enums with negative values are now skipped.
+
+=head2 C<perlivp> enhancements
+
+C<perlivp> implements new option C<-a> and will not check for F<*.ph>
+files by default any more.  Use the C<-a> option to run I<all> tests.
 
 =head1 Documentation
 
 =head2 Perl Glossary
 
 The L<perlglossary> manpage is a glossary of terms used in the Perl
-documentation, technical and otherwise.
+documentation, technical and otherwise, kindly provided by O'Reilly Media,
+inc.
 
 =head1 Performance Enhancements
 
@@ -156,7 +232,7 @@ documentation, technical and otherwise.
 Some pure-perl code that perl was using to retrieve Unicode properties and
 transliteration mappings has been reimplemented in XS.
 
-=head2 Constants subroutines
+=head2 Constant subroutines
 
 XXX
 
@@ -180,6 +256,18 @@ and to speed up some cases.
 
 =head1 Installation and Configuration Improvements
 
+=head2 Compilation improvements
+
+Parallel makes should work properly now, although there may still be problems
+if C<make test> is instructed to run in parallel.
+
+Building with Borland's compilers on Win32 should work more smoothly. In
+particular Steve Hay has worked to side step many warnings emitted by their
+compilers and at least one C compiler internal error.
+
+Perl extensions on Windows now can be statically built into the Perl DLL,
+thanks to a work by Vadim Konovalov.
+
 =head2 New Or Improved Platforms
 
 Perl is being ported to Symbian OS. See L<perlsymbian> for more
@@ -194,7 +282,10 @@ improved (Borland C++, Visual C++ 7.0).
 
 =head2 New probes
 
-Perl will detect and use internally futimes(2) if available.
+C<Configure> will now detect C<clearenv> and C<unsetenv>, thanks to a
+patch from Alan Burlison. It will also probe for C<futimes> (and use it
+internally if available), and whether C<sprintf> correctly returns the
+length of the formatted string.
 
 =head2 Module auxiliary files
 
@@ -244,8 +335,17 @@ Using the sprintf() function with some formats could lead to a buffer
 overflow in some specific cases. This has been fixed, along with several
 other bugs, notably in bound checking.
 
-In related fixes, a format string injection vulnerability has been fixed
-in Sys::Syslog.
+In related fixes, it was possible for badly written code that did not follow
+the documentation of C<Sys::Syslog> to have formatting vulnerabilities.
+C<Sys::Syslog> has been changed to protect people from poor quality third
+party code.
+
+=head2 no warnings 'category' works correctly with -w
+
+Previously when running with warnings enabled globally via C<-w>, selective
+disabling of specific warning categories would actually turn off all warnings.
+This is now fixed; now C<no warnings 'io';> will only turn off warnings in the
+C<io> class. Previously it would erroneously turn off all warnings.
 
 =head2 Smaller fixes
 
@@ -332,6 +432,20 @@ This is a new warning, produced in situations like the following one:
     $r = do {my @a; \$#a};
     $$r = 503;
 
+=head2 Non-string passed as bitmask
+
+This is a new warning, produced when number has been passed as a argument to
+select(), instead of a bitmask.
+
+    # Wrong, will now warn
+    $rin = fileno(STDIN);
+    ($nfound,$timeleft) = select($rout=$rin, undef, undef, $timeout);
+    
+    # Should be
+    $rin = '';
+    vec($rin,fileno(STDIN),1) = 1;
+    ($nfound,$timeleft) = select($rout=$rin, undef, undef, $timeout);
+
 =head2 Search pattern not terminated or ternary operator parsed as search pattern
 
 This syntax error indicates that the lexer couldn't find the final
@@ -360,7 +474,16 @@ either closed or not really a dirhandle.
 
 =head1 Changed Internals
 
-XXX consting
+In general, the source code of perl has been refactored, tied up, and
+optimized in many places. Also, memory management and allocation has been
+improved in a couple of points.
+
+Andy Lester supplied many improvements to determine which function
+parameters and local variables could actually be declared C<const> to the C
+compiler. Steve Peters provided new C<*_set> macros and reworked the core to
+use these rather than assigning to macros in LVALUE context.
+
+Dave Mitchell improved the lexer debugging output under C<-DT>.
 
 A new file, F<mathoms.c>, has been added. It contains functions that are
 no longer used in the perl core, but that remain available for binary or
