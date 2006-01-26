@@ -89,10 +89,10 @@ toc perltoc.pod:	buildtoc
 .SUFFIXES: .man
 
 .pm.man:     pod2man
-	$(PERL) -I../lib pod2man $*.pm >$*.man
+	$(REALPERL) -I../lib pod2man $*.pm >$*.man
 
 .pod.man:     pod2man
-	$(PERL) -I../lib pod2man $*.pod >$*.man
+	$(REALPERL) -I../lib pod2man $*.pod >$*.man
 
 .SUFFIXES: .html
 
