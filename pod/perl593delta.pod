@@ -83,7 +83,7 @@ detail">.
 
 =head2 C<say()>
 
-say() is a new built-in, only avaiable when C<use feature 'say'> is in
+say() is a new built-in, only available when C<use feature 'say'> is in
 effect, that is similar to print(), but that implicitly appends a newline
 to the printed string. See L<perlfunc/say>.
 
@@ -214,8 +214,8 @@ Any enums with negative values are now skipped.
 
 =head2 C<perlivp> enhancements
 
-C<perlivp> implements new option C<-a> and will not check for F<*.ph>
-files by default any more.  Use the C<-a> option to run I<all> tests.
+C<perlivp> no longer checks for F<*.ph> files by default.  Use the new C<-a>
+option to run I<all> tests.
 
 =head1 Documentation
 
@@ -311,7 +311,7 @@ anyway.)
 =head2 Calling CORE::require()
 
 CORE::require() and CORE::do() were always parsed as require() and do()
-when they were overriden. This is now fixed.
+when they were overridden. This is now fixed.
 
 =head2 Subscripts of slices
 
