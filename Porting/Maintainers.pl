@@ -52,6 +52,7 @@ package Maintainers;
 	'rmbarker'	=> 'Robin Barker <rmbarker@cpan.org>',
 	'rra'		=> 'Russ Allbery <rra@cpan.org>',
 	'sadahiro'	=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
+	'salva'		=> 'Salvador Fandiño García <salva@cpan.org>',
 	'saper'		=> 'Sébastien Aperghis-Tramoni <saper@cpan.org>',
 	'sburke'	=> 'Sean Burke <sburke@cpan.org>',
 	'mschwern'	=> 'Michael Schwern <mschwern@cpan.org>',
@@ -71,6 +72,13 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'kane',
 		'FILES'		=> q[lib/Archive/Tar.pm lib/Archive/Tar],
+		'CPAN'		=> 1,
+		},
+
+	'assertions' =>
+		{
+		'MAINTAINER'	=> 'salva',
+		'FILES'		=> q[lib/assertions.pm lib/assertions t/comp/assertions.t t/comp/asstcompat.t],
 		'CPAN'		=> 1,
 		},
 
