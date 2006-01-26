@@ -3406,6 +3406,8 @@ Perl_my_unexec(pTHX)
 #  ifdef VMS
 #    include <lib$routines.h>
      lib$signal(SS$_DEBUG);  /* ssdef.h #included from vmsish.h */
+#  elif defined(WIN32) || defined(__CYGWIN__)
+    Perl_croak(aTHX_ "dump is not supported");
 #  else
     ABORT();		/* for use with undump */
 #  endif

@@ -1512,6 +1512,10 @@ subroutine or package before the current location.  You can use an empty
 (W misc) You used the obsolescent C<dump()> built-in function, without fully
 qualifying it as C<CORE::dump()>.  Maybe it's a typo.  See L<perlfunc/dump>.
 
+=item dump is not supported
+
+(F) Your machine doesn't support dump/undump.
+
 =item Duplicate free() ignored
 
 (S malloc) An internal routine called free() on something that had

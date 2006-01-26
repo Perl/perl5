@@ -1678,7 +1678,7 @@ Not implemented. (VMS, S<Plan 9>, VOS)
 
 Not useful. (S<Mac OS>, S<RISC OS>)
 
-Not implemented. (Win32)
+Not supported. (Cygwin, Win32)
 
 Invokes VMS debugger. (VMS)
 
