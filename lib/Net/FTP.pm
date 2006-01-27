@@ -1332,10 +1332,18 @@ B<Timeout> - Set a timeout value (defaults to 120)
 
 B<Debug> - debug level (see the debug method in L<Net::Cmd>)
 
-B<Passive> - If set to a non-zero value then all data transfers will be done
-using passive mode. This is not usually required except for some I<dumb>
-servers, and some firewall configurations. This can also be set by the
-environment variable C<FTP_PASSIVE>.
+B<Passive> - If set to a non-zero value then all data transfers will
+be done using passive mode. If set to zero then data transfers will be
+done using active mode.  If the machine is connected to the Internet
+directly, both passive and active mode should work equally well.
+Behind most firewall and NAT configurations passive mode has a better
+chance of working.  However, in some rare firewall configurations,
+active mode actually works when passive mode doesn't.  Some really old
+FTP servers might not implement passive transfers.  If not specified,
+then the transfer mode is set by the environment variable
+C<FTP_PASSIVE> or if that one is not set by the settings done by the
+F<libnetcfg> utility.  If none of these apply then passive mode is
+used.
 
 B<Hash> - If given a reference to a file handle (e.g., C<\*STDERR>),
 print hash marks (#) on that filehandle every 1024 bytes.  This

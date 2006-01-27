@@ -27,8 +27,8 @@ eval { local $SIG{__DIE__}; require Net::LocalCfg };
     time_hosts => [],
     inet_domain => undef,
     ftp_firewall => undef,
-    ftp_ext_passive => 0,
-    ftp_int_passive => 0,
+    ftp_ext_passive => 1,
+    ftp_int_passive => 1,
     test_hosts => 1,
     test_exist => 1,
 );
@@ -269,11 +269,12 @@ There is no firewall
 
 =item ftp_int_passive
 
-FTP servers normally work on a non-passive mode. That is when you want to
-transfer data you have to tell the server the address and port to
-connect to.
+FTP servers can work in passive or active mode. Active mode is when
+you want to transfer data you have to tell the server the address and
+port to connect to.  Passive mode is when the server provide the
+address and port and you establish the connection.
 
-With some firewalls this does not work as the server cannot
+With some firewalls active mode does not work as the server cannot
 connect to your machine (because you are behind a firewall) and the firewall
 does not re-write the command. In this case you should set C<ftp_ext_passive>
 to a I<true> value.
