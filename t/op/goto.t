@@ -416,16 +416,16 @@ a32039();
     my $r = runperl(
 		stderr => 1,
 		prog =>
-'for ($_=0;$_<3;$_++){A: if($_==1){next} if($_==2){$_++;goto A}}print qq(ok)'
+'for ($_=0;$_<3;$_++){A: if($_==1){next} if($_==2){$_++;goto A}}print qq(ok\n)'
     );
-    is($r, "ok", 'next and goto');
+    is($r, "ok\n", 'next and goto');
 
     $r = runperl(
 		stderr => 1,
 		prog =>
-'for ($_=0;$_<3;$_++){A: if($_==1){$_++;redo} if($_==2){$_++;goto A}}print qq(ok)'
+'for ($_=0;$_<3;$_++){A: if($_==1){$_++;redo} if($_==2){$_++;goto A}}print qq(ok\n)'
     );
-    is($r, "ok", 'redo and goto');
+    is($r, "ok\n", 'redo and goto');
 }
 
 # goto &foo not allowed in evals

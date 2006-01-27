@@ -3,8 +3,8 @@
 use Test::More;
 
 BEGIN {
-  if ($^O eq 'MSWin32') {
-    plan skip_all => "Not portable on Win32\n";
+  if ($^O eq 'MSWin32' || $^O eq 'VMS') {
+    plan skip_all => "Not portable on Win32 or VMS\n";
   }
   else {
     plan tests => 15;
