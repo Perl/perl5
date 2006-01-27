@@ -3463,6 +3463,7 @@ utils/piconv.PL			iconv(1), reinvented in perl
 utils/pl2pm.PL			A pl to pm translator
 utils/prove.PL			The prove harness utility
 utils/ptar.PL			The ptar utility
+utils/ptardiff.PL		The ptardiff utility
 utils/shasum.PL			filter for computing SHA digests (analogous to md5sum)
 utils/splain.PL			Stand-alone version of diagnostics.pm
 utils/xsubpp.PL			External subroutine preprocessor
