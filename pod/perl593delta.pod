@@ -225,6 +225,8 @@ The L<perlglossary> manpage is a glossary of terms used in the Perl
 documentation, technical and otherwise, kindly provided by O'Reilly Media,
 Inc.
 
+L<perltodo> now lists a rough roadmap to Perl 5.10.
+
 =head1 Performance Enhancements
 
 =head2 XS-assisted SWASHGET
@@ -344,7 +346,7 @@ was backed out.
 
 Using the sprintf() function with some formats could lead to a buffer
 overflow in some specific cases. This has been fixed, along with several
-other bugs, notably in bound checking.
+other bugs, notably in bounds checking.
 
 In related fixes, it was possible for badly written code that did not follow
 the documentation of C<Sys::Syslog> to have formatting vulnerabilities.
@@ -389,8 +391,8 @@ C<PerlIO::scalar> now works better with non-default C<$/> settings.
 
 =item *
 
-You can now use the C<x> operator to repeat a C<qw//> list. This used
-to raise a syntax error. For example: C<qw(foo bar) x 3>.
+The C<x> repetition operator is now able to operate on C<qw//> lists. This
+used to raise a syntax error.
 
 =item *
 
@@ -510,10 +512,6 @@ C<AV*> parameters.
 
 The inheritance hierarchy of C<B::> modules has changed; C<B::NV> now
 inherits from C<B::SV> (it used to inherit from C<B::IV>).
-
-=head1 Known Problems
-
-=head2 Platform Specific Problems
 
 =head1 Reporting Bugs
 
