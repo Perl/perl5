@@ -29,6 +29,1545 @@ Version v5.9.X		Development release working toward v5.10
 --------------
 
 ____________________________________________________________________________
+[ 26966] By: rgs                                   on 2006/01/27  17:47:32
+        Log: Remove patch number
+     Branch: perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 26965] By: rgs                                   on 2006/01/27  17:44:48
+        Log: Mention ptardiff in perldelta.
+     Branch: perl
+	   ! pod/perl593delta.pod
+____________________________________________________________________________
+[ 26964] By: rgs                                   on 2006/01/27  17:37:27
+        Log: Don't install ptardiff in the module tree
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[ 26963] By: rgs                                   on 2006/01/27  17:19:52
+        Log: Install the ptardiff utility that comes with Archive::Tar
+     Branch: perl
+	   ! MANIFEST utils.lst utils/Makefile vms/descrip_mms.template
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 26962] By: rgs                                   on 2006/01/27  17:04:35
+        Log: Install nit : README.e2x should be installed, the other READMEs shouldn't
+     Branch: perl
+	   ! installperl
+____________________________________________________________________________
+[ 26961] By: rgs                                   on 2006/01/27  16:31:33
+        Log: Regenerate PODs
+     Branch: perl
+	   ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 26960] By: rgs                                   on 2006/01/27  15:35:01
+        Log: Some spelling fixes by David Landgren.
+             Mention perltodo.
+     Branch: perl
+	   ! pod/perl593delta.pod
+____________________________________________________________________________
+[ 26959] By: rgs                                   on 2006/01/27  15:26:05
+        Log: Revert change 24461, now that change 26757 allows TEST
+             to accept extra output from module tests
+     Branch: perl
+	   ! cygwin/perlld.in
+____________________________________________________________________________
+[ 26958] By: rgs                                   on 2006/01/27  13:54:06
+        Log: Subject: [PATCH] quiet gcc Info message in cygwin
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Wed, 25 Jan 2006 19:16:09 -0800
+             Message-ID: <20060126031608.GA2588@efn.org>
+     Branch: perl
+	   ! hints/cygwin.sh
+____________________________________________________________________________
+[ 26957] By: rgs                                   on 2006/01/27  13:08:12
+        Log: Remove note about #elif, see :
+             Subject: Re: Change 26954: Simplify nested '#ifdef' by replacing it with '#elif defined()'
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Fri, 27 Jan 2006 11:09:02 +0000
+             Message-ID: <43D9FF4E.6010501@uk.radan.com>
+     Branch: perl
+	   ! Porting/pumpkin.pod
+____________________________________________________________________________
+[ 26955] By: nicholas                              on 2006/01/27  10:36:05
+        Log: A description of the new constants.
+     Branch: perl
+	   ! pod/perl593delta.pod
+____________________________________________________________________________
+[ 26954] By: gisle                                 on 2006/01/27  08:54:04
+        Log: Simplify nested '#ifdef' by replacing it with '#elif defined()'
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 26953] By: gisle                                 on 2006/01/27  08:49:34
+        Log: Safer implementation of RTRIM().
+             Don't rely on SvCUR to be sane unless SvPOK.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 26952] By: nicholas                              on 2006/01/26  22:03:19
+        Log: Subject: [PATCH] Change 26781/26830 (SvRTRIM should also write a new '\0' at the end) can cause segfaults
+             From: "Philippe M. Chiasson" <gozer@ActiveState.com>
+             Message-ID: <43D941AF.1060503@ActiveState.com>
+             Date: Thu, 26 Jan 2006 13:39:59 -0800
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 26951] By: stevep                                on 2006/01/26  19:23:48
+        Log: Fix a few nits in perl593delta
+     Branch: perl
+	   ! pod/perl593delta.pod
+____________________________________________________________________________
+[ 26950] By: rgs                                   on 2006/01/26  18:48:27
+        Log: miniperl isn't enough anymore to run pod2man.
+     Branch: perl
+	   ! pod/Makefile.SH
+____________________________________________________________________________
+[ 26949] By: nicholas                              on 2006/01/26  18:35:56
+        Log: 2 spelling corrections, and rephrase the entry on perlivp (better
+             grammer, more succinct)
+     Branch: perl
+	   ! pod/perl593delta.pod
+____________________________________________________________________________
+[ 26948] By: rgs                                   on 2006/01/26  18:14:26
+        Log: More work on perldelta
+     Branch: perl
+	   ! pod/perl593delta.pod
+____________________________________________________________________________
+[ 26947] By: steveh                                on 2006/01/26  16:25:20
+        Log: Make dump and -u croak on Win32 and Cygwin to avoid confusion
+             such as was seen here:
+             
+             Subject: Weird Win32 error: "This application has requested the Runtime to terminate it in an unusual way."
+             From: demerphq <demerphq@gmail.com>
+             Date: Thu, 26 Jan 2006 15:40:42 +0100
+             Message-ID: <9b18b3110601260640x34b2442cnf5379d2f83b74187@mail.gmail.com>
+     Branch: perl
+	   ! perl.c pod/perldiag.pod pod/perlport.pod
+____________________________________________________________________________
+[ 26946] By: nicholas                              on 2006/01/26  14:57:42
+        Log: SvREADONLY_off inside the magic routines is also dangerous on shared
+             hash key scalars, so decompose them to normal scalars if they ever
+             get here.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 26945] By: rgs                                   on 2006/01/26  11:49:22
+        Log: assertions.pm is dual-lived
+     Branch: perl
+	   ! Porting/Maintainers.pl
+____________________________________________________________________________
+[ 26943] By: rgs                                   on 2006/01/25  17:12:11
+        Log: Subject: aelemfast optimization opclass problem (c.f. [perl #38279])
+             From: Stephen McCamant <smcc@mit.edu>
+             Date: Jan 24, 2006 7:23 AM
+             Message-ID: <17365.51166.604020.571992@conquest.OCF.Berkeley.EDU>
+     Branch: perl
+	   + ext/B/t/optree_misc.t
+	   ! MANIFEST ext/B/B.xs
+____________________________________________________________________________
+[ 26941] By: gisle                                 on 2006/01/24  15:37:25
+        Log: Subject: Simplify &IO::Handle::say
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 24 Jan 2006 05:01:28 -0800
+             Message-ID: <lrzmll7pav.fsf@caliper.activestate.com>
+     Branch: perl
+	   ! ext/IO/lib/IO/Handle.pm
+____________________________________________________________________________
+[ 26940] By: rgs                                   on 2006/01/24  15:10:27
+        Log: Fix a regression on suidperl : the error message "No #! line" was
+             produced in erroneous cases, because we used to read values in a
+             string buffer that pointed to nothing.
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 26936] By: steveh                                on 2006/01/24  12:13:15
+        Log: Remove d_nanosleep from win32 configs
+             Change 19899 removed them before, but they have accidentally crept back.
+     Branch: perl
+	   ! win32/config.bc win32/config.gc win32/config.vc
+	   ! win32/config.vc64
+____________________________________________________________________________
+[ 26935] By: steveh                                on 2006/01/24  09:22:44
+        Log: Subject: SPRINTF_RETURNS_STRLEN isn't really a compile-time option 
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 23 Jan 2006 02:12:04 -0800
+             Message-ID: <lr3bjfb6dn.fsf@caliper.activestate.com>
+             
+             Subject: RE: SPRINTF_RETURNS_STRLEN isn't really a compile-time option
+             From: "Jan Dubois" <jand@ActiveState.com>
+             Date: Mon, 23 Jan 2006 11:30:51 -0800
+             Message-ID: <008001c62053$86adf680$2217a8c0@candy>
+     Branch: perl
+	   ! makedef.pl perl.c
+____________________________________________________________________________
+[ 26933] By: rgs                                   on 2006/01/23  19:24:06
+        Log: More work on perldelta
+     Branch: perl
+	   ! pod/perl593delta.pod
+____________________________________________________________________________
+[ 26932] By: nicholas                              on 2006/01/23  19:06:41
+        Log: constant_add_symbol needs to be static, else static builds can fail at
+             link time. (*How* many meanings is "static" overloaded with?)
+     Branch: perl
+	   ! lib/ExtUtils/Constant/ProxySubs.pm
+____________________________________________________________________________
+[ 26930] By: stevep                                on 2006/01/23  18:40:08
+        Log: Subject: [PATCH] Tru64: -Uusedl: lib/ExtUtils/t/Embed.t
+             From: Jarkko Hietaniemi <jhietaniemi@gmail.com>
+             Date: Mon, 23 Jan 2006 20:34:18 +0200
+             Message-ID: <43D521AA.7030008@gmail.com>
+     Branch: perl
+	   ! lib/ExtUtils/t/Embed.t
+____________________________________________________________________________
+[ 26929] By: stevep                                on 2006/01/23  15:56:34
+        Log: Upgrade to Pod-Simple-3.04
+     Branch: perl
+	   ! lib/Pod/Simple.pm lib/Pod/Simple/BlackBox.pm
+	   ! lib/Pod/Simple/Search.pm
+____________________________________________________________________________
+[ 26928] By: rgs                                   on 2006/01/23  15:28:51
+        Log: Now that change #26410 is reverted, mark as TODO the tests added
+             by change #26925.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 26927] By: rgs                                   on 2006/01/23  15:18:30
+        Log: Missing chunk in change #26926
+     Branch: perl
+	   ! t/op/taint.t
+____________________________________________________________________________
+[ 26926] By: rgs                                   on 2006/01/23  15:18:10
+        Log: Revert change 26410, marking the test that was added there as TODO.
+             See the thread :
+             Subject: LVALUE m//g (was Re: au revoir ...)
+             From: Nicholas Clark <nick@ccl4.org>
+             Date: Jan 18, 2006 9:30 PM
+             Message-ID: <20060118203058.GQ616@plum.flirble.org>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 26925] By: nicholas                              on 2006/01/23  15:11:11
+        Log: Change the regression test added by 26410 to use test.pl; this makes
+             it easier to TODO if needed.
+             Add the TODO test provided by Rick Delaney, but not as TODO, because
+             change 26410 also made pos on LVALUE subroutines work for the first
+             time.
+     Branch: perl
+	   ! t/op/pat.t t/op/taint.t
+____________________________________________________________________________
+[ 26924] By: rgs                                   on 2006/01/23  14:44:59
+        Log: Un-const magic virtual tables; this consting breaks the nasty
+             things done by Swig, as noticed by Audrey.
+     Branch: perl
+	   ! embed.fnc mg.c mg.h perl.h pod/perlapi.pod proto.h sv.c
+____________________________________________________________________________
+[ 26923] By: stevep                                on 2006/01/23  14:35:52
+        Log: Upgrade to CPAN-1.83_58
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/Debug.pm lib/CPAN/FirstTime.pm
+	   ! lib/CPAN/HandleConfig.pm lib/CPAN/SIGNATURE
+	   ! lib/CPAN/Version.pm lib/CPAN/t/vcmp.t
+____________________________________________________________________________
+[ 26922] By: gisle                                 on 2006/01/23  12:33:02
+        Log: Avoid warning with MS Visual C compiler.
+             Encode.xs(443) : warning C4761: integral size mismatch in argument; conversion supplied
+     Branch: perl
+	   ! ext/Encode/Encode.xs
+____________________________________________________________________________
+[ 26921] By: gisle                                 on 2006/01/23  09:57:10
+        Log: Subject: Avoid most getprotobyname/number calls in IO::Socket::INET
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 18 Jan 2006 09:28:24 -0800
+             Message-ID: <lr3bjlbg3r.fsf@caliper.activestate.com>
+     Branch: perl
+	   ! ext/IO/lib/IO/Socket/INET.pm
+____________________________________________________________________________
+[ 26919] By: craigb                                on 2006/01/21  17:05:07
+        Log: Make Manifest.t do what is says it's doing.
+     Branch: perl
+	   ! lib/ExtUtils/t/Manifest.t
+____________________________________________________________________________
+[ 26918] By: mhx                                   on 2006/01/21  15:31:06
+        Log: Remove wrong cast to (void *), which fixes a gcc warning, and use
+             the return value of upg_version() at least once in the core.
+     Branch: perl
+	   ! pp_ctl.c util.c
+____________________________________________________________________________
+[ 26915] By: nicholas                              on 2006/01/20  10:12:12
+        Log: Note 5.8.8-RC1
+     Branch: perl
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[ 26914] By: mhx                                   on 2006/01/19  18:44:34
+        Log: Upgrade to Devel::PPPort 3.08
+     Branch: perl
+	   ! ext/Devel/PPPort/Changes ext/Devel/PPPort/META.yml
+	   ! ext/Devel/PPPort/Makefile.PL ext/Devel/PPPort/PPPort.pm
+	   ! ext/Devel/PPPort/PPPort_pm.PL
+	   ! ext/Devel/PPPort/parts/inc/ppphtest ext/Devel/PPPort/soak
+____________________________________________________________________________
+[ 26913] By: craigb                                on 2006/01/19  04:55:19
+        Log: find_perl() must be after environment initialization
+     Branch: perl
+	   ! ext/Devel/PPPort/t/ppphtest.t
+____________________________________________________________________________
+[ 26912] By: stevep                                on 2006/01/19  02:58:37
+        Log: Fix hardcoded "/" in a filepath that causes ext/List/Util/t/p_tainted.t
+             to fail on VMS.
+     Branch: perl
+	   ! ext/List/Util/t/p_tainted.t
+____________________________________________________________________________
+[ 26911] By: stevep                                on 2006/01/19  02:32:06
+        Log: Fix another concatenated filepath in a test for Digest::SHA.
+     Branch: perl
+	   ! ext/Digest/SHA/t/6-dump-load.t
+____________________________________________________________________________
+[ 26910] By: nicholas                              on 2006/01/18  23:52:20
+        Log: Integrate 26847 from maint.
+             [Whoops, that was never the plan. Didn't realise which directory I was
+             in]
+     Branch: perl
+	  !> AUTHORS Porting/Maintainers.pl
+____________________________________________________________________________
+[ 26904] By: nicholas                              on 2006/01/18  18:02:17
+        Log: Change 26410 caused a regression, with the RVALUE return value of
+             method calls now failing if bound to a global match. Add a TODO test.
+     Branch: perl
+	   ! t/op/pat.t
+____________________________________________________________________________
+[ 26903] By: gisle                                 on 2006/01/18  14:43:14
+        Log: Allow IPPROTO_ICMP and IPPROTO_UDP to be exported.
+             These were introduced in change 26897.
+     Branch: perl
+	   ! ext/Socket/Socket.pm
+____________________________________________________________________________
+[ 26902] By: gisle                                 on 2006/01/18  14:41:17
+        Log: Use the IPPROTO_TCP constant instead of 6.
+     Branch: perl
+	   ! ext/Socket/t/Socket.t
+____________________________________________________________________________
+[ 26901] By: steveh                                on 2006/01/18  14:23:09
+        Log: Change all NEWSV() to newSV() in the core and non-dual-lived modules.
+             Keep NEWSV() itself for backwards-compatibility outside of the core,
+             but don't advertise it any more.
+             (cf. change #25101).
+     Branch: perl
+	   ! av.c doio.c dump.c ext/ByteLoader/bytecode.h
+	   ! ext/Opcode/Opcode.xs ext/POSIX/POSIX.xs gv.c handy.h hv.c
+	   ! mathoms.c op.c os2/OS2/REXX/REXX.xs pad.c perl.c perly.c
+	   ! pod/perlapi.pod pod/perlembed.pod pp.c pp_ctl.c pp_hot.c
+	   ! pp_pack.c pp_sys.c regexec.c scope.c sv.c toke.c
+	   ! vms/ext/Stdio/Stdio.xs
+____________________________________________________________________________
+[ 26900] By: stevep                                on 2006/01/18  13:32:09
+        Log: Digest::SHA's t/2-nist-sha-oo.t has some path related problems on
+             VMS as well.
+     Branch: perl
+	   ! ext/Digest/SHA/t/2-nist-sha-oo.t
+____________________________________________________________________________
+[ 26899] By: stevep                                on 2006/01/18  13:09:10
+        Log: Fixes for Digest::SHA.  Replaced old ppport.h file with a new one
+             generated from Devel::PPPort 3.07.  Also, fixed a UNIX-based path
+             element that caused test failures on VMS (reported by John E. Malmberg
+             <wb8tyw@qsl.net>).
+     Branch: perl
+	   ! ext/Digest/SHA/ppport.h ext/Digest/SHA/t/6-dump-load.t
+____________________________________________________________________________
+[ 26897] By: gisle                                 on 2006/01/18  11:57:07
+        Log: Make sure the most common IPPROTO_* constants are always available.
+             These are well known numbers so it should not be a problem to
+             hardcode values when no constant is provided by the C library.
+             Ref <http://www.iana.org/assignments/protocol-numbers>.
+             
+             On some old glibc systems (eg Redhat 6) IPPROTO_TCP is an enum only
+             and this change workaround that problem as well.
+     Branch: perl
+	   ! ext/Socket/Makefile.PL
+____________________________________________________________________________
+[ 26893] By: gisle                                 on 2006/01/18  10:12:14
+        Log: Suppress "statement not reached" warning from the Sun C compiler.
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[ 26892] By: rgs                                   on 2006/01/18  10:06:24
+        Log: Explain better how that test count works.
+     Branch: perl
+	   ! t/comp/require.t
+____________________________________________________________________________
+[ 26891] By: nicholas                              on 2006/01/18  10:02:19
+        Log: New t/comp/require.t tests should go before the conditional exit.
+     Branch: perl
+	   ! t/comp/require.t
+____________________________________________________________________________
+[ 26889] By: craigb                                on 2006/01/18  05:12:10
+        Log: special VMS handling no longer needed since we now close the file
+     Branch: perl
+	   ! lib/File/Compare.t
+____________________________________________________________________________
+[ 26885] By: rgs                                   on 2006/01/17  21:45:37
+        Log: Gisle points out that it's ok to ignore the return value of newSVrv.
+             Due to how embed.pl is implemented, this also has the unfortunate
+             side-effect of removing __attribute__malloc__ from the attributes of
+             this function, but given that the new pointer is stored elsewhere
+             anyway, this shouldn't impact what gcc could have optimized.
+     Branch: perl
+	   ! embed.fnc proto.h
+____________________________________________________________________________
+[ 26883] By: rgs                                   on 2006/01/17  21:22:38
+        Log: Regression test for change #26881
+     Branch: perl
+	   ! t/comp/require.t
+____________________________________________________________________________
+[ 26881] By: rgs                                   on 2006/01/17  19:03:51
+        Log: The current OP that is tested in doeval() can be a require(), an
+             eval() or a do(). When we test whether OPf_SPECIAL is set on it, be
+             sure to take into account that it's the eval-related meaning of
+             OPf_SPECIAL we're testing for, not the require-related one.
+     Branch: perl
+	   ! pp_ctl.c
+____________________________________________________________________________
+[ 26878] By: rgs                                   on 2006/01/17  16:15:15
+        Log: Make the description of $^M in perlvar a bit more clear
+             w.r.t. cross-references to the INSTALL document. (spotted
+             by Stas Bekman)
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 26877] By: rgs                                   on 2006/01/17  16:08:47
+        Log: Subject: Re: [PATCH] Updated README.macosx
+             From: Sherm Pendley <sherm@dot-app.org>
+             Date: Mon, 16 Jan 2006 16:53:23 -0500
+             Message-Id: <619C9A5D-972F-4B90-A99A-B4B6D04C584D@dot-app.org>
+     Branch: perl
+	   ! README.macosx
+____________________________________________________________________________
+[ 26871] By: gisle                                 on 2006/01/17  11:37:54
+        Log: More readable MEM_WRAP_CHECK_1() macro.
+             This form also avoids the "dead part of constant expression is nonconstant"
+             warning from the Sun Studio 10 compiler.
+     Branch: perl
+	   ! README.solaris handy.h
+____________________________________________________________________________
+[ 26870] By: craigb                                on 2006/01/17  04:03:01
+        Log: Dots in directory names aren't nice on VMS.
+     Branch: perl
+	   ! lib/Archive/Tar/t/04_resolved_issues.t
+____________________________________________________________________________
+[ 26869] By: craigb                                on 2006/01/17  03:28:20
+        Log: more case tolerance for vms/ext/filespec.t
+     Branch: perl
+	   ! vms/ext/filespec.t
+____________________________________________________________________________
+[ 26868] By: stevep                                on 2006/01/16  22:31:52
+        Log: Don't warn about a directory being closed in the DESTROY for
+             IO::Dir.
+     Branch: perl
+	   ! ext/IO/lib/IO/Dir.pm
+____________________________________________________________________________
+[ 26867] By: rgs                                   on 2006/01/16  19:16:58
+        Log: defined %foo::bar:: wasn't working like it used to do in evals
+             (and, consequently, when require'ing modules.)
+     Branch: perl
+	   ! t/op/stash.t toke.c
+____________________________________________________________________________
+[ 26866] By: mhx                                   on 2006/01/16  18:13:28
+        Log: Upgrade to Devel::PPPort 3.07
+     Branch: perl
+	   + ext/Devel/PPPort/parts/base/5008007
+	   + ext/Devel/PPPort/parts/base/5009003
+	   + ext/Devel/PPPort/parts/inc/Sv_set
+	   + ext/Devel/PPPort/parts/inc/memory
+	   + ext/Devel/PPPort/parts/inc/variables
+	   + ext/Devel/PPPort/parts/todo/5008007
+	   + ext/Devel/PPPort/parts/todo/5009003
+	   + ext/Devel/PPPort/t/Sv_set.t ext/Devel/PPPort/t/memory.t
+	   + ext/Devel/PPPort/t/variables.t
+	   ! MANIFEST ext/Devel/PPPort/Changes ext/Devel/PPPort/HACKERS
+	   ! ext/Devel/PPPort/MANIFEST ext/Devel/PPPort/META.yml
+	   ! ext/Devel/PPPort/Makefile.PL ext/Devel/PPPort/PPPort.pm
+	   ! ext/Devel/PPPort/PPPort.xs ext/Devel/PPPort/PPPort_pm.PL
+	   ! ext/Devel/PPPort/PPPort_xs.PL ext/Devel/PPPort/README
+	   ! ext/Devel/PPPort/TODO ext/Devel/PPPort/apicheck_c.PL
+	   ! ext/Devel/PPPort/devel/buildperl.pl
+	   ! ext/Devel/PPPort/devel/mkapidoc.sh
+	   ! ext/Devel/PPPort/devel/mktodo ext/Devel/PPPort/devel/mktodo.pl
+	   ! ext/Devel/PPPort/devel/scanprov ext/Devel/PPPort/mktests.PL
+	   ! ext/Devel/PPPort/module2.c ext/Devel/PPPort/module3.c
+	   ! ext/Devel/PPPort/parts/apicheck.pl
+	   ! ext/Devel/PPPort/parts/apidoc.fnc
+	   ! ext/Devel/PPPort/parts/base/5004000
+	   ! ext/Devel/PPPort/parts/base/5004050
+	   ! ext/Devel/PPPort/parts/base/5006000
+	   ! ext/Devel/PPPort/parts/base/5007001
+	   ! ext/Devel/PPPort/parts/base/5008001
+	   ! ext/Devel/PPPort/parts/embed.fnc
+	   ! ext/Devel/PPPort/parts/inc/MY_CXT
+	   ! ext/Devel/PPPort/parts/inc/SvPV
+	   ! ext/Devel/PPPort/parts/inc/call ext/Devel/PPPort/parts/inc/cop
+	   ! ext/Devel/PPPort/parts/inc/exception
+	   ! ext/Devel/PPPort/parts/inc/format
+	   ! ext/Devel/PPPort/parts/inc/grok
+	   ! ext/Devel/PPPort/parts/inc/limits
+	   ! ext/Devel/PPPort/parts/inc/mPUSH
+	   ! ext/Devel/PPPort/parts/inc/magic
+	   ! ext/Devel/PPPort/parts/inc/misc
+	   ! ext/Devel/PPPort/parts/inc/newCONSTSUB
+	   ! ext/Devel/PPPort/parts/inc/newRV
+	   ! ext/Devel/PPPort/parts/inc/ppphbin
+	   ! ext/Devel/PPPort/parts/inc/ppphdoc
+	   ! ext/Devel/PPPort/parts/inc/ppphtest
+	   ! ext/Devel/PPPort/parts/inc/sv_xpvf
+	   ! ext/Devel/PPPort/parts/inc/threads
+	   ! ext/Devel/PPPort/parts/inc/uv
+	   ! ext/Devel/PPPort/parts/inc/version
+	   ! ext/Devel/PPPort/parts/ppptools.pl
+	   ! ext/Devel/PPPort/parts/todo/5004000
+	   ! ext/Devel/PPPort/parts/todo/5007001
+	   ! ext/Devel/PPPort/parts/todo/5008001
+	   ! ext/Devel/PPPort/ppport_h.PL ext/Devel/PPPort/soak
+	   ! ext/Devel/PPPort/t/misc.t ext/Devel/PPPort/t/ppphtest.t
+	   ! ext/Devel/PPPort/t/testutil.pl ext/Devel/PPPort/typemap
+____________________________________________________________________________
+[ 26863] By: rgs                                   on 2006/01/16  14:09:29
+        Log: Upgrade to Encode 2.14
+     Branch: perl
+	   + ext/Encode/t/from_to.t
+	   ! MANIFEST ext/Encode/AUTHORS ext/Encode/Changes
+	   ! ext/Encode/Encode.pm ext/Encode/Encode.xs ext/Encode/MANIFEST
+	   ! ext/Encode/META.yml ext/Encode/bin/enc2xs
+	   ! ext/Encode/encoding.pm ext/Encode/lib/Encode/CN/HZ.pm
+	   ! ext/Encode/lib/Encode/MIME/Header.pm
+	   ! ext/Encode/t/mime-header.t ext/Encode/ucm/8859-7.ucm
+____________________________________________________________________________
+[ 26861] By: nicholas                              on 2006/01/16  13:10:06
+        Log: Teach checkAUTHORS about all the authors in 5.8.2-5.8.8, and any others
+             whose e-mail address I recognise.
+     Branch: perl
+	   ! Porting/checkAUTHORS.pl
+____________________________________________________________________________
+[ 26859] By: rgs                                   on 2006/01/16  12:07:34
+        Log: Add new directories from C::Zlib to make clean
+     Branch: perl
+	   ! Makefile.SH
+____________________________________________________________________________
+[ 26858] By: rgs                                   on 2006/01/16  11:13:54
+        Log: Subject: [PAUSE] CPAN Upload: A/AN/ANDK/CPAN-1.83_55.tar.gz
+             From: andreas.koenig.gmwojprw@franz.ak.mind.de (Andreas J. Koenig)
+             Date: Sat, 14 Jan 2006 12:57:48 +0100
+             Message-ID: <87u0c7yqbn.fsf@k75.linux.bogus>
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm lib/CPAN/HandleConfig.pm
+	   ! lib/CPAN/SIGNATURE lib/CPAN/bin/cpan
+____________________________________________________________________________
+[ 26857] By: craigb                                on 2006/01/14  16:45:56
+        Log: Give up on through.t on VMS for now -- no can do with current 
+             pipe implementation.
+     Branch: perl
+	   ! t/io/through.t
+____________________________________________________________________________
+[ 26856] By: nicholas                              on 2006/01/14  12:49:31
+        Log: Can now count the patches committed with --thanks-applied.
+             Changes5.8's top 3:
+             3332:   jhi
+             321:    ams
+             60:     nick
+     Branch: perl
+	   ! Porting/checkAUTHORS.pl
+____________________________________________________________________________
+[ 26855] By: nicholas                              on 2006/01/14  12:35:58
+        Log: Oops. When the e-mail address came first, or there was no name with it,
+             checkAUTHORS.pl wasn't recognising it, which caused the change to be
+             attributed to the committer rather than the author. This now reveals
+             several people "missing" from the AUTHORS file.
+     Branch: perl
+	   ! Porting/checkAUTHORS.pl
+____________________________________________________________________________
+[ 26854] By: nicholas                              on 2006/01/14  12:25:15
+        Log: Some reordering and one new address for Stéphane Payrard
+     Branch: perl
+	   ! Porting/checkAUTHORS.pl
+____________________________________________________________________________
+[ 26853] By: nicholas                              on 2006/01/14  12:20:19
+        Log: Teach checkAUTHORS.pl about everyone in Changes5.8.[2-8], adding to
+             AUTHORS where necessary.
+     Branch: perl
+	   ! AUTHORS Porting/checkAUTHORS.pl
+____________________________________________________________________________
+[ 26852] By: nicholas                              on 2006/01/14  11:54:09
+        Log: Add Ken Hirsch to AUTHORS.
+     Branch: perl
+	   ! AUTHORS
+____________________________________________________________________________
+[ 26850] By: nicholas                              on 2006/01/14  11:39:42
+        Log: e-mail update from Phil Lobbes
+     Branch: perl
+	   ! AUTHORS Porting/checkAUTHORS.pl
+____________________________________________________________________________
+[ 26849] By: rgs                                   on 2006/01/14  10:26:15
+        Log: Perldelta nits by Jim Cromie
+     Branch: perl
+	   ! pod/perl593delta.pod
+____________________________________________________________________________
+[ 26846] By: rgs                                   on 2006/01/14  08:49:12
+        Log: Adapt test.valgrind make target to recent valgrinds (3.x)
+             by Jim Cromie
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 26845] By: craigb                                on 2006/01/14  05:16:27
+        Log: Friday the 13th, Part II.  Don't call SYS$GETJPI with fancy case
+             lookup stuff on older systems that don't know what it means (broken
+             in #25306).
+     Branch: perl
+	   ! vms/vms.c
+____________________________________________________________________________
+[ 26844] By: craigb                                on 2006/01/14  05:02:38
+        Log: Eek.  #25783 broke all pre-v8.2 VMS builds.  Undo all the bits
+             having to do with dirent, opendir, etc.  Must be Friday the 13th.
+     Branch: perl
+	   ! configure.com vms/vms.c vms/vmsish.h
+____________________________________________________________________________
+[ 26838] By: nicholas                              on 2006/01/13  21:44:47
+        Log: checkAUTHORS.pl --rank would loop infinitely on an empty results array.
+     Branch: perl
+	   ! Porting/checkAUTHORS.pl
+____________________________________________________________________________
+[ 26835] By: stevep                                on 2006/01/13  19:31:19
+        Log: Additional tests for RT #38207: "Useless localization of constant ($[)
+             in getopts.pl".
+     Branch: perl
+	   ! t/op/local.t
+____________________________________________________________________________
+[ 26831] By: nicholas                              on 2006/01/13  18:10:55
+        Log: Subject: Re: Today's compiling adventure
+             From: Ken Hirsch <kenhirsch@ftml.net>
+             Message-ID: <43C69F48.7090600@ftml.net>
+             Date: Thu, 12 Jan 2006 13:26:16 -0500
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 26826] By: rgs                                   on 2006/01/13  17:32:31
+        Log: More perldelta work
+     Branch: perl
+	   ! pod/perl593delta.pod
+____________________________________________________________________________
+[ 26824] By: nicholas                              on 2006/01/13  17:08:13
+        Log: $utf8::VERSION++ # Documentation.
+     Branch: perl
+	   ! lib/utf8.pm
+____________________________________________________________________________
+[ 26819] By: rgs                                   on 2006/01/13  14:50:32
+        Log: Fix internal links in POD.
+     Branch: perl
+	   ! lib/utf8.pm
+____________________________________________________________________________
+[ 26817] By: nicholas                              on 2006/01/13  14:02:00
+        Log: More $VERSION bumps.
+     Branch: perl
+	   ! ext/PerlIO/via/via.pm lib/Attribute/Handlers.pm lib/Switch.pm
+____________________________________________________________________________
+[ 26816] By: rgs                                   on 2006/01/13  13:47:52
+        Log: Better wording for change 26796. Plus, make podchecker happy.
+     Branch: perl
+	   ! lib/PerlIO.pm
+____________________________________________________________________________
+[ 26815] By: gisle                                 on 2006/01/13  12:10:28
+        Log: Fix [perl #38223]; _IOC_SIZE() not always safe.
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 26814] By: rgs                                   on 2006/01/13  09:22:14
+        Log: Add a link to the Opcode doc in Safe.
+             (see RT CPAN ticket #8579)
+     Branch: perl
+	   ! ext/Opcode/Safe.pm
+____________________________________________________________________________
+[ 26813] By: craigb                                on 2006/01/13  01:12:44
+        Log: Assorted VMS-only MakeMaker fixes for blead
+     Branch: perl
+	   ! lib/ExtUtils/MM_Unix.pm lib/ExtUtils/MM_VMS.pm
+	   ! lib/ExtUtils/t/FIRST_MAKEFILE.t lib/ExtUtils/t/basic.t
+____________________________________________________________________________
+[ 26812] By: rgs                                   on 2006/01/12  23:11:16
+        Log: Make h2ph recognize (and skip) const and __const__ in C function
+             prototypes. This makes it produce better files on linux-sparc64.
+     Branch: perl
+	   ! utils/h2ph.PL
+____________________________________________________________________________
+[ 26809] By: nicholas                              on 2006/01/12  20:03:51
+        Log: Upgrade to Devel::PPPort 3.06_01
+     Branch: perl
+	   ! ext/Devel/PPPort/Changes ext/Devel/PPPort/HACKERS
+	   ! ext/Devel/PPPort/META.yml ext/Devel/PPPort/PPPort.pm
+	   ! ext/Devel/PPPort/PPPort.xs ext/Devel/PPPort/PPPort_pm.PL
+	   ! ext/Devel/PPPort/devel/buildperl.pl
+	   ! ext/Devel/PPPort/devel/mkapidoc.sh ext/Devel/PPPort/mktests.PL
+	   ! ext/Devel/PPPort/parts/apicheck.pl
+	   ! ext/Devel/PPPort/parts/apidoc.fnc
+	   ! ext/Devel/PPPort/parts/base/5006000
+	   ! ext/Devel/PPPort/parts/base/5009002
+	   ! ext/Devel/PPPort/parts/embed.fnc
+	   ! ext/Devel/PPPort/parts/inc/MY_CXT
+	   ! ext/Devel/PPPort/parts/inc/SvPV
+	   ! ext/Devel/PPPort/parts/inc/format
+	   ! ext/Devel/PPPort/parts/inc/grok
+	   ! ext/Devel/PPPort/parts/inc/misc
+	   ! ext/Devel/PPPort/parts/inc/newCONSTSUB
+	   ! ext/Devel/PPPort/parts/inc/ppphbin
+	   ! ext/Devel/PPPort/parts/inc/ppphdoc
+	   ! ext/Devel/PPPort/parts/inc/ppphtest
+	   ! ext/Devel/PPPort/parts/inc/version
+	   ! ext/Devel/PPPort/parts/ppptools.pl
+	   ! ext/Devel/PPPort/parts/todo/5004040
+	   ! ext/Devel/PPPort/parts/todo/5005000
+	   ! ext/Devel/PPPort/parts/todo/5006000
+	   ! ext/Devel/PPPort/ppport_h.PL ext/Devel/PPPort/soak
+	   ! ext/Devel/PPPort/t/newCONSTSUB.t ext/Devel/PPPort/t/ppphtest.t
+____________________________________________________________________________
+[ 26808] By: merijn                                on 2006/01/12  19:54:57
+        Log: Add new mpeix file from #26807
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 26807] By: merijn                                on 2006/01/12  19:52:01
+        Log: Subject: Re: Today's compiling adventure
+             From: Ken Hirsch <kenhirsch@ftml.net>
+             Date: Thu, 12 Jan 2006 13:26:16 -0500
+             Message-ID: <43C69F48.7090600@ftml.net>
+     Branch: perl
+	   + mpeix/mpeix_setjmp.c
+	   ! README.mpeix hints/mpeix.sh mpeix/mpeix.c mpeix/mpeixish.h
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 26805] By: nicholas                              on 2006/01/12  19:09:19
+        Log: $Socket::VERSION++; # You always miss one.
+     Branch: perl
+	   ! ext/Socket/Socket.pm
+____________________________________________________________________________
+[ 26804] By: nicholas                              on 2006/01/12  18:44:49
+        Log: Bump $VERSION in many modules that have changed.
+     Branch: perl
+	   ! ext/File/Glob/Glob.pm ext/GDBM_File/GDBM_File.pm
+	   ! ext/NDBM_File/NDBM_File.pm ext/ODBM_File/ODBM_File.pm
+	   ! ext/Opcode/Opcode.pm ext/Opcode/ops.pm
+	   ! ext/SDBM_File/SDBM_File.pm ext/XS/Typemap/Typemap.pm
+	   ! ext/attrs/attrs.pm ext/re/re.pm ext/threads/shared/shared.pm
+	   ! lib/DB.pm lib/Dumpvalue.pm lib/English.pm lib/File/Copy.pm
+	   ! lib/FileCache.pm lib/Pod/Functions.pm lib/Pod/Html.pm
+	   ! lib/Term/ReadLine.pm lib/Tie/Hash.pm lib/Unicode/UCD.pm
+	   ! lib/User/grent.pm lib/blib.pm lib/diagnostics.pm
+	   ! lib/overload.pm lib/vmsish.pm lib/warnings.pm
+	   ! lib/warnings/register.pm os2/OS2/PrfDB/PrfDB.pm
+	   ! os2/OS2/Process/Process.pm os2/OS2/REXX/REXX.pm warnings.pl
+____________________________________________________________________________
+[ 26803] By: rgs                                   on 2006/01/12  15:40:53
+        Log: Don't warn when localizing $[
+     Branch: perl
+	   ! op.c t/lib/warnings/op
+____________________________________________________________________________
+[ 26802] By: rgs                                   on 2006/01/12  13:47:59
+        Log: Subject: [perl #38205] misleading typo in perlfaq8
+             From: erik@cs.uni-jena.de (via RT) <perlbug-followup@perl.org>
+             Date: Wed, 11 Jan 2006 14:56:28 -0800
+             Message-ID: <rt-3.0.11-38205-127890.10.340635502974@perl.org>
+     Branch: perl
+	   ! pod/perlfaq8.pod
+____________________________________________________________________________
+[ 26801] By: rgs                                   on 2006/01/12  13:36:05
+        Log: FAQ sync.
+     Branch: perl
+	   ! pod/perlfaq.pod pod/perlfaq2.pod
+____________________________________________________________________________
+[ 26800] By: rgs                                   on 2006/01/12  13:25:15
+        Log: Subject: [PATCH] Compress::Zlib
+             From: "Paul Marquess" <paul.marquess@ntlworld.com>
+             Date: Thu, 12 Jan 2006 13:20:58 -0000
+             Message-ID: <020d01c6177b$087b1c60$4c05140a@myopwv.com>
+     Branch: perl
+	   ! ext/Compress/Zlib/t/16oneshot-gzip-only.t
+	   ! ext/Compress/Zlib/t/16oneshot-zip-only.t
+____________________________________________________________________________
+[ 26799] By: rgs                                   on 2006/01/12  11:20:27
+        Log: Subject: Re: cloning and foo_dup functions
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Thu, 12 Jan 2006 01:41:18 -0800
+             Message-ID: <20060112094118.GA1432@efn.org>
+     Branch: perl
+	   ! embed.fnc pod/perltodo.pod proto.h
+____________________________________________________________________________
+[ 26798] By: rgs                                   on 2006/01/12  11:02:45
+        Log: Test comment fix by Dominic Dunlop
+     Branch: perl
+	   ! lib/locale.t
+____________________________________________________________________________
+[ 26797] By: rgs                                   on 2006/01/12  10:13:27
+        Log: Typo fix.
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 26796] By: nicholas                              on 2006/01/11  22:41:04
+        Log: Subject: [PATCH] fix for :crlf example 
+             From: Xavier Noria <fxn@hashref.com> 
+             Message-Id: <0F64C146-3A80-4FDF-8149-AFB35B3C4D3B@hashref.com> 
+             Date: Wed, 11 Jan 2006 23:11:49 +0100 
+             
+             plus bump its $VERSION
+     Branch: perl
+	   ! lib/PerlIO.pm
+____________________________________________________________________________
+[ 26795] By: gisle                                 on 2006/01/11  21:09:19
+        Log: A few more places that can use hv_fetchs().
+             Ref change 26676.
+     Branch: perl
+	   ! ext/POSIX/POSIX.xs gv.c mg.c pp_ctl.c toke.c universal.c
+	   ! utf8.c util.c
+____________________________________________________________________________
+[ 26793] By: merijn                                on 2006/01/11  21:02:14
+        Log: Cygwin issue (26792) and patchlevel (26790)
+             
+             Subject: Re: Cygwin status, maint and blead
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Fri, 6 Jan 2006 13:47:10 -0800
+             Message-ID: <20060106214710.GA592@efn.org>
+             
+             Subject: Re: Cygwin status, maint and blead
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Thu, 10 Nov 2005 00:46:33 -0800
+             Message-ID: <20051110084633.GA3364@efn.org>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 26791] By: gisle                                 on 2006/01/11  20:50:30
+        Log: Make $( and $) list the groups in the order they
+             are returned from the OS.  Linux seems to return
+             the gids sorted and it seemed wrong for perl to
+             reverse this order.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 26789] By: stevep                                on 2006/01/11  19:07:04
+        Log: Subject: Re: [PATCH] Mac OS X 10.4.4 (Darwin 8.4.0) still does not fix locale issue
+             From: Dominic Dunlop <domo@computer.org>
+             Date: Wed, 11 Jan 2006 19:52:20 +0100
+             Message-Id: <FD99F9D3-16DB-484C-BC0A-702F60DAACA4@computer.org>
+     Branch: perl
+	   ! lib/locale.t
+____________________________________________________________________________
+[ 26787] By: nicholas                              on 2006/01/11  14:47:04
+        Log: Refactor S_vdie_common so that Perl_vwarn can use it too.
+     Branch: perl
+	   ! embed.fnc embed.h proto.h util.c
+____________________________________________________________________________
+[ 26786] By: gisle                                 on 2006/01/11  14:23:28
+        Log: Get rid of the following gcc format warnings by	simplifying the
+             getgroups implementation:
+             
+             mg.c: In function Perl_magic_get':
+             mg.c:1008: warning: long unsigned int format, gid_t arg (arg 3)
+             mg.c:1014: warning: long unsigned int format, gid_t arg (arg 3)
+             mg.c:1025: warning: long unsigned int format, unsigned int arg (arg 3)
+             
+             Since we already cast the numeric Gid_t values to an IV it should not
+             be too risky to also cast the Group_t values.  Converting these values
+             with Gid_t_f wasn't quite right anyway.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 26785] By: steveh                                on 2006/01/11  14:07:47
+        Log: Clean up temp files/dirs left by Archive-Tar tests
+             
+             Part of this reinstates change 25043 which was mistakenly removed
+             by change 25312
+     Branch: perl
+	   ! lib/Archive/Tar/t/02_methods.t lib/Archive/Tar/t/99_clean.t
+____________________________________________________________________________
+[ 26784] By: rgs                                   on 2006/01/11  12:52:27
+        Log: Make description of new warning introduced in change 26780 more precise
+     Branch: perl
+	   ! pod/perldiag.pod
+____________________________________________________________________________
+[ 26783] By: steveh                                on 2006/01/11  12:31:26
+        Log: Clean up libdirs left behind by new Compress-Zlib
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 26782] By: stevep                                on 2006/01/11  12:25:24
+        Log: Subject: Fw: CPAN Upload: S/SA/SAPER/Sys-Syslog-0.13.tar.gz
+             From: Sébastien Aperghis-Tramoni <maddingue@free.fr>
+             Date: Wed, 11 Jan 2006 02:13:31 +0100
+             Message-ID: <1136942011.43c45bbb82dce@imp1-g19.free.fr>
+     Branch: perl
+	   ! ext/Sys/Syslog/Changes ext/Sys/Syslog/Syslog.pm
+____________________________________________________________________________
+[ 26781] By: nicholas                              on 2006/01/11  12:11:03
+        Log: Gisle notes that SvRTRIM should also write a new '\0' at the end.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 26780] By: stevep                                on 2006/01/11  11:53:07
+        Log: Fix the new warning created with version-0.53
+     Branch: perl
+	   ! pod/perldiag.pod util.c
+____________________________________________________________________________
+[ 26779] By: gisle                                 on 2006/01/11  09:52:18
+        Log: Make setting 'PL_origalen = 1' before perl_parse() disable
+             argv[0] munging when $0 is assigned to.
+     Branch: perl
+	   ! mg.c perl.c pod/perlembed.pod
+____________________________________________________________________________
+[ 26778] By: steveh                                on 2006/01/11  09:04:38
+        Log: Bleadperl's Win32::Win32 is more recent than the current CPAN release
+             of libwin32 (0.26), so bump the $VERSION a little
+     Branch: perl
+	   ! win32/ext/Win32/Win32.pm
+____________________________________________________________________________
+[ 26777] By: stevep                                on 2006/01/11  03:22:57
+        Log: Upgrade to version-0.53
+     Branch: perl
+	   ! lib/version.pm lib/version.t util.c
+____________________________________________________________________________
+[ 26774] By: nicholas                              on 2006/01/10  17:46:15
+        Log: s/superceded/superseded/g
+     Branch: perl
+	   ! Changes5.004 Changes5.6 handy.h pod/perlapi.pod
+____________________________________________________________________________
+[ 26773] By: nicholas                              on 2006/01/10  16:59:25
+        Log: Subject: Re: Sys::Syslog blows up rather spectacularly on Solaris
+             From: Alan Burlison <Alan.Burlison@sun.com>
+             Message-ID: <43C3D80E.20704@sun.com>
+             Date: Tue, 10 Jan 2006 15:51:42 +0000
+     Branch: perl
+	   ! ext/Sys/Syslog/Syslog.pm ext/Sys/Syslog/t/constants.t
+____________________________________________________________________________
+[ 26772] By: nicholas                              on 2006/01/10  16:36:03
+        Log: Gisle is correct - $host needs to stay in case the user sets it
+             themselves. But if the user doesn't, default to INADDR_LOOPBACK.
+     Branch: perl
+	   ! ext/Sys/Syslog/Syslog.pm
+____________________________________________________________________________
+[ 26770] By: merijn                                on 2006/01/10  15:16:03
+        Log: 1. Make HP C-ANSI-C work on Itanium2 (HP-UX 11.23)
+             broken optimizer
+             2. Remove a compiler warning in a try program
+     Branch: perl
+	   ! hints/hpux.sh
+____________________________________________________________________________
+[ 26769] By: nicholas                              on 2006/01/10  15:09:07
+        Log: Why should Syslog jump through hoops to look up the hostname so it can
+             immediately convert it to an IP address, when all it really wants is
+             a connection to the loopback device?
+     Branch: perl
+	   ! ext/Sys/Syslog/Syslog.pm
+____________________________________________________________________________
+[ 26768] By: gisle                                 on 2006/01/10  14:32:43
+        Log: If getservbyname fails tell what service the lookup
+             attempt tried to use.
+     Branch: perl
+	   ! ext/Sys/Syslog/Syslog.pm
+____________________________________________________________________________
+[ 26767] By: nicholas                              on 2006/01/10  13:24:26
+        Log: Missing an initialisation, as spotted by Merijn's HP compiler.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 26766] By: rgs                                   on 2006/01/10  13:20:52
+        Log: Remove Syslog tests that use external modules
+     Branch: perl
+	   - ext/Sys/Syslog/t/distchk.t ext/Sys/Syslog/t/pod.t
+	   - ext/Sys/Syslog/t/podcover.t ext/Sys/Syslog/t/podspell.t
+	   - ext/Sys/Syslog/t/portfs.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 26765] By: gisle                                 on 2006/01/10  11:41:24
+        Log: Move initialization of old values prior to moreswitches()
+             closer to their use and together with 'switches_done'.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 26764] By: rgs                                   on 2006/01/10  10:51:16
+        Log: Subject: [PATCH] It's the Barbie bus patch
+             From: Andy Lester <andy@petdance.com>
+             Date: Mon, 9 Jan 2006 23:42:43 -0600
+             Message-ID: <20060110054243.GA26165@petdance.com>
+     Branch: perl
+	   ! av.c doio.c embed.fnc embed.h gv.c hv.c mg.c op.c pad.c
+	   ! pp_ctl.c pp_hot.c pp_sys.c proto.h reentr.c reentr.h regcomp.c
+	   ! regexec.c sv.c toke.c uconfig.sh util.c
+____________________________________________________________________________
+[ 26762] By: gisle                                 on 2006/01/10  10:10:10
+        Log: Remove stale date.
+     Branch: perl
+	   ! pod/perlembed.pod
+____________________________________________________________________________
+[ 26761] By: rgs                                   on 2006/01/10  10:05:26
+        Log: Subject: [PATCH] Compress::Zlib  becomes zlib agnostic
+             From: "Paul Marquess" <Paul.Marquess@ntlworld.com>
+             Date: Mon, 9 Jan 2006 20:25:00 -0000
+             Message-ID: <002101c6155a$c5886c90$1340100a@myopwv.com>
+     Branch: perl
+	   + ext/Compress/Zlib/lib/Compress/Zip/Constants.pm
+	   + ext/Compress/Zlib/lib/CompressPlugin/Deflate.pm
+	   + ext/Compress/Zlib/lib/CompressPlugin/Identity.pm
+	   + ext/Compress/Zlib/lib/IO/Compress/Base.pm
+	   + ext/Compress/Zlib/lib/IO/Compress/Zip.pm
+	   + ext/Compress/Zlib/lib/IO/Uncompress/AnyUncompress.pm
+	   + ext/Compress/Zlib/lib/IO/Uncompress/Base.pm
+	   + ext/Compress/Zlib/lib/IO/Uncompress/Unzip.pm
+	   + ext/Compress/Zlib/lib/UncompressPlugin/Identity.pm
+	   + ext/Compress/Zlib/lib/UncompressPlugin/Inflate.pm
+	   + ext/Compress/Zlib/t/04generic-deflate.t
+	   + ext/Compress/Zlib/t/04generic-gzip.t
+	   + ext/Compress/Zlib/t/04generic-rawdeflate.t
+	   + ext/Compress/Zlib/t/04generic-zip.t
+	   + ext/Compress/Zlib/t/04zlib-generic-deflate.t
+	   + ext/Compress/Zlib/t/04zlib-generic-gzip.t
+	   + ext/Compress/Zlib/t/04zlib-generic-rawdeflate.t
+	   + ext/Compress/Zlib/t/04zlib-generic-zip.t
+	   + ext/Compress/Zlib/t/12any-deflate.t
+	   + ext/Compress/Zlib/t/12any-gzip.t
+	   + ext/Compress/Zlib/t/12any-rawdeflate.t
+	   + ext/Compress/Zlib/t/12any-transparent.t
+	   + ext/Compress/Zlib/t/12any-zip.t
+	   + ext/Compress/Zlib/t/13prime-deflate.t
+	   + ext/Compress/Zlib/t/13prime-gzip.t
+	   + ext/Compress/Zlib/t/13prime-rawdeflate.t
+	   + ext/Compress/Zlib/t/13prime-zip.t
+	   + ext/Compress/Zlib/t/15multi-deflate.t
+	   + ext/Compress/Zlib/t/15multi-gzip.t
+	   + ext/Compress/Zlib/t/15multi-rawdeflate.t
+	   + ext/Compress/Zlib/t/15multi-zip.t
+	   + ext/Compress/Zlib/t/16oneshot-deflate.t
+	   + ext/Compress/Zlib/t/16oneshot-gzip-only.t
+	   + ext/Compress/Zlib/t/16oneshot-gzip.t
+	   + ext/Compress/Zlib/t/16oneshot-rawdeflate.t
+	   + ext/Compress/Zlib/t/16oneshot-zip-only.t
+	   + ext/Compress/Zlib/t/16oneshot-zip.t
+	   + ext/Compress/Zlib/t/19destroy-deflate.t
+	   + ext/Compress/Zlib/t/19destroy-gzip.t
+	   + ext/Compress/Zlib/t/19destroy-rawdeflate.t
+	   + ext/Compress/Zlib/t/19destroy-zip.t
+	   + ext/Compress/Zlib/t/20tied-deflate.t
+	   + ext/Compress/Zlib/t/20tied-gzip.t
+	   + ext/Compress/Zlib/t/20tied-rawdeflate.t
+	   + ext/Compress/Zlib/t/20tied-zip.t
+	   + ext/Compress/Zlib/t/21newtied-deflate.t
+	   + ext/Compress/Zlib/t/21newtied-gzip.t
+	   + ext/Compress/Zlib/t/21newtied-rawdeflate.t
+	   + ext/Compress/Zlib/t/21newtied-zip.t
+	   + ext/Compress/Zlib/t/22merge-deflate.t
+	   + ext/Compress/Zlib/t/22merge-gzip.t
+	   + ext/Compress/Zlib/t/22merge-rawdeflate.t
+	   + ext/Compress/Zlib/t/22merge-zip.t
+	   + ext/Compress/Zlib/t/25anyunc-deflate.t
+	   + ext/Compress/Zlib/t/25anyunc-gzip.t
+	   + ext/Compress/Zlib/t/25anyunc-rawdeflate.t
+	   + ext/Compress/Zlib/t/25anyunc-transparent.t
+	   + ext/Compress/Zlib/t/25anyunc-zip.t ext/Compress/Zlib/t/99pod.t
+	   + t/lib/compress/ZlibTestUtils.pm t/lib/compress/any.pl
+	   + t/lib/compress/anyunc.pl t/lib/compress/destroy.pl
+	   + t/lib/compress/generic.pl t/lib/compress/merge.pl
+	   + t/lib/compress/multi.pl t/lib/compress/newtied.pl
+	   + t/lib/compress/oneshot.pl t/lib/compress/prime.pl
+	   + t/lib/compress/tied.pl t/lib/compress/truncate.pl
+	   + t/lib/compress/zlib-generic.pl
+	   - ext/Compress/Zlib/t/04def.t ext/Compress/Zlib/t/12any.t
+	   - ext/Compress/Zlib/t/13prime.t ext/Compress/Zlib/t/15multi.t
+	   - ext/Compress/Zlib/t/16oneshot.t
+	   - ext/Compress/Zlib/t/19destroy.t ext/Compress/Zlib/t/20tied.t
+	   - ext/Compress/Zlib/t/21newtied.t ext/Compress/Zlib/t/22merge.t
+	   - t/lib/ZlibTestUtils.pm
+	   ! MANIFEST ext/Compress/Zlib/Changes
+	   ! ext/Compress/Zlib/Makefile.PL ext/Compress/Zlib/README
+	   ! ext/Compress/Zlib/Zlib.pm ext/Compress/Zlib/Zlib.xs
+	   ! ext/Compress/Zlib/lib/Compress/Gzip/Constants.pm
+	   ! ext/Compress/Zlib/lib/Compress/Zlib/Common.pm
+	   ! ext/Compress/Zlib/lib/Compress/Zlib/FileConstants.pm
+	   ! ext/Compress/Zlib/lib/Compress/Zlib/ParseParameters.pm
+	   ! ext/Compress/Zlib/lib/File/GlobMapper.pm
+	   ! ext/Compress/Zlib/lib/IO/Compress/Deflate.pm
+	   ! ext/Compress/Zlib/lib/IO/Compress/Gzip.pm
+	   ! ext/Compress/Zlib/lib/IO/Compress/RawDeflate.pm
+	   ! ext/Compress/Zlib/lib/IO/Uncompress/AnyInflate.pm
+	   ! ext/Compress/Zlib/lib/IO/Uncompress/Gunzip.pm
+	   ! ext/Compress/Zlib/lib/IO/Uncompress/Inflate.pm
+	   ! ext/Compress/Zlib/lib/IO/Uncompress/RawInflate.pm
+	   ! ext/Compress/Zlib/pod/FAQ.pod ext/Compress/Zlib/ppport.h
+	   ! ext/Compress/Zlib/t/01version.t ext/Compress/Zlib/t/02zlib.t
+	   ! ext/Compress/Zlib/t/03zlib-v1.t
+	   ! ext/Compress/Zlib/t/05examples.t
+	   ! ext/Compress/Zlib/t/06gzsetp.t ext/Compress/Zlib/t/07bufsize.t
+	   ! ext/Compress/Zlib/t/08encoding.t
+	   ! ext/Compress/Zlib/t/09gziphdr.t ext/Compress/Zlib/t/10defhdr.t
+	   ! ext/Compress/Zlib/t/11truncate.t
+	   ! ext/Compress/Zlib/t/14gzopen.t ext/Compress/Zlib/t/17isize.t
+	   ! ext/Compress/Zlib/t/18lvalue.t ext/Compress/Zlib/t/23misc.t
+	   ! ext/Compress/Zlib/t/globmapper.t
+____________________________________________________________________________
+[ 26760] By: gisle                                 on 2006/01/10  08:58:21
+        Log: Avoid possible dereference of NULL in the initialization of PL_origalen.
+             This can only happen when perlparse is called with no argv.
+             Don't try to update PL_origargv unless PL_origalen is at least 2.
+     Branch: perl
+	   ! mg.c perl.c
+____________________________________________________________________________
+[ 26759] By: craigb                                on 2006/01/10  04:28:25
+        Log: Make FAKE,READONLY optional on VMS in test 21
+     Branch: perl
+	   ! ext/Devel/Peek/t/Peek.t
+____________________________________________________________________________
+[ 26758] By: rgs                                   on 2006/01/09  14:58:57
+        Log: Add Digest::SHA to the Win32 makefiles
+     Branch: perl
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 26757] By: rgs                                   on 2006/01/09  14:42:18
+        Log: Subject: Re: relaxing TEST restrictions (was: Re: 5.9.3 approaches)
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Mon, 9 Jan 2006 06:38:25 -0800
+             Message-ID: <20060109143825.GB4132@efn.org>
+     Branch: perl
+	   ! t/TEST
+____________________________________________________________________________
+[ 26756] By: rgs                                   on 2006/01/09  14:28:20
+        Log: Subject: [patch] more about embed.fnc in perlguts
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Date: Sun, 08 Jan 2006 11:35:46 -0700
+             Message-ID: <43C15B82.9090309@gmail.com>
+             
+             (with a few nits)
+     Branch: perl
+	   ! embed.fnc pod/perlguts.pod
+____________________________________________________________________________
+[ 26755] By: stevep                                on 2006/01/09  14:27:07
+        Log: Added standard core header to test cases for Digest::SHA
+     Branch: perl
+	   ! ext/Digest/SHA/t/0-pod-coverage.t ext/Digest/SHA/t/0-pod.t
+	   ! ext/Digest/SHA/t/1-exist.t ext/Digest/SHA/t/1-hello-world.t
+	   ! ext/Digest/SHA/t/2-nist-sha-1.t
+	   ! ext/Digest/SHA/t/2-nist-sha-224.t
+	   ! ext/Digest/SHA/t/2-nist-sha-256.t
+	   ! ext/Digest/SHA/t/2-nist-sha-384.t
+	   ! ext/Digest/SHA/t/2-nist-sha-512.t
+	   ! ext/Digest/SHA/t/2-nist-sha-base64.t
+	   ! ext/Digest/SHA/t/2-nist-sha-oo.t
+	   ! ext/Digest/SHA/t/2-nist-vectors-bit.t
+	   ! ext/Digest/SHA/t/2-nist-vectors-byte.t
+	   ! ext/Digest/SHA/t/3-gillogly-easy.t
+	   ! ext/Digest/SHA/t/3-gillogly-hard.t
+	   ! ext/Digest/SHA/t/4-bitstr-increasing.t
+	   ! ext/Digest/SHA/t/4-bitstr-large.t
+	   ! ext/Digest/SHA/t/4-bitstr-random.t
+	   ! ext/Digest/SHA/t/5-hmac-fips198.t
+	   ! ext/Digest/SHA/t/5-hmac-rfc2202.t
+	   ! ext/Digest/SHA/t/5-hmac-sha-256.t
+	   ! ext/Digest/SHA/t/5-hmac-woodbury.t
+	   ! ext/Digest/SHA/t/6-dump-load.t ext/Digest/SHA/t/7-ireland.t
+____________________________________________________________________________
+[ 26754] By: nicholas                              on 2006/01/09  14:10:34
+        Log: POSIX and Fcntl both export the same constants derived from the same
+             C macros. Given that constants are now real inline and *defined*,
+             rather than merely declared and AUTOLOADed as needed, it is best that
+             POSIX quite litereally re-exports the constants defined by Fcntl.
+     Branch: perl
+	   ! ext/POSIX/Makefile.PL ext/POSIX/POSIX.pm
+____________________________________________________________________________
+[ 26753] By: gisle                                 on 2006/01/09  13:59:48
+        Log: Restore hardcoded PERL_PATCHNUM removed in change 26672.
+             This is actually needed for the current Configure logic
+             to pick up the real patchnum from the .patch file.
+     Branch: perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 26752] By: rgs                                   on 2006/01/09  13:44:20
+        Log: Upgrade to Sys::Syslog 0.12
+     Branch: perl
+	   ! ext/Sys/Syslog/Changes ext/Sys/Syslog/README
+	   ! ext/Sys/Syslog/Syslog.pm ext/Sys/Syslog/t/constants.t
+	   ! ext/Sys/Syslog/t/podspell.t
+____________________________________________________________________________
+[ 26751] By: rgs                                   on 2006/01/09  10:16:23
+        Log: Subject: [PATCH] RE: Failing tests on VMS blead@26652
+             From: "Paul Marquess" <Paul.Marquess@ntlworld.com>
+             Date: Sun, 8 Jan 2006 23:47:33 -0000
+             Message-ID: <00cd01c614ad$e815d340$6401a8c0@myopwv.com>
+     Branch: perl
+	   ! ext/Compress/Zlib/t/03zlib-v1.t ext/Compress/Zlib/t/04def.t
+	   ! ext/Compress/Zlib/t/05examples.t
+	   ! ext/Compress/Zlib/t/06gzsetp.t
+	   ! ext/Compress/Zlib/t/08encoding.t
+	   ! ext/Compress/Zlib/t/09gziphdr.t ext/Compress/Zlib/t/10defhdr.t
+	   ! ext/Compress/Zlib/t/11truncate.t ext/Compress/Zlib/t/13prime.t
+	   ! ext/Compress/Zlib/t/14gzopen.t ext/Compress/Zlib/t/15multi.t
+	   ! ext/Compress/Zlib/t/16oneshot.t
+	   ! ext/Compress/Zlib/t/19destroy.t ext/Compress/Zlib/t/20tied.t
+	   ! ext/Compress/Zlib/t/21newtied.t ext/Compress/Zlib/t/22merge.t
+	   ! ext/Compress/Zlib/t/23misc.t t/lib/ZlibTestUtils.pm
+____________________________________________________________________________
+[ 26750] By: rgs                                   on 2006/01/09  08:20:00
+        Log: Revert change 26749
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 26749] By: davem                                 on 2006/01/09  02:20:51
+        Log: Subject:  [PATCH] identifiers always in main (was: defining a _ function breaks File::Find)
+             From:  Xavier Noria <fxn@hashref.com>
+             Date:  Sun, 23 Oct 2005 09:47:37 +0200
+             Message-Id:  <D3867DED-313E-4D39-A85F-1178FE7F7A5E@hashref.com>
+             
+             clarify which variables are always forced into main::
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 26747] By: nicholas                              on 2006/01/08  22:43:15
+        Log: Cope with change entries that are \r terminated
+     Branch: perl
+	   ! Porting/genlog
+____________________________________________________________________________
+[ 26745] By: craigb                                on 2006/01/08  22:37:47
+        Log: follow-up to 26740, shasum --> shasum.com
+     Branch: perl
+	   ! vms/descrip_mms.template
+____________________________________________________________________________
+[ 26744] By: craigb                                on 2006/01/08  22:19:39
+        Log: Grr.  #26690 broke handling of old ODS-2 style names
+             on current versions of VMS
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 26743] By: craigb                                on 2006/01/08  22:14:13
+        Log: VMS needs the meta-quoted version of $0
+     Branch: perl
+	   ! lib/Test/Simple/t/is_deeply_fail.t
+____________________________________________________________________________
+[ 26740] By: rgs                                   on 2006/01/08  21:42:59
+        Log: Install shasum on Windows and VMS too
+     Branch: perl
+	   ! vms/descrip_mms.template win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 26739] By: rgs                                   on 2006/01/08  21:34:22
+        Log: Subject: Re: [perl #38181] Default IO Layer is ignored in 3-argument open call 
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Mon, 09 Jan 2006 01:29:30 +0900
+             Message-Id: <20060109012103.F20A.BQW10602@nifty.com>
+     Branch: perl
+	   ! lib/open.pm pod/perlfunc.pod
+____________________________________________________________________________
+[ 26737] By: nicholas                              on 2006/01/08  21:13:05
+        Log: Update copyright with the 2 years where changes were made.
+     Branch: perl
+	   ! pad.h
+____________________________________________________________________________
+[ 26736] By: nicholas                              on 2006/01/08  20:41:25
+        Log: Update the copyright years in the generated files, and nostdio.h
+     Branch: perl
+	   ! keywords.h keywords.pl nostdio.h opcode.pl opnames.h
+____________________________________________________________________________
+[ 26735] By: davem                                 on 2006/01/08  20:41:16
+        Log: document svt_copy, svt_dup and svt_local vtable slots
+     Branch: perl
+	   ! pod/perlguts.pod
+____________________________________________________________________________
+[ 26733] By: rgs                                   on 2006/01/08  20:16:06
+        Log: Add shasum (from Digest::SHA) to utils.lst
+     Branch: perl
+	   ! utils.lst
+____________________________________________________________________________
+[ 26732] By: nicholas                              on 2006/01/08  19:53:11
+        Log: Update copyright years (including some years where we made changes but
+             did not update)
+     Branch: perl
+	   ! av.c deb.c mathoms.c mg.h numeric.c pad.c patchlevel.h perl.h
+	   ! perlvars.h perly.c run.c scope.c taint.c thread.h
+____________________________________________________________________________
+[ 26726] By: nicholas                              on 2006/01/08  18:27:27
+        Log: run pod/buildtoc --build-all
+     Branch: perl
+	   ! MANIFEST pod/perltoc.pod vms/descrip_mms.template
+	   ! win32/Makefile win32/makefile.mk
+____________________________________________________________________________
+[ 26725] By: nicholas                              on 2006/01/08  18:25:20
+        Log: With VMS moving from [lib.pod] to [lib.pods] then pod/buildtoc needs
+             tweaking
+     Branch: perl
+	   ! pod/buildtoc
+____________________________________________________________________________
+[ 26713] By: nicholas                              on 2006/01/08  15:24:53
+        Log: Add an option 'opened' which reports on the maintainers of all files
+             perforce currently has open.
+     Branch: perl
+	   ! Porting/Maintainers.pm
+____________________________________________________________________________
+[ 26710] By: craigb                                on 2006/01/08  13:33:43
+        Log: pod2usage2.t is not readily portable to VMS either
+     Branch: perl
+	   ! t/pod/pod2usage2.t
+____________________________________________________________________________
+[ 26709] By: nicholas                              on 2006/01/08  13:15:30
+        Log: Tweak the code that generates unique entries in @POSIX::EXPORT so that
+             the array ends up with shared hash key scalars, for a memory saving.
+     Branch: perl
+	   ! ext/POSIX/POSIX.pm
+____________________________________________________________________________
+[ 26708] By: merijn                                on 2006/01/08  12:27:29
+        Log: Subject: [PATCH] blead: format warnings
+             Date: Sat, 07 Jan 2006 21:42:08 +0200
+             From: Jarkko Hietaniemi <jhietaniemi@gmail.com>
+             Message-ID: <43C01990.6020207@gmail.com>
+     Branch: perl
+	   ! mg.c regcomp.c sv.c
+____________________________________________________________________________
+[ 26707] By: merijn                                on 2006/01/08  09:53:56
+        Log: Subject: [PATCH] hints/dec_osf.sh (Re: blead@26701 compilation warning from tru64 cc)
+             From: Jarkko Hietaniemi <jhietaniemi@gmail.com>
+             Date: Sun, 08 Jan 2006 11:38:34 +0200
+             Message-ID: <43C0DD9A.9080809@gmail.com>
+     Branch: perl
+	   ! hints/dec_osf.sh
+____________________________________________________________________________
+[ 26706] By: nicholas                              on 2006/01/08  08:33:46
+        Log: Add utils/shasum.PL to MANIFEST
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 26705] By: nicholas                              on 2006/01/08  08:28:29
+        Log: Add missing files in ext/Digest/SHA/src that somehow escaped the net.
+     Branch: perl
+	   + ext/Digest/SHA/src/hmac.c ext/Digest/SHA/src/hmac.h
+	   + ext/Digest/SHA/src/hmacxtra.c ext/Digest/SHA/src/sha.c
+	   + ext/Digest/SHA/src/sha.h ext/Digest/SHA/src/sha64bit.c
+	   + ext/Digest/SHA/src/sha64bit.h ext/Digest/SHA/src/shaxtra.c
+____________________________________________________________________________
+[ 26704] By: stevep                                on 2006/01/08  04:17:08
+        Log: Add Digest-SHA-5.32 for SHA-256 support for CPAN.
+     Branch: perl
+	   + ext/Digest/SHA/Changes ext/Digest/SHA/Makefile.PL
+	   + ext/Digest/SHA/README ext/Digest/SHA/SHA.pm
+	   + ext/Digest/SHA/SHA.xs ext/Digest/SHA/bin/shasum
+	   + ext/Digest/SHA/ppport.h ext/Digest/SHA/t/0-pod-coverage.t
+	   + ext/Digest/SHA/t/0-pod.t ext/Digest/SHA/t/1-exist.t
+	   + ext/Digest/SHA/t/1-hello-world.t
+	   + ext/Digest/SHA/t/2-nist-sha-1.t
+	   + ext/Digest/SHA/t/2-nist-sha-224.t
+	   + ext/Digest/SHA/t/2-nist-sha-256.t
+	   + ext/Digest/SHA/t/2-nist-sha-384.t
+	   + ext/Digest/SHA/t/2-nist-sha-512.t
+	   + ext/Digest/SHA/t/2-nist-sha-base64.t
+	   + ext/Digest/SHA/t/2-nist-sha-oo.t
+	   + ext/Digest/SHA/t/2-nist-vectors-bit.t
+	   + ext/Digest/SHA/t/2-nist-vectors-byte.t
+	   + ext/Digest/SHA/t/3-gillogly-easy.t
+	   + ext/Digest/SHA/t/3-gillogly-hard.t
+	   + ext/Digest/SHA/t/4-bitstr-increasing.t
+	   + ext/Digest/SHA/t/4-bitstr-large.t
+	   + ext/Digest/SHA/t/4-bitstr-random.t
+	   + ext/Digest/SHA/t/5-hmac-fips198.t
+	   + ext/Digest/SHA/t/5-hmac-rfc2202.t
+	   + ext/Digest/SHA/t/5-hmac-sha-256.t
+	   + ext/Digest/SHA/t/5-hmac-woodbury.t
+	   + ext/Digest/SHA/t/6-dump-load.t ext/Digest/SHA/t/7-ireland.t
+	   + ext/Digest/SHA/t/gillogly/state.011
+	   + ext/Digest/SHA/t/gillogly/state.110
+	   + ext/Digest/SHA/t/nist/COPYRIGHT
+	   + ext/Digest/SHA/t/nist/Readme.txt
+	   + ext/Digest/SHA/t/nist/bit-hashes.sha1
+	   + ext/Digest/SHA/t/nist/bit-messages.sha1
+	   + ext/Digest/SHA/t/nist/byte-hashes.sha1
+	   + ext/Digest/SHA/t/nist/byte-messages.sha1
+	   + ext/Digest/SHA/t/state/state.1
+	   + ext/Digest/SHA/t/state/state.256
+	   + ext/Digest/SHA/t/state/state.384
+	   + ext/Digest/SHA/t/state/state.512 ext/Digest/SHA/typemap
+	   + utils/shasum.PL
+	   ! MANIFEST Porting/Maintainers.pl utils/Makefile
+____________________________________________________________________________
+[ 26703] By: craigb                                on 2006/01/07  22:12:16
+        Log: Make v?snprintf available on VMS v7.3-2 and later and clean up
+             some other version-dependency checks.
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 26702] By: nicholas                              on 2006/01/07  20:42:57
+        Log: Remove the greedy quantifier from inside the grouping (?:) so that it
+             and the greedy quantifier on the (?:) don't fight each other until the
+             C stack is exhausted.
+     Branch: perl
+	   ! lib/Pod/Simple/BlackBox.pm
+____________________________________________________________________________
+[ 26701] By: nicholas                              on 2006/01/07  17:19:29
+        Log: Reorder Fcntl's bootstrapping so that the constants actually get
+             inlined within the functions that Fcntl defines.
+     Branch: perl
+	   ! ext/Fcntl/Fcntl.pm
+____________________________________________________________________________
+[ 26695] By: davem                                 on 2006/01/07  03:13:08
+        Log: preserve the referent associated with a shared RV.
+             its faster, and the user doesn't see a different address each time
+             for ref($sharedref).
+     Branch: perl
+	   ! ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 26694] By: stevep                                on 2006/01/07  03:13:05
+        Log: Additional const prototype fixes.
+     Branch: perl
+	   ! os2/os2.c wince/wince.c
+____________________________________________________________________________
+[ 26693] By: davem                                 on 2006/01/07  01:24:37
+        Log: fix coredump on 'local $shared[N]' introduced by change #24942
+     Branch: perl
+	   ! ext/threads/shared/shared.xs
+____________________________________________________________________________
+[ 26691] By: nicholas                              on 2006/01/06  23:57:55
+        Log: Don't code the absolute number of tests for the UTF8/EBCDIC case; much
+             better to subtract the number of tests that don't get run.
+     Branch: perl
+	   ! t/comp/require.t
+____________________________________________________________________________
+[ 26690] By: craigb                                on 2006/01/06  23:16:30
+        Log: Make VMS manifest checker handle multi-dot filenames on ODS-5
+     Branch: perl
+	   ! configure.com
+____________________________________________________________________________
+[ 26687] By: nicholas                              on 2006/01/06  22:19:47
+        Log: Correct the typo in the description of change 24253
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
+[ 26685] By: stevep                                on 2006/01/06  21:59:00
+        Log: Upgrade to version-0.52
+     Branch: perl
+	   ! lib/version.pm lib/version.pod lib/version.t sv.c
+	   ! t/op/sprintf.t util.c
+____________________________________________________________________________
+[ 26684] By: davem                                 on 2006/01/06  21:13:12
+        Log: make ithreads shared vars smaller/quicker by eliminating shared_sv
+             struct. Also document how it works.
+     Branch: perl
+	   ! ext/threads/shared/shared.xs ext/threads/shared/typemap
+____________________________________________________________________________
+[ 26680] By: stevep                                on 2006/01/06  18:59:54
+        Log: const'ing parameters killed the builds for djgpp.  Changes get the 
+             Perl core, but not the modules, to compile cleanly. 
+     Branch: perl
+	   ! djgpp/djgpp.c djgpp/djgpp.h
+____________________________________________________________________________
+[ 26679] By: nicholas                              on 2006/01/06  18:29:57
+        Log: Negating an unsigned value generates warnings for some compilers, so
+             cast it first.
+     Branch: perl
+	   ! lib/ExtUtils/Constant/ProxySubs.pm
+____________________________________________________________________________
+[ 26677] By: steveh                                on 2006/01/06  17:20:47
+        Log: DBL_MAX and FLT_MAX are not constants in Borland C++
+             
+             (Fixes BCC compilation error in POSIX introduced by change 26455)
+     Branch: perl
+	   ! ext/POSIX/Makefile.PL
+____________________________________________________________________________
+[ 26676] By: rgs                                   on 2006/01/06  16:58:14
+        Log: Subject: [PATCH] hv_fetchs() support
+             From: Andy Lester <andy@petdance.com>
+             Date: Fri, 6 Jan 2006 09:57:19 -0600
+             Message-ID: <20060106155719.GB9035@petdance.com>
+     Branch: perl
+	   ! doop.c handy.h hv.c malloc.c op.c pp_sys.c taint.c
+____________________________________________________________________________
+[ 26675] By: rgs                                   on 2006/01/06  15:50:34
+        Log: Subject: [PATCH] sprinkle dVAR
+             From: Jarkko Hietaniemi <jhietaniemi@gmail.com>
+             Date: Fri, 06 Jan 2006 16:18:53 +0200
+             Message-ID: <43BE7C4D.1010302@gmail.com>
+     Branch: perl
+	   ! av.c deb.c doio.c doop.c dump.c ext/threads/threads.xs gv.c
+	   ! hv.c lib/ExtUtils/ParseXS.pm locale.c mathoms.c mg.c numeric.c
+	   ! op.c opcode.h opcode.pl pad.c perl.c perl.h perl_keyword.pl
+	   ! perlio.c perlvars.h perly.c pp.c pp_ctl.c pp_hot.c pp_pack.c
+	   ! pp_sort.c pp_sys.c regcomp.c regexec.c run.c scope.c sv.c
+	   ! taint.c toke.c universal.c utf8.c util.c xsutils.c
+____________________________________________________________________________
+[ 26674] By: rgs                                   on 2006/01/06  14:35:38
+        Log: Subject: [PATCH] performance tweaking op.c
+             From: Andy Lester <andy@petdance.com>
+             Date: Fri, 6 Jan 2006 01:44:48 -0600
+             Message-ID: <20060106074448.GB3401@petdance.com>
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 26673] By: gisle                                 on 2006/01/06  14:00:14
+        Log: Remove code duplicated a few lines above by change 19695.
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 26672] By: gisle                                 on 2006/01/06  13:57:27
+        Log: Move "DEVEL####" marker to the 'perl -v' output.
+             This avoids problem with using STRINGIFY in patchlevel.h
+             (ref msg <43BE4BAC.6010701@uk.radan.com> posted to p5p).
+     Branch: perl
+	   ! patchlevel.h perl.c t/run/switches.t utils/perlbug.PL
+____________________________________________________________________________
+[ 26671] By: stevep                                on 2006/01/06  13:04:44
+        Log: Replacing broken call to savepvn() with savepvs() to get threaded
+             Cygwin to compile again.
+     Branch: perl
+	   ! perl.c
+____________________________________________________________________________
+[ 26670] By: gisle                                 on 2006/01/06  10:54:18
+        Log: Make '-s' on the shebang line able to parse -foo=bar switches again.
+             This feature was broken by change 19695 some years ago
+             and integrated into perl-5.8.1.  perl-5.8.0 was fine.
+             Ref http://bugs.activestate.com/show_bug.cgi?id=43483
+     Branch: perl
+	   ! perl.c t/run/switches.t
+____________________________________________________________________________
+[ 26669] By: gisle                                 on 2006/01/06  10:38:37
+        Log: Improve description of the -s switch.
+             I found the "This means you can have switches
+             with two leading dashes." sentence introduced by
+             change 7144 really confusing.  The note after
+             the example should make it clear enough that double
+             dash switches can be used for those that insist.
+     Branch: perl
+	   ! pod/perlrun.pod
+____________________________________________________________________________
+[ 26668] By: merijn                                on 2006/01/05  21:04:32
+        Log: Test if the probed availability of v?snprintf () is
+             actually usable. Thanks to Russ and Jarkko.
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 26666] By: rgs                                   on 2006/01/05  17:39:07
+        Log: Upgrade to CPAN.pm 1.83
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm lib/CPAN/HandleConfig.pm
+	   ! lib/CPAN/SIGNATURE lib/CPAN/Tarzip.pm
+____________________________________________________________________________
+[ 26665] By: rgs                                   on 2006/01/05  17:27:28
+        Log: Regenerate PODs
+     Branch: perl
+	   ! pod/perlmodlib.pod pod/perltoc.pod
+____________________________________________________________________________
+[ 26664] By: steveh                                on 2006/01/05  17:24:44
+        Log: Workaround another problem following change 26395
+             
+             MinGW doesn't like 26395 either! (ref: change 26634)
+     Branch: perl
+	   ! gv.h
+____________________________________________________________________________
+[ 26663] By: rgs                                   on 2006/01/05  17:19:27
+        Log: Really commit change 26662 (duh)
+     Branch: perl
+	   ! pod.lst pod/perl.pod
+____________________________________________________________________________
+[ 26662] By: rgs                                   on 2006/01/05  17:17:52
+        Log: Let table of contents know about perllinux man page
+     Branch: perl
+	   ! pod.lst pod/perl.pod
+____________________________________________________________________________
+[ 26661] By: rgs                                   on 2006/01/05  16:58:51
+        Log: Update Changes
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [ 26659] By: steveh                                on 2006/01/05  16:22:50
         Log: Subject: MinGW and lib/CORE/Win32.h
              From: "Sisyphus" <sisyphus1@optusnet.com.au>
@@ -343,7 +1882,9 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 26581] By: craigb                                on 2006/01/02  19:22:52
         Log: Subject: patch@26561 & earlier - buffer overrun in VMS.C
-             From: "John E. Malmberg" <wb8tyw@qsl.net>	Date: Mon, 02 Jan 2006 14:05:43 -0500	Message-id: <43B97987.70201@qsl.net>
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
+	     Date: Mon, 02 Jan 2006 14:05:43 -0500
+	     Message-id: <43B97987.70201@qsl.net>
      Branch: perl
 	   ! vms/vms.c
 ____________________________________________________________________________
@@ -711,7 +2252,10 @@ ____________________________________________________________________________
 	   ! pod/perlfunc.pod
 ____________________________________________________________________________
 [ 26519] By: craigb                                on 2005/12/29  03:49:58
-        Log: Subject: [PATCH] fortify Pod::Simple::Search against non-case-preserving filesystems	From: "Craig A. Berry" <craigberry@mac.com>	Date: Tue, 27 Dec 2005 17:59:35 -0600	Message-id: <43B1D567.9080504@mac.com>
+        Log: Subject: [PATCH] fortify Pod::Simple::Search against non-case-preserving filesystems
+	     From: "Craig A. Berry" <craigberry@mac.com>
+	     Date: Tue, 27 Dec 2005 17:59:35 -0600
+	     Message-id: <43B1D567.9080504@mac.com>
      Branch: perl
 	   ! lib/Pod/Simple/Search.pm
 	   ! lib/Pod/Simple/t/other_test_lib/squaa/Wowo.pod
