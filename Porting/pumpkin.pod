@@ -797,38 +797,6 @@ they must be fixed eventually.)
 
 =over 4
 
-=item #elif
-
-The '#elif' preprocessor directive is not understood on all systems.
-Specifically, I know that Pyramids don't understand it.  Thus instead of the
-simple
-
-	#if defined(I_FOO)
-	#  include <foo.h>
-	#elif defined(I_BAR)
-	#  include <bar.h>
-	#else
-	#  include <fubar.h>
-	#endif
-
-You have to do the more Byzantine
-
-	#if defined(I_FOO)
-	#  include <foo.h>
-	#else
-	#  if defined(I_BAR)
-	#    include <bar.h>
-	#  else
-	#    include <fubar.h>
-	#  endif
-	#endif
-
-Incidentally, whitespace between the leading '#' and the preprocessor
-command is not guaranteed, but is very portable and you may use it freely.
-I think it makes things a bit more readable, especially once things get
-rather deeply nested.  I also think that things should almost never get
-too deeply nested,  so it ought to be a moot point :-)
-
 =item Probably Prefer POSIX
 
 It's often the case that you'll need to choose whether to do
