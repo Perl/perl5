@@ -1,24 +1,30 @@
 name: perl
-version: 5.009002
+version: 5.009003
 abstract: Practical Extraction and Reporting Language
 author: perl5-porters@perl.org
 license: perl
 distribution_type: core
 private:
   directory:
+    - ext/Compress/Zlib
     - ext/Cwd
     - ext/Data/Dumper
     - ext/DB_File
     - ext/Devel/PPPort
     - ext/Digest/MD5
+    - ext/Digest/SHA
     - ext/Encode
     - ext/Filter/Util/Call
+    - ext/IO
     - ext/List/Util
+    - ext/Math/BigInt/FastCalc
     - ext/MIME/Base64
     - ext/Safe
     - ext/Storable
     - ext/Time/HiRes
     - ext/Unicode/Normalize
+    - lib/Archive/Tar
+    - lib/assertions
     - lib/Attribute/Handlers
     - lib/base
     - lib/bignum
@@ -27,12 +33,15 @@ private:
     - lib/CPAN
     - lib/Digest
     - lib/encoding/warnings
+    - lib/ExtUtils/CBuilder
+    - lib/ExtUtils/ParseXS
     - lib/ExtUtils/t
     - lib/File/Spec
     - lib/File/Temp
     - lib/Filter/Simple
     - lib/Getopt/Long
     - lib/I18N/LangTags
+    - lib/IO/Zlib
     - lib/Locale/Maketext
     - lib/Math/BigFloat
     - lib/Math/BigInt
@@ -43,7 +52,9 @@ private:
     - lib/Net/Ping
     - lib/Net/t
     - lib/NEXT
+    - lib/Pod/Escapes
     - lib/Pod/Perldoc
+    - lib/Pod/Simple
     - lib/Switch
     - lib/Term/ANSIColor
     - lib/Test/Harness
@@ -60,7 +71,11 @@ private:
     - t/lib/Test/Simple
 
   file:
+    - ext/DynaLoader/t/XSLoader.t
+    - ext/DynaLoader/XSLoader_pm.PL
     - ext/Filter/t/call.t
+    - lib/Archive/Tar.pm
+    - lib/assertions.pm
     - lib/Attribute/Handlers.pm
     - lib/base.pm
     - lib/bigint.pm
@@ -72,6 +87,7 @@ private:
     - lib/Cwd.pm
     - lib/Digest.pm
     - lib/encoding/warnings.pm
+    - lib/ExtUtils/CBuilder.pm
     - lib/ExtUtils/Command
     - lib/ExtUtils/Command.pm
     - lib/ExtUtils/Install.pm
@@ -85,6 +101,7 @@ private:
     - lib/ExtUtils/Mkbootstrap.pm
     - lib/ExtUtils/Mksymlists.pm
     - lib/ExtUtils/MM.pm
+    - lib/ExtUtils/MM_AIX.pm
     - lib/ExtUtils/MM_Any.pm
     - lib/ExtUtils/MM_BeOS.pm
     - lib/ExtUtils/MM_Cygwin.pm
@@ -92,13 +109,16 @@ private:
     - lib/ExtUtils/MM_MacOS.pm
     - lib/ExtUtils/MM_NW5.pm
     - lib/ExtUtils/MM_OS2.pm
+    - lib/ExtUtils/MM_QNX.pm
     - lib/ExtUtils/MM_Unix.pm
     - lib/ExtUtils/MM_UWIN.pm
     - lib/ExtUtils/MM_VMS.pm
+    - lib/ExtUtils/MM_VOS.pm
     - lib/ExtUtils/MM_Win32.pm
     - lib/ExtUtils/MM_Win95.pm
     - lib/ExtUtils/MY.pm
     - lib/ExtUtils/Packlist.pm
+    - lib/ExtUtils/ParseXS.pm
     - lib/ExtUtils/testlib.pm
     - lib/fields.pm
     - lib/File/Spec.pm
@@ -108,6 +128,7 @@ private:
     - lib/I18N/LangTags.pm
     - lib/if.pm
     - lib/if.t
+    - lib/IO/Zlib.pm
     - lib/Locale/Codes
     - lib/Locale/Constants.pm
     - lib/Locale/Constants.pod
@@ -144,6 +165,7 @@ private:
     - lib/PerlIO/via/QuotedPrint.pm
     - lib/PerlIO/via/t/QuotedPrint.t
     - lib/Pod/Checker.pm
+    - lib/Pod/Escapes.pm
     - lib/Pod/Find.pm
     - lib/Pod/InputObjects.pm
     - lib/Pod/LaTeX.pm
@@ -154,6 +176,8 @@ private:
     - lib/Pod/Perldoc.pm
     - lib/Pod/PlainText.pm
     - lib/Pod/Select.pm
+    - lib/Pod/Simple.pm
+    - lib/Pod/Simple.pod
     - lib/Pod/t/basic.cap
     - lib/Pod/t/basic.clr
     - lib/Pod/t/basic.man
@@ -164,7 +188,6 @@ private:
     - lib/Pod/t/man.t
     - lib/Pod/t/parselink.t
     - lib/Pod/t/pod2latex.t
-    - lib/Pod/t/text-errors.t
     - lib/Pod/t/text-options.t
     - lib/Pod/t/text.t
     - lib/Pod/Text.pm
@@ -193,9 +216,12 @@ private:
     - pod/pod2usage.PL
     - pod/podchecker.PL
     - pod/podselect.PL
+    - t/comp/assertions.t
+    - t/comp/asstcompat.t
     - t/lib/filter-util.pl
     - t/lib/TieIn.pm
     - t/lib/TieOut.pm
+    - t/lib/ZlibTestUtils.pm
     - t/pod/emptycmd.t
     - t/pod/emptycmd.xr
     - t/pod/find.t
