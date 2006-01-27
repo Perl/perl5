@@ -805,10 +805,10 @@ sub installlib {
 	      $dir  =~ m{/t(?:/|$)};
     # ignore the cpan script in lib/CPAN/bin, the instmodsh and xsubpp
     # scripts in lib/ExtUtils, the prove script in lib/Test/Harness,
-    # the corelist script from lib/Module/CoreList/bin and ptar in
+    # the corelist script from lib/Module/CoreList/bin and ptar* in
     # lib/Archive/Tar/bin
     # (they're installed later with other utils)
-    return if $name =~ /^(?:cpan|instmodsh|prove|corelist|ptar)\z/;
+    return if $name =~ /^(?:cpan|instmodsh|prove|corelist|ptar|ptardiff)\z/;
     # ignore the Makefiles
     return if $name =~ /^makefile$/i;
     # ignore the test extensions
