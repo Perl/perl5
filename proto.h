@@ -3141,10 +3141,6 @@ PERL_CALLCONV OP*	Perl_ck_sassign(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV OP*	Perl_ck_say(pTHX_ OP *o)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-
 PERL_CALLCONV OP*	Perl_ck_select(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);

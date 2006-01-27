@@ -1160,7 +1160,6 @@ pR	|OP*	|ck_return	|NN OP *o
 pR	|OP*	|ck_rfun	|NN OP *o
 pR	|OP*	|ck_rvconst	|NN OP *o
 pR	|OP*	|ck_sassign	|NN OP *o
-pR	|OP*	|ck_say		|NN OP *o
 pR	|OP*	|ck_select	|NN OP *o
 pR	|OP*	|ck_shift	|NN OP *o
 pR	|OP*	|ck_sort	|NN OP *o

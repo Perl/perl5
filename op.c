@@ -6754,16 +6754,6 @@ Perl_ck_listiob(pTHX_ OP *o)
 }
 
 OP *
-Perl_ck_say(pTHX_ OP *o)
-{
-    o = ck_listiob(o);
-    o->op_type = OP_PRINT;
-    cLISTOPo->op_last = cLISTOPo->op_last->op_sibling
-    	= newSVOP(OP_CONST, 0, newSVpvs("\n"));
-    return o;
-}
-
-OP *
 Perl_ck_smartmatch(pTHX_ OP *o)
 {
     dVAR;

@@ -36,7 +36,6 @@ Perl_ck_return
 Perl_ck_rfun
 Perl_ck_rvconst
 Perl_ck_sassign
-Perl_ck_say
 Perl_ck_select
 Perl_ck_shift
 Perl_ck_smartmatch

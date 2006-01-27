@@ -4718,11 +4718,8 @@ X<say>
 =item say
 
 Just like C<print>, but implicitly appends a newline.
-C<say LIST> is simply an abbreviation for C<print LIST, "\n">,
-and C<say()> works just like C<print($_, "\n")>.
-
-That means that a call to say() appends any output record separator
-I<after> the added newline.
+C<say LIST> is simply an abbreviation for C<{ local $/ = "\n"; print
+LIST }>.
 
 This keyword is only available when the "say" feature is
 enabled: see L<feature>.

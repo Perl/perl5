@@ -1524,7 +1524,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* break */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* continue */
 	MEMBER_TO_FPTR(Perl_ck_smartmatch),	/* smartmatch */
-	MEMBER_TO_FPTR(Perl_ck_say),	/* say */
+	MEMBER_TO_FPTR(Perl_ck_listiob),	/* say */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* custom */
 }
 #endif

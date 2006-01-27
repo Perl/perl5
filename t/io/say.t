@@ -16,7 +16,7 @@ die $@ if $@ and !$ENV{PERL_CORE_MINITEST};
 
 use feature "say";
 
-say "1..11";
+say "1..12";
 
 my $foo = 'STDOUT';
 say $foo "ok 1";
@@ -47,3 +47,9 @@ say;
 
 $_ = "ok 11";
 say STDOUT;
+
+{
+    # test that $, doesn't show up before the trailing \n
+    local $, = "\nnot ok 13"; # how to fool Test::Harness
+    say "ok 12";
+}

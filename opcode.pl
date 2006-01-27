@@ -1045,7 +1045,7 @@ break		break			ck_null		0
 continue	continue		ck_null		0
 smartmatch	smart match		ck_smartmatch	s2
 
-say		say			ck_say		ims@	F? L
+say		say			ck_listiob	ims@	F? L
 
 # Add new ops before this, the custom operator.
 
