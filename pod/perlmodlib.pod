@@ -449,6 +449,10 @@ Modules that calculate message digests
 
 Perl interface to the MD5 Algorithm
 
+=item Digest::SHA
+
+Perl extension for SHA-1/224/256/384/512
+
 =item Digest::base
 
 Digest base class

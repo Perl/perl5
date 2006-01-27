@@ -806,8 +806,7 @@ LIMIT specified
 
 =back
 
-=head2 perlfaq - frequently asked questions about Perl ($Date: 2005/12/30
-15:04:07 $)
+=head2 perlfaq - frequently asked questions about Perl
 
 =over 4
 
@@ -820,21 +819,13 @@ LIMIT specified
 =item How to contribute to the perlfaq
 
 =item What will happen if you mail your Perl programming problems to the
-authors
+authors?
 
 =back
 
-=item Credits
+=item CREDITS
 
-=item Author and Copyright Information
-
-=over 4
-
-=item Bundled Distributions
-
-=item Disclaimer
-
-=back
+=item AUTHOR AND COPYRIGHT
 
 =item Table of Contents
 
@@ -919,8 +910,8 @@ Scheme, or Tcl?
 
 =back
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.38 $,
-$Date: 2005/12/31 00:54:37 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.39 $,
+$Date: 2006/01/08 14:27:07 $)
 
 =over 4
 
@@ -955,13 +946,11 @@ What does CPAN/src/... mean?
 
 References, Tutorials, Task-Oriented, Special Topics
 
-=item Perl in Magazines
-
-=item Perl on the Net: FTP and WWW Access
+=item Which magazines have Perl content?
 
 =item What mailing lists are there for Perl?
 
-=item Archives of comp.lang.perl.misc
+=item Where are the archives for comp.lang.perl.misc?
 
 =item Where can I buy a commercial version of perl?
 
@@ -4037,11 +4026,11 @@ CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util, CPAN, CPAN::FirstTime,
 CPAN::Nox, CPAN::Version, Carp, Carp::Heavy, Class::ISA, Class::Struct,
 Compress::Zlib, Compress::Zlib::pod::FAQ, Config, Cwd, DB, DBM_Filter,
 DB_File, Data::Dumper, Devel::DProf, Devel::PPPort, Devel::Peek,
-Devel::SelfStubber, Digest, Digest::MD5, Digest::base, Digest::file,
-DirHandle, Dumpvalue, DynaLoader, Encode, Encode::Alias, Encode::Byte,
-Encode::CJKConstants, Encode::CN, Encode::CN::HZ, Encode::Config,
-Encode::EBCDIC, Encode::Encoder, Encode::Encoding, Encode::Guess,
-Encode::JP, Encode::JP::H2Z, Encode::JP::JIS7, Encode::KR,
+Devel::SelfStubber, Digest, Digest::MD5, Digest::SHA, Digest::base,
+Digest::file, DirHandle, Dumpvalue, DynaLoader, Encode, Encode::Alias,
+Encode::Byte, Encode::CJKConstants, Encode::CN, Encode::CN::HZ,
+Encode::Config, Encode::EBCDIC, Encode::Encoder, Encode::Encoding,
+Encode::Guess, Encode::JP, Encode::JP::H2Z, Encode::JP::JIS7, Encode::KR,
 Encode::KR::2022_KR, Encode::MIME::Header, Encode::PerlIO,
 Encode::Supported, Encode::Symbol, Encode::TW, Encode::Unicode,
 Encode::Unicode::UTF7, English, Env, Errno, Exporter, Exporter::Heavy,
@@ -4676,6 +4665,8 @@ Perl?>, B<Use C from C?>, B<Use Perl from C?>
 
 =item Execution of END blocks
 
+=item $0 assignments
+
 =item Maintaining multiple interpreter instances
 
 =item Using Perl modules, which themselves use C libraries, from your C
@@ -5107,7 +5098,7 @@ save_hptr(HV **hptr)>
 
 =item Internal Functions
 
-A, p, d, s, n, r, f, M, o, x, m, X, E, b
+A, p, d, s, n, r, f, M, o, x, m, X, E, b, others
 
 =over 4
 
@@ -5413,9 +5404,9 @@ X<SVt_PVMG>
 =item SV Manipulation Functions
 
 get_sv X<get_sv>, looks_like_number X<looks_like_number>, newRV_inc
-X<newRV_inc>, newRV_noinc X<newRV_noinc>, NEWSV X<NEWSV>, newSV X<newSV>,
-newSVhek X<newSVhek>, newSViv X<newSViv>, newSVnv X<newSVnv>, newSVpv
-X<newSVpv>, newSVpvf X<newSVpvf>, newSVpvn X<newSVpvn>, newSVpvn_share
+X<newRV_inc>, newRV_noinc X<newRV_noinc>, newSV X<newSV>, newSVhek
+X<newSVhek>, newSViv X<newSViv>, newSVnv X<newSVnv>, newSVpv X<newSVpv>,
+newSVpvf X<newSVpvf>, newSVpvn X<newSVpvn>, newSVpvn_share
 X<newSVpvn_share>, newSVrv X<newSVrv>, newSVsv X<newSVsv>, newSVuv
 X<newSVuv>, SvCUR X<SvCUR>, SvCUR_set X<SvCUR_set>, SvEND X<SvEND>, SvGROW
 X<SvGROW>, SvIOK X<SvIOK>, SvIOKp X<SvIOKp>, SvIOK_notUV X<SvIOK_notUV>,
@@ -6100,11 +6091,15 @@ B<-V>
 
 =item C<:unique>
 
+=item Scoping of the C<sort> pragma
+
 =back
 
 =item Core Enhancements
 
 =over 4
+
+=item The C<feature> pragma
 
 =item Switch and Smart Match operator
 
@@ -6120,23 +6115,23 @@ B<-V>
 
 =item C<no VERSION>
 
+=item Recursive sort subs
+
+=item Effect of pragmas in eval
+
+=item New B<-E> command-line switch
+
+=item C<chdir>, C<chmod> and C<chown> on filehandles
+
+=item OS groups
+
 =back
 
 =item Modules and Pragmata
 
 =over 4
 
-=item C<feature>
-
-=item C<assertions::compat>
-
-=item C<Math::BigInt::FastCalc>
-
-=item C<Compress::Zlib>
-
-=item C<IO::Zlib>
-
-=item C<Archive::Tar>
+=item New Core Modules
 
 =back
 
@@ -6145,6 +6140,12 @@ B<-V>
 =over 4
 
 =item C<ptar>
+
+=item C<shasum>
+
+=item C<h2xs> enhancements
+
+=item C<perlivp> enhancements
 
 =back
 
@@ -6158,11 +6159,29 @@ B<-V>
 
 =item Performance Enhancements
 
+=over 4
+
+=item XS-assisted SWASHGET
+
+=item Constant subroutines
+
+=item C<PERL_DONT_CREATE_GVSV>
+
+=item Weak references are cheaper
+
+=item sort() enhancements
+
+=back
+
 =item Installation and Configuration Improvements
 
 =over 4
 
+=item Compilation improvements
+
 =item New Or Improved Platforms
+
+=item New probes
 
 =item Module auxiliary files
 
@@ -6173,6 +6192,16 @@ B<-V>
 =over 4
 
 =item C<defined $$x>
+
+=item Calling CORE::require()
+
+=item Subscripts of slices
+
+=item Remove over-optimisation
+
+=item sprintf() fixes
+
+=item no warnings 'category' works correctly with -w
 
 =item Smaller fixes
 
@@ -6186,10 +6215,14 @@ B<-V>
 
 =item Attempt to set length of freed array
 
+=item Non-string passed as bitmask
+
 =item Search pattern not terminated or ternary operator parsed as search
 pattern
 
 =item "%s" variable %s masks earlier declaration
+
+=item readdir()/closedir()/etc. attempted on invalid dirhandle
 
 =back
 
@@ -6235,11 +6268,15 @@ pattern
 
 =item C<:unique>
 
+=item Scoping of the C<sort> pragma
+
 =back
 
 =item Core Enhancements
 
 =over 4
+
+=item The C<feature> pragma
 
 =item Switch and Smart Match operator
 
@@ -6255,23 +6292,23 @@ pattern
 
 =item C<no VERSION>
 
+=item Recursive sort subs
+
+=item Effect of pragmas in eval
+
+=item New B<-E> command-line switch
+
+=item C<chdir>, C<chmod> and C<chown> on filehandles
+
+=item OS groups
+
 =back
 
 =item Modules and Pragmata
 
 =over 4
 
-=item C<feature>
-
-=item C<assertions::compat>
-
-=item C<Math::BigInt::FastCalc>
-
-=item C<Compress::Zlib>
-
-=item C<IO::Zlib>
-
-=item C<Archive::Tar>
+=item New Core Modules
 
 =back
 
@@ -6280,6 +6317,12 @@ pattern
 =over 4
 
 =item C<ptar>
+
+=item C<shasum>
+
+=item C<h2xs> enhancements
+
+=item C<perlivp> enhancements
 
 =back
 
@@ -6293,11 +6336,29 @@ pattern
 
 =item Performance Enhancements
 
+=over 4
+
+=item XS-assisted SWASHGET
+
+=item Constant subroutines
+
+=item C<PERL_DONT_CREATE_GVSV>
+
+=item Weak references are cheaper
+
+=item sort() enhancements
+
+=back
+
 =item Installation and Configuration Improvements
 
 =over 4
 
+=item Compilation improvements
+
 =item New Or Improved Platforms
+
+=item New probes
 
 =item Module auxiliary files
 
@@ -6308,6 +6369,16 @@ pattern
 =over 4
 
 =item C<defined $$x>
+
+=item Calling CORE::require()
+
+=item Subscripts of slices
+
+=item Remove over-optimisation
+
+=item sprintf() fixes
+
+=item no warnings 'category' works correctly with -w
 
 =item Smaller fixes
 
@@ -6321,10 +6392,14 @@ pattern
 
 =item Attempt to set length of freed array
 
+=item Non-string passed as bitmask
+
 =item Search pattern not terminated or ternary operator parsed as search
 pattern
 
 =item "%s" variable %s masks earlier declaration
+
+=item readdir()/closedir()/etc. attempted on invalid dirhandle
 
 =back
 
@@ -9520,15 +9595,13 @@ op/lexassign.t, pragma/warnings.t
 
 =item Installation Prefix
 
+=item SDK support
+
+=item Universal Binary support
+
 =item libperl and Prebinding
 
-=item Updating Apple-supplied Perl
-
-=item 64-bit Perl
-
-=item Intel processor support
-
-=item  Universal binaries
+=item Updating Apple's Perl
 
 =item Known problems
 
@@ -10110,8 +10183,7 @@ Solaris FAQ, Precompiled Binaries, Solaris Documentation
 
 Dynamic Loading Problems With GNU as and GNU ld, ld.so.1: ./perl: fatal:
 relocation error:, dlopen: stub interception failed, #error "No
-DATAMODEL_NATIVE specified", sh: ar: not found, warning: dead part of
-constant expression is nonconstant
+DATAMODEL_NATIVE specified", sh: ar: not found
 
 =item MAKE TEST
 
@@ -10803,36 +10875,6 @@ semantics
 =item LIMITATIONS
 
 =item SEE ALSO
-
-=back
-
-=head2 c, constant - Perl pragma to declare constants
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item NOTES
-
-=over 4
-
-=item List constants
-
-=item Defining multiple constants at once
-
-=item Magic constants
-
-=back
-
-=item TECHNICAL NOTES
-
-=item BUGS
-
-=item AUTHOR
-
-=item COPYRIGHT
 
 =back
 
@@ -13032,7 +13074,8 @@ FCGI_SOCKET_PATH, FCGI_LISTEN_QUEUE
 
 Searching for authors, bundles, distribution files and modules, make, test,
 install, clean	modules or distributions, get, readme, perldoc, look module
-or distribution, ls author, ls globbing_expresion, Signals
+or distribution, ls author, ls globbing_expresion, failed, Lockfile,
+Signals
 
 =item CPAN::Shell
 
@@ -13114,6 +13157,8 @@ optionE<gt> [shift|pop]>, C<o conf E<lt>list optionE<gt>
 =back
 
 =item EXPORT
+
+=item ENVIRONMENT
 
 =item POPULATE AN INSTALLATION WITH LOTS OF MODULES
 
@@ -13351,7 +13396,7 @@ $nice_length, $max_chain)>
 B<-WindowBits>, B<-Bufsize>, B<-Dictionary>, B<-AppendOutput>, B<-CRC32>,
 B<-ADLER32>, B<-ConsumeInput>
 
-=item B< $status = $i-E<gt>inflate($input, $output) >
+=item B< $status = $i-E<gt>inflate($input, $output [,$eof]) >
 
 =item B<$status = $i-E<gt>inflateSync($input)>
 
@@ -13509,19 +13554,14 @@ problems you find
 =item deflate $input => $output [, OPTS]
 
 A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, A Hash
-Reference, An Array Reference, An Output FileGlob
-
-=item deflate \%hash [, OPTS]
-
-undef, A filename, A filehandle, A scalar reference, A Hash Reference, An
-Array Reference
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
 
 =item Notes
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, -Append =E<gt> 0|1
+AutoClose =E<gt> 0|1, BinModeIn =E<gt> 0|1, -Append =E<gt> 0|1
 
 =item Examples
 
@@ -13570,7 +13610,9 @@ Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
 
 =item close
 
-=item newStream
+=item newStream([OPTS])
+
+Level, TODO
 
 =item deflateParams
 
@@ -13612,19 +13654,14 @@ problems you find
 =item gzip $input => $output [, OPTS]
 
 A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, A Hash
-Reference, An Array Reference, An Output FileGlob
-
-=item gzip \%hash [, OPTS]
-
-undef, A filename, A filehandle, A scalar reference, A Hash Reference, An
-Array Reference
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
 
 =item Notes
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, -Append =E<gt> 0|1
+AutoClose =E<gt> 0|1, BinModeIn =E<gt> 0|1, -Append =E<gt> 0|1
 
 =item Examples
 
@@ -13641,7 +13678,7 @@ A filename, A filehandle, A scalar reference
 =item Constructor Options
 
 -AutoClose =E<gt> 0|1, -Append =E<gt> 0|1, A Buffer, A Filename, A
-Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Mimimal =E<gt> 0|1,
+Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Minimal =E<gt> 0|1,
 -Comment =E<gt> $comment, -Name =E<gt> $string, -Time =E<gt> $number,
 -TextFlag =E<gt> 0|1, -HeaderCRC =E<gt> 0|1, -OS_Code =E<gt> $value,
 -ExtraField =E<gt> $data, -ExtraFlags =E<gt> $value, -Strict =E<gt> 0|1
@@ -13676,7 +13713,9 @@ Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Mimimal =E<gt> 0|1,
 
 =item close
 
-=item newStream
+=item newStream([OPTS])
+
+Level, TODO
 
 =item deflateParams
 
@@ -13718,19 +13757,14 @@ problems you find
 =item rawdeflate $input => $output [, OPTS]
 
 A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, A Hash
-Reference, An Array Reference, An Output FileGlob
-
-=item rawdeflate \%hash [, OPTS]
-
-undef, A filename, A filehandle, A scalar reference, A Hash Reference, An
-Array Reference
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
 
 =item Notes
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, -Append =E<gt> 0|1
+AutoClose =E<gt> 0|1, BinModeIn =E<gt> 0|1, -Append =E<gt> 0|1
 
 =item Examples
 
@@ -13779,7 +13813,9 @@ Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
 
 =item close
 
-=item newStream
+=item newStream([OPTS])
+
+Level, TODO
 
 =item deflateParams
 
@@ -13822,19 +13858,15 @@ problems you find
 =item anyinflate $input => $output [, OPTS]
 
 A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, A Hash
-Reference, An Array Reference, An Output FileGlob
-
-=item anyinflate \%hash [, OPTS]
-
-undef, A filename, A filehandle, A scalar reference, A Hash Reference, An
-Array Reference
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
 
 =item Notes
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, -Append =E<gt> 0|1
+AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
+-MultiStream =E<gt> 0|1
 
 =item Examples
 
@@ -13926,19 +13958,15 @@ problems you find
 =item gunzip $input => $output [, OPTS]
 
 A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, A Hash
-Reference, An Array Reference, An Output FileGlob
-
-=item gunzip \%hash [, OPTS]
-
-undef, A filename, A filehandle, A scalar reference, A Hash Reference, An
-Array Reference
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
 
 =item Notes
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, -Append =E<gt> 0|1
+AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
+-MultiStream =E<gt> 0|1
 
 =item Examples
 
@@ -13980,7 +14008,7 @@ A filename, A filehandle, A scalar reference
 
 =item getHeaderInfo
 
-Comment
+Name, Comment
 
 =item tell
 
@@ -14032,19 +14060,15 @@ problems you find
 =item inflate $input => $output [, OPTS]
 
 A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, A Hash
-Reference, An Array Reference, An Output FileGlob
-
-=item inflate \%hash [, OPTS]
-
-undef, A filename, A filehandle, A scalar reference, A Hash Reference, An
-Array Reference
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
 
 =item Notes
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, -Append =E<gt> 0|1
+AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
+-MultiStream =E<gt> 0|1
 
 =item Examples
 
@@ -14136,19 +14160,15 @@ problems you find
 =item rawinflate $input => $output [, OPTS]
 
 A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, A Hash
-Reference, An Array Reference, An Output FileGlob
-
-=item rawinflate \%hash [, OPTS]
-
-undef, A filename, A filehandle, A scalar reference, A Hash Reference, An
-Array Reference
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
 
 =item Notes
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, -Append =E<gt> 0|1
+AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
+-MultiStream =E<gt> 0|1
 
 =item Examples
 
@@ -14950,10 +14970,6 @@ Dumper
 
 =item Why use ppport.h?
 
-You should use F<ppport.h> in modern code so that your code will work
-with the widest range of Perl interpreters possible, without significant
-additional work.
-
 =item How to use ppport.h
 
 =item Running ppport.h
@@ -14976,9 +14992,9 @@ additional work.
 
 =item Perl API not supported by ppport.h
 
-perl 5.9.2, perl 5.9.1, perl 5.9.0, perl 5.8.3, perl 5.8.1, perl 5.8.0,
-perl 5.7.3, perl 5.7.2, perl 5.7.1, perl 5.6.1, perl 5.6.0, perl 5.005_03,
-perl 5.005, perl 5.004_05, perl 5.004_04, perl 5.004
+perl 5.9.3, perl 5.9.2, perl 5.9.1, perl 5.9.0, perl 5.8.3, perl 5.8.1,
+perl 5.8.0, perl 5.7.3, perl 5.7.2, perl 5.7.1, perl 5.6.1, perl 5.6.0,
+perl 5.005_03, perl 5.005, perl 5.004_05, perl 5.004
 
 =back
 
@@ -15049,59 +15065,6 @@ perl 5.005, perl 5.004_05, perl 5.004_04, perl 5.004
 =item SYNOPSIS
 
 =item DESCRIPTION
-
-=back
-
-=head2 Devel::Size - Perl extension for finding the memory usage of Perl
-variables
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item FUNCTIONS
-
-=over 4
-
-=item size($ref)
-
-=item total_size($ref)
-
-=back
-
-=item EXPORT
-
-=item UNDERSTANDING MEMORY ALLOCATION
-
-=over 4
-
-=item The C library
-
-=item Perl
-
-=back
-
-=item DANGERS
-
-=item Messages: texts originating from this module.
-
-=over 4
-
-=item Errors
-
-=item warnings
-
-=back
-
-=item BUGS
-
-=item AUTHOR
-
-=item COPYRIGHT
-
-=item SEE ALSO
 
 =back
 
@@ -17616,20 +17579,6 @@ errors()
 
 =back
 
-=head2 Fcntl2 - load the C Fcntl2.h defines
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item NOTE
-
-=item EXPORTED SYMBOLS
-
-=back
-
 =head2 File::Basename - Parse file paths into directory, filename and
 suffix.
 
@@ -18880,19 +18829,14 @@ problems you find
 =item deflate $input => $output [, OPTS]
 
 A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, A Hash
-Reference, An Array Reference, An Output FileGlob
-
-=item deflate \%hash [, OPTS]
-
-undef, A filename, A filehandle, A scalar reference, A Hash Reference, An
-Array Reference
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
 
 =item Notes
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, -Append =E<gt> 0|1
+AutoClose =E<gt> 0|1, BinModeIn =E<gt> 0|1, -Append =E<gt> 0|1
 
 =item Examples
 
@@ -18941,7 +18885,9 @@ Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
 
 =item close
 
-=item newStream
+=item newStream([OPTS])
+
+Level, TODO
 
 =item deflateParams
 
@@ -18983,19 +18929,14 @@ problems you find
 =item gzip $input => $output [, OPTS]
 
 A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, A Hash
-Reference, An Array Reference, An Output FileGlob
-
-=item gzip \%hash [, OPTS]
-
-undef, A filename, A filehandle, A scalar reference, A Hash Reference, An
-Array Reference
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
 
 =item Notes
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, -Append =E<gt> 0|1
+AutoClose =E<gt> 0|1, BinModeIn =E<gt> 0|1, -Append =E<gt> 0|1
 
 =item Examples
 
@@ -19012,7 +18953,7 @@ A filename, A filehandle, A scalar reference
 =item Constructor Options
 
 -AutoClose =E<gt> 0|1, -Append =E<gt> 0|1, A Buffer, A Filename, A
-Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Mimimal =E<gt> 0|1,
+Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Minimal =E<gt> 0|1,
 -Comment =E<gt> $comment, -Name =E<gt> $string, -Time =E<gt> $number,
 -TextFlag =E<gt> 0|1, -HeaderCRC =E<gt> 0|1, -OS_Code =E<gt> $value,
 -ExtraField =E<gt> $data, -ExtraFlags =E<gt> $value, -Strict =E<gt> 0|1
@@ -19047,7 +18988,9 @@ Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Mimimal =E<gt> 0|1,
 
 =item close
 
-=item newStream
+=item newStream([OPTS])
+
+Level, TODO
 
 =item deflateParams
 
@@ -19089,19 +19032,14 @@ problems you find
 =item rawdeflate $input => $output [, OPTS]
 
 A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, A Hash
-Reference, An Array Reference, An Output FileGlob
-
-=item rawdeflate \%hash [, OPTS]
-
-undef, A filename, A filehandle, A scalar reference, A Hash Reference, An
-Array Reference
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
 
 =item Notes
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, -Append =E<gt> 0|1
+AutoClose =E<gt> 0|1, BinModeIn =E<gt> 0|1, -Append =E<gt> 0|1
 
 =item Examples
 
@@ -19150,7 +19088,9 @@ Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
 
 =item close
 
-=item newStream
+=item newStream([OPTS])
+
+Level, TODO
 
 =item deflateParams
 
@@ -19432,19 +19372,15 @@ problems you find
 =item anyinflate $input => $output [, OPTS]
 
 A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, A Hash
-Reference, An Array Reference, An Output FileGlob
-
-=item anyinflate \%hash [, OPTS]
-
-undef, A filename, A filehandle, A scalar reference, A Hash Reference, An
-Array Reference
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
 
 =item Notes
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, -Append =E<gt> 0|1
+AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
+-MultiStream =E<gt> 0|1
 
 =item Examples
 
@@ -19536,19 +19472,15 @@ problems you find
 =item gunzip $input => $output [, OPTS]
 
 A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, A Hash
-Reference, An Array Reference, An Output FileGlob
-
-=item gunzip \%hash [, OPTS]
-
-undef, A filename, A filehandle, A scalar reference, A Hash Reference, An
-Array Reference
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
 
 =item Notes
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, -Append =E<gt> 0|1
+AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
+-MultiStream =E<gt> 0|1
 
 =item Examples
 
@@ -19590,7 +19522,7 @@ A filename, A filehandle, A scalar reference
 
 =item getHeaderInfo
 
-Comment
+Name, Comment
 
 =item tell
 
@@ -19642,19 +19574,15 @@ problems you find
 =item inflate $input => $output [, OPTS]
 
 A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, A Hash
-Reference, An Array Reference, An Output FileGlob
-
-=item inflate \%hash [, OPTS]
-
-undef, A filename, A filehandle, A scalar reference, A Hash Reference, An
-Array Reference
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
 
 =item Notes
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, -Append =E<gt> 0|1
+AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
+-MultiStream =E<gt> 0|1
 
 =item Examples
 
@@ -19746,19 +19674,15 @@ problems you find
 =item rawinflate $input => $output [, OPTS]
 
 A filename, A filehandle, A scalar reference, An array reference, An Input
-FileGlob string, A filename, A filehandle, A scalar reference, A Hash
-Reference, An Array Reference, An Output FileGlob
-
-=item rawinflate \%hash [, OPTS]
-
-undef, A filename, A filehandle, A scalar reference, A Hash Reference, An
-Array Reference
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
 
 =item Notes
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, -Append =E<gt> 0|1
+AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
+-MultiStream =E<gt> 0|1
 
 =item Examples
 
