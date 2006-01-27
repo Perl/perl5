@@ -234,7 +234,18 @@ transliteration mappings has been reimplemented in XS.
 
 =head2 Constant subroutines
 
-XXX
+The interpreter internals now support a far more memory efficient form of
+inlineable constants. Storing a reference to a constant value in a symbol
+table is equivalent to a full typeglob referencing a constant subroutine,
+but using about 400 bytes less memory. This proxy constant subroutine is
+automatically upgraded to a real typeglob with subroutine if necessary.
+The approach taken is analogous to the existing space optimisation for
+subroutine stub declarations, which are stored as plain scalars in place
+of the full typeglob.
+
+Several of the core modules have been converted to use this feature for
+their system dependent constants - as a result C<use POSIX;> now takes about
+200K less memory.
 
 =head2 C<PERL_DONT_CREATE_GVSV>
 
