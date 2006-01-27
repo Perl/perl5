@@ -157,9 +157,10 @@ if($@ =~ /Directory .*threads not allowed in require/) {
     print "not ok $i\n";
 }
 
-############################
-#### Add new tests here ####
-############################
+##########################################
+# What follows are UTF-8 specific tests. #
+# Add generic tests before this point.   #
+##########################################
 
 # UTF-encoded things - skipped on EBCDIC machines and on UTF-8 input
 
