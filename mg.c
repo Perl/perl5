@@ -680,15 +680,14 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\005':  /* ^E */
 	 if (nextchar == '\0') {
-#ifdef MACOS_TRADITIONAL
+#if defined(MACOS_TRADITIONAL)
 	     {
 		  char msg[256];
 
 		  sv_setnv(sv,(double)gMacPerl_OSErr);
 		  sv_setpv(sv, gMacPerl_OSErr ? GetSysErrText(gMacPerl_OSErr, msg) : "");
 	     }
-#else
-#ifdef VMS
+#elif defined(VMS)
 	     {
 #	          include <descrip.h>
 #	          include <starlet.h>
@@ -700,8 +699,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		  else
 		       sv_setpvn(sv,"",0);
 	     }
-#else
-#ifdef OS2
+#elif defined(OS2)
 	     if (!(_emx_env & 0x200)) {	/* Under DOS */
 		  sv_setnv(sv, (NV)errno);
 		  sv_setpv(sv, errno ? Strerror(errno) : "");
@@ -714,8 +712,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		  sv_setnv(sv, (NV)Perl_rc);
 		  sv_setpv(sv, os2error(Perl_rc));
 	     }
-#else
-#ifdef WIN32
+#elif defined(WIN32)
 	     {
 		  DWORD dwErr = GetLastError();
 		  sv_setnv(sv, (NV)dwErr);
@@ -733,9 +730,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		 sv_setpv(sv, errno ? Strerror(errno) : "");
 		 errno = saveerrno;
 	     }
-#endif
-#endif
-#endif
 #endif
 	     SvRTRIM(sv);
 	     SvNOK_on(sv);	/* what a wonderful hack! */
