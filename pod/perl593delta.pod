@@ -198,6 +198,12 @@ has been included for SHA support in the CPAN module.
 C<ptar> is a pure perl implementation of C<tar>, that comes with
 C<Archive::Tar>.
 
+=head2 C<ptardiff>
+
+C<ptardiff> is a small script used to generate a diff between the contents
+of a tar archive and a directory tree. Like C<ptar>, it comes with
+C<Archive::Tar>.
+
 =head2 C<shasum>
 
 This command-line utility, used to print or to check SHA digests, comes
