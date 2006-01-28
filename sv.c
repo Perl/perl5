@@ -3260,24 +3260,17 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
 	(void)SvOK_off(dstr);
 	SvRV_set(dstr, SvREFCNT_inc(SvRV(sstr)));
-	SvROK_on(dstr);
+	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK|SVf_ROK
+				   |SVf_AMAGIC);
 	if (sflags & SVp_NOK) {
-	    SvNOKp_on(dstr);
-	    /* Only set the public OK flag if the source has public OK.  */
-	    if (sflags & SVf_NOK)
-		SvFLAGS(dstr) |= SVf_NOK;
 	    SvNV_set(dstr, SvNVX(sstr));
 	}
 	if (sflags & SVp_IOK) {
-	    (void)SvIOKp_on(dstr);
-	    if (sflags & SVf_IOK)
-		SvFLAGS(dstr) |= SVf_IOK;
+	    /* Must do this otherwise some other overloaded use of 0x80000000
+	       gets confused. Probably 0x80000000 */
 	    if (sflags & SVf_IVisUV)
 		SvIsUV_on(dstr);
 	    SvIV_set(dstr, SvIVX(sstr));
-	}
-	if (SvAMAGIC(sstr)) {
-	    SvAMAGIC_on(dstr);
 	}
     }
     else if (sflags & SVp_POK) {
@@ -3401,22 +3394,18 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
                 SvTEMP_off(sstr);
             }
         }
-	if (sflags & SVf_UTF8)
-	    SvUTF8_on(dstr);
 	if (sflags & SVp_NOK) {
-	    SvNOKp_on(dstr);
-	    if (sflags & SVf_NOK)
-		SvFLAGS(dstr) |= SVf_NOK;
 	    SvNV_set(dstr, SvNVX(sstr));
 	}
 	if (sflags & SVp_IOK) {
-	    (void)SvIOKp_on(dstr);
-	    if (sflags & SVf_IOK)
-		SvFLAGS(dstr) |= SVf_IOK;
+	    SvRELEASE_IVX(dstr);
+	    SvIV_set(dstr, SvIVX(sstr));
+	    /* Must do this otherwise some other overloaded use of 0x80000000
+	       gets confused. I guess SVpbm_VALID */
 	    if (sflags & SVf_IVisUV)
 		SvIsUV_on(dstr);
-	    SvIV_set(dstr, SvIVX(sstr));
 	}
+	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK|SVf_UTF8);
 	{
 	    const MAGIC * const smg = SvVOK(sstr);
 	    if (smg) {
