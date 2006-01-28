@@ -1380,7 +1380,7 @@ S_procself_val(pTHX_ SV *sv, const char *arg0)
 STATIC void
 S_set_caret_X(pTHX) {
     dVAR;
-    GV* tmpgv = gv_fetchpv("\030",TRUE, SVt_PV); /* $^X */
+    GV* tmpgv = gv_fetchpvs("\030",TRUE, SVt_PV); /* $^X */
     if (tmpgv) {
 #ifdef HAS_PROCSELFEXE
 	S_procself_val(aTHX_ GvSV(tmpgv), PL_origargv[0]);
@@ -2131,7 +2131,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		  (fp = IoOFP(io)))
 		   PerlIO_binmode(aTHX_ fp, IoTYPE(io), 0, ":utf8");
 	      if ((PL_unicode & PERL_UNICODE_INOUT_FLAG) &&
-		  (sv = GvSV(gv_fetchpv("\017PEN", TRUE, SVt_PV)))) {
+		  (sv = GvSV(gv_fetchpvs("\017PEN", TRUE, SVt_PV)))) {
 		   U32 in  = PL_unicode & PERL_UNICODE_IN_FLAG;
 		   U32 out = PL_unicode & PERL_UNICODE_OUT_FLAG;
 		   if (in) {
@@ -3470,7 +3470,7 @@ S_init_main_stash(pTHX)
        table, so it's a small saving to use it rather than allocate another
        8 bytes.  */
     PL_curstname = newSVpvs_share("main");
-    gv = gv_fetchpv("main::",TRUE, SVt_PVHV);
+    gv = gv_fetchpvs("main::",TRUE, SVt_PVHV);
     /* If we hadn't caused another reference to "main" to be in the shared
        string table above, then it would be worth reordering these two,
        because otherwise all we do is delete "main" from it as a consequence
@@ -3479,17 +3479,17 @@ S_init_main_stash(pTHX)
     hv_name_set(PL_defstash, "main", 4, 0);
     GvHV(gv) = (HV*)SvREFCNT_inc(PL_defstash);
     SvREADONLY_on(gv);
-    PL_incgv = gv_HVadd(gv_AVadd(gv_fetchpv("INC",TRUE, SVt_PVAV)));
+    PL_incgv = gv_HVadd(gv_AVadd(gv_fetchpvs("INC",TRUE, SVt_PVAV)));
     SvREFCNT_inc(PL_incgv); /* Don't allow it to be freed */
     GvMULTI_on(PL_incgv);
-    PL_hintgv = gv_fetchpv("\010",TRUE, SVt_PV); /* ^H */
+    PL_hintgv = gv_fetchpvs("\010",TRUE, SVt_PV); /* ^H */
     GvMULTI_on(PL_hintgv);
-    PL_defgv = gv_fetchpv("_",TRUE, SVt_PVAV);
+    PL_defgv = gv_fetchpvs("_",TRUE, SVt_PVAV);
     SvREFCNT_inc(PL_defgv);
-    PL_errgv = gv_HVadd(gv_fetchpv("@", TRUE, SVt_PV));
+    PL_errgv = gv_HVadd(gv_fetchpvs("@", TRUE, SVt_PV));
     SvREFCNT_inc(PL_errgv);
     GvMULTI_on(PL_errgv);
-    PL_replgv = gv_fetchpv("\022", TRUE, SVt_PV); /* ^R */
+    PL_replgv = gv_fetchpvs("\022", TRUE, SVt_PV); /* ^R */
     GvMULTI_on(PL_replgv);
     (void)Perl_form(aTHX_ "%240s","");	/* Preallocate temp - for immediate signals. */
 #ifdef PERL_DONT_CREATE_GVSV
@@ -3499,8 +3499,9 @@ S_init_main_stash(pTHX)
     sv_setpvn(ERRSV, "", 0);
     PL_curstash = PL_defstash;
     CopSTASH_set(&PL_compiling, PL_defstash);
-    PL_debstash = GvHV(gv_fetchpv("DB::", GV_ADDMULTI, SVt_PVHV));
-    PL_globalstash = GvHV(gv_fetchpv("CORE::GLOBAL::", GV_ADDMULTI, SVt_PVHV));
+    PL_debstash = GvHV(gv_fetchpvs("DB::", GV_ADDMULTI, SVt_PVHV));
+    PL_globalstash = GvHV(gv_fetchpvs("CORE::GLOBAL::", GV_ADDMULTI,
+				      SVt_PVHV));
     /* We must init $/ before switches are processed. */
     sv_setpvn(get_sv("/", TRUE), "\n", 1);
 }
@@ -4399,18 +4400,19 @@ Perl_init_debugger(pTHX)
     HV * const ostash = PL_curstash;
 
     PL_curstash = PL_debstash;
-    PL_dbargs = GvAV(gv_AVadd((gv_fetchpv("DB::args", GV_ADDMULTI, SVt_PVAV))));
+    PL_dbargs = GvAV(gv_AVadd((gv_fetchpvs("DB::args", GV_ADDMULTI,
+					   SVt_PVAV))));
     AvREAL_off(PL_dbargs);
-    PL_DBgv = gv_fetchpv("DB::DB", GV_ADDMULTI, SVt_PVGV);
-    PL_DBline = gv_fetchpv("DB::dbline", GV_ADDMULTI, SVt_PVAV);
-    PL_DBsub = gv_HVadd(gv_fetchpv("DB::sub", GV_ADDMULTI, SVt_PVHV));
-    PL_DBsingle = GvSV((gv_fetchpv("DB::single", GV_ADDMULTI, SVt_PV)));
+    PL_DBgv = gv_fetchpvs("DB::DB", GV_ADDMULTI, SVt_PVGV);
+    PL_DBline = gv_fetchpvs("DB::dbline", GV_ADDMULTI, SVt_PVAV);
+    PL_DBsub = gv_HVadd(gv_fetchpvs("DB::sub", GV_ADDMULTI, SVt_PVHV));
+    PL_DBsingle = GvSV((gv_fetchpvs("DB::single", GV_ADDMULTI, SVt_PV)));
     sv_setiv(PL_DBsingle, 0);
-    PL_DBtrace = GvSV((gv_fetchpv("DB::trace", GV_ADDMULTI, SVt_PV)));
+    PL_DBtrace = GvSV((gv_fetchpvs("DB::trace", GV_ADDMULTI, SVt_PV)));
     sv_setiv(PL_DBtrace, 0);
-    PL_DBsignal = GvSV((gv_fetchpv("DB::signal", GV_ADDMULTI, SVt_PV)));
+    PL_DBsignal = GvSV((gv_fetchpvs("DB::signal", GV_ADDMULTI, SVt_PV)));
     sv_setiv(PL_DBsignal, 0);
-    PL_DBassertion = GvSV((gv_fetchpv("DB::assertion", GV_ADDMULTI, SVt_PV)));
+    PL_DBassertion = GvSV((gv_fetchpvs("DB::assertion", GV_ADDMULTI, SVt_PV)));
     sv_setiv(PL_DBassertion, 0);
     PL_curstash = ostash;
 }
@@ -4497,31 +4499,31 @@ S_init_predump_symbols(pTHX)
     IO *io;
 
     sv_setpvn(get_sv("\"", TRUE), " ", 1);
-    PL_stdingv = gv_fetchpv("STDIN",TRUE, SVt_PVIO);
+    PL_stdingv = gv_fetchpvs("STDIN",TRUE, SVt_PVIO);
     GvMULTI_on(PL_stdingv);
     io = GvIOp(PL_stdingv);
     IoTYPE(io) = IoTYPE_RDONLY;
     IoIFP(io) = PerlIO_stdin();
-    tmpgv = gv_fetchpv("stdin",TRUE, SVt_PV);
+    tmpgv = gv_fetchpvs("stdin",TRUE, SVt_PV);
     GvMULTI_on(tmpgv);
     GvIOp(tmpgv) = (IO*)SvREFCNT_inc(io);
 
-    tmpgv = gv_fetchpv("STDOUT",TRUE, SVt_PVIO);
+    tmpgv = gv_fetchpvs("STDOUT",TRUE, SVt_PVIO);
     GvMULTI_on(tmpgv);
     io = GvIOp(tmpgv);
     IoTYPE(io) = IoTYPE_WRONLY;
     IoOFP(io) = IoIFP(io) = PerlIO_stdout();
     setdefout(tmpgv);
-    tmpgv = gv_fetchpv("stdout",TRUE, SVt_PV);
+    tmpgv = gv_fetchpvs("stdout",TRUE, SVt_PV);
     GvMULTI_on(tmpgv);
     GvIOp(tmpgv) = (IO*)SvREFCNT_inc(io);
 
-    PL_stderrgv = gv_fetchpv("STDERR",TRUE, SVt_PVIO);
+    PL_stderrgv = gv_fetchpvs("STDERR",TRUE, SVt_PVIO);
     GvMULTI_on(PL_stderrgv);
     io = GvIOp(PL_stderrgv);
     IoTYPE(io) = IoTYPE_WRONLY;
     IoOFP(io) = IoIFP(io) = PerlIO_stderr();
-    tmpgv = gv_fetchpv("stderr",TRUE, SVt_PV);
+    tmpgv = gv_fetchpvs("stderr",TRUE, SVt_PV);
     GvMULTI_on(tmpgv);
     GvIOp(tmpgv) = (IO*)SvREFCNT_inc(io);
 
@@ -4554,7 +4556,7 @@ Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 		sv_setiv(GvSV(gv_fetchpv(argv[0]+1,TRUE, SVt_PV)),1);
 	}
     }
-    if ((PL_argvgv = gv_fetchpv("ARGV",TRUE, SVt_PVAV))) {
+    if ((PL_argvgv = gv_fetchpvs("ARGV",TRUE, SVt_PVAV))) {
 	GvMULTI_on(PL_argvgv);
 	(void)gv_AVadd(PL_argvgv);
 	av_clear(GvAVn(PL_argvgv));
@@ -4589,7 +4591,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 
     init_argv_symbols(argc,argv);
 
-    if ((tmpgv = gv_fetchpv("0",TRUE, SVt_PV))) {
+    if ((tmpgv = gv_fetchpvs("0",TRUE, SVt_PV))) {
 #ifdef MACOS_TRADITIONAL
 	/* $0 is not majick on a Mac */
 	sv_setpv(GvSV(tmpgv),MacPerl_MPWFileName(PL_origfilename));
@@ -4598,7 +4600,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	magicname("0", "0", 1);
 #endif
     }
-    if ((PL_envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV))) {
+    if ((PL_envgv = gv_fetchpvs("ENV",TRUE, SVt_PVHV))) {
 	HV *hv;
 	GvMULTI_on(PL_envgv);
 	hv = GvHVn(PL_envgv);
@@ -4647,7 +4649,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 #endif /* !PERL_MICRO */
     }
     TAINT_NOT;
-    if ((tmpgv = gv_fetchpv("$",TRUE, SVt_PV))) {
+    if ((tmpgv = gv_fetchpvs("$",TRUE, SVt_PV))) {
         SvREADONLY_off(GvSV(tmpgv));
 	sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
         SvREADONLY_on(GvSV(tmpgv));

@@ -2887,7 +2887,7 @@ Perl_yylex(pTHX)
 		     * interpreter. So, having found "#!", we'll set it right.
 		     */
 		    SV * const x
-			= GvSV(gv_fetchpv("\030", GV_ADD, SVt_PV)); /* $^X */
+			= GvSV(gv_fetchpvs("\030", GV_ADD, SVt_PV)); /* $^X */
 		    assert(SvPOK(x) || SvGMAGICAL(x));
 		    if (sv_eq(x, CopFILESV(PL_curcop))) {
 			sv_setpvn(x, ipath, ipathend - ipath);
@@ -3120,7 +3120,7 @@ Perl_yylex(pTHX)
 	    case 'T': ftst = OP_FTTEXT;		break;
 	    case 'B': ftst = OP_FTBINARY;	break;
 	    case 'M': case 'A': case 'C':
-		gv_fetchpv("\024",GV_ADD, SVt_PV);
+		gv_fetchpvs("\024",GV_ADD, SVt_PV);
 		switch (tmp) {
 		case 'M': ftst = OP_FTMTIME;	break;
 		case 'A': ftst = OP_FTATIME;	break;
@@ -4687,7 +4687,7 @@ Perl_yylex(pTHX)
 	    }
 
 	case KEY_chdir:
-	    (void)gv_fetchpv("ENV", GV_ADD, SVt_PVHV);	/* may use HOME */
+	    (void)gv_fetchpvs("ENV", GV_ADD, SVt_PVHV);	/* may use HOME */
 	    UNI(OP_CHDIR);
 
 	case KEY_close:
@@ -4757,7 +4757,7 @@ Perl_yylex(pTHX)
 	    UNI(OP_DELETE);
 
 	case KEY_dbmopen:
-	    gv_fetchpv("AnyDBM_File::ISA", GV_ADDMULTI, SVt_PVAV);
+	    gv_fetchpvs("AnyDBM_File::ISA", GV_ADDMULTI, SVt_PVAV);
 	    LOP(OP_DBMOPEN,XTERM);
 
 	case KEY_dbmclose:
@@ -5664,7 +5664,7 @@ Perl_yylex(pTHX)
 	    gv_fetchpv(ctl_l, GV_ADD, SVt_PV);
 	}
 #else
-	    gv_fetchpv("\f", GV_ADD, SVt_PV);    /* Make sure $^L is defined */
+	    gv_fetchpvs("\f", GV_ADD, SVt_PV);  /* Make sure $^L is defined */
 #endif
 	    UNI(OP_ENTERWRITE);
 
@@ -10009,7 +10009,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 	    Copy("ARGV",d,5,char);
 
 	/* Check whether readline() is overriden */
-	gv_readline = gv_fetchpv("readline", 0, SVt_PVCV);
+	gv_readline = gv_fetchpvs("readline", 0, SVt_PVCV);
 	if ((gv_readline
 		&& GvCVu(gv_readline) && GvIMPORTED_CV(gv_readline))
 		||
