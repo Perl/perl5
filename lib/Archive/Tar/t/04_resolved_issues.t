@@ -57,3 +57,43 @@ use_ok( $Class );
     ### remove the file
     unless( $NO_UNLINK ) { 1 while unlink $out }
 }    
+
+### bug #14922
+### There's a bug in Archive::Tar that causes a file like: foo/foo.txt 
+### to be stored in the tar file as: foo/.txt
+### XXX could not be reproduced in 1.26 -- leave test to be sure
+{   my $dir     = $$ . '/';
+    my $file    = $$ . '.txt';
+    my $out     = $$ . '.tar';
+    
+    ### first create the file
+    {   my $tar = $Class->new;
+        
+        isa_ok( $tar,           $Class );
+        ok( $tar->add_data( $dir.$file => $$ ),
+                                "   Added long file" );
+        
+        ok( $tar->write($out),  "   File written to $out" );
+    }
+
+    ### then read it back in
+    {   my $tar = $Class->new;
+        isa_ok( $tar,           $Class );
+        ok( $tar->read( $out ), "   Read in $out again" );
+        
+        my @files = $tar->get_files;
+        is( scalar(@files), 1,  "   Only 1 entry found" );
+        
+        my $entry = shift @files;
+        ok( $entry->is_file,    "   Entry is a file" );
+        is( $entry->full_path, $dir.$file,
+                                "   With the proper name" );
+    }                                
+    
+    ### remove the file
+    unless( $NO_UNLINK ) { 1 while unlink $out }
+}    
+    
+    
+    
+    

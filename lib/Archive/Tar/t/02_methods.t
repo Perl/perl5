@@ -220,7 +220,16 @@ chmod 0644, $COMPRESS_FILE;
         is( scalar @files, scalar @add,
                                     "Adding files");
         is( $files[0]->name, 'b',   "   Proper name" );
-	is( $files[0]->is_file, 1,  "   Proper type" );
+
+
+        use Config;
+        if ($ENV{PERL_CORE} and $Config{config_args} =~/Dmksymlinks/) {
+            ok( !$files[0]->is_file,"   Proper type" );
+        } else {
+            is( $files[0]->is_file, 1,  
+                                    "   Proper type" );
+        }
+
         like( $files[0]->get_content, qr/^bbbbbbbbbbb\s*$/,
                                     "   Content OK" );
 

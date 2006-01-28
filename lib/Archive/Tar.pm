@@ -14,7 +14,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG              = 0;
 $WARN               = 1;
 $FOLLOW_SYMLINK     = 0;
-$VERSION            = "1.26_01";
+$VERSION            = "1.28";
 $CHOWN              = 1;
 $CHMOD              = 1;
 $DO_NOT_USE_PREFIX  = 0;
@@ -133,6 +133,12 @@ The second argument may be considered optional if IO::Zlib is
 installed, since it will transparently Do The Right Thing.
 Archive::Tar will warn if you try to pass a compressed file if
 IO::Zlib is not available and simply return.
+
+Note that you can currently B<not> pass a C<gzip> compressed
+filehandle, which is not opened with C<IO::Zlib>, nor a string
+containing the full archive information (either compressed or
+uncompressed). These are worth while features, but not currently
+implemented. See the C<TODO> section.
 
 The third argument can be a hash reference with options. Note that
 all options are case-sensitive.
@@ -1100,8 +1106,44 @@ Will add a file to the in-memory archive, with name C<$filename> and
 content C<$data>. Specific properties can be set using C<$opthashref>.
 The following list of properties is supported: name, size, mtime
 (last modified date), mode, uid, gid, linkname, uname, gname,
-devmajor, devminor, prefix.  (On MacOS, the file's path and
+devmajor, devminor, prefix, type.  (On MacOS, the file's path and
 modification times are converted to Unix equivalents.)
+
+Valid values for the file type are the following constants defined in
+Archive::Tar::Constants:
+
+=over 4
+
+=item FILE
+
+Regular file.
+
+=item HARDLINK
+
+=item SYMLINK
+
+Hard and symbolic ("soft") links; linkname should specify target.
+
+=item CHARDEV
+
+=item BLOCKDEV
+
+Character and block devices. devmajor and devminor should specify the major
+and minor device numbers.
+
+=item DIR
+
+Directory.
+
+=item FIFO
+
+FIFO (named pipe).
+
+=item SOCKET
+
+Socket.
+
+=back
 
 Returns the C<Archive::Tar::File> object that was just added, or
 C<undef> on failure.
@@ -1250,8 +1292,10 @@ reference to an open file handle (e.g. a GLOB reference).
 If C<list_archive()> is passed an array reference as its third
 argument it returns a list of hash references containing the requested
 properties of each file.  The following list of properties is
-supported: name, size, mtime (last modified date), mode, uid, gid,
-linkname, uname, gname, devmajor, devminor, prefix.
+supported: full_path, name, size, mtime (last modified date), mode, 
+uid, gid, linkname, uname, gname, devmajor, devminor, prefix.
+
+See C<Archive::Tar::File> for details about supported properties.
 
 Passing an array reference containing only one element, 'name', is
 special cased to return a list of names rather than a list of hash
@@ -1508,6 +1552,18 @@ write a C<.tar.Z> file
 
 Currently I don't know of any portable pure perl way to do this.
 Suggestions welcome.
+
+=item Allow archives to be passed in as string
+
+Currently, we only allow opened filehandles or filenames, but
+not strings. The internals would need some reworking to facilitate
+stringified archives.
+
+=item Facilitate processing an opened filehandle of a compressed archive
+
+Currently, we only support this if the filehandle is an IO::Zlib object.
+Environments, like apache, will present you with an opened filehandle
+to an uploaded file, which might be a compressed archive.
 
 =back
 
