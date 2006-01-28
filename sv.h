@@ -751,7 +751,8 @@ in gv.h: */
 						  SVf_IVisUV),		\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 
-#define SvVOK(sv)		(SvMAGICAL(sv) && mg_find(sv,'V'))
+#define SvVOK(sv)		(SvMAGICAL(sv)				\
+				 ? mg_find(sv,PERL_MAGIC_vstring) : NULL)
 #define SvOOK(sv)		(SvFLAGS(sv) & SVf_OOK)
 #define SvOOK_on(sv)		((void)SvIOK_off(sv), SvFLAGS(sv) |= SVf_OOK)
 #define SvOOK_off(sv)		((void)(SvOOK(sv) && sv_backoff(sv)))

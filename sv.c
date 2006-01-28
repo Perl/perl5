@@ -3417,11 +3417,13 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		SvIsUV_on(dstr);
 	    SvIV_set(dstr, SvIVX(sstr));
 	}
-	if (SvVOK(sstr)) {
-	    const MAGIC * const smg = mg_find(sstr,PERL_MAGIC_vstring);
-	    sv_magic(dstr, NULL, PERL_MAGIC_vstring,
-			smg->mg_ptr, smg->mg_len);
-	    SvRMAGICAL_on(dstr);
+	{
+	    const MAGIC * const smg = SvVOK(sstr);
+	    if (smg) {
+		sv_magic(dstr, NULL, PERL_MAGIC_vstring,
+			 smg->mg_ptr, smg->mg_len);
+		SvRMAGICAL_on(dstr);
+	    }
 	}
     }
     else if (sflags & SVp_IOK) {

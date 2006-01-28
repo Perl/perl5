@@ -4170,17 +4170,19 @@ Perl_new_version(pTHX_ SV *ver)
 	return rv;
     }
 #ifdef SvVOK
-    if ( SvVOK(ver) ) { /* already a v-string */
-	const MAGIC* const mg = mg_find(ver,PERL_MAGIC_vstring);
-	const STRLEN len = mg->mg_len;
-	char * const version = savepvn( (const char*)mg->mg_ptr, len);
-	sv_setpvn(rv,version,len);
-	Safefree(version);
-    }
-    else {
+    {
+	const MAGIC* const mg = SvVOK(ver);
+	if ( mg ) { /* already a v-string */
+	    const STRLEN len = mg->mg_len;
+	    char * const version = savepvn( (const char*)mg->mg_ptr, len);
+	    sv_setpvn(rv,version,len);
+	    Safefree(version);
+	}
+	else {
 #endif
-    sv_setsv(rv,ver); /* make a duplicate */
+	sv_setsv(rv,ver); /* make a duplicate */
 #ifdef SvVOK
+	}
     }
 #endif
     return upg_version(rv);
@@ -4203,6 +4205,9 @@ Perl_upg_version(pTHX_ SV *ver)
 {
     const char *version, *s;
     bool qv = 0;
+#ifdef SvVOK
+    const MAGIC *mg;
+#endif
 
     if ( SvNOK(ver) ) /* may get too much accuracy */ 
     {
@@ -4211,8 +4216,7 @@ Perl_upg_version(pTHX_ SV *ver)
 	version = savepvn(tbuf, len);
     }
 #ifdef SvVOK
-    else if ( SvVOK(ver) ) { /* already a v-string */
-	const MAGIC* const mg = mg_find(ver,PERL_MAGIC_vstring);
+    else if ( (mg = SvVOK(ver)) ) { /* already a v-string */
 	version = savepvn( (const char*)mg->mg_ptr,mg->mg_len );
 	qv = 1;
     }
