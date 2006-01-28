@@ -1022,7 +1022,8 @@ S_force_ident(pTHX_ register const char *s, int kind)
 {
     dVAR;
     if (s && *s) {
-	OP* const o = (OP*)newSVOP(OP_CONST, 0, newSVpv(s,0));
+	const STRLEN len = strlen(s);
+	OP* const o = (OP*)newSVOP(OP_CONST, 0, newSVpvn(s, len));
 	PL_nextval[PL_nexttoke].opval = o;
 	force_next(WORD);
 	if (kind) {
@@ -1030,12 +1031,14 @@ S_force_ident(pTHX_ register const char *s, int kind)
 	    /* XXX see note in pp_entereval() for why we forgo typo
 	       warnings if the symbol must be introduced in an eval.
 	       GSAR 96-10-12 */
-	    gv_fetchpv(s, PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL) : GV_ADD,
-		kind == '$' ? SVt_PV :
-		kind == '@' ? SVt_PVAV :
-		kind == '%' ? SVt_PVHV :
+	    gv_fetchpvn_flags(s, len,
+			      PL_in_eval ? (GV_ADDMULTI | GV_ADDINEVAL)
+			      : GV_ADD,
+			      kind == '$' ? SVt_PV :
+			      kind == '@' ? SVt_PVAV :
+			      kind == '%' ? SVt_PVHV :
 			      SVt_PVGV
-		);
+			      );
 	}
     }
 }
@@ -2031,9 +2034,10 @@ S_intuit_more(pTHX_ register char *s)
 	    case '$':
 		weight -= seen[un_char] * 10;
 		if (isALNUM_lazy_if(s+1,UTF)) {
+		    int len;
 		    scan_ident(s, send, tmpbuf, sizeof tmpbuf, FALSE);
-		    if ((int)strlen(tmpbuf) > 1
-			&& gv_fetchpv(tmpbuf, 0, SVt_PV))
+		    len = (int)strlen(tmpbuf);
+		    if (len > 1 && gv_fetchpvn_flags(tmpbuf, len, 0, SVt_PV))
 			weight -= 100;
 		    else
 			weight -= 10;
@@ -2166,7 +2170,7 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 	    tmpbuf[len] = '\0';
 	    goto bare_package;
 	}
-	indirgv = gv_fetchpv(tmpbuf, 0, SVt_PVCV);
+	indirgv = gv_fetchpvn_flags(tmpbuf, len, 0, SVt_PVCV);
 	if (indirgv && GvCVu(indirgv))
 	    return 0;
 	/* filehandle or package name makes it a method */
@@ -2366,13 +2370,13 @@ S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
 
     if (len > 2 &&
         (pkgname[len - 2] == ':' && pkgname[len - 1] == ':') &&
-        (gv = gv_fetchpv(pkgname, 0, SVt_PVHV)))
+        (gv = gv_fetchpvn_flags(pkgname, len, 0, SVt_PVHV)))
     {
         return GvHV(gv);			/* Foo:: */
     }
 
     /* use constant CLASS => 'MyClass' */
-    if ((gv = gv_fetchpv(pkgname, 0, SVt_PVCV))) {
+    if ((gv = gv_fetchpvn_flags(pkgname, len, 0, SVt_PVCV))) {
         SV *sv;
         if (GvCV(gv) && (sv = cv_const_sv(GvCV(gv)))) {
             pkgname = SvPV_nolen_const(sv);
@@ -4185,7 +4189,7 @@ Perl_yylex(pTHX)
 	    GV *hgv = NULL;	/* hidden (loser) */
 	    if (PL_expect != XOPERATOR && (*s != ':' || s[1] != ':')) {
 		CV *cv;
-		if ((gv = gv_fetchpv(PL_tokenbuf, 0, SVt_PVCV)) &&
+		if ((gv = gv_fetchpvn_flags(PL_tokenbuf, len, 0, SVt_PVCV)) &&
 		    (cv = GvCVu(gv)))
 		{
 		    if (GvIMPORTED_CV(gv))
@@ -4279,7 +4283,7 @@ Perl_yylex(pTHX)
 		    PL_tokenbuf[len - 2] == ':' && PL_tokenbuf[len - 1] == ':')
 		{
 		    if (ckWARN(WARN_BAREWORD)
-			&& ! gv_fetchpv(PL_tokenbuf, 0, SVt_PVHV))
+			&& ! gv_fetchpvn_flags(PL_tokenbuf, len, 0, SVt_PVHV))
 			Perl_warner(aTHX_ packWARN(WARN_BAREWORD),
 		  	    "Bareword \"%s\" refers to nonexistent package",
 			     PL_tokenbuf);
@@ -4295,8 +4299,8 @@ Perl_yylex(pTHX)
 			   But also don't want to "initialise" any placeholder
 			   constants that might already be there into full
 			   blown PVGVs with attached PVCV.  */
-			gv = gv_fetchpv(PL_tokenbuf, GV_NOADD_NOINIT,
-					SVt_PVCV);
+			gv = gv_fetchpvn_flags(PL_tokenbuf, len,
+					       GV_NOADD_NOINIT, SVt_PVCV);
 		    }
 		}
 
@@ -4443,7 +4447,7 @@ Perl_yylex(pTHX)
 
 		    /* Resolve to GV now. */
 		    if (SvTYPE(gv) != SVt_PVGV) {
-			gv = gv_fetchpv(PL_tokenbuf, 0, SVt_PVCV);
+			gv = gv_fetchpvn_flags(PL_tokenbuf, len, 0, SVt_PVCV);
 			assert (SvTYPE(gv) == SVt_PVGV);
 			/* cv must have been some sort of placeholder, so
 			   now needs replacing with a real code reference.  */
@@ -5661,7 +5665,7 @@ Perl_yylex(pTHX)
 	    char ctl_l[2];
 	    ctl_l[0] = toCTRL('L');
 	    ctl_l[1] = '\0';
-	    gv_fetchpv(ctl_l, GV_ADD, SVt_PV);
+	    gv_fetchpvn_flags(ctl_l, 1, GV_ADD, SVt_PV);
 	}
 #else
 	    gv_fetchpvs("\f", GV_ADD, SVt_PV);  /* Make sure $^L is defined */
