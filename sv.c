@@ -3427,31 +3427,18 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
     }
     else if (sflags & SVp_IOK) {
-	if (sflags & SVf_IOK)
-	    (void)SvIOK_only(dstr);
-	else {
-	    (void)SvOK_off(dstr);
-	    (void)SvIOKp_on(dstr);
-	}
+	(void)SvOK_off(dstr);
 	/* XXXX Do we want to set IsUV for IV(ROK)?  Be extra safe... */
-	if (sflags & SVf_IVisUV)
-	    SvIsUV_on(dstr);
+	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_IVisUV);
 	SvIV_set(dstr, SvIVX(sstr));
 	if (sflags & SVp_NOK) {
-	    if (sflags & SVf_NOK)
-		(void)SvNOK_on(dstr);
-	    else
-		(void)SvNOKp_on(dstr);
+	    SvFLAGS(dstr) |= sflags & (SVf_NOK|SVp_NOK);
 	    SvNV_set(dstr, SvNVX(sstr));
 	}
     }
     else if (sflags & SVp_NOK) {
-	if (sflags & SVf_NOK)
-	    (void)SvNOK_only(dstr);
-	else {
-	    (void)SvOK_off(dstr);
-	    SvNOKp_on(dstr);
-	}
+	(void)SvOK_off(dstr);
+	SvFLAGS(dstr) |= sflags & (SVf_NOK|SVp_NOK);
 	SvNV_set(dstr, SvNVX(sstr));
     }
     else {
