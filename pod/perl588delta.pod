@@ -1659,6 +1659,19 @@ The optimiser on HP-UX 11.23 (Itanium 2) is currently partly disabled (scaled
 down to +O1) when using HP C-ANSI-C; the cause of problems at higher
 optimisation levels is still unclear.
 
+There are a handful of remaining test failures on VMS, mostly due to
+test fixes and minor module tweaks with too many dependencies to
+integrate into this release from the development stream, where they have
+all been corrected.  The following is a list of expected failures with
+the patch number of the fix where that is known:
+
+    ext/Devel/PPPort/t/ppphtest.t  #26913
+    ext/List/Util/t/p_tainted.t    #26912
+    lib/ExtUtils/t/PL_FILES.t      #26813
+    lib/ExtUtils/t/basic.t         #26813
+    t/io/fs.t
+    t/op/cmp.t
+
 =head1 Reporting Bugs
 
 If you find what you think is a bug, you might check the articles
