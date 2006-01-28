@@ -3058,7 +3058,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		GvMULTI_on(dstr);
 		return;
 	    }
-	    goto glob_assign;
+	    return S_glob_assign(aTHX_ dstr, sstr, dtype);
 	}
 	break;
     case SVt_PVFM:
@@ -3097,7 +3097,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 
     case SVt_PVGV:
 	if (dtype <= SVt_PVGV) {
-  glob_assign:
 	    return S_glob_assign(aTHX_ dstr, sstr, dtype);
 	}
 	/* FALL THROUGH */
@@ -3108,7 +3107,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    if ((int)SvTYPE(sstr) != stype) {
 		stype = SvTYPE(sstr);
 		if (stype == SVt_PVGV && dtype <= SVt_PVGV)
-		    goto glob_assign;
+		    return S_glob_assign(aTHX_ dstr, sstr, dtype);
 	    }
 	}
 	if (stype == SVt_PVLV)
