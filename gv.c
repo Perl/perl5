@@ -253,6 +253,7 @@ S_gv_init_sv(pTHX_ GV *gv, I32 sv_type)
     case SVt_NULL:
     case SVt_PVCV:
     case SVt_PVFM:
+    case SVt_PVGV:
 	break;
     default:
 	(void)GvSVn(gv);
