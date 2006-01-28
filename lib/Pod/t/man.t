@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
-# $Id: man.t,v 1.5 2004/02/15 06:42:49 eagle Exp $
+# $Id: man.t,v 1.8 2006-01-25 23:58:22 eagle Exp $
 #
 # man.t -- Additional specialized tests for Pod::Man.
 #
-# Copyright 2002, 2003, 2004 by Russ Allbery <rra@stanford.edu>
+# Copyright 2002, 2003, 2004, 2006 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -29,70 +29,23 @@ use Pod::Man;
 $loaded = 1;
 print "ok 1\n";
 
-SKIP: {
-    if (defined $ENV{PERL_UNICODE}) {
-        print "not ok 2 # TODO Unicode not yet supported\n"
-    } else {
-        my $pod = <<EOP;
-=head1 ACCENTS
-
-Beyoncé!  Beyoncé!  Beyoncé!!
-
-    Beyoncé!  Beyoncé!
-      Beyoncé!  Beyoncé!
-        Beyoncé!  Beyoncé!
-
-Older versions didn't convert Beyoncé in verbatim.
-EOP
-
-       my $expected = <<"EOM";
-.SH "ACCENTS"
-.IX Header "ACCENTS"
-Beyonce\\*'!  Beyonce\\*'!  Beyonce\\*'!!
-.PP
-.Vb 3
-\\&    Beyonce\\*'!  Beyonce\\*'!
-\\&      Beyonce\\*'!  Beyonce\\*'!
-\\&        Beyonce\\*'!  Beyonce\\*'!
-.Ve
-.PP
-Older versions didn't convert Beyonce\\*' in verbatim.
-EOM
-        $parser = Pod::Man->new or die "Cannot create parser\n";
-        open my $out_fh, ">", 'out.tmp' or die "Can't open \$out_fh:  $!";
-        $parser->output_fh($out_fh);
-        $parser->parse_string_document($pod);
-        close $out_fh;
-        open my $in_fh, "<", 'out.tmp' or die "Can't open \$in_fh:  $!";
-        while (<$in_fh>) { last if /^\.TH/; }
-        my $man;
-        {
-            local $/ = undef;
-            $man = <$in_fh>;
-        }
-        close $in_fh;
-        unlink 'out.tmp';
-        if ($man eq $expected) {
-            print "ok 2\n";
-        } else {
-            print "not ok 2\n";
-            print "Expected\n========\n$expected\nOutput\n======\n$man\n";
-        }
-    }
-}
-
-my $n = 3;
+my $parser = Pod::Man->new or die "Cannot create parser\n";
+my $n = 2;
 while (<DATA>) {
     next until $_ eq "###\n";
     open (TMP, '> tmp.pod') or die "Cannot create tmp.pod: $!\n";
+
+    # We have a test in ISO 8859-1 encoding.  Make sure that nothing strange
+    # happens if Perl thinks the world is Unicode.  Wrap this in eval so that
+    # older versions of Perl don't croak.
+    eval { binmode (\*TMP, ':encoding(iso-8859-1)') };
+
     while (<DATA>) {
         last if $_ eq "###\n";
         print TMP $_;
     }
     close TMP;
-    my $parser = Pod::Man->new or die "Cannot create parser\n";
     $parser->parse_from_file ('tmp.pod', 'out.tmp');
-    undef $parser;
     open (OUT, 'out.tmp') or die "Cannot open out.tmp: $!\n";
     while (<OUT>) { last if /^\.TH/ }
     my $output;
@@ -189,6 +142,32 @@ Also not a bullet.
 Not a bullet.
 .IP "*" 4
 Also not a bullet.
+###
+
+###
+=encoding iso-8859-1
+
+=head1 ACCENTS
+
+Beyoncé!  Beyoncé!  Beyoncé!!
+
+    Beyoncé!  Beyoncé!
+      Beyoncé!  Beyoncé!
+        Beyoncé!  Beyoncé!
+
+Older versions didn't convert Beyoncé in verbatim.
+###
+.SH "ACCENTS"
+.IX Header "ACCENTS"
+Beyonce\*'!  Beyonce\*'!  Beyonce\*'!!
+.PP
+.Vb 3
+\&    Beyonce\*'!  Beyonce\*'!
+\&      Beyonce\*'!  Beyonce\*'!
+\&        Beyonce\*'!  Beyonce\*'!
+.Ve
+.PP
+Older versions didn't convert Beyonce\*' in verbatim.
 ###
 
 ###

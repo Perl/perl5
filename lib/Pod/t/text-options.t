@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: text-options.t,v 1.4 2004/12/31 21:29:34 eagle Exp $
+# $Id: text-options.t,v 1.5 2006-01-20 21:20:58 eagle Exp $
 #
 # text-options.t -- Additional tests for Pod::Text options.
 #
@@ -46,7 +46,6 @@ while (<DATA>) {
     close TMP;
     my $parser = Pod::Text->new (%options) or die "Cannot create parser\n";
     $parser->parse_from_file ('tmp.pod', 'out.tmp');
-    undef $parser;
     open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
     my $output;
     {

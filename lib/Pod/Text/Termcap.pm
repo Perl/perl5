@@ -1,7 +1,7 @@
 # Pod::Text::Termcap -- Convert POD data to ASCII text with format escapes.
-# $Id: Termcap.pm,v 2.1 2004/12/31 21:50:00 eagle Exp $
+# $Id: Termcap.pm,v 2.3 2006-01-25 23:56:54 eagle Exp $
 #
-# Copyright 1999, 2001, 2002, 2004 by Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2001, 2002, 2004, 2006 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -30,7 +30,7 @@ use vars qw(@ISA $VERSION);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 2.01;
+$VERSION = 2.03;
 
 ##############################################################################
 # Overrides
@@ -107,10 +107,14 @@ sub wrap {
 
     # $codes matches a single special sequence.  $char matches any number of
     # special sequences preceeding a single character other than a newline.
+    # We have to do $shortchar and $longchar in variables because the
+    # construct ${char}{0,$width} didn't do the right thing until Perl 5.8.x.
     my $codes = "(?:\Q$$self{BOLD}\E|\Q$$self{UNDL}\E|\Q$$self{NORM}\E)";
     my $char = "(?:$codes*[^\\n])";
+    my $shortchar = $char . "{0,$width}";
+    my $longchar = $char . "{$width}";
     while (length > $width) {
-        if (s/^(${char}{0,$width})\s+// || s/^(${char}{$width})//) {
+        if (s/^($shortchar)\s+// || s/^($longchar)//) {
             $output .= $spaces . $1 . "\n";
         } else {
             last;
@@ -172,7 +176,7 @@ Russ Allbery <rra@stanford.edu>.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2001, 2002, 2004 by Russ Allbery <rra@stanford.edu>.
+Copyright 1999, 2001, 2002, 2004, 2006 by Russ Allbery <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.

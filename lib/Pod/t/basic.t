@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: basic.t,v 1.8 2004/12/31 21:27:58 eagle Exp $
+# $Id: basic.t,v 1.9 2006-01-20 21:20:58 eagle Exp $
 #
 # basic.t -- Basic tests for podlators.
 #
@@ -83,7 +83,6 @@ for (sort keys %translators) {
     # line.  That means that we don't check those things; oh well.  The header
     # changes with each version change or touch of the input file.
     $parser->parse_from_file (source_path ('basic.pod'), 'out.tmp');
-    undef $parser;
     if ($_ eq 'Pod::Man') {
         open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
         open (OUTPUT, "> out.$translators{$_}")

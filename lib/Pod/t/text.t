@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: text.t,v 1.3 2004/12/31 21:29:48 eagle Exp $
+# $Id: text.t,v 1.4 2006-01-20 21:20:58 eagle Exp $
 #
 # text.t -- Additional specialized tests for Pod::Text.
 #
@@ -29,6 +29,7 @@ use Pod::Text;
 $loaded = 1;
 print "ok 1\n";
 
+my $parser = Pod::Text->new or die "Cannot create parser\n";
 my $n = 2;
 while (<DATA>) {
     next until $_ eq "###\n";
@@ -38,9 +39,7 @@ while (<DATA>) {
         print TMP $_;
     }
     close TMP;
-    my $parser = Pod::Text->new or die "Cannot create parser\n";
     $parser->parse_from_file ('tmp.pod', 'out.tmp');
-    undef $parser;
     open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
     my $output;
     {

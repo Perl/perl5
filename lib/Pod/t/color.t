@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: color.t,v 1.1 2004/12/31 21:50:05 eagle Exp $
+# $Id: color.t,v 1.2 2006-01-20 21:20:58 eagle Exp $
 #
 # color.t -- Additional specialized tests for Pod::Text::Color.
 #
@@ -37,6 +37,7 @@ require Pod::Text::Color;
 $loaded = 1;
 print "ok 1\n";
 
+my $parser = Pod::Text::Color->new or die "Cannot create parser\n";
 my $n = 2;
 while (<DATA>) {
     next until $_ eq "###\n";
@@ -46,9 +47,7 @@ while (<DATA>) {
         print TMP $_;
     }
     close TMP;
-    my $parser = Pod::Text::Color->new or die "Cannot create parser\n";
     $parser->parse_from_file ('tmp.pod', 'out.tmp');
-    undef $parser;
     open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
     my $output;
     {

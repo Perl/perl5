@@ -36,9 +36,9 @@ $Config{startperl}
 print OUT <<'!NO!SUBS!';
 
 # pod2man -- Convert POD data to formatted *roff input.
-# $Id: pod2man.PL,v 1.14 2004/12/31 20:39:30 eagle Exp $
+# $Id: pod2man.PL,v 1.16 2006-01-21 01:53:55 eagle Exp $
 #
-# Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2000, 2001, 2004, 2006 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -84,9 +84,9 @@ delete $options{lax};
 
 # Initialize and run the formatter, pulling a pair of input and output off at
 # a time.
+my $parser = Pod::Man->new (%options);
 my @files;
 do {
-    my $parser = Pod::Man->new (%options);
     @files = splice (@ARGV, 0, 2);
     print "  $files[1]\n" if $verbose;
     $parser->parse_from_file (@files);
@@ -537,7 +537,7 @@ page, are taken from the B<pod2man> documentation by Tom.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2000, 2001 by Russ Allbery <rra@stanford.edu>.
+Copyright 1999, 2000, 2001, 2004, 2006 by Russ Allbery <rra@stanford.edu>.
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.

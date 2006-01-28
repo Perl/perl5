@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: termcap.t,v 1.2 2005/11/28 23:38:02 eagle Exp $
+# $Id: termcap.t,v 1.3 2006-01-20 21:20:58 eagle Exp $
 #
 # termcap.t -- Additional specialized tests for Pod::Text::Termcap.
 #
@@ -34,6 +34,7 @@ use Pod::Text::Termcap;
 $loaded = 1;
 print "ok 1\n";
 
+my $parser = Pod::Text::Termcap->new or die "Cannot create parser\n";
 my $n = 2;
 while (<DATA>) {
     next until $_ eq "###\n";
@@ -43,9 +44,7 @@ while (<DATA>) {
         print TMP $_;
     }
     close TMP;
-    my $parser = Pod::Text::Termcap->new or die "Cannot create parser\n";
     $parser->parse_from_file ('tmp.pod', 'out.tmp');
-    undef $parser;
     open (TMP, 'out.tmp') or die "Cannot open out.tmp: $!\n";
     my $output;
     {
