@@ -29,6 +29,34 @@ Version v5.9.X		Development release working toward v5.10
 --------------
 
 ____________________________________________________________________________
+[ 26974] By: rgs                                   on 2006/01/28  10:57:04
+        Log: Add perl 5.9.3 in release list
+     Branch: perl
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[ 26970] By: gisle                                 on 2006/01/27  19:48:28
+        Log: Subject: Re: Make Passive mode the default for Net::FTP
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 27 Jan 2006 07:21:16 -0800
+             Message-ID: <lrslr91ytv.fsf@caliper.activestate.com>
+     Branch: perl
+	   ! lib/Net/Config.pm lib/Net/FTP.pm
+____________________________________________________________________________
+[ 26969] By: rgs                                   on 2006/01/27  18:27:22
+        Log: Oops. Forgot to add this file.
+     Branch: perl
+	   + utils/ptardiff.PL
+____________________________________________________________________________
+[ 26968] By: rgs                                   on 2006/01/27  18:07:54
+        Log: Regenerate META.yml
+     Branch: perl
+	   ! META.yml
+____________________________________________________________________________
+[ 26967] By: rgs                                   on 2006/01/27  18:04:17
+        Log: Regenerate Changes; remove ^M chars in Changes
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [ 26966] By: rgs                                   on 2006/01/27  17:47:32
         Log: Remove patch number
      Branch: perl
