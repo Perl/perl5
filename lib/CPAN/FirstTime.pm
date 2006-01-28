@@ -2,7 +2,7 @@
 package CPAN::Mirrored::By;
 use strict;
 use vars qw($VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 450 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 469 $,4)/100;
 
 sub new { 
     my($self,@arg) = @_;
@@ -21,7 +21,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec;
 use vars qw($VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 450 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 469 $,4)/100;
 
 =head1 NAME
 
@@ -395,9 +395,10 @@ Shall we use it as the general CPAN build and cache directory?
 
     conf_sites() unless $fastread;
 
-    # We don't ask that now, it will be noticed in time, won't it?
-    $CPAN::Config->{'inhibit_startup_message'} = 0;
-    $CPAN::Config->{'getcwd'} = 'cwd';
+    # We don't ask these now, the defaults are very likely OK.
+    $CPAN::Config->{inhibit_startup_message} = 0;
+    $CPAN::Config->{getcwd}                  = 'cwd';
+    $CPAN::Config->{ftp_passive}             = 1;
 
     $CPAN::Frontend->myprint("\n\n");
     CPAN::HandleConfig->commit($configpm);

@@ -1,5 +1,5 @@
 package CPAN;
-$VERSION = '1.83_58';
+$VERSION = '1.83_59';
 $VERSION = eval $VERSION;
 use strict;
 
@@ -33,7 +33,8 @@ END { $CPAN::End++; &cleanup; }
 
 $CPAN::Signal ||= 0;
 $CPAN::Frontend ||= "CPAN::Shell";
-$CPAN::Defaultsite ||= "ftp://ftp.perl.org/pub/CPAN";
+@CPAN::Defaultsites = ("http://www.perl.org/CPAN/","ftp://ftp.perl.org/pub/CPAN/")
+    unless @CPAN::Defaultsites;
 # $CPAN::iCwd (i for initial) is going to be initialized during find_perl
 $CPAN::Perl ||= CPAN::find_perl();
 $CPAN::Defaultdocs ||= "http://search.cpan.org/perldoc?";
@@ -45,7 +46,7 @@ use strict;
 
 use vars qw($VERSION @EXPORT $AUTOLOAD $DEBUG $META $HAS_USABLE $term
             $Signal $Suppress_readline $Frontend
-            $Defaultsite $Have_warned $Defaultdocs $Defaultrecent
+            @Defaultsites $Have_warned $Defaultdocs $Defaultrecent
             $Be_Silent );
 
 @CPAN::ISA = qw(CPAN::Debug Exporter);
@@ -738,6 +739,12 @@ sub cwd {Cwd::cwd();}
 #-> sub CPAN::getcwd ;
 sub getcwd {Cwd::getcwd();}
 
+#-> sub CPAN::fastcwd ;
+sub fastcwd {Cwd::fastcwd();}
+
+#-> sub CPAN::backtickcwd ;
+sub backtickcwd {my $cwd = `cwd`; chomp $cwd; $cwd}
+
 #-> sub CPAN::find_perl ;
 sub find_perl {
     my($perl) = File::Spec->file_name_is_absolute($^X) ? $^X : "";
@@ -1201,8 +1208,9 @@ sub a {
   $CPAN::Frontend->myprint($self->format_result('Author',@arg));
 }
 
-sub handle_ls {
-    my($self,$pragmas,$s) = @_;
+#-> sub CPAN::Shell::globls ;
+sub globls {
+    my($self,$s,$pragmas) = @_;
     # ls is really very different, but we had it once as an ordinary
     # command in the Shell (upto rev. 321) and we could not handle
     # force well then
@@ -1237,6 +1245,7 @@ sub handle_ls {
     }
     my $silent = @accept>1;
     my $last_alpha = "";
+    my @results;
     for my $a (@accept){
         my($author,$pathglob);
         if ($a =~ m|(.*?)/(.*)|) {
@@ -1266,7 +1275,9 @@ sub handle_ls {
                 $author->$pragma();
             }
         }
-        $author->ls($pathglob,$silent); # silent if more than one author
+        push @results, $author->ls($pathglob,$silent); # silent if
+                                                       # more than one
+                                                       # author
         for my $pragma (@$pragmas) {
             my $meth = "un$pragma";
             if ($author->can($meth)) {
@@ -1274,6 +1285,7 @@ sub handle_ls {
             }
         }
     }
+    @results;
 }
 
 #-> sub CPAN::Shell::local_bundles ;
@@ -2121,7 +2133,7 @@ sub rematein {
             sleep 2;
             next;
 	} elsif ($meth eq "ls") {
-            $self->handle_ls(\@pragma,$s);
+            $self->globls($s,\@pragma);
             next STHING;
         } else {
             CPAN->debug("calling expandany [$s]") if $CPAN::DEBUG;
@@ -2481,7 +2493,8 @@ sub localize {
     my(@reordered,$last);
     $CPAN::Config->{urllist} ||= [];
     unless (ref $CPAN::Config->{urllist} eq 'ARRAY') {
-        warn "Malformed urllist; ignoring.  Configuration file corrupt?\n";
+        $CPAN::Frontend->mywarn("Malformed urllist; ignoring.  Configuration file corrupt?\n");
+        $CPAN::Config->{urllist} = [];
     }
     $last = $#{$CPAN::Config->{urllist}};
     if ($force & 2) { # local cpans probably out of date, don't reorder
@@ -2495,9 +2508,9 @@ sub localize {
 		    or
 		defined($Thesite)
 		    and
-		($b == $Thesite)
+                ($CPAN::Config->{urllist}[$b] eq $Thesite)
 		    <=>
-		($a == $Thesite)
+                ($CPAN::Config->{urllist}[$a] eq $Thesite)
 	    } 0..$last;
     }
     my(@levels);
@@ -2508,13 +2521,21 @@ sub localize {
     }
     @levels = qw/easy/ if $^O eq 'MacOS';
     my($levelno);
+    local $ENV{FTP_PASSIVE} = $CPAN::Config->{ftp_passive} if exists $CPAN::Config->{ftp_passive};
     for $levelno (0..$#levels) {
         my $level = $levels[$levelno];
 	my $method = "host$level";
 	my @host_seq = $level eq "easy" ?
 	    @reordered : 0..$last;  # reordered has CDROM up front
-	@host_seq = (0) unless @host_seq;
-	my $ret = $self->$method(\@host_seq,$file,$aslocal);
+        my @urllist = map { $CPAN::Config->{urllist}[$_] } @host_seq;
+        for my $u (@urllist) {
+            $u .= "/" unless substr($u,-1) eq "/";
+        }
+        for my $u (@CPAN::Defaultsites) {
+            push @urllist, $u unless grep { $_ eq $u } @urllist;
+        }
+        $self->debug("synth. urllist[@urllist]") if $CPAN::DEBUG;
+	my $ret = $self->$method(\@urllist,$file,$aslocal);
 	if ($ret) {
 	  $Themethod = $level;
 	  my $now = time;
@@ -2547,13 +2568,12 @@ sub localize {
     return;
 }
 
+# package CPAN::FTP;
 sub hosteasy {
     my($self,$host_seq,$file,$aslocal) = @_;
-    my($i);
-  HOSTEASY: for $i (@$host_seq) {
-        my $url = $CPAN::Config->{urllist}[$i] || $CPAN::Defaultsite;
-	$url .= "/" unless substr($url,-1) eq "/";
-	$url .= $file;
+    my($ro_url);
+  HOSTEASY: for $ro_url (@$host_seq) {
+	my $url .= "$ro_url$file";
 	$self->debug("localizing perlish[$url]") if $CPAN::DEBUG;
 	if ($url =~ /^file:/) {
 	    my $l;
@@ -2574,7 +2594,7 @@ sub hosteasy {
 		$self->debug("without URI::URL we try local file $l") if $CPAN::DEBUG;
 	    }
 	    if ( -f $l && -r _) {
-		$Thesite = $i;
+		$Thesite = $ro_url;
 		return $l;
 	    }
 	    # Maybe mirror has compressed it?
@@ -2582,7 +2602,7 @@ sub hosteasy {
 		$self->debug("found compressed $l.gz") if $CPAN::DEBUG;
 		CPAN::Tarzip->new("$l.gz")->gunzip($aslocal);
 		if ( -f $aslocal) {
-		    $Thesite = $i;
+		    $Thesite = $ro_url;
 		    return $aslocal;
 		}
 	    }
@@ -2600,7 +2620,7 @@ sub hosteasy {
 	  }
 	  my $res = $Ua->mirror($url, $aslocal);
 	  if ($res->is_success) {
-	    $Thesite = $i;
+	    $Thesite = $ro_url;
 	    my $now = time;
 	    utime $now, $now, $aslocal; # download time is more
                                         # important than upload time
@@ -2614,7 +2634,7 @@ sub hosteasy {
 	    if ($res->is_success &&
 		CPAN::Tarzip->new("$aslocal.gz")->gunzip($aslocal)
 	       ) {
-	      $Thesite = $i;
+	      $Thesite = $ro_url;
 	      return $aslocal;
 	    }
 	  } else {
@@ -2642,7 +2662,7 @@ sub hosteasy {
 		$self->debug("getfile[$getfile]dir[$dir]host[$host]" .
 			     "aslocal[$aslocal]") if $CPAN::DEBUG;
 		if (CPAN::FTP->ftp_get($host,$dir,$getfile,$aslocal)) {
-		    $Thesite = $i;
+		    $Thesite = $ro_url;
 		    return $aslocal;
 		}
 		if ($aslocal !~ /\.gz(?!\n)\Z/) {
@@ -2656,7 +2676,7 @@ sub hosteasy {
                                            $gz) &&
 			CPAN::Tarzip->new($gz)->gunzip($aslocal)
 		       ){
-			$Thesite = $i;
+			$Thesite = $ro_url;
 			return $aslocal;
 		    }
 		}
@@ -2667,6 +2687,7 @@ sub hosteasy {
     }
 }
 
+# package CPAN::FTP;
 sub hosthard {
   my($self,$host_seq,$file,$aslocal) = @_;
 
@@ -2674,15 +2695,13 @@ sub hosthard {
   # failed otherwise) Maybe they are behind a firewall, but they
   # gave us a socksified (or other) ftp program...
 
-  my($i);
+  my($ro_url);
   my($devnull) = $CPAN::Config->{devnull} || "";
   # < /dev/null ";
   my($aslocal_dir) = File::Basename::dirname($aslocal);
   File::Path::mkpath($aslocal_dir);
-  HOSTHARD: for $i (@$host_seq) {
-	my $url = $CPAN::Config->{urllist}[$i] || $CPAN::Defaultsite;
-	$url .= "/" unless substr($url,-1) eq "/";
-	$url .= $file;
+  HOSTHARD: for $ro_url (@$host_seq) {
+	my $url = "$ro_url$file";
 	my($proto,$host,$dir,$getfile);
 
 	# Courtesy Mark Conty mark_conty@cargill.com change from
@@ -2755,7 +2774,7 @@ Trying with "$funkyftp$src_switch" to get
                   CPAN::Tarzip->new($asl_gz)->gzip($asl_ungz);
 	      }
 	    }
-	    $Thesite = $i;
+	    $Thesite = $ro_url;
 	    return $aslocal;
 	  } elsif ($url !~ /\.gz(?!\n)\Z/) {
 	    unlink $asl_ungz if
@@ -2782,7 +2801,7 @@ Trying with "$funkyftp$src_switch" to get
                   # somebody uncompressed file for us?
                   rename $asl_ungz, $aslocal;
 	      }
-	      $Thesite = $i;
+	      $Thesite = $ro_url;
 	      return $aslocal;
 	    } else {
 	      unlink $asl_gz if -f $asl_gz;
@@ -2802,21 +2821,35 @@ returned status $estatus (wstat $wstatus)$size
     } # host
 }
 
+# package CPAN::FTP;
 sub hosthardest {
     my($self,$host_seq,$file,$aslocal) = @_;
 
-    my($i);
+    my($ro_url);
     my($aslocal_dir) = File::Basename::dirname($aslocal);
     File::Path::mkpath($aslocal_dir);
     my $ftpbin = $CPAN::Config->{ftp};
-  HOSTHARDEST: for $i (@$host_seq) {
-	unless (length $ftpbin && MM->maybe_command($ftpbin)) {
-	    $CPAN::Frontend->myprint("No external ftp command available\n\n");
-	    last HOSTHARDEST;
-	}
-	my $url = $CPAN::Config->{urllist}[$i] || $CPAN::Defaultsite;
-	$url .= "/" unless substr($url,-1) eq "/";
-	$url .= $file;
+    unless (length $ftpbin && MM->maybe_command($ftpbin)) {
+        $CPAN::Frontend->myprint("No external ftp command available\n\n");
+        return;
+    }
+    $CPAN::Frontend->myprint(qq{
+As a last ressort we now switch to the external ftp command '$ftpbin'
+to get '$aslocal'.
+
+Doing so often leads to problems that are hard to diagnose, even endless
+loops may be encountered.
+
+If you're victim of such problems, please consider unsetting the ftp
+config variable with
+
+    o conf ftp ""
+    o conf commit
+
+});
+    $CPAN::Frontend->mysleep(4);
+  HOSTHARDEST: for $ro_url (@$host_seq) {
+	my $url = "$ro_url$file";
 	$self->debug("localizing ftpwise[$url]") if $CPAN::DEBUG;
 	unless ($url =~ m|^ftp://(.*?)/(.*)/(.*)|) {
 	    next;
@@ -2847,12 +2880,21 @@ sub hosthardest {
 				$netrc->hasdefault,
 				$netrc->contains($host))) if $CPAN::DEBUG;
 	    if ($netrc->protected) {
+                my $dialog = join "", map { "    $_\n" } @dialog;
+                my $netrc_explain;
+                if ($netrc->contains($host)) {
+                    $netrc_explain = "Relying that your .netrc entry for '$host' ".
+                        "manages the login";
+                } else {
+                    $netrc_explain = "Relying that your default .netrc entry ".
+                        "manages the login";
+                }
 		$CPAN::Frontend->myprint(qq{
   Trying with external ftp to get
     $url
-  As this requires some features that are not thoroughly tested, we\'re
-  not sure, that we get it right....
-
+  $netrc_explain
+  Going to send the dialog
+$dialog
 }
 		     );
 		$self->talk_ftp("$ftpbin$verbose $host",
@@ -2862,7 +2904,7 @@ sub hosthardest {
 		$mtime ||= 0;
 		if ($mtime > $timestamp) {
 		    $CPAN::Frontend->myprint("GOT $aslocal\n");
-		    $Thesite = $i;
+		    $Thesite = $ro_url;
 		    return $aslocal;
 		} else {
 		    $CPAN::Frontend->myprint("Hmm... Still failed!\n");
@@ -2886,13 +2928,21 @@ sub hosthardest {
 		"open $host",
 		"user anonymous $Config::Config{'cf_email'}"
 	       );
+        my $dialog = join "", map { "    $_\n" } @dialog;
+        $CPAN::Frontend->myprint(qq{
+  Trying with external ftp to get
+    $url
+  Going to send the dialog
+$dialog
+}
+		     );
 	$self->talk_ftp("$ftpbin$verbose -n", @dialog);
 	($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
 	 $atime,$mtime,$ctime,$blksize,$blocks) = stat($aslocal);
 	$mtime ||= 0;
 	if ($mtime > $timestamp) {
 	    $CPAN::Frontend->myprint("GOT $aslocal\n");
-	    $Thesite = $i;
+	    $Thesite = $ro_url;
 	    return $aslocal;
 	} else {
 	    $CPAN::Frontend->myprint("Bad luck... Still failed!\n");
@@ -2903,6 +2953,7 @@ sub hosthardest {
     } # host
 }
 
+# package CPAN::FTP;
 sub talk_ftp {
     my($self,$command,@dialog) = @_;
     my $fh = FileHandle->new;
@@ -2986,6 +3037,7 @@ sub ls {
 package CPAN::FTP::netrc;
 use strict;
 
+# package CPAN::FTP::netrc;
 sub new {
     my($class) = @_;
     my $file = File::Spec->catfile($ENV{HOME},".netrc");
@@ -3029,7 +3081,7 @@ sub new {
 	  }, $class;
 }
 
-# CPAN::FTP::hasdefault;
+# CPAN::FTP::netrc::hasdefault;
 sub hasdefault { shift->{'hasdefault'} }
 sub netrc      { shift->{'netrc'}      }
 sub protected  { shift->{'protected'}  }
@@ -3822,6 +3874,7 @@ sub ls {
     $CPAN::Frontend->myprint(join "", map {
         sprintf("%8d %10s %s/%s\n", $_->[0], $_->[1], $id, $_->[2])
     } sort { $a->[2] cmp $b->[2] } @dl);
+    @dl;
 }
 
 # returns an array of arrays, the latter contain (size,mtime,filename)
@@ -5119,6 +5172,17 @@ sub prereq_pm {
             }
             $req = $areq if $do_replace;
         }
+        if ($yaml->{build_requires}
+            && ref $yaml->{build_requires}
+            && ref $yaml->{build_requires} eq "HASH") {
+            while (my($k,$v) = each %{$yaml->{build_requires}}) {
+                if ($req->{$k}) {
+                    # merging of two "requires"-type values--what should we do?
+                } else {
+                    $req->{$k} = $v;
+                }
+            }
+        }
         if ($req) {
             delete $req->{perl};
         }
@@ -5993,7 +6057,7 @@ sub as_glimpse {
                      $color_on,
                      $self->id,
                      $color_off,
-		     $self->distribution->pretty_id,
+		     $self->distribution ? $self->distribution->pretty_id : $self->id,
                     );
     join "", @m;
 }
@@ -6573,11 +6637,11 @@ plain text format.
 
 =item ls author
 
-=item ls globbing_expresion
+=item ls globbing_expression
 
 The first form lists all distribution files in and below an author's
-CPAN directory as they are stored in the CHECKUMS files distrbute on
-CPAN.
+CPAN directory as they are stored in the CHECKUMS files distributed on
+CPAN. The listing goes recursive into all subdirectories.
 
 The second form allows to limit or expand the output with shell
 globbing as in the following examples:
@@ -6588,6 +6652,10 @@ globbing as in the following examples:
 
 The last example is very slow and outputs extra progress indicators
 that break the alignment of the result.
+
+Note that globbing only lists directories explicitly asked for, for
+example FOO/* will not list FOO/bar/Acme-Sthg-n.nn.tar.gz. This may be
+regarded as a bug and may be changed in future versions.
 
 =item failed
 
@@ -6727,7 +6795,8 @@ list.
 
 Like expand, but returns objects of the appropriate type, i.e.
 CPAN::Bundle objects for bundles, CPAN::Module objects for modules and
-CPAN::Distribution objects fro distributions.
+CPAN::Distribution objects for distributions. Note: it does not expand
+to CPAN::Author objects.
 
 =item Programming Examples
 
@@ -7235,17 +7304,18 @@ defined:
 
   build_cache        size of cache for directories to build modules
   build_dir          locally accessible directory to build modules
-  index_expire       after this many days refetch index files
   cache_metadata     use serializer to cache metadata
   cpan_home          local directory reserved for this package
   dontload_hash      anonymous hash: modules in the keys will not be
                      loaded by the CPAN::has_inst() routine
+  getcwd             see below
   gzip		     location of external program gzip
   histfile           file to maintain history between sessions
   histsize           maximum number of lines to keep in histfile
   inactivity_timeout breaks interactive Makefile.PLs or Build.PLs
                      after this many seconds inactivity. Set to 0 to
                      never break.
+  index_expire       after this many days refetch index files
   inhibit_startup_message
                      if true, does not print the startup message
   keep_source_where  directory in which to keep the source (if we do)
@@ -7309,6 +7379,18 @@ shifts or pops the array in the I<list option> variable
 works like the corresponding perl commands.
 
 =back
+
+=head2 Not on config variable getcwd
+
+CPAN.pm changes the current working directory often and needs to
+determine its own current working directory. Per default it uses
+Cwd::cwd but if this doesn't work on your system for some reason,
+alternatives can be configured according to the following table:
+
+    cwd         Cwd::cwd
+    getcwd      Cwd::getcwd
+    fastcwd     Cwd::fastcwd
+    backtickcwd external command cwd
 
 =head2 Note on urllist parameter's format
 
@@ -7565,7 +7647,7 @@ that your root user installed. The following command sequence is a
 possible approach:
 
     % mkdir -p $HOME/.cpan/CPAN
-    % echo '$CPAN::Config={ };' > $HOME/.cpan/CPAN/MyConfig.pm
+    % echo '1;' > $HOME/.cpan/CPAN/MyConfig.pm
     % cpan
     [...answer all questions...]
 

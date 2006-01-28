@@ -2,7 +2,7 @@ package CPAN::HandleConfig;
 use strict;
 use vars qw(%can %keys $dot_cpan $VERSION);
 
-$VERSION = sprintf "%.2f", substr(q$Rev: 431 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 469 $,4)/100;
 
 %can = (
   'commit' => "Commit changes to disk",
@@ -14,7 +14,7 @@ $VERSION = sprintf "%.2f", substr(q$Rev: 431 $,4)/100;
     build_cache build_dir bzip2
     cache_metadata commandnumber_in_prompt cpan_home curl
     dontload_hash
-    ftp ftp_proxy
+    ftp ftp_passive ftp_proxy
     getcwd gpg gzip
     histfile histsize http_proxy
     inactivity_timeout index_expire inhibit_startup_message
@@ -79,7 +79,10 @@ sub edit {
                 undef $CPAN::FTP::Themethod;
             }
             return $changed;
-	} else {
+        } elsif ($o =~ /_hash$/) {
+            push @args, "" if @args % 2;
+            $CPAN::Config->{$o} = { @args };
+        } else {
 	    $CPAN::Config->{$o} = $args[0] if defined $args[0];
 	    $self->prettyprint($o);
 	}
@@ -161,7 +164,7 @@ EOF
     foreach (sort keys %$CPAN::Config) {
 	$fh->print(
 		   "  '$_' => ",
-		   ExtUtils::MakeMaker::neatvalue($CPAN::Config->{$_}),
+		   $self->neatvalue($CPAN::Config->{$_}),
 		   ",\n"
 		  );
     }
@@ -176,7 +179,33 @@ EOF
     1;
 }
 
-*default = \&defaults;
+# stolen from MakeMaker; not taking the original because it is buggy;
+# bugreport will have to say: keys of hashes remain unquoted and can
+# produce syntax errors
+sub neatvalue {
+    my($self, $v) = @_;
+    return "undef" unless defined $v;
+    my($t) = ref $v;
+    return "q[$v]" unless $t;
+    if ($t eq 'ARRAY') {
+        my(@m, @neat);
+        push @m, "[";
+        foreach my $elem (@$v) {
+            push @neat, "q[$elem]";
+        }
+        push @m, join ", ", @neat;
+        push @m, "]";
+        return join "", @m;
+    }
+    return "$v" unless $t eq 'HASH';
+    my(@m, $key, $val);
+    while (($key,$val) = each %$v){
+        last unless defined $key; # cautious programming in case (undef,undef) is true
+        push(@m,"q[$key]=>".$self->neatvalue($val)) ;
+    }
+    return "{ ".join(', ',@m)." }";
+}
+
 sub defaults {
     my($self) = @_;
     my $done;
@@ -389,7 +418,7 @@ package ####::###### #hide from indexer
 
 use strict;
 use vars qw($AUTOLOAD $VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 431 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 469 $,4)/100;
 
 # formerly CPAN::HandleConfig was known as CPAN::Config
 sub AUTOLOAD {
@@ -404,5 +433,5 @@ sub AUTOLOAD {
 __END__
 # Local Variables:
 # mode: cperl
-# cperl-indent-level: 2
+# cperl-indent-level: 4
 # End:
