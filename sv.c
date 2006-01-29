@@ -3188,7 +3188,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		GvMULTI_on(dstr);
 		return;
 	    }
-	    return S_glob_assign(aTHX_ dstr, sstr, dtype);
+	    S_glob_assign(aTHX_ dstr, sstr, dtype);
+	    return;
 	}
 	break;
     case SVt_PVFM:
@@ -3227,7 +3228,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 
     case SVt_PVGV:
 	if (dtype <= SVt_PVGV) {
-	    return S_glob_assign(aTHX_ dstr, sstr, dtype);
+	    S_glob_assign(aTHX_ dstr, sstr, dtype);
+	    return;
 	}
 	/* FALL THROUGH */
 
@@ -3236,8 +3238,10 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    mg_get(sstr);
 	    if ((int)SvTYPE(sstr) != stype) {
 		stype = SvTYPE(sstr);
-		if (stype == SVt_PVGV && dtype <= SVt_PVGV)
-		    return S_glob_assign(aTHX_ dstr, sstr, dtype);
+		if (stype == SVt_PVGV && dtype <= SVt_PVGV) {
+		    S_glob_assign(aTHX_ dstr, sstr, dtype);
+		    return;
+		}
 	    }
 	}
 	if (stype == SVt_PVLV)
@@ -3250,8 +3254,10 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 
     if (sflags & SVf_ROK) {
 	if (dtype >= SVt_PV) {
-	    if (dtype == SVt_PVGV)
-		return S_pvgv_assign(aTHX_ dstr, sstr);
+	    if (dtype == SVt_PVGV) {
+		S_pvgv_assign(aTHX_ dstr, sstr);
+		return;
+	    }
 	    if (SvPVX_const(dstr)) {
 		SvPV_free(dstr);
 		SvLEN_set(dstr, 0);
