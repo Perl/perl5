@@ -29,8 +29,6 @@
 #define PERL_IN_MATHOMS_C
 #include "perl.h"
 
-void Perl_mathoms(void) {}
-
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
  */

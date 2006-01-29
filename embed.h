@@ -1027,6 +1027,10 @@
 #endif
 #endif
 #define sv_nosharing		Perl_sv_nosharing
+#ifdef NO_MATHOMS
+#else
+#define sv_nounlocking		Perl_sv_nounlocking
+#endif
 #define nothreadhook		Perl_nothreadhook
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
@@ -3067,6 +3071,10 @@
 #endif
 #endif
 #define sv_nosharing(a)		Perl_sv_nosharing(aTHX_ a)
+#ifdef NO_MATHOMS
+#else
+#define sv_nounlocking(a)	Perl_sv_nounlocking(aTHX_ a)
+#endif
 #define nothreadhook()		Perl_nothreadhook(aTHX)
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE

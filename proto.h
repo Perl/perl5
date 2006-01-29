@@ -2808,7 +2808,11 @@ PERL_CALLCONV int	Perl_sv_release_IVX(pTHX_ SV *sv)
 
 PERL_CALLCONV void	Perl_sv_nosharing(pTHX_ SV *sv);
 /* PERL_CALLCONV void	Perl_sv_nolocking(pTHX_ SV *sv); */
+#ifdef NO_MATHOMS
 /* PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *sv); */
+#else
+PERL_CALLCONV void	Perl_sv_nounlocking(pTHX_ SV *sv);
+#endif
 PERL_CALLCONV int	Perl_nothreadhook(pTHX);
 
 END_EXTERN_C
