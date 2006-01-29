@@ -60,9 +60,9 @@ my @names =
    {name=>"SIGRTMIN", not_constant=>1},
    {name=>"EXIT_FAILURE", default=>["IV", "1"]},
    {name=>"EXIT_SUCCESS", default=>["IV", "0"]},
-   {name=>"SIG_DFL", value=>"(IV)SIG_DFL"},
-   {name=>"SIG_ERR", value=>"(IV)SIG_ERR"},
-   {name=>"SIG_IGN", value=>"(IV)SIG_IGN"},
+   {name=>"SIG_DFL", value=>"(IV)SIG_DFL", not_constant=>1},
+   {name=>"SIG_ERR", value=>"(IV)SIG_ERR", not_constant=>1},
+   {name=>"SIG_IGN", value=>"(IV)SIG_IGN", not_constant=>1},
    # L_tmpnam[e] was a typo--retained for compatibility
    {name=>"L_tmpname", value=>"L_tmpnam"},
    {name=>"NULL", value=>"0"},
