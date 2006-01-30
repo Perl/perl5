@@ -463,6 +463,14 @@ case "$usemorebits" in
 	;;
 esac
 
+if test `uname -p` = i386; then
+    case "$use64bitint" in
+    "$define"|true|[yY]*)
+            ccflags="$ccflags -DPTR_IS_LONG"
+            ;;
+    esac
+fi
+
 if test `uname -p` = sparc -o `uname -p` = i386; then
     cat > UU/use64bitint.cbu <<'EOCBU'
 # This script UU/use64bitint.cbu will get 'called-back' by Configure
