@@ -1196,7 +1196,7 @@ See the documentation of C<warnings> for more details.
 =item $^X
 
 The name used to execute the current copy of Perl, from C's
-C<argv[0]>.
+C<argv[0]> or (where supported) F</proc/self/exe>.
 
 Depending on the host operating system, the value of $^X may be
 a relative or absolute pathname of the perl program file, or may
