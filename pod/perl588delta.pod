@@ -164,62 +164,6 @@ C<viacode()> now accept hex strings and has been optimized.
 
 =item *
 
-C<CPAN> upgraded to version 1.83
-
-=over
-
-=item *
-
-Support for C<Module::Build>
-
-=item *
-
-Support for C<bzip2>
-
-=item *
-
-Support for C<Module::Signature>
-
-=item *
-
-Support for C<SHA256>
-
-=item *
-
-Support for C<curl>
-
-=item *
-
-Support for C<sudo>
-
-=item *
-
-new pragma C<notest>
-
-=item *
-
-New commands C<recent> and C<perldoc>
-
-=item *
-
-New feature C<show_upload_date>
-
-=item *
-
-C<CPAN::Version> (improved support for multi-dot version notation)
-
-=item *
-
-Improved config variable handling
-
-=item *
-
-Improved C<wget> support on Win32
-
-=back
-
-=item *
-
 C<Cwd> upgraded to version 3.12
 
 =over
@@ -1418,25 +1362,6 @@ inc.
 =head1 Performance Enhancements
 
 =over 4
-
-=item *
-
-The default since perl 5.000 has been for perl to create an empty scalar
-with every new typeglob. The increased use of lexical variables means that
-most are now unused. Thanks to Nicholas Clark's efforts, Perl can now be
-compiled with C<-DPERL_DONT_CREATE_GVSV> to avoid creating these empty scalars.
-This will significantly decrease the number of scalars allocated for all
-configurations, and the number of scalars that need to be copied for ithread
-creation. Whilst this option is binary compatible with existing perl
-installations, it does change a long-standing assumption about the
-internals, hence it is not enabled by default, as some third party code may
-rely on the old behaviour.
-
-We would recommend testing with this configuration on new deployments of
-perl, particularly for multi-threaded servers, to see whether all third party
-code is compatible with it, as this configuration may give useful performance
-improvements. For existing installations we would not recommend changing to
-this configuration unless thorough testing is performed before deployment.
 
 =item *
 
