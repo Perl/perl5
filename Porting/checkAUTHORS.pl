@@ -98,7 +98,7 @@ my %map = reverse (
 		   "whatever\100davidnicol.com" => "davidnicol\100gmail.com",
 		   "rmgiroux\100acm.org" => "rmgiroux\100hotmail.com",
 		   "smcc\100mit.edu" => "smcc\100ocf.berkeley.edu",
-		   "steven\100accognoscere.org" => "schubiger\100cpan.org",
+		   "schubiger\100cpan.org" => "steven\100accognoscere.org",
 		   "richard.foley\100ubsw.com"
 		   => "richard.foley\100t-online.de",
 		   "damian\100cs.monash.edu.au" => "damian\100conway.org",
@@ -144,7 +144,7 @@ $map{"rs\100crystalflame.net"} = "p5-authors\100crystalflame.net";
 $map{"(srezic\100iconmobile.com)"} = "slaven\100rezic.de";
 $map{"perl\100dellah.anu.edu.au"} = "spoon\100cpan.org";
 $map{"rjk-perl-p5p\100tamias.net"} = "rjk\100linguist.dartmouth.edu";
-$map{"sts\100accognoscere.org"} = "steven\100accognoscere.org";
+$map{"sts\100accognoscere.org"} = "schubiger\100cpan.org";
 $map{"s.payrard\100wanadoo.fr"} = "stef\100mongueurs.net";
 $map{"richard.foley\100ubs.com"} = "richard.foley\100ubsw.com";
 # I assume that Ton Hopsel's lack of e-mail address in AUTHORS is deliberate

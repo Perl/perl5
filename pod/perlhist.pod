@@ -389,6 +389,7 @@ the strings?).
  Hugo     5.9.0         2003-Oct-27
  Rafael   5.9.1         2004-Mar-16
           5.9.2         2005-Apr-01
+          5.9.3         2006-Jan-28
 
 =head2 SELECTED RELEASE SIZES
 
