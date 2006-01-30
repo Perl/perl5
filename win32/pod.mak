@@ -36,6 +36,7 @@ POD = \
 	perl591delta.pod	\
 	perl592delta.pod	\
 	perl593delta.pod	\
+	perl594delta.pod	\
 	perlapi.pod	\
 	perlapio.pod	\
 	perlartistic.pod	\
@@ -144,6 +145,7 @@ MAN = \
 	perl591delta.man	\
 	perl592delta.man	\
 	perl593delta.man	\
+	perl594delta.man	\
 	perlapi.man	\
 	perlapio.man	\
 	perlartistic.man	\
@@ -252,6 +254,7 @@ HTML = \
 	perl591delta.html	\
 	perl592delta.html	\
 	perl593delta.html	\
+	perl594delta.html	\
 	perlapi.html	\
 	perlapio.html	\
 	perlartistic.html	\
@@ -360,6 +363,7 @@ TEX = \
 	perl591delta.tex	\
 	perl592delta.tex	\
 	perl593delta.tex	\
+	perl594delta.tex	\
 	perlapi.tex	\
 	perlapio.tex	\
 	perlartistic.tex	\
