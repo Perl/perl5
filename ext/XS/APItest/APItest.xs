@@ -86,7 +86,7 @@ test_freeent(freeent_function *f) {
 
     test_scalar = newSV(0);
     SvREFCNT_inc(test_scalar);
-    victim->hent_val = test_scalar;
+    HeVAL(victim) = test_scalar;
 
     /* Need this little game else we free the temps on the return stack.  */
     results[0] = SvREFCNT(test_scalar);

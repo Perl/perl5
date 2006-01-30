@@ -2279,8 +2279,8 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
 	assert (he->shared_he_he.hent_hek == hek);
 
 	LOCK_STRTAB_MUTEX;
-	if (he->shared_he_he.hent_val - 1) {
-	    --he->shared_he_he.hent_val;
+	if (he->shared_he_he.he_valu.hent_refcount - 1) {
+	    --he->shared_he_he.he_valu.hent_refcount;
 	    UNLOCK_STRTAB_MUTEX;
 	    return;
 	}
@@ -2299,7 +2299,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
             k_flags |= HVhek_WASUTF8 | HVhek_FREEKEY;
     }
 
-    /* what follows is the moral equivalent of:
+    /* what follows was the moral equivalent of:
     if ((Svp = hv_fetch(PL_strtab, tmpsv, FALSE, hash))) {
 	if (--*Svp == Nullsv)
 	    hv_delete(PL_strtab, str, len, G_DISCARD, hash);
@@ -2333,7 +2333,7 @@ S_unshare_hek_or_pvn(pTHX_ const HEK *hek, const char *str, I32 len, U32 hash)
     }
 
     if (found) {
-        if (--HeVAL(entry) == Nullsv) {
+        if (--he->shared_he_he.he_valu.hent_refcount == 0) {
             *oentry = HeNEXT(entry);
             if (!*first) {
 		/* There are now no entries in our slot.  */
@@ -2449,7 +2449,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	/* Still "point" to the HEK, so that other code need not know what
 	   we're up to.  */
 	HeKEY_hek(entry) = hek;
-	HeVAL(entry) = Nullsv;
+	entry->he_valu.hent_refcount = 0;
 	HeNEXT(entry) = next;
 	*head = entry;
 
@@ -2461,7 +2461,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	}
     }
 
-    ++HeVAL(entry);				/* use value slot as REFCNT */
+    ++entry->he_valu.hent_refcount;
     UNLOCK_STRTAB_MUTEX;
 
     if (flags & HVhek_FREEKEY)

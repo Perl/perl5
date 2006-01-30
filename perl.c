@@ -1100,7 +1100,7 @@ perl_destruct(pTHXx)
 		HE * const next = HeNEXT(hent);
 		Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
 		     "Unbalanced string table refcount: (%ld) for \"%s\"",
-		     (long)(HeVAL(hent) - Nullsv), HeKEY(hent));
+		     (long)hent->he_valu.hent_refcount, HeKEY(hent));
 		Safefree(hent);
 		hent = next;
 	    }

@@ -15,7 +15,10 @@ struct he {
        body arenas  */
     HE		*hent_next;	/* next entry in chain */
     HEK		*hent_hek;	/* hash key */
-    SV		*hent_val;	/* scalar value that was hashed */
+    union {
+	SV	*hent_val;	/* scalar value that was hashed */
+	Size_t	hent_refcount;	/* references for this shared hash key */
+    } he_valu;
 };
 
 /* hash key -- defined separately for use as shared pointer */
@@ -291,7 +294,7 @@ C<SV*>.
 #define HeKREHASH(he)  HEK_REHASH(HeKEY_hek(he))
 #define HeKLEN_UTF8(he)  (HeKUTF8(he) ? -HeKLEN(he) : HeKLEN(he))
 #define HeKFLAGS(he)  HEK_FLAGS(HeKEY_hek(he))
-#define HeVAL(he)		(he)->hent_val
+#define HeVAL(he)		(he)->he_valu.hent_val
 #define HeHASH(he)		HEK_HASH(HeKEY_hek(he))
 #define HePV(he,lp)		((HeKLEN(he) == HEf_SVKEY) ?		\
 				 SvPV(HeKEY_sv(he),lp) :		\
@@ -372,7 +375,7 @@ C<SV*>.
     (++(((struct shared_he *)(((char *)hek)				\
 			      - STRUCT_OFFSET(struct shared_he,		\
 					      shared_he_hek)))		\
-	->shared_he_he.hent_val),					\
+	->shared_he_he.he_valu.hent_refcount),				\
      hek)
 
 /*
