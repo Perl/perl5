@@ -637,7 +637,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     }
 
     if (is_utf8) {
-	char * const keysave = (char * const)key;
+	char * const keysave = (char *)key;
 	key = (char*)bytes_from_utf8((U8*)key, &klen, &is_utf8);
         if (is_utf8)
 	    flags |= HVhek_UTF8;
