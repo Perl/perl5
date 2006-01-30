@@ -207,8 +207,11 @@ enum token_type {
     TOKENTYPE_GVVAL
 };
 
-static struct debug_tokens { const int token, type; const char *name; }
-  const debug_tokens[] =
+static struct debug_tokens {
+    const int token;
+    enum token_type type;
+    const char *name;
+} const debug_tokens[] =
 {
     { ADDOP,		TOKENTYPE_OPNUM,	"ADDOP" },
     { ANDAND,		TOKENTYPE_NONE,		"ANDAND" },
