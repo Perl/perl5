@@ -607,7 +607,7 @@ PP(pp_gelem)
 	    break;
 	case 'S':
 	    if (strEQ(second_letter, "CALAR"))
-		tmpRef = GvSV(gv);
+		tmpRef = GvSVn(gv);
 	    break;
 	}
     }

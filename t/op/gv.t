@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 132 );
+plan( tests => 134 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -393,6 +393,19 @@ foreach my $value ([1,2,3], {1=>2}, *STDOUT{IO}, \&ok, *STDOUT{FORMAT}) {
     like ($@, qr/^Cannot convert a reference to $type to typeglob/,
 	  "Cannot upgrade ref-to-$type to typeglob");
 }
+
+{
+    no warnings qw(once uninitialized);
+    my $g = \*clatter;
+    my $r = eval {no strict; ${*{$g}{SCALAR}}};
+    is ($@, '', "PERL_DONT_CREATE_GVSV shouldn't affect thingy syntax");
+
+    $g = \*vowm;
+    $r = eval {use strict; ${*{$g}{SCALAR}}};
+    is ($@, '',
+	"PERL_DONT_CREATE_GVSV shouldn't affect thingy syntax under strict");
+}
+
 __END__
 Perl
 Rules
