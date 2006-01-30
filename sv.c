@@ -3146,8 +3146,11 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    SvIV_set(dstr,  SvIVX(sstr));
 	    if (SvIsUV(sstr))
 		SvIsUV_on(dstr);
-	    if (SvTAINTED(sstr))
-		SvTAINT(dstr);
+	    /* SvTAINTED can only be true if the SV has taint magic, which in
+	       turn means that the SV type is PVMG (or greater). This is the
+	       case statement for SVt_IV, so this cannot be true (whatever gcov
+	       may say).  */
+	    assert(!SvTAINTED(sstr));
 	    return;
 	}
 	goto undef_sstr;
@@ -3167,8 +3170,11 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    }
 	    SvNV_set(dstr, SvNVX(sstr));
 	    (void)SvNOK_only(dstr);
-	    if (SvTAINTED(sstr))
-		SvTAINT(dstr);
+	    /* SvTAINTED can only be true if the SV has taint magic, which in
+	       turn means that the SV type is PVMG (or greater). This is the
+	       case statement for SVt_NV, so this cannot be true (whatever gcov
+	       may say).  */
+	    assert(!SvTAINTED(sstr));
 	    return;
 	}
 	goto undef_sstr;
