@@ -9,7 +9,3 @@ use CPAN::FirstTime;
 
 print "ok 1\n";
 
-# Local Variables:
-# mode: cperl
-# cperl-indent-level: 2
-# End:

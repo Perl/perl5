@@ -9,7 +9,7 @@ BEGIN{
 use base 'Exporter';
 use CPAN;
 
-$VERSION = sprintf "%.2f", substr(q$Rev: 231 $,4)/100;
+$VERSION = "1.03";
 $CPAN::META->has_inst('Digest::MD5','no');
 $CPAN::META->has_inst('LWP','no');
 $CPAN::META->has_inst('Compress::Zlib','no');
