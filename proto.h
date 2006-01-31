@@ -1970,9 +1970,6 @@ PERL_CALLCONV void	Perl_save_sptr(pTHX_ SV** sptr)
 PERL_CALLCONV SV*	Perl_save_svref(pTHX_ SV** sptr)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV SV**	Perl_save_threadsv(pTHX_ PADOFFSET i)
-			__attribute__noreturn__;
-
 PERL_CALLCONV OP*	Perl_sawparens(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_scalar(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_scalarkids(pTHX_ OP* o);

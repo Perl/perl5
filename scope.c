@@ -460,15 +460,6 @@ Perl_save_padsv(pTHX_ PADOFFSET off)
     SSPUSHINT(SAVEt_PADSV);
 }
 
-SV **
-Perl_save_threadsv(pTHX_ PADOFFSET i)
-{
-    dVAR;
-    Perl_croak(aTHX_ "panic: save_threadsv called in non-threaded perl");
-    PERL_UNUSED_ARG(i);
-    NORETURN_FUNCTION_END;
-}
-
 void
 Perl_save_nogv(pTHX_ GV *gv)
 {

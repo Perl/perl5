@@ -431,7 +431,6 @@ Perl_save_re_context
 Perl_save_padsv
 Perl_save_sptr
 Perl_save_svref
-Perl_save_threadsv
 Perl_scan_bin
 Perl_scan_hex
 Perl_scan_num

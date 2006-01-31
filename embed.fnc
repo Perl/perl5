@@ -704,7 +704,6 @@ Ap	|void	|save_re_context
 Ap	|void	|save_padsv	|PADOFFSET off
 Ap	|void	|save_sptr	|NN SV** sptr
 Ap	|SV*	|save_svref	|NN SV** sptr
-Apr	|SV**	|save_threadsv	|PADOFFSET i
 p	|OP*	|sawparens	|NULLOK OP* o
 p	|OP*	|scalar		|NULLOK OP* o
 p	|OP*	|scalarkids	|NULLOK OP* o
