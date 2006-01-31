@@ -4612,8 +4612,8 @@ S_socketpair_udp (int fd[2]) {
 	fd_set rset;
 
 	FD_ZERO(&rset);
-	FD_SET(sockets[0], &rset);
-	FD_SET(sockets[1], &rset);
+	FD_SET((unsigned int)sockets[0], &rset);
+	FD_SET((unsigned int)sockets[1], &rset);
 
 	got = PerlSock_select(max + 1, &rset, NULL, NULL, &waitfor);
 	if (got != 2 || !FD_ISSET(sockets[0], &rset)
