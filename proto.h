@@ -2850,6 +2850,11 @@ STATIC void	S_require_errno(pTHX_ GV *gv)
 
 #endif
 
+PERL_CALLCONV void*	Perl_get_arena(pTHX_ int svtype)
+			__attribute__malloc__
+			__attribute__warn_unused_result__;
+
+
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 STATIC void	S_hsplit(pTHX_ HV *hv)
 			__attribute__nonnull__(pTHX_1);

@@ -42,7 +42,8 @@ S_more_he(pTHX)
     dVAR;
     HE* he;
     HE* heend;
-    Newx(he, PERL_ARENA_SIZE/sizeof(HE), HE);
+
+    he = (HE*) Perl_get_arena(aTHX_ PERL_ARENA_SIZE);
     HeNEXT(he) = (HE*) PL_body_arenas;
     PL_body_arenas = he;
 

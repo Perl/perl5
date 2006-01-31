@@ -556,6 +556,50 @@ Perl_sv_clean_all(pTHX)
     return cleaned;
 }
 
+/*
+  ARENASETS: a meta-arena implementation which separates arena-info
+  into struct arena_set, which contains an array of struct
+  arena_descs, each holding info for a single arena.  By separating
+  the meta-info from the arena, we recover the 1st slot, formerly
+  borrowed for list management.  The arena_set is about the size of an
+  arena, avoiding the needless malloc overhead of a naive linked-list
+
+  The cost is 1 arena-set malloc per ~320 arena-mallocs, + the unused
+  memory in the last arena-set (1/2 on average).  In trade, we get
+  back the 1st slot in each arena (ie 1.7% of a CV-arena, less for
+  others)
+
+  union arena is declared with a fixed size, but is intended to vary
+  by type, allowing their use for big, rare body-types where theres
+  currently too much wastage (unused arena slots)
+*/
+#define ARENASETS 1
+
+union arena {
+    double alignthis;	/* maybe too big, NV instead ? */
+    unsigned char data[PERL_ARENA_SIZE];
+};
+
+struct arena_desc {
+    union arena* arena;		/* the raw storage */
+    size_t        size;		/* its size ~4k typ */
+    int           unit_type;	/* useful for arena audits */
+    /* info for sv-heads (eventually)
+       int count, flags;
+    */
+};
+
+#define ARENAS_PER_SET  256+64	/* x 3words/arena_desc -> ~ 4kb/arena_set */
+
+struct arena_set {
+    struct arena_set* next;
+    int   set_size;		/* ie ARENAS_PER_SET */
+    int   curr;			/* index of next available arena-desc */
+    struct arena_desc set[ARENAS_PER_SET];
+};
+
+#if !ARENASETS
+
 static void 
 S_free_arena(pTHX_ void **root) {
     while (root) {
@@ -564,7 +608,8 @@ S_free_arena(pTHX_ void **root) {
 	root = next;
     }
 }
-    
+#endif
+
 /*
 =for apidoc sv_free_arenas
 
@@ -593,7 +638,23 @@ Perl_sv_free_arenas(pTHX)
 	    Safefree(sva);
     }
 
+#if ARENASETS
+    {
+	struct arena_set *next, *aroot = (struct arena_set*) PL_body_arenas;
+	
+	for (; aroot; aroot = next) {
+	    int max = aroot->curr;
+	    for (i=0; i<max; i++) {
+		assert(aroot->set[i].arena);
+		Safefree(aroot->set[i].arena);
+	    }
+	    next = aroot->next;
+	    Safefree(aroot);
+	}
+    }
+#else
     S_free_arena(aTHX_ (void**) PL_body_arenas);
+#endif
 
     for (i=0; i<SVt_LAST; i++)
 	PL_body_roots[i] = 0;
@@ -640,6 +701,61 @@ Perl_sv_free_arenas(pTHX)
   contexts below (line ~10k)
 */
 
+/* get_arena(size): when ARENASETS is enabled, this creates
+   custom-sized arenas, otherwize it uses PERL_ARENA_SIZE, as
+   previously done.
+   TBD: export properly for hv.c: S_more_he().
+*/
+void*
+Perl_get_arena(pTHX_ int arena_size)
+{
+#if !ARENASETS
+    union arena* arp;
+
+    /* allocate and attach arena */
+    Newx(arp, PERL_ARENA_SIZE, char);
+    arp->next = PL_body_arenas;
+    PL_body_arenas = arp;
+    return arp;
+
+#else
+    struct arena_desc* adesc;
+    struct arena_set *newroot, *aroot = (struct arena_set*) PL_body_arenas;
+    int curr;
+
+    if (!arena_size)
+	arena_size = PERL_ARENA_SIZE;
+
+    /* may need new arena-set to hold new arena */
+    if (!aroot || aroot->curr >= aroot->set_size) {
+	Newxz(newroot, 1, struct arena_set);
+	newroot->set_size = ARENAS_PER_SET;
+	newroot->next = aroot;
+	aroot = newroot;
+	DEBUG_m(PerlIO_printf(Perl_debug_log, "new arenaset %p\n", aroot));
+    }
+
+    /* ok, now have arena-set with at least 1 empty/available arena-desc */
+    curr = aroot->curr++;
+    adesc = &aroot->set[curr];
+    assert(!adesc->arena);
+    
+    /* old fixed-size way
+       Newxz(adesc->arena, 1, union arena);
+       adesc->size = sizeof(union arena);
+    */
+    /* new buggy way    */
+    Newxz(adesc->arena, arena_size, char);
+    adesc->size = arena_size;
+
+    /* adesc->count = sizeof(struct arena)/size; */
+    
+    DEBUG_m(PerlIO_printf(Perl_debug_log, "arena %d added: %p\n", curr, aroot));
+
+    return adesc->arena;
+#endif
+}
+
 STATIC void *
 S_more_bodies (pTHX_ size_t size, svtype sv_type)
 {
@@ -649,16 +765,15 @@ S_more_bodies (pTHX_ size_t size, svtype sv_type)
     const char *end;
     const size_t count = PERL_ARENA_SIZE / size;
 
-    Newx(start, count*size, char);
-    *((void **) start) = PL_body_arenas;
-    PL_body_arenas = (void *)start;
+    start = (char*) Perl_get_arena(aTHX_ PERL_ARENA_SIZE); /* get a raw arena */
 
     end = start + (count-1) * size;
 
+#if !ARENASETS
     /* The initial slot is used to link the arenas together, so it isn't to be
        linked into the list of ready-to-use bodies.  */
-
     start += size;
+#endif
 
     *root = (void *)start;
 

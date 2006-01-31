@@ -1034,6 +1034,10 @@ s	|void	|gv_init_sv	|NN GV *gv|I32 sv_type
 s	|void	|require_errno	|NN GV *gv
 #endif
 
+: #if defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+paRxo	|void*	|get_arena	|int svtype
+: #endif
+
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 s	|void	|hsplit		|NN HV *hv
 s	|void	|hfreeentries	|NN HV *hv

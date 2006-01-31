@@ -3090,6 +3090,8 @@
 #define require_errno(a)	S_require_errno(aTHX_ a)
 #endif
 #endif
+#ifdef PERL_CORE
+#endif
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define hsplit(a)		S_hsplit(aTHX_ a)
