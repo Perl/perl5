@@ -697,7 +697,11 @@ Ap	|void	|save_re_context
 Ap	|void	|save_padsv	|PADOFFSET off
 Ap	|void	|save_sptr	|NN SV** sptr
 Ap	|SV*	|save_svref	|NN SV** sptr
+#ifdef USE_5005THREADS
+Ap	|SV**	|save_threadsv	|PADOFFSET i
+#else
 Apr	|SV**	|save_threadsv	|PADOFFSET i
+#endif
 p	|OP*	|sawparens	|NULLOK OP* o
 p	|OP*	|scalar		|NULLOK OP* o
 p	|OP*	|scalarkids	|NULLOK OP* o

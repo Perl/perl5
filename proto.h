@@ -1108,9 +1108,13 @@ PERL_CALLCONV void	Perl_save_re_context(pTHX);
 PERL_CALLCONV void	Perl_save_padsv(pTHX_ PADOFFSET off);
 PERL_CALLCONV void	Perl_save_sptr(pTHX_ SV** sptr);
 PERL_CALLCONV SV*	Perl_save_svref(pTHX_ SV** sptr);
+#ifdef USE_5005THREADS
+PERL_CALLCONV SV**	Perl_save_threadsv(pTHX_ PADOFFSET i);
+#else
 PERL_CALLCONV SV**	Perl_save_threadsv(pTHX_ PADOFFSET i)
 			__attribute__noreturn__;
 
+#endif
 PERL_CALLCONV OP*	Perl_sawparens(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_scalar(pTHX_ OP* o);
 PERL_CALLCONV OP*	Perl_scalarkids(pTHX_ OP* o);

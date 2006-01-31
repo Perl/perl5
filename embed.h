@@ -739,7 +739,11 @@
 #define save_padsv		Perl_save_padsv
 #define save_sptr		Perl_save_sptr
 #define save_svref		Perl_save_svref
+#ifdef USE_5005THREADS
 #define save_threadsv		Perl_save_threadsv
+#else
+#define save_threadsv		Perl_save_threadsv
+#endif
 #ifdef PERL_CORE
 #define sawparens		Perl_sawparens
 #define scalar			Perl_scalar
@@ -2786,7 +2790,11 @@
 #define save_padsv(a)		Perl_save_padsv(aTHX_ a)
 #define save_sptr(a)		Perl_save_sptr(aTHX_ a)
 #define save_svref(a)		Perl_save_svref(aTHX_ a)
+#ifdef USE_5005THREADS
 #define save_threadsv(a)	Perl_save_threadsv(aTHX_ a)
+#else
+#define save_threadsv(a)	Perl_save_threadsv(aTHX_ a)
+#endif
 #ifdef PERL_CORE
 #define sawparens(a)		Perl_sawparens(aTHX_ a)
 #define scalar(a)		Perl_scalar(aTHX_ a)
