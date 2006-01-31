@@ -5898,7 +5898,7 @@ The commonly available C<S_IF*> constants are
 
     # File types.  Not necessarily all are available on your system.
 
-    S_IFREG S_IFDIR S_IFLNK S_IFBLK S_ISCHR S_IFIFO S_IFSOCK S_IFWHT S_ENFMT
+    S_IFREG S_IFDIR S_IFLNK S_IFBLK S_IFCHR S_IFIFO S_IFSOCK S_IFWHT S_ENFMT
 
     # The following are compatibility aliases for S_IRUSR, S_IWUSR, S_IXUSR.
 
