@@ -4539,9 +4539,9 @@ Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
 		break;
 	    }
 	    if ((s = strchr(argv[0], '='))) {
-		*s = '\0';
-		sv_setpv(GvSV(gv_fetchpv(argv[0] + 1, TRUE, SVt_PV)), s + 1);
-		*s = '=';
+		const char *const start_name = argv[0] + 1;
+		sv_setpv(GvSV(gv_fetchpvn_flags(start_name, s - start_name,
+						TRUE, SVt_PV)), s + 1);
 	    }
 	    else
 		sv_setiv(GvSV(gv_fetchpv(argv[0]+1,TRUE, SVt_PV)),1);

@@ -423,9 +423,8 @@ TODO: {
 
     is ($$name1, undef, 'Nothing before we start');
     is ($$name2, undef, 'Nothing before we start');
-    $$name2 = "Yummy";
+    $$name1 = "Yummy";
     is ($$name1, "Yummy", 'Accessing via the correct name works');
-    local $TODO = "NUL bytes truncate in symrefs";
     is ($$name2, undef,
 	'Accessing via a different NUL-containing name gives nothing');
 }

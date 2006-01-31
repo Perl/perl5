@@ -4296,7 +4296,6 @@ Perl_yylex(pTHX)
 		    gvp = 0;
 		}
 		else {
-		    len = 0;
 		    if (!gv) {
 			/* Mustn't actually add anything to a symbol table.
 			   But also don't want to "initialise" any placeholder
@@ -4305,6 +4304,7 @@ Perl_yylex(pTHX)
 			gv = gv_fetchpvn_flags(PL_tokenbuf, len,
 					       GV_NOADD_NOINIT, SVt_PVCV);
 		    }
+		    len = 0;
 		}
 
 		/* if we saw a global override before, get the right name */
@@ -4450,7 +4450,7 @@ Perl_yylex(pTHX)
 
 		    /* Resolve to GV now. */
 		    if (SvTYPE(gv) != SVt_PVGV) {
-			gv = gv_fetchpvn_flags(PL_tokenbuf, len, 0, SVt_PVCV);
+			gv = gv_fetchpv(PL_tokenbuf, 0, SVt_PVCV);
 			assert (SvTYPE(gv) == SVt_PVGV);
 			/* cv must have been some sort of placeholder, so
 			   now needs replacing with a real code reference.  */

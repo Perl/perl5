@@ -758,27 +758,28 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     register GV *gv = NULL;
     GV**gvp;
     I32 len;
-    register const char *namend;
+    register const char *name_cursor;
     HV *stash = NULL;
     const I32 no_init = flags & (GV_NOADD_NOINIT | GV_NOINIT);
     const I32 no_expand = flags & GV_NOEXPAND;
     const I32 add = flags & ~SVf_UTF8 & ~GV_NOADD_NOINIT & ~GV_NOEXPAND;
-
-    PERL_UNUSED_ARG(full_len);
+    const char *const name_end = nambeg + full_len;
+    const char *const name_em1 = name_end - 1;
 
     if (*name == '*' && isALPHA(name[1])) /* accidental stringify on a GV? */
 	name++;
 
-    for (namend = name; *namend; namend++) {
-	if ((*namend == ':' && namend[1] == ':')
-	    || (*namend == '\'' && namend[1]))
+    for (name_cursor = name; name_cursor < name_end; name_cursor++) {
+	if ((*name_cursor == ':' && name_cursor < name_em1
+	     && name_cursor[1] == ':')
+	    || (*name_cursor == '\'' && name_cursor[1]))
 	{
 	    if (!stash)
 		stash = PL_defstash;
 	    if (!stash || !SvREFCNT(stash)) /* symbol table under destruction */
 		return Nullgv;
 
-	    len = namend - name;
+	    len = name_cursor - name;
 	    if (len > 0) {
 		char smallbuf[128];
 		char *tmpbuf;
@@ -808,18 +809,18 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		    stash = GvHV(gv) = newHV();
 
 		if (!HvNAME_get(stash))
-		    hv_name_set(stash, nambeg, namend - nambeg, 0);
+		    hv_name_set(stash, nambeg, name_cursor - nambeg, 0);
 	    }
 
-	    if (*namend == ':')
-		namend++;
-	    namend++;
-	    name = namend;
+	    if (*name_cursor == ':')
+		name_cursor++;
+	    name_cursor++;
+	    name = name_cursor;
 	    if (!*name)
 		return gv ? gv : (GV*)*hv_fetchs(PL_defstash, "main::", TRUE);
 	}
     }
-    len = namend - name;
+    len = name_cursor - name;
 
     /* No stash in name, so see how we can default */
 
