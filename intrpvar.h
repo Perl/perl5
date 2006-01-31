@@ -589,4 +589,4 @@ PERLVARI(Idumper_fd, int, -1)
 #endif
 
 PERLVARA(Ibody_roots, PERL_ARENA_ROOTS_SIZE, void*) /* array of body roots */
-PERLVARA(Ibody_arenaroots, PERL_ARENA_ROOTS_SIZE, void*) /* consolidated body-arena pointers */
+PERLVAR(Ibody_arenas, void*) /* pointer to list of body-arenas */
