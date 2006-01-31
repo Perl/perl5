@@ -171,8 +171,8 @@ Perl_pad_new(pTHX_ int flags)
     }
     else {
 #ifdef USE_5005THREADS
+        AV * const a0 = newAV();			/* will be @_ */
 	av_store(padname, 0, newSVpvn("@_", 2));
-	a0 = newAV();
 	SvPADMY_on((SV*)a0);		/* XXX Needed? */
 	av_store(pad, 0, (SV*)a0);
 #else
