@@ -2,7 +2,7 @@ package ExtUtils::Install;
 
 use 5.00503;
 use vars qw(@ISA @EXPORT $VERSION);
-$VERSION = '1.33';
+$VERSION = '1.33_01';
 
 use Exporter;
 use Carp ();
@@ -91,6 +91,9 @@ sub install {
     use File::Path qw(mkpath);
     use File::Compare qw(compare);
 
+    my $win32_special=!$nonono &&
+                      $^O eq 'MSWin32' &&
+                      eval { require Win32API::File; 1 };
     my(%from_to) = %$from_to;
     my(%pack, $dir, $warn_permissions);
     my($packlist) = ExtUtils::Packlist->new();
@@ -169,8 +172,28 @@ sub install {
 		$diff++;
 	    }
 
-	    if ($diff){
-		if (-f $targetfile){
+	    if ($diff) {
+	        if ($win32_special && -f $targetfile && !unlink $targetfile) {
+	            print "Can't remove existing '$targetfile': $!\n";
+	            my $tmp = "AAA";
+	            ++$tmp while -e "$targetfile.$tmp";
+	            $tmp= "$targetfile.$tmp";
+	            if ( rename $targetfile, $tmp ) {
+	                print "However it has been renamed as '$tmp' which ".
+	                      "will be removed at next reboot.\n";
+	                Win32API::File::MoveFileEx( $tmp, [],
+	                    Win32API::File::MOVEFILE_DELAY_UNTIL_REBOOT() )
+	                    or die "MoveFileEx/Delete '$tmp' failed: $^E\n";
+	            } else {
+	                print "Installation cannot be completed until you reboot.\n",
+	                      "Until then using '$tmp' as the install filename.\n";
+	                Win32API::File::MoveFileEx( $tmp, $targetfile,
+	                    Win32API::File::MOVEFILE_REPLACE_EXISTING() |
+	                    Win32API::File::MOVEFILE_DELAY_UNTIL_REBOOT() )
+	                    or die "MoveFileEx/Replace '$tmp' failed: $^E\n";
+	                $targetfile = $tmp;
+	            }
+	        } elsif (-f $targetfile) {
 		    forceunlink($targetfile) unless $nonono;
 		} else {
 		    mkpath($targetdir,0,0755) unless $nonono;
