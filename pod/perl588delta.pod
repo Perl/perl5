@@ -164,6 +164,18 @@ C<viacode()> now accept hex strings and has been optimized.
 
 =item *
 
+C<CPAN> upgraded to version 1.76_02
+
+=over
+
+=item *
+
+1 minor bug fix for Win32
+
+=back
+
+=item *
+
 C<Cwd> upgraded to version 3.12
 
 =over
@@ -1573,10 +1585,6 @@ scalars have already been freed sufficiently at the point of detection that
 it is impossible to produce any meaningful dump of their contents.  This
 feature was implemented by the indefatigable Nicholas Clark, based on an idea
 by Mike Giroux.
-
-=head1 New Tests
-
-=head1 Known Problems
 
 =head1 Platform Specific Problems
 
