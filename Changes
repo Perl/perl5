@@ -28,6 +28,257 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.8		Maintenance release working toward v5.8.8
 --------------
 ____________________________________________________________________________
+[ 27024] By: nicholas                              on 2006/01/31  15:50:30
+        Log: More history.
+     Branch: maint-5.8/perl
+	   ! pod/perlhist.pod
+____________________________________________________________________________
+[ 27023] By: nicholas                              on 2006/01/31  15:48:38
+        Log: Integrate:
+             [ 27022]
+             Subject: [perl #38380] Typo in perlfunc.pod 
+             From: p.boven@sara.nl (via RT) <perlbug-followup@perl.org>
+             Message-ID: <rt-3.0.11-38380-129047.11.4217468041333@perl.org>
+             Date: Tue, 31 Jan 2006 05:22:28 -0800
+     Branch: maint-5.8/perl
+	  !> pod/perlfunc.pod
+____________________________________________________________________________
+[ 27020] By: nicholas                              on 2006/01/31  15:00:26
+        Log: Perl_save_threadsv does return under 5005 threads.
+     Branch: maint-5.8/perl
+	   ! embed.fnc embed.h global.sym proto.h
+____________________________________________________________________________
+[ 27019] By: nicholas                              on 2006/01/31  14:46:24
+        Log: Note the new CPAN version in perl588delta.pod.
+             Remove the 2 empty headings.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 27018] By: nicholas                              on 2006/01/31  14:40:06
+        Log: Re-integrate change 25774 (Keys of %INC always use forward slashes)
+             and bump $CPAN::VERSION to 1.76_02.
+     Branch: maint-5.8/perl
+	  !> lib/CPAN.pm
+____________________________________________________________________________
+[ 27017] By: nicholas                              on 2006/01/31  12:40:43
+        Log: Make 5005threads compile to miniperl
+     Branch: maint-5.8/perl
+	   ! pad.c perl.c
+____________________________________________________________________________
+[ 27013] By: nicholas                              on 2006/01/30  22:58:16
+        Log: Integrate:
+             [ 26974]
+             Add perl 5.9.3 in release list
+             
+             [ 26994]
+             Email change for Steven Schubiger
+             
+             [ 26999]
+             Subject: [DOC PATCH] $^X isn't necessarily argv[0]
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Mon, 30 Jan 2006 01:06:24 -0800
+             Message-ID: <20060130090624.GA3760@efn.org>
+             
+             [ 27009]
+             Change the author aliasing to reflect updates to AUTHORS.
+     Branch: maint-5.8/perl
+	  !> AUTHORS Porting/checkAUTHORS.pl pod/perlhist.pod
+	  !> pod/perlvar.pod
+____________________________________________________________________________
+[ 27012] By: nicholas                              on 2006/01/30  21:45:52
+        Log: Remove the description of PERL_DONT_CREATE_GVSV, as a significant
+             change has been added in blead, so the behaviour won't be the same
+             when this is merged for 5.8.9.
+             Remove the description of CPAN.pm 1.83.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 27011] By: nicholas                              on 2006/01/30  21:42:54
+        Log: Revert change 26719 (back to CPAN 1.76_01), as Module::Build and
+             curl support aren't quite stable yet. All should be good for 5.8.9
+     Branch: maint-5.8/perl
+	   - lib/CPAN/Debug.pm lib/CPAN/HandleConfig.pm
+	   - lib/CPAN/PAUSE2005.pub lib/CPAN/Tarzip.pm lib/CPAN/Version.pm
+	   - lib/CPAN/t/version.t
+	   ! MANIFEST lib/CPAN.pm lib/CPAN/FirstTime.pm lib/CPAN/Nox.pm
+	   ! lib/CPAN/SIGNATURE lib/CPAN/bin/cpan lib/CPAN/t/Nox.t
+	   ! lib/CPAN/t/loadme.t lib/CPAN/t/mirroredby.t lib/CPAN/t/vcmp.t
+____________________________________________________________________________
+[ 27008] By: nicholas                              on 2006/01/30  17:06:19
+        Log: Integrate:
+             [ 26998]
+             Subject: [PATCH] maint and blead: unicos.sh hints
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Sun, 29 Jan 2006 23:45:03 +0200 (EET)
+             Message-Id: <200601292145.k0TLj3mW320311@kosh.hut.fi>
+     Branch: maint-5.8/perl
+	  !> hints/unicos.sh
+____________________________________________________________________________
+[ 27003] By: nicholas                              on 2006/01/30  14:47:07
+        Log: Subject: [PATCH] 5.8.8 perldelta note for VMS
+             From: "Craig A. Berry" <craigberry@mac.com>
+             Message-ID: <43DC14CD.3080902@mac.com>
+             Date: Sat, 28 Jan 2006 19:05:17 -0600
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26984] By: nicholas                              on 2006/01/28  16:41:58
+        Log: Integrate:
+             [ 26962]
+             Install nit : README.e2x should be installed, the other READMEs shouldn't
+     Branch: maint-5.8/perl
+	  !> installperl
+____________________________________________________________________________
+[ 26973] By: nicholas                              on 2006/01/27  20:37:19
+        Log: Integrate:
+             [ 26952]
+             Subject: [PATCH] Change 26781/26830 (SvRTRIM should also write a new '\0' at the end) can cause segfaults
+             From: "Philippe M. Chiasson" <gozer@ActiveState.com>
+             Message-ID: <43D941AF.1060503@ActiveState.com>
+             Date: Thu, 26 Jan 2006 13:39:59 -0800
+             
+             [ 26953]
+             Safer implementation of RTRIM().
+             Don't rely on SvCUR to be sane unless SvPOK.
+     Branch: maint-5.8/perl
+	  !> mg.c
+____________________________________________________________________________
+[ 26972] By: nicholas                              on 2006/01/27  20:23:05
+        Log: Integrate:
+             [ 26935]
+             Subject: SPRINTF_RETURNS_STRLEN isn't really a compile-time option 
+             From: Gisle Aas <gisle@ActiveState.com>
+             Date: 23 Jan 2006 02:12:04 -0800
+             Message-ID: <lr3bjfb6dn.fsf@caliper.activestate.com>
+             
+             Subject: RE: SPRINTF_RETURNS_STRLEN isn't really a compile-time option
+             From: "Jan Dubois" <jand@ActiveState.com>
+             Date: Mon, 23 Jan 2006 11:30:51 -0800
+             Message-ID: <008001c62053$86adf680$2217a8c0@candy>
+             
+             [ 26936]
+             Remove d_nanosleep from win32 configs
+             Change 19899 removed them before, but they have accidentally crept back.
+     Branch: maint-5.8/perl
+	  !> makedef.pl perl.c win32/config.bc win32/config.gc
+	  !> win32/config.vc win32/config.vc64
+____________________________________________________________________________
+[ 26971] By: nicholas                              on 2006/01/27  20:12:42
+        Log: Integrate:
+             [ 26892]
+             Explain better how that test count works.
+             
+             [ 26915]
+             Note 5.8.8-RC1
+             
+             [ 26945]
+             assertions.pm is dual-lived
+             
+             [ 26957]
+             Remove note about #elif, see :
+             Subject: Re: Change 26954: Simplify nested '#ifdef' by replacing it with '#elif defined()'
+             From: Steve Hay <steve.hay@uk.radan.com>
+             Date: Fri, 27 Jan 2006 11:09:02 +0000
+             Message-ID: <43D9FF4E.6010501@uk.radan.com>
+     Branch: maint-5.8/perl
+	  !> Porting/Maintainers.pl Porting/pumpkin.pod pod/perlhist.pod
+	  !> t/comp/require.t
+____________________________________________________________________________
+[ 26956] By: nicholas                              on 2006/01/27  11:35:12
+        Log: Integrate:
+             [ 26396]
+             Two test workarounds for VMS
+             
+             [ 26710]
+             pod2usage2.t is not readily portable to VMS either
+             
+             [ 26857]
+             Give up on through.t on VMS for now -- no can do with current 
+             pipe implementation.
+     Branch: maint-5.8/perl
+	  !> lib/File/Copy.t t/io/through.t t/op/goto.t t/pod/pod2usage2.t
+____________________________________________________________________________
+[ 26944] By: nicholas                              on 2006/01/25  18:09:41
+        Log: Integrate:
+             [ 26940]
+             Fix a regression on suidperl : the error message "No #! line" was
+             produced in erroneous cases, because we used to read values in a
+             string buffer that pointed to nothing.
+     Branch: maint-5.8/perl
+	  !> perl.c
+____________________________________________________________________________
+[ 26942] By: nicholas                              on 2006/01/24  18:50:52
+        Log: Document the fix to no warnings '...' as it will cause fun and games.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26939] By: nicholas                              on 2006/01/24  14:59:03
+        Log: Subject: Re: [PATCH] perl588delta.pod (minor tweaks) [new! improved!]
+             From: David Landgren <david@landgren.net>
+             Date: Tue, 24 Jan 2006 15:17:35 +0100
+             Message-ID: <43D636FF.8000001@landgren.net>
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26938] By: nicholas                              on 2006/01/24  13:37:26
+        Log: Integrate:
+             [ 23592]
+             Subject: [PATCH] Makefile.SH: de-parallelise mktables
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Message-ID: <41ADFD95.4030007@iki.fi>
+             Date: Wed, 01 Dec 2004 19:21:25 +0200
+     Branch: maint-5.8/perl
+	  !> Makefile.SH
+____________________________________________________________________________
+[ 26937] By: nicholas                              on 2006/01/24  13:24:05
+        Log: Missing C on <>, spotted by David Landgren.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26934] By: nicholas                              on 2006/01/23  19:58:38
+        Log: Nits spotted by Rafael.
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26931] By: rgs                                   on 2006/01/23  19:04:52
+        Log: POD formatting nits
+     Branch: maint-5.8/perl
+	   ! pod/perl588delta.pod
+____________________________________________________________________________
+[ 26920] By: nicholas                              on 2006/01/22  20:41:25
+        Log: Subject: [PATCH] Overzealous consting in mg.h breaks SWIG
+             From: Audrey Tang <autrijus@autrijus.org>
+             Message-ID: <43D2FFAD.9070401@autrijus.org>
+             Date: Sun, 22 Jan 2006 11:44:45 +0800
+     Branch: maint-5.8/perl
+	   ! mg.h
+____________________________________________________________________________
+[ 26917] By: nicholas                              on 2006/01/20  14:51:09
+        Log: Update sample config.sh
+     Branch: maint-5.8/perl
+	   ! Porting/config.sh
+____________________________________________________________________________
+[ 26916] By: nicholas                              on 2006/01/20  14:49:22
+        Log: Restore patchlevel.
+     Branch: maint-5.8/perl
+	   ! patchlevel.h
+____________________________________________________________________________
+[ 26909] By: nicholas                              on 2006/01/18  20:14:06
+        Log: Cargo cult 5.8.8 upgrade.
+     Branch: maint-5.8/perl
+	   ! Cross/config.sh-arm-linux META.yml NetWare/Makefile README.os2
+	   ! README.vms epoc/createpkg.pl patchlevel.h plan9/config.plan9
+	   ! vos/build.cm vos/config.alpha.def vos/config.alpha.h
+	   ! vos/config.ga.def vos/config.ga.h vos/install_perl.cm
+	   ! win32/Makefile win32/config_H.bc win32/config_H.gc
+	   ! win32/config_H.vc win32/config_H.vc64 win32/makefile.mk
+	   ! wince/Makefile.ce
+____________________________________________________________________________
+[ 26908] By: nicholas                              on 2006/01/18  19:31:08
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 26907] By: nicholas                              on 2006/01/18  19:18:34
         Log: Integrate:
              [ 26885]
