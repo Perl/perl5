@@ -246,7 +246,7 @@ static int vms_process_case_tolerant = 1;
 
 /* bug workarounds if needed */
 int decc_bug_readdir_efs1 = 0;
-int decc_bug_devnull = 0;
+int decc_bug_devnull = 1;
 int decc_bug_fgetname = 0;
 int decc_dir_barename = 0;
 
@@ -3127,11 +3127,7 @@ vmspipe_tempfile(pTHX)
     if (!fp) return 0;
     fstat(fileno(fp), (struct stat *)&s1);
 
-    #if defined(_USE_STD_STAT)
-      cmp_result = s0.crtl_stat.st_ino != s1.crtl_stat.st_ino;
-    #else
-      cmp_result = memcmp(s0.crtl_stat.st_ino, s1.crtl_stat.st_ino, 6);
-    #endif
+    cmp_result = VMS_INO_T_COMPARE(s0.crtl_stat.st_ino, s1.crtl_stat.st_ino);
     if ((cmp_result != 0) && (s0.st_ctime != s1.st_ctime))  {
         fclose(fp);
         return 0;
@@ -9504,7 +9500,7 @@ is_null_device(name)
     const char *name;
 {
   if (decc_bug_devnull != 0) {
-    if (strcmp("/dev/null", name) == 0) /* temp hack */
+    if (strncmp("/dev/null", name, 9) == 0)
       return 1;
   }
     /* The VMS null device is named "_NLA0:", usually abbreviated as "NL:".
@@ -9702,11 +9698,8 @@ Perl_flex_fstat(pTHX_ int fd, Stat_t *statbufp)
 	if (cptr == NULL)
 	   namecache[0] = '\0';
     }
-#ifdef _USE_STD_STAT
-    memcpy(&statbufp->st_ino, &statbufp->crtl_stat.st_ino, 8);
-#else
-    memcpy(&statbufp->st_ino, statbufp->crtl_stat.st_ino, 8);
-#endif
+
+    VMS_INO_T_COPY(statbufp->st_ino, statbufp->crtl_stat.st_ino);
 #ifndef _USE_STD_STAT
     strncpy(statbufp->st_devnam, statbufp->crtl_stat.st_dev, 63);
     statbufp->st_devnam[63] = 0;
@@ -9822,11 +9815,7 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
   }
 #endif
     if (!retval) {
-#ifdef _USE_STD_STAT
-      memcpy(&statbufp->st_ino, &statbufp->crtl_stat.st_ino, 8);
-#else
-      memcpy(&statbufp->st_ino, statbufp->crtl_stat.st_ino, 8);
-#endif
+      VMS_INO_T_COPY(statbufp->st_ino, statbufp->crtl_stat.st_ino);
 #ifndef _USE_STD_STAT
       strncpy(statbufp->st_devnam, statbufp->crtl_stat.st_dev, 63);
       statbufp->st_devnam[63] = 0;
@@ -10890,11 +10879,13 @@ static int set_features
     }
 
     /* PCP mode requires creating /dev/null special device file */
-    decc_bug_devnull = 0;
+    decc_bug_devnull = 1;
     status = sys_trnlnm("DECC_BUG_DEVNULL", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
           decc_bug_devnull = 1;
+       else
+	  decc_bug_devnull = 0;
     }
 
     /* fgetname returning a VMS name in UNIX mode */
