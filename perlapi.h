@@ -180,8 +180,8 @@ END_EXTERN_C
 #define PL_beginav_save		(*Perl_Ibeginav_save_ptr(aTHX))
 #undef  PL_bitcount
 #define PL_bitcount		(*Perl_Ibitcount_ptr(aTHX))
-#undef  PL_body_arenaroots
-#define PL_body_arenaroots	(*Perl_Ibody_arenaroots_ptr(aTHX))
+#undef  PL_body_arenas
+#define PL_body_arenas		(*Perl_Ibody_arenas_ptr(aTHX))
 #undef  PL_body_roots
 #define PL_body_roots		(*Perl_Ibody_roots_ptr(aTHX))
 #undef  PL_bufend

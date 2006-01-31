@@ -573,13 +573,6 @@ heads and bodies within the arenas must already have been freed.
 
 =cut
 */
-#define free_arena(name)					\
-    STMT_START {						\
-	S_free_arena(aTHX_ (void**) PL_ ## name ## _arenaroot);	\
-	PL_ ## name ## _arenaroot = 0;				\
-	PL_ ## name ## _root = 0;				\
-    } STMT_END
-
 void
 Perl_sv_free_arenas(pTHX)
 {
@@ -600,11 +593,10 @@ Perl_sv_free_arenas(pTHX)
 	    Safefree(sva);
     }
 
-    for (i=0; i<SVt_LAST; i++) {
-	S_free_arena(aTHX_ (void**) PL_body_arenaroots[i]);
-	PL_body_arenaroots[i] = 0;
+    S_free_arena(aTHX_ (void**) PL_body_arenas);
+
+    for (i=0; i<SVt_LAST; i++)
 	PL_body_roots[i] = 0;
-    }
 
     Safefree(PL_nice_chunk);
     PL_nice_chunk = Nullch;
@@ -652,15 +644,14 @@ STATIC void *
 S_more_bodies (pTHX_ size_t size, svtype sv_type)
 {
     dVAR;
-    void ** const arena_root	= &PL_body_arenaroots[sv_type];
-    void ** const root		= &PL_body_roots[sv_type];
+    void ** const root = &PL_body_roots[sv_type];
     char *start;
     const char *end;
     const size_t count = PERL_ARENA_SIZE / size;
 
     Newx(start, count*size, char);
-    *((void **) start) = *arena_root;
-    *arena_root = (void *)start;
+    *((void **) start) = PL_body_arenas;
+    PL_body_arenas = (void *)start;
 
     end = start + (count-1) * size;
 
@@ -10294,7 +10285,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     param->flags = flags;
     param->proto_perl = proto_perl;
 
-    Zero(&PL_body_arenaroots, 1, PL_body_arenaroots);
+    PL_body_arenas = NULL;
     Zero(&PL_body_roots, 1, PL_body_roots);
     
     PL_nice_chunk	= NULL;

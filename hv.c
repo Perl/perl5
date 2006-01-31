@@ -43,8 +43,8 @@ S_more_he(pTHX)
     HE* he;
     HE* heend;
     Newx(he, PERL_ARENA_SIZE/sizeof(HE), HE);
-    HeNEXT(he) = (HE*) PL_body_arenaroots[HE_SVSLOT];
-    PL_body_arenaroots[HE_SVSLOT] = he;
+    HeNEXT(he) = (HE*) PL_body_arenas;
+    PL_body_arenas = he;
 
     heend = &he[PERL_ARENA_SIZE / sizeof(HE) - 1];
     PL_body_roots[HE_SVSLOT] = ++he;

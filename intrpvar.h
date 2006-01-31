@@ -414,7 +414,7 @@ PERLVAR(Iptr_table,	PTR_TBL_t*)
 #endif
 PERLVARI(Ibeginav_save, AV*, NULL)	/* save BEGIN{}s when compiling */
 
-PERLVARA(Ibody_arenaroots, SVt_LAST, void*) /* consolidated body-arena pointers */
+PERLVAR(Ibody_arenas, void*) /* pointer to list of body-arenas */
 
      /* 5.6.0 stopped here */
 

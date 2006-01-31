@@ -191,7 +191,7 @@
 #define PL_beginav		(vTHX->Ibeginav)
 #define PL_beginav_save		(vTHX->Ibeginav_save)
 #define PL_bitcount		(vTHX->Ibitcount)
-#define PL_body_arenaroots	(vTHX->Ibody_arenaroots)
+#define PL_body_arenas		(vTHX->Ibody_arenas)
 #define PL_body_roots		(vTHX->Ibody_roots)
 #define PL_bufend		(vTHX->Ibufend)
 #define PL_bufptr		(vTHX->Ibufptr)
@@ -473,7 +473,7 @@
 #define PL_Ibeginav		PL_beginav
 #define PL_Ibeginav_save	PL_beginav_save
 #define PL_Ibitcount		PL_bitcount
-#define PL_Ibody_arenaroots	PL_body_arenaroots
+#define PL_Ibody_arenas		PL_body_arenas
 #define PL_Ibody_roots		PL_body_roots
 #define PL_Ibufend		PL_bufend
 #define PL_Ibufptr		PL_bufptr
