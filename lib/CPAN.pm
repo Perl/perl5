@@ -1,6 +1,6 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.76_01';
+$VERSION = '1.76_02';
 $VERSION = eval $VERSION;
 # $Id: CPAN.pm,v 1.412 2003/07/31 14:53:04 k Exp $
 
@@ -739,7 +739,6 @@ sub has_inst {
     my $file = $mod;
     my $obj;
     $file =~ s|::|/|g;
-    $file =~ s|/|\\|g if $^O eq 'MSWin32';
     $file .= ".pm";
     if ($INC{$file}) {
 	# checking %INC is wrong, because $INC{LWP} may be true
