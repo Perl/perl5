@@ -10842,36 +10842,6 @@ semantics
 
 =back
 
-=head2 c, constant - Perl pragma to declare constants
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item NOTES
-
-=over 4
-
-=item List constants
-
-=item Defining multiple constants at once
-
-=item Magic constants
-
-=back
-
-=item TECHNICAL NOTES
-
-=item BUGS
-
-=item AUTHOR
-
-=item COPYRIGHT
-
-=back
-
 =head2 charnames - define character names for C<\N{named}> string literal
 escapes
 
@@ -14938,32 +14908,6 @@ Dumper
 
 =back
 
-=head2 Devel::Arena - Perl extension for inspecting the core's arena
-structures
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=over 4
-
-=item EXPORT
-
-sv_stats [DONT_SHARE], shared_string_table, sizes, HEK_size STRING,
-shared_string_table_effectiveness, write_stats_at_END
-
-=back
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
 =head2 Devel::DProf - a Perl code profiler
 
 =over 4
@@ -15091,59 +15035,6 @@ perl 5.005_03, perl 5.005, perl 5.004_05, perl 5.004
 =item SYNOPSIS
 
 =item DESCRIPTION
-
-=back
-
-=head2 Devel::Size - Perl extension for finding the memory usage of Perl
-variables
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item FUNCTIONS
-
-=over 4
-
-=item size($ref)
-
-=item total_size($ref)
-
-=back
-
-=item EXPORT
-
-=item UNDERSTANDING MEMORY ALLOCATION
-
-=over 4
-
-=item The C library
-
-=item Perl
-
-=back
-
-=item DANGERS
-
-=item Messages: texts originating from this module.
-
-=over 4
-
-=item Errors
-
-=item warnings
-
-=back
-
-=item BUGS
-
-=item AUTHOR
-
-=item COPYRIGHT
-
-=item SEE ALSO
 
 =back
 
@@ -17645,20 +17536,6 @@ errors()
 =back
 
 =head2 Fcntl - load the C Fcntl.h defines
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item NOTE
-
-=item EXPORTED SYMBOLS
-
-=back
-
-=head2 Fcntl2 - load the C Fcntl2.h defines
 
 =over 4
 
