@@ -3270,7 +3270,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
 	if (sflags & SVp_IOK) {
 	    /* Must do this otherwise some other overloaded use of 0x80000000
-	       gets confused. Probably 0x80000000 */
+	       gets confused. Probably SVprv_WEAKREF */
 	    if (sflags & SVf_IVisUV)
 		SvIsUV_on(dstr);
 	    SvIV_set(dstr, SvIVX(sstr));
