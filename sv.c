@@ -3263,18 +3263,11 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
 	(void)SvOK_off(dstr);
 	SvRV_set(dstr, SvREFCNT_inc(SvRV(sstr)));
-	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK|SVf_ROK
-				   |SVf_AMAGIC);
-	if (sflags & SVp_NOK) {
-	    SvNV_set(dstr, SvNVX(sstr));
-	}
-	if (sflags & SVp_IOK) {
-	    /* Must do this otherwise some other overloaded use of 0x80000000
-	       gets confused. Probably SVprv_WEAKREF */
-	    if (sflags & SVf_IVisUV)
-		SvIsUV_on(dstr);
-	    SvIV_set(dstr, SvIVX(sstr));
-	}
+	SvFLAGS(dstr) |= sflags & (SVf_ROK|SVf_AMAGIC);
+	assert(!(sflags & SVp_NOK));
+	assert(!(sflags & SVp_IOK));
+	assert(!(sflags & SVf_NOK));
+	assert(!(sflags & SVf_IOK));
     }
     else if (sflags & SVp_POK) {
         bool isSwipe = 0;
