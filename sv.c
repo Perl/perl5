@@ -3680,7 +3680,7 @@ S_sv_release_COW(pTHX_ register SV *sv, const char *pvx, STRLEN len, SV *after)
 {
     if (len) { /* this SV was SvIsCOW_normal(sv) */
          /* we need to find the SV pointing to us.  */
-        SV * const current = SV_COW_NEXT_SV(after);
+        SV *current = SV_COW_NEXT_SV(after);
 
         if (current == sv) {
             /* The SV we point to points back to us (there were only two of us
