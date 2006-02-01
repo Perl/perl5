@@ -1,7 +1,7 @@
 package autouse;
 
 #use strict;		# debugging only
-use 5.003_90;		# ->can, for my $var
+use 5.006;		# use warnings
 
 $autouse::VERSION = '1.06';
 
