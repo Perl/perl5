@@ -816,7 +816,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		name_cursor++;
 	    name_cursor++;
 	    name = name_cursor;
-	    if (!*name)
+	    if (name == name_end)
 		return gv ? gv : (GV*)*hv_fetchs(PL_defstash, "main::", TRUE);
 	}
     }
