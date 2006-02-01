@@ -373,9 +373,9 @@ ext/Devel/PPPort/parts/inc/newRV	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/ppphbin	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/ppphdoc	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/ppphtest	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/SvPV	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/Sv_set	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/sv_xpvf	Devel::PPPort include
-ext/Devel/PPPort/parts/inc/SvPV	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/threads	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/uv	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/variables	Devel::PPPort include
@@ -411,10 +411,10 @@ ext/Devel/PPPort/parts/todo/5009000	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009001	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009002	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009003	Devel::PPPort todo file
-ext/Devel/PPPort/PPPort.pm	Devel::PPPort extension
-ext/Devel/PPPort/PPPort.xs	Devel::PPPort extension
 ext/Devel/PPPort/ppport_h.PL	Devel::PPPort ppport.h writer
+ext/Devel/PPPort/PPPort.pm	Devel::PPPort extension
 ext/Devel/PPPort/PPPort_pm.PL	Devel::PPPort PPPort.pm writer
+ext/Devel/PPPort/PPPort.xs	Devel::PPPort extension
 ext/Devel/PPPort/PPPort_xs.PL	Devel::PPPort PPPort.xs writer
 ext/Devel/PPPort/README		Devel::PPPort Readme
 ext/Devel/PPPort/soak		Devel::PPPort Test Harness to run under various Perls
@@ -430,15 +430,15 @@ ext/Devel/PPPort/t/mPUSH.t	Devel::PPPort test file
 ext/Devel/PPPort/t/MY_CXT.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newCONSTSUB.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newRV.t	Devel::PPPort test file
+ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Devel/PPPort/t/ppphtest.t	Devel::PPPort test file
+ext/Devel/PPPort/t/SvPV.t	Devel::PPPort test file
 ext/Devel/PPPort/t/Sv_set.t	Devel::PPPort test file
 ext/Devel/PPPort/t/sv_xpvf.t	Devel::PPPort test file
-ext/Devel/PPPort/t/SvPV.t	Devel::PPPort test file
 ext/Devel/PPPort/t/testutil.pl	Devel::PPPort test utilities
 ext/Devel/PPPort/t/threads.t	Devel::PPPort test file
 ext/Devel/PPPort/t/uv.t		Devel::PPPort test file
 ext/Devel/PPPort/t/variables.t	Devel::PPPort test file
-ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Devel/PPPort/typemap	Devel::PPPort Typemap
 ext/Digest/MD5/Changes		Digest::MD5 extension changes
 ext/Digest/MD5/hints/dec_osf.pl	Hints for named architecture
@@ -2742,6 +2742,7 @@ pod/perl584delta.pod		Perl changes in version 5.8.4
 pod/perl585delta.pod		Perl changes in version 5.8.5
 pod/perl586delta.pod		Perl changes in version 5.8.6
 pod/perl587delta.pod		Perl changes in version 5.8.7
+pod/perl588delta.pod		Perl changes in version 5.8.8
 pod/perl58delta.pod		Perl changes in version 5.8.0
 pod/perl590delta.pod		Perl changes in version 5.9.0
 pod/perl591delta.pod		Perl changes in version 5.9.1
@@ -3066,7 +3067,6 @@ t/lib/1_compile.t		See if the various libraries and extensions compile
 t/lib/common.pl			Helper for lib/{warnings,feature}.t
 t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/compmod.pl		Helper for 1_compile.t
-t/lib/compress/ZlibTestUtils.pm	Compress::Zlib
 t/lib/compress/any.pl		Compress::Zlib
 t/lib/compress/anyunc.pl	Compress::Zlib
 t/lib/compress/destroy.pl	Compress::Zlib
@@ -3079,6 +3079,7 @@ t/lib/compress/prime.pl		Compress::Zlib
 t/lib/compress/tied.pl		Compress::Zlib
 t/lib/compress/truncate.pl	Compress::Zlib
 t/lib/compress/zlib-generic.pl	Compress::Zlib
+t/lib/compress/ZlibTestUtils.pm	Compress::Zlib
 t/lib/contains_pod.xr		Pod-Parser test file
 t/lib/cygwin.t			Builtin cygwin function tests
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
@@ -3463,8 +3464,8 @@ utils/perlivp.PL		installation verification procedure
 utils/piconv.PL			iconv(1), reinvented in perl
 utils/pl2pm.PL			A pl to pm translator
 utils/prove.PL			The prove harness utility
-utils/ptar.PL			The ptar utility
 utils/ptardiff.PL		The ptardiff utility
+utils/ptar.PL			The ptar utility
 utils/shasum.PL			filter for computing SHA digests (analogous to md5sum)
 utils/splain.PL			Stand-alone version of diagnostics.pm
 utils/xsubpp.PL			External subroutine preprocessor

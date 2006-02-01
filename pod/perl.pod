@@ -143,6 +143,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perl592delta	Perl changes in version 5.9.2
     perl591delta	Perl changes in version 5.9.1
     perl590delta	Perl changes in version 5.9.0
+    perl588delta	Perl changes in version 5.8.8
     perl587delta	Perl changes in version 5.8.7
     perl586delta	Perl changes in version 5.8.6
     perl585delta	Perl changes in version 5.8.5

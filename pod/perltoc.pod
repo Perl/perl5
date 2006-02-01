@@ -6071,7 +6071,7 @@ B<-V>
 
 =back
 
-=head2 perldelta - what is new for perl v5.9.3
+=head2 perldelta - what is new for perl v5.9.4
 
 =over 4
 
@@ -6079,160 +6079,63 @@ B<-V>
 
 =item Incompatible Changes
 
-=over 4
-
-=item Parsing of C<-f _>
-
-=item C<mkdir()>
-
-=item Magic goto and eval
-
-=item C<$#> has been removed
-
-=item C<:unique>
-
-=item Scoping of the C<sort> pragma
-
-=back
-
 =item Core Enhancements
-
-=over 4
-
-=item The C<feature> pragma
-
-=item Switch and Smart Match operator
-
-=item C<say()>
-
-=item C<CLONE_SKIP()>
-
-=item C<${^CHILD_ERROR_NATIVE}>
-
-=item Assertions
-
-=item Unicode Character Database 4.1.0
-
-=item C<no VERSION>
-
-=item Recursive sort subs
-
-=item Effect of pragmas in eval
-
-=item New B<-E> command-line switch
-
-=item C<chdir>, C<chmod> and C<chown> on filehandles
-
-=item OS groups
-
-=back
 
 =item Modules and Pragmata
 
-=over 4
-
-=item New Core Modules
-
-=back
-
 =item Utility Changes
-
-=over 4
-
-=item C<ptar>
-
-=item C<shasum>
-
-=item C<h2xs> enhancements
-
-=item C<perlivp> enhancements
-
-=back
 
 =item Documentation
 
-=over 4
-
-=item Perl Glossary
-
-=back
-
 =item Performance Enhancements
-
-=over 4
-
-=item XS-assisted SWASHGET
-
-=item Constant subroutines
-
-=item C<PERL_DONT_CREATE_GVSV>
-
-=item Weak references are cheaper
-
-=item sort() enhancements
-
-=back
 
 =item Installation and Configuration Improvements
 
-=over 4
-
-=item Compilation improvements
-
-=item New Or Improved Platforms
-
-=item New probes
-
-=item Module auxiliary files
-
-=back
-
 =item Selected Bug Fixes
-
-=over 4
-
-=item C<defined $$x>
-
-=item Calling CORE::require()
-
-=item Subscripts of slices
-
-=item Remove over-optimisation
-
-=item sprintf() fixes
-
-=item no warnings 'category' works correctly with -w
-
-=item Smaller fixes
-
-=item More Unicode Fixes
-
-=back
 
 =item New or Changed Diagnostics
 
-=over 4
-
-=item Attempt to set length of freed array
-
-=item Non-string passed as bitmask
-
-=item Search pattern not terminated or ternary operator parsed as search
-pattern
-
-=item "%s" variable %s masks earlier declaration
-
-=item readdir()/closedir()/etc. attempted on invalid dirhandle
-
-=back
-
 =item Changed Internals
 
+=item Known Problems
+
 =over 4
 
-=item B:: modules inheritance changed
+=item Platform Specific Problems
 
 =back
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl594delta, perldelta - what is new for perl v5.9.4
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=item Core Enhancements
+
+=item Modules and Pragmata
+
+=item Utility Changes
+
+=item Documentation
+
+=item Performance Enhancements
+
+=item Installation and Configuration Improvements
+
+=item Selected Bug Fixes
+
+=item New or Changed Diagnostics
+
+=item Changed Internals
 
 =item Known Problems
 
@@ -6318,6 +6221,8 @@ pattern
 
 =item C<ptar>
 
+=item C<ptardiff>
+
 =item C<shasum>
 
 =item C<h2xs> enhancements
@@ -6408,14 +6313,6 @@ pattern
 =over 4
 
 =item B:: modules inheritance changed
-
-=back
-
-=item Known Problems
-
-=over 4
-
-=item Platform Specific Problems
 
 =back
 
@@ -6739,6 +6636,73 @@ Win32::GetOSVersion
 =back
 
 =item TODO
+
+=item Reporting Bugs
+
+=item SEE ALSO
+
+=back
+
+=head2 perl588delta, perldelta - what is new for perl v5.8.8
+
+=over 4
+
+=item DESCRIPTION
+
+=item Incompatible Changes
+
+=item Core Enhancements
+
+=item Modules and Pragmata
+
+=item Utility Changes
+
+=over 4
+
+=item C<h2xs> enhancements
+
+=item C<perlivp> enhancements
+
+=back
+
+=item New Documentation
+
+=item Performance Enhancements
+
+=item Installation and Configuration Improvements
+
+=item Selected Bug Fixes
+
+=over 4
+
+=item no warnings 'category' works correctly with -w
+
+=item Remove over-optimisation
+
+=item sprintf() fixes
+
+=item Debugger and Unicode slowdown
+
+=item Smaller fixes
+
+=back
+
+=item New or Changed Diagnostics
+
+=over 4
+
+=item Attempt to set length of freed array
+
+=item Non-string passed as bitmask
+
+=item Search pattern not terminated or ternary operator parsed as search
+pattern
+
+=back
+
+=item Changed Internals
+
+=item Platform Specific Problems
 
 =item Reporting Bugs
 
@@ -10878,6 +10842,36 @@ semantics
 
 =back
 
+=head2 c, constant - Perl pragma to declare constants
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTES
+
+=over 4
+
+=item List constants
+
+=item Defining multiple constants at once
+
+=item Magic constants
+
+=back
+
+=item TECHNICAL NOTES
+
+=item BUGS
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
 =head2 charnames - define character names for C<\N{named}> string literal
 escapes
 
@@ -11673,6 +11667,8 @@ limit, extract
 
 =item $tar->add_data ( $filename, $data, [$opthashref] )
 
+FILE, HARDLINK, SYMLINK, CHARDEV, BLOCKDEV, DIR, FIFO, SOCKET
+
 =back
 
 =over 4
@@ -11759,7 +11755,9 @@ access .tar.Z files?
 
 =item TODO
 
-Check if passed in handles are open for read/write
+Check if passed in handles are open for read/write, Allow archives to be
+passed in as string, Facilitate processing an opened filehandle of a
+compressed archive
 
 =item AUTHOR
 
@@ -13074,7 +13072,7 @@ FCGI_SOCKET_PATH, FCGI_LISTEN_QUEUE
 
 Searching for authors, bundles, distribution files and modules, make, test,
 install, clean	modules or distributions, get, readme, perldoc, look module
-or distribution, ls author, ls globbing_expresion, failed, Lockfile,
+or distribution, ls author, ls globbing_expression, failed, Lockfile,
 Signals
 
 =item CPAN::Shell
@@ -13141,6 +13139,8 @@ optionE<gt> [shift|pop]>, C<o conf E<lt>list optionE<gt>
 [unshift|push|splice] E<lt>listE<gt>>
 
 =over 4
+
+=item Not on config variable getcwd
 
 =item Note on urllist parameter's format
 
@@ -14938,6 +14938,32 @@ Dumper
 
 =back
 
+=head2 Devel::Arena - Perl extension for inspecting the core's arena
+structures
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item EXPORT
+
+sv_stats [DONT_SHARE], shared_string_table, sizes, HEK_size STRING,
+shared_string_table_effectiveness, write_stats_at_END
+
+=back
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
 =head2 Devel::DProf - a Perl code profiler
 
 =over 4
@@ -15065,6 +15091,59 @@ perl 5.005_03, perl 5.005, perl 5.004_05, perl 5.004
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=back
+
+=head2 Devel::Size - Perl extension for finding the memory usage of Perl
+variables
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item FUNCTIONS
+
+=over 4
+
+=item size($ref)
+
+=item total_size($ref)
+
+=back
+
+=item EXPORT
+
+=item UNDERSTANDING MEMORY ALLOCATION
+
+=over 4
+
+=item The C library
+
+=item Perl
+
+=back
+
+=item DANGERS
+
+=item Messages: texts originating from this module.
+
+=over 4
+
+=item Errors
+
+=item warnings
+
+=back
+
+=item BUGS
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=item SEE ALSO
 
 =back
 
@@ -17566,6 +17645,20 @@ errors()
 =back
 
 =head2 Fcntl - load the C Fcntl.h defines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item NOTE
+
+=item EXPORTED SYMBOLS
+
+=back
+
+=head2 Fcntl2 - load the C Fcntl2.h defines
 
 =over 4
 
