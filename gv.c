@@ -825,31 +825,40 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     /* No stash in name, so see how we can default */
 
     if (!stash) {
-	if (isIDFIRST_lazy(name)) {
+	if (len && isIDFIRST_lazy(name)) {
 	    bool global = FALSE;
 
-	    /* name is always \0 terminated, and initial \0 wouldn't return
-	       true from isIDFIRST_lazy, so we know that name[1] is defined  */
-	    switch (name[1]) {
-	    case '\0':
+	    switch (len) {
+	    case 1:
 		if (*name == '_')
 		    global = TRUE;
 		break;
-	    case 'N':
-		if (strEQ(name, "INC") || strEQ(name, "ENV"))
+	    case 3:
+		if ((name[0] == 'I' && name[1] == 'N' && name[2] == 'C')
+		    || (name[0] == 'E' && name[1] == 'N' && name[2] == 'V')
+		    || (name[0] == 'S' && name[1] == 'I' && name[2] == 'G'))
 		    global = TRUE;
 		break;
-	    case 'I':
-		if (strEQ(name, "SIG"))
+	    case 4:
+		if (name[0] == 'A' && name[1] == 'R' && name[2] == 'G'
+		    && name[3] == 'V')
 		    global = TRUE;
 		break;
-	    case 'T':
-		if (strEQ(name, "STDIN") || strEQ(name, "STDOUT") ||
-		    strEQ(name, "STDERR"))
+	    case 5:
+		if (name[0] == 'S' && name[1] == 'T' && name[2] == 'D'
+		    && name[3] == 'I' && name[4] == 'N')
 		    global = TRUE;
 		break;
-	    case 'R':
-		if (strEQ(name, "ARGV") || strEQ(name, "ARGVOUT"))
+	    case 6:
+		if ((name[0] == 'S' && name[1] == 'T' && name[2] == 'D')
+		    &&((name[3] == 'O' && name[4] == 'U' && name[5] == 'T')
+		       ||(name[3] == 'E' && name[4] == 'R' && name[5] == 'R')))
+		    global = TRUE;
+		break;
+	    case 7:
+		if (name[0] == 'A' && name[1] == 'R' && name[2] == 'G'
+		    && name[3] == 'V' && name[4] == 'O' && name[5] == 'U'
+		    && name[6] == 'T')
 		    global = TRUE;
 		break;
 	    }
