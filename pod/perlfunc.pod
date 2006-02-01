@@ -2593,10 +2593,12 @@ same as the number actually killed).
     $cnt = kill 1, $child1, $child2;
     kill 9, @goners;
 
-If SIGNAL is zero, no signal is sent to the process.  This is a
-useful way to check that a child process is alive and hasn't changed
-its UID.  See L<perlport> for notes on the portability of this
-construct.
+If SIGNAL is zero, no signal is sent to the process, but the kill(2)
+system call will check whether it's possible so send a signal to it (that
+means, to be brief, that the process is owned by the same user, or we are
+the super-user).  This is a useful way to check that a child process is
+alive and hasn't changed its UID.  See L<perlport> for notes on the
+portability of this construct.
 
 Unlike in the shell, if SIGNAL is negative, it kills
 process groups instead of processes.  (On System V, a negative I<PROCESS>
