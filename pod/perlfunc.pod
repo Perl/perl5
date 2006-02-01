@@ -2594,7 +2594,7 @@ same as the number actually killed).
     kill 9, @goners;
 
 If SIGNAL is zero, no signal is sent to the process, but the kill(2)
-system call will check whether it's possible so send a signal to it (that
+system call will check whether it's possible to send a signal to it (that
 means, to be brief, that the process is owned by the same user, or we are
 the super-user).  This is a useful way to check that a child process is
 alive and hasn't changed its UID.  See L<perlport> for notes on the
