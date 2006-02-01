@@ -32,9 +32,12 @@ See L<Module::CoreList> for one.
       5.008004   1.03
       5.008005   1.04
       5.008006   1.04
+      5.008007   1.05
+      5.008008   1.06
       5.009      1.02
       5.009001   1.02
       5.009002   1.04
+      5.009003   1.06
 
 =item -?
 
@@ -48,7 +51,7 @@ all of the help
 
 lists all of the perl release versions we got the CoreList for.
 
-If you pass a version argument (value of $], like 5.00503),
+If you pass a version argument (value of C<$]>, like 5.00503),
 you get a list of all the modules and their respective versions.
 
 =back
@@ -152,12 +155,12 @@ sub module_version {
 
 =head1 COPYRIGHT
 
-Copyright (c) 2002-2005 by D.H. aka PodMaster
+Copyright (c) 2002-2006 by D.H. aka PodMaster
 
 Current maintainer : Rafael Garcia-Suarez E<lt>rgarciasuarez at mandriva dot
 comE<gt>
 
 This program is distributed under the same terms as perl itself.
-See http://perl.com or http://cpan.org for more info on that.
+See http://perl.org/ or http://cpan.org/ for more info on that.
 
 =cut
