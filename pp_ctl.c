@@ -1078,7 +1078,7 @@ PP(pp_flip)
 		flip = SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv));
 	    }
 	    else {
-		GV * const gv = gv_fetchpvs(".", GV_ADD, SVt_PV);
+		GV * const gv = gv_fetchpvs(".", GV_ADD|GV_NOTQUAL, SVt_PV);
 		if (gv && GvSV(gv))
 		    flip = SvIV(sv) == SvIV(GvSV(gv));
 	    }
@@ -1172,7 +1172,7 @@ PP(pp_flop)
 		flop = SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv));
 	    }
 	    else {
-		GV * const gv = gv_fetchpvs(".", GV_ADD, SVt_PV);
+		GV * const gv = gv_fetchpvs(".", GV_ADD|GV_NOTQUAL, SVt_PV);
 		if (gv && GvSV(gv)) flop = SvIV(sv) == SvIV(GvSV(gv));
 	    }
 	}

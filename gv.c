@@ -762,9 +762,16 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     HV *stash = NULL;
     const I32 no_init = flags & (GV_NOADD_NOINIT | GV_NOINIT);
     const I32 no_expand = flags & GV_NOEXPAND;
-    const I32 add = flags & ~SVf_UTF8 & ~GV_NOADD_NOINIT & ~GV_NOEXPAND;
+    const I32 add =
+	flags & ~SVf_UTF8 & ~GV_NOADD_NOINIT & ~GV_NOEXPAND & ~GV_NOTQUAL;
     const char *const name_end = nambeg + full_len;
     const char *const name_em1 = name_end - 1;
+
+    if (flags & GV_NOTQUAL) {
+	/* Caller promised that there is no stash, so we can skip the check. */
+	len = full_len;
+	goto no_stash;
+    }
 
     if (full_len > 2 && *name == '*' && isALPHA(name[1])) {
 	/* accidental stringify on a GV? */
@@ -827,6 +834,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     /* No stash in name, so see how we can default */
 
     if (!stash) {
+    no_stash:
 	if (len && isIDFIRST_lazy(name)) {
 	    bool global = FALSE;
 

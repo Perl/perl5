@@ -2050,8 +2050,9 @@ OP *
 Perl_jmaybe(pTHX_ OP *o)
 {
     if (o->op_type == OP_LIST) {
-	OP * const o2 = newSVREF(newGVOP(OP_GV, 0, gv_fetchpvs(";", GV_ADD,
-							       SVt_PV)));
+	OP * const o2
+	    = newSVREF(newGVOP(OP_GV, 0, gv_fetchpvs(";", GV_ADD|GV_NOTQUAL,
+						     SVt_PV)));
 	o = convert(OP_JOIN, 0, prepend_elem(OP_LIST, o2, o));
     }
     return o;
@@ -3235,7 +3236,7 @@ Perl_dofile(pTHX_ OP *term, I32 force_builtin)
     GV *gv = Nullgv;
 
     if (!force_builtin) {
-	gv = gv_fetchpvs("do", 0, SVt_PVCV);
+	gv = gv_fetchpvs("do", GV_NOTQUAL, SVt_PVCV);
 	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
 	    GV * const * const gvp = (GV**)hv_fetchs(PL_globalstash, "do", FALSE);
 	    gv = gvp ? *gvp : Nullgv;
@@ -4974,7 +4975,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 
     GV * const gv = o
 	? gv_fetchsv(cSVOPo->op_sv, GV_ADD, SVt_PVFM)
-	: gv_fetchpvs("STDOUT", GV_ADD, SVt_PVFM);
+	: gv_fetchpvs("STDOUT", GV_ADD|GV_NOTQUAL, SVt_PVFM);
 
 #ifdef GV_UNIQUE_CHECK
     if (GvUNIQUE(gv)) {
@@ -5801,7 +5802,7 @@ Perl_ck_glob(pTHX_ OP *o)
     if ((o->op_flags & OPf_KIDS) && !cLISTOPo->op_first->op_sibling)
 	append_elem(OP_GLOB, o, newDEFSVOP());
 
-    if (!((gv = gv_fetchpvs("glob", 0, SVt_PVCV))
+    if (!((gv = gv_fetchpvs("glob", GV_NOTQUAL, SVt_PVCV))
 	  && GvCVu(gv) && GvIMPORTED_CV(gv)))
     {
 	gv = gv_fetchpvs("CORE::GLOBAL::glob", 0, SVt_PVCV);
@@ -6223,7 +6224,7 @@ Perl_ck_require(pTHX_ OP *o)
 
     if (!(o->op_flags & OPf_SPECIAL)) { /* Wasn't written as CORE::require */
 	/* handle override, if any */
-	gv = gv_fetchpvs("require", 0, SVt_PVCV);
+	gv = gv_fetchpvs("require", GV_NOTQUAL, SVt_PVCV);
 	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
 	    GV * const * const gvp = (GV**)hv_fetchs(PL_globalstash, "require", FALSE);
 	    gv = gvp ? *gvp : Nullgv;
@@ -6384,8 +6385,8 @@ S_simplify_sort(pTHX_ OP *o)
     const char *gvname;
     if (!(o->op_flags & OPf_STACKED))
 	return;
-    GvMULTI_on(gv_fetchpvs("a", GV_ADD, SVt_PV));
-    GvMULTI_on(gv_fetchpvs("b", GV_ADD, SVt_PV));
+    GvMULTI_on(gv_fetchpvs("a", GV_ADD|GV_NOTQUAL, SVt_PV));
+    GvMULTI_on(gv_fetchpvs("b", GV_ADD|GV_NOTQUAL, SVt_PV));
     kid = kUNOP->op_first;				/* get past null */
     if (kid->op_type != OP_SCOPE)
 	return;

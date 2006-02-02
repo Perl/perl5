@@ -1330,7 +1330,7 @@ PP(pp_leavewrite)
 		topname = sv_2mortal(Perl_newSVpvf(aTHX_ "%s_TOP", GvNAME(gv)));
 		topgv = gv_fetchsv(topname, 0, SVt_PVFM);
 		if ((topgv && GvFORM(topgv)) ||
-		  !gv_fetchpvs("top", 0, SVt_PVFM))
+		  !gv_fetchpvs("top", GV_NOTQUAL, SVt_PVFM))
 		    IoTOP_NAME(io) = savesvpv(topname);
 		else
 		    IoTOP_NAME(io) = savepvs("top");
@@ -3856,7 +3856,7 @@ PP(pp_fork)
     if (childpid < 0)
 	RETSETUNDEF;
     if (!childpid) {
-	GV * const tmpgv = gv_fetchpvs("$", GV_ADD, SVt_PV);
+	GV * const tmpgv = gv_fetchpvs("$", GV_ADD|GV_NOTQUAL, SVt_PV);
 	if (tmpgv) {
             SvREADONLY_off(GvSV(tmpgv));
 	    sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());

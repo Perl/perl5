@@ -173,6 +173,8 @@ Return the SV from the GV.
 #define GV_NOADD_NOINIT	0x20	/* Don't add the symbol if it's not there.
 				   Don't init it if it is there but ! PVGV */
 #define GV_NOEXPAND	0x40	/* Don't expand SvOK() entries to PVGV */
+#define GV_NOTQUAL	0x80	/* A plain symbol name, not qualified with a
+				   package (so skip checks for :: and ')  */
 
 /*      SVf_UTF8 (more accurately the return value from SvUTF8) is also valid
 	as a flag to gv_fetch_pvn_flags, so ensure it lies outside this range.

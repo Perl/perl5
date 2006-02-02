@@ -734,7 +734,7 @@ Perl_nextargv(pTHX_ register GV *gv)
     IO * const io = GvIOp(gv);
 
     if (!PL_argvoutgv)
-	PL_argvoutgv = gv_fetchpvs("ARGVOUT",GV_ADD,SVt_PVIO);
+	PL_argvoutgv = gv_fetchpvs("ARGVOUT", GV_ADD|GV_NOTQUAL, SVt_PVIO);
     if (io && (IoFLAGS(io) & IOf_ARGV) && (IoFLAGS(io) & IOf_START)) {
 	IoFLAGS(io) &= ~IOf_START;
 	if (PL_inplace) {
@@ -767,7 +767,8 @@ Perl_nextargv(pTHX_ register GV *gv)
 	    if (PL_inplace) {
 		TAINT_PROPER("inplace open");
 		if (oldlen == 1 && *PL_oldname == '-') {
-		    setdefout(gv_fetchpvs("STDOUT",GV_ADD,SVt_PVIO));
+		    setdefout(gv_fetchpvs("STDOUT", GV_ADD|GV_NOTQUAL,
+					  SVt_PVIO));
 		    return IoIFP(GvIOp(gv));
 		}
 #ifndef FLEXFILENAMES
@@ -934,7 +935,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 	    SvREFCNT_dec(oldout);
 	    return Nullfp;
 	}
-	setdefout(gv_fetchpvs("STDOUT",GV_ADD,SVt_PVIO));
+	setdefout(gv_fetchpvs("STDOUT", GV_ADD|GV_NOTQUAL, SVt_PVIO));
     }
     return Nullfp;
 }
