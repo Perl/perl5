@@ -152,7 +152,7 @@ sub first_release {
     5.009002 => [perl => 24131],
     5.008007 => ['maint-5.8' => 24641],
     5.009003 => [perl => 26975],
-    5.008008 => ['maint-5.8' => 27029],
+    5.008008 => ['maint-5.8' => 27040],
 );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
