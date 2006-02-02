@@ -1078,7 +1078,7 @@ PP(pp_flip)
 		flip = SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv));
 	    }
 	    else {
-		GV * const gv = gv_fetchpvs(".", TRUE, SVt_PV);
+		GV * const gv = gv_fetchpvs(".", GV_ADD, SVt_PV);
 		if (gv && GvSV(gv))
 		    flip = SvIV(sv) == SvIV(GvSV(gv));
 	    }
@@ -1172,7 +1172,7 @@ PP(pp_flop)
 		flop = SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv));
 	    }
 	    else {
-		GV * const gv = gv_fetchpvs(".", TRUE, SVt_PV);
+		GV * const gv = gv_fetchpvs(".", GV_ADD, SVt_PV);
 		if (gv && GvSV(gv)) flop = SvIV(sv) == SvIV(GvSV(gv));
 	    }
 	}
@@ -1674,7 +1674,7 @@ PP(pp_caller)
 	const int off = AvARRAY(ary) - AvALLOC(ary);
 
 	if (!PL_dbargs) {
-	    GV* const tmpgv = gv_fetchpvs("DB::args", TRUE, SVt_PVAV);
+	    GV* const tmpgv = gv_fetchpvs("DB::args", GV_ADD, SVt_PVAV);
 	    PL_dbargs = GvAV(gv_AVadd(tmpgv));
 	    GvMULTI_on(tmpgv);
 	    AvREAL_off(PL_dbargs);	/* XXX should be REIFY (see av.h) */

@@ -1631,8 +1631,8 @@ PP(pp_sort)
 		SAVESPTR(PL_firstgv);
 		SAVESPTR(PL_secondgv);
 		SAVESPTR(PL_sortstash);
-		PL_firstgv = gv_fetchpvs("a", TRUE, SVt_PV);
-		PL_secondgv = gv_fetchpvs("b", TRUE, SVt_PV);
+		PL_firstgv = gv_fetchpvs("a", GV_ADD, SVt_PV);
+		PL_secondgv = gv_fetchpvs("b", GV_ADD, SVt_PV);
 		PL_sortstash = stash;
 		SAVESPTR(GvSV(PL_firstgv));
 		SAVESPTR(GvSV(PL_secondgv));

@@ -1267,10 +1267,10 @@ Perl_newIO(pTHX)
     SvOBJECT_on(io);
     /* Clear the stashcache because a new IO could overrule a package name */
     hv_clear(PL_stashcache);
-    iogv = gv_fetchpvn_flags("FileHandle::", 12, 0, SVt_PVHV);
+    iogv = gv_fetchpvs("FileHandle::", 0, SVt_PVHV);
     /* unless exists($main::{FileHandle}) and defined(%main::FileHandle::) */
     if (!(iogv && GvHV(iogv) && HvARRAY(GvHV(iogv))))
-      iogv = gv_fetchpvn_flags("IO::Handle::", 12, TRUE, SVt_PVHV);
+      iogv = gv_fetchpvs("IO::Handle::", GV_ADD, SVt_PVHV);
     SvSTASH_set(io, (HV*)SvREFCNT_inc(GvHV(iogv)));
     return io;
 }
