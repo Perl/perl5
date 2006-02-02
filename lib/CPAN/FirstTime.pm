@@ -2,7 +2,7 @@
 package CPAN::Mirrored::By;
 use strict;
 use vars qw($VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 469 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 485 $,4)/100;
 
 sub new { 
     my($self,@arg) = @_;
@@ -21,7 +21,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec;
 use vars qw($VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 469 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 485 $,4)/100;
 
 =head1 NAME
 
@@ -324,8 +324,13 @@ Shall we use it as the general CPAN build and cache directory?
 
     my_dflt_prompt(make_arg => "", $matcher);
 
-    my_dflt_prompt(make_install_make_command => $CPAN::Config->{make} || "",
-		   $matcher);
+    require CPAN::HandleConfig;
+    if (exists $CPAN::HandleConfig::keys{make_install_make_command}) {
+        # as long as Windows needs $self->_build_command, we cannot
+        # support sudo on windows :-)
+        my_dflt_prompt(make_install_make_command => $CPAN::Config->{make} || "",
+                       $matcher);
+    }
 
     my_dflt_prompt(make_install_arg => $CPAN::Config->{make_arg} || "", 
 		   $matcher);
@@ -337,7 +342,11 @@ Shall we use it as the general CPAN build and cache directory?
 
     my_dflt_prompt(mbuild_arg => "", $matcher);
 
-    my_dflt_prompt(mbuild_install_build_command => "./Build", $matcher);
+    if (exists $CPAN::HandleConfig::keys{mbuild_install_build_command}) {
+        # as long as Windows needs $self->_build_command, we cannot
+        # support sudo on windows :-)
+        my_dflt_prompt(mbuild_install_build_command => "./Build", $matcher);
+    }
 
     my_dflt_prompt(mbuild_install_arg => "", $matcher);
 

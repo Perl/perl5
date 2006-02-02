@@ -2,7 +2,7 @@ package CPAN::HandleConfig;
 use strict;
 use vars qw(%can %keys $dot_cpan $VERSION);
 
-$VERSION = sprintf "%.2f", substr(q$Rev: 469 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 488 $,4)/100;
 
 %can = (
   'commit' => "Commit changes to disk",
@@ -29,6 +29,19 @@ $VERSION = sprintf "%.2f", substr(q$Rev: 469 $,4)/100;
     unzip urllist
     wait_list wget
 );
+if ($^O eq "MSWin32") {
+    for my $k (qw(
+                  mbuild_install_build_command
+                  make_install_make_command
+                 )) {
+        delete $keys{$k};
+        if (exists $CPAN::Config->{$k}) {
+            $CPAN::Frontend->mywarn("deleting previously set config variable ".
+                                    "'$k' => '$CPAN::Config->{$k}'");
+            delete $CPAN::Config->{$k};
+        }
+    }
+}
 
 # returns true on successful action
 sub edit {
@@ -80,6 +93,7 @@ sub edit {
             }
             return $changed;
         } elsif ($o =~ /_hash$/) {
+            @args = () if @args==1 && $args[0] eq "";
             push @args, "" if @args % 2;
             $CPAN::Config->{$o} = { @args };
         } else {
@@ -162,6 +176,11 @@ EOF
         $CPAN::Frontend->mydie("Couldn't open >$configpm: $!");
     $fh->print(qq[$msg\$CPAN::Config = \{\n]);
     foreach (sort keys %$CPAN::Config) {
+        unless (exists $keys{$_}) {
+            $CPAN::Frontend->mywarn("Dropping unknown config variable '$_'\n");
+            delete $CPAN::Config->{$_};
+            next;
+        }
 	$fh->print(
 		   "  '$_' => ",
 		   $self->neatvalue($CPAN::Config->{$_}),
@@ -352,6 +371,7 @@ sub missing_config_data {
          "unzip",
          "urllist",
         ) {
+        next unless exists $keys{$_};
 	push @miss, $_ unless defined $CPAN::Config->{$_};
     }
     return @miss;
@@ -418,7 +438,7 @@ package ####::###### #hide from indexer
 
 use strict;
 use vars qw($AUTOLOAD $VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 469 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 488 $,4)/100;
 
 # formerly CPAN::HandleConfig was known as CPAN::Config
 sub AUTOLOAD {
