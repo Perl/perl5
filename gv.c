@@ -766,8 +766,10 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     const char *const name_end = nambeg + full_len;
     const char *const name_em1 = name_end - 1;
 
-    if (*name == '*' && isALPHA(name[1])) /* accidental stringify on a GV? */
+    if (full_len > 2 && *name == '*' && isALPHA(name[1])) {
+	/* accidental stringify on a GV? */
 	name++;
+    }
 
     for (name_cursor = name; name_cursor < name_end; name_cursor++) {
 	if ((*name_cursor == ':' && name_cursor < name_em1
