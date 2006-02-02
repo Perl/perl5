@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 =head1 NAME
 
@@ -10,7 +10,8 @@ See L<Module::CoreList> for one.
 
 =head1 SYNOPSIS
 
-    corelist [-help] [-a] [-man] [-v [ version ]] [ Modulename [ version ]] ...
+    corelist [-a] [ Modulename [ version ]] ...
+    corelist [-v [ version ]]
 
 =head1 OPTIONS
 
@@ -39,7 +40,7 @@ See L<Module::CoreList> for one.
       5.009002   1.04
       5.009003   1.06
 
-=item -?
+=item -? or -help
 
 help! help! help! to see more help, try --man.
 
@@ -62,6 +63,7 @@ use Module::CoreList;
 use Getopt::Long;
 use Pod::Usage;
 use strict;
+use warnings;
 
 my %Opts;
 
