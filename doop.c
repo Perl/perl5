@@ -1390,7 +1390,7 @@ Perl_do_kv(pTHX)
 	if (PL_op->op_flags & OPf_MOD || LVRET) {	/* lvalue */
 	    if (SvTYPE(TARG) < SVt_PVLV) {
 		sv_upgrade(TARG, SVt_PVLV);
-		sv_magic(TARG, Nullsv, PERL_MAGIC_nkeys, Nullch, 0);
+		sv_magic(TARG, Nullsv, PERL_MAGIC_nkeys, NULL, 0);
 	    }
 	    LvTYPE(TARG) = 'k';
 	    if (LvTARG(TARG) != (SV*)keys) {

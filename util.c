@@ -92,7 +92,7 @@ Perl_safesysmalloc(MEM_SIZE size)
     ptr = (Malloc_t)PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
     PERL_ALLOC_CHECK(ptr);
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) malloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
-    if (ptr != Nullch) {
+    if (ptr != NULL) {
 #ifdef PERL_TRACK_MEMPOOL
         ((struct perl_memory_debug_header *)ptr)->interpreter = aTHX;
 #  ifdef PERL_POISON
@@ -104,7 +104,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 	return ptr;
 }
     else if (PL_nomemok)
-	return Nullch;
+	return NULL;
     else {
 	return write_no_mem();
     }
@@ -162,14 +162,14 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) rfree\n",PTR2UV(where),(long)PL_an++));
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) realloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
 
-    if (ptr != Nullch) {
+    if (ptr != NULL) {
 #ifdef PERL_TRACK_MEMPOOL
         ptr = (Malloc_t)((char*)ptr+sTHX);
 #endif
 	return ptr;
     }
     else if (PL_nomemok)
-	return Nullch;
+	return NULL;
     else {
 	return write_no_mem();
     }
@@ -239,7 +239,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     ptr = (Malloc_t)PerlMem_malloc(size?size:1);	/* malloc(0) is NASTY on our system */
     PERL_ALLOC_CHECK(ptr);
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) calloc %ld x %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)count,(long)size));
-    if (ptr != Nullch) {
+    if (ptr != NULL) {
 	memset((void*)ptr, 0, size);
 #ifdef PERL_TRACK_MEMPOOL
         ((struct perl_memory_debug_header *)ptr)->interpreter = aTHX;
@@ -252,7 +252,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 	return ptr;
     }
     else if (PL_nomemok)
-	return Nullch;
+	return NULL;
     return write_no_mem();
 }
 
@@ -334,7 +334,7 @@ Perl_instr(pTHX_ register const char *big, register const char *little)
 	    continue;
 	for (x=big,s=little; *s; /**/ ) {
 	    if (!*x)
-		return Nullch;
+		return NULL;
 	    if (*s != *x)
 		break;
 	    else {
@@ -345,7 +345,7 @@ Perl_instr(pTHX_ register const char *big, register const char *little)
 	if (!*s)
 	    return (char*)(big-1);
     }
-    return Nullch;
+    return NULL;
 }
 
 /* same as instr but allow embedded nulls */
@@ -370,7 +370,7 @@ Perl_ninstr(pTHX_ const char *big, const char *bigend, const char *little, const
             return (char*)(big-1);
         }
     }
-    return Nullch;
+    return NULL;
 }
 
 /* reverse of the above--find last substring */
@@ -401,7 +401,7 @@ Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *lit
 	if (s >= littleend)
 	    return (char*)(big+1);
     }
-    return Nullch;
+    return NULL;
 }
 
 #define FBM_TABLE_OFFSET 2	/* Number of bytes between EOS and table*/
@@ -461,7 +461,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	    s--, i++;
 	}
     }
-    sv_magic(sv, Nullsv, PERL_MAGIC_bm, Nullch, 0);	/* deep magic */
+    sv_magic(sv, Nullsv, PERL_MAGIC_bm, NULL, 0);	/* deep magic */
     SvVALID_on(sv);
 
     s = (const unsigned char*)(SvPVX_const(sv));	/* deeper magic */
@@ -488,7 +488,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 =for apidoc fbm_instr
 
 Returns the location of the SV in the string delimited by C<str> and
-C<strend>.  It returns C<Nullch> if the string can't be found.  The C<sv>
+C<strend>.  It returns C<NULL> if the string can't be found.  The C<sv>
 does not have to be fbm_compiled, but the search will not be as fast
 then.
 
@@ -512,7 +512,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 		 || (*big == *little &&
 		     memEQ((char *)big, (char *)little, littlelen - 1))))
 	    return (char*)big;
-	return Nullch;
+	return NULL;
     }
 
     if (littlelen <= 2) {		/* Special-cased */
@@ -532,7 +532,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	    }
 	    if (SvTAIL(littlestr))
 		return (char *) bigend;
-	    return Nullch;
+	    return NULL;
 	}
 	if (!littlelen)
 	    return (char*)big;		/* Cannot be SvTAIL! */
@@ -543,7 +543,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 		return (char*)bigend - 2;
 	    if (bigend[-1] == *little)
 		return (char*)bigend - 1;
-	    return Nullch;
+	    return NULL;
 	}
 	{
 	    /* This should be better than FBM if c1 == c2, and almost
@@ -596,7 +596,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
       check_1char_anchor:		/* One char and anchor! */
 	if (SvTAIL(littlestr) && (*bigend == *little))
 	    return (char *)bigend;	/* bigend is already decremented. */
-	return Nullch;
+	return NULL;
     }
     if (SvTAIL(littlestr) && !multiline) {	/* tail anchored? */
 	s = bigend - littlelen;
@@ -611,7 +611,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	{
 	    return (char*)s + 1;	/* how sweet it is */
 	}
-	return Nullch;
+	return NULL;
     }
     if (SvTYPE(littlestr) != SVt_PVBM || !SvVALID(littlestr)) {
 	char * const b = ninstr((char*)big,(char*)bigend,
@@ -625,7 +625,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	    {
 		return (char*)s;
 	    }
-	    return Nullch;
+	    return NULL;
 	}
 	return b;
     }
@@ -635,7 +635,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	register const unsigned char *oldlittle;
 
 	if (littlelen > (STRLEN)(bigend - big))
-	    return Nullch;
+	    return NULL;
 	--littlelen;			/* Last char found by table lookup */
 
 	s = big + littlelen;
@@ -672,7 +672,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	     && memEQ((char *)(bigend - littlelen),
 		      (char *)(oldlittle - littlelen), littlelen) )
 	    return (char*)bigend - littlelen;
-	return Nullch;
+	return NULL;
     }
 }
 
@@ -715,7 +715,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 	    first = *little++;
 	    goto check_tail;
 	}
-	return Nullch;
+	return NULL;
     }
 
     little = (const unsigned char *)(SvPVX_const(littlestr));
@@ -735,7 +735,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 	if (previous + start_shift == stop_pos + 1) /* A fake '\n'? */
 	    goto check_tail;
 #endif
-	return Nullch;
+	return NULL;
     }
     while (pos < previous + start_shift) {
 	if (!(pos += PL_screamnext[pos]))
@@ -763,7 +763,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 	return (char *)(big+(*old_posp));
   check_tail:
     if (!SvTAIL(littlestr) || (end_shift > 0))
-	return Nullch;
+	return NULL;
     /* Ignore the trailing "\n".  This code is not microoptimized */
     big = (const unsigned char *)(SvPVX_const(bigstr) + SvCUR(bigstr));
     stop_pos = littleend - little;	/* Actual littlestr len */
@@ -774,7 +774,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 	&& ((stop_pos == 1) ||
 	    memEQ((char *)(big + 1), (char *)little, stop_pos - 1)))
 	return (char*)big;
-    return Nullch;
+    return NULL;
 }
 
 I32
@@ -823,7 +823,7 @@ char *
 Perl_savepv(pTHX_ const char *pv)
 {
     if (!pv)
-	return Nullch;
+	return NULL;
     else {
 	char *newaddr;
 	const STRLEN pvlen = strlen(pv)+1;
@@ -877,7 +877,7 @@ Perl_savesharedpv(pTHX_ const char *pv)
     register char *newaddr;
     STRLEN pvlen;
     if (!pv)
-	return Nullch;
+	return NULL;
 
     pvlen = strlen(pv)+1;
     newaddr = (char*)PerlMemShared_malloc(pvlen);
@@ -1201,7 +1201,7 @@ S_vdie_croak_common(pTHX_ const char* pat, va_list* args, STRLEN* msglen,
 	*utf8 = SvUTF8(msv);
     }
     else {
-	message = Nullch;
+	message = NULL;
     }
 
     DEBUG_S(PerlIO_printf(Perl_debug_log,
@@ -1309,11 +1309,11 @@ function.  Calling C<croak> returns control directly to Perl,
 sidestepping the normal C order of execution. See C<warn>.
 
 If you want to throw an exception object, assign the object to
-C<$@> and then pass C<Nullch> to croak():
+C<$@> and then pass C<NULL> to croak():
 
    errsv = get_sv("@", TRUE);
    sv_setsv(errsv, exception_object);
-   croak(Nullch);
+   croak(NULL);
 
 =cut
 */
@@ -1517,7 +1517,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 	    tmpenv[j] = (char*)safesysmalloc((len+1)*sizeof(char));
 	    Copy(environ[j], tmpenv[j], len+1, char);
 	}
-	tmpenv[max] = Nullch;
+	tmpenv[max] = NULL;
 	environ = tmpenv;		/* tell exec where it is now */
     }
     if (!val) {
@@ -1530,7 +1530,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
     }
     if (!environ[i]) {			/* does not exist yet */
 	environ = (char**)safesysrealloc(environ, (i+2) * sizeof(char*));
-	environ[i+1] = Nullch;	/* make sure it's null terminated */
+	environ[i+1] = NULL;	/* make sure it's null terminated */
     }
     else
 	safesysfree(environ[i]);
@@ -2871,8 +2871,8 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 		 const char *const *const search_ext, I32 flags)
 {
     dVAR;
-    const char *xfound = Nullch;
-    char *xfailed = Nullch;
+    const char *xfound = NULL;
+    char *xfailed = NULL;
     char tmpbuf[MAXPATHLEN];
     register char *s;
     I32 len = 0;
@@ -2894,7 +2894,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
     static const char *const exts[] = { SEARCH_EXTS };
     const char *const *const ext = search_ext ? search_ext : exts;
     int extidx = 0, i = 0;
-    const char *curext = Nullch;
+    const char *curext = NULL;
 #else
     PERL_UNUSED_ARG(search_ext);
 #  define MAX_EXT_LEN 0
@@ -2927,13 +2927,13 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 	int idx = 0, deftypes = 1;
 	bool seen_dot = 1;
 
-	const int hasdir = !dosearch || (strpbrk(scriptname,":[</") != Nullch);
+	const int hasdir = !dosearch || (strpbrk(scriptname,":[</") != NULL);
 #  else
     if (dosearch) {
 	int idx = 0, deftypes = 1;
 	bool seen_dot = 1;
 
-	const int hasdir = (strpbrk(scriptname,":[</") != Nullch);
+	const int hasdir = (strpbrk(scriptname,":[</") != NULL);
 #  endif
 	/* The first time through, just add SEARCH_EXTS to whatever we
 	 * already have, so we can check for default file types. */
@@ -3094,12 +3094,12 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 		      (xfailed ? "" : " on PATH"),
 		      (xfailed || seen_dot) ? "" : ", '.' not in PATH");
 	    }
-	    scriptname = Nullch;
+	    scriptname = NULL;
 	}
 	Safefree(xfailed);
 	scriptname = xfound;
     }
-    return (scriptname ? savepv(scriptname) : Nullch);
+    return (scriptname ? savepv(scriptname) : NULL);
 }
 
 #ifndef PERL_GET_CONTEXT_DEFINED

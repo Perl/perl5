@@ -87,7 +87,7 @@ Perl_dump_sub(pTHX_ const GV *gv)
 {
     SV * const sv = sv_newmortal();
 
-    gv_fullname3(sv, gv, Nullch);
+    gv_fullname3(sv, gv, NULL);
     Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nSUB %s = ", SvPVX_const(sv));
     if (CvXSUB(GvCV(gv)))
 	Perl_dump_indent(aTHX_ 0, Perl_debug_log, "(xsub 0x%"UVxf" %d)\n",
@@ -104,7 +104,7 @@ Perl_dump_form(pTHX_ const GV *gv)
 {
     SV * const sv = sv_newmortal();
 
-    gv_fullname3(sv, gv, Nullch);
+    gv_fullname3(sv, gv, NULL);
     Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nFORMAT %s = ", SvPVX_const(sv));
     if (CvROOT(GvFORM(gv)))
 	op_dump(CvROOT(GvFORM(gv)));
@@ -772,7 +772,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		SV *tmpsv = newSV(0);
 		ENTER;
 		SAVEFREESV(tmpsv);
-		gv_fullname3(tmpsv, (GV*)cSVOPo->op_sv, Nullch);
+		gv_fullname3(tmpsv, (GV*)cSVOPo->op_sv, NULL);
 		Perl_dump_indent(aTHX_ level, file, "GV = %s\n",
 				 SvPV_nolen_const(tmpsv));
 		LEAVE;
@@ -875,10 +875,10 @@ Perl_gv_dump(pTHX_ GV *gv)
     }
     sv = sv_newmortal();
     PerlIO_printf(Perl_debug_log, "{\n");
-    gv_fullname3(sv, gv, Nullch);
+    gv_fullname3(sv, gv, NULL);
     Perl_dump_indent(aTHX_ 1, Perl_debug_log, "GV_NAME = %s", SvPVX_const(sv));
     if (gv != GvEGV(gv)) {
-	gv_efullname3(sv, GvEGV(gv), Nullch);
+	gv_efullname3(sv, GvEGV(gv), NULL);
 	Perl_dump_indent(aTHX_ 1, Perl_debug_log, "-> %s", SvPVX_const(sv));
     }
     PerlIO_putc(Perl_debug_log, '\n');
@@ -1650,7 +1650,7 @@ Perl_debop(pTHX_ const OP *o)
     case OP_GV:
 	if (cGVOPo_gv) {
 	    SV *sv = newSV(0);
-	    gv_fullname3(sv, cGVOPo_gv, Nullch);
+	    gv_fullname3(sv, cGVOPo_gv, NULL);
 	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV_nolen_const(sv));
 	    SvREFCNT_dec(sv);
 	}

@@ -1173,7 +1173,7 @@ perl_get_emergency_buffer(IV *size)
     }
 
     SvPOK_off(sv);
-    SvPV_set(sv, Nullch);
+    SvPV_set(sv, NULL);
     SvCUR_set(sv, 0);
     SvLEN_set(sv, 0);
     *size = malloced_size(pv) + M_OVERHEAD;
@@ -1249,7 +1249,7 @@ emergency_sbrk(MEM_SIZE size)
 	if (emergency_buffer_size) {
 	    add_to_chain(emergency_buffer, emergency_buffer_size, 0);
 	    emergency_buffer_size = 0;
-	    emergency_buffer = Nullch;
+	    emergency_buffer = NULL;
 	    have = 1;
 	}
 
@@ -1276,7 +1276,7 @@ emergency_sbrk(MEM_SIZE size)
     MALLOC_UNLOCK;
     emergency_sbrk_croak("Out of memory during request for %"UVuf" bytes, total sbrk() is %"UVuf" bytes", (UV)size, (UV)(goodsbrk + sbrk_slack));
     /* NOTREACHED */
-    return Nullch;
+    return NULL;
 }
 
 #else /*  !defined(PERL_EMERGENCY_SBRK) */
@@ -2141,7 +2141,7 @@ Perl_realloc(void *mp, size_t nbytes)
 		    bad_free_warn = (pbf) ? atoi(pbf) : 1;
 		}
 		if (!bad_free_warn)
-		    return Nullch;
+		    return NULL;
 #ifdef RCHECK
 #ifdef PERL_CORE
 		{
@@ -2169,7 +2169,7 @@ Perl_realloc(void *mp, size_t nbytes)
 		warn("%s", "Bad realloc() ignored");
 #endif
 #endif
-		return Nullch;			/* sanity */
+		return NULL;			/* sanity */
 	    }
 
 	onb = BUCKET_SIZE_REAL(bucket);

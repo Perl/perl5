@@ -196,7 +196,7 @@ PERLVAR(Treg_oldsaved,	char*)		/* old saved substr during match */
 PERLVAR(Treg_oldsavedlen, STRLEN)	/* old length of saved substr during match */
 PERLVAR(Treg_maxiter,	I32)		/* max wait until caching pos */
 PERLVAR(Treg_leftiter,	I32)		/* wait until caching pos */
-PERLVARI(Treg_poscache, char *, Nullch)	/* cache of pos of WHILEM */
+PERLVARI(Treg_poscache, char *, NULL)	/* cache of pos of WHILEM */
 PERLVAR(Treg_poscache_size, STRLEN)	/* size of pos cache of WHILEM */
 
 PERLVARI(Tpeepp,	peep_t, MEMBER_TO_FPTR(Perl_peep))

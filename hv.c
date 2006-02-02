@@ -1808,7 +1808,7 @@ Perl_hv_undef(pTHX_ HV *hv)
     if ((name = HvNAME_get(hv))) {
         if(PL_stashcache)
 	    hv_delete(PL_stashcache, name, HvNAMELEN_get(hv), G_DISCARD);
-	hv_name_set(hv, Nullch, 0, 0);
+	hv_name_set(hv, NULL, 0, 0);
     }
     SvFLAGS(hv) &= ~SVf_OOK;
     Safefree(HvARRAY(hv));

@@ -204,7 +204,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     GvFILE(gv) = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : (char *) "";
     GvCVGEN(gv) = 0;
     GvEGV(gv) = gv;
-    sv_magic((SV*)gv, (SV*)gv, PERL_MAGIC_glob, Nullch, 0);
+    sv_magic((SV*)gv, (SV*)gv, PERL_MAGIC_glob, NULL, 0);
     GvSTASH(gv) = stash;
     if (stash)
 	Perl_sv_add_backref(aTHX_ (SV*)stash, (SV*)gv);
@@ -990,7 +990,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		if (strEQ(name2, "SA")) {
 		    AV* const av = GvAVn(gv);
 		    GvMULTI_on(gv);
-		    sv_magic((SV*)av, (SV*)gv, PERL_MAGIC_isa, Nullch, 0);
+		    sv_magic((SV*)av, (SV*)gv, PERL_MAGIC_isa, NULL, 0);
 		    /* NOTE: No support for tied ISA */
 		    if ((add & GV_ADDMULTI) && strEQ(nambeg,"AnyDBM_File::ISA")
 			&& AvFILLp(av) == -1)
@@ -1133,7 +1133,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	case '-':
 	{
 	    AV* const av = GvAVn(gv);
-            sv_magic((SV*)av, Nullsv, PERL_MAGIC_regdata, Nullch, 0);
+            sv_magic((SV*)av, Nullsv, PERL_MAGIC_regdata, NULL, 0);
 	    SvREADONLY_on(av);
 	    goto magicalize;
 	}
@@ -1150,7 +1150,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	case '+':
 	{
 	    AV* const av = GvAVn(gv);
-            sv_magic((SV*)av, (SV*)av, PERL_MAGIC_regdata, Nullch, 0);
+            sv_magic((SV*)av, (SV*)av, PERL_MAGIC_regdata, NULL, 0);
 	    SvREADONLY_on(av);
 	    /* FALL THROUGH */
 	}

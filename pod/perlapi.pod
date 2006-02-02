@@ -2163,7 +2163,7 @@ Found in file util.c
 X<fbm_instr>
 
 Returns the location of the SV in the string delimited by C<str> and
-C<strend>.  It returns C<Nullch> if the string can't be found.  The C<sv>
+C<strend>.  It returns C<NULL> if the string can't be found.  The C<sv>
 does not have to be fbm_compiled, but the search will not be as fast
 then.
 
@@ -5399,7 +5399,7 @@ X<sv_setref_iv>
 Copies an integer into a new SV, optionally blessing the SV.  The C<rv>
 argument will be upgraded to an RV.  That RV will be modified to point to
 the new SV.  The C<classname> argument indicates the package for the
-blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
+blessing.  Set C<classname> to C<NULL> to avoid the blessing.  The new SV
 will have a reference count of 1, and the RV will be returned.
 
 	SV*	sv_setref_iv(SV* rv, const char* classname, IV iv)
@@ -5413,7 +5413,7 @@ X<sv_setref_nv>
 Copies a double into a new SV, optionally blessing the SV.  The C<rv>
 argument will be upgraded to an RV.  That RV will be modified to point to
 the new SV.  The C<classname> argument indicates the package for the
-blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
+blessing.  Set C<classname> to C<NULL> to avoid the blessing.  The new SV
 will have a reference count of 1, and the RV will be returned.
 
 	SV*	sv_setref_nv(SV* rv, const char* classname, NV nv)
@@ -5428,7 +5428,7 @@ Copies a pointer into a new SV, optionally blessing the SV.  The C<rv>
 argument will be upgraded to an RV.  That RV will be modified to point to
 the new SV.  If the C<pv> argument is NULL then C<PL_sv_undef> will be placed
 into the SV.  The C<classname> argument indicates the package for the
-blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
+blessing.  Set C<classname> to C<NULL> to avoid the blessing.  The new SV
 will have a reference count of 1, and the RV will be returned.
 
 Do not use with other Perl types such as HV, AV, SV, CV, because those
@@ -5448,7 +5448,7 @@ Copies a string into a new SV, optionally blessing the SV.  The length of the
 string must be specified with C<n>.  The C<rv> argument will be upgraded to
 an RV.  That RV will be modified to point to the new SV.  The C<classname>
 argument indicates the package for the blessing.  Set C<classname> to
-C<Nullch> to avoid the blessing.  The new SV will have a reference count
+C<NULL> to avoid the blessing.  The new SV will have a reference count
 of 1, and the RV will be returned.
 
 Note that C<sv_setref_pv> copies the pointer while this copies the string.
@@ -5464,7 +5464,7 @@ X<sv_setref_uv>
 Copies an unsigned integer into a new SV, optionally blessing the SV.  The C<rv>
 argument will be upgraded to an RV.  That RV will be modified to point to
 the new SV.  The C<classname> argument indicates the package for the
-blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
+blessing.  Set C<classname> to C<NULL> to avoid the blessing.  The new SV
 will have a reference count of 1, and the RV will be returned.
 
 	SV*	sv_setref_uv(SV* rv, const char* classname, UV uv)
@@ -6502,11 +6502,11 @@ function.  Calling C<croak> returns control directly to Perl,
 sidestepping the normal C order of execution. See C<warn>.
 
 If you want to throw an exception object, assign the object to
-C<$@> and then pass C<Nullch> to croak():
+C<$@> and then pass C<NULL> to croak():
 
    errsv = get_sv("@", TRUE);
    sv_setsv(errsv, exception_object);
-   croak(Nullch);
+   croak(NULL);
 
 	void	croak(const char* pat, ...)
 

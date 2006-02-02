@@ -288,7 +288,7 @@ S_tokereport(pTHX_ I32 rv)
 {
     dVAR;
     if (DEBUG_T_TEST) {
-	const char *name = Nullch;
+	const char *name = NULL;
 	enum token_type type = TOKENTYPE_NONE;
 	const struct debug_tokens *p;
 	SV* const report = newSVpvs("<== ");
@@ -623,7 +623,7 @@ Perl_lex_start(pTHX_ SV *line)
     SvTEMP_off(PL_linestr);
     PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = SvPVX(PL_linestr);
     PL_bufend = PL_bufptr + SvCUR(PL_linestr);
-    PL_last_lop = PL_last_uni = Nullch;
+    PL_last_lop = PL_last_uni = NULL;
     PL_rsfp = 0;
 }
 
@@ -786,7 +786,7 @@ S_skipspace(pTHX_ register char *s)
 
 	/* try to recharge the buffer */
 	if ((s = filter_gets(PL_linestr, PL_rsfp,
-			     (prevlen = SvCUR(PL_linestr)))) == Nullch)
+			     (prevlen = SvCUR(PL_linestr)))) == NULL)
 	{
 	    /* end of file.  Add on the -p or -n magic */
 	    if (PL_minus_p) {
@@ -805,7 +805,7 @@ S_skipspace(pTHX_ register char *s)
 	    PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = s = PL_linestart
 		= SvPVX(PL_linestr);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-	    PL_last_lop = PL_last_uni = Nullch;
+	    PL_last_lop = PL_last_uni = NULL;
 
 	    /* Close the filehandle.  Could be from -P preprocessor,
 	     * STDIN, or a regular file.  If we were reading code from
@@ -1285,7 +1285,7 @@ S_sublex_push(pTHX)
     PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart
 	= SvPVX(PL_linestr);
     PL_bufend += SvCUR(PL_linestr);
-    PL_last_lop = PL_last_uni = Nullch;
+    PL_last_lop = PL_last_uni = NULL;
     SAVEFREESV(PL_linestr);
 
     PL_lex_dojoin = FALSE;
@@ -1336,7 +1336,7 @@ S_sublex_done(pTHX)
 	PL_lex_inpat = 0;
 	PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart = SvPVX(PL_linestr);
 	PL_bufend += SvCUR(PL_linestr);
-	PL_last_lop = PL_last_uni = Nullch;
+	PL_last_lop = PL_last_uni = NULL;
 	SAVEFREESV(PL_linestr);
 	PL_lex_dojoin = FALSE;
 	PL_lex_brackets = 0;
@@ -1788,7 +1788,7 @@ S_scan_const(pTHX_ char *start)
 			goto NUM_ESCAPE_INSERT;
 		    }
 		    res = newSVpvn(s + 1, e - s - 1);
-		    res = new_constant( Nullch, 0, "charnames",
+		    res = new_constant( NULL, 0, "charnames",
 					res, Nullsv, "\\N{...}" );
 		    if (has_utf8)
 			sv_utf8_upgrade(res);
@@ -2356,7 +2356,7 @@ S_filter_gets(pTHX_ register SV *sv, register PerlIO *fp, STRLEN append)
         if (FILTER_READ(0, sv, 0) > 0)
             return ( SvPVX(sv) ) ;
         else
-	    return Nullch ;
+	    return NULL ;
     }
     else
         return (sv_gets(sv, fp, append));
@@ -2758,7 +2758,7 @@ Perl_yylex(pTHX)
 	    sv_catpvs(PL_linestr, "\n");
 	    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-	    PL_last_lop = PL_last_uni = Nullch;
+	    PL_last_lop = PL_last_uni = NULL;
 	    if (PERLDB_LINE && PL_curstash != PL_debstash) {
 		SV * const sv = newSV(0);
 
@@ -2772,7 +2772,7 @@ Perl_yylex(pTHX)
 	}
 	do {
 	    bof = PL_rsfp ? TRUE : FALSE;
-	    if ((s = filter_gets(PL_linestr, PL_rsfp, 0)) == Nullch) {
+	    if ((s = filter_gets(PL_linestr, PL_rsfp, 0)) == NULL) {
 	      fake_eof:
 		if (PL_rsfp) {
 		    if (PL_preprocess && !PL_in_eval)
@@ -2789,12 +2789,12 @@ Perl_yylex(pTHX)
 			     ? ";}continue{print;}" : ";}");
 		    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-		    PL_last_lop = PL_last_uni = Nullch;
+		    PL_last_lop = PL_last_uni = NULL;
 		    PL_minus_n = PL_minus_p = 0;
 		    goto retry;
 		}
 		PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
-		PL_last_lop = PL_last_uni = Nullch;
+		PL_last_lop = PL_last_uni = NULL;
 		sv_setpvn(PL_linestr,"",0);
 		TOKEN(';');	/* not infinite loop because rsfp is NULL now */
 	    }
@@ -2839,7 +2839,7 @@ Perl_yylex(pTHX)
 		    sv_setpvn(PL_linestr, "", 0);
 		    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-		    PL_last_lop = PL_last_uni = Nullch;
+		    PL_last_lop = PL_last_uni = NULL;
 		    PL_doextract = FALSE;
 		}
 	    }
@@ -2856,13 +2856,13 @@ Perl_yylex(pTHX)
 	    av_store(CopFILEAVx(PL_curcop),(I32)CopLINE(PL_curcop),sv);
 	}
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-	PL_last_lop = PL_last_uni = Nullch;
+	PL_last_lop = PL_last_uni = NULL;
 	if (CopLINE(PL_curcop) == 1) {
 	    while (s < PL_bufend && isSPACE(*s))
 		s++;
 	    if (*s == ':' && s[1] != ':') /* for csh execing sh scripts */
 		s++;
-	    d = Nullch;
+	    d = NULL;
 	    if (!PL_in_eval) {
 		if (*s == '#' && *(s+1) == '!')
 		    d = s + 2;
@@ -2935,7 +2935,7 @@ Perl_yylex(pTHX)
 			    }
 			}
 			if (d < ipath)
-			    d = Nullch;
+			    d = NULL;
 		    }
 #endif
 		}
@@ -2954,7 +2954,7 @@ Perl_yylex(pTHX)
 		    while (*c && !strchr("; \t\r\n\f\v#", *c))
 			c++;
 		    if (c < d)
-			d = Nullch;	/* "perl" not in first word; ignore */
+			d = NULL;	/* "perl" not in first word; ignore */
 		    else
 			*s = '#';	/* Don't try to parse shebang line */
 		}
@@ -3026,7 +3026,7 @@ Perl_yylex(pTHX)
 			    sv_setpvn(PL_linestr, "", 0);
 			    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 			    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-			    PL_last_lop = PL_last_uni = Nullch;
+			    PL_last_lop = PL_last_uni = NULL;
 			    PL_preambled = FALSE;
 			    if (PERLDB_LINE)
 				(void)gv_fetchfile(PL_origfilename);
@@ -9869,7 +9869,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	sv_setsv(PL_linestr,herewas);
 	PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = s = PL_linestart = SvPVX(PL_linestr);
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-	PL_last_lop = PL_last_uni = Nullch;
+	PL_last_lop = PL_last_uni = NULL;
     }
     else
 	sv_setpvn(tmpstr,"",0);   /* avoid "uninitialized" warning */
@@ -9881,7 +9881,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	}
 	CopLINE_inc(PL_curcop);
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-	PL_last_lop = PL_last_uni = Nullch;
+	PL_last_lop = PL_last_uni = NULL;
 #ifndef PERL_STRICT_CR
 	if (PL_bufend - PL_linestart >= 2) {
 	    if ((PL_bufend[-2] == '\r' && PL_bufend[-1] == '\n') ||
@@ -10366,7 +10366,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	 !(PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = filter_gets(PL_linestr, PL_rsfp, 0))) {
 	    sv_free(sv);
 	    CopLINE_set(PL_curcop, (line_t)PL_multi_start);
-	    return Nullch;
+	    return NULL;
 	}
 	/* we read a line, so increment our line counter */
 	CopLINE_inc(PL_curcop);
@@ -10384,7 +10384,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
 	/* having changed the buffer, we must update PL_bufend */
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
-	PL_last_lop = PL_last_uni = Nullch;
+	PL_last_lop = PL_last_uni = NULL;
     }
 
     /* at this point, we have successfully read the delimited string */
@@ -10877,7 +10877,7 @@ S_scan_formline(pTHX_ register char *s)
 	    s = filter_gets(PL_linestr, PL_rsfp, 0);
 	    PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = SvPVX(PL_linestr);
 	    PL_bufend = PL_bufptr + SvCUR(PL_linestr);
-	    PL_last_lop = PL_last_uni = Nullch;
+	    PL_last_lop = PL_last_uni = NULL;
 	    if (!s) {
 		s = PL_bufptr;
 		break;

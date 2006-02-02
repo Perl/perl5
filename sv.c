@@ -242,7 +242,7 @@ S_more_sv(pTHX)
 
     if (PL_nice_chunk) {
 	sv_add_arena(PL_nice_chunk, PL_nice_chunk_size, 0);
-	PL_nice_chunk = Nullch;
+	PL_nice_chunk = NULL;
         PL_nice_chunk_size = 0;
     }
     else {
@@ -599,7 +599,7 @@ Perl_sv_free_arenas(pTHX)
 	PL_body_roots[i] = 0;
 
     Safefree(PL_nice_chunk);
-    PL_nice_chunk = Nullch;
+    PL_nice_chunk = NULL;
     PL_nice_chunk_size = 0;
     PL_sv_arenaroot = 0;
     PL_sv_root = 0;
@@ -2925,7 +2925,7 @@ S_glob_assign(pTHX_ SV *dstr, SV *sstr, const int dtype)
 	/* don't upgrade SVt_PVLV: it can hold a glob */
 	if (dtype != SVt_PVLV)
 	    sv_upgrade(dstr, SVt_PVGV);
-	sv_magic(dstr, dstr, PERL_MAGIC_glob, Nullch, 0);
+	sv_magic(dstr, dstr, PERL_MAGIC_glob, NULL, 0);
 	GvSTASH(dstr) = GvSTASH(sstr);
 	if (GvSTASH(dstr))
 	    Perl_sv_add_backref(aTHX_ (SV*)GvSTASH(dstr), dstr);
@@ -3042,7 +3042,7 @@ S_pvgv_assign(pTHX_ SV *dstr, SV *sstr) {
 		    }
 		if (!intro)
 		    cv_ckproto(cv, (GV*)dstr,
-			       SvPOK(sref) ? SvPVX_const(sref) : Nullch);
+			       SvPOK(sref) ? SvPVX_const(sref) : NULL);
 	    }
 	    GvCV(dstr) = (CV*)sref;
 	    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
@@ -3780,7 +3780,7 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	    const STRLEN len = SvCUR(sv);
 	    SvFAKE_off(sv);
 	    SvREADONLY_off(sv);
-	    SvPV_set(sv, Nullch);
+	    SvPV_set(sv, NULL);
 	    SvLEN_set(sv, 0);
 	    SvGROW(sv, len + 1);
 	    Move(pvx,SvPVX(sv),len,char);
@@ -5416,7 +5416,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
     const char *pv2;
     STRLEN cur2;
     I32  eq     = 0;
-    char *tpv   = Nullch;
+    char *tpv   = NULL;
     SV* svrecode = Nullsv;
 
     if (!sv1) {
@@ -5509,7 +5509,7 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
     dVAR;
     STRLEN cur1, cur2;
     const char *pv1, *pv2;
-    char *tpv = Nullch;
+    char *tpv = NULL;
     I32  cmp;
     SV *svrecode = Nullsv;
 
@@ -6053,7 +6053,7 @@ screamer2:
     }
 
 return_string_or_null:
-    return (SvCUR(sv) - append) ? SvPVX(sv) : Nullch;
+    return (SvCUR(sv) - append) ? SvPVX(sv) : NULL;
 }
 
 /*
@@ -6791,7 +6791,7 @@ Perl_sv_reset(pTHX_ register const char *s, HV *stash)
 		    SvOK_off(sv);
 		    if (SvTYPE(sv) >= SVt_PV) {
 			SvCUR_set(sv, 0);
-			if (SvPVX_const(sv) != Nullch)
+			if (SvPVX_const(sv) != NULL)
 			    *SvPVX(sv) = '\0';
 			SvTAINT(sv);
 		    }
@@ -6931,7 +6931,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	    SV *tmpsv;
 	    ENTER;
 	    tmpsv = newSV(0);
-	    gv_efullname3(tmpsv, gv, Nullch);
+	    gv_efullname3(tmpsv, gv, NULL);
 	    /* XXX this is probably not what they think they're getting.
 	     * It has the same effect as "sub name;", i.e. just a forward
 	     * declaration! */
@@ -7246,7 +7246,7 @@ Copies a pointer into a new SV, optionally blessing the SV.  The C<rv>
 argument will be upgraded to an RV.  That RV will be modified to point to
 the new SV.  If the C<pv> argument is NULL then C<PL_sv_undef> will be placed
 into the SV.  The C<classname> argument indicates the package for the
-blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
+blessing.  Set C<classname> to C<NULL> to avoid the blessing.  The new SV
 will have a reference count of 1, and the RV will be returned.
 
 Do not use with other Perl types such as HV, AV, SV, CV, because those
@@ -7276,7 +7276,7 @@ Perl_sv_setref_pv(pTHX_ SV *rv, const char *classname, void *pv)
 Copies an integer into a new SV, optionally blessing the SV.  The C<rv>
 argument will be upgraded to an RV.  That RV will be modified to point to
 the new SV.  The C<classname> argument indicates the package for the
-blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
+blessing.  Set C<classname> to C<NULL> to avoid the blessing.  The new SV
 will have a reference count of 1, and the RV will be returned.
 
 =cut
@@ -7295,7 +7295,7 @@ Perl_sv_setref_iv(pTHX_ SV *rv, const char *classname, IV iv)
 Copies an unsigned integer into a new SV, optionally blessing the SV.  The C<rv>
 argument will be upgraded to an RV.  That RV will be modified to point to
 the new SV.  The C<classname> argument indicates the package for the
-blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
+blessing.  Set C<classname> to C<NULL> to avoid the blessing.  The new SV
 will have a reference count of 1, and the RV will be returned.
 
 =cut
@@ -7314,7 +7314,7 @@ Perl_sv_setref_uv(pTHX_ SV *rv, const char *classname, UV uv)
 Copies a double into a new SV, optionally blessing the SV.  The C<rv>
 argument will be upgraded to an RV.  That RV will be modified to point to
 the new SV.  The C<classname> argument indicates the package for the
-blessing.  Set C<classname> to C<Nullch> to avoid the blessing.  The new SV
+blessing.  Set C<classname> to C<NULL> to avoid the blessing.  The new SV
 will have a reference count of 1, and the RV will be returned.
 
 =cut
@@ -7334,7 +7334,7 @@ Copies a string into a new SV, optionally blessing the SV.  The length of the
 string must be specified with C<n>.  The C<rv> argument will be upgraded to
 an RV.  That RV will be modified to point to the new SV.  The C<classname>
 argument indicates the package for the blessing.  Set C<classname> to
-C<Nullch> to avoid the blessing.  The new SV will have a reference count
+C<NULL> to avoid the blessing.  The new SV will have a reference count
 of 1, and the RV will be returned.
 
 Note that C<sv_setref_pv> copies the pointer while this copies the string.
@@ -7800,7 +7800,7 @@ S_F0convert(NV nv, char *endbuf, STRLEN *len)
 	*len = endbuf - p;
 	return p;
     }
-    return Nullch;
+    return NULL;
 }
 
 
@@ -7940,7 +7940,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	U8 utf8buf[UTF8_MAXBYTES+1];
 	STRLEN esignlen = 0;
 
-	const char *eptr = Nullch;
+	const char *eptr = NULL;
 	STRLEN elen = 0;
 	SV *vecsv = Nullsv;
 	const U8 *vecstr = Null(U8*);
@@ -9030,7 +9030,7 @@ Perl_re_dup(pTHX_ const REGEXP *r, CLONE_PARAMS *param)
     if (RX_MATCH_COPIED(ret))
 	ret->subbeg  = SAVEPVN(r->subbeg, r->sublen);
     else
-	ret->subbeg = Nullch;
+	ret->subbeg = NULL;
 #ifdef PERL_OLD_COPY_ON_WRITE
     ret->saved_copy = Nullsv;
 #endif
@@ -9572,7 +9572,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		    }
 		}
 		else {
-		    SvPV_set(dstr, Nullch);
+		    SvPV_set(dstr, NULL);
 		    AvALLOC((AV*)dstr)	= (SV**)NULL;
 		}
 		break;
@@ -9620,7 +9620,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 			}
 		    }
 		    else {
-			SvPV_set(dstr, Nullch);
+			SvPV_set(dstr, NULL);
 		    }
 		    /* Record stashes for possible cloning in Perl_clone(). */
 		    if(hvname)
@@ -10492,7 +10492,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     if (proto_perl->Iop_mask)
 	PL_op_mask	= SAVEPVN(proto_perl->Iop_mask, PL_maxo);
     else
-	PL_op_mask 	= Nullch;
+	PL_op_mask 	= NULL;
     /* PL_asserting        = proto_perl->Iasserting; */
 
     /* current interpreter roots */
@@ -10510,7 +10510,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_lastfd		= proto_perl->Ilastfd;
     PL_oldname		= proto_perl->Ioldname;		/* XXX not quite right */
     PL_Argv		= NULL;
-    PL_Cmd		= Nullch;
+    PL_Cmd		= NULL;
     PL_gensym		= proto_perl->Igensym;
     PL_preambled	= proto_perl->Ipreambled;
     PL_preambleav	= av_dup_inc(proto_perl->Ipreambleav, param);
@@ -10747,7 +10747,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_glob_index	= proto_perl->Iglob_index;
     PL_srand_called	= proto_perl->Isrand_called;
     PL_uudmap['M']	= 0;		/* reinits on demand */
-    PL_bitcount		= Nullch;	/* reinits on demand */
+    PL_bitcount		= NULL;	/* reinits on demand */
 
     if (proto_perl->Ipsig_pend) {
 	Newxz(PL_psig_pend, SIG_SIZE, int);
@@ -10883,7 +10883,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_sortstash	= hv_dup(proto_perl->Tsortstash, param);
     PL_firstgv		= gv_dup(proto_perl->Tfirstgv, param);
     PL_secondgv		= gv_dup(proto_perl->Tsecondgv, param);
-    PL_efloatbuf	= Nullch;		/* reinits on demand */
+    PL_efloatbuf	= NULL;		/* reinits on demand */
     PL_efloatsize	= 0;			/* reinits on demand */
 
     /* regex stuff */
@@ -10894,26 +10894,26 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_lastscream	= Nullsv;
 
     PL_watchaddr	= NULL;
-    PL_watchok		= Nullch;
+    PL_watchok		= NULL;
 
     PL_regdummy		= proto_perl->Tregdummy;
-    PL_regprecomp	= Nullch;
+    PL_regprecomp	= NULL;
     PL_regnpar		= 0;
     PL_regsize		= 0;
     PL_colorset		= 0;		/* reinits PL_colors[] */
     /*PL_colors[6]	= {0,0,0,0,0,0};*/
-    PL_reginput		= Nullch;
-    PL_regbol		= Nullch;
-    PL_regeol		= Nullch;
+    PL_reginput		= NULL;
+    PL_regbol		= NULL;
+    PL_regeol		= NULL;
     PL_regstartp	= (I32*)NULL;
     PL_regendp		= (I32*)NULL;
     PL_reglastparen	= (U32*)NULL;
     PL_reglastcloseparen	= (U32*)NULL;
-    PL_regtill		= Nullch;
+    PL_regtill		= NULL;
     PL_reg_start_tmp	= (char**)NULL;
     PL_reg_start_tmpl	= 0;
     PL_regdata		= (struct reg_data*)NULL;
-    PL_bostr		= Nullch;
+    PL_bostr		= NULL;
     PL_reg_flags	= 0;
     PL_reg_eval_set	= 0;
     PL_regnarrate	= 0;
@@ -10922,21 +10922,21 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_regcc		= (CURCUR*)NULL;
     PL_reg_call_cc	= (struct re_cc_state*)NULL;
     PL_reg_re		= (regexp*)NULL;
-    PL_reg_ganch	= Nullch;
+    PL_reg_ganch	= NULL;
     PL_reg_sv		= Nullsv;
     PL_reg_match_utf8	= FALSE;
     PL_reg_magic	= (MAGIC*)NULL;
     PL_reg_oldpos	= 0;
     PL_reg_oldcurpm	= (PMOP*)NULL;
     PL_reg_curpm	= (PMOP*)NULL;
-    PL_reg_oldsaved	= Nullch;
+    PL_reg_oldsaved	= NULL;
     PL_reg_oldsavedlen	= 0;
 #ifdef PERL_OLD_COPY_ON_WRITE
     PL_nrs		= Nullsv;
 #endif
     PL_reg_maxiter	= 0;
     PL_reg_leftiter	= 0;
-    PL_reg_poscache	= Nullch;
+    PL_reg_poscache	= NULL;
     PL_reg_poscache_size= 0;
 
     /* RE engine - function pointers */

@@ -65,7 +65,7 @@ Taint an SV. Use C<SvTAINTED_on> instead.
 void
 Perl_sv_taint(pTHX_ SV *sv)
 {
-    sv_magic((sv), Nullsv, PERL_MAGIC_taint, Nullch, 0);
+    sv_magic((sv), Nullsv, PERL_MAGIC_taint, NULL, 0);
 }
 
 /* sv_2iv() is now a macro using Perl_sv_2iv_flags();
@@ -491,7 +491,7 @@ Perl_hv_iternext(pTHX_ HV *hv)
 void
 Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how)
 {
-    sv_magic((SV*)hv, (SV*)gv, how, Nullch, 0);
+    sv_magic((SV*)hv, (SV*)gv, how, NULL, 0);
 }
 
 #if 0 /* use the macro from hv.h instead */

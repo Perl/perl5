@@ -928,7 +928,7 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 	    if (*s) {
 		STRLEN llen = 0;
 		const char *e = s;
-		const char *as = Nullch;
+		const char *as = NULL;
 		STRLEN alen = 0;
 		if (!isIDFIRST(*s)) {
 		    /*
@@ -1095,7 +1095,7 @@ PerlIO_default_layers(pTHX)
 {
     dVAR;
     if (!PL_def_layerlist) {
-	const char * const s = (PL_tainting) ? Nullch : PerlEnv_getenv("PERLIO");
+	const char * const s = (PL_tainting) ? NULL : PerlEnv_getenv("PERLIO");
 	PERLIO_FUNCS_DECL(*osLayer) = &PerlIO_unix;
 	PL_def_layerlist = PerlIO_list_alloc(aTHX);
 	PerlIO_define_layer(aTHX_ PERLIO_FUNCS_CAST(&PerlIO_unix));
@@ -1357,7 +1357,7 @@ PerlIO_binmode(pTHX_ PerlIO *f, int iotype, int mode, const char *names)
 	/* Legacy binmode is now _defined_ as being equivalent to pushing :raw
 	   So code that used to be here is now in PerlIORaw_pushed().
 	 */
-	return PerlIO_push(aTHX_ f, PERLIO_FUNCS_CAST(&PerlIO_raw), Nullch, Nullsv) ? TRUE : FALSE;
+	return PerlIO_push(aTHX_ f, PERLIO_FUNCS_CAST(&PerlIO_raw), NULL, Nullsv) ? TRUE : FALSE;
     }
 }
 
@@ -3229,7 +3229,7 @@ PerlIOStdio_setlinebuf(pTHX_ PerlIO *f)
 #ifdef HAS_SETLINEBUF
     PerlSIO_setlinebuf(PerlIOSelf(f, PerlIOStdio)->stdio);
 #else
-    PerlSIO_setvbuf(PerlIOSelf(f, PerlIOStdio)->stdio, Nullch, _IOLBF, 0);
+    PerlSIO_setvbuf(PerlIOSelf(f, PerlIOStdio)->stdio, NULL, _IOLBF, 0);
 #endif
 }
 
@@ -3461,7 +3461,7 @@ PerlIO_findFILE(PerlIO *f)
 	l = *PerlIONext(&l);
     }
     /* Uses fallback "mode" via PerlIO_modestr() in PerlIO_exportFILE */
-    return PerlIO_exportFILE(f, Nullch);
+    return PerlIO_exportFILE(f, NULL);
 }
 
 /* Use this to reverse PerlIO_exportFILE calls. */
@@ -3555,7 +3555,7 @@ PerlIOBuf_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 #ifdef PERLIO_USING_CRLF
 #  ifdef PERLIO_IS_BINMODE_FD
 		if (PERLIO_IS_BINMODE_FD(fd))
-		    PerlIO_binmode(aTHX_ f,  '<'/*not used*/, O_BINARY, Nullch);
+		    PerlIO_binmode(aTHX_ f,  '<'/*not used*/, O_BINARY, NULL);
 		else
 #  endif
 		/*
@@ -4792,7 +4792,7 @@ PerlIO_getname(PerlIO *f, char *buf)
     PERL_UNUSED_ARG(f);
     PERL_UNUSED_ARG(buf);
     Perl_croak(aTHX_ "Don't know how to get file name");
-    return Nullch;
+    return NULL;
 #endif
 }
 
@@ -4808,7 +4808,7 @@ PerlIO *
 PerlIO_fdopen(int fd, const char *mode)
 {
     dTHX;
-    return PerlIO_openn(aTHX_ Nullch, mode, fd, 0, 0, NULL, 0, NULL);
+    return PerlIO_openn(aTHX_ NULL, mode, fd, 0, 0, NULL, 0, NULL);
 }
 
 #undef PerlIO_open
@@ -4817,7 +4817,7 @@ PerlIO_open(const char *path, const char *mode)
 {
     dTHX;
     SV *name = sv_2mortal(newSVpv(path, 0));
-    return PerlIO_openn(aTHX_ Nullch, mode, -1, 0, 0, NULL, 1, &name);
+    return PerlIO_openn(aTHX_ NULL, mode, -1, 0, 0, NULL, 1, &name);
 }
 
 #undef Perlio_reopen
@@ -4826,7 +4826,7 @@ PerlIO_reopen(const char *path, const char *mode, PerlIO *f)
 {
     dTHX;
     SV *name = sv_2mortal(newSVpv(path,0));
-    return PerlIO_openn(aTHX_ Nullch, mode, -1, 0, 0, f, 1, &name);
+    return PerlIO_openn(aTHX_ NULL, mode, -1, 0, 0, f, 1, &name);
 }
 
 #undef PerlIO_getc

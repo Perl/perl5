@@ -179,7 +179,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	namesv = sv_2mortal(newSVpv(oname,0));
 	num_svs = 1;
 	svp = &namesv;
-        type = Nullch;
+	type = NULL;
 	fp = PerlIO_openn(aTHX_ type, mode, -1, rawmode, rawperm, NULL, num_svs, svp);
     }
     else {
@@ -381,7 +381,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 			    fd = -1;
 		    }
 		    if (!num_svs)
-			type = Nullch;
+			type = NULL;
 		    if (that_fp) {
 			fp = PerlIO_fdupopen(aTHX_ that_fp, NULL, dodup);
 		    }
@@ -412,7 +412,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 			namesv = sv_2mortal(newSVpvn(type,tend - type));
 			num_svs = 1;
 			svp = &namesv;
-		        type = Nullch;
+		        type = NULL;
 		    }
 		    fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 		}
@@ -450,7 +450,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 		    namesv = sv_2mortal(newSVpvn(type,tend - type));
 		    num_svs = 1;
 		    svp = &namesv;
-		    type = Nullch;
+		    type = NULL;
 		}
 		fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 	    }
@@ -542,7 +542,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 		    namesv = sv_2mortal(newSVpvn(type,tend - type));
 		    num_svs = 1;
 		    svp = &namesv;
-		    type = Nullch;
+		    type = NULL;
 		}
 		fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 	    }
@@ -1427,7 +1427,7 @@ Perl_do_execfree(pTHX)
     Safefree(PL_Argv);
     PL_Argv = Null(char **);
     Safefree(PL_Cmd);
-    PL_Cmd = Nullch;
+    PL_Cmd = NULL;
 }
 
 #ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION

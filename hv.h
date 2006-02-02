@@ -299,7 +299,7 @@ C<SV*>.
 #define HePV(he,lp)		((HeKLEN(he) == HEf_SVKEY) ?		\
 				 SvPV(HeKEY_sv(he),lp) :		\
 				 (((lp = HeKLEN(he)) >= 0) ?		\
-				  HeKEY(he) : Nullch))
+				  HeKEY(he) : NULL))
 
 #define HeSVKEY(he)		((HeKEY(he) && 				\
 				  HeKLEN(he) == HEf_SVKEY) ?		\
@@ -365,7 +365,7 @@ C<SV*>.
 #define HV_ITERNEXT_WANTPLACEHOLDERS	0x01	/* Don't skip placeholders.  */
 
 #define hv_iternext(hv)	hv_iternext_flags(hv, 0)
-#define hv_magic(hv, gv, how) sv_magic((SV*)(hv), (SV*)(gv), how, Nullch, 0)
+#define hv_magic(hv, gv, how) sv_magic((SV*)(hv), (SV*)(gv), how, NULL, 0)
 
 /* available as a function in hv.c */
 #define Perl_sharepvn(sv, len, hash) HEK_KEY(share_hek(sv, len, hash))

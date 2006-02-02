@@ -866,7 +866,7 @@ perl_destruct(pTHXx)
     PL_unsafe       = FALSE;
 
     Safefree(PL_inplace);
-    PL_inplace = Nullch;
+    PL_inplace = NULL;
     SvREFCNT_dec(PL_patchlevel);
 
     if (PL_e_script) {
@@ -889,7 +889,7 @@ perl_destruct(pTHXx)
 
     PL_multiline = 0;		/* $* */
     Safefree(PL_osname);	/* $^O */
-    PL_osname = Nullch;
+    PL_osname = NULL;
 
     SvREFCNT_dec(PL_statname);
     PL_statname = Nullsv;
@@ -907,7 +907,7 @@ perl_destruct(pTHXx)
 
     /* float buffer */
     Safefree(PL_efloatbuf);
-    PL_efloatbuf = Nullch;
+    PL_efloatbuf = NULL;
     PL_efloatsize = 0;
 
     /* startup and shutdown function lists */
@@ -970,12 +970,12 @@ perl_destruct(pTHXx)
     /* free locale stuff */
 #ifdef USE_LOCALE_COLLATE
     Safefree(PL_collation_name);
-    PL_collation_name = Nullch;
+    PL_collation_name = NULL;
 #endif
 
 #ifdef USE_LOCALE_NUMERIC
     Safefree(PL_numeric_name);
-    PL_numeric_name = Nullch;
+    PL_numeric_name = NULL;
     SvREFCNT_dec(PL_numeric_radix_sv);
     PL_numeric_radix_sv = Nullsv;
 #endif
@@ -1213,7 +1213,7 @@ perl_destruct(pTHXx)
     SvREADONLY_off(&PL_sv_undef);
 
     Safefree(PL_origfilename);
-    PL_origfilename = Nullch;
+    PL_origfilename = NULL;
     Safefree(PL_reg_start_tmp);
     PL_reg_start_tmp = (char**)NULL;
     PL_reg_start_tmpl = 0;
@@ -1226,7 +1226,7 @@ perl_destruct(pTHXx)
     Safefree(PL_psig_name);
     PL_psig_name = (SV**)NULL;
     Safefree(PL_bitcount);
-    PL_bitcount = Nullch;
+    PL_bitcount = NULL;
     Safefree(PL_psig_pend);
     PL_psig_pend = (int*)NULL;
     PL_formfeed = Nullsv;
@@ -1498,7 +1498,7 @@ setuid perl scripts securely.\n");
 		   s = PL_origenviron[0];
 		   while (*s) s++;
 #endif
-		   my_setenv("NoNe  SuCh", Nullch);
+		   my_setenv("NoNe  SuCh", NULL);
 		   /* Force copy of environment. */
 		   for (i = 1; PL_origenviron[i]; i++) {
 			if (PL_origenviron[i] == s + 1
@@ -1589,7 +1589,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     const char *validarg = "";
     register SV *sv;
     register char *s;
-    const char *cddir = Nullch;
+    const char *cddir = NULL;
 #ifdef USE_SITECUSTOMIZE
     bool minus_f = FALSE;
 #endif
@@ -1698,7 +1698,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
 	case 'I':	/* -I handled both here and in moreswitches() */
 	    forbid_setid("-I");
-	    if (!*++s && (s=argv[1]) != Nullch) {
+	    if (!*++s && (s=argv[1]) != NULL) {
 		argc--,argv++;
 	    }
 	    if (s && *s) {
@@ -1951,7 +1951,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
             PL_taint_warn = FALSE;
 	}
 	else {
-	    char *popt_copy = Nullch;
+	    char *popt_copy = NULL;
 	    while (s && *s) {
 	        char *d;
 		while (isSPACE(*s))
@@ -2008,7 +2008,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	argc++,argv--;
 	scriptname = BIT_BUCKET;	/* don't look for script or read stdin */
     }
-    else if (scriptname == Nullch) {
+    else if (scriptname == NULL) {
 #ifdef MSDOS
 	if ( PerlLIO_isatty(PerlIO_fileno(PerlIO_stdin())) )
 	    moreswitches("h");
@@ -3369,7 +3369,7 @@ Internet, point your browser at http://www.perl.org/, the Perl Home Page.\n\n");
     default:
 	Perl_croak(aTHX_ "Can't emulate -%.1s on #! line",s);
     }
-    return Nullch;
+    return NULL;
 }
 
 /* compliments of Tom Christiansen */
@@ -3947,7 +3947,7 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
 	PL_doswitches = FALSE;		/* -s is insecure in suid */
 	/* PSz 13 Nov 03  But -s was caught elsewhere ... so unsetting it here is useless(?!) */
 	CopLINE_inc(PL_curcop);
-	if (sv_gets(PL_linestr, PL_rsfp, 0) == Nullch)
+	if (sv_gets(PL_linestr, PL_rsfp, 0) == NULL)
 	    Perl_croak(aTHX_ "No #! line");
 	linestr = SvPV_nolen_const(PL_linestr);
 	/* required even on Sys V */
@@ -4230,7 +4230,7 @@ S_find_beginning(pTHX)
     /* Since the Mac OS does not honor #! arguments for us, we do it ourselves */
 
     while (PL_doextract || gMacPerl_AlwaysExtract) {
-	if ((s = sv_gets(PL_linestr, PL_rsfp, 0)) == Nullch) {
+	if ((s = sv_gets(PL_linestr, PL_rsfp, 0)) == NULL) {
 	    if (!gMacPerl_AlwaysExtract)
 		Perl_croak(aTHX_ "No Perl script found in input\n");
 
@@ -4247,7 +4247,7 @@ S_find_beginning(pTHX)
 	}
 #else
     while (PL_doextract) {
-	if ((s = sv_gets(PL_linestr, PL_rsfp, 0)) == Nullch)
+	if ((s = sv_gets(PL_linestr, PL_rsfp, 0)) == NULL)
 	    Perl_croak(aTHX_ "No Perl script found in input\n");
 #endif
 	s2 = s;
@@ -4613,7 +4613,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 #  endif
 	   )
 	{
-	    environ[0] = Nullch;
+	    environ[0] = NULL;
 	}
 	if (env) {
           char** origenv = environ;
@@ -4847,14 +4847,14 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 	    }
 	}
 
-	if ( usesep && (s = strchr(p, PERLLIB_SEP)) != Nullch ) {
+	if ( usesep && (s = strchr(p, PERLLIB_SEP)) != NULL ) {
 	    sv_setpvn(libdir, PERLLIB_MANGLE(p, (STRLEN)(s - p)),
 		      (STRLEN)(s - p));
 	    p = s + 1;
 	}
 	else {
 	    sv_setpv(libdir, PERLLIB_MANGLE(p, 0));
-	    p = Nullch;	/* break out */
+	    p = NULL;	/* break out */
 	}
 #ifdef MACOS_TRADITIONAL
 	if (!strchr(SvPVX(libdir), ':')) {
@@ -4978,7 +4978,7 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 	    char *unix;
 	    STRLEN len;
 
-	    if ((unix = tounixspec_ts(SvPV(libdir,len),Nullch)) != Nullch) {
+	    if ((unix = tounixspec_ts(SvPV(libdir,len),NULL)) != NULL) {
 		len = strlen(unix);
 		while (unix[len-1] == '/') len--;  /* Cosmetic */
 		sv_usepvn(libdir,unix,len);

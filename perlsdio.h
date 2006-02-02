@@ -87,7 +87,7 @@
 #ifdef HAS_SETLINEBUF
 #define PerlIO_setlinebuf(f)		PerlSIO_setlinebuf(f);
 #else
-#define PerlIO_setlinebuf(f)		PerlSIO_setvbuf(f, Nullch, _IOLBF, 0);
+#define PerlIO_setlinebuf(f)		PerlSIO_setvbuf(f, NULL, _IOLBF, 0);
 #endif
 
 /* Now our interface to Configure's FILE_xxx macros */

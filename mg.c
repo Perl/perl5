@@ -1076,7 +1076,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 			    return 0;
 			}
 		    }
-		    if ((cp = strchr(elt, ':')) != Nullch)
+		    if ((cp = strchr(elt, ':')) != NULL)
 			*cp = '\0';
 		    if (my_trnlnm(elt, eltbuf, j++))
 			elt = eltbuf;
@@ -1115,7 +1115,7 @@ int
 Perl_magic_clearenv(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_UNUSED_ARG(sv);
-    my_setenv(MgPV_nolen_const(mg),Nullch);
+    my_setenv(MgPV_nolen_const(mg),NULL);
     return 0;
 }
 
@@ -2206,12 +2206,12 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	break;
     case '\011':	/* ^I */ /* NOT \t in EBCDIC */
 	Safefree(PL_inplace);
-	PL_inplace = SvOK(sv) ? savesvpv(sv) : Nullch;
+	PL_inplace = SvOK(sv) ? savesvpv(sv) : NULL;
 	break;
     case '\017':	/* ^O */
 	if (*(mg->mg_ptr+1) == '\0') {
 	    Safefree(PL_osname);
-	    PL_osname = Nullch;
+	    PL_osname = NULL;
 	    if (SvOK(sv)) {
 		TAINT_PROPER("assigning to $^O");
 		PL_osname = savesvpv(sv);
@@ -2738,7 +2738,7 @@ Perl_sighandler(int sig)
 	(void)rsignal(sig, PL_csighandlerp);
 #endif
 #endif /* !PERL_MICRO */
-	Perl_die(aTHX_ Nullch);
+	Perl_die(aTHX_ NULL);
     }
 cleanup:
     if (flags & 1)

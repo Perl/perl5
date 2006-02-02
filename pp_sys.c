@@ -344,7 +344,7 @@ PP(pp_backtick)
 	    SAVESPTR(PL_rs);
 	    PL_rs = &PL_sv_undef;
 	    sv_setpvn(TARG, "", 0);	/* note that this preserves previous buffer */
-	    while (sv_gets(TARG, fp, SvCUR(TARG)) != Nullch)
+	    while (sv_gets(TARG, fp, SvCUR(TARG)) != NULL)
 		;
 	    LEAVE;
 	    XPUSHs(TARG);
@@ -353,7 +353,7 @@ PP(pp_backtick)
 	else {
 	    for (;;) {
 		SV * const sv = newSV(79);
-		if (sv_gets(sv, fp, 0) == Nullch) {
+		if (sv_gets(sv, fp, 0) == NULL) {
 		    SvREFCNT_dec(sv);
 		    break;
 		}
@@ -477,7 +477,7 @@ PP(pp_die)
     }
     else {
 	tmpsv = TOPs;
-        tmps = SvROK(tmpsv) ? Nullch : SvPV_const(tmpsv, len);
+        tmps = SvROK(tmpsv) ? NULL : SvPV_const(tmpsv, len);
     }
     if (!tmps || !len) {
 	SV * const error = ERRSV;
@@ -502,7 +502,7 @@ PP(pp_die)
 		    sv_setsv(error,*PL_stack_sp--);
 		}
 	    }
-	    DIE(aTHX_ Nullch);
+	    DIE(aTHX_ NULL);
 	}
 	else {
 	    if (SvPOK(error) && SvCUR(error))
@@ -511,7 +511,7 @@ PP(pp_die)
 	    if (SvOK(tmpsv))
 		tmps = SvPV_const(tmpsv, len);
 	    else
-		tmps = Nullch;
+		tmps = NULL;
 	}
     }
     if (!tmps || !len)
@@ -761,11 +761,11 @@ PP(pp_binmode)
 
     PUTBACK;
     if (PerlIO_binmode(aTHX_ fp,IoTYPE(io),mode_from_discipline(discp),
-                       (discp) ? SvPV_nolen_const(discp) : Nullch)) {
+                       (discp) ? SvPV_nolen_const(discp) : NULL)) {
 	if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {
 	     if (!PerlIO_binmode(aTHX_ IoOFP(io),IoTYPE(io),
 			mode_from_discipline(discp),
-                       (discp) ? SvPV_nolen_const(discp) : Nullch)) {
+                       (discp) ? SvPV_nolen_const(discp) : NULL)) {
 		SPAGAIN;
 		RETPUSHUNDEF;
 	     }
@@ -859,7 +859,7 @@ PP(pp_tie)
 	     SvTYPE(varsv) == SVt_PVHV))
 	    Perl_croak(aTHX_
 		       "Self-ties of arrays and hashes are not supported");
-	sv_magic(varsv, (SvRV(sv) == varsv ? Nullsv : sv), how, Nullch, 0);
+	sv_magic(varsv, (SvRV(sv) == varsv ? Nullsv : sv), how, NULL, 0);
     }
     LEAVE;
     SP = PL_stack_base + markoff;
@@ -975,7 +975,7 @@ PP(pp_dbmopen)
 
     if (sv_isobject(TOPs)) {
 	sv_unmagic((SV *) hv, PERL_MAGIC_tied);
-	sv_magic((SV*)hv, TOPs, PERL_MAGIC_tied, Nullch, 0);
+	sv_magic((SV*)hv, TOPs, PERL_MAGIC_tied, NULL, 0);
     }
     LEAVE;
     RETURN;
@@ -1172,7 +1172,7 @@ PP(pp_select)
     else {
 	GV * const * const gvp = (GV**)hv_fetch(hv, GvNAME(egv), GvNAMELEN(egv), FALSE);
 	if (gvp && *gvp == egv) {
-	    gv_efullname4(TARG, PL_defoutgv, Nullch, TRUE);
+	    gv_efullname4(TARG, PL_defoutgv, NULL, TRUE);
 	    XPUSHTARG;
 	}
 	else {
@@ -1286,7 +1286,7 @@ PP(pp_enterwrite)
 	if (fgv) {
 	    SV * const tmpsv = sv_newmortal();
 	    const char *name;
-	    gv_efullname4(tmpsv, fgv, Nullch, FALSE);
+	    gv_efullname4(tmpsv, fgv, NULL, FALSE);
 	    name = SvPV_nolen_const(tmpsv);
 	    if (name && *name)
 		DIE(aTHX_ "Undefined format \"%s\" called", name);
@@ -1375,7 +1375,7 @@ PP(pp_leavewrite)
 	if (!cv) {
 	    SV * const sv = sv_newmortal();
 	    const char *name;
-	    gv_efullname4(sv, fgv, Nullch, FALSE);
+	    gv_efullname4(sv, fgv, NULL, FALSE);
 	    name = SvPV_nolen_const(sv);
 	    if (name && *name)
 		DIE(aTHX_ "Undefined top format \"%s\" called",name);
@@ -3218,7 +3218,7 @@ PP(pp_fttext)
 	    (void)PerlIO_close(fp);
 	    RETPUSHUNDEF;
 	}
-	PerlIO_binmode(aTHX_ fp, '<', O_BINARY, Nullch);
+	PerlIO_binmode(aTHX_ fp, '<', O_BINARY, NULL);
 	len = PerlIO_read(fp, tbuf, sizeof(tbuf));
 	(void)PerlIO_close(fp);
 	if (len <= 0) {
@@ -3511,7 +3511,7 @@ S_dooneliner(pTHX_ const char *cmd, const char *filename)
 	/* Need to save/restore 'PL_rs' ?? */
 	s = sv_gets(tmpsv, myfp, 0);
 	(void)PerlProc_pclose(myfp);
-	if (s != Nullch) {
+	if (s != NULL) {
 	    int e;
 	    for (e = 1;
 #ifdef HAS_SYS_ERRLIST
@@ -4753,7 +4753,7 @@ PP(pp_gservent)
 #ifdef HAS_GETSERVBYNAME
 	const char * const proto = POPpbytex;
 	const char * const name = POPpbytex;
-	sent = PerlSock_getservbyname(name, (proto && !*proto) ? Nullch : proto);
+	sent = PerlSock_getservbyname(name, (proto && !*proto) ? NULL : proto);
 #else
 	DIE(aTHX_ PL_no_sock_func, "getservbyname");
 #endif
@@ -4765,7 +4765,7 @@ PP(pp_gservent)
 #ifdef HAS_HTONS
 	port = PerlSock_htons(port);
 #endif
-	sent = PerlSock_getservbyport(port, (proto && !*proto) ? Nullch : proto);
+	sent = PerlSock_getservbyport(port, (proto && !*proto) ? NULL : proto);
 #else
 	DIE(aTHX_ PL_no_sock_func, "getservbyport");
 #endif

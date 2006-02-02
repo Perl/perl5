@@ -162,7 +162,7 @@ STATIC const char*
 S_gv_ename(pTHX_ GV *gv)
 {
     SV* const tmpsv = sv_newmortal();
-    gv_efullname3(tmpsv, gv, Nullch);
+    gv_efullname3(tmpsv, gv, NULL);
     return SvPV_nolen_const(tmpsv);
 }
 
@@ -384,7 +384,7 @@ Perl_op_clear(pTHX_ OP *o)
 	}
 	else {
 	    Safefree(cPVOPo->op_pv);
-	    cPVOPo->op_pv = Nullch;
+	    cPVOPo->op_pv = NULL;
 	}
 	break;
     case OP_SUBST:
@@ -3123,9 +3123,9 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	Nullop,
 	append_elem(OP_LINESEQ,
 	    append_elem(OP_LINESEQ,
-	        newSTATEOP(0, Nullch, newUNOP(OP_REQUIRE, 0, idop)),
-	        newSTATEOP(0, Nullch, veop)),
-	    newSTATEOP(0, Nullch, imop) ));
+	        newSTATEOP(0, NULL, newUNOP(OP_REQUIRE, 0, idop)),
+	        newSTATEOP(0, NULL, veop)),
+	    newSTATEOP(0, NULL, imop) ));
 
     /* The "did you use incorrect case?" warning used to be here.
      * The problem is that on case-insensitive filesystems one
@@ -4311,7 +4311,7 @@ Perl_cv_ckproto(pTHX_ const CV *cv, const GV *gv, const char *p)
 	SV* name = Nullsv;
 
 	if (gv)
-	    gv_efullname3(name = sv_newmortal(), gv, Nullch);
+	    gv_efullname3(name = sv_newmortal(), gv, NULL);
 	sv_setpv(msg, "Prototype mismatch:");
 	if (name)
 	    Perl_sv_catpvf(aTHX_ msg, " sub %"SVf, name);
@@ -4471,14 +4471,14 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     const I32 gv_fetch_flags
 	= (block || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS))
 	? GV_ADDMULTI : GV_ADDMULTI | GV_NOINIT;
-    const char * const name = o ? SvPVx_nolen_const(cSVOPo->op_sv) : Nullch;
+    const char * const name = o ? SvPVx_nolen_const(cSVOPo->op_sv) : NULL;
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
 	ps = SvPVx_const(((SVOP*)proto)->op_sv, ps_len);
     }
     else
-	ps = Nullch;
+	ps = NULL;
 
     if (!name && PERLDB_NAMEANON && CopLINE(PL_curcop)) {
 	SV * const sv = sv_newmortal();
@@ -4488,7 +4488,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	aname = SvPVX_const(sv);
     }
     else
-	aname = Nullch;
+	aname = NULL;
 
     gv = name ? gv_fetchsv(cSVOPo->op_sv, gv_fetch_flags, SVt_PVCV)
 	: gv_fetchpv(aname ? aname
@@ -4695,7 +4695,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	/* This makes sub {}; work as expected.  */
 	if (block->op_type == OP_STUB) {
 	    op_free(block);
-	    block = newSTATEOP(0, Nullch, 0);
+	    block = newSTATEOP(0, NULL, 0);
 	}
 	CvROOT(cv) = newUNOP(OP_LEAVESUB, 0, scalarseq(block));
     }
@@ -4729,7 +4729,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    Perl_sv_setpvf(aTHX_ sv, "%s:%ld-%ld",
 			   CopFILE(PL_curcop),
 			   (long)PL_subline, (long)CopLINE(PL_curcop));
-	    gv_efullname3(tmpstr, gv, Nullch);
+	    gv_efullname3(tmpstr, gv, NULL);
 	    hv_store(GvHV(PL_DBsub), SvPVX_const(tmpstr), SvCUR(tmpstr), sv, 0);
 	    hv = GvHVn(db_postponed);
 	    if (HvFILL(hv) > 0 && hv_exists(hv, SvPVX_const(tmpstr), SvCUR(tmpstr))) {
@@ -5413,7 +5413,7 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 	if (SvROK(kidsv) && SvREADONLY(kidsv)) {
 	    SV * const rsv = SvRV(kidsv);
 	    const int svtype = SvTYPE(rsv);
-            const char *badtype = Nullch;
+            const char *badtype = NULL;
 
 	    switch (o->op_type) {
 	    case OP_RV2SV:
@@ -5449,7 +5449,7 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 		o->op_private &= ~HINT_STRICT_REFS;
 	}
 	if ((o->op_private & HINT_STRICT_REFS) && (kid->op_private & OPpCONST_BARE)) {
-            const char *badthing = Nullch;
+            const char *badthing = NULL;
 	    switch (o->op_type) {
 	    case OP_RV2SV:
 		badthing = "a SCALAR";
@@ -5674,7 +5674,7 @@ Perl_ck_fun(pTHX_ OP *o)
 
 			/* is this op a FH constructor? */
 			if (is_handle_constructor(o,numargs)) {
-                            const char *name = Nullch;
+                            const char *name = NULL;
 			    STRLEN len = 0;
 
 			    flags = 0;
@@ -6979,7 +6979,7 @@ Perl_peep(pTHX_ register OP *o)
 		if (SvTYPE(gv) == SVt_PVGV && GvCV(gv) && SvPVX_const(GvCV(gv))) {
 		    /* XXX could check prototype here instead of just carping */
 		    SV * const sv = sv_newmortal();
-		    gv_efullname3(sv, gv, Nullch);
+		    gv_efullname3(sv, gv, NULL);
 		    Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE),
 				"%"SVf"() called too early to check prototype",
 				sv);
