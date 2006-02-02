@@ -2623,7 +2623,7 @@ Perl_sighandler(int sig)
     GV *gv = Nullgv;
     SV *sv = Nullsv;
     SV * const tSv = PL_Sv;
-    CV *cv = Nullcv;
+    CV *cv = NULL;
     OP *myop = PL_op;
     U32 flags = 0;
     XPV * const tXpv = PL_Xpv;

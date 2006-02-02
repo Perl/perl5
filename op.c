@@ -4290,7 +4290,7 @@ Perl_cv_undef(pTHX_ CV *cv)
     if (!SvREFCNT(cv) && CvOUTSIDE(cv)) {
 	if (!CvWEAKOUTSIDE(cv))
 	    SvREFCNT_dec(CvOUTSIDE(cv));
-	CvOUTSIDE(cv) = Nullcv;
+	CvOUTSIDE(cv) = NULL;
     }
     if (CvCONST(cv)) {
 	SvREFCNT_dec((SV*)CvXSUBANY(cv).any_ptr);
@@ -4522,7 +4522,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	goto done;
     }
 
-    cv = (!name || GvCVGEN(gv)) ? Nullcv : GvCV(gv);
+    cv = (!name || GvCVGEN(gv)) ? NULL : GvCV(gv);
 
 #ifdef GV_UNIQUE_CHECK
     if (cv && GvUNIQUE(gv) && SvREADONLY(cv)) {
@@ -4533,7 +4533,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     if (!block || !ps || *ps || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS))
 	const_sv = Nullsv;
     else
-	const_sv = op_const_sv(block, Nullcv);
+	const_sv = op_const_sv(block, NULL);
 
     if (cv) {
         const bool exists = CvROOT(cv) || CvXSUB(cv);
@@ -4575,7 +4575,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		    CopLINE_set(PL_curcop, oldline);
 		}
 		SvREFCNT_dec(cv);
-		cv = Nullcv;
+		cv = NULL;
 	    }
 	}
     }
@@ -4589,7 +4589,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    CvCONST_on(cv);
 	}
 	else {
-	    GvCV(gv) = Nullcv;
+	    GvCV(gv) = NULL;
 	    cv = newCONSTSUB(NULL, name, const_sv);
 	}
 	op_free(block);
@@ -4869,11 +4869,11 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
     if (!subaddr)
 	Perl_croak(aTHX_ "panic: no address for '%s' in '%s'", name, filename);
 
-    if ((cv = (name ? GvCV(gv) : Nullcv))) {
+    if ((cv = (name ? GvCV(gv) : NULL))) {
 	if (GvCVGEN(gv)) {
 	    /* just a cached method */
 	    SvREFCNT_dec(cv);
-	    cv = Nullcv;
+	    cv = NULL;
 	}
 	else if (CvROOT(cv) || CvXSUB(cv) || GvASSUMECV(gv)) {
 	    /* already defined (or promised) */
@@ -4898,7 +4898,7 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
 		}
 	    }
 	    SvREFCNT_dec(cv);
-	    cv = Nullcv;
+	    cv = NULL;
 	}
     }
 

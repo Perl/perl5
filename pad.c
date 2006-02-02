@@ -284,7 +284,7 @@ Perl_pad_undef(pTHX_ CV* cv)
 			(void)SvREFCNT_inc(outercv);
 		    }
 		    else {
-			CvOUTSIDE(innercv) = Nullcv;
+			CvOUTSIDE(innercv) = NULL;
 		    }
 
 		}

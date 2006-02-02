@@ -3002,7 +3002,7 @@ S_pvgv_assign(pTHX_ SV *dstr, SV *sstr) {
 	if (intro) {
 	    if (GvCVGEN(dstr) && GvCV(dstr) != (CV*)sref) {
 		SvREFCNT_dec(GvCV(dstr));
-		GvCV(dstr) = Nullcv;
+		GvCV(dstr) = NULL;
 		GvCVGEN(dstr) = 0; /* Switch off cacheness. */
 		PL_sub_generation++;
 	    }
@@ -6873,10 +6873,10 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 {
     dVAR;
     GV *gv = Nullgv;
-    CV *cv = Nullcv;
+    CV *cv = NULL;
 
     if (!sv)
-	return *st = NULL, *gvp = Nullgv, Nullcv;
+	return *st = NULL, *gvp = Nullgv, NULL;
     switch (SvTYPE(sv)) {
     case SVt_PVCV:
 	*st = CvSTASH(sv);
@@ -6886,7 +6886,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
     case SVt_PVAV:
 	*st = NULL;
 	*gvp = Nullgv;
-	return Nullcv;
+	return NULL;
     case SVt_PVGV:
 	gv = (GV*)sv;
 	*gvp = gv;
@@ -6918,7 +6918,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	*gvp = gv;
 	if (!gv) {
 	    *st = NULL;
-	    return Nullcv;
+	    return NULL;
 	}
 	/* Some flags to gv_fetchsv mean don't really create the GV  */
 	if (SvTYPE(gv) != SVt_PVGV) {

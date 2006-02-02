@@ -347,7 +347,7 @@ struct block_eval {
 	cx->blk_eval.old_namesv = (n ? newSVpv(n,0) : Nullsv);		\
 	cx->blk_eval.old_eval_root = PL_eval_root;			\
 	cx->blk_eval.cur_text = PL_linestr;				\
-	cx->blk_eval.cv = Nullcv; /* set by doeval(), as applicable */	\
+	cx->blk_eval.cv = NULL; /* set by doeval(), as applicable */	\
 	cx->blk_eval.retop = Nullop; 					\
 	cx->blk_eval.cur_top_env = PL_top_env; 				\
     } STMT_END

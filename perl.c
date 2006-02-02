@@ -726,7 +726,7 @@ perl_destruct(pTHXx)
     }
     PL_main_start = Nullop;
     SvREFCNT_dec(PL_main_cv);
-    PL_main_cv = Nullcv;
+    PL_main_cv = NULL;
     PL_dirty = TRUE;
 
     /* Tell PerlIO we are about to tear things apart in case
@@ -942,7 +942,7 @@ perl_destruct(pTHXx)
     PL_DBtrace = Nullsv;
     PL_DBsignal = Nullsv;
     PL_DBassertion = Nullsv;
-    PL_DBcv = Nullcv;
+    PL_DBcv = NULL;
     PL_dbargs = NULL;
     PL_debstash = NULL;
 
@@ -1542,7 +1542,7 @@ setuid perl scripts securely.\n");
     }
     PL_main_start = Nullop;
     SvREFCNT_dec(PL_main_cv);
-    PL_main_cv = Nullcv;
+    PL_main_cv = NULL;
 
     time(&PL_basetime);
     oldscope = PL_scopestack_ix;
@@ -2416,7 +2416,7 @@ Perl_get_cv(pTHX_ const char *name, I32 create)
 		      Nullop);
     if (gv)
 	return GvCVu(gv);
-    return Nullcv;
+    return NULL;
 }
 
 /* Be sure to refetch the stack pointer after calling these routines. */

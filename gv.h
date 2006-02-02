@@ -84,7 +84,7 @@ Return the SV from the GV.
 
 #define GvCV(gv)	(GvGP(gv)->gp_cv)
 #define GvCVGEN(gv)	(GvGP(gv)->gp_cvgen)
-#define GvCVu(gv)	(GvGP(gv)->gp_cvgen ? Nullcv : GvGP(gv)->gp_cv)
+#define GvCVu(gv)	(GvGP(gv)->gp_cvgen ? NULL : GvGP(gv)->gp_cv)
 
 #define GvLINE(gv)	(GvGP(gv)->gp_line)
 #define GvFILE(gv)	(GvGP(gv)->gp_file)

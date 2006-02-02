@@ -324,7 +324,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 		return topgv;
 	    /* Stale cached entry: junk it */
 	    SvREFCNT_dec(cv);
-	    GvCV(topgv) = cv = Nullcv;
+	    GvCV(topgv) = cv = NULL;
 	    GvCVGEN(topgv) = 0;
 	}
 	else if (GvCVGEN(topgv) == PL_sub_generation)
@@ -1356,7 +1356,7 @@ Perl_gp_ref(pTHX_ GP *gp)
 	if (gp->gp_cvgen) {
 	    /* multi-named GPs cannot be used for method cache */
 	    SvREFCNT_dec(gp->gp_cv);
-	    gp->gp_cv = Nullcv;
+	    gp->gp_cv = NULL;
 	    gp->gp_cvgen = 0;
 	}
 	else {
@@ -1421,9 +1421,9 @@ Perl_magic_freeovrld(pTHX_ SV *sv, MAGIC *mg)
 	int i;
 	for (i = 1; i < NofAMmeth; i++) {
 	    CV * const cv = amtp->table[i];
-	    if (cv != Nullcv) {
+	    if (cv != NULL) {
 		SvREFCNT_dec((SV *) cv);
-		amtp->table[i] = Nullcv;
+		amtp->table[i] = NULL;
 	    }
 	}
     }
@@ -1477,7 +1477,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 	amt.fallback=AMGfallNEVER;
 
     for (i = 1; i < lim; i++)
-	amt.table[i] = Nullcv;
+	amt.table[i] = NULL;
     for (; i < NofAMmeth; i++) {
 	const char * const cooky = PL_AMG_names[i];
 	/* Human-readable form, for debugging: */
@@ -1563,7 +1563,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
     AMT *amtp;
 
     if (!stash || !HvNAME_get(stash))
-        return Nullcv;
+        return NULL;
     mg = mg_find((SV*)stash, PERL_MAGIC_overload_table);
     if (!mg) {
       do_update:
@@ -1589,7 +1589,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 	return ret;
     }
 
-    return Nullcv;
+    return NULL;
 }
 
 

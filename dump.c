@@ -1695,7 +1695,7 @@ S_deb_curcv(pTHX_ I32 ix)
     else if (ix == 0 && PL_curstackinfo->si_type == PERLSI_MAIN)
         return PL_main_cv;
     else if (ix <= 0)
-        return Nullcv;
+        return NULL;
     else
         return deb_curcv(ix - 1);
 }

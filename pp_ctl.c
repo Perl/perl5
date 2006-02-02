@@ -2751,7 +2751,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
     char *tmpbuf = tbuf;
     char *safestr;
     int runtime;
-    CV* runcv = Nullcv;	/* initialise to avoid compiler warnings */
+    CV* runcv = NULL;	/* initialise to avoid compiler warnings */
     STRLEN len;
 
     ENTER;
@@ -3406,7 +3406,7 @@ PP(pp_require)
     encoding = PL_encoding;
     PL_encoding = NULL;
 
-    op = DOCATCH(doeval(gimme, NULL, Nullcv, PL_curcop->cop_seq));
+    op = DOCATCH(doeval(gimme, NULL, NULL, PL_curcop->cop_seq));
 
     /* Restore encoding. */
     PL_encoding = encoding;
