@@ -162,7 +162,7 @@ STATIC const char*
 S_gv_ename(pTHX_ GV *gv)
 {
     SV* const tmpsv = sv_newmortal();
-    gv_efullname3(tmpsv, gv, Nullch);
+    gv_efullname3(tmpsv, gv, NULL);
     return SvPV_nolen_const(tmpsv);
 }
 
@@ -255,7 +255,7 @@ Perl_allocmy(pTHX_ char *name)
 		    PL_in_my_stash,
 		    (PL_in_my == KEY_our 
 			? (PL_curstash ? PL_curstash : PL_defstash)
-			: Nullhv
+			: NULL
 		    ),
 		    0 /*  not fake */
     );
@@ -417,14 +417,14 @@ Perl_op_clear(pTHX_ OP *o)
 	    }
 #else
 	    SvREFCNT_dec(cSVOPo->op_sv);
-	    cSVOPo->op_sv = Nullsv;
+	    cSVOPo->op_sv = NULL;
 #endif
 	}
 	break;
     case OP_METHOD_NAMED:
     case OP_CONST:
 	SvREFCNT_dec(cSVOPo->op_sv);
-	cSVOPo->op_sv = Nullsv;
+	cSVOPo->op_sv = NULL;
 #ifdef USE_ITHREADS
 	/** Bug #15654
 	  Even if op_clear does a pad_free for the target of the op,
@@ -448,11 +448,11 @@ Perl_op_clear(pTHX_ OP *o)
     case OP_TRANS:
 	if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
 	    SvREFCNT_dec(cSVOPo->op_sv);
-	    cSVOPo->op_sv = Nullsv;
+	    cSVOPo->op_sv = NULL;
 	}
 	else {
 	    Safefree(cPVOPo->op_pv);
-	    cPVOPo->op_pv = Nullch;
+	    cPVOPo->op_pv = NULL;
 	}
 	break;
     case OP_SUBST:
@@ -1691,7 +1691,7 @@ Perl_apply_attrs_string(pTHX_ char *stashpv, CV *cv,
 
     Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
                      newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1),
-                     Nullsv, prepend_elem(OP_LIST,
+                     NULL, prepend_elem(OP_LIST,
 				  newSVOP(OP_CONST, 0, newSVpv(stashpv,0)),
 				  prepend_elem(OP_LIST,
 					       newSVOP(OP_CONST, 0,
@@ -1723,7 +1723,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 	} else if (attrs) {
 	    GV * const gv = cGVOPx_gv(cUNOPo->op_first);
 	    PL_in_my = FALSE;
-	    PL_in_my_stash = Nullhv;
+	    PL_in_my_stash = NULL;
 	    apply_attrs(GvSTASH(gv),
 			(type == OP_RV2SV ? GvSV(gv) :
 			 type == OP_RV2AV ? (SV*)GvAV(gv) :
@@ -1747,7 +1747,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 	HV *stash;
 
 	PL_in_my = FALSE;
-	PL_in_my_stash = Nullhv;
+	PL_in_my_stash = NULL;
 
 	/* check for C<my Dog $spot> when deciding package */
 	stash = PAD_COMPNAME_TYPE(o->op_targ);
@@ -1788,7 +1788,7 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
 	    o = append_list(OP_LIST, (LISTOP*)o, (LISTOP*)rops);
     }
     PL_in_my = FALSE;
-    PL_in_my_stash = Nullhv;
+    PL_in_my_stash = NULL;
     return o;
 }
 
@@ -2039,7 +2039,7 @@ Perl_localize(pTHX_ OP *o, I32 lex)
     else
 	o = mod(o, OP_NULL);		/* a bit kludgey */
     PL_in_my = FALSE;
-    PL_in_my_stash = Nullhv;
+    PL_in_my_stash = NULL;
     return o;
 }
 
@@ -3167,9 +3167,9 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 	Nullop,
 	append_elem(OP_LINESEQ,
 	    append_elem(OP_LINESEQ,
-	        newSTATEOP(0, Nullch, newUNOP(OP_REQUIRE, 0, idop)),
-	        newSTATEOP(0, Nullch, veop)),
-	    newSTATEOP(0, Nullch, imop) ));
+	        newSTATEOP(0, NULL, newUNOP(OP_REQUIRE, 0, idop)),
+	        newSTATEOP(0, NULL, veop)),
+	    newSTATEOP(0, NULL, imop) ));
 
     /* The "did you use incorrect case?" warning used to be here.
      * The problem is that on case-insensitive filesystems one
@@ -3468,7 +3468,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			cPADOPx(tmpop)->op_padix = 0;	/* steal it */
 #else
 			pm->op_pmreplroot = (OP*)cSVOPx(tmpop)->op_sv;
-			cSVOPx(tmpop)->op_sv = Nullsv;	/* steal it */
+			cSVOPx(tmpop)->op_sv = NULL;	/* steal it */
 #endif
 			pm->op_pmflags |= PMf_ONCE;
 			tmpop = cUNOPo->op_first;	/* to list (nulled) */
@@ -4140,7 +4140,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	LEAVE;
     }
     SvPOK_off((SV*)cv);		/* forget prototype */
-    CvGV(cv) = Nullgv;
+    CvGV(cv) = NULL;
 
     pad_undef(cv);
 
@@ -4166,10 +4166,10 @@ Perl_cv_ckproto(pTHX_ CV *cv, GV *gv, char *p)
 {
     if (((!p != !SvPOK(cv)) || (p && strNE(p, SvPVX_const(cv)))) && ckWARN_d(WARN_PROTOTYPE)) {
 	SV* const msg = sv_newmortal();
-	SV* name = Nullsv;
+	SV* name = NULL;
 
 	if (gv)
-	    gv_efullname3(name = sv_newmortal(), gv, Nullch);
+	    gv_efullname3(name = sv_newmortal(), gv, NULL);
 	sv_setpv(msg, "Prototype mismatch:");
 	if (name)
 	    Perl_sv_catpvf(aTHX_ msg, " sub %"SVf, name);
@@ -4213,10 +4213,10 @@ Perl_cv_const_sv(pTHX_ CV *cv)
 SV *
 Perl_op_const_sv(pTHX_ OP *o, CV *cv)
 {
-    SV *sv = Nullsv;
+    SV *sv = NULL;
 
     if (!o)
-	return Nullsv;
+	return NULL;
 
     if (o->op_type == OP_LINESEQ && cLISTOPo->op_first)
 	o = cLISTOPo->op_first->op_sibling;
@@ -4235,13 +4235,13 @@ Perl_op_const_sv(pTHX_ OP *o, CV *cv)
 	if (type == OP_LEAVESUB || type == OP_RETURN)
 	    break;
 	if (sv)
-	    return Nullsv;
+	    return NULL;
 	if (type == OP_CONST && cSVOPo->op_sv)
 	    sv = cSVOPo->op_sv;
 	else if ((type == OP_PADSV || type == OP_CONST) && cv) {
 	    sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
 	    if (!sv)
-		return Nullsv;
+		return NULL;
 	    if (CvCONST(cv)) {
 		/* We get here only from cv_clone2() while creating a closure.
 		   Copy the const value here instead of in cv_clone2 so that
@@ -4254,7 +4254,7 @@ Perl_op_const_sv(pTHX_ OP *o, CV *cv)
 		return Nullsv;
 	}
 	else
-	    return Nullsv;
+	    return NULL;
     }
     if (sv)
 	SvREADONLY_on(sv);
@@ -4294,14 +4294,14 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     SV *const_sv;
     I32 gv_fetch_flags;
 
-    const char * const name = o ? SvPVx_nolen_const(cSVOPo->op_sv) : Nullch;
+    const char * const name = o ? SvPVx_nolen_const(cSVOPo->op_sv) : NULL;
 
     if (proto) {
 	assert(proto->op_type == OP_CONST);
 	ps = SvPVx_const(((SVOP*)proto)->op_sv, ps_len);
     }
     else
-	ps = Nullch;
+	ps = NULL;
 
     if (!name && PERLDB_NAMEANON && CopLINE(PL_curcop)) {
 	SV * const sv = sv_newmortal();
@@ -4311,7 +4311,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	aname = SvPVX_const(sv);
     }
     else
-	aname = Nullch;
+	aname = NULL;
 
     /* There may be future conflict here as change 23766 is not yet merged.  */
     gv_fetch_flags = (block || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS))
@@ -4356,7 +4356,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 #endif
 
     if (!block || !ps || *ps || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS))
-	const_sv = Nullsv;
+	const_sv = NULL;
     else
 	const_sv = op_const_sv(block, Nullcv);
 
@@ -4529,7 +4529,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	/* This makes sub {}; work as expected.  */
 	if (block->op_type == OP_STUB) {
 	    op_free(block);
-	    block = newSTATEOP(0, Nullch, 0);
+	    block = newSTATEOP(0, NULL, 0);
 	}
 	CvROOT(cv) = newUNOP(OP_LEAVESUB, 0, scalarseq(block));
     }
@@ -4562,7 +4562,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    Perl_sv_setpvf(aTHX_ sv, "%s:%ld-%ld",
 			   CopFILE(PL_curcop),
 			   (long)PL_subline, (long)CopLINE(PL_curcop));
-	    gv_efullname3(tmpstr, gv, Nullch);
+	    gv_efullname3(tmpstr, gv, NULL);
 	    hv_store(GvHV(PL_DBsub), SvPVX_const(tmpstr), SvCUR(tmpstr), sv, 0);
 	    hv = GvHVn(db_postponed);
 	    if (HvFILL(hv) > 0 && hv_exists(hv, SvPVX_const(tmpstr), SvCUR(tmpstr))) {
@@ -4990,7 +4990,7 @@ OP *
 Perl_ck_anoncode(pTHX_ OP *o)
 {
     cSVOPo->op_targ = pad_add_anon(cSVOPo->op_sv, o->op_type);
-    cSVOPo->op_sv = Nullsv;
+    cSVOPo->op_sv = NULL;
     return o;
 }
 
@@ -5226,7 +5226,7 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 	if (SvROK(kidsv) && SvREADONLY(kidsv)) {
 	    SV *rsv = SvRV(kidsv);
 	    const int svtype = SvTYPE(rsv);
-            const char *badtype = Nullch;
+            const char *badtype = NULL;
 
 	    switch (o->op_type) {
 	    case OP_RV2SV:
@@ -5261,7 +5261,7 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 	}
 	name = SvPV(kidsv, n_a);
 	if ((PL_hints & HINT_STRICT_REFS) && (kid->op_private & OPpCONST_BARE)) {
-            const char *badthing = Nullch;
+            const char *badthing = NULL;
 	    switch (o->op_type) {
 	    case OP_RV2SV:
 		badthing = "a SCALAR";
@@ -5485,7 +5485,7 @@ Perl_ck_fun(pTHX_ OP *o)
 
 			/* is this op a FH constructor? */
 			if (is_handle_constructor(o,numargs)) {
-                            const char *name = Nullch;
+                            const char *name = NULL;
 			    STRLEN len = 0;
 
 			    flags = 0;
@@ -5520,7 +5520,7 @@ Perl_ck_fun(pTHX_ OP *o)
 				 OP *op = ((BINOP*)kid)->op_first;
 				 name = 0;
 				 if (op) {
-				      SV *tmpstr = Nullsv;
+				      SV *tmpstr = NULL;
 				      const char * const a =
 					   kid->op_type == OP_AELEM ?
 					   "[]" : "{}";
@@ -5628,7 +5628,7 @@ Perl_ck_glob(pTHX_ OP *o)
 	GV *glob_gv;
 	ENTER;
 	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-		newSVpvn("File::Glob", 10), Nullsv, Nullsv, Nullsv);
+		newSVpvn("File::Glob", 10), NULL, NULL, NULL);
 	gv = gv_fetchpv("CORE::GLOBAL::glob", FALSE, SVt_PVCV);
 	glob_gv = gv_fetchpv("File::Glob::csh_glob", FALSE, SVt_PVCV);
 	GvCV(gv) = GvCV(glob_gv);
@@ -5865,7 +5865,7 @@ Perl_ck_method(pTHX_ OP *o)
 		sv = newSVpvn_share(SvPVX_const(sv), SvCUR(sv), 0);
 	    }
 	    else {
-		kSVOP->op_sv = Nullsv;
+		kSVOP->op_sv = NULL;
 	    }
 	    cmop = newSVOP(OP_METHOD_NAMED, 0, sv);
 	    op_free(o);
@@ -6567,7 +6567,7 @@ Perl_peep(pTHX_ register OP *o)
 		    /* XXX I don't know how this isn't readonly already. */
 		    SvREADONLY_on(PAD_SVl(ix));
 		}
-		cSVOPo->op_sv = Nullsv;
+		cSVOPo->op_sv = NULL;
 		o->op_targ = ix;
 	    }
 #endif
@@ -6677,7 +6677,7 @@ Perl_peep(pTHX_ register OP *o)
 		if (SvTYPE(gv) == SVt_PVGV && GvCV(gv) && SvPVX_const(GvCV(gv))) {
 		    /* XXX could check prototype here instead of just carping */
 		    SV * const sv = sv_newmortal();
-		    gv_efullname3(sv, gv, Nullch);
+		    gv_efullname3(sv, gv, NULL);
 		    Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE),
 				"%"SVf"() called too early to check prototype",
 				sv);

@@ -1531,7 +1531,7 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
 	ENTER;
 	errsv_save = newSVsv(ERRSV);
 	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn(pkg,pkg_len),
-			 Nullsv);
+			 NULL);
 	if (!SvTRUE(ERRSV))
 	    sv_setsv(ERRSV, errsv_save);
 	SvREFCNT_dec(errsv_save);

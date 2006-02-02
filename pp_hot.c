@@ -1026,8 +1026,8 @@ PP(pp_aassign)
 
     relem = firstrelem;
     lelem = firstlelem;
-    ary = Null(AV*);
-    hash = Null(HV*);
+    ary = NULL;
+    hash = NULL;
 
     while (lelem <= lastlelem) {
 	TAINT_NOT;		/* Each item stands on its own, taintwise. */
@@ -1507,7 +1507,7 @@ Perl_do_readline(pTHX)
 	}
 	RETURN;
     }
-    fp = Nullfp;
+    fp = NULL;
     if (io) {
 	fp = IoIFP(io);
 	if (!fp) {
@@ -1516,7 +1516,7 @@ Perl_do_readline(pTHX)
 		    IoLINES(io) = 0;
 		    if (av_len(GvAVn(PL_last_in_gv)) < 0) {
 			IoFLAGS(io) &= ~IOf_START;
-			do_open(PL_last_in_gv,"-",1,FALSE,O_RDONLY,0,Nullfp);
+			do_open(PL_last_in_gv,"-",1,FALSE,O_RDONLY,0,NULL);
 			sv_setpvn(GvSVn(PL_last_in_gv), "-", 1);
 			SvSETMAGIC(GvSV(PL_last_in_gv));
 			fp = IoIFP(io);
@@ -1922,7 +1922,7 @@ PP(pp_iter)
 
 	if (SvMAGICAL(av) || AvREIFY(av)) {
 	    SV ** const svp = av_fetch(av, --cx->blk_loop.iterix, FALSE);
-	    sv = svp ? *svp : Nullsv;
+	    sv = svp ? *svp : NULL;
 	}
 	else {
 	    sv = AvARRAY(av)[--cx->blk_loop.iterix];
@@ -1938,7 +1938,7 @@ PP(pp_iter)
 	    if (svp)
 		sv = *svp;
 	    else
-		sv = Nullsv;
+		sv = NULL;
 	}
 	else {
 	    sv = AvARRAY(av)[++cx->blk_loop.iterix];
@@ -1946,7 +1946,7 @@ PP(pp_iter)
     }
 
     if (sv && SvREFCNT(sv) == 0) {
-	*itersvp = Nullsv;
+	*itersvp = NULL;
 	Perl_croak(aTHX_ "Use of freed value in iteration");
     }
 
@@ -1958,7 +1958,7 @@ PP(pp_iter)
 	SV *lv = cx->blk_loop.iterlval;
 	if (lv && SvREFCNT(lv) > 1) {
 	    SvREFCNT_dec(lv);
-	    lv = Nullsv;
+	    lv = NULL;
 	}
 	if (lv)
 	    SvREFCNT_dec(LvTARG(lv));
@@ -2006,10 +2006,10 @@ PP(pp_subst)
     I32 oldsave = PL_savestack_ix;
     STRLEN slen;
     bool doutf8 = FALSE;
-    SV *nsv = Nullsv;
+    SV *nsv = NULL;
 
     /* known replacement string? */
-    dstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
+    dstr = (pm->op_pmflags & PMf_CONST) ? POPs : NULL;
     if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
     else {
@@ -3039,7 +3039,7 @@ PP(pp_aelem)
 	    lv = sv_newmortal();
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
-	    sv_magic(lv, Nullsv, PERL_MAGIC_defelem, Nullch, 0);
+	    sv_magic(lv, NULL, PERL_MAGIC_defelem, Nullch, 0);
 	    LvTARG(lv) = SvREFCNT_inc(av);
 	    LvTARGOFF(lv) = elem;
 	    LvTARGLEN(lv) = 1;
@@ -3101,7 +3101,7 @@ PP(pp_method)
 	}
     }
 
-    SETs(method_common(sv, Null(U32*)));
+    SETs(method_common(sv, NULL));
     RETURN;
 }
 
@@ -3123,7 +3123,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     HV* stash;
     STRLEN namelen;
     const char* packname = Nullch;
-    SV *packsv = Nullsv;
+    SV *packsv = NULL;
     STRLEN packlen;
     const char * const name = SvPV_const(meth, namelen);
     SV * const sv = *(PL_stack_base + TOPMARK + 1);

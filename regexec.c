@@ -410,8 +410,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     char *t;
     const int do_utf8 = sv ? SvUTF8(sv) : 0;	/* if no sv we have to assume bytes */
     I32 ml_anch;
-    register char *other_last = Nullch;	/* other substr checked before this */
-    char *check_at = Nullch;		/* check substr found at this pos */
+    register char *other_last = NULL;	/* other substr checked before this */
+    char *check_at = NULL;		/* check substr found at this pos */
     const I32 multiline = PL_multiline | (prog->reganch & PMf_MULTILINE);
 #ifdef DEBUGGING
     const char * const i_strpos = strpos;
@@ -836,9 +836,9 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    SvREFCNT_dec(do_utf8 ? prog->check_utf8 : prog->check_substr);
 	    if (do_utf8 ? prog->check_substr : prog->check_utf8)
 		SvREFCNT_dec(do_utf8 ? prog->check_substr : prog->check_utf8);
-	    prog->check_substr = prog->check_utf8 = Nullsv;	/* disable */
-	    prog->float_substr = prog->float_utf8 = Nullsv;	/* clear */
-	    check = Nullsv;			/* abort */
+	    prog->check_substr = prog->check_utf8 = NULL;	/* disable */
+	    prog->float_substr = prog->float_utf8 = NULL;	/* clear */
+	    check = NULL;			/* abort */
 	    s = strpos;
 	    /* XXXX This is a remnant of the old implementation.  It
 	            looks wasteful, since now INTUIT can use many
@@ -962,7 +962,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
   fail:
     DEBUG_r(PerlIO_printf(Perl_debug_log, "%sMatch rejected by optimizer%s\n",
 			  PL_colors[4],PL_colors[5]));
-    return Nullch;
+    return NULL;
 }
 
 /* We know what class REx starts with.  Try to find this position... */
@@ -1717,7 +1717,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    PL_reg_ganch = strbeg;
     }
 
-    if (!(flags & REXEC_CHECKED) && (prog->check_substr != Nullsv || prog->check_utf8 != Nullsv)) {
+    if (!(flags & REXEC_CHECKED) && (prog->check_substr != NULL || prog->check_utf8 != NULL)) {
 	re_scream_pos_data d;
 
 	d.scream_olds = &scream_olds;
@@ -1843,9 +1843,9 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
                                   "Did not find anchored character...\n")
                );
     }
-    else if (prog->anchored_substr != Nullsv
-	      || prog->anchored_utf8 != Nullsv
-	      || ((prog->float_substr != Nullsv || prog->float_utf8 != Nullsv)
+    else if (prog->anchored_substr != NULL
+	      || prog->anchored_utf8 != NULL
+	      || ((prog->float_substr != NULL || prog->float_utf8 != NULL)
 		  && prog->float_max_offset < strend - s)) {
 	SV *must;
 	I32 back_max;
@@ -1967,7 +1967,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
     else {
 	dontbother = 0;
-	if (prog->float_substr != Nullsv || prog->float_utf8 != Nullsv) {
+	if (prog->float_substr != NULL || prog->float_utf8 != NULL) {
 	    /* Trim the end. */
 	    char *last;
 	    SV* float_real;
@@ -1994,7 +1994,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 			last = strend - len + 1;
 		    else if (!multiline)
 			last = memEQ(strend - len, little, len)
-			    ? strend - len : Nullch;
+			    ? strend - len : NULL;
 		    else
 			goto find_last;
 		} else {
@@ -2121,7 +2121,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 		  && (mg = mg_find(PL_reg_sv, PERL_MAGIC_regex_global)))) {
 		/* prepare for quick setting of pos */
 		sv_magic(PL_reg_sv, (SV*)0,
-			PERL_MAGIC_regex_global, Nullch, 0);
+			PERL_MAGIC_regex_global, NULL, 0);
 		mg = mg_find(PL_reg_sv, PERL_MAGIC_regex_global);
 		mg->mg_len = -1;
 	    }
@@ -2154,7 +2154,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	    RX_MATCH_COPIED_off(prog);
 	}
 	else
-	    PL_reg_oldsaved = Nullch;
+	    PL_reg_oldsaved = NULL;
 	prog->subbeg = PL_bostr;
 	prog->sublen = PL_regeol - PL_bostr; /* strend may have been modified */
     }
@@ -2310,7 +2310,7 @@ S_regmatch(pTHX_ regnode *prog)
 				   function of same name */
     register I32 n;		/* no or next */
     register I32 ln = 0;	/* len or last */
-    register char *s = Nullch;	/* operand or save */
+    register char *s = NULL;	/* operand or save */
     register char *locinput = PL_reginput;
     register I32 c1 = 0, c2 = 0, paren;	/* case fold search, parenth */
     int minmod = 0, sw = 0, logical = 0;
@@ -4286,7 +4286,7 @@ S_regrepeat(pTHX_ const regnode *p, I32 max)
 STATIC I32
 S_regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
 {
-    register char *scan = Nullch;
+    register char *scan = NULL;
     register char *start;
     register char *loceol = PL_regeol;
     I32 l = 0;

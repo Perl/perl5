@@ -1486,7 +1486,7 @@ PP(pp_sort)
     dSP; dMARK; dORIGMARK;
     register SV **p1 = ORIGMARK+1, **p2;
     register I32 max, i;
-    AV* av = Nullav;
+    AV* av = NULL;
     HV *stash;
     GV *gv;
     CV *cv = 0;
@@ -1532,7 +1532,7 @@ PP(pp_sort)
 		}
 		else if (gv) {
 		    SV *tmpstr = sv_newmortal();
-		    gv_efullname3(tmpstr, gv, Nullch);
+		    gv_efullname3(tmpstr, gv, NULL);
 		    DIE(aTHX_ "Undefined sort subroutine \"%"SVf"\" called",
 			tmpstr);
 		}
@@ -1571,7 +1571,7 @@ PP(pp_sort)
 	    p2 = SP;
 	    for (i=0; i < max; i++) {
 		SV **svp = av_fetch(av, i, FALSE);
-		*SP++ = (svp) ? *svp : Nullsv;
+		*SP++ = (svp) ? *svp : NULL;
 	    }
 	}
 	else {
@@ -1849,7 +1849,7 @@ sv_i_ncmp(pTHX_ SV *a, SV *b)
 #define tryCALL_AMAGICbin(left,right,meth) \
     (PL_amagic_generation && (SvAMAGIC(left)||SvAMAGIC(right))) \
 	? amagic_call(left, right, CAT2(meth,_amg), 0) \
-	: Nullsv;
+	: NULL;
 
 static I32
 amagic_ncmp(pTHX_ register SV *a, register SV *b)

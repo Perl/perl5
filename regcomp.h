@@ -15,7 +15,7 @@ typedef OP OP_4tree;			/* Will be redefined later. */
  * compile to execute that permits the execute phase to run lots faster on
  * simple cases.  They are:
  *
- * regstart	sv that must begin a match; Nullch if none obvious
+ * regstart	sv that must begin a match; NULL if none obvious
  * reganch	is the match anchored (at beginning-of-line only)?
  * regmust	string (pointer into program) that match must include, or NULL
  *  [regmust changed to SV* for bminstr()--law]

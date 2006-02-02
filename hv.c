@@ -119,7 +119,7 @@ Perl_free_tied_hv_pool(pTHX)
 	he = HeNEXT(he);
 	del_HE(ohe);
     }
-    PL_hv_fetch_ent_mh = Nullhe;
+    PL_hv_fetch_ent_mh = NULL;
 }
 
 #if defined(USE_ITHREADS)
@@ -129,7 +129,7 @@ Perl_he_dup(pTHX_ HE *e, bool shared, CLONE_PARAMS* param)
     HE *ret;
 
     if (!e)
-	return Nullhe;
+	return NULL;
     /* look for it in the table first */
     ret = (HE*)ptr_table_fetch(PL_ptr_table, e);
     if (ret)
@@ -329,7 +329,7 @@ Perl_hv_fetch(pTHX_ HV *hv, const char *key, I32 klen_i32, I32 lval)
     }
     hek = hv_fetch_common (hv, NULL, key, klen, flags,
 			   HV_FETCH_JUST_SV | (lval ? HV_FETCH_LVALUE : 0),
-			   Nullsv, 0);
+			   NULL, 0);
     return hek ? &HeVAL(hek) : NULL;
 }
 
@@ -373,7 +373,7 @@ HE *
 Perl_hv_fetch_ent(pTHX_ HV *hv, SV *keysv, I32 lval, register U32 hash)
 {
     return hv_fetch_common(hv, keysv, NULL, 0, 0, 
-			   (lval ? HV_FETCH_LVALUE : 0), Nullsv, hash);
+			   (lval ? HV_FETCH_LVALUE : 0), NULL, hash);
 }
 
 STATIC HE *
@@ -430,7 +430,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		    Newx(k, HEK_BASESIZE + sizeof(SV*), char);
 		    HeKEY_hek(entry) = (HEK*)k;
 		}
-		HeNEXT(entry) = Nullhe;
+		HeNEXT(entry) = NULL;
 		HeSVKEY_set(entry, keysv);
 		HeVAL(entry) = sv;
 		sv_upgrade(sv, SVt_PVLV);
@@ -454,10 +454,10 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 			const char *nkey = strupr(savepvn(key,klen));
 			/* Note that this fetch is for nkey (the uppercased
 			   key) whereas the store is for key (the original)  */
-			entry = hv_fetch_common(hv, Nullsv, nkey, klen,
+			entry = hv_fetch_common(hv, NULL, nkey, klen,
 						HVhek_FREEKEY, /* free nkey */
 						0 /* non-LVAL fetch */,
-						Nullsv /* no value */,
+						NULL /* no value */,
 						0 /* compute hash */);
 			if (!entry && (action & HV_FETCH_LVALUE)) {
 			    /* This call will free key if necessary.
@@ -542,7 +542,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		if (!xhv->xhv_array /* !HvARRAY(hv) */ && !needs_store) {
 		    if (flags & HVhek_FREEKEY)
 			Safefree(key);
-		    return Nullhe;
+		    return NULL;
 		}
 #ifdef ENV_IS_CASELESS
 		else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
@@ -629,7 +629,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     masked_flags = (flags & HVhek_MASK);
 
 #ifdef DYNAMIC_ENV_FETCH
-    if (!xhv->xhv_array /* !HvARRAY(hv) */) entry = Null(HE*);
+    if (!xhv->xhv_array /* !HvARRAY(hv) */) entry = NULL;
     else
 #endif
     {
@@ -907,7 +907,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     int masked_flags;
 
     if (!hv)
-	return Nullsv;
+	return NULL;
 
     if (keysv) {
 	if (k_flags & HVhek_FREEKEY)
@@ -927,7 +927,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	if (needs_copy) {
 	    entry = hv_fetch_common(hv, keysv, key, klen,
 				    k_flags & ~HVhek_FREEKEY, HV_FETCH_LVALUE,
-				    Nullsv, hash);
+				    NULL, hash);
 	    sv = entry ? HeVAL(entry) : NULL;
 	    if (sv) {
 		if (SvMAGICAL(sv)) {
@@ -939,7 +939,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 			sv_unmagic(sv, PERL_MAGIC_tiedelem);
 			return sv;
 		    }		
-		    return Nullsv;		/* element cannot be deleted */
+		    return NULL;		/* element cannot be deleted */
 		}
 #ifdef ENV_IS_CASELESS
 		else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
@@ -959,7 +959,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     }
     xhv = (XPVHV*)SvANY(hv);
     if (!xhv->xhv_array /* !HvARRAY(hv) */)
-	return Nullsv;
+	return NULL;
 
     if (is_utf8) {
 	const char *keysave = key;
@@ -1025,7 +1025,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
             Safefree(key);
 
 	if (d_flags & G_DISCARD)
-	    sv = Nullsv;
+	    sv = NULL;
 	else {
 	    sv = sv_2mortal(HeVAL(entry));
 	    HeVAL(entry) = &PL_sv_placeholder;
@@ -1066,7 +1066,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
     if (k_flags & HVhek_FREEKEY)
 	Safefree(key);
-    return Nullsv;
+    return NULL;
 }
 
 STATIC void
@@ -1626,7 +1626,7 @@ Perl_hv_undef(pTHX_ HV *hv)
 	/* FIXME - strlen HvNAME  */
         if(PL_stashcache)
 	    hv_delete(PL_stashcache, name, strlen(name), G_DISCARD);
-	hv_name_set(hv, Nullch, 0, 0);
+	hv_name_set(hv, NULL, 0, 0);
     }
     xhv->xhv_max   = 7;	/* HvMAX(hv) = 7 (it's a normal hash) */
     xhv->xhv_array = 0;	/* HvARRAY(hv) = 0 */
@@ -1740,8 +1740,8 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	    SvREFCNT_dec(HeVAL(entry));
 	Safefree(HeKEY_hek(entry));
 	del_HE(entry);
-	xhv->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
-	return Null(HE*);
+	xhv->xhv_eiter = NULL; /* HvEITER(hv) = NULL */
+	return NULL;
     }
 #ifdef DYNAMIC_ENV_FETCH  /* set up %ENV for iteration */
     if (!entry && SvRMAGICAL((SV*)hv) && mg_find((SV*)hv, PERL_MAGIC_env)) {
@@ -1953,7 +1953,7 @@ S_unshare_hek_or_pvn(pTHX_ HEK *hek, const char *str, I32 len, U32 hash)
 
     /* what follows is the moral equivalent of:
     if ((Svp = hv_fetch(PL_strtab, tmpsv, FALSE, hash))) {
-	if (--*Svp == Nullsv)
+	if (--*Svp == NULL)
 	    hv_delete(PL_strtab, str, len, G_DISCARD, hash);
     } */
     xhv = (XPVHV*)SvANY(PL_strtab);
@@ -2051,7 +2051,7 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
     /* what follows is the moral equivalent of:
 
     if (!(Svp = hv_fetch(PL_strtab, str, len, FALSE)))
-	hv_store(PL_strtab, str, len, Nullsv, hash);
+	hv_store(PL_strtab, str, len, NULL, hash);
 
 	Can't rehash the shared string table, so not sure if it's worth
 	counting the number of entries in the linked list

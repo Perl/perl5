@@ -57,7 +57,6 @@ struct magic {
 				 SvPV_nolen_const((SV*)((mg)->mg_ptr)) :  \
 				 (const char*)(mg)->mg_ptr)
 
-#define SvTIED_mg(sv,how) \
-    (SvRMAGICAL(sv) ? mg_find((sv),(how)) : Null(MAGIC*))
+#define SvTIED_mg(sv,how) (SvRMAGICAL(sv) ? mg_find((sv),(how)) : NULL)
 #define SvTIED_obj(sv,mg) \
     ((mg)->mg_obj ? (mg)->mg_obj : sv_2mortal(newRV(sv)))

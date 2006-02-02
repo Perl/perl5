@@ -74,7 +74,7 @@ PP(pp_regcomp)
     dSP;
     register PMOP *pm = (PMOP*)cLOGOP->op_other;
     SV *tmpstr;
-    MAGIC *mg = Null(MAGIC*);
+    MAGIC *mg = NULL;
 
     tmpstr = POPs;
 
@@ -105,7 +105,7 @@ PP(pp_regcomp)
 	{
 	    if (PM_GETRE(pm)) {
 	        ReREFCNT_dec(PM_GETRE(pm));
-		PM_SETRE(pm, Null(REGEXP*));	/* crucial if regcomp aborts */
+		PM_SETRE(pm, NULL);	/* crucial if regcomp aborts */
 	    }
 	    if (PL_op->op_flags & OPf_SPECIAL)
 		PL_reginterp_cnt = I32_MAX; /* Mark as safe.  */
@@ -326,7 +326,7 @@ Perl_rxres_free(pTHX_ void **rsp)
 	Safefree(INT2PTR(char*,*p));
 #endif
 	Safefree(p);
-	*rsp = Null(void*);
+	*rsp = NULL;
     }
 }
 
@@ -2685,7 +2685,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
     PL_op->op_type = OP_ENTEREVAL;
     PL_op->op_flags = 0;			/* Avoid uninit warning. */
     PUSHBLOCK(cx, CXt_EVAL|(IN_PERL_COMPILETIME ? 0 : CXp_REAL), SP);
-    PUSHEVAL(cx, 0, Nullgv);
+    PUSHEVAL(cx, 0, NULL);
 
     if (runtime)
 	rop = doeval(G_SCALAR, startop, runcv, PL_curcop->cop_seq);
@@ -2919,7 +2919,7 @@ S_check_type_and_open(pTHX_ const char *name, const char *mode)
     int st_rc;
     st_rc = PerlLIO_stat(name, &st);
     if (st_rc < 0) {
-       return Nullfp;
+	return NULL;
     }
 
     if(S_ISDIR(st.st_mode) || S_ISBLK(st.st_mode)) {
@@ -3143,8 +3143,8 @@ PP(pp_require)
 				    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {
 					PerlIO_close(IoOFP(io));
 				    }
-				    IoIFP(io) = Nullfp;
-				    IoOFP(io) = Nullfp;
+				    IoIFP(io) = NULL;
+				    IoOFP(io) = NULL;
 				}
 			    }
 
@@ -3303,7 +3303,7 @@ PP(pp_require)
     SAVETMPS;
     lex_start(sv_2mortal(newSVpvn("",0)));
     SAVEGENERICSV(PL_rsfp_filters);
-    PL_rsfp_filters = Nullav;
+    PL_rsfp_filters = NULL;
 
     PL_rsfp = tryrsfp;
     SAVEHINTS();
@@ -3331,7 +3331,7 @@ PP(pp_require)
     /* switch to eval mode */
     push_return(PL_op->op_next);
     PUSHBLOCK(cx, CXt_EVAL, SP);
-    PUSHEVAL(cx, name, Nullgv);
+    PUSHEVAL(cx, name, NULL);
 
     SAVECOPLINE(&PL_compiling);
     CopLINE_set(&PL_compiling, 0);
@@ -3428,7 +3428,7 @@ PP(pp_entereval)
 
     push_return(PL_op->op_next);
     PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), SP);
-    PUSHEVAL(cx, 0, Nullgv);
+    PUSHEVAL(cx, 0, NULL);
 
     /* prepare to compile string */
 
@@ -3886,15 +3886,15 @@ run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	IoLINES(datasv) = 0;
 	if (filter_child_proc) {
 	    SvREFCNT_dec(filter_child_proc);
-	    IoFMT_GV(datasv) = Nullgv;
+	    IoFMT_GV(datasv) = NULL;
 	}
 	if (filter_state) {
 	    SvREFCNT_dec(filter_state);
-	    IoTOP_GV(datasv) = Nullgv;
+	    IoTOP_GV(datasv) = NULL;
 	}
 	if (filter_sub) {
 	    SvREFCNT_dec(filter_sub);
-	    IoBOTTOM_GV(datasv) = Nullgv;
+	    IoBOTTOM_GV(datasv) = NULL;
 	}
 	filter_del(run_user_filter);
     }

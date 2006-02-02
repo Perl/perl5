@@ -190,7 +190,7 @@ Perl_free_tmps(pTHX)
     const I32 myfloor = PL_tmps_floor;
     while (PL_tmps_ix > myfloor) {      /* clean up after last statement */
 	SV* const sv = PL_tmps_stack[PL_tmps_ix];
-	PL_tmps_stack[PL_tmps_ix--] = Nullsv;
+	PL_tmps_stack[PL_tmps_ix--] = NULL;
 	if (sv && sv != &PL_sv_undef) {
 	    SvTEMP_off(sv);
 	    SvREFCNT_dec(sv);		/* note, can modify tmps_ix!!! */
@@ -316,7 +316,7 @@ Perl_save_ary(pTHX_ GV *gv)
     SSPUSHPTR(oav);
     SSPUSHINT(SAVEt_AV);
 
-    GvAV(gv) = Null(AV*);
+    GvAV(gv) = NULL;
     av = GvAVn(gv);
     if (SvMAGIC(oav))
 	mg_localize((SV*)oav, (SV*)av);
@@ -333,7 +333,7 @@ Perl_save_hash(pTHX_ GV *gv)
     SSPUSHPTR(ohv = GvHVn(gv));
     SSPUSHINT(SAVEt_HV);
 
-    GvHV(gv) = Null(HV*);
+    GvHV(gv) = NULL;
     hv = GvHVn(gv);
     if (SvMAGIC(ohv))
 	mg_localize((SV*)ohv, (SV*)hv);
@@ -908,7 +908,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    if (PL_comppad)
 		PL_curpad = AvARRAY(PL_comppad);
 	    else
-		PL_curpad = Null(SV**);
+		PL_curpad = NULL;
 	    break;
 	case SAVEt_PADSV:
 	    {

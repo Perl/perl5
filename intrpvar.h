@@ -203,8 +203,8 @@ PERLVAR(Imodglobal,	HV *)		/* per-interp module data */
 
 /* these used to be in global before 5.004_68 */
 PERLVARI(Iprofiledata,	U32 *,	NULL)	/* table of ops, counts */
-PERLVARI(Irsfp,	PerlIO * VOL,	Nullfp) /* current source file pointer */
-PERLVARI(Irsfp_filters,	AV *,	Nullav)	/* keeps active source filters */
+PERLVARI(Irsfp,	PerlIO * VOL,	NULL)	/* current source file pointer */
+PERLVARI(Irsfp_filters,	AV *,	NULL)	/* keeps active source filters */
 
 PERLVAR(Icompiling,	COP)		/* compiling/done executing marker */
 
@@ -457,7 +457,7 @@ PERLVAR(IProc,		struct IPerlProc*)
 #if defined(USE_ITHREADS)
 PERLVAR(Iptr_table,	PTR_TBL_t*)
 #endif
-PERLVARI(Ibeginav_save, AV*, Nullav)	/* save BEGIN{}s when compiling */
+PERLVARI(Ibeginav_save, AV*, NULL)	/* save BEGIN{}s when compiling */
 
 #ifdef USE_5005THREADS
 PERLVAR(Ifdpid_mutex,	perl_mutex)	/* mutex for fdpid array */
@@ -511,7 +511,7 @@ PERLVARI(Iknown_layers, PerlIO_list_t *,NULL)
 PERLVARI(Idef_layerlist, PerlIO_list_t *,NULL)
 #endif
 
-PERLVARI(Iencoding,	SV*, Nullsv)		/* character encoding */
+PERLVARI(Iencoding,	SV*, NULL)		/* character encoding */
 
 PERLVAR(Idebug_pad,	struct perl_debug_pad)	/* always needed because of the re extension */
 
@@ -530,7 +530,7 @@ PERLVAR(Iutf8_idcont,	SV *)
 
 PERLVAR(Isort_RealCmp,  SVCOMPARE_t)
 
-PERLVARI(Icheckav_save, AV*, Nullav)	/* save CHECK{}s when compiling */
+PERLVARI(Icheckav_save, AV*, NULL)	/* save CHECK{}s when compiling */
 
 PERLVARI(Iclocktick, long, 0)	/* this many times() ticks in a second */
 

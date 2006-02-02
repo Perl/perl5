@@ -85,7 +85,7 @@ PERLVAR(Tna,		STRLEN)		/* for use in SvPV when length is
 PERLVAR(Tstatbuf,	Stat_t)
 PERLVAR(Tstatcache,	Stat_t)		/* _ */
 PERLVAR(Tstatgv,	GV *)
-PERLVARI(Tstatname,	SV *,	Nullsv)
+PERLVARI(Tstatname,	SV *,	NULL)
 
 #ifdef HAS_TIMES
 PERLVAR(Ttimesbuf,	struct tms)
@@ -141,7 +141,7 @@ PERLVAR(Tstart_env,	JMPENV)		/* empty startup sigjmp() environment */
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
 PERLVARI(Tprotect,	protect_proc_t,	MEMBER_TO_FPTR(Perl_default_protect))
 #endif
-PERLVARI(Terrors,	SV *, Nullsv)	/* outstanding queued errors */
+PERLVARI(Terrors,	SV *, NULL)	/* outstanding queued errors */
 
 /* statics "owned" by various functions */
 PERLVAR(Tav_fetch_sv,	SV *)		/* unused as of change #19268 */
@@ -221,7 +221,7 @@ PERLVAR(Treg_oldsaved,	char*)		/* old saved substr during match */
 PERLVAR(Treg_oldsavedlen, STRLEN)	/* old length of saved substr during match */
 PERLVAR(Treg_maxiter,	I32)		/* max wait until caching pos */
 PERLVAR(Treg_leftiter,	I32)		/* wait until caching pos */
-PERLVARI(Treg_poscache, char *, Nullch)	/* cache of pos of WHILEM */
+PERLVARI(Treg_poscache, char *, NULL)	/* cache of pos of WHILEM */
 PERLVAR(Treg_poscache_size, STRLEN)	/* size of pos cache of WHILEM */
 
 PERLVARI(Tpeepp,	peep_t, MEMBER_TO_FPTR(Perl_peep))

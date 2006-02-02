@@ -64,8 +64,8 @@ Perl_do_openn(pTHX_ GV *gv, register char *oname, I32 len, int as_raw,
 	      I32 num_svs)
 {
     register IO * const io = GvIOn(gv);
-    PerlIO *saveifp = Nullfp;
-    PerlIO *saveofp = Nullfp;
+    PerlIO *saveifp = NULL;
+    PerlIO *saveofp = NULL;
     int savefd = -1;
     char savetype = IoTYPE_CLOSED;
     int writing = 0;
@@ -124,7 +124,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *oname, I32 len, int as_raw,
 			  "Warning: unable to close filehandle %s properly.\n",
 			  GvENAME(gv));
 	}
-	IoOFP(io) = IoIFP(io) = Nullfp;
+	IoOFP(io) = IoIFP(io) = NULL;
     }
 
     if (as_raw) {
@@ -178,7 +178,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *oname, I32 len, int as_raw,
 	namesv = sv_2mortal(newSVpvn(oname,strlen(oname)));
 	num_svs = 1;
 	svp = &namesv;
-        type = Nullch;
+	type = NULL;
 	fp = PerlIO_openn(aTHX_ type, mode, -1, rawmode, rawperm, NULL, num_svs, svp);
     }
     else {
@@ -379,7 +379,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *oname, I32 len, int as_raw,
 			    fd = -1;
 		    }
 		    if (!num_svs)
-			type = Nullch;
+			type = NULL;
 		    if (that_fp) {
 			fp = PerlIO_fdupopen(aTHX_ that_fp, NULL, dodup);
 		    }
@@ -410,7 +410,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *oname, I32 len, int as_raw,
 			namesv = sv_2mortal(newSVpvn(type,strlen(type)));
 			num_svs = 1;
 			svp = &namesv;
-		        type = Nullch;
+		        type = NULL;
 		    }
 		    fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 		}
@@ -448,7 +448,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *oname, I32 len, int as_raw,
 		    namesv = sv_2mortal(newSVpvn(type,strlen(type)));
 		    num_svs = 1;
 		    svp = &namesv;
-		    type = Nullch;
+		    type = NULL;
 		}
 		fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 	    }
@@ -540,7 +540,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *oname, I32 len, int as_raw,
 		    namesv = sv_2mortal(newSVpvn(type,strlen(type)));
 		    num_svs = 1;
 		    svp = &namesv;
-		    type = Nullch;
+		    type = NULL;
 		}
 		fp = PerlIO_openn(aTHX_ type,mode,-1,0,0,NULL,num_svs,svp);
 	    }
@@ -702,7 +702,7 @@ Perl_do_openn(pTHX_ GV *gv, register char *oname, I32 len, int as_raw,
 	    *s = 'w';
 	    if (!(IoOFP(io) = PerlIO_openn(aTHX_ type,s,fd,0,0,NULL,0,svp))) {
 		PerlIO_close(fp);
-		IoIFP(io) = Nullfp;
+		IoIFP(io) = NULL;
 		goto say_false;
 	    }
 	}
@@ -752,7 +752,7 @@ Perl_nextargv(pTHX_ register GV *gv)
     PL_lastfd = -1;
     PL_filemode = 0;
     if (!GvAV(gv))
-        return Nullfp;
+	return NULL;
     while (av_len(GvAV(gv)) >= 0) {
 	STRLEN oldlen;
 	sv = av_shift(GvAV(gv));
@@ -760,7 +760,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 	sv_setsv(GvSVn(gv),sv);
 	SvSETMAGIC(GvSV(gv));
 	PL_oldname = SvPVx(GvSV(gv), oldlen);
-	if (do_open(gv,PL_oldname,oldlen,PL_inplace!=0,O_RDONLY,0,Nullfp)) {
+	if (do_open(gv,PL_oldname,oldlen,PL_inplace!=0,O_RDONLY,0,NULL)) {
 	    if (PL_inplace) {
 		TAINT_PROPER("inplace open");
 		if (oldlen == 1 && *PL_oldname == '-') {
@@ -830,7 +830,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 		    (void)PerlLIO_unlink(SvPVX_const(sv));
 		    (void)PerlLIO_rename(PL_oldname,SvPVX_const(sv));
 		    do_open(gv,(char*)SvPVX_const(sv),SvCUR(sv),PL_inplace!=0,
-			    O_RDONLY,0,Nullfp);
+			    O_RDONLY,0,NULL);
 #endif /* DOSISH */
 #else
 		    (void)UNLINK(SvPVX_const(sv));
@@ -867,11 +867,11 @@ Perl_nextargv(pTHX_ register GV *gv)
 		SETERRNO(0,0);		/* in case sprintf set errno */
 #ifdef VMS
 		if (!do_open(PL_argvoutgv,(char*)SvPVX_const(sv),SvCUR(sv),
-			     PL_inplace!=0,O_WRONLY|O_CREAT|O_TRUNC,0,Nullfp))
+			     PL_inplace!=0,O_WRONLY|O_CREAT|O_TRUNC,0,NULL))
 #else
 		    if (!do_open(PL_argvoutgv,(char*)SvPVX_const(sv),SvCUR(sv),
 			     PL_inplace!=0,O_WRONLY|O_CREAT|OPEN_EXCL,0666,
-			     Nullfp))
+			     NULL))
 #endif
 		{
 		    if (ckWARN_d(WARN_INPLACE))	
@@ -929,11 +929,11 @@ Perl_nextargv(pTHX_ register GV *gv)
 	    GV *oldout = (GV*)av_pop(PL_argvout_stack);
 	    setdefout(oldout);
 	    SvREFCNT_dec(oldout);
-	    return Nullfp;
+	    return NULL;
 	}
 	setdefout(gv_fetchpv("STDOUT",TRUE,SVt_PVIO));
     }
-    return Nullfp;
+    return NULL;
 }
 
 /* explicit renamed to avoid C++ conflict    -- kja */
@@ -998,7 +998,7 @@ Perl_io_close(pTHX_ IO *io, bool not_implicit)
 		retval = (PerlIO_close(IoIFP(io)) != EOF && !prev_err);
 	    }
 	}
-	IoOFP(io) = IoIFP(io) = Nullfp;
+	IoOFP(io) = IoIFP(io) = NULL;
     }
     else if (not_implicit) {
 	SETERRNO(EBADF,SS_IVCHAN);
@@ -1300,7 +1300,7 @@ Perl_my_stat(pTHX)
 		return PL_laststatval;
 	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
-	    PL_statgv = Nullgv;
+	    PL_statgv = NULL;
 	    sv_setpvn(PL_statname,"", 0);
 	    return (PL_laststatval = -1);
 	}
@@ -1320,7 +1320,7 @@ Perl_my_stat(pTHX)
 	}
 
 	s = SvPV_const(sv, len);
-	PL_statgv = Nullgv;
+	PL_statgv = NULL;
 	sv_setpvn(PL_statname, s, len);
 	s = SvPVX_const(PL_statname);		/* s now NUL-terminated */
 	PL_laststype = OP_STAT;
@@ -1353,7 +1353,7 @@ Perl_my_lstat(pTHX)
     }
 
     PL_laststype = OP_LSTAT;
-    PL_statgv = Nullgv;
+    PL_statgv = NULL;
     sv = POPs;
     PUTBACK;
     if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV && ckWARN(WARN_IO)) {
@@ -1419,9 +1419,9 @@ void
 Perl_do_execfree(pTHX)
 {
     Safefree(PL_Argv);
-    PL_Argv = Null(char **);
+    PL_Argv = NULL;
     Safefree(PL_Cmd);
-    PL_Cmd = Nullch;
+    PL_Cmd = NULL;
 }
 
 #ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
@@ -2399,7 +2399,7 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 #endif /* !DOSISH */
 #endif /* MACOS_TRADITIONAL */
     (void)do_open(PL_last_in_gv, (char*)SvPVX_const(tmpcmd), SvCUR(tmpcmd),
-		  FALSE, O_RDONLY, 0, Nullfp);
+		  FALSE, O_RDONLY, 0, NULL);
     fp = IoIFP(io);
 #endif /* !VMS */
     LEAVE;

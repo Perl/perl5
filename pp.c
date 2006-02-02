@@ -4364,7 +4364,7 @@ PP(pp_split)
 	ary = GvAVn(PL_defgv);
 #endif /* USE_5005THREADS */
     else
-	ary = Nullav;
+	ary = NULL;
     if (ary && (gimme != G_ARRAY || (pm->op_pmflags & PMf_ONCE))) {
 	realarray = 1;
 	PUTBACK;

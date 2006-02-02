@@ -707,7 +707,7 @@ Perl_do_sprintf(pTHX_ SV *sv, I32 len, SV **sarg)
     SvUTF8_off(sv);
     if (DO_UTF8(*sarg))
         SvUTF8_on(sv);
-    sv_vsetpvfn(sv, pat, patlen, Null(va_list*), sarg + 1, len - 1, &do_taint);
+    sv_vsetpvfn(sv, pat, patlen, NULL, sarg + 1, len - 1, &do_taint);
     SvSETMAGIC(sv);
     if (do_taint)
 	SvTAINTED_on(sv);
@@ -1015,7 +1015,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
     STRLEN len;
     char *s;
     char *temp_buffer = NULL;
-    SV* svrecode = Nullsv;
+    SV* svrecode = NULL;
 
     if (RsSNARF(PL_rs))
 	return 0;
@@ -1351,7 +1351,7 @@ Perl_do_kv(pTHX)
 	if (PL_op->op_flags & OPf_MOD || LVRET) {	/* lvalue */
 	    dTARGET;		/* make sure to clear its target here */
 	    if (SvTYPE(TARG) == SVt_PVLV)
-		LvTARG(TARG) = Nullsv;
+		LvTARG(TARG) = NULL;
 	    PUSHs(TARG);
 	}
 	RETURN;
@@ -1370,7 +1370,7 @@ Perl_do_kv(pTHX)
 	if (PL_op->op_flags & OPf_MOD || LVRET) {	/* lvalue */
 	    if (SvTYPE(TARG) < SVt_PVLV) {
 		sv_upgrade(TARG, SVt_PVLV);
-		sv_magic(TARG, Nullsv, PERL_MAGIC_nkeys, Nullch, 0);
+		sv_magic(TARG, NULL, PERL_MAGIC_nkeys, NULL, 0);
 	    }
 	    LvTYPE(TARG) = 'k';
 	    if (LvTARG(TARG) != (SV*)keys) {

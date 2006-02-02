@@ -250,7 +250,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
     SV **svp;
     SV *sv, *ipad, *ival;
     SV *blesspad = Nullsv;
-    AV *seenentry = Nullav;
+    AV *seenentry = NULL;
     char *iname;
     STRLEN inamelen, idlen = 0;
     U32 realtype;
@@ -530,7 +530,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	    char *key;
 	    I32 klen;
 	    SV *hval;
-	    AV *keys = Nullav;
+	    AV *keys = NULL;
 	
 	    iname = newSVpvn(name, namelen);
 	    if (name[0] == '%') {
@@ -927,7 +927,7 @@ Data_Dumper_Dumpxs(href, ...)
 	{
 	    HV *hv;
 	    SV *retval, *valstr;
-	    HV *seenhv = Nullhv;
+	    HV *seenhv = NULL;
 	    AV *postav, *todumpav, *namesav;
 	    I32 level = 0;
 	    I32 indent, terse, i, imax, postlen;
@@ -963,8 +963,8 @@ Data_Dumper_Dumpxs(href, ...)
 		    (void)sv_2mortal(href);
 	    }
 
-	    todumpav = namesav = Nullav;
-	    seenhv = Nullhv;
+	    todumpav = namesav = NULL;
+	    seenhv = NULL;
 	    val = pad = xpad = apad = sep = pair = varname
 		= freezer = toaster = bless = &PL_sv_undef;
 	    name = sv_newmortal();

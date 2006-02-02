@@ -317,14 +317,14 @@ struct pmop {
 #  define PmopSTASHPV(o)	((o)->op_pmstashpv)
 #  define PmopSTASHPV_set(o,pv)	(PmopSTASHPV(o) = savesharedpv(pv))
 #  define PmopSTASH(o)		(PmopSTASHPV(o) \
-				 ? gv_stashpv(PmopSTASHPV(o),GV_ADD) : Nullhv)
-#  define PmopSTASH_set(o,hv)	PmopSTASHPV_set(o, ((hv) ? HvNAME_get(hv) : Nullch))
+				 ? gv_stashpv(PmopSTASHPV(o),GV_ADD) : NULL)
+#  define PmopSTASH_set(o,hv)	PmopSTASHPV_set(o, ((hv) ? HvNAME_get(hv) : NULL))
 #  define PmopSTASH_free(o)	PerlMemShared_free(PmopSTASHPV(o))
 
 #else
 #  define PmopSTASH(o)		((o)->op_pmstash)
 #  define PmopSTASH_set(o,hv)	((o)->op_pmstash = (hv))
-#  define PmopSTASHPV(o)	(PmopSTASH(o) ? HvNAME_get(PmopSTASH(o)) : Nullch)
+#  define PmopSTASHPV(o)	(PmopSTASH(o) ? HvNAME_get(PmopSTASH(o)) : NULL)
    /* op_pmstash is not refcounted */
 #  define PmopSTASHPV_set(o,pv)	PmopSTASH_set((o), gv_stashpv(pv,GV_ADD))
 #  define PmopSTASH_free(o)    

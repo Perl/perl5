@@ -176,7 +176,7 @@ Perl_pad_new(pTHX_ int flags)
 	SvPADMY_on((SV*)a0);		/* XXX Needed? */
 	av_store(pad, 0, (SV*)a0);
 #else
-	av_store(pad, 0, Nullsv);
+	av_store(pad, 0, NULL);
 #endif /* USE_THREADS */
     }
 
@@ -258,11 +258,11 @@ Perl_pad_undef(pTHX_ CV* cv)
 		CV * const innercv = (CV*)curpad[ix];
 		U32 inner_rc = SvREFCNT(innercv);
 		assert(inner_rc);
-		namepad[ix] = Nullsv;
+		namepad[ix] = NULL;
 		SvREFCNT_dec(namesv);
 
 		if (SvREFCNT(comppad) < 2) { /* allow for /(?{ sub{} })/  */
-		    curpad[ix] = Nullsv;
+		    curpad[ix] = NULL;
 		    SvREFCNT_dec(innercv);
 		    inner_rc--;
 		}
@@ -293,7 +293,7 @@ Perl_pad_undef(pTHX_ CV* cv)
 	if (!sv)
 	    continue;
 	if (sv == (SV*)PL_comppad_name)
-	    PL_comppad_name = Nullav;
+	    PL_comppad_name = NULL;
 	else if (sv == (SV*)PL_comppad) {
 	    PL_comppad = Null(PAD*);
 	    PL_curpad = Null(SV**);
@@ -301,7 +301,7 @@ Perl_pad_undef(pTHX_ CV* cv)
 	SvREFCNT_dec(sv);
     }
     SvREFCNT_dec((SV*)CvPADLIST(cv));
-    CvPADLIST(cv) = Null(PADLIST*);
+    CvPADLIST(cv) = NULL;
 }
 
 
@@ -753,7 +753,7 @@ found:
 	    CvCLONE_on(PL_compcv);
 	    if (cv == startcv) {
 		if (CvANON(PL_compcv))
-		    oldsv = Nullsv; /* no need to keep ref */
+		    oldsv = NULL; /* no need to keep ref */
 	    }
 	    else {
 		CV *bcv;
@@ -773,9 +773,9 @@ found:
 			pad_add_name(
 			    SvPVX(sv),
 			    (SvFLAGS(sv) & SVpad_TYPED)
-				? SvSTASH(sv) : Nullhv,
+				? SvSTASH(sv) : NULL,
 			    (SvFLAGS(sv) & SVpad_OUR)
-				? GvSTASH(sv) : Nullhv,
+				? GvSTASH(sv) : NULL,
 			    1  /* fake */
 			);
 
@@ -1096,7 +1096,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
     ASSERT_CURPAD_ACTIVE("pad_tidy");
     /* extend curpad to match namepad */
     if (AvFILLp(PL_comppad_name) < AvFILLp(PL_comppad))
-	av_store(PL_comppad_name, AvFILLp(PL_comppad), Nullsv);
+	av_store(PL_comppad_name, AvFILLp(PL_comppad), NULL);
 
     if (type == padtidy_SUBCLONE) {
 	SV * const * const namep = AvARRAY(PL_comppad_name);
@@ -1111,13 +1111,13 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	     * pad are references to outer lexicals and anonymous subs.
 	     * The rest are created anew during cloning.
 	     */
-	    if (!((namesv = namep[ix]) != Nullsv &&
+	    if (!((namesv = namep[ix]) != NULL &&
 		  namesv != &PL_sv_undef &&
 		  (SvFAKE(namesv) ||
 		   *SvPVX_const(namesv) == '&')))
 	    {
 		SvREFCNT_dec(PL_curpad[ix]);
-		PL_curpad[ix] = Nullsv;
+		PL_curpad[ix] = NULL;
 	    }
 	}
     }
@@ -1223,7 +1223,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
     for (ix = 1; ix <= AvFILLp(pad_name); ix++) {
         const SV *namesv = pname[ix];
 	if (namesv && namesv == &PL_sv_undef) {
-	    namesv = Nullsv;
+	    namesv = NULL;
 	}
 	if (namesv) {
 	    if (SvFAKE(namesv))
@@ -1381,7 +1381,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     PL_curpad = AvARRAY(PL_comppad);
 
     for (ix = fpad; ix > 0; ix--) {
-	SV* const namesv = (ix <= fname) ? pname[ix] : Nullsv;
+	SV* const namesv = (ix <= fname) ? pname[ix] : NULL;
 	if (namesv && namesv != &PL_sv_undef) {
 	    const char *name = SvPVX_const(namesv);    /* XXX */
 	    if (SvFLAGS(namesv) & SVf_FAKE) {   /* lexical from outside? */
@@ -1453,7 +1453,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 	assert(const_sv);
 	/* constant sub () { $x } closing over $x - see lib/constant.pm */
 	SvREFCNT_dec(cv);
-	cv = newCONSTSUB(CvSTASH(proto), Nullch, const_sv);
+	cv = newCONSTSUB(CvSTASH(proto), NULL, const_sv);
     }
 
     return cv;
@@ -1564,7 +1564,7 @@ Perl_pad_compname_type(pTHX_ const PADOFFSET po)
     if ( SvFLAGS(*av) & SVpad_TYPED ) {
         return SvSTASH(*av);
     }
-    return Nullhv;
+    return NULL;
 }
 
 /*

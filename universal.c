@@ -38,7 +38,7 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
     AV* av;
     GV* gv;
     GV** gvp;
-    HV* hv = Nullhv;
+    HV* hv = NULL;
     SV* subgen = Nullsv;
     const char *hvname;
 
@@ -141,7 +141,7 @@ bool
 Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
 {
     const char *type = Nullch;
-    HV *stash = Nullhv;
+    HV *stash = NULL;
     HV *name_stash;
 
     SvGETMAGIC(sv);
@@ -299,7 +299,7 @@ XS(XS_UNIVERSAL_VERSION)
         pkg = gv_stashsv(ST(0), FALSE);
     }
 
-    gvp = pkg ? (GV**)hv_fetch(pkg,"VERSION",7,FALSE) : Null(GV**);
+    gvp = pkg ? (GV**)hv_fetch(pkg,"VERSION",7,FALSE) : NULL;
 
     if (gvp && isGV(gv = *gvp) && (sv = GvSV(gv)) && SvOK(sv)) {
         SV *nsv = sv_newmortal();
