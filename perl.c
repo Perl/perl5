@@ -1594,7 +1594,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     bool minus_f = FALSE;
 #endif
     int fdscript;
-    int suidscript;
+    int suidscript = -1;
 
     sv_setpvn(PL_linestr,"",0);
     sv = newSVpvs("");		/* first used for -I flags */
