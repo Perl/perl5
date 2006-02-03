@@ -435,10 +435,11 @@ Perl_printf_nocontext(const char *format, ...)
 NV
 Perl_huge(void)
 {
-#   if defined(USE_LONG_DOUBLE) && defined(HUGE_VALL)
+#  if defined(USE_LONG_DOUBLE) && defined(HUGE_VALL)
     return HUGE_VALL;
-#   endif
+#  else
     return HUGE_VAL;
+#  endif
 }
 #endif
 
