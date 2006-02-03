@@ -1593,8 +1593,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #ifdef USE_SITECUSTOMIZE
     bool minus_f = FALSE;
 #endif
-    int fdscript;
-    int suidscript = -1;
 
     sv_setpvn(PL_linestr,"",0);
     sv = newSVpvs("");		/* first used for -I flags */
@@ -1645,7 +1643,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	case 'X':
 	case 'w':
 	case 'A':
-	    if ((s = moreswitches(s, suidscript)))
+	    if ((s = moreswitches(s, -1)))
 		goto reswitch;
 	    break;
 
@@ -1673,7 +1671,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    if (argv[1] && !strcmp(argv[1], "Dev:Pseudo"))
 		break;
 #endif
-	    forbid_setid('e', suidscript);
+	    forbid_setid('e', -1);
 	    if (!PL_e_script) {
 		PL_e_script = newSVpvs("");
 		filter_add(read_e_script, NULL);
@@ -1697,7 +1695,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    goto reswitch;
 
 	case 'I':	/* -I handled both here and in moreswitches() */
-	    forbid_setid('I', suidscript);
+	    forbid_setid('I', -1);
 	    if (!*++s && (s=argv[1]) != NULL) {
 		argc--,argv++;
 	    }
@@ -1714,12 +1712,12 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		Perl_croak(aTHX_ "No directory specified for -I");
 	    break;
 	case 'P':
-	    forbid_setid('P', suidscript);
+	    forbid_setid('P', -1);
 	    PL_preprocess = TRUE;
 	    s++;
 	    goto reswitch;
 	case 'S':
-	    forbid_setid('S', suidscript);
+	    forbid_setid('S', -1);
 	    dosearch = TRUE;
 	    s++;
 	    goto reswitch;
@@ -1983,7 +1981,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		        PL_tainting = TRUE;
 		    }
 		} else {
-		    moreswitches(d, suidscript);
+		    moreswitches(d, -1);
 		}
 	    }
 	}
@@ -2023,36 +2021,39 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     TAINT_NOT;
     init_perllib();
 
-    fdscript = open_script(scriptname, dosearch, sv, &suidscript);
+    {
+	int suidscript;
+	const int fdscript
+	    = open_script(scriptname, dosearch, sv, &suidscript);
 
-    validate_suid(validarg, scriptname, fdscript, suidscript);
+	validate_suid(validarg, scriptname, fdscript, suidscript);
 
 #ifndef PERL_MICRO
-#if defined(SIGCHLD) || defined(SIGCLD)
-    {
-#ifndef SIGCHLD
-#  define SIGCHLD SIGCLD
-#endif
-	Sighandler_t sigstate = rsignal_state(SIGCHLD);
-	if (sigstate == (Sighandler_t) SIG_IGN) {
-	    if (ckWARN(WARN_SIGNAL))
-		Perl_warner(aTHX_ packWARN(WARN_SIGNAL),
-			    "Can't ignore signal CHLD, forcing to default");
-	    (void)rsignal(SIGCHLD, (Sighandler_t)SIG_DFL);
+#  if defined(SIGCHLD) || defined(SIGCLD)
+	{
+#  ifndef SIGCHLD
+#    define SIGCHLD SIGCLD
+#  endif
+	    Sighandler_t sigstate = rsignal_state(SIGCHLD);
+	    if (sigstate == (Sighandler_t) SIG_IGN) {
+		if (ckWARN(WARN_SIGNAL))
+		    Perl_warner(aTHX_ packWARN(WARN_SIGNAL),
+				"Can't ignore signal CHLD, forcing to default");
+		(void)rsignal(SIGCHLD, (Sighandler_t)SIG_DFL);
+	    }
 	}
-    }
-#endif
+#  endif
 #endif
 
+	if (PL_doextract
 #ifdef MACOS_TRADITIONAL
-    if (PL_doextract || gMacPerl_AlwaysExtract) {
-#else
-    if (PL_doextract) {
+	    || gMacPerl_AlwaysExtract
 #endif
-	find_beginning(suidscript);
-	if (cddir && PerlDir_chdir( (char *)cddir ) < 0)
-	    Perl_croak(aTHX_ "Can't chdir to %s",cddir);
-
+	    ) {
+	    find_beginning(suidscript);
+	    if (cddir && PerlDir_chdir( (char *)cddir ) < 0)
+		Perl_croak(aTHX_ "Can't chdir to %s",cddir);
+	}
     }
 
     PL_main_cv = PL_compcv = (CV*)newSV(0);
