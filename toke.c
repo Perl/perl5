@@ -3008,12 +3008,7 @@ Perl_yylex(pTHX)
 				Perl_croak(aTHX_ "Too late for \"-%.*s\" option",
 				      (int)(d - m), m);
 			    }
-			    /* Given that these switches are within the script,
-			       then it is not unsafe to allow them even within
-			       a suidperl fd script. Hence pass in the
-			       suidscript flag as -1, irrespective of what we
-			       really are.  */
-			    d = moreswitches(d, -1);
+			    d = moreswitches(d);
 			} while (d);
 			if (PL_doswitches && !switches_done) {
 			    int argc = PL_origargc;

@@ -1643,7 +1643,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	case 'X':
 	case 'w':
 	case 'A':
-	    if ((s = moreswitches(s, -1)))
+	    if ((s = moreswitches(s)))
 		goto reswitch;
 	    break;
 
@@ -1981,7 +1981,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		        PL_tainting = TRUE;
 		    }
 		} else {
-		    moreswitches(d, -1);
+		    moreswitches(d);
 		}
 	    }
 	}
@@ -2009,7 +2009,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     else if (scriptname == NULL) {
 #ifdef MSDOS
 	if ( PerlLIO_isatty(PerlIO_fileno(PerlIO_stdin())) )
-	    moreswitches("h", -1);
+	    moreswitches("h");
 #endif
 	scriptname = "-";
     }
@@ -2935,7 +2935,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
 /* This routine handles any switches that can be given during run */
 
 char *
-Perl_moreswitches(pTHX_ char *s, const int suidscript)
+Perl_moreswitches(pTHX_ char *s)
 {
     dVAR;
     UV rschar;
@@ -3003,7 +3003,7 @@ Perl_moreswitches(pTHX_ char *s, const int suidscript)
 	s++;
 	return s;
     case 'd':
-	forbid_setid('d', suidscript);
+	forbid_setid('d', -1);
 	s++;
 
         /* -dt indicates to the debugger that threads will be used */
@@ -3037,7 +3037,7 @@ Perl_moreswitches(pTHX_ char *s, const int suidscript)
     case 'D':
     {	
 #ifdef DEBUGGING
-	forbid_setid('D', suidscript);
+	forbid_setid('D', -1);
 	s++;
 	PL_debug = get_debug_opts( (const char **)&s, 1) | DEBUG_TOP_FLAG;
 #else /* !DEBUGGING */
@@ -3069,7 +3069,7 @@ Perl_moreswitches(pTHX_ char *s, const int suidscript)
 	}
 	return s;
     case 'I':	/* -I handled both here and in parse_body() */
-	forbid_setid('I', suidscript);
+	forbid_setid('I', -1);
 	++s;
 	while (*s && isSPACE(*s))
 	    ++s;
@@ -3118,7 +3118,7 @@ Perl_moreswitches(pTHX_ char *s, const int suidscript)
 	}
 	return s;
     case 'A':
-	forbid_setid('A', suidscript);
+	forbid_setid('A', -1);
 	if (!PL_preambleav)
 	    PL_preambleav = newAV();
 	s++;
@@ -3141,10 +3141,10 @@ Perl_moreswitches(pTHX_ char *s, const int suidscript)
 	    return s;
 	}
     case 'M':
-	forbid_setid('M', suidscript);	/* XXX ? */
+	forbid_setid('M', -1);	/* XXX ? */
 	/* FALL THROUGH */
     case 'm':
-	forbid_setid('m', suidscript);	/* XXX ? */
+	forbid_setid('m', -1);	/* XXX ? */
 	if (*++s) {
 	    char *start;
 	    SV *sv;
@@ -3191,7 +3191,7 @@ Perl_moreswitches(pTHX_ char *s, const int suidscript)
 	s++;
 	return s;
     case 's':
-	forbid_setid('s', suidscript);
+	forbid_setid('s', -1);
 	PL_doswitches = TRUE;
 	s++;
 	return s;
@@ -4229,7 +4229,11 @@ S_find_beginning(pTHX_ const int suidscript)
 
     /* skip forward in input to the real script? */
 
+    /* This will croak if suidscript is >= 0, as -x cannot be used with
+       setuid scripts.  */
     forbid_setid('x', suidscript);
+    /* Hence you can't get here if suidscript >= 0  */
+
 #ifdef MACOS_TRADITIONAL
     /* Since the Mac OS does not honor #! arguments for us, we do it ourselves */
 
@@ -4265,7 +4269,7 @@ S_find_beginning(pTHX_ const int suidscript)
 		while (isDIGIT(s2[-1]) || s2[-1] == '-' || s2[-1] == '.'
 		       || s2[-1] == '_') s2--;
 		if (strnEQ(s2-4,"perl",4))
-		    while ((s = moreswitches(s, -1)))
+		    while ((s = moreswitches(s)))
 			;
 	    }
 #ifdef MACOS_TRADITIONAL
