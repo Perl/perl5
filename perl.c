@@ -2009,7 +2009,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     else if (scriptname == NULL) {
 #ifdef MSDOS
 	if ( PerlLIO_isatty(PerlIO_fileno(PerlIO_stdin())) )
-	    moreswitches("h", suidscript);
+	    moreswitches("h", -1);
 #endif
 	scriptname = "-";
     }
@@ -4265,7 +4265,7 @@ S_find_beginning(pTHX_ const int suidscript)
 		while (isDIGIT(s2[-1]) || s2[-1] == '-' || s2[-1] == '.'
 		       || s2[-1] == '_') s2--;
 		if (strnEQ(s2-4,"perl",4))
-		    while ((s = moreswitches(s, suidscript)))
+		    while ((s = moreswitches(s, -1)))
 			;
 	    }
 #ifdef MACOS_TRADITIONAL
