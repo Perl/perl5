@@ -946,6 +946,8 @@ END_EXTERN_C
 #define PL_perlio_debug_fd	(*Perl_Gperlio_debug_fd_ptr(NULL))
 #undef  PL_perlio_fd_refcnt
 #define PL_perlio_fd_refcnt	(*Perl_Gperlio_fd_refcnt_ptr(NULL))
+#undef  PL_perlio_fd_refcnt_size
+#define PL_perlio_fd_refcnt_size	(*Perl_Gperlio_fd_refcnt_size_ptr(NULL))
 #undef  PL_ppaddr
 #define PL_ppaddr		(*Perl_Gppaddr_ptr(NULL))
 #undef  PL_sh_path
