@@ -515,10 +515,6 @@ PERLVARI(Irehash_seed, UV, 0)		/* 582 hash initializer */
 
 PERLVARI(Irehash_seed_set, bool, FALSE)	/* 582 hash initialized? */
 
-/* These two variables are needed to preserve 5.8.x bincompat because we can't
-   change function prototypes of two exported functions.  Probably should be
-   taken out of blead soon, and relevant prototypes changed.  */
-PERLVARI(Isuidscript, int, -1)	/* fd for suid script */
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 /* File descriptor to talk to the child which dumps scalars.  */
 PERLVARI(Idumper_fd, int, -1)

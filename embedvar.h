@@ -393,7 +393,6 @@
 #define PL_sublex_info		(vTHX->Isublex_info)
 #define PL_subline		(vTHX->Isubline)
 #define PL_subname		(vTHX->Isubname)
-#define PL_suidscript		(vTHX->Isuidscript)
 #define PL_sv_arenaroot		(vTHX->Isv_arenaroot)
 #define PL_sv_count		(vTHX->Isv_count)
 #define PL_sv_no		(vTHX->Isv_no)
@@ -674,7 +673,6 @@
 #define PL_Isublex_info		PL_sublex_info
 #define PL_Isubline		PL_subline
 #define PL_Isubname		PL_subname
-#define PL_Isuidscript		PL_suidscript
 #define PL_Isv_arenaroot	PL_sv_arenaroot
 #define PL_Isv_count		PL_sv_count
 #define PL_Isv_no		PL_sv_no

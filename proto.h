@@ -1306,7 +1306,7 @@ PERL_CALLCONV void	Perl_mini_mktime(pTHX_ struct tm *pm)
 
 PERL_CALLCONV OP*	Perl_mod(pTHX_ OP* o, I32 type);
 PERL_CALLCONV int	Perl_mode_from_discipline(pTHX_ SV* discp);
-PERL_CALLCONV char*	Perl_moreswitches(pTHX_ char* s)
+PERL_CALLCONV char*	Perl_moreswitches(pTHX_ char* s, int suidscript)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV OP*	Perl_my(pTHX_ OP* o)
@@ -3167,8 +3167,8 @@ PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op)
 #endif
 
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
-STATIC void	S_find_beginning(pTHX);
-STATIC void	S_forbid_setid(pTHX_ char flag);
+STATIC void	S_find_beginning(pTHX_ int suidscript);
+STATIC void	S_forbid_setid(pTHX_ char flag, int suidscript);
 STATIC void	S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep, bool canrelocate);
 STATIC void	S_init_interp(pTHX);
 STATIC void	S_init_ids(pTHX);
@@ -3183,14 +3183,15 @@ STATIC void	S_my_exit_jump(pTHX)
 			__attribute__noreturn__;
 
 STATIC void	S_nuke_stacks(pTHX);
-STATIC int	S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
+STATIC int	S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv, int *suidscript)
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_3);
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_4);
 
 STATIC void	S_usage(pTHX_ const char *name)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname, int fdscript)
+STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname, int fdscript, int suidscript)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 

@@ -584,8 +584,6 @@ END_EXTERN_C
 #define PL_subline		(*Perl_Isubline_ptr(aTHX))
 #undef  PL_subname
 #define PL_subname		(*Perl_Isubname_ptr(aTHX))
-#undef  PL_suidscript
-#define PL_suidscript		(*Perl_Isuidscript_ptr(aTHX))
 #undef  PL_sv_arenaroot
 #define PL_sv_arenaroot		(*Perl_Isv_arenaroot_ptr(aTHX))
 #undef  PL_sv_count

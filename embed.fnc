@@ -469,7 +469,7 @@ Ap	|I32	|mg_size	|NN SV* sv
 Ap	|void	|mini_mktime	|NN struct tm *pm
 p	|OP*	|mod		|NULLOK OP* o|I32 type
 p	|int	|mode_from_discipline|NULLOK SV* discp
-Ap	|char*	|moreswitches	|NN char* s
+Ap	|char*	|moreswitches	|NN char* s|int suidscript
 p	|OP*	|my		|NN OP* o
 Ap	|NV	|my_atof	|NN const char *s
 #if (!defined(HAS_MEMCPY) && !defined(HAS_BCOPY)) || (!defined(HAS_MEMMOVE) && !defined(HAS_SAFE_MEMCPY) && !defined(HAS_SAFE_BCOPY))
@@ -1134,8 +1134,8 @@ Ap	|void	|Slab_Free	|NN void *op
 #endif
 
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
-s	|void	|find_beginning
-s	|void	|forbid_setid	|char flag
+s	|void	|find_beginning	|int suidscript
+s	|void	|forbid_setid	|char flag|int suidscript
 s	|void	|incpush	|NULLOK const char *dir|bool addsubdirs|bool addoldvers|bool usesep|bool canrelocate
 s	|void	|init_interp
 s	|void	|init_ids
@@ -1146,10 +1146,12 @@ s	|void	|init_postdump_symbols|int argc|NN char **argv|NULLOK char **env
 s	|void	|init_predump_symbols
 rs	|void	|my_exit_jump
 s	|void	|nuke_stacks
-s	|int	|open_script	|NN const char *scriptname|bool dosearch|NN SV *sv
+s	|int	|open_script	|NN const char *scriptname|bool dosearch \
+				|NN SV *sv|NN int *suidscript
 s	|void	|usage		|NN const char *name
 s	|void	|validate_suid	|NN const char *validarg \
-				|NN const char *scriptname|int fdscript
+				|NN const char *scriptname|int fdscript \
+				|int suidscript
 #  if defined(IAMSUID)
 s	|int	|fd_on_nosuid_fs|int fd
 #  endif
