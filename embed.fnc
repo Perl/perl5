@@ -1146,9 +1146,10 @@ s	|void	|init_postdump_symbols|int argc|NN char **argv|NULLOK char **env
 s	|void	|init_predump_symbols
 rs	|void	|my_exit_jump
 s	|void	|nuke_stacks
-s	|void	|open_script	|NN const char *scriptname|bool dosearch|NN SV *sv
+s	|int	|open_script	|NN const char *scriptname|bool dosearch|NN SV *sv
 s	|void	|usage		|NN const char *name
-s	|void	|validate_suid	|NN const char *validarg|NN const char *scriptname
+s	|void	|validate_suid	|NN const char *validarg \
+				|NN const char *scriptname|int fdscript
 #  if defined(IAMSUID)
 s	|int	|fd_on_nosuid_fs|int fd
 #  endif

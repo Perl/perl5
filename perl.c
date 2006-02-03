@@ -1593,8 +1593,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #ifdef USE_SITECUSTOMIZE
     bool minus_f = FALSE;
 #endif
+    int fdscript;
 
-    PL_fdscript = -1;
     PL_suidscript = -1;
     sv_setpvn(PL_linestr,"",0);
     sv = newSVpvs("");		/* first used for -I flags */
@@ -2023,9 +2023,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     TAINT_NOT;
     init_perllib();
 
-    open_script(scriptname,dosearch,sv);
+    fdscript = open_script(scriptname,dosearch,sv);
 
-    validate_suid(validarg, scriptname);
+    validate_suid(validarg, scriptname, fdscript);
 
 #ifndef PERL_MICRO
 #if defined(SIGCHLD) || defined(SIGCLD)
@@ -3500,7 +3500,7 @@ S_init_main_stash(pTHX)
 }
 
 /* PSz 18 Nov 03  fdscript now global but do not change prototype */
-STATIC void
+STATIC int
 S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
 {
 #ifndef IAMSUID
@@ -3509,9 +3509,9 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
     const char *cpp_discard_flag;
     const char *perl;
 #endif
+    int fdscript = -1;
     dVAR;
 
-    PL_fdscript = -1;
     PL_suidscript = -1;
 
     if (PL_e_script) {
@@ -3523,7 +3523,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
 
 	if (strnEQ(scriptname, "/dev/fd/", 8) && isDIGIT(scriptname[8]) ) {
             const char *s = scriptname + 8;
-	    PL_fdscript = atoi(s);
+	    fdscript = atoi(s);
 	    while (isDIGIT(*s))
 		s++;
 	    if (*s) {
@@ -3558,8 +3558,8 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
     CopFILE_set(PL_curcop, PL_origfilename);
     if (*PL_origfilename == '-' && PL_origfilename[1] == '\0')
 	scriptname = (char *)"";
-    if (PL_fdscript >= 0) {
-	PL_rsfp = PerlIO_fdopen(PL_fdscript,PERL_SCRIPT_MODE);
+    if (fdscript >= 0) {
+	PL_rsfp = PerlIO_fdopen(fdscript,PERL_SCRIPT_MODE);
 #       if defined(HAS_FCNTL) && defined(F_SETFD)
 	    if (PL_rsfp)
                 /* ensure close-on-exec */
@@ -3670,6 +3670,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
 	    Perl_croak(aTHX_ "Can't open perl script \"%s\": %s\n",
 		    CopFILE(PL_curcop), Strerror(errno));
     }
+    return fdscript;
 }
 
 /* Mention
@@ -3807,7 +3808,8 @@ S_fd_on_nosuid_fs(pTHX_ int fd)
 #endif /* IAMSUID */
 
 STATIC void
-S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
+S_validate_suid(pTHX_ const char *validarg, const char *scriptname,
+		int fdscript)
 {
     dVAR;
 #ifdef IAMSUID
@@ -3852,7 +3854,7 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
 	const char *s_end;
 
 #ifdef IAMSUID
-	if (PL_fdscript < 0 || PL_suidscript != 1)
+	if (fdscript < 0 || PL_suidscript != 1)
 	    Perl_croak(aTHX_ "Need (suid) fdscript in suidperl\n");	/* We already checked this */
 	/* PSz 11 Nov 03
 	 * Since the script is opened by perl, not suidperl, some of these
@@ -4002,7 +4004,7 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
 	    Perl_croak(aTHX_ "Args must match #! line");
 
 #ifndef IAMSUID
-	if (PL_fdscript < 0 &&
+	if (fdscript < 0 &&
 	    PL_euid != PL_uid && (PL_statbuf.st_mode & S_ISUID) &&
 	    PL_euid == PL_statbuf.st_uid)
 	    if (!PL_do_undump)
@@ -4010,7 +4012,7 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
 FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 #endif /* IAMSUID */
 
-	if (PL_fdscript < 0 &&
+	if (fdscript < 0 &&
 	    PL_euid) {	/* oops, we're not the setuid root perl */
 	    /* PSz 18 Feb 04
 	     * When root runs a setuid script, we do not go through the same
@@ -4023,7 +4025,7 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 	     * might run also non-setuid ones, and deserves what he gets.
 	     * 
 	     * Or, we might drop the PL_euid check above (and rely just on
-	     * PL_fdscript to avoid loops), and do the execs
+	     * fdscript to avoid loops), and do the execs
 	     * even for root.
 	     */
 #ifndef IAMSUID
@@ -4131,7 +4133,7 @@ FIX YOUR KERNEL, OR PUT A C WRAPPER AROUND THIS SCRIPT!\n");
 #ifdef IAMSUID
     else if (PL_preprocess)	/* PSz 13 Nov 03  Caught elsewhere, useless(?!) here */
 	Perl_croak(aTHX_ "-P not allowed for setuid/setgid script\n");
-    else if (PL_fdscript < 0 || PL_suidscript != 1)
+    else if (fdscript < 0 || PL_suidscript != 1)
 	/* PSz 13 Nov 03  Caught elsewhere, useless(?!) here */
 	Perl_croak(aTHX_ "(suid) fdscript needed in suidperl\n");
     else {
