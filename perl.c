@@ -1673,7 +1673,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    if (argv[1] && !strcmp(argv[1], "Dev:Pseudo"))
 		break;
 #endif
-	    forbid_setid("-e");
+	    forbid_setid('e');
 	    if (!PL_e_script) {
 		PL_e_script = newSVpvs("");
 		filter_add(read_e_script, NULL);
@@ -1697,7 +1697,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    goto reswitch;
 
 	case 'I':	/* -I handled both here and in moreswitches() */
-	    forbid_setid("-I");
+	    forbid_setid('I');
 	    if (!*++s && (s=argv[1]) != NULL) {
 		argc--,argv++;
 	    }
@@ -1714,12 +1714,12 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		Perl_croak(aTHX_ "No directory specified for -I");
 	    break;
 	case 'P':
-	    forbid_setid("-P");
+	    forbid_setid('P');
 	    PL_preprocess = TRUE;
 	    s++;
 	    goto reswitch;
 	case 'S':
-	    forbid_setid("-S");
+	    forbid_setid('S');
 	    dosearch = TRUE;
 	    s++;
 	    goto reswitch;
@@ -3002,7 +3002,7 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	return s;
     case 'd':
-	forbid_setid("-d");
+	forbid_setid('d');
 	s++;
 
         /* -dt indicates to the debugger that threads will be used */
@@ -3036,7 +3036,7 @@ Perl_moreswitches(pTHX_ char *s)
     case 'D':
     {	
 #ifdef DEBUGGING
-	forbid_setid("-D");
+	forbid_setid('D');
 	s++;
 	PL_debug = get_debug_opts( (const char **)&s, 1) | DEBUG_TOP_FLAG;
 #else /* !DEBUGGING */
@@ -3068,7 +3068,7 @@ Perl_moreswitches(pTHX_ char *s)
 	}
 	return s;
     case 'I':	/* -I handled both here and in parse_body() */
-	forbid_setid("-I");
+	forbid_setid('I');
 	++s;
 	while (*s && isSPACE(*s))
 	    ++s;
@@ -3117,7 +3117,7 @@ Perl_moreswitches(pTHX_ char *s)
 	}
 	return s;
     case 'A':
-	forbid_setid("-A");
+	forbid_setid('A');
 	if (!PL_preambleav)
 	    PL_preambleav = newAV();
 	s++;
@@ -3140,10 +3140,10 @@ Perl_moreswitches(pTHX_ char *s)
 	    return s;
 	}
     case 'M':
-	forbid_setid("-M");	/* XXX ? */
+	forbid_setid('M');	/* XXX ? */
 	/* FALL THROUGH */
     case 'm':
-	forbid_setid("-m");	/* XXX ? */
+	forbid_setid('m');	/* XXX ? */
 	if (*++s) {
 	    char *start;
 	    SV *sv;
@@ -3190,7 +3190,7 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	return s;
     case 's':
-	forbid_setid("-s");
+	forbid_setid('s');
 	PL_doswitches = TRUE;
 	s++;
 	return s;
@@ -3650,7 +3650,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
 	SvREFCNT_dec(cpp);
     }
     else if (!*scriptname) {
-	forbid_setid("program input from stdin");
+	forbid_setid(0);
 	PL_rsfp = PerlIO_stdin();
     }
     else {
@@ -4227,7 +4227,7 @@ S_find_beginning(pTHX)
 
     /* skip forward in input to the real script? */
 
-    forbid_setid("-x");
+    forbid_setid('x');
 #ifdef MACOS_TRADITIONAL
     /* Since the Mac OS does not honor #! arguments for us, we do it ourselves */
 
@@ -4348,15 +4348,27 @@ Perl_doing_taint(int argc, char *argv[], char *envp[])
     return 0;
 }
 
+/* Passing the flag as a single char rather than a string is a slight space
+   optimisation.  The only message that isn't /^-.$/ is
+   "program input from stdin", which is substituted in place of '\0', which
+   could never be a command line flag.  */
 STATIC void
-S_forbid_setid(pTHX_ const char *s)
+S_forbid_setid(pTHX_ const char flag)
 {
     dVAR;
+    char string[3] = "-x";
+    const char *message = "program input from stdin";
+
+    if (flag) {
+	string[1] = flag;
+	message = string;
+    }
+
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
     if (PL_euid != PL_uid)
-        Perl_croak(aTHX_ "No %s allowed while running setuid", s);
+        Perl_croak(aTHX_ "No %s allowed while running setuid", message);
     if (PL_egid != PL_gid)
-        Perl_croak(aTHX_ "No %s allowed while running setgid", s);
+        Perl_croak(aTHX_ "No %s allowed while running setgid", message);
 #endif /* SETUID_SCRIPTS_ARE_SECURE_NOW */
     /* PSz 29 Feb 04
      * Checks for UID/GID above "wrong": why disallow
@@ -4381,10 +4393,10 @@ S_forbid_setid(pTHX_ const char *s)
      * Also see comments about root running a setuid script, elsewhere.
      */
     if (PL_suidscript >= 0)
-        Perl_croak(aTHX_ "No %s allowed with (suid) fdscript", s);
+        Perl_croak(aTHX_ "No %s allowed with (suid) fdscript", message);
 #ifdef IAMSUID
     /* PSz 11 Nov 03  Catch it in suidperl, always! */
-    Perl_croak(aTHX_ "No %s allowed in suidperl", s);
+    Perl_croak(aTHX_ "No %s allowed in suidperl", message);
 #endif /* IAMSUID */
 }
 
