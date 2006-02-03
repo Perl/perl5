@@ -3188,7 +3188,7 @@
 #endif
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
-#define find_beginning(a)	S_find_beginning(aTHX_ a)
+#define find_beginning()	S_find_beginning(aTHX)
 #define forbid_setid(a,b)	S_forbid_setid(aTHX_ a,b)
 #define incpush(a,b,c,d,e)	S_incpush(aTHX_ a,b,c,d,e)
 #define init_interp()		S_init_interp(aTHX)

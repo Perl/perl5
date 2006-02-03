@@ -2050,7 +2050,13 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    || gMacPerl_AlwaysExtract
 #endif
 	    ) {
-	    find_beginning(suidscript);
+
+	    /* This will croak if suidscript is >= 0, as -x cannot be used with
+	       setuid scripts.  */
+	    forbid_setid('x', suidscript);
+	    /* Hence you can't get here if suidscript >= 0  */
+
+	    find_beginning();
 	    if (cddir && PerlDir_chdir( (char *)cddir ) < 0)
 		Perl_croak(aTHX_ "Can't chdir to %s",cddir);
 	}
@@ -4218,7 +4224,7 @@ FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!\n");
 }
 
 STATIC void
-S_find_beginning(pTHX_ const int suidscript)
+S_find_beginning(pTHX)
 {
     dVAR;
     register char *s;
@@ -4228,11 +4234,6 @@ S_find_beginning(pTHX_ const int suidscript)
 #endif
 
     /* skip forward in input to the real script? */
-
-    /* This will croak if suidscript is >= 0, as -x cannot be used with
-       setuid scripts.  */
-    forbid_setid('x', suidscript);
-    /* Hence you can't get here if suidscript >= 0  */
 
 #ifdef MACOS_TRADITIONAL
     /* Since the Mac OS does not honor #! arguments for us, we do it ourselves */

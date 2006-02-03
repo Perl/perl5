@@ -1134,7 +1134,7 @@ Ap	|void	|Slab_Free	|NN void *op
 #endif
 
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
-s	|void	|find_beginning	|int suidscript
+s	|void	|find_beginning
 s	|void	|forbid_setid	|char flag|int suidscript
 s	|void	|incpush	|NULLOK const char *dir|bool addsubdirs|bool addoldvers|bool usesep|bool canrelocate
 s	|void	|init_interp
