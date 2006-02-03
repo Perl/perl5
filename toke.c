@@ -605,8 +605,8 @@ Perl_lex_start(pTHX_ SV *line)
     *PL_lex_casestack = '\0';
     PL_lex_dojoin = 0;
     PL_lex_starts = 0;
-    PL_lex_stuff = Nullsv;
-    PL_lex_repl = Nullsv;
+    PL_lex_stuff = NULL;
+    PL_lex_repl = NULL;
     PL_lex_inpat = 0;
     PL_nexttoke = 0;
     PL_lex_inwhat = 0;
@@ -1223,7 +1223,7 @@ S_sublex_start(pTHX)
 	    sv = nsv;
 	}
 	yylval.opval = (OP*)newSVOP(op_type, 0, sv);
-	PL_lex_stuff = Nullsv;
+	PL_lex_stuff = NULL;
 	/* Allow <FH> // "foo" */
 	if (op_type == OP_READLINE)
 	    PL_expect = XTERMORDORDOR;
@@ -1280,7 +1280,7 @@ S_sublex_push(pTHX)
     SAVEGENERICPV(PL_lex_casestack);
 
     PL_linestr = PL_lex_stuff;
-    PL_lex_stuff = Nullsv;
+    PL_lex_stuff = NULL;
 
     PL_bufend = PL_bufptr = PL_oldbufptr = PL_oldoldbufptr = PL_linestart
 	= SvPVX(PL_linestr);
@@ -1353,7 +1353,7 @@ S_sublex_done(pTHX)
 	}
 	else {
 	    PL_lex_state = LEX_INTERPCONCAT;
-	    PL_lex_repl = Nullsv;
+	    PL_lex_repl = NULL;
 	}
 	return ',';
     }
@@ -1789,7 +1789,7 @@ S_scan_const(pTHX_ char *start)
 		    }
 		    res = newSVpvn(s + 1, e - s - 1);
 		    res = new_constant( NULL, 0, "charnames",
-					res, Nullsv, "\\N{...}" );
+					res, NULL, "\\N{...}" );
 		    if (has_utf8)
 			sv_utf8_upgrade(res);
 		    str = SvPV_const(res,len);
@@ -1938,7 +1938,7 @@ S_scan_const(pTHX_ char *start)
     if (s > PL_bufptr) {
 	if ( PL_hints & ( PL_lex_inpat ? HINT_NEW_RE : HINT_NEW_STRING ) )
 	    sv = new_constant(start, s - start, (PL_lex_inpat ? "qr" : "q"),
-			      sv, Nullsv,
+			      sv, NULL,
 			      ( PL_lex_inwhat == OP_TRANS
 				? "tr"
 				: ( (PL_lex_inwhat == OP_SUBST && !PL_lex_inpat)
@@ -2239,7 +2239,7 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
 {
     dVAR;
     if (!funcp)
-	return Nullsv;
+	return NULL;
 
     if (!PL_rsfp_filters)
 	PL_rsfp_filters = newAV();
@@ -2622,7 +2622,7 @@ Perl_yylex(pTHX)
 	{
 	    if (PL_bufptr != PL_bufend)
 		Perl_croak(aTHX_ "Bad evalled substitution pattern");
-	    PL_lex_repl = Nullsv;
+	    PL_lex_repl = NULL;
 	}
 	/* FALLTHROUGH */
     case LEX_INTERPCONCAT:
@@ -3311,7 +3311,7 @@ Perl_yylex(pTHX)
 		    attrs = append_elem(OP_LIST, attrs,
 					newSVOP(OP_CONST, 0, sv));
 		    SvREFCNT_dec(PL_lex_stuff);
-		    PL_lex_stuff = Nullsv;
+		    PL_lex_stuff = NULL;
 		}
 		else {
 		    if (len == 6 && strnEQ(s, "unique", len)) {
@@ -4225,7 +4225,7 @@ Perl_yylex(pTHX)
 		    Perl_warner(aTHX_ packWARN(WARN_MISC),
 			    "dump() better written as CORE::dump()");
 		}
-		gv = Nullgv;
+		gv = NULL;
 		gvp = 0;
 		if (hgv && tmp != KEY_x && tmp != KEY_CORE
 			&& ckWARN(WARN_AMBIGUOUS))	/* never ambiguous */
@@ -4292,7 +4292,7 @@ Perl_yylex(pTHX)
 			     PL_tokenbuf);
 		    len -= 2;
 		    PL_tokenbuf[len] = '\0';
-		    gv = Nullgv;
+		    gv = NULL;
 		    gvp = 0;
 		}
 		else {
@@ -5211,7 +5211,7 @@ Perl_yylex(pTHX)
 	    }
 	    if (PL_lex_stuff) {
 		SvREFCNT_dec(PL_lex_stuff);
-		PL_lex_stuff = Nullsv;
+		PL_lex_stuff = NULL;
 	    }
 	    PL_expect = XTERM;
 	    TOKEN('(');
@@ -5535,7 +5535,7 @@ Perl_yylex(pTHX)
 		if (have_proto) {
 		    PL_nextval[PL_nexttoke].opval =
 			(OP*)newSVOP(OP_CONST, 0, PL_lex_stuff);
-		    PL_lex_stuff = Nullsv;
+		    PL_lex_stuff = NULL;
 		    force_next(THING);
 		}
 		if (!have_name) {
@@ -9626,7 +9626,7 @@ S_scan_subst(pTHX_ char *start)
     if (!s) {
 	if (PL_lex_stuff) {
 	    SvREFCNT_dec(PL_lex_stuff);
-	    PL_lex_stuff = Nullsv;
+	    PL_lex_stuff = NULL;
 	}
 	Perl_croak(aTHX_ "Substitution replacement not terminated");
     }
@@ -9694,7 +9694,7 @@ S_scan_trans(pTHX_ char *start)
     if (!s) {
 	if (PL_lex_stuff) {
 	    SvREFCNT_dec(PL_lex_stuff);
-	    PL_lex_stuff = Nullsv;
+	    PL_lex_stuff = NULL;
 	}
 	Perl_croak(aTHX_ "Transliteration replacement not terminated");
     }
@@ -10446,7 +10446,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
     register char *d;			/* destination in temp buffer */
     register char *e;			/* end of temp buffer */
     NV nv;				/* number read, as a double */
-    SV *sv = Nullsv;			/* place to put the converted number */
+    SV *sv = NULL;			/* place to put the converted number */
     bool floatit;			/* boolean: int or float? */
     const char *lastub = NULL;		/* position of last underbar */
     static char const number_too_long[] = "Number too long";
@@ -10630,9 +10630,9 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	    }
 	    if (just_zero && (PL_hints & HINT_NEW_INTEGER))
 		sv = new_constant(start, s - start, "integer",
-				  sv, Nullsv, NULL);
+				  sv, NULL, NULL);
 	    else if (PL_hints & HINT_NEW_BINARY)
-		sv = new_constant(start, s - start, "binary", sv, Nullsv, NULL);
+		sv = new_constant(start, s - start, "binary", sv, NULL, NULL);
 	}
 	break;
 
@@ -10799,7 +10799,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
 	               (PL_hints & HINT_NEW_INTEGER) )
 	    sv = new_constant(PL_tokenbuf, d - PL_tokenbuf,
 			      (floatit ? "float" : "integer"),
-			      sv, Nullsv, NULL);
+			      sv, NULL, NULL);
 	break;
 
     /* if it starts with a v, it could be a v-string */

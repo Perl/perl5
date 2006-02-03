@@ -155,7 +155,7 @@ struct cop {
 #ifdef USE_ITHREADS
 #  define CopFILE(c)		((c)->cop_file)
 #  define CopFILEGV(c)		(CopFILE(c) \
-				 ? gv_fetchfile(CopFILE(c)) : Nullgv)
+				 ? gv_fetchfile(CopFILE(c)) : NULL)
 				 
 #  ifdef NETWARE
 #    define CopFILE_set(c,pv)	((c)->cop_file = savepv(pv))
@@ -164,7 +164,7 @@ struct cop {
 #  endif
 
 #  define CopFILESV(c)		(CopFILE(c) \
-				 ? GvSV(gv_fetchfile(CopFILE(c))) : Nullsv)
+				 ? GvSV(gv_fetchfile(CopFILE(c))) : NULL)
 #  define CopFILEAV(c)		(CopFILE(c) \
 				 ? GvAV(gv_fetchfile(CopFILE(c))) : NULL)
 #  ifdef DEBUGGING
@@ -196,7 +196,7 @@ struct cop {
 #  define CopFILEGV(c)		((c)->cop_filegv)
 #  define CopFILEGV_set(c,gv)	((c)->cop_filegv = (GV*)SvREFCNT_inc(gv))
 #  define CopFILE_set(c,pv)	CopFILEGV_set((c), gv_fetchfile(pv))
-#  define CopFILESV(c)		(CopFILEGV(c) ? GvSV(CopFILEGV(c)) : Nullsv)
+#  define CopFILESV(c)		(CopFILEGV(c) ? GvSV(CopFILEGV(c)) : NULL)
 #  define CopFILEAV(c)		(CopFILEGV(c) ? GvAV(CopFILEGV(c)) : NULL)
 #  ifdef DEBUGGING
 #    define CopFILEAVx(c)	(assert(CopFILEGV(c)), GvAV(CopFILEGV(c)))
@@ -211,7 +211,7 @@ struct cop {
 #  define CopSTASHPV_set(c,pv)	CopSTASH_set((c), gv_stashpv(pv,GV_ADD))
 #  define CopSTASH_eq(c,hv)	(CopSTASH(c) == (hv))
 #  define CopSTASH_free(c)	
-#  define CopFILE_free(c)	(SvREFCNT_dec(CopFILEGV(c)),(CopFILEGV(c) = Nullgv))
+#  define CopFILE_free(c)	(SvREFCNT_dec(CopFILEGV(c)),(CopFILEGV(c) = NULL))
 
 #endif /* USE_ITHREADS */
 
@@ -315,7 +315,7 @@ struct block_sub {
 	}								\
 	sv = (SV*)cx->blk_sub.cv;					\
 	if (sv && (CvDEPTH((CV*)sv) = cx->blk_sub.olddepth))		\
-	    sv = Nullsv;						\
+	    sv = NULL;						\
     } STMT_END
 
 #define LEAVESUB(sv)							\
@@ -344,7 +344,7 @@ struct block_eval {
     STMT_START {							\
 	cx->blk_eval.old_in_eval = PL_in_eval;				\
 	cx->blk_eval.old_op_type = PL_op->op_type;			\
-	cx->blk_eval.old_namesv = (n ? newSVpv(n,0) : Nullsv);		\
+	cx->blk_eval.old_namesv = (n ? newSVpv(n,0) : NULL);		\
 	cx->blk_eval.old_eval_root = PL_eval_root;			\
 	cx->blk_eval.cur_text = PL_linestr;				\
 	cx->blk_eval.cv = NULL; /* set by doeval(), as applicable */	\
@@ -394,14 +394,14 @@ struct block_loop {
 	if ((cx->blk_loop.iterdata = (idata)))				\
 	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));	\
 	else								\
-	    cx->blk_loop.itersave = Nullsv;
+	    cx->blk_loop.itersave = NULL;
 #else
 #  define CxITERVAR(c)		((c)->blk_loop.itervar)
 #  define CX_ITERDATA_SET(cx,ivar)					\
 	if ((cx->blk_loop.itervar = (SV**)(ivar)))			\
 	    cx->blk_loop.itersave = SvREFCNT_inc(*CxITERVAR(cx));	\
 	else								\
-	    cx->blk_loop.itersave = Nullsv;
+	    cx->blk_loop.itersave = NULL;
 #endif
 
 #define PUSHLOOP(cx, dat, s)						\
@@ -410,7 +410,7 @@ struct block_loop {
 	cx->blk_loop.redo_op = cLOOP->op_redoop;			\
 	cx->blk_loop.next_op = cLOOP->op_nextop;			\
 	cx->blk_loop.last_op = cLOOP->op_lastop;			\
-	cx->blk_loop.iterlval = Nullsv;					\
+	cx->blk_loop.iterlval = NULL;					\
 	cx->blk_loop.iterary = NULL;					\
 	cx->blk_loop.iterix = -1;					\
 	CX_ITERDATA_SET(cx,dat);

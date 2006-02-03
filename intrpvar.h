@@ -448,7 +448,7 @@ PERLVARI(Iknown_layers, PerlIO_list_t *,NULL)
 PERLVARI(Idef_layerlist, PerlIO_list_t *,NULL)
 #endif
 
-PERLVARI(Iencoding,	SV*, Nullsv)		/* character encoding */
+PERLVARI(Iencoding,	SV*, NULL)		/* character encoding */
 
 PERLVAR(Idebug_pad,	struct perl_debug_pad)	/* always needed because of the re extension */
 

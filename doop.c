@@ -1034,7 +1034,7 @@ Perl_do_chomp(pTHX_ register SV *sv)
     STRLEN len;
     char *s;
     char *temp_buffer = NULL;
-    SV* svrecode = Nullsv;
+    SV* svrecode = NULL;
 
     if (RsSNARF(PL_rs))
 	return 0;
@@ -1371,7 +1371,7 @@ Perl_do_kv(pTHX)
 	if (PL_op->op_flags & OPf_MOD || LVRET) {	/* lvalue */
 	    dTARGET;		/* make sure to clear its target here */
 	    if (SvTYPE(TARG) == SVt_PVLV)
-		LvTARG(TARG) = Nullsv;
+		LvTARG(TARG) = NULL;
 	    PUSHs(TARG);
 	}
 	RETURN;
@@ -1390,7 +1390,7 @@ Perl_do_kv(pTHX)
 	if (PL_op->op_flags & OPf_MOD || LVRET) {	/* lvalue */
 	    if (SvTYPE(TARG) < SVt_PVLV) {
 		sv_upgrade(TARG, SVt_PVLV);
-		sv_magic(TARG, Nullsv, PERL_MAGIC_nkeys, NULL, 0);
+		sv_magic(TARG, NULL, PERL_MAGIC_nkeys, NULL, 0);
 	    }
 	    LvTYPE(TARG) = 'k';
 	    if (LvTARG(TARG) != (SV*)keys) {

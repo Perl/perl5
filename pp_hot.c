@@ -1494,7 +1494,7 @@ yup:					/* Confirmed by INTUIT */
 
 	    rx->subbeg = savepvn(t, strend - t);
 #ifdef PERL_OLD_COPY_ON_WRITE
-	    rx->saved_copy = Nullsv;
+	    rx->saved_copy = NULL;
 #endif
 	}
 	rx->sublen = strend - t;
@@ -1961,7 +1961,7 @@ PP(pp_iter)
 
 	if (SvMAGICAL(av) || AvREIFY(av)) {
 	    SV * const * const svp = av_fetch(av, --cx->blk_loop.iterix, FALSE);
-	    sv = svp ? *svp : Nullsv;
+	    sv = svp ? *svp : NULL;
 	}
 	else {
 	    sv = AvARRAY(av)[--cx->blk_loop.iterix];
@@ -1974,7 +1974,7 @@ PP(pp_iter)
 
 	if (SvMAGICAL(av) || AvREIFY(av)) {
 	    SV * const * const svp = av_fetch(av, ++cx->blk_loop.iterix, FALSE);
-	    sv = svp ? *svp : Nullsv;
+	    sv = svp ? *svp : NULL;
 	}
 	else {
 	    sv = AvARRAY(av)[++cx->blk_loop.iterix];
@@ -1982,7 +1982,7 @@ PP(pp_iter)
     }
 
     if (sv && SvIS_FREED(sv)) {
-	*itersvp = Nullsv;
+	*itersvp = NULL;
 	Perl_croak(aTHX_ "Use of freed value in iteration");
     }
 
@@ -1994,7 +1994,7 @@ PP(pp_iter)
 	SV *lv = cx->blk_loop.iterlval;
 	if (lv && SvREFCNT(lv) > 1) {
 	    SvREFCNT_dec(lv);
-	    lv = Nullsv;
+	    lv = NULL;
 	}
 	if (lv)
 	    SvREFCNT_dec(LvTARG(lv));
@@ -2045,10 +2045,10 @@ PP(pp_subst)
 #ifdef PERL_OLD_COPY_ON_WRITE
     bool is_cow;
 #endif
-    SV *nsv = Nullsv;
+    SV *nsv = NULL;
 
     /* known replacement string? */
-    dstr = (pm->op_pmflags & PMf_CONST) ? POPs : Nullsv;
+    dstr = (pm->op_pmflags & PMf_CONST) ? POPs : NULL;
     if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
     else if (PL_op->op_private & OPpTARGET_MY)
@@ -2971,7 +2971,7 @@ PP(pp_aelem)
 	    lv = sv_newmortal();
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
-	    sv_magic(lv, Nullsv, PERL_MAGIC_defelem, NULL, 0);
+	    sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
 	    LvTARG(lv) = SvREFCNT_inc(av);
 	    LvTARGOFF(lv) = elem;
 	    LvTARGLEN(lv) = 1;
@@ -3056,7 +3056,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
     HV* stash;
     STRLEN namelen;
     const char* packname = NULL;
-    SV *packsv = Nullsv;
+    SV *packsv = NULL;
     STRLEN packlen;
     const char * const name = SvPV_const(meth, namelen);
     SV * const sv = *(PL_stack_base + TOPMARK + 1);

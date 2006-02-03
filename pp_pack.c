@@ -2541,7 +2541,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	SV *fromstr;
 	STRLEN fromlen;
 	I32 len;
-	SV *lengthcode = Nullsv;
+	SV *lengthcode = NULL;
         I32 datumtype = symptr->code;
         howlen_t howlen = symptr->howlen;
 	char *start = SvPVX(cat);

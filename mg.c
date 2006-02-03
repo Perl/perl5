@@ -1974,7 +1974,7 @@ int
 Perl_magic_getdefelem(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
-    SV *targ = Nullsv;
+    SV *targ = NULL;
     if (LvTARGLEN(sv)) {
 	if (mg->mg_obj) {
 	    SV * const ahv = LvTARG(sv);
@@ -1993,7 +1993,7 @@ Perl_magic_getdefelem(pTHX_ SV *sv, MAGIC *mg)
 	    LvTARG(sv) = SvREFCNT_inc(targ);
 	    LvTARGLEN(sv) = 0;
 	    SvREFCNT_dec(mg->mg_obj);
-	    mg->mg_obj = Nullsv;
+	    mg->mg_obj = NULL;
 	    mg->mg_flags &= ~MGf_REFCOUNTED;
 	}
     }
@@ -2021,7 +2021,7 @@ Perl_vivify_defelem(pTHX_ SV *sv)
 {
     dVAR;
     MAGIC *mg;
-    SV *value = Nullsv;
+    SV *value = NULL;
 
     if (!LvTARGLEN(sv) || !(mg = mg_find(sv, PERL_MAGIC_defelem)))
 	return;
@@ -2036,7 +2036,7 @@ Perl_vivify_defelem(pTHX_ SV *sv)
     else {
 	AV* const av = (AV*)LvTARG(sv);
 	if ((I32)LvTARGLEN(sv) < 0 && (I32)LvTARGOFF(sv) > AvFILL(av))
-	    LvTARG(sv) = Nullsv;	/* array can't be extended */
+	    LvTARG(sv) = NULL;	/* array can't be extended */
 	else {
 	    SV** const svp = av_fetch(av, LvTARGOFF(sv), TRUE);
 	    if (!svp || (value = *svp) == &PL_sv_undef)
@@ -2048,7 +2048,7 @@ Perl_vivify_defelem(pTHX_ SV *sv)
     LvTARG(sv) = value;
     LvTARGLEN(sv) = 0;
     SvREFCNT_dec(mg->mg_obj);
-    mg->mg_obj = Nullsv;
+    mg->mg_obj = NULL;
     mg->mg_flags &= ~MGf_REFCOUNTED;
 }
 
@@ -2194,7 +2194,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		PL_encoding = newSVsv(sv);
 	    }
 	    else {
-		PL_encoding = Nullsv;
+		PL_encoding = NULL;
 	    }
 	}
 	break;
@@ -2336,7 +2336,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    PL_ors_sv = newSVsv(sv);
 	}
 	else {
-	    PL_ors_sv = Nullsv;
+	    PL_ors_sv = NULL;
 	}
 	break;
     case ',':
@@ -2346,7 +2346,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    PL_ofs_sv = newSVsv(sv);
 	}
 	else {
-	    PL_ofs_sv = Nullsv;
+	    PL_ofs_sv = NULL;
 	}
 	break;
     case '[':
@@ -2620,8 +2620,8 @@ Perl_sighandler(int sig)
     dTHX;
 #endif
     dSP;
-    GV *gv = Nullgv;
-    SV *sv = Nullsv;
+    GV *gv = NULL;
+    SV *sv = NULL;
     SV * const tSv = PL_Sv;
     CV *cv = NULL;
     OP *myop = PL_op;

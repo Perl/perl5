@@ -189,7 +189,7 @@ the length of hash keys. This is very similar to the C<SvPV()> macro
 described elsewhere in this document.
 
 =for apidoc Am|SV*|HeSVKEY|HE* he
-Returns the key as an C<SV*>, or C<Nullsv> if the hash entry does not
+Returns the key as an C<SV*>, or C<NULL> if the hash entry does not
 contain an C<SV*> key.
 
 =for apidoc Am|SV*|HeSVKEY_force|HE* he
@@ -303,7 +303,7 @@ C<SV*>.
 
 #define HeSVKEY(he)		((HeKEY(he) && 				\
 				  HeKLEN(he) == HEf_SVKEY) ?		\
-				 HeKEY_sv(he) : Nullsv)
+				 HeKEY_sv(he) : NULL)
 
 #define HeSVKEY_force(he)	(HeKEY(he) ?				\
 				 ((HeKLEN(he) == HEf_SVKEY) ?		\

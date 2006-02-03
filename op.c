@@ -349,14 +349,14 @@ Perl_op_clear(pTHX_ OP *o)
 	    }
 #else
 	    SvREFCNT_dec(cSVOPo->op_sv);
-	    cSVOPo->op_sv = Nullsv;
+	    cSVOPo->op_sv = NULL;
 #endif
 	}
 	break;
     case OP_METHOD_NAMED:
     case OP_CONST:
 	SvREFCNT_dec(cSVOPo->op_sv);
-	cSVOPo->op_sv = Nullsv;
+	cSVOPo->op_sv = NULL;
 #ifdef USE_ITHREADS
 	/** Bug #15654
 	  Even if op_clear does a pad_free for the target of the op,
@@ -380,7 +380,7 @@ Perl_op_clear(pTHX_ OP *o)
     case OP_TRANS:
 	if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
 	    SvREFCNT_dec(cSVOPo->op_sv);
-	    cSVOPo->op_sv = Nullsv;
+	    cSVOPo->op_sv = NULL;
 	}
 	else {
 	    Safefree(cPVOPo->op_pv);
@@ -1683,7 +1683,7 @@ Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv,
 
     Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
 		     newSVpvs(ATTRSMODULE),
-                     Nullsv, prepend_elem(OP_LIST,
+                     NULL, prepend_elem(OP_LIST,
 				  newSVOP(OP_CONST, 0, newSVpv(stashpv,0)),
 				  prepend_elem(OP_LIST,
 					       newSVOP(OP_CONST, 0,
@@ -3233,13 +3233,13 @@ Perl_dofile(pTHX_ OP *term, I32 force_builtin)
 {
     dVAR;
     OP *doop;
-    GV *gv = Nullgv;
+    GV *gv = NULL;
 
     if (!force_builtin) {
 	gv = gv_fetchpvs("do", GV_NOTQUAL, SVt_PVCV);
 	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
 	    GV * const * const gvp = (GV**)hv_fetchs(PL_globalstash, "do", FALSE);
-	    gv = gvp ? *gvp : Nullgv;
+	    gv = gvp ? *gvp : NULL;
 	}
     }
 
@@ -3422,7 +3422,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			cPADOPx(tmpop)->op_padix = 0;	/* steal it */
 #else
 			pm->op_pmreplroot = (OP*)cSVOPx(tmpop)->op_sv;
-			cSVOPx(tmpop)->op_sv = Nullsv;	/* steal it */
+			cSVOPx(tmpop)->op_sv = NULL;	/* steal it */
 #endif
 			pm->op_pmflags |= PMf_ONCE;
 			tmpop = cUNOPo->op_first;	/* to list (nulled) */
@@ -4282,7 +4282,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	LEAVE;
     }
     SvPOK_off((SV*)cv);		/* forget prototype */
-    CvGV(cv) = Nullgv;
+    CvGV(cv) = NULL;
 
     pad_undef(cv);
 
@@ -4308,7 +4308,7 @@ Perl_cv_ckproto(pTHX_ const CV *cv, const GV *gv, const char *p)
 {
     if (((!p != !SvPOK(cv)) || (p && strNE(p, SvPVX_const(cv)))) && ckWARN_d(WARN_PROTOTYPE)) {
 	SV* const msg = sv_newmortal();
-	SV* name = Nullsv;
+	SV* name = NULL;
 
 	if (gv)
 	    gv_efullname3(name = sv_newmortal(), gv, NULL);
@@ -4378,10 +4378,10 @@ SV *
 Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 {
     dVAR;
-    SV *sv = Nullsv;
+    SV *sv = NULL;
 
     if (!o)
-	return Nullsv;
+	return NULL;
 
     if (o->op_type == OP_LINESEQ && cLISTOPo->op_first)
 	o = cLISTOPo->op_first->op_sibling;
@@ -4400,13 +4400,13 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 	if (type == OP_LEAVESUB || type == OP_RETURN)
 	    break;
 	if (sv)
-	    return Nullsv;
+	    return NULL;
 	if (type == OP_CONST && cSVOPo->op_sv)
 	    sv = cSVOPo->op_sv;
 	else if (cv && type == OP_CONST) {
 	    sv = PAD_BASE_SV(CvPADLIST(cv), o->op_targ);
 	    if (!sv)
-		return Nullsv;
+		return NULL;
 	}
 	else if (cv && type == OP_PADSV) {
 	    if (CvCONST(cv)) { /* newly cloned anon */
@@ -4414,7 +4414,7 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 		/* the candidate should have 1 ref from this pad and 1 ref
 		 * from the parent */
 		if (!sv || SvREFCNT(sv) != 2)
-		    return Nullsv;
+		    return NULL;
 		sv = newSVsv(sv);
 		SvREADONLY_on(sv);
 		return sv;
@@ -4425,7 +4425,7 @@ Perl_op_const_sv(pTHX_ const OP *o, CV *cv)
 	    }
 	}
 	else {
-	    return Nullsv;
+	    return NULL;
 	}
     }
     return sv;
@@ -4531,7 +4531,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 #endif
 
     if (!block || !ps || *ps || attrs || (CvFLAGS(PL_compcv) & CVf_BUILTIN_ATTRS))
-	const_sv = Nullsv;
+	const_sv = NULL;
     else
 	const_sv = op_const_sv(block, NULL);
 
@@ -5162,7 +5162,7 @@ OP *
 Perl_ck_anoncode(pTHX_ OP *o)
 {
     cSVOPo->op_targ = pad_add_anon(cSVOPo->op_sv, o->op_type);
-    cSVOPo->op_sv = Nullsv;
+    cSVOPo->op_sv = NULL;
     return o;
 }
 
@@ -5705,7 +5705,7 @@ Perl_ck_fun(pTHX_ OP *o)
 				 OP *op = ((BINOP*)kid)->op_first;
 				 name = NULL;
 				 if (op) {
-				      SV *tmpstr = Nullsv;
+				      SV *tmpstr = NULL;
 				      const char * const a =
 					   kid->op_type == OP_AELEM ?
 					   "[]" : "{}";
@@ -5814,7 +5814,7 @@ Perl_ck_glob(pTHX_ OP *o)
 	GV *glob_gv;
 	ENTER;
 	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-		newSVpvs("File::Glob"), Nullsv, Nullsv, Nullsv);
+		newSVpvs("File::Glob"), NULL, NULL, NULL);
 	gv = gv_fetchpvs("CORE::GLOBAL::glob", 0, SVt_PVCV);
 	glob_gv = gv_fetchpvs("File::Glob::csh_glob", 0, SVt_PVCV);
 	GvCV(gv) = GvCV(glob_gv);
@@ -6108,7 +6108,7 @@ Perl_ck_method(pTHX_ OP *o)
 		sv = newSVpvn_share(method, SvCUR(sv), 0);
 	    }
 	    else {
-		kSVOP->op_sv = Nullsv;
+		kSVOP->op_sv = NULL;
 	    }
 	    cmop = newSVOP(OP_METHOD_NAMED, 0, sv);
 	    op_free(o);
@@ -6189,7 +6189,7 @@ OP *
 Perl_ck_require(pTHX_ OP *o)
 {
     dVAR;
-    GV* gv = Nullgv;
+    GV* gv = NULL;
 
     if (o->op_flags & OPf_KIDS) {	/* Shall we supply missing .pm? */
 	SVOP * const kid = (SVOP*)cUNOPo->op_first;
@@ -6227,7 +6227,7 @@ Perl_ck_require(pTHX_ OP *o)
 	gv = gv_fetchpvs("require", GV_NOTQUAL, SVt_PVCV);
 	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
 	    GV * const * const gvp = (GV**)hv_fetchs(PL_globalstash, "require", FALSE);
-	    gv = gvp ? *gvp : Nullgv;
+	    gv = gvp ? *gvp : NULL;
 	}
     }
 
@@ -6868,7 +6868,7 @@ Perl_peep(pTHX_ register OP *o)
 		    /* XXX I don't know how this isn't readonly already. */
 		    SvREADONLY_on(PAD_SVl(ix));
 		}
-		cSVOPo->op_sv = Nullsv;
+		cSVOPo->op_sv = NULL;
 		o->op_targ = ix;
 	    }
 #endif

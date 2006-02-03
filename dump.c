@@ -1669,7 +1669,7 @@ Perl_debop(pTHX_ const OP *o)
             AV * const comppad = (AV*)(*av_fetch(padlist, 0, FALSE));
             sv = *av_fetch(comppad, o->op_targ, FALSE);
         } else
-            sv = Nullsv;
+            sv = NULL;
         if (sv)
            PerlIO_printf(Perl_debug_log, "(%s)", SvPV_nolen_const(sv));
         else

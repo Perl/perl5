@@ -1297,7 +1297,7 @@ Perl_my_stat(pTHX)
 		return PL_laststatval;
 	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 		report_evil_fh(gv, io, PL_op->op_type);
-	    PL_statgv = Nullgv;
+	    PL_statgv = NULL;
 	    sv_setpvn(PL_statname,"", 0);
 	    return (PL_laststatval = -1);
 	}
@@ -1320,7 +1320,7 @@ Perl_my_stat(pTHX)
 	}
 
 	s = SvPV_const(sv, len);
-	PL_statgv = Nullgv;
+	PL_statgv = NULL;
 	sv_setpvn(PL_statname, s, len);
 	s = SvPVX_const(PL_statname);		/* s now NUL-terminated */
 	PL_laststype = OP_STAT;
@@ -1357,7 +1357,7 @@ Perl_my_lstat(pTHX)
 	Perl_croak(aTHX_ no_prev_lstat);
 
     PL_laststype = OP_LSTAT;
-    PL_statgv = Nullgv;
+    PL_statgv = NULL;
     sv = POPs;
     PUTBACK;
     if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV && ckWARN(WARN_IO)) {

@@ -726,7 +726,7 @@ PP(pp_binmode)
     IO *io;
     PerlIO *fp;
     MAGIC *mg;
-    SV *discp = Nullsv;
+    SV *discp = NULL;
 
     if (MAXARG < 1)
 	RETPUSHUNDEF;
@@ -859,7 +859,7 @@ PP(pp_tie)
 	     SvTYPE(varsv) == SVt_PVHV))
 	    Perl_croak(aTHX_
 		       "Self-ties of arrays and hashes are not supported");
-	sv_magic(varsv, (SvRV(sv) == varsv ? Nullsv : sv), how, NULL, 0);
+	sv_magic(varsv, (SvRV(sv) == varsv ? NULL : sv), how, NULL, 0);
     }
     LEAVE;
     SP = PL_stack_base + markoff;
@@ -2752,7 +2752,7 @@ PP(pp_stat)
 	    goto do_fstat;
 	}
 	sv_setpv(PL_statname, SvPV_nolen_const(sv));
-	PL_statgv = Nullgv;
+	PL_statgv = NULL;
 	PL_laststype = PL_op->op_type;
 	if (PL_op->op_type == OP_LSTAT)
 	    PL_laststatval = PerlLIO_lstat(SvPV_nolen_const(PL_statname), &PL_statcache);
@@ -3089,7 +3089,7 @@ PP(pp_fttty)
     dSP;
     int fd;
     GV *gv;
-    SV *tmpsv = Nullsv;
+    SV *tmpsv = NULL;
 
     STACKED_FTEST_CHECK;
 
@@ -3149,7 +3149,7 @@ PP(pp_fttext)
     else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
 	gv = (GV*)SvRV(POPs);
     else
-	gv = Nullgv;
+	gv = NULL;
 
     if (gv) {
 	EXTEND(SP, 1);
@@ -3204,7 +3204,7 @@ PP(pp_fttext)
     else {
 	sv = POPs;
       really_filename:
-	PL_statgv = Nullgv;
+	PL_statgv = NULL;
 	PL_laststype = OP_STAT;
 	sv_setpv(PL_statname, SvPV_nolen_const(sv));
 	if (!(fp = PerlIO_open(SvPVX_const(PL_statname), "r"))) {
@@ -4039,7 +4039,7 @@ PP(pp_system)
 	    value = (I32)do_aexec5(really, MARK, SP, pp[1], did_pipes);
 	}
 	else if (SP - MARK != 1)
-	    value = (I32)do_aexec5(Nullsv, MARK, SP, pp[1], did_pipes);
+	    value = (I32)do_aexec5(NULL, MARK, SP, pp[1], did_pipes);
 	else {
 	    value = (I32)do_exec3(SvPVx_nolen(sv_mortalcopy(*SP)), pp[1], did_pipes);
 	}
@@ -4058,9 +4058,9 @@ PP(pp_system)
     }
     else if (SP - MARK != 1) {
 #  if defined(WIN32) || defined(OS2) || defined(__SYMBIAN32__)
-	value = (I32)do_aspawn(Nullsv, MARK, SP);
+	value = (I32)do_aspawn(NULL, MARK, SP);
 #  else
-	value = (I32)do_aspawn(Nullsv, (void **)MARK, (void **)SP);
+	value = (I32)do_aspawn(NULL, (void **)MARK, (void **)SP);
 #  endif
     }
     else {
@@ -4098,15 +4098,15 @@ PP(pp_exec)
     }
     else if (SP - MARK != 1)
 #ifdef VMS
-	value = (I32)vms_do_aexec(Nullsv, MARK, SP);
+	value = (I32)vms_do_aexec(NULL, MARK, SP);
 #else
 #  ifdef __OPEN_VM
 	{
-	   (void ) do_aspawn(Nullsv, MARK, SP);
+	   (void ) do_aspawn(NULL, MARK, SP);
 	   value = 0;
 	}
 #  else
-	value = (I32)do_aexec(Nullsv, MARK, SP);
+	value = (I32)do_aexec(NULL, MARK, SP);
 #  endif
 #endif
     else {

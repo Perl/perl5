@@ -832,9 +832,9 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    SvREFCNT_dec(do_utf8 ? prog->check_utf8 : prog->check_substr);
 	    if (do_utf8 ? prog->check_substr : prog->check_utf8)
 		SvREFCNT_dec(do_utf8 ? prog->check_substr : prog->check_utf8);
-	    prog->check_substr = prog->check_utf8 = Nullsv;	/* disable */
-	    prog->float_substr = prog->float_utf8 = Nullsv;	/* clear */
-	    check = Nullsv;			/* abort */
+	    prog->check_substr = prog->check_utf8 = NULL;	/* disable */
+	    prog->float_substr = prog->float_utf8 = NULL;	/* clear */
+	    check = NULL;			/* abort */
 	    s = strpos;
 	    /* XXXX This is a remnant of the old implementation.  It
 	            looks wasteful, since now INTUIT can use many
@@ -1715,7 +1715,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    PL_reg_ganch = strbeg;
     }
 
-    if (!(flags & REXEC_CHECKED) && (prog->check_substr != Nullsv || prog->check_utf8 != Nullsv)) {
+    if (!(flags & REXEC_CHECKED) && (prog->check_substr != NULL || prog->check_utf8 != NULL)) {
 	re_scream_pos_data d;
 
 	d.scream_olds = &scream_olds;
@@ -1841,9 +1841,9 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
                                   "Did not find anchored character...\n")
                );
     }
-    else if (prog->anchored_substr != Nullsv
-	      || prog->anchored_utf8 != Nullsv
-	      || ((prog->float_substr != Nullsv || prog->float_utf8 != Nullsv)
+    else if (prog->anchored_substr != NULL
+	      || prog->anchored_utf8 != NULL
+	      || ((prog->float_substr != NULL || prog->float_utf8 != NULL)
 		  && prog->float_max_offset < strend - s)) {
 	SV *must;
 	I32 back_max;
@@ -1965,7 +1965,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
     else {
 	dontbother = 0;
-	if (prog->float_substr != Nullsv || prog->float_utf8 != Nullsv) {
+	if (prog->float_substr != NULL || prog->float_utf8 != NULL) {
 	    /* Trim the end. */
 	    char *last;
 	    SV* float_real;

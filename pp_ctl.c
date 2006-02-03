@@ -2801,7 +2801,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
     PL_op->op_type = OP_ENTEREVAL;
     PL_op->op_flags = 0;			/* Avoid uninit warning. */
     PUSHBLOCK(cx, CXt_EVAL|(IN_PERL_COMPILETIME ? 0 : CXp_REAL), SP);
-    PUSHEVAL(cx, 0, Nullgv);
+    PUSHEVAL(cx, 0, NULL);
 
     if (runtime)
 	rop = doeval(G_SCALAR, startop, runcv, PL_curcop->cop_seq);
@@ -3394,7 +3394,7 @@ PP(pp_require)
 
     /* switch to eval mode */
     PUSHBLOCK(cx, CXt_EVAL, SP);
-    PUSHEVAL(cx, name, Nullgv);
+    PUSHEVAL(cx, name, NULL);
     cx->blk_eval.retop = PL_op->op_next;
 
     SAVECOPLINE(&PL_compiling);
@@ -3492,7 +3492,7 @@ PP(pp_entereval)
     runcv = find_runcv(&seq);
 
     PUSHBLOCK(cx, (CXt_EVAL|CXp_REAL), SP);
-    PUSHEVAL(cx, 0, Nullgv);
+    PUSHEVAL(cx, 0, NULL);
     cx->blk_eval.retop = PL_op->op_next;
 
     /* prepare to compile string */
@@ -3732,7 +3732,7 @@ S_destroy_matcher(pTHX_ PMOP *matcher)
 /* Do a smart match */
 PP(pp_smartmatch)
 {
-    return do_smartmatch(Nullhv, Nullhv);
+    return do_smartmatch(NULL, NULL);
 }
 
 /* This version of do_smartmatch() implements the following
@@ -3973,11 +3973,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    	I32 i;
 	    	const I32 other_len = av_len(other_av);
 
-		if (Nullhv == seen_this) {
+		if (NULL == seen_this) {
 		    seen_this = newHV();
 		    (void) sv_2mortal((SV *) seen_this);
 		}
-		if (Nullhv == seen_other) {
+		if (NULL == seen_other) {
 		    seen_this = newHV();
 		    (void) sv_2mortal((SV *) seen_other);
 		}
@@ -4551,15 +4551,15 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	IoLINES(datasv) = 0;
 	if (filter_child_proc) {
 	    SvREFCNT_dec(filter_child_proc);
-	    IoFMT_GV(datasv) = Nullgv;
+	    IoFMT_GV(datasv) = NULL;
 	}
 	if (filter_state) {
 	    SvREFCNT_dec(filter_state);
-	    IoTOP_GV(datasv) = Nullgv;
+	    IoTOP_GV(datasv) = NULL;
 	}
 	if (filter_sub) {
 	    SvREFCNT_dec(filter_sub);
-	    IoBOTTOM_GV(datasv) = Nullgv;
+	    IoBOTTOM_GV(datasv) = NULL;
 	}
 	filter_del(S_run_user_filter);
     }

@@ -180,7 +180,7 @@ Perl_pad_new(pTHX_ int flags)
 	AvREIFY_only(a0);
     }
     else {
-	av_store(pad, 0, Nullsv);
+	av_store(pad, 0, NULL);
     }
 
     AvREAL_off(padlist);
@@ -264,11 +264,11 @@ Perl_pad_undef(pTHX_ CV* cv)
 		CV * const innercv = (CV*)curpad[ix];
 		U32 inner_rc = SvREFCNT(innercv);
 		assert(inner_rc);
-		namepad[ix] = Nullsv;
+		namepad[ix] = NULL;
 		SvREFCNT_dec(namesv);
 
 		if (SvREFCNT(comppad) < 2) { /* allow for /(?{ sub{} })/  */
-		    curpad[ix] = Nullsv;
+		    curpad[ix] = NULL;
 		    SvREFCNT_dec(innercv);
 		    inner_rc--;
 		}
@@ -736,7 +736,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 
 		/* our ? */
 		if ((SvFLAGS(*out_name_sv) & SVpad_OUR)) {
-		    *out_capture = Nullsv;
+		    *out_capture = NULL;
 		    return offset;
 		}
 
@@ -748,7 +748,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 		    if (warn && ckWARN(WARN_CLOSURE))
 			Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
 			    "Variable \"%s\" is not available", name);
-		    *out_capture = Nullsv;
+		    *out_capture = NULL;
 		}
 
 		/* real value */
@@ -787,7 +787,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 			if (ckWARN(WARN_CLOSURE))
 			    Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
 				"Variable \"%s\" is not available", name);
-			*out_capture = Nullsv;
+			*out_capture = NULL;
 		    }
 		}
 		if (!*out_capture) {
@@ -1180,7 +1180,7 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 
     /* extend curpad to match namepad */
     if (AvFILLp(PL_comppad_name) < AvFILLp(PL_comppad))
-	av_store(PL_comppad_name, AvFILLp(PL_comppad), Nullsv);
+	av_store(PL_comppad_name, AvFILLp(PL_comppad), NULL);
 
     if (type == padtidy_SUBCLONE) {
 	SV * const * const namep = AvARRAY(PL_comppad_name);
@@ -1196,12 +1196,12 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
 	     * pad are anonymous subs.
 	     * The rest are created anew during cloning.
 	     */
-	    if (!((namesv = namep[ix]) != Nullsv &&
+	    if (!((namesv = namep[ix]) != NULL &&
 		  namesv != &PL_sv_undef &&
 		   *SvPVX_const(namesv) == '&'))
 	    {
 		SvREFCNT_dec(PL_curpad[ix]);
-		PL_curpad[ix] = Nullsv;
+		PL_curpad[ix] = NULL;
 	    }
 	}
     }
@@ -1314,7 +1314,7 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
     for (ix = 1; ix <= AvFILLp(pad_name); ix++) {
         const SV *namesv = pname[ix];
 	if (namesv && namesv == &PL_sv_undef) {
-	    namesv = Nullsv;
+	    namesv = NULL;
 	}
 	if (namesv) {
 	    if (SvFAKE(namesv))
@@ -1473,8 +1473,8 @@ Perl_cv_clone(pTHX_ CV *proto)
     outpad = AvARRAY(AvARRAY(CvPADLIST(outside))[depth]);
 
     for (ix = fpad; ix > 0; ix--) {
-	SV* const namesv = (ix <= fname) ? pname[ix] : Nullsv;
-	SV *sv = Nullsv;
+	SV* const namesv = (ix <= fname) ? pname[ix] : NULL;
+	SV *sv = NULL;
 	if (namesv && namesv != &PL_sv_undef) { /* lexical */
 	    if (SvFAKE(namesv)) {   /* lexical from outside? */
 		sv = outpad[(I32)SvNVX(namesv)];
@@ -1484,7 +1484,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 		    if (ckWARN(WARN_CLOSURE))
 			Perl_warner(aTHX_ packWARN(WARN_CLOSURE),
 			    "Variable \"%s\" is not available", SvPVX_const(namesv));
-		    sv = Nullsv;
+		    sv = NULL;
 		}
 		else {
 		    assert(!SvPADSTALE(sv));

@@ -4466,7 +4466,7 @@ S_sv_del_backref(pTHX_ SV *tsv, SV *sv)
 		*/
 		svp[i] = svp[fill];
 	    }
-	    svp[fill] = Nullsv;
+	    svp[fill] = NULL;
 	    AvFILLp(av) = fill - 1;
 	}
     }
@@ -4504,7 +4504,7 @@ Perl_sv_kill_backrefs(pTHX_ SV *sv, AV *av)
 			       (UV)SvFLAGS(referrer));
 		}
 
-		*svp = Nullsv;
+		*svp = NULL;
 	    }
 	    svp++;
 	}
@@ -5417,7 +5417,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
     STRLEN cur2;
     I32  eq     = 0;
     char *tpv   = NULL;
-    SV* svrecode = Nullsv;
+    SV* svrecode = NULL;
 
     if (!sv1) {
 	pv1 = "";
@@ -5511,7 +5511,7 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
     const char *pv1, *pv2;
     char *tpv = NULL;
     I32  cmp;
-    SV *svrecode = Nullsv;
+    SV *svrecode = NULL;
 
     if (!sv1) {
 	pv1 = "";
@@ -6711,7 +6711,7 @@ Perl_newSVsv(pTHX_ register SV *old)
     if (SvTYPE(old) == SVTYPEMASK) {
         if (ckWARN_d(WARN_INTERNAL))
 	    Perl_warner(aTHX_ packWARN(WARN_INTERNAL), "semi-panic: attempt to dup freed string");
-	return Nullsv;
+	return NULL;
     }
     new_SV(sv);
     /* SV_GMAGIC is the default for sv_setv()
@@ -6872,20 +6872,20 @@ CV *
 Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 {
     dVAR;
-    GV *gv = Nullgv;
+    GV *gv = NULL;
     CV *cv = NULL;
 
     if (!sv)
-	return *st = NULL, *gvp = Nullgv, NULL;
+	return *st = NULL, *gvp = NULL, NULL;
     switch (SvTYPE(sv)) {
     case SVt_PVCV:
 	*st = CvSTASH(sv);
-	*gvp = Nullgv;
+	*gvp = NULL;
 	return (CV*)sv;
     case SVt_PVHV:
     case SVt_PVAV:
 	*st = NULL;
-	*gvp = Nullgv;
+	*gvp = NULL;
 	return NULL;
     case SVt_PVGV:
 	gv = (GV*)sv;
@@ -6902,7 +6902,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	    sv = SvRV(sv);
 	    if (SvTYPE(sv) == SVt_PVCV) {
 		cv = (CV*)sv;
-		*gvp = Nullgv;
+		*gvp = NULL;
 		*st = CvSTASH(cv);
 		return cv;
 	    }
@@ -7835,10 +7835,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     STRLEN origlen;
     I32 svix = 0;
     static const char nullstr[] = "(null)";
-    SV *argsv = Nullsv;
+    SV *argsv = NULL;
     bool has_utf8 = DO_UTF8(sv);    /* has the result utf8? */
     const bool pat_utf8 = has_utf8; /* the pattern is in utf8? */
-    SV *nsv = Nullsv;
+    SV *nsv = NULL;
     /* Times 4: a decimal digit takes more than 3 binary digits.
      * NV_DIG: mantissa takes than many decimal digits.
      * Plus 32: Playing safe. */
@@ -7942,7 +7942,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	const char *eptr = NULL;
 	STRLEN elen = 0;
-	SV *vecsv = Nullsv;
+	SV *vecsv = NULL;
 	const U8 *vecstr = Null(U8*);
 	STRLEN veclen = 0;
 	char c = 0;
@@ -9032,7 +9032,7 @@ Perl_re_dup(pTHX_ const REGEXP *r, CLONE_PARAMS *param)
     else
 	ret->subbeg = NULL;
 #ifdef PERL_OLD_COPY_ON_WRITE
-    ret->saved_copy = Nullsv;
+    ret->saved_copy = NULL;
 #endif
 
     ptr_table_store(PL_ptr_table, r, ret);
@@ -9642,7 +9642,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		/* don't dup if copying back - CvGV isn't refcounted, so the
 		 * duped GV may never be freed. A bit of a hack! DAPM */
 		CvGV(dstr)	= (param->flags & CLONEf_JOIN_IN) ?
-		    Nullgv : gv_dup(CvGV(dstr), param) ;
+		    NULL : gv_dup(CvGV(dstr), param) ;
 		if (!(param->flags & CLONEf_COPY_STACKS)) {
 		    CvDEPTH(dstr) = 0;
 		}
@@ -10285,8 +10285,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_nice_chunk_size	= 0;
     PL_sv_count		= 0;
     PL_sv_objcount	= 0;
-    PL_sv_root		= Nullsv;
-    PL_sv_arenaroot	= Nullsv;
+    PL_sv_root		= NULL;
+    PL_sv_arenaroot	= NULL;
 
     PL_debug		= proto_perl->Idebug;
 
@@ -10516,7 +10516,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_preambleav	= av_dup_inc(proto_perl->Ipreambleav, param);
     PL_laststatval	= proto_perl->Ilaststatval;
     PL_laststype	= proto_perl->Ilaststype;
-    PL_mess_sv		= Nullsv;
+    PL_mess_sv		= NULL;
 
     PL_ors_sv		= sv_dup_inc(proto_perl->Iors_sv, param);
 
@@ -10844,7 +10844,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_op		= proto_perl->Top;
 
-    PL_Sv		= Nullsv;
+    PL_Sv		= NULL;
     PL_Xpv		= (XPV*)NULL;
     PL_na		= proto_perl->Tna;
 
@@ -10891,7 +10891,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_screamfirst	= NULL;
     PL_screamnext	= NULL;
     PL_maxscream	= -1;			/* reinits on demand */
-    PL_lastscream	= Nullsv;
+    PL_lastscream	= NULL;
 
     PL_watchaddr	= NULL;
     PL_watchok		= NULL;
@@ -10923,7 +10923,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_reg_call_cc	= (struct re_cc_state*)NULL;
     PL_reg_re		= (regexp*)NULL;
     PL_reg_ganch	= NULL;
-    PL_reg_sv		= Nullsv;
+    PL_reg_sv		= NULL;
     PL_reg_match_utf8	= FALSE;
     PL_reg_magic	= (MAGIC*)NULL;
     PL_reg_oldpos	= 0;
@@ -10932,7 +10932,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_reg_oldsaved	= NULL;
     PL_reg_oldsavedlen	= 0;
 #ifdef PERL_OLD_COPY_ON_WRITE
-    PL_nrs		= Nullsv;
+    PL_nrs		= NULL;
 #endif
     PL_reg_maxiter	= 0;
     PL_reg_leftiter	= 0;
@@ -11125,7 +11125,7 @@ S_find_hash_subscript(pTHX_ HV *hv, SV* val)
 
     if (!hv || SvMAGICAL(hv) || !HvARRAY(hv) ||
 			(HvTOTALKEYS(hv) > FUV_MAX_SEARCH_SIZE))
-	return Nullsv;
+	return NULL;
 
     array = HvARRAY(hv);
 
@@ -11138,13 +11138,13 @@ S_find_hash_subscript(pTHX_ HV *hv, SV* val)
 		    HeVAL(entry) == &PL_sv_placeholder)
 		continue;
 	    if (!HeKEY(entry))
-		return Nullsv;
+		return NULL;
 	    if (HeKLEN(entry) == HEf_SVKEY)
 		return sv_mortalcopy(HeKEY_sv(entry));
 	    return sv_2mortal(newSVpvn(HeKEY(entry), HeKLEN(entry)));
 	}
     }
-    return Nullsv;
+    return NULL;
 }
 
 /* Look for an entry in the array whose value has the same SV as val;
@@ -11210,7 +11210,7 @@ S_varname(pTHX_ GV *gv, const char gvtype, PADOFFSET targ,
 	AV *av;
 
 	if (!cv || !CvPADLIST(cv))
-	    return Nullsv;
+	    return NULL;
 	av = (AV*)(*av_fetch(CvPADLIST(cv), 0, FALSE));
 	sv = *av_fetch(av, targ, FALSE);
 	/* SvLEN in a pad name is not to be trusted */
@@ -11266,7 +11266,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 
     if (!obase || (match && (!uninit_sv || uninit_sv == &PL_sv_undef ||
 			    uninit_sv == &PL_sv_placeholder)))
-	return Nullsv;
+	return NULL;
 
     switch (obase->op_type) {
 
@@ -11278,12 +11278,12 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	const bool pad  = (obase->op_type == OP_PADAV || obase->op_type == OP_PADHV);
 	const bool hash = (obase->op_type == OP_PADHV || obase->op_type == OP_RV2HV);
 	I32 index = 0;
-	SV *keysv = Nullsv;
+	SV *keysv = NULL;
 	int subscript_type = FUV_SUBSCRIPT_WITHIN;
 
 	if (pad) { /* @lex, %lex */
 	    sv = PAD_SVl(obase->op_targ);
-	    gv = Nullgv;
+	    gv = NULL;
 	}
 	else {
 	    if (cUNOPx(obase)->op_first->op_type == OP_GV) {
@@ -11320,14 +11320,14 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
     case OP_PADSV:
 	if (match && PAD_SVl(obase->op_targ) != uninit_sv)
 	    break;
-	return varname(Nullgv, '$', obase->op_targ,
-				    Nullsv, 0, FUV_SUBSCRIPT_NONE);
+	return varname(NULL, '$', obase->op_targ,
+				    NULL, 0, FUV_SUBSCRIPT_NONE);
 
     case OP_GVSV:
 	gv = cGVOPx_gv(obase);
 	if (!gv || (match && GvSV(gv) != uninit_sv))
 	    break;
-	return varname(gv, '$', 0, Nullsv, 0, FUV_SUBSCRIPT_NONE);
+	return varname(gv, '$', 0, NULL, 0, FUV_SUBSCRIPT_NONE);
 
     case OP_AELEMFAST:
 	if (obase->op_flags & OPf_SPECIAL) { /* lexical array */
@@ -11340,8 +11340,8 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		if (!svp || *svp != uninit_sv)
 		    break;
 	    }
-	    return varname(Nullgv, '$', obase->op_targ,
-		    Nullsv, (I32)obase->op_private, FUV_SUBSCRIPT_ARRAY);
+	    return varname(NULL, '$', obase->op_targ,
+		    NULL, (I32)obase->op_private, FUV_SUBSCRIPT_ARRAY);
 	}
 	else {
 	    gv = cGVOPx_gv(obase);
@@ -11357,7 +11357,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		    break;
 	    }
 	    return varname(gv, '$', 0,
-		    Nullsv, (I32)obase->op_private, FUV_SUBSCRIPT_ARRAY);
+		    NULL, (I32)obase->op_private, FUV_SUBSCRIPT_ARRAY);
 	}
 	break;
 
@@ -11374,12 +11374,12 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	    /* $a[uninit_expr] or $h{uninit_expr} */
 	    return find_uninit_var(cBINOPx(obase)->op_last, uninit_sv, match);
 
-	gv = Nullgv;
+	gv = NULL;
 	o = cBINOPx(obase)->op_first;
 	kid = cBINOPx(obase)->op_last;
 
 	/* get the av or hv, and optionally the gv */
-	sv = Nullsv;
+	sv = NULL;
 	if  (o->op_type == OP_PADAV || o->op_type == OP_PADHV) {
 	    sv = PAD_SV(o->op_targ);
 	}
@@ -11414,7 +11414,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		return varname(gv, '%', o->op_targ,
 			    cSVOPx_sv(kid), 0, FUV_SUBSCRIPT_HASH);
 	    else
-		return varname(gv, '@', o->op_targ, Nullsv,
+		return varname(gv, '@', o->op_targ, NULL,
 			    SvIV(cSVOPx_sv(kid)), FUV_SUBSCRIPT_ARRAY);
 	}
 	else  {
@@ -11430,14 +11430,14 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		const I32 index = S_find_array_subscript(aTHX_ (AV*)sv, uninit_sv);
 		if (index >= 0)
 		    return varname(gv, '@', o->op_targ,
-					Nullsv, index, FUV_SUBSCRIPT_ARRAY);
+					NULL, index, FUV_SUBSCRIPT_ARRAY);
 	    }
 	    if (match)
 		break;
 	    return varname(gv,
 		(o->op_type == OP_PADAV || o->op_type == OP_RV2AV)
 		? '@' : '%',
-		o->op_targ, Nullsv, 0, FUV_SUBSCRIPT_WITHIN);
+		o->op_targ, NULL, 0, FUV_SUBSCRIPT_WITHIN);
 	}
 
 	break;
@@ -11459,7 +11459,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		if (match && GvSV(gv) != uninit_sv)
 		    break;
 		return varname(gv, '$', 0,
-			    Nullsv, 0, FUV_SUBSCRIPT_NONE);
+			    NULL, 0, FUV_SUBSCRIPT_NONE);
 	    }
 	    /* other possibilities not handled are:
 	     * open $x; or open my $x;	should return '${*$x}'
@@ -11545,7 +11545,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	}
 	break;
     }
-    return Nullsv;
+    return NULL;
 }
 
 
@@ -11562,7 +11562,7 @@ Perl_report_uninit(pTHX_ SV* uninit_sv)
 {
     dVAR;
     if (PL_op) {
-	SV* varname = Nullsv;
+	SV* varname = NULL;
 	if (uninit_sv) {
 	    varname = find_uninit_var(PL_op, uninit_sv,0);
 	    if (varname)

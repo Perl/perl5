@@ -461,7 +461,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	    s--, i++;
 	}
     }
-    sv_magic(sv, Nullsv, PERL_MAGIC_bm, NULL, 0);	/* deep magic */
+    sv_magic(sv, NULL, PERL_MAGIC_bm, NULL, 0);	/* deep magic */
     SvVALID_on(sv);
 
     s = (const unsigned char*)(SvPVX_const(sv));	/* deeper magic */
@@ -1100,7 +1100,7 @@ Perl_write_to_stderr(pTHX_ const char* message, int msglen)
 
 	save_re_context();
 	SAVESPTR(PL_stderrgv);
-	PL_stderrgv = Nullgv;
+	PL_stderrgv = NULL;
 
 	PUSHSTACKi(PERLSI_MAGIC);
 
@@ -2129,7 +2129,7 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
 	    }
 	}
 #endif
-	do_aexec5(Nullsv, args-1, args-1+n, pp[1], did_pipes);
+	do_aexec5(NULL, args-1, args-1+n, pp[1], did_pipes);
 	PerlProc__exit(1);
 #undef THIS
 #undef THAT

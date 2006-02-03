@@ -88,7 +88,7 @@ Perl_set_numeric_radix(pTHX)
     if (lc && lc->decimal_point) {
 	if (lc->decimal_point[0] == '.' && lc->decimal_point[1] == 0) {
 	    SvREFCNT_dec(PL_numeric_radix_sv);
-	    PL_numeric_radix_sv = Nullsv;
+	    PL_numeric_radix_sv = NULL;
 	}
 	else {
 	    if (PL_numeric_radix_sv)
@@ -98,7 +98,7 @@ Perl_set_numeric_radix(pTHX)
 	}
     }
     else
-	PL_numeric_radix_sv = Nullsv;
+	PL_numeric_radix_sv = NULL;
 # endif /* HAS_LOCALECONV */
 #endif /* USE_LOCALE_NUMERIC */
 }

@@ -65,7 +65,7 @@ Taint an SV. Use C<SvTAINTED_on> instead.
 void
 Perl_sv_taint(pTHX_ SV *sv)
 {
-    sv_magic((sv), Nullsv, PERL_MAGIC_taint, NULL, 0);
+    sv_magic((sv), NULL, PERL_MAGIC_taint, NULL, 0);
 }
 
 /* sv_2iv() is now a macro using Perl_sv_2iv_flags();

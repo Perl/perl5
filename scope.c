@@ -150,7 +150,7 @@ Perl_free_tmps(pTHX)
     const I32 myfloor = PL_tmps_floor;
     while (PL_tmps_ix > myfloor) {      /* clean up after last statement */
 	SV* const sv = PL_tmps_stack[PL_tmps_ix];
-	PL_tmps_stack[PL_tmps_ix--] = Nullsv;
+	PL_tmps_stack[PL_tmps_ix--] = NULL;
 	if (sv && sv != &PL_sv_undef) {
 	    SvTEMP_off(sv);
 	    SvREFCNT_dec(sv);		/* note, can modify tmps_ix!!! */

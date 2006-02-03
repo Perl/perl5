@@ -745,14 +745,14 @@ perl_destruct(pTHXx)
 	sv_clean_objs();
 	PL_sv_objcount = 0;
 	if (PL_defoutgv && !SvREFCNT(PL_defoutgv))
-	    PL_defoutgv = Nullgv; /* may have been freed */
+	    PL_defoutgv = NULL; /* may have been freed */
     }
 
     /* unhook hooks which will soon be, or use, destroyed data */
     SvREFCNT_dec(PL_warnhook);
-    PL_warnhook = Nullsv;
+    PL_warnhook = NULL;
     SvREFCNT_dec(PL_diehook);
-    PL_diehook = Nullsv;
+    PL_diehook = NULL;
 
     /* call exit list functions */
     while (PL_exitlistlen-- > 0)
@@ -803,7 +803,7 @@ perl_destruct(pTHXx)
 #endif /* !PERL_MICRO */
 
     /* reset so print() ends up where we expect */
-    setdefout(Nullgv);
+    setdefout(NULL);
 
 #ifdef USE_ITHREADS
     /* the syntax tree is shared between clones
@@ -871,7 +871,7 @@ perl_destruct(pTHXx)
 
     if (PL_e_script) {
 	SvREFCNT_dec(PL_e_script);
-	PL_e_script = Nullsv;
+	PL_e_script = NULL;
     }
 
     PL_perldb = 0;
@@ -879,27 +879,27 @@ perl_destruct(pTHXx)
     /* magical thingies */
 
     SvREFCNT_dec(PL_ofs_sv);	/* $, */
-    PL_ofs_sv = Nullsv;
+    PL_ofs_sv = NULL;
 
     SvREFCNT_dec(PL_ors_sv);	/* $\ */
-    PL_ors_sv = Nullsv;
+    PL_ors_sv = NULL;
 
     SvREFCNT_dec(PL_rs);	/* $/ */
-    PL_rs = Nullsv;
+    PL_rs = NULL;
 
     PL_multiline = 0;		/* $* */
     Safefree(PL_osname);	/* $^O */
     PL_osname = NULL;
 
     SvREFCNT_dec(PL_statname);
-    PL_statname = Nullsv;
-    PL_statgv = Nullgv;
+    PL_statname = NULL;
+    PL_statgv = NULL;
 
     /* defgv, aka *_ should be taken care of elsewhere */
 
     /* clean up after study() */
     SvREFCNT_dec(PL_lastscream);
-    PL_lastscream = Nullsv;
+    PL_lastscream = NULL;
     Safefree(PL_screamfirst);
     PL_screamfirst = 0;
     Safefree(PL_screamnext);
@@ -925,23 +925,23 @@ perl_destruct(pTHXx)
     PL_initav = NULL;
 
     /* shortcuts just get cleared */
-    PL_envgv = Nullgv;
-    PL_incgv = Nullgv;
-    PL_hintgv = Nullgv;
-    PL_errgv = Nullgv;
-    PL_argvgv = Nullgv;
-    PL_argvoutgv = Nullgv;
-    PL_stdingv = Nullgv;
-    PL_stderrgv = Nullgv;
-    PL_last_in_gv = Nullgv;
-    PL_replgv = Nullgv;
-    PL_DBgv = Nullgv;
-    PL_DBline = Nullgv;
-    PL_DBsub = Nullgv;
-    PL_DBsingle = Nullsv;
-    PL_DBtrace = Nullsv;
-    PL_DBsignal = Nullsv;
-    PL_DBassertion = Nullsv;
+    PL_envgv = NULL;
+    PL_incgv = NULL;
+    PL_hintgv = NULL;
+    PL_errgv = NULL;
+    PL_argvgv = NULL;
+    PL_argvoutgv = NULL;
+    PL_stdingv = NULL;
+    PL_stderrgv = NULL;
+    PL_last_in_gv = NULL;
+    PL_replgv = NULL;
+    PL_DBgv = NULL;
+    PL_DBline = NULL;
+    PL_DBsub = NULL;
+    PL_DBsingle = NULL;
+    PL_DBtrace = NULL;
+    PL_DBsignal = NULL;
+    PL_DBassertion = NULL;
     PL_DBcv = NULL;
     PL_dbargs = NULL;
     PL_debstash = NULL;
@@ -954,18 +954,18 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_preambleav);
     PL_preambleav = NULL;
     SvREFCNT_dec(PL_subname);
-    PL_subname = Nullsv;
+    PL_subname = NULL;
     SvREFCNT_dec(PL_linestr);
-    PL_linestr = Nullsv;
+    PL_linestr = NULL;
 #ifdef PERL_USES_PL_PIDSTATUS
     SvREFCNT_dec(PL_pidstatus);
     PL_pidstatus = NULL;
 #endif
     SvREFCNT_dec(PL_toptarget);
-    PL_toptarget = Nullsv;
+    PL_toptarget = NULL;
     SvREFCNT_dec(PL_bodytarget);
-    PL_bodytarget = Nullsv;
-    PL_formtarget = Nullsv;
+    PL_bodytarget = NULL;
+    PL_formtarget = NULL;
 
     /* free locale stuff */
 #ifdef USE_LOCALE_COLLATE
@@ -977,7 +977,7 @@ perl_destruct(pTHXx)
     Safefree(PL_numeric_name);
     PL_numeric_name = NULL;
     SvREFCNT_dec(PL_numeric_radix_sv);
-    PL_numeric_radix_sv = Nullsv;
+    PL_numeric_radix_sv = NULL;
 #endif
 
     /* clear utf8 character classes */
@@ -1001,33 +1001,33 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_utf8_tofold);
     SvREFCNT_dec(PL_utf8_idstart);
     SvREFCNT_dec(PL_utf8_idcont);
-    PL_utf8_alnum	= Nullsv;
-    PL_utf8_alnumc	= Nullsv;
-    PL_utf8_ascii	= Nullsv;
-    PL_utf8_alpha	= Nullsv;
-    PL_utf8_space	= Nullsv;
-    PL_utf8_cntrl	= Nullsv;
-    PL_utf8_graph	= Nullsv;
-    PL_utf8_digit	= Nullsv;
-    PL_utf8_upper	= Nullsv;
-    PL_utf8_lower	= Nullsv;
-    PL_utf8_print	= Nullsv;
-    PL_utf8_punct	= Nullsv;
-    PL_utf8_xdigit	= Nullsv;
-    PL_utf8_mark	= Nullsv;
-    PL_utf8_toupper	= Nullsv;
-    PL_utf8_totitle	= Nullsv;
-    PL_utf8_tolower	= Nullsv;
-    PL_utf8_tofold	= Nullsv;
-    PL_utf8_idstart	= Nullsv;
-    PL_utf8_idcont	= Nullsv;
+    PL_utf8_alnum	= NULL;
+    PL_utf8_alnumc	= NULL;
+    PL_utf8_ascii	= NULL;
+    PL_utf8_alpha	= NULL;
+    PL_utf8_space	= NULL;
+    PL_utf8_cntrl	= NULL;
+    PL_utf8_graph	= NULL;
+    PL_utf8_digit	= NULL;
+    PL_utf8_upper	= NULL;
+    PL_utf8_lower	= NULL;
+    PL_utf8_print	= NULL;
+    PL_utf8_punct	= NULL;
+    PL_utf8_xdigit	= NULL;
+    PL_utf8_mark	= NULL;
+    PL_utf8_toupper	= NULL;
+    PL_utf8_totitle	= NULL;
+    PL_utf8_tolower	= NULL;
+    PL_utf8_tofold	= NULL;
+    PL_utf8_idstart	= NULL;
+    PL_utf8_idcont	= NULL;
 
     if (!specialWARN(PL_compiling.cop_warnings))
 	SvREFCNT_dec(PL_compiling.cop_warnings);
-    PL_compiling.cop_warnings = Nullsv;
+    PL_compiling.cop_warnings = NULL;
     if (!specialCopIO(PL_compiling.cop_io))
 	SvREFCNT_dec(PL_compiling.cop_io);
-    PL_compiling.cop_io = Nullsv;
+    PL_compiling.cop_io = NULL;
     CopFILE_free(&PL_compiling);
     CopSTASH_free(&PL_compiling);
 
@@ -1037,11 +1037,11 @@ perl_destruct(pTHXx)
     PL_defstash = 0;
     SvREFCNT_dec(hv);
     SvREFCNT_dec(PL_curstname);
-    PL_curstname = Nullsv;
+    PL_curstname = NULL;
 
     /* clear queued errors */
     SvREFCNT_dec(PL_errors);
-    PL_errors = Nullsv;
+    PL_errors = NULL;
 
     FREETMPS;
     if (destruct_level >= 2 && ckWARN_d(WARN_INTERNAL)) {
@@ -1206,7 +1206,7 @@ perl_destruct(pTHXx)
 #endif
 
     /* sv_undef needs to stay immortal until after PerlIO_cleanup
-       as currently layers use it rather than Nullsv as a marker
+       as currently layers use it rather than NULL as a marker
        for no arg - and will try and SvREFCNT_dec it.
      */
     SvREFCNT(&PL_sv_undef) = 0;
@@ -1229,7 +1229,7 @@ perl_destruct(pTHXx)
     PL_bitcount = NULL;
     Safefree(PL_psig_pend);
     PL_psig_pend = (int*)NULL;
-    PL_formfeed = Nullsv;
+    PL_formfeed = NULL;
     nuke_stacks();
     PL_tainting = FALSE;
     PL_taint_warn = FALSE;
@@ -1264,7 +1264,7 @@ perl_destruct(pTHXx)
 	SvPV_free(PL_mess_sv);
 	Safefree(SvANY(PL_mess_sv));
 	Safefree(PL_mess_sv);
-	PL_mess_sv = Nullsv;
+	PL_mess_sv = NULL;
     }
     return STATUS_EXIT;
 }
@@ -2178,7 +2178,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     PL_preprocess = FALSE;
     if (PL_e_script) {
 	SvREFCNT_dec(PL_e_script);
-	PL_e_script = Nullsv;
+	PL_e_script = NULL;
     }
 
     if (PL_do_undump)
@@ -2339,7 +2339,7 @@ Perl_get_sv(pTHX_ const char *name, I32 create)
     gv = gv_fetchpv(name, create, SVt_PV);
     if (gv)
 	return GvSV(gv);
-    return Nullsv;
+    return NULL;
 }
 
 /*
@@ -3097,7 +3097,7 @@ Perl_moreswitches(pTHX_ char *s)
 	s++;
 	if (PL_ors_sv) {
 	    SvREFCNT_dec(PL_ors_sv);
-	    PL_ors_sv = Nullsv;
+	    PL_ors_sv = NULL;
 	}
 	if (isDIGIT(*s)) {
             I32 flags = 0;
@@ -4597,7 +4597,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	HV *hv;
 	GvMULTI_on(PL_envgv);
 	hv = GvHVn(PL_envgv);
-	hv_magic(hv, Nullgv, PERL_MAGIC_env);
+	hv_magic(hv, NULL, PERL_MAGIC_env);
 #ifndef PERL_MICRO
 #ifdef USE_ENVIRON_ARRAY
 	/* Note that if the supplied env parameter is actually a copy
@@ -4823,7 +4823,7 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 	  bool canrelocate)
 {
     dVAR;
-    SV *subdir = Nullsv;
+    SV *subdir = NULL;
     const char *p = dir;
 
     if (!p || !*p)
@@ -5319,7 +5319,7 @@ S_my_exit_jump(pTHX)
 
     if (PL_e_script) {
 	SvREFCNT_dec(PL_e_script);
-	PL_e_script = Nullsv;
+	PL_e_script = NULL;
     }
 
     POPSTACK_TO(PL_mainstack);

@@ -77,7 +77,7 @@ PERLVAR(Tna,		STRLEN)		/* for use in SvPV when length is
 PERLVAR(Tstatbuf,	Stat_t)
 PERLVAR(Tstatcache,	Stat_t)		/* _ */
 PERLVAR(Tstatgv,	GV *)
-PERLVARI(Tstatname,	SV *,	Nullsv)
+PERLVARI(Tstatname,	SV *,	NULL)
 
 #ifdef HAS_TIMES
 PERLVAR(Ttimesbuf,	struct tms)
@@ -130,7 +130,7 @@ PERLVAR(Tmainstack,	AV *)		/* the stack when nothing funny is happening */
 
 PERLVAR(Ttop_env,	JMPENV *)	/* ptr. to current sigjmp() environment */
 PERLVAR(Tstart_env,	JMPENV)		/* empty startup sigjmp() environment */
-PERLVARI(Terrors,	SV *, Nullsv)	/* outstanding queued errors */
+PERLVARI(Terrors,	SV *, NULL)	/* outstanding queued errors */
 
 /* statics "owned" by various functions */
 PERLVAR(Tav_fetch_sv,	SV *)		/* unused as of change #19268 */
