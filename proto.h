@@ -3185,14 +3185,14 @@ STATIC void	S_my_exit_jump(pTHX)
 			__attribute__noreturn__;
 
 STATIC void	S_nuke_stacks(pTHX);
-STATIC void	S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
+STATIC int	S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 
 STATIC void	S_usage(pTHX_ const char *name)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
+STATIC void	S_validate_suid(pTHX_ const char *validarg, const char *scriptname, int fdscript)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 

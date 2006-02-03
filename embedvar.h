@@ -246,7 +246,6 @@
 #define PL_exitlistlen		(vTHX->Iexitlistlen)
 #define PL_expect		(vTHX->Iexpect)
 #define PL_fdpid		(vTHX->Ifdpid)
-#define PL_fdscript		(vTHX->Ifdscript)
 #define PL_filemode		(vTHX->Ifilemode)
 #define PL_forkprocess		(vTHX->Iforkprocess)
 #define PL_formfeed		(vTHX->Iformfeed)
@@ -528,7 +527,6 @@
 #define PL_Iexitlistlen		PL_exitlistlen
 #define PL_Iexpect		PL_expect
 #define PL_Ifdpid		PL_fdpid
-#define PL_Ifdscript		PL_fdscript
 #define PL_Ifilemode		PL_filemode
 #define PL_Iforkprocess		PL_forkprocess
 #define PL_Iformfeed		PL_formfeed

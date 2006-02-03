@@ -290,8 +290,6 @@ END_EXTERN_C
 #define PL_expect		(*Perl_Iexpect_ptr(aTHX))
 #undef  PL_fdpid
 #define PL_fdpid		(*Perl_Ifdpid_ptr(aTHX))
-#undef  PL_fdscript
-#define PL_fdscript		(*Perl_Ifdscript_ptr(aTHX))
 #undef  PL_filemode
 #define PL_filemode		(*Perl_Ifilemode_ptr(aTHX))
 #undef  PL_forkprocess

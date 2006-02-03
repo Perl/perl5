@@ -3202,7 +3202,7 @@
 #define nuke_stacks()		S_nuke_stacks(aTHX)
 #define open_script(a,b,c)	S_open_script(aTHX_ a,b,c)
 #define usage(a)		S_usage(aTHX_ a)
-#define validate_suid(a,b)	S_validate_suid(aTHX_ a,b)
+#define validate_suid(a,b,c)	S_validate_suid(aTHX_ a,b,c)
 #endif
 #  if defined(IAMSUID)
 #ifdef PERL_CORE
@@ -4160,7 +4160,7 @@
 
 #if !defined(PERL_CORE)
 #  define sv_setptrobj(rv,ptr,name)	sv_setref_iv(rv,name,PTR2IV(ptr))
-#  define sv_setptrref(rv,ptr)		sv_setref_iv(rv,Nullch,PTR2IV(ptr))
+#  define sv_setptrref(rv,ptr)		sv_setref_iv(rv,NULL,PTR2IV(ptr))
 #endif
 
 #if !defined(PERL_CORE) && !defined(PERL_NOCOMPAT)
