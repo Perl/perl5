@@ -17,9 +17,9 @@
 #define G_WARN_ONCE		8	/* set if 'once' ever enabled */
 #define G_WARN_ALL_MASK		(G_WARN_ALL_ON|G_WARN_ALL_OFF)
 
-#define pWARN_STD		Nullsv
-#define pWARN_ALL		(Nullsv+1)	/* use warnings 'all' */
-#define pWARN_NONE		(Nullsv+2)	/* no  warnings 'all' */
+#define pWARN_STD		NULL
+#define pWARN_ALL		(NULL+1)	/* use warnings 'all' */
+#define pWARN_NONE		(NULL+2)	/* no  warnings 'all' */
 
 #define specialWARN(x)		((x) == pWARN_STD || (x) == pWARN_ALL ||	\
 				 (x) == pWARN_NONE)
