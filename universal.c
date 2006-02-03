@@ -207,7 +207,7 @@ void
 Perl_boot_core_UNIVERSAL(pTHX)
 {
     dVAR;
-    const char file[] = __FILE__;
+    static const char file[] = __FILE__;
 
     newXS("UNIVERSAL::isa",             XS_UNIVERSAL_isa,         file);
     newXS("UNIVERSAL::can",             XS_UNIVERSAL_can,         file);
