@@ -250,6 +250,8 @@ int decc_bug_devnull = 1;
 int decc_bug_fgetname = 0;
 int decc_dir_barename = 0;
 
+static int vms_debug_on_exception = 0;
+
 /* Is this a UNIX file specification?
  *   No longer a simple check with EFS file specs
  *   For now, not a full check, but need to
@@ -1660,8 +1662,8 @@ Perl_my_sigaction (pTHX_ int sig, const struct sigaction* act,
 
 #define _MY_SIG_MAX 17
 
-unsigned int
-Perl_sig_to_vmscondition(int sig)
+static unsigned int
+Perl_sig_to_vmscondition_int(int sig)
 {
     static unsigned int sig_code[_MY_SIG_MAX+1] = 
     {
@@ -1703,6 +1705,17 @@ Perl_sig_to_vmscondition(int sig)
     return sig_code[sig];
 }
 
+unsigned int
+Perl_sig_to_vmscondition(int sig)
+{
+#ifdef SS$_DEBUG
+    if (vms_debug_on_exception != 0)
+	lib$signal(SS$_DEBUG);
+#endif
+    return Perl_sig_to_vmscondition_int(sig);
+}
+
+
 int
 Perl_my_kill(int pid, int sig)
 {
@@ -1738,7 +1751,7 @@ Perl_my_kill(int pid, int sig)
 	return -1;
     }
 
-    code = Perl_sig_to_vmscondition(sig);
+    code = Perl_sig_to_vmscondition_int(sig);
 
     if (!code) {
 	SETERRNO(EINVAL, SS$_BADPARAM);
@@ -10865,6 +10878,17 @@ static int set_features
     unsigned long case_perm;
     unsigned long case_image;
 #endif
+
+    /* Allow an exception to bring Perl into the VMS debugger */
+    vms_debug_on_exception = 0;
+    status = sys_trnlnm("PERL_VMS_EXCEPTION_DEBUG", val_str, sizeof(val_str));
+    if ($VMS_STATUS_SUCCESS(status)) {
+       if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
+	 vms_debug_on_exception = 1;
+       else
+	 vms_debug_on_exception = 0;
+    }
+
 
     /* hacks to see if known bugs are still present for testing */
 
