@@ -367,38 +367,6 @@ anyone feeling like exercising their skill with coverage and profiling tools
 might want to determine what ops I<really> are the most commonly used. And in
 turn suggest evictions and promotions to achieve a better F<pp_hot.c>.
 
-=head2 emulate the per-thread memory pool on Unix
-
-For Windows, ithreads allocates memory for each thread from a separate pool,
-which it discards at thread exit. It also checks that memory is free()d to
-the correct pool. Neither check is done on Unix, so code developed there won't
-be subject to such strictures, so can harbour bugs that only show up when the
-code reaches Windows.
-
-It would be good to be able to optionally emulate the Window pool system on
-Unix, to let developers who only have access to Unix, or want to use
-Unix-specific debugging tools, check for these problems. To do this would
-involve figuring out how the C<PerlMem_*> macros wrap C<malloc()> access, and
-providing a layer that records/checks the identity of the thread making the
-call, and recording all the memory allocated by each thread via this API so
-that it can be summarily free()d at thread exit. One implementation idea
-would be to increase the size of allocation, and store the C<my_perl> pointer
-(to identify the thread) at the start, along with pointers to make a linked
-list of blocks for this thread. To avoid alignment problems it would be
-necessary to do something like
-
-  union memory_header_padded {
-    struct memory_header {
-      void *thread_id;   /* For my_perl */
-      void *next;        /* Pointer to next block for this thread */
-    } data;
-    long double padding; /* whatever type has maximal alignment constraint */
-  };
-
-
-although C<long double> might not be the only type to add to the padding
-union.
-
 =head2 reduce duplication in sv_setsv_flags
 
 C<Perl_sv_setsv_flags> has a comment

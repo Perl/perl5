@@ -94,10 +94,17 @@ Perl_safesysmalloc(MEM_SIZE size)
     DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%"UVxf": (%05ld) malloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
     if (ptr != NULL) {
 #ifdef PERL_TRACK_MEMPOOL
-        ((struct perl_memory_debug_header *)ptr)->interpreter = aTHX;
+	struct perl_memory_debug_header *const header
+	    = (struct perl_memory_debug_header *)ptr;
+
+	header->interpreter = aTHX;
+	/* Link us into the list.  */
+	header->prev = &PL_memory_debug_header;
+	header->next = PL_memory_debug_header.next;
+	PL_memory_debug_header.next = header;
+	header->next->prev = header;
 #  ifdef PERL_POISON
-        ((struct perl_memory_debug_header *)ptr)->size = size;
-        ((struct perl_memory_debug_header *)ptr)->in_use = PERL_POISON_INUSE;
+	header->size = size;
 #  endif
         ptr = (Malloc_t)((char*)ptr+sTHX);
 #endif
@@ -139,18 +146,24 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 #ifdef PERL_TRACK_MEMPOOL
     where = (Malloc_t)((char*)where-sTHX);
     size += sTHX;
-    if (((struct perl_memory_debug_header *)where)->interpreter != aTHX) {
-        Perl_croak_nocontext("panic: realloc from wrong pool");
-    }
+    {
+	struct perl_memory_debug_header *const header
+	    = (struct perl_memory_debug_header *)where;
+
+	if (header->interpreter != aTHX) {
+	    Perl_croak_nocontext("panic: realloc from wrong pool");
+	}
+	assert(header->next->prev == header);
+	assert(header->prev->next == header);
 #  ifdef PERL_POISON
-    if (((struct perl_memory_debug_header *)where)->size > size) {
-	const MEM_SIZE freed_up =
-	    ((struct perl_memory_debug_header *)where)->size - size;
-	char *start_of_freed = ((char *)where) + size;
-	Poison(start_of_freed, freed_up, char);
-    }
-    ((struct perl_memory_debug_header *)where)->size = size;
+	if (header->size > size) {
+	    const MEM_SIZE freed_up = header->size - size;
+	    char *start_of_freed = ((char *)where) + size;
+	    Poison(start_of_freed, freed_up, char);
+	}
+	header->size = size;
 #  endif
+    }
 #endif
 #ifdef DEBUGGING
     if ((long)size < 0)
@@ -164,6 +177,12 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 
     if (ptr != NULL) {
 #ifdef PERL_TRACK_MEMPOOL
+	struct perl_memory_debug_header *const header
+	    = (struct perl_memory_debug_header *)ptr;
+
+	header->next->prev = header;
+	header->prev->next = header;
+
         ptr = (Malloc_t)((char*)ptr+sTHX);
 #endif
 	return ptr;
@@ -190,24 +209,29 @@ Perl_safesysfree(Malloc_t where)
     if (where) {
 #ifdef PERL_TRACK_MEMPOOL
         where = (Malloc_t)((char*)where-sTHX);
-        if (((struct perl_memory_debug_header *)where)->interpreter != aTHX) {
-            Perl_croak_nocontext("panic: free from wrong pool");
-	}
-#  ifdef PERL_POISON
 	{
-	    if (((struct perl_memory_debug_header *)where)->in_use
-		== PERL_POISON_FREE) {
+	    struct perl_memory_debug_header *const header
+		= (struct perl_memory_debug_header *)where;
+
+	    if (header->interpreter != aTHX) {
+		Perl_croak_nocontext("panic: free from wrong pool");
+	    }
+	    if (!header->prev) {
 		Perl_croak_nocontext("panic: duplicate free");
 	    }
-	    if (((struct perl_memory_debug_header *)where)->in_use
-		!= PERL_POISON_INUSE) {
-		Perl_croak_nocontext("panic: bad free ");
+	    if (!(header->next) || header->next->prev != header
+		|| header->prev->next != header) {
+		Perl_croak_nocontext("panic: bad free");
 	    }
-	    ((struct perl_memory_debug_header *)where)->in_use
-		= PERL_POISON_FREE;
-	}
-	Poison(where, ((struct perl_memory_debug_header *)where)->size, char);
+	    /* Unlink us from the chain.  */
+	    header->next->prev = header->prev;
+	    header->prev->next = header->next;
+#  ifdef PERL_POISON
+	    Poison(where, header->size, char);
 #  endif
+	    /* Trigger the duplicate free warning.  */
+	    header->next = NULL;
+	}
 #endif
 	PerlMem_free(where);
     }
@@ -242,12 +266,21 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     if (ptr != NULL) {
 	memset((void*)ptr, 0, size);
 #ifdef PERL_TRACK_MEMPOOL
-        ((struct perl_memory_debug_header *)ptr)->interpreter = aTHX;
+	{
+	    struct perl_memory_debug_header *const header
+		= (struct perl_memory_debug_header *)ptr;
+
+	    header->interpreter = aTHX;
+	    /* Link us into the list.  */
+	    header->prev = &PL_memory_debug_header;
+	    header->next = PL_memory_debug_header.next;
+	    PL_memory_debug_header.next = header;
+	    header->next->prev = header;
 #  ifdef PERL_POISON
-        ((struct perl_memory_debug_header *)ptr)->size = size;
-        ((struct perl_memory_debug_header *)ptr)->in_use = PERL_POISON_INUSE;
+	    header->size = size;
 #  endif
-        ptr = (Malloc_t)((char*)ptr+sTHX);
+	    ptr = (Malloc_t)((char*)ptr+sTHX);
+	}
 #endif
 	return ptr;
     }

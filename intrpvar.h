@@ -525,6 +525,11 @@ PERLVARI(Imy_cxt_size, int, 0)		/* size of PL_my_cxt_list */
 PERLVARI(Imy_cxt_list, void **, NULL) /* per-module array of MY_CXT pointers */
 #endif
 
+#ifdef PERL_TRACK_MEMPOOL
+/* For use with the memory debugging code in util.c  */
+PERLVAR(Imemory_debug_header, struct perl_memory_debug_header)
+#endif
+
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
  * (Don't forget to add your variable also to perl_clone()!)

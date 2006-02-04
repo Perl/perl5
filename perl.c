@@ -181,6 +181,7 @@ perl_alloc_using(struct IPerlMem* ipM, struct IPerlMem* ipMS,
     PL_Dir = ipD;
     PL_Sock = ipS;
     PL_Proc = ipP;
+    INIT_TRACK_MEMPOOL(PL_memory_debug_header, my_perl);
 
     return my_perl;
 }
@@ -205,7 +206,13 @@ perl_alloc(void)
     my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
 
     S_init_tls_and_interp(my_perl);
+#ifndef PERL_TRACK_MEMPOOL
     return (PerlInterpreter *) ZeroD(my_perl, 1, PerlInterpreter);
+#else
+    Zero(my_perl, 1, PerlInterpreter);
+    INIT_TRACK_MEMPOOL(PL_memory_debug_header, my_perl);
+    return my_perl;
+#endif
 }
 #endif /* PERL_IMPLICIT_SYS */
 
@@ -1280,6 +1287,13 @@ Releases a Perl interpreter.  See L<perlembed>.
 void
 perl_free(pTHXx)
 {
+#ifdef PERL_TRACK_MEMPOOL
+    /* Emulate the PerlHost behaviour of free()ing all memory allocated in this
+       thread at thread exit.  */
+    while(aTHXx->Imemory_debug_header.next != &(aTHXx->Imemory_debug_header))
+	safesysfree(sTHX + (char *)(aTHXx->Imemory_debug_header.next));
+#endif
+
 #if defined(WIN32) || defined(NETWARE)
 #  if defined(PERL_IMPLICIT_SYS)
 #    ifdef NETWARE

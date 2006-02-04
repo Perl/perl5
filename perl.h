@@ -3728,21 +3728,31 @@ typedef Sighandler_t Sigsave_t;
 #endif
 
 #if defined(PERL_IMPLICIT_CONTEXT)
+
+struct perl_memory_debug_header;
 struct perl_memory_debug_header {
   tTHX	interpreter;
 #  ifdef PERL_POISON
   MEM_SIZE size;
-  U8 in_use;
 #  endif
-
-#define PERL_POISON_INUSE 29
-#define PERL_POISON_FREE 159
+  struct perl_memory_debug_header *prev;
+  struct perl_memory_debug_header *next;
 };
 
 #  define sTHX	(sizeof(struct perl_memory_debug_header) + \
 	(MEM_ALIGNBYTES - sizeof(struct perl_memory_debug_header) \
 	 %MEM_ALIGNBYTES) % MEM_ALIGNBYTES)
 
+#endif
+
+#ifdef PERL_TRACK_MEMPOOL
+#  define INIT_TRACK_MEMPOOL(header, interp)			\
+	STMT_START {						\
+		(header).interpreter = (interp);		\
+		(header).prev = (header).next = &(header);	\
+	} STMT_END
+#  else
+#  define INIT_TRACK_MEMPOOL(header, interp)
 #endif
 
 

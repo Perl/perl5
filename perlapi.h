@@ -406,6 +406,8 @@ END_EXTERN_C
 #define PL_maxo			(*Perl_Imaxo_ptr(aTHX))
 #undef  PL_maxsysfd
 #define PL_maxsysfd		(*Perl_Imaxsysfd_ptr(aTHX))
+#undef  PL_memory_debug_header
+#define PL_memory_debug_header	(*Perl_Imemory_debug_header_ptr(aTHX))
 #undef  PL_mess_sv
 #define PL_mess_sv		(*Perl_Imess_sv_ptr(aTHX))
 #undef  PL_min_intro_pending
