@@ -3506,7 +3506,6 @@ S_init_main_stash(pTHX)
     sv_setpvn(get_sv("/", TRUE), "\n", 1);
 }
 
-/* PSz 18 Nov 03  fdscript now global but do not change prototype */
 STATIC int
 S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv,
 	      int *suidscript)
