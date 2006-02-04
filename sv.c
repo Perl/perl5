@@ -584,7 +584,14 @@ struct arena_desc {
     */
 };
 
-#define ARENAS_PER_SET  256+64	/* x 3words/arena_desc -> ~ 4kb/arena_set */
+struct arena_set;
+
+/* Get the maximum number of elements in set[] such that struct arena_set
+   will fit within PERL_ARENA_SIZE, which is probabably just under 4K, and
+   therefore likely to be 1 aligned memory page.  */
+
+#define ARENAS_PER_SET  ((PERL_ARENA_SIZE - sizeof(struct arena_set*) \
+			  - 2 * sizeof(int)) / sizeof (struct arena_desc))
 
 struct arena_set {
     struct arena_set* next;
