@@ -575,15 +575,10 @@ Perl_sv_clean_all(pTHX)
 */
 #define ARENASETS 1
 
-union arena {
-    double alignthis;	/* maybe too big, NV instead ? */
-    unsigned char data[PERL_ARENA_SIZE];
-};
-
 struct arena_desc {
-    union arena* arena;		/* the raw storage */
-    size_t        size;		/* its size ~4k typ */
-    int           unit_type;	/* useful for arena audits */
+    char       *arena;		/* the raw storage, allocated aligned */
+    size_t      size;		/* its size ~4k typ */
+    int         unit_type;	/* useful for arena audits */
     /* info for sv-heads (eventually)
        int count, flags;
     */
