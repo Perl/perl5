@@ -6992,8 +6992,11 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
     GV *gv = NULL;
     CV *cv = NULL;
 
-    if (!sv)
-	return *st = NULL, *gvp = NULL, NULL;
+    if (!sv) {
+	*st = NULL;
+	*gvp = NULL;
+	return NULL;
+    }
     switch (SvTYPE(sv)) {
     case SVt_PVCV:
 	*st = CvSTASH(sv);
