@@ -334,18 +334,6 @@ such that it's trivial for the Pumpking to flag "this is an official release"
 when making a tarball, yet leave the default source saying "I'm not the
 official release".
 
-=head2 Tidy up global variables
-
-There's a note in F<intrpvar.h>
-
-  /* These two variables are needed to preserve 5.8.x bincompat because
-     we can't change function prototypes of two exported functions.
-     Probably should be taken out of blead soon, and relevant prototypes
-     changed.  */
-
-So doing this, and removing any of the unused variables still present would
-be good.
-
 =head2 Ordering of "global" variables.
 
 F<thrdvar.h> and F<intrpvarh> define the "global" variables that need to be
@@ -360,6 +348,12 @@ typically requiring 4 byte alignment, and then an odd C<bool> later on.
 (C<bool>s are typically defined as C<char>s). So it would be good for someone
 to review the ordering of the variables, to see how much alignment padding can
 be removed.
+
+It's also worth checking that all variables are actually used. Perl 5.8.0
+shipped with C<PL_nrs> still defined in F<thrdvar.h>, despite it being unused
+since a change over a year earlier. Had this been spotted before release, it
+could have been removed, but now it has to remain in the 5.8.x releases to
+keep the structure the same size, to retain binary compatibility.
 
 =head2 am I hot or not?
 
