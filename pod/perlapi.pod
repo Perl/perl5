@@ -1373,7 +1373,7 @@ Found in file hv.h
 =item HeSVKEY
 X<HeSVKEY>
 
-Returns the key as an C<SV*>, or C<Nullsv> if the hash entry does not
+Returns the key as an C<SV*>, or C<NULL> if the hash entry does not
 contain an C<SV*> key.
 
 	SV*	HeSVKEY(HE* he)
