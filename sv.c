@@ -1154,9 +1154,10 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
     SvFLAGS(sv) &= ~SVTYPEMASK;
     SvFLAGS(sv) |= new_type;
 
+    /* This can't happen, as SVt_NULL is <= all values of new_type, so one of
+       the return statements above will have triggered.  */
+    assert (new_type != SVt_NULL);
     switch (new_type) {
-    case SVt_NULL:
-	Perl_croak(aTHX_ "Can't upgrade to undef");
     case SVt_IV:
 	assert(old_type == SVt_NULL);
 	SvANY(sv) = (XPVIV*)((char*)&(sv->sv_u.svu_iv) - STRUCT_OFFSET(XPVIV, xiv_iv));
