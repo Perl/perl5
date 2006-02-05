@@ -3074,6 +3074,7 @@ S_pvgv_assign(pTHX_ SV *dstr, SV *sstr) {
     SV * const sref = SvREFCNT_inc(SvRV(sstr));
     SV *dref = NULL;
     const int intro = GvINTRO(dstr);
+    SV **location;
 
 #ifdef GV_UNIQUE_CHECK
     if (GvUNIQUE((GV*)dstr)) {
@@ -3168,18 +3169,16 @@ S_pvgv_assign(pTHX_ SV *dstr, SV *sstr) {
 	}
 	break;
     case SVt_PVIO:
-	if (intro)
-	    SAVEGENERICSV(GvIOp(dstr));
-	else
-	    dref = (SV*)GvIOp(dstr);
-	GvIOp(dstr) = (IO*)sref;
-	break;
+	location = (SV **) &GvIOp(dstr);
+	goto common;
     case SVt_PVFM:
+	location = (SV **) &GvFORM(dstr);
+    common:
 	if (intro)
-	    SAVEGENERICSV(GvFORM(dstr));
+	    SAVEGENERICSV(*location);
 	else
-	    dref = (SV*)GvFORM(dstr);
-	GvFORM(dstr) = (CV*)sref;
+	    dref = *location;
+	*location = sref;
 	break;
     default:
 	if (intro)
