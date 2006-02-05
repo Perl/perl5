@@ -3446,12 +3446,12 @@ PP(pp_entereval)
     /* switch to eval mode */
 
     if (PERLDB_NAMEEVAL && CopLINE(PL_curcop)) {
-	SV * const sv = sv_newmortal();
-	Perl_sv_setpvf(aTHX_ sv, "_<(eval %lu)[%s:%"IVdf"]",
+	SV * const temp_sv = sv_newmortal();
+	Perl_sv_setpvf(aTHX_ temp_sv, "_<(eval %lu)[%s:%"IVdf"]",
 		       (unsigned long)++PL_evalseq,
 		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
-	tmpbuf = SvPVX(sv);
-	len = SvCUR(sv);
+	tmpbuf = SvPVX(temp_sv);
+	len = SvCUR(temp_sv);
     }
     else
 	len = my_sprintf(tmpbuf, "_<(eval %lu)", (unsigned long)++PL_evalseq);

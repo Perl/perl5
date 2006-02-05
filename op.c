@@ -4883,8 +4883,8 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
 		if (gvcv) {
 		    HV * const stash = GvSTASH(gvcv);
 		    if (stash) {
-			const char *name = HvNAME_get(stash);
-			if ( strEQ(name,"autouse") ) {
+			const char *redefined_name = HvNAME_get(stash);
+			if ( strEQ(redefined_name,"autouse") ) {
 			    const line_t oldline = CopLINE(PL_curcop);
 			    if (PL_copline != NOLINE)
 				CopLINE_set(PL_curcop, PL_copline);
