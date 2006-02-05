@@ -722,36 +722,29 @@ Perl_get_arena(pTHX_ int arena_size)
 
 #else
     struct arena_desc* adesc;
-    struct arena_set *newroot, *aroot = (struct arena_set*) PL_body_arenas;
+    struct arena_set *newroot, **aroot = (struct arena_set**) &PL_body_arenas;
     int curr;
 
-    if (!arena_size)
-	arena_size = PERL_ARENA_SIZE;
+    /* shouldnt need this
+    if (!arena_size)	arena_size = PERL_ARENA_SIZE;
+    */
 
     /* may need new arena-set to hold new arena */
-    if (!aroot || aroot->curr >= aroot->set_size) {
+    if (!*aroot || (*aroot)->curr >= (*aroot)->set_size) {
 	Newxz(newroot, 1, struct arena_set);
 	newroot->set_size = ARENAS_PER_SET;
-	newroot->next = aroot;
-	aroot = newroot;
-	DEBUG_m(PerlIO_printf(Perl_debug_log, "new arenaset %p\n", aroot));
+	newroot->next = *aroot;
+	*aroot = newroot;
+	DEBUG_m(PerlIO_printf(Perl_debug_log, "new arenaset %p\n", *aroot));
     }
 
     /* ok, now have arena-set with at least 1 empty/available arena-desc */
-    curr = aroot->curr++;
-    adesc = &aroot->set[curr];
+    curr = (*aroot)->curr++;
+    adesc = &((*aroot)->set[curr]);
     assert(!adesc->arena);
     
-    /* old fixed-size way
-       Newxz(adesc->arena, 1, union arena);
-       adesc->size = sizeof(union arena);
-    */
-    /* new buggy way    */
     Newxz(adesc->arena, arena_size, char);
     adesc->size = arena_size;
-
-    /* adesc->count = sizeof(struct arena)/size; */
-    
     DEBUG_m(PerlIO_printf(Perl_debug_log, "arena %d added: %p\n", curr, aroot));
 
     return adesc->arena;
@@ -767,7 +760,7 @@ S_more_bodies (pTHX_ size_t size, svtype sv_type)
     const char *end;
     const size_t count = PERL_ARENA_SIZE / size;
 
-    start = (char*) Perl_get_arena(aTHX_ PERL_ARENA_SIZE); /* get a raw arena */
+    start = (char*) Perl_get_arena(aTHX_ PERL_ARENA_SIZE);
 
     end = start + (count-1) * size;
 
