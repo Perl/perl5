@@ -1174,21 +1174,27 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	SvRV_set(sv, 0);
 	return;
     case SVt_PVHV:
-	SvANY(sv) = new_XPVHV();
-	HvFILL(sv)	= 0;
-	HvMAX(sv)	= 0;
-	HvTOTALKEYS(sv)	= 0;
-
-	goto hv_av_common;
-
     case SVt_PVAV:
-	SvANY(sv) = new_XPVAV();
-	AvMAX(sv)	= -1;
-	AvFILLp(sv)	= -1;
-	AvALLOC(sv)	= 0;
-	AvREAL_only(sv);
+	assert(new_type_details->size);
 
-    hv_av_common:
+#ifndef PURIFY	
+	assert(new_type_details->arena);
+	/* This points to the start of the allocated area.  */
+	new_body_inline(new_body, new_type_details->size, new_type);
+	Zero(new_body, new_type_details->size, char);
+	new_body = ((char *)new_body) - new_type_details->offset;
+#else
+	/* We always allocated the full length item with PURIFY. To do this
+	   we fake things so that arena is false for all 16 types..  */
+	new_body = new_NOARENAZ(new_type_details);
+#endif
+	SvANY(sv) = new_body;
+	if (new_type == SVt_PVAV) {
+	    AvMAX(sv)	= -1;
+	    AvFILLp(sv)	= -1;
+	    AvREAL_only(sv);
+	}
+
 	/* SVt_NULL isn't the only thing upgraded to AV or HV.
 	   The target created by newSVrv also is, and it can have magic.
 	   However, it never has SvPVX set.
@@ -1204,9 +1210,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	if (old_type >= SVt_PVMG) {
 	    SvMAGIC_set(sv, ((XPVMG*)old_body)->xmg_magic);
 	    SvSTASH_set(sv, ((XPVMG*)old_body)->xmg_stash);
-	} else {
-	    SvMAGIC_set(sv, NULL);
-	    SvSTASH_set(sv, NULL);
 	}
 	break;
 
