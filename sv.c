@@ -3075,6 +3075,7 @@ S_pvgv_assign(pTHX_ SV *dstr, SV *sstr) {
     SV *dref = NULL;
     const int intro = GvINTRO(dstr);
     SV **location;
+    U8 import_flag = 0;
 
 #ifdef GV_UNIQUE_CHECK
     if (GvUNIQUE((GV*)dstr)) {
@@ -3173,21 +3174,18 @@ S_pvgv_assign(pTHX_ SV *dstr, SV *sstr) {
 	goto common;
     case SVt_PVFM:
 	location = (SV **) &GvFORM(dstr);
+    default:
+	location = &GvSV(dstr);
+	import_flag = GVf_IMPORTED_SV;
     common:
 	if (intro)
 	    SAVEGENERICSV(*location);
 	else
 	    dref = *location;
 	*location = sref;
-	break;
-    default:
-	if (intro)
-	    SAVEGENERICSV(GvSV(dstr));
-	else
-	    dref = (SV*)GvSV(dstr);
-	GvSV(dstr) = sref;
-	if (!GvIMPORTED_SV(dstr) && CopSTASH_ne(PL_curcop, GvSTASH(dstr))) {
-	    GvIMPORTED_SV_on(dstr);
+	if (import_flag && !(GvFLAGS(dstr) & import_flag)
+	    && CopSTASH_ne(PL_curcop, GvSTASH(dstr))) {
+	    GvFLAGS(dstr) |= import_flag;
 	}
 	break;
     }
