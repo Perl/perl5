@@ -831,6 +831,12 @@ unless ($define{'PERL_USES_PL_PIDSTATUS'}) {
 		    )];
 }
 
+unless ($define{'PERL_TRACK_MEMPOOL'}) {
+    skip_symbols [qw(
+                     PL_memory_debug_header
+                    )];
+}
+
 unless ($define{'d_mmap'}) {
     skip_symbols [qw(
 		    PL_mmap_page_size
