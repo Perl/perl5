@@ -8,6 +8,10 @@ BEGIN
   $| = 1;
   chdir 't' if -d 't';
   unshift @INC, '../lib';		# for running manually
+  if ($^O eq 'unicos') {
+    print "1..0\n";
+    exit(0);
+  }
   plan tests => 308;
   }
 
