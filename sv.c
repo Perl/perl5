@@ -970,8 +970,7 @@ static const struct body_details bodies_by_type[] = {
 };
 
 #define new_body_type(sv_type)			\
-    (void *)((char *)S_new_body(aTHX_ bodies_by_type[sv_type].size, sv_type)\
-	     - bodies_by_type[sv_type].offset)
+    (void *)((char *)S_new_body(aTHX_ bodies_by_type[sv_type].size, sv_type))
 
 #define del_body_type(p, sv_type)	\
     del_body(p, &PL_body_roots[sv_type])
