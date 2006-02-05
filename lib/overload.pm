@@ -668,6 +668,24 @@ value is a scalar and not a reference.
 
 =back
 
+=head1 Minimal set of overloaded operations
+
+Since some operations can be automatically generated from others, there is
+a minimal set of operations that need to be overloaded in order to have
+the complete set of overloaded operations at one's disposal. This minimal
+set is:
+
+    + - * / % ** << >> x
+    <=> cmp
+    & | ^ ~
+    atan2 cos sin exp log sqrt int
+
+Additionally, you need to define at least one of string, boolean or
+numeric conversions. The string conversion can also be used to
+emulate concatenation, so we'll assume string conversion is defined.
+It usually makes sense to explicitly overload all conversion
+operations.
+
 =head1 Losing overloading
 
 The restriction for the comparison operation is that even if, for example,
