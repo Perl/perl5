@@ -3076,6 +3076,8 @@ S_pvgv_assign(pTHX_ SV *dstr, SV *sstr) {
     const int intro = GvINTRO(dstr);
     SV **location;
     U8 import_flag = 0;
+    const U32 stype = SvTYPE(sref);
+
 
 #ifdef GV_UNIQUE_CHECK
     if (GvUNIQUE((GV*)dstr)) {
@@ -3089,21 +3091,43 @@ S_pvgv_assign(pTHX_ SV *dstr, SV *sstr) {
 	GvEGV(dstr) = (GV*)dstr;
     }
     GvMULTI_on(dstr);
-    switch (SvTYPE(sref)) {
+    switch (stype) {
     case SVt_PVCV:
+	location = (SV **) &GvCV(dstr);
+	import_flag = GVf_IMPORTED_CV;
+	goto common;
+    case SVt_PVHV:
+	location = (SV **) &GvHV(dstr);
+	import_flag = GVf_IMPORTED_HV;
+	goto common;
+    case SVt_PVAV:
+	location = (SV **) &GvAV(dstr);
+	import_flag = GVf_IMPORTED_AV;
+	goto common;
+    case SVt_PVIO:
+	location = (SV **) &GvIOp(dstr);
+	goto common;
+    case SVt_PVFM:
+	location = (SV **) &GvFORM(dstr);
+    default:
+	location = &GvSV(dstr);
+	import_flag = GVf_IMPORTED_SV;
+    common:
 	if (intro) {
-	    if (GvCVGEN(dstr) && GvCV(dstr) != (CV*)sref) {
-		SvREFCNT_dec(GvCV(dstr));
-		GvCV(dstr) = NULL;
-		GvCVGEN(dstr) = 0; /* Switch off cacheness. */
-		PL_sub_generation++;
+	    if (stype == SVt_PVCV) {
+		if (GvCVGEN(dstr) && GvCV(dstr) != (CV*)sref) {
+		    SvREFCNT_dec(GvCV(dstr));
+		    GvCV(dstr) = NULL;
+		    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
+		    PL_sub_generation++;
+		}
 	    }
-	    SAVEGENERICSV(GvCV(dstr));
+	    SAVEGENERICSV(*location);
 	}
 	else
-	    dref = (SV*)GvCV(dstr);
-	if (GvCV(dstr) != (CV*)sref) {
-	    CV* const cv = GvCV(dstr);
+	    dref = *location;
+	if (stype == SVt_PVCV && *location != sref) {
+	    CV* const cv = (CV*)*location;
 	    if (cv) {
 		if (!GvCVGEN((GV*)dstr) &&
 		    (CvROOT(cv) || CvXSUB(cv)))
@@ -3136,36 +3160,10 @@ S_pvgv_assign(pTHX_ SV *dstr, SV *sstr) {
 		    cv_ckproto(cv, (GV*)dstr,
 			       SvPOK(sref) ? SvPVX_const(sref) : NULL);
 	    }
-	    GvCV(dstr) = (CV*)sref;
 	    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
 	    GvASSUMECV_on(dstr);
 	    PL_sub_generation++;
 	}
-	if (!GvIMPORTED_CV(dstr) && CopSTASH_ne(PL_curcop, GvSTASH(dstr))) {
-	    GvIMPORTED_CV_on(dstr);
-	}
-	break;
-    case SVt_PVHV:
-	location = (SV **) &GvHV(dstr);
-	import_flag = GVf_IMPORTED_HV;
-	goto common;
-    case SVt_PVAV:
-	location = (SV **) &GvAV(dstr);
-	import_flag = GVf_IMPORTED_AV;
-	goto common;
-    case SVt_PVIO:
-	location = (SV **) &GvIOp(dstr);
-	goto common;
-    case SVt_PVFM:
-	location = (SV **) &GvFORM(dstr);
-    default:
-	location = &GvSV(dstr);
-	import_flag = GVf_IMPORTED_SV;
-    common:
-	if (intro)
-	    SAVEGENERICSV(*location);
-	else
-	    dref = *location;
 	*location = sref;
 	if (import_flag && !(GvFLAGS(dstr) & import_flag)
 	    && CopSTASH_ne(PL_curcop, GvSTASH(dstr))) {
