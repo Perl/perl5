@@ -1308,7 +1308,7 @@ IV
 MgREGEX(mg)
 	B::MAGIC	mg
     CODE:
-        if( mg->mg_type == 'r' ) {
+        if(mg->mg_type == PERL_MAGIC_qr) {
             RETVAL = MgREGEX(mg);
         }
         else {
@@ -1321,7 +1321,7 @@ SV*
 precomp(mg)
         B::MAGIC        mg
     CODE:
-        if (mg->mg_type == 'r') {
+        if (mg->mg_type == PERL_MAGIC_qr) {
             REGEXP* rx = (REGEXP*)mg->mg_obj;
             RETVAL = Nullsv;
             if( rx )

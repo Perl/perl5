@@ -1407,17 +1407,19 @@ perl_free(pTHXx)
 
 #if defined(WIN32) || defined(NETWARE)
 #  if defined(PERL_IMPLICIT_SYS)
+    {
 #    ifdef NETWARE
-    void *host = nw_internal_host;
+	void *host = nw_internal_host;
 #    else
-    void *host = w32_internal_host;
+	void *host = w32_internal_host;
 #    endif
-    PerlMem_free(aTHXx);
+	PerlMem_free(aTHXx);
 #    ifdef NETWARE
-    nw_delete_internal_host(host);
+	nw_delete_internal_host(host);
 #    else
-    win32_delete_internal_host(host);
+	win32_delete_internal_host(host);
 #    endif
+    }
 #  else
     PerlMem_free(aTHXx);
 #  endif

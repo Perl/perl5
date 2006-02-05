@@ -190,7 +190,7 @@ XS(XS_Internals_HvREHASH);
 void
 Perl_boot_core_UNIVERSAL(pTHX)
 {
-    const char file[] = __FILE__;
+    static const char file[] = __FILE__;
 
     newXS("UNIVERSAL::isa",             XS_UNIVERSAL_isa,         (char *)file);
     newXS("UNIVERSAL::can",             XS_UNIVERSAL_can,         (char *)file);
