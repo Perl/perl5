@@ -1076,7 +1076,7 @@ redefined subroutine while the old routine is running.  Go figure.
 (F) You tried to unshift an "unreal" array that can't be unshifted, such
 as the main Perl stack.
 
-=item Can't upgrade that kind of scalar
+=item Can't upgrade %s (%d) to %d
 
 (P) The internal sv_upgrade routine adds "members" to an SV, making it
 into a more specialized kind of SV.  The top several SV types are so

@@ -1147,7 +1147,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	break;
     default:
 	if (old_type_details->cant_upgrade)
-	    Perl_croak(aTHX_ "Can't upgrade that kind of scalar");
+	    Perl_croak(aTHX_ "Can't upgrade %s (%" UVuf ") to %" UVuf,
+		       sv_reftype(sv, 0), (UV) old_type, (UV) new_type);
     }
 
     SvFLAGS(sv) &= ~SVTYPEMASK;
