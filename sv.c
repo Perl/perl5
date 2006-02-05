@@ -3090,30 +3090,6 @@ S_pvgv_assign(pTHX_ SV *dstr, SV *sstr) {
     }
     GvMULTI_on(dstr);
     switch (SvTYPE(sref)) {
-    case SVt_PVAV:
-	if (intro)
-	    SAVEGENERICSV(GvAV(dstr));
-	else
-	    dref = (SV*)GvAV(dstr);
-	GvAV(dstr) = (AV*)sref;
-	if (!GvIMPORTED_AV(dstr)
-	    && CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
-	    {
-		GvIMPORTED_AV_on(dstr);
-	    }
-	break;
-    case SVt_PVHV:
-	if (intro)
-	    SAVEGENERICSV(GvHV(dstr));
-	else
-	    dref = (SV*)GvHV(dstr);
-	GvHV(dstr) = (HV*)sref;
-	if (!GvIMPORTED_HV(dstr)
-	    && CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
-	    {
-		GvIMPORTED_HV_on(dstr);
-	    }
-	break;
     case SVt_PVCV:
 	if (intro) {
 	    if (GvCVGEN(dstr) && GvCV(dstr) != (CV*)sref) {
@@ -3169,6 +3145,14 @@ S_pvgv_assign(pTHX_ SV *dstr, SV *sstr) {
 	    GvIMPORTED_CV_on(dstr);
 	}
 	break;
+    case SVt_PVHV:
+	location = (SV **) &GvHV(dstr);
+	import_flag = GVf_IMPORTED_HV;
+	goto common;
+    case SVt_PVAV:
+	location = (SV **) &GvAV(dstr);
+	import_flag = GVf_IMPORTED_AV;
+	goto common;
     case SVt_PVIO:
 	location = (SV **) &GvIOp(dstr);
 	goto common;
