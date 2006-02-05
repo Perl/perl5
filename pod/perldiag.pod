@@ -1083,12 +1083,6 @@ into a more specialized kind of SV.  The top several SV types are so
 specialized, however, that they cannot be interconverted.  This message
 indicates that such a conversion was attempted.
 
-=item Can't upgrade to undef
-
-(P) The undefined SV is the bottom of the totem pole, in the scheme of
-upgradability.  Upgrading to undef indicates an error in the code
-calling sv_upgrade.
-
 =item Can't use anonymous symbol table for method lookup
 
 (F) The internal routine that does method lookup was handed a symbol
