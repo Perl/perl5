@@ -1295,8 +1295,8 @@ perl_free(pTHXx)
 #endif
 
 #if defined(WIN32) || defined(NETWARE)
-    {
 #  if defined(PERL_IMPLICIT_SYS)
+    {
 #    ifdef NETWARE
 	void *host = nw_internal_host;
 #    else
