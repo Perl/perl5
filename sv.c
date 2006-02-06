@@ -3513,7 +3513,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    SvIV_set(dstr, SvIVX(sstr));
 	}
 	if (sflags & SVp_NOK) {
-	    SvFLAGS(dstr) |= sflags & (SVf_NOK|SVp_NOK);
 	    SvNV_set(dstr, SvNVX(sstr));
 	}
     }
