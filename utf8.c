@@ -852,7 +852,7 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
 
     *is_utf8 = 0;		
 
-    Newxz(d, (*len) - count + 1, U8);
+    Newx(d, (*len) - count + 1, U8);
     s = start; start = d;
     while (s < send) {
 	U8 c = *s++;
@@ -888,7 +888,7 @@ Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *len)
     U8 *d;
     U8 *dst;
 
-    Newxz(d, (*len) * 2 + 1, U8);
+    Newx(d, (*len) * 2 + 1, U8);
     dst = d;
 
     while (s < send) {
