@@ -1317,7 +1317,7 @@ perl_free(pTHXx)
 #endif
 }
 
-#if defined(USE_5005THREADS) || defined(USE_ITHREADS)
+#if defined(USE_ITHREADS)
 /* provide destructors to clean up the thread key when libperl is unloaded */
 #ifndef WIN32 /* handled during DLL_PROCESS_DETACH in win32/perllib.c */
 
@@ -1817,9 +1817,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef THREADS_HAVE_PIDS
 			     " THREADS_HAVE_PIDS"
 #  endif
-#  ifdef USE_5005THREADS
-			     " USE_5005THREADS"
-#  endif
 #  ifdef USE_64_BIT_ALL
 			     " USE_64_BIT_ALL"
 #  endif
@@ -2083,11 +2080,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     CvUNIQUE_on(PL_compcv);
 
     CvPADLIST(PL_compcv) = pad_new(0);
-#ifdef USE_5005THREADS
-    CvOWNER(PL_compcv) = 0;
-    Newx(CvMUTEXP(PL_compcv), 1, perl_mutex);
-    MUTEX_INIT(CvMUTEXP(PL_compcv));
-#endif /* USE_5005THREADS */
 
     boot_core_PerlIO();
     boot_core_UNIVERSAL();
@@ -2352,13 +2344,6 @@ SV*
 Perl_get_sv(pTHX_ const char *name, I32 create)
 {
     GV *gv;
-#ifdef USE_5005THREADS
-    if (name[1] == '\0' && !isALPHA(name[0])) {
-	PADOFFSET tmp = find_threadsv(name);
-    	if (tmp != NOT_IN_PAD)
-	    return THREADSV(tmp);
-    }
-#endif /* USE_5005THREADS */
     gv = gv_fetchpv(name, create, SVt_PV);
     if (gv)
 	return GvSV(gv);
@@ -3438,21 +3423,14 @@ S_init_interp(pTHX)
 #  define PERLVAR(var,type)
 #  define PERLVARA(var,n,type)
 #  if defined(PERL_IMPLICIT_CONTEXT)
-#    if defined(USE_5005THREADS)
-#      define PERLVARI(var,type,init)		PERL_GET_INTERP->var = init;
-#      define PERLVARIC(var,type,init)		PERL_GET_INTERP->var = init;
-#    else /* !USE_5005THREADS */
-#      define PERLVARI(var,type,init)		aTHX->var = init;
-#      define PERLVARIC(var,type,init)	aTHX->var = init;
-#    endif /* USE_5005THREADS */
+#    define PERLVARI(var,type,init)		aTHX->var = init;
+#    define PERLVARIC(var,type,init)	aTHX->var = init;
 #  else
 #    define PERLVARI(var,type,init)	PERL_GET_INTERP->var = init;
 #    define PERLVARIC(var,type,init)	PERL_GET_INTERP->var = init;
 #  endif
 #  include "intrpvar.h"
-#  ifndef USE_5005THREADS
-#    include "thrdvar.h"
-#  endif
+#  include "thrdvar.h"
 #  undef PERLVAR
 #  undef PERLVARA
 #  undef PERLVARI
@@ -3463,9 +3441,7 @@ S_init_interp(pTHX)
 #  define PERLVARI(var,type,init)	PL_##var = init;
 #  define PERLVARIC(var,type,init)	PL_##var = init;
 #  include "intrpvar.h"
-#  ifndef USE_5005THREADS
-#    include "thrdvar.h"
-#  endif
+#  include "thrdvar.h"
 #  undef PERLVAR
 #  undef PERLVARA
 #  undef PERLVARI
@@ -5073,85 +5049,6 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
     }
 }
 
-#ifdef USE_5005THREADS
-STATIC struct perl_thread *
-S_init_main_thread(pTHX)
-{
-#if !defined(PERL_IMPLICIT_CONTEXT)
-    struct perl_thread *thr;
-#endif
-    XPV *xpv;
-
-    Newxz(thr, 1, struct perl_thread);
-    PL_curcop = &PL_compiling;
-    thr->interp = PERL_GET_INTERP;
-    thr->cvcache = newHV();
-    thr->threadsv = newAV();
-    /* thr->threadsvp is set when find_threadsv is called */
-    thr->specific = newAV();
-    thr->flags = THRf_R_JOINABLE;
-    MUTEX_INIT(&thr->mutex);
-    /* Handcraft thrsv similarly to mess_sv */
-    Newx(PL_thrsv, 1, SV);
-    Newxz(xpv, 1, XPV);
-    SvFLAGS(PL_thrsv) = SVt_PV;
-    SvANY(PL_thrsv) = (void*)xpv;
-    SvREFCNT(PL_thrsv) = 1 << 30;	/* practically infinite */
-    SvPV_set(PL_thrsvr, (char*)thr);
-    SvCUR_set(PL_thrsv, sizeof(thr));
-    SvLEN_set(PL_thrsv, sizeof(thr));
-    *SvEND(PL_thrsv) = '\0';	/* in the trailing_nul field */
-    thr->oursv = PL_thrsv;
-    PL_chopset = " \n-";
-    PL_dumpindent = 4;
-
-    MUTEX_LOCK(&PL_threads_mutex);
-    PL_nthreads++;
-    thr->tid = 0;
-    thr->next = thr;
-    thr->prev = thr;
-    thr->thr_done = 0;
-    MUTEX_UNLOCK(&PL_threads_mutex);
-
-#ifdef HAVE_THREAD_INTERN
-    Perl_init_thread_intern(thr);
-#endif
-
-#ifdef SET_THREAD_SELF
-    SET_THREAD_SELF(thr);
-#else
-    thr->self = pthread_self();
-#endif /* SET_THREAD_SELF */
-    PERL_SET_THX(thr);
-
-    /*
-     * These must come after the thread self setting
-     * because sv_setpvn does SvTAINT and the taint
-     * fields thread selfness being set.
-     */
-    PL_toptarget = newSV(0);
-    sv_upgrade(PL_toptarget, SVt_PVFM);
-    sv_setpvn(PL_toptarget, "", 0);
-    PL_bodytarget = newSV(0);
-    sv_upgrade(PL_bodytarget, SVt_PVFM);
-    sv_setpvn(PL_bodytarget, "", 0);
-    PL_formtarget = PL_bodytarget;
-    thr->errsv = newSVpvs("");
-    (void) find_threadsv("@");	/* Ensure $@ is initialised early */
-
-    PL_maxscream = -1;
-    PL_peepp = MEMBER_TO_FPTR(Perl_peep);
-    PL_regcompp = MEMBER_TO_FPTR(Perl_pregcomp);
-    PL_regexecp = MEMBER_TO_FPTR(Perl_regexec_flags);
-    PL_regint_start = MEMBER_TO_FPTR(Perl_re_intuit_start);
-    PL_regint_string = MEMBER_TO_FPTR(Perl_re_intuit_string);
-    PL_regfree = MEMBER_TO_FPTR(Perl_pregfree);
-    PL_regindent = 0;
-    PL_reginterp_cnt = 0;
-
-    return thr;
-}
-#endif /* USE_5005THREADS */
 
 void
 Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
