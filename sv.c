@@ -1049,7 +1049,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
     const U32	old_type = SvTYPE(sv);
     const struct body_details *const old_type_details
 	= bodies_by_type + old_type;
-    const struct body_details *new_type_details = bodies_by_type + new_type;
+    const struct body_details *new_type_details;
 
     if (new_type != SVt_PV && SvIsCOW(sv)) {
 	sv_force_normal_flags(sv, 0);
@@ -1108,13 +1108,11 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	if (new_type < SVt_PVIV) {
 	    new_type = (new_type == SVt_NV)
 		? SVt_PVNV : SVt_PVIV;
-	    new_type_details = bodies_by_type + new_type;
 	}
 	break;
     case SVt_NV:
 	if (new_type < SVt_PVNV) {
 	    new_type = SVt_PVNV;
-	    new_type_details = bodies_by_type + new_type;
 	}
 	break;
     case SVt_RV:
@@ -1143,6 +1141,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	    Perl_croak(aTHX_ "Can't upgrade %s (%" UVuf ") to %" UVuf,
 		       sv_reftype(sv, 0), (UV) old_type, (UV) new_type);
     }
+    new_type_details = bodies_by_type + new_type;
 
     SvFLAGS(sv) &= ~SVTYPEMASK;
     SvFLAGS(sv) |= new_type;
