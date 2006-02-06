@@ -3117,8 +3117,8 @@ PP(pp_index)
     const char *tmps2;
     STRLEN biglen;
     const I32 arybase = PL_curcop->cop_arybase;
-    int big_utf8;
-    int little_utf8;
+    bool big_utf8;
+    bool little_utf8;
 
     if (MAXARG < 3)
 	offset = 0;
@@ -3130,22 +3130,43 @@ PP(pp_index)
     little_utf8 = DO_UTF8(little);
     if (big_utf8 ^ little_utf8) {
 	/* One needs to be upgraded.  */
-	SV * const bytes = little_utf8 ? big : little;
-	STRLEN len;
-	const char * const p = SvPV_const(bytes, len);
+	if (little_utf8 && !PL_encoding) {
+	    /* Well, maybe instead we might be able to downgrade the small
+	       string?  */
+	    STRLEN little_len;
+	    const U8 * const little_pv = (U8*) SvPV_const(little, little_len);
+	    char * const pv = (char*)bytes_from_utf8(little_pv, &little_len,
+						     &little_utf8);
+	    if (little_utf8) {
+		/* If the large string is ISO-8859-1, and it's not possible to
+		   convert the small string to ISO-8859-1, then there is no
+		   way that it could be found anywhere by index.  */
+		retval = -1;
+		goto fail;
+	    }
 
-	temp = newSVpvn(p, len);
+	    /* At this point, pv is a malloc()ed string. So donate it to temp
+	       to ensure it will get free()d  */
+	    little = temp = newSV(0);
+	    sv_usepvn(temp, pv, little_len);
+	} else {
+	    SV * const bytes = little_utf8 ? big : little;
+	    STRLEN len;
+	    const char * const p = SvPV_const(bytes, len);
 
-	if (PL_encoding) {
-	    sv_recode_to_utf8(temp, PL_encoding);
-	} else {
-	    sv_utf8_upgrade(temp);
-	}
-	if (little_utf8) {
-	    big = temp;
-	    big_utf8 = TRUE;
-	} else {
-	    little = temp;
+	    temp = newSVpvn(p, len);
+
+	    if (PL_encoding) {
+		sv_recode_to_utf8(temp, PL_encoding);
+	    } else {
+		sv_utf8_upgrade(temp);
+	    }
+	    if (little_utf8) {
+		big = temp;
+		big_utf8 = TRUE;
+	    } else {
+		little = temp;
+	    }
 	}
     }
     if (big_utf8 && offset > 0)
@@ -3158,12 +3179,14 @@ PP(pp_index)
     if (!(tmps2 = fbm_instr((unsigned char*)tmps + offset,
       (unsigned char*)tmps + biglen, little, 0)))
 	retval = -1;
-    else
+    else {
 	retval = tmps2 - tmps;
-    if (retval > 0 && big_utf8)
-	sv_pos_b2u(big, &retval);
+	if (big_utf8)
+	    sv_pos_b2u(big, &retval);
+    }
     if (temp)
 	SvREFCNT_dec(temp);
+ fail:
     PUSHi(retval + arybase);
     RETURN;
 }
