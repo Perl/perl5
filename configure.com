@@ -6950,7 +6950,7 @@ $ WRITE CONFIG "$ instmodsh  == """ + perl_setup_perl + " ''vms_prefix':[utils]i
 $ WRITE CONFIG "$ libnetcfg  == """ + perl_setup_perl + " ''vms_prefix':[utils]libnetcfg.com"""
 $ WRITE CONFIG "$ perlbug    == """ + perl_setup_perl + " ''vms_prefix':[lib]perlbug.com"""
 $ WRITE CONFIG "$!perlcc     == """ + perl_setup_perl + " ''vms_prefix':[utils]perlcc.com"""
-$ WRITE CONFIG "$ perldoc    == """ + perl_setup_perl + " ''vms_prefix':[lib.pods]perldoc.com -t"""
+$ WRITE CONFIG "$ perldoc    == """ + perl_setup_perl + " ''vms_prefix':[lib.pods]perldoc.com """"-t"""""""
 $ WRITE CONFIG "$ perlivp    == """ + perl_setup_perl + " ''vms_prefix':[utils]perlivp.com"""
 $ WRITE CONFIG "$ piconv     == """ + perl_setup_perl + " ''vms_prefix':[utils]piconv.com"""
 $ WRITE CONFIG "$ pl2pm      == """ + perl_setup_perl + " ''vms_prefix':[utils]pl2pm.com"""
