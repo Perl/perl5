@@ -367,18 +367,6 @@ anyone feeling like exercising their skill with coverage and profiling tools
 might want to determine what ops I<really> are the most commonly used. And in
 turn suggest evictions and promotions to achieve a better F<pp_hot.c>.
 
-=head2 reduce duplication in sv_setsv_flags
-
-C<Perl_sv_setsv_flags> has a comment
-C</* There's a lot of redundancy below but we're going for speed here */>
-
-Whilst this was true 10 years ago, the growing disparity between RAM and CPU
-speeds mean that the trade offs have changed. In addition, the duplicate code
-adds to the maintenance burden. It would be good to see how much of the
-redundancy can be pruned, particular in the less common paths. (Profiling
-tools at the ready...). For example, why does the test for
-"Can't redefine active sort subroutine" need to occur in two places?
-
 
 
 
@@ -398,16 +386,6 @@ By removing unused elements and careful re-ordering, the structures for C<AV>s
 and C<HV>s have recently been shrunk considerably. It's probable that the same
 approach would find savings in C<GV>s and C<CV>s, if not all the other
 larger-than-C<PVMG> types.
-
-=head2 merge Perl_sv_2[inpu]v
-
-There's a lot of code shared between C<Perl_sv_2iv_flags>,
-C<Perl_sv_2uv_flags>, C<Perl_sv_2nv>, and C<Perl_sv_2pv_flags>. It would be
-interesting to see if some of it can be merged into common shared static
-functions. In particular, C<Perl_sv_2uv_flags> started out as a cut&paste
-from C<Perl_sv_2iv_flags> around 5.005_50 time, and it may be possible to
-replace both with a single function that returns a value or union which is
-split out by the macros in F<sv.h>
 
 =head2 UTF8 caching code
 
