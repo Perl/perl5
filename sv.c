@@ -3266,21 +3266,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     case SVt_RV:
 	if (dtype < SVt_RV)
 	    sv_upgrade(dstr, SVt_RV);
-	else if (dtype == SVt_PVGV &&
-		 SvROK(sstr) && SvTYPE(SvRV(sstr)) == SVt_PVGV) {
-	    sstr = SvRV(sstr);
-	    if (sstr == dstr) {
-		if (GvIMPORTED(dstr) != GVf_IMPORTED
-		    && CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
-		{
-		    GvIMPORTED_on(dstr);
-		}
-		GvMULTI_on(dstr);
-		return;
-	    }
-	    S_glob_assign(aTHX_ dstr, sstr, dtype);
-	    return;
-	}
 	break;
     case SVt_PVFM:
 #ifdef PERL_OLD_COPY_ON_WRITE
@@ -3343,6 +3328,22 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     sflags = SvFLAGS(sstr);
 
     if (sflags & SVf_ROK) {
+	if (dtype == SVt_PVGV &&
+	    SvROK(sstr) && SvTYPE(SvRV(sstr)) == SVt_PVGV) {
+	    sstr = SvRV(sstr);
+	    if (sstr == dstr) {
+		if (GvIMPORTED(dstr) != GVf_IMPORTED
+		    && CopSTASH_ne(PL_curcop, GvSTASH(dstr)))
+		{
+		    GvIMPORTED_on(dstr);
+		}
+		GvMULTI_on(dstr);
+		return;
+	    }
+	    S_glob_assign(aTHX_ dstr, sstr, dtype);
+	    return;
+	}
+
 	if (dtype >= SVt_PV) {
 	    if (dtype == SVt_PVGV) {
 		S_pvgv_assign(aTHX_ dstr, sstr);
