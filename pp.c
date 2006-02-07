@@ -3112,6 +3112,7 @@ PP(pp_index)
     SV *little;
     SV *temp = NULL;
     STRLEN biglen;
+    STRLEN llen = 0;
     I32 offset;
     I32 retval;
     const char *tmps;
@@ -3119,9 +3120,13 @@ PP(pp_index)
     const I32 arybase = PL_curcop->cop_arybase;
     bool big_utf8;
     bool little_utf8;
+    const bool is_index = PL_op->op_type == OP_INDEX;
 
-    if (MAXARG >= 3)
+    if (MAXARG >= 3) {
+	/* arybase is in characters, like offset, so combine prior to the
+	   UTF-8 to bytes calculation.  */
 	offset = POPi - arybase;
+    }
     little = POPs;
     big = POPs;
     big_utf8 = DO_UTF8(big);
@@ -3167,20 +3172,27 @@ PP(pp_index)
 	    }
 	}
     }
+    if (!is_index) {
+	tmps2 = SvPV_const(little, llen);
+    }
     tmps = SvPV_const(big, biglen);
 
     if (MAXARG < 3)
-	offset = 0;
+	offset = is_index ? 0 : biglen;
     else {
 	if (big_utf8 && offset > 0)
 	    sv_pos_u2b(big, &offset, 0);
+	offset += llen;
     }
     if (offset < 0)
 	offset = 0;
     else if (offset > (I32)biglen)
 	offset = biglen;
-    if (!(tmps2 = fbm_instr((unsigned char*)tmps + offset,
-      (unsigned char*)tmps + biglen, little, 0)))
+    if (!(tmps2 = is_index
+	  ? fbm_instr((unsigned char*)tmps + offset,
+		      (unsigned char*)tmps + biglen, little, 0)
+	  : rninstr(tmps,  tmps  + offset,
+		    tmps2, tmps2 + llen)))
 	retval = -1;
     else {
 	retval = tmps2 - tmps;
@@ -3190,80 +3202,6 @@ PP(pp_index)
     if (temp)
 	SvREFCNT_dec(temp);
  fail:
-    PUSHi(retval + arybase);
-    RETURN;
-}
-
-PP(pp_rindex)
-{
-    dVAR; dSP; dTARGET;
-    SV *big;
-    SV *little;
-    SV *temp = NULL;
-    STRLEN biglen;
-    STRLEN llen;
-    I32 offset;
-    I32 retval;
-    const char *tmps;
-    const char *tmps2;
-    const I32 arybase = PL_curcop->cop_arybase;
-    int big_utf8;
-    int little_utf8;
-
-    if (MAXARG >= 3) {
-	/* arybase is in characters, like offset, so combine prior to the
-	   UTF-8 to bytes calculation.  */
-	offset = POPi - arybase;
-    }
-    little = POPs;
-    big = POPs;
-    big_utf8 = DO_UTF8(big);
-    little_utf8 = DO_UTF8(little);
-    if (big_utf8 ^ little_utf8) {
-	/* One needs to be upgraded.  */
-	SV * const bytes = little_utf8 ? big : little;
-	STRLEN len;
-	const char *p = SvPV_const(bytes, len);
-
-	temp = newSVpvn(p, len);
-
-	if (PL_encoding) {
-	    sv_recode_to_utf8(temp, PL_encoding);
-	} else {
-	    sv_utf8_upgrade(temp);
-	}
-	if (little_utf8) {
-	    big = temp;
-	    big_utf8 = TRUE;
-	} else {
-	    little = temp;
-	}
-    }
-    tmps2 = SvPV_const(little, llen);
-    tmps = SvPV_const(big, biglen);
-
-    if (MAXARG < 3)
-	offset = biglen;
-    else {
-	if (big_utf8 && offset > 0)
-	    sv_pos_u2b(big, &offset, 0);
-	/* llen is in bytes.  */
-	offset += llen;
-    }
-    if (offset < 0)
-	offset = 0;
-    else if (offset > (I32)biglen)
-	offset = biglen;
-    if (!(tmps2 = rninstr(tmps,  tmps  + offset,
-			  tmps2, tmps2 + llen)))
-	retval = -1;
-    else {
-	retval = tmps2 - tmps;
-	if (retval > 0 && big_utf8)
-	    sv_pos_b2u(big, &retval);
-    }
-    if (temp)
-	SvREFCNT_dec(temp);
     PUSHi(retval + arybase);
     RETURN;
 }

@@ -899,7 +899,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_substr),
 	MEMBER_TO_FPTR(Perl_pp_vec),
 	MEMBER_TO_FPTR(Perl_pp_index),
-	MEMBER_TO_FPTR(Perl_pp_rindex),
+	MEMBER_TO_FPTR(Perl_pp_index),	/* Perl_pp_rindex */
 	MEMBER_TO_FPTR(Perl_pp_sprintf),
 	MEMBER_TO_FPTR(Perl_pp_formline),
 	MEMBER_TO_FPTR(Perl_pp_ord),

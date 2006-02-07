@@ -1039,6 +1039,11 @@ PP(pp_sge)
     return pp_sle();
 }
 
+PP(pp_rindex)
+{
+    return pp_index();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {
