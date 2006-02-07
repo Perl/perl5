@@ -892,7 +892,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_log),
 	MEMBER_TO_FPTR(Perl_pp_sqrt),
 	MEMBER_TO_FPTR(Perl_pp_int),
-	MEMBER_TO_FPTR(Perl_pp_hex),
+	MEMBER_TO_FPTR(Perl_pp_oct),	/* Perl_pp_hex */
 	MEMBER_TO_FPTR(Perl_pp_oct),
 	MEMBER_TO_FPTR(Perl_pp_abs),
 	MEMBER_TO_FPTR(Perl_pp_length),

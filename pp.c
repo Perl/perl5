@@ -2821,37 +2821,6 @@ PP(pp_abs)
     RETURN;
 }
 
-
-PP(pp_hex)
-{
-    dVAR; dSP; dTARGET;
-    const char *tmps;
-    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
-    STRLEN len;
-    NV result_nv;
-    UV result_uv;
-    SV* const sv = POPs;
-
-    tmps = (SvPV_const(sv, len));
-    if (DO_UTF8(sv)) {
-	 /* If Unicode, try to downgrade
-	  * If not possible, croak. */
-	 SV* const tsv = sv_2mortal(newSVsv(sv));
-	
-	 SvUTF8_on(tsv);
-	 sv_utf8_downgrade(tsv, FALSE);
-	 tmps = SvPV_const(tsv, len);
-    }
-    result_uv = grok_hex (tmps, &len, &flags, &result_nv);
-    if (flags & PERL_SCAN_GREATER_THAN_UV_MAX) {
-        XPUSHn(result_nv);
-    }
-    else {
-        XPUSHu(result_uv);
-    }
-    RETURN;
-}
-
 PP(pp_oct)
 {
     dVAR; dSP; dTARGET;
@@ -2872,12 +2841,17 @@ PP(pp_oct)
 	 sv_utf8_downgrade(tsv, FALSE);
 	 tmps = SvPV_const(tsv, len);
     }
+    if (PL_op->op_type == OP_HEX)
+	goto hex;
+
     while (*tmps && len && isSPACE(*tmps))
         tmps++, len--;
     if (*tmps == '0')
         tmps++, len--;
-    if (*tmps == 'x')
+    if (*tmps == 'x') {
+    hex:
         result_uv = grok_hex (tmps, &len, &flags, &result_nv);
+    }
     else if (*tmps == 'b')
         result_uv = grok_bin (tmps, &len, &flags, &result_nv);
     else
