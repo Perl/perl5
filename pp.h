@@ -414,7 +414,11 @@ and C<PUSHu>.
 #define tryAMAGICbinW(meth,assign,set) \
     tryAMAGICbinW_var(CAT2(meth,_amg),assign,set)
 
-#define tryAMAGICbin(meth,assign) tryAMAGICbinW(meth,assign,SETsv)
+#define tryAMAGICbin_var(meth_enum,assign) \
+		tryAMAGICbinW_var(meth_enum,assign,SETsv)
+#define tryAMAGICbin(meth,assign) \
+		tryAMAGICbin_var(CAT2(meth,_amg),assign)
+
 #define tryAMAGICbinSET(meth,assign) tryAMAGICbinW(meth,assign,SETs)
 
 #define tryAMAGICbinSET_var(meth_enum,assign) \

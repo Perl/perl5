@@ -2205,50 +2205,32 @@ PP(pp_bit_and)
     }
 }
 
-PP(pp_bit_xor)
-{
-    dVAR; dSP; dATARGET; tryAMAGICbin(bxor,opASSIGN);
-    {
-      dPOPTOPssrl;
-      SvGETMAGIC(left);
-      SvGETMAGIC(right);
-      if (SvNIOKp(left) || SvNIOKp(right)) {
-	if (PL_op->op_private & HINT_INTEGER) {
-	  const IV i = (USE_LEFT(left) ? SvIV_nomg(left) : 0) ^ SvIV_nomg(right);
-	  SETi(i);
-	}
-	else {
-	  const UV u = (USE_LEFT(left) ? SvUV_nomg(left) : 0) ^ SvUV_nomg(right);
-	  SETu(u);
-	}
-      }
-      else {
-	do_vop(PL_op->op_type, TARG, left, right);
-	SETTARG;
-      }
-      RETURN;
-    }
-}
-
 PP(pp_bit_or)
 {
-    dVAR; dSP; dATARGET; tryAMAGICbin(bor,opASSIGN);
+    dVAR; dSP; dATARGET;
+    const int op_type = PL_op->op_type;
+
+    tryAMAGICbin_var((op_type == OP_BIT_OR ? bor_amg : bxor_amg), opASSIGN);
     {
       dPOPTOPssrl;
       SvGETMAGIC(left);
       SvGETMAGIC(right);
       if (SvNIOKp(left) || SvNIOKp(right)) {
 	if (PL_op->op_private & HINT_INTEGER) {
-	  const IV i = (USE_LEFT(left) ? SvIV_nomg(left) : 0) | SvIV_nomg(right);
-	  SETi(i);
+	  const IV l = (USE_LEFT(left) ? SvIV_nomg(left) : 0);
+	  const IV r = SvIV_nomg(right);
+	  const IV result = op_type == OP_BIT_OR ? (l | r) : (l ^ r);
+	  SETi(result);
 	}
 	else {
-	  const UV u = (USE_LEFT(left) ? SvUV_nomg(left) : 0) | SvUV_nomg(right);
-	  SETu(u);
+	  const UV l = (USE_LEFT(left) ? SvUV_nomg(left) : 0);
+	  const UV r = SvUV_nomg(right);
+	  const UV result = op_type == OP_BIT_OR ? (l | r) : (l ^ r);
+	  SETu(result);
 	}
       }
       else {
-	do_vop(PL_op->op_type, TARG, left, right);
+	do_vop(op_type, TARG, left, right);
 	SETTARG;
       }
       RETURN;

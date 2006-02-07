@@ -1074,6 +1074,11 @@ PP(pp_sqrt)
     return pp_sin();
 }
 
+PP(pp_bit_xor)
+{
+    return pp_bit_or();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {

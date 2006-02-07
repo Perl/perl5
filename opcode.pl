@@ -83,6 +83,7 @@ my @raw_alias = (
 		 Perl_pp_oct => ['hex'],
 		 Perl_pp_shift => ['pop'],
 		 Perl_pp_sin => [qw(cos exp log sqrt)],
+		 Perl_pp_bit_or => ['bit_xor'],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {
