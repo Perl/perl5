@@ -3111,18 +3111,16 @@ PP(pp_index)
     SV *big;
     SV *little;
     SV *temp = NULL;
+    STRLEN biglen;
     I32 offset;
     I32 retval;
     const char *tmps;
     const char *tmps2;
-    STRLEN biglen;
     const I32 arybase = PL_curcop->cop_arybase;
     bool big_utf8;
     bool little_utf8;
 
-    if (MAXARG < 3)
-	offset = 0;
-    else
+    if (MAXARG >= 3)
 	offset = POPi - arybase;
     little = POPs;
     big = POPs;
@@ -3169,9 +3167,14 @@ PP(pp_index)
 	    }
 	}
     }
-    if (big_utf8 && offset > 0)
-	sv_pos_u2b(big, &offset, 0);
     tmps = SvPV_const(big, biglen);
+
+    if (MAXARG < 3)
+	offset = 0;
+    else {
+	if (big_utf8 && offset > 0)
+	    sv_pos_u2b(big, &offset, 0);
+    }
     if (offset < 0)
 	offset = 0;
     else if (offset > (I32)biglen)
@@ -3181,7 +3184,7 @@ PP(pp_index)
 	retval = -1;
     else {
 	retval = tmps2 - tmps;
-	if (big_utf8)
+	if (retval > 0 && big_utf8)
 	    sv_pos_b2u(big, &retval);
     }
     if (temp)
@@ -3197,7 +3200,7 @@ PP(pp_rindex)
     SV *big;
     SV *little;
     SV *temp = NULL;
-    STRLEN blen;
+    STRLEN biglen;
     STRLEN llen;
     I32 offset;
     I32 retval;
@@ -3207,8 +3210,11 @@ PP(pp_rindex)
     int big_utf8;
     int little_utf8;
 
-    if (MAXARG >= 3)
-	offset = POPi;
+    if (MAXARG >= 3) {
+	/* arybase is in characters, like offset, so combine prior to the
+	   UTF-8 to bytes calculation.  */
+	offset = POPi - arybase;
+    }
     little = POPs;
     big = POPs;
     big_utf8 = DO_UTF8(big);
@@ -3234,30 +3240,28 @@ PP(pp_rindex)
 	}
     }
     tmps2 = SvPV_const(little, llen);
-    tmps = SvPV_const(big, blen);
+    tmps = SvPV_const(big, biglen);
 
     if (MAXARG < 3)
-	offset = blen;
+	offset = biglen;
     else {
-	/* arybase is in characters, like offset, so combine prior to the
-	   UTF-8 to bytes calculation.  */
-	offset -= arybase;
-	if (offset > 0 && big_utf8)
+	if (big_utf8 && offset > 0)
 	    sv_pos_u2b(big, &offset, 0);
 	/* llen is in bytes.  */
 	offset += llen;
     }
     if (offset < 0)
 	offset = 0;
-    else if (offset > (I32)blen)
-	offset = blen;
+    else if (offset > (I32)biglen)
+	offset = biglen;
     if (!(tmps2 = rninstr(tmps,  tmps  + offset,
 			  tmps2, tmps2 + llen)))
 	retval = -1;
-    else
+    else {
 	retval = tmps2 - tmps;
-    if (retval > 0 && big_utf8)
-	sv_pos_b2u(big, &retval);
+	if (retval > 0 && big_utf8)
+	    sv_pos_b2u(big, &retval);
+    }
     if (temp)
 	SvREFCNT_dec(temp);
     PUSHi(retval + arybase);
