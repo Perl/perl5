@@ -1562,6 +1562,8 @@ Perl_pad_fixup_inner_anons(pTHX_ PADLIST *padlist, CV *old_cv, CV *new_cv)
     AV * const comppad = (AV*)AvARRAY(padlist)[1];
     SV ** const namepad = AvARRAY(comppad_name);
     SV ** const curpad = AvARRAY(comppad);
+    PERL_UNUSED_ARG(old_cv);
+
     for (ix = AvFILLp(comppad_name); ix > 0; ix--) {
         const SV * const namesv = namepad[ix];
 	if (namesv && namesv != &PL_sv_undef

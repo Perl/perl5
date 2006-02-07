@@ -1974,7 +1974,8 @@ Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
     const key_t key = (key_t)SvNVx(*++mark);
     const I32 n = (optype == OP_MSGGET) ? 0 : SvIVx(*++mark);
     const I32 flags = SvIVx(*++mark);
-    (void)sp;
+
+    PERL_UNUSED_ARG(sp);
 
     SETERRNO(0,0);
     switch (optype)
