@@ -2643,20 +2643,43 @@ PP(pp_atan2)
 
 PP(pp_sin)
 {
-    dVAR; dSP; dTARGET; tryAMAGICun_var(sin_amg);
-    {
-      const NV value = POPn;
-      XPUSHn(Perl_sin(value));
-      RETURN;
-    }
-}
+    dVAR; dSP; dTARGET;
+    int amg_type = sin_amg;
+    const char *neg_report = NULL;
+    NV (*func)(NV) = &Perl_sin;
+    const int op_type = PL_op->op_type;
 
-PP(pp_cos)
-{
-    dVAR; dSP; dTARGET; tryAMAGICun_var(cos_amg);
+    switch (op_type) {
+    case OP_COS:
+	amg_type = cos_amg;
+	func = &Perl_cos;
+	break;
+    case OP_EXP:
+	amg_type = exp_amg;
+	func = &Perl_exp;
+	break;
+    case OP_LOG:
+	amg_type = log_amg;
+	func = &Perl_log;
+	neg_report = "log";
+	break;
+    case OP_SQRT:
+	amg_type = sqrt_amg;
+	func = &Perl_sqrt;
+	neg_report = "sqrt";
+	break;
+    }
+
+    tryAMAGICun_var(amg_type);
     {
       const NV value = POPn;
-      XPUSHn(Perl_cos(value));
+      if (neg_report) {
+	  if (op_type == OP_LOG ? (value <= 0.0) : (value < 0.0)) {
+	      SET_NUMERIC_STANDARD();
+	      DIE(aTHX_ "Can't take %s of %"NVgf, neg_report, value);
+	  }
+      }
+      XPUSHn(func(value));
       RETURN;
     }
 }
@@ -2703,46 +2726,6 @@ PP(pp_srand)
     PL_srand_called = TRUE;
     EXTEND(SP, 1);
     RETPUSHYES;
-}
-
-PP(pp_exp)
-{
-    dVAR; dSP; dTARGET; tryAMAGICun_var(exp_amg);
-    {
-      NV value;
-      value = POPn;
-      value = Perl_exp(value);
-      XPUSHn(value);
-      RETURN;
-    }
-}
-
-PP(pp_log)
-{
-    dVAR; dSP; dTARGET; tryAMAGICun_var(log_amg);
-    {
-      const NV value = POPn;
-      if (value <= 0.0) {
-	SET_NUMERIC_STANDARD();
-	DIE(aTHX_ "Can't take log of %"NVgf, value);
-      }
-      XPUSHn(Perl_log(value));
-      RETURN;
-    }
-}
-
-PP(pp_sqrt)
-{
-    dVAR; dSP; dTARGET; tryAMAGICun_var(sqrt_amg);
-    {
-      const NV value = POPn;
-      if (value < 0.0) {
-	SET_NUMERIC_STANDARD();
-	DIE(aTHX_ "Can't take sqrt of %"NVgf, value);
-      }
-      XPUSHn(Perl_sqrt(value));
-      RETURN;
-    }
 }
 
 PP(pp_int)

@@ -885,12 +885,12 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_complement),
 	MEMBER_TO_FPTR(Perl_pp_atan2),
 	MEMBER_TO_FPTR(Perl_pp_sin),
-	MEMBER_TO_FPTR(Perl_pp_cos),
+	MEMBER_TO_FPTR(Perl_pp_sin),	/* Perl_pp_cos */
 	MEMBER_TO_FPTR(Perl_pp_rand),
 	MEMBER_TO_FPTR(Perl_pp_srand),
-	MEMBER_TO_FPTR(Perl_pp_exp),
-	MEMBER_TO_FPTR(Perl_pp_log),
-	MEMBER_TO_FPTR(Perl_pp_sqrt),
+	MEMBER_TO_FPTR(Perl_pp_sin),	/* Perl_pp_exp */
+	MEMBER_TO_FPTR(Perl_pp_sin),	/* Perl_pp_log */
+	MEMBER_TO_FPTR(Perl_pp_sin),	/* Perl_pp_sqrt */
 	MEMBER_TO_FPTR(Perl_pp_int),
 	MEMBER_TO_FPTR(Perl_pp_oct),	/* Perl_pp_hex */
 	MEMBER_TO_FPTR(Perl_pp_oct),

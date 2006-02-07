@@ -1054,6 +1054,26 @@ PP(pp_pop)
     return pp_shift();
 }
 
+PP(pp_cos)
+{
+    return pp_sin();
+}
+
+PP(pp_exp)
+{
+    return pp_sin();
+}
+
+PP(pp_log)
+{
+    return pp_sin();
+}
+
+PP(pp_sqrt)
+{
+    return pp_sin();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {
