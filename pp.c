@@ -3239,9 +3239,13 @@ PP(pp_rindex)
     if (MAXARG < 3)
 	offset = blen;
     else {
+	/* arybase is in characters, like offset, so combine prior to the
+	   UTF-8 to bytes calculation.  */
+	offset -= arybase;
 	if (offset > 0 && big_utf8)
 	    sv_pos_u2b(big, &offset, 0);
-	offset = offset - arybase + llen;
+	/* llen is in bytes.  */
+	offset += llen;
     }
     if (offset < 0)
 	offset = 0;
