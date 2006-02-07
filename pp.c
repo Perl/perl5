@@ -2643,7 +2643,7 @@ PP(pp_atan2)
 
 PP(pp_sin)
 {
-    dVAR; dSP; dTARGET; tryAMAGICun(sin);
+    dVAR; dSP; dTARGET; tryAMAGICun_var(sin_amg);
     {
       const NV value = POPn;
       XPUSHn(Perl_sin(value));
@@ -2653,7 +2653,7 @@ PP(pp_sin)
 
 PP(pp_cos)
 {
-    dVAR; dSP; dTARGET; tryAMAGICun(cos);
+    dVAR; dSP; dTARGET; tryAMAGICun_var(cos_amg);
     {
       const NV value = POPn;
       XPUSHn(Perl_cos(value));
@@ -2707,7 +2707,7 @@ PP(pp_srand)
 
 PP(pp_exp)
 {
-    dVAR; dSP; dTARGET; tryAMAGICun(exp);
+    dVAR; dSP; dTARGET; tryAMAGICun_var(exp_amg);
     {
       NV value;
       value = POPn;
@@ -2719,7 +2719,7 @@ PP(pp_exp)
 
 PP(pp_log)
 {
-    dVAR; dSP; dTARGET; tryAMAGICun(log);
+    dVAR; dSP; dTARGET; tryAMAGICun_var(log_amg);
     {
       const NV value = POPn;
       if (value <= 0.0) {
@@ -2733,7 +2733,7 @@ PP(pp_log)
 
 PP(pp_sqrt)
 {
-    dVAR; dSP; dTARGET; tryAMAGICun(sqrt);
+    dVAR; dSP; dTARGET; tryAMAGICun_var(sqrt_amg);
     {
       const NV value = POPn;
       if (value < 0.0) {

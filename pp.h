@@ -118,9 +118,9 @@ Pops a long off the stack.
 */
 
 #define PUTBACK		PL_stack_sp = sp
-#define RETURN		return PUTBACK, NORMAL
-#define RETURNOP(o)	return PUTBACK, o
-#define RETURNX(x)	return x, PUTBACK, NORMAL
+#define RETURN		return (PUTBACK, NORMAL)
+#define RETURNOP(o)	return (PUTBACK, o)
+#define RETURNX(x)	return (x, PUTBACK, NORMAL)
 
 #define POPs		(*sp--)
 #define POPp		(SvPVx(POPs, PL_na))		/* deprecated */
@@ -420,25 +420,30 @@ and C<PUSHu>.
 #define tryAMAGICbinSET_var(meth_enum,assign) \
     tryAMAGICbinW_var(meth_enum,assign,SETs)
 
-#define AMG_CALLun(sv,meth) amagic_call(sv,&PL_sv_undef,  \
-					CAT2(meth,_amg),AMGf_noright | AMGf_unary)
+#define AMG_CALLun_var(sv,meth_enum) amagic_call(sv,&PL_sv_undef,  \
+					meth_enum,AMGf_noright | AMGf_unary)
+#define AMG_CALLun(sv,meth) AMG_CALLun_var(sv,CAT2(meth,_amg))
+
 #define AMG_CALLbinL(left,right,meth) \
             amagic_call(left,right,CAT2(meth,_amg),AMGf_noright)
 
-#define tryAMAGICunW(meth,set,shift,ret) STMT_START { \
+#define tryAMAGICunW_var(meth_enum,set,shift,ret) STMT_START { \
 	    SV* tmpsv; \
 	    SV* arg= sp[shift]; \
           if(0) goto am_again;  /* shut up unused warning */ \
 	  am_again: \
 	    if ((SvAMAGIC(arg))&&\
-		(tmpsv=AMG_CALLun(arg,meth))) {\
+		(tmpsv=AMG_CALLun_var(arg,meth_enum))) {\
 	       SPAGAIN; if (shift) sp += shift; \
 	       set(tmpsv); ret; } \
 	} STMT_END
+#define tryAMAGICunW(meth,set,shift,ret) \
+	tryAMAGICunW_var(CAT2(meth,_amg),set,shift,ret)
 
 #define FORCE_SETs(sv) STMT_START { sv_setsv(TARG, (sv)); SETTARG; } STMT_END
 
-#define tryAMAGICun(meth)	tryAMAGICunW(meth,SETsvUN,0,RETURN)
+#define tryAMAGICun_var(meth_enum) tryAMAGICunW_var(meth_enum,SETsvUN,0,RETURN)
+#define tryAMAGICun(meth)	tryAMAGICun_var(CAT2(meth,_amg))
 #define tryAMAGICunSET(meth)	tryAMAGICunW(meth,SETs,0,RETURN)
 #define tryAMAGICunTARGET(meth, shift)					\
 	STMT_START { dSP; sp--; 	/* get TARGET from below PL_stack_sp */		\
