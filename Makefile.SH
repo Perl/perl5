@@ -1171,10 +1171,10 @@ test_prep.valgrind: test_prep perl.valgrind
 test.valgrind check.valgrind:	test_prep perl.valgrind.config
 	PERL=./perl PERL_DEBUG=PERL_VALGRIND=1 VALGRIND='$(VALGRIND)' $(MAKE) _test
 
-utest.valgrind ucheck.valgrind: test_prep.valgrind perl.valgrind
+utest.valgrind ucheck.valgrind: test_prep.valgrind perl.valgrind.config
 	PERL=./perl PERL_DEBUG=PERL_VALGRIND=1 TEST_ARGS=-utf8 $(MAKE) _test
 
-test_notty.valgrind: test_prep.valgrind perl.valgrind
+test_notty.valgrind: test_prep.valgrind perl.valgrind.config
 	PERL=./perl $(MAKE) PERL_DEBUG=PERL_VALGRIND=1 _test_notty
 
 # Targets for Third Degree testing.
