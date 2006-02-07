@@ -4195,24 +4195,12 @@ PP(pp_push)
     RETURN;
 }
 
-PP(pp_pop)
-{
-    dVAR;
-    dSP;
-    AV * const av = (AV*)POPs;
-    SV * const sv = av_pop(av);
-    if (AvREAL(av))
-	(void)sv_2mortal(sv);
-    PUSHs(sv);
-    RETURN;
-}
-
 PP(pp_shift)
 {
     dVAR;
     dSP;
     AV * const av = (AV*)POPs;
-    SV * const sv = av_shift(av);
+    SV * const sv = PL_op->op_type == OP_SHIFT ? av_shift(av) : av_pop(av);
     EXTEND(SP, 1);
     if (!sv)
 	RETPUSHUNDEF;

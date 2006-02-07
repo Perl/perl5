@@ -932,7 +932,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_anonhash),
 	MEMBER_TO_FPTR(Perl_pp_splice),
 	MEMBER_TO_FPTR(Perl_pp_push),
-	MEMBER_TO_FPTR(Perl_pp_pop),
+	MEMBER_TO_FPTR(Perl_pp_shift),	/* Perl_pp_pop */
 	MEMBER_TO_FPTR(Perl_pp_shift),
 	MEMBER_TO_FPTR(Perl_pp_unshift),
 	MEMBER_TO_FPTR(Perl_pp_sort),

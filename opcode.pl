@@ -81,6 +81,7 @@ my @raw_alias = (
 		 Perl_pp_print => ['say'],
 		 Perl_pp_index => ['rindex'],
 		 Perl_pp_oct => ['hex'],
+		 Perl_pp_shift => ['pop'],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {

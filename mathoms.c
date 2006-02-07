@@ -1049,6 +1049,11 @@ PP(pp_hex)
     return pp_oct();
 }
 
+PP(pp_pop)
+{
+    return pp_shift();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {
