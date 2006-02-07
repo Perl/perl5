@@ -3146,9 +3146,8 @@ PP(pp_index)
 	    }
 	}
     }
-    if (!is_index) {
-	tmps2 = SvPV_const(little, llen);
-    }
+    /* Don't actually need the NULL initialisation, but it keeps gcc quiet.  */
+    tmps2 = is_index ? NULL : SvPV_const(little, llen);
     tmps = SvPV_const(big, biglen);
 
     if (MAXARG < 3)
