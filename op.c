@@ -6760,6 +6760,22 @@ Perl_ck_svconst(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_chdir(pTHX_ OP *o)
+{
+    if (o->op_flags & OPf_KIDS) {
+	SVOP *kid = (SVOP*)cUNOPo->op_first;
+
+	if (kid && kid->op_type == OP_CONST &&
+	    (kid->op_private & OPpCONST_BARE))
+	{
+	    o->op_flags |= OPf_SPECIAL;
+	    kid->op_private &= ~OPpCONST_STRICT;
+	}
+    }
+    return ck_fun(o);
+}
+
+OP *
 Perl_ck_trunc(pTHX_ OP *o)
 {
     if (o->op_flags & OPf_KIDS) {

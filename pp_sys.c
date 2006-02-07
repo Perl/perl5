@@ -3293,7 +3293,10 @@ PP(pp_chdir)
 
     if( MAXARG == 1 ) {
 	SV * const sv = POPs;
-        if (SvTYPE(sv) == SVt_PVGV) {
+	if (PL_op->op_flags & OPf_SPECIAL) {
+	    gv = gv_fetchsv(sv, 0, SVt_PVIO);
+	}
+        else if (SvTYPE(sv) == SVt_PVGV) {
 	    gv = (GV*)sv;
         }
 	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {

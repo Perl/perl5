@@ -907,7 +907,8 @@ ftbinary	-B			ck_ftst		isu-	F-
 
 # File calls.
 
-chdir		chdir			ck_fun		isT%	S?
+# chdir really behaves as if it had both "S?" and "F?"
+chdir		chdir			ck_chdir	isT%	S?
 chown		chown			ck_fun		imsT@	L
 chroot		chroot			ck_fun		isTu%	S?
 unlink		unlink			ck_fun		imsTu@	L

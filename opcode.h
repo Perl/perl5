@@ -1427,7 +1427,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* fttty */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* fttext */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftbinary */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* chdir */
+	MEMBER_TO_FPTR(Perl_ck_chdir),	/* chdir */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* chown */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* chroot */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* unlink */

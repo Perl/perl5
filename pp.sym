@@ -7,6 +7,7 @@
 
 Perl_ck_anoncode
 Perl_ck_bitop
+Perl_ck_chdir
 Perl_ck_concat
 Perl_ck_defined
 Perl_ck_delete

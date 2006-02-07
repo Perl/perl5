@@ -9,7 +9,7 @@ BEGIN {
 
 use Config;
 require "test.pl";
-plan(tests => 38);
+plan(tests => 41);
 
 my $IsVMS   = $^O eq 'VMS';
 my $IsMacOS = $^O eq 'MacOS';
@@ -43,7 +43,7 @@ SKIP: {
 $Cwd = abs_path;
 
 SKIP: {
-    skip("no fchdir", 6) unless ($Config{d_fchdir} || "") eq "define";
+    skip("no fchdir", 9) unless ($Config{d_fchdir} || "") eq "define";
     ok(opendir(my $dh, "."), "opendir .");
     ok(open(my $fh, "<", "op"), "open op");
     ok(chdir($fh), "fchdir op");
@@ -53,6 +53,21 @@ SKIP: {
     }
     else {
        eval { chdir($dh); };
+       like($@, qr/^The dirfd function is unimplemented at/, "dirfd is unimplemented");
+       chdir "..";
+    }
+
+    # same with bareword file handles
+    no warnings 'once';
+    *DH = $dh;
+    *FH = $fh;
+    ok(chdir FH, "fchdir op bareword");
+    ok(-f "chdir.t", "verify that we are in op");
+    if (($Config{d_dirfd} || "") eq "define") {
+       ok(chdir DH, "fchdir back bareword");
+    }
+    else {
+       eval { chdir(DH); };
        like($@, qr/^The dirfd function is unimplemented at/, "dirfd is unimplemented");
        chdir "..";
     }
