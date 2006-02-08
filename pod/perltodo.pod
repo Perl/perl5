@@ -34,6 +34,10 @@ TODO are completed.
 Review assertions. Review syntax to combine assertions. Assertions could take
 advantage of the lexical pragmas work. L</What hooks would assertions need?>
 
+=item *
+
+C<encoding::warnings> should be turned into a lexical pragma.
+
 =back
 
 =head2 Needed for a 5.9.5 release
