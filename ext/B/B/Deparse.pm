@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.73;
+$VERSION = 0.74;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -2504,7 +2504,7 @@ sub pp_cond_expr {
 	    (is_scope($false) || is_ifelse_cont($false))
 	    and $self->{'expand'} < 7) {
 	$cond = $self->deparse($cond, 8);
-	$true = $self->deparse($true, 8);
+	$true = $self->deparse($true, 6);
 	$false = $self->deparse($false, 8);
 	return $self->maybe_parens("$cond ? $true : $false", $cx, 8);
     }
