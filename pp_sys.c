@@ -3345,10 +3345,16 @@ PP(pp_chdir)
 #endif
 	    }
 	    else {
+		if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+		    report_evil_fh(gv, io, PL_op->op_type);
+		SETERRNO(EBADF, RMS_IFI);
 		PUSHi(0);
 	    }
         }
 	else {
+	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+		report_evil_fh(gv, io, PL_op->op_type);
+	    SETERRNO(EBADF,RMS_IFI);
 	    PUSHi(0);
 	}
 #else

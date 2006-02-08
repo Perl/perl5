@@ -457,3 +457,22 @@ no warnings 'misc';
 select $x, undef, undef, undef;
 EXPECT
 Non-string passed as bitmask at - line 4.
+########
+opendir FOO, '.'; closedir FOO;
+open BAR, '.'; close BAR;
+opendir $dh, '.'; closedir $dh;
+open $fh, '.'; close $fh;
+chdir FOO;
+chdir BAR;
+chdir $dh;
+chdir $fh;
+use warnings qw(unopened closed) ;
+chdir FOO;
+chdir BAR;
+chdir $dh;
+chdir $fh;
+EXPECT
+chdir() on unopened filehandle FOO at - line 10.
+chdir() on closed filehandle BAR at - line 11.
+chdir() on unopened filehandle $dh at - line 12.
+chdir() on closed filehandle $fh at - line 13.
