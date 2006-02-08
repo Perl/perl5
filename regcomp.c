@@ -2870,6 +2870,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 #endif
     r->reganch = pm->op_pmflags & PMf_COMPILETIME;
     r->nparens = RExC_npar - 1;	/* set early to validate backrefs */
+    r->lastparen = 0;			/* mg.c reads this.  */
 
     r->substrs = 0;			/* Useful during FAIL. */
     r->startp = 0;			/* Useful during FAIL. */
