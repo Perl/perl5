@@ -688,7 +688,9 @@ successfully changed.  See also L</oct>, if all you have is a string.
 
 On systems that support fchmod, you might pass file handles among the
 files.  On systems that don't support fchmod, passing file handles
-produces a fatal error at run time.
+produces a fatal error at run time.   The file handles must be passed
+as globs or references to be recognized.  Barewords are considered
+file names.
 
     open(my $fh, "<", "foo");
     my $perm = (stat $fh)[2] & 07777;
@@ -784,7 +786,9 @@ successfully changed.
 
 On systems that support fchown, you might pass file handles among the
 files.  On systems that don't support fchown, passing file handles
-produces a fatal error at run time.
+produces a fatal error at run time.  The file handles must be passed
+as globs or references to be recognized.  Barewords are considered
+file names.
 
 Here's an example that looks up nonnumeric uids in the passwd file:
 
@@ -6832,7 +6836,9 @@ uninitialized warning.
 
 On systems that support futimes, you might pass file handles among the
 files.  On systems that don't support futimes, passing file handles
-produces a fatal error at run time.
+produces a fatal error at run time.  The file handles must be passed
+as globs or references to be recognized.  Barewords are considered
+file names.
 
 =item values HASH
 X<values>
