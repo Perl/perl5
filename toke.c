@@ -4000,6 +4000,7 @@ Perl_yylex(pTHX)
 	    attrs = NULL;
 	    while (isIDFIRST_lazy_if(s,UTF)) {
 		I32 tmp;
+		SV *sv;
 		d = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
 		if (isLOWER(*s) && (tmp = keyword(PL_tokenbuf, len))) {
 		    if (tmp < 0) tmp = -tmp;
@@ -4017,6 +4018,7 @@ Perl_yylex(pTHX)
 			break;
 		    }
 		}
+		sv = newSVpvn(s, len);
 		if (*d == '(') {
 		    d = scan_str(d,TRUE,TRUE);
 		    if (!d) {
@@ -4027,11 +4029,11 @@ Perl_yylex(pTHX)
 			yyerror("Unterminated attribute parameter in attribute list");
 			if (attrs)
 			    op_free(attrs);
+			sv_free(sv);
 			return REPORT(0);	/* EOF indicator */
 		    }
 		}
 		if (PL_lex_stuff) {
-		    SV *sv = newSVpvn(s, len);
 		    sv_catsv(sv, PL_lex_stuff);
 		    attrs = append_elem(OP_LIST, attrs,
 					newSVOP(OP_CONST, 0, sv));
@@ -4039,7 +4041,8 @@ Perl_yylex(pTHX)
 		    PL_lex_stuff = NULL;
 		}
 		else {
-		    if (len == 6 && strnEQ(s, "unique", len)) {
+		    if (len == 6 && strnEQ(SvPVX(sv), "unique", len)) {
+			sv_free(sv);
 			if (PL_in_my == KEY_our) {
 #ifdef USE_ITHREADS
 			    GvUNIQUE_on(cGVOPx_gv(yylval.opval));
@@ -4054,14 +4057,22 @@ Perl_yylex(pTHX)
 
 		    /* NOTE: any CV attrs applied here need to be part of
 		       the CVf_BUILTIN_ATTRS define in cv.h! */
-		    else if (!PL_in_my && len == 6 && strnEQ(s, "lvalue", len))
+		    else if (!PL_in_my && len == 6 && strnEQ(SvPVX(sv), "lvalue", len)) {
+			sv_free(sv);
 			CvLVALUE_on(PL_compcv);
-		    else if (!PL_in_my && len == 6 && strnEQ(s, "locked", len))
+		    }
+		    else if (!PL_in_my && len == 6 && strnEQ(SvPVX(sv), "locked", len)) {
+			sv_free(sv);
 			CvLOCKED_on(PL_compcv);
-		    else if (!PL_in_my && len == 6 && strnEQ(s, "method", len))
+		    }
+		    else if (!PL_in_my && len == 6 && strnEQ(SvPVX(sv), "method", len)) {
+			sv_free(sv);
 			CvMETHOD_on(PL_compcv);
-		    else if (!PL_in_my && len == 9 && strnEQ(s, "assertion", len))
+		    }
+		    else if (!PL_in_my && len == 9 && strnEQ(SvPVX(sv), "assertion", len)) {
+			sv_free(sv);
 		        CvASSERTION_on(PL_compcv);
+		    }
 		    /* After we've set the flags, it could be argued that
 		       we don't need to do the attributes.pm-based setting
 		       process, and shouldn't bother appending recognized
@@ -4075,7 +4086,7 @@ Perl_yylex(pTHX)
 		    else
 		        attrs = append_elem(OP_LIST, attrs,
 					    newSVOP(OP_CONST, 0,
-					      	    newSVpvn(s, len)));
+					      	    sv));
 		}
 		s = PEEKSPACE(d);
 		if (*s == ':' && s[1] != ':')
