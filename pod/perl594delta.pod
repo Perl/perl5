@@ -10,6 +10,11 @@ and L<perl593delta> for the differences between 5.8.0 and 5.9.3.
 
 =head1 Incompatible Changes
 
+=head2 chdir FOO
+
+A bareword argument to chdir is now recognized as a file handle.
+Earlier releases interpreted the bareword as a directory name.
+
 =head1 Core Enhancements
 
 =head1 Modules and Pragmata
