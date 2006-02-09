@@ -2866,15 +2866,15 @@ STATIC HE*	S_new_he(pTHX)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
-STATIC HEK*	S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
+STATIC HEK*	S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
 			__attribute__malloc__
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(1);
 
-STATIC void	S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
+STATIC void	S_hv_magic_check(HV *hv, bool *needs_copy, bool *needs_store)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2)
+			__attribute__nonnull__(3);
 
 STATIC void	S_unshare_hek_or_pvn(pTHX_ const HEK* hek, const char* str, I32 len, U32 hash);
 STATIC HEK*	S_share_hek_flags(pTHX_ const char* sv, I32 len, U32 hash, int flags)
@@ -2886,8 +2886,9 @@ STATIC void	S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen, const ch
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_4);
 
-STATIC struct xpvhv_aux*	S_hv_auxinit(pTHX_ HV *hv)
-			__attribute__nonnull__(pTHX_1);
+STATIC struct xpvhv_aux*	S_hv_auxinit(HV *hv)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(1);
 
 STATIC SV*	S_hv_delete_common(pTHX_ HV* tb, SV* keysv, const char* key, STRLEN klen, int k_flags, I32 d_flags, U32 hash);
 STATIC HE*	S_hv_fetch_common(pTHX_ HV* tb, SV* keysv, const char* key, STRLEN klen, int flags, int action, SV* val, U32 hash);
@@ -3085,9 +3086,9 @@ PERL_CALLCONV OP*	Perl_ck_unpack(pTHX_ OP *o)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-STATIC bool	S_is_handle_constructor(pTHX_ const OP *o, I32 numargs)
+STATIC bool	S_is_handle_constructor(const OP *o, I32 numargs)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(1);
 
 STATIC I32	S_is_list_assignment(pTHX_ const OP *o)
 			__attribute__warn_unused_result__;
@@ -3113,8 +3114,9 @@ STATIC void	S_simplify_sort(pTHX_ OP *o)
 STATIC const char*	S_gv_ename(pTHX_ GV *gv)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC bool	S_scalar_mod_type(pTHX_ const OP *o, I32 type)
-			__attribute__nonnull__(pTHX_1);
+STATIC bool	S_scalar_mod_type(const OP *o, I32 type)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(1);
 
 STATIC OP *	S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 			__attribute__nonnull__(pTHX_3);
@@ -3336,9 +3338,9 @@ STATIC PerlIO *	S_doopen_pm(pTHX_ const char *name, const char *mode)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC bool	S_path_is_absolute(pTHX_ const char *name)
+STATIC bool	S_path_is_absolute(const char *name)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(1);
 
 STATIC I32	S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 			__attribute__warn_unused_result__
@@ -3457,9 +3459,9 @@ STATIC void	S_reguni(pTHX_ const struct RExC_state_t *state, UV uv, char *s, STR
 STATIC regnode*	S_regclass(pTHX_ struct RExC_state_t *state)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC I32	S_regcurly(pTHX_ const char *)
+STATIC I32	S_regcurly(const char *)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(1);
 
 STATIC regnode*	S_reg_node(pTHX_ struct RExC_state_t *state, U8 op)
 			__attribute__nonnull__(pTHX_1);
@@ -3482,9 +3484,10 @@ STATIC void	S_regtail(pTHX_ struct RExC_state_t *state, regnode *p, regnode *val
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
-STATIC char*	S_regwhite(pTHX_ char *p, const char *e)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+STATIC char*	S_regwhite(char *p, const char *e)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
 
 STATIC char*	S_nextchar(pTHX_ struct RExC_state_t *state)
 			__attribute__nonnull__(pTHX_1);
@@ -3503,29 +3506,30 @@ STATIC void	S_scan_commit(pTHX_ struct RExC_state_t* state, struct scan_data_t *
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC void	S_cl_anything(pTHX_ struct RExC_state_t* state, struct regnode_charclass_class *cl)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+STATIC void	S_cl_anything(struct RExC_state_t* state, struct regnode_charclass_class *cl)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
 
-STATIC int	S_cl_is_anything(pTHX_ const struct regnode_charclass_class *cl)
-			__attribute__nonnull__(pTHX_1);
+STATIC int	S_cl_is_anything(const struct regnode_charclass_class *cl)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(1);
 
-STATIC void	S_cl_init(pTHX_ struct RExC_state_t* state, struct regnode_charclass_class *cl)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+STATIC void	S_cl_init(struct RExC_state_t* state, struct regnode_charclass_class *cl)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
 
-STATIC void	S_cl_init_zero(pTHX_ struct RExC_state_t* state, struct regnode_charclass_class *cl)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+STATIC void	S_cl_init_zero(struct RExC_state_t* state, struct regnode_charclass_class *cl)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
 
-STATIC void	S_cl_and(pTHX_ struct regnode_charclass_class *cl, const struct regnode_charclass_class *and_with)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+STATIC void	S_cl_and(struct regnode_charclass_class *cl, const struct regnode_charclass_class *and_with)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
 
-STATIC void	S_cl_or(pTHX_ struct RExC_state_t* state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
+STATIC void	S_cl_or(struct RExC_state_t* state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2)
+			__attribute__nonnull__(3);
 
 STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t* state, regnode **scanp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags, U32 depth)
 			__attribute__nonnull__(pTHX_1)
@@ -3533,9 +3537,10 @@ STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t* state, regnode **scanp, I32 
 			__attribute__nonnull__(pTHX_3)
 			__attribute__nonnull__(pTHX_4);
 
-STATIC I32	S_add_data(pTHX_ struct RExC_state_t* state, I32 n, const char *s)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_3);
+STATIC I32	S_add_data(struct RExC_state_t* state, I32 n, const char *s)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(3);
 
 STATIC void	S_re_croak2(pTHX_ const char* pat1, const char* pat2, ...)
 			__attribute__noreturn__
@@ -3591,19 +3596,19 @@ STATIC U8*	S_reghop(pTHX_ U8 *pos, I32 off)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-STATIC U8*	S_reghop3(pTHX_ U8 *pos, I32 off, U8 *lim)
+STATIC U8*	S_reghop3(U8 *pos, I32 off, U8 *lim)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_3);
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(3);
 
 STATIC U8*	S_reghopmaybe(pTHX_ U8 *pos, I32 off)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-STATIC U8*	S_reghopmaybe3(pTHX_ U8 *pos, I32 off, U8 *lim)
+STATIC U8*	S_reghopmaybe3(U8 *pos, I32 off, U8 *lim)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_3);
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(3);
 
 STATIC char*	S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, const char *strend, I32 norun)
 			__attribute__warn_unused_result__
@@ -3710,13 +3715,38 @@ STATIC char *	S_F0convert(NV nv, char *endbuf, STRLEN *len)
 			__attribute__nonnull__(2)
 			__attribute__nonnull__(3);
 
-#if defined(PERL_OLD_COPY_ON_WRITE)
+#  if defined(PERL_OLD_COPY_ON_WRITE)
 STATIC void	S_sv_release_COW(pTHX_ SV *sv, const char *pvx, STRLEN len, SV *after)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_4);
 
-#endif
+#  endif
+STATIC SV *	S_more_sv(pTHX);
+STATIC void *	S_more_bodies(pTHX_ size_t size, svtype sv_type);
+STATIC bool	S_sv_2iuv_common(pTHX_ SV *sv)
+			__attribute__nonnull__(pTHX_1);
+
+STATIC void	S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC void	S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC PTR_TBL_ENT_t *	S_ptr_table_find(PTR_TBL_t *tbl, const void *sv)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
+
+STATIC SV *	S_find_hash_subscript(pTHX_ HV *hv, SV *val)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC I32	S_find_array_subscript(pTHX_ AV *av, SV *val)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC SV *	S_find_uninit_var(pTHX_ OP *obase, SV *uninit_sv, bool match);
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
@@ -3866,7 +3896,7 @@ STATIC char*	S_stdize_locale(pTHX_ char* locs)
 #endif
 
 #if defined(PERL_IN_UTIL_C) || defined(PERL_DECL_PROT)
-STATIC COP*	S_closest_cop(pTHX_ COP *cop, const OP *o)
+STATIC const COP*	S_closest_cop(pTHX_ const COP *cop, const OP *o)
 			__attribute__nonnull__(pTHX_1);
 
 STATIC SV*	S_mess_alloc(pTHX);
@@ -3882,8 +3912,9 @@ STATIC NV	S_mulexp10(NV value, I32 exponent);
 #endif
 
 #if defined(PERL_IN_UTF8_C) || defined(PERL_DECL_PROT)
-STATIC STRLEN	S_is_utf8_char_slow(pTHX_ const U8 *s, const STRLEN len)
-			__attribute__nonnull__(pTHX_1);
+STATIC STRLEN	S_is_utf8_char_slow(const U8 *s, const STRLEN len)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(1);
 
 STATIC bool	S_is_utf8_common(pTHX_ const U8 *const p, SV **swash, const char * const swashname)
 			__attribute__warn_unused_result__
