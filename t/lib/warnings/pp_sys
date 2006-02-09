@@ -458,6 +458,16 @@ select $x, undef, undef, undef;
 EXPECT
 Non-string passed as bitmask at - line 4.
 ########
+use Config;
+BEGIN {
+    if (!$Config{d_fchdir}) {
+	print <<EOM;
+SKIPPED
+# fchdir not present
+EOM
+	exit;
+    }
+}
 opendir FOO, '.'; closedir FOO;
 open BAR, '.'; close BAR;
 opendir $dh, '.'; closedir $dh;
@@ -472,7 +482,7 @@ chdir BAR;
 chdir $dh;
 chdir $fh;
 EXPECT
-chdir() on unopened filehandle FOO at - line 10.
-chdir() on closed filehandle BAR at - line 11.
-chdir() on unopened filehandle $dh at - line 12.
-chdir() on closed filehandle $fh at - line 13.
+chdir() on unopened filehandle FOO at - line 20.
+chdir() on closed filehandle BAR at - line 21.
+chdir() on unopened filehandle $dh at - line 22.
+chdir() on closed filehandle $fh at - line 23.
