@@ -10923,7 +10923,9 @@ S_set_csh(pTHX)
     if (!PL_cshlen)
 	PL_cshlen = strlen(PL_cshname);
 #else
+#if defined(USE_ITHREADS)
     PERL_UNUSED_ARG(my_perl);
+#endif
 #endif
 }
 
