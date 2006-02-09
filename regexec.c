@@ -3466,7 +3466,7 @@ S_regmatch(pTHX_ regnode *prog)
 		PL_regcc = cc.oldcc;
 		saySAME(n);
 	    }
-	    /* NOT REACHED */
+	    /* NOTREACHED */
 	case WHILEM: {
 		/*
 		 * This is really hard to understand, because after we match
@@ -3667,7 +3667,7 @@ S_regmatch(pTHX_ regnode *prog)
 		cc->lastloc = lastloc;
 		CACHEsayNO;
 	    }
-	    /* NOT REACHED */
+	    /* NOTREACHED */
 	case BRANCHJ:
 	    next = scan + ARG(scan);
 	    if (next == scan)
@@ -3855,6 +3855,7 @@ S_regmatch(pTHX_ regnode *prog)
 		}
 	    }
 	    sayNO;
+	    /* NOTREACHED */
 	    break;
 	}
 	case CURLYN:
@@ -4330,11 +4331,11 @@ do_no:
 
 	    goto reenter;
 	}
-	/* NOT REACHED */
+	/* NOTREACHED */
 	default:
 	    Perl_croak(aTHX_ "regexp unwind memory corruption");
 	}
-	/* NOT REACHED */
+	/* NOTREACHED */
     }
 #ifdef DEBUGGING
     PL_regindent--;
@@ -4827,11 +4828,11 @@ STATIC U8 *
 S_reghop(pTHX_ U8 *s, I32 off)
 {
     dVAR;
-    return S_reghop3(aTHX_ s, off, (U8*)(off >= 0 ? PL_regeol : PL_bostr));
+    return S_reghop3(s, off, (U8*)(off >= 0 ? PL_regeol : PL_bostr));
 }
 
 STATIC U8 *
-S_reghop3(pTHX_ U8 *s, I32 off, U8* lim)
+S_reghop3(U8 *s, I32 off, U8* lim)
 {
     dVAR;
     if (off >= 0) {
@@ -4859,11 +4860,11 @@ STATIC U8 *
 S_reghopmaybe(pTHX_ U8 *s, I32 off)
 {
     dVAR;
-    return S_reghopmaybe3(aTHX_ s, off, (U8*)(off >= 0 ? PL_regeol : PL_bostr));
+    return S_reghopmaybe3(s, off, (U8*)(off >= 0 ? PL_regeol : PL_bostr));
 }
 
 STATIC U8 *
-S_reghopmaybe3(pTHX_ U8* s, I32 off, U8* lim)
+S_reghopmaybe3(U8* s, I32 off, U8* lim)
 {
     dVAR;
     if (off >= 0) {

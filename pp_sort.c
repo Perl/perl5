@@ -1536,7 +1536,7 @@ PP(pp_sort)
 	}
     }
     else {
-	PL_sortcop = Nullop;
+	PL_sortcop = NULL;
 	stash = CopSTASH(PL_curcop);
     }
 

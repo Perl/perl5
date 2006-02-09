@@ -771,7 +771,7 @@ PP(pp_undef)
 	if (cv_const_sv((CV*)sv) && ckWARN(WARN_MISC))
 	    Perl_warner(aTHX_ packWARN(WARN_MISC), "Constant subroutine %s undefined",
 		 CvANON((CV*)sv) ? "(anonymous)" : GvENAME(CvGV((CV*)sv)));
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     case SVt_PVFM:
 	{
 	    /* let user-undef'd sub keep its identity */

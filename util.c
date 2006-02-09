@@ -1046,8 +1046,8 @@ Perl_mess(pTHX_ const char *pat, ...)
     return retval;
 }
 
-STATIC COP*
-S_closest_cop(pTHX_ COP *cop, const OP *o)
+STATIC const COP*
+S_closest_cop(pTHX_ const COP *cop, const OP *o)
 {
     dVAR;
     /* Look for PL_op starting from o.  cop is the last COP we've seen. */
@@ -1056,15 +1056,15 @@ S_closest_cop(pTHX_ COP *cop, const OP *o)
 	return cop;
 
     if (o->op_flags & OPf_KIDS) {
-	OP *kid;
+	const OP *kid;
 	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
-	    COP *new_cop;
+	    const COP *new_cop;
 
 	    /* If the OP_NEXTSTATE has been optimised away we can still use it
 	     * the get the file and line number. */
 
 	    if (kid->op_type == OP_NULL && kid->op_targ == OP_NEXTSTATE)
-		cop = (COP *)kid;
+		cop = (const COP *)kid;
 
 	    /* Keep searching, and return when we've found something. */
 
@@ -1076,7 +1076,7 @@ S_closest_cop(pTHX_ COP *cop, const OP *o)
 
     /* Nothing found. */
 
-    return Null(COP *);
+    return NULL;
 }
 
 SV *
@@ -1084,11 +1084,9 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
 {
     dVAR;
     SV * const sv = mess_alloc();
-    static const char dgd[] = " during global destruction.\n";
 
-    sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
+    sv_vsetpvfn(sv, pat, strlen(pat), args, NULL, 0, NULL);
     if (!SvCUR(sv) || *(SvEND(sv) - 1) != '\n') {
-
 	/*
 	 * Try and find the file and line for PL_op.  This will usually be
 	 * PL_curcop, but it might be a cop that has been optimised away.  We
@@ -1097,7 +1095,8 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
 	 */
 
 	const COP *cop = closest_cop(PL_curcop, PL_curcop->op_sibling);
-	if (!cop) cop = PL_curcop;
+	if (!cop)
+	    cop = PL_curcop;
 
 	if (CopLINE(cop))
 	    Perl_sv_catpvf(aTHX_ sv, " at %s line %"IVdf,
@@ -1106,12 +1105,13 @@ Perl_vmess(pTHX_ const char *pat, va_list *args)
 	    const bool line_mode = (RsSIMPLE(PL_rs) &&
 			      SvCUR(PL_rs) == 1 && *SvPVX_const(PL_rs) == '\n');
 	    Perl_sv_catpvf(aTHX_ sv, ", <%s> %s %"IVdf,
-			   PL_last_in_gv == PL_argvgv ?
-			   "" : GvNAME(PL_last_in_gv),
+			   PL_last_in_gv == PL_argvgv ? "" : GvNAME(PL_last_in_gv),
 			   line_mode ? "line" : "chunk",
 			   (IV)IoLINES(GvIOp(PL_last_in_gv)));
 	}
-	sv_catpv(sv, PL_dirty ? dgd : ".\n");
+	if (PL_dirty)
+	    sv_catpvs(sv, " during global destruction");
+	sv_catpvs(sv, ".\n");
     }
     return sv;
 }

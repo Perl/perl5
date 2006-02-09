@@ -729,9 +729,9 @@ perl_destruct(pTHXx)
 	    PAD_SET_CUR_NOSAVE(CvPADLIST(PL_main_cv), 1);
 	}
 	op_free(PL_main_root);
-	PL_main_root = Nullop;
+	PL_main_root = NULL;
     }
-    PL_main_start = Nullop;
+    PL_main_start = NULL;
     SvREFCNT_dec(PL_main_cv);
     PL_main_cv = NULL;
     PL_dirty = TRUE;
@@ -1554,9 +1554,9 @@ setuid perl scripts securely.\n");
 
     if (PL_main_root) {
 	op_free(PL_main_root);
-	PL_main_root = Nullop;
+	PL_main_root = NULL;
     }
-    PL_main_start = Nullop;
+    PL_main_start = NULL;
     SvREFCNT_dec(PL_main_cv);
     PL_main_cv = NULL;
 
@@ -2420,8 +2420,7 @@ Perl_get_cv(pTHX_ const char *name, I32 create)
     if (create && !GvCVu(gv))
     	return newSUB(start_subparse(FALSE, 0),
 		      newSVOP(OP_CONST, 0, newSVpv(name,0)),
-		      Nullop,
-		      Nullop);
+		      NULL, NULL);
     if (gv)
 	return GvCVu(gv);
     return NULL;
@@ -2524,7 +2523,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
     }
 
     Zero(&myop, 1, LOGOP);
-    myop.op_next = Nullop;
+    myop.op_next = NULL;
     if (!(flags & G_NOARGS))
 	myop.op_flags |= OPf_STACKED;
     myop.op_flags |= ((flags & G_VOID) ? OPf_WANT_VOID :
@@ -2700,7 +2699,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 
     if (!(flags & G_NOARGS))
 	myop.op_flags = OPf_STACKED;
-    myop.op_next = Nullop;
+    myop.op_next = NULL;
     myop.op_type = OP_ENTEREVAL;
     myop.op_flags |= ((flags & G_VOID) ? OPf_WANT_VOID :
 		      (flags & G_ARRAY) ? OPf_WANT_LIST :

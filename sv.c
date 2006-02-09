@@ -3305,7 +3305,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    S_glob_assign_glob(aTHX_ dstr, sstr, dtype);
 	    return;
 	}
-	/* FALL THROUGH */
+	/*FALLTHROUGH*/
 
     default:
 	if (SvGMAGICAL(sstr) && (flags & SV_GMAGIC)) {
@@ -5721,7 +5721,7 @@ Perl_sv_cmp_locale(pTHX_ register SV *sv1, register SV *sv2)
      */
 
   raw_compare:
-    /* FALL THROUGH */
+    /*FALLTHROUGH*/
 
 #endif /* USE_LOCALE_COLLATE */
 
@@ -7032,8 +7032,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	     * declaration! */
 	    newSUB(start_subparse(FALSE, 0),
 		   newSVOP(OP_CONST, 0, tmpsv),
-		   Nullop,
-		   Nullop);
+		   NULL, NULL);
 	    LEAVE;
 	    if (!GvCVu(gv))
 		Perl_croak(aTHX_ "Unable to create sub named \"%"SVf"\"",
@@ -7863,7 +7862,7 @@ S_expect_number(pTHX_ char** pattern)
     case '7': case '8': case '9':
 	var = *(*pattern)++ - '0';
 	while (isDIGIT(**pattern)) {
-	    I32 tmp = var * 10 + (*(*pattern)++ - '0');
+	    const I32 tmp = var * 10 + (*(*pattern)++ - '0');
 	    if (tmp < var)
 		Perl_croak(aTHX_ "Integer overflow in format string for %s", (PL_op ? OP_NAME(PL_op) : "sv_vcatpvfn"));
 	    var = tmp;
@@ -8325,7 +8324,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #endif
 #if defined(HAS_QUAD) || defined(HAS_LONG_DOUBLE)
 	case 'L':			/* Ld */
-	    /* FALL THROUGH */
+	    /*FALLTHROUGH*/
 #ifdef HAS_QUAD
 	case 'q':			/* qd */
 #endif
@@ -8341,9 +8340,9 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		break;
 	     }
 #endif
-	    /* FALL THROUGH */
+	    /*FALLTHROUGH*/
 	case 'h':
-	    /* FALL THROUGH */
+	    /*FALLTHROUGH*/
 	case 'V':
 	    intsize = *q++;
 	    break;
@@ -8446,7 +8445,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #else
 	    intsize = 'l';
 #endif
-	    /* FALL THROUGH */
+	    /*FALLTHROUGH*/
 	case 'd':
 	case 'i':
 #if vdNUMBER
@@ -8512,7 +8511,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #else
 	    intsize = 'l';
 #endif
-	    /* FALL THROUGH */
+	    /*FALLTHROUGH*/
 	case 'u':
 	    base = 10;
 	    goto uns_integer;
@@ -8527,7 +8526,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #else
 	    intsize = 'l';
 #endif
-	    /* FALL THROUGH */
+	    /*FALLTHROUGH*/
 	case 'o':
 	    base = 8;
 	    goto uns_integer;
@@ -8637,7 +8636,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 
 	case 'F':
 	    c = 'f';		/* maybe %F isn't supported here */
-	    /* FALL THROUGH */
+	    /*FALLTHROUGH*/
 	case 'e': case 'E':
 	case 'f':
 	case 'g': case 'G':
@@ -8658,7 +8657,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		break;
 /* [perl #20339] - we should accept and ignore %lf rather than die */
 	    case 'l':
-		/* FALL THROUGH */
+		/*FALLTHROUGH*/
 	    default:
 #if defined(USE_LONG_DOUBLE)
 		intsize = args ? 0 : 'q';
@@ -8668,7 +8667,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 #if defined(HAS_LONG_DOUBLE)
 		break;
 #else
-		/* FALL THROUGH */
+		/*FALLTHROUGH*/
 #endif
 	    case 'h':
 		goto unknown;
@@ -9295,7 +9294,7 @@ Perl_ptr_table_new(pTHX)
 /* map an existing pointer using a table */
 
 STATIC PTR_TBL_ENT_t *
-S_ptr_table_find(pTHX_ PTR_TBL_t *tbl, const void *sv) {
+S_ptr_table_find(PTR_TBL_t *tbl, const void *sv) {
     PTR_TBL_ENT_t *tblent;
     const UV hash = PTR_TABLE_HASH(sv);
     assert(tbl);
@@ -9310,7 +9309,7 @@ S_ptr_table_find(pTHX_ PTR_TBL_t *tbl, const void *sv) {
 void *
 Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, const void *sv)
 {
-    PTR_TBL_ENT_t const *const tblent = S_ptr_table_find(aTHX_ tbl, sv);
+    PTR_TBL_ENT_t const *const tblent = ptr_table_find(tbl, sv);
     return tblent ? tblent->newval : (void *) 0;
 }
 
@@ -9319,7 +9318,7 @@ Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, const void *sv)
 void
 Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, const void *oldsv, void *newsv)
 {
-    PTR_TBL_ENT_t *tblent = S_ptr_table_find(aTHX_ tbl, oldsv);
+    PTR_TBL_ENT_t *tblent = S_ptr_table_find(tbl, oldsv);
 
     if (tblent) {
 	tblent->newval = newsv;
@@ -10093,12 +10092,12 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		    OpREFCNT_inc(o);
 		    break;
 		default:
-		    TOPPTR(nss,ix) = Nullop;
+		    TOPPTR(nss,ix) = NULL;
 		    break;
 		}
 	    }
 	    else
-		TOPPTR(nss,ix) = Nullop;
+		TOPPTR(nss,ix) = NULL;
 	    break;
 	case SAVEt_FREEPV:
 	    c = (char*)POPPTR(ss,ix);
@@ -10314,17 +10313,17 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     IV i;
     CLONE_PARAMS clone_params;
-    CLONE_PARAMS* param = &clone_params;
+    CLONE_PARAMS* const param = &clone_params;
 
-    PerlInterpreter *my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
+    PerlInterpreter * const my_perl = (PerlInterpreter*)(*ipM->pMalloc)(ipM, sizeof(PerlInterpreter));
     /* for each stash, determine whether its objects should be cloned */
     S_visit(proto_perl, do_mark_cloneable_stash, SVt_PVHV, SVTYPEMASK);
     PERL_SET_THX(my_perl);
 
 #  ifdef DEBUGGING
     Poison(my_perl, 1, PerlInterpreter);
-    PL_op = Nullop;
-    PL_curcop = (COP *)Nullop;
+    PL_op = NULL;
+    PL_curcop = NULL;
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
@@ -10350,15 +10349,15 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     IV i;
     CLONE_PARAMS clone_params;
     CLONE_PARAMS* param = &clone_params;
-    PerlInterpreter *my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
+    PerlInterpreter * const my_perl = (PerlInterpreter*)PerlMem_malloc(sizeof(PerlInterpreter));
     /* for each stash, determine whether its objects should be cloned */
     S_visit(proto_perl, do_mark_cloneable_stash, SVt_PVHV, SVTYPEMASK);
     PERL_SET_THX(my_perl);
 
 #    ifdef DEBUGGING
     Poison(my_perl, 1, PerlInterpreter);
-    PL_op = Nullop;
-    PL_curcop = (COP *)Nullop;
+    PL_op = NULL;
+    PL_curcop = NULL;
     PL_markstack = 0;
     PL_scopestack = 0;
     PL_savestack = 0;
@@ -10973,7 +10972,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_errors		= sv_dup_inc(proto_perl->Terrors, param);
     PL_hv_fetch_ent_mh	= Nullhe;
     PL_modcount		= proto_perl->Tmodcount;
-    PL_lastgotoprobe	= Nullop;
+    PL_lastgotoprobe	= NULL;
     PL_dumpindent	= proto_perl->Tdumpindent;
 
     PL_sortcop		= (OP*)any_dup(proto_perl->Tsortcop, proto_perl);
@@ -11536,7 +11535,6 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		? '@' : '%',
 		o->op_targ, NULL, 0, FUV_SUBSCRIPT_WITHIN);
 	}
-
 	break;
 
     case OP_AASSIGN:
@@ -11601,7 +11599,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
     case OP_CHOMP:
 	if (SvROK(PL_rs) && uninit_sv == SvRV(PL_rs))
 	    return sv_2mortal(newSVpvs("${$/}"));
-	/* FALL THROUGH */
+	/*FALLTHROUGH*/
 
     default:
     do_op:
@@ -11615,7 +11613,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 
 	/* if all except one arg are constant, or have no side-effects,
 	 * or are optimized away, then it's unambiguous */
-	o2 = Nullop;
+	o2 = NULL;
 	for (kid=o; kid; kid = kid->op_sibling) {
 	    if (kid &&
 		(    (kid->op_type == OP_CONST && SvOK(cSVOPx_sv(kid)))
@@ -11625,7 +11623,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	    )
 		continue;
 	    if (o2) { /* more than one found */
-		o2 = Nullop;
+		o2 = NULL;
 		break;
 	    }
 	    o2 = kid;

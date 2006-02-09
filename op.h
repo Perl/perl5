@@ -522,7 +522,7 @@ struct loop {
 #endif
 
 #define OpREFCNT_set(o,n)		((o)->op_targ = (n))
-#define OpREFCNT_inc(o)			((o) ? (++(o)->op_targ, (o)) : Nullop)
+#define OpREFCNT_inc(o)			((o) ? (++(o)->op_targ, (o)) : NULL)
 #define OpREFCNT_dec(o)			(--(o)->op_targ)
 
 /* flags used by Perl_load_module() */

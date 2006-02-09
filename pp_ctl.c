@@ -2730,7 +2730,7 @@ S_docatch(pTHX_ OP *o)
     }
     JMPENV_POP;
     PL_op = oldop;
-    return Nullop;
+    return NULL;
 }
 
 OP *
@@ -2918,11 +2918,11 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 
     /* try to compile it */
 
-    PL_eval_root = Nullop;
+    PL_eval_root = NULL;
     PL_error_count = 0;
     PL_curcop = &PL_compiling;
     PL_curcop->cop_arybase = 0;
-    if (saveop && saveop->op_type != OP_REQUIRE && saveop->op_flags & OPf_SPECIAL)
+    if (saveop && (saveop->op_type != OP_REQUIRE) && (saveop->op_flags & OPf_SPECIAL))
 	PL_in_eval |= EVAL_KEEPERR;
     else
 	sv_setpvn(ERRSV,"",0);
@@ -2935,7 +2935,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	PL_op = saveop;
 	if (PL_eval_root) {
 	    op_free(PL_eval_root);
-	    PL_eval_root = Nullop;
+	    PL_eval_root = NULL;
 	}
 	SP = PL_stack_base + POPMARK;		/* pop original mark */
 	if (!startop) {
@@ -4570,7 +4570,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 /* perhaps someone can come up with a better name for
    this?  it is not really "absolute", per se ... */
 static bool
-S_path_is_absolute(pTHX_ const char *name)
+S_path_is_absolute(const char *name)
 {
     if (PERL_FILE_IS_ABSOLUTE(name)
 #ifdef MACOS_TRADITIONAL

@@ -32,6 +32,8 @@ Perl_deb_nocontext(const char *pat, ...)
     va_start(args, pat);
     vdeb(pat, &args);
     va_end(args);
+#else
+    PERL_UNUSED_ARG(pat);
 #endif /* DEBUGGING */
 }
 #endif
@@ -54,7 +56,7 @@ Perl_vdeb(pTHX_ const char *pat, va_list *args)
 {
 #ifdef DEBUGGING
     dVAR;
-    char* file = OutCopFILE(PL_curcop);
+    const char* const file = OutCopFILE(PL_curcop);
 
     PerlIO_printf(Perl_debug_log, "(%s:%ld)\t", (file ? file : "<free>"),
 		  (long)CopLINE(PL_curcop));

@@ -91,7 +91,7 @@ S_new_he(pTHX)
 #endif
 
 STATIC HEK *
-S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags)
+S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
 {
     const int flags_masked = flags & HVhek_MASK;
     char *k;
@@ -857,7 +857,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 }
 
 STATIC void
-S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
+S_hv_magic_check(HV *hv, bool *needs_copy, bool *needs_store)
 {
     const MAGIC *mg = SvMAGIC(hv);
     *needs_copy = FALSE;
@@ -1820,7 +1820,7 @@ Perl_hv_undef(pTHX_ HV *hv)
 }
 
 static struct xpvhv_aux*
-S_hv_auxinit(pTHX_ HV *hv) {
+S_hv_auxinit(HV *hv) {
     struct xpvhv_aux *iter;
     char *array;
 

@@ -487,7 +487,7 @@ S_scan_commit(pTHX_ RExC_state_t *pRExC_state, scan_data_t *data)
 
 /* Can match anything (initialization) */
 STATIC void
-S_cl_anything(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
+S_cl_anything(RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 {
     ANYOF_CLASS_ZERO(cl);
     ANYOF_BITMAP_SETALL(cl);
@@ -498,7 +498,7 @@ S_cl_anything(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *c
 
 /* Can match anything (initialization) */
 STATIC int
-S_cl_is_anything(pTHX_ const struct regnode_charclass_class *cl)
+S_cl_is_anything(const struct regnode_charclass_class *cl)
 {
     int value;
 
@@ -514,7 +514,7 @@ S_cl_is_anything(pTHX_ const struct regnode_charclass_class *cl)
 
 /* Can match anything (initialization) */
 STATIC void
-S_cl_init(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
+S_cl_init(RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 {
     Zero(cl, 1, struct regnode_charclass_class);
     cl->type = ANYOF;
@@ -522,7 +522,7 @@ S_cl_init(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 }
 
 STATIC void
-S_cl_init_zero(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
+S_cl_init_zero(RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 {
     Zero(cl, 1, struct regnode_charclass_class);
     cl->type = ANYOF;
@@ -534,7 +534,7 @@ S_cl_init_zero(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *
 /* 'And' a given class with another one.  Can create false positives */
 /* We assume that cl is not inverted */
 STATIC void
-S_cl_and(pTHX_ struct regnode_charclass_class *cl,
+S_cl_and(struct regnode_charclass_class *cl,
 	const struct regnode_charclass_class *and_with)
 {
     if (!(and_with->flags & ANYOF_CLASS)
@@ -571,7 +571,7 @@ S_cl_and(pTHX_ struct regnode_charclass_class *cl,
 /* 'OR' a given class with another one.  Can create false positives */
 /* We assume that cl is not inverted */
 STATIC void
-S_cl_or(pTHX_ RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
+S_cl_or(RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
 {
     if (or_with->flags & ANYOF_INVERT) {
 	/* We do not use
@@ -2725,7 +2725,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 }
 
 STATIC I32
-S_add_data(pTHX_ RExC_state_t *pRExC_state, I32 n, const char *s)
+S_add_data(RExC_state_t *pRExC_state, I32 n, const char *s)
 {
     if (RExC_rx->data) {
 	Renewc(RExC_rx->data,
@@ -4413,7 +4413,7 @@ tryagain:
 }
 
 STATIC char *
-S_regwhite(pTHX_ char *p, const char *e)
+S_regwhite(char *p, const char *e)
 {
     while (p < e) {
 	if (isSPACE(*p))
@@ -5415,7 +5415,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 STATIC char*
 S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 {
-    dVAR;
     char* retval = RExC_parse++;
 
     for (;;) {
@@ -5641,7 +5640,7 @@ S_regoptail(pTHX_ RExC_state_t *pRExC_state, regnode *p, regnode *val)
  - regcurly - a little FSA that accepts {\d+,?\d*}
  */
 STATIC I32
-S_regcurly(pTHX_ register const char *s)
+S_regcurly(register const char *s)
 {
     if (*s++ != '{')
 	return FALSE;

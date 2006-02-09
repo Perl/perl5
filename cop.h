@@ -150,8 +150,6 @@ struct cop {
     SV *	cop_io;		/* lexical IO defaults */
 };
 
-#define Nullcop Null(COP*)
-
 #ifdef USE_ITHREADS
 #  define CopFILE(c)		((c)->cop_file)
 #  define CopFILEGV(c)		(CopFILE(c) \
@@ -254,7 +252,7 @@ struct block_sub {
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
 	cx->blk_sub.hasargs = hasargs;					\
-	cx->blk_sub.retop = Nullop;						\
+	cx->blk_sub.retop = NULL;					\
 	if (!CvDEPTH(cv)) {						\
 	    (void)SvREFCNT_inc(cv);					\
 	    (void)SvREFCNT_inc(cv);					\
@@ -276,7 +274,7 @@ struct block_sub {
 #define PUSHFORMAT(cx)							\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.gv = gv;						\
-	cx->blk_sub.retop = Nullop;					\
+	cx->blk_sub.retop = NULL;					\
 	cx->blk_sub.hasargs = 0;					\
 	cx->blk_sub.dfoutgv = PL_defoutgv;				\
 	(void)SvREFCNT_inc(cx->blk_sub.dfoutgv)
@@ -348,7 +346,7 @@ struct block_eval {
 	cx->blk_eval.old_eval_root = PL_eval_root;			\
 	cx->blk_eval.cur_text = PL_linestr;				\
 	cx->blk_eval.cv = NULL; /* set by doeval(), as applicable */	\
-	cx->blk_eval.retop = Nullop; 					\
+	cx->blk_eval.retop = NULL;					\
 	cx->blk_eval.cur_top_env = PL_top_env; 				\
     } STMT_END
 

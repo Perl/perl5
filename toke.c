@@ -1083,7 +1083,7 @@ STATIC char *
 S_force_version(pTHX_ char *s, int guessing)
 {
     dVAR;
-    OP *version = Nullop;
+    OP *version = NULL;
     char *d;
 
     s = skipspace(s);
@@ -1206,7 +1206,7 @@ S_sublex_start(pTHX)
 
     if (op_type == OP_NULL) {
 	yylval.opval = PL_lex_op;
-	PL_lex_op = Nullop;
+	PL_lex_op = NULL;
 	return THING;
     }
     if (op_type == OP_CONST || op_type == OP_READLINE) {
@@ -1238,7 +1238,7 @@ S_sublex_start(pTHX)
     PL_expect = XTERM;
     if (PL_lex_op) {
 	yylval.opval = PL_lex_op;
-	PL_lex_op = Nullop;
+	PL_lex_op = NULL;
 	return PMFUNC;
     }
     else
@@ -1302,7 +1302,7 @@ S_sublex_push(pTHX)
     if (PL_lex_inwhat == OP_MATCH || PL_lex_inwhat == OP_QR || PL_lex_inwhat == OP_SUBST)
 	PL_lex_inpat = PL_sublex_info.sub_op;
     else
-	PL_lex_inpat = Nullop;
+	PL_lex_inpat = NULL;
 
     return '(';
 }
@@ -1893,15 +1893,15 @@ S_scan_const(pTHX_ char *start)
 	   and then encode the next character */
 	if ((has_utf8 || this_utf8) && !NATIVE_IS_INVARIANT((U8)(*s))) {
 	    STRLEN len  = 1;
-	    const UV uv       = (this_utf8) ? utf8n_to_uvchr((U8*)s, send - s, &len, 0) : (UV) ((U8) *s);
-	    const STRLEN need = UNISKIP(NATIVE_TO_UNI(uv));
+	    const UV nextuv   = (this_utf8) ? utf8n_to_uvchr((U8*)s, send - s, &len, 0) : (UV) ((U8) *s);
+	    const STRLEN need = UNISKIP(NATIVE_TO_UNI(nextuv));
 	    s += len;
 	    if (need > len) {
 		/* encoded value larger than old, need extra space (NOTE: SvCUR() not set here) */
 		const STRLEN off = d - SvPVX_const(sv);
 		d = SvGROW(sv, SvLEN(sv) + (need-len)) + off;
 	    }
-	    d = (char*)uvchr_to_utf8((U8*)d, uv);
+	    d = (char*)uvchr_to_utf8((U8*)d, nextuv);
 	    has_utf8 = TRUE;
 	}
 	else {
@@ -2399,7 +2399,7 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
     if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
 	s = force_version(s, TRUE);
 	if (*s == ';' || (s = skipspace(s), *s == ';')) {
-	    PL_nextval[PL_nexttoke].opval = Nullop;
+	    PL_nextval[PL_nexttoke].opval = NULL;
 	    force_next(WORD);
 	}
 	else if (*s == 'v') {
@@ -3272,7 +3272,7 @@ Perl_yylex(pTHX)
 	    PL_expect = XTERMBLOCK;
 	 grabattrs:
 	    s = skipspace(s);
-	    attrs = Nullop;
+	    attrs = NULL;
 	    while (isIDFIRST_lazy_if(s,UTF)) {
 		I32 tmp;
 		d = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
@@ -3846,9 +3846,9 @@ Perl_yylex(pTHX)
 			    char tmpbuf[sizeof PL_tokenbuf];
 			    for (t++; isSPACE(*t); t++) ;
 			    if (isIDFIRST_lazy_if(t,UTF)) {
-				STRLEN len;
+				STRLEN dummylen;
 				t = scan_word(t, tmpbuf, sizeof tmpbuf, TRUE,
-					      &len);
+					      &dummylen);
 				for (; isSPACE(*t); t++) ;
 				if (*t == ';' && get_cv(tmpbuf, FALSE))
 				    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
@@ -4464,9 +4464,9 @@ Perl_yylex(pTHX)
 		    PL_last_lop_op = OP_ENTERSUB;
 		    /* Is there a prototype? */
 		    if (SvPOK(cv)) {
-			STRLEN len;
-			const char *proto = SvPV_const((SV*)cv, len);
-			if (!len)
+			STRLEN protolen;
+			const char *proto = SvPV_const((SV*)cv, protolen);
+			if (!protolen)
 			    TERM(FUNC0SUB);
 			if (*proto == '$' && proto[1] == '\0')
 			    OPERATOR(UNIOPSUB);
@@ -5104,10 +5104,10 @@ Perl_yylex(pTHX)
 		    /* [perl #16184] */
 		    && !(t[0] == '=' && t[1] == '>')
 		) {
-		    int len = (int)(d-s);
+		    int parms_len = (int)(d-s);
 		    Perl_warner(aTHX_ packWARN(WARN_PRECEDENCE),
 			   "Precedence problem: open %.*s should be open(%.*s)",
-			    len, s, len, s);
+			    parms_len, s, parms_len, s);
 		}
 	    }
 	    LOP(OP_OPEN,XTERM);
@@ -5172,7 +5172,7 @@ Perl_yylex(pTHX)
 	    PL_expect = XOPERATOR;
 	    force_next(')');
 	    if (SvCUR(PL_lex_stuff)) {
-		OP *words = Nullop;
+		OP *words = NULL;
 		int warned = 0;
 		d = SvPV_force(PL_lex_stuff, len);
 		while (len) {
@@ -10373,13 +10373,13 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
 	/* update debugger info */
 	if (PERLDB_LINE && PL_curstash != PL_debstash) {
-	    SV * const sv = newSV(0);
+	    SV * const line_sv = newSV(0);
 
-	    sv_upgrade(sv, SVt_PVMG);
-	    sv_setsv(sv,PL_linestr);
-            (void)SvIOK_on(sv);
-            SvIV_set(sv, 0);
-	    av_store(CopFILEAVx(PL_curcop), (I32)CopLINE(PL_curcop), sv);
+	    sv_upgrade(line_sv, SVt_PVMG);
+	    sv_setsv(line_sv,PL_linestr);
+	    (void)SvIOK_on(line_sv);
+	    SvIV_set(line_sv, 0);
+	    av_store(CopFILEAVx(PL_curcop), (I32)CopLINE(PL_curcop), line_sv);
 	}
 
 	/* having changed the buffer, we must update PL_bufend */
@@ -10815,7 +10815,7 @@ vstring:
     if (sv)
 	lvalp->opval = newSVOP(OP_CONST, 0, sv);
     else
-	lvalp->opval = Nullop;
+	lvalp->opval = NULL;
 
     return (char *)s;
 }
@@ -10922,6 +10922,8 @@ S_set_csh(pTHX)
     dVAR;
     if (!PL_cshlen)
 	PL_cshlen = strlen(PL_cshname);
+#else
+    PERL_UNUSED_ARG(my_perl);
 #endif
 }
 

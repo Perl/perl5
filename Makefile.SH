@@ -359,30 +359,33 @@ obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ
 obj = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
 
 lintflags = \
-    -bhn \
+    -b \
+    -n \
     -p \
-    -s \
     -Ncheck=%all \
     -Nlevel=4 \
     -errfmt=src \
     -errtags \
-    -erroff=E_BAD_PTR_CAST \
-    -erroff=E_BLOCK_DECL_UNUSED \
-    -erroff=E_CONSTANT_CONDITION \
-    -erroff=E_BAD_PTR_CAST_ALIGN \
-    -erroff=E_PTRDIFF_OVERFLOW \
-    -erroff=E_EXPR_NULL_EFFECT \
-    -erroff=E_BAD_PTR_INT_COMBINATION \
-    -erroff=E_LOOP_EMPTY \
-    -erroff=E_TRUE_LOGICAL_EXPR \
-    -erroff=E_FALSE_LOGICAL_EXPR \
-    -erroff=E_INDISTING_FROM_TRUNC \
-    -erroff=E_POINTER_TO_OBJECT \
     -erroff=E_ASSIGN_NARROW_CONV \
+    -erroff=E_BAD_PTR_CAST \
+    -erroff=E_BAD_PTR_CAST_ALIGN \
+    -erroff=E_BAD_PTR_INT_COMBINATION \
     -erroff=E_BAD_SIGN_EXTEND \
+    -erroff=E_BLOCK_DECL_UNUSED \
+    -erroff=E_CASE_FALLTHRU \
+    -erroff=E_CONSTANT_CONDITION \
+    -erroff=E_EQUALITY_NOT_ASSIGNMENT \
+    -erroff=E_EXPR_NULL_EFFECT \
+    -erroff=E_FALSE_LOGICAL_EXPR \
     -erroff=E_INCL_NUSD \
+    -erroff=E_INDISTING_FROM_TRUNC \
+    -erroff=E_LOOP_EMPTY \
     -erroff=E_MAIN_PARAM \
-    -Wfoo.flow
+    -erroff=E_POINTER_TO_OBJECT \
+    -erroff=E_PTRDIFF_OVERFLOW \
+    -erroff=E_SHIFT_CNT_NEG_TOO_BIG_L \
+    -erroff=E_STATIC_UNUSED \
+    -erroff=E_TRUE_LOGICAL_EXPR \
 
 .c$(OBJ_EXT):
 	$(CCCMD) $(PLDLFLAGS) $*.c

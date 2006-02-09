@@ -146,14 +146,14 @@ Perl_Slab_Free(pTHX_ void *op)
 }
 #endif
 /*
- * In the following definition, the ", Nullop" is just to make the compiler
+ * In the following definition, the ", NULL" is just to make the compiler
  * think the expression is of the right type: croak actually does a Siglongjmp.
  */
 #define CHECKOP(type,o) \
     ((PL_op_mask && PL_op_mask[type])					\
      ? ( op_free((OP*)o),					\
 	 Perl_croak(aTHX_ "'%s' trapped by operation mask", PL_op_desc[type]),	\
-	 Nullop )						\
+	 NULL )						\
      : CALL_FPTR(PL_check[type])(aTHX_ (OP*)o))
 
 #define RETURN_UNLIMITED_NUMBER (PERL_INT_MAX / 2)
@@ -316,7 +316,7 @@ Perl_op_free(pTHX_ OP *o)
     FreeOp(o);
 #ifdef DEBUG_LEAKING_SCALARS
     if (PL_op == o)
-	PL_op = Nullop;
+	PL_op = NULL;
 #endif
 }
 
@@ -426,7 +426,7 @@ clear_pmop:
 	    }
 	    PmopSTASH_free(cPMOPo);
 	}
-	cPMOPo->op_pmreplroot = Nullop;
+	cPMOPo->op_pmreplroot = NULL;
         /* we use the "SAFE" version of the PM_ macros here
          * since sv_clean_all might release some PMOPs
          * after PL_regex_padav has been cleared
@@ -434,7 +434,7 @@ clear_pmop:
          * happen before sv_clean_all
          */
 	ReREFCNT_dec(PM_GETRE_SAFE(cPMOPo));
-	PM_SETRE_SAFE(cPMOPo, (REGEXP*)NULL);
+	PM_SETRE_SAFE(cPMOPo, NULL);
 #ifdef USE_ITHREADS
 	if(PL_regex_pad) {        /* We could be in destruction */
             av_push((AV*) PL_regex_pad[0],(SV*) PL_regex_pad[(cPMOPo)->op_pmoffset]);
@@ -1104,7 +1104,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 			NewOp(1101, newop, 1, UNOP);
 			newop->op_type = OP_RV2CV;
 			newop->op_ppaddr = PL_ppaddr[OP_RV2CV];
-			newop->op_first = Nullop;
+			newop->op_first = NULL;
                         newop->op_next = (OP*)newop;
 			kid->op_sibling = (OP*)newop;
 			newop->op_private |= OPpLVAL_INTRO;
@@ -1138,7 +1138,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 			kid->op_next = okid;
 		    }
 		    else
-			okid->op_next = Nullop;
+			okid->op_next = NULL;
 		    okid->op_type = OP_RV2CV;
 		    okid->op_targ = 0;
 		    okid->op_ppaddr = PL_ppaddr[OP_RV2CV];
@@ -1362,7 +1362,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 }
 
 STATIC bool
-S_scalar_mod_type(pTHX_ const OP *o, I32 type)
+S_scalar_mod_type(const OP *o, I32 type)
 {
     switch (type) {
     case OP_SASSIGN:
@@ -1409,7 +1409,7 @@ S_scalar_mod_type(pTHX_ const OP *o, I32 type)
 }
 
 STATIC bool
-S_is_handle_constructor(pTHX_ const OP *o, I32 numargs)
+S_is_handle_constructor(const OP *o, I32 numargs)
 {
     switch (o->op_type) {
     case OP_PIPE_OP:
@@ -1425,7 +1425,7 @@ S_is_handle_constructor(pTHX_ const OP *o, I32 numargs)
     case OP_ACCEPT:
 	if (numargs == 1)
 	    return TRUE;
-	/* FALL THROUGH */
+	/* FALLTHROUGH */
     default:
 	return FALSE;
     }
@@ -1551,7 +1551,7 @@ S_dup_attrlist(pTHX_ OP *o)
 	rop = newSVOP(OP_CONST, o->op_flags, SvREFCNT_inc(cSVOPo->op_sv));
     else {
 	assert((o->op_type == OP_LIST) && (o->op_flags & OPf_KIDS));
-	rop = Nullop;
+	rop = NULL;
 	for (o = cLISTOPo->op_first; o; o=o->op_sibling) {
 	    if (o->op_type == OP_CONST)
 		rop = append_elem(OP_LIST, rop,
@@ -1664,7 +1664,7 @@ void
 Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv,
                         const char *attrstr, STRLEN len)
 {
-    OP *attrs = Nullop;
+    OP *attrs = NULL;
 
     if (!len) {
         len = strlen(attrstr);
@@ -1772,7 +1772,7 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
 #endif
     if (attrs)
 	SAVEFREEOP(attrs);
-    rops = Nullop;
+    rops = NULL;
     o = my_kid(o, attrs, &rops);
     if (rops) {
 	if (maybe_scalar && o->op_type == OP_PADSV) {
@@ -1790,7 +1790,7 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
 OP *
 Perl_my(pTHX_ OP *o)
 {
-    return my_attrs(o, Nullop);
+    return my_attrs(o, NULL);
 }
 
 OP *
@@ -1892,7 +1892,7 @@ Perl_scope(pTHX_ OP *o)
 	    }
 	}
 	else
-	    o = newLISTOP(OP_SCOPE, 0, o, Nullop);
+	    o = newLISTOP(OP_SCOPE, 0, o, NULL);
     }
     return o;
 }
@@ -2174,7 +2174,7 @@ Perl_convert(pTHX_ I32 type, I32 flags, OP *o)
 {
     dVAR;
     if (!o || o->op_type != OP_LIST)
-	o = newLISTOP(OP_LIST, 0, o, Nullop);
+	o = newLISTOP(OP_LIST, 0, o, NULL);
     else
 	o->op_flags &= ~OPf_WANT;
 
@@ -2286,7 +2286,7 @@ OP *
 Perl_force_list(pTHX_ OP *o)
 {
     if (!o || o->op_type != OP_LIST)
-	o = newLISTOP(OP_LIST, 0, o, Nullop);
+	o = newLISTOP(OP_LIST, 0, o, NULL);
     op_null(o);
     return o;
 }
@@ -2400,7 +2400,10 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     return fold_constants((OP *)binop);
 }
 
-static int uvcompare(const void *a, const void *b) __attribute__nonnull__(1) __attribute__nonnull__(2) __attribute__pure__;
+static int uvcompare(const void *a, const void *b)
+    __attribute__nonnull__(1)
+    __attribute__nonnull__(2)
+    __attribute__pure__;
 static int uvcompare(const void *a, const void *b)
 {
     if (*((const UV *)a) < (*(const UV *)b))
@@ -2785,7 +2788,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
     PMOP *pm;
     LOGOP *rcop;
     I32 repl_has_vars = 0;
-    OP* repl  = Nullop;
+    OP* repl = NULL;
     bool reglist;
 
     if (o->op_type == OP_SUBST || o->op_type == OP_TRANS) {
@@ -2795,7 +2798,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	kid = cLISTOPx(expr)->op_first;
 	while (kid->op_sibling != repl)
 	    kid = kid->op_sibling;
-	kid->op_sibling = Nullop;
+	kid->op_sibling = NULL;
 	cLISTOPx(expr)->op_last = kid;
     }
 
@@ -2805,8 +2808,8 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	/* convert single element list to element */
 	OP* const oe = expr;
 	expr = cLISTOPx(oe)->op_first->op_sibling;
-	cLISTOPx(oe)->op_first->op_sibling = Nullop;
-	cLISTOPx(oe)->op_last = Nullop;
+	cLISTOPx(oe)->op_first->op_sibling = NULL;
+	cLISTOPx(oe)->op_last = NULL;
 	op_free(oe);
     }
 
@@ -3066,7 +3069,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
     if (idop->op_type != OP_CONST)
 	Perl_croak(aTHX_ "Module name must be constant");
 
-    veop = Nullop;
+    veop = NULL;
 
     if (version) {
 	SV * const vesv = ((SVOP*)version)->op_sv;
@@ -3097,7 +3100,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
     if (arg && arg->op_type == OP_STUB)
 	imop = arg;		/* no import on explicit () */
     else if (SvNIOKp(((SVOP*)idop)->op_sv)) {
-	imop = Nullop;		/* use 5.0; */
+	imop = NULL;		/* use 5.0; */
 	if (!aver)
 	    idop->op_private |= OPpCONST_NOVER;
     }
@@ -3119,8 +3122,8 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
     /* Fake up the BEGIN {}, which does its thing immediately. */
     newATTRSUB(floor,
 	newSVOP(OP_CONST, 0, newSVpvs_share("BEGIN")),
-	Nullop,
-	Nullop,
+	NULL,
+	NULL,
 	append_elem(OP_LINESEQ,
 	    append_elem(OP_LINESEQ,
 	        newSTATEOP(0, NULL, newUNOP(OP_REQUIRE, 0, idop)),
@@ -3199,7 +3202,7 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
 	veop = newSVOP(OP_CONST, 0, ver);
     }
     else
-	veop = Nullop;
+	veop = NULL;
     if (flags & PERL_LOADMOD_NOIMPORT) {
 	imop = sawparens(newNULLLIST());
     }
@@ -3208,7 +3211,7 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
     }
     else {
 	SV *sv;
-	imop = Nullop;
+	imop = NULL;
 	sv = va_arg(*args, SV*);
 	while (sv) {
 	    imop = append_elem(OP_LIST, imop, newSVOP(OP_CONST, 0, sv));
@@ -3427,7 +3430,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			pm->op_pmflags |= PMf_ONCE;
 			tmpop = cUNOPo->op_first;	/* to list (nulled) */
 			tmpop = ((UNOP*)tmpop)->op_first; /* to pushmark */
-			tmpop->op_sibling = Nullop;	/* don't free split */
+			tmpop->op_sibling = NULL;	/* don't free split */
 			right->op_next = tmpop->op_next;  /* fix starting loc */
 			op_free(o);			/* blow off assign */
 			right->op_flags &= ~OPf_WANT;
@@ -3563,7 +3566,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    first = *firstp = cUNOPo->op_first;
 	    if (o->op_next)
 		first->op_next = o->op_next;
-	    cUNOPo->op_first = Nullop;
+	    cUNOPo->op_first = NULL;
 	    op_free(o);
 	}
     }
@@ -3576,7 +3579,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    (type == OP_OR  && !SvTRUE(((SVOP*)first)->op_sv)) ||
 	    (type == OP_DOR && !SvOK(((SVOP*)first)->op_sv))) {
 	    op_free(first);
-	    *firstp = Nullop;
+	    *firstp = NULL;
 	    if (other->op_type == OP_CONST)
 		other->op_private |= OPpCONST_SHORTCIRCUIT;
 	    return other;
@@ -3600,7 +3603,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
 	    }
 
 	    op_free(other);
-	    *otherp = Nullop;
+	    *otherp = NULL;
 	    if (first->op_type == OP_CONST)
 		first->op_private |= OPpCONST_SHORTCIRCUIT;
 	    return first;
@@ -3905,7 +3908,7 @@ whileline, OP *expr, OP *block, OP *cont, I32 has_my)
 	if (o == expr && o->op_type == OP_CONST && !SvTRUE(cSVOPo->op_sv)) {
 	    op_free(expr);		/* oops, it's a while (0) */
 	    op_free((OP*)loop);
-	    return Nullop;		/* listop already freed by new_logop */
+	    return NULL;		/* listop already freed by new_logop */
 	}
 	if (listop)
 	    ((LISTOP*)listop)->op_last->op_next =
@@ -3961,14 +3964,14 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
 	    padoff = sv->op_targ;
 	    sv->op_targ = 0;
 	    op_free(sv);
-	    sv = Nullop;
+	    sv = NULL;
 	}
 	else if (sv->op_type == OP_THREADSV) { /* per-thread variable */
 	    padoff = sv->op_targ;
 	    sv->op_targ = 0;
 	    iterflags |= OPf_SPECIAL;
 	    op_free(sv);
-	    sv = Nullop;
+	    sv = NULL;
 	}
 	else
 	    Perl_croak(aTHX_ "Can't use %s for loop variable", PL_op_desc[sv->op_type]);
@@ -4004,7 +4007,7 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
 	LISTOP* listop;
 
 	range->op_flags &= ~OPf_KIDS;
-	range->op_first = Nullop;
+	range->op_first = NULL;
 
 	listop = (LISTOP*)newLISTOP(OP_LIST, 0, left, right);
 	listop->op_first->op_next = range->op_next;
@@ -4277,8 +4280,8 @@ Perl_cv_undef(pTHX_ CV *cv)
 	PAD_SAVE_SETNULLPAD();
 
 	op_free(CvROOT(cv));
-	CvROOT(cv) = Nullop;
-	CvSTART(cv) = Nullop;
+	CvROOT(cv) = NULL;
+	CvSTART(cv) = NULL;
 	LEAVE;
     }
     SvPOK_off((SV*)cv);		/* forget prototype */
@@ -4450,7 +4453,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 CV *
 Perl_newSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *block)
 {
-    return Perl_newATTRSUB(aTHX_ floor, o, proto, Nullop, block);
+    return Perl_newATTRSUB(aTHX_ floor, o, proto, NULL, block);
 }
 
 CV *
@@ -4667,7 +4670,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     if (PL_error_count) {
 	op_free(block);
-	block = Nullop;
+	block = NULL;
 	if (name) {
 	    const char *s = strrchr(name, ':');
 	    s = s ? s+1 : name;
@@ -5030,7 +5033,7 @@ Perl_newANONHASH(pTHX_ OP *o)
 OP *
 Perl_newANONSUB(pTHX_ I32 floor, OP *proto, OP *block)
 {
-    return newANONATTRSUB(floor, proto, Nullop, block);
+    return newANONATTRSUB(floor, proto, NULL, block);
 }
 
 OP *
@@ -5449,7 +5452,7 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 		o->op_private &= ~HINT_STRICT_REFS;
 	}
 	if ((o->op_private & HINT_STRICT_REFS) && (kid->op_private & OPpCONST_BARE)) {
-            const char *badthing = NULL;
+	    const char *badthing;
 	    switch (o->op_type) {
 	    case OP_RV2SV:
 		badthing = "a SCALAR";
@@ -5459,6 +5462,9 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 		break;
 	    case OP_RV2HV:
 		badthing = "a HASH";
+		break;
+	    default:
+		badthing = NULL;
 		break;
 	    }
 	    if (badthing)
@@ -6030,7 +6036,7 @@ Perl_ck_smartmatch(pTHX_ OP *o)
 	OP *second = first->op_sibling;
 	
 	/* Implicitly take a reference to an array or hash */
-	first->op_sibling = Nullop;
+	first->op_sibling = NULL;
 	first = cBINOPo->op_first = ref_array_or_hash(first);
 	second = first->op_sibling = ref_array_or_hash(second);
 	
@@ -6570,9 +6576,9 @@ Perl_ck_subr(pTHX_ OP *o)
 	if (o2->op_type == OP_CONST)
 	    o2->op_private &= ~OPpCONST_STRICT;
 	else if (o2->op_type == OP_LIST) {
-	    OP * const o = ((UNOP*)o2)->op_first->op_sibling;
-	    if (o && o->op_type == OP_CONST)
-		o->op_private &= ~OPpCONST_STRICT;
+	    OP * const sib = ((UNOP*)o2)->op_first->op_sibling;
+	    if (sib && sib->op_type == OP_CONST)
+		sib->op_private &= ~OPpCONST_STRICT;
 	}
     }
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
