@@ -146,14 +146,14 @@ Perl_Slab_Free(pTHX_ void *op)
 }
 #endif
 /*
- * In the following definition, the ", NULL" is just to make the compiler
+ * In the following definition, the ", (OP*)0" is just to make the compiler
  * think the expression is of the right type: croak actually does a Siglongjmp.
  */
 #define CHECKOP(type,o) \
-    ((PL_op_mask && PL_op_mask[type])					\
+    ((PL_op_mask && PL_op_mask[type])				\
      ? ( op_free((OP*)o),					\
 	 Perl_croak(aTHX_ "'%s' trapped by operation mask", PL_op_desc[type]),	\
-	 NULL )						\
+	 (OP*)0 )						\
      : CALL_FPTR(PL_check[type])(aTHX_ (OP*)o))
 
 #define RETURN_UNLIMITED_NUMBER (PERL_INT_MAX / 2)
