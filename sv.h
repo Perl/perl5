@@ -252,6 +252,8 @@ struct xpv {
     STRLEN	xpv_len;	/* allocated size */
 };
 
+typedef struct xpv xpv_allocated;
+
 struct xpviv {
     char *	xpv_pv;		/* pointer to malloced string */
     STRLEN	xpv_cur;	/* length of xpv_pv as a C string */

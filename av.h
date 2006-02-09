@@ -22,6 +22,8 @@ struct xpvav {
     U8		xav_flags;
 };
 
+typedef struct xpvav xpvav_allocated;
+
 
 /* AVf_REAL is set for all AVs whose xav_array contents are refcounted.
  * Some things like "@_" and the scratchpad list do not set this, to

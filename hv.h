@@ -47,6 +47,8 @@ struct xpvhv {
     char	*xhv_name;	/* name, if a symbol table */
 };
 
+typedef struct xpvhv xpvhv_allocated;
+
 /* hash a key */
 /* FYI: This is the "One-at-a-Time" algorithm by Bob Jenkins
  * from requirements by Colin Plumb.
