@@ -3505,7 +3505,6 @@ Gid_t getegid (void);
 	((what) ? ((void) 0) :						\
 	    (Perl_croak_nocontext("Assertion %s failed: file \"" __FILE__ \
 			"\", line %d", STRINGIFY(what), __LINE__),	\
-	    PerlProc_exit(1),						\
 	    (void) 0)))
 #endif
 
