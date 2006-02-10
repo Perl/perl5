@@ -96,7 +96,13 @@ Perl_safesysmalloc(MEM_SIZE size)
 #ifdef PERL_TRACK_MEMPOOL
 	struct perl_memory_debug_header *const header
 	    = (struct perl_memory_debug_header *)ptr;
+#endif
 
+#ifdef PERL_POISON
+	Poison(((char *)ptr), size, char);
+#endif
+
+#ifdef PERL_TRACK_MEMPOOL
 	header->interpreter = aTHX;
 	/* Link us into the list.  */
 	header->prev = &PL_memory_debug_header;
@@ -179,6 +185,14 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 #ifdef PERL_TRACK_MEMPOOL
 	struct perl_memory_debug_header *const header
 	    = (struct perl_memory_debug_header *)ptr;
+
+#  ifdef PERL_POISON
+	if (header->size < size) {
+	    const MEM_SIZE fresh = size - header->size;
+	    char *start_of_fresh = ((char *)ptr) + size;
+	    Poison(start_of_fresh, fresh, char);
+	}
+#  endif
 
 	header->next->prev = header;
 	header->prev->next = header;
