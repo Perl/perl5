@@ -892,6 +892,12 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     if (SvTYPE(sv) == mt)
 	return TRUE;
 
+    if (SvTYPE(sv) > mt) {
+	/* FIXME For 5.8.x need some cross-upgrade checks for things like
+	   PV upgraded to NV - that needs to become PVNV.  */
+	return TRUE;
+    }
+
     pv = NULL;
     cur = 0;
     len = 0;
@@ -6106,7 +6112,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
 
     if (!(flags & SVp_POK) || !*SvPVX_const(sv)) {
 	if ((flags & SVTYPEMASK) < SVt_PVIV)
-	    sv_upgrade(sv, SVt_IV);
+	    sv_upgrade(sv, ((flags & SVTYPEMASK) > SVt_IV ? SVt_PVIV : SVt_IV));
 	(void)SvIOK_only(sv);
 	SvIV_set(sv, 1);
 	return;
@@ -9328,45 +9334,8 @@ Perl_ptr_table_new(pTHX)
 #define PTR_TABLE_HASH(ptr) \
   ((PTR2UV(ptr) >> 3) ^ (PTR2UV(ptr) >> (3 + 7)) ^ (PTR2UV(ptr) >> (3 + 17)))
 
-
-
-STATIC void
-S_more_pte(pTHX)
-{
-    struct ptr_tbl_ent* pte;
-    struct ptr_tbl_ent* pteend;
-    XPV *ptr;
-    New(54, ptr, PERL_ARENA_SIZE/sizeof(XPV), XPV);
-    ptr->xpv_pv = (char*)PL_pte_arenaroot;
-    PL_pte_arenaroot = ptr;
-
-    pte = (struct ptr_tbl_ent*)ptr;
-    pteend = &pte[PERL_ARENA_SIZE / sizeof(struct ptr_tbl_ent) - 1];
-    PL_pte_root = ++pte;
-    while (pte < pteend) {
-	pte->next = pte + 1;
-	pte++;
-    }
-    pte->next = 0;
-}
-
-STATIC struct ptr_tbl_ent*
-S_new_pte(pTHX)
-{
-    struct ptr_tbl_ent* pte;
-    if (!PL_pte_root)
-	S_more_pte(aTHX);
-    pte = PL_pte_root;
-    PL_pte_root = pte->next;
-    return pte;
-}
-
-STATIC void
-S_del_pte(pTHX_ struct ptr_tbl_ent*p)
-{
-    p->next = PL_pte_root;
-    PL_pte_root = p;
-}
+#define new_pte()	new_body(struct ptr_tbl_ent, pte)
+#define del_pte(p)	del_body(p, struct ptr_tbl_ent, pte)
 
 /* map an existing pointer using a table */
 
@@ -9404,7 +9373,7 @@ Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldsv, void *newsv)
 	    return;
 	}
     }
-    tblent = S_new_pte(aTHX);
+    tblent = new_pte();
     tblent->oldval = oldsv;
     tblent->newval = newsv;
     tblent->next = *otblent;
@@ -9468,7 +9437,7 @@ Perl_ptr_table_clear(pTHX_ PTR_TBL_t *tbl)
         if (entry) {
             PTR_TBL_ENT_t *oentry = entry;
             entry = entry->next;
-            S_del_pte(aTHX_ oentry);
+            del_pte(oentry);
         }
         if (!entry) {
             if (++riter > max) {
