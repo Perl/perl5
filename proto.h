@@ -2887,7 +2887,6 @@ STATIC void	S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen, const ch
 			__attribute__nonnull__(pTHX_4);
 
 STATIC struct xpvhv_aux*	S_hv_auxinit(HV *hv)
-			__attribute__warn_unused_result__
 			__attribute__nonnull__(1);
 
 STATIC SV*	S_hv_delete_common(pTHX_ HV* tb, SV* keysv, const char* key, STRLEN klen, int k_flags, I32 d_flags, U32 hash);
