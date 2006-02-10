@@ -884,6 +884,14 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     NV		nv;
     MAGIC*	magic;
     HV*		stash;
+    void**	old_body_arena;
+    size_t	old_body_offset;
+    size_t	old_body_length;	/* Well, the length to copy.  */
+    void*	old_body;
+    bool	zero_nv = TRUE;
+#ifdef DEBUGGING
+    U32		old_type = SvTYPE(sv);
+#endif
 
     if (mt != SVt_PV && SvREADONLY(sv) && SvFAKE(sv)) {
 	sv_force_normal(sv);
@@ -906,12 +914,21 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     magic = NULL;
     stash = Nullhv;
 
+    old_body = SvANY(sv);
+    old_body_arena = 0;
+    old_body_offset = 0;
+    old_body_length = 0;
+
     switch (SvTYPE(sv)) {
     case SVt_NULL:
 	break;
     case SVt_IV:
 	iv	= SvIVX(sv);
-	del_XIV(SvANY(sv));
+	old_body_arena = (void **) &PL_xiv_root;
+	old_body_offset = STRUCT_OFFSET(XIV, xiv_iv)
+	    - STRUCT_OFFSET(xiv_allocated, xiv_iv);
+	old_body_length = sizeof(IV);
+
 	if (mt == SVt_NV)
 	    mt = SVt_PVNV;
 	else if (mt < SVt_PVIV)
@@ -919,19 +936,28 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	break;
     case SVt_NV:
 	nv	= SvNVX(sv);
-	del_XNV(SvANY(sv));
+	old_body_arena = (void **) &PL_xnv_root;
+	old_body_length = sizeof(NV);
+	zero_nv = FALSE;
+	old_body_offset = STRUCT_OFFSET(XNV, xnv_nv)
+	    - STRUCT_OFFSET(xnv_allocated, xnv_nv);
+
 	if (mt < SVt_PVNV)
 	    mt = SVt_PVNV;
 	break;
     case SVt_RV:
 	pv	= (char*)SvRV(sv);
-	del_XRV(SvANY(sv));
+	old_body_arena = (void **) &PL_xrv_root;
+	old_body_length = sizeof(XRV);
 	break;
     case SVt_PV:
 	pv	= SvPVX_mutable(sv);
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
-	del_XPV(SvANY(sv));
+	old_body_arena = (void **) &PL_xpv_root;
+	old_body_offset = STRUCT_OFFSET(XPV, xpv_cur)
+	    - STRUCT_OFFSET(xpv_allocated, xpv_cur);
+	old_body_length = sizeof(XPV) - old_body_offset;
 	if (mt <= SVt_IV)
 	    mt = SVt_PVIV;
 	else if (mt == SVt_NV)
@@ -942,7 +968,10 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	cur	= SvCUR(sv);
 	len	= SvLEN(sv);
 	iv	= SvIVX(sv);
-	del_XPVIV(SvANY(sv));
+	old_body_arena = (void **) &PL_xpviv_root;
+	old_body_offset = STRUCT_OFFSET(XPVIV, xpv_cur)
+	    - STRUCT_OFFSET(xpviv_allocated, xpv_cur);
+	old_body_length = sizeof(XPVIV) - old_body_offset;
 	break;
     case SVt_PVNV:
 	pv	= SvPVX_mutable(sv);
@@ -950,7 +979,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	len	= SvLEN(sv);
 	iv	= SvIVX(sv);
 	nv	= SvNVX(sv);
-	del_XPVNV(SvANY(sv));
+	old_body_arena = (void **) &PL_xpvnv_root;
+	old_body_length = sizeof(XPVNV);
+	zero_nv = FALSE;
 	break;
     case SVt_PVMG:
 	/* Because the XPVMG of PL_mess_sv isn't allocated from the arena,
@@ -968,7 +999,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	nv	= SvNVX(sv);
 	magic	= SvMAGIC(sv);
 	stash	= SvSTASH(sv);
-	del_XPVMG(SvANY(sv));
+	old_body_arena = (void **) &PL_xpvmg_root;
+	old_body_length = sizeof(XPVMG);
+	zero_nv = FALSE;
 	break;
     default:
 	Perl_croak(aTHX_ "Can't upgrade that kind of scalar");
@@ -981,14 +1014,17 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     case SVt_NULL:
 	Perl_croak(aTHX_ "Can't upgrade to undef");
     case SVt_IV:
+	assert(old_type == SVt_NULL);
 	SvANY(sv) = new_XIV();
 	SvIV_set(sv, iv);
 	break;
     case SVt_NV:
+	assert(old_type == SVt_NULL);
 	SvANY(sv) = new_XNV();
 	SvNV_set(sv, nv);
 	break;
     case SVt_RV:
+	assert(old_type == SVt_NULL);
 	SvANY(sv) = new_XRV();
 	SvRV_set(sv, (SV*)pv);
 	break;
@@ -1095,6 +1131,15 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	SvCUR_set(sv, cur);
 	SvLEN_set(sv, len);
 	break;
+    }
+
+
+    if (old_body_arena) {
+#ifdef PURIFY
+	my_safefree(old_body);
+#else
+	S_del_body(aTHX_ old_body, old_body_arena, old_body_offset);
+#endif
     }
     return TRUE;
 }
