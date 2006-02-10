@@ -1230,32 +1230,6 @@ s	|SV*	|save_scalar_at	|NN SV **sptr
 nsR	|char *	|uiv_2buf	|NN char *buf|IV iv|UV uv|int is_uv|NN char **peob
 sR	|IV	|asIV		|NN SV* sv
 sR	|UV	|asUV		|NN SV* sv
-s	|XPVIV*	|new_xiv
-s	|XPVNV*	|new_xnv
-s	|XPV*	|new_xpv
-s	|XPVIV*	|new_xpviv
-s	|XPVNV*	|new_xpvnv
-s	|XPVCV*	|new_xpvcv
-s	|XPVAV*	|new_xpvav
-s	|XPVHV*	|new_xpvhv
-s	|XPVMG*	|new_xpvmg
-s	|XPVGV*	|new_xpvgv
-s	|XPVLV*	|new_xpvlv
-s	|XPVBM*	|new_xpvbm
-s	|XRV*	|new_xrv
-s	|void	|del_xiv	|NN XPVIV* p
-s	|void	|del_xnv	|NN XPVNV* p
-s	|void	|del_xpv	|NN XPV* p
-s	|void	|del_xpviv	|NN XPVIV* p
-s	|void	|del_xpvnv	|NN XPVNV* p
-s	|void	|del_xpvcv	|NN XPVCV* p
-s	|void	|del_xpvav	|NN XPVAV* p
-s	|void	|del_xpvhv	|NN XPVHV* p
-s	|void	|del_xpvmg	|NN XPVMG* p
-s	|void	|del_xpvgv	|NN XPVGV* p
-s	|void	|del_xpvlv	|NN XPVLV* p
-s	|void	|del_xpvbm	|NN XPVBM* p
-s	|void	|del_xrv	|NN XRV* p
 s	|void	|sv_unglob	|NN SV* sv
 s	|void	|not_a_number	|NN SV *sv
 s	|I32	|visit		|NN SVFUNC_t f|U32 flags|U32 mask
