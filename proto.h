@@ -2871,10 +2871,10 @@ STATIC HEK*	S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1);
 
-STATIC void	S_hv_magic_check(HV *hv, bool *needs_copy, bool *needs_store)
-			__attribute__nonnull__(1)
-			__attribute__nonnull__(2)
-			__attribute__nonnull__(3);
+STATIC void	S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
 
 STATIC void	S_unshare_hek_or_pvn(pTHX_ const HEK* hek, const char* str, I32 len, U32 hash);
 STATIC HEK*	S_share_hek_flags(pTHX_ const char* sv, I32 len, U32 hash, int flags)
@@ -3735,10 +3735,10 @@ STATIC void	S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC PTR_TBL_ENT_t *	S_ptr_table_find(PTR_TBL_t *tbl, const void *sv)
+STATIC PTR_TBL_ENT_t *	S_ptr_table_find(pTHX_ PTR_TBL_t *tbl, const void *sv)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(1)
-			__attribute__nonnull__(2);
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 
 STATIC SV *	S_find_hash_subscript(pTHX_ HV *hv, SV *val)
 			__attribute__nonnull__(pTHX_2);

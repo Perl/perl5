@@ -1043,7 +1043,7 @@ s	|void	|hsplit		|NN HV *hv
 s	|void	|hfreeentries	|NN HV *hv
 sa	|HE*	|new_he
 sanR	|HEK*	|save_hek_flags	|NN const char *str|I32 len|U32 hash|int flags
-sn	|void	|hv_magic_check	|NN HV *hv|NN bool *needs_copy|NN bool *needs_store
+s	|void	|hv_magic_check	|NN HV *hv|NN bool *needs_copy|NN bool *needs_store
 s	|void	|unshare_hek_or_pvn|NULLOK const HEK* hek|NULLOK const char* str|I32 len|U32 hash
 sR	|HEK*	|share_hek_flags|NN const char* sv|I32 len|U32 hash|int flags
 rs	|void	|hv_notallowed	|int flags|NN const char *key|I32 klen|NN const char *msg
@@ -1350,7 +1350,7 @@ s	|void *	|more_bodies	|size_t size|svtype sv_type
 s	|bool	|sv_2iuv_common	|NN SV *sv
 s	|void	|glob_assign_glob|NN SV *dstr|NN SV *sstr|const int dtype
 s	|void	|glob_assign_ref|NN SV *dstr|NN SV *sstr
-sRn	|PTR_TBL_ENT_t *|ptr_table_find|NN PTR_TBL_t *tbl|NN const void *sv
+sR	|PTR_TBL_ENT_t *|ptr_table_find|NN PTR_TBL_t *tbl|NN const void *sv
 s	|SV *	|find_hash_subscript|NULLOK HV *hv|NN SV *val
 s	|I32	|find_array_subscript|NULLOK AV *av|NN SV *val
 s	|SV *	|find_uninit_var|NULLOK OP *obase|NULLOK SV *uninit_sv|bool match

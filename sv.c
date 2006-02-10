@@ -9294,7 +9294,7 @@ Perl_ptr_table_new(pTHX)
 /* map an existing pointer using a table */
 
 STATIC PTR_TBL_ENT_t *
-S_ptr_table_find(PTR_TBL_t *tbl, const void *sv) {
+S_ptr_table_find(pTHX_ PTR_TBL_t *tbl, const void *sv) {
     PTR_TBL_ENT_t *tblent;
     const UV hash = PTR_TABLE_HASH(sv);
     assert(tbl);
@@ -9309,7 +9309,7 @@ S_ptr_table_find(PTR_TBL_t *tbl, const void *sv) {
 void *
 Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, const void *sv)
 {
-    PTR_TBL_ENT_t const *const tblent = ptr_table_find(tbl, sv);
+    PTR_TBL_ENT_t const *const tblent = S_ptr_table_find(aTHX_ tbl, sv);
     return tblent ? tblent->newval : (void *) 0;
 }
 
@@ -9318,7 +9318,7 @@ Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, const void *sv)
 void
 Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, const void *oldsv, void *newsv)
 {
-    PTR_TBL_ENT_t *tblent = S_ptr_table_find(tbl, oldsv);
+    PTR_TBL_ENT_t *tblent = S_ptr_table_find(aTHX_ tbl, oldsv);
 
     if (tblent) {
 	tblent->newval = newsv;

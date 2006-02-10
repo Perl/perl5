@@ -857,7 +857,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 }
 
 STATIC void
-S_hv_magic_check(HV *hv, bool *needs_copy, bool *needs_store)
+S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store)
 {
     const MAGIC *mg = SvMAGIC(hv);
     *needs_copy = FALSE;
