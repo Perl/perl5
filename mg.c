@@ -843,8 +843,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    {
 		i = t1 - s1;
 		s = rx->subbeg + s1;
-		if (!rx->subbeg)
-		    break;
+		assert(rx->subbeg);
 
 	      getrx:
 		if (i >= 0) {

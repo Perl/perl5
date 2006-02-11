@@ -4166,8 +4166,7 @@ PP(pp_shift)
     AV * const av = (AV*)POPs;
     SV * const sv = PL_op->op_type == OP_SHIFT ? av_shift(av) : av_pop(av);
     EXTEND(SP, 1);
-    if (!sv)
-	RETPUSHUNDEF;
+    assert (sv);
     if (AvREAL(av))
 	(void)sv_2mortal(sv);
     PUSHs(sv);
