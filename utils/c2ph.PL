@@ -1320,7 +1320,7 @@ EOF
 	$intrinsics{$_[1]} = $template{$_[0]};
     }
     close(PIPE) || die "couldn't read intrinsics!";
-    unlink($TMP, '$SAFEDIR/a.out');
+    unlink($TMP, "$SAFEDIR/a.out");
     print STDERR "done\n" if $trace;
 }
 
