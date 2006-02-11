@@ -9624,8 +9624,6 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		else
 		    IoOFP(dstr)	= fp_dup(IoOFP(dstr), IoTYPE(dstr), param);
 		/* PL_rsfp_filters entries have fake IoDIRP() */
-		if (IoDIRP(dstr) && !(IoFLAGS(dstr) & IOf_FAKE_DIRP))
-		    IoDIRP(dstr)	= dirp_dup(IoDIRP(dstr));
 		if(IoFLAGS(dstr) & IOf_FAKE_DIRP) {
 		    /* I have no idea why fake dirp (rsfps)
 		       should be treated differently but otherwise
@@ -9637,6 +9635,11 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		    IoTOP_GV(dstr)      = gv_dup(IoTOP_GV(dstr), param);
 		    IoFMT_GV(dstr)      = gv_dup(IoFMT_GV(dstr), param);
 		    IoBOTTOM_GV(dstr)   = gv_dup(IoBOTTOM_GV(dstr), param);
+		    if (IoDIRP(dstr)) {
+			IoDIRP(dstr)	= dirp_dup(IoDIRP(dstr));
+		    } else {
+			/* IoDIRP(dstr) is already a copy of IoDIRP(sstr)  */
+		    }
 		}
 		IoTOP_NAME(dstr)	= SAVEPV(IoTOP_NAME(dstr));
 		IoFMT_NAME(dstr)	= SAVEPV(IoFMT_NAME(dstr));
