@@ -770,6 +770,9 @@ S_del_body(pTHX_ void *thing, void **root, size_t offset)
 #define my_safemalloc(s)	(void*)safemalloc(s)
 #define my_safefree(p)	safefree((char*)p)
 
+typedef struct xpviv XIV;
+typedef struct xpvnv XNV;
+
 #ifdef PURIFY
 
 #define new_XIV()	my_safemalloc(sizeof(XPVIV))
@@ -812,9 +815,6 @@ S_del_body(pTHX_ void *thing, void **root, size_t offset)
 #define del_XPVBM(p)	my_safefree(p)
 
 #else /* !PURIFY */
-
-typedef struct xpviv XIV;
-typedef struct xpvnv XNV;
 
 #define new_XIV()	new_body_allocated(XIV, xiv, xiv_iv)
 #define del_XIV(p)	del_body_allocated(p, XIV, xiv, xiv_iv)
@@ -876,22 +876,17 @@ You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 bool
 Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 {
-
-    char*	pv;
-    U32		cur;
-    U32		len;
-    IV		iv;
-    NV		nv;
-    MAGIC*	magic;
-    HV*		stash;
     void**	old_body_arena;
     size_t	old_body_offset;
     size_t	old_body_length;	/* Well, the length to copy.  */
     void*	old_body;
     bool	zero_nv = TRUE;
-#ifdef DEBUGGING
+    void*	new_body;
+    size_t	new_body_length;
+    size_t	new_body_offset;
+    void**	new_body_arena;
+    void**	new_body_arenaroot;
     U32		old_type = SvTYPE(sv);
-#endif
 
     if (mt != SVt_PV && SvREADONLY(sv) && SvFAKE(sv)) {
 	sv_force_normal(sv);
@@ -906,24 +901,54 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	return TRUE;
     }
 
-    pv = NULL;
-    cur = 0;
-    len = 0;
-    iv = 0;
-    nv = 0.0;
-    magic = NULL;
-    stash = Nullhv;
 
     old_body = SvANY(sv);
     old_body_arena = 0;
     old_body_offset = 0;
     old_body_length = 0;
+    new_body_offset = 0;
+    new_body_length = ~0;
+
+    /* Copying structures onto other structures that have been neatly zeroed
+       has a subtle gotcha. Consider XPVMG
+
+       +------+------+------+------+------+-------+-------+
+       |     NV      | CUR  | LEN  |  IV  | MAGIC | STASH |
+       +------+------+------+------+------+-------+-------+
+       0      4      8     12     16     20      24      28
+
+       where NVs are aligned to 8 bytes, so that sizeof that structure is
+       actually 32 bytes long, with 4 bytes of padding at the end:
+
+       +------+------+------+------+------+-------+-------+------+
+       |     NV      | CUR  | LEN  |  IV  | MAGIC | STASH | ???  |
+       +------+------+------+------+------+-------+-------+------+
+       0      4      8     12     16     20      24      28     32
+
+       so what happens if you allocate memory for this structure:
+
+       +------+------+------+------+------+-------+-------+------+------+...
+       |     NV      | CUR  | LEN  |  IV  | MAGIC | STASH |  GP  | NAME |
+       +------+------+------+------+------+-------+-------+------+------+...
+       0      4      8     12     16     20      24      28     32     36
+
+       zero it, then copy sizeof(XPVMG) bytes on top of it? Not quite what you
+       expect, because you copy the area marked ??? onto GP. Now, ??? may have
+       started out as zero once, but it's quite possible that it isn't. So now,
+       rather than a nicely zeroed GP, you have it pointing somewhere random.
+       Bugs ensue.
+
+       (In fact, GP ends up pointing at a previous GP structure, because the
+       principle cause of the padding in XPVMG getting garbage is a copy of
+       sizeof(XPVMG) bytes from a XPVGV structure in sv_unglob)
+
+       So we are careful and work out the size of used parts of all the
+       structures.  */
 
     switch (SvTYPE(sv)) {
     case SVt_NULL:
 	break;
     case SVt_IV:
-	iv	= SvIVX(sv);
 	old_body_arena = (void **) &PL_xiv_root;
 	old_body_offset = STRUCT_OFFSET(XIV, xiv_iv)
 	    - STRUCT_OFFSET(xiv_allocated, xiv_iv);
@@ -935,7 +960,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	    mt = SVt_PVIV;
 	break;
     case SVt_NV:
-	nv	= SvNVX(sv);
 	old_body_arena = (void **) &PL_xnv_root;
 	old_body_length = sizeof(NV);
 	zero_nv = FALSE;
@@ -946,41 +970,33 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	    mt = SVt_PVNV;
 	break;
     case SVt_RV:
-	pv	= (char*)SvRV(sv);
 	old_body_arena = (void **) &PL_xrv_root;
 	old_body_length = sizeof(XRV);
 	break;
     case SVt_PV:
-	pv	= SvPVX_mutable(sv);
-	cur	= SvCUR(sv);
-	len	= SvLEN(sv);
 	old_body_arena = (void **) &PL_xpv_root;
 	old_body_offset = STRUCT_OFFSET(XPV, xpv_cur)
 	    - STRUCT_OFFSET(xpv_allocated, xpv_cur);
-	old_body_length = sizeof(XPV) - old_body_offset;
+	old_body_length = STRUCT_OFFSET(XPV, xpv_len)
+	    + sizeof (((XPV*)SvANY(sv))->xpv_len)
+	    - old_body_offset;
 	if (mt <= SVt_IV)
 	    mt = SVt_PVIV;
 	else if (mt == SVt_NV)
 	    mt = SVt_PVNV;
 	break;
     case SVt_PVIV:
-	pv	= SvPVX_mutable(sv);
-	cur	= SvCUR(sv);
-	len	= SvLEN(sv);
-	iv	= SvIVX(sv);
 	old_body_arena = (void **) &PL_xpviv_root;
 	old_body_offset = STRUCT_OFFSET(XPVIV, xpv_cur)
 	    - STRUCT_OFFSET(xpviv_allocated, xpv_cur);
-	old_body_length = sizeof(XPVIV) - old_body_offset;
+	old_body_length =  STRUCT_OFFSET(XPVIV, xiv_iv)
+	    + sizeof (((XPVIV*)SvANY(sv))->xiv_iv)
+	    - old_body_offset;
 	break;
     case SVt_PVNV:
-	pv	= SvPVX_mutable(sv);
-	cur	= SvCUR(sv);
-	len	= SvLEN(sv);
-	iv	= SvIVX(sv);
-	nv	= SvNVX(sv);
 	old_body_arena = (void **) &PL_xpvnv_root;
-	old_body_length = sizeof(XPVNV);
+	old_body_length = STRUCT_OFFSET(XPVNV, xiv_iv)
+	    + sizeof (((XPVNV*)SvANY(sv))->xiv_iv);
 	zero_nv = FALSE;
 	break;
     case SVt_PVMG:
@@ -992,15 +1008,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	   Given that it only has meaning inside the pad, it shouldn't be set
 	   on anything that can get upgraded.  */
 	assert((SvFLAGS(sv) & SVpad_TYPED) == 0);
-	pv	= SvPVX_mutable(sv);
-	cur	= SvCUR(sv);
-	len	= SvLEN(sv);
-	iv	= SvIVX(sv);
-	nv	= SvNVX(sv);
-	magic	= SvMAGIC(sv);
-	stash	= SvSTASH(sv);
 	old_body_arena = (void **) &PL_xpvmg_root;
-	old_body_length = sizeof(XPVMG);
+	old_body_length = STRUCT_OFFSET(XPVMG, xmg_stash)
+	    + sizeof (((XPVMG*)SvANY(sv))->xmg_stash);
 	zero_nv = FALSE;
 	break;
     default:
@@ -1016,20 +1026,22 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     case SVt_IV:
 	assert(old_type == SVt_NULL);
 	SvANY(sv) = new_XIV();
-	SvIV_set(sv, iv);
+	SvIV_set(sv, 0);
 	break;
     case SVt_NV:
 	assert(old_type == SVt_NULL);
 	SvANY(sv) = new_XNV();
-	SvNV_set(sv, nv);
+	SvNV_set(sv, 0);
 	break;
     case SVt_RV:
 	assert(old_type == SVt_NULL);
 	SvANY(sv) = new_XRV();
-	SvRV_set(sv, (SV*)pv);
+	SvRV_set(sv, 0);
 	break;
     case SVt_PVHV:
+
 	SvANY(sv) = new_XPVHV();
+	HvARRAY(sv)	= 0;
 	HvRITER(sv)	= 0;
 	HvEITER(sv)	= 0;
 	HvPMROOT(sv)	= 0;
@@ -1039,98 +1051,144 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	HvTOTALKEYS(sv)	= 0;
 	HvPLACEHOLDERS_set(sv, 0);
 
-	/* Fall through...  */
-	if (0) {
-	case SVt_PVAV:
-	    SvANY(sv) = new_XPVAV();
-	    AvMAX(sv)	= -1;
-	    AvFILLp(sv)	= -1;
-	    AvALLOC(sv)	= 0;
-	    AvARYLEN(sv)= 0;
-	    AvFLAGS(sv)	= AVf_REAL;
-	    SvIV_set(sv, 0);
-	    SvNV_set(sv, 0.0);
-	}
-	/* to here.  */
-	/* XXX? Only SVt_NULL is ever upgraded to AV or HV?  */
-	if (pv && len) { 
-	    if(SvOOK(sv)) {
-		Safefree(pv - iv);
-		SvFLAGS(sv) &= ~SVf_OOK;
-	    } else {
+	goto hv_av_common;
+
+    case SVt_PVAV:
+	SvANY(sv) = new_XPVAV();
+	SvPV_set(sv, 0);
+	AvMAX(sv)	= -1;
+	AvFILLp(sv)	= -1;
+	AvALLOC(sv)	= 0;
+	SvIV_set(sv, 0);
+	SvNV_set(sv, 0.0);
+	AvARYLEN(sv)	= 0;
+	AvFLAGS(sv)	= AVf_REAL;
+
+    hv_av_common:
+
+	/* SVt_NULL isn't the only thing upgraded to AV or HV.
+	   The target created by newSVrv also is, and it can have magic.
+	   However, it never has SvPVX set.
+	*/
+	if (old_type >= SVt_RV && ((XPV*)old_body)->xpv_pv) {
+	    char *pv = ((XPV*)old_body)->xpv_pv;
+	    if (old_type >= SVt_PV) {
+		if (SvOOK(sv)) {
+		    pv -= ((XPVIV*)old_body)->xiv_iv;
+		}
 		Safefree(pv);
+	    } else {
+		/* RV shouldn't be pointing at anything, but just in case.  */
+		if (SvROK(sv)) {
+		    SvREFCNT_dec((SV*)pv);
+		}
 	    }
 	}
-	SvPV_set(sv, (char*)0);
-	SvMAGIC_set(sv, magic);
-	SvSTASH_set(sv, stash);
+
+	if (old_type >= SVt_PVMG) {
+	    SvMAGIC_set(sv, ((XPVMG*)old_body)->xmg_magic);
+	    SvSTASH_set(sv, ((XPVMG*)old_body)->xmg_stash);
+	} else {
+	    SvMAGIC_set(sv, 0);
+	    SvSTASH_set(sv, 0);
+	}
 	break;
 
     case SVt_PVIO:
-	SvANY(sv) = new_XPVIO();
-	Zero(SvANY(sv), 1, XPVIO);
-	IoPAGE_LEN(sv)	= 60;
-	goto set_magic_common;
+	new_body = new_XPVIO();
+	new_body_length = sizeof(XPVIO);
+	goto zero;
     case SVt_PVFM:
-	SvANY(sv) = new_XPVFM();
-	Zero(SvANY(sv), 1, XPVFM);
-	goto set_magic_common;
+	new_body = new_XPVFM();
+	new_body_length = sizeof(XPVFM);
+	goto zero;
+
     case SVt_PVBM:
-	SvANY(sv) = new_XPVBM();
-	BmRARE(sv)	= 0;
-	BmUSEFUL(sv)	= 0;
-	BmPREVIOUS(sv)	= 0;
-	goto set_magic_common;
+	new_body_length = sizeof(XPVBM);
+	new_body_arena = (void **) &PL_xpvbm_root;
+	new_body_arenaroot = (void **) &PL_xpvbm_arenaroot;
+	goto new_body;
     case SVt_PVGV:
-	SvANY(sv) = new_XPVGV();
-	GvGP(sv)	= 0;
-	GvNAME(sv)	= 0;
-	GvNAMELEN(sv)	= 0;
-	GvSTASH(sv)	= 0;
-	GvFLAGS(sv)	= 0;
-	goto set_magic_common;
+	new_body_length = sizeof(XPVGV);
+	new_body_arena = (void **) &PL_xpvgv_root;
+	new_body_arenaroot = (void **) &PL_xpvgv_arenaroot;
+	goto new_body;
     case SVt_PVCV:
-	SvANY(sv) = new_XPVCV();
-	Zero(SvANY(sv), 1, XPVCV);
-	goto set_magic_common;
+	new_body_length = sizeof(XPVCV);
+	new_body_arena = (void **) &PL_xpvcv_root;
+	new_body_arenaroot = (void **) &PL_xpvcv_arenaroot;
+	goto new_body;
     case SVt_PVLV:
-	SvANY(sv) = new_XPVLV();
-	LvTARGOFF(sv)	= 0;
-	LvTARGLEN(sv)	= 0;
-	LvTARG(sv)	= 0;
-	LvTYPE(sv)	= 0;
-	/* Fall through.  */
-	if (0) {
-	case SVt_PVMG:
-	    SvANY(sv) = new_XPVMG();
+	new_body_length = sizeof(XPVLV);
+	new_body_arena = (void **) &PL_xpvlv_root;
+	new_body_arenaroot = (void **) &PL_xpvlv_arenaroot;
+	goto new_body;
+    case SVt_PVMG:
+	new_body_length = sizeof(XPVMG);
+	new_body_arena = (void **) &PL_xpvmg_root;
+	new_body_arenaroot = (void **) &PL_xpvmg_arenaroot;
+	goto new_body;
+    case SVt_PVNV:
+	new_body_length = sizeof(XPVNV);
+	new_body_arena = (void **) &PL_xpvnv_root;
+	new_body_arenaroot = (void **) &PL_xpvnv_arenaroot;
+	goto new_body;
+    case SVt_PVIV:
+	new_body_offset = STRUCT_OFFSET(XPVIV, xpv_cur)
+	    - STRUCT_OFFSET(xpviv_allocated, xpv_cur);
+	new_body_length = sizeof(XPVIV) - new_body_offset;
+	new_body_arena = (void **) &PL_xpviv_root;
+	new_body_arenaroot = (void **) &PL_xpviv_arenaroot;
+	/* XXX Is this still needed?  Was it ever needed?   Surely as there is
+	   no route from NV to PVIV, NOK can never be true  */
+	if (SvNIOK(sv))
+	    (void)SvIOK_on(sv);
+	SvNOK_off(sv);
+	goto new_body_no_NV; 
+    case SVt_PV:
+	new_body_offset = STRUCT_OFFSET(XPV, xpv_cur)
+	    - STRUCT_OFFSET(xpv_allocated, xpv_cur);
+	new_body_length = sizeof(XPV) - new_body_offset;
+	new_body_arena = (void **) &PL_xpv_root;
+	new_body_arenaroot = (void **) &PL_xpv_arenaroot;
+    new_body_no_NV:
+	/* PV and PVIV don't have an NV slot.  */
+	zero_nv = FALSE;
+
+	{
+	new_body:
+	    assert(new_body_length);
+#ifndef PURIFY
+	    new_body = S_new_body(aTHX_ new_body_arenaroot, new_body_arena,
+				  new_body_length, new_body_offset);
+#else
+	    /* We always allocated the full length item with PURIFY */
+	    new_body_length += new_body_offset;
+	    new_body_offset = 0;
+	    new_body = my_safemalloc(new_body_length);
+
+#endif
+	zero:
+	    Zero(((char *)new_body) + new_body_offset, new_body_length, char);
+	    SvANY(sv) = new_body;
+
+	    if (old_body_length) {
+		Copy((char *)old_body + old_body_offset,
+		     (char *)new_body + old_body_offset,
+		     old_body_length, char);
+	    }
+
+	    /* FIXME - add a Configure test to determine if NV 0.0 is actually
+	       all bits zero. If it is, we can skip this initialisation.  */
+	    if (zero_nv)
+		SvNV_set(sv, 0);
+
+	    if (mt == SVt_PVIO)
+		IoPAGE_LEN(sv)	= 60;
 	}
-    set_magic_common:
-	SvMAGIC_set(sv, magic);
-	SvSTASH_set(sv, stash);
-	/* Fall through.  */
-	if (0) {
-	case SVt_PVNV:
-	    SvANY(sv) = new_XPVNV();
-	}
-	SvNV_set(sv, nv);
-	/* Fall through.  */
-	if (0) {
-	case SVt_PVIV:
-	    SvANY(sv) = new_XPVIV();
-	    if (SvNIOK(sv))
-		(void)SvIOK_on(sv);
-	    SvNOK_off(sv);
-	}
-	SvIV_set(sv, iv);
-	/* Fall through.  */
-	if (0) {
-	case SVt_PV:
-	    SvANY(sv) = new_XPV();
-	}
-	SvPV_set(sv, pv);
-	SvCUR_set(sv, cur);
-	SvLEN_set(sv, len);
 	break;
+    default:
+	Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu", mt);
     }
 
 
