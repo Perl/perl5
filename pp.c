@@ -2423,12 +2423,16 @@ PP(pp_i_multiply)
 
 PP(pp_i_divide)
 {
+    IV num;
     dVAR; dSP; dATARGET; tryAMAGICbin(div,opASSIGN);
     {
       dPOPiv;
       if (value == 0)
-	DIE(aTHX_ "Illegal division by zero");
-      value = POPi / value;
+	  DIE(aTHX_ "Illegal division by zero");
+      num = POPi;
+      if (num == IV_MIN && value == -1)
+          DIE(aTHX_ "Integer overflow in division");
+      value = num / value;
       PUSHi( value );
       RETURN;
     }
