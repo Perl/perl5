@@ -260,6 +260,7 @@ case "`uname -m`" in
 sparc*)
 	case "$cccdlflags" in
 	*-fpic*) cccdlflags="`echo $cccdlflags|sed 's/-fpic/-fPIC/'`" ;;
+	*-fPIC*) ;;
 	*)	 cccdlflags="$cccdlflags -fPIC" ;;
 	esac
 	;;
