@@ -2249,7 +2249,7 @@ perl_mutex PerlIO_mutex;
 static void
 S_more_refcounted_fds(pTHX_ const int new_fd) {
     const int old_max = PL_perlio_fd_refcnt_size;
-    const int new_max = 16 + (new_fd & 15);
+    const int new_max = 16 + (new_fd & ~15);
     int *new_array;
 
     PerlIO_debug("More fds - old=%d, need %d, new=%d\n",
@@ -2258,6 +2258,8 @@ S_more_refcounted_fds(pTHX_ const int new_fd) {
     if (new_fd < old_max) {
 	return;
     }
+
+    assert (new_max > new_fd);
 
     new_array
 	= PerlMemShared_realloc(PL_perlio_fd_refcnt, new_max * sizeof(int));
