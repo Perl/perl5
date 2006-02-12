@@ -234,6 +234,8 @@ PP(pp_rv2sv)
 	case SVt_PVAV:
 	case SVt_PVHV:
 	case SVt_PVCV:
+	case SVt_PVFM:
+	case SVt_PVIO:
 	    DIE(aTHX_ "Not a SCALAR reference");
 	}
     }
