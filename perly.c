@@ -89,17 +89,11 @@ do {						\
 	YYFPRINTF Args;				\
 } while (0)
 
-#  define YYDSYMPRINT(Args)			\
-do {						\
-    if (yydebug)				\
-	yysymprint Args;			\
-} while (0)
-
 #  define YYDSYMPRINTF(Title, Token, Value)			\
 do {								\
     if (yydebug) {						\
 	YYFPRINTF (Perl_debug_log, "%s ", Title);		\
-	yysymprint (aTHX_ Perl_debug_log,  Token, Value);	\
+	yysymprint (Perl_debug_log,  Token, Value);	\
 	YYFPRINTF (Perl_debug_log, "\n");			\
     }								\
 } while (0)
@@ -109,7 +103,7 @@ do {								\
 `--------------------------------*/
 
 static void
-yysymprint (pTHX_ PerlIO *yyoutput, int yytype, const YYSTYPE *yyvaluep)
+yysymprint(PerlIO * const yyoutput, int yytype, const YYSTYPE * const yyvaluep)
 {
     if (yytype < YYNTOKENS) {
 	YYFPRINTF (yyoutput, "token %s (", yytname[yytype]);
@@ -189,7 +183,6 @@ do {					\
 
 #else /* !DEBUGGING */
 #  define YYDPRINTF(Args)
-#  define YYDSYMPRINT(Args)
 #  define YYDSYMPRINTF(Title, Token, Value)
 #  define YY_STACK_PRINT(yyss, yyssp, yyvs, yyns)
 #  define YY_REDUCE_PRINT(Rule)
