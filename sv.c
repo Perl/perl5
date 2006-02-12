@@ -832,13 +832,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     if (SvTYPE(sv) == mt)
 	return TRUE;
 
-    if (SvTYPE(sv) > mt) {
-	/* FIXME For 5.8.x need some cross-upgrade checks for things like
-	   PV upgraded to NV - that needs to become PVNV.  */
-	return TRUE;
-    }
-
-
     old_body = SvANY(sv);
     old_body_arena = 0;
     old_body_offset = 0;
@@ -910,6 +903,10 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     case SVt_RV:
 	old_body_arena = (void **) &PL_xrv_root;
 	old_body_length = sizeof(XRV);
+	if (mt == SVt_IV)
+	    mt = SVt_PVIV;
+	else if (mt == SVt_NV)
+	    mt = SVt_PVNV;
 	break;
     case SVt_PV:
 	old_body_arena = (void **) &PL_xpv_root;
@@ -918,7 +915,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	old_body_length = STRUCT_OFFSET(XPV, xpv_len)
 	    + sizeof (((XPV*)SvANY(sv))->xpv_len)
 	    - old_body_offset;
-	if (mt <= SVt_IV)
+	if (mt == SVt_IV)
 	    mt = SVt_PVIV;
 	else if (mt == SVt_NV)
 	    mt = SVt_PVNV;
@@ -930,6 +927,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	old_body_length =  STRUCT_OFFSET(XPVIV, xiv_iv)
 	    + sizeof (((XPVIV*)SvANY(sv))->xiv_iv)
 	    - old_body_offset;
+	if (mt == SVt_NV)
+	    mt = SVt_PVNV;
 	break;
     case SVt_PVNV:
 	old_body_arena = (void **) &PL_xpvnv_root;
@@ -957,6 +956,10 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	break;
     default:
 	Perl_croak(aTHX_ "Can't upgrade that kind of scalar");
+    }
+
+    if (SvTYPE(sv) > mt) {
+	return TRUE;
     }
 
     SvFLAGS(sv) &= ~SVTYPEMASK;
