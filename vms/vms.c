@@ -167,6 +167,13 @@ struct itmlst_3 {
   void *bufadr;
   unsigned short int *retlen;
 };
+
+struct filescan_itmlst_2 {
+    unsigned short length;
+    unsigned short itmcode;
+    char * component;
+};
+
 #ifdef __DECC
 #pragma message restore
 #pragma member_alignment restore
@@ -260,7 +267,7 @@ static int vms_debug_on_exception = 0;
  *   changes to many other conversion routines.
  */
 
-static is_unix_filespec(const char *path)
+static int is_unix_filespec(const char *path)
 {
 int ret_val;
 const char * pch1;
@@ -280,6 +287,249 @@ const char * pch1;
 	}
     }
     return ret_val;
+}
+
+/* This handles the expansion of a '^' prefix to the proper character
+ * in a UNIX file specification.
+ *
+ * The output count variable contains the number of characters added
+ * to the output string.
+ *
+ * The return value is the number of characters read from the input
+ * string
+ */
+static int copy_expand_vms_filename_escape
+  (char *outspec, const char *inspec, int *output_cnt)
+{
+int count;
+int scnt;
+
+    count = 0;
+    *output_cnt = 0;
+    if (*inspec == '^') {
+	inspec++;
+	switch (*inspec) {
+	case '.':
+	    /* Non trailing dots should just be passed through */
+	    *outspec = *inspec;
+	    count++;
+	    (*output_cnt)++;
+	    break;
+	case '_': /* space */
+	    *outspec = ' ';
+	    inspec++;
+	    count++;
+	    (*output_cnt)++;
+	    break;
+	case 'U': /* Unicode */
+	    inspec++;
+	    count++;
+	    scnt = strspn(inspec, "0123456789ABCDEFabcdef");
+	    if (scnt == 4) {
+		scnt = sscanf(inspec, "%2x%2x", outspec, &outspec[1]);
+		if (scnt > 1) {
+		    (*output_cnt) += 2;
+		    count += 4;
+		}
+	    }
+	    else {
+		/* Error - do best we can to continue */
+		*outspec = 'U';
+		outspec++;
+		(*output_cnt++);
+		*outspec = *inspec;
+		count++;
+		(*output_cnt++);
+	    }
+	    break;
+	default:
+	    scnt = strspn(inspec, "0123456789ABCDEFabcdef");
+	    if (scnt == 2) {
+		/* Hex encoded */
+		scnt = sscanf(inspec, "%2x", outspec);
+		if (scnt > 0) {
+		    (*output_cnt++);
+		    count += 2;
+	        }
+	    }
+	    else {
+		*outspec = *inspec;
+		count++;
+		(*output_cnt++);
+	    }
+	}
+    }
+    else {
+	*outspec = *inspec;
+	count++;
+	(*output_cnt)++;
+    }
+    return count;
+}
+
+
+int SYS$FILESCAN
+   (const struct dsc$descriptor_s * srcstr,
+    struct filescan_itmlst_2 * valuelist,
+    unsigned long * fldflags,
+    struct dsc$descriptor_s *auxout,
+    unsigned short * retlen);
+
+/* vms_split_path - Verify that the input file specification is a
+ * VMS format file specification, and provide pointers to the components of
+ * it.  With EFS format filenames, this is virtually the only way to
+ * parse a VMS path specification into components.
+ *
+ * If the sum of the components do not add up to the length of the
+ * string, then the passed file specification is probably a UNIX style
+ * path.
+ */
+static int vms_split_path
+   (const char * path,
+    const char ** volume,
+    int * vol_len,
+    const char ** root,
+    int * root_len,
+    const char ** dir,
+    int * dir_len,
+    const char ** name,
+    int * name_len,
+    const char ** ext,
+    int * ext_len,
+    const char ** version,
+    int * ver_len)
+{
+struct dsc$descriptor path_desc;
+int status;
+unsigned long flags;
+int ret_stat;
+struct filescan_itmlst_2 item_list[9];
+const int filespec = 0;
+const int nodespec = 1;
+const int devspec = 2;
+const int rootspec = 3;
+const int dirspec = 4;
+const int namespec = 5;
+const int typespec = 6;
+const int verspec = 7;
+
+    /* Assume the worst for an easy exit */
+    ret_stat = -1;
+    *volume = NULL;
+    *vol_len = 0;
+    *root = NULL;
+    *root_len = 0;
+    *dir = NULL;
+    *dir_len;
+    *name = NULL;
+    *name_len = 0;
+    *ext = NULL;
+    *ext_len = 0;
+    *version = NULL;
+    *ver_len = 0;
+
+    path_desc.dsc$a_pointer = (char *)path; /* cast ok */
+    path_desc.dsc$w_length = strlen(path);
+    path_desc.dsc$b_dtype = DSC$K_DTYPE_T;
+    path_desc.dsc$b_class = DSC$K_CLASS_S;
+
+    /* Get the total length, if it is shorter than the string passed
+     * then this was probably not a VMS formatted file specification
+     */
+    item_list[filespec].itmcode = FSCN$_FILESPEC;
+    item_list[filespec].length = 0;
+    item_list[filespec].component = NULL;
+
+    /* If the node is present, then it gets considered as part of the
+     * volume name to hopefully make things simple.
+     */
+    item_list[nodespec].itmcode = FSCN$_NODE;
+    item_list[nodespec].length = 0;
+    item_list[nodespec].component = NULL;
+
+    item_list[devspec].itmcode = FSCN$_DEVICE;
+    item_list[devspec].length = 0;
+    item_list[devspec].component = NULL;
+
+    /* root is a special case,  adding it to either the directory or
+     * the device components will probalby complicate things for the
+     * callers of this routine, so leave it separate.
+     */
+    item_list[rootspec].itmcode = FSCN$_ROOT;
+    item_list[rootspec].length = 0;
+    item_list[rootspec].component = NULL;
+
+    item_list[dirspec].itmcode = FSCN$_DIRECTORY;
+    item_list[dirspec].length = 0;
+    item_list[dirspec].component = NULL;
+
+    item_list[namespec].itmcode = FSCN$_NAME;
+    item_list[namespec].length = 0;
+    item_list[namespec].component = NULL;
+
+    item_list[typespec].itmcode = FSCN$_TYPE;
+    item_list[typespec].length = 0;
+    item_list[typespec].component = NULL;
+
+    item_list[verspec].itmcode = FSCN$_VERSION;
+    item_list[verspec].length = 0;
+    item_list[verspec].component = NULL;
+
+    item_list[8].itmcode = 0;
+    item_list[8].length = 0;
+    item_list[8].component = NULL;
+
+    status = SYS$FILESCAN
+       ((const struct dsc$descriptor_s *)&path_desc, item_list,
+	&flags, NULL, NULL);
+    _ckvmssts(status); /* All failure status values indicate a coding error */
+
+    /* If we parsed it successfully these two lengths should be the same */
+    if (path_desc.dsc$w_length != item_list[filespec].length)
+	return ret_stat;
+
+    /* If we got here, then it is a VMS file specification */
+    ret_stat = 0;
+
+    /* set the volume name */
+    if (item_list[nodespec].length > 0) {
+	*volume = item_list[nodespec].component;
+	*vol_len = item_list[nodespec].length + item_list[devspec].length;
+    }
+    else {
+	*volume = item_list[devspec].component;
+	*vol_len = item_list[devspec].length;
+    }
+
+    *root = item_list[rootspec].component;
+    *root_len = item_list[rootspec].length;
+
+    *dir = item_list[dirspec].component;
+    *dir_len = item_list[dirspec].length;
+
+    /* Now fun with versions and EFS file specifications
+     * The parser can not tell the difference when a "." is a version
+     * delimiter or a part of the file specification.
+     */
+    if ((decc_efs_charset) && 
+	(item_list[verspec].length > 0) &&
+	(item_list[verspec].component[0] == '.')) {
+	*name = item_list[namespec].component;
+	*name_len = item_list[namespec].length + item_list[typespec].length;
+	*ext = item_list[verspec].component;
+	*ext_len = item_list[verspec].length;
+	*version = NULL;
+	*ver_len = 0;
+    }
+    else {
+	*name = item_list[namespec].component;
+	*name_len = item_list[namespec].length;
+	*ext = item_list[typespec].component;
+	*ext_len = item_list[typespec].length;
+	*version = item_list[verspec].component;
+	*ver_len = item_list[verspec].length;
+    }
+    return ret_stat;
 }
 
 
@@ -4484,6 +4734,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts)
         for (cp2 = cp1; cp2 > trndir; cp2--) {
 	  if (*cp2 == '.') {
 	    if ((cp2 - 1 > trndir) && (*(cp2 - 1) != '^')) {
+/* fix-me, can not scan EFS file specs backward like this */
               *cp2 = *cp1; *cp1 = '\0';
               hasfilename = 1;
 	      break;
@@ -4748,6 +4999,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts)
       retlen = strlen(esa);
       cp1 = strrchr(esa,'.');
       /* ODS-5 directory specifications can have extra "." in them. */
+      /* Fix-me, can not scan EFS file specifications backwards */
       while (cp1 != NULL) {
         if ((cp1-1 == esa) || (*(cp1-1) != '^'))
 	  break;
@@ -4795,7 +5047,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts)
           memcpy(retspec,esa,dirlen);
           if (!strncmp(cp1+2,"000000]",7)) {
             retspec[dirlen-1] = '\0';
-	    /* Not full ODS-5, just extra dots in directories for now */
+	    /* fix-me Not full ODS-5, just extra dots in directories for now */
 	    cp1 = retspec + dirlen - 1;
 	    while (cp1 > retspec)
 	    {
@@ -6372,7 +6624,7 @@ static char *mp_do_tovmsspec(pTHX_ const char *path, char *buf, int ts) {
 	break;
     case ';':
 	/* FIXME: This needs fixing as Perl is putting ".dir;" on UNIX filespecs
-	 * which is wrong.  UNIX notation should be ".dir. unless
+	 * which is wrong.  UNIX notation should be ".dir." unless
 	 * the DECC$FILENAME_UNIX_NO_VERSION is enabled.
 	 * changing this behavior could break more things at this time.
 	 * efs character set effectively does not allow "." to be a version
@@ -7504,10 +7756,18 @@ DIR *
 Perl_opendir(pTHX_ const char *name)
 {
     DIR *dd;
-    char dir[NAM$C_MAXRSS+1];
+    char *dir;
     Stat_t sb;
+    int unix_flag;
 
+    unix_flag = 0;
+    if (decc_efs_charset) {
+        unix_flag = is_unix_filespec(name);
+    }
+
+    Newx(dir, VMS_MAXRSS, char);
     if (do_tovmspath(name,dir,0) == NULL) {
+      Safefree(dir);
       return NULL;
     }
     /* Check access before stat; otherwise stat does not
@@ -7515,10 +7775,12 @@ Perl_opendir(pTHX_ const char *name)
      */
     if (!cando_by_name(S_IRUSR,0,dir)) {
       /* cando_by_name has already set errno */
+      Safefree(dir);
       return NULL;
     }
     if (flex_stat(dir,&sb) == -1) return NULL;
     if (!S_ISDIR(sb.st_mode)) {
+      Safefree(dir);
       set_errno(ENOTDIR);  set_vaxc_errno(RMS$_DIR);
       return NULL;
     }
@@ -7528,9 +7790,12 @@ Perl_opendir(pTHX_ const char *name)
 
     /* Fill in the fields; mainly playing with the descriptor. */
     sprintf(dd->pattern, "%s*.*",dir);
+    Safefree(dir);
     dd->context = 0;
     dd->count = 0;
-    dd->vms_wantversions = 0;
+    dd->flags = 0;
+    if (unix_flag)
+	dd->flags = PERL_VMSDIR_M_UNIXSPECS;
     dd->pat.dsc$a_pointer = dd->pattern;
     dd->pat.dsc$w_length = strlen(dd->pattern);
     dd->pat.dsc$b_dtype = DSC$K_DTYPE_T;
@@ -7553,7 +7818,10 @@ Perl_opendir(pTHX_ const char *name)
 void
 vmsreaddirversions(DIR *dd, int flag)
 {
-    dd->vms_wantversions = flag;
+    if (flag)
+	dd->flags |= PERL_VMSDIR_M_VERSIONS;
+    else
+	dd->flags &= ~PERL_VMSDIR_M_VERSIONS;
 }
 /*}}}*/
 
@@ -7585,7 +7853,7 @@ collectversions(pTHX_ DIR *dd)
     struct dsc$descriptor_s	pat;
     struct dsc$descriptor_s	res;
     struct dirent *e;
-    char *p, *text, buff[sizeof dd->entry.d_name];
+    char *p, *text, *buff;
     int i;
     unsigned long context, tmpsts;
 
@@ -7605,8 +7873,9 @@ collectversions(pTHX_ DIR *dd)
     pat.dsc$b_class = DSC$K_CLASS_S;
 
     /* Set up result descriptor. */
+    Newx(buff, VMS_MAXRSS, char);
     res.dsc$a_pointer = buff;
-    res.dsc$w_length = sizeof buff - 2;
+    res.dsc$w_length = VMS_MAXRSS - 1;
     res.dsc$b_dtype = DSC$K_DTYPE_T;
     res.dsc$b_class = DSC$K_CLASS_S;
 
@@ -7614,10 +7883,16 @@ collectversions(pTHX_ DIR *dd)
     for (context = 0, e->vms_verscount = 0;
          e->vms_verscount < VERSIZE(e);
          e->vms_verscount++) {
-	tmpsts = lib$find_file(&pat, &res, &context);
+	unsigned long rsts;
+	unsigned long flags = 0;
+
+#ifdef VMS_LONGNAME_SUPPORT
+	flags = LIB$M_FIL_LONG_NAMES
+#endif
+	tmpsts = lib$find_file(&pat, &res, &context, NULL, NULL, &rsts, &flags);
 	if (tmpsts == RMS$_NMF || context == 0) break;
 	_ckvmssts(tmpsts);
-	buff[sizeof buff - 1] = '\0';
+	buff[VMS_MAXRSS - 1] = '\0';
 	if ((p = strchr(buff, ';')))
 	    e->vms_versions[e->vms_verscount] = atoi(p + 1);
 	else
@@ -7626,6 +7901,7 @@ collectversions(pTHX_ DIR *dd)
 
     _ckvmssts(lib$find_file_end(&context));
     Safefree(text);
+    Safefree(buff);
 
 }  /* end of collectversions() */
 
@@ -7637,15 +7913,26 @@ struct dirent *
 Perl_readdir(pTHX_ DIR *dd)
 {
     struct dsc$descriptor_s	res;
-    char *p, buff[sizeof dd->entry.d_name];
+    char *p, *buff;
     unsigned long int tmpsts;
+    unsigned long rsts;
+    unsigned long flags = 0;
+    const char * v_spec, * r_spec, * d_spec, * n_spec, * e_spec, * vs_spec;
+    int sts, v_len, r_len, d_len, n_len, e_len, vs_len;
 
     /* Set up result descriptor, and get next file. */
+    Newx(buff, VMS_MAXRSS, char);
     res.dsc$a_pointer = buff;
-    res.dsc$w_length = sizeof buff - 2;
+    res.dsc$w_length = VMS_MAXRSS - 1;
     res.dsc$b_dtype = DSC$K_DTYPE_T;
     res.dsc$b_class = DSC$K_CLASS_S;
-    tmpsts = lib$find_file(&dd->pat, &res, &dd->context);
+
+#ifdef VMS_LONGNAME_SUPPORT
+    flags = LIB$M_FIL_LONG_NAMES
+#endif
+
+    tmpsts = lib$find_file
+	(&dd->pat, &res, &dd->context, NULL, NULL, &rsts, &flags);
     if ( tmpsts == RMS$_NMF || dd->context == 0) return NULL;  /* None left. */
     if (!(tmpsts & 1)) {
       set_vaxc_errno(tmpsts);
@@ -7661,34 +7948,85 @@ Perl_readdir(pTHX_ DIR *dd)
         default:
           set_errno(EVMSERR);
       }
+      Safefree(buff);
       return NULL;
     }
     dd->count++;
     /* Force the buffer to end with a NUL, and downcase name to match C convention. */
     if (!decc_efs_case_preserve) {
-      buff[sizeof buff - 1] = '\0';
+      buff[VMS_MAXRSS - 1] = '\0';
       for (p = buff; *p; p++) *p = _tolower(*p);
-      while (--p >= buff) if (!isspace(*p)) break; /* Do we really need this? */
-      *p = '\0';
     }
     else {
       /* we don't want to force to lowercase, just null terminate */
       buff[res.dsc$w_length] = '\0';
     }
-    for (p = buff; *p; p++) *p = _tolower(*p);
     while (--p >= buff) if (!isspace(*p)) break;  /* Do we really need this? */
     *p = '\0';
 
     /* Skip any directory component and just copy the name. */
-    if ((p = strchr(buff, ']'))) strcpy(dd->entry.d_name, p + 1);
-    else strcpy(dd->entry.d_name, buff);
+    sts = vms_split_path
+       (buff,
+	&v_spec,
+	&v_len,
+	&r_spec,
+	&r_len,
+	&d_spec,
+	&d_len,
+	&n_spec,
+	&n_len,
+	&e_spec,
+	&e_len,
+	&vs_spec,
+	&vs_len);
 
-    /* Clobber the version. */
-    if ((p = strchr(dd->entry.d_name, ';'))) *p = '\0';
-
+    strncpy(dd->entry.d_name, n_spec, n_len + e_len);
+    dd->entry.d_name[n_len + e_len] = '\0';
     dd->entry.d_namlen = strlen(dd->entry.d_name);
+
+    /* Convert the filename to UNIX format if needed */
+    if (dd->flags & PERL_VMSDIR_M_UNIXSPECS) {
+
+	/* Translate the encoded characters. */
+	/* Fixme: unicode handling could result in embedded 0 characters */
+	if (strchr(dd->entry.d_name, '^') != NULL) {
+	    char new_name[256];
+	    char * q;
+	    int cnt;
+	    p = dd->entry.d_name;
+	    q = new_name;
+	    while (*p != 0) {
+		if ((*p == '.') && (p[1] == 0) && decc_readdir_dropdotnotype) {
+		    /* Normally trailing dots should be dropped */
+		    p++;
+		}
+		else {
+		    int x, y;
+		    x = copy_expand_vms_filename_escape(q, p, &y);
+		    p += x;
+		    q += y;
+		    /* fix-me */
+		    /* if y > 1, then this is a wide file specification */
+		    /* Wide file specifications need to be passed in Perl */
+		    /* counted strings apparently with a unicode flag */
+		}
+	    }
+	    *q = 0;
+	    strcpy(dd->entry.d_name, new_name);
+	}
+	else {
+	    /* Remove a trailing "." if present and not preceded by a ^ */
+	    if ((dd->entry.d_name[dd->entry.d_namlen-1] == '.') &&
+		  decc_readdir_dropdotnotype) {
+		dd->entry.d_namlen--;
+		dd->entry.d_name[dd->entry.d_namlen] == 0;
+	    }
+	}
+    }
+
     dd->entry.vms_verscount = 0;
-    if (dd->vms_wantversions) collectversions(aTHX_ dd);
+    if (dd->flags & PERL_VMSDIR_M_VERSIONS) collectversions(aTHX_ dd);
+    Safefree(buff);
     return &dd->entry;
 
 }  /* end of readdir() */
@@ -7734,15 +8072,15 @@ Perl_telldir(DIR *dd)
 void
 Perl_seekdir(pTHX_ DIR *dd, long count)
 {
-    int vms_wantversions;
+    int old_flags;
 
     /* If we haven't done anything yet... */
     if (dd->count == 0)
 	return;
 
     /* Remember some state, and clear it. */
-    vms_wantversions = dd->vms_wantversions;
-    dd->vms_wantversions = 0;
+    old_flags = dd->flags;
+    dd->flags &= ~PERL_VMSDIR_M_VERSIONS;
     _ckvmssts(lib$find_file_end(&dd->context));
     dd->context = 0;
 
@@ -7750,7 +8088,7 @@ Perl_seekdir(pTHX_ DIR *dd, long count)
     for (dd->count = 0; dd->count < count; )
 	readdir(dd);
 
-    dd->vms_wantversions = vms_wantversions;
+    dd->flags = old_flags;
 
 }  /* end of seekdir() */
 /*}}}*/
@@ -9595,7 +9933,8 @@ Perl_cando_by_name(pTHX_ I32 bit, bool effective, const char *fname)
   static char usrname[L_cuserid];
   static struct dsc$descriptor_s usrdsc =
          {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, usrname};
-  char vmsname[NAM$C_MAXRSS+1], fileified[NAM$C_MAXRSS+1];
+  char vmsname[NAM$C_MAXRSS+1];
+  char *fileified;
   unsigned long int objtyp = ACL$C_FILE, access, retsts, privused, iosb[2];
   unsigned short int retlen, trnlnm_iter_count;
   struct dsc$descriptor_s namdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
@@ -9611,6 +9950,7 @@ Perl_cando_by_name(pTHX_ I32 bit, bool effective, const char *fname)
 
   if (!fname || !*fname) return FALSE;
   /* Make sure we expand logical names, since sys$check_access doesn't */
+  Newx(fileified, VMS_MAXRSS, char);
   if (!strpbrk(fname,"/]>:")) {
     strcpy(fileified,fname);
     trnlnm_iter_count = 0;
@@ -9620,7 +9960,10 @@ Perl_cando_by_name(pTHX_ I32 bit, bool effective, const char *fname)
     }
     fname = fileified;
   }
-  if (!do_tovmsspec(fname,vmsname,1)) return FALSE;
+  if (!do_rmsexpand(fname, vmsname, 1, NULL, PERL_RMSEXPAND_M_VMS)) {
+    Safefree(fileified);
+    return FALSE;
+  }
   retlen = namdsc.dsc$w_length = strlen(vmsname);
   namdsc.dsc$a_pointer = vmsname;
   if (vmsname[retlen-1] == ']' || vmsname[retlen-1] == '>' ||
@@ -9640,6 +9983,7 @@ Perl_cando_by_name(pTHX_ I32 bit, bool effective, const char *fname)
     case S_IDUSR: case S_IDGRP: case S_IDOTH:
       access = ARM$M_DELETE; break;
     default:
+      Safefree(fileified);
       return FALSE;
   }
 
@@ -9683,13 +10027,16 @@ Perl_cando_by_name(pTHX_ I32 bit, bool effective, const char *fname)
     if (retsts == SS$_NOPRIV) set_errno(EACCES);
     else if (retsts == SS$_INVFILFOROP) set_errno(EINVAL);
     else set_errno(ENOENT);
+    Safefree(fileified);
     return FALSE;
   }
   if (retsts == SS$_NORMAL || retsts == SS$_ACCONFLICT) {
+    Safefree(fileified);
     return TRUE;
   }
   _ckvmssts(retsts);
 
+  Safefree(fileified);
   return FALSE;  /* Should never get here */
 
 }  /* end of cando_by_name() */

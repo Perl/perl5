@@ -580,6 +580,11 @@ struct utimbuf {
  *
  */
 
+/* Flags for the _dirdesc structure */
+#define PERL_VMSDIR_M_VERSIONS		0x02 /* Want VMS versions */
+#define PERL_VMSDIR_M_UNIXSPECS		0x04 /* Want UNIX specifications */
+
+
     /* Data structure returned by READDIR(). */
 struct dirent {
     char	d_name[256];		/* File name		*/
@@ -592,7 +597,7 @@ struct dirent {
      * are not supposed to care what's inside this structure. */
 typedef struct _dirdesc {
     long			context;
-    int				vms_wantversions;
+    int				flags;
     unsigned long int           count;
     char			*pattern;
     struct dirent		entry;
