@@ -8,7 +8,7 @@ BEGIN {
 require 'test.pl';
 use strict qw(refs subs);
 
-plan (89);
+plan (100);
 
 # Test glob operations.
 
@@ -422,6 +422,33 @@ TODO: {
     is ($$name1, "Yummy", 'Accessing via the correct name works');
     is ($$name2, undef,
 	'Accessing via a different NUL-containing name gives nothing');
+}
+
+# test dereferencing errors
+{
+    format STDERR =
+.
+    my $ref;
+    foreach $ref (*STDOUT{IO}, *STDERR{FORMAT}) {
+	eval q/ $$ref /;
+	like($@, qr/Not a SCALAR reference/, "Scalar dereference");
+	eval q/ @$ref /;
+	like($@, qr/Not an ARRAY reference/, "Array dereference");
+	eval q/ %$ref /;
+	like($@, qr/Not a HASH reference/, "Hash dereference");
+	eval q/ &$ref /;
+	like($@, qr/Not a CODE reference/, "Code dereference");
+    }
+
+    $ref = *STDERR{FORMAT};
+    eval q/ *$ref /;
+    like($@, qr/Not a GLOB reference/, "Glob dereference");
+
+    $ref = *STDOUT{IO};
+    eval q/ *$ref /;
+    is($@, '', "Glob dereference of PVIO is acceptable");
+
+    is($ref, *{$ref}{IO}, "IO slot of the temporary glob is set correctly");
 }
 
 # Bit of a hack to make test.pl happy. There are 3 more tests after it leaves.
