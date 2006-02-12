@@ -2265,7 +2265,7 @@ L<Bitwise String Operators>.)  However, C<use integer> still has meaning for
 them.  By default, their results are interpreted as unsigned integers, but
 if C<use integer> is in effect, their results are interpreted
 as signed integers.  For example, C<~0> usually evaluates to a large
-integral value.  However, C<use integer; ~0> is C<-1> on twos-complement
+integral value.  However, C<use integer; ~0> is C<-1> on two's-complement
 machines.
 
 =head2 Floating-point Arithmetic

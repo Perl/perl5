@@ -1978,18 +1978,18 @@ operations.
 
 =item Integer overflow in division
 
-(F) In the scope of the C<use integer;> pragma division would have overflowed.
-This will happen if attempt to divide the largest negative integer by -1,
-as on a twos complement system the result cannot be represented as a signed
-integer. This division is trapped as a Perl level exception because on some
+(F) In the scope of the C<use integer;> pragma, division would have overflowed.
+This will happen if you attempt to divide the largest negative integer by -1,
+since the result cannot be represented as a signed integer on a two's complement
+system.  This division is trapped as a Perl-level exception because on some
 architectures the integer divide operation will trigger a CPU exception
 causing program exit, rather than merely returning a mathematically wrong
 answer.
 
 =item Integer overflow in format string for %s
 
-(F) The indexes and widths specified in the format string of printf()
-or sprintf() are too large.  The numbers must not overflow the size of
+(F) The indexes and widths specified in the format string of C<printf()>
+or C<sprintf()> are too large.  The numbers must not overflow the size of
 integers for your architecture.
 
 =item Integer overflow in version
