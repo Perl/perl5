@@ -969,17 +969,17 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	assert(old_type == SVt_NULL);
 	SvANY(sv) = new_XIV();
 	SvIV_set(sv, 0);
-	return;
+	return TRUE;
     case SVt_NV:
 	assert(old_type == SVt_NULL);
 	SvANY(sv) = new_XNV();
 	SvNV_set(sv, 0);
-	return;
+	return TRUE;
     case SVt_RV:
 	assert(old_type == SVt_NULL);
 	SvANY(sv) = new_XRV();
 	SvRV_set(sv, 0);
-	return;
+	return TRUE;
     case SVt_PVHV:
 
 	SvANY(sv) = new_XPVHV();
