@@ -4242,8 +4242,13 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
 	    /* sv_magic() refuses to add a magic of the same 'how' as an
 	       existing one
 	     */
-	    if (how == PERL_MAGIC_taint)
+	    if (how == PERL_MAGIC_taint) {
 		mg->mg_len |= 1;
+		/* Any scalar which already had taint magic on which someone
+		   (erroneously?) did SvIOK_on() or similar will now be
+		   incorrectly sporting public "OK" flags.  */
+		SvFLAGS(sv) &= ~(SVf_IOK|SVf_NOK|SVf_POK);
+	    }
 	    return;
 	}
     }
