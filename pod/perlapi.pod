@@ -3440,18 +3440,6 @@ NOTE: the perl_ form of this function is deprecated.
 =for hackers
 Found in file perl.c
 
-=item looks_like_number
-X<looks_like_number>
-
-Test if the content of an SV looks like a number (or is a number).
-C<Inf> and C<Infinity> are treated as numbers (so will not issue a
-non-numeric warning), even if your atof() doesn't grok them.
-
-	I32	looks_like_number(SV* sv)
-
-=for hackers
-Found in file sv.c
-
 =item newRV_inc
 X<newRV_inc>
 
@@ -3462,157 +3450,6 @@ incremented.
 
 =for hackers
 Found in file sv.h
-
-=item newRV_noinc
-X<newRV_noinc>
-
-Creates an RV wrapper for an SV.  The reference count for the original
-SV is B<not> incremented.
-
-	SV*	newRV_noinc(SV *sv)
-
-=for hackers
-Found in file sv.c
-
-=item newSV
-X<newSV>
-
-Creates a new SV.  A non-zero C<len> parameter indicates the number of
-bytes of preallocated string space the SV should have.  An extra byte for a
-trailing NUL is also reserved.  (SvPOK is not set for the SV even if string
-space is allocated.)  The reference count for the new SV is set to 1.
-
-In 5.9.3, newSV() replaces the older NEWSV() API, and drops the first
-parameter, I<x>, a debug aid which allowed callers to identify themselves.
-This aid has been superseded by a new build option, PERL_MEM_LOG (see
-L<perlhack/PERL_MEM_LOG>).  The older API is still there for use in XS
-modules supporting older perls.
-
-	SV*	newSV(STRLEN len)
-
-=for hackers
-Found in file sv.c
-
-=item newSVhek
-X<newSVhek>
-
-Creates a new SV from the hash key structure.  It will generate scalars that
-point to the shared string table where possible. Returns a new (undefined)
-SV if the hek is NULL.
-
-	SV*	newSVhek(const HEK *hek)
-
-=for hackers
-Found in file sv.c
-
-=item newSViv
-X<newSViv>
-
-Creates a new SV and copies an integer into it.  The reference count for the
-SV is set to 1.
-
-	SV*	newSViv(IV i)
-
-=for hackers
-Found in file sv.c
-
-=item newSVnv
-X<newSVnv>
-
-Creates a new SV and copies a floating point value into it.
-The reference count for the SV is set to 1.
-
-	SV*	newSVnv(NV n)
-
-=for hackers
-Found in file sv.c
-
-=item newSVpv
-X<newSVpv>
-
-Creates a new SV and copies a string into it.  The reference count for the
-SV is set to 1.  If C<len> is zero, Perl will compute the length using
-strlen().  For efficiency, consider using C<newSVpvn> instead.
-
-	SV*	newSVpv(const char* s, STRLEN len)
-
-=for hackers
-Found in file sv.c
-
-=item newSVpvf
-X<newSVpvf>
-
-Creates a new SV and initializes it with the string formatted like
-C<sprintf>.
-
-	SV*	newSVpvf(const char* pat, ...)
-
-=for hackers
-Found in file sv.c
-
-=item newSVpvn
-X<newSVpvn>
-
-Creates a new SV and copies a string into it.  The reference count for the
-SV is set to 1.  Note that if C<len> is zero, Perl will create a zero length
-string.  You are responsible for ensuring that the source string is at least
-C<len> bytes long.  If the C<s> argument is NULL the new SV will be undefined.
-
-	SV*	newSVpvn(const char* s, STRLEN len)
-
-=for hackers
-Found in file sv.c
-
-=item newSVpvn_share
-X<newSVpvn_share>
-
-Creates a new SV with its SvPVX_const pointing to a shared string in the string
-table. If the string does not already exist in the table, it is created
-first.  Turns on READONLY and FAKE.  The string's hash is stored in the UV
-slot of the SV; if the C<hash> parameter is non-zero, that value is used;
-otherwise the hash is computed.  The idea here is that as the string table
-is used for shared hash keys these strings will have SvPVX_const == HeKEY and
-hash lookup will avoid string compare.
-
-	SV*	newSVpvn_share(const char* s, I32 len, U32 hash)
-
-=for hackers
-Found in file sv.c
-
-=item newSVrv
-X<newSVrv>
-
-Creates a new SV for the RV, C<rv>, to point to.  If C<rv> is not an RV then
-it will be upgraded to one.  If C<classname> is non-null then the new SV will
-be blessed in the specified package.  The new SV is returned and its
-reference count is 1.
-
-	SV*	newSVrv(SV* rv, const char* classname)
-
-=for hackers
-Found in file sv.c
-
-=item newSVsv
-X<newSVsv>
-
-Creates a new SV which is an exact duplicate of the original SV.
-(Uses C<sv_setsv>).
-
-	SV*	newSVsv(SV* old)
-
-=for hackers
-Found in file sv.c
-
-=item newSVuv
-X<newSVuv>
-
-Creates a new SV and copies an unsigned integer into it.
-The reference count for the SV is set to 1.
-
-	SV*	newSVuv(UV u)
-
-=for hackers
-Found in file sv.c
 
 =item SvCUR
 X<SvCUR>
@@ -4544,6 +4381,228 @@ Returns a boolean indicating whether the SV contains a v-string.
 =for hackers
 Found in file sv.h
 
+=item sv_catpvn_nomg
+X<sv_catpvn_nomg>
+
+Like C<sv_catpvn> but doesn't process magic.
+
+	void	sv_catpvn_nomg(SV* sv, const char* ptr, STRLEN len)
+
+=for hackers
+Found in file sv.h
+
+=item sv_catsv_nomg
+X<sv_catsv_nomg>
+
+Like C<sv_catsv> but doesn't process magic.
+
+	void	sv_catsv_nomg(SV* dsv, SV* ssv)
+
+=for hackers
+Found in file sv.h
+
+=item sv_derived_from
+X<sv_derived_from>
+
+Returns a boolean indicating whether the SV is derived from the specified
+class.  This is the function that implements C<UNIVERSAL::isa>.  It works
+for class names as well as for objects.
+
+	bool	sv_derived_from(SV* sv, const char* name)
+
+=for hackers
+Found in file universal.c
+
+=item sv_report_used
+X<sv_report_used>
+
+Dump the contents of all SVs not yet freed. (Debugging aid).
+
+	void	sv_report_used()
+
+=for hackers
+Found in file sv.c
+
+=item sv_setsv_nomg
+X<sv_setsv_nomg>
+
+Like C<sv_setsv> but doesn't process magic.
+
+	void	sv_setsv_nomg(SV* dsv, SV* ssv)
+
+=for hackers
+Found in file sv.h
+
+
+=back
+
+=head1 SV-Body Allocation
+
+=over 8
+
+=item looks_like_number
+X<looks_like_number>
+
+Test if the content of an SV looks like a number (or is a number).
+C<Inf> and C<Infinity> are treated as numbers (so will not issue a
+non-numeric warning), even if your atof() doesn't grok them.
+
+	I32	looks_like_number(SV* sv)
+
+=for hackers
+Found in file sv.c
+
+=item newRV_noinc
+X<newRV_noinc>
+
+Creates an RV wrapper for an SV.  The reference count for the original
+SV is B<not> incremented.
+
+	SV*	newRV_noinc(SV *sv)
+
+=for hackers
+Found in file sv.c
+
+=item newSV
+X<newSV>
+
+Creates a new SV.  A non-zero C<len> parameter indicates the number of
+bytes of preallocated string space the SV should have.  An extra byte for a
+trailing NUL is also reserved.  (SvPOK is not set for the SV even if string
+space is allocated.)  The reference count for the new SV is set to 1.
+
+In 5.9.3, newSV() replaces the older NEWSV() API, and drops the first
+parameter, I<x>, a debug aid which allowed callers to identify themselves.
+This aid has been superseded by a new build option, PERL_MEM_LOG (see
+L<perlhack/PERL_MEM_LOG>).  The older API is still there for use in XS
+modules supporting older perls.
+
+	SV*	newSV(STRLEN len)
+
+=for hackers
+Found in file sv.c
+
+=item newSVhek
+X<newSVhek>
+
+Creates a new SV from the hash key structure.  It will generate scalars that
+point to the shared string table where possible. Returns a new (undefined)
+SV if the hek is NULL.
+
+	SV*	newSVhek(const HEK *hek)
+
+=for hackers
+Found in file sv.c
+
+=item newSViv
+X<newSViv>
+
+Creates a new SV and copies an integer into it.  The reference count for the
+SV is set to 1.
+
+	SV*	newSViv(IV i)
+
+=for hackers
+Found in file sv.c
+
+=item newSVnv
+X<newSVnv>
+
+Creates a new SV and copies a floating point value into it.
+The reference count for the SV is set to 1.
+
+	SV*	newSVnv(NV n)
+
+=for hackers
+Found in file sv.c
+
+=item newSVpv
+X<newSVpv>
+
+Creates a new SV and copies a string into it.  The reference count for the
+SV is set to 1.  If C<len> is zero, Perl will compute the length using
+strlen().  For efficiency, consider using C<newSVpvn> instead.
+
+	SV*	newSVpv(const char* s, STRLEN len)
+
+=for hackers
+Found in file sv.c
+
+=item newSVpvf
+X<newSVpvf>
+
+Creates a new SV and initializes it with the string formatted like
+C<sprintf>.
+
+	SV*	newSVpvf(const char* pat, ...)
+
+=for hackers
+Found in file sv.c
+
+=item newSVpvn
+X<newSVpvn>
+
+Creates a new SV and copies a string into it.  The reference count for the
+SV is set to 1.  Note that if C<len> is zero, Perl will create a zero length
+string.  You are responsible for ensuring that the source string is at least
+C<len> bytes long.  If the C<s> argument is NULL the new SV will be undefined.
+
+	SV*	newSVpvn(const char* s, STRLEN len)
+
+=for hackers
+Found in file sv.c
+
+=item newSVpvn_share
+X<newSVpvn_share>
+
+Creates a new SV with its SvPVX_const pointing to a shared string in the string
+table. If the string does not already exist in the table, it is created
+first.  Turns on READONLY and FAKE.  The string's hash is stored in the UV
+slot of the SV; if the C<hash> parameter is non-zero, that value is used;
+otherwise the hash is computed.  The idea here is that as the string table
+is used for shared hash keys these strings will have SvPVX_const == HeKEY and
+hash lookup will avoid string compare.
+
+	SV*	newSVpvn_share(const char* s, I32 len, U32 hash)
+
+=for hackers
+Found in file sv.c
+
+=item newSVrv
+X<newSVrv>
+
+Creates a new SV for the RV, C<rv>, to point to.  If C<rv> is not an RV then
+it will be upgraded to one.  If C<classname> is non-null then the new SV will
+be blessed in the specified package.  The new SV is returned and its
+reference count is 1.
+
+	SV*	newSVrv(SV* rv, const char* classname)
+
+=for hackers
+Found in file sv.c
+
+=item newSVsv
+X<newSVsv>
+
+Creates a new SV which is an exact duplicate of the original SV.
+(Uses C<sv_setsv>).
+
+	SV*	newSVsv(SV* old)
+
+=for hackers
+Found in file sv.c
+
+=item newSVuv
+X<newSVuv>
+
+Creates a new SV and copies an unsigned integer into it.
+The reference count for the SV is set to 1.
+
+	SV*	newSVuv(UV u)
+
+=for hackers
+Found in file sv.c
+
 =item sv_2bool
 X<sv_2bool>
 
@@ -4759,16 +4818,6 @@ in terms of this function.
 =for hackers
 Found in file sv.c
 
-=item sv_catpvn_nomg
-X<sv_catpvn_nomg>
-
-Like C<sv_catpvn> but doesn't process magic.
-
-	void	sv_catpvn_nomg(SV* sv, const char* ptr, STRLEN len)
-
-=for hackers
-Found in file sv.h
-
 =item sv_catpv_mg
 X<sv_catpv_mg>
 
@@ -4803,16 +4852,6 @@ and C<sv_catsv_nomg> are implemented in terms of this function.
 
 =for hackers
 Found in file sv.c
-
-=item sv_catsv_nomg
-X<sv_catsv_nomg>
-
-Like C<sv_catsv> but doesn't process magic.
-
-	void	sv_catsv_nomg(SV* dsv, SV* ssv)
-
-=for hackers
-Found in file sv.h
 
 =item sv_chop
 X<sv_chop>
@@ -4911,18 +4950,6 @@ if necessary. Handles 'get' magic.
 
 =for hackers
 Found in file sv.c
-
-=item sv_derived_from
-X<sv_derived_from>
-
-Returns a boolean indicating whether the SV is derived from the specified
-class.  This is the function that implements C<UNIVERSAL::isa>.  It works
-for class names as well as for objects.
-
-	bool	sv_derived_from(SV* sv, const char* name)
-
-=for hackers
-Found in file universal.c
 
 =item sv_eq
 X<sv_eq>
@@ -5232,16 +5259,6 @@ time you'll want to use C<sv_setsv> or one of its many macro front-ends.
 =for hackers
 Found in file sv.c
 
-=item sv_report_used
-X<sv_report_used>
-
-Dump the contents of all SVs not yet freed. (Debugging aid).
-
-	void	sv_report_used()
-
-=for hackers
-Found in file sv.c
-
 =item sv_reset
 X<sv_reset>
 
@@ -5524,16 +5541,6 @@ Like C<sv_setsv>, but also handles 'set' magic.
 
 =for hackers
 Found in file sv.c
-
-=item sv_setsv_nomg
-X<sv_setsv_nomg>
-
-Like C<sv_setsv> but doesn't process magic.
-
-	void	sv_setsv_nomg(SV* dsv, SV* ssv)
-
-=for hackers
-Found in file sv.h
 
 =item sv_setuv
 X<sv_setuv>

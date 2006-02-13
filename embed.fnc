@@ -1346,7 +1346,7 @@ sn	|char *	|F0convert	|NV nv|NN char *endbuf|NN STRLEN *len
 sM	|void	|sv_release_COW	|NN SV *sv|NN const char *pvx|STRLEN len|NN SV *after
 #  endif
 s	|SV *	|more_sv
-s	|void *	|more_bodies	|size_t size|svtype sv_type
+s	|void *	|more_bodies	|svtype sv_type
 s	|bool	|sv_2iuv_common	|NN SV *sv
 s	|void	|glob_assign_glob|NN SV *dstr|NN SV *sstr|const int dtype
 s	|void	|glob_assign_ref|NN SV *dstr|NN SV *sstr

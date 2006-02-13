@@ -807,6 +807,11 @@ int usleep(unsigned int);
 #define PERL_ARENA_SIZE 4080
 #endif
 
+/* enable ARENA_SETS by default, but allow disabling */
+#ifndef ARENASETS
+#define ARENASETS 1
+#endif
+
 #endif /* PERL_CORE */
 
 /* We no longer default to creating a new SV for GvSV.

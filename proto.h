@@ -3722,7 +3722,7 @@ STATIC void	S_sv_release_COW(pTHX_ SV *sv, const char *pvx, STRLEN len, SV *afte
 
 #  endif
 STATIC SV *	S_more_sv(pTHX);
-STATIC void *	S_more_bodies(pTHX_ size_t size, svtype sv_type);
+STATIC void *	S_more_bodies(pTHX_ svtype sv_type);
 STATIC bool	S_sv_2iuv_common(pTHX_ SV *sv)
 			__attribute__nonnull__(pTHX_1);
 
