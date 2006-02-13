@@ -26,11 +26,9 @@ struct gp {
 
 /* MSVC++ 6.0 (_MSC_VER == 1200) can't compile pp_hot.c with DEBUGGING enabled
  * if we include the following assert(). Must be a compiler bug because it
- * works fine with MSVC++ 7.0. Borland (5.5.1) has the same problem. And MinGW
- * (gcc-3.4.2) has a different problem when compiling win32/perllib.c! */
+ * works fine with MSVC++ 7.0. Borland (5.5.1) has the same problem. */
 #if defined(DEBUGGING) && \
-    ((!defined(_MSC_VER) || _MSC_VER > 1200) && \
-      !defined(__BORLANDC__) && !defined(__MINGW32__))
+    ((!defined(_MSC_VER) || _MSC_VER > 1200) && !defined(__BORLANDC__))
 #  define GvGP(gv)	(*(assert(SvTYPE(gv) == SVt_PVGV || \
 				  SvTYPE(gv) == SVt_PVLV), \
 			   &(GvXPVGV(gv)->xgv_gp)))
