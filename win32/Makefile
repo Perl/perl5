@@ -569,8 +569,8 @@ CFGSH_TMPL	= config.vc
 CFGH_TMPL	= config_H.vc
 !ENDIF
 
-XCOPY		= xcopy /f /r /i /d
-RCOPY		= xcopy /f /r /i /e /d
+XCOPY		= xcopy /f /r /i /d /y
+RCOPY		= xcopy /f /r /i /e /d /y
 NOOP		= @rem
 NULL		=
 

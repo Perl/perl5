@@ -742,8 +742,8 @@ CFGH_TMPL	= config_H.vc
 PERLIMPLIB	*= ..\perl59$(a)
 PERLDLL		= ..\perl59.dll
 
-XCOPY		= xcopy /f /r /i /d
-RCOPY		= xcopy /f /r /i /e /d
+XCOPY		= xcopy /f /r /i /d /y
+RCOPY		= xcopy /f /r /i /e /d /y
 NOOP		= @rem
 
 #
