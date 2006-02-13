@@ -7,7 +7,7 @@ BEGIN {
 
 use integer;
 
-use Test::More tests => 12;
+use Test::More tests => 15;
 use Config;
 
 my $x = 4.5;
@@ -55,10 +55,15 @@ is(~0, -1, "signed instead of unsigned");
 # [perl #38485] use integer; 0x80000000/-1;
 SKIP: {
     my $ivsize = $Config{ivsize};
-    skip "ivsize == $ivsize", 2 unless $ivsize == 4 || $ivsize == 8;
+    skip "ivsize == $ivsize", 4 unless $ivsize == 4 || $ivsize == 8;
 
     my $iv_min = $ivsize == 4 ? -2147483648 : -9223372036854775808;
     my $biff;
     eval { $biff = $iv_min / -1 };
-    like($@, qr/Integer overflow in division/, "Caught IV_MIN / -1");
+    is($@, '', 'IV_MIN / -1 succeeds');
+    is($biff, -$iv_min, 'IV_MIN / -1 == -IV_MIN');
+
+    eval { $biff = $iv_min % -1 };
+    is($@, '', 'IV_MIN % -1 succeeds');
+    is($biff, 0, 'IV_MIN % -1 == 0');
 }
