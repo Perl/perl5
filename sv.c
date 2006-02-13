@@ -42,7 +42,7 @@
  * --jhi
  */
 #define ASSERT_UTF8_CACHE(cache) \
-	STMT_START { if (cache) { assert((cache)[0] <= (cache)[1]); } } STMT_END
+    STMT_START { if (cache) { assert((cache)[0] <= (cache)[1]); } } STMT_END
 #else
 #define ASSERT_UTF8_CACHE(cache) NOOP
 #endif
@@ -226,7 +226,7 @@ Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
 #define uproot_SV(p) \
     STMT_START {					\
 	(p) = PL_sv_root;				\
-	PL_sv_root = (SV*)SvARENA_CHAIN(p);			\
+	PL_sv_root = (SV*)SvARENA_CHAIN(p);		\
 	++PL_sv_count;					\
     } STMT_END
 
