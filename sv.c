@@ -1988,7 +1988,7 @@ S_sv_2iuv_common(pTHX_ SV *sv) {
                 if ((NV)(SvIVX(sv)) == SvNVX(sv)) {
                     SvIOK_on(sv);
                 } else {
-                    /* Integer is imprecise. NOK, IOKp */
+		    /*EMPTY*/;  /* Integer is imprecise. NOK, IOKp */
                 }
                 /* UV will not work better than IV */
             } else {
@@ -2003,7 +2003,7 @@ S_sv_2iuv_common(pTHX_ SV *sv) {
                     if ((NV)(SvUVX(sv)) == SvNVX(sv)) {
                         SvIOK_on(sv);
                     } else {
-                        /* Integer is imprecise. NOK, IOKp, is UV */
+			/*EMPTY*/;   /* Integer is imprecise. NOK, IOKp, is UV */
                     }
                 }
 		SvIsUV_on(sv);
@@ -3187,6 +3187,7 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr) {
 			   it was a const and its value changed. */
 			if (CvCONST(cv)	&& CvCONST((CV*)sref)
 			    && cv_const_sv(cv) == cv_const_sv((CV*)sref)) {
+			    /*EMPTY*/
 			    /* They are 2 constant subroutines generated from
 			       the same constant. This probably means that
 			       they are really the "same" proxy subroutine
@@ -9385,13 +9386,12 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 
 	    switch (sv_type) {
 	    default:
-		Perl_croak(aTHX_ "Bizarre SvTYPE [%" IVdf "]",
-			   (IV)SvTYPE(sstr));
+		Perl_croak(aTHX_ "Bizarre SvTYPE [%" IVdf "]", (IV)SvTYPE(sstr));
 		break;
 
 	    case SVt_PVGV:
 		if (GvUNIQUE((GV*)sstr)) {
-		    /* Do sharing here, and fall through */
+		    /*EMPTY*/;   /* Do sharing here, and fall through */
 		}
 	    case SVt_PVIO:
 	    case SVt_PVFM:
@@ -9489,6 +9489,7 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		    if (IoDIRP(dstr)) {
 			IoDIRP(dstr)	= dirp_dup(IoDIRP(dstr));
 		    } else {
+			/*EMPTY*/;
 			/* IoDIRP(dstr) is already a copy of IoDIRP(sstr)  */
 		    }
 		}

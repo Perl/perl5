@@ -1070,6 +1070,7 @@ PP(pp_multiply)
 	    bhigh = blow >> (4 * sizeof (UV));
 	    blow &= botmask;
 	    if (ahigh && bhigh) {
+		/*EMPTY*/;
 		/* eg 32 bit is at least 0x10000 * 0x10000 == 0x100000000
 		   which is overflow. Drop to NVs below.  */
 	    } else if (!ahigh && !bhigh) {
