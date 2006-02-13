@@ -3418,7 +3418,7 @@
 #define stringify_regexp(a,b,c)	S_stringify_regexp(aTHX_ a,b,c)
 #define F0convert		S_F0convert
 #define more_sv()		S_more_sv(aTHX)
-#define more_bodies(a,b)	S_more_bodies(aTHX_ a,b)
+#define more_bodies(a)		S_more_bodies(aTHX_ a)
 #define sv_2iuv_common(a)	S_sv_2iuv_common(aTHX_ a)
 #define glob_assign_glob(a,b,c)	S_glob_assign_glob(aTHX_ a,b,c)
 #define glob_assign_ref(a,b)	S_glob_assign_ref(aTHX_ a,b)

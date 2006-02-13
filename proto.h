@@ -1567,7 +1567,7 @@ STATIC void	S_gv_init_sv(pTHX_ GV *gv, I32 sv_type);
 STATIC void	S_require_errno(pTHX_ GV *gv);
 #endif
 
-PERL_CALLCONV void*	Perl_get_arena(pTHX_ int svtype)
+PERL_CALLCONV void*	Perl_get_arena(pTHX_ size_t svtype, U32 misc)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
@@ -1913,7 +1913,7 @@ STATIC STRLEN	S_sv_pos_b2u_midway(pTHX_ const U8 *s, const U8 *const target, con
 STATIC char *	S_stringify_regexp(pTHX_ SV *sv, MAGIC *mg, STRLEN *lp);
 STATIC char *	S_F0convert(NV nv, char *endbuf, STRLEN *len);
 STATIC SV *	S_more_sv(pTHX);
-STATIC void *	S_more_bodies(pTHX_ size_t size, svtype sv_type);
+STATIC void *	S_more_bodies(pTHX_ svtype sv_type);
 STATIC bool	S_sv_2iuv_common(pTHX_ SV *sv);
 STATIC void	S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype);
 STATIC void	S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr);

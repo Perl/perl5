@@ -1058,7 +1058,7 @@ s	|void	|require_errno	|NN GV *gv
 #endif
 
 : #if defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
-paRxo	|void*	|get_arena	|int svtype
+paRxo	|void*	|get_arena	|size_t svtype|U32 misc
 : #endif
 
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
@@ -1316,7 +1316,7 @@ s	|STRLEN	|sv_pos_b2u_midway|NN const U8 *s|NN const U8 *const target \
 s	|char *	|stringify_regexp|NN SV *sv|NN MAGIC *mg|NULLOK STRLEN *lp
 sn	|char *	|F0convert	|NV nv|NN char *endbuf|NN STRLEN *len
 s	|SV *	|more_sv
-s	|void *	|more_bodies	|size_t size|svtype sv_type
+s	|void *	|more_bodies	|svtype sv_type
 s	|bool	|sv_2iuv_common	|NN SV *sv
 s	|void	|glob_assign_glob|NN SV *dstr|NN SV *sstr|const int dtype
 s	|void	|glob_assign_ref|NN SV *dstr|NN SV *sstr
