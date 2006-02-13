@@ -629,7 +629,7 @@ Perl_ithread_join(pTHX_ SV *obj)
 	  PerlInterpreter *other_perl = thread->interp;
 	  CLONE_PARAMS clone_params;
 	  clone_params.stashes = newAV();
-	  clone_params.flags |= CLONEf_JOIN_IN;
+	  clone_params.flags = CLONEf_JOIN_IN;
 	  PL_ptr_table = ptr_table_new();
 	  current_thread = Perl_ithread_get(aTHX);
 	  Perl_ithread_set(aTHX_ thread);
