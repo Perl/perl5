@@ -932,8 +932,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	break;
     case SVt_PVNV:
 	old_body_arena = (void **) &PL_xpvnv_root;
-	old_body_length = STRUCT_OFFSET(XPVNV, xiv_iv)
-	    + sizeof (((XPVNV*)SvANY(sv))->xiv_iv);
+	old_body_length = STRUCT_OFFSET(XPVNV, xnv_nv)
+	    + sizeof (((XPVNV*)SvANY(sv))->xnv_nv);
 #ifndef NV_ZERO_IS_ALLBITS_ZERO
 	zero_nv = FALSE;
 #endif
