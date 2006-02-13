@@ -763,6 +763,11 @@ ext/GDBM_File/hints/sco.pl	Hint for GDBM_File for named architecture
 ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
 ext/GDBM_File/t/gdbm.t		See if GDBM_File works
 ext/GDBM_File/typemap		GDBM extension interface types
+ext/Hash/Util/Changes		Change history of Hash::Util
+ext/Hash/Util/lib/Hash/Util.pm	Hash::Util
+ext/Hash/Util/Makefile.PL	Makefile for Hash::Util
+ext/Hash/Util/t/Util.t		See if Hash::Util works
+ext/Hash/Util/Util.xs		XS bits of Hash::Util
 ext/I18N/Langinfo/fallback/const-c.inc	I18N::Langinfo
 ext/I18N/Langinfo/fallback/const-xs.inc	I18N::Langinfo
 ext/I18N/Langinfo/Langinfo.pm	I18N::Langinfo
@@ -1735,8 +1740,6 @@ lib/Getopt/Std.pm		Fetch command options (getopt, getopts)
 lib/Getopt/Std.t		See if Getopt::Std and Getopt::Long work
 lib/h2ph.t			See if h2ph works like it should
 lib/h2xs.t			See if h2xs produces expected lists of files
-lib/Hash/Util.pm		Hash::Util
-lib/Hash/Util.t			See if Hash::Util works
 lib/hostname.pl			Old hostname code
 lib/I18N/Collate.pm		Routines to do strxfrm-based collation
 lib/I18N/Collate.t		See if I18N::Collate works

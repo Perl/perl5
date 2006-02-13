@@ -1350,6 +1350,8 @@ distclean: realclean
 	-if exist $(LIBDIR)\MIME rmdir /s $(LIBDIR)\MIME
 	-if exist $(LIBDIR)\List rmdir /s /q $(LIBDIR)\List
 	-if exist $(LIBDIR)\List rmdir /s $(LIBDIR)\List
+	-if exist $(LIBDIR)\Hash rmdir /s /q $(LIBDIR)\Hash
+	-if exist $(LIBDIR)\Hash rmdir /s $(LIBDIR)\Hash
 	-if exist $(LIBDIR)\Scalar rmdir /s /q $(LIBDIR)\Scalar
 	-if exist $(LIBDIR)\Scalar rmdir /s $(LIBDIR)\Scalar
 	-if exist $(LIBDIR)\Sys rmdir /s /q $(LIBDIR)\Sys

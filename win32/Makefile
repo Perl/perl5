@@ -747,6 +747,7 @@ MIMEBASE64		= $(EXTDIR)\MIME\Base64\Base64
 TIMEHIRES		= $(EXTDIR)\Time\HiRes\HiRes
 CWD			= $(EXTDIR)\Cwd\Cwd
 LISTUTIL  		= $(EXTDIR)\List\Util\Util
+HASHUTIL  		= $(EXTDIR)\Hash\Util\Util
 PERLIOVIA		= $(EXTDIR)\PerlIO\via\via
 XSAPITEST		= $(EXTDIR)\XS\APItest\APItest
 XSTYPEMAP		= $(EXTDIR)\XS\Typemap\Typemap
@@ -781,6 +782,7 @@ MIMEBASE64_DLL		= $(AUTODIR)\MIME\Base64\Base64.dll
 TIMEHIRES_DLL		= $(AUTODIR)\Time\HiRes\HiRes.dll
 CWD_DLL			= $(AUTODIR)\Cwd\Cwd.dll
 LISTUTIL_DLL		= $(AUTODIR)\List\Util\Util.dll
+HASHUTIL_DLL		= $(AUTODIR)\HASH\Util\Util.dll
 PERLIOVIA_DLL		= $(AUTODIR)\PerlIO\via\via.dll
 XSAPITEST_DLL		= $(AUTODIR)\XS\APItest\APItest.dll
 XSTYPEMAP_DLL		= $(AUTODIR)\XS\Typemap\Typemap.dll
@@ -816,6 +818,7 @@ EXTENSION_C	= 		\
 		$(TIMEHIRES).c	\
 		$(CWD).c	\
 		$(LISTUTIL).c	\
+		$(HASHUTIL).c	\
 		$(PERLIOVIA).c	\
 		$(XSAPITEST).c	\
 		$(XSTYPEMAP).c	\
@@ -851,6 +854,7 @@ EXTENSION_DLL	= 		\
 		$(TIMEHIRES_DLL)  \
 		$(CWD_DLL)	\
 		$(LISTUTIL_DLL)	\
+		$(HASHUTIL_DLL)	\
 		$(PERLIOVIA_DLL)	\
 		$(XSAPITEST_DLL)	\
 		$(XSTYPEMAP_DLL)	\
@@ -1184,6 +1188,8 @@ distclean: realclean
 	-if exist $(LIBDIR)\MIME rmdir /s $(LIBDIR)\MIME
 	-if exist $(LIBDIR)\List rmdir /s /q $(LIBDIR)\List
 	-if exist $(LIBDIR)\List rmdir /s $(LIBDIR)\List
+	-if exist $(LIBDIR)\Hash rmdir /s /q $(LIBDIR)\Hash
+	-if exist $(LIBDIR)\Hash rmdir /s $(LIBDIR)\Hash
 	-if exist $(LIBDIR)\Scalar rmdir /s /q $(LIBDIR)\Scalar
 	-if exist $(LIBDIR)\Scalar rmdir /s $(LIBDIR)\Scalar
 	-if exist $(LIBDIR)\Sys rmdir /s /q $(LIBDIR)\Sys
