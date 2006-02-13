@@ -968,6 +968,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     if (len > 1) {
 #ifndef EBCDIC
 	if (*name > 'V' ) {
+	    /*EMPTY*/;
 	    /* Nothing else to do.
 	       The compiler will probably turn the switch statement into a
 	       branch table. Make sure we avoid even that small overhead for
@@ -1468,7 +1469,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 	lim = DESTROY_amg;		/* Skip overloading entries. */
 #ifdef PERL_DONT_CREATE_GVSV
     else if (!sv) {
-	/* Equivalent to !SvTRUE and !SvOK  */
+	/*EMPTY*/;   /* Equivalent to !SvTRUE and !SvOK  */
     }
 #endif
     else if (SvTRUE(sv))

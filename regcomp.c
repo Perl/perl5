@@ -1015,7 +1015,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 		});
 
 	    } else {
-		/* Its a dupe. So ignore it. */
+		/*EMPTY*/;   /* It's a dupe. So ignore it. */
 	    }
 
         } /* end second pass */
@@ -1221,7 +1221,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                 });
 
             } else {
-                /* Its a dupe. So ignore it. */
+		/*EMPTY*/;  /* Its a dupe. So ignore it. */
             }
 
         } /* end second pass */
@@ -2946,7 +2946,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
       again:
 	if (PL_regkind[(U8)OP(first)] == EXACT) {
 	    if (OP(first) == EXACT)
-	        ;	/* Empty, get anchored substr later. */
+	        /*EMPTY*/;	/* Empty, get anchored substr later. */
 	    else if ((OP(first) == EXACTF || OP(first) == EXACTFL))
 		r->regstclass = first;
 	}
@@ -5798,7 +5798,9 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
 		       PL_colors[0],
 		       len, s,
 		       PL_colors[1]);
-    } else if (k == TRIE) {/*
+    } else if (k == TRIE) {
+	/*EMPTY*/;
+	/*
 	this isn't always safe, as Pl_regdata may not be for this regex yet
 	(depending on where its called from) so its being moved to dumpuntil
 	I32 n = ARG(o);

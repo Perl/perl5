@@ -3319,7 +3319,7 @@ Perl_yylex(pTHX)
 #ifdef USE_ITHREADS
 			    GvUNIQUE_on(cGVOPx_gv(yylval.opval));
 #else
-			    ; /* skip to avoid loading attributes.pm */
+			    /*EMPTY*/;    /* skip to avoid loading attributes.pm */
 #endif
 			else
 			    Perl_croak(aTHX_ "The 'unique' attribute may only be applied to 'our' variables");

@@ -364,6 +364,8 @@ lintflags = \
     -p \
     -Ncheck=%all \
     -Nlevel=4 \
+    -errchk=parentheses \
+    -errhdr=%all \
     -errfmt=src \
     -errtags \
     -erroff=E_ASSIGN_NARROW_CONV \

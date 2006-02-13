@@ -2505,7 +2505,7 @@ PP(pp_leavesublv)
 	    EXTEND_MORTAL(SP - newsp);
 	    for (mark = newsp + 1; mark <= SP; mark++) {
 		if (SvTEMP(*mark))
-		    /* empty */ ;
+		    /*EMPTY*/;
 		else if (SvFLAGS(*mark) & (SVs_PADTMP | SVf_READONLY))
 		    *mark = sv_mortalcopy(*mark);
 		else {

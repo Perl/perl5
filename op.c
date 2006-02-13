@@ -462,11 +462,7 @@ S_cop_free(pTHX_ COP* cop)
 	SvREFCNT_dec(cop->cop_warnings);
     if (! specialCopIO(cop->cop_io)) {
 #ifdef USE_ITHREADS
-#if 0
-	STRLEN len;
-        char *s = SvPV(cop->cop_io,len);
-	Perl_warn(aTHX_ "io='%.*s'",(int) len,s); /* ??? --jhi */
-#endif
+	/*EMPTY*/
 #else
 	SvREFCNT_dec(cop->cop_io);
 #endif
@@ -1580,7 +1576,7 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
 	/* Don't force the C<use> if we don't need it. */
 	SV * const * const svp = hv_fetchs(GvHVn(PL_incgv), ATTRSMODULE_PM, FALSE);
 	if (svp && *svp != &PL_sv_undef)
-	    ; 		/* already in %INC */
+	    /*EMPTY*/; 		/* already in %INC */
 	else
 	    Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
 			     newSVpvs(ATTRSMODULE), NULL);
@@ -2003,7 +1999,7 @@ Perl_localize(pTHX_ OP *o, I32 lex)
 #if 0
 	list(o);
 #else
-	;
+	/*EMPTY*/;
 #endif
     else {
 	if ( PL_bufptr > PL_oldbufptr && PL_bufptr[-1] == ','
@@ -2926,7 +2922,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 			repl_has_vars = 1;
 		    }
 		    else if (curop->op_type == OP_PUSHRE)
-			; /* Okay here, dangerous in newASSIGNOP */
+			/*EMPTY*/; /* Okay here, dangerous in newASSIGNOP */
 		    else
 			break;
 		}
@@ -5520,7 +5516,7 @@ Perl_ck_ftst(pTHX_ OP *o)
     const I32 type = o->op_type;
 
     if (o->op_flags & OPf_REF) {
-	/* nothing */
+	/*EMPTY*/;
     }
     else if (o->op_flags & OPf_KIDS && cUNOPo->op_first->op_type != OP_STUB) {
 	SVOP * const kid = (SVOP*)cUNOPo->op_first;
@@ -7507,6 +7503,7 @@ const_sv_xsub(pTHX_ CV* cv)
     dVAR;
     dXSARGS;
     if (items != 0) {
+	/*EMPTY*/;
 #if 0
         Perl_croak(aTHX_ "usage: %s::%s()",
                    HvNAME_get(GvSTASH(CvGV(cv))), GvNAME(CvGV(cv)));

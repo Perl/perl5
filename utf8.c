@@ -2051,7 +2051,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 		}
 
 		if (opc == '+' && otherval)
-		    ; /* replace with otherval */
+		    /*EMPTY*/;   /* replace with otherval */
 		else if (opc == '!' && !otherval)
 		    otherval = 1;
 		else if (opc == '-' && otherval)
