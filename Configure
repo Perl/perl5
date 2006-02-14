@@ -3137,18 +3137,21 @@ EOM
 		domainos) osname=apollo
 			osvers="$3"
 			;;
-		dgux)	osname=dgux 
+		dgux)	osname=dgux
+			osvers="$3"
+			;;
+		dragonfly) osname=dragonfly
 			osvers="$3"
 			;;
 		dynixptx*) osname=dynixptx
 			osvers=`echo "$4"|sed 's/^v//'`
 			;;
-		freebsd) osname=freebsd 
+		freebsd) osname=freebsd
 			osvers="$3" ;;
 		genix)	osname=genix ;;
 		gnu)	osname=gnu
 			osvers="$3" ;;
-		hp*)	osname=hpux 
+		hp*)	osname=hpux
 			osvers=`echo "$3" | $sed 's,.*\.\([0-9]*\.[0-9]*\),\1,'`
 			;;
 		irix*)	osname=irix
@@ -3244,7 +3247,7 @@ EOM
 			*freebsd*) ;;
 			svr*)
 				: svr4.x or possibly later
-				case "svr$3" in	
+				case "svr$3" in
 				${osname}*)
 					osname=svr$3
 					osvers=$4
@@ -3307,7 +3310,7 @@ EOM
 			osvers="$5"
 		fi
 	fi
-	
+
         case "$targetarch" in
         '') ;;
         *)  hostarch=$osname
@@ -7921,7 +7924,7 @@ if "$useshrplib"; then
 	solaris)
 		xxx="-R $shrpdir"
 		;;
-	freebsd|netbsd|openbsd|interix)
+	freebsd|netbsd|openbsd|interix|dragonfly)
 		xxx="-Wl,-R$shrpdir"
 		;;
 	bsdos|linux|irix*|dec_osf|gnu*)

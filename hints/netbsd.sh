@@ -129,7 +129,25 @@ $define|true|[yY]*)
 		exit 1 
         fi
 	unset lpthread
-        ;; 
+         
+        # several reentrant functions are embeded in libc, but haven't
+        # been added to the header files yet.  Let's hold off on using
+        # them until they are a valid part of the API
+        case "$osvers" in
+        [012].*|3.0)
+                d_getprotobyname_r=$undef
+                d_getprotobynumber_r=$undef
+                d_getprotoent_r=$undef
+                d_getservbyname_r=$undef
+                d_getservbyport_r=$undef
+                d_getservent_r=$undef
+                d_setprotoent_r=$undef
+                d_setservent_r=$undef
+                d_endprotoent_r=$undef
+                d_endservent_r=$undef ;;
+        esac
+        ;;
+
 esac 
 EOCBU
 

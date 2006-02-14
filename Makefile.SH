@@ -73,7 +73,7 @@ true)
 	sunos*)
 		linklibperl="-lperl"
 		;;
-	netbsd*|freebsd[234]*|openbsd*)
+	netbsd*|freebsd[234]*|openbsd*|dragonfly*)
 		linklibperl="-L. -lperl"
 		;;
 	interix*)
@@ -1010,6 +1010,10 @@ $extra_dep
 EOF
 
 $spitshell >>Makefile <<'!NO!SUBS!'
+
+.PHONY: printconfig
+printconfig:
+	@eval `$(LDLIBPTH) ./perl -Ilib -V:$(CONFIGVAR)`; echo $$$(CONFIGVAR)
 
 .PHONY: clean _tidy _mopup _cleaner1 _cleaner2 \
 	realclean _realcleaner clobber _clobber \
