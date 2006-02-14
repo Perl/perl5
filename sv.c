@@ -4730,7 +4730,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
     assert(sv);
     assert(SvREFCNT(sv) == 0);
 
-    if (type <= SVt_IV)
+    if (type < SVt_IV)
 	return;
 
     old_body_arena = 0;
