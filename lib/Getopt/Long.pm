@@ -1241,12 +1241,14 @@ sub Configure (@) {
 	}
 	elsif ( $try eq 'getopt_compat' ) {
 	    $getopt_compat = $action;
+            $genprefix = $action ? "(--|-|\\+)" : "(--|-)";
 	}
 	elsif ( $try eq 'gnu_getopt' ) {
 	    if ( $action ) {
 		$gnu_compat = 1;
 		$bundling = 1;
 		$getopt_compat = 0;
+                $genprefix = "(--|-)";
 		$order = $PERMUTE;
 	    }
 	}
