@@ -2289,8 +2289,6 @@ PerlIO_init(pTHX)
  /* Place holder for stdstreams call ??? */
 #ifdef USE_THREADS
     MUTEX_INIT(&PerlIO_mutex);
-#else
-    PERL_UNUSED_ARG(my_perl);
 #endif
 }
 
