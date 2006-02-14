@@ -6,20 +6,12 @@ BEGIN {
 	@INC = '../lib';
 	require Config; import Config;
 	keys %Config; # Silence warning
-	if ($Config{extensions} !~ /\bList\/Util\b/) {
-	    print "1..0 # Skip: List::Util was not built\n";
+	if ($Config{extensions} !~ /\bHash\/Util\b/) {
+	    print "1..0 # Skip: Hash::Util was not built\n";
 	    exit 0;
 	}
     }
 }
-
-#BEGIN {
-#    if( $ENV{PERL_CORE} ) {
-#        @INC = '../lib';
-#        chdir 't';
-#    }
-#}
-
 
 use strict;
 use Test::More;
