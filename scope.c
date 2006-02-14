@@ -169,7 +169,7 @@ S_save_scalar_at(pTHX_ SV **sptr)
 	if (SvGMAGICAL(osv)) {
 	    const bool oldtainted = PL_tainted;
 	    SvFLAGS(osv) |= (SvFLAGS(osv) &
-	       (SVp_NOK|SVp_POK)) >> PRIVSHIFT;
+	       (SVp_IOK|SVp_NOK|SVp_POK)) >> PRIVSHIFT;
 	    PL_tainted = oldtainted;
 	}
 	mg_localize(osv, sv);
