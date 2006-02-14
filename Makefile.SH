@@ -73,7 +73,7 @@ true)
 	sunos*)
 		linklibperl="-lperl"
 		;;
-	netbsd*|freebsd[234]*|openbsd*)
+	netbsd*|freebsd[234]*|openbsd*|dragonfly*)
 		linklibperl="-L. -lperl"
 		;;
 	interix*)
@@ -971,6 +971,10 @@ s_dummy $(static_ext):	miniperl$(EXE_EXT) preplibrary $(DYNALOADER) FORCE
 
 n_dummy $(nonxs_ext):	miniperl$(EXE_EXT) preplibrary $(DYNALOADER) FORCE
 	@$(LDLIBPTH) sh ext/util/make_ext nonxs $@ MAKE=$(MAKE) LIBPERL_A=$(LIBPERL)
+
+.PHONY: printconfig
+printconfig:
+	@eval `$(LDLIBPTH) ./perl -Ilib -V:$(CONFIGVAR)`; echo $$$(CONFIGVAR)
 
 .PHONY: clean _tidy _mopup _cleaner1 _cleaner2 \
 	realclean _realcleaner clobber _clobber \
