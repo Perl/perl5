@@ -74,11 +74,12 @@ if ($have_fork) {
     $timer_pid = fork();
     if (defined $timer_pid) {
 	if ($timer_pid == 0) { # We are the kid, set up the timer.
+	    my $ppid = getppid();
 	    print "# I am the timer process $$, sleeping for $waitfor seconds...\n";
 	    sleep($waitfor);
 	    warn "\n$0: overall time allowed for tests (${waitfor}s) exceeded!\n";
-	    print "# Terminating the main process...\n";
-	    kill('TERM', getppid());
+	    print "# Terminating main process $ppid...\n";
+	    kill('TERM', $ppid);
 	    print "# This is the timer process $$, over and out.\n";
 	    exit(0);
 	} else {
@@ -588,10 +589,11 @@ if ($have_clock) {
 }
 
 END {
-    if (defined $timer_pid) {
+    if ($timer_pid) { # Only in the main process.
 	my $left = $TheEnd - time();
 	printf "# I am the main process $$, terminating the timer process $timer_pid\n# before it terminates me in %d seconds (testing took %d seconds).\n", $left, $waitfor - $left;
-	kill('TERM', $timer_pid); # We are done, the timer can go.
+	my $kill = kill('TERM', $timer_pid); # We are done, the timer can go.
+	printf "# kill TERM $timer_pid = %d\n", $kill;
 	unlink("ktrace.out"); # Used in BSD system call tracing.
 	print "# All done.\n";
     }

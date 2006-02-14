@@ -1,5 +1,12 @@
 Revision history for Perl extension Time::HiRes.
 
+1.87	[2006-02-13]
+	- [rt.cpan.org #17442] 'make test' frequently fails under
+	  Cygwin Perl v5.8.8, reported and patched by J. R. Hedden
+	  (two race condition bugs in the END block in the case the
+	   main process dies before the timer process, unearthed
+	   by a bug in Cygwin ualarm)
+
 1.86	[2005-12-17]
 	- HiRes.t:s/ok 32/ok 33/, from Dominic Dunlop
 	- tighten up the clock() test marginally by requiring non-negative
