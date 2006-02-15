@@ -1321,7 +1321,7 @@ perl_free(pTHXx)
 /* provide destructors to clean up the thread key when libperl is unloaded */
 #ifndef WIN32 /* handled during DLL_PROCESS_DETACH in win32/perllib.c */
 
-#if defined(__hpux) && __ux_version > 1020 && !defined(__GNUC__)
+#if defined(__hpux) && !(defined(__ux_version) && __ux_version <= 1020) && !defined(__GNUC__)
 #pragma fini "perl_fini"
 #endif
 
