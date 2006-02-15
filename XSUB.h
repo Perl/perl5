@@ -104,7 +104,7 @@ is a lexical $_ in scope.
 #  define XS(name) EXPORT_C void name(pTHX_ CV* cv)
 #endif
 #ifndef XS
-#  ifdef HASATTRIBUTE_UNUSED
+#  if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)
 #    define XS(name) void name(pTHX_ CV* cv __attribute__unused__)
 #  else
 #    define XS(name) void name(pTHX_ CV* cv)

@@ -211,7 +211,7 @@
 #endif
 
 #ifndef PERL_UNUSED_DECL
-#  ifdef HASATTRIBUTE_UNUSED
+#  if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)
 #    define PERL_UNUSED_DECL __attribute__unused__
 #  else
 #    define PERL_UNUSED_DECL
