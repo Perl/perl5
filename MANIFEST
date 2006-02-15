@@ -1220,6 +1220,7 @@ hints/dcosx.sh			Hints for named architecture
 hints/dec_osf.sh		Hints for named architecture
 hints/dgux.sh			Hints for named architecture
 hints/dos_djgpp.sh		Hints for named architecture
+hints/dragonfly.sh		Hints for named architecture
 hints/dynixptx.sh		Hints for named architecture
 hints/dynix.sh			Hints for named architecture
 hints/epix.sh			Hints for named architecture
