@@ -1169,21 +1169,31 @@ win32_stat(const char *path, Stat_t *sbuf)
     int		res;
     HANDLE      handle;
     int         nlink = 1;
+    BOOL        expect_dir = FALSE;
 
     if (l > 1) {
 	switch(path[l - 1]) {
 	/* FindFirstFile() and stat() are buggy with a trailing
-	 * backslash, so change it to a forward slash :-( */
+	 * slashes, except for the root directory of a drive */
 	case '\\':
-	    if (l >= sizeof(buffer)) {
+        case '/':
+	    if (l > sizeof(buffer)) {
 		errno = ENAMETOOLONG;
 		return -1;
 	    }
-	    strncpy(buffer, path, l-1);
-	    buffer[l - 1] = '/';
-	    buffer[l] = '\0';
-	    path = buffer;
+            --l;
+            strncpy(buffer, path, l);
+            /* remove additional trailing slashes */
+            while (l > 1 && (buffer[l-1] == '/' || buffer[l-1] == '\\'))
+                --l;
+            /* add back slash if we otherwise end up with just a drive letter */
+            if (l == 2 && isALPHA(buffer[0]) && buffer[1] == ':')
+                buffer[l++] = '\\';
+            buffer[l] = '\0';
+            path = buffer;
+            expect_dir = TRUE;
 	    break;
+
 	/* FindFirstFile() is buggy with "x:", so add a dot :-( */
 	case ':':
 	    if (l == 2 && isALPHA(path[0])) {
@@ -1245,6 +1255,10 @@ win32_stat(const char *path, Stat_t *sbuf)
 		return -1;
 	    }
 	}
+        if (expect_dir && !S_ISDIR(sbuf->st_mode)) {
+            errno = ENOTDIR;
+            return -1;
+        }
 #ifdef __BORLANDC__
 	if (S_ISDIR(sbuf->st_mode))
 	    sbuf->st_mode |= S_IWRITE | S_IEXEC;
