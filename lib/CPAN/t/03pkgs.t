@@ -3,11 +3,11 @@
 use strict;
 eval 'use warnings';
 
-opendir DH, "lib/CPAN" or die;
 my @m;
 if ($ENV{PERL_CORE}){
   @m = ("CPAN", map { "CPAN::$_" } qw(Debug FirstTime Nox Tarzip Version));
 } else {
+  opendir DH, "lib/CPAN" or die;
   @m = ("CPAN", map { "CPAN::$_" } grep { s/\.pm$// } readdir DH);
 }
 
