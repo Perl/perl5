@@ -452,9 +452,9 @@ getc() on closed filehandle FH2 at - line 12.
 # pp_sys.c [pp_sselect]
 use warnings 'misc';
 $x = 1;
-select $x, undef, undef, undef;
+select $x, undef, undef, 1;
 no warnings 'misc';
-select $x, undef, undef, undef;
+select $x, undef, undef, 1;
 EXPECT
 Non-string passed as bitmask at - line 4.
 ########
