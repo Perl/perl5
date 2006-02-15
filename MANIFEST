@@ -1494,11 +1494,11 @@ lib/CPAN/PAUSE2005.pub		CPAN public key
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
 lib/CPAN/SIGNATURE		CPAN public key
 lib/CPAN/Tarzip.pm		helper package for CPAN.pm
-lib/CPAN/t/loadme.t		See if CPAN the module works
-lib/CPAN/t/mirroredby.t		See if CPAN::Mirrored::By works
-lib/CPAN/t/Nox.t		See if CPAN::Nox works
-lib/CPAN/t/vcmp.t		See if CPAN the module works
-lib/CPAN/t/version.t		See if CPAN::Version works
+lib/CPAN/t/01loadme.t		See if CPAN the module works
+lib/CPAN/t/02nox.t		See if CPAN::Nox works
+lib/CPAN/t/03pkgs.t		See if CPAN::Version works
+lib/CPAN/t/10version.t		See if CPAN the module works
+lib/CPAN/t/11mirroredby.t		See if CPAN::Mirrored::By works
 lib/CPAN/Version.pm		Simple math with different flavors of version strings
 lib/ctime.pl			A ctime workalike
 lib/Cwd.pm			Various cwd routines (getcwd, fastcwd, chdir)

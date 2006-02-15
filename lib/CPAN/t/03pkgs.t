@@ -2,8 +2,14 @@
 
 use strict;
 eval 'use warnings';
-my @m = qw(CPAN CPAN::FirstTime CPAN::Nox CPAN::Version);
-push @m, 'CPAN::Admin' unless $ENV{PERL_CORE};
+
+opendir DH, "lib/CPAN" or die;
+my @m;
+if ($ENV{PERL_CORE}){
+  @m = ("CPAN", map { "CPAN::$_" } qw(Debug FirstTime Nox Tarzip Version));
+} else {
+  @m = ("CPAN", map { "CPAN::$_" } grep { s/\.pm$// } readdir DH);
+}
 
 use Test::More;
 plan(tests => scalar @m);

@@ -32,13 +32,15 @@ while (@$D) {
   }
   if ($has_versionpm) {
     local $^W;
-    my $vres = version->new($l) cmp version->new($r);
+    my $vpack = "version"; # hide the name from 5.004
+    my $vres = $vpack->new($l) cmp $vpack->new($r);
     if ($vres != $res) {
       push @other, sprintf "v.pm: %d", $vres;
     }
   }
   my $other = @other ? " (".join("; ", @other).")" : "";
   printf "ok %2d # %12s %12s %3d%s\n", $N-@$D, $l, $r, $res, $other;
+  die "Panic" if CPAN::Version->vgt($l,$r) && CPAN::Version->vlt($l,$r);
 }
 
 __END__

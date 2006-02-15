@@ -36,7 +36,7 @@ package CPAN::Version;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = "2.55";
+$VERSION = sprintf "%.6f", substr(q$Rev: 561 $,4)/1000000 + 5.4;
 
 # CPAN::Version::vcmp courtesy Jost Krieger
 sub vcmp {
