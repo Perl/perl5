@@ -1,3 +1,14 @@
+  Version 3.16 Wed Feb  8 13:29:11 EST 2006
+   1. header() -charset option now works even when the MIME type is not "text".
+   2. Fixed documentation for cookie() function and fastCGI.
+   3. Upload filehandles now only closed automatically on Windows systems.
+   4. Apache::Cookie compatibility fix from David Wheeler
+   5. CGI::Carp->fatalsToBrowser() does not work correctly with
+	mod_perl 2. No workaround is known.
+   6. Fixed text status code associated with 302 redirects. Should be "Found"
+	but was "Moved".
+   7. Fixed charset in start_html() and header() to be in synch.
+
   Version 3.15 Wed Dec  7 15:13:22 EST 2005
    1. Remove extraneous "?" from self_url() when URI contains a ? but no query string.
 

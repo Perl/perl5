@@ -16,6 +16,7 @@ package CGI::Cookie;
 $CGI::Cookie::VERSION='1.26';
 
 use CGI::Util qw(rearrange unescape escape);
+use CGI;
 use overload '""' => \&as_string,
     'cmp' => \&compare,
     'fallback'=>1;
@@ -112,6 +113,9 @@ sub parse {
 sub new {
   my $class = shift;
   $class = ref($class) if ref($class);
+  # Ignore mod_perl request object--compatability with Apache::Cookie.
+  shift if ref $_[0]
+        && eval { $_[0]->isa('Apache::Request::Req') || $_[0]->isa('Apache') };
   my($name,$value,$path,$domain,$secure,$expires) =
     rearrange([NAME,[VALUE,VALUES],PATH,DOMAIN,SECURE,EXPIRES],@_);
   
@@ -167,6 +171,22 @@ sub compare {
     my $self = shift;
     my $value = shift;
     return "$self" cmp $value;
+}
+
+sub bake {
+  my ($self, $r) = @_;
+
+  $r ||= eval {
+      $MOD_PERL == 2
+          ? Apache2::RequestUtil->request()
+          : Apache->request
+  } if $MOD_PERL;
+  if ($r) {
+      $r->headers_out->set('Set-Cookie' => $self->as_string);
+  } else {
+      print CGI::header(-cookie => $self);
+  }
+
 }
 
 # accessors
@@ -321,7 +341,7 @@ script if the CGI request is occurring on a secure channel, such as SSL.
 
 =head2 Creating New Cookies
 
-	$c = new CGI::Cookie(-name    =>  'foo',
+	my $c = new CGI::Cookie(-name    =>  'foo',
                              -value   =>  'bar',
                              -expires =>  '+3M',
                              -domain  =>  '.capricorn.com',
@@ -351,11 +371,28 @@ pages at your site.
 B<-secure> if set to a true value instructs the browser to return the
 cookie only when a cryptographic protocol is in use.
 
+For compatibility with Apache::Cookie, you may optionally pass in
+a mod_perl request object as the first argument to C<new()>. It will
+simply be ignored:
+
+  my $c = new CGI::Cookie($r,
+                          -name    =>  'foo',
+                          -value   =>  ['bar','baz']);
+
 =head2 Sending the Cookie to the Browser
 
-Within a CGI script you can send a cookie to the browser by creating
-one or more Set-Cookie: fields in the HTTP header.  Here is a typical
-sequence:
+The simplest way to send a cookie to the browser is by calling the bake()
+method:
+
+  $c->bake;
+
+Under mod_perl, pass in an Apache request object:
+
+  $c->bake($r);
+
+If you want to set the cookie yourself, Within a CGI script you can send
+a cookie to the browser by creating one or more Set-Cookie: fields in the
+HTTP header.  Here is a typical sequence:
 
   my $c = new CGI::Cookie(-name    =>  'foo',
                           -value   =>  ['bar','baz'],
