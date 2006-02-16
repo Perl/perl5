@@ -74,4 +74,3 @@ sub compile_module {
 __DATA__
 CPAN::FirstTime
 DynaLoader
-Pod::Plainer
