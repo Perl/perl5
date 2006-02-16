@@ -1055,8 +1055,8 @@ _cleaner2:
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(DLSUFFIX)
 	-rmdir lib/B lib/Data lib/CompressPlugin lib/UncompressPlugin
 	-rmdir lib/Filter/Util lib/IO/Socket lib/IO/Compress lib/IO/Uncompress
-	-rmdir lib/List lib/MIME lib/Scalar lib/Sys 
-	-rmdir lib/threads lib/XS
+	-rmdir lib/List lib/MIME lib/Scalar lib/Sys
+	-rmdir lib/threads lib/XS lib/Hash
 
 _realcleaner:
 	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=realclean
