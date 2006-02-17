@@ -387,7 +387,7 @@ lintflags = \
     -erroff=E_PTRDIFF_OVERFLOW \
     -erroff=E_SHIFT_CNT_NEG_TOO_BIG_L \
     -erroff=E_STATIC_UNUSED \
-    -erroff=E_TRUE_LOGICAL_EXPR \
+    -erroff=E_TRUE_LOGICAL_EXPR
 
 .c$(OBJ_EXT):
 	$(CCCMD) $(PLDLFLAGS) $*.c
