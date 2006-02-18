@@ -4,15 +4,15 @@ use integer;
 use Digest::SHA qw(hmac_sha1_hex);
 
 BEGIN {
-        if ($ENV{PERL_CORE}) {
-                chdir 't' if -d 't';
-                @INC = '../lib';
-        }
+	if ($ENV{PERL_CORE}) {
+		chdir 't' if -d 't';
+		@INC = '../lib';
+	}
 }
 
 my(@vec);
 
-BEGIN { 
+BEGIN {
 	@vec = (
 		"Sample #1",
 		"Sample #2",

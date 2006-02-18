@@ -10,10 +10,10 @@ use File::Spec;
 use Digest::SHA;
 
 BEGIN {
-        if ($ENV{PERL_CORE}) {
-                chdir 't' if -d 't';
-                @INC = '../lib';
-        }
+	if ($ENV{PERL_CORE}) {
+		chdir 't' if -d 't';
+		@INC = '../lib';
+	}
 }
 
 #	SHA-1 Test Vectors
@@ -37,7 +37,7 @@ BEGIN {
 
 my(@vec110, @vec011);
 
-BEGIN { 
+BEGIN {
 	@vec110 = (	# 110 rep 1431655764
 		"11", "1eef5a18969255a3b1793a2a955c7ec28cd221a5",
 		"110", "7a1045b914672aface8d90e6d19b3a6ada3cb879",
@@ -51,11 +51,11 @@ BEGIN {
 		"0110", "a3d7438c589b0b932aa91cc2446f06df9abc73f0",
 		"01101", "3eee3e1e28dede2ca444d68da5675b2faaab3203"
 	);
-	plan tests => scalar(@vec110) / 2 + scalar(@vec011) / 2; 
+	plan tests => scalar(@vec110) / 2 + scalar(@vec011) / 2;
 }
 
-my $fileSTATE110 = dirname($0) . "/gillogly/state.110";
-my $fileSTATE011 = dirname($0) . "/gillogly/state.011";
+my $fileSTATE110 = File::Spec->catfile(dirname($0), "gillogly", "state.110");
+my $fileSTATE011 = File::Spec->catfile(dirname($0), "gillogly", "state.011");
 
 my $STATE110 = File::Spec->canonpath($fileSTATE110);
 my $STATE011 = File::Spec->canonpath($fileSTATE011);

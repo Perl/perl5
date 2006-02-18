@@ -4,15 +4,15 @@ use integer;
 use Digest::SHA qw(sha384_hex);
 
 BEGIN {
-        if ($ENV{PERL_CORE}) {
-                chdir 't' if -d 't';
-                @INC = '../lib';
-        }
+	if ($ENV{PERL_CORE}) {
+		chdir 't' if -d 't';
+		@INC = '../lib';
+	}
 }
 
 my(@vec, @rsp);
 
-BEGIN { 
+BEGIN {
 	@vec = (
 "abc",
 "abcdefghbcdefghicdefghijdefghijkefghijklfghijklmghijklmnhijklmnoijklmnopjklmnopqklmnopqrlmnopqrsmnopqrstnopqrstu",
@@ -25,7 +25,7 @@ BEGIN {
 "9d0e1809716474cb086e834e310a4a1ced149e9c00f248527972cec5704c2a5b07b8b3dc38ecc4ebae97ddd87f3d8985"
 	);
 
-	plan tests => scalar(@vec); 
+	plan tests => scalar(@vec);
 }
 
 my $skip = sha384_hex("") ? 0 : 1;

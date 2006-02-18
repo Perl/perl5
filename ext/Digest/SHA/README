@@ -1,4 +1,4 @@
-Digest::SHA version 5.32
+Digest::SHA version 5.34
 ========================
 
 Digest::SHA is a complete implementation of the NIST Secure Hash
@@ -34,7 +34,7 @@ DEPENDENCIES
 
 COPYRIGHT AND LICENSE
 
-Copyright (C) 2003-2005 Mark Shelor
+Copyright (C) 2003-2006 Mark Shelor
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.

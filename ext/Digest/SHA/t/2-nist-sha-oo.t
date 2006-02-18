@@ -6,15 +6,15 @@ use File::Spec;
 use Digest::SHA;
 
 BEGIN {
-        if ($ENV{PERL_CORE}) {
-                chdir 't' if -d 't';
-                @INC = '../lib';
-        }
+	if ($ENV{PERL_CORE}) {
+		chdir 't' if -d 't';
+		@INC = '../lib';
+	}
 }
 
 my(@vec);
 
-BEGIN { 
+BEGIN {
 	@vec = (
 "ungWv48Bz+pBQUDeXa4iI7ADYaOWF3qctBD/YfIAFa0",
 "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"

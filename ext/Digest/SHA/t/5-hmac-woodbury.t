@@ -8,10 +8,10 @@ use integer;
 use Digest::SHA qw(hmac_sha256_hex hmac_sha384_hex hmac_sha512_hex);
 
 BEGIN {
-        if ($ENV{PERL_CORE}) {
-                chdir 't' if -d 't';
-                @INC = '../lib';
-        }
+	if ($ENV{PERL_CORE}) {
+		chdir 't' if -d 't';
+		@INC = '../lib';
+	}
 }
 
 BEGIN { plan tests => 21 }

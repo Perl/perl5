@@ -6,15 +6,15 @@ use integer;
 use Digest::SHA qw(hmac_sha256_hex);
 
 BEGIN {
-        if ($ENV{PERL_CORE}) {
-                chdir 't' if -d 't';
-                @INC = '../lib';
-        }
+	if ($ENV{PERL_CORE}) {
+		chdir 't' if -d 't';
+		@INC = '../lib';
+	}
 }
 
 my(@data);
 
-BEGIN { 
+BEGIN {
 	@data = (
 "abc",
 "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",

@@ -5,10 +5,10 @@ use File::Spec;
 use Digest::SHA;
 
 BEGIN {
-        if ($ENV{PERL_CORE}) {
-                chdir 't' if -d 't';
-                @INC = '../lib';
-        }
+	if ($ENV{PERL_CORE}) {
+		chdir 't' if -d 't';
+		@INC = '../lib';
+	}
 }
 
 # David Ireland's test vector - SHA-256 digest of "a" x 536870912
@@ -18,7 +18,7 @@ BEGIN {
 
 BEGIN { plan tests => 1 }
 
-my $filename = dirname($0) . "/ireland.tmp";
+my $filename = File::Spec->catfile(dirname($0), "ireland.tmp");
 my $file = File::Spec->canonpath($filename);
 open(F, ">$file"); while (<DATA>) { print F $_ }  close(F);
 
