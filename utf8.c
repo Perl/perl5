@@ -1592,6 +1592,10 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
     ENTER;
     SAVEI32(PL_hints);
     PL_hints = 0;
+    /* It is assumed that callers of this routine are not passing in any
+       user derived data.  */
+    SAVEBOOL(PL_tainted);
+    PL_tainted = 0;
     save_re_context();
     if (!gv_fetchmeth(stash, "SWASHNEW", 8, -1)) {	/* demand load utf8 */
 	ENTER;

@@ -18,7 +18,7 @@ sub tainted ($) {
 }
 
 require './test.pl';
-plan(tests => 3*10 + 3*8 + 2*16);
+plan(tests => 3*10 + 3*8 + 2*16 + 2);
 
 my $arg = $ENV{PATH}; # a tainted value
 use constant UTF8 => "\x{1234}";
@@ -143,4 +143,10 @@ for my $ary ([ascii => 'perl'], [latin1 => "\xB6"]) {
     is(tainted($taint), tainted($arg), "tainted: $encode, downgrade down");
 }
 
+fresh_perl_is('$a = substr $^X, 0, 0; /\x{100}/i; /$a\x{100}/i || print q,ok,',
+	      'ok', {switches => ["-T", "-l"]},
+	      "matching a regexp is taint agnostic");
 
+fresh_perl_is('$a = substr $^X, 0, 0; /$a\x{100}/i || print q,ok,',
+	      'ok', {switches => ["-T", "-l"]},
+	      "therefore swash_init should be taint agnostic");
