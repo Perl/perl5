@@ -481,6 +481,15 @@ sub runperl {
     die "test.pl:runperl() does not take a hashref"
 	if ref $_[0] and ref $_[0] eq 'HASH';
     my $runperl = &_create_runperl;
+    if (${^TAINT}) {
+	# We will assume that if you're running under -T, you really mean
+	# to run a fresh perl, so we'll brute force launder everything for
+	# you
+	foreach ($runperl, $ENV{PATH}) {
+	    $_ =~ /(.*)/s;
+	    $_ = $1;
+	}
+    }
     my $result = `$runperl`;
     $result =~ s/\n\n/\n/ if $is_vms; # XXX pipes sometimes double these
     return $result;
