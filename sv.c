@@ -729,41 +729,47 @@ struct body_details {
     size_t size;	/* Size to allocate  */
     size_t copy;	/* Size of structure to copy (may be shorter)  */
     int offset;
+    bool cant_upgrade;	/* Can upgrade this type */
+    bool zero_nv;	/* zero the NV when upgrading from this */
 };
 
 struct body_details bodies_by_type[] = {
-    {0, 0, 0},
+    {0, 0, 0, FALSE, TRUE},
     {sizeof(xiv_allocated), sizeof(IV),
-     STRUCT_OFFSET(xiv_allocated, xiv_iv) - STRUCT_OFFSET(XPVIV, xiv_iv)},
+     STRUCT_OFFSET(xiv_allocated, xiv_iv) - STRUCT_OFFSET(XPVIV, xiv_iv),
+     FALSE, TRUE},
     {sizeof(xnv_allocated), sizeof(NV),
-     STRUCT_OFFSET(xnv_allocated, xnv_nv) - STRUCT_OFFSET(XPVNV, xnv_nv)},
-    {sizeof(XRV), sizeof(XRV), 0},
+     STRUCT_OFFSET(xnv_allocated, xnv_nv) - STRUCT_OFFSET(XPVNV, xnv_nv),
+     FALSE, FALSE},
+    {sizeof(XRV), sizeof(XRV), 0, FALSE, TRUE},
     {sizeof(xpv_allocated),
      STRUCT_OFFSET(XPV, xpv_len) + sizeof (((XPV*)SvANY((SV*)0))->xpv_len)
-     - STRUCT_OFFSET(xpv_allocated, xpv_cur) + STRUCT_OFFSET(XPV, xpv_cur),
-     STRUCT_OFFSET(xpv_allocated,   xpv_cur) - STRUCT_OFFSET(XPV,   xpv_cur)},
+     + STRUCT_OFFSET(xpv_allocated, xpv_cur) - STRUCT_OFFSET(XPV, xpv_cur),
+     + STRUCT_OFFSET(xpv_allocated, xpv_cur) - STRUCT_OFFSET(XPV, xpv_cur)
+     , FALSE, TRUE},
     {sizeof(xpviv_allocated),
      STRUCT_OFFSET(XPVIV, xiv_iv) + sizeof (((XPVIV*)SvANY((SV*)0))->xiv_iv)
-     - STRUCT_OFFSET(xpviv_allocated, xpv_cur) + STRUCT_OFFSET(XPVIV, xpv_cur),
-     STRUCT_OFFSET(xpviv_allocated, xpv_cur) - STRUCT_OFFSET(XPVIV, xpv_cur)},
+     + STRUCT_OFFSET(xpviv_allocated, xpv_cur) - STRUCT_OFFSET(XPVIV, xpv_cur),
+     + STRUCT_OFFSET(xpviv_allocated, xpv_cur) - STRUCT_OFFSET(XPVIV, xpv_cur)
+    , FALSE, TRUE},
     {sizeof(XPVNV), 
      STRUCT_OFFSET(XPVNV, xnv_nv) + sizeof (((XPVNV*)SvANY((SV*)0))->xnv_nv),
-     0},
+     0, FALSE, FALSE},
     {sizeof(XPVMG),
      STRUCT_OFFSET(XPVMG, xmg_stash) + sizeof (((XPVMG*)SvANY((SV*)0))->xmg_stash),
-     0},
-    {sizeof(XPVBM), 0, 0},
-    {sizeof(XPVLV), 0, 0},
+     0, FALSE, FALSE},
+    {sizeof(XPVBM), 0, 0, TRUE, FALSE},
+    {sizeof(XPVLV), 0, 0, TRUE, FALSE},
     {sizeof(xpvav_allocated), 0,
      STRUCT_OFFSET(xpvav_allocated, xav_fill)
-     - STRUCT_OFFSET(XPVAV, xav_fill)},
+     - STRUCT_OFFSET(XPVAV, xav_fill), TRUE, FALSE},
     {sizeof(xpvhv_allocated), 0, 
      STRUCT_OFFSET(xpvhv_allocated, xhv_fill)
-     - STRUCT_OFFSET(XPVHV, xhv_fill)},
-    {sizeof(XPVCV), 0, 0},
-    {sizeof(XPVGV), 0, 0},
-    {sizeof(XPVFM), 0, 0},
-    {sizeof(XPVIO), 0, 0}
+     - STRUCT_OFFSET(XPVHV, xhv_fill), TRUE, FALSE},
+    {sizeof(XPVCV), 0, 0, TRUE, FALSE},
+    {sizeof(XPVGV), 0, 0, TRUE, FALSE},
+    {sizeof(XPVFM), 0, 0, TRUE, FALSE},
+    {sizeof(XPVIO), 0, 0, TRUE, FALSE}
 };
 
 #define new_body_type(sv_type)			\
@@ -894,21 +900,15 @@ You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 bool
 Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 {
-    void**	old_body_arena;
-    size_t	old_body_offset;
-    size_t	old_body_length;	/* Well, the length to copy.  */
     void*	old_body;
-#ifndef NV_ZERO_IS_ALLBITS_ZERO
-    /* If NV 0.0 is store as all bits 0 then Zero() already creates a correct
-       0.0 for us.  */
-    bool	zero_nv = TRUE;
-#endif
     void*	new_body;
     size_t	new_body_length;
     size_t	new_body_offset;
     void**	new_body_arena;
     void**	new_body_arenaroot;
     U32		old_type = SvTYPE(sv);
+    const struct body_details *const old_type_details
+	= bodies_by_type + old_type;
 
     if (mt != SVt_PV && SvREADONLY(sv) && SvFAKE(sv)) {
 	sv_force_normal(sv);
@@ -918,9 +918,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	return TRUE;
 
     old_body = SvANY(sv);
-    old_body_arena = 0;
-    old_body_offset = 0;
-    old_body_length = 0;
     new_body_offset = 0;
     new_body_length = ~0;
 
@@ -964,62 +961,33 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     case SVt_NULL:
 	break;
     case SVt_IV:
-	old_body_arena = &PL_body_roots[SVt_IV];
-	old_body_offset = - bodies_by_type[SVt_IV].offset;
-	old_body_length = bodies_by_type[old_type].copy;
-
 	if (mt == SVt_NV)
 	    mt = SVt_PVNV;
 	else if (mt < SVt_PVIV)
 	    mt = SVt_PVIV;
 	break;
     case SVt_NV:
-	old_body_arena = &PL_body_roots[old_type];
-	old_body_length = bodies_by_type[old_type].copy;
-	old_body_offset = - bodies_by_type[old_type].offset;
-#ifndef NV_ZERO_IS_ALLBITS_ZERO
-	zero_nv = FALSE;
-#endif
-	old_body_offset = STRUCT_OFFSET(XNV, xnv_nv)
-	    - STRUCT_OFFSET(xnv_allocated, xnv_nv);
+
 	if (mt < SVt_PVNV)
 	    mt = SVt_PVNV;
 	break;
     case SVt_RV:
-	old_body_arena = (void **) &PL_body_roots[SVt_RV];
-	old_body_length = sizeof(XRV);
 	if (mt == SVt_IV)
 	    mt = SVt_PVIV;
 	else if (mt == SVt_NV)
 	    mt = SVt_PVNV;
 	break;
     case SVt_PV:
-	old_body_arena = &PL_body_roots[SVt_PV];
-	old_body_offset = - bodies_by_type[SVt_PV].offset;
-	old_body_length = STRUCT_OFFSET(XPV, xpv_len)
-	    + sizeof (((XPV*)SvANY(sv))->xpv_len)
-	    - old_body_offset;
 	if (mt == SVt_IV)
 	    mt = SVt_PVIV;
 	else if (mt == SVt_NV)
 	    mt = SVt_PVNV;
 	break;
     case SVt_PVIV:
-	old_body_arena = &PL_body_roots[SVt_PVIV];
-	old_body_offset = - bodies_by_type[SVt_PVIV].offset;
-	old_body_length = STRUCT_OFFSET(XPVIV, xiv_iv);
-	old_body_length += sizeof (((XPVIV*)SvANY(sv))->xiv_iv);
-	old_body_length -= old_body_offset;
 	if (mt == SVt_NV)
 	    mt = SVt_PVNV;
 	break;
     case SVt_PVNV:
-	old_body_arena = &PL_body_roots[SVt_PVNV];
-	old_body_length = STRUCT_OFFSET(XPVNV, xnv_nv)
-	    + sizeof (((XPVNV*)SvANY(sv))->xnv_nv);
-#ifndef NV_ZERO_IS_ALLBITS_ZERO
-	zero_nv = FALSE;
-#endif
 	break;
     case SVt_PVMG:
 	/* Because the XPVMG of PL_mess_sv isn't allocated from the arena,
@@ -1030,15 +998,10 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	   Given that it only has meaning inside the pad, it shouldn't be set
 	   on anything that can get upgraded.  */
 	assert((SvFLAGS(sv) & SVpad_TYPED) == 0);
-	old_body_arena = &PL_body_roots[SVt_PVMG];
-	old_body_length = STRUCT_OFFSET(XPVMG, xmg_stash)
-	    + sizeof (((XPVMG*)SvANY(sv))->xmg_stash);
-#ifndef NV_ZERO_IS_ALLBITS_ZERO
-	zero_nv = FALSE;
-#endif
 	break;
     default:
-	Perl_croak(aTHX_ "Can't upgrade that kind of scalar");
+	if (old_type_details->cant_upgrade)
+	    Perl_croak(aTHX_ "Can't upgrade that kind of scalar");
     }
 
     if (old_type > mt) {
@@ -1161,9 +1124,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	new_body_arenaroot = &PL_body_arenaroots[SVt_PV];
     new_body_no_NV:
 	/* PV and PVIV don't have an NV slot.  */
-#ifndef NV_ZERO_IS_ALLBITS_ZERO
-	zero_nv = FALSE;
-#endif
 
     new_body:
 	assert(new_body_length);
@@ -1182,14 +1142,19 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	new_body = ((char *)new_body) - new_body_offset;
 	SvANY(sv) = new_body;
 
-	if (old_body_length) {
-	    Copy((char *)old_body + old_body_offset,
-		 (char *)new_body + old_body_offset,
-		 old_body_length, char);
+	if (old_type_details->copy) {
+	    Copy((char *)old_body - old_type_details->offset,
+		 (char *)new_body - old_type_details->offset,
+		 old_type_details->copy, char);
 	}
 
 #ifndef NV_ZERO_IS_ALLBITS_ZERO
-	if (zero_nv)
+	/* If NV 0.0 is stores as all bits 0 then Zero() already creates a
+	 * correct 0.0 for us.  Otherwise, if the old body didn't have an
+	 * NV slot, but the new one does, then we need to initialise the
+	 * freshly created NV slot with whatever the correct bit pattern is
+	 * for 0.0  */
+	if (old_type_details->zero_nv && !bodies_by_type[mt].zero_nv)
 	    SvNV_set(sv, 0);
 #endif
 
@@ -1200,13 +1165,13 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu", mt);
     }
 
-
-    if (old_body_arena) {
+    if (old_type_details->size) {
+	/* If the old body had an allocated size, then we need to free it.  */
 #ifdef PURIFY
 	my_safefree(old_body);
 #else
-	del_body((void*)((char*)old_body + old_body_offset),
-		 old_body_arena);
+	del_body((void*)((char*)old_body - old_type_details->offset),
+		 &PL_body_roots[old_type]);
 #endif
     }
     return TRUE;
