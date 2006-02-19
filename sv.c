@@ -768,14 +768,16 @@ static const struct body_details bodies_by_type[] = {
      0, FALSE, HADNV, HASARENA},
     {sizeof(XPVBM), sizeof(XPVBM), 0, TRUE, HADNV, HASARENA},
     {sizeof(XPVLV), sizeof(XPVLV), 0, TRUE, HADNV, HASARENA},
-    {sizeof(xpvav_allocated), sizeof(xpvav_allocated),
+    {sizeof(xpvav_allocated),
+     sizeof(xpvav_allocated),
      STRUCT_OFFSET(xpvav_allocated, xav_fill)
      - STRUCT_OFFSET(XPVAV, xav_fill), TRUE, HADNV, HASARENA},
-    {sizeof(xpvhv_allocated), sizeof(xpvhv_allocated), 
+    {sizeof(xpvhv_allocated),
+     sizeof(xpvhv_allocated),
      STRUCT_OFFSET(xpvhv_allocated, xhv_fill)
      - STRUCT_OFFSET(XPVHV, xhv_fill), TRUE, HADNV, HASARENA},
     {sizeof(XPVCV), sizeof(XPVCV), 0, TRUE, HADNV, HASARENA},
-    {sizeof(XPVGV), 0, 0, TRUE, HADNV, HASARENA},
+    {sizeof(XPVGV), sizeof(XPVGV), 0, TRUE, HADNV, HASARENA},
     {sizeof(XPVFM), sizeof(XPVFM), 0, TRUE, HADNV, NOARENA},
     {sizeof(XPVIO), sizeof(XPVIO), 0, TRUE, HADNV, NOARENA}
 };
@@ -890,6 +892,8 @@ typedef struct xpvnv XNV;
 /* no arena for you! */
 
 #define new_NOARENA(details) \
+	my_safemalloc((details)->size - (details)->offset)
+#define new_NOARENAZ(details) \
 	my_safecalloc((details)->size - (details)->offset)
 
 #define new_XPVFM()	my_safemalloc(sizeof(XPVFM))
@@ -1121,11 +1125,11 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	    Zero(new_body, new_type_details->size, char);
 	    new_body = ((char *)new_body) + new_type_details->offset;
 	} else {
-	    new_body = new_NOARENA(new_type_details);
+	    new_body = new_NOARENAZ(new_type_details);
 	}
 #else
 	/* We always allocated the full length item with PURIFY */
-	new_body = new_NOARENA(new_type_details);
+	new_body = new_NOARENAZ(new_type_details);
 #endif
 	SvANY(sv) = new_body;
 
@@ -9644,10 +9648,10 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
     default:
 	{
 	    /* These are all the types that need complex bodies allocating.  */
-	    size_t new_body_length;
-	    size_t new_body_offset = 0;
 	    void *new_body;
-	    svtype sv_type = SvTYPE(sstr);
+	    const svtype sv_type = SvTYPE(sstr);
+	    const struct body_details *const sv_type_details
+		= bodies_by_type + sv_type;
 
 	    switch (sv_type) {
 	    default:
@@ -9655,65 +9659,49 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 			   (IV)SvTYPE(sstr));
 		break;
 
-	    case SVt_PVIO:
-		new_body = new_XPVIO();
-		new_body_length = sizeof(XPVIO);
-		break;
-	    case SVt_PVFM:
-		new_body = new_XPVFM();
-		new_body_length = sizeof(XPVFM);
-		break;
-
-	    case SVt_PVHV:
-		new_body_offset = - bodies_by_type[SVt_PVHV].offset;
-
-		new_body_length = sizeof(xpvhv_allocated) - new_body_offset;
-		goto new_body;
-	    case SVt_PVAV:
-		new_body_offset =  - bodies_by_type[SVt_PVAV].offset;
-
-		new_body_length = sizeof(xpvav_allocated) - new_body_offset;
-		goto new_body;
 	    case SVt_PVGV:
 		if (GvUNIQUE((GV*)sstr)) {
 		    /* Do sharing here, and fall through */
 		}
+	    case SVt_PVIO:
+	    case SVt_PVFM:
+	    case SVt_PVHV:
+	    case SVt_PVAV:
 	    case SVt_PVBM:
 	    case SVt_PVCV:
 	    case SVt_PVLV:
 	    case SVt_PVMG:
 	    case SVt_PVNV:
-		new_body_length = bodies_by_type[sv_type].size;
-		goto new_body;
-
 	    case SVt_PVIV:
-		new_body_offset = - bodies_by_type[SVt_PVIV].offset;
-		new_body_length = sizeof(XPVIV) - new_body_offset;
-		goto new_body; 
 	    case SVt_PV:
-		new_body_offset = - bodies_by_type[SVt_PV].offset;
-		new_body_length = sizeof(XPV) - new_body_offset;
-	    new_body:
-		assert(new_body_length);
+		assert(sv_type_details->size);
 #ifndef PURIFY
-		new_body_inline(new_body, new_body_length, SvTYPE(sstr));
-
-		new_body = (void*)((char*)new_body - new_body_offset);
+		if (sv_type_details->arena) {
+		    new_body_inline(new_body, sv_type_details->size, sv_type);
+		    new_body
+			= (void*)((char*)new_body + sv_type_details->offset);
+		} else {
+		    new_body = new_NOARENA(sv_type_details);
+		}
 #else
 		/* We always allocated the full length item with PURIFY */
-		new_body_length += new_body_offset;
-		new_body_offset = 0;
-		new_body = my_safemalloc(new_body_length);
+		new_body = new_NOARENA(sv_type_details);
 #endif
 	    }
 	    assert(new_body);
 	    SvANY(dstr) = new_body;
 
-	    Copy(((char*)SvANY(sstr)) + new_body_offset,
-		 ((char*)SvANY(dstr)) + new_body_offset,
-		 new_body_length, char);
+#ifndef PURIFY
+	    Copy(((char*)SvANY(sstr)) - sv_type_details->offset,
+		 ((char*)SvANY(dstr)) - sv_type_details->offset,
+		 sv_type_details->copy, char);
+#else
+	    Copy(((char*)SvANY(sstr)),
+		 ((char*)SvANY(dstr)),
+		 sv_type_details->size - sv_type_details->offset, char);
+#endif
 
-	    if (SvTYPE(sstr) != SVt_PVAV && SvTYPE(sstr) != SVt_PVHV)
+	    if (sv_type != SVt_PVAV && sv_type != SVt_PVHV)
 		Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 
 	    /* The Copy above means that all the source (unduplicated) pointers
@@ -9721,14 +9709,15 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	       pointers in either, but it's possible that there's less cache
 	       missing by always going for the destination.
 	       FIXME - instrument and check that assumption  */
-	    if (SvTYPE(sstr) >= SVt_PVMG) {
+	    if (sv_type >= SVt_PVMG) {
 		if (SvMAGIC(dstr))
 		    SvMAGIC_set(dstr, mg_dup(SvMAGIC(dstr), param));
 		if (SvSTASH(dstr))
 		    SvSTASH_set(dstr, hv_dup_inc(SvSTASH(dstr), param));
 	    }
 
-	    switch (SvTYPE(sstr)) {
+	    /* The cast silences a GCC warning about unhandled types.  */
+	    switch ((int)sv_type) {
 	    case SVt_PV:
 		break;
 	    case SVt_PVIV:
@@ -9761,8 +9750,6 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		else
 		    IoOFP(dstr)	= fp_dup(IoOFP(dstr), IoTYPE(dstr), param);
 		/* PL_rsfp_filters entries have fake IoDIRP() */
-		if (IoDIRP(dstr) && !(IoFLAGS(dstr) & IOf_FAKE_DIRP))
-		    IoDIRP(dstr)	= dirp_dup(IoDIRP(dstr));
 		if(IoFLAGS(dstr) & IOf_FAKE_DIRP) {
 		    /* I have no idea why fake dirp (rsfps)
 		       should be treated differently but otherwise
@@ -9774,6 +9761,11 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 		    IoTOP_GV(dstr)      = gv_dup(IoTOP_GV(dstr), param);
 		    IoFMT_GV(dstr)      = gv_dup(IoFMT_GV(dstr), param);
 		    IoBOTTOM_GV(dstr)   = gv_dup(IoBOTTOM_GV(dstr), param);
+		    if (IoDIRP(dstr)) {
+			IoDIRP(dstr)	= dirp_dup(IoDIRP(dstr));
+		    } else {
+			/* IoDIRP(dstr) is already a copy of IoDIRP(sstr)  */
+		    }
 		}
 		IoTOP_NAME(dstr)	= SAVEPV(IoTOP_NAME(dstr));
 		IoFMT_NAME(dstr)	= SAVEPV(IoFMT_NAME(dstr));
