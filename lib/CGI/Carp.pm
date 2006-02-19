@@ -102,7 +102,7 @@ CGI::Carp methods is called to prevent the performance hit.
 
 =head1 MAKING PERL ERRORS APPEAR IN THE BROWSER WINDOW
 
-If you want to send fatal (die, confess) errors to the browser, ask to 
+If you want to send fatal (die, confess) errors to the browser, ask to
 import the special "fatalsToBrowser" subroutine:
 
     use CGI::Carp qw(fatalsToBrowser);
@@ -113,6 +113,9 @@ arranges to send a minimal HTTP header to the browser so that even errors that
 occur in the early compile phase will be seen.
 Nonfatal errors will still be directed to the log file only (unless redirected
 with carpout).
+
+Note that fatalsToBrowser does B<not> work with mod_perl version 2.0
+and higher.
 
 =head2 Changing the default message
 
@@ -204,6 +207,9 @@ non-overridden program name
   
 =head1 CHANGE LOG
 
+1.29 Patch from Peter Whaite to fix the unfixable problem of CGI::Carp
+     not behaving correctly in an eval() context.
+
 1.05 carpout() added and minor corrections by Marc Hedlund
      <hedlund@best.com> on 11/26/95.
 
@@ -290,7 +296,6 @@ sub import {
     my $pkg = shift;
     my(%routines);
     my(@name);
-  
     if (@name=grep(/^name=/,@_))
       {
         my($n) = (split(/=/,$name[0]))[1];
@@ -382,7 +387,18 @@ sub ineval {
 
 sub die {
   my ($arg,@rest) = @_;
-  realdie ($arg,@rest) if ineval();
+
+  if ( ineval() )  {
+    if (!ref($arg)) {
+      $arg = join("",($arg,@rest)) || "Died";
+      my($file,$line,$id) = id(1);
+      $arg .= " at $file line $line.\n" unless $arg=~/\n$/;
+      realdie($arg);
+    }
+    else {
+      realdie($arg,@rest);
+    }
+  }
 
   if (!ref($arg)) {
     $arg = join("", ($arg,@rest));

@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.194 2005/12/06 22:12:56 lstein Exp $';
-$CGI::VERSION='3.15';
+$CGI::revision = '$Id: CGI.pm,v 1.221 2006/09/28 17:04:10 lstein Exp $';
+$CGI::VERSION='3.25';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -39,6 +39,7 @@ use constant XHTML_DTD => ['-//W3C//DTD XHTML 1.0 Transitional//EN',
 
 $MOD_PERL = 0; # no mod_perl by default
 @SAVED_SYMBOLS = ();
+
 
 # >>>>> Here are some globals that you might want to adjust <<<<<<
 sub initialize_globals {
@@ -329,6 +330,10 @@ sub new {
   my $self = {};
 
   bless $self,ref $class || $class || $DefaultClass;
+
+  # always use a tempfile
+  $self->{'use_tempfile'} = 1;
+
   if (ref($initializer[0])
       && (UNIVERSAL::isa($initializer[0],'Apache')
 	  ||
@@ -339,6 +344,7 @@ sub new {
  if (ref($initializer[0]) 
      && (UNIVERSAL::isa($initializer[0],'CODE'))) {
     $self->upload_hook(shift @initializer, shift @initializer);
+    $self->{'use_tempfile'} = shift @initializer if (@initializer > 0);
   }
   if ($MOD_PERL) {
     if ($MOD_PERL == 1) {
@@ -392,9 +398,10 @@ sub upload_hook {
   } else {
     $self = shift;
   }
-  my ($hook,$data) = @_;
+  my ($hook,$data,$use_tempfile) = @_;
   $self->{'.upload_hook'} = $hook;
   $self->{'.upload_data'} = $data;
+  $self->{'use_tempfile'} = $use_tempfile if defined $use_tempfile;
 }
 
 #### Method: param
@@ -427,7 +434,7 @@ sub param {
 	    }
 	}
 	# If values is provided, then we set it.
-	if (@values) {
+	if (@values or defined $value) {
 	    $self->add_parameter($name);
 	    $self->{$name}=[@values];
 	}
@@ -436,7 +443,16 @@ sub param {
     }
 
     return unless defined($name) && $self->{$name};
-    return wantarray ? @{$self->{$name}} : $self->{$name}->[0];
+
+    my $charset = $self->charset || '';
+    my $utf8    = $charset eq 'utf-8';
+    if ($utf8) {
+      eval "require Encode; 1;" if $utf8 && !Encode->can('decode'); # bring in these functions
+      return wantarray ? map {Encode::decode(utf8=>$_) } @{$self->{$name}} 
+                       : Encode::decode(utf8=>$self->{$name}->[0]);
+    } else {
+      return wantarray ? @{$self->{$name}} : $self->{$name}->[0];
+    }
 }
 
 sub self_or_default {
@@ -508,17 +524,10 @@ sub init {
 
       # avoid unreasonably large postings
       if (($POST_MAX > 0) && ($content_length > $POST_MAX)) {
-	# quietly read and discard the post
-	  my $buffer;
-          my $tmplength = $content_length;
-          while($tmplength > 0) {
-                 my $maxbuffer = ($tmplength < 10000)?$tmplength:10000;
-                 my $bytesread = $MOD_PERL ? $self->r->read($buffer,$maxbuffer) : read(STDIN,$buffer,$maxbuffer);
-                 $tmplength -= $bytesread;
-          }
-          $self->cgi_error("413 Request entity too large");
-          last METHOD;
-       }
+	#discard the post, unread
+	$self->cgi_error("413 Request entity too large");
+	last METHOD;
+      }
 
       # Process multipart postings, but only if the initializer is
       # not defined.
@@ -1418,11 +1427,15 @@ sub header {
                             'ATTACHMENT','P3P'],@p);
 
     $nph     ||= $NPH;
+
+    $type ||= 'text/html' unless defined($type);
+
     if (defined $charset) {
       $self->charset($charset);
     } else {
-      $charset = $self->charset;
+      $charset = $self->charset if $type =~ /^text\//;
     }
+   $charset ||= '';
 
     # rearrange() was designed for the HTML portion, so we
     # need to fix it up a little.
@@ -1432,8 +1445,11 @@ sub header {
         ($_ = $header) =~ s/^(\w)(.*)/"\u$1\L$2" . ': '.$self->unescapeHTML($value)/e;
     }
 
-    $type ||= 'text/html' unless defined($type);
-    $type .= "; charset=$charset" if $type ne '' and $type =~ m!^text/! and $type !~ /\bcharset\b/ and $charset ne '';
+    $type .= "; charset=$charset"
+      if     $type ne ''
+         and $type !~ /\bcharset\b/
+         and defined $charset
+         and $charset ne '';
 
     # Maybe future compatibility.  Maybe not.
     my $protocol = $ENV{SERVER_PROTOCOL} || 'HTTP/1.0';
@@ -1499,7 +1515,7 @@ sub redirect {
     my($self,@p) = self_or_default(@_);
     my($url,$target,$status,$cookie,$nph,@other) = 
          rearrange([[LOCATION,URI,URL],TARGET,STATUS,['COOKIE','COOKIES'],NPH],@p);
-    $status = '302 Moved' unless defined $status;
+    $status = '302 Found' unless defined $status;
     $url ||= $self->self_url;
     my(@o);
     foreach (@other) { tr/\"//d; push(@o,split("=",$_,2)); }
@@ -1546,7 +1562,7 @@ sub start_html {
     $self->element_id(0);
     $self->element_tab(0);
 
-    $encoding = 'iso-8859-1' unless defined $encoding;
+    $encoding = lc($self->charset) unless defined $encoding;
 
     # Need to sort out the DTD before it's okay to call escapeHTML().
     my(@result,$xml_dtd);
@@ -1637,6 +1653,7 @@ sub _style {
     my ($self,$style) = @_;
     my (@result);
     my $type = 'text/css';
+    my $rel  = 'stylesheet';
 
     my $cdata_start = $XHTML ? "\n<!--/* <![CDATA[ */" : "\n<!-- ";
     my $cdata_end   = $XHTML ? "\n/* ]]> */-->\n" : " -->\n";
@@ -1645,25 +1662,26 @@ sub _style {
 
     for my $s (@s) {
       if (ref($s)) {
-       my($src,$code,$verbatim,$stype,$foo,@other) =
-           rearrange([qw(SRC CODE VERBATIM TYPE FOO)],
+       my($src,$code,$verbatim,$stype,$alternate,$foo,@other) =
+           rearrange([qw(SRC CODE VERBATIM TYPE ALTERNATE FOO)],
                       ('-foo'=>'bar',
                        ref($s) eq 'ARRAY' ? @$s : %$s));
        $type  = $stype if $stype;
+       $rel   = 'alternate stylesheet' if $alternate;
        my $other = @other ? join ' ',@other : '';
 
        if (ref($src) eq "ARRAY") # Check to see if the $src variable is an array reference
        { # If it is, push a LINK tag for each one
            foreach $src (@$src)
          {
-           push(@result,$XHTML ? qq(<link rel="stylesheet" type="$type" href="$src" $other/>)
-                             : qq(<link rel="stylesheet" type="$type" href="$src"$other>)) if $src;
+           push(@result,$XHTML ? qq(<link rel="$rel" type="$type" href="$src" $other/>)
+                             : qq(<link rel="$rel" type="$type" href="$src"$other>)) if $src;
          }
        }
        else
        { # Otherwise, push the single -src, if it exists.
-         push(@result,$XHTML ? qq(<link rel="stylesheet" type="$type" href="$src" $other/>)
-                             : qq(<link rel="stylesheet" type="$type" href="$src"$other>)
+         push(@result,$XHTML ? qq(<link rel="$rel" type="$type" href="$src" $other/>)
+                             : qq(<link rel="$rel" type="$type" href="$src"$other>)
               ) if $src;
         }
      if ($verbatim) {
@@ -1675,8 +1693,8 @@ sub _style {
 
       } else {
            my $src = $s;
-           push(@result,$XHTML ? qq(<link rel="stylesheet" type="$type" href="$src" $other/>)
-                               : qq(<link rel="stylesheet" type="$type" href="$src"$other>));
+           push(@result,$XHTML ? qq(<link rel="$rel" type="$type" href="$src" $other/>)
+                               : qq(<link rel="$rel" type="$type" href="$src"$other>));
       }
     }
     @result;
@@ -1782,7 +1800,7 @@ sub startform {
        $action = $self->escapeHTML($action);
     }
     else {
-       $action = $self->escapeHTML($self->request_uri);
+       $action = $self->escapeHTML($self->request_uri || $self->self_url);
     }
     $action = qq(action="$action");
     my($other) = @other ? " @other" : '';
@@ -1812,9 +1830,7 @@ END_OF_FUNC
 sub start_multipart_form {
     my($self,@p) = self_or_default(@_);
     if (defined($p[0]) && substr($p[0],0,1) eq '-') {
-	my(%p) = @p;
-	$p{'-enctype'}=&MULTIPART;
-	return $self->startform(%p);
+      return $self->startform(-enctype=>&MULTIPART,@p);
     } else {
 	my($method,$action,@other) = 
 	    rearrange([METHOD,ACTION],@p);
@@ -2386,13 +2402,13 @@ sub popup_menu {
             }
         }
         else {
-            my $attribs = $self->_set_attributes($_, $attributes);
-	my($selectit) = defined($selected) ? $self->_selected($selected eq $_) : '';
-	my($label) = $_;
-	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
-	my($value) = $self->escapeHTML($_);
-	$label=$self->escapeHTML($label,1);
-            $result .= "<option $selectit${attribs}value=\"$value\">$label</option>\n";
+          my $attribs = $self->_set_attributes($_, $attributes);
+	  my($selectit) = defined($selected) ? $self->_selected($selected eq $_) : '';
+	  my($label) = $_;
+	  $label = $labels->{$_} if defined($labels) && defined($labels->{$_});
+	  my($value) = $self->escapeHTML($_);
+	  $label=$self->escapeHTML($label,1);
+          $result .= "<option${attribs} ${selectit}value=\"$value\">$label</option>\n";
         }
     }
 
@@ -2577,7 +2593,7 @@ sub image_button {
     my($name,$src,$alignment,@other) =
 	rearrange([NAME,SRC,ALIGN],@p);
 
-    my($align) = $alignment ? " align=\U\"$alignment\"" : '';
+    my($align) = $alignment ? " align=\L\"$alignment\"" : '';
     my($other) = @other ? " @other" : '';
     $name=$self->escapeHTML($name);
     return $XHTML ? qq(<input type="image" name="$name" src="$src"$align$other />)
@@ -2624,7 +2640,7 @@ sub url {
 
     my $path        =  $self->path_info;
     my $script_name =  $self->script_name;
-    my $request_uri = $self->request_uri || '';
+    my $request_uri =  unescape($self->request_uri) || '';
     my $query_str   =  $self->query_string;
 
     my $rewrite_in_use = $request_uri && $request_uri !~ /^$script_name/;
@@ -2632,7 +2648,7 @@ sub url {
 
     my $uri         =  $rewrite && $request_uri ? $request_uri : $script_name;
     $uri            =~ s/\?.*$//;                                 # remove query string
-    $uri            =~ s/$path$//      if defined $path;          # remove path
+    $uri            =~ s/\Q$path\E$//      if defined $path;      # remove path
 
     if ($full) {
 	my $protocol = $self->protocol();
@@ -2650,7 +2666,7 @@ sub url {
         return $url if $base;
 	$url .= $uri;
     } elsif ($relative) {
-	($url) = $script_name =~ m!([^/]+)$!;
+	($url) = $uri =~ m!([^/]+)$!;
     } elsif ($absolute) {
 	$url = $uri;
     }
@@ -2678,8 +2694,8 @@ END_OF_FUNC
 'cookie' => <<'END_OF_FUNC',
 sub cookie {
     my($self,@p) = self_or_default(@_);
-    my($name,$value,$path,$domain,$secure,$expires) =
-	rearrange([NAME,[VALUE,VALUES],PATH,DOMAIN,SECURE,EXPIRES],@p);
+    my($name,$value,$path,$domain,$secure,$expires,$httponly) =
+	rearrange([NAME,[VALUE,VALUES],PATH,DOMAIN,SECURE,EXPIRES,HTTPONLY],@p);
 
     require CGI::Cookie;
 
@@ -2707,6 +2723,7 @@ sub cookie {
     push(@param,'-path'=>$path) if $path;
     push(@param,'-expires'=>$expires) if $expires;
     push(@param,'-secure'=>$secure) if $secure;
+    push(@param,'-httponly'=>$httponly) if $httponly;
 
     return new CGI::Cookie(@param);
 }
@@ -2752,9 +2769,6 @@ sub path_info {
     } elsif (! defined($self->{'.path_info'}) ) {
         my (undef,$path_info) = $self->_name_and_path_from_env;
 	$self->{'.path_info'} = $path_info || '';
-	# hack to fix broken path info in IIS
-	$self->{'.path_info'} =~ s/^\Q$ENV{'SCRIPT_NAME'}\E// if $IIS;
-
     }
     return $self->{'.path_info'};
 }
@@ -2766,11 +2780,10 @@ sub _name_and_path_from_env {
    my $self = shift;
    my $raw_script_name = $ENV{SCRIPT_NAME} || '';
    my $raw_path_info   = $ENV{PATH_INFO}   || '';
-   my $uri             = $ENV{REQUEST_URI} || '';
+   my $uri             = unescape($self->request_uri) || '';
 
-   if ($raw_script_name =~ m/$raw_path_info$/) {
-     $raw_script_name =~ s/$raw_path_info$//;
-   }
+   my $protected    = quotemeta($raw_path_info);
+   $raw_script_name =~ s/$protected$//;
 
    my @uri_double_slashes  = $uri =~ m^(/{2,}?)^g;
    my @path_double_slashes = "$raw_script_name $raw_path_info" =~ m^(/{2,}?)^g;
@@ -2778,10 +2791,7 @@ sub _name_and_path_from_env {
    my $apache_bug      = @uri_double_slashes != @path_double_slashes;
    return ($raw_script_name,$raw_path_info) unless $apache_bug;
 
-   my $path_info_search = $raw_path_info;
-   # these characters will not (necessarily) be escaped
-   $path_info_search    =~ s/([^a-zA-Z0-9$()':_.,+*\/;?=&-])/uc sprintf("%%%02x",ord($1))/eg;
-   $path_info_search    = quotemeta($path_info_search);
+   my $path_info_search = quotemeta($raw_path_info);
    $path_info_search    =~ s!/!/+!g;
    if ($uri =~ m/^(.+)($path_info_search)/) {
        return ($1,$2);
@@ -3308,11 +3318,11 @@ sub read_multipart {
 	    return;
 	}
 
-	my($param)= $header{'Content-Disposition'}=~/ name="([^;]*)"/;
+	my($param)= $header{'Content-Disposition'}=~/ name="([^"]*)"/;
         $param .= $TAINTED;
 
 	# Bug:  Netscape doesn't escape quotation marks in file names!!!
-	my($filename) = $header{'Content-Disposition'}=~/ filename="([^;]*)"/;
+	my($filename) = $header{'Content-Disposition'}=~/ filename="([^"]*)"/;
 	# Test for Opera's multiple upload feature
 	my($multipart) = ( defined( $header{'Content-Type'} ) &&
 		$header{'Content-Type'} =~ /multipart\/mixed/ ) ?
@@ -3378,7 +3388,7 @@ sub read_multipart {
                   $totalbytes += length($data);
                    &{$self->{'.upload_hook'}}($filename ,$data, $totalbytes, $self->{'.upload_data'});
               }
-	      print $filehandle $data;
+              print $filehandle $data if ($self->{'use_tempfile'});
           }
 
 	  # back up to beginning of file
@@ -3411,7 +3421,7 @@ END_OF_FUNC
 'upload' =><<'END_OF_FUNC',
 sub upload {
     my($self,$param_name) = self_or_default(@_);
-    my @param = grep(ref && fileno($_), $self->param($param_name));
+    my @param = grep {ref($_) && defined(fileno($_))} $self->param($param_name);
     return unless @param;
     return wantarray ? @param : $param[0];
 }
@@ -5879,7 +5889,7 @@ UPLOAD_HOOK facility available in Apache::Request, with the exception
 that the first argument to the callback is an Apache::Upload object,
 here it's the remote filename.
 
- $q = CGI->new(\&hook,$data);
+ $q = CGI->new(\&hook [,$data [,$use_tempfile]]);
 
  sub hook
  {
@@ -5887,10 +5897,19 @@ here it's the remote filename.
         print  "Read $bytes_read bytes of $filename\n";         
  }
 
+The $data field is optional; it lets you pass configuration
+information (e.g. a database handle) to your hook callback.
+
+The $use_tempfile field is a flag that lets you turn on and off
+CGI.pm's use of a temporary disk-based file during file upload. If you
+set this to a FALSE value (default true) then param('uploaded_file')
+will no longer work, and the only way to get at the uploaded data is
+via the hook you provide.
+
 If using the function-oriented interface, call the CGI::upload_hook()
 method before calling param() or any other CGI functions:
 
-  CGI::upload_hook(\&hook,$data);
+  CGI::upload_hook(\&hook [,$data [,$use_tempfile]]);
 
 This method is not exported by default.  You will have to import it
 explicitly if you wish to use it without the CGI:: prefix.
@@ -6032,7 +6051,7 @@ for each option element within the optgroup.
 =item 5.
 
 An optional fifth parameter (-novals) can be set to a true value and
-indicates to suppress the val attribut in each option element within
+indicates to suppress the val attribute in each option element within
 the optgroup.
 
 See the discussion on optgroup at W3C
@@ -6647,6 +6666,7 @@ SSL session.
 The cookie created by cookie() must be incorporated into the HTTP
 header within the string returned by the header() method:
 
+        use CGI ':standard';
 	print header(-cookie=>$my_cookie);
 
 To create multiple cookies, give header() an array reference:
@@ -6658,12 +6678,13 @@ To create multiple cookies, give header() an array reference:
 	print header(-cookie=>[$cookie1,$cookie2]);
 
 To retrieve a cookie, request it by name by calling cookie() method
-without the B<-value> parameter:
+without the B<-value> parameter. This example uses the object-oriented
+form:
 
 	use CGI;
 	$query = new CGI;
-	$riddle = cookie('riddle_name');
-        %answers = cookie('answers');
+	$riddle = $query->cookie('riddle_name');
+        %answers = $query->cookie('answers');
 
 Cookies created with a single scalar value, such as the "riddle_name"
 cookie, will be returned in that form.  Cookies with array and hash
@@ -6678,6 +6699,11 @@ simple to turn a CGI parameter into a cookie, and vice-versa:
    $c=cookie(-name=>'answers',-value=>[param('answers')]);
    # vice-versa
    param(-name=>'answers',-value=>[cookie('answers')]);
+
+If you call cookie() without any parameters, it will return a list of
+the names of all cookies passed to your script:
+
+  @cookies = cookie();
 
 See the B<cookie.cgi> example script for some ideas on how to use
 cookies effectively.
@@ -6701,7 +6727,7 @@ There is no specific support for creating <frameset> sections
 in CGI.pm, but the HTML is very simple to write.  See the frame
 documentation in Netscape's home pages for details 
 
-  http://home.netscape.com/assist/net_sites/frames.html
+  http://wp.netscape.com/assist/net_sites/frames.html
 
 =item 2. Specify the destination for the document in the HTTP header
 
@@ -6739,7 +6765,7 @@ Netscape versions 2.0 and higher incorporate an interpreted language
 called JavaScript. Internet Explorer, 3.0 and higher, supports a
 closely-related dialect called JScript. JavaScript isn't the same as
 Java, and certainly isn't at all the same as Perl, which is a great
-pity. JavaScript allows you to programatically change the contents of
+pity. JavaScript allows you to programmatically change the contents of
 fill-out forms, create new windows, and pop up dialog box from within
 Netscape itself. From the point of view of CGI scripting, JavaScript
 is quite useful for validating fill-out forms prior to submitting
@@ -6992,6 +7018,14 @@ and pass it to start_html() in the -head argument, as in:
   @h = (Link({-rel=>'stylesheet',-type=>'text/css',-src=>'/ss/ss.css',-media=>'all'}),
         Link({-rel=>'stylesheet',-type=>'text/css',-src=>'/ss/fred.css',-media=>'paper'}));
   print start_html({-head=>\@h})
+
+To create primary and  "alternate" stylesheet, use the B<-alternate> option:
+
+ start_html(-style=>{-src=>[
+                           {-src=>'/styles/print.css'},
+			   {-src=>'/styles/alt.css',-alternate=>1}
+                           ]
+		    });
 
 =head1 DEBUGGING
 
