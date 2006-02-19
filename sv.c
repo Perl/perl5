@@ -733,7 +733,7 @@ struct body_details {
     bool zero_nv;	/* zero the NV when upgrading from this */
 };
 
-struct body_details bodies_by_type[] = {
+static const struct body_details bodies_by_type[] = {
     {0, 0, 0, FALSE, TRUE},
     {sizeof(xiv_allocated), sizeof(IV),
      STRUCT_OFFSET(xiv_allocated, xiv_iv) - STRUCT_OFFSET(XPVIV, xiv_iv),
@@ -898,7 +898,7 @@ You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 */
 
 bool
-Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
+Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 {
     void*	old_body;
     void*	new_body;
@@ -910,11 +910,11 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     const struct body_details *const old_type_details
 	= bodies_by_type + old_type;
 
-    if (mt != SVt_PV && SvREADONLY(sv) && SvFAKE(sv)) {
-	sv_force_normal(sv);
+    if (new_type != SVt_PV && SvIsCOW(sv)) {
+	sv_force_normal_flags(sv, 0);
     }
 
-    if (old_type == mt)
+    if (old_type == new_type)
 	return TRUE;
 
     old_body = SvANY(sv);
@@ -961,31 +961,31 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     case SVt_NULL:
 	break;
     case SVt_IV:
-	if (mt == SVt_NV)
-	    mt = SVt_PVNV;
-	else if (mt < SVt_PVIV)
-	    mt = SVt_PVIV;
+	if (new_type < SVt_PVIV) {
+	    new_type = (new_type == SVt_NV)
+		? SVt_PVNV : SVt_PVIV;
+	}
 	break;
     case SVt_NV:
 
-	if (mt < SVt_PVNV)
-	    mt = SVt_PVNV;
+	if (new_type < SVt_PVNV)
+	    new_type = SVt_PVNV;
 	break;
     case SVt_RV:
-	if (mt == SVt_IV)
-	    mt = SVt_PVIV;
-	else if (mt == SVt_NV)
-	    mt = SVt_PVNV;
+	if (new_type == SVt_IV)
+	    new_type = SVt_PVIV;
+	else if (new_type == SVt_NV)
+	    new_type = SVt_PVNV;
 	break;
     case SVt_PV:
-	if (mt == SVt_IV)
-	    mt = SVt_PVIV;
-	else if (mt == SVt_NV)
-	    mt = SVt_PVNV;
+	if (new_type == SVt_IV)
+	    new_type = SVt_PVIV;
+	else if (new_type == SVt_NV)
+	    new_type = SVt_PVNV;
 	break;
     case SVt_PVIV:
-	if (mt == SVt_NV)
-	    mt = SVt_PVNV;
+	if (new_type == SVt_NV)
+	    new_type = SVt_PVNV;
 	break;
     case SVt_PVNV:
 	break;
@@ -1004,14 +1004,14 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	    Perl_croak(aTHX_ "Can't upgrade that kind of scalar");
     }
 
-    if (old_type > mt) {
+    if (old_type > new_type) {
 	return TRUE;
     }
 
     SvFLAGS(sv) &= ~SVTYPEMASK;
-    SvFLAGS(sv) |= mt;
+    SvFLAGS(sv) |= new_type;
 
-    switch (mt) {
+    switch (new_type) {
     case SVt_NULL:
 	Perl_croak(aTHX_ "Can't upgrade to undef");
     case SVt_IV:
@@ -1101,9 +1101,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
     case SVt_PVLV:
     case SVt_PVMG:
     case SVt_PVNV:
-	new_body_length = bodies_by_type[mt].size;
-	new_body_arena = &PL_body_roots[mt];
-	new_body_arenaroot = &PL_body_arenaroots[mt];
+	new_body_length = bodies_by_type[new_type].size;
+	new_body_arena = &PL_body_roots[new_type];
+	new_body_arenaroot = &PL_body_arenaroots[new_type];
 	goto new_body;
 
     case SVt_PVIV:
@@ -1113,9 +1113,8 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	new_body_arenaroot = &PL_body_arenaroots[SVt_PVIV];
 	/* XXX Is this still needed?  Was it ever needed?   Surely as there is
 	   no route from NV to PVIV, NOK can never be true  */
-	if (SvNIOK(sv))
-	    (void)SvIOK_on(sv);
-	SvNOK_off(sv);
+	assert(!SvNOKp(sv));
+	assert(!SvNOK(sv));
 	goto new_body_no_NV; 
     case SVt_PV:
 	new_body_offset = - bodies_by_type[SVt_PV].offset;
@@ -1129,7 +1128,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	assert(new_body_length);
 #ifndef PURIFY
 	/* This points to the start of the allocated area.  */
-	new_body_inline(new_body, new_body_arena, new_body_length, mt);
+	new_body_inline(new_body, new_body_arena, new_body_length, new_type);
 #else
 	/* We always allocated the full length item with PURIFY */
 	new_body_length += new_body_offset;
@@ -1154,15 +1153,15 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 mt)
 	 * NV slot, but the new one does, then we need to initialise the
 	 * freshly created NV slot with whatever the correct bit pattern is
 	 * for 0.0  */
-	if (old_type_details->zero_nv && !bodies_by_type[mt].zero_nv)
+	if (old_type_details->zero_nv && !bodies_by_type[new_type].zero_nv)
 	    SvNV_set(sv, 0);
 #endif
 
-	if (mt == SVt_PVIO)
+	if (new_type == SVt_PVIO)
 	    IoPAGE_LEN(sv)	= 60;
 	break;
     default:
-	Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu", mt);
+	Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu", new_type);
     }
 
     if (old_type_details->size) {
