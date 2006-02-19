@@ -897,18 +897,42 @@ in gv.h: */
 #  define SvSTASH(sv)     (0 + ((XPVMG*)  SvANY(sv))->xmg_stash)
 #  endif
 #else
-#  define SvIVX(sv) ((XPVIV*) SvANY(sv))->xiv_iv
-#  define SvUVX(sv) ((XPVUV*) SvANY(sv))->xuv_uv
-#  define SvNVX(sv) ((XPVNV*) SvANY(sv))->xnv_nv
 #  define SvPVX(sv) ((sv)->sv_u.svu_pv)
 #  define SvCUR(sv) ((XPV*) SvANY(sv))->xpv_cur
 #  define SvLEN(sv) ((XPV*) SvANY(sv))->xpv_len
 #  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
 
-#  ifdef DEBUGGING
-#    define SvMAGIC(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
-#    define SvSTASH(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_stash))
+#  if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+/* These get expanded inside other macros that already use a variable _sv  */
+#    define SvIVX(sv)							\
+	(*({ SV *const _svi = (SV *) sv;				\
+	    assert(SvTYPE(_svi) == SVt_IV || SvTYPE(_svi) >= SVt_PVIV);	\
+	    &(((XPVIV*) SvANY(_svi))->xiv_iv);				\
+	 }))
+#    define SvUVX(sv)							\
+	(*({ SV *const _svi = (SV *) sv;				\
+	    assert(SvTYPE(_svi) == SVt_IV || SvTYPE(_svi) >= SVt_PVIV);	\
+	    &(((XPVUV*) SvANY(_svi))->xuv_uv);				\
+	 }))
+#    define SvNVX(sv)							\
+	(*({ SV *const _svi = (SV *) sv;				\
+	   assert(SvTYPE(_svi) == SVt_NV || SvTYPE(_svi) >= SVt_PVNV);	\
+	   &(((XPVNV*) SvANY(_svi))->xnv_nv);				\
+	 }))
+#    define SvMAGIC(sv)							\
+	(*({ SV *const _svi = (SV *) sv;				\
+	    assert(SvTYPE(_svi) >= SVt_PVMG);				\
+	    &(((XPVMG*) SvANY(_svi))->xmg_magic);			\
+	  }))
+#    define SvSTASH(sv)							\
+	(*({ SV *const _svi = (SV *) sv;				\
+	    assert(SvTYPE(_svi) >= SVt_PVMG);				\
+	    &(((XPVMG*) SvANY(_svi))->xmg_stash);			\
+	  }))
 #  else
+#    define SvIVX(sv) ((XPVIV*) SvANY(sv))->xiv_iv
+#    define SvUVX(sv) ((XPVUV*) SvANY(sv))->xuv_uv
+#    define SvNVX(sv) ((XPVNV*) SvANY(sv))->xnv_nv
 #    define SvMAGIC(sv)	((XPVMG*)  SvANY(sv))->xmg_magic
 #    define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
 #  endif
