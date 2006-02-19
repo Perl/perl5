@@ -2601,16 +2601,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		Gconvert(SvNVX(sv), NV_DIG, 0, tbuf);
 		len = strlen(tbuf);
 	    }
-	    if (SvROK(sv)) {	/* XXX Skip this when sv_pvn_force calls */
-		/* Sneaky stuff here */
-		SV * const tsv = newSVpvn(tbuf, len);
-
-		sv_2mortal(tsv);
-		if (lp)
-		    *lp = SvCUR(tsv);
-		return SvPVX(tsv);
-	    }
-	    else {
+	    assert(!SvROK(sv));
+	    {
 		dVAR;
 
 #ifdef FIXNEGATIVEZERO
