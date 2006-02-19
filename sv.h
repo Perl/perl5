@@ -446,6 +446,34 @@ struct xpvfm {
     IV		xfm_lines;
 };
 
+typedef struct {
+    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
+    STRLEN	xpv_len;	/* allocated size */
+    union {
+	IV	xivu_iv;	/* integer value or pv offset */
+	UV	xivu_uv;
+	void *	xivu_p1;
+    }		xiv_u;
+    MAGIC*	xmg_magic;	/* linked list of magicalness */
+    HV*		xmg_stash;	/* class package */
+
+    HV *	xcv_stash;
+    OP *	xcv_start;
+    OP *	xcv_root;
+    void      (*xcv_xsub)(pTHX_ CV*);
+    ANY		xcv_xsubany;
+    GV *	xcv_gv;
+    char *	xcv_file;
+    long	xcv_depth;	/* >= 2 indicates recursive call */
+    AV *	xcv_padlist;
+    CV *	xcv_outside;
+    cv_flags_t	xcv_flags;
+    U32		xcv_outside_seq; /* the COP sequence (at the point of our
+				  * compilation) in the lexically enclosing
+				  * sub */
+    IV		xfm_lines;
+} xpvfm_allocated;
+
 struct xpvio {
     NV		xnv_nv;		/* numeric value, if any */
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
@@ -923,6 +951,7 @@ in gv.h: */
 	    assert(SvTYPE(_svi) == SVt_NV || SvTYPE(_svi) >= SVt_PVNV);	\
 	    assert(SvTYPE(_svi) != SVt_PVAV);				\
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
+	    assert(SvTYPE(_svi) != SVt_PVFM);				\
 	   &(((XPVNV*) SvANY(_svi))->xnv_nv);				\
 	 }))
 #    define SvMAGIC(sv)							\

@@ -973,9 +973,11 @@ static const struct body_details bodies_by_type[] = {
     { sizeof(XPVCV), sizeof(XPVCV), 0, TRUE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVCV)) },
 
-    /* XPVFM is 80 bytes, fits 51x */
-    { sizeof(XPVFM), sizeof(XPVFM), 0, TRUE, HADNV, 
-      HASARENA, FIT_ARENA(20, sizeof(XPVFM)) },
+    { sizeof(xpvfm_allocated),
+      sizeof(xpvfm_allocated)
+      - relative_STRUCT_OFFSET(xpvfm_allocated, XPVFM, xpv_cur),
+      + relative_STRUCT_OFFSET(xpvfm_allocated, XPVFM, xpv_cur),
+      TRUE, HADNV, NOARENA, FIT_ARENA(20, sizeof(xpvfm_allocated)) },
 
     /* XPVIO is 84 bytes, fits 48x */
     { sizeof(XPVIO), sizeof(XPVIO), 0, TRUE, HADNV,
