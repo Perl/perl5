@@ -2257,7 +2257,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	mg_get(sv);
 	if (SvNOKp(sv))
 	    return SvNVX(sv);
-	if (SvPOKp(sv) && SvLEN(sv)) {
+	if ((SvPOKp(sv) && SvLEN(sv)) && !SvIOKp(sv)) {
 	    if (!SvIOKp(sv) && ckWARN(WARN_NUMERIC) &&
 		!grok_number(SvPVX_const(sv), SvCUR(sv), NULL))
 		not_a_number(sv);

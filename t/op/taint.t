@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 245;
+plan tests => 246;
 
 
 $| = 1;
@@ -1147,4 +1147,14 @@ TERNARY_CONDITIONALS: {
 	last if $i++ > 10000;
     }
     cmp_ok $i, '<', 10000, "infinite m//g";
+}
+
+SKIP:
+{
+    my $got_dualvar;
+    eval 'use Scalar::Util "dualvar"; $got_dualvar++';
+    skip "No Scalar::Util::dualvar" unless $got_dualvar;
+    my $a = Scalar::Util::dualvar(3, $^X);
+    my $b = $a + 5;
+    is ($b, 8, "Arithmetic on tainted dualvars works");
 }
