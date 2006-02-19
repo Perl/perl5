@@ -907,16 +907,22 @@ in gv.h: */
 #    define SvIVX(sv)							\
 	(*({ SV *const _svi = (SV *) sv;				\
 	    assert(SvTYPE(_svi) == SVt_IV || SvTYPE(_svi) >= SVt_PVIV);	\
+	    assert(SvTYPE(_svi) != SVt_PVAV);				\
+	    assert(SvTYPE(_svi) != SVt_PVHV);				\
 	    &(((XPVIV*) SvANY(_svi))->xiv_iv);				\
 	 }))
 #    define SvUVX(sv)							\
 	(*({ SV *const _svi = (SV *) sv;				\
 	    assert(SvTYPE(_svi) == SVt_IV || SvTYPE(_svi) >= SVt_PVIV);	\
+	    assert(SvTYPE(_svi) != SVt_PVAV);				\
+	    assert(SvTYPE(_svi) != SVt_PVHV);				\
 	    &(((XPVUV*) SvANY(_svi))->xuv_uv);				\
 	 }))
 #    define SvNVX(sv)							\
 	(*({ SV *const _svi = (SV *) sv;				\
-	   assert(SvTYPE(_svi) == SVt_NV || SvTYPE(_svi) >= SVt_PVNV);	\
+	    assert(SvTYPE(_svi) == SVt_NV || SvTYPE(_svi) >= SVt_PVNV);	\
+	    assert(SvTYPE(_svi) != SVt_PVAV);				\
+	    assert(SvTYPE(_svi) != SVt_PVHV);				\
 	   &(((XPVNV*) SvANY(_svi))->xnv_nv);				\
 	 }))
 #    define SvMAGIC(sv)							\
