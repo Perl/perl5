@@ -4699,7 +4699,7 @@ ____________________________________________________________________________
 	   ! sv.c
 ____________________________________________________________________________
 [ 26166] By: nicholas                              on 2005/11/18  20:38:26
-        Log: Elimiate new_body_length from sv_dup. Replace SvTYPE(sstr) with
+        Log: Eliminate new_body_length from sv_dup. Replace SvTYPE(sstr) with
              sv_type, which is a constant variable with the same value.
      Branch: perl
 	   ! sv.c
