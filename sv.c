@@ -889,7 +889,8 @@ typedef struct xpvnv XNV;
 
 /* no arena for you! */
 
-#define new_NOARENA(s)	my_safecalloc(s)
+#define new_NOARENA(details) \
+	my_safecalloc((details)->size - (details)->offset)
 
 #define new_XPVFM()	my_safemalloc(sizeof(XPVFM))
 #define del_XPVFM(p)	my_safefree(p)
@@ -1096,16 +1097,14 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	}
 	break;
 
-    case SVt_PVIO:
-    case SVt_PVFM:
-	new_body = new_NOARENA(new_type_details->size);
-	goto post_zero;
 
     case SVt_PVIV:
 	/* XXX Is this still needed?  Was it ever needed?   Surely as there is
 	   no route from NV to PVIV, NOK can never be true  */
 	assert(!SvNOKp(sv));
 	assert(!SvNOK(sv));
+    case SVt_PVIO:
+    case SVt_PVFM:
     case SVt_PVBM:
     case SVt_PVGV:
     case SVt_PVCV:
@@ -1114,19 +1113,19 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
     case SVt_PVNV:
     case SVt_PV:
 
+	assert(new_type_details->size);
 #ifndef PURIFY
-	/* This points to the start of the allocated area.  */
-	new_body_inline(new_body, bodies_by_type[new_type].size, new_type);
-	Zero(new_body, bodies_by_type[new_type].size, char);
+	if(new_type_details->arena) {
+	    /* This points to the start of the allocated area.  */
+	    new_body_inline(new_body, new_type_details->size, new_type);
+	    Zero(new_body, new_type_details->size, char);
+	    new_body = ((char *)new_body) + new_type_details->offset;
+	} else {
+	    new_body = new_NOARENA(new_type_details);
+	}
 #else
 	/* We always allocated the full length item with PURIFY */
-	new_body = my_safemalloc(bodies_by_type[new_type].size - bodies_by_type[new_type].offset);
-	Zero(new_body, bodies_by_type[new_type].size - bodies_by_type[new_type].offset, char);
-
-#endif
-    post_zero:
-#ifndef PURIFY
-	new_body = ((char *)new_body) + bodies_by_type[new_type].offset;
+	new_body = new_NOARENA(new_type_details);
 #endif
 	SvANY(sv) = new_body;
 
