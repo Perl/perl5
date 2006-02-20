@@ -7,7 +7,7 @@
 
 package B::Bytecode;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 
 use strict;
 use Config;
@@ -240,6 +240,7 @@ sub B::PVIV::bsave {
 	# See note below in B::PVNV::bsave
 	return if $sv->isa('B::AV');
 	return if $sv->isa('B::HV');
+	return if $sv->isa('B::CV');
     }
     asm "xiv", !ITHREADS && $sv->FLAGS & (SVf_FAKE|SVf_READONLY) ?
 	"0 but true" : $sv->IVX;

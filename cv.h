@@ -15,9 +15,10 @@ struct xpvcv {
     STRLEN	xpv_cur;	/* length of xp_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
-	IV	xivu_iv;	/* integer value or pv offset */
+	IV	xivu_iv;
 	UV	xivu_uv;
 	void *	xivu_p1;
+	I32	xivu_i32;	/* depth, >= 2 indicates recursive call */
     }		xiv_u;
     MAGIC*	xmg_magic;	/* magic for scalar array */
     HV*		xmg_stash;	/* class package */
@@ -33,13 +34,13 @@ struct xpvcv {
     }		xcv_root_u;
     GV *	xcv_gv;
     char *	xcv_file;
-    long	xcv_depth;	/* >= 2 indicates recursive call */
+    long	xcv_depth;
     PADLIST *	xcv_padlist;
     CV *	xcv_outside;
-    cv_flags_t	xcv_flags;
     U32		xcv_outside_seq; /* the COP sequence (at the point of our
 				  * compilation) in the lexically enclosing
 				  * sub */
+    cv_flags_t	xcv_flags;
 };
 
 /*
@@ -71,7 +72,14 @@ Returns the stash of the CV.
 #  define CvFILE_set_from_cop(sv, cop)	(CvFILE(sv) = CopFILE(cop))
 #endif
 #define CvFILEGV(sv)	(gv_fetchfile(CvFILE(sv)))
-#define CvDEPTH(sv)	((XPVCV*)SvANY(sv))->xcv_depth
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  define CvDEPTH(sv) (*({const CV *_cv = (CV *)sv; \
+			  assert(SvTYPE(_cv) == SVt_PVCV); \
+			  &((XPVCV*)SvANY(_cv))->xiv_u.xivu_i32; \
+			}))
+#else
+#  define CvDEPTH(sv)	((XPVCV*)SvANY(sv))->xiv_u.xivu_i32
+#endif
 #define CvPADLIST(sv)	((XPVCV*)SvANY(sv))->xcv_padlist
 #define CvOUTSIDE(sv)	((XPVCV*)SvANY(sv))->xcv_outside
 #define CvFLAGS(sv)	((XPVCV*)SvANY(sv))->xcv_flags

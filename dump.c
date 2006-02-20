@@ -1283,8 +1283,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	SvREFCNT_dec(d);
 	return;
     }
-    if ((type >= SVt_PVIV && type != SVt_PVAV && type != SVt_PVHV)
-	|| type == SVt_IV) {
+    if (type == SVt_IV || (type >= SVt_PVIV && type != SVt_PVAV
+			   && type != SVt_PVHV && type != SVt_PVCV)) {
 	if (SvIsUV(sv)
 #ifdef PERL_OLD_COPY_ON_WRITE
 	               || SvIsCOW(sv)

@@ -237,7 +237,7 @@ struct block_sub {
     GV *	dfoutgv;
     AV *	savearray;
     AV *	argarray;
-    long	olddepth;
+    I32		olddepth;
     U8		hasargs;
     U8		lval;		/* XXX merge lval and hasargs? */
     PAD		*oldcomppad;

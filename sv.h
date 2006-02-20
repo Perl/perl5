@@ -294,6 +294,7 @@ struct xpviv {
 	IV	xivu_iv;	/* integer value or pv offset */
 	UV	xivu_uv;
 	void *	xivu_p1;
+	I32	xivu_i32;
     }		xiv_u;
 };
 
@@ -307,6 +308,7 @@ typedef struct {
 	IV	xivu_iv;	/* integer value or pv offset */
 	UV	xivu_uv;
 	void *	xivu_p1;
+	I32	xivu_i32;
     }		xiv_u;
 } xpviv_allocated;
 #endif
@@ -334,6 +336,7 @@ struct xpvnv {
 	IV	xivu_iv;	/* integer value or pv offset */
 	UV	xivu_uv;
 	void *	xivu_p1;
+	I32	xivu_i32;
     }		xiv_u;
 };
 
@@ -346,6 +349,7 @@ struct xpvmg {
 	IV	xivu_iv;	/* integer value or pv offset */
 	UV	xivu_uv;
 	void *	xivu_p1;
+	I32	xivu_i32;
     }		xiv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
@@ -359,6 +363,7 @@ struct xpvlv {
 	IV	xivu_iv;	/* integer value or pv offset */
 	UV	xivu_uv;
 	void *	xivu_p1;
+	I32	xivu_i32;
     }		xiv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
@@ -385,6 +390,7 @@ struct xpvgv {
 	IV	xivu_iv;	/* integer value or pv offset */
 	UV	xivu_uv;
 	void *	xivu_p1;
+	I32	xivu_i32;
     }		xiv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
@@ -404,6 +410,7 @@ struct xpvbm {
 	IV	xivu_iv;	/* integer value or pv offset */
 	UV	xivu_uv;
 	void *	xivu_p1;
+	I32	xivu_i32;
     }		xiv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
@@ -422,9 +429,10 @@ struct xpvfm {
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
-	IV	xivu_iv;	/* integer value or pv offset */
+	IV	xivu_iv;	/* PVFMs use the pv offset */
 	UV	xivu_uv;
 	void *	xivu_p1;
+	I32	xivu_i32;
     }		xiv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
@@ -440,13 +448,12 @@ struct xpvfm {
     }		xcv_root_u;
     GV *	xcv_gv;
     char *	xcv_file;
-    long	xcv_depth;	/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;
-    cv_flags_t	xcv_flags;
     U32		xcv_outside_seq; /* the COP sequence (at the point of our
 				  * compilation) in the lexically enclosing
 				  * sub */
+    cv_flags_t	xcv_flags;
     IV		xfm_lines;
 };
 
@@ -454,9 +461,10 @@ typedef struct {
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
-	IV	xivu_iv;	/* integer value or pv offset */
+	IV	xivu_iv;	/* PVFMs use the pv offset */
 	UV	xivu_uv;
 	void *	xivu_p1;
+	I32	xivu_i32;
     }		xiv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
@@ -472,13 +480,12 @@ typedef struct {
     }		xcv_root_u;
     GV *	xcv_gv;
     char *	xcv_file;
-    long	xcv_depth;	/* >= 2 indicates recursive call */
     AV *	xcv_padlist;
     CV *	xcv_outside;
-    cv_flags_t	xcv_flags;
     U32		xcv_outside_seq; /* the COP sequence (at the point of our
 				  * compilation) in the lexically enclosing
 				  * sub */
+    cv_flags_t	xcv_flags;
     IV		xfm_lines;
 } xpvfm_allocated;
 
@@ -490,6 +497,7 @@ struct xpvio {
 	IV	xivu_iv;	/* integer value or pv offset */
 	UV	xivu_uv;
 	void *	xivu_p1;
+	I32	xivu_i32;
     }		xiv_u;
     MAGIC*	xmg_magic;	/* linked list of magicalness */
     HV*		xmg_stash;	/* class package */
@@ -945,6 +953,7 @@ in gv.h: */
 	    assert(SvTYPE(_svi) == SVt_IV || SvTYPE(_svi) >= SVt_PVIV);	\
 	    assert(SvTYPE(_svi) != SVt_PVAV);				\
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
+	    assert(SvTYPE(_svi) != SVt_PVCV);				\
 	    &(((XPVIV*) SvANY(_svi))->xiv_iv);				\
 	 }))
 #    define SvUVX(sv)							\
@@ -952,6 +961,7 @@ in gv.h: */
 	    assert(SvTYPE(_svi) == SVt_IV || SvTYPE(_svi) >= SVt_PVIV);	\
 	    assert(SvTYPE(_svi) != SVt_PVAV);				\
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
+	    assert(SvTYPE(_svi) != SVt_PVCV);				\
 	    &(((XPVUV*) SvANY(_svi))->xuv_uv);				\
 	 }))
 #    define SvNVX(sv)							\

@@ -218,7 +218,6 @@ do_test(13,
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = 2
     FLAGS = \\(PADMY,POK,pPOK,ANON,WEAKOUTSIDE\\)
-    IV = 0
     NV = 0
     PROTOTYPE = ""
     COMP_STASH = $ADDR\\t"main"
@@ -245,7 +244,6 @@ do_test(14,
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = (3|4)
     FLAGS = \\(\\)
-    IV = 0
     NV = 0
     COMP_STASH = $ADDR\\t"main"
     START = $ADDR ===> \\d+
@@ -491,7 +489,6 @@ do_test(23,
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = (2)
     FLAGS = \\(POK,pPOK,CONST\\)
-    IV = 0
     NV = 0
     PROTOTYPE = ""
     COMP_STASH = 0x0

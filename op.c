@@ -4269,7 +4269,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 #endif
 
     if (!CvISXSUB(cv) && CvROOT(cv)) {
-	if (CvDEPTH(cv))
+	if (SvTYPE(cv) == SVt_PVCV && CvDEPTH(cv))
 	    Perl_croak(aTHX_ "Can't undef active subroutine");
 	ENTER;
 

@@ -9819,8 +9819,11 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 			av_push(param->stashes, dstr);
 		}
 		break;
-	    case SVt_PVFM:
 	    case SVt_PVCV:
+		if (!(param->flags & CLONEf_COPY_STACKS)) {
+		    CvDEPTH(dstr) = 0;
+		}
+	    case SVt_PVFM:
 		/* NOTE: not refcounted */
 		CvSTASH(dstr)	= hv_dup(CvSTASH(dstr), param);
 		OP_REFCNT_LOCK;
@@ -9836,9 +9839,6 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		 * duped GV may never be freed. A bit of a hack! DAPM */
 		CvGV(dstr)	= (param->flags & CLONEf_JOIN_IN) ?
 		    NULL : gv_dup(CvGV(dstr), param) ;
-		if (!(param->flags & CLONEf_COPY_STACKS)) {
-		    CvDEPTH(dstr) = 0;
-		}
 		PAD_DUP(CvPADLIST(dstr), CvPADLIST(sstr), param);
 		CvOUTSIDE(dstr)	=
 		    CvWEAKOUTSIDE(sstr)
