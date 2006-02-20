@@ -9,7 +9,7 @@ require ExtUtils::Constant::XS;
 use ExtUtils::Constant::Utils qw(C_stringify);
 use ExtUtils::Constant::XS qw(%XS_TypeSet);
 
-$VERSION = '0.01';
+$VERSION = '0.02';
 @ISA = 'ExtUtils::Constant::XS';
 
 %type_to_struct =
@@ -367,8 +367,10 @@ EXPLODE
 		CV *cv = newCONSTSUB(symbol_table, value_for_notfound->name,
 				     &PL_sv_yes);
 		/* and then turn it into a non constant declaration only.  */
+		SvREFCNT_dec(CvXSUBANY(cv).any_ptr);
 		CvCONST_off(cv);
 		CvXSUB(cv) = NULL;
+		CvXSUBANY(cv).any_ptr = NULL;
 	    }
 
 	    if (!hv_store(${c_subname}_missing, value_for_notfound->name,
