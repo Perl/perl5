@@ -257,7 +257,9 @@ sub B::PVNV::bsave {
 	# Likewise HVs have no NV slot actually allocated.
 	# I don't think that they can get here, but better safe than sorry
 	return if $sv->isa('B::HV');
-    }
+	return if $sv->isa('B::CV');
+	return if $sv->isa('B::FM');
+     }
     asm "xnv", sprintf "%.40g", $sv->NVX;
 }
 

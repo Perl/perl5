@@ -38,6 +38,9 @@ sub do_test {
 	    $pattern =~ s/^ *\$ROOT *\n/
 		($] < 5.009) ? "    ROOT = 0x0\n" : '';
 	    /mge;
+	    $pattern =~ s/^ *\$IVNV *\n/
+		($] < 5.009) ? "    IV = 0\n    NV = 0\n" : '';
+	    /mge;
 
 
 
@@ -218,7 +221,7 @@ do_test(13,
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = 2
     FLAGS = \\(PADMY,POK,pPOK,ANON,WEAKOUTSIDE\\)
-    NV = 0
+    $IVNV
     PROTOTYPE = ""
     COMP_STASH = $ADDR\\t"main"
     START = $ADDR ===> \\d+
@@ -244,7 +247,7 @@ do_test(14,
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = (3|4)
     FLAGS = \\(\\)
-    NV = 0
+    $IVNV
     COMP_STASH = $ADDR\\t"main"
     START = $ADDR ===> \\d+
     ROOT = $ADDR
@@ -489,7 +492,7 @@ do_test(23,
   SV = PVCV\\($ADDR\\) at $ADDR
     REFCNT = (2)
     FLAGS = \\(POK,pPOK,CONST\\)
-    NV = 0
+    $IVNV
     PROTOTYPE = ""
     COMP_STASH = 0x0
     $ROOT

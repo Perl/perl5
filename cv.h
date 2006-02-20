@@ -34,7 +34,6 @@ struct xpvcv {
     }		xcv_root_u;
     GV *	xcv_gv;
     char *	xcv_file;
-    long	xcv_depth;
     PADLIST *	xcv_padlist;
     CV *	xcv_outside;
     U32		xcv_outside_seq; /* the COP sequence (at the point of our
@@ -42,6 +41,37 @@ struct xpvcv {
 				  * sub */
     cv_flags_t	xcv_flags;
 };
+
+typedef struct {
+    STRLEN	xpv_cur;	/* length of xp_pv as a C string */
+    STRLEN	xpv_len;	/* allocated size */
+    union {
+	IV	xivu_iv;
+	UV	xivu_uv;
+	void *	xivu_p1;
+	I32	xivu_i32;	/* depth, >= 2 indicates recursive call */
+    }		xiv_u;
+    MAGIC*	xmg_magic;	/* magic for scalar array */
+    HV*		xmg_stash;	/* class package */
+
+    HV *	xcv_stash;
+    union {
+	OP *	xcv_start;
+	ANY	xcv_xsubany;
+    }		xcv_start_u;
+    union {
+	OP *	xcv_root;
+	void	(*xcv_xsub) (pTHX_ CV*);
+    }		xcv_root_u;
+    GV *	xcv_gv;
+    char *	xcv_file;
+    PADLIST *	xcv_padlist;
+    CV *	xcv_outside;
+    U32		xcv_outside_seq; /* the COP sequence (at the point of our
+				  * compilation) in the lexically enclosing
+				  * sub */
+    cv_flags_t	xcv_flags;
+} xpvcv_allocated;
 
 /*
 =head1 Handy Values
