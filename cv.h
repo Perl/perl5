@@ -74,22 +74,23 @@ Returns the stash of the CV.
 #define CvFLAGS(sv)	((XPVCV*)SvANY(sv))->xcv_flags
 #define CvOUTSIDE_SEQ(sv) ((XPVCV*)SvANY(sv))->xcv_outside_seq
 
-#define CVf_CLONE	0x0001	/* anon CV uses external lexicals */
-#define CVf_CLONED	0x0002	/* a clone of one of those */
-#define CVf_ANON	0x0004	/* CvGV() can't be trusted */
-#define CVf_OLDSTYLE	0x0008
-#define CVf_UNIQUE	0x0010	/* sub is only called once (eg PL_main_cv,
+#define CVf_METHOD	0x0001	/* CV is explicitly marked as a method */
+#define CVf_LOCKED	0x0002	/* CV locks itself or first arg on entry */
+#define CVf_LVALUE	0x0004  /* CV return value can be used as lvalue */
+#define CVf_ASSERTION   0x0008  /* CV called only when asserting */
+
+#define CVf_WEAKOUTSIDE	0x0010  /* CvOUTSIDE isn't ref counted */
+#define CVf_CLONE	0x0020	/* anon CV uses external lexicals */
+#define CVf_CLONED	0x0040	/* a clone of one of those */
+#define CVf_ANON	0x0080	/* CvGV() can't be trusted */
+#define CVf_UNIQUE	0x0100	/* sub is only called once (eg PL_main_cv,
 				 * require, eval). Not to be confused
 				 * with the GVf_UNIQUE flag associated
 				 * with the :unique attribute */
-#define CVf_NODEBUG	0x0020	/* no DB::sub indirection for this CV
+#define CVf_NODEBUG	0x0200	/* no DB::sub indirection for this CV
 				   (esp. useful for special XSUBs) */
-#define CVf_METHOD	0x0040	/* CV is explicitly marked as a method */
-#define CVf_LOCKED	0x0080	/* CV locks itself or first arg on entry */
-#define CVf_LVALUE	0x0100  /* CV return value can be used as lvalue */
-#define CVf_CONST	0x0200  /* inlinable sub */
-#define CVf_WEAKOUTSIDE	0x0400  /* CvOUTSIDE isn't ref counted */
-#define CVf_ASSERTION   0x0800  /* CV called only when asserting */
+#define CVf_CONST	0x0400  /* inlinable sub */
+#define CVf_OLDSTYLE	0x0800
 
 /* This symbol for optimised communication between toke.c and op.c: */
 #define CVf_BUILTIN_ATTRS	(CVf_METHOD|CVf_LOCKED|CVf_LVALUE|CVf_ASSERTION)

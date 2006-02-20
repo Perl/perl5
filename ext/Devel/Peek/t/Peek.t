@@ -219,7 +219,7 @@ do_test(13,
     DEPTH = 0
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
-)?    FLAGS = 0x404
+)?    FLAGS = 0x90
     OUTSIDE_SEQ = \\d+
     PADLIST = $ADDR
     PADNAME = $ADDR\\($ADDR\\) PAD = $ADDR\\($ADDR\\)
@@ -499,7 +499,7 @@ do_test(23,
     DEPTH = 0
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
-)?    FLAGS = 0x200
+)?    FLAGS = 0x400
     OUTSIDE_SEQ = 0
     PADLIST = 0x0
     OUTSIDE = 0x0 \\(null\\)');	
