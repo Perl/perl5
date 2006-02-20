@@ -643,7 +643,7 @@ Perl_sv_free_arenas(pTHX)
     S_free_arena(aTHX_ (void**) PL_body_arenas);
 #endif
 
-    for (i=0; i<SVt_LAST; i++)
+    for (i=0; i<PERL_ARENA_ROOTS_SIZE; i++)
 	PL_body_roots[i] = 0;
 
     Safefree(PL_nice_chunk);

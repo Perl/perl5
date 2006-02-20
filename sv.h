@@ -75,6 +75,8 @@ typedef enum {
 #define HE_SVSLOT	SVt_NULL
 #endif
 
+#define PERL_ARENA_ROOTS_SIZE	(SVt_LAST)
+
 /* typedefs to eliminate some typing */
 typedef struct he HE;
 typedef struct hek HEK;
