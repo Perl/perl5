@@ -174,6 +174,11 @@ struct filescan_itmlst_2 {
     char * component;
 };
 
+struct vs_str_st {
+    unsigned short length;
+    char str[65536];
+};
+
 #ifdef __DECC
 #pragma message restore
 #pragma member_alignment restore
@@ -386,17 +391,17 @@ int SYS$FILESCAN
  */
 static int vms_split_path
    (const char * path,
-    const char ** volume,
+    char * * volume,
     int * vol_len,
-    const char ** root,
+    char * * root,
     int * root_len,
-    const char ** dir,
+    char * * dir,
     int * dir_len,
-    const char ** name,
+    char * * name,
     int * name_len,
-    const char ** ext,
+    char * * ext,
     int * ext_len,
-    const char ** version,
+    char * * version,
     int * ver_len)
 {
 struct dsc$descriptor path_desc;
@@ -1822,12 +1827,12 @@ Perl_my_chdir(pTHX_ const char *dir)
    * - Preview- '/' will be valid soon on VMS
    */
   if ((dirlen > 1) && (dir1[dirlen-1] == '/')) {
-    char *newdir = savepvn(dir,dirlen-1);
+    char *newdir = savepvn(dir1,dirlen-1);
     int ret = chdir(newdir);
     Safefree(newdir);
     return ret;
   }
-  else return chdir(dir);
+  else return chdir(dir1);
 }  /* end of my_chdir */
 /*}}}*/
 
@@ -7074,6 +7079,7 @@ $DESCRIPTOR(defaultspec, "SYS$DISK:[]");
 $DESCRIPTOR(resultspec, "");
 unsigned long int lff_flags = 0;
 int sts;
+int rms_sts;
 
 #ifdef VMS_LONGNAME_SUPPORT
     lff_flags = LIB$M_FIL_LONG_NAMES;
@@ -7123,7 +7129,7 @@ int sts;
     
     while ($VMS_STATUS_SUCCESS(sts = lib$find_file
 				 (&filespec, &resultspec, &context,
-    				  &defaultspec, 0, 0, &lff_flags)))
+    				  &defaultspec, 0, &rms_sts, &lff_flags)))
 	{
 	char *string;
 	char *c;
@@ -7917,7 +7923,7 @@ Perl_readdir(pTHX_ DIR *dd)
     unsigned long int tmpsts;
     unsigned long rsts;
     unsigned long flags = 0;
-    const char * v_spec, * r_spec, * d_spec, * n_spec, * e_spec, * vs_spec;
+    char * v_spec, * r_spec, * d_spec, * n_spec, * e_spec, * vs_spec;
     int sts, v_len, r_len, d_len, n_len, e_len, vs_len;
 
     /* Set up result descriptor, and get next file. */
@@ -7980,6 +7986,13 @@ Perl_readdir(pTHX_ DIR *dd)
 	&vs_spec,
 	&vs_len);
 
+    /* Drop NULL extensions on UNIX file specification */
+    if ((dd->flags & PERL_VMSDIR_M_UNIXSPECS &&
+	(e_len == 1) && decc_readdir_dropdotnotype)) {
+	e_len = 0;
+	e_spec[0] = '\0';
+    }
+
     strncpy(dd->entry.d_name, n_spec, n_len + e_len);
     dd->entry.d_name[n_len + e_len] = '\0';
     dd->entry.d_namlen = strlen(dd->entry.d_name);
@@ -7996,31 +8009,17 @@ Perl_readdir(pTHX_ DIR *dd)
 	    p = dd->entry.d_name;
 	    q = new_name;
 	    while (*p != 0) {
-		if ((*p == '.') && (p[1] == 0) && decc_readdir_dropdotnotype) {
-		    /* Normally trailing dots should be dropped */
-		    p++;
-		}
-		else {
-		    int x, y;
-		    x = copy_expand_vms_filename_escape(q, p, &y);
-		    p += x;
-		    q += y;
-		    /* fix-me */
-		    /* if y > 1, then this is a wide file specification */
-		    /* Wide file specifications need to be passed in Perl */
-		    /* counted strings apparently with a unicode flag */
-		}
+		int x, y;
+		x = copy_expand_vms_filename_escape(q, p, &y);
+		p += x;
+		q += y;
+		/* fix-me */
+		/* if y > 1, then this is a wide file specification */
+		/* Wide file specifications need to be passed in Perl */
+		/* counted strings apparently with a unicode flag */
 	    }
 	    *q = 0;
 	    strcpy(dd->entry.d_name, new_name);
-	}
-	else {
-	    /* Remove a trailing "." if present and not preceded by a ^ */
-	    if ((dd->entry.d_name[dd->entry.d_namlen-1] == '.') &&
-		  decc_readdir_dropdotnotype) {
-		dd->entry.d_namlen--;
-		dd->entry.d_name[dd->entry.d_namlen] == 0;
-	    }
 	}
     }
 
@@ -8276,19 +8275,20 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
   }
 
   if (!isdcl) {
+    int rsts;
     imgdsc.dsc$a_pointer = s;
     imgdsc.dsc$w_length = wordbreak - s;
-    retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc,0,0,&flags);
+    retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc,0,&rsts,&flags);
     if (!(retsts&1)) {
         _ckvmssts(lib$find_file_end(&cxt));
-        retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc2,0,0,&flags);
+        retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc2,0,&rsts,&flags);
       if (!(retsts & 1) && *s == '$') {
         _ckvmssts(lib$find_file_end(&cxt));
 	imgdsc.dsc$a_pointer++; imgdsc.dsc$w_length--;
-	retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc,0,0,&flags);
+	retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc,0,&rsts,&flags);
 	if (!(retsts&1)) {
 	  _ckvmssts(lib$find_file_end(&cxt));
-          retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc2,0,0,&flags);
+          retsts = lib$find_file(&imgdsc,&resdsc,&cxt,&defdsc2,0,&rsts,&flags);
         }
       }
     }
@@ -10982,6 +10982,170 @@ hushexit_fromperl(pTHX_ CV *cv)
     }
     ST(0) = boolSV(VMSISH_HUSHED);
     XSRETURN(1);
+}
+
+
+PerlIO * 
+Perl_vms_start_glob
+   (pTHX_ SV *tmpglob,
+    IO *io)
+{
+    PerlIO *fp;
+    struct vs_str_st *rslt;
+    char *vmsspec;
+    char *rstr;
+    char *begin, *cp;
+    $DESCRIPTOR(dfltdsc,"SYS$DISK:[]*.*;");
+    PerlIO *tmpfp;
+    STRLEN i;
+    struct dsc$descriptor_s wilddsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
+    struct dsc$descriptor_vs rsdsc;
+    unsigned long int cxt = 0, sts = 0, ok = 1, hasdir = 0;
+    unsigned long hasver = 0, isunix = 0;
+    unsigned long int lff_flags = 0;
+    int rms_sts;
+
+#ifdef VMS_LONGNAME_SUPPORT
+    lff_flags = LIB$M_FIL_LONG_NAMES;
+#endif
+    /* The Newx macro will not allow me to assign a smaller array
+     * to the rslt pointer, so we will assign it to the begin char pointer
+     * and then copy the value into the rslt pointer.
+     */
+    Newx(begin, VMS_MAXRSS + sizeof(unsigned short int), char);
+    rslt = (struct vs_str_st *)begin;
+    rslt->length = 0;
+    rstr = &rslt->str[0];
+    rsdsc.dsc$a_pointer = (char *) rslt; /* cast required */
+    rsdsc.dsc$w_maxstrlen = VMS_MAXRSS + sizeof(unsigned short int);
+    rsdsc.dsc$b_dtype = DSC$K_DTYPE_VT;
+    rsdsc.dsc$b_class = DSC$K_CLASS_VS;
+
+    Newx(vmsspec, VMS_MAXRSS, char);
+
+	/* We could find out if there's an explicit dev/dir or version
+	   by peeking into lib$find_file's internal context at
+	   ((struct NAM *)((struct FAB *)cxt)->fab$l_nam)->nam$l_fnb
+	   but that's unsupported, so I don't want to do it now and
+	   have it bite someone in the future. */
+	/* Fix-me: vms_split_path() is the only way to do this, the
+	   existing method will fail with many legal EFS or UNIX specifications
+	 */
+
+    cp = SvPV(tmpglob,i);
+
+    for (; i; i--) {
+	if (cp[i] == ';') hasver = 1;
+	if (cp[i] == '.') {
+	    if (sts) hasver = 1;
+	    else sts = 1;
+	}
+	if (cp[i] == '/') {
+	    hasdir = isunix = 1;
+	    break;
+	}
+	if (cp[i] == ']' || cp[i] == '>' || cp[i] == ':') {
+	    hasdir = 1;
+	    break;
+	}
+    }
+    if ((tmpfp = PerlIO_tmpfile()) != NULL) {
+	Stat_t st;
+	int stat_sts;
+	stat_sts = PerlLIO_stat(SvPVX_const(tmpglob),&st);
+	if (!stat_sts && S_ISDIR(st.st_mode)) {
+	    wilddsc.dsc$a_pointer = tovmspath(SvPVX(tmpglob),vmsspec);
+	    ok = (wilddsc.dsc$a_pointer != NULL);
+	}
+	else {
+	    wilddsc.dsc$a_pointer = tovmsspec(SvPVX(tmpglob),vmsspec);
+	    ok = (wilddsc.dsc$a_pointer != NULL);
+	}
+	if (ok)
+	    wilddsc.dsc$w_length = strlen(wilddsc.dsc$a_pointer);
+
+	/* If not extended character set, replace ? with % */
+	/* With extended character set, ? is a wildcard single character */
+	if (!decc_efs_case_preserve) {
+	    for (cp=wilddsc.dsc$a_pointer; ok && cp && *cp; cp++)
+	        if (*cp == '?') *cp = '%';
+	}
+	sts = SS$_NORMAL;
+	while (ok && $VMS_STATUS_SUCCESS(sts)) {
+	 char * v_spec, * r_spec, * d_spec, * n_spec, * e_spec, * vs_spec;
+	 int v_sts, v_len, r_len, d_len, n_len, e_len, vs_len;
+
+	    sts = lib$find_file(&wilddsc,&rsdsc,&cxt,
+				&dfltdsc,NULL,&rms_sts,&lff_flags);
+	    if (!$VMS_STATUS_SUCCESS(sts))
+		break;
+
+	    /* with varying string, 1st word of buffer contains result length */
+	    rstr[rslt->length] = '\0';
+
+	     /* Find where all the components are */
+	     v_sts = vms_split_path
+		       (rstr,
+			&v_spec,
+			&v_len,
+			&r_spec,
+			&r_len,
+			&d_spec,
+			&d_len,
+			&n_spec,
+			&n_len,
+			&e_spec,
+			&e_len,
+			&vs_spec,
+			&vs_len);
+
+	    /* If no version on input, truncate the version on output */
+	    if (!hasver && (vs_len > 0)) {
+		*vs_spec = '\0';
+		vs_len = 0;
+
+		/* No version & a null extension on UNIX handling */
+		if (isunix && (e_len == 1) && decc_readdir_dropdotnotype) {
+		    e_len = 0;
+		    *e_spec = '\0';
+		}
+	    }
+
+	    if (!decc_efs_case_preserve) {
+	        for (cp = rstr; *cp; cp++) *cp = _tolower(*cp);
+	    }
+
+	    if (hasdir) {
+		if (isunix) trim_unixpath(rstr,SvPVX(tmpglob),1);
+		begin = rstr;
+	    }
+	    else {
+		/* Start with the name */
+		begin = n_spec;
+	    }
+	    strcat(begin,"\n");
+	    ok = (PerlIO_puts(tmpfp,begin) != EOF);
+	}
+	if (cxt) (void)lib$find_file_end(&cxt);
+	if (ok && sts != RMS$_NMF &&
+	    sts != RMS$_DNF && sts != RMS_FNF) ok = 0;
+	if (!ok) {
+	    if (!(sts & 1)) {
+		SETERRNO((sts == RMS$_SYN ? EINVAL : EVMSERR),sts);
+	    }
+	    PerlIO_close(tmpfp);
+	    fp = NULL;
+	}
+	else {
+	    PerlIO_rewind(tmpfp);
+	    IoTYPE(io) = IoTYPE_RDONLY;
+	    IoIFP(io) = fp = tmpfp;
+	    IoFLAGS(io) &= ~IOf_UNTAINT;  /* maybe redundant */
+	}
+    }
+    Safefree(vmsspec);
+    Safefree(rslt);
+    return fp;
 }
 
 #ifdef HAS_SYMLINK

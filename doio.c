@@ -2317,89 +2317,14 @@ Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
     SAVEFREESV(tmpcmd);
 #ifdef VMS /* expand the wildcards right here, rather than opening a pipe, */
            /* since spawning off a process is a real performance hit */
-    {
-#include <descrip.h>
-#include <lib$routines.h>
-#include <nam.h>
-#include <rmsdef.h>
-	char rslt[NAM$C_MAXRSS+1+sizeof(unsigned short int)] = {'\0','\0'};
-	char vmsspec[NAM$C_MAXRSS+1];
-	char * const rstr = rslt + sizeof(unsigned short int);
-	char *begin, *end, *cp;
-	$DESCRIPTOR(dfltdsc,"SYS$DISK:[]*.*;");
-	PerlIO *tmpfp;
-	STRLEN i;
-	struct dsc$descriptor_s wilddsc
-	    = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
-	struct dsc$descriptor_vs rsdsc
-	    = {sizeof rslt, DSC$K_DTYPE_VT, DSC$K_CLASS_VS, rslt};
-	unsigned long int cxt = 0, sts = 0, ok = 1, hasdir = 0, hasver = 0, isunix = 0;
 
-	/* We could find out if there's an explicit dev/dir or version
-	   by peeking into lib$find_file's internal context at
-	   ((struct NAM *)((struct FAB *)cxt)->fab$l_nam)->nam$l_fnb
-	   but that's unsupported, so I don't want to do it now and
-	   have it bite someone in the future. */
-	cp = SvPV(tmpglob,i);
-	for (; i; i--) {
-	    if (cp[i] == ';') hasver = 1;
-	    if (cp[i] == '.') {
-		if (sts) hasver = 1;
-		else sts = 1;
-	    }
-	    if (cp[i] == '/') {
-		hasdir = isunix = 1;
-		break;
-	    }
-	    if (cp[i] == ']' || cp[i] == '>' || cp[i] == ':') {
-		hasdir = 1;
-		break;
-	    }
-	}
-       if ((tmpfp = PerlIO_tmpfile()) != NULL) {
-	    Stat_t st;
-	    if (!PerlLIO_stat(SvPVX_const(tmpglob),&st) && S_ISDIR(st.st_mode))
-		ok = ((wilddsc.dsc$a_pointer = tovmspath(SvPVX(tmpglob),vmsspec)) != NULL);
-	    else ok = ((wilddsc.dsc$a_pointer = tovmsspec(SvPVX(tmpglob),vmsspec)) != NULL);
-	    if (ok) wilddsc.dsc$w_length = (unsigned short int) strlen(wilddsc.dsc$a_pointer);
-	    for (cp=wilddsc.dsc$a_pointer; ok && cp && *cp; cp++)
-		if (*cp == '?') *cp = '%';  /* VMS style single-char wildcard */
-	    while (ok && ((sts = lib$find_file(&wilddsc,&rsdsc,&cxt,
-					       &dfltdsc,NULL,NULL,NULL))&1)) {
-		/* with varying string, 1st word of buffer contains result length */
-		end = rstr + *((unsigned short int*)rslt);
-		if (!hasver) while (*end != ';' && end > rstr) end--;
-		*(end++) = '\n';  *end = '\0';
-		for (cp = rstr; *cp; cp++) *cp = _tolower(*cp);
-		if (hasdir) {
-		    if (isunix) trim_unixpath(rstr,SvPVX(tmpglob),1);
-		    begin = rstr;
-		}
-		else {
-		    begin = end;
-		    while (*(--begin) != ']' && *begin != '>') ;
-		    ++begin;
-		}
-		ok = (PerlIO_puts(tmpfp,begin) != EOF);
-	    }
-	    if (cxt) (void)lib$find_file_end(&cxt);
-	    if (ok && sts != RMS$_NMF &&
-		sts != RMS$_DNF && sts != RMS_FNF) ok = 0;
-	    if (!ok) {
-		if (!(sts & 1)) {
-		    SETERRNO((sts == RMS$_SYN ? EINVAL : EVMSERR),sts);
-		}
-		PerlIO_close(tmpfp);
-		fp = NULL;
-	    }
-	    else {
-		PerlIO_rewind(tmpfp);
-		IoTYPE(io) = IoTYPE_RDONLY;
-		IoIFP(io) = fp = tmpfp;
-		IoFLAGS(io) &= ~IOf_UNTAINT;  /* maybe redundant */
-	    }
-	}
-    }
+PerlIO * 
+Perl_vms_start_glob
+   (pTHX_ SV *tmpglob,
+    IO *io);
+
+    fp = Perl_vms_start_glob(tmpglob, io);
+
 #else /* !VMS */
 #ifdef MACOS_TRADITIONAL
     sv_setpv(tmpcmd, "glob ");

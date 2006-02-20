@@ -58,6 +58,7 @@ if (($^O eq 'MSWin32') || ($^O eq 'NetWare')) {
 }
 elsif ($^O eq 'VMS') {
     `if f\$search("[.tmp]*.*") .nes. "" then delete/nolog/noconfirm [.tmp]*.*.*`;
+    `if f\$search("tmp.dir") .nes. "" then set file/prot=o:rwed tmp.dir;`;
     `if f\$search("tmp.dir") .nes. "" then delete/nolog/noconfirm tmp.dir;`;
     `create/directory [.tmp]`;
 }
