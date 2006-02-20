@@ -1445,8 +1445,8 @@ Perl_cv_clone(pTHX_ CV *proto)
     CvCLONED_on(cv);
 
 #ifdef USE_ITHREADS
-    CvFILE(cv)		= CvXSUB(proto) ? CvFILE(proto)
-					: savepv(CvFILE(proto));
+    CvFILE(cv)		= CvISXSUB(proto) ? CvFILE(proto)
+					  : savepv(CvFILE(proto));
 #else
     CvFILE(cv)		= CvFILE(proto);
 #endif

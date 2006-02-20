@@ -600,7 +600,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
 	  "Use of inherited AUTOLOAD for non-method %s::%.*s() is deprecated",
 	     packname, (int)len, name);
 
-    if (CvXSUB(cv)) {
+    if (CvISXSUB(cv)) {
         /* rather than lookup/init $AUTOLOAD here
          * only to have the XSUB do another lookup for $AUTOLOAD
          * and split that value on the last '::',

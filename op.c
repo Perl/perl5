@@ -4261,14 +4261,14 @@ Perl_cv_undef(pTHX_ CV *cv)
 {
     dVAR;
 #ifdef USE_ITHREADS
-    if (CvFILE(cv) && !CvXSUB(cv)) {
+    if (CvFILE(cv) && !CvISXSUB(cv)) {
 	/* for XSUBs CvFILE point directly to static memory; __FILE__ */
 	Safefree(CvFILE(cv));
     }
     CvFILE(cv) = 0;
 #endif
 
-    if (!CvXSUB(cv) && CvROOT(cv)) {
+    if (!CvISXSUB(cv) && CvROOT(cv)) {
 	if (CvDEPTH(cv))
 	    Perl_croak(aTHX_ "Can't undef active subroutine");
 	ENTER;

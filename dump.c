@@ -89,7 +89,7 @@ Perl_dump_sub(pTHX_ const GV *gv)
 
     gv_fullname3(sv, gv, NULL);
     Perl_dump_indent(aTHX_ 0, Perl_debug_log, "\nSUB %s = ", SvPVX_const(sv));
-    if (CvXSUB(GvCV(gv)))
+    if (CvISXSUB(GvCV(gv)))
 	Perl_dump_indent(aTHX_ 0, Perl_debug_log, "(xsub 0x%"UVxf" %d)\n",
 	    PTR2UV(CvXSUB(GvCV(gv))),
 	    (int)CvXSUBANY(GvCV(gv)).any_i32);

@@ -2667,7 +2667,7 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 	SvIV_set(dbsv, PTR2IV(cv));	/* Do it the quickest way  */
     }
 
-    if (CvXSUB(cv))
+    if (CvISXSUB(cv))
 	PL_curcopdb = PL_curcop;
     cv = GvCV(PL_DBsub);
     return cv;
@@ -2785,7 +2785,7 @@ try_autoload:
 	    DIE(aTHX_ "No DB::sub routine defined");
     }
 
-    if (!(CvXSUB(cv))) {
+    if (!(CvISXSUB(cv))) {
 	/* This path taken at least 75% of the time   */
 	dMARK;
 	register I32 items = SP - MARK;

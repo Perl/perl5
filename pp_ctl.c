@@ -1763,7 +1763,7 @@ PP(pp_dbstate)
 	hasargs = 0;
 	SPAGAIN;
 
-	if (CvXSUB(cv)) {
+	if (CvISXSUB(cv)) {
 	    CvDEPTH(cv)++;
 	    PUSHMARK(SP);
 	    (void)(*CvXSUB(cv))(aTHX_ cv);
@@ -2352,7 +2352,7 @@ PP(pp_goto)
 		    PAD_SVl(0) = (SV*)(cx->blk_sub.argarray = av);
 		}
 	    }
-	    else if (CvXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
+	    else if (CvISXSUB(cv)) {	/* put GvAV(defgv) back onto stack */
 		AV* const av = GvAV(PL_defgv);
 		items = AvFILLp(av) + 1;
 		EXTEND(SP, items+1); /* @_ could have been extended. */
@@ -2369,7 +2369,7 @@ PP(pp_goto)
 	    /* Now do some callish stuff. */
 	    SAVETMPS;
 	    SAVEFREESV(cv); /* later, undo the 'avoid premature free' hack */
-	    if (CvXSUB(cv)) {
+	    if (CvISXSUB(cv)) {
 		OP* retop = cx->blk_sub.retop;
 		if (reified) {
 		    I32 index;
