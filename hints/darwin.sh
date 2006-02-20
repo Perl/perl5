@@ -219,8 +219,8 @@ EOM
 *** Perl 64-bit addressing support is experimental for Mac OS X
 *** 10.4 ("Tiger") and Darwin version 8. Expect a number of test
 *** failures:
-***    ext/IO/io_*   ext/IPC/sysV/t/*   lib/Net/Ping/t/450_service
-***    Any test that uses sdbm
+***    ext/IPC/sysV/t/*
+***    ext/threads/shared/t/wait
 
 EOM
     for var in ccflags cppflags ld ldflags

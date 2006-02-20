@@ -6,8 +6,12 @@ use Config;
 #	config, all, clean, realclean and sdbm/Makefile
 # which perform the corresponding actions in the subdirectory.
 
+# Work around: Darwin ppc64 bug ignores archive contents when building bundles
+
 $define = ($^O eq 'MSWin32') ? '-DMSDOS' : '';
 if ($^O eq 'MSWin32') { $myextlib = 'sdbm\\libsdbm$(LIB_EXT)'; }
+elsif ($^O eq 'darwin' && $Config{'ldflags'} =~/-arch ppc64/) {
+                        $myextlib = '-all_load sdbm/libsdbm$(LIB_EXT)'; }
 else                  { $myextlib = 'sdbm/libsdbm$(LIB_EXT)';  }
 
 WriteMakefile(
