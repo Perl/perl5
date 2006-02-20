@@ -8,8 +8,7 @@
  *
  */
 
-/* This structure must match XPVCV in B/C.pm and the beginning of XPVFM
- * in sv.h  */
+/* This structure must the beginning of XPVFM in sv.h  */
 
 struct xpvcv {
     NV		xnv_nv;		/* numeric value, if any */

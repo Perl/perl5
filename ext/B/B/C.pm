@@ -8,7 +8,7 @@
 
 package B::C;
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 package B::C::Section;
 
@@ -1416,46 +1416,11 @@ sub output_declarations {
 #endif /* BROKEN_STATIC_REDECL */
 
 #ifdef BROKEN_UNION_INIT
-/*
- * Cribbed from cv.h with ANY (a union) replaced by void*.
- * Some pre-Standard compilers can't cope with initialising unions. Ho hum.
- */
-typedef struct {
-    STRLEN	xpv_cur;	/* length of xp_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-    IV		xof_off;	/* integer value */
-    NV		xnv_nv;		/* numeric value, if any */
-    MAGIC*	xmg_magic;	/* magic for scalar array */
-    HV*		xmg_stash;	/* class package */
+#error BROKEN_UNION_INIT no longer needed, as Perl requires an ANSI compiler
+#endif
 
-    HV *	xcv_stash;
-    OP *	xcv_start;
-    OP *	xcv_root;
-    void      (*xcv_xsub) (pTHX_ CV*);
-    ANY		xcv_xsubany;
-    GV *	xcv_gv;
-    char *	xcv_file;
-    long	xcv_depth;	/* >= 2 indicates recursive call */
-    AV *	xcv_padlist;
-    CV *	xcv_outside;
-EOT
-    print <<'EOT' if $] < 5.009;
-#ifdef USE_5005THREADS
-    perl_mutex *xcv_mutexp;
-    struct perl_thread *xcv_owner;	/* current owner thread */
-#endif /* USE_5005THREADS */
-EOT
-    print <<'EOT';
-    cv_flags_t	xcv_flags;
-    U32		xcv_outside_seq; /* the COP sequence (at the point of our
-				  * compilation) in the lexically enclosing
-				  * sub */
-} XPVCV_or_similar;
-#define ANYINIT(i) i
-#else
 #define XPVCV_or_similar XPVCV
 #define ANYINIT(i) {i}
-#endif /* BROKEN_UNION_INIT */
 #define Nullany ANYINIT(0)
 
 #define UNUSED 0
