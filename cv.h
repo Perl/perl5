@@ -1,7 +1,7 @@
 /*    cv.h
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
- *    2000, 2001, 2002, 2003, 2004, 2005, by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2004, 2005, 2006, by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -23,10 +23,12 @@ struct xpvcv {
     HV*		xmg_stash;	/* class package */
 
     HV *	xcv_stash;
-    OP *	xcv_start;
+    union {
+	OP *	xcv_start;
+	ANY	xcv_xsubany;
+    }		xcv_start_u;
     OP *	xcv_root;
     void	(*xcv_xsub) (pTHX_ CV*);
-    ANY		xcv_xsubany;
     GV *	xcv_gv;
     char *	xcv_file;
     long	xcv_depth;	/* >= 2 indicates recursive call */
@@ -55,10 +57,10 @@ Returns the stash of the CV.
 #define Nullcv Null(CV*)
 
 #define CvSTASH(sv)	((XPVCV*)SvANY(sv))->xcv_stash
-#define CvSTART(sv)	((XPVCV*)SvANY(sv))->xcv_start
+#define CvSTART(sv)	((XPVCV*)SvANY(sv))->xcv_start_u.xcv_start
 #define CvROOT(sv)	((XPVCV*)SvANY(sv))->xcv_root
 #define CvXSUB(sv)	((XPVCV*)SvANY(sv))->xcv_xsub
-#define CvXSUBANY(sv)	((XPVCV*)SvANY(sv))->xcv_xsubany
+#define CvXSUBANY(sv)	((XPVCV*)SvANY(sv))->xcv_start_u.xcv_xsubany
 #define CvGV(sv)	((XPVCV*)SvANY(sv))->xcv_gv
 #define CvFILE(sv)	((XPVCV*)SvANY(sv))->xcv_file
 #ifdef USE_ITHREADS

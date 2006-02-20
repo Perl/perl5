@@ -17,6 +17,7 @@ print "1..23\n";
 our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
 
+
 sub do_test {
     my $pattern = pop;
     if (open(OUT,">peek$$")) {
@@ -30,6 +31,12 @@ sub do_test {
 	    $pattern =~ s/\$FLOAT/(?:\\d*\\.\\d+(?:e[-+]\\d+)?|\\d+)/g;
 	    # handle DEBUG_LEAKING_SCALARS prefix
 	    $pattern =~ s/^(\s*)(SV =.* at )/(?:$1ALLOCATED at .*?\n)?$1$2/mg;
+
+	    $pattern =~ s/^ *\$XSUBANY *\n/
+		($] < 5.009) ? "    XSUBANY = 0\n" : '';
+	    /mge;
+
+
 	    print $pattern, "\n" if $DEBUG;
 	    my $dump = <IN>;
 	    print $dump, "\n"    if $DEBUG;
@@ -50,6 +57,7 @@ our   $a;
 our   $b;
 my    $c;
 local $d = 0;
+
 
 do_test( 1,
 	$a = "foo",
@@ -213,7 +221,7 @@ do_test(13,
     START = $ADDR ===> \\d+
     ROOT = $ADDR
     XSUB = 0x0
-    XSUBANY = 0
+    $XSUBANY
     GVGV::GV = $ADDR\\t"main" :: "__ANON__[^"]*"
     FILE = ".*\\b(?i:peek\\.t)"
     DEPTH = 0
@@ -240,7 +248,7 @@ do_test(14,
     START = $ADDR ===> \\d+
     ROOT = $ADDR
     XSUB = 0x0
-    XSUBANY = 0
+    $XSUBANY
     GVGV::GV = $ADDR\\t"main" :: "do_test"
     FILE = ".*\\b(?i:peek\\.t)"
     DEPTH = 1

@@ -1636,6 +1636,10 @@ CvSTASH(cv)
 B::OP
 CvSTART(cv)
 	B::CV	cv
+    CODE:
+	RETVAL = CvISXSUB(cv) ? NULL : CvSTART(cv);
+    OUTPUT:
+	RETVAL
 
 B::OP
 CvROOT(cv)
@@ -1678,7 +1682,7 @@ CvXSUBANY(cv)
     CODE:
 	ST(0) = CvCONST(cv) ?
 	    make_sv_object(aTHX_ sv_newmortal(),(SV *)CvXSUBANY(cv).any_ptr) :
-	    sv_2mortal(newSViv(CvXSUBANY(cv).any_iv));
+	    sv_2mortal(newSViv(CvISXSUB(cv) ? CvXSUBANY(cv).any_iv : 0));
 
 MODULE = B    PACKAGE = B::CV
 

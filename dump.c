@@ -1486,13 +1486,13 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	/* FALL THROUGH */
     case SVt_PVFM:
 	do_hv_dump(level, file, "  COMP_STASH", CvSTASH(sv));
-	if (CvSTART(sv))
+	if (!CvISXSUB(sv) && CvSTART(sv))
 	    Perl_dump_indent(aTHX_ level, file, "  START = 0x%"UVxf" ===> %"IVdf"\n", PTR2UV(CvSTART(sv)), (IV)sequence_num(CvSTART(sv)));
 	Perl_dump_indent(aTHX_ level, file, "  ROOT = 0x%"UVxf"\n", PTR2UV(CvROOT(sv)));
         if (CvROOT(sv) && dumpops)
 	    do_op_dump(level+1, file, CvROOT(sv));
 	Perl_dump_indent(aTHX_ level, file, "  XSUB = 0x%"UVxf"\n", PTR2UV(CvXSUB(sv)));
-	{
+	if (CvISXSUB(sv)) {
 	    SV *constant = cv_const_sv((CV *)sv);
 
 
