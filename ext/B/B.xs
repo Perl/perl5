@@ -1644,6 +1644,10 @@ CvSTART(cv)
 B::OP
 CvROOT(cv)
 	B::CV	cv
+    CODE:
+	RETVAL = CvISXSUB(cv) ? NULL : CvROOT(cv);
+    OUTPUT:
+	RETVAL
 
 B::GV
 CvGV(cv)
@@ -1673,7 +1677,7 @@ void
 CvXSUB(cv)
 	B::CV	cv
     CODE:
-	ST(0) = sv_2mortal(newSViv(PTR2IV(CvXSUB(cv))));
+	ST(0) = sv_2mortal(newSViv(CvISXSUB(cv) ? PTR2IV(CvXSUB(cv)) : 0));
 
 
 void

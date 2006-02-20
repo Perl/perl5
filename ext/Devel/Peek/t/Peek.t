@@ -32,9 +32,13 @@ sub do_test {
 	    # handle DEBUG_LEAKING_SCALARS prefix
 	    $pattern =~ s/^(\s*)(SV =.* at )/(?:$1ALLOCATED at .*?\n)?$1$2/mg;
 
-	    $pattern =~ s/^ *\$XSUBANY *\n/
-		($] < 5.009) ? "    XSUBANY = 0\n" : '';
+	    $pattern =~ s/^ *\$XSUB *\n/
+		($] < 5.009) ? "    XSUB = 0\n    XSUBANY = 0\n" : '';
 	    /mge;
+	    $pattern =~ s/^ *\$ROOT *\n/
+		($] < 5.009) ? "    ROOT = 0x0\n" : '';
+	    /mge;
+
 
 
 	    print $pattern, "\n" if $DEBUG;
@@ -220,8 +224,7 @@ do_test(13,
     COMP_STASH = $ADDR\\t"main"
     START = $ADDR ===> \\d+
     ROOT = $ADDR
-    XSUB = 0x0
-    $XSUBANY
+    $XSUB
     GVGV::GV = $ADDR\\t"main" :: "__ANON__[^"]*"
     FILE = ".*\\b(?i:peek\\.t)"
     DEPTH = 0
@@ -247,8 +250,7 @@ do_test(14,
     COMP_STASH = $ADDR\\t"main"
     START = $ADDR ===> \\d+
     ROOT = $ADDR
-    XSUB = 0x0
-    $XSUBANY
+    $XSUB
     GVGV::GV = $ADDR\\t"main" :: "do_test"
     FILE = ".*\\b(?i:peek\\.t)"
     DEPTH = 1
@@ -493,7 +495,7 @@ do_test(23,
     NV = 0
     PROTOTYPE = ""
     COMP_STASH = 0x0
-    ROOT = 0x0
+    $ROOT
     XSUB = $ADDR
     XSUBANY = $ADDR \\(CONST SV\\)
     SV = PV\\($ADDR\\) at $ADDR
@@ -507,7 +509,7 @@ do_test(23,
     DEPTH = 0
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
-)?    FLAGS = 0x400
+)?    FLAGS = 0x1400
     OUTSIDE_SEQ = 0
     PADLIST = 0x0
     OUTSIDE = 0x0 \\(null\\)');	

@@ -27,8 +27,10 @@ struct xpvcv {
 	OP *	xcv_start;
 	ANY	xcv_xsubany;
     }		xcv_start_u;
-    OP *	xcv_root;
-    void	(*xcv_xsub) (pTHX_ CV*);
+    union {
+	OP *	xcv_root;
+	void	(*xcv_xsub) (pTHX_ CV*);
+    }		xcv_root_u;
     GV *	xcv_gv;
     char *	xcv_file;
     long	xcv_depth;	/* >= 2 indicates recursive call */
@@ -58,8 +60,8 @@ Returns the stash of the CV.
 
 #define CvSTASH(sv)	((XPVCV*)SvANY(sv))->xcv_stash
 #define CvSTART(sv)	((XPVCV*)SvANY(sv))->xcv_start_u.xcv_start
-#define CvROOT(sv)	((XPVCV*)SvANY(sv))->xcv_root
-#define CvXSUB(sv)	((XPVCV*)SvANY(sv))->xcv_xsub
+#define CvROOT(sv)	((XPVCV*)SvANY(sv))->xcv_root_u.xcv_root
+#define CvXSUB(sv)	((XPVCV*)SvANY(sv))->xcv_root_u.xcv_xsub
 #define CvXSUBANY(sv)	((XPVCV*)SvANY(sv))->xcv_start_u.xcv_xsubany
 #define CvGV(sv)	((XPVCV*)SvANY(sv))->xcv_gv
 #define CvFILE(sv)	((XPVCV*)SvANY(sv))->xcv_file
@@ -92,6 +94,7 @@ Returns the stash of the CV.
 				   (esp. useful for special XSUBs) */
 #define CVf_CONST	0x0400  /* inlinable sub */
 #define CVf_OLDSTYLE	0x0800
+#define CVf_ISXSUB	0x1000	/* CV is an XSUB, not pure perl.  */
 
 /* This symbol for optimised communication between toke.c and op.c: */
 #define CVf_BUILTIN_ATTRS	(CVf_METHOD|CVf_LOCKED|CVf_LVALUE|CVf_ASSERTION)
@@ -155,7 +158,10 @@ Returns the stash of the CV.
 #define CvWEAKOUTSIDE_on(cv)	(CvFLAGS(cv) |= CVf_WEAKOUTSIDE)
 #define CvWEAKOUTSIDE_off(cv)	(CvFLAGS(cv) &= ~CVf_WEAKOUTSIDE)
 
-#define CvISXSUB(cv)		(CvXSUB(cv) ? TRUE : FALSE)
+#define CvISXSUB(cv)		(CvFLAGS(cv) & CVf_ISXSUB)
+#define CvISXSUB_on(cv)		(CvFLAGS(cv) |= CVf_ISXSUB)
+#define CvISXSUB_off(cv)	(CvFLAGS(cv) &= ~CVf_ISXSUB)
+
 /*
 =head1 CV reference counts and CvOUTSIDE
 

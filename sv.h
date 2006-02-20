@@ -434,8 +434,10 @@ struct xpvfm {
 	OP *	xcv_start;
 	ANY	xcv_xsubany;
     }		xcv_start_u;
-    OP *	xcv_root;
-    void      (*xcv_xsub)(pTHX_ CV*);
+    union {
+	OP *	xcv_root;
+	void	(*xcv_xsub) (pTHX_ CV*);
+    }		xcv_root_u;
     GV *	xcv_gv;
     char *	xcv_file;
     long	xcv_depth;	/* >= 2 indicates recursive call */
@@ -460,10 +462,14 @@ typedef struct {
     HV*		xmg_stash;	/* class package */
 
     HV *	xcv_stash;
-    OP *	xcv_start;
-    OP *	xcv_root;
-    void      (*xcv_xsub)(pTHX_ CV*);
-    ANY		xcv_xsubany;
+    union {
+	OP *	xcv_start;
+	ANY	xcv_xsubany;
+    }		xcv_start_u;
+    union {
+	OP *	xcv_root;
+	void	(*xcv_xsub) (pTHX_ CV*);
+    }		xcv_root_u;
     GV *	xcv_gv;
     char *	xcv_file;
     long	xcv_depth;	/* >= 2 indicates recursive call */

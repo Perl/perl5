@@ -4295,7 +4295,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	SvREFCNT_dec((SV*)CvXSUBANY(cv).any_ptr);
 	CvCONST_off(cv);
     }
-    if (CvXSUB(cv)) {
+    if (CvISXSUB(cv) && CvXSUB(cv)) {
         CvXSUB(cv) = 0;
     }
     /* delete all flags except WEAKOUTSIDE */
@@ -4586,6 +4586,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    CvXSUBANY(cv).any_ptr = const_sv;
 	    CvXSUB(cv) = const_sv_xsub;
 	    CvCONST_on(cv);
+	    CvISXSUB_on(cv);
 	}
 	else {
 	    GvCV(gv) = NULL;
@@ -4916,6 +4917,7 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
     (void)gv_fetchfile(filename);
     CvFILE(cv) = (char *)filename; /* NOTE: not copied, as it is expected to be
 				   an external constant string */
+    CvISXSUB_on(cv);
     CvXSUB(cv) = subaddr;
 
     if (name) {
