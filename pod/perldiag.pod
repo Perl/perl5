@@ -1056,18 +1056,12 @@ redefined subroutine while the old routine is running.  Go figure.
 (F) You tried to unshift an "unreal" array that can't be unshifted, such
 as the main Perl stack.
 
-=item Can't upgrade that kind of scalar
+=item Can't upgrade %s (%d) to %d
 
 (P) The internal sv_upgrade routine adds "members" to an SV, making it
 into a more specialized kind of SV.  The top several SV types are so
 specialized, however, that they cannot be interconverted.  This message
 indicates that such a conversion was attempted.
-
-=item Can't upgrade to undef
-
-(P) The undefined SV is the bottom of the totem pole, in the scheme of
-upgradability.  Upgrading to undef indicates an error in the code
-calling sv_upgrade.
 
 =item Can't use anonymous symbol table for method lookup
 

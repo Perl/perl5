@@ -729,7 +729,7 @@ S_new_body(pTHX_ size_t size, svtype sv_type)
 struct body_details {
     size_t size;	/* Size to allocate  */
     size_t copy;	/* Size of structure to copy (may be shorter)  */
-    int offset;
+    size_t offset;
     bool cant_upgrade;	/* Can upgrade this type */
     bool zero_nv;	/* zero the NV when upgrading from this */
     bool arena;		/* Allocated from an arena */
@@ -738,44 +738,76 @@ struct body_details {
 #define HADNV FALSE
 #define NONV TRUE
 
+#ifdef PURIFY
+/* With -DPURFIY we allocate everything directly, and don't use arenas.
+   This seems a rather elegant way to simplify some of the code below.  */
+#define HASARENA FALSE
+#else
 #define HASARENA TRUE
+#endif
 #define NOARENA FALSE
+
+/* A macro to work out the offset needed to subtract from a pointer to (say)
+
+typedef struct {
+    STRLEN	xpv_cur;
+    STRLEN	xpv_len;
+} xpv_allocated;
+
+to make its members accessible via a pointer to (say)
+
+struct xpv {
+    NV		xnv_nv;
+    STRLEN	xpv_cur;
+    STRLEN	xpv_len;
+};
+
+*/
+
+#define relative_STRUCT_OFFSET(longer, shorter, member) \
+    (STRUCT_OFFSET(shorter, member) - STRUCT_OFFSET(longer, member))
+
+/* Calculate the length to copy. Specifically work out the length less any
+   final padding the compiler needed to add.  See the comment in sv_upgrade
+   for why copying the padding proved to be a bug.  */
+
+#define copy_length(type, last_member) \
+	STRUCT_OFFSET(type, last_member) \
+	+ sizeof (((type*)SvANY((SV*)0))->last_member)
 
 static const struct body_details bodies_by_type[] = {
     {0, 0, 0, FALSE, NONV, NOARENA},
     {sizeof(xiv_allocated), sizeof(IV),
-     STRUCT_OFFSET(xiv_allocated, xiv_iv) - STRUCT_OFFSET(XPVIV, xiv_iv),
+     + relative_STRUCT_OFFSET(xiv_allocated, XPVIV, xiv_iv),
      FALSE, NONV, HASARENA},
     {sizeof(xnv_allocated), sizeof(NV),
-     STRUCT_OFFSET(xnv_allocated, xnv_nv) - STRUCT_OFFSET(XPVNV, xnv_nv),
+     + relative_STRUCT_OFFSET(xnv_allocated, XPVNV, xnv_nv),
      FALSE, HADNV, HASARENA},
     {sizeof(XRV), sizeof(XRV), 0, FALSE, NONV, HASARENA},
     {sizeof(xpv_allocated),
-     STRUCT_OFFSET(XPV, xpv_len) + sizeof (((XPV*)SvANY((SV*)0))->xpv_len)
-     + STRUCT_OFFSET(xpv_allocated, xpv_cur) - STRUCT_OFFSET(XPV, xpv_cur),
-     + STRUCT_OFFSET(xpv_allocated, xpv_cur) - STRUCT_OFFSET(XPV, xpv_cur)
-     , FALSE, NONV, HASARENA},
+     copy_length(XPV, xpv_len)
+     - relative_STRUCT_OFFSET(xpv_allocated, XPV, xpv_cur),
+     + relative_STRUCT_OFFSET(xpv_allocated, XPV, xpv_cur),
+     FALSE, NONV, HASARENA},
     {sizeof(xpviv_allocated),
-     STRUCT_OFFSET(XPVIV, xiv_iv) + sizeof (((XPVIV*)SvANY((SV*)0))->xiv_iv)
-     + STRUCT_OFFSET(xpviv_allocated, xpv_cur) - STRUCT_OFFSET(XPVIV, xpv_cur),
-     + STRUCT_OFFSET(xpviv_allocated, xpv_cur) - STRUCT_OFFSET(XPVIV, xpv_cur)
-    , FALSE, NONV, HASARENA},
-    {sizeof(XPVNV), 
-     STRUCT_OFFSET(XPVNV, xnv_nv) + sizeof (((XPVNV*)SvANY((SV*)0))->xnv_nv),
-     0, FALSE, HADNV, HASARENA},
-    {sizeof(XPVMG),
-     STRUCT_OFFSET(XPVMG, xmg_stash) + sizeof (((XPVMG*)SvANY((SV*)0))->xmg_stash),
-     0, FALSE, HADNV, HASARENA},
+     copy_length(XPVIV, xiv_iv)
+     - relative_STRUCT_OFFSET(xpviv_allocated, XPVIV, xpv_cur),
+     + relative_STRUCT_OFFSET(xpviv_allocated, XPVIV, xpv_cur),
+     FALSE, NONV, HASARENA},
+    {sizeof(XPVNV), copy_length(XPVNV, xnv_nv), 0, FALSE, HADNV, HASARENA},
+    {sizeof(XPVMG), copy_length(XPVMG, xmg_stash), 0, FALSE, HADNV, HASARENA},
     {sizeof(XPVBM), sizeof(XPVBM), 0, TRUE, HADNV, HASARENA},
     {sizeof(XPVLV), sizeof(XPVLV), 0, TRUE, HADNV, HASARENA},
     {sizeof(xpvav_allocated),
-     sizeof(xpvav_allocated),
-     STRUCT_OFFSET(xpvav_allocated, xav_fill)
-     - STRUCT_OFFSET(XPVAV, xav_fill), TRUE, HADNV, HASARENA},
+     sizeof(xpvav_allocated)
+     - relative_STRUCT_OFFSET(xpvav_allocated, XPVAV, xav_fill),
+     + relative_STRUCT_OFFSET(xpvav_allocated, XPVAV, xav_fill),
+     TRUE, HADNV, HASARENA},
     {sizeof(xpvhv_allocated),
-     sizeof(xpvhv_allocated),
-     STRUCT_OFFSET(xpvhv_allocated, xhv_fill)
-     - STRUCT_OFFSET(XPVHV, xhv_fill), TRUE, HADNV, HASARENA},
+     sizeof(xpvhv_allocated)
+     - relative_STRUCT_OFFSET(xpvhv_allocated, XPVHV, xhv_fill),
+     + relative_STRUCT_OFFSET(xpvhv_allocated, XPVHV, xhv_fill),
+     TRUE, HADNV, HASARENA},
     {sizeof(XPVCV), sizeof(XPVCV), 0, TRUE, HADNV, HASARENA},
     {sizeof(XPVGV), sizeof(XPVGV), 0, TRUE, HADNV, HASARENA},
     {sizeof(XPVFM), sizeof(XPVFM), 0, TRUE, HADNV, NOARENA},
@@ -783,8 +815,7 @@ static const struct body_details bodies_by_type[] = {
 };
 
 #define new_body_type(sv_type)			\
-    (void *)((char *)S_new_body(aTHX_ bodies_by_type[sv_type].size, sv_type)\
-	     + bodies_by_type[sv_type].offset)
+    (void *)((char *)S_new_body(aTHX_ bodies_by_type[sv_type].size, sv_type))
 
 #define del_body_type(p, sv_type)	\
     del_body(p, &PL_body_roots[sv_type])
@@ -792,10 +823,10 @@ static const struct body_details bodies_by_type[] = {
 
 #define new_body_allocated(sv_type)		\
     (void *)((char *)S_new_body(aTHX_ bodies_by_type[sv_type].size, sv_type)\
-	     + bodies_by_type[sv_type].offset)
+	     - bodies_by_type[sv_type].offset)
 
 #define del_body_allocated(p, sv_type)		\
-    del_body(p - bodies_by_type[sv_type].offset, &PL_body_roots[sv_type])
+    del_body(p + bodies_by_type[sv_type].offset, &PL_body_roots[sv_type])
 
 
 #define my_safemalloc(s)	(void*)safemalloc(s)
@@ -816,17 +847,8 @@ typedef struct xpvnv XNV;
 #define new_XRV()	my_safemalloc(sizeof(XRV))
 #define del_XRV(p)	my_safefree(p)
 
-#define new_XPV()	my_safemalloc(sizeof(XPV))
-#define del_XPV(p)	my_safefree(p)
-
-#define new_XPVIV()	my_safemalloc(sizeof(XPVIV))
-#define del_XPVIV(p)	my_safefree(p)
-
 #define new_XPVNV()	my_safemalloc(sizeof(XPVNV))
 #define del_XPVNV(p)	my_safefree(p)
-
-#define new_XPVCV()	my_safemalloc(sizeof(XPVCV))
-#define del_XPVCV(p)	my_safefree(p)
 
 #define new_XPVAV()	my_safemalloc(sizeof(XPVAV))
 #define del_XPVAV(p)	my_safefree(p)
@@ -840,12 +862,6 @@ typedef struct xpvnv XNV;
 #define new_XPVGV()	my_safemalloc(sizeof(XPVGV))
 #define del_XPVGV(p)	my_safefree(p)
 
-#define new_XPVLV()	my_safemalloc(sizeof(XPVLV))
-#define del_XPVLV(p)	my_safefree(p)
-
-#define new_XPVBM()	my_safemalloc(sizeof(XPVBM))
-#define del_XPVBM(p)	my_safefree(p)
-
 #else /* !PURIFY */
 
 #define new_XIV()	new_body_allocated(SVt_IV)
@@ -857,17 +873,8 @@ typedef struct xpvnv XNV;
 #define new_XRV()	new_body_type(SVt_RV)
 #define del_XRV(p)	del_body_type(SVt_RV)
 
-#define new_XPV()	new_body_allocated(SVt_PV)
-#define del_XPV(p)	del_body_allocated(p, SVt_PV)
-
-#define new_XPVIV()	new_body_allocated(SVt_PVIV)
-#define del_XPVIV(p)	del_body_allocated(p, SVt_PVIV)
-
 #define new_XPVNV()	new_body_type(SVt_PVNV)
 #define del_XPVNV(p)	del_body_type(p, SVt_PVNV)
-
-#define new_XPVCV()	new_body_type(SVt_PVCV)
-#define del_XPVCV(p)	del_body_type(p, SVt_PVCV)
 
 #define new_XPVAV()	new_body_allocated(SVt_PVAV)
 #define del_XPVAV(p)	del_body_allocated(p, SVt_PVAV)
@@ -881,28 +888,14 @@ typedef struct xpvnv XNV;
 #define new_XPVGV()	new_body_type(SVt_PVGV)
 #define del_XPVGV(p)	del_body_type(p, SVt_PVGV)
 
-#define new_XPVLV()	new_body_type(SVt_PVLV)
-#define del_XPVLV(p)	del_body_type(p, SVt_PVLV)
-
-#define new_XPVBM()	new_body_type(SVt_PVBM)
-#define del_XPVBM(p)	del_body_type(p, SVt_PVBM)
-
 #endif /* PURIFY */
 
 /* no arena for you! */
 
 #define new_NOARENA(details) \
-	my_safemalloc((details)->size - (details)->offset)
+	my_safemalloc((details)->size + (details)->offset)
 #define new_NOARENAZ(details) \
-	my_safecalloc((details)->size - (details)->offset)
-
-#define new_XPVFM()	my_safemalloc(sizeof(XPVFM))
-#define del_XPVFM(p)	my_safefree(p)
-
-#define new_XPVIO()	my_safemalloc(sizeof(XPVIO))
-#define del_XPVIO(p)	my_safefree(p)
-
-
+	my_safecalloc((details)->size + (details)->offset)
 
 /*
 =for apidoc sv_upgrade
@@ -922,7 +915,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
     U32		old_type = SvTYPE(sv);
     const struct body_details *const old_type_details
 	= bodies_by_type + old_type;
-    const struct body_details *new_type_details = bodies_by_type + new_type;
+    const struct body_details *new_type_details;
 
     if (new_type != SVt_PV && SvIsCOW(sv)) {
 	sv_force_normal_flags(sv, 0);
@@ -976,14 +969,12 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	if (new_type < SVt_PVIV) {
 	    new_type = (new_type == SVt_NV)
 		? SVt_PVNV : SVt_PVIV;
-	    new_type_details = bodies_by_type + new_type;
 	}
 	break;
     case SVt_NV:
 
 	if (new_type < SVt_PVNV) {
 	    new_type = SVt_PVNV;
-	    new_type_details = bodies_by_type + new_type;
 	}
 	break;
     case SVt_RV:
@@ -1016,8 +1007,10 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	break;
     default:
 	if (old_type_details->cant_upgrade)
-	    Perl_croak(aTHX_ "Can't upgrade that kind of scalar");
+	    Perl_croak(aTHX_ "Can't upgrade %s (%" UVuf ") to %" UVuf,
+		       sv_reftype(sv, 0), (UV) old_type, (UV) new_type);
     }
+    new_type_details = bodies_by_type + new_type;
 
     if (old_type > new_type) {
 	return TRUE;
@@ -1026,9 +1019,10 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
     SvFLAGS(sv) &= ~SVTYPEMASK;
     SvFLAGS(sv) |= new_type;
 
+    /* This can't happen, as SVt_NULL is <= all values of new_type, so one of
+       the return statements above will have triggered.  */
+    assert (new_type != SVt_NULL);
     switch (new_type) {
-    case SVt_NULL:
-	Perl_croak(aTHX_ "Can't upgrade to undef");
     case SVt_IV:
 	assert(old_type == SVt_NULL);
 	SvANY(sv) = new_XIV();
@@ -1045,33 +1039,26 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	SvRV_set(sv, 0);
 	return TRUE;
     case SVt_PVHV:
-
-	SvANY(sv) = new_XPVHV();
-
-	HvARRAY(sv)	= 0;
-	HvRITER(sv)	= 0;
-	HvEITER(sv)	= 0;
-	HvPMROOT(sv)	= 0;
-	HvNAME(sv)	= 0;
-	HvFILL(sv)	= 0;
-	HvMAX(sv)	= 0;
-	HvTOTALKEYS(sv)	= 0;
-	HvPLACEHOLDERS_set(sv, 0);
-
-	goto hv_av_common;
-
     case SVt_PVAV:
-	SvANY(sv) = new_XPVAV();
-	SvPV_set(sv, 0);
-	AvMAX(sv)	= -1;
-	AvFILLp(sv)	= -1;
-	AvALLOC(sv)	= 0;
-	SvIV_set(sv, 0);
-	SvNV_set(sv, 0.0);
-	AvARYLEN(sv)	= 0;
-	AvFLAGS(sv)	= AVf_REAL;
+	assert(new_type_details->size);
 
-    hv_av_common:
+#ifndef PURIFY	
+	assert(new_type_details->arena);
+	/* This points to the start of the allocated area.  */
+	new_body_inline(new_body, new_type_details->size, new_type);
+	Zero(new_body, new_type_details->size, char);
+	new_body = ((char *)new_body) - new_type_details->offset;
+#else
+	/* We always allocated the full length item with PURIFY. To do this
+	   we fake things so that arena is false for all 16 types..  */
+	new_body = new_NOARENAZ(new_type_details);
+#endif
+	SvANY(sv) = new_body;
+	if (new_type == SVt_PVAV) {
+	    AvMAX(sv)	= -1;
+	    AvFILLp(sv)	= -1;
+	    AvFLAGS(sv)	= AVf_REAL;
+	}
 
 	/* SVt_NULL isn't the only thing upgraded to AV or HV.
 	   The target created by newSVrv also is, and it can have magic.
@@ -1095,9 +1082,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	if (old_type >= SVt_PVMG) {
 	    SvMAGIC_set(sv, ((XPVMG*)old_body)->xmg_magic);
 	    SvSTASH_set(sv, ((XPVMG*)old_body)->xmg_stash);
-	} else {
-	    SvMAGIC_set(sv, 0);
-	    SvSTASH_set(sv, 0);
 	}
 	break;
 
@@ -1118,24 +1102,21 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
     case SVt_PV:
 
 	assert(new_type_details->size);
-#ifndef PURIFY
+	/* We always allocated the full length item with PURIFY. To do this
+	   we fake things so that arena is false for all 16 types..  */
 	if(new_type_details->arena) {
 	    /* This points to the start of the allocated area.  */
 	    new_body_inline(new_body, new_type_details->size, new_type);
 	    Zero(new_body, new_type_details->size, char);
-	    new_body = ((char *)new_body) + new_type_details->offset;
+	    new_body = ((char *)new_body) - new_type_details->offset;
 	} else {
 	    new_body = new_NOARENAZ(new_type_details);
 	}
-#else
-	/* We always allocated the full length item with PURIFY */
-	new_body = new_NOARENAZ(new_type_details);
-#endif
 	SvANY(sv) = new_body;
 
 	if (old_type_details->copy) {
-	    Copy((char *)old_body - old_type_details->offset,
-		 (char *)new_body - old_type_details->offset,
+	    Copy((char *)old_body + old_type_details->offset,
+		 (char *)new_body + old_type_details->offset,
 		 old_type_details->copy, char);
 	}
 
@@ -1161,7 +1142,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 #ifdef PURIFY
 	my_safefree(old_body);
 #else
-	del_body((void*)((char*)old_body - old_type_details->offset),
+	del_body((void*)((char*)old_body + old_type_details->offset),
 		 &PL_body_roots[old_type]);
 #endif
     }
@@ -4886,19 +4867,13 @@ Perl_sv_clear(pTHX_ register SV *sv)
     SvFLAGS(sv) &= SVf_BREAK;
     SvFLAGS(sv) |= SVTYPEMASK;
 
-#ifndef PURIFY
     if (sv_type_details->arena) {
-	del_body(((char *)SvANY(sv) - sv_type_details->offset),
+	del_body(((char *)SvANY(sv) + sv_type_details->offset),
 		 &PL_body_roots[type]);
     }
     else if (sv_type_details->size) {
 	my_safefree(SvANY(sv));
     }
-#else
-    if (sv_type_details->size) {
-	my_safefree(SvANY(sv));
-    }
-#endif
 
     /* decrease refcount of the stash that owns this GV, if any */
     if (stash)
@@ -9652,30 +9627,25 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
 	    case SVt_PVIV:
 	    case SVt_PV:
 		assert(sv_type_details->size);
-#ifndef PURIFY
 		if (sv_type_details->arena) {
 		    new_body_inline(new_body, sv_type_details->size, sv_type);
 		    new_body
-			= (void*)((char*)new_body + sv_type_details->offset);
+			= (void*)((char*)new_body - sv_type_details->offset);
 		} else {
 		    new_body = new_NOARENA(sv_type_details);
 		}
-#else
-		/* We always allocated the full length item with PURIFY */
-		new_body = new_NOARENA(sv_type_details);
-#endif
 	    }
 	    assert(new_body);
 	    SvANY(dstr) = new_body;
 
 #ifndef PURIFY
-	    Copy(((char*)SvANY(sstr)) - sv_type_details->offset,
-		 ((char*)SvANY(dstr)) - sv_type_details->offset,
+	    Copy(((char*)SvANY(sstr)) + sv_type_details->offset,
+		 ((char*)SvANY(dstr)) + sv_type_details->offset,
 		 sv_type_details->copy, char);
 #else
 	    Copy(((char*)SvANY(sstr)),
 		 ((char*)SvANY(dstr)),
-		 sv_type_details->size - sv_type_details->offset, char);
+		 sv_type_details->size + sv_type_details->offset, char);
 #endif
 
 	    if (sv_type != SVt_PVAV && sv_type != SVt_PVHV)
