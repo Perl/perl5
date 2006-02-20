@@ -1070,8 +1070,8 @@ PP(pp_aassign)
 
     relem = firstrelem;
     lelem = firstlelem;
-    ary = Null(AV*);
-    hash = Null(HV*);
+    ary = NULL;
+    hash = NULL;
 
     while (lelem <= lastlelem) {
 	TAINT_NOT;		/* Each item stands on its own, taintwise. */
@@ -1555,7 +1555,7 @@ Perl_do_readline(pTHX)
 	    RETURN;
 	}
     }
-    fp = Nullfp;
+    fp = NULL;
     if (io) {
 	fp = IoIFP(io);
 	if (!fp) {
@@ -1564,7 +1564,7 @@ Perl_do_readline(pTHX)
 		    IoLINES(io) = 0;
 		    if (av_len(GvAVn(PL_last_in_gv)) < 0) {
 			IoFLAGS(io) &= ~IOf_START;
-			do_open(PL_last_in_gv,"-",1,FALSE,O_RDONLY,0,Nullfp);
+			do_open(PL_last_in_gv,"-",1,FALSE,O_RDONLY,0,NULL);
 			sv_setpvn(GvSVn(PL_last_in_gv), "-", 1);
 			SvSETMAGIC(GvSV(PL_last_in_gv));
 			fp = IoIFP(io);
@@ -3033,7 +3033,7 @@ PP(pp_method)
 	}
     }
 
-    SETs(method_common(sv, Null(U32*)));
+    SETs(method_common(sv, NULL));
     RETURN;
 }
 

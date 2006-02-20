@@ -342,7 +342,7 @@ XS(XS_UNIVERSAL_VERSION)
         pkg = gv_stashsv(ST(0), FALSE);
     }
 
-    gvp = pkg ? (GV**)hv_fetchs(pkg, "VERSION", FALSE) : Null(GV**);
+    gvp = pkg ? (GV**)hv_fetchs(pkg, "VERSION", FALSE) : NULL;
 
     if (gvp && isGV(gv = *gvp) && (sv = GvSV(gv)) && SvOK(sv)) {
         SV * const nsv = sv_newmortal();

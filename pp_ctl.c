@@ -75,7 +75,7 @@ PP(pp_regcomp)
     dSP;
     register PMOP *pm = (PMOP*)cLOGOP->op_other;
     SV *tmpstr;
-    MAGIC *mg = Null(MAGIC*);
+    MAGIC *mg = NULL;
 
     /* prevent recompiling under /o and ithreads. */
 #if defined(USE_ITHREADS)
@@ -133,7 +133,7 @@ PP(pp_regcomp)
 	{
 	    if (PM_GETRE(pm)) {
 	        ReREFCNT_dec(PM_GETRE(pm));
-		PM_SETRE(pm, Null(REGEXP*));	/* crucial if regcomp aborts */
+		PM_SETRE(pm, NULL);	/* crucial if regcomp aborts */
 	    }
 	    if (PL_op->op_flags & OPf_SPECIAL)
 		PL_reginterp_cnt = I32_MAX; /* Mark as safe.  */
@@ -383,7 +383,7 @@ Perl_rxres_free(pTHX_ void **rsp)
 	}
 #endif
 	Safefree(p);
-	*rsp = Null(void*);
+	*rsp = NULL;
     }
 }
 
@@ -3018,7 +3018,7 @@ S_check_type_and_open(pTHX_ const char *name, const char *mode)
     Stat_t st;
     const int st_rc = PerlLIO_stat(name, &st);
     if (st_rc < 0) {
-       return Nullfp;
+	return NULL;
     }
 
     if(S_ISDIR(st.st_mode) || S_ISBLK(st.st_mode)) {
@@ -3209,8 +3209,8 @@ PP(pp_require)
 				    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {
 					PerlIO_close(IoOFP(io));
 				    }
-				    IoIFP(io) = Nullfp;
-				    IoOFP(io) = Nullfp;
+				    IoIFP(io) = NULL;
+				    IoOFP(io) = NULL;
 				}
 			    }
 

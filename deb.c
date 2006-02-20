@@ -225,10 +225,8 @@ Perl_deb_stack_all(pTHX)
 		 */
 
 		I32 i, stack_min, stack_max, mark_min, mark_max;
-		const PERL_CONTEXT *cx_n;
+		const PERL_CONTEXT *cx_n = NULL;
 		const PERL_SI *si_n;
-
-		cx_n = Null(PERL_CONTEXT*);
 
 		/* there's a separate stack per SI, so only search
 		 * this one */
@@ -257,7 +255,7 @@ Perl_deb_stack_all(pTHX)
 
 		si_n = si;
 		i = ix;
-		cx_n = Null(PERL_CONTEXT*);
+		cx_n = NULL;
 		for (;;) {
 		    i++;
 		    if (i > si_n->si_cxix) {

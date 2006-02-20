@@ -155,20 +155,20 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 
 
 #define PAD_SAVE_SETNULLPAD()	SAVECOMPPAD(); \
-	PL_comppad = Null(PAD*); PL_curpad = Null(SV**);	\
+	PL_comppad = NULL; PL_curpad = NULL;	\
 	DEBUG_Xv(PerlIO_printf(Perl_debug_log, "Pad set_null\n"));
 
 #define PAD_SAVE_LOCAL(opad,npad) \
 	opad = PL_comppad;					\
 	PL_comppad = (npad);					\
-	PL_curpad =  PL_comppad ? AvARRAY(PL_comppad) : Null(SV**); \
+	PL_curpad =  PL_comppad ? AvARRAY(PL_comppad) : NULL;	\
 	DEBUG_Xv(PerlIO_printf(Perl_debug_log,			\
 	      "Pad 0x%"UVxf"[0x%"UVxf"] save_local\n",		\
 	      PTR2UV(PL_comppad), PTR2UV(PL_curpad)));
 
 #define PAD_RESTORE_LOCAL(opad) \
 	PL_comppad = opad;					\
-	PL_curpad =  PL_comppad ? AvARRAY(PL_comppad) : Null(SV**); \
+	PL_curpad =  PL_comppad ? AvARRAY(PL_comppad) : NULL;	\
 	DEBUG_Xv(PerlIO_printf(Perl_debug_log,			\
 	      "Pad 0x%"UVxf"[0x%"UVxf"] restore_local\n",	\
 	      PTR2UV(PL_comppad), PTR2UV(PL_curpad)));
@@ -264,7 +264,7 @@ Clone the state variables associated with running and compiling pads.
 
 #define PAD_CLONE_VARS(proto_perl, param)				\
     PL_comppad = (AV *) ptr_table_fetch(PL_ptr_table, proto_perl->Icomppad); \
-    PL_curpad = PL_comppad ?  AvARRAY(PL_comppad) : Null(SV**);		\
+    PL_curpad = PL_comppad ?  AvARRAY(PL_comppad) : NULL;		\
     PL_comppad_name		= av_dup(proto_perl->Icomppad_name, param); \
     PL_comppad_name_fill	= proto_perl->Icomppad_name_fill;	\
     PL_comppad_name_floor	= proto_perl->Icomppad_name_floor;	\

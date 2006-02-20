@@ -1031,7 +1031,7 @@ char *
 Perl_vform(pTHX_ const char *pat, va_list *args)
 {
     SV * const sv = mess_alloc();
-    sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
+    sv_vsetpvfn(sv, pat, strlen(pat), args, NULL, 0, NULL);
     return SvPVX(sv);
 }
 
@@ -2123,7 +2123,7 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
 	taint_proper("Insecure %s%s", "EXEC");
     }
     if (PerlProc_pipe(p) < 0)
-	return Nullfp;
+	return NULL;
     /* Try for another pipe pair for error return */
     if (PerlProc_pipe(pp) >= 0)
 	did_pipes = 1;
@@ -2135,7 +2135,7 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
 		PerlLIO_close(pp[0]);
 		PerlLIO_close(pp[1]);
 	    }
-	    return Nullfp;
+	    return NULL;
 	}
 	sleep(5);
     }
@@ -2224,7 +2224,7 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
 		pid2 = wait4pid(pid, &status, 0);
 	    } while (pid2 == -1 && errno == EINTR);
 	    errno = errkid;		/* Propagate errno from kid */
-	    return Nullfp;
+	    return NULL;
 	}
     }
     if (did_pipes)
@@ -2263,7 +2263,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 	taint_proper("Insecure %s%s", "EXEC");
     }
     if (PerlProc_pipe(p) < 0)
-	return Nullfp;
+	return NULL;
     if (doexec && PerlProc_pipe(pp) >= 0)
 	did_pipes = 1;
     while ((pid = PerlProc_fork()) < 0) {
@@ -2276,7 +2276,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 	    }
 	    if (!doexec)
 		Perl_croak(aTHX_ "Can't fork");
-	    return Nullfp;
+	    return NULL;
 	}
 	sleep(5);
     }
@@ -2332,7 +2332,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 #ifdef PERL_USES_PL_PIDSTATUS
 	hv_clear(PL_pidstatus);	/* we have no children */
 #endif
-	return Nullfp;
+	return NULL;
 #undef THIS
 #undef THAT
     }
@@ -2376,7 +2376,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 		pid2 = wait4pid(pid, &status, 0);
 	    } while (pid2 == -1 && errno == EINTR);
 	    errno = errkid;		/* Propagate errno from kid */
-	    return Nullfp;
+	    return NULL;
 	}
     }
     if (did_pipes)
@@ -2782,7 +2782,7 @@ Perl_wait4pid(pTHX_ Pid_t pid, int *statusp, int flags)
     goto finish;
 #endif
 #if !defined(HAS_WAITPID) && defined(HAS_WAIT4)
-    result = wait4((pid==-1)?0:pid,statusp,flags,Null(struct rusage *));
+    result = wait4((pid==-1)?0:pid,statusp,flags,NULL);
     goto finish;
 #endif
 #ifdef PERL_USES_PL_PIDSTATUS
@@ -3341,7 +3341,7 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
 	result = &PL_vtbl_utf8;
 	break;
     default:
-	result = Null(MGVTBL*);
+	result = NULL;
 	break;
     }
     return (MGVTBL*)result;

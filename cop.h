@@ -542,7 +542,7 @@ struct subst {
 	cx->sb_s		= s,					\
 	cx->sb_m		= m,					\
 	cx->sb_strend		= strend,				\
-	cx->sb_rxres		= Null(void*),				\
+	cx->sb_rxres		= NULL,					\
 	cx->sb_rx		= rx,					\
 	cx->cx_type		= CXt_SUBST;				\
 	rxres_save(&cx->sb_rxres, rx)

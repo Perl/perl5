@@ -307,7 +307,7 @@ Perl_pad_undef(pTHX_ CV* cv)
 	SvREFCNT_dec(sv);
     }
     SvREFCNT_dec((SV*)CvPADLIST(cv));
-    CvPADLIST(cv) = Null(PADLIST*);
+    CvPADLIST(cv) = NULL;
 }
 
 
@@ -587,7 +587,7 @@ Perl_pad_findmy(pTHX_ const char *name)
     SV **name_svp;
 
     offset =  pad_findlex(name, PL_compcv, PL_cop_seqmax, 1,
-		Null(SV**), &out_sv, &out_flags);
+		NULL, &out_sv, &out_flags);
     if (offset != NOT_IN_PAD) 
 	return offset;
 
@@ -622,7 +622,7 @@ Perl_find_rundefsvoffset(pTHX)
     SV *out_sv;
     int out_flags;
     return pad_findlex("$_", find_runcv(NULL), PL_curcop->cop_seq, 1,
-	    Null(SV**), &out_sv, &out_flags);
+	    NULL, &out_sv, &out_flags);
 }
 
 /*
@@ -812,7 +812,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
     /* out_capture non-null means caller wants us to capture lex; in
      * addition we capture ourselves unless it's an ANON/format */
     new_capturep = out_capture ? out_capture :
-		CvLATE(cv) ? Null(SV**) : &new_capture;
+		CvLATE(cv) ? NULL : &new_capture;
 
     offset = pad_findlex(name, CvOUTSIDE(cv), CvOUTSIDE_SEQ(cv), 1,
 		new_capturep, out_name_sv, out_flags);
@@ -867,7 +867,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 
 	PL_comppad_name = ocomppad_name;
 	PL_comppad = ocomppad;
-	PL_curpad = ocomppad ? AvARRAY(ocomppad) : Null(SV **);
+	PL_curpad = ocomppad ? AvARRAY(ocomppad) : NULL;
     }
     return new_offset;
 }

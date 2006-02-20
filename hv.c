@@ -124,7 +124,7 @@ Perl_free_tied_hv_pool(pTHX)
 	he = HeNEXT(he);
 	del_HE(ohe);
     }
-    PL_hv_fetch_ent_mh = Nullhe;
+    PL_hv_fetch_ent_mh = NULL;
 }
 
 #if defined(USE_ITHREADS)
@@ -154,7 +154,7 @@ Perl_he_dup(pTHX_ const HE *e, bool shared, CLONE_PARAMS* param)
     HE *ret;
 
     if (!e)
-	return Nullhe;
+	return NULL;
     /* look for it in the table first */
     ret = (HE*)ptr_table_fetch(PL_ptr_table, e);
     if (ret)
@@ -473,7 +473,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		    Newx(k, HEK_BASESIZE + sizeof(SV*), char);
 		    HeKEY_hek(entry) = (HEK*)k;
 		}
-		HeNEXT(entry) = Nullhe;
+		HeNEXT(entry) = NULL;
 		HeSVKEY_set(entry, keysv);
 		HeVAL(entry) = sv;
 		sv_upgrade(sv, SVt_PVLV);
@@ -585,7 +585,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		if (!HvARRAY(hv) && !needs_store) {
 		    if (flags & HVhek_FREEKEY)
 			Safefree(key);
-		    return Nullhe;
+		    return NULL;
 		}
 #ifdef ENV_IS_CASELESS
 		else if (mg_find((SV*)hv, PERL_MAGIC_env)) {
@@ -668,7 +668,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     masked_flags = (flags & HVhek_MASK);
 
 #ifdef DYNAMIC_ENV_FETCH
-    if (!HvARRAY(hv)) entry = Null(HE*);
+    if (!HvARRAY(hv)) entry = NULL;
     else
 #endif
     {
@@ -1718,7 +1718,7 @@ S_hfreeentries(pTHX_ HV *hv)
 		hv_free_ent(hv, entry);
 	    }
 	    iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
-	    iter->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
+	    iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
 
 	    /* There are now no allocated pointers in the aux structure.  */
 
@@ -1838,7 +1838,7 @@ S_hv_auxinit(HV *hv) {
     iter = HvAUX(hv);
 
     iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
-    iter->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
+    iter->xhv_eiter = NULL;	/* HvEITER(hv) = NULL */
     iter->xhv_name = 0;
     iter->xhv_backreferences = 0;
     return iter;
@@ -1873,7 +1873,7 @@ Perl_hv_iterinit(pTHX_ HV *hv)
 	    hv_free_ent(hv, entry);
 	}
 	iter->xhv_riter = -1; 	/* HvRITER(hv) = -1 */
-	iter->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
+	iter->xhv_eiter = NULL; /* HvEITER(hv) = NULL */
     } else {
 	hv_auxinit(hv);
     }
@@ -2068,8 +2068,8 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	    SvREFCNT_dec(HeVAL(entry));
 	Safefree(HeKEY_hek(entry));
 	del_HE(entry);
-	iter->xhv_eiter = Null(HE*); /* HvEITER(hv) = Null(HE*) */
-	return Null(HE*);
+	iter->xhv_eiter = NULL; /* HvEITER(hv) = NULL */
+	return NULL;
     }
 #ifdef DYNAMIC_ENV_FETCH  /* set up %ENV for iteration */
     if (!entry && SvRMAGICAL((SV*)hv) && mg_find((SV*)hv, PERL_MAGIC_env)) {

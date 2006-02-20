@@ -564,7 +564,7 @@ PP(pp_open)
     }
 
     tmps = SvPV_const(sv, len);
-    ok = do_openn(gv, tmps, len, FALSE, O_RDONLY, 0, Nullfp, MARK+1, (SP-MARK));
+    ok = do_openn(gv, tmps, len, FALSE, O_RDONLY, 0, NULL, MARK+1, (SP-MARK));
     SP = ORIGMARK;
     if (ok)
 	PUSHi( (I32)PL_forkprocess );
@@ -1070,7 +1070,7 @@ PP(pp_sselect)
 	timebuf.tv_usec = (long)(value * 1000000.0);
     }
     else
-	tbuf = Null(struct timeval*);
+	tbuf = NULL;
 
     for (i = 1; i <= 3; i++) {
 	sv = SP[i];
@@ -1511,7 +1511,7 @@ PP(pp_sysopen)
     /* Need TIEHANDLE method ? */
     const char * const tmps = SvPV_const(sv, len);
     /* FIXME? do_open should do const  */
-    if (do_open(gv, tmps, len, TRUE, mode, perm, Nullfp)) {
+    if (do_open(gv, tmps, len, TRUE, mode, perm, NULL)) {
 	IoLINES(GvIOp(gv)) = 0;
 	PUSHs(&PL_sv_yes);
     }
@@ -1942,7 +1942,7 @@ PP(pp_eof)
 		if ((IoFLAGS(io) & IOf_START) && av_len(GvAVn(gv)) < 0) {
 		    IoLINES(io) = 0;
 		    IoFLAGS(io) &= ~IOf_START;
-		    do_open(gv, "-", 1, FALSE, O_RDONLY, 0, Nullfp);
+		    do_open(gv, "-", 1, FALSE, O_RDONLY, 0, NULL);
 		    sv_setpvn(GvSV(gv), "-", 1);
 		    SvSETMAGIC(GvSV(gv));
 		}
@@ -2162,7 +2162,7 @@ PP(pp_ioctl)
     const unsigned int func = POPu;
     const int optype = PL_op->op_type;
     GV * const gv = (GV*)POPs;
-    IO * const io = gv ? GvIOn(gv) : Null(IO*);
+    IO * const io = gv ? GvIOn(gv) : NULL;
     char *s;
     IV retval;
 
@@ -2243,7 +2243,7 @@ PP(pp_flock)
     if (gv && (io = GvIO(gv)))
 	fp = IoIFP(io);
     else {
-	fp = Nullfp;
+	fp = NULL;
 	io = NULL;
     }
     /* XXX Looks to me like io is always NULL at this point */
@@ -4241,9 +4241,9 @@ PP(pp_time)
 {
     dVAR; dSP; dTARGET;
 #ifdef BIG_TIME
-    XPUSHn( time(Null(Time_t*)) );
+    XPUSHn( time(NULL) );
 #else
-    XPUSHi( time(Null(Time_t*)) );
+    XPUSHi( time(NULL) );
 #endif
     RETURN;
 }

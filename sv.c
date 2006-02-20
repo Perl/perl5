@@ -520,7 +520,7 @@ do_clean_all(pTHX_ SV *sv)
     SvFLAGS(sv) |= SVf_BREAK;
     if (PL_comppad == (AV*)sv) {
 	PL_comppad = NULL;
-	PL_curpad = Null(SV**);
+	PL_curpad = NULL;
     }
     SvREFCNT_dec(sv);
 }
@@ -6779,7 +6779,7 @@ Perl_vnewSVpvf(pTHX_ const char* pat, va_list* args)
     dVAR;
     register SV *sv;
     new_SV(sv);
-    sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
+    sv_vsetpvfn(sv, pat, strlen(pat), args, NULL, 0, NULL);
     return sv;
 }
 
@@ -7784,7 +7784,7 @@ Usually used via its frontend C<sv_setpvf>.
 void
 Perl_sv_vsetpvf(pTHX_ SV *sv, const char* pat, va_list* args)
 {
-    sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
+    sv_vsetpvfn(sv, pat, strlen(pat), args, NULL, 0, NULL);
 }
 
 /*
@@ -7817,7 +7817,7 @@ Usually used via its frontend C<sv_setpvf_mg>.
 void
 Perl_sv_vsetpvf_mg(pTHX_ SV *sv, const char* pat, va_list* args)
 {
-    sv_vsetpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
+    sv_vsetpvfn(sv, pat, strlen(pat), args, NULL, 0, NULL);
     SvSETMAGIC(sv);
 }
 
@@ -7890,7 +7890,7 @@ Usually used via its frontend C<sv_catpvf>.
 void
 Perl_sv_vcatpvf(pTHX_ SV *sv, const char* pat, va_list* args)
 {
-    sv_vcatpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
+    sv_vcatpvfn(sv, pat, strlen(pat), args, NULL, 0, NULL);
 }
 
 /*
@@ -7923,7 +7923,7 @@ Usually used via its frontend C<sv_catpvf_mg>.
 void
 Perl_sv_vcatpvf_mg(pTHX_ SV *sv, const char* pat, va_list* args)
 {
-    sv_vcatpvfn(sv, pat, strlen(pat), args, Null(SV**), 0, Null(bool*));
+    sv_vcatpvfn(sv, pat, strlen(pat), args, NULL, 0, NULL);
     SvSETMAGIC(sv);
 }
 
@@ -8131,7 +8131,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	const char *eptr = NULL;
 	STRLEN elen = 0;
 	SV *vecsv = NULL;
-	const U8 *vecstr = Null(U8*);
+	const U8 *vecstr = NULL;
 	STRLEN veclen = 0;
 	char c = 0;
 	int i;
@@ -9536,7 +9536,7 @@ Perl_rvpv_dup(pTHX_ SV *dstr, const SV *sstr, CLONE_PARAMS* param)
 	}
     }
     else {
-	/* Copy the Null */
+	/* Copy the NULL */
 	if (SvTYPE(dstr) == SVt_RV)
 	    SvRV_set(dstr, NULL);
 	else
@@ -11068,7 +11068,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_localizing	= proto_perl->Tlocalizing;
 
     PL_errors		= sv_dup_inc(proto_perl->Terrors, param);
-    PL_hv_fetch_ent_mh	= Nullhe;
+    PL_hv_fetch_ent_mh	= NULL;
     PL_modcount		= proto_perl->Tmodcount;
     PL_lastgotoprobe	= NULL;
     PL_dumpindent	= proto_perl->Tdumpindent;

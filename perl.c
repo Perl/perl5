@@ -852,7 +852,7 @@ perl_destruct(pTHXx)
 
     if(PL_rsfp) {
 	(void)PerlIO_close(PL_rsfp);
-	PL_rsfp = Nullfp;
+	PL_rsfp = NULL;
     }
 
     /* Filters for program text */
@@ -4491,7 +4491,7 @@ S_init_lexer(pTHX)
     dVAR;
     PerlIO *tmpfp;
     tmpfp = PL_rsfp;
-    PL_rsfp = Nullfp;
+    PL_rsfp = NULL;
     lex_start(PL_linestr);
     PL_rsfp = tmpfp;
     PL_subname = newSVpvs("main");

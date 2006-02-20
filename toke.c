@@ -820,7 +820,7 @@ S_skipspace(pTHX_ register char *s)
 		PerlIO_clearerr(PL_rsfp);
 	    else
 		(void)PerlIO_close(PL_rsfp);
-	    PL_rsfp = Nullfp;
+	    PL_rsfp = NULL;
 	    return s;
 	}
 
@@ -2781,7 +2781,7 @@ Perl_yylex(pTHX)
 			PerlIO_clearerr(PL_rsfp);
 		    else
 			(void)PerlIO_close(PL_rsfp);
-		    PL_rsfp = Nullfp;
+		    PL_rsfp = NULL;
 		    PL_doextract = FALSE;
 		}
 		if (!PL_in_eval && (PL_minus_n || PL_minus_p)) {
@@ -4610,7 +4610,7 @@ Perl_yylex(pTHX)
 		    }
 		}
 #endif
-		PL_rsfp = Nullfp;
+		PL_rsfp = NULL;
 	    }
 	    goto fake_eof;
 	}
