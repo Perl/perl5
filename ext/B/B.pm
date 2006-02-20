@@ -18,7 +18,7 @@ require Exporter;
 @EXPORT_OK = qw(minus_c ppname save_BEGINs
 		class peekop cast_I32 cstring cchar hash threadsv_names
 		main_root main_start main_cv svref_2object opnumber
-		amagic_generation perlstring
+		sub_generation amagic_generation perlstring
 		walkoptree_slow walkoptree walkoptree_exec walksymtable
 		parents comppadlist sv_undef compile_stats timing_info
 		begin_av init_av check_av end_av regex_padav dowarn
@@ -935,9 +935,9 @@ underlying C "inheritance":
 
                                  B::OP
                                    |
-                   +---------------+--------+--------+
-                   |               |        |        |
-                B::UNOP          B::SVOP B::PADOP  B::COP
+                   +---------------+--------+--------+-------+
+                   |               |        |        |       |
+                B::UNOP          B::SVOP B::PADOP  B::COP  B::PVOP
                  ,'  `-.
                 /       `--.
            B::BINOP     B::LOGOP

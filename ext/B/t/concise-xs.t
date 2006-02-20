@@ -117,7 +117,7 @@ use Getopt::Std;
 use Carp;
 use Test::More tests => ( # per-pkg tests (function ct + require_ok)
 			  40 + 16	# Data::Dumper, Digest::MD5
-			  + 511 + 233	# B::Deparse, B
+			  + 511 + 234	# B::Deparse, B
 			  + 588 + 189	# POSIX, IO::Socket
 			  + 3 * ($] > 5.009)
 			  + 14 * ($] >= 5.009003)
@@ -156,7 +156,7 @@ my $testpkgs = {
 		  main_start main_root main_cv init_av inc_gv hash
 		  formfeed end_av dowarn diehook defstash curstash
 		  cstring comppadlist check_av cchar cast_I32 bootstrap
-		  begin_av amagic_generation address
+		  begin_av amagic_generation sub_generation address
 		  )],
     },
 

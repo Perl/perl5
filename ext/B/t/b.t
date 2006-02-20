@@ -22,7 +22,7 @@ BEGIN {
 $|  = 1;
 use warnings;
 use strict;
-use Test::More tests => 55;
+use Test::More tests => 57;
 
 BEGIN { use_ok( 'B' ); }
 
@@ -164,4 +164,22 @@ is(B::cstring("wibble"), '"wibble"', "Testing B::cstring()");
 is(B::perlstring("wibble"), '"wibble"', "Testing B::perlstring()");
 is(B::class(bless {}, "Wibble::Bibble"), "Bibble", "Testing B::class()");
 is(B::cast_I32(3.14), 3, "Testing B::cast_I32()");
-is(B::opnumber("localtime"), 294);
+is(B::opnumber("localtime"), 294, "Testing opnumber with opname (localtime)");
+
+{
+    no warnings 'once';
+    my $sg = B::sub_generation();
+    *Whatever::hand_waving = sub { };
+    ok( $sg < B::sub_generation, "sub_generation increments" );
+}
+
+{
+    my $ag = B::amagic_generation();
+    {
+
+        package Whatever;
+        require overload;
+        overload->import( '""' => sub {"What? You want more?!"} );
+    }
+    ok( $ag < B::amagic_generation, "amagic_generation increments" );
+}
