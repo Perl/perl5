@@ -143,16 +143,11 @@ for my $ary ([ascii => 'perl'], [latin1 => "\xB6"]) {
     is(tainted($taint), tainted($arg), "tainted: $encode, downgrade down");
 }
 
-SKIP: {
-    eval {
-	fresh_perl_is('$a = substr $^X, 0, 0; /\x{100}/i; /$a\x{100}/i || print q,ok,',
-		      'ok', {switches => ["-T", "-l"]},
-		      "matching a regexp is taint agnostic");
-	};
-    if ($@ =~ /^Insecure directory in/) {
-	chomp $@;
-	skip ("Can't run taint checks with $@", 2);
-    } 
+{
+    local @ENV{qw(PATH CDPATH IFS ENV BASH_ENV)} = (undef) x 5;
+    fresh_perl_is('$a = substr $^X, 0, 0; /\x{100}/i; /$a\x{100}/i || print q,ok,',
+		  'ok', {switches => ["-T", "-l"]},
+		  "matching a regexp is taint agnostic");
 
     fresh_perl_is('$a = substr $^X, 0, 0; /$a\x{100}/i || print q,ok,',
 		  'ok', {switches => ["-T", "-l"]},
