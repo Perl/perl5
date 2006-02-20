@@ -1303,7 +1303,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 #endif
 	PerlIO_putc(file, '\n');
     }
-    if ((type >= SVt_PVNV && type != SVt_PVAV && type != SVt_PVHV)
+    if ((type >= SVt_PVNV && type != SVt_PVAV && type != SVt_PVHV
+	 && type != SVt_PVFM)
 	|| type == SVt_NV) {
 	STORE_NUMERIC_LOCAL_SET_STANDARD();
 	/* %Vg doesn't work? --jhi */
