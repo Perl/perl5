@@ -2417,7 +2417,7 @@ PP(pp_goto)
 		    cx->blk_sub.hasargs = 0;
 		}
 		cx->blk_sub.cv = cv;
-		cx->blk_sub.olddepth = (U16)CvDEPTH(cv);
+		cx->blk_sub.olddepth = CvDEPTH(cv);
 
 		CvDEPTH(cv)++;
 		if (CvDEPTH(cv) < 2)
