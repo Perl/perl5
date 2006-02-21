@@ -642,6 +642,7 @@ Perl_sv_free_arenas(pTHX)
 #else
     S_free_arena(aTHX_ (void**) PL_body_arenas);
 #endif
+    PL_body_arenas = 0;
 
     for (i=0; i<PERL_ARENA_ROOTS_SIZE; i++)
 	PL_body_roots[i] = 0;
