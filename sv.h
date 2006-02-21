@@ -245,44 +245,54 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVp_NOK		0x02000000	/* has valid non-public numeric value */
 #define SVp_POK		0x04000000	/* has valid non-public pointer value */
 #define SVp_SCREAM	0x08000000	/* has been studied? */
+#define SVphv_CLONEABLE	0x08000000	/* PVHV (stashes) clone its objects */
 
-#define SVf_UTF8        0x20000000      /* SvPV is UTF-8 encoded */
-/* Ensure this value does not clash with the GV_ADD* flags in gv.h */
 
 #define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK|SVf_FAKE)
 
 #define SVf_OK		(SVf_IOK|SVf_NOK|SVf_POK|SVf_ROK| \
 			 SVp_IOK|SVp_NOK|SVp_POK)
 
-#define SVf_AMAGIC	0x10000000      /* has magical overloaded methods */
-
 #define PRIVSHIFT 8	/* (SVp_?OK >> PRIVSHIFT) == SVf_?OK */
+
+#define SVf_AMAGIC	0x10000000      /* has magical overloaded methods */
+#define SVf_UTF8        0x20000000      /* SvPV is UTF-8 encoded */
+/* Ensure this value does not clash with the GV_ADD* flags in gv.h */
 
 /* Some private flags. */
 
-/* SVpad_OUR may be set on SVt_PV{NV,MG,GV} types */
-#define SVpad_OUR	0x80000000	/* pad name is "our" instead of "my" */
+/* PVHV */
+#define SVphv_REHASH	0x10000000	/* PVHV is recalculating hash values */
+/* PVHV */
+#define SVphv_SHAREKEYS 0x20000000	/* PVHV
+					   keys live on shared string table */
+/* PVNV, PVMG, PVGV, presumably only inside pads */
 #define SVpad_TYPED	0x40000000	/* Typed Lexical */
-
-#define SVf_IVisUV	0x80000000	/* use XPVUV instead of XPVIV */
-
-#define SVpfm_COMPILED	0x80000000	/* FORMLINE is compiled */
-
-#define SVpbm_VALID	0x80000000
+/* PVAV */
+#define SVpav_REAL	0x40000000	/* free old entries */
+/* PVHV */
+#define SVphv_LAZYDEL	0x40000000	/* entry in xhv_eiter must be deleted */
+/* PVBM */
 #define SVpbm_TAIL	0x40000000
-
+/* ??? */
 #define SVrepl_EVAL	0x40000000	/* Replacement part of s///e */
 
-#define SVphv_CLONEABLE	0x08000000	/* for stashes: clone its objects */
-#define SVphv_REHASH	0x10000000	/* HV is recalculating hash values */
-#define SVphv_SHAREKEYS 0x20000000	/* keys live on shared string table */
-#define SVphv_LAZYDEL	0x40000000	/* entry in xhv_eiter must be deleted */
+/* PVNV, PVMG, PVGV, presumably only inside pads */
+#define SVpad_OUR	0x80000000	/* pad name is "our" instead of "my" */
+/* IV, PVIV, PVNV, PVMG, PVGV and (I assume) PVLV  */
+/* Presumably IVs aren't stored in pads */
+#define SVf_IVisUV	0x80000000	/* use XPVUV instead of XPVIV */
+/* PVAV */
+#define SVpav_REIFY 	0x80000000	/* can become real */
+/* PVHV */
 #define SVphv_HASKFLAGS	0x80000000	/* keys have flag byte after hash */
-
+/* PVFM */
+#define SVpfm_COMPILED	0x80000000	/* FORMLINE is compiled */
+/* PVBM */
+#define SVpbm_VALID	0x80000000
+/* RV upwards. However, SVf_ROK and SVp_IOK are exclusive  */
 #define SVprv_WEAKREF   0x80000000      /* Weak reference */
 
-#define SVpav_REAL	0x40000000	/* free old entries */
-#define SVpav_REIFY 	0x80000000	/* can become real */
 
 struct xpv {
     NV		xnv_nv;		/* numeric value, if any */
