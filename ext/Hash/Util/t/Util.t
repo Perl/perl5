@@ -33,7 +33,7 @@ BEGIN {
                      hv_store
 
                     );
-    plan tests => 201 + @Exported_Funcs;
+    plan tests => 204 + @Exported_Funcs;
     use_ok 'Hash::Util', @Exported_Funcs;
 }
 foreach my $func (@Exported_Funcs) {
@@ -452,3 +452,21 @@ ok($hash_seed >= 0, "hash_seed $hash_seed");
     is("@legal","0 2 4 6 8 a b c d e f",'lock_keys_plus() @legal DDS/t 3');
     is("@keys","0 2 4 6 8",'lock_keys_plus() @keys DDS/t 3');
 }
+
+{
+    my %hash = ('a'..'f');
+    my @keys = ();
+    my @ph = ();
+    my @lock = ('a', 'c', 'e', 'g');
+    lock_keys(%hash, @lock);
+    my $ref = all_keys(%hash, @keys, @ph);
+    my @crrack = sort(@keys);
+    my @ooooff = qw(a c e);
+    my @bam = qw(g);
+
+    ok(ref $ref eq ref \%hash && $ref == \%hash, 
+            "all_keys() - \$ref is a reference to \%hash");
+    is_deeply(\@crrack, \@ooooff, "Keys are what they should be");
+    is_deeply(\@ph, \@bam, "Placeholders in place");
+}
+
