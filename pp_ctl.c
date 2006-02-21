@@ -2371,29 +2371,13 @@ PP(pp_goto)
 	    SAVEFREESV(cv); /* later, undo the 'avoid premature free' hack */
 	    if (CvISXSUB(cv)) {
 		OP* retop = cx->blk_sub.retop;
+		SV **newsp;
+		I32 gimme;
 		if (reified) {
 		    I32 index;
 		    for (index=0; index<items; index++)
 			sv_2mortal(SP[-index]);
 		}
-#ifdef PERL_XSUB_OLDSTYLE
-		if (CvOLDSTYLE(cv)) {
-		    I32 (*fp3)(int,int,int);
-		    while (SP > mark) {
-			SP[1] = SP[0];
-			SP--;
-		    }
-		    fp3 = (I32(*)(int,int,int))CvXSUB(cv);
-		    items = (*fp3)(CvXSUBANY(cv).any_i32,
-		                   mark - PL_stack_base + 1,
-				   items);
-		    SP = PL_stack_base + items;
-		}
-		else
-#endif /* PERL_XSUB_OLDSTYLE */
-		{
-		    SV **newsp;
-		    I32 gimme;
 
 		    /* XS subs don't have a CxSUB, so pop it */
 		    POPBLOCK(cx, PL_curpm);
@@ -2404,7 +2388,6 @@ PP(pp_goto)
 		    /* Put these at the bottom since the vars are set but not used */
 		    PERL_UNUSED_VAR(newsp);
 		    PERL_UNUSED_VAR(gimme);
-		}
 		LEAVE;
 		return retop;
 	    }

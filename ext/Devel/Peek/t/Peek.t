@@ -509,7 +509,7 @@ do_test(23,
     DEPTH = 0
 (?:    MUTEXP = $ADDR
     OWNER = $ADDR
-)?    FLAGS = 0x1400
+)?    FLAGS = 0xc00
     OUTSIDE_SEQ = 0
     PADLIST = 0x0
     OUTSIDE = 0x0 \\(null\\)');	

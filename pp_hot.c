@@ -2857,26 +2857,6 @@ try_autoload:
 	RETURNOP(CvSTART(cv));
     }
     else {
-#ifdef PERL_XSUB_OLDSTYLE
-	if (CvOLDSTYLE(cv)) {
-	    I32 (*fp3)(int,int,int);
-	    dMARK;
-	    register I32 items = SP - MARK;
-					/* We dont worry to copy from @_. */
-	    while (SP > mark) {
-		SP[1] = SP[0];
-		SP--;
-	    }
-	    PL_stack_sp = mark + 1;
-	    fp3 = (I32(*)(int,int,int))CvXSUB(cv);
-	    items = (*fp3)(CvXSUBANY(cv).any_i32,
-			   MARK - PL_stack_base + 1,
-			   items);
-	    PL_stack_sp = PL_stack_base + items;
-	}
-	else
-#endif /* PERL_XSUB_OLDSTYLE */
-	{
 	    I32 markix = TOPMARK;
 
 	    PUTBACK;
@@ -2913,7 +2893,6 @@ try_autoload:
 		    *(PL_stack_base + markix) = *PL_stack_sp;
 		PL_stack_sp = PL_stack_base + markix;
 	    }
-	}
 	LEAVE;
 	return NORMAL;
     }
