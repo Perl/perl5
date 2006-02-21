@@ -220,7 +220,18 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVf_POK		0x00040000	/* has valid public pointer value */
 #define SVf_ROK		0x00080000	/* has a valid reference pointer */
 
-#define SVf_FAKE	0x00100000	/* glob or lexical is just a copy */
+#define SVf_FAKE	0x00100000	/* 0: glob or lexical is just a copy
+					   1: SV head arena wasn't malloc()ed
+					   2: in conjunction with SVf_READONLY
+					      marks a shared hash key scalar
+					      (SvLEN == 0) or a copy on write
+					      string (SvLEN != 0) [SvIsCOW(sv)]
+					   3: For PVCV, whether CvUNIQUE(cv)
+					      refers to an eval or once only
+					      [CvEVAL(cv), CvSPECIAL(cv)]
+					   4: Whether the regexp pointer is in
+					      fact an offset [SvREPADTMP(sv)]
+					*/
 #define SVf_OOK		0x00200000	/* has valid offset value
 					   For a PVHV this means that a
 					   hv_aux struct is present after the
