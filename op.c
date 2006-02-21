@@ -554,12 +554,14 @@ Perl_op_null(pTHX_ OP *o)
 void
 Perl_op_refcnt_lock(pTHX)
 {
+    PERL_UNUSED_CONTEXT;
     OP_REFCNT_LOCK;
 }
 
 void
 Perl_op_refcnt_unlock(pTHX)
 {
+    PERL_UNUSED_CONTEXT;
     OP_REFCNT_UNLOCK;
 }
 
@@ -1816,6 +1818,7 @@ Perl_my(pTHX_ OP *o)
 OP *
 Perl_sawparens(pTHX_ OP *o)
 {
+    PERL_UNUSED_CONTEXT;
     if (o)
 	o->op_flags |= OPf_PARENS;
     return o;
@@ -4187,7 +4190,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	CvCONST_off(cv);
     }
     if (CvXSUB(cv)) {
-        CvXSUB(cv) = 0;
+	CvXSUB(cv) = NULL;
     }
     /* delete all flags except WEAKOUTSIDE */
     CvFLAGS(cv) &= CVf_WEAKOUTSIDE;
@@ -4237,6 +4240,7 @@ L<perlsub/"Constant Functions">.
 SV *
 Perl_cv_const_sv(pTHX_ CV *cv)
 {
+    PERL_UNUSED_CONTEXT;
     if (!cv)
 	return NULL;
     if (!(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM))
@@ -5067,6 +5071,7 @@ OP *
 Perl_ck_concat(pTHX_ OP *o)
 {
     const OP * const kid = cUNOPo->op_first;
+    PERL_UNUSED_CONTEXT;
     if (kid->op_type == OP_CONCAT && !(kid->op_private & OPpTARGET_MY) &&
 	    !(kUNOP->op_first->op_flags & OPf_MOD))
         o->op_flags |= OPf_STACKED;
@@ -5913,6 +5918,7 @@ Perl_ck_method(pTHX_ OP *o)
 OP *
 Perl_ck_null(pTHX_ OP *o)
 {
+    PERL_UNUSED_CONTEXT;
     return o;
 }
 
@@ -6518,6 +6524,7 @@ Perl_ck_subr(pTHX_ OP *o)
 OP *
 Perl_ck_svconst(pTHX_ OP *o)
 {
+    PERL_UNUSED_CONTEXT;
     SvREADONLY_on(cSVOPo->op_sv);
     return o;
 }

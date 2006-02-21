@@ -238,6 +238,7 @@ STRLEN
 Perl_is_utf8_char(pTHX_ U8 *s)
 {
     const STRLEN len = UTF8SKIP(s);
+    PERL_UNUSED_CONTEXT;
 #ifdef IS_UTF8_CHAR
     if (IS_UTF8_CHAR_FAST(len))
         return IS_UTF8_CHAR(s, len) ? len : 0;
@@ -264,6 +265,7 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
     const U8* x = s;
     const U8* send;
 
+    PERL_UNUSED_CONTEXT;
     if (!len)
 	len = strlen((const char *)s);
     send = s + len;
@@ -329,6 +331,7 @@ Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN 
     const U8* x = s;
     const U8* send;
     STRLEN c;
+    PERL_UNUSED_CONTEXT;
 
     if (!len)
         len = strlen((const char *)s);
@@ -717,6 +720,7 @@ on the first byte of character or just after the last byte of a character.
 U8 *
 Perl_utf8_hop(pTHX_ U8 *s, I32 off)
 {
+    PERL_UNUSED_CONTEXT;
     /* Note: cannot use UTF8_IS_...() too eagerly here since e.g
      * the bitops (especially ~) can create illegal UTF-8.
      * In other words: in Perl UTF-8 is not just for Unicode. */
@@ -798,6 +802,7 @@ Perl_bytes_from_utf8(pTHX_ U8 *s, STRLEN *len, bool *is_utf8)
     I32 count = 0;
     const U8 *s2;
 
+    PERL_UNUSED_CONTEXT;
     if (!*is_utf8)
         return (U8 *)start;
 
@@ -850,6 +855,7 @@ Perl_bytes_to_utf8(pTHX_ U8 *s, STRLEN *len)
     const U8 * const send = s + (*len);
     U8 *d;
     U8 *dst;
+    PERL_UNUSED_CONTEXT;
 
     Newx(d, (*len) * 2 + 1, U8);
     dst = d;

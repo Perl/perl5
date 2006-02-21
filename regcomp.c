@@ -4665,6 +4665,7 @@ Perl_regdump(pTHX_ regexp *r)
       PerlIO_printf(Perl_debug_log, "\n");
     }
 #else
+    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(r);
 #endif	/* DEBUGGING */
 }
@@ -4857,6 +4858,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
     else if (k == BRANCHJ && (OP(o) == UNLESSM || OP(o) == IFMATCH))
 	Perl_sv_catpvf(aTHX_ sv, "[-%d]", o->flags);
 #else
+    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(o);
 #endif	/* DEBUGGING */

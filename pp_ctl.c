@@ -266,6 +266,7 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
 {
     UV *p = (UV*)*rsp;
     U32 i;
+    PERL_UNUSED_CONTEXT;
 
     if (!p || p[1] < rx->nparens) {
 	i = 6 + rx->nparens * 2;
@@ -294,6 +295,7 @@ Perl_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
 {
     UV *p = (UV*)*rsp;
     U32 i;
+    PERL_UNUSED_CONTEXT;
 
     if (RX_MATCH_COPIED(rx))
 	Safefree(rx->subbeg);
@@ -314,6 +316,7 @@ void
 Perl_rxres_free(pTHX_ void **rsp)
 {
     UV * const p = (UV*)*rsp;
+    PERL_UNUSED_CONTEXT;
 
     if (p) {
 #ifdef PERL_POISON

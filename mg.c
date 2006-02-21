@@ -122,6 +122,7 @@ void
 Perl_mg_magical(pTHX_ SV *sv)
 {
     const MAGIC* mg;
+    PERL_UNUSED_CONTEXT;
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
 	const MGVTBL* const vtbl = mg->mg_virtual;
 	if (vtbl) {
@@ -351,6 +352,7 @@ Finds the magic pointer for type matching the SV.  See C<sv_magic>.
 MAGIC*
 Perl_mg_find(pTHX_ SV *sv, int type)
 {
+    PERL_UNUSED_CONTEXT;
     if (sv) {
         MAGIC *mg;
         for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
@@ -2085,6 +2087,7 @@ Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setmglob(pTHX_ SV *sv, MAGIC *mg)
 {
+    PERL_UNUSED_CONTEXT;
     mg->mg_len = -1;
     SvSCREAM_off(sv);
     return 0;
@@ -2144,6 +2147,7 @@ Perl_magic_setcollxfrm(pTHX_ SV *sv, MAGIC *mg)
      * RenE<eacute> Descartes said "I think not."
      * and vanished with a faint plop.
      */
+    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     if (mg->mg_ptr) {
 	Safefree(mg->mg_ptr);
@@ -2158,6 +2162,7 @@ Perl_magic_setcollxfrm(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_setutf8(pTHX_ SV *sv, MAGIC *mg)
 {
+    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
      Safefree(mg->mg_ptr);	/* The mg_ptr holds the pos cache. */
      mg->mg_ptr = 0;
@@ -2648,6 +2653,7 @@ I32
 Perl_whichsig(pTHX_ char *sig)
 {
     register const char * const *sigv;
+    PERL_UNUSED_CONTEXT;
 
     for (sigv = PL_sig_name; *sigv; sigv++)
 	if (strEQ(sig,*sigv))

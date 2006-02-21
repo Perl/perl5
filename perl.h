@@ -193,6 +193,12 @@ struct perl_thread;
 #  define PERL_UNUSED_VAR(x) ((void)x)
 #endif
 
+#ifdef USE_ITHREADS
+#  define PERL_UNUSED_CONTEXT PERL_UNUSED_ARG(my_perl)
+#else
+#  define PERL_UNUSED_CONTEXT
+#endif
+
 #define NOOP (void)0
 #define dNOOP extern int Perl___notused PERL_UNUSED_DECL
 

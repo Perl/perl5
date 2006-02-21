@@ -392,6 +392,8 @@ Perl_sv_report_used(pTHX)
 {
 #ifdef DEBUGGING
     visit(do_report_used, 0, 0);
+#else
+    PERL_UNUSED_CONTEXT;
 #endif
 }
 
@@ -1010,7 +1012,7 @@ STATIC void *
 S_more_bodies (pTHX_ svtype sv_type)
 {
     void ** const root = &PL_body_roots[sv_type];
-    const struct body_details *bdp = &bodies_by_type[sv_type];
+    const struct body_details * const bdp = &bodies_by_type[sv_type];
     const size_t body_size = bdp->body_size;
     char *start;
     const char *end;
@@ -1350,6 +1352,7 @@ wrapper instead.
 int
 Perl_sv_backoff(pTHX_ register SV *sv)
 {
+    PERL_UNUSED_CONTEXT;
     assert(SvOOK(sv));
     if (SvIVX(sv)) {
 	const char * const s = SvPVX_const(sv);
@@ -4635,6 +4638,7 @@ instead.
 SV *
 Perl_sv_newref(pTHX_ SV *sv)
 {
+    PERL_UNUSED_CONTEXT;
     if (sv)
 	ATOMIC_INC(SvREFCNT(sv));
     return sv;
@@ -8990,6 +8994,7 @@ Perl_fp_dup(pTHX_ PerlIO *fp, char type, CLONE_PARAMS *param)
 DIR *
 Perl_dirp_dup(pTHX_ DIR *dp)
 {
+    PERL_UNUSED_CONTEXT;
     if (!dp)
 	return (DIR*)NULL;
     /* XXX TODO */
@@ -9101,6 +9106,8 @@ PTR_TBL_t *
 Perl_ptr_table_new(pTHX)
 {
     PTR_TBL_t *tbl;
+    PERL_UNUSED_CONTEXT;
+
     Newxz(tbl, 1, PTR_TBL_t);
     tbl->tbl_max	= 511;
     tbl->tbl_items	= 0;
@@ -9138,6 +9145,7 @@ void *
 Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, void *sv)
 {
     PTR_TBL_ENT_t const *const tblent = ptr_table_find(tbl, (const void *)sv);
+    PERL_UNUSED_CONTEXT;
     return tblent ? tblent->newval : (void *) 0;
 }
 
@@ -9147,6 +9155,7 @@ void
 Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, void *oldsv, void *newsv)
 {
     PTR_TBL_ENT_t *tblent = S_ptr_table_find(tbl, (const void *)oldsv);
+    PERL_UNUSED_CONTEXT;
 
     if (tblent) {
 	tblent->newval = newsv;
@@ -9174,6 +9183,7 @@ Perl_ptr_table_split(pTHX_ PTR_TBL_t *tbl)
     const UV oldsize = tbl->tbl_max + 1;
     UV newsize = oldsize * 2;
     UV i;
+    PERL_UNUSED_CONTEXT;
 
     Renew(ary, newsize, PTR_TBL_ENT_t*);
     Zero(&ary[oldsize], newsize-oldsize, PTR_TBL_ENT_t*);
