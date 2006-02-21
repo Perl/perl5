@@ -206,21 +206,27 @@ perform the upgrade if necessary.  See C<svtype>.
 
 #define SvUPGRADE(sv, mt) (SvTYPE(sv) >= (mt) || (sv_upgrade(sv, mt), 1))
 
-#define SVs_PADSTALE	0x00000100	/* lexical has gone out of scope */
-#define SVs_PADTMP	0x00000200	/* in use as tmp */
-#define SVs_PADMY	0x00000400	/* in use a "my" variable */
-#define SVs_TEMP	0x00000800	/* string is stealable? */
-#define SVs_OBJECT	0x00001000	/* is "blessed" */
-#define SVs_GMG		0x00002000	/* has magical get method */
-#define SVs_SMG		0x00004000	/* has magical set method */
-#define SVs_RMG		0x00008000	/* has random magical methods */
+#define SVf_IOK		0x00000100	/* has valid public integer value */
+#define SVf_NOK		0x00000200	/* has valid public numeric value */
+#define SVf_POK		0x00000400	/* has valid public pointer value */
+#define SVf_ROK		0x00000800	/* has a valid reference pointer */
 
-#define SVf_IOK		0x00010000	/* has valid public integer value */
-#define SVf_NOK		0x00020000	/* has valid public numeric value */
-#define SVf_POK		0x00040000	/* has valid public pointer value */
-#define SVf_ROK		0x00080000	/* has a valid reference pointer */
+#define SVp_IOK		0x00001000	/* has valid non-public integer value */
+#define SVp_NOK		0x00002000	/* has valid non-public numeric value */
+#define SVp_POK		0x00004000	/* has valid non-public pointer value */
+#define SVp_SCREAM	0x00008000	/* has been studied? */
+#define SVphv_CLONEABLE	0x00008000	/* PVHV (stashes) clone its objects */
 
-#define SVf_FAKE	0x00100000	/* 0: glob or lexical is just a copy
+#define SVs_PADSTALE	0x00010000	/* lexical has gone out of scope */
+#define SVs_PADTMP	0x00020000	/* in use as tmp */
+#define SVs_PADMY	0x00040000	/* in use a "my" variable */
+#define SVs_TEMP	0x00080000	/* string is stealable? */
+#define SVs_OBJECT	0x00100000	/* is "blessed" */
+#define SVs_GMG		0x00200000	/* has magical get method */
+#define SVs_SMG		0x00400000	/* has magical set method */
+#define SVs_RMG		0x00800000	/* has random magical methods */
+
+#define SVf_FAKE	0x01000000	/* 0: glob or lexical is just a copy
 					   1: SV head arena wasn't malloc()ed
 					   2: in conjunction with SVf_READONLY
 					      marks a shared hash key scalar
@@ -232,20 +238,15 @@ perform the upgrade if necessary.  See C<svtype>.
 					   4: Whether the regexp pointer is in
 					      fact an offset [SvREPADTMP(sv)]
 					*/
-#define SVf_OOK		0x00200000	/* has valid offset value
+#define SVf_OOK		0x02000000	/* has valid offset value
 					   For a PVHV this means that a
 					   hv_aux struct is present after the
 					   main array  */
-#define SVf_BREAK	0x00400000	/* refcnt is artificially low - used
+#define SVf_BREAK	0x04000000	/* refcnt is artificially low - used
 					 * by SV's in final arena  cleanup */
-#define SVf_READONLY	0x00800000	/* may not be modified */
+#define SVf_READONLY	0x08000000	/* may not be modified */
 
 
-#define SVp_IOK		0x01000000	/* has valid non-public integer value */
-#define SVp_NOK		0x02000000	/* has valid non-public numeric value */
-#define SVp_POK		0x04000000	/* has valid non-public pointer value */
-#define SVp_SCREAM	0x08000000	/* has been studied? */
-#define SVphv_CLONEABLE	0x08000000	/* PVHV (stashes) clone its objects */
 
 
 #define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK|SVf_FAKE)
@@ -253,7 +254,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVf_OK		(SVf_IOK|SVf_NOK|SVf_POK|SVf_ROK| \
 			 SVp_IOK|SVp_NOK|SVp_POK)
 
-#define PRIVSHIFT 8	/* (SVp_?OK >> PRIVSHIFT) == SVf_?OK */
+#define PRIVSHIFT 4	/* (SVp_?OK >> PRIVSHIFT) == SVf_?OK */
 
 #define SVf_AMAGIC	0x10000000      /* has magical overloaded methods */
 #define SVf_UTF8        0x20000000      /* SvPV is UTF-8 encoded */
