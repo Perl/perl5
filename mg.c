@@ -1839,14 +1839,15 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_getglob(pTHX_ SV *sv, MAGIC *mg)
 {
+    const U32 wasfake = SvFLAGS(sv) & SVf_FAKE;
     PERL_UNUSED_ARG(mg);
-    if (SvFAKE(sv)) {			/* FAKE globs can get coerced */
-	SvFAKE_off(sv);
-	gv_efullname3(sv,((GV*)sv), "*");
-	SvFAKE_on(sv);
-    }
-    else
-	gv_efullname3(sv,((GV*)sv), "*");	/* a gv value, be nice */
+
+    /* FAKE globs can get coerced, so need to turn this off temporarily if it
+       is on.  */
+    SvFAKE_off(sv);
+    gv_efullname3(sv,((GV*)sv), "*");
+    SvFLAGS(sv) |= wasfake;
+
     return 0;
 }
 
