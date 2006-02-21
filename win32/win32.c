@@ -1167,9 +1167,12 @@ win32_stat(const char *path, Stat_t *sbuf)
     char	buffer[MAX_PATH+1];
     int		l = strlen(path);
     int		res;
-    HANDLE      handle;
     int         nlink = 1;
     BOOL        expect_dir = FALSE;
+
+    GV          *gv_sloppy = gv_fetchpvs("\027IN32_SLOPPY_STAT",
+                                         GV_NOTQUAL, SVt_PV);
+    BOOL        sloppy = gv_sloppy && SvTRUE(GvSV(gv_sloppy));
 
     if (l > 1) {
 	switch(path[l - 1]) {
@@ -1208,17 +1211,20 @@ win32_stat(const char *path, Stat_t *sbuf)
 	}
     }
 
-    /* We *must* open & close the file once; otherwise file attribute changes */
-    /* might not yet have propagated to "other" hard links of the same file.  */
-    /* This also gives us an opportunity to determine the number of links.    */
     path = PerlDir_mapA(path);
     l = strlen(path);
-    handle = CreateFileA(path, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
-    if (handle != INVALID_HANDLE_VALUE) {
-	BY_HANDLE_FILE_INFORMATION bhi;
-	if (GetFileInformationByHandle(handle, &bhi))
-	    nlink = bhi.nNumberOfLinks;
-	CloseHandle(handle);
+
+    if (!sloppy) {
+        /* We must open & close the file once; otherwise file attribute changes  */
+        /* might not yet have propagated to "other" hard links of the same file. */
+        /* This also gives us an opportunity to determine the number of links.   */
+        HANDLE handle = CreateFileA(path, 0, 0, NULL, OPEN_EXISTING, 0, NULL);
+        if (handle != INVALID_HANDLE_VALUE) {
+            BY_HANDLE_FILE_INFORMATION bhi;
+            if (GetFileInformationByHandle(handle, &bhi))
+                nlink = bhi.nNumberOfLinks;
+            CloseHandle(handle);
+        }
     }
 
     /* path will be mapped correctly above */
