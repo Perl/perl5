@@ -340,6 +340,7 @@ char *
 Perl_delimcpy(pTHX_ register char *to, register const char *toend, register const char *from, register const char *fromend, register int delim, I32 *retlen)
 {
     register I32 tolen;
+    PERL_UNUSED_CONTEXT;
     for (tolen = 0; from < fromend; from++, tolen++) {
 	if (*from == '\\') {
 	    if (from[1] == delim)
@@ -369,6 +370,7 @@ char *
 Perl_instr(pTHX_ register const char *big, register const char *little)
 {
     register I32 first;
+    PERL_UNUSED_CONTEXT;
 
     if (!little)
 	return (char*)big;
@@ -400,6 +402,7 @@ Perl_instr(pTHX_ register const char *big, register const char *little)
 char *
 Perl_ninstr(pTHX_ const char *big, const char *bigend, const char *little, const char *lend)
 {
+    PERL_UNUSED_CONTEXT;
     if (little >= lend)
         return (char*)big;
     {
@@ -428,6 +431,7 @@ Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *lit
     register const char *bigbeg;
     register const I32 first = *little;
     register const char * const littleend = lend;
+    PERL_UNUSED_CONTEXT;
 
     if (little >= littleend)
 	return (char*)bigend;
@@ -829,6 +833,8 @@ Perl_ibcmp(pTHX_ const char *s1, const char *s2, register I32 len)
 {
     register const U8 *a = (const U8 *)s1;
     register const U8 *b = (const U8 *)s2;
+    PERL_UNUSED_CONTEXT;
+
     while (len--) {
 	if (*a != *b && *a != PL_fold[*b])
 	    return 1;
@@ -843,6 +849,8 @@ Perl_ibcmp_locale(pTHX_ const char *s1, const char *s2, register I32 len)
     dVAR;
     register const U8 *a = (const U8 *)s1;
     register const U8 *b = (const U8 *)s2;
+    PERL_UNUSED_CONTEXT;
+
     while (len--) {
 	if (*a != *b && *a != PL_fold_locale[*b])
 	    return 1;
@@ -869,6 +877,7 @@ be freed with the C<Safefree()> function.
 char *
 Perl_savepv(pTHX_ const char *pv)
 {
+    PERL_UNUSED_CONTEXT;
     if (!pv)
 	return NULL;
     else {
@@ -877,7 +886,6 @@ Perl_savepv(pTHX_ const char *pv)
 	Newx(newaddr,pvlen,char);
 	return memcpy(newaddr,pv,pvlen);
     }
-
 }
 
 /* same thing but with a known length */
@@ -897,6 +905,7 @@ char *
 Perl_savepvn(pTHX_ const char *pv, register I32 len)
 {
     register char *newaddr;
+    PERL_UNUSED_CONTEXT;
 
     Newx(newaddr,len+1,char);
     /* Give a meaning to NULL pointer mainly for the use in sv_magic() */
@@ -1659,6 +1668,7 @@ Perl_setenv_getix(pTHX_ const char *nam)
 {
     register I32 i;
     register const I32 len = strlen(nam);
+    PERL_UNUSED_CONTEXT;
 
     for (i = 0; environ[i]; i++) {
 	if (
@@ -2556,6 +2566,7 @@ Sighandler_t
 Perl_rsignal_state(pTHX_ int signo)
 {
     struct sigaction oact;
+    PERL_UNUSED_CONTEXT;
 
     if (sigaction(signo, (struct sigaction *)NULL, &oact) == -1)
 	return (Sighandler_t) SIG_ERR;
@@ -2861,6 +2872,7 @@ Perl_repeatcpy(pTHX_ register char *to, register const char *from, I32 len, regi
 {
     register I32 todo;
     register const char * const frombase = from;
+    PERL_UNUSED_CONTEXT;
 
     if (len == 1) {
 	register const char c = *from;
@@ -3202,32 +3214,37 @@ Perl_GetVars(pTHX)
 char **
 Perl_get_op_names(pTHX)
 {
- return (char **)PL_op_name;
+    PERL_UNUSED_CONTEXT;
+    return (char **)PL_op_name;
 }
 
 char **
 Perl_get_op_descs(pTHX)
 {
- return (char **)PL_op_desc;
+    PERL_UNUSED_CONTEXT;
+    return (char **)PL_op_desc;
 }
 
 const char *
 Perl_get_no_modify(pTHX)
 {
- return PL_no_modify;
+    PERL_UNUSED_CONTEXT;
+    return PL_no_modify;
 }
 
 U32 *
 Perl_get_opargs(pTHX)
 {
- return (U32 *)PL_opargs;
+    PERL_UNUSED_CONTEXT;
+    return (U32 *)PL_opargs;
 }
 
 PPADDR_t*
 Perl_get_ppaddr(pTHX)
 {
- dVAR;
- return (PPADDR_t*)PL_ppaddr;
+    dVAR;
+    PERL_UNUSED_CONTEXT;
+    return (PPADDR_t*)PL_ppaddr;
 }
 
 #ifndef HAS_GETENV_LEN
@@ -3235,6 +3252,7 @@ char *
 Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *len)
 {
     char * const env_trans = PerlEnv_getenv(env_elem);
+    PERL_UNUSED_CONTEXT;
     if (env_trans)
 	*len = strlen(env_trans);
     return env_trans;
@@ -3246,6 +3264,7 @@ MGVTBL*
 Perl_get_vtbl(pTHX_ int vtbl_id)
 {
     const MGVTBL* result;
+    PERL_UNUSED_CONTEXT;
 
     switch(vtbl_id) {
     case want_vtbl_sv:
@@ -3545,6 +3564,7 @@ Perl_mini_mktime(pTHX_ struct tm *ptm)
     int secs;
     int month, mday, year, jday;
     int odd_cent, odd_year;
+    PERL_UNUSED_CONTEXT;
 
 #define	DAYS_PER_YEAR	365
 #define	DAYS_PER_QYEAR	(4*DAYS_PER_YEAR+1)
@@ -4854,6 +4874,7 @@ potentially warn under some level of strict-ness.
 void
 Perl_sv_nosharing(pTHX_ SV *sv)
 {
+    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
 }
 
@@ -5037,6 +5058,7 @@ Perl_stashpv_hvname_match(pTHX_ const COP *c, const HV *hv)
 {
     const char * const stashpv = CopSTASHPV(c);
     const char * const name = HvNAME_get(hv);
+    PERL_UNUSED_CONTEXT;
 
     if (stashpv == name)
 	return TRUE;

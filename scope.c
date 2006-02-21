@@ -1060,6 +1060,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	break;
     }
 #else
+    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(cx);
 #endif	/* DEBUGGING */
 }

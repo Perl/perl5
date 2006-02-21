@@ -819,6 +819,7 @@ XS(XS_Internals_hv_clear_placehold)
 
 XS(XS_Regexp_DESTROY)
 {
+    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(cv);
 }
 

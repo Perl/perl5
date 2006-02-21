@@ -1969,6 +1969,7 @@ Perl_hv_name_set(pTHX_ HV *hv, const char *name, I32 len, int flags)
 AV **
 Perl_hv_backreferences_p(pTHX_ HV *hv) {
     struct xpvhv_aux * const iter = SvOOK(hv) ? HvAUX(hv) : hv_auxinit(hv);
+    PERL_UNUSED_CONTEXT;
     return &(iter->xhv_backreferences);
 }
 

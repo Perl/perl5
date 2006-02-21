@@ -1215,7 +1215,7 @@ S_sublex_start(pTHX)
 	if (SvTYPE(sv) == SVt_PVIV) {
 	    /* Overloaded constants, nothing fancy: Convert to SVt_PV: */
 	    STRLEN len;
-	    const char *p = SvPV_const(sv, len);
+	    const char * const p = SvPV_const(sv, len);
 	    SV * const nsv = newSVpvn(p, len);
 	    if (SvUTF8(sv))
 		SvUTF8_on(nsv);
@@ -9552,6 +9552,7 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
 void
 Perl_pmflag(pTHX_ U32* pmfl, int ch)
 {
+    PERL_UNUSED_CONTEXT;
     if (ch == 'i')
 	*pmfl |= PMf_FOLD;
     else if (ch == 'g')
@@ -10924,7 +10925,7 @@ S_set_csh(pTHX)
 	PL_cshlen = strlen(PL_cshname);
 #else
 #if defined(USE_ITHREADS)
-    PERL_UNUSED_ARG(my_perl);
+    PERL_UNUSED_CONTEXT;
 #endif
 #endif
 }

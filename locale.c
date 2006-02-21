@@ -185,6 +185,7 @@ Perl_new_ctype(pTHX_ const char *newctype)
 
 #endif /* USE_LOCALE_CTYPE */
     PERL_UNUSED_ARG(newctype);
+    PERL_UNUSED_CONTEXT;
 }
 
 /*

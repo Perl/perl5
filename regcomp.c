@@ -5758,6 +5758,7 @@ Perl_regdump(pTHX_ regexp *r)
         });
     }
 #else
+    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(r);
 #endif	/* DEBUGGING */
 }
@@ -5963,6 +5964,7 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
     else if (k == BRANCHJ && (OP(o) == UNLESSM || OP(o) == IFMATCH))
 	Perl_sv_catpvf(aTHX_ sv, "[-%d]", o->flags);
 #else
+    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(o);
 #endif	/* DEBUGGING */
@@ -5973,6 +5975,8 @@ Perl_re_intuit_string(pTHX_ regexp *prog)
 {				/* Assume that RE_INTUIT is set */
     dVAR;
     GET_RE_DEBUG_FLAGS_DECL;
+    PERL_UNUSED_CONTEXT;
+
     DEBUG_COMPILE_r(
 	{
 	    const char * const s = SvPV_nolen_const(prog->check_substr

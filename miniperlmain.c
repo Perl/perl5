@@ -123,6 +123,7 @@ main(int argc, char **argv, char **env)
 static void
 xs_init(pTHX)
 {
+    PERL_UNUSED_CONTEXT;
     dXSUB_SYS;
 }
 

@@ -304,6 +304,7 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
 {
     UV *p = (UV*)*rsp;
     U32 i;
+    PERL_UNUSED_CONTEXT;
 
     if (!p || p[1] < rx->nparens) {
 #ifdef PERL_OLD_COPY_ON_WRITE
@@ -341,6 +342,7 @@ Perl_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
 {
     UV *p = (UV*)*rsp;
     U32 i;
+    PERL_UNUSED_CONTEXT;
 
     RX_MATCH_COPY_FREE(rx);
     RX_MATCH_COPIED_set(rx, *p);
@@ -367,6 +369,7 @@ void
 Perl_rxres_free(pTHX_ void **rsp)
 {
     UV * const p = (UV*)*rsp;
+    PERL_UNUSED_CONTEXT;
 
     if (p) {
 #ifdef PERL_POISON
@@ -3656,11 +3659,10 @@ PP(pp_leavegiven)
     I32 gimme;
     SV **newsp;
     PMOP *newpm;
-    SV **mark;
+    PERL_UNUSED_CONTEXT;
 
     POPBLOCK(cx,newpm);
     assert(CxTYPE(cx) == CXt_GIVEN);
-    mark = newsp;
 
     SP = newsp;
     PUTBACK;

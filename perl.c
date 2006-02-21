@@ -228,7 +228,7 @@ void
 perl_construct(pTHXx)
 {
     dVAR;
-    PERL_UNUSED_ARG(my_perl);
+    PERL_UNUSED_CONTEXT;
 #ifdef MULTIPLICITY
     init_interp();
     PL_perl_destruct_level = 1;
@@ -404,6 +404,7 @@ no threads.
 int
 Perl_nothreadhook(pTHX)
 {
+    PERL_UNUSED_CONTEXT;
     return 0;
 }
 
@@ -523,7 +524,7 @@ perl_destruct(pTHXx)
     pid_t child;
 #endif
 
-    PERL_UNUSED_ARG(my_perl);
+    PERL_UNUSED_CONTEXT;
 
     /* wait for all pseudo-forked children to finish */
     PERL_WAIT_FOR_CHILDREN;
@@ -2234,7 +2235,7 @@ perl_run(pTHXx)
     int ret = 0;
     dJMPENV;
 
-    PERL_UNUSED_ARG(my_perl);
+    PERL_UNUSED_CONTEXT;
 
     oldscope = PL_scopestack_ix;
 #ifdef VMS

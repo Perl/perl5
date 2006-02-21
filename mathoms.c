@@ -1106,6 +1106,7 @@ potentially warn under some level of strict-ness.
 void
 Perl_sv_nolocking(pTHX_ SV *sv)
 {
+    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
 }
 
@@ -1125,6 +1126,7 @@ potentially warn under some level of strict-ness.
 void
 Perl_sv_nounlocking(pTHX_ SV *sv)
 {
+    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
 }
 

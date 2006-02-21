@@ -137,7 +137,7 @@
 #  endif
 #endif
 
-#define pVAR    register struct perl_vars* my_vars PERL_UNUSED_DECL
+#define pVAR    register struct perl_vars* const my_vars PERL_UNUSED_DECL
 
 #ifdef PERL_GLOBAL_STRUCT
 #  define dVAR		pVAR    = (struct perl_vars*)PERL_GET_VARS()
@@ -232,6 +232,12 @@
 #endif
 #ifndef PERL_UNUSED_VAR
 #  define PERL_UNUSED_VAR(x) ((void)x)
+#endif
+
+#ifdef USE_ITHREADS
+#  define PERL_UNUSED_CONTEXT PERL_UNUSED_ARG(my_perl)
+#else
+#  define PERL_UNUSED_CONTEXT
 #endif
 
 #define NOOP (void)0

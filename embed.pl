@@ -876,14 +876,14 @@ START_EXTERN_C
 #undef PERLVARISC
 
 #define PERLVAR(v,t)	t* Perl_##v##_ptr(pTHX)				\
-			{ dVAR; return &(aTHX->v); }
+			{ dVAR; PERL_UNUSED_CONTEXT; return &(aTHX->v); }
 #define PERLVARA(v,n,t)	PL_##v##_t* Perl_##v##_ptr(pTHX)		\
-			{ dVAR; return &(aTHX->v); }
+			{ dVAR; PERL_UNUSED_CONTEXT; return &(aTHX->v); }
 
 #define PERLVARI(v,t,i)	PERLVAR(v,t)
 #define PERLVARIC(v,t,i) PERLVAR(v, const t)
 #define PERLVARISC(v,i)	PL_##v##_t* Perl_##v##_ptr(pTHX)		\
-			{ dVAR; return &(aTHX->v); }
+			{ dVAR; PERL_UNUSED_CONTEXT; return &(aTHX->v); }
 
 #include "thrdvar.h"
 #include "intrpvar.h"
@@ -891,16 +891,16 @@ START_EXTERN_C
 #undef PERLVAR
 #undef PERLVARA
 #define PERLVAR(v,t)	t* Perl_##v##_ptr(pTHX)				\
-			{ dVAR; return &(PL_##v); }
+			{ dVAR; PERL_UNUSED_CONTEXT; return &(PL_##v); }
 #define PERLVARA(v,n,t)	PL_##v##_t* Perl_##v##_ptr(pTHX)		\
-			{ dVAR; return &(PL_##v); }
+			{ dVAR; PERL_UNUSED_CONTEXT; return &(PL_##v); }
 #undef PERLVARIC
 #undef PERLVARISC
 #define PERLVARIC(v,t,i)	\
 			const t* Perl_##v##_ptr(pTHX)		\
-			{ return (const t *)&(PL_##v); }
+			{ PERL_UNUSED_CONTEXT; return (const t *)&(PL_##v); }
 #define PERLVARISC(v,i)	PL_##v##_t* Perl_##v##_ptr(pTHX)	\
-			{ dVAR; return &(PL_##v); }
+			{ dVAR; PERL_UNUSED_CONTEXT; return &(PL_##v); }
 #include "perlvars.h"
 
 #undef PERLVAR
@@ -915,15 +915,18 @@ START_EXTERN_C
 #undef PL_check
 #undef PL_fold_locale
 Perl_ppaddr_t** Perl_Gppaddr_ptr(pTHX) {
-    static const Perl_ppaddr_t* ppaddr_ptr = PL_ppaddr;
+    static const Perl_ppaddr_t* const ppaddr_ptr = PL_ppaddr;
+    PERL_UNUSED_CONTEXT;
     return (Perl_ppaddr_t**)&ppaddr_ptr;
 }
 Perl_check_t**  Perl_Gcheck_ptr(pTHX) {
-    static const Perl_check_t* check_ptr  = PL_check;
+    static const Perl_check_t* const check_ptr  = PL_check;
+    PERL_UNUSED_CONTEXT;
     return (Perl_check_t**)&check_ptr;
 }
 unsigned char** Perl_Gfold_locale_ptr(pTHX) {
-    static const unsigned char* fold_locale_ptr = PL_fold_locale;
+    static const unsigned char* const fold_locale_ptr = PL_fold_locale;
+    PERL_UNUSED_CONTEXT;
     return (unsigned char**)&fold_locale_ptr;
 }
 #endif

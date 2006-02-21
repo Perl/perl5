@@ -30,6 +30,7 @@ values, including such things as replacements for the OS's atof() function
 U32
 Perl_cast_ulong(pTHX_ NV f)
 {
+    PERL_UNUSED_CONTEXT;
   if (f < 0.0)
     return f < I32_MIN ? (U32) I32_MIN : (U32)(I32) f;
   if (f < U32_MAX_P1) {
@@ -48,6 +49,7 @@ Perl_cast_ulong(pTHX_ NV f)
 I32
 Perl_cast_i32(pTHX_ NV f)
 {
+    PERL_UNUSED_CONTEXT;
   if (f < I32_MAX_P1)
     return f < I32_MIN ? I32_MIN : (I32) f;
   if (f < U32_MAX_P1) {
@@ -66,6 +68,7 @@ Perl_cast_i32(pTHX_ NV f)
 IV
 Perl_cast_iv(pTHX_ NV f)
 {
+    PERL_UNUSED_CONTEXT;
   if (f < IV_MAX_P1)
     return f < IV_MIN ? IV_MIN : (IV) f;
   if (f < UV_MAX_P1) {
@@ -85,6 +88,7 @@ Perl_cast_iv(pTHX_ NV f)
 UV
 Perl_cast_uv(pTHX_ NV f)
 {
+    PERL_UNUSED_CONTEXT;
   if (f < 0.0)
     return f < IV_MIN ? (UV) IV_MIN : (UV)(IV) f;
   if (f < UV_MAX_P1) {
