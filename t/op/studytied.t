@@ -45,6 +45,6 @@ for my $do_study qw( 0 1 ) {
     is( index( $x, 'n' ), 0,    qq{"next" contains "n" at pos 0} );
 
     # The letter "t" is in both, but in different positions
-    ok( $x =~ /t/,              qq{"next" matches /x/} );
-    is( index( $x, 't' ), 3,    qq{"next" contains "x" at pos 3} );
+    ok( $x =~ /t/,              qq{"next" matches /t/} );
+    is( index( $x, 't' ), 3,    qq{"next" contains "t" at pos 3} );
 }
