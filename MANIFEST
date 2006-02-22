@@ -3338,6 +3338,7 @@ t/op/sselect.t			See if 4 argument select works
 t/op/stash.t			See if %:: stashes work
 t/op/stat.t			See if stat works
 t/op/study.t			See if study works
+t/op/studytied.t		See if study works with tied scalars
 t/op/sub_lval.t			See if lvalue subroutines work
 t/op/subst_amp.t		See if $&-related substitution works
 t/op/substr.t			See if substr works
