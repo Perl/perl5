@@ -9833,7 +9833,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		if (!CvISXSUB(dstr))
 		    CvROOT(dstr) = OpREFCNT_inc(CvROOT(dstr));
 		OP_REFCNT_UNLOCK;
-		if (CvCONST(dstr)) {
+		if (CvCONST(dstr) && CvISXSUB(dstr)) {
 		    CvXSUBANY(dstr).any_ptr = GvUNIQUE(CvGV(dstr)) ?
 			SvREFCNT_inc(CvXSUBANY(dstr).any_ptr) :
 			sv_dup_inc((SV *)CvXSUBANY(dstr).any_ptr, param);
