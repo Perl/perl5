@@ -1324,7 +1324,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	SvREFCNT_dec(d);
 	return;
     }
-    if (type <= SVt_PVLV && type != SVt_PVGV) {
+    if (type <= SVt_PVLV) {
 	if (SvPVX_const(sv)) {
 	    Perl_dump_indent(aTHX_ level, file,"  PV = 0x%"UVxf" ", PTR2UV(SvPVX_const(sv)));
 	    if (SvOOK(sv))

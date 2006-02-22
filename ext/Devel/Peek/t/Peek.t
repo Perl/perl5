@@ -308,6 +308,7 @@ do_test(17,
   FLAGS = \\(GMG,SMG,MULTI(?:,IN_PAD)?\\)
   IV = 0
   NV = 0
+  PV = 0
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_glob
     MG_TYPE = PERL_MAGIC_glob\(\*\)
