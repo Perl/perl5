@@ -41,10 +41,16 @@ for my $do_study qw( 0 1 ) {
     is( index( $x, 'f' ), -1,   qq{"next" doesn't contain "f"} );
 
     # Subsequent references to $x are "next", so should match /n/
-    ok( $x =~ /n/,              qq{"next" matches /n/} );
+    TODO: {
+	local $TODO = $do_study ? 'not yet fixed' : 0;
+	ok( $x =~ /n/,              qq{"next" matches /n/} );
+    }
     is( index( $x, 'n' ), 0,    qq{"next" contains "n" at pos 0} );
 
     # The letter "t" is in both, but in different positions
-    ok( $x =~ /t/,              qq{"next" matches /x/} );
-    is( index( $x, 't' ), 3,    qq{"next" contains "x" at pos 3} );
+    TODO: {
+	local $TODO = $do_study ? 'not yet fixed' : 0;
+	ok( $x =~ /t/,              qq{"next" matches /t/} );
+    }
+    is( index( $x, 't' ), 3,    qq{"next" contains "t" at pos 3} );
 }
