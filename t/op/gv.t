@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 138 );
+plan( tests => 154 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -89,6 +89,34 @@ is (scalar %foo, 0);
     is($msg, '');
     *foo = undef;
     like($msg, qr/Undefined value assigned to typeglob/);
+
+    no warnings 'once';
+    # test warnings for converting globs to other forms
+    my $copy = *PWOMPF;
+    foreach ($copy, *SKREEE) {
+	$msg = '';
+	my $victim = sprintf "%d", $_;
+	like($msg, qr/Argument "\*main::[A-Z]{6}" isn't numeric in sprintf/,
+	     "Warning on conversion to IV");
+	is($victim, 0);
+
+	$msg = '';
+	$victim = sprintf "%u", $_;
+	like($msg, qr/Argument "\*main::[A-Z]{6}" isn't numeric in sprintf/,
+	     "Warning on conversion to UV");
+	is($victim, 0);
+
+	$msg = '';
+	$victim = sprintf "%e", $_;
+	like($msg, qr/Argument "\*main::[A-Z]{6}" isn't numeric in sprintf/,
+	     "Warning on conversion to NV");
+	like($victim, qr/^0\.0+E\+?00/i, "Expect floating point zero");
+
+	$msg = '';
+	$victim = sprintf "%s", $_;
+	is($msg, '', "No warning on stringification");
+	is($victim, '' . $_);
+    }
 }
 
 my $test = curr_test();
