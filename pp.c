@@ -639,13 +639,22 @@ PP(pp_study)
 	if (SvSCREAM(sv))
 	    RETPUSHYES;
     }
-    else {
-	if (PL_lastscream) {
-	    SvSCREAM_off(PL_lastscream);
-	    SvREFCNT_dec(PL_lastscream);
-	}
-	PL_lastscream = SvREFCNT_inc(sv);
+    s = (unsigned char*)(SvPV(sv, len));
+    pos = len;
+    if (pos <= 0 || !SvPOK(sv)) {
+	/* No point in studying a zero length string, and not safe to study
+	   anything that doesn't appear to be a simple scalar (and hence might
+	   change between now and when the regexp engine runs without our set
+	   magic ever running, such as a reference to an object with overloaded
+	   stringification.  */
+	RETPUSHNO;
     }
+
+    if (PL_lastscream) {
+	SvSCREAM_off(PL_lastscream);
+	SvREFCNT_dec(PL_lastscream);
+    }
+    PL_lastscream = SvREFCNT_inc(sv);
 
     s = (unsigned char*)(SvPV(sv, len));
     pos = len;
