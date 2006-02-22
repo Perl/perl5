@@ -9577,19 +9577,44 @@ Perl_sv_dup(pTHX_ SV *sstr, CLONE_PARAMS* param)
     case SVt_NULL:
 	SvANY(dstr)	= NULL;
 	break;
-	/* FIXME - worth merging any of these 3 into the code below?  */
     case SVt_IV:
-	SvANY(dstr)	= new_XIV();
-	SvIV_set(dstr, SvIVX(sstr));
-	break;
     case SVt_NV:
-	SvANY(dstr)	= new_XNV();
-	SvNV_set(dstr, SvNVX(sstr));
-	break;
     case SVt_RV:
-	SvANY(dstr)	= new_XRV();
-	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
-	break;
+	{
+	    /* These are all the types that need simple bodies allocating.  */
+	    void *new_body;
+	    const svtype sv_type = SvTYPE(sstr);
+	    const struct body_details *const sv_type_details
+		= bodies_by_type + sv_type;
+
+	    assert(sv_type_details->size);
+#ifndef PURIFY
+	    assert(sv_type_details->arena);
+	    new_body_inline(new_body, sv_type_details->size, sv_type);
+	    new_body = (void*)((char*)new_body - sv_type_details->offset);
+#else
+	    assert(!sv_type_details->arena);
+	    new_body = new_NOARENA(sv_type_details);
+#endif
+
+	    assert(new_body);
+	    SvANY(dstr) = new_body;
+
+	    if (sv_type == SVt_RV) {
+		Perl_rvpv_dup(aTHX_ dstr, sstr, param);
+	    } else {
+#ifndef PURIFY
+		Copy(((char*)SvANY(sstr)) + sv_type_details->offset,
+		     ((char*)SvANY(dstr)) + sv_type_details->offset,
+		     sv_type_details->copy, char);
+#else
+		Copy(((char*)SvANY(sstr)),
+		     ((char*)SvANY(dstr)),
+		     sv_type_details->size + sv_type_details->offset, char);
+#endif
+	    }
+	    break;
+	}
     default:
 	{
 	    /* These are all the types that need complex bodies allocating.  */
