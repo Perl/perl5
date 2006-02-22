@@ -1335,7 +1335,7 @@ PP(pp_match)
 	}
     }
     if ((!global && rx->nparens)
-	    || SvTEMP(TARG) || PL_sawampersand)
+	    || SvTEMP(TARG) || PL_sawampersand || (pm->op_pmflags & PMf_EVAL))
 	r_flags |= REXEC_COPY_STR;
     if (SvSCREAM(TARG))
 	r_flags |= REXEC_SCREAM;
@@ -2101,7 +2101,8 @@ PP(pp_subst)
 	pm = PL_curpm;
 	rx = PM_GETRE(pm);
     }
-    r_flags = (rx->nparens || SvTEMP(TARG) || PL_sawampersand)
+    r_flags = (rx->nparens || SvTEMP(TARG) || PL_sawampersand
+	    || (pm->op_pmflags & PMf_EVAL))
 	       ? REXEC_COPY_STR : 0;
     if (SvSCREAM(TARG))
 	r_flags |= REXEC_SCREAM;
