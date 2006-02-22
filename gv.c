@@ -1399,6 +1399,7 @@ Perl_gp_free(pTHX_ GV *gv)
     if (--gp->gp_refcnt > 0) {
 	if (gp->gp_egv == gv)
 	    gp->gp_egv = 0;
+	GvGP(gv) = 0;
         return;
     }
 

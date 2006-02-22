@@ -830,6 +830,8 @@ Perl_scalarvoid(pTHX_ OP *o)
 	else {
 	    if (ckWARN(WARN_VOID)) {
 		useless = "a constant";
+		if (o->op_private & OPpCONST_ARYBASE)
+		    useless = 0;
 		/* don't warn on optimised away booleans, eg 
 		 * use constant Foo, 5; Foo || print; */
 		if (cSVOPo->op_private & OPpCONST_SHORTCIRCUIT)
@@ -1067,7 +1069,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	PL_modcount++;
 	return o;
     case OP_CONST:
-	if (!(o->op_private & (OPpCONST_ARYBASE)))
+	if (!(o->op_private & OPpCONST_ARYBASE))
 	    goto nomod;
 	if (PL_eval_start && PL_eval_start->op_type == OP_CONST) {
 	    PL_compiling.cop_arybase = (I32)SvIV(cSVOPx(PL_eval_start)->op_sv);
@@ -3540,7 +3542,9 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	if (PL_eval_start)
 	    PL_eval_start = 0;
 	else {
+	    op_free(o);
 	    o = newSVOP(OP_CONST, 0, newSViv(PL_compiling.cop_arybase));
+	    o->op_private |= OPpCONST_ARYBASE;
 	}
     }
     return o;
@@ -3859,10 +3863,10 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 		break;
 
 	      case OP_SASSIGN:
-		if (k1->op_type == OP_READDIR
+		if (k1 && (k1->op_type == OP_READDIR
 		      || k1->op_type == OP_GLOB
 		      || (k1->op_type == OP_NULL && k1->op_targ == OP_GLOB)
-		      || k1->op_type == OP_EACH)
+		      || k1->op_type == OP_EACH))
 		    expr = newUNOP(OP_DEFINED, 0, expr);
 		break;
 	    }
@@ -3929,10 +3933,10 @@ whileline, OP *expr, OP *block, OP *cont, I32 has_my)
 		break;
 
 	      case OP_SASSIGN:
-		if (k1->op_type == OP_READDIR
+		if (k1 && (k1->op_type == OP_READDIR
 		      || k1->op_type == OP_GLOB
 		      || (k1->op_type == OP_NULL && k1->op_targ == OP_GLOB)
-		      || k1->op_type == OP_EACH)
+		      || k1->op_type == OP_EACH))
 		    expr = newUNOP(OP_DEFINED, 0, expr);
 		break;
 	    }
@@ -5703,12 +5707,12 @@ Perl_ck_glob(pTHX_ OP *o)
 OP *
 Perl_ck_grep(pTHX_ OP *o)
 {
-    LOGOP *gwop;
+    LOGOP *gwop = NULL;
     OP *kid;
     const OPCODE type = o->op_type == OP_GREPSTART ? OP_GREPWHILE : OP_MAPWHILE;
 
     o->op_ppaddr = PL_ppaddr[OP_GREPSTART];
-    NewOp(1101, gwop, 1, LOGOP);
+    /* don't allocate gwop here, as we may leak it if PL_error_count > 0 */
 
     if (o->op_flags & OPf_STACKED) {
 	OP* k;
@@ -5719,6 +5723,7 @@ Perl_ck_grep(pTHX_ OP *o)
 	for (k = cUNOPx(kid)->op_first; k; k = k->op_next) {
 	    kid = k;
 	}
+	NewOp(1101, gwop, 1, LOGOP);
 	kid->op_next = (OP*)gwop;
 	o->op_flags &= ~OPf_STACKED;
     }
@@ -5735,6 +5740,8 @@ Perl_ck_grep(pTHX_ OP *o)
 	Perl_croak(aTHX_ "panic: ck_grep");
     kid = kUNOP->op_first;
 
+    if (!gwop)
+	NewOp(1101, gwop, 1, LOGOP);
     gwop->op_type = type;
     gwop->op_ppaddr = PL_ppaddr[type];
     gwop->op_first = listkids(o);
