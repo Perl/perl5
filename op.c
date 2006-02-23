@@ -1933,7 +1933,7 @@ S_newDEFSVOP(pTHX)
 {
     dVAR;
     const I32 offset = pad_findmy("$_");
-    if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS(offset) & SVpad_OUR) {
+    if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(offset)) {
 	return newSVREF(newGVOP(OP_GV, 0, PL_defgv));
     }
     else {
@@ -3976,7 +3976,7 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
     }
     else {
         const I32 offset = pad_findmy("$_");
-	if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS(offset) & SVpad_OUR) {
+	if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(offset)) {
 	    sv = newGVOP(OP_GV, 0, PL_defgv);
 	}
 	else {
@@ -5895,7 +5895,7 @@ Perl_ck_grep(pTHX_ OP *o)
     gwop->op_other = LINKLIST(kid);
     kid->op_next = (OP*)gwop;
     offset = pad_findmy("$_");
-    if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS(offset) & SVpad_OUR) {
+    if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(offset)) {
 	o->op_private = gwop->op_private = 0;
 	gwop->op_targ = pad_alloc(type, SVs_PADTMP);
     }
@@ -6089,7 +6089,7 @@ Perl_ck_match(pTHX_ OP *o)
     dVAR;
     if (o->op_type != OP_QR && PL_compcv) {
 	const I32 offset = pad_findmy("$_");
-	if (offset != NOT_IN_PAD && !(PAD_COMPNAME_FLAGS(offset) & SVpad_OUR)) {
+	if (offset != NOT_IN_PAD && !(PAD_COMPNAME_FLAGS_isOUR(offset))) {
 	    o->op_targ = offset;
 	    o->op_private |= OPpTARGET_MY;
 	}
@@ -7112,7 +7112,7 @@ Perl_peep(pTHX_ register OP *o)
 	    if (rop->op_type != OP_RV2HV || rop->op_first->op_type != OP_PADSV)
 		break;
 	    lexname = *av_fetch(PL_comppad_name, rop->op_first->op_targ, TRUE);
-	    if (!(SvFLAGS(lexname) & SVpad_TYPED))
+	    if (!SvPAD_TYPED(lexname))
 		break;
 	    fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
 	    if (!fields || !GvHV(*fields))
@@ -7161,7 +7161,7 @@ Perl_peep(pTHX_ register OP *o)
 	    }
 		    
 	    lexname = *av_fetch(PL_comppad_name, rop->op_targ, TRUE);
-	    if (!(SvFLAGS(lexname) & SVpad_TYPED))
+	    if (!SvPAD_TYPED(lexname))
 		break;
 	    fields = (GV**)hv_fetchs(SvSTASH(lexname), "FIELDS", FALSE);
 	    if (!fields || !GvHV(*fields))

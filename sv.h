@@ -928,6 +928,14 @@ in gv.h: */
 #define SvREPADTMP_off(sv)	(SvFLAGS(sv) &= ~SVf_FAKE)
 #endif
 
+#define SvPAD_TYPED(sv)		(SvFLAGS(sv) & SVpad_TYPED)
+#define SvPAD_TYPED_on(sv)	(SvFLAGS(sv) |= SVpad_TYPED)
+#define SvPAD_TYPED_off(sv)	(SvFLAGS(sv) &= ~SVpad_TYPED)
+
+#define SvPAD_OUR(sv)		(SvFLAGS(sv) & SVpad_OUR)
+#define SvPAD_OUR_on(sv)	(SvFLAGS(sv) |= SVpad_OUR)
+#define SvPAD_OUR_off(sv)	(SvFLAGS(sv) &= ~SVpad_OUR)
+
 #ifdef PERL_DEBUG_COW
 #define SvRV(sv) (0 + (sv)->sv_u.svu_rv)
 #else

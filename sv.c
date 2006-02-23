@@ -1240,7 +1240,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	/* This flag bit is used to mean other things in other scalar types.
 	   Given that it only has meaning inside the pad, it shouldn't be set
 	   on anything that can get upgraded.  */
-	assert((SvFLAGS(sv) & SVpad_TYPED) == 0);
+	assert(!SvPAD_TYPED(sv));
 	break;
     default:
 	if (old_type_details->cant_upgrade)
@@ -5042,7 +5042,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
     if (type >= SVt_PVMG) {
     	if (SvMAGIC(sv))
 	    mg_free(sv);
-	if (type == SVt_PVMG && SvFLAGS(sv) & SVpad_TYPED)
+	if (type == SVt_PVMG && SvPAD_TYPED(sv))
 	    SvREFCNT_dec(SvSTASH(sv));
     }
     switch (type) {

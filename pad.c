@@ -342,11 +342,11 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
     sv_setpv(namesv, name);
 
     if (typestash) {
-	SvFLAGS(namesv) |= SVpad_TYPED;
+	SvPAD_TYPED_on(namesv);
 	SvSTASH_set(namesv, (HV*)SvREFCNT_inc((SV*) typestash));
     }
     if (ourstash) {
-	SvFLAGS(namesv) |= SVpad_OUR;
+	SvPAD_OUR_on(namesv);
 	GvSTASH(namesv) = ourstash;
 	Perl_sv_add_backref(aTHX_ (SV*)ourstash, namesv);
     }
@@ -530,7 +530,7 @@ Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
 	    && (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
 	    && strEQ(name, SvPVX_const(sv)))
 	{
-	    if (is_our && (SvFLAGS(sv) & SVpad_OUR))
+	    if (is_our && (SvPAD_OUR(sv)))
 		break; /* "our" masking "our" */
 	    Perl_warner(aTHX_ packWARN(WARN_MISC),
 		"\"%s\" variable %s masks earlier declaration in same %s",
@@ -549,7 +549,7 @@ Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
 		&& sv != &PL_sv_undef
 		&& !SvFAKE(sv)
 		&& (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
-		&& ((SvFLAGS(sv) & SVpad_OUR) && GvSTASH(sv) == ourstash)
+		&& ((SvPAD_OUR(sv)) && GvSTASH(sv) == ourstash)
 		&& strEQ(name, SvPVX_const(sv)))
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_MISC),
@@ -601,7 +601,7 @@ Perl_pad_findmy(pTHX_ const char *name)
         const SV * const namesv = name_svp[offset];
 	if (namesv && namesv != &PL_sv_undef
 	    && !SvFAKE(namesv)
-	    && (SvFLAGS(namesv) & SVpad_OUR)
+	    && (SvPAD_OUR(namesv))
 	    && strEQ(SvPVX_const(namesv), name)
 	    && U_32(SvNVX(namesv)) == PAD_MAX /* min */
 	)
@@ -735,7 +735,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 	    if (out_capture) {
 
 		/* our ? */
-		if ((SvFLAGS(*out_name_sv) & SVpad_OUR)) {
+		if (SvPAD_OUR(*out_name_sv)) {
 		    *out_capture = NULL;
 		    return offset;
 		}
@@ -836,9 +836,9 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 
 	new_offset = pad_add_name(
 	    SvPVX_const(*out_name_sv),
-	    (SvFLAGS(*out_name_sv) & SVpad_TYPED)
+	    SvPAD_TYPED(*out_name_sv)
 		    ? SvSTASH(*out_name_sv) : NULL,
-	    (SvFLAGS(*out_name_sv) & SVpad_OUR)
+	    SvPAD_OUR(*out_name_sv)
 		    ? GvSTASH(*out_name_sv) : NULL,
 	    1  /* fake */
 	);
@@ -847,7 +847,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 	SvIV_set(new_namesv, *out_flags);
 
 	SvNV_set(new_namesv, (NV)0);
-	if (SvFLAGS(new_namesv) & SVpad_OUR) {
+	if (SvPAD_OUR(new_namesv)) {
 	    /*EMPTY*/;   /* do nothing */
 	}
 	else if (CvLATE(cv)) {
@@ -1649,7 +1649,7 @@ Perl_pad_compname_type(pTHX_ const PADOFFSET po)
 {
     dVAR;
     SV* const * const av = av_fetch(PL_comppad_name, po, FALSE);
-    if ( SvFLAGS(*av) & SVpad_TYPED ) {
+    if ( SvPAD_TYPED(*av) ) {
         return SvSTASH(*av);
     }
     return NULL;

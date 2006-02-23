@@ -150,7 +150,7 @@ is a lexical $_ in scope.
 
 #define dUNDERBAR I32 padoff_du = find_rundefsvoffset()
 #define UNDERBAR ((padoff_du == NOT_IN_PAD \
-	    || PAD_COMPNAME_FLAGS(padoff_du) & SVpad_OUR) \
+	    || PAD_COMPNAME_FLAGS_isOUR(padoff_du)) \
 	? DEFSV : PAD_SVl(padoff_du))
 
 /* Simple macros to put new mortal values onto the stack.   */
