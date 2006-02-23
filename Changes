@@ -28,6 +28,21 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 27284] By: nicholas                              on 2006/02/23  14:49:22
+        Log: Integrate:
+             [ 27002]
+             Code assumes that *FOO{SCALAR} will always return a scalar reference,
+             so make it so, creating $FOO if necessary.
+             (Effectively this is a policy decision that PERL_DONT_CREATE_GVSV is
+             visible to XS code, but isn't visible to Perl code)
+     Branch: maint-5.8/perl
+	  !> pp.c t/op/gv.t
+____________________________________________________________________________
+[ 27281] By: nicholas                              on 2006/02/23  13:35:27
+        Log: Update Changes
+     Branch: maint-5.8/perl
+	   ! Changes patchlevel.h
+____________________________________________________________________________
 [ 27280] By: nicholas                              on 2006/02/23  13:32:51
         Log: Missed file from running embed.pl
      Branch: maint-5.8/perl
