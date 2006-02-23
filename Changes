@@ -28,6 +28,492 @@ example from http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 Version v5.8.9		Maintenance release working toward v5.8.9
 --------------
 ____________________________________________________________________________
+[ 27280] By: nicholas                              on 2006/02/23  13:32:51
+        Log: Missed file from running embed.pl
+     Branch: maint-5.8/perl
+	   ! embedvar.h
+____________________________________________________________________________
+[ 27277] By: nicholas                              on 2006/02/23  00:51:58
+        Log: Integrate:
+             [ 26980]
+             PERL_DONT_CREATE_GVSV wasn't as effective as it should have been.
+             
+             plus restore the description (but now to perl589delta.pod)
+     Branch: maint-5.8/perl
+	   ! pod/perl589delta.pod
+	  !> gv.c
+____________________________________________________________________________
+[ 27275] By: nicholas                              on 2006/02/22  23:58:35
+        Log: In Perl_sv_dup, merge the copy code for the 3 simple types (IV,NV,RV).
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 27266] By: nicholas                              on 2006/02/21  23:57:15
+        Log: Integrate:
+             [ 27030]
+             Subject: [patch] arena rework - unify arenaroots
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Message-ID: <43DF3D0A.3040102@gmail.com>
+             Date: Tue, 31 Jan 2006 03:33:46 -0700
+             
+             [ 27262]
+             PL_body_arenas should be set to NULL when the interpreter is cleared.
+     Branch: maint-5.8/perl
+	   ! sv.c
+	  !> embedvar.h hv.c intrpvar.h perlapi.h
+____________________________________________________________________________
+[ 27253] By: nicholas                              on 2006/02/20  23:42:25
+        Log: Integrate:
+             [ 26170]
+             Remove all the now unused new_XFOO()/del_XFOO() macros
+             
+             [ 26172]
+             With -DPURFIY we change the flags so that everything is allocated
+             directly. (Don't use arenas at all.) This seems a rather elegant way
+             to simplify some of the code in sv.c by removing conditional
+             compilation.
+             
+             [ 26173]
+             Norman observed that a couple of macros could make the body defintion
+             table a lot more readable.
+             
+             [ 26184]
+             Flip the sign of the value in body details offset, and change its type
+             to size_t.
+             
+             [ 26439]
+             Avoid negating an unsigned value. (The offset in the SV body table)
+             
+             [ 27090]
+             Eliminate a croak we can't get to.
+             
+             [ 27091]
+             Merge and refactor the PVAV and PVHV code in Perl_sv_upgrade, which
+             reduces the object size by about 80 bytes.
+             
+             [ 27092]
+             Remove "Can't upgrade to undef" from perldiag, as the corresponding
+             code is now gone from sv_upgrade.
+             
+             [ 27094]
+             new_body_type doesn't need to subtract the offset, that's what
+             new_body_allocated is for.
+             
+             [ 27095]
+             The message "Can't upgrade that kind of scalar" can be far more
+             informative.
+             
+             [ 27109]
+             In Perl_sv_upgrade, the assignment to new_type_details only needs to
+             be done once.
+     Branch: maint-5.8/perl
+	   ! sv.c
+	  !> pod/perldiag.pod
+____________________________________________________________________________
+[ 27246] By: nicholas                              on 2006/02/20  16:41:57
+        Log: Integrate:
+             [ 26169]
+             sv_clear can manipulate the arena array directly too.
+             Also, I think that we may have been "leaking" NV bodies in blead since
+             25051. Oops. (Will not have been detectable except with -DPURIFY as
+             the leak is not returning them as free to the arena)
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 27232] By: nicholas                              on 2006/02/19  23:57:27
+        Log: Integrate:
+             [ 26165]
+             Eliminate new_body_offset from sv_dup()
+             
+             [ 26166]
+             Eliminate new_body_length from sv_dup. Replace SvTYPE(sstr) with
+             sv_type, which is a constant variable with the same value.
+             
+             [ 26167]
+             Merge the arms of the switch. The decision about what comes from an
+             arena and what comes from malloc is now solely in the table.
+             
+             [ 26168]
+             We only need to zero new bodies for upgrades. sv_dup doesn't need to
+             zero as it's copying over the same sized structure. So change
+             new_NOARENA to malloc(), and add new_NOARENAZ() to calloc()
+             
+             [ 26378]
+             Perl_sv_dup should be allocating bodies based on *size*, not the
+             length to copy.
+             
+             [ 27159]
+             Coalesce 2 if blocks with duplicated conditions in Perl_sv_dup.
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 27226] By: nicholas                              on 2006/02/19  12:07:56
+        Log: Integrate:
+             [ 26164]
+             Merge the last remaining case duplication in sv_upgrade
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 27225] By: nicholas                              on 2006/02/19  11:49:31
+        Log: Integrate:
+             [ 26159]
+             Add a flag to the body details of which types come from arenas.
+             Update the allocation information for all the types.
+             Add a new macro new_NOARENA() for allocating the non-arena types.
+             Use calloc rather than malloc for the new_NOARENA so that the Zero()
+             can be skipped.
+             
+             [ 26161]
+             new_body_inline doesn't need to be passed the root, as it's already
+             inferring the arenaroot directly from the passed-in type.
+             
+             [ 26162]
+             Eliminate new_body_offset from sv_upgrade
+             
+             [ 26163]
+             Eliminate new_body_length from sv_upgrade
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 27224] By: nicholas                              on 2006/02/19  11:30:33
+        Log: Integrate:
+             [ 26155]
+             Rename sv_upgrade's parameter mt to new_type.
+             
+             [ 26156]
+             const and static for the const static private table.
+             Replace the "upgrade" special case for SVt_PV with assertions as it's
+             not been needed since we forced *up*grades.
+             
+             [ 26158]
+             Simplify the expression for the upgrade logic for SVt_IV.
+             Replace the "can't happen" comment for SVt_PVIV with assertions
+             that it didn't happen.
+             
+             (except the bit about assertions)
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 27217] By: nicholas                              on 2006/02/18  11:50:06
+        Log: Integrate:
+             [ 26151]
+             "Can you see what it is yet?"
+             Next steps towards making as much as possible table driven.
+             
+             [ 26152]
+             All that can be in the first switch statement of sv_upgrade is now
+             table driven. The shrinking continues on the morrow.
+             
+             [ 26623]
+             If NV_ZERO_IS_ALLBITS_ZERO is not true, then it's important to inialise
+             the NV only if the new body has an NV. (D'oh!)
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 27216] By: nicholas                              on 2006/02/18  11:07:18
+        Log: Integrate:
+             [ 26146]
+             s/SvTYPE(sv)/old_type/ in sv_upgrade because we already have that value
+             in that variable.
+             Don't compile S_new_body with -DPURIFY
+             
+             [ 26149]
+             Merge sizeof_body_by_svtype and offset_by_svtype into a single array
+             of structures.
+             
+             [ 26150]
+             Add the size of the structure to copy as a field in the per type
+             data table.
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 27206] By: nicholas                              on 2006/02/17  13:04:04
+        Log: Integrate:
+             [ 26141]
+             Subject: Re: eliminate discreet arenaroots
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Message-ID: <4378E5B0.3010708@gmail.com>
+             Date: Mon, 14 Nov 2005 12:29:52 -0700
+             
+             [ 26142]
+             PL_pte_root and PL_pte_arenaroot can be exterminated. Which reveals
+             an erroneous remaining reference to PL_pte_root to correct.
+             
+             [ 26143]
+             Oi gcc, No! sizeof(void) is an error. *Not* 1.
+             Wanting sizeof(void) isn't even a compilation error with -ansi
+             -pedantic. Just a warning. Lame! I'm going to send it back for a full
+             refund. Hateful software.
+             
+             [ 26148]
+             Move the location of the definition of the arena slot used for pte
+             into sv.h, to keep it in one central place.
+             Change it to use SVt_RV. (Having SVt_IV for real use will be useful.
+             SVt_RV has no body, and doesn't pretend to have one, so it is spare.)
+             
+             [ 26171]
+             Map the HE arena onto SV type 0 (SVt_NULL).
+             Abolish PL_he_root and PL_he_arenaroot.
+     Branch: maint-5.8/perl
+	   ! hv.c intrpvar.h sv.c sv.h
+	  !> embedvar.h ext/XS/APItest/APItest.xs perlapi.h
+____________________________________________________________________________
+[ 27191] By: nicholas                              on 2006/02/15  09:44:22
+        Log: Integrate:
+             [ 26129]
+             Provide a crude way for specifying the command line for
+             make test.valgrind
+             
+             [ 26846]
+             Adapt test.valgrind make target to recent valgrinds (3.x)
+             by Jim Cromie
+             
+             [ 27128]
+             Subject: [patch] several broken make *.valgrind targets
+             From: Jim Cromie <jim.cromie@gmail.com>
+             Date: Tue, 07 Feb 2006 15:11:54 -0700
+             Message-ID: <43E91B2A.4060700@gmail.com>
+     Branch: maint-5.8/perl
+	   ! t/TEST
+	  !> Makefile.SH
+____________________________________________________________________________
+[ 27183] By: nicholas                              on 2006/02/14  22:06:00
+        Log: Unlike 5.9, SVt_IV needs to be freed. Only SVt_NULL can exit early.
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 27175] By: nicholas                              on 2006/02/13  21:02:41
+        Log: Getting the old_length wrong for SVt_PVNV in Perl_sv_upgrade causes
+             surprisingly subtle bugs. Now fixed. (Cause being that the expression
+             to get the length of PVNV differs between blead and maint, because
+             blead's structures have been space optimised.)
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 27170] By: nicholas                              on 2006/02/13  15:32:10
+        Log: Integrate:
+             [ 27133]
+             lastparen in the regexp structure is never initialised, and so will
+             still be uninitialised after a failed match, yet various points in
+             mg.c read it come what may. Should fix bug 38461.
+             
+             [ 27169]
+             All the bits of clone_params.flags need to be initialised, not just
+             CLONEf_JOIN_IN.
+     Branch: maint-5.8/perl
+	  !> ext/threads/threads.xs regcomp.c
+____________________________________________________________________________
+[ 27168] By: nicholas                              on 2006/02/12  21:10:26
+        Log: Integrate:
+             [ 25904]
+             global.sym appears to have become out of date. Oops.
+             
+             [ 25923]
+             Arrange to only output each symbol once into global.sym
+             
+             [ 25924]
+             Perl_csighandler was in global.sym twice.
+     Branch: maint-5.8/perl
+	  !> embed.pl global.sym
+____________________________________________________________________________
+[ 27167] By: nicholas                              on 2006/02/12  20:48:31
+        Log: Make cross upgrades work (eg a request to "upgrade" PV to NV)
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 27165] By: nicholas                              on 2006/02/12  18:18:04
+        Log: Integrate:
+             [ 25051]
+             Unwrap the del_Xfoo() macros by explicitly noting the arena to free
+             the body to. This comletely eliminates the second switch statement.
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 27164] By: nicholas                              on 2006/02/12  11:20:06
+        Log: Perl_sv_upgrade is not void in maint, so need to return TRUE.
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 27163] By: nicholas                              on 2006/02/12  00:29:55
+        Log: Integrate:
+             [ 24897]
+             Move the offset calculations outside of new_body/del_body.
+             This makes some of the upgrade code slightly simpler.
+             
+             [ 24899]
+             If NV_ZERO_IS_ALLBITS_ZERO there's no need to explicitly set the NVX
+             to 0.0, as the memset has already done it.
+             
+             [ 24900]
+             S_del_body is sufficiently small that inlining it is a space win.
+             
+             [ 24918]
+             As there will be no old body to dispose of, we can return immediately.
+             
+             [ 25053]
+             Copying the first parameter in the macro del_body seems to reduce
+             code size.  Presumably an expression is no longer evaluated twice.
+             
+             [ 25066]
+             Inlining del_HE is actually a space optimisation.
+             It's therefore likely also to be a speed optimisation. :-)
+             
+             [ 25069]
+             Provide a macro version of S_new_body to inline it within the hot code.
+             
+             [ 25113]
+             Subject: [patch: sv.c] reuse new_body_inline in Perl_new_body
+             From: Jim Cromie <jcromie@divsol.com>
+             Date: Sun, 10 Jul 2005 15:59:30 -0600
+             Message-ID: <42D19A42.8040409@divsol.com>
+     Branch: maint-5.8/perl
+	  !> embed.fnc embed.h hv.c proto.h sv.c
+____________________________________________________________________________
+[ 27160] By: nicholas                              on 2006/02/11  15:13:04
+        Log: Integrate:
+             [ 24896]
+             Refactor sv_dup to memcpy from source to destination, and only
+             explicitly copy the structure members that need explicit duplication.
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 27157] By: nicholas                              on 2006/02/11  10:48:48
+        Log: Integrate:
+             [ 24894]
+             Subject: [PATCH] squeeze repetition out of Perl_sv_free_arenas
+             From: Jim Cromie <jcromie@divsol.com>
+             Message-ID: <42B3C388.2090902@divsol.com>
+             Date: Sat, 18 Jun 2005 00:47:36 -0600
+             
+             [ 24895]
+             Squeeze a little more savings by moving pte and he arenas into the
+             common arena free code.
+             
+             [ 24914]
+             Replace the non-const initialiser block + loop with a series of calls
+             to a small static function.
+             c.f. "I will replace you with a small shell script..."
+     Branch: maint-5.8/perl
+	  !> hv.h perl.h sv.c
+____________________________________________________________________________
+[ 27156] By: nicholas                              on 2006/02/11  10:09:35
+        Log: Integrate:
+             [ 24892]
+             sv_upgrade by memcpy
+             AV and HV cases need tidyup
+             
+             [ 24893]
+             update AVs and HVs using the old_body, and remove all of the local
+             variables used to hold the SV body piecemeal.
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 27150] By: nicholas                              on 2006/02/10  11:49:32
+        Log: Integrate:
+             [ 24886]
+             Move freeing the old body after the creating of the new body.
+             
+             [ 24887]
+             Missing aTHX_ (noticed by Jim Cromie)
+             
+             [ 24888]
+             Collect a little more information about the body we're getting rid of
+             
+             [ 24890]
+             Change 24886 was buggy - should be taking (and passing in) the
+             address of the arena.
+             
+             [ 24891]
+             Fix compiling with -DPURIFY
+     Branch: maint-5.8/perl
+	  !> sv.c
+____________________________________________________________________________
+[ 27149] By: nicholas                              on 2006/02/10  11:25:06
+        Log: Integrate:
+             [ 24881]
+             new_pte/del_pte can use new_body/del_body too
+             
+             [ 24885]
+             The only way is up!
+             (*up*grades. Or croak)
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 27147] By: nicholas                              on 2006/02/10  11:04:46
+        Log: Integrate:
+             [ 24878]
+             Replace all the new/del static functions with calls to a single pair
+             of functions that uproot/plant bodies
+     Branch: maint-5.8/perl
+	   ! sv.c
+	  !> embed.fnc embed.h proto.h
+____________________________________________________________________________
+[ 27146] By: nicholas                              on 2006/02/10  10:29:10
+        Log: Integrate:
+             [ 24876]
+             Replace all the S_more_* functions with a single function.
+             Saves 1.5K on the object file in OS X when built with -Os
+             
+             [ 24877]
+             Making more_* return a pointer, and swapping to a ternary ?: in
+             new_* seems to generate slightly terser object code.
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 27144] By: nicholas                              on 2006/02/09  22:33:56
+        Log: Integrate:
+             [ 24875]
+             Subject: [PATCH] Re: [perl #36048] Refactor S_more_*v into one function
+             From: Jim Cromie <jcromie@divsol.com>
+             Message-ID: <42ADC8ED.4090009@divsol.com>
+             Date: Mon, 13 Jun 2005 11:57:01 -0600
+             
+             Plus fixups - xiv_allocated, xnv_allocated, xpviv_allocated structures,
+             cast corrections in S_{new,del}_x[in]v, and more_thingy declarations
+             for the 2 types that no longer use arenas in 5.9 (IVs and RVs)
+     Branch: maint-5.8/perl
+	   ! embedvar.h intrpvar.h sv.c sv.h
+____________________________________________________________________________
+[ 27143] By: nicholas                              on 2006/02/09  21:49:46
+        Log: Restore changes 24459 and 24467 (GVs from arenas) (ie reverse 26559)
+             as the arena re-working is started.
+     Branch: maint-5.8/perl
+	   ! embed.fnc embed.h embedvar.h intrpvar.h perlapi.h proto.h sv.c
+____________________________________________________________________________
+[ 27142] By: nicholas                              on 2006/02/09  21:12:42
+        Log: Integrate:
+             [ 24544]
+             create an "allocated" structure for PVs, PVAVs and PVHVs
+     Branch: maint-5.8/perl
+	  !> av.h hv.h intrpvar.h sv.c sv.h
+____________________________________________________________________________
+[ 27141] By: nicholas                              on 2006/02/09  20:34:26
+        Log: Integrate:
+             [ 24258]
+             Merge common code. Reduces object size by 1K on x86, 6K on PPC
+             
+             [ 24340]
+             The if() clause is the wrong way round, so OOK can never be true in
+             this case. Given that OOK is never undone, we could never have been
+             correctly upgrading a PV with OOK to HV or AV. I believe that only
+             SVt_NULL is the only type ever upgraded to HV or AV.
+     Branch: maint-5.8/perl
+	   ! sv.c
+____________________________________________________________________________
+[ 27058] By: nicholas                              on 2006/02/03  11:35:30
+        Log: Create perl589delta.pod
+     Branch: maint-5.8/perl
+	   + pod/perl589delta.pod
+	   ! MANIFEST Makefile.SH pod.lst pod/perl.pod
+	   ! vms/descrip_mms.template win32/Makefile win32/makefile.mk
+	   ! win32/pod.mak
+____________________________________________________________________________
+[ 27055] By: nicholas                              on 2006/02/02  17:28:37
+        Log: Update Changes, and create Changes5.8.8
+     Branch: maint-5.8/perl
+	  +> Changes5.8.8
+	   ! Changes MANIFEST patchlevel.h
+____________________________________________________________________________
 [ 27041] By: nicholas                              on 2006/02/01  18:22:12
         Log: That was 5.8.8.
      Branch: maint-5.8/perl
