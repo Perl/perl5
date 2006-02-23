@@ -3352,8 +3352,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		sv_upgrade(dstr, SVt_IV);
 		break;
 	    case SVt_NV:
-		sv_upgrade(dstr, SVt_PVNV);
-		break;
 	    case SVt_RV:
 	    case SVt_PV:
 		sv_upgrade(dstr, SVt_PVIV);
