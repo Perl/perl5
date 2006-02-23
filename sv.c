@@ -845,9 +845,9 @@ struct body_details {
     U8 body_size;	/* Size to allocate  */
     U8 copy;	/* Size of structure to copy (may be shorter)  */
     U8 offset;
-    bool cant_upgrade;	/* Cannot upgrade this type */
-    bool zero_nv;	/* zero the NV when upgrading from this */
-    bool arena;		/* Allocated from an arena */
+    unsigned int cant_upgrade : 1;	/* Cannot upgrade this type */
+    unsigned int zero_nv : 1;	/* zero the NV when upgrading from this */
+    unsigned int arena : 1;		/* Allocated from an arena */
     size_t arena_size;	/* Size of arena to allocate */
 };
 
