@@ -497,7 +497,7 @@ Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void* p)
 }
 
 void
-Perl_save_aelem(pTHX_ const AV *av, I32 idx, SV **sptr)
+Perl_save_aelem(pTHX_ AV *av, I32 idx, SV **sptr)
 {
     dVAR;
     SV *sv;

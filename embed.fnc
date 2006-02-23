@@ -665,7 +665,7 @@ Apda	|char*	|savesharedpv	|NULLOK const char* pv
 Apda	|char*	|savesvpv	|NN SV* sv
 Ap	|void	|savestack_grow
 Ap	|void	|savestack_grow_cnt	|I32 need
-Ap	|void	|save_aelem	|NN const AV* av|I32 idx|NN SV **sptr
+Ap	|void	|save_aelem	|NN AV* av|I32 idx|NN SV **sptr
 Ap	|I32	|save_alloc	|I32 size|I32 pad
 Ap	|void	|save_aptr	|NN AV** aptr
 Ap	|AV*	|save_ary	|NN GV* gv

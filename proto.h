@@ -1866,7 +1866,7 @@ PERL_CALLCONV char*	Perl_savesvpv(pTHX_ SV* sv)
 
 PERL_CALLCONV void	Perl_savestack_grow(pTHX);
 PERL_CALLCONV void	Perl_savestack_grow_cnt(pTHX_ I32 need);
-PERL_CALLCONV void	Perl_save_aelem(pTHX_ const AV* av, I32 idx, SV **sptr)
+PERL_CALLCONV void	Perl_save_aelem(pTHX_ AV* av, I32 idx, SV **sptr)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 
