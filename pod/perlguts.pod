@@ -1060,7 +1060,6 @@ The current kinds of Magic Virtual Tables are:
     y  PERL_MAGIC_defelem        vtbl_defelem   Shadow "foreach" iterator
 						variable / smart parameter
 						vivification
-    *  PERL_MAGIC_glob           vtbl_glob      GV (typeglob)
     #  PERL_MAGIC_arylen         vtbl_arylen    Array length ($#ary)
     .  PERL_MAGIC_pos            vtbl_pos       pos() lvalue
     <  PERL_MAGIC_backref        vtbl_backref   back pointer to a weak ref 

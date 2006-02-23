@@ -3485,7 +3485,6 @@ Gid_t getegid (void);
 #define PERL_MAGIC_substr	  'x' /* substr() lvalue */
 #define PERL_MAGIC_defelem	  'y' /* Shadow "foreach" iterator variable /
 					smart parameter vivification */
-#define PERL_MAGIC_glob		  '*' /* GV (typeglob) */
 #define PERL_MAGIC_arylen	  '#' /* Array length ($#ary) */
 #define PERL_MAGIC_pos		  '.' /* pos() lvalue */
 #define PERL_MAGIC_backref	  '<' /* for weak ref data */
@@ -4491,17 +4490,6 @@ MGVTBL_SET(
     NULL,
     NULL,
     MEMBER_TO_FPTR(Perl_magic_freearylen_p),
-    NULL,
-    NULL
-);
-
-MGVTBL_SET(
-    PL_vtbl_glob,
-    NULL,
-    MEMBER_TO_FPTR(Perl_magic_setglob),
-    NULL,
-    NULL,
-    NULL,
     NULL,
     NULL
 );

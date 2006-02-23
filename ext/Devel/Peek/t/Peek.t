@@ -305,14 +305,10 @@ do_test(17,
 	*a,
 'SV = PVGV\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(SMG,SCREAM,MULTI(?:,IN_PAD)?\\)
+  FLAGS = \\(SCREAM,MULTI(?:,IN_PAD)?\\)
   IV = 0
   NV = 0
   PV = 0
-  MAGIC = $ADDR
-    MG_VIRTUAL = &PL_vtbl_glob
-    MG_TYPE = PERL_MAGIC_glob\(\*\)
-    MG_OBJ = $ADDR
   NAME = "a"
   NAMELEN = 1
   GvSTASH = $ADDR\\t"main"

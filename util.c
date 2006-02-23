@@ -3281,9 +3281,6 @@ Perl_get_vtbl(pTHX_ int vtbl_id)
     case want_vtbl_arylen:
 	result = &PL_vtbl_arylen;
 	break;
-    case want_vtbl_glob:
-	result = &PL_vtbl_glob;
-	break;
     case want_vtbl_mglob:
 	result = &PL_vtbl_mglob;
 	break;

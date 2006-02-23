@@ -3170,7 +3170,6 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 	/* don't upgrade SVt_PVLV: it can hold a glob */
 	if (dtype != SVt_PVLV)
 	    sv_upgrade(dstr, SVt_PVGV);
-	sv_magic(dstr, dstr, PERL_MAGIC_glob, NULL, 0);
 	GvSTASH(dstr) = GvSTASH(sstr);
 	if (GvSTASH(dstr))
 	    Perl_sv_add_backref(aTHX_ (SV*)GvSTASH(dstr), dstr);
@@ -3496,6 +3495,21 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	assert(!(sflags & SVf_NOK));
 	assert(!(sflags & SVf_IOK));
     }
+    else if (dtype == SVt_PVGV) {
+	if (!(sflags & SVf_OK)) {
+	    if (ckWARN(WARN_MISC))
+		Perl_warner(aTHX_ packWARN(WARN_MISC),
+			    "Undefined value assigned to typeglob");
+	}
+	else {
+	    GV *gv = gv_fetchsv(sstr, GV_ADD, SVt_PVGV);
+	    if (dstr != (SV*)gv) {
+		if (GvGP(dstr))
+		    gp_free((GV*)dstr);
+		GvGP(dstr) = gp_ref(GvGP(gv));
+	    }
+	}
+    }
     else if (sflags & SVp_POK) {
         bool isSwipe = 0;
 
@@ -3650,11 +3664,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
     }
     else {
-	if (dtype == SVt_PVGV) {
-	    if (ckWARN(WARN_MISC))
-		Perl_warner(aTHX_ packWARN(WARN_MISC), "Undefined value assigned to typeglob");
-	}
-	else if ((stype == SVt_PVGV || stype == SVt_PVLV)
+	if ((stype == SVt_PVGV || stype == SVt_PVLV)
 		 && (sflags & SVp_SCREAM)) {
 	    /* This stringification rule for globs is spread in 3 places.
 	       This feels bad. FIXME.  */
@@ -4492,9 +4502,6 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
 	break;
     case PERL_MAGIC_defelem:
 	vtable = &PL_vtbl_defelem;
-	break;
-    case PERL_MAGIC_glob:
-	vtable = &PL_vtbl_glob;
 	break;
     case PERL_MAGIC_arylen:
 	vtable = &PL_vtbl_arylen;
@@ -7665,7 +7672,6 @@ S_sv_unglob(pTHX_ SV *sv)
 	sv_del_backref((SV*)GvSTASH(sv), sv);
 	GvSTASH(sv) = NULL;
     }
-    sv_unmagic(sv, PERL_MAGIC_glob);
     SvSCREAM_off(sv);
     Safefree(GvNAME(sv));
     GvMULTI_off(sv);

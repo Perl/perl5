@@ -894,7 +894,6 @@ static const struct { const char type; const char *name; } magic_names[] = {
 	{ PERL_MAGIC_sv,             "sv(\\0)" },
 	{ PERL_MAGIC_arylen,         "arylen(#)" },
 	{ PERL_MAGIC_rhash,          "rhash(%)" },
-	{ PERL_MAGIC_glob,           "glob(*)" },
 	{ PERL_MAGIC_pos,            "pos(.)" },
 	{ PERL_MAGIC_symtab,         "symtab(:)" },
 	{ PERL_MAGIC_backref,        "backref(<)" },
@@ -956,7 +955,6 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
             else if (v == &PL_vtbl_dbline)     s = "dbline";
             else if (v == &PL_vtbl_isa)        s = "isa";
             else if (v == &PL_vtbl_arylen)     s = "arylen";
-            else if (v == &PL_vtbl_glob)       s = "glob";
             else if (v == &PL_vtbl_mglob)      s = "mglob";
             else if (v == &PL_vtbl_nkeys)      s = "nkeys";
             else if (v == &PL_vtbl_taint)      s = "taint";
