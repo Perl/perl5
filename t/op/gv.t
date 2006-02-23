@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 61 );
+plan( tests => 63 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -216,6 +216,19 @@ is($j[0], 1);
     $x  = undef;
     $x .= <DATA>;
     is ($x, "Rules\n");
+}
+
+
+{
+    no warnings qw(once uninitialized);
+    my $g = \*clatter;
+    my $r = eval {no strict; ${*{$g}{SCALAR}}};
+    is ($@, '', "PERL_DONT_CREATE_GVSV shouldn't affect thingy syntax");
+
+    $g = \*vowm;
+    $r = eval {use strict; ${*{$g}{SCALAR}}};
+    is ($@, '',
+	"PERL_DONT_CREATE_GVSV shouldn't affect thingy syntax under strict");
 }
 
 __END__
