@@ -1917,9 +1917,11 @@ STATIC void *	S_more_bodies(pTHX_ svtype sv_type);
 STATIC bool	S_sv_2iuv_common(pTHX_ SV *sv);
 STATIC void	S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype);
 STATIC void	S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr);
+#  if defined(USE_ITHREADS)
 STATIC PTR_TBL_ENT_t *	S_ptr_table_find(PTR_TBL_t *tbl, const void *sv)
 			__attribute__warn_unused_result__;
 
+#  endif
 STATIC void	S_reset_amagic(pTHX_ SV *rv, const bool on);
 #endif
 

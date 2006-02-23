@@ -1353,7 +1353,13 @@
 #define sv_2iuv_common		S_sv_2iuv_common
 #define glob_assign_glob	S_glob_assign_glob
 #define glob_assign_ref		S_glob_assign_ref
+#endif
+#  if defined(USE_ITHREADS)
+#ifdef PERL_CORE
 #define ptr_table_find		S_ptr_table_find
+#endif
+#  endif
+#ifdef PERL_CORE
 #define reset_amagic		S_reset_amagic
 #endif
 #endif
@@ -3422,7 +3428,13 @@
 #define sv_2iuv_common(a)	S_sv_2iuv_common(aTHX_ a)
 #define glob_assign_glob(a,b,c)	S_glob_assign_glob(aTHX_ a,b,c)
 #define glob_assign_ref(a,b)	S_glob_assign_ref(aTHX_ a,b)
+#endif
+#  if defined(USE_ITHREADS)
+#ifdef PERL_CORE
 #define ptr_table_find		S_ptr_table_find
+#endif
+#  endif
+#ifdef PERL_CORE
 #define reset_amagic(a,b)	S_reset_amagic(aTHX_ a,b)
 #endif
 #endif
