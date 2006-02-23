@@ -237,6 +237,9 @@ perform the upgrade if necessary.  See C<svtype>.
 					      [CvEVAL(cv), CvSPECIAL(cv)]
 					   4: Whether the regexp pointer is in
 					      fact an offset [SvREPADTMP(sv)]
+					   5: On a pad name SV, that slot in the
+					      frame AV is a REFCNT'ed reference
+					      to a lexical from "outside".
 					*/
 #define SVf_OOK		0x02000000	/* has valid offset value
 					   For a PVHV this means that a
