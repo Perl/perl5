@@ -3456,6 +3456,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    SvUPGRADE(dstr, (U32)stype);
     }
 
+    /* dstr may have been upgraded.  */
+    dtype = SvTYPE(dstr);
     sflags = SvFLAGS(sstr);
 
     if (sflags & SVf_ROK) {
