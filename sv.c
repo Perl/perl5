@@ -843,12 +843,13 @@ has no consequence at this time.
 
 struct body_details {
     U8 body_size;	/* Size to allocate  */
-    U8 copy;	/* Size of structure to copy (may be shorter)  */
+    U8 copy;		/* Size of structure to copy (may be shorter)  */
     U8 offset;
-    unsigned int cant_upgrade : 1;	/* Cannot upgrade this type */
-    unsigned int zero_nv : 1;	/* zero the NV when upgrading from this */
-    unsigned int arena : 1;		/* Allocated from an arena */
-    size_t arena_size;	/* Size of arena to allocate */
+    unsigned int type : 4;	    /* We have space for a sanity check.  */
+    unsigned int cant_upgrade : 1;  /* Cannot upgrade this type */
+    unsigned int zero_nv : 1;	    /* zero the NV when upgrading from this */
+    unsigned int arena : 1;	    /* Allocated from an arena */
+    size_t arena_size;		    /* Size of arena to allocate */
 };
 
 #define HADNV FALSE
@@ -905,82 +906,83 @@ struct xpv {
 	+ sizeof (((type*)SvANY((SV*)0))->last_member)
 
 static const struct body_details bodies_by_type[] = {
-    { sizeof(HE), 0, 0, FALSE, NONV, NOARENA, FIT_ARENA(0, sizeof(HE)) },
+    { sizeof(HE), 0, 0, SVt_NULL,
+      FALSE, NONV, NOARENA, FIT_ARENA(0, sizeof(HE)) },
 
     /* IVs are in the head, so the allocation size is 0.
        However, the slot is overloaded for PTEs.  */
     { sizeof(struct ptr_tbl_ent), /* This is used for PTEs.  */
       sizeof(IV), /* This is used to copy out the IV body.  */
-      STRUCT_OFFSET(XPVIV, xiv_iv), FALSE, NONV,
+      STRUCT_OFFSET(XPVIV, xiv_iv), SVt_IV, FALSE, NONV,
       NOARENA /* IVS don't need an arena  */,
       /* But PTEs need to know the size of their arena  */
       FIT_ARENA(0, sizeof(struct ptr_tbl_ent))
     },
 
     /* 8 bytes on most ILP32 with IEEE doubles */
-    { sizeof(NV), sizeof(NV), 0, FALSE, HADNV, HASARENA,
+    { sizeof(NV), sizeof(NV), 0, SVt_NV, FALSE, HADNV, HASARENA,
       FIT_ARENA(0, sizeof(NV)) },
 
     /* RVs are in the head now.  */
-    { 0, 0, 0, FALSE, NONV, NOARENA, 0 },
+    { 0, 0, 0, SVt_RV, FALSE, NONV, NOARENA, 0 },
 
     /* 8 bytes on most ILP32 with IEEE doubles */
     { sizeof(xpv_allocated),
       copy_length(XPV, xpv_len)
       - relative_STRUCT_OFFSET(xpv_allocated, XPV, xpv_cur),
       + relative_STRUCT_OFFSET(xpv_allocated, XPV, xpv_cur),
-      FALSE, NONV, HASARENA, FIT_ARENA(0, sizeof(xpv_allocated)) },
+      SVt_PV, FALSE, NONV, HASARENA, FIT_ARENA(0, sizeof(xpv_allocated)) },
 
     /* 12 */
     { sizeof(xpviv_allocated),
       copy_length(XPVIV, xiv_u)
       - relative_STRUCT_OFFSET(xpviv_allocated, XPVIV, xpv_cur),
       + relative_STRUCT_OFFSET(xpviv_allocated, XPVIV, xpv_cur),
-      FALSE, NONV, HASARENA, FIT_ARENA(0, sizeof(xpviv_allocated)) },
+      SVt_PVIV, FALSE, NONV, HASARENA, FIT_ARENA(0, sizeof(xpviv_allocated)) },
 
     /* 20 */
-    { sizeof(XPVNV), copy_length(XPVNV, xiv_u), 0, FALSE, HADNV,
+    { sizeof(XPVNV), copy_length(XPVNV, xiv_u), 0, SVt_PVNV, FALSE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVNV)) },
 
     /* 28 */
-    { sizeof(XPVMG), copy_length(XPVMG, xmg_stash), 0, FALSE, HADNV,
+    { sizeof(XPVMG), copy_length(XPVMG, xmg_stash), 0, SVt_PVMG, FALSE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
     
     /* 36 */
-    { sizeof(XPVBM), sizeof(XPVBM), 0, TRUE, HADNV,
+    { sizeof(XPVBM), sizeof(XPVBM), 0, SVt_PVBM, TRUE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVBM)) },
 
     /* 48 */
-    { sizeof(XPVGV), sizeof(XPVGV), 0, TRUE, HADNV,
+    { sizeof(XPVGV), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVGV)) },
     
     /* 64 */
-    { sizeof(XPVLV), sizeof(XPVLV), 0, TRUE, HADNV,
+    { sizeof(XPVLV), sizeof(XPVLV), 0, SVt_PVLV, TRUE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVLV)) },
 
     { sizeof(xpvav_allocated),
       copy_length(XPVAV, xmg_stash)
       - relative_STRUCT_OFFSET(xpvav_allocated, XPVAV, xav_fill),
       + relative_STRUCT_OFFSET(xpvav_allocated, XPVAV, xav_fill),
-      TRUE, HADNV, HASARENA, FIT_ARENA(0, sizeof(xpvav_allocated)) },
+      SVt_PVAV, TRUE, HADNV, HASARENA, FIT_ARENA(0, sizeof(xpvav_allocated)) },
 
     { sizeof(xpvhv_allocated),
       copy_length(XPVHV, xmg_stash)
       - relative_STRUCT_OFFSET(xpvhv_allocated, XPVHV, xhv_fill),
       + relative_STRUCT_OFFSET(xpvhv_allocated, XPVHV, xhv_fill),
-      TRUE, HADNV, HASARENA, FIT_ARENA(0, sizeof(xpvhv_allocated)) },
+      SVt_PVHV, TRUE, HADNV, HASARENA, FIT_ARENA(0, sizeof(xpvhv_allocated)) },
 
     /* 56 */
     { sizeof(xpvcv_allocated), sizeof(xpvcv_allocated),
       + relative_STRUCT_OFFSET(xpvcv_allocated, XPVCV, xpv_cur),
-      TRUE, NONV, HASARENA, FIT_ARENA(0, sizeof(xpvcv_allocated)) },
+      SVt_PVCV, TRUE, NONV, HASARENA, FIT_ARENA(0, sizeof(xpvcv_allocated)) },
 
     { sizeof(xpvfm_allocated), sizeof(xpvfm_allocated),
       + relative_STRUCT_OFFSET(xpvfm_allocated, XPVFM, xpv_cur),
-      TRUE, NONV, NOARENA, FIT_ARENA(20, sizeof(xpvfm_allocated)) },
+      SVt_PVFM, TRUE, NONV, NOARENA, FIT_ARENA(20, sizeof(xpvfm_allocated)) },
 
     /* XPVIO is 84 bytes, fits 48x */
-    { sizeof(XPVIO), sizeof(XPVIO), 0, TRUE, HADNV,
+    { sizeof(XPVIO), sizeof(XPVIO), 0, SVt_PVIO, TRUE, HADNV,
       HASARENA, FIT_ARENA(24, sizeof(XPVIO)) },
 };
 
@@ -1052,6 +1054,10 @@ static const struct body_details bodies_by_type[] = {
 #define new_NOARENAZ(details) \
 	my_safecalloc((details)->body_size + (details)->offset)
 
+#ifdef DEBUGGING
+static bool done_sanity_check;
+#endif
+
 STATIC void *
 S_more_bodies (pTHX_ svtype sv_type)
 {
@@ -1063,6 +1069,18 @@ S_more_bodies (pTHX_ svtype sv_type)
     const char *end;
 
     assert(bdp->arena_size);
+
+#ifdef DEBUGGING
+    if (!done_sanity_check) {
+	int i = SVt_LAST;
+
+	done_sanity_check = TRUE;
+
+	while (i--)
+	    assert (bodies_by_type[i].type == i);
+    }
+#endif
+
     start = (char*) Perl_get_arena(aTHX_ bdp->arena_size);
 
     end = start + bdp->arena_size - body_size;
