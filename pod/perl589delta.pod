@@ -21,6 +21,29 @@ There are no changes incompatible with 5.8.8.
 
 =head1 Performance Enhancements
 
+=over
+
+=item *
+
+The default since perl 5.000 has been for perl to create an empty scalar
+with every new typeglob. The increased use of lexical variables means that
+most are now unused. Thanks to Nicholas Clark's efforts, Perl can now be
+compiled with C<-DPERL_DONT_CREATE_GVSV> to avoid creating these empty scalars.
+This will significantly decrease the number of scalars allocated for all
+configurations, and the number of scalars that need to be copied for ithread
+creation. Whilst this option is binary compatible with existing perl
+installations, it does change a long-standing assumption about the
+internals, hence it is not enabled by default, as some third party code may
+rely on the old behaviour.
+
+We would recommend testing with this configuration on new deployments of
+perl, particularly for multi-threaded servers, to see whether all third party
+code is compatible with it, as this configuration may give useful performance
+improvements. For existing installations we would not recommend changing to
+this configuration unless thorough testing is performed before deployment.
+
+=back
+
 =head1 Installation and Configuration Improvements
 
 =head1 Selected Bug Fixes
