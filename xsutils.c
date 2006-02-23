@@ -278,10 +278,6 @@ usage:
 	    else if (/* !CvANON(sv) && */ CvSTASH(sv))
 		stash = CvSTASH(sv);
 	    break;
-	case SVt_PVMG:
-	    if (!(SvFAKE(sv) && SvTIED_mg(sv, PERL_MAGIC_glob)))
-		break;
-	    /*FALLTHROUGH*/
 	case SVt_PVGV:
 	    if (GvGP(sv) && GvESTASH((GV*)sv))
 		stash = GvESTASH((GV*)sv);
