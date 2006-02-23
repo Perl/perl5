@@ -213,7 +213,7 @@
 #define PL_beginav		(PERL_GET_INTERP->Ibeginav)
 #define PL_beginav_save		(PERL_GET_INTERP->Ibeginav_save)
 #define PL_bitcount		(PERL_GET_INTERP->Ibitcount)
-#define PL_body_arenaroots	(PERL_GET_INTERP->Ibody_arenaroots)
+#define PL_body_arenas		(PERL_GET_INTERP->Ibody_arenas)
 #define PL_body_roots		(PERL_GET_INTERP->Ibody_roots)
 #define PL_bufend		(PERL_GET_INTERP->Ibufend)
 #define PL_bufptr		(PERL_GET_INTERP->Ibufptr)
