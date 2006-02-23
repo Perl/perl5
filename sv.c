@@ -971,14 +971,11 @@ static const struct body_details bodies_by_type[] = {
       TRUE, HADNV, HASARENA, FIT_ARENA(0, sizeof(xpvhv_allocated)) },
 
     /* 56 */
-    { sizeof(xpvcv_allocated), sizeof(XPVCV)
-      - relative_STRUCT_OFFSET(xpvcv_allocated, XPVCV, xpv_cur),
+    { sizeof(xpvcv_allocated), sizeof(xpvcv_allocated),
       + relative_STRUCT_OFFSET(xpvcv_allocated, XPVCV, xpv_cur),
       TRUE, NONV, HASARENA, FIT_ARENA(0, sizeof(xpvcv_allocated)) },
 
-    { sizeof(xpvfm_allocated),
-      sizeof(XPVFM)
-      - relative_STRUCT_OFFSET(xpvfm_allocated, XPVFM, xpv_cur),
+    { sizeof(xpvfm_allocated), sizeof(xpvfm_allocated),
       + relative_STRUCT_OFFSET(xpvfm_allocated, XPVFM, xpv_cur),
       TRUE, NONV, NOARENA, FIT_ARENA(20, sizeof(xpvfm_allocated)) },
 
