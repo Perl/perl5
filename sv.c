@@ -1711,6 +1711,31 @@ Perl_looks_like_number(pTHX_ SV *sv)
     return grok_number(sbegin, len, NULL);
 }
 
+STATIC char *
+S_glob_2inpuv(pTHX_ GV *gv, STRLEN *len, bool want_number)
+{
+    const U32 wasfake = SvFLAGS(gv) & SVf_FAKE;
+    SV *const buffer = sv_newmortal();
+
+    /* FAKE globs can get coerced, so need to turn this off temporarily if it
+       is on.  */
+    SvFAKE_off(gv);
+    gv_efullname3(buffer, gv, "*");
+    SvFLAGS(gv) |= wasfake;
+
+    if (want_number) {
+	/* We know that all GVs stringify to something that is not-a-number,
+	   so no need to test that.  */
+	if (ckWARN(WARN_NUMERIC))
+	    not_a_number(buffer);
+	/* We just want something true to return, so that S_sv_2iuv_common
+	   can tail call us and return true.  */
+	return (char *) 1;
+    } else {
+	return SvPV(buffer, *len);
+    }
+}
+
 /* Actually, ISO C leaves conversion of UV to IV undefined, but
    until proven guilty, assume that things are not that bad... */
 
@@ -2071,6 +2096,13 @@ S_sv_2iuv_common(pTHX_ SV *sv) {
 	}
     }
     else  {
+	if (((SvFLAGS(sv) & (SVp_POK|SVp_SCREAM)) == SVp_SCREAM)
+	    && (SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVLV)) {
+	    return PTR2IV(glob_2inpuv((GV *)sv, NULL, TRUE));
+	}
+	if (SvTYPE(sv) == SVt_PVGV)
+	    sv_dump(sv);
+
 	if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 	    if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
 		report_uninit(sv);
@@ -2418,6 +2450,12 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 #endif /* NV_PRESERVES_UV */
     }
     else  {
+	if (((SvFLAGS(sv) & (SVp_POK|SVp_SCREAM)) == SVp_SCREAM)
+	    && (SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVLV)) {
+	    glob_2inpuv((GV *)sv, NULL, TRUE);
+	    return 0.0;
+	}
+
 	if (!PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP) && ckWARN(WARN_UNINITIALIZED))
 	    report_uninit(sv);
 	assert (SvTYPE(sv) >= SVt_NV);
@@ -2750,6 +2788,11 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 #endif
     }
     else {
+	if (((SvFLAGS(sv) & (SVp_POK|SVp_SCREAM)) == SVp_SCREAM)
+	    && (SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVLV)) {
+	    return glob_2inpuv((GV *)sv, lp, FALSE);
+	}
+
 	if (!PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP) && ckWARN(WARN_UNINITIALIZED))
 	    report_uninit(sv);
 	if (lp)
@@ -2880,8 +2923,13 @@ Perl_sv_2bool(pTHX_ register SV *sv)
 	else {
 	    if (SvNOKp(sv))
 		return SvNVX(sv) != 0.0;
-	    else
-		return FALSE;
+	    else {
+		if ((SvFLAGS(sv) & SVp_SCREAM)
+		    && (SvTYPE(sv) == (SVt_PVGV) || SvTYPE(sv) == (SVt_PVLV)))
+		    return TRUE;
+		else
+		    return FALSE;
+	    }
 	}
     }
 }
@@ -3138,6 +3186,7 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 #endif
 
     (void)SvOK_off(dstr);
+    SvSCREAM_on(dstr);
     GvINTRO_off(dstr);		/* one-shot flag */
     gp_free((GV*)dstr);
     GvGP(dstr) = gp_ref(GvGP(sstr));
@@ -3604,6 +3653,18 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	if (dtype == SVt_PVGV) {
 	    if (ckWARN(WARN_MISC))
 		Perl_warner(aTHX_ packWARN(WARN_MISC), "Undefined value assigned to typeglob");
+	}
+	else if ((stype == SVt_PVGV || stype == SVt_PVLV)
+		 && (sflags & SVp_SCREAM)) {
+	    /* This stringification rule for globs is spread in 3 places.
+	       This feels bad. FIXME.  */
+	    const U32 wasfake = sflags & SVf_FAKE;
+
+	    /* FAKE globs can get coerced, so need to turn this off
+	       temporarily if it is on.  */
+	    SvFAKE_off(sstr);
+	    gv_efullname3(dstr, (GV *)sstr, "*");
+	    SvFLAGS(sstr) |= wasfake;
 	}
 	else
 	    (void)SvOK_off(dstr);
@@ -7592,9 +7653,12 @@ S_sv_unglob(pTHX_ SV *sv)
 {
     dVAR;
     void *xpvmg;
+    SV *temp = sv_newmortal();
 
     assert(SvTYPE(sv) == SVt_PVGV);
     SvFAKE_off(sv);
+    gv_efullname3(temp, (GV *) sv, "*");
+
     if (GvGP(sv))
 	gp_free((GV*)sv);
     if (GvSTASH(sv)) {
@@ -7602,6 +7666,7 @@ S_sv_unglob(pTHX_ SV *sv)
 	GvSTASH(sv) = NULL;
     }
     sv_unmagic(sv, PERL_MAGIC_glob);
+    SvSCREAM_off(sv);
     Safefree(GvNAME(sv));
     GvMULTI_off(sv);
 
@@ -7613,6 +7678,10 @@ S_sv_unglob(pTHX_ SV *sv)
 
     SvFLAGS(sv) &= ~SVTYPEMASK;
     SvFLAGS(sv) |= SVt_PVMG;
+
+    /* Intentionally not calling any local SET magic, as this isn't so much a
+       set operation as merely an internal storage change.  */
+    sv_setsv_flags(sv, temp, 0);
 }
 
 /*

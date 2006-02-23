@@ -252,7 +252,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK|SVf_FAKE)
 
 #define SVf_OK		(SVf_IOK|SVf_NOK|SVf_POK|SVf_ROK| \
-			 SVp_IOK|SVp_NOK|SVp_POK)
+			 SVp_IOK|SVp_NOK|SVp_POK|SVp_SCREAM)
 
 #define PRIVSHIFT 4	/* (SVp_?OK >> PRIVSHIFT) == SVf_?OK */
 
@@ -897,7 +897,7 @@ in gv.h: */
 #define SvREADONLY_on(sv)	(SvFLAGS(sv) |= SVf_READONLY)
 #define SvREADONLY_off(sv)	(SvFLAGS(sv) &= ~SVf_READONLY)
 
-#define SvSCREAM(sv)		(SvFLAGS(sv) & SVp_SCREAM)
+#define SvSCREAM(sv) ((SvFLAGS(sv) & (SVp_SCREAM|SVp_POK)) == (SVp_SCREAM|SVp_POK))
 #define SvSCREAM_on(sv)		(SvFLAGS(sv) |= SVp_SCREAM)
 #define SvSCREAM_off(sv)	(SvFLAGS(sv) &= ~SVp_SCREAM)
 

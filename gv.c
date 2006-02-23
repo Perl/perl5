@@ -205,6 +205,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     GvCVGEN(gv) = 0;
     GvEGV(gv) = gv;
     sv_magic((SV*)gv, (SV*)gv, PERL_MAGIC_glob, NULL, 0);
+    SvSCREAM_on(gv);
     GvSTASH(gv) = stash;
     if (stash)
 	Perl_sv_add_backref(aTHX_ (SV*)stash, (SV*)gv);

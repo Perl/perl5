@@ -1837,21 +1837,6 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 }
 
 int
-Perl_magic_getglob(pTHX_ SV *sv, MAGIC *mg)
-{
-    const U32 wasfake = SvFLAGS(sv) & SVf_FAKE;
-    PERL_UNUSED_ARG(mg);
-
-    /* FAKE globs can get coerced, so need to turn this off temporarily if it
-       is on.  */
-    SvFAKE_off(sv);
-    gv_efullname3(sv,((GV*)sv), "*");
-    SvFLAGS(sv) |= wasfake;
-
-    return 0;
-}
-
-int
 Perl_magic_setglob(pTHX_ SV *sv, MAGIC *mg)
 {
     GV* gv;
@@ -1859,6 +1844,12 @@ Perl_magic_setglob(pTHX_ SV *sv, MAGIC *mg)
 
     if (!SvOK(sv))
 	return 0;
+    if (SvFLAGS(sv) & SVp_SCREAM
+	&& (SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVGV)) {
+	/* We're actually already a typeglob, so don't need the stuff below.
+	 */
+	return 0;
+    }
     gv =  gv_fetchsv(sv, GV_ADD, SVt_PVGV);
     if (sv == (SV*)gv)
 	return 0;

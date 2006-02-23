@@ -406,7 +406,6 @@ p	|int	|magic_freeovrld|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_get	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_getarylen|NN SV* sv|NN const MAGIC* mg
 p	|int	|magic_getdefelem|NN SV* sv|NN MAGIC* mg
-p	|int	|magic_getglob	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_getnkeys	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_getpack	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_getpos	|NN SV* sv|NN MAGIC* mg
@@ -734,6 +733,9 @@ p	|void	|sub_crush_depth|NN CV* cv
 Apd	|bool	|sv_2bool	|NN SV* sv
 Apd	|CV*	|sv_2cv		|NULLOK SV* sv|NN HV** st|NN GV** gvp|I32 lref
 Apd	|IO*	|sv_2io		|NN SV* sv
+#ifdef PERL_IN_SV_C
+s	|char*	|glob_2inpuv	|NN GV* gv|NULLOK STRLEN *len|bool want_number
+#endif
 Amb	|IV	|sv_2iv		|NN SV* sv
 Apd	|IV	|sv_2iv_flags	|NN SV* sv|I32 flags
 Apd	|SV*	|sv_2mortal	|NULLOK SV* sv

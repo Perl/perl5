@@ -4497,7 +4497,7 @@ MGVTBL_SET(
 
 MGVTBL_SET(
     PL_vtbl_glob,
-    MEMBER_TO_FPTR(Perl_magic_getglob),
+    NULL,
     MEMBER_TO_FPTR(Perl_magic_setglob),
     NULL,
     NULL,

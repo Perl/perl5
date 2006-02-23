@@ -404,7 +404,6 @@
 #define magic_get		Perl_magic_get
 #define magic_getarylen		Perl_magic_getarylen
 #define magic_getdefelem	Perl_magic_getdefelem
-#define magic_getglob		Perl_magic_getglob
 #define magic_getnkeys		Perl_magic_getnkeys
 #define magic_getpack		Perl_magic_getpack
 #define magic_getpos		Perl_magic_getpos
@@ -774,6 +773,11 @@
 #define sv_2bool		Perl_sv_2bool
 #define sv_2cv			Perl_sv_2cv
 #define sv_2io			Perl_sv_2io
+#ifdef PERL_IN_SV_C
+#ifdef PERL_CORE
+#define glob_2inpuv		S_glob_2inpuv
+#endif
+#endif
 #define sv_2iv_flags		Perl_sv_2iv_flags
 #define sv_2mortal		Perl_sv_2mortal
 #define sv_2nv			Perl_sv_2nv
@@ -2471,7 +2475,6 @@
 #define magic_get(a,b)		Perl_magic_get(aTHX_ a,b)
 #define magic_getarylen(a,b)	Perl_magic_getarylen(aTHX_ a,b)
 #define magic_getdefelem(a,b)	Perl_magic_getdefelem(aTHX_ a,b)
-#define magic_getglob(a,b)	Perl_magic_getglob(aTHX_ a,b)
 #define magic_getnkeys(a,b)	Perl_magic_getnkeys(aTHX_ a,b)
 #define magic_getpack(a,b)	Perl_magic_getpack(aTHX_ a,b)
 #define magic_getpos(a,b)	Perl_magic_getpos(aTHX_ a,b)
@@ -2836,6 +2839,11 @@
 #define sv_2bool(a)		Perl_sv_2bool(aTHX_ a)
 #define sv_2cv(a,b,c,d)		Perl_sv_2cv(aTHX_ a,b,c,d)
 #define sv_2io(a)		Perl_sv_2io(aTHX_ a)
+#ifdef PERL_IN_SV_C
+#ifdef PERL_CORE
+#define glob_2inpuv(a,b,c)	S_glob_2inpuv(aTHX_ a,b,c)
+#endif
+#endif
 #define sv_2iv_flags(a,b)	Perl_sv_2iv_flags(aTHX_ a,b)
 #define sv_2mortal(a)		Perl_sv_2mortal(aTHX_ a)
 #define sv_2nv(a)		Perl_sv_2nv(aTHX_ a)

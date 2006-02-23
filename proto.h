@@ -1081,10 +1081,6 @@ PERL_CALLCONV int	Perl_magic_getdefelem(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV int	Perl_magic_getglob(pTHX_ SV* sv, MAGIC* mg)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
-
 PERL_CALLCONV int	Perl_magic_getnkeys(pTHX_ SV* sv, MAGIC* mg)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -2033,6 +2029,11 @@ PERL_CALLCONV CV*	Perl_sv_2cv(pTHX_ SV* sv, HV** st, GV** gvp, I32 lref)
 PERL_CALLCONV IO*	Perl_sv_2io(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 
+#ifdef PERL_IN_SV_C
+STATIC char*	S_glob_2inpuv(pTHX_ GV* gv, STRLEN *len, bool want_number)
+			__attribute__nonnull__(pTHX_1);
+
+#endif
 /* PERL_CALLCONV IV	sv_2iv(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1); */
 
