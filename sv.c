@@ -842,9 +842,9 @@ has no consequence at this time.
 */
 
 struct body_details {
-    size_t body_size;	/* Size to allocate  */
-    size_t copy;	/* Size of structure to copy (may be shorter)  */
-    size_t offset;
+    U8 body_size;	/* Size to allocate  */
+    U8 copy;	/* Size of structure to copy (may be shorter)  */
+    U8 offset;
     bool cant_upgrade;	/* Cannot upgrade this type */
     bool zero_nv;	/* zero the NV when upgrading from this */
     bool arena;		/* Allocated from an arena */
