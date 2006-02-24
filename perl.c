@@ -137,6 +137,14 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 #endif
 #endif
 
+#ifndef NO_MATHOMS
+/* This reference ensure that the mathoms are linked with perl */
+void Perl_mathoms_ref() {
+    extern void Perl_mathoms();
+    Perl_mathoms();
+}
+#endif
+
 #if defined(USE_5005THREADS)
 #  define INIT_TLS_AND_INTERP \
     STMT_START {				\

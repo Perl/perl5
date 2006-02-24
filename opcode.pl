@@ -60,7 +60,6 @@ my @raw_alias = (
 		 Perl_pp_gmtime => ['localtime'],
 		 Perl_pp_semget => [qw(shmget msgget)],
 		 Perl_pp_semctl => [qw(shmctl msgctl)],
-		 Perl_pp_shmwrite => ['shmread'],
 		 Perl_pp_ghostent => [qw(ghbyname ghbyaddr)],
 		 Perl_pp_gnetent => [qw(gnbyname gnbyaddr)],
 		 Perl_pp_gprotoent => [qw(gpbyname gpbynumber)],
@@ -70,6 +69,10 @@ my @raw_alias = (
 		 Perl_pp_ftis => [qw(ftsize ftmtime ftatime ftctime)],
 		 Perl_pp_chown => [qw(unlink chmod utime kill)],
 		 Perl_pp_link => ['symlink'],
+		 Perl_pp_ftrread => [qw(ftrwrite ftrexec fteread ftewrite
+ 					fteexec)],
+		 Perl_pp_shmwrite => [qw(shmread msgsnd msgrcv semop)],
+		 Perl_pp_send => ['syswrite'],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {

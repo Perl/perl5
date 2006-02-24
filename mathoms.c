@@ -14,6 +14,8 @@
  * hand to hand were of that sort." 
  */
 
+#ifndef NO_MATHOMS
+
 /* 
  * This file contains mathoms, various binary artifacts from previous
  * versions of Perl.  For binary or source compatibility reasons, though,
@@ -26,6 +28,8 @@
 #include "EXTERN.h"
 #define PERL_IN_MATHOMS_C
 #include "perl.h"
+
+void Perl_mathoms() {}
 
 #if 0
 /* ref() is now a macro using Perl_doref;
@@ -959,6 +963,51 @@ PP(pp_symlink)
     return pp_link();
 }
 
+PP(pp_ftrwrite)
+{
+    return pp_ftrread();
+}
+
+PP(pp_ftrexec)
+{
+    return pp_ftrread();
+}
+
+PP(pp_fteread)
+{
+    return pp_ftrread();
+}
+
+PP(pp_ftewrite)
+{
+    return pp_ftrread();
+}
+
+PP(pp_fteexec)
+{
+    return pp_ftrread();
+}
+
+PP(pp_msgsnd)
+{
+    return pp_shmwrite();
+}
+
+PP(pp_msgrcv)
+{
+    return pp_shmwrite();
+}
+
+PP(pp_syswrite)
+{
+    return pp_send();
+}
+
+PP(pp_semop)
+{
+    return pp_shmwrite();
+}
+
 U8 *
 Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
 {
@@ -1007,6 +1056,8 @@ Perl_sv_nounlocking(pTHX_ SV *sv)
 {
     PERL_UNUSED_ARG(sv);
 }
+
+#endif /* NO_MATHOMS */
 
 /*
  * Local variables:

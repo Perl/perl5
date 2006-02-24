@@ -968,7 +968,7 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 	MEMBER_TO_FPTR(Perl_pp_sysopen),
 	MEMBER_TO_FPTR(Perl_pp_sysseek),
 	MEMBER_TO_FPTR(Perl_pp_sysread),
-	MEMBER_TO_FPTR(Perl_pp_syswrite),
+	MEMBER_TO_FPTR(Perl_pp_send),	/* Perl_pp_syswrite */
 	MEMBER_TO_FPTR(Perl_pp_send),
 	MEMBER_TO_FPTR(Perl_pp_sysread),	/* Perl_pp_recv */
 	MEMBER_TO_FPTR(Perl_pp_eof),
@@ -992,11 +992,11 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 	MEMBER_TO_FPTR(Perl_pp_stat),	/* Perl_pp_lstat */
 	MEMBER_TO_FPTR(Perl_pp_stat),
 	MEMBER_TO_FPTR(Perl_pp_ftrread),
-	MEMBER_TO_FPTR(Perl_pp_ftrwrite),
-	MEMBER_TO_FPTR(Perl_pp_ftrexec),
-	MEMBER_TO_FPTR(Perl_pp_fteread),
-	MEMBER_TO_FPTR(Perl_pp_ftewrite),
-	MEMBER_TO_FPTR(Perl_pp_fteexec),
+	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_ftrwrite */
+	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_ftrexec */
+	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_fteread */
+	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_ftewrite */
+	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_fteexec */
 	MEMBER_TO_FPTR(Perl_pp_ftis),
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_fteowned */
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),
@@ -1059,11 +1059,11 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 	MEMBER_TO_FPTR(Perl_pp_shmwrite),
 	MEMBER_TO_FPTR(Perl_pp_semget),	/* Perl_pp_msgget */
 	MEMBER_TO_FPTR(Perl_pp_semctl),	/* Perl_pp_msgctl */
-	MEMBER_TO_FPTR(Perl_pp_msgsnd),
-	MEMBER_TO_FPTR(Perl_pp_msgrcv),
+	MEMBER_TO_FPTR(Perl_pp_shmwrite),	/* Perl_pp_msgsnd */
+	MEMBER_TO_FPTR(Perl_pp_shmwrite),	/* Perl_pp_msgrcv */
 	MEMBER_TO_FPTR(Perl_pp_semget),
 	MEMBER_TO_FPTR(Perl_pp_semctl),
-	MEMBER_TO_FPTR(Perl_pp_semop),
+	MEMBER_TO_FPTR(Perl_pp_shmwrite),	/* Perl_pp_semop */
 	MEMBER_TO_FPTR(Perl_pp_require),
 	MEMBER_TO_FPTR(Perl_pp_require),	/* Perl_pp_dofile */
 	MEMBER_TO_FPTR(Perl_pp_entereval),

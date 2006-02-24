@@ -197,9 +197,7 @@ void setservent(int);
 void endservent(void);
 #endif
 
-#undef PERL_EFF_ACCESS_R_OK	/* EFFective uid/gid ACCESS R_OK */
-#undef PERL_EFF_ACCESS_W_OK
-#undef PERL_EFF_ACCESS_X_OK
+#undef PERL_EFF_ACCESS	/* EFFective uid/gid ACCESS */
 
 /* AIX 5.2 and below use mktime for localtime, and defines the edge case
  * for time 0x7fffffff to be valid only in UTC. AIX 5.3 provides localtime64
@@ -212,38 +210,31 @@ void endservent(void);
 
 /* F_OK unused: if stat() cannot find it... */
 
-#if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_ACCESS) && defined(EFF_ONLY_OK) && !defined(NO_EFF_ONLY_OK)
+#if !defined(PERL_EFF_ACCESS) && defined(HAS_ACCESS) && defined(EFF_ONLY_OK) && !defined(NO_EFF_ONLY_OK)
     /* Digital UNIX (when the EFF_ONLY_OK gets fixed), UnixWare */
-#   define PERL_EFF_ACCESS_R_OK(p) (access((p), R_OK | EFF_ONLY_OK))
-#   define PERL_EFF_ACCESS_W_OK(p) (access((p), W_OK | EFF_ONLY_OK))
-#   define PERL_EFF_ACCESS_X_OK(p) (access((p), X_OK | EFF_ONLY_OK))
+#   define PERL_EFF_ACCESS(p,f) (access((p), (f) | EFF_ONLY_OK))
 #endif
 
-#if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_EACCESS)
+#if !defined(PERL_EFF_ACCESS) && defined(HAS_EACCESS)
 #   ifdef I_SYS_SECURITY
 #       include <sys/security.h>
 #   endif
 #   ifdef ACC_SELF
         /* HP SecureWare */
-#       define PERL_EFF_ACCESS_R_OK(p) (eaccess((p), R_OK, ACC_SELF))
-#       define PERL_EFF_ACCESS_W_OK(p) (eaccess((p), W_OK, ACC_SELF))
-#       define PERL_EFF_ACCESS_X_OK(p) (eaccess((p), X_OK, ACC_SELF))
+#       define PERL_EFF_ACCESS(p,f) (eaccess((p), (f), ACC_SELF))
 #   else
         /* SCO */
-#       define PERL_EFF_ACCESS_R_OK(p) (eaccess((p), R_OK))
-#       define PERL_EFF_ACCESS_W_OK(p) (eaccess((p), W_OK))
-#       define PERL_EFF_ACCESS_X_OK(p) (eaccess((p), X_OK))
+#       define PERL_EFF_ACCESS(p,f) (eaccess((p), (f)))
 #   endif
 #endif
 
-#if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_ACCESSX) && defined(ACC_SELF)
+#if !defined(PERL_EFF_ACCESS) && defined(HAS_ACCESSX) && defined(ACC_SELF)
     /* AIX */
-#   define PERL_EFF_ACCESS_R_OK(p) (accessx((p), R_OK, ACC_SELF))
-#   define PERL_EFF_ACCESS_W_OK(p) (accessx((p), W_OK, ACC_SELF))
-#   define PERL_EFF_ACCESS_X_OK(p) (accessx((p), X_OK, ACC_SELF))
+#   define PERL_EFF_ACCESS(p,f) (accessx((p), (f), ACC_SELF))
 #endif
 
-#if !defined(PERL_EFF_ACCESS_R_OK) && defined(HAS_ACCESS)	\
+
+#if !defined(PERL_EFF_ACCESS) && defined(HAS_ACCESS)	\
     && (defined(HAS_SETREUID) || defined(HAS_SETRESUID)		\
 	|| defined(HAS_SETREGID) || defined(HAS_SETRESGID))
 /* The Hard Way. */
@@ -306,12 +297,10 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 
     return res;
 }
-#   define PERL_EFF_ACCESS_R_OK(p) (emulate_eaccess((p), R_OK))
-#   define PERL_EFF_ACCESS_W_OK(p) (emulate_eaccess((p), W_OK))
-#   define PERL_EFF_ACCESS_X_OK(p) (emulate_eaccess((p), X_OK))
+#   define PERL_EFF_ACCESS(p,f) (emulate_eaccess((p), (f)))
 #endif
 
-#if !defined(PERL_EFF_ACCESS_R_OK)
+#if !defined(PERL_EFF_ACCESS)
 /* With it or without it: anyway you get a warning: either that
    it is unused, or it is declared static and never defined.
  */
@@ -1793,20 +1782,6 @@ PP(pp_sysread)
     RETPUSHUNDEF;
 }
 
-PP(pp_syswrite)
-{
-    dSP;
-    const int items = (SP - PL_stack_base) - TOPMARK;
-    if (items == 2) {
-	SV *sv;
-        EXTEND(SP, 1);
-	sv = sv_2mortal(newSViv(sv_len(*SP)));
-	PUSHs(sv);
-        PUTBACK;
-    }
-    return pp_send();
-}
-
 PP(pp_send)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
@@ -1814,20 +1789,28 @@ PP(pp_send)
     IO *io;
     SV *bufsv;
     const char *buffer;
-    Size_t length;
+    Size_t length = 0;
     SSize_t retval;
     STRLEN blen;
     MAGIC *mg;
-
+    const int op_type = PL_op->op_type;
+    
     gv = (GV*)*++MARK;
     if (PL_op->op_type == OP_SYSWRITE
 	&& gv && (io = GvIO(gv))
 	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
     {
 	SV *sv;
+
+	if (MARK == SP - 1) {
+	    EXTEND(SP, 1000);
+	    sv = sv_2mortal(newSViv(sv_len(*SP)));
+	    PUSHs(sv);
+	    PUTBACK;
+	}
 	
-	PUSHMARK(MARK-1);
-	*MARK = SvTIED_obj((SV*)io, mg);
+	PUSHMARK(ORIGMARK);
+	*(ORIGMARK+1) = SvTIED_obj((SV*)io, mg);
 	ENTER;
 	call_method("WRITE", G_SCALAR);
 	LEAVE;
@@ -1839,14 +1822,22 @@ PP(pp_send)
     }
     if (!gv)
 	goto say_undef;
+
     bufsv = *++MARK;
+
+    if (op_type == OP_SYSWRITE) {
+	if (MARK >= SP) {
+	    length = (Size_t) sv_len(bufsv);
+	} else {
 #if Size_t_size > IVSIZE
-    length = (Size_t)SvNVx(*++MARK);
+	    length = (Size_t)SvNVx(*++MARK);
 #else
-    length = (Size_t)SvIVx(*++MARK);
+	    length = (Size_t)SvIVx(*++MARK);
 #endif
-    if ((SSize_t)length < 0)
-	DIE(aTHX_ "Negative length");
+	    if ((SSize_t)length < 0)
+		DIE(aTHX_ "Negative length");
+	}
+    }
     SETERRNO(0,0);
     io = GvIO(gv);
     if (!io || !IoIFP(io)) {
@@ -1873,7 +1864,7 @@ PP(pp_send)
 	 buffer = SvPV_const(bufsv, blen);
     }
 
-    if (PL_op->op_type == OP_SYSWRITE) {
+    if (op_type == OP_SYSWRITE) {
 	IV offset;
 	if (DO_UTF8(bufsv)) {
 	    /* length and offset are in chars */
@@ -1912,16 +1903,19 @@ PP(pp_send)
 	}
     }
 #ifdef HAS_SOCKET
-    else if (SP > MARK) {
-	STRLEN mlen;
-	char * const sockbuf = SvPVx(*++MARK, mlen);
-	/* length is really flags */
-	retval = PerlSock_sendto(PerlIO_fileno(IoIFP(io)), buffer, blen,
-				 length, (struct sockaddr *)sockbuf, mlen);
+    else {
+	const int flags = SvIVx(*++MARK);
+	if (SP > MARK) {
+	    STRLEN mlen;
+	    char * const sockbuf = SvPVx(*++MARK, mlen);
+	    retval = PerlSock_sendto(PerlIO_fileno(IoIFP(io)), buffer, blen,
+				     flags, (struct sockaddr *)sockbuf, mlen);
+	}
+	else {
+	    retval
+		= PerlSock_send(PerlIO_fileno(IoIFP(io)), buffer, blen, flags);
+	}
     }
-    else
-	/* length is really flags */
-	retval = PerlSock_send(PerlIO_fileno(IoIFP(io)), buffer, blen, length);
 #else
     else
 	DIE(aTHX_ PL_no_sock_func, "send");
@@ -2853,155 +2847,109 @@ PP(pp_stat)
 PP(pp_ftrread)
 {
     I32 result;
-    dSP;
-#if defined(HAS_ACCESS) && defined(R_OK)
-    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = access(POPpx, R_OK);
-	if (result == 0)
-	    RETPUSHYES;
-	if (result < 0)
-	    RETPUSHUNDEF;
-	RETPUSHNO;
-    }
-    else
-	result = my_stat();
+    /* Not const, because things tweak this below. Not bool, because there's
+       no guarantee that OPp_FT_ACCESS is <= CHAR_MAX  */
+#if defined(HAS_ACCESS) || defined (PERL_EFF_ACCESS)
+    I32 use_access = PL_op->op_private & OPpFT_ACCESS;
+    /* Giving some sort of initial value silences compilers.  */
+#  ifdef R_OK
+    int access_mode = R_OK;
+#  else
+    int access_mode = 0;
+#  endif
 #else
-    result = my_stat();
+    /* access_mode is never used, but leaving use_access in makes the
+       conditional compiling below much clearer.  */
+    I32 use_access = 0;
 #endif
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (cando(S_IRUSR, 0, &PL_statcache))
-	RETPUSHYES;
-    RETPUSHNO;
-}
+    int stat_mode = S_IRUSR;
 
-PP(pp_ftrwrite)
-{
-    I32 result;
+    bool effective = FALSE;
     dSP;
+
+
+    switch (PL_op->op_type) {
+    case OP_FTRREAD:
+#if !(defined(HAS_ACCESS) && defined(R_OK))
+	use_access = 0;
+#endif
+	break;
+
+    case OP_FTRWRITE:
 #if defined(HAS_ACCESS) && defined(W_OK)
-    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = access(POPpx, W_OK);
-	if (result == 0)
-	    RETPUSHYES;
-	if (result < 0)
-	    RETPUSHUNDEF;
-	RETPUSHNO;
-    }
-    else
-	result = my_stat();
+	access_mode = W_OK;
 #else
-    result = my_stat();
+	use_access = 0;
 #endif
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (cando(S_IWUSR, 0, &PL_statcache))
-	RETPUSHYES;
-    RETPUSHNO;
-}
+	stat_mode = S_IWUSR;
+	break;
 
-PP(pp_ftrexec)
-{
-    I32 result;
-    dSP;
+    case OP_FTREXEC:
 #if defined(HAS_ACCESS) && defined(X_OK)
-    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = access(POPpx, X_OK);
-	if (result == 0)
-	    RETPUSHYES;
-	if (result < 0)
-	    RETPUSHUNDEF;
-	RETPUSHNO;
-    }
-    else
-	result = my_stat();
+	access_mode = X_OK;
 #else
-    result = my_stat();
+	use_access = 0;
 #endif
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (cando(S_IXUSR, 0, &PL_statcache))
-	RETPUSHYES;
-    RETPUSHNO;
-}
+	stat_mode = S_IXUSR;
+	break;
 
-PP(pp_fteread)
-{
-    I32 result;
-    dSP;
-#ifdef PERL_EFF_ACCESS_R_OK
-    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = PERL_EFF_ACCESS_R_OK(POPpx);
-	if (result == 0)
-	    RETPUSHYES;
-	if (result < 0)
-	    RETPUSHUNDEF;
-	RETPUSHNO;
-    }
-    else
-	result = my_stat();
-#else
-    result = my_stat();
+    case OP_FTEWRITE:
+#ifdef PERL_EFF_ACCESS
+	access_mode = W_OK;
 #endif
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (cando(S_IRUSR, 1, &PL_statcache))
-	RETPUSHYES;
-    RETPUSHNO;
-}
+	stat_mode = S_IWUSR;
+	/* Fall through  */
 
-PP(pp_ftewrite)
-{
-    I32 result;
-    dSP;
-#ifdef PERL_EFF_ACCESS_W_OK
-    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = PERL_EFF_ACCESS_W_OK(POPpx);
-	if (result == 0)
-	    RETPUSHYES;
-	if (result < 0)
-	    RETPUSHUNDEF;
-	RETPUSHNO;
-    }
-    else
-	result = my_stat();
-#else
-    result = my_stat();
+    case OP_FTEREAD:
+#ifndef PERL_EFF_ACCESS
+	use_access = 0;
 #endif
-    SPAGAIN;
-    if (result < 0)
-	RETPUSHUNDEF;
-    if (cando(S_IWUSR, 1, &PL_statcache))
-	RETPUSHYES;
-    RETPUSHNO;
-}
+	effective = TRUE;
+	break;
 
-PP(pp_fteexec)
-{
-    I32 result;
-    dSP;
-#ifdef PERL_EFF_ACCESS_X_OK
-    if ((PL_op->op_private & OPpFT_ACCESS) && SvPOK(TOPs)) {
-	result = PERL_EFF_ACCESS_X_OK(POPpx);
+
+    case OP_FTEEXEC:
+#ifdef PERL_EFF_ACCESS
+	access_mode = W_OK;
+#else
+	use_access = 0;
+#endif
+	stat_mode = S_IXUSR;
+	effective = TRUE;
+	break;
+    }
+
+    if (use_access) {
+#if defined(HAS_ACCESS) || defined (PERL_EFF_ACCESS)
+	const char *const name = POPpx;
+	if (effective) {
+#  ifdef PERL_EFF_ACCESS
+	    result = PERL_EFF_ACCESS(name, access_mode);
+#  else
+	    DIE(aTHX_ "panic: attempt to call PERL_EFF_ACCESS in %s",
+		OP_NAME(PL_op));
+#  endif
+	}
+	else {
+#  ifdef HAS_ACCESS
+	    result = access(name, access_mode);
+#  else
+	    DIE(aTHX_ "panic: attempt to call access() in %s", OP_NAME(PL_op));
+#  endif
+	}
 	if (result == 0)
 	    RETPUSHYES;
 	if (result < 0)
 	    RETPUSHUNDEF;
 	RETPUSHNO;
-    }
-    else
-	result = my_stat();
-#else
-    result = my_stat();
 #endif
+    }
+
+    result = my_stat();
     SPAGAIN;
     if (result < 0)
 	RETPUSHUNDEF;
-    if (cando(S_IXUSR, 1, &PL_statcache))
+    if (cando(stat_mode, effective, &PL_statcache))
 	RETPUSHYES;
     RETPUSHNO;
 }
@@ -4436,40 +4384,30 @@ PP(pp_sleep)
 }
 
 /* Shared memory. */
+/* Merged with some message passing. */
 
 PP(pp_shmwrite)
 {
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
     dSP; dMARK; dTARGET;
-    I32 value = (I32)(do_shmio(PL_op->op_type, MARK, SP) >= 0);
-    SP = MARK;
-    PUSHi(value);
-    RETURN;
-#else
-    return pp_semget();
-#endif
-}
+    const int op_type = PL_op->op_type;
+    I32 value;
 
-/* Message passing. */
+    switch (op_type) {
+    case OP_MSGSND:
+	value = (I32)(do_msgsnd(MARK, SP) >= 0);
+	break;
+    case OP_MSGRCV:
+	value = (I32)(do_msgrcv(MARK, SP) >= 0);
+	break;
+    case OP_SEMOP:
+	value = (I32)(do_semop(MARK, SP) >= 0);
+	break;
+    default:
+	value = (I32)(do_shmio(op_type, MARK, SP) >= 0);
+	break;
+    }
 
-PP(pp_msgsnd)
-{
-#if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-    dSP; dMARK; dTARGET;
-    I32 value = (I32)(do_msgsnd(MARK, SP) >= 0);
-    SP = MARK;
-    PUSHi(value);
-    RETURN;
-#else
-    return pp_semget();
-#endif
-}
-
-PP(pp_msgrcv)
-{
-#if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-    dSP; dMARK; dTARGET;
-    I32 value = (I32)(do_msgrcv(MARK, SP) >= 0);
     SP = MARK;
     PUSHi(value);
     RETURN;
@@ -4509,19 +4447,6 @@ PP(pp_semctl)
     else {
 	PUSHp(zero_but_true, ZBTLEN);
     }
-    RETURN;
-#else
-    return pp_semget();
-#endif
-}
-
-PP(pp_semop)
-{
-#if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
-    dSP; dMARK; dTARGET;
-    I32 value = (I32)(do_semop(MARK, SP) >= 0);
-    SP = MARK;
-    PUSHi(value);
     RETURN;
 #else
     return pp_semget();
