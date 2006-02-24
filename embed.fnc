@@ -1014,9 +1014,13 @@ Ap	|void	|sys_intern_init
 ApR	|char *	|custom_op_name	|NN OP* op
 ApR	|char *	|custom_op_desc	|NN OP* op
 
-Adp	|void	|sv_nosharing	|NULLOK SV *
-Adpbm	|void	|sv_nolocking	|NULLOK SV *
-Adpbm	|void	|sv_nounlocking	|NULLOK SV *
+Adp	|void	|sv_nosharing	|NULLOK SV *sv
+Adpbm	|void	|sv_nolocking	|NULLOK SV *sv
+#ifdef NO_MATHOMS
+Adpbm	|void	|sv_nounlocking	|NULLOK SV *sv
+#else
+Adpb	|void	|sv_nounlocking	|NULLOK SV *sv
+#endif
 Adp	|int	|nothreadhook
 
 END_EXTERN_C

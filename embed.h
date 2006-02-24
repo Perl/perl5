@@ -1039,6 +1039,10 @@
 #define custom_op_name		Perl_custom_op_name
 #define custom_op_desc		Perl_custom_op_desc
 #define sv_nosharing		Perl_sv_nosharing
+#ifdef NO_MATHOMS
+#else
+#define sv_nounlocking		Perl_sv_nounlocking
+#endif
 #define nothreadhook		Perl_nothreadhook
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
@@ -3053,6 +3057,10 @@
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
 #define sv_nosharing(a)		Perl_sv_nosharing(aTHX_ a)
+#ifdef NO_MATHOMS
+#else
+#define sv_nounlocking(a)	Perl_sv_nounlocking(aTHX_ a)
+#endif
 #define nothreadhook()		Perl_nothreadhook(aTHX)
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
