@@ -127,11 +127,6 @@ PP(pp_padhv)
     RETURN;
 }
 
-PP(pp_padany)
-{
-    DIE(aTHX_ "NOT IMPL LINE %d",__LINE__);
-}
-
 /* Translations. */
 
 PP(pp_rv2gv)
@@ -4811,21 +4806,6 @@ PP(pp_lock)
     }
     SETs(retsv);
     RETURN;
-}
-
-PP(pp_threadsv)
-{
-#ifdef USE_5005THREADS
-    dSP;
-    EXTEND(SP, 1);
-    if (PL_op->op_private & OPpLVAL_INTRO)
-	PUSHs(*save_threadsv(PL_op->op_targ));
-    else
-	PUSHs(THREADSV(PL_op->op_targ));
-    RETURN;
-#else
-    DIE(aTHX_ "tried to access per-thread data in non-threaded perl");
-#endif /* USE_5005THREADS */
 }
 
 /*

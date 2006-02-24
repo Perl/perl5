@@ -58,8 +58,8 @@ END_EXTERN_C
 #define ASCII_TO_NEED(enc,ch)    (ch)
 
 /* As there are no translations avoid the function wrapper */
-#define Perl_utf8n_to_uvchr Perl_utf8n_to_uvuni
-#define Perl_uvchr_to_utf8  Perl_uvuni_to_utf8
+#define utf8n_to_uvchr utf8n_to_uvuni
+#define uvchr_to_utf8  uvuni_to_utf8
 
 /*
 
@@ -331,5 +331,9 @@ encoded character.
 	 (n) == 4 ? IS_UTF8_CHAR_4(p) : 0)
 
 #define IS_UTF8_CHAR_FAST(n) ((n) <= 4)
+
+#define is_utf8_string_loc(s, len, ep)	is_utf8_string_loclen(s, len, ep, 0)
+
+#define uvuni_to_utf8(d, uv)		uvuni_to_utf8_flags(d, uv, 0)
 
 #endif /* IS_UTF8_CHAR() for UTF-8 */

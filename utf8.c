@@ -166,12 +166,6 @@ Perl_uvuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 #endif
 #endif /* Loop style */
 }
- 
-U8 *
-Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
-{
-    return Perl_uvuni_to_utf8_flags(aTHX_ d, uv, 0);
-}
 
 /*
 
@@ -307,6 +301,16 @@ Perl_is_utf8_string(pTHX_ U8 *s, STRLEN len)
 }
 
 /*
+Implemented as a macro in utf8.h
+
+=for apidoc A|bool|is_utf8_string_loc|const U8 *s|STRLEN len|const U8 **ep
+
+Like is_utf8_string() but stores the location of the failure (in the
+case of "utf8ness failure") or the location s+len (in the case of
+"utf8ness success") in the C<ep>.
+
+See also is_utf8_string_loclen() and is_utf8_string().
+
 =for apidoc A|bool|is_utf8_string_loclen|const U8 *s|STRLEN len|const U8 **ep|const STRLEN *el
 
 Like is_utf8_string() but stores the location of the failure (in the
@@ -368,24 +372,7 @@ Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN 
 }
 
 /*
-=for apidoc A|bool|is_utf8_string_loc|const U8 *s|STRLEN len|const U8 **ep|const STRLEN *el
 
-Like is_utf8_string() but stores the location of the failure (in the
-case of "utf8ness failure") or the location s+len (in the case of
-"utf8ness success") in the C<ep>.
-
-See also is_utf8_string_loclen() and is_utf8_string().
-
-=cut
-*/
-
-bool
-Perl_is_utf8_string_loc(pTHX_ U8 *s, STRLEN len, U8 **ep)
-{
-    return is_utf8_string_loclen(s, len, (const U8 **)ep, 0);
-}
-
-/*
 =for apidoc A|UV|utf8n_to_uvuni|U8 *s|STRLEN curlen|STRLEN *retlen|U32 flags
 
 Bottom level UTF-8 decode routine.
@@ -627,8 +614,8 @@ returned and retlen is set, if possible, to -1.
 UV
 Perl_utf8_to_uvchr(pTHX_ U8 *s, STRLEN *retlen)
 {
-    return Perl_utf8n_to_uvchr(aTHX_ s, UTF8_MAXBYTES, retlen,
-			       ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
+    return utf8n_to_uvchr(s, UTF8_MAXBYTES, retlen,
+			  ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY);
 }
 
 /*
@@ -1251,40 +1238,29 @@ Perl_to_uni_lower_lc(pTHX_ U32 c)
 }
 
 bool
-Perl_is_utf8_alnum(pTHX_ U8 *p)
+S_is_utf8_common(pTHX_ const U8 *const p, SV **swash,
+		 const char *const swashname)
 {
     if (!is_utf8_char(p))
 	return FALSE;
-    if (!PL_utf8_alnum)
-	/* NOTE: "IsWord", not "IsAlnum", since Alnum is a true
-	 * descendant of isalnum(3), in other words, it doesn't
-	 * contain the '_'. --jhi */
-	PL_utf8_alnum = swash_init("utf8", "IsWord", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_alnum, p, TRUE) != 0;
-/*    return *p == '_' || is_utf8_alpha(p) || is_utf8_digit(p); */
-#ifdef SURPRISINGLY_SLOWER  /* probably because alpha is usually true */
-    if (!PL_utf8_alnum)
-	PL_utf8_alnum = swash_init("utf8", "",
-	    sv_2mortal(newSVpv("+utf8::IsAlpha\n+utf8::IsDigit\n005F\n",0)), 0, 0);
-    return swash_fetch(PL_utf8_alnum, p, TRUE) != 0;
-#endif
+    if (!*swash)
+	*swash = swash_init("utf8", swashname, &PL_sv_undef, 0, 0);
+    return swash_fetch(*swash, p, TRUE) != 0;
+}
+
+bool
+Perl_is_utf8_alnum(pTHX_ U8 *p)
+{
+    /* NOTE: "IsWord", not "IsAlnum", since Alnum is a true
+     * descendant of isalnum(3), in other words, it doesn't
+     * contain the '_'. --jhi */
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_alnum, "IsWord");
 }
 
 bool
 Perl_is_utf8_alnumc(pTHX_ U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_alnumc)
-	PL_utf8_alnumc = swash_init("utf8", "IsAlnumC", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_alnumc, p, TRUE) != 0;
-/*    return is_utf8_alpha(p) || is_utf8_digit(p); */
-#ifdef SURPRISINGLY_SLOWER  /* probably because alpha is usually true */
-    if (!PL_utf8_alnum)
-	PL_utf8_alnum = swash_init("utf8", "",
-	    sv_2mortal(newSVpv("+utf8::IsAlpha\n+utf8::IsDigit\n005F\n",0)), 0, 0);
-    return swash_fetch(PL_utf8_alnum, p, TRUE) != 0;
-#endif
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_alnumc, "IsAlnumC");
 }
 
 bool
@@ -1292,11 +1268,8 @@ Perl_is_utf8_idfirst(pTHX_ U8 *p) /* The naming is historical. */
 {
     if (*p == '_')
 	return TRUE;
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_idstart) /* is_utf8_idstart would be more logical. */
-	PL_utf8_idstart = swash_init("utf8", "IdStart", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_idstart, p, TRUE) != 0;
+    /* is_utf8_idstart would be more logical. */
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_idstart, "IdStart");
 }
 
 bool
@@ -1304,131 +1277,79 @@ Perl_is_utf8_idcont(pTHX_ U8 *p)
 {
     if (*p == '_')
 	return TRUE;
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_idcont)
-	PL_utf8_idcont = swash_init("utf8", "IdContinue", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_idcont, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_idcont, "IdContinue");
 }
 
 bool
 Perl_is_utf8_alpha(pTHX_ U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_alpha)
-	PL_utf8_alpha = swash_init("utf8", "IsAlpha", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_alpha, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_alpha, "IsAlpha");
 }
 
 bool
 Perl_is_utf8_ascii(pTHX_ U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_ascii)
-	PL_utf8_ascii = swash_init("utf8", "IsAscii", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_ascii, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_ascii, "IsAscii");
 }
 
 bool
 Perl_is_utf8_space(pTHX_ U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_space)
-	PL_utf8_space = swash_init("utf8", "IsSpacePerl", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_space, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_space, "IsSpacePerl");
 }
 
 bool
 Perl_is_utf8_digit(pTHX_ U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_digit)
-	PL_utf8_digit = swash_init("utf8", "IsDigit", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_digit, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_digit, "IsDigit");
 }
 
 bool
 Perl_is_utf8_upper(pTHX_ U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_upper)
-	PL_utf8_upper = swash_init("utf8", "IsUppercase", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_upper, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_upper, "IsUppercase");
 }
 
 bool
 Perl_is_utf8_lower(pTHX_ U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_lower)
-	PL_utf8_lower = swash_init("utf8", "IsLowercase", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_lower, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_lower, "IsLowercase");
 }
 
 bool
 Perl_is_utf8_cntrl(pTHX_ U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_cntrl)
-	PL_utf8_cntrl = swash_init("utf8", "IsCntrl", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_cntrl, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_cntrl, "IsCntrl");
 }
 
 bool
 Perl_is_utf8_graph(pTHX_ U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_graph)
-	PL_utf8_graph = swash_init("utf8", "IsGraph", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_graph, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_graph, "IsGraph");
 }
 
 bool
 Perl_is_utf8_print(pTHX_ U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_print)
-	PL_utf8_print = swash_init("utf8", "IsPrint", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_print, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_print, "IsPrint");
 }
 
 bool
 Perl_is_utf8_punct(pTHX_ U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_punct)
-	PL_utf8_punct = swash_init("utf8", "IsPunct", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_punct, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_punct, "IsPunct");
 }
 
 bool
 Perl_is_utf8_xdigit(pTHX_ U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_xdigit)
-	PL_utf8_xdigit = swash_init("utf8", "IsXDigit", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_xdigit, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_xdigit, "Isxdigit");
 }
 
 bool
 Perl_is_utf8_mark(pTHX_ U8 *p)
 {
-    if (!is_utf8_char(p))
-	return FALSE;
-    if (!PL_utf8_mark)
-	PL_utf8_mark = swash_init("utf8", "IsM", &PL_sv_undef, 0, 0);
-    return swash_fetch(PL_utf8_mark, p, TRUE) != 0;
+    return S_is_utf8_common(aTHX_ p, &PL_utf8_mark, "IsM");
 }
 
 /*
@@ -1830,10 +1751,59 @@ Perl_swash_fetch(pTHX_ SV *sv, U8 *ptr, bool do_utf8)
     return 0;
 }
 
+/*
+=for apidoc A|U8 *|uvchr_to_utf8|U8 *d|UV uv
+
+Adds the UTF-8 representation of the Native codepoint C<uv> to the end
+of the string C<d>; C<d> should be have at least C<UTF8_MAXBYTES+1> free
+bytes available. The return value is the pointer to the byte after the
+end of the new character. In other words,
+
+    d = uvchr_to_utf8(d, uv);
+
+is the recommended wide native character-aware way of saying
+
+    *(d++) = uv;
+
+=cut
+*/
+
+/* On ASCII machines this is normally a macro but we want a
+   real function in case XS code wants it
+*/
+U8 *
+Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
+{
+    return Perl_uvuni_to_utf8_flags(aTHX_ d, NATIVE_TO_UNI(uv), 0);
+}
+
 U8 *
 Perl_uvchr_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags)
 {
     return Perl_uvuni_to_utf8_flags(aTHX_ d, NATIVE_TO_UNI(uv), flags);
+}
+
+/*
+=for apidoc A|UV|utf8n_to_uvchr|U8 *s|STRLEN curlen|STRLEN *retlen|U32 
+flags
+
+Returns the native character value of the first character in the string 
+C<s>
+which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
+length, in bytes, of that character.
+
+Allows length and flags to be passed to low level routine.
+
+=cut
+*/
+/* On ASCII machines this is normally a macro but we want
+   a real function in case XS code wants it
+*/
+UV
+Perl_utf8n_to_uvchr(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
+{
+    const UV uv = Perl_utf8n_to_uvuni(aTHX_ s, curlen, retlen, flags);
+    return UNI_TO_NATIVE(uv);
 }
 
 /*

@@ -194,7 +194,13 @@ Ap	|int	|do_binmode	|NN PerlIO *fp|int iotype|int mode
 p	|void	|do_chop	|NN SV* asv|NN SV* sv
 Ap	|bool	|do_close	|NN GV* gv|bool not_implicit
 p	|bool	|do_eof		|NN GV* gv
+
+#ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 pmb	|bool	|do_exec	|NN char* cmd
+#else
+p	|bool	|do_exec	|NN char* cmd
+#endif
+
 #if defined(WIN32)
 Ap	|int	|do_aspawn	|NN SV* really|NN SV** mark|NN SV** sp
 Ap	|int	|do_spawn	|NN char* cmd
@@ -277,7 +283,7 @@ Ap	|void	|gv_efullname4	|NN SV* sv|NN GV* gv|NULLOK const char* prefix|bool keep
 Ap	|GV*	|gv_fetchfile	|NN const char* name
 Apd	|GV*	|gv_fetchmeth	|NULLOK HV* stash|NN const char* name|STRLEN len|I32 level
 Apd	|GV*	|gv_fetchmeth_autoload	|NULLOK HV* stash|NN const char* name|STRLEN len|I32 level
-Apd	|GV*	|gv_fetchmethod	|NULLOK HV* stash|NN const char* name
+Apdmb	|GV*	|gv_fetchmethod	|NULLOK HV* stash|NN const char* name
 Apd	|GV*	|gv_fetchmethod_autoload|NULLOK HV* stash|NN const char* name|I32 autoload
 Ap	|GV*	|gv_fetchpv	|NN const char* name|I32 add|I32 sv_type
 Ap	|void	|gv_fullname	|NN SV* sv|NN GV* gv
@@ -299,12 +305,12 @@ Ap	|void	|hv_free_ent	|NN HV* hv|NULLOK HE* entryK
 Apd	|I32	|hv_iterinit	|NN HV* tb
 ApdR	|char*	|hv_iterkey	|NN HE* entry|NN I32* retlen
 ApdR	|SV*	|hv_iterkeysv	|NN HE* entry
-ApdR	|HE*	|hv_iternext	|NN HV* tb
+ApdRbm	|HE*	|hv_iternext	|NN HV* tb
 ApdR	|SV*	|hv_iternextsv	|NN HV* hv|NN char** key|NN I32* retlen
 ApMdR	|HE*	|hv_iternext_flags|NN HV* tb|I32 flags
 ApdR	|SV*	|hv_iterval	|NN HV* tb|NN HE* entry
 Ap	|void	|hv_ksplit	|NN HV* hv|IV newmax
-Apd	|void	|hv_magic	|NN HV* hv|NULLOK GV* gv|int how
+Apdbm	|void	|hv_magic	|NN HV* hv|NULLOK GV* gv|int how
 Apd	|SV**	|hv_store	|NULLOK HV* tb|NULLOK const char* key|I32 klen|NULLOK SV* val \
 				|U32 hash
 Apd	|HE*	|hv_store_ent	|NULLOK HV* tb|NULLOK SV* key|NULLOK SV* val|U32 hash
@@ -362,7 +368,7 @@ ApPR	|bool	|is_uni_print_lc|UV c
 ApPR	|bool	|is_uni_punct_lc|UV c
 ApPR	|bool	|is_uni_xdigit_lc|UV c
 Apd	|STRLEN	|is_utf8_char	|NN U8 *p
-Apd	|bool	|is_utf8_string_loc|NN U8 *s|STRLEN len|NULLOK U8 **p
+Apdbm	|bool	|is_utf8_string_loc|NN U8 *s|STRLEN len|NULLOK U8 **p
 Apd	|bool	|is_utf8_string	|NN U8 *s|STRLEN len
 ApR	|bool	|is_utf8_alnum	|NN U8 *p
 ApR	|bool	|is_utf8_alnumc	|NN U8 *p
@@ -859,10 +865,22 @@ ApMd	|U8*	|bytes_from_utf8|NN U8 *s|NN STRLEN *len|NULLOK bool *is_utf8
 ApMd	|U8*	|bytes_to_utf8	|NN U8 *s|NN STRLEN *len
 Apd	|UV	|utf8_to_uvchr	|NN U8 *s|NULLOK STRLEN *retlen
 Apd	|UV	|utf8_to_uvuni	|NN U8 *s|NULLOK STRLEN *retlen
+
+#ifdef EBCDIC
 Adp	|UV	|utf8n_to_uvchr	|NN U8 *s|STRLEN curlen|NULLOK STRLEN *retlen|U32 flags
+#else
+Adpbm	|UV	|utf8n_to_uvchr	|NN U8 *s|STRLEN curlen|NULLOK STRLEN *retlen|U32 flags
+#endif
+
 Adp	|UV	|utf8n_to_uvuni	|NN U8 *s|STRLEN curlen|NULLOK STRLEN *retlen|U32 flags
+
+#ifdef EBCDIC
 Apd	|U8*	|uvchr_to_utf8	|NN U8 *d|UV uv
-Ap	|U8*	|uvuni_to_utf8	|NN U8 *d|UV uv
+#else
+Apdbm	|U8*	|uvchr_to_utf8	|NN U8 *d|UV uv
+#endif
+
+Apbm	|U8*	|uvuni_to_utf8	|NN U8 *d|UV uv
 Ap	|U8*	|uvchr_to_utf8_flags	|NN U8 *d|UV uv|UV flags
 Apd	|U8*	|uvuni_to_utf8_flags	|NN U8 *d|UV uv|UV flags
 Apd	|char*	|pv_uni_display	|NN SV *dsv|NN U8 *spv|STRLEN len \
@@ -997,8 +1015,8 @@ ApR	|char *	|custom_op_name	|NN OP* op
 ApR	|char *	|custom_op_desc	|NN OP* op
 
 Adp	|void	|sv_nosharing	|NULLOK SV *
-Adp	|void	|sv_nolocking	|NULLOK SV *
-Adp	|void	|sv_nounlocking	|NULLOK SV *
+Adpbm	|void	|sv_nolocking	|NULLOK SV *
+Adpbm	|void	|sv_nounlocking	|NULLOK SV *
 Adp	|int	|nothreadhook
 
 END_EXTERN_C

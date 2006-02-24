@@ -175,6 +175,12 @@
 #ifdef PERL_CORE
 #define do_eof			Perl_do_eof
 #endif
+#ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
+#else
+#ifdef PERL_CORE
+#define do_exec			Perl_do_exec
+#endif
+#endif
 #if defined(WIN32)
 #define do_aspawn		Perl_do_aspawn
 #define do_spawn		Perl_do_spawn
@@ -270,7 +276,6 @@
 #define gv_fetchfile		Perl_gv_fetchfile
 #define gv_fetchmeth		Perl_gv_fetchmeth
 #define gv_fetchmeth_autoload	Perl_gv_fetchmeth_autoload
-#define gv_fetchmethod		Perl_gv_fetchmethod
 #define gv_fetchmethod_autoload	Perl_gv_fetchmethod_autoload
 #define gv_fetchpv		Perl_gv_fetchpv
 #define gv_fullname		Perl_gv_fullname
@@ -291,12 +296,10 @@
 #define hv_iterinit		Perl_hv_iterinit
 #define hv_iterkey		Perl_hv_iterkey
 #define hv_iterkeysv		Perl_hv_iterkeysv
-#define hv_iternext		Perl_hv_iternext
 #define hv_iternextsv		Perl_hv_iternextsv
 #define hv_iternext_flags	Perl_hv_iternext_flags
 #define hv_iterval		Perl_hv_iterval
 #define hv_ksplit		Perl_hv_ksplit
-#define hv_magic		Perl_hv_magic
 #define hv_store		Perl_hv_store
 #define hv_store_ent		Perl_hv_store_ent
 #define hv_store_flags		Perl_hv_store_flags
@@ -357,7 +360,6 @@
 #define is_uni_punct_lc		Perl_is_uni_punct_lc
 #define is_uni_xdigit_lc	Perl_is_uni_xdigit_lc
 #define is_utf8_char		Perl_is_utf8_char
-#define is_utf8_string_loc	Perl_is_utf8_string_loc
 #define is_utf8_string		Perl_is_utf8_string
 #define is_utf8_alnum		Perl_is_utf8_alnum
 #define is_utf8_alnumc		Perl_is_utf8_alnumc
@@ -898,10 +900,15 @@
 #define bytes_to_utf8		Perl_bytes_to_utf8
 #define utf8_to_uvchr		Perl_utf8_to_uvchr
 #define utf8_to_uvuni		Perl_utf8_to_uvuni
+#ifdef EBCDIC
 #define utf8n_to_uvchr		Perl_utf8n_to_uvchr
+#else
+#endif
 #define utf8n_to_uvuni		Perl_utf8n_to_uvuni
+#ifdef EBCDIC
 #define uvchr_to_utf8		Perl_uvchr_to_utf8
-#define uvuni_to_utf8		Perl_uvuni_to_utf8
+#else
+#endif
 #define uvchr_to_utf8_flags	Perl_uvchr_to_utf8_flags
 #define uvuni_to_utf8_flags	Perl_uvuni_to_utf8_flags
 #define pv_uni_display		Perl_pv_uni_display
@@ -1032,8 +1039,6 @@
 #define custom_op_name		Perl_custom_op_name
 #define custom_op_desc		Perl_custom_op_desc
 #define sv_nosharing		Perl_sv_nosharing
-#define sv_nolocking		Perl_sv_nolocking
-#define sv_nounlocking		Perl_sv_nounlocking
 #define nothreadhook		Perl_nothreadhook
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
@@ -2195,6 +2200,14 @@
 #ifdef PERL_CORE
 #define do_eof(a)		Perl_do_eof(aTHX_ a)
 #endif
+#ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
+#ifdef PERL_CORE
+#endif
+#else
+#ifdef PERL_CORE
+#define do_exec(a)		Perl_do_exec(aTHX_ a)
+#endif
+#endif
 #if defined(WIN32)
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)
 #define do_spawn(a)		Perl_do_spawn(aTHX_ a)
@@ -2289,7 +2302,6 @@
 #define gv_fetchfile(a)		Perl_gv_fetchfile(aTHX_ a)
 #define gv_fetchmeth(a,b,c,d)	Perl_gv_fetchmeth(aTHX_ a,b,c,d)
 #define gv_fetchmeth_autoload(a,b,c,d)	Perl_gv_fetchmeth_autoload(aTHX_ a,b,c,d)
-#define gv_fetchmethod(a,b)	Perl_gv_fetchmethod(aTHX_ a,b)
 #define gv_fetchmethod_autoload(a,b,c)	Perl_gv_fetchmethod_autoload(aTHX_ a,b,c)
 #define gv_fetchpv(a,b,c)	Perl_gv_fetchpv(aTHX_ a,b,c)
 #define gv_fullname(a,b)	Perl_gv_fullname(aTHX_ a,b)
@@ -2310,12 +2322,10 @@
 #define hv_iterinit(a)		Perl_hv_iterinit(aTHX_ a)
 #define hv_iterkey(a,b)		Perl_hv_iterkey(aTHX_ a,b)
 #define hv_iterkeysv(a)		Perl_hv_iterkeysv(aTHX_ a)
-#define hv_iternext(a)		Perl_hv_iternext(aTHX_ a)
 #define hv_iternextsv(a,b,c)	Perl_hv_iternextsv(aTHX_ a,b,c)
 #define hv_iternext_flags(a,b)	Perl_hv_iternext_flags(aTHX_ a,b)
 #define hv_iterval(a,b)		Perl_hv_iterval(aTHX_ a,b)
 #define hv_ksplit(a,b)		Perl_hv_ksplit(aTHX_ a,b)
-#define hv_magic(a,b,c)		Perl_hv_magic(aTHX_ a,b,c)
 #define hv_store(a,b,c,d,e)	Perl_hv_store(aTHX_ a,b,c,d,e)
 #define hv_store_ent(a,b,c,d)	Perl_hv_store_ent(aTHX_ a,b,c,d)
 #define hv_store_flags(a,b,c,d,e,f)	Perl_hv_store_flags(aTHX_ a,b,c,d,e,f)
@@ -2376,7 +2386,6 @@
 #define is_uni_punct_lc(a)	Perl_is_uni_punct_lc(aTHX_ a)
 #define is_uni_xdigit_lc(a)	Perl_is_uni_xdigit_lc(aTHX_ a)
 #define is_utf8_char(a)		Perl_is_utf8_char(aTHX_ a)
-#define is_utf8_string_loc(a,b,c)	Perl_is_utf8_string_loc(aTHX_ a,b,c)
 #define is_utf8_string(a,b)	Perl_is_utf8_string(aTHX_ a,b)
 #define is_utf8_alnum(a)	Perl_is_utf8_alnum(aTHX_ a)
 #define is_utf8_alnumc(a)	Perl_is_utf8_alnumc(aTHX_ a)
@@ -2911,10 +2920,15 @@
 #define bytes_to_utf8(a,b)	Perl_bytes_to_utf8(aTHX_ a,b)
 #define utf8_to_uvchr(a,b)	Perl_utf8_to_uvchr(aTHX_ a,b)
 #define utf8_to_uvuni(a,b)	Perl_utf8_to_uvuni(aTHX_ a,b)
+#ifdef EBCDIC
 #define utf8n_to_uvchr(a,b,c,d)	Perl_utf8n_to_uvchr(aTHX_ a,b,c,d)
+#else
+#endif
 #define utf8n_to_uvuni(a,b,c,d)	Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)
+#ifdef EBCDIC
 #define uvchr_to_utf8(a,b)	Perl_uvchr_to_utf8(aTHX_ a,b)
-#define uvuni_to_utf8(a,b)	Perl_uvuni_to_utf8(aTHX_ a,b)
+#else
+#endif
 #define uvchr_to_utf8_flags(a,b,c)	Perl_uvchr_to_utf8_flags(aTHX_ a,b,c)
 #define uvuni_to_utf8_flags(a,b,c)	Perl_uvuni_to_utf8_flags(aTHX_ a,b,c)
 #define pv_uni_display(a,b,c,d,e)	Perl_pv_uni_display(aTHX_ a,b,c,d,e)
@@ -3039,8 +3053,6 @@
 #define custom_op_name(a)	Perl_custom_op_name(aTHX_ a)
 #define custom_op_desc(a)	Perl_custom_op_desc(aTHX_ a)
 #define sv_nosharing(a)		Perl_sv_nosharing(aTHX_ a)
-#define sv_nolocking(a)		Perl_sv_nolocking(aTHX_ a)
-#define sv_nounlocking(a)	Perl_sv_nounlocking(aTHX_ a)
 #define nothreadhook()		Perl_nothreadhook(aTHX)
 #if defined(PERL_IN_AV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE

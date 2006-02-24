@@ -1668,6 +1668,8 @@ Perl_hv_iterinit(pTHX_ HV *hv)
     return HvTOTALKEYS(hv);
 }
 /*
+hv_iternext is implemented as a macro in hv.h
+
 =for apidoc hv_iternext
 
 Returns entries from a hash iterator.  See C<hv_iterinit>.
@@ -1680,16 +1682,6 @@ to free the entry on the next call to C<hv_iternext>, so you must not discard
 your iterator immediately else the entry will leak - call C<hv_iternext> to
 trigger the resource deallocation.
 
-=cut
-*/
-
-HE *
-Perl_hv_iternext(pTHX_ HV *hv)
-{
-    return hv_iternext_flags(hv, 0);
-}
-
-/*
 =for apidoc hv_iternext_flags
 
 Returns entries from a hash iterator.  See C<hv_iterinit> and C<hv_iternext>.
@@ -1900,28 +1892,15 @@ Perl_hv_iternextsv(pTHX_ HV *hv, char **key, I32 *retlen)
 }
 
 /*
+
+Now a macro in hv.h
+
 =for apidoc hv_magic
 
 Adds magic to a hash.  See C<sv_magic>.
 
 =cut
 */
-
-void
-Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how)
-{
-    sv_magic((SV*)hv, (SV*)gv, how, Nullch, 0);
-}
-
-#if 0 /* use the macro from hv.h instead */
-
-char*	
-Perl_sharepvn(pTHX_ const char *sv, I32 len, U32 hash)
-{
-    return HEK_KEY(share_hek(sv, len, hash));
-}
-
-#endif
 
 /* possibly free a shared string if no one has access to it
  * len and hash must both be valid for str.

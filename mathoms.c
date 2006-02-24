@@ -27,6 +27,7 @@
 #define PERL_IN_MATHOMS_C
 #include "perl.h"
 
+#if 0
 /* ref() is now a macro using Perl_doref;
  * this version provided for binary compatibility only.
  */
@@ -35,6 +36,7 @@ Perl_ref(pTHX_ OP *o, I32 type)
 {
     return doref(o, type, TRUE);
 }
+#endif
 
 /*
 =for apidoc sv_unref
@@ -66,6 +68,7 @@ Perl_sv_taint(pTHX_ SV *sv)
     sv_magic((sv), Nullsv, PERL_MAGIC_taint, Nullch, 0);
 }
 
+#if 0
 /* sv_2iv() is now a macro using Perl_sv_2iv_flags();
  * this function provided for binary compatibility only
  */
@@ -85,6 +88,7 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 {
     return sv_2uv_flags(sv, SV_GMAGIC);
 }
+#endif
 
 /* sv_2pv() is now a macro using Perl_sv_2pv_flags();
  * this function provided for binary compatibility only
@@ -406,57 +410,6 @@ Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
     return sv_utf8_upgrade_flags(sv, SV_GMAGIC);
 }
 
-/*
-=for apidoc A|U8 *|uvchr_to_utf8|U8 *d|UV uv
-
-Adds the UTF-8 representation of the Native codepoint C<uv> to the end
-of the string C<d>; C<d> should be have at least C<UTF8_MAXBYTES+1> free
-bytes available. The return value is the pointer to the byte after the
-end of the new character. In other words,
-
-    d = uvchr_to_utf8(d, uv);
-
-is the recommended wide native character-aware way of saying
-
-    *(d++) = uv;
-
-=cut
-*/
-
-/* On ASCII machines this is normally a macro but we want a
-   real function in case XS code wants it
-*/
-#undef Perl_uvchr_to_utf8
-U8 *
-Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv)
-{
-    return Perl_uvuni_to_utf8_flags(aTHX_ d, NATIVE_TO_UNI(uv), 0);
-}
-
-
-/*
-=for apidoc A|UV|utf8n_to_uvchr|U8 *s|STRLEN curlen|STRLEN *retlen|U32 
-flags
-
-Returns the native character value of the first character in the string 
-C<s>
-which is assumed to be in UTF-8 encoding; C<retlen> will be set to the
-length, in bytes, of that character.
-
-Allows length and flags to be passed to low level routine.
-
-=cut
-*/
-/* On ASCII machines this is normally a macro but we want
-   a real function in case XS code wants it
-*/
-#undef Perl_utf8n_to_uvchr
-UV
-Perl_utf8n_to_uvchr(pTHX_ U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
-{
-    const UV uv = Perl_utf8n_to_uvuni(aTHX_ s, curlen, retlen, flags);
-    return UNI_TO_NATIVE(uv);
-}
 int
 Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...)
 {
@@ -491,69 +444,6 @@ Perl_huge(void)
 }
 #endif
 
-#ifndef USE_SFIO
-int
-perlsio_binmode(FILE *fp, int iotype, int mode)
-{
-    /*
-     * This used to be contents of do_binmode in doio.c
-     */
-#ifdef DOSISH
-#  if defined(atarist) || defined(__MINT__)
-    if (!fflush(fp)) {
-        if (mode & O_BINARY)
-            ((FILE *) fp)->_flag |= _IOBIN;
-        else
-            ((FILE *) fp)->_flag &= ~_IOBIN;
-        return 1;
-    }
-    return 0;
-#  else
-    dTHX;
-#ifdef NETWARE
-    if (PerlLIO_setmode(fp, mode) != -1) {
-#else
-    if (PerlLIO_setmode(fileno(fp), mode) != -1) {
-#endif
-#    if defined(WIN32) && defined(__BORLANDC__)
-        /*
-         * The translation mode of the stream is maintained independent 
-of
-         * the translation mode of the fd in the Borland RTL (heavy
-         * digging through their runtime sources reveal).  User has to 
-set
-         * the mode explicitly for the stream (though they don't 
-document
-         * this anywhere). GSAR 97-5-24
-         */
-        fseek(fp, 0L, 0);
-        if (mode & O_BINARY)
-            fp->flags |= _F_BIN;
-        else
-            fp->flags &= ~_F_BIN;
-#    endif
-        return 1;
-    }
-    else
-        return 0;
-#  endif
-#else
-#  if defined(USEMYBINMODE)
-    dTHX;
-    if (my_binmode(fp, iotype, mode) != FALSE)
-        return 1;
-    else
-        return 0;
-#  else
-    PERL_UNUSED_ARG(fp);
-    PERL_UNUSED_ARG(iotype);
-    PERL_UNUSED_ARG(mode);
-    return 1;
-#  endif
-#endif
-}
-#endif /* sfio */
-
 /* compatibility with versions <= 5.003. */
 void
 Perl_gv_fullname(pTHX_ SV *sv, GV *gv)
@@ -579,6 +469,42 @@ Perl_gv_efullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
 {
     gv_efullname4(sv, gv, prefix, TRUE);
 }
+
+/*
+=for apidoc gv_fetchmethod
+
+See L<gv_fetchmethod_autoload>.
+
+=cut
+*/
+
+GV *
+Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name)
+{
+    return gv_fetchmethod_autoload(stash, name, TRUE);
+}
+
+HE *
+Perl_hv_iternext(pTHX_ HV *hv)
+{
+    return hv_iternext_flags(hv, 0);
+}
+
+void
+Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how)
+{
+    sv_magic((SV*)hv, (SV*)gv, how, Nullch, 0);
+}
+
+#if 0 /* use the macro from hv.h instead */
+
+char*	
+Perl_sharepvn(pTHX_ const char *sv, I32 len, U32 hash)
+{
+    return HEK_KEY(share_hek(sv, len, hash));
+}
+
+#endif
 
 AV *
 Perl_av_fake(pTHX_ register I32 size, register SV **strp)
@@ -695,6 +621,113 @@ badexit:
     return;
 }
 #endif
+
+/* Backwards compatibility. */
+int
+Perl_init_i18nl14n(pTHX_ int printwarn)
+{
+    return init_i18nl10n(printwarn);
+}
+
+/* XXX kept for BINCOMPAT only */
+void
+Perl_save_hints(pTHX)
+{
+    Perl_croak(aTHX_ "internal error: obsolete function save_hints() called");
+}
+
+#if 0
+OP *
+Perl_ck_retarget(pTHX_ OP *o)
+{
+    Perl_croak(aTHX_ "NOT IMPL LINE %d",__LINE__);
+    /* STUB */
+    return o;
+}
+#endif
+
+OP *
+Perl_oopsCV(pTHX_ OP *o)
+{
+    Perl_croak(aTHX_ "NOT IMPL LINE %d",__LINE__);
+    /* STUB */
+    PERL_UNUSED_ARG(o);
+    NORETURN_FUNCTION_END;
+}
+
+PP(pp_padany)
+{
+    DIE(aTHX_ "NOT IMPL LINE %d",__LINE__);
+}
+
+PP(pp_threadsv)
+{
+#ifdef USE_5005THREADS
+    dSP;
+    EXTEND(SP, 1);
+    if (PL_op->op_private & OPpLVAL_INTRO)
+	PUSHs(*save_threadsv(PL_op->op_targ));
+    else
+	PUSHs(THREADSV(PL_op->op_targ));
+    RETURN;
+#else
+    DIE(aTHX_ "tried to access per-thread data in non-threaded perl");
+#endif /* USE_5005THREADS */
+}
+
+PP(pp_mapstart)
+{
+    DIE(aTHX_ "panic: mapstart");	/* uses grepstart */
+}
+
+bool
+Perl_is_utf8_string_loc(pTHX_ U8 *s, STRLEN len, U8 **ep)
+{
+    return is_utf8_string_loclen(s, len, (const U8 **)ep, 0);
+}
+
+U8 *
+Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
+{
+    return Perl_uvuni_to_utf8_flags(aTHX_ d, uv, 0);
+}
+
+/*
+=for apidoc sv_nolocking
+
+Dummy routine which "locks" an SV when there is no locking module present.
+Exists to avoid test for a NULL function pointer and because it could
+potentially warn under some level of strict-ness.
+
+"Superseded" by sv_nosharing().
+
+=cut
+*/
+
+void
+Perl_sv_nolocking(pTHX_ SV *sv)
+{
+    PERL_UNUSED_ARG(sv);
+}
+
+
+/*
+=for apidoc sv_nounlocking
+
+Dummy routine which "unlocks" an SV when there is no locking module present.
+Exists to avoid test for a NULL function pointer and because it could
+potentially warn under some level of strict-ness.
+
+"Superseded" by sv_nosharing().
+
+=cut
+*/
+
+void
+Perl_sv_nounlocking(pTHX_ SV *sv)
+{
+    PERL_UNUSED_ARG(sv);
+}
 
 /*
  * Local variables:

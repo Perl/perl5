@@ -1896,13 +1896,6 @@ Perl_scope(pTHX_ OP *o)
     return o;
 }
 
-/* XXX kept for BINCOMPAT only */
-void
-Perl_save_hints(pTHX)
-{
-    Perl_croak(aTHX_ "internal error: obsolete function save_hints() called");
-}
-
 int
 Perl_block_start(pTHX_ int full)
 {
@@ -4884,15 +4877,6 @@ Perl_newHVREF(pTHX_ OP *o)
 }
 
 OP *
-Perl_oopsCV(pTHX_ OP *o)
-{
-    Perl_croak(aTHX_ "NOT IMPL LINE %d",__LINE__);
-    /* STUB */
-    PERL_UNUSED_ARG(o);
-    NORETURN_FUNCTION_END;
-}
-
-OP *
 Perl_newCVREF(pTHX_ I32 flags, OP *o)
 {
     return newUNOP(OP_RV2CV, flags, scalar(o));
@@ -5935,16 +5919,6 @@ Perl_ck_return(pTHX_ OP *o)
     }
     return o;
 }
-
-#if 0
-OP *
-Perl_ck_retarget(pTHX_ OP *o)
-{
-    Perl_croak(aTHX_ "NOT IMPL LINE %d",__LINE__);
-    /* STUB */
-    return o;
-}
-#endif
 
 OP *
 Perl_ck_select(pTHX_ OP *o)
