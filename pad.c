@@ -348,7 +348,7 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
     if (ourstash) {
 	SvPAD_OUR_on(namesv);
 	OURSTASH_set(namesv, ourstash);
-	Perl_sv_add_backref(aTHX_ (SV*)ourstash, namesv);
+	SvREFCNT_inc(ourstash);
     }
 
     av_store(PL_comppad_name, offset, namesv);

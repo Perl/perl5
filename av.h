@@ -17,7 +17,10 @@ struct xpvav {
 	UV	xivu_uv;
 	void *	xivu_p1;
     }		xiv_u;
-    MAGIC*	xmg_magic;	/* magic for scalar array */
+    union {
+	MAGIC*	xmg_magic;	/* linked list of magicalness */
+	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
+    } xmg_u;
     HV*		xmg_stash;	/* class package */
 };
 
@@ -32,7 +35,10 @@ typedef struct {
 	UV	xivu_uv;
 	void *	xivu_p1;
     }		xiv_u;
-    MAGIC*	xmg_magic;	/* magic for scalar array */
+    union {
+	MAGIC*	xmg_magic;	/* linked list of magicalness */
+	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
+    } xmg_u;
     HV*		xmg_stash;	/* class package */
 } xpvav_allocated;
 #endif

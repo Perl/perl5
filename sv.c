@@ -1309,7 +1309,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	SvPV_set(sv, NULL);
 
 	if (old_type >= SVt_PVMG) {
-	    SvMAGIC_set(sv, ((XPVMG*)old_body)->xmg_magic);
+	    SvMAGIC_set(sv, ((XPVMG*)old_body)->xmg_u.xmg_magic);
 	    SvSTASH_set(sv, ((XPVMG*)old_body)->xmg_stash);
 	}
 	break;
@@ -5043,7 +5043,11 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	}
     }
     if (type >= SVt_PVMG) {
-    	if (SvMAGIC(sv))
+	HV *ourstash;
+	if ((type == SVt_PVMG || type == SVt_PVGV) &&
+	    (ourstash = OURSTASH(sv))) {
+	    SvREFCNT_dec(ourstash);
+	} else if (SvMAGIC(sv))
 	    mg_free(sv);
 	if (type == SVt_PVMG && SvPAD_TYPED(sv))
 	    SvREFCNT_dec(SvSTASH(sv));
@@ -9779,7 +9783,11 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 	       missing by always going for the destination.
 	       FIXME - instrument and check that assumption  */
 	    if (sv_type >= SVt_PVMG) {
-		if (SvMAGIC(dstr))
+		HV *ourstash;
+		if ((sv_type == SVt_PVMG || sv_type == SVt_PVGV) &&
+		    (ourstash = OURSTASH(dstr))) {
+		    OURSTASH_set(dstr, hv_dup_inc(ourstash, param));
+		} else if (SvMAGIC(dstr))
 		    SvMAGIC_set(dstr, mg_dup(SvMAGIC(dstr), param));
 		if (SvSTASH(dstr))
 		    SvSTASH_set(dstr, hv_dup_inc(SvSTASH(dstr), param));

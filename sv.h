@@ -379,7 +379,10 @@ struct xpvmg {
 	void *	xivu_p1;
 	I32	xivu_i32;
     }		xiv_u;
-    MAGIC*	xmg_magic;	/* linked list of magicalness */
+    union {
+	MAGIC*	xmg_magic;	/* linked list of magicalness */
+	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
+    } xmg_u;
     HV*		xmg_stash;	/* class package */
 };
 
@@ -393,7 +396,10 @@ struct xpvlv {
 	void *	xivu_p1;
 	I32	xivu_i32;
     }		xiv_u;
-    MAGIC*	xmg_magic;	/* linked list of magicalness */
+    union {
+	MAGIC*	xmg_magic;	/* linked list of magicalness */
+	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
+    } xmg_u;
     HV*		xmg_stash;	/* class package */
 
     /* a full glob fits into this */
@@ -420,7 +426,10 @@ struct xpvgv {
 	void *	xivu_p1;
 	I32	xivu_i32;
     }		xiv_u;
-    MAGIC*	xmg_magic;	/* linked list of magicalness */
+    union {
+	MAGIC*	xmg_magic;	/* linked list of magicalness */
+	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
+    } xmg_u;
     HV*		xmg_stash;	/* class package */
 
     GP*		xgv_gp;
@@ -440,7 +449,10 @@ struct xpvbm {
 	void *	xivu_p1;
 	I32	xivu_i32;
     }		xiv_u;
-    MAGIC*	xmg_magic;	/* linked list of magicalness */
+    union {
+	MAGIC*	xmg_magic;	/* linked list of magicalness */
+	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
+    } xmg_u;
     HV*		xmg_stash;	/* class package */
 
     I32		xbm_useful;	/* is this constant pattern being useful? */
@@ -462,7 +474,10 @@ struct xpvfm {
 	void *	xivu_p1;
 	I32	xivu_i32;
     }		xiv_u;
-    MAGIC*	xmg_magic;	/* linked list of magicalness */
+    union {
+	MAGIC*	xmg_magic;	/* linked list of magicalness */
+	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
+    } xmg_u;
     HV*		xmg_stash;	/* class package */
 
     HV *	xcv_stash;
@@ -494,7 +509,10 @@ typedef struct {
 	void *	xivu_p1;
 	I32	xivu_i32;
     }		xiv_u;
-    MAGIC*	xmg_magic;	/* linked list of magicalness */
+    union {
+	MAGIC*	xmg_magic;	/* linked list of magicalness */
+	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
+    } xmg_u;
     HV*		xmg_stash;	/* class package */
 
     HV *	xcv_stash;
@@ -527,7 +545,10 @@ struct xpvio {
 	void *	xivu_p1;
 	I32	xivu_i32;
     }		xiv_u;
-    MAGIC*	xmg_magic;	/* linked list of magicalness */
+    union {
+	MAGIC*	xmg_magic;	/* linked list of magicalness */
+	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
+    } xmg_u;
     HV*		xmg_stash;	/* class package */
 
     PerlIO *	xio_ifp;	/* ifp and ofp are normally the same */
@@ -937,11 +958,12 @@ in gv.h: */
 	((SvFLAGS(sv) & (SVpad_NAME|SVpad_OUR)) == (SVpad_NAME|SVpad_OUR))
 #define SvPAD_OUR_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_OUR)
 
-#define OURSTASH(sv)	(SvPAD_OUR(sv) ? GvSTASH(sv) : NULL)
-#define OURSTASH_set(sv, st)			\
-        STMT_START {				\
-	    assert(SvTYPE(sv) == SVt_PVGV);	\
-	    GvSTASH(sv) = st;			\
+#define OURSTASH(sv)	\
+	(SvPAD_OUR(sv) ? ((XPVMG*) SvANY(sv))->xmg_u.xmg_ourstash : NULL)
+#define OURSTASH_set(sv, st)					\
+        STMT_START {						\
+	    assert(SvTYPE(sv) == SVt_PVGV);			\
+	    ((XPVMG*) SvANY(sv))->xmg_u.xmg_ourstash = st;	\
 	} STMT_END
 
 #ifdef PERL_DEBUG_COW
@@ -970,16 +992,16 @@ in gv.h: */
 #  ifdef DEBUGGING
 #    ifdef PERL_IN_SV_C
 /* Can't make this RVALUE because of Perl_sv_unmagic.  */
-#      define SvMAGIC(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
+#      define SvMAGIC(sv)	(*(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic))
 #    else
-#      define SvMAGIC(sv)	(0 + *(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_magic))
+#      define SvMAGIC(sv)	(0 + *(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic))
 #    endif
 #  define SvSTASH(sv)	(0 + *(assert(SvTYPE(sv) >= SVt_PVMG), &((XPVMG*)  SvANY(sv))->xmg_stash))
 #  else
 #    ifdef PERL_IN_SV_C
-#      define SvMAGIC(sv) ((XPVMG*)  SvANY(sv))->xmg_magic
+#      define SvMAGIC(sv) ((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic
 #    else
-#      define SvMAGIC(sv) (0 + ((XPVMG*)  SvANY(sv))->xmg_magic)
+#      define SvMAGIC(sv) (0 + ((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic)
 #    endif
 #  define SvSTASH(sv)     (0 + ((XPVMG*)  SvANY(sv))->xmg_stash)
 #  endif
@@ -1018,9 +1040,7 @@ in gv.h: */
 #    define SvMAGIC(sv)							\
 	(*({ SV *const _svi = (SV *) sv;				\
 	    assert(SvTYPE(_svi) >= SVt_PVMG);				\
-	    if (SvTYPE(_svi) == SVt_PVMG && (SvFLAGS(_svi) & SVpad_NAME)) \
-		assert (!((XPVMG*) SvANY(_svi))->xmg_magic); \
-	    &(((XPVMG*) SvANY(_svi))->xmg_magic);			\
+	    &(((XPVMG*) SvANY(_svi))->xmg_u.xmg_magic);			\
 	  }))
 #    define SvSTASH(sv)							\
 	(*({ SV *const _svi = (SV *) sv;				\
@@ -1031,7 +1051,7 @@ in gv.h: */
 #    define SvIVX(sv) ((XPVIV*) SvANY(sv))->xiv_iv
 #    define SvUVX(sv) ((XPVUV*) SvANY(sv))->xuv_uv
 #    define SvNVX(sv) ((XPVNV*) SvANY(sv))->xnv_nv
-#    define SvMAGIC(sv)	((XPVMG*)  SvANY(sv))->xmg_magic
+#    define SvMAGIC(sv)	((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic
 #    define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
 #  endif
 #endif
@@ -1080,7 +1100,7 @@ in gv.h: */
                 ((sv)->sv_u.svu_rv = (val)); } STMT_END
 #define SvMAGIC_set(sv, val) \
         STMT_START { assert(SvTYPE(sv) >= SVt_PVMG); \
-                (((XPVMG*)SvANY(sv))->xmg_magic = (val)); } STMT_END
+                (((XPVMG*)SvANY(sv))->xmg_u.xmg_magic = (val)); } STMT_END
 #define SvSTASH_set(sv, val) \
         STMT_START { assert(SvTYPE(sv) >= SVt_PVMG); \
                 (((XPVMG*)  SvANY(sv))->xmg_stash = (val)); } STMT_END

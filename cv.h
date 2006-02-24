@@ -20,7 +20,10 @@ struct xpvcv {
 	void *	xivu_p1;
 	I32	xivu_i32;	/* depth, >= 2 indicates recursive call */
     }		xiv_u;
-    MAGIC*	xmg_magic;	/* magic for scalar array */
+    union {
+	MAGIC*	xmg_magic;	/* linked list of magicalness */
+	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
+    } xmg_u;
     HV*		xmg_stash;	/* class package */
 
     HV *	xcv_stash;
@@ -51,7 +54,10 @@ typedef struct {
 	void *	xivu_p1;
 	I32	xivu_i32;	/* depth, >= 2 indicates recursive call */
     }		xiv_u;
-    MAGIC*	xmg_magic;	/* magic for scalar array */
+    union {
+	MAGIC*	xmg_magic;	/* linked list of magicalness */
+	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
+    } xmg_u;
     HV*		xmg_stash;	/* class package */
 
     HV *	xcv_stash;
