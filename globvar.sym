@@ -45,7 +45,6 @@ vtbl_defelem
 vtbl_env
 vtbl_envelem
 vtbl_fm
-vtbl_glob
 vtbl_isa
 vtbl_isaelem
 vtbl_mglob

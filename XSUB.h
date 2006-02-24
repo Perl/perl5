@@ -376,6 +376,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #  define VTBL_isa		&PL_vtbl_isa
 #  define VTBL_isaelem		&PL_vtbl_isaelem
 #  define VTBL_arylen		&PL_vtbl_arylen
+#  define VTBL_glob		&PL_vtbl_glob
 #  define VTBL_mglob		&PL_vtbl_mglob
 #  define VTBL_nkeys		&PL_vtbl_nkeys
 #  define VTBL_taint		&PL_vtbl_taint
