@@ -242,16 +242,6 @@ Perl_save_scalar(pTHX_ GV *gv)
     return save_scalar_at(sptr);
 }
 
-SV*
-Perl_save_svref(pTHX_ SV **sptr)
-{
-    SSCHECK(3);
-    SSPUSHPTR(sptr);
-    SSPUSHPTR(SvREFCNT_inc(*sptr));
-    SSPUSHINT(SAVEt_SVREF);
-    return save_scalar_at(sptr);
-}
-
 /* Like save_sptr(), but also SvREFCNT_dec()s the new value.  Can be used to
  * restore a global SV to its prior contents, freeing new value. */
 void
@@ -397,15 +387,6 @@ Perl_save_int(pTHX_ int *intp)
 }
 
 void
-Perl_save_long(pTHX_ long int *longp)
-{
-    SSCHECK(3);
-    SSPUSHLONG(*longp);
-    SSPUSHPTR(longp);
-    SSPUSHINT(SAVEt_LONG);
-}
-
-void
 Perl_save_bool(pTHX_ bool *boolp)
 {
     SSCHECK(3);
@@ -421,33 +402,6 @@ Perl_save_I32(pTHX_ I32 *intp)
     SSPUSHINT(*intp);
     SSPUSHPTR(intp);
     SSPUSHINT(SAVEt_I32);
-}
-
-void
-Perl_save_I16(pTHX_ I16 *intp)
-{
-    SSCHECK(3);
-    SSPUSHINT(*intp);
-    SSPUSHPTR(intp);
-    SSPUSHINT(SAVEt_I16);
-}
-
-void
-Perl_save_I8(pTHX_ I8 *bytep)
-{
-    SSCHECK(3);
-    SSPUSHINT(*bytep);
-    SSPUSHPTR(bytep);
-    SSPUSHINT(SAVEt_I8);
-}
-
-void
-Perl_save_iv(pTHX_ IV *ivp)
-{
-    SSCHECK(3);
-    SSPUSHIV(*ivp);
-    SSPUSHPTR(ivp);
-    SSPUSHINT(SAVEt_IV);
 }
 
 /* Cannot use save_sptr() to store a char* since the SV** cast will
@@ -505,14 +459,6 @@ Perl_save_threadsv(pTHX_ PADOFFSET i)
     PERL_UNUSED_ARG(i);
     NORETURN_FUNCTION_END;
 #endif /* USE_5005THREADS */
-}
-
-void
-Perl_save_nogv(pTHX_ GV *gv)
-{
-    SSCHECK(2);
-    SSPUSHPTR(gv);
-    SSPUSHINT(SAVEt_NSTAB);
 }
 
 void
@@ -585,30 +531,6 @@ Perl_save_delete(pTHX_ HV *hv, char *key, I32 klen)
 }
 
 void
-Perl_save_list(pTHX_ register SV **sarg, I32 maxsarg)
-{
-    register I32 i;
-
-    for (i = 1; i <= maxsarg; i++) {
-	register SV * const sv = NEWSV(0,0);
-	sv_setsv(sv,sarg[i]);
-	SSCHECK(3);
-	SSPUSHPTR(sarg[i]);		/* remember the pointer */
-	SSPUSHPTR(sv);			/* remember the value */
-	SSPUSHINT(SAVEt_ITEM);
-    }
-}
-
-void
-Perl_save_destructor(pTHX_ DESTRUCTORFUNC_NOCONTEXT_t f, void* p)
-{
-    SSCHECK(3);
-    SSPUSHDPTR(f);
-    SSPUSHPTR(p);
-    SSPUSHINT(SAVEt_DESTRUCTOR);
-}
-
-void
 Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void* p)
 {
     SSCHECK(3);
@@ -656,6 +578,17 @@ Perl_save_helem(pTHX_ HV *hv, SV *key, SV **sptr)
      * mortifying it instead. DAPM */
     if (SvTIED_mg(sv, PERL_MAGIC_tiedelem))
 	sv_2mortal(sv);
+}
+
+SV*
+Perl_save_svref(pTHX_ SV **sptr)
+{
+    SvGETMAGIC(*sptr);
+    SSCHECK(3);
+    SSPUSHPTR(sptr);
+    SSPUSHPTR(SvREFCNT_inc(*sptr));
+    SSPUSHINT(SAVEt_SVREF);
+    return save_scalar_at(sptr);
 }
 
 void
@@ -712,39 +645,6 @@ Perl_leave_scope(pTHX_ I32 base)
 	    gv = (GV*)SSPOPPTR;
 	    ptr = &GvSV(gv);
 	    av = (AV*)gv; /* what to refcnt_dec */
-	    goto restore_sv;
-	case SAVEt_GENERIC_PVREF:		/* generic pv */
-	    str = (char*)SSPOPPTR;
-	    ptr = SSPOPPTR;
-	    if (*(char**)ptr != str) {
-		Safefree(*(char**)ptr);
-		*(char**)ptr = str;
-	    }
-	    break;
-	case SAVEt_SHARED_PVREF:		/* shared pv */
-	    str = (char*)SSPOPPTR;
-	    ptr = SSPOPPTR;
-	    if (*(char**)ptr != str) {
-#ifdef NETWARE
-		PerlMem_free(*(char**)ptr);
-#else
-		PerlMemShared_free(*(char**)ptr);
-#endif
-		*(char**)ptr = str;
-	    }
-	    break;
-	case SAVEt_GENERIC_SVREF:		/* generic sv */
-	    value = (SV*)SSPOPPTR;
-	    ptr = SSPOPPTR;
-	    sv = *(SV**)ptr;
-	    *(SV**)ptr = value;
-	    SvREFCNT_dec(sv);
-	    SvREFCNT_dec(value);
-	    break;
-	case SAVEt_SVREF:			/* scalar reference */
-	    value = (SV*)SSPOPPTR;
-	    ptr = SSPOPPTR;
-	    av = Nullav; /* what to refcnt_dec */
 	restore_sv:
 	    sv = *(SV**)ptr;
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,
@@ -782,6 +682,34 @@ Perl_leave_scope(pTHX_ I32 base)
 	    SvREFCNT_dec(value);
 	    if (av) /* actually an av, hv or gv */
 		SvREFCNT_dec(av);
+	    break;
+	case SAVEt_GENERIC_PVREF:		/* generic pv */
+	    str = (char*)SSPOPPTR;
+	    ptr = SSPOPPTR;
+	    if (*(char**)ptr != str) {
+		Safefree(*(char**)ptr);
+		*(char**)ptr = str;
+	    }
+	    break;
+	case SAVEt_SHARED_PVREF:		/* shared pv */
+	    str = (char*)SSPOPPTR;
+	    ptr = SSPOPPTR;
+	    if (*(char**)ptr != str) {
+#ifdef NETWARE
+		PerlMem_free(*(char**)ptr);
+#else
+		PerlMemShared_free(*(char**)ptr);
+#endif
+		*(char**)ptr = str;
+	    }
+	    break;
+	case SAVEt_GENERIC_SVREF:		/* generic sv */
+	    value = (SV*)SSPOPPTR;
+	    ptr = SSPOPPTR;
+	    sv = *(SV**)ptr;
+	    *(SV**)ptr = value;
+	    SvREFCNT_dec(sv);
+	    SvREFCNT_dec(value);
 	    break;
 	case SAVEt_AV:				/* array reference */
 	    av = (AV*)SSPOPPTR;
@@ -823,10 +751,6 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    *(int*)ptr = (int)SSPOPINT;
 	    break;
-	case SAVEt_LONG:			/* long reference */
-	    ptr = SSPOPPTR;
-	    *(long*)ptr = (long)SSPOPLONG;
-	    break;
 	case SAVEt_BOOL:			/* bool reference */
 	    ptr = SSPOPPTR;
 	    *(bool*)ptr = (bool)SSPOPBOOL;
@@ -834,18 +758,6 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_I32:				/* I32 reference */
 	    ptr = SSPOPPTR;
 	    *(I32*)ptr = (I32)SSPOPINT;
-	    break;
-	case SAVEt_I16:				/* I16 reference */
-	    ptr = SSPOPPTR;
-	    *(I16*)ptr = (I16)SSPOPINT;
-	    break;
-	case SAVEt_I8:				/* I8 reference */
-	    ptr = SSPOPPTR;
-	    *(I8*)ptr = (I8)SSPOPINT;
-	    break;
-	case SAVEt_IV:				/* IV reference */
-	    ptr = SSPOPPTR;
-	    *(IV*)ptr = (IV)SSPOPIV;
 	    break;
 	case SAVEt_SPTR:			/* SV* reference */
 	    ptr = SSPOPPTR;
@@ -863,10 +775,6 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_APTR:			/* AV* reference */
 	    ptr = SSPOPPTR;
 	    *(AV**)ptr = (AV*)SSPOPPTR;
-	    break;
-	case SAVEt_NSTAB:
-	    gv = (GV*)SSPOPPTR;
-	    (void)sv_clear((SV*)gv);
 	    break;
 	case SAVEt_GP:				/* scalar reference */
 	    ptr = SSPOPPTR;
@@ -977,10 +885,6 @@ Perl_leave_scope(pTHX_ I32 base)
 	    SvREFCNT_dec(hv);
 	    Safefree(ptr);
 	    break;
-	case SAVEt_DESTRUCTOR:
-	    ptr = SSPOPPTR;
-	    (*SSPOPDPTR)(ptr);
-	    break;
 	case SAVEt_DESTRUCTOR_X:
 	    ptr = SSPOPPTR;
 	    (*SSPOPDXPTR)(aTHX_ ptr);
@@ -1070,6 +974,36 @@ Perl_leave_scope(pTHX_ I32 base)
 		SWITCHSTACK(t,f);
 		PL_curstackinfo->si_stack = f;
 	    }
+	    break;
+	    /* These are only saved in mathoms.c */
+	case SAVEt_SVREF:			/* scalar reference */
+	    value = (SV*)SSPOPPTR;
+	    ptr = SSPOPPTR;
+	    av = NULL; /* what to refcnt_dec */
+	    goto restore_sv;
+	case SAVEt_LONG:			/* long reference */
+	    ptr = SSPOPPTR;
+	    *(long*)ptr = (long)SSPOPLONG;
+	    break;
+	case SAVEt_I16:				/* I16 reference */
+	    ptr = SSPOPPTR;
+	    *(I16*)ptr = (I16)SSPOPINT;
+	    break;
+	case SAVEt_I8:				/* I8 reference */
+	    ptr = SSPOPPTR;
+	    *(I8*)ptr = (I8)SSPOPINT;
+	    break;
+	case SAVEt_IV:				/* IV reference */
+	    ptr = SSPOPPTR;
+	    *(IV*)ptr = (IV)SSPOPIV;
+	    break;
+	case SAVEt_NSTAB:
+	    gv = (GV*)SSPOPPTR;
+	    (void)sv_clear((SV*)gv);
+	    break;
+	case SAVEt_DESTRUCTOR:
+	    ptr = SSPOPPTR;
+	    (*SSPOPDPTR)(ptr);
 	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: leave_scope inconsistency");

@@ -361,11 +361,6 @@ typically requiring 4 byte alignment, and then an odd C<bool> later on.
 to review the ordering of the variables, to see how much alignment padding can
 be removed.
 
-=head2 bincompat functions
-
-There are lots of functions which are retained for binary compatibility.
-Clean these up. Move them to mathom.c, and don't compile for blead?
-
 =head2 am I hot or not?
 
 The idea of F<pp_hot.c> is that it contains the I<hot> ops, the ops that are

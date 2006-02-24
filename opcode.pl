@@ -76,6 +76,11 @@ my @raw_alias = (
                  Perl_pp_and => ['andassign'],
 		 Perl_pp_or => ['orassign'],
 		 Perl_pp_ucfirst => ['lcfirst'],
+		 Perl_pp_sle => [qw(slt sgt sge)],
+		 Perl_pp_index => ['rindex'],
+		 Perl_pp_oct => ['hex'],
+		 Perl_pp_shift => ['pop'],
+		 Perl_pp_sin => [qw(cos exp log sqrt)],
 		);
 
 while (my ($func, $names) = splice @raw_alias, 0, 2) {

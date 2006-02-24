@@ -2129,54 +2129,40 @@ PP(pp_ncmp)
     }
 }
 
-PP(pp_slt)
-{
-    dSP; tryAMAGICbinSET(slt,0);
-    {
-      dPOPTOPssrl;
-      const int cmp = (IN_LOCALE_RUNTIME
-		 ? sv_cmp_locale(left, right)
-		 : sv_cmp(left, right));
-      SETs(boolSV(cmp < 0));
-      RETURN;
-    }
-}
-
-PP(pp_sgt)
-{
-    dSP; tryAMAGICbinSET(sgt,0);
-    {
-      dPOPTOPssrl;
-      const int cmp = (IN_LOCALE_RUNTIME
-		 ? sv_cmp_locale(left, right)
-		 : sv_cmp(left, right));
-      SETs(boolSV(cmp > 0));
-      RETURN;
-    }
-}
-
 PP(pp_sle)
 {
-    dSP; tryAMAGICbinSET(sle,0);
-    {
-      dPOPTOPssrl;
-      const int cmp = (IN_LOCALE_RUNTIME
-		 ? sv_cmp_locale(left, right)
-		 : sv_cmp(left, right));
-      SETs(boolSV(cmp <= 0));
-      RETURN;
-    }
-}
+    dSP;
 
-PP(pp_sge)
-{
-    dSP; tryAMAGICbinSET(sge,0);
+    int amg_type = sle_amg;
+    int multiplier = 1;
+    int rhs = 1;
+
+    switch (PL_op->op_type) {
+    case OP_SLT:
+	amg_type = slt_amg;
+	/* cmp < 0 */
+	rhs = 0;
+	break;
+    case OP_SGT:
+	amg_type = sgt_amg;
+	/* cmp > 0 */
+	multiplier = -1;
+	rhs = 0;
+	break;
+    case OP_SGE:
+	amg_type = sge_amg;
+	/* cmp >= 0 */
+	multiplier = -1;
+	break;
+    }
+
+    tryAMAGICbinSET_var(amg_type,0);
     {
       dPOPTOPssrl;
       const int cmp = (IN_LOCALE_RUNTIME
 		 ? sv_cmp_locale(left, right)
 		 : sv_cmp(left, right));
-      SETs(boolSV(cmp >= 0));
+      SETs(boolSV(cmp * multiplier < rhs));
       RETURN;
     }
 }
@@ -2671,20 +2657,43 @@ PP(pp_atan2)
 
 PP(pp_sin)
 {
-    dSP; dTARGET; tryAMAGICun(sin);
-    {
-      const NV value = POPn;
-      XPUSHn(Perl_sin(value));
-      RETURN;
-    }
-}
+    dSP; dTARGET;
+    int amg_type = sin_amg;
+    const char *neg_report = NULL;
+    NV (*func)(NV) = &Perl_sin;
+    const int op_type = PL_op->op_type;
 
-PP(pp_cos)
-{
-    dSP; dTARGET; tryAMAGICun(cos);
+    switch (op_type) {
+    case OP_COS:
+	amg_type = cos_amg;
+	func = &Perl_cos;
+	break;
+    case OP_EXP:
+	amg_type = exp_amg;
+	func = &Perl_exp;
+	break;
+    case OP_LOG:
+	amg_type = log_amg;
+	func = &Perl_log;
+	neg_report = "log";
+	break;
+    case OP_SQRT:
+	amg_type = sqrt_amg;
+	func = &Perl_sqrt;
+	neg_report = "sqrt";
+	break;
+    }
+
+    tryAMAGICun_var(amg_type);
     {
       const NV value = POPn;
-      XPUSHn(Perl_cos(value));
+      if (neg_report) {
+	  if (op_type == OP_LOG ? (value <= 0.0) : (value < 0.0)) {
+	      SET_NUMERIC_STANDARD();
+	      DIE(aTHX_ "Can't take %s of %"NVgf, neg_report, value);
+	  }
+      }
+      XPUSHn(func(value));
       RETURN;
     }
 }
@@ -2735,46 +2744,6 @@ PP(pp_srand)
     PL_srand_called = TRUE;
     EXTEND(SP, 1);
     RETPUSHYES;
-}
-
-PP(pp_exp)
-{
-    dSP; dTARGET; tryAMAGICun(exp);
-    {
-      NV value;
-      value = POPn;
-      value = Perl_exp(value);
-      XPUSHn(value);
-      RETURN;
-    }
-}
-
-PP(pp_log)
-{
-    dSP; dTARGET; tryAMAGICun(log);
-    {
-      const NV value = POPn;
-      if (value <= 0.0) {
-	SET_NUMERIC_STANDARD();
-	DIE(aTHX_ "Can't take log of %"NVgf, value);
-      }
-      XPUSHn(Perl_log(value));
-      RETURN;
-    }
-}
-
-PP(pp_sqrt)
-{
-    dSP; dTARGET; tryAMAGICun(sqrt);
-    {
-      const NV value = POPn;
-      if (value < 0.0) {
-	SET_NUMERIC_STANDARD();
-	DIE(aTHX_ "Can't take sqrt of %"NVgf, value);
-      }
-      XPUSHn(Perl_sqrt(value));
-      RETURN;
-    }
 }
 
 PP(pp_int)
@@ -2853,37 +2822,6 @@ PP(pp_abs)
     RETURN;
 }
 
-
-PP(pp_hex)
-{
-    dSP; dTARGET;
-    const char *tmps;
-    I32 flags = PERL_SCAN_ALLOW_UNDERSCORES;
-    STRLEN len;
-    NV result_nv;
-    UV result_uv;
-    SV* const sv = POPs;
-
-    tmps = (SvPV_const(sv, len));
-    if (DO_UTF8(sv)) {
-	 /* If Unicode, try to downgrade
-	  * If not possible, croak. */
-	 SV* const tsv = sv_2mortal(newSVsv(sv));
-	
-	 SvUTF8_on(tsv);
-	 sv_utf8_downgrade(tsv, FALSE);
-	 tmps = SvPV_const(tsv, len);
-    }
-    result_uv = grok_hex ((char *)tmps, &len, &flags, &result_nv);
-    if (flags & PERL_SCAN_GREATER_THAN_UV_MAX) {
-        XPUSHn(result_nv);
-    }
-    else {
-        XPUSHu(result_uv);
-    }
-    RETURN;
-}
-
 PP(pp_oct)
 {
     dSP; dTARGET;
@@ -2904,12 +2842,17 @@ PP(pp_oct)
 	 sv_utf8_downgrade(tsv, FALSE);
 	 tmps = SvPV_const(tsv, len);
     }
+    if (PL_op->op_type == OP_HEX)
+	goto hex;
+
     while (*tmps && len && isSPACE(*tmps))
         tmps++, len--;
     if (*tmps == '0')
         tmps++, len--;
-    if (*tmps == 'x')
+    if (*tmps == 'x') {
+    hex:
         result_uv = grok_hex ((char *)tmps, &len, &flags, &result_nv);
+    }
     else if (*tmps == 'b')
         result_uv = grok_bin ((char *)tmps, &len, &flags, &result_nv);
     else
@@ -3143,128 +3086,97 @@ PP(pp_index)
     SV *big;
     SV *little;
     SV *temp = Nullsv;
+    STRLEN biglen;
+    STRLEN llen = 0;
     I32 offset;
     I32 retval;
     const char *tmps;
     const char *tmps2;
-    STRLEN biglen;
     const I32 arybase = PL_curcop->cop_arybase;
-    int big_utf8;
-    int little_utf8;
+    bool big_utf8;
+    bool little_utf8;
+    const bool is_index = PL_op->op_type == OP_INDEX;
 
-    if (MAXARG < 3)
-	offset = 0;
-    else
+    if (MAXARG >= 3) {
+	/* arybase is in characters, like offset, so combine prior to the
+	   UTF-8 to bytes calculation.  */
 	offset = POPi - arybase;
+    }
     little = POPs;
     big = POPs;
     big_utf8 = DO_UTF8(big);
     little_utf8 = DO_UTF8(little);
     if (big_utf8 ^ little_utf8) {
 	/* One needs to be upgraded.  */
-	SV * const bytes = little_utf8 ? big : little;
-	STRLEN len;
-	const char * const p = SvPV_const(bytes, len);
+	if (little_utf8 && !PL_encoding) {
+	    /* Well, maybe instead we might be able to downgrade the small
+	       string?  */
+	    STRLEN little_len;
+	    const U8 * const little_pv = (U8*) SvPV_const(little, little_len);
+	    char * const pv = (char*)bytes_from_utf8((U8 *)little_pv,
+						     &little_len,
+						     &little_utf8);
+	    if (little_utf8) {
+		/* If the large string is ISO-8859-1, and it's not possible to
+		   convert the small string to ISO-8859-1, then there is no
+		   way that it could be found anywhere by index.  */
+		retval = -1;
+		goto fail;
+	    }
 
-	temp = newSVpvn(p, len);
+	    /* At this point, pv is a malloc()ed string. So donate it to temp
+	       to ensure it will get free()d  */
+	    little = temp = newSV(0);
+	    sv_usepvn(temp, pv, little_len);
+	} else {
+	    SV * const bytes = little_utf8 ? big : little;
+	    STRLEN len;
+	    const char * const p = SvPV_const(bytes, len);
 
-	if (PL_encoding) {
-	    sv_recode_to_utf8(temp, PL_encoding);
-	} else {
-	    sv_utf8_upgrade(temp);
-	}
-	if (little_utf8) {
-	    big = temp;
-	    big_utf8 = TRUE;
-	} else {
-	    little = temp;
+	    temp = newSVpvn(p, len);
+
+	    if (PL_encoding) {
+		sv_recode_to_utf8(temp, PL_encoding);
+	    } else {
+		sv_utf8_upgrade(temp);
+	    }
+	    if (little_utf8) {
+		big = temp;
+		big_utf8 = TRUE;
+	    } else {
+		little = temp;
+	    }
 	}
     }
-    if (big_utf8 && offset > 0)
-	sv_pos_u2b(big, &offset, 0);
+    /* Don't actually need the NULL initialisation, but it keeps gcc quiet.  */
+    tmps2 = is_index ? NULL : SvPV_const(little, llen);
     tmps = SvPV_const(big, biglen);
+
+    if (MAXARG < 3)
+	offset = is_index ? 0 : biglen;
+    else {
+	if (big_utf8 && offset > 0)
+	    sv_pos_u2b(big, &offset, 0);
+	offset += llen;
+    }
     if (offset < 0)
 	offset = 0;
     else if (offset > (I32)biglen)
 	offset = biglen;
-    if (!(tmps2 = fbm_instr((unsigned char*)tmps + offset,
-      (unsigned char*)tmps + biglen, little, 0)))
+    if (!(tmps2 = is_index
+	  ? fbm_instr((unsigned char*)tmps + offset,
+		      (unsigned char*)tmps + biglen, little, 0)
+	  : rninstr(tmps,  tmps  + offset,
+		    tmps2, tmps2 + llen)))
 	retval = -1;
-    else
-	retval = tmps2 - tmps;
-    if (retval > 0 && big_utf8)
-	sv_pos_b2u(big, &retval);
-    if (temp)
-	SvREFCNT_dec(temp);
-    PUSHi(retval + arybase);
-    RETURN;
-}
-
-PP(pp_rindex)
-{
-    dSP; dTARGET;
-    SV *big;
-    SV *little;
-    SV *temp = Nullsv;
-    STRLEN blen;
-    STRLEN llen;
-    I32 offset;
-    I32 retval;
-    const char *tmps;
-    const char *tmps2;
-    const I32 arybase = PL_curcop->cop_arybase;
-    int big_utf8;
-    int little_utf8;
-
-    if (MAXARG >= 3)
-	offset = POPi;
-    little = POPs;
-    big = POPs;
-    big_utf8 = DO_UTF8(big);
-    little_utf8 = DO_UTF8(little);
-    if (big_utf8 ^ little_utf8) {
-	/* One needs to be upgraded.  */
-	SV * const bytes = little_utf8 ? big : little;
-	STRLEN len;
-	const char *p = SvPV_const(bytes, len);
-
-	temp = newSVpvn(p, len);
-
-	if (PL_encoding) {
-	    sv_recode_to_utf8(temp, PL_encoding);
-	} else {
-	    sv_utf8_upgrade(temp);
-	}
-	if (little_utf8) {
-	    big = temp;
-	    big_utf8 = TRUE;
-	} else {
-	    little = temp;
-	}
-    }
-    tmps2 = SvPV_const(little, llen);
-    tmps = SvPV_const(big, blen);
-
-    if (MAXARG < 3)
-	offset = blen;
     else {
-	if (offset > 0 && big_utf8)
-	    sv_pos_u2b(big, &offset, 0);
-	offset = offset - arybase + llen;
-    }
-    if (offset < 0)
-	offset = 0;
-    else if (offset > (I32)blen)
-	offset = blen;
-    if (!(tmps2 = rninstr(tmps,  tmps  + offset,
-			  tmps2, tmps2 + llen)))
-	retval = -1;
-    else
 	retval = tmps2 - tmps;
-    if (retval > 0 && big_utf8)
-	sv_pos_b2u(big, &retval);
+	if (retval > 0 && big_utf8)
+	    sv_pos_b2u(big, &retval);
+    }
     if (temp)
 	SvREFCNT_dec(temp);
+ fail:
     PUSHi(retval + arybase);
     RETURN;
 }
@@ -4285,22 +4197,11 @@ PP(pp_push)
     RETURN;
 }
 
-PP(pp_pop)
-{
-    dSP;
-    AV * const av = (AV*)POPs;
-    SV * const sv = av_pop(av);
-    if (AvREAL(av))
-	(void)sv_2mortal(sv);
-    PUSHs(sv);
-    RETURN;
-}
-
 PP(pp_shift)
 {
     dSP;
     AV * const av = (AV*)POPs;
-    SV * const sv = av_shift(av);
+    SV * const sv = PL_op->op_type == OP_SHIFT ? av_shift(av) : av_pop(av);
     EXTEND(SP, 1);
     if (!sv)
 	RETPUSHUNDEF;

@@ -839,10 +839,10 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 	MEMBER_TO_FPTR(Perl_pp_i_ne),
 	MEMBER_TO_FPTR(Perl_pp_ncmp),
 	MEMBER_TO_FPTR(Perl_pp_i_ncmp),
-	MEMBER_TO_FPTR(Perl_pp_slt),
-	MEMBER_TO_FPTR(Perl_pp_sgt),
+	MEMBER_TO_FPTR(Perl_pp_sle),	/* Perl_pp_slt */
+	MEMBER_TO_FPTR(Perl_pp_sle),	/* Perl_pp_sgt */
 	MEMBER_TO_FPTR(Perl_pp_sle),
-	MEMBER_TO_FPTR(Perl_pp_sge),
+	MEMBER_TO_FPTR(Perl_pp_sle),	/* Perl_pp_sge */
 	MEMBER_TO_FPTR(Perl_pp_seq),
 	MEMBER_TO_FPTR(Perl_pp_sne),
 	MEMBER_TO_FPTR(Perl_pp_scmp),
@@ -855,21 +855,21 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 	MEMBER_TO_FPTR(Perl_pp_complement),
 	MEMBER_TO_FPTR(Perl_pp_atan2),
 	MEMBER_TO_FPTR(Perl_pp_sin),
-	MEMBER_TO_FPTR(Perl_pp_cos),
+	MEMBER_TO_FPTR(Perl_pp_sin),	/* Perl_pp_cos */
 	MEMBER_TO_FPTR(Perl_pp_rand),
 	MEMBER_TO_FPTR(Perl_pp_srand),
-	MEMBER_TO_FPTR(Perl_pp_exp),
-	MEMBER_TO_FPTR(Perl_pp_log),
-	MEMBER_TO_FPTR(Perl_pp_sqrt),
+	MEMBER_TO_FPTR(Perl_pp_sin),	/* Perl_pp_exp */
+	MEMBER_TO_FPTR(Perl_pp_sin),	/* Perl_pp_log */
+	MEMBER_TO_FPTR(Perl_pp_sin),	/* Perl_pp_sqrt */
 	MEMBER_TO_FPTR(Perl_pp_int),
-	MEMBER_TO_FPTR(Perl_pp_hex),
+	MEMBER_TO_FPTR(Perl_pp_oct),	/* Perl_pp_hex */
 	MEMBER_TO_FPTR(Perl_pp_oct),
 	MEMBER_TO_FPTR(Perl_pp_abs),
 	MEMBER_TO_FPTR(Perl_pp_length),
 	MEMBER_TO_FPTR(Perl_pp_substr),
 	MEMBER_TO_FPTR(Perl_pp_vec),
 	MEMBER_TO_FPTR(Perl_pp_index),
-	MEMBER_TO_FPTR(Perl_pp_rindex),
+	MEMBER_TO_FPTR(Perl_pp_index),	/* Perl_pp_rindex */
 	MEMBER_TO_FPTR(Perl_pp_sprintf),
 	MEMBER_TO_FPTR(Perl_pp_formline),
 	MEMBER_TO_FPTR(Perl_pp_ord),
@@ -902,7 +902,7 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 	MEMBER_TO_FPTR(Perl_pp_anonhash),
 	MEMBER_TO_FPTR(Perl_pp_splice),
 	MEMBER_TO_FPTR(Perl_pp_push),
-	MEMBER_TO_FPTR(Perl_pp_pop),
+	MEMBER_TO_FPTR(Perl_pp_shift),	/* Perl_pp_pop */
 	MEMBER_TO_FPTR(Perl_pp_shift),
 	MEMBER_TO_FPTR(Perl_pp_unshift),
 	MEMBER_TO_FPTR(Perl_pp_sort),
