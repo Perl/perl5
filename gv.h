@@ -38,9 +38,17 @@ struct gp {
 
 #define GvNAME(gv)	(GvXPVGV(gv)->xgv_name)
 #define GvNAMELEN(gv)	(GvXPVGV(gv)->xgv_namelen)
-#define GvSTASH(gv)	(GvXPVGV(gv)->xgv_stash)
 #define GvFLAGS(gv)	(GvXPVGV(gv)->xgv_flags)
 
+#if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  define GvSTASH(gv)							\
+	(*({ GV *_gv = (GV *) gv;					\
+	    assert(SvTYPE(_gv) == SVt_PVGV || SvTYPE(_gv) >= SVt_PVLV);	\
+	    &(GvXPVGV(_gv)->xgv_stash);					\
+	 }))
+#else
+#define GvSTASH(gv)	(GvXPVGV(gv)->xgv_stash)
+#endif
 /*
 =head1 GV Functions
 
