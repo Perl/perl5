@@ -97,6 +97,54 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
 }
 
 /*
+=for apidoc sv_2pv_nolen
+
+Like C<sv_2pv()>, but doesn't return the length too. You should usually
+use the macro wrapper C<SvPV_nolen(sv)> instead.
+=cut
+*/
+
+char *
+Perl_sv_2pv_nolen(pTHX_ register SV *sv)
+{
+    return sv_2pv(sv, 0);
+}
+
+/*
+=for apidoc sv_2pvbyte_nolen
+
+Return a pointer to the byte-encoded representation of the SV.
+May cause the SV to be downgraded from UTF-8 as a side-effect.
+
+Usually accessed via the C<SvPVbyte_nolen> macro.
+
+=cut
+*/
+
+char *
+Perl_sv_2pvbyte_nolen(pTHX_ register SV *sv)
+{
+    return sv_2pvbyte(sv, 0);
+}
+
+/*
+=for apidoc sv_2pvutf8_nolen
+
+Return a pointer to the UTF-8-encoded representation of the SV.
+May cause the SV to be upgraded to UTF-8 as a side-effect.
+
+Usually accessed via the C<SvPVutf8_nolen> macro.
+
+=cut
+*/
+
+char *
+Perl_sv_2pvutf8_nolen(pTHX_ register SV *sv)
+{
+    return sv_2pvutf8(sv, 0);
+}
+
+/*
 =for apidoc sv_force_normal
 
 Undo various types of fakery on an SV: if the PV is a shared string, make
@@ -132,6 +180,20 @@ Perl_sv_catpvn(pTHX_ SV *dsv, const char* sstr, STRLEN slen)
     sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC);
 }
 
+/*
+=for apidoc sv_catpvn_mg
+
+Like C<sv_catpvn>, but also handles 'set' magic.
+
+=cut
+*/
+
+void
+Perl_sv_catpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
+{
+    sv_catpvn_flags(sv,ptr,len,SV_GMAGIC|SV_SMAGIC);
+}
+
 /* sv_catsv() is now a macro using Perl_sv_catsv_flags();
  * this function provided for binary compatibility only
  */
@@ -140,6 +202,20 @@ void
 Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
 {
     sv_catsv_flags(dstr, sstr, SV_GMAGIC);
+}
+
+/*
+=for apidoc sv_catsv_mg
+
+Like C<sv_catsv>, but also handles 'set' magic.
+
+=cut
+*/
+
+void
+Perl_sv_catsv_mg(pTHX_ SV *dsv, register SV *ssv)
+{
+    sv_catsv_flags(dsv,ssv,SV_GMAGIC|SV_SMAGIC);
 }
 
 /*
@@ -527,6 +603,14 @@ Perl_av_fake(pTHX_ register I32 size, register SV **strp)
 }
 
 bool
+Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
+	     int rawmode, int rawperm, PerlIO *supplied_fp)
+{
+    return do_openn(gv, name, len, as_raw, rawmode, rawperm,
+		    supplied_fp, (SV **) NULL, 0);
+}
+
+bool
 Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	      int rawmode, int rawperm, PerlIO *supplied_fp, SV *svs,
 	      I32 num_svs)
@@ -549,6 +633,68 @@ Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
 #endif
  return PerlIO_binmode(aTHX_ fp, iotype, mode, name);
 }
+
+#ifndef OS2
+bool
+Perl_do_aexec(pTHX_ SV *really, register SV **mark, register SV **sp)
+{
+    return do_aexec5(really, mark, sp, 0, 0);
+}
+#endif
+
+#ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
+bool
+Perl_do_exec(pTHX_ char *cmd)
+{
+    return do_exec3(cmd,0,0);
+}
+#endif
+
+#ifdef HAS_PIPE
+void
+Perl_do_pipe(pTHX_ SV *sv, GV *rgv, GV *wgv)
+{
+    register IO *rstio;
+    register IO *wstio;
+    int fd[2];
+
+    if (!rgv)
+	goto badexit;
+    if (!wgv)
+	goto badexit;
+
+    rstio = GvIOn(rgv);
+    wstio = GvIOn(wgv);
+
+    if (IoIFP(rstio))
+	do_close(rgv,FALSE);
+    if (IoIFP(wstio))
+	do_close(wgv,FALSE);
+
+    if (PerlProc_pipe(fd) < 0)
+	goto badexit;
+    IoIFP(rstio) = PerlIO_fdopen(fd[0], "r"PIPE_OPEN_MODE);
+    IoOFP(wstio) = PerlIO_fdopen(fd[1], "w"PIPE_OPEN_MODE);
+    IoOFP(rstio) = IoIFP(rstio);
+    IoIFP(wstio) = IoOFP(wstio);
+    IoTYPE(rstio) = IoTYPE_RDONLY;
+    IoTYPE(wstio) = IoTYPE_WRONLY;
+    if (!IoIFP(rstio) || !IoOFP(wstio)) {
+	if (IoIFP(rstio)) PerlIO_close(IoIFP(rstio));
+	else PerlLIO_close(fd[0]);
+	if (IoOFP(wstio)) PerlIO_close(IoOFP(wstio));
+	else PerlLIO_close(fd[1]);
+	goto badexit;
+    }
+
+    sv_setsv(sv,&PL_sv_yes);
+    return;
+
+badexit:
+    sv_setsv(sv,&PL_sv_undef);
+    return;
+}
+#endif
 
 /*
  * Local variables:

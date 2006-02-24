@@ -59,14 +59,6 @@
 #include <signal.h>
 
 bool
-Perl_do_open(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
-	     int rawmode, int rawperm, PerlIO *supplied_fp)
-{
-    return do_openn(gv, name, len, as_raw, rawmode, rawperm,
-		    supplied_fp, (SV **) NULL, 0);
-}
-
-bool
 Perl_do_openn(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
 	      int rawmode, int rawperm, PerlIO *supplied_fp, SV **svp,
 	      I32 num_svs)
@@ -944,52 +936,6 @@ Perl_nextargv(pTHX_ register GV *gv)
     return Nullfp;
 }
 
-#ifdef HAS_PIPE
-void
-Perl_do_pipe(pTHX_ SV *sv, GV *rgv, GV *wgv)
-{
-    register IO *rstio;
-    register IO *wstio;
-    int fd[2];
-
-    if (!rgv)
-	goto badexit;
-    if (!wgv)
-	goto badexit;
-
-    rstio = GvIOn(rgv);
-    wstio = GvIOn(wgv);
-
-    if (IoIFP(rstio))
-	do_close(rgv,FALSE);
-    if (IoIFP(wstio))
-	do_close(wgv,FALSE);
-
-    if (PerlProc_pipe(fd) < 0)
-	goto badexit;
-    IoIFP(rstio) = PerlIO_fdopen(fd[0], "r"PIPE_OPEN_MODE);
-    IoOFP(wstio) = PerlIO_fdopen(fd[1], "w"PIPE_OPEN_MODE);
-    IoOFP(rstio) = IoIFP(rstio);
-    IoIFP(wstio) = IoOFP(wstio);
-    IoTYPE(rstio) = IoTYPE_RDONLY;
-    IoTYPE(wstio) = IoTYPE_WRONLY;
-    if (!IoIFP(rstio) || !IoOFP(wstio)) {
-	if (IoIFP(rstio)) PerlIO_close(IoIFP(rstio));
-	else PerlLIO_close(fd[0]);
-	if (IoOFP(wstio)) PerlIO_close(IoOFP(wstio));
-	else PerlLIO_close(fd[1]);
-	goto badexit;
-    }
-
-    sv_setsv(sv,&PL_sv_yes);
-    return;
-
-badexit:
-    sv_setsv(sv,&PL_sv_undef);
-    return;
-}
-#endif
-
 /* explicit renamed to avoid C++ conflict    -- kja */
 bool
 Perl_do_close(pTHX_ GV *gv, bool not_implicit)
@@ -1424,14 +1370,6 @@ Perl_my_lstat(pTHX)
     return PL_laststatval;
 }
 
-#ifndef OS2
-bool
-Perl_do_aexec(pTHX_ SV *really, register SV **mark, register SV **sp)
-{
-    return do_aexec5(really, mark, sp, 0, 0);
-}
-#endif
-
 bool
 Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	       int fd, int do_report)
@@ -1487,14 +1425,7 @@ Perl_do_execfree(pTHX)
     PL_Cmd = Nullch;
 }
 
-#if !defined(OS2) && !defined(WIN32) && !defined(DJGPP) && !defined(EPOC) && !defined(SYMBIAN) && !defined(MACOS_TRADITIONAL)
-
-bool
-Perl_do_exec(pTHX_ char *cmd)
-{
-    return do_exec3(cmd,0,0);
-}
-
+#ifdef PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION
 bool
 Perl_do_exec3(pTHX_ char *cmd, int fd, int do_report)
 {

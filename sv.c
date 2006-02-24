@@ -2461,20 +2461,6 @@ S_asUV(pTHX_ SV *sv)
     return U_V(Atof(SvPVX_const(sv)));
 }
 
-/*
-=for apidoc sv_2pv_nolen
-
-Like C<sv_2pv()>, but doesn't return the length too. You should usually
-use the macro wrapper C<SvPV_nolen(sv)> instead.
-=cut
-*/
-
-char *
-Perl_sv_2pv_nolen(pTHX_ register SV *sv)
-{
-    return sv_2pv(sv, 0);
-}
-
 /* uiv_2buf(): private routine for use by sv_2pv_flags(): print an IV or
  * UV as a string towards the end of buf, and return pointers to start and
  * end of it.
@@ -2877,23 +2863,6 @@ Perl_sv_copypv(pTHX_ SV *dsv, register SV *ssv)
 }
 
 /*
-=for apidoc sv_2pvbyte_nolen
-
-Return a pointer to the byte-encoded representation of the SV.
-May cause the SV to be downgraded from UTF-8 as a side-effect.
-
-Usually accessed via the C<SvPVbyte_nolen> macro.
-
-=cut
-*/
-
-char *
-Perl_sv_2pvbyte_nolen(pTHX_ register SV *sv)
-{
-    return sv_2pvbyte(sv, 0);
-}
-
-/*
 =for apidoc sv_2pvbyte
 
 Return a pointer to the byte-encoded representation of the SV, and set *lp
@@ -2910,23 +2879,6 @@ Perl_sv_2pvbyte(pTHX_ register SV *sv, STRLEN *lp)
 {
     sv_utf8_downgrade(sv,0);
     return lp ? SvPV(sv,*lp) : SvPV_nolen(sv);
-}
-
-/*
-=for apidoc sv_2pvutf8_nolen
-
-Return a pointer to the UTF-8-encoded representation of the SV.
-May cause the SV to be upgraded to UTF-8 as a side-effect.
-
-Usually accessed via the C<SvPVutf8_nolen> macro.
-
-=cut
-*/
-
-char *
-Perl_sv_2pvutf8_nolen(pTHX_ register SV *sv)
-{
-    return sv_2pvutf8(sv, 0);
 }
 
 /*
@@ -3942,21 +3894,8 @@ Perl_sv_catpvn_flags(pTHX_ register SV *dsv, register const char *sstr, register
     *SvEND(dsv) = '\0';
     (void)SvPOK_only_UTF8(dsv);		/* validate pointer */
     SvTAINT(dsv);
-}
-
-/*
-=for apidoc sv_catpvn_mg
-
-Like C<sv_catpvn>, but also handles 'set' magic.
-
-=cut
-*/
-
-void
-Perl_sv_catpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRLEN len)
-{
-    sv_catpvn(sv,ptr,len);
-    SvSETMAGIC(sv);
+    if (flags & SV_SMAGIC)
+	SvSETMAGIC(dsv);
 }
 
 /*
@@ -3980,51 +3919,38 @@ Perl_sv_catsv_flags(pTHX_ SV *dsv, register SV *ssv, I32 flags)
 {
     const char *spv;
     STRLEN slen;
-    if (!ssv)
-	return;
-    if ((spv = SvPV_const(ssv, slen))) {
-	/*  sutf8 and dutf8 were type bool, but under USE_ITHREADS,
-	    gcc version 2.95.2 20000220 (Debian GNU/Linux) for
-	    Linux xxx 2.2.17 on sparc64 with gcc -O2, we erroneously
-	    get dutf8 = 0x20000000, (i.e.  SVf_UTF8) even though
-	    dsv->sv_flags doesn't have that bit set.
+    if (ssv) {
+	if ((spv = SvPV_const(ssv, slen))) {
+	    /*  sutf8 and dutf8 were type bool, but under USE_ITHREADS,
+		gcc version 2.95.2 20000220 (Debian GNU/Linux) for
+		Linux xxx 2.2.17 on sparc64 with gcc -O2, we erroneously
+		get dutf8 = 0x20000000, (i.e.  SVf_UTF8) even though
+		dsv->sv_flags doesn't have that bit set.
 		Andy Dougherty  12 Oct 2001
-	*/
-	const I32 sutf8 = DO_UTF8(ssv);
-	I32 dutf8;
+	    */
+	    const I32 sutf8 = DO_UTF8(ssv);
+	    I32 dutf8;
 
-	if (SvGMAGICAL(dsv) && (flags & SV_GMAGIC))
-	    mg_get(dsv);
-	dutf8 = DO_UTF8(dsv);
+	    if (SvGMAGICAL(dsv) && (flags & SV_GMAGIC))
+		mg_get(dsv);
+	    dutf8 = DO_UTF8(dsv);
 
-	if (dutf8 != sutf8) {
-	    if (dutf8) {
-		/* Not modifying source SV, so taking a temporary copy. */
-		SV* csv = sv_2mortal(newSVpvn(spv, slen));
+	    if (dutf8 != sutf8) {
+		if (dutf8) {
+		    /* Not modifying source SV, so taking a temporary copy. */
+		    SV* csv = sv_2mortal(newSVpvn(spv, slen));
 
-		sv_utf8_upgrade(csv);
-		spv = SvPV_const(csv, slen);
+		    sv_utf8_upgrade(csv);
+		    spv = SvPV_const(csv, slen);
+		}
+		else
+		    sv_utf8_upgrade_nomg(dsv);
 	    }
-	    else
-		sv_utf8_upgrade_nomg(dsv);
+	    sv_catpvn_nomg(dsv, spv, slen);
 	}
-	sv_catpvn_nomg(dsv, spv, slen);
     }
-}
-
-/*
-=for apidoc sv_catsv_mg
-
-Like C<sv_catsv>, but also handles 'set' magic.
-
-=cut
-*/
-
-void
-Perl_sv_catsv_mg(pTHX_ SV *dsv, register SV *ssv)
-{
-    sv_catsv(dsv,ssv);
-    SvSETMAGIC(dsv);
+    if (flags & SV_SMAGIC)
+	SvSETMAGIC(dsv);
 }
 
 /*
@@ -7420,11 +7346,7 @@ Like C<sv_setpviv>, but also handles 'set' magic.
 void
 Perl_sv_setpviv_mg(pTHX_ SV *sv, IV iv)
 {
-    char buf[TYPE_CHARS(UV)];
-    char *ebuf;
-    char * const ptr = uiv_2buf(buf, iv, 0, 0, &ebuf);
-
-    sv_setpvn(sv, ptr, ebuf - ptr);
+    sv_setpviv(sv, iv);
     SvSETMAGIC(sv);
 }
 

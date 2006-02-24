@@ -259,13 +259,13 @@ PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...)
 PERL_CALLCONV OP*	Perl_vdie(pTHX_ const char* pat, va_list* args);
 PERL_CALLCONV OP*	Perl_die_where(pTHX_ char* message, STRLEN msglen);
 PERL_CALLCONV void	Perl_dounwind(pTHX_ I32 cxix);
-PERL_CALLCONV bool	Perl_do_aexec(pTHX_ SV* really, SV** mark, SV** sp);
+/* PERL_CALLCONV bool	Perl_do_aexec(pTHX_ SV* really, SV** mark, SV** sp); */
 PERL_CALLCONV bool	Perl_do_aexec5(pTHX_ SV* really, SV** mark, SV** sp, int fd, int flag);
 PERL_CALLCONV int	Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode);
 PERL_CALLCONV void	Perl_do_chop(pTHX_ SV* asv, SV* sv);
 PERL_CALLCONV bool	Perl_do_close(pTHX_ GV* gv, bool not_implicit);
 PERL_CALLCONV bool	Perl_do_eof(pTHX_ GV* gv);
-PERL_CALLCONV bool	Perl_do_exec(pTHX_ char* cmd);
+/* PERL_CALLCONV bool	Perl_do_exec(pTHX_ char* cmd); */
 #if defined(WIN32)
 PERL_CALLCONV int	Perl_do_aspawn(pTHX_ SV* really, SV** mark, SV** sp);
 PERL_CALLCONV int	Perl_do_spawn(pTHX_ char* cmd);
@@ -285,7 +285,7 @@ PERL_CALLCONV I32	Perl_do_shmio(pTHX_ I32 optype, SV** mark, SV** sp);
 #endif
 PERL_CALLCONV void	Perl_do_join(pTHX_ SV* sv, SV* del, SV** mark, SV** sp);
 PERL_CALLCONV OP*	Perl_do_kv(pTHX);
-PERL_CALLCONV bool	Perl_do_open(pTHX_ GV* gv, char* name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO* supplied_fp);
+/* PERL_CALLCONV bool	Perl_do_open(pTHX_ GV* gv, char* name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO* supplied_fp); */
 PERL_CALLCONV bool	Perl_do_open9(pTHX_ GV *gv, char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp, SV *svs, I32 num);
 PERL_CALLCONV bool	Perl_do_openn(pTHX_ GV *gv, char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp, SV **svp, I32 num);
 PERL_CALLCONV void	Perl_do_pipe(pTHX_ SV* sv, GV* rgv, GV* wgv);
@@ -1354,8 +1354,8 @@ PERL_CALLCONV void	Perl_sv_catpvf_mg(pTHX_ SV *sv, const char* pat, ...)
 
 PERL_CALLCONV void	Perl_sv_vcatpvf_mg(pTHX_ SV* sv, const char* pat, va_list* args);
 PERL_CALLCONV void	Perl_sv_catpv_mg(pTHX_ SV *sv, const char *ptr);
-PERL_CALLCONV void	Perl_sv_catpvn_mg(pTHX_ SV *sv, const char *ptr, STRLEN len);
-PERL_CALLCONV void	Perl_sv_catsv_mg(pTHX_ SV *dstr, SV *sstr);
+/* PERL_CALLCONV void	Perl_sv_catpvn_mg(pTHX_ SV *sv, const char *ptr, STRLEN len); */
+/* PERL_CALLCONV void	Perl_sv_catsv_mg(pTHX_ SV *dstr, SV *sstr); */
 PERL_CALLCONV void	Perl_sv_setpvf_mg(pTHX_ SV *sv, const char* pat, ...)
 			__attribute__format__(__printf__,pTHX_2,pTHX_3);
 
@@ -1389,14 +1389,14 @@ PERL_CALLCONV void*	Perl_default_protect(pTHX_ volatile JMPENV *je, int *excpt, 
 PERL_CALLCONV void*	Perl_vdefault_protect(pTHX_ volatile JMPENV *je, int *excpt, protect_body_t body, va_list *args);
 #endif
 PERL_CALLCONV void	Perl_reginitcolors(pTHX);
-PERL_CALLCONV char*	Perl_sv_2pv_nolen(pTHX_ SV* sv)
-			__attribute__warn_unused_result__;
+/* PERL_CALLCONV char*	Perl_sv_2pv_nolen(pTHX_ SV* sv)
+			__attribute__warn_unused_result__; */
 
-PERL_CALLCONV char*	Perl_sv_2pvutf8_nolen(pTHX_ SV* sv)
-			__attribute__warn_unused_result__;
+/* PERL_CALLCONV char*	Perl_sv_2pvutf8_nolen(pTHX_ SV* sv)
+			__attribute__warn_unused_result__; */
 
-PERL_CALLCONV char*	Perl_sv_2pvbyte_nolen(pTHX_ SV* sv)
-			__attribute__warn_unused_result__;
+/* PERL_CALLCONV char*	Perl_sv_2pvbyte_nolen(pTHX_ SV* sv)
+			__attribute__warn_unused_result__; */
 
 /* PERL_CALLCONV char*	sv_pv(pTHX_ SV *sv)
 			__attribute__warn_unused_result__; */

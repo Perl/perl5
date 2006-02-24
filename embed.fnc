@@ -188,13 +188,13 @@ Afp	|OP*	|die		|NULLOK const char* pat|...
 p	|OP*	|vdie		|NULLOK const char* pat|NULLOK va_list* args
 p	|OP*	|die_where	|NULLOK char* message|STRLEN msglen
 Ap	|void	|dounwind	|I32 cxix
-p	|bool	|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
+pmb	|bool	|do_aexec	|NULLOK SV* really|NN SV** mark|NN SV** sp
 p	|bool	|do_aexec5	|NULLOK SV* really|NN SV** mark|NN SV** sp|int fd|int flag
 Ap	|int	|do_binmode	|NN PerlIO *fp|int iotype|int mode
 p	|void	|do_chop	|NN SV* asv|NN SV* sv
 Ap	|bool	|do_close	|NN GV* gv|bool not_implicit
 p	|bool	|do_eof		|NN GV* gv
-p	|bool	|do_exec	|NN char* cmd
+pmb	|bool	|do_exec	|NN char* cmd
 #if defined(WIN32)
 Ap	|int	|do_aspawn	|NN SV* really|NN SV** mark|NN SV** sp
 Ap	|int	|do_spawn	|NN char* cmd
@@ -214,7 +214,7 @@ p	|I32	|do_shmio	|I32 optype|NN SV** mark|NN SV** sp
 #endif
 Ap	|void	|do_join	|NN SV* sv|NN SV* del|NN SV** mark|NN SV** sp
 p	|OP*	|do_kv
-Ap	|bool	|do_open	|NN GV* gv|NN char* name|I32 len|int as_raw \
+Apmb	|bool	|do_open	|NN GV* gv|NN char* name|I32 len|int as_raw \
 				|int rawmode|int rawperm|NULLOK PerlIO* supplied_fp
 Ap	|bool	|do_open9	|NN GV *gv|NN char *name|I32 len|int as_raw \
 				|int rawmode|int rawperm|NULLOK PerlIO *supplied_fp \
@@ -909,8 +909,8 @@ Ap	|SV*	|sv_lock	|NN SV *sv
 Afpd	|void	|sv_catpvf_mg	|NN SV *sv|NN const char* pat|...
 Apd	|void	|sv_vcatpvf_mg	|NN SV* sv|NN const char* pat|NULLOK va_list* args
 Apd	|void	|sv_catpv_mg	|NN SV *sv|NN const char *ptr
-Apd	|void	|sv_catpvn_mg	|NN SV *sv|NN const char *ptr|STRLEN len
-Apd	|void	|sv_catsv_mg	|NN SV *dstr|NULLOK SV *sstr
+Apdbm	|void	|sv_catpvn_mg	|NN SV *sv|NN const char *ptr|STRLEN len
+Apdbm	|void	|sv_catsv_mg	|NN SV *dstr|NULLOK SV *sstr
 Afpd	|void	|sv_setpvf_mg	|NN SV *sv|NN const char* pat|...
 Apd	|void	|sv_vsetpvf_mg	|NN SV* sv|NN const char* pat|NULLOK va_list* args
 Apd	|void	|sv_setiv_mg	|NN SV *sv|IV i
@@ -944,9 +944,9 @@ Ap	|void*	|vdefault_protect|NN volatile JMPENV *je|NN int *excpt \
 				|protect_body_t body|NN va_list *args
 #endif
 Ap	|void	|reginitcolors
-ApdR	|char*	|sv_2pv_nolen	|NN SV* sv
-ApdR	|char*	|sv_2pvutf8_nolen|NN SV* sv
-ApdR	|char*	|sv_2pvbyte_nolen|NN SV* sv
+ApdRmb	|char*	|sv_2pv_nolen	|NN SV* sv
+ApdRmb	|char*	|sv_2pvutf8_nolen|NN SV* sv
+ApdRmb	|char*	|sv_2pvbyte_nolen|NN SV* sv
 AmdbR	|char*	|sv_pv		|NN SV *sv
 AmdbR	|char*	|sv_pvutf8	|NN SV *sv
 AmdbR	|char*	|sv_pvbyte	|NN SV *sv

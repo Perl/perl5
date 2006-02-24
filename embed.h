@@ -165,7 +165,6 @@
 #endif
 #define dounwind		Perl_dounwind
 #ifdef PERL_CORE
-#define do_aexec		Perl_do_aexec
 #define do_aexec5		Perl_do_aexec5
 #endif
 #define do_binmode		Perl_do_binmode
@@ -175,7 +174,6 @@
 #define do_close		Perl_do_close
 #ifdef PERL_CORE
 #define do_eof			Perl_do_eof
-#define do_exec			Perl_do_exec
 #endif
 #if defined(WIN32)
 #define do_aspawn		Perl_do_aspawn
@@ -204,7 +202,6 @@
 #ifdef PERL_CORE
 #define do_kv			Perl_do_kv
 #endif
-#define do_open			Perl_do_open
 #define do_open9		Perl_do_open9
 #define do_openn		Perl_do_openn
 #ifdef PERL_CORE
@@ -962,8 +959,6 @@
 #define sv_catpvf_mg		Perl_sv_catpvf_mg
 #define sv_vcatpvf_mg		Perl_sv_vcatpvf_mg
 #define sv_catpv_mg		Perl_sv_catpv_mg
-#define sv_catpvn_mg		Perl_sv_catpvn_mg
-#define sv_catsv_mg		Perl_sv_catsv_mg
 #define sv_setpvf_mg		Perl_sv_setpvf_mg
 #define sv_vsetpvf_mg		Perl_sv_vsetpvf_mg
 #define sv_setiv_mg		Perl_sv_setiv_mg
@@ -991,9 +986,6 @@
 #define vdefault_protect	Perl_vdefault_protect
 #endif
 #define reginitcolors		Perl_reginitcolors
-#define sv_2pv_nolen		Perl_sv_2pv_nolen
-#define sv_2pvutf8_nolen	Perl_sv_2pvutf8_nolen
-#define sv_2pvbyte_nolen	Perl_sv_2pvbyte_nolen
 #define sv_utf8_downgrade	Perl_sv_utf8_downgrade
 #define sv_utf8_encode		Perl_sv_utf8_encode
 #define sv_utf8_decode		Perl_sv_utf8_decode
@@ -2193,7 +2185,6 @@
 #endif
 #define dounwind(a)		Perl_dounwind(aTHX_ a)
 #ifdef PERL_CORE
-#define do_aexec(a,b,c)		Perl_do_aexec(aTHX_ a,b,c)
 #define do_aexec5(a,b,c,d,e)	Perl_do_aexec5(aTHX_ a,b,c,d,e)
 #endif
 #define do_binmode(a,b,c)	Perl_do_binmode(aTHX_ a,b,c)
@@ -2203,7 +2194,6 @@
 #define do_close(a,b)		Perl_do_close(aTHX_ a,b)
 #ifdef PERL_CORE
 #define do_eof(a)		Perl_do_eof(aTHX_ a)
-#define do_exec(a)		Perl_do_exec(aTHX_ a)
 #endif
 #if defined(WIN32)
 #define do_aspawn(a,b,c)	Perl_do_aspawn(aTHX_ a,b,c)
@@ -2232,7 +2222,6 @@
 #ifdef PERL_CORE
 #define do_kv()			Perl_do_kv(aTHX)
 #endif
-#define do_open(a,b,c,d,e,f,g)	Perl_do_open(aTHX_ a,b,c,d,e,f,g)
 #define do_open9(a,b,c,d,e,f,g,h,i)	Perl_do_open9(aTHX_ a,b,c,d,e,f,g,h,i)
 #define do_openn(a,b,c,d,e,f,g,h,i)	Perl_do_openn(aTHX_ a,b,c,d,e,f,g,h,i)
 #ifdef PERL_CORE
@@ -2980,8 +2969,6 @@
 #endif
 #define sv_vcatpvf_mg(a,b,c)	Perl_sv_vcatpvf_mg(aTHX_ a,b,c)
 #define sv_catpv_mg(a,b)	Perl_sv_catpv_mg(aTHX_ a,b)
-#define sv_catpvn_mg(a,b,c)	Perl_sv_catpvn_mg(aTHX_ a,b,c)
-#define sv_catsv_mg(a,b)	Perl_sv_catsv_mg(aTHX_ a,b)
 #define sv_vsetpvf_mg(a,b,c)	Perl_sv_vsetpvf_mg(aTHX_ a,b,c)
 #define sv_setiv_mg(a,b)	Perl_sv_setiv_mg(aTHX_ a,b)
 #define sv_setpviv_mg(a,b)	Perl_sv_setpviv_mg(aTHX_ a,b)
@@ -3006,9 +2993,6 @@
 #define vdefault_protect(a,b,c,d)	Perl_vdefault_protect(aTHX_ a,b,c,d)
 #endif
 #define reginitcolors()		Perl_reginitcolors(aTHX)
-#define sv_2pv_nolen(a)		Perl_sv_2pv_nolen(aTHX_ a)
-#define sv_2pvutf8_nolen(a)	Perl_sv_2pvutf8_nolen(aTHX_ a)
-#define sv_2pvbyte_nolen(a)	Perl_sv_2pvbyte_nolen(aTHX_ a)
 #define sv_utf8_downgrade(a,b)	Perl_sv_utf8_downgrade(aTHX_ a,b)
 #define sv_utf8_encode(a)	Perl_sv_utf8_encode(aTHX_ a)
 #define sv_utf8_decode(a)	Perl_sv_utf8_decode(aTHX_ a)

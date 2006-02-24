@@ -1255,6 +1255,7 @@ Like C<sv_catsv> but doesn't process magic.
 #define SV_NOSTEAL		16
 #define SV_CONST_RETURN		32
 #define SV_MUTABLE_RETURN	64
+#define SV_SMAGIC		128
 
 #define sv_unref(sv)    	sv_unref_flags(sv, 0)
 #define sv_force_normal(sv)	sv_force_normal_flags(sv, 0)
@@ -1272,8 +1273,14 @@ Like C<sv_catsv> but doesn't process magic.
 #define sv_setsv_nomg(dsv, ssv) sv_setsv_flags(dsv, ssv, 0)
 #define sv_catsv(dsv, ssv) sv_catsv_flags(dsv, ssv, SV_GMAGIC)
 #define sv_catsv_nomg(dsv, ssv) sv_catsv_flags(dsv, ssv, 0)
+#define sv_catsv_mg(dsv, ssv) sv_catsv_flags(dsv, ssv, SV_GMAGIC|SV_SMAGIC)
 #define sv_catpvn(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC)
+#define sv_catpvn_mg(sv, sstr, slen) \
+	sv_catpvn_flags(sv, sstr, slen, SV_GMAGIC|SV_SMAGIC);
 #define sv_2pv(sv, lp) sv_2pv_flags(sv, lp, SV_GMAGIC)
+#define sv_2pv_nolen(sv) sv_2pv(sv, 0)
+#define sv_2pvbyte_nolen(sv) sv_2pvbyte(sv, 0)
+#define sv_2pvutf8_nolen(sv) sv_2pvutf8(sv, 0)
 #define sv_2pv_nomg(sv, lp) sv_2pv_flags(sv, lp, 0)
 #define sv_pvn_force(sv, lp) sv_pvn_force_flags(sv, lp, SV_GMAGIC)
 #define sv_utf8_upgrade(sv) sv_utf8_upgrade_flags(sv, SV_GMAGIC)
