@@ -962,7 +962,7 @@ in gv.h: */
 	(SvPAD_OUR(sv) ? ((XPVMG*) SvANY(sv))->xmg_u.xmg_ourstash : NULL)
 #define OURSTASH_set(sv, st)					\
         STMT_START {						\
-	    assert(SvTYPE(sv) == SVt_PVGV);			\
+	    assert(SvTYPE(sv) == SVt_PVMG);			\
 	    ((XPVMG*) SvANY(sv))->xmg_u.xmg_ourstash = st;	\
 	} STMT_END
 

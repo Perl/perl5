@@ -9784,8 +9784,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 	       FIXME - instrument and check that assumption  */
 	    if (sv_type >= SVt_PVMG) {
 		HV *ourstash;
-		if ((sv_type == SVt_PVMG || sv_type == SVt_PVGV) &&
-		    (ourstash = OURSTASH(dstr))) {
+		if ((sv_type == SVt_PVMG) && (ourstash = OURSTASH(dstr))) {
 		    OURSTASH_set(dstr, hv_dup_inc(ourstash, param));
 		} else if (SvMAGIC(dstr))
 		    SvMAGIC_set(dstr, mg_dup(SvMAGIC(dstr), param));

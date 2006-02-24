@@ -74,10 +74,10 @@ in PL_op->op_targ), wasting a name SV for them doesn't make sense.
 The SVs in the names AV have their PV being the name of the variable.
 NV+1..IV inclusive is a range of cop_seq numbers for which the name is
 valid.  For typed lexicals name SV is SVt_PVMG and SvSTASH points at the
-type.  For C<our> lexicals, the type is SVt_PVGV, and GvSTASH points at the
-stash of the associated global (so that duplicate C<our> declarations in the
-same package can be detected).  SvCUR is sometimes hijacked to
-store the generation number during compilation.
+type.  For C<our> lexicals, the type is also SVt_PVGV, with the MAGIC slot
+pointing at the stash of the associated global (so that duplicate C<our>
+declarations in the same package can be detected).  SvCUR is sometimes
+hijacked to store the generation number during compilation.
 
 If SvFAKE is set on the name SV, then that slot in the frame AV is
 a REFCNT'ed reference to a lexical from "outside". In this case,
@@ -338,7 +338,7 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
     ASSERT_CURPAD_ACTIVE("pad_add_name");
 
 
-    sv_upgrade(namesv, ourstash ? SVt_PVGV : typestash ? SVt_PVMG : SVt_PVNV);
+    sv_upgrade(namesv, (ourstash || typestash) ? SVt_PVMG : SVt_PVNV);
     sv_setpv(namesv, name);
 
     if (typestash) {
