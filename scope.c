@@ -247,12 +247,7 @@ void
 Perl_save_gp(pTHX_ GV *gv, I32 empty)
 {
     dVAR;
-    SSGROW(6);
-    SSPUSHIV((IV)SvLEN(gv));
-    SvLEN_set(gv, 0); /* forget that anything was allocated here */
-    SSPUSHIV((IV)SvCUR(gv));
-    SSPUSHPTR(SvPVX_const(gv));
-    SvPOK_off(gv);
+    SSGROW(3);
     SSPUSHPTR(SvREFCNT_inc(gv));
     SSPUSHPTR(GvGP(gv));
     SSPUSHINT(SAVEt_GP);
@@ -723,12 +718,6 @@ Perl_leave_scope(pTHX_ I32 base)
 	case SAVEt_GP:				/* scalar reference */
 	    ptr = SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
-	    if (SvPVX_const(gv) && SvLEN(gv) > 0) {
-		Safefree(SvPVX_mutable(gv));
-	    }
-	    SvPV_set(gv, (char *)SSPOPPTR);
-	    SvCUR_set(gv, (STRLEN)SSPOPIV);
-	    SvLEN_set(gv, (STRLEN)SSPOPIV);
 	    gp_free(gv);
 	    GvGP(gv) = (GP*)ptr;
 	    if (GvCVu(gv))
