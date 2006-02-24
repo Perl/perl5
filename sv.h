@@ -219,7 +219,9 @@ perform the upgrade if necessary.  See C<svtype>.
 
 #define SVs_PADSTALE	0x00010000	/* lexical has gone out of scope */
 #define SVs_PADTMP	0x00020000	/* in use as tmp */
+#define SVpad_TYPED	0x00020000	/* pad name is a Typed Lexical */
 #define SVs_PADMY	0x00040000	/* in use a "my" variable */
+#define SVpad_OUR	0x00040000	/* pad name is "our" instead of "my" */
 #define SVs_TEMP	0x00080000	/* string is stealable? */
 #define SVs_OBJECT	0x00100000	/* is "blessed" */
 #define SVs_GMG		0x00200000	/* has magical get method */
@@ -271,7 +273,8 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVphv_SHAREKEYS 0x20000000	/* PVHV
 					   keys live on shared string table */
 /* PVNV, PVMG, PVGV, presumably only inside pads */
-#define SVpad_TYPED	0x40000000	/* Typed Lexical */
+#define SVpad_NAME	0x40000000	/* This SV is a name in the PAD, so
+					   SVpad_TYPED and SVpad_OUR apply */
 /* PVAV */
 #define SVpav_REAL	0x40000000	/* free old entries */
 /* PVHV */
@@ -281,8 +284,6 @@ perform the upgrade if necessary.  See C<svtype>.
 /* ??? */
 #define SVrepl_EVAL	0x40000000	/* Replacement part of s///e */
 
-/* PVNV, PVMG, PVGV, presumably only inside pads */
-#define SVpad_OUR	0x80000000	/* pad name is "our" instead of "my" */
 /* IV, PVIV, PVNV, PVMG, PVGV and (I assume) PVLV  */
 /* Presumably IVs aren't stored in pads */
 #define SVf_IVisUV	0x80000000	/* use XPVUV instead of XPVIV */
@@ -928,13 +929,13 @@ in gv.h: */
 #define SvREPADTMP_off(sv)	(SvFLAGS(sv) &= ~SVf_FAKE)
 #endif
 
-#define SvPAD_TYPED(sv)		(SvFLAGS(sv) & SVpad_TYPED)
-#define SvPAD_TYPED_on(sv)	(SvFLAGS(sv) |= SVpad_TYPED)
-#define SvPAD_TYPED_off(sv)	(SvFLAGS(sv) &= ~SVpad_TYPED)
+#define SvPAD_TYPED(sv) \
+	((SvFLAGS(sv) & (SVpad_NAME|SVpad_TYPED)) == (SVpad_NAME|SVpad_TYPED))
+#define SvPAD_TYPED_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_TYPED)
 
-#define SvPAD_OUR(sv)		(SvFLAGS(sv) & SVpad_OUR)
-#define SvPAD_OUR_on(sv)	(SvFLAGS(sv) |= SVpad_OUR)
-#define SvPAD_OUR_off(sv)	(SvFLAGS(sv) &= ~SVpad_OUR)
+#define SvPAD_OUR(sv)	\
+	((SvFLAGS(sv) & (SVpad_NAME|SVpad_OUR)) == (SVpad_NAME|SVpad_OUR))
+#define SvPAD_OUR_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_OUR)
 
 #ifdef PERL_DEBUG_COW
 #define SvRV(sv) (0 + (sv)->sv_u.svu_rv)
