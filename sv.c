@@ -4573,7 +4573,7 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
     MAGIC** mgp;
     if (SvTYPE(sv) < SVt_PVMG || !SvMAGIC(sv))
 	return 0;
-    mgp = &SvMAGIC(sv);
+    mgp = &(((XPVMG*) SvANY(sv))->xmg_u.xmg_magic);
     for (mg = *mgp; mg; mg = *mgp) {
 	if (mg->mg_type == type) {
             const MGVTBL* const vtbl = mg->mg_virtual;
