@@ -740,7 +740,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 	if (PL_inplace) {
 	    if (!PL_argvout_stack)
 		PL_argvout_stack = newAV();
-	    av_push(PL_argvout_stack, SvREFCNT_inc(PL_defoutgv));
+	    av_push(PL_argvout_stack, SvREFCNT_inc_simple(PL_defoutgv));
 	}
     }
     if (PL_filemode & (S_ISUID|S_ISGID)) {

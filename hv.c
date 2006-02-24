@@ -2062,7 +2062,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	magic_nextpack((SV*) hv,mg,key);
 	if (SvOK(key)) {
 	    /* force key to stay around until next time */
-	    HeSVKEY_set(entry, SvREFCNT_inc(key));
+	    HeSVKEY_set(entry, SvREFCNT_inc_simple_NN(key));
 	    return entry;		/* beware, hent_val is not set */
 	}
 	if (HeVAL(entry))

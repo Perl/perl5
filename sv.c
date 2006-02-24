@@ -3328,8 +3328,7 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr) {
 	}
 	break;
     }
-    if (dref)
-	SvREFCNT_dec(dref);
+    SvREFCNT_dec(dref);
     if (SvTAINTED(sstr))
 	SvTAINT(dstr);
     return;
@@ -4338,7 +4337,7 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
 	mg->mg_obj = obj;
     }
     else {
-	mg->mg_obj = SvREFCNT_inc(obj);
+	mg->mg_obj = SvREFCNT_inc_simple(obj);
 	mg->mg_flags |= MGf_REFCOUNTED;
     }
 
@@ -4362,7 +4361,7 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
 	if (namlen > 0)
 	    mg->mg_ptr = savepvn(name, namlen);
 	else if (namlen == HEf_SVKEY)
-	    mg->mg_ptr = (char*)SvREFCNT_inc((SV*)name);
+	    mg->mg_ptr = (char*)SvREFCNT_inc_simple_NN((SV*)name);
 	else
 	    mg->mg_ptr = (char *) name;
     }
@@ -4668,7 +4667,7 @@ Perl_sv_add_backref(pTHX_ SV *tsv, SV *sv)
 	    } else {
 		av = newAV();
 		AvREAL_off(av);
-		SvREFCNT_inc(av);
+		SvREFCNT_inc_simple_void(av);
 	    }
 	    *avp = av;
 	}
@@ -5112,7 +5111,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
     case SVt_PV:
     case SVt_RV:
 	if (SvROK(sv)) {
-	    SV *target = SvRV(sv);
+	    SV * const target = SvRV(sv);
 	    if (SvWEAKREF(sv))
 	        sv_del_backref(target, sv);
 	    else
@@ -5766,9 +5765,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
     if (cur1 == cur2)
 	eq = (pv1 == pv2) || memEQ(pv1, pv2, cur1);
 	
-    if (svrecode)
-	 SvREFCNT_dec(svrecode);
-
+    SvREFCNT_dec(svrecode);
     if (tpv)
 	Safefree(tpv);
 
@@ -5851,9 +5848,7 @@ Perl_sv_cmp(pTHX_ register SV *sv1, register SV *sv2)
 	}
     }
 
-    if (svrecode)
-	 SvREFCNT_dec(svrecode);
-
+    SvREFCNT_dec(svrecode);
     if (tpv)
 	Safefree(tpv);
 
@@ -6971,7 +6966,7 @@ SV *
 Perl_newRV(pTHX_ SV *tmpRef)
 {
     dVAR;
-    return newRV_noinc(SvREFCNT_inc(tmpRef));
+    return newRV_noinc(SvREFCNT_inc_simple(tmpRef));
 }
 
 /*
@@ -7665,7 +7660,7 @@ Perl_sv_bless(pTHX_ SV *sv, HV *stash)
     if (SvTYPE(tmpRef) != SVt_PVIO)
 	++PL_sv_objcount;
     SvUPGRADE(tmpRef, SVt_PVMG);
-    SvSTASH_set(tmpRef, (HV*)SvREFCNT_inc(stash));
+    SvSTASH_set(tmpRef, (HV*)SvREFCNT_inc_simple(stash));
 
     if (Gv_AMG(stash))
 	SvAMAGIC_on(sv);
@@ -7689,7 +7684,7 @@ S_sv_unglob(pTHX_ SV *sv)
 {
     dVAR;
     void *xpvmg;
-    SV *temp = sv_newmortal();
+    SV * const temp = sv_newmortal();
 
     assert(SvTYPE(sv) == SVt_PVGV);
     SvFAKE_off(sv);
@@ -9373,6 +9368,7 @@ GP *
 Perl_gp_dup(pTHX_ GP *gp, CLONE_PARAMS* param)
 {
     GP *ret;
+
     if (!gp)
 	return (GP*)NULL;
     /* look for it in the table first */
@@ -11152,7 +11148,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 		    proto_perl->Ttmps_stack[i]);
 	    if (nsv && !SvREFCNT(nsv)) {
 		EXTEND_MORTAL(1);
-		PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc(nsv);
+		PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple(nsv);
 	    }
 	}
     }
@@ -11300,7 +11296,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* orphaned? eg threads->new inside BEGIN or use */
     if (PL_compcv && ! SvREFCNT(PL_compcv)) {
-	(void)SvREFCNT_inc(PL_compcv);
+	SvREFCNT_inc_simple_void(PL_compcv);
 	SAVEFREESV(PL_compcv);
     }
 

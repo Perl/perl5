@@ -6230,14 +6230,15 @@ Perl_save_re_context(pTHX)
 	if (rx) {
 	    U32 i;
 	    for (i = 1; i <= rx->nparens; i++) {
-		GV *gv;
 		char digits[TYPE_CHARS(long)];
 		const STRLEN len = my_sprintf(digits, "%lu", (long)i);
 		GV *const *const gvp
 		    = (GV**)hv_fetch(PL_defstash, digits, len, 0);
 
-		if (gvp && SvTYPE(gv = *gvp) == SVt_PVGV && GvSV(gv)) {
-		    save_scalar(gv);
+		if (gvp) {
+		    GV * const gv = *gvp;
+		    if (SvTYPE(gv) == SVt_PVGV && GvSV(gv))
+			save_scalar(gv);
 		}
 	    }
 	}

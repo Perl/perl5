@@ -146,7 +146,7 @@ PP(pp_sassign)
 		SvUPGRADE((SV *)gv, SVt_RV);
 		SvROK_on(gv);
 		SvRV_set(gv, value);
-		SvREFCNT_inc(value);
+		SvREFCNT_inc_simple_void(value);
 		SETs(right);
 		RETURN;
 	    }
@@ -162,7 +162,7 @@ PP(pp_sassign)
 	    /* We've been returned a constant rather than a full subroutine,
 	       but they expect a subroutine reference to apply.  */
 	    ENTER;
-	    SvREFCNT_inc(SvRV(cv));
+	    SvREFCNT_inc_void(SvRV(cv));
 	    /* newCONSTSUB takes a reference count on the passed in SV
 	       from us.  We set the name to NULL, otherwise we get into
 	       all sorts of fun as the reference to our new sub is
@@ -1801,7 +1801,7 @@ PP(pp_helem)
 	    LvTYPE(lv) = 'y';
 	    sv_magic(lv, key2 = newSVsv(keysv), PERL_MAGIC_defelem, NULL, 0);
 	    SvREFCNT_dec(key2);	/* sv_magic() increments refcount */
-	    LvTARG(lv) = SvREFCNT_inc(hv);
+	    LvTARG(lv) = SvREFCNT_inc_simple(hv);
 	    LvTARGLEN(lv) = 1;
 	    PUSHs(lv);
 	    RETURN;
@@ -2007,14 +2007,14 @@ PP(pp_iter)
 	    LvTYPE(lv) = 'y';
 	    sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
 	}
-	LvTARG(lv) = SvREFCNT_inc(av);
+	LvTARG(lv) = SvREFCNT_inc_simple(av);
 	LvTARGOFF(lv) = cx->blk_loop.iterix;
 	LvTARGLEN(lv) = (STRLEN)UV_MAX;
 	sv = (SV*)lv;
     }
 
     oldsv = *itersvp;
-    *itersvp = SvREFCNT_inc(sv);
+    *itersvp = SvREFCNT_inc_simple_NN(sv);
     SvREFCNT_dec(oldsv);
 
     RETPUSHYES;
@@ -2025,7 +2025,6 @@ PP(pp_subst)
     dVAR; dSP; dTARG;
     register PMOP *pm = cPMOP;
     PMOP *rpm = pm;
-    register SV *dstr;
     register char *s;
     char *strend;
     register char *m;
@@ -2051,7 +2050,7 @@ PP(pp_subst)
     SV *nsv = NULL;
 
     /* known replacement string? */
-    dstr = (pm->op_pmflags & PMf_CONST) ? POPs : NULL;
+    register SV *dstr = (pm->op_pmflags & PMf_CONST) ? POPs : NULL;
     if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
     else if (PL_op->op_private & OPpTARGET_MY)
@@ -2515,7 +2514,7 @@ PP(pp_leavesublv)
 		else {
 		    /* Can be a localized value subject to deletion. */
 		    PL_tmps_stack[++PL_tmps_ix] = *mark;
-		    (void)SvREFCNT_inc(*mark);
+		    SvREFCNT_inc_void(*mark);
 		}
 	    }
 	}
@@ -2552,7 +2551,7 @@ PP(pp_leavesublv)
 		else {                  /* Can be a localized value
 					 * subject to deletion. */
 		    PL_tmps_stack[++PL_tmps_ix] = *mark;
-		    (void)SvREFCNT_inc(*mark);
+		    SvREFCNT_inc_void(*mark);
 		}
 	    }
 	    else {			/* Should not happen? */
@@ -2584,7 +2583,7 @@ PP(pp_leavesublv)
 		else {
 		    /* Can be a localized value subject to deletion. */
 		    PL_tmps_stack[++PL_tmps_ix] = *mark;
-		    (void)SvREFCNT_inc(*mark);
+		    SvREFCNT_inc_void(*mark);
 		}
 	    }
 	}
@@ -2820,7 +2819,7 @@ try_autoload:
 		AvREIFY_on(av);
 	    }
 	    cx->blk_sub.savearray = GvAV(PL_defgv);
-	    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
+	    GvAV(PL_defgv) = (AV*)SvREFCNT_inc_simple(av);
 	    CX_CURPAD_SAVE(cx->blk_sub);
 	    cx->blk_sub.argarray = av;
 	    ++MARK;
@@ -2955,7 +2954,7 @@ PP(pp_aelem)
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
 	    sv_magic(lv, NULL, PERL_MAGIC_defelem, NULL, 0);
-	    LvTARG(lv) = SvREFCNT_inc(av);
+	    LvTARG(lv) = SvREFCNT_inc_simple(av);
 	    LvTARGOFF(lv) = elem;
 	    LvTARGLEN(lv) = 1;
 	    PUSHs(lv);

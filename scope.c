@@ -186,7 +186,7 @@ Perl_save_scalar(pTHX_ GV *gv)
     SvGETMAGIC(*sptr);
     PL_localizing = 0;
     SSCHECK(3);
-    SSPUSHPTR(SvREFCNT_inc(gv));
+    SSPUSHPTR(SvREFCNT_inc_simple(gv));
     SSPUSHPTR(SvREFCNT_inc(*sptr));
     SSPUSHINT(SAVEt_SV);
     return save_scalar_at(sptr);
@@ -479,7 +479,7 @@ Perl_save_delete(pTHX_ HV *hv, char *key, I32 klen)
     SSCHECK(4);
     SSPUSHINT(klen);
     SSPUSHPTR(key);
-    SSPUSHPTR(SvREFCNT_inc(hv));
+    SSPUSHPTR(SvREFCNT_inc_simple(hv));
     SSPUSHINT(SAVEt_DELETE);
 }
 
@@ -500,13 +500,13 @@ Perl_save_aelem(pTHX_ AV *av, I32 idx, SV **sptr)
     SV *sv;
     SvGETMAGIC(*sptr);
     SSCHECK(4);
-    SSPUSHPTR(SvREFCNT_inc(av));
+    SSPUSHPTR(SvREFCNT_inc_simple(av));
     SSPUSHINT(idx);
     SSPUSHPTR(SvREFCNT_inc(*sptr));
     SSPUSHINT(SAVEt_AELEM);
     /* if it gets reified later, the restore will have the wrong refcnt */
     if (!AvREAL(av) && AvREIFY(av))
-        (void)SvREFCNT_inc(*sptr);
+	SvREFCNT_inc_void(*sptr);
     save_scalar_at(sptr);
     sv = *sptr;
     /* If we're localizing a tied array element, this new sv
@@ -524,8 +524,8 @@ Perl_save_helem(pTHX_ HV *hv, SV *key, SV **sptr)
     SV *sv;
     SvGETMAGIC(*sptr);
     SSCHECK(4);
-    SSPUSHPTR(SvREFCNT_inc(hv));
-    SSPUSHPTR(SvREFCNT_inc(key));
+    SSPUSHPTR(SvREFCNT_inc_simple(hv));
+    SSPUSHPTR(SvREFCNT_inc_simple(key));
     SSPUSHPTR(SvREFCNT_inc(*sptr));
     SSPUSHINT(SAVEt_HELEM);
     save_scalar_at(sptr);
@@ -831,7 +831,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		sv = *(SV**)ptr;
 		if (sv && sv != &PL_sv_undef) {
 		    if (SvTIED_mg((SV*)av, PERL_MAGIC_tied))
-			(void)SvREFCNT_inc(sv);
+			SvREFCNT_inc_void_NN(sv);
 		    goto restore_sv;
 		}
 	    }
@@ -848,7 +848,7 @@ Perl_leave_scope(pTHX_ I32 base)
 		if (oval && oval != &PL_sv_undef) {
 		    ptr = &HeVAL((HE*)ptr);
 		    if (SvTIED_mg((SV*)hv, PERL_MAGIC_tied))
-			(void)SvREFCNT_inc(*(SV**)ptr);
+			SvREFCNT_inc_void(*(SV**)ptr);
 		    SvREFCNT_dec(sv);
 		    av = (AV*)hv; /* what to refcnt_dec */
 		    goto restore_sv;

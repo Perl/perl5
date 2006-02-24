@@ -4443,7 +4443,7 @@ Perl_yylex(pTHX)
 		    if ((sv = gv_const_sv(gv))) {
 		  its_constant:
 			SvREFCNT_dec(((SVOP*)yylval.opval)->op_sv);
-			((SVOP*)yylval.opval)->op_sv = SvREFCNT_inc(sv);
+			((SVOP*)yylval.opval)->op_sv = SvREFCNT_inc_simple(sv);
 			yylval.opval->op_private = 0;
 			TOKEN(WORD);
 		    }
@@ -9329,11 +9329,11 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv,
  	sv_catpvs(ERRSV, "Propagated");
 	yyerror(SvPV_nolen_const(ERRSV)); /* Duplicates the message inside eval */
 	(void)POPs;
- 	res = SvREFCNT_inc(sv);
+	res = SvREFCNT_inc_simple(sv);
     }
     else {
  	res = POPs;
- 	(void)SvREFCNT_inc(res);
+	SvREFCNT_inc_simple_void(res);
     }
 
     PUTBACK ;
@@ -10950,7 +10950,7 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 
     PL_subline = CopLINE(PL_curcop);
     CvPADLIST(PL_compcv) = pad_new(padnew_SAVE|padnew_SAVESUB);
-    CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(outsidecv);
+    CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc_simple(outsidecv);
     CvOUTSIDE_SEQ(PL_compcv) = PL_cop_seqmax;
 
     return oldsavestack_ix;

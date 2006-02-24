@@ -152,7 +152,7 @@ Perl_mg_get(pTHX_ SV *sv)
        cause the SV's buffer to get stolen (and maybe other stuff).
        So restore it.
     */
-    sv_2mortal(SvREFCNT_inc(sv));
+    sv_2mortal(SvREFCNT_inc_simple(sv));
     if (!was_temp) {
 	SvTEMP_off(sv);
     }
@@ -1188,7 +1188,7 @@ Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
     	    	sv_setpv(sv,"IGNORE");
     	    else
     	    	sv_setsv(sv,&PL_sv_undef);
-    	    PL_psig_ptr[i] = SvREFCNT_inc(sv);
+	    PL_psig_ptr[i] = SvREFCNT_inc_simple(sv);
     	    SvTEMP_off(sv);
     	}
     }
@@ -1400,7 +1400,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 #endif
 	SvREFCNT_dec(PL_psig_name[i]);
 	to_dec = PL_psig_ptr[i];
-	PL_psig_ptr[i] = SvREFCNT_inc(sv);
+	PL_psig_ptr[i] = SvREFCNT_inc_simple(sv);
 	SvTEMP_off(sv); /* Make sure it doesn't go away on us */
 	PL_psig_name[i] = newSVpvn(s, len);
 	SvREADONLY_on(PL_psig_name[i]);
@@ -1413,7 +1413,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 #endif
 	}
 	else
-	    *svp = SvREFCNT_inc(sv);
+	    *svp = SvREFCNT_inc_simple_NN(sv);
 	if(to_dec)
 	    SvREFCNT_dec(to_dec);
 	return 0;
@@ -1451,7 +1451,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	if (i)
 	    (void)rsignal(i, PL_csighandlerp);
 	else
-	    *svp = SvREFCNT_inc(sv);
+	    *svp = SvREFCNT_inc_simple(sv);
     }
 #ifdef HAS_SIGPROCMASK
     if(i)
@@ -1983,7 +1983,7 @@ Perl_magic_getdefelem(pTHX_ SV *sv, MAGIC *mg)
 	if (targ && targ != &PL_sv_undef) {
 	    /* somebody else defined it for us */
 	    SvREFCNT_dec(LvTARG(sv));
-	    LvTARG(sv) = SvREFCNT_inc(targ);
+	    LvTARG(sv) = SvREFCNT_inc_simple_NN(targ);
 	    LvTARGLEN(sv) = 0;
 	    SvREFCNT_dec(mg->mg_obj);
 	    mg->mg_obj = NULL;
@@ -2036,7 +2036,7 @@ Perl_vivify_defelem(pTHX_ SV *sv)
 		Perl_croak(aTHX_ PL_no_aelem, (I32)LvTARGOFF(sv));
 	}
     }
-    (void)SvREFCNT_inc(value);
+    SvREFCNT_inc_simple_void(value);
     SvREFCNT_dec(LvTARG(sv));
     LvTARG(sv) = value;
     LvTARGLEN(sv) = 0;
@@ -2666,7 +2666,7 @@ Perl_sighandler(int sig)
     }
 
     if(PL_psig_name[sig]) {
-    	sv = SvREFCNT_inc(PL_psig_name[sig]);
+	sv = SvREFCNT_inc_NN(PL_psig_name[sig]);
 	flags |= 64;
 #if !defined(PERL_IMPLICIT_CONTEXT)
 	PL_sig_sv = sv;

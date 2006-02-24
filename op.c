@@ -1546,7 +1546,7 @@ S_dup_attrlist(pTHX_ OP *o)
      * are OP_CONST.  We need to push the OP_CONST values.
      */
     if (o->op_type == OP_CONST)
-	rop = newSVOP(OP_CONST, o->op_flags, SvREFCNT_inc(cSVOPo->op_sv));
+	rop = newSVOP(OP_CONST, o->op_flags, SvREFCNT_inc_NN(cSVOPo->op_sv));
     else {
 	assert((o->op_type == OP_LIST) && (o->op_flags & OPf_KIDS));
 	rop = NULL;
@@ -1554,7 +1554,7 @@ S_dup_attrlist(pTHX_ OP *o)
 	    if (o->op_type == OP_CONST)
 		rop = append_elem(OP_LIST, rop,
 				  newSVOP(OP_CONST, o->op_flags,
-					  SvREFCNT_inc(cSVOPo->op_sv)));
+					  SvREFCNT_inc_NN(cSVOPo->op_sv)));
 	}
     }
     return rop;
@@ -2124,7 +2124,7 @@ Perl_fold_constants(pTHX_ register OP *o)
     if (o->op_targ && sv == PAD_SV(o->op_targ))	/* grab pad temp? */
 	pad_swipe(o->op_targ,  FALSE);
     else if (SvTEMP(sv)) {			/* grab mortal temp? */
-	(void)SvREFCNT_inc(sv);
+	SvREFCNT_inc_simple_void(sv);
 	SvTEMP_off(sv);
     }
     op_free(o);
@@ -2162,7 +2162,7 @@ Perl_gen_constant_list(pTHX_ register OP *o)
     o->op_flags |= OPf_PARENS;	/* and flatten \(1..2,3) */
     o->op_opt = 0;		/* needs to be revisited in peep() */
     curop = ((UNOP*)o)->op_first;
-    ((UNOP*)o)->op_first = newSVOP(OP_CONST, 0, SvREFCNT_inc(*PL_stack_sp--));
+    ((UNOP*)o)->op_first = newSVOP(OP_CONST, 0, SvREFCNT_inc_NN(*PL_stack_sp--));
     op_free(curop);
     linklist(o);
     return list(o);
@@ -2629,8 +2629,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	Safefree(cPVOPo->op_pv);
 	cSVOPo->op_sv = (SV*)swash_init("utf8", "", listsv, bits, none);
 	SvREFCNT_dec(listsv);
-	if (transv)
-	    SvREFCNT_dec(transv);
+	SvREFCNT_dec(transv);
 
 	if (!del && havefinal && rlen)
 	    (void)hv_store((HV*)SvRV((cSVOPo->op_sv)), "FINAL", 5,
@@ -2639,10 +2638,8 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	if (grows)
 	    o->op_private |= OPpTRANS_GROWS;
 
-	if (tsave)
-	    Safefree(tsave);
-	if (rsave)
-	    Safefree(rsave);
+	Safefree(tsave);
+	Safefree(rsave);
 
 	op_free(expr);
 	op_free(repl);
@@ -2747,7 +2744,7 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
 	sv_setiv(repointer,0);
     } else {
 	SV * const repointer = newSViv(0);
-	av_push(PL_regex_padav,SvREFCNT_inc(repointer));
+	av_push(PL_regex_padav, SvREFCNT_inc_simple_NN(repointer));
 	pmop->op_pmoffset = av_len(PL_regex_padav);
 	PL_regex_pad = AvARRAY(PL_regex_padav);
     }
@@ -3013,9 +3010,9 @@ Perl_newGVOP(pTHX_ I32 type, I32 flags, GV *gv)
 #ifdef USE_ITHREADS
     if (gv)
 	GvIN_PAD_on(gv);
-    return newPADOP(type, flags, SvREFCNT_inc(gv));
+    return newPADOP(type, flags, SvREFCNT_inc_simple(gv));
 #else
-    return newSVOP(type, flags, SvREFCNT_inc(gv));
+    return newSVOP(type, flags, SvREFCNT_inc_simple(gv));
 #endif
 }
 
@@ -4586,7 +4583,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
     }
     if (const_sv) {
-	(void)SvREFCNT_inc(const_sv);
+	SvREFCNT_inc_void_NN(const_sv);
 	if (cv) {
 	    assert(!CvROOT(cv) && !CvCONST(cv));
 	    sv_setpvn((SV*)cv, "", 0);  /* prototype is "" */
@@ -5508,9 +5505,9 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 	    kPADOP->op_padix = pad_alloc(OP_GV, SVs_PADTMP);
 	    SvREFCNT_dec(PAD_SVl(kPADOP->op_padix));
 	    GvIN_PAD_on(gv);
-	    PAD_SETSV(kPADOP->op_padix, (SV*) SvREFCNT_inc(gv));
+	    PAD_SETSV(kPADOP->op_padix, (SV*) SvREFCNT_inc_simple_NN(gv));
 #else
-	    kid->op_sv = SvREFCNT_inc(gv);
+	    kid->op_sv = SvREFCNT_inc_simple_NN(gv);
 #endif
 	    kid->op_private = 0;
 	    kid->op_ppaddr = PL_ppaddr[OP_GV];
@@ -5830,7 +5827,7 @@ Perl_ck_glob(pTHX_ OP *o)
 	gv = gv_fetchpvs("CORE::GLOBAL::glob", 0, SVt_PVCV);
 	glob_gv = gv_fetchpvs("File::Glob::csh_glob", 0, SVt_PVCV);
 	GvCV(gv) = GvCV(glob_gv);
-	(void)SvREFCNT_inc((SV*)GvCV(gv));
+	SvREFCNT_inc_void((SV*)GvCV(gv));
 	GvIMPORTED_CV_on(gv);
 	LEAVE;
     }

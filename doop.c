@@ -1396,7 +1396,7 @@ Perl_do_kv(pTHX)
 	    if (LvTARG(TARG) != (SV*)keys) {
 		if (LvTARG(TARG))
 		    SvREFCNT_dec(LvTARG(TARG));
-		LvTARG(TARG) = SvREFCNT_inc(keys);
+		LvTARG(TARG) = SvREFCNT_inc_simple(keys);
 	    }
 	    PUSHs(TARG);
 	    RETURN;

@@ -4129,6 +4129,77 @@ Increments the reference count of the given SV.
 =for hackers
 Found in file sv.h
 
+=item SvREFCNT_inc_NN
+X<SvREFCNT_inc_NN>
+
+Same as SvREFCNT_inc, but can only be used if you know I<sv>
+is not NULL.  Since we don't have to check the NULLness, it's faster
+and smaller.
+
+	SV*	SvREFCNT_inc_NN(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvREFCNT_inc_simple
+X<SvREFCNT_inc_simple>
+
+Same as SvREFCNT_inc, but can only be used with simple variables, not
+expressions or pointer dereferences.  Since we don't have to store a
+temporary value, it's faster.
+
+	SV*	SvREFCNT_inc_simple(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvREFCNT_inc_simple_NN
+X<SvREFCNT_inc_simple_NN>
+
+Same as SvREFCNT_inc_simple, but can only be used if you know I<sv>
+is not NULL.  Since we don't have to check the NULLness, it's faster
+and smaller.
+
+	SV*	SvREFCNT_inc_simple_NN(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvREFCNT_inc_simple_void
+X<SvREFCNT_inc_simple_void>
+
+Same as SvREFCNT_inc_simple, but can only be used if you don't need the
+return value.  The macro doesn't need to return a meaningful value.
+
+	SV*	SvREFCNT_inc_simple_void(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvREFCNT_inc_void
+X<SvREFCNT_inc_void>
+
+Same as SvREFCNT_inc, but can only be used if you don't need the
+return value.  The macro doesn't need to return a meaningful value.
+
+	SV*	SvREFCNT_inc_void(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvREFCNT_inc_void_NN
+X<SvREFCNT_inc_void_NN>
+
+Same as SvREFCNT_inc, but can only be used if you don't need the return
+value, and you know that I<sv> is not NULL.  The macro doesn't need
+to return a meaningful value, or check for NULLness, so it's smaller
+and faster.
+
+	SV*	SvREFCNT_inc_void_NN(SV* sv)
+
+=for hackers
+Found in file sv.h
+
 =item SvROK
 X<SvROK>
 

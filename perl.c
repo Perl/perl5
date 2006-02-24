@@ -3388,15 +3388,14 @@ Internet, point your browser at http://www.perl.org/, the Perl Home Page.\n\n");
 void
 Perl_my_unexec(pTHX)
 {
+    PERL_UNUSED_CONTEXT;
 #ifdef UNEXEC
-    SV*    prog;
-    SV*    file;
+    SV *    prog = newSVpv(BIN_EXP, 0);
+    SV *    file = newSVpv(PL_origfilename, 0);
     int    status = 1;
     extern int etext;
 
-    prog = newSVpv(BIN_EXP, 0);
     sv_catpvs(prog, "/perl");
-    file = newSVpv(PL_origfilename, 0);
     sv_catpvs(file, ".perldump");
 
     unexec(SvPVX(file), SvPVX(prog), &etext, sbrk(0), 0);
@@ -3468,18 +3467,18 @@ S_init_main_stash(pTHX)
        of the SvREFCNT_dec, only to add it again with hv_name_set */
     SvREFCNT_dec(GvHV(gv));
     hv_name_set(PL_defstash, "main", 4, 0);
-    GvHV(gv) = (HV*)SvREFCNT_inc(PL_defstash);
+    GvHV(gv) = (HV*)SvREFCNT_inc_simple(PL_defstash);
     SvREADONLY_on(gv);
     PL_incgv = gv_HVadd(gv_AVadd(gv_fetchpvs("INC", GV_ADD|GV_NOTQUAL,
 					     SVt_PVAV)));
-    SvREFCNT_inc(PL_incgv); /* Don't allow it to be freed */
+    SvREFCNT_inc_simple(PL_incgv); /* Don't allow it to be freed */
     GvMULTI_on(PL_incgv);
     PL_hintgv = gv_fetchpvs("\010", GV_ADD|GV_NOTQUAL, SVt_PV); /* ^H */
     GvMULTI_on(PL_hintgv);
     PL_defgv = gv_fetchpvs("_", GV_ADD|GV_NOTQUAL, SVt_PVAV);
-    SvREFCNT_inc(PL_defgv);
+    SvREFCNT_inc_simple(PL_defgv);
     PL_errgv = gv_HVadd(gv_fetchpvs("@", GV_ADD|GV_NOTQUAL, SVt_PV));
-    SvREFCNT_inc(PL_errgv);
+    SvREFCNT_inc_simple(PL_errgv);
     GvMULTI_on(PL_errgv);
     PL_replgv = gv_fetchpvs("\022", GV_ADD|GV_NOTQUAL, SVt_PV); /* ^R */
     GvMULTI_on(PL_replgv);
@@ -4513,7 +4512,7 @@ S_init_predump_symbols(pTHX)
     IoIFP(io) = PerlIO_stdin();
     tmpgv = gv_fetchpvs("stdin", GV_ADD|GV_NOTQUAL, SVt_PV);
     GvMULTI_on(tmpgv);
-    GvIOp(tmpgv) = (IO*)SvREFCNT_inc(io);
+    GvIOp(tmpgv) = (IO*)SvREFCNT_inc_simple(io);
 
     tmpgv = gv_fetchpvs("STDOUT", GV_ADD|GV_NOTQUAL, SVt_PVIO);
     GvMULTI_on(tmpgv);
@@ -4523,7 +4522,7 @@ S_init_predump_symbols(pTHX)
     setdefout(tmpgv);
     tmpgv = gv_fetchpvs("stdout", GV_ADD|GV_NOTQUAL, SVt_PV);
     GvMULTI_on(tmpgv);
-    GvIOp(tmpgv) = (IO*)SvREFCNT_inc(io);
+    GvIOp(tmpgv) = (IO*)SvREFCNT_inc_simple(io);
 
     PL_stderrgv = gv_fetchpvs("STDERR", GV_ADD|GV_NOTQUAL, SVt_PVIO);
     GvMULTI_on(PL_stderrgv);
@@ -4532,7 +4531,7 @@ S_init_predump_symbols(pTHX)
     IoOFP(io) = IoIFP(io) = PerlIO_stderr();
     tmpgv = gv_fetchpvs("stderr", GV_ADD|GV_NOTQUAL, SVt_PV);
     GvMULTI_on(tmpgv);
-    GvIOp(tmpgv) = (IO*)SvREFCNT_inc(io);
+    GvIOp(tmpgv) = (IO*)SvREFCNT_inc_simple(io);
 
     PL_statname = newSV(0);		/* last filename we did stat on */
 

@@ -601,6 +601,8 @@ void
 PerlIO_list_push(pTHX_ PerlIO_list_t *list, PerlIO_funcs *funcs, SV *arg)
 {
     dVAR;
+    PERL_UNUSED_CONTEXT;
+
     PerlIO_pair_t *p;
     if (list->cur >= list->len) {
 	list->len += 8;
@@ -612,14 +614,14 @@ PerlIO_list_push(pTHX_ PerlIO_list_t *list, PerlIO_funcs *funcs, SV *arg)
     p = &(list->array[list->cur++]);
     p->funcs = funcs;
     if ((p->arg = arg)) {
-	(void)SvREFCNT_inc(arg);
+	SvREFCNT_inc_void_NN(arg);
     }
 }
 
 PerlIO_list_t *
 PerlIO_clone_list(pTHX_ PerlIO_list_t *proto, CLONE_PARAMS *param)
 {
-    PerlIO_list_t *list = (PerlIO_list_t *) NULL;
+    PerlIO_list_t *list = NULL;
     if (proto) {
 	int i;
 	list = PerlIO_list_alloc(aTHX);
@@ -772,8 +774,7 @@ PerlIO_find_layer(pTHX_ const char *name, STRLEN len, int load)
 	    SAVEINT(PL_in_load_module);
 	    if (cv) {
 		SAVEGENERICSV(PL_warnhook);
-		(void)SvREFCNT_inc(cv);
-		PL_warnhook = (SV *) cv;
+		PL_warnhook = (SV *) (SvREFCNT_inc_simple_NN(cv));
 	    }
 	    PL_in_load_module++;
 	    /*
@@ -856,7 +857,7 @@ XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
 	const char * const name = SvPV_const(ST(i), len);
 	SV * const layer = PerlIO_find_layer(aTHX_ name, len, 1);
 	if (layer) {
-	    av_push(av, SvREFCNT_inc(layer));
+	    av_push(av, SvREFCNT_inc_simple_NN(layer));
 	}
 	else {
 	    ST(count) = ST(i);
@@ -1497,7 +1498,7 @@ PerlIO_resolve_layers(pTHX_ const char *layers,
 	}
 	else {
 	    PerlIO_list_free(aTHX_ av);
-	    return (PerlIO_list_t *) NULL;
+	    return NULL;
 	}
     }
     else {

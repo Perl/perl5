@@ -2957,10 +2957,18 @@ typedef pthread_key_t	perl_key;
    appropriate to call return.  In either case, include the lint directive.
  */
 #ifdef HASATTRIBUTE_NORETURN
-#  define NORETURN_FUNCTION_END /* NOT REACHED */
+#  define NORETURN_FUNCTION_END /* NOTREACHED */
 #else
-#  define NORETURN_FUNCTION_END /* NOT REACHED */ return 0
+#  define NORETURN_FUNCTION_END /* NOTREACHED */ return 0
 #endif
+
+#ifdef HASBUILTIN_EXPECT
+#  define EXPECT(expr,val)                  __builtin_expect(expr,val)
+#else
+#  define EXPECT(expr,val)                  (expr)
+#endif
+#define LIKELY(cond)                        EXPECT(cond,1)
+#define UNLIKELY(cond)                      EXPECT(cond,0)
 
 /* Some unistd.h's give a prototype for pause() even though
    HAS_PAUSE ends up undefined.  This causes the #define

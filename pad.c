@@ -272,37 +272,35 @@ Perl_pad_undef(pTHX_ CV* cv)
 		    SvREFCNT_dec(innercv);
 		    inner_rc--;
 		}
-		if (inner_rc /* in use, not just a prototype */
-		    && CvOUTSIDE(innercv) == cv)
-		{
+
+		/* in use, not just a prototype */
+		if (inner_rc && (CvOUTSIDE(innercv) == cv)) {
 		    assert(CvWEAKOUTSIDE(innercv));
 		    /* don't relink to grandfather if he's being freed */
 		    if (outercv && SvREFCNT(outercv)) {
 			CvWEAKOUTSIDE_off(innercv);
 			CvOUTSIDE(innercv) = outercv;
 			CvOUTSIDE_SEQ(innercv) = seq;
-			(void)SvREFCNT_inc(outercv);
+			SvREFCNT_inc_void_NN(outercv);
 		    }
 		    else {
 			CvOUTSIDE(innercv) = NULL;
 		    }
-
 		}
-
 	    }
 	}
     }
 
     ix = AvFILLp(padlist);
     while (ix >= 0) {
-	SV* const sv = AvARRAY(padlist)[ix--];
-	if (!sv)
-	    continue;
-	if (sv == (SV*)PL_comppad_name)
-	    PL_comppad_name = NULL;
-	else if (sv == (SV*)PL_comppad) {
-	    PL_comppad = Null(PAD*);
-	    PL_curpad = Null(SV**);
+	const SV* const sv = AvARRAY(padlist)[ix--];
+	if (sv) {
+	    if (sv == (SV*)PL_comppad_name)
+		PL_comppad_name = NULL;
+	    else if (sv == (SV*)PL_comppad) {
+		PL_comppad = NULL;
+		PL_curpad = NULL;
+	    }
 	}
 	SvREFCNT_dec(sv);
     }
@@ -343,12 +341,12 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
 
     if (typestash) {
 	SvPAD_TYPED_on(namesv);
-	SvSTASH_set(namesv, (HV*)SvREFCNT_inc((SV*) typestash));
+	SvSTASH_set(namesv, (HV*)SvREFCNT_inc_simple_NN((SV*)typestash));
     }
     if (ourstash) {
 	SvPAD_OUR_on(namesv);
 	OURSTASH_set(namesv, ourstash);
-	SvREFCNT_inc(ourstash);
+	SvREFCNT_inc_void_NN(ourstash);
     }
 
     av_store(PL_comppad_name, offset, namesv);
@@ -1455,7 +1453,7 @@ Perl_cv_clone(pTHX_ CV *proto)
     CvROOT(cv)		= OpREFCNT_inc(CvROOT(proto));
     OP_REFCNT_UNLOCK;
     CvSTART(cv)		= CvSTART(proto);
-    CvOUTSIDE(cv)	= (CV*)SvREFCNT_inc(outside);
+    CvOUTSIDE(cv)	= (CV*)SvREFCNT_inc_simple(outside);
     CvOUTSIDE_SEQ(cv) = CvOUTSIDE_SEQ(proto);
 
     if (SvPOK(proto))
@@ -1487,7 +1485,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 		}
 		else {
 		    assert(!SvPADSTALE(sv));
-		    sv = SvREFCNT_inc(sv);
+		    SvREFCNT_inc_simple_void(sv);
 		}
 	    }
 	    if (!sv) {
@@ -1591,10 +1589,7 @@ void
 Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 {
     dVAR;
-    if (depth <= AvFILLp(padlist))
-	return;
-
-    {
+    if (depth > AvFILLp(padlist)) {
 	SV** const svp = AvARRAY(padlist);
 	AV* const newpad = newAV();
 	SV** const oldpad = AvARRAY(svp[depth-1]);

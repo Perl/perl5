@@ -80,7 +80,8 @@ Perl_gv_IOadd(pTHX_ register GV *gv)
          * if it walks like a dirhandle, then let's assume that
          * this is a dirhandle.
          */
-        const char *fh = PL_op->op_type == OP_READDIR ||
+	const char * const fh =
+			 PL_op->op_type ==  OP_READDIR ||
                          PL_op->op_type ==  OP_TELLDIR ||
                          PL_op->op_type ==  OP_SEEKDIR ||
                          PL_op->op_type ==  OP_REWINDDIR ||
@@ -351,7 +352,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 		if (SvTYPE(gv) != SVt_PVGV)
 		    gv_init(gv, stash, "ISA", 3, TRUE);
 		SvREFCNT_dec(GvAV(gv));
-		GvAV(gv) = (AV*)SvREFCNT_inc(av);
+		GvAV(gv) = (AV*)SvREFCNT_inc_simple(av);
 	    }
 	}
     }
@@ -508,7 +509,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	    --nsplit;
 	if ((nsplit - origname) == 5 && strnEQ(origname, "SUPER", 5)) {
 	    /* ->SUPER::method should really be looked up in original stash */
-	    SV *tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%s::SUPER",
+	    SV * const tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%s::SUPER",
 						  CopSTASHPV(PL_curcop)));
 	    /* __PACKAGE__::SUPER stash should be autovivified */
 	    stash = gv_stashpvn(SvPVX_const(tmpstr), SvCUR(tmpstr), TRUE);
@@ -1423,7 +1424,7 @@ Perl_magic_freeovrld(pTHX_ SV *sv, MAGIC *mg)
 	int i;
 	for (i = 1; i < NofAMmeth; i++) {
 	    CV * const cv = amtp->table[i];
-	    if (cv != NULL) {
+	    if (cv) {
 		SvREFCNT_dec((SV *) cv);
 		amtp->table[i] = NULL;
 	    }
@@ -1537,7 +1538,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 	    cv = (CV*)gv;
 	    filled = 1;
 	}
-	amt.table[i]=(CV*)SvREFCNT_inc(cv);
+	amt.table[i]=(CV*)SvREFCNT_inc_simple(cv);
     }
     if (filled) {
       AMT_AMAGIC_on(&amt);
@@ -1869,7 +1870,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     CATCH_SET(TRUE);
     Zero(&myop, 1, BINOP);
     myop.op_last = (OP *) &myop;
-    myop.op_next = Nullop;
+    myop.op_next = NULL;
     myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
 
     PUSHSTACKi(PERLSI_OVERLOAD);
@@ -1978,6 +1979,7 @@ pointers returned by SvPV.
 bool
 Perl_is_gv_magical(pTHX_ const char *name, STRLEN len, U32 flags)
 {
+    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(flags);
 
     if (len > 1) {

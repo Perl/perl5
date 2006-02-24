@@ -562,10 +562,10 @@ in PL_op->op_targ), wasting a name SV for them doesn't make sense.
 The SVs in the names AV have their PV being the name of the variable.
 NV+1..IV inclusive is a range of cop_seq numbers for which the name is
 valid.  For typed lexicals name SV is SVt_PVMG and SvSTASH points at the
-type.  For C<our> lexicals, the type is SVt_PVGV, and GvSTASH points at the
-stash of the associated global (so that duplicate C<our> declarations in the
-same package can be detected).  SvCUR is sometimes hijacked to
-store the generation number during compilation.
+type.  For C<our> lexicals, the type is also SVt_PVGV, with the MAGIC slot
+pointing at the stash of the associated global (so that duplicate C<our>
+declarations in the same package can be detected).  SvCUR is sometimes
+hijacked to store the generation number during compilation.
 
 If SvFAKE is set on the name SV, then that slot in the frame AV is
 a REFCNT'ed reference to a lexical from "outside". In this case,
@@ -655,7 +655,7 @@ offset.
 If C<typestash> is valid, the name is for a typed lexical; set the
 name's stash to that value.
 If C<ourstash> is valid, it's an our lexical, set the name's
-GvSTASH to that value
+OURSTASH to that value
 
 If fake, it means we're cloning an existing entry
 

@@ -254,8 +254,8 @@ struct block_sub {
 	cx->blk_sub.hasargs = hasargs;					\
 	cx->blk_sub.retop = NULL;					\
 	if (!CvDEPTH(cv)) {						\
-	    (void)SvREFCNT_inc(cv);					\
-	    (void)SvREFCNT_inc(cv);					\
+	    SvREFCNT_inc_void(cv);					\
+	    SvREFCNT_inc_void(cv);					\
 	    SAVEFREESV(cv);						\
 	}
 
@@ -277,7 +277,7 @@ struct block_sub {
 	cx->blk_sub.retop = NULL;					\
 	cx->blk_sub.hasargs = 0;					\
 	cx->blk_sub.dfoutgv = PL_defoutgv;				\
-	(void)SvREFCNT_inc(cx->blk_sub.dfoutgv)
+	SvREFCNT_inc_void(cx->blk_sub.dfoutgv)
 
 #define POP_SAVEARRAY()						\
     STMT_START {							\
