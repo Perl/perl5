@@ -112,66 +112,6 @@ int mkstemp(char*);
 	else							\
 		SETERRNO(EBADF, SS_IVCHAN)
 
-#ifndef USE_SFIO
-int
-perlsio_binmode(FILE *fp, int iotype, int mode)
-{
-    /*
-     * This used to be contents of do_binmode in doio.c
-     */
-#ifdef DOSISH
-#  if defined(atarist) || defined(__MINT__)
-    if (!fflush(fp)) {
-	if (mode & O_BINARY)
-	    ((FILE *) fp)->_flag |= _IOBIN;
-	else
-	    ((FILE *) fp)->_flag &= ~_IOBIN;
-	return 1;
-    }
-    return 0;
-#  else
-    dTHX;
-#ifdef NETWARE
-    if (PerlLIO_setmode(fp, mode) != -1) {
-#else
-    if (PerlLIO_setmode(fileno(fp), mode) != -1) {
-#endif
-#    if defined(WIN32) && defined(__BORLANDC__)
-	/*
-	 * The translation mode of the stream is maintained independent of
-	 * the translation mode of the fd in the Borland RTL (heavy
-	 * digging through their runtime sources reveal).  User has to set
-	 * the mode explicitly for the stream (though they don't document
-	 * this anywhere). GSAR 97-5-24
-	 */
-	fseek(fp, 0L, 0);
-	if (mode & O_BINARY)
-	    fp->flags |= _F_BIN;
-	else
-	    fp->flags &= ~_F_BIN;
-#    endif
-	return 1;
-    }
-    else
-	return 0;
-#  endif
-#else
-#  if defined(USEMYBINMODE)
-    dTHX;
-    if (my_binmode(fp, iotype, mode) != FALSE)
-	return 1;
-    else
-	return 0;
-#  else
-    PERL_UNUSED_ARG(fp);
-    PERL_UNUSED_ARG(iotype);
-    PERL_UNUSED_ARG(mode);
-    return 1;
-#  endif
-#endif
-}
-#endif /* sfio */
-
 #ifndef O_ACCMODE
 #define O_ACCMODE 3             /* Assume traditional implementation */
 #endif

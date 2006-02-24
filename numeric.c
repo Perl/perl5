@@ -100,22 +100,6 @@ Perl_cast_uv(pTHX_ NV f)
   return f > 0 ? UV_MAX : 0 /* NaN */;
 }
 
-#if defined(HUGE_VAL) || (defined(USE_LONG_DOUBLE) && defined(HUGE_VALL))
-/*
- * This hack is to force load of "huge" support from libm.a
- * So it is in perl for (say) POSIX to use.
- * Needed for SunOS with Sun's 'acc' for example.
- */
-NV
-Perl_huge(void)
-{
-#   if defined(USE_LONG_DOUBLE) && defined(HUGE_VALL)
-    return HUGE_VALL;
-#   endif
-    return HUGE_VAL;
-}
-#endif
-
 /*
 =for apidoc grok_bin
 
