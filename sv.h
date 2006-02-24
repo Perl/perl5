@@ -1011,6 +1011,8 @@ in gv.h: */
 #    define SvMAGIC(sv)							\
 	(*({ SV *const _svi = (SV *) sv;				\
 	    assert(SvTYPE(_svi) >= SVt_PVMG);				\
+	    if (SvTYPE(_svi) == SVt_PVMG && (SvFLAGS(_svi) & SVpad_NAME)) \
+		assert (!((XPVMG*) SvANY(_svi))->xmg_magic); \
 	    &(((XPVMG*) SvANY(_svi))->xmg_magic);			\
 	  }))
 #    define SvSTASH(sv)							\
