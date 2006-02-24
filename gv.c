@@ -297,7 +297,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 		if (SvTYPE(gv) != SVt_PVGV)
 		    gv_init(gv, stash, "ISA", 3, TRUE);
 		SvREFCNT_dec(GvAV(gv));
-		GvAV(gv) = (AV*)SvREFCNT_inc(av);
+		GvAV(gv) = (AV*)SvREFCNT_inc_simple(av);
 	    }
 	}
     }
@@ -453,7 +453,7 @@ Perl_gv_fetchmethod_autoload(pTHX_ HV *stash, const char *name, I32 autoload)
 	    --nsplit;
 	if ((nsplit - origname) == 5 && strnEQ(origname, "SUPER", 5)) {
 	    /* ->SUPER::method should really be looked up in original stash */
-	    SV *tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%s::SUPER",
+	    SV * const tmpstr = sv_2mortal(Perl_newSVpvf(aTHX_ "%s::SUPER",
 						  CopSTASHPV(PL_curcop)));
 	    /* __PACKAGE__::SUPER stash should be autovivified */
 	    stash = gv_stashpvn(SvPVX_const(tmpstr), SvCUR(tmpstr), TRUE);
@@ -1325,7 +1325,7 @@ Perl_magic_freeovrld(pTHX_ SV *sv, MAGIC *mg)
 	int i;
 	for (i = 1; i < NofAMmeth; i++) {
 	    CV * const cv = amtp->table[i];
-	    if (cv != Nullcv) {
+	    if (cv) {
 		SvREFCNT_dec((SV *) cv);
 		amtp->table[i] = Nullcv;
 	    }
@@ -1438,7 +1438,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 	    cv = (CV*)gv;
 	    filled = 1;
 	}
-	amt.table[i]=(CV*)SvREFCNT_inc(cv);
+	amt.table[i]=(CV*)SvREFCNT_inc_simple(cv);
     }
     if (filled) {
       AMT_AMAGIC_on(&amt);
@@ -1768,7 +1768,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     CATCH_SET(TRUE);
     Zero(&myop, 1, BINOP);
     myop.op_last = (OP *) &myop;
-    myop.op_next = Nullop;
+    myop.op_next = NULL;
     myop.op_flags = OPf_WANT_SCALAR | OPf_STACKED;
 
     PUSHSTACKi(PERLSI_OVERLOAD);

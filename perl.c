@@ -3445,14 +3445,12 @@ void
 Perl_my_unexec(pTHX)
 {
 #ifdef UNEXEC
-    SV*    prog;
-    SV*    file;
+    SV *    prog = newSVpv(BIN_EXP, 0);
+    SV *    file = newSVpv(PL_origfilename, 0);
     int    status = 1;
     extern int etext;
 
-    prog = newSVpv(BIN_EXP, 0);
     sv_catpv(prog, "/perl");
-    file = newSVpv(PL_origfilename, 0);
     sv_catpv(file, ".perldump");
 
     unexec(SvPVX(file), SvPVX(prog), &etext, sbrk(0), 0);
@@ -3522,7 +3520,7 @@ S_init_main_stash(pTHX)
     PL_curstname = newSVpvn("main",4);
     gv = gv_fetchpv("main::",TRUE, SVt_PVHV);
     SvREFCNT_dec(GvHV(gv));
-    GvHV(gv) = (HV*)SvREFCNT_inc(PL_defstash);
+    GvHV(gv) = (HV*)SvREFCNT_inc_simple(PL_defstash);
     SvREADONLY_on(gv);
     hv_name_set(PL_defstash, "main", 4, 0);
     PL_incgv = gv_HVadd(gv_AVadd(gv_fetchpv("INC",TRUE, SVt_PVAV)));
@@ -4538,7 +4536,7 @@ S_init_predump_symbols(pTHX)
     IoIFP(io) = PerlIO_stdin();
     tmpgv = gv_fetchpv("stdin",TRUE, SVt_PV);
     GvMULTI_on(tmpgv);
-    GvIOp(tmpgv) = (IO*)SvREFCNT_inc(io);
+    GvIOp(tmpgv) = (IO*)SvREFCNT_inc_simple(io);
 
     tmpgv = gv_fetchpv("STDOUT",TRUE, SVt_PVIO);
     GvMULTI_on(tmpgv);
@@ -4548,7 +4546,7 @@ S_init_predump_symbols(pTHX)
     setdefout(tmpgv);
     tmpgv = gv_fetchpv("stdout",TRUE, SVt_PV);
     GvMULTI_on(tmpgv);
-    GvIOp(tmpgv) = (IO*)SvREFCNT_inc(io);
+    GvIOp(tmpgv) = (IO*)SvREFCNT_inc_simple(io);
 
     PL_stderrgv = gv_fetchpv("STDERR",TRUE, SVt_PVIO);
     GvMULTI_on(PL_stderrgv);
@@ -4557,7 +4555,7 @@ S_init_predump_symbols(pTHX)
     IoOFP(io) = IoIFP(io) = PerlIO_stderr();
     tmpgv = gv_fetchpv("stderr",TRUE, SVt_PV);
     GvMULTI_on(tmpgv);
-    GvIOp(tmpgv) = (IO*)SvREFCNT_inc(io);
+    GvIOp(tmpgv) = (IO*)SvREFCNT_inc_simple(io);
 
     PL_statname = NEWSV(66,0);		/* last filename we did stat on */
 

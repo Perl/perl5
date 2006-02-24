@@ -118,6 +118,41 @@ Returns the value of the object's reference count.
 =for apidoc Am|SV*|SvREFCNT_inc|SV* sv
 Increments the reference count of the given SV.
 
+All of the following SvREFCNT_inc* macros are optimized versions of
+SvREFCNT_inc, and can be replaced with SvREFCNT_inc.
+
+=for apidoc Am|SV*|SvREFCNT_inc_NN|SV* sv
+Same as SvREFCNT_inc, but can only be used if you know I<sv>
+is not NULL.  Since we don't have to check the NULLness, it's faster
+and smaller.
+
+=for apidoc Am|SV*|SvREFCNT_inc_void|SV* sv
+Same as SvREFCNT_inc, but can only be used if you don't need the
+return value.  The macro doesn't need to return a meaningful value.
+
+=for apidoc Am|SV*|SvREFCNT_inc_void_NN|SV* sv
+Same as SvREFCNT_inc, but can only be used if you don't need the return
+value, and you know that I<sv> is not NULL.  The macro doesn't need
+to return a meaningful value, or check for NULLness, so it's smaller
+and faster.
+
+=for apidoc Am|SV*|SvREFCNT_inc_simple|SV* sv
+Same as SvREFCNT_inc, but can only be used with simple variables, not
+expressions or pointer dereferences.  Since we don't have to store a
+temporary value, it's faster.
+
+=for apidoc Am|SV*|SvREFCNT_inc_simple_NN|SV* sv
+Same as SvREFCNT_inc_simple, but can only be used if you know I<sv>
+is not NULL.  Since we don't have to check the NULLness, it's faster
+and smaller.
+
+=for apidoc Am|SV*|SvREFCNT_inc_simple_void|SV* sv
+Same as SvREFCNT_inc_simple, but can only be used if you don't need the
+return value.  The macro doesn't need to return a meaningful value.
+
+=for apidoc Am|SV*|SvREFCNT_inc|SV* sv
+Increments the reference count of the given SV.
+
 =for apidoc Am|void|SvREFCNT_dec|SV* sv
 Decrements the reference count of the given SV.
 
@@ -170,6 +205,24 @@ perform the upgrade if necessary.  See C<svtype>.
 	     ATOMIC_INC(SvREFCNT(_sv));	\
 	_sv;				\
     })
+#  define SvREFCNT_inc_simple(sv)	\
+    ({					\
+	if (sv)				\
+	     (SvREFCNT(sv))++;		\
+	(SV *)(sv);				\
+    })
+#  define SvREFCNT_inc_NN(sv)		\
+    ({					\
+	SV * const _sv = (SV*)(sv);	\
+	SvREFCNT(_sv)++;		\
+	_sv;				\
+    })
+#  define SvREFCNT_inc_void(sv)		\
+    ({					\
+	SV * const _sv = (SV*)(sv);	\
+	if (_sv)			\
+	    (void)(SvREFCNT(_sv)++);	\
+    })
 #else
 #  ifdef USE_5005THREADS
 #    if defined(VMS) && defined(__ALPHA)
@@ -178,11 +231,26 @@ perform the upgrade if necessary.  See C<svtype>.
 #    else
 #      define SvREFCNT_inc(sv) sv_newref((SV*)sv)
 #    endif
+#    define SvREFCNT_inc_simple(sv) SvREFCNT_inc(sv)
+#    define SvREFCNT_inc_NN(sv) SvREFCNT_inc(sv)
+#    define SvREFCNT_inc_void(sv) SvREFCNT_inc(sv)
 #  else
 #    define SvREFCNT_inc(sv)	\
 	((PL_Sv=(SV*)(sv)), (PL_Sv && ATOMIC_INC(SvREFCNT(PL_Sv))), (SV*)PL_Sv)
+#    define SvREFCNT_inc_simple(sv) \
+	((sv) ? (ATOMIC_INC(SvREFCNT(sv)),(SV*)(sv)) : NULL)
+#    define SvREFCNT_inc_NN(sv) \
+	(PL_Sv=(SV*)(sv),ATOMIC_INC(SvREFCNT(PL_Sv)),PL_Sv)
+#    define SvREFCNT_inc_void(sv) \
+	(void)((PL_Sv=(SV*)(sv)) ? ATOMIC_INC(SvREFCNT(PL_Sv)) : 0)
 #  endif
 #endif
+
+/* These guys don't need the curly blocks */
+#define SvREFCNT_inc_simple_void(sv)	if (sv) (SvREFCNT(sv)++);
+#define SvREFCNT_inc_simple_NN(sv)	(++(SvREFCNT(sv)),(SV*)(sv))
+#define SvREFCNT_inc_void_NN(sv)	(void)(++SvREFCNT((SV*)(sv)))
+#define SvREFCNT_inc_simple_void_NN(sv)	(void)(++SvREFCNT((SV*)(sv)))
 
 #define SvREFCNT_dec(sv)	sv_free((SV*)(sv))
 

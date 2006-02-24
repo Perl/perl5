@@ -1756,7 +1756,7 @@ PP(pp_helem)
 	    LvTYPE(lv) = 'y';
 	    sv_magic(lv, key2 = newSVsv(keysv), PERL_MAGIC_defelem, Nullch, 0);
 	    SvREFCNT_dec(key2);	/* sv_magic() increments refcount */
-	    LvTARG(lv) = SvREFCNT_inc(hv);
+	    LvTARG(lv) = SvREFCNT_inc_simple(hv);
 	    LvTARGLEN(lv) = 1;
 	    PUSHs(lv);
 	    RETURN;
@@ -1968,14 +1968,14 @@ PP(pp_iter)
 	    LvTYPE(lv) = 'y';
 	    sv_magic(lv, Nullsv, PERL_MAGIC_defelem, Nullch, 0);
 	}
-	LvTARG(lv) = SvREFCNT_inc(av);
+	LvTARG(lv) = SvREFCNT_inc_simple(av);
 	LvTARGOFF(lv) = cx->blk_loop.iterix;
 	LvTARGLEN(lv) = (STRLEN)UV_MAX;
 	sv = (SV*)lv;
     }
 
     oldsv = *itersvp;
-    *itersvp = SvREFCNT_inc(sv);
+    *itersvp = SvREFCNT_inc_simple_NN(sv);
     SvREFCNT_dec(oldsv);
 
     RETPUSHYES;
@@ -1986,7 +1986,6 @@ PP(pp_subst)
     dSP; dTARG;
     register PMOP *pm = cPMOP;
     PMOP *rpm = pm;
-    register SV *dstr;
     register char *s;
     char *strend;
     register char *m;
@@ -2009,7 +2008,7 @@ PP(pp_subst)
     SV *nsv = NULL;
 
     /* known replacement string? */
-    dstr = (pm->op_pmflags & PMf_CONST) ? POPs : NULL;
+    register SV *dstr = (pm->op_pmflags & PMf_CONST) ? POPs : NULL;
     if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
     else {
@@ -2422,7 +2421,7 @@ PP(pp_leavesublv)
 		else {
 		    /* Can be a localized value subject to deletion. */
 		    PL_tmps_stack[++PL_tmps_ix] = *mark;
-		    (void)SvREFCNT_inc(*mark);
+		    SvREFCNT_inc_void(*mark);
 		}
 	    }
 	}
@@ -2459,7 +2458,7 @@ PP(pp_leavesublv)
 		else {                  /* Can be a localized value
 					 * subject to deletion. */
 		    PL_tmps_stack[++PL_tmps_ix] = *mark;
-		    (void)SvREFCNT_inc(*mark);
+		    SvREFCNT_inc_void(*mark);
 		}
 	    }
 	    else {			/* Should not happen? */
@@ -2491,7 +2490,7 @@ PP(pp_leavesublv)
 		else {
 		    /* Can be a localized value subject to deletion. */
 		    PL_tmps_stack[++PL_tmps_ix] = *mark;
-		    (void)SvREFCNT_inc(*mark);
+		    SvREFCNT_inc_void(*mark);
 		}
 	    }
 	}
@@ -2944,7 +2943,7 @@ try_autoload:
 	    }
 #ifndef USE_5005THREADS
 	    cx->blk_sub.savearray = GvAV(PL_defgv);
-	    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
+	    GvAV(PL_defgv) = (AV*)SvREFCNT_inc_simple(av);
 #endif /* USE_5005THREADS */
 	    CX_CURPAD_SAVE(cx->blk_sub);
 	    cx->blk_sub.argarray = av;
@@ -3040,7 +3039,7 @@ PP(pp_aelem)
 	    sv_upgrade(lv, SVt_PVLV);
 	    LvTYPE(lv) = 'y';
 	    sv_magic(lv, NULL, PERL_MAGIC_defelem, Nullch, 0);
-	    LvTARG(lv) = SvREFCNT_inc(av);
+	    LvTARG(lv) = SvREFCNT_inc_simple(av);
 	    LvTARGOFF(lv) = elem;
 	    LvTARGLEN(lv) = 1;
 	    PUSHs(lv);

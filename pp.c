@@ -137,7 +137,7 @@ PP(pp_rv2gv)
 	    GV * const gv = (GV*) sv_newmortal();
 	    gv_init(gv, 0, "", 0, 0);
 	    GvIOp(gv) = (IO *)sv;
-	    (void)SvREFCNT_inc(sv);
+	    SvREFCNT_inc_void_NN(sv);
 	    sv = (SV*) gv;
 	}
 	else if (SvTYPE(sv) != SVt_PVGV)
@@ -316,7 +316,7 @@ PP(pp_pos)
 	if (LvTARG(TARG) != sv) {
 	    if (LvTARG(TARG))
 		SvREFCNT_dec(LvTARG(TARG));
-	    LvTARG(TARG) = SvREFCNT_inc(sv);
+	    LvTARG(TARG) = SvREFCNT_inc_simple(sv);
 	}
 	PUSHs(TARG);	/* no SvSETMAGIC */
 	RETURN;
@@ -475,19 +475,19 @@ S_refto(pTHX_ SV *sv)
 	if (!(sv = LvTARG(sv)))
 	    sv = &PL_sv_undef;
 	else
-	    (void)SvREFCNT_inc(sv);
+	    SvREFCNT_inc_void_NN(sv);
     }
     else if (SvTYPE(sv) == SVt_PVAV) {
 	if (!AvREAL((AV*)sv) && AvREIFY((AV*)sv))
 	    av_reify((AV*)sv);
 	SvTEMP_off(sv);
-	(void)SvREFCNT_inc(sv);
+	SvREFCNT_inc_void_NN(sv);
     }
     else if (SvPADTMP(sv) && !IS_PADGV(sv))
         sv = newSVsv(sv);
     else {
 	SvTEMP_off(sv);
-	(void)SvREFCNT_inc(sv);
+	SvREFCNT_inc_void_NN(sv);
     }
     rv = sv_newmortal();
     sv_upgrade(rv, SVt_RV);
@@ -3042,7 +3042,7 @@ PP(pp_substr)
 	    if (LvTARG(TARG) != sv) {
 		if (LvTARG(TARG))
 		    SvREFCNT_dec(LvTARG(TARG));
-		LvTARG(TARG) = SvREFCNT_inc(sv);
+		LvTARG(TARG) = SvREFCNT_inc_simple(sv);
 	    }
 	    LvTARGOFF(TARG) = upos;
 	    LvTARGLEN(TARG) = urem;
@@ -3073,7 +3073,7 @@ PP(pp_vec)
 	if (LvTARG(TARG) != src) {
 	    if (LvTARG(TARG))
 		SvREFCNT_dec(LvTARG(TARG));
-	    LvTARG(TARG) = SvREFCNT_inc(src);
+	    LvTARG(TARG) = SvREFCNT_inc_simple(src);
 	}
 	LvTARGOFF(TARG) = offset;
 	LvTARGLEN(TARG) = size;
@@ -4334,7 +4334,7 @@ PP(pp_split)
     const I32 gimme = GIMME_V;
     const I32 oldsave = PL_savestack_ix;
     I32 make_mortal = 1;
-    MAGIC *mg = (MAGIC *) NULL;
+    MAGIC *mg = NULL;
 
 #ifdef DEBUGGING
     Copy(&LvTARGOFF(POPs), &pm, 1, PMOP*);

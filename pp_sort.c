@@ -1675,7 +1675,7 @@ PP(pp_sort)
 
 #ifndef USE_5005THREADS
 		cx->blk_sub.savearray = GvAV(PL_defgv);
-		GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
+		GvAV(PL_defgv) = (AV*)SvREFCNT_inc_simple(av);
 #endif /* USE_5005THREADS */
 		CX_CURPAD_SAVE(cx->blk_sub);
 		cx->blk_sub.argarray = av;

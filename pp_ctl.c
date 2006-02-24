@@ -2166,7 +2166,7 @@ PP(pp_goto)
 	    }
 
 	    /* First do some returnish stuff. */
-	    (void)SvREFCNT_inc(cv); /* avoid premature free during unwind */
+	    SvREFCNT_inc_simple_void(cv); /* avoid premature free during unwind */
 	    FREETMPS;
 	    cxix = dopoptosub(cxstack_ix);
 	    if (cxix < 0)
@@ -2266,7 +2266,7 @@ PP(pp_goto)
 		return pop_return();
 	    }
 	    else {
-		AV* padlist = CvPADLIST(cv);
+		AV* const padlist = CvPADLIST(cv);
 		if (CxTYPE(cx) == CXt_EVAL) {
 		    PL_in_eval = cx->blk_eval.old_in_eval;
 		    PL_eval_root = cx->blk_eval.old_eval_root;
@@ -2278,7 +2278,7 @@ PP(pp_goto)
 
 		CvDEPTH(cv)++;
 		if (CvDEPTH(cv) < 2)
-		    (void)SvREFCNT_inc(cv);
+		    SvREFCNT_inc_void_NN(cv);
 		else {
 		    if (CvDEPTH(cv) == 100 && ckWARN(WARN_RECURSION))
 			sub_crush_depth(cv);
@@ -2304,18 +2304,17 @@ PP(pp_goto)
 		if (cx->blk_sub.hasargs)
 #endif /* USE_5005THREADS */
 		{
-		    AV* av = (AV*)PAD_SVl(0);
-		    SV** ary;
+		    AV* const av = (AV*)PAD_SVl(0);
 
 #ifndef USE_5005THREADS
 		    cx->blk_sub.savearray = GvAV(PL_defgv);
-		    GvAV(PL_defgv) = (AV*)SvREFCNT_inc(av);
+		    GvAV(PL_defgv) = (AV*)SvREFCNT_inc_simple(av);
 #endif /* USE_5005THREADS */
 		    CX_CURPAD_SAVE(cx->blk_sub);
 		    cx->blk_sub.argarray = av;
 
 		    if (items >= AvMAX(av) + 1) {
-			ary = AvALLOC(av);
+			SV **ary = AvALLOC(av);
 			if (AvARRAY(av) != ary) {
 			    AvMAX(av) += AvARRAY(av) - AvALLOC(av);
 			    SvPV_set(av, (char*)ary);
@@ -2348,8 +2347,6 @@ PP(pp_goto)
 		     * it's for informational purposes only.
 		     */
 		    SV * const sv = GvSV(PL_DBsub);
-		    CV *gotocv;
-
 		    save_item(sv);
 		    if (PERLDB_SUB_NN) {
 			const int type = SvTYPE(sv);
@@ -2360,11 +2357,13 @@ PP(pp_goto)
 		    } else {
 			gv_efullname3(sv, CvGV(cv), Nullch);
 		    }
-		    if (  PERLDB_GOTO
-			  && (gotocv = get_cv("DB::goto", FALSE)) ) {
-			PUSHMARK( PL_stack_sp );
-			call_sv((SV*)gotocv, G_SCALAR | G_NODEBUG);
-			PL_stack_sp--;
+		    if (PERLDB_GOTO) {
+			CV * const gotocv = get_cv("DB::goto", FALSE);
+			if (gotocv) {
+			    PUSHMARK( PL_stack_sp );
+			    call_sv((SV*)gotocv, G_SCALAR | G_NODEBUG);
+			    PL_stack_sp--;
+			}
 		    }
 		}
 		RETURNOP(CvSTART(cv));
@@ -2698,7 +2697,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
     (*startop)->op_ppaddr = PL_ppaddr[OP_NULL];
     lex_end();
     /* XXX DAPM do this properly one year */
-    *padp = (AV*)SvREFCNT_inc(PL_comppad);
+    *padp = (AV*)SvREFCNT_inc_simple(PL_comppad);
     LEAVE;
     if (IN_PERL_COMPILETIME)
 	PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
@@ -2785,7 +2784,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 #endif /* USE_5005THREADS */
 
     CvOUTSIDE_SEQ(PL_compcv) = seq;
-    CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc(outside);
+    CvOUTSIDE(PL_compcv) = (CV*)SvREFCNT_inc_simple(outside);
 
     /* set up a scratch pad */
 
@@ -3137,7 +3136,7 @@ PP(pp_require)
 				       save the gv to manage the lifespan of
 				       the pipe, but this didn't help. XXX */
 				    filter_child_proc = (GV *)arg;
-				    (void)SvREFCNT_inc(filter_child_proc);
+				    SvREFCNT_inc_simple_void(filter_child_proc);
 				}
 				else {
 				    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {
@@ -3155,11 +3154,11 @@ PP(pp_require)
 
 			if (SvROK(arg) && SvTYPE(SvRV(arg)) == SVt_PVCV) {
 			    filter_sub = arg;
-			    (void)SvREFCNT_inc(filter_sub);
+			    SvREFCNT_inc_void_NN(filter_sub);
 
 			    if (i < count) {
 				filter_state = SP[i];
-				(void)SvREFCNT_inc(filter_state);
+				SvREFCNT_inc_simple_void(filter_state);
 			    }
 
 			    if (tryrsfp == 0) {
@@ -3296,7 +3295,7 @@ PP(pp_require)
     } else {
 	SV** const svp = hv_fetch(GvHVn(PL_incgv), name, len, 0);
 	if (!svp)
-	    (void)hv_store(GvHVn(PL_incgv), name, len, SvREFCNT_inc(hook_sv), 0 );
+	    (void)hv_store(GvHVn(PL_incgv), name, len, SvREFCNT_inc_simple(hook_sv), 0 );
     }
 
     ENTER;
