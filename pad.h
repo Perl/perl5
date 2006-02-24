@@ -226,7 +226,7 @@ ling pad (lvalue) to C<gen>.  Note that C<SvCUR_set> is hijacked for this purpos
 #define PAD_COMPNAME_TYPE(po) pad_compname_type(po)
 
 #define PAD_COMPNAME_OURSTASH(po) \
-    (GvSTASH(*av_fetch(PL_comppad_name, (po), FALSE)))
+    (OURSTASH(*av_fetch(PL_comppad_name, (po), FALSE)))
 
 #define PAD_COMPNAME_GEN(po) SvCUR(AvARRAY(PL_comppad_name)[po])
 

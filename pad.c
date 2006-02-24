@@ -321,7 +321,7 @@ offset.
 If C<typestash> is valid, the name is for a typed lexical; set the
 name's stash to that value.
 If C<ourstash> is valid, it's an our lexical, set the name's
-GvSTASH to that value
+OURSTASH to that value
 
 If fake, it means we're cloning an existing entry
 
@@ -347,7 +347,7 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
     }
     if (ourstash) {
 	SvPAD_OUR_on(namesv);
-	GvSTASH(namesv) = ourstash;
+	OURSTASH_set(namesv, ourstash);
 	Perl_sv_add_backref(aTHX_ (SV*)ourstash, namesv);
     }
 
@@ -549,7 +549,7 @@ Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
 		&& sv != &PL_sv_undef
 		&& !SvFAKE(sv)
 		&& (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
-		&& ((SvPAD_OUR(sv)) && GvSTASH(sv) == ourstash)
+		&& OURSTASH(sv) == ourstash
 		&& strEQ(name, SvPVX_const(sv)))
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_MISC),
@@ -838,8 +838,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 	    SvPVX_const(*out_name_sv),
 	    SvPAD_TYPED(*out_name_sv)
 		    ? SvSTASH(*out_name_sv) : NULL,
-	    SvPAD_OUR(*out_name_sv)
-		    ? GvSTASH(*out_name_sv) : NULL,
+	    OURSTASH(*out_name_sv),
 	    1  /* fake */
 	);
 

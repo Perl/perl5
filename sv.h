@@ -937,6 +937,13 @@ in gv.h: */
 	((SvFLAGS(sv) & (SVpad_NAME|SVpad_OUR)) == (SVpad_NAME|SVpad_OUR))
 #define SvPAD_OUR_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_OUR)
 
+#define OURSTASH(sv)	(SvPAD_OUR(sv) ? GvSTASH(sv) : NULL)
+#define OURSTASH_set(sv, st)			\
+        STMT_START {				\
+	    assert(SvTYPE(sv) == SVt_PVGV);	\
+	    GvSTASH(sv) = st;			\
+	} STMT_END
+
 #ifdef PERL_DEBUG_COW
 #define SvRV(sv) (0 + (sv)->sv_u.svu_rv)
 #else
