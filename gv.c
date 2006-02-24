@@ -1171,36 +1171,10 @@ Perl_gv_fullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
 }
 
 void
-Perl_gv_fullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
-{
-    gv_fullname4(sv, gv, prefix, TRUE);
-}
-
-void
 Perl_gv_efullname4(pTHX_ SV *sv, GV *gv, const char *prefix, bool keepmain)
 {
     const GV * const egv = GvEGV(gv);
     gv_fullname4(sv, (GV *) (egv ? egv : gv), prefix, keepmain);
-}
-
-void
-Perl_gv_efullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
-{
-    gv_efullname4(sv, gv, prefix, TRUE);
-}
-
-/* compatibility with versions <= 5.003. */
-void
-Perl_gv_fullname(pTHX_ SV *sv, GV *gv)
-{
-    gv_fullname3(sv, gv, sv == (const SV*)gv ? "*" : "");
-}
-
-/* compatibility with versions <= 5.003. */
-void
-Perl_gv_efullname(pTHX_ SV *sv, GV *gv)
-{
-    gv_efullname3(sv, gv, sv == (const SV*)gv ? "*" : "");
 }
 
 IO *

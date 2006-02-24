@@ -810,10 +810,10 @@ Apd	|SV*	|sv_setref_pvn	|NN SV* rv|NULLOK const char* classname|NN char* pv|STRL
 Apd	|void	|sv_setpv	|NN SV* sv|NULLOK const char* ptr
 Apd	|void	|sv_setpvn	|NN SV* sv|NULLOK const char* ptr|STRLEN len
 Amdb	|void	|sv_setsv	|NN SV* dsv|NULLOK SV* ssv
-Apd	|void	|sv_taint	|NN SV* sv
+Amdb	|void	|sv_taint	|NN SV* sv
 ApdR	|bool	|sv_tainted	|NN SV* sv
 Apd	|int	|sv_unmagic	|NN SV* sv|int type
-Apd	|void	|sv_unref	|NN SV* sv
+Apdmb	|void	|sv_unref	|NN SV* sv
 Apd	|void	|sv_unref_flags	|NN SV* sv|U32 flags
 Apd	|void	|sv_untaint	|NN SV* sv
 Apd	|bool	|sv_upgrade	|NN SV* sv|U32 mt
@@ -954,7 +954,7 @@ Amdb	|STRLEN	|sv_utf8_upgrade|NN SV *sv
 ApdM	|bool	|sv_utf8_downgrade|NN SV *sv|bool fail_ok
 Apd	|void	|sv_utf8_encode |NN SV *sv
 ApdM	|bool	|sv_utf8_decode |NN SV *sv
-Apd	|void	|sv_force_normal|NN SV *sv
+Apdmb	|void	|sv_force_normal|NN SV *sv
 Apd	|void	|sv_force_normal_flags|NN SV *sv|U32 flags
 Ap	|void	|tmps_grow	|I32 n
 Apd	|SV*	|sv_rvweaken	|NN SV *sv

@@ -16,8 +16,8 @@
 
 /* 
  * This file contains mathoms, various binary artifacts from previous
- * versions of Perl.  For binary compatibility reasons, though, we
- * cannot completely remove them from the core code.  
+ * versions of Perl.  For binary or source compatibility reasons, though,
+ * we cannot completely remove them from the core code.  
  *
  * SMP - Oct. 24, 2005
  *
@@ -34,6 +34,36 @@ OP *
 Perl_ref(pTHX_ OP *o, I32 type)
 {
     return doref(o, type, TRUE);
+}
+
+/*
+=for apidoc sv_unref
+
+Unsets the RV status of the SV, and decrements the reference count of
+whatever was being referenced by the RV.  This can almost be thought of
+as a reversal of C<newSVrv>.  This is C<sv_unref_flags> with the C<flag>
+being zero.  See C<SvROK_off>.
+
+=cut
+*/
+
+void
+Perl_sv_unref(pTHX_ SV *sv)
+{
+    sv_unref_flags(sv, 0);
+}
+
+/*
+=for apidoc sv_taint
+
+Taint an SV. Use C<SvTAINTED_on> instead.
+=cut
+*/
+
+void
+Perl_sv_taint(pTHX_ SV *sv)
+{
+    sv_magic((sv), Nullsv, PERL_MAGIC_taint, Nullch, 0);
 }
 
 /* sv_2iv() is now a macro using Perl_sv_2iv_flags();
@@ -66,6 +96,21 @@ Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp)
     return sv_2pv_flags(sv, lp, SV_GMAGIC);
 }
 
+/*
+=for apidoc sv_force_normal
+
+Undo various types of fakery on an SV: if the PV is a shared string, make
+a private copy; if we're a ref, stop refing; if we're a glob, downgrade to
+an xpvmg. See also C<sv_force_normal_flags>.
+
+=cut
+*/
+
+void
+Perl_sv_force_normal(pTHX_ register SV *sv)
+{
+    sv_force_normal_flags(sv, 0);
+}
 
 /* sv_setsv() is now a macro using Perl_sv_setsv_flags();
  * this function provided for binary compatibility only
@@ -95,6 +140,97 @@ void
 Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr)
 {
     sv_catsv_flags(dstr, sstr, SV_GMAGIC);
+}
+
+/*
+=for apidoc sv_iv
+
+A private implementation of the C<SvIVx> macro for compilers which can't
+cope with complex macro expressions. Always use the macro instead.
+
+=cut
+*/
+
+IV
+Perl_sv_iv(pTHX_ register SV *sv)
+{
+    if (SvIOK(sv)) {
+	if (SvIsUV(sv))
+	    return (IV)SvUVX(sv);
+	return SvIVX(sv);
+    }
+    return sv_2iv(sv);
+}
+
+/*
+=for apidoc sv_uv
+
+A private implementation of the C<SvUVx> macro for compilers which can't
+cope with complex macro expressions. Always use the macro instead.
+
+=cut
+*/
+
+UV
+Perl_sv_uv(pTHX_ register SV *sv)
+{
+    if (SvIOK(sv)) {
+	if (SvIsUV(sv))
+	    return SvUVX(sv);
+	return (UV)SvIVX(sv);
+    }
+    return sv_2uv(sv);
+}
+
+/*
+=for apidoc sv_nv
+
+A private implementation of the C<SvNVx> macro for compilers which can't
+cope with complex macro expressions. Always use the macro instead.
+
+=cut
+*/
+
+NV
+Perl_sv_nv(pTHX_ register SV *sv)
+{
+    if (SvNOK(sv))
+	return SvNVX(sv);
+    return sv_2nv(sv);
+}
+
+/*
+=for apidoc sv_pv
+
+Use the C<SvPV_nolen> macro instead
+
+=for apidoc sv_pvn
+
+A private implementation of the C<SvPV> macro for compilers which can't
+cope with complex macro expressions. Always use the macro instead.
+
+=cut
+*/
+
+char *
+Perl_sv_pvn(pTHX_ SV *sv, STRLEN *lp)
+{
+    if (SvPOK(sv)) {
+	*lp = SvCUR(sv);
+	return SvPVX(sv);
+    }
+    return sv_2pv(sv, lp);
+}
+
+
+char *
+Perl_sv_pvn_nomg(pTHX_ register SV *sv, STRLEN *lp)
+{
+    if (SvPOK(sv)) {
+	*lp = SvCUR(sv);
+	return SvPVX(sv);
+    }
+    return sv_2pv_flags(sv, lp, 0);
 }
 
 /* sv_pv() is now a macro using SvPV_nolen();
@@ -131,6 +267,27 @@ Perl_sv_pvbyte(pTHX_ SV *sv)
     return sv_pv(sv);
 }
 
+/*
+=for apidoc sv_pvbyte
+
+Use C<SvPVbyte_nolen> instead.
+
+=for apidoc sv_pvbyten
+
+A private implementation of the C<SvPVbyte> macro for compilers
+which can't cope with complex macro expressions. Always use the macro
+instead.
+
+=cut
+*/
+
+char *
+Perl_sv_pvbyten(pTHX_ SV *sv, STRLEN *lp)
+{
+    sv_utf8_downgrade(sv,0);
+    return sv_pvn(sv,lp);
+}
+
 /* sv_pvutf8 () is now a macro using Perl_sv_2pv_flags();
  * this function provided for binary compatibility only
  */
@@ -140,6 +297,37 @@ Perl_sv_pvutf8(pTHX_ SV *sv)
 {
     sv_utf8_upgrade(sv);
     return sv_pv(sv);
+}
+
+/*
+=for apidoc sv_pvutf8
+
+Use the C<SvPVutf8_nolen> macro instead
+
+=for apidoc sv_pvutf8n
+
+A private implementation of the C<SvPVutf8> macro for compilers
+which can't cope with complex macro expressions. Always use the macro
+instead.
+
+=cut
+*/
+
+char *
+Perl_sv_pvutf8n(pTHX_ SV *sv, STRLEN *lp)
+{
+    sv_utf8_upgrade(sv);
+    return sv_pvn(sv,lp);
+}
+
+/* sv_utf8_upgrade() is now a macro using sv_utf8_upgrade_flags();
+ * this function provided for binary compatibility only
+ */
+
+STRLEN
+Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
+{
+    return sv_utf8_upgrade_flags(sv, SV_GMAGIC);
 }
 
 /*
@@ -289,6 +477,78 @@ document
 #endif
 }
 #endif /* sfio */
+
+/* compatibility with versions <= 5.003. */
+void
+Perl_gv_fullname(pTHX_ SV *sv, GV *gv)
+{
+    gv_fullname3(sv, gv, sv == (const SV*)gv ? "*" : "");
+}
+
+/* compatibility with versions <= 5.003. */
+void
+Perl_gv_efullname(pTHX_ SV *sv, GV *gv)
+{
+    gv_efullname3(sv, gv, sv == (const SV*)gv ? "*" : "");
+}
+
+void
+Perl_gv_fullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
+{
+    gv_fullname4(sv, gv, prefix, TRUE);
+}
+
+void
+Perl_gv_efullname3(pTHX_ SV *sv, GV *gv, const char *prefix)
+{
+    gv_efullname4(sv, gv, prefix, TRUE);
+}
+
+AV *
+Perl_av_fake(pTHX_ register I32 size, register SV **strp)
+{
+    register SV** ary;
+    register AV * const av = (AV*)NEWSV(9,0);
+
+    sv_upgrade((SV *)av, SVt_PVAV);
+    Newx(ary,size+1,SV*);
+    AvALLOC(av) = ary;
+    Copy(strp,ary,size,SV*);
+    AvFLAGS(av) = AVf_REIFY;
+    SvPV_set(av, (char*)ary);
+    AvFILLp(av) = size - 1;
+    AvMAX(av) = size - 1;
+    while (size--) {
+	assert (*strp);
+	SvTEMP_off(*strp);
+	strp++;
+    }
+    return av;
+}
+
+bool
+Perl_do_open9(pTHX_ GV *gv, register char *name, I32 len, int as_raw,
+	      int rawmode, int rawperm, PerlIO *supplied_fp, SV *svs,
+	      I32 num_svs)
+{
+    PERL_UNUSED_ARG(num_svs);
+    return do_openn(gv, name, len, as_raw, rawmode, rawperm,
+		    supplied_fp, &svs, 1);
+}
+
+int
+Perl_do_binmode(pTHX_ PerlIO *fp, int iotype, int mode)
+{
+ /* The old body of this is now in non-LAYER part of perlio.c
+  * This is a stub for any XS code which might have been calling it.
+  */
+ const char *name = ":raw";
+#ifdef PERLIO_USING_CRLF
+ if (!(mode & O_BINARY))
+     name = ":crlf";
+#endif
+ return PerlIO_binmode(aTHX_ fp, iotype, mode, name);
+}
 
 /*
  * Local variables:

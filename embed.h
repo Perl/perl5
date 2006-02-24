@@ -860,10 +860,8 @@
 #define sv_setref_pvn		Perl_sv_setref_pvn
 #define sv_setpv		Perl_sv_setpv
 #define sv_setpvn		Perl_sv_setpvn
-#define sv_taint		Perl_sv_taint
 #define sv_tainted		Perl_sv_tainted
 #define sv_unmagic		Perl_sv_unmagic
-#define sv_unref		Perl_sv_unref
 #define sv_unref_flags		Perl_sv_unref_flags
 #define sv_untaint		Perl_sv_untaint
 #define sv_upgrade		Perl_sv_upgrade
@@ -999,7 +997,6 @@
 #define sv_utf8_downgrade	Perl_sv_utf8_downgrade
 #define sv_utf8_encode		Perl_sv_utf8_encode
 #define sv_utf8_decode		Perl_sv_utf8_decode
-#define sv_force_normal		Perl_sv_force_normal
 #define sv_force_normal_flags	Perl_sv_force_normal_flags
 #define tmps_grow		Perl_tmps_grow
 #define sv_rvweaken		Perl_sv_rvweaken
@@ -2884,10 +2881,8 @@
 #define sv_setref_pvn(a,b,c,d)	Perl_sv_setref_pvn(aTHX_ a,b,c,d)
 #define sv_setpv(a,b)		Perl_sv_setpv(aTHX_ a,b)
 #define sv_setpvn(a,b,c)	Perl_sv_setpvn(aTHX_ a,b,c)
-#define sv_taint(a)		Perl_sv_taint(aTHX_ a)
 #define sv_tainted(a)		Perl_sv_tainted(aTHX_ a)
 #define sv_unmagic(a,b)		Perl_sv_unmagic(aTHX_ a,b)
-#define sv_unref(a)		Perl_sv_unref(aTHX_ a)
 #define sv_unref_flags(a,b)	Perl_sv_unref_flags(aTHX_ a,b)
 #define sv_untaint(a)		Perl_sv_untaint(aTHX_ a)
 #define sv_upgrade(a,b)		Perl_sv_upgrade(aTHX_ a,b)
@@ -3017,7 +3012,6 @@
 #define sv_utf8_downgrade(a,b)	Perl_sv_utf8_downgrade(aTHX_ a,b)
 #define sv_utf8_encode(a)	Perl_sv_utf8_encode(aTHX_ a)
 #define sv_utf8_decode(a)	Perl_sv_utf8_decode(aTHX_ a)
-#define sv_force_normal(a)	Perl_sv_force_normal(aTHX_ a)
 #define sv_force_normal_flags(a,b)	Perl_sv_force_normal_flags(aTHX_ a,b)
 #define tmps_grow(a)		Perl_tmps_grow(aTHX_ a)
 #define sv_rvweaken(a)		Perl_sv_rvweaken(aTHX_ a)

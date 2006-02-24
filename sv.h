@@ -942,6 +942,8 @@ Taints an SV if tainting is enabled.
 =cut
 */
 
+#define sv_taint(sv)	  sv_magic((sv), Nullsv, PERL_MAGIC_taint, Nullch, 0)
+
 #define SvTAINTED(sv)	  (SvMAGICAL(sv) && sv_tainted(sv))
 #define SvTAINTED_on(sv)  STMT_START{ if(PL_tainting){sv_taint(sv);}   }STMT_END
 #define SvTAINTED_off(sv) STMT_START{ if(PL_tainting){sv_untaint(sv);} }STMT_END
@@ -1253,6 +1255,9 @@ Like C<sv_catsv> but doesn't process magic.
 #define SV_NOSTEAL		16
 #define SV_CONST_RETURN		32
 #define SV_MUTABLE_RETURN	64
+
+#define sv_unref(sv)    	sv_unref_flags(sv, 0)
+#define sv_force_normal(sv)	sv_force_normal_flags(sv, 0)
 
 /* all these 'functions' are now just macros */
 

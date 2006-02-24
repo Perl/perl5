@@ -2994,17 +2994,6 @@ Perl_sv_2bool(pTHX_ register SV *sv)
     }
 }
 
-/* sv_utf8_upgrade() is now a macro using sv_utf8_upgrade_flags();
- * this function provided for binary compatibility only
- */
-
-
-STRLEN
-Perl_sv_utf8_upgrade(pTHX_ register SV *sv)
-{
-    return sv_utf8_upgrade_flags(sv, SV_GMAGIC);
-}
-
 /*
 =for apidoc sv_utf8_upgrade
 
@@ -3872,22 +3861,6 @@ Perl_sv_force_normal_flags(pTHX_ register SV *sv, U32 flags)
 	sv_unref_flags(sv, flags);
     else if (SvFAKE(sv) && SvTYPE(sv) == SVt_PVGV)
 	sv_unglob(sv);
-}
-
-/*
-=for apidoc sv_force_normal
-
-Undo various types of fakery on an SV: if the PV is a shared string, make
-a private copy; if we're a ref, stop refing; if we're a glob, downgrade to
-an xpvmg. See also C<sv_force_normal_flags>.
-
-=cut
-*/
-
-void
-Perl_sv_force_normal(pTHX_ register SV *sv)
-{
-    sv_force_normal_flags(sv, 0);
 }
 
 /*
@@ -6909,97 +6882,6 @@ Perl_sv_true(pTHX_ register SV *sv)
 }
 
 /*
-=for apidoc sv_iv
-
-A private implementation of the C<SvIVx> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
-
-=cut
-*/
-
-IV
-Perl_sv_iv(pTHX_ register SV *sv)
-{
-    if (SvIOK(sv)) {
-	if (SvIsUV(sv))
-	    return (IV)SvUVX(sv);
-	return SvIVX(sv);
-    }
-    return sv_2iv(sv);
-}
-
-/*
-=for apidoc sv_uv
-
-A private implementation of the C<SvUVx> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
-
-=cut
-*/
-
-UV
-Perl_sv_uv(pTHX_ register SV *sv)
-{
-    if (SvIOK(sv)) {
-	if (SvIsUV(sv))
-	    return SvUVX(sv);
-	return (UV)SvIVX(sv);
-    }
-    return sv_2uv(sv);
-}
-
-/*
-=for apidoc sv_nv
-
-A private implementation of the C<SvNVx> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
-
-=cut
-*/
-
-NV
-Perl_sv_nv(pTHX_ register SV *sv)
-{
-    if (SvNOK(sv))
-	return SvNVX(sv);
-    return sv_2nv(sv);
-}
-
-/*
-=for apidoc sv_pv
-
-Use the C<SvPV_nolen> macro instead
-
-=for apidoc sv_pvn
-
-A private implementation of the C<SvPV> macro for compilers which can't
-cope with complex macro expressions. Always use the macro instead.
-
-=cut
-*/
-
-char *
-Perl_sv_pvn(pTHX_ SV *sv, STRLEN *lp)
-{
-    if (SvPOK(sv)) {
-	*lp = SvCUR(sv);
-	return SvPVX(sv);
-    }
-    return sv_2pv(sv, lp);
-}
-
-
-char *
-Perl_sv_pvn_nomg(pTHX_ register SV *sv, STRLEN *lp)
-{
-    if (SvPOK(sv)) {
-	*lp = SvCUR(sv);
-	return SvPVX(sv);
-    }
-    return sv_2pv_flags(sv, lp, 0);
-}
-
-/*
 =for apidoc sv_pvn_force
 
 Get a sensible string out of the SV somehow.
@@ -7068,32 +6950,9 @@ Perl_sv_pvn_force_flags(pTHX_ SV *sv, STRLEN *lp, I32 flags)
 }
 
 /*
-=for apidoc sv_pvbyte
-
-Use C<SvPVbyte_nolen> instead.
-
-=for apidoc sv_pvbyten
-
-A private implementation of the C<SvPVbyte> macro for compilers
-which can't cope with complex macro expressions. Always use the macro
-instead.
-
-=cut
-*/
-
-char *
-Perl_sv_pvbyten(pTHX_ SV *sv, STRLEN *lp)
-{
-    sv_utf8_downgrade(sv,0);
-    return sv_pvn(sv,lp);
-}
-
-/*
 =for apidoc sv_pvbyten_force
 
-A private implementation of the C<SvPVbytex_force> macro for compilers
-which can't cope with complex macro expressions. Always use the macro
-instead.
+The backend for the C<SvPVbytex_force> macro. Always use the macro instead.
 
 =cut
 */
@@ -7108,32 +6967,9 @@ Perl_sv_pvbyten_force(pTHX_ SV *sv, STRLEN *lp)
 }
 
 /*
-=for apidoc sv_pvutf8
-
-Use the C<SvPVutf8_nolen> macro instead
-
-=for apidoc sv_pvutf8n
-
-A private implementation of the C<SvPVutf8> macro for compilers
-which can't cope with complex macro expressions. Always use the macro
-instead.
-
-=cut
-*/
-
-char *
-Perl_sv_pvutf8n(pTHX_ SV *sv, STRLEN *lp)
-{
-    sv_utf8_upgrade(sv);
-    return sv_pvn(sv,lp);
-}
-
-/*
 =for apidoc sv_pvutf8n_force
 
-A private implementation of the C<SvPVutf8_force> macro for compilers
-which can't cope with complex macro expressions. Always use the macro
-instead.
+The backend for the C<SvPVutf8x_force> macro. Always use the macro instead.
 
 =cut
 */
@@ -7517,36 +7353,6 @@ Perl_sv_unref_flags(pTHX_ SV *sv, U32 flags)
 	SvREFCNT_dec(rv);
     else /* XXX Hack, but hard to make $a=$a->[1] work otherwise */
 	sv_2mortal((SV *)rv);		/* Schedule for freeing later */
-}
-
-/*
-=for apidoc sv_unref
-
-Unsets the RV status of the SV, and decrements the reference count of
-whatever was being referenced by the RV.  This can almost be thought of
-as a reversal of C<newSVrv>.  This is C<sv_unref_flags> with the C<flag>
-being zero.  See C<SvROK_off>.
-
-=cut
-*/
-
-void
-Perl_sv_unref(pTHX_ SV *sv)
-{
-    sv_unref_flags(sv, 0);
-}
-
-/*
-=for apidoc sv_taint
-
-Taint an SV. Use C<SvTAINTED_on> instead.
-=cut
-*/
-
-void
-Perl_sv_taint(pTHX_ SV *sv)
-{
-    sv_magic((sv), Nullsv, PERL_MAGIC_taint, Nullch, 0);
 }
 
 /*

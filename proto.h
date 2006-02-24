@@ -1231,12 +1231,11 @@ PERL_CALLCONV SV*	Perl_sv_setref_pvn(pTHX_ SV* rv, const char* classname, char* 
 PERL_CALLCONV void	Perl_sv_setpv(pTHX_ SV* sv, const char* ptr);
 PERL_CALLCONV void	Perl_sv_setpvn(pTHX_ SV* sv, const char* ptr, STRLEN len);
 /* PERL_CALLCONV void	sv_setsv(pTHX_ SV* dsv, SV* ssv); */
-PERL_CALLCONV void	Perl_sv_taint(pTHX_ SV* sv);
 PERL_CALLCONV bool	Perl_sv_tainted(pTHX_ SV* sv)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV int	Perl_sv_unmagic(pTHX_ SV* sv, int type);
-PERL_CALLCONV void	Perl_sv_unref(pTHX_ SV* sv);
+/*PERL_CALLCONV void	Perl_sv_unref(pTHX_ SV* sv);*/
 PERL_CALLCONV void	Perl_sv_unref_flags(pTHX_ SV* sv, U32 flags);
 PERL_CALLCONV void	Perl_sv_untaint(pTHX_ SV* sv);
 PERL_CALLCONV bool	Perl_sv_upgrade(pTHX_ SV* sv, U32 mt);
@@ -1412,7 +1411,7 @@ PERL_CALLCONV char*	Perl_sv_2pvbyte_nolen(pTHX_ SV* sv)
 PERL_CALLCONV bool	Perl_sv_utf8_downgrade(pTHX_ SV *sv, bool fail_ok);
 PERL_CALLCONV void	Perl_sv_utf8_encode(pTHX_ SV *sv);
 PERL_CALLCONV bool	Perl_sv_utf8_decode(pTHX_ SV *sv);
-PERL_CALLCONV void	Perl_sv_force_normal(pTHX_ SV *sv);
+/*PERL_CALLCONV void	Perl_sv_force_normal(pTHX_ SV *sv);*/
 PERL_CALLCONV void	Perl_sv_force_normal_flags(pTHX_ SV *sv, U32 flags);
 PERL_CALLCONV void	Perl_tmps_grow(pTHX_ I32 n);
 PERL_CALLCONV SV*	Perl_sv_rvweaken(pTHX_ SV *sv);
