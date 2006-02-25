@@ -424,7 +424,6 @@ struct xpvlv {
     /* a full glob fits into this */
     char*	xgv_name;
     STRLEN	xgv_namelen;
-    U8		xgv_flags;
 
     STRLEN	xlv_targoff;
     STRLEN	xlv_targlen;
@@ -438,8 +437,8 @@ struct xpvgv {
 	NV	xnv_nv;
 	HV *	xgv_stash;	/* The stash of this GV */
     }		xnv_u;
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
+    STRLEN	xpv_cur;	/* xgv_flags */
+    STRLEN	xpv_len;	/* 0 */
     union {
 	IV	xivu_iv;	/* integer value or pv offset */
 	UV	xivu_uv;
@@ -454,7 +453,6 @@ struct xpvgv {
 
     char*	xgv_name;
     STRLEN	xgv_namelen;
-    U8		xgv_flags;
 };
 
 struct xpvbm {
