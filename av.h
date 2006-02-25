@@ -9,7 +9,10 @@
  */
 
 struct xpvav {
-    NV		xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnv_nv;		/* numeric value, if any */
+	HV *	xgv_stash;
+    }		xnv_u;
     SSize_t	xav_fill;       /* Index of last element present */
     SSize_t	xav_max;        /* max index for which array has space */
     union {

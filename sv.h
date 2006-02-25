@@ -301,7 +301,10 @@ perform the upgrade if necessary.  See C<svtype>.
 
 
 struct xpv {
-    NV		xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnv_nv;		/* numeric value, if any */
+	HV *	xgv_stash;
+    }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
 };
@@ -316,7 +319,10 @@ typedef struct {
 #endif
 
 struct xpviv {
-    NV		xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnv_nv;		/* numeric value, if any */
+	HV *	xgv_stash;
+    }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
@@ -345,7 +351,10 @@ typedef struct {
 #define xiv_iv xiv_u.xivu_iv
 
 struct xpvuv {
-    NV		xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnv_nv;		/* numeric value, if any */
+	HV *	xgv_stash;
+    }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
@@ -358,7 +367,10 @@ struct xpvuv {
 #define xuv_uv xuv_u.xuvu_uv
 
 struct xpvnv {
-    NV		xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnv_nv;		/* numeric value, if any */
+	HV *	xgv_stash;
+    }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
@@ -371,7 +383,10 @@ struct xpvnv {
 
 /* These structure must match the beginning of struct xpvhv in hv.h. */
 struct xpvmg {
-    NV		xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnv_nv;		/* numeric value, if any */
+	HV *	xgv_stash;
+    }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
@@ -388,7 +403,10 @@ struct xpvmg {
 };
 
 struct xpvlv {
-    NV		xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnv_nv;		/* numeric value, if any */
+	HV *	xgv_stash;
+    }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
@@ -406,7 +424,6 @@ struct xpvlv {
     /* a full glob fits into this */
     char*	xgv_name;
     STRLEN	xgv_namelen;
-    HV*		xgv_stash;
     U8		xgv_flags;
 
     STRLEN	xlv_targoff;
@@ -417,7 +434,10 @@ struct xpvlv {
 };
 
 struct xpvgv {
-    NV		xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnv_nv;
+	HV *	xgv_stash;	/* The stash of this GV */
+    }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
@@ -434,12 +454,14 @@ struct xpvgv {
 
     char*	xgv_name;
     STRLEN	xgv_namelen;
-    HV*		xgv_stash;
     U8		xgv_flags;
 };
 
 struct xpvbm {
-    NV		xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnv_nv;		/* numeric value, if any */
+	HV *	xgv_stash;
+    }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
@@ -464,7 +486,10 @@ struct xpvbm {
 typedef U16 cv_flags_t;
 
 struct xpvfm {
-    NV		xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnv_nv;		/* numeric value, if any */
+	HV *	xgv_stash;
+    }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
@@ -535,7 +560,10 @@ typedef struct {
 } xpvfm_allocated;
 
 struct xpvio {
-    NV		xnv_nv;		/* numeric value, if any */
+    union {
+	NV	xnv_nv;		/* numeric value, if any */
+	HV *	xgv_stash;
+    }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
     union {
@@ -980,7 +1008,7 @@ in gv.h: */
    +0.0 + -0.0 => +0.0 but -0.0 + -0.0 => -0.0 */
 #  define SvIVX(sv) (0 + ((XPVIV*) SvANY(sv))->xiv_iv)
 #  define SvUVX(sv) (0 + ((XPVUV*) SvANY(sv))->xuv_uv)
-#  define SvNVX(sv) (-0.0 + ((XPVNV*) SvANY(sv))->xnv_nv)
+#  define SvNVX(sv) (-0.0 + ((XPVNV*) SvANY(sv))->xnv_u.xnv_nv)
 /* Don't test the core XS code yet.  */
 #  if defined (PERL_CORE) && PERL_DEBUG_COW > 1
 #    define SvPVX(sv) (0 + (assert(!SvREADONLY(sv)), (sv)->sv_u.svu_pv))
@@ -1038,7 +1066,7 @@ in gv.h: */
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
 	    assert(SvTYPE(_svi) != SVt_PVFM);				\
 	    assert(!isGV_with_GP(_svi));				\
-	   &(((XPVNV*) SvANY(_svi))->xnv_nv);				\
+	   &(((XPVNV*) SvANY(_svi))->xnv_u.xnv_nv);			\
 	 }))
 #    define SvMAGIC(sv)							\
 	(*({ SV *const _svi = (SV *) sv;				\
@@ -1054,7 +1082,7 @@ in gv.h: */
 #   define SvPVX(sv) ((sv)->sv_u.svu_pv)
 #    define SvIVX(sv) ((XPVIV*) SvANY(sv))->xiv_iv
 #    define SvUVX(sv) ((XPVUV*) SvANY(sv))->xuv_uv
-#    define SvNVX(sv) ((XPVNV*) SvANY(sv))->xnv_nv
+#    define SvNVX(sv) ((XPVNV*) SvANY(sv))->xnv_u.xnv_nv
 #    define SvMAGIC(sv)	((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic
 #    define SvSTASH(sv)	((XPVMG*)  SvANY(sv))->xmg_stash
 #  endif
@@ -1092,7 +1120,7 @@ in gv.h: */
 #define SvNV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_NV || SvTYPE(sv) >= SVt_PVNV); \
 	    assert(SvTYPE(sv) != SVt_PVAV); assert(SvTYPE(sv) != SVt_PVHV); \
-		(((XPVNV*)SvANY(sv))->xnv_nv = (val)); } STMT_END
+		(((XPVNV*)SvANY(sv))->xnv_u.xnv_nv = (val)); } STMT_END
 #define SvPV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
 		((sv)->sv_u.svu_pv = (val)); } STMT_END

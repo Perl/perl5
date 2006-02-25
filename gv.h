@@ -41,7 +41,7 @@ struct gp {
 	(*({ GV *_gv = (GV *) gv;					\
 	    assert(isGV_with_GP(_gv));					\
 	    assert(SvTYPE(_gv) == SVt_PVGV || SvTYPE(_gv) >= SVt_PVLV);	\
-	    &(GvXPVGV(_gv)->xgv_stash);					\
+	    &(GvXPVGV(_gv)->xnv_u.xgv_stash);				\
 	 }))
 #  define GvNAME(gv)							\
 	(*({ GV *zzzz = (GV *) gv;					\
@@ -58,7 +58,7 @@ struct gp {
 #else
 #  define GvGP(gv)	((gv)->sv_u.svu_gp)
 #  define GvFLAGS(gv)	(GvXPVGV(gv)->xgv_flags)
-#  define GvSTASH(gv)	(GvXPVGV(gv)->xgv_stash)
+#  define GvSTASH(gv)	(GvXPVGV(gv)->xnv_u.xgv_stash)
 #  define GvNAME(gv)	(GvXPVGV(gv)->xgv_name)
 #  define GvNAMELEN(gv)	(GvXPVGV(gv)->xgv_namelen)
 #endif
