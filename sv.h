@@ -1027,7 +1027,6 @@ in gv.h: */
 #    define SvSTASH(sv)	(0 + ((XPVMG*)  SvANY(sv))->xmg_stash)
 #  endif
 #else
-#  define SvCUR(sv) ((XPV*) SvANY(sv))->xpv_cur
 #  define SvLEN(sv) ((XPV*) SvANY(sv))->xpv_len
 #  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
 
@@ -1040,6 +1039,14 @@ in gv.h: */
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
 	    assert(!isGV_with_GP(_svi));				\
 	    &((_svi)->sv_u.svu_pv);					\
+	 }))
+#    define SvCUR(sv)							\
+	(*({ SV *const _svi = (SV *) sv;				\
+	    assert(SvTYPE(_svi) >= SVt_PV);				\
+	    assert(SvTYPE(_svi) != SVt_PVAV);				\
+	    assert(SvTYPE(_svi) != SVt_PVHV);				\
+	    assert(!isGV_with_GP(_svi));				\
+	    &(((XPV*) SvANY(_svi))->xpv_cur);				\
 	 }))
 #    define SvIVX(sv)							\
 	(*({ SV *const _svi = (SV *) sv;				\
@@ -1079,7 +1086,8 @@ in gv.h: */
 	    &(((XPVMG*) SvANY(_svi))->xmg_stash);			\
 	  }))
 #  else
-#   define SvPVX(sv) ((sv)->sv_u.svu_pv)
+#    define SvPVX(sv) ((sv)->sv_u.svu_pv)
+#    define SvCUR(sv) ((XPV*) SvANY(sv))->xpv_cur
 #    define SvIVX(sv) ((XPVIV*) SvANY(sv))->xiv_iv
 #    define SvUVX(sv) ((XPVUV*) SvANY(sv))->xuv_uv
 #    define SvNVX(sv) ((XPVNV*) SvANY(sv))->xnv_u.xnv_nv
@@ -1116,19 +1124,24 @@ in gv.h: */
 		(void) SvIV(sv); } STMT_END
 #define SvIV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
+		assert(!isGV_with_GP(sv));		\
 		(((XPVIV*)  SvANY(sv))->xiv_iv = (val)); } STMT_END
 #define SvNV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_NV || SvTYPE(sv) >= SVt_PVNV); \
 	    assert(SvTYPE(sv) != SVt_PVAV); assert(SvTYPE(sv) != SVt_PVHV); \
+		assert(!isGV_with_GP(sv));		\
 		(((XPVNV*)SvANY(sv))->xnv_u.xnv_nv = (val)); } STMT_END
 #define SvPV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
+		assert(!isGV_with_GP(sv));		\
 		((sv)->sv_u.svu_pv = (val)); } STMT_END
 #define SvUV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
+		assert(!isGV_with_GP(sv));		\
 		(((XPVUV*)SvANY(sv))->xuv_uv = (val)); } STMT_END
 #define SvRV_set(sv, val) \
         STMT_START { assert(SvTYPE(sv) >=  SVt_RV); \
+		assert(!isGV_with_GP(sv));		\
                 ((sv)->sv_u.svu_rv = (val)); } STMT_END
 #define SvMAGIC_set(sv, val) \
         STMT_START { assert(SvTYPE(sv) >= SVt_PVMG); \
@@ -1138,6 +1151,7 @@ in gv.h: */
                 (((XPVMG*)  SvANY(sv))->xmg_stash = (val)); } STMT_END
 #define SvCUR_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
+		assert(!isGV_with_GP(sv));		\
 		(((XPV*)  SvANY(sv))->xpv_cur = (val)); } STMT_END
 #define SvLEN_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
