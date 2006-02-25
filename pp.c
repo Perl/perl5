@@ -2872,7 +2872,22 @@ PP(pp_length)
     dSP; dTARGET;
     SV *sv = TOPs;
 
-    if (DO_UTF8(sv))
+    if (SvAMAGIC(sv)) {
+	/* For an overloaded scalar, we can't know in advance if it's going to
+	   be UTF-8 or not. Also, we can't call sv_len_utf8 as it likes to
+	   cache the length. Maybe that should be a documented feature of it.
+	*/
+	STRLEN len;
+	const char *const p = SvPV_const(sv, len);
+
+	if (DO_UTF8(sv)) {
+	    SETi(Perl_utf8_length(aTHX_ p, p + len));
+	}
+	else
+	    SETi(len);
+
+    }
+    else if (DO_UTF8(sv))
 	SETi(sv_len_utf8(sv));
     else
 	SETi(sv_len(sv));
@@ -3088,8 +3103,8 @@ PP(pp_index)
     STRLEN llen = 0;
     I32 offset;
     I32 retval;
-    const char *tmps;
-    const char *tmps2;
+    const char *big_p;
+    const char *little_p;
     const I32 arybase = PL_curcop->cop_arybase;
     bool big_utf8;
     bool little_utf8;
@@ -3102,6 +3117,9 @@ PP(pp_index)
     }
     little = POPs;
     big = POPs;
+    big_p = SvPV_const(big, biglen);
+    little_p = SvPV_const(little, llen);
+
     big_utf8 = DO_UTF8(big);
     little_utf8 = DO_UTF8(little);
     if (big_utf8 ^ little_utf8) {
@@ -3109,10 +3127,7 @@ PP(pp_index)
 	if (little_utf8 && !PL_encoding) {
 	    /* Well, maybe instead we might be able to downgrade the small
 	       string?  */
-	    STRLEN little_len;
-	    const U8 * const little_pv = (U8*) SvPV_const(little, little_len);
-	    char * const pv = (char*)bytes_from_utf8((U8 *)little_pv,
-						     &little_len,
+	    char * const pv = (char*)bytes_from_utf8((U8 *)little_p, &llen,
 						     &little_utf8);
 	    if (little_utf8) {
 		/* If the large string is ISO-8859-1, and it's not possible to
@@ -3125,13 +3140,11 @@ PP(pp_index)
 	    /* At this point, pv is a malloc()ed string. So donate it to temp
 	       to ensure it will get free()d  */
 	    little = temp = newSV(0);
-	    sv_usepvn(temp, pv, little_len);
+	    sv_usepvn(temp, pv, llen);
+	    little_p = SvPVX(little);
 	} else {
-	    SV * const bytes = little_utf8 ? big : little;
-	    STRLEN len;
-	    const char * const p = SvPV_const(bytes, len);
-
-	    temp = newSVpvn(p, len);
+	    temp = little_utf8
+		? newSVpvn(big_p, biglen) : newSVpvn(little_p, llen);
 
 	    if (PL_encoding) {
 		sv_recode_to_utf8(temp, PL_encoding);
@@ -3141,34 +3154,58 @@ PP(pp_index)
 	    if (little_utf8) {
 		big = temp;
 		big_utf8 = TRUE;
+		big_p = SvPV_const(big, biglen);
 	    } else {
 		little = temp;
+		little_p = SvPV_const(little, llen);
 	    }
 	}
     }
-    /* Don't actually need the NULL initialisation, but it keeps gcc quiet.  */
-    tmps2 = is_index ? NULL : SvPV_const(little, llen);
-    tmps = SvPV_const(big, biglen);
+    if (SvGAMAGIC(big)) {
+	/* Life just becomes a lot easier if I use a temporary here.
+	   Otherwise I need to avoid calls to sv_pos_u2b(), which (dangerously)
+	   will trigger magic and overloading again, as will fbm_instr()
+	*/
+	big = sv_2mortal(newSVpvn(big_p, biglen));
+	if (big_utf8)
+	    SvUTF8_on(big);
+	big_p = SvPVX(big);
+    }
+    if (SvGAMAGIC(little) || (is_index && !SvOK(little))) {
+	/* index && SvOK() is a hack. fbm_instr() calls SvPV_const, which will
+	   warn on undef, and we've already triggered a warning with the
+	   SvPV_const some lines above. We can't remove that, as we need to
+	   call some SvPV to trigger overloading early and find out if the
+	   string is UTF-8.
+	   This is all getting to messy. The API isn't quite clean enough,
+	   because data access has side effects.
+	*/
+	little = sv_2mortal(newSVpvn(little_p, llen));
+	if (little_utf8)
+	    SvUTF8_on(little);
+	little_p = SvPVX(little);
+    }
 
     if (MAXARG < 3)
 	offset = is_index ? 0 : biglen;
     else {
 	if (big_utf8 && offset > 0)
 	    sv_pos_u2b(big, &offset, 0);
-	offset += llen;
+	if (!is_index)
+	    offset += llen;
     }
     if (offset < 0)
 	offset = 0;
     else if (offset > (I32)biglen)
 	offset = biglen;
-    if (!(tmps2 = is_index
-	  ? fbm_instr((unsigned char*)tmps + offset,
-		      (unsigned char*)tmps + biglen, little, 0)
-	  : rninstr(tmps,  tmps  + offset,
-		    tmps2, tmps2 + llen)))
+    if (!(little_p = is_index
+	  ? fbm_instr((unsigned char*)big_p + offset,
+		      (unsigned char*)big_p + biglen, little, 0)
+	  : rninstr(big_p,  big_p  + offset,
+		    little_p, little_p + llen)))
 	retval = -1;
     else {
-	retval = tmps2 - tmps;
+	retval = little_p - big_p;
 	if (retval > 0 && big_utf8)
 	    sv_pos_b2u(big, &retval);
     }
@@ -3307,28 +3344,64 @@ PP(pp_crypt)
 PP(pp_ucfirst)
 {
     dSP;
-    SV *sv = TOPs;
-    const U8 *s;
+    SV *source = TOPs;
     STRLEN slen;
+    STRLEN need;
+    SV *dest;
+    bool inplace = TRUE;
+    bool doing_utf8;
     const int op_type = PL_op->op_type;
+    const U8 *s;
+    U8 *d;
+    U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
+    STRLEN ulen;
+    STRLEN tculen;
 
-    SvGETMAGIC(sv);
-    if (DO_UTF8(sv) &&
-	(s = (const U8*)SvPV_nomg_const(sv, slen)) && slen &&
-	UTF8_IS_START(*s)) {
-	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
-	STRLEN ulen;
-	STRLEN tculen;
+    SvGETMAGIC(source);
+    if (SvOK(source)) {
+	s = (const U8*)SvPV_nomg_const(source, slen);
+    } else {
+	s = "";
+	slen = 0;
+    }
 
+    if (slen && DO_UTF8(source) && UTF8_IS_START(*s)) {
+	doing_utf8 = TRUE;
 	utf8_to_uvchr((U8 *)s, &ulen);
 	if (op_type == OP_UCFIRST) {
 	    toTITLE_utf8((U8 *)s, tmpbuf, &tculen);
 	} else {
 	    toLOWER_utf8((U8 *)s, tmpbuf, &tculen);
 	}
+	/* If the two differ, we definately cannot do inplace.  */
+	inplace = ulen == tculen;
+	need = slen + 1 - ulen + tculen;
+    } else {
+	doing_utf8 = FALSE;
+	need = slen + 1;
+    }
 
-	if (!SvPADTMP(sv) || SvREADONLY(sv) || ulen != tculen) {
-	    dTARGET;
+    if (SvPADTMP(source) && !SvREADONLY(source) && inplace) {
+	/* We can convert in place.  */
+
+	dest = source;
+	s = d = (U8*)SvPV_force_nomg(source, slen);
+    } else {
+	dTARGET;
+
+	dest = TARG;
+
+	SvUPGRADE(dest, SVt_PV);
+	d = SvGROW(dest, need);
+	(void)SvPOK_only(dest);
+
+	SETs(dest);
+
+	inplace = FALSE;
+    }
+
+    if (doing_utf8) {
+	if(!inplace) {
 	    /* slen is the byte length of the whole SV.
 	     * ulen is the byte length of the original Unicode character
 	     * stored as UTF-8 at s.
@@ -3336,227 +3409,258 @@ PP(pp_ucfirst)
 	     * lowercased) Unicode character stored as UTF-8 at tmpbuf.
 	     * We first set the result to be the titlecased (/lowercased)
 	     * character, and then append the rest of the SV data. */
-	    sv_setpvn(TARG, (char*)tmpbuf, tculen);
+	    sv_setpvn(dest, (char*)tmpbuf, tculen);
 	    if (slen > ulen)
-	        sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
-	    SvUTF8_on(TARG);
-	    SETs(TARG);
+	        sv_catpvn(dest, (char*)(s + ulen), slen - ulen);
+	    SvUTF8_on(dest);
 	}
 	else {
-	    s = (U8*)SvPV_force_nomg(sv, slen);
-	    Copy(tmpbuf, s, tculen, U8);
+	    Copy(tmpbuf, d, tculen, U8);
+	    SvCUR_set(dest, need - 1);
 	}
     }
     else {
-	U8 *s1;
-	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
-	    dTARGET;
-	    SvUTF8_off(TARG);				/* decontaminate */
-	    sv_setsv_nomg(TARG, sv);
-	    sv = TARG;
-	    SETs(sv);
-	}
-	s1 = (U8*)SvPV_force_nomg(sv, slen);
-	if (*s1) {
+	if (*s) {
 	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
-		SvTAINTED_on(sv);
-		*s1 = (op_type == OP_UCFIRST)
-		    ? toUPPER_LC(*s1) : toLOWER_LC(*s1);
+		SvTAINTED_on(dest);
+		*d = (op_type == OP_UCFIRST)
+		    ? toUPPER_LC(*s) : toLOWER_LC(*s);
 	    }
 	    else
-		*s1 = (op_type == OP_UCFIRST) ? toUPPER(*s1) : toLOWER(*s1);
+		*d = (op_type == OP_UCFIRST) ? toUPPER(*s) : toLOWER(*s);
+	} else {
+	    /* See bug #39028  */
+	    *d = *s;
+	}
+
+	if (SvUTF8(source))
+	    SvUTF8_on(dest);
+
+	if (!inplace) {
+	    /* This will copy the trailing NUL  */
+	    Copy(s + 1, d + 1, slen, U8);
+	    SvCUR_set(dest, need - 1);
 	}
     }
-    SvSETMAGIC(sv);
+    SvSETMAGIC(dest);
     RETURN;
 }
 
+/* There's so much setup/teardown code common between uc and lc, I wonder if
+   it would be worth merging the two, and just having a switch outside each
+   of the three tight loops.  */
 PP(pp_uc)
 {
     dSP;
-    SV *sv = TOPs;
+    SV *source = TOPs;
     STRLEN len;
+    STRLEN min;
+    SV *dest;
+    const U8 *s;
+    U8 *d;
 
-    SvGETMAGIC(sv);
-    if (DO_UTF8(sv)) {
+    SvGETMAGIC(source);
+
+    if (SvPADTMP(source) && !SvREADONLY(source) && !SvAMAGIC(source)
+	&& !DO_UTF8(source)) {
+	/* We can convert in place.  */
+
+	dest = source;
+	s = d = (U8*)SvPV_force_nomg(source, len);
+	min = len + 1;
+    } else {
 	dTARGET;
-	STRLEN ulen;
-	register U8 *d;
-	const U8 *s;
-	const U8 *send;
+
+	dest = TARG;
+
+	/* The old implementation would copy source into TARG at this point.
+	   This had the side effect that if source was undef, TARG was now
+	   an undefined SV with PADTMP set, and they don't warn inside
+	   sv_2pv_flags(). However, we're now getting the PV direct from
+	   source, which doesn't have PADTMP set, so it would warn. Hence the
+	   little games.  */
+
+	if (SvOK(source)) {
+	    s = (const U8*)SvPV_nomg_const(source, len);
+	} else {
+	    s = "";
+	    len = 0;
+	}
+	min = len + 1;
+
+	SvUPGRADE(dest, SVt_PV);
+	d = SvGROW(dest, min);
+	(void)SvPOK_only(dest);
+
+	SETs(dest);
+    }
+
+    /* Overloaded values may have toggled the UTF-8 flag on source, so we need
+       to check DO_UTF8 again here.  */
+
+    if (DO_UTF8(source)) {
+	const U8 *const send = s + len;
 	U8 tmpbuf[UTF8_MAXBYTES+1];
 
-	s = (const U8*)SvPV_nomg_const(sv,len);
-	if (!len) {
-	    SvUTF8_off(TARG);				/* decontaminate */
-	    sv_setpvn(TARG, "", 0);
-	    SETs(TARG);
-	}
-	else {
-	    STRLEN min = len + 1;
+	while (s < send) {
+	    const STRLEN u = UTF8SKIP(s);
+	    STRLEN ulen;
 
-	    (void)SvUPGRADE(TARG, SVt_PV);
-	    SvGROW(TARG, min);
-	    (void)SvPOK_only(TARG);
-	    d = (U8*)SvPVX(TARG);
-	    send = s + len;
-	    while (s < send) {
-		STRLEN u = UTF8SKIP(s);
+	    toUPPER_utf8((U8 *)s, tmpbuf, &ulen);
+	    if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
+		/* If the eventually required minimum size outgrows
+		 * the available space, we need to grow. */
+		const UV o = d - (U8*)SvPVX_const(dest);
 
-		toUPPER_utf8((U8 *)s, tmpbuf, &ulen);
-		if (ulen > u && (SvLEN(TARG) < (min += ulen - u))) {
-		    /* If the eventually required minimum size outgrows
-		     * the available space, we need to grow. */
-		    UV o = d - (U8*)SvPVX_const(TARG);
-
-		    /* If someone uppercases one million U+03B0s we
-		     * SvGROW() one million times.  Or we could try
-		     * guessing how much to allocate without allocating
-		     * too much. Such is life. */
-		    SvGROW(TARG, min);
-		    d = (U8*)SvPVX(TARG) + o;
-		}
-		Copy(tmpbuf, d, ulen, U8);
-		d += ulen;
-		s += u;
+		/* If someone uppercases one million U+03B0s we SvGROW() one
+		 * million times.  Or we could try guessing how much to
+		 allocate without allocating too much.  Such is life. */
+		SvGROW(dest, min);
+		d = (U8*)SvPVX(dest) + o;
 	    }
-	    *d = '\0';
-	    SvUTF8_on(TARG);
-	    SvCUR_set(TARG, d - (U8*)SvPVX_const(TARG));
-	    SETs(TARG);
+	    Copy(tmpbuf, d, ulen, U8);
+	    d += ulen;
+	    s += u;
 	}
-    }
-    else {
-	U8 *s;
-	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
-	    dTARGET;
-	    SvUTF8_off(TARG);				/* decontaminate */
-	    sv_setsv_nomg(TARG, sv);
-	    sv = TARG;
-	    SETs(sv);
-	}
-	s = (U8*)SvPV_force_nomg(sv, len);
+	SvUTF8_on(dest);
+	*d = '\0';
+	SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
+    } else {
 	if (len) {
-	    register const U8 *send = s + len;
-
+	    const U8 *const send = s + len;
 	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
-		SvTAINTED_on(sv);
-		for (; s < send; s++)
-		    *s = toUPPER_LC(*s);
+		SvTAINTED_on(dest);
+		for (; s < send; d++, s++)
+		    *d = toUPPER_LC(*s);
 	    }
 	    else {
-		for (; s < send; s++)
-		    *s = toUPPER(*s);
+		for (; s < send; d++, s++)
+		    *d = toUPPER(*s);
 	    }
 	}
+	if (source != dest) {
+	    *d = '\0';
+	    SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
+	}
     }
-    SvSETMAGIC(sv);
+    SvSETMAGIC(dest);
     RETURN;
 }
 
 PP(pp_lc)
 {
     dSP;
-    SV *sv = TOPs;
+    SV *source = TOPs;
     STRLEN len;
+    STRLEN min;
+    SV *dest;
+    const U8 *s;
+    U8 *d;
 
-    SvGETMAGIC(sv);
-    if (DO_UTF8(sv)) {
+    SvGETMAGIC(source);
+
+    if (SvPADTMP(source) && !SvREADONLY(source) && !SvAMAGIC(source)
+	&& !DO_UTF8(source)) {
+	/* We can convert in place.  */
+
+	dest = source;
+	s = d = (U8*)SvPV_force_nomg(source, len);
+	min = len + 1;
+    } else {
 	dTARGET;
-	const U8 *s;
-	STRLEN ulen;
-	register U8 *d;
-	const U8 *send;
+
+	dest = TARG;
+
+	/* The old implementation would copy source into TARG at this point.
+	   This had the side effect that if source was undef, TARG was now
+	   an undefined SV with PADTMP set, and they don't warn inside
+	   sv_2pv_flags(). However, we're now getting the PV direct from
+	   source, which doesn't have PADTMP set, so it would warn. Hence the
+	   little games.  */
+
+	if (SvOK(source)) {
+	    s = (const U8*)SvPV_nomg_const(source, len);
+	} else {
+	    s = "";
+	    len = 0;
+	}
+	min = len + 1;
+
+	SvUPGRADE(dest, SVt_PV);
+	d = SvGROW(dest, min);
+	(void)SvPOK_only(dest);
+
+	SETs(dest);
+    }
+
+    /* Overloaded values may have toggled the UTF-8 flag on source, so we need
+       to check DO_UTF8 again here.  */
+
+    if (DO_UTF8(source)) {
+	const U8 *const send = s + len;
 	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
 
-	s = (const U8*)SvPV_nomg_const(sv,len);
-	if (!len) {
-	    SvUTF8_off(TARG);				/* decontaminate */
-	    sv_setpvn(TARG, "", 0);
-	    SETs(TARG);
-	}
-	else {
-	    STRLEN min = len + 1;
-
-	    (void)SvUPGRADE(TARG, SVt_PV);
-	    SvGROW(TARG, min);
-	    (void)SvPOK_only(TARG);
-	    d = (U8*)SvPVX(TARG);
-	    send = s + len;
-	    while (s < send) {
-		const STRLEN u = UTF8SKIP(s);
-		const UV uv = toLOWER_utf8((U8 *)s, tmpbuf, &ulen);
+	while (s < send) {
+	    const STRLEN u = UTF8SKIP(s);
+	    STRLEN ulen;
+	    const UV uv = toLOWER_utf8((U8 *)s, tmpbuf, &ulen);
 
 #define GREEK_CAPITAL_LETTER_SIGMA 0x03A3 /* Unicode U+03A3 */
-		if (uv == GREEK_CAPITAL_LETTER_SIGMA) {
-		     /*
-		      * Now if the sigma is NOT followed by
-		      * /$ignorable_sequence$cased_letter/;
-		      * and it IS preceded by
-		      * /$cased_letter$ignorable_sequence/;
-		      * where $ignorable_sequence is
-		      * [\x{2010}\x{AD}\p{Mn}]*
-		      * and $cased_letter is
-		      * [\p{Ll}\p{Lo}\p{Lt}]
-		      * then it should be mapped to 0x03C2,
-		      * (GREEK SMALL LETTER FINAL SIGMA),
-		      * instead of staying 0x03A3.
-		      * "should be": in other words,
-		      * this is not implemented yet.
-		      * See lib/unicore/SpecialCasing.txt.
-		      */
-		}
-		if (ulen > u && (SvLEN(TARG) < (min += ulen - u))) {
-		    /* If the eventually required minimum size outgrows
-		     * the available space, we need to grow. */
-		    UV o = d - (U8*)SvPVX_const(TARG);
-
-		    /* If someone lowercases one million U+0130s we
-		     * SvGROW() one million times.  Or we could try
-		     * guessing how much to allocate without allocating.
-		     * too much.  Such is life. */
-		    SvGROW(TARG, min);
-		    d = (U8*)SvPVX(TARG) + o;
-		}
-		Copy(tmpbuf, d, ulen, U8);
-		d += ulen;
-		s += u;
+	    if (uv == GREEK_CAPITAL_LETTER_SIGMA) {
+		NOOP;
+		/*
+		 * Now if the sigma is NOT followed by
+		 * /$ignorable_sequence$cased_letter/;
+		 * and it IS preceded by /$cased_letter$ignorable_sequence/;
+		 * where $ignorable_sequence is [\x{2010}\x{AD}\p{Mn}]*
+		 * and $cased_letter is [\p{Ll}\p{Lo}\p{Lt}]
+		 * then it should be mapped to 0x03C2,
+		 * (GREEK SMALL LETTER FINAL SIGMA),
+		 * instead of staying 0x03A3.
+		 * "should be": in other words, this is not implemented yet.
+		 * See lib/unicore/SpecialCasing.txt.
+		 */
 	    }
-	    *d = '\0';
-	    SvUTF8_on(TARG);
-	    SvCUR_set(TARG, d - (U8*)SvPVX_const(TARG));
-	    SETs(TARG);
-	}
-    }
-    else {
-	U8 *s;
-	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
-	    dTARGET;
-	    SvUTF8_off(TARG);				/* decontaminate */
-	    sv_setsv_nomg(TARG, sv);
-	    sv = TARG;
-	    SETs(sv);
-	}
+	    if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
+		/* If the eventually required minimum size outgrows
+		 * the available space, we need to grow. */
+		const UV o = d - (U8*)SvPVX_const(dest);
 
-	s = (U8*)SvPV_force_nomg(sv, len);
+		/* If someone lowercases one million U+0130s we SvGROW() one
+		 * million times.  Or we could try guessing how much to
+		 allocate without allocating too much.  Such is life. */
+		SvGROW(dest, min);
+		d = (U8*)SvPVX(dest) + o;
+	    }
+	    Copy(tmpbuf, d, ulen, U8);
+	    d += ulen;
+	    s += u;
+	}
+	SvUTF8_on(dest);
+	*d = '\0';
+	SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
+    } else {
 	if (len) {
-	    register const U8 * const send = s + len;
-
+	    const U8 *const send = s + len;
 	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
-		SvTAINTED_on(sv);
-		for (; s < send; s++)
-		    *s = toLOWER_LC(*s);
+		SvTAINTED_on(dest);
+		for (; s < send; d++, s++)
+		    *d = toLOWER_LC(*s);
 	    }
 	    else {
-		for (; s < send; s++)
-		    *s = toLOWER(*s);
+		for (; s < send; d++, s++)
+		    *d = toLOWER(*s);
 	    }
 	}
+	if (source != dest) {
+	    *d = '\0';
+	    SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
+	}
     }
-    SvSETMAGIC(sv);
+    SvSETMAGIC(dest);
     RETURN;
 }
 
