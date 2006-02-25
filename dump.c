@@ -1281,8 +1281,9 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	SvREFCNT_dec(d);
 	return;
     }
-    if (type == SVt_IV || (type >= SVt_PVIV && type != SVt_PVAV
-			   && type != SVt_PVHV && type != SVt_PVCV)) {
+    if ((type >= SVt_PVIV && type != SVt_PVAV && type != SVt_PVHV
+	 && type != SVt_PVCV && !isGV_with_GP(sv))
+	|| type == SVt_IV) {
 	if (SvIsUV(sv)
 #ifdef PERL_OLD_COPY_ON_WRITE
 	               || SvIsCOW(sv)
@@ -1302,7 +1303,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	PerlIO_putc(file, '\n');
     }
     if ((type >= SVt_PVNV && type != SVt_PVAV && type != SVt_PVHV
-	 && type != SVt_PVCV && type != SVt_PVFM)
+	 && type != SVt_PVCV && type != SVt_PVFM && !isGV_with_GP(sv))
 	|| type == SVt_NV) {
 	STORE_NUMERIC_LOCAL_SET_STANDARD();
 	/* %Vg doesn't work? --jhi */

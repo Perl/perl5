@@ -1019,6 +1019,7 @@ in gv.h: */
 	    assert(SvTYPE(_svi) != SVt_PVAV);				\
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
 	    assert(SvTYPE(_svi) != SVt_PVCV);				\
+	    assert(!isGV_with_GP(_svi));				\
 	    &(((XPVIV*) SvANY(_svi))->xiv_iv);				\
 	 }))
 #    define SvUVX(sv)							\
@@ -1027,6 +1028,7 @@ in gv.h: */
 	    assert(SvTYPE(_svi) != SVt_PVAV);				\
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
 	    assert(SvTYPE(_svi) != SVt_PVCV);				\
+	    assert(!isGV_with_GP(_svi));				\
 	    &(((XPVUV*) SvANY(_svi))->xuv_uv);				\
 	 }))
 #    define SvNVX(sv)							\
@@ -1035,6 +1037,7 @@ in gv.h: */
 	    assert(SvTYPE(_svi) != SVt_PVAV);				\
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
 	    assert(SvTYPE(_svi) != SVt_PVFM);				\
+	    assert(!isGV_with_GP(_svi));				\
 	   &(((XPVNV*) SvANY(_svi))->xnv_nv);				\
 	 }))
 #    define SvMAGIC(sv)							\
