@@ -3350,7 +3350,8 @@ PP(pp_ucfirst)
 	    if (slen > ulen)
 	        sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
 	    SvUTF8_on(TARG);
-	    SETs(TARG);
+	    sv = TARG;
+	    SETs(sv);
 	}
 	else {
 	    s = (U8*)SvPV_force_nomg(sv, slen);
@@ -3402,7 +3403,8 @@ PP(pp_uc)
 	if (!len) {
 	    SvUTF8_off(TARG);				/* decontaminate */
 	    sv_setpvn(TARG, "", 0);
-	    SETs(TARG);
+	    sv = TARG;
+	    SETs(sv);
 	}
 	else {
 	    STRLEN min = len + 1;
@@ -3435,7 +3437,8 @@ PP(pp_uc)
 	    *d = '\0';
 	    SvUTF8_on(TARG);
 	    SvCUR_set(TARG, d - (U8*)SvPVX_const(TARG));
-	    SETs(TARG);
+	    sv = TARG;
+	    SETs(sv);
 	}
     }
     else {
@@ -3487,7 +3490,8 @@ PP(pp_lc)
 	if (!len) {
 	    SvUTF8_off(TARG);				/* decontaminate */
 	    sv_setpvn(TARG, "", 0);
-	    SETs(TARG);
+	    sv = TARG;
+	    SETs(sv);
 	}
 	else {
 	    STRLEN min = len + 1;
@@ -3540,7 +3544,8 @@ PP(pp_lc)
 	    *d = '\0';
 	    SvUTF8_on(TARG);
 	    SvCUR_set(TARG, d - (U8*)SvPVX_const(TARG));
-	    SETs(TARG);
+	    sv = TARG;
+	    SETs(sv);
 	}
     }
     else {
