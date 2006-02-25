@@ -3191,6 +3191,8 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 		SvCUR_set(dstr, 0);
 	    }
 	    sv_upgrade(dstr, SVt_PVGV);
+	    (void)SvOK_off(dstr);
+	    SvSCREAM_on(dstr);
 	}
 	GvSTASH(dstr) = GvSTASH(sstr);
 	if (GvSTASH(dstr))
@@ -3209,8 +3211,8 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
     gp_free((GV*)dstr);
     SvSCREAM_off(dstr);
     (void)SvOK_off(dstr);
-    GvINTRO_off(dstr);		/* one-shot flag */
     SvSCREAM_on(dstr);
+    GvINTRO_off(dstr);		/* one-shot flag */
     GvGP(dstr) = gp_ref(GvGP(sstr));
     if (SvTAINTED(sstr))
 	SvTAINT(dstr);
@@ -7700,9 +7702,9 @@ S_sv_unglob(pTHX_ SV *sv)
 	sv_del_backref((SV*)GvSTASH(sv), sv);
 	GvSTASH(sv) = NULL;
     }
-    SvSCREAM_off(sv);
-    Safefree(GvNAME(sv));
     GvMULTI_off(sv);
+    Safefree(GvNAME(sv));
+    SvSCREAM_off(sv);
 
     /* need to keep SvANY(sv) in the right arena */
     xpvmg = new_XPVMG();

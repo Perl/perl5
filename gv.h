@@ -24,32 +24,45 @@ struct gp {
 
 #define GvXPVGV(gv)	((XPVGV*)SvANY(gv))
 
-/* MSVC++ 6.0 (_MSC_VER == 1200) can't compile pp_hot.c with DEBUGGING enabled
- * if we include the following assert(). Must be a compiler bug because it
- * works fine with MSVC++ 7.0. Borland (5.5.1) has the same problem. */
-#if defined(DEBUGGING) && \
-    ((!defined(_MSC_VER) || _MSC_VER > 1200) && !defined(__BORLANDC__))
-#  define GvGP(gv)	(*(assert(SvTYPE(gv) == SVt_PVGV || \
-				  SvTYPE(gv) == SVt_PVLV), \
-			assert(isGV_with_GP(gv)),	\
-			   &((gv)->sv_u.svu_gp)))
-#else
-#  define GvGP(gv)	((gv)->sv_u.svu_gp)
-#endif
-
-#define GvNAME(gv)	(GvXPVGV(gv)->xgv_name)
-#define GvNAMELEN(gv)	(GvXPVGV(gv)->xgv_namelen)
-#define GvFLAGS(gv)	(GvXPVGV(gv)->xgv_flags)
 
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  define GvGP(gv)							\
+	(*({GV *const shplep = (GV *) gv;				\
+	    assert(SvTYPE(shplep) == SVt_PVGV ||			\
+	    SvTYPE(shplep) == SVt_PVLV);				\
+	    assert(isGV_with_GP(shplep));				\
+	    &((shplep)->sv_u.svu_gp);}))
+#  define GvFLAGS(gv)							\
+	(*({GV *const yaah  = (GV *) gv;				\
+	    assert(SvTYPE(yaah) == SVt_PVGV || SvTYPE(yaah) == SVt_PVLV); \
+	    assert(isGV_with_GP(yaah));					\
+	    &(GvXPVGV(yaah)->xgv_flags);}))
 #  define GvSTASH(gv)							\
 	(*({ GV *_gv = (GV *) gv;					\
+	    assert(isGV_with_GP(_gv));					\
 	    assert(SvTYPE(_gv) == SVt_PVGV || SvTYPE(_gv) >= SVt_PVLV);	\
 	    &(GvXPVGV(_gv)->xgv_stash);					\
 	 }))
+#  define GvNAME(gv)							\
+	(*({ GV *zzzz = (GV *) gv;					\
+	    assert(isGV_with_GP(zzzz));					\
+	    assert(SvTYPE(zzzz) == SVt_PVGV || SvTYPE(zzzz) >= SVt_PVLV); \
+	    &(GvXPVGV(zzzz)->xgv_name);					\
+	 }))
+#  define GvNAMELEN(gv)							\
+	(*({ GV *glank = (GV *) gv;					\
+	    assert(isGV_with_GP(glank));				\
+	    assert(SvTYPE(glank) == SVt_PVGV || SvTYPE(glank) >= SVt_PVLV); \
+	    &(GvXPVGV(glank)->xgv_namelen);				\
+	 }))
 #else
-#define GvSTASH(gv)	(GvXPVGV(gv)->xgv_stash)
+#  define GvGP(gv)	((gv)->sv_u.svu_gp)
+#  define GvFLAGS(gv)	(GvXPVGV(gv)->xgv_flags)
+#  define GvSTASH(gv)	(GvXPVGV(gv)->xgv_stash)
+#  define GvNAME(gv)	(GvXPVGV(gv)->xgv_name)
+#  define GvNAMELEN(gv)	(GvXPVGV(gv)->xgv_namelen)
 #endif
+
 /*
 =head1 GV Functions
 
