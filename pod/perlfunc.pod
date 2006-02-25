@@ -228,9 +228,9 @@ C<gmtime>, C<localtime>, C<time>, C<times>
 X<perl5>
 
 C<abs>, C<bless>, C<chomp>, C<chr>, C<exists>, C<formline>, C<glob>,
-C<import>, C<lc>, C<lcfirst>, C<map>, C<my>, C<no>, C<our>, C<prototype>,
-C<qx>, C<qw>, C<readline>, C<readpipe>, C<ref>, C<sub*>, C<sysopen>, C<tie>,
-C<tied>, C<uc>, C<ucfirst>, C<untie>, C<use>
+C<import>, C<lc>, C<lcfirst>, C<lock>, C<map>, C<my>, C<no>, C<our>,
+C<prototype>, C<qr>, C<qw>, C<qx>, C<readline>, C<readpipe>, C<ref>,
+C<sub>*, C<sysopen>, C<tie>, C<tied>, C<uc>, C<ucfirst>, C<untie>, C<use>
 
 * - C<sub> was a keyword in perl4, but in perl5 it is an
 operator, which can be used in expressions.
@@ -3557,7 +3557,7 @@ of values, as follows:
     I	A unsigned integer value.
 	  (This 'integer' is _at_least_ 32 bits wide.  Its exact
            size depends on what a local C compiler calls 'int'.)
- 
+
     n	An unsigned short (16-bit) in "network" (big-endian) order.
     N	An unsigned long (32-bit) in "network" (big-endian) order.
     v	An unsigned short (16-bit) in "VAX" (little-endian) order.
