@@ -63,6 +63,11 @@ struct gp {
 #  define GvNAMELEN(gv)	(GvXPVGV(gv)->xgv_namelen)
 #endif
 
+#define	GvASSIGN_GENERATION(gv)		(0 + ((XPV*) SvANY(gv))->xpv_cur)
+#define	GvASSIGN_GENERATION_set(gv,val)			\
+	STMT_START { assert(SvTYPE(gv) == SVt_PVGV);	\
+		(((XPV*) SvANY(gv))->xpv_cur = (val)); } STMT_END
+
 /*
 =head1 GV Functions
 
