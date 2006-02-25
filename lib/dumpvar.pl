@@ -282,14 +282,14 @@ sub unwrap {
       if ($globPrint) {
 	$s += 3;
        dumpglob($s, "{$$v}", $$v, 1, $m-1);
-      } elsif (defined ($fileno = fileno($v))) {
+      } elsif (defined ($fileno = eval {fileno($v)})) {
 	print( (' ' x ($s+3)) .  "FileHandle({$$v}) => fileno($fileno)\n" );
       }
     } elsif (ref \$v eq 'GLOB') {
       # Raw glob (again?)
       if ($globPrint) {
        dumpglob($s, "{$v}", $v, 1, $m-1) if $globPrint;
-      } elsif (defined ($fileno = fileno(\$v))) {
+      } elsif (defined ($fileno = eval {fileno(\$v)})) {
 	print( (' ' x $s) .  "FileHandle({$v}) => fileno($fileno)\n" );
       }
     }
@@ -368,7 +368,7 @@ sub dumpglob {
       unwrap(\%entry,3+$off,$m) ;
       print( (' ' x $off) .  ")\n" );
     }
-    if (defined ($fileno = fileno(*entry))) {
+    if (defined ($fileno = eval{fileno(*entry)})) {
       print( (' ' x $off) .  "FileHandle($key) => fileno($fileno)\n" );
     }
     if ($all) {
