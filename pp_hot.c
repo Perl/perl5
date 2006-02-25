@@ -1611,6 +1611,9 @@ Perl_do_readline(pTHX)
 	sv = TARG;
 	if (SvROK(sv))
 	    sv_unref(sv);
+	else if (isGV_with_GP(sv)) {
+	    SvPV_force_nolen(sv);
+	}
 	SvUPGRADE(sv, SVt_PV);
 	tmplen = SvLEN(sv);	/* remember if already alloced */
 	if (!tmplen && !SvREADONLY(sv))

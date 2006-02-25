@@ -192,6 +192,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	    Safefree(SvPVX_mutable(gv));
     }
     Newxz(gp, 1, GP);
+    SvSCREAM_on(gv);
     GvGP(gv) = gp_ref(gp);
 #ifdef PERL_DONT_CREATE_GVSV
     GvSV(gv) = NULL;
@@ -204,7 +205,6 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     GvFILE(gv) = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : (char *) "";
     GvCVGEN(gv) = 0;
     GvEGV(gv) = gv;
-    SvSCREAM_on(gv);
     GvSTASH(gv) = stash;
     if (stash)
 	Perl_sv_add_backref(aTHX_ (SV*)stash, (SV*)gv);
@@ -1374,7 +1374,7 @@ Perl_gp_free(pTHX_ GV *gv)
     dVAR;
     GP* gp;
 
-    if (!gv || !(gp = GvGP(gv)))
+    if (!gv || !isGV_with_GP(gv) || !(gp = GvGP(gv)))
 	return;
     if (gp->gp_refcnt == 0) {
 	if (ckWARN_d(WARN_INTERNAL))

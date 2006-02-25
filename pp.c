@@ -3016,7 +3016,9 @@ PP(pp_substr)
 			Perl_warner(aTHX_ packWARN(WARN_SUBSTR),
 				"Attempt to use reference as lvalue in substr");
 		}
-		if (SvOK(sv))		/* is it defined ? */
+		if (isGV_with_GP(sv))
+		    SvPV_force_nolen(sv);
+		else if (SvOK(sv))	/* is it defined ? */
 		    (void)SvPOK_only_UTF8(sv);
 		else
 		    sv_setpvn(sv,"",0);	/* avoid lexical reincarnation */

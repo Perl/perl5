@@ -31,9 +31,10 @@ struct gp {
     ((!defined(_MSC_VER) || _MSC_VER > 1200) && !defined(__BORLANDC__))
 #  define GvGP(gv)	(*(assert(SvTYPE(gv) == SVt_PVGV || \
 				  SvTYPE(gv) == SVt_PVLV), \
-			   &(GvXPVGV(gv)->xgv_gp)))
+			assert(isGV_with_GP(gv)),	\
+			   &((gv)->sv_u.svu_gp)))
 #else
-#  define GvGP(gv)	(GvXPVGV(gv)->xgv_gp)
+#  define GvGP(gv)	((gv)->sv_u.svu_gp)
 #endif
 
 #define GvNAME(gv)	(GvXPVGV(gv)->xgv_name)

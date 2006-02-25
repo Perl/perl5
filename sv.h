@@ -97,6 +97,7 @@ typedef struct hek HEK;
 	char*   svu_pv;		/* pointer to malloced string */	\
 	SV**    svu_array;		\
 	HE**	svu_hash;		\
+	GP*	svu_gp;			\
     }	sv_u
 
 
@@ -403,7 +404,6 @@ struct xpvlv {
     HV*		xmg_stash;	/* class package */
 
     /* a full glob fits into this */
-    GP*		xgv_gp;
     char*	xgv_name;
     STRLEN	xgv_namelen;
     HV*		xgv_stash;
@@ -432,7 +432,6 @@ struct xpvgv {
     } xmg_u;
     HV*		xmg_stash;	/* class package */
 
-    GP*		xgv_gp;
     char*	xgv_name;
     STRLEN	xgv_namelen;
     HV*		xgv_stash;
@@ -763,12 +762,14 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #define assert_not_ROK(sv)	({assert(!SvROK(sv) || !SvRV(sv));}),
+#define assert_not_glob(sv)	({assert(!isGV_with_GP(sv));}),
 #else
 #define assert_not_ROK(sv)	
+#define assert_not_glob(sv)	
 #endif
 
 #define SvOK(sv)		(SvFLAGS(sv) & SVf_OK)
-#define SvOK_off(sv)		(assert_not_ROK(sv)			\
+#define SvOK_off(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
 				 SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC|	\
 						  SVf_IVisUV|SVf_UTF8),	\
 							SvOOK_off(sv))
@@ -779,21 +780,21 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 
 #define SvOKp(sv)		(SvFLAGS(sv) & (SVp_IOK|SVp_NOK|SVp_POK))
 #define SvIOKp(sv)		(SvFLAGS(sv) & SVp_IOK)
-#define SvIOKp_on(sv)		(SvRELEASE_IVX(sv), \
+#define SvIOKp_on(sv)		(assert_not_glob(sv) SvRELEASE_IVX(sv), \
 				    SvFLAGS(sv) |= SVp_IOK)
 #define SvNOKp(sv)		(SvFLAGS(sv) & SVp_NOK)
-#define SvNOKp_on(sv)		(SvFLAGS(sv) |= SVp_NOK)
+#define SvNOKp_on(sv)		(assert_not_glob(sv) SvFLAGS(sv) |= SVp_NOK)
 #define SvPOKp(sv)		(SvFLAGS(sv) & SVp_POK)
-#define SvPOKp_on(sv)		(assert_not_ROK(sv)			\
+#define SvPOKp_on(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
 				 SvFLAGS(sv) |= SVp_POK)
 
 #define SvIOK(sv)		(SvFLAGS(sv) & SVf_IOK)
-#define SvIOK_on(sv)		(SvRELEASE_IVX(sv), \
+#define SvIOK_on(sv)		(assert_not_glob(sv) SvRELEASE_IVX(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 #define SvIOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_IOK|SVp_IOK|SVf_IVisUV))
 #define SvIOK_only(sv)		(SvOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
-#define SvIOK_only_UV(sv)	(SvOK_off_exc_UV(sv), \
+#define SvIOK_only_UV(sv)	(assert_not_glob(sv) SvOK_off_exc_UV(sv), \
 				    SvFLAGS(sv) |= (SVf_IOK|SVp_IOK))
 
 #define SvIOK_UV(sv)		((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))	\
@@ -807,7 +808,8 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 #define SvIsUV_off(sv)		(SvFLAGS(sv) &= ~SVf_IVisUV)
 
 #define SvNOK(sv)		(SvFLAGS(sv) & SVf_NOK)
-#define SvNOK_on(sv)		(SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
+#define SvNOK_on(sv)		(assert_not_glob(sv) \
+				 SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
 #define SvNOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_NOK|SVp_NOK))
 #define SvNOK_only(sv)		(SvOK_off(sv), \
 				    SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
@@ -837,14 +839,14 @@ in gv.h: */
 #define SvUTF8_off(sv)		(SvFLAGS(sv) &= ~(SVf_UTF8))
 
 #define SvPOK(sv)		(SvFLAGS(sv) & SVf_POK)
-#define SvPOK_on(sv)		(assert_not_ROK(sv)			\
+#define SvPOK_on(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
 				 SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 #define SvPOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_POK|SVp_POK))
-#define SvPOK_only(sv)		(assert_not_ROK(sv)			\
+#define SvPOK_only(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
 				 SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|	\
 						  SVf_IVisUV|SVf_UTF8),	\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
-#define SvPOK_only_UTF8(sv)	(assert_not_ROK(sv)			\
+#define SvPOK_only_UTF8(sv)	(assert_not_ROK(sv) assert_not_glob(sv)	\
 				 SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|	\
 						  SVf_IVisUV),		\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
@@ -997,13 +999,20 @@ in gv.h: */
 #    define SvSTASH(sv)	(0 + ((XPVMG*)  SvANY(sv))->xmg_stash)
 #  endif
 #else
-#  define SvPVX(sv) ((sv)->sv_u.svu_pv)
 #  define SvCUR(sv) ((XPV*) SvANY(sv))->xpv_cur
 #  define SvLEN(sv) ((XPV*) SvANY(sv))->xpv_len
 #  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
 
 #  if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 /* These get expanded inside other macros that already use a variable _sv  */
+#    define SvPVX(sv)							\
+	(*({ SV *const _svi = (SV *) sv;				\
+	    assert(SvTYPE(_svi) >= SVt_PV);				\
+	    assert(SvTYPE(_svi) != SVt_PVAV);				\
+	    assert(SvTYPE(_svi) != SVt_PVHV);				\
+	    assert(!isGV_with_GP(_svi));				\
+	    &((_svi)->sv_u.svu_pv);					\
+	 }))
 #    define SvIVX(sv)							\
 	(*({ SV *const _svi = (SV *) sv;				\
 	    assert(SvTYPE(_svi) == SVt_IV || SvTYPE(_svi) >= SVt_PVIV);	\
@@ -1039,6 +1048,7 @@ in gv.h: */
 	    &(((XPVMG*) SvANY(_svi))->xmg_stash);			\
 	  }))
 #  else
+#   define SvPVX(sv) ((sv)->sv_u.svu_pv)
 #    define SvIVX(sv) ((XPVIV*) SvANY(sv))->xiv_iv
 #    define SvUVX(sv) ((XPVUV*) SvANY(sv))->xuv_uv
 #    define SvNVX(sv) ((XPVNV*) SvANY(sv))->xnv_nv
@@ -1100,6 +1110,7 @@ in gv.h: */
 		(((XPV*)  SvANY(sv))->xpv_cur = (val)); } STMT_END
 #define SvLEN_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
+		assert(!isGV_with_GP(sv));	\
 		(((XPV*)  SvANY(sv))->xpv_len = (val)); } STMT_END
 #define SvEND_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
@@ -1681,6 +1692,11 @@ Returns a pointer to the character buffer.
 #define boolSV(b) ((b) ? &PL_sv_yes : &PL_sv_no)
 
 #define isGV(sv) (SvTYPE(sv) == SVt_PVGV)
+/* If I give every macro argument a different name, then there won't be bugs
+   where nested macros get confused. Been there, done that.  */
+#define isGV_with_GP(pwadak) \
+	(((SvFLAGS(pwadak) & (SVp_POK|SVp_SCREAM)) == SVp_SCREAM)	\
+	&& (SvTYPE(pwadak) == SVt_PVGV || SvTYPE(pwadak) == SVt_PVLV))
 
 #define SvGROW(sv,len) (SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
 #define SvGROW_mutable(sv,len) \

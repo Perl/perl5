@@ -308,7 +308,6 @@ do_test(17,
   FLAGS = \\(SCREAM,MULTI(?:,IN_PAD)?\\)
   IV = 0
   NV = 0
-  PV = 0
   NAME = "a"
   NAMELEN = 1
   GvSTASH = $ADDR\\t"main"

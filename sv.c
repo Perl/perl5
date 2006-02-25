@@ -472,7 +472,7 @@ static void
 do_clean_named_objs(pTHX_ SV *sv)
 {
     dVAR;
-    if (SvTYPE(sv) == SVt_PVGV && GvGP(sv)) {
+    if (SvTYPE(sv) == SVt_PVGV && isGV_with_GP(sv) && GvGP(sv)) {
 	if ((
 #ifdef PERL_DONT_CREATE_GVSV
 	     GvSV(sv) &&
@@ -2117,12 +2117,9 @@ S_sv_2iuv_common(pTHX_ SV *sv) {
 	}
     }
     else  {
-	if (((SvFLAGS(sv) & (SVp_POK|SVp_SCREAM)) == SVp_SCREAM)
-	    && (SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVLV)) {
+	if (isGV_with_GP(sv)) {
 	    return PTR2IV(glob_2inpuv((GV *)sv, NULL, TRUE));
 	}
-	if (SvTYPE(sv) == SVt_PVGV)
-	    sv_dump(sv);
 
 	if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 	    if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
@@ -2471,8 +2468,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 #endif /* NV_PRESERVES_UV */
     }
     else  {
-	if (((SvFLAGS(sv) & (SVp_POK|SVp_SCREAM)) == SVp_SCREAM)
-	    && (SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVLV)) {
+	if (isGV_with_GP(sv)) {
 	    glob_2inpuv((GV *)sv, NULL, TRUE);
 	    return 0.0;
 	}
@@ -2809,8 +2805,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 #endif
     }
     else {
-	if (((SvFLAGS(sv) & (SVp_POK|SVp_SCREAM)) == SVp_SCREAM)
-	    && (SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVLV)) {
+	if (isGV_with_GP(sv)) {
 	    return glob_2inpuv((GV *)sv, lp, FALSE);
 	}
 
@@ -2945,8 +2940,7 @@ Perl_sv_2bool(pTHX_ register SV *sv)
 	    if (SvNOKp(sv))
 		return SvNVX(sv) != 0.0;
 	    else {
-		if ((SvFLAGS(sv) & SVp_SCREAM)
-		    && (SvTYPE(sv) == (SVt_PVGV) || SvTYPE(sv) == (SVt_PVLV)))
+		if (isGV_with_GP(sv))
 		    return TRUE;
 		else
 		    return FALSE;
@@ -3189,8 +3183,15 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 	const char * const name = GvNAME(sstr);
 	const STRLEN len = GvNAMELEN(sstr);
 	/* don't upgrade SVt_PVLV: it can hold a glob */
-	if (dtype != SVt_PVLV)
+	if (dtype != SVt_PVLV) {
+	    if (dtype >= SVt_PV) {
+		SvPV_free(dstr);
+		SvPV_set(dstr, 0);
+		SvLEN_set(dstr, 0);
+		SvCUR_set(dstr, 0);
+	    }
 	    sv_upgrade(dstr, SVt_PVGV);
+	}
 	GvSTASH(dstr) = GvSTASH(sstr);
 	if (GvSTASH(dstr))
 	    Perl_sv_add_backref(aTHX_ (SV*)GvSTASH(dstr), dstr);
@@ -3205,10 +3206,11 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
     }
 #endif
 
-    (void)SvOK_off(dstr);
-    SvSCREAM_on(dstr);
-    GvINTRO_off(dstr);		/* one-shot flag */
     gp_free((GV*)dstr);
+    SvSCREAM_off(dstr);
+    (void)SvOK_off(dstr);
+    GvINTRO_off(dstr);		/* one-shot flag */
+    SvSCREAM_on(dstr);
     GvGP(dstr) = gp_ref(GvGP(sstr));
     if (SvTAINTED(sstr))
 	SvTAINT(dstr);
@@ -3685,8 +3687,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
     }
     else {
-	if ((stype == SVt_PVGV || stype == SVt_PVLV)
-		 && (sflags & SVp_SCREAM)) {
+	if (isGV_with_GP(sstr)) {
 	    /* This stringification rule for globs is spread in 3 places.
 	       This feels bad. FIXME.  */
 	    const U32 wasfake = sflags & SVf_FAKE;
@@ -7692,8 +7693,9 @@ S_sv_unglob(pTHX_ SV *sv)
     SvFAKE_off(sv);
     gv_efullname3(temp, (GV *) sv, "*");
 
-    if (GvGP(sv))
+    if (GvGP(sv)) {
 	gp_free((GV*)sv);
+    }
     if (GvSTASH(sv)) {
 	sv_del_backref((SV*)GvSTASH(sv), sv);
 	GvSTASH(sv) = NULL;
@@ -9630,7 +9632,10 @@ Perl_rvpv_dup(pTHX_ SV *dstr, const SV *sstr, CLONE_PARAMS* param)
 	}
 	else {
 	    /* Special case - not normally malloced for some reason */
-	    if ((SvREADONLY(sstr) && SvFAKE(sstr))) {
+	    if (isGV_with_GP(sstr)) {
+		/* Don't need to do anything here.  */
+	    }
+	    else if ((SvREADONLY(sstr) && SvFAKE(sstr))) {
 		/* A "shared" PV - clone it as "shared" PV */
 		SvPV_set(dstr,
 			 HEK_KEY(hek_dup(SvSHARED_HEK_FROM_PV(SvPVX_const(sstr)),
@@ -9774,7 +9779,8 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		 sv_type_details->body_size + sv_type_details->offset, char);
 #endif
 
-	    if (sv_type != SVt_PVAV && sv_type != SVt_PVHV)
+	    if (sv_type != SVt_PVAV && sv_type != SVt_PVHV
+		&& !isGV_with_GP(dstr))
 		Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 
 	    /* The Copy above means that all the source (unduplicated) pointers
@@ -9815,11 +9821,16 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		break;
 	    case SVt_PVGV:
 		GvNAME(dstr)	= SAVEPVN(GvNAME(dstr), GvNAMELEN(dstr));
-		GvSTASH(dstr)	= hv_dup(GvSTASH(dstr), param);
 		/* Don't call sv_add_backref here as it's going to be created
 		   as part of the magic cloning of the symbol table.  */
-		GvGP(dstr)	= gp_dup(GvGP(dstr), param);
-		(void)GpREFCNT_inc(GvGP(dstr));
+		GvSTASH(dstr)	= hv_dup(GvSTASH(dstr), param);
+		if(isGV_with_GP(sstr)) {
+		    /* Danger Will Robinson - GvGP(dstr) isn't initialised
+		       at the point of this comment.  */
+		    GvGP(dstr)	= gp_dup(GvGP(sstr), param);
+		    (void)GpREFCNT_inc(GvGP(dstr));
+		} else
+		    Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 		break;
 	    case SVt_PVIO:
 		IoIFP(dstr)	= fp_dup(IoIFP(dstr), IoTYPE(dstr), param);
