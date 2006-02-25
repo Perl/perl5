@@ -38,19 +38,19 @@ struct gp {
 	    assert(isGV_with_GP(yaah));					\
 	    &(GvXPVGV(yaah)->xpv_cur);}))
 #  define GvSTASH(gv)							\
-	(*({ GV *_gv = (GV *) (gv);					\
+	(*({ GV * const _gv = (GV *) (gv);				\
 	    assert(isGV_with_GP(_gv));					\
 	    assert(SvTYPE(_gv) == SVt_PVGV || SvTYPE(_gv) >= SVt_PVLV);	\
 	    &(GvXPVGV(_gv)->xnv_u.xgv_stash);				\
 	 }))
 #  define GvNAME(gv)							\
-	(*({ GV *zzzz = (GV *) (gv);					\
+	(*({ GV * const zzzz = (GV *) (gv);				\
 	    assert(isGV_with_GP(zzzz));					\
 	    assert(SvTYPE(zzzz) == SVt_PVGV || SvTYPE(zzzz) >= SVt_PVLV); \
 	    &(GvXPVGV(zzzz)->xgv_name);					\
 	 }))
 #  define GvNAMELEN(gv)							\
-	(*({ GV *glank = (GV *) (gv);					\
+	(*({ GV * const glank = (GV *) (gv);				\
 	    assert(isGV_with_GP(glank));				\
 	    assert(SvTYPE(glank) == SVt_PVGV || SvTYPE(glank) >= SVt_PVLV); \
 	    &(GvXPVGV(glank)->xgv_namelen);				\
