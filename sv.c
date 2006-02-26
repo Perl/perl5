@@ -10102,6 +10102,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     param->flags = flags;
     param->proto_perl = proto_perl;
 
+    INIT_TRACK_MEMPOOL(my_perl->Imemory_debug_header, my_perl);
 
     /* arena roots */
     PL_body_arenas = NULL;

@@ -100,9 +100,12 @@
 #   endif
 #endif
 
+
 #ifdef PERL_IMPLICIT_CONTEXT
+
 #  ifdef USE_5005THREADS
 struct perl_thread;
+#    define tTHX	register struct perl_thread *
 #    define pTHX	register struct perl_thread *thr PERL_UNUSED_DECL
 #    define aTHX	thr
 #    define dTHR	dNOOP /* only backward compatibility */
@@ -112,7 +115,6 @@ struct perl_thread;
 #      define MULTIPLICITY
 #    endif
 #    define tTHX	PerlInterpreter*
-#    define sTHX	(sizeof(tTHX) + (MEM_ALIGNBYTES - sizeof(tTHX)%MEM_ALIGNBYTES) % MEM_ALIGNBYTES)
 #    define pTHX	register PerlInterpreter *my_perl PERL_UNUSED_DECL
 #    define aTHX	my_perl
 #    define dTHXa(a)	pTHX = (tTHX)a
@@ -3714,6 +3716,34 @@ typedef Sighandler_t Sigsave_t;
 #else
 #  define MALLOC_INIT
 #  define MALLOC_TERM
+#endif
+
+#if defined(PERL_IMPLICIT_CONTEXT)
+
+struct perl_memory_debug_header;
+struct perl_memory_debug_header {
+  tTHX	interpreter;
+#  ifdef PERL_POISON
+  MEM_SIZE size;
+#  endif
+  struct perl_memory_debug_header *prev;
+  struct perl_memory_debug_header *next;
+};
+
+#  define sTHX	(sizeof(struct perl_memory_debug_header) + \
+	(MEM_ALIGNBYTES - sizeof(struct perl_memory_debug_header) \
+	 %MEM_ALIGNBYTES) % MEM_ALIGNBYTES)
+
+#endif
+
+#ifdef PERL_TRACK_MEMPOOL
+#  define INIT_TRACK_MEMPOOL(header, interp)			\
+	STMT_START {						\
+		(header).interpreter = (interp);		\
+		(header).prev = (header).next = &(header);	\
+	} STMT_END
+#  else
+#  define INIT_TRACK_MEMPOOL(header, interp)
 #endif
 
 

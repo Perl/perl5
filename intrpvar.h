@@ -591,6 +591,11 @@ PERLVARI(Iutf8cache, I8, -1)	/* Is the utf8 caching code enabled? */
 PERLVARI(Iutf8cache, I8, 1)	/* Is the utf8 caching code enabled? */
 #endif
 
+#ifdef PERL_TRACK_MEMPOOL
+/* For use with the memory debugging code in util.c  */
+PERLVAR(Imemory_debug_header, struct perl_memory_debug_header)
+#endif
+
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).
  * (Don't forget to add your variable also to perl_clone()!)

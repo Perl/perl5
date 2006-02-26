@@ -805,6 +805,12 @@ if ($define{'SPRINTF_RETURNS_STRLEN'}) {
 		    )];
 }
 
+unless ($define{'PERL_TRACK_MEMPOOL'}) {
+    skip_symbols [qw(
+                     PL_memory_debug_header
+                    )];
+}
+
 # Ideally this would also check SA_SIGINFO, but there doesn't seem to be an
 # easy way to find that out from here. Fix it if it breaks because there is
 # a platform where the logic here doesn't work, *and* the export lists have to
