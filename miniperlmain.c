@@ -101,10 +101,23 @@ main(int argc, char **argv, char **env)
     exitstatus = perl_parse(my_perl, xs_init, argc, argv, (char **)NULL);
     if (!exitstatus)
         perl_run(my_perl);
-      
+
     exitstatus = perl_destruct(my_perl);
 
     perl_free(my_perl);
+
+#if defined(USE_ENVIRON_ARRAY) && defined(PERL_TRACK_MEMPOOL)
+    /*
+     * The old environment may have been freed by perl_free()
+     * when PERL_TRACK_MEMPOOL is defined, but without having
+     * been restored by perl_destruct() before (this is only
+     * done if destruct_level > 0).
+     *
+     * It is important to have a valid environment for atexit()
+     * routines that are eventually called.
+     */
+    environ = env;
+#endif
 
 #ifdef PERL_GLOBAL_STRUCT
     free_global_struct(plvarsp);
