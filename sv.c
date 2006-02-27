@@ -875,9 +875,16 @@ struct body_details {
    limited by PERL_ARENA_SIZE, so we can safely oversize the
    declarations.
  */
-#define FIT_ARENA(count, body_size)			\
-    (!count || count * body_size > PERL_ARENA_SIZE)	\
-	? (int)(PERL_ARENA_SIZE / body_size) * body_size : count * body_size
+#define FIT_ARENA0(body_size)				\
+    ((size_t)(PERL_ARENA_SIZE / body_size) * body_size)
+#define FIT_ARENAn(count,body_size)			\
+    ( count * body_size <= PERL_ARENA_SIZE)		\
+    ? count * body_size					\
+    : FIT_ARENA0 (body_size)
+#define FIT_ARENA(count,body_size)			\
+    count 						\
+    ? FIT_ARENAn (count, body_size)			\
+    : FIT_ARENA0 (body_size)
 
 /* A macro to work out the offset needed to subtract from a pointer to (say)
 
