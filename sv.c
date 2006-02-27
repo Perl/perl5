@@ -2137,7 +2137,7 @@ S_sv_2iuv_common(pTHX_ SV *sv) {
     }
     else  {
 	if (isGV_with_GP(sv)) {
-	    return PTR2IV(glob_2inpuv((GV *)sv, NULL, TRUE));
+	    return (bool)PTR2IV(glob_2inpuv((GV *)sv, NULL, TRUE));
 	}
 
 	if (!(SvFLAGS(sv) & SVs_PADTMP)) {
