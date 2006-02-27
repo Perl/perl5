@@ -214,7 +214,7 @@ perform the upgrade if necessary.  See C<svtype>.
     ({					\
 	if (sv)				\
 	     (SvREFCNT(sv))++;		\
-	sv;				\
+	(SV *)(sv);				\
     })
 #  define SvREFCNT_inc_NN(sv)		\
     ({					\
