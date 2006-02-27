@@ -1351,9 +1351,21 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	SvANY(sv) = new_body;
 
 	if (old_type_details->copy) {
-	    Copy((char *)old_body + old_type_details->offset,
-		 (char *)new_body + old_type_details->offset,
-		 old_type_details->copy, char);
+	    /* There is now the potential for an upgrade from something without
+	       an offset (PVNV or PVMG) to something with one (PVCV, PVFM)  */
+	    int offset = old_type_details->offset;
+	    int length = old_type_details->copy;
+
+	    if (new_type_details->offset > old_type_details->offset) {
+		int difference
+		    = new_type_details->offset - old_type_details->offset;
+		offset += difference;
+		length -= difference;
+	    }
+	    assert (length >= 0);
+		
+	    Copy((char *)old_body + offset, (char *)new_body + offset, length,
+		 char);
 	}
 
 #ifndef NV_ZERO_IS_ALLBITS_ZERO
