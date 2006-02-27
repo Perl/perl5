@@ -3461,10 +3461,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	if (dtype < SVt_PVNV)
 	    sv_upgrade(dstr, SVt_PVNV);
 	break;
-    case SVt_PVAV:
-    case SVt_PVHV:
-    case SVt_PVCV:
-    case SVt_PVIO:
+    default:
 	{
 	const char * const type = sv_reftype(sstr,0);
 	if (PL_op)
@@ -3481,7 +3478,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
 	/*FALLTHROUGH*/
 
-    default:
+    case SVt_PVMG:
+    case SVt_PVLV:
+    case SVt_PVBM:
 	if (SvGMAGICAL(sstr) && (flags & SV_GMAGIC)) {
 	    mg_get(sstr);
 	    if ((int)SvTYPE(sstr) != stype) {
