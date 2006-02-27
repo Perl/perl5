@@ -1376,7 +1376,13 @@
 #define sv_2iuv_common		S_sv_2iuv_common
 #define glob_assign_glob	S_glob_assign_glob
 #define glob_assign_ref		S_glob_assign_ref
+#endif
+#  if defined(USE_ITHREADS)
+#ifdef PERL_CORE
 #define ptr_table_find		S_ptr_table_find
+#endif
+#  endif
+#ifdef PERL_CORE
 #define find_hash_subscript	S_find_hash_subscript
 #define find_array_subscript	S_find_array_subscript
 #define find_uninit_var		S_find_uninit_var
@@ -3440,7 +3446,13 @@
 #define sv_2iuv_common(a)	S_sv_2iuv_common(aTHX_ a)
 #define glob_assign_glob(a,b,c)	S_glob_assign_glob(aTHX_ a,b,c)
 #define glob_assign_ref(a,b)	S_glob_assign_ref(aTHX_ a,b)
+#endif
+#  if defined(USE_ITHREADS)
+#ifdef PERL_CORE
 #define ptr_table_find		S_ptr_table_find
+#endif
+#  endif
+#ifdef PERL_CORE
 #define find_hash_subscript(a,b)	S_find_hash_subscript(aTHX_ a,b)
 #define find_array_subscript(a,b)	S_find_array_subscript(aTHX_ a,b)
 #define find_uninit_var(a,b,c)	S_find_uninit_var(aTHX_ a,b,c)

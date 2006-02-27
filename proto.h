@@ -3735,11 +3735,13 @@ STATIC void	S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
+#  if defined(USE_ITHREADS)
 STATIC PTR_TBL_ENT_t *	S_ptr_table_find(PTR_TBL_t *tbl, const void *sv)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(2);
 
+#  endif
 STATIC SV *	S_find_hash_subscript(pTHX_ HV *hv, SV *val)
 			__attribute__nonnull__(pTHX_2);
 

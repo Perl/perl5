@@ -1352,7 +1352,9 @@ s	|void *	|more_bodies	|svtype sv_type
 s	|bool	|sv_2iuv_common	|NN SV *sv
 s	|void	|glob_assign_glob|NN SV *dstr|NN SV *sstr|const int dtype
 s	|void	|glob_assign_ref|NN SV *dstr|NN SV *sstr
+#  if defined(USE_ITHREADS)
 sRn	|PTR_TBL_ENT_t *|ptr_table_find|NN PTR_TBL_t *tbl|NN const void *sv
+#  endif
 s	|SV *	|find_hash_subscript|NULLOK HV *hv|NN SV *val
 s	|I32	|find_array_subscript|NULLOK AV *av|NN SV *val
 s	|SV *	|find_uninit_var|NULLOK OP *obase|NULLOK SV *uninit_sv|bool match

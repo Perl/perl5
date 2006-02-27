@@ -9524,7 +9524,7 @@ Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, const void *sv)
 void
 Perl_ptr_table_store(pTHX_ PTR_TBL_t *tbl, const void *oldsv, void *newsv)
 {
-    PTR_TBL_ENT_t *tblent = S_ptr_table_find(tbl, oldsv);
+    PTR_TBL_ENT_t *tblent = ptr_table_find(tbl, oldsv);
     PERL_UNUSED_CONTEXT;
 
     if (tblent) {
