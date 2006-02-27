@@ -2,7 +2,7 @@
 package CPAN::Mirrored::By;
 use strict;
 use vars qw($VERSION);
-$VERSION = sprintf "%.6f", substr(q$Rev: 561 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 657 $,4)/1000000 + 5.4;
 
 sub new { 
     my($self,@arg) = @_;
@@ -21,7 +21,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec;
 use vars qw($VERSION);
-$VERSION = sprintf "%.6f", substr(q$Rev: 561 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 657 $,4)/1000000 + 5.4;
 
 =head1 NAME
 
@@ -51,7 +51,8 @@ sub init {
     unless ($CPAN::VERSION) {
 	require CPAN::Nox;
     }
-    eval {require CPAN::Config;};
+    require CPAN::HandleConfig;
+    CPAN::HandleConfig::require_myconfig_or_config();
     $CPAN::Config ||= {};
     local($/) = "\n";
     local($\) = "";

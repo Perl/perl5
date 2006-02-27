@@ -1,8 +1,8 @@
 package CPAN::HandleConfig;
 use strict;
-use vars qw(%can %keys $dot_cpan $VERSION);
+use vars qw(%can %keys $VERSION);
 
-$VERSION = sprintf "%.6f", substr(q$Rev: 581 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 657 $,4)/1000000 + 5.4;
 
 %can = (
         commit   => "Commit changes to disk",
@@ -67,8 +67,9 @@ if ($^O eq "MSWin32") {
                  )) {
         delete $keys{$k};
         if (exists $CPAN::Config->{$k}) {
-            $CPAN::Frontend->mywarn("deleting previously set config variable ".
-                                    "'$k' => '$CPAN::Config->{$k}'");
+            for ("deleting previously set config variable '$k' => '$CPAN::Config->{$k}'") {
+                $CPAN::Frontend ? $CPAN::Frontend->mywarn($_) : warn $_;
+            }
             delete $CPAN::Config->{$k};
         }
     }
@@ -312,20 +313,34 @@ END
     } else { return }
 }
 
+sub require_myconfig_or_config () {
+    return if $INC{"CPAN/MyConfig.pm"};
+    local @INC = @INC;
+    my $home = home();
+    unshift @INC, File::Spec->catdir($home,'.cpan');
+    eval { require CPAN::MyConfig };
+    unless ($INC{"CPAN/MyConfig.pm"}) { # this guy has settled his needs already
+      eval {require CPAN::Config;}; # not everybody has one
+    }
+}
+
+sub home () {
+    my $home;
+    if ($CPAN::META->has_usable("File::HomeDir")) {
+        $home = File::HomeDir->my_data;
+    } else {
+        $home = $ENV{HOME};
+    }
+    $home;
+}
+
 sub load {
     my($self, %args) = @_;
 	$CPAN::Be_Silent++ if $args{be_silent};
 
     my(@miss);
     use Carp;
-    unless ($INC{"CPAN/MyConfig.pm"}) { # this guy has settled his needs already
-      eval {require CPAN::Config;}; # not everybody has one
-    }
-    unless ($dot_cpan++){
-      unshift @INC, File::Spec->catdir($ENV{HOME},".cpan");
-      eval {require CPAN::MyConfig;}; # override system wide settings
-      shift @INC;
-    }
+    require_myconfig_or_config;
     return unless @miss = $self->missing_config_data;
 
     require CPAN::FirstTime;
@@ -348,7 +363,7 @@ sub load {
             $inc_key = "CPAN/Config.pm";
 	}
 	unless ($configpm) {
-	    $configpmdir = File::Spec->catdir($ENV{HOME},".cpan","CPAN");
+	    $configpmdir = File::Spec->catdir(home,".cpan","CPAN");
 	    File::Path::mkpath($configpmdir);
 	    $configpmtest = File::Spec->catfile($configpmdir,"MyConfig.pm");
 	    $configpm = _configpmtest($configpmdir,$configpmtest);
@@ -471,7 +486,7 @@ package
 
 use strict;
 use vars qw($AUTOLOAD $VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 581 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 657 $,4)/100;
 
 # formerly CPAN::HandleConfig was known as CPAN::Config
 sub AUTOLOAD {

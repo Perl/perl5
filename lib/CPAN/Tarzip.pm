@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION @ISA $BUGHUNTING);
 use CPAN::Debug;
 use File::Basename ();
-$VERSION = sprintf "%.6f", substr(q$Rev: 561 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 659 $,4)/1000000 + 5.4;
 # module is internal to CPAN.pm
 
 @ISA = qw(CPAN::Debug);
@@ -89,7 +89,9 @@ sub gunzip {
 
 sub gtest {
   my($self) = @_;
-  my $read = $self->{FILE};
+  return $self->{GTEST} if exists $self->{GTEST};
+  my $read = $self->{FILE} or die;
+  my $success;
   # After I had reread the documentation in zlib.h, I discovered that
   # uncompressed files do not lead to an gzerror (anymore?).
   if ( $CPAN::META->has_inst("Compress::Zlib") ) {
@@ -104,17 +106,17 @@ sub gtest {
         $buffer = "";
     }
     my $err = $gz->gzerror;
-    my $success = ! $err || $err == Compress::Zlib::Z_STREAM_END();
+    $success = ! $err || $err == Compress::Zlib::Z_STREAM_END();
     if ($len == -s $read){
         $success = 0;
         CPAN->debug("hit an uncompressed file") if $CPAN::DEBUG;
     }
     $gz->gzclose();
     CPAN->debug("err[$err]success[$success]") if $CPAN::DEBUG;
-    return $success;
   } else {
-      return system(qq{$self->{UNGZIPPRG} -dt "$read"})==0;
+    $success = 0==system(qq{$self->{UNGZIPPRG} -qdt "$read"});
   }
+  return $self->{GTEST} = $success;
 }
 
 
@@ -122,17 +124,23 @@ sub TIEHANDLE {
   my($class,$file) = @_;
   my $ret;
   $class->debug("file[$file]");
-  if ($CPAN::META->has_inst("Compress::Zlib")) {
+  my $self = $class->new($file);
+  if (0) {
+  } elsif (!$self->gtest) {
+    my $fh = FileHandle->new($file) or die "Could not open file[$file]: $!";
+    binmode $fh;
+    $self->{FH} = $fh;
+  } elsif ($CPAN::META->has_inst("Compress::Zlib")) {
     my $gz = Compress::Zlib::gzopen($file,"rb") or
 	die "Could not gzopen $file";
-    $ret = bless {GZ => $gz}, $class;
+    $self->{GZ} = $gz;
   } else {
     my $pipe = "$CPAN::Config->{gzip} -dc $file |";
     my $fh = FileHandle->new($pipe) or die "Could not pipe[$pipe]: $!";
     binmode $fh;
-    $ret = bless {FH => $fh}, $class;
+    $self->{FH} = $fh;
   }
-  $ret;
+  $self;
 }
 
 

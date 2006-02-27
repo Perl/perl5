@@ -1,6 +1,6 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN;
-$VERSION = '1.86';
+$VERSION = '1.87';
 $VERSION = eval $VERSION;
 use strict;
 
@@ -212,7 +212,7 @@ ReadLine support %s
 	    my $command = shift @line;
 	    eval { CPAN::Shell->$command(@line) };
 	    warn $@ if $@;
-            if ($command =~ /^(make|test|install|force|notest)$/) {
+            if ($command =~ /^(make|test|install|force|notest|clean)$/) {
                 CPAN::Shell->failed($CPAN::CurrentCommandId,1);
             }
             soft_chdir_with_alternatives(\@cwd);
@@ -416,7 +416,7 @@ For this you just need to type
 });
 	}
     } else {
-	$CPAN::Frontend->mywarn(qq{Unknown shell command '$autoload'. }.
+	$CPAN::Frontend->mywarn(qq{Unknown shell command '$autoload @_'. }.
 				qq{Type ? for help.
 });
     }
@@ -672,8 +672,6 @@ Please make sure the directory exists and is writable.
     my $fh;
     unless ($fh = FileHandle->new(">$lockfile")) {
 	if ($! =~ /Permission/) {
-	    my $incc = $INC{'CPAN/Config.pm'};
-	    my $myincc = File::Spec->catfile($ENV{HOME},'.cpan','CPAN','MyConfig.pm');
 	    $CPAN::Frontend->myprint(qq{
 
 Your configuration suggests that CPAN.pm should use a working
@@ -686,10 +684,8 @@ due to permission problems.
 Please make sure that the configuration variable
     \$CPAN::Config->{cpan_home}
 points to a directory where you can write a .lock file. You can set
-this variable in either
-    $incc
-or
-    $myincc
+this variable in either a CPAN/MyConfig.pm or a CPAN/Config.pm in your
+\@INC path;
 });
             if(!$INC{'CPAN/MyConfig.pm'}) {
                 $CPAN::Frontend->myprint("You don't seem to have a user ".
@@ -836,17 +832,28 @@ sub has_usable {
                'Net::FTP' => [
                             sub {require Net::FTP},
                             sub {require Net::Config},
-                           ]
+                           ],
+               'File::HomeDir' => [
+                                   sub {require File::HomeDir;
+                                        unless (File::HomeDir->VERSION >= 0.52){
+                                            for ("Will not use File::HomeDir, need 0.52\n") {
+                                                warn $_;
+                                                die $_;
+                                            }
+                                        }
+                                    },
+                                  ],
               };
     if ($usable->{$mod}) {
-      for my $c (0..$#{$usable->{$mod}}) {
-        my $code = $usable->{$mod}[$c];
-        my $ret = eval { &$code() };
-        if ($@) {
-          warn "DEBUG: c[$c]\$\@[$@]ret[$ret]";
-          return;
+        for my $c (0..$#{$usable->{$mod}}) {
+            my $code = $usable->{$mod}[$c];
+            my $ret = eval { &$code() };
+            $ret = "" unless defined $ret;
+            if ($@) {
+                # warn "DEBUG: c[$c]\$\@[$@]ret[$ret]";
+                return;
+            }
         }
-      }
     }
     return $HAS_USABLE->{$mod} = 1;
 }
@@ -1558,11 +1565,11 @@ sub reload_this {
 sub mkmyconfig {
     my($self, $cpanpm, %args) = @_;
     require CPAN::FirstTime;
-    $cpanpm = $INC{'CPAN/MyConfig.pm'} || "$ENV{HOME}/.cpan/CPAN/MyConfig.pm";
+    my $home = CPAN::HandleConfig::home;
+    $cpanpm = $INC{'CPAN/MyConfig.pm'} ||
+        File::Spec->catfile(split /\//, "$home/.cpan/CPAN/MyConfig.pm");
     File::Path::mkpath(File::Basename::dirname($cpanpm)) unless -e $cpanpm;
-    if(!$INC{'CPAN/Config.pm'}) {
-        eval { require CPAN::Config; };
-    }
+    CPAN::HandleConfig::require_myconfig_or_config;
     $CPAN::Config ||= {};
     $CPAN::Config = {
         %$CPAN::Config,
@@ -1753,30 +1760,31 @@ sub failed {
     my @failed;
   DIST: for my $d ($CPAN::META->all_objects("CPAN::Distribution")) {
         my $failed = "";
-        for my $nosayer (
-                         "writemakefile",
-                         "signature_verify",
-                         "make",
-                         "make_test",
-                         "install",
-                        ) {
+      NAY: for my $nosayer (
+                            "writemakefile",
+                            "signature_verify",
+                            "make",
+                            "make_test",
+                            "install",
+                            "make_clean",
+                           ) {
             next unless exists $d->{$nosayer};
             next unless (
                          $d->{$nosayer}->can("failed") ?
                          $d->{$nosayer}->failed :
                          $d->{$nosayer} =~ /^NO/
                         );
+            next NAY if $only_id && $only_id != (
+                                                 $d->{$nosayer}->can("commandid")
+                                                 ?
+                                                 $d->{$nosayer}->commandid
+                                                 :
+                                                 $CPAN::CurrentCommandId
+                                                );
             $failed = $nosayer;
             last;
         }
         next DIST unless $failed;
-        next DIST if $only_id && $only_id != (
-                                              $d->{$failed}->can("commandid")
-                                              ?
-                                              $d->{$failed}->commandid
-                                              :
-                                              $CPAN::CurrentCommandId
-                                             );
         my $id = $d->id;
         $id =~ s|^./../||;
         #$print .= sprintf(
@@ -3148,7 +3156,8 @@ use strict;
 # package CPAN::FTP::netrc;
 sub new {
     my($class) = @_;
-    my $file = File::Spec->catfile($ENV{HOME},".netrc");
+    my $home = CPAN::HandleConfig::home;
+    my $file = File::Spec->catfile($home,".netrc");
 
     my($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
        $atime,$mtime,$ctime,$blksize,$blocks)
@@ -3941,7 +3950,9 @@ sub fullname {
 #-> sub CPAN::InfoObj::dump ;
 sub dump {
   my($self) = @_;
-  require Data::Dumper;
+  unless ($CPAN::META->has_inst("Data::Dumper")) {
+      $CPAN::Frontend->mydie("dump command requires Data::Dumper installed");
+  }
   local $Data::Dumper::Sortkeys;
   $Data::Dumper::Sortkeys = 1;
   print Data::Dumper::Dumper($self);
@@ -4936,14 +4947,17 @@ going awry right now.
 #-> sub CPAN::Distribution::eq_CHECKSUM ;
 sub eq_CHECKSUM {
     my($self,$fh,$expect) = @_;
-    my $dg = Digest::SHA->new(256);
-    my($data);
-    while (read($fh, $data, 4096)){
-      $dg->add($data);
+    if ($CPAN::META->has_inst("Digest::SHA")) {
+        my $dg = Digest::SHA->new(256);
+        my($data);
+        while (read($fh, $data, 4096)){
+            $dg->add($data);
+        }
+        my $hexdigest = $dg->hexdigest;
+        # warn "fh[$fh] hex[$hexdigest] aexp[$expectMD5]";
+        return $hexdigest eq $expect;
     }
-    my $hexdigest = $dg->hexdigest;
-    # warn "fh[$fh] hex[$hexdigest] aexp[$expectMD5]";
-    $hexdigest eq $expect;
+    return 1;
 }
 
 #-> sub CPAN::Distribution::force ;
@@ -5577,16 +5591,16 @@ sub clean {
                    )) {
           delete $self->{$k};
       }
-      $self->{make_clean} = "YES";
+      $self->{make_clean} = CPAN::Distrostatus->new("YES");
 
     } else {
       # Hmmm, what to do if make clean failed?
 
-      $CPAN::Frontend->myprint(qq{  $system -- NOT OK
+      $self->{make_clean} = CPAN::Distrostatus->new("NO");
+      $CPAN::Frontend->myprint(qq{  $system -- NOT OK\n});
 
-make clean did not succeed, marking directory as unusable for further work.
-});
-      $self->force("make"); # so that this directory won't be used again
+      # 2006-02-27: seems silly to me to force a make now
+      # $self->force("make"); # so that this directory won't be used again
 
     }
 }
@@ -5679,7 +5693,7 @@ sub install {
                          );
     }
 
-    my($stderr) = $^O =~ /Win/i ? "" : " 2>&1 ";
+    my($stderr) = $^O eq "MSWin32" ? "" : " 2>&1 ";
     my($pipe) = FileHandle->new("$system $stderr |");
     my($makeout) = "";
     while (<$pipe>){
@@ -6194,10 +6208,10 @@ during recursive bundle calls: " unless $report_propagated++;
     }
 }
 
-#sub CPAN::Bundle::xs_file
+# If a bundle contains another that contains an xs_file we have here,
+# we just don't bother I suppose
+#-> sub CPAN::Bundle::xs_file
 sub xs_file {
-    # If a bundle contains another that contains an xs_file we have
-    # here, we just don't bother I suppose
     return 0;
 }
 
@@ -6330,6 +6344,48 @@ sub as_glimpse {
     join "", @m;
 }
 
+#-> sub CPAN::Module::dslip_status
+sub dslip_status {
+    my($self) = @_;
+    my($stat);
+    @{$stat->{D}}{qw,i c a b R M S,}     = qw,idea
+                                              pre-alpha alpha beta released
+                                              mature standard,;
+    @{$stat->{S}}{qw,m d u n a,}         = qw,mailing-list
+                                              developer comp.lang.perl.*
+                                              none abandoned,;
+    @{$stat->{L}}{qw,p c + o h,}         = qw,perl C C++ other hybrid,;
+    @{$stat->{I}}{qw,f r O p h n,}       = qw,functions
+                                              references+ties
+                                              object-oriented pragma
+                                              hybrid none,;
+    @{$stat->{P}}{qw,p g l b a o d r n,} = qw,Standard-Perl
+                                              GPL LGPL
+                                              BSD Artistic
+                                              open-source
+                                              distribution_allowed
+                                              restricted_distribution
+                                              no_licence,;
+    for my $x (qw(d s l i p)) {
+        $stat->{$x}{' '} = 'unknown';
+        $stat->{$x}{'?'} = 'unknown';
+    }
+    my $ro = $self->ro;
+    return +{} unless $ro && $ro->{statd};
+    return {
+            D  => $ro->{statd},
+            S  => $ro->{stats},
+            L  => $ro->{statl},
+            I  => $ro->{stati},
+            P  => $ro->{statp},
+            DV => $stat->{D}{$ro->{statd}},
+            SV => $stat->{S}{$ro->{stats}},
+            LV => $stat->{L}{$ro->{statl}},
+            IV => $stat->{I}{$ro->{stati}},
+            PV => $stat->{P}{$ro->{statp}},
+           };
+}
+
 #-> sub CPAN::Module::as_string ;
 sub as_string {
     my($self) = @_;
@@ -6372,32 +6428,13 @@ sub as_string {
             }
         }
     }
-    my $sprintf3 = "    %-12s %1s%1s%1s%1s (%s,%s,%s,%s)\n";
-    my(%statd,%stats,%statl,%stati);
-    @statd{qw,? i c a b R M S,} = qw,unknown idea
-	pre-alpha alpha beta released mature standard,;
-    @stats{qw,? m d u n a,}       = qw,unknown mailing-list
-	developer comp.lang.perl.* none abandoned,;
-    @statl{qw,? p c + o h,}       = qw,unknown perl C C++ other hybrid,;
-    @stati{qw,? f r O h,}         = qw,unknown functions
-	references+ties object-oriented hybrid,;
-    $statd{' '} = 'unknown';
-    $stats{' '} = 'unknown';
-    $statl{' '} = 'unknown';
-    $stati{' '} = 'unknown';
-    my $ro = $self->ro;
+    my $sprintf3 = "    %-12s %1s%1s%1s%1s%1s (%s,%s,%s,%s,%s)\n";
+    my $dslip = $self->dslip_status;
     push @m, sprintf(
-		     $sprintf3,
-		     'DSLI_STATUS',
-		     $ro->{statd},
-		     $ro->{stats},
-		     $ro->{statl},
-		     $ro->{stati},
-		     $statd{$ro->{statd}},
-		     $stats{$ro->{stats}},
-		     $statl{$ro->{statl}},
-		     $stati{$ro->{stati}}
-		    ) if $ro && $ro->{statd};
+                     $sprintf3,
+                     'DSLIP_STATUS',
+                     @{$dslip}{qw(D S L I P DV SV LV IV PV)},
+                    );
     my $local_file = $self->inst_file;
     unless ($self->{MANPAGE}) {
         if ($local_file) {
@@ -7399,6 +7436,60 @@ or 00modlist.long.txt.gz)
 Returns the CPAN::Distribution object that contains the current
 version of this module.
 
+=item CPAN::Module::dslip_status()
+
+Returns a hash reference. The keys of the hash are the letters C<D>,
+C<S>, C<L>, C<I>, and <P>, for development status, support level,
+language, interface and public licence respectively. The data for the
+DSLIP status are collected by pause.perl.org when authors register
+their namespaces. The values of the 5 hash elements are one-character
+words whose meaning is described in the table below. There are also 5
+hash elements C<DV>, C<SV>, C<LV>, C<IV>, and <PV> that carry a more
+verbose value of the 5 status variables.
+
+Where the 'DSLIP' characters have the following meanings:
+
+  D - Development Stage  (Note: *NO IMPLIED TIMESCALES*):
+    i   - Idea, listed to gain consensus or as a placeholder
+    c   - under construction but pre-alpha (not yet released)
+    a/b - Alpha/Beta testing
+    R   - Released
+    M   - Mature (no rigorous definition)
+    S   - Standard, supplied with Perl 5
+
+  S - Support Level:
+    m   - Mailing-list
+    d   - Developer
+    u   - Usenet newsgroup comp.lang.perl.modules
+    n   - None known, try comp.lang.perl.modules
+    a   - abandoned; volunteers welcome to take over maintainance
+
+  L - Language Used:
+    p   - Perl-only, no compiler needed, should be platform independent
+    c   - C and perl, a C compiler will be needed
+    h   - Hybrid, written in perl with optional C code, no compiler needed
+    +   - C++ and perl, a C++ compiler will be needed
+    o   - perl and another language other than C or C++
+
+  I - Interface Style
+    f   - plain Functions, no references used
+    h   - hybrid, object and function interfaces available
+    n   - no interface at all (huh?)
+    r   - some use of unblessed References or ties
+    O   - Object oriented using blessed references and/or inheritance
+
+  P - Public License
+    p   - Standard-Perl: user may choose between GPL and Artistic
+    g   - GPL: GNU General Public License
+    l   - LGPL: "GNU Lesser General Public License" (previously known as
+          "GNU Library General Public License")
+    b   - BSD: The BSD License
+    a   - Artistic license alone
+    o   - open source: appoved by www.opensource.org
+    d   - allows distribution without restrictions
+    r   - restricted distribtion
+    n   - no license at all
+
 =item CPAN::Module::force($method,@args)
 
 Forces CPAN to perform a task that normally would have failed. Force
@@ -7977,6 +8068,10 @@ including
   use lib "$ENV{HOME}/myperl/lib";
 
 or setting the PERL5LIB environment variable.
+
+While we're speaking about $ENV{HOME}, it might be worth mentioning,
+that for Windows we use the File::HomeDir module that provides an
+equivalent to the concept of the home directory on Unix.
 
 Another thing you should bear in mind is that the UNINST parameter can
 be dnagerous when you are installing into a private area because you
