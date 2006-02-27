@@ -481,16 +481,36 @@ sub runperl {
     die "test.pl:runperl() does not take a hashref"
 	if ref $_[0] and ref $_[0] eq 'HASH';
     my $runperl = &_create_runperl;
+    my $result;
+
     if (${^TAINT}) {
-	# We will assume that if you're running under -T, you really mean
-	# to run a fresh perl, so we'll brute force launder everything for
-	# you
-	foreach ($runperl, $ENV{PATH}) {
-	    $_ =~ /(.*)/s;
-	    $_ = $1;
+	# We will assume that if you're running under -T, you really mean to
+	# run a fresh perl, so we'll brute force launder everything for you
+	my $sep;
+
+	eval "require Config; Config->import";
+	if ($@) {
+	    warn "test.pl had problems loading Config: $@";
+	    $sep = ':';
+	} else {
+	    $sep = $Config{path_sep};
 	}
+
+	my @keys = grep {exists $ENV{$_}} qw(CDPATH IFS ENV BASH_ENV);
+	local @ENV{@keys} = ();
+	# Untaint, plus take out . and empty string:
+	$ENV{PATH} =~ /(.*)/s;
+	local $ENV{PATH}
+	    = join $sep, grep {$_ ne "" and $_ ne "."}
+		split quotemeta ($sep), $1;
+
+	$runperl =~ /(.*)/s;
+	$runperl = $1;
+
+	$result = `$runperl`;
+    } else {
+	$result = `$runperl`;
     }
-    my $result = `$runperl`;
     $result =~ s/\n\n/\n/ if $is_vms; # XXX pipes sometimes double these
     return $result;
 }
