@@ -27,30 +27,30 @@ struct gp {
 
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define GvGP(gv)							\
-	(*({GV *const shplep = (GV *) gv;				\
+	(*({GV *const shplep = (GV *) (gv);				\
 	    assert(SvTYPE(shplep) == SVt_PVGV ||			\
 	    SvTYPE(shplep) == SVt_PVLV);				\
 	    assert(isGV_with_GP(shplep));				\
 	    &((shplep)->sv_u.svu_gp);}))
 #  define GvFLAGS(gv)							\
-	(*({GV *const yaah  = (GV *) gv;				\
+	(*({GV *const yaah  = (GV *) (gv);				\
 	    assert(SvTYPE(yaah) == SVt_PVGV || SvTYPE(yaah) == SVt_PVLV); \
 	    assert(isGV_with_GP(yaah));					\
 	    &(GvXPVGV(yaah)->xpv_cur);}))
 #  define GvSTASH(gv)							\
-	(*({ GV *_gv = (GV *) gv;					\
+	(*({ GV *_gv = (GV *) (gv);					\
 	    assert(isGV_with_GP(_gv));					\
 	    assert(SvTYPE(_gv) == SVt_PVGV || SvTYPE(_gv) >= SVt_PVLV);	\
 	    &(GvXPVGV(_gv)->xnv_u.xgv_stash);				\
 	 }))
 #  define GvNAME(gv)							\
-	(*({ GV *zzzz = (GV *) gv;					\
+	(*({ GV *zzzz = (GV *) (gv);					\
 	    assert(isGV_with_GP(zzzz));					\
 	    assert(SvTYPE(zzzz) == SVt_PVGV || SvTYPE(zzzz) >= SVt_PVLV); \
 	    &(GvXPVGV(zzzz)->xgv_name);					\
 	 }))
 #  define GvNAMELEN(gv)							\
-	(*({ GV *glank = (GV *) gv;					\
+	(*({ GV *glank = (GV *) (gv);					\
 	    assert(isGV_with_GP(glank));				\
 	    assert(SvTYPE(glank) == SVt_PVGV || SvTYPE(glank) >= SVt_PVLV); \
 	    &(GvXPVGV(glank)->xgv_namelen);				\
