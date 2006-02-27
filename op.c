@@ -272,24 +272,27 @@ Perl_op_free(pTHX_ OP *o)
 {
     dVAR;
     OPCODE type;
-    PADOFFSET refcnt;
 
     if (!o || o->op_static)
 	return;
 
+    type = o->op_type;
     if (o->op_private & OPpREFCOUNTED) {
-	switch (o->op_type) {
+	switch (type) {
 	case OP_LEAVESUB:
 	case OP_LEAVESUBLV:
 	case OP_LEAVEEVAL:
 	case OP_LEAVE:
 	case OP_SCOPE:
 	case OP_LEAVEWRITE:
+	    {
+	    PADOFFSET refcnt;
 	    OP_REFCNT_LOCK;
 	    refcnt = OpREFCNT_dec(o);
 	    OP_REFCNT_UNLOCK;
 	    if (refcnt)
 		return;
+	    }
 	    break;
 	default:
 	    break;
