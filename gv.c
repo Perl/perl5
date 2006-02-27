@@ -162,7 +162,8 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 {
     dVAR;
     register GP *gp;
-    const bool doproto = SvTYPE(gv) > SVt_NULL;
+    const U32 old_type = SvTYPE(gv);
+    const bool doproto = old_type > SVt_NULL;
     const char * const proto = (doproto && SvPOK(gv)) ? SvPVX_const(gv) : NULL;
     SV *const has_constant = doproto && SvROK(gv) ? SvRV(gv) : NULL;
 
@@ -183,7 +184,12 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	SvROK_off(gv);
     }
 
-    sv_upgrade((SV*)gv, SVt_PVGV);
+
+    if (old_type < SVt_PVGV) {
+	if (old_type >= SVt_PV)
+	    SvCUR_set(gv, 0);
+	sv_upgrade((SV*)gv, SVt_PVGV);
+    }
     if (SvLEN(gv)) {
 	if (proto) {
 	    SvPV_set(gv, NULL);
