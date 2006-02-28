@@ -1081,7 +1081,7 @@ S_more_bodies (pTHX_ svtype sv_type)
 
 #ifdef DEBUGGING
     if (!done_sanity_check) {
-	int i = SVt_LAST;
+	unsigned int i = SVt_LAST;
 
 	done_sanity_check = TRUE;
 
