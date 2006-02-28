@@ -306,7 +306,6 @@ Perl_op_free(pTHX_ OP *o)
 	    op_free(kid);
 	}
     }
-    type = o->op_type;
     if (type == OP_NULL)
 	type = (OPCODE)o->op_targ;
 
