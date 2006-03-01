@@ -1,6 +1,6 @@
 package assertions;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 # use strict;
 # use warnings;
@@ -183,6 +183,10 @@ assertions - select assertions in blocks of code
   assert { print "asserting 'foo' again\n" };
 
 =head1 DESCRIPTION
+
+  *** WARNING: assertion support is only available from perl version
+  *** 5.9.0 and upwards. Check assertions::compat (also available from
+  *** this package) for an alternative backwards compatible module.
 
 The C<assertions> pragma specifies the tags used to enable and disable
 the execution of assertion subroutines.

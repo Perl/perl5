@@ -1,5 +1,7 @@
 #!./perl
 
+BEGIN { $^W = 0 }
+
 my $i = 1;
 sub ok {
     my $ok = shift;

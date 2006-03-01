@@ -27,7 +27,7 @@ assertions::activate - activate assertions
 This module is used internally by perl (and its C<-A> command-line switch) to
 enable and disable assertions.
 
-It can also be used directly:
+Though it can also be explicetly used:
 
   use assertions::activate qw(foo bar);
 

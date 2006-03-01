@@ -1,5 +1,7 @@
 package assertions::compat;
 
+our $VERSION = '0.02';
+
 require assertions;
 our @ISA = qw(assertions);
 
@@ -40,6 +42,18 @@ my $assertion_ok=eval q{
     ? \&_do_nothing_handler
     : \&_compat_assertion_handler;
 
+*supported =
+    defined($assertion_ok)
+    ? \&_on
+    : \&_off;
+
+unless (defined $assertion_ok) {
+    package assertions;
+    require warnings::register;
+    warnings::register->import;
+}
+
+
 1;
 
 __END__
@@ -69,7 +83,7 @@ assertions::compat - assertions for pre-5.9 versions of perl
 
 C<assertions::compat> allows to use assertions on perl versions prior
 to 5.9.0 (that is the first one to natively support them). Though,
-it's not magic, do not expect it to allow for conditional executed
+it's not magic, do not expect it to allow for conditionally executed
 subroutines.
 
 This module provides support for two different functionalities:
@@ -89,11 +103,17 @@ Be aware that the handler just discards the attribute, so subroutines
 declared as assertions will be B<unconditionally> called on perl without
 native support for them.
 
+This module also provides the C<supported> function to check if
+assertions are supported or not:
+
+  my $supported = assertions::compat::supported();
+
+
 =head2 Assertion execution status as a constant
 
-C<assertions::compat> also allows to create constant subs which value
+C<assertions::compat> also allows to create constant subs whose value
 is the assertion execution status. That allows checking explicitly and
-efficiently if assertions have to be executed on perls without native
+efficiently when assertions have to be executed on perls without native
 assertion support.
 
 For instance...
@@ -123,7 +143,7 @@ When ASST is false, the perl interpreter optimizes away the rest of
 the C<and> statement at compile time.
 
 
-When no assertion selection tags are passed to C<use
+If no assertion selection tags are passed to C<use
 assertions::compat>, the current module name is used as the selection
 tag, so...
 
@@ -146,8 +166,8 @@ this is done on purpose to allow for code like that:
   ASST and assert_bar();
 
 Finally, be aware that while assertion execution status is lexical
-scoped, defined constants are not. You should be careful on that to
-not write inconsistent code. For instance...
+scoped, the defined constants are not. You should be careful on that
+to not write inconsistent code. For instance...
 
   package Foo;
 
