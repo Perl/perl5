@@ -538,8 +538,8 @@ Apa	|OP*	|newLISTOP	|I32 type|I32 flags|NULLOK OP* first|NULLOK OP* last
 Apa	|OP*	|newPADOP	|I32 type|I32 flags|NULLOK SV* sv
 Apa	|OP*	|newPMOP	|I32 type|I32 flags
 Apa	|OP*	|newPVOP	|I32 type|I32 flags|NULLOK char* pv
-Apa	|SV*	|newRV		|NN SV* pref
-Apda	|SV*	|newRV_noinc	|NN SV *sv
+Apa	|SV*	|newRV		|NN SV* sv
+Apda	|SV*	|newRV_noinc	|NN SV* sv
 Apda	|SV*	|newSV		|STRLEN len
 Apa	|OP*	|newSVREF	|NN OP* o
 Apa	|OP*	|newSVOP	|I32 type|I32 flags|NN SV* sv

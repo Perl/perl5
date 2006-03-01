@@ -4529,7 +4529,7 @@ X<newRV_noinc>
 Creates an RV wrapper for an SV.  The reference count for the original
 SV is B<not> incremented.
 
-	SV*	newRV_noinc(SV *sv)
+	SV*	newRV_noinc(SV* sv)
 
 =for hackers
 Found in file sv.c
