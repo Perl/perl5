@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 2.8 2006-01-25 23:56:52 eagle Exp $
+# $Id: Man.pm,v 2.9 2006-02-19 23:02:35 eagle Exp $
 #
 # Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
 #     Russ Allbery <rra@stanford.edu>
@@ -40,7 +40,7 @@ use POSIX qw(strftime);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 2.08;
+$VERSION = 2.09;
 
 # Set the debugging level.  If someone has inserted a debug function into this
 # class already, use that.  Otherwise, use any Pod::Simple debug function
@@ -819,11 +819,18 @@ sub devise_title {
 
 # Determine the modification date and return that, properly formatted in ISO
 # format.  If we can't get the modification date of the input, instead use the
-# current time.
+# current time.  Pod::Simple returns a completely unuseful stringified file
+# handle as the source_filename for input from a file handle, so we have to
+# deal with that as well.
 sub devise_date {
     my ($self) = @_;
     my $input = $self->source_filename;
-    my $time = ($input ? (stat $input)[9] : time);
+    my $time;
+    if ($input) {
+        $time = (stat $input)[9] || time;
+    } else {
+        $time = time;
+    }
     return strftime ('%Y-%m-%d', localtime $time);
 }
 
@@ -1218,6 +1225,14 @@ sub parse_from_file {
     $| = $oldflush;
     select $oldfh;
     return $retval;
+}
+
+# Pod::Simple failed to provide this backward compatibility function, so
+# implement it ourselves.  File handles are one of the inputs that
+# parse_from_file supports.
+sub parse_from_filehandle {
+    my $self = shift;
+    $self->parse_from_file (@_);
 }
 
 ##############################################################################

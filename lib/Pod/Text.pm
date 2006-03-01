@@ -1,5 +1,5 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
-# $Id: Text.pm,v 3.6 2006-01-25 23:56:52 eagle Exp $
+# $Id: Text.pm,v 3.7 2006-02-19 23:02:35 eagle Exp $
 #
 # Copyright 1999, 2000, 2001, 2002, 2004, 2006
 #     by Russ Allbery <rra@stanford.edu>
@@ -41,7 +41,7 @@ use Pod::Simple ();
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 3.06;
+$VERSION = 3.07;
 
 ##############################################################################
 # Initialization
@@ -598,6 +598,14 @@ sub parse_from_file {
     $| = $oldflush;
     select $oldfh;
     return $retval;
+}
+
+# Pod::Simple failed to provide this backward compatibility function, so
+# implement it ourselves.  File handles are one of the inputs that
+# parse_from_file supports.
+sub parse_from_filehandle {
+    my $self = shift;
+    $self->parse_from_file (@_);
 }
 
 ##############################################################################

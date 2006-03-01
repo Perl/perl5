@@ -2213,6 +2213,7 @@ lib/Pod/Text/Color.pm		Convert POD data to color ASCII text
 lib/Pod/Text/Overstrike.pm	Convert POD data to formatted overstrike text
 lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
 lib/Pod/Text/Termcap.pm		Convert POD data to ASCII text with format escapes
+lib/Pod/t/filehandle.t		podlators test
 lib/Pod/t/Functions.t		See if Pod::Functions works
 lib/Pod/t/htmlescp.pod		pod2html escape test input data
 lib/Pod/t/htmlescp.t		pod2html escape test
