@@ -1,6 +1,6 @@
 package B::Lint;
 
-our $VERSION = '1.04';
+our $VERSION = '1.05';
 
 =head1 NAME
 
@@ -280,7 +280,12 @@ sub B::UNOP::lint {
 sub B::PMOP::lint {
     my $op = shift;
     if ($check{implicit_read}) {
-	if ($op->name eq "match" && !($op->flags & OPf_STACKED)) {
+	if ($op->name eq "match"
+		and not ( $op->flags & OPf_STACKED
+		    or join( " ",
+			map $_->name,
+			@{B::parents()} )
+		=~ /^(?:leave )?(?:null )*grep/ ) ) {
 	    warning('Implicit match on $_');
 	}
     }

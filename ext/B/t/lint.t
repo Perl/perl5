@@ -16,7 +16,7 @@ BEGIN {
     require 'test.pl';
 }
 
-plan tests => 16; # adjust also number of skipped tests !
+plan tests => 18; # adjust also number of skipped tests !
 
 # Runs a separate perl interpreter with the appropriate lint options
 # turned on
@@ -42,6 +42,10 @@ RESULT
 runlint 'implicit-read', '/foo/', <<'RESULT';
 Implicit match on $_ at -e line 1
 RESULT
+
+runlint 'implicit-read', 'grep /foo/, ()', '';
+
+runlint 'implicit-read', 'grep { /foo/ } ()', '';
 
 runlint 'implicit-write', 's/foo/bar/', <<'RESULT';
 Implicit substitution on $_ at -e line 1
