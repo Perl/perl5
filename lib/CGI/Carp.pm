@@ -207,6 +207,9 @@ non-overridden program name
   
 =head1 CHANGE LOG
 
+1.29 Patch from Peter Whaite to fix the unfixable problem of CGI::Carp
+     not behaving correctly in an eval() context.
+
 1.05 carpout() added and minor corrections by Marc Hedlund
      <hedlund@best.com> on 11/26/95.
 
@@ -384,7 +387,18 @@ sub ineval {
 
 sub die {
   my ($arg,@rest) = @_;
-  realdie ($arg,@rest) if ineval();
+
+  if ( ineval() )  {
+    if (!ref($arg)) {
+      $arg = join("",($arg,@rest)) || "Died";
+      my($file,$line,$id) = id(1);
+      $arg .= " at $file line $line.\n" unless $arg=~/\n$/;
+      realdie($arg);
+    }
+    else {
+      realdie($arg,@rest);
+    }
+  }
 
   if (!ref($arg)) {
     $arg = join("", ($arg,@rest));

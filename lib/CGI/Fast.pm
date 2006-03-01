@@ -13,7 +13,7 @@ package CGI::Fast;
 # wish, but if you redistribute a modified version, please attach a note
 # listing the modifications you have made.
 
-$CGI::Fast::VERSION='1.06';
+$CGI::Fast::VERSION='1.07';
 
 use CGI;
 use FCGI;
@@ -54,6 +54,7 @@ sub new {
          return undef unless FCGI::accept() >= 0;
      }
      }
+     CGI->_reset_globals;
      return $CGI::Q = $self->SUPER::new($initializer, @param);
 }
 
