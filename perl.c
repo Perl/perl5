@@ -3031,7 +3031,9 @@ Perl_moreswitches(pTHX_ char *s)
 		sv_catpv(sv, start);
 	    else {
 		sv_catpvn(sv, start, s-start);
-		Perl_sv_catpvf(aTHX_ sv, " split(/,/,q%c%s%c)", 0, ++s, 0);
+		/* Don't use NUL as q// delimiter here, this string goes in the
+		 * environment. */
+		Perl_sv_catpvf(aTHX_ sv, " split(/,/,q{%s});", ++s);
 	    }
 	    s += strlen(s);
 	    my_setenv("PERL5DB", SvPV_nolen_const(sv));
