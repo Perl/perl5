@@ -208,7 +208,7 @@ number that noun is, and therefore the endings you have to put on it.
 
 He elaborates:  In "I scanned %g directories", you'd I<expect>
 "directories" to be in the accusative case (since it is the direct
-object in the sentnce) and the plural number,
+object in the sentence) and the plural number,
 except where $directory_count is 1, then you'd expect the singular, of
 course.  Just like Latin or German.  I<But!>  Where $directory_count %
 10 is 1 ("%" for modulo, remember), assuming $directory count is an
