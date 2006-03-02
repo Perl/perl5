@@ -16,7 +16,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 1;
+use Test::More tests => 2;
 use Data::Dumper;
 
 {
@@ -33,3 +33,18 @@ use Data::Dumper;
     my $new_count = iterate_hash(\%ENV);
     is($new_count, $orig_count, 'correctly resets hash iterators');
 }
+
+# [perl #38612] Data::Dumper core dump in 5.8.6, fixed by 5.8.7
+sub foo {
+     my $s = shift;
+     local $Data::Dumper::Terse = 1;
+     my $c = eval Dumper($s);
+     sub bar::quote { }
+     bless $c, 'bar';
+     my $d = Data::Dumper->new([$c]);
+     $d->Freezer('quote');
+     return $d->Dump;
+}
+foo({});
+ok(1, "[perl #38612]"); # Still no core dump? We are fine.
+
