@@ -20,7 +20,7 @@ sub plan {
 	}
     } else {
 	my %plan = @_;
-	$n = $plan{tests}; 
+	$n = $plan{tests};
     }
     print STDOUT "1..$n\n" unless $noplan;
     $planned = $n;
@@ -38,11 +38,11 @@ END {
     }
 }
 
-# Use this instead of "print STDERR" when outputing failure diagnostic 
+# Use this instead of "print STDERR" when outputing failure diagnostic
 # messages
 sub _diag {
     return unless @_;
-    my @mess = map { /^#/ ? "$_\n" : "# $_\n" } 
+    my @mess = map { /^#/ ? "$_\n" : "# $_\n" }
                map { split /\n/ } @_;
     my $fh = $TODO ? *STDOUT : *STDERR;
     print $fh @mess;
@@ -308,7 +308,7 @@ sub eq_array {
     my ($ra, $rb) = @_;
     return 0 unless $#$ra == $#$rb;
     for my $i (0..$#$ra) {
-	next     if !defined $ra->[$i] && !defined $rb->[$i]; 
+	next     if !defined $ra->[$i] && !defined $rb->[$i];
 	return 0 if !defined $ra->[$i];
 	return 0 if !defined $rb->[$i];
 	return 0 unless $ra->[$i] eq $rb->[$i];
@@ -329,7 +329,7 @@ sub eq_hash {
         $fail = 1;
       }
     } else {
-      print STDOUT "# key ", _qq($key), " is ", _qq($value), 
+      print STDOUT "# key ", _qq($key), " is ", _qq($value),
                    ", not in original.\n";
       $fail = 1;
     }
@@ -483,7 +483,11 @@ sub runperl {
     my $runperl = &_create_runperl;
     my $result;
 
-    if (${^TAINT}) {
+    my $tainted = ${^TAINT};
+    my %args = @_;
+    exists $args{switches} && grep m/^-T$/, @{$args{switches}} and $tainted++;
+
+    if ($tainted) {
 	# We will assume that if you're running under -T, you really mean to
 	# run a fresh perl, so we'll brute force launder everything for you
 	my $sep;
@@ -500,9 +504,10 @@ sub runperl {
 	local @ENV{@keys} = ();
 	# Untaint, plus take out . and empty string:
 	$ENV{PATH} =~ /(.*)/s;
-	local $ENV{PATH}
-	    = join $sep, grep {$_ ne "" and $_ ne "."}
-		split quotemeta ($sep), $1;
+	local $ENV{PATH} =
+	    join $sep, grep { $_ ne "" and $_ ne "." and
+		($is_mswin or !((stat$_)[2]&0020)) }
+		    split quotemeta ($sep), $1;
 
 	$runperl =~ /(.*)/s;
 	$runperl = $1;
@@ -527,7 +532,7 @@ my $Perl;
 sub which_perl {
     unless (defined $Perl) {
 	$Perl = $^X;
-	
+
 	# VMS should have 'perl' aliased properly
 	return $Perl if $^O eq 'VMS';
 
@@ -540,11 +545,11 @@ sub which_perl {
 	    $exe = $Config{_exe};
 	}
        $exe = '' unless defined $exe;
-	
+
 	# This doesn't absolutize the path: beware of future chdirs().
 	# We could do File::Spec->abs2rel() but that does getcwd()s,
 	# which is a bit heavyweight to do here.
-	
+
 	if ($Perl =~ /^perl\Q$exe\E$/i) {
 	    my $perl = "perl$exe";
 	    eval "require File::Spec";
@@ -564,7 +569,7 @@ sub which_perl {
 	}
 
 	warn "which_perl: cannot find $Perl from $^X" unless -f $Perl;
-	
+
 	# For subcommands to use.
 	$ENV{PERLEXE} = $Perl;
     }
@@ -604,7 +609,7 @@ sub _fresh_perl {
     if( $^O eq 'VMS' ) {
         $prog =~ s#/dev/null#NL:#;
 
-        # VMS file locking 
+        # VMS file locking
         $prog =~ s{if \(-e _ and -f _ and -r _\)}
                   {if (-e _ and -f _)}
     }
@@ -695,9 +700,9 @@ sub can_ok ($@) {
     }
 
     my $name;
-    $name = @methods == 1 ? "$class->can('$methods[0]')" 
+    $name = @methods == 1 ? "$class->can('$methods[0]')"
                           : "$class->can(...)";
-    
+
     _ok( !@nok, _where(), $name );
 }
 
