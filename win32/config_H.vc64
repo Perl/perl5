@@ -3836,6 +3836,17 @@
  */
 /*#define HAS_AINTL		/ **/
 
+
+/* HAS_BUILTIN_CHOOSE_EXPR:
+ *      Can we handle GCC builtin for compile-time ternary-like expressions
+ */
+/* HAS_BUILTIN_EXPECT:
+ *      Can we handle GCC builtin for telling that certain values are more
+ *      likely
+ */
+/*#define HAS_BUILTIN_EXPECT    / **/
+/*#define HAS_BUILTIN_CHOOSE_EXPR /**/
+
 /* HAS_CLEARENV:
  *	This symbol, if defined, indicates that the clearenv () routine is
  *	available for use.
