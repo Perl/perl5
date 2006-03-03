@@ -87,7 +87,7 @@ for my $cfg (@CFG) {
 	      sub {
 		  return if /^\#/ || /^\s*$/;
 		  return if $cfg eq 'configure.com' &&
-			    ! /^\$ WC "(\w+)='(.*)'"$/;
+			    ! /^\$\s+WC "(\w+)='(.*)'"$/;
 		  # foo='bar'
 		  # foo=bar
 		  # $foo='bar' # VOS 5.8.x specialty
@@ -98,7 +98,7 @@ for my $cfg (@CFG) {
 		  elsif (/^\$?(\w+)=(.*)$/) {
 		      $cfg{$1}++;
 		  }
-		  elsif (/^\$ WC "(\w+)='(.*)'"$/) {
+		  elsif (/^\$\s+WC "(\w+)='(.*)'"$/) {
 		      $cfg{$1}++;
 		  } else {
 		      warn "$cfg:$.:$_";
