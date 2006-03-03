@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Thu Mar  2 21:01:10 CET 2006 [metaconfig 3.0 PL70]
+# Generated on Fri Mar  3 08:34:32 CET 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -20319,18 +20319,20 @@ chmod +x Cppsym.try
 $eunicefix Cppsym.try
 ./Cppsym < Cppsym.know > Cppsym.true
 : Add in any linux cpp "predefined macros":
-if [[ "$osname" == *linux* ]] && [[ "$gccversion" != "" ]]; then
-  tHdrH=_tmpHdr
-  rm -f $tHdrH'.h' $tHdrH
-  touch $tHdrH'.h'
-  if cpp -dM $tHdrH'.h' > $tHdrH'_cppsym.h' && [ -s $tHdrH'_cppsym.h' ]; then
-     sed 's/#define[\ \  ]*//;s/[\ \     ].*$//' <$tHdrH'_cppsym.h' >$tHdrH'_cppsym.real'
-     if [ -s $tHdrH'_cppsym.real' ]; then
-	cat $tHdrH'_cppsym.real' Cppsym.know | sort | uniq | ./Cppsym | sort | uniq > Cppsym.true
-     fi
-  fi
-  rm -f $tHdrH'.h' $tHdrH'_cppsym.h' $tHdrH'_cppsym.real'
-fi
+case "$osname::$gccversion" in
+  *linux*::*.*)
+    tHdrH=_tmpHdr
+    rm -f $tHdrH'.h' $tHdrH
+    touch $tHdrH'.h'
+    if cpp -dM $tHdrH'.h' > $tHdrH'_cppsym.h' && [ -s $tHdrH'_cppsym.h' ]; then
+       sed 's/#define[\ \  ]*//;s/[\ \     ].*$//' <$tHdrH'_cppsym.h' >$tHdrH'_cppsym.real'
+       if [ -s $tHdrH'_cppsym.real' ]; then
+	  cat $tHdrH'_cppsym.real' Cppsym.know | sort | uniq | ./Cppsym | sort | uniq > Cppsym.true
+       fi
+    fi
+    rm -f $tHdrH'.h' $tHdrH'_cppsym.h' $tHdrH'_cppsym.real'
+  ;;
+esac
 : now check the C compiler for additional symbols
 postprocess_cc_v=''
 case "$osname" in
