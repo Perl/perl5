@@ -1,7 +1,11 @@
 CHANGES
 -------
 
-  2.000_07 9 January 2006
+  2.000_08 2 March 2006
+
+      * Moved the IO::* modules out into their own distributions.
+
+  2.000_08 9 January 2006
 
       * Breakout zlib specific code into separate modules.
 

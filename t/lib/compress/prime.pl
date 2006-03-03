@@ -5,7 +5,7 @@ use warnings;
 use bytes;
 
 use Test::More ;
-use ZlibTestUtils;
+use CompTestUtils;
 
 our ($extra);
 

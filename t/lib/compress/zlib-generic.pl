@@ -4,7 +4,7 @@ use warnings;
 use bytes;
 
 use Test::More ;
-use ZlibTestUtils;
+use CompTestUtils;
 
 BEGIN 
 { 
@@ -23,7 +23,7 @@ my $UncompressClass = getInverse($CompressClass);
 my $Error           = getErrorRef($CompressClass);
 my $UnError         = getErrorRef($UncompressClass);
 
-use Compress::Zlib;
+use Compress::Raw::Zlib;
 use IO::Handle qw(SEEK_SET SEEK_CUR SEEK_END);
 
 sub myGZreadFile

@@ -4,14 +4,14 @@ use warnings;
 use bytes;
 
 use Test::More ; 
-use ZlibTestUtils;
+use CompTestUtils;
 
-use Compress::Zlib 2 ;
+use Compress::Raw::Zlib 2 ;
 
 BEGIN 
 { 
     plan(skip_all => "Merge needs Zlib 1.2.1 or better - you have Zlib "  
-                . Compress::Zlib::zlib_version()) 
+                . Compress::Raw::Zlib::zlib_version()) 
         if ZLIB_VERNUM() < 0x1210 ;
 
     # use Test::NoWarnings, if available
@@ -36,8 +36,8 @@ sub run
 
 
     # Check zlib_version and ZLIB_VERSION are the same.
-    is Compress::Zlib::zlib_version, ZLIB_VERSION, 
-        "ZLIB_VERSION matches Compress::Zlib::zlib_version" ;
+    is Compress::Raw::Zlib::zlib_version, ZLIB_VERSION, 
+        "ZLIB_VERSION matches Compress::Raw::Zlib::zlib_version" ;
 
     # Tests     
     #   destination is a file that doesn't exist -- should work ok unless AnyDeflate
@@ -50,11 +50,11 @@ sub run
     {
         title "Misc error cases";
 
-        eval { new Compress::Zlib::InflateScan Bufsize => 0} ;
-        like $@, mkErr("^Compress::Zlib::InflateScan::new: Bufsize must be >= 1, you specified 0"), "  catch bufsize == 0";
+        eval { new Compress::Raw::Zlib::InflateScan Bufsize => 0} ;
+        like $@, mkErr("^Compress::Raw::Zlib::InflateScan::new: Bufsize must be >= 1, you specified 0"), "  catch bufsize == 0";
 
-        eval { Compress::Zlib::inflateScanStream::createDeflateStream(undef, Bufsize => 0) } ;
-        like $@, mkErr("^Compress::Zlib::InflateScan::createDeflateStream: Bufsize must be >= 1, you specified 0"), "  catch bufsize == 0";
+        eval { Compress::Raw::Zlib::inflateScanStream::createDeflateStream(undef, Bufsize => 0) } ;
+        like $@, mkErr("^Compress::Raw::Zlib::InflateScan::createDeflateStream: Bufsize must be >= 1, you specified 0"), "  catch bufsize == 0";
 
     }
 

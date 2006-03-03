@@ -4,7 +4,7 @@ use warnings;
 use bytes;
 
 use Test::More ;
-use ZlibTestUtils;
+use CompTestUtils;
 
 BEGIN {
     plan(skip_all => "oneshot needs Perl 5.005 or better - you have Perl $]" )
@@ -18,7 +18,7 @@ BEGIN {
 
     plan tests => 944 + $extra ;
 
-    use_ok('IO::Uncompress::AnyInflate', qw(anyinflate $AnyInflateError)) ;
+    use_ok('IO::Uncompress::AnyUncompress', qw(anyuncompress $AnyUncompressError)) ;
 
 }
 
@@ -34,7 +34,7 @@ sub run
 
 
     foreach my $bit ($CompressClass, $UncompressClass,
-                     'IO::Uncompress::AnyInflate',
+                     'IO::Uncompress::AnyUncompress',
                     )
     {
         my $Error = getErrorRef($bit);
@@ -136,7 +136,7 @@ sub run
     }
 
     foreach my $bit ($UncompressClass,
-                     'IO::Uncompress::AnyInflate',
+                     'IO::Uncompress::AnyUncompress',
                     )
     {
         my $Error = getErrorRef($bit);
@@ -199,8 +199,8 @@ sub run
 
         #is $result, $data, "  data ok";
 
-        ok ! anyinflate(\$out => \$result, Transparent => 0), "  anyinflate ok";
-        ok $AnyInflateError, "  Got error '$AnyInflateError'" ;
+        ok ! anyuncompress(\$out => \$result, Transparent => 0), "anyuncompress ok";
+        ok $AnyUncompressError, "  Got error '$AnyUncompressError'" ;
     }
 
 
@@ -852,7 +852,7 @@ sub run
     }
 
     foreach my $bit ($UncompressClass,
-                     'IO::Uncompress::AnyInflate',
+                     'IO::Uncompress::AnyUncompress',
                     )
     {
         my $Error = getErrorRef($bit);
@@ -863,8 +863,8 @@ sub run
         my $buffer2 = "ABCDE" ;
         my $keep_orig = $buffer;
 
-        my $comp = compressBuffer($TopType, $buffer) ;
-        my $comp2 = compressBuffer($TopType, $buffer2) ;
+        my $comp = compressBuffer(getTopFuncName($UncompressClass), $buffer) ;
+        my $comp2 = compressBuffer(getTopFuncName($UncompressClass), $buffer2) ;
         my $keep_comp = $comp;
 
         my $incumbent = "incumbent data" ;
@@ -1149,7 +1149,7 @@ sub run
     }
 
     foreach my $bit ($UncompressClass,
-                     'IO::Uncompress::AnyInflate',
+                     'IO::Uncompress::AnyUncompress',
                     )
     {
         # TODO -- Add Append mode tests
@@ -1161,18 +1161,17 @@ sub run
         my $buffer = "abcde" ;
         my $keep_orig = $buffer;
 
-
-        my $null = compressBuffer($TopType, "") ;
-        my $undef = compressBuffer($TopType, undef) ;
-        my $comp = compressBuffer($TopType, $buffer) ;
+        my $null = compressBuffer(getTopFuncName($UncompressClass), "") ;
+        my $undef = compressBuffer(getTopFuncName($UncompressClass), undef) ;
+        my $comp = compressBuffer(getTopFuncName($UncompressClass), $buffer) ;
         my $keep_comp = $comp;
 
         my $incumbent = "incumbent data" ;
 
         my $lex = new LexFile(my $file1, my $file2) ;
 
-        writeFile($file1, compressBuffer($TopType,"data1"));
-        writeFile($file2, compressBuffer($TopType,"data2"));
+        writeFile($file1, compressBuffer(getTopFuncName($UncompressClass),"data1"));
+        writeFile($file2, compressBuffer(getTopFuncName($UncompressClass),"data2"));
 
         my $of = new IO::File "<$file1" ;
         ok $of, "  Created output filehandle" ;
@@ -1233,7 +1232,7 @@ sub run
     }
 
     foreach my $bit ($UncompressClass,
-                     'IO::Uncompress::AnyInflate',
+                     'IO::Uncompress::AnyUncompress',
                     )
     {
         # TODO -- Add Append mode tests
@@ -1253,7 +1252,7 @@ sub run
         #ok ! -d $tmpDir2, "  Temp Directory $tmpDir2 does not exist";
 
         my @files = map { "$tmpDir1/$_.tmp" } qw( a1 a2 a3) ;
-        foreach (@files) { writeFile($_, compressBuffer($TopType, "abc $_")) }
+        foreach (@files) { writeFile($_, compressBuffer(getTopFuncName($UncompressClass), "abc $_")) }
 
         my @expected = map { "abc $_" } @files ;
         my @outFiles = map { s/$tmpDir1/$tmpDir2/; $_ } @files ;

@@ -5,13 +5,13 @@ BEGIN {
     }
 }
 
-use lib 't';
+use lib qw(t t/compress);
 use strict;
 use warnings;
 use bytes;
 
 use Test::More ;
-use ZlibTestUtils;
+use CompTestUtils;
 use Symbol;
 
 BEGIN 
@@ -33,7 +33,7 @@ BEGIN
     plan tests => $count + $extra ;
 
     use_ok('Compress::Zlib', 2) ;
-    use_ok('Compress::Gzip::Constants') ;
+    use_ok('IO::Compress::Gzip::Constants') ;
 
     use_ok('IO::Compress::Gzip', qw($GzipError)) ;
 }
@@ -698,11 +698,14 @@ EOM
     
     # error cases
     eval { $x->deflateParams() };
-    ok $@ =~ m#^Compress::Zlib::deflateParams needs Level and/or Strategy#;
+    #like $@, mkErr("^Compress::Raw::Zlib::deflateParams needs Level and/or Strategy");
+    like $@, "/^Compress::Raw::Zlib::deflateParams needs Level and/or Strategy/";
 
     eval { $x->deflateParams(-Joe => 3) };
-    ok $@ =~ /^Compress::Zlib::deflateStream::deflateParams: unknown key value\(s\) Joe at/
-        or print "# $@\n" ;
+    like $@, "/^Compress::Raw::Zlib::deflateStream::deflateParams: unknown key value/";
+    #like $@, mkErr("^Compress::Raw::Zlib::deflateStream::deflateParams: unknown key value(s) Joe");
+    #ok $@ =~ /^Compress::Zlib::deflateStream::deflateParams: unknown key value\(s\) Joe at/
+    #    or print "# $@\n" ;
 
     ok $x->get_Level()    == Z_BEST_COMPRESSION;
     ok $x->get_Strategy() == Z_DEFAULT_STRATEGY;

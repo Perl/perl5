@@ -1,0 +1,11 @@
+CHANGES
+-------
+
+  2.000_08 2 March 2006
+
+      * Split IO::Compress::Base into its own distribution.
+
+      * Added opened, autoflush and input_line_number.
+
+      * Beefed up support for $.
+

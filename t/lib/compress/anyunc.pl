@@ -6,7 +6,7 @@ use warnings;
 use bytes;
 
 use Test::More ;
-use ZlibTestUtils;
+use CompTestUtils;
 
 BEGIN {
     # use Test::NoWarnings, if available

@@ -5,7 +5,7 @@ BEGIN {
     }
 }
 
-use lib 't';
+use lib qw(t t/compress);
 use strict ;
 use warnings ;
 

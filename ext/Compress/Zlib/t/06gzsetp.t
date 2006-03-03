@@ -5,13 +5,13 @@ BEGIN {
     }
 }
 
-use lib 't';
+use lib qw(t t/compress);
 use strict;
 use warnings;
 use bytes;
  
 use Test::More ;
-use ZlibTestUtils;
+use CompTestUtils;
  
 use Compress::Zlib 2 ;
 

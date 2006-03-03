@@ -1,29 +1,30 @@
 #!/usr/local/bin/perl
 
-use IO::Uncompress::Gunzip qw( $GunzipError );
 use strict ;
 use warnings ;
+
+use Compress::Zlib ;
 
 #die "Usage: gzcat file...\n"
 #    unless @ARGV ;
 
-my $file ;
-my $buffer ;
-my $s;
+my $filename ;
 
 @ARGV = '-' unless @ARGV ;
 
-foreach $file (@ARGV) {
-    
-    my $gz = new IO::Uncompress::Gunzip $file
-         or die "Cannot open $file: $GunzipError\n" ;
+foreach my $filename (@ARGV) {
+    my $buffer ;
 
-    print $buffer
-        while ($s = $gz->read($buffer)) > 0 ;
+    my $file = $filename ;
+    $file = \*STDIN if $file eq '-' ;
 
-    die "Error reading from $file: $GunzipError\n" 
-        if $s < 0 ;
+    my $gz = gzopen($file, "rb") 
+         or die "Cannot open $file: $gzerrno\n" ;
+
+    print $buffer while $gz->gzread($buffer) > 0 ;
+
+    die "Error reading from $filename: $gzerrno" . ($gzerrno+0) . "\n" 
+        if $gzerrno != Z_STREAM_END ;
     
-    $gz->close() ;
+    $gz->gzclose() ;
 }
-

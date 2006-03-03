@@ -5,14 +5,14 @@ BEGIN {
     }
 }
 
-use lib 't';
+use lib qw(t t/compress);
 
 use strict;
 use warnings;
 use bytes;
 
 use Test::More ;
-use ZlibTestUtils;
+use CompTestUtils;
 use Compress::Zlib;
 
 BEGIN 
@@ -25,7 +25,7 @@ BEGIN
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 30 + $extra ;
+    plan tests => 26 + $extra ;
 }
 
 
@@ -111,9 +111,6 @@ sub check
 
 # gzcat
 # #####
-
-title "gzcat.zlib" ;
-check "$Perl ${examples}/gzcat.zlib $file1 $file2 ", $hello1 . $hello2 ;
 
 title "gzcat - command line" ;
 check "$Perl ${examples}/gzcat $file1 $file2",  $hello1 . $hello2;

@@ -5,7 +5,7 @@ use warnings;
 use bytes;
 
 use Test::More ;
-use ZlibTestUtils;
+use CompTestUtils;
 
 BEGIN {
     # use Test::NoWarnings, if available
@@ -64,9 +64,9 @@ EOM
 
                 if ($CompressClass eq 'IO::Compress::Gzip') {
                     %headers = (
-                                  Strict     => 0,
+                                  Strict     => 1,
                                   Comment    => "this is a comment",
-                                  ExtraField => "some extra",
+                                  ExtraField => ["so" => "me extra"],
                                   HeaderCRC  => 1); 
 
                 }
@@ -107,11 +107,12 @@ EOM
                         $cc = new IO::File "<$name" ;
                     }
                     my $gz = new $unc($cc,
-                                   Strict      => 0,
+                                   Strict      => 1,
                                    AutoClose   => 1,
                                    Append      => 1,
                                    MultiStream => 1,
-                                   Transparent => 0);
+                                   Transparent => 0)
+                        or diag $$UnError;
                     isa_ok $gz, $UncompressClass, '    $gz' ;
 
                     my $un = '';

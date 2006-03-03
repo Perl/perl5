@@ -4,7 +4,7 @@ use warnings;
 use bytes;
 
 use Test::More ;
-use ZlibTestUtils;
+use CompTestUtils;
 
 use IO::Handle qw(SEEK_SET SEEK_CUR SEEK_END);
 
@@ -17,14 +17,9 @@ BEGIN
     my $st = eval { require Test::NoWarnings ;  import Test::NoWarnings; 1; };
     $extra = 1
         if $st ;
-    
-    
 
-    plan(tests => 564 + $extra) ;
+    plan(tests => 597 + $extra) ;
 }
-
-
-
 
 sub myGZreadFile
 {
@@ -47,7 +42,6 @@ sub myGZreadFile
 
 sub run
 {
-
     my $CompressClass   = identify();
     $UncompressClass = getInverse($CompressClass);
     my $Error           = getErrorRef($CompressClass);
@@ -176,15 +170,20 @@ EOM
             {
               my $x ;
               ok $x = new $CompressClass $name  ;
+              is $x->autoflush(1), 0, "autoflush";
+              is $x->autoflush(1), 1, "autoflush";
+              ok $x->opened(), "opened";
 
               ok $x->write($hello), "write" ;
               ok $x->flush(), "flush";
               ok $x->close, "close" ;
+              ok ! $x->opened(), "! opened";
             }
 
             {
               my $uncomp;
               ok my $x = new $UncompressClass $name, -Append => 1  ;
+              ok $x->opened(), "opened";
 
               my $len ;
               1 while ($len = $x->read($uncomp)) > 0 ;
@@ -194,6 +193,7 @@ EOM
 
               ok $x->close ;
               is $uncomp, $hello ;
+              ok !$x->opened(), "! opened";
             }
         }
 
@@ -284,6 +284,7 @@ EOM
 
 
             my $lex = new LexFile my $name ;
+            #my $name  = "/tmp/fred";
 
             my $hello = <<EOM ;
 hello world
@@ -327,6 +328,7 @@ EOM
 
         {
             my $lex = new LexFile my $name ;
+            #my $name = "/tmp/fred";
 
             my $hello = <<EOM ;
 hello world
@@ -348,6 +350,8 @@ EOM
 
               ok 1, "  wrote to stdout" ;
             }
+            is myGZreadFile($name), $hello, "  wrote OK";
+            #hexDump($name);
 
             {
               title "Input from stdin via filename '-'";  
@@ -359,7 +363,8 @@ EOM
                  open(SAVEIN, "<&STDIN");
               ok open(STDIN, "<$name"), "  redirect STDIN";
               my $dummy = fileno SAVEIN;
-              $x = new $UncompressClass '-', Append => 1;
+              $x = new $UncompressClass '-', Append => 1, Transparent => 0
+                    or diag $$UnError ;
               ok $x, "  created object" ;
               is $x->fileno(), $stdinFileno, "  fileno ok" ;
 
@@ -376,7 +381,8 @@ EOM
             # and read back 
             #========================================
 
-            my $name = "test.gz" ;
+            #my $name = "test.gz" ;
+            my $lex = new LexFile my $name ;
 
             my $hello = <<EOM ;
 hello world
@@ -388,6 +394,8 @@ EOM
               my $x ;
               ok $x = new $CompressClass(\$buffer) ;
           
+              ok ! defined $x->autoflush(1) ;
+              ok ! defined $x->autoflush(1) ;
               ok ! defined $x->fileno() ;
               is $x->write(''), 0, "Write empty string is ok";
               is $x->write(undef), 0, "Write undef is ok";
@@ -405,6 +413,8 @@ EOM
               my $x ;
               ok $x = new $UncompressClass(\$buffer, Append => 1)  ;
 
+              ok ! defined $x->autoflush(1) ;
+              ok ! defined $x->autoflush(1) ;
               ok ! defined $x->fileno() ;
               1 while $x->read($uncomp) > 0  ;
 
@@ -618,6 +628,8 @@ EOT
             {
                 my $io = new $UncompressClass $name ;
             
+                is $., 0; 
+                is $io->input_line_number, 0; 
                 ok ! $io->eof;
                 is $io->tell(), 0 ;
                 #my @lines = <$io>;
@@ -627,6 +639,7 @@ EOT
                 is $lines[1], "of a paragraph\n" ;
                 is join('', @lines), $str ;
                 is $., 6; 
+                is $io->input_line_number, 6; 
                 is $io->tell(), length($str) ;
             
                 ok $io->eof;
@@ -642,8 +655,12 @@ EOT
             {
                 local $/;  # slurp mode
                 my $io = $UncompressClass->new($name);
+                is $., 0; 
+                is $io->input_line_number, 0; 
                 ok ! $io->eof;
                 my @lines = $io->getlines;
+                is $., 1; 
+                is $io->input_line_number, 1; 
                 ok $io->eof;
                 ok @lines == 1 && $lines[0] eq $str;
             
@@ -657,8 +674,12 @@ EOT
             {
                 local $/ = "";  # paragraph mode
                 my $io = $UncompressClass->new($name);
+                is $., 0; 
+                is $io->input_line_number, 0; 
                 ok ! $io->eof;
                 my @lines = $io->getlines();
+                is $., 2; 
+                is $io->input_line_number, 2; 
                 ok $io->eof;
                 ok @lines == 2 
                     or print "# Got " . scalar(@lines) . " lines, expected 2\n" ;
@@ -682,6 +703,8 @@ EOT
                 ok $err == 0 ;
                 ok $io->eof;
             
+                is $., 3; 
+                is $io->input_line_number, 3; 
                 ok @lines == 3 
                     or print "# Got " . scalar(@lines) . " lines, expected 3\n" ;
                 ok join("-", @lines) eq
@@ -749,10 +772,11 @@ EOT
                 ok ! $io->eof;
                 ok $io->tell() == 0 ;
                 my @lines = $io->getlines();
-                ok @lines == 6; 
+                is @lines, 6; 
                 ok $lines[1] eq "of a paragraph\n" ;
                 ok join('', @lines) eq $str ;
-                ok $. == 6; 
+                is $., 6; 
+                is $io->input_line_number, 6; 
                 ok $io->tell() == length($str) ;
             
                 ok $io->eof;
@@ -770,12 +794,16 @@ EOT
                 my $io = $UncompressClass->new($name);
                 ok ! $io->eof;
                 my @lines = $io->getlines;
+                is $., 1; 
+                is $io->input_line_number, 1; 
                 ok $io->eof;
                 ok @lines == 1 && $lines[0] eq $str;
             
                 $io = $UncompressClass->new($name);
                 ok ! $io->eof;
                 my $line = $io->getline;
+                is $., 1; 
+                is $io->input_line_number, 1; 
                 ok $line eq $str;
                 ok $io->eof;
             }
@@ -785,6 +813,8 @@ EOT
                 my $io = $UncompressClass->new($name);
                 ok ! $io->eof;
                 my @lines = $io->getlines;
+                is $., 2; 
+                is $io->input_line_number, 2; 
                 ok $io->eof;
                 ok @lines == 2 
                     or print "# exected 2 lines, got " . scalar(@lines) . "\n";
@@ -805,9 +835,12 @@ EOT
                     $err++ if $. != ++$no;
                 }
             
+                is $., 3; 
+                is $io->input_line_number, 3; 
                 ok $err == 0 ;
                 ok $io->eof;
             
+
                 ok @lines == 3 ;
                 ok join("-", @lines) eq
                                  "This- is- an example\n" .
@@ -960,7 +993,8 @@ EOT
                 ok myGZreadFile($input) eq $first . "\x00" x 10 . $last ;
 
                 my $io = $UncompressClass->new($input, Strict => 1);
-                ok $io->seek(length($first), SEEK_CUR) ;
+                ok $io->seek(length($first), SEEK_CUR) 
+                    or diag $$UnError ;
                 ok ! $io->eof;
                 is $io->tell(), length($first);
 
@@ -1412,6 +1446,7 @@ EOT
 }
 
 1;
+
 
 
 

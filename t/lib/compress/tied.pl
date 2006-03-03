@@ -5,7 +5,7 @@ use warnings;
 use bytes;
 
 use Test::More ;
-use ZlibTestUtils;
+use CompTestUtils;
 
 our ($BadPerl, $UncompressClass);
  
@@ -31,7 +31,7 @@ BEGIN
 
     plan tests => $tests + $extra ;
 
-    use_ok('Compress::Zlib', 2) ;
+    use_ok('Compress::Raw::Zlib') ;
 
 }
  
