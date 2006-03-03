@@ -6,7 +6,8 @@
 # needed symbols are not lagging after how Configure thinks the world
 # is laid out.
 #
-# VMS is not handled here, due to their own rather elaborate DCL scripting.
+# VMS is probably not handled properly here, due to their own
+# rather elaborate DCL scripting.
 #
 
 use strict;
@@ -30,6 +31,7 @@ my @CFG = (
 	   "win32/config.vc",
 	   "win32/config.vc64",
 	   "wince/config.ce",
+	   "configure.com",
 	  );
 
 sub read_file {
@@ -84,6 +86,8 @@ for my $cfg (@CFG) {
     read_file($cfg,
 	      sub {
 		  return if /^\#/ || /^\s*$/;
+		  return if $cfg eq 'configure.com' &&
+			    ! /^\$ WC "(\w+)='(.*)'"$/;
 		  # foo='bar'
 		  # foo=bar
 		  # $foo='bar' # VOS 5.8.x specialty
@@ -92,6 +96,9 @@ for my $cfg (@CFG) {
 		      $cfg{$1}++;
 		  }
 		  elsif (/^\$?(\w+)=(.*)$/) {
+		      $cfg{$1}++;
+		  }
+		  elsif (/^\$ WC "(\w+)='(.*)'"$/) {
 		      $cfg{$1}++;
 		  } else {
 		      warn "$cfg:$.:$_";
