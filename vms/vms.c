@@ -331,7 +331,10 @@ int scnt;
 	    count++;
 	    scnt = strspn(inspec, "0123456789ABCDEFabcdef");
 	    if (scnt == 4) {
-		scnt = sscanf(inspec, "%2x%2x", outspec, &outspec[1]);
+		unsigned int c1, c2;
+		scnt = sscanf(inspec, "%2x%2x", &c1, &c2);
+		outspec[0] == c1 & 0xff;
+		outspec[1] == c2 & 0xff;
 		if (scnt > 1) {
 		    (*output_cnt) += 2;
 		    count += 4;
@@ -351,7 +354,9 @@ int scnt;
 	    scnt = strspn(inspec, "0123456789ABCDEFabcdef");
 	    if (scnt == 2) {
 		/* Hex encoded */
-		scnt = sscanf(inspec, "%2x", outspec);
+		unsigned int c1;
+		scnt = sscanf(inspec, "%2x", &c1);
+		outspec[0] = c1 & 0xff;
 		if (scnt > 0) {
 		    (*output_cnt++);
 		    count += 2;
@@ -1513,7 +1518,7 @@ mp_do_kill_file(pTHX_ const char *name, int dirflag)
      * system services won't do this by themselves, so we may miss
      * a file "hiding" behind a logical name or search list. */
     Newx(vmsname, NAM$C_MAXRSS+1, char);
-    if (do_tovmsspec(name,vmsname,0) == NULL) {
+    if (do_rmsexpand(name, vmsname, 0, NULL, PERL_RMSEXPAND_M_VMS) == NULL) {
       Safefree(vmsname);
       return -1;
     }
@@ -1525,7 +1530,7 @@ mp_do_kill_file(pTHX_ const char *name, int dirflag)
     }
     else {
       Newx(rspec, NAM$C_MAXRSS+1, char);
-      if (do_rmsexpand(vmsname, rspec, 1, NULL, PERL_RMSEXPAND_M_VMS) == NULL) {
+      if (do_rmsexpand(vmsname, rspec, 0, NULL, PERL_RMSEXPAND_M_VMS) == NULL) {
 	Safefree(rspec);
         Safefree(vmsname);
 	return -1;
@@ -1679,7 +1684,8 @@ Perl_do_rmdir(pTHX_ const char *name)
 int
 Perl_kill_file(pTHX_ const char *name)
 {
-    char vmsname[NAM$C_MAXRSS+1], rspec[NAM$C_MAXRSS+1];
+    char rspec[NAM$C_MAXRSS+1];
+    char *tspec;
     unsigned long int jpicode = JPI$_UIC, type = ACL$C_FILE;
     unsigned long int cxt = 0, aclsts, fndsts, rmsts = -1;
     struct dsc$descriptor_s fildsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
@@ -1703,8 +1709,8 @@ Perl_kill_file(pTHX_ const char *name)
     /* Expand the input spec using RMS, since the CRTL remove() and
      * system services won't do this by themselves, so we may miss
      * a file "hiding" behind a logical name or search list. */
-    if (do_tovmsspec(name,vmsname,0) == NULL) return -1;
-    if (do_rmsexpand(vmsname,rspec,1,NULL,0) == NULL) return -1;
+    tspec = do_rmsexpand(name, rspec, 0, NULL, PERL_RMSEXPAND_M_VMS);
+    if (tspec == NULL) return -1;
     if (!remove(rspec)) return 0;   /* Can we just get rid of it? */
     /* If not, can changing protections help? */
     if (vaxc$errno != RMS$_PRV) return -1;
@@ -3293,12 +3299,15 @@ find_vmspipe(pTHX)
         pPLOC  p = head_PLOC;
 
         while (p) {
+	    char * exp_res;
             strcpy(file, p->dir);
             strncat(file, "vmspipe.com",NAM$C_MAXRSS);
             file[NAM$C_MAXRSS] = '\0';
             p = p->next;
 
-            if (!do_tovmsspec(file,vmspipe_file,0)) continue;
+            exp_res = do_rmsexpand
+		(file, vmspipe_file, 0, NULL, PERL_RMSEXPAND_M_VMS);
+            if (!exp_res) continue;
 
             if (cando_by_name(S_IRUSR, 0, vmspipe_file)
              && cando_by_name(S_IXUSR, 0, vmspipe_file)) {
@@ -5376,7 +5385,7 @@ char *Perl_pathify_dirspec_ts(pTHX_ const char *dir, char *buf)
 static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts)
 {
   static char __tounixspec_retbuf[VMS_MAXRSS];
-  char *dirend, *rslt, *cp1, *cp3, tmp[VMS_MAXRSS];
+  char *dirend, *rslt, *cp1, *cp3, *tmp;
   const char *cp2;
   int devlen, dirlen, retlen = VMS_MAXRSS;
   int expand = 1; /* guarantee room for leading and trailing slashes */
@@ -5523,6 +5532,7 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts)
 #else
   cmp_rslt = strncasecmp(spec,"SYS$SCRATCH:", 12);
 #endif
+  Newx(tmp, VMS_MAXRSS, char);
   if (cmp_rslt == 0) {
   int islnm;
 
@@ -5546,11 +5556,13 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts)
     cp2++;
     if (*cp2 == ']' || *cp2 == '>') {
       *(cp1++) = '.'; *(cp1++) = '/'; *(cp1++) = '\0';
+      Safefree(tmp);
       return rslt;
     }
     else if ( *cp2 != '^' && *cp2 != '.' && *cp2 != '-') { /* add the implied device */
-      if (getcwd(tmp,sizeof tmp,1) == NULL) {
+      if (getcwd(tmp, VMS_MAXRSS-1 ,1) == NULL) {
         if (ts) Safefree(rslt);
+	Safefree(tmp);
         return NULL;
       }
       trnlnm_iter_count = 0;
@@ -5572,7 +5584,10 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts)
       *(cp1++) = '/';
       while (*cp3) {
         *(cp1++) = *(cp3++);
-        if (cp1 - rslt > NAM$C_MAXRSS && !ts && !buf) return NULL; /* No room */
+        if (cp1 - rslt > (VMS_MAXRSS - 1) && !ts && !buf) {
+	    Safefree(tmp);
+	    return NULL; /* No room */
+	}
       }
       *(cp1++) = '/';
     }
@@ -5589,6 +5604,7 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts)
       else cp2++;
     }
   }
+  Safefree(tmp);
   for (; cp2 <= dirend; cp2++) {
     if ((*cp2 == '^')) {
 	/* EFS file escape, pass the next character as is */
@@ -9960,7 +9976,7 @@ Perl_cando_by_name(pTHX_ I32 bit, bool effective, const char *fname)
     }
     fname = fileified;
   }
-  if (!do_rmsexpand(fname, vmsname, 1, NULL, PERL_RMSEXPAND_M_VMS)) {
+  if (!do_rmsexpand(fname, vmsname, 0, NULL, PERL_RMSEXPAND_M_VMS)) {
     Safefree(fileified);
     return FALSE;
   }
