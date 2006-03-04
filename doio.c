@@ -2323,7 +2323,7 @@ Perl_vms_start_glob
    (pTHX_ SV *tmpglob,
     IO *io);
 
-    fp = Perl_vms_start_glob(tmpglob, io);
+    fp = Perl_vms_start_glob(aTHX_ tmpglob, io);
 
 #else /* !VMS */
 #ifdef MACOS_TRADITIONAL
