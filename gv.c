@@ -215,8 +215,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     GvSTASH(gv) = stash;
     if (stash)
 	Perl_sv_add_backref(aTHX_ (SV*)stash, (SV*)gv);
-    GvNAME(gv) = savepvn(name, len);
-    GvNAMELEN(gv) = len;
+    gv_name_set(gv, name, len, 0);
     if (multi || doproto)              /* doproto means it _was_ mentioned */
 	GvMULTI_on(gv);
     if (doproto) {			/* Replicate part of newSUB here. */
@@ -2102,6 +2101,17 @@ Perl_is_gv_magical(pTHX_ const char *name, STRLEN len, U32 flags)
 	}
     }
     return FALSE;
+}
+
+void
+Perl_gv_name_set(pTHX_ GV *gv, const char *name, U32 len, U32 flags)
+{
+    dVAR;
+
+    PERL_UNUSED_ARG(flags);
+
+    GvXPVGV(gv)->xgv_name = name ? savepvn(name, len) : NULL;
+    GvXPVGV(gv)->xgv_namelen = len;
 }
 
 /*

@@ -3216,8 +3216,7 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 	GvSTASH(dstr) = GvSTASH(sstr);
 	if (GvSTASH(dstr))
 	    Perl_sv_add_backref(aTHX_ (SV*)GvSTASH(dstr), dstr);
-	GvNAME(dstr) = savepvn(name, len);
-	GvNAMELEN(dstr) = len;
+	gv_name_set(dstr, name, len, 0);
 	SvFAKE_on(dstr);	/* can coerce to non-glob */
     }
 
@@ -9837,7 +9836,8 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		    LvTARG(dstr) = sv_dup_inc(LvTARG(dstr), param);
 		break;
 	    case SVt_PVGV:
-		GvNAME(dstr)	= SAVEPVN(GvNAME(dstr), GvNAMELEN(dstr));
+		GvXPVGV(dstr)->xgv_name	= SAVEPVN(GvNAME(dstr), GvNAMELEN(dstr));
+
 		/* Don't call sv_add_backref here as it's going to be created
 		   as part of the magic cloning of the symbol table.  */
 		GvSTASH(dstr)	= hv_dup(GvSTASH(dstr), param);

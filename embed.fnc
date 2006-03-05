@@ -278,6 +278,7 @@ Ap	|void	|gv_fullname	|NN SV* sv|NN const GV* gv
 Apmb	|void	|gv_fullname3	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix
 Ap	|void	|gv_fullname4	|NN SV* sv|NN const GV* gv|NULLOK const char* prefix|bool keepmain
 Ap	|void	|gv_init	|NN GV* gv|NULLOK HV* stash|NN const char* name|STRLEN len|int multi
+Ap	|void	|gv_name_set	|NN GV* gv|NULLOK const char *name|U32 len|U32 flags
 Apd	|HV*	|gv_stashpv	|NN const char* name|I32 create
 Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 create
 Apd	|HV*	|gv_stashsv	|NULLOK SV* sv|I32 create

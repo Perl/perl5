@@ -43,25 +43,28 @@ struct gp {
 	    assert(SvTYPE(_gv) == SVt_PVGV || SvTYPE(_gv) >= SVt_PVLV);	\
 	    &(GvXPVGV(_gv)->xnv_u.xgv_stash);				\
 	 }))
-#  define GvNAME(gv)							\
-	(*({ GV * const zzzz = (GV *) (gv);				\
-	    assert(isGV_with_GP(zzzz));					\
-	    assert(SvTYPE(zzzz) == SVt_PVGV || SvTYPE(zzzz) >= SVt_PVLV); \
-	    &(GvXPVGV(zzzz)->xgv_name);					\
-	 }))
-#  define GvNAMELEN(gv)							\
-	(*({ GV * const glank = (GV *) (gv);				\
-	    assert(isGV_with_GP(glank));				\
-	    assert(SvTYPE(glank) == SVt_PVGV || SvTYPE(glank) >= SVt_PVLV); \
-	    &(GvXPVGV(glank)->xgv_namelen);				\
-	 }))
+#  define GvNAME_get(gv)						\
+	({ GV * const zzzz = (GV *) (gv);				\
+	   assert(isGV_with_GP(zzzz));					\
+	   assert(SvTYPE(zzzz) == SVt_PVGV || SvTYPE(zzzz) >= SVt_PVLV); \
+	   0 + (GvXPVGV(zzzz)->xgv_name);				\
+	 })
+#  define GvNAMELEN_get(gv)						\
+	({ GV * const glank = (GV *) (gv);				\
+	   assert(isGV_with_GP(glank));				\
+	   assert(SvTYPE(glank) == SVt_PVGV || SvTYPE(glank) >= SVt_PVLV); \
+	   0 + (GvXPVGV(glank)->xgv_namelen);				\
+	 })
 #else
 #  define GvGP(gv)	((gv)->sv_u.svu_gp)
 #  define GvFLAGS(gv)	(GvXPVGV(gv)->xpv_cur)
 #  define GvSTASH(gv)	(GvXPVGV(gv)->xnv_u.xgv_stash)
-#  define GvNAME(gv)	(GvXPVGV(gv)->xgv_name)
-#  define GvNAMELEN(gv)	(GvXPVGV(gv)->xgv_namelen)
+#  define GvNAME_get(gv)	(0 + GvXPVGV(gv)->xgv_name)
+#  define GvNAMELEN_get(gv)	(0 + GvXPVGV(gv)->xgv_namelen)
 #endif
+
+#define GvNAME(gv)	GvNAME_get(gv)
+#define GvNAMELEN(gv)	GvNAMELEN_get(gv)
 
 #define	GvASSIGN_GENERATION(gv)		(0 + ((XPV*) SvANY(gv))->xpv_len)
 #define	GvASSIGN_GENERATION_set(gv,val)			\
