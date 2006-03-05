@@ -3216,7 +3216,7 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 	GvSTASH(dstr) = GvSTASH(sstr);
 	if (GvSTASH(dstr))
 	    Perl_sv_add_backref(aTHX_ (SV*)GvSTASH(dstr), dstr);
-	gv_name_set(dstr, name, len, 0);
+	gv_name_set((GV *)dstr, name, len, 0);
 	SvFAKE_on(dstr);	/* can coerce to non-glob */
     }
 
@@ -5111,7 +5111,9 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	goto freescalar;
     case SVt_PVGV:
 	gp_free((GV*)sv);
-	Safefree(GvNAME(sv));
+	if (GvNAME_HEK(sv)) {
+	    unshare_hek(GvNAME_HEK(sv));
+	}
 	/* If we're in a stash, we don't own a reference to it. However it does
 	   have a back reference to us, which needs to be cleared.  */
 	if (GvSTASH(sv))
@@ -7715,7 +7717,9 @@ S_sv_unglob(pTHX_ SV *sv)
 	GvSTASH(sv) = NULL;
     }
     GvMULTI_off(sv);
-    Safefree(GvNAME(sv));
+    if (GvNAME_HEK(sv)) {
+	unshare_hek(GvNAME_HEK(sv));
+    }
     SvSCREAM_off(sv);
 
     /* need to keep SvANY(sv) in the right arena */
@@ -9836,7 +9840,8 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		    LvTARG(dstr) = sv_dup_inc(LvTARG(dstr), param);
 		break;
 	    case SVt_PVGV:
-		GvXPVGV(dstr)->xgv_name	= SAVEPVN(GvNAME(dstr), GvNAMELEN(dstr));
+		if (GvNAME_HEK(dstr))
+		    GvNAME_HEK(dstr) = hek_dup(GvNAME_HEK(dstr), param);
 
 		/* Don't call sv_add_backref here as it's going to be created
 		   as part of the magic cloning of the symbol table.  */

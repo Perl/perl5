@@ -2107,11 +2107,15 @@ void
 Perl_gv_name_set(pTHX_ GV *gv, const char *name, U32 len, U32 flags)
 {
     dVAR;
+    U32 hash;
 
     PERL_UNUSED_ARG(flags);
 
-    GvXPVGV(gv)->xgv_name = name ? savepvn(name, len) : NULL;
-    GvXPVGV(gv)->xgv_namelen = len;
+    if (len > I32_MAX)
+	Perl_croak(aTHX_ "panic: gv name too long (%"UVuf")", (UV) len);
+
+    PERL_HASH(hash, name, len);
+    GvXPVGV(gv)->xgv_namehek = name ? share_hek(name, len, hash) : 0;
 }
 
 /*

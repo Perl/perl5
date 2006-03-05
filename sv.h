@@ -487,8 +487,7 @@ struct xpvlv {
     HV*		xmg_stash;	/* class package */
 
     /* a full glob fits into this */
-    char*	xgv_name;
-    STRLEN	xgv_namelen;
+    HEK *	xgv_namehek;
 
     STRLEN	xlv_targoff;
     STRLEN	xlv_targlen;
@@ -516,8 +515,7 @@ struct xpvgv {
     } xmg_u;
     HV*		xmg_stash;	/* class package */
 
-    char*	xgv_name;
-    STRLEN	xgv_namelen;
+    HEK *	xgv_namehek;
 };
 
 struct xpvbm {
