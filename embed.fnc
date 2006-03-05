@@ -1527,7 +1527,7 @@ ApoR	|I32*	|hv_riter_p	|NN HV* hv
 ApoR	|HE**	|hv_eiter_p	|NN HV* hv
 Apo	|void	|hv_riter_set	|NN HV* hv|I32 riter
 Apo	|void	|hv_eiter_set	|NN HV* hv|NULLOK HE* eiter
-Ap	|void	|hv_name_set	|NN HV* hv|NULLOK const char *name|I32 len|int flags
+Ap	|void	|hv_name_set	|NN HV* hv|NULLOK const char *name|U32 len|U32 flags
 poM	|AV**	|hv_backreferences_p	|NN HV* hv
 #if defined(PERL_IN_DUMP_C) || defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 poM	|void	|hv_kill_backrefs	|NN HV* hv

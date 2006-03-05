@@ -4106,7 +4106,7 @@ PERL_CALLCONV void	Perl_hv_riter_set(pTHX_ HV* hv, I32 riter)
 PERL_CALLCONV void	Perl_hv_eiter_set(pTHX_ HV* hv, HE* eiter)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV void	Perl_hv_name_set(pTHX_ HV* hv, const char *name, I32 len, int flags)
+PERL_CALLCONV void	Perl_hv_name_set(pTHX_ HV* hv, const char *name, U32 len, U32 flags)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV AV**	Perl_hv_backreferences_p(pTHX_ HV* hv)

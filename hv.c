@@ -1943,13 +1943,16 @@ Perl_hv_eiter_set(pTHX_ HV *hv, HE *eiter) {
 }
 
 void
-Perl_hv_name_set(pTHX_ HV *hv, const char *name, I32 len, int flags)
+Perl_hv_name_set(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 {
     dVAR;
     struct xpvhv_aux *iter;
     U32 hash;
 
     PERL_UNUSED_ARG(flags);
+
+    if (len > I32_MAX)
+	Perl_croak(aTHX_ "panic: hv name too long (%"UVuf")", (UV) len);
 
     if (SvOOK(hv)) {
 	iter = HvAUX(hv);
