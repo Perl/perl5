@@ -53,7 +53,7 @@ struct gp {
 #  define GvGP(gv)	((gv)->sv_u.svu_gp)
 #  define GvFLAGS(gv)	(GvXPVGV(gv)->xpv_cur)
 #  define GvSTASH(gv)	(GvXPVGV(gv)->xnv_u.xgv_stash)
-#  define GvNAME_HEK(gv)	(GvXPVGV(gv)->xgv_namehek)
+#  define GvNAME_HEK(gv)	(GvXPVGV(gv)->xiv_u.xivu_namehek)
 #endif
 
 #define GvNAME_get(gv)		(GvNAME_HEK(gv) ? HEK_KEY(GvNAME_HEK(gv)) : 0)
