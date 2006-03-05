@@ -1943,6 +1943,55 @@ lib/Memoize/t/tie_sdbm.t	Memoize SDBM interface test
 lib/Memoize/t/tie_storable.t	Memoize Storable interface test
 lib/Memoize/t/tie.t		Memoize tied file test
 lib/Memoize/t/unmemoize.t	Memoize 'unmemoize' function test
+lib/Module/Build/Authoring.pod	Module::Build
+lib/Module/Build/Base.pm	Module::Build
+lib/Module/Build/Changes	Module::Build
+lib/Module/Build/Compat.pm	Module::Build
+lib/Module/Build/ConfigData.pm	Module::Build
+lib/Module/Build/Cookbook.pm	Module::Build
+lib/Module/Build/ModuleInfo.pm	Module::Build
+lib/Module/Build/Notes.pm	Module::Build
+lib/Module/Build/Platform/aix.pm	Module::Build
+lib/Module/Build/Platform/Amiga.pm	Module::Build
+lib/Module/Build/Platform/cygwin.pm	Module::Build
+lib/Module/Build/Platform/darwin.pm	Module::Build
+lib/Module/Build/Platform/Default.pm	Module::Build
+lib/Module/Build/Platform/EBCDIC.pm	Module::Build
+lib/Module/Build/Platform/MacOS.pm	Module::Build
+lib/Module/Build/Platform/MPEiX.pm	Module::Build
+lib/Module/Build/Platform/os2.pm	Module::Build
+lib/Module/Build/Platform/RiscOS.pm	Module::Build
+lib/Module/Build/Platform/Unix.pm	Module::Build
+lib/Module/Build/Platform/VMS.pm	Module::Build
+lib/Module/Build/Platform/VOS.pm	Module::Build
+lib/Module/Build/Platform/Windows.pm	Module::Build
+lib/Module/Build/PodParser.pm	Module::Build
+lib/Module/Build/PPMMaker.pm	Module::Build
+lib/Module/Build/scripts/config_data	Module::Build
+lib/Module/Build/t/basic.t	Module::Build
+lib/Module/Build/t/compat.t	Module::Build
+lib/Module/Build/t/destinations.t	Module::Build
+lib/Module/Build/t/ext.t	Module::Build
+lib/Module/Build/t/extend.t	Module::Build
+lib/Module/Build/t/files.t	Module::Build
+lib/Module/Build/t/install.t	Module::Build
+lib/Module/Build/t/lib/DistGen.pm	Module::Build
+lib/Module/Build/t/lib/MBTest.pm	Module::Build
+lib/Module/Build/t/manifypods.t	Module::Build
+lib/Module/Build/t/metadata.t	Module::Build
+lib/Module/Build/t/metadata2.t	Module::Build
+lib/Module/Build/t/moduleinfo.t	Module::Build
+lib/Module/Build/t/notes.t	Module::Build
+lib/Module/Build/t/parents.t	Module::Build
+lib/Module/Build/t/pod_parser.t	Module::Build
+lib/Module/Build/t/ppm.t	Module::Build
+lib/Module/Build/t/runthrough.t	Module::Build
+lib/Module/Build/t/signature.t	Module::Build
+lib/Module/Build/t/tilde.t	Module::Build
+lib/Module/Build/t/versions.t	Module::Build
+lib/Module/Build/t/xs.t		Module::Build
+lib/Module/Build/t/bundled/Tie/CPHash.pm	Module::Build.pm
+lib/Module/Build.pm		Module::Build
 lib/Module/CoreList/bin/corelist	Module::CoreList
 lib/Module/CoreList.pm			Module::CoreList
 lib/Module/CoreList/t/corelist.t	Module::CoreList
@@ -3479,6 +3528,7 @@ utfebcdic.h			Unicode on EBCDIC (UTF-EBCDIC, tr16) header
 util.c				Utility routines
 util.h				Dummy header
 utils/c2ph.PL			program to translate dbx stabs to perl
+utils/config_data.PL		Module::Build tool
 utils/corelist.PL		Module::CoreList
 utils/cpan.PL			easily interact with CPAN from the command line
 utils/dprofpp.PL		Perl code profile post-processor

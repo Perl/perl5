@@ -7,6 +7,7 @@ pod/podchecker
 pod/podselect
 utils/c2ph      # link = utils/pstruct
 utils/cpan
+utils/config_data
 utils/corelist
 utils/dprofpp
 utils/enc2xs

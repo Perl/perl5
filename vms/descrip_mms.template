@@ -344,7 +344,8 @@ LIBPREREQ = $(ARCHDIR)Config.pm $(ARCHDIR)Config_heavy.pl [.lib.VMS]Filespec.pm 
 utils1 = [.lib.pods]perldoc.com [.lib.ExtUtils]Miniperl.pm [.utils]c2ph.com [.utils]h2ph.com 
 utils2 = [.utils]h2xs.com [.utils]libnetcfg.com [.lib]perlbug.com [.lib]perlcc.com [.utils]dprofpp.com 
 utils3 = [.utils]perlivp.com [.lib]splain.com [.utils]pl2pm.com [.utils]xsubpp.com [.utils]instmodsh.com
-utils4 = [.utils]enc2xs.com [.utils]piconv.com [.utils]cpan.com [.utils]prove.com [.utils]ptar.com [.utils]ptardiff.com [.utils]shasum.com [.utils]corelist.com
+utils4 = [.utils]enc2xs.com [.utils]piconv.com [.utils]cpan.com [.utils]prove.com [.utils]ptar.com [.utils]ptardiff.com [.utils]shasum.com
+utils5 = [.utils]corelist.com [.utils]config_data.com
 
 .ifdef NOX2P
 all : base extras archcorefiles preplibrary perlpods
@@ -365,7 +366,7 @@ extras : dynext libmods utils podxform extra.pods
 	@ $(NOOP)
 libmods : $(LIBPREREQ)
 	@ $(NOOP)
-utils : $(utils1) $(utils2) $(utils3) $(utils4)
+utils : $(utils1) $(utils2) $(utils3) $(utils4) $(utils5)
 	@ $(NOOP)
 podxform : [.lib.pods]pod2text.com [.lib.pods]pod2html.com [.lib.pods]pod2latex.com [.lib.pods]pod2man.com [.lib.pods]podchecker.com [.lib.pods]pod2usage.com [.lib.pods]podselect.com
 	@ $(NOOP)
@@ -561,6 +562,9 @@ dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary
 	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]shasum.com : [.utils]shasum.PL $(ARCHDIR)Config.pm
+	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
+
+[.utils]config_data.com : [.utils]config_data.PL $(ARCHDIR)Config.pm
 	$(MINIPERL) -"I[-.lib]" $(MMS$SOURCE)
 
 [.utils]corelist.com : [.utils]corelist.PL $(ARCHDIR)Config.pm

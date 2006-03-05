@@ -382,6 +382,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Module::Build' =>
+		{
+		'MAINTAINER'	=> 'kwilliams',
+		'FILES'		=> q[lib/Module/Build lib/Module/Build.pm],
+		'CPAN'		=> 1,
+		},
+
 	'Module::CoreList' =>
 		{
 		'MAINTAINER'	=> 'rclamp',

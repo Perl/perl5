@@ -1,0 +1,1635 @@
+=head1 NAME
+
+Module::Build::Authoring - Authoring Module::Build modules
+
+
+=head1 DESCRIPTION
+
+When creating a C<Build.PL> script for a module, something like the
+following code will typically be used:
+
+  use Module::Build;
+  my $build = Module::Build->new
+    (
+     module_name => 'Foo::Bar',
+     license  => 'perl',
+     requires => {
+                  'perl'          => '5.6.1',
+                  'Some::Module'  => '1.23',
+                  'Other::Module' => '>= 1.2, != 1.5, < 2.0',
+                 },
+    );
+  $build->create_build_script;
+
+A simple module could get away with something as short as this for its
+C<Build.PL> script:
+
+  use Module::Build;
+  Module::Build->new(
+    module_name => 'Foo::Bar',
+    license     => 'perl',
+  )->create_build_script;
+
+The model used by C<Module::Build> is a lot like the C<MakeMaker>
+metaphor, with the following correspondences:
+
+   In Module::Build                 In ExtUtils::MakeMaker
+  ---------------------------      ------------------------
+   Build.PL (initial script)        Makefile.PL (initial script)
+   Build (a short perl script)      Makefile (a long Makefile)
+   _build/ (saved state info)       various config text in the Makefile
+
+Any customization can be done simply by subclassing C<Module::Build>
+and adding a method called (for example) C<ACTION_test>, overriding
+the default 'test' action.  You could also add a method called
+C<ACTION_whatever>, and then you could perform the action C<Build
+whatever>.
+
+For information on providing compatibility with
+C<ExtUtils::MakeMaker>, see L<Module::Build::Compat> and
+L<http://www.makemaker.org/wiki/index.cgi?ModuleBuildConversionGuide>.
+
+
+=head1 API
+
+I list here some of the most important methods in C<Module::Build>.
+Normally you won't need to deal with these methods unless you want to
+subclass C<Module::Build>.  But since one of the reasons I created
+this module in the first place was so that subclassing is possible
+(and easy), I will certainly write more docs as the interface
+stabilizes.
+
+
+=head2 CONSTRUCTORS
+
+
+=over 4
+
+=item current()
+
+This method returns a reasonable facsimile of the currently-executing
+C<Module::Build> object representing the current build.  You can use
+this object to query its C<notes()> method, inquire about installed
+modules, and so on.  This is a great way to share information between
+different parts of your build process.  For instance, you can ask
+the user a question during C<perl Build.PL>, then use their answer
+during a regression test:
+
+  # In Build.PL:
+  my $color = $build->prompt("What is your favorite color?");
+  $build->notes(color => $color);
+
+  # In t/colortest.t:
+  use Module::Build;
+  my $build = Module::Build->current;
+  my $color = $build->notes('color');
+  ...
+
+The way the C<current()> method is currently implemented, there may be
+slight differences between the C<$build> object in Build.PL and the
+one in C<t/colortest.t>.  It is our goal to minimize these differences
+in future releases of Module::Build, so please report any anomalies
+you find.
+
+One important caveat: in its current implementation, C<current()> will
+B<NOT> work correctly if you have changed out of the directory that
+C<Module::Build> was invoked from.
+
+=item new()
+
+Creates a new Module::Build object.  Arguments to the new() method are
+listed below.  Most arguments are optional, but you must provide
+either the C<module_name> argument, or C<dist_name> and one of
+C<dist_version> or C<dist_version_from>.  In other words, you must
+provide enough information to determine both a distribution name and
+version.
+
+
+=over 4
+
+=item add_to_cleanup
+
+An array reference of files to be cleaned up when the C<clean> action
+is performed.  See also the add_to_cleanup() method.
+
+=item auto_features
+
+This parameter supports the setting of features (see
+L<feature($name)>) automatically based on a set of prerequisites.  For
+instance, for a module that could optionally use either MySQL or
+PostgreSQL databases, you might use C<auto_features> like this:
+
+  my $build = Module::Build->new
+    (
+     ...other stuff here...
+     auto_features => {
+       pg_support    => {
+                         description => "Interface with Postgres databases",
+                         requires    => { 'DBD::Pg' => 23.3,
+                                          'DateTime::Format::Pg' => 0 },
+                        },
+       mysql_support => {
+                         description => "Interface with MySQL databases",
+                         requires    => { 'DBD::mysql' => 17.9,
+                                          'DateTime::Format::MySQL' => 0 },
+                        },
+     }
+    );
+
+For each feature named, the required prerequisites will be checked, and
+if there are no failures, the feature will be enabled (set to C<1>).
+Otherwise the failures will be displayed to the user and the feature
+will be disabled (set to C<0>).
+
+See the documentation for L<requires> for the details of how
+requirements can be specified.
+
+=item autosplit
+
+An optional C<autosplit> argument specifies a file which should be run
+through the C<Autosplit::autosplit()> function.  If multiple files
+should be split, the argument may be given as an array of the files to
+split.
+
+In general I don't consider autosplitting a great idea, because it's
+not always clear that autosplitting achieves its intended performance
+benefits.  It may even harm performance in environments like mod_perl,
+where as much as possible of a module's code should be loaded during
+startup.
+
+=item build_class
+
+The Module::Build class or subclass to use in the build
+script.  Defaults to "Module::Build" or the class name passed to or
+created by a call to C<subclass()>.  This property is useful if you're
+writing a custom Module::Build subclass and have a bootstrapping
+problem--that is, your subclass requires modules that may not be
+installed when C<perl Build.PL> is executed, but you've listed in
+C<build_requires> so that they should be available when C<./Build> is
+executed.
+
+=item build_requires
+
+Modules listed in this section are necessary to build and install the
+given module, but are not necessary for regular usage of it.  This is
+actually an important distinction - it allows for tighter control over
+the body of installed modules, and facilitates correct dependency
+checking on binary/packaged distributions of the module.
+
+See the documentation for L<"PREREQUISITES"> for the details of how
+requirements can be specified.
+
+=item c_source
+
+An optional C<c_source> argument specifies a directory which contains
+C source files that the rest of the build may depend on.  Any C<.c>
+files in the directory will be compiled to object files.  The
+directory will be added to the search path during the compilation and
+linking phases of any C or XS files.
+
+=item conflicts
+
+Modules listed in this section conflict in some serious way with the
+given module.  C<Module::Build> (or some higher-level tool) will
+refuse to install the given module if the given module/version is also
+installed.
+
+See the documentation for L<"PREREQUISITES"> for the details of how
+requirements can be specified.
+
+=item create_makefile_pl
+
+This parameter lets you use Module::Build::Compat during the
+C<distdir> (or C<dist>) action to automatically create a Makefile.PL
+for compatibility with ExtUtils::MakeMaker.  The parameter's value
+should be one of the styles named in the Module::Build::Compat
+documentation.
+
+=item create_readme
+
+This parameter tells Module::Build to automatically create a F<README>
+file at the top level of your distribution.  Currently it will simply
+use C<Pod::Text> (or C<Pod::Readme> if it's installed) on the file
+indicated by C<dist_version_from> and put the result in the F<README>
+file.  This is by no means the only recommended style for writing a
+README, but it seems to be one common one used on the CPAN.
+
+If you generate a F<README> in this way, it's probably a good idea to
+create a separate F<INSTALL> file if that information isn't in the
+generated F<README>.
+
+=item dist_abstract
+
+This should be a short description of the distribution.  This is used
+when generating metadata for F<META.yml> and PPD files.  If it is not
+given then C<Module::Build> looks in the POD of the module from which
+it gets the distribution's version.  It looks for the first line
+matching C<$package\s-\s(.+)>, and uses the captured text as the
+abstract.
+
+=item dist_author
+
+This should be something like "John Doe <jdoe@example.com>", or if
+there are multiple authors, an anonymous array of strings may be
+specified.  This is used when generating metadata for F<META.yml> and
+PPD files.  If this is not specified, then C<Module::Build> looks at
+the module from which it gets the distribution's version.  If it finds
+a POD section marked "=head1 AUTHOR", then it uses the contents of
+this section.
+
+=item dist_name
+
+Specifies the name for this distribution.  Most authors won't need to
+set this directly, they can use C<module_name> to set C<dist_name> to
+a reasonable default.  However, some agglomerative distributions like
+C<libwww-perl> or C<bioperl> have names that don't correspond directly
+to a module name, so C<dist_name> can be set independently.
+
+=item dist_version
+
+Specifies a version number for the distribution.  See C<module_name>
+or C<dist_version_from> for ways to have this set automatically from a
+C<$VERSION> variable in a module.  One way or another, a version
+number needs to be set.
+
+=item dist_version_from
+
+Specifies a file to look for the distribution version in.  Most
+authors won't need to set this directly, they can use C<module_name>
+to set it to a reasonable default.
+
+The version is extracted from the specified file according to the same
+rules as C<ExtUtils::MakeMaker> and C<CPAN.pm>.  It involves finding
+the first line that matches the regular expression
+
+   /([\$*])(([\w\:\']*)\bVERSION)\b.*\=/
+
+eval()-ing that line, then checking the value of the C<$VERSION>
+variable.  Quite ugly, really, but all the modules on CPAN depend on
+this process, so there's no real opportunity to change to something
+better.
+
+=item dynamic_config
+
+A boolean flag indicating whether the F<Build.PL> file must be
+executed, or whether this module can be built, tested and installed
+solely from consulting its metadata file.  The main reason to set this
+to a true value is that your module performs some dynamic
+configuration as part of its build/install process.  If the flag is
+omitted, the F<META.yml> spec says that installation tools should
+treat it as 1 (true), because this is a safer way to behave.
+
+Currently C<Module::Build> doesn't actually do anything with this flag
+- it's up to higher-level tools like C<CPAN.pm> to do
+something useful with it.  It can potentially bring lots of security,
+packaging, and convenience improvements.
+
+=item extra_compiler_flags
+
+=item extra_linker_flags
+
+These parameters can contain array references (or strings, in which
+case they will be split into arrays) to pass through to the compiler
+and linker phases when compiling/linking C code.  For example, to tell
+the compiler that your code is C++, you might do:
+
+  my $build = Module::Build->new
+    (
+     module_name          => 'Foo::Bar',
+     extra_compiler_flags => ['-x', 'c++'],
+    );
+
+To link your XS code against glib you might write something like:
+
+  my $build = Module::Build->new
+    (
+     module_name          => 'Foo::Bar',
+     dynamic_config       => 1,
+     extra_compiler_flags => scalar `glib-config --cflags`,
+     extra_linker_flags   => scalar `glib-config --libs`,
+    );
+
+=item get_options
+
+You can pass arbitrary command line options to F<Build.PL> or
+F<Build>, and they will be stored in the Module::Build object and can
+be accessed via the C<args()> method.  However, sometimes you want
+more flexibility out of your argument processing than this allows.  In
+such cases, use the C<get_options> parameter to pass in a hash
+reference of argument specifications, and the list of arguments to
+F<Build.PL> or F<Build> will be processed according to those
+specifications before they're passed on to C<Module::Build>'s own
+argument processing.
+
+The supported option specification hash keys are:
+
+
+=over 4
+
+=item type
+
+The type of option.  The types are those supported by Getopt::Long; consult
+its documentation for a complete list.  Typical types are C<=s> for strings,
+C<+> for additive options, and C<!> for negatable options.  If the
+type is not specified, it will be considered a boolean, i.e. no
+argument is taken and a value of 1 will be assigned when the option is
+encountered.
+
+=item store
+
+A reference to a scalar in which to store the value passed to the option.
+If not specified, the value will be stored under the option name in the
+hash returned by the C<args()> method.
+
+=item default
+
+A default value for the option.  If no default value is specified and no option
+is passed, then the option key will not exist in the hash returned by
+C<args()>.
+
+=back
+
+
+You can combine references to your own variables or subroutines with
+unreferenced specifications, for which the result will also be stored in the
+hash returned by C<args()>.  For example:
+
+  my $loud = 0;
+  my $build = Module::Build->new
+    (
+     module_name => 'Foo::Bar',
+     get_options => {
+                     loud =>     { store => \$loud },
+                     dbd  =>     { type  => '=s'   },
+                     quantity => { type  => '+'    },
+                    }
+    );
+
+  print STDERR "HEY, ARE YOU LISTENING??\n" if $loud;
+  print "We'll use the ", $build->args('dbd'), " DBI driver\n";
+  print "Are you sure you want that many?\n"
+    if $build->args('quantity') > 2;
+
+The arguments for such a specification can be called like so:
+
+  perl Build.PL --loud --dbd=DBD::pg --quantity --quantity --quantity
+
+B<WARNING:> Any option specifications that conflict with Module::Build's own
+options (defined by its properties) will throw an exception.
+
+Consult the Getopt::Long documentation for details on its usage.
+
+=item include_dirs
+
+Specifies any additional directories in which to search for C header
+files.  May be given as a string indicating a single directory, or as
+a list reference indicating multiple directories.
+
+=item install_path
+
+You can set paths for individual installable elements by using the
+C<install_path> parameter:
+
+  my $build = Module::Build->new
+    (
+     ...other stuff here...
+     install_path => {
+                      lib  => '/foo/lib',
+                      arch => '/foo/lib/arch',
+                     }
+    );
+
+=item installdirs
+
+Determines where files are installed within the normal perl hierarchy
+as determined by F<Config.pm>.  Valid values are: C<core>, C<site>,
+C<vendor>.  The default is C<site>.  See
+L<Module::Build/"INSTALL PATHS">
+
+=item license
+
+Specifies the licensing terms of your distribution.  Valid options include:
+
+
+=over 4
+
+=item apache
+
+The distribution is licensed under the Apache Software License
+(http://opensource.org/licenses/apachepl.php).
+
+=item artistic
+
+The distribution is licensed under the Artistic License, as specified
+by the F<Artistic> file in the standard perl distribution.
+
+=item bsd
+
+The distribution is licensed under the BSD License
+(http://www.opensource.org/licenses/bsd-license.php).
+
+=item gpl
+
+The distribution is licensed under the terms of the Gnu General
+Public License (http://www.opensource.org/licenses/gpl-license.php).
+
+=item lgpl
+
+The distribution is licensed under the terms of the Gnu Lesser
+General Public License
+(http://www.opensource.org/licenses/lgpl-license.php).
+
+=item mit
+
+The distribution is licensed under the MIT License
+(http://opensource.org/licenses/mit-license.php).
+
+=item mozilla
+
+The distribution is licensed under the Mozilla Public
+License.  (http://opensource.org/licenses/mozilla1.0.php or
+http://opensource.org/licenses/mozilla1.1.php)
+
+=item open_source
+
+The distribution is licensed under some other Open Source
+Initiative-approved license listed at
+http://www.opensource.org/licenses/ .
+
+=item perl
+
+The distribution may be copied and redistributed under the same terms
+as perl itself (this is by far the most common licensing option for
+modules on CPAN).  This is a dual license, in which the user may
+choose between either the GPL or the Artistic license.
+
+=item restrictive
+
+The distribution may not be redistributed without special permission
+from the author and/or copyright holder.
+
+=item unrestricted
+
+The distribution is licensed under a license that is B<not> approved
+by www.opensource.org but that allows distribution without
+restrictions.
+
+=back
+
+
+Note that you must still include the terms of your license in your
+documentation - this field only lets automated tools figure out your
+licensing restrictions.  Humans still need something to read.  If you
+choose to provide this field, you should make sure that you keep it in
+sync with your written documentation if you ever change your licensing
+terms.
+
+It is a fatal error to use a license other than the ones mentioned
+above.  This is not because I wish to impose licensing terms on you -
+please let me know if you would like another license option to be
+added to the list.  You may also use a license type of C<unknown> if
+you don't wish to specify your terms (but this is usually not a good
+idea for you to do!).
+
+I just started out with a small set of licenses to keep things simple,
+figuring I'd let people with actual working knowledge in this area
+tell me what to do.  So if that's you, drop me a line.
+
+=item meta_add
+
+A hash of key/value pairs that should be added to the F<META.yml> file
+during the C<distmeta> action.  Any existing entries with the same
+names will be overridden.
+
+=item meta_merge
+
+A hash of key/value pairs that should be merged into the F<META.yml>
+file during the C<distmeta> action.  Any existing entries with the
+same names will be overridden.
+
+The only difference between C<meta_add> and C<meta_merge> is their
+behavior on hash-valued and array-valued entries: C<meta_add> will
+completely blow away the existing hash or array value, but
+C<meta_merge> will merge the supplied data into the existing hash or
+array value.
+
+=item module_name
+
+The C<module_name> is a shortcut for setting default values of
+C<dist_name> and C<dist_version_from>, reflecting the fact that the
+majority of CPAN distributions are centered around one "main" module.
+For instance, if you set C<module_name> to C<Foo::Bar>, then
+C<dist_name> will default to C<Foo-Bar> and C<dist_version_from> will
+default to C<lib/Foo/Bar.pm>.  C<dist_version_from> will in turn be
+used to set C<dist_version>.
+
+Setting C<module_name> won't override a C<dist_*> parameter you
+specify explicitly.
+
+=item PL_files
+
+An optional parameter specifying a set of C<.PL> files in your
+distribution.  These will be run as Perl scripts prior to processing
+the rest of the files in your distribution.  They are usually used as
+templates for creating other files dynamically, so that a file like
+C<lib/Foo/Bar.pm.PL> might create the file C<lib/Foo/Bar.pm>.
+
+The files are specified with the C<.PL> files as hash keys, and the
+file(s) they generate as hash values, like so:
+
+  my $build = Module::Build->new
+    (
+     module_name => 'Foo::Bar',
+     ...
+     PL_files => { 'lib/Foo/Bar.pm.PL' => 'lib/Foo/Bar.pm' },
+    );
+
+Note that the path specifications are I<always> given in Unix-like
+format, not in the style of the local system.
+
+If your C<.PL> scripts don't create any files, or if they create files
+with unexpected names, or even if they create multiple files, you can
+indicate that so that Module::Build can properly handle these created
+files:
+
+  PL_files => {
+               'lib/Foo/Bar.pm.PL' => 'lib/Foo/Bar.pm',
+               'lib/something.PL'  => ['/lib/something', '/lib/else'],
+               'lib/funny.PL'      => [],
+              }
+
+=item pm_files
+
+An optional parameter specifying the set of C<.pm> files in this
+distribution, specified as a hash reference whose keys are the files'
+locations in the distributions, and whose values are their logical
+locations based on their package name, i.e. where they would be found
+in a "normal" Module::Build-style distribution.  This parameter is
+mainly intended to support alternative layouts of files.
+
+For instance, if you have an old-style MakeMaker distribution for a
+module called C<Foo::Bar> and a F<Bar.pm> file at the top level of the
+distribution, you could specify your layout in your C<Build.PL> like
+this:
+
+  my $build = Module::Build->new
+    (
+     module_name => 'Foo::Bar',
+     ...
+     pm_files => { 'Bar.pm' => 'lib/Foo/Bar.pm' },
+    );
+
+Note that the values should include C<lib/>, because this is where
+they would be found in a "normal" Module::Build-style distribution.
+
+Note also that the path specifications are I<always> given in
+Unix-like format, not in the style of the local system.
+
+=item pod_files
+
+Just like C<pm_files>, but used for specifying the set of C<.pod>
+files in your distribution.
+
+=item recommends
+
+This is just like the C<requires> argument, except that modules listed
+in this section aren't essential, just a good idea.  We'll just print
+a friendly warning if one of these modules aren't found, but we'll
+continue running.
+
+If a module is recommended but not required, all tests should still
+pass if the module isn't installed.  This may mean that some tests
+may be skipped if recommended dependencies aren't present.
+
+Automated tools like CPAN.pm should inform the user when recommended
+modules aren't installed, and it should offer to install them if it
+wants to be helpful.
+
+See the documentation for L<"PREREQUISITES"> for the details of how
+requirements can be specified.
+
+=item requires
+
+An optional C<requires> argument specifies any module prerequisites
+that the current module depends on.
+
+One note: currently C<Module::Build> doesn't actually I<require> the
+user to have dependencies installed, it just strongly urges.  In the
+future we may require it.  There's also a C<recommends> section for
+things that aren't absolutely required.
+
+Automated tools like CPAN.pm should refuse to install a module if one
+of its dependencies isn't satisfied, unless a "force" command is given
+by the user.  If the tools are helpful, they should also offer to
+install the dependencies.
+
+A synonym for C<requires> is C<prereq>, to help succour people
+transitioning from C<ExtUtils::MakeMaker>.  The C<requires> term is
+preferred, but the C<prereq> term will remain valid in future
+distributions.
+
+See the documentation for L<"PREREQUISITES"> for the details of how
+requirements can be specified.
+
+=item script_files
+
+An optional parameter specifying a set of files that should be
+installed as executable perl scripts when the module is installed.
+May be given as an array reference of the files, or as a hash
+reference whose keys are the files (and whose values will currently be
+ignored).
+
+The default is to install no script files - in other words, there is
+no default location where Module::Build will look for script files to
+install.
+
+For backward compatibility, you may use the parameter C<scripts>
+instead of C<script_files>.  Please consider this usage deprecated,
+though it will continue to exist for several version releases.
+
+=item sign
+
+If a true value is specified for this parameter, C<Module::Signature>
+will be used (via the 'distsign' action) to create a SIGNATURE file
+for your distribution during the 'distdir' action, and to add the
+SIGNATURE file to the MANIFEST (therefore, don't add it yourself).
+
+The default value is false.  In the future, the default may change to
+true if you have C<Module::Signature> installed on your system.
+
+=item test_files
+
+An optional parameter specifying a set of files that should be used as
+C<Test::Harness>-style regression tests to be run during the C<test>
+action.  May be given as an array reference of the files, or as a hash
+reference whose keys are the files (and whose values will currently be
+ignored).  If the argument is given as a single string (not in an
+array reference), that string will be treated as a C<glob()> pattern
+specifying the files to use.
+
+The default is to look for a F<test.pl> script in the top-level
+directory of the distribution, and any files matching the glob pattern
+C<*.t> in the F<t/> subdirectory.  If the C<recursive_test_files>
+property is true, then the C<t/> directory will be scanned recursively
+for C<*.t> files.
+
+=item xs_files
+
+Just like C<pm_files>, but used for specifying the set of C<.xs>
+files in your distribution.
+
+=back
+
+
+=item new_from_context(%args)
+
+When called from a directory containing a F<Build.PL> script and a
+F<META.yml> file (in other words, the base directory of a
+distribution), this method will run the F<Build.PL> and return the
+resulting C<Module::Build> object to the caller.  Any key-value
+arguments given to C<new_from_context()> are essentially like
+command line arguments given to the F<Build.PL> script, so for example
+you could pass C<< verbose => 1 >> to this method to turn on
+verbosity.
+
+=item resume()
+
+You'll probably never call this method directly, it's only called from
+the auto-generated C<Build> script.  The C<new()> method is only
+called once, when the user runs C<perl Build.PL>.  Thereafter, when
+the user runs C<Build test> or another action, the C<Module::Build>
+object is created using the C<resume()> method to re-instantiate with
+the settings given earlier to C<new()>.
+
+=item subclass()
+
+This creates a new C<Module::Build> subclass on the fly, as described
+in the L<"SUBCLASSING"> section.  The caller must provide either a
+C<class> or C<code> parameter, or both.  The C<class> parameter
+indicates the name to use for the new subclass, and defaults to
+C<MyModuleBuilder>.  The C<code> parameter specifies Perl code to use
+as the body of the subclass.
+
+=back
+
+
+=head2 METHODS
+
+
+=over 4
+
+=item add_build_element($type)
+
+Adds a new type of entry to the build process.  Accepts a single
+string specifying its type-name.  There must also be a method defined
+to process things of that type, e.g. if you add a build element called
+C<'foo'>, then you must also define a method called
+C<process_foo_files()>.
+
+See also L<Module::Build::Cookbook/"Adding new file types to the build process">.
+
+=item add_to_cleanup(@files)
+
+You may call C<< $self->add_to_cleanup(@patterns) >> to tell
+C<Module::Build> that certain files should be removed when the user
+performs the C<Build clean> action.  The arguments to the method are
+patterns suitable for passing to Perl's C<glob()> function, specified
+in either Unix format or the current machine's native format.  It's
+usually convenient to use Unix format when you hard-code the filenames
+(e.g. in F<Build.PL>) and the native format when the names are
+programmatically generated (e.g. in a testing script).
+
+I decided to provide a dynamic method of the C<$build> object, rather
+than just use a static list of files named in the F<Build.PL>, because
+these static lists can get difficult to manage.  I usually prefer to
+keep the responsibility for registering temporary files close to the
+code that creates them.
+
+=item args()
+
+  my $args_href = $build->args;
+  my %args = $build->args;
+  my $arg_value = $build->args($key);
+  $build->args($key, $value);
+
+This method is the preferred interface for retrieving the arguments passed via
+command line options to F<Build.PL> or F<Build>, minus the Module-Build
+specific options.
+
+When called in in a scalar context with no arguments, this method returns a
+reference to the hash storing all of the arguments; in an array context, it
+returns the hash itself.  When passed a single argument, it returns the value
+stored in the args hash for that option key.  When called with two arguments,
+the second argument is assigned to the args hash under the key passed as the
+first argument.
+
+=item autosplit_file($from, $to)
+
+Invokes the C<AutoSplit> module on the C<$from> file, sending the
+output to the C<lib/auto> directory inside C<$to>.  C<$to> is
+typically the C<blib/> directory.
+
+=item base_dir()
+
+Returns a string containing the root-level directory of this build,
+i.e. where the C<Build.PL> script and the C<lib> directory can be
+found.  This is usually the same as the current working directory,
+because the C<Build> script will C<chdir()> into this directory as
+soon as it begins execution.
+
+=item build_requires()
+
+Returns a hash reference indicating the C<build_requires>
+prerequisites that were passed to the C<new()> method.
+
+=item check_installed_status($module, $version)
+
+This method returns a hash reference indicating whether a version
+dependency on a certain module is satisfied.  The C<$module> argument
+is given as a string like C<"Data::Dumper"> or C<"perl">, and the
+C<$version> argument can take any of the forms described in L<requires>
+above.  This allows very fine-grained version checking.
+
+The returned hash reference has the following structure:
+
+  {
+   ok => $whether_the_dependency_is_satisfied,
+   have => $version_already_installed,
+   need => $version_requested, # Same as incoming $version argument
+   message => $informative_error_message,
+  }
+
+If no version of C<$module> is currently installed, the C<have> value
+will be the string C<< "<none>" >>.  Otherwise the C<have> value will
+simply be the version of the installed module.  Note that this means
+that if C<$module> is installed but doesn't define a version number,
+the C<have> value will be C<undef> - this is why we don't use C<undef>
+for the case when C<$module> isn't installed at all.
+
+This method may be called either as an object method
+(C<< $build->check_installed_status($module, $version) >>)
+or as a class method 
+(C<< Module::Build->check_installed_status($module, $version) >>).
+
+=item check_installed_version($module, $version)
+
+Like C<check_installed_status()>, but simply returns true or false
+depending on whether module C<$module> satisfies the dependency
+C<$version>.
+
+If the check succeeds, the return value is the actual version of
+C<$module> installed on the system.  This allows you to do the
+following:
+
+  my $installed = $build->check_installed_version('DBI', '1.15');
+  if ($installed) {
+    print "Congratulations, version $installed of DBI is installed.\n";
+  } else {
+    die "Sorry, you must install DBI.\n";
+  }
+
+If the check fails, we return false and set C<$@> to an informative
+error message.
+
+If C<$version> is any non-true value (notably zero) and any version of
+C<$module> is installed, we return true.  In this case, if C<$module>
+doesn't define a version, or if its version is zero, we return the
+special value "0 but true", which is numerically zero, but logically
+true.
+
+In general you might prefer to use C<check_installed_status> if you
+need detailed information, or this method if you just need a yes/no
+answer.
+
+=item compare_versions($v1, $op, $v2)
+
+Compares two module versions C<$v1> and C<$v2> using the operator
+C<$op>, which should be one of Perl's numeric operators like C<!=> or
+C<< >= >> or the like.  We do at least a halfway-decent job of
+handling versions that aren't strictly numeric, like C<0.27_02>, but
+exotic stuff will likely cause problems.
+
+In the future, the guts of this method might be replaced with a call
+out to C<version.pm>.
+
+=item config()
+
+Returns a hash reference containing the C<Config.pm> hash, including
+any changes the author or user has specified.  This is a reference to
+the actual internal hash we use, so you probably shouldn't modify
+stuff there.
+
+=item config_data($name)
+
+=item config_data($name => $value)
+
+With a single argument, returns the value of the configuration
+variable C<$name>.  With two arguments, sets the given configuration
+variable to the given value.  The value may be any perl scalar that's
+serializable with C<Data::Dumper>.  For instance, if you write a
+module that can use a MySQL or PostgreSQL back-end, you might create
+configuration variables called C<mysql_connect> and
+C<postgres_connect>, and set each to an array of connection parameters
+for C<< DBI->connect() >>.
+
+Configuration values set in this way using the Module::Build object
+will be available for querying during the build/test process and after
+installation via the generated C<...::ConfigData> module, as
+C<< ...::ConfigData->config($name) >>.
+
+The C<feature()> and C<config_data()> methods represent
+Module::Build's main support for configuration of installed modules.
+See also L<SAVING CONFIGURATION INFORMATION>.
+
+=item conflicts()
+
+Returns a hash reference indicating the C<conflicts> prerequisites
+that were passed to the C<new()> method.
+
+=item contains_pod($file)
+
+[Deprecated] Please see L<Module::Build::ModuleInfo> instead.
+
+Returns true if the given file appears to contain POD documentation.
+Currently this checks whether the file has a line beginning with
+'=pod', '=head', or '=item', but the exact semantics may change in the
+future.
+
+=item copy_if_modified(%parameters)
+
+Takes the file in the C<from> parameter and copies it to the file in
+the C<to> parameter, or the directory in the C<to_dir> parameter, if
+the file has changed since it was last copied (or if it doesn't exist
+in the new location).  By default the entire directory structure of
+C<from> will be copied into C<to_dir>; an optional C<flatten>
+parameter will copy into C<to_dir> without doing so.
+
+Returns the path to the destination file, or C<undef> if nothing
+needed to be copied.
+
+Any directories that need to be created in order to perform the
+copying will be automatically created.
+
+=item create_build_script()
+
+Creates an executable script called C<Build> in the current directory
+that will be used to execute further user actions.  This script is
+roughly analogous (in function, not in form) to the Makefile created
+by C<ExtUtils::MakeMaker>.  This method also creates some temporary
+data in a directory called C<_build/>.  Both of these will be removed
+when the C<realclean> action is performed.
+
+=item current_action()
+
+Returns the name of the currently-running action, such as "build" or
+"test".  This action is not necessarily the action that was originally
+invoked by the user.  For example, if the user invoked the "test"
+action, current_action() would initially return "test".  However,
+action "test" depends on action "code", so current_action() will
+return "code" while that dependency is being executed.  Once that
+action has completed, current_action() will again return "test".
+
+If you need to know the name of the original action invoked by the
+user, see L<invoked_action()> below.
+
+=item depends_on(@actions)
+
+Invokes the named action or list of actions in sequence.  Using this
+method is preferred to calling the action explicitly because it
+performs some internal record-keeping, and it ensures that the same
+action is not invoked multiple times (note: in future versions of
+Module::Build it's conceivable that this run-only-once mechanism will
+be changed to something more intelligent).
+
+Note that the name of this method is something of a misnomer; it
+should really be called something like
+C<invoke_actions_unless_already_invoked()> or something, but for
+better or worse (perhaps better!) we were still thinking in
+C<make>-like dependency terms when we created this method.
+
+See also C<dispatch()>.  The main distinction between the two is that
+C<depends_on()> is meant to call an action from inside another action,
+whereas C<dispatch()> is meant to set the very top action in motion.
+
+=item dir_contains($first_dir, $second_dir)
+
+Returns true if the first directory logically contains the second
+directory.  This is just a convenience function because C<File::Spec>
+doesn't really provide an easy way to figure this out (but
+C<Path::Class> does...).
+
+=item dispatch($action, %args)
+
+Invokes the build action C<$action>.  Optionally, a list of options
+and their values can be passed in.  This is equivalent to invoking an
+action at the command line, passing in a list of options.
+
+Custom options that have not been registered must be passed in as a
+hash reference in a key named "args":
+
+  $build->dispatch('foo', verbose => 1, args => { my_option => 'value' });
+
+This method is intended to be used to programmatically invoke build
+actions, e.g. by applications controlling Module::Build-based builds
+rather than by subclasses.
+
+See also C<depends_on()>.  The main distinction between the two is that
+C<depends_on()> is meant to call an action from inside another action,
+whereas C<dispatch()> is meant to set the very top action in motion.
+
+=item dist_dir()
+
+Returns the name of the directory that will be created during the
+C<dist> action.  The name is derived from the C<dist_name> and
+C<dist_version> properties.
+
+=item dist_name()
+
+Returns the name of the current distribution, as passed to the
+C<new()> method in a C<dist_name> or modified C<module_name>
+parameter.
+
+=item dist_version()
+
+Returns the version of the current distribution, as determined by the
+C<new()> method from a C<dist_version>, C<dist_version_from>, or
+C<module_name> parameter.
+
+=item do_system($cmd, @args)
+
+This is a fairly simple wrapper around Perl's C<system()> built-in
+command.  Given a command and an array of optional arguments, this
+method will print the command to C<STDOUT>, and then execute it using
+Perl's C<system()>.  It returns true or false to indicate success or
+failure (the opposite of how C<system()> works, but more intuitive).
+
+Note that if you supply a single argument to C<do_system()>, it
+will/may be processed by the systems's shell, and any special
+characters will do their special things.  If you supply multiple
+arguments, no shell will get involved and the command will be executed
+directly.
+
+=item feature($name)
+
+=item feature($name => $value)
+
+With a single argument, returns true if the given feature is set.
+With two arguments, sets the given feature to the given boolean value.
+In this context, a "feature" is any optional functionality of an
+installed module.  For instance, if you write a module that could
+optionally support a MySQL or PostgreSQL backend, you might create
+features called C<mysql_support> and C<postgres_support>, and set them
+to true/false depending on whether the user has the proper databases
+installed and configured.
+
+Features set in this way using the Module::Build object will be
+available for querying during the build/test process and after
+installation via the generated C<...::ConfigData> module, as 
+C<< ...::ConfigData->feature($name) >>.
+
+The C<feature()> and C<config_data()> methods represent
+Module::Build's main support for configuration of installed modules.
+See also L<SAVING CONFIGURATION INFORMATION>.
+
+=item have_c_compiler()
+
+Returns true if the current system seems to have a working C compiler.
+We currently determine this by attempting to compile a simple C source
+file and reporting whether the attempt was successful.
+
+=item install_destination($type)
+
+Returns the directory in which items of type C<$type> (e.g. C<lib>,
+C<arch>, C<bin>, or anything else returned by the C<install_types()>
+method) will be installed during the C<install> action.  Any settings
+for C<install_path>, C<install_base>, and C<prefix> are taken into
+account when determining the return value.
+
+=item install_types()
+
+Returns a list of installable types that this build knows about.
+These types each correspond to the name of a directory in F<blib/>,
+and the list usually includes items such as C<lib>, C<arch>, C<bin>,
+C<script>, C<libdoc>, C<bindoc>, and if HTML documentation is to be
+built, C<libhtml> and C<binhtml>.  Other user-defined types may also
+exist.
+
+=item invoked_action()
+
+This is the name of the original action invoked by the user.  This
+value is set when the user invokes F<Build.PL>, the F<Build> script,
+or programatically through the L<dispatch()> method.  It does not
+change as sub-actions are executed as dependencies are evaluated.
+
+To get the name of the currently executing dependency, see
+L<current_action()> above.
+
+=item notes()
+
+=item notes($key)
+
+=item notes($key => $value)
+
+The C<notes()> value allows you to store your own persistent
+information about the build, and to share that information among
+different entities involved in the build.  See the example in the
+C<current()> method.
+
+The C<notes()> method is essentally a glorified hash access.  With no
+arguments, C<notes()> returns the entire hash of notes.  With one argument,
+C<notes($key)> returns the value associated with the given key.  With two
+arguments, C<notes($key, $value)> sets the value associated with the given key
+to C<$value> and returns the new value.
+
+The lifetime of the C<notes> data is for "a build" - that is, the
+C<notes> hash is created when C<perl Build.PL> is run (or when the
+C<new()> method is run, if the Module::Build Perl API is being used
+instead of called from a shell), and lasts until C<perl Build.PL> is
+run again or the C<clean> action is run.
+
+=item orig_dir()
+
+Returns a string containing the working directory that was in effect
+before the F<Build> script chdir()-ed into the C<base_dir>.  This
+might be useful for writing wrapper tools that might need to chdir()
+back out.
+
+=item rscan_dir($dir, $pattern)
+
+Uses C<File::Find> to traverse the directory C<$dir>, returning a
+reference to an array of entries matching C<$pattern>.  C<$pattern>
+may either be a regular expression (using C<qr//> or just a plain
+string), or a reference to a subroutine that will return true for
+wanted entries.  If C<$pattern> is not given, all entries will be
+returned.
+
+Examples:
+
+ # All the *.pm files in lib/
+ $m->rscan_dir('lib', qr/\.pm$/)
+ 
+ # All the files in blib/ that aren't *.html files
+ $m->rscan_dir('blib', sub {-f $_ and not /\.html$/});
+
+ # All the files in t/
+ $m->rscan_dir('t');
+
+=item runtime_params()
+
+=item runtime_params($key)
+
+The C<runtime_params()> method stores the values passed on the command line
+for valid properties (that is, any command line options for which
+C<valid_property()> returns a true value).  The value on the command line may
+override the default value for a property, as well as any value specified in a
+call to C<new()>.  This allows you to programmatically tell if C<perl Build.PL>
+or any execution of C<./Build> had command line options specified that
+override valid properties.
+
+The C<runtime_params()> method is essentally a glorified read-only hash.  With
+no arguments, C<runtime_params()> returns the entire hash of properties
+specified on the command line.  With one argument, C<runtime_params($key)>
+returns the value associated with the given key.
+
+The lifetime of the C<runtime_params> data is for "a build" - that is, the
+C<runtime_params> hash is created when C<perl Build.PL> is run (or when the
+C<new()> method is called, if the Module::Build Perl API is being used instead
+of called from a shell), and lasts until C<perl Build.PL> is run again or the
+C<clean> action is run.
+
+=item os_type()
+
+If you're subclassing Module::Build and some code needs to alter its
+behavior based on the current platform, you may only need to know
+whether you're running on Windows, Unix, MacOS, VMS, etc., and not the
+fine-grained value of Perl's C<$^O> variable.  The C<os_type()> method
+will return a string like C<Windows>, C<Unix>, C<MacOS>, C<VMS>, or
+whatever is appropriate.  If you're running on an unknown platform, it
+will return C<undef> - there shouldn't be many unknown platforms
+though.
+
+=item prepare_metadata()
+
+This method is provided for authors to override to customize the
+fields of F<META.yml>.  It is passed a YAML::Node node object which can
+be modified as desired and then returned.  E.g.
+
+  package My::Builder;
+  use base 'Module::Build';
+
+  sub prepare_metadata {
+    my $self = shift;
+    my $node = $self->SUPER::prepare_metadata( shift );
+    $node->{custom_field} = 'foo';
+    return $node;
+  }
+
+=item prereq_failures()
+
+Returns a data structure containing information about any failed
+prerequisites (of any of the types described above), or C<undef> if
+all prerequisites are met.
+
+The data structure returned is a hash reference.  The top level keys
+are the type of prerequisite failed, one of "requires",
+"build_requires", "conflicts", or "recommends".  The associated values
+are hash references whose keys are the names of required (or
+conflicting) modules.  The associated values of those are hash
+references indicating some information about the failure.  For example:
+
+  {
+   have => '0.42',
+   need => '0.59',
+   message => 'Version 0.42 is installed, but we need version 0.59',
+  }
+
+or
+
+  {
+   have => '<none>',
+   need => '0.59',
+   message => 'Prerequisite Foo isn't installed',
+  }
+
+This hash has the same structure as the hash returned by the
+C<check_installed_status()> method, except that in the case of
+"conflicts" dependencies we change the "need" key to "conflicts" and
+construct a proper message.
+
+Examples:
+
+  # Check a required dependency on Foo::Bar
+  if ( $build->prereq_failures->{requires}{Foo::Bar} ) { ...
+
+  # Check whether there were any failures
+  if ( $build->prereq_failures ) { ...
+
+  # Show messages for all failures
+  my $failures = $build->prereq_failures;
+  while (my ($type, $list) = each %$failures) {
+    while (my ($name, $hash) = each %$list) {
+      print "Failure for $name: $hash->{message}\n";
+    }
+  }
+
+=item prereq_report()
+
+Returns a human-readable (table-form) string showing all
+prerequisites, the versions required, and the versions actually
+installed.  This can be useful for reviewing the configuration of your
+system prior to a build, or when compiling data to send for a bug
+report.  The C<prereq_report> action is just a thin wrapper around the
+C<prereq_report()> method.
+
+=item prompt($message, $default)
+
+Asks the user a question and returns their response as a string.  The
+first argument specifies the message to display to the user (for
+example, C<"Where do you keep your money?">).  The second argument,
+which is optional, specifies a default answer (for example,
+C<"wallet">).  The user will be asked the question once.
+
+If C<prompt()> detects that it is not running interactively and there
+is nothing on STDIN or if the PERL_MM_USE_DEFAULT environment variable
+is set to true, the $default will be used without prompting.  This
+prevents automated processes from blocking on user input.
+
+If no $default is provided an empty string will be used instead.
+
+This method may be called as a class or object method.
+
+=item recommends()
+
+Returns a hash reference indicating the C<recommends> prerequisites
+that were passed to the C<new()> method.
+
+=item requires()
+
+Returns a hash reference indicating the C<requires> prerequisites that
+were passed to the C<new()> method.
+
+=item script_files()
+
+Returns a hash reference whose keys are the perl script files to be
+installed, if any.  This corresponds to the C<script_files> parameter to the
+C<new()> method.  With an optional argument, this parameter may be set
+dynamically.
+
+For backward compatibility, the C<scripts()> method does exactly the
+same thing as C<script_files()>.  C<scripts()> is deprecated, but it
+will stay around for several versions to give people time to
+transition.
+
+=item up_to_date($source_file, $derived_file)
+
+=item up_to_date(\@source_files, \@derived_files)
+
+This method can be used to compare a set of source files to a set of
+derived files.  If any of the source files are newer than any of the
+derived files, it returns false.  Additionally, if any of the derived
+files do not exist, it returns false.  Otherwise it returns true.
+
+The arguments may be either a scalar or an array reference of file
+names.
+
+=item y_n($message, $default)
+
+Asks the user a yes/no question using C<prompt()> and returns true or
+false accordingly.  The user will be asked the question repeatedly
+until they give an answer that looks like "yes" or "no".
+
+The first argument specifies the message to display to the user (for
+example, C<"Shall I invest your money for you?">), and the second
+argument specifies the default answer (for example, C<"y">).
+
+Note that the default is specified as a string like C<"y"> or C<"n">,
+and the return value is a Perl boolean value like 1 or 0.  I thought
+about this for a while and this seemed like the most useful way to do
+it.
+
+This method may be called as a class or object method.
+
+=back
+
+
+=head2 Autogenerated Accessors
+
+In addition to the aforementioned methods, there are also some get/set
+accessor methods for the following properties:
+
+=over 4
+
+=item PL_files()
+
+=item autosplit()
+
+=item base_dir()
+
+=item bindoc_dirs()
+
+=item blib()
+
+=item build_bat()
+
+=item build_class()
+
+=item build_elements()
+
+=item build_requires()
+
+=item build_script()
+
+=item c_source()
+
+=item config()
+
+=item config_dir()
+
+=item conflicts()
+
+=item create_makefile_pl()
+
+=item create_readme()
+
+=item debugger()
+
+=item destdir()
+
+=item dist_version_from()
+
+=item get_options()
+
+=item html_css()
+
+=item include_dirs()
+
+=item install_base()
+
+=item install_path()
+
+=item install_sets()
+
+=item installdirs()
+
+=item libdoc_dirs()
+
+=item license()
+
+=item magic_number()
+
+=item mb_version()
+
+=item meta_add()
+
+=item meta_merge()
+
+=item metafile()
+
+=item module_name()
+
+=item orig_dir()
+
+=item original_prefix()
+
+=item perl()
+
+=item pm_files()
+
+=item pod_files()
+
+=item pollute()
+
+=item prefix()
+
+=item prereq_action_types()
+
+=item quiet()
+
+=item recommends()
+
+=item recurse_into()
+
+=item recursive_test_files()
+
+=item requires()
+
+=item scripts()
+
+=item use_rcfile()
+
+=item verbose()
+
+=item xs_files()
+
+=back
+
+
+=head1 PREREQUISITES
+
+There are three basic types of prerequisites that can be defined: 1)
+"requires" - are versions of modules that are required for certain
+functionality to be available; 2) "recommends" - are versions of
+modules that are recommended to provide enhanced functionality; and 3)
+"conflicts" - are versions of modules that conflict with, and that can
+cause problems with the distribution.
+
+Each of the three types of prerequisites listed above can be applied
+to different aspects of the Build process.  For the module distribution
+itself you simply define "requires", "recommends", or "conflicts".  The
+types can also apply to other aspects of the Build process.  Currently,
+only "build_requires" is defined which is used for modules which are
+required during the Build process.
+
+
+=head2 Format of prerequisites
+
+The prerequisites are given in a hash reference, where the keys are
+the module names and the values are version specifiers:
+
+  requires => {
+               Foo::Module => '2.4',
+               Bar::Module => 0,
+               Ken::Module => '>= 1.2, != 1.5, < 2.0',
+               perl => '5.6.0'
+              },
+
+These four version specifiers have different effects.  The value
+C<'2.4'> means that B<at least> version 2.4 of C<Foo::Module> must be
+installed.  The value C<0> means that B<any> version of C<Bar::Module>
+is acceptable, even if C<Bar::Module> doesn't define a version.  The
+more verbose value C<'E<gt>= 1.2, != 1.5, E<lt> 2.0'> means that
+C<Ken::Module>'s version must be B<at least> 1.2, B<less than> 2.0,
+and B<not equal to> 1.5.  The list of criteria is separated by commas,
+and all criteria must be satisfied.
+
+A special C<perl> entry lets you specify the versions of the Perl
+interpreter that are supported by your module.  The same version
+dependency-checking semantics are available, except that we also
+understand perl's new double-dotted version numbers.
+
+
+=head1 SAVING CONFIGURATION INFORMATION
+
+Module::Build provides a very convenient way to save configuration
+information that your installed modules (or your regression tests) can
+access.  If your Build process calls the C<feature()> or
+C<config_data()> methods, then a C<Foo::Bar::ConfigData> module will
+automatically be created for you, where C<Foo::Bar> is the
+C<module_name> parameter as passed to C<new()>.  This module provides
+access to the data saved by these methods, and a way to update the
+values.  There is also a utility script called C<config_data>
+distributed with Module::Build that provides a command line interface
+to this same functionality.  See also the generated
+C<Foo::Bar::ConfigData> documentation, and the C<config_data>
+script's documentation, for more information.
+
+
+=head1 AUTOMATION
+
+One advantage of Module::Build is that since it's implemented as Perl
+methods, you can invoke these methods directly if you want to install
+a module non-interactively.  For instance, the following Perl script
+will invoke the entire build/install procedure:
+
+  my $build = Module::Build->new(module_name => 'MyModule');
+  $build->dispatch('build');
+  $build->dispatch('test');
+  $build->dispatch('install');
+
+If any of these steps encounters an error, it will throw a fatal
+exception.
+
+You can also pass arguments as part of the build process:
+
+  my $build = Module::Build->new(module_name => 'MyModule');
+  $build->dispatch('build');
+  $build->dispatch('test', verbose => 1);
+  $build->dispatch('install', sitelib => '/my/secret/place/');
+
+Building and installing modules in this way skips creating the
+C<Build> script.
+
+
+=head1 STRUCTURE
+
+Module::Build creates a class hierarchy conducive to customization.
+Here is the parent-child class hierarchy in classy ASCII art:
+
+   /--------------------\
+   |   Your::Parent     |  (If you subclass Module::Build)
+   \--------------------/
+            |
+            |
+   /--------------------\  (Doesn't define any functionality
+   |   Module::Build    |   of its own - just figures out what
+   \--------------------/   other modules to load.)
+            |
+            |
+   /-----------------------------------\  (Some values of $^O may
+   |   Module::Build::Platform::$^O    |   define specialized functionality.
+   \-----------------------------------/   Otherwise it's ...::Default, a
+            |                              pass-through class.)
+            |
+   /--------------------------\
+   |   Module::Build::Base    |  (Most of the functionality of 
+   \--------------------------/   Module::Build is defined here.)
+
+
+=head1 SUBCLASSING
+
+Right now, there are two ways to subclass Module::Build.  The first
+way is to create a regular module (in a C<.pm> file) that inherits
+from Module::Build, and use that module's class instead of using
+Module::Build directly:
+
+  ------ in Build.PL: ----------
+  #!/usr/bin/perl
+
+  use lib q(/nonstandard/library/path);
+  use My::Builder;  # Or whatever you want to call it
+
+  my $build = My::Builder->new
+    (
+     module_name => 'Foo::Bar',  # All the regular args...
+     license     => 'perl',
+     dist_author => 'A N Other <me@here.net.au>',
+     requires    => { Carp => 0 }
+    );
+  $build->create_build_script;
+
+This is relatively straightforward, and is the best way to do things
+if your My::Builder class contains lots of code.  The
+C<create_build_script()> method will ensure that the current value of
+C<@INC> (including the C</nonstandard/library/path>) is propogated to
+the Build script, so that My::Builder can be found when running build
+actions.
+
+For very small additions, Module::Build provides a C<subclass()>
+method that lets you subclass Module::Build more conveniently, without
+creating a separate file for your module:
+
+  ------ in Build.PL: ----------
+  #!/usr/bin/perl
+
+  use Module::Build;
+  my $class = Module::Build->subclass
+    (
+     class => 'My::Builder',
+     code => q{
+       sub ACTION_foo {
+         print "I'm fooing to death!\n";
+       }
+     },
+    );
+
+  my $build = $class->new
+    (
+     module_name => 'Foo::Bar',  # All the regular args...
+     license     => 'perl',
+     dist_author => 'A N Other <me@here.net.au>',
+     requires    => { Carp => 0 }
+    );
+  $build->create_build_script;
+
+Behind the scenes, this actually does create a C<.pm> file, since the
+code you provide must persist after Build.PL is run if it is to be
+very useful.
+
+See also the documentation for the C<subclass()> method.
+
+
+=head1 STARTING MODULE DEVELOPMENT
+
+When starting development on a new module, it's rarely worth your time
+to create a tree of all the files by hand.  Some automatic
+module-creators are available: the oldest is C<h2xs>, which has
+shipped with perl itself for a long time.  Its name reflects the fact
+that modules were originally conceived of as a way to wrap up a C
+library (thus the C<h> part) into perl extensions (thus the C<xs>
+part).
+
+These days, C<h2xs> has largely been superseded by modules like
+C<ExtUtils::ModuleMaker>, C<Module::Starter>, and C<Module::Maker>.
+They have varying degrees of support for C<Module::Build>.
+
+
+=head1 MIGRATION
+
+Note that if you want to provide both a F<Makefile.PL> and a
+F<Build.PL> for your distribution, you probably want to add the
+following to C<WriteMakefile> in your F<Makefile.PL> so that MakeMaker
+doesn't try to run your F<Build.PL> as a normal F<.PL> file:
+
+  PL_FILES => {},
+
+You may also be interested in looking at the C<Module::Build::Compat>
+module, which can automatically create various kinds of F<Makefile.PL>
+compatibility layers.
+
+
+=head1 AUTHOR
+
+Ken Williams, kwilliams@cpan.org
+
+Development questions, bug reports, and patches should be sent to the
+Module-Build mailing list at module-build-general@lists.sourceforge.net .
+
+Bug reports are also welcome at
+http://rt.cpan.org/NoAuth/Bugs.html?Dist=Module-Build .
+
+An anonymous CVS repository containing the latest development version
+is available; see http://sourceforge.net/cvs/?group_id=45731 for the
+details of how to access it.
+
+
+=head1 SEE ALSO
+
+perl(1), Module::Build(3), Module::Build::Cookbook(3),
+ExtUtils::MakeMaker(3), YAML(3)
+
+F<META.yml> Specification:
+L<http://module-build.sourceforge.net/META-spec-v1.2.html>
+
+L<http://www.dsmit.com/cons/>
+
+=cut
