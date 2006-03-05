@@ -3216,7 +3216,7 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 	GvSTASH(dstr) = GvSTASH(sstr);
 	if (GvSTASH(dstr))
 	    Perl_sv_add_backref(aTHX_ (SV*)GvSTASH(dstr), dstr);
-	gv_name_set((GV *)dstr, name, len, 0);
+	gv_name_set((GV *)dstr, name, len, GV_ADD);
 	SvFAKE_on(dstr);	/* can coerce to non-glob */
     }
 

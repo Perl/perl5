@@ -187,7 +187,9 @@ Return the SV from the GV.
 /*
  * symbol creation flags, for use in gv_fetchpv() and get_*v()
  */
-#define GV_ADD		0x01	/* add, if symbol not already there */
+#define GV_ADD		0x01	/* add, if symbol not already there
+				   For gv_name_set, adding a HEK for the first
+				   time, so don't try to free what's there.  */
 #define GV_ADDMULTI	0x02	/* add, pretending it has been added already */
 #define GV_ADDWARN	0x04	/* add, but warn if symbol wasn't already there */
 #define GV_ADDINEVAL	0x08	/* add, as though we're doing so within an eval */

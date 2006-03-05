@@ -215,7 +215,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     GvSTASH(gv) = stash;
     if (stash)
 	Perl_sv_add_backref(aTHX_ (SV*)stash, (SV*)gv);
-    gv_name_set(gv, name, len, 0);
+    gv_name_set(gv, name, len, GV_ADD);
     if (multi || doproto)              /* doproto means it _was_ mentioned */
 	GvMULTI_on(gv);
     if (doproto) {			/* Replicate part of newSUB here. */
@@ -2113,6 +2113,10 @@ Perl_gv_name_set(pTHX_ GV *gv, const char *name, U32 len, U32 flags)
 
     if (len > I32_MAX)
 	Perl_croak(aTHX_ "panic: gv name too long (%"UVuf")", (UV) len);
+
+    if (!(flags & GV_ADD) && GvNAME_HEK(gv)) {
+	unshare_hek(GvNAME_HEK(gv));
+    }
 
     PERL_HASH(hash, name, len);
     GvNAME_HEK(gv) = name ? share_hek(name, len, hash) : 0;
