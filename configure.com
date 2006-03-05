@@ -1194,6 +1194,9 @@ $   prefixbase = prefix - "]"
 $!  Add _ROOT to make install PERL_ROOT differ from build directory.
 $   prefix = prefixbase + "_ROOT.]"
 $ ENDIF
+$ ! more redundant scrubbing of values
+$ prefix = prefix - "000000."
+$ IF F$LOCATE(".]",prefix) .EQ. F$LENGTH(prefix) THEN prefix = prefix - "]" + ".]"
 $ src = prefix
 $!: determine root of directory hierarchy where package will be installed.
 $ dflt = prefix
@@ -5652,8 +5655,8 @@ $ WC "d_bincompat3='undef'"
 $! WC "d_bsdpgrp='undef'"
 $ WC "d_bsdgetpgrp='undef'"
 $ WC "d_bsdsetpgrp='undef'"
-$ WC "d_builtin_choose_expr='undef'"
-$ WC "d_builtin_expect='undef'"
+$ WC "d_builtin_choose_expr='undef'" ! GCC only
+$ WC "d_builtin_expect='undef'" ! GCC only
 $ WC "d_bzero='" + d_bzero + "'"
 $ WC "d_casti32='define'"
 $ WC "d_castneg='define'"
@@ -6870,8 +6873,6 @@ $!----------------------------------------------
 $ pcsi_producer = f$trnlnm("PCSI_PRODUCER")
 $ if pcsi_producer .eqs. ""
 $ then
-$   prefix = prefix - "000000."
-$   IF F$LOCATE(".]",prefix) .EQ. F$LENGTH(prefix) THEN prefix = prefix - "]" + ".]"
 $   WRITE CONFIG "$ define/translation=concealed ''vms_prefix' ''prefix'"
 $ else
 $  WRITE CONFIG "$ myproc = f$environment(""PROCEDURE"")"
@@ -6886,12 +6887,6 @@ $  WRITE CONFIG "$ then"
 $  WRITE CONFIG "$  define/translation=concealed ''vms_prefix' 'myroot_dev'['myroot_dir'.]"
 $  WRITE CONFIG "$ endif"
 $ endif
-$
-$ prefix = prefix - "000000."
-$ IF F$LOCATE(".]",prefix) .EQ. F$LENGTH(prefix) THEN prefix = prefix - "]" + ".]" 
-$ WRITE CONFIG "$ define/translation=concealed ''vms_prefix' ''prefix'"
-
-
 $ WRITE CONFIG "$ ext = "".exe"""
 $ IF sharedperl
 $ THEN
@@ -6923,9 +6918,6 @@ $   THEN
 $     WRITE CONFIG "$ set command ''vms_prefix':[000000]''packageup'.CLD"
 $   ENDIF
 $ ENDIF !  perl_symbol
-$ WRITE CONFIG "$ define/nolog pod2text ''vms_prefix':[lib.pod]pod2text.com"
-$ WRITE CONFIG "$ define/nolog pod2html ''vms_prefix':[lib.pod]pod2html.com"
-$ WRITE CONFIG "$ define/nolog pod2man  ''vms_prefix':[lib.pod]pod2man.com"
 $!
 $ IF (tzneedset)
 $ THEN
@@ -6948,16 +6940,16 @@ $ WRITE CONFIG "$ h2ph       == """ + perl_setup_perl + " ''vms_prefix':[utils]h
 $ WRITE CONFIG "$ h2xs       == """ + perl_setup_perl + " ''vms_prefix':[utils]h2xs.com"""
 $ WRITE CONFIG "$ instmodsh  == """ + perl_setup_perl + " ''vms_prefix':[utils]instmodsh.com"""
 $ WRITE CONFIG "$ libnetcfg  == """ + perl_setup_perl + " ''vms_prefix':[utils]libnetcfg.com"""
-$ WRITE CONFIG "$ perlbug    == """ + perl_setup_perl + " ''vms_prefix':[lib]perlbug.com"""
+$ WRITE CONFIG "$ perlbug    == """ + perl_setup_perl + " ''vms_prefix':[utils]perlbug.com"""
 $ WRITE CONFIG "$!perlcc     == """ + perl_setup_perl + " ''vms_prefix':[utils]perlcc.com"""
-$ WRITE CONFIG "$ perldoc    == """ + perl_setup_perl + " ''vms_prefix':[lib.pods]perldoc.com """"-t"""""""
+$ WRITE CONFIG "$ perldoc    == """ + perl_setup_perl + " ''vms_prefix':[utils]perldoc.com """"-t"""""""
 $ WRITE CONFIG "$ perlivp    == """ + perl_setup_perl + " ''vms_prefix':[utils]perlivp.com"""
 $ WRITE CONFIG "$ piconv     == """ + perl_setup_perl + " ''vms_prefix':[utils]piconv.com"""
 $ WRITE CONFIG "$ pl2pm      == """ + perl_setup_perl + " ''vms_prefix':[utils]pl2pm.com"""
-$ WRITE CONFIG "$ pod2html   == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2html"""
-$ WRITE CONFIG "$ pod2latex  == """ + perl_setup_perl + " ''vms_prefix':[lib.pod]pod2latex.com"""
-$ WRITE CONFIG "$ pod2text   == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2text"""
-$ WRITE CONFIG "$!pod2man    == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2man"""
+$ WRITE CONFIG "$ pod2html   == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2html.com"""
+$ WRITE CONFIG "$ pod2latex  == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2latex.com"""
+$ WRITE CONFIG "$ pod2text   == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2text.com"""
+$ WRITE CONFIG "$!pod2man    == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2man.com"""
 $ WRITE CONFIG "$ pod2usage  == """ + perl_setup_perl + " ''vms_prefix':[utils]pod2usage.com"""
 $ WRITE CONFIG "$ podchecker == """ + perl_setup_perl + " ''vms_prefix':[utils]podchecker.com"""
 $ WRITE CONFIG "$ podselect  == """ + perl_setup_perl + " ''vms_prefix':[utils]podselect.com"""
