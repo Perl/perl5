@@ -47,7 +47,7 @@ struct gp {
 	(*({ GV * const zzzz = (GV *) (gv);				\
 	   assert(isGV_with_GP(zzzz));					\
 	   assert(SvTYPE(zzzz) == SVt_PVGV || SvTYPE(zzzz) >= SVt_PVLV); \
-	   &(GvXPVGV(zzzz)->xgv_namehek);				\
+	   &(GvXPVGV(zzzz)->xiv_u.xivu_namehek);			\
 	 }))
 #else
 #  define GvGP(gv)	((gv)->sv_u.svu_gp)

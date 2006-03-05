@@ -395,6 +395,7 @@ struct xpviv {
 	UV	xivu_uv;
 	void *	xivu_p1;
 	I32	xivu_i32;
+	HEK *	xivu_namehek;
     }		xiv_u;
 };
 
@@ -409,6 +410,7 @@ typedef struct {
 	UV	xivu_uv;
 	void *	xivu_p1;
 	I32	xivu_i32;
+	HEK *	xivu_namehek;
     }		xiv_u;
 } xpviv_allocated;
 #endif
@@ -426,6 +428,7 @@ struct xpvuv {
 	IV	xuvu_iv;
 	UV	xuvu_uv;	/* unsigned value or pv offset */
 	void *	xuvu_p1;
+	HEK *	xivu_namehek;
     }		xuv_u;
 };
 
@@ -443,6 +446,7 @@ struct xpvnv {
 	UV	xivu_uv;
 	void *	xivu_p1;
 	I32	xivu_i32;
+	HEK *	xivu_namehek;
     }		xiv_u;
 };
 
@@ -459,6 +463,7 @@ struct xpvmg {
 	UV	xivu_uv;
 	void *	xivu_p1;
 	I32	xivu_i32;
+	HEK *	xivu_namehek;
     }		xiv_u;
     union {
 	MAGIC*	xmg_magic;	/* linked list of magicalness */
@@ -479,15 +484,13 @@ struct xpvlv {
 	UV	xivu_uv;
 	void *	xivu_p1;
 	I32	xivu_i32;
+	HEK *	xivu_namehek;	/* GvNAME */
     }		xiv_u;
     union {
 	MAGIC*	xmg_magic;	/* linked list of magicalness */
 	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
     } xmg_u;
     HV*		xmg_stash;	/* class package */
-
-    /* a full glob fits into this */
-    HEK *	xgv_namehek;
 
     STRLEN	xlv_targoff;
     STRLEN	xlv_targlen;
@@ -504,10 +507,11 @@ struct xpvgv {
     STRLEN	xpv_cur;	/* xgv_flags */
     STRLEN	xpv_len;	/* 0 */
     union {
-	IV	xivu_iv;	/* integer value or pv offset */
+	IV	xivu_iv;
 	UV	xivu_uv;
 	void *	xivu_p1;
 	I32	xivu_i32;
+	HEK *	xivu_namehek;	/* GvNAME */
     }		xiv_u;
     union {
 	MAGIC*	xmg_magic;	/* linked list of magicalness */
@@ -515,7 +519,6 @@ struct xpvgv {
     } xmg_u;
     HV*		xmg_stash;	/* class package */
 
-    HEK *	xgv_namehek;
 };
 
 struct xpvbm {
@@ -530,6 +533,7 @@ struct xpvbm {
 	UV	xivu_uv;
 	void *	xivu_p1;
 	I32	xivu_i32;
+	HEK *	xivu_namehek;
     }		xiv_u;
     union {
 	MAGIC*	xmg_magic;	/* linked list of magicalness */
@@ -558,6 +562,7 @@ struct xpvfm {
 	UV	xivu_uv;
 	void *	xivu_p1;
 	I32	xivu_i32;
+	HEK *	xivu_namehek;
     }		xiv_u;
     union {
 	MAGIC*	xmg_magic;	/* linked list of magicalness */
@@ -593,6 +598,7 @@ typedef struct {
 	UV	xivu_uv;
 	void *	xivu_p1;
 	I32	xivu_i32;
+	HEK *	xivu_namehek;
     }		xiv_u;
     union {
 	MAGIC*	xmg_magic;	/* linked list of magicalness */
@@ -632,6 +638,7 @@ struct xpvio {
 	UV	xivu_uv;
 	void *	xivu_p1;
 	I32	xivu_i32;
+	HEK *	xivu_namehek;
     }		xiv_u;
     union {
 	MAGIC*	xmg_magic;	/* linked list of magicalness */

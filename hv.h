@@ -59,6 +59,8 @@ struct xpvhv {
 	IV	xivu_iv;	/* integer value or pv offset */
 	UV	xivu_uv;
 	void *	xivu_p1;
+	I32	xivu_i32;
+	HEK *	xivu_namehek;
     }		xiv_u;
     union {
 	MAGIC*	xmg_magic;	/* linked list of magicalness */
@@ -79,6 +81,8 @@ typedef struct {
 	IV	xivu_iv;	/* integer value or pv offset */
 	UV	xivu_uv;
 	void *	xivu_p1;
+	I32	xivu_i32;
+	HEK *	xivu_namehek;
     }		xiv_u;
     union {
 	MAGIC*	xmg_magic;	/* linked list of magicalness */

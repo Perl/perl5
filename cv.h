@@ -22,6 +22,7 @@ struct xpvcv {
 	UV	xivu_uv;
 	void *	xivu_p1;
 	I32	xivu_i32;	/* depth, >= 2 indicates recursive call */
+	HEK *	xivu_namehek;
     }		xiv_u;
     union {
 	MAGIC*	xmg_magic;	/* linked list of magicalness */
@@ -56,6 +57,7 @@ typedef struct {
 	UV	xivu_uv;
 	void *	xivu_p1;
 	I32	xivu_i32;	/* depth, >= 2 indicates recursive call */
+	HEK *	xivu_namehek;
     }		xiv_u;
     union {
 	MAGIC*	xmg_magic;	/* linked list of magicalness */
