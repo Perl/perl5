@@ -1048,10 +1048,8 @@ PP(pp_flop)
     if (GIMME == G_ARRAY) {
 	dPOPPOPssrl;
 
-	if (SvGMAGICAL(left))
-	    mg_get(left);
-	if (SvGMAGICAL(right))
-	    mg_get(right);
+	SvGETMAGIC(left);
+	SvGETMAGIC(right);
 
 	if (RANGE_IS_NUMERIC(left,right)) {
 	    register IV i, j;

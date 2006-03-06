@@ -2935,8 +2935,7 @@ sv_true() or its macro equivalent.
 bool
 Perl_sv_2bool(pTHX_ register SV *sv)
 {
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
+    SvGETMAGIC(sv);
 
     if (!SvOK(sv))
 	return 0;
@@ -5944,8 +5943,7 @@ Perl_sv_inc(pTHX_ register SV *sv)
 
     if (!sv)
 	return;
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
+    SvGETMAGIC(sv);
     if (SvTHINKFIRST(sv)) {
 	if (SvREADONLY(sv) && SvFAKE(sv))
 	    sv_force_normal(sv);
@@ -6100,8 +6098,7 @@ Perl_sv_dec(pTHX_ register SV *sv)
 
     if (!sv)
 	return;
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
+    SvGETMAGIC(sv);
     if (SvTHINKFIRST(sv)) {
 	if (SvREADONLY(sv) && SvFAKE(sv))
 	    sv_force_normal(sv);
@@ -6746,8 +6743,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	goto fix_gv;
 
     default:
-	if (SvGMAGICAL(sv))
-	    mg_get(sv);
+	SvGETMAGIC(sv);
 	if (SvROK(sv)) {
 	    SV * const *sp = &sv;	/* Used in tryAMAGICunDEREF macro. */
 	    tryAMAGICunDEREF(to_cv);
@@ -6996,8 +6992,7 @@ Perl_sv_isobject(pTHX_ SV *sv)
 {
     if (!sv)
 	return 0;
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
+    SvGETMAGIC(sv);
     if (!SvROK(sv))
 	return 0;
     sv = (SV*)SvRV(sv);
@@ -7022,8 +7017,7 @@ Perl_sv_isa(pTHX_ SV *sv, const char *name)
     const char *hvname;
     if (!sv)
 	return 0;
-    if (SvGMAGICAL(sv))
-	mg_get(sv);
+    SvGETMAGIC(sv);
     if (!SvROK(sv))
 	return 0;
     sv = (SV*)SvRV(sv);
