@@ -1289,10 +1289,19 @@ void
 perl_free(pTHXx)
 {
 #ifdef PERL_TRACK_MEMPOOL
-    /* Emulate the PerlHost behaviour of free()ing all memory allocated in this
-       thread at thread exit.  */
-    while(aTHXx->Imemory_debug_header.next != &(aTHXx->Imemory_debug_header))
-	safesysfree(sTHX + (char *)(aTHXx->Imemory_debug_header.next));
+    {
+	/*
+	 * Don't free thread memory if PERL_DESTRUCT_LEVEL is set to a non-zero
+	 * value as we're probably hunting memory leaks then
+	 */
+	const char * const s = PerlEnv_getenv("PERL_DESTRUCT_LEVEL");
+	if (!s || atoi(s) == 0) {
+	    /* Emulate the PerlHost behaviour of free()ing all memory allocated in this
+	       thread at thread exit.  */
+	    while(aTHXx->Imemory_debug_header.next != &(aTHXx->Imemory_debug_header))
+		safesysfree(sTHX + (char *)(aTHXx->Imemory_debug_header.next));
+	}
+    }
 #endif
 
 #if defined(WIN32) || defined(NETWARE)
