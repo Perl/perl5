@@ -1,15 +1,19 @@
-#!perl
-use File::Spec ();
-
 BEGIN {
-    if ($ENV{PERL_CORE}) {
-	chdir '../lib/Archive/Tar/t' if -d '../lib/Archive/Tar/t';
-	mkdir 'src' unless -d 'src';
-	chdir 'src';
-    }
+    if( $ENV{PERL_CORE} ) {
+        chdir '../lib/Archive/Tar' if -d '../lib/Archive/Tar';
+    }       
+    use lib '../../..';
 }
 
-for my $d (qw(short long)) {
+BEGIN { chdir 't' if -d 't' }
+
+use lib '../lib';
+use File::Spec ();
+
+
+mkdir 'src' unless -d 'src';
+
+for my $d ( map { File::Spec->catdir( 'src', $_ ) } qw(short long) ) {
     -d $d or mkdir $d;
     my $file = File::Spec->catfile($d,'b');
     open F, '>', $file or die "Can't create $file: $!\n";
@@ -22,12 +26,12 @@ sub output {
     open F, '>', $file or die "Can't create $file: $!\n";
     binmode F;
     for (@_) {
-	print F pack "H*", $_;
+        print F pack "H*", $_;
     }
     close F;
 }
 
-output( 'long/bar.tar', qw(
+output( File::Spec->catfile( qw[src long bar.tar] ), qw(
 6300000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000
@@ -349,7 +353,7 @@ output( 'long/bar.tar', qw(
 0000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000
 ));
-output( 'long/foo.tgz', qw(
+output( File::Spec->catfile( qw[src long foo.tgz] ), qw(
 1f8b0800000000000003edd74b6e8330100660af730a2e4098c10fb63d009740
 8949501c902851c4ed6bc8ab515abaf2b485f93616c9481e64fe91bc11e10102
 18a5047899d1e30ae9e57984fe37ff074a4c4daac77a09220282dec4e9bd2bda
@@ -362,7 +366,7 @@ e2fc871cdf5f29ae8ba30d38d7e680e0fc2ff3ff9af7e9f99f2a35dc05a54454
 df0cf35f81411f7d1ce6bf7fe4fb3f85bd75aee1cb3f638c31c618638c31c6d8
 6c7d00dd7a588000280000
 ));
-output( 'short/bar.tar', qw(
+output( File::Spec->catfile( qw[src short bar.tar] ), qw(
 6300000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000
@@ -684,7 +688,7 @@ output( 'short/bar.tar', qw(
 0000000000000000000000000000000000000000000000000000000000000000
 0000000000000000000000000000000000000000000000000000000000000000
 ));
-output( 'short/foo.tgz', qw(
+output( File::Spec->catfile( qw[src short foo.tgz] ), qw(
 1f8b0800000000000003edd3410ac2301085e159f71439c24cdaa6e7296a4184
 2eaabd7f87e84210ecaa23c2ff6d862403799b7792e3a9a996ae137543e9ebd4
 fc3c57e677fe60ade592fbbadfaa240dc826ebfd312e29c96d9c2fdff67c6d9a
