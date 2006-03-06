@@ -70,7 +70,6 @@ Perl_sv_taint(pTHX_ SV *sv)
     sv_magic((sv), Nullsv, PERL_MAGIC_taint, Nullch, 0);
 }
 
-#if 0
 /* sv_2iv() is now a macro using Perl_sv_2iv_flags();
  * this function provided for binary compatibility only
  */
@@ -90,7 +89,6 @@ Perl_sv_2uv(pTHX_ register SV *sv)
 {
     return sv_2uv_flags(sv, SV_GMAGIC);
 }
-#endif
 
 /* sv_2pv() is now a macro using Perl_sv_2pv_flags();
  * this function provided for binary compatibility only

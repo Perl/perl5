@@ -1624,16 +1624,6 @@ S_sv_2iuv_non_preserve(pTHX_ register SV *sv, I32 numtype)
 }
 #endif /* !NV_PRESERVES_UV*/
 
-/* sv_2iv() is now a macro using Perl_sv_2iv_flags();
- * this function provided for binary compatibility only
- */
-
-IV
-Perl_sv_2iv(pTHX_ register SV *sv)
-{
-    return sv_2iv_flags(sv, SV_GMAGIC);
-}
-
 STATIC bool
 S_sv_2iuv_common(pTHX_ SV *sv) {
     if (SvNOKp(sv)) {
@@ -1933,16 +1923,6 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
     DEBUG_c(PerlIO_printf(Perl_debug_log, "0x%"UVxf" 2iv(%"IVdf")\n",
 	PTR2UV(sv),SvIVX(sv)));
     return SvIsUV(sv) ? (IV)SvUVX(sv) : SvIVX(sv);
-}
-
-/* sv_2uv() is now a macro using Perl_sv_2uv_flags();
- * this function provided for binary compatibility only
- */
-
-UV
-Perl_sv_2uv(pTHX_ register SV *sv)
-{
-    return sv_2uv_flags(sv, SV_GMAGIC);
 }
 
 /*
