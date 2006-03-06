@@ -107,6 +107,7 @@ my %map = reverse (
 		   "paul.green\100stratus.com"
 		   => "paul_greenvos\100vos.stratus.com",
 		   "alian\100cpan.org" => "alian\100alianwebserver.com",
+		   "david.dyck\100fluke.com" => "dcd\100tc.fluke.com",
 		   # Maybe we should special case this to get real names out?
 		   "perlbug\100perl.org" => "perlbug-followup\100perl.org",
 		  );
