@@ -3,7 +3,7 @@ package File::Spec;
 use strict;
 use vars qw(@ISA $VERSION);
 
-$VERSION = '3.15';
+$VERSION = '3.17';
 $VERSION = eval $VERSION;
 
 my %module = (MacOS   => 'Mac',
@@ -230,10 +230,10 @@ from the base path to the destination path:
     $rel_path = File::Spec->abs2rel( $path ) ;
     $rel_path = File::Spec->abs2rel( $path, $base ) ;
 
-If C<$base> is not present or '', then L<cwd()|Cwd> is used. If C<$base> is
+If C<$base> is not present or '', then L<Cwd::cwd()|Cwd> is used. If C<$base> is
 relative, then it is converted to absolute form using
 L</rel2abs()>. This means that it is taken to be relative to
-L<cwd()|Cwd>.
+L<Cwd::cwd()|Cwd>.
 
 On systems with the concept of volume, if C<$path> and C<$base> appear to be
 on two different volumes, we will not attempt to resolve the two
@@ -246,7 +246,7 @@ C<$base> filename as well. Otherwise all path components are assumed to be
 directories.
 
 If C<$path> is relative, it is converted to absolute form using L</rel2abs()>.
-This means that it is taken to be relative to L<cwd()|Cwd>.
+This means that it is taken to be relative to L<Cwd::cwd()|Cwd>.
 
 No checks against the filesystem are made.  On VMS, there is
 interaction with the working environment, as logicals and
@@ -261,9 +261,9 @@ Converts a relative path to an absolute path.
     $abs_path = File::Spec->rel2abs( $path ) ;
     $abs_path = File::Spec->rel2abs( $path, $base ) ;
 
-If C<$base> is not present or '', then L<cwd()|Cwd> is used. If C<$base> is relative,
+If C<$base> is not present or '', then L<Cwd::cwd()|Cwd> is used. If C<$base> is relative,
 then it is converted to absolute form using L</rel2abs()>. This means that it
-is taken to be relative to L<cwd()|Cwd>.
+is taken to be relative to L<Cwd::cwd()|Cwd>.
 
 On systems with the concept of volume, if C<$path> and C<$base> appear to be
 on two different volumes, we will not attempt to resolve the two

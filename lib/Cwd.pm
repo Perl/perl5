@@ -171,7 +171,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.15';
+$VERSION = '3.17';
 
 @ISA = qw/ Exporter /;
 @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
@@ -356,6 +356,15 @@ unless ($METHOD_MAP{$^O}{cwd} or defined &cwd) {
 	*cwd = \&getcwd;
     }
 }
+
+if ($^O eq 'cygwin') {
+  # We need to make sure cwd() is called with no args, because it's
+  # got an arg-less prototype and will die if args are present.
+  local $^W = 0;
+  my $orig_cwd = \&cwd;
+  *cwd = sub { &$orig_cwd() }
+}
+
 
 # set a reasonable (and very safe) default for fastgetcwd, in case it
 # isn't redefined later (20001212 rspier)

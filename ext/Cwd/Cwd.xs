@@ -409,7 +409,7 @@ PPCODE:
 }
 
 void
-getcwd()
+getcwd(...)
 PROTOTYPE: DISABLE
 PPCODE:
 {
