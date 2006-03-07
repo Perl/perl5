@@ -24,7 +24,7 @@ use warnings;
 use strict;
 use Config;
 
-print "1..39\n";
+print "1..40\n";
 
 use B::Deparse;
 my $deparse = B::Deparse->new() or print "not ";
@@ -117,7 +117,7 @@ BEGIN { $^W = 1; }
 BEGIN { $/ = "\n"; $\ = "\n"; }
 LINE: while (defined($_ = <ARGV>)) {
     chomp $_;
-    our(@F) = split(" ", $_, 0);
+    our(@F) = split(' ', $_, 0);
     '???';
 }
 EOF
@@ -320,3 +320,7 @@ print $_ foreach (reverse @a);
 # 33
 our @a;
 print $_ foreach (reverse 1, 2..5);
+####
+# 34  (bug #38684)
+our @ary;
+@ary = split(' ', 'foo', 0);

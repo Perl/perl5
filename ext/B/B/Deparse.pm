@@ -4121,12 +4121,10 @@ sub pp_split {
 	push @exprs, $self->deparse($kid, 6);
     }
 
-    # handle special case of split(), and split(" ") that compiles to /\s+/
+    # handle special case of split(), and split(' ') that compiles to /\s+/
     $kid = $op->first;
-    if ($kid->flags & OPf_SPECIAL
-	&& $exprs[0] eq '/\\s+/'
-	&& $kid->pmflags & PMf_SKIPWHITE ) {
-	    $exprs[0] = '" "';
+    if ($kid->flags & OPf_SPECIAL and $kid->pmflags & PMf_SKIPWHITE) {
+	$exprs[0] = "' '";
     }
 
     $expr = "split(" . join(", ", @exprs) . ")";
