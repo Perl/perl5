@@ -298,6 +298,7 @@
 #define PL_linestr		(vTHX->Ilinestr)
 #define PL_localpatches		(vTHX->Ilocalpatches)
 #define PL_lockhook		(vTHX->Ilockhook)
+#define PL_madskills		(vTHX->Imadskills)
 #define PL_main_cv		(vTHX->Imain_cv)
 #define PL_main_root		(vTHX->Imain_root)
 #define PL_main_start		(vTHX->Imain_start)
@@ -434,6 +435,7 @@
 #define PL_uudmap		(vTHX->Iuudmap)
 #define PL_warnhook		(vTHX->Iwarnhook)
 #define PL_widesyscalls		(vTHX->Iwidesyscalls)
+#define PL_xmlfp		(vTHX->Ixmlfp)
 #define PL_yycharp		(vTHX->Iyycharp)
 #define PL_yylvalp		(vTHX->Iyylvalp)
 
@@ -579,6 +581,7 @@
 #define PL_Ilinestr		PL_linestr
 #define PL_Ilocalpatches	PL_localpatches
 #define PL_Ilockhook		PL_lockhook
+#define PL_Imadskills		PL_madskills
 #define PL_Imain_cv		PL_main_cv
 #define PL_Imain_root		PL_main_root
 #define PL_Imain_start		PL_main_start
@@ -715,6 +718,7 @@
 #define PL_Iuudmap		PL_uudmap
 #define PL_Iwarnhook		PL_warnhook
 #define PL_Iwidesyscalls	PL_widesyscalls
+#define PL_Ixmlfp		PL_xmlfp
 #define PL_Iyycharp		PL_yycharp
 #define PL_Iyylvalp		PL_yylvalp
 

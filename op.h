@@ -36,6 +36,12 @@
 #define OPCODE U16
 #endif
 
+#ifdef PERL_MAD
+#  define MADPROP_IN_BASEOP	MADPROP*	op_madprop;
+#else
+#  define MADPROP_IN_BASEOP
+#endif
+
 #ifdef BASEOP_DEFINITION
 #define BASEOP BASEOP_DEFINITION
 #else
@@ -43,6 +49,7 @@
     OP*		op_next;		\
     OP*		op_sibling;		\
     OP*		(CPERLscope(*op_ppaddr))(pTHX);		\
+    MADPROP_IN_BASEOP			\
     PADOFFSET	op_targ;		\
     unsigned	op_type:9;		\
     unsigned	op_opt:1;		\
@@ -548,4 +555,26 @@ struct loop {
 #define NewOpSz(m, var, size)	\
 	(var = (OP*)safemalloc(size), memzero(var, size))
 #define FreeOp(p) Safefree(p)
+#endif
+
+#ifdef PERL_MAD
+#  define MAD_NULL 1
+#  define MAD_PV 2
+#  define MAD_OP 3
+#  define MAD_SV 4
+
+struct madprop {
+    MADPROP* mad_next;
+    void *mad_val;
+    U32 mad_vlen;
+/*    short mad_count; */
+    char mad_key;
+    char mad_type;
+};
+
+struct token {
+    I32 tk_type;
+    YYSTYPE tk_lval;
+    MADPROP* tk_mad;
+};
 #endif

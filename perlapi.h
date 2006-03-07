@@ -394,6 +394,8 @@ END_EXTERN_C
 #define PL_localpatches		(*Perl_Ilocalpatches_ptr(aTHX))
 #undef  PL_lockhook
 #define PL_lockhook		(*Perl_Ilockhook_ptr(aTHX))
+#undef  PL_madskills
+#define PL_madskills		(*Perl_Imadskills_ptr(aTHX))
 #undef  PL_main_cv
 #define PL_main_cv		(*Perl_Imain_cv_ptr(aTHX))
 #undef  PL_main_root
@@ -666,6 +668,8 @@ END_EXTERN_C
 #define PL_warnhook		(*Perl_Iwarnhook_ptr(aTHX))
 #undef  PL_widesyscalls
 #define PL_widesyscalls		(*Perl_Iwidesyscalls_ptr(aTHX))
+#undef  PL_xmlfp
+#define PL_xmlfp		(*Perl_Ixmlfp_ptr(aTHX))
 #undef  PL_yycharp
 #define PL_yycharp		(*Perl_Iyycharp_ptr(aTHX))
 #undef  PL_yylvalp

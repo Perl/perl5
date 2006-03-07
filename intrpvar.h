@@ -439,6 +439,12 @@ PERLVAR(Ireentrant_buffer, REENTR*)	/* here we store the _r buffers */
 
 PERLVARI(Isavebegin,     bool,	FALSE)	/* save BEGINs for compiler	*/
 
+#ifdef PERL_MAD
+PERLVARI(Imadskills,	bool, FALSE)	/* preserve all syntactic info */
+					/* (MAD = Misc Attribute Decoration) */
+PERLVARI(Ixmlfp, PerlIO *,NULL)
+#endif
+
 PERLVAR(Icustom_op_names, HV*)  /* Names of user defined ops */
 PERLVAR(Icustom_op_descs, HV*)  /* Descriptions of user defined ops */
 

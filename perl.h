@@ -2141,6 +2141,11 @@ struct RExC_state_t;
 
 typedef MEM_SIZE STRLEN;
 
+#ifdef PERL_MAD
+typedef struct token TOKEN;
+typedef struct madprop MADPROP;
+typedef struct nexttoken NEXTTOKE;
+#endif
 typedef struct op OP;
 typedef struct cop COP;
 typedef struct unop UNOP;
@@ -3060,6 +3065,23 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
  * randomisation defines use the Configure -Accflags=... instead. */
 #if !defined(NO_HASH_SEED) && !defined(USE_HASH_SEED) && !defined(USE_HASH_SEED_EXPLICIT)
 #  define USE_HASH_SEED
+#endif
+
+/* Win32 defines a type 'WORD' in windef.h. This conflicts with the enumerator
+ * 'WORD' defined in perly.h. The yytokentype enum is only a debugging aid, so
+ * it's not really needed.
+ */
+#if defined(WIN32)
+#  define YYTOKENTYPE
+#endif
+#include "perly.h"
+
+#ifdef PERL_MAD
+struct nexttoken {
+    YYSTYPE next_val;	/* value of next token, if any */
+    I32 next_type;	/* type of next token */
+    MADPROP *next_mad;	/* everything else about that token */
+};
 #endif
 
 #include "regexp.h"
@@ -4080,15 +4102,6 @@ END_EXTERN_C
 #endif
 #endif
 
-/* Win32 defines a type 'WORD' in windef.h. This conflicts with the enumerator
- * 'WORD' defined in perly.h. The yytokentype enum is only a debugging aid, so
- * it's not really needed.
- */
-#if defined(WIN32)
-#  define YYTOKENTYPE
-#endif
-#include "perly.h"
-
 #define LEX_NOTPARSING		11	/* borrowed from toke.c */
 
 typedef enum {
@@ -4320,6 +4333,12 @@ struct tempsym; /* defined in pp_pack.c */
 
 #if !defined(PERL_FOR_X2P)
 #  include "embedvar.h"
+#endif
+#ifndef PERL_MAD
+#  undef PL_madskills
+#  undef PL_xmlfp
+#  define PL_madskills 0
+#  define PL_xmlfp 0
 #endif
 
 /* Now include all the 'global' variables
