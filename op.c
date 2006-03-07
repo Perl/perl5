@@ -3467,6 +3467,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	if (PL_eval_start)
 	    PL_eval_start = 0;
 	else {
+	    op_free(o);
 	    o = newSVOP(OP_CONST, 0, newSViv(PL_compiling.cop_arybase));
 	    o->op_private |= OPpCONST_ARYBASE;
 	}
