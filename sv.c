@@ -587,18 +587,6 @@ struct arena_set {
     struct arena_desc set[ARENAS_PER_SET];
 };
 
-#if !ARENASETS
-
-static void 
-S_free_arena(pTHX_ void **root) {
-    while (root) {
-	void ** const next = *(void **)root;
-	Safefree(root);
-	root = next;
-    }
-}
-#endif
-
 /*
 =for apidoc sv_free_arenas
 
@@ -627,7 +615,6 @@ Perl_sv_free_arenas(pTHX)
 	    Safefree(sva);
     }
 
-#if ARENASETS
     {
 	struct arena_set *next, *aroot = (struct arena_set*) PL_body_arenas;
 	
@@ -641,9 +628,6 @@ Perl_sv_free_arenas(pTHX)
 	    Safefree(aroot);
 	}
     }
-#else
-    S_free_arena(aTHX_ (void**) PL_body_arenas);
-#endif
     PL_body_arenas = 0;
 
     for (i=0; i<PERL_ARENA_ROOTS_SIZE; i++)
@@ -691,24 +675,12 @@ Perl_sv_free_arenas(pTHX)
   contexts below (line ~10k)
 */
 
-/* get_arena(size): when ARENASETS is enabled, this creates
-   custom-sized arenas, otherwize it uses PERL_ARENA_SIZE, as
-   previously done.
+/* get_arena(size): this creates custom-sized arenas
    TBD: export properly for hv.c: S_more_he().
 */
 void*
 Perl_get_arena(pTHX_ int arena_size)
 {
-#if !ARENASETS
-    union arena* arp;
-
-    /* allocate and attach arena */
-    Newx(arp, arena_size, char);
-    arp->next = PL_body_arenas;
-    PL_body_arenas = arp;
-    return arp;
-
-#else
     struct arena_desc* adesc;
     struct arena_set *newroot, **aroot = (struct arena_set**) &PL_body_arenas;
     int curr;
@@ -737,7 +709,6 @@ Perl_get_arena(pTHX_ int arena_size)
 			  curr, adesc->arena, arena_size));
 
     return adesc->arena;
-#endif
 }
 
 
@@ -1094,17 +1065,11 @@ S_more_bodies (pTHX_ svtype sv_type)
 
     end = start + bdp->arena_size - body_size;
 
-#if !ARENASETS
-    /* The initial slot is used to link the arenas together, so it isn't to be
-       linked into the list of ready-to-use bodies.  */
-    start += body_size;
-#else
     /* computed count doesnt reflect the 1st slot reservation */
     DEBUG_m(PerlIO_printf(Perl_debug_log,
 			  "arena %p end %p arena-size %d type %d size %d ct %d\n",
 			  start, end, bdp->arena_size, sv_type, body_size,
 			  bdp->arena_size / body_size));
-#endif
 
     *root = (void *)start;
 
