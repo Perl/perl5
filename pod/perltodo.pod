@@ -385,12 +385,11 @@ C.
 
 Clean this up. Check everything in core works
 
-=head2 shrink C<GV>s, C<CV>s
+=head2 shrink C<IO>s
 
-By removing unused elements and careful re-ordering, the structures for C<AV>s
-and C<HV>s have recently been shrunk considerably. It's probable that the same
-approach would find savings in C<GV>s and C<CV>s, if not all the other
-larger-than-C<PVMG> types.
+By removing unused elements and careful re-ordering, the structures for C<AV>s,
+C<HV>s, C<CV>s and C<GV>s have recently been shrunk considerably. C<PVIO>s and
+C<PVBM>s might have some savings to win.
 
 =head2 UTF8 caching code
 
