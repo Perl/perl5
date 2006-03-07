@@ -528,6 +528,7 @@ use warnings 'void' ;
 5 || print "bad\n";	# test OPpCONST_SHORTCIRCUIT
 use constant U => undef;
 print "boo\n" if U;	# test OPpCONST_SHORTCIRCUIT
+$[ = 2; # should not warn
 no warnings 'void' ;
 "abc"; # OP_CONST
 7 ; # OP_CONST

@@ -776,6 +776,8 @@ Perl_scalarvoid(pTHX_ OP *o)
 	else {
 	    if (ckWARN(WARN_VOID)) {
 		useless = "a constant";
+		if (o->op_private & OPpCONST_ARYBASE)
+		    useless = 0;
 		/* don't warn on optimised away booleans, eg 
 		 * use constant Foo, 5; Foo || print; */
 		if (cSVOPo->op_private & OPpCONST_SHORTCIRCUIT)
@@ -1035,7 +1037,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	PL_modcount++;
 	return o;
     case OP_CONST:
-	if (!(o->op_private & (OPpCONST_ARYBASE)))
+	if (!(o->op_private & OPpCONST_ARYBASE))
 	    goto nomod;
 	localize = 0;
 	if (PL_eval_start && PL_eval_start->op_type == OP_CONST) {
@@ -3466,6 +3468,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    PL_eval_start = 0;
 	else {
 	    o = newSVOP(OP_CONST, 0, newSViv(PL_compiling.cop_arybase));
+	    o->op_private |= OPpCONST_ARYBASE;
 	}
     }
     return o;
