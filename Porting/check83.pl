@@ -63,9 +63,9 @@ if (open(MANIFEST, "MANIFEST")) {
 
 for my $dir (sort keys %dir) {
     for my $edt (keys %{$dir{$dir}}) {
-	my @files = @{$dir{$dir}->{$edt}};
+	my @files = @{$dir{$dir}{$edt}};
 	if (@files > 1) {
-	    print "directory $dir conflict $edt: @files\n";
+	    print "conflict on filename $edt:\n", map "    $_\n", @files;
 	}
     }
 }
