@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.39 $, $Date: 2006/01/08 14:27:07 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 3606 $)
 
 =head1 DESCRIPTION
 
@@ -513,6 +513,14 @@ joining, starting, or requesting services for a Perl user group.
 http://www.cpan.org/ is the Comprehensive Perl Archive Network,
 a replicated worldwide repository of Perl software, see
 the I<What is CPAN?> question earlier in this document.
+
+=head1 REVISION
+
+Revision: $Revision: 3606 $
+
+Date: $Date: 2006-03-06 12:05:47 +0100 (lun, 06 mar 2006) $
+
+See L<perlfaq> for source control details and availability.
 
 =head1 AUTHOR AND COPYRIGHT
 

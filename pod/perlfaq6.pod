@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regular Expressions ($Revision: 1.38 $, $Date: 2005/12/31 00:54:37 $)
+perlfaq6 - Regular Expressions ($Revision: 3606 $)
 
 =head1 DESCRIPTION
 
@@ -886,6 +886,14 @@ in L<perlre>.
 	print if /\Q$pattern\E/;
     }
     close FILE;
+
+=head1 REVISION
+
+Revision: $Revision: 3606 $
+
+Date: $Date: 2006-03-06 12:05:47 +0100 (lun, 06 mar 2006) $
+
+See L<perlfaq> for source control details and availability.
 
 =head1 AUTHOR AND COPYRIGHT
 

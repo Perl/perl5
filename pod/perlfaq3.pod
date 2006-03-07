@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 1.56 $, $Date: 2005/12/31 00:54:37 $)
+perlfaq3 - Programming Tools ($Revision: 3606 $)
 
 =head1 DESCRIPTION
 
@@ -110,28 +110,41 @@ perl finds it.
 
 =head2 How do I debug my Perl programs?
 
-Have you tried C<use warnings> or used C<-w>?  They enable warnings
-to detect dubious practices.
+(contributed by brian d foy)
 
-Have you tried C<use strict>?  It prevents you from using symbolic
-references, makes you predeclare any subroutines that you call as bare
-words, and (probably most importantly) forces you to predeclare your
-variables with C<my>, C<our>, or C<use vars>.
+Before you do anything else, you can help yourself by ensuring that
+you let Perl tell you about problem areas in your code. By turning
+on warnings and strictures, you can head off many problems before 
+they get too big. You can find out more about these in L<strict>
+and L<warnings>.
 
-Did you check the return values of each and every system call?  The operating
-system (and thus Perl) tells you whether they worked, and if not
-why.
+	#!/usr/bin/perl
+	use strict;
+	use warnings;
+	
+Beyond that, the simplest debugger is the C<print> function. Use it
+to look at values as you run your program:
 
-  open(FH, "> /etc/cantwrite")
-    or die "Couldn't write to /etc/cantwrite: $!\n";
+	print STDERR "The value is [$value]\n";
 
-Did you read L<perltrap>?  It's full of gotchas for old and new Perl
-programmers and even has sections for those of you who are upgrading
-from languages like I<awk> and I<C>.
+The C<Data::Dumper> module can pretty-print Perl data structures:
 
-Have you tried the Perl debugger, described in L<perldebug>?  You can
-step through your program and see what it's doing and thus work out
-why what it's doing isn't what it should be doing.
+	use Data::Dumper( Dump );
+	print STDERR "The hash is " . Dump( \%hash ) . "\n";
+	
+Perl comes with an interactive debugger, which you can start with the
+C<-d> switch. It's fully explained in L<perldebug>.
+
+If you'd like a graphical user interface and you have Tk, you can use
+C<ptkdb>. It's on CPAN and available for free.
+
+If you need something much more sophisicated and controllable, Leon
+Brocard's Devel::ebug (which you can call with the -D switch as -Debug)
+gives you the programmatic hooks into everything you need to write your
+own (without too much pain and suffering).
+
+You can also use a commercial debugger such as Affrus (Mac OS X), Komodo
+from Activestate (Windows and Mac OS X), or EPIC (most platforms).
 
 =head2 How do I profile my Perl programs?
 
@@ -974,6 +987,14 @@ or
 This module (part of the standard Perl distribution) is designed to
 write a Makefile for an extension module from a Makefile.PL.  For more
 information, see L<ExtUtils::MakeMaker>.
+
+=head1 REVISION
+
+Revision: $Revision: 3606 $
+
+Date: $Date: 2006-03-06 12:05:47 +0100 (lun, 06 mar 2006) $
+
+See L<perlfaq> for source control details and availability.
 
 =head1 AUTHOR AND COPYRIGHT
 

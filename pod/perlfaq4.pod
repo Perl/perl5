@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 1.73 $, $Date: 2005/12/31 00:54:37 $)
+perlfaq4 - Data Manipulation ($Revision: 3606 $)
 
 =head1 DESCRIPTION
 
@@ -362,6 +362,9 @@ pseudorandom generator than comes with your operating system, look at
 
 =head2 How do I get a random number between X and Y?
 
+To get a random number between two values, you can use the
+C<rand()> builtin to get a random number between 0 and
+
 C<rand($x)> returns a number such that
 C<< 0 <= rand($x) < $x >>. Thus what you want to have perl
 figure out is a random number in the range from 0 to the
@@ -371,19 +374,19 @@ That is, to get a number between 10 and 15, inclusive, you
 want a random number between 0 and 5 that you can then add
 to 10.
 
-    my $number = 10 + int rand( 15-10+1 );
+	my $number = 10 + int rand( 15-10+1 );
 
 Hence you derive the following simple function to abstract
 that. It selects a random integer between the two given
-integers (inclusive), For example: C<random_int_in(50,120)>.
+integers (inclusive), For example: C<random_int_between(50,120)>.
 
-   sub random_int_in ($$) {
-     my($min, $max) = @_;
-      # Assumes that the two arguments are integers themselves!
-     return $min if $min == $max;
-     ($min, $max) = ($max, $min)  if  $min > $max;
-     return $min + int rand(1 + $max - $min);
-   }
+	sub random_int_between ($$) {
+		my($min, $max) = @_;
+		# Assumes that the two arguments are integers themselves!
+		return $min if $min == $max;
+		($min, $max) = ($max, $min)  if  $min > $max;
+		return $min + int rand(1 + $max - $min);
+		}
 
 =head1 Data: Dates
 
@@ -2152,6 +2155,14 @@ Get the Business::CreditCard module from CPAN.
 The kgbpack.c code in the PGPLOT module on CPAN does just this.
 If you're doing a lot of float or double processing, consider using
 the PDL module from CPAN instead--it makes number-crunching easy.
+
+=head1 REVISION
+
+Revision: $Revision: 3606 $
+
+Date: $Date: 2006-03-06 12:05:47 +0100 (lun, 06 mar 2006) $
+
+See L<perlfaq> for source control details and availability.
 
 =head1 AUTHOR AND COPYRIGHT
 

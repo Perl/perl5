@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq8 - System Interaction ($Revision: 1.27 $, $Date: 2005/12/31 00:54:37 $)
+perlfaq8 - System Interaction ($Revision: 3606 $)
 
 =head1 DESCRIPTION
 
@@ -1250,6 +1250,14 @@ included with the 5.002 release of Perl.
 It's a perl4-style file defining values for system networking
 constants.  Sometimes it is built using h2ph when Perl is installed,
 but other times it is not.  Modern programs C<use Socket;> instead.
+
+=head1 REVISION
+
+Revision: $Revision: 3606 $
+
+Date: $Date: 2006-03-06 12:05:47 +0100 (lun, 06 mar 2006) $
+
+See L<perlfaq> for source control details and availability.
 
 =head1 AUTHOR AND COPYRIGHT
 
