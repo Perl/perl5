@@ -106,9 +106,7 @@ int hmacclose(h)
 HMAC *h;
 {
 	shaclose(h->osha);
-	if (h != NULL) {
-		memset(h, 0, sizeof(HMAC));
-		SHA_free(h);
-	}
+	memset(h, 0, sizeof(HMAC));
+	SHA_free(h);
 	return(0);
 }
