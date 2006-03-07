@@ -1159,6 +1159,7 @@ usenm=''
 useperlio=''
 userelocatableinc=''
 usesocks=''
+mad=''
 d_oldpthreads=''
 use5005threads=''
 useithreads=''
@@ -3547,6 +3548,27 @@ y|Y)	val="$define" ;;
 *)      val="$undef" ;;
 esac
 set usesocks
+eval $setvar
+
+case "$mad" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
+cat <<EOM
+
+Would you like to build with Misc Attribute Decoration? This is development
+work leading to a Perl 5 to Perl 6 convertor, which imposes a space and speed
+overhead on the interpreter.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+rp='Build Perl with MAD?'
+. ./myread
+case "$ans" in
+y|Y)	val="$define" ;;     
+*)      val="$undef" ;;
+esac
+set mad
 eval $setvar
 
 case "$usesocks" in
@@ -21872,6 +21894,7 @@ lpr='$lpr'
 ls='$ls'
 lseeksize='$lseeksize'
 lseektype='$lseektype'
+mad='$mad'
 mail='$mail'
 mailx='$mailx'
 make='$make'

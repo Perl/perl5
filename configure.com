@@ -6163,6 +6163,7 @@ $   WC "lseeksize='4'"
 $   WC "lseektype='int'"
 $ ENDIF
 $ WC "mab='" + "'"
+$ WC "mad='undef'"
 $ WC "make='" + make + "'"
 $ WC "malloctype='void *'"
 $ WC "usemallocwrap='" + usemallocwrap + "'"

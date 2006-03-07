@@ -627,6 +627,7 @@ longlongsize=8
 longsize='4'
 lseeksize=4
 lseektype=int
+mad='undef'
 make='make'
 malloctype='int*'
 malloctype='void *'

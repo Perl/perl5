@@ -3507,6 +3507,10 @@ lseektype (lseektype.U):
 	or whatever type is used to declare lseek offset's type in the
 	kernel (which also appears to be lseek's return type).
 
+mad (mad.u):
+	This variable indicates that the Misc Attribute Definition code is to
+	be compiled.
+
 mail (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
