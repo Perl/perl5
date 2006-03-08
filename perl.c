@@ -3010,8 +3010,7 @@ Perl_moreswitches(pTHX_ char *s)
 	PL_minus_F = TRUE;
 	PL_splitstr = ++s;
 	while (*s && !isSPACE(*s)) ++s;
-	*s = '\0';
-	PL_splitstr = savepv(PL_splitstr);
+	PL_splitstr = savepvn(PL_splitstr, s - PL_splitstr);
 	return s;
     case 'a':
 	PL_minus_a = TRUE;
