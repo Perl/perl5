@@ -3841,11 +3841,11 @@
 /*#define HAS_AINTL		/ **/
 
 /* HAS_BUILTIN_CHOOSE_EXPR:
- *      Can we handle GCC builtin for compile-time ternary-like expressions
+ *	Can we handle GCC builtin for compile-time ternary-like expressions
  */
 /* HAS_BUILTIN_EXPECT:
- *      Can we handle GCC builtin for telling that certain values are more
- *      likely
+ *	Can we handle GCC builtin for telling that certain values are more
+ *	likely
  */
 /*#define HAS_BUILTIN_EXPECT    / **/
 /*#define HAS_BUILTIN_CHOOSE_EXPR /**/
@@ -4059,6 +4059,12 @@
  *	should be included.
  */
 /*#define	I_LANGINFO		/**/
+
+/* PERL_MAD:
+ *	This symbol, if defined, indicates that the Misc Attribution
+ *	Declaration code should be conditionally compiled.
+ */
+/*#define	PERL_MAD		/**/
 
 /* USE_FAST_STDIO:
  *	This symbol, if defined, indicates that Perl should
