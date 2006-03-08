@@ -706,6 +706,7 @@ sub check_tar_extract {
         like( $content, qr/$econtent/,
                                     "   Contents OK" );
 
+        close $fh;
         $NO_UNLINK or 1 while unlink $path;
 
         ### alternate extract path tests 
