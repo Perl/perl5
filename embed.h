@@ -520,7 +520,11 @@
 #define newASSIGNOP		Perl_newASSIGNOP
 #define newCONDOP		Perl_newCONDOP
 #define newCONSTSUB		Perl_newCONSTSUB
+#ifdef PERL_MAD
 #define newFORM			Perl_newFORM
+#else
+#define newFORM			Perl_newFORM
+#endif
 #define newFOROP		Perl_newFOROP
 #define newGIVENOP		Perl_newGIVENOP
 #define newLOGOP		Perl_newLOGOP
@@ -586,8 +590,16 @@
 #define oopsCV			Perl_oopsCV
 #endif
 #define op_free			Perl_op_free
+#ifdef PERL_MAD
 #ifdef PERL_CORE
 #define package			Perl_package
+#endif
+#else
+#ifdef PERL_CORE
+#define package			Perl_package
+#endif
+#endif
+#ifdef PERL_CORE
 #define pad_alloc		Perl_pad_alloc
 #define allocmy			Perl_allocmy
 #define pad_findmy		Perl_pad_findmy
@@ -886,7 +898,15 @@
 #define unsharepvn		Perl_unsharepvn
 #ifdef PERL_CORE
 #define unshare_hek		Perl_unshare_hek
+#endif
+#ifdef PERL_MAD
+#ifdef PERL_CORE
 #define utilize			Perl_utilize
+#endif
+#else
+#ifdef PERL_CORE
+#define utilize			Perl_utilize
+#endif
 #endif
 #define utf16_to_utf8		Perl_utf16_to_utf8
 #define utf16_to_utf8_reversed	Perl_utf16_to_utf8_reversed
@@ -990,7 +1010,11 @@
 #endif
 #define newANONATTRSUB		Perl_newANONATTRSUB
 #define newATTRSUB		Perl_newATTRSUB
+#ifdef PERL_MAD
 #define newMYSUB		Perl_newMYSUB
+#else
+#define newMYSUB		Perl_newMYSUB
+#endif
 #ifdef PERL_CORE
 #define my_attrs		Perl_my_attrs
 #define boot_core_xsutils	Perl_boot_core_xsutils
@@ -1745,6 +1769,19 @@
 #define pmop_xmldump		Perl_pmop_xmldump
 #define do_op_xmldump		Perl_do_op_xmldump
 #define op_xmldump		Perl_op_xmldump
+#endif
+#ifdef PERL_CORE
+#define newTOKEN		Perl_newTOKEN
+#define token_free		Perl_token_free
+#define token_getmad		Perl_token_getmad
+#define op_getmad_weak		Perl_op_getmad_weak
+#define op_getmad		Perl_op_getmad
+#define prepend_madprops	Perl_prepend_madprops
+#define append_madprops		Perl_append_madprops
+#define addmad			Perl_addmad
+#define newMADsv		Perl_newMADsv
+#define newMADPROP		Perl_newMADPROP
+#define mad_free		Perl_mad_free
 #endif
 #endif
 #define ck_anoncode		Perl_ck_anoncode
@@ -2623,7 +2660,11 @@
 #define newASSIGNOP(a,b,c,d)	Perl_newASSIGNOP(aTHX_ a,b,c,d)
 #define newCONDOP(a,b,c,d)	Perl_newCONDOP(aTHX_ a,b,c,d)
 #define newCONSTSUB(a,b,c)	Perl_newCONSTSUB(aTHX_ a,b,c)
+#ifdef PERL_MAD
 #define newFORM(a,b,c)		Perl_newFORM(aTHX_ a,b,c)
+#else
+#define newFORM(a,b,c)		Perl_newFORM(aTHX_ a,b,c)
+#endif
 #define newFOROP(a,b,c,d,e,f,g)	Perl_newFOROP(aTHX_ a,b,c,d,e,f,g)
 #define newGIVENOP(a,b,c)	Perl_newGIVENOP(aTHX_ a,b,c)
 #define newLOGOP(a,b,c,d)	Perl_newLOGOP(aTHX_ a,b,c,d)
@@ -2688,8 +2729,16 @@
 #define oopsCV(a)		Perl_oopsCV(aTHX_ a)
 #endif
 #define op_free(a)		Perl_op_free(aTHX_ a)
+#ifdef PERL_MAD
 #ifdef PERL_CORE
 #define package(a)		Perl_package(aTHX_ a)
+#endif
+#else
+#ifdef PERL_CORE
+#define package(a)		Perl_package(aTHX_ a)
+#endif
+#endif
+#ifdef PERL_CORE
 #define pad_alloc(a,b)		Perl_pad_alloc(aTHX_ a,b)
 #define allocmy(a)		Perl_allocmy(aTHX_ a)
 #define pad_findmy(a)		Perl_pad_findmy(aTHX_ a)
@@ -2983,7 +3032,15 @@
 #define unsharepvn(a,b,c)	Perl_unsharepvn(aTHX_ a,b,c)
 #ifdef PERL_CORE
 #define unshare_hek(a)		Perl_unshare_hek(aTHX_ a)
+#endif
+#ifdef PERL_MAD
+#ifdef PERL_CORE
 #define utilize(a,b,c,d,e)	Perl_utilize(aTHX_ a,b,c,d,e)
+#endif
+#else
+#ifdef PERL_CORE
+#define utilize(a,b,c,d,e)	Perl_utilize(aTHX_ a,b,c,d,e)
+#endif
 #endif
 #define utf16_to_utf8(a,b,c,d)	Perl_utf16_to_utf8(aTHX_ a,b,c,d)
 #define utf16_to_utf8_reversed(a,b,c,d)	Perl_utf16_to_utf8_reversed(aTHX_ a,b,c,d)
@@ -3082,7 +3139,11 @@
 #endif
 #define newANONATTRSUB(a,b,c,d)	Perl_newANONATTRSUB(aTHX_ a,b,c,d)
 #define newATTRSUB(a,b,c,d,e)	Perl_newATTRSUB(aTHX_ a,b,c,d,e)
+#ifdef PERL_MAD
 #define newMYSUB(a,b,c,d,e)	Perl_newMYSUB(aTHX_ a,b,c,d,e)
+#else
+#define newMYSUB(a,b,c,d,e)	Perl_newMYSUB(aTHX_ a,b,c,d,e)
+#endif
 #ifdef PERL_CORE
 #define my_attrs(a,b)		Perl_my_attrs(aTHX_ a,b)
 #define boot_core_xsutils()	Perl_boot_core_xsutils(aTHX)
@@ -3844,6 +3905,19 @@
 #define pmop_xmldump(a)		Perl_pmop_xmldump(aTHX_ a)
 #define do_op_xmldump(a,b,c)	Perl_do_op_xmldump(aTHX_ a,b,c)
 #define op_xmldump(a)		Perl_op_xmldump(aTHX_ a)
+#endif
+#ifdef PERL_CORE
+#define newTOKEN(a,b,c)		Perl_newTOKEN(aTHX_ a,b,c)
+#define token_free(a)		Perl_token_free(aTHX_ a)
+#define token_getmad(a,b,c)	Perl_token_getmad(aTHX_ a,b,c)
+#define op_getmad_weak(a,b,c)	Perl_op_getmad_weak(aTHX_ a,b,c)
+#define op_getmad(a,b,c)	Perl_op_getmad(aTHX_ a,b,c)
+#define prepend_madprops(a,b,c)	Perl_prepend_madprops(aTHX_ a,b,c)
+#define append_madprops(a,b,c)	Perl_append_madprops(aTHX_ a,b,c)
+#define addmad(a,b,c)		Perl_addmad(aTHX_ a,b,c)
+#define newMADsv(a,b)		Perl_newMADsv(aTHX_ a,b)
+#define newMADPROP(a,b,c,d)	Perl_newMADPROP(aTHX_ a,b,c,d)
+#define mad_free(a)		Perl_mad_free(aTHX_ a)
 #endif
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)

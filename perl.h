@@ -836,6 +836,10 @@ int usleep(unsigned int);
  */
 #if !defined(PERL_FOR_X2P) && !(defined(WIN32)||defined(VMS))
 #  include "embed.h"
+#  ifndef PERL_MAD
+#    undef op_getmad
+#    define op_getmad(arg,pegop,slot) /**/
+#  endif
 #endif
 
 #define MEM_SIZE Size_t
@@ -2321,6 +2325,10 @@ typedef struct clone_params CLONE_PARAMS;
 #if defined(VMS)
 #   include "vmsish.h"
 #   include "embed.h"
+#  ifndef PERL_MAD
+#    undef op_getmad
+#    define op_getmad(arg,pegop,slot) /**/
+#  endif
 #   define ISHISH "vms"
 #endif
 
@@ -2351,6 +2359,10 @@ typedef struct clone_params CLONE_PARAMS;
 #ifdef __SYMBIAN32__
 #   include "symbian/symbianish.h"
 #   include "embed.h"
+#  ifndef PERL_MAD
+#    undef op_getmad
+#    define op_getmad(arg,pegop,slot) /**/
+#  endif
 #   define ISHISH "symbian"
 #endif
 
@@ -4362,6 +4374,10 @@ END_EXTERN_C
 #if defined(WIN32)
 /* Now all the config stuff is setup we can include embed.h */
 #  include "embed.h"
+#  ifndef PERL_MAD
+#    undef op_getmad
+#    define op_getmad(arg,pegop,slot) /**/
+#  endif
 #endif
 
 #ifndef PERL_GLOBAL_STRUCT

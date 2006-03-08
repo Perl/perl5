@@ -509,7 +509,11 @@ Ap	|OP*	|newANONSUB	|I32 floor|NULLOK OP* proto|NULLOK OP* block
 Apa	|OP*	|newASSIGNOP	|I32 flags|NULLOK OP* left|I32 optype|NULLOK OP* right
 Apa	|OP*	|newCONDOP	|I32 flags|NN OP* first|NULLOK OP* trueop|NULLOK OP* falseop
 Apd	|CV*	|newCONSTSUB	|NULLOK HV* stash|NULLOK const char* name|NULLOK SV* sv
+#ifdef PERL_MAD
+Ap	|OP*	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
+#else
 Ap	|void	|newFORM	|I32 floor|NULLOK OP* o|NULLOK OP* block
+#endif
 Apa	|OP*	|newFOROP	|I32 flags|NULLOK char* label|line_t forline \
 				|NULLOK OP* sv|NN OP* expr|NULLOK OP* block|NULLOK OP* cont
 Apa	|OP*	|newGIVENOP	|NN OP* cond|NN OP* block|PADOFFSET defsv_off
@@ -575,7 +579,11 @@ ApP	|char*	|ninstr		|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
 pr	|OP*	|oopsCV		|NN OP* o
 Ap	|void	|op_free	|NULLOK OP* arg
+#ifdef PERL_MAD
+p	|OP*	|package	|NN OP* o
+#else
 p	|void	|package	|NN OP* o
+#endif
 pd	|PADOFFSET|pad_alloc	|I32 optype|U32 tmptype
 p	|PADOFFSET|allocmy	|NN char* name
 pdR	|PADOFFSET|pad_findmy	|NN const char* name
@@ -859,7 +867,12 @@ Apd	|I32	|unpackstring	|NN const char *pat|NN const char *patend|NN const char *
 				|NN const char *strend|U32 flags
 Ap	|void	|unsharepvn	|NULLOK const char* sv|I32 len|U32 hash
 p	|void	|unshare_hek	|NULLOK HEK* hek
+#ifdef PERL_MAD
+p	|OP *	|utilize	|int aver|I32 floor|NULLOK OP* version \
+				|NN OP* idop|NULLOK OP* arg
+#else
 p	|void	|utilize	|int aver|I32 floor|NULLOK OP* version|NN OP* idop|NULLOK OP* arg
+#endif
 Ap	|U8*	|utf16_to_utf8	|NN U8* p|NN U8 *d|I32 bytelen|NN I32 *newlen
 Ap	|U8*	|utf16_to_utf8_reversed|NN U8* p|NN U8 *d|I32 bytelen|NN I32 *newlen
 AdpPR	|STRLEN	|utf8_length	|NN const U8* s|NN const U8 *e
@@ -973,7 +986,12 @@ Apd	|SV*	|sv_rvweaken	|NN SV *sv
 p	|int	|magic_killbackrefs|NN SV *sv|NN MAGIC *mg
 Ap	|OP*	|newANONATTRSUB	|I32 floor|NULLOK OP *proto|NULLOK OP *attrs|NULLOK OP *block
 Ap	|CV*	|newATTRSUB	|I32 floor|NULLOK OP *o|NULLOK OP *proto|NULLOK OP *attrs|NULLOK OP *block
+#ifdef PERL_MAD
+Apr	|OP *	|newMYSUB	|I32 floor|NULLOK OP *o|NULLOK OP *proto \
+				|NULLOK OP *attrs|NULLOK OP *block
+#else
 Apr	|void	|newMYSUB	|I32 floor|NULLOK OP *o|NULLOK OP *proto|NULLOK OP *attrs|NULLOK OP *block
+#endif
 p	|OP *	|my_attrs	|NN OP *o|NULLOK OP *attrs
 p	|void	|boot_core_xsutils
 #if defined(USE_ITHREADS)
@@ -1669,6 +1687,18 @@ Mp	|void	|do_pmop_xmldump|I32 level|NN PerlIO *file \
 Mp	|void	|pmop_xmldump	|NULLOK const PMOP* pm
 Mp	|void	|do_op_xmldump	|I32 level|NN PerlIO *file|NULLOK const OP *o
 Mp	|void	|op_xmldump	|NN const OP* arg
+
+Mp	|TOKEN*	|newTOKEN	|I32 optype|YYSTYPE lval|MADPROP* madprop
+Mp	|void	|token_free	|TOKEN* arg
+Mp	|void	|token_getmad	|TOKEN* arg|OP* o|char slot
+Mp	|void	|op_getmad_weak	|OP* from|OP* o|char slot
+Mp	|void	|op_getmad	|OP* from|OP* o|char slot
+Mp	|void	|prepend_madprops|MADPROP* mp|OP* o|char slot
+Mp	|void	|append_madprops|MADPROP* tm|OP* o|char slot
+Mp	|void	|addmad		|MADPROP* tm|MADPROP** root|char slot
+Mp	|MADPROP*|newMADsv	|char key|SV* sv
+Mp	|MADPROP*|newMADPROP	|char key|char type|void* val|I32 vlen
+Mp	|void	|mad_free	|MADPROP* mp
 #endif
 
 END_EXTERN_C
