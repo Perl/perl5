@@ -2645,13 +2645,12 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 
     save_item(dbsv);
     if (!PERLDB_SUB_NN) {
-	GV *gv = CvGV(cv);
+	GV * const gv = CvGV(cv);
 
 	if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
 	     || strEQ(GvNAME(gv), "END")
 	     || ((GvCV(gv) != cv) && /* Could be imported, and old sub redefined. */
-		 !( (SvTYPE(*svp) == SVt_PVGV) && (GvCV((GV*)*svp) == cv)
-		    && (gv = (GV*)*svp) ))) {
+		 !( (SvTYPE(*svp) == SVt_PVGV) && (GvCV((GV*)*svp) == cv) ))) {
 	    /* Use GV from the stack as a fallback. */
 	    /* GV is potentially non-unique, or contain different CV. */
 	    SV * const tmp = newRV((SV*)cv);
