@@ -4268,6 +4268,11 @@ PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *index, size_t size)
 
 #endif
 
+#ifdef PERL_MAD
+PERL_CALLCONV void	Perl_pad_peg(const char* s)
+			__attribute__nonnull__(1);
+
+#endif
 
 END_EXTERN_C
 /*

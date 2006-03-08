@@ -1646,6 +1646,9 @@ px	|void	|my_clearenv
 Apo	|void*	|my_cxt_init	|NN int *index|size_t size
 #endif
 
+#ifdef PERL_MAD
+Mnp	|void	|pad_peg	|NN const char* s
+#endif
 
 END_EXTERN_C
 /*

@@ -841,6 +841,7 @@ unless ($define{'PERL_MAD'}) {
     skip_symbols [qw(
 		    PL_madskills
 		    PL_xmlfp
+		    Perl_pad_peg
 		    )];
 }
 

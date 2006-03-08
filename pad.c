@@ -113,7 +113,12 @@ to be generated in evals, such as
 
 #define PAD_MAX 999999999
 
-
+#ifdef PERL_MAD
+void pad_peg(const char* s) {
+    static int pegcnt;
+    pegcnt++;
+}
+#endif
 
 /*
 =for apidoc pad_new
@@ -233,6 +238,7 @@ Perl_pad_undef(pTHX_ CV* cv)
     I32 ix;
     const PADLIST * const padlist = CvPADLIST(cv);
 
+    pad_peg("pad_undef");
     if (!padlist)
 	return;
     if (SvIS_FREED(padlist)) /* may be during global destruction */
@@ -468,6 +474,7 @@ Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type)
     dVAR;
     PADOFFSET ix;
     SV* const name = newSV(0);
+    pad_peg("add_anon");
     sv_upgrade(name, SVt_PVNV);
     sv_setpvn(name, "&", 1);
     SvIV_set(name, -1);
@@ -584,6 +591,7 @@ Perl_pad_findmy(pTHX_ const char *name)
     const AV *nameav;
     SV **name_svp;
 
+    pad_peg("pad_findmy");
     offset =  pad_findlex(name, PL_compcv, PL_cop_seqmax, 1,
 		NULL, &out_sv, &out_flags);
     if (offset != NOT_IN_PAD) 
