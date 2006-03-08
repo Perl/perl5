@@ -2356,7 +2356,7 @@ TOKEN *
 Perl_newTOKEN(pTHX_ I32 optype, YYSTYPE lval, MADPROP* madprop)
 {
     TOKEN *tk;
-    Newz(1101, tk, 1, TOKEN);
+    Newxz(tk, 1, TOKEN);
     tk->tk_type = (OPCODE)optype;
     tk->tk_type = 12345;
     tk->tk_lval = lval;
@@ -2485,7 +2485,8 @@ Perl_op_getmad(pTHX_ OP* from, OP* o, char slot)
 	}
     }
     else {
-	PerlIO_printf(PerlIO_stderr(), "DESTROYING op = %0x\n", from);
+	PerlIO_printf(PerlIO_stderr(),
+		      "DESTROYING op = %0"UVxf"\n", PTR2UV(from));
 	op_free(from);
     }
 }
@@ -2547,7 +2548,7 @@ MADPROP *
 Perl_newMADPROP(pTHX_ char key, char type, void* val, I32 vlen)
 {
     MADPROP *mp;
-    Newz(1101, mp, 1, MADPROP);
+    Newxz(mp, 1, MADPROP);
     mp->mad_next = 0;
     mp->mad_key = key;
     mp->mad_vlen = vlen;
@@ -4878,10 +4879,8 @@ void
 #endif
 Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 {
-#ifdef PERL_MAD
-    /* FIXME for MAD - shouldn't this be done at the return statement? And
-       given that the return statement is never reached, surely this currently
-       is a leak?  */
+#if 0
+    /* This would be the return value, but the return cannot be reached.  */
     OP* pegop = newOP(OP_NULL, 0);
 #endif
 
@@ -4897,7 +4896,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	SAVEFREEOP(block);
     Perl_croak(aTHX_ "\"my sub\" not yet implemented");
 #ifdef PERL_MAD
-    return pegop;
+    NORETURN_FUNCTION_END;
 #endif
 }
 
@@ -5084,7 +5083,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	/* Need to do a C<use attributes $stash_of_cv,\&cv,@attrs>
 	 * before we clobber PL_compcv.
 	 */
-	if (cv && !(block
+	if (cv && (!block
 #ifdef PERL_MAD
 		    || block->op_type == OP_NULL
 #endif
