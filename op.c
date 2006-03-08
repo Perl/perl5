@@ -6358,8 +6358,13 @@ Perl_ck_fun(pTHX_ OP *o)
 	listkids(o);
     }
     else if (PL_opargs[type] & OA_DEFGV) {
+	OP *newop = newUNOP(type, 0, newDEFSVOP());
+#ifdef PERL_MAD
+	op_getmad(o,newop,'O');
+#else
 	op_free(o);
-	return newUNOP(type, 0, newDEFSVOP());
+#endif
+	return newop;
     }
 
     if (oa) {
