@@ -3041,13 +3041,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define PERL_INC_VERSION_LIST $inc_version_list_init		/**/
 
-
-/* PERL_MAD:
- *	This symbol, if defined, indicates that the Misc Attribution
- *	Declaration code should be conditionally compiled.
- */
-#$mad	PERL_MAD		/**/
-
 /* INSTALL_USR_BIN_PERL:
  *	This symbol, if defined, indicates that Perl is to be installed
  * 	also as /usr/bin/perl.
@@ -4086,6 +4079,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	should be included.
  */
 #$i_langinfo	I_LANGINFO		/**/
+
+/* PERL_MAD:
+ *	This symbol, if defined, indicates that the Misc Attribution
+ *	Declaration code should be conditionally compiled.
+ */
+#$mad	PERL_MAD		/**/
 
 /* USE_FAST_STDIO:
  *	This symbol, if defined, indicates that Perl should

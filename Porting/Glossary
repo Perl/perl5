@@ -3507,7 +3507,7 @@ lseektype (lseektype.U):
 	or whatever type is used to declare lseek offset's type in the
 	kernel (which also appears to be lseek's return type).
 
-mad (mad.u):
+mad (mad.U):
 	This variable indicates that the Misc Attribute Definition code is to
 	be compiled.
 
