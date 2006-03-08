@@ -837,6 +837,13 @@ unless ($define{'PERL_TRACK_MEMPOOL'}) {
                     )];
 }
 
+unless ($define{'PERL_MAD'}) {
+    skip_symbols [qw(
+		    PL_madskills
+		    PL_xmlfp
+		    )];
+}
+
 unless ($define{'d_mmap'}) {
     skip_symbols [qw(
 		    PL_mmap_page_size
