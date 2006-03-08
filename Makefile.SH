@@ -1050,11 +1050,12 @@ _cleaner2:
 	rm -f preload
 	rm -f testcompile compilelog
 	rm -rf lib/Encode lib/Compress
+	rm -f lib/IO/Compress lib/IO/Uncompress
 	rm -f lib/ExtUtils/ParseXS/t/XSTest.c
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(OBJ_EXT)
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(DLSUFFIX)
-	-rmdir lib/B lib/Data lib/CompressPlugin lib/UncompressPlugin
-	-rmdir lib/Filter/Util lib/IO/Socket lib/IO/Compress lib/IO/Uncompress
+	-rmdir lib/B lib/Data
+	-rmdir lib/Filter/Util lib/IO/Socket
 	-rmdir lib/List lib/MIME lib/Scalar lib/Sys
 	-rmdir lib/threads lib/XS lib/Hash
 
