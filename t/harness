@@ -96,6 +96,7 @@ if (@ARGV) {
 	my $updir = File::Spec->updir;
 	my $mani  = File::Spec->catfile(File::Spec->updir, "MANIFEST");
 	if (open(MANI, $mani)) {
+	    my @manitests = ();
 	    while (<MANI>) { # similar code in t/TEST
 		if (m!^(ext/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\s!) {
 		    my ($test, $extension) = ($1, $2);
@@ -104,10 +105,13 @@ if (@ARGV) {
 			# XXX Do I want to warn that I'm skipping these?
 			next if $skip{$extension};
 		    }
-		    push @tests, File::Spec->catfile($updir, $test);
+		    push @manitests, File::Spec->catfile($updir, $test);
 		}
 	    }
 	    close MANI;
+	    # Sort the list of test files read from MANIFEST into a sensible
+	    # order instead of using the order in which they are listed there
+	    push @tests, sort { lc $a cmp lc $b } @manitests;
 	} else {
 	    warn "$0: cannot open $mani: $!\n";
 	}
