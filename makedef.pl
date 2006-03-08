@@ -842,6 +842,20 @@ unless ($define{'PERL_MAD'}) {
 		    PL_madskills
 		    PL_xmlfp
 		    Perl_pad_peg
+		    Perl_xmldump_indent
+		    Perl_xmldump_vindent
+		    Perl_xmldump_all
+		    Perl_xmldump_packsubs
+		    Perl_xmldump_sub
+		    Perl_xmldump_form
+		    Perl_xmldump_eval
+		    Perl_sv_catxmlsv
+		    Perl_sv_catxmlpvn
+		    Perl_sv_xmlpeek
+		    Perl_do_pmop_xmldump
+		    Perl_pmop_xmldump
+		    Perl_do_op_xmldump
+		    Perl_op_xmldump
 		    )];
 }
 

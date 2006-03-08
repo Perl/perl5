@@ -1725,6 +1725,27 @@
 #ifdef PERL_CORE
 #define pad_peg			Perl_pad_peg
 #endif
+#if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#define xmldump_attr		S_xmldump_attr
+#endif
+#endif
+#ifdef PERL_CORE
+#define xmldump_indent		Perl_xmldump_indent
+#define xmldump_vindent		Perl_xmldump_vindent
+#define xmldump_all		Perl_xmldump_all
+#define xmldump_packsubs	Perl_xmldump_packsubs
+#define xmldump_sub		Perl_xmldump_sub
+#define xmldump_form		Perl_xmldump_form
+#define xmldump_eval		Perl_xmldump_eval
+#define sv_catxmlsv		Perl_sv_catxmlsv
+#define sv_catxmlpvn		Perl_sv_catxmlpvn
+#define sv_xmlpeek		Perl_sv_xmlpeek
+#define do_pmop_xmldump		Perl_do_pmop_xmldump
+#define pmop_xmldump		Perl_pmop_xmldump
+#define do_op_xmldump		Perl_do_op_xmldump
+#define op_xmldump		Perl_op_xmldump
+#endif
 #endif
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
@@ -3804,6 +3825,25 @@
 #ifdef PERL_MAD
 #ifdef PERL_CORE
 #define pad_peg			Perl_pad_peg
+#endif
+#if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
+#ifdef PERL_CORE
+#endif
+#endif
+#ifdef PERL_CORE
+#define xmldump_vindent(a,b,c,d)	Perl_xmldump_vindent(aTHX_ a,b,c,d)
+#define xmldump_all()		Perl_xmldump_all(aTHX)
+#define xmldump_packsubs(a)	Perl_xmldump_packsubs(aTHX_ a)
+#define xmldump_sub(a)		Perl_xmldump_sub(aTHX_ a)
+#define xmldump_form(a)		Perl_xmldump_form(aTHX_ a)
+#define xmldump_eval()		Perl_xmldump_eval(aTHX)
+#define sv_catxmlsv(a,b)	Perl_sv_catxmlsv(aTHX_ a,b)
+#define sv_catxmlpvn(a,b,c,d)	Perl_sv_catxmlpvn(aTHX_ a,b,c,d)
+#define sv_xmlpeek(a)		Perl_sv_xmlpeek(aTHX_ a)
+#define do_pmop_xmldump(a,b,c)	Perl_do_pmop_xmldump(aTHX_ a,b,c)
+#define pmop_xmldump(a)		Perl_pmop_xmldump(aTHX_ a)
+#define do_op_xmldump(a,b,c)	Perl_do_op_xmldump(aTHX_ a,b,c)
+#define op_xmldump(a)		Perl_op_xmldump(aTHX_ a)
 #endif
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)

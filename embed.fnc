@@ -1648,6 +1648,27 @@ Apo	|void*	|my_cxt_init	|NN int *index|size_t size
 
 #ifdef PERL_MAD
 Mnp	|void	|pad_peg	|NN const char* s
+#if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
+sf	|void	|xmldump_attr	|I32 level|NN PerlIO *file|NN const char* pat \
+				|...
+#endif
+Mfp	|void	|xmldump_indent	|I32 level|NN PerlIO *file|NN const char* pat \
+				|...
+Mp	|void	|xmldump_vindent|I32 level|NN PerlIO *file|NN const char* pat \
+				|NULLOK va_list *args
+Mp	|void	|xmldump_all
+Mp	|void	|xmldump_packsubs	|NN const HV* stash
+Mp	|void	|xmldump_sub	|NN const GV* gv
+Mp	|void	|xmldump_form	|NN const GV* gv
+Mp	|void	|xmldump_eval
+Mp	|char*	|sv_catxmlsv	|NN SV *dsv|NN SV *ssv
+Mp	|char*	|sv_catxmlpvn	|NN SV *dsv|NN char *pv|STRLEN len|int utf8
+Mp	|char*	|sv_xmlpeek	|NN SV* sv
+Mp	|void	|do_pmop_xmldump|I32 level|NN PerlIO *file \
+				|NULLOK const PMOP *pm
+Mp	|void	|pmop_xmldump	|NULLOK const PMOP* pm
+Mp	|void	|do_op_xmldump	|I32 level|NN PerlIO *file|NULLOK const OP *o
+Mp	|void	|op_xmldump	|NN const OP* arg
 #endif
 
 END_EXTERN_C

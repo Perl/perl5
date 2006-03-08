@@ -4272,6 +4272,54 @@ PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *index, size_t size)
 PERL_CALLCONV void	Perl_pad_peg(const char* s)
 			__attribute__nonnull__(1);
 
+#if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
+STATIC void	S_xmldump_attr(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
+			__attribute__format__(__printf__,pTHX_3,pTHX_4)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+
+#endif
+PERL_CALLCONV void	Perl_xmldump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
+			__attribute__format__(__printf__,pTHX_3,pTHX_4)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+
+PERL_CALLCONV void	Perl_xmldump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+
+PERL_CALLCONV void	Perl_xmldump_all(pTHX);
+PERL_CALLCONV void	Perl_xmldump_packsubs(pTHX_ const HV* stash)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV void	Perl_xmldump_sub(pTHX_ const GV* gv)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV void	Perl_xmldump_form(pTHX_ const GV* gv)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV void	Perl_xmldump_eval(pTHX);
+PERL_CALLCONV char*	Perl_sv_catxmlsv(pTHX_ SV *dsv, SV *ssv)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+PERL_CALLCONV char*	Perl_sv_catxmlpvn(pTHX_ SV *dsv, char *pv, STRLEN len, int utf8)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+PERL_CALLCONV char*	Perl_sv_xmlpeek(pTHX_ SV* sv)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV void	Perl_do_pmop_xmldump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
+			__attribute__nonnull__(pTHX_2);
+
+PERL_CALLCONV void	Perl_pmop_xmldump(pTHX_ const PMOP* pm);
+PERL_CALLCONV void	Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
+			__attribute__nonnull__(pTHX_2);
+
+PERL_CALLCONV void	Perl_op_xmldump(pTHX_ const OP* arg)
+			__attribute__nonnull__(pTHX_1);
+
 #endif
 
 END_EXTERN_C
