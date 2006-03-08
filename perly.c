@@ -296,6 +296,11 @@ Perl_yyparse (pTHX)
 	  rule.  */
     int yylen;
 
+#ifdef PERL_MAD
+    if (PL_madskills)
+	return madparse();
+#endif
+
     YYDPRINTF ((Perl_debug_log, "Starting parse\n"));
 
     ENTER;			/* force stack free before we return */
@@ -403,7 +408,11 @@ Perl_yyparse (pTHX)
     /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
     if (yychar == YYEMPTY) {
 	YYDPRINTF ((Perl_debug_log, "Reading a token: "));
+#ifdef PERL_MAD
+	yychar = PL_madskills ? madlex() : yylex();
+#else
 	yychar = yylex();
+#endif
 #  ifdef EBCDIC
 	if (yychar >= 0 && yychar < 255) {
 	    yychar = NATIVE_TO_ASCII(yychar);

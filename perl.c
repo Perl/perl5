@@ -2176,6 +2176,25 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	      Perl_croak(aTHX_ "PERL_SIGNALS illegal: \"%s\"", s);
     }
 
+#ifdef PERL_MAD
+    if ((s = PerlEnv_getenv("PERL_XMLDUMP"))) {
+	PL_madskills = 1;
+	PL_minus_c = 1;
+	if (!s || !s[0])
+	    PL_xmlfp = PerlIO_stdout();
+	else {
+	    PL_xmlfp = PerlIO_open(s, "w");
+	    if (!PL_xmlfp)
+		Perl_croak(aTHX_ "Can't open %s", s);
+	}
+	my_setenv("PERL_XMLDUMP", Nullch);	/* hide from subprocs */
+    }
+    if ((s = PerlEnv_getenv("PERL_MADSKILLS"))) {
+	PL_madskills = atoi(s);
+	my_setenv("PERL_MADSKILLS", Nullch);	/* hide from subprocs */
+    }
+#endif
+
     init_lexer();
 
     /* now parse the script */
@@ -2301,6 +2320,12 @@ S_run_body(pTHX_ I32 oldscope)
                     PL_sawampersand ? "Enabling" : "Omitting"));
 
     if (!PL_restartop) {
+#ifdef PERL_MAD
+	if (PL_xmlfp) {
+	    xmldump_all();
+	    exit(0);	/* less likely to core dump than my_exit(0) */
+	}
+#endif
 	DEBUG_x(dump_all());
 #ifdef DEBUGGING
 	if (!DEBUG_q_TEST)
@@ -5091,14 +5116,25 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 		av_push(PL_checkav_save, (SV*)cv);
 	    }
 	} else {
-	    SAVEFREESV(cv);
+	    if (!PL_madskills)
+		SAVEFREESV(cv);
 	}
 	JMPENV_PUSH(ret);
 	switch (ret) {
 	case 0:
+#ifdef PERL_MAD
+	    if (PL_madskills)
+		PL_madskills |= 16384;
+#endif
 	    call_list_body(cv);
+#ifdef PERL_MAD
+	    if (PL_madskills)
+		PL_madskills &= ~16384;
+#endif
 	    atsv = ERRSV;
 	    (void)SvPV_const(atsv, len);
+	    if (PL_madskills && PL_minus_c && paramList == PL_beginav)
+		break;	/* not really trying to run, so just wing it */
 	    if (len) {
 		PL_curcop = &PL_compiling;
 		CopLINE_set(PL_curcop, oldline);
@@ -5128,6 +5164,8 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    PL_curcop = &PL_compiling;
 	    CopLINE_set(PL_curcop, oldline);
 	    JMPENV_POP;
+	    if (PL_madskills && PL_minus_c && paramList == PL_beginav)
+		return;	/* not really trying to run, so just wing it */
 	    if (PL_statusvalue && !(PL_exit_flags & PERL_EXIT_EXPECTED)) {
 		if (paramList == PL_beginav)
 		    Perl_croak(aTHX_ "BEGIN failed--compilation aborted");

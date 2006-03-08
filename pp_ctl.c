@@ -2625,7 +2625,13 @@ PP(pp_exit)
 #endif
     }
     PL_exit_flags |= PERL_EXIT_EXPECTED;
+#ifdef PERL_MAD
+    /* KLUDGE: disable exit 0 in BEGIN blocks when we're just compiling */
+    if (anum || !(PL_minus_c && PL_madskills))
+	my_exit(anum);
+#else
     my_exit(anum);
+#endif
     PUSHs(&PL_sv_undef);
     RETURN;
 }
@@ -2885,7 +2891,8 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     CvPADLIST(PL_compcv) = pad_new(padnew_SAVE);
 
 
-    SAVEMORTALIZESV(PL_compcv);	/* must remain until end of current statement */
+    if (!PL_madskills)
+	SAVEMORTALIZESV(PL_compcv);	/* must remain until end of current statement */
 
     /* make sure we compile in the right package */
 
@@ -2897,6 +2904,11 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     PL_beginav = newAV();
     SAVEFREESV(PL_beginav);
     SAVEI32(PL_error_count);
+
+#ifdef PERL_MAD
+    SAVEI32(PL_madskills);
+    PL_madskills = 0;
+#endif
 
     /* try to compile it */
 
