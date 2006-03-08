@@ -1135,8 +1135,6 @@ utils: $(PERLEXE) $(X2P)
 # Note that the pod cleanup in this next section is parsed (and regenerated
 # by pod/buildtoc so please check that script before making changes here
 
-# the doubled rmdir calls are needed because older cmd shells
-# don't understand /q
 distclean: realclean
 	-del /f $(MINIPERL) $(PERLEXE) $(PERLDLL) $(GLOBEXE) \
 		$(PERLIMPLIB) ..\miniperl.lib $(MINIMOD)
@@ -1172,35 +1170,20 @@ distclean: realclean
 	-del /f $(LIBDIR)\Math\BigInt\FastCalc.pm
 	-del /f $(LIBDIR)\Win32.pm
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B
-	-if exist $(LIBDIR)\B rmdir /s $(LIBDIR)\B
 	-if exist $(LIBDIR)\Compress rmdir /s /q $(LIBDIR)\Compress
-	-if exist $(LIBDIR)\Compress rmdir /s $(LIBDIR)\Compress
 	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data
-	-if exist $(LIBDIR)\Data rmdir /s $(LIBDIR)\Data
 	-if exist $(LIBDIR)\Encode rmdir /s /q $(LIBDIR)\Encode
-	-if exist $(LIBDIR)\Encode rmdir /s $(LIBDIR)\Encode
 	-if exist $(LIBDIR)\Filter\Util rmdir /s /q $(LIBDIR)\Filter\Util
-	-if exist $(LIBDIR)\Filter\Util rmdir /s $(LIBDIR)\Filter\Util
 	-if exist $(LIBDIR)\Hash rmdir /s /q $(LIBDIR)\Hash
-	-if exist $(LIBDIR)\Hash rmdir /s $(LIBDIR)\Hash
 	-if exist $(LIBDIR)\IO\Compress rmdir /s /q $(LIBDIR)\IO\Compress
-	-if exist $(LIBDIR)\IO\Compress rmdir /s $(LIBDIR)\IO\Compress
 	-if exist $(LIBDIR)\IO\Socket rmdir /s /q $(LIBDIR)\IO\Socket
-	-if exist $(LIBDIR)\IO\Socket rmdir /s $(LIBDIR)\IO\Socket
 	-if exist $(LIBDIR)\IO\Uncompress rmdir /s /q $(LIBDIR)\IO\Uncompress
-	-if exist $(LIBDIR)\IO\Uncompress rmdir /s $(LIBDIR)\IO\Uncompress
 	-if exist $(LIBDIR)\List rmdir /s /q $(LIBDIR)\List
-	-if exist $(LIBDIR)\List rmdir /s $(LIBDIR)\List
 	-if exist $(LIBDIR)\MIME rmdir /s /q $(LIBDIR)\MIME
-	-if exist $(LIBDIR)\MIME rmdir /s $(LIBDIR)\MIME
 	-if exist $(LIBDIR)\Scalar rmdir /s /q $(LIBDIR)\Scalar
-	-if exist $(LIBDIR)\Scalar rmdir /s $(LIBDIR)\Scalar
 	-if exist $(LIBDIR)\Sys rmdir /s /q $(LIBDIR)\Sys
-	-if exist $(LIBDIR)\Sys rmdir /s $(LIBDIR)\Sys
 	-if exist $(LIBDIR)\threads rmdir /s /q $(LIBDIR)\threads
-	-if exist $(LIBDIR)\threads rmdir /s $(LIBDIR)\threads
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
-	-if exist $(LIBDIR)\XS rmdir /s $(LIBDIR)\XS
 	-cd $(PODDIR) && del /f *.html *.bat checkpods \
 	    perlaix.pod perlamiga.pod perlapollo.pod perlbeos.pod \
 	    perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \
@@ -1226,9 +1209,7 @@ distclean: realclean
 	-cd .. && del /s *.lib *.map *.pdb *.ilk *.bs *$(o) .exists pm_to_blib
 	-cd $(EXTDIR) && del /s *.def Makefile Makefile.old
 	-if exist $(AUTODIR) rmdir /s /q $(AUTODIR)
-	-if exist $(AUTODIR) rmdir /s $(AUTODIR)
 	-if exist $(COREDIR) rmdir /s /q $(COREDIR)
-	-if exist $(COREDIR) rmdir /s $(COREDIR)
 
 install : all installbare installhtml
 
@@ -1285,8 +1266,6 @@ _test :
        $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
        cd ..\win32
 
-# the doubled rmdir calls are needed because older cmd shells
-# don't understand /q
 _clean :
 	-@$(DEL) miniperlmain$(o)
 	-@$(DEL) $(MINIPERL)
@@ -1300,11 +1279,8 @@ _clean :
 	-@$(DEL) $(PERLDLL)
 	-@$(DEL) $(CORE_OBJ)
 	-if exist $(MINIDIR) rmdir /s /q $(MINIDIR)
-	-if exist $(MINIDIR) rmdir /s $(MINIDIR)
 	-if exist $(UNIDATADIR1) rmdir /s /q $(UNIDATADIR1)
-	-if exist $(UNIDATADIR1) rmdir /s $(UNIDATADIR1)
 	-if exist $(UNIDATADIR2) rmdir /s /q $(UNIDATADIR2)
-	-if exist $(UNIDATADIR2) rmdir /s $(UNIDATADIR2)
 	-@$(DEL) $(UNIDATAFILES)
 	-@$(DEL) $(WIN32_OBJ)
 	-@$(DEL) $(DLL_OBJ)
