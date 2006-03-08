@@ -1050,7 +1050,7 @@ _cleaner2:
 	rm -f preload
 	rm -f testcompile compilelog
 	rm -rf lib/Encode lib/Compress
-	rm -f lib/IO/Compress lib/IO/Uncompress
+	rm -rf lib/IO/Compress lib/IO/Uncompress
 	rm -f lib/ExtUtils/ParseXS/t/XSTest.c
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(OBJ_EXT)
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(DLSUFFIX)
