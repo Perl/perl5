@@ -205,3 +205,6 @@ SKIP: {
     kill 'HUP', $$;
 }
 
+eval { sigaction(-999, "foo"); };
+like($@, qr/Negative signals/,
+    "Prevent negative signals instead of core dumping");
