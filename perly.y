@@ -30,6 +30,9 @@
 %union {
     I32	ival;
     char *pval;
+#ifdef PERL_MAD
+    TOKEN* tkval;
+#endif
     OP *opval;
     GV *gvval;
 }
@@ -91,6 +94,8 @@
 %nonassoc <ival> ')'
 %left '('
 %left '[' '{'
+
+%token PEG
 
 %% /* RULES */
 

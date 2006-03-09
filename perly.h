@@ -96,7 +96,8 @@
      POSTINC = 321,
      PREDEC = 322,
      PREINC = 323,
-     ARROW = 324
+     ARROW = 324,
+     PEG = 325
    };
 #endif
 /* Tokens.  */
@@ -167,6 +168,7 @@
 #define PREDEC 322
 #define PREINC 323
 #define ARROW 324
+#define PEG 325
 
 
 
@@ -177,11 +179,14 @@
 typedef union YYSTYPE {
     I32	ival;
     char *pval;
+#ifdef PERL_MAD
+    TOKEN* tkval;
+#endif
     OP *opval;
     GV *gvval;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 183 "perly.h"
+#line 188 "perly.h"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
