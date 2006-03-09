@@ -1089,15 +1089,10 @@ S_check_uni(pTHX)
     if ((t = strchr(s, '(')) && t < PL_bufptr)
 	return;
 
-    /* XXX Things like this are just so nasty.  We shouldn't be modifying
-    source code, even if we realquick set it back. */
     if (ckWARN_d(WARN_AMBIGUOUS)){
-	const char ch = *s;
-        *s = '\0';
         Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
-		   "Warning: Use of \"%s\" without parentheses is ambiguous",
-		   PL_last_uni);
-        *s = ch;
+		   "Warning: Use of \"%.*s\" without parentheses is ambiguous",
+		   (int)(s - PL_last_uni), PL_last_uni);
     }
 }
 
