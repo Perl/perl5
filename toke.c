@@ -9769,9 +9769,9 @@ S_scan_subst(pTHX_ char *start)
 	pm->op_pmflags |= PMf_EVAL;
 	while (es-- > 0)
 	    sv_catpv(repl, es ? "eval " : "do ");
-	sv_catpvs(repl, "{ ");
+	sv_catpvs(repl, "{");
 	sv_catsv(repl, PL_lex_repl);
-	sv_catpvs(repl, " }");
+	sv_catpvs(repl, "}");
 	SvEVALED_on(repl);
 	SvREFCNT_dec(PL_lex_repl);
 	PL_lex_repl = repl;
