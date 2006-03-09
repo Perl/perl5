@@ -6444,13 +6444,13 @@ OP *
 Perl_ck_grep(pTHX_ OP *o)
 {
     dVAR;
-    LOGOP *gwop;
+    LOGOP *gwop = NULL;
     OP *kid;
     const OPCODE type = o->op_type == OP_GREPSTART ? OP_GREPWHILE : OP_MAPWHILE;
     I32 offset;
 
     o->op_ppaddr = PL_ppaddr[OP_GREPSTART];
-    NewOp(1101, gwop, 1, LOGOP);
+    /* don't allocate gwop here, as we may leak it if PL_error_count > 0 */
 
     if (o->op_flags & OPf_STACKED) {
 	OP* k;
@@ -6461,6 +6461,7 @@ Perl_ck_grep(pTHX_ OP *o)
 	for (k = cUNOPx(kid)->op_first; k; k = k->op_next) {
 	    kid = k;
 	}
+	NewOp(1101, gwop, 1, LOGOP);
 	kid->op_next = (OP*)gwop;
 	o->op_flags &= ~OPf_STACKED;
     }
@@ -6477,6 +6478,8 @@ Perl_ck_grep(pTHX_ OP *o)
 	Perl_croak(aTHX_ "panic: ck_grep");
     kid = kUNOP->op_first;
 
+    if (!gwop)
+	NewOp(1101, gwop, 1, LOGOP);
     gwop->op_type = type;
     gwop->op_ppaddr = PL_ppaddr[type];
     gwop->op_first = listkids(o);
