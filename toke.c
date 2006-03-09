@@ -993,7 +993,11 @@ S_skipspace(pTHX_ register char *s)
 
 	    /* reset variables for next time we lex */
 	    PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = s = PL_linestart
-		= SvPVX(PL_linestr);
+		= SvPVX(PL_linestr)
+#ifdef PERL_MAD
+		+ curoff
+#endif
+		;
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	    PL_last_lop = PL_last_uni = NULL;
 
@@ -3104,12 +3108,12 @@ Perl_yylex(pTHX)
               "### Saw case modifier\n"); });
 	    s = PL_bufptr + 1;
 	    if (s[1] == '\\' && s[2] == 'E') {
-	        PL_bufptr = s + 3;
 #ifdef PERL_MAD
 		if (!thiswhite)
 		    thiswhite = newSVpvn("",0);
 		sv_catpvn(thiswhite, PL_bufptr, 4);
 #endif
+	        PL_bufptr = s + 3;
 		PL_lex_state = LEX_INTERPCONCAT;
 		return yylex();
 	    }
@@ -4109,7 +4113,7 @@ Perl_yylex(pTHX)
 		start_force(curforce);
 		NEXTVAL_NEXTTOKE.opval = attrs;
 		CURMAD('_', nextwhite);
-	force_next(THING);
+		force_next(THING);
 	    }
 #ifdef PERL_MAD
 	    if (PL_madskills) {
