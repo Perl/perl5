@@ -51,6 +51,10 @@ static SV *endwhite;
 static I32 curforce = -1;
 
 #  define CURMAD(slot,sv) if (PL_madskills) { curmad(slot,sv); sv = 0; }
+
+#  define NEXTVAL_NEXTTOKE PL_nextval[PL_nexttoke]
+#else
+#  define NEXTVAL_NEXTTOKE PL_nextval[PL_nexttoke]
 #endif
 
 #define XFAKEBRACK 128
@@ -1107,10 +1111,10 @@ S_force_word(pTHX_ register char *start, int token, int check_keyword, int allow
 		PL_expect = XOPERATOR;
 	    }
 	}
-	PL_nextval[PL_nexttoke].opval
+	NEXTVAL_NEXTTOKE.opval
 	    = (OP*)newSVOP(OP_CONST,0,
 			   S_newSV_maybe_utf8(aTHX_ PL_tokenbuf, len));
-	PL_nextval[PL_nexttoke].opval->op_private |= OPpCONST_BARE;
+	NEXTVAL_NEXTTOKE.opval->op_private |= OPpCONST_BARE;
 	force_next(token);
     }
     return s;
@@ -1132,7 +1136,7 @@ S_force_ident(pTHX_ register const char *s, int kind)
     if (s && *s) {
 	const STRLEN len = strlen(s);
 	OP* const o = (OP*)newSVOP(OP_CONST, 0, newSVpvn(s, len));
-	PL_nextval[PL_nexttoke].opval = o;
+	NEXTVAL_NEXTTOKE.opval = o;
 	force_next(WORD);
 	if (kind) {
 	    o->op_private = OPpCONST_ENTERED;
@@ -1215,7 +1219,7 @@ S_force_version(pTHX_ char *s, int guessing)
     }
 
     /* NOTE: The parser sees the package name and the VERSION swapped */
-    PL_nextval[PL_nexttoke].opval = version;
+    NEXTVAL_NEXTTOKE.opval = version;
     force_next(WORD);
 
     return s;
@@ -2287,9 +2291,9 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 	    if ((PL_bufend - s) >= 2 && *s == '=' && *(s+1) == '>')
 		return 0;	/* no assumptions -- "=>" quotes bearword */
       bare_package:
-	    PL_nextval[PL_nexttoke].opval = (OP*)newSVOP(OP_CONST, 0,
+	    NEXTVAL_NEXTTOKE.opval = (OP*)newSVOP(OP_CONST, 0,
 						   newSVpvn(tmpbuf,len));
-	    PL_nextval[PL_nexttoke].opval->op_private = OPpCONST_BARE;
+	    NEXTVAL_NEXTTOKE.opval->op_private = OPpCONST_BARE;
 	    PL_expect = XTERM;
 	    force_next(WORD);
 	    PL_bufptr = s;
@@ -2504,7 +2508,7 @@ S_tokenize_use(pTHX_ int is_use, char *s) {
     if (isDIGIT(*s) || (*s == 'v' && isDIGIT(s[1]))) {
 	s = force_version(s, TRUE);
 	if (*s == ';' || (s = SKIPSPACE1(s), *s == ';')) {
-	    PL_nextval[PL_nexttoke].opval = NULL;
+	    NEXTVAL_NEXTTOKE.opval = NULL;
 	    force_next(WORD);
 	}
 	else if (*s == 'v') {
@@ -2589,7 +2593,7 @@ Perl_yylex(pTHX)
     /* when we've already built the next token, just pull it out of the queue */
     case LEX_KNOWNEXT:
 	PL_nexttoke--;
-	yylval = PL_nextval[PL_nexttoke];
+	yylval = NEXTVAL_NEXTTOKE;
 	if (!PL_nexttoke) {
 	    PL_lex_state = PL_lex_defer;
 	    PL_expect = PL_lex_expect;
@@ -2647,18 +2651,18 @@ Perl_yylex(pTHX)
 		PL_lex_casestack[PL_lex_casemods++] = *s;
 		PL_lex_casestack[PL_lex_casemods] = '\0';
 		PL_lex_state = LEX_INTERPCONCAT;
-		PL_nextval[PL_nexttoke].ival = 0;
+		NEXTVAL_NEXTTOKE.ival = 0;
 		force_next('(');
 		if (*s == 'l')
-		    PL_nextval[PL_nexttoke].ival = OP_LCFIRST;
+		    NEXTVAL_NEXTTOKE.ival = OP_LCFIRST;
 		else if (*s == 'u')
-		    PL_nextval[PL_nexttoke].ival = OP_UCFIRST;
+		    NEXTVAL_NEXTTOKE.ival = OP_UCFIRST;
 		else if (*s == 'L')
-		    PL_nextval[PL_nexttoke].ival = OP_LC;
+		    NEXTVAL_NEXTTOKE.ival = OP_LC;
 		else if (*s == 'U')
-		    PL_nextval[PL_nexttoke].ival = OP_UC;
+		    NEXTVAL_NEXTTOKE.ival = OP_UC;
 		else if (*s == 'Q')
-		    PL_nextval[PL_nexttoke].ival = OP_QUOTEMETA;
+		    NEXTVAL_NEXTTOKE.ival = OP_QUOTEMETA;
 		else
 		    Perl_croak(aTHX_ "panic: yylex");
 		PL_bufptr = s + 1;
@@ -2689,14 +2693,14 @@ Perl_yylex(pTHX)
 	PL_lex_dojoin = (*PL_bufptr == '@');
 	PL_lex_state = LEX_INTERPNORMAL;
 	if (PL_lex_dojoin) {
-	    PL_nextval[PL_nexttoke].ival = 0;
+	    NEXTVAL_NEXTTOKE.ival = 0;
 	    force_next(',');
 	    force_ident("\"", '$');
-	    PL_nextval[PL_nexttoke].ival = 0;
+	    NEXTVAL_NEXTTOKE.ival = 0;
 	    force_next('$');
-	    PL_nextval[PL_nexttoke].ival = 0;
+	    NEXTVAL_NEXTTOKE.ival = 0;
 	    force_next('(');
-	    PL_nextval[PL_nexttoke].ival = OP_JOIN;	/* emulate join($", ...) */
+	    NEXTVAL_NEXTTOKE.ival = OP_JOIN;	/* emulate join($", ...) */
 	    force_next(FUNC);
 	}
 	if (PL_lex_starts++) {
@@ -2756,7 +2760,7 @@ Perl_yylex(pTHX)
 	}
 
 	if (s != PL_bufptr) {
-	    PL_nextval[PL_nexttoke] = yylval;
+	    NEXTVAL_NEXTTOKE = yylval;
 	    PL_expect = XTERM;
 	    force_next(THING);
 	    if (PL_lex_starts++) {
@@ -3489,7 +3493,7 @@ Perl_yylex(pTHX)
 	    }
 	got_attrs:
 	    if (attrs) {
-		PL_nextval[PL_nexttoke].opval = attrs;
+		NEXTVAL_NEXTTOKE.opval = attrs;
 		force_next(THING);
 	    }
 	    TOKEN(COLONATTR);
@@ -4516,7 +4520,7 @@ Perl_yylex(pTHX)
 			    goto its_constant;
 			}
 		    }
-		    PL_nextval[PL_nexttoke].opval = yylval.opval;
+		    NEXTVAL_NEXTTOKE.opval = yylval.opval;
 		    PL_expect = XOPERATOR;
 		    force_next(WORD);
 		    yylval.ival = 0;
@@ -4584,7 +4588,7 @@ Perl_yylex(pTHX)
 			    PREBLOCK(LSTOPSUB);
 			}
 		    }
-		    PL_nextval[PL_nexttoke].opval = yylval.opval;
+		    NEXTVAL_NEXTTOKE.opval = yylval.opval;
 		    PL_expect = XTERM;
 		    force_next(WORD);
 		    TOKEN(NOAMP);
@@ -5311,7 +5315,7 @@ Perl_yylex(pTHX)
 		    }
 		}
 		if (words) {
-		    PL_nextval[PL_nexttoke].opval = words;
+		    NEXTVAL_NEXTTOKE.opval = words;
 		    force_next(THING);
 		}
 	    }
@@ -5639,7 +5643,7 @@ Perl_yylex(pTHX)
 		}
 
 		if (have_proto) {
-		    PL_nextval[PL_nexttoke].opval =
+		    NEXTVAL_NEXTTOKE.opval =
 			(OP*)newSVOP(OP_CONST, 0, PL_lex_stuff);
 		    PL_lex_stuff = NULL;
 		    force_next(THING);
@@ -10998,7 +11002,7 @@ S_scan_formline(pTHX_ register char *s)
 	PL_expect = XTERM;
 	if (needargs) {
 	    PL_lex_state = LEX_NORMAL;
-	    PL_nextval[PL_nexttoke].ival = 0;
+	    NEXTVAL_NEXTTOKE.ival = 0;
 	    force_next(',');
 	}
 	else
@@ -11009,9 +11013,9 @@ S_scan_formline(pTHX_ register char *s)
 	    else if (PL_encoding)
 		sv_recode_to_utf8(stuff, PL_encoding);
 	}
-	PL_nextval[PL_nexttoke].opval = (OP*)newSVOP(OP_CONST, 0, stuff);
+	NEXTVAL_NEXTTOKE.opval = (OP*)newSVOP(OP_CONST, 0, stuff);
 	force_next(THING);
-	PL_nextval[PL_nexttoke].ival = OP_FORMLINE;
+	NEXTVAL_NEXTTOKE.ival = OP_FORMLINE;
 	force_next(LSTOP);
     }
     else {
