@@ -3104,13 +3104,17 @@ Perl_moreswitches(pTHX_ char *s)
 	return s+1;
 	}
 #endif /* __CYGWIN__ */
-	PL_inplace = savepv(s+1);
-	for (s = PL_inplace; *s && !isSPACE(*s); s++)
-	    ;
+	{
+	    const char *start = ++s;
+	    while (*s && !isSPACE(*s))
+		++s;
+
+	    PL_inplace = savepvn(start, s - start);
+	}
 	if (*s) {
-	    *s++ = '\0';
+	    ++s;
 	    if (*s == '-')	/* Additional switches on #! line. */
-	        s++;
+		s++;
 	}
 	return s;
     case 'I':	/* -I handled both here and in parse_body() */
