@@ -1708,6 +1708,7 @@ s	|void	|start_force	|int where
 s	|void	|curmad		|char slot|NULLOK SV *sv
 #  endif
 Mp	|int	|madlex
+Mp	|int	|madparse
 #endif
 
 END_EXTERN_C

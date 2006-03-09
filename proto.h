@@ -4369,6 +4369,7 @@ STATIC void	S_start_force(pTHX_ int where);
 STATIC void	S_curmad(pTHX_ char slot, SV *sv);
 #  endif
 PERL_CALLCONV int	Perl_madlex(pTHX);
+PERL_CALLCONV int	Perl_madparse(pTHX);
 #endif
 
 END_EXTERN_C

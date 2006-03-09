@@ -2621,6 +2621,11 @@ lib/warnings.pm			For "use warnings"
 lib/warnings/register.pm	For "use warnings::register"
 lib/warnings.t			See if warning controls work
 locale.c			locale-specific utility functions
+madly.act			parser actions; derived from madly.y
+madly.c				parser code (NOT derived from madly.y)
+madly.h				header file for madly.c; derived from madly.y
+madly.tab			parser state tables; derived from madly.y
+madly.y				Yacc grammar for MAD
 makeaperl.SH			perl script that produces a new perl binary
 makedef.pl			Create symbol export lists for linking
 makedepend.SH			Precursor to makedepend
@@ -3025,6 +3030,7 @@ regcomp.h			Private declarations for above
 regcomp.pl			Builder of regnodes.h
 regcomp.sym			Data for regnodes.h
 regen_lib.pl			Common file routines for generator scripts
+regen_madly.pl			generate madly.{act,h,tab} from madly.y
 regen_perly.pl			generate perly.{act,h,tab} from perly.y
 regen.pl			Run all scripts that (re)generate files
 regexec.c			Regular expression evaluator

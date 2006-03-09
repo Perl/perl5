@@ -297,8 +297,8 @@ Perl_yyparse (pTHX)
     int yylen;
 
 #ifdef PERL_MAD
-    /*if (PL_madskills)
-      return madparse();*/
+    if (PL_madskills)
+	return madparse();
 #endif
 
     YYDPRINTF ((Perl_debug_log, "Starting parse\n"));
@@ -409,7 +409,7 @@ Perl_yyparse (pTHX)
     if (yychar == YYEMPTY) {
 	YYDPRINTF ((Perl_debug_log, "Reading a token: "));
 #ifdef PERL_MAD
-	yychar = /*PL_madskills ? madlex() :*/ yylex();
+	yychar = PL_madskills ? madlex() : yylex();
 #else
 	yychar = yylex();
 #endif

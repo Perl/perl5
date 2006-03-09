@@ -966,6 +966,9 @@ mad=''
 make_set_make=''
 d_mymalloc=''
 freetype=''
+madlyh=''
+madlyobj=''
+madlysrc=''
 mallocobj=''
 mallocsrc=''
 malloctype=''
@@ -18978,8 +18981,14 @@ EOM
 rp='Build Perl with MAD?'
 . ./myread
 case "$ans" in
-y|Y)	val="$define" ;;
-*)	val="$undef"  ;;
+y|Y)	val="$define"
+	madlyh='madly.h madly.act madly.tab'
+	madlysrc='madly.c'
+	madlyobj="madly$_o" ;;
+*)	val="$undef"
+	madlyh=''
+	madlysrc=''
+	madlyobj='' ;;
 esac
 set mad
 eval $setvar
@@ -21902,6 +21911,9 @@ make='$make'
 make_set_make='$make_set_make'
 mallocobj='$mallocobj'
 mallocsrc='$mallocsrc'
+madlyh='$madlyh'
+madlyobj='$madlyobj'
+madlysrc='$madlysrc'
 malloctype='$malloctype'
 man1dir='$man1dir'
 man1direxp='$man1direxp'

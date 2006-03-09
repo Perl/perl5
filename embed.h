@@ -1794,6 +1794,7 @@
 #  endif
 #ifdef PERL_CORE
 #define madlex			Perl_madlex
+#define madparse		Perl_madparse
 #endif
 #endif
 #define ck_anoncode		Perl_ck_anoncode
@@ -3942,6 +3943,7 @@
 #  endif
 #ifdef PERL_CORE
 #define madlex()		Perl_madlex(aTHX)
+#define madparse()		Perl_madparse(aTHX)
 #endif
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
