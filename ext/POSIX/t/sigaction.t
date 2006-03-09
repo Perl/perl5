@@ -16,7 +16,7 @@ BEGIN{
 	}
 }
 
-use Test::More tests => 30;
+use Test::More tests => 31;
 
 use strict;
 use vars qw/$bad $bad7 $ok10 $bad18 $ok/;
