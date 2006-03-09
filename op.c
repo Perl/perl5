@@ -6365,13 +6365,15 @@ Perl_ck_fun(pTHX_ OP *o)
 	listkids(o);
     }
     else if (PL_opargs[type] & OA_DEFGV) {
-	OP *newop = newUNOP(type, 0, newDEFSVOP());
 #ifdef PERL_MAD
+	OP *newop = newUNOP(type, 0, newDEFSVOP());
 	op_getmad(o,newop,'O');
-#else
-	op_free(o);
-#endif
 	return newop;
+#else
+	/* Ordering of these two is important to keep f_map.t passing.  */
+	op_free(o);
+	return newUNOP(type, 0, newDEFSVOP());
+#endif
     }
 
     if (oa) {

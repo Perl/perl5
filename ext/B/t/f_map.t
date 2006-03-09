@@ -57,32 +57,32 @@ checkOptree(note   => q{},
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <#> gv[*nums] s
-# 5  <1> rv2av[t6] lKM/1
+# 5  <1> rv2av[t7] lKM/1
 # 6  <@> mapstart lK
-# 7  <|> mapwhile(other->8)[t7] lK
+# 7  <|> mapwhile(other->8)[t8] lK
 # 8      <#> gvsv[*_] s
 # 9      <1> chr[t5] sK/1
 #            goto 7
 # a  <0> pushmark s
 # b  <#> gv[*chars] s
 # c  <1> rv2av[t2] lKRM*/1
-# d  <2> aassign[t8] KS/COMMON
+# d  <2> aassign[t9] KS/COMMON
 # e  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 559 (eval 15):1) v
 # 2  <0> pushmark s
 # 3  <0> pushmark s
 # 4  <$> gv(*nums) s
-# 5  <1> rv2av[t2] lKM/1
+# 5  <1> rv2av[t4] lKM/1
 # 6  <@> mapstart lK
-# 7  <|> mapwhile(other->8)[t4] lK
+# 7  <|> mapwhile(other->8)[t5] lK
 # 8      <$> gvsv(*_) s
 # 9      <1> chr[t3] sK/1
 #            goto 7
 # a  <0> pushmark s
 # b  <$> gv(*chars) s
 # c  <1> rv2av[t1] lKRM*/1
-# d  <2> aassign[t5] KS/COMMON
+# d  <2> aassign[t6] KS/COMMON
 # e  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
