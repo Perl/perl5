@@ -2538,10 +2538,10 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	if (cSVOPo->op_sv) {
 	    SV *tmpsv1 = NEWSV(0,0);
 	    SV *tmpsv2 = NEWSV(0,0);
-	    SvUTF8_on(tmpsv1);
-	    SvUTF8_on(tmpsv2);
 	    char *s;
 	    STRLEN len;
+	    SvUTF8_on(tmpsv1);
+	    SvUTF8_on(tmpsv2);
 	    ENTER;
 	    SAVEFREESV(tmpsv1);
 	    SAVEFREESV(tmpsv2);
