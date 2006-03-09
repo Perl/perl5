@@ -6508,6 +6508,9 @@ otherwise.
 The behavior is undefined if LENGTH is greater than the length of the
 file.
 
+The position in the file of FILEHANDLE is left unchanged.  You may want to
+call L<seek> before writing to the file.
+
 =item uc EXPR
 X<uc> X<uppercase> X<toupper>
 
