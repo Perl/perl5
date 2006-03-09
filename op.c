@@ -332,8 +332,14 @@ Perl_op_clear(pTHX_ OP *o)
 #ifdef PERL_MAD
     /* if (o->op_madprop && o->op_madprop->mad_next)
        abort(); */
-    mad_free(o->op_madprop);
-    o->op_madprop = 0;
+    /* FIXME for MAD - if I uncomment these two lines t/op/pack.t fails with
+       "modification of a read only value" for a reason I can't fathom why.
+       It's the "" stringification of $_, where $_ was set to '' in a foreach
+       loop, but it defies simplification into a small test case.  */
+    /*
+      mad_free(o->op_madprop);
+      o->op_madprop = 0;
+    */
 #endif    
 
  retry:
