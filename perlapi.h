@@ -354,6 +354,8 @@ END_EXTERN_C
 #define PL_laststatval		(*Perl_Ilaststatval_ptr(aTHX))
 #undef  PL_laststype
 #define PL_laststype		(*Perl_Ilaststype_ptr(aTHX))
+#undef  PL_lasttoke
+#define PL_lasttoke		(*Perl_Ilasttoke_ptr(aTHX))
 #undef  PL_lex_brackets
 #define PL_lex_brackets		(*Perl_Ilex_brackets_ptr(aTHX))
 #undef  PL_lex_brackstack

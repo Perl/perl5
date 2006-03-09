@@ -278,6 +278,7 @@
 #define PL_lastfd		(vTHX->Ilastfd)
 #define PL_laststatval		(vTHX->Ilaststatval)
 #define PL_laststype		(vTHX->Ilaststype)
+#define PL_lasttoke		(vTHX->Ilasttoke)
 #define PL_lex_brackets		(vTHX->Ilex_brackets)
 #define PL_lex_brackstack	(vTHX->Ilex_brackstack)
 #define PL_lex_casemods		(vTHX->Ilex_casemods)
@@ -561,6 +562,7 @@
 #define PL_Ilastfd		PL_lastfd
 #define PL_Ilaststatval		PL_laststatval
 #define PL_Ilaststype		PL_laststype
+#define PL_Ilasttoke		PL_lasttoke
 #define PL_Ilex_brackets	PL_lex_brackets
 #define PL_Ilex_brackstack	PL_lex_brackstack
 #define PL_Ilex_casemods	PL_lex_casemods

@@ -1788,8 +1788,13 @@
 #define skipspace0		S_skipspace0
 #define skipspace1		S_skipspace1
 #define skipspace2		S_skipspace2
+#define start_force		S_start_force
+#define curmad			S_curmad
 #endif
 #  endif
+#ifdef PERL_CORE
+#define madlex			Perl_madlex
+#endif
 #endif
 #define ck_anoncode		Perl_ck_anoncode
 #define ck_bitop		Perl_ck_bitop
@@ -3931,8 +3936,13 @@
 #define skipspace0(a)		S_skipspace0(aTHX_ a)
 #define skipspace1(a)		S_skipspace1(aTHX_ a)
 #define skipspace2(a,b)		S_skipspace2(aTHX_ a,b)
+#define start_force(a)		S_start_force(aTHX_ a)
+#define curmad(a,b)		S_curmad(aTHX_ a,b)
 #endif
 #  endif
+#ifdef PERL_CORE
+#define madlex()		Perl_madlex(aTHX)
+#endif
 #endif
 #define ck_anoncode(a)		Perl_ck_anoncode(aTHX_ a)
 #define ck_bitop(a)		Perl_ck_bitop(aTHX_ a)
