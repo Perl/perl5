@@ -298,9 +298,14 @@ PERLVAR(Ilex_brackstack,char *)		/* what kind of brackets to pop */
 PERLVAR(Ilex_casestack,	char *)		/* what kind of case mods in effect */
 
 /* What we know when we're in LEX_KNOWNEXT state. */
+#ifdef PERL_MAD
+PERLVARA(Inexttoke,5,	NEXTTOKE)	/* value of next token, if any */
+PERLVAR(Ilasttoke,	I32)
+#else
 PERLVARA(Inextval,5,	YYSTYPE)	/* value of next token, if any */
 PERLVARA(Inexttype,5,	I32)		/* type of next token */
 PERLVAR(Inexttoke,	I32)
+#endif
 
 PERLVAR(Ilinestr,	SV *)
 PERLVAR(Ibufptr,	char *)

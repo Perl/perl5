@@ -1409,6 +1409,10 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 {
     register char *s;
 
+    if (PL_madskills && newlen >= 0x100000) {
+	PerlIO_printf(Perl_debug_log,
+		      "Allocation too large: %"UVxf"\n", (UV)newlen);
+    }
 #ifdef HAS_64K_LIMIT
     if (newlen >= 0x10000) {
 	PerlIO_printf(Perl_debug_log,
@@ -10904,9 +10908,14 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     i = (PL_lex_casemods < 12 ? 12 : PL_lex_casemods);
     PL_lex_casestack	= SAVEPVN(proto_perl->Ilex_casestack,i);
 
+#ifdef PERL_MAD
+    Copy(proto_perl->Inexttoke, PL_nexttoke, 5, NEXTTOKE);
+    PL_lasttoke		= proto_perl->Ilasttoke;
+#else
     Copy(proto_perl->Inextval, PL_nextval, 5, YYSTYPE);
     Copy(proto_perl->Inexttype, PL_nexttype, 5,	I32);
     PL_nexttoke		= proto_perl->Inexttoke;
+#endif
 
     /* XXX This is probably masking the deeper issue of why
      * SvANY(proto_perl->Ilinestr) can be NULL at this point. For test case:

@@ -1704,7 +1704,10 @@ Mp	|void	|mad_free	|MADPROP* mp
 s	|char*	|skipspace0	|NN char *s
 s	|char*	|skipspace1	|NN char *s
 s	|char*	|skipspace2	|NN char *s|NULLOK SV **sv
+s	|void	|start_force	|int where
+s	|void	|curmad		|char slot|NULLOK SV *sv
 #  endif
+Mp	|int	|madlex
 #endif
 
 END_EXTERN_C
