@@ -166,6 +166,7 @@ S_save_scalar_at(pTHX_ SV **sptr)
     register SV * const sv = *sptr = newSV(0);
 
 #ifdef PERL_MAD
+    /* FIXME for MAD - this is causing ext/Safe/t/safeops.t to abort.  */
     if (PL_formfeed && sv == PL_formfeed)
 	abort();
 #endif
