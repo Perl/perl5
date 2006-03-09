@@ -6836,18 +6836,18 @@ Perl_ck_require(pTHX_ OP *o)
 
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
 	OP * const kid = cUNOPo->op_first;
-	OP * newop
-	    = ck_subr(newUNOP(OP_ENTERSUB, OPf_STACKED,
-			      append_elem(OP_LIST, kid,
-					  scalar(newUNOP(OP_RV2CV, 0,
-							 newGVOP(OP_GV, 0,
-								 gv))))));
+	OP * newop;
+
 	cUNOPo->op_first = 0;
-#ifdef PERL_MAD
-	op_getmad(o,newop,'O');
-#else
+#ifndef PERL_MAD
 	op_free(o);
 #endif
+	newop = ck_subr(newUNOP(OP_ENTERSUB, OPf_STACKED,
+				append_elem(OP_LIST, kid,
+					    scalar(newUNOP(OP_RV2CV, 0,
+							   newGVOP(OP_GV, 0,
+								   gv))))));
+	op_getmad(o,newop,'O');
 	return newop;
     }
 
