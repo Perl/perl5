@@ -1699,6 +1699,12 @@ Mp	|void	|addmad		|MADPROP* tm|MADPROP** root|char slot
 Mp	|MADPROP*|newMADsv	|char key|SV* sv
 Mp	|MADPROP*|newMADPROP	|char key|char type|void* val|I32 vlen
 Mp	|void	|mad_free	|MADPROP* mp
+
+#  if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
+s	|char*	|skipspace0	|NN char *s
+s	|char*	|skipspace1	|NN char *s
+s	|char*	|skipspace2	|NN char *s|NULLOK SV **sv
+#  endif
 #endif
 
 END_EXTERN_C

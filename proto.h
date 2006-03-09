@@ -4354,6 +4354,18 @@ PERL_CALLCONV void	Perl_addmad(pTHX_ MADPROP* tm, MADPROP** root, char slot);
 PERL_CALLCONV MADPROP*	Perl_newMADsv(pTHX_ char key, SV* sv);
 PERL_CALLCONV MADPROP*	Perl_newMADPROP(pTHX_ char key, char type, void* val, I32 vlen);
 PERL_CALLCONV void	Perl_mad_free(pTHX_ MADPROP* mp);
+
+#  if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
+STATIC char*	S_skipspace0(pTHX_ char *s)
+			__attribute__nonnull__(pTHX_1);
+
+STATIC char*	S_skipspace1(pTHX_ char *s)
+			__attribute__nonnull__(pTHX_1);
+
+STATIC char*	S_skipspace2(pTHX_ char *s, SV **sv)
+			__attribute__nonnull__(pTHX_1);
+
+#  endif
 #endif
 
 END_EXTERN_C
