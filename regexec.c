@@ -1632,7 +1632,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     I32 dontbother = 0;	/* how many characters not to try at end */
     I32 end_shift = 0;			/* Same for the end. */		/* CC */
     I32 scream_pos = -1;		/* Internal iterator of scream. */
-    char *scream_olds;
+    char *scream_olds = NULL;
     SV* oreplsv = GvSV(PL_replgv);
     const bool do_utf8 = DO_UTF8(sv);
     const I32 multiline = prog->reganch & PMf_MULTILINE;
