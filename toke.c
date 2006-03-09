@@ -3171,13 +3171,14 @@ Perl_yylex(pTHX)
 		CopLINE_dec(PL_curcop);
 		incline(s);
 	    }
-	    d = PL_bufend;
-	    while (s < d && *s != '\n')
-		s++;
-	    if (s < d)
-		s++;
-	    else if (s > d) /* Found by Ilya: feed random input to Perl. */
-	      Perl_croak(aTHX_ "panic: input overflow");
+	    d = s;
+	    while (d < PL_bufend && *d != '\n')
+		d++;
+	    if (d < PL_bufend)
+		d++;
+	    else if (d > PL_bufend) /* Found by Ilya: feed random input to Perl. */
+		Perl_croak(aTHX_ "panic: input overflow");
+	    s = d;
 	    incline(s);
 	    if (PL_lex_formbrack && PL_lex_brackets <= PL_lex_formbrack) {
 		PL_bufptr = s;
