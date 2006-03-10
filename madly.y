@@ -14,6 +14,7 @@
 
 /*  Make the parser re-entrant. */
 
+/* FIXME for MAD - is the new mintro on while and until important?  */
 %pure_parser
 
 %start prog
@@ -33,15 +34,18 @@
 %token <tkval> LABEL
 %token <tkval> FORMAT SUB ANONSUB PACKAGE USE
 %token <tkval> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
+%token <tkval> GIVEN WHEN DEFAULT
 %token <tkval> LOOPEX DOTDOT
 %token <tkval> FUNC0 FUNC1 FUNC UNIOP LSTOP
 %token <tkval> RELOP EQOP MULOP ADDOP
 %token <tkval> DOLSHARP DO HASHBRACK NOAMP
-%token <tkval> LOCAL MY MYSUB
+%token <tkval> LOCAL MY MYSUB REQUIRE
 %token <tkval> COLONATTR
 
 %type <ival> prog progstart remember mremember savescope
-%type <ival> startsub startanonsub startformsub mintro
+%type <ival>  startsub startanonsub startformsub
+/* FIXME for MAD - are these two ival? */
+%type <ival> mydefsv mintro
 
 %type <tkval> '&' ';'
 
@@ -54,6 +58,7 @@
 %type <opval> formname subname proto subbody cont my_scalar
 %type <opval> subattrlist myattrlist myattrterm myterm
 %type <opval> termbinop termunop anonymous termdo
+%type <opval> switch case
 %type <tkval> label
 
 %nonassoc <tkval> PREC_LOW
@@ -74,6 +79,7 @@
 %nonassoc EQOP
 %nonassoc RELOP
 %nonassoc UNIOP UNIOPSUB
+%nonassoc REQUIRE
 %left <tkval> SHIFTOP
 %left ADDOP
 %left MULOP
@@ -108,6 +114,10 @@ block	:	'{' remember lineseq '}'
 
 remember:	/* NULL */	/* start a full lexical scope */
 			{ $$ = block_start(TRUE); }
+	;
+
+mydefsv:	/* NULL */	/* lexicalize $_ */
+			{ $$ = (I32) allocmy("$_"); }
 	;
 
 progstart:
@@ -153,6 +163,10 @@ line	:	label cond
 			{ $$ = newSTATEOP(0, ($1)->tk_lval.pval, $2);
 			  token_getmad($1,((LISTOP*)$$)->op_first,'L'); }
 	|	loop	/* loops add their own labels */
+	|	switch  /* ... and so do switches */
+			{ $$ = $1; }
+	|	label case
+			{ $$ = newSTATEOP(0, ($1)->tk_lval.pval, $2); }
 	|	label ';'
 			{
 			  if (($1)->tk_lval.pval) {
@@ -248,6 +262,14 @@ cond	:	IF '(' remember mexpr ')' mblock else
 			}
 	;
 
+/* Cases for a switch statement */
+case	:	WHEN '(' remember mexpr ')' mblock
+	{ $$ = block_end($3,
+		newWHENOP($4, scope($6))); }
+	|	DEFAULT block
+	{ $$ = newWHENOP(0, scope($2)); }
+	;
+
 /* Continue blocks */
 cont	:	/* NULL */
 			{ $$ = Nullop; }
@@ -261,7 +283,7 @@ cont	:	/* NULL */
 loop	:	label WHILE '(' remember texpr ')' mintro mblock cont
 			{ OP *innerop;
 			  PL_copline = (line_t)$2;
-			  $$ = block_end($4,
+			    $$ = block_end($4,
 				   newSTATEOP(0, ($1)->tk_lval.pval,
 				     innerop = newWHILEOP(0, 1, (LOOP*)Nullop,
 						($2)->tk_lval.ival, $5, $8, $9, $7)));
@@ -270,12 +292,13 @@ loop	:	label WHILE '(' remember texpr ')' mintro mblock cont
 			  token_getmad($3,innerop,'(');
 			  token_getmad($6,innerop,')');
 			}
+
 	|	label UNTIL '(' remember iexpr ')' mintro mblock cont
 			{ OP *innerop;
 			  PL_copline = (line_t)$2;
-			  $$ = block_end($4,
+			    $$ = block_end($4,
 				   newSTATEOP(0, ($1)->tk_lval.pval,
-				     innerop = newWHILEOP(0, 1, (LOOP*)Nullop,
+				     newWHILEOP(0, 1, (LOOP*)Nullop,
 						($2)->tk_lval.ival, $5, $8, $9, $7)));
 			  token_getmad($1,innerop,'L');
 			  token_getmad($2,innerop,'W');
@@ -311,7 +334,8 @@ loop	:	label WHILE '(' remember texpr ')' mintro mblock cont
 			  token_getmad($3,((LISTOP*)innerop)->op_first->op_sibling,'(');
 			  token_getmad($6,((LISTOP*)innerop)->op_first->op_sibling,')');
 			}
-	|	label FOR '(' remember mnexpr ';' texpr ';'  mintro mnexpr ')' mblock
+	|	label FOR '(' remember mnexpr ';' texpr ';' mintro mnexpr ')'
+	    	    mblock
 			/* basically fake up an initialize-while lineseq */
 			{ OP *forop;
 			  PL_copline = (line_t)($2)->tk_lval.ival;
@@ -334,8 +358,7 @@ loop	:	label WHILE '(' remember texpr ')' mintro mblock cont
 			  token_getmad($8,forop,'2');
 			  token_getmad($11,forop,')');
 			  token_getmad($1,forop,'L');
-			  $$ = block_end($4, forop);
-			}
+			  $$ = block_end($4, forop); }
 	|	label block cont  /* a block is a loop that happens once */
 			{ $$ = newSTATEOP(0, ($1)->tk_lval.pval,
 				 newWHILEOP(0, 1, (LOOP*)Nullop,
@@ -343,12 +366,20 @@ loop	:	label WHILE '(' remember texpr ')' mintro mblock cont
 			  token_getmad($1,((LISTOP*)$$)->op_first,'L'); }
 	;
 
+/* Switch blocks */
+switch	:	label GIVEN '(' remember mydefsv mexpr ')' mblock
+			{ PL_copline = (line_t) $2;
+			    $$ = block_end($4,
+				newSTATEOP(0, ($1)->tk_lval.pval,
+				    newGIVENOP($6, scope($8),
+					(PADOFFSET) $5) )); }
+	;
+
 /* determine whether there are any new my declarations */
 mintro	:	/* NULL */
 			{ $$ = (PL_min_intro_pending &&
 			    PL_max_intro_pending >=  PL_min_intro_pending);
 			  intro_my(); }
-
 
 /* Normal expression */
 nexpr	:	/* NULL */
@@ -458,7 +489,7 @@ startformsub:	/* NULL */	/* start a format subroutine scope */
 	;
 
 /* Name of a subroutine - must be a bareword, could be special */
-subname	:	WORD	{ STRLEN n_a; char *name = SvPV(((SVOP*)$1)->op_sv,n_a);
+subname	:	WORD	{ const char *const name = SvPV_nolen_const(((SVOP*)$1)->op_sv);
 			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
 			      || strEQ(name, "INIT") || strEQ(name, "CHECK"))
 			      CvSPECIAL_on(PL_compcv);
@@ -702,6 +733,20 @@ subscripted:    star '{' expr ';' '}'        /* *main::{something} */
 			  token_getmad($2,$$,'(');
 			  token_getmad($3,$$,')');
 			}
+	|	'(' expr ')' '[' expr ']'            /* list slice */
+			{ $$ = newSLICEOP(0, $5, $2);
+			  token_getmad($1,$$,'(');
+			  token_getmad($3,$$,')');
+			  token_getmad($4,$$,'[');
+			  token_getmad($6,$$,']');
+			}
+	|	'(' ')' '[' expr ']'                 /* empty list slice! */
+			{ $$ = newSLICEOP(0, $4, Nullop);
+			  token_getmad($1,$$,'(');
+			  token_getmad($2,$$,')');
+			  token_getmad($3,$$,'[');
+			  token_getmad($5,$$,']');
+			}
     ;
 
 /* Binary operators between terms */
@@ -940,20 +985,6 @@ term	:	termbinop
 			{ $$ = newUNOP(OP_AV2ARYLEN, 0, ref($1, OP_AV2ARYLEN));}
 	|       subscripted
 			{ $$ = $1; }
-	|	'(' expr ')' '[' expr ']'            /* list slice */
-			{ $$ = newSLICEOP(0, $5, $2);
-			  token_getmad($1,$$,'(');
-			  token_getmad($3,$$,')');
-			  token_getmad($4,$$,'[');
-			  token_getmad($6,$$,']');
-			}
-	|	'(' ')' '[' expr ']'                 /* empty list slice! */
-			{ $$ = newSLICEOP(0, $4, Nullop);
-			  token_getmad($1,$$,'(');
-			  token_getmad($2,$$,')');
-			  token_getmad($3,$$,'[');
-			  token_getmad($5,$$,']');
-			}
 	|	ary '[' expr ']'                     /* array slice */
 			{ $$ = prepend_elem(OP_ASLICE,
 				newOP(OP_PUSHMARK, 0),
@@ -1024,10 +1055,13 @@ term	:	termbinop
 			{ $$ = newUNOP(($1)->tk_lval.ival, 0, $2);
 			  token_getmad($1,$$,'o');
 			}
+	|	REQUIRE                              /* require, $_ implied *//* FIMXE for MAD needed? */
+			{ $$ = newOP(OP_REQUIRE, $1 ? OPf_SPECIAL : 0); }
+	|	REQUIRE term                         /* require Foo *//* FIMXE for MAD needed? */
+			{ $$ = newUNOP(OP_REQUIRE, $1 ? OPf_SPECIAL : 0, $2); }
 	|	UNIOPSUB term                        /* Sub treated as unop */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-			    append_elem(OP_LIST, $2, scalar($1)));
-			}
+			    append_elem(OP_LIST, $2, scalar($1))); }
 	|	FUNC0                                /* Nullary operator */
 			{ $$ = newOP(($1)->tk_lval.ival, 0);
 			  token_getmad($1,$$,'o');
