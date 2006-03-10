@@ -1,6 +1,5 @@
 package ExtUtils::XSSymSet;
 
-use Carp qw( &carp );
 use strict;
 use vars qw( $VERSION );
 $VERSION = '1.0';
@@ -69,7 +68,7 @@ sub trimsym {
       }
     }
   }
-  carp "Warning: long symbol $name\n\ttrimmed to $trimmed\n\t" unless $silent;
+  warn "Warning: long symbol $name\n\ttrimmed to $trimmed\n\t" unless $silent;
   return $trimmed;
 }
 
@@ -87,12 +86,12 @@ sub addsym {
     my($i) = "00";
     $trimmed = $self->trimsym($sym,$maxlen-3,$silent);
     while (exists $self->{"${trimmed}_$i"}) { $i++; }
-    carp "Warning: duplicate symbol $trimmed\n\tchanged to ${trimmed}_$i\n\t(original was $sym)\n\t"
+    warn "Warning: duplicate symbol $trimmed\n\tchanged to ${trimmed}_$i\n\t(original was $sym)\n\t"
       unless $silent;
     $trimmed .= "_$i";
   }
   elsif (not $silent and $trimmed ne $sym) {
-    carp "Warning: long symbol $sym\n\ttrimmed to $trimmed\n\t";
+    warn "Warning: long symbol $sym\n\ttrimmed to $trimmed\n\t";
   }
   $self->{$trimmed} = $sym;
   $self->{'__N+Map'}->{$sym} = $trimmed;

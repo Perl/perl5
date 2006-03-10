@@ -9099,10 +9099,12 @@ static int set_features
     int dflt;
     char* str;
     char val_str[10];
+#if defined(JPI$_CASE_LOOKUP_PERM) && !defined(__VAX)
     const unsigned long int jpicode1 = JPI$_CASE_LOOKUP_PERM;
     const unsigned long int jpicode2 = JPI$_CASE_LOOKUP_IMAGE;
     unsigned long case_perm;
     unsigned long case_image;
+#endif
 
     /* Allow an exception to bring Perl into the VMS debugger */
     vms_debug_on_exception = 0;
@@ -9253,7 +9255,7 @@ static int set_features
     }
 #endif
 
-#ifndef __VAX
+#if defined(JPI$_CASE_LOOKUP_PERM) && !defined(__VAX)
 
      /* Report true case tolerance */
     /*----------------------------*/
@@ -9277,25 +9279,19 @@ static int set_features
 }
 
 #ifdef __DECC
-/* DECC dependent attributes */
-#if __DECC_VER < 60560002
-#define relative
-#define not_executable
-#else
-#define relative ,rel
-#define not_executable ,noexe
-#endif
 #pragma nostandard
 #pragma extern_model save
 #pragma extern_model strict_refdef "LIB$INITIALIZ" nowrt
-#endif
 	const __align (LONGWORD) int spare[8] = {0};
-/* .psect LIB$INITIALIZE, NOPIC, USR, CON, REL, GBL, NOSHR, NOEXE, RD, */
-/*			  NOWRT, LONG */
-#ifdef __DECC
-#pragma extern_model strict_refdef "LIB$INITIALIZE" con, gbl,noshr, \
-	nowrt,noshr relative not_executable
+
+/* .psect LIB$INITIALIZE, NOPIC, USR, CON, REL, GBL, NOSHR, NOEXE, RD, NOWRT, LONG */
+#if __DECC_VER >= 60560002
+#pragma extern_model strict_refdef "LIB$INITIALIZE" nopic, con, rel, gbl, noshr, noexe, nowrt, long
+#else
+#pragma extern_model strict_refdef "LIB$INITIALIZE" nopic, con, gbl, noshr, nowrt, long
 #endif
+#endif /* __DECC */
+
 const long vms_cc_features = (const long)set_features;
 
 /*
