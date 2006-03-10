@@ -161,9 +161,6 @@ sub mkpath {
 	if ($Is_VMS) {
 	    next if $path eq '/';
 	    $path = VMS::Filespec::unixify($path);
-	    if ($path =~ m:^(/[^/]+)/?\z:) {
-	        $path = $1.'/000000';
-	    }
 	}
 	next if -d $path;
 	my $parent = File::Basename::dirname($path);
