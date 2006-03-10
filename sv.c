@@ -10911,6 +10911,18 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #ifdef PERL_MAD
     Copy(proto_perl->Inexttoke, PL_nexttoke, 5, NEXTTOKE);
     PL_lasttoke		= proto_perl->Ilasttoke;
+    PL_realtokenstart	= proto_perl->Irealtokenstart;
+    PL_faketokens	= proto_perl->Ifaketokens;
+    PL_thismad		= proto_perl->Ithismad;
+    PL_thistoken	= proto_perl->Ithistoken;
+    PL_thisopen		= proto_perl->Ithisopen;
+    PL_thisstuff	= proto_perl->Ithisstuff;
+    PL_thisclose	= proto_perl->Ithisclose;
+    PL_thiswhite	= proto_perl->Ithiswhite;
+    PL_nextwhite	= proto_perl->Inextwhite;
+    PL_skipwhite	= proto_perl->Iskipwhite;
+    PL_endwhite		= proto_perl->Iendwhite;
+    PL_curforce		= proto_perl->Icurforce;
 #else
     Copy(proto_perl->Inextval, PL_nextval, 5, YYSTYPE);
     Copy(proto_perl->Inexttype, PL_nexttype, 5,	I32);

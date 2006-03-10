@@ -847,6 +847,18 @@ if ($define{'PERL_MAD'}) {
 		    PL_madskills
 		    PL_xmlfp
 		    PL_lasttoke
+		    PL_realtokenstart
+		    PL_faketokens
+		    PL_thismad
+		    PL_thistoken
+		    PL_thisopen
+		    PL_thisstuff
+		    PL_thisclose
+		    PL_thiswhite
+		    PL_nextwhite
+		    PL_skipwhite
+		    PL_endwhite
+		    PL_curforce
 		    Perl_pad_peg
 		    Perl_xmldump_indent
 		    Perl_xmldump_vindent

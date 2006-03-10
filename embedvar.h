@@ -215,6 +215,7 @@
 #define PL_cshlen		(vTHX->Icshlen)
 #define PL_cshname		(vTHX->Icshname)
 #define PL_curcopdb		(vTHX->Icurcopdb)
+#define PL_curforce		(vTHX->Icurforce)
 #define PL_curstname		(vTHX->Icurstname)
 #define PL_custom_op_descs	(vTHX->Icustom_op_descs)
 #define PL_custom_op_names	(vTHX->Icustom_op_names)
@@ -234,6 +235,7 @@
 #define PL_egid			(vTHX->Iegid)
 #define PL_encoding		(vTHX->Iencoding)
 #define PL_endav		(vTHX->Iendav)
+#define PL_endwhite		(vTHX->Iendwhite)
 #define PL_envgv		(vTHX->Ienvgv)
 #define PL_errgv		(vTHX->Ierrgv)
 #define PL_error_count		(vTHX->Ierror_count)
@@ -245,6 +247,7 @@
 #define PL_exitlist		(vTHX->Iexitlist)
 #define PL_exitlistlen		(vTHX->Iexitlistlen)
 #define PL_expect		(vTHX->Iexpect)
+#define PL_faketokens		(vTHX->Ifaketokens)
 #define PL_fdpid		(vTHX->Ifdpid)
 #define PL_filemode		(vTHX->Ifilemode)
 #define PL_forkprocess		(vTHX->Iforkprocess)
@@ -327,6 +330,7 @@
 #define PL_nexttoke		(vTHX->Inexttoke)
 #define PL_nexttype		(vTHX->Inexttype)
 #define PL_nextval		(vTHX->Inextval)
+#define PL_nextwhite		(vTHX->Inextwhite)
 #define PL_nice_chunk		(vTHX->Inice_chunk)
 #define PL_nice_chunk_size	(vTHX->Inice_chunk_size)
 #define PL_nomemok		(vTHX->Inomemok)
@@ -364,6 +368,7 @@
 #define PL_psig_pend		(vTHX->Ipsig_pend)
 #define PL_psig_ptr		(vTHX->Ipsig_ptr)
 #define PL_ptr_table		(vTHX->Iptr_table)
+#define PL_realtokenstart	(vTHX->Irealtokenstart)
 #define PL_reentrant_buffer	(vTHX->Ireentrant_buffer)
 #define PL_reentrant_retint	(vTHX->Ireentrant_retint)
 #define PL_regex_pad		(vTHX->Iregex_pad)
@@ -382,6 +387,7 @@
 #define PL_sig_pending		(vTHX->Isig_pending)
 #define PL_sighandlerp		(vTHX->Isighandlerp)
 #define PL_signals		(vTHX->Isignals)
+#define PL_skipwhite		(vTHX->Iskipwhite)
 #define PL_sort_RealCmp		(vTHX->Isort_RealCmp)
 #define PL_splitstr		(vTHX->Isplitstr)
 #define PL_srand_called		(vTHX->Isrand_called)
@@ -406,6 +412,12 @@
 #define PL_sys_intern		(vTHX->Isys_intern)
 #define PL_taint_warn		(vTHX->Itaint_warn)
 #define PL_tainting		(vTHX->Itainting)
+#define PL_thisclose		(vTHX->Ithisclose)
+#define PL_thismad		(vTHX->Ithismad)
+#define PL_thisopen		(vTHX->Ithisopen)
+#define PL_thisstuff		(vTHX->Ithisstuff)
+#define PL_thistoken		(vTHX->Ithistoken)
+#define PL_thiswhite		(vTHX->Ithiswhite)
 #define PL_threadhook		(vTHX->Ithreadhook)
 #define PL_tokenbuf		(vTHX->Itokenbuf)
 #define PL_uid			(vTHX->Iuid)
@@ -499,6 +511,7 @@
 #define PL_Icshlen		PL_cshlen
 #define PL_Icshname		PL_cshname
 #define PL_Icurcopdb		PL_curcopdb
+#define PL_Icurforce		PL_curforce
 #define PL_Icurstname		PL_curstname
 #define PL_Icustom_op_descs	PL_custom_op_descs
 #define PL_Icustom_op_names	PL_custom_op_names
@@ -518,6 +531,7 @@
 #define PL_Iegid		PL_egid
 #define PL_Iencoding		PL_encoding
 #define PL_Iendav		PL_endav
+#define PL_Iendwhite		PL_endwhite
 #define PL_Ienvgv		PL_envgv
 #define PL_Ierrgv		PL_errgv
 #define PL_Ierror_count		PL_error_count
@@ -529,6 +543,7 @@
 #define PL_Iexitlist		PL_exitlist
 #define PL_Iexitlistlen		PL_exitlistlen
 #define PL_Iexpect		PL_expect
+#define PL_Ifaketokens		PL_faketokens
 #define PL_Ifdpid		PL_fdpid
 #define PL_Ifilemode		PL_filemode
 #define PL_Iforkprocess		PL_forkprocess
@@ -611,6 +626,7 @@
 #define PL_Inexttoke		PL_nexttoke
 #define PL_Inexttype		PL_nexttype
 #define PL_Inextval		PL_nextval
+#define PL_Inextwhite		PL_nextwhite
 #define PL_Inice_chunk		PL_nice_chunk
 #define PL_Inice_chunk_size	PL_nice_chunk_size
 #define PL_Inomemok		PL_nomemok
@@ -648,6 +664,7 @@
 #define PL_Ipsig_pend		PL_psig_pend
 #define PL_Ipsig_ptr		PL_psig_ptr
 #define PL_Iptr_table		PL_ptr_table
+#define PL_Irealtokenstart	PL_realtokenstart
 #define PL_Ireentrant_buffer	PL_reentrant_buffer
 #define PL_Ireentrant_retint	PL_reentrant_retint
 #define PL_Iregex_pad		PL_regex_pad
@@ -666,6 +683,7 @@
 #define PL_Isig_pending		PL_sig_pending
 #define PL_Isighandlerp		PL_sighandlerp
 #define PL_Isignals		PL_signals
+#define PL_Iskipwhite		PL_skipwhite
 #define PL_Isort_RealCmp	PL_sort_RealCmp
 #define PL_Isplitstr		PL_splitstr
 #define PL_Isrand_called	PL_srand_called
@@ -690,6 +708,12 @@
 #define PL_Isys_intern		PL_sys_intern
 #define PL_Itaint_warn		PL_taint_warn
 #define PL_Itainting		PL_tainting
+#define PL_Ithisclose		PL_thisclose
+#define PL_Ithismad		PL_thismad
+#define PL_Ithisopen		PL_thisopen
+#define PL_Ithisstuff		PL_thisstuff
+#define PL_Ithistoken		PL_thistoken
+#define PL_Ithiswhite		PL_thiswhite
 #define PL_Ithreadhook		PL_threadhook
 #define PL_Itokenbuf		PL_tokenbuf
 #define PL_Iuid			PL_uid

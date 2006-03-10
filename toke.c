@@ -36,20 +36,6 @@ static I32 utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen);
 #endif
 
 #ifdef PERL_MAD
-/* XXX these probably need to be made into PL vars */
-static I32 PL_realtokenstart;
-static I32 PL_faketokens = 0;
-static MADPROP *PL_thismad;
-static SV *PL_thistoken;
-static SV *PL_thisopen;
-static SV *PL_thisstuff;
-static SV *PL_thisclose;
-static SV *PL_thiswhite;
-static SV *PL_nextwhite;
-static SV *PL_skipwhite;
-static SV *PL_endwhite;
-static I32 PL_curforce = -1;
-
 #  define CURMAD(slot,sv) if (PL_madskills) { curmad(slot,sv); sv = 0; }
 #  define NEXTVAL_NEXTTOKE PL_nexttoke[PL_curforce].next_val
 #else

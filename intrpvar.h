@@ -301,6 +301,18 @@ PERLVAR(Ilex_casestack,	char *)		/* what kind of case mods in effect */
 #ifdef PERL_MAD
 PERLVARA(Inexttoke,5,	NEXTTOKE)	/* value of next token, if any */
 PERLVAR(Ilasttoke,	I32)
+PERLVAR(Irealtokenstart,I32)
+PERLVAR(Ifaketokens,	I32)
+PERLVAR(Ithismad,	MADPROP *)
+PERLVAR(Ithistoken,	SV *)
+PERLVAR(Ithisopen,	SV *)
+PERLVAR(Ithisstuff,	SV *)
+PERLVAR(Ithisclose,	SV *)
+PERLVAR(Ithiswhite,	SV *)
+PERLVAR(Inextwhite,	SV *)
+PERLVAR(Iskipwhite,	SV *)
+PERLVAR(Iendwhite,	SV *)
+PERLVAR(Icurforce,	I32)
 #else
 PERLVARA(Inextval,5,	YYSTYPE)	/* value of next token, if any */
 PERLVARA(Inexttype,5,	I32)		/* type of next token */
