@@ -10167,7 +10167,7 @@ unknown:
 }
 
 STATIC void
-S_checkcomma(pTHX_ register char *s, const char *name, const char *what)
+S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 {
     dVAR;
     const char *w;
@@ -10201,17 +10201,12 @@ S_checkcomma(pTHX_ register char *s, const char *name, const char *what)
 	while (s < PL_bufend && isSPACE(*s))
 	    s++;
 	if (*s == ',') {
-	    I32 kw;
-	    CV *cv;
-	    *s = '\0'; /* XXX If we didn't do this, we could const a lot of toke.c */
-	    kw = keyword(w, s - w);
-	    *s = ',';
-	    if (kw)
+	    GV* gv;
+	    if (keyword(w, s - w))
 		return;
-	    *s = '\0';
-	    cv = get_cv(w, FALSE);
-	    *s = ',';
-	    if (cv)
+
+	    gv = gv_fetchpvn_flags(w, s - w, 0, SVt_PVCV);
+	    if (gv && GvCVu(gv))
 		return;
 	    Perl_croak(aTHX_ "No comma allowed after %s", what);
 	}

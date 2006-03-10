@@ -3839,7 +3839,7 @@ STATIC char*	S_swallow_bom(pTHX_ U8 *s)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_checkcomma(pTHX_ char *s, const char *name, const char *what)
+STATIC void	S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);

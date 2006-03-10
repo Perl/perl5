@@ -1401,7 +1401,8 @@ s	|char*	|scan_word	|NN char *s|NN char *dest|STRLEN destlen \
 				|int allow_package|NN STRLEN *slp
 sR	|char*	|skipspace	|NN char *s
 sR	|char*	|swallow_bom	|NN U8 *s
-s	|void	|checkcomma	|NN char *s|NN const char *name|NN const char *what
+s	|void	|checkcomma	|NN const char *s|NN const char *name \
+				|NN const char *what
 s	|bool	|feature_is_enabled|NN char* name|STRLEN namelen
 s	|void	|force_ident	|NN const char *s|int kind
 s	|void	|incline	|NN char *s
