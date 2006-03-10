@@ -493,8 +493,8 @@ Integrate patches 12347-12350 from the perlio branch to the mainline:
 The mail alias E<lt>perl-repository-keepers@perl.orgE<gt> can be used to reach
 all current users of the repository.
 
-The repository keeper is currently Gurusamy Sarathy
-E<lt>gsar@activestate.comE<gt>.
+The repository keeper is currently Philippe M. Chiasson
+E<lt>gozer@ActiveState.comE<gt>.
 
 =head1 AUTHORS
 
