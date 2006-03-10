@@ -300,8 +300,8 @@ PERLVAR(Ilex_casestack,	char *)		/* what kind of case mods in effect */
 /* What we know when we're in LEX_KNOWNEXT state. */
 #ifdef PERL_MAD
 PERLVARA(Inexttoke,5,	NEXTTOKE)	/* value of next token, if any */
-PERLVAR(Ilasttoke,	I32)
 #else
+PERLVAR(Ilasttoke,	I32)
 PERLVARA(Inextval,5,	YYSTYPE)	/* value of next token, if any */
 PERLVARA(Inexttype,5,	I32)		/* type of next token */
 PERLVAR(Inexttoke,	I32)
