@@ -155,6 +155,17 @@ Ilya observed that use POSIX; eats memory like there's no tomorrow, and at
 various times worked to cut it down. There is probably still fat to cut out -
 for example POSIX passes Exporter some very memory hungry data structures.
 
+=head2 embed.pl/makedef.pl
+
+There is a script F<embed.pl> that generates several header files to prefix
+all of Perl's symbols in a consistent way, to provide some semblance of
+namespace support in C<C>. Functions are declared in F<embed.fnc>, variables
+in F<interpvar.h> and F<thrdvar.h>. Quite a few of the functions and variables
+are conditionally declared there, using C<#ifdef>. However, F<embed.pl>
+doesn't understand the C macros, so the rules about which symbols are present
+when is duplicated in F<makedef.pl>. Writing things twice is bad, m'kay.
+It would be good to teach C<embed.pl> to understand the conditional
+compilation, and hence remove the duplication, and the mistakes it has caused.
 
 
 
