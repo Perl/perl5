@@ -10156,19 +10156,19 @@ STATIC void
 S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 {
     dVAR;
-    const char *w;
 
     if (*s == ' ' && s[1] == '(') {	/* XXX gotta be a better way */
 	if (ckWARN(WARN_SYNTAX)) {
 	    int level = 1;
+	    const char *w;
 	    for (w = s+2; *w && level; w++) {
 		if (*w == '(')
 		    ++level;
 		else if (*w == ')')
 		    --level;
 	    }
-	    if (*w)
-		for (; *w && isSPACE(*w); w++) ;
+	    for (; *w && isSPACE(*w); w++)
+		/* EMPTY */;
 	    if (!*w || !strchr(";|})]oaiuw!=", *w))	/* an advisory hack only... */
 		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			    "%s (...) interpreted as function",name);
@@ -10181,7 +10181,7 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
     while (s < PL_bufend && isSPACE(*s))
 	s++;
     if (isIDFIRST_lazy_if(s,UTF)) {
-	w = s++;
+	const char * const w = s++;
 	while (isALNUM_lazy_if(s,UTF))
 	    s++;
 	while (s < PL_bufend && isSPACE(*s))
