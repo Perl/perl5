@@ -10202,10 +10202,16 @@ S_checkcomma(pTHX_ register char *s, const char *name, const char *what)
 	    s++;
 	if (*s == ',') {
 	    I32 kw;
+	    CV *cv;
 	    *s = '\0'; /* XXX If we didn't do this, we could const a lot of toke.c */
-	    kw = keyword(w, s - w) || get_cv(w, FALSE) != 0;
+	    kw = keyword(w, s - w);
 	    *s = ',';
 	    if (kw)
+		return;
+	    *s = '\0';
+	    cv = get_cv(w, FALSE);
+	    *s = ',';
+	    if (cv)
 		return;
 	    Perl_croak(aTHX_ "No comma allowed after %s", what);
 	}
