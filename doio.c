@@ -246,7 +246,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 		errno = EPIPE;
 		goto say_false;
 	    }
-	    if ((*name == '-' && name[1] == '\0') || num_svs)
+	    if (!(*name == '-' && name[1] == '\0') || num_svs)
 		TAINT_ENV();
 	    TAINT_PROPER("piped open");
 	    if (!num_svs && name[len-1] == '|') {

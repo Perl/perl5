@@ -17,8 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 246;
-
+plan tests => 249;
 
 $| = 1;
 
@@ -1157,4 +1156,32 @@ SKIP:
     my $a = Scalar::Util::dualvar(3, $^X);
     my $b = $a + 5;
     is ($b, 8, "Arithmetic on tainted dualvars works");
+}
+
+# opening '|-' should not trigger $ENV{PATH} check
+
+{
+    SKIP: {
+	skip "fork() is not available", 3 unless $Config{'d_fork'};
+
+	$ENV{'PATH'} = $TAINT;
+	local $SIG{'PIPE'} = 'IGNORE';
+	eval {
+	    my $pid = open my $pipe, '|-';
+	    if (!defined $pid) {
+		die "open failed: $!";
+	    }
+	    if (!$pid) {
+		kill 'KILL', $$;	# child suicide
+	    }
+	    close $pipe;
+	};
+	test $@ !~ /Insecure \$ENV/, 'fork triggers %ENV check';
+	test $@ eq '',               'pipe/fork/open/close failed';
+	eval {
+	    open my $pipe, "|$Invoke_Perl -e 1";
+	    close $pipe;
+	};
+	test $@ =~ /Insecure \$ENV/, 'popen neglects %ENV check';
+    }
 }
