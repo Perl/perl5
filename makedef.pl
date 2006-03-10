@@ -837,10 +837,16 @@ unless ($define{'PERL_TRACK_MEMPOOL'}) {
                     )];
 }
 
-unless ($define{'PERL_MAD'}) {
+if ($define{'PERL_MAD'}) {
+    skip_symbols [qw(
+		     PL_nextval
+		     PL_nexttype
+		     )];
+} else {
     skip_symbols [qw(
 		    PL_madskills
 		    PL_xmlfp
+		    PL_lasttoke
 		    Perl_pad_peg
 		    Perl_xmldump_indent
 		    Perl_xmldump_vindent
