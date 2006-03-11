@@ -4299,10 +4299,10 @@ whileline, OP *expr, OP *block, OP *cont, I32 has_my)
 		break;
 
 	      case OP_SASSIGN:
-		if (k1->op_type == OP_READDIR
+		if (k1 && (k1->op_type == OP_READDIR
 		      || k1->op_type == OP_GLOB
 		      || (k1->op_type == OP_NULL && k1->op_targ == OP_GLOB)
-		      || k1->op_type == OP_EACH)
+		      || k1->op_type == OP_EACH))
 		    expr = newUNOP(OP_DEFINED, 0, expr);
 		break;
 	    }
