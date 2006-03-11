@@ -4,7 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
 }
-plan tests => 87;
+plan tests => 95;
 
 my $list_assignment_supported = 1;
 
@@ -342,3 +342,31 @@ is($@, "");
 
 sub f { ok(0 == $[); }
 
+# sub localisation
+{
+	package Other;
+
+	sub f1 { "f1" }
+	sub f2 { "f2" }
+
+	no warnings "redefine";
+	{
+		local *f1 = sub  { "g1" };
+		::ok(f1() eq "g1", "localised sub via glob");
+	}
+	::ok(f1() eq "f1", "localised sub restored");
+	{
+		local $Other::{"f1"} = sub { "h1" };
+		::ok(f1() eq "h1", "localised sub via stash");
+	}
+	::ok(f1() eq "f1", "localised sub restored");
+	{
+		local @Other::{qw/ f1 f2 /} = (sub { "j1" }, sub { "j2" });
+		local $::TODO = "localisation of stash slice not working";
+		::ok(f1() eq "j1", "localised sub via stash slice");
+		::ok(f2() eq "j2", "localised sub via stash slice");
+		undef $::TODO;
+	}
+	::ok(f1() eq "f1", "localised sub restored");
+	::ok(f2() eq "f2", "localised sub restored");
+}
