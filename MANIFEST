@@ -2622,7 +2622,6 @@ lib/warnings/register.pm	For "use warnings::register"
 lib/warnings.t			See if warning controls work
 locale.c			locale-specific utility functions
 mad/P5AST.pm			Used by nomad
-mad/P5RE.pm			Used by nomad
 mad/P5re.pm			Used by nomad
 mad/PLXML.pm			Used by nomad
 mad/nomad			Converts raw XML dump to something vaguely sane
