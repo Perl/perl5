@@ -1689,17 +1689,19 @@ Mp	|void	|pmop_xmldump	|NULLOK const PMOP* pm
 Mp	|void	|do_op_xmldump	|I32 level|NN PerlIO *file|NULLOK const OP *o
 Mp	|void	|op_xmldump	|NN const OP* arg
 
-Mp	|TOKEN*	|newTOKEN	|I32 optype|YYSTYPE lval|MADPROP* madprop
-Mp	|void	|token_free	|TOKEN* arg
-Mp	|void	|token_getmad	|TOKEN* arg|OP* o|char slot
-Mp	|void	|op_getmad_weak	|OP* from|OP* o|char slot
-Mp	|void	|op_getmad	|OP* from|OP* o|char slot
-Mp	|void	|prepend_madprops|MADPROP* mp|OP* o|char slot
-Mp	|void	|append_madprops|MADPROP* tm|OP* o|char slot
-Mp	|void	|addmad		|MADPROP* tm|MADPROP** root|char slot
-Mp	|MADPROP*|newMADsv	|char key|SV* sv
-Mp	|MADPROP*|newMADPROP	|char key|char type|void* val|I32 vlen
-Mp	|void	|mad_free	|MADPROP* mp
+Mp	|TOKEN*	|newTOKEN	|I32 optype|YYSTYPE lval \
+				|NULLOK MADPROP* madprop
+Mp	|void	|token_free	|NN TOKEN* arg
+Mp	|void	|token_getmad	|NN TOKEN* arg|NULLOK OP* o|char slot
+Mp	|void	|op_getmad_weak	|NULLOK OP* from|NULLOK OP* o|char slot
+Mp	|void	|op_getmad	|NULLOK OP* from|NULLOK OP* o|char slot
+Mp	|void	|prepend_madprops|NULLOK MADPROP* mp|NULLOK OP* o|char slot
+Mp	|void	|append_madprops|NULLOK MADPROP* tm|NULLOK OP* o|char slot
+Mp	|void	|addmad		|NULLOK MADPROP* tm|NULLOK MADPROP** root \
+				|char slot
+Mp	|MADPROP*|newMADsv	|char key|NN SV* sv
+Mp	|MADPROP*|newMADPROP	|char key|char type|NULLOK void* val|I32 vlen
+Mp	|void	|mad_free	|NULLOK MADPROP* mp
 
 #  if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 s	|char*	|skipspace0	|NN char *s
