@@ -114,7 +114,7 @@ while (<TMPH_FILE>) {
 	print H_FILE "#endif /* PERL_CORE */\n";
 	$endcore_done = 1;
     }
-    s/"perlytmp.h"/"perly.h"/;
+    s/"$tmph_file"/"$h_file"/;
     print H_FILE $_;
 }
 close TMPH_FILE;
@@ -150,7 +150,7 @@ sub extract {
 	switch \s* \( \s* \w+ \s* \) \s* { \s*
 	(
 	    case \s* \d+ \s* : \s*
-	    \#line [^\n]+"perly\.y"
+	    \#line [^\n]+"\Q$y_file\E"
 	    .*?
 	)
 	}

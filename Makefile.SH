@@ -892,7 +892,7 @@ run_byacc:
 # this outputs perly.h, perly.act, perly.tab, madly.h, madly.act and madly.tab
 regen_perly:
 	perl regen_perly.pl
-	perl regen_madly.pl
+	perl regen_perly.pl madly.y
 
 # We don't want to regenerate perly.c and perly.h, but they might
 # appear out-of-date after a patch is applied or a new distribution is
