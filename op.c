@@ -1745,12 +1745,13 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
     if (!o || PL_error_count)
 	return o;
 
+    type = o->op_type;
+
     if (PL_madskills && type == OP_NULL && o->op_flags & OPf_KIDS) {
 	(void)my_kid(cUNOPo->op_first, attrs, imopsp);
 	return o;
     }
 
-    type = o->op_type;
     if (type == OP_LIST) {
         OP *kid;
 	for (kid = cLISTOPo->op_first; kid; kid = kid->op_sibling)
