@@ -8546,9 +8546,9 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
   /* It's either a DCL command or we couldn't find a suitable image */
   vmscmd->dsc$w_length = strlen(cmd);
 
-  vmscmd->dsc$a_pointer = PerlMem_malloc(vmscmd->dsc$w_length);
+  vmscmd->dsc$a_pointer = PerlMem_malloc(vmscmd->dsc$w_length + 1);
   strncpy(vmscmd->dsc$a_pointer,cmd,vmscmd->dsc$w_length);
-  vmscmd->dsc$a_pointer[vmscmd->dsc$w_length];
+  vmscmd->dsc$a_pointer[vmscmd->dsc$w_length] = 0;
 
   PerlMem_free(cmd);
 
