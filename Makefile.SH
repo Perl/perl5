@@ -889,9 +889,10 @@ install.html: all installhtml
 run_byacc:
 	@echo "run_byacc is obsolete; try 'make regen_perly' instead"
 
-# this outputs perly.act and perly.tab
+# this outputs perly.h, perly.act, perly.tab, madly.h, madly.act and madly.tab
 regen_perly:
 	perl regen_perly.pl
+	perl regen_madly.pl
 
 # We don't want to regenerate perly.c and perly.h, but they might
 # appear out-of-date after a patch is applied or a new distribution is
