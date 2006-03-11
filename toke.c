@@ -10167,8 +10167,8 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 		else if (*w == ')')
 		    --level;
 	    }
-	    for (; *w && isSPACE(*w); w++)
-		/* EMPTY */;
+	    while (isSPACE(*w))
+		++w;
 	    if (!*w || !strchr(";|})]oaiuw!=", *w))	/* an advisory hack only... */
 		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			    "%s (...) interpreted as function",name);
