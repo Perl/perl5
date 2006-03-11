@@ -389,7 +389,7 @@ PERL_CALLCONV void	Perl_dounwind(pTHX_ I32 cxix);
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3); */
 
-PERL_CALLCONV bool	Perl_do_aexec5(pTHX_ SV* really, SV** mark, SV** sp, int fd, int flag)
+PERL_CALLCONV bool	Perl_do_aexec5(pTHX_ SV* really, SV** mark, SV** sp, int fd, int do_report)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
@@ -431,7 +431,7 @@ PERL_CALLCONV int	Perl_do_spawn_nowait(pTHX_ char* cmd)
 
 #endif
 #if !defined(WIN32)
-PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char* cmd, int fd, int flag)
+PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char* cmd, int fd, int do_report)
 			__attribute__nonnull__(pTHX_1);
 
 #endif
