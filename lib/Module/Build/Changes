@@ -1,5 +1,25 @@
 Revision history for Perl extension Module::Build.
 
+0.27_09  Sat Mar 11 22:48:54 EST 2006
+
+ - Fixed find_perl_interpreter() so we can find the perl executable
+   when running from uninstalled perl even when $^X contains a
+   relative path. [Yitzchak Scott-Thoennes]
+
+ - Fixed warning message where we were printing the wrong field names.
+   [Chris Dolan]
+
+ - Added a 'testpodcoverage' action that runs a POD coverage check for
+   all modules in the distribution. [Yanick Champoux]
+
+ - Added a Cookbook example of subclassing to modify an action. [Dylan
+   Martin and David Golden]
+
+ - When building HTML documentation, we were opening the POD file and
+   not checking whether the open succeeded, which of course caused
+   problems down the line if it failed.  Now we do "or die(...)" like
+   everywhere else. [Spotted by Joerg Braun]
+
 0.27_08  Fri Mar  3 21:22:41 CST 2006
 
  - Due to shell quoting issues and differences in syntax between

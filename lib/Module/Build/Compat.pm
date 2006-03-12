@@ -90,8 +90,9 @@ EOF
       # Save this 'cause CPAN will chdir all over the place.
       my $cwd = Cwd::cwd();
       
-      # There seems to be no way to determine if this install was successful
       CPAN::Shell->install('Module::Build::Compat');
+      CPAN::Shell->expand("Module", "Module::Build::Compat")->uptodate
+	or die "Couldn't install Module::Build, giving up.\n";
       
       chdir $cwd or die "Cannot chdir() back to $cwd: $!";
     }

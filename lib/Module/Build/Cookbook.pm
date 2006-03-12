@@ -329,6 +329,40 @@ was very easy to do with M::B.
 =back 4
 
 
+=head2 Modifying an action
+
+Sometimes you might need an to have an action, say C<./Build install>,
+do something unusual.  For instance, you might need to change the
+ownership of a file or do something else peculiar to your application.
+
+You can subclass C<Module::Build> on the fly using the C<subclass()>
+method and override the methods that perform the actions. You may need
+to read through C<Module::Build::Authoring> to find the methods you
+want to override, but the general pattern is C<ACTION_> followed by
+the name of the action you want to modify.  Here's an example of how
+it would work for C<install>:
+
+  # Build.PL
+  use Module::Build;
+  my $class = Module::Build->subclass(
+      class => "Module::Build::Custom",
+      code => <<'SUBCLASS' );
+  
+  sub ACTION_install {
+      my $self = shift;
+      # YOUR CODE HERE
+      $self->SUPER::ACTION_install;
+  }
+  SUBCLASS
+  
+  $class->new(
+      module_name => 'Your::Module',
+      # rest of the usual Module::Build parameters
+  )->create_build_script;
+
+See the C<Module::Build::Authoring> pod in 0.27 or above for more
+complete documentation on this.
+
 =head1 AUTHOR
 
 Ken Williams <ken@cpan.org>

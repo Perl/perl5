@@ -59,7 +59,8 @@ package Maintainers;
 	'smccam'	=> 'Stephen McCamant <smccam@cpan.org>',
 	'tels'		=> 'perl_dummy a-t bloodgate.com',
 	'tomhughes'	=> 'Tom Hughes <tomhughes@cpan.org>',
-	'tjenness'	=> 'Tim Jenness <tjenness@cpan.org>'
+	'tjenness'	=> 'Tim Jenness <tjenness@cpan.org>',
+	'yves'		=> 'Yves Orton <yves@cpan.org>',
 	);
 
 # The FILES is either filenames, or glob patterns, or directory
@@ -223,10 +224,18 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+        'ExtUtils::Install' =>
+
+		{
+		'MAINTAINER' => 'yves',
+		'FILES' => q[lib/ExtUtils/{Install,Installed,Packlist}.pm],
+		'CPAN' => 1,
+		},
+
 	'ExtUtils::MakeMaker' =>
 		{
 		'MAINTAINER'	=> 'mschwern',
-		'FILES'		=> q[lib/ExtUtils/{Command,Install,Installed,Liblist,MakeMaker,Manifest,Mkbootstrap,Mksymlists,MM*,MY,Packlist,testlib}.pm lib/ExtUtils/{Command,Liblist,MakeMaker,MANIFEST.SKIP}
+		'FILES'	=> q[lib/ExtUtils/{Command,Liblist,MakeMaker,Manifest,Mkbootstrap,Mksymlists,MM*,MY,testlib}.pm lib/ExtUtils/{Command,Liblist,MakeMaker,MANIFEST.SKIP}
 				     lib/ExtUtils/t t/lib/MakeMaker t/lib/TieIn.pm t/lib/TieOut.pm],
 		'CPAN'		=> 1,
 		},

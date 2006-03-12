@@ -1335,8 +1335,6 @@ accessor methods for the following properties:
 
 =item destdir()
 
-=item dist_version_from()
-
 =item get_options()
 
 =item html_css()

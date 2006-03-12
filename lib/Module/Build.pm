@@ -15,7 +15,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.27_08';
+$VERSION = '0.27_09';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -149,21 +149,22 @@ This illustrates initial configuration and the running of three
 'actions'.  In this case the actions run are 'build' (the default
 action), 'test', and 'install'.  Other actions defined so far include:
 
-  build                          html        
-  clean                          install     
-  code                           manifest    
-  config_data                    manpages    
-  diff                           ppd         
-  dist                           ppmdist     
-  distcheck                      prereq_report
-  distclean                      pure_install
-  distdir                        realclean   
-  distmeta                       skipcheck   
-  distsign                       test        
-  disttest                       testcover   
-  docs                           testdb      
-  fakeinstall                    testpod     
+  build                          install     
+  clean                          manifest    
+  code                           manpages    
+  config_data                    ppd         
+  diff                           ppmdist     
+  dist                           prereq_report
+  distcheck                      pure_install
+  distclean                      realclean   
+  distdir                        skipcheck   
+  distmeta                       test        
+  distsign                       testcover   
+  disttest                       testdb      
+  docs                           testpod     
+  fakeinstall                    testpodcoverage
   help                           versioninstall
+  html                                       
 
 
 You can run the 'help' action for a complete list of actions.
@@ -236,6 +237,12 @@ If you run the C<Build> script without any arguments, it runs the
 C<build> action, which in turn runs the C<code> and C<docs> actions.
 
 This is analogous to the MakeMaker 'make all' target.
+
+=item testpodcoverage
+
+This checks the pod coverage of the distribution and 
+produces C<Test::Harness>-style output. If you are a module author,
+this is useful to run before creating a new release.
 
 =item clean
 

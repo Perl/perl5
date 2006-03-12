@@ -333,8 +333,16 @@ sub find_perl_interpreter {
   } elsif (defined $exe) {
     $thisperl .= $exe unless $thisperl =~ m/$exe$/i;
   }
-  
-  foreach my $perl ( $c->{perlpath},
+
+  my $uninstperl;
+  if ($ENV{PERL_CORE}) {
+    # CBuilder is also in the core, so it should be available here
+    require ExtUtils::CBuilder;
+    $uninstperl = File::Spec->catfile(ExtUtils::CBuilder::->perl_src, $thisperl);
+  }
+
+  foreach my $perl ( $uninstperl || (),
+                     $c->{perlpath},
 		     map File::Spec->catfile($_, $thisperl), File::Spec->path()
 		   ) {
     return $perl if -f $perl and $proto->_perl_is_same($perl);
@@ -762,22 +770,21 @@ sub dist_name {
   return $p->{dist_name} if defined $p->{dist_name};
   
   die "Can't determine distribution name, must supply either 'dist_name' or 'module_name' parameter"
-    unless $p->{module_name};
+    unless $self->module_name;
   
-  ($p->{dist_name} = $p->{module_name}) =~ s/::/-/g;
+  ($p->{dist_name} = $self->module_name) =~ s/::/-/g;
   
   return $p->{dist_name};
 }
 
-sub _find_dist_version_from {
+sub dist_version_from {
   my ($self) = @_;
   my $p = $self->{properties};
   if ($self->module_name) {
-    return $p->{dist_version_from} ||=
+    $p->{dist_version_from} ||=
 	join( '/', 'lib', split(/::/, $self->module_name) ) . '.pm';
-  } else {
-    return undef;
   }
+  return $p->{dist_version_from} || undef;
 }
 
 sub dist_version {
@@ -785,11 +792,9 @@ sub dist_version {
   my $p = $self->{properties};
 
   return $p->{dist_version} if defined $p->{dist_version};
-  
-  $self->_find_dist_version_from;
 
-  if ( $p->{dist_version_from} ) {
-    my $version_from = File::Spec->catfile( split( qr{/}, $p->{dist_version_from} ) );
+  if ( my $dist_version_from = $self->dist_version_from ) {
+    my $version_from = File::Spec->catfile( split( qr{/}, $dist_version_from ) );
     my $pm_info = Module::Build::ModuleInfo->new_from_file( $version_from )
       or die "Can't find file $version_from to determine version";
     $p->{dist_version} = $pm_info->version();
@@ -2172,6 +2177,18 @@ sub ACTION_testpod {
   }
 }
 
+sub ACTION_testpodcoverage {
+  my $self = shift;
+
+  $self->depends_on('docs');
+  
+  eval q{use Test::Pod::Coverage 1.00; 1}
+    or die "The 'testpodcoverage' action requires ",
+           "Test::Pod::Coverage version 1.00";
+
+  all_pod_coverage_ok();
+}
+
 sub ACTION_docs {
   my $self = shift;
 
@@ -2369,7 +2386,7 @@ sub htmlify_pods {
 			 ($path2root,
 			  $self->installdirs eq 'core' ? () : qw(site) ) );
 
-    my $fh = IO::File->new($infile);
+    my $fh = IO::File->new($infile) or die "Can't read $infile: $!";
     my $abstract = Module::Build::PodParser->new(fh => $fh)->get_abstract();
 
     my $title = join( '::', (@dirs, $name) );
@@ -2748,7 +2765,6 @@ EOF
 
 sub _main_docfile {
   my $self = shift;
-  $self->_find_dist_version_from;
   if ( my $pm_file = $self->dist_version_from ) {
     (my $pod_file = $pm_file) =~ s/.pm$/.pod/;
     return (-e $pod_file ? $pod_file : $pm_file);
@@ -3065,7 +3081,7 @@ sub prepare_metadata {
   foreach (qw(dist_name dist_version dist_author dist_abstract license)) {
     (my $name = $_) =~ s/^dist_//;
     $node->{$name} = $self->$_();
-    die "ERROR: Missing required field '$name' for META.yml\n"
+    die "ERROR: Missing required field '$_' for META.yml\n"
       unless defined($node->{$name}) && length($node->{$name});
   }
 
@@ -3418,12 +3434,14 @@ sub install_map {
     "WARNING: Can't figure out install path for types: @skipping\n" .
     "Files will not be installed.\n"
   ) if @skipping;
-  
+
   # Write the packlist into the same place as ExtUtils::MakeMaker.
-  my $archdir = $self->install_destination('arch');
-  my @ext = split /::/, $self->module_name;
-  $map{write} = File::Spec->catdir($archdir, 'auto', @ext, '.packlist');
-  
+  if (my $module_name = $self->module_name) {
+    my $archdir = $self->install_destination('arch');
+    my @ext = split /::/, $module_name;
+    $map{write} = File::Spec->catdir($archdir, 'auto', @ext, '.packlist');
+  }
+
   # Handle destdir
   if (length(my $destdir = $self->destdir || '')) {
     foreach (keys %map) {
