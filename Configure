@@ -5968,6 +5968,23 @@ esac
 : confusing anyway.
 installstyle=$dflt
 
+
+: Set variables such as privlib and privlibexp from the output of ./getfile
+: performing the prefixexp/installprefixexp correction if necessary.
+cat <<EOS >setprefixvar
+$startsh
+EOS
+cat <<'EOSC' >>setprefixvar
+eval "${prefixvar}=\"\$ans\""
+eval "${prefixvar}exp=\"\$ansexp\""
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	eval "install${prefixvar}=\`echo \$${prefixvar}exp | sed \"s#^\$prefixexp#\$installprefixexp#\"\`"
+else
+	eval "install${prefixvar}=\"\$${prefixvar}exp\""
+fi
+EOSC
+
 : determine where private library files go
 : Usual default is /usr/local/lib/perl5/$version.
 : Also allow things like /opt/perl/lib/$version, since 
@@ -5987,14 +6004,8 @@ EOM
 fn=d~+
 rp='Pathname where the private library files will reside?'
 . ./getfile
-privlib="$ans"
-privlibexp="$ansexp"
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installprivlib=`echo $privlibexp | sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installprivlib="$privlibexp"
-fi
+prefixvar=privlib
+. ./setprefixvar
 
 : set the prefixup variable, to restore leading tilda escape
 prefixup='case "$prefixexp" in
@@ -6027,18 +6038,12 @@ EOM
 fn=d+~
 rp='Where do you want to put the public architecture-dependent libraries?'
 . ./getfile
-archlib="$ans"
-archlibexp="$ansexp"
+prefixvar=archlib
+. ./setprefixvar
 if $test X"$archlib" = X"$privlib"; then
 	d_archlib="$undef"
 else
 	d_archlib="$define"
-fi
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installarchlib=`echo $archlibexp | sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installarchlib="$archlibexp"
 fi
 
 : see if setuid scripts can be secure
@@ -6495,15 +6500,9 @@ EOM
 fn=d~+
 rp='Pathname for the site-specific library files?'
 . ./getfile
-sitelib="$ans"
-sitelibexp="$ansexp"
+prefixvar=sitelib
+. ./setprefixvar
 sitelib_stem=`echo "$sitelibexp" | sed "s,/$version$,,"`
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installsitelib=`echo $sitelibexp | $sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installsitelib="$sitelibexp"
-fi
 
 : determine where site specific architecture-dependent libraries go.
 : sitelib  default is /usr/local/lib/perl5/site_perl/$version
@@ -6527,14 +6526,8 @@ EOM
 fn=d~+
 rp='Pathname for the site-specific architecture-dependent library files?'
 . ./getfile
-sitearch="$ans"
-sitearchexp="$ansexp"
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installsitearch=`echo $sitearchexp | sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installsitearch="$sitearchexp"
-fi
+prefixvar=sitearch
+. ./setprefixvar
 
 $cat <<EOM
 
@@ -6746,15 +6739,9 @@ rp='Pathname where the public executables will reside?'
 if $test "X$ansexp" != "X$binexp"; then
 	installbin=''
 fi
-bin="$ans"
-binexp="$ansexp"
-: Change installation prefix, if necessary.
+prefixvar=bin
 : XXX Bug? -- ignores Configure -Dinstallprefix setting.
-if $test X"$prefix" != X"$installprefix"; then
-	installbin=`echo $binexp | sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installbin="$binexp"
-fi
+. ./setprefixvar
 
 echo " "
 case "$extras" in
@@ -6824,16 +6811,10 @@ esac
 fn=dn+~
 rp="Directory for the main $spackage html pages?"
 . ./getfile
-html1dir="$ans"
-html1direxp="$ansexp"
+prefixvar=html1dir
+. ./setprefixvar
 : Use ' ' for none so value is preserved next time through Configure
 $test X"$html1dir" = "X" && html1dir=' '
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installhtml1dir=`echo $html1direxp | sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installhtml1dir="$html1direxp"
-fi
 
 : determine where html pages for libraries and modules go
 set html3dir html3dir none
@@ -6853,16 +6834,10 @@ esac
 fn=dn+~
 rp="Directory for the $spackage module html pages?"
 . ./getfile
-html3dir="$ans"
-html3direxp="$ansexp"
+prefixvar=html3dir
+. ./setprefixvar
 : Use ' ' for none so value is preserved next time through Configure
 $test X"$html3dir" = "X" && html3dir=' '
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installhtml3dir=`echo $html3direxp | sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installhtml3dir="$html3direxp"
-fi
 
 : Find perl5.005 or later.
 echo "Looking for a previously installed perl5.005 or later... "
@@ -8015,14 +7990,9 @@ rp="Where do the main $spackage manual pages (source) go?"
 if $test "X$man1direxp" != "X$ansexp"; then
 	installman1dir=''
 fi
-man1dir="$ans"
-man1direxp="$ansexp"
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installman1dir=`echo $man1direxp | $sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installman1dir="$man1direxp"
-fi
+prefixvar=man1dir
+. ./setprefixvar
+
 case "$man1dir" in
 '')	man1dir=' '
 	installman1dir='';;
@@ -8139,14 +8109,9 @@ echo " "
 fn=dn+~
 rp="Where do the $package library man pages (source) go?"
 . ./getfile
-man3dir="$ans"
-man3direxp="$ansexp"
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installman3dir=`echo $man3direxp | $sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installman3dir="$man3direxp"
-fi
+prefixvar=man3dir
+. ./setprefixvar
+
 case "$man3dir" in
 '')	man3dir=' '
 	installman3dir='';;
@@ -8620,14 +8585,11 @@ rp='Where do you keep publicly executable scripts?'
 if $test "X$ansexp" != "X$scriptdirexp"; then
 	installscript=''
 fi
-scriptdir="$ans"
-scriptdirexp="$ansexp"
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installscript=`echo $scriptdirexp | sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installscript="$scriptdirexp"
-fi
+prefixvar=scriptdir
+. ./setprefixvar
+: A little fix up for an irregularly named variable.
+installscript="$installscriptdir"
+
 
 : determine where add-on public executables go
 case "$sitebin" in
@@ -8637,14 +8599,8 @@ esac
 fn=d~
 rp='Pathname where the add-on public executables should be installed?'
 . ./getfile
-sitebin="$ans"
-sitebinexp="$ansexp"
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installsitebin=`echo $sitebinexp | sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installsitebin="$sitebinexp"
-fi
+prefixvar=sitebin
+. ./setprefixvar
 
 : determine where add-on html pages go
 : There is no standard location, so try to copy the previously-selected
@@ -8659,14 +8615,8 @@ esac
 fn=dn+~
 rp='Pathname where the site-specific html pages should be installed?'
 . ./getfile
-sitehtml1dir="$ans"
-sitehtml1direxp="$ansexp"
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installsitehtml1dir=`echo $sitehtml1direxp | $sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installsitehtml1dir="$sitehtml1direxp"
-fi
+prefixvar=sitehtml1dir
+. ./setprefixvar
 
 : determine where add-on library html pages go
 : There is no standard location, so try to copy the previously-selected
@@ -8681,14 +8631,8 @@ esac
 fn=dn+~
 rp='Pathname where the site-specific library html pages should be installed?'
 . ./getfile
-sitehtml3dir="$ans"
-sitehtml3direxp="$ansexp"
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installsitehtml3dir=`echo $sitehtml3direxp | $sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installsitehtml3dir="$sitehtml3direxp"
-fi
+prefixvar=sitehtml3dir
+. ./setprefixvar
 
 : determine where add-on manual pages go
 case "$siteman1dir" in
@@ -8701,14 +8645,8 @@ esac
 fn=dn+~
 rp='Pathname where the site-specific manual pages should be installed?'
 . ./getfile
-siteman1dir="$ans"
-siteman1direxp="$ansexp"
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installsiteman1dir=`echo $siteman1direxp | $sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installsiteman1dir="$siteman1direxp"
-fi
+prefixvar=siteman1dir
+. ./setprefixvar
 
 : determine where add-on library man pages go
 case "$siteman3dir" in
@@ -8721,14 +8659,8 @@ esac
 fn=dn+~
 rp='Pathname where the site-specific library manual pages should be installed?'
 . ./getfile
-siteman3dir="$ans"
-siteman3direxp="$ansexp"
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installsiteman3dir=`echo $siteman3direxp | $sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installsiteman3dir="$siteman3direxp"
-fi
+prefixvar=siteman3dir
+. ./setprefixvar
 
 : determine where add-on public executable scripts go
 case "$sitescript" in
@@ -8739,14 +8671,8 @@ esac
 fn=d~+
 rp='Pathname where add-on public executable scripts should be installed?'
 . ./getfile
-sitescript="$ans"
-sitescriptexp="$ansexp"
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installsitescript=`echo $sitescriptexp | sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installsitescript="$sitescriptexp"
-fi
+prefixvar=sitescript
+. ./setprefixvar
 
 case "$usefaststdio" in
 $define|true|[yY]*|'')
