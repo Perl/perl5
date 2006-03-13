@@ -4607,7 +4607,7 @@ S_newGIVWHENOP(pTHX_ OP *cond, OP *block,
  */
 STATIC
 bool
-S_looks_like_bool(pTHX_ OP *o)
+S_looks_like_bool(pTHX_ const OP *o)
 {
     dVAR;
     switch(o->op_type) {
@@ -4678,7 +4678,7 @@ Perl_newGIVENOP(pTHX_ OP *cond, OP *block, PADOFFSET defsv_off)
 OP *
 Perl_newWHENOP(pTHX_ OP *cond, OP *block)
 {
-    bool cond_llb = (!cond || looks_like_bool(cond));
+    const bool cond_llb = (!cond || looks_like_bool(cond));
     OP *cond_op;
 
     if (cond_llb)

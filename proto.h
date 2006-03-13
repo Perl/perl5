@@ -3180,7 +3180,7 @@ STATIC OP*	S_too_many_arguments(pTHX_ OP *o, const char* name)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC bool	S_looks_like_bool(pTHX_ OP* o)
+STATIC bool	S_looks_like_bool(pTHX_ const OP* o)
 			__attribute__nonnull__(pTHX_1);
 
 STATIC OP*	S_newGIVWHENOP(pTHX_ OP* cond, OP *block, I32 enter_opcode, I32 leave_opcode, PADOFFSET entertarg)

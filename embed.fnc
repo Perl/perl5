@@ -1147,7 +1147,7 @@ s	|void	|no_bareword_allowed|NN const OP *o
 sR	|OP*	|no_fh_allowed|NN OP *o
 sR	|OP*	|too_few_arguments|NN OP *o|NN const char* name
 sR	|OP*	|too_many_arguments|NN OP *o|NN const char* name
-s	|bool	|looks_like_bool|NN OP* o
+s	|bool	|looks_like_bool|NN const OP* o
 s	|OP*	|newGIVWHENOP	|NULLOK OP* cond|NN OP *block \
 				|I32 enter_opcode|I32 leave_opcode \
 				|PADOFFSET entertarg
