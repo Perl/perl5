@@ -5991,7 +5991,7 @@ privlib="$ans"
 privlibexp="$ansexp"
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installprivlib=`echo $privlibexp | sed "s#^$prefix#$installprefix#"`
+	installprivlib=`echo $privlibexp | sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installprivlib="$privlibexp"
 fi
@@ -6036,7 +6036,7 @@ else
 fi
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installarchlib=`echo $archlibexp | sed "s#^$prefix#$installprefix#"`
+	installarchlib=`echo $archlibexp | sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installarchlib="$archlibexp"
 fi
@@ -6500,7 +6500,7 @@ sitelibexp="$ansexp"
 sitelib_stem=`echo "$sitelibexp" | sed "s,/$version$,,"`
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installsitelib=`echo $sitelibexp | $sed "s#^$prefix#$installprefix#"`
+	installsitelib=`echo $sitelibexp | $sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installsitelib="$sitelibexp"
 fi
@@ -6531,7 +6531,7 @@ sitearch="$ans"
 sitearchexp="$ansexp"
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installsitearch=`echo $sitearchexp | sed "s#^$prefix#$installprefix#"`
+	installsitearch=`echo $sitearchexp | sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installsitearch="$sitearchexp"
 fi
@@ -6621,7 +6621,7 @@ esac
 vendorlib_stem=`echo "$vendorlibexp" | sed "s,/$version$,,"`
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installvendorlib=`echo $vendorlibexp | $sed "s#^$prefix#$installprefix#"`
+	installvendorlib=`echo $vendorlibexp | $sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installvendorlib="$vendorlibexp"
 fi
@@ -6651,7 +6651,7 @@ case "$vendorprefix" in
 esac
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installvendorarch=`echo $vendorarchexp | sed "s#^$prefix#$installprefix#"`
+	installvendorarch=`echo $vendorarchexp | sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installvendorarch="$vendorarchexp"
 fi
@@ -6751,7 +6751,7 @@ binexp="$ansexp"
 : Change installation prefix, if necessary.
 : XXX Bug? -- ignores Configure -Dinstallprefix setting.
 if $test X"$prefix" != X"$installprefix"; then
-	installbin=`echo $binexp | sed "s#^$prefix#$installprefix#"`
+	installbin=`echo $binexp | sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installbin="$binexp"
 fi
@@ -6830,7 +6830,7 @@ html1direxp="$ansexp"
 $test X"$html1dir" = "X" && html1dir=' '
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installhtml1dir=`echo $html1direxp | sed "s#^$prefix#$installprefix#"`
+	installhtml1dir=`echo $html1direxp | sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installhtml1dir="$html1direxp"
 fi
@@ -6859,7 +6859,7 @@ html3direxp="$ansexp"
 $test X"$html3dir" = "X" && html3dir=' '
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installhtml3dir=`echo $html3direxp | sed "s#^$prefix#$installprefix#"`
+	installhtml3dir=`echo $html3direxp | sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installhtml3dir="$html3direxp"
 fi
@@ -8024,7 +8024,7 @@ esac
 
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installman1dir=`echo $man1direxp | $sed "s#^$prefix#$installprefix#"`
+	installman1dir=`echo $man1direxp | $sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installman1dir="$man1direxp"
 fi
@@ -8149,7 +8149,7 @@ esac
 
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installman3dir=`echo $man3direxp | $sed "s#^$prefix#$installprefix#"`
+	installman3dir=`echo $man3direxp | $sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installman3dir="$man3direxp"
 fi
@@ -8626,7 +8626,7 @@ scriptdir="$ans"
 scriptdirexp="$ansexp"
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installscript=`echo $scriptdirexp | sed "s#^$prefix#$installprefix#"`
+	installscript=`echo $scriptdirexp | sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installscript="$scriptdirexp"
 fi
@@ -8643,7 +8643,7 @@ sitebin="$ans"
 sitebinexp="$ansexp"
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installsitebin=`echo $sitebinexp | sed "s#^$prefix#$installprefix#"`
+	installsitebin=`echo $sitebinexp | sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installsitebin="$sitebinexp"
 fi
@@ -8665,7 +8665,7 @@ sitehtml1dir="$ans"
 sitehtml1direxp="$ansexp"
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installsitehtml1dir=`echo $sitehtml1direxp | $sed "s#^$prefix#$installprefix#"`
+	installsitehtml1dir=`echo $sitehtml1direxp | $sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installsitehtml1dir="$sitehtml1direxp"
 fi
@@ -8687,7 +8687,7 @@ sitehtml3dir="$ans"
 sitehtml3direxp="$ansexp"
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installsitehtml3dir=`echo $sitehtml3direxp | $sed "s#^$prefix#$installprefix#"`
+	installsitehtml3dir=`echo $sitehtml3direxp | $sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installsitehtml3dir="$sitehtml3direxp"
 fi
@@ -8707,7 +8707,7 @@ siteman1dir="$ans"
 siteman1direxp="$ansexp"
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installsiteman1dir=`echo $siteman1direxp | $sed "s#^$prefix#$installprefix#"`
+	installsiteman1dir=`echo $siteman1direxp | $sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installsiteman1dir="$siteman1direxp"
 fi
@@ -8727,7 +8727,7 @@ siteman3dir="$ans"
 siteman3direxp="$ansexp"
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installsiteman3dir=`echo $siteman3direxp | $sed "s#^$prefix#$installprefix#"`
+	installsiteman3dir=`echo $siteman3direxp | $sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installsiteman3dir="$siteman3direxp"
 fi
@@ -8745,7 +8745,7 @@ sitescript="$ans"
 sitescriptexp="$ansexp"
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installsitescript=`echo $sitescriptexp | sed "s#^$prefix#$installprefix#"`
+	installsitescript=`echo $sitescriptexp | sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installsitescript="$sitescriptexp"
 fi
@@ -9047,7 +9047,7 @@ case "$vendorprefix" in
 esac
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installvendorbin=`echo $vendorbinexp | $sed "s#^$prefix#$installprefix#"`
+	installvendorbin=`echo $vendorbinexp | $sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installvendorbin="$vendorbinexp"
 fi
@@ -9078,7 +9078,7 @@ esac
 $test X"$vendorhtml1dir" = "X" && vendorhtml1dir=' '
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installvendorhtml1dir=`echo $vendorhtml1direxp | $sed "s#^$prefix#$installprefix#"`
+	installvendorhtml1dir=`echo $vendorhtml1direxp | $sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installvendorhtml1dir="$vendorhtml1direxp"
 fi
@@ -9109,7 +9109,7 @@ esac
 $test X"$vendorhtml3dir" = "X" && vendorhtml3dir=' '
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installvendorhtml3dir=`echo $vendorhtml3direxp | $sed "s#^$prefix#$installprefix#"`
+	installvendorhtml3dir=`echo $vendorhtml3direxp | $sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installvendorhtml3dir="$vendorhtml3direxp"
 fi
@@ -9137,7 +9137,7 @@ esac
 $test X"$vendorman1dir" = "X" && vendorman1dir=' '
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installvendorman1dir=`echo "$vendorman1direxp" | $sed "s#^$prefix#$installprefix#"`
+	installvendorman1dir=`echo "$vendorman1direxp" | $sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installvendorman1dir="$vendorman1direxp"
 fi
@@ -9165,7 +9165,7 @@ esac
 $test X"$vendorman3dir" = "X" && vendorman3dir=' '
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installvendorman3dir=`echo "$vendorman3direxp" | $sed "s#^$prefix#$installprefix#"`
+	installvendorman3dir=`echo "$vendorman3direxp" | $sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installvendorman3dir="$vendorman3direxp"
 fi
@@ -9197,7 +9197,7 @@ EOM
 esac
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
-	installvendorscript=`echo $vendorscriptexp | $sed "s#^$prefix#$installprefix#"`
+	installvendorscript=`echo $vendorscriptexp | $sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installvendorscript="$vendorscriptexp"
 fi
