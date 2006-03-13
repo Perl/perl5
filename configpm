@@ -326,7 +326,34 @@ if (fetch_string({},'userelocatableinc')) {
 
 			 siteprefixexp
 			 sitelib_stem
-			 vendorlib_stem)) {
+			 vendorlib_stem
+
+			 installarchlib
+			 installhtml1dir
+			 installhtml3dir
+			 installman1dir
+			 installman3dir
+			 installprefix
+			 installprefixexp
+			 installprivlib
+			 installscript
+			 installsitearch
+			 installsitebin
+			 installsitehtml1dir
+			 installsitehtml3dir
+			 installsitelib
+			 installsiteman1dir
+			 installsiteman3dir
+			 installsitescript
+			 installvendorarch
+			 installvendorbin
+			 installvendorhtml1dir
+			 installvendorhtml3dir
+			 installvendorlib
+			 installvendorman1dir
+			 installvendorman3dir
+			 installvendorscript
+			 )) {
 	push @need_relocation, $what if fetch_string({}, $what) =~ m!^\.\.\./!;
     }
 }

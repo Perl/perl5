@@ -1161,6 +1161,7 @@ nm_so_opt=''
 runnm=''
 usenm=''
 useperlio=''
+initialinstalllocation=''
 userelocatableinc=''
 usesocks=''
 d_oldpthreads=''
@@ -6031,8 +6032,12 @@ eval $setvar
 
 : Default prefix is now "up one level from where the binaries are"
 case "$userelocatableinc" in
-$define|true|[yY]*) prefix=".../.."
-		    prefixexp=".../..";;
+$define|true|[yY]*) initialinstalllocation="$binexp"
+		    bin=".../"
+		    binexp=".../"
+		    prefix=".../.."
+		    prefixexp=".../.."
+		    installprefixexp=".../..";;
 esac
 
 
@@ -22063,6 +22068,7 @@ useopcode='$useopcode'
 useperlio='$useperlio'
 useposix='$useposix'
 usereentrant='$usereentrant'
+initialinstalllocation="$initialinstalllocation"
 userelocatableinc='$userelocatableinc'
 usesfio='$usesfio'
 useshrplib='$useshrplib'
