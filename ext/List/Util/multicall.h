@@ -160,7 +160,7 @@ multicall_pad_push(pTHX_ AV *padlist, int depth)
 	POPSTACK;							\
 	CATCH_SET(multicall_oldcatch);					\
 	LEAVE;								\
-	SPAGAIN;
+	SPAGAIN;							\
     } STMT_END
 
 #endif
