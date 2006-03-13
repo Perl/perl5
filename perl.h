@@ -838,7 +838,7 @@ int usleep(unsigned int);
 #  include "embed.h"
 #  ifndef PERL_MAD
 #    undef op_getmad
-#    define op_getmad(arg,pegop,slot) /**/
+#    define op_getmad(arg,pegop,slot) /*EMPTY*/
 #  endif
 #endif
 
@@ -2327,7 +2327,7 @@ typedef struct clone_params CLONE_PARAMS;
 #   include "embed.h"
 #  ifndef PERL_MAD
 #    undef op_getmad
-#    define op_getmad(arg,pegop,slot) /**/
+#    define op_getmad(arg,pegop,slot) /*EMPTY*/
 #  endif
 #   define ISHISH "vms"
 #endif
@@ -2361,7 +2361,7 @@ typedef struct clone_params CLONE_PARAMS;
 #   include "embed.h"
 #  ifndef PERL_MAD
 #    undef op_getmad
-#    define op_getmad(arg,pegop,slot) /**/
+#    define op_getmad(arg,pegop,slot) /*EMPTY*/
 #  endif
 #   define ISHISH "symbian"
 #endif
@@ -4376,7 +4376,7 @@ END_EXTERN_C
 #  include "embed.h"
 #  ifndef PERL_MAD
 #    undef op_getmad
-#    define op_getmad(arg,pegop,slot) /**/
+#    define op_getmad(arg,pegop,slot) /*EMPTY*/
 #  endif
 #endif
 
