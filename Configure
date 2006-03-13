@@ -5993,6 +5993,49 @@ eval "${prefixvar}exp=\"\$ansexp\""
 . ./installprefix
 EOSC
 
+: determine where public executables go
+echo " "
+set dflt bin bin
+eval $prefixit
+fn=d~
+rp='Pathname where the public executables will reside?'
+. ./getfile
+if $test "X$ansexp" != "X$binexp"; then
+	installbin=''
+fi
+prefixvar=bin
+: XXX Bug? -- ignores Configure -Dinstallprefix setting.
+. ./setprefixvar
+
+case "$userelocatableinc" in
+$define|true|[yY]*)	dflt='y';;
+*) dflt='n';;
+esac
+cat <<EOM
+
+Would you like to build Perl so that the installation is relocatable, so that
+library paths in @INC are determined relative to the path of the perl binary?
+This is not advised for system Perl installs, or if you need to run setid
+scripts or scripts under taint mode.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+rp='Use relocatable @INC?'
+. ./myread
+case "$ans" in
+y|Y)	val="$define" ;;     
+*)      val="$undef" ;;
+esac
+set userelocatableinc
+eval $setvar
+
+: Default prefix is now "up one level from where the binaries are"
+case "$userelocatableinc" in
+$define|true|[yY]*) prefix=".../.."
+		    prefixexp=".../..";;
+esac
+
+
 : determine where private library files go
 : Usual default is /usr/local/lib/perl5/$version.
 : Also allow things like /opt/perl/lib/$version, since 
@@ -6728,20 +6771,6 @@ EOM
 	exit 2
 	;;
 esac
-
-: determine where public executables go
-echo " "
-set dflt bin bin
-eval $prefixit
-fn=d~
-rp='Pathname where the public executables will reside?'
-. ./getfile
-if $test "X$ansexp" != "X$binexp"; then
-	installbin=''
-fi
-prefixvar=bin
-: XXX Bug? -- ignores Configure -Dinstallprefix setting.
-. ./setprefixvar
 
 echo " "
 case "$extras" in
@@ -8945,11 +8974,6 @@ EOCP
 	fi
 	;;
 esac
-
-# probably will refer to
-#   $archlib $privlib $sitearch $sitelib $vendorarch $vendorlib
-need_relocation=0
-userelocatableinc=undef
 
 case "$vendorprefix" in
 '')	d_vendorbin="$undef"

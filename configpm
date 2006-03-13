@@ -298,13 +298,34 @@ EOT
 my @need_relocation;
 
 if (fetch_string({},'userelocatableinc')) {
-    foreach my $what (qw(archlibexp
+    foreach my $what (qw(prefixexp
+
+			 archlibexp
+			 html1direxp
+			 html3direxp
+			 man1direxp
+			 man3direxp
 			 privlibexp
+			 scriptdirexp
 			 sitearchexp
+			 sitebinexp
+			 sitehtml1direxp
+			 sitehtml3direxp
 			 sitelibexp
-			 sitelib_stem
+			 siteman1direxp
+			 siteman3direxp
+			 sitescriptexp
 			 vendorarchexp
+			 vendorbinexp
+			 vendorhtml1direxp
+			 vendorhtml3direxp
 			 vendorlibexp
+			 vendorman1direxp
+			 vendorman3direxp
+			 vendorscriptexp
+
+			 siteprefixexp
+			 sitelib_stem
 			 vendorlib_stem)) {
 	push @need_relocation, $what if fetch_string({}, $what) =~ m!^\.\.\./!;
     }
