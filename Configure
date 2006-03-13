@@ -8017,17 +8017,16 @@ if $test "X$man1direxp" != "X$ansexp"; then
 fi
 man1dir="$ans"
 man1direxp="$ansexp"
-case "$man1dir" in
-'')	man1dir=' '
-	installman1dir='';;
-esac
-
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
 	installman1dir=`echo $man1direxp | $sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installman1dir="$man1direxp"
 fi
+case "$man1dir" in
+'')	man1dir=' '
+	installman1dir='';;
+esac
 
 : What suffix to use on installed man pages
 
@@ -8142,17 +8141,16 @@ rp="Where do the $package library man pages (source) go?"
 . ./getfile
 man3dir="$ans"
 man3direxp="$ansexp"
-case "$man3dir" in
-'')	man3dir=' '
-	installman3dir='';;
-esac
-
 : Change installation prefix, if necessary.
 if $test X"$prefix" != X"$installprefix"; then
 	installman3dir=`echo $man3direxp | $sed "s#^$prefixexp#$installprefixexp#"`
 else
 	installman3dir="$man3direxp"
 fi
+case "$man3dir" in
+'')	man3dir=' '
+	installman3dir='';;
+esac
 
 : What suffix to use on installed man pages
 case "$man3dir" in
