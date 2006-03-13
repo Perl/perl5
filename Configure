@@ -5969,6 +5969,19 @@ esac
 installstyle=$dflt
 
 
+: Perform the prefixexp/installprefixexp correction if necessary
+cat <<EOS >installprefix
+$startsh
+EOS
+cat <<'EOSC' >>installprefix
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+	eval "install${prefixvar}=\`echo \$${prefixvar}exp | sed \"s#^\$prefixexp#\$installprefixexp#\"\`"
+else
+	eval "install${prefixvar}=\"\$${prefixvar}exp\""
+fi
+EOSC
+
 : Set variables such as privlib and privlibexp from the output of ./getfile
 : performing the prefixexp/installprefixexp correction if necessary.
 cat <<EOS >setprefixvar
@@ -5977,12 +5990,7 @@ EOS
 cat <<'EOSC' >>setprefixvar
 eval "${prefixvar}=\"\$ans\""
 eval "${prefixvar}exp=\"\$ansexp\""
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	eval "install${prefixvar}=\`echo \$${prefixvar}exp | sed \"s#^\$prefixexp#\$installprefixexp#\"\`"
-else
-	eval "install${prefixvar}=\"\$${prefixvar}exp\""
-fi
+. ./installprefix
 EOSC
 
 : determine where private library files go
@@ -6612,12 +6620,8 @@ case "$vendorprefix" in
 	;;
 esac
 vendorlib_stem=`echo "$vendorlibexp" | sed "s,/$version$,,"`
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installvendorlib=`echo $vendorlibexp | $sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installvendorlib="$vendorlibexp"
-fi
+prefixvar=vendorlib
+. ./installprefix
 
 case "$vendorprefix" in
 '')	d_vendorarch="$undef"
@@ -6642,12 +6646,8 @@ case "$vendorprefix" in
 	vendorarchexp="$ansexp"
 	;;
 esac
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installvendorarch=`echo $vendorarchexp | sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installvendorarch="$vendorarchexp"
-fi
+prefixvar=vendorarch
+. ./installprefix
 
 : Final catch-all directories to search
 $cat <<EOM
@@ -8969,12 +8969,8 @@ case "$vendorprefix" in
 	vendorbinexp="$ansexp"
 	;;
 esac
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installvendorbin=`echo $vendorbinexp | $sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installvendorbin="$vendorbinexp"
-fi
+prefixvar=vendorbin
+. ./installprefix
 
 case "$vendorprefix" in
 '')	vendorhtml1dir=''
@@ -9000,12 +8996,8 @@ case "$vendorprefix" in
 esac
 : Use ' ' for none so value is preserved next time through Configure
 $test X"$vendorhtml1dir" = "X" && vendorhtml1dir=' '
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installvendorhtml1dir=`echo $vendorhtml1direxp | $sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installvendorhtml1dir="$vendorhtml1direxp"
-fi
+prefixvar=vendorhtml1dir
+. ./installprefix
 
 case "$vendorprefix" in
 '')	vendorhtml3dir=''
@@ -9031,12 +9023,8 @@ case "$vendorprefix" in
 esac
 : Use ' ' for none so value is preserved next time through Configure
 $test X"$vendorhtml3dir" = "X" && vendorhtml3dir=' '
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installvendorhtml3dir=`echo $vendorhtml3direxp | $sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installvendorhtml3dir="$vendorhtml3direxp"
-fi
+prefixvar=vendorhtml3dir
+. ./installprefix
 
 case "$vendorprefix" in
 '')	vendorman1dir=''
@@ -9059,12 +9047,8 @@ case "$vendorprefix" in
 esac
 : Use ' ' for none so value is preserved next time through Configure
 $test X"$vendorman1dir" = "X" && vendorman1dir=' '
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installvendorman1dir=`echo "$vendorman1direxp" | $sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installvendorman1dir="$vendorman1direxp"
-fi
+prefixvar=vendorman1dir
+. ./installprefix
 
 case "$vendorprefix" in
 '')	vendorman3dir=''
@@ -9087,12 +9071,8 @@ case "$vendorprefix" in
 esac
 : Use ' ' for none so value is preserved next time through Configure
 $test X"$vendorman3dir" = "X" && vendorman3dir=' '
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installvendorman3dir=`echo "$vendorman3direxp" | $sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installvendorman3dir="$vendorman3direxp"
-fi
+prefixvar=vendorman3dir
+. ./installprefix
 
 case "$vendorprefix" in
 '')	d_vendorscript="$undef"
@@ -9119,12 +9099,8 @@ EOM
 	vendorscriptexp="$ansexp"
 	;;
 esac
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	installvendorscript=`echo $vendorscriptexp | $sed "s#^$prefixexp#$installprefixexp#"`
-else
-	installvendorscript="$vendorscriptexp"
-fi
+prefixvar=vendorscript
+. ./installprefix
 
 : see if qgcvt exists
 set qgcvt d_qgcvt
