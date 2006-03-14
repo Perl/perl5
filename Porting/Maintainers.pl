@@ -28,6 +28,7 @@ package Maintainers;
 	'ilyam'		=> 'Ilya Martynov <ilyam@cpan.org>',
 	'ilyaz'		=> 'Ilya Zakharevich <ilyaz@cpan.org>',
 	'jand'		=> 'Jan Dubois <jand@activestate.com>',
+	'jdhedden'	=> 'Jerry D. Hedden <jdhedden@cpan.org>',
 	'jhi'		=> 'Jarkko Hietaniemi <jhi@cpan.org>',
 	'jstowe'	=> 'Jonathan Stowe <jstowe@cpan.org>',
 	'jv'		=> 'Johan Vromans <jv@cpan.org>',
@@ -615,9 +616,17 @@ package Maintainers;
 
 	'threads' =>
 		{
-		'MAINTAINER' => 'abergman',
-		'FILES'	 => q[ext/threads],
-		'CPAN'		=> 0,
+		'MAINTAINER'	=> 'jdhedden',
+		'FILES'		=> q[ext/threads/hints ext/threads/t
+				     ext/threads/threads.{pm,xs} ext/threads/typemap],
+		'CPAN'		=> 1,
+		},
+
+	'threads::shared' =>
+		{
+		'MAINTAINER'	=> 'jdhedden',
+		'FILES'		=> q[ext/threads/shared],
+		'CPAN'		=> 1,
 		},
 
 	'Tie::File' =>
