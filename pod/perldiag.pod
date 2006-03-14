@@ -3938,8 +3938,7 @@ instead.
 
 =item The 'unique' attribute may only be applied to 'our' variables
 
-(F) Currently this attribute is not supported on C<my> or C<sub>
-declarations.  See L<perlfunc/our>.
+(F) This attribute was never supported on C<my> or C<sub> declarations.
 
 =item This Perl can't reset CRTL environ elements (%s)
 

@@ -844,3 +844,10 @@ EXPECT
 !=~ should be !~ at - line 8.
 !=~ should be !~ at - line 9.
 !=~ should be !~ at - line 10.
+########
+# toke.c
+our $foo :unique;
+use warnings 'deprecated';
+our $bar :unique;
+EXPECT
+Use of :unique is deprecated at - line 4.

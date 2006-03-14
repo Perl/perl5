@@ -3490,30 +3490,6 @@ from Perl 5.8.0 also via the C<Attribute::Handlers> module.  See
 L<perlsub/"Private Variables via my()"> for details, and L<fields>,
 L<attributes>, and L<Attribute::Handlers>.
 
-The only currently recognized C<our()> attribute is C<unique> which
-indicates that a single copy of the global is to be used by all
-interpreters should the program happen to be running in a
-multi-interpreter environment. (The default behaviour would be for
-each interpreter to have its own copy of the global.)  Examples:
-
-    our @EXPORT : unique = qw(foo);
-    our %EXPORT_TAGS : unique = (bar => [qw(aa bb cc)]);
-    our $VERSION : unique = "1.00";
-
-Note that this attribute also has the effect of making the global
-readonly when the first new interpreter is cloned (for example,
-when the first new thread is created).
-
-Multi-interpreter environments can come to being either through the
-fork() emulation on Windows platforms, or by embedding perl in a
-multi-threaded application.  The C<unique> attribute does nothing in
-all other environments.
-
-Warning: the current implementation of this attribute operates on the
-typeglob associated with the variable; this means that C<our $x : unique>
-also has the effect of C<our @x : unique; our %x : unique>. This may be
-subject to change.
-
 =item pack TEMPLATE,LIST
 X<pack>
 

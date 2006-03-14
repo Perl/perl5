@@ -4022,12 +4022,14 @@ Perl_yylex(pTHX)
 		}
 		else {
 		    if (len == 6 && strnEQ(s, "unique", len)) {
-			if (PL_in_my == KEY_our)
+			if (PL_in_my == KEY_our) {
 #ifdef USE_ITHREADS
 			    GvUNIQUE_on(cGVOPx_gv(yylval.opval));
 #else
-			    /*EMPTY*/;    /* skip to avoid loading attributes.pm */
+			    /* skip to avoid loading attributes.pm */
+			    deprecate(":unique");
 #endif
+			}
 			else
 			    Perl_croak(aTHX_ "The 'unique' attribute may only be applied to 'our' variables");
 		    }

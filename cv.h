@@ -136,9 +136,7 @@ Returns the stash of the CV.
 #define CVf_CLONED	0x0040	/* a clone of one of those */
 #define CVf_ANON	0x0080	/* CvGV() can't be trusted */
 #define CVf_UNIQUE	0x0100	/* sub is only called once (eg PL_main_cv,
-				 * require, eval). Not to be confused
-				 * with the GVf_UNIQUE flag associated
-				 * with the :unique attribute */
+				 * require, eval). */
 #define CVf_NODEBUG	0x0200	/* no DB::sub indirection for this CV
 				   (esp. useful for special XSUBs) */
 #define CVf_CONST	0x0400  /* inlinable sub */
