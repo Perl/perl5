@@ -4027,8 +4027,8 @@ Perl_yylex(pTHX)
 			    GvUNIQUE_on(cGVOPx_gv(yylval.opval));
 #else
 			    /* skip to avoid loading attributes.pm */
-			    deprecate(":unique");
 #endif
+			    deprecate(":unique");
 			}
 			else
 			    Perl_croak(aTHX_ "The 'unique' attribute may only be applied to 'our' variables");
