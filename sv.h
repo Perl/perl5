@@ -307,8 +307,9 @@ perform the upgrade if necessary.  See C<svtype>.
 					      fact an offset [SvREPADTMP(sv)]
 					   5: On a pad name SV, that slot in the
 					      frame AV is a REFCNT'ed reference
-					      to a lexical from "outside".
-					*/
+					      to a lexical from "outside". */
+#define SVphv_REHASH	SVf_FAKE	/* 6: On a PVHV, hash values are being
+					      recalculated */
 #define SVf_OOK		0x02000000	/* has valid offset value
 					   For a PVHV this means that a
 					   hv_aux struct is present after the
@@ -333,8 +334,6 @@ perform the upgrade if necessary.  See C<svtype>.
 
 /* Some private flags. */
 
-/* PVHV */
-#define SVphv_REHASH	0x10000000	/* PVHV is recalculating hash values */
 /* PVHV */
 #define SVphv_SHAREKEYS 0x20000000	/* PVHV
 					   keys live on shared string table */
