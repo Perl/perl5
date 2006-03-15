@@ -1232,7 +1232,6 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     use overload '""' => sub {"CLiK KLAK"};
 
     package Ksshfwoom;
-    use overload '""' => sub {"OOOKK AWK"};
 
     package main;
 
@@ -1248,8 +1247,8 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 
     bless $obj, 'Ksshfwoom';
 
-    is ($obj, "OOOKK AWK");
-    is ($ref, "OOOKK AWK");
+    like ($obj, qr/^Ksshfwoom=/);
+    like ($ref, qr/^Ksshfwoom=/);
 
     undef $obj;
     is ($ref, undef);
