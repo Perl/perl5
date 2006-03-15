@@ -46,92 +46,64 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 
 package main;
 
-our $test = 0;
 $| = 1;
-use Test::More tests=>498;
+use Test::More tests=>497;
 
-sub test {
-  $test++; 
-  if (@_ > 1) {
-    my $comment = "";
-    $comment = " # " . $_ [2] if @_ > 2;
-    if ($_[0] eq $_[1]) {
-      print "ok $test$comment\n";
-      return 1;
-    } else {
-      $comment .= ": '$_[0]' ne '$_[1]'";
-      print "not ok $test$comment\n";
-      return 0;
-    }
-  } else {
-    if (shift) {
-      print "ok $test\n";
-      return 1;
-    } else {
-      print "not ok $test\n";
-      return 0;
-    }
-  }
-}
 
 $a = new Oscalar "087";
 $b= "$a";
 
-# All test numbers in comments are off by 1.
-# So much for hard-wiring them in :-) To fix this:
-test(1);			# 1
-
-test ($b eq $a);		# 2
-test ($b eq "087");		# 3
-test (ref $a eq "Oscalar");	# 4
-test ($a eq $a);		# 5
-test ($a eq "087");		# 6
+is($b, $a);
+is($b, "087");
+is(ref $a, "Oscalar");
+is($a, $a);
+is($a, "087");
 
 $c = $a + 7;
 
-test (ref $c eq "Oscalar");	# 7
-test (!($c eq $a));		# 8
-test ($c eq "94");		# 9
+is(ref $c, "Oscalar");
+isnt($c, $a);
+is($c, "94");
 
 $b=$a;
 
-test (ref $a eq "Oscalar");	# 10
+is(ref $a, "Oscalar");
 
 $b++;
 
-test (ref $b eq "Oscalar");	# 11
-test ( $a eq "087");		# 12
-test ( $b eq "88");		# 13
-test (ref $a eq "Oscalar");	# 14
+is(ref $b, "Oscalar");
+is($a, "087");
+is($b, "88");
+is(ref $a, "Oscalar");
 
 $c=$b;
 $c-=$a;
 
-test (ref $c eq "Oscalar");	# 15
-test ( $a eq "087");		# 16
-test ( $c eq "1");		# 17
-test (ref $a eq "Oscalar");	# 18
+is(ref $c, "Oscalar");
+is($a, "087");
+is($c, "1");
+is(ref $a, "Oscalar");
 
 $b=1;
 $b+=$a;
 
-test (ref $b eq "Oscalar");	# 19
-test ( $a eq "087");		# 20
-test ( $b eq "88");		# 21
-test (ref $a eq "Oscalar");	# 22
+is(ref $b, "Oscalar");
+is($a, "087");
+is($b, "88");
+is(ref $a, "Oscalar");
 
 eval q[ package Oscalar; use overload ('++' => sub { $ {$_[0]}++;$_[0] } ) ];
 
 $b=$a;
 
-test (ref $a eq "Oscalar");	# 23
+is(ref $a, "Oscalar");
 
 $b++;
 
-test (ref $b eq "Oscalar");	# 24
-test ( $a eq "087");		# 25
-test ( $b eq "88");		# 26
-test (ref $a eq "Oscalar");	# 27
+is(ref $b, "Oscalar");
+is($a, "087");
+is($b, "88");
+is(ref $a, "Oscalar");
 
 package Oscalar;
 $dummy=bless \$dummy;		# Now cache of method should be reloaded
@@ -140,10 +112,10 @@ package main;
 $b=$a;
 $b++;				
 
-test (ref $b eq "Oscalar");	# 28
-test ( $a eq "087");		# 29
-test ( $b eq "88");		# 30
-test (ref $a eq "Oscalar");	# 31
+is(ref $b, "Oscalar");
+is($a, "087");
+is($b, "88");
+is(ref $a, "Oscalar");
 
 undef $b;			# Destroying updates tables too...
 
@@ -151,14 +123,14 @@ eval q[package Oscalar; use overload ('++' => sub { $ {$_[0]} += 2; $_[0] } ) ];
 
 $b=$a;
 
-test (ref $a eq "Oscalar");	# 32
+is(ref $a, "Oscalar");
 
 $b++;
 
-test (ref $b eq "Oscalar");	# 33
-test ( $a eq "087");		# 34
-test ( $b eq "88");		# 35
-test (ref $a eq "Oscalar");	# 36
+is(ref $b, "Oscalar");
+is($a, "087");
+is($b, "88");
+is(ref $a, "Oscalar");
 
 package Oscalar;
 $dummy=bless \$dummy;		# Now cache of method should be reloaded
@@ -166,21 +138,21 @@ package main;
 
 $b++;				
 
-test (ref $b eq "Oscalar");	# 37
-test ( $a eq "087");		# 38
-test ( $b eq "90");		# 39
-test (ref $a eq "Oscalar");	# 40
+is(ref $b, "Oscalar");
+is($a, "087");
+is($b, "90");
+is(ref $a, "Oscalar");
 
 $b=$a;
 $b++;
 
-test (ref $b eq "Oscalar");	# 41
-test ( $a eq "087");		# 42
-test ( $b eq "89");		# 43
-test (ref $a eq "Oscalar");	# 44
+is(ref $b, "Oscalar");
+is($a, "087");
+is($b, "89");
+is(ref $a, "Oscalar");
 
 
-test ($b? 1:0);			# 45
+ok($b? 1:0);
 
 eval q[ package Oscalar; use overload ('=' => sub {$main::copies++; 
 						   package Oscalar;
@@ -189,44 +161,44 @@ eval q[ package Oscalar; use overload ('=' => sub {$main::copies++;
 
 $b=new Oscalar "$a";
 
-test (ref $b eq "Oscalar");	# 46
-test ( $a eq "087");		# 47
-test ( $b eq "087");		# 48
-test (ref $a eq "Oscalar");	# 49
+is(ref $b, "Oscalar");
+is($a, "087");
+is($b, "087");
+is(ref $a, "Oscalar");
 
 $b++;
 
-test (ref $b eq "Oscalar");	# 50
-test ( $a eq "087");		# 51
-test ( $b eq "89");		# 52
-test (ref $a eq "Oscalar");	# 53
-test ($copies == 0);		# 54
+is(ref $b, "Oscalar");
+is($a, "087");
+is($b, "89");
+is(ref $a, "Oscalar");
+is($copies, undef);
 
 $b+=1;
 
-test (ref $b eq "Oscalar");	# 55
-test ( $a eq "087");		# 56
-test ( $b eq "90");		# 57
-test (ref $a eq "Oscalar");	# 58
-test ($copies == 0);		# 59
+is(ref $b, "Oscalar");
+is($a, "087");
+is($b, "90");
+is(ref $a, "Oscalar");
+is($copies, undef);
 
 $b=$a;
 $b+=1;
 
-test (ref $b eq "Oscalar");	# 60
-test ( $a eq "087");		# 61
-test ( $b eq "88");		# 62
-test (ref $a eq "Oscalar");	# 63
-test ($copies == 0);		# 64
+is(ref $b, "Oscalar");
+is($a, "087");
+is($b, "88");
+is(ref $a, "Oscalar");
+is($copies, undef);
 
 $b=$a;
 $b++;
 
-test (ref $b eq "Oscalar") || print ref $b,"=ref(b)\n";	# 65
-test ( $a eq "087");		# 66
-test ( $b eq "89");		# 67
-test (ref $a eq "Oscalar");	# 68
-test ($copies == 1);		# 69
+is(ref $b, "Oscalar");
+is($a, "087");
+is($b, "89");
+is(ref $a, "Oscalar");
+is($copies, 1);
 
 eval q[package Oscalar; use overload ('+=' => sub {$ {$_[0]} += 3*$_[1];
 						   $_[0] } ) ];
@@ -235,34 +207,34 @@ $c=new Oscalar;			# Cause rehash
 $b=$a;
 $b+=1;
 
-test (ref $b eq "Oscalar");	# 70
-test ( $a eq "087");		# 71
-test ( $b eq "90");		# 72
-test (ref $a eq "Oscalar");	# 73
-test ($copies == 2);		# 74
+is(ref $b, "Oscalar");
+is($a, "087");
+is($b, "90");
+is(ref $a, "Oscalar");
+is($copies, 2);
 
 $b+=$b;
 
-test (ref $b eq "Oscalar");	# 75
-test ( $b eq "360");		# 76
-test ($copies == 2);		# 77
+is(ref $b, "Oscalar");
+is($b, "360");
+is($copies, 2);
 $b=-$b;
 
-test (ref $b eq "Oscalar");	# 78
-test ( $b eq "-360");		# 79
-test ($copies == 2);		# 80
+is(ref $b, "Oscalar");
+is($b, "-360");
+is($copies, 2);
 
 $b=abs($b);
 
-test (ref $b eq "Oscalar");	# 81
-test ( $b eq "360");		# 82
-test ($copies == 2);		# 83
+is(ref $b, "Oscalar");
+is($b, "360");
+is($copies, 2);
 
 $b=abs($b);
 
-test (ref $b eq "Oscalar");	# 84
-test ( $b eq "360");		# 85
-test ($copies == 2);		# 86
+is(ref $b, "Oscalar");
+is($b, "360");
+is($copies, 2);
 
 eval q[package Oscalar; 
        use overload ('x' => sub {new Oscalar ( $_[2] ? "_.$_[1]._" x $ {$_[0]}
@@ -270,7 +242,7 @@ eval q[package Oscalar;
 
 $a=new Oscalar "yy";
 $a x= 3;
-test ($a eq "_.yy.__.yy.__.yy._"); # 87
+is($a, "_.yy.__.yy.__.yy._");
 
 eval q[package Oscalar; 
        use overload ('.' => sub {new Oscalar ( $_[2] ? 
@@ -279,7 +251,7 @@ eval q[package Oscalar;
 
 $a=new Oscalar "xx";
 
-test ("b${a}c" eq "_._.b.__.xx._.__.c._"); # 88
+is("b${a}c", "_._.b.__.xx._.__.c._");
 
 # Check inheritance of overloading;
 {
@@ -288,26 +260,26 @@ test ("b${a}c" eq "_._.b.__.xx._.__.c._"); # 88
 }
 
 $aI = new OscalarI "$a";
-test (ref $aI eq "OscalarI");	# 89
-test ("$aI" eq "xx");		# 90
-test ($aI eq "xx");		# 91
-test ("b${aI}c" eq "_._.b.__.xx._.__.c._");		# 92
+is(ref $aI, "OscalarI");
+is("$aI", "xx");
+is($aI, "xx");
+is("b${aI}c", "_._.b.__.xx._.__.c._");
 
 # Here we test blessing to a package updates hash
 
 eval "package Oscalar; no overload '.'";
 
-test ("b${a}" eq "_.b.__.xx._"); # 93
+is("b${a}", "_.b.__.xx._");
 $x="1";
 bless \$x, Oscalar;
-test ("b${a}c" eq "bxxc");	# 94
+is("b${a}c", "bxxc");
 new Oscalar 1;
-test ("b${a}c" eq "bxxc");	# 95
+is("b${a}c", "bxxc");
 
 # Negative overloading:
 
 $na = eval { ~$a };
-test($@ =~ /no method found/);	# 96
+like($@, qr/no method found/);
 
 # Check AUTOLOADING:
 
@@ -318,21 +290,17 @@ test($@ =~ /no method found/);	# 96
 eval "package Oscalar; sub comple; use overload '~' => 'comple'";
 
 $na = eval { ~$a };		# Hash was not updated
-test($@ =~ /no method found/);	# 97
+like($@, qr/no method found/);
 
 bless \$x, Oscalar;
 
 $na = eval { ~$a };		# Hash updated
 warn "`$na', $@" if $@;
-test !$@;			# 98
-test($na eq '_!_xx_!_');	# 99
+ok !$@;
+is($na, '_!_xx_!_');
 
 $na = 0;
 
-{
-    my $Test = Test::Builder->new;
-    $Test->current_test(99);
-}
 $na = eval { ~$aI };		# Hash was not updated
 like($@, qr/no method found/);
 
