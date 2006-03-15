@@ -54,6 +54,8 @@ Command Line Tools" and is the same compiler that ships with the full
 "Borland C++ Builder" product.  The Microsoft compiler is available as
 "Visual C++ Toolkit 2003", and also as part of the ".NET Framework SDK", and
 is the same compiler that ships with "Visual Studio .NET 2003 Professional".
+Currently, Perl cannot be compiled with Visual C++ 8.0, which is part of the
+.NET 2.0 Framework SDK and Visual Studio 2005.  
 
 This port can also be built on the Intel IA64 using:
 

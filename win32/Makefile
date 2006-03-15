@@ -102,7 +102,7 @@ CCTYPE		= MSVC60
 #CCTYPE		= MSVC70
 # Visual C++ Toolkit 2005 (free version of Visual C++ 8.x command-line tools)
 #CCTYPE		= MSVC80FREE
-# Visual C++ 8.x (aka Visual Studio .NET 2003) (full version)
+# Visual C++ 8.x (aka Visual Studio 2005) (full version)
 #CCTYPE		= MSVC80
 
 #
@@ -500,9 +500,9 @@ CONFIGPM	= ..\lib\Config.pm ..\lib\Config_heavy.pl
 MINIMOD		= ..\lib\ExtUtils\Miniperl.pm
 X2P		= ..\x2p\a2p.exe
   
-# With .NET 1.1 and 2.0, setargs.obj is not available with the .NET SDK.  It
-# only comes with Visual Studio 2003 and Visual Studio 2005.
-!IF "$(CCTYPE)" != "MSVC70FREE" && "$(CCTYPE)" != "MSVC80FREE"
+# With the .NET 2.0 SDK, setargs.obj is not available with the .NET SDK.  It
+# only comes with Visual Studio 2005.
+!IF "$(CCTYPE)" != "MSVC80FREE"
 GLOBEXEBUILD         = 
 !ENDIF
 
