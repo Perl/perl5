@@ -329,21 +329,25 @@ test($na eq '_!_xx_!_');	# 99
 
 $na = 0;
 
+{
+    my $Test = Test::Builder->new;
+    $Test->current_test(99);
+}
 $na = eval { ~$aI };		# Hash was not updated
-test($@ =~ /no method found/);	# 100
+like($@, qr/no method found/);
 
 bless \$x, OscalarI;
 
 $na = eval { ~$aI };
 print $@;
 
-test !$@;			# 101
-test($na eq '_!_xx_!_');	# 102
+ok(!$@);
+is($na, '_!_xx_!_');
 
 eval "package Oscalar; sub rshft; use overload '>>' => 'rshft'";
 
 $na = eval { $aI >> 1 };	# Hash was not updated
-test($@ =~ /no method found/);	# 103
+like($@, qr/no method found/);
 
 bless \$x, OscalarI;
 
@@ -352,20 +356,20 @@ $na = 0;
 $na = eval { $aI >> 1 };
 print $@;
 
-test !$@;			# 104
-test($na eq '_!_xx_!_');	# 105
+ok(!$@);
+is($na, '_!_xx_!_');
 
 # warn overload::Method($a, '0+'), "\n";
-test (overload::Method($a, '0+') eq \&Oscalar::numify); # 106
-test (overload::Method($aI,'0+') eq \&Oscalar::numify); # 107
-test (overload::Overloaded($aI)); # 108
-test (!overload::Overloaded('overload')); # 109
+is(overload::Method($a, '0+'), \&Oscalar::numify);
+is(overload::Method($aI,'0+'), \&Oscalar::numify);
+ok(overload::Overloaded($aI));
+ok(!overload::Overloaded('overload'));
 
-test (! defined overload::Method($aI, '<<')); # 110
-test (! defined overload::Method($a, '<')); # 111
+ok(! defined overload::Method($aI, '<<'));
+ok(! defined overload::Method($a, '<'));
 
-test (overload::StrVal($aI) =~ /^OscalarI=SCALAR\(0x[\da-fA-F]+\)$/); # 112
-test (overload::StrVal(\$aI) eq "@{[\$aI]}"); # 113
+like (overload::StrVal($aI), qr/^OscalarI=SCALAR\(0x[\da-fA-F]+\)$/);
+is(overload::StrVal(\$aI), "@{[\$aI]}");
 
 # Check overloading by methods (specified deep in the ISA tree).
 {
@@ -379,16 +383,16 @@ $aaII = "087";
 $aII = \$aaII;
 bless $aII, 'OscalarII';
 bless \$fake, 'OscalarI';		# update the hash
-test(($aI | 3) eq '_<<_xx_<<_');	# 114
+is(($aI | 3), '_<<_xx_<<_');
 # warn $aII << 3;
-test(($aII << 3) eq '_<<_087_<<_');	# 115
+is(($aII << 3), '_<<_087_<<_');
 
 {
   BEGIN { $int = 7; overload::constant 'integer' => sub {$int++; shift}; }
   $out = 2**10;
 }
-test($int, 9);		# 116
-test($out, 1024);		# 117
+is($int, 9);
+is($out, 1024);
 
 $foo = 'foo';
 $foo1 = 'f\'o\\o';
@@ -402,15 +406,15 @@ $foo1 = 'f\'o\\o';
   /b\b$foo.\./;
 }
 
-test($out, 'foo');		# 118
-test($out, $foo);		# 119
-test($out1, 'f\'o\\o');		# 120
-test($out1, $foo1);		# 121
-test($out2, "a\afoo,\,");	# 122
-test("@q", "foo q f'o\\\\o q a\\a qq ,\\, qq");	# 123
-test($q, 11);			# 124
-test("@qr", "b\\b qq .\\. qq");	# 125
-test($qr, 9);			# 126
+is($out, 'foo');
+is($out, $foo);
+is($out1, 'f\'o\\o');
+is($out1, $foo1);
+is($out2, "a\afoo,\,");
+is("@q", "foo q f'o\\\\o q a\\a qq ,\\, qq");
+is($q, 11);
+is("@qr", "b\\b qq .\\. qq");
+is($qr, 9);
 
 {
   $_ = '!<b>!foo!<-.>!';
@@ -433,19 +437,19 @@ EOF
   tr/A-Z/a-z/;
 }
 
-test($out, '_<foo>_');		# 117
-test($out1, '_<f\'o\\o>_');		# 128
-test($out2, "_<a\a>_foo_<,\,>_");	# 129
-test("@q1", "foo q f'o\\\\o q a\\a qq ,\\, qq oups
+is($out, '_<foo>_');
+is($out1, '_<f\'o\\o>_');
+is($out2, "_<a\a>_foo_<,\,>_");
+is("@q1", "foo q f'o\\\\o q a\\a qq ,\\, qq oups
  qq oups1
- q second part q tail here s A-Z tr a-z tr");	# 130
-test("@qr1", "b\\b qq .\\. qq try it q first part q yet another qq");	# 131
-test($res, 1);			# 132
-test($a, "_<oups
->_");	# 133
-test($b, "_<oups1
->_");	# 134
-test($c, "bareword");	# 135
+ q second part q tail here s A-Z tr a-z tr");
+is("@qr1", "b\\b qq .\\. qq try it q first part q yet another qq");
+is($res, 1);
+is($a, "_<oups
+>_");
+is($b, "_<oups1
+>_");
+is($c, "bareword");
 
 {
   package symbolic;		# Primitive symbolic calculator
@@ -513,24 +517,24 @@ test($c, "bareword");	# 135
 {
   my $foo = new symbolic 11;
   my $baz = $foo++;
-  test( (sprintf "%d", $foo), '12');
-  test( (sprintf "%d", $baz), '11');
+  is((sprintf "%d", $foo), '12');
+  is((sprintf "%d", $baz), '11');
   my $bar = $foo;
   $baz = ++$foo;
-  test( (sprintf "%d", $foo), '13');
-  test( (sprintf "%d", $bar), '12');
-  test( (sprintf "%d", $baz), '13');
+  is((sprintf "%d", $foo), '13');
+  is((sprintf "%d", $bar), '12');
+  is((sprintf "%d", $baz), '13');
   my $ban = $foo;
   $baz = ($foo += 1);
-  test( (sprintf "%d", $foo), '14');
-  test( (sprintf "%d", $bar), '12');
-  test( (sprintf "%d", $baz), '14');
-  test( (sprintf "%d", $ban), '13');
+  is((sprintf "%d", $foo), '14');
+  is((sprintf "%d", $bar), '12');
+  is((sprintf "%d", $baz), '14');
+  is((sprintf "%d", $ban), '13');
   $baz = 0;
   $baz = $foo++;
-  test( (sprintf "%d", $foo), '15');
-  test( (sprintf "%d", $baz), '14');
-  test( "$foo", '[++ [+= [++ [++ [n 11] 1] 1] 1] 1]');
+  is((sprintf "%d", $foo), '15');
+  is((sprintf "%d", $baz), '14');
+  is("$foo", '[++ [+= [++ [++ [n 11] 1] 1] 1] 1]');
 }
 
 {
@@ -543,8 +547,8 @@ test($c, "bareword");	# 135
     $side = (sqrt(1 + $side**2) - 1)/$side;
   }
   my $pi = $side*(2**($iter+2));
-  test "$side", '[/ [- [sqrt [+ 1 [** [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]] 2]]] 1] [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]]]';
-  test( (sprintf "%f", $pi), '3.182598');
+  is("$side", '[/ [- [sqrt [+ 1 [** [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]] 2]]] 1] [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]]]');
+  is((sprintf "%f", $pi), '3.182598');
 }
 
 {
@@ -556,8 +560,8 @@ test($c, "bareword");	# 135
     $side = (sqrt(1 + $side**2) - 1)/$side;
   }
   my $pi = $side*(2**($iter+2));
-  test "$side", '[/ [- [sqrt [+ 1 [** [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]] 2]]] 1] [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]]]';
-  test( (sprintf "%f", $pi), '3.182598');
+  is("$side", '[/ [- [sqrt [+ 1 [** [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]] 2]]] 1] [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]]]');
+  is((sprintf "%f", $pi), '3.182598');
 }
 
 {
@@ -565,9 +569,9 @@ test($c, "bareword");	# 135
   symbolic->vars($a, $b);
   my $c = sqrt($a**2 + $b**2);
   $a = 3; $b = 4;
-  test( (sprintf "%d", $c), '5');
+  is((sprintf "%d", $c), '5');
   $a = 12; $b = 5;
-  test( (sprintf "%d", $c), '13');
+  is((sprintf "%d", $c), '13');
 }
 
 {
@@ -634,24 +638,24 @@ test($c, "bareword");	# 135
 {
   my $foo = new symbolic1 11;
   my $baz = $foo++;
-  test( (sprintf "%d", $foo), '12');
-  test( (sprintf "%d", $baz), '11');
+  is((sprintf "%d", $foo), '12');
+  is((sprintf "%d", $baz), '11');
   my $bar = $foo;
   $baz = ++$foo;
-  test( (sprintf "%d", $foo), '13');
-  test( (sprintf "%d", $bar), '12');
-  test( (sprintf "%d", $baz), '13');
+  is((sprintf "%d", $foo), '13');
+  is((sprintf "%d", $bar), '12');
+  is((sprintf "%d", $baz), '13');
   my $ban = $foo;
   $baz = ($foo += 1);
-  test( (sprintf "%d", $foo), '14');
-  test( (sprintf "%d", $bar), '12');
-  test( (sprintf "%d", $baz), '14');
-  test( (sprintf "%d", $ban), '13');
+  is((sprintf "%d", $foo), '14');
+  is((sprintf "%d", $bar), '12');
+  is((sprintf "%d", $baz), '14');
+  is((sprintf "%d", $ban), '13');
   $baz = 0;
   $baz = $foo++;
-  test( (sprintf "%d", $foo), '15');
-  test( (sprintf "%d", $baz), '14');
-  test( "$foo", '[++ [+= [++ [++ [n 11] 1] 1] 1] 1]');
+  is((sprintf "%d", $foo), '15');
+  is((sprintf "%d", $baz), '14');
+  is("$foo", '[++ [+= [++ [++ [n 11] 1] 1] 1] 1]');
 }
 
 {
@@ -664,8 +668,8 @@ test($c, "bareword");	# 135
     $side = (sqrt(1 + $side**2) - 1)/$side;
   }
   my $pi = $side*(2**($iter+2));
-  test "$side", '[/ [- [sqrt [+ 1 [** [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]] 2]]] 1] [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]]]';
-  test( (sprintf "%f", $pi), '3.182598');
+  is("$side", '[/ [- [sqrt [+ 1 [** [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]] 2]]] 1] [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]]]');
+  is((sprintf "%f", $pi), '3.182598');
 }
 
 {
@@ -677,8 +681,8 @@ test($c, "bareword");	# 135
     $side = (sqrt(1 + $side**2) - 1)/$side;
   }
   my $pi = $side*(2**($iter+2));
-  test "$side", '[/ [- [sqrt [+ 1 [** [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]] 2]]] 1] [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]]]';
-  test( (sprintf "%f", $pi), '3.182598');
+  is("$side", '[/ [- [sqrt [+ 1 [** [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]] 2]]] 1] [/ [- [sqrt [+ 1 [** [n 1] 2]]] 1] [n 1]]]');
+  is((sprintf "%f", $pi), '3.182598');
 }
 
 {
@@ -686,9 +690,9 @@ test($c, "bareword");	# 135
   symbolic1->vars($a, $b);
   my $c = sqrt($a**2 + $b**2);
   $a = 3; $b = 4;
-  test( (sprintf "%d", $c), '5');
+  is((sprintf "%d", $c), '5');
   $a = 12; $b = 5;
-  test( (sprintf "%d", $c), '13');
+  is((sprintf "%d", $c), '13');
 }
 
 {
@@ -702,15 +706,11 @@ test($c, "bareword");	# 135
 
 {
   my $seven = new two_face ("vii", 7);
-  test( (sprintf "seven=$seven, seven=%d, eight=%d", $seven, $seven+1),
+  is((sprintf "seven=$seven, seven=%d, eight=%d", $seven, $seven+1),
 	'seven=vii, seven=7, eight=8');
-  test( scalar ($seven =~ /i/), '1')
+  is(scalar ($seven =~ /i/), '1');
 }
 
-{
-    my $Test = Test::Builder->new;
-    $Test->current_test(173);
-}
 {
   package sorting;
   use overload 'cmp' => \&comp;
