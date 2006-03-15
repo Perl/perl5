@@ -1273,6 +1273,7 @@ s	|bool	|utf8_mg_pos	|NN SV *sv|NN MAGIC **mgp|NN STRLEN **cachep \
 s	|bool	|utf8_mg_pos_init	|NN SV *sv|NN MAGIC **mgp \
 				|NN STRLEN **cachep|I32 i|I32 offsetp \
 				|NN const U8 *s|NN const U8 *start
+s	|void	|reset_amagic	|NN SV *rv|const bool on
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

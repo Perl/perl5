@@ -47,7 +47,7 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests=>496;
+use Test::More tests => 508;
 
 
 $a = new Oscalar "087";
@@ -1172,4 +1172,77 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     like('x:a:=', qr/x$a=$/);
     like('x:a:a:=', qr/x$a$a=$/);
 
+}
+
+{
+    package Sklorsh;
+    use overload
+	bool     => sub { shift->is_cool };
+
+    sub is_cool {
+	$_[0]->{name} eq 'cool';
+    }
+
+    sub delete {
+	undef %{$_[0]};
+	bless $_[0], 'Brap';
+	return 1;
+    }
+
+    sub delete_with_self {
+	my $self = shift;
+	undef %$self;
+	bless $self, 'Brap';
+	return 1;
+    }
+
+    package Brap;
+
+    1;
+
+    package main;
+
+    my $obj;
+    $obj = bless {name => 'cool'}, 'Sklorsh';
+    $obj->delete;
+    ok(eval {if ($obj) {1}; 1}, $@ || 'reblessed into nonexist namespace');
+
+    $obj = bless {name => 'cool'}, 'Sklorsh';
+    $obj->delete_with_self;
+    ok (eval {if ($obj) {1}; 1}, $@);
+    
+    my $a = $b = {name => 'hot'};
+    bless $b, 'Sklorsh';
+    is(ref $a, 'Sklorsh');
+    is(ref $b, 'Sklorsh');
+    ok(!$b, "Expect overloaded boolean");
+    ok(!$a, "Expect overloaded boolean");
+}
+{
+    use Scalar::Util 'weaken';
+
+    package Shklitza;
+    use overload '""' => sub {"CLiK KLAK"};
+
+    package Ksshfwoom;
+
+    package main;
+
+    my ($obj, $ref);
+    $obj = bless do {my $a; \$a}, 'Shklitza';
+    $ref = $obj;
+
+    is ($obj, "CLiK KLAK");
+    is ($ref, "CLiK KLAK");
+
+    weaken $ref;
+    is ($ref, "CLiK KLAK");
+
+    bless $obj, 'Ksshfwoom';
+
+    like ($obj, qr/^Ksshfwoom=/);
+    like ($ref, qr/^Ksshfwoom=/);
+
+    undef $obj;
+    is ($ref, undef);
 }

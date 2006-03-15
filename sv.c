@@ -6945,6 +6945,52 @@ Perl_sv_setref_pvn(pTHX_ SV *rv, const char *classname, char *pv, STRLEN n)
     return rv;
 }
 
+/* This is a hack to cope with reblessing from class with overloading magic to
+   one without (or the other way).  Search for every reference pointing to the
+   object.  Can't use S_visit() because we would need to pass a parameter to
+   our function.  */
+static void
+S_reset_amagic(pTHX_ SV *rv, const bool on) {
+    /* It is assumed that you've already turned magic on/off on rv  */
+    SV* sva;
+    SV *const target = SvRV(rv);
+    /* Less 1 for the reference we've already dealt with.  */
+    U32 how_many = SvREFCNT(target) - 1;
+    MAGIC *mg;
+
+    if (SvMAGICAL(target) && (mg = mg_find(target, PERL_MAGIC_backref))) {
+	/* Back referneces also need to be found, but aren't part of the
+	   target's reference count.  */
+	how_many += 1 + av_len((AV*)mg->mg_obj);
+    }
+
+    if (!how_many) {
+	/* There was only 1 reference to this object.  */
+	return;
+    }
+
+    for (sva = PL_sv_arenaroot; sva; sva = (SV*)SvANY(sva)) {
+	register const SV * const svend = &sva[SvREFCNT(sva)];
+	register SV* sv;
+	for (sv = sva + 1; sv < svend; ++sv) {
+	    if (SvTYPE(sv) != SVTYPEMASK
+		&& (sv->sv_flags & SVf_ROK) == SVf_ROK
+		&& SvREFCNT(sv)
+		&& SvRV(sv) == target
+		&& sv != rv) {
+		if (on)
+		    SvAMAGIC_on(sv);
+		else
+		    SvAMAGIC_off(sv);
+		if (--how_many == 0) {
+		    /* We have found them all.  */
+		    return;
+		}
+	    }
+	}
+    }
+}
+
 /*
 =for apidoc sv_bless
 
@@ -6977,10 +7023,17 @@ Perl_sv_bless(pTHX_ SV *sv, HV *stash)
     (void)SvUPGRADE(tmpRef, SVt_PVMG);
     SvSTASH_set(tmpRef, (HV*)SvREFCNT_inc(stash));
 
-    if (Gv_AMG(stash))
-	SvAMAGIC_on(sv);
-    else
-	SvAMAGIC_off(sv);
+    if (Gv_AMG(stash)) {
+	if (!SvAMAGIC(sv)) {
+	    SvAMAGIC_on(sv);
+	    S_reset_amagic(aTHX_ sv, TRUE);
+	}
+    } else {
+	if (SvAMAGIC(sv)) {
+	    SvAMAGIC_off(sv);
+	    S_reset_amagic(aTHX_ sv, FALSE);
+	}
+    }
 
     if(SvSMAGICAL(tmpRef))
         if(mg_find(tmpRef, PERL_MAGIC_ext) || mg_find(tmpRef, PERL_MAGIC_uvar))
