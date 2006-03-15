@@ -3652,7 +3652,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    if (sflags & SVf_IVisUV)
 		SvIsUV_on(dstr);
 	}
-	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK|SVf_UTF8);
+	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK|SVf_UTF8
+				   |SVf_AMAGIC);
 	{
 	    const MAGIC * const smg = SvVOK(sstr);
 	    if (smg) {
@@ -3664,7 +3665,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     }
     else if (sflags & (SVp_IOK|SVp_NOK)) {
 	(void)SvOK_off(dstr);
-	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_IVisUV|SVf_NOK|SVp_NOK);
+	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_IVisUV|SVf_NOK|SVp_NOK
+				   |SVf_AMAGIC);
 	if (sflags & SVp_IOK) {
 	    /* XXXX Do we want to set IsUV for IV(ROK)?  Be extra safe... */
 	    SvIV_set(dstr, SvIVX(sstr));
@@ -3684,6 +3686,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    SvFAKE_off(sstr);
 	    gv_efullname3(dstr, (GV *)sstr, "*");
 	    SvFLAGS(sstr) |= wasfake;
+	    SvFLAGS(dstr) |= sflags & SVf_AMAGIC;
 	}
 	else
 	    (void)SvOK_off(dstr);

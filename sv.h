@@ -865,11 +865,11 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 
 #define SvOK(sv)		(SvFLAGS(sv) & SVf_OK)
 #define SvOK_off(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
-				 SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC|	\
+				 SvFLAGS(sv) &=	~(SVf_OK|		\
 						  SVf_IVisUV|SVf_UTF8),	\
 							SvOOK_off(sv))
 #define SvOK_off_exc_UV(sv)	(assert_not_ROK(sv)			\
-				 SvFLAGS(sv) &=	~(SVf_OK|SVf_AMAGIC|	\
+				 SvFLAGS(sv) &=	~(SVf_OK|		\
 						  SVf_UTF8),		\
 							SvOOK_off(sv))
 
@@ -938,11 +938,11 @@ in gv.h: */
 				 SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 #define SvPOK_off(sv)		(SvFLAGS(sv) &= ~(SVf_POK|SVp_POK))
 #define SvPOK_only(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
-				 SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|	\
+				 SvFLAGS(sv) &= ~(SVf_OK|		\
 						  SVf_IVisUV|SVf_UTF8),	\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 #define SvPOK_only_UTF8(sv)	(assert_not_ROK(sv) assert_not_glob(sv)	\
-				 SvFLAGS(sv) &= ~(SVf_OK|SVf_AMAGIC|	\
+				 SvFLAGS(sv) &= ~(SVf_OK|		\
 						  SVf_IVisUV),		\
 				    SvFLAGS(sv) |= (SVf_POK|SVp_POK))
 
@@ -958,7 +958,7 @@ in gv.h: */
 
 #define SvROK(sv)		(SvFLAGS(sv) & SVf_ROK)
 #define SvROK_on(sv)		(SvFLAGS(sv) |= SVf_ROK)
-#define SvROK_off(sv)		(SvFLAGS(sv) &= ~(SVf_ROK|SVf_AMAGIC))
+#define SvROK_off(sv)		(SvFLAGS(sv) &= ~(SVf_ROK))
 
 #define SvMAGICAL(sv)		(SvFLAGS(sv) & (SVs_GMG|SVs_SMG|SVs_RMG))
 #define SvMAGICAL_on(sv)	(SvFLAGS(sv) |= (SVs_GMG|SVs_SMG|SVs_RMG))
@@ -976,11 +976,22 @@ in gv.h: */
 #define SvRMAGICAL_on(sv)	(SvFLAGS(sv) |= SVs_RMG)
 #define SvRMAGICAL_off(sv)	(SvFLAGS(sv) &= ~SVs_RMG)
 
-#define SvAMAGIC(sv)		(SvFLAGS(sv) & SVf_AMAGIC)
-#define SvAMAGIC_on(sv)		(SvFLAGS(sv) |= SVf_AMAGIC)
-#define SvAMAGIC_off(sv)	(SvFLAGS(sv) &= ~SVf_AMAGIC)
+#define SvAMAGIC(sv)		(SvROK(sv) && (SvFLAGS(SvRV(sv)) & SVf_AMAGIC))
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  define SvAMAGIC_on(sv)	({ SV *kloink = sv;			\
+				   assert(SvROK(kloink));		\
+				   SvFLAGS(SvRV(kloink)) |= SVf_AMAGIC;	\
+				})
+#  define SvAMAGIC_off(sv)	({ SV *kloink = sv;			\
+				   if(SvROK(kloink))			\
+					SvFLAGS(SvRV(kloink)) &= ~SVf_AMAGIC;\
+				})
+#else
+#  define SvAMAGIC_on(sv)	(SvFLAGS(SvRV(sv)) |= SVf_AMAGIC)
+#  define SvAMAGIC_off(sv)	(SvROK(sv) && SvFLAGS(SvRV(sv)) &= ~SVf_AMAGIC)
+#endif
 
-#define SvGAMAGIC(sv)           (SvFLAGS(sv) & (SVs_GMG|SVf_AMAGIC))
+#define SvGAMAGIC(sv)           (SvGMAGICAL(sv) || SvAMAGIC(sv))
 
 /*
 #define Gv_AMG(stash) \
@@ -1653,7 +1664,7 @@ Like C<sv_catsv> but doesn't process magic.
 
 #define CAN_COW_MASK	(SVs_OBJECT|SVs_GMG|SVs_SMG|SVs_RMG|SVf_IOK|SVf_NOK| \
 			 SVf_POK|SVf_ROK|SVp_IOK|SVp_NOK|SVp_POK|SVf_FAKE| \
-			 SVf_OOK|SVf_BREAK|SVf_READONLY|SVf_AMAGIC)
+			 SVf_OOK|SVf_BREAK|SVf_READONLY)
 #define CAN_COW_FLAGS	(SVp_POK|SVf_POK)
 
 #define SV_CHECK_THINKFIRST(sv) if (SvTHINKFIRST(sv)) \

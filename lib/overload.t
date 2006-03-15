@@ -47,7 +47,7 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests=>497;
+use Test::More tests=>503;
 
 
 $a = new Oscalar "087";
@@ -1179,4 +1179,49 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     # Check that constant overloading propagates into evals
     BEGIN { overload::constant integer => sub { 23 } }
     is(eval "17", $twenty_three);
+}
+
+{
+    package Sklorsh;
+    use overload
+	bool     => sub { shift->is_cool };
+
+    sub is_cool {
+	$_[0]->{name} eq 'cool';
+    }
+
+    sub delete {
+	undef %{$_[0]};
+	bless $_[0], 'Brap';
+	return 1;
+    }
+
+    sub delete_with_self {
+	my $self = shift;
+	undef %$self;
+	bless $self, 'Brap';
+	return 1;
+    }
+
+    package Brap;
+
+    1;
+
+    package main;
+
+    my $obj;
+    $obj = bless {name => 'cool'}, 'Sklorsh';
+    $obj->delete;
+    ok(eval {if ($obj) {1}; 1}, $@ || 'reblessed into nonexist namespace');
+
+    $obj = bless {name => 'cool'}, 'Sklorsh';
+    $obj->delete_with_self;
+    ok (eval {if ($obj) {1}; 1}, $@);
+    
+    my $a = $b = {name => 'hot'};
+    bless $b, 'Sklorsh';
+    is(ref $a, 'Sklorsh');
+    is(ref $b, 'Sklorsh');
+    ok(!$b, "Expect overloaded boolean");
+    ok(!$a, "Expect overloaded boolean");
 }
