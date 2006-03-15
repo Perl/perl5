@@ -988,7 +988,8 @@ in gv.h: */
 				})
 #else
 #  define SvAMAGIC_on(sv)	(SvFLAGS(SvRV(sv)) |= SVf_AMAGIC)
-#  define SvAMAGIC_off(sv)	(SvROK(sv) && SvFLAGS(SvRV(sv)) &= ~SVf_AMAGIC)
+#  define SvAMAGIC_off(sv) \
+	(SvROK(sv) && (SvFLAGS(SvRV(sv)) &= ~SVf_AMAGIC))
 #endif
 
 #define SvGAMAGIC(sv)           (SvGMAGICAL(sv) || SvAMAGIC(sv))
