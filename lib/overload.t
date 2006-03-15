@@ -48,7 +48,7 @@ package main;
 
 our $test = 0;
 $| = 1;
-print "1..",&last,"\n";
+use Test::More tests=>498;
 
 sub test {
   $test++; 
@@ -1027,6 +1027,10 @@ unless ($aaa) {
   main::test($x);                               # 220
   main::test($x+0 =~ /Recurse=ARRAY/);		# 221
 }
+{
+    my $Test = Test::Builder->new;
+    $Test->current_test(221);
+}
 
 # BugID 20010422.003
 package Foo;
@@ -1056,7 +1060,7 @@ use strict;
 my $r = Foo->new(8);
 $r = Foo->new(0);
 
-test(($r || 0) == 0); # 222
+is(($r || 0), 0);
 
 package utf8_o;
 
@@ -1076,8 +1080,8 @@ package main;
 
 
 my $utfvar = new utf8_o 200.2.1;
-test("$utfvar" eq 200.2.1); # 223 - stringify
-test("a$utfvar" eq "a".200.2.1); # 224 - overload via sv_2pv_flags
+is("$utfvar", 200.2.1); # 223 - stringify
+is("a$utfvar", "a".200.2.1); # 224 - overload via sv_2pv_flags
 
 # 225..227 -- more %{} tests.  Hangs in 5.6.0, okay in later releases.
 # Basically this example implements strong encapsulation: if Hderef::import()
@@ -1093,9 +1097,9 @@ sub xet { @_ == 2 ? $_[0]->{$_[1]} :
 package main;
 my $a = Foo->new;
 $a->xet('b', 42);
-test ($a->xet('b'), 42);
-test (!defined eval { $a->{b} });
-test ($@ =~ /zap/);
+is ($a->xet('b'), 42);
+ok (!defined eval { $a->{b} });
+like ($@, qr/zap/);
 
 {
    package t229;
@@ -1110,7 +1114,7 @@ test ($@ =~ /zap/);
       my $y = $x;
       eval { $y++ };
    }
-   main::test (!$warn);
+   main::ok (!$warn);
 }
 
 {
@@ -1120,9 +1124,9 @@ test ($@ =~ /zap/);
         $out1 = 0;
         $out2 = 1;
     }
-    test($int,  2,  "#24313");	# 230
-    test($out1, 17, "#24313");	# 231
-    test($out2, 17, "#24313");	# 232
+    is($int,  2,  "#24313");	# 230
+    is($out1, 17, "#24313");	# 231
+    is($out2, 17, "#24313");	# 232
 }
 
 {
@@ -1146,16 +1150,16 @@ test ($@ =~ /zap/);
     my $o  = bless [], 'perl31793';
     my $of = bless [], 'perl31793_fb';
     my $no = bless [], 'no_overload';
-    test (overload::StrVal(\"scalar") =~ /^SCALAR\(0x[0-9a-f]+\)$/);
-    test (overload::StrVal([])        =~ /^ARRAY\(0x[0-9a-f]+\)$/);
-    test (overload::StrVal({})        =~ /^HASH\(0x[0-9a-f]+\)$/);
-    test (overload::StrVal(sub{1})    =~ /^CODE\(0x[0-9a-f]+\)$/);
-    test (overload::StrVal(\*GLOB)    =~ /^GLOB\(0x[0-9a-f]+\)$/);
-    test (overload::StrVal(\$o)       =~ /^REF\(0x[0-9a-f]+\)$/);
-    test (overload::StrVal(qr/a/)     =~ /^Regexp=SCALAR\(0x[0-9a-f]+\)$/);
-    test (overload::StrVal($o)        =~ /^perl31793=ARRAY\(0x[0-9a-f]+\)$/);
-    test (overload::StrVal($of)       =~ /^perl31793_fb=ARRAY\(0x[0-9a-f]+\)$/);
-    test (overload::StrVal($no)       =~ /^no_overload=ARRAY\(0x[0-9a-f]+\)$/);
+    like(overload::StrVal(\"scalar"), qr/^SCALAR\(0x[0-9a-f]+\)$/);
+    like(overload::StrVal([]),        qr/^ARRAY\(0x[0-9a-f]+\)$/);
+    like(overload::StrVal({}),        qr/^HASH\(0x[0-9a-f]+\)$/);
+    like(overload::StrVal(sub{1}),    qr/^CODE\(0x[0-9a-f]+\)$/);
+    like(overload::StrVal(\*GLOB),    qr/^GLOB\(0x[0-9a-f]+\)$/);
+    like(overload::StrVal(\$o),       qr/^REF\(0x[0-9a-f]+\)$/);
+    like(overload::StrVal(qr/a/),     qr/^Regexp=SCALAR\(0x[0-9a-f]+\)$/);
+    like(overload::StrVal($o),        qr/^perl31793=ARRAY\(0x[0-9a-f]+\)$/);
+    like(overload::StrVal($of),       qr/^perl31793_fb=ARRAY\(0x[0-9a-f]+\)$/);
+    like(overload::StrVal($no),       qr/^no_overload=ARRAY\(0x[0-9a-f]+\)$/);
 }
 
 # These are all check that overloaded values rather than reference addressess
@@ -1174,7 +1178,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 	    die if $@;
 	    my $expect = eval $rcode;
 	    die if $@;
-	    test ($got, $expect, $ocode) or print "# $rcode\n";
+	    is ($got, $expect, $ocode) or print "# $rcode\n";
 	}
     }
 }
@@ -1194,10 +1198,10 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     }
 
     my $a = bless [ "a" ], 'Foo493';
-    test('a' =~ /$a/);
-    test('x:a' =~ /x$a/);
-    test('x:a:=' =~ /x$a=$/);
-    test('x:a:a:=' =~ /x$a$a=$/);
+    like('a', qr/$a/);
+    like('x:a', qr/x$a/);
+    like('x:a:=', qr/x$a=$/);
+    like('x:a:a:=', qr/x$a$a=$/);
 
 }
 
@@ -1205,9 +1209,5 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     my $twenty_three = 23;
     # Check that constant overloading propagates into evals
     BEGIN { overload::constant integer => sub { 23 } }
-    test(eval "17", $twenty_three);
+    is(eval "17", $twenty_three);
 }
-
-
-# Last test is:
-sub last {498}
