@@ -47,7 +47,7 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests=>503;
+use Test::More tests => 509;
 
 
 $a = new Oscalar "087";
@@ -1224,4 +1224,33 @@ foreach my $op (qw(<=> == != < <= > >=)) {
     is(ref $b, 'Sklorsh');
     ok(!$b, "Expect overloaded boolean");
     ok(!$a, "Expect overloaded boolean");
+}
+{
+    use Scalar::Util 'weaken';
+
+    package Shklitza;
+    use overload '""' => sub {"CLiK KLAK"};
+
+    package Ksshfwoom;
+    use overload '""' => sub {"OOOKK AWK"};
+
+    package main;
+
+    my ($obj, $ref);
+    $obj = bless do {my $a; \$a}, 'Shklitza';
+    $ref = $obj;
+
+    is ($obj, "CLiK KLAK");
+    is ($ref, "CLiK KLAK");
+
+    weaken $ref;
+    is ($ref, "CLiK KLAK");
+
+    bless $obj, 'Ksshfwoom';
+
+    is ($obj, "OOOKK AWK");
+    is ($ref, "OOOKK AWK");
+
+    undef $obj;
+    is ($ref, undef);
 }
