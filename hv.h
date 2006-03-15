@@ -283,19 +283,6 @@ C<SV*>.
 #define HvREHASH_on(hv)		(SvFLAGS(hv) |= SVphv_REHASH)
 #define HvREHASH_off(hv)	(SvFLAGS(hv) &= ~SVphv_REHASH)
 
-/* Maybe amagical: */
-/* #define HV_AMAGICmb(hv)      (SvFLAGS(hv) & (SVpgv_badAM | SVpgv_AM)) */
-
-#define HV_AMAGIC(hv)        (SvFLAGS(hv) &   SVpgv_AM)
-#define HV_AMAGIC_on(hv)     (SvFLAGS(hv) |=  SVpgv_AM)
-#define HV_AMAGIC_off(hv)    (SvFLAGS(hv) &= ~SVpgv_AM)
-
-/*
-#define HV_AMAGICbad(hv)     (SvFLAGS(hv) & SVpgv_badAM)
-#define HV_badAMAGIC_on(hv)  (SvFLAGS(hv) |= SVpgv_badAM)
-#define HV_badAMAGIC_off(hv) (SvFLAGS(hv) &= ~SVpgv_badAM)
-*/
-
 #define Nullhe Null(HE*)
 #define HeNEXT(he)		(he)->hent_next
 #define HeKEY_hek(he)		(he)->hent_hek

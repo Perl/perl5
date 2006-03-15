@@ -993,11 +993,6 @@ in gv.h: */
 
 #define SvGAMAGIC(sv)           (SvGMAGICAL(sv) || SvAMAGIC(sv))
 
-/*
-#define Gv_AMG(stash) \
-        (HV_AMAGICmb(stash) && \
-         ((!HV_AMAGICbad(stash) && HV_AMAGIC(stash)) || Gv_AMupdate(stash)))
-*/
 #define Gv_AMG(stash)           (PL_amagic_generation && Gv_AMupdate(stash))
 
 #define SvWEAKREF(sv)		((SvFLAGS(sv) & (SVf_ROK|SVprv_WEAKREF)) \
