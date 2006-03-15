@@ -708,6 +708,10 @@ test($c, "bareword");	# 135
 }
 
 {
+    my $Test = Test::Builder->new;
+    $Test->current_test(173);
+}
+{
   package sorting;
   use overload 'cmp' => \&comp;
   sub new { my ($p, $v) = @_; bless \$v, $p }
@@ -717,7 +721,7 @@ test($c, "bareword");	# 135
   my @arr = map sorting->new($_), 0..12;
   my @sorted1 = sort @arr;
   my @sorted2 = map $$_, @sorted1;
-  test "@sorted2", '0 10 7 4 1 11 8 5 12 2 9 6 3';
+  is("@sorted2", '0 10 7 4 1 11 8 5 12 2 9 6 3');
 }
 {
   package iterator;
@@ -728,21 +732,21 @@ test($c, "bareword");	# 135
 
 # XXX iterator overload not intended to work with CORE::GLOBAL?
 if (defined &CORE::GLOBAL::glob) {
-  test '1', '1';	# 175
-  test '1', '1';	# 176
-  test '1', '1';	# 177
+  is('1', '1');
+  is('1', '1');
+  is('1', '1');
 }
 else {
   my $iter = iterator->new(5);
   my $acc = '';
   my $out;
   $acc .= " $out" while $out = <${iter}>;
-  test $acc, ' 5 4 3 2 1 0';	# 175
+  is($acc, ' 5 4 3 2 1 0');
   $iter = iterator->new(5);
-  test scalar <${iter}>, '5';	# 176
+  is(scalar <${iter}>, '5');
   $acc = '';
   $acc .= " $out" while $out = <$iter>;
-  test $acc, ' 4 3 2 1 0';	# 177
+  is($acc, ' 4 3 2 1 0');
 }
 {
   package deref;
@@ -773,53 +777,53 @@ else {
   # Hash:
   my @cont = sort %$deref;
   if ("\t" eq "\011") { # ascii
-      test "@cont", '23 5 fake foo';	# 178
+      is("@cont", '23 5 fake foo');
   } 
   else {                # ebcdic alpha-numeric sort order
-      test "@cont", 'fake foo 23 5';	# 178
+      is("@cont", 'fake foo 23 5');
   }
   my @keys = sort keys %$deref;
-  test "@keys", 'fake foo';	# 179
+  is("@keys", 'fake foo');
   my @val = sort values %$deref;
-  test "@val", '23 5';		# 180
-  test $deref->{foo}, 5;	# 181
-  test defined $deref->{bar}, ''; # 182
+  is("@val", '23 5');
+  is($deref->{foo}, 5);
+  is(defined $deref->{bar}, '');
   my $key;
   @keys = ();
   push @keys, $key while $key = each %$deref;
   @keys = sort @keys;
-  test "@keys", 'fake foo';	# 183  
-  test exists $deref->{bar}, ''; # 184
-  test exists $deref->{foo}, 1; # 185
+  is("@keys", 'fake foo');
+  is(exists $deref->{bar}, '');
+  is(exists $deref->{foo}, 1);
   # Code:
-  test $deref->(5), 39;		# 186
-  test &$deref(6), 40;		# 187
+  is($deref->(5), 39);
+  is(&$deref(6), 40);
   sub xxx_goto { goto &$deref }
-  test xxx_goto(7), 41;		# 188
+  is(xxx_goto(7), 41);
   my $srt = bless { c => sub {$b <=> $a}
 		  }, 'deref';
   *srt = \&$srt;
   my @sorted = sort srt 11, 2, 5, 1, 22;
-  test "@sorted", '22 11 5 2 1'; # 189
+  is("@sorted", '22 11 5 2 1');
   # Scalar
-  test $$deref, 123;		# 190
+  is($$deref, 123);
   # Code
   @sorted = sort $srt 11, 2, 5, 1, 22;
-  test "@sorted", '22 11 5 2 1'; # 191
+  is("@sorted", '22 11 5 2 1');
   # Array
-  test "@$deref", '11 12 13';	# 192
-  test $#$deref, '2';		# 193
+  is("@$deref", '11 12 13');
+  is($#$deref, '2');
   my $l = @$deref;
-  test $l, 3;			# 194
-  test $deref->[2], '13';		# 195
+  is($l, 3);
+  is($deref->[2], '13');
   $l = pop @$deref;
-  test $l, 13;			# 196
+  is($l, 13);
   $l = 1;
-  test $deref->[$l], '12';	# 197
+  is($deref->[$l], '12');
   # Repeated dereference
   my $double = bless { h => $deref,
 		     }, 'deref';
-  test $double->{foo}, 5;	# 198
+  is($double->{foo}, 5);
 }
 
 {
@@ -856,9 +860,9 @@ else {
 
 my $bar = new two_refs 3,4,5,6;
 $bar->[2] = 11;
-test $bar->{two}, 11;		# 199
+is($bar->{two}, 11);
 $bar->{three} = 13;
-test $bar->[3], 13;		# 200
+is($bar->[3], 13);
 
 {
   package two_refs_o;
@@ -867,9 +871,9 @@ test $bar->[3], 13;		# 200
 
 $bar = new two_refs_o 3,4,5,6;
 $bar->[2] = 11;
-test $bar->{two}, 11;		# 201
+is($bar->{two}, 11);
 $bar->{three} = 13;
-test $bar->[3], 13;		# 202
+is($bar->[3], 13);
 
 {
   package two_refs1;
@@ -909,9 +913,9 @@ test $bar->[3], 13;		# 202
 
 $bar = new two_refs_o 3,4,5,6;
 $bar->[2] = 11;
-test $bar->{two}, 11;		# 203
+is($bar->{two}, 11);
 $bar->{three} = 13;
-test $bar->[3], 13;		# 204
+is($bar->[3], 13);
 
 {
   package two_refs1_o;
@@ -920,9 +924,9 @@ test $bar->[3], 13;		# 204
 
 $bar = new two_refs1_o 3,4,5,6;
 $bar->[2] = 11;
-test $bar->{two}, 11;		# 205
+is($bar->{two}, 11);
 $bar->{three} = 13;
-test $bar->[3], 13;		# 206
+is($bar->[3], 13);
 
 {
   package B;
@@ -932,12 +936,12 @@ test $bar->[3], 13;		# 206
 my $aaa;
 { my $bbbb = 0; $aaa = bless \$bbbb, B }
 
-test !$aaa, 1;			# 207
+is !$aaa, 1;
 
 unless ($aaa) {
-  test 'ok', 'ok';		# 208
+  pass();
 } else {
-  test 'is not', 'ok';		# 208
+  fail();
 }
 
 # check that overload isn't done twice by join
@@ -945,7 +949,7 @@ unless ($aaa) {
   package Join;
   use overload '""' => sub { $c++ };
   my $x = join '', bless([]), 'pq', bless([]);
-  main::test $x, '0pq1';		# 209
+  main::is $x, '0pq1';
 };
 
 # Test module-specific warning
@@ -954,10 +958,10 @@ unless ($aaa) {
     my $a = "" ;
     local $SIG{__WARN__} = sub {$a = $_[0]} ;
     $x = eval ' overload::constant "integer" ; ' ;
-    test($a eq "") ; # 210
+    is($a, "");
     use warnings 'overload' ;
     $x = eval ' overload::constant "integer" ; ' ;
-    test($a =~ /^Odd number of arguments for overload::constant at/) ; # 211
+    like($a, qr/^Odd number of arguments for overload::constant at/);
 }
 
 {
@@ -965,10 +969,10 @@ unless ($aaa) {
     my $a = "" ;
     local $SIG{__WARN__} = sub {$a = $_[0]} ;
     $x = eval ' overload::constant "fred" => sub {} ; ' ;
-    test($a eq "") ; # 212
+    is($a, "");
     use warnings 'overload' ;
     $x = eval ' overload::constant "fred" => sub {} ; ' ;
-    test($a =~ /^`fred' is not an overloadable type at/); # 213
+    like($a, qr/^`fred' is not an overloadable type at/);
 }
 
 {
@@ -976,10 +980,10 @@ unless ($aaa) {
     my $a = "" ;
     local $SIG{__WARN__} = sub {$a = $_[0]} ;
     $x = eval ' overload::constant "integer" => 1; ' ;
-    test($a eq "") ; # 214
+    is($a, "");
     use warnings 'overload' ;
     $x = eval ' overload::constant "integer" => 1; ' ;
-    test($a =~ /^`1' is not a code reference at/); # 215
+    like($a, qr/^`1' is not a code reference at/);
 }
 
 {
@@ -1005,13 +1009,13 @@ unless ($aaa) {
 
   my $x = new noov_int 11;
   my $int_x = int $x;
-  main::test("$int_x" eq 20);			# 216
+  main::is("$int_x", 20);
   $x = new ov_int1 31;
   $int_x = int $x;
-  main::test("$int_x" eq 131);			# 217
+  main::is("$int_x", 131);
   $x = new ov_int2 51;
   $int_x = int $x;
-  main::test("$int_x" eq 1054);			# 218
+  main::is("$int_x", 1054);
 }
 
 # make sure that we don't inifinitely recurse
@@ -1023,13 +1027,10 @@ unless ($aaa) {
                'bool'  => sub { shift },
                fallback => 1;
   my $x = bless([]);
-  main::test("$x" =~ /Recurse=ARRAY/);		# 219
-  main::test($x);                               # 220
-  main::test($x+0 =~ /Recurse=ARRAY/);		# 221
-}
-{
-    my $Test = Test::Builder->new;
-    $Test->current_test(221);
+  # For some reason beyond me these have to be oks rather than likes.
+  main::ok("$x" =~ /Recurse=ARRAY/);
+  main::ok($x);
+  main::ok($x+0 =~ qr/Recurse=ARRAY/);
 }
 
 # BugID 20010422.003
