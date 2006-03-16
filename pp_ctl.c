@@ -3011,14 +3011,10 @@ S_check_type_and_open(pTHX_ const char *name, const char *mode)
 {
     Stat_t st;
     const int st_rc = PerlLIO_stat(name, &st);
-    if (st_rc < 0) {
+    if (st_rc < 0 || S_ISDIR(st.st_mode) || S_ISBLK(st.st_mode)) {
 	return NULL;
     }
 
-    if(S_ISDIR(st.st_mode) || S_ISBLK(st.st_mode)) {
-       Perl_die(aTHX_ "%s %s not allowed in require",
-           S_ISDIR(st.st_mode) ? "Directory" : "Block device", name);
-    }
     return PerlIO_open(name, mode);
 }
 

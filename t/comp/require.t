@@ -183,7 +183,7 @@ $foo = eval  {require bleah}; delete $INC{"bleah.pm"}; ++$::i;
 my $r = "threads";
 eval { require $r };
 $i++;
-if($@ =~ /Directory .*threads not allowed in require/) {
+if($@ =~ /Can't locate threads in \@INC/) {
     print "ok $i\n";
 } else {
     print "not ok $i\n";
