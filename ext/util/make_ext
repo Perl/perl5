@@ -121,14 +121,6 @@ esac
 if test ! -f $makefile ; then
 	test -f Makefile.PL && ../$depth/miniperl -I../$depth/lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1 $passthru
 fi
-if test ! -f $makefile ; then
-	if test -f Makefile.SH; then
-		echo "Warning: Writing $makefile from old-style Makefile.SH!"
-		sh Makefile.SH
-	else
-		echo "Warning: No Makefile!"
-	fi
-fi
 
 case "$target" in
 clean)		;;
