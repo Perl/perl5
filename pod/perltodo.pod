@@ -371,6 +371,16 @@ since a change over a year earlier. Had this been spotted before release, it
 could have been removed, but now it has to remain in the 5.8.x releases to
 keep the structure the same size, to retain binary compatibility.
 
+It's probably worth checking if all need to be the types they are. For example
+
+    PERLVAR(Ierror_count, I32)	/* how many errors so far, max 10 */
+
+might work as well if stored in a signed (or unsigned) 8 bit value, if the
+comment is accurate. C<PL_multi_open> and C<PL_multi_close> can probably
+become C<char>s. Finding variables to downsize coupled with rearrangement
+could shrink the interpreter structure; a size saving which is multiplied by
+the number of threads running.
+
 =head2 am I hot or not?
 
 The idea of F<pp_hot.c> is that it contains the I<hot> ops, the ops that are
