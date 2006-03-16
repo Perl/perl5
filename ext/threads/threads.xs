@@ -167,6 +167,7 @@ Perl_ithread_destruct (pTHX_ ithread* thread, const char *why)
 	/* Thread is now disowned */
 
 	S_ithread_clear(aTHX_ thread);
+        aTHX = PL_curinterp;
 	MUTEX_UNLOCK(&thread->mutex);
 	MUTEX_DESTROY(&thread->mutex);
 #ifdef WIN32
