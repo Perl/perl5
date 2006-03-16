@@ -10,6 +10,7 @@ BEGIN {
 }
 
 use warnings;
+no warnings 'deprecated';
 use strict;
 use threads;
 use threads::shared;
