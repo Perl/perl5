@@ -13,7 +13,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.000_08';
+$VERSION = '2.000_10';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -299,7 +299,9 @@ __END__
 =head1 NAME
 
 
-IO::Compress::Zip - Perl interface to write zip files/buffers
+
+IO::Compress::Zip - Write zip files/buffers
+ 
  
 
 =head1 SYNOPSIS
@@ -376,8 +378,9 @@ compressed data to files or buffer.
 
 
 
-Note that this module is not intended to be a replacement for the module
+Note that IO::Compress::Zip is not intended to be a replacement for the module
 C<Archive::Zip>.
+
 The primary aim of this module is not as an archiver, but to provide
 streaming write access to zip file files and buffers.
 
@@ -463,16 +466,8 @@ See L<File::GlobMapper|File::GlobMapper> for more details.
 If the C<$input> parameter is any other type, C<undef> will be returned.
 
 
-
 In addition, if C<$input> is a simple filename, the default values for
-a number of the zip header fields created by this function will 
-be sourced from that file -- 
-
-the NAME gzip header field will be populated with
-the filename itself, and the MTIME header field will be set to the
-modification time of the file.
-The intention here is to mirror part of the behaviour of the 
-zip executable.
+the C<Name> and C<Time> options will be sourced from that file.
 
 If you do not want to use these defaults they can be overridden by
 explicitly setting the C<Name> and C<Time> options or by setting the
@@ -1108,13 +1103,9 @@ The primary site for gzip is F<http://www.gzip.org>.
 
 
 
-
-
-
 =head1 AUTHOR
 
-The I<IO::Compress::Zip> module was written by Paul Marquess,
-F<pmqs@cpan.org>. 
+This module was written by Paul Marquess, F<pmqs@cpan.org>. 
 
 
 
@@ -1123,7 +1114,6 @@ F<pmqs@cpan.org>.
 See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
- 
 
 Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
 

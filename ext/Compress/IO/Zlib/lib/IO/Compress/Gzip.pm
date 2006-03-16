@@ -26,7 +26,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $GzipError);
 
-$VERSION = '2.000_08';
+$VERSION = '2.000_10';
 $GzipError = '' ;
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -429,7 +429,9 @@ __END__
 =head1 NAME
 
 
-IO::Compress::Gzip - Perl interface to write RFC 1952 files/buffers
+
+IO::Compress::Gzip - Write RFC 1952 files/buffers
+ 
  
 
 =head1 SYNOPSIS
@@ -591,16 +593,8 @@ See L<File::GlobMapper|File::GlobMapper> for more details.
 If the C<$input> parameter is any other type, C<undef> will be returned.
 
 
-
 In addition, if C<$input> is a simple filename, the default values for
-a number of the gzip header fields created by this function will 
-be sourced from that file -- 
-
-the NAME gzip header field will be populated with
-the filename itself, and the MTIME header field will be set to the
-modification time of the file.
-The intention here is to mirror part of the behaviour of the gzip
-executable.
+the C<Name> and C<Time> options will be sourced from that file.
 
 If you do not want to use these defaults they can be overridden by
 explicitly setting the C<Name> and C<Time> options or by setting the
@@ -854,7 +848,7 @@ This parameter defaults to 0.
 
 
 
-=item -Merge =E<gt> 0|1
+=item Merge =E<gt> 0|1
 
 This option is used to compress input data and append it to an existing
 compressed data stream in C<$output>. The end result is a single compressed
@@ -1465,13 +1459,9 @@ The primary site for gzip is F<http://www.gzip.org>.
 
 
 
-
-
-
 =head1 AUTHOR
 
-The I<IO::Compress::Gzip> module was written by Paul Marquess,
-F<pmqs@cpan.org>. 
+This module was written by Paul Marquess, F<pmqs@cpan.org>. 
 
 
 
@@ -1480,7 +1470,6 @@ F<pmqs@cpan.org>.
 See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
- 
 
 Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
 

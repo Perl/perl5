@@ -10,7 +10,7 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter );
 
 
-$VERSION = '2.000_08';
+$VERSION = '2.000_10';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
@@ -1316,13 +1316,9 @@ L<IO::Zlib|IO::Zlib>
 
 
 
-
-
-
 =head1 AUTHOR
 
-The I<IO::Uncompress::Base> module was written by Paul Marquess,
-F<pmqs@cpan.org>. 
+This module was written by Paul Marquess, F<pmqs@cpan.org>. 
 
 
 
@@ -1331,7 +1327,6 @@ F<pmqs@cpan.org>.
 See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
- 
 
 Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
 

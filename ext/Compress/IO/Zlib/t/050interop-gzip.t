@@ -18,7 +18,7 @@ BEGIN {
 
     # Check external gzip is available
     my $name = 'gzip';
-    for my $dir (split ":", $ENV{PATH})
+    for my $dir (reverse split ":", $ENV{PATH})
     {
         $GZIP = "$dir/$name"
             if -x "$dir/$name" ;
@@ -46,14 +46,18 @@ sub readWithGzip
 {
     my $file = shift ;
 
+    my $lex = new LexFile my $outfile;
+
     my $comp = "$GZIP -dc" ;
 
-    open F, "$comp $file |";
-    local $/;
-    $_[0] = <F>;
-    close F;
+    #diag "$comp $file >$outfile" ;
 
-    return $? ;
+    system("$comp $file >$outfile") == 0
+        or die "'$comp' failed: $?";
+
+    $_[0] = readFile($outfile);
+
+    return 1 ;
 }
 
 sub getGzipInfo
@@ -67,14 +71,16 @@ sub writeWithGzip
     my $content = shift ;
     my $options = shift || '';
 
+    my $lex = new LexFile my $infile;
+    writeFile($infile, $content);
+
     unlink $file ;
-    my $gzip = "$GZIP -c $options >$file" ;
+    my $gzip = "$GZIP -c $options $infile >$file" ;
 
-    open F, "| $gzip" ;
-    print F $content ;
-    close F ;
+    system($gzip) == 0 
+        or die "'$gzip' failed: $?";
 
-    return $? ;
+    return 1 ;
 }
 
 
@@ -87,15 +93,15 @@ sub writeWithGzip
     my $content = "hello world\n" ;
     my $got;
 
-    is writeWithGzip($file, $content), 0, "writeWithGzip ok";
+    is writeWithGzip($file, $content), 1, "writeWithGzip ok";
 
     gunzip $file => \$got ;
-    is $got, $content;
+    is $got, $content, "got content";
 
 
     gzip \$content => $file1;
     $got = '';
-    is readWithGzip($file1, $got), 0, "readWithGzip returns 0";
+    is readWithGzip($file1, $got), 1, "readWithGzip ok";
     is $got, $content, "got content";
 }
 

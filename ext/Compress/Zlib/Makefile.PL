@@ -21,10 +21,14 @@ WriteMakefile(
     (
       $ENV{SKIP_FOR_CORE}
         ? (MAN3PODS    => {})
-	    : (PREREQ_PM   => { 'Compress::Raw::Zlib'  => 0,
-		                    'IO::Compress::Base'   => 0,
-		                    'IO::Compress::Zlib'   => 0,
-		                    'Scalar::Util'         => 0,
+	    : (PREREQ_PM   => { 'Compress::Raw::Zlib'           => 0,
+		                    'IO::Compress::Base'            => 0,
+		                    'IO::Compress::Base::Common'    => 0,
+		                    'IO::Uncompress::Base'          => 0,
+		                    'IO::Compress::Gzip'            => 0,
+		                    'IO::Compress::Gzip::Constants' => 0,
+		                    'IO::Uncompress::Gunzip'        => 0,
+		                    'Scalar::Util'                  => 0,
                           }
 	      )
     ),

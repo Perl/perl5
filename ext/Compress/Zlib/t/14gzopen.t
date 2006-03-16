@@ -20,7 +20,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 208 + $extra ;
+    plan tests => 210 + $extra ;
 
     use_ok('Compress::Zlib', 2) ;
     use_ok('IO::Compress::Gzip::Constants') ;
@@ -70,8 +70,16 @@ is $fil->gzread($uncomp), $len;
 
 is $fil->gztell(), $len;
 ok   $fil->gzeof() ;
+
+# gzread after eof bahavior
+
+my $xyz = "123" ;
+is $fil->gzread($xyz), 0, "gzread returns 0 on eof" ;
+is $xyz, "", "gzread on eof zaps the output buffer [Match 1,x behavior]" ;
+
 ok ! $fil->gzclose ;
 ok   $fil->gzeof() ;
+
 
 1 while unlink $name ;
 

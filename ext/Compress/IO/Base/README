@@ -1,9 +1,9 @@
 
                              IO::Compress::Base
 
-                             Version 2.000_08
+                             Version 2.000_10
 
-                                27 Feb 2006 
+                                13 Mar 2006 
 
 
        Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
@@ -23,7 +23,7 @@ DESCRIPTION
 -----------
 
 
-This module is a base class for all IO::Compress and IO::Uncompress
+This module is the base class for all IO::Compress and IO::Uncompress
 modules.
 
 

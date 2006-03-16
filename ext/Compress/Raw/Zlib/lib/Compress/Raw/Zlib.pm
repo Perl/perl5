@@ -13,7 +13,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.000_08';
+$VERSION = '2.000_10';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -1177,13 +1177,9 @@ The primary site for gzip is F<http://www.gzip.org>.
 
 
 
-
-
-
 =head1 AUTHOR
 
-The I<Compress::Raw::Zlib> module was written by Paul Marquess,
-F<pmqs@cpan.org>. 
+This module was written by Paul Marquess, F<pmqs@cpan.org>. 
 
 
 
@@ -1192,7 +1188,6 @@ F<pmqs@cpan.org>.
 See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
- 
 
 Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
 

@@ -20,7 +20,7 @@ use bytes;
 our (@ISA, $VERSION, $got_encode);
 #@ISA    = qw(Exporter IO::File);
 
-$VERSION = '2.000_08';
+$VERSION = '2.000_10';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 
@@ -968,13 +968,9 @@ L<IO::Zlib|IO::Zlib>
 
 
 
-
-
-
 =head1 AUTHOR
 
-The I<IO::Compress::Base> module was written by Paul Marquess,
-F<pmqs@cpan.org>. 
+This module was written by Paul Marquess, F<pmqs@cpan.org>. 
 
 
 
@@ -983,7 +979,6 @@ F<pmqs@cpan.org>.
 See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
- 
 
 Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
 

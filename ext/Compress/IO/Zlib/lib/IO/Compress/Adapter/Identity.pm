@@ -8,7 +8,7 @@ use IO::Compress::Base::Common qw(:Status);
 use Compress::Raw::Zlib () ;
 our ($VERSION);
 
-$VERSION = '2.000_05';
+$VERSION = '2.000_10';
 
 sub mkCompObject
 {

@@ -6,25 +6,27 @@ use bytes;
 
 use IO::Compress::Base::Common qw(createSelfTiedObject);
 
-#use IO::Uncompress::Base ;
-use IO::Uncompress::Gunzip ;
-use IO::Uncompress::Inflate ;
-use IO::Uncompress::RawInflate ;
-use IO::Uncompress::Unzip ;
+use IO::Uncompress::Base ;
 
 BEGIN
 {
+   eval { require IO::Uncompress::Adapter::Inflate; import IO::Uncompress::Adapter::Inflate };
    eval { require IO::Uncompress::Adapter::Bunzip2; import IO::Uncompress::Adapter::Bunzip2 };
-   eval { require IO::Uncompress::Adapter::LZO;     import IO::Uncompress::Adapter::LZO };
-   eval { require IO::Uncompress::Bunzip2;   import IO::Uncompress::Bunzip2 };
-   eval { require IO::Uncompress::UnLzop;    import IO::Uncompress::UnLzop };
+   eval { require IO::Uncompress::Adapter::LZO; import IO::Uncompress::Adapter::LZO };
+
+   eval { require IO::Uncompress::Bunzip2; import IO::Uncompress::Bunzip2 };
+   eval { require IO::Uncompress::UnLzop; import IO::Uncompress::UnLzop };
+   eval { require IO::Uncompress::Gunzip; import IO::Uncompress::Gunzip };
+   eval { require IO::Uncompress::Inflate; import IO::Uncompress::Inflate };
+   eval { require IO::Uncompress::RawInflate; import IO::Uncompress::RawInflate };
+   eval { require IO::Uncompress::Unzip; import IO::Uncompress::Unzip };
 }
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyUncompressError);
 
-$VERSION = '2.000_08';
+$VERSION = '2.000_10';
 $AnyUncompressError = '';
 
 @ISA = qw( Exporter IO::Uncompress::Base );
@@ -72,21 +74,26 @@ sub mkUncomp
     my $class = shift ;
     my $got = shift ;
 
+    my $magic ;
+
     # try zlib first
-    my ($obj, $errstr, $errno) = IO::Uncompress::Adapter::Inflate::mkUncompObject();
+    if (defined $IO::Uncompress::RawInflate::VERSION )
+    {
+        my ($obj, $errstr, $errno) = IO::Uncompress::Adapter::Inflate::mkUncompObject();
 
-    return $self->saveErrorString(undef, $errstr, $errno)
-        if ! defined $obj;
+        return $self->saveErrorString(undef, $errstr, $errno)
+            if ! defined $obj;
 
-    *$self->{Uncomp} = $obj;
-    
-     my $magic = $self->ckMagic( qw( RawInflate Inflate Gunzip Unzip ) ); 
+        *$self->{Uncomp} = $obj;
+        
+         $magic = $self->ckMagic( qw( RawInflate Inflate Gunzip Unzip ) ); 
 
-     if ($magic) {
-        *$self->{Info} = $self->readHeader($magic)
-            or return undef ;
+         if ($magic) {
+            *$self->{Info} = $self->readHeader($magic)
+                or return undef ;
 
-        return 1;
+            return 1;
+         }
      }
 
      #foreach my $type ( qw( Bunzip2 UnLzop ) ) {
@@ -158,7 +165,7 @@ __END__
 =head1 NAME
 
 
-IO::Uncompress::AnyUncompress - Perl interface to read 1950, 1951 & 1952 files/buffers
+IO::Uncompress::AnyUncompress - Uncompress gzip, zip, bzip2 or lzop file/buffer
 
 
 =head1 SYNOPSIS
@@ -225,11 +232,32 @@ B<WARNING -- This is a Beta release>.
 
 
 
-
 This module provides a Perl interface that allows the reading of
-any files/buffers.
+files/buffers that have been compressed with a variety of compression
+libraries.
 
-For writing 1950, 1951 & 1952 files/buffers, see the companion module IO::Compress::RawDeflate.
+The formats supported are:
+
+=over 5
+
+=item RFC 1950
+
+=item RFC 1951
+
+=item gzip (RFC 1952)
+
+=item zip
+
+=item bzip2
+
+=item lzop
+
+=back
+
+The module will auto-detect which, if any, of the supported
+compression formats is being used.
+
+
 
 
 
@@ -881,13 +909,9 @@ L<IO::Zlib|IO::Zlib>
 
 
 
-
-
-
 =head1 AUTHOR
 
-The I<IO::Uncompress::AnyUncompress> module was written by Paul Marquess,
-F<pmqs@cpan.org>. 
+This module was written by Paul Marquess, F<pmqs@cpan.org>. 
 
 
 
@@ -896,7 +920,6 @@ F<pmqs@cpan.org>.
 See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
- 
 
 Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
 

@@ -16,7 +16,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %DEFLATE_CONSTANTS, %EXPORT_TAGS, $RawDeflateError);
 
-$VERSION = '2.000_08';
+$VERSION = '2.000_10';
 $RawDeflateError = '';
 
 @ISA = qw(Exporter IO::Compress::Base);
@@ -248,7 +248,9 @@ __END__
 =head1 NAME
 
 
-IO::Compress::RawDeflate - Perl interface to write RFC 1951 files/buffers
+
+IO::Compress::RawDeflate - Write RFC 1951 files/buffers
+ 
  
 
 =head1 SYNOPSIS
@@ -657,7 +659,7 @@ This parameter defaults to 0.
 
 
 
-=item -Merge =E<gt> 0|1
+=item Merge =E<gt> 0|1
 
 This option is used to compress input data and append it to an existing
 compressed data stream in C<$output>. The end result is a single compressed
@@ -1072,13 +1074,9 @@ The primary site for gzip is F<http://www.gzip.org>.
 
 
 
-
-
-
 =head1 AUTHOR
 
-The I<IO::Compress::RawDeflate> module was written by Paul Marquess,
-F<pmqs@cpan.org>. 
+This module was written by Paul Marquess, F<pmqs@cpan.org>. 
 
 
 
@@ -1087,7 +1085,6 @@ F<pmqs@cpan.org>.
 See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
- 
 
 Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
 

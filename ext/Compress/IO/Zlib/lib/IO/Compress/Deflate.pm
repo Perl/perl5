@@ -15,7 +15,7 @@ use IO::Compress::Base::Common qw(createSelfTiedObject);
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $DeflateError);
 
-$VERSION = '2.000_08';
+$VERSION = '2.000_10';
 $DeflateError = '';
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -167,7 +167,9 @@ __END__
 =head1 NAME
 
 
-IO::Compress::Deflate - Perl interface to write RFC 1950 files/buffers
+
+IO::Compress::Deflate - Write RFC 1950 files/buffers
+ 
  
 
 =head1 SYNOPSIS
@@ -573,7 +575,7 @@ This parameter defaults to 0.
 
 
 
-=item -Merge =E<gt> 0|1
+=item Merge =E<gt> 0|1
 
 This option is used to compress input data and append it to an existing
 compressed data stream in C<$output>. The end result is a single compressed
@@ -988,13 +990,9 @@ The primary site for gzip is F<http://www.gzip.org>.
 
 
 
-
-
-
 =head1 AUTHOR
 
-The I<IO::Compress::Deflate> module was written by Paul Marquess,
-F<pmqs@cpan.org>. 
+This module was written by Paul Marquess, F<pmqs@cpan.org>. 
 
 
 
@@ -1003,7 +1001,6 @@ F<pmqs@cpan.org>.
 See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
- 
 
 Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
 

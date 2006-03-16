@@ -1,6 +1,15 @@
 CHANGES
 -------
 
+  2.000_10 13 March 2006
+
+      * AnyUncompress doesn't assume  that IO-Compress-Zlib is installed any
+        more.
+
+  2.000_09 3 March 2006
+
+      * Released to CPAN.
+
   2.000_08 2 March 2006
 
       * Split IO::Compress::Base into its own distribution.

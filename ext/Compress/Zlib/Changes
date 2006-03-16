@@ -1,11 +1,18 @@
 CHANGES
 -------
 
+  2.000_10 13 March 2006
+
+      * Changed gzread so that its behaviour matches C::Z::gzread 1.x if it
+        is called after eof. In this case it will write an empty string
+        into the output parameter. This change is solely for backward
+        compatability reasons.
+
+  2.000_09 3 March 2006
+
+      * Posted to CPAN
+
   2.000_08 2 March 2006
-
-      * Moved the IO::* modules out into their own distributions.
-
-  2.000_08 9 January 2006
 
       * Breakout zlib specific code into separate modules.
 

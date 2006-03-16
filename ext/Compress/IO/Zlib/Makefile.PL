@@ -23,6 +23,7 @@ WriteMakefile(
         ? (MAN3PODS    => {})
 	    : (PREREQ_PM   => { 'Compress::Raw::Zlib'  => 0,
 		                    'IO::Compress::Base'   => 0,
+		                    'IO::Uncompress::Base' => 0,
 		                    $] >= 5.005 && $] < 5.006   
                                 ? ('File::BSDGlob' => 0) 
                                 : () }

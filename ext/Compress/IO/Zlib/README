@@ -1,9 +1,9 @@
 
                              IO::Compress::Zlib
 
-                             Version 2.000_08
+                             Version 2.000_10
 
-                                27 Feb 2006 
+                                13 Mar 2006 
 
 
        Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
@@ -23,7 +23,7 @@ DESCRIPTION
 -----------
 
 
-This module provides a Perl interface to allow reading an writing of RFC
+This module provides a Perl interface to allow reading and writing of RFC
 1950, 1951, 1952 (i.e. gzip) and zip files/buffers.
 
 
@@ -79,7 +79,7 @@ TROUBLESHOOTING
 
 
 
-The t/17isize Test Suite
+The t/020isize Test Suite
 ------------------------
 
 This test suite checks that IO::Compress::Zlib can cope with gzip files

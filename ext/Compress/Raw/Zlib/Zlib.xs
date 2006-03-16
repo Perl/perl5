@@ -1862,7 +1862,8 @@ resetLastBlockByte(s, byte)
 #ifndef MAGIC_APPEND
         croak("resetLastBlockByte needs zlib 1.2.1 or better");
 #else
-        *byte = *byte ^ (1 << ((8 - s->window_lastbit) & 7));
+        if (byte != NULL)
+            *byte = *byte ^ (1 << ((8 - s->window_lastbit) & 7));
 #endif
 
 

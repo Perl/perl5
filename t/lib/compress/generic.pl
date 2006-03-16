@@ -18,7 +18,7 @@ BEGIN
     $extra = 1
         if $st ;
 
-    plan(tests => 597 + $extra) ;
+    plan(tests => 601 + $extra) ;
 }
 
 sub myGZreadFile
@@ -1260,6 +1260,8 @@ EOT
                 is $u->read($buff, 1), 0;
                 ok $u->eof() ;
 
+                # getc returns undef on eof
+                is $u->getc(), undef;
                 $u->close();
 
             }

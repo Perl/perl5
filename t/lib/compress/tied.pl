@@ -23,15 +23,13 @@ BEGIN
     $BadPerl = ($] >= 5.006 and $] <= 5.008) ;
 
     if ($BadPerl) {
-        $tests = 242 ;
+        $tests = 241 ;
     }
     else {
-        $tests = 250 ;
+        $tests = 249 ;
     }
 
     plan tests => $tests + $extra ;
-
-    use_ok('Compress::Raw::Zlib') ;
 
 }
  

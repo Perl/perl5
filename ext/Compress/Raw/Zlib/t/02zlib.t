@@ -24,13 +24,13 @@ BEGIN
 
     my $count = 0 ;
     if ($] < 5.005) {
-        $count = 188 ;
+        $count = 189 ;
     }
     elsif ($] >= 5.006) {
-        $count = 242 ;
+        $count = 243 ;
     }
     else {
-        $count = 200 ;
+        $count = 201 ;
     }
 
     plan tests => $count + $extra;
@@ -718,6 +718,13 @@ if ($] >= 5.005)
     ok $hello eq $Z ;
     is $X, $keep;
     
+}
+
+{
+    # regression - check that resetLastBlockByte can cope with a NULL
+    # pointer.
+    Compress::Raw::Zlib::InflateScan->new->resetLastBlockByte(undef);
+    ok 1, "resetLastBlockByte(undef) is ok" ;
 }
 
 exit if $] < 5.006 ;

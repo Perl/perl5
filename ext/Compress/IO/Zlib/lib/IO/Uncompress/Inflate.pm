@@ -13,7 +13,7 @@ use IO::Uncompress::RawInflate ;
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $InflateError);
 
-$VERSION = '2.000_08';
+$VERSION = '2.000_10';
 $InflateError = '';
 
 @ISA    = qw( Exporter IO::Uncompress::RawInflate );
@@ -178,7 +178,9 @@ __END__
 =head1 NAME
 
 
-IO::Uncompress::Inflate - Perl interface to read RFC 1950 files/buffers
+
+IO::Uncompress::Inflate - Read RFC 1950 files/buffers
+
 
 
 =head1 SYNOPSIS
@@ -252,6 +254,9 @@ This module provides a Perl interface that allows the reading of
 files/buffers that conform to RFC 1950.
 
 For writing RFC 1950 files/buffers, see the companion module IO::Compress::Deflate.
+
+
+
 
 
 
@@ -938,13 +943,9 @@ The primary site for gzip is F<http://www.gzip.org>.
 
 
 
-
-
-
 =head1 AUTHOR
 
-The I<IO::Uncompress::Inflate> module was written by Paul Marquess,
-F<pmqs@cpan.org>. 
+This module was written by Paul Marquess, F<pmqs@cpan.org>. 
 
 
 
@@ -953,7 +954,6 @@ F<pmqs@cpan.org>.
 See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
- 
 
 Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
 

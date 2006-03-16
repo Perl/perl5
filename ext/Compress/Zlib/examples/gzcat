@@ -15,11 +15,8 @@ my $filename ;
 foreach my $filename (@ARGV) {
     my $buffer ;
 
-    my $file = $filename ;
-    $file = \*STDIN if $file eq '-' ;
-
-    my $gz = gzopen($file, "rb") 
-         or die "Cannot open $file: $gzerrno\n" ;
+    my $gz = gzopen($filename, "rb") 
+         or die "Cannot open $filename: $gzerrno\n" ;
 
     print $buffer while $gz->gzread($buffer) > 0 ;
 

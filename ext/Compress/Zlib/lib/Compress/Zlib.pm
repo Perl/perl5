@@ -18,7 +18,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.000_08';
+$VERSION = '2.000_10';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -158,11 +158,14 @@ sub Compress::Zlib::gzFile::gzread
     return _set_gzerr(Z_STREAM_ERROR())
         if $self->[1] ne 'inflate';
 
-    return 0 if $self->gzeof();
+    if ($self->gzeof()) {
+        # Zap the output buffer to match ver 1 behaviour.
+        $_[0] = "" ;
+        return 0 ;
+    }
 
     my $gz = $self->[0] ;
     my $status = $gz->read($_[0], defined $_[1] ? $_[1] : 4096) ; 
-    $_[0] = "" if ! defined $_[0] ;
     _save_gzerr($gz, 1);
     return $status ;
 }
@@ -1436,13 +1439,9 @@ The primary site for gzip is F<http://www.gzip.org>.
 
 
 
-
-
-
 =head1 AUTHOR
 
-The I<Compress::Zlib> module was written by Paul Marquess,
-F<pmqs@cpan.org>. 
+This module was written by Paul Marquess, F<pmqs@cpan.org>. 
 
 
 
@@ -1451,7 +1450,6 @@ F<pmqs@cpan.org>.
 See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
- 
 
 Copyright (c) 1995-2006 Paul Marquess. All rights reserved.
 

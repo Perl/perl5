@@ -329,8 +329,7 @@ sub zlib_files
 
 
 
-my @GZIP_OS_Names ;
-my %OSnames ;
+use vars qw ( @GZIP_OS_Names  %OSnames) ;
 
 BEGIN
 {

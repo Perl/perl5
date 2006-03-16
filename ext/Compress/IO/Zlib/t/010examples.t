@@ -30,8 +30,8 @@ BEGIN
 
 
 my $Inc = join " ", map qq["-I$_"] => @INC;
-#$Inc = '"-MExtUtils::testlib"'
-#    if ! $ENV{PERL_CORE} && eval " require ExtUtils::testlib; " ;
+$Inc = '"-MExtUtils::testlib"'
+    if ! $ENV{PERL_CORE} && eval " require ExtUtils::testlib; " ;
 
 my $Perl = ($ENV{'FULLPERL'} or $^X or 'perl') ;
 $Perl = qq["$Perl"] if $^O eq 'MSWin32' ;

@@ -1,6 +1,14 @@
 CHANGES
 -------
 
+  2.000_10 13 March 2006
+
+      * Documentation updates.
+
+  2.000_09 3 March 2006
+
+      * Released to CPAN.
+
   2.000_08 2 March 2006
 
       * Split IO::Compress::Zlib into its own distribution.
