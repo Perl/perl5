@@ -1145,6 +1145,10 @@ documentation for the C<-C> switch for more information about
 the possible values. This variable is set during Perl startup
 and is thereafter read-only.
 
+=item ${^UTF8CACHE}
+
+This variable controls the state of the internal UTF-8 offset caching code.
+
 =item ${^UTF8LOCALE}
 
 This variable indicates whether an UTF-8 locale was detected by perl at

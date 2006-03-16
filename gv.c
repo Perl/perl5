@@ -1070,6 +1070,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		    goto ro_magicalize;
 		if (strEQ(name2, "TF8LOCALE"))
 		    goto ro_magicalize;
+		if (strEQ(name2, "TF8CACHE"))
+		    goto magicalize;
 		break;
 	    case '\027':	/* $^WARNING_BITS */
 		if (strEQ(name2, "ARNING_BITS"))

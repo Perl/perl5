@@ -686,6 +686,8 @@ END_EXTERN_C
 #define PL_utf8_upper		(*Perl_Iutf8_upper_ptr(aTHX))
 #undef  PL_utf8_xdigit
 #define PL_utf8_xdigit		(*Perl_Iutf8_xdigit_ptr(aTHX))
+#undef  PL_utf8cache
+#define PL_utf8cache		(*Perl_Iutf8cache_ptr(aTHX))
 #undef  PL_utf8locale
 #define PL_utf8locale		(*Perl_Iutf8locale_ptr(aTHX))
 #undef  PL_uudmap

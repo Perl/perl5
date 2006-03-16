@@ -790,11 +790,13 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		    ? (PL_taint_warn || PL_unsafe ? -1 : 1)
 		    : 0);
         break;
-    case '\025':		/* $^UNICODE, $^UTF8LOCALE */
+    case '\025':		/* $^UNICODE, $^UTF8LOCALE, $^UTF8CACHE */
 	if (strEQ(remaining, "NICODE"))
 	    sv_setuv(sv, (UV) PL_unicode);
 	else if (strEQ(remaining, "TF8LOCALE"))
 	    sv_setuv(sv, (UV) PL_utf8locale);
+	else if (strEQ(remaining, "TF8CACHE"))
+	    sv_setiv(sv, (IV) PL_utf8cache);
         break;
     case '\027':		/* ^W  & $^WARNING_BITS */
 	if (nextchar == '\0')
@@ -2232,6 +2234,11 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	PL_basetime = (Time_t)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 #endif
 	break;
+    case '\025':	/* ^UTF8CACHE */
+	 if (strEQ(mg->mg_ptr+1, "TF8CACHE")) {
+	     PL_utf8cache = (signed char) sv_2iv(sv);
+	 }
+	 break;
     case '\027':	/* ^W & $^WARNING_BITS */
 	if (*(mg->mg_ptr+1) == '\0') {
 	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
