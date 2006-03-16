@@ -1784,8 +1784,17 @@ win32_async_check(pTHX)
 
     w32_poll_count = 0;
 
-    if (hwnd == INVALID_HANDLE_VALUE)
+    if (hwnd == INVALID_HANDLE_VALUE) {
+        /* Call PeekMessage() to mark all pending messages in the queue as "old".
+         * This is necessary when we are being called by win32_msgwait() to
+         * make sure MsgWaitForMultipleObjects() stops reporting the same waiting
+         * message over and over.  An example how this can happen is when
+         * Perl is calling win32_waitpid() inside a GUI application and the GUI
+         * is generating messages before the process terminated.
+         */
+        PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE|PM_NOYIELD);
         return 1;
+    }
 
     /* Passing PeekMessage -1 as HWND (2nd arg) only get PostThreadMessage() messages
      * and ignores window messages - should co-exist better with windows apps e.g. Tk
