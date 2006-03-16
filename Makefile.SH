@@ -357,7 +357,7 @@ c5 = $(madlysrc) $(mallocsrc)
 c = $(c1) $(c2) $(c3) $(c4) $(c5) miniperlmain.c perlmain.c opmini.c
 
 obj1 = $(madlyobj) $(mallocobj) gv$(OBJ_EXT) toke$(OBJ_EXT) perly$(OBJ_EXT) op$(OBJ_EXT) pad$(OBJ_EXT) regcomp$(OBJ_EXT) dump$(OBJ_EXT) util$(OBJ_EXT) mg$(OBJ_EXT) reentr$(OBJ_EXT)
-obj2 = hv$(OBJ_EXT) av$(OBJ_EXT) run$(OBJ_EXT) pp_hot$(OBJ_EXT) sv$(OBJ_EXT) pp$(OBJ_EXT) scope$(OBJ_EXT) pp_ctl$(OBJ_EXT) pp_sys$(OBJ_EXT)
+obj2 = hv$(OBJ_EXT) av$(OBJ_EXT) perl$(OBJ_EXT) run$(OBJ_EXT) pp_hot$(OBJ_EXT) sv$(OBJ_EXT) pp$(OBJ_EXT) scope$(OBJ_EXT) pp_ctl$(OBJ_EXT) pp_sys$(OBJ_EXT)
 obj3 = doop$(OBJ_EXT) doio$(OBJ_EXT) regexec$(OBJ_EXT) utf8$(OBJ_EXT) taint$(OBJ_EXT) deb$(OBJ_EXT) universal$(OBJ_EXT) xsutils$(OBJ_EXT) globals$(OBJ_EXT) perlio$(OBJ_EXT) perlapi$(OBJ_EXT) numeric$(OBJ_EXT) mathoms$(OBJ_EXT) locale$(OBJ_EXT) pp_pack$(OBJ_EXT) pp_sort$(OBJ_EXT)
 
 obj = $(obj1) $(obj2) $(obj3) $(ARCHOBJS)
@@ -497,9 +497,9 @@ CCDLFLAGS		= `echo $ccdlflags|sed -e 's@-bE:.*/perl\.exp@-bE:perl.exp@'`
 LIBPERL_NONSHR		= libperl_nonshr$(LIB_EXT)
 MINIPERL_NONSHR		= miniperl_nonshr$(EXE_EXT)
 
-$(LIBPERL_NONSHR): perl$(OBJ_EXT) $(obj)
+$(LIBPERL_NONSHR): $(obj)
 	$(RMS) $(LIBPERL_NONSHR)
-	$(AR) rcu $(LIBPERL_NONSHR) perl$(OBJ_EXT) $(obj)
+	$(AR) rcu $(LIBPERL_NONSHR) $(obj)
 
 $(MINIPERL_NONSHR): $(LIBPERL_NONSHR) miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT)
 	$(CC) $(LDFLAGS) -o $(MINIPERL_NONSHR) miniperlmain$(OBJ_EXT) \
@@ -546,12 +546,12 @@ Makefile: $Makefile_s
 !GROK!THIS!
 else
 	$spitshell >>Makefile <<'!NO!SUBS!'
-$(LIBPERL): $& perl$(OBJ_EXT) $(obj) $(LIBPERLEXPORT)
+$(LIBPERL): $& $(obj) $(LIBPERLEXPORT)
 !NO!SUBS!
 	case "$useshrplib" in
 	true)
 		$spitshell >>Makefile <<'!NO!SUBS!'
-	$(LD) -o $@ $(SHRPLDFLAGS) perl$(OBJ_EXT) $(obj) $(libs)
+	$(LD) -o $@ $(SHRPLDFLAGS) $(obj) $(libs)
 !NO!SUBS!
 		case "$osname" in
 		aix)
@@ -566,7 +566,7 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj) $(LIBPERLEXPORT)
 	*)
 		$spitshell >>Makefile <<'!NO!SUBS!'
 	rm -f $(LIBPERL)
-	$(AR) rcu $(LIBPERL) perl$(OBJ_EXT) $(obj)
+	$(AR) rcu $(LIBPERL) $(obj)
 	@$(ranlib) $(LIBPERL)
 !NO!SUBS!
 		;;
@@ -591,7 +591,7 @@ $(LIBPERL): $& perl$(OBJ_EXT) $(obj) $(LIBPERLEXPORT)
 miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
 	$(CC) -o miniperl $(CLDFLAGS) \
 	    `echo $(obj) | sed 's/ op$(OBJ_EXT) / /'` \
-	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) perl$(OBJ_EXT) $(libs)
+	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) $(libs)
 	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 !NO!SUBS!
 		;;
@@ -599,7 +599,7 @@ miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
 		$spitshell >>Makefile <<'!NO!SUBS!'
 miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
 	$(CC) -o miniperl `echo $(obj) | sed 's/ op$(OBJ_EXT) / /'` \
-	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) perl$(OBJ_EXT) $(libs)
+	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) $(libs)
 	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
 !NO!SUBS!
 		;;
