@@ -121,6 +121,9 @@ esac
 if test ! -f $makefile ; then
 	test -f Makefile.PL && ../$depth/miniperl -I../$depth/lib Makefile.PL INSTALLDIRS=perl PERL_CORE=1 $passthru
 fi
+if test ! -f $makefile ; then
+	echo "Warning: No Makefile!"
+fi
 
 case "$target" in
 clean)		;;
