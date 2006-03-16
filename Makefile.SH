@@ -588,7 +588,7 @@ $(LIBPERL): $& $(obj) $(LIBPERLEXPORT)
 	case "${osname}${osvers}" in
 	aix*|beos*)
 		$spitshell >>Makefile <<'!NO!SUBS!'
-miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
+miniperl: $& miniperlmain$(OBJ_EXT) $(obj) opmini$(OBJ_EXT)
 	$(CC) -o miniperl $(CLDFLAGS) \
 	    `echo $(obj) | sed 's/ op$(OBJ_EXT) / /'` \
 	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) $(libs)
@@ -597,7 +597,7 @@ miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
 		;;
 	next4*)
 		$spitshell >>Makefile <<'!NO!SUBS!'
-miniperl: $& miniperlmain$(OBJ_EXT) $(LIBPERL) opmini$(OBJ_EXT)
+miniperl: $& miniperlmain$(OBJ_EXT) $(obj) opmini$(OBJ_EXT)
 	$(CC) -o miniperl `echo $(obj) | sed 's/ op$(OBJ_EXT) / /'` \
 	    miniperlmain$(OBJ_EXT) opmini$(OBJ_EXT) $(libs)
 	$(LDLIBPTH) ./miniperl -w -Ilib -MExporter -e '<?>' || $(MAKE) minitest
