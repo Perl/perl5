@@ -12,7 +12,7 @@ WriteMakefile(
 		    'XSLoader_pm.PL'=>'XSLoader.pm'},
     PM		=> {'DynaLoader.pm' => '$(INST_LIBDIR)/DynaLoader.pm',
 		    'XSLoader.pm' => '$(INST_LIBDIR)/XSLoader.pm'},
-    depend      => {'DynaLoader.o' => 'dlutils.c'},
+    depend      => {'DynaLoader$(OBJ_EXT)' => 'dlutils.c'},
     clean	=> {FILES => 'DynaLoader.c DynaLoader.xs DynaLoader.pm ' .
 			     'XSLoader.pm'},
 );
