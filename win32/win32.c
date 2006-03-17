@@ -1793,6 +1793,8 @@ win32_async_check(pTHX)
          * is generating messages before the process terminated.
          */
         PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE|PM_NOYIELD);
+        if (PL_sig_pending)
+            despatch_signals();
         return 1;
     }
 
