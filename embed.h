@@ -1330,7 +1330,6 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define regmatch		S_regmatch
 #define regrepeat		S_regrepeat
-#define regrepeat_hard		S_regrepeat_hard
 #define regtry			S_regtry
 #define reginclass		S_reginclass
 #define regcppush		S_regcppush
@@ -3473,7 +3472,6 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define regmatch(a)		S_regmatch(aTHX_ a)
 #define regrepeat(a,b)		S_regrepeat(aTHX_ a,b)
-#define regrepeat_hard(a,b,c)	S_regrepeat_hard(aTHX_ a,b,c)
 #define regtry(a,b)		S_regtry(aTHX_ a,b)
 #define reginclass(a,b,c,d)	S_reginclass(aTHX_ a,b,c,d)
 #define regcppush(a)		S_regcppush(aTHX_ a)

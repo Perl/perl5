@@ -2130,12 +2130,9 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	    if (!(SvTYPE(PL_reg_sv) >= SVt_PVMG && SvMAGIC(PL_reg_sv)
 		  && (mg = mg_find(PL_reg_sv, PERL_MAGIC_regex_global)))) {
 		/* prepare for quick setting of pos */
-#ifdef PERL_OLD_COPY_ON_WRITE
-		if (SvIsCOW(sv))
-		    sv_force_normal_flags(sv, 0);
-#endif
-		mg = sv_magicext(PL_reg_sv, (SV*)0, PERL_MAGIC_regex_global,
-				 &PL_vtbl_mglob, NULL, 0);
+		sv_magic(PL_reg_sv, (SV*)0,
+			PERL_MAGIC_regex_global, NULL, 0);
+		mg = mg_find(PL_reg_sv, PERL_MAGIC_regex_global);
 		mg->mg_len = -1;
 	    }
 	    PL_reg_magic    = mg;
@@ -3716,8 +3713,9 @@ S_regmatch(pTHX_ regnode *prog)
 	case CURLYM:
 	{
 	    I32 l = 0;
+	    I32 matches = 0;
 	    CHECKPOINT lastcp;
-	    I32 count;
+	    I32 maxwanted;
 	
 	    /* We suppose that the next guy does not need
 	       backtracking: in particular, it is of constant non-zero length,
@@ -3735,14 +3733,38 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (paren)
 		scan += NEXT_OFF(scan); /* Skip former OPEN. */
 	    PL_reginput = locinput;
-	    count = minmod ? ln : n;
-	    if (count)
-		count = regrepeat_hard(scan, count, &l);
+	    maxwanted = minmod ? ln : n;
+	    if (maxwanted) {
+		while (PL_reginput < PL_regeol && matches < maxwanted) {
+		    if (!regmatch(scan))
+			break;
+		    /* on first match, determine length, l */
+		    if (!matches++) {
+			if (PL_reg_match_utf8) {
+			    char *s = locinput;
+			    while (s < PL_reginput) {
+				l++;
+				s += UTF8SKIP(s);
+			    }
+			}
+			else {
+			    l = PL_reginput - locinput;
+			}
+			if (l == 0) {
+			    matches = maxwanted;
+			    break;
+			}
+		    }
+		    locinput = PL_reginput;
+		}
+	    }
+
+	    PL_reginput = locinput;
+
 	    if (minmod) {
 		minmod = 0;
-		if (ln && count < ln)
+		if (ln && matches < ln)
 		    sayNO;
-		locinput = PL_reginput;
 		if (HAS_TEXT(next) || JUMPABLE(next)) {
 		    regnode *text_node = next;
 
@@ -3797,15 +3819,13 @@ S_regmatch(pTHX_ regnode *prog)
 		}
 	    }
 	    else {
-		n = count;
-		locinput = PL_reginput;
 		DEBUG_EXECUTE_r(
 		    PerlIO_printf(Perl_debug_log,
 				  "%*s  matched %"IVdf" times, len=%"IVdf"...\n",
 				  (int)(REPORT_CODE_OFF+PL_regindent*2), "",
-				  (IV) n, (IV)l)
+				  (IV) matches, (IV)l)
 		    );
-		if (n >= ln) {
+		if (matches >= ln) {
 		    if (HAS_TEXT(next) || JUMPABLE(next)) {
 			regnode *text_node = next;
 
@@ -3832,19 +3852,20 @@ S_regmatch(pTHX_ regnode *prog)
 		}
 	    assume_ok_REG:
 		REGCP_SET(lastcp);
-		while (n >= ln) {
+		while (matches >= ln) {
 		    /* If it could work, try it. */
 		    if (c1 == -1000 ||
 			UCHARAT(PL_reginput) == c1 ||
 			UCHARAT(PL_reginput) == c2)
 		    {
 			DEBUG_EXECUTE_r(
-				PerlIO_printf(Perl_debug_log,
-					      "%*s  trying tail with n=%"IVdf"...\n",
-					      (int)(REPORT_CODE_OFF+PL_regindent*2), "", (IV)n)
+			    PerlIO_printf(Perl_debug_log,
+				"%*s  trying tail with matches=%"IVdf"...\n",
+				(int)(REPORT_CODE_OFF+PL_regindent*2),
+				"", (IV)matches)
 			    );
 			if (paren) {
-			    if (n) {
+			    if (matches) {
 				PL_regstartp[paren] = HOPc(PL_reginput, -l) - PL_bostr;
 				PL_regendp[paren] = PL_reginput - PL_bostr;
 			    }
@@ -3856,7 +3877,7 @@ S_regmatch(pTHX_ regnode *prog)
 			REGCP_UNWIND(lastcp);
 		    }
 		    /* Couldn't or didn't -- back up. */
-		    n--;
+		    matches--;
 		    locinput = HOPc(locinput, -l);
 		    PL_reginput = locinput;
 		}
@@ -4598,58 +4619,6 @@ S_regrepeat(pTHX_ const regnode *p, I32 max)
     return(c);
 }
 
-/*
- - regrepeat_hard - repeatedly match something, report total lenth and length
- *
- * The repeater is supposed to have constant non-zero length.
- */
-
-STATIC I32
-S_regrepeat_hard(pTHX_ regnode *p, I32 max, I32 *lp)
-{
-    dVAR;
-    register char *scan = NULL;
-    register char *start;
-    register char *loceol = PL_regeol;
-    I32 l = 0;
-    I32 count = 0, res = 1;
-
-    if (!max)
-	return 0;
-
-    start = PL_reginput;
-    if (PL_reg_match_utf8) {
-	while (PL_reginput < loceol && (scan = PL_reginput, res = regmatch(p))) {
-	    if (!count++) {
-		l = 0;
-		while (start < PL_reginput) {
-		    l++;
-		    start += UTF8SKIP(start);
-		}
-		*lp = l;
-		if (l == 0)
-		    return max;
-	    }
-	    if (count == max)
-		return count;
-	}
-    }
-    else {
-	while (PL_reginput < loceol && (scan = PL_reginput, res = regmatch(p))) {
-	    if (!count++) {
-		*lp = l = PL_reginput - start;
-		if (max != REG_INFTY && l*max < loceol - scan)
-		    loceol = scan + l*max;
-		if (l == 0)
-		    return max;
-	    }
-	}
-    }
-    if (!res)
-	PL_reginput = scan;
-
-    return count;
-}
 
 /*
 - regclass_swash - prepare the utf8 swash

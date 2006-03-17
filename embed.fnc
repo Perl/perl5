@@ -1303,7 +1303,6 @@ Es	|I32	|make_trie	|NN struct RExC_state_t* state|NN regnode *startbranch \
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
 ERs	|I32	|regmatch	|NN regnode *prog
 ERs	|I32	|regrepeat	|NN const regnode *p|I32 max
-ERs	|I32	|regrepeat_hard	|NN regnode *p|I32 max|NN I32 *lp
 ERs	|I32	|regtry		|NN regexp *prog|NN char *startpos
 ERs	|bool	|reginclass	|NN const regnode *n|NN const U8 *p|NULLOK STRLEN *lenp\
 				|bool do_utf8sv_is_utf8
