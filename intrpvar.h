@@ -553,7 +553,11 @@ PERLVARI(Imy_cxt_list, void **, NULL) /* per-module array of MY_CXT pointers */
 PERLVAR(Imemory_debug_header, struct perl_memory_debug_header)
 #endif
 
-PERLVARI(Iutf8cache, signed char, 1)	/* Is the utf8 caching code enabled? */
+#ifdef PERL_UTF8_CACHE_ASSERT
+PERLVARI(Iutf8cache, I8, -1)	/* Is the utf8 caching code enabled? */
+#else
+PERLVARI(Iutf8cache, I8, 1)	/* Is the utf8 caching code enabled? */
+#endif
 
 /* New variables must be added to the very end, before this comment,
  * for binary compatibility (the offsets of the old members must not change).

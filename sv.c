@@ -5285,28 +5285,43 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
 	return mg_length(sv);
     else
     {
-	STRLEN len, ulen;
+	STRLEN len;
 	const U8 *s = (U8*)SvPV_const(sv, len);
-	MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : 0;
 
-	if (mg && mg->mg_len != -1) {
-	    ulen = mg->mg_len;
-#ifdef PERL_UTF8_CACHE_ASSERT
-	    assert(ulen == Perl_utf8_length(aTHX_ s, s + len));
-#endif
-	}
-	else {
-	    ulen = Perl_utf8_length(aTHX_ s, s + len);
-	    if (!SvREADONLY(sv)) {
-		if (!mg) {
-		    sv_magic(sv, 0, PERL_MAGIC_utf8, 0, 0);
-		    mg = mg_find(sv, PERL_MAGIC_utf8);
-		    assert(mg);
+	if (PL_utf8cache) {
+	    STRLEN ulen;
+	    MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : 0;
+
+	    if (mg && mg->mg_len != -1) {
+		ulen = mg->mg_len;
+		if (PL_utf8cache < 0) {
+		    const STRLEN real = Perl_utf8_length(aTHX_ s, s + len);
+		    if (real != ulen) {
+			/* Need to turn the assertions off otherwise we may
+			   recurse infinitely while printing error messages.
+			*/
+			SAVEI8(PL_utf8cache);
+			PL_utf8cache = 0;
+			Perl_croak(aTHX_ "panic: sv_len_utf8 cache %"UVf
+				   "real %"UVf" for %"SVf,
+				   (UV) ulen, (UV) real, sv);
+		    }
 		}
-		mg->mg_len = ulen;
 	    }
+	    else {
+		ulen = Perl_utf8_length(aTHX_ s, s + len);
+		if (!SvREADONLY(sv)) {
+		    if (!mg) {
+			mg = sv_magicext(sv, 0, PERL_MAGIC_utf8,
+					 &PL_vtbl_utf8, 0, 0);
+		    }
+		    assert(mg);
+		    mg->mg_len = ulen;
+		}
+	    }
+	    return ulen;
 	}
-	return ulen;
+	return Perl_utf8_length(aTHX_ s, s + len);
     }
 }
 
