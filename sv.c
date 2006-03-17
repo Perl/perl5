@@ -5297,13 +5297,14 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
 	}
 	else {
 	    ulen = Perl_utf8_length(aTHX_ s, s + len);
-	    if (!mg && !SvREADONLY(sv)) {
-		sv_magic(sv, 0, PERL_MAGIC_utf8, 0, 0);
-		mg = mg_find(sv, PERL_MAGIC_utf8);
-		assert(mg);
-	    }
-	    if (mg)
+	    if (!SvREADONLY(sv)) {
+		if (!mg) {
+		    sv_magic(sv, 0, PERL_MAGIC_utf8, 0, 0);
+		    mg = mg_find(sv, PERL_MAGIC_utf8);
+		    assert(mg);
+		}
 		mg->mg_len = ulen;
+	    }
 	}
 	return ulen;
     }
