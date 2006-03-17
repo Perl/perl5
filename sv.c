@@ -5289,7 +5289,7 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
 	const U8 *s = (U8*)SvPV_const(sv, len);
 	MAGIC *mg = SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : 0;
 
-	if (mg && mg->mg_len != -1 && (mg->mg_len > 0 || len == 0)) {
+	if (mg && mg->mg_len != -1) {
 	    ulen = mg->mg_len;
 #ifdef PERL_UTF8_CACHE_ASSERT
 	    assert(ulen == Perl_utf8_length(aTHX_ s, s + len));
@@ -5326,8 +5326,10 @@ S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i,
     bool found = FALSE;
 
     if (SvMAGICAL(sv) && !SvREADONLY(sv)) {
-	if (!*mgp)
+	if (!*mgp) {
 	    *mgp = sv_magicext(sv, 0, PERL_MAGIC_utf8, (MGVTBL*)&PL_vtbl_utf8, 0, 0);
+	    (*mgp)->mg_len = -1;
+	}
 	assert(*mgp);
 
 	if ((*mgp)->mg_ptr)
@@ -5445,7 +5447,7 @@ S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I
 	}
 #ifdef PERL_UTF8_CACHE_ASSERT
 	if (found) {
-	     U8 *s = start;
+	     const U8 *s = start;
 	     I32 n = uoff;
 
 	     while (n-- && s < send)
@@ -5649,6 +5651,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 	    if (!mg) {
 		sv_magic(sv, 0, PERL_MAGIC_utf8, 0, 0);
 		mg = mg_find(sv, PERL_MAGIC_utf8);
+		mg->mg_len = -1;
 	    }
 	    assert(mg);
 

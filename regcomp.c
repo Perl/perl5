@@ -478,7 +478,7 @@ S_scan_commit(pTHX_ RExC_state_t *pRExC_state, scan_data_t *data)
 	SV * const sv = data->last_found;
 	MAGIC * const mg =
 	    SvUTF8(sv) && SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : NULL;
-	if (mg && mg->mg_len > 0)
+	if (mg)
 	    mg->mg_len = 0;
     }
     data->last_end = -1;
@@ -1978,6 +1978,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
  			? I32_MAX : data->pos_min + data->pos_delta;
 		}
 		sv_catpvn(data->last_found, STRING(scan), STR_LEN(scan));
+		if (UTF)
+		    SvUTF8_on(data->last_found);
 		{
 		    SV * const sv = data->last_found;
 		    MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ?
@@ -1986,8 +1988,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 			mg->mg_len += utf8_length((U8*)STRING(scan),
 						  (U8*)STRING(scan)+STR_LEN(scan));
 		}
-		if (UTF)
-		    SvUTF8_on(data->last_found);
 		data->last_end = data->pos_min + l;
 		data->pos_min += l; /* As in the first entry. */
 		data->flags &= ~SF_BEFORE_EOL;
@@ -2383,7 +2383,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 			    the group.  */
 			scan_commit(pRExC_state,data);
 			if (mincount && last_str) {
-			    sv_setsv(data->last_found, last_str);
+			    SV *sv = data->last_found;
+			    MAGIC *mg = SvUTF8(sv) && SvMAGICAL(sv) ?
+				mg_find(sv, PERL_MAGIC_utf8) : NULL;
+
+			    if (mg)
+				mg->mg_len = -1;
+			    sv_setsv(sv, last_str);
 			    data->last_end = data->pos_min;
 			    data->last_start_min =
 				data->pos_min - CHR_SVLEN(last_str);
