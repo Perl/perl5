@@ -353,6 +353,7 @@ LIBDIR		= ..\lib
 EXTDIR		= ..\ext
 PODDIR		= ..\pod
 EXTUTILSDIR	= $(LIBDIR)\ExtUtils
+HTMLDIR		= .\html
 
 #
 INST_SCRIPT	= $(INST_TOP)$(INST_VER)\bin
@@ -1083,7 +1084,7 @@ Extensions_realclean:
 #-------------------------------------------------------------------------------
 
 doc: $(PERLEXE)
-	$(PERLEXE) -I..\lib ..\installhtml --podroot=.. --htmldir=./html \
+	$(PERLEXE) -I..\lib ..\installhtml --podroot=.. --htmldir=$(HTMLDIR) \
 	    --podpath=pod:lib:ext:utils --htmlroot="file://$(INST_HTML::=|)" \
 	    --libpod=perlfunc:perlguts:perlvar:perlrun:perlop --recurse
 
@@ -1219,6 +1220,9 @@ distclean: realclean
 	-cd $(EXTDIR) && del /s *.def Makefile Makefile.old
 	-if exist $(AUTODIR) rmdir /s /q $(AUTODIR)
 	-if exist $(COREDIR) rmdir /s /q $(COREDIR)
+	-if exist pod2htmd.tmp del pod2htmd.tmp
+	-if exist pod2htmi.tmp del pod2htmi.tmp
+	-if exist $(HTMLDIR) rmdir /s /q $(HTMLDIR)
 
 install : all installbare installhtml
 
@@ -1231,7 +1235,7 @@ installbare : utils
 	$(XCOPY) bin\*.bat $(INST_SCRIPT)\*.*
 
 installhtml : doc
-	$(RCOPY) html\*.* $(INST_HTML)\*.*
+	$(RCOPY) $(HTMLDIR)\*.* $(INST_HTML)\*.*
 
 inst_lib : $(CONFIGPM)
 	copy splittree.pl ..
