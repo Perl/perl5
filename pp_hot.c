@@ -1405,8 +1405,12 @@ play_it_again:
 		if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG))
 		    mg = mg_find(TARG, PERL_MAGIC_regex_global);
 		if (!mg) {
-		    sv_magic(TARG, NULL, PERL_MAGIC_regex_global, NULL, 0);
-		    mg = mg_find(TARG, PERL_MAGIC_regex_global);
+#ifdef PERL_OLD_COPY_ON_WRITE
+		    if (SvIsCOW(TARG))
+			sv_force_normal_flags(TARG, 0);
+#endif
+		    mg = sv_magicext(TARG, NULL, PERL_MAGIC_regex_global,
+				     &PL_vtbl_mglob, NULL, 0);
 		}
 		if (rx->startp[0] != -1) {
 		    mg->mg_len = rx->endp[0];
@@ -1435,8 +1439,12 @@ play_it_again:
 	    else
 		mg = NULL;
 	    if (!mg) {
-		sv_magic(TARG, NULL, PERL_MAGIC_regex_global, NULL, 0);
-		mg = mg_find(TARG, PERL_MAGIC_regex_global);
+#ifdef PERL_OLD_COPY_ON_WRITE
+		if (SvIsCOW(TARG))
+		    sv_force_normal_flags(TARG, 0);
+#endif
+		mg = sv_magicext(TARG, NULL, PERL_MAGIC_regex_global,
+				 &PL_vtbl_mglob, NULL, 0);
 	    }
 	    if (rx->startp[0] != -1) {
 		mg->mg_len = rx->endp[0];

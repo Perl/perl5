@@ -284,8 +284,12 @@ PP(pp_substcont)
 	if (SvTYPE(sv) < SVt_PVMG)
 	    SvUPGRADE(sv, SVt_PVMG);
 	if (!(mg = mg_find(sv, PERL_MAGIC_regex_global))) {
-	    sv_magic(sv, NULL, PERL_MAGIC_regex_global, NULL, 0);
-	    mg = mg_find(sv, PERL_MAGIC_regex_global);
+#ifdef PERL_OLD_COPY_ON_WRITE
+	    if (SvIsCOW(lsv))
+		sv_force_normal_flags(sv, 0);
+#endif
+	    mg = sv_magicext(sv, NULL, PERL_MAGIC_regex_global, &PL_vtbl_mglob,
+			     NULL, 0);
 	}
 	i = m - orig;
 	if (DO_UTF8(sv))

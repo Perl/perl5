@@ -1803,8 +1803,12 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
     if (!mg) {
 	if (!SvOK(sv))
 	    return 0;
-	sv_magic(lsv, NULL, PERL_MAGIC_regex_global, NULL, 0);
-	mg = mg_find(lsv, PERL_MAGIC_regex_global);
+#ifdef PERL_OLD_COPY_ON_WRITE
+    if (SvIsCOW(lsv))
+        sv_force_normal_flags(lsv, 0);
+#endif
+	mg = sv_magicext(lsv, NULL, PERL_MAGIC_regex_global, &PL_vtbl_mglob,
+			 NULL, 0);
     }
     else if (!SvOK(sv)) {
 	mg->mg_len = -1;

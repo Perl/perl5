@@ -5943,8 +5943,12 @@ Perl_sv_collxfrm(pTHX_ SV *sv, STRLEN *nxp)
 		return xf + sizeof(PL_collation_ix);
 	    }
 	    if (! mg) {
-		sv_magic(sv, 0, PERL_MAGIC_collxfrm, 0, 0);
-		mg = mg_find(sv, PERL_MAGIC_collxfrm);
+#ifdef PERL_OLD_COPY_ON_WRITE
+		if (SvIsCOW(sv))
+		    sv_force_normal_flags(sv, 0);
+#endif
+		mg = sv_magicext(sv, 0, PERL_MAGIC_collxfrm, &PL_vtbl_collxfrm,
+				 0, 0);
 		assert(mg);
 	    }
 	    mg->mg_ptr = xf;
