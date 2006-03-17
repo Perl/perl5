@@ -3714,6 +3714,7 @@ S_regmatch(pTHX_ regnode *prog)
 	{
 	    I32 l = 0;
 	    CHECKPOINT lastcp;
+	    I32 count;
 	
 	    /* We suppose that the next guy does not need
 	       backtracking: in particular, it is of constant non-zero length,
@@ -3731,9 +3732,12 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (paren)
 		scan += NEXT_OFF(scan); /* Skip former OPEN. */
 	    PL_reginput = locinput;
+	    count = minmod ? ln : n;
+	    if (count)
+		count = regrepeat_hard(scan, count, &l);
 	    if (minmod) {
 		minmod = 0;
-		if (ln && regrepeat_hard(scan, ln, &l) < ln)
+		if (ln && count < ln)
 		    sayNO;
 		locinput = PL_reginput;
 		if (HAS_TEXT(next) || JUMPABLE(next)) {
@@ -3781,7 +3785,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    }
 		    /* Couldn't or didn't -- move forward. */
 		    PL_reginput = locinput;
-		    if (regrepeat_hard(scan, 1, &l)) {
+		    if (regmatch(scan)) {
 			ln++;
 			locinput = PL_reginput;
 		    }
@@ -3790,7 +3794,7 @@ S_regmatch(pTHX_ regnode *prog)
 		}
 	    }
 	    else {
-		n = regrepeat_hard(scan, n, &l);
+		n = count;
 		locinput = PL_reginput;
 		DEBUG_EXECUTE_r(
 		    PerlIO_printf(Perl_debug_log,
