@@ -602,7 +602,7 @@ if ($versiononly) {
 # Install pod pages.  Where? I guess in $installprivlib/pod
 # ($installprivlib/pods for cygwin).
 
-my $pod = ($Is_Cygwin || $Is_Darwin || $Is_VMS) ? 'pods' : 'pod';
+my $pod = ($Is_Cygwin || $Is_Darwin || $Is_VMS || $Is_W32) ? 'pods' : 'pod';
 if ( !$versiononly || ($installprivlib =~ m/\Q$ver/)) {
     mkpath("${installprivlib}/$pod", $verbose, 0777);
 

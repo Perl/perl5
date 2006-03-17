@@ -355,7 +355,6 @@ INST_BIN	= $(INST_SCRIPT)$(INST_ARCH)
 INST_LIB	= $(INST_TOP)$(INST_VER)\lib
 INST_ARCHLIB	= $(INST_LIB)$(INST_ARCH)
 INST_COREDIR	= $(INST_ARCHLIB)\CORE
-INST_POD	= $(INST_LIB)\pod
 INST_HTML	= $(INST_TOP)$(INST_VER)\html
 
 #
@@ -892,11 +891,6 @@ STATIC_EXT	=
 NONXS_EXT	= Errno
 
 DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
-
-POD2HTML	= $(PODDIR)\pod2html
-POD2MAN		= $(PODDIR)\pod2man
-POD2LATEX	= $(PODDIR)\pod2latex
-POD2TEXT	= $(PODDIR)\pod2text
 
 # vars must be separated by "\t+~\t+", since we're using the tempfile
 # version of config_sh.pl (we were overflowing someone's buffer by
