@@ -1577,6 +1577,7 @@ lib/Exporter/Heavy.pm		Complicated routines for Exporter
 lib/Exporter.pm			Exporter base class
 lib/Exporter.t			See if Exporter works
 lib/ExtUtils/CBuilder/Base.pm	Base class for ExtUtils::CBuilder methods
+lib/ExtUtils/CBuilder/Changes	Changes for ExtUtils::CBuilder
 lib/ExtUtils/CBuilder/Platform/aix.pm	CBuilder methods for AIX
 lib/ExtUtils/CBuilder/Platform/cygwin.pm	CBuilder methods for cygwin
 lib/ExtUtils/CBuilder/Platform/darwin.pm	CBuilder methods for darwin

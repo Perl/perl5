@@ -240,11 +240,11 @@ sub perl_src {
 
   return unless $ENV{PERL_CORE};
 
-  my $Updir  = File::Spec->updir;
-  my $dir = $Updir;
+  my $Updir = File::Spec->updir;
+  my $dir   = File::Spec->curdir;
 
   # Try up to 5 levels upwards
-  for (1..5) {
+  for (0..5) {
     if (
 	-f File::Spec->catfile($dir,"config_h.SH")
 	&&
@@ -257,9 +257,9 @@ sub perl_src {
 
     $dir = File::Spec->catdir($dir, $Updir);
   }
-  
+
   warn "PERL_CORE is set but I can't find your perl source!\n";
-  return;
+  return ''; # return empty string if $ENV{PERL_CORE} but can't find dir ???
 }
 
 # directory of perl's include files

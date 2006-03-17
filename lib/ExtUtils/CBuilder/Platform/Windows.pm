@@ -93,7 +93,7 @@ sub split_like_shell {
 sub arg_defines {
   my ($self, %args) = @_;
   s/"/\\"/g foreach values %args;
-  return map "-D$_=$args{$_}", keys %args;
+  return map qq{"-D$_=$args{$_}"}, keys %args;
 }
 
 sub compile {

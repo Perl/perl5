@@ -5,7 +5,7 @@ use File::Path ();
 use File::Basename ();
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.15';
+$VERSION = '0.17';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -116,6 +116,12 @@ by the object, as in the following example:
   # Use a different compiler than Config.pm says
   my $b = ExtUtils::CBuilder->new( config =>
                                    { ld => 'gcc' } );
+
+A C<quiet> parameter tells C<CBuilder> to not print its C<system()>
+commands before executing them:
+
+  # Be quieter than normal
+  my $b = ExtUtils::CBuilder->new( quiet => 1 );
 
 =item have_compiler
 

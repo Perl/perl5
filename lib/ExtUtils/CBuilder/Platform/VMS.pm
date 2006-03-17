@@ -9,6 +9,28 @@ $VERSION = '0.12';
 
 sub need_prelink { 0 }
 
+sub arg_defines {
+  my ($self, %args) = @_;
+
+  s/"/""/g foreach values %args;
+
+  my $config_defines;
+
+  # VMS can only have one define qualifier; add the one from config, if any.
+  if ($self->{config}{ccflags} =~ s{/def[^=]+(?:=)+(?:\()?([^\/\)]*)} {}i) {
+    $config_defines = $1;
+  }
+
+  return unless (scalar keys %args) || $config_defines;
+
+  return ('/define=(' 
+          . (defined $config_defines ? "$config_defines," : '')
+          . join(',', 
+                 map "\"$_" . ( length($args{$_}) ? "=$args{$_}" : '') . "\"", 
+                     keys %args) 
+          . ')');
+}
+
 sub arg_include_dirs {
   my ($self, @dirs) = @_;
 
