@@ -2130,9 +2130,12 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	    if (!(SvTYPE(PL_reg_sv) >= SVt_PVMG && SvMAGIC(PL_reg_sv)
 		  && (mg = mg_find(PL_reg_sv, PERL_MAGIC_regex_global)))) {
 		/* prepare for quick setting of pos */
-		sv_magic(PL_reg_sv, (SV*)0,
-			PERL_MAGIC_regex_global, NULL, 0);
-		mg = mg_find(PL_reg_sv, PERL_MAGIC_regex_global);
+#ifdef PERL_OLD_COPY_ON_WRITE
+		if (SvIsCOW(sv))
+		    sv_force_normal_flags(sv, 0);
+#endif
+		mg = sv_magicext(PL_reg_sv, (SV*)0, PERL_MAGIC_regex_global,
+				 &PL_vtbl_mglob, NULL, 0);
 		mg->mg_len = -1;
 	    }
 	    PL_reg_magic    = mg;
