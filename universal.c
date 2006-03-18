@@ -31,7 +31,7 @@
  * The main guts of traverse_isa was actually copied from gv_fetchmeth
  */
 
-STATIC SV *
+STATIC bool
 S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
              int len, int level)
 {
@@ -46,15 +46,15 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
     /* A stash/class can go by many names (ie. User == main::User), so 
        we compare the stash itself just in case */
     if (name_stash && (stash == name_stash))
-        return &PL_sv_yes;
+        return TRUE;
 
     hvname = HvNAME_get(stash);
 
     if (strEQ(hvname, name))
-	return &PL_sv_yes;
+	return TRUE;
 
     if (strEQ(name, "UNIVERSAL"))
-	return &PL_sv_yes;
+	return TRUE;
 
     if (level > 100)
 	Perl_croak(aTHX_ "Recursive inheritance detected in package '%s'",
@@ -71,7 +71,7 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
 	    if (svp && (sv = *svp) != (SV*)&PL_sv_undef) {
 	        DEBUG_o( Perl_deb(aTHX_ "Using cached ISA %s for package %s\n",
 				  name, hvname) );
-		return sv;
+		return (sv == &PL_sv_yes);
 	    }
 	}
 	else {
@@ -114,16 +114,15 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
 				    sv, hvname);
 		    continue;
 		}
-		if (&PL_sv_yes == isa_lookup(basestash, name, name_stash, 
-                                             len, level + 1)) {
+		if (isa_lookup(basestash, name, name_stash, len, level + 1)) {
 		    (void)hv_store(hv,name,len,&PL_sv_yes,0);
-		    return &PL_sv_yes;
+		    return TRUE;
 		}
 	    }
 	    (void)hv_store(hv,name,len,&PL_sv_no,0);
 	}
     }
-    return &PL_sv_no;
+    return FALSE;
 }
 
 /*
@@ -160,7 +159,7 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
 
     if (stash) {
 	HV * const name_stash = gv_stashpv(name, FALSE);
-	return isa_lookup(stash, name, name_stash, strlen(name), 0) == &PL_sv_yes;
+	return isa_lookup(stash, name, name_stash, strlen(name), 0);
     }
     else
 	return FALSE;

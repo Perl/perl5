@@ -1431,7 +1431,7 @@ s	|int	|tokereport	|I32 rv
 #endif
 
 #if defined(PERL_IN_UNIVERSAL_C) || defined(PERL_DECL_PROT)
-s	|SV*|isa_lookup	|NULLOK HV *stash|NN const char *name|NULLOK HV *name_stash|int len|int level
+s	|bool|isa_lookup	|NULLOK HV *stash|NN const char *name|NULLOK HV *name_stash|int len|int level
 #endif
 
 #if defined(PERL_IN_LOCALE_C) || defined(PERL_DECL_PROT)
