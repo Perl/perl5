@@ -362,10 +362,8 @@ sub f { ok(0 == $[); }
 	::ok(f1() eq "f1", "localised sub restored");
 	{
 		local @Other::{qw/ f1 f2 /} = (sub { "j1" }, sub { "j2" });
-		local $::TODO = "localisation of stash slice not working";
 		::ok(f1() eq "j1", "localised sub via stash slice");
 		::ok(f2() eq "j2", "localised sub via stash slice");
-		undef $::TODO;
 	}
 	::ok(f1() eq "f1", "localised sub restored");
 	::ok(f2() eq "f2", "localised sub restored");
