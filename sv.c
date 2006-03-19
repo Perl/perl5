@@ -4576,7 +4576,7 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
 		    Safefree(mg->mg_ptr);
 		else if (mg->mg_len == HEf_SVKEY)
 		    SvREFCNT_dec((SV*)mg->mg_ptr);
-		else if (mg->mg_type == PERL_MAGIC_utf8 && mg->mg_ptr)
+		else if (mg->mg_type == PERL_MAGIC_utf8)
 		    Safefree(mg->mg_ptr);
             }
 	    if (mg->mg_flags & MGf_REFCOUNTED)
