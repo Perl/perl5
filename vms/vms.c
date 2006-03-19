@@ -3316,8 +3316,10 @@ find_vmspipe(pTHX)
 
         while (p) {
 	    char * exp_res;
+	    int dirlen;
             strcpy(file, p->dir);
-            strncat(file, "vmspipe.com",NAM$C_MAXRSS);
+	    dirlen = strlen(file);
+            strncat(file, "vmspipe.com",NAM$C_MAXRSS - dirlen);
             file[NAM$C_MAXRSS] = '\0';
             p = p->next;
 
@@ -4065,6 +4067,7 @@ struct NAM * nam;
 }
 
 #define rms_setup_nam(nam) struct NAM nam = cc$rms_nam
+#define rms_clear_nam_nop(nam) nam.nam$b_nop = 0;
 #define rms_set_nam_nop(nam, opt) nam.nam$b_nop |= (opt)
 #define rms_set_nam_fnb(nam, opt) nam.nam$l_fnb |= (opt)
 #define rms_is_nam_fnb(nam, opt) (nam.nam$l_fnb & (opt))
@@ -4108,6 +4111,7 @@ struct NAML * nam;
 }
 
 #define rms_setup_nam(nam) struct NAML nam = cc$rms_naml
+#define rms_clear_nam_nop(nam) nam.naml$b_nop = 0;
 #define rms_set_nam_nop(nam, opt) nam.naml$b_nop |= (opt)
 #define rms_set_nam_fnb(nam, opt) nam.naml$l_fnb |= (opt)
 #define rms_is_nam_fnb(nam, opt) (nam.naml$l_fnb & (opt))
@@ -4176,7 +4180,7 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
 {
   static char __rmsexpand_retbuf[NAM$C_MAXRSS+1];
   char vmsfspec[NAM$C_MAXRSS+1], tmpfspec[NAM$C_MAXRSS+1];
-  char esa[NAM$C_MAXRSS], *cp, *out = NULL;
+  char esa[NAM$C_MAXRSS+1], *cp, *out = NULL;
   struct FAB myfab = cc$rms_fab;
   struct NAM mynam = cc$rms_nam;
   STRLEN speclen;
@@ -4219,7 +4223,7 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
   }
 
   mynam.nam$l_esa = esa;
-  mynam.nam$b_ess = sizeof esa;
+  mynam.nam$b_ess = NAM$C_MAXRSS;
   mynam.nam$l_rsa = outbuf;
   mynam.nam$b_rss = NAM$C_MAXRSS;
 
@@ -4265,6 +4269,7 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
   }
   if (mynam.nam$b_rsl) { out = outbuf; speclen = mynam.nam$b_rsl; }
   else                 { out = esa;    speclen = mynam.nam$b_esl; }
+  out[speclen] = 0;
   /* Trim off null fields added by $PARSE
    * If type > 1 char, must have been specified in original or default spec
    * (not true for version; $SEARCH may have added version of existing file).
@@ -4281,7 +4286,7 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
       deffab.fab$l_nam = &defnam;
       /* cast below ok for read only pointer */
       deffab.fab$l_fna = (char *)defspec;  deffab.fab$b_fns = myfab.fab$b_dns;
-      defnam.nam$l_esa = defesa;   defnam.nam$b_ess = sizeof defesa;
+      defnam.nam$l_esa = defesa;   defnam.nam$b_ess = NAM$C_MAXRSS;
       defnam.nam$b_nop = NAM$M_SYNCHK;
 #ifdef NAM$M_NO_SHORT_UPCASE
       if (decc_efs_case_preserve)
@@ -4312,10 +4317,12 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
     speclen = mynam.nam$l_name - out;
 
   /* Posix format specifications must have matching quotes */
-  if (decc_posix_compliant_pathnames && (out[0] == '\"')) {
-    if ((speclen > 1) && (out[speclen-1] != '\"')) {
-      out[speclen] = '\"';
-      speclen++;
+  if (speclen < NAM$C_MAXRSS) {
+    if (decc_posix_compliant_pathnames && (out[0] == '\"')) {
+      if ((speclen > 1) && (out[speclen-1] != '\"')) {
+        out[speclen] = '\"';
+        speclen++;
+      }
     }
   }
 
@@ -4520,6 +4527,8 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
 	speclen = rms_nam_esl(mynam);
     }
   }
+  tbuf[speclen] = '\0';
+
   /* Trim off null fields added by $PARSE
    * If type > 1 char, must have been specified in original or default spec
    * (not true for version; $SEARCH may have added version of existing file).
@@ -4549,7 +4558,7 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
 
 	rms_set_esa(deffab, defnam, defesal, VMS_MAXRSS - 1);
 
-	rms_set_nam_nop(defnam, 0);
+	rms_clear_nam_nop(defnam);
 	rms_set_nam_nop(defnam, NAM$M_SYNCHK);
 #ifdef NAM$M_NO_SHORT_UPCASE
 	if (decc_efs_case_preserve)
@@ -4620,10 +4629,12 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
   }
 
   /* Posix format specifications must have matching quotes */
-  if (decc_posix_compliant_pathnames && (tbuf[0] == '\"')) {
-    if ((speclen > 1) && (tbuf[speclen-1] != '\"')) {
-      tbuf[speclen] = '\"';
-      speclen++;
+  if (speclen < (VMS_MAXRSS - 1)) {
+    if (decc_posix_compliant_pathnames && (tbuf[0] == '\"')) {
+      if ((speclen > 1) && (tbuf[speclen-1] != '\"')) {
+        tbuf[speclen] = '\"';
+        speclen++;
+      }
     }
   }
   tbuf[speclen] = '\0';
@@ -5433,20 +5444,10 @@ static char *mp_do_tounixspec(pTHX_ const char *spec, char *buf, int ts)
   int cmp_rslt;
 
   if (spec == NULL) return NULL;
-  if (strlen(spec) > NAM$C_MAXRSS) return NULL;
+  if (strlen(spec) > (VMS_MAXRSS-1)) return NULL;
   if (buf) rslt = buf;
   else if (ts) {
-    retlen = strlen(spec);
-    cp1 = strchr(spec,'[');
-    if (!cp1) cp1 = strchr(spec,'<');
-    if (cp1) {
-      for (cp1++; *cp1; cp1++) {
-        if (*cp1 == '-') expand++; /* VMS  '-' ==> Unix '../' */
-        if (*cp1 == '.' && *(cp1+1) == '.' && *(cp1+2) == '.')
-          { expand++; cp1 +=2; } /* VMS '...' ==> Unix '/.../' */
-      }
-    }
-    Newx(rslt,retlen+2+2*expand,char);
+    Newx(rslt, VMS_MAXRSS, char);
   }
   else rslt = __tounixspec_retbuf;
 
@@ -6373,7 +6374,7 @@ static char *mp_do_tovmsspec(pTHX_ const char *path, char *buf, int ts) {
   int no_type_seen;
 
   if (path == NULL) return NULL;
-  rslt_len = VMS_MAXRSS;
+  rslt_len = VMS_MAXRSS-1;
   if (buf) rslt = buf;
   else if (ts) Newx(rslt, VMS_MAXRSS, char);
   else rslt = __tovmsspec_retbuf;
@@ -11523,7 +11524,7 @@ static int set_features
     }
 
     /* PCP mode requires creating /dev/null special device file */
-    decc_bug_devnull = 1;
+    decc_bug_devnull = 0;
     status = sys_trnlnm("DECC_BUG_DEVNULL", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
