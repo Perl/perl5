@@ -1592,7 +1592,7 @@ S_dup_attrlist(pTHX_ OP *o)
 	rop = newSVOP(OP_CONST, o->op_flags, SvREFCNT_inc_NN(cSVOPo->op_sv));
 #ifdef PERL_MAD
     else if (o->op_type == OP_NULL)
-	rop = Nullop;
+	rop = NULL;
 #endif
     else {
 	assert((o->op_type == OP_LIST) && (o->op_flags & OPf_KIDS));
@@ -1917,8 +1917,7 @@ OP *
 Perl_invert(pTHX_ OP *o)
 {
     if (!o)
-	return o;
-    /* XXX need to optimize away NOT NOT here?  Or do we let optimizer do it? */
+	return NULL;
     return newUNOP(OP_NOT, OPf_SPECIAL, scalar(o));
 }
 
@@ -3402,7 +3401,7 @@ Perl_package(pTHX_ OP *o)
 #else
     if (!PL_madskills) {
 	op_free(o);
-	return Nullop;
+	return NULL;
     }
 
     pegop = newOP(OP_NULL,0);
@@ -3527,7 +3526,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
     if (!PL_madskills) {
 	/* FIXME - don't allocate pegop if !PL_madskills */
 	op_free(pegop);
-	return Nullop;
+	return NULL;
     }
     return pegop;
 #endif
@@ -5690,7 +5689,7 @@ Perl_ck_anoncode(pTHX_ OP *o)
 {
     cSVOPo->op_targ = pad_add_anon(cSVOPo->op_sv, o->op_type);
     if (!PL_madskills)
-	cSVOPo->op_sv = Nullsv;
+	cSVOPo->op_sv = NULL;
     return o;
 }
 
@@ -5810,12 +5809,11 @@ OP *
 Perl_ck_eof(pTHX_ OP *o)
 {
     dVAR;
-    const I32 type = o->op_type;
 
     if (o->op_flags & OPf_KIDS) {
 	if (cLISTOPo->op_first->op_type == OP_STUB) {
-	    OP* newop
-		= newUNOP(type, OPf_SPECIAL, newGVOP(OP_GV, 0, PL_argvgv));
+	    OP * const newop
+		= newUNOP(o->op_type, OPf_SPECIAL, newGVOP(OP_GV, 0, PL_argvgv));
 #ifdef PERL_MAD
 	    op_getmad(o,newop,'O');
 #else
@@ -5843,7 +5841,7 @@ Perl_ck_eval(pTHX_ OP *o)
 	else if (kid->op_type == OP_LINESEQ || kid->op_type == OP_STUB) {
 	    LOGOP *enter;
 #ifdef PERL_MAD
-	    OP* oldo = o;
+	    OP* const oldo = o;
 #endif
 
 	    cUNOPo->op_first = 0;
@@ -5873,7 +5871,7 @@ Perl_ck_eval(pTHX_ OP *o)
     }
     else {
 #ifdef PERL_MAD
-	OP* oldo = o;
+	OP* const oldo = o;
 #else
 	op_free(o);
 #endif
@@ -6080,21 +6078,17 @@ Perl_ck_ftst(pTHX_ OP *o)
 #else
 	    op_free(o);
 #endif
-	    o = newop;
-	    return o;
+	    return newop;
 	}
-	else {
-	  if ((PL_hints & HINT_FILETEST_ACCESS) &&
-	      OP_IS_FILETEST_ACCESS(o))
+	if ((PL_hints & HINT_FILETEST_ACCESS) && OP_IS_FILETEST_ACCESS(o))
 	    o->op_private |= OPpFT_ACCESS;
-	}
 	if (PL_check[kid->op_type] == MEMBER_TO_FPTR(Perl_ck_ftst)
 		&& kid->op_type != OP_STAT && kid->op_type != OP_LSTAT)
 	    o->op_private |= OPpFT_STACKED;
     }
     else {
 #ifdef PERL_MAD
-	OP* oldo = o;
+	OP* const oldo = o;
 #else
 	op_free(o);
 #endif
@@ -6901,7 +6895,7 @@ Perl_ck_shift(pTHX_ OP *o)
 	OP *argop;
 	/* FIXME - this can be refactored to reduce code in #ifdefs  */
 #ifdef PERL_MAD
-	OP *oldo = o;
+	OP * const oldo = o;
 #else
 	op_free(o);
 #endif
@@ -7262,7 +7256,7 @@ Perl_ck_subr(pTHX_ OP *o)
 				OP * const sibling = o2->op_sibling;
 				SV * const n = newSVpvs("");
 #ifdef PERL_MAD
-				OP *oldo2 = o2;
+				OP * const oldo2 = o2;
 #else
 				op_free(o2);
 #endif
@@ -7385,7 +7379,7 @@ Perl_ck_subr(pTHX_ OP *o)
 	return too_few_arguments(o, gv_ename(namegv));
     if(delete_op) {
 #ifdef PERL_MAD
-	OP *oldo = o;
+	OP * const oldo = o;
 #else
 	op_free(o);
 #endif
@@ -7453,7 +7447,7 @@ OP *
 Perl_ck_substr(pTHX_ OP *o)
 {
     o = ck_fun(o);
-    if ((o->op_flags & OPf_KIDS) && o->op_private == 4) {
+    if ((o->op_flags & OPf_KIDS) && (o->op_private == 4)) {
 	OP *kid = cLISTOPo->op_first;
 
 	if (kid->op_type == OP_NULL)
