@@ -32,3 +32,10 @@ test-xs:
 ';
 }
 
+sub MY::static {
+	'
+static :: $(FIRST_MAKEFILE) $(OBJECT)
+	$(RM_RF) $(PERL_SRC)/$(OBJECT)
+	$(CP) $(OBJECT) $(PERL_SRC)/$(OBJECT)
+';
+}

@@ -65,6 +65,7 @@ ext*)	# Remove ext/ prefix and /pm_to_blib suffix
 	pname=`echo "$extspec" | sed -e 's:^ext/::' -e 's:/pm_to_blib$::' ` ;;
 *::*)	# Convert :: to /
 	pname=`echo "$extspec" | sed -e 's/::/\//g' ` ;;
+*.o)    pname=`echo "$extspec" | sed -e 's/\.o//'` ;;
 *)	pname="$extspec" ;;
 esac
 # echo "Converted $extspec to $pname"
