@@ -14,7 +14,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG              = 0;
 $WARN               = 1;
 $FOLLOW_SYMLINK     = 0;
-$VERSION            = "1.29_01";
+$VERSION            = "1.29_02";
 $CHOWN              = 1;
 $CHMOD              = 1;
 $DO_NOT_USE_PREFIX  = 0;
@@ -328,7 +328,7 @@ sub _read_tar {
             }
 
             ### throw away trailing garbage ###
-            substr ($$data, $entry->size) = "";
+            substr ($$data, $entry->size) = "" if defined $$data;
 
             ### part II of the @LongLink munging -- need to do /after/
             ### the checksum check.
