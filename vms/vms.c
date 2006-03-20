@@ -11524,7 +11524,7 @@ static int set_features
     }
 
     /* PCP mode requires creating /dev/null special device file */
-    decc_bug_devnull = 0;
+    decc_bug_devnull = 1;
     status = sys_trnlnm("DECC_BUG_DEVNULL", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
