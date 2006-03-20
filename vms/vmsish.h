@@ -464,12 +464,18 @@ struct interp_intern {
 # include <signal.h>
 #define ABORT() abort()
 
+#ifdef I_UTIME
+#include <utime.h>
+#else
 /* Used with our my_utime() routine in vms.c */
 struct utimbuf {
   time_t actime;
   time_t modtime;
 };
+#endif
+#ifndef DONT_MASK_RTL_CALLS
 #define utime my_utime
+#endif
 
 /* This is what times() returns, but <times.h> calls it tbuffer_t on VMS
  * prior to v7.0.  We check the DECC manifest to see whether it's already

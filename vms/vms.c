@@ -9740,12 +9740,31 @@ int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
                         devdsc = {0,DSC$K_DTYPE_T, DSC$K_CLASS_S,0},
                         fnmdsc = {0,DSC$K_DTYPE_T, DSC$K_CLASS_S,0};
 
+  if (decc_efs_charset != 0) {
+    struct utimbuf utc_utimes;
+
+    utc_utimes.actime = utimes->actime;
+    utc_utimes.modtime = utimes->modtime;
+#   ifdef VMSISH_TIME
+    /* If input was local; convert to UTC for sys svc */
+    if (VMSISH_TIME) {
+	utc_utimes.actime = _toutc(utimes->actime);
+	utc_utimes.modtime = _toutc(utimes->modtime);
+    }
+#   endif
+    sts = utime(file, &utc_utimes);
+    return sts;
+  }
+	
   if (file == NULL || *file == '\0') {
     set_errno(ENOENT);
     set_vaxc_errno(LIB$_INVARG);
     return -1;
   }
-  if (do_tovmsspec(file,vmsspec,0) == NULL) return -1;
+
+  /* Convert to VMS format ensuring that it will fit in 255 characters */
+  if (do_rmsexpand(file, vmsspec, 0, NULL, PERL_RMSEXPAND_M_VMS) == NULL)
+	return -1;
 
   if (utimes != NULL) {
     /* Convert Unix time    (seconds since 01-JAN-1970 00:00:00.00)

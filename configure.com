@@ -3512,6 +3512,13 @@ $ tmp = "unistd.h"
 $ GOSUB inhdr
 $ i_unistd = tmp
 $!
+$! Check to see if we've got utime.h (which we should use if we have)
+$!
+$ i_netdb = "undef"
+$ tmp = "utime.h"
+$ GOSUB inhdr
+$ i_utime = tmp
+$!
 $! do we have getppid()?
 $!
 $ IF i_unistd .EQS. "define"
@@ -6113,7 +6120,7 @@ $ WC "i_termios='undef'"
 $ WC "i_time='define'"
 $ WC "i_unistd='" + i_unistd + "'"
 $ WC "i_ustat='undef'"
-$ WC "i_utime='undef'"
+$ WC "i_utime='" + i_utime + "'"
 $ WC "i_values='undef'"
 $ WC "i_varargs='undef'"
 $ WC "i_vfork='undef'"
