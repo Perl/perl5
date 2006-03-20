@@ -2,7 +2,7 @@
 # Makefile to build perl on Windows NT using Microsoft NMAKE.
 # Supported compilers:
 #	Visual C++ 2.0 through 7.0 (and possibly newer versions)
-#	MS Platform SDK 64-bit compiler and tools **experimental**
+#	MS Platform SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
 # (perl59.dll).  Also makes individual DLLs for the XS extensions.
@@ -320,6 +320,13 @@ WIN64			= undef
 !ENDIF
 !ENDIF
 
+!IF "$(PROCESSOR_ARCHITECTURE)" == "AMD64"
+PROCESSOR_ARCHITECTURE	= x86_64
+!ENDIF
+!IF "$(PROCESSOR_ARCHITECTURE)" == "IA64"
+PROCESSOR_ARCHITECTURE	= ia64
+!ENDIF
+
 !IF "$(USE_MULTI)" == "define"
 ARCHNAME	= MSWin32-$(PROCESSOR_ARCHITECTURE)-multi
 !ELSE
@@ -419,15 +426,7 @@ OPTIMIZE	= $(OPTIMIZE) -O1
 
 !IF "$(WIN64)" == "define"
 DEFINES		= $(DEFINES) -DWIN64 -DCONSERVATIVE
-OPTIMIZE	= $(OPTIMIZE) -Wp64 -Op
-!ENDIF
-
-# the string-pooling option -Gf is deprecated in VC++ 7.x and will be removed
-# in later versions, so use read-only string-pooling (-GF) instead
-!IF "$(CCTYPE)" == "MSVC70FREE" || "$(CCTYPE)" == "MSVC70" || "$(CCTYPE)" == "MSVC80FREE" || "$(CCTYPE)" == "MSVC80"
-STRPOOL		= -GF
-!ELSE
-STRPOOL		= -Gf
+OPTIMIZE	= $(OPTIMIZE) -Wp64 -fp:precise
 !ENDIF
 
 !IF "$(USE_PERLCRT)" != "define"
@@ -438,17 +437,20 @@ LIBBASEFILES	= $(CRYPT_LIB) \
 		oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 		comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
 		netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib \
-		version.lib
+		version.lib odbc32.lib odbccp32.lib
 
-# win64 doesn't have some libs
-!IF "$(WIN64)" != "define"
-LIBBASEFILES	= $(LIBBASEFILES) odbc32.lib odbccp32.lib
+# The 64 bit Platform SDK compilers contain a runtime library that doesn't
+# include the buffer overrun verification code used by the /GS switch.
+# Since the code links against libraries that are compiled with /GS, this
+# "security cookie verification" must be included via bufferoverlow.lib.
+!IF "$(WIN64)" == "define"
+LIBBASEFILES    = $(LIBBASEFILES) bufferoverflowU.lib
 !ENDIF
 
 # we add LIBC here, since we may be using PerlCRT.dll
 LIBFILES	= $(LIBBASEFILES) $(LIBC)
 
-EXTRACFLAGS	= -nologo $(STRPOOL) -W3
+EXTRACFLAGS	= -nologo -GF -W3
 CFLAGS		= $(EXTRACFLAGS) $(INCLUDES) $(DEFINES) $(LOCDEFS) \
 		$(PCHFLAGS) $(OPTIMIZE)
 LINK_FLAGS	= -nologo -nodefaultlib $(LINK_DBG) \
