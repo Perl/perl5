@@ -703,39 +703,7 @@ same UTF-8 buffer.
 IV
 Perl_utf8_distance(pTHX_ const U8 *a, const U8 *b)
 {
-    dVAR;
-    IV off = 0;
-    IV sign = 1;
-
-    /* Note: cannot use UTF8_IS_...() too eagerly here since  e.g.
-     * the bitops (especially ~) can create illegal UTF-8.
-     * In other words: in Perl UTF-8 is not just for Unicode. */
-
-    if (a < b) {
-	const U8 *const temp = a;
-	a = b;
-	b = temp;
-	sign = -1;
-    }
-
-    while (b < a) {
-	const U8 c = UTF8SKIP(b);
-
-	if (a - b < c) {
-	    if (ckWARN_d(WARN_UTF8)) {
-		if (PL_op)
-		    Perl_warner(aTHX_ packWARN(WARN_UTF8),
-				"%s in %s", unees, OP_DESC(PL_op));
-		else
-		    Perl_warner(aTHX_ packWARN(WARN_UTF8), unees);
-	    }
-	    return off * sign;
-	}
-	b += c;
-	off++;
-    }
-
-    return off * sign;
+    return (a < b) ? -1 * (IV) utf8_length(a, b) : (IV) utf8_length(b, a);
 }
 
 /*
