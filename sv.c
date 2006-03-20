@@ -5686,9 +5686,9 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 
     send = s + byte;
 
-    if (SvMAGICAL(sv) && !SvREADONLY(sv) && PL_utf8cache) {
-	mg = mg_find(sv, PERL_MAGIC_utf8);
-	if (mg && mg->mg_ptr) {
+    if (SvMAGICAL(sv) && !SvREADONLY(sv) && PL_utf8cache
+	&& (mg = mg_find(sv, PERL_MAGIC_utf8))) {
+	if (mg->mg_ptr) {
 	    STRLEN *cache = (STRLEN *) mg->mg_ptr;
 	    if (cache[1] == byte) {
 		/* An exact match. */
@@ -5727,6 +5727,8 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 			       (UV) len, (UV) reallen, sv);
 		}
 	    }
+	} else if (mg->mg_len != -1) {
+	    len = S_sv_pos_b2u_midway(aTHX_ s, send, s + len, mg->mg_len);
 	} else {
 	    len = S_sv_pos_b2u_forwards(aTHX_ s, send);
 	}
