@@ -5681,7 +5681,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 
     s = (const U8*)SvPV_const(sv, len);
 
-    if ((I32)len < byte)
+    if (len < byte)
 	Perl_croak(aTHX_ "panic: sv_pos_b2u: bad byte offset");
 
     send = s + byte;
@@ -5690,16 +5690,23 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 	mg = mg_find(sv, PERL_MAGIC_utf8);
 	if (mg && mg->mg_ptr) {
 	    STRLEN *cache = (STRLEN *) mg->mg_ptr;
-	    if (cache[1] == (STRLEN)byte) {
+	    if (cache[1] == byte) {
 		/* An exact match. */
 		*offsetp = cache[0];
 
 		return;
 	    }
-	    else if (cache[1] < (STRLEN)byte) {
+	    else if (cache[1] < byte) {
 		/* We already know part of the way. */
-		len = cache[0]
-		    + S_sv_pos_b2u_forwards(aTHX_ s + cache[1] , send);
+		if (mg->mg_len != -1) {
+		    /* Actually, we know the end too.  */
+		    len = cache[0]
+			+ S_sv_pos_b2u_midway(aTHX_ s + cache[1], send,
+					      s + len, mg->mg_len - cache[0]);
+		} else {
+		    len = cache[0]
+			+ S_sv_pos_b2u_forwards(aTHX_ s + cache[1], send);
+		}
 	    }
 	    else { /* cache[1] > byte */
 		len = S_sv_pos_b2u_midway(aTHX_ s, send, s + cache[1],
