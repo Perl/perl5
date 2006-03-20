@@ -172,7 +172,7 @@ PP(pp_rv2gv)
 		    }
 		    if (SvTYPE(sv) < SVt_RV)
 			sv_upgrade(sv, SVt_RV);
-		    if (SvPVX_const(sv)) {
+		    else if (SvPVX_const(sv)) {
 			SvPV_free(sv);
 			SvLEN_set(sv, 0);
                         SvCUR_set(sv, 0);
