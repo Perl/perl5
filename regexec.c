@@ -2312,56 +2312,7 @@ typedef union re_unwind_t {
 /* Make sure there is a test for this +1 options in re_tests */
 #define TRIE_INITAL_ACCEPT_BUFFLEN 4;
 
-#define TRIE_CHECK_STATE_IS_ACCEPTING STMT_START {                       \
-    if ( trie->states[ state ].wordnum ) {                               \
-	if ( !accepted ) {                                               \
-	    ENTER;                                                       \
-	    SAVETMPS;                                                    \
-	    bufflen = TRIE_INITAL_ACCEPT_BUFFLEN ;                       \
-	    sv_accept_buff=newSV(bufflen * sizeof(reg_trie_accepted) - 1 );\
-	    SvCUR_set( sv_accept_buff, sizeof(reg_trie_accepted) );      \
-	    SvPOK_on( sv_accept_buff );                                  \
-	    sv_2mortal( sv_accept_buff );                                \
-	    accept_buff = (reg_trie_accepted*)SvPV_nolen( sv_accept_buff );\
-	} else {                                                         \
-	    if ( accepted >= bufflen ) {                                 \
-	        bufflen *= 2;                                            \
-	        accept_buff =(reg_trie_accepted*)SvGROW( sv_accept_buff, \
-	            bufflen * sizeof(reg_trie_accepted) );               \
-	    }                                                            \
-	    SvCUR_set( sv_accept_buff,SvCUR( sv_accept_buff )            \
-	        + sizeof( reg_trie_accepted ) );                         \
-	}                                                                \
-	accept_buff[ accepted ].wordnum = trie->states[ state ].wordnum; \
-	accept_buff[ accepted ].endpos = uc;                             \
-	++accepted;                                                      \
-    } } STMT_END
 
-#define TRIE_HANDLE_CHAR STMT_START {                                   \
-        if ( uvc < 256 ) {                                              \
-            charid = trie->charmap[ uvc ];                              \
-        } else {                                                        \
-            charid = 0;                                                 \
-            if( trie->widecharmap ) {                                   \
-            SV** svpp = (SV**)NULL;                                     \
-            svpp = hv_fetch( trie->widecharmap, (char*)&uvc,            \
-        		  sizeof( UV ), 0 );                            \
-            if ( svpp ) {                                               \
-        	charid = (U16)SvIV( *svpp );                            \
-                }                                                       \
-            }                                                           \
-        }                                                               \
-        if ( charid &&                                                  \
-             ( base + charid > trie->uniquecharcount ) &&               \
-             ( base + charid - 1 - trie->uniquecharcount < trie->lasttrans) && \
-             trie->trans[ base + charid - 1 - trie->uniquecharcount ].check == state ) \
-        {                                                               \
-            state = trie->trans[ base + charid - 1 - trie->uniquecharcount ].next;     \
-        } else {                                                        \
-            state = 0;                                                  \
-        }                                                               \
-        uc += len;                                                      \
-    } STMT_END
 
 /*
  - regmatch - main matching routine
@@ -2393,12 +2344,6 @@ S_regmatch(pTHX_ regnode *prog)
     register I32 c1 = 0, c2 = 0, paren;	/* case fold search, parenth */
     int minmod = 0, sw = 0, logical = 0;
     I32 unwind = 0;
-
-    /* used by the trie code */
-    SV                 *sv_accept_buff = NULL; /* accepting states we have traversed */
-    reg_trie_accepted  *accept_buff = NULL;  /* "" */
-    reg_trie_data      *trie;                /* what trie are we using right now */
-    U32 accepted = 0;                        /* how many accepting states we have seen*/
 
 #if 0
     I32 firstcp = PL_savestack_ix;
@@ -2570,12 +2515,9 @@ S_regmatch(pTHX_ regnode *prog)
 	   traverse the TRIE keeping track of all accepting states
 	   we transition through until we get to a failing node.
 
-	   we use two slightly different pieces of code to handle
-	   the traversal depending on whether its case sensitive or
-	   not. we reuse the accept code however. (this should probably
-	   be turned into a macro.)
 
 	*/
+	case TRIE:
 	case TRIEF:
 	case TRIEFL:
 	    {
@@ -2588,13 +2530,50 @@ S_regmatch(pTHX_ regnode *prog)
 		STRLEN foldlen = 0;
 		U8 *uscan = (U8*)NULL;
 		STRLEN bufflen=0;
-		accepted = 0;
+		const enum { trie_plain, trie_utf8, trie_uft8_fold }
+		    trie_type = do_utf8 ?
+			  (OP(scan) == TRIE ? trie_utf8 : trie_uft8_fold)
+			: trie_plain;
+
+		int gotit = 0;
+		/* accepting states we have traversed */
+		SV *sv_accept_buff = NULL;
+		reg_trie_accepted  *accept_buff = NULL;
+		reg_trie_data *trie; /* what trie are we using right now */
+	    	U32 accepted = 0; /* how many accepting states we have seen */
 
 		trie = (reg_trie_data*)PL_regdata->data[ ARG( scan ) ];
 
 		while ( state && uc <= (U8*)PL_regeol ) {
 
-		    TRIE_CHECK_STATE_IS_ACCEPTING;
+		    if (trie->states[ state ].wordnum) {
+			if (!accepted ) {
+			    ENTER;
+			    SAVETMPS;
+			    bufflen = TRIE_INITAL_ACCEPT_BUFFLEN;
+			    sv_accept_buff=newSV(bufflen *
+					    sizeof(reg_trie_accepted) - 1);
+			    SvCUR_set(sv_accept_buff,
+						sizeof(reg_trie_accepted));
+			    SvPOK_on(sv_accept_buff);
+			    sv_2mortal(sv_accept_buff);
+			    accept_buff =
+				(reg_trie_accepted*)SvPV_nolen(sv_accept_buff );
+			}
+			else {
+			    if (accepted >= bufflen) {
+				bufflen *= 2;
+				accept_buff =(reg_trie_accepted*)
+				    SvGROW(sv_accept_buff,
+				       	bufflen * sizeof(reg_trie_accepted));
+			    }
+			    SvCUR_set(sv_accept_buff,SvCUR(sv_accept_buff)
+				+ sizeof(reg_trie_accepted));
+			}
+			accept_buff[accepted].wordnum = trie->states[state].wordnum;
+			accept_buff[accepted].endpos = uc;
+			++accepted;
+		    }
 
 		    base = trie->states[ state ].trans.base;
 
@@ -2606,8 +2585,8 @@ S_regmatch(pTHX_ regnode *prog)
 		    );
 
 		    if ( base ) {
-
-			if ( do_utf8 ) {
+			switch (trie_type) {
+			case trie_uft8_fold:
 			    if ( foldlen>0 ) {
 				uvc = utf8n_to_uvuni( uscan, UTF8_MAXLEN, &len, uniflags );
 				foldlen -= len;
@@ -2620,14 +2599,47 @@ S_regmatch(pTHX_ regnode *prog)
 				foldlen -= UNISKIP( uvc );
 				uscan = foldbuf + UNISKIP( uvc );
 			    }
-			} else {
+			    break;
+			case trie_utf8:
+			    uvc = utf8n_to_uvuni( (U8*)uc, UTF8_MAXLEN,
+							    &len, uniflags );
+			    break;
+			case trie_plain:
 			    uvc = (UV)*uc;
 			    len = 1;
 			}
 
-			TRIE_HANDLE_CHAR;
+			if (uvc < 256) {
+			    charid = trie->charmap[ uvc ];
+			}
+			else {
+			    charid = 0;
+			    if (trie->widecharmap) {
+				SV** svpp = (SV**)NULL;
+				svpp = hv_fetch(trie->widecharmap,
+					    (char*)&uvc, sizeof(UV), 0);
+				if (svpp)
+				    charid = (U16)SvIV(*svpp);
+			    }
+			}
 
-		    } else {
+			if (charid &&
+			     (base + charid > trie->uniquecharcount )
+			     && (base + charid - 1 - trie->uniquecharcount
+				    < trie->lasttrans)
+			     && trie->trans[base + charid - 1 -
+				    trie->uniquecharcount].check == state)
+			{
+			    state = trie->trans[base + charid - 1 -
+				trie->uniquecharcount ].next;
+			}
+			else {
+			    state = 0;
+			}
+			uc += len;
+
+		    }
+		    else {
 			state = 0;
 		    }
 		    DEBUG_TRIE_EXECUTE_r(
@@ -2636,65 +2648,8 @@ S_regmatch(pTHX_ regnode *prog)
 		            charid, uvc, (UV)state, PL_colors[5] );
 		    );
 		}
-		if ( !accepted ) {
+		if (!accepted )
 		   sayNO;
-		} else {
-		    goto TrieAccept;
-		}
-	    }
-	    /* unreached codepoint: we jump into the middle of the next case
-	       from previous if blocks */
-	case TRIE:
-	    {
-		U8 *uc = (U8*)locinput;
-		U32 state = 1;
-		U16 charid = 0;
-		U32 base = 0;
-		UV uvc = 0;
-		STRLEN len = 0;
-		STRLEN bufflen = 0;
-		accepted = 0;
-
-		trie = (reg_trie_data*)PL_regdata->data[ ARG( scan ) ];
-
-		while ( state && uc <= (U8*)PL_regeol ) {
-
-		    TRIE_CHECK_STATE_IS_ACCEPTING;
-
-		    base = trie->states[ state ].trans.base;
-
-		    DEBUG_TRIE_EXECUTE_r(
-			    PerlIO_printf( Perl_debug_log,
-			        "%*s  %sState: %4"UVxf", Base: %4"UVxf", Accepted: %4"UVxf" ",
-			        REPORT_CODE_OFF + PL_regindent * 2, "", PL_colors[4],
-			        (UV)state, (UV)base, (UV)accepted );
-		    );
-
-		    if ( base ) {
-
-			if ( do_utf8 ) {
-			    uvc = utf8n_to_uvuni( (U8*)uc, UTF8_MAXLEN, &len, uniflags );
-			} else {
-			    uvc = (U32)*uc;
-			    len = 1;
-			}
-
-                        TRIE_HANDLE_CHAR;
-
-		    } else {
-			state = 0;
-		    }
-		    DEBUG_TRIE_EXECUTE_r(
-			    PerlIO_printf( Perl_debug_log,
-			        "Charid:%3x CV:%4"UVxf" After State: %4"UVxf"%s\n",
-			        charid, uvc, (UV)state, PL_colors[5] );
-		    );
-		}
-		if ( !accepted ) {
-		   sayNO;
-		}
-	    }
-
 
 	    /*
 	       There was at least one accepting state that we
@@ -2708,9 +2663,6 @@ S_regmatch(pTHX_ regnode *prog)
 	       eventually terminates once all of the accepting states
 	       have been tried.
 	    */
-	TrieAccept:
-	    {
-		int gotit = 0;
 
 		if ( accepted == 1 ) {
 		    DEBUG_EXECUTE_r({
