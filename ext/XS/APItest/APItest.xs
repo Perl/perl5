@@ -461,10 +461,15 @@ exception(throw_e)
         RETVAL
 
 void
-mycroak(pv)
-    const char* pv
+mycroak(sv)
+    SV* sv
     CODE:
-    Perl_croak(aTHX_ "%s", pv);
+    if (SvOK(sv)) {
+        Perl_croak(aTHX_ "%s", SvPV_nolen(sv));
+    }
+    else {
+	Perl_croak(aTHX_ NULL);
+    }
 
 SV*
 strtab()
