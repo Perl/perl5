@@ -5600,7 +5600,7 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8)
     assert(cache);
 
     if (PL_utf8cache < 0) {
-	const char *start = SvPVX_const(sv);
+	const U8 *start = (const U8 *) SvPVX_const(sv);
 	const STRLEN realutf8
 	    = S_sv_pos_b2u_forwards(aTHX_ start, start + byte);
 
