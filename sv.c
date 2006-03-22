@@ -5517,6 +5517,21 @@ S_sv_pos_u2b_forwards(pTHX_ const U8 *const start, const U8 *const send,
     return s - start;
 }
 
+static STRLEN
+S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
+		    const U8 *const send, STRLEN uoffset,
+		    STRLEN uoffset0, STRLEN boffset0) {
+    STRLEN boffset;
+    if (uoffset >= uoffset0) {
+	boffset = boffset0 + S_sv_pos_u2b_forwards(aTHX_ start + boffset0,
+						   send, uoffset - uoffset0);
+    }
+    else {
+	boffset = S_sv_pos_u2b_forwards(aTHX_ start, send, uoffset);
+    }
+    return boffset;
+}
+
 void
 Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 {
@@ -5530,18 +5545,20 @@ Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
     if (len) {
 	STRLEN uoffset = (STRLEN) *offsetp;
 	const U8 * const send = start + len;
-	STRLEN boffset = S_sv_pos_u2b_forwards(aTHX_ start, send, uoffset);
+	MAGIC *mg;
+	STRLEN boffset = S_sv_pos_u2b_cached(aTHX_ sv, &mg, start, send,
+					     uoffset, 0, 0);
 
 	*offsetp = (I32) boffset;
 
 	if (lenp) {
-	    /* Recalculate things relative to the previously found pair,
-	       as if the string started from here.  */
-	    start += boffset;
-	    uoffset = *lenp;
+	    /* Convert the relative offset to absolute.  */
+	    STRLEN uoffset2 = uoffset + (STRLEN) *lenp;
+	    STRLEN boffset2
+		= S_sv_pos_u2b_cached(aTHX_ sv, &mg, start, send, uoffset2,
+				      uoffset, boffset) - boffset;
 
-	    boffset = S_sv_pos_u2b_forwards(aTHX_ start, send, uoffset);
-	    *lenp = boffset;
+	    *lenp = boffset2;
 	}
     }
     else {
