@@ -859,6 +859,12 @@ Thus, signals may work only for simple things like setting a flag
 variable in the handler.  Using signals under this port should
 currently be considered unsupported.
 
+Numeric comparisons involving "Not a Number" (NaN, an IEEE floating point
+feature) will give incorrect results if you build with Visual C++ Version 6
+or earlier -- see I<Floating-Point Comparison> in
+L<http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dndeepc/html/deep05282002.asp>
+for details. If possible, you should build using a later version of VC++.
+
 Please send detailed descriptions of any problems and solutions that
 you may find to E<lt>F<perlbug@perl.org>E<gt>, along with the output
 produced by C<perl -V>.
@@ -909,6 +915,6 @@ Win9x support was added in 5.6 (Benjamin Stuhl).
 
 Support for 64-bit Windows added in 5.8 (ActiveState Corp).
 
-Last updated: 30 September 2005
+Last updated: 22 March 2006
 
 =cut
