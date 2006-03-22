@@ -90,7 +90,11 @@ sub writeWithGzip
     my $file;
     my $file1;
     my $lex = new LexFile $file, $file1;
-    my $content = "hello world\n" ;
+    my $content = qq {
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut tempus odio id
+ dolor. Camelus perlus.  Larrius in lumen numen.  Dolor en quiquum filia
+ est.  Quintus cenum parat.
+};
     my $got;
 
     is writeWithGzip($file, $content), 1, "writeWithGzip ok";
