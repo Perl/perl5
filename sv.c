@@ -5517,17 +5517,65 @@ S_sv_pos_u2b_forwards(pTHX_ const U8 *const start, const U8 *const send,
     return s - start;
 }
 
+
+static STRLEN
+S_sv_pos_u2b_midway(pTHX_ const U8 *const start, const U8 *send,
+		      STRLEN uoffset, STRLEN uend)
+{
+    STRLEN backw = uend - uoffset;
+    if (uoffset < 2 * backw) {
+	/* The assumption is that going fowards is twice the speed of going
+	   forward (that's where the 2 * backw comes from).
+	   (The real figure of course depends on the UTF-8 data.)  */
+	return S_sv_pos_u2b_forwards(aTHX_ start, send, uoffset);
+    }
+
+    while (backw--) {
+	send--;
+	while (UTF8_IS_CONTINUATION(*send))
+	    send--;
+    }
+    return send - start;
+}
+
 static STRLEN
 S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
 		    const U8 *const send, STRLEN uoffset,
 		    STRLEN uoffset0, STRLEN boffset0) {
     STRLEN boffset;
-    if (uoffset >= uoffset0) {
-	boffset = boffset0 + S_sv_pos_u2b_forwards(aTHX_ start + boffset0,
-						   send, uoffset - uoffset0);
+    bool found = FALSE;
+
+    if (SvMAGICAL(sv) && !SvREADONLY(sv) && PL_utf8cache
+	&& (*mgp = mg_find(sv, PERL_MAGIC_utf8))) {
+	if ((*mgp)->mg_len != -1) {
+	    boffset = S_sv_pos_u2b_midway(aTHX_ start, send, uoffset,
+					  (*mgp)->mg_len);
+	    found = TRUE;
+	}
     }
-    else {
-	boffset = S_sv_pos_u2b_forwards(aTHX_ start, send, uoffset);
+
+    if (!found || PL_utf8cache < 0) {
+	STRLEN real_boffset;
+	if (uoffset >= uoffset0) {
+	    real_boffset
+		= boffset0 + S_sv_pos_u2b_forwards(aTHX_ start + boffset0,
+						   send, uoffset - uoffset0);
+	}
+	else {
+	    real_boffset = S_sv_pos_u2b_forwards(aTHX_ start, send, uoffset);
+	}
+	if (found && PL_utf8cache < 0) {
+	    if (real_boffset != boffset) {
+		/* Need to turn the assertions off otherwise we may recurse
+		   infinitely while printing error messages.  */
+		SAVEI8(PL_utf8cache);
+		PL_utf8cache = 0;
+		Perl_croak(aTHX_ "panic: sv_pos_u2b_cache cache %"UVf
+			   " real %"UVf" for %"SVf,
+			   (UV) boffset, (UV) real_boffset, sv);
+	    }
+	}
+	boffset = real_boffset;
     }
     return boffset;
 }
