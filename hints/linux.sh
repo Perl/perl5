@@ -77,7 +77,8 @@ esac
 case "`${cc:-cc} -V 2>&1`" in
 *"Intel(R) C++ Compiler"*|*"Intel(R) C Compiler"*)
     # This is needed for Configure's prototype checks to work correctly
-    ccflags="-we147 $ccflags"
+    # The -mp1 flag is needed to pass cmp related tests
+    ccflags="-we147 -mp1 $ccflags"
     # If we're using ICC, we usually want the best performance
     case "$optimize" in
     '') optimize='-O3' ;;
