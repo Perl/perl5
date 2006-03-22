@@ -4067,29 +4067,7 @@ S_regmatch(pTHX_ regnode *prog)
 			ln--;
 		}
 		REGCP_SET(lastcp);
-		if (paren) {
-		    UV c = 0;
-		    while (n >= ln) {
-			if (c1 != -1000) {
-			    if (do_utf8)
-				c = utf8n_to_uvchr((U8*)PL_reginput,
-						   UTF8_MAXBYTES, 0,
-						   uniflags);
-			    else
-				c = UCHARAT(PL_reginput);
-			}
-			/* If it could work, try it. */
-			if (c1 == -1000 || c == (UV)c1 || c == (UV)c2)
-			    {
-				TRYPAREN(paren, n, PL_reginput);
-				REGCP_UNWIND(lastcp);
-			    }
-			/* Couldn't or didn't -- back up. */
-			n--;
-			PL_reginput = locinput = HOPc(locinput, -1);
-		    }
-		}
-		else {
+		{
 		    UV c = 0;
 		    while (n >= ln) {
 			if (c1 != -1000) {
