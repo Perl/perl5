@@ -1895,6 +1895,13 @@ S_sv_2iuv_common(pTHX_ SV *sv) {
 	   certainly cast into the IV range at IV_MAX, whereas the correct
 	   answer is the UV IV_MAX +1. Hence < ensures that dodgy boundary
 	   cases go to UV */
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+	if (Perl_isnan(SvNVX(sv))) {
+	    SvUV_set(sv, 0);
+	    SvIsUV_on(sv);
+	}
+	else
+#endif
 	if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
 	    SvIV_set(sv, I_V(SvNVX(sv)));
 	    if (SvNVX(sv) == (NV) SvIVX(sv)

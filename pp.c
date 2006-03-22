@@ -1714,8 +1714,15 @@ PP(pp_lt)
     }
 #endif
     {
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+      dPOPTOPnnrl;
+      if (Perl_isnan(left) || Perl_isnan(right))
+	  RETSETNO;
+      SETs(boolSV(left < right));
+#else
       dPOPnv;
       SETs(boolSV(TOPn < value));
+#endif
       RETURN;
     }
 }
@@ -1790,8 +1797,15 @@ PP(pp_gt)
     }
 #endif
     {
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+      dPOPTOPnnrl;
+      if (Perl_isnan(left) || Perl_isnan(right))
+	  RETSETNO;
+      SETs(boolSV(left > right));
+#else
       dPOPnv;
       SETs(boolSV(TOPn > value));
+#endif
       RETURN;
     }
 }
@@ -1866,8 +1880,15 @@ PP(pp_le)
     }
 #endif
     {
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+      dPOPTOPnnrl;
+      if (Perl_isnan(left) || Perl_isnan(right))
+	  RETSETNO;
+      SETs(boolSV(left <= right));
+#else
       dPOPnv;
       SETs(boolSV(TOPn <= value));
+#endif
       RETURN;
     }
 }
@@ -1942,8 +1963,15 @@ PP(pp_ge)
     }
 #endif
     {
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+      dPOPTOPnnrl;
+      if (Perl_isnan(left) || Perl_isnan(right))
+	  RETSETNO;
+      SETs(boolSV(left >= right));
+#else
       dPOPnv;
       SETs(boolSV(TOPn >= value));
+#endif
       RETURN;
     }
 }
@@ -2011,8 +2039,15 @@ PP(pp_ne)
     }
 #endif
     {
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+      dPOPTOPnnrl;
+      if (Perl_isnan(left) || Perl_isnan(right))
+	  RETSETYES;
+      SETs(boolSV(left != right));
+#else
       dPOPnv;
       SETs(boolSV(TOPn != value));
+#endif
       RETURN;
     }
 }

@@ -363,8 +363,15 @@ PP(pp_eq)
     }
 #endif
     {
+#if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
+      dPOPTOPnnrl;
+      if (Perl_isnan(left) || Perl_isnan(right))
+	  RETSETNO;
+      SETs(boolSV(left == right));
+#else
       dPOPnv;
       SETs(boolSV(TOPn == value));
+#endif
       RETURN;
     }
 }
