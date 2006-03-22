@@ -5501,6 +5501,22 @@ type coercion.
  *
  */
 
+static STRLEN
+S_sv_pos_u2b_forwards(pTHX_ const U8 *const start, const U8 *const send,
+		      STRLEN uoffset)
+{
+    const U8 *s = start;
+
+    while (s < send && uoffset--)
+	s += UTF8SKIP(s);
+    if (s > send) {
+	/* This is the existing behaviour. Possibly it should be a croak, as
+	   it's actually a bounds error  */
+	s = send;
+    }
+    return s - start;
+}
+
 void
 Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 {
@@ -5512,42 +5528,21 @@ Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 
     start = (U8*)SvPV_const(sv, len);
     if (len) {
-	STRLEN boffset = 0;
-	STRLEN *cache = NULL;
-	const U8 *s = start;
-	I32 uoffset = *offsetp;
-	const U8 * const send = s + len;
-	MAGIC *mg = NULL;
-	bool found = utf8_mg_pos(sv, &mg, &cache, 0, offsetp, *offsetp, &s, start, send);
+	STRLEN uoffset = (STRLEN) *offsetp;
+	const U8 * const send = start + len;
+	STRLEN boffset = S_sv_pos_u2b_forwards(aTHX_ start, send, uoffset);
 
-	 if (!found && uoffset > 0) {
-	      while (s < send && uoffset--)
-		   s += UTF8SKIP(s);
-	      if (s >= send)
-		   s = send;
-              if (utf8_mg_pos_init(sv, &mg, &cache, 0, *offsetp, s, start))
-                  boffset = cache[1];
-	      *offsetp = s - start;
-	 }
-	 if (lenp) {
-	      found = FALSE;
-	      start = s;
-              if (utf8_mg_pos(sv, &mg, &cache, 2, lenp, *lenp, &s, start, send)) {
-                  *lenp -= boffset;
-                  found = TRUE;
-              }
-	      if (!found && *lenp > 0) {
-		   I32 ulen = *lenp;
-		   if (ulen > 0)
-			while (s < send && ulen--)
-			     s += UTF8SKIP(s);
-		   if (s >= send)
-			s = send;
-                   utf8_mg_pos_init(sv, &mg, &cache, 2, *lenp, s, start);
-	      }
-	      *lenp = s - start;
-	 }
-	 ASSERT_UTF8_CACHE(cache);
+	*offsetp = (I32) boffset;
+
+	if (lenp) {
+	    /* Recalculate things relative to the previously found pair,
+	       as if the string started from here.  */
+	    start += boffset;
+	    uoffset = *lenp;
+
+	    boffset = S_sv_pos_u2b_forwards(aTHX_ start, send, uoffset);
+	    *lenp = boffset;
+	}
     }
     else {
 	 *offsetp = 0;
