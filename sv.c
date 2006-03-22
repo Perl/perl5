@@ -5545,25 +5545,27 @@ S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
     STRLEN boffset;
     bool found = FALSE;
 
+    assert (uoffset >= uoffset0);
+
     if (SvMAGICAL(sv) && !SvREADONLY(sv) && PL_utf8cache
 	&& (*mgp = mg_find(sv, PERL_MAGIC_utf8))) {
 	if ((*mgp)->mg_len != -1) {
-	    boffset = S_sv_pos_u2b_midway(aTHX_ start, send, uoffset,
-					  (*mgp)->mg_len);
+	    /* If we can take advantage of a passed in offset, do so.  */
+	    /* In fact, offset0 is either 0, or less than offset, so don't
+	       need to worry about the other possibility.  */
+	    boffset = boffset0
+		+ S_sv_pos_u2b_midway(aTHX_ start + boffset0, send,
+				      uoffset - uoffset0,
+				      (*mgp)->mg_len - uoffset0);
 	    found = TRUE;
 	}
     }
 
     if (!found || PL_utf8cache < 0) {
-	STRLEN real_boffset;
-	if (uoffset >= uoffset0) {
-	    real_boffset
-		= boffset0 + S_sv_pos_u2b_forwards(aTHX_ start + boffset0,
-						   send, uoffset - uoffset0);
-	}
-	else {
-	    real_boffset = S_sv_pos_u2b_forwards(aTHX_ start, send, uoffset);
-	}
+	const STRLEN real_boffset
+	    = boffset0 + S_sv_pos_u2b_forwards(aTHX_ start + boffset0,
+					       send, uoffset - uoffset0);
+
 	if (found && PL_utf8cache < 0) {
 	    if (real_boffset != boffset) {
 		/* Need to turn the assertions off otherwise we may recurse
