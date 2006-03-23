@@ -5501,6 +5501,9 @@ type coercion.
  *
  */
 
+static void
+S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8);
+
 static STRLEN
 S_sv_pos_u2b_forwards(pTHX_ const U8 *const start, const U8 *const send,
 		      STRLEN uoffset)
@@ -5548,7 +5551,7 @@ S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
     assert (uoffset >= uoffset0);
 
     if (SvMAGICAL(sv) && !SvREADONLY(sv) && PL_utf8cache
-	&& (*mgp = mg_find(sv, PERL_MAGIC_utf8))) {
+	&& (*mgp || (*mgp = mg_find(sv, PERL_MAGIC_utf8)))) {
 	if ((*mgp)->mg_len != -1) {
 	    /* If we can take advantage of a passed in offset, do so.  */
 	    /* In fact, offset0 is either 0, or less than offset, so don't
@@ -5579,6 +5582,8 @@ S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
 	}
 	boffset = real_boffset;
     }
+
+    S_utf8_mg_pos_cache_update(aTHX_ sv, mgp, boffset, uoffset);
     return boffset;
 }
 
@@ -5595,7 +5600,7 @@ Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
     if (len) {
 	STRLEN uoffset = (STRLEN) *offsetp;
 	const U8 * const send = start + len;
-	MAGIC *mg;
+	MAGIC *mg = NULL;
 	STRLEN boffset = S_sv_pos_u2b_cached(aTHX_ sv, &mg, start, send,
 					     uoffset, 0, 0);
 
@@ -5663,8 +5668,18 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8)
 
     if (PL_utf8cache < 0) {
 	const U8 *start = (const U8 *) SvPVX_const(sv);
-	const STRLEN realutf8
-	    = S_sv_pos_b2u_forwards(aTHX_ start, start + byte);
+	const U8 *const end = start + byte;
+	STRLEN realutf8 = 0;
+
+	while (start < end) {
+	    start += UTF8SKIP(start);
+	    realutf8++;
+	}
+
+	/* Can't use S_sv_pos_b2u_forwards as it will scream warnings on
+	   surrogates.  FIXME - is it inconsistent that b2u warns, but u2b
+	   doesn't?  I don't know whether this difference was introduced with
+	   the caching code in 5.8.1.  */
 
 	if (realutf8 != utf8) {
 	    /* Need to turn the assertions off otherwise we may recurse
@@ -5677,6 +5692,7 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8)
     }
     cache[0] = utf8;
     cache[1] = byte;
+    ASSERT_UTF8_CACHE(cache);
     /* Drop the stale "length" cache */
     cache[2] = 0;
     cache[3] = 0;
