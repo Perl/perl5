@@ -19,7 +19,7 @@ use vars qw($VERSION @ISA
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
 # $VERSION needs to stay numeric to avoid test warnings
-$VERSION = '1.5002';
+$VERSION = '1.5003';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -1312,6 +1312,8 @@ sub init_MANPODS {
 	    $self->{"BUILD${man}PODS"} = 0 if
               $self->{"INSTALL${man}DIR"} =~ /^(none|\s*)$/;
 	}
+	$self->{"BUILD${man}PODS"} = 0 if
+	    scalar(keys %{$self->{"${man}PODS"}}) == 0;
     }
 
     $self->init_MAN1PODS() if $self->{BUILDMAN1PODS};
