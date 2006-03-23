@@ -5776,6 +5776,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
     STRLEN blen;
     MAGIC* mg = NULL;
     const U8* send;
+    bool found = FALSE;
 
     if (!sv)
 	return;
@@ -5830,27 +5831,27 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 
 	    }
 	    ASSERT_UTF8_CACHE(cache);
-	    if (PL_utf8cache < 0) {
-		const STRLEN reallen = S_sv_pos_b2u_forwards(aTHX_ s, send);
-
-		if (len != reallen) {
-		    /* Need to turn the assertions off otherwise we may recurse
-		       infinitely while printing error messages.  */
-		    SAVEI8(PL_utf8cache);
-		    PL_utf8cache = 0;
-		    Perl_croak(aTHX_ "panic: sv_pos_b2u cache %"UVf
-			       " real %"UVf" for %"SVf,
-			       (UV) len, (UV) reallen, sv);
-		}
-	    }
+	    found = TRUE;
 	} else if (mg->mg_len != -1) {
 	    len = S_sv_pos_b2u_midway(aTHX_ s, send, s + blen, mg->mg_len);
-	} else {
-	    len = S_sv_pos_b2u_forwards(aTHX_ s, send);
+	    found = TRUE;
 	}
     }
-    else {
-	len = S_sv_pos_b2u_forwards(aTHX_ s, send);
+    if (!found || PL_utf8cache < 0) {
+	const STRLEN real_len = S_sv_pos_b2u_forwards(aTHX_ s, send);
+
+	if (found && PL_utf8cache < 0) {
+	    if (len != real_len) {
+		/* Need to turn the assertions off otherwise we may recurse
+		   infinitely while printing error messages.  */
+		SAVEI8(PL_utf8cache);
+		PL_utf8cache = 0;
+		Perl_croak(aTHX_ "panic: sv_pos_b2u cache %"UVf
+			   " real %"UVf" for %"SVf,
+			   (UV) len, (UV) real_len, sv);
+	    }
+	}
+	len = real_len;
     }
     *offsetp = len;
 
