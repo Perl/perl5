@@ -1899,8 +1899,8 @@ S_sv_2iuv_common(pTHX_ SV *sv) {
 	if (Perl_isnan(SvNVX(sv))) {
 	    SvUV_set(sv, 0);
 	    SvIsUV_on(sv);
+	    return FALSE;
 	}
-	else
 #endif
 	if (SvNVX(sv) < (NV)IV_MAX + 0.5) {
 	    SvIV_set(sv, I_V(SvNVX(sv)));
