@@ -5565,7 +5565,8 @@ S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
 		/* An exact match. */
 		return cache[1];
 	    }
-	    else if (cache[0] < uoffset) {
+
+	    if (cache[0] < uoffset) {
 		/* The cache already knows part of the way.   */
 		if (cache[0] > uoffset0) {
 		    /* The cache knows more than the passed in pair  */
@@ -5583,8 +5584,14 @@ S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
 			+ S_sv_pos_u2b_forwards(aTHX_ start + boffset0,
 						send, uoffset - uoffset0);
 		}
-		found = TRUE;
+	    } else {
+		boffset = boffset0
+		    + S_sv_pos_u2b_midway(aTHX_ start + boffset0,
+					  start + cache[1],
+					  uoffset - uoffset0,
+					  cache[0] - uoffset0);
 	    }
+	    found = TRUE;
 	}
 	else if ((*mgp)->mg_len != -1) {
 	    /* If we can take advantage of a passed in offset, do so.  */
@@ -5805,10 +5812,10 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 	    if (cache[1] == byte) {
 		/* An exact match. */
 		*offsetp = cache[0];
-
 		return;
 	    }
-	    else if (cache[1] < byte) {
+
+	    if (cache[1] < byte) {
 		/* We already know part of the way. */
 		if (mg->mg_len != -1) {
 		    /* Actually, we know the end too.  */
