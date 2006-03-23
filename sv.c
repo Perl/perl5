@@ -5559,7 +5559,34 @@ S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
 
     if (SvMAGICAL(sv) && !SvREADONLY(sv) && PL_utf8cache
 	&& (*mgp || (*mgp = mg_find(sv, PERL_MAGIC_utf8)))) {
-	if ((*mgp)->mg_len != -1) {
+	if ((*mgp)->mg_ptr) {
+	    STRLEN *cache = (STRLEN *) (*mgp)->mg_ptr;
+	    if (cache[0] == uoffset) {
+		/* An exact match. */
+		return cache[1];
+	    }
+	    else if (cache[0] < uoffset) {
+		/* The cache already knows part of the way.   */
+		if (cache[0] > uoffset0) {
+		    /* The cache knows more than the passed in pair  */
+		    uoffset0 = cache[0];
+		    boffset0 = cache[1];
+		}
+		if ((*mgp)->mg_len != -1) {
+		    /* And we know the end too.  */
+		    boffset = boffset0
+			+ S_sv_pos_u2b_midway(aTHX_ start + boffset0, send,
+					      uoffset - uoffset0,
+					      (*mgp)->mg_len - uoffset0);
+		} else {
+		    boffset = boffset0
+			+ S_sv_pos_u2b_forwards(aTHX_ start + boffset0,
+						send, uoffset - uoffset0);
+		}
+		found = TRUE;
+	    }
+	}
+	else if ((*mgp)->mg_len != -1) {
 	    /* If we can take advantage of a passed in offset, do so.  */
 	    /* In fact, offset0 is either 0, or less than offset, so don't
 	       need to worry about the other possibility.  */
