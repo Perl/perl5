@@ -52,7 +52,8 @@ $ use64bitint = "n"
 $ uselargefiles = "n"
 $ usesitecustomize = "n"
 $ C_Compiler_Replace = "CC="
-$ Thread_Live_Dangerously = "MT="
+$ thread_upcalls = "MTU="
+$ thread_kernel = "MTK="
 $ use_two_pot_malloc = "N"
 $ use_pack_malloc = "N"
 $ use_debugmalloc = "N"
@@ -903,7 +904,7 @@ $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitel
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
 $   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|usemultiplicity|usemymalloc|usedebugging_perl|useperlio|usesecurelog|"
 $   config_symbols4 ="|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
-$   config_symbols5 ="|buildmake|builder|"
+$   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads"
 $!  
 $   open/read CONFIG 'config_sh'
 $   rd_conf_loop:
@@ -2433,28 +2434,50 @@ $       use_5005_threads="N"
 $     ELSE
 $       use_5005_threads="Y"
 $     ENDIF
-$     ! Are they on VMS 7.1 on an alpha or itanium?
-$     if (archname.nes."VMS_VAX").and.("''f$extract(1,3, f$getsyi(""version""))'".ges."7.1")
+$     ! Are they on VMS 7.1 or greater?
+$     IF "''f$extract(1,3, f$getsyi(""version""))'" .GES. "7.1"
 $     THEN
 $       echo ""
-$       echo "Threaded perl can be linked to use multiple kernel threads"
-$       echo "and system upcalls on VMS 7.1+ on Alpha systems.  This feature"
-$       echo "allows multiple threads to execute simultaneously on an SMP"
-$       echo "system as well as preventing a single thread from blocking"
-$       echo "all the threads in a program, even on a single-processor"
-$       echo "machine.  Unfortunately, this feature isn't safe on an"
-$       echo "unpatched 7.1 system (several OS patches were required when"
-$       echo "this procedure was written)."
-$       bool_dflt = "n"
-$       rp = "Enable multiple kernel threads and upcalls? [''bool_dflt'] "
+$	echo "Threaded Perl can be linked to use system upcalls on your system. This feature"
+$	echo "allows the thread scheduler to be made aware of system events (such as I/O)"
+$	echo "so as to prevent a single thread from blocking all the threads in a program,"
+$	echo "even on a single-processor machine."
+$	bool_dflt = "y"
+$	IF f$type(usethreadupcalls) .NES. ""
+$	THEN
+$       	if .not. usethreadupcalls .or. usethreadupcalls .eqs. "undef" then bool_dflt="n"
+$	ENDIF
+$       rp = "Enable thread upcalls? [''bool_dflt'] "
 $       gosub myread
-$       if ans
+$       IF ans
 $       THEN
-$         Thread_Live_Dangerously = "MT=MT=1"
+$           thread_upcalls = "MTU=MTU=1"
+$	    usethreadupcalls = "define"
+$     	    ! Are they on alpha or itanium?
+$	    IF (archname .NES. "VMS_VAX") .AND. ("''f$extract(1,3, f$getsyi(""version""))'" .GES. "7.2")
+$     	    THEN
+$       	echo ""
+$       	echo "Threaded Perl can be linked to use multiple kernel threads on your system."
+$       	echo "This feature allows multiple user threads to make use of multiple CPUs on
+$		echo "a multi-processor machine."
+$       	bool_dflt = "n"
+$		IF f$type(usekernelthreads) .nes. ""
+$		THEN
+$       		if usekernelthreads .or. usekernelthreads .eqs. "define" then bool_dflt="y"
+$		ENDIF
+$       	rp = "Enable multiple kernel threads? [''bool_dflt'] "
+$       	gosub myread
+$       	IF ans
+$		THEN
+$           	    thread_kernel = "MTK=MTK=1"
+$	    	    usekernelthreads = "define"
+$           ENDIF
 $       ENDIF
 $     ENDIF
 $   ENDIF
 $ ENDIF
+$ IF F$TYPE(usethreadupcalls) .EQS. "" THEN usethreadupcalls = "undef"
+$ IF F$TYPE(usekernelthreads) .EQS. "" THEN usekernelthreads = "undef"
 $ IF archname .NES. "VMS_VAX"
 $ THEN
 $! Case sensitive?
@@ -6309,6 +6332,7 @@ $ WC "usedl='" + usedl + "'"
 $ WC "usefaststdio='" + usefaststdio + "'"
 $ WC "useieee='" + useieee + "'"                    ! VMS-specific
 $ WC "useithreads='" + useithreads + "'"
+$ WC "usekernelthreads='" + usekernelthreads + "'"	! VMS-specific
 $ WC "uselargefiles='" + uselargefiles + "'"
 $ WC "uselongdouble='" + uselongdouble + "'"
 $ WC "usemorebits='" + usemorebits + "'"
@@ -6322,6 +6346,7 @@ $ WC "usesecurelog='" + usesecurelog + "'"  ! VMS-specific
 $ WC "usesitecustomize='" + usesitecustomize + "'"
 $ WC "usesocks='undef'"
 $ WC "usethreads='" + usethreads + "'"
+$ WC "usethreadupcalls='" + usethreadupcalls + "'"	! VMS-specific
 $ WC "usevendorprefix='" + "'" ! try to say no, though we'll be ignored as of MM 5.90_01
 $ WC "usevfork='true'"
 $ WC "usevmsdebug='" + usevmsdebug + "'"     ! VMS-specific
@@ -6640,7 +6665,7 @@ $ echo4 "Extracting ''defmakefile' (with variable substitutions)"
 $ DEFINE/USER_MODE sys$output 'UUmakefile'
 $ mcr []munchconfig 'config_sh' 'Makefile_SH' "''DECC_REPLACE'" "''DECCXX_REPLACE'" "''ARCH_TYPE'" "''GNUC_REPLACE'" -
 "''SOCKET_REPLACE'" "''THREAD_REPLACE'" "''C_Compiler_Replace'" "''MALLOC_REPLACE'" -
-"''Thread_Live_Dangerously'" "PV=''version'" "FLAGS=FLAGS=''extra_flags'" "''LARGEFILE_REPLACE'"
+"''THREAD_UPCALLS'" "''THREAD_KERNEL'" "PV=''version'" "FLAGS=FLAGS=''extra_flags'" "''LARGEFILE_REPLACE'"
 $! Clean up after ourselves
 $ DELETE/NOLOG/NOCONFIRM []munchconfig.exe;
 $!

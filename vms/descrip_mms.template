@@ -29,7 +29,8 @@
 ~SOCKET~
 ~MALLOC~
 ~CC~
-~MT~
+~MTK~
+~MTU~
 ~FLAGS~
 ~LARGEFILE~
 
@@ -208,6 +209,16 @@ THREADH = fakethr.h
 THREAD = THREAD
 .else
 THREADH =
+.endif
+
+.ifdef MTU
+.ifdef MTK
+MTHREADLINKFLAGS = /THREADS=(MULTIPLE_KERNEL,UPCALLS)
+.else
+MTHREADLINKFLAGS = /THREADS=UPCALLS
+.endif
+.else
+MTHREADLINKFLAGS = 
 .endif
 
 # C preprocessor manifest "DEBUGGING" ==> perl -D, not the VMS debugger
@@ -438,7 +449,7 @@ perlmain.c : miniperlmain.c $(MINIPERL_EXE) [.vms]writemain.pl
 .ifdef __DEBUG__
 # Link an extra perl that doesn't invoke the debugger
 perl : $(DBG)perl$(E)
-	Link $(LINKFLAGS)/NoDebug/Trace/NoMap/NoCross/NoFull/Exe=N$(DBG)perl$(E) perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)
+	Link $(LINKFLAGS)$(MTHREADLINKFLAGS)/NoDebug/Trace/NoMap/NoCross/NoFull/Exe=N$(DBG)perl$(E) perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)
 .else
 perl : $(DBG)perl$(E)
 	@ Continue
@@ -446,11 +457,7 @@ perl : $(DBG)perl$(E)
 
 $(DBG)perl$(E) : perlmain$(O), $(DBG)perlshr$(E), $(MINIPERL_EXE)
 	@ @[.vms]genopt "PerlShr.Opt/Write" "|" "''F$Environment("Default")'$(DBG)PerlShr$(E)/Share"
-.ifdef MT
-	Link $(LINKFLAGS)/Exe=$(MMS$TARGET) perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)/THREAD=(MULTI,UPCALL)
-.else
-	Link $(LINKFLAGS)/Exe=$(MMS$TARGET) perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)
-.endif
+	Link $(LINKFLAGS)$(MTHREADLINKFLAGS)/Exe=$(MMS$TARGET) perlmain$(O), perlshr.opt/Option, perlshr_attr.opt/Option $(CRTLOPTS)
 
 $(DBG)perlshr$(E) : $(DBG)libperl$(OLB) $(extobj) $(DBG)perlshr_xtras.ts
 	Link $(LINKFLAGS)/Share=$(MMS$TARGET) $(extobj) []$(DBG)perlshr_bld.opt/Option, perlshr_attr.opt/Option
