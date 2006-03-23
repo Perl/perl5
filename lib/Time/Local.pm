@@ -7,7 +7,7 @@ use strict;
 use integer;
 
 use vars qw( $VERSION @ISA @EXPORT @EXPORT_OK );
-$VERSION    = '1.11';
+$VERSION    = '1.12';
 $VERSION    = eval $VERSION;
 @ISA	= qw( Exporter );
 @EXPORT	= qw( timegm timelocal );
@@ -26,6 +26,9 @@ my $SecOff       = 0;
 my (%Options, %Cheat, %Min, %Max);
 my ($MinInt, $MaxInt);
 
+use constant ONE_HOUR => 3600;
+use constant ONE_DAY  => 86400;
+
 if ($^O eq 'MacOS') {
     # time_t is unsigned...
     $MaxInt = (1 << (8 * $Config{intsize})) - 1;
@@ -43,8 +46,8 @@ if ($^O eq 'MacOS') {
 $Max{Day} = ($MaxInt >> 1) / 43200;
 $Min{Day} = $MinInt ? -($Max{Day} + 1) : 0;
 
-$Max{Sec} = $MaxInt - 86400 * $Max{Day};
-$Min{Sec} = $MinInt - 86400 * $Min{Day};
+$Max{Sec} = $MaxInt - ONE_DAY * $Max{Day};
+$Min{Sec} = $MinInt - ONE_DAY * $Min{Day};
 
 # Determine the EPOC day for this machine
 my $Epoc = 0;
@@ -78,11 +81,11 @@ sub _daygm {
 
 
 sub _timegm {
-    my $sec = $SecOff + $_[0]  +  60 * $_[1]  +  3600 * $_[2];
+    my $sec = $SecOff + $_[0]  +  60 * $_[1]  +  ONE_HOUR * $_[2];
 
     no integer;
 
-    $sec +  86400 * &_daygm;
+    $sec +  ONE_DAY * &_daygm;
 }
 
 
@@ -90,8 +93,8 @@ sub _zoneadjust {
     my ($day, $sec, $time) = @_;
 
     $sec = $sec + _timegm(localtime($time)) - $time;
-    if ($sec >= 86400) { $day++; $sec -= 86400; }
-    if ($sec <  0)     { $day--; $sec += 86400; }
+    if ($sec >= ONE_DAY) { $day++; $sec -= ONE_DAY; }
+    if ($sec <  0)     { $day--; $sec += ONE_DAY; }
 
     ($day, $sec);
 }
@@ -127,7 +130,7 @@ sub timegm {
     }
 
     my $days = _daygm(undef, undef, undef, $mday, $month, $year);
-    my $xsec = $sec + $SecOff + 60*$min + 3600*$hour;
+    my $xsec = $sec + $SecOff + 60*$min + ONE_HOUR*$hour;
 
     unless ($Options{no_range_check}
         or  ($days > $Min{Day} or $days == $Min{Day} and $xsec >= $Min{Sec})
@@ -143,7 +146,7 @@ sub timegm {
 
     no integer;
 
-    $xsec + 86400 * $days;
+    $xsec + ONE_DAY * $days;
 }
 
 
@@ -159,9 +162,7 @@ sub timelocal {
     local ($Min{Day}, $Min{Sec}) = _zoneadjust($Min{Day}, $Min{Sec}, $MinInt);
     my $ref_t = &timegm;
 
-    # Calculate first guess with a one-day delta to avoid localtime overflow
-    my $delta = ($_[5] < 100)? 86400 : -86400;
-    my $loc_t = _timegm(localtime( $ref_t + $delta )) - $delta;
+    my $loc_t = _timegm(localtime($ref_t));
 
     # Is there a timezone offset from GMT or are we done
     my $zone_off = $ref_t - $loc_t
@@ -169,7 +170,7 @@ sub timelocal {
 
     # This hack is needed to always pick the first matching time
     # during a DST change when time would otherwise be ambiguous
-    $zone_off -= 3600 if ($delta > 0 && $ref_t >= 3600);
+    $zone_off -= ONE_HOUR if $ref_t >= ONE_HOUR;
 
     # Adjust for timezone
     $loc_t = $ref_t + $zone_off;
@@ -186,7 +187,6 @@ sub timelocal {
     # for a negative offset from GMT, and if the original date
     # was a non-extent gap in a forward DST jump, we should
     # now have the wrong answer - undo the DST adjust;
-
     my ($s,$m,$h) = localtime($loc_t);
     $loc_t -= $dst_off if $s != $_[0] || $m != $_[1] || $h != $_[2];
 
