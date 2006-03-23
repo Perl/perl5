@@ -5763,9 +5763,19 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 			+ S_sv_pos_b2u_forwards(aTHX_ s + cache[1], send);
 		}
 	    }
-	    else { /* cache[1] > byte */
-		len = S_sv_pos_b2u_midway(aTHX_ s, send, s + cache[1],
-					  cache[0]);
+	    else if (cache[3] < byte) {
+		/* We're between the two cached pairs, so we do the calculation
+		   offset by the byte/utf-8 positions for the earlier pair,
+		   then add the utf-8 characters from the string start to
+		   there.  */
+		len = S_sv_pos_b2u_midway(aTHX_ s + cache[3], send,
+					  s + cache[1], cache[0] - cache[2])
+		    + cache[2];
+
+	    }
+	    else { /* cache[3] > byte */
+		len = S_sv_pos_b2u_midway(aTHX_ s, send, s + cache[3],
+					  cache[2]);
 
 	    }
 	    ASSERT_UTF8_CACHE(cache);
