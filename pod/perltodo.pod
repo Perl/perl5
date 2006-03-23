@@ -437,10 +437,6 @@ By removing unused elements and careful re-ordering, the structures for C<AV>s,
 C<HV>s, C<CV>s and C<GV>s have recently been shrunk considerably. C<PVIO>s and
 C<PVBM>s might have some savings to win.
 
-=head2 UTF8 caching code
-
-The string position/offset cache is not optional. It should be.
-
 =head2 Implicit Latin 1 => Unicode translation
 
 Conversions from byte strings to UTF-8 currently map high bit characters

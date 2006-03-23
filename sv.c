@@ -5274,8 +5274,10 @@ UTF-8 bytes as a single character. Handles magic and type coercion.
 
 /*
  * The length is cached in PERL_UTF8_magic, in the mg_len field.  Also the
- * mg_ptr is used, by sv_pos_u2b(), see the comments of S_utf8_mg_pos_init().
- * (Note that the mg_len is not the length of the mg_ptr field.)
+ * mg_ptr is used, by sv_pos_u2b() and sv_pos_b2u() - see the comments below.
+ * (Note that the mg_len is not the length of the mg_ptr field.
+ * This allows the cache to store the character length of the string without
+ * needing to malloc() extra storage to attach to the mg_ptr.)
  *
  */
 
@@ -5329,25 +5331,8 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
     }
 }
 
-/*
-=for apidoc sv_pos_u2b
-
-Converts the value pointed to by offsetp from a count of UTF-8 chars from
-the start of the string, to a count of the equivalent number of bytes; if
-lenp is non-zero, it does the same to lenp, but this time starting from
-the offset, rather than from the start of the string. Handles magic and
-type coercion.
-
-=cut
-*/
-
-/*
- * sv_pos_u2b() uses, like sv_pos_b2u(), the mg_ptr of the potential
- * PERL_UTF8_magic of the sv to store the mapping between UTF-8 and
- * byte offsets.  See also the comments of S_utf8_mg_pos().
- *
- */
-
+/* Walk forwards to find the byte corresponding to the passed in UTF-8
+   offset.  */
 static STRLEN
 S_sv_pos_u2b_forwards(pTHX_ const U8 *const start, const U8 *const send,
 		      STRLEN uoffset)
@@ -5364,7 +5349,9 @@ S_sv_pos_u2b_forwards(pTHX_ const U8 *const start, const U8 *const send,
     return s - start;
 }
 
-
+/* Given the length of the string in both bytes and UTF-8 characters, decide
+   whether to walk forwards or backwards to find the byte corresponding to
+   the passed in UTF-8 offset.  */
 static STRLEN
 S_sv_pos_u2b_midway(pTHX_ const U8 *const start, const U8 *send,
 		      STRLEN uoffset, STRLEN uend)
@@ -5385,6 +5372,14 @@ S_sv_pos_u2b_midway(pTHX_ const U8 *const start, const U8 *send,
     return send - start;
 }
 
+/* For the string representation of the given scalar, find the byte
+   corresponding to the passed in UTF-8 offset.  uoffset0 and boffset0
+   give another position in the string, *before* the sought offset, which
+   (which is always true, as 0, 0 is a valid pair of positions), which should
+   help reduce the amount of linear searching.
+   If *mgp is non-NULL, it should point to the UTF-8 cache magic, which
+   will be used to reduce the amount of linear searching. The cache will be
+   created if necessary, and the found value offered to it for update.  */
 static STRLEN
 S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
 		    const U8 *const send, STRLEN uoffset,
@@ -5483,6 +5478,26 @@ S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
     return boffset;
 }
 
+
+/*
+=for apidoc sv_pos_u2b
+
+Converts the value pointed to by offsetp from a count of UTF-8 chars from
+the start of the string, to a count of the equivalent number of bytes; if
+lenp is non-zero, it does the same to lenp, but this time starting from
+the offset, rather than from the start of the string. Handles magic and
+type coercion.
+
+=cut
+*/
+
+/*
+ * sv_pos_u2b() uses, like sv_pos_b2u(), the mg_ptr of the potential
+ * PERL_UTF8_magic of the sv to store the mapping between UTF-8 and
+ * byte offsets.  See also the comments of S_utf8_mg_pos_cache_update().
+ *
+ */
+
 void
 Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
 {
@@ -5521,23 +5536,29 @@ Perl_sv_pos_u2b(pTHX_ register SV *sv, I32* offsetp, I32* lenp)
     return;
 }
 
-/*
-=for apidoc sv_pos_b2u
+/* Create and update the UTF8 magic offset cache, with the proffered utf8/
+   byte length pairing. The (byte) length of the total SV is passed in too,
+   as blen, because for some (more esoteric) SVs, the call to SvPV_const()
+   may not have updated SvCUR, so we can't rely on reading it directly.
 
-Converts the value pointed to by offsetp from a count of bytes from the
-start of the string, to a count of the equivalent number of UTF-8 chars.
-Handles magic and type coercion.
+   The proffered utf8/byte length pairing isn't used if the cache already has
+   two pairs, and swapping either for the proffered pair would increase the
+   RMS of the intervals between known byte offsets.
 
-=cut
+   The cache itself consists of 4 STRLEN values
+   0: larger UTF-8 offset
+   1: corresponding byte offset
+   2: smaller UTF-8 offset
+   3: corresponding byte offset
+
+   Unused cache pairs have the value 0, 0.
+   Keeping the cache "backwards" means that the invariant of
+   cache[0] >= cache[2] is maintained even with empty slots, which means that
+   the code that uses it doesn't need to worry if only 1 entry has actually
+   been set to non-zero.  It also makes the "position beyond the end of the
+   cache" logic much simpler, as the first slot is always the one to start
+   from.   
 */
-
-/*
- * sv_pos_b2u() uses, like sv_pos_u2b(), the mg_ptr of the potential
- * PERL_UTF8_magic of the sv to store the mapping between UTF-8 and
- * byte offsets.
- *
- */
-
 static void
 S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8,
 			   STRLEN blen)
@@ -5730,6 +5751,22 @@ S_sv_pos_b2u_midway(pTHX_ const U8 *s, const U8 *const target, const U8 *end,
     return endu;
 }
 
+/*
+=for apidoc sv_pos_b2u
+
+Converts the value pointed to by offsetp from a count of bytes from the
+start of the string, to a count of the equivalent number of UTF-8 chars.
+Handles magic and type coercion.
+
+=cut
+*/
+
+/*
+ * sv_pos_b2u() uses, like sv_pos_u2b(), the mg_ptr of the potential
+ * PERL_UTF8_magic of the sv to store the mapping between UTF-8 and
+ * byte offsets.
+ *
+ */
 void
 Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 {
