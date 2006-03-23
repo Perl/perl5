@@ -24,19 +24,17 @@ use File::Basename;
 use File::Spec;
 use ExtUtils::MakeMaker qw( neatvalue );
 
-use vars qw(@ISA $VERSION $BORLAND $GCC $DMAKE $NMAKE);
+use vars qw(@ISA $VERSION);
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-$VERSION = '1.12';
+$VERSION = '1.12_01';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
-$BORLAND = 1 if $Config{'cc'} =~ /^bcc/i;
-$GCC     = 1 if $Config{'cc'} =~ /^gcc/i;
-$DMAKE = 1 if $Config{'make'} =~ /^dmake/i;
-$NMAKE = 1 if $Config{'make'} =~ /^nmake/i;
+my $BORLAND = 1 if $Config{'cc'} =~ /^bcc/i;
+my $GCC     = 1 if $Config{'cc'} =~ /^gcc/i;
 
 
 =head2 Overridden methods
@@ -130,10 +128,12 @@ Using \ for Windows.
 sub init_DIRFILESEP {
     my($self) = shift;
 
+    my $make = $self->make;
+
     # The ^ makes sure its not interpreted as an escape in nmake
-    $self->{DIRFILESEP} = $NMAKE ? '^\\' :
-                          $DMAKE ? '\\\\'
-                                 : '\\';
+    $self->{DIRFILESEP} = $make eq 'nmake' ? '^\\' :
+                          $make eq 'dmake' ? '\\\\'
+                                           : '\\';
 }
 
 =item B<init_others>
@@ -236,7 +236,7 @@ sub special_targets {
 
     my $make_frag = $self->SUPER::special_targets;
 
-    $make_frag .= <<'MAKE_FRAG' if $DMAKE;
+    $make_frag .= <<'MAKE_FRAG' if $self->make eq 'dmake';
 .USESHELL :
 MAKE_FRAG
 
@@ -331,7 +331,8 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DFSEP).
     } elsif ($BORLAND) {
       push(@m,
        q{	$(LD) $(LDDLFLAGS) $(OTHERLDFLAGS) }.$ldfrom.q{,$@,,}
-       .($DMAKE ? q{$(PERL_ARCHIVE:s,/,\,) $(LDLOADLIBS:s,/,\,) }
+       .($self->make eq 'dmake' 
+                ? q{$(PERL_ARCHIVE:s,/,\,) $(LDLOADLIBS:s,/,\,) }
 		 .q{$(MYEXTLIB:s,/,\,),$(EXPORT_LIST:s,/,\,)}
 		: q{$(subst /,\,$(PERL_ARCHIVE)) $(subst /,\,$(LDLOADLIBS)) }
 		 .q{$(subst /,\,$(MYEXTLIB)),$(subst /,\,$(EXPORT_LIST))})
@@ -410,7 +411,7 @@ banner.
 
 sub pasthru {
     my($self) = shift;
-    return "PASTHRU = " . ($NMAKE ? "-nologo" : "");
+    return "PASTHRU = " . ($self->make eq 'nmake' ? "-nologo" : "");
 }
 
 
@@ -434,7 +435,7 @@ sub oneliner {
 
     $switches = join ' ', @$switches;
 
-    return qq{\$(ABSPERLRUN) $switches -e $cmd};
+    return qq{\$(ABSPERLRUN) $switches -e $cmd --};
 }
 
 
@@ -449,7 +450,7 @@ sub quote_literal {
     # quotes; however it transforms {{ into { either inside and outside double
     # quotes.  It also translates }} into }.  The escaping below is not
     # 100% correct.
-    if( $DMAKE ) {
+    if( $self->make eq 'dmake' ) {
         $text =~ s/{/{{/g;
         $text =~ s/}}/}}}/g;
     }
@@ -486,7 +487,7 @@ what MakeMaker needs.
 sub cd {
     my($self, $dir, @cmds) = @_;
 
-    return $self->SUPER::cd($dir, @cmds) unless $NMAKE;
+    return $self->SUPER::cd($dir, @cmds) unless $self->make eq 'nmake';
 
     my $cmd = join "\n\t", map "$_", @cmds;
 

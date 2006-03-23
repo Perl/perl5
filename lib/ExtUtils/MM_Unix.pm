@@ -4,7 +4,6 @@ require 5.005_03;  # Maybe further back, dunno
 
 use strict;
 
-use Exporter ();
 use Carp;
 use ExtUtils::MakeMaker::Config;
 use File::Basename qw(basename dirname);
@@ -14,7 +13,6 @@ use vars qw($VERSION @ISA
             $Is_OS2 $Is_VMS $Is_Win32 $Is_Dos
             $Is_OSF $Is_IRIX  $Is_NetBSD $Is_BSD
             $Is_SunOS4 $Is_Solaris $Is_SunOS $Is_Interix
-            $Verbose %pm
             %Config_Override
            );
 
@@ -375,7 +373,7 @@ sub constants {
               INST_ARCHLIB INST_SCRIPT INST_BIN INST_LIB
               INST_MAN1DIR INST_MAN3DIR
               MAN1EXT      MAN3EXT
-              INSTALLDIRS INSTALLBASE DESTDIR PREFIX
+              INSTALLDIRS INSTALL_BASE DESTDIR PREFIX
               PERLPREFIX      SITEPREFIX      VENDORPREFIX
                    ),
                    (map { ("INSTALL".$_,
@@ -1049,7 +1047,7 @@ WARNING
                 print "Using PERL=$abs\n" if $trace;
                 return $abs;
             } elsif ($trace >= 2) {
-                print "Result: '$val'\n";
+                print "Result: '$val' ".($? >> 8)."\n";
             }
         }
     }
@@ -1230,8 +1228,8 @@ sub has_link_code {
 
 =item init_dirscan
 
-Scans the directory structure and initializes DIR, XS, XS_FILES, PM,
-C, C_FILES, O_FILES, H, H_FILES, PL_FILES, MAN*PODS, EXE_FILES.
+Scans the directory structure and initializes DIR, XS, XS_FILES,
+C, C_FILES, O_FILES, H, H_FILES, PL_FILES, EXE_FILES.
 
 Called by init_main.
 
@@ -1239,8 +1237,7 @@ Called by init_main.
 
 sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     my($self) = @_;
-    my($name, %dir, %xs, %c, %h, %pl_files, %manifypods);
-    my %pm;
+    my($name, %dir, %xs, %c, %h, %pl_files, %pm);
 
     my %ignore = map {( $_ => 1 )} qw(Makefile.PL Build.PL test.pl t);
 
@@ -1284,6 +1281,145 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
 	}
     }
 
+    $self->{PL_FILES}   ||= \%pl_files;
+    $self->{DIR}        ||= [sort keys %dir];
+    $self->{XS}         ||= \%xs;
+    $self->{C}          ||= [sort keys %c];
+    $self->{H}          ||= [sort keys %h];
+    $self->{PM}         ||= \%pm;
+
+    my @o_files = @{$self->{C}};
+    $self->{O_FILES} = [grep s/\.c(pp|xx|c)?\z/$self->{OBJ_EXT}/i, @o_files];
+}
+
+
+=item init_MANPODS
+
+Determines if man pages should be generated and initializes MAN1PODS
+and MAN3PODS as appropriate.
+
+=cut
+
+sub init_MANPODS {
+    my $self = shift;
+
+    # Set up names of manual pages to generate from pods
+    foreach my $man (qw(MAN1 MAN3)) {
+	$self->{"BUILD${man}PODS"} = 1;
+
+	unless ($self->{"${man}PODS"}) {
+	    $self->{"${man}PODS"} = {};
+	    $self->{"BUILD${man}PODS"} = 0 if
+              $self->{"INSTALL${man}DIR"} =~ /^(none|\s*)$/;
+	}
+    }
+
+    $self->init_MAN1PODS() if $self->{BUILDMAN1PODS};
+    $self->init_MAN3PODS() if $self->{BUILDMAN3PODS};
+}
+
+
+sub _has_pod {
+    my($self, $file) = @_;
+
+    local *FH;
+    my($ispod)=0;
+    if (open(FH,"<$file")) {
+	while (<FH>) {
+	    if (/^=(?:head\d+|item|pod)\b/) {
+		$ispod=1;
+		last;
+	    }
+	}
+	close FH;
+    } else {
+	# If it doesn't exist yet, we assume, it has pods in it
+	$ispod = 1;
+    }
+
+    return $ispod;
+}
+
+
+=item init_MAN1PODS
+
+Initializes MAN1PODS from the list of EXE_FILES.
+
+=cut
+
+sub init_MAN1PODS {
+    my($self) = @_;
+
+    if ( exists $self->{EXE_FILES} ) {
+	foreach my $name (@{$self->{EXE_FILES}}) {
+	    next unless $self->_has_pod($name);
+
+	    $self->{MAN1PODS}->{$name} =
+		$self->catfile("\$(INST_MAN1DIR)", 
+			       basename($name).".\$(MAN1EXT)");
+	}
+    }
+}
+
+
+=item init_MAN3PODS
+
+Initializes MAN3PODS from the list of PM files.
+
+=cut
+
+sub init_MAN3PODS {
+    my $self = shift;
+
+    my %manifypods = (); # we collect the keys first, i.e. the files
+                         # we have to convert to pod
+
+    foreach my $name (keys %{$self->{PM}}) {
+	if ($name =~ /\.pod\z/ ) {
+	    $manifypods{$name} = $self->{PM}{$name};
+	} elsif ($name =~ /\.p[ml]\z/ ) {
+	    if( $self->_has_pod($name) ) {
+		$manifypods{$name} = $self->{PM}{$name};
+	    }
+	}
+    }
+
+    my $parentlibs_re = join '|', @{$self->{PMLIBPARENTDIRS}};
+
+    # Remove "Configure.pm" and similar, if it's not the only pod listed
+    # To force inclusion, just name it "Configure.pod", or override 
+    # MAN3PODS
+    foreach my $name (keys %manifypods) {
+	if ($self->{PERL_CORE} and $name =~ /(config|setup).*\.pm/is) {
+	    delete $manifypods{$name};
+	    next;
+	}
+	my($manpagename) = $name;
+	$manpagename =~ s/\.p(od|m|l)\z//;
+	# everything below lib is ok
+	unless($manpagename =~ s!^\W*($parentlibs_re)\W+!!s) {
+	    $manpagename = $self->catfile(
+	        split(/::/,$self->{PARENT_NAME}),$manpagename
+	    );
+	}
+	$manpagename = $self->replace_manpage_separator($manpagename);
+	$self->{MAN3PODS}->{$name} =
+	    $self->catfile("\$(INST_MAN3DIR)", "$manpagename.\$(MAN3EXT)");
+    }
+}
+
+
+=item init_PM
+
+Initializes PMLIBDIRS and PM from PMLIBDIRS.
+
+=cut
+
+sub init_PM {
+    my $self = shift;
+
+    my $pm = $self->{PM};
+
     # Some larger extensions often wish to install a number of *.pm/pl
     # files into the library in various locations.
 
@@ -1325,10 +1461,14 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
     # Avoid $_ wherever possible:
     # @{$self->{PMLIBDIRS}} = grep -d && !$dir{$_}, @{$self->{PMLIBDIRS}};
     my (@pmlibdirs) = @{$self->{PMLIBDIRS}};
-    my ($pmlibdir);
     @{$self->{PMLIBDIRS}} = ();
-    foreach $pmlibdir (@pmlibdirs) {
+    my %dir = map { ($_ => $_) } @{$self->{DIR}};
+    foreach my $pmlibdir (@pmlibdirs) {
 	-d $pmlibdir && !$dir{$pmlibdir} && push @{$self->{PMLIBDIRS}}, $pmlibdir;
+    }
+
+    unless( $self->{PMLIBPARENTDIRS} ) {
+	@{$self->{PMLIBPARENTDIRS}} = ('lib');
     }
 
     if (@{$self->{PMLIBDIRS}}){
@@ -1350,115 +1490,21 @@ sub init_dirscan {	# --- File and Directory Lists (.xs .pm .pod etc)
             my $prefix = $self->{INST_LIBDIR};
             my $striplibpath;
 
+	    my $parentlibs_re = join '|', @{$self->{PMLIBPARENTDIRS}};
 	    $prefix =  $self->{INST_LIB} 
-                if ($striplibpath = $path) =~ s:^(\W*)lib\W:$1:i;
+                if ($striplibpath = $path) =~ s{^(\W*)($parentlibs_re)\W}
+	                                       {$1}i;
 
 	    my($inst) = $self->catfile($prefix,$striplibpath);
 	    local($_) = $inst; # for backwards compatibility
 	    $inst = $self->libscan($inst);
 	    print "libscan($path) => '$inst'\n" if ($Verbose >= 2);
 	    return unless $inst;
-	    $pm{$path} = $inst;
+	    $pm->{$path} = $inst;
 	}, @{$self->{PMLIBDIRS}});
     }
-
-    $self->{PM}  ||= \%pm;
-    $self->{PL_FILES} ||= \%pl_files;
-
-    $self->{DIR} ||= [sort keys %dir];
-
-    $self->{XS}  ||= \%xs;
-    $self->{C}   ||= [sort keys %c];
-    my @o_files = @{$self->{C}};
-    $self->{O_FILES} = [grep s/\.c(pp|xx|c)?\z/$self->{OBJ_EXT}/i, @o_files];
-                            
-    $self->{H}   ||= [sort keys %h];
-
-    # Set up names of manual pages to generate from pods
-    my %pods;
-    foreach my $man (qw(MAN1 MAN3)) {
-	unless ($self->{"${man}PODS"}) {
-	    $self->{"${man}PODS"} = {};
-	    $pods{$man} = 1 unless 
-              $self->{"INSTALL${man}DIR"} =~ /^(none|\s*)$/;
-	}
-    }
-
-    if ($pods{MAN1}) {
-	if ( exists $self->{EXE_FILES} ) {
-	    foreach $name (@{$self->{EXE_FILES}}) {
-		local *FH;
-		my($ispod)=0;
-		if (open(FH,"<$name")) {
-		    while (<FH>) {
-			if (/^=(?:head\d+|item|pod)\b/) {
-			    $ispod=1;
-			    last;
-			}
-		    }
-		    close FH;
-		} else {
-		    # If it doesn't exist yet, we assume, it has pods in it
-		    $ispod = 1;
-		}
-		next unless $ispod;
-		if ($pods{MAN1}) {
-		    $self->{MAN1PODS}->{$name} =
-		      $self->catfile("\$(INST_MAN1DIR)", basename($name).".\$(MAN1EXT)");
-		}
-	    }
-	}
-    }
-    if ($pods{MAN3}) {
-	my %manifypods = (); # we collect the keys first, i.e. the files
-			     # we have to convert to pod
-	foreach $name (keys %{$self->{PM}}) {
-	    if ($name =~ /\.pod\z/ ) {
-		$manifypods{$name} = $self->{PM}{$name};
-	    } elsif ($name =~ /\.p[ml]\z/ ) {
-		local *FH;
-		my($ispod)=0;
-		if (open(FH,"<$name")) {
-		    while (<FH>) {
-			if (/^=head1\s+\w+/) {
-			    $ispod=1;
-			    last;
-			}
-		    }
-		    close FH;
-		} else {
-		    $ispod = 1;
-		}
-		if( $ispod ) {
-		    $manifypods{$name} = $self->{PM}{$name};
-		}
-	    }
-	}
-
-	# Remove "Configure.pm" and similar, if it's not the only pod listed
-	# To force inclusion, just name it "Configure.pod", or override 
-        # MAN3PODS
-	foreach $name (keys %manifypods) {
-           if ($self->{PERL_CORE} and $name =~ /(config|setup).*\.pm/is) {
-		delete $manifypods{$name};
-		next;
-	    }
-	    my($manpagename) = $name;
-	    $manpagename =~ s/\.p(od|m|l)\z//;
-           # everything below lib is ok
-	    unless($manpagename =~ s!^\W*lib\W+!!s) {
-		$manpagename = $self->catfile(
-                                split(/::/,$self->{PARENT_NAME}),$manpagename
-                               );
-	    }
-	    if ($pods{MAN3}) {
-		$manpagename = $self->replace_manpage_separator($manpagename);
-		$self->{MAN3PODS}->{$name} =
-		  $self->catfile("\$(INST_MAN3DIR)", "$manpagename.\$(MAN3EXT)");
-	    }
-	}
-    }
 }
+
 
 =item init_DIRFILESEP
 
@@ -1604,15 +1650,18 @@ from the perl source tree.
 	    and not $old){
 	    # Maybe somebody tries to build an extension with an
 	    # uninstalled Perl outside of Perl build tree
-	    my $found;
+	    my $lib;
 	    for my $dir (@INC) {
-	      $found = $dir, last if -e $self->catdir($dir, "Config.pm");
+	      $lib = $dir, last if -e $self->catdir($dir, "Config.pm");
 	    }
-	    if ($found) {
-	      my $inc = dirname $found;
+	    if ($lib) {
+              # Win32 puts its header files in /perl/src/lib/CORE.
+              # Unix leaves them in /perl/src.
+	      my $inc = $Is_Win32 ? $self->catdir($lib, "CORE" )
+                                  : dirname $lib;
 	      if (-e $self->catdir($inc, "perl.h")) {
-		$self->{PERL_LIB}	   = $found;
-		$self->{PERL_ARCHLIB}	   = $found;
+		$self->{PERL_LIB}	   = $lib;
+		$self->{PERL_ARCHLIB}	   = $lib;
 		$self->{PERL_INC}	   = $inc;
 		$self->{UNINSTALLED_PERL}  = 1;
 		print STDOUT <<EOP;
@@ -2691,7 +2740,7 @@ sub pasthru {
     $sep .= "\\\n\t";
 
     foreach $key (qw(LIB LIBPERL_A LINKTYPE OPTIMIZE
-                     PREFIX INSTALLBASE)
+                     PREFIX INSTALL_BASE)
                  ) 
     {
         next unless defined $self->{$key};
@@ -2899,12 +2948,6 @@ for a binary distribution.
 
 sub ppd {
     my($self) = @_;
-
-    if ($self->{ABSTRACT_FROM}){
-        $self->{ABSTRACT} = $self->parse_abstract($self->{ABSTRACT_FROM}) or
-            carp "WARNING: Setting ABSTRACT via file ".
-                 "'$self->{ABSTRACT_FROM}' failed\n";
-    }
 
     my ($pack_ver) = join ",", (split (/\./, $self->{VERSION}), (0)x4)[0..3];
 
@@ -3143,7 +3186,7 @@ sub oneliner {
 
     $switches = join ' ', @$switches;
 
-    return qq{\$(ABSPERLRUN) $switches -e $cmd};   
+    return qq{\$(ABSPERLRUN) $switches -e $cmd --};   
 }
 
 

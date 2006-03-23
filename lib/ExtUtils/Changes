@@ -1,3 +1,33 @@
+6.30_01  Tue Aug 16 23:53:27 PDT 2005
+    * Fixed compiling modules using an uninstalled Perl on Win32 by using
+      the proper perl header location for Windows (which is different from
+      Unix).  Looks like a very old bug.  [bugs.perl.org 36128]
+    - $ExtUtils::MakeMaker::Revision accidentally left in a stray "Revision".
+      [thanks pdx.pm for noticing this]
+    - Fixed the $VERSION = $Revision$ example in the MakeMaker docs and the
+      FAQ. [thanks again, pdx.pm]
+    - Elaborated on the differences between CVS, SVN and others when using
+      $Revision$ based $VERSIONs.
+    * ExtUtils::Command, ExtUtils::Install, ExtUtils::Manifest,
+      ExtUtils::Mkbootstrap, ExtUtils::Mksymlists and ExtUtils::Packlist
+      are all now considered to be separate distributions.  To avoid a 
+      circular dependency, MakeMaker distributes its own versions but CPAN 
+      should not index them and they will not overwrite a newer, installed 
+      version.
+    * Added EXTRA_META option to allow module authors to append extra
+      text to the generated META.yml.
+    * Added a LICENSE field mirroring Module::Build's license.
+    * META.yml support updated to version 1.1.  All required fields
+      now generated.  (NOTE: 1.1 isn't yet complete but we're going with
+      it anyway.  MakeMaker uses "author" instead of "authored_by" as its
+      expected the former will be used in 1.1 final).
+    * Non-conforming version_from and installdirs META.yml fields removed.
+    * META.yml distribution_type field now intelligent enough to guess at
+      the type rather than hard code 'module'.
+    * INSTALLBASE changed to INSTALL_BASE to match Module::Build.
+    * Added a MAKE parameter for Windows users to say if they're using
+      dmake or nmake.
+
 6.30  Fri May 20 16:05:38 PDT 2005
     * PL_FILES behavior tweak again to restore old behavior.  Sometimes its 
       supposed to run before pm_to_blib, sometimes after.

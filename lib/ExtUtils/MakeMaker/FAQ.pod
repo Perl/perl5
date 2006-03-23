@@ -1,7 +1,7 @@
 package ExtUtils::MakeMaker::FAQ;
 
 use vars qw($VERSION);
-$VERSION = '1.11';
+$VERSION = '1.11_01';
 
 1;
 __END__
@@ -116,22 +116,34 @@ Simplest way to do it automatically is to use your version control
 system's revision number (you are using version control, right?).
 
 In CVS, RCS and SVN you use $Revision$ (see the documentation of your
-version control system for details) writing it like so:
+version control system for details).  Every time the file is checked
+in the $Revision$ will be updated, updating your $VERSION.
 
-    $VERSION = sprintf "%d.%03d", q$Revision$ =~ /(\d+)/g;
+SVN uses a simple integer for $Revision$ so you can adapt it for your
+$VERSION like so:
 
-Every time the file is checked in the $Revision$ will be updated,
-updating your $VERSION.
+    $VERSION = (q$Revision$) =~ /(\d+)/g;
 
-In CVS version 1.9 is followed by 1.10.  Since CPAN compares version
-numbers numerically we use a sprintf() to convert 1.9 to 1.009 and
-1.10 to 1.010 which compare properly.
+In CVS and RCS version 1.9 is followed by 1.10.  Since CPAN compares
+version numbers numerically we use a sprintf() to convert 1.9 to 1.009
+and 1.10 to 1.010 which compare properly.
+
+    $VERSION = sprintf "%d.%03d", q$Revision$ =~ /(\d+)\.(\d+)/g;
 
 If branches are involved (ie. $Revision: 1.5.3.4$) its a little more
 complicated.
 
     # must be all on one line or MakeMaker will get confused.
     $VERSION = do { my @r = (q$Revision$ =~ /\d+/g); sprintf "%d."."%03d" x $#r, @r };
+
+In SVN, $Revision$ should be the same for every file in the project so
+they would all have the same $VERSION.  CVS and RCS have a different
+$Revision$ per file so each file will have a differnt $VERSION.
+Distributed version control systems, such as SVK, may have a different
+$Revision$ based on who checks out the file leading to a different $VERSION
+on each machine!  Finally, some distributed version control systems, such
+as darcs, have no concept of revision number at all.
+
 
 =item What's this F<META.yml> thing and how did it get in my F<MANIFEST>?!
 

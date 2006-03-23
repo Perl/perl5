@@ -100,7 +100,7 @@ is( $res, 'bar', 'bar reported as new' );
 ($res, $warn) = do { local $ExtUtils::Manifest::Quiet = 1; 
                      catch_warning( \&skipcheck ) 
                 };
-ok( ! defined $warn, 'disabled warnings' );
+cmp_ok( $warn, 'eq', '', 'disabled warnings' );
 
 # add a skip file with a rule to skip itself (and the nonexistent glob '*baz*')
 add_file( 'MANIFEST.SKIP', "baz\n.SKIP" );
@@ -150,16 +150,8 @@ is_deeply( [sort map { lc } @copies], [sort map { lc } keys %$files] );
 foreach my $orig (@copies) {
     my $copy = "copy/$orig";
     ok( -r $copy,               "$copy: must be readable" );
-
-  SKIP: {
-    skip "       original was not writable", 1 unless -w $orig;
-    ok(-w $copy, "       writable if original was" );
-  }
-
-  SKIP: {
-    skip "       original was not executable", 1 unless -x $orig;
-    ok(-x $copy, "       executable if original was" );
-  }
+    is( -w $copy, -w $orig,     "       writable if original was" );
+    is( -x $copy, -x $orig,     "       executable if original was" );
 }
 rmtree('copy');
 

@@ -58,7 +58,7 @@ BEGIN {
     ok( test_f(), 'testing non-existent file' );
 
     @ARGV = ( $Testfile );
-    cmp_ok( ! test_f(), '==', defined (-f $Testfile), 'testing non-existent file' );
+    cmp_ok( ! test_f(), '==', (-f $Testfile), 'testing non-existent file' );
 
     # these are destructive, have to keep setting @ARGV
     @ARGV = ( $Testfile );

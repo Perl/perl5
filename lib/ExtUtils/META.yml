@@ -1,14 +1,19 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         ExtUtils-MakeMaker
-version:      6.28
-version_from: lib/ExtUtils/MakeMaker.pm
-installdirs:  perl
-requires:
+--- #YAML:1.0
+name:                ExtUtils-MakeMaker
+version:             6.30_01
+abstract:            Create a module Makefile
+license:             perl
+generated_by:        ExtUtils::MakeMaker version 6.30_01
+author:              Michael G Schwern <schwern@pobox.com>
+distribution_type:   module
+requires:     
     DirHandle:                     0
     File::Basename:                0
     File::Spec:                    0.8
     Pod::Man:                      0
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.28
+meta-spec:
+    url: <http://module-build.sourceforge.net/META-spec-new.html>;
+    version: 1.1
+no_index:
+    dir:
+        - inc

@@ -1,4 +1,4 @@
-# $Id: /local/schwern.org/CPAN/ExtUtils-MakeMaker/trunk/lib/ExtUtils/MakeMaker.pm 4535 2005-05-20T23:08:34.937906Z schwern  $
+# $Id: /local/svn.schwern.org/CPAN/ExtUtils-MakeMaker/trunk/lib/ExtUtils/MakeMaker.pm 2539 2005-08-17T06:53:55.009300Z schwern  $
 package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
@@ -21,8 +21,8 @@ use vars qw(
 use vars qw($Revision);
 use strict;
 
-$VERSION = '6.30_01';
-($Revision = q$Revision: 4535 $) =~ /Revision:\s+(\S+)/;
+$VERSION = '6.30_02';
+$Revision = (q$Revision: 2539 $) =~ /Revision:\s+(\S+)/;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&WriteMakefile &writeMakefile $Verbose &prompt);
@@ -85,6 +85,7 @@ my %Special_Sigs = (
  PL_FILES           => 'hash',
  PM                 => 'hash',
  PMLIBDIRS          => 'array',
+ PMLIBPARENTDIRS    => 'array',
  PREREQ_PM          => 'hash',
  SKIP               => 'array',
  TYPEMAPS           => 'array',
@@ -208,13 +209,13 @@ sub full_setup {
 
     AUTHOR ABSTRACT ABSTRACT_FROM BINARY_LOCATION
     C CAPI CCFLAGS CONFIG CONFIGURE DEFINE DIR DISTNAME DL_FUNCS DL_VARS
-    EXCLUDE_EXT EXE_FILES FIRST_MAKEFILE
+    EXCLUDE_EXT EXE_FILES EXTRA_META FIRST_MAKEFILE
     FULLPERL FULLPERLRUN FULLPERLRUNINST
     FUNCLIST H IMPORTS
 
     INST_ARCHLIB INST_SCRIPT INST_BIN INST_LIB INST_MAN1DIR INST_MAN3DIR
     INSTALLDIRS
-    DESTDIR PREFIX INSTALLBASE
+    DESTDIR PREFIX INSTALL_BASE
     PERLPREFIX      SITEPREFIX      VENDORPREFIX
     INSTALLPRIVLIB  INSTALLSITELIB  INSTALLVENDORLIB
     INSTALLARCHLIB  INSTALLSITEARCH INSTALLVENDORARCH
@@ -226,12 +227,12 @@ sub full_setup {
     PERL_LIB        PERL_ARCHLIB 
     SITELIBEXP      SITEARCHEXP 
 
-    INC INCLUDE_EXT LDFROM LIB LIBPERL_A LIBS
-    LINKTYPE MAKEAPERL MAKEFILE MAKEFILE_OLD MAN1PODS MAN3PODS MAP_TARGET 
+    INC INCLUDE_EXT LDFROM LIB LIBPERL_A LIBS LICENSE
+    LINKTYPE MAKE MAKEAPERL MAKEFILE MAKEFILE_OLD MAN1PODS MAN3PODS MAP_TARGET 
     MYEXTLIB NAME NEEDS_LINKING NOECHO NO_META NORECURS NO_VC OBJECT OPTIMIZE 
     PERL_MALLOC_OK PERL PERLMAINCC PERLRUN PERLRUNINST PERL_CORE
     PERL_SRC PERM_RW PERM_RWX
-    PL_FILES PM PM_FILTER PMLIBDIRS POLLUTE PPM_INSTALL_EXEC
+    PL_FILES PM PM_FILTER PMLIBDIRS PMLIBPARENTDIRS POLLUTE PPM_INSTALL_EXEC
     PPM_INSTALL_SCRIPT PREREQ_FATAL PREREQ_PM PREREQ_PRINT PRINT_PREREQ
     SIGN SKIP TYPEMAPS VERSION VERSION_FROM XS XSOPT XSPROTOARG
     XS_VERSION clean depend dist dynamic_lib linkext macro realclean
@@ -281,7 +282,10 @@ sub full_setup {
     push @Overridable, qw[
 
  libscan makeaperl needs_linking perm_rw perm_rwx
- subdir_x test_via_harness test_via_script init_PERL
+ subdir_x test_via_harness test_via_script 
+
+ init_VERSION init_dist init_INST init_INSTALL init_DEST init_dirscan
+ init_PM init_MANPODS init_xs init_PERL init_DIRFILESEP init_linker
                          ];
 
     push @MM_Sections, qw[
@@ -300,9 +304,9 @@ sub full_setup {
     # we will use all these variables in the Makefile
     @Get_from_Config = 
         qw(
-           ar cc cccdlflags ccdlflags dlext dlsrc ld lddlflags ldflags libc
-           lib_ext obj_ext osname osvers ranlib sitelibexp sitearchexp so
-           exe_ext full_ar
+           ar cc cccdlflags ccdlflags dlext dlsrc exe_ext full_ar ld 
+           lddlflags ldflags libc lib_ext obj_ext osname osvers ranlib 
+           sitelibexp sitearchexp so
           );
 
     # 5.5.3 doesn't have any concept of vendor libs
@@ -491,6 +495,7 @@ sub new {
 
     ($self->{NAME_SYM} = $self->{NAME}) =~ s/\W+/_/g;
 
+    $self->init_MAKE;
     $self->init_main;
     $self->init_VERSION;
     $self->init_dist;
@@ -498,10 +503,13 @@ sub new {
     $self->init_INSTALL;
     $self->init_DEST;
     $self->init_dirscan;
+    $self->init_PM;
+    $self->init_MANPODS;
     $self->init_xs;
     $self->init_PERL;
     $self->init_DIRFILESEP;
     $self->init_linker;
+    $self->init_ABSTRACT;
 
     if (! $self->{PERL_SRC} ) {
         require VMS::Filespec if $Is_VMS;
@@ -1452,6 +1460,10 @@ If your executables start with something like #!perl or
 'Makefile.PL' was invoked with so the programs will be sure to run
 properly even if perl is not in /usr/bin/perl.
 
+=item EXTRA_META
+
+Extra text to be appended to the generated META.yml.
+
 =item FIRST_MAKEFILE
 
 The name of the Makefile to be produced.  This is used for the second
@@ -1689,11 +1701,34 @@ you specify a scalar as in
 
 MakeMaker will turn it into an array with one element.
 
+=item LICENSE
+
+The licensing terms of your distribution.  Generally its "perl" for the
+same license as Perl itself.
+
+See L<Module::Build::Authoring> for the list of options.
+
+Defaults to "unknown".
+
 =item LINKTYPE
 
 'static' or 'dynamic' (default unless usedl=undef in
 config.sh). Should only be used to force static linking (also see
 linkext below).
+
+=item MAKE
+
+Variant of make you intend to run the generated Makefile with.  This
+parameter lets Makefile.PL know what make quirks to account for when
+generating the Makefile.
+
+MakeMaker also honors the MAKE environment variable.  This parameter
+takes precedent.
+
+Currently the only significant values are 'dmake' and 'nmake' for Windows
+users.
+
+Defaults to $Config{make}.
 
 =item MAKEAPERL
 
@@ -2100,7 +2135,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    $VERSION = sprintf "%d.%03d", q$Revision: 4535 $ =~ /(\d+)/g;
+    $VERSION = (q$Revision: 2539 $) =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 

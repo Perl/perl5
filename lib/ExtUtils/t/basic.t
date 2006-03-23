@@ -25,13 +25,10 @@ use File::Path;
 
 # 'make disttest' sets a bunch of environment variables which interfere
 # with our testing.
-delete @ENV{qw(PREFIX LIB MAKEFLAGS MAKE_JOBS_FIFO)};
+delete @ENV{qw(PREFIX LIB MAKEFLAGS)};
 
 my $perl = which_perl();
 my $Is_VMS = $^O eq 'VMS';
-
-# GNV logical interferes with testing
-$ENV{'bin'} = '[.bin]' if $Is_VMS;
 
 chdir 't';
 
