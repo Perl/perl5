@@ -5332,163 +5332,6 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
     }
 }
 
-/* S_utf8_mg_pos_init() is used to initialize the mg_ptr field of
- * a PERL_UTF8_magic.  The mg_ptr is used to store the mapping
- * between UTF-8 and byte offsets.  There are two (substr offset and substr
- * length, the i offset, PERL_MAGIC_UTF8_CACHESIZE) times two (UTF-8 offset
- * and byte offset) cache positions.
- *
- * The mg_len field is used by sv_len_utf8(), see its comments.
- * Note that the mg_len is not the length of the mg_ptr field.
- *
- */
-STATIC bool
-S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i,
-		   I32 offsetp, const U8 *s, const U8 *start)
-{
-    bool found = FALSE;
-
-    if (SvMAGICAL(sv) && !SvREADONLY(sv)) {
-	if (!*mgp) {
-	    *mgp = sv_magicext(sv, 0, PERL_MAGIC_utf8, (MGVTBL*)&PL_vtbl_utf8, 0, 0);
-	    (*mgp)->mg_len = -1;
-	}
-	assert(*mgp);
-
-	if ((*mgp)->mg_ptr)
-	    *cachep = (STRLEN *) (*mgp)->mg_ptr;
-	else {
-	    Newxz(*cachep, PERL_MAGIC_UTF8_CACHESIZE * 2, STRLEN);
-	    (*mgp)->mg_ptr = (char *) *cachep;
-	}
-	assert(*cachep);
-
-	(*cachep)[i]   = offsetp;
-	(*cachep)[i+1] = s - start;
-	found = TRUE;
-    }
-
-    return found;
-}
-
-/*
- * S_utf8_mg_pos() is used to query and update mg_ptr field of
- * a PERL_UTF8_magic.  The mg_ptr is used to store the mapping
- * between UTF-8 and byte offsets.  See also the comments of
- * S_utf8_mg_pos_init().
- *
- */
-STATIC bool
-S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uoff, const U8 **sp, const U8 *start, const U8 *send)
-{
-    bool found = FALSE;
-
-    if (SvMAGICAL(sv) && !SvREADONLY(sv)) {
-	if (!*mgp)
-	    *mgp = mg_find(sv, PERL_MAGIC_utf8);
-	if (*mgp && (*mgp)->mg_ptr) {
-	    *cachep = (STRLEN *) (*mgp)->mg_ptr;
-	    ASSERT_UTF8_CACHE(*cachep);
-	    if ((*cachep)[i] == (STRLEN)uoff)	/* An exact match. */
-                 found = TRUE;
-	    else {			/* We will skip to the right spot. */
-		 STRLEN forw  = 0;
-		 STRLEN backw = 0;
-		 const U8* p = NULL;
-
-		 /* The assumption is that going backward is half
-		  * the speed of going forward (that's where the
-		  * 2 * backw in the below comes from).  (The real
-		  * figure of course depends on the UTF-8 data.) */
-
-		 if ((*cachep)[i] > (STRLEN)uoff) {
-		      forw  = uoff;
-		      backw = (*cachep)[i] - (STRLEN)uoff;
-
-		      if (forw < 2 * backw)
-			   p = start;
-		      else
-			   p = start + (*cachep)[i+1];
-		 }
-		 /* Try this only for the substr offset (i == 0),
-		  * not for the substr length (i == 2). */
-		 else if (i == 0) { /* (*cachep)[i] < uoff */
-		      const STRLEN ulen = sv_len_utf8(sv);
-
-		      if ((STRLEN)uoff < ulen) {
-			   forw  = (STRLEN)uoff - (*cachep)[i];
-			   backw = ulen - (STRLEN)uoff;
-
-			   if (forw < 2 * backw)
-				p = start + (*cachep)[i+1];
-			   else
-				p = send;
-		      }
-
-		      /* If the string is not long enough for uoff,
-		       * we could extend it, but not at this low a level. */
-		 }
-
-		 if (p) {
-		      if (forw < 2 * backw) {
-			   while (forw--)
-				p += UTF8SKIP(p);
-		      }
-		      else {
-			   while (backw--) {
-				p--;
-				while (UTF8_IS_CONTINUATION(*p))
-				     p--;
-			   }
-		      }
-
-		      /* Update the cache. */
-		      (*cachep)[i]   = (STRLEN)uoff;
-		      (*cachep)[i+1] = p - start;
-
-		      /* Drop the stale "length" cache */
-		      if (i == 0) {
-			  (*cachep)[2] = 0;
-			  (*cachep)[3] = 0;
-		      }
-
-		      found = TRUE;
-		 }
-	    }
-	    if (found) {	/* Setup the return values. */
-		 *offsetp = (*cachep)[i+1];
-		 *sp = start + *offsetp;
-		 if (*sp >= send) {
-		      *sp = send;
-		      *offsetp = send - start;
-		 }
-		 else if (*sp < start) {
-		      *sp = start;
-		      *offsetp = 0;
-		 }
-	    }
-	}
-#ifdef PERL_UTF8_CACHE_ASSERT
-	if (found) {
-	     const U8 *s = start;
-	     I32 n = uoff;
-
-	     while (n-- && s < send)
-		  s += UTF8SKIP(s);
-
-	     if (i == 0) {
-		  assert(*offsetp == s - start);
-		  assert((*cachep)[0] == (STRLEN)uoff);
-		  assert((*cachep)[1] == *offsetp);
-	     }
-	     ASSERT_UTF8_CACHE(*cachep);
-	}
-#endif
-    }
-
-    return found;
-}
-
 /*
 =for apidoc sv_pos_u2b
 
@@ -5507,9 +5350,6 @@ type coercion.
  * byte offsets.  See also the comments of S_utf8_mg_pos().
  *
  */
-
-static void
-S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8);
 
 static STRLEN
 S_sv_pos_u2b_forwards(pTHX_ const U8 *const start, const U8 *const send,
@@ -5534,7 +5374,7 @@ S_sv_pos_u2b_midway(pTHX_ const U8 *const start, const U8 *send,
 {
     STRLEN backw = uend - uoffset;
     if (uoffset < 2 * backw) {
-	/* The assumption is that going fowards is twice the speed of going
+	/* The assumption is that going forwards is twice the speed of going
 	   forward (that's where the 2 * backw comes from).
 	   (The real figure of course depends on the UTF-8 data.)  */
 	return S_sv_pos_u2b_forwards(aTHX_ start, send, uoffset);
@@ -5679,13 +5519,9 @@ Handles magic and type coercion.
 /*
  * sv_pos_b2u() uses, like sv_pos_u2b(), the mg_ptr of the potential
  * PERL_UTF8_magic of the sv to store the mapping between UTF-8 and
- * byte offsets.  See also the comments of S_utf8_mg_pos().
+ * byte offsets.
  *
  */
-
-
-static STRLEN
-S_sv_pos_b2u_forwards(pTHX_ const U8 *s, const U8 *const target);
 
 static void
 S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8)
@@ -5735,8 +5571,6 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8)
     cache[1] = byte;
     ASSERT_UTF8_CACHE(cache);
     /* Drop the stale "length" cache */
-    cache[2] = 0;
-    cache[3] = 0;
 }
 
 /* If we don't know the character offset of the end of a region, our only
@@ -5763,8 +5597,8 @@ S_sv_pos_b2u_forwards(pTHX_ const U8 *s, const U8 *const target)
 }
 
 /* We already know all of the way, now we may be able to walk back.  The same
-   assumption is made as in S_utf8_mg_pos(), namely that walking backward is
-   twice slower than walking forward. */
+   assumption is made as in S_sv_pos_u2b_midway(), namely that walking
+   backward is half the speed of walking forward. */
 static STRLEN
 S_sv_pos_b2u_midway(pTHX_ const U8 *s, const U8 *const target, const U8 *end,
 		    STRLEN endu)

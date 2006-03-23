@@ -1353,13 +1353,18 @@ s	|int	|sv_2iuv_non_preserve	|NN SV *sv|I32 numtype
 #  endif
 sR	|I32	|expect_number	|NN char** pattern
 #
-s	|bool	|utf8_mg_pos	|NN SV *sv|NN MAGIC **mgp|NN STRLEN **cachep \
-				|I32 i|NN I32 *offsetp|I32 uoff \
-				|NN const U8 **sp|NN const U8 *start \
-				|NN const U8 *send
-s	|bool	|utf8_mg_pos_init	|NN SV *sv|NN MAGIC **mgp \
-				|NN STRLEN **cachep|I32 i|I32 offsetp \
-				|NN const U8 *s|NN const U8 *start
+s	|STRLEN	|sv_pos_u2b_forwards|NN const U8 *const start \
+		|NN const U8 *const send|STRLEN uoffset
+s	|STRLEN	|sv_pos_u2b_midway|NN const U8 *const start \
+		|NN const U8 *const send|STRLEN uoffset|STRLEN uend
+s	|STRLEN	|sv_pos_u2b_cached|NN SV *sv|NN MAGIC **mgp \
+		|NN const U8 *const start|NN const U8 *const send \
+		|STRLEN uoffset|STRLEN uoffset0|STRLEN boffset0
+s	|void	|utf8_mg_pos_cache_update|NN SV *sv|NN MAGIC **mgp \
+		|STRLEN byte|STRLEN utf8
+s	|STRLEN	|sv_pos_b2u_forwards|NN const U8 *s|NN const U8 *const target
+s	|STRLEN	|sv_pos_b2u_midway|NN const U8 *s|NN const U8 *const target \
+		|NN const U8 *end|STRLEN endu
 s	|char *	|stringify_regexp|NN SV *sv|NN MAGIC *mg|NULLOK STRLEN *lp
 sn	|char *	|F0convert	|NV nv|NN char *endbuf|NN STRLEN *len
 #  if defined(PERL_OLD_COPY_ON_WRITE)

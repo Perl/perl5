@@ -1384,8 +1384,12 @@
 #define expect_number		S_expect_number
 #endif
 #ifdef PERL_CORE
-#define utf8_mg_pos		S_utf8_mg_pos
-#define utf8_mg_pos_init	S_utf8_mg_pos_init
+#define sv_pos_u2b_forwards	S_sv_pos_u2b_forwards
+#define sv_pos_u2b_midway	S_sv_pos_u2b_midway
+#define sv_pos_u2b_cached	S_sv_pos_u2b_cached
+#define utf8_mg_pos_cache_update	S_utf8_mg_pos_cache_update
+#define sv_pos_b2u_forwards	S_sv_pos_b2u_forwards
+#define sv_pos_b2u_midway	S_sv_pos_b2u_midway
 #define stringify_regexp	S_stringify_regexp
 #define F0convert		S_F0convert
 #endif
@@ -3530,8 +3534,12 @@
 #define expect_number(a)	S_expect_number(aTHX_ a)
 #endif
 #ifdef PERL_CORE
-#define utf8_mg_pos(a,b,c,d,e,f,g,h,i)	S_utf8_mg_pos(aTHX_ a,b,c,d,e,f,g,h,i)
-#define utf8_mg_pos_init(a,b,c,d,e,f,g)	S_utf8_mg_pos_init(aTHX_ a,b,c,d,e,f,g)
+#define sv_pos_u2b_forwards(a,b,c)	S_sv_pos_u2b_forwards(aTHX_ a,b,c)
+#define sv_pos_u2b_midway(a,b,c,d)	S_sv_pos_u2b_midway(aTHX_ a,b,c,d)
+#define sv_pos_u2b_cached(a,b,c,d,e,f,g)	S_sv_pos_u2b_cached(aTHX_ a,b,c,d,e,f,g)
+#define utf8_mg_pos_cache_update(a,b,c,d)	S_utf8_mg_pos_cache_update(aTHX_ a,b,c,d)
+#define sv_pos_b2u_forwards(a,b)	S_sv_pos_b2u_forwards(aTHX_ a,b)
+#define sv_pos_b2u_midway(a,b,c,d)	S_sv_pos_b2u_midway(aTHX_ a,b,c,d)
 #define stringify_regexp(a,b,c)	S_stringify_regexp(aTHX_ a,b,c)
 #define F0convert		S_F0convert
 #endif
