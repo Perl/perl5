@@ -16,7 +16,7 @@ my $DOSISH = ($^O =~ /^(MSWin\d\d|os2|dos|mint)$/);
 require VMS::Filespec if $Is_VMS;
 
 use vars qw($VERSION);
-$VERSION = '0.08';
+$VERSION = '0.08_01';
 
 sub _is_prefix {
     my ($self, $path, $prefix) = @_;
