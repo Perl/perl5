@@ -2,6 +2,12 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#ifdef HAS_PPPORT_H
+#  define NEED_newRV_noinc
+#  define NEED_sv_2pv_nolen
+#  include "ppport.h"
+#  include "threads.h"
+#endif
 
 #ifdef USE_ITHREADS
 

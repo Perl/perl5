@@ -1,28 +1,44 @@
+use strict;
+use warnings;
 
 BEGIN {
-    chdir 't' if -d 't';
-    push @INC, '../lib';
-    require Config; import Config;
+    if ($ENV{'PERL_CORE'}){
+        chdir 't';
+        unshift @INC, '../lib';
+    }
+    use Config;
     unless ($Config{'useithreads'}) {
 	print "1..0 # Skip: no useithreads\n";
  	exit 0;	
     }
 }
 
-use warnings;
-no warnings 'deprecated';
-use strict;
+use ExtUtils::testlib;
+
+BEGIN {
+    $| = 1;
+    if ($] == 5.008) {
+        print("1..14\n");   ### Number of tests that will be run ###
+    } else {
+        print("1..15\n");   ### Number of tests that will be run ###
+    }
+};
+
 use threads;
 use threads::shared;
+print("ok 1 - Loaded\n");
+
+### Start of Testing ###
+
+no warnings 'deprecated';       # Suppress warnings related to :unique
+
 use Hash::Util 'lock_keys';
 
 # Note that we can't use  Test::More here, as we would need to
 # call is() from within the DESTROY() function at global destruction time,
 # and parts of Test::* may have already been freed by then
 
-print "1..14\n";
-
-my $test : shared = 1;
+my $test : shared = 2;
 
 sub is($$$) {
     my ($got, $want, $desc) = @_;
@@ -42,8 +58,6 @@ sub is($$$) {
 # on join which led to double the dataspace
 #
 #########################
-
-$|++;
 
 { 
     sub Foo::DESTROY { 
@@ -70,9 +84,13 @@ $|++;
 #
 #########################
 
-threads->new( sub {1} )->join;
-my $not = eval { Config::myconfig() } ? '' : 'not ';
-print "${not}ok $test - Are we able to call Config::myconfig after clone\n";
+if ($] == 5.008 || $] >= 5.008003) {
+    threads->new( sub {1} )->join;
+    my $not = eval { Config::myconfig() } ? '' : 'not ';
+    print "${not}ok $test - Are we able to call Config::myconfig after clone\n";
+} else {
+    print "ok $test # Skip Are we able to call Config::myconfig after clone\n";
+}
 $test++;
 
 # bugid 24383 - :unique hashes weren't being made readonly on interpreter
@@ -92,9 +110,13 @@ threads->new(
 	print $@ =~ /read-only/
 	  ? '' : 'not ', "ok $test # TODO $TODO - unique_array\n";
 	$test++;
-	eval { $unique_hash{abc} = 1 };
-	print $@ =~ /disallowed/
-	  ? '' : 'not ', "ok $test # TODO $TODO - unique_hash\n";
+        if ($] >= 5.008003 && $^O ne 'MSWin32') {
+            eval { $unique_hash{abc} = 1 };
+            print $@ =~ /disallowed/
+              ? '' : 'not ', "ok $test # TODO $TODO - unique_hash\n";
+        } else {
+            print("ok $test # Skip $TODO - unique_hash\n");
+        }
 	$test++;
     }
 )->join;
@@ -102,10 +124,13 @@ threads->new(
 # bugid #24940 :unique should fail on my and sub declarations
 
 for my $decl ('my $x : unique', 'sub foo : unique') {
-    eval $decl;
-    print $@ =~
-	/^The 'unique' attribute may only be applied to 'our' variables/
-	    ? '' : 'not ', "ok $test - $decl\n";
+    if ($] >= 5.008005) {
+        eval $decl;
+        print $@ =~ /^The 'unique' attribute may only be applied to 'our' variables/
+                ? '' : 'not ', "ok $test - $decl\n";
+    } else {
+        print("ok $test # Skip $decl\n");
+    }
     $test++;
 }
 
@@ -125,6 +150,7 @@ for my $decl ('my $x : unique', 'sub foo : unique') {
 # my $string = threads->new(\&f)->join->();
 # print $string eq 'foobar' ?  '' : 'not ', "ok $test - returning closure\n";
 # $test++;
+
 
 # Nothing is checking that total keys gets cloned correctly.
 

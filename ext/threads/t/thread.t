@@ -1,17 +1,22 @@
+use strict;
+use warnings;
 
 BEGIN {
-    chdir 't' if -d 't';
-    push @INC, '../lib','.';
-    require Config; import Config;
+    if ($ENV{'PERL_CORE'}){
+        chdir 't';
+        unshift @INC, '../lib';
+    }
+    use Config;
     unless ($Config{'useithreads'}) {
         print "1..0 # Skip: no useithreads\n";
         exit 0;
     }
-    require "test.pl";
+
+    require($ENV{PERL_CORE} ? "./test.pl" : "./t/test.pl");
 }
 
 use ExtUtils::testlib;
-use strict;
+
 BEGIN { $| = 1; print "1..31\n" };
 use threads;
 use threads::shared;
@@ -160,8 +165,7 @@ run_perl(prog =>
 is($?, 0, 'coredump in global destruction');
 
 # test CLONE_SKIP() functionality
-
-{
+if ($] >= 5.008007) {
     my %c : shared;
     my %d : shared;
 
@@ -268,5 +272,13 @@ is($?, 0, 'coredump in global destruction');
 	    )
 	}),
 	"counts of calls to DESTROY");
+
+} else {
+    print("ok 27 # Skip objs clone skip at depth 0\n");
+    print("ok 28 # Skip objs clone skip at depth 1\n");
+    print("ok 29 # Skip objs clone skip at depth 2\n");
+    print("ok 30 # Skip counts of calls to CLONE_SKIP\n");
+    print("ok 31 # Skip counts of calls to DESTROY\n");
 }
 
+# EOF

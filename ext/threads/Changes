@@ -1,5 +1,42 @@
 Revision history for Perl extension threads.
 
+1.17 Thu Mar 23 10:31:20 EST 2006
+	- Restoration of 'core' build parameters
+
+1.15 Wed Mar 22 13:46:51 EST 2006
+	- BUG FIX: Replaced SvPV_nolen_const macro
+	- Disabled closure return test again and added note in POD
+
+1.14 Tue Mar 21 08:40:16 EST 2006
+	- BUG FIX: Corrected UV formatting string
+
+1.13 Mon Mar 20 15:09:42 EST 2006
+	- BUG FIX: Round stack sizes to multiple of page size
+	- Use PTHREAD_STACK_MIN if available
+
+1.12 Sun Mar 19 17:34:49 EST 2006
+	- Implemented $thr1->equal($thr2) in XS
+	- Use $ENV{PERL_CORE} in tests
+
+1.11 Fri Mar 17 13:24:35 EST 2006
+	- BUG FIX: Proper freeing thread's Perl interpreter
+	- Removed BUGS POD item regarding returning objects from threads
+	- Enabled closure return test in t/problems.t
+	- Handle deprecation of :unique in tests
+	- XS code cleanup
+	- Better POD coverage
+
+1.09 Mon Mar 13 14:14:37 EST 2006
+	- Initial (re-)release to CPAN
+	- 64-bit TIDs
+	- API for thread stack size (courtesy of Dean Arnold)
+	- Made threads->list() context sensitive
+	- Implemented threads->object($tid) in XS
+	- Added $thr->_handle() method
+
+
+Ancient history:
+
 0.03  Mon Jul  2 12:00:50 CEST 2001
 	Fixed bug with threads->self() in main thread, thanks Hackworth!
 

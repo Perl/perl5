@@ -1,8 +1,8 @@
-threads version 0.03
+threads version 1.17
 ====================
 
-This module needs perl 5.7.2 or later compiled with USEITHREADS, 
-it exposes interpreter threads to the perl level.
+This module needs perl 5.8.0 or later compiled with 'useithreads'.
+It exposes interpreter threads to the Perl level.
 
 INSTALLATION
 
@@ -17,8 +17,13 @@ DEPENDENCIES
 
 This module requires these other modules and libraries:
 
+    threads::shared
 
 COPYRIGHT AND LICENCE
 
-Copyright (C) 2001 Artur Bergman artur at contiller.se
-Same licence as perl.
+Copyright (C) 2001 Artur Bergman <sky AT crucially DOT net>
+Same licence as Perl.
+
+CPAN version produced by Jerry D. Hedden <jdhedden AT cpan DOT org>
+
+# EOF

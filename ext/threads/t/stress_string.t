@@ -1,7 +1,12 @@
+use strict;
+use warnings;
+
 BEGIN {
-    chdir 't' if -d 't';
-    push @INC, '../lib';
-    require Config; import Config;
+    if ($ENV{'PERL_CORE'}){
+        chdir 't';
+        unshift @INC, '../lib';
+    }
+    use Config;
     unless ($Config{'useithreads'}) {
 	print "1..0 # Skip: no useithreads\n";
  	exit 0;	
@@ -9,7 +14,7 @@ BEGIN {
 }
 
 use ExtUtils::testlib;
-use strict;
+
 BEGIN { print "1..64\n" };
 use threads;
 

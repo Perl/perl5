@@ -1,4 +1,5 @@
-
+use strict;
+use warnings;
 
 #
 # The reason this does not use a Test module is that
@@ -14,9 +15,11 @@
 
 
 BEGIN {
-    chdir 't' if -d 't';
-    push @INC, '../lib';
-    require Config; import Config;
+    if ($ENV{'PERL_CORE'}){
+        chdir 't';
+        unshift @INC, '../lib';
+    }
+    use Config;
     unless ($Config{'useithreads'}) {
 	print "1..0 # Skip: no useithreads\n";
  	exit 0;	
@@ -24,17 +27,19 @@ BEGIN {
 }
 
 use ExtUtils::testlib;
-use strict;
-BEGIN { $| = 1; print "1..19\n" };
+
+BEGIN { $| = 1; print "1..28\n" };
 use threads;
 
 
 
-print "ok 1\n";
+if ($threads::VERSION && ! exists($ENV{'PERL_CORE'})) {
+    print(STDERR "# Testing threads $threads::VERSION\n");
+}
 
+ok(1, 1, 'Loaded');
 
-#########################
-
+### Start of Testing ###
 
 
 
@@ -50,7 +55,6 @@ sub ok {
 }
 
 
-
 sub test1 {
 	ok(2,'bar' eq $_[0],"Test that argument passing works");
 }
@@ -60,12 +64,12 @@ sub test2 {
 	ok(3,'bar' eq $_[0]->[0]->{foo},"Test that passing arguments as references work");
 }
 
-threads->create('test2',[{foo => 'bar'}])->join();
+threads->create(\&test2,[{foo => 'bar'}])->join();
 
 
 #test execuion of normal sub
 sub test3 { ok(4,shift() == 1,"Test a normal sub") }
-threads->create('test3',1)->join();
+threads->create(\&test3,1)->join();
 
 
 #check Config
@@ -134,11 +138,31 @@ ok(15, 0 == threads->tid(),"Check so that tid for threads work for main thread")
 		      })->join();
 
 }
-1;
 
 
+my $thr1 = threads->create(sub {});
+my $thr2 = threads->create(sub {});
+my $thr3 = threads->object($thr1->tid());
 
+ok(20, $thr1 != $thr2,   'Treads not equal');
+ok(21, $thr1 == $thr3,   'Threads equal');
 
+ok(22, threads->object($thr1->tid())->tid() == 11, 'Object method');
+ok(23, threads->object($thr2->tid())->tid() == 12, 'Object method');
 
+$thr1->join();
+$thr2->join();
 
+my $sub = sub { ok(24, shift() == 1, "Test code ref"); };
+threads->create($sub, 1)->join();
 
+my $thrx = threads->object(99);
+ok(25, ! defined($thrx), 'No object');
+$thrx = threads->object();
+ok(26, ! defined($thrx), 'No object');
+$thrx = threads->object(undef);
+ok(27, ! defined($thrx), 'No object');
+$thrx = threads->object(0);
+ok(28, ! defined($thrx), 'No object');
+
+# EOF
