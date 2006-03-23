@@ -30,19 +30,16 @@
 #endif
 
 #ifdef PERL_UTF8_CACHE_ASSERT
-/* The cache element 0 is the Unicode offset;
- * the cache element 1 is the byte offset of the element 0;
- * the cache element 2 is the Unicode length of the substring;
- * the cache element 3 is the byte length of the substring;
- * The checking of the substring side would be good
- * but substr() has enough code paths to make my head spin;
- * if adding more checks watch out for the following tests:
+/* if adding more checks watch out for the following tests:
  *   t/op/index.t t/op/length.t t/op/pat.t t/op/substr.t
  *   lib/utf8.t lib/Unicode/Collate/t/index.t
  * --jhi
  */
 #define ASSERT_UTF8_CACHE(cache) \
-    STMT_START { if (cache) { assert((cache)[0] <= (cache)[1]); } } STMT_END
+    STMT_START { if (cache) { assert((cache)[0] <= (cache)[1]); \
+			      assert((cache)[2] <= (cache)[3]); \
+			      assert((cache)[3] <= (cache)[1]);} \
+			      } STMT_END
 #else
 #define ASSERT_UTF8_CACHE(cache) NOOP
 #endif
@@ -5405,6 +5402,10 @@ S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
 		/* An exact match. */
 		return cache[1];
 	    }
+	    if (cache[2] == uoffset) {
+		/* An exact match. */
+		return cache[3];
+	    }
 
 	    if (cache[0] < uoffset) {
 		/* The cache already knows part of the way.   */
@@ -5464,7 +5465,7 @@ S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
 	boffset = real_boffset;
     }
 
-    S_utf8_mg_pos_cache_update(aTHX_ sv, mgp, boffset, uoffset);
+    S_utf8_mg_pos_cache_update(aTHX_ sv, mgp, boffset, uoffset, send - start);
     return boffset;
 }
 
@@ -5524,7 +5525,8 @@ Handles magic and type coercion.
  */
 
 static void
-S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8)
+S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8,
+			   STRLEN blen)
 {
     STRLEN *cache;
     if (SvREADONLY(sv))
@@ -5567,10 +5569,62 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8)
 		       " real %"UVf" for %"SVf, (UV) utf8, (UV) realutf8, sv);
 	}
     }
-    cache[0] = utf8;
-    cache[1] = byte;
+
+    /* Cache is held with the later position first, to simplify the code
+       that deals with unbounded ends.  */
+       
     ASSERT_UTF8_CACHE(cache);
-    /* Drop the stale "length" cache */
+    if (cache[1] == 0) {
+	/* Cache is totally empty  */
+	cache[0] = utf8;
+	cache[1] = byte;
+    } else if (cache[3] == 0) {
+	if (byte > cache[1]) {
+	    /* New one is larger, so goes first.  */
+	    cache[2] = cache[0];
+	    cache[3] = cache[1];
+	    cache[0] = utf8;
+	    cache[1] = byte;
+	} else {
+	    cache[2] = utf8;
+	    cache[3] = byte;
+	}
+    } else {
+#define THREEWAY_SQUARE(a,b,c,d) \
+	    ((float)((d) - (c))) * ((float)((d) - (c))) \
+	    + ((float)((c) - (b))) * ((float)((c) - (b))) \
+	       + ((float)((b) - (a))) * ((float)((b) - (a)))
+
+	/* Cache has 2 slots in use, and we know three potential pairs.
+	   Keep the two that give the lowest RMS distance. Do the
+	   calcualation in bytes simply because we always know the byte
+	   length.  squareroot has the same ordering as the positive value,
+	   so don't bother with the actual square root.  */
+	const float existing = THREEWAY_SQUARE(0, cache[3], cache[1], blen);
+	if (byte > cache[1]) {
+	    /* New position is after the existing pair of pairs.  */
+	    const float keep_earlier
+		= THREEWAY_SQUARE(0, cache[3], byte, blen);
+	    const float keep_later
+		= THREEWAY_SQUARE(0, cache[1], byte, blen);
+
+	    if (keep_later < keep_earlier) {
+		if (keep_later < existing) {
+		    cache[2] = cache[0];
+		    cache[3] = cache[1];
+		    cache[0] = utf8;
+		    cache[1] = byte;
+		}
+	    }
+	    else {
+		if (keep_earlier < existing) {
+		    cache[0] = utf8;
+		    cache[1] = byte;
+		}
+	    }
+	}
+    }
+    ASSERT_UTF8_CACHE(cache);
 }
 
 /* If we don't know the character offset of the end of a region, our only
@@ -5626,15 +5680,16 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
     const U8* s;
     const STRLEN byte = *offsetp;
     STRLEN len;
+    STRLEN blen;
     MAGIC* mg = NULL;
     const U8* send;
 
     if (!sv)
 	return;
 
-    s = (const U8*)SvPV_const(sv, len);
+    s = (const U8*)SvPV_const(sv, blen);
 
-    if (len < byte)
+    if (blen < byte)
 	Perl_croak(aTHX_ "panic: sv_pos_b2u: bad byte offset");
 
     send = s + byte;
@@ -5648,6 +5703,11 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 		*offsetp = cache[0];
 		return;
 	    }
+	    if (cache[3] == byte) {
+		/* An exact match. */
+		*offsetp = cache[2];
+		return;
+	    }
 
 	    if (cache[1] < byte) {
 		/* We already know part of the way. */
@@ -5655,7 +5715,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 		    /* Actually, we know the end too.  */
 		    len = cache[0]
 			+ S_sv_pos_b2u_midway(aTHX_ s + cache[1], send,
-					      s + len, mg->mg_len - cache[0]);
+					      s + blen, mg->mg_len - cache[0]);
 		} else {
 		    len = cache[0]
 			+ S_sv_pos_b2u_forwards(aTHX_ s + cache[1], send);
@@ -5681,7 +5741,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 		}
 	    }
 	} else if (mg->mg_len != -1) {
-	    len = S_sv_pos_b2u_midway(aTHX_ s, send, s + len, mg->mg_len);
+	    len = S_sv_pos_b2u_midway(aTHX_ s, send, s + blen, mg->mg_len);
 	} else {
 	    len = S_sv_pos_b2u_forwards(aTHX_ s, send);
 	}
@@ -5691,7 +5751,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
     }
     *offsetp = len;
 
-    S_utf8_mg_pos_cache_update(aTHX_ sv, &mg, byte, len);
+    S_utf8_mg_pos_cache_update(aTHX_ sv, &mg, byte, len, blen);
 }
 
 /*

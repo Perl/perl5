@@ -3725,7 +3725,7 @@ STATIC STRLEN	S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const sta
 			__attribute__nonnull__(pTHX_3)
 			__attribute__nonnull__(pTHX_4);
 
-STATIC void	S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8)
+STATIC void	S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8, STRLEN blen)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
