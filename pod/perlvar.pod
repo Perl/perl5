@@ -1148,6 +1148,8 @@ and is thereafter read-only.
 =item ${^UTF8CACHE}
 
 This variable controls the state of the internal UTF-8 offset caching code.
+1 for on (the default), 0 for off, -1 to debug the caching code by checking
+all its results against linear scans, and panicking on any discrepancy.
 
 =item ${^UTF8LOCALE}
 
