@@ -5425,12 +5425,26 @@ S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
 			+ S_sv_pos_u2b_forwards(aTHX_ start + boffset0,
 						send, uoffset - uoffset0);
 		}
-	    } else {
+	    }
+	    else if (cache[2] < uoffset) {
+		/* We're between the two cache entries.  */
+		if (cache[2] > uoffset0) {
+		    /* and the cache knows more than the passed in pair  */
+		    uoffset0 = cache[2];
+		    boffset0 = cache[3];
+		}
+
 		boffset = boffset0
 		    + S_sv_pos_u2b_midway(aTHX_ start + boffset0,
 					  start + cache[1],
 					  uoffset - uoffset0,
 					  cache[0] - uoffset0);
+	    } else {
+		boffset = boffset0
+		    + S_sv_pos_u2b_midway(aTHX_ start + boffset0,
+					  start + cache[3],
+					  uoffset - uoffset0,
+					  cache[2] - uoffset0);
 	    }
 	    found = TRUE;
 	}
