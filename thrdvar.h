@@ -183,7 +183,6 @@ PERLVAR(Treg_eval_set,	I32)		/* from regexec.c */
 PERLVAR(Tregnarrate,	I32)		/* from regexec.c */
 PERLVAR(Tregprogram,	regnode *)	/* from regexec.c */
 PERLVARI(Tregindent,	int,	    0)	/* from regexec.c */
-PERLVAR(Tregcc,		CURCUR *)	/* from regexec.c */
 PERLVAR(Treg_call_cc,	struct re_cc_state *)	/* from regexec.c */
 PERLVAR(Treg_re,	regexp *)	/* from regexec.c */
 PERLVAR(Treg_ganch,	char *)		/* position of \G */

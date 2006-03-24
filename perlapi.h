@@ -830,8 +830,6 @@ END_EXTERN_C
 #define PL_reg_sv		(*Perl_Treg_sv_ptr(aTHX))
 #undef  PL_regbol
 #define PL_regbol		(*Perl_Tregbol_ptr(aTHX))
-#undef  PL_regcc
-#define PL_regcc		(*Perl_Tregcc_ptr(aTHX))
 #undef  PL_regcompp
 #define PL_regcompp		(*Perl_Tregcompp_ptr(aTHX))
 #undef  PL_regdata

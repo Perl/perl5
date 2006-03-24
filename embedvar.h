@@ -104,7 +104,6 @@
 #define PL_reg_starttry		(vTHX->Treg_starttry)
 #define PL_reg_sv		(vTHX->Treg_sv)
 #define PL_regbol		(vTHX->Tregbol)
-#define PL_regcc		(vTHX->Tregcc)
 #define PL_regcompp		(vTHX->Tregcompp)
 #define PL_regdata		(vTHX->Tregdata)
 #define PL_regdummy		(vTHX->Tregdummy)
@@ -814,7 +813,6 @@
 #define PL_Treg_starttry	PL_reg_starttry
 #define PL_Treg_sv		PL_reg_sv
 #define PL_Tregbol		PL_regbol
-#define PL_Tregcc		PL_regcc
 #define PL_Tregcompp		PL_regcompp
 #define PL_Tregdata		PL_regdata
 #define PL_Tregdummy		PL_regdummy

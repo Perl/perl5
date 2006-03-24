@@ -11437,7 +11437,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_regnarrate	= 0;
     PL_regprogram	= (regnode*)NULL;
     PL_regindent	= 0;
-    PL_regcc		= (CURCUR*)NULL;
     PL_reg_call_cc	= (struct re_cc_state*)NULL;
     PL_reg_re		= (regexp*)NULL;
     PL_reg_ganch	= NULL;

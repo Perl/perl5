@@ -6199,7 +6199,6 @@ Perl_save_re_context(pTHX)
     SAVEI32(PL_regnarrate);		/* from regexec.c */
     SAVEVPTR(PL_regprogram);		/* from regexec.c */
     SAVEINT(PL_regindent);		/* from regexec.c */
-    SAVEVPTR(PL_regcc);			/* from regexec.c */
     SAVEVPTR(PL_curcop);
     SAVEVPTR(PL_reg_call_cc);		/* from regexec.c */
     SAVEVPTR(PL_reg_re);		/* from regexec.c */
