@@ -1011,7 +1011,7 @@ prime_env_iter(void)
   for (i = 0; env_tables[i]; i++) {
      if (!have_sym && (tmpdsc.dsc$a_pointer = env_tables[i]->dsc$a_pointer) &&
          !str$case_blind_compare(&tmpdsc,&clisym)) have_sym = 1;
-     if (!have_lnm && !str$case_blind_compare(env_tables[i],&crtlenv)) have_lnm = 1;
+     if (!have_lnm && str$case_blind_compare(env_tables[i],&crtlenv)) have_lnm = 1;
   }
   if (have_sym || have_lnm) {
     long int syiitm = SYI$_MAXBUF, dviitm = DVI$_DEVNAM;
