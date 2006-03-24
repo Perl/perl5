@@ -29,7 +29,7 @@ use vars qw(@ISA $VERSION);
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
 @ISA = qw( ExtUtils::MM_Any ExtUtils::MM_Unix );
-$VERSION = '1.12_01';
+$VERSION = '1.12_02';
 
 $ENV{EMXSHELL} = 'sh'; # to run `commands`
 
