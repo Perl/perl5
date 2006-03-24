@@ -37,6 +37,7 @@ my $MM = bless {
                 MAKEFILE => 'Makefile',
                 RM_RF   => 'rm -rf',
                 MV      => 'mv',
+                MAKE    => $Config{make},
                }, 'MM';
 
 
@@ -163,15 +164,10 @@ delete $ENV{PATHEXT} unless $had_pathext;
 }
 
 # path()
-my $had_path = exists $ENV{PATH};
 {
-    my @path_eg = ( qw( . .. ), 'C:\\Program Files' );
-    local $ENV{PATH} = join ';', @path_eg;
-    ok( eq_array( [ $MM->path() ], [ @path_eg ] ),
+    ok( eq_array( [ $MM->path() ], [ File::Spec->path ] ),
         'path() [preset]' );
 }
-# Bug in Perl.  local $ENV{FOO} will not delete key afterwards.
-delete $ENV{PATH} unless $had_path;
 
 # static_lib() should look into that
 # dynamic_bs() should look into that
