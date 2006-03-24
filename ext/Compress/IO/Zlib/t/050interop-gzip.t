@@ -11,36 +11,35 @@ use warnings;
 use bytes;
 
 use Test::More ;
+use CompTestUtils;
 
 my $GZIP ;
 
-BEGIN {
 
-    # Check external gzip is available
-    my $name = 'gzip';
-    for my $dir (reverse split ":", $ENV{PATH})
+sub ExternalGzipWorks
+{
+    my $lex = new LexFile my $outfile;
+    my $content = qq {
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut tempus odio id
+ dolor. Camelus perlus.  Larrius in lumen numen.  Dolor en quiquum filia
+ est.  Quintus cenum parat.
+};
+
+    writeWithGzip($outfile, $content)
+        or return 0;
+    
+    my $got ;
+    readWithGzip($outfile, $got)
+        or return 0;
+
+    if ($content ne $got)
     {
-        $GZIP = "$dir/$name"
-            if -x "$dir/$name" ;
+        diag "Uncompressed content is wrong";
+        return 0 ;
     }
 
-    plan(skip_all => "Cannot find $name")
-        if ! $GZIP ;
-
-    
-    # use Test::NoWarnings, if available
-    my $extra = 0 ;
-    $extra = 1
-        if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
-
-    plan tests => 7 + $extra ;
-
-    use_ok('IO::Compress::Gzip',     ':all') ;
-    use_ok('IO::Uncompress::Gunzip', ':all') ;
-
+    return 1 ;
 }
-
-use CompTestUtils;
 
 sub readWithGzip
 {
@@ -50,14 +49,14 @@ sub readWithGzip
 
     my $comp = "$GZIP -dc" ;
 
-    #diag "$comp $file >$outfile" ;
+    if ( system("$comp $file >$outfile") == 0 )
+    {
+        $_[0] = readFile($outfile);
+        return 1 
+    }
 
-    system("$comp $file >$outfile") == 0
-        or die "'$comp' failed: $?";
-
-    $_[0] = readFile($outfile);
-
-    return 1 ;
+    diag "'$comp' failed: $?";
+    return 0 ;
 }
 
 sub getGzipInfo
@@ -75,12 +74,42 @@ sub writeWithGzip
     writeFile($infile, $content);
 
     unlink $file ;
-    my $gzip = "$GZIP -c $options $infile >$file" ;
+    my $comp = "$GZIP -c $options $infile >$file" ;
 
-    system($gzip) == 0 
-        or die "'$gzip' failed: $?";
+    return 1 
+        if system($comp) == 0 ;
 
-    return 1 ;
+    diag "'$comp' failed: $?";
+    return 0 ;
+}
+
+BEGIN {
+
+    # Check external gzip is available
+    my $name = 'gzip';
+    for my $dir (reverse split ":", $ENV{PATH})
+    {
+        $GZIP = "$dir/$name"
+            if -x "$dir/$name" ;
+    }
+
+    plan(skip_all => "Cannot find $name")
+        if ! $GZIP ;
+
+    plan(skip_all => "$name doesn't work as expected")
+        if ! ExternalGzipWorks();
+
+    
+    # use Test::NoWarnings, if available
+    my $extra = 0 ;
+    $extra = 1
+        if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
+
+    plan tests => 7 + $extra ;
+
+    use_ok('IO::Compress::Gzip',     ':all') ;
+    use_ok('IO::Uncompress::Gunzip', ':all') ;
+
 }
 
 
@@ -97,7 +126,7 @@ Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut tempus odio id
 };
     my $got;
 
-    is writeWithGzip($file, $content), 1, "writeWithGzip ok";
+    ok writeWithGzip($file, $content), "writeWithGzip ok";
 
     gunzip $file => \$got ;
     is $got, $content, "got content";
@@ -105,7 +134,7 @@ Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut tempus odio id
 
     gzip \$content => $file1;
     $got = '';
-    is readWithGzip($file1, $got), 1, "readWithGzip ok";
+    ok readWithGzip($file1, $got), "readWithGzip ok";
     is $got, $content, "got content";
 }
 
