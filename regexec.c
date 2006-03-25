@@ -4605,6 +4605,7 @@ exit_level:
 	accepted = p->accepted;
 	PL_reg_call_cc = p->reg_call_cc;
 	prev_state = p->prev_state;
+	Safefree(p);
 
 	switch (resume_state) {
 	case resume_TRIE1:
