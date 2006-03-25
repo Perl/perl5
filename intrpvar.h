@@ -70,7 +70,6 @@ PERLVAR(Iformfeed,	SV *)		/* $^L */
 
 PERLVARI(Imaxsysfd,	I32,	MAXSYSFD)
 					/* top fd to pass to subprocesses */
-PERLVAR(Imultiline,	int)		/* $*--do strings hold >1 line? */
 PERLVAR(Istatusvalue,	I32)		/* $? */
 PERLVAR(Iexit_flags,	U8)		/* was exit() unexpected, etc. */
 #ifdef VMS

@@ -10907,7 +10907,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_formfeed		= sv_dup(proto_perl->Iformfeed, param);
 
     PL_maxsysfd		= proto_perl->Imaxsysfd;
-    PL_multiline	= proto_perl->Imultiline;
     PL_statusvalue	= proto_perl->Istatusvalue;
 #ifdef VMS
     PL_statusvalue_vms	= proto_perl->Istatusvalue_vms;

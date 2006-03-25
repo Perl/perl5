@@ -446,8 +446,6 @@ END_EXTERN_C
 #define PL_multi_open		(*Perl_Imulti_open_ptr(aTHX))
 #undef  PL_multi_start
 #define PL_multi_start		(*Perl_Imulti_start_ptr(aTHX))
-#undef  PL_multiline
-#define PL_multiline		(*Perl_Imultiline_ptr(aTHX))
 #undef  PL_my_cxt_list
 #define PL_my_cxt_list		(*Perl_Imy_cxt_list_ptr(aTHX))
 #undef  PL_my_cxt_size

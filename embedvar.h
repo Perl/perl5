@@ -323,7 +323,6 @@
 #define PL_multi_end		(vTHX->Imulti_end)
 #define PL_multi_open		(vTHX->Imulti_open)
 #define PL_multi_start		(vTHX->Imulti_start)
-#define PL_multiline		(vTHX->Imultiline)
 #define PL_my_cxt_list		(vTHX->Imy_cxt_list)
 #define PL_my_cxt_size		(vTHX->Imy_cxt_size)
 #define PL_nexttoke		(vTHX->Inexttoke)
@@ -620,7 +619,6 @@
 #define PL_Imulti_end		PL_multi_end
 #define PL_Imulti_open		PL_multi_open
 #define PL_Imulti_start		PL_multi_start
-#define PL_Imultiline		PL_multiline
 #define PL_Imy_cxt_list		PL_my_cxt_list
 #define PL_Imy_cxt_size		PL_my_cxt_size
 #define PL_Inexttoke		PL_nexttoke

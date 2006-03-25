@@ -899,7 +899,6 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_rs);	/* $/ */
     PL_rs = NULL;
 
-    PL_multiline = 0;		/* $* */
     Safefree(PL_osname);	/* $^O */
     PL_osname = NULL;
 
