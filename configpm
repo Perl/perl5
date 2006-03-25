@@ -1,4 +1,41 @@
 #!./miniperl -w
+#
+# configpm
+#
+# Copyright (C) 1994, 1995, 1996 1997, 1998, 1999, 2000, 2001,
+# 2002, 2003, 2004, 2005, 2006 Larry Wall and others.
+#
+#
+# Regenerate the files
+#
+#    lib/Config.pm
+#    lib/Config_heavy.pl
+#    lib/Config.pod
+#    lib/Cross.pm (optionally)
+#
+# from the contents of the static files
+#
+#    Porting/Glossary
+#    myconfig.SH
+#
+# and from the contents of the Configure-generated file
+#
+#    config.sh
+#
+# It will only update Config.pm and Config_heavy.pl if the contents of
+# either file would be different. Note that *both* files are updated in
+# this case, since for example an extension makefile that has a dependency
+# on Config.pm should trigger even if only Config_heavy.pl has changed.
+
+sub usage { die <<EOF }
+usage: $0  [ options ] [ Config_file ] [ Glossary_file ]
+    --cross=PLATFORM    cross-compile for a different platform
+    --no-glossary       don't include Porting/Glossary in lib/Config.pod
+    --heavy=FILE        alternative name for lib/Config_heavy.pl
+    Config_file         alternative name for lib/Config.pm
+    Glossary_file       alternative name for Porting/Glossary
+EOF
+
 use strict;
 use vars qw(%Config $Config_SH_expanded);
 
@@ -38,7 +75,8 @@ sub opts {
     my %opts = (%Allowed_Opts, %given_opts);
 
     for my $opt (grep {!exists $Allowed_Opts{$_}} keys %given_opts) {
-        die "option '$opt' is not recognized";
+        warn "option '$opt' is not recognized";
+	usage;
     }
     @ARGV = grep {!/^--/} @ARGV;
 
@@ -69,10 +107,10 @@ else {
     if $Config_heavy eq $Config_PM;
 }
 
-open CONFIG, ">$Config_PM" or die "Can't open $Config_PM: $!\n";
-open CONFIG_HEAVY, ">$Config_heavy" or die "Can't open $Config_heavy: $!\n";
+my $config_txt;
+my $heavy_txt;
 
-print CONFIG_HEAVY <<'ENDOFBEG';
+$heavy_txt .= <<'ENDOFBEG';
 # This file was created by configpm when Perl was built. Any changes
 # made to this file will be lost the next time perl is built.
 
@@ -84,7 +122,7 @@ ENDOFBEG
 
 my $myver = sprintf "%vd", $^V;
 
-printf CONFIG <<'ENDOFBEG', ($myver) x 3;
+$config_txt .= sprintf <<'ENDOFBEG', ($myver) x 3;
 # This file was created by configpm when Perl was built. Any changes
 # made to this file will be lost the next time perl is built.
 
@@ -401,22 +439,22 @@ if (%need_relocation) {
     $relocations_in_common++ if $Common{$_};
   }
   if ($relocations_in_common) {
-    print CONFIG $relocation_code;
+    $config_txt .= $relocation_code;
   } else {
-    print CONFIG_HEAVY $relocation_code;
+    $heavy_txt .= $relocation_code;
   }
 }
 
-print CONFIG_HEAVY @non_v, "\n";
+$heavy_txt .= join('', @non_v) . "\n";
 
 # copy config summary format from the myconfig.SH script
-print CONFIG_HEAVY "our \$summary = <<'!END!';\n";
+$heavy_txt .= "our \$summary = <<'!END!';\n";
 open(MYCONFIG,"<myconfig.SH") || die "open myconfig.SH failed: $!";
 1 while defined($_ = <MYCONFIG>) && !/^Summary of/;
-do { print CONFIG_HEAVY $_ } until !defined($_ = <MYCONFIG>) || /^\s*$/;
+do { $heavy_txt .= $_ } until !defined($_ = <MYCONFIG>) || /^\s*$/;
 close(MYCONFIG);
 
-print CONFIG_HEAVY "\n!END!\n", <<'EOT';
+$heavy_txt .= "\n!END!\n" . <<'EOT';
 my $summary_expanded;
 
 sub myconfig {
@@ -430,19 +468,19 @@ local *_ = \my $a;
 $_ = <<'!END!';
 EOT
 
-print CONFIG_HEAVY join('', sort @v_others), "!END!\n";
+$heavy_txt .= join('', sort @v_others) . "!END!\n";
 
 # Only need the dynamic byteorder code in Config.pm if 'byteorder' is one of
 # the precached keys
 if ($Common{byteorder}) {
-    print CONFIG $byteorder_code;
+    $config_txt .= $byteorder_code;
 } else {
-    print CONFIG_HEAVY $byteorder_code;
+    $heavy_txt .= $byteorder_code;
 }
 
 if (@need_relocation) {
-print CONFIG_HEAVY 'foreach my $what (qw(', join (' ', @need_relocation),
-      ")) {\n", <<'EOT';
+$heavy_txt .= 'foreach my $what (qw(' . join (' ', @need_relocation) .
+      ")) {\n" . <<'EOT';
     s<^($what=)(['"])(.*?)\2>
      <$1 . $2 . relocate_inc($3) . $2 . "\n" .
       'raw_' . $1 . $2 . $3 . $2>me;
@@ -452,14 +490,14 @@ EOT
 # no need to emulate the "which separator for this platform" logic in perl.c -
 # ':' will always be applicable
 if ($need_relocation{otherlibdirs}) {
-print CONFIG_HEAVY << 'EOT';
+$heavy_txt .= << 'EOT';
 s{^(otherlibdirs=)(['"])(.*?)\2}
  {$1 . $2 . join ':', map {relocate_inc($_)} split ':', $3 . $2}me;
 EOT
 }
 }
 
-print CONFIG_HEAVY <<'EOT';
+$heavy_txt .= <<'EOT';
 s/(byteorder=)(['"]).*?\2/$1$2$Config::byteorder$2/m;
 
 my $config_sh_len = length $_;
@@ -472,7 +510,7 @@ foreach my $prefix (qw(ccflags ldflags)) {
     my $withlargefiles = fetch_string ({}, $prefix . "_uselargefiles");
     if (defined $withlargefiles) {
         $value =~ s/\Q$withlargefiles\E\b//;
-        print CONFIG_HEAVY "${prefix}_nolargefiles='$value'\n";
+        $heavy_txt .= "${prefix}_nolargefiles='$value'\n";
     }
 }
 
@@ -496,14 +534,14 @@ foreach my $prefix (qw(libs libswanted)) {
 	    $value = join(' ', @libswanted);
 	}
     }
-    print CONFIG_HEAVY "${prefix}_nolargefiles='$value'\n";
+    $heavy_txt .= "${prefix}_nolargefiles='$value'\n";
 }
 
-print CONFIG_HEAVY "EOVIRTUAL\n";
+$heavy_txt .= "EOVIRTUAL\n";
 
-print CONFIG_HEAVY $fetch_string;
+$heavy_txt .= $fetch_string;
 
-print CONFIG <<'ENDOFEND';
+$config_txt .= <<'ENDOFEND';
 
 sub FETCH {
     my($self, $key) = @_;
@@ -515,7 +553,7 @@ sub FETCH {
 }
 ENDOFEND
 
-print CONFIG_HEAVY <<'ENDOFEND';
+$heavy_txt .= <<'ENDOFEND';
 
 my $prevpos = 0;
 
@@ -527,7 +565,7 @@ sub FIRSTKEY {
 sub NEXTKEY {
 ENDOFEND
 if ($seen_quotes{'"'}) {
-print CONFIG_HEAVY <<'ENDOFEND';
+$heavy_txt .= <<'ENDOFEND';
     # Find out how the current key's quoted so we can skip to its end.
     my $quote = substr($Config_SH_expanded,
 		       index($Config_SH_expanded, "=", $prevpos)+1, 1);
@@ -535,11 +573,11 @@ print CONFIG_HEAVY <<'ENDOFEND';
 ENDOFEND
 } else {
     # Just ' quotes, so it's much easier.
-print CONFIG_HEAVY <<'ENDOFEND';
+$heavy_txt .= <<'ENDOFEND';
     my $pos = index($Config_SH_expanded, qq('\n), $prevpos) + 2;
 ENDOFEND
 }
-print CONFIG_HEAVY <<'ENDOFEND';
+$heavy_txt .= <<'ENDOFEND';
     my $len = index($Config_SH_expanded, "=", $pos) - $pos;
     $prevpos = $pos;
     $len > 0 ? substr($Config_SH_expanded, $pos, $len) : undef;
@@ -551,11 +589,11 @@ sub EXISTS {
     return(index($Config_SH_expanded, "\n$_[1]='") != -1
 ENDOFEND
 if ($seen_quotes{'"'}) {
-print CONFIG_HEAVY <<'ENDOFEND';
+$heavy_txt .= <<'ENDOFEND';
            or index($Config_SH_expanded, "\n$_[1]=\"") != -1
 ENDOFEND
 }
-print CONFIG_HEAVY <<'ENDOFEND';
+$heavy_txt .= <<'ENDOFEND';
           );
 }
 
@@ -607,7 +645,7 @@ sub launcher {
 ENDOFEND
 
 if ($^O eq 'os2') {
-    print CONFIG <<'ENDOFSET';
+    $config_txt .= <<'ENDOFSET';
 my %preconfig;
 if ($OS2::is_aout) {
     my ($value, $v) = $Config_SH_expanded =~ m/^used_aout='(.*)'\s*$/m;
@@ -627,11 +665,11 @@ ENDOFSET
 	    $dll = $1, last if /^PERL_DLL_BASE\s*=\s*(\S*)\s*$/;
 	}
     }
-    print CONFIG <<ENDOFSET if $dll;
+    $config_txt .= <<ENDOFSET if $dll;
 \$preconfig{dll_name} = '$dll';
 ENDOFSET
 } else {
-    print CONFIG <<'ENDOFSET';
+    $config_txt .= <<'ENDOFSET';
 sub TIEHASH {
     bless $_[1], $_[0];
 }
@@ -665,7 +703,7 @@ my $fast_config = join '', map { "    $_,\n" } sort values %Common;
 
 # Sanity check needed to stop an infite loop if Config_heavy.pl fails to define
 # &launcher for some reason (eg it got truncated)
-print CONFIG sprintf <<'ENDOFTIE', $fast_config;
+$config_txt .= sprintf <<'ENDOFTIE', $fast_config;
 
 sub DESTROY { }
 
@@ -879,10 +917,30 @@ outside of it.
 
 ENDOFTAIL
 
-close(CONFIG_HEAVY);
-close(CONFIG);
-close(GLOS);
+close(GLOS) if $Opts{glossary};
 close(CONFIG_POD);
+print "written lib/Config.pod\n";
+
+my $orig_config_txt = "";
+my $orig_heavy_txt = "";
+{
+    local $/;
+    my $fh;
+    $orig_config_txt = <$fh> if open $fh, "<", $Config_PM;
+    $orig_heavy_txt  = <$fh> if open $fh, "<", $Config_heavy;
+}
+
+if ($orig_config_txt ne $config_txt or $orig_heavy_txt ne $heavy_txt) {
+    open CONFIG, ">", $Config_PM or die "Can't open $Config_PM: $!\n";
+    open CONFIG_HEAVY, ">", $Config_heavy or die "Can't open $Config_heavy: $!\n";
+    print CONFIG $config_txt;
+    print CONFIG_HEAVY $heavy_txt;
+    close(CONFIG_HEAVY);
+    close(CONFIG);
+    print "updated $Config_PM\n";
+    print "updated $Config_heavy\n";
+}
+
 
 # Now create Cross.pm if needed
 if ($Opts{cross}) {
@@ -909,6 +967,7 @@ EOS
   $cross =~ s/\*\*\*replace-marker\*\*\*/$Opts{cross}/g;
   print CROSS $cross;
   close CROSS;
+  print "written lib/Cross.pm\n";
   unshift(@INC,"xlib/$Opts{cross}");
 }
 
