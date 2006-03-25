@@ -2709,11 +2709,11 @@ S_regmatch(pTHX_ regnode *prog)
 			  (OP(scan) == TRIE ? trie_utf8 : trie_uft8_fold)
 			: trie_plain;
 
-		reg_trie_data *trie; /* what trie are we using right now */
-
+		/* what trie are we using right now */
+		reg_trie_data *trie
+		    = (reg_trie_data*)PL_regdata->data[ ARG( scan ) ];
 	    	accepted = 0; /* how many accepting states we have seen */
 		result = 0;
-		trie = (reg_trie_data*)PL_regdata->data[ ARG( scan ) ];
 
 		while ( state && uc <= (U8*)PL_regeol ) {
 
