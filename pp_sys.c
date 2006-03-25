@@ -4493,6 +4493,24 @@ PP(pp_semctl)
 #endif
 }
 
+/* I can't const this further without getting warnings about the types of
+   various arrays passed in from structures.  */
+static SV *
+S_space_join_names_mortal(pTHX_ char *const *array)
+{
+    SV *target = sv_2mortal(newSVpvs(""));
+
+    if (array && *array) {
+	while (1) {
+	    sv_catpv(target, *array);
+	    if (!*++array)
+		break;
+	    sv_catpvs(target, " ");
+	}
+    }
+    return target;
+}
+
 /* Get system info. */
 
 PP(pp_ghostent)
@@ -4565,12 +4583,7 @@ PP(pp_ghostent)
     if (hent) {
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, (char*)hent->h_name);
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	for (elem = hent->h_aliases; elem && *elem; elem++) {
-	    sv_catpv(sv, *elem);
-	    if (elem[1])
-		sv_catpvs(sv, " ");
-	}
+	PUSHs(S_space_join_names_mortal(aTHX_ hent->h_aliases));
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)hent->h_addrtype);
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
@@ -4598,7 +4611,6 @@ PP(pp_gnetent)
 #if defined(HAS_GETNETBYNAME) || defined(HAS_GETNETBYADDR) || defined(HAS_GETNETENT)
     dVAR; dSP;
     I32 which = PL_op->op_type;
-    register char **elem;
     register SV *sv;
 #ifndef HAS_GETNET_PROTOS /* XXX Do we need individual probes? */
     struct netent *getnetbyaddr(Netdb_net_t, int);
@@ -4657,12 +4669,7 @@ PP(pp_gnetent)
     if (nent) {
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, nent->n_name);
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	for (elem = nent->n_aliases; elem && *elem; elem++) {
-	    sv_catpv(sv, *elem);
-	    if (elem[1])
-		sv_catpvs(sv, " ");
-	}
+	PUSHs(S_space_join_names_mortal(aTHX_ nent->n_aliases));
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)nent->n_addrtype);
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
@@ -4680,7 +4687,6 @@ PP(pp_gprotoent)
 #if defined(HAS_GETPROTOBYNAME) || defined(HAS_GETPROTOBYNUMBER) || defined(HAS_GETPROTOENT)
     dVAR; dSP;
     I32 which = PL_op->op_type;
-    register char **elem;
     register SV *sv;
 #ifndef HAS_GETPROTO_PROTOS /* XXX Do we need individual probes? */
     struct protoent *getprotobyname(Netdb_name_t);
@@ -4727,12 +4733,7 @@ PP(pp_gprotoent)
     if (pent) {
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, pent->p_name);
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	for (elem = pent->p_aliases; elem && *elem; elem++) {
-	    sv_catpv(sv, *elem);
-	    if (elem[1])
-		sv_catpvs(sv, " ");
-	}
+	PUSHs(S_space_join_names_mortal(aTHX_ pent->p_aliases));
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setiv(sv, (IV)pent->p_proto);
     }
@@ -4748,7 +4749,6 @@ PP(pp_gservent)
 #if defined(HAS_GETSERVBYNAME) || defined(HAS_GETSERVBYPORT) || defined(HAS_GETSERVENT)
     dVAR; dSP;
     I32 which = PL_op->op_type;
-    register char **elem;
     register SV *sv;
 #ifndef HAS_GETSERV_PROTOS /* XXX Do we need individual probes? */
     struct servent *getservbyname(Netdb_name_t, Netdb_name_t);
@@ -4805,12 +4805,7 @@ PP(pp_gservent)
     if (sent) {
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, sent->s_name);
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	for (elem = sent->s_aliases; elem && *elem; elem++) {
-	    sv_catpv(sv, *elem);
-	    if (elem[1])
-		sv_catpvs(sv, " ");
-	}
+	PUSHs(S_space_join_names_mortal(aTHX_ sent->s_aliases));
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef HAS_NTOHS
 	sv_setiv(sv, (IV)PerlSock_ntohs(sent->s_port));
@@ -5213,7 +5208,6 @@ PP(pp_ggrent)
 
     if (grent) {
 	SV *sv;
-	char **elem;
 	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	sv_setpv(sv, grent->gr_name);
 
@@ -5226,7 +5220,6 @@ PP(pp_ggrent)
 	sv_setiv(sv, (IV)grent->gr_gid);
 
 #if !(defined(_CRAYMPP) && defined(USE_REENTRANT_API))
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	/* In UNICOS/mk (_CRAYMPP) the multithreading
 	 * versions (getgrnam_r, getgrgid_r)
 	 * seem to return an illegal pointer
@@ -5235,11 +5228,7 @@ PP(pp_ggrent)
 	 * but the gr_mem is poisonous anyway.
 	 * So yes, you cannot get the list of group
 	 * members if building multithreaded in UNICOS/mk. */
-	for (elem = grent->gr_mem; elem && *elem; elem++) {
-	    sv_catpv(sv, *elem);
-	    if (elem[1])
-		sv_catpvs(sv, " ");
-	}
+	PUSHs(S_space_join_names_mortal(aTHX_ grent->gr_mem));
 #endif
     }
 

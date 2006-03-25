@@ -1256,6 +1256,7 @@ s	|int	|emulate_eaccess|NN const char* path|Mode_t mode
 #  if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 sR	|int	|dooneliner	|NN const char *cmd|NN const char *filename
 #  endif
+s	|SV *	|space_join_names_mortal|NN char *const *array
 #endif
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
