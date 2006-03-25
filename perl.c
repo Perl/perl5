@@ -1476,7 +1476,10 @@ setuid perl scripts securely.\n");
     PL_origargc = argc;
     PL_origargv = argv;
 
-    {
+    if (PL_origalen != 0) {
+	PL_origalen = 1; /* don't use old PL_origalen if perl_parse() is called again */
+    }
+    else {
 	/* Set PL_origalen be the sum of the contiguous argv[]
 	 * elements plus the size of the env in case that it is
 	 * contiguous with the argv[].  This is used in mg.c:Perl_magic_set()
@@ -1524,7 +1527,7 @@ setuid perl scripts securely.\n");
 	      }
 	 }
 	 /* Can we grab env area too to be used as the area for $0? */
-	 if (PL_origenviron) {
+	 if (s && PL_origenviron) {
 	      if ((PL_origenviron[0] == s + 1
 #ifdef OS2
 		   || (PL_origenviron[0] == s + 9 && (s += 8))
@@ -1560,7 +1563,7 @@ setuid perl scripts securely.\n");
 		   }
 	      }
 	 }
-	 PL_origalen = s - PL_origargv[0] + 1;
+	 PL_origalen = s ? s - PL_origargv[0] + 1 : 0;
     }
 
     if (PL_do_undump) {
