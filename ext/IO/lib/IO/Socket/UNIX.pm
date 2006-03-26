@@ -12,7 +12,7 @@ use IO::Socket;
 use Carp;
 
 @ISA = qw(IO::Socket);
-$VERSION = "1.22_01";
+$VERSION = "1.23";
 $VERSION = eval $VERSION;
 
 IO::Socket::UNIX->register_domain( AF_UNIX );

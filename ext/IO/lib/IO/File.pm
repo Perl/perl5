@@ -137,7 +137,7 @@ require Exporter;
 
 @ISA = qw(IO::Handle IO::Seekable Exporter);
 
-$VERSION = "1.13_01";
+$VERSION = "1.14";
 
 @EXPORT = @IO::Seekable::EXPORT;
 
