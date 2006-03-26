@@ -334,6 +334,11 @@ invocations:
 
 	sh Configure -Accflags="-DPERL_EXTERNAL_GLOB -DPERL_POLLUTE_MALLOC"
 
+To clarify, those ccflags values are not Configure options; if passed to
+Configure directly, they won't do anything useful (that will define a config.sh
+variable, but without taking any action based upon it).  When passed to the
+compiler, those flags will activate #ifdefd code.
+
 For more help on Configure switches, run
 
 	sh Configure -h
