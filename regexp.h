@@ -133,7 +133,6 @@ typedef struct regexp {
 #define REXEC_SCREAM	0x04		/* use scream table. */
 #define REXEC_IGNOREPOS	0x08		/* \G matches at start. */
 #define REXEC_NOT_FIRST	0x10		/* This is another iteration of //g. */
-#define REXEC_ML	0x20		/* $* was set. */
 
 #define ReREFCNT_inc(re) ((void)(re && re->refcnt++), re)
 #define ReREFCNT_dec(re) CALLREGFREE(aTHX_ re)
