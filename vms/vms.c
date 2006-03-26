@@ -5000,11 +5000,13 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts)
         else { /* No; just work with potential name */
           if (dirfab.fab$l_sts == RMS$_FNF) dirnam = savnam;
           else { 
+	    int fab_sts;
+	    fab_sts = dirfab.fab$l_sts;
+	    sts = rms_free_search_context(&dirfab);
 	    PerlMem_free(esa);
 	    PerlMem_free(trndir);
 	    PerlMem_free(vmsdir);
-            set_errno(EVMSERR);  set_vaxc_errno(dirfab.fab$l_sts);
-	    sts = rms_free_search_context(&dirfab);
+            set_errno(EVMSERR);  set_vaxc_errno(fab_sts);
             return NULL;
           }
         }
@@ -11543,7 +11545,7 @@ static int set_features
     }
 
     /* PCP mode requires creating /dev/null special device file */
-    decc_bug_devnull = 1;
+    decc_bug_devnull = 0;
     status = sys_trnlnm("DECC_BUG_DEVNULL", val_str, sizeof(val_str));
     if ($VMS_STATUS_SUCCESS(status)) {
        if ((val_str[0] == 'E') || (val_str[0] == '1') || (val_str[0] == 'T'))
