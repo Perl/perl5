@@ -934,9 +934,7 @@ PP(pp_dbmopen)
     GV *gv;
 
     HV * const hv = (HV*)POPs;
-    SV * const sv = sv_mortalcopy(&PL_sv_no);
-
-    sv_setpv(sv, "AnyDBM_File");
+    SV * const sv = sv_2mortal(newSVpvs("AnyDBM_File"));
     stash = gv_stashsv(sv, FALSE);
     if (!stash || !(gv = gv_fetchmethod(stash, "TIEHASH"))) {
 	PUTBACK;
@@ -1137,8 +1135,7 @@ PP(pp_sselect)
     if (GIMME == G_ARRAY && tbuf) {
 	value = (NV)(timebuf.tv_sec) +
 		(NV)(timebuf.tv_usec) / 1000000.0;
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	sv_setnv(sv, value);
+	PUSHs(sv_2mortal(newSVnv(value)));
     }
     RETURN;
 #else
@@ -4498,15 +4495,18 @@ PP(pp_semctl)
 static SV *
 S_space_join_names_mortal(pTHX_ char *const *array)
 {
-    SV *target = sv_2mortal(newSVpvs(""));
+    SV *target;
 
     if (array && *array) {
+	target = sv_2mortal(newSVpvs(""));
 	while (1) {
 	    sv_catpv(target, *array);
 	    if (!*++array)
 		break;
 	    sv_catpvs(target, " ");
 	}
+    } else {
+	target = sv_mortalcopy(&PL_sv_no);
     }
     return target;
 }
@@ -4581,23 +4581,20 @@ PP(pp_ghostent)
     }
 
     if (hent) {
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	sv_setpv(sv, (char*)hent->h_name);
+	PUSHs(sv_2mortal(newSVpv((char*)hent->h_name, 0)));
 	PUSHs(S_space_join_names_mortal(aTHX_ hent->h_aliases));
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	sv_setiv(sv, (IV)hent->h_addrtype);
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
+	PUSHs(sv_2mortal(newSViv((IV)hent->h_addrtype)));
 	len = hent->h_length;
-	sv_setiv(sv, (IV)len);
+	PUSHs(sv_2mortal(newSViv((IV)len)));
 #ifdef h_addr
 	for (elem = hent->h_addr_list; elem && *elem; elem++) {
-	    XPUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	    sv_setpvn(sv, *elem, len);
+	    XPUSHs(sv_2mortal(newSVpvn(*elem, len)));
 	}
 #else
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 	if (hent->h_addr)
-	    sv_setpvn(sv, hent->h_addr, len);
+	    PUSHs(newSVpvn(hent->h_addr, len));
+	else
+	    PUSHs(sv_mortalcopy(&PL_sv_no));
 #endif /* h_addr */
     }
     RETURN;
@@ -4667,13 +4664,10 @@ PP(pp_gnetent)
     }
 
     if (nent) {
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	sv_setpv(sv, nent->n_name);
+	PUSHs(sv_2mortal(newSVpv(nent->n_name, 0)));
 	PUSHs(S_space_join_names_mortal(aTHX_ nent->n_aliases));
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	sv_setiv(sv, (IV)nent->n_addrtype);
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	sv_setiv(sv, (IV)nent->n_net);
+	PUSHs(sv_2mortal(newSViv((IV)nent->n_addrtype)));
+	PUSHs(sv_2mortal(newSViv((IV)nent->n_net)));
     }
 
     RETURN;
@@ -4731,11 +4725,9 @@ PP(pp_gprotoent)
     }
 
     if (pent) {
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	sv_setpv(sv, pent->p_name);
+	PUSHs(sv_2mortal(newSVpv(pent->p_name, 0)));
 	PUSHs(S_space_join_names_mortal(aTHX_ pent->p_aliases));
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	sv_setiv(sv, (IV)pent->p_proto);
+	PUSHs(sv_2mortal(newSViv((IV)pent->p_proto)));
     }
 
     RETURN;
@@ -4803,17 +4795,14 @@ PP(pp_gservent)
     }
 
     if (sent) {
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	sv_setpv(sv, sent->s_name);
+	PUSHs(sv_2mortal(newSVpv(sent->s_name, 0)));
 	PUSHs(S_space_join_names_mortal(aTHX_ sent->s_aliases));
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef HAS_NTOHS
-	sv_setiv(sv, (IV)PerlSock_ntohs(sent->s_port));
+	PUSHs(sv_2mortal(newSViv((IV)PerlSock_ntohs(sent->s_port))));
 #else
-	sv_setiv(sv, (IV)(sent->s_port));
+	PUSHs(sv_2mortal(newSViv((IV)(sent->s_port))));
 #endif
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	sv_setpv(sv, sent->s_proto);
+	PUSHs(sv_2mortal(newSVpv(sent->s_proto, 0)));
     }
 
     RETURN;
@@ -5029,11 +5018,9 @@ PP(pp_gpwent)
     }
 
     if (pwent) {
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	sv_setpv(sv, pwent->pw_name);
+	PUSHs(sv_2mortal(newSVpv(pwent->pw_name, 0)));
 
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	SvPOK_off(sv);
+	PUSHs(sv = sv_2mortal(newSViv(0)));
 	/* If we have getspnam(), we try to dig up the shadow
 	 * password.  If we are underprivileged, the shadow
 	 * interface will set the errno to EACCES or similar,
@@ -5076,70 +5063,70 @@ PP(pp_gpwent)
 	SvTAINTED_on(sv);
 #   endif
 
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #   if Uid_t_sign <= 0
-	sv_setiv(sv, (IV)pwent->pw_uid);
+	PUSHs(sv_2mortal(newSViv((IV)pwent->pw_uid)));
 #   else
-	sv_setuv(sv, (UV)pwent->pw_uid);
+	PUSHs(sv_2mortal(newSVuv((UV)pwent->pw_uid)));
 #   endif
 
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #   if Uid_t_sign <= 0
-	sv_setiv(sv, (IV)pwent->pw_gid);
+	PUSHs(sv_2mortal(newSViv((IV)pwent->pw_gid)));
 #   else
-	sv_setuv(sv, (UV)pwent->pw_gid);
+	PUSHs(sv_2mortal(newSVuv((UV)pwent->pw_gid)));
 #   endif
 	/* pw_change, pw_quota, and pw_age are mutually exclusive--
 	 * because of the poor interface of the Perl getpw*(),
 	 * not because there's some standard/convention saying so.
 	 * A better interface would have been to return a hash,
 	 * but we are accursed by our history, alas. --jhi.  */
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #   ifdef PWCHANGE
-	sv_setiv(sv, (IV)pwent->pw_change);
+	PUSHs(sv_2mortal(newSViv((IV)pwent->pw_change)));
 #   else
 #       ifdef PWQUOTA
-	sv_setiv(sv, (IV)pwent->pw_quota);
+	PUSHs(sv_2mortal(newSViv((IV)pwent->pw_quota)));
 #       else
 #           ifdef PWAGE
-	sv_setpv(sv, pwent->pw_age);
+	PUSHs(sv_2mortal(newSVpv(pwent->pw_age, 0)));
+#	    else
+	/* I think that you can never get this compiled, but just in case.  */
+	PUSHs(sv_mortalcopy(&PL_sv_no));
 #           endif
 #       endif
 #   endif
 
 	/* pw_class and pw_comment are mutually exclusive--.
 	 * see the above note for pw_change, pw_quota, and pw_age. */
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #   ifdef PWCLASS
-	sv_setpv(sv, pwent->pw_class);
+	PUSHs(sv_2mortal(newSVpv(pwent->pw_class, 0)));
 #   else
 #       ifdef PWCOMMENT
-	sv_setpv(sv, pwent->pw_comment);
+	PUSHs(sv_2mortal(newSVpv(pwent->pw_comment, 0)));
+#	else
+	/* I think that you can never get this compiled, but just in case.  */
+	PUSHs(sv_mortalcopy(&PL_sv_no));
 #       endif
 #   endif
 
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #   ifdef PWGECOS
-	sv_setpv(sv, pwent->pw_gecos);
+	PUSHs(sv = sv_2mortal(newSVpv(pwent->pw_gecos, 0)));
+#   else
+	PUSHs(sv_mortalcopy(&PL_sv_no));
 #   endif
 #   ifndef INCOMPLETE_TAINTS
 	/* pw_gecos is tainted because user himself can diddle with it. */
 	SvTAINTED_on(sv);
 #   endif
 
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	sv_setpv(sv, pwent->pw_dir);
+	PUSHs(sv_2mortal(newSVpv(pwent->pw_dir, 0)));
 
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	sv_setpv(sv, pwent->pw_shell);
+	PUSHs(sv = sv_2mortal(newSVpv(pwent->pw_shell, 0)));
 #   ifndef INCOMPLETE_TAINTS
 	/* pw_shell is tainted because user himself can diddle with it. */
 	SvTAINTED_on(sv);
 #   endif
 
 #   ifdef PWEXPIRE
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	sv_setiv(sv, (IV)pwent->pw_expire);
+	PUSHs(sv_2mortal(newSViv((IV)pwent->pw_expire)));
 #   endif
     }
     RETURN;
@@ -5208,16 +5195,15 @@ PP(pp_ggrent)
 
     if (grent) {
 	SV *sv;
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	sv_setpv(sv, grent->gr_name);
+	PUSHs(sv_2mortal(newSVpv(grent->gr_name, 0)));
 
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
 #ifdef GRPASSWD
-	sv_setpv(sv, grent->gr_passwd);
+	PUSHs(sv_2mortal(newSVpv(grent->gr_passwd, 0)));
+#else
+	PUSHs(sv_mortalcopy(&PL_sv_no));
 #endif
 
-	PUSHs(sv = sv_mortalcopy(&PL_sv_no));
-	sv_setiv(sv, (IV)grent->gr_gid);
+	PUSHs(sv_2mortal(newSViv((IV)grent->gr_gid)));
 
 #if !(defined(_CRAYMPP) && defined(USE_REENTRANT_API))
 	/* In UNICOS/mk (_CRAYMPP) the multithreading
