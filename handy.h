@@ -617,10 +617,22 @@ optimise.
 =for apidoc Am|void|StructCopy|type src|type dest|type
 This is an architecture-independent macro to copy one structure to another.
 
+=for apidoc Am|void|PoisonWith|void* dest|int nitems|type|U8 byte
+
+Fill up memory with a byte pattern (a byte repeated over and over
+again) that hopefully catches attempts to access uninitialized memory.
+
+=for apidoc Am|void|PoisonNew|void* dest|int nitems|type
+
+PoisonWith(0xAB) for catching access to allocated but uninitialized memory.
+
+=for apidoc Am|void|PoisonFree|void* dest|int nitems|type
+
+PoisonWith(0xEF) for catching access to freed memory.
+
 =for apidoc Am|void|Poison|void* dest|int nitems|type
 
-Fill up memory with a pattern (byte 0xAB over and over again) that
-hopefully catches attempts to access uninitialized memory.
+PoisonWith(0xEF) for catching access to freed memory.
 
 =cut */
 
@@ -705,8 +717,7 @@ Malloc_t Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int li
 
 #define Newx(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_ALLOC(n,t,(t*)safemalloc((MEM_SIZE)((n)*sizeof(t))))))
 #define Newxc(v,n,t,c)	(v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_ALLOC(n,t,(c*)safemalloc((MEM_SIZE)((n)*sizeof(t))))))
-#define Newxz(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_ALLOC(n,t,(t*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))), \
-			memzero((char*)(v), (n)*sizeof(t))
+#define Newxz(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_ALLOC(n,t,(t*)safecalloc((n),sizeof(t)))))
 /* pre 5.9.x compatibility */
 #define New(x,v,n,t)	Newx(v,n,t)
 #define Newc(x,v,n,t,c)	Newxc(v,n,t,c)
@@ -737,7 +748,10 @@ Malloc_t Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int li
 #define ZeroD(d,n,t)	(MEM_WRAP_CHECK_(n,t) memzero((char*)(d), (n) * sizeof(t)),d)
 #endif
 
-#define Poison(d,n,t)	(MEM_WRAP_CHECK_(n,t) (void)memset((char*)(d), 0xAB, (n) * sizeof(t)))
+#define PoisonWith(d,n,t,b)	(MEM_WRAP_CHECK_(n,t) (void)memset((char*)(d), (U8)(b), (n) * sizeof(t)))
+#define PoisonNew(d,n,t)	PoisonWith(d,n,t,0xAB)
+#define PoisonFree(d,n,t)	PoisonWith(d,n,t,0xEF)
+#define Poison(d,n,t)		PoisonFree(d,n,t)
 
 #ifdef USE_STRUCT_COPY
 #define StructCopy(s,d,t) (*((t*)(d)) = *((t*)(s)))
