@@ -99,7 +99,7 @@ Perl_safesysmalloc(MEM_SIZE size)
 #endif
 
 #ifdef PERL_POISON
-	Poison(((char *)ptr), size, char);
+	PoisonNew(((char *)ptr), size, char);
 #endif
 
 #ifdef PERL_TRACK_MEMPOOL
@@ -165,7 +165,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	if (header->size > size) {
 	    const MEM_SIZE freed_up = header->size - size;
 	    char *start_of_freed = ((char *)where) + size;
-	    Poison(start_of_freed, freed_up, char);
+	    PoisonFree(start_of_freed, freed_up, char);
 	}
 	header->size = size;
 #  endif
@@ -190,7 +190,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 	if (header->size < size) {
 	    const MEM_SIZE fresh = size - header->size;
 	    char *start_of_fresh = ((char *)ptr) + size;
-	    Poison(start_of_fresh, fresh, char);
+	    PoisonNew(start_of_fresh, fresh, char);
 	}
 #  endif
 
@@ -241,7 +241,7 @@ Perl_safesysfree(Malloc_t where)
 	    header->next->prev = header->prev;
 	    header->prev->next = header->next;
 #  ifdef PERL_POISON
-	    Poison(where, header->size, char);
+	    PoisonNew(where, header->size, char);
 #  endif
 	    /* Trigger the duplicate free warning.  */
 	    header->next = NULL;

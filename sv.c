@@ -190,10 +190,10 @@ Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
 #  define SvARENA_CHAIN(sv)	((sv)->sv_u.svu_rv)
 /* Whilst I'd love to do this, it seems that things like to check on
    unreferenced scalars
-#  define POSION_SV_HEAD(sv)	Poison(sv, 1, struct STRUCT_SV)
+#  define POSION_SV_HEAD(sv)	PoisonNew(sv, 1, struct STRUCT_SV)
 */
-#  define POSION_SV_HEAD(sv)	Poison(&SvANY(sv), 1, void *), \
-				Poison(&SvREFCNT(sv), 1, U32)
+#  define POSION_SV_HEAD(sv)	PoisonNew(&SvANY(sv), 1, void *), \
+				PoisonNew(&SvREFCNT(sv), 1, U32)
 #else
 #  define SvARENA_CHAIN(sv)	SvANY(sv)
 #  define POSION_SV_HEAD(sv)
@@ -10727,7 +10727,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PERL_SET_THX(my_perl);
 
 #  ifdef DEBUGGING
-    Poison(my_perl, 1, PerlInterpreter);
+    PoisonNew(my_perl, 1, PerlInterpreter);
     PL_op = NULL;
     PL_curcop = NULL;
     PL_markstack = 0;
@@ -10761,7 +10761,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PERL_SET_THX(my_perl);
 
 #    ifdef DEBUGGING
-    Poison(my_perl, 1, PerlInterpreter);
+    PoisonNew(my_perl, 1, PerlInterpreter);
     PL_op = NULL;
     PL_curcop = NULL;
     PL_markstack = 0;

@@ -2022,10 +2022,30 @@ Found in file handy.h
 =item Poison
 X<Poison>
 
-Fill up memory with a pattern (byte 0xAB over and over again) that
-hopefully catches attempts to access uninitialized memory.
+PoisonWith(0xEF) for catching access to freed memory.
 
 	void	Poison(void* dest, int nitems, type)
+
+=for hackers
+Found in file handy.h
+
+=item PoisonNew
+X<PoisonNew>
+
+PoisonWith(0xAB) for catching access to allocated but uninitialized memory.
+
+	void	PoisonNew(void* dest, int nitems, type)
+
+=for hackers
+Found in file handy.h
+
+=item PoisonWith
+X<PoisonWith>
+
+Fill up memory with a byte pattern (a byte repeated over and over
+again) that hopefully catches attempts to access uninitialized memory.
+
+	void	PoisonWith(void* dest, int nitems, type, U8 byte)
 
 =for hackers
 Found in file handy.h

@@ -2712,8 +2712,9 @@ section.
 
 =item *
 
-If you see in a debugger a memory area mysteriously full of 0xabababab,
-you may be seeing the effect of the Poison() macro, see L<perlclib>.
+If you see in a debugger a memory area mysteriously full of 0xABABABAB
+or 0xEFEFEFEF, you may be seeing the effect of the Poison() macros,
+see L<perlclib>.
 
 =back
 

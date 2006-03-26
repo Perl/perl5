@@ -380,7 +380,7 @@ Perl_rxres_free(pTHX_ void **rsp)
 	void *tmp = INT2PTR(char*,*p);
 	Safefree(tmp);
 	if (*p)
-	    Poison(*p, 1, sizeof(*p));
+	    PoisonFree(*p, 1, sizeof(*p));
 #else
 	Safefree(INT2PTR(char*,*p));
 #endif

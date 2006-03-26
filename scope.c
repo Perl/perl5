@@ -62,7 +62,7 @@ Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
     Newx(si->si_cxstack, cxitems, PERL_CONTEXT);
     /* Without any kind of initialising PUSHSUBST()
      * in pp_subst() will read uninitialised heap. */
-    Poison(si->si_cxstack, cxitems, PERL_CONTEXT);
+    PoisonNew(si->si_cxstack, cxitems, PERL_CONTEXT);
     return si;
 }
 
@@ -75,7 +75,7 @@ Perl_cxinc(pTHX)
     Renew(cxstack, cxstack_max + 1, PERL_CONTEXT);	/* XXX should fix CXINC macro */
     /* Without any kind of initialising deep enough recursion
      * will end up reading uninitialised PERL_CONTEXTs. */
-    Poison(cxstack + old_max + 1, cxstack_max - old_max, PERL_CONTEXT);
+    PoisonNew(cxstack + old_max + 1, cxstack_max - old_max, PERL_CONTEXT);
     return cxstack_ix + 1;
 }
 
