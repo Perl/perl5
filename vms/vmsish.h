@@ -63,6 +63,31 @@
 #  define DONT_MASK_RTL_CALLS
 #endif
 
+#include <namdef.h>
+
+/* Set the maximum filespec size here as it is larger for EFS file
+ * specifications.
+ */
+#ifndef __VAX
+#ifndef VMS_MAXRSS
+#ifdef NAML$C_MAXRSS
+#define VMS_MAXRSS (NAML$C_MAXRSS+1)
+#ifndef VMS_LONGNAME_SUPPORT
+#define VMS_LONGNAME_SUPPORT 1
+#endif /* VMS_LONGNAME_SUPPORT */
+#endif /* NAML$C_MAXRSS */
+#endif /* VMS_MAXRSS */
+#endif
+
+#ifndef VMS_MAXRSS
+#define VMS_MAXRSS (NAM$C_MAXRSS + 1)
+#endif
+
+#ifndef MAXPATHLEN
+#define MAXPATHLEN (VMS_MAXRSS - 1)
+#endif
+
+
 /* Note that we do, in fact, have this */
 #define HAS_GETENV_SV
 #define HAS_GETENV_LEN

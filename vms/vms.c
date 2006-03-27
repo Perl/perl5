@@ -48,37 +48,6 @@
 #include <stsdef.h>
 #include <rmsdef.h>
 
-/* Set the maximum filespec size here as it is larger for EFS file
- * specifications.
- * Not fully implemented at this time because the larger size
- * will likely impact the stack local storage requirements of
- * threaded code, and probably cause hard to diagnose failures.
- * To implement the larger sizes, all places where filename
- * storage is put on the stack need to be changed to use
- * New()/SafeFree() instead.
- */
-#ifndef __VAX
-#ifndef VMS_MAXRSS
-#ifdef NAML$C_MAXRSS
-#define VMS_MAXRSS (NAML$C_MAXRSS+1)
-#ifndef VMS_LONGNAME_SUPPORT
-#define VMS_LONGNAME_SUPPORT 1
-#endif /* VMS_LONGNAME_SUPPORT */
-#endif /* NAML$C_MAXRSS */
-#endif /* VMS_MAXRSS */
-#endif
-
-/* temporary hack until support is complete */
-#ifdef VMS_LONGNAME_SUPPORT
-#undef VMS_LONGNAME_SUPPORT
-#undef VMS_MAXRSS
-#endif
-/* end of temporary hack until support is complete */
-
-#ifndef VMS_MAXRSS
-#define VMS_MAXRSS (NAM$C_MAXRSS + 1)
-#endif
-
 #if  __CRTL_VER < 70301000 && __CRTL_VER >= 70300000
 int   decc$feature_get_index(const char *name);
 char* decc$feature_get_name(int index);
@@ -131,6 +100,10 @@ return 0;
 /* Anticipating future expansion in lexical warnings . . . */
 #ifndef WARN_INTERNAL
 #  define WARN_INTERNAL WARN_MISC
+#endif
+
+#ifdef VMS_LONGNAME_SUPPORT
+#include <libfildef.h>
 #endif
 
 #if defined(__VMS_VER) && __VMS_VER >= 70000000 && __DECC_VER >= 50200000
@@ -4054,7 +4027,7 @@ my_gconvert(double val, int ndig, int trail, char *buf)
 }
 /*}}}*/
 
-#if 1 /* defined(__VAX) || !defined(NAML$C_MAXRSS) */
+#if defined(__VAX) || !defined(NAML$C_MAXRSS)
 static int rms_free_search_context(struct FAB * fab)
 {
 struct NAM * nam;
@@ -4106,6 +4079,7 @@ struct NAML * nam;
     nam->naml$b_nop |= NAM$M_SYNCHK;
     nam->naml$l_rlf = NULL;
     nam->naml$l_long_defname_size = 0;
+
     fab->fab$b_dns = 0;
     return sys$parse(fab, NULL, NULL);
 }
@@ -7333,12 +7307,12 @@ pipe_and_fork(pTHX_ char **cmargv)
                     *p++ = '"';
                     l++;
                 }
-	}
+	    }
         } else {
             if ((quote||tquote) && *q == '"') {
                 *p++ = '"';
                 l++;
-	}
+	    }
             *p++ = *q++;
             l++;
         }
@@ -7348,7 +7322,7 @@ pipe_and_fork(pTHX_ char **cmargv)
     fp = safe_popen(aTHX_ subcmd,"wbF",&sts);
     if (fp == Nullfp) {
         PerlIO_printf(Perl_debug_log,"Can't open output pipe (status %d)",sts);
-	}
+    }
 }
 
 static int background_process(pTHX_ int argc, char **argv)
@@ -7981,7 +7955,7 @@ collectversions(pTHX_ DIR *dd)
 	unsigned long flags = 0;
 
 #ifdef VMS_LONGNAME_SUPPORT
-	flags = LIB$M_FIL_LONG_NAMES
+	flags = LIB$M_FIL_LONG_NAMES;
 #endif
 	tmpsts = lib$find_file(&pat, &res, &context, NULL, NULL, &rsts, &flags);
 	if (tmpsts == RMS$_NMF || context == 0) break;
@@ -8022,7 +7996,7 @@ Perl_readdir(pTHX_ DIR *dd)
     res.dsc$b_class = DSC$K_CLASS_S;
 
 #ifdef VMS_LONGNAME_SUPPORT
-    flags = LIB$M_FIL_LONG_NAMES
+    flags = LIB$M_FIL_LONG_NAMES;
 #endif
 
     tmpsts = lib$find_file
@@ -9952,6 +9926,8 @@ static mydev_t encode_dev (pTHX_ const char *dev)
   f = 1;
   i = 0;
   for (q = dev + strlen(dev); q--; q >= dev) {
+    if (*q == ':')
+	break;
     if (isdigit (*q))
       c= (*q) - '0';
     else if (isalpha (toupper (*q)))
@@ -9967,8 +9943,6 @@ static mydev_t encode_dev (pTHX_ const char *dev)
 
 }  /* end of encode_dev() */
 #endif
-
-static char namecache[NAM$C_MAXRSS+1];
 
 static int
 is_null_device(name)
@@ -9999,53 +9973,7 @@ is_null_device(name)
 bool
 Perl_cando(pTHX_ Mode_t bit, bool effective, const Stat_t *statbufp)
 {
-  char fname_phdev[NAM$C_MAXRSS+1];
-#if __CRTL_VER >= 80200000 && !defined(__VAX)
-  /* Namecache not workable with symbolic links, as symbolic links do
-   *  not have extensions and directories do in VMS mode.  So in order
-   *  to test this, the did and ino_t must be used.
-   *
-   * Fix-me - Hide the information in the new stat structure
-   *	      Get rid of the namecache.
-   */
-  if (decc_posix_compliant_pathnames == 0)
-#endif
-      if (statbufp == &PL_statcache)
-	  return cando_by_name(bit,effective,namecache);
-  {
-    char fname[NAM$C_MAXRSS+1];
-    unsigned long int retsts;
-    struct dsc$descriptor_s devdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0},
-                            namdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
-
-    /* If the struct mystat is stale, we're OOL; stat() overwrites the
-       device name on successive calls */
-    devdsc.dsc$a_pointer = ((Stat_t *)statbufp)->st_devnam;
-    devdsc.dsc$w_length = strlen(((Stat_t *)statbufp)->st_devnam);
-    namdsc.dsc$a_pointer = fname;
-    namdsc.dsc$w_length = sizeof fname - 1;
-
-    retsts = lib$fid_to_name(&devdsc,&(((Stat_t *)statbufp)->st_ino),
-                             &namdsc,&namdsc.dsc$w_length,0,0);
-    if (retsts & 1) {
-      fname[namdsc.dsc$w_length] = '\0';
-/* 
- * lib$fid_to_name returns DVI$_LOGVOLNAM as the device part of the name,
- * but if someone has redefined that logical, Perl gets very lost.  Since
- * we have the physical device name from the stat buffer, just paste it on.
- */
-      strcpy( fname_phdev, statbufp->st_devnam );
-      strcat( fname_phdev, strrchr(fname, ':') );
-
-      return cando_by_name(bit,effective,fname_phdev);
-    }
-    else if (retsts == SS$_NOSUCHDEV || retsts == SS$_NOSUCHFILE) {
-      Perl_warn(aTHX_ "Can't get filespec - stale stat buffer?\n");
-      return FALSE;
-    }
-    _ckvmssts(retsts);
-    return FALSE;  /* Should never get to here */
-  }
+  return cando_by_name(bit,effective, statbufp->st_devnam);
 }  /* end of cando() */
 /*}}}*/
 
@@ -10173,30 +10101,34 @@ int
 Perl_flex_fstat(pTHX_ int fd, Stat_t *statbufp)
 {
   if (!fstat(fd,(stat_t *) statbufp)) {
-    if (statbufp == (Stat_t *) &PL_statcache) {
     char *cptr;
+    char *vms_filename;
+    vms_filename = PerlMem_malloc(VMS_MAXRSS);
+    if (vms_filename == NULL) _ckvmssts(SS$_INSFMEM);
 
-	/* Save name for cando by name in VMS format */
-	cptr = getname(fd, namecache, 1);
+    /* Save name for cando by name in VMS format */
+    cptr = getname(fd, vms_filename, 1);
 
-	/* This should not happen, but just in case */
-	if (cptr == NULL)
-	   namecache[0] = '\0';
+    /* This should not happen, but just in case */
+    if (cptr == NULL) {
+	statbufp->st_devnam[0] = 0;
     }
+    else {
+	/* Make sure that the saved name fits in 255 characters */
+	cptr = do_rmsexpand
+		       (vms_filename,
+			statbufp->st_devnam, 
+			0,
+			NULL,
+			PERL_RMSEXPAND_M_VMS);
+	if (cptr == NULL)
+	    statbufp->st_devnam[0] = 0;
+    }
+    PerlMem_free(vms_filename);
 
     VMS_INO_T_COPY(statbufp->st_ino, statbufp->crtl_stat.st_ino);
 #ifndef _USE_STD_STAT
-    strncpy(statbufp->st_devnam, statbufp->crtl_stat.st_dev, 63);
-    statbufp->st_devnam[63] = 0;
     statbufp->st_dev = encode_dev(aTHX_ statbufp->st_devnam);
-#else
-    /* todo:
-     * The device is only encoded so that Perl_cando can use it to
-     * look up ACLS.  So rmsexpand it to the 255 character version
-     * and store it in ->st_devnam.  rmsexpand needs to be fixed
-     * for long filenames and symbolic links first.  This also seems
-     * to remove the need for a namecache that could be stale.
-     */
 #endif
 
 #   ifdef RTL_USES_UTC
@@ -10241,16 +10173,16 @@ Perl_flex_fstat(pTHX_ int fd, Stat_t *statbufp)
 static int
 Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
 {
-    char fileified[NAM$C_MAXRSS+1];
-    char temp_fspec[NAM$C_MAXRSS+300];
+    char fileified[VMS_MAXRSS];
+    char temp_fspec[VMS_MAXRSS];
+    char *save_spec;
     int retval = -1;
     int saved_errno, saved_vaxc_errno;
 
     if (!fspec) return retval;
     saved_errno = errno; saved_vaxc_errno = vaxc$errno;
     strcpy(temp_fspec, fspec);
-    if (statbufp == (Stat_t *) &PL_statcache)
-      do_tovmsspec(temp_fspec,namecache,0);
+
     if (decc_bug_devnull != 0) {
       if (is_null_device(temp_fspec)) { /* Fake a stat() for the null device */
 	memset(statbufp,0,sizeof *statbufp);
@@ -10282,14 +10214,14 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
 	retval = stat(fileified,(stat_t *) statbufp);
       else
 	retval = lstat(fileified,(stat_t *) statbufp);
-      if (!retval && statbufp == (Stat_t *) &PL_statcache)
-        strcpy(namecache,fileified);
+      save_spec = fileified;
     }
     if (retval) {
       if (lstat_flag == 0)
 	retval = stat(temp_fspec,(stat_t *) statbufp);
       else
 	retval = lstat(temp_fspec,(stat_t *) statbufp);
+      save_spec = temp_fspec;
     }
 #if __CRTL_VER >= 80200000 && !defined(__VAX)
   } else {
@@ -10297,22 +10229,19 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
       retval = stat(temp_fspec,(stat_t *) statbufp);
     else
       retval = lstat(temp_fspec,(stat_t *) statbufp);
+      save_spec = temp_fspec;
   }
 #endif
     if (!retval) {
+    char * cptr;
+      cptr = do_rmsexpand
+	    (save_spec, statbufp->st_devnam, 0, NULL, PERL_RMSEXPAND_M_VMS);
+      if (cptr == NULL)
+	statbufp->st_devnam[0] = 0;
+
       VMS_INO_T_COPY(statbufp->st_ino, statbufp->crtl_stat.st_ino);
 #ifndef _USE_STD_STAT
-      strncpy(statbufp->st_devnam, statbufp->crtl_stat.st_dev, 63);
-      statbufp->st_devnam[63] = 0;
       statbufp->st_dev = encode_dev(aTHX_ statbufp->st_devnam);
-#else
-    /* todo:
-     * The device is only encoded so that Perl_cando can use it to
-     * look up ACLS.  So rmsexpand it to the 255 character version
-     * and store it in ->st_devnam.  rmsexpand needs to be fixed
-     * for long filenames and symbolic links first.  This also seems
-     * to remove the need for a namecache that could be stale.
-     */
 #endif
 #     ifdef RTL_USES_UTC
 #     ifdef VMSISH_TIME
@@ -10933,7 +10862,7 @@ void
 candelete_fromperl(pTHX_ CV *cv)
 {
   dXSARGS;
-  char fspec[NAM$C_MAXRSS+1], *fsp;
+  char *fspec, *fsp;
   SV *mysv;
   IO *io;
   STRLEN n_a;
@@ -10941,10 +10870,13 @@ candelete_fromperl(pTHX_ CV *cv)
   if (items != 1) Perl_croak(aTHX_ "Usage: VMS::Filespec::candelete(spec)");
 
   mysv = SvROK(ST(0)) ? SvRV(ST(0)) : ST(0);
+  Newx(fspec, VMS_MAXRSS, char);
+  if (fspec == NULL) _ckvmssts(SS$_INSFMEM);
   if (SvTYPE(mysv) == SVt_PVGV) {
     if (!(io = GvIOp(mysv)) || !PerlIO_getname(IoIFP(io),fspec)) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
       ST(0) = &PL_sv_no;
+      Safefree(fspec);
       XSRETURN(1);
     }
     fsp = fspec;
@@ -10953,11 +10885,13 @@ candelete_fromperl(pTHX_ CV *cv)
     if (mysv != ST(0) || !(fsp = SvPV(mysv,n_a)) || !*fsp) {
       set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
       ST(0) = &PL_sv_no;
+      Safefree(fspec);
       XSRETURN(1);
     }
   }
 
   ST(0) = boolSV(cando_by_name(S_IDUSR,0,fsp));
+  Safefree(fspec);
   XSRETURN(1);
 }
 
@@ -11352,8 +11286,7 @@ init_os_extras(void)
 {
   dTHX;
   char* file = __FILE__;
-  char temp_buff[512];
-  if (my_trnlnm("DECC$DISABLE_TO_VMS_LOGNAME_TRANSLATION", temp_buff, 0)) {
+  if (decc_disable_to_vms_logname_translation) {
     no_translate_barewords = TRUE;
   } else {
     no_translate_barewords = FALSE;
