@@ -2604,27 +2604,11 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
     else {
 	myop.op_other = (OP*)&myop;
 	PL_markstack_ptr--;
-	/* we're trying to emulate pp_entertry() here */
-	{
-	    register PERL_CONTEXT *cx;
-	    const I32 gimme = GIMME_V;
-	
-	    ENTER;
-	    SAVETMPS;
-	
-	    PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), PL_stack_sp);
-	    PUSHEVAL(cx, 0, 0);
-	    PL_eval_root = PL_op;             /* Only needed so that goto works right. */
-	
-	    PL_in_eval = EVAL_INEVAL;
-	    if (flags & G_KEEPERR)
-		PL_in_eval |= EVAL_KEEPERR;
-	    else
-		sv_setpvn(ERRSV,"",0);
-	}
+	create_eval_scope(flags|G_FAKINGEVAL);
 	PL_markstack_ptr++;
 
 	JMPENV_PUSH(ret);
+
 	switch (ret) {
 	case 0:
  redo_body:
@@ -2661,21 +2645,8 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	    break;
 	}
 
-	if (PL_scopestack_ix > oldscope) {
-	    SV **newsp;
-	    PMOP *newpm;
-	    I32 gimme;
-	    register PERL_CONTEXT *cx;
-	    I32 optype;
-
-	    POPBLOCK(cx,newpm);
-	    POPEVAL(cx);
-	    PL_curpm = newpm;
-	    LEAVE;
-	    PERL_UNUSED_VAR(newsp);
-	    PERL_UNUSED_VAR(gimme);
-	    PERL_UNUSED_VAR(optype);
-	}
+	if (PL_scopestack_ix > oldscope)
+	    delete_eval_scope();
 	JMPENV_POP;
     }
 

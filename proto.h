@@ -224,6 +224,7 @@ PERL_CALLCONV I32	Perl_my_chsize(pTHX_ int fd, Off_t length)
 PERL_CALLCONV OP*	Perl_convert(pTHX_ I32 optype, I32 flags, OP* o)
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV PERL_CONTEXT*	Perl_create_eval_scope(pTHX_ U32 flags);
 PERL_CALLCONV void	Perl_croak(pTHX_ const char* pat, ...)
 			__attribute__noreturn__
 			__attribute__format__(__printf__,pTHX_1,pTHX_2);
@@ -373,6 +374,7 @@ PERL_CALLCONV char*	Perl_delimcpy(pTHX_ char* to, const char* toend, const char*
 			__attribute__nonnull__(pTHX_4)
 			__attribute__nonnull__(pTHX_6);
 
+PERL_CALLCONV void	Perl_delete_eval_scope(pTHX);
 PERL_CALLCONV void	Perl_deprecate(pTHX_ const char* s)
 			__attribute__nonnull__(pTHX_1);
 

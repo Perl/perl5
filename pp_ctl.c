@@ -3562,22 +3562,57 @@ PP(pp_leaveeval)
     RETURNOP(retop);
 }
 
-PP(pp_entertry)
+/* Common code for Perl_call_sv and Perl_fold_constants, put here to keep it
+   close to the related Perl_create_eval_scope.  */
+void
+Perl_delete_eval_scope(pTHX)
 {
-    dVAR; dSP;
+    SV **newsp;
+    PMOP *newpm;
+    I32 gimme;
     register PERL_CONTEXT *cx;
-    const I32 gimme = GIMME_V;
+    I32 optype;
+	
+    POPBLOCK(cx,newpm);
+    POPEVAL(cx);
+    PL_curpm = newpm;
+    LEAVE;
+    PERL_UNUSED_VAR(newsp);
+    PERL_UNUSED_VAR(gimme);
+    PERL_UNUSED_VAR(optype);
+}
 
+/* Common-ish code salvaged from Perl_call_sv and pp_entertry, because it was
+   also needed by Perl_fold_constants.  */
+PERL_CONTEXT *
+Perl_create_eval_scope(pTHX_ U32 flags)
+{
+    PERL_CONTEXT *cx;
+    const I32 gimme = GIMME_V;
+	
     ENTER;
     SAVETMPS;
 
-    PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), SP);
+    PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), PL_stack_sp);
     PUSHEVAL(cx, 0, 0);
-    cx->blk_eval.retop = cLOGOP->op_other->op_next;
+    PL_eval_root = PL_op;	/* Only needed so that goto works right. */
 
     PL_in_eval = EVAL_INEVAL;
-    sv_setpvn(ERRSV,"",0);
-    PUTBACK;
+    if (flags & G_KEEPERR)
+	PL_in_eval |= EVAL_KEEPERR;
+    else
+	sv_setpvn(ERRSV,"",0);
+    if (flags & G_FAKINGEVAL) {
+	PL_eval_root = PL_op; /* Only needed so that goto works right. */
+    }
+    return cx;
+}
+    
+PP(pp_entertry)
+{
+    dVAR;
+    PERL_CONTEXT *cx = create_eval_scope(0);
+    cx->blk_eval.retop = cLOGOP->op_other->op_next;
     return DOCATCH(PL_op->op_next);
 }
 

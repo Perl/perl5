@@ -2183,22 +2183,8 @@ Perl_fold_constants(pTHX_ register OP *o)
     PL_op = curop;
 
     oldscope = PL_scopestack_ix;
+    create_eval_scope(G_FAKINGEVAL);
 
-	/* we're trying to emulate pp_entertry() here */
-	{
-	    register PERL_CONTEXT *cx;
-	    const I32 gimme = GIMME_V;
-	
-	    ENTER;
-	    SAVETMPS;
-	
-	    PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), PL_stack_sp);
-	    PUSHEVAL(cx, 0, 0);
-	    PL_eval_root = PL_op;             /* Only needed so that goto works right. */
-	
-	    PL_in_eval = EVAL_INEVAL;
-	    sv_setpvn(ERRSV,"",0);
-	}
     JMPENV_PUSH(ret);
 
     switch (ret) {
@@ -2225,21 +2211,9 @@ Perl_fold_constants(pTHX_ register OP *o)
     }
 
     JMPENV_POP;
-    if (PL_scopestack_ix > oldscope) {
-	SV **newsp;
-	PMOP *newpm;
-	I32 gimme;
-	register PERL_CONTEXT *cx;
-	I32 optype;
-	
-	POPBLOCK(cx,newpm);
-	    POPEVAL(cx);
-	    PL_curpm = newpm;
-	    LEAVE;
-	    PERL_UNUSED_VAR(newsp);
-	    PERL_UNUSED_VAR(gimme);
-	    PERL_UNUSED_VAR(optype);
-    }
+
+    if (PL_scopestack_ix > oldscope)
+	delete_eval_scope();
 
     if (ret)
 	goto nope;
