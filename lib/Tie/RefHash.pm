@@ -1,6 +1,6 @@
 package Tie::RefHash;
 
-our $VERSION = 1.32;
+our $VERSION = 1.33;
 
 =head1 NAME
 
@@ -59,10 +59,6 @@ Gurusamy Sarathy        gsar@activestate.com
 
 'Nestable' by Ed Avis   ed@membled.com
 
-=head1 VERSION
-
-Version 1.32
-
 =head1 SEE ALSO
 
 perl(1), perlfunc(1), perltie(1)
@@ -74,7 +70,16 @@ use vars '@ISA';
 @ISA = qw(Tie::Hash);
 use strict;
 
+BEGIN {
+  use Config ();
+  my $usethreads = $Config::Config{usethreads}; # && exists $INC{"threads.pm"}
+  *_HAS_THREADS = $usethreads ? sub () { 1 } : sub () { 0 };
+  require Scalar::Util if $usethreads; # we need weaken()
+}
+
 require overload; # to support objects with overloaded ""
+
+my (@thread_object_registry, $count); # used by the CLONE method to rehash the keys after their refaddr changed
 
 sub TIEHASH {
   my $c = shift;
@@ -83,7 +88,35 @@ sub TIEHASH {
   while (@_) {
     $s->STORE(shift, shift);
   }
+
+  if (_HAS_THREADS) {
+    # remember the object so that we can rekey it on CLONE
+    push @thread_object_registry, $s;
+    # but make this a weak reference, so that there are no leaks
+    Scalar::Util::weaken( $thread_object_registry[-1] );
+
+    if ( ++$count > 1000 ) {
+      # this ensures we don't fill up with a huge array dead weakrefs
+      @thread_object_registry = grep { defined } @thread_object_registry;
+      $count = 0;
+    }
+  }
+
   return $s;
+}
+
+sub CLONE {
+  my $pkg = shift;
+  # when the thread has been cloned all the objects need to be updated.
+  # dead weakrefs are undefined, so we filter them out
+  @thread_object_registry = grep { defined && do { $_->CLONE_OBJ; 1 } } @thread_object_registry;
+  $count = 0; # we just cleaned up
+}
+
+sub CLONE_OBJ {
+  my $self = shift;
+  # rehash all the ref keys based on their new StrVal
+  %{ $self->[0] } = map { overload::StrVal($_->[0]) => $_ } values %{ $self->[0] };
 }
 
 sub FETCH {
