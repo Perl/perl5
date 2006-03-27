@@ -18,7 +18,7 @@ use File::Basename;
 # $Revision can't be on the same line or SVN/K gets confused
 use vars qw($Revision
             $VERSION @ISA);
-$VERSION = '5.73_02';
+$VERSION = '5.73_03';
 
 require ExtUtils::MM_Any;
 require ExtUtils::MM_Unix;
@@ -1732,7 +1732,7 @@ sub oneliner {
     # Switches must be quoted else they will be lowercased.
     $switches = join ' ', map { qq{"$_"} } @$switches;
 
-    return qq{\$(ABSPERLRUN) $switches -e $cmd --};
+    return qq{\$(ABSPERLRUN) $switches -e $cmd \"--\"};
 }
 
 
