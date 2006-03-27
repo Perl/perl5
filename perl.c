@@ -2324,7 +2324,8 @@ S_vrun_body(pTHX_ va_list args)
 {
     I32 oldscope = va_arg(args, I32);
 
-    return run_body(oldscope);
+    run_body(oldscope);
+    return NULL;
 }
 #endif
 

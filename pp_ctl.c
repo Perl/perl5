@@ -2541,9 +2541,10 @@ S_save_lines(pTHX_ AV *array, SV *sv)
 
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
 STATIC void *
-S_docatch_body(pTHX_ va_list args)
+S_vdocatch_body(pTHX_ va_list args)
 {
-    return docatch_body();
+    docatch_body();
+    return NULL;
 }
 #endif
 
@@ -2578,7 +2579,7 @@ S_docatch(pTHX_ OP *o)
 
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
  redo_body:
-    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_docatch_body));
+    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vdocatch_body));
 #else
     JMPENV_PUSH(ret);
 #endif
