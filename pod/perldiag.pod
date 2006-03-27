@@ -2921,6 +2921,11 @@ data.
 (P) The internal do_trans routines were called with invalid operational
 data.
 
+=item panic: fold_constants JMPENV_PUSH returned %d
+
+(P) While attemtping folding constants an exception other than an C<eval>
+failure was caught.
+
 =item panic: frexp
 
 (P) The library function frexp() failed, making printf("%f") impossible.

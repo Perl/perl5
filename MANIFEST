@@ -3118,6 +3118,7 @@ t/comp/colon.t			See if colons are parsed correctly
 t/comp/cpp.aux			main file for cpp.t
 t/comp/cpp.t			See if C preprocessor works
 t/comp/decl.t			See if declarations work
+t/comp/fold.t			See if constant folding works
 t/comp/hints.t			See if %^H works
 t/comp/multiline.t		See if multiline strings work
 t/comp/opsubs.t			See if q() etc. are not parsed as functions

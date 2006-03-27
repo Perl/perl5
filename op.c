@@ -2121,6 +2121,10 @@ Perl_fold_constants(pTHX_ register OP *o)
     OP *newop;
     I32 type = o->op_type;
     SV *sv;
+    int ret = 0;
+    I32 oldscope;
+    OP *old_next;
+    dJMPENV;
 
     if (PL_opargs[type] & OA_RETSCALAR)
 	scalar(o);
@@ -2174,16 +2178,71 @@ Perl_fold_constants(pTHX_ register OP *o)
     }
 
     curop = LINKLIST(o);
+    old_next = o->op_next;
     o->op_next = 0;
     PL_op = curop;
-    CALLRUNOPS(aTHX);
-    sv = *(PL_stack_sp--);
-    if (o->op_targ && sv == PAD_SV(o->op_targ))	/* grab pad temp? */
-	pad_swipe(o->op_targ,  FALSE);
-    else if (SvTEMP(sv)) {			/* grab mortal temp? */
-	SvREFCNT_inc_simple_void(sv);
-	SvTEMP_off(sv);
+
+    oldscope = PL_scopestack_ix;
+
+	/* we're trying to emulate pp_entertry() here */
+	{
+	    register PERL_CONTEXT *cx;
+	    const I32 gimme = GIMME_V;
+	
+	    ENTER;
+	    SAVETMPS;
+	
+	    PUSHBLOCK(cx, (CXt_EVAL|CXp_TRYBLOCK), PL_stack_sp);
+	    PUSHEVAL(cx, 0, 0);
+	    PL_eval_root = PL_op;             /* Only needed so that goto works right. */
+	
+	    PL_in_eval = EVAL_INEVAL;
+	    sv_setpvn(ERRSV,"",0);
+	}
+    JMPENV_PUSH(ret);
+
+    switch (ret) {
+    case 0:
+	CALLRUNOPS(aTHX);
+	sv = *(PL_stack_sp--);
+	if (o->op_targ && sv == PAD_SV(o->op_targ))	/* grab pad temp? */
+	    pad_swipe(o->op_targ,  FALSE);
+	else if (SvTEMP(sv)) {			/* grab mortal temp? */
+	    SvREFCNT_inc_simple_void(sv);
+	    SvTEMP_off(sv);
+	}
+	break;
+    case 3:
+	/* Something tried to die.  Abandon constant folding.  */
+	/* Pretend the error never happened.  */
+	sv_setpvn(ERRSV,"",0);
+	o->op_next = old_next;
+	break;
+    default:
+	JMPENV_POP;
+	/* Don't expect 1 (setjmp failed) or 2 (something called my_exit)  */
+	Perl_croak(aTHX_ "panic: fold_constants JMPENV_PUSH returned %d", ret);
     }
+
+    JMPENV_POP;
+    if (PL_scopestack_ix > oldscope) {
+	SV **newsp;
+	PMOP *newpm;
+	I32 gimme;
+	register PERL_CONTEXT *cx;
+	I32 optype;
+	
+	POPBLOCK(cx,newpm);
+	    POPEVAL(cx);
+	    PL_curpm = newpm;
+	    LEAVE;
+	    PERL_UNUSED_VAR(newsp);
+	    PERL_UNUSED_VAR(gimme);
+	    PERL_UNUSED_VAR(optype);
+    }
+
+    if (ret)
+	goto nope;
 
 #ifndef PERL_MAD
     op_free(o);
@@ -2195,7 +2254,7 @@ Perl_fold_constants(pTHX_ register OP *o)
     op_getmad(o,newop,'f');
     return newop;
 
-  nope:
+ nope:
     return o;
 }
 

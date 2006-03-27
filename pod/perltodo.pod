@@ -527,13 +527,6 @@ program if you pass the process ID. It would be good to do this with the Perl
 debugger on a running Perl program, although I'm not sure how it would be
 done." ssh and screen do this with named pipes in /tmp. Maybe we can too.
 
-=head2 Constant folding
-
-The peephole optimiser should trap errors during constant folding, and give
-up on the folding, rather than bailing out at compile time.  It is quite
-possible that the unfoldable constant is in unreachable code, eg something
-akin to C<$a = 0/0 if 0;>
-
 =head2 LVALUE functions for lists
 
 The old perltodo notes that lvalue functions don't work for list or hash
