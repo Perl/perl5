@@ -427,10 +427,6 @@ These tasks would need C knowledge, and roughly the level of knowledge of
 the perl API that comes from writing modules that use XS to interface to
 C.
 
-=head2 IPv6
-
-Clean this up. Check everything in core works
-
 =head2 shrink C<IO>s
 
 By removing unused elements and careful re-ordering, the structures for C<AV>s,
