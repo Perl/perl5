@@ -2522,6 +2522,8 @@ Check that a hash is in an internally consistent state.
 =cut
 */
 
+#ifdef DEBUGGING
+
 void
 Perl_hv_assert(pTHX_ HV *hv)
 {
@@ -2583,6 +2585,8 @@ Perl_hv_assert(pTHX_ HV *hv)
   HvRITER_set(hv, riter);		/* Restore hash iterator state */
   HvEITER_set(hv, eiter);
 }
+
+#endif
 
 /*
  * Local variables:
