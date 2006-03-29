@@ -6465,6 +6465,8 @@ seconds, for this process and the children of this process.
 
 In scalar context, C<times> returns C<$user>.
 
+Note that times for children are included only after they terminate.
+
 =item tr///
 
 The transliteration operator.  Same as C<y///>.  See L<perlop>.
