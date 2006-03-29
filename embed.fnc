@@ -456,8 +456,8 @@ p	|char*	|mem_collxfrm	|NN const char* s|STRLEN len|NN STRLEN* xlen
 Afp	|SV*	|mess		|NN const char* pat|...
 Ap	|SV*	|vmess		|NN const char* pat|NULLOK va_list* args
 p	|void	|qerror		|NN SV* err
-Apd	|void	|sortsv		|NN SV** array|size_t num_elts|SVCOMPARE_t cmp
-Apd	|void	|sortsv_flags	|NN SV** array|size_t num_elts|SVCOMPARE_t cmp|U32 flags
+Apd	|void	|sortsv		|NN SV** array|size_t num_elts|NN SVCOMPARE_t cmp
+Apd	|void	|sortsv_flags	|NN SV** array|size_t num_elts|NN SVCOMPARE_t cmp|U32 flags
 Apd	|int	|mg_clear	|NN SV* sv
 Apd	|int	|mg_copy	|NN SV* sv|NN SV* nsv|NULLOK const char* key|I32 klen
 pd	|void	|mg_localize	|NN SV* sv|NN SV* nsv
@@ -1312,9 +1312,7 @@ ERs	|bool	|reginclass	|NN const regnode *n|NN const U8 *p|NULLOK STRLEN *lenp\
 Es	|CHECKPOINT|regcppush	|I32 parenfloor
 Es	|char*|regcppop
 Es	|void	|cache_re	|NN regexp *prog
-ERs	|U8*	|reghop		|NN U8 *pos|I32 off
 ERsn	|U8*	|reghop3	|NN U8 *pos|I32 off|NN U8 *lim
-ERs	|U8*	|reghopmaybe	|NN U8 *pos|I32 off
 ERsn	|U8*	|reghopmaybe3	|NN U8 *pos|I32 off|NN U8 *lim
 ERs	|char*	|find_byclass	|NN regexp * prog|NN regnode *c|NN char *s|NN const char *strend|I32 norun
 Es	|void	|to_utf8_substr	|NN regexp * prog

@@ -1265,10 +1265,12 @@ PERL_CALLCONV void	Perl_qerror(pTHX_ SV* err)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV void	Perl_sortsv(pTHX_ SV** array, size_t num_elts, SVCOMPARE_t cmp)
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_3);
 
 PERL_CALLCONV void	Perl_sortsv_flags(pTHX_ SV** array, size_t num_elts, SVCOMPARE_t cmp, U32 flags)
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_3);
 
 PERL_CALLCONV int	Perl_mg_clear(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
@@ -3617,18 +3619,10 @@ STATIC char*	S_regcppop(pTHX);
 STATIC void	S_cache_re(pTHX_ regexp *prog)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC U8*	S_reghop(pTHX_ U8 *pos, I32 off)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
-
 STATIC U8*	S_reghop3(U8 *pos, I32 off, U8 *lim)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(3);
-
-STATIC U8*	S_reghopmaybe(pTHX_ U8 *pos, I32 off)
-			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
 
 STATIC U8*	S_reghopmaybe3(U8 *pos, I32 off, U8 *lim)
 			__attribute__warn_unused_result__

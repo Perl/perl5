@@ -1340,9 +1340,7 @@
 #define regcppush		S_regcppush
 #define regcppop		S_regcppop
 #define cache_re		S_cache_re
-#define reghop			S_reghop
 #define reghop3			S_reghop3
-#define reghopmaybe		S_reghopmaybe
 #define reghopmaybe3		S_reghopmaybe3
 #define find_byclass		S_find_byclass
 #define to_utf8_substr		S_to_utf8_substr
@@ -3491,9 +3489,7 @@
 #define regcppush(a)		S_regcppush(aTHX_ a)
 #define regcppop()		S_regcppop(aTHX)
 #define cache_re(a)		S_cache_re(aTHX_ a)
-#define reghop(a,b)		S_reghop(aTHX_ a,b)
 #define reghop3			S_reghop3
-#define reghopmaybe(a,b)	S_reghopmaybe(aTHX_ a,b)
 #define reghopmaybe3		S_reghopmaybe3
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
 #define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)

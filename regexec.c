@@ -116,28 +116,20 @@
 #define CHR_SVLEN(sv) (do_utf8 ? sv_len_utf8(sv) : SvCUR(sv))
 #define CHR_DIST(a,b) (PL_reg_match_utf8 ? utf8_distance(a,b) : a - b)
 
-#define reghop_c(pos,off) ((char*)reghop((U8*)pos, off))
-#define reghopmaybe_c(pos,off) ((char*)reghopmaybe((U8*)pos, off))
-#define HOP(pos,off) (PL_reg_match_utf8 ? reghop((U8*)pos, off) : (U8*)(pos + off))
-#define HOPMAYBE(pos,off) (PL_reg_match_utf8 ? reghopmaybe((U8*)pos, off) : (U8*)(pos + off))
-#define HOPc(pos,off) ((char*)HOP(pos,off))
-#define HOPMAYBEc(pos,off) ((char*)HOPMAYBE(pos,off))
-
-#define HOPBACK(pos, off) (		\
-    (PL_reg_match_utf8)			\
-	? reghopmaybe((U8*)pos, -off)	\
+#define HOPc(pos,off) ((char *)(PL_reg_match_utf8 \
+	    ? reghop3((U8*)pos, off, (U8*)(off >= 0 ? PL_regeol : PL_bostr)) \
+	    : (U8*)(pos + off)))
+#define HOPBACKc(pos, off) ((char*)	\
+    ((PL_reg_match_utf8)		\
+	? reghopmaybe3((U8*)pos, -off, ((U8*)(off < 0 ? PL_regeol : PL_bostr))) \
     : (pos - off >= PL_bostr)		\
 	? (U8*)(pos - off)		\
-    : (U8*)NULL				\
+    : (U8*)NULL)			\
 )
-#define HOPBACKc(pos, off) (char*)HOPBACK(pos, off)
 
-#define reghop3_c(pos,off,lim) ((char*)reghop3((U8*)pos, off, (U8*)lim))
 #define reghopmaybe3_c(pos,off,lim) ((char*)reghopmaybe3((U8*)pos, off, (U8*)lim))
 #define HOP3(pos,off,lim) (PL_reg_match_utf8 ? reghop3((U8*)pos, off, (U8*)lim) : (U8*)(pos + off))
-#define HOPMAYBE3(pos,off,lim) (PL_reg_match_utf8 ? reghopmaybe3((U8*)pos, off, (U8*)lim) : (U8*)(pos + off))
 #define HOP3c(pos,off,lim) ((char*)HOP3(pos,off,lim))
-#define HOPMAYBE3c(pos,off,lim) ((char*)HOPMAYBE3(pos,off,lim))
 
 #define LOAD_UTF8_CHARCLASS(class,str) STMT_START { \
     if (!CAT2(PL_utf8_,class)) { bool ok; ENTER; save_re_context(); ok=CAT2(is_utf8_,class)((const U8*)str); assert(ok); LEAVE; } } STMT_END
@@ -1898,10 +1890,10 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		s = HOPc(s, -back_max);
 	    }
 	    else {
-		char *t = (last1 >= PL_bostr) ? HOPc(last1, 1) : last1 + 1;
+		char * const t = (last1 >= PL_bostr) ? HOPc(last1, 1) : last1 + 1;
 
 		last1 = HOPc(s, -back_min);
-		s = t;		
+		s = t;
 	    }
 	    if (do_utf8) {
 		while (s <= last1) {
@@ -4363,7 +4355,7 @@ S_regmatch(pTHX_ regnode *prog)
 	case UNLESSM:
 	    n = 0;
 	    if (scan->flags) {
-		char *s = HOPBACKc(locinput, scan->flags);
+		char * const s = HOPBACKc(locinput, scan->flags);
 		if (!s)
 		    goto say_yes;
 		PL_reginput = s;
@@ -4374,7 +4366,7 @@ S_regmatch(pTHX_ regnode *prog)
 	case IFMATCH:
 	    n = 1;
 	    if (scan->flags) {
-		char *s = HOPBACKc(locinput, scan->flags);
+		char * const s = HOPBACKc(locinput, scan->flags);
 		if (!s)
 		    goto say_no;
 		PL_reginput = s;
@@ -5085,13 +5077,6 @@ S_reginclass(pTHX_ register const regnode *n, register const U8* p, STRLEN* lenp
 }
 
 STATIC U8 *
-S_reghop(pTHX_ U8 *s, I32 off)
-{
-    dVAR;
-    return S_reghop3(s, off, (U8*)(off >= 0 ? PL_regeol : PL_bostr));
-}
-
-STATIC U8 *
 S_reghop3(U8 *s, I32 off, U8* lim)
 {
     dVAR;
@@ -5114,13 +5099,6 @@ S_reghop3(U8 *s, I32 off, U8* lim)
 	}
     }
     return s;
-}
-
-STATIC U8 *
-S_reghopmaybe(pTHX_ U8 *s, I32 off)
-{
-    dVAR;
-    return S_reghopmaybe3(s, off, (U8*)(off >= 0 ? PL_regeol : PL_bostr));
 }
 
 STATIC U8 *
