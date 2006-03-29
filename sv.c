@@ -1066,7 +1066,7 @@ S_more_bodies (pTHX_ svtype sv_type)
 	void ** const r3wt = &PL_body_roots[sv_type]; \
 	LOCK_SV_MUTEX; \
 	xpv = *((void **)(r3wt)) \
-	  ? *((void **)(r3wt)) : S_more_bodies(aTHX_ sv_type); \
+	  ? *((void **)(r3wt)) : more_bodies(sv_type); \
 	*(r3wt) = *(void**)(xpv); \
 	UNLOCK_SV_MUTEX; \
     } STMT_END
@@ -3342,7 +3342,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 
     case SVt_PVGV:
 	if (dtype <= SVt_PVGV) {
-	    S_glob_assign_glob(aTHX_ dstr, sstr, dtype);
+	    glob_assign_glob(dstr, sstr, dtype);
 	    return;
 	}
 	/*FALLTHROUGH*/
@@ -3355,7 +3355,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    if ((int)SvTYPE(sstr) != stype) {
 		stype = SvTYPE(sstr);
 		if (stype == SVt_PVGV && dtype <= SVt_PVGV) {
-		    S_glob_assign_glob(aTHX_ dstr, sstr, dtype);
+		    glob_assign_glob(dstr, sstr, dtype);
 		    return;
 		}
 	    }
@@ -3383,13 +3383,13 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		GvMULTI_on(dstr);
 		return;
 	    }
-	    S_glob_assign_glob(aTHX_ dstr, sstr, dtype);
+	    glob_assign_glob(dstr, sstr, dtype);
 	    return;
 	}
 
 	if (dtype >= SVt_PV) {
 	    if (dtype == SVt_PVGV) {
-		S_glob_assign_ref(aTHX_ dstr, sstr);
+		glob_assign_ref(dstr, sstr);
 		return;
 	    }
 	    if (SvPVX_const(dstr)) {
@@ -4806,6 +4806,8 @@ S_sv_pos_u2b_forwards(pTHX_ const U8 *const start, const U8 *const send,
 {
     const U8 *s = start;
 
+    PERL_UNUSED_CONTEXT;
+
     while (s < send && uoffset--)
 	s += UTF8SKIP(s);
     if (s > send) {
@@ -5257,7 +5259,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
     if (SvMAGICAL(sv) && !SvREADONLY(sv) && PL_utf8cache
 	&& (mg = mg_find(sv, PERL_MAGIC_utf8))) {
 	if (mg->mg_ptr) {
-	    STRLEN *cache = (STRLEN *) mg->mg_ptr;
+	    STRLEN * const cache = (STRLEN *) mg->mg_ptr;
 	    if (cache[1] == byte) {
 		/* An exact match. */
 		*offsetp = cache[0];
@@ -9144,7 +9146,7 @@ S_ptr_table_find(PTR_TBL_t *tbl, const void *sv) {
 	if (tblent->oldval == sv)
 	    return tblent;
     }
-    return 0;
+    return NULL;
 }
 
 void *
@@ -9152,7 +9154,7 @@ Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, void *sv)
 {
     PTR_TBL_ENT_t const *const tblent = ptr_table_find(tbl, (const void *)sv);
     PERL_UNUSED_CONTEXT;
-    return tblent ? tblent->newval : (void *) 0;
+    return tblent ? tblent->newval : NULL;
 }
 
 /* add a new entry to a pointer-mapping table */

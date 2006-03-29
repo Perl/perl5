@@ -115,7 +115,7 @@ struct perl_thread;
 #      define MULTIPLICITY
 #    endif
 #    define tTHX	PerlInterpreter*
-#    define pTHX	register PerlInterpreter *my_perl PERL_UNUSED_DECL
+#    define pTHX  register tTHX my_perl PERL_UNUSED_DECL
 #    define aTHX	my_perl
 #    define dTHXa(a)	pTHX = (tTHX)a
 #  endif
@@ -152,10 +152,17 @@ struct perl_thread;
 #define CALLREG_INTUIT_STRING CALL_FPTR(PL_regint_string)
 #define CALLREGFREE CALL_FPTR(PL_regfree)
 
-/* XXX The PERL_UNUSED_DECL suffix is unfortunately rather inflexible:
- * it assumes that in all compilers the way to suppress an "unused"
- * warning is to have a suffix.  In some compilers that might be a
- * a compiler pragma, e.g. #pragma unused(varname). */
+/*
+ * Because of backward compatibility reasons the PERL_UNUSED_DECL
+ * cannot be changed from postfix to PERL_UNUSED_DECL(x).  Sigh.
+ *
+ * Note that there are C compilers such as MetroWerks CodeWarrior
+ * which do not have an "inlined" way (like the gcc __attribute__) of
+ * marking unused variables (they need e.g. a #pragma) and therefore
+ * cpp macros like PERL_UNUSED_DECL cannot work for this purpose, even
+ * if it were PERL_UNUSED_DECL(x), which it cannot be (see above).
+ *
+ */
 
 #ifdef PERL_FLEXIBLE_EXCEPTIONS
 #  define CALLPROTECT CALL_FPTR(PL_protect)

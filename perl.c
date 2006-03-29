@@ -3227,7 +3227,7 @@ Perl_moreswitches(pTHX_ char *s)
 	}
 #endif /* __CYGWIN__ */
 	{
-	    const char *start = ++s;
+	    const char * const start = ++s;
 	    while (*s && !isSPACE(*s))
 		++s;
 

@@ -739,7 +739,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		 char * const s0 = STRING(scan), *s, *t;
 		 char * const s1 = s0 + STR_LEN(scan) - 1;
 		 char * const s2 = s1 - 4;
-		 const char * const t0 = "\xcc\x88\xcc\x81";
+		 const char t0[] = "\xcc\x88\xcc\x81";
 		 const char * const t1 = t0 + 3;
 
 		 for (s = s0 + 2;
@@ -999,7 +999,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 	else if (strchr((const char*)PL_varies,OP(scan))) {
 	    I32 mincount, maxcount, minnext, deltanext, fl = 0;
 	    I32 f = flags, pos_before = 0;
-	    regnode *oscan = scan;
+	    regnode * const oscan = scan;
 	    struct regnode_charclass_class this_class;
 	    struct regnode_charclass_class *oclass = NULL;
 	    I32 next_is_eval = 0;
@@ -1134,7 +1134,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 		      && !deltanext && minnext == 1 ) {
 		    /* Try to optimize to CURLYN.  */
 		    regnode *nxt = NEXTOPER(oscan) + EXTRA_STEP_2ARGS;
-		    regnode *nxt1 = nxt;
+		    regnode * const nxt1 = nxt;
 #ifdef DEBUGGING
 		    regnode *nxt2;
 #endif
@@ -1263,7 +1263,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			I32 b = pos_before >= data->last_start_min
 			    ? pos_before : data->last_start_min;
 			STRLEN l;
-			const char *s = SvPV_const(data->last_found, l);
+			const char * const s = SvPV_const(data->last_found, l);
 			I32 old = b - data->last_start_min;
 #endif
 
@@ -1312,8 +1312,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap, reg
 			    the group.  */
 			scan_commit(pRExC_state,data);
 			if (mincount && last_str) {
-			    SV *sv = data->last_found;
-			    MAGIC *mg = SvUTF8(sv) && SvMAGICAL(sv) ?
+			    SV * const sv = data->last_found;
+			    MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ?
 				mg_find(sv, PERL_MAGIC_utf8) : NULL;
 
 			    if (mg)
@@ -2582,7 +2582,7 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first)
 	*flagp |= flags&SIMPLE;
     }
 
-    return(ret);
+    return ret;
 }
 
 /*
@@ -4141,10 +4141,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 
 	if (range) {
 	    if (prevvalue > (IV)value) /* b-a */ {
-		Simple_vFAIL4("Invalid [] range \"%*.*s\"",
-			      RExC_parse - rangebegin,
-			      RExC_parse - rangebegin,
-			      rangebegin);
+		const int w = RExC_parse - rangebegin;
+		Simple_vFAIL4("Invalid [] range \"%*.*s\"", w, w, rangebegin);
 		range = 0; /* not a valid range */
 	    }
 	}
@@ -4157,7 +4155,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		/* a bad range like \w-, [:word:]- ? */
 		if (namedclass > OOB_NAMEDCLASS) {
 		    if (ckWARN(WARN_REGEXP)) {
-			int w =
+			const int w =
 			    RExC_parse >= rangebegin ?
 			    RExC_parse - rangebegin : 0;
 			vWARN4(RExC_parse,

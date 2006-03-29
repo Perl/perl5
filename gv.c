@@ -903,7 +903,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			*gvp == (GV*)&PL_sv_undef ||
 			SvTYPE(*gvp) != SVt_PVGV)
 		    {
-			stash = 0;
+			stash = NULL;
 		    }
 		    else if ((sv_type == SVt_PV   && !GvIMPORTED_SV(*gvp)) ||
 			     (sv_type == SVt_PVAV && !GvIMPORTED_AV(*gvp)) ||
@@ -915,7 +915,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			    name);
 			if (GvCVu(*gvp))
 			    Perl_warn(aTHX_ "\t(Did you mean &%s instead?)\n", name);
-			stash = 0;
+			stash = NULL;
 		    }
 		}
 	    }
@@ -1361,7 +1361,7 @@ GP*
 Perl_gp_ref(pTHX_ GP *gp)
 {
     if (!gp)
-	return (GP*)NULL;
+	return NULL;
     gp->gp_refcnt++;
     if (gp->gp_cv) {
 	if (gp->gp_cvgen) {
@@ -1403,8 +1403,8 @@ Perl_gp_free(pTHX_ GV *gv)
         return;
     }
 
-    if (gp->gp_sv) SvREFCNT_dec(gp->gp_sv);
-    if (gp->gp_av) SvREFCNT_dec(gp->gp_av);
+    SvREFCNT_dec(gp->gp_sv);
+    SvREFCNT_dec(gp->gp_av);
     /* FIXME - another reference loop GV -> symtab -> GV ?
        Somehow gp->gp_hv can end up pointing at freed garbage.  */
     if (gp->gp_hv && SvTYPE(gp->gp_hv) == SVt_PVHV) {
@@ -1414,9 +1414,9 @@ Perl_gp_free(pTHX_ GV *gv)
 	    hv_delete(PL_stashcache, hvname, strlen(hvname), G_DISCARD);
 	SvREFCNT_dec(gp->gp_hv);
     }
-    if (gp->gp_io)   SvREFCNT_dec(gp->gp_io);
-    if (gp->gp_cv)   SvREFCNT_dec(gp->gp_cv);
-    if (gp->gp_form) SvREFCNT_dec(gp->gp_form);
+    SvREFCNT_dec(gp->gp_io);
+    SvREFCNT_dec(gp->gp_cv);
+    SvREFCNT_dec(gp->gp_form);
 
     Safefree(gp);
     GvGP(gv) = 0;
@@ -1622,7 +1622,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       && (mg = mg_find((SV*)stash, PERL_MAGIC_overload_table))
       && (ocvp = cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			? (oamtp = amtp = (AMT*)mg->mg_ptr)->table
-			: (CV **) NULL))
+			: NULL))
       && ((cv = cvp[off=method+assignshift])
 	  || (assign && amtp->fallback > AMGfallNEVER && /* fallback to
 						          * usual method */
@@ -1740,7 +1740,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	       && (mg = mg_find((SV*)stash, PERL_MAGIC_overload_table))
 	       && (cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			  ? (amtp = (AMT*)mg->mg_ptr)->table
-			  : (CV **) NULL))
+			  : NULL))
 	       && (cv = cvp[off=method])) { /* Method for right
 					     * argument found */
       lr=1;

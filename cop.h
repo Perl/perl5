@@ -286,7 +286,7 @@ struct block_loop {
 #define POPLOOP(cx)							\
 	SvREFCNT_dec(cx->blk_loop.iterlval);				\
 	if (CxITERVAR(cx)) {						\
-	    SV **s_v_p = CxITERVAR(cx);					\
+	    SV ** const s_v_p = CxITERVAR(cx);				\
 	    sv_2mortal(*s_v_p);						\
 	    *s_v_p = cx->blk_loop.itersave;				\
 	}								\

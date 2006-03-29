@@ -833,16 +833,16 @@ Perl_scalarvoid(pTHX_ OP *o)
 	    if (ckWARN(WARN_VOID)) {
 		useless = "a constant";
 		if (o->op_private & OPpCONST_ARYBASE)
-		    useless = 0;
+		    useless = NULL;
 		/* don't warn on optimised away booleans, eg 
 		 * use constant Foo, 5; Foo || print; */
 		if (cSVOPo->op_private & OPpCONST_SHORTCIRCUIT)
-		    useless = 0;
+		    useless = NULL;
 		/* the constants 0 and 1 are permitted as they are
 		   conventionally used as dummies in constructs like
 		        1 while some_condition_with_side_effects;  */
 		else if (SvNIOK(sv) && (SvNV(sv) == 0.0 || SvNV(sv) == 1.0))
-		    useless = 0;
+		    useless = NULL;
 		else if (SvPOK(sv)) {
                   /* perl4's way of mixing documentation and code
                      (before the invention of POD) was based on a
@@ -854,7 +854,7 @@ Perl_scalarvoid(pTHX_ OP *o)
 		    if (strnEQ(maybe_macro, "di", 2) ||
 			strnEQ(maybe_macro, "ds", 2) ||
 			strnEQ(maybe_macro, "ig", 2))
-			    useless = 0;
+			    useless = NULL;
 		}
 	    }
 	}
@@ -2074,8 +2074,7 @@ Perl_jmaybe(pTHX_ OP *o)
 	o2->op_targ = find_threadsv(";");
 #else
 	OP * const o2
-	    = newSVREF(newGVOP(OP_GV, 0, gv_fetchpvs(";", GV_ADD|GV_NOTQUAL,
-						     SVt_PV)));
+	    = newSVREF(newGVOP(OP_GV, 0, gv_fetchpvs(";", GV_ADD|GV_NOTQUAL, SVt_PV)));
 #endif /* USE_5005THREADS */
 	o = convert(OP_JOIN, 0, prepend_elem(OP_LIST, o2, o));
     }
@@ -3296,8 +3295,7 @@ Perl_dofile2(pTHX_ OP *term, I32 force_builtin)
 	doop = ck_subr(newUNOP(OP_ENTERSUB, OPf_STACKED,
 			       append_elem(OP_LIST, term,
 					   scalar(newUNOP(OP_RV2CV, 0,
-							  newGVOP(OP_GV, 0,
-								  gv))))));
+							  newGVOP(OP_GV, 0, gv))))));
     }
     else {
 	doop = newUNOP(OP_DOFILE, 0, scalar(term));
@@ -4037,7 +4035,7 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
 	 * set the STACKED flag to indicate that these values are to be
 	 * treated as min/max values by 'pp_iterinit'.
 	 */
-	UNOP* const flip = (UNOP*)((UNOP*)((BINOP*)expr)->op_first)->op_first;
+	const UNOP* const flip = (UNOP*)((UNOP*)((BINOP*)expr)->op_first)->op_first;
 	LOGOP* const range = (LOGOP*) flip->op_first;
 	OP* const left  = range->op_first;
 	OP* const right = left->op_sibling;

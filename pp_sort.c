@@ -178,12 +178,11 @@ typedef SV * gptr;		/* pointers in our lists */
 
 
 static IV
-dynprep(pTHX_ gptr *list1, gptr *list2, size_t nmemb, SVCOMPARE_t cmp)
+dynprep(pTHX_ gptr *list1, gptr *list2, size_t nmemb, const SVCOMPARE_t cmp)
 {
     I32 sense;
     register gptr *b, *p, *q, *t, *p2;
-    register gptr c, *last, *r;
-    gptr *savep;
+    register gptr *last, *r;
     IV runs = 0;
 
     b = list1;
@@ -215,7 +214,8 @@ dynprep(pTHX_ gptr *list1, gptr *list2, size_t nmemb, SVCOMPARE_t cmp)
 		}
 	    }
 	    if (q > b) {		/* run of greater than 2 at b */
-		savep = p;
+		gptr *savep = p;
+
 		p = q += 2;
 		/* pick up singleton, if possible */
 		if ((p == t) &&
@@ -223,17 +223,18 @@ dynprep(pTHX_ gptr *list1, gptr *list2, size_t nmemb, SVCOMPARE_t cmp)
 		    ((cmp(aTHX_ *(p-1), *p) > 0) == sense))
 		    savep = r = p = q = last;
 		p2 = NEXT(p2) = p2 + (p - b); ++runs;
-		if (sense) while (b < --p) {
-		    c = *b;
-		    *b++ = *p;
-		    *p = c;
-		}
+		if (sense)
+		    while (b < --p) {
+			const gptr c = *b;
+			*b++ = *p;
+			*p = c;
+		    }
 		p = savep;
 	    }
 	    while (q < p) {		/* simple pairs */
 		p2 = NEXT(p2) = p2 + 2; ++runs;
 		if (sense) {
-		    c = *q++;
+		    const gptr c = *q++;
 		    *(q-1) = *q;
 		    *q++ = c;
 		} else q += 2;
@@ -354,7 +355,7 @@ S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
     gptr small[SMALLSORT];
     gptr *which[3];
     off_runs stack[60], *stackp;
-    SVCOMPARE_t savecmp = 0;
+    SVCOMPARE_t savecmp = NULL;
 
     if (nmemb <= 1) return;			/* sorted trivially */
 
@@ -1405,7 +1406,7 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 	 /* restore prevailing comparison routine */
 	 PL_sort_RealCmp = savecmp;
     } else if (flags) {
-	 SVCOMPARE_t savecmp = PL_sort_RealCmp;	/* Save current comparison routine, if any */
+	 const SVCOMPARE_t savecmp = PL_sort_RealCmp;	/* Save current comparison routine, if any */
 	 PL_sort_RealCmp = cmp;	/* Put comparison routine where cmp_desc can find it */
 	 cmp = cmp_desc;
 	 S_qsortsvu(aTHX_ list1, nmemb, cmp);
@@ -1433,38 +1434,31 @@ See lib/sort.pm for details about controlling the sorting algorithm.
 void
 Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 {
-    void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
-      = S_mergesortsv;
     dSORTHINTS;
     const I32 hints = SORTHINTS;
     if (hints & HINT_SORT_QUICKSORT) {
-	sortsvp = S_qsortsv;
+	S_qsortsv(aTHX_ array, nmemb, cmp, 0);
     }
     else {
 	/* The default as of 5.8.0 is mergesort */
-	sortsvp = S_mergesortsv;
+	S_mergesortsv(aTHX_ array, nmemb, cmp, 0);
     }
-
-    sortsvp(aTHX_ array, nmemb, cmp, 0);
 }
 
 
 static void
 S_sortsv_desc(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 {
-    void (*sortsvp)(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
-      = S_mergesortsv;
     dSORTHINTS;
     const I32 hints = SORTHINTS;
     if (hints & HINT_SORT_QUICKSORT) {
-	sortsvp = S_qsortsv;
+	S_qsortsv(aTHX_ array, nmemb, cmp, 1);
     }
     else {
 	/* The default as of 5.8.0 is mergesort */
-	sortsvp = S_mergesortsv;
+	S_mergesortsv(aTHX_ array, nmemb, cmp, 1);
     }
 
-    sortsvp(aTHX_ array, nmemb, cmp, 1);
 }
 
 #define SvNSIOK(sv) ((SvFLAGS(sv) & SVf_NOK) || ((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV)) == SVf_IOK))

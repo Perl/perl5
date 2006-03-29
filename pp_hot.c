@@ -346,13 +346,12 @@ PP(pp_eq)
                     ivp = *--SP;
                 }
                 iv = SvIVX(ivp);
-                if (iv < 0) {
+		if (iv < 0)
                     /* As uv is a UV, it's >0, so it cannot be == */
                     SETs(&PL_sv_no);
-                    RETURN;
-                }
-		/* we know iv is >= 0 */
-		SETs(boolSV((UV)iv == SvUVX(uvp)));
+		else
+		    /* we know iv is >= 0 */
+		    SETs(boolSV((UV)iv == SvUVX(uvp)));
 		RETURN;
 	    }
 	}
@@ -3214,7 +3213,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    if (!stash)
 		packsv = sv;
             else {
-	        SV* ref = newSViv(PTR2IV(stash));
+	        SV* const ref = newSViv(PTR2IV(stash));
 	        hv_store(PL_stashcache, packname, packlen, ref, 0);
 	    }
 	    goto fetch;
