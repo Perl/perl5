@@ -119,6 +119,20 @@ sub _prefixify {
 }
 
 
+sub _quote_args {
+  # Returns a string that can become [part of] a command line with
+  # proper quoting so that the subprocess sees this same list of args.
+  my ($self, @args) = @_;
+
+  my $return_args = '';
+  for (@args) {
+    $return_args .= q( ").$_.q(") if !/^\"/ && length($_) > 0;
+  }
+  return $return_args;
+}
+
+sub have_multiarg_pipeopen { 0 }
+
 =back
 
 =head1 AUTHOR

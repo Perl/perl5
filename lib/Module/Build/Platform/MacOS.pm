@@ -6,6 +6,8 @@ use base qw(Module::Build::Base);
 
 use ExtUtils::Install;
 
+sub have_multiarg_pipeopen { 0 }
+
 sub new {
   my $class = shift;
   my $self = $class->SUPER::new(@_);

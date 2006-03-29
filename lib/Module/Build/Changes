@@ -1,5 +1,29 @@
 Revision history for Perl extension Module::Build.
 
+0.27_11  Tue Mar 28 22:50:50 CST 2006
+
+ - Added the create_packlist property, default true, which controls
+   whether packlist files will be written during installation.  This
+   was already part of Module::Build 0.2609, but for some reason we've
+   forgotten it in the 0.27_xx series.  [Spotted by Steve Kirkup]
+
+ - Document the versions of Module::Build where each feature, action,
+   constructor argument, and method was first publicly documented.
+
+ - More fixes for find_perl_interpreter() to work with BSD flavored
+   UNIX: Ensure we always return absolute paths; throw an exception
+   upon failure to find correct interperter; document everything.
+
+ - We now include our own YAML.pm work-alike that we can use when the
+   real YAML isn't installed.  We might soon even start using it when
+   YAML is installed, because the YAML API and dependency chain have
+   been changing in unfavorable ways lately. [Stephen Adkins]
+
+ - Fixed some shell-argument-quoting issues on VMS.  In the process,
+   we have added some support for avoiding tripping over
+   shell-argument-quoting issues on other platforms too. [Initial
+   patch by Craig A. Berry]
+
 0.27_09  Sat Mar 11 22:48:54 EST 2006
 
  - Fixed find_perl_interpreter() so we can find the perl executable

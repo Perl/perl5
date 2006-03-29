@@ -15,7 +15,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.27_09';
+$VERSION = '0.27_10';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -233,24 +233,24 @@ The following build actions are provided by default.
 
 =item build
 
+[version 0.01]
+
 If you run the C<Build> script without any arguments, it runs the
 C<build> action, which in turn runs the C<code> and C<docs> actions.
 
 This is analogous to the MakeMaker 'make all' target.
 
-=item testpodcoverage
-
-This checks the pod coverage of the distribution and 
-produces C<Test::Harness>-style output. If you are a module author,
-this is useful to run before creating a new release.
-
 =item clean
+
+[version 0.01]
 
 This action will clean up any files that the build process may have
 created, including the C<blib/> directory (but not including the
 C<_build/> directory and the C<Build> script itself).
 
 =item code
+
+[version 0.20]
 
 This action builds your codebase.
 
@@ -270,9 +270,13 @@ with) will get copied correctly.
 
 =item config_data
 
+[version 0.26]
+
 ...
 
 =item diff
+
+[version 0.14]
 
 This action will compare the files about to be installed with their
 installed counterparts.  For .pm and .pod files, a diff will be shown
@@ -288,6 +292,8 @@ parameters it will accept - a good one is C<-u>:
 
 =item dist
 
+[version 0.02]
+
 This action is helpful for module authors who want to package up their
 module for source distribution through a medium like CPAN.  It will create a
 tarball of the files listed in F<MANIFEST> and compress the tarball using
@@ -302,14 +308,20 @@ want by supplying an explicit C<tar> (and optional C<gzip>) parameter:
 
 =item distcheck
 
+[version 0.05]
+
 Reports which files are in the build directory but not in the
 F<MANIFEST> file, and vice versa.  (See L<manifest> for details.)
 
 =item distclean
 
+[version 0.05]
+
 Performs the 'realclean' action and then the 'distcheck' action.
 
 =item distdir
+
+[version 0.05]
 
 Creates a "distribution directory" named C<$dist_name-$dist_version>
 (if that directory already exists, it will be removed first), then
@@ -318,13 +330,19 @@ This directory is what the distribution tarball is created from.
 
 =item distmeta
 
+[version 0.21]
+
 Creates the F<META.yml> file that describes the distribution.
 
 F<META.yml> is a file containing various bits of "metadata" about the
 distribution.  The metadata includes the distribution name, version,
 abstract, prerequisites, license, and various other data about the
-distribution.  This file is created as F<META.yml> in YAML format, so
-the C<YAML> module must be installed in order to create it.  The
+distribution.  This file is created as F<META.yml> in YAML format.
+It is recommended that the C<YAML> module be installed to create it.
+If the C<YAML> module is not installed, an internal module supplied
+with Module::Build will be used to write the META.yml file, and this
+will most likely be fine.
+
 F<META.yml> file must also be listed in F<MANIFEST> - if it's not, a
 warning will be issued.
 
@@ -333,17 +351,23 @@ L<http://module-build.sourceforge.net/META-spec-v1.2.html>
 
 =item distsign
 
+[version 0.16]
+
 Uses C<Module::Signature> to create a SIGNATURE file for your
 distribution, and adds the SIGNATURE file to the distribution's
 MANIFEST.
 
 =item disttest
 
+[version 0.05]
+
 Performs the 'distdir' action, then switches into that directory and
 runs a C<perl Build.PL>, followed by the 'build' and 'test' actions in
 that directory.
 
 =item docs
+
+[version 0.20]
 
 This will generate documentation (e.g. Unix man pages and html
 documents) for any installable items under B<blib/> that
@@ -355,11 +379,15 @@ taken for html documents.
 
 =item fakeinstall
 
+[version 0.02]
+
 This is just like the C<install> action, but it won't actually do
 anything, it will just report what it I<would> have done if you had
 actually run the C<install> action.
 
 =item help
+
+[version 0.03]
 
 This action will simply print out a message that is meant to help you
 use the build process.  It will show you a list of available build
@@ -371,6 +399,8 @@ find for that action.
 
 =item html
 
+[version 0.26]
+
 This will generate HTML documentation for any binary or library files
 under B<blib/> that contain POD.  The HTML documentation will only be
 installed if the install paths can be determined from values in
@@ -379,6 +409,8 @@ command line by specifying C<install_path> values for the C<binhtml>
 and/or C<libhtml> installation targets.
 
 =item install
+
+[version 0.01]
 
 This action will use C<ExtUtils::Install> to install the files from
 C<blib/> into the system.  See L<INSTALL PATHS>
@@ -397,6 +429,8 @@ module from being present on your system, which can be a confusing
 situation indeed.
 
 =item manifest
+
+[version 0.05]
 
 This is an action intended for use by module authors, not people
 installing modules.  It will bring the F<MANIFEST> up to date with the
@@ -423,6 +457,8 @@ what the C<manifest> action would do, without actually doing anything.
 
 =item manpages
 
+[version 0.28]
+
 This will generate man pages for any binary or library files under
 B<blib/> that contain POD.  The man pages will only be installed if the
 install paths can be determined from values in C<Config.pm>.  You can
@@ -431,6 +467,8 @@ the command line with the C<bindoc> and C<libdoc> installation
 targets.
 
 =item ppd
+
+[version 0.20]
 
 Build a PPD file for your distribution.
 
@@ -445,6 +483,8 @@ Example:
 
 =item ppmdist
 
+[version 0.23]
+
 Generates a PPM binary distribution and a PPD description file.  This
 action also invokes the 'ppd' action, so it can accept the same
 C<codebase> argument described under that action.
@@ -455,12 +495,16 @@ the result.
 
 =item prereq_report
 
+[version 0.28]
+
 This action prints out a list of all prerequisites, the versions required, and
 the versions actually installed.  This can be useful for reviewing the
 configuration of your system prior to a build, or when compiling data to send
 for a bug report.
 
 =item pure_install
+
+[version 0.28]
 
 This action is identical to the C<install> action.  In the future,
 though, if C<install> starts writing to the file file
@@ -469,6 +513,8 @@ will be the only difference between them.
 
 =item realclean
 
+[version 0.01]
+
 This action is just like the C<clean> action, but also removes the
 C<_build> directory and the C<Build> script.  If you run the
 C<realclean> action, you are essentially starting over, so you will
@@ -476,10 +522,14 @@ have to re-create the C<Build> script again.
 
 =item skipcheck
 
+[version 0.05]
+
 Reports which files are skipped due to the entries in the
 F<MANIFEST.SKIP> file (See L<manifest> for details)
 
 =item test
+
+[version 0.01]
 
 This will use C<Test::Harness> to run any regression tests and report
 their results.  Tests can be defined in the standard places: a file
@@ -514,6 +564,8 @@ or use a C<glob()>-style pattern:
 
 =item testcover
 
+[version 0.26]
+
 Runs the C<test> action using C<Devel::Cover>, generating a
 code-coverage report showing which parts of the code were actually
 exercised during the tests.
@@ -525,16 +577,30 @@ environment variable:
 
 =item testdb
 
+[version 0.05]
+
 This is a synonym for the 'test' action with the C<debugger=1>
 argument.
 
 =item testpod
 
+[version 0.25]
+
 This checks all the files described in the C<docs> action and 
 produces C<Test::Harness>-style output.  If you are a module author,
 this is useful to run before creating a new release.
 
+=item testpodcoverage
+
+[version 0.28]
+
+This checks the pod coverage of the distribution and 
+produces C<Test::Harness>-style output. If you are a module author,
+this is useful to run before creating a new release.
+
 =item versioninstall
+
+[version 0.16]
 
 ** Note: since C<only.pm> is so new, and since we just recently added
 support for it here too, this feature is to be considered
@@ -599,6 +665,8 @@ Display extra information about the Build on output.
 
 =head2 Default Options File (F<.modulebuildrc>)
 
+[version 0.28]
+
 When Module::Build starts up, it will look for a file,
 F<$ENV{HOME}/.modulebuildrc>.  If the file exists, the options
 specified there will be used as defaults, as if they were typed on the
@@ -630,6 +698,8 @@ absolute path of the file containing your options.
 
 
 =head1 INSTALL PATHS
+
+[version 0.19]
 
 When you invoke Module::Build's C<build> action, it needs to figure
 out where to install things.  The nutshell version of how this works
@@ -797,6 +867,8 @@ platform you're installing on.
 =back
 
 =head2 About PREFIX Support
+
+[version 0.28]
 
 First, it is necessary to understand the original idea behind
 C<PREFIX>.  If, for example, the default installation locations for

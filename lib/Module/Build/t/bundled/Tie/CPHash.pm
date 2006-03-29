@@ -3,9 +3,9 @@ package Tie::CPHash;
 #
 # Copyright 1997 Christopher J. Madsen
 #
-# Author: Christopher J. Madsen <chris_madsen@geocities.com>
+# Author: Christopher J. Madsen <cjm@pobox.com>
 # Created: 08 Nov 1997
-# Version: 1.001 (25-Oct-1998)
+# $Revision: 1.2 $  $Date: 2006/03/21 13:27:29 $
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the same terms as Perl itself.
@@ -27,11 +27,7 @@ use vars qw(@ISA $VERSION);
 #=====================================================================
 # Package Global Variables:
 
-BEGIN
-{
-    # Convert RCS revision number to d.ddd format:
-    $VERSION = sprintf('%d.%03d', '1.001 ' =~ /(\d+)\.(\d+)/);
-} # end BEGIN
+$VERSION = '1.02';
 
 #=====================================================================
 # Tied Methods:
@@ -83,6 +79,15 @@ sub NEXTKEY
     my $v = (each %{$_[0]})[1];
     ($v ? $v->[0] : undef );
 } # end NEXTKEY
+
+#---------------------------------------------------------------------
+# SCALAR this
+#     Return bucket usage information for the hash (0 if empty).
+
+sub SCALAR
+{
+    scalar %{$_[0]};
+} # end SCALAR
 
 #---------------------------------------------------------------------
 # EXISTS this, key
@@ -147,8 +152,8 @@ Tie::CPHash - Case preserving but case insensitive hash table
 
 =head1 DESCRIPTION
 
-The B<Tie::CPHash> provides a hash table that is case preserving but
-case insensitive.  This means that
+The B<Tie::CPHash> module provides a hash table that is case
+preserving but case insensitive.  This means that
 
     $cphash{KEY}    $cphash{key}
     $cphash{Key}    $cphash{keY}
@@ -180,7 +185,7 @@ less overhead than B<Tie::CPHash>.
 
 =head1 AUTHOR
 
-Christopher J. Madsen E<lt>F<chris_madsen@geocities.com>E<gt>
+Christopher J. Madsen E<lt>F<cjm@pobox.com>E<gt>
 
 =cut
 

@@ -67,6 +67,8 @@ stabilizes.
 
 =item current()
 
+[version 0.20]
+
 This method returns a reasonable facsimile of the currently-executing
 C<Module::Build> object representing the current build.  You can use
 this object to query its C<notes()> method, inquire about installed
@@ -97,6 +99,8 @@ C<Module::Build> was invoked from.
 
 =item new()
 
+[version 0.03]
+
 Creates a new Module::Build object.  Arguments to the new() method are
 listed below.  Most arguments are optional, but you must provide
 either the C<module_name> argument, or C<dist_name> and one of
@@ -109,10 +113,14 @@ version.
 
 =item add_to_cleanup
 
+[version 0.19]
+
 An array reference of files to be cleaned up when the C<clean> action
 is performed.  See also the add_to_cleanup() method.
 
 =item auto_features
+
+[version 0.26]
 
 This parameter supports the setting of features (see
 L<feature($name)>) automatically based on a set of prerequisites.  For
@@ -146,6 +154,8 @@ requirements can be specified.
 
 =item autosplit
 
+[version 0.04]
+
 An optional C<autosplit> argument specifies a file which should be run
 through the C<Autosplit::autosplit()> function.  If multiple files
 should be split, the argument may be given as an array of the files to
@@ -159,6 +169,8 @@ startup.
 
 =item build_class
 
+[version 0.28]
+
 The Module::Build class or subclass to use in the build
 script.  Defaults to "Module::Build" or the class name passed to or
 created by a call to C<subclass()>.  This property is useful if you're
@@ -170,6 +182,8 @@ executed.
 
 =item build_requires
 
+[version 0.07]
+
 Modules listed in this section are necessary to build and install the
 given module, but are not necessary for regular usage of it.  This is
 actually an important distinction - it allows for tighter control over
@@ -179,7 +193,21 @@ checking on binary/packaged distributions of the module.
 See the documentation for L<"PREREQUISITES"> for the details of how
 requirements can be specified.
 
+=item create_packlist
+
+If true, this parameter tells Module::Build to create a F<.packlist>
+file during the C<install> action, just like ExtUtils::MakeMaker does.
+The file is created in a subdirectory of the C<arch> installation
+location.  It is used by some other tools (CPAN, CPANPLUS, etc.) for
+determining what files are part of an install.
+
+The default value is true.  This parameter was introduced in
+Module::Build version 0.2609; previously no packlists were ever
+created by Module::Build.
+
 =item c_source
+
+[version 0.04]
 
 An optional C<c_source> argument specifies a directory which contains
 C source files that the rest of the build may depend on.  Any C<.c>
@@ -188,6 +216,8 @@ directory will be added to the search path during the compilation and
 linking phases of any C or XS files.
 
 =item conflicts
+
+[version 0.07]
 
 Modules listed in this section conflict in some serious way with the
 given module.  C<Module::Build> (or some higher-level tool) will
@@ -199,6 +229,8 @@ requirements can be specified.
 
 =item create_makefile_pl
 
+[version 0.19]
+
 This parameter lets you use Module::Build::Compat during the
 C<distdir> (or C<dist>) action to automatically create a Makefile.PL
 for compatibility with ExtUtils::MakeMaker.  The parameter's value
@@ -206,6 +238,8 @@ should be one of the styles named in the Module::Build::Compat
 documentation.
 
 =item create_readme
+
+[version 0.22]
 
 This parameter tells Module::Build to automatically create a F<README>
 file at the top level of your distribution.  Currently it will simply
@@ -220,6 +254,8 @@ generated F<README>.
 
 =item dist_abstract
 
+[version 0.20]
+
 This should be a short description of the distribution.  This is used
 when generating metadata for F<META.yml> and PPD files.  If it is not
 given then C<Module::Build> looks in the POD of the module from which
@@ -228,6 +264,8 @@ matching C<$package\s-\s(.+)>, and uses the captured text as the
 abstract.
 
 =item dist_author
+
+[version 0.20]
 
 This should be something like "John Doe <jdoe@example.com>", or if
 there are multiple authors, an anonymous array of strings may be
@@ -239,6 +277,8 @@ this section.
 
 =item dist_name
 
+[version 0.11]
+
 Specifies the name for this distribution.  Most authors won't need to
 set this directly, they can use C<module_name> to set C<dist_name> to
 a reasonable default.  However, some agglomerative distributions like
@@ -247,12 +287,16 @@ to a module name, so C<dist_name> can be set independently.
 
 =item dist_version
 
+[version 0.11]
+
 Specifies a version number for the distribution.  See C<module_name>
 or C<dist_version_from> for ways to have this set automatically from a
 C<$VERSION> variable in a module.  One way or another, a version
 number needs to be set.
 
 =item dist_version_from
+
+[version 0.11]
 
 Specifies a file to look for the distribution version in.  Most
 authors won't need to set this directly, they can use C<module_name>
@@ -271,6 +315,8 @@ better.
 
 =item dynamic_config
 
+[version 0.07]
+
 A boolean flag indicating whether the F<Build.PL> file must be
 executed, or whether this module can be built, tested and installed
 solely from consulting its metadata file.  The main reason to set this
@@ -287,6 +333,8 @@ packaging, and convenience improvements.
 =item extra_compiler_flags
 
 =item extra_linker_flags
+
+[version 0.19]
 
 These parameters can contain array references (or strings, in which
 case they will be split into arrays) to pass through to the compiler
@@ -310,6 +358,8 @@ To link your XS code against glib you might write something like:
     );
 
 =item get_options
+
+[version 0.26]
 
 You can pass arbitrary command line options to F<Build.PL> or
 F<Build>, and they will be stored in the Module::Build object and can
@@ -381,11 +431,15 @@ Consult the Getopt::Long documentation for details on its usage.
 
 =item include_dirs
 
+[version 0.24]
+
 Specifies any additional directories in which to search for C header
 files.  May be given as a string indicating a single directory, or as
 a list reference indicating multiple directories.
 
 =item install_path
+
+[version 0.19]
 
 You can set paths for individual installable elements by using the
 C<install_path> parameter:
@@ -401,12 +455,16 @@ C<install_path> parameter:
 
 =item installdirs
 
+[version 0.19]
+
 Determines where files are installed within the normal perl hierarchy
 as determined by F<Config.pm>.  Valid values are: C<core>, C<site>,
 C<vendor>.  The default is C<site>.  See
 L<Module::Build/"INSTALL PATHS">
 
 =item license
+
+[version 0.07]
 
 Specifies the licensing terms of your distribution.  Valid options include:
 
@@ -497,11 +555,15 @@ tell me what to do.  So if that's you, drop me a line.
 
 =item meta_add
 
+[version 0.28]
+
 A hash of key/value pairs that should be added to the F<META.yml> file
 during the C<distmeta> action.  Any existing entries with the same
 names will be overridden.
 
 =item meta_merge
+
+[version 0.28]
 
 A hash of key/value pairs that should be merged into the F<META.yml>
 file during the C<distmeta> action.  Any existing entries with the
@@ -515,6 +577,8 @@ array value.
 
 =item module_name
 
+[version 0.03]
+
 The C<module_name> is a shortcut for setting default values of
 C<dist_name> and C<dist_version_from>, reflecting the fact that the
 majority of CPAN distributions are centered around one "main" module.
@@ -527,6 +591,8 @@ Setting C<module_name> won't override a C<dist_*> parameter you
 specify explicitly.
 
 =item PL_files
+
+[version 0.06]
 
 An optional parameter specifying a set of C<.PL> files in your
 distribution.  These will be run as Perl scripts prior to processing
@@ -560,6 +626,8 @@ files:
 
 =item pm_files
 
+[version 0.19]
+
 An optional parameter specifying the set of C<.pm> files in this
 distribution, specified as a hash reference whose keys are the files'
 locations in the distributions, and whose values are their logical
@@ -587,10 +655,14 @@ Unix-like format, not in the style of the local system.
 
 =item pod_files
 
+[version 0.19]
+
 Just like C<pm_files>, but used for specifying the set of C<.pod>
 files in your distribution.
 
 =item recommends
+
+[version 0.08]
 
 This is just like the C<requires> argument, except that modules listed
 in this section aren't essential, just a good idea.  We'll just print
@@ -608,7 +680,17 @@ wants to be helpful.
 See the documentation for L<"PREREQUISITES"> for the details of how
 requirements can be specified.
 
+=item recursive_test_files
+
+[version 0.28]
+
+Normally, C<Module::Build> does not search subdirectories when looking
+for tests to run. When this options is set it will search recursively
+in all subdirectories of the standard 't' test directory.
+
 =item requires
+
+[version 0.07]
 
 An optional C<requires> argument specifies any module prerequisites
 that the current module depends on.
@@ -633,6 +715,8 @@ requirements can be specified.
 
 =item script_files
 
+[version 0.18]
+
 An optional parameter specifying a set of files that should be
 installed as executable perl scripts when the module is installed.
 May be given as an array reference of the files, or as a hash
@@ -649,6 +733,8 @@ though it will continue to exist for several version releases.
 
 =item sign
 
+[version 0.16]
+
 If a true value is specified for this parameter, C<Module::Signature>
 will be used (via the 'distsign' action) to create a SIGNATURE file
 for your distribution during the 'distdir' action, and to add the
@@ -658,6 +744,8 @@ The default value is false.  In the future, the default may change to
 true if you have C<Module::Signature> installed on your system.
 
 =item test_files
+
+[version 0.23]
 
 An optional parameter specifying a set of files that should be used as
 C<Test::Harness>-style regression tests to be run during the C<test>
@@ -675,6 +763,8 @@ for C<*.t> files.
 
 =item xs_files
 
+[version 0.19]
+
 Just like C<pm_files>, but used for specifying the set of C<.xs>
 files in your distribution.
 
@@ -682,6 +772,8 @@ files in your distribution.
 
 
 =item new_from_context(%args)
+
+[version 0.28]
 
 When called from a directory containing a F<Build.PL> script and a
 F<META.yml> file (in other words, the base directory of a
@@ -694,6 +786,8 @@ verbosity.
 
 =item resume()
 
+[version 0.03]
+
 You'll probably never call this method directly, it's only called from
 the auto-generated C<Build> script.  The C<new()> method is only
 called once, when the user runs C<perl Build.PL>.  Thereafter, when
@@ -702,6 +796,8 @@ object is created using the C<resume()> method to re-instantiate with
 the settings given earlier to C<new()>.
 
 =item subclass()
+
+[version 0.06]
 
 This creates a new C<Module::Build> subclass on the fly, as described
 in the L<"SUBCLASSING"> section.  The caller must provide either a
@@ -720,6 +816,8 @@ as the body of the subclass.
 
 =item add_build_element($type)
 
+[version 0.26]
+
 Adds a new type of entry to the build process.  Accepts a single
 string specifying its type-name.  There must also be a method defined
 to process things of that type, e.g. if you add a build element called
@@ -729,6 +827,8 @@ C<process_foo_files()>.
 See also L<Module::Build::Cookbook/"Adding new file types to the build process">.
 
 =item add_to_cleanup(@files)
+
+[version 0.03]
 
 You may call C<< $self->add_to_cleanup(@patterns) >> to tell
 C<Module::Build> that certain files should be removed when the user
@@ -746,6 +846,8 @@ keep the responsibility for registering temporary files close to the
 code that creates them.
 
 =item args()
+
+[version 0.26]
 
   my $args_href = $build->args;
   my %args = $build->args;
@@ -765,11 +867,15 @@ first argument.
 
 =item autosplit_file($from, $to)
 
+[version 0.28]
+
 Invokes the C<AutoSplit> module on the C<$from> file, sending the
 output to the C<lib/auto> directory inside C<$to>.  C<$to> is
 typically the C<blib/> directory.
 
 =item base_dir()
+
+[version 0.14]
 
 Returns a string containing the root-level directory of this build,
 i.e. where the C<Build.PL> script and the C<lib> directory can be
@@ -779,10 +885,14 @@ soon as it begins execution.
 
 =item build_requires()
 
+[version 0.21]
+
 Returns a hash reference indicating the C<build_requires>
 prerequisites that were passed to the C<new()> method.
 
 =item check_installed_status($module, $version)
+
+[version 0.11]
 
 This method returns a hash reference indicating whether a version
 dependency on a certain module is satisfied.  The C<$module> argument
@@ -812,6 +922,8 @@ or as a class method
 (C<< Module::Build->check_installed_status($module, $version) >>).
 
 =item check_installed_version($module, $version)
+
+[version 0.05]
 
 Like C<check_installed_status()>, but simply returns true or false
 depending on whether module C<$module> satisfies the dependency
@@ -843,6 +955,8 @@ answer.
 
 =item compare_versions($v1, $op, $v2)
 
+[version 0.28]
+
 Compares two module versions C<$v1> and C<$v2> using the operator
 C<$op>, which should be one of Perl's numeric operators like C<!=> or
 C<< >= >> or the like.  We do at least a halfway-decent job of
@@ -854,6 +968,8 @@ out to C<version.pm>.
 
 =item config()
 
+[version 0.22]
+
 Returns a hash reference containing the C<Config.pm> hash, including
 any changes the author or user has specified.  This is a reference to
 the actual internal hash we use, so you probably shouldn't modify
@@ -862,6 +978,8 @@ stuff there.
 =item config_data($name)
 
 =item config_data($name => $value)
+
+[version 0.26]
 
 With a single argument, returns the value of the configuration
 variable C<$name>.  With two arguments, sets the given configuration
@@ -883,10 +1001,14 @@ See also L<SAVING CONFIGURATION INFORMATION>.
 
 =item conflicts()
 
+[version 0.21]
+
 Returns a hash reference indicating the C<conflicts> prerequisites
 that were passed to the C<new()> method.
 
 =item contains_pod($file)
+
+[version 0.20]
 
 [Deprecated] Please see L<Module::Build::ModuleInfo> instead.
 
@@ -896,6 +1018,8 @@ Currently this checks whether the file has a line beginning with
 future.
 
 =item copy_if_modified(%parameters)
+
+[version 0.19]
 
 Takes the file in the C<from> parameter and copies it to the file in
 the C<to> parameter, or the directory in the C<to_dir> parameter, if
@@ -912,6 +1036,8 @@ copying will be automatically created.
 
 =item create_build_script()
 
+[version 0.05]
+
 Creates an executable script called C<Build> in the current directory
 that will be used to execute further user actions.  This script is
 roughly analogous (in function, not in form) to the Makefile created
@@ -920,6 +1046,8 @@ data in a directory called C<_build/>.  Both of these will be removed
 when the C<realclean> action is performed.
 
 =item current_action()
+
+[version 0.28]
 
 Returns the name of the currently-running action, such as "build" or
 "test".  This action is not necessarily the action that was originally
@@ -933,6 +1061,8 @@ If you need to know the name of the original action invoked by the
 user, see L<invoked_action()> below.
 
 =item depends_on(@actions)
+
+[version 0.28]
 
 Invokes the named action or list of actions in sequence.  Using this
 method is preferred to calling the action explicitly because it
@@ -953,12 +1083,16 @@ whereas C<dispatch()> is meant to set the very top action in motion.
 
 =item dir_contains($first_dir, $second_dir)
 
+[version 0.28]
+
 Returns true if the first directory logically contains the second
 directory.  This is just a convenience function because C<File::Spec>
 doesn't really provide an easy way to figure this out (but
 C<Path::Class> does...).
 
 =item dispatch($action, %args)
+
+[version 0.03]
 
 Invokes the build action C<$action>.  Optionally, a list of options
 and their values can be passed in.  This is equivalent to invoking an
@@ -979,11 +1113,15 @@ whereas C<dispatch()> is meant to set the very top action in motion.
 
 =item dist_dir()
 
+[version 0.28]
+
 Returns the name of the directory that will be created during the
 C<dist> action.  The name is derived from the C<dist_name> and
 C<dist_version> properties.
 
 =item dist_name()
+
+[version 0.21]
 
 Returns the name of the current distribution, as passed to the
 C<new()> method in a C<dist_name> or modified C<module_name>
@@ -991,11 +1129,15 @@ parameter.
 
 =item dist_version()
 
+[version 0.21]
+
 Returns the version of the current distribution, as determined by the
 C<new()> method from a C<dist_version>, C<dist_version_from>, or
 C<module_name> parameter.
 
 =item do_system($cmd, @args)
+
+[version 0.21]
 
 This is a fairly simple wrapper around Perl's C<system()> built-in
 command.  Given a command and an array of optional arguments, this
@@ -1012,6 +1154,8 @@ directly.
 =item feature($name)
 
 =item feature($name => $value)
+
+[version 0.26]
 
 With a single argument, returns true if the given feature is set.
 With two arguments, sets the given feature to the given boolean value.
@@ -1033,11 +1177,15 @@ See also L<SAVING CONFIGURATION INFORMATION>.
 
 =item have_c_compiler()
 
+[version 0.21]
+
 Returns true if the current system seems to have a working C compiler.
 We currently determine this by attempting to compile a simple C source
 file and reporting whether the attempt was successful.
 
 =item install_destination($type)
+
+[version 0.28]
 
 Returns the directory in which items of type C<$type> (e.g. C<lib>,
 C<arch>, C<bin>, or anything else returned by the C<install_types()>
@@ -1045,7 +1193,33 @@ method) will be installed during the C<install> action.  Any settings
 for C<install_path>, C<install_base>, and C<prefix> are taken into
 account when determining the return value.
 
+=item install_path()
+
+=item install_path($type)
+
+=item install_path($type => $path)
+
+[version 0.28]
+
+Set or retrieve paths for specific installable elements. This is
+useful when you want to examine any explicit install paths specified
+by the user on the command line, or if you want to set the install
+path for a specific installable element based on another attribute
+like C<install_base()>.
+
+With no argument, it returns a reference to a hash containing all
+elements and their respective values. This hash should not be modified
+directly; use the multi-argument below form to change values.
+
+The single argument form returns the value associated with the
+element C<$type>.
+
+The multi-argument form allows you to set the paths for one or more
+element types. The return value is undefined.
+
 =item install_types()
+
+[version 0.28]
 
 Returns a list of installable types that this build knows about.
 These types each correspond to the name of a directory in F<blib/>,
@@ -1055,6 +1229,8 @@ built, C<libhtml> and C<binhtml>.  Other user-defined types may also
 exist.
 
 =item invoked_action()
+
+[version 0.28]
 
 This is the name of the original action invoked by the user.  This
 value is set when the user invokes F<Build.PL>, the F<Build> script,
@@ -1069,6 +1245,8 @@ L<current_action()> above.
 =item notes($key)
 
 =item notes($key => $value)
+
+[version 0.20]
 
 The C<notes()> value allows you to store your own persistent
 information about the build, and to share that information among
@@ -1089,55 +1267,16 @@ run again or the C<clean> action is run.
 
 =item orig_dir()
 
+[version 0.28]
+
 Returns a string containing the working directory that was in effect
 before the F<Build> script chdir()-ed into the C<base_dir>.  This
 might be useful for writing wrapper tools that might need to chdir()
 back out.
 
-=item rscan_dir($dir, $pattern)
-
-Uses C<File::Find> to traverse the directory C<$dir>, returning a
-reference to an array of entries matching C<$pattern>.  C<$pattern>
-may either be a regular expression (using C<qr//> or just a plain
-string), or a reference to a subroutine that will return true for
-wanted entries.  If C<$pattern> is not given, all entries will be
-returned.
-
-Examples:
-
- # All the *.pm files in lib/
- $m->rscan_dir('lib', qr/\.pm$/)
- 
- # All the files in blib/ that aren't *.html files
- $m->rscan_dir('blib', sub {-f $_ and not /\.html$/});
-
- # All the files in t/
- $m->rscan_dir('t');
-
-=item runtime_params()
-
-=item runtime_params($key)
-
-The C<runtime_params()> method stores the values passed on the command line
-for valid properties (that is, any command line options for which
-C<valid_property()> returns a true value).  The value on the command line may
-override the default value for a property, as well as any value specified in a
-call to C<new()>.  This allows you to programmatically tell if C<perl Build.PL>
-or any execution of C<./Build> had command line options specified that
-override valid properties.
-
-The C<runtime_params()> method is essentally a glorified read-only hash.  With
-no arguments, C<runtime_params()> returns the entire hash of properties
-specified on the command line.  With one argument, C<runtime_params($key)>
-returns the value associated with the given key.
-
-The lifetime of the C<runtime_params> data is for "a build" - that is, the
-C<runtime_params> hash is created when C<perl Build.PL> is run (or when the
-C<new()> method is called, if the Module::Build Perl API is being used instead
-of called from a shell), and lasts until C<perl Build.PL> is run again or the
-C<clean> action is run.
-
 =item os_type()
+
+[version 0.04]
 
 If you're subclassing Module::Build and some code needs to alter its
 behavior based on the current platform, you may only need to know
@@ -1149,6 +1288,8 @@ will return C<undef> - there shouldn't be many unknown platforms
 though.
 
 =item prepare_metadata()
+
+[version 0.28]
 
 This method is provided for authors to override to customize the
 fields of F<META.yml>.  It is passed a YAML::Node node object which can
@@ -1165,6 +1306,8 @@ be modified as desired and then returned.  E.g.
   }
 
 =item prereq_failures()
+
+[version 0.11]
 
 Returns a data structure containing information about any failed
 prerequisites (of any of the types described above), or C<undef> if
@@ -1214,6 +1357,8 @@ Examples:
 
 =item prereq_report()
 
+[version 0.28]
+
 Returns a human-readable (table-form) string showing all
 prerequisites, the versions required, and the versions actually
 installed.  This can be useful for reviewing the configuration of your
@@ -1222,6 +1367,8 @@ report.  The C<prereq_report> action is just a thin wrapper around the
 C<prereq_report()> method.
 
 =item prompt($message, $default)
+
+[version 0.12]
 
 Asks the user a question and returns their response as a string.  The
 first argument specifies the message to display to the user (for
@@ -1240,15 +1387,68 @@ This method may be called as a class or object method.
 
 =item recommends()
 
+[version 0.21]
+
 Returns a hash reference indicating the C<recommends> prerequisites
 that were passed to the C<new()> method.
 
 =item requires()
 
+[version 0.21]
+
 Returns a hash reference indicating the C<requires> prerequisites that
 were passed to the C<new()> method.
 
+=item rscan_dir($dir, $pattern)
+
+[version 0.28]
+
+Uses C<File::Find> to traverse the directory C<$dir>, returning a
+reference to an array of entries matching C<$pattern>.  C<$pattern>
+may either be a regular expression (using C<qr//> or just a plain
+string), or a reference to a subroutine that will return true for
+wanted entries.  If C<$pattern> is not given, all entries will be
+returned.
+
+Examples:
+
+ # All the *.pm files in lib/
+ $m->rscan_dir('lib', qr/\.pm$/)
+ 
+ # All the files in blib/ that aren't *.html files
+ $m->rscan_dir('blib', sub {-f $_ and not /\.html$/});
+
+ # All the files in t/
+ $m->rscan_dir('t');
+
+=item runtime_params()
+
+=item runtime_params($key)
+
+[version 0.28]
+
+The C<runtime_params()> method stores the values passed on the command line
+for valid properties (that is, any command line options for which
+C<valid_property()> returns a true value).  The value on the command line may
+override the default value for a property, as well as any value specified in a
+call to C<new()>.  This allows you to programmatically tell if C<perl Build.PL>
+or any execution of C<./Build> had command line options specified that
+override valid properties.
+
+The C<runtime_params()> method is essentally a glorified read-only hash.  With
+no arguments, C<runtime_params()> returns the entire hash of properties
+specified on the command line.  With one argument, C<runtime_params($key)>
+returns the value associated with the given key.
+
+The lifetime of the C<runtime_params> data is for "a build" - that is, the
+C<runtime_params> hash is created when C<perl Build.PL> is run (or when the
+C<new()> method is called, if the Module::Build Perl API is being used instead
+of called from a shell), and lasts until C<perl Build.PL> is run again or the
+C<clean> action is run.
+
 =item script_files()
+
+[version 0.18]
 
 Returns a hash reference whose keys are the perl script files to be
 installed, if any.  This corresponds to the C<script_files> parameter to the
@@ -1264,6 +1464,8 @@ transition.
 
 =item up_to_date(\@source_files, \@derived_files)
 
+[version 0.20]
+
 This method can be used to compare a set of source files to a set of
 derived files.  If any of the source files are newer than any of the
 derived files, it returns false.  Additionally, if any of the derived
@@ -1273,6 +1475,8 @@ The arguments may be either a scalar or an array reference of file
 names.
 
 =item y_n($message, $default)
+
+[version 0.12]
 
 Asks the user a yes/no question using C<prompt()> and returns true or
 false accordingly.  The user will be asked the question repeatedly
@@ -1328,6 +1532,8 @@ accessor methods for the following properties:
 =item conflicts()
 
 =item create_makefile_pl()
+
+=item create_packlist()
 
 =item create_readme()
 

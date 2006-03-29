@@ -1953,6 +1953,7 @@ lib/Module/Build/ConfigData.pm	Module::Build
 lib/Module/Build/Cookbook.pm	Module::Build
 lib/Module/Build/ModuleInfo.pm	Module::Build
 lib/Module/Build/Notes.pm	Module::Build
+lib/Module/Build/YAML.pm	Module::Build
 lib/Module/Build/Platform/aix.pm	Module::Build
 lib/Module/Build/Platform/Amiga.pm	Module::Build
 lib/Module/Build/Platform/cygwin.pm	Module::Build
@@ -1980,6 +1981,7 @@ lib/Module/Build/t/install.t	Module::Build
 lib/Module/Build/t/lib/DistGen.pm	Module::Build
 lib/Module/Build/t/lib/MBTest.pm	Module::Build
 lib/Module/Build/t/manifypods.t	Module::Build
+lib/Module/Build/t/mbyaml.t	Module::Build
 lib/Module/Build/t/metadata.t	Module::Build
 lib/Module/Build/t/metadata2.t	Module::Build
 lib/Module/Build/t/moduleinfo.t	Module::Build

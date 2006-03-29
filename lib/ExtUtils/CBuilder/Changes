@@ -1,5 +1,10 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.18  Sat Mar 25 13:35:47 CST 2006
+
+ - Yet more fixes for arg_defines() on VMS. [Craig A. Berry and John
+   E. Malmberg]
+
 0.17  Wed Mar 15 22:46:15 CST 2006
 
  - When we're being run from an uninstalled perl distribution

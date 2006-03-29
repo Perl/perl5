@@ -14,18 +14,18 @@ sub arg_defines {
 
   s/"/""/g foreach values %args;
 
-  my $config_defines;
+  my @config_defines;
 
   # VMS can only have one define qualifier; add the one from config, if any.
-  if ($self->{config}{ccflags} =~ s{/def[^=]+(?:=)+(?:\()?([^\/\)]*)} {}i) {
-    $config_defines = $1;
+  if ($self->{config}{ccflags} =~ s{/  def[^=]+  =+  \(?  ([^\/\)]*)  } {}ix) {
+    push @config_defines, $1;
   }
 
-  return unless (scalar keys %args) || $config_defines;
+  return '' unless keys(%args) || @config_defines;
 
   return ('/define=(' 
-          . (defined $config_defines ? "$config_defines," : '')
           . join(',', 
+		 @config_defines,
                  map "\"$_" . ( length($args{$_}) ? "=$args{$_}" : '') . "\"", 
                      keys %args) 
           . ')');

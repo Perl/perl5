@@ -8,6 +8,8 @@ use vars qw(@ISA);
 
 sub manpage_separator { '.' }
 
+sub have_multiarg_pipeopen { 0 }
+
 1;
 __END__
 

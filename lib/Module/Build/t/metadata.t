@@ -2,7 +2,7 @@
 
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
-use MBTest tests => 46;
+use MBTest tests => 43;
 
 use Cwd ();
 my $cwd = Cwd::cwd;
@@ -555,15 +555,6 @@ Doesn't do anything.
 $dist->regen( clean => 1 );
 $mb = new_build();
 is_deeply($mb->find_dist_packages, {});
-
-
-{
-  # Put our YAML escaper through a few tests.  This isn't part of the M::B API.
-  my $yq = sub {Module::Build->_yaml_quote_string(@_)};
-  like $yq->(''), qr{^ (['"]) \1 $}x;
-  is $yq->('Foo "bar" baz'), q{'Foo "bar" baz'};
-  is $yq->("Foo 'bar' baz"), q{"Foo 'bar' baz"};
-}
 
 ############################################################
 # cleanup

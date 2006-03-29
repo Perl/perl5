@@ -16,6 +16,14 @@ use File::Spec ();
 use IO::File ();
 use Tie::CPHash;
 
+BEGIN {
+    if( $^O eq 'VMS' ) {
+        # For things like vmsify()
+        require VMS::Filespec;
+        VMS::Filespec->import;
+    }
+}
+
 sub new {
   my $package = shift;
   my %options = @_;
@@ -309,7 +317,11 @@ sub clean {
   File::Find::finddepth( sub {
     my $name = File::Spec->canonpath( $File::Find::name );
 
-    $name =~ s/\.\z// if $^O eq 'VMS';
+    if ($^O eq 'VMS') {
+        $name =~ s/\.\z//;
+        $name = vmspath($name) if -d $name;
+        $name = File::Spec->rel2abs($name) if $name eq File::Spec->curdir();
+    }
 
     if ( not exists $names{$name} ) {
       print "Removing '$name'\n" if $VERBOSE;
@@ -322,7 +334,7 @@ sub clean {
 
 sub remove {
   my $self = shift;
-  File::Path::rmtree( $self->dirname );
+  File::Path::rmtree( File::Spec->canonpath($self->dirname) );
 }
 
 sub revert {
