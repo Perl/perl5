@@ -585,3 +585,11 @@ tie $h, "main";
 print $h.$h;
 EXPECT
 01
+########
+sub TIESCALAR { my $foo = $_[1]; bless \$foo, $_[0] }
+sub FETCH { ${$_[0]} }
+tie my $x, "main", 2;
+tie my $y, "main", 8;
+print $x | $y;
+EXPECT
+10
