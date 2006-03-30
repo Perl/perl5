@@ -998,7 +998,47 @@ PP(pp_pow)
 #endif    
     {
 	dPOPTOPnnrl;
+
+#if defined(USE_LONG_DOUBLE) && defined(HAS_AIX_POWL_NEG_BASE_BUG)
+    /*
+    We are building perl with long double support and are on an AIX OS
+    afflicted with a powl() function that wrongly returns NaNQ for any
+    negative base.  This was reported to IBM as PMR #23047-379 on
+    03/06/2006.  The problem exists in at least the following versions
+    of AIX and the libm fileset, and no doubt others as well:
+
+	AIX 4.3.3-ML10      bos.adt.libm 4.3.3.50
+	AIX 5.1.0-ML04      bos.adt.libm 5.1.0.29
+	AIX 5.2.0           bos.adt.libm 5.2.0.85
+
+    So, until IBM fixes powl(), we provide the following workaround to
+    handle the problem ourselves.  Our logic is as follows: for
+    negative bases (left), we use fmod(right, 2) to check if the
+    exponent is an odd or even integer:
+
+	- if odd,  powl(left, right) == -powl(-left, right)
+	- if even, powl(left, right) ==  powl(-left, right)
+
+    If the exponent is not an integer, the result is rightly NaNQ, so
+    we just return that (as NV_NAN).
+    */
+
+	if (left < 0.0) {
+	    NV mod2 = Perl_fmod( right, 2.0 );
+	    if (mod2 == 1.0 || mod2 == -1.0) {	/* odd integer */
+		SETn( -Perl_pow( -left, right) );
+	    } else if (mod2 == 0.0) {		/* even integer */
+		SETn( Perl_pow( -left, right) );
+	    } else {				/* fractional power */
+		SETn( NV_NAN );
+	    }
+	} else {
+	    SETn( Perl_pow( left, right) );
+	}
+#else
 	SETn( Perl_pow( left, right) );
+#endif  /* HAS_AIX_POWL_NEG_BASE_BUG */
+
 #ifdef PERL_PRESERVE_IVUV
 	if (is_int)
 	    SvIV_please(TOPs);
