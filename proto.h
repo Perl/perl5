@@ -3849,7 +3849,7 @@ STATIC void	S_checkcomma(pTHX_ const char *s, const char *name, const char *what
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
-STATIC bool	S_feature_is_enabled(pTHX_ char* name, STRLEN namelen)
+STATIC bool	S_feature_is_enabled(pTHX_ const char* name, STRLEN namelen)
 			__attribute__nonnull__(pTHX_1);
 
 STATIC void	S_force_ident(pTHX_ const char *s, int kind)

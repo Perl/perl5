@@ -360,7 +360,7 @@ perl_construct(pTHXx)
 	if ((long) PL_mmap_page_size < 0) {
 	  if (errno) {
 	    SV * const error = ERRSV;
-	    (void) SvUPGRADE(error, SVt_PV);
+	    SvUPGRADE(error, SVt_PV);
 	    Perl_croak(aTHX_ "panic: sysconf: %s", SvPV_nolen_const(error));
 	  }
 	  else
@@ -3079,7 +3079,7 @@ Perl_moreswitches(pTHX_ char *s)
 	}
 #endif /* __CYGWIN__ */
 	{
-	    const char *start = ++s;
+	    const char * const start = ++s;
 	    while (*s && !isSPACE(*s))
 		++s;
 

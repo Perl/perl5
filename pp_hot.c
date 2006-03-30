@@ -208,7 +208,7 @@ PP(pp_concat)
     dPOPTOPssrl;
     bool lbyte;
     STRLEN rlen;
-    const char *rpv = 0;
+    const char *rpv = NULL;
     bool rbyte = FALSE;
     bool rcopied = FALSE;
 
@@ -350,13 +350,12 @@ PP(pp_eq)
                     ivp = *--SP;
                 }
                 iv = SvIVX(ivp);
-                if (iv < 0) {
+		if (iv < 0)
                     /* As uv is a UV, it's >0, so it cannot be == */
                     SETs(&PL_sv_no);
-                    RETURN;
-                }
-		/* we know iv is >= 0 */
-		SETs(boolSV((UV)iv == SvUVX(uvp)));
+		else
+		    /* we know iv is >= 0 */
+		    SETs(boolSV((UV)iv == SvUVX(uvp)));
 		RETURN;
 	    }
 	}
@@ -1716,16 +1715,17 @@ Perl_do_readline(pTHX)
 		continue;
 	    }
 	} else if (SvUTF8(sv)) { /* OP_READLINE, OP_RCATLINE */
-	     const U8 * const s = (const U8*)SvPVX_const(sv) + offset;
-	     const STRLEN len = SvCUR(sv) - offset;
-	     const U8 *f;
-	     
-	     if (ckWARN(WARN_UTF8) &&
-		    !is_utf8_string_loc(s, len, &f))
-		  /* Emulate :encoding(utf8) warning in the same case. */
-		  Perl_warner(aTHX_ packWARN(WARN_UTF8),
-			      "utf8 \"\\x%02X\" does not map to Unicode",
-			      f < (U8*)SvEND(sv) ? *f : 0);
+	     if (ckWARN(WARN_UTF8)) {
+		const U8 * const s = (const U8*)SvPVX_const(sv) + offset;
+		const STRLEN len = SvCUR(sv) - offset;
+		const U8 *f;
+
+		if (!is_utf8_string_loc(s, len, &f))
+		    /* Emulate :encoding(utf8) warning in the same case. */
+		    Perl_warner(aTHX_ packWARN(WARN_UTF8),
+				"utf8 \"\\x%02X\" does not map to Unicode",
+				f < (U8*)SvEND(sv) ? *f : 0);
+	     }
 	}
 	if (gimme == G_ARRAY) {
 	    if (SvLEN(sv) - SvCUR(sv) > 20) {
@@ -1778,32 +1778,28 @@ PP(pp_helem)
     const U32 hash = (SvIsCOW_shared_hash(keysv)) ? SvSHARED_HASH(keysv) : 0;
     I32 preeminent = 0;
 
-    if (SvTYPE(hv) == SVt_PVHV) {
-	if (PL_op->op_private & OPpLVAL_INTRO) {
-	    MAGIC *mg;
-	    HV *stash;
-	    /* does the element we're localizing already exist? */
-	    preeminent =  
-		/* can we determine whether it exists? */
-		(    !SvRMAGICAL(hv)
-		  || mg_find((SV*)hv, PERL_MAGIC_env)
-		  || (     (mg = mg_find((SV*)hv, PERL_MAGIC_tied))
-			/* Try to preserve the existenceness of a tied hash
-			 * element by using EXISTS and DELETE if possible.
-			 * Fallback to FETCH and STORE otherwise */
-			&& (stash = SvSTASH(SvRV(SvTIED_obj((SV*)hv, mg))))
-			&& gv_fetchmethod_autoload(stash, "EXISTS", TRUE)
-			&& gv_fetchmethod_autoload(stash, "DELETE", TRUE)
-		    )
-		) ? hv_exists_ent(hv, keysv, 0) : 1;
-
-	}
-	he = hv_fetch_ent(hv, keysv, lval && !defer, hash);
-	svp = he ? &HeVAL(he) : NULL;
-    }
-    else {
+    if (SvTYPE(hv) != SVt_PVHV)
 	RETPUSHUNDEF;
+
+    if (PL_op->op_private & OPpLVAL_INTRO) {
+	MAGIC *mg;
+	HV *stash;
+	/* does the element we're localizing already exist? */
+	preeminent = /* can we determine whether it exists? */
+	    (    !SvRMAGICAL(hv)
+		|| mg_find((SV*)hv, PERL_MAGIC_env)
+		|| (     (mg = mg_find((SV*)hv, PERL_MAGIC_tied))
+			/* Try to preserve the existenceness of a tied hash
+			* element by using EXISTS and DELETE if possible.
+			* Fallback to FETCH and STORE otherwise */
+		    && (stash = SvSTASH(SvRV(SvTIED_obj((SV*)hv, mg))))
+		    && gv_fetchmethod_autoload(stash, "EXISTS", TRUE)
+		    && gv_fetchmethod_autoload(stash, "DELETE", TRUE)
+		)
+	    ) ? hv_exists_ent(hv, keysv, 0) : 1;
     }
+    he = hv_fetch_ent(hv, keysv, lval && !defer, hash);
+    svp = he ? &HeVAL(he) : NULL;
     if (lval) {
 	if (!svp || *svp == &PL_sv_undef) {
 	    SV* lv;
@@ -3097,7 +3093,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 	    if (!stash)
 		packsv = sv;
             else {
-	        SV* ref = newSViv(PTR2IV(stash));
+	        SV* const ref = newSViv(PTR2IV(stash));
 	        hv_store(PL_stashcache, packname, packlen, ref, 0);
 	    }
 	    goto fetch;

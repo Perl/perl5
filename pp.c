@@ -3886,7 +3886,7 @@ PP(pp_hslice)
 			save_helem(hv, keysv, svp);
 		    else {
 			STRLEN keylen;
-			const char *key = SvPV_const(keysv, keylen);
+			const char * const key = SvPV_const(keysv, keylen);
 			SAVEDELETE(hv, savepvn(key,keylen),
 				   SvUTF8(keysv) ? -keylen : keylen);
 		    }

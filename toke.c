@@ -429,7 +429,8 @@ S_no_op(pTHX_ const char *what, char *s)
 		    "\t(Missing semicolon on previous line?)\n");
 	else if (PL_oldoldbufptr && isIDFIRST_lazy_if(PL_oldoldbufptr,UTF)) {
 	    const char *t;
-	    for (t = PL_oldoldbufptr; *t && (isALNUM_lazy_if(t,UTF) || *t == ':'); t++) ;
+	    for (t = PL_oldoldbufptr; *t && (isALNUM_lazy_if(t,UTF) || *t == ':'); t++)
+		/**/;
 	    if (t < PL_bufptr && isSPACE(*t))
 		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			"\t(Do you need to predeclare %.*s?)\n",
@@ -447,7 +448,7 @@ S_no_op(pTHX_ const char *what, char *s)
 /*
  * S_missingterm
  * Complain about missing quote/regexp/heredoc terminator.
- * If it's called with (char *)NULL then it cauterizes the line buffer.
+ * If it's called with NULL then it cauterizes the line buffer.
  * If we're in a delimited string and the delimiter is a control
  * character, it's reformatted into a two-char sequence like ^C.
  * This is fatal.
@@ -493,13 +494,13 @@ S_missingterm(pTHX_ char *s)
  * Check whether the named feature is enabled.
  */
 STATIC bool
-S_feature_is_enabled(pTHX_ char *name, STRLEN namelen)
+S_feature_is_enabled(pTHX_ const char *name, STRLEN namelen)
 {
     dVAR;
     HV * const hinthv = GvHV(PL_hintgv);
     char he_name[32] = "feature_";
     (void) strncpy(&he_name[8], name, 24);
-    
+
     return (hinthv && hv_exists(hinthv, he_name, 8 + namelen));
 }
 
@@ -711,7 +712,8 @@ S_incline(pTHX_ char *s)
     CopLINE_inc(PL_curcop);
     if (*s++ != '#')
 	return;
-    while (SPACE_OR_TAB(*s)) s++;
+    while (SPACE_OR_TAB(*s))
+	s++;
     if (strnEQ(s, "line", 4))
 	s += 4;
     else
@@ -720,9 +722,11 @@ S_incline(pTHX_ char *s)
 	s++;
     else
 	return;
-    while (SPACE_OR_TAB(*s)) s++;
+    while (SPACE_OR_TAB(*s))
+	s++;
     if (!isDIGIT(*s))
 	return;
+
     n = s;
     while (isDIGIT(*s))
 	s++;
@@ -813,7 +817,7 @@ S_skipspace0(pTHX_ register char *s)
 STATIC char *
 S_skipspace1(pTHX_ register char *s)
 {
-    char *start = s;
+    const char *start = s;
     I32 startoff = start - SvPVX(PL_linestr);
 
     s = skipspace(s);
@@ -821,7 +825,7 @@ S_skipspace1(pTHX_ register char *s)
 	return s;
     start = SvPVX(PL_linestr) + startoff;
     if (!PL_thistoken && PL_realtokenstart >= 0) {
-	char *tstart = SvPVX(PL_linestr) + PL_realtokenstart;
+	const char * const tstart = SvPVX(PL_linestr) + PL_realtokenstart;
 	PL_thistoken = newSVpvn(tstart, start - tstart);
     }
     PL_realtokenstart = -1;
@@ -847,7 +851,7 @@ S_skipspace2(pTHX_ register char *s, SV **svp)
 	return s;
     start = SvPVX(PL_linestr) + startoff;
     if (!PL_thistoken && PL_realtokenstart >= 0) {
-	char *tstart = SvPVX(PL_linestr) + PL_realtokenstart;
+	char * const tstart = SvPVX(PL_linestr) + PL_realtokenstart;
 	PL_thistoken = newSVpvn(tstart, start - tstart);
 	PL_realtokenstart = -1;
     }
@@ -1064,14 +1068,15 @@ STATIC void
 S_check_uni(pTHX)
 {
     dVAR;
-    char *s;
-    char *t;
+    const char *s;
+    const char *t;
 
     if (PL_oldoldbufptr != PL_last_uni)
 	return;
     while (isSPACE(*PL_last_uni))
 	PL_last_uni++;
-    for (s = PL_last_uni; isALNUM_lazy_if(s,UTF) || *s == '-'; s++) ;
+    for (s = PL_last_uni; isALNUM_lazy_if(s,UTF) || *s == '-'; s++)
+	/**/;
     if ((t = strchr(s, '(')) && t < PL_bufptr)
 	return;
 
@@ -1189,8 +1194,8 @@ S_curmad(pTHX_ char slot, SV *sv)
 	addmad(newMADsv(slot, sv), where, 0);
 }
 #else
-#  define start_force(where)
-#  define curmad(slot, sv)
+#  define start_force(where)    /*EMPTY*/
+#  define curmad(slot, sv)      /*EMPTY*/
 #endif
 
 /*
@@ -1774,7 +1779,7 @@ S_scan_const(pTHX_ char *start)
     UV literal_endpoint = 0;
 #endif
 
-    const char *leaveit =	/* set of acceptably-backslashed characters */
+    const char * const leaveit = /* set of acceptably-backslashed characters */
 	PL_lex_inpat
 	    ? "\\.^$@AGZdDwWsSbBpPXC+*?|()-nrtfeaxz0123456789[{]} \t\n\r\f\v#"
 	    : "";
@@ -3130,7 +3135,7 @@ Perl_yylex(pTHX)
 		else
 		    Perl_croak(aTHX_ "panic: yylex");
 		if (PL_madskills) {
-		    SV* tmpsv = newSVpvn("",0);
+		    SV* const tmpsv = newSVpvn("",0);
 		    Perl_sv_catpvf(aTHX_ tmpsv, "\\%c", *s);
 		    curmad('_', tmpsv);
 		}
@@ -3649,7 +3654,8 @@ Perl_yylex(pTHX)
 			do {
 			    if (*d == 'M' || *d == 'm' || *d == 'C') {
 				const char * const m = d;
-				while (*d && !isSPACE(*d)) d++;
+				while (*d && !isSPACE(*d))
+				    d++;
 				Perl_croak(aTHX_ "Too late for \"-%.*s\" option",
 				      (int)(d - m), m);
 			    }
@@ -4505,7 +4511,7 @@ Perl_yylex(pTHX)
 	    const char tmp = *s++;
 	    if (tmp == '>')
 		SHop(OP_RIGHT_SHIFT);
-	    if (tmp == '=')
+	    else if (tmp == '=')
 		Rop(OP_GE);
 	}
 	s--;
@@ -4775,7 +4781,7 @@ Perl_yylex(pTHX)
 		no_op("String",s);
 	}
 	if (!s)
-	    missingterm((char*)0);
+	    missingterm(NULL);
 	yylval.ival = OP_CONST;
 	TERM(sublex_start());
 
@@ -4792,7 +4798,7 @@ Perl_yylex(pTHX)
 		no_op("String",s);
 	}
 	if (!s)
-	    missingterm((char*)0);
+	    missingterm(NULL);
 	yylval.ival = OP_CONST;
 	/* FIXME. I think that this can be const if char *d is replaced by
 	   more localised variables.  */
@@ -4810,7 +4816,7 @@ Perl_yylex(pTHX)
 	if (PL_expect == XOPERATOR)
 	    no_op("Backticks",s);
 	if (!s)
-	    missingterm((char*)0);
+	    missingterm(NULL);
 	yylval.ival = OP_BACKTICK;
 	set_csh();
 	TERM(sublex_start());
@@ -4837,6 +4843,7 @@ Perl_yylex(pTHX)
 	    else if (!isALPHA(*start) && (PL_expect == XTERM
 			|| PL_expect == XREF || PL_expect == XSTATE
 			|| PL_expect == XTERMORDORDOR)) {
+		/* XXX Use gv_fetchpvn rather than stomping on a const string */
 		const char c = *start;
 		GV *gv;
 		*start = '\0';
@@ -6040,7 +6047,7 @@ Perl_yylex(pTHX)
 	case KEY_q:
 	    s = scan_str(s,!!PL_madskills,FALSE);
 	    if (!s)
-		missingterm((char*)0);
+		missingterm(NULL);
 	    yylval.ival = OP_CONST;
 	    TERM(sublex_start());
 
@@ -6050,7 +6057,7 @@ Perl_yylex(pTHX)
 	case KEY_qw:
 	    s = scan_str(s,!!PL_madskills,FALSE);
 	    if (!s)
-		missingterm((char*)0);
+		missingterm(NULL);
 	    PL_expect = XOPERATOR;
 	    force_next(')');
 	    if (SvCUR(PL_lex_stuff)) {
@@ -6058,9 +6065,10 @@ Perl_yylex(pTHX)
 		int warned = 0;
 		d = SvPV_force(PL_lex_stuff, len);
 		while (len) {
-		    SV *sv;
-		    for (; isSPACE(*d) && len; --len, ++d) ;
+		    for (; isSPACE(*d) && len; --len, ++d)
+			/**/;
 		    if (len) {
+			SV *sv;
 			const char *b = d;
 			if (!warned && ckWARN(WARN_QW)) {
 			    for (; !isSPACE(*d) && len; --len, ++d) {
@@ -6077,7 +6085,8 @@ Perl_yylex(pTHX)
 			    }
 			}
 			else {
-			    for (; !isSPACE(*d) && len; --len, ++d) ;
+			    for (; !isSPACE(*d) && len; --len, ++d)
+				/**/;
 			}
 			sv = newSVpvn(b, d-b);
 			if (DO_UTF8(PL_lex_stuff))
@@ -6102,7 +6111,7 @@ Perl_yylex(pTHX)
 	case KEY_qq:
 	    s = scan_str(s,!!PL_madskills,FALSE);
 	    if (!s)
-		missingterm((char*)0);
+		missingterm(NULL);
 	    yylval.ival = OP_STRINGIFY;
 	    if (SvIVX(PL_lex_stuff) == '\'')
 		SvIV_set(PL_lex_stuff, 0);	/* qq'$foo' should intepolate */
@@ -6115,7 +6124,7 @@ Perl_yylex(pTHX)
 	case KEY_qx:
 	    s = scan_str(s,!!PL_madskills,FALSE);
 	    if (!s)
-		missingterm((char*)0);
+		missingterm(NULL);
 	    yylval.ival = OP_BACKTICK;
 	    set_csh();
 	    TERM(sublex_start());
@@ -12446,22 +12455,20 @@ Perl_scan_vstring(pTHX_ const char *s, SV *sv)
     if (!isALPHA(*pos)) {
 	U8 tmpbuf[UTF8_MAXBYTES+1];
 
-	if (*s == 'v') s++;  /* get past 'v' */
+	if (*s == 'v')
+	    s++;  /* get past 'v' */
 
 	sv_setpvn(sv, "", 0);
 
 	for (;;) {
+	    /* this is atoi() that tolerates underscores */
 	    U8 *tmpend;
 	    UV rev = 0;
-	    {
-		/* this is atoi() that tolerates underscores */
-		const char *end = pos;
-		UV mult = 1;
-		while (--end >= s) {
-		    UV orev;
-		    if (*end == '_')
-			continue;
-		    orev = rev;
+	    const char *end = pos;
+	    UV mult = 1;
+	    while (--end >= s) {
+		if (*end != '_') {
+		    const UV orev = rev;
 		    rev += (*end - '0') * mult;
 		    mult *= 10;
 		    if (orev > rev && ckWARN_d(WARN_OVERFLOW))

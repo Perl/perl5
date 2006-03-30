@@ -5075,7 +5075,7 @@ typedef struct am_table_short AMTS;
 #   define Strtoul(s, e, b)	strchr((s), '-') ? ULONG_MAX : (unsigned long)strtol((s), (e), (b))
 #endif
 #ifndef Atoul
-#   define Atoul(s)	Strtoul(s, (char **)NULL, 10)
+#   define Atoul(s)	Strtoul(s, NULL, 10)
 #endif
 
 

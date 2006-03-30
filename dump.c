@@ -365,7 +365,7 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 	op_dump(pm->op_pmreplroot);
     }
     if (pm->op_pmflags || (PM_GETRE(pm) && PM_GETRE(pm)->check_substr)) {
-	SV *tmpsv = newSVpvs("");
+	SV * const tmpsv = newSVpvs("");
 	if (pm->op_pmdynflags & PMdf_USED)
 	    sv_catpv(tmpsv, ",USED");
 	if (pm->op_pmdynflags & PMdf_TAINTED)
@@ -771,7 +771,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 
 #ifdef PERL_MAD
     if (PL_madskills && o->op_madprop) {
-	SV *tmpsv = newSVpvn("", 0);
+	SV * const tmpsv = newSVpvn("", 0);
 	MADPROP* mp = o->op_madprop;
 	Perl_dump_indent(aTHX_ level, file, "MADPROPS = {\n");
 	level++;
@@ -821,7 +821,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 #else
 	if ( ! PL_op->op_flags & OPf_SPECIAL) { /* not lexical */
 	    if (cSVOPo->op_sv) {
-		SV *tmpsv = newSV(0);
+		SV * const tmpsv = newSV(0);
 		ENTER;
 		SAVEFREESV(tmpsv);
 #ifdef PERL_MAD

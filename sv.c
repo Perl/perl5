@@ -1089,7 +1089,7 @@ S_more_bodies (pTHX_ svtype sv_type)
 	void ** const r3wt = &PL_body_roots[sv_type]; \
 	LOCK_SV_MUTEX; \
 	xpv = *((void **)(r3wt)) \
-	  ? *((void **)(r3wt)) : S_more_bodies(aTHX_ sv_type); \
+	  ? *((void **)(r3wt)) : more_bodies(sv_type); \
 	*(r3wt) = *(void**)(xpv); \
 	UNLOCK_SV_MUTEX; \
     } STMT_END
@@ -1319,7 +1319,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 	    int length = old_type_details->copy;
 
 	    if (new_type_details->offset > old_type_details->offset) {
-		int difference
+		const int difference
 		    = new_type_details->offset - old_type_details->offset;
 		offset += difference;
 		length -= difference;
@@ -3445,7 +3445,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 
     case SVt_PVGV:
 	if (dtype <= SVt_PVGV) {
-	    S_glob_assign_glob(aTHX_ dstr, sstr, dtype);
+	    glob_assign_glob(dstr, sstr, dtype);
 	    return;
 	}
 	/*FALLTHROUGH*/
@@ -3458,7 +3458,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    if ((int)SvTYPE(sstr) != stype) {
 		stype = SvTYPE(sstr);
 		if (stype == SVt_PVGV && dtype <= SVt_PVGV) {
-		    S_glob_assign_glob(aTHX_ dstr, sstr, dtype);
+		    glob_assign_glob(dstr, sstr, dtype);
 		    return;
 		}
 	    }
@@ -3486,13 +3486,13 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 		GvMULTI_on(dstr);
 		return;
 	    }
-	    S_glob_assign_glob(aTHX_ dstr, sstr, dtype);
+	    glob_assign_glob(dstr, sstr, dtype);
 	    return;
 	}
 
 	if (dtype >= SVt_PV) {
 	    if (dtype == SVt_PVGV) {
-		S_glob_assign_ref(aTHX_ dstr, sstr);
+		glob_assign_ref(dstr, sstr);
 		return;
 	    }
 	    if (SvPVX_const(dstr)) {
@@ -5339,6 +5339,8 @@ S_sv_pos_u2b_forwards(pTHX_ const U8 *const start, const U8 *const send,
 {
     const U8 *s = start;
 
+    PERL_UNUSED_CONTEXT;
+
     while (s < send && uoffset--)
 	s += UTF8SKIP(s);
     if (s > send) {
@@ -5791,7 +5793,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
     if (SvMAGICAL(sv) && !SvREADONLY(sv) && PL_utf8cache
 	&& (mg = mg_find(sv, PERL_MAGIC_utf8))) {
 	if (mg->mg_ptr) {
-	    STRLEN *cache = (STRLEN *) mg->mg_ptr;
+	    STRLEN * const cache = (STRLEN *) mg->mg_ptr;
 	    if (cache[1] == byte) {
 		/* An exact match. */
 		*offsetp = cache[0];
@@ -9375,6 +9377,7 @@ ptr_table_* functions.
 
 #if defined(USE_ITHREADS)
 
+/* XXX Remove this so it doesn't have to go thru the macro and return for nothing */
 #ifndef GpREFCNT_inc
 #  define GpREFCNT_inc(gp)	((gp) ? (++(gp)->gp_refcnt, (gp)) : (GP*)NULL)
 #endif
@@ -9687,7 +9690,7 @@ S_ptr_table_find(PTR_TBL_t *tbl, const void *sv) {
 	if (tblent->oldval == sv)
 	    return tblent;
     }
-    return 0;
+    return NULL;
 }
 
 void *
@@ -9695,7 +9698,7 @@ Perl_ptr_table_fetch(pTHX_ PTR_TBL_t *tbl, const void *sv)
 {
     PTR_TBL_ENT_t const *const tblent = ptr_table_find(tbl, sv);
     PERL_UNUSED_CONTEXT;
-    return tblent ? tblent->newval : (void *) 0;
+    return tblent ? tblent->newval : NULL;
 }
 
 /* add a new entry to a pointer-mapping table */
@@ -11816,7 +11819,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 
 	/* attempt to find a match within the aggregate */
 	if (hash) {
-	    keysv = S_find_hash_subscript(aTHX_ (HV*)sv, uninit_sv);
+	    keysv = find_hash_subscript((HV*)sv, uninit_sv);
 	    if (keysv)
 		subscript_type = FUV_SUBSCRIPT_HASH;
 	}
@@ -11937,13 +11940,13 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	    /* index is an expression;
 	     * attempt to find a match within the aggregate */
 	    if (obase->op_type == OP_HELEM) {
-		SV * const keysv = S_find_hash_subscript(aTHX_ (HV*)sv, uninit_sv);
+		SV * const keysv = find_hash_subscript((HV*)sv, uninit_sv);
 		if (keysv)
 		    return varname(gv, '%', o->op_targ,
 						keysv, 0, FUV_SUBSCRIPT_HASH);
 	    }
 	    else {
-		const I32 index = S_find_array_subscript(aTHX_ (AV*)sv, uninit_sv);
+		const I32 index = find_array_subscript((AV*)sv, uninit_sv);
 		if (index >= 0)
 		    return varname(gv, '@', o->op_targ,
 					NULL, index, FUV_SUBSCRIPT_ARRAY);

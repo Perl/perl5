@@ -417,7 +417,7 @@ struct block_loop {
 	SvREFCNT_dec(cx->blk_loop.iterlval);				\
 	if (CxITERVAR(cx)) {						\
             if (SvPADMY(cx->blk_loop.itersave)) {			\
-		SV **s_v_p = CxITERVAR(cx);				\
+		SV ** const s_v_p = CxITERVAR(cx);			\
 		sv_2mortal(*s_v_p);					\
 		*s_v_p = cx->blk_loop.itersave;				\
 	    }								\

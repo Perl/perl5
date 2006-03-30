@@ -2502,7 +2502,7 @@ PP(pp_goto)
 
 	/* find label */
 
-	PL_lastgotoprobe = 0;
+	PL_lastgotoprobe = NULL;
 	*enterops = 0;
 	for (ix = cxstack_ix; ix >= 0; ix--) {
 	    cx = &cxstack[ix];

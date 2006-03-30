@@ -896,7 +896,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			*gvp == (GV*)&PL_sv_undef ||
 			SvTYPE(*gvp) != SVt_PVGV)
 		    {
-			stash = 0;
+			stash = NULL;
 		    }
 		    else if ((sv_type == SVt_PV   && !GvIMPORTED_SV(*gvp)) ||
 			     (sv_type == SVt_PVAV && !GvIMPORTED_AV(*gvp)) ||
@@ -908,7 +908,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 			    name);
 			if (GvCVu(*gvp))
 			    Perl_warn(aTHX_ "\t(Did you mean &%s instead?)\n", name);
-			stash = 0;
+			stash = NULL;
 		    }
 		}
 	    }
@@ -1359,7 +1359,7 @@ Perl_gp_ref(pTHX_ GP *gp)
 {
     dVAR;
     if (!gp)
-	return (GP*)NULL;
+	return NULL;
     gp->gp_refcnt++;
     if (gp->gp_cv) {
 	if (gp->gp_cvgen) {
@@ -1624,7 +1624,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       && (mg = mg_find((SV*)stash, PERL_MAGIC_overload_table))
       && (ocvp = cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			? (oamtp = amtp = (AMT*)mg->mg_ptr)->table
-			: (CV **) NULL))
+			: NULL))
       && ((cv = cvp[off=method+assignshift])
 	  || (assign && amtp->fallback > AMGfallNEVER && /* fallback to
 						          * usual method */
@@ -1742,7 +1742,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	       && (mg = mg_find((SV*)stash, PERL_MAGIC_overload_table))
 	       && (cvp = (AMT_AMAGIC((AMT*)mg->mg_ptr)
 			  ? (amtp = (AMT*)mg->mg_ptr)->table
-			  : (CV **) NULL))
+			  : NULL))
 	       && (cv = cvp[off=method])) { /* Method for right
 					     * argument found */
       lr=1;

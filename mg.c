@@ -544,7 +544,8 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 int
 Perl_magic_regdatum_set(pTHX_ SV *sv, MAGIC *mg)
 {
-    PERL_UNUSED_ARG(sv); PERL_UNUSED_ARG(mg);
+    PERL_UNUSED_ARG(sv);
+    PERL_UNUSED_ARG(mg);
     Perl_croak(aTHX_ PL_no_modify);
     NORETURN_FUNCTION_END;
 }
@@ -716,7 +717,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	     }
 #elif defined(WIN32)
 	     {
-		  DWORD dwErr = GetLastError();
+		  const DWORD dwErr = GetLastError();
 		  sv_setnv(sv, (NV)dwErr);
 		  if (dwErr) {
 		       PerlProc_GetOSError(sv, dwErr);
@@ -2037,7 +2038,7 @@ Perl_vivify_defelem(pTHX_ SV *sv)
 	if ((I32)LvTARGLEN(sv) < 0 && (I32)LvTARGOFF(sv) > AvFILL(av))
 	    LvTARG(sv) = NULL;	/* array can't be extended */
 	else {
-	    SV** const svp = av_fetch(av, LvTARGOFF(sv), TRUE);
+	    SV* const * const svp = av_fetch(av, LvTARGOFF(sv), TRUE);
 	    if (!svp || (value = *svp) == &PL_sv_undef)
 		Perl_croak(aTHX_ PL_no_aelem, (I32)LvTARGOFF(sv));
 	}

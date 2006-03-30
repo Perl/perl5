@@ -28,8 +28,7 @@ struct gp {
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define GvGP(gv)							\
 	(*({GV *const shplep = (GV *) (gv);				\
-	    assert(SvTYPE(shplep) == SVt_PVGV ||			\
-	    SvTYPE(shplep) == SVt_PVLV);				\
+	    assert(SvTYPE(shplep) == SVt_PVGV || SvTYPE(shplep) == SVt_PVLV); \
 	    assert(isGV_with_GP(shplep));				\
 	    &((shplep)->sv_u.svu_gp);}))
 #  define GvFLAGS(gv)							\
@@ -56,7 +55,7 @@ struct gp {
 #  define GvNAME_HEK(gv)	(GvXPVGV(gv)->xiv_u.xivu_namehek)
 #endif
 
-#define GvNAME_get(gv)		(GvNAME_HEK(gv) ? HEK_KEY(GvNAME_HEK(gv)) : 0)
+#define GvNAME_get(gv)		(GvNAME_HEK(gv) ? HEK_KEY(GvNAME_HEK(gv)) : NULL)
 #define GvNAMELEN_get(gv)	(GvNAME_HEK(gv) ? HEK_LEN(GvNAME_HEK(gv)) : 0)
 
 #define GvNAME(gv)	GvNAME_get(gv)

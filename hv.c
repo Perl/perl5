@@ -1073,7 +1073,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	    return NULL;
 	}
 	if (SvREADONLY(hv) && HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
-	    S_hv_notallowed(aTHX_ k_flags, key, klen,
+	    hv_notallowed(k_flags, key, klen,
 			    "Attempt to delete readonly key '%"SVf"' from"
 			    " a restricted hash");
 	}
@@ -1115,7 +1115,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return sv;
     }
     if (SvREADONLY(hv)) {
-        S_hv_notallowed(aTHX_ k_flags, key, klen,
+	hv_notallowed(k_flags, key, klen,
 			"Attempt to delete disallowed key '%"SVf"' from"
 			" a restricted hash");
     }

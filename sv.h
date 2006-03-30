@@ -978,11 +978,11 @@ in gv.h: */
 
 #define SvAMAGIC(sv)		(SvROK(sv) && (SvFLAGS(SvRV(sv)) & SVf_AMAGIC))
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
-#  define SvAMAGIC_on(sv)	({ SV *kloink = sv;			\
+#  define SvAMAGIC_on(sv)	({ SV * const kloink = sv;		\
 				   assert(SvROK(kloink));		\
 				   SvFLAGS(SvRV(kloink)) |= SVf_AMAGIC;	\
 				})
-#  define SvAMAGIC_off(sv)	({ SV *kloink = sv;			\
+#  define SvAMAGIC_off(sv)	({ SV * const kloink = sv;		\
 				   if(SvROK(kloink))			\
 					SvFLAGS(SvRV(kloink)) &= ~SVf_AMAGIC;\
 				})
