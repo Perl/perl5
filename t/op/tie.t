@@ -593,3 +593,22 @@ tie my $y, "main", 8;
 print $x | $y;
 EXPECT
 10
+########
+# Bug 36267
+sub TIEHASH  { bless {}, $_[0] }
+sub STORE    { $_[0]->{$_[1]} = $_[2] }
+sub FIRSTKEY { my $a = scalar keys %{$_[0]}; each %{$_[0]} }
+sub NEXTKEY  { each %{$_[0]} }
+sub DELETE   { delete $_[0]->{$_[1]} }
+sub CLEAR    { %{$_[0]} = () }
+$h{b}=1;
+delete $h{b};
+print scalar keys %h, "\n";
+tie %h, 'main';
+$i{a}=1;
+%h = %i;
+untie %h;
+print scalar keys %h, "\n";
+EXPECT
+0
+0

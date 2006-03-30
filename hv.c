@@ -582,7 +582,7 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		}
 
 		TAINT_IF(save_taint);
-		if (!HvARRAY(hv) && !needs_store) {
+		if (!needs_store) {
 		    if (flags & HVhek_FREEKEY)
 			Safefree(key);
 		    return NULL;

@@ -49,7 +49,7 @@ main_tests (\@keys, \@testkeys, ' [utf8 hash]');
 {
   my %h = (a=>'cheat');
   tie %h, 'Tie::StdHash';
-  is (XS::APItest::Hash::store(\%h, chr 258,  1), 1);
+  is (XS::APItest::Hash::store(\%h, chr 258,  1), undef);
     
   ok (!exists $h{$utf8_for_258},
       "hv_store doesn't insert a key with the raw utf8 on a tied hash");
@@ -222,9 +222,9 @@ sub test_store {
   if (defined $class) {
     tie %h1, ref $class;
     tie %h2, ref $class;
-    $HV_STORE_IS_CRAZY = undef unless @$defaults;
+    $HV_STORE_IS_CRAZY = undef;
   }
-  is (XS::APItest::Hash::store_ent(\%h1, $key, 1), 1,
+  is (XS::APItest::Hash::store_ent(\%h1, $key, 1), $HV_STORE_IS_CRAZY,
       "hv_store_ent$message $printable"); 
   ok (brute_force_exists (\%h1, $key), "hv_store_ent$message $printable");
   is (XS::APItest::Hash::store(\%h2, $key,  1), $HV_STORE_IS_CRAZY,
