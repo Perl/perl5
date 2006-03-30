@@ -3041,7 +3041,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	for a C initialization string.  See the inc_version_list entry
  *	in Porting/Glossary for more details.
  */
-#define PERL_INC_VERSION_LIST $inc_version_list_init		/**/
+#$d_inc_version_list PERL_INC_VERSION_LIST $inc_version_list_init		/**/
 
 /* INSTALL_USR_BIN_PERL:
  *	This symbol, if defined, indicates that Perl is to be installed
@@ -3485,8 +3485,8 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol contains the ~name expanded version of SITEARCH, to be used
  *	in programs that are not prepared to deal with ~ expansion at run-time.
  */
-#define SITEARCH "$sitearch"		/**/
-#define SITEARCH_EXP "$sitearchexp"		/**/
+#$d_sitearch SITEARCH "$sitearch"		/**/
+#$d_sitearch SITEARCH_EXP "$sitearchexp"		/**/
 
 /* SITELIB:
  *	This symbol contains the name of the private library for this package.

@@ -921,6 +921,7 @@ i_varhdr=''
 i_vfork=''
 inc_version_list=''
 inc_version_list_init=''
+d_inc_version_list=''
 installprefix=''
 installprefixexp=''
 installstyle=''
@@ -1101,6 +1102,7 @@ sig_size=''
 installsitearch=''
 sitearch=''
 sitearchexp=''
+d_sitearch=''
 installsitebin=''
 sitebin=''
 sitebinexp=''
@@ -6584,6 +6586,11 @@ rp='Pathname for the site-specific architecture-dependent library files?'
 . ./getfile
 prefixvar=sitearch
 . ./setprefixvar
+if $test X"$sitearch" = X"$sitelib"; then
+	d_sitearch="$undef"
+else
+	d_sitearch="$define"
+fi
 
 $cat <<EOM
 
@@ -6984,9 +6991,12 @@ case "$ans" in
 esac
 case "$inc_version_list" in
 ''|' ') 
-	inc_version_list_init='0';;
+	inc_version_list_init='0'
+	d_inc_version_list="$undef"
+	;;
 *)	inc_version_list_init=`echo $inc_version_list |
 		$sed -e 's/^/"/' -e 's/ /","/g' -e 's/$/",0/'`
+	d_inc_version_list="$define"
 	;;
 esac
 $rm -f getverlist
@@ -21342,6 +21352,7 @@ d_grpasswd='$d_grpasswd'
 d_hasmntopt='$d_hasmntopt'
 d_htonl='$d_htonl'
 d_ilogbl='$d_ilogbl'
+d_inc_version_list="$d_inc_version_list"
 d_index='$d_index'
 d_inetaton='$d_inetaton'
 d_int64_t='$d_int64_t'
@@ -21496,6 +21507,7 @@ d_shmget='$d_shmget'
 d_sigaction='$d_sigaction'
 d_sigprocmask='$d_sigprocmask'
 d_sigsetjmp='$d_sigsetjmp'
+d_sitearch='$d_sitearch'
 d_snprintf='$d_snprintf'
 d_sockatmark='$d_sockatmark'
 d_sockatmarkproto='$d_sockatmarkproto'

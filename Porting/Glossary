@@ -1151,6 +1151,10 @@ d_ilogbl (d_ilogbl.U):
 	indicates to the C program that the ilogbl() routine is available.
 	If scalbnl is also present we can emulate frexpl.
 
+d_inc_version_list (inc_version_list.U):
+	This variable conditionally defines PERL_INC_VERSION_LIST.
+	It is set to undef when PERL_INC_VERSION_LIST is empty.
+
 d_index (d_strchr.U):
 	This variable conditionally defines HAS_INDEX if index() and
 	rindex() are available for string searching.
@@ -1906,6 +1910,11 @@ d_sigsetjmp (d_sigsetjmp.U):
 	This variable conditionally defines the HAS_SIGSETJMP symbol,
 	which indicates that the sigsetjmp() routine is available to
 	call setjmp() and optionally save the process's signal mask.
+
+d_sitearch (sitearch.U):
+	This variable conditionally defines SITEARCH to hold the pathname
+	of architecture-dependent library files for $package.  If
+	$sitearch is the same as $archlib, then this is set to undef.
 
 d_sockatmark (d_sockatmark.U):
 	This variable conditionally defines the HAS_SOCKATMARK symbol, which

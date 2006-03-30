@@ -4781,7 +4781,8 @@ S_init_perllib(pTHX)
 #  endif
 #endif
 
-#ifdef SITELIB_STEM /* Search for version-specific dirs below here */
+#if defined(SITELIB_STEM) && defined(PERL_INC_VERSION_LIST)
+    /* Search for version-specific dirs below here */
     incpush(SITELIB_STEM, FALSE, TRUE, TRUE, TRUE);
 #endif
 
