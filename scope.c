@@ -826,7 +826,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    hv = (HV*)ptr;
 	    ptr = SSPOPPTR;
-	    (void)hv_delete(hv, (char*)ptr, (U32)SSPOPINT, G_DISCARD);
+	    (void)hv_delete(hv, (char*)ptr, (I32)SSPOPINT, G_DISCARD);
 	    SvREFCNT_dec(hv);
 	    Safefree(ptr);
 	    break;

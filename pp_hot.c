@@ -1828,7 +1828,8 @@ PP(pp_helem)
 		if (!preeminent) {
 		    STRLEN keylen;
 		    const char * const key = SvPV_const(keysv, keylen);
-		    SAVEDELETE(hv, savepvn(key,keylen), keylen);
+		    SAVEDELETE(hv, savepvn(key,keylen),
+			       SvUTF8(keysv) ? -(I32)keylen : keylen);
 		} else
 		    save_helem(hv, keysv, svp);
             }
