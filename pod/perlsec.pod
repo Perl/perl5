@@ -497,7 +497,7 @@ its input data, so it cannot be similarly fooled.
 =back
 
 See L<http://www.cs.rice.edu/~scrosby/hash/> for more information,
-and any computer science text book on the algorithmic complexity.
+and any computer science textbook on the algorithmic complexity.
 
 =head1 SEE ALSO
 
