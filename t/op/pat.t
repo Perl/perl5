@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1199\n";
+print "1..1200\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3465,4 +3465,9 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
     ok($f eq "ab", "pos retained between calls # TODO") or print "# $@\n";
 }
 
-# last test 1199
+# Keep the following test last -- it may crash perl
+
+ok(("a" x (2**15 - 10)) =~ /^()(a|bb)*$/, "Recursive stack cracker: #24274")
+    or print "# Unexpected outcome: should pass or crash perl\n";
+
+# last test 1200
