@@ -197,6 +197,12 @@
 #define CALLREG_INTUIT_STRING CALL_FPTR(PL_regint_string)
 #define CALLREGFREE CALL_FPTR(PL_regfree)
 
+/* Note that there are C compilers such as MetroWerks CodeWarrior
+ * which do not have an "inlined" way (like the gcc __attribute__) of
+ * marking unused variables (they need e.g. a #pragma, and using e.g.
+ * (void)x is considered dubious) and therefore cpp macros like
+ * PERL_UNUSED_DECL(x) cannot work for this purpose. */
+
 #if defined(__SYMBIAN32__) && defined(__GNUC__)
 #  ifdef __cplusplus
 #    define PERL_UNUSED_DECL(x) /*@unused@*/ x
@@ -218,6 +224,7 @@
  * but we cannot quite get rid of, such as "ax" in PPCODE+noargs xsubs
  */
 #ifndef PERL_UNUSED_ARG
+/* Which lint? Which <note.h>? Need more more robust cpp test. */
 #  ifdef lint
 #    include <note.h>
 #    define PERL_UNUSED_ARG(x) NOTE(ARGUNUSED(x))
