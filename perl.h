@@ -137,7 +137,7 @@
 #  endif
 #endif
 
-#define pVAR    register struct perl_vars* const my_vars PERL_UNUSED_DECL
+#define pVAR    PERL_UNUSED_DECL(register struct perl_vars* const my_vars)
 
 #ifdef PERL_GLOBAL_STRUCT
 #  define dVAR		pVAR    = (struct perl_vars*)PERL_GET_VARS()
@@ -150,7 +150,7 @@
 #    define MULTIPLICITY
 #  endif
 #  define tTHX	PerlInterpreter*
-#  define pTHX	register tTHX my_perl PERL_UNUSED_DECL
+#  define pTHX PERL_UNUSED_DECL(register tTHX my_perl)
 #  define aTHX	my_perl
 #  ifdef PERL_GLOBAL_STRUCT
 #    define dTHXa(a)	dVAR; pTHX = (tTHX)a
@@ -197,24 +197,19 @@
 #define CALLREG_INTUIT_STRING CALL_FPTR(PL_regint_string)
 #define CALLREGFREE CALL_FPTR(PL_regfree)
 
-/* XXX The PERL_UNUSED_DECL suffix is unfortunately rather inflexible:
- * it assumes that in all compilers the way to suppress an "unused"
- * warning is to have a suffix.  In some compilers that might be a
- * a compiler pragma, e.g. #pragma unused(varname). */
-
 #if defined(__SYMBIAN32__) && defined(__GNUC__)
 #  ifdef __cplusplus
-#    define PERL_UNUSED_DECL
+#    define PERL_UNUSED_DECL(x) /*@unused@*/ x
 #  else
-#    define PERL_UNUSED_DECL __attribute__((unused))
+#    define PERL_UNUSED_DECL(x) /*@unused@*/ x __attribute__((unused))
 #  endif
 #endif
 
 #ifndef PERL_UNUSED_DECL
 #  if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)
-#    define PERL_UNUSED_DECL __attribute__unused__
+#    define PERL_UNUSED_DECL(x) /*@unused@*/ x __attribute__unused__
 #  else
-#    define PERL_UNUSED_DECL
+#    define PERL_UNUSED_DECL(x) /*@unused@*/ x
 #  endif
 #endif
  
@@ -241,7 +236,7 @@
 #endif
 
 #define NOOP (void)0
-#define dNOOP extern int Perl___notused PERL_UNUSED_DECL
+#define dNOOP PERL_UNUSED_DECL(extern int Perl___notused)
 
 #ifndef pTHX
 /* Don't bother defining tTHX and sTHX; using them outside
