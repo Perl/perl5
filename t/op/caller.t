@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 48 );
+    plan( tests => 56 );
 }
 
 my @c;
@@ -116,21 +116,32 @@ $i = eval $debugger_test;
 is( $i, 11, 'do not skip over eval even if $^P had been on at some point' );
 is( eval 'pb()', 'main::pb', 'actually return the right function name even if $^P had been on at some point' );
 
-# caller can now return the compile time state of %^H
-sub get_dooot {
-    my $level = shift;
-    my @results = caller($level||0);
-    $results[10]->{dooot};
-}
+print "# caller can now return the compile time state of %^H\n";
+
 sub get_hash {
     my $level = shift;
     my @results = caller($level||0);
     $results[10];
 }
+
+sub get_dooot {
+    my $level = shift;
+    my @results = caller($level||0);
+    $results[10]->{dooot};
+}
+
+sub get_thikoosh {
+    my $level = shift;
+    my @results = caller($level||0);
+    $results[10]->{thikoosh};
+}
+
 sub dooot {
     is(get_dooot(), undef);
+    is(get_thikoosh(), undef);
     my $hash = get_hash();
     ok(!exists $hash->{dooot});
+    ok(!exists $hash->{thikoosh});
     is(get_dooot(1), 54);
     BEGIN {
 	$^H{dooot} = 42;
@@ -155,10 +166,13 @@ sub dooot {
 }
 {
     is(get_dooot(), undef);
+    is(get_thikoosh(), undef);
     BEGIN {
 	$^H{dooot} = 1;
+	$^H{thikoosh} = "SKREECH";
     }
-	is(get_dooot(), 1);
+    is(get_dooot(), 1);
+    is(get_thikoosh(), "SKREECH");
 
     BEGIN {
 	$^H{dooot} = 42;
@@ -169,6 +183,7 @@ sub dooot {
 		$^H{dooot} = 6 * 9;
 	    }
 	    is(get_dooot(), 54);
+	    is(get_thikoosh(), "SKREECH");
 	    {
 		BEGIN {
 		    delete $^H{dooot};
@@ -176,10 +191,13 @@ sub dooot {
 		is(get_dooot(), undef);
 		my $hash = get_hash();
 		ok(!exists $hash->{dooot});
+		is(get_thikoosh(), "SKREECH");
 	    }
 	    dooot();
 	}
 	is(get_dooot(), 6 * 7);
+	is(get_thikoosh(), "SKREECH");
     }
     is(get_dooot(), 6 * 7);
+    is(get_thikoosh(), "SKREECH");
 }
