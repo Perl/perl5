@@ -10580,8 +10580,10 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    TOPINT(nss,ix) = i;
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = Perl_refcounted_he_dup(aTHX_ ptr, param);
-	    /* FIXME - either dup the conditionally saved HV, or eliminate
-	       it by recreating eval's %^H from the cop  */
+	    if (i & HINT_LOCALIZE_HH) {
+		hv = (HV*)POPPTR(ss,ix);
+		TOPPTR(nss,ix) = hv_dup_inc(hv, param);
+	    }
 	    break;
 	case SAVEt_COMPPAD:
 	    av = (AV*)POPPTR(ss,ix);
