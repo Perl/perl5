@@ -959,6 +959,7 @@ static const struct { const char type; const char *name; } magic_names[] = {
 	{ PERL_MAGIC_bm,             "bm(B)" },
 	{ PERL_MAGIC_regdata,        "regdata(D)" },
 	{ PERL_MAGIC_env,            "env(E)" },
+	{ PERL_MAGIC_hints,          "hints(H)" },
 	{ PERL_MAGIC_isa,            "isa(I)" },
 	{ PERL_MAGIC_dbfile,         "dbfile(L)" },
 	{ PERL_MAGIC_shared,         "shared(N)" },
@@ -971,6 +972,7 @@ static const struct { const char type; const char *name; } magic_names[] = {
 	{ PERL_MAGIC_envelem,        "envelem(e)" },
 	{ PERL_MAGIC_fm,             "fm(f)" },
 	{ PERL_MAGIC_regex_global,   "regex_global(g)" },
+	{ PERL_MAGIC_hintselem,      "hintselem(h)" },
 	{ PERL_MAGIC_isaelem,        "isaelem(i)" },
 	{ PERL_MAGIC_nkeys,          "nkeys(k)" },
 	{ PERL_MAGIC_dbline,         "dbline(l)" },
@@ -1030,6 +1032,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 	    else if (v == &PL_vtbl_backref)    s = "backref";
 	    else if (v == &PL_vtbl_utf8)       s = "utf8";
             else if (v == &PL_vtbl_arylen_p)   s = "arylen_p";
+            else if (v == &PL_vtbl_hintselem)  s = "hintselem";
 	    if (s)
 	        Perl_dump_indent(aTHX_ level, file, "    MG_VIRTUAL = &PL_vtbl_%s\n", s);
 	    else

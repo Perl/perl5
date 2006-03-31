@@ -4489,6 +4489,8 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     case PERL_MAGIC_qr:
 	vtable = &PL_vtbl_regexp;
 	break;
+    case PERL_MAGIC_hints:
+	/* As this vtable is all NULL, we can reuse it.  */
     case PERL_MAGIC_sig:
 	vtable = &PL_vtbl_sig;
 	break;
@@ -4527,6 +4529,9 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
 	break;
     case PERL_MAGIC_backref:
 	vtable = &PL_vtbl_backref;
+	break;
+    case PERL_MAGIC_hintselem:
+	vtable = &PL_vtbl_hintselem;
 	break;
     case PERL_MAGIC_ext:
 	/* Reserved for use by extensions not perl internals.	        */
@@ -10573,6 +10578,10 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	case SAVEt_HINTS:
 	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
+	    ptr = POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = Perl_refcounted_he_dup(aTHX_ ptr, param);
+	    /* FIXME - either dup the conditionally saved HV, or eliminate
+	       it by recreating eval's %^H from the cop  */
 	    break;
 	case SAVEt_COMPPAD:
 	    av = (AV*)POPPTR(ss,ix);
@@ -10857,6 +10866,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	PL_compiling.cop_warnings = sv_dup_inc(PL_compiling.cop_warnings, param);
     if (!specialCopIO(PL_compiling.cop_io))
 	PL_compiling.cop_io = sv_dup_inc(PL_compiling.cop_io, param);
+    PL_compiling.cop_hints
+	= Perl_refcounted_he_dup(aTHX_ PL_compiling.cop_hints, proto_perl);
     PL_curcop		= (COP*)any_dup(proto_perl->Tcurcop, proto_perl);
 
     /* pseudo environmental stuff */

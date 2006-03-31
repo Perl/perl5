@@ -623,7 +623,8 @@ print a stack trace.  The value of EXPR indicates how many call frames
 to go back before the current one.
 
     ($package, $filename, $line, $subroutine, $hasargs,
-    $wantarray, $evaltext, $is_require, $hints, $bitmask) = caller($i);
+    $wantarray, $evaltext, $is_require, $hints, $bitmask, $hinthash)
+	 = caller($i);
 
 Here $subroutine may be C<(eval)> if the frame is not a subroutine
 call, but an C<eval>.  In such a case additional elements $evaltext and
@@ -638,6 +639,10 @@ C<$hasargs> is true if a new instance of C<@_> was set up for the frame.
 C<$hints> and C<$bitmask> contain pragmatic hints that the caller was
 compiled with.  The C<$hints> and C<$bitmask> values are subject to change
 between versions of Perl, and are not meant for external use.
+
+C<$hinthash> is a reference to a hash containing the value of C<%^H> when the
+caller was compiled, or C<undef> if C<%^H> was empty. Do not modify the values
+of this hash, as they are the actual values stored in the optree.
 
 Furthermore, when called from within the DB package, caller returns more
 detailed information: it sets the list variable C<@DB::args> to be the

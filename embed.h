@@ -287,6 +287,8 @@
 #define hv_iternext_flags	Perl_hv_iternext_flags
 #define hv_iterval		Perl_hv_iterval
 #define hv_ksplit		Perl_hv_ksplit
+#ifdef USE_ITHREADS
+#endif
 #define hv_store		Perl_hv_store
 #define hv_store_ent		Perl_hv_store_ent
 #define hv_store_flags		Perl_hv_store_flags
@@ -399,6 +401,7 @@
 #ifdef PERL_CORE
 #define magic_clearenv		Perl_magic_clearenv
 #define magic_clear_all_env	Perl_magic_clear_all_env
+#define magic_clearhint		Perl_magic_clearhint
 #define magic_clearpack		Perl_magic_clearpack
 #define magic_clearsig		Perl_magic_clearsig
 #define magic_existspack	Perl_magic_existspack
@@ -429,6 +432,7 @@
 #define magic_setdefelem	Perl_magic_setdefelem
 #define magic_setenv		Perl_magic_setenv
 #define magic_setfm		Perl_magic_setfm
+#define magic_sethint		Perl_magic_sethint
 #define magic_setisa		Perl_magic_setisa
 #define magic_setglob		Perl_magic_setglob
 #define magic_setmglob		Perl_magic_setmglob
@@ -1091,6 +1095,7 @@
 #define hv_auxinit		S_hv_auxinit
 #define hv_delete_common	S_hv_delete_common
 #define hv_fetch_common		S_hv_fetch_common
+#define clear_placeholders	S_clear_placeholders
 #endif
 #endif
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
@@ -2448,6 +2453,12 @@
 #define hv_iternext_flags(a,b)	Perl_hv_iternext_flags(aTHX_ a,b)
 #define hv_iterval(a,b)		Perl_hv_iterval(aTHX_ a,b)
 #define hv_ksplit(a,b)		Perl_hv_ksplit(aTHX_ a,b)
+#ifdef USE_ITHREADS
+#ifdef PERL_CORE
+#endif
+#endif
+#ifdef PERL_CORE
+#endif
 #define hv_store(a,b,c,d,e)	Perl_hv_store(aTHX_ a,b,c,d,e)
 #define hv_store_ent(a,b,c,d)	Perl_hv_store_ent(aTHX_ a,b,c,d)
 #define hv_store_flags(a,b,c,d,e,f)	Perl_hv_store_flags(aTHX_ a,b,c,d,e,f)
@@ -2559,6 +2570,7 @@
 #ifdef PERL_CORE
 #define magic_clearenv(a,b)	Perl_magic_clearenv(aTHX_ a,b)
 #define magic_clear_all_env(a,b)	Perl_magic_clear_all_env(aTHX_ a,b)
+#define magic_clearhint(a,b)	Perl_magic_clearhint(aTHX_ a,b)
 #define magic_clearpack(a,b)	Perl_magic_clearpack(aTHX_ a,b)
 #define magic_clearsig(a,b)	Perl_magic_clearsig(aTHX_ a,b)
 #define magic_existspack(a,b)	Perl_magic_existspack(aTHX_ a,b)
@@ -2589,6 +2601,7 @@
 #define magic_setdefelem(a,b)	Perl_magic_setdefelem(aTHX_ a,b)
 #define magic_setenv(a,b)	Perl_magic_setenv(aTHX_ a,b)
 #define magic_setfm(a,b)	Perl_magic_setfm(aTHX_ a,b)
+#define magic_sethint(a,b)	Perl_magic_sethint(aTHX_ a,b)
 #define magic_setisa(a,b)	Perl_magic_setisa(aTHX_ a,b)
 #define magic_setglob(a,b)	Perl_magic_setglob(aTHX_ a,b)
 #define magic_setmglob(a,b)	Perl_magic_setmglob(aTHX_ a,b)
@@ -3241,6 +3254,7 @@
 #define hv_auxinit		S_hv_auxinit
 #define hv_delete_common(a,b,c,d,e,f,g)	S_hv_delete_common(aTHX_ a,b,c,d,e,f,g)
 #define hv_fetch_common(a,b,c,d,e,f,g,h)	S_hv_fetch_common(aTHX_ a,b,c,d,e,f,g,h)
+#define clear_placeholders(a,b)	S_clear_placeholders(aTHX_ a,b)
 #endif
 #endif
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)

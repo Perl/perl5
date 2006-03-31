@@ -747,6 +747,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_sharedsv_thrcnt_inc
 		    Perl_sharedsv_unlock
 		    Perl_stashpv_hvname_match
+		    Perl_refcounted_he_dup
 		    )];
 }
 

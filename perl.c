@@ -1039,6 +1039,8 @@ perl_destruct(pTHXx)
     if (!specialCopIO(PL_compiling.cop_io))
 	SvREFCNT_dec(PL_compiling.cop_io);
     PL_compiling.cop_io = NULL;
+    Perl_refcounted_he_free(aTHX_ PL_compiling.cop_hints);
+    PL_compiling.cop_hints = NULL;
     CopFILE_free(&PL_compiling);
     CopSTASH_free(&PL_compiling);
 

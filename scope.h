@@ -150,11 +150,15 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 
 #define SAVEHINTS() \
     STMT_START {					\
-	SSCHECK(3);					\
+	SSCHECK(4);					\
 	if (PL_hints & HINT_LOCALIZE_HH) {		\
 	    SSPUSHPTR(GvHV(PL_hintgv));			\
 	    GvHV(PL_hintgv) = newHVhv(GvHV(PL_hintgv));	\
 	}						\
+	if (PL_compiling.cop_hints) {			\
+	    PL_compiling.cop_hints->refcounted_he_refcnt++;	\
+	}						\
+	SSPUSHPTR(PL_compiling.cop_hints);		\
 	SSPUSHINT(PL_hints);				\
 	SSPUSHINT(SAVEt_HINTS);				\
     } STMT_END

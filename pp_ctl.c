@@ -1620,7 +1620,7 @@ PP(pp_caller)
 	RETURN;
     }
 
-    EXTEND(SP, 10);
+    EXTEND(SP, 11);
 
     if (!stashname)
 	PUSHs(&PL_sv_undef);
@@ -1721,6 +1721,12 @@ PP(pp_caller)
             mask = newSVsv(old_warnings);
         PUSHs(sv_2mortal(mask));
     }
+
+    PUSHs(cx->blk_oldcop->cop_hints ?
+	  sv_2mortal(newRV_noinc(
+		(SV*)Perl_refcounted_he_chain_2hv(aTHX_
+						  cx->blk_oldcop->cop_hints)))
+	  : &PL_sv_undef);
     RETURN;
 }
 

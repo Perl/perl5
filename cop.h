@@ -148,6 +148,9 @@ struct cop {
     line_t      cop_line;       /* line # of this command */
     SV *	cop_warnings;	/* lexical warnings bitmask */
     SV *	cop_io;		/* lexical IO defaults */
+    /* compile time state of %^H.  See the comment in op.c for how this is
+       used to recreate a hash to return from caller.  */
+    struct refcounted_he * cop_hints;
 };
 
 #ifdef USE_ITHREADS
@@ -805,3 +808,13 @@ See L<perlcall/Lightweight Callbacks>.
 	CATCH_SET(multicall_oldcatch);					\
 	LEAVE;								\
     } STMT_END
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

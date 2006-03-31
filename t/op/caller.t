@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 31 );
+    plan( tests => 48 );
 }
 
 my @c;
@@ -104,7 +104,7 @@ my $debugger_test =  q<
 sub pb { return (caller(0))[3] }
 
 my $i = eval $debugger_test;
-is( $i, 10, "do not skip over eval (and caller returns 10 elements)" );
+is( $i, 11, "do not skip over eval (and caller returns 10 elements)" );
 
 is( eval 'pb()', 'main::pb', "actually return the right function name" );
 
@@ -113,6 +113,73 @@ $^P = 16;
 $^P = $saved_perldb;
 
 $i = eval $debugger_test;
-is( $i, 10, 'do not skip over eval even if $^P had been on at some point' );
+is( $i, 11, 'do not skip over eval even if $^P had been on at some point' );
 is( eval 'pb()', 'main::pb', 'actually return the right function name even if $^P had been on at some point' );
 
+# caller can now return the compile time state of %^H
+sub get_dooot {
+    my $level = shift;
+    my @results = caller($level||0);
+    $results[10]->{dooot};
+}
+sub get_hash {
+    my $level = shift;
+    my @results = caller($level||0);
+    $results[10];
+}
+sub dooot {
+    is(get_dooot(), undef);
+    my $hash = get_hash();
+    ok(!exists $hash->{dooot});
+    is(get_dooot(1), 54);
+    BEGIN {
+	$^H{dooot} = 42;
+    }
+    is(get_dooot(), 6 * 7);
+    is(get_dooot(1), 54);
+
+    BEGIN {
+	$^H{dooot} = undef;
+    }
+    is(get_dooot(), undef);
+    $hash = get_hash();
+    ok(exists $hash->{dooot});
+
+    BEGIN {
+	delete $^H{dooot};
+    }
+    is(get_dooot(), undef);
+    $hash = get_hash();
+    ok(!exists $hash->{dooot});
+    is(get_dooot(1), 54);
+}
+{
+    is(get_dooot(), undef);
+    BEGIN {
+	$^H{dooot} = 1;
+    }
+	is(get_dooot(), 1);
+
+    BEGIN {
+	$^H{dooot} = 42;
+    }
+    {
+	{
+	    BEGIN {
+		$^H{dooot} = 6 * 9;
+	    }
+	    is(get_dooot(), 54);
+	    {
+		BEGIN {
+		    delete $^H{dooot};
+		}
+		is(get_dooot(), undef);
+		my $hash = get_hash();
+		ok(!exists $hash->{dooot});
+	    }
+	    dooot();
+	}
+	is(get_dooot(), 6 * 7);
+    }
+    is(get_dooot(), 6 * 7);
+}

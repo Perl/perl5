@@ -36,6 +36,11 @@ struct shared_he {
     struct hek shared_he_hek;
 };
 
+struct refcounted_he {
+    struct he refcounted_he_he;
+    U32 refcounted_he_refcnt;
+};
+
 /* Subject to change.
    Don't access this directly.
 */

@@ -1156,6 +1156,13 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    sv_setiv(GvSVn(gv), (IV)(IoFLAGS(GvIOp(PL_defoutgv)) & IOf_FLUSH) != 0);
 	    goto magicalize;
 
+	case '\010':	/* $^H */
+	    {
+		HV *const hv = GvHVn(gv);
+		hv_magic(hv, NULL, PERL_MAGIC_hints);
+	    }
+	    goto magicalize;
+
 	case '+':
 	{
 	    AV* const av = GvAVn(gv);
@@ -1194,7 +1201,6 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	case '\004':	/* $^D */
 	case '\005':	/* $^E */
 	case '\006':	/* $^F */
-	case '\010':	/* $^H */
 	case '\011':	/* $^I, NOT \t in EBCDIC */
 	case '\016':	/* $^N */
 	case '\017':	/* $^O */

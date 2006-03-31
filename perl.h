@@ -3105,9 +3105,9 @@ struct nexttoken {
 #include "cv.h"
 #include "opnames.h"
 #include "op.h"
+#include "hv.h"
 #include "cop.h"
 #include "av.h"
-#include "hv.h"
 #include "mg.h"
 #include "scope.h"
 #include "warnings.h"
@@ -3509,6 +3509,8 @@ Gid_t getegid (void);
 #define PERL_MAGIC_envelem	  'e' /* %ENV hash element */
 #define PERL_MAGIC_fm		  'f' /* Formline ('compiled' format) */
 #define PERL_MAGIC_regex_global	  'g' /* m//g target / study()ed string */
+#define PERL_MAGIC_hints	  'H' /* %^H hash */
+#define PERL_MAGIC_hintselem	  'h' /* %^H hash element */
 #define PERL_MAGIC_isa		  'I' /* @ISA array */
 #define PERL_MAGIC_isaelem	  'i' /* @ISA array element */
 #define PERL_MAGIC_nkeys	  'k' /* scalar(keys()) lvalue */
@@ -4161,7 +4163,8 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_backref,
     want_vtbl_utf8,
     want_vtbl_symtab,
-    want_vtbl_arylen_p
+    want_vtbl_arylen_p,
+    want_vtbl_hintselem
 };
 
 				/* Note: the lowest 8 bits are reserved for
@@ -4441,6 +4444,7 @@ MGVTBL_SET(
     NULL
 );
 
+/* For now, hints magic will also use vtbl_sig, because it is all NULL  */
 MGVTBL_SET(
     PL_vtbl_sig,
     NULL,
@@ -4792,6 +4796,18 @@ MGVTBL_SET(
     NULL
 );
 #endif
+
+MGVTBL_SET(
+    PL_vtbl_hintselem,
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_sethint),
+    NULL,
+    MEMBER_TO_FPTR(Perl_magic_clearhint),
+    NULL,
+    NULL,
+    NULL,
+    NULL
+);
 
 
 enum {

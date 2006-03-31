@@ -2838,6 +2838,46 @@ S_unwind_handler_stack(pTHX_ const void *p)
 }
 
 /*
+=for apidoc magic_sethint
+
+Triggered by a store to %^H, records the key/value pair to
+C<PL_compiling.cop_hints>.  It is assumed that hints aren't storing anything
+that would need a deep copy.  Maybe we should warn if we find a reference.
+
+=cut
+*/
+int
+Perl_magic_sethint(pTHX_ SV *sv, MAGIC *mg)
+{
+    dVAR;
+    assert(mg->mg_len == HEf_SVKEY);
+
+    PL_compiling.cop_hints
+	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints,
+				 (SV *)mg->mg_ptr, newSVsv(sv));
+    return 0;
+}
+
+/*
+=for apidoc magic_sethint
+
+Triggered by a delete from %^H, records the key to C<PL_compiling.cop_hints>.
+
+=cut
+*/
+int
+Perl_magic_clearhint(pTHX_ SV *sv, MAGIC *mg)
+{
+    dVAR;
+    assert(mg->mg_len == HEf_SVKEY);
+
+    PL_compiling.cop_hints
+	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints,
+				 (SV *)mg->mg_ptr, &PL_sv_placeholder);
+    return 0;
+}
+
+/*
  * Local variables:
  * c-indentation-style: bsd
  * c-basic-offset: 4

@@ -302,6 +302,16 @@ ApMdR	|HE*	|hv_iternext_flags|NN HV* tb|I32 flags
 ApdR	|SV*	|hv_iterval	|NN HV* tb|NN HE* entry
 Ap	|void	|hv_ksplit	|NN HV* hv|IV newmax
 Apdbm	|void	|hv_magic	|NN HV* hv|NULLOK GV* gv|int how
+#ifdef USE_ITHREADS
+dpoM|struct refcounted_he *|refcounted_he_dup \
+				|NULLOK const struct refcounted_he *const he \
+				|NN CLONE_PARAMS* param
+#endif
+dpoM	|HV *	|refcounted_he_chain_2hv|NULLOK const struct refcounted_he *c
+dpoM	|void	|refcounted_he_free|NULLOK struct refcounted_he *he
+dpoM	|struct refcounted_he *|refcounted_he_new \
+				|NULLOK struct refcounted_he *parent \
+				|NULLOK SV *key|NULLOK SV *value
 Apd	|SV**	|hv_store	|NULLOK HV* tb|NULLOK const char* key|I32 klen|NULLOK SV* val \
 				|U32 hash
 Apd	|HE*	|hv_store_ent	|NULLOK HV* tb|NULLOK SV* key|NULLOK SV* val|U32 hash
@@ -401,6 +411,7 @@ ApdR	|bool	|grok_numeric_radix|NN const char **sp|NN const char *send
 Apd	|UV	|grok_oct	|NN const char* start|NN STRLEN* len_p|NN I32* flags|NULLOK NV *result
 p	|int	|magic_clearenv	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_clear_all_env|NN SV* sv|NN MAGIC* mg
+dp	|int	|magic_clearhint|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_clearpack|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_clearsig	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_existspack|NN SV* sv|NN MAGIC* mg
@@ -431,6 +442,7 @@ p	|int	|magic_setdbline|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setdefelem|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setenv	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setfm	|NN SV* sv|NN MAGIC* mg
+dp	|int	|magic_sethint	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setisa	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setglob	|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_setmglob	|NN SV* sv|NN MAGIC* mg
@@ -1075,6 +1087,7 @@ sM	|SV*	|hv_delete_common|NULLOK HV* tb|NULLOK SV* keysv|NULLOK const char* key 
 		|STRLEN klen|int k_flags|I32 d_flags|U32 hash
 sM	|HE*	|hv_fetch_common|NULLOK HV* tb|NULLOK SV* keysv|NULLOK const char* key \
 		|STRLEN klen|int flags|int action|NULLOK SV* val|U32 hash
+sM	|void	|clear_placeholders	|NN HV* hb|U32 items
 #endif
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)

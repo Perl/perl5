@@ -1606,7 +1606,16 @@ void
 Perl_hv_clear_placeholders(pTHX_ HV *hv)
 {
     dVAR;
-    I32 items = (I32)HvPLACEHOLDERS_get(hv);
+    const U32 items = (U32)HvPLACEHOLDERS_get(hv);
+
+    if (items)
+	clear_placeholders(hv, items);
+}
+
+static void
+S_clear_placeholders(pTHX_ HV *hv, U32 items)
+{
+    dVAR;
     I32 i;
 
     if (items == 0)
@@ -2513,6 +2522,180 @@ Perl_hv_placeholders_set(pTHX_ HV *hv, I32 ph)
     }
     /* else we don't need to add magic to record 0 placeholders.  */
 }
+
+/*
+=for apidoc refcounted_he_chain_2hv
+
+Generates an returns a C<HV *> by walking up the tree starting at the passed
+in C<struct refcounted_he *>.
+
+=cut
+*/
+HV *
+Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
+{
+    HV *hv = newHV();
+    U32 placeholders = 0;
+    /* We could chase the chain once to get an idea of the number of keys,
+       and call ksplit.  But for now we'll make a potentially inefficient
+       hash with only 8 entries in its array.  */
+    const U32 max = HvMAX(hv);
+
+    if (!HvARRAY(hv)) {
+	char *array;
+	Newxz(array, PERL_HV_ARRAY_ALLOC_BYTES(max + 1), char);
+	HvARRAY(hv) = (HE**)array;
+    }
+
+    while (chain) {
+	const U32 hash = HEK_HASH(chain->refcounted_he_he.hent_hek);
+	HE **oentry = &((HvARRAY(hv))[hash & max]);
+	HE *entry = *oentry;
+
+	for (; entry; entry = HeNEXT(entry)) {
+	    if (HeHASH(entry) == hash) {
+		goto next_please;
+	    }
+	}
+	assert (!entry);
+	entry = new_HE();
+
+	HeKEY_hek(entry) = share_hek_hek(chain->refcounted_he_he.hent_hek);
+
+	HeVAL(entry) = chain->refcounted_he_he.he_valu.hent_val;
+	if (HeVAL(entry) == &PL_sv_placeholder)
+	    placeholders++;
+	SvREFCNT_inc_void_NN(HeVAL(entry));
+
+	/* Link it into the chain.  */
+	HeNEXT(entry) = *oentry;
+	if (!HeNEXT(entry)) {
+	    /* initial entry.   */
+	    HvFILL(hv)++;
+	}
+	*oentry = entry;
+
+	HvTOTALKEYS(hv)++;
+
+    next_please:
+	chain = (struct refcounted_he *) chain->refcounted_he_he.hent_next;
+    }
+
+    if (placeholders) {
+	clear_placeholders(hv, placeholders);
+	HvTOTALKEYS(hv) -= placeholders;
+    }
+
+    /* We could check in the loop to see if we encounter any keys with key
+       flags, but it's probably not worth it, as this per-hash flag is only
+       really meant as an optimisation for things like Storable.  */
+    HvHASKFLAGS_on(hv);
+#ifdef DEBUGGING
+    Perl_hv_assert(aTHX_ hv);
+#endif
+
+    return hv;
+}
+
+/*
+=for apidoc refcounted_he_new
+
+Creates a new C<struct refcounted_he>. Assumes ownership of one reference
+to I<value>. As S<key> is copied into a shared hash key, all references remain
+the property of the caller. The C<struct refcounted_he> is returned with a
+reference count of 1.
+
+=cut
+*/
+
+struct refcounted_he *
+Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent,
+		       SV *const key, SV *const value) {
+    struct refcounted_he *he;
+    U32 hash;
+    STRLEN len;
+    const char *p = SvPV_const(key, len);
+
+    PERL_HASH(hash, p, len);
+
+    Newx(he, 1, struct refcounted_he);
+
+    he->refcounted_he_he.hent_next = (HE *)parent;
+    he->refcounted_he_he.he_valu.hent_val = value;
+    he->refcounted_he_he.hent_hek
+	= share_hek(p, SvUTF8(key) ? -(I32)len : len, hash);
+    he->refcounted_he_refcnt = 1;
+
+    return he;
+}
+
+/*
+=for apidoc refcounted_he_free
+
+Decrements the reference count of the passed in C<struct refcounted_he *>
+by one. If the reference count reaches zero the structure's memory is freed,
+and C<refcounted_he_free> iterates onto the parent node.
+
+=cut
+*/
+
+void
+Perl_refcounted_he_free(pTHX_ struct refcounted_he *he) {
+    while (he) {
+	struct refcounted_he *copy;
+
+	if (--he->refcounted_he_refcnt)
+	    return;
+
+	unshare_hek_or_pvn (he->refcounted_he_he.hent_hek, 0, 0, 0);
+	SvREFCNT_dec(he->refcounted_he_he.he_valu.hent_val);
+	copy = he;
+	he = (struct refcounted_he *) he->refcounted_he_he.hent_next;
+	Safefree(copy);
+    }
+}
+
+
+/*
+=for apidoc refcounted_he_dup
+
+Duplicates the C<struct refcounted_he *> for a new thread.
+
+=cut
+*/
+
+#if defined(USE_ITHREADS)
+struct refcounted_he *
+Perl_refcounted_he_dup(pTHX_ const struct refcounted_he *const he,
+			CLONE_PARAMS* param)
+{
+    struct refcounted_he *copy;
+
+    if (!he)
+	return NULL;
+
+    /* look for it in the table first */
+    copy = (struct refcounted_he *)ptr_table_fetch(PL_ptr_table, he);
+    if (copy)
+	return copy;
+
+    /* create anew and remember what it is */
+    Newx(copy, 1, struct refcounted_he);
+    ptr_table_store(PL_ptr_table, he, copy);
+
+    copy->refcounted_he_he.hent_next
+	= (HE *)Perl_refcounted_he_dup(aTHX_
+				       (struct refcounted_he *)
+				       he->refcounted_he_he.hent_next,
+				       param);
+    copy->refcounted_he_he.he_valu.hent_val
+	= SvREFCNT_inc(sv_dup(he->refcounted_he_he.he_valu.hent_val, param));
+    copy->refcounted_he_he.hent_hek
+	= hek_dup(he->refcounted_he_he.hent_hek, param);
+    copy->refcounted_he_refcnt = he->refcounted_he_refcnt;
+    return copy;
+}
+#endif
 
 /*
 =for apidoc hv_assert

@@ -73,6 +73,28 @@ into peep() to do that code's portion of the 3rd pass.  It has to be
 recursive, but it's recursive on basic blocks, not on tree nodes.
 */
 
+/* To implement user lexical pragams, there needs to be a way at run time to
+   get the compile time state of %^H for that block.  Storing %^H in every
+   block (or even COP) would be very expensive, so a different approach is
+   taken.  The (running) state of %^H is serialised into a tree of HE-like
+   structs.  Stores into %^H are chained onto the current leaf as a struct
+   refcounted_he * with the key and the value.  Deletes from %^H are saved
+   with a value of PL_sv_placeholder.  The state of %^H at any point can be
+   turned back into a regular HV by walking back up the tree from that point's
+   leaf, ignoring any key you've already seen (placeholder or now), storing
+   the rest into the HV structure, then removing the placeholders. Hence
+   memory is only used to store the %^H deltas from the enclosing COP, rather
+   than the entire %^H on each COP.
+
+   To cause actions on %^H to write out the serialisation records, it has
+   magic type 'H'. This magic (itself) does nothing, but its presence causes
+   the values to gain magic type 'h', which has entries for set and clear.
+   C<Perl_magic_sethint> updates C<PL_compiling.cop_hints> with a store
+   record, with deletes written by C<Perl_magic_clearhint>. C<SAVE_HINTS>
+   saves the current C<PL_compiling.cop_hints> on the save stack, so that it
+   will be correctly restored when any inner compiling scope is exited.
+*/
+
 #include "EXTERN.h"
 #define PERL_IN_OP_C
 #include "perl.h"
@@ -492,6 +514,7 @@ S_cop_free(pTHX_ COP* cop)
 	SvREFCNT_dec(cop->cop_io);
 #endif
     }
+    Perl_refcounted_he_free(aTHX_ cop->cop_hints);
 }
 
 void
@@ -3928,7 +3951,10 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
         cop->cop_io = PL_curcop->cop_io;
     else
         cop->cop_io = newSVsv(PL_curcop->cop_io) ;
-
+    cop->cop_hints = PL_curcop->cop_hints;
+    if (cop->cop_hints) {
+	cop->cop_hints->refcounted_he_refcnt++;
+    }
 
     if (PL_copline == NOLINE)
         CopLINE_set(cop, CopLINE(PL_curcop));
