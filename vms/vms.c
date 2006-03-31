@@ -47,6 +47,12 @@
 #include <uicdef.h>
 #include <stsdef.h>
 #include <rmsdef.h>
+#if __CRTL_VER >= 70000000 /* FIXME to earliest version */
+#include <efndef.h>
+#define NO_EFN EFN$C_ENF
+#else
+#define NO_EFN 0;
+#endif
 
 #if  __CRTL_VER < 70301000 && __CRTL_VER >= 70300000
 int   decc$feature_get_index(const char *name);
@@ -56,6 +62,32 @@ int   decc$feature_set_value(int index, int mode, int value);
 #else
 #include <unixlib.h>
 #endif
+
+#pragma member_alignment save
+#pragma nomember_alignment longword
+struct item_list_3 {
+	unsigned short len;
+	unsigned short code;
+	void * bufadr;
+	unsigned short * retadr;
+};
+#pragma member_alignment restore
+
+/* More specific prototype than in starlet_c.h makes programming errors
+   more visible.
+ */
+#ifdef sys$getdviw
+#undef sys$getdviw
+#endif
+int sys$getdviw
+       (unsigned long efn,
+	unsigned short chan,
+	const struct dsc$descriptor_s * devnam,
+	const struct item_list_3 * itmlst,
+	void * iosb,
+	void * (astadr)(unsigned long),
+	void * astprm,
+	void * nullarg);
 
 #if __CRTL_VER >= 70300000 && !defined(__VAX)
 
@@ -3068,14 +3100,43 @@ pipe_mbxtofd_setup(pTHX_ int fd, char *out)
     /* things like terminals and mbx's don't need this filter */
     if (fd && fstat(fd,&s) == 0) {
         unsigned long dviitm = DVI$_DEVCHAR, devchar;
-        struct dsc$descriptor_s d_dev = {strlen(s.st_dev), DSC$K_DTYPE_T,
-                                         DSC$K_CLASS_S, s.st_dev};
+	char device[65];
+	unsigned short dev_len;
+	struct dsc$descriptor_s d_dev;
+	char * cptr;
+	struct item_list_3 items[3];
+	int status;
+	unsigned short dvi_iosb[4];
 
-        _ckvmssts(lib$getdvi(&dviitm,0,&d_dev,&devchar,0,0));
-        if (!(devchar & DEV$M_DIR)) {  /* non directory structured...*/
-            strcpy(out, s.st_dev);
-            return 0;
-        }
+	cptr = getname(fd, out, 1);
+	if (cptr == NULL) _ckvmssts(SS$_NOSUCHDEV);
+	d_dev.dsc$a_pointer = out;
+	d_dev.dsc$w_length = strlen(out);
+	d_dev.dsc$b_dtype = DSC$K_DTYPE_T;
+	d_dev.dsc$b_class = DSC$K_CLASS_S;
+
+	items[0].len = 4;
+	items[0].code = DVI$_DEVCHAR;
+	items[0].bufadr = &devchar;
+	items[0].retadr = NULL;
+	items[1].len = 64;
+	items[1].code = DVI$_FULLDEVNAM;
+	items[1].bufadr = device;
+	items[1].retadr = &dev_len;
+	items[2].len = 0;
+	items[2].code = 0;
+
+	status = sys$getdviw
+	        (NO_EFN, 0, &d_dev, items, dvi_iosb, NULL, NULL, NULL);
+	_ckvmssts(status);
+	if ($VMS_STATUS_SUCCESS(dvi_iosb[0])) {
+	    device[dev_len] = 0;
+
+	    if (!(devchar & DEV$M_DIR)) {
+		strcpy(out, device);
+		return 0;
+	    }
+	}
     }
 
     _ckvmssts(lib$get_vm(&n, &p));
@@ -3418,7 +3479,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
     unsigned int table = LIB$K_CLI_LOCAL_SYM;
     int j, wait = 0, n;
     char *p, mode[10], symbol[MAX_DCL_SYMBOL+1], *vmspipe;
-    char in[512], out[512], err[512], mbx[512];
+    char *in, *out, *err, mbx[512];
     FILE *tpipe = 0;
     char tfilebuf[NAM$C_MAXRSS+1];
     pInfo info = NULL;
@@ -3525,6 +3586,14 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
     info->in_done    = TRUE;
     info->out_done   = TRUE;
     info->err_done   = TRUE;
+
+    in = PerlMem_malloc(VMS_MAXRSS);
+    if (in == NULL) _ckvmssts(SS$_INSFMEM);
+    out = PerlMem_malloc(VMS_MAXRSS);
+    if (out == NULL) _ckvmssts(SS$_INSFMEM);
+    err = PerlMem_malloc(VMS_MAXRSS);
+    if (err == NULL) _ckvmssts(SS$_INSFMEM);
+
     in[0] = out[0] = err[0] = '\0';
 
     if ((p = strchr(mode,'F')) != NULL) {   /* F -> use FILE* */
@@ -3669,6 +3738,11 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
     strncpy(symbol, out, MAX_DCL_SYMBOL);
     d_symbol.dsc$w_length = strlen(symbol);
     _ckvmssts(lib$set_symbol(&d_sym_out, &d_symbol, &table));
+
+    /* Done with the names for the pipes */
+    PerlMem_free(err);
+    PerlMem_free(out);
+    PerlMem_free(in);
 
     p = vmscmd->dsc$a_pointer;
     while (*p == ' ' || *p == '\t') p++;        /* remove leading whitespace */
@@ -9942,6 +10016,11 @@ static mydev_t encode_dev (pTHX_ const char *dev)
   return (enc | LOCKID_MASK);  /* May have already overflowed into bit 31 */
 
 }  /* end of encode_dev() */
+#define VMS_DEVICE_ENCODE(device_no, devname, new_dev_no) \
+	device_no = encode_dev(aTHX_ devname)
+#else
+#define VMS_DEVICE_ENCODE(device_no, devname, new_dev_no) \
+	device_no = new_dev_no
 #endif
 
 static int
@@ -10127,9 +10206,8 @@ Perl_flex_fstat(pTHX_ int fd, Stat_t *statbufp)
     PerlMem_free(vms_filename);
 
     VMS_INO_T_COPY(statbufp->st_ino, statbufp->crtl_stat.st_ino);
-#ifndef _USE_STD_STAT
-    statbufp->st_dev = encode_dev(aTHX_ statbufp->st_devnam);
-#endif
+    VMS_DEVICE_ENCODE
+	(statbufp->st_dev, statbufp->st_devnam, statbufp->crtl_stat.st_dev);
 
 #   ifdef RTL_USES_UTC
 #   ifdef VMSISH_TIME
@@ -10186,7 +10264,7 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
     if (decc_bug_devnull != 0) {
       if (is_null_device(temp_fspec)) { /* Fake a stat() for the null device */
 	memset(statbufp,0,sizeof *statbufp);
-	statbufp->st_dev = encode_dev(aTHX_ "_NLA0:");
+        VMS_DEVICE_ENCODE(statbufp->st_dev, "_NLA0:", 0);
 	statbufp->st_mode = S_IFBLK | S_IREAD | S_IWRITE | S_IEXEC;
 	statbufp->st_uid = 0x00010001;
 	statbufp->st_gid = 0x0001;
@@ -10240,9 +10318,8 @@ Perl_flex_stat_int(pTHX_ const char *fspec, Stat_t *statbufp, int lstat_flag)
 	statbufp->st_devnam[0] = 0;
 
       VMS_INO_T_COPY(statbufp->st_ino, statbufp->crtl_stat.st_ino);
-#ifndef _USE_STD_STAT
-      statbufp->st_dev = encode_dev(aTHX_ statbufp->st_devnam);
-#endif
+      VMS_DEVICE_ENCODE
+	(statbufp->st_dev, statbufp->st_devnam, statbufp->crtl_stat.st_dev);
 #     ifdef RTL_USES_UTC
 #     ifdef VMSISH_TIME
       if (VMSISH_TIME) {

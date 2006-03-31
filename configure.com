@@ -50,6 +50,7 @@ $ use_vmsdebug_perl = "n"
 $ use64bitall = "n"
 $ use64bitint = "n"
 $ uselargefiles = "n"
+$ usestdstat = "n"
 $ usesitecustomize = "n"
 $ C_Compiler_Replace = "CC="
 $ thread_upcalls = "MTU="
@@ -4872,6 +4873,8 @@ $  ENDIF
 $!
 $  IF uselargefiles .OR. uselargefiles .eqs. "define"
 $  THEN
+$    echo4 "Largefile support enabled (plus standard stat support on V8.2 and later)"
+$    usestdstat = "y"
 $    IF (vms_ver .GES. "8.2") .AND. (archname .NES. "VMS_VAX")
 $    THEN
 $      echo4 -
@@ -5616,13 +5619,12 @@ $ WC "cccdlflags='" + cccdlflags + "'"
 $ WC "ccdlflags='" + ccdlflags + "'"
 $ IF uselargefiles .OR. uselargefiles .EQS. "define"
 $ THEN
-$!    Perl can not use _USE_STD_STAT at the moment
-$!    IF d_symlink .OR. d_symlink .EQS. "define"
-$!    THEN
-$!	ccdefines = "_USE_STD_STAT=1"
-$!    ELSE
+$    IF usestdstat .OR. usestdstat .EQS. "define"
+$    THEN
+$	ccdefines = "_USE_STD_STAT=1"
+$    ELSE
 $	ccdefines = "_LARGEFILE=1"
-$!    ENDIF
+$    ENDIF
 $ ELSE
 $     ccdefines = ""
 $ ENDIF
@@ -6653,13 +6655,12 @@ $   MALLOC_REPLACE = "MALLOC="
 $ ENDIF
 $ IF uselargefiles .OR. uselargefiles .EQS. "define"
 $ THEN
-$!    Perl can not use _USE_STD_STAT at the moment
-$!   IF d_symlink .or. d_symlink .eqs. "define"
-$!   THEN
-$!      LARGEFILE_REPLACE = "LARGEFILE=LARGEFILE=_USE_STD_STAT=1"
-$!   ELSE
+$   IF usestdstat .or. usestdstat .eqs. "define"
+$   THEN
+$      LARGEFILE_REPLACE = "LARGEFILE=LARGEFILE=_USE_STD_STAT=1"
+$   ELSE
 $      LARGEFILE_REPLACE = "LARGEFILE=LARGEFILE=_LARGEFILE=1"
-$!   ENDIF
+$   ENDIF
 $ ELSE
 $   LARGEFILE_REPLACE = "LARGEFILE="
 $ ENDIF

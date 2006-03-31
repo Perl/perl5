@@ -717,7 +717,7 @@ struct mystat
 
 #ifdef _USE_STD_STAT
 #define VMS_INO_T_COMPARE(__a, __b) (__a != __b)
-#define VMS_INO_T_COPY(__a, __b) a = b
+#define VMS_INO_T_COPY(__a, __b) __a = __b
 #else
 #define VMS_INO_T_COMPARE(__a, __b) memcmp(&__a, &__b, 6)
 #define VMS_INO_T_COPY(__a, __b) memcpy(&__a, &__b, 6)
