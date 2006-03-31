@@ -2852,6 +2852,11 @@ Perl_magic_sethint(pTHX_ SV *sv, MAGIC *mg)
     dVAR;
     assert(mg->mg_len == HEf_SVKEY);
 
+    /* mg->mg_obj isn't being used.  If needed, it would be possible to store
+       an alternative leaf in there, with PL_compiling.cop_hints being used if
+       it's NULL. If needed for threads, the alternative could lock a mutex,
+       or take other more complex action.  */
+
     PL_compiling.cop_hints
 	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints,
 				 (SV *)mg->mg_ptr, newSVsv(sv));
