@@ -4200,7 +4200,7 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_ASSERTING          0x01000000
 #define HINT_ASSERTIONSSEEN     0x02000000
 
-/* The following are stored in $sort::hints, not in PL_hints */
+/* The following are stored in $^H{sort}, not in PL_hints */
 #define HINT_SORT_SORT_BITS	0x000000FF /* allow 256 different ones */
 #define HINT_SORT_QUICKSORT	0x00000001
 #define HINT_SORT_MERGESORT	0x00000002
