@@ -73,7 +73,7 @@ into peep() to do that code's portion of the 3rd pass.  It has to be
 recursive, but it's recursive on basic blocks, not on tree nodes.
 */
 
-/* To implement user lexical pragams, there needs to be a way at run time to
+/* To implement user lexical pragmas, there needs to be a way at run time to
    get the compile time state of %^H for that block.  Storing %^H in every
    block (or even COP) would be very expensive, so a different approach is
    taken.  The (running) state of %^H is serialised into a tree of HE-like
@@ -81,7 +81,7 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
    refcounted_he * with the key and the value.  Deletes from %^H are saved
    with a value of PL_sv_placeholder.  The state of %^H at any point can be
    turned back into a regular HV by walking back up the tree from that point's
-   leaf, ignoring any key you've already seen (placeholder or now), storing
+   leaf, ignoring any key you've already seen (placeholder or not), storing
    the rest into the HV structure, then removing the placeholders. Hence
    memory is only used to store the %^H deltas from the enclosing COP, rather
    than the entire %^H on each COP.
