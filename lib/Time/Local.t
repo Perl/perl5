@@ -67,7 +67,7 @@ if ($^O eq 'VMS') {
 my $tests = (@time * 12);
 $tests += @neg_time * 12;
 $tests += @bad_time;
-$tests += 8;
+$tests += 6;
 $tests += 2 if $ENV{PERL_CORE};
 $tests += 6 if $ENV{MAINTAINER};
 
@@ -88,12 +88,12 @@ for (@time, @neg_time) {
 
         my($s,$m,$h,$D,$M,$Y) = localtime($time);
 
-        ok($s, $sec, 'timelocal second');
-        ok($m, $min, 'timelocal minute');
-        ok($h, $hour, 'timelocal hour');
-        ok($D, $mday, 'timelocal day');
-        ok($M, $mon, 'timelocal month');
-        ok($Y, $year, 'timelocal year');
+        ok($s, $sec, "timelocal second for @$_");
+        ok($m, $min, "timelocal minute for @$_");
+        ok($h, $hour, "timelocal hour for @$_");
+        ok($D, $mday, "timelocal day for @$_");
+        ok($M, $mon, "timelocal month for @$_");
+        ok($Y, $year, "timelocal year for @$_");
     }
 
     if ($^O eq 'vos' && $year == 70) {
@@ -106,12 +106,12 @@ for (@time, @neg_time) {
 
         my($s,$m,$h,$D,$M,$Y) = gmtime($time);
 
-        ok($s, $sec, 'timegm second');
-        ok($m, $min, 'timegm minute');
-        ok($h, $hour, 'timegm hour');
-        ok($D, $mday, 'timegm day');
-        ok($M, $mon, 'timegm month');
-        ok($Y, $year, 'timegm year');
+        ok($s, $sec, "timegm second for @$_");
+        ok($m, $min, "timegm minute for @$_");
+        ok($h, $hour, "timegm hour for @$_");
+        ok($D, $mday, "timegm day for @$_");
+        ok($M, $mon, "timegm month for @$_");
+        ok($Y, $year, "timegm year for @$_");
     }
 }
 
@@ -155,17 +155,6 @@ if ($neg_epoch_ok) {
     ok($@, '');
 } else {
     skip(1, "skipping negative epoch.\n") for 1..2;
-}
-
-# round trip was broken for edge cases
-if ($^O eq "aix" && $Config{osvers} =~ m/^4\.3\./) {
-    skip( 1, "No fix expected for edge case test for $_ on AIX 4.3") for qw( timegm timelocal );
-} else {
-    ok(sprintf('%x', timegm(gmtime(0x7fffffff))), sprintf('%x', 0x7fffffff),
-       '0x7fffffff round trip through gmtime then timegm');
-
-    ok(sprintf('%x', timelocal(localtime(0x7fffffff))), sprintf('%x', 0x7fffffff),
-       '0x7fffffff round trip through localtime then timelocal');
 }
 
 if ($ENV{MAINTAINER}) {
