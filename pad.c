@@ -287,7 +287,7 @@ Perl_pad_undef(pTHX_ CV* cv)
 			CvWEAKOUTSIDE_off(innercv);
 			CvOUTSIDE(innercv) = outercv;
 			CvOUTSIDE_SEQ(innercv) = seq;
-			SvREFCNT_inc_void_NN(outercv);
+			SvREFCNT_inc_simple_void_NN(outercv);
 		    }
 		    else {
 			CvOUTSIDE(innercv) = NULL;
@@ -352,7 +352,7 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
     if (ourstash) {
 	SvPAD_OUR_on(namesv);
 	OURSTASH_set(namesv, ourstash);
-	SvREFCNT_inc_void_NN(ourstash);
+	SvREFCNT_inc_simple_void_NN(ourstash);
     }
 
     av_store(PL_comppad_name, offset, namesv);
@@ -1493,7 +1493,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 		}
 		else {
 		    assert(!SvPADSTALE(sv));
-		    SvREFCNT_inc_simple_void(sv);
+		    SvREFCNT_inc_simple_void_NN(sv);
 		}
 	    }
 	    if (!sv) {
@@ -1510,7 +1510,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 	    }
 	}
 	else if (IS_PADGV(ppad[ix]) || IS_PADCONST(ppad[ix])) {
-	    sv = SvREFCNT_inc(ppad[ix]);
+	    sv = SvREFCNT_inc_NN(ppad[ix]);
 	}
 	else {
 	    sv = newSV(0);
@@ -1626,7 +1626,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 		}
 	    }
 	    else if (IS_PADGV(oldpad[ix]) || IS_PADCONST(oldpad[ix])) {
-		av_store(newpad, ix, SvREFCNT_inc(oldpad[ix]));
+		av_store(newpad, ix, SvREFCNT_inc_NN(oldpad[ix]));
 	    }
 	    else {
 		/* save temporaries on recursion? */

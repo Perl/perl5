@@ -614,7 +614,7 @@ PerlIO_list_push(pTHX_ PerlIO_list_t *list, PerlIO_funcs *funcs, SV *arg)
     p = &(list->array[list->cur++]);
     p->funcs = funcs;
     if ((p->arg = arg)) {
-	SvREFCNT_inc_void_NN(arg);
+	SvREFCNT_inc_simple_void_NN(arg);
     }
 }
 

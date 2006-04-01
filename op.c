@@ -5121,7 +5121,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	}
     }
     if (const_sv) {
-	SvREFCNT_inc_void_NN(const_sv);
+	SvREFCNT_inc_simple_void_NN(const_sv);
 	if (cv) {
 	    assert(!CvROOT(cv) && !CvCONST(cv));
 	    sv_setpvn((SV*)cv, "", 0);  /* prototype is "" */
