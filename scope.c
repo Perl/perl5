@@ -895,8 +895,28 @@ Perl_leave_scope(pTHX_ I32 base)
 	    if (PL_hints & HINT_LOCALIZE_HH) {
 		SvREFCNT_dec((SV*)GvHV(PL_hintgv));
 		GvHV(PL_hintgv) = (HV*)SSPOPPTR;
+		assert(GvHV(PL_hintgv));
+	    } else if (!GvHV(PL_hintgv)) {
+		/* Need to add a new one manually, else gv_fetchpv() can
+		   add one in this code:
+		   
+		   if (SvTYPE(gv) == SVt_PVGV) {
+		       if (add) {
+		       GvMULTI_on(gv);
+		       gv_init_sv(gv, sv_type);
+		       if (*name=='!' && sv_type == SVt_PVHV && len==1)
+			   require_errno(gv);
+		       }
+		       return gv;
+		   }
+
+		   and it won't have the magic set.  */
+
+		HV *const hv = newHV();
+		hv_magic(hv, NULL, PERL_MAGIC_hints);
+		GvHV(PL_hintgv) = hv;
 	    }
-		    
+	    assert(GvHV(PL_hintgv));
 	    break;
 	case SAVEt_COMPPAD:
 	    PL_comppad = (PAD*)SSPOPPTR;

@@ -5937,7 +5937,8 @@ Perl_ck_eval(pTHX_ OP *o)
     o->op_targ = (PADOFFSET)PL_hints;
     if ((PL_hints & HINT_LOCALIZE_HH) != 0 && GvHV(PL_hintgv)) {
 	/* Store a copy of %^H that pp_entereval can pick up */
-	OP *hhop = newSVOP(OP_CONST, 0, (SV*)newHVhv(GvHV(PL_hintgv)));
+	OP *hhop = newSVOP(OP_CONST, 0,
+			   (SV*)Perl_hv_copy_hints_hv(aTHX_ GvHV(PL_hintgv)));
 	cUNOPo->op_first->op_sibling = hhop;
 	o->op_private |= OPpEVAL_HAS_HH;
     }

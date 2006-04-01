@@ -1,7 +1,6 @@
 package feature;
 
 our $VERSION = '1.00';
-$feature::hint_bits = 0x00020000; # HINT_LOCALIZE_HH
 
 # (feature name) => (internal name, used in %^H)
 my %feature = (
@@ -93,8 +92,6 @@ to C<use feature qw(switch ~~ say err)>.
 =cut
 
 sub import {
-    $^H |= $feature::hint_bits;	# Need this or %^H won't work
-
     my $class = shift;
     if (@_ == 0) {
 	require Carp;

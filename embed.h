@@ -2438,6 +2438,8 @@
 #define gv_stashpvn(a,b,c)	Perl_gv_stashpvn(aTHX_ a,b,c)
 #define gv_stashsv(a,b)		Perl_gv_stashsv(aTHX_ a,b)
 #define hv_clear(a)		Perl_hv_clear(aTHX_ a)
+#ifdef PERL_CORE
+#endif
 #define hv_delayfree_ent(a,b)	Perl_hv_delayfree_ent(aTHX_ a,b)
 #define hv_delete(a,b,c,d)	Perl_hv_delete(aTHX_ a,b,c,d)
 #define hv_delete_ent(a,b,c,d)	Perl_hv_delete_ent(aTHX_ a,b,c,d)

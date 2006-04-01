@@ -657,6 +657,9 @@ PERL_CALLCONV HV*	Perl_gv_stashpvn(pTHX_ const char* name, U32 namelen, I32 crea
 
 PERL_CALLCONV HV*	Perl_gv_stashsv(pTHX_ SV* sv, I32 create);
 PERL_CALLCONV void	Perl_hv_clear(pTHX_ HV* tb);
+PERL_CALLCONV HV *	Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV void	Perl_hv_delayfree_ent(pTHX_ HV* hv, HE* entry)
 			__attribute__nonnull__(pTHX_1);
 

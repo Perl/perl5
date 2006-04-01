@@ -2857,6 +2857,10 @@ Perl_magic_sethint(pTHX_ SV *sv, MAGIC *mg)
        it's NULL. If needed for threads, the alternative could lock a mutex,
        or take other more complex action.  */
 
+    /* Something changed in %^H, so it will need to be restored on scope exit.
+       Doing this here saves a lot of doing it manually in perl code (and
+       forgetting to do it, and consequent subtle errors.  */
+    PL_hints |= HINT_LOCALIZE_HH;
     PL_compiling.cop_hints
 	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints,
 				 (SV *)mg->mg_ptr, newSVsv(sv));
@@ -2876,6 +2880,7 @@ Perl_magic_clearhint(pTHX_ SV *sv, MAGIC *mg)
     dVAR;
     assert(mg->mg_len == HEf_SVKEY);
 
+    PL_hints |= HINT_LOCALIZE_HH;
     PL_compiling.cop_hints
 	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints,
 				 (SV *)mg->mg_ptr, &PL_sv_placeholder);

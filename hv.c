@@ -1491,6 +1491,39 @@ Perl_newHVhv(pTHX_ HV *ohv)
     return hv;
 }
 
+/* A rather specialised version of newHVhv for copying %^H, ensuring all the
+   magic stays on it.  */
+HV *
+Perl_hv_copy_hints_hv(pTHX_ HV *const ohv)
+{
+    HV * const hv = newHV();
+    STRLEN hv_fill;
+
+    if (ohv && (hv_fill = HvFILL(ohv))) {
+	STRLEN hv_max = HvMAX(ohv);
+	HE *entry;
+	const I32 riter = HvRITER_get(ohv);
+	HE * const eiter = HvEITER_get(ohv);
+
+	while (hv_max && hv_max + 1 >= hv_fill * 2)
+	    hv_max = hv_max / 2;
+	HvMAX(hv) = hv_max;
+
+	hv_iterinit(ohv);
+	while ((entry = hv_iternext_flags(ohv, 0))) {
+	    SV *const sv = newSVsv(HeVAL(entry));
+	    sv_magic(sv, NULL, PERL_MAGIC_hintselem,
+		     (char *)newSVhek (HeKEY_hek(entry)), HEf_SVKEY);
+	    hv_store_flags(hv, HeKEY(entry), HeKLEN(entry),
+			   sv, HeHASH(entry), HeKFLAGS(entry));
+	}
+	HvRITER_set(ohv, riter);
+	HvEITER_set(ohv, eiter);
+    }
+    hv_magic(hv, NULL, PERL_MAGIC_hints);
+    return hv;
+}
+
 void
 Perl_hv_free_ent(pTHX_ HV *hv, register HE *entry)
 {

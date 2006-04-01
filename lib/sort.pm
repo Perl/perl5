@@ -5,8 +5,6 @@ our $VERSION = '2.00';
 # The hints for pp_sort are now stored in $^H{sort}; older versions
 # of perl used the global variable $sort::hints. -- rjh 2005-12-19
 
-$sort::hint_bits = 0x00020000; # HINT_LOCALIZE_HH
-
 $sort::quicksort_bit   = 0x00000001;
 $sort::mergesort_bit   = 0x00000002;
 $sort::sort_bits       = 0x000000FF; # allow 256 different ones

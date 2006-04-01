@@ -31,7 +31,6 @@ use warnings;
 
 sub import {
     $^H{mypragma} = 1;
-    $^H |= 0x00020000;
 }
 
 sub unimport {

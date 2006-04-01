@@ -285,6 +285,7 @@ Apd	|HV*	|gv_stashpv	|NN const char* name|I32 create
 Apd	|HV*	|gv_stashpvn	|NN const char* name|U32 namelen|I32 create
 Apd	|HV*	|gv_stashsv	|NULLOK SV* sv|I32 create
 Apd	|void	|hv_clear	|NULLOK HV* tb
+poM	|HV *	|hv_copy_hints_hv|NN HV *const ohv
 Ap	|void	|hv_delayfree_ent|NN HV* hv|NULLOK HE* entry
 Apd	|SV*	|hv_delete	|NULLOK HV* tb|NN const char* key|I32 klen|I32 flags
 Apd	|SV*	|hv_delete_ent	|NULLOK HV* tb|NN SV* key|I32 flags|U32 hash

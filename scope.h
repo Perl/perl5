@@ -153,7 +153,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 	SSCHECK(4);					\
 	if (PL_hints & HINT_LOCALIZE_HH) {		\
 	    SSPUSHPTR(GvHV(PL_hintgv));			\
-	    GvHV(PL_hintgv) = newHVhv(GvHV(PL_hintgv));	\
+	    GvHV(PL_hintgv) = Perl_hv_copy_hints_hv(aTHX_ GvHV(PL_hintgv)); \
 	}						\
 	if (PL_compiling.cop_hints) {			\
 	    PL_compiling.cop_hints->refcounted_he_refcnt++;	\
