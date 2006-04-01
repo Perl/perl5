@@ -7,7 +7,7 @@ BEGIN {
 
 use strict;
 use warnings;
-use Test::More tests => 5;
+use Test::More tests => 9;
 
 use mypragma (); # don't enable this pragma yet
 
@@ -17,10 +17,17 @@ BEGIN {
 
 is(mypragma::in_effect(), undef, "pragma not in effect yet");
 {
+    is(mypragma::in_effect(), undef, "pragma not in effect yet");
+    eval qq{is(mypragma::in_effect(), undef, "pragma not in effect yet"); 1}
+	or die $@;
+
     use mypragma;
     is(mypragma::in_effect(), 1, "pragma is in effect within this block");
+    eval qq{is(mypragma::in_effect(), 1,
+	       "pragma is in effect within this eval"); 1} or die $@;
 }
 is(mypragma::in_effect(), undef, "pragma no longer in effect");
+eval qq{is(mypragma::in_effect(), undef, "pragma not in effect"); 1} or die $@;
 
 
 BEGIN {
