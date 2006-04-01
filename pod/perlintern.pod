@@ -485,6 +485,16 @@ in C<struct refcounted_he *>.
 =for hackers
 Found in file hv.c
 
+=item refcounted_he_copy
+X<refcounted_he_copy>
+
+Copies a chain of C<struct refcounted_he *>. Used by C<pp_entereval>.
+
+	struct refcounted_he *	refcounted_he_copy(const struct refcounted_he *he)
+
+=for hackers
+Found in file hv.c
+
 =item refcounted_he_dup
 X<refcounted_he_dup>
 
@@ -515,7 +525,7 @@ to I<value>. As S<key> is copied into a shared hash key, all references remain
 the property of the caller. The C<struct refcounted_he> is returned with a
 reference count of 1.
 
-	struct refcounted_he *	refcounted_he_new(struct refcounted_he *parent, SV *key, SV *value)
+	struct refcounted_he *	refcounted_he_new(struct refcounted_he *const parent, SV *key, SV *value)
 
 =for hackers
 Found in file hv.c

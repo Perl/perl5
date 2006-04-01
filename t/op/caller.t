@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 56 );
+    plan( tests => 64 );
 }
 
 my @c;
@@ -200,4 +200,28 @@ sub dooot {
     }
     is(get_dooot(), 6 * 7);
     is(get_thikoosh(), "SKREECH");
+}
+
+print "# which now works inside evals\n";
+
+{
+    BEGIN {
+	$^H{dooot} = 42;
+    }
+    is(get_dooot(), 6 * 7);
+
+    eval "is(get_dooot(), 6 * 7); 1" or die $@;
+
+    eval <<'EOE' or die $@;
+    is(get_dooot(), 6 * 7);
+    eval "is(get_dooot(), 6 * 7); 1" or die $@;
+    BEGIN {
+	$^H{dooot} = 54;
+    }
+    is(get_dooot(), 54);
+    eval "is(get_dooot(), 54); 1" or die $@;
+    eval 'BEGIN { $^H{dooot} = -1; }; 1' or die $@;
+    is(get_dooot(), 54);
+    eval "is(get_dooot(), 54); 1" or die $@;
+EOE
 }

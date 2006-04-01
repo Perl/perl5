@@ -721,6 +721,7 @@ PERL_CALLCONV void	Perl_hv_ksplit(pTHX_ HV* hv, IV newmax)
 			__attribute__nonnull__(pTHX_1); */
 
 #ifdef USE_ITHREADS
+PERL_CALLCONV struct refcounted_he *	Perl_refcounted_he_copy(pTHX_ const struct refcounted_he *he);
 PERL_CALLCONV struct refcounted_he *	Perl_refcounted_he_dup(pTHX_ const struct refcounted_he *const he, CLONE_PARAMS* param)
 			__attribute__nonnull__(pTHX_2);
 

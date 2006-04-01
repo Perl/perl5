@@ -3476,6 +3476,29 @@ PP(pp_entereval)
         PL_compiling.cop_io = newSVsv(PL_curcop->cop_io);
         SAVEFREESV(PL_compiling.cop_io);
     }
+    if (PL_compiling.cop_hints) {
+	PL_compiling.cop_hints->refcounted_he_refcnt--;
+    }
+    PL_compiling.cop_hints = PL_curcop->cop_hints;
+    if (PL_compiling.cop_hints) {
+#ifdef USE_ITHREADS
+	/* PL_curcop could be pointing to an optree owned by another /.*parent/
+	   thread. We can't manipulate the reference count of the refcounted he
+	   there (race condition) so we have to do something less than
+	   pleasant to keep it read only. The simplest solution seems to be to
+	   copy their chain. We might want to cache this.
+	   Alternatively we could add a flag to the refcounted he *we* point to
+	   here saying "I don't own a reference count on the thing I point to",
+	   and arrange for Perl_refcounted_he_free() to spot that. If so, we'd
+	   still need to copy the topmost refcounted he so that we could change
+	   its flag. So still not trivial. (Flag bits could be hung from the
+	   shared HEK) */
+	PL_compiling.cop_hints
+	    = Perl_refcounted_he_copy(aTHX_ PL_compiling.cop_hints);
+#else
+	PL_compiling.cop_hints->refcounted_he_refcnt++;
+#endif
+    }
     /* special case: an eval '' executed within the DB package gets lexically
      * placed in the first non-DB CV rather than the current CV - this
      * allows the debugger to execute code, find lexicals etc, in the

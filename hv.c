@@ -2695,6 +2695,39 @@ Perl_refcounted_he_dup(pTHX_ const struct refcounted_he *const he,
     copy->refcounted_he_refcnt = he->refcounted_he_refcnt;
     return copy;
 }
+
+/*
+=for apidoc refcounted_he_copy
+
+Copies a chain of C<struct refcounted_he *>. Used by C<pp_entereval>.
+
+=cut
+*/
+
+struct refcounted_he *
+Perl_refcounted_he_copy(pTHX_ const struct refcounted_he * he)
+{
+    struct refcounted_he *copy;
+    HEK *hek;
+    /* This is much easier to express recursively than iteratively.  */
+    if (!he)
+	return NULL;
+
+    Newx(copy, 1, struct refcounted_he);
+    copy->refcounted_he_he.hent_next
+	= (HE *)Perl_refcounted_he_copy(aTHX_
+				       (struct refcounted_he *)
+				       he->refcounted_he_he.hent_next);
+    copy->refcounted_he_he.he_valu.hent_val
+	= newSVsv(he->refcounted_he_he.he_valu.hent_val);
+    hek = he->refcounted_he_he.hent_hek;
+    copy->refcounted_he_he.hent_hek
+	= share_hek(HEK_KEY(hek),
+		    HEK_UTF8(hek) ? -(I32)HEK_LEN(hek) : HEK_LEN(hek),
+		    HEK_HASH(hek));
+    copy->refcounted_he_refcnt = 1;
+    return copy;
+}
 #endif
 
 /*
