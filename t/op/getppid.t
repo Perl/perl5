@@ -23,7 +23,7 @@ BEGIN {
 	}
     }
     require './test.pl';
-    plan (7);
+    plan (8);
 }
 
 sub fork_and_retrieve {
@@ -69,3 +69,4 @@ sub fork_and_retrieve {
 my $first = fork_and_retrieve("first");
 my $second = fork_and_retrieve("second");
 is ($first, $second, "Both orphaned grandchildren get the same new parent");
+isnt ($first, $$, "And that new parent isn't this process");
