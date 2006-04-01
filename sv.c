@@ -10869,7 +10869,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     if (!specialCopIO(PL_compiling.cop_io))
 	PL_compiling.cop_io = sv_dup_inc(PL_compiling.cop_io, param);
     PL_compiling.cop_hints
-	= Perl_refcounted_he_dup(aTHX_ PL_compiling.cop_hints, proto_perl);
+	= Perl_refcounted_he_dup(aTHX_ PL_compiling.cop_hints, param);
     PL_curcop		= (COP*)any_dup(proto_perl->Tcurcop, proto_perl);
 
     /* pseudo environmental stuff */

@@ -727,7 +727,7 @@ PERL_CALLCONV struct refcounted_he *	Perl_refcounted_he_dup(pTHX_ const struct r
 #endif
 PERL_CALLCONV HV *	Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *c);
 PERL_CALLCONV void	Perl_refcounted_he_free(pTHX_ struct refcounted_he *he);
-PERL_CALLCONV struct refcounted_he *	Perl_refcounted_he_new(pTHX_ struct refcounted_he *parent, SV *key, SV *value);
+PERL_CALLCONV struct refcounted_he *	Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent, SV *key, SV *value);
 PERL_CALLCONV SV**	Perl_hv_store(pTHX_ HV* tb, const char* key, I32 klen, SV* val, U32 hash);
 PERL_CALLCONV HE*	Perl_hv_store_ent(pTHX_ HV* tb, SV* key, SV* val, U32 hash);
 PERL_CALLCONV SV**	Perl_hv_store_flags(pTHX_ HV* tb, const char* key, I32 klen, SV* val, U32 hash, int flags);
@@ -3733,7 +3733,7 @@ STATIC STRLEN	S_sv_pos_u2b_forwards(pTHX_ const U8 *const start, const U8 *const
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC STRLEN	S_sv_pos_u2b_midway(pTHX_ const U8 *const start, const U8 *const send, STRLEN uoffset, STRLEN uend)
+STATIC STRLEN	S_sv_pos_u2b_midway(pTHX_ const U8 *const start, const U8 *send, STRLEN uoffset, STRLEN uend)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
