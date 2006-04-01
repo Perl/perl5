@@ -7688,9 +7688,11 @@ Perl_newSVrv(pTHX_ SV *rv, const char *classname)
 	sv_clear(rv);
 	SvFLAGS(rv) = 0;
 	SvREFCNT(rv) = refcnt;
-    }
 
-    if (SvTYPE(rv) < SVt_RV)
+	sv_upgrade(rv, SVt_RV);
+    } else if (SvROK(rv)) {
+	SvREFCNT_dec(SvRV(rv));
+    } else if (SvTYPE(rv) < SVt_RV)
 	sv_upgrade(rv, SVt_RV);
     else if (SvTYPE(rv) > SVt_RV) {
 	SvPV_free(rv);
