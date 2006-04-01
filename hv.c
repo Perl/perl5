@@ -2590,9 +2590,7 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
        flags, but it's probably not worth it, as this per-hash flag is only
        really meant as an optimisation for things like Storable.  */
     HvHASKFLAGS_on(hv);
-#ifdef DEBUGGING
-    Perl_hv_assert(aTHX_ hv);
-#endif
+    DEBUG_A(Perl_hv_assert(aTHX_ hv));
 
     return hv;
 }
