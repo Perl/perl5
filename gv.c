@@ -1408,8 +1408,8 @@ Perl_gp_free(pTHX_ GV *gv)
         return;
     }
 
-    if (gp->gp_sv) SvREFCNT_dec(gp->gp_sv);
-    if (gp->gp_av) SvREFCNT_dec(gp->gp_av);
+    SvREFCNT_dec(gp->gp_sv);
+    SvREFCNT_dec(gp->gp_av);
     /* FIXME - another reference loop GV -> symtab -> GV ?
        Somehow gp->gp_hv can end up pointing at freed garbage.  */
     if (gp->gp_hv && SvTYPE(gp->gp_hv) == SVt_PVHV) {
@@ -1419,9 +1419,9 @@ Perl_gp_free(pTHX_ GV *gv)
 		      G_DISCARD);
 	SvREFCNT_dec(gp->gp_hv);
     }
-    if (gp->gp_io)   SvREFCNT_dec(gp->gp_io);
-    if (gp->gp_cv)   SvREFCNT_dec(gp->gp_cv);
-    if (gp->gp_form) SvREFCNT_dec(gp->gp_form);
+    SvREFCNT_dec(gp->gp_io);
+    SvREFCNT_dec(gp->gp_cv);
+    SvREFCNT_dec(gp->gp_form);
 
     Safefree(gp);
     GvGP(gv) = 0;
