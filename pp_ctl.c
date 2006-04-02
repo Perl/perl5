@@ -4090,7 +4090,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		PUSHs(other);
 		PUSHs(*svp);
 		PUTBACK;
-		if ((PL_curcop->op_private & HINT_INTEGER) == HINT_INTEGER)
+		if (CopHINTS_get(PL_curcop) & HINT_INTEGER)
 		    (void) pp_i_eq();
 		else
 		    (void) pp_eq();
@@ -4184,7 +4184,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	/* Otherwise, numeric comparison */
 	PUSHs(d); PUSHs(e);
 	PUTBACK;
-	if ((PL_curcop->op_private & HINT_INTEGER) == HINT_INTEGER)
+	if (CopHINTS_get(PL_curcop) & HINT_INTEGER)
 	    (void) pp_i_eq();
 	else
 	    (void) pp_eq();

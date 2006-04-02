@@ -4988,7 +4988,7 @@ typedef struct am_table_short AMTS;
 #define SET_NUMERIC_LOCAL() \
 	set_numeric_local();
 
-#define IN_LOCALE_RUNTIME	(PL_curcop->op_private & HINT_LOCALE)
+#define IN_LOCALE_RUNTIME	(CopHINTS_get(PL_curcop) & HINT_LOCALE)
 #define IN_LOCALE_COMPILETIME	(PL_hints & HINT_LOCALE)
 
 #define IN_LOCALE \

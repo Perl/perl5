@@ -188,7 +188,7 @@ encoded character.
  * SpecialCasing.txt. */
 #define UTF8_MAXBYTES_CASE	6
 
-#define IN_BYTES (PL_curcop->op_private & HINT_BYTES)
+#define IN_BYTES (CopHINTS_get(PL_curcop) & HINT_BYTES)
 #define DO_UTF8(sv) (SvUTF8(sv) && !IN_BYTES)
 
 #define UTF8_ALLOW_EMPTY		0x0001
