@@ -1017,7 +1017,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, const char *strend, I32
 		U8 *sm = (U8 *) m;
 		U8 tmpbuf1[UTF8_MAXBYTES_CASE+1];
 		U8 tmpbuf2[UTF8_MAXBYTES_CASE+1];
-		const U32 uniflags = UTF8_ALLOW_DEFAULT;
+		const U32 uniflags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
 
 		to_utf8_lower((U8*)m, tmpbuf1, &ulen1);
 		to_utf8_upper((U8*)m, tmpbuf2, &ulen2);
@@ -1064,7 +1064,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, const char *strend, I32
 	        UV c, f;
 	        U8 tmpbuf [UTF8_MAXBYTES+1];
 		STRLEN len, foldlen;
-		const U32 uniflags = UTF8_ALLOW_DEFAULT;
+		const U32 uniflags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
 		if (c1 == c2) {
 		    /* Upper and lower of 1st char are equal -
 		     * probably not a "letter". */
@@ -1166,7 +1166,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, const char *strend, I32
 		    tmp = '\n';
 		else {
 		    U8 * const r = reghop3((U8*)s, -1, (U8*)PL_bostr);
-		    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, UTF8_ALLOW_DEFAULT);
+		    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, 0);
 		}
 		tmp = ((OP(c) == BOUND ?
 			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp))) != 0);
@@ -1208,7 +1208,7 @@ S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, const char *strend, I32
 		    tmp = '\n';
 		else {
 		    U8 * const r = reghop3((U8*)s, -1, (U8*)PL_bostr);
-		    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, UTF8_ALLOW_DEFAULT);
+		    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, 0);
 		}
 		tmp = ((OP(c) == NBOUND ?
 			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp))) != 0);
@@ -2430,7 +2430,7 @@ S_regmatch(pTHX_ regnode *prog)
 {
     dVAR;
     register const bool do_utf8 = PL_reg_match_utf8;
-    const U32 uniflags = UTF8_ALLOW_DEFAULT;
+    const U32 uniflags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
 
     regmatch_slab  *orig_slab;
     regmatch_state *orig_state;
@@ -3046,7 +3046,7 @@ S_regmatch(pTHX_ regnode *prog)
 		else {
 		    const U8 * const r = reghop3((U8*)locinput, -1, (U8*)PL_bostr);
 		
-		    st->ln = utf8n_to_uvchr(r, UTF8SKIP(r), 0, uniflags);
+		    st->ln = utf8n_to_uvchr(r, UTF8SKIP(r), 0, 0);
 		}
 		if (OP(scan) == BOUND || OP(scan) == NBOUND) {
 		    st->ln = isALNUM_uni(st->ln);
@@ -3439,20 +3439,21 @@ S_regmatch(pTHX_ regnode *prog)
 	    st->logical = scan->flags;
 	    break;
 /*******************************************************************
- cc contains infoblock about the innermost (...)* loop, and
- a pointer to the next outer infoblock.
+ cc points to the regmatch_state associated with the most recent CURLYX.
+ This struct contains info about the innermost (...)* loop (an
+ "infoblock"), and a pointer to the next outer cc.
 
  Here is how Y(A)*Z is processed (if it is compiled into CURLYX/WHILEM):
 
    1) After matching Y, regnode for CURLYX is processed;
 
-   2) This regnode mallocs an infoblock, and calls regmatch() recursively
+   2) This regnode populates cc, and calls regmatch() recursively
       with the starting point at WHILEM node;
 
    3) Each hit of WHILEM node tries to match A and Z (in the order
       depending on the current iteration, min/max of {min,max} and
       greediness).  The information about where are nodes for "A"
-      and "Z" is read from the infoblock, as is info on how many times "A"
+      and "Z" is read from cc, as is info on how many times "A"
       was already matched, and greediness.
 
    4) After A matches, the same WHILEM node is hit again.
@@ -3463,7 +3464,7 @@ S_regmatch(pTHX_ regnode *prog)
       as in (Y(A)*Z)*.  If Z matches, the automaton will hit the WHILEM node
       of the external loop.
 
- Currently present infoblocks form a tree with a stem formed by PL_curcc
+ Currently present infoblocks form a tree with a stem formed by st->cc
  and whatever it mentions via ->next, and additional attached trees
  corresponding to temporarily unset infoblocks as in "5" above.
 
@@ -3518,34 +3519,32 @@ S_regmatch(pTHX_ regnode *prog)
 		/* No need to save/restore up to this paren */
 		I32 parenfloor = scan->flags;
 
-		{
-		    CURCUR *newcc;
-		    Newx(newcc, 1, CURCUR);
-		    st->curlyx.savecc = st->cc;
-		    newcc->oldcc = st->cc;
-		    st->cc = newcc;
-		}
-		st->curlyx.cp = PL_savestack_ix;
 		if (OP(PREVOPER(next)) == NOTHING) /* LONGJMP */
 		    next += ARG(next);
 		/* XXXX Probably it is better to teach regpush to support
 		   parenfloor > PL_regsize... */
 		if (parenfloor > (I32)*PL_reglastparen)
 		    parenfloor = *PL_reglastparen; /* Pessimization... */
-		st->cc->parenfloor = parenfloor;
-		st->cc->cur = -1;
-		st->cc->min = ARG1(scan);
-		st->cc->max  = ARG2(scan);
-		st->cc->scan = NEXTOPER(scan) + EXTRA_STEP_2ARGS;
-		st->cc->next = next;
-		st->cc->minmod = st->minmod;
-		st->cc->lastloc = 0;
+
+		st->curlyx.cp = PL_savestack_ix;
+		st->curlyx.outercc = st->cc;
+		st->cc = st;
+		/* these fields contain the state of the current curly.
+		 * they are accessed by subsequent WHILEMs;
+		 * cur and lastloc are also updated by WHILEM */
+		st->curlyx.parenfloor = parenfloor;
+		st->curlyx.cur = -1; /* this will be updated by WHILEM */
+		st->curlyx.min = ARG1(scan);
+		st->curlyx.max  = ARG2(scan);
+		st->curlyx.scan = NEXTOPER(scan) + EXTRA_STEP_2ARGS;
+		st->curlyx.lastloc = 0;
+		/* st->next and st->minmod are also read by WHILEM */
+
 		PL_reginput = locinput;
 		REGMATCH(PREVOPER(next), CURLYX); /* start on the WHILEM */
 		/*** all unsaved local vars undefined at this point */
 		regcpblow(st->curlyx.cp);
-		Safefree(st->cc);
-		st->cc = st->curlyx.savecc;
+		st->cc = st->curlyx.outercc;
 		saySAME(result);
 	    }
 	    /* NOTREACHED */
@@ -3559,28 +3558,28 @@ S_regmatch(pTHX_ regnode *prog)
 		 * that we can try again after backing off.
 		 */
 
-		st->whilem.lastloc = st->cc->lastloc; /* Detection of 0-len. */
+		st->whilem.lastloc = st->cc->curlyx.lastloc; /* Detection of 0-len. */
 		st->whilem.cache_offset = 0;
 		st->whilem.cache_bit = 0;
 		
-		n = st->cc->cur + 1;	/* how many we know we matched */
+		n = st->cc->curlyx.cur + 1; /* how many we know we matched */
 		PL_reginput = locinput;
 
 		DEBUG_EXECUTE_r(
 		    PerlIO_printf(Perl_debug_log,
 				  "%*s  %ld out of %ld..%ld  cc=%"UVxf"\n",
 				  REPORT_CODE_OFF+PL_regindent*2, "",
-				  (long)n, (long)st->cc->min,
-				  (long)st->cc->max, PTR2UV(st->cc))
+				  (long)n, (long)st->cc->curlyx.min,
+				  (long)st->cc->curlyx.max, PTR2UV(st->cc))
 		    );
 
 		/* If degenerate scan matches "", assume scan done. */
 
-		if (locinput == st->cc->lastloc && n >= st->cc->min) {
+		if (locinput == st->cc->curlyx.lastloc && n >= st->cc->curlyx.min) {
 		    st->whilem.savecc = st->cc;
-		    st->cc = st->cc->oldcc;
+		    st->cc = st->cc->curlyx.outercc;
 		    if (st->cc)
-			st->ln = st->cc->cur;
+			st->ln = st->cc->curlyx.cur;
 		    DEBUG_EXECUTE_r(
 			PerlIO_printf(Perl_debug_log,
 			   "%*s  empty match detected, try continuation...\n",
@@ -3591,22 +3590,22 @@ S_regmatch(pTHX_ regnode *prog)
 		    st->cc = st->whilem.savecc;
 		    if (result)
 			sayYES;
-		    if (st->cc->oldcc)
-			st->cc->oldcc->cur = st->ln;
+		    if (st->cc->curlyx.outercc)
+			st->cc->curlyx.outercc->curlyx.cur = st->ln;
 		    sayNO;
 		}
 
 		/* First just match a string of min scans. */
 
-		if (n < st->cc->min) {
-		    st->cc->cur = n;
-		    st->cc->lastloc = locinput;
-		    REGMATCH(st->cc->scan, WHILEM2);
+		if (n < st->cc->curlyx.min) {
+		    st->cc->curlyx.cur = n;
+		    st->cc->curlyx.lastloc = locinput;
+		    REGMATCH(st->cc->curlyx.scan, WHILEM2);
 		    /*** all unsaved local vars undefined at this point */
 		    if (result)
 			sayYES;
-		    st->cc->cur = n - 1;
-		    st->cc->lastloc = st->whilem.lastloc;
+		    st->cc->curlyx.cur = n - 1;
+		    st->cc->curlyx.lastloc = st->whilem.lastloc;
 		    sayNO;
 		}
 
@@ -3665,10 +3664,10 @@ S_regmatch(pTHX_ regnode *prog)
 
 		if (st->cc->minmod) {
 		    st->whilem.savecc = st->cc;
-		    st->cc = st->cc->oldcc;
+		    st->cc = st->cc->curlyx.outercc;
 		    if (st->cc)
-			st->ln = st->cc->cur;
-		    st->whilem.cp = regcppush(st->whilem.savecc->parenfloor);
+			st->ln = st->cc->curlyx.cur;
+		    st->whilem.cp = regcppush(st->whilem.savecc->curlyx.parenfloor);
 		    REGCP_SET(st->whilem.lastcp);
 		    REGMATCH(st->whilem.savecc->next, WHILEM3);
 		    /*** all unsaved local vars undefined at this point */
@@ -3679,10 +3678,10 @@ S_regmatch(pTHX_ regnode *prog)
 		    }
 		    REGCP_UNWIND(st->whilem.lastcp);
 		    regcppop();
-		    if (st->cc->oldcc)
-			st->cc->oldcc->cur = st->ln;
+		    if (st->cc->curlyx.outercc)
+			st->cc->curlyx.outercc->curlyx.cur = st->ln;
 
-		    if (n >= st->cc->max) {	/* Maximum greed exceeded? */
+		    if (n >= st->cc->curlyx.max) { /* Maximum greed exceeded? */
 			if (ckWARN(WARN_REGEXP) && n >= REG_INFTY
 			    && !(PL_reg_flags & RF_warned)) {
 			    PL_reg_flags |= RF_warned;
@@ -3700,11 +3699,11 @@ S_regmatch(pTHX_ regnode *prog)
 			);
 		    /* Try scanning more and see if it helps. */
 		    PL_reginput = locinput;
-		    st->cc->cur = n;
-		    st->cc->lastloc = locinput;
-		    st->whilem.cp = regcppush(st->cc->parenfloor);
+		    st->cc->curlyx.cur = n;
+		    st->cc->curlyx.lastloc = locinput;
+		    st->whilem.cp = regcppush(st->cc->curlyx.parenfloor);
 		    REGCP_SET(st->whilem.lastcp);
-		    REGMATCH(st->cc->scan, WHILEM4);
+		    REGMATCH(st->cc->curlyx.scan, WHILEM4);
 		    /*** all unsaved local vars undefined at this point */
 		    if (result) {
 			regcpblow(st->whilem.cp);
@@ -3712,19 +3711,19 @@ S_regmatch(pTHX_ regnode *prog)
 		    }
 		    REGCP_UNWIND(st->whilem.lastcp);
 		    regcppop();
-		    st->cc->cur = n - 1;
-		    st->cc->lastloc = st->whilem.lastloc;
+		    st->cc->curlyx.cur = n - 1;
+		    st->cc->curlyx.lastloc = st->whilem.lastloc;
 		    CACHEsayNO;
 		}
 
 		/* Prefer scan over next for maximal matching. */
 
-		if (n < st->cc->max) {	/* More greed allowed? */
-		    st->whilem.cp = regcppush(st->cc->parenfloor);
-		    st->cc->cur = n;
-		    st->cc->lastloc = locinput;
+		if (n < st->cc->curlyx.max) {	/* More greed allowed? */
+		    st->whilem.cp = regcppush(st->cc->curlyx.parenfloor);
+		    st->cc->curlyx.cur = n;
+		    st->cc->curlyx.lastloc = locinput;
 		    REGCP_SET(st->whilem.lastcp);
-		    REGMATCH(st->cc->scan, WHILEM5);
+		    REGMATCH(st->cc->curlyx.scan, WHILEM5);
 		    /*** all unsaved local vars undefined at this point */
 		    if (result) {
 			regcpblow(st->whilem.cp);
@@ -3749,18 +3748,18 @@ S_regmatch(pTHX_ regnode *prog)
 
 		/* Failed deeper matches of scan, so see if this one works. */
 		st->whilem.savecc = st->cc;
-		st->cc = st->cc->oldcc;
+		st->cc = st->cc->curlyx.outercc;
 		if (st->cc)
-		    st->ln = st->cc->cur;
+		    st->ln = st->cc->curlyx.cur;
 		REGMATCH(st->whilem.savecc->next, WHILEM6);
 		/*** all unsaved local vars undefined at this point */
 		st->cc = st->whilem.savecc;
 		if (result)
 		    CACHEsayYES;
-		if (st->cc->oldcc)
-		    st->cc->oldcc->cur = st->ln;
-		st->cc->cur = n - 1;
-		st->cc->lastloc = st->whilem.lastloc;
+		if (st->cc->curlyx.outercc)
+		    st->cc->curlyx.outercc->curlyx.cur = st->ln;
+		st->cc->curlyx.cur = n - 1;
+		st->cc->curlyx.lastloc = st->whilem.lastloc;
 		CACHEsayNO;
 	    }
 	    /* NOTREACHED */
@@ -4887,8 +4886,8 @@ S_reginclass(pTHX_ register const regnode *n, register const U8* p, STRLEN* lenp
 
     if (do_utf8 && !UTF8_IS_INVARIANT(c)) {
 	c = utf8n_to_uvchr(p, UTF8_MAXBYTES, &len,
-		(UTF8_ALLOW_DEFAULT & UTF8_ALLOW_ANYUV) | UTF8_CHECK_ONLY);
-		/* see [perl #37836] for UTF8_ALLOW_ANYUV */
+			    ckWARN(WARN_UTF8) ? UTF8_CHECK_ONLY :
+					UTF8_ALLOW_ANYUV|UTF8_CHECK_ONLY);
 	if (len == (STRLEN)-1)
 	    Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
     }

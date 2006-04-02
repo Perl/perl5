@@ -159,29 +159,14 @@ typedef struct _reg_trie_accepted reg_trie_accepted;
 
 typedef I32 CHECKPOINT;
 
-/* Current curly descriptor */
-typedef struct curcur CURCUR;
-struct curcur {
-    int		parenfloor;	/* how far back to strip paren data */
-    int		cur;		/* how many instances of scan we've matched */
-    int		min;		/* the minimal number of scans to match */
-    int		max;		/* the maximal number of scans to match */
-    int		minmod;		/* whether to work our way up or down */
-    regnode *	scan;		/* the thing to match */
-    regnode *	next;		/* what has to match after it */
-    char *	lastloc;	/* where we started matching this scan */
-    CURCUR *	oldcc;		/* current curly before we started this one */
-};
-
 typedef struct re_cc_state
 {
     I32 ss;
     regnode *node;
     struct re_cc_state *prev;
-    CURCUR *cc;
+    struct regmatch_state *cc;	/* state corresponding to the current curly */
     regexp *re;
 } re_cc_state;
-
 
 
 typedef enum {
@@ -207,7 +192,7 @@ typedef enum {
 } regmatch_resume_states;
 
 
-typedef struct {
+typedef struct regmatch_state {
 
     /* these vars contain state that needs to be maintained
      * across the main while loop ... */
@@ -219,7 +204,7 @@ typedef struct {
     bool sw;			/* the condition value in (?(cond)a|b) */
     int logical;
     I32 unwind;			/* savestack index of current unwind block */
-    CURCUR *cc;			/* current innermost curly struct */
+    struct regmatch_state  *cc;	/* current innermost curly state */
     char *locinput;
 
     /* ... while the rest of these are local to an individual branch */
@@ -240,13 +225,22 @@ typedef struct {
 
 	struct {
 	    CHECKPOINT cp;	/* remember current savestack indexes */
-	    CURCUR *savecc;
+	    struct regmatch_state *outercc; /* outer CURLYX state if any */
+
+	    /* these contain the current curly state, and are accessed
+	     * by subsequent WHILEMs */
+	    int		parenfloor;/* how far back to strip paren data */
+	    int		cur;	/* how many instances of scan we've matched */
+	    int		min;	/* the minimal number of scans to match */
+	    int		max;	/* the maximal number of scans to match */
+	    regnode *	scan;	/* the thing to match */
+	    char *	lastloc;/* where we started matching this scan */
 	} curlyx;
 
 	struct {
 	    CHECKPOINT cp;	/* remember current savestack indexes */
 	    CHECKPOINT lastcp;
-	    CURCUR *savecc;
+	    struct regmatch_state *savecc;
 	    char *lastloc;	/* Detection of 0-len. */
 	    I32 cache_offset;
 	    I32 cache_bit;
@@ -273,7 +267,7 @@ typedef struct {
 	struct {
 	    CHECKPOINT cp;	/* remember current savestack indexes */
 	    CHECKPOINT lastcp;
-	    CURCUR *savecc;
+	    struct regmatch_state *savecc;
 	    re_cc_state *cur_call_cc;
 	    regexp *end_re;
 	} end;
