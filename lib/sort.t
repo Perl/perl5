@@ -26,7 +26,7 @@ use strict;
 use warnings;
 
 use Test::More tests => @TestSizes * 2	# sort() tests
-			* 4		# number of pragmas to test
+			* 6		# number of pragmas to test
 			+ 1 		# extra test for qsort instability
 			+ 3		# tests for sort::current
 			+ 3;		# tests for "defaults" and "no sort"
@@ -163,16 +163,19 @@ main(sub { sort {&{$_[0]}} @{$_[1]} }, 0);
     no sort qw(_qsort);
     my $sort_current; BEGIN { $sort_current = sort::current(); }
     is($sort_current, 'stable', 'sort::current after no _qsort');
+    main(sub { sort {&{$_[0]}} @{$_[1]} }, 0);
 }
 
 {
     use sort qw(defaults _qsort);
     my $sort_current; BEGIN { $sort_current = sort::current(); }
     is($sort_current, 'quicksort', 'sort::current after defaults _qsort');
+    # Not expected to be stable, so don't test for stability here
 }
 
 {
     use sort qw(defaults stable);
     my $sort_current; BEGIN { $sort_current = sort::current(); }
     is($sort_current, 'stable', 'sort::current after defaults stable');
+    main(sub { sort {&{$_[0]}} @{$_[1]} }, 0);
 }

@@ -363,7 +363,7 @@ S_mergesortsv(pTHX_ gptr *base, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 
     if (nmemb <= 1) return;			/* sorted trivially */
 
-    if (flags) {
+    if ((flags & SORTf_DESC) != 0) {
 	savecmp = PL_sort_RealCmp;	/* Save current comparison routine, if any */
 	PL_sort_RealCmp = cmp;	/* Put comparison routine where cmp_desc can find it */
 	cmp = cmp_desc;
