@@ -1609,7 +1609,7 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
 	const char* const pv = SvPV_const(tokenbufsv, len);
 
 	Copy(pv, PL_tokenbuf, len+1, char);
-	PL_curcop->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
+	CopHINTS_set(PL_curcop, PL_hints);
     }
     if (!SvROK(retval) || SvTYPE(SvRV(retval)) != SVt_PVHV) {
         if (SvPOK(retval))
@@ -1710,7 +1710,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
 				needents);
 
 	    if (IN_PERL_COMPILETIME)
-		PL_curcop->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
+		CopHINTS_set(PL_curcop, PL_hints);
 
 	    svp = hv_store(hv, (const char *)ptr, klen, swatch, 0);
 

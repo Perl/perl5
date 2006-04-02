@@ -1695,8 +1695,7 @@ PP(pp_caller)
     /* XXX only hints propagated via op_private are currently
      * visible (others are not easily accessible, since they
      * use the global PL_hints) */
-    PUSHs(sv_2mortal(newSViv((I32)cx->blk_oldcop->op_private &
-			     HINT_PRIVATE_MASK)));
+    PUSHs(sv_2mortal(newSViv(CopHINTS_get(cx->blk_oldcop))));
     {
 	SV * mask ;
 	SV * const old_warnings = cx->blk_oldcop->cop_warnings ;
@@ -2815,7 +2814,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
     *padp = (AV*)SvREFCNT_inc_simple(PL_comppad);
     LEAVE;
     if (IN_PERL_COMPILETIME)
-	PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
+	CopHINTS_set(&PL_compiling, PL_hints);
 #ifdef OP_IN_REGISTER
     op = PL_opsave;
 #endif

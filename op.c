@@ -2003,7 +2003,7 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
     const int needblockscope = PL_hints & HINT_BLOCK_SCOPE;
     OP* const retval = scalarseq(seq);
     LEAVE_SCOPE(floor);
-    PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
+    CopHINTS_set(&PL_compiling, PL_hints);
     if (needblockscope)
 	PL_hints |= HINT_BLOCK_SCOPE; /* propagate out */
     pad_leavemy();
@@ -3931,11 +3931,11 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	cop->op_ppaddr = PL_ppaddr[ OP_NEXTSTATE ];
     }
     cop->op_flags = (U8)flags;
-    cop->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
+    CopHINTS_set(cop, PL_hints);
 #ifdef NATIVE_HINTS
     cop->op_private |= NATIVE_HINTS;
 #endif
-    PL_compiling.op_private = cop->op_private;
+    CopHINTS_set(&PL_compiling, CopHINTS_get(cop));
     cop->op_next = (OP*)cop;
 
     if (label) {
@@ -5333,7 +5333,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    call_list(oldscope, PL_beginav);
 
 	    PL_curcop = &PL_compiling;
-	    PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
+	    CopHINTS_set(&PL_compiling, PL_hints);
 	    LEAVE;
 	}
 	else if (strEQ(s, "END") && !PL_error_count) {

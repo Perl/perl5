@@ -234,6 +234,13 @@ struct cop {
 #define CopARYBASE_get(c)	((c)->cop_arybase + 0)
 #define CopARYBASE_set(c, b)	STMT_START { (c)->cop_arybase = (b); } STMT_END
 
+/* FIXME NATIVE_HINTS if this is changed from op_private (see perl.h)  */
+#define CopHINTS_get(c)		((c)->op_private + 0)
+#define CopHINTS_set(c, h)	STMT_START {				\
+				    (c)->op_private			\
+					 = (U8)((h) & HINT_PRIVATE_MASK); \
+				} STMT_END
+
 /*
  * Here we have some enormously heavy (or at least ponderous) wizardry.
  */
