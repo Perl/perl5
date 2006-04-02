@@ -1257,6 +1257,12 @@ perl_destruct(pTHXx)
 
     sv_free_arenas();
 
+    while (PL_regmatch_slab) {
+	regmatch_slab  *s = PL_regmatch_slab;
+	PL_regmatch_slab = PL_regmatch_slab->next;
+	Safefree(s);
+    }
+
     /* As the absolutely last thing, free the non-arena SV for mess() */
 
     if (PL_mess_sv) {

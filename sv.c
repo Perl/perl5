@@ -11482,6 +11482,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_reginterp_cnt	= 0;
     PL_reg_starttry	= 0;
+    PL_regmatch_slab	= NULL;
 
     /* Pluggable optimizer */
     PL_peepp		= proto_perl->Tpeepp;

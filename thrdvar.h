@@ -221,3 +221,8 @@ PERLVAR(Twatchok,	char *)
 
 PERLVAR(Treg_match_utf8,	bool)		/* was what we matched against utf8 */
 
+/* the currently active slab in a chain of slabs of regmatch states,
+ * and the currently active state within that slab */
+
+PERLVARI(Tregmatch_slab,	regmatch_slab *, NULL)
+PERLVAR(Tregmatch_state,	regmatch_state *)

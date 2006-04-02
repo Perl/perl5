@@ -3115,19 +3115,6 @@ struct nexttoken {
 #include "warnings.h"
 #include "utf8.h"
 
-/* Current curly descriptor */
-typedef struct curcur CURCUR;
-struct curcur {
-    int		parenfloor;	/* how far back to strip paren data */
-    int		cur;		/* how many instances of scan we've matched */
-    int		min;		/* the minimal number of scans to match */
-    int		max;		/* the maximal number of scans to match */
-    int		minmod;		/* whether to work our way up or down */
-    regnode *	scan;		/* the thing to match */
-    regnode *	next;		/* what has to match after it */
-    char *	lastloc;	/* where we started matching this scan */
-    CURCUR *	oldcc;		/* current curly before we started this one */
-};
 
 typedef struct _sublex_info SUBLEXINFO;
 struct _sublex_info {
@@ -3142,8 +3129,6 @@ typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
 
 struct scan_data_t;		/* Used in S_* functions in regcomp.c */
 struct regnode_charclass_class;	/* Used in S_* functions in regcomp.c */
-
-typedef I32 CHECKPOINT;
 
 /* Keep next first in this structure, because sv_free_arenas take
    advantage of this to share code between the pte arenas and the SV

@@ -146,3 +146,116 @@ typedef struct regexp {
 #define FBMrf_MULTILINE	1
 
 struct re_scream_pos_data_s;
+
+/* an accepting state/position*/
+struct _reg_trie_accepted {
+    U8   *endpos;
+    U16  wordnum;
+};
+typedef struct _reg_trie_accepted reg_trie_accepted;
+
+
+/* structures for holding and saving the state maintained by regmatch() */
+
+typedef I32 CHECKPOINT;
+
+/* Current curly descriptor */
+typedef struct curcur CURCUR;
+struct curcur {
+    int		parenfloor;	/* how far back to strip paren data */
+    int		cur;		/* how many instances of scan we've matched */
+    int		min;		/* the minimal number of scans to match */
+    int		max;		/* the maximal number of scans to match */
+    int		minmod;		/* whether to work our way up or down */
+    regnode *	scan;		/* the thing to match */
+    regnode *	next;		/* what has to match after it */
+    char *	lastloc;	/* where we started matching this scan */
+    CURCUR *	oldcc;		/* current curly before we started this one */
+};
+
+typedef struct re_cc_state
+{
+    I32 ss;
+    regnode *node;
+    struct re_cc_state *prev;
+    CURCUR *cc;
+    regexp *re;
+} re_cc_state;
+
+
+
+typedef enum {
+    resume_TRIE1,
+    resume_TRIE2,
+    resume_CURLYX,
+    resume_WHILEM1,
+    resume_WHILEM2,
+    resume_WHILEM3,
+    resume_WHILEM4,
+    resume_WHILEM5,
+    resume_WHILEM6,
+    resume_CURLYM1,
+    resume_CURLYM2,
+    resume_CURLYM3,
+    resume_CURLYM4,
+    resume_IFMATCH,
+    resume_PLUS1,
+    resume_PLUS2,
+    resume_PLUS3,
+    resume_PLUS4,
+    resume_END
+} regmatch_resume_states;
+
+
+typedef struct {
+
+    /* these vars contain state that needs to be maintained
+     * across the main while loop ... */
+
+    regmatch_resume_states resume_state; /* where to jump to on return */
+    regnode *scan;		/* Current node. */
+    regnode *next;		/* Next node. */
+    bool minmod;		/* the next "{n.m}" is a "{n,m}?" */
+    bool sw;			/* the condition value in (?(cond)a|b) */
+    int logical;
+    I32 unwind;			/* savestack index of current unwind block */
+    CURCUR *cc;			/* current innermost curly struct */
+    char *locinput;
+
+    /* ... while the rest of these are local to an individual branch;
+     * thus they can be safely reused in other branches. */
+
+    I32 n;			/* no or next */
+    I32 ln;			/* len or last */
+    I32 c1, c2, paren;		/* case fold search, parenth */
+    CHECKPOINT cp;		/* remember current savestack indexes */
+    CHECKPOINT lastcp;
+    CURCUR *oldcc;		/* tmp copy of cc */
+    char *lastloc;		/* Detection of 0-len. */
+    I32 cache_offset;
+    I32 cache_bit;
+    I32 curlym_l;
+    I32 matches;
+    I32 maxwanted;
+    char *e;
+    char *old;
+    int count;
+    re_cc_state *cur_call_cc;
+    regexp *end_re;
+    reg_trie_accepted *accept_buff;
+    U32 accepted;		/* how many accepting states we have seen */
+
+    re_cc_state *reg_call_cc;	/* saved value of PL_reg_call_cc */
+} regmatch_state;
+
+/* how many regmatch_state structs to allocate as a single slab.
+ * We do it in 4K blocks for efficiency. The "3" is 2 for the next/prev
+ * pointers, plus 1 for any mythical malloc overhead. */
+ 
+#define PERL_REGMATCH_SLAB_SLOTS \
+    ((4096 - 3 * sizeof (void*)) / sizeof(regmatch_state))
+
+typedef struct regmatch_slab {
+    regmatch_state states[PERL_REGMATCH_SLAB_SLOTS];
+    struct regmatch_slab *prev, *next;
+} regmatch_slab;

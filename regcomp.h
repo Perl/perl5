@@ -402,11 +402,7 @@ struct reg_substr_data {
 
 
 /* trie related stuff */
-/* an accepting state/position*/
-struct _reg_trie_accepted {
-    U8   *endpos;
-    U16  wordnum;
-};
+
 /* a transition record for the state machine. the
    check field determines which state "owns" the
    transition. the char the transition is for is
@@ -441,7 +437,6 @@ struct _reg_trie_state {
 
 
 
-typedef struct _reg_trie_accepted reg_trie_accepted;
 typedef struct _reg_trie_state    reg_trie_state;
 typedef struct _reg_trie_trans    reg_trie_trans;
 

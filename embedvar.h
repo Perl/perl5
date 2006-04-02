@@ -118,6 +118,8 @@
 #define PL_reginterp_cnt	(vTHX->Treginterp_cnt)
 #define PL_reglastcloseparen	(vTHX->Treglastcloseparen)
 #define PL_reglastparen		(vTHX->Treglastparen)
+#define PL_regmatch_slab	(vTHX->Tregmatch_slab)
+#define PL_regmatch_state	(vTHX->Tregmatch_state)
 #define PL_regnarrate		(vTHX->Tregnarrate)
 #define PL_regnpar		(vTHX->Tregnpar)
 #define PL_regprecomp		(vTHX->Tregprecomp)
@@ -825,6 +827,8 @@
 #define PL_Treginterp_cnt	PL_reginterp_cnt
 #define PL_Treglastcloseparen	PL_reglastcloseparen
 #define PL_Treglastparen	PL_reglastparen
+#define PL_Tregmatch_slab	PL_regmatch_slab
+#define PL_Tregmatch_state	PL_regmatch_state
 #define PL_Tregnarrate		PL_regnarrate
 #define PL_Tregnpar		PL_regnpar
 #define PL_Tregprecomp		PL_regprecomp

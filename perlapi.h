@@ -856,6 +856,10 @@ END_EXTERN_C
 #define PL_reglastcloseparen	(*Perl_Treglastcloseparen_ptr(aTHX))
 #undef  PL_reglastparen
 #define PL_reglastparen		(*Perl_Treglastparen_ptr(aTHX))
+#undef  PL_regmatch_slab
+#define PL_regmatch_slab	(*Perl_Tregmatch_slab_ptr(aTHX))
+#undef  PL_regmatch_state
+#define PL_regmatch_state	(*Perl_Tregmatch_state_ptr(aTHX))
 #undef  PL_regnarrate
 #define PL_regnarrate		(*Perl_Tregnarrate_ptr(aTHX))
 #undef  PL_regnpar
