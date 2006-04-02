@@ -60,7 +60,7 @@ $isvax = `\$ Write Sys\$Output \(F\$GetSyI(\"HW_MODEL\") .LE. 1024 .AND. F\$GetS
 chomp $isvax;
 print "\$isvax: \\$isvax\\\n" if $debug;
 
-$isi64 = `\$ Write Sys\$Output \(F\$GetSyI(\"HW_MODEL\") .GE. 4096`;
+$isi64 = `\$ Write Sys\$Output \(F\$GetSyI(\"HW_MODEL\") .GE. 4096)`;
 chomp $isi64;
 print "\$isi64: \\$isi64\\\n" if $debug;
 
