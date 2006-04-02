@@ -694,6 +694,10 @@ so you should only do so if you are also using taint checking.
 Better yet, use the carefully constrained evaluation within a Safe
 compartment.  See L<perlsec> for details about both these mechanisms.
 
+Because perl's regex engine is not currently re-entrant, interpolated 
+code may not invoke the regex engine either directly with C<m//> or C<s///>),
+or indirectly with functions such as C<split>.
+
 =item C<(??{ code })>
 X<(??{})>
 X<regex, postponed> X<regexp, postponed> X<regular expression, postponed>
@@ -723,6 +727,10 @@ The following pattern matches a parenthesized group:
 	     )*
 	     \)
 	  }x;
+
+Because perl's regex engine is not currently re-entrant, delayed 
+code may not invoke the regex engine either directly with C<m//> or C<s///>),
+or indirectly with functions such as C<split>.
 
 =item C<< (?>pattern) >>
 X<backtrack> X<backtracking>
