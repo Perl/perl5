@@ -1057,7 +1057,7 @@ LOOP_lastop(o)
 #define COP_file(o)	CopFILE(o)
 #define COP_filegv(o)	CopFILEGV(o)
 #define COP_cop_seq(o)	o->cop_seq
-#define COP_arybase(o)	o->cop_arybase
+#define COP_arybase(o)	CopARYBASE_get(o)
 #define COP_line(o)	CopLINE(o)
 #define COP_warnings(o)	o->cop_warnings
 #define COP_io(o)	o->cop_io

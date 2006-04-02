@@ -2939,7 +2939,7 @@ PP(pp_aelem)
     if (SvROK(elemsv) && !SvGAMAGIC(elemsv) && ckWARN(WARN_MISC))
 	Perl_warner(aTHX_ packWARN(WARN_MISC), "Use of reference \"%"SVf"\" as array index", elemsv);
     if (elem > 0)
-	elem -= PL_curcop->cop_arybase;
+	elem -= CopARYBASE_get(PL_curcop);
     if (SvTYPE(av) != SVt_PVAV)
 	RETPUSHUNDEF;
     svp = av_fetch(av, elem, lval && !defer);

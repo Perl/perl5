@@ -963,7 +963,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '/':
 	break;
     case '[':
-	WITH_THR(sv_setiv(sv, (IV)PL_curcop->cop_arybase));
+	WITH_THR(sv_setiv(sv, (IV)CopARYBASE_get(PL_curcop)));
 	break;
     case '|':
 	if (GvIOp(PL_defoutgv))
@@ -1724,7 +1724,7 @@ Perl_magic_getarylen(pTHX_ SV *sv, const MAGIC *mg)
     dVAR;
     const AV * const obj = (AV*)mg->mg_obj;
     if (obj) {
-	sv_setiv(sv, AvFILL(obj) + PL_curcop->cop_arybase);
+	sv_setiv(sv, AvFILL(obj) + CopARYBASE_get(PL_curcop));
     } else {
 	SvOK_off(sv);
     }
@@ -1737,7 +1737,7 @@ Perl_magic_setarylen(pTHX_ SV *sv, MAGIC *mg)
     dVAR;
     AV * const obj = (AV*)mg->mg_obj;
     if (obj) {
-	av_fill(obj, SvIV(sv) - PL_curcop->cop_arybase);
+	av_fill(obj, SvIV(sv) - CopARYBASE_get(PL_curcop));
     } else {
 	if (ckWARN(WARN_MISC))
 	    Perl_warner(aTHX_ packWARN(WARN_MISC),
@@ -1780,7 +1780,7 @@ Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
 	    I32 i = mg->mg_len;
 	    if (DO_UTF8(lsv))
 		sv_pos_b2u(lsv, &i);
-	    sv_setiv(sv, i + PL_curcop->cop_arybase);
+	    sv_setiv(sv, i + CopARYBASE_get(PL_curcop));
 	    return 0;
 	}
     }
@@ -1817,7 +1817,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
     }
     len = SvPOK(lsv) ? SvCUR(lsv) : sv_len(lsv);
 
-    pos = SvIV(sv) - PL_curcop->cop_arybase;
+    pos = SvIV(sv) - CopARYBASE_get(PL_curcop);
 
     if (DO_UTF8(lsv)) {
 	ulen = sv_len_utf8(lsv);
@@ -2358,7 +2358,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '[':
-	PL_compiling.cop_arybase = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	CopARYBASE_set(&PL_compiling, SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
 	break;
     case '?':
 #ifdef COMPLEX_STATUS

@@ -1103,12 +1103,13 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	    goto nomod;
 	localize = 0;
 	if (PL_eval_start && PL_eval_start->op_type == OP_CONST) {
-	    PL_compiling.cop_arybase = (I32)SvIV(cSVOPx(PL_eval_start)->op_sv);
+	    CopARYBASE_set(&PL_compiling,
+			   (I32)SvIV(cSVOPx(PL_eval_start)->op_sv));
 	    PL_eval_start = 0;
 	}
 	else if (!type) {
-	    SAVEI32(PL_compiling.cop_arybase);
-	    PL_compiling.cop_arybase = 0;
+	    SAVECOPARYBASE(&PL_compiling);
+	    CopARYBASE_set(&PL_compiling, 0);
 	}
 	else if (type == OP_REFGEN)
 	    goto nomod;
@@ -3906,7 +3907,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	else {
 	    /* FIXME for MAD */
 	    op_free(o);
-	    o = newSVOP(OP_CONST, 0, newSViv(PL_compiling.cop_arybase));
+	    o = newSVOP(OP_CONST, 0, newSViv(CopARYBASE_get(&PL_compiling)));
 	    o->op_private |= OPpCONST_ARYBASE;
 	}
     }
@@ -3942,7 +3943,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	PL_hints |= HINT_BLOCK_SCOPE;
     }
     cop->cop_seq = seq;
-    cop->cop_arybase = PL_curcop->cop_arybase;
+    CopARYBASE_set(cop, CopARYBASE_get(PL_curcop));
     if (specialWARN(PL_curcop->cop_warnings))
         cop->cop_warnings = PL_curcop->cop_warnings ;
     else
@@ -7648,7 +7649,7 @@ Perl_peep(pTHX_ register OP *o)
 		    pop->op_next->op_type == OP_AELEM &&
 		    !(pop->op_next->op_private &
 		      (OPpLVAL_INTRO|OPpLVAL_DEFER|OPpDEREF|OPpMAYBE_LVSUB)) &&
-		    (i = SvIV(((SVOP*)pop)->op_sv) - PL_curcop->cop_arybase)
+		    (i = SvIV(((SVOP*)pop)->op_sv) - CopARYBASE_get(PL_curcop))
 				<= 255 &&
 		    i >= 0)
 		{

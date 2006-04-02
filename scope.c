@@ -981,6 +981,11 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    (*SSPOPDPTR)(ptr);
 	    break;
+	case SAVEt_COP_ARYBASE:
+	    ptr = SSPOPPTR;
+	    i = SSPOPINT;
+	    CopARYBASE_set((COP *)ptr, i);
+	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: leave_scope inconsistency");
 	}

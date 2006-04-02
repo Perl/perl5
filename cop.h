@@ -229,6 +229,11 @@ struct cop {
 #  define OutCopFILE(c) CopFILE(c)
 #endif
 
+/* CopARYBASE is likely to be removed soon.  */
+#define CopARYBASE(c)		((c)->cop_arybase)
+#define CopARYBASE_get(c)	((c)->cop_arybase + 0)
+#define CopARYBASE_set(c, b)	STMT_START { (c)->cop_arybase = (b); } STMT_END
+
 /*
  * Here we have some enormously heavy (or at least ponderous) wizardry.
  */
