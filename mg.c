@@ -2157,7 +2157,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	sv_setsv(PL_bodytarget, sv);
 	break;
     case '\003':	/* ^C */
-	PL_minus_c = (bool)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	PL_minus_c = (bool)SvIV(sv);
 	break;
 
     case '\004':	/* ^D */
@@ -2166,25 +2166,25 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	PL_debug = get_debug_opts(&s, 0) | DEBUG_TOP_FLAG;
 	DEBUG_x(dump_all());
 #else
-	PL_debug = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) | DEBUG_TOP_FLAG;
+	PL_debug = (SvIV(sv)) | DEBUG_TOP_FLAG;
 #endif
 	break;
     case '\005':  /* ^E */
 	if (*(mg->mg_ptr+1) == '\0') {
 #ifdef MACOS_TRADITIONAL
-	    gMacPerl_OSErr = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	    gMacPerl_OSErr = SvIV(sv);
 #else
 #  ifdef VMS
-	    set_vaxc_errno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	    set_vaxc_errno(SvIV(sv));
 #  else
 #    ifdef WIN32
 	    SetLastError( SvIV(sv) );
 #    else
 #      ifdef OS2
-	    os2_setsyserrno(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	    os2_setsyserrno(SvIV(sv));
 #      else
 	    /* will anyone ever use this? */
-	    SETERRNO(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv), 4);
+	    SETERRNO(SvIV(sv), 4);
 #      endif
 #    endif
 #  endif
@@ -2202,10 +2202,10 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '\006':	/* ^F */
-	PL_maxsysfd = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	PL_maxsysfd = SvIV(sv);
 	break;
     case '\010':	/* ^H */
-	PL_hints = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	PL_hints = SvIV(sv);
 	break;
     case '\011':	/* ^I */ /* NOT \t in EBCDIC */
 	Safefree(PL_inplace);
@@ -2228,7 +2228,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '\020':	/* ^P */
-	PL_perldb = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	PL_perldb = SvIV(sv);
 	if (PL_perldb && !PL_DBsingle)
 	    init_debugger();
 	break;
@@ -2236,7 +2236,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 #ifdef BIG_TIME
 	PL_basetime = (Time_t)(SvNOK(sv) ? SvNVX(sv) : sv_2nv(sv));
 #else
-	PL_basetime = (Time_t)(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	PL_basetime = (Time_t)SvIV(sv);
 #endif
 	break;
     case '\025':	/* ^UTF8CACHE */
@@ -2247,7 +2247,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     case '\027':	/* ^W & $^WARNING_BITS */
 	if (*(mg->mg_ptr+1) == '\0') {
 	    if ( ! (PL_dowarn & G_WARN_ALL_MASK)) {
-	        i = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	        i = SvIV(sv);
 	        PL_dowarn = (PL_dowarn & ~G_WARN_ON)
 		    		| (i ? G_WARN_ON : G_WARN_OFF) ;
 	    }
@@ -2306,22 +2306,22 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	IoFMT_GV(GvIOp(PL_defoutgv)) =  gv_fetchsv(sv, GV_ADD, SVt_PVIO);
 	break;
     case '=':
-	IoPAGE_LEN(GvIOp(PL_defoutgv)) = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	IoPAGE_LEN(GvIOp(PL_defoutgv)) = (SvIV(sv));
 	break;
     case '-':
-	IoLINES_LEFT(GvIOp(PL_defoutgv)) = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	IoLINES_LEFT(GvIOp(PL_defoutgv)) = (SvIV(sv));
 	if (IoLINES_LEFT(GvIOp(PL_defoutgv)) < 0L)
 	    IoLINES_LEFT(GvIOp(PL_defoutgv)) = 0L;
 	break;
     case '%':
-	IoPAGE(GvIOp(PL_defoutgv)) = (SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	IoPAGE(GvIOp(PL_defoutgv)) = (SvIV(sv));
 	break;
     case '|':
 	{
 	    IO * const io = GvIOp(PL_defoutgv);
 	    if(!io)
 	      break;
-	    if ((SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv)) == 0)
+	    if ((SvIV(sv)) == 0)
 		IoFLAGS(io) &= ~IOf_FLUSH;
 	    else {
 		if (!(IoFLAGS(io) & IOf_FLUSH)) {
@@ -2358,7 +2358,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '[':
-	CopARYBASE_set(&PL_compiling, SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	CopARYBASE_set(&PL_compiling, SvIV(sv));
 	break;
     case '?':
 #ifdef COMPLEX_STATUS
@@ -2373,7 +2373,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    STATUS_NATIVE_CHILD_SET((U32)SvIV(sv));
 	else
 #endif
-	    STATUS_UNIX_EXIT_SET(SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv));
+	    STATUS_UNIX_EXIT_SET(SvIV(sv));
 	break;
     case '!':
         {
@@ -2387,7 +2387,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	}
 	break;
     case '<':
-	PL_uid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	PL_uid = SvIV(sv);
 	if (PL_delaymagic) {
 	    PL_delaymagic |= DM_RUID;
 	    break;				/* don't do magic till later */
@@ -2419,7 +2419,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
 	break;
     case '>':
-	PL_euid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	PL_euid = SvIV(sv);
 	if (PL_delaymagic) {
 	    PL_delaymagic |= DM_EUID;
 	    break;				/* don't do magic till later */
@@ -2446,7 +2446,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	PL_tainting |= (PL_uid && (PL_euid != PL_uid || PL_egid != PL_gid));
 	break;
     case '(':
-	PL_gid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	PL_gid = SvIV(sv);
 	if (PL_delaymagic) {
 	    PL_delaymagic |= DM_RGID;
 	    break;				/* don't do magic till later */
@@ -2500,7 +2500,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                 Safefree(gary);
 	}
 #else  /* HAS_SETGROUPS */
-	PL_egid = SvIOK(sv) ? SvIVX(sv) : sv_2iv(sv);
+	PL_egid = SvIV(sv);
 #endif /* HAS_SETGROUPS */
 	if (PL_delaymagic) {
 	    PL_delaymagic |= DM_EGID;
