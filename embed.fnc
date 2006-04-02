@@ -314,7 +314,7 @@ dpoM	|HV *	|refcounted_he_chain_2hv|NULLOK const struct refcounted_he *c
 dpoM	|void	|refcounted_he_free|NULLOK struct refcounted_he *he
 dpoM	|struct refcounted_he *|refcounted_he_new \
 				|NULLOK struct refcounted_he *const parent \
-				|NULLOK SV *key|NULLOK SV *value
+				|NULLOK SV *const key|NULLOK SV *const value
 Apd	|SV**	|hv_store	|NULLOK HV* tb|NULLOK const char* key|I32 klen|NULLOK SV* val \
 				|U32 hash
 Apd	|HE*	|hv_store_ent	|NULLOK HV* tb|NULLOK SV* key|NULLOK SV* val|U32 hash
