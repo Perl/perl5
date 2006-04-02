@@ -1103,7 +1103,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		U8 *sm = (U8 *) m;
 		U8 tmpbuf1[UTF8_MAXBYTES_CASE+1];
 		U8 tmpbuf2[UTF8_MAXBYTES_CASE+1];
-		const U32 uniflags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
+		const U32 uniflags = UTF8_ALLOW_DEFAULT;
 
 		to_utf8_lower((U8*)m, tmpbuf1, &ulen1);
 		to_utf8_upper((U8*)m, tmpbuf2, &ulen2);
@@ -1150,7 +1150,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	        UV c, f;
 	        U8 tmpbuf [UTF8_MAXBYTES+1];
 		STRLEN len, foldlen;
-		const U32 uniflags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
+		const U32 uniflags = UTF8_ALLOW_DEFAULT;
 		if (c1 == c2) {
 		    /* Upper and lower of 1st char are equal -
 		     * probably not a "letter". */
@@ -1196,7 +1196,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		    tmp = '\n';
 		else {
 		    U8 * const r = reghop3((U8*)s, -1, (U8*)PL_bostr);
-		    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, 0);
+		    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, UTF8_ALLOW_DEFAULT);
 		}
 		tmp = ((OP(c) == BOUND ?
 			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp))) != 0);
@@ -1234,7 +1234,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		    tmp = '\n';
 		else {
 		    U8 * const r = reghop3((U8*)s, -1, (U8*)PL_bostr);
-		    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, 0);
+		    tmp = utf8n_to_uvchr(r, UTF8SKIP(r), 0, UTF8_ALLOW_DEFAULT);
 		}
 		tmp = ((OP(c) == NBOUND ?
 			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp))) != 0);
@@ -2055,7 +2055,7 @@ S_regmatch(pTHX_ regnode *prog)
     SV * const dsv1 = PERL_DEBUG_PAD_ZERO(1);
     SV * const dsv2 = PERL_DEBUG_PAD_ZERO(2);
 #endif
-    U32 uniflags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
+    const U32 uniflags = UTF8_ALLOW_DEFAULT;
 
     I32 parenfloor = 0;
 
@@ -2402,7 +2402,7 @@ S_regmatch(pTHX_ regnode *prog)
 		else {
 		    const U8 * const r = reghop3((U8*)locinput, -1, (U8*)PL_bostr);
 		
-		    ln = utf8n_to_uvchr((U8 *)r, UTF8SKIP(r), 0, 0);
+		    ln = utf8n_to_uvchr((U8 *)r, UTF8SKIP(r), 0, uniflags);
 		}
 		if (OP(scan) == BOUND || OP(scan) == NBOUND) {
 		    ln = isALNUM_uni(ln);
@@ -4133,8 +4133,8 @@ S_reginclass(pTHX_ register const regnode *n, register const U8* p, STRLEN* lenp
 
     if (do_utf8 && !UTF8_IS_INVARIANT(c)) {
 	c = utf8n_to_uvchr((U8 *)p, UTF8_MAXBYTES, &len,
-			    ckWARN(WARN_UTF8) ? UTF8_CHECK_ONLY :
-					UTF8_ALLOW_ANYUV|UTF8_CHECK_ONLY);
+		(UTF8_ALLOW_DEFAULT & UTF8_ALLOW_ANYUV) | UTF8_CHECK_ONLY);
+		/* see [perl #37836] for UTF8_ALLOW_ANYUV */
 	if (len == (STRLEN)-1) 
 	    Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
     }

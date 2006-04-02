@@ -3197,7 +3197,7 @@ tryagain:
 		    if (UTF8_IS_START(*p) && UTF) {
 			STRLEN numlen;
 			ender = utf8n_to_uvchr((U8*)p, RExC_end - p,
-					       &numlen, 0);
+					       &numlen, UTF8_ALLOW_DEFAULT);
 			p += numlen;
 		    }
 		    else
@@ -3649,7 +3649,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	if (UTF) {
 	    value = utf8n_to_uvchr((U8*)RExC_parse,
 				   RExC_end - RExC_parse,
-				   &numlen, 0);
+				   &numlen, UTF8_ALLOW_DEFAULT);
 	    RExC_parse += numlen;
 	}
 	else
@@ -3661,7 +3661,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    if (UTF) {
 		value = utf8n_to_uvchr((U8*)RExC_parse,
 				   RExC_end - RExC_parse,
-				   &numlen, 0);
+				   &numlen, UTF8_ALLOW_DEFAULT);
 		RExC_parse += numlen;
 	    }
 	    else
