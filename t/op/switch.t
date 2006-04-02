@@ -58,306 +58,330 @@ sub check_outside1 { is($_, "outside", "\$_ lexically scoped") }
 # Basic string/numeric comparisons and control flow
 
 {    
-    my $ok = 0;
+    my $ok;
     given(3) {
-	when(2) { $ok = 0; }
-	when(3) { $ok = 1; }
-	when(4) { $ok = 0; }
-	default { $ok = 0; }
+	when(2) { $ok = 'two'; }
+	when(3) { $ok = 'three'; }
+	when(4) { $ok = 'four'; }
+	default { $ok = 'd'; }
     }
-    ok($ok, "numeric comparison");
+    is($ok, 'three', "numeric comparison");
 }
 
 {    
-    my $ok = 0;
+    my $ok;
     use integer;
     given(3.14159265) {
-	when(2) { $ok = 0; }
-	when(3) { $ok = 1; }
-	when(4) { $ok = 0; }
-	default { $ok = 0; }
+	when(2) { $ok = 'two'; }
+	when(3) { $ok = 'three'; }
+	when(4) { $ok = 'four'; }
+	default { $ok = 'd'; }
     }
-    ok($ok, "integer comparison");
+    is($ok, 'three', "integer comparison");
 }
 
 {    
-    my ($ok1, $ok2) = (0, 0);
+    my ($ok1, $ok2);
     given(3) {
-	when(3.1)   { $ok1 = 0; }
-	when(3.0)   { $ok1 = 1; continue }
-	when("3.0") { $ok2 = 1; }
-	default     { $ok2 = 0; }
+	when(3.1)   { $ok1 = 'n'; }
+	when(3.0)   { $ok1 = 'y'; continue }
+	when("3.0") { $ok2 = 'y'; }
+	default     { $ok2 = 'n'; }
     }
-    ok($ok1, "more numeric (pt. 1)");
-    ok($ok2, "more numeric (pt. 2)");
+    is($ok1, 'y', "more numeric (pt. 1)");
+    is($ok2, 'y', "more numeric (pt. 2)");
 }
 
 {
-    my $ok = 0;
+    my $ok;
     given("c") {
-	when("b") { $ok = 0; }
-	when("c") { $ok = 1; }
-	when("d") { $ok = 0; }
-	default   { $ok = 0; }
+	when("b") { $ok = 'B'; }
+	when("c") { $ok = 'C'; }
+	when("d") { $ok = 'D'; }
+	default   { $ok = 'def'; }
     }
-    ok($ok, "string comparison");
+    is($ok, 'C', "string comparison");
 }
 
 {
-    my $ok = 0;
+    my $ok;
     given("c") {
-	when("b") { $ok = 0; }
-	when("c") { $ok = 0; continue }
-	when("c") { $ok = 1; }
-	default   { $ok = 0; }
+	when("b") { $ok = 'B'; }
+	when("c") { $ok = 'C'; continue }
+	when("c") { $ok = 'CC'; }
+	default   { $ok = 'D'; }
     }
-    ok($ok, "simple continue");
+    is($ok, 'CC', "simple continue");
 }
 
 # Definedness
 {
     my $ok = 1;
     given (0) { when(undef) {$ok = 0} }
-    ok($ok, "Given(0) when(undef)");
+    is($ok, 1, "Given(0) when(undef)");
 }
 {
     my $undef;
     my $ok = 1;
     given (0) { when($undef) {$ok = 0} }
-    ok($ok, 'Given(0) when($undef)');
+    is($ok, 1, 'Given(0) when($undef)');
 }
 {
     my $undef;
     my $ok = 0;
     given (0) { when($undef++) {$ok = 1} }
-    ok($ok, "Given(0) when($undef++)");
+    is($ok, 1, "Given(0) when($undef++)");
 }
 {
     my $ok = 1;
     given (undef) { when(0) {$ok = 0} }
-    ok($ok, "Given(undef) when(0)");
+    is($ok, 1, "Given(undef) when(0)");
 }
 {
     my $undef;
     my $ok = 1;
     given ($undef) { when(0) {$ok = 0} }
-    ok($ok, 'Given($undef) when(0)');
+    is($ok, 1, 'Given($undef) when(0)');
 }
 ########
 {
     my $ok = 1;
     given ("") { when(undef) {$ok = 0} }
-    ok($ok, 'Given("") when(undef)');
+    is($ok, 1, 'Given("") when(undef)');
 }
 {
     my $undef;
     my $ok = 1;
     given ("") { when($undef) {$ok = 0} }
-    ok($ok, 'Given("") when($undef)');
+    is($ok, 1, 'Given("") when($undef)');
 }
 {
     my $ok = 1;
     given (undef) { when("") {$ok = 0} }
-    ok($ok, 'Given(undef) when("")');
+    is($ok, 1, 'Given(undef) when("")');
 }
 {
     my $undef;
     my $ok = 1;
     given ($undef) { when("") {$ok = 0} }
-    ok($ok, 'Given($undef) when("")');
+    is($ok, 1, 'Given($undef) when("")');
 }
 ########
 {
     my $ok = 0;
     given (undef) { when(undef) {$ok = 1} }
-    ok($ok, "Given(undef) when(undef)");
+    is($ok, 1, "Given(undef) when(undef)");
 }
 {
     my $undef;
     my $ok = 0;
     given (undef) { when($undef) {$ok = 1} }
-    ok($ok, 'Given(undef) when($undef)');
+    is($ok, 1, 'Given(undef) when($undef)');
 }
 {
     my $undef;
     my $ok = 0;
     given ($undef) { when(undef) {$ok = 1} }
-    ok($ok, 'Given($undef) when(undef)');
+    is($ok, 1, 'Given($undef) when(undef)');
 }
 {
     my $undef;
     my $ok = 0;
     given ($undef) { when($undef) {$ok = 1} }
-    ok($ok, 'Given($undef) when($undef)');
+    is($ok, 1, 'Given($undef) when($undef)');
 }
 
 
 # Regular expressions
 {
-    my ($ok1, $ok2) = 0;
+    my ($ok1, $ok2);
     given("Hello, world!") {
 	when(/lo/)
-	    { $ok1 = 1; continue}
+	    { $ok1 = 'y'; continue}
 	when(/no/)
-	    { $ok1 = 0; continue}
+	    { $ok1 = 'n'; continue}
 	when(/^(Hello,|Goodbye cruel) world[!.?]/)
-	    { $ok2 = 1; continue}
+	    { $ok2 = 'Y'; continue}
 	when(/^(Hello cruel|Goodbye,) world[!.?]/)
-	    { $ok2 = 0; continue}
+	    { $ok2 = 'n'; continue}
     }
-    ok($ok1, "regex 1");
-    ok($ok2, "regex 2");
+    is($ok1, 'y', "regex 1");
+    is($ok2, 'Y', "regex 2");
 }
 
 # Comparisons
 {
     my $test = "explicit numeric comparison (<)";
     my $twenty_five = 25;
+    my $ok;
     given($twenty_five) {
-	when ($_ < 10) { fail($test) }
-	when ($_ < 20) { fail($test) }
-	when ($_ < 30) { pass($test) }
-	when ($_ < 40) { fail($test) }
-	default        { fail($test) }
+	when ($_ < 10) { $ok = "ten" }
+	when ($_ < 20) { $ok = "twenty" }
+	when ($_ < 30) { $ok = "thirty" }
+	when ($_ < 40) { $ok = "forty" }
+	default        { $ok = "default" }
     }
+    is($ok, "thirty", $test);
 }
 
 {
     use integer;
     my $test = "explicit numeric comparison (integer <)";
     my $twenty_five = 25;
+    my $ok;
     given($twenty_five) {
-	when ($_ < 10) { fail($test) }
-	when ($_ < 20) { fail($test) }
-	when ($_ < 30) { pass($test) }
-	when ($_ < 40) { fail($test) }
-	default        { fail($test) }
+	when ($_ < 10) { $ok = "ten" }
+	when ($_ < 20) { $ok = "twenty" }
+	when ($_ < 30) { $ok = "thirty" }
+	when ($_ < 40) { $ok = "forty" }
+	default        { $ok = "default" }
     }
+    is($ok, "thirty", $test);
 }
 
 {
     my $test = "explicit numeric comparison (<=)";
     my $twenty_five = 25;
+    my $ok;
     given($twenty_five) {
-	when ($_ <= 10) { fail($test) }
-	when ($_ <= 20) { fail($test) }
-	when ($_ <= 30) { pass($test) }
-	when ($_ <= 40) { fail($test) }
-	default         { fail($test) }
+	when ($_ <= 10) { $ok = "ten" }
+	when ($_ <= 20) { $ok = "twenty" }
+	when ($_ <= 30) { $ok = "thirty" }
+	when ($_ <= 40) { $ok = "forty" }
+	default         { $ok = "default" }
     }
+    is($ok, "thirty", $test);
 }
 
 {
     use integer;
     my $test = "explicit numeric comparison (integer <=)";
     my $twenty_five = 25;
+    my $ok;
     given($twenty_five) {
-	when ($_ <= 10) { fail($test) }
-	when ($_ <= 20) { fail($test) }
-	when ($_ <= 30) { pass($test) }
-	when ($_ <= 40) { fail($test) }
-	default         { fail($test) }
+	when ($_ <= 10) { $ok = "ten" }
+	when ($_ <= 20) { $ok = "twenty" }
+	when ($_ <= 30) { $ok = "thirty" }
+	when ($_ <= 40) { $ok = "forty" }
+	default         { $ok = "default" }
     }
+    is($ok, "thirty", $test);
 }
 
 
 {
     my $test = "explicit numeric comparison (>)";
     my $twenty_five = 25;
+    my $ok;
     given($twenty_five) {
-	when ($_ > 40) { fail($test) }
-	when ($_ > 30) { fail($test) }
-	when ($_ > 20) { pass($test) }
-	when ($_ > 10) { fail($test) }
-	default        { fail($test) }
+	when ($_ > 40) { $ok = "forty" }
+	when ($_ > 30) { $ok = "thirty" }
+	when ($_ > 20) { $ok = "twenty" }
+	when ($_ > 10) { $ok = "ten" }
+	default        { $ok = "default" }
     }
+    is($ok, "twenty", $test);
 }
 
 {
     my $test = "explicit numeric comparison (>=)";
     my $twenty_five = 25;
+    my $ok;
     given($twenty_five) {
-	when ($_ >= 40) { fail($test) }
-	when ($_ >= 30) { fail($test) }
-	when ($_ >= 20) { pass($test) }
-	when ($_ >= 10) { fail($test) }
-	default         { fail($test) }
+	when ($_ >= 40) { $ok = "forty" }
+	when ($_ >= 30) { $ok = "thirty" }
+	when ($_ >= 20) { $ok = "twenty" }
+	when ($_ >= 10) { $ok = "ten" }
+	default         { $ok = "default" }
     }
+    is($ok, "twenty", $test);
 }
 
 {
     use integer;
     my $test = "explicit numeric comparison (integer >)";
     my $twenty_five = 25;
+    my $ok;
     given($twenty_five) {
-	when ($_ > 40) { fail($test) }
-	when ($_ > 30) { fail($test) }
-	when ($_ > 20) { pass($test) }
-	when ($_ > 10) { fail($test) }
-	default        { fail($test) }
+	when ($_ > 40) { $ok = "forty" }
+	when ($_ > 30) { $ok = "thirty" }
+	when ($_ > 20) { $ok = "twenty" }
+	when ($_ > 10) { $ok = "ten" }
+	default        { $ok = "default" }
     }
+    is($ok, "twenty", $test);
 }
 
 {
     use integer;
     my $test = "explicit numeric comparison (integer >=)";
     my $twenty_five = 25;
+    my $ok;
     given($twenty_five) {
-	when ($_ >= 40) { fail($test) }
-	when ($_ >= 30) { fail($test) }
-	when ($_ >= 20) { pass($test) }
-	when ($_ >= 10) { fail($test) }
-	default         { fail($test) }
+	when ($_ >= 40) { $ok = "forty" }
+	when ($_ >= 30) { $ok = "thirty" }
+	when ($_ >= 20) { $ok = "twenty" }
+	when ($_ >= 10) { $ok = "ten" }
+	default         { $ok = "default" }
     }
+    is($ok, "twenty", $test);
 }
 
 
 {
     my $test = "explicit string comparison (lt)";
     my $twenty_five = "25";
+    my $ok;
     given($twenty_five) {
-	when ($_ lt "10") { fail($test) }
-	when ($_ lt "20") { fail($test) }
-	when ($_ lt "30") { pass($test) }
-	when ($_ lt "40") { fail($test) }
-	default         { fail($test) }
+	when ($_ lt "10") { $ok = "ten" }
+	when ($_ lt "20") { $ok = "twenty" }
+	when ($_ lt "30") { $ok = "thirty" }
+	when ($_ lt "40") { $ok = "forty" }
+	default           { $ok = "default" }
     }
+    is($ok, "thirty", $test);
 }
 
 {
     my $test = "explicit string comparison (le)";
     my $twenty_five = "25";
+    my $ok;
     given($twenty_five) {
-	when ($_ le "10") { fail($test) }
-	when ($_ le "20") { fail($test) }
-	when ($_ le "30") { pass($test) }
-	when ($_ le "40") { fail($test) }
-	default           { fail($test) }
+	when ($_ le "10") { $ok = "ten" }
+	when ($_ le "20") { $ok = "twenty" }
+	when ($_ le "30") { $ok = "thirty" }
+	when ($_ le "40") { $ok = "forty" }
+	default           { $ok = "default" }
     }
+    is($ok, "thirty", $test);
 }
 
 {
     my $test = "explicit string comparison (gt)";
     my $twenty_five = 25;
+    my $ok;
     given($twenty_five) {
-	when ($_ ge "40") { fail($test) }
-	when ($_ ge "30") { fail($test) }
-	when ($_ ge "20") { pass($test) }
-	when ($_ ge "10") { fail($test) }
-	default           { fail($test) }
+	when ($_ ge "40") { $ok = "forty" }
+	when ($_ ge "30") { $ok = "thirty" }
+	when ($_ ge "20") { $ok = "twenty" }
+	when ($_ ge "10") { $ok = "ten" }
+	default           { $ok = "default" }
     }
+    is($ok, "twenty", $test);
 }
 
 {
     my $test = "explicit string comparison (ge)";
     my $twenty_five = 25;
+    my $ok;
     given($twenty_five) {
-	when ($_ ge "40") { fail($test) }
-	when ($_ ge "30") { fail($test) }
-	when ($_ ge "20") { pass($test) }
-	when ($_ ge "10") { fail($test) }
-	default           { fail($test) }
+	when ($_ ge "40") { $ok = "forty" }
+	when ($_ ge "30") { $ok = "thirty" }
+	when ($_ ge "20") { $ok = "twenty" }
+	when ($_ ge "10") { $ok = "ten" }
+	default           { $ok = "default" }
     }
+    is($ok, "twenty", $test);
 }
 
 # Make sure it still works with a lexical $_:
@@ -365,23 +389,25 @@ sub check_outside1 { is($_, "outside", "\$_ lexically scoped") }
     my $_;
     my $test = "explicit comparison with lexical \$_";
     my $twenty_five = 25;
+    my $ok;
     given($twenty_five) {
-	when ($_ ge "40") { fail($test) }
-	when ($_ ge "30") { fail($test) }
-	when ($_ ge "20") { pass($test) }
-	when ($_ ge "10") { fail($test) }
-	default           { fail($test) }
+	when ($_ ge "40") { $ok = "forty" }
+	when ($_ ge "30") { $ok = "thirty" }
+	when ($_ ge "20") { $ok = "twenty" }
+	when ($_ ge "10") { $ok = "ten" }
+	default           { $ok = "default" }
     }
+    is($ok, "twenty", $test);
 }
 
 # Optimized-away comparisons
 {
-    my $ok = 0;
+    my $ok;
     given(23) {
-	when (2 + 2 == 4) { $ok = 1; continue }
-	when (2 + 2 == 5) { $ok = 0 }
+	when (2 + 2 == 4) { $ok = 'y'; continue }
+	when (2 + 2 == 5) { $ok = 'n' }
     }
-    ok($ok, "Optimized-away comparison");
+    is($ok, 'y', "Optimized-away comparison");
 }
 
 # File tests
@@ -512,7 +538,7 @@ sub bar {"bar"}
 my $f = tie my $v, "FetchCounter";
 
 {   my $test_name = "Only one FETCH (in given)";
-    my $ok = 0;
+    my $ok;
     given($v = 23) {
     	when(undef) {}
     	when(sub{0}->()) {}
@@ -521,12 +547,12 @@ my $f = tie my $v, "FetchCounter";
 	when(23) {$ok = 1}
 	when(/24/) {$ok = 0}
     }
-    ok($ok, "precheck: $test_name");
+    is($ok, 1, "precheck: $test_name");
     is($f->count(), 1, $test_name);
 }
 
 {   my $test_name = "Only one FETCH (numeric when)";
-    my $ok = 0;
+    my $ok;
     $v = 23;
     is($f->count(), 0, "Sanity check: $test_name");
     given(23) {
@@ -537,12 +563,12 @@ my $f = tie my $v, "FetchCounter";
 	when($v) {$ok = 1}
 	when(/24/) {$ok = 0}
     }
-    ok($ok, "precheck: $test_name");
+    is($ok, 1, "precheck: $test_name");
     is($f->count(), 1, $test_name);
 }
 
 {   my $test_name = "Only one FETCH (string when)";
-    my $ok = 0;
+    my $ok;
     $v = "23";
     is($f->count(), 0, "Sanity check: $test_name");
     given("23") {
@@ -553,12 +579,12 @@ my $f = tie my $v, "FetchCounter";
 	when($v) {$ok = 1}
 	when(/24/) {$ok = 0}
     }
-    ok($ok, "precheck: $test_name");
+    is($ok, 1, "precheck: $test_name");
     is($f->count(), 1, $test_name);
 }
 
 {   my $test_name = "Only one FETCH (undef)";
-    my $ok = 0;
+    my $ok;
     $v = undef;
     is($f->count(), 0, "Sanity check: $test_name");
     given(my $undef) {
@@ -568,7 +594,7 @@ my $f = tie my $v, "FetchCounter";
     	when($v)    {$ok = 1}
 	when(undef) {$ok = 0}
     }
-    ok($ok, "precheck: $test_name");
+    is($ok, 1, "precheck: $test_name");
     is($f->count(), 1, $test_name);
 }
 
