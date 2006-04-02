@@ -222,28 +222,62 @@ typedef struct {
     CURCUR *cc;			/* current innermost curly struct */
     char *locinput;
 
-    /* ... while the rest of these are local to an individual branch;
-     * thus they can be safely reused in other branches. */
+    /* ... while the rest of these are local to an individual branch */
 
     I32 n;			/* no or next */
     I32 ln;			/* len or last */
-    I32 c1, c2, paren;		/* case fold search, parenth */
-    CHECKPOINT cp;		/* remember current savestack indexes */
-    CHECKPOINT lastcp;
-    CURCUR *oldcc;		/* tmp copy of cc */
-    char *lastloc;		/* Detection of 0-len. */
-    I32 cache_offset;
-    I32 cache_bit;
-    I32 curlym_l;
-    I32 matches;
-    I32 maxwanted;
-    char *e;
-    char *old;
-    int count;
-    re_cc_state *cur_call_cc;
-    regexp *end_re;
-    reg_trie_accepted *accept_buff;
-    U32 accepted;		/* how many accepting states we have seen */
+
+    union {
+	struct {
+	    reg_trie_accepted *accept_buff;
+	    U32 accepted;	/* how many accepting states we have seen */
+	} trie;
+
+	struct {
+	    CHECKPOINT cp;	/* remember current savestack indexes */
+	    CHECKPOINT lastcp;
+	} eval;
+
+	struct {
+	    CHECKPOINT cp;	/* remember current savestack indexes */
+	    CURCUR *savecc;
+	} curlyx;
+
+	struct {
+	    CHECKPOINT cp;	/* remember current savestack indexes */
+	    CHECKPOINT lastcp;
+	    CURCUR *savecc;
+	    char *lastloc;	/* Detection of 0-len. */
+	    I32 cache_offset;
+	    I32 cache_bit;
+	} whilem;
+
+	struct {
+	    I32 paren;
+	    I32 c1, c2;		/* case fold search */
+	    CHECKPOINT lastcp;
+	    I32 l;
+	    I32 matches;
+	    I32 maxwanted;
+	} curlym;
+
+	struct {
+	    I32 paren;
+	    CHECKPOINT lastcp;
+	    I32 c1, c2;		/* case fold search */
+	    char *e;
+	    char *old;
+	    int count;
+	} plus; /* and CURLYN/CURLY/STAR */
+
+	struct {
+	    CHECKPOINT cp;	/* remember current savestack indexes */
+	    CHECKPOINT lastcp;
+	    CURCUR *savecc;
+	    re_cc_state *cur_call_cc;
+	    regexp *end_re;
+	} end;
+    };
 
     re_cc_state *reg_call_cc;	/* saved value of PL_reg_call_cc */
 } regmatch_state;
