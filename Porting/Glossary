@@ -112,12 +112,12 @@ archlibexp (archlib.U):
 	This variable is the same as the archlib variable, but is
 	filename expanded at configuration time, for convenient use.
 
-archname64 (use64bits.U):
-	This variable is used for the 64-bitness part of $archname.
-
 archname (archname.U):
 	This variable is a short name to characterize the current
 	architecture.  It is used mainly to construct the default archlib.
+
+archname64 (use64bits.U):
+	This variable is used for the 64-bitness part of $archname.
 
 archobjs (Unix.U):
 	This variable defines any additional objects that must be linked
@@ -406,38 +406,38 @@ d_atoll (atoll.U):
 	This variable conditionally defines the HAS_ATOLL symbol, which
 	indicates to the C program that the atoll() routine is available.
 
-d_attribute_format (d_attribut_format.U):
+d_attribute_format (d_attribut.U):
 	This variable conditionally defines HASATTRIBUTE_FORMAT, which
 	indicates the C compiler can check for printf-like formats.
 
-d_attribute_malloc (d_attribute_malloc.U):
+d_attribute_malloc (d_attribut.U):
 	This variable conditionally defines HASATTRIBUTE_MALLOC, which
 	indicates the C compiler can understand functions as having
 	malloc-like semantics.
 
-d_attribute_nonnull (d_attribute_nonnull.U):
+d_attribute_nonnull (d_attribut.U):
 	This variable conditionally defines HASATTRIBUTE_NONNULL, which
 	indicates that the C compiler can know that certain arguments
 	must not be NULL, and will check accordingly at compile time.
 
-d_attribute_noreturn (d_attribute_noreturn.U):
+d_attribute_noreturn (d_attribut.U):
 	This variable conditionally defines HASATTRIBUTE_NORETURN, which
 	indicates that the C compiler can know that certain functions
 	are guaranteed never to return.
 
-d_attribute_pure (d_attribute_pure.U):
+d_attribute_pure (d_attribut.U):
 	This variable conditionally defines HASATTRIBUTE_PURE, which
 	indicates that the C compiler can know that certain functions
 	are "pure" functions, meaning that they have no side effects, and
 	only rely on function input and/or global data for their results.
 
-d_attribute_unused (d_attribute_unused.U):
+d_attribute_unused (d_attribut.U):
 	This variable conditionally defines HASATTRIBUTE_UNUSED, which
 	indicates that the C compiler can know that certain variables
 	and arguments may not always be used, and to not throw warnings
 	if they don't get used.
 
-d_attribute_warn_unused_result (d_attribute_warn_unused_result.U):
+d_attribute_warn_unused_result (d_attribut.U):
 	This variable conditionally defines
 	HASATTRIBUTE_WARN_UNUSED_RESULT, which indicates that the C
 	compiler can know that certain functions have a return values
@@ -824,7 +824,7 @@ d_ftime (d_ftime.U):
 	that the ftime() routine exists.  The ftime() routine is basically
 	a sub-second accuracy clock.
 
-d_futimes (f_futimes.U):
+d_futimes (d_futimes.U):
 	This variable conditionally defines the HAS_FUTIMES symbol, which
 	indicates to the C program that the futimes() routine is available.
 
@@ -1011,14 +1011,14 @@ d_getpgid (d_getpgid.U):
 	indicates to the C program that the getpgid(pid) function
 	is available to get the process group id.
 
+d_getpgrp (d_getpgrp.U):
+	This variable conditionally defines HAS_GETPGRP if getpgrp() is
+	available to get the current process group.
+
 d_getpgrp2 (d_getpgrp2.U):
 	This variable conditionally defines the HAS_GETPGRP2 symbol, which
 	indicates to the C program that the getpgrp2() (as in DG/UX) routine
 	is available to get the current process group.
-
-d_getpgrp (d_getpgrp.U):
-	This variable conditionally defines HAS_GETPGRP if getpgrp() is
-	available to get the current process group.
 
 d_getppid (d_getppid.U):
 	This variable conditionally defines the HAS_GETPPID symbol, which
@@ -1202,6 +1202,11 @@ d_ldbl_dig (d_ldbl_dig.U):
 	header files provide LDBL_DIG, which is the number of significant
 	digits in a long double precision number.
 
+d_libm_lib_version (d_libm_lib_version.U):
+	This variable conditionally defines the LIBM_LIB_VERSION symbol,
+	which indicates to the C program that math.h defines _LIB_VERSION
+	being available in libm
+
 d_link (d_link.U):
 	This variable conditionally defines HAS_LINK if link() is
 	available to create hard links.
@@ -1241,12 +1246,12 @@ d_madvise (d_madvise.U):
 	This variable conditionally defines HAS_MADVISE if madvise() is
 	available to map a file into memory.
 
-d_malloc_size (d_malloc_size.U):
-	This symbol, if defined, indicates that the malloc_size
+d_malloc_good_size (d_malloc_size.U):
+	This symbol, if defined, indicates that the malloc_good_size
 	routine is available for use.
 
-d_malloc_good_size (d_malloc_good_size.U):
-	This symbol, if defined, indicates that the malloc_good_size
+d_malloc_size (d_malloc_size.U):
+	This symbol, if defined, indicates that the malloc_size
 	routine is available for use.
 
 d_mblen (d_mblen.U):
@@ -1600,14 +1605,14 @@ d_random_r (d_random_r.U):
 	which indicates to the C program that the random_r()
 	routine is available.
 
+d_readdir (d_readdir.U):
+	This variable conditionally defines HAS_READDIR if readdir() is
+	available to read directory entries.
+
 d_readdir64_r (d_readdir64_r.U):
 	This variable conditionally defines the HAS_READDIR64_R symbol,
 	which indicates to the C program that the readdir64_r()
 	routine is available.
-
-d_readdir (d_readdir.U):
-	This variable conditionally defines HAS_READDIR if readdir() is
-	available to read directory entries.
 
 d_readdir_r (d_readdir_r.U):
 	This variable conditionally defines the HAS_READDIR_R symbol,
@@ -1787,14 +1792,14 @@ d_setpgid (d_setpgid.U):
 	This variable conditionally defines the HAS_SETPGID symbol if the
 	setpgid(pid, gpid) function is available to set process group ID.
 
+d_setpgrp (d_setpgrp.U):
+	This variable conditionally defines HAS_SETPGRP if setpgrp() is
+	available to set the current process group.
+
 d_setpgrp2 (d_setpgrp2.U):
 	This variable conditionally defines the HAS_SETPGRP2 symbol, which
 	indicates to the C program that the setpgrp2() (as in DG/UX) routine
 	is available to set the current process group.
-
-d_setpgrp (d_setpgrp.U):
-	This variable conditionally defines HAS_SETPGRP if setpgrp() is
-	available to set the current process group.
 
 d_setprior (d_setprior.U):
 	This variable conditionally defines HAS_SETPRIORITY if setpriority()
@@ -1916,6 +1921,11 @@ d_sitearch (sitearch.U):
 	of architecture-dependent library files for $package.  If
 	$sitearch is the same as $archlib, then this is set to undef.
 
+d_snprintf (d_snprintf.U):
+	This variable conditionally defines the HAS_SNPRINTF symbol, which
+	indicates to the C program that the snprintf () library function
+	is available.
+
 d_sockatmark (d_sockatmark.U):
 	This variable conditionally defines the HAS_SOCKATMARK symbol, which
 	indicates to the C program that the sockatmark() routine is available.
@@ -1941,7 +1951,7 @@ d_socks5_init (d_socks5_init.U):
 	This variable conditionally defines the HAS_SOCKS5_INIT symbol, which
 	indicates to the C program that the socks5_init() routine is available.
 
-d_sprintf_returns_strlen (d_sprintf_returns_strlen.U):
+d_sprintf_returns_strlen (d_sprintf_len.U):
 	This variable defines whether sprintf returns the length of the string
 	(as per the ANSI spec). Some C libraries retain compatibility with
 	pre-ANSI C and return a pointer to the passed in buffer; for these
@@ -2278,6 +2288,11 @@ d_vprintf (d_vprintf.U):
 	This variable conditionally defines the HAS_VPRINTF symbol, which
 	indicates to the C program that the vprintf() routine is available
 	to printf with a pointer to an argument list.
+
+d_vsnprintf (d_snprintf.U):
+	This variable conditionally defines the HAS_VSNPRINTF symbol, which
+	indicates to the C program that the vsnprintf () library function
+	is available.
 
 d_wait4 (d_wait4.U):
 	This variable conditionally defines the HAS_WAIT4 symbol, which
@@ -3141,6 +3156,11 @@ inc_version_list (inc_version_list.U):
 	site_perl directory was introduced in 5.005, so that is the
 	lowest possible value.
 
+	This list includes architecture-dependent directories back to
+	version $api_versionstring (e.g. 5.5.640) and
+	architecture-independent directories all the way back to
+	5.005.
+
 inc_version_list_init (inc_version_list.U):
 	This variable holds the same list as inc_version_list, but
 	each item is enclosed in double quotes and separated by commas,
@@ -3154,6 +3174,14 @@ incpath (usrinc.U):
 inews (Loc.U):
 	This variable is defined but not used by Configure.
 	The value is a plain '' and is not useful.
+
+initialinstalllocation (bin.U):
+	When userelocatableinc is true, this variable holds the location
+	that make install should copy the perl binary to, with all the
+	run-time relocatable paths calculated from this at install time.
+	When used, it is initialised to the original value of binexp, and
+	then binexp is set to '.../', as the other binaries are found
+	relative to the perl binary.
 
 installarchlib (archlib.U):
 	This variable is really the same as archlibexp but may differ on
@@ -3556,7 +3584,7 @@ make_set_make (make.U):
 	make_set_make="MAKE=$make"	# if it doesn't.
 
 	This uses a comment character to distinguish a
-	'set' value (from a previous config.sh or Configure '-D' option)
+	'set' value (from a previous config.sh or Configure -D option)
 	from an uncomputed value.
 
 mallocobj (mallocsrc.U):
@@ -3673,7 +3701,7 @@ myuname (Oldconfig.U):
 	whole thing is then lower-cased.
 
 n (n.U):
-	This variable contains the '-n' flag if that is what causes the echo
+	This variable contains the -n flag if that is what causes the echo
 	command to suppress newline.  Otherwise it is null.  Correct usage is
 	$echo $n "prompt for a question: $c".
 
@@ -3841,14 +3869,14 @@ path_sep (Unix.U):
 	This is an old synonym for p_ in Head.U, the character
 	used to separate elements in the command shell search PATH.
 
+perl (Loc.U):
+	This variable is defined but not used by Configure.
+	The value is a plain '' and is not useful.
+
 perl5 (perl5.U):
 	This variable contains the full path (if any) to a previously
 	installed perl5.005 or later suitable for running the script
 	to determine inc_version_list.
-
-perl (Loc.U):
-	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
 
 perl_patchlevel (patchlevel.U):
 	This is the Perl patch level, a numeric change identifier,
@@ -4116,9 +4144,9 @@ sh (sh.U):
 	/bin/sh, though it's possible that some systems will have /bin/ksh,
 	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
 	D:/bin/sh.exe.
-	This unit comes before Options.U, so you can't set sh with a '-D'
+	This unit comes before Options.U, so you can't set sh with a -D
 	option, though you can override this (and startsh)
-	with '-O -Dsh=/bin/whatever -Dstartsh=whatever'
+	with -O -Dsh=/bin/whatever -Dstartsh=whatever
 
 shar (Loc.U):
 	This variable is defined but not used by Configure.
@@ -4369,7 +4397,7 @@ spackage (package.U):
 
 spitshell (spitshell.U):
 	This variable contains the command necessary to spit out a runnable
-	shell on this system.  It is either cat or a grep '-v' for # comments.
+	shell on this system.  It is either cat or a grep -v for # comments.
 
 sPRId64 (quadfio.U):
 	This variable, if defined, contains the string used by stdio to
@@ -4758,7 +4786,7 @@ usereentrant (usethreads.U):
 	meaningful if usethreads is set and is very experimental, it is
 	not even prompted for.
 
-userelocatableinc (XXX.U):
+userelocatableinc (bin.U):
 	This variable is set to true to indicate that perl should relocate
 	@INC entries at runtime based on the path to the perl binary.
 	Any @INC paths starting ".../" are relocated relative to the directory
@@ -4775,6 +4803,11 @@ usesfio (d_sfio.U):
 useshrplib (libperl.U):
 	This variable is set to 'true' if the user wishes
 	to build a shared libperl, and 'false' otherwise.
+
+usesitecustomize (d_sitecustomize.U):
+	This variable is set to true when the user requires a mechanism that
+	allows the sysadmin to add entries to @INC at runtime.  This variable
+	being set, makes perl run '$sitelib/sitecustomize.pl' at startup.
 
 usesocks (usesocks.U):
 	This variable conditionally defines the USE_SOCKS symbol,
