@@ -52,7 +52,26 @@ print "1..5\n";
 
 use IO::Socket;
 
-$listen = IO::Socket::UNIX->new(Local=>$PATH, Listen=>0) || die "$!";
+$listen = IO::Socket::UNIX->new(Local => $PATH, Listen => 0);
+
+# Sometimes UNIX filesystems are mounted for security reasons
+# with "nodev" option which spells out "no" for creating UNIX
+# local sockets.  Therefore we will retry with a File::Temp
+# generated filename from a temp directory.
+unless (defined $listen) {
+    eval { require File::Temp };
+    unless ($@) {
+	import File::Temp 'mktemp';
+	for my $TMPDIR ($ENV{TMPDIR}, "/tmp") {
+	    if (defined $TMPDIR && -d $TMPDIR && -w $TMPDIR) {
+		$PATH = mktemp("$TMPDIR/sXXXXXXXX");
+		last if $listen = IO::Socket::UNIX->new(Local => $PATH,
+							Listen => 0);
+	    }
+	}
+    }
+    defined $listen or die "$PATH: $!";
+}
 print "ok 1\n";
 
 if($pid = fork()) {
