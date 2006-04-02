@@ -2842,6 +2842,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	const I32 to_utf    = o->op_private & OPpTRANS_TO_UTF;
 	U8* tsave = NULL;
 	U8* rsave = NULL;
+	const U32 flags = UTF8_ALLOW_DEFAULT;
 
 	if (!from_utf) {
 	    STRLEN len = tlen;
@@ -2868,11 +2869,11 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    i = 0;
 	    transv = newSVpvs("");
 	    while (t < tend) {
-		cp[2*i] = utf8n_to_uvuni(t, tend-t, &ulen, 0);
+		cp[2*i] = utf8n_to_uvuni(t, tend-t, &ulen, flags);
 		t += ulen;
 		if (t < tend && NATIVE_TO_UTF(*t) == 0xff) {
 		    t++;
-		    cp[2*i+1] = utf8n_to_uvuni(t, tend-t, &ulen, 0);
+		    cp[2*i+1] = utf8n_to_uvuni(t, tend-t, &ulen, flags);
 		    t += ulen;
 		}
 		else {
@@ -2926,11 +2927,11 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	while (t < tend || tfirst <= tlast) {
 	    /* see if we need more "t" chars */
 	    if (tfirst > tlast) {
-		tfirst = (I32)utf8n_to_uvuni(t, tend - t, &ulen, 0);
+		tfirst = (I32)utf8n_to_uvuni(t, tend - t, &ulen, flags);
 		t += ulen;
 		if (t < tend && NATIVE_TO_UTF(*t) == 0xff) {	/* illegal utf8 val indicates range */
 		    t++;
-		    tlast = (I32)utf8n_to_uvuni(t, tend - t, &ulen, 0);
+		    tlast = (I32)utf8n_to_uvuni(t, tend - t, &ulen, flags);
 		    t += ulen;
 		}
 		else
@@ -2940,11 +2941,11 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    /* now see if we need more "r" chars */
 	    if (rfirst > rlast) {
 		if (r < rend) {
-		    rfirst = (I32)utf8n_to_uvuni(r, rend - r, &ulen, 0);
+		    rfirst = (I32)utf8n_to_uvuni(r, rend - r, &ulen, flags);
 		    r += ulen;
 		    if (r < rend && NATIVE_TO_UTF(*r) == 0xff) {	/* illegal utf8 val indicates range */
 			r++;
-			rlast = (I32)utf8n_to_uvuni(r, rend - r, &ulen, 0);
+			rlast = (I32)utf8n_to_uvuni(r, rend - r, &ulen, flags);
 			r += ulen;
 		    }
 		    else

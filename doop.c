@@ -69,7 +69,7 @@ S_do_trans_simple(pTHX_ SV *sv)
 	I32 ch;
 
         /* Need to check this, otherwise 128..255 won't match */
-	const UV c = utf8n_to_uvchr(s, send - s, &ulen, 0);
+	const UV c = utf8n_to_uvchr(s, send - s, &ulen, UTF8_ALLOW_DEFAULT);
         if (c < 0x100 && (ch = tbl[c]) >= 0) {
             matches++;
 	    d = uvchr_to_utf8(d, ch);
@@ -119,7 +119,7 @@ S_do_trans_count(pTHX_ SV *sv)
 	const I32 complement = PL_op->op_private & OPpTRANS_COMPLEMENT;
 	while (s < send) {
 	    STRLEN ulen;
-	    const UV c = utf8n_to_uvchr(s, send - s, &ulen, 0);
+	    const UV c = utf8n_to_uvchr(s, send - s, &ulen, UTF8_ALLOW_DEFAULT);
 	    if (c < 0x100) {
 		if (tbl[c] >= 0)
 		    matches++;
@@ -209,7 +209,8 @@ S_do_trans_complex(pTHX_ SV *sv)
 	    UV pch = 0xfeedface;
 	    while (s < send) {
 		STRLEN len;
-		const UV comp = utf8_to_uvchr(s, &len);
+		const UV comp = utf8n_to_uvchr(s, send - s, &len,
+					       UTF8_ALLOW_DEFAULT);
 		I32 ch;
 
 		if (comp > 0xff) {
@@ -254,7 +255,8 @@ S_do_trans_complex(pTHX_ SV *sv)
 	else {
 	    while (s < send) {
 		STRLEN len;
-		const UV comp = utf8_to_uvchr(s, &len);
+		const UV comp = utf8n_to_uvchr(s, send - s, &len,
+					       UTF8_ALLOW_DEFAULT);
 		I32 ch;
 		if (comp > 0xff) {
 		    if (!complement) {
@@ -540,7 +542,7 @@ S_do_trans_complex_utf8(pTHX_ SV *sv)
 		}
 		else {
 		    STRLEN len;
-		    uv = utf8_to_uvuni(s, &len);
+		    uv = utf8n_to_uvuni(s, send - s, &len, UTF8_ALLOW_DEFAULT);
 		    if (uv != puv) {
 			Move(s, d, len, U8);
 			d += len;

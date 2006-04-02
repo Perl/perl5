@@ -6,7 +6,7 @@
 
 $| = 1;
 
-print "1..1200\n";
+print "1..1208\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3464,6 +3464,53 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
     eval { for (1..2) { $f .= $1 if variable() =~ /(.)/g } };
     ok($f eq "ab", "pos retained between calls # TODO") or print "# $@\n";
 }
+
+# [perl #37836] Simple Regex causes SEGV when run on specific data
+if ($ordA == 193) {
+    print "ok $test # Skip: in EBCDIC\n"; $test++;
+} else {
+    no warnings 'utf8';
+    $_ = pack('U0C2', 0xa2, 0xf8); # ill-formed UTF-8
+    my $ret = 0;
+    eval { $ret = s/[\0]+//g };
+    ok($ret == 0, "ill-formed UTF-8 doesn't match NUL in class");
+}
+
+{ # [perl #38293] chr(65535) should be allowed in regexes
+    no warnings 'utf8'; # to allow non-characters
+    my($c, $r, $s);
+
+    $c = chr 0xffff;
+    $c =~ s/$c//g;
+    ok($c eq "", "U+FFFF, parsed as atom");
+
+    $c = chr 0xffff;
+    $r = "\\$c";
+    $c =~ s/$r//g;
+    ok($c eq "", "U+FFFF backslashed, parsed as atom");
+
+    $c = chr 0xffff;
+    $c =~ s/[$c]//g;
+    ok($c eq "", "U+FFFF, parsed in class");
+
+    $c = chr 0xffff;
+    $r = "[\\$c]";
+    $c =~ s/$r//g;
+    ok($c eq "", "U+FFFF backslashed, parsed in class");
+
+    $s = "A\x{ffff}B";
+    $s =~ s/\x{ffff}//i;
+    ok($s eq "AB", "U+FFFF, EXACTF");
+
+    $s = "\x{ffff}A";
+    $s =~ s/\bA//;
+    ok($s eq "\x{ffff}", "U+FFFF, BOUND");
+
+    $s = "\x{ffff}!";
+    $s =~ s/\B!//;
+    ok($s eq "\x{ffff}", "U+FFFF, NBOUND");
+} # non-characters end
+
 
 # Keep the following test last -- it may crash perl
 
