@@ -17,8 +17,15 @@ BEGIN {
     elsif ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bIO\b/) {
 	$reason = 'IO extension unavailable';
     }
-    elsif (! $Config{'d_fork'}) {
-	$reason = 'no fork';
+    elsif (
+        ! eval {
+            my $pid= fork();
+            ! defined($pid) and die "Fork failed!";
+            ! $pid and exit;
+            defined waitpid($pid, 0);
+        }
+    ) {
+        $reason = "no fork: $@";
     }
     if ($reason) {
 	print "1..0 # Skip: $reason\n";

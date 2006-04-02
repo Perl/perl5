@@ -23,7 +23,7 @@ require IO::Socket::UNIX if ($^O ne 'epoc' && $^O ne 'symbian');
 
 @ISA = qw(IO::Handle);
 
-$VERSION = "1.30";
+$VERSION = "1.30_01";
 
 @EXPORT_OK = qw(sockatmark);
 
@@ -112,7 +112,7 @@ sub connect {
 
     $blocking = $sock->blocking(0) if $timeout;
     if (!connect($sock, $addr)) {
-	if (defined $timeout && $!{EINPROGRESS}) {
+	if (defined $timeout && ($!{EINPROGRESS} || $!{EWOULDBLOCK})) {
 	    require IO::Select;
 
 	    my $sel = new IO::Select $sock;
@@ -121,14 +121,17 @@ sub connect {
 		$err = $! || (exists &Errno::ETIMEDOUT ? &Errno::ETIMEDOUT : 1);
 		$@ = "connect: timeout";
 	    }
-	    elsif (!connect($sock,$addr) && not $!{EISCONN}) {
+	    elsif (!connect($sock,$addr) &&
+                not ($!{EISCONN} || ($! == 10022 && $^O eq 'MSWin32'))
+            ) {
 		# Some systems refuse to re-connect() to
 		# an already open socket and set errno to EISCONN.
+		# Windows sets errno to WSAEINVAL (10022)
 		$err = $!;
 		$@ = "connect: $!";
 	    }
 	}
-        elsif ($blocking || !$!{EINPROGRESS})  {
+        elsif ($blocking || !($!{EINPROGRESS} || $!{EWOULDBLOCK}))  {
 	    $err = $!;
 	    $@ = "connect: $!";
 	}
@@ -140,6 +143,34 @@ sub connect {
 
     $err ? undef : $sock;
 }
+
+
+sub blocking {
+    my $sock = shift;
+
+    return $sock->SUPER::blocking(@_)
+        if $^O ne 'MSWin32';
+
+    # Windows handles blocking differently
+    #
+    # http://groups.google.co.uk/group/perl.perl5.porters/browse_thread/
+    #   thread/b4e2b1d88280ddff/630b667a66e3509f?#630b667a66e3509f
+    # http://msdn.microsoft.com/library/default.asp?url=/library/en-us/
+    #   winsock/winsock/ioctlsocket_2.asp
+    #
+    # 0x8004667e is FIONBIO
+    # By default all sockets are blocking
+
+    return !${*$sock}{io_sock_nonblocking}
+        unless @_;
+
+    my $block = shift;
+
+    ${*$sock}{io_sock_nonblocking} = $block ? "0" : "1";
+
+    return ioctl($sock, 0x8004667e, \${*$sock}{io_sock_nonblocking});
+}
+
 
 sub close {
     @_ == 1 or croak 'usage: $sock->close()';

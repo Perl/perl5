@@ -24,8 +24,8 @@ BEGIN {
 	  or $@ !~ /not implemented/ or
 	    $reason = 'compiled without TCP/IP stack v4';
     }
-    elsif ($^O =~ m/^(?:qnx|nto|vos)$/ ) {
-	$reason = 'Not implemented';
+    elsif ($^O =~ m/^(?:qnx|nto|vos|MSWin32)$/ ) {
+	$reason = "UNIX domain sockets not implemented on $^O";
     }
     elsif (! $Config{'d_fork'}) {
 	$reason = 'no fork';
