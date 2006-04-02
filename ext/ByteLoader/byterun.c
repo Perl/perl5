@@ -964,7 +964,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    {
 		I32 arg;
 		BGET_I32(arg);
-		cCOP->cop_arybase = arg;
+		BSET_cop_arybase(cCOP, arg);
 		break;
 	    }
 	  case INSN_COP_LINE:		/* 129 */

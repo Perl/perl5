@@ -493,7 +493,7 @@ cop_stash	cCOP					svindex		x
 cop_filegv	cCOP					svindex		x
 #endif
 cop_seq		cCOP->cop_seq				U32
-cop_arybase	cCOP->cop_arybase			I32
+cop_arybase	cCOP					I32		x
 cop_line	cCOP->cop_line				line_t
 cop_io		cCOP->cop_io				svindex
 cop_warnings	cCOP->cop_warnings			svindex
