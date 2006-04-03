@@ -102,7 +102,7 @@ ok(1,"");
 if ($^O eq 'linux') {
   # First modify $0 in a subthread.
   print "# mainthread: \$0 = $0\n";
-  threads->new( sub {
+  threads->create( sub {
 		  print "# subthread: \$0 = $0\n";
 		  $0 = "foobar";
 		  print "# subthread: \$0 = $0\n" } )->join;
@@ -135,9 +135,9 @@ if ($^O eq 'linux') {
 }
 
 {
-    my $t = threads->new(sub {});
+    my $t = threads->create(sub {});
     $t->join;
-    my $x = threads->new(sub {});
+    my $x = threads->create(sub {});
     $x->join;
     eval {
       $t->join;
@@ -153,6 +153,6 @@ if ($^O eq 'linux') {
     # archives for the thread "maint@20974 or before broke mp2 ithreads test".
     use IO::File;
     # this coredumped between #20930 and #21000
-    $_->join for map threads->new(sub{ok($_, "stress newCONSTSUB")}), 1..2;
+    $_->join for map threads->create(sub{ok($_, "stress newCONSTSUB")}), 1..2;
 }
 

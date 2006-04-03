@@ -1,5 +1,10 @@
 Revision history for Perl extension threads.
 
+1.18 Fri Mar 24 14:21:36 EST 2006
+	- ->equal returns 0 on false for backwards compatibility
+	- Changed UVs to IVs in XS code (except for TID)
+	- Use ->create in tests
+
 1.17 Thu Mar 23 10:31:20 EST 2006
 	- Restoration of 'core' build parameters
 

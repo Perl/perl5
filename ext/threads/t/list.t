@@ -17,7 +17,7 @@ use ExtUtils::testlib;
 
 
 
-BEGIN { $| = 1; print "1..8\n" };
+BEGIN { $| = 1; print "1..15\n" };
 use threads;
 
 
@@ -37,21 +37,36 @@ sub ok {
     return $ok;
 }
 
-ok(2, scalar @{[threads->list]} == 0,'');
+### Start of Testing ###
 
-
+ok(2, scalar @{[threads->list()]} == 0, 'No threads yet');
 
 threads->create(sub {})->join();
-ok(3, scalar @{[threads->list]} == 0,'');
+ok(3, scalar @{[threads->list()]} == 0, 'Empty thread list after join');
 
 my $thread = threads->create(sub {});
-ok(4, scalar @{[threads->list]} == 1,'');
+ok(4, scalar(threads->list()) == 1, 'Non-empty thread list');
+ok(5, threads->list() == 1,             'Non-empty thread list');
 $thread->join();
-ok(5, scalar @{[threads->list]} == 0,'');
+ok(6, scalar @{[threads->list()]} == 0, 'Thread list empty again');
+ok(7, threads->list() == 0,             'Thread list empty again');
 
-$thread = threads->create(sub { ok(6, threads->self == (threads->list)[0],'')});
+$thread = threads->create(sub {
+    ok(8, threads->list() == 1, 'Non-empty thread list in thread');
+    ok(9, threads->self == (threads->list())[0], 'Self in thread list')
+});
+
 threads->yield; # help out non-preemptive thread implementations
 sleep 1;
-ok(7, $thread == (threads->list)[0],'');
+
+ok(10, scalar(threads->list()) == 1, 'Thread count 1');
+ok(11, threads->list() == 1,             'Thread count 1');
+my $cnt = threads->list();
+ok(12, $cnt == 1,                        'Thread count 1');
+my ($thr_x) = threads->list();
+ok(13, $thread == $thr_x,                'Thread in list');
 $thread->join();
-ok(8, scalar @{[threads->list]} == 0,'');
+ok(14, scalar @{[threads->list()]} == 0, 'Thread list empty');
+ok(15, threads->list() == 0,             'Thread list empty');
+
+# EOF

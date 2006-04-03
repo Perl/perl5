@@ -1,19 +1,6 @@
 use strict;
 use warnings;
 
-#
-# The reason this does not use a Test module is that
-# they mess up test numbers between threads
-#
-# And even when that will be fixed, this is a basic
-# test and should not rely on shared variables
-#
-# This will test the basic API, it will not use any coderefs
-# as they are more advanced
-#
-#########################
-
-
 BEGIN {
     if ($ENV{'PERL_CORE'}){
         chdir 't';
@@ -28,7 +15,7 @@ BEGIN {
 
 use ExtUtils::testlib;
 
-BEGIN { $| = 1; print "1..28\n" };
+BEGIN { $| = 1; print "1..30\n" };
 use threads;
 
 
@@ -147,22 +134,25 @@ my $thr3 = threads->object($thr1->tid());
 ok(20, $thr1 != $thr2,   'Treads not equal');
 ok(21, $thr1 == $thr3,   'Threads equal');
 
-ok(22, threads->object($thr1->tid())->tid() == 11, 'Object method');
-ok(23, threads->object($thr2->tid())->tid() == 12, 'Object method');
+ok(22, $thr1->_handle(), 'Handle method');
+ok(23, $thr2->_handle(), 'Handle method');
+
+ok(24, threads->object($thr1->tid())->tid() == 11, 'Object method');
+ok(25, threads->object($thr2->tid())->tid() == 12, 'Object method');
 
 $thr1->join();
 $thr2->join();
 
-my $sub = sub { ok(24, shift() == 1, "Test code ref"); };
+my $sub = sub { ok(26, shift() == 1, "Test code ref"); };
 threads->create($sub, 1)->join();
 
 my $thrx = threads->object(99);
-ok(25, ! defined($thrx), 'No object');
-$thrx = threads->object();
-ok(26, ! defined($thrx), 'No object');
-$thrx = threads->object(undef);
 ok(27, ! defined($thrx), 'No object');
-$thrx = threads->object(0);
+$thrx = threads->object();
 ok(28, ! defined($thrx), 'No object');
+$thrx = threads->object(undef);
+ok(29, ! defined($thrx), 'No object');
+$thrx = threads->object(0);
+ok(30, ! defined($thrx), 'No object');
 
 # EOF

@@ -85,7 +85,7 @@ sub is($$$) {
 #########################
 
 if ($] == 5.008 || $] >= 5.008003) {
-    threads->new( sub {1} )->join;
+    threads->create( sub {1} )->join;
     my $not = eval { Config::myconfig() } ? '' : 'not ';
     print "${not}ok $test - Are we able to call Config::myconfig after clone\n";
 } else {
@@ -99,7 +99,7 @@ $test++;
 our $unique_scalar : unique;
 our @unique_array : unique;
 our %unique_hash : unique;
-threads->new(
+threads->create(
     sub {
 	my $TODO = ":unique needs to be re-implemented in a non-broken way";
 	eval { $unique_scalar = 1 };
@@ -147,7 +147,7 @@ for my $decl ('my $x : unique', 'sub foo : unique') {
 #     sub { $x."bar" };
 # }
 # 
-# my $string = threads->new(\&f)->join->();
+# my $string = threads->create(\&f)->join->();
 # print $string eq 'foobar' ?  '' : 'not ', "ok $test - returning closure\n";
 # $test++;
 
@@ -157,7 +157,7 @@ for my $decl ('my $x : unique', 'sub foo : unique') {
 my %h = (1,2,3,4);
 is (keys %h, 2, "keys correct in parent");
 
-my $child = threads->new(sub { return scalar keys %h })->join;
+my $child = threads->create(sub { return scalar keys %h })->join;
 is ($child, 2, "keys correct in child");
 
 lock_keys (%h);
@@ -165,7 +165,7 @@ delete $h{1};
 
 is (keys %h, 1, "keys correct in parent with restricted hash");
 
-$child = threads->new(sub { return scalar keys %h })->join;
+$child = threads->create(sub { return scalar keys %h })->join;
 is ($child, 1, "keys correct in child with restricted hash");
 
 1;

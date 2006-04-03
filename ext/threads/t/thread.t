@@ -28,7 +28,7 @@ sub content {
     return shift;
 }
 {
-    my $t = threads->new(\&content, "ok 2\n", "ok 3\n", 1..1000);
+    my $t = threads->create(\&content, "ok 2\n", "ok 3\n", 1..1000);
     print $t->join();
 }
 {
@@ -36,7 +36,7 @@ sub content {
     my $t;
     {
 	lock($lock);
-	$t = threads->new(sub { lock($lock); print "ok 5\n"});
+	$t = threads->create(sub { lock($lock); print "ok 5\n"});
 	print "ok 4\n";
     }
     $t->join();
@@ -47,18 +47,18 @@ sub dorecurse {
     my $ret;
     print $val;
     if(@_) {
-	$ret = threads->new(\&dorecurse, @_);
+	$ret = threads->create(\&dorecurse, @_);
 	$ret->join;
     }
 }
 {
-    my $t = threads->new(\&dorecurse, map { "ok $_\n" } 6..10);
+    my $t = threads->create(\&dorecurse, map { "ok $_\n" } 6..10);
     $t->join();
 }
 
 {
     # test that sleep lets other thread run
-    my $t = threads->new(\&dorecurse, "ok 11\n");
+    my $t = threads->create(\&dorecurse, "ok 11\n");
     threads->yield; # help out non-preemptive thread implementations
     sleep 1;
     print "ok 12\n";
@@ -72,11 +72,11 @@ sub dorecurse {
 	my $ret;
 	print $val;
 	if (@_) {
-	    $ret = threads->new(\&islocked, shift);
+	    $ret = threads->create(\&islocked, shift);
 	}
 	return $ret;
     }
-my $t = threads->new(\&islocked, "ok 13\n", "ok 14\n");
+my $t = threads->create(\&islocked, "ok 13\n", "ok 14\n");
 $t->join->join;
 }
 
@@ -103,8 +103,8 @@ sub threaded {
 { 
     curr_test(15);
 
-    my $thr1 = threads->new(\&testsprintf, 15);
-    my $thr2 = threads->new(\&testsprintf, 16);
+    my $thr1 = threads->create(\&testsprintf, 15);
+    my $thr2 = threads->create(\&testsprintf, 16);
     
     my $short = "This is a long string that goes on and on.";
     my $shorte = " a long string that goes on and on.";
@@ -150,7 +150,7 @@ package main;
     # since it tests rand	
     my %rand : shared;
     rand(10);
-    threads->new( sub { $rand{int(rand(10000000000))}++ } ) foreach 1..25;
+    threads->create( sub { $rand{int(rand(10000000000))}++ } ) foreach 1..25;
     $_->join foreach threads->list;
 #    use Data::Dumper qw(Dumper);
 #    print Dumper(\%rand);
@@ -161,7 +161,7 @@ package main;
 # bugid #24165
 
 run_perl(prog =>
-    'use threads; sub a{threads->new(shift)} $t = a sub{}; $t->tid; $t->join; $t->tid');
+    'use threads; sub a{threads->create(shift)} $t = a sub{}; $t->tid; $t->join; $t->tid');
 is($?, 0, 'coredump in global destruction');
 
 # test CLONE_SKIP() functionality
@@ -233,7 +233,7 @@ if ($] >= 5.008007) {
 	    $cloned .= "$_" =~ /ARRAY/ ? '1' : '0' for @objs;
 	    is($cloned, ($depth ? '00010001111' : '11111111111'),
 		"objs clone skip at depth $depth");
-	    threads->new( \&f, $depth+1)->join if $depth < 2;
+	    threads->create( \&f, $depth+1)->join if $depth < 2;
 	    @objs = ();
 	}
 	f(0);

@@ -38,7 +38,7 @@ BEGIN {
                if($threads::shared::threads_shared);
 }
 
-our $VERSION = '1.17';
+our $VERSION = '1.18';
 
 
 # Load the XS code
@@ -76,25 +76,14 @@ sub import
 
 ### Methods, etc. ###
 
-# || 0 to ensure compatibility with previous versions
-sub equal { ($_[0]->tid == $_[1]->tid) || 0 }
-
 # use "goto" trick to avoid pad problems from 5.8.1 (fixed in 5.8.2)
 # should also be faster
 sub async (&;@) { unshift @_,'threads'; goto &new }
 
-sub object {
-    return undef unless @_ > 1;
-    foreach (threads->list) {
-        return $_ if $_->tid == $_[1];
-    }
-    return undef;
-}
-
 $threads::threads = 1;
 
-# why document 'new' then use 'create' in the tests!
-*create = \&new;
+# 'new' is an alias for 'create'
+*new = \&create;
 
 1;
 
@@ -106,7 +95,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.17
+This document describes threads version 1.18
 
 =head1 SYNOPSIS
 
@@ -276,9 +265,10 @@ thread implementation.
 You may do C<use threads qw(yield)> then use just a bare C<yield> in your
 code.
 
-=item threads->list();
+=item threads->list()
 
-This will return a list of all non joined, non detached threads.
+In a list context, returns a list of all non-joined, non-detached I<threads>
+objects.  In a scalar context, returns a count of the same.
 
 =item $thr1->equal($thr2)
 
@@ -297,6 +287,22 @@ C<async> creates a thread to execute the block immediately following
 it.  This block is treated as an anonymous sub, and so must have a
 semi-colon after the closing brace. Like C<< threads->new >>, C<async>
 returns a thread object.
+
+=item $thr->_handle()
+
+This I<private> method returns the memory location of the internal thread
+structure associated with a threads object.  For Win32, this is the handle
+returned by C<CreateThread>; for other platforms, it is the pointer returned
+by C<pthread_create>.
+
+This method is of no use for general Perl threads programming.  Its intent is
+to provide other (XS-based) thread modules with the capability to access, and
+possibly manipulate, the underlying thread structure associated with a Perl
+thread.
+
+=item threads->_handle()
+
+Class method that allows a thread to obtain its own I<handle>.
 
 =back
 
@@ -337,11 +343,6 @@ incompatible.)
 
 On some platforms it might not be possible to destroy "parent"
 threads while there are still existing child "threads".
-
-=item tid is I32
-
-The thread id is a 32 bit integer, it can potentially overflow.
-This might be fixed in a later version of perl.
 
 =item Creating threads inside BEGIN blocks
 
@@ -385,7 +386,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.17/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.18/shared.pm>
 
 L<threads::shared>, L<perlthrtut>
 
