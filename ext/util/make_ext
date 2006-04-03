@@ -131,10 +131,10 @@ clean)		;;
 realclean)	;;
 *)	# Give makefile an opportunity to rewrite itself.
 	# reassure users that life goes on...
-	$MAKE config $passthru || echo "$MAKE config failed, continuing anyway..."
+	$MAKE config MAKE=$MAKE $passthru || echo "$MAKE config failed, continuing anyway..."
 	;;
 esac
 
-$MAKE $makeopts $target $makeargs $passthru || exit
+$MAKE $makeopts $target MAKE=$MAKE $makeargs $passthru || exit
 
 exit $?
