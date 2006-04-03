@@ -271,7 +271,7 @@ typedef struct regmatch_state {
 	    re_cc_state *cur_call_cc;
 	    regexp *end_re;
 	} end;
-    };
+    } u;
 
     re_cc_state *reg_call_cc;	/* saved value of PL_reg_call_cc */
 } regmatch_state;
