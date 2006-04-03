@@ -3068,7 +3068,6 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
     }
     else {
         const int fd = fileno(stdio);
-	int socksfd = 0;
 	int invalidate = 0;
 	IV result = 0;
 	int saveerr = 0;
@@ -3080,36 +3079,26 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	 */
     	int optval;
     	Sock_size_t optlen = sizeof(int);
-    	if (getsockopt(fd, SOL_SOCKET, SO_TYPE, (void *) &optval, &optlen) == 0) {
-            socksfd = 1;
+	if (getsockopt(fd, SOL_SOCKET, SO_TYPE, (void *) &optval, &optlen) == 0)
 	    invalidate = 1;
-    	}
 #endif
-    	if (PerlIOUnix_refcnt_dec(fd) > 0) {
-	    /* File descriptor still in use */
+	if (PerlIOUnix_refcnt_dec(fd) > 0) /* File descriptor still in use */
 	    invalidate = 1;
-	    socksfd = 0;
-	}
 	if (invalidate) {
-   	    /* For STD* handles don't close the stdio at all
-	       this is because we have shared the FILE * too
-   	     */
-	    if (stdio == stdin) {
-	    	/* Some stdios are buggy fflush-ing inputs */
-	    	return 0;
-	    }
-	    else if (stdio == stdout || stdio == stderr) {
-	    	return PerlIO_flush(f);
-	    }
+	    /* For STD* handles, don't close stdio, since we shared the FILE *, too. */
+	    if (stdio == stdin) /* Some stdios are buggy fflush-ing inputs */
+		return 0;
+	    if (stdio == stdout || stdio == stderr)
+		return PerlIO_flush(f);
             /* Tricky - must fclose(stdio) to free memory but not close(fd)
 	       Use Sarathy's trick from maint-5.6 to invalidate the
 	       fileno slot of the FILE *
 	    */
 	    result = PerlIO_flush(f);
 	    saveerr = errno;
-    	    if (!(invalidate = PerlIOStdio_invalidate_fileno(aTHX_ stdio))) {
-	    	dupfd = PerlLIO_dup(fd);
-	    }
+	    invalidate = PerlIOStdio_invalidate_fileno(aTHX_ stdio);
+	    if (!invalidate)
+		dupfd = PerlLIO_dup(fd);
 	}
         result = PerlSIO_fclose(stdio);
 	/* We treat error from stdio as success if we invalidated
@@ -3119,10 +3108,10 @@ PerlIOStdio_close(pTHX_ PerlIO *f)
 	    errno = saveerr;
 	    result = 0;
 	}
-	if (socksfd) {
-	    /* in SOCKS case let close() determine return value */
-	    result = close(fd);
-	}
+#ifdef SOCKS5_VERSION_NAME
+	/* in SOCKS' case, let close() determine return value */
+	result = close(fd);
+#endif
 	if (dupfd) {
 	    PerlLIO_dup2(dupfd,fd);
 	    PerlLIO_close(dupfd);
