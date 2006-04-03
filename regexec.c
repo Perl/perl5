@@ -4556,10 +4556,12 @@ exit_level:
 
     /* free all slabs above current one */
     if (orig_slab->next) {
-	regmatch_slab *sl = orig_slab->next;
+	regmatch_slab *osl, *sl = orig_slab->next;
 	orig_slab->next = NULL;
 	while (sl) {
+	    osl = sl;
 	    sl = sl->next;
+	    Safefree(osl);
 	}
     }
 
