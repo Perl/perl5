@@ -517,11 +517,6 @@ The key C<"fallback"> governs what to do if a method for a particular
 operation is not found.  Three different cases are possible depending on
 the value of C<"fallback">:
 
-=head2 Smart Match
-
-The key C<"~~"> allows you to override the smart matching used by
-the switch construct. See L<feature>.
-
 =over 16
 
 =item * C<undef>
@@ -546,6 +541,11 @@ C<"nomethod"> value, and if this is missing, raises an exception.
 
 B<Note.> C<"fallback"> inheritance via @ISA is not carved in stone
 yet, see L<"Inheritance and overloading">.
+
+=head2 Smart Match
+
+The key C<"~~"> allows you to override the smart matching used by
+the switch construct. See L<feature>.
 
 =head2 Copy Constructor
 
