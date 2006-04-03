@@ -936,6 +936,7 @@ typedef char __VMS_SEPYTOTORP__;
 /* RMSEXPAND options */
 #define PERL_RMSEXPAND_M_VMS		0x02 /* Force output to VMS format */
 #define PERL_RMSEXPAND_M_LONG		0x04 /* Expand to long name format */
+#define PERL_RMSEXPAND_M_VMS_IN		0x08 /* Assume input is VMS already */
 #define PERL_RMSEXPAND_M_SYMLINK	0x20 /* Use symbolic link, not target */
 
 #endif  /* __vmsish_h_included */

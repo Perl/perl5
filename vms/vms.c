@@ -3325,6 +3325,14 @@ store_pipelocs(pTHX)
     PerlMem_free(unixdir);
 }
 
+static I32
+Perl_cando_by_name_int
+   (pTHX_ I32 bit, bool effective, const char *fname, int opts);
+#if !defined(PERL_IMPLICIT_CONTEXT)
+#define cando_by_name_int		Perl_cando_by_name_int
+#else
+#define cando_by_name_int(a,b,c,d)	Perl_cando_by_name_int(aTHX_ a,b,c,d)
+#endif
 
 static char *
 find_vmspipe(pTHX)
@@ -3335,8 +3343,9 @@ find_vmspipe(pTHX)
     /* already found? Check and use ... need read+execute permission */
 
     if (vmspipe_file_status == 1) {
-        if (cando_by_name(S_IRUSR, 0, vmspipe_file)
-         && cando_by_name(S_IXUSR, 0, vmspipe_file)) {
+        if (cando_by_name_int(S_IRUSR, 0, vmspipe_file, PERL_RMSEXPAND_M_VMS_IN)
+         && cando_by_name_int
+	   (S_IXUSR, 0, vmspipe_file, PERL_RMSEXPAND_M_VMS_IN)) {
             return vmspipe_file;
         }
         vmspipe_file_status = 0;
@@ -3361,8 +3370,10 @@ find_vmspipe(pTHX)
 		(file, vmspipe_file, 0, NULL, PERL_RMSEXPAND_M_VMS);
             if (!exp_res) continue;
 
-            if (cando_by_name(S_IRUSR, 0, vmspipe_file)
-             && cando_by_name(S_IXUSR, 0, vmspipe_file)) {
+            if (cando_by_name_int
+		(S_IRUSR, 0, vmspipe_file, PERL_RMSEXPAND_M_VMS_IN)
+             && cando_by_name_int
+		   (S_IXUSR, 0, vmspipe_file, PERL_RMSEXPAND_M_VMS_IN)) {
                 vmspipe_file_status = 1;
                 return vmspipe_file;
             }
@@ -4130,20 +4141,21 @@ struct NAM * nam;
 #define rms_nam_rsl(nam) nam.nam$b_rsl
 #define rms_bind_fab_nam(fab, nam) fab.fab$l_nam = &nam
 #define rms_set_fna(fab, nam, name, size) \
-	fab.fab$b_fns = size; fab.fab$l_fna = name;
+	{ fab.fab$b_fns = size; fab.fab$l_fna = name; }
 #define rms_get_fna(fab, nam) fab.fab$l_fna
 #define rms_set_dna(fab, nam, name, size) \
-	fab.fab$b_dns = size; fab.fab$l_dna = name;
-#define rms_nam_dns(fab, nam) fab.fab$b_dns;
+	{ fab.fab$b_dns = size; fab.fab$l_dna = name; }
+#define rms_nam_dns(fab, nam) fab.fab$b_dns
 #define rms_set_esa(fab, nam, name, size) \
-	nam.nam$b_ess = size; nam.nam$l_esa = name;
+	{ nam.nam$b_ess = size; nam.nam$l_esa = name; }
 #define rms_set_esal(nam, s_name, s_size, l_name, l_size) \
-	nam.nam$l_esa = s_name; nam.nam$b_ess = s_size;
+	{ nam.nam$l_esa = s_name; nam.nam$b_ess = s_size;}
 #define rms_set_rsa(nam, name, size) \
-	nam.nam$l_rsa = name; nam.nam$b_rss = size;
+	{ nam.nam$l_rsa = name; nam.nam$b_rss = size; }
 #define rms_set_rsal(nam, s_name, s_size, l_name, l_size) \
-	nam.nam$l_rsa = s_name; nam.nam$b_rss = s_size;
-
+	{ nam.nam$l_rsa = s_name; nam.nam$b_rss = s_size; }
+#define rms_nam_name_type_l_size(nam) \
+	(nam.nam$b_name + nam.nam$b_type)
 #else
 static int rms_free_search_context(struct FAB * fab)
 {
@@ -4175,32 +4187,33 @@ struct NAML * nam;
 #define rms_nam_rsl(nam) nam.naml$b_rsl
 #define rms_bind_fab_nam(fab, nam) fab.fab$l_naml = &nam
 #define rms_set_fna(fab, nam, name, size) \
-	fab.fab$b_fns = 0; fab.fab$l_fna = (char *) -1; \
+	{ fab.fab$b_fns = 0; fab.fab$l_fna = (char *) -1; \
 	nam.naml$l_long_filename_size = size; \
-	nam.naml$l_long_filename = name
+	nam.naml$l_long_filename = name;}
 #define rms_get_fna(fab, nam) nam.naml$l_long_filename
 #define rms_set_dna(fab, nam, name, size) \
-	fab.fab$b_dns = 0; fab.fab$l_dna = (char *) -1; \
+	{ fab.fab$b_dns = 0; fab.fab$l_dna = (char *) -1; \
 	nam.naml$l_long_defname_size = size; \
-	nam.naml$l_long_defname = name
+	nam.naml$l_long_defname = name; }
 #define rms_nam_dns(fab, nam) nam.naml$l_long_defname_size
 #define rms_set_esa(fab, nam, name, size) \
-	nam.naml$b_ess = 0; nam.naml$l_esa = (char *) -1; \
+	{ nam.naml$b_ess = 0; nam.naml$l_esa = (char *) -1; \
 	nam.naml$l_long_expand_alloc = size; \
-	nam.naml$l_long_expand = name
+	nam.naml$l_long_expand = name; }
 #define rms_set_esal(nam, s_name, s_size, l_name, l_size) \
-	nam.naml$l_esa = s_name; nam.naml$b_ess = s_size; \
+	{ nam.naml$l_esa = s_name; nam.naml$b_ess = s_size; \
 	nam.naml$l_long_expand = l_name; \
-	nam.naml$l_long_expand_alloc = l_size;
+	nam.naml$l_long_expand_alloc = l_size; }
 #define rms_set_rsa(nam, name, size) \
-	nam.naml$l_rsa = NULL; nam.naml$b_rss = 0; \
+	{ nam.naml$l_rsa = NULL; nam.naml$b_rss = 0; \
 	nam.naml$l_long_result = name; \
-	nam.naml$l_long_result_alloc = size;
+	nam.naml$l_long_result_alloc = size; }
 #define rms_set_rsal(nam, s_name, s_size, l_name, l_size) \
-	nam.naml$l_rsa = s_name; nam.naml$b_rss = s_size; \
+	{ nam.naml$l_rsa = s_name; nam.naml$b_rss = s_size; \
 	nam.naml$l_long_result = l_name; \
-	nam.naml$l_long_result_alloc = l_size;
-
+	nam.naml$l_long_result_alloc = l_size; }
+#define rms_nam_name_type_l_size(nam) \
+	(nam.naml$l_long_name_size + nam.naml$l_long_type_size)
 #endif
 
 
@@ -4218,192 +4231,15 @@ struct NAML * nam;
  *
  * New functionality for previously unused opts value:
  *  PERL_RMSEXPAND_M_VMS - Force output file specification to VMS format.
+ *  PERL_RMSEXPAND_M_LONG - Want output in long formst
+ *  PERL_RMSEXPAND_M_VMS_IN - Input is already in VMS, so do not vmsify
  */
 static char *mp_do_tounixspec(pTHX_ const char *, char *, int);
 
-#if defined(__VAX) || !defined(NAML$C_MAXRSS)
-/* ODS-2 only version */
 static char *
 mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *defspec, unsigned opts)
 {
-  static char __rmsexpand_retbuf[NAM$C_MAXRSS+1];
-  char vmsfspec[NAM$C_MAXRSS+1], tmpfspec[NAM$C_MAXRSS+1];
-  char esa[NAM$C_MAXRSS+1], *cp, *out = NULL;
-  struct FAB myfab = cc$rms_fab;
-  struct NAM mynam = cc$rms_nam;
-  STRLEN speclen;
-  unsigned long int retsts, trimver, trimtype, haslower = 0, isunix = 0;
-  int sts;
-
-  if (!filespec || !*filespec) {
-    set_vaxc_errno(LIB$_INVARG); set_errno(EINVAL);
-    return NULL;
-  }
-  if (!outbuf) {
-    if (ts) out = Newx(outbuf,NAM$C_MAXRSS+1,char);
-    else    outbuf = __rmsexpand_retbuf;
-  }
-  isunix = is_unix_filespec(filespec);
-  if (isunix) {
-    if (do_tovmsspec(filespec,vmsfspec,0) == NULL) {
-	if (out)
-	   Safefree(out);
-	return NULL;
-    }
-    filespec = vmsfspec;
-  }
-
-  myfab.fab$l_fna = (char *)filespec;  /* cast ok for read only pointer */
-  myfab.fab$b_fns = strlen(filespec);
-  myfab.fab$l_nam = &mynam;
-
-  if (defspec && *defspec) {
-    if (strchr(defspec,'/') != NULL) {
-      if (do_tovmsspec(defspec,tmpfspec,0) == NULL) {
-	if (out)
-	   Safefree(out);
-	return NULL;
-      }
-      defspec = tmpfspec;
-    }
-    myfab.fab$l_dna = (char *)defspec; /* cast ok for read only pointer */
-    myfab.fab$b_dns = strlen(defspec);
-  }
-
-  mynam.nam$l_esa = esa;
-  mynam.nam$b_ess = NAM$C_MAXRSS;
-  mynam.nam$l_rsa = outbuf;
-  mynam.nam$b_rss = NAM$C_MAXRSS;
-
-#ifdef NAM$M_NO_SHORT_UPCASE
-  if (decc_efs_case_preserve)
-    mynam.nam$b_nop |= NAM$M_NO_SHORT_UPCASE;
-#endif
-
-  retsts = sys$parse(&myfab,0,0);
-  if (!(retsts & 1)) {
-    mynam.nam$b_nop |= NAM$M_SYNCHK;
-    if (retsts == RMS$_DNF || retsts == RMS$_DIR || retsts == RMS$_DEV) {
-      retsts = sys$parse(&myfab,0,0);
-      if (retsts & 1) goto expanded;
-    }  
-    mynam.nam$l_rlf = NULL; myfab.fab$b_dns = 0;
-    sts = sys$parse(&myfab,0,0);  /* Free search context */
-    if (out) Safefree(out);
-    set_vaxc_errno(retsts);
-    if      (retsts == RMS$_PRV) set_errno(EACCES);
-    else if (retsts == RMS$_DEV) set_errno(ENODEV);
-    else if (retsts == RMS$_DIR) set_errno(ENOTDIR);
-    else                         set_errno(EVMSERR);
-    return NULL;
-  }
-  retsts = sys$search(&myfab,0,0);
-  if (!(retsts & 1) && retsts != RMS$_FNF) {
-    mynam.nam$b_nop |= NAM$M_SYNCHK; mynam.nam$l_rlf = NULL;
-    myfab.fab$b_dns = 0; sts = sys$parse(&myfab,0,0);  /* Free search context */
-    if (out) Safefree(out);
-    set_vaxc_errno(retsts);
-    if      (retsts == RMS$_PRV) set_errno(EACCES);
-    else                         set_errno(EVMSERR);
-    return NULL;
-  }
-
-  /* If the input filespec contained any lowercase characters,
-   * downcase the result for compatibility with Unix-minded code. */
-  expanded:
-  if (!decc_efs_case_preserve) {
-    for (out = myfab.fab$l_fna; *out; out++)
-      if (islower(*out)) { haslower = 1; break; }
-  }
-  if (mynam.nam$b_rsl) { out = outbuf; speclen = mynam.nam$b_rsl; }
-  else                 { out = esa;    speclen = mynam.nam$b_esl; }
-  out[speclen] = 0;
-  /* Trim off null fields added by $PARSE
-   * If type > 1 char, must have been specified in original or default spec
-   * (not true for version; $SEARCH may have added version of existing file).
-   */
-  trimver  = !(mynam.nam$l_fnb & NAM$M_EXP_VER);
-  trimtype = !(mynam.nam$l_fnb & NAM$M_EXP_TYPE) &&
-             (mynam.nam$l_ver - mynam.nam$l_type == 1);
-  if (trimver || trimtype) {
-    if (defspec && *defspec) {
-      char defesa[NAM$C_MAXRSS];
-      struct FAB deffab = cc$rms_fab;
-      struct NAM defnam = cc$rms_nam;
-     
-      deffab.fab$l_nam = &defnam;
-      /* cast below ok for read only pointer */
-      deffab.fab$l_fna = (char *)defspec;  deffab.fab$b_fns = myfab.fab$b_dns;
-      defnam.nam$l_esa = defesa;   defnam.nam$b_ess = NAM$C_MAXRSS;
-      defnam.nam$b_nop = NAM$M_SYNCHK;
-#ifdef NAM$M_NO_SHORT_UPCASE
-      if (decc_efs_case_preserve)
-	defnam.nam$b_nop |= NAM$M_NO_SHORT_UPCASE;
-#endif
-      if (sys$parse(&deffab,0,0) & 1) {
-        if (trimver)  trimver  = !(defnam.nam$l_fnb & NAM$M_EXP_VER);
-        if (trimtype) trimtype = !(defnam.nam$l_fnb & NAM$M_EXP_TYPE); 
-      }
-    }
-    if (trimver) {
-      if (*mynam.nam$l_ver != '\"')
-	speclen = mynam.nam$l_ver - out;
-    }
-    if (trimtype) {
-      /* If we didn't already trim version, copy down */
-      if (speclen > mynam.nam$l_ver - out)
-        memmove(mynam.nam$l_type, mynam.nam$l_ver, 
-               speclen - (mynam.nam$l_ver - out));
-      speclen -= mynam.nam$l_ver - mynam.nam$l_type; 
-    }
-  }
-  /* If we just had a directory spec on input, $PARSE "helpfully"
-   * adds an empty name and type for us */
-  if (mynam.nam$l_name == mynam.nam$l_type &&
-      mynam.nam$l_ver  == mynam.nam$l_type + 1 &&
-      !(mynam.nam$l_fnb & NAM$M_EXP_NAME))
-    speclen = mynam.nam$l_name - out;
-
-  /* Posix format specifications must have matching quotes */
-  if (speclen < NAM$C_MAXRSS) {
-    if (decc_posix_compliant_pathnames && (out[0] == '\"')) {
-      if ((speclen > 1) && (out[speclen-1] != '\"')) {
-        out[speclen] = '\"';
-        speclen++;
-      }
-    }
-  }
-
-  out[speclen] = '\0';
-  if (haslower && !decc_efs_case_preserve) __mystrtolower(out);
-
-  /* Have we been working with an expanded, but not resultant, spec? */
-  /* Also, convert back to Unix syntax if necessary. */
-  if ((opts & PERL_RMSEXPAND_M_VMS) != 0)
-    isunix = 0;
-
-  if (!mynam.nam$b_rsl) {
-    if (isunix) {
-      if (do_tounixspec(esa,outbuf,0) == NULL) return NULL;
-    }
-    else strcpy(outbuf,esa);
-  }
-  else if (isunix) {
-    if (do_tounixspec(outbuf,tmpfspec,0) == NULL) return NULL;
-    strcpy(outbuf,tmpfspec);
-  }
-  mynam.nam$b_nop |= NAM$M_SYNCHK; mynam.nam$l_rlf = NULL;
-  mynam.nam$l_rsa = NULL;
-  mynam.nam$b_rss = 0;
-  myfab.fab$b_dns = 0;  sts = sys$parse(&myfab,0,0);  /* Free search context */
-  return outbuf;
-}
-#else
-/* ODS-5 supporting routine */
-static char *
-mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *defspec, unsigned opts)
-{
-  static char __rmsexpand_retbuf[NAML$C_MAXRSS+1];
+  static char __rmsexpand_retbuf[VMS_MAXRSS];
   char * vmsfspec, *tmpfspec;
   char * esa, *cp, *out = NULL;
   char * tbuf;
@@ -4427,25 +4263,29 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
   vmsfspec = NULL;
   tmpfspec = NULL;
   outbufl = NULL;
-  isunix = is_unix_filespec(filespec);
-  if (isunix) {
-    vmsfspec = PerlMem_malloc(VMS_MAXRSS);
-    if (vmsfspec == NULL) _ckvmssts(SS$_INSFMEM);
-    if (do_tovmsspec(filespec,vmsfspec,0) == NULL) {
+
+  isunix = 0;
+  if ((opts & PERL_RMSEXPAND_M_VMS_IN) == 0) {
+    isunix = is_unix_filespec(filespec);
+    if (isunix) {
+      vmsfspec = PerlMem_malloc(VMS_MAXRSS);
+      if (vmsfspec == NULL) _ckvmssts(SS$_INSFMEM);
+      if (do_tovmsspec(filespec,vmsfspec,0) == NULL) {
 	PerlMem_free(vmsfspec);
 	if (out)
 	   Safefree(out);
 	return NULL;
-    }
-    filespec = vmsfspec;
+      }
+      filespec = vmsfspec;
 
-     /* Unless we are forcing to VMS format, a UNIX input means
-      * UNIX output, and that requires long names to be used
-      */
-    if ((opts & PERL_RMSEXPAND_M_VMS) == 0)
+      /* Unless we are forcing to VMS format, a UNIX input means
+       * UNIX output, and that requires long names to be used
+       */
+      if ((opts & PERL_RMSEXPAND_M_VMS) == 0)
 	opts |= PERL_RMSEXPAND_M_LONG;
-    else {
+      else {
 	isunix = 0;
+      }
     }
   }
 
@@ -4474,10 +4314,10 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
   esa = PerlMem_malloc(NAM$C_MAXRSS + 1);
   if (esa == NULL) _ckvmssts(SS$_INSFMEM);
 #if !defined(__VAX) && defined(NAML$C_MAXRSS)
-  esal = PerlMem_malloc(NAML$C_MAXRSS + 1);
+  esal = PerlMem_malloc(VMS_MAXRSS);
   if (esal == NULL) _ckvmssts(SS$_INSFMEM);
 #endif
-  rms_set_esal(mynam, esa, NAM$C_MAXRSS, esal, NAML$C_MAXRSS);
+  rms_set_esal(mynam, esa, NAM$C_MAXRSS, esal, VMS_MAXRSS-1);
 
   if ((opts & PERL_RMSEXPAND_M_LONG) != 0) {
     rms_set_rsa(mynam, outbuf, (VMS_MAXRSS - 1));
@@ -4728,7 +4568,6 @@ mp_do_rmsexpand(pTHX_ const char *filespec, char *outbuf, int ts, const char *de
      PerlMem_free(outbufl);
   return outbuf;
 }
-#endif
 /*}}}*/
 /* External entry points */
 char *Perl_rmsexpand(pTHX_ const char *spec, char *buf, const char *def, unsigned opt)
@@ -7915,7 +7754,7 @@ Perl_opendir(pTHX_ const char *name)
     /* Check access before stat; otherwise stat does not
      * accurately report whether it's a directory.
      */
-    if (!cando_by_name(S_IRUSR,0,dir)) {
+    if (!cando_by_name_int(S_IRUSR,0,dir,PERL_RMSEXPAND_M_VMS_IN)) {
       /* cando_by_name has already set errno */
       Safefree(dir);
       return NULL;
@@ -8505,7 +8344,8 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
 	      iname = do_rmsexpand
 		  (tmpspec, image_name, 0, ".exe", PERL_RMSEXPAND_M_VMS);
 	      if (iname != NULL) {
-		if (cando_by_name(S_IXUSR,0,image_name)) {
+		if (cando_by_name_int
+			(S_IXUSR,0,image_name,PERL_RMSEXPAND_M_VMS_IN)) {
 		  /* MCR prefix needed */
 		  isdcl = 0;
 		}
@@ -8515,7 +8355,8 @@ setup_cmddsc(pTHX_ const char *incmd, int check_img, int *suggest_quote,
 		  iname = do_rmsexpand
 		    (tmpspec, image_name, 0, ".", PERL_RMSEXPAND_M_VMS);
 		  if (iname != NULL) {
-		    if (cando_by_name(S_IXUSR,0,image_name)) {
+		    if (cando_by_name_int
+			 (S_IXUSR,0,image_name, PERL_RMSEXPAND_M_VMS_IN)) {
 		      /* MCR prefix needed */
 		      isdcl = 0;
 		    }
@@ -10060,21 +9901,10 @@ is_null_device(name)
   return (*name++ == ':') && (*name != ':');
 }
 
-/* Do the permissions allow some operation?  Assumes PL_statcache already set. */
-/* Do this via $Check_Access on VMS, since the CRTL stat() returns only a
- * subset of the applicable information.
- */
-bool
-Perl_cando(pTHX_ Mode_t bit, bool effective, const Stat_t *statbufp)
-{
-  return cando_by_name(bit,effective, statbufp->st_devnam);
-}  /* end of cando() */
-/*}}}*/
 
-
-/*{{{I32 cando_by_name(I32 bit, bool effective, char *fname)*/
-I32
-Perl_cando_by_name(pTHX_ I32 bit, bool effective, const char *fname)
+static I32
+Perl_cando_by_name_int
+   (pTHX_ I32 bit, bool effective, const char *fname, int opts)
 {
   static char usrname[L_cuserid];
   static struct dsc$descriptor_s usrdsc =
@@ -10096,27 +9926,35 @@ Perl_cando_by_name(pTHX_ I32 bit, bool effective, const char *fname)
 
   if (!fname || !*fname) return FALSE;
   /* Make sure we expand logical names, since sys$check_access doesn't */
-  fileified = PerlMem_malloc(VMS_MAXRSS);
-  if (!strpbrk(fname,"/]>:")) {
-    strcpy(fileified,fname);
-    trnlnm_iter_count = 0;
-    while (!strpbrk(fileified,"/]>:>") && my_trnlnm(fileified,fileified,0)) {
+
+  fileified = NULL;
+  if ((opts & PERL_RMSEXPAND_M_VMS_IN) != 0) {
+    fileified = PerlMem_malloc(VMS_MAXRSS);
+    if (!strpbrk(fname,"/]>:")) {
+      strcpy(fileified,fname);
+      trnlnm_iter_count = 0;
+      while (!strpbrk(fileified,"/]>:>") && my_trnlnm(fileified,fileified,0)) {
         trnlnm_iter_count++; 
         if (trnlnm_iter_count >= PERL_LNM_MAX_ITER) break;
+      }
+      fname = fileified;
     }
-    fname = fileified;
-  }
-  if (!do_rmsexpand(fname, vmsname, 0, NULL, PERL_RMSEXPAND_M_VMS)) {
-    PerlMem_free(fileified);
-    return FALSE;
-  }
-  retlen = namdsc.dsc$w_length = strlen(vmsname);
-  namdsc.dsc$a_pointer = vmsname;
-  if (vmsname[retlen-1] == ']' || vmsname[retlen-1] == '>' ||
+    if (!do_rmsexpand(fname, vmsname, 0, NULL, PERL_RMSEXPAND_M_VMS)) {
+      PerlMem_free(fileified);
+      return FALSE;
+    }
+    retlen = namdsc.dsc$w_length = strlen(vmsname);
+    namdsc.dsc$a_pointer = vmsname;
+    if (vmsname[retlen-1] == ']' || vmsname[retlen-1] == '>' ||
       vmsname[retlen-1] == ':') {
-    if (!do_fileify_dirspec(vmsname,fileified,1)) return FALSE;
-    namdsc.dsc$w_length = strlen(fileified);
-    namdsc.dsc$a_pointer = fileified;
+      if (!do_fileify_dirspec(vmsname,fileified,1)) return FALSE;
+      namdsc.dsc$w_length = strlen(fileified);
+      namdsc.dsc$a_pointer = fileified;
+    }
+  }
+  else {
+    retlen = namdsc.dsc$w_length = strlen(fname);
+    namdsc.dsc$a_pointer = (char *)fname; /* cast ok */
   }
 
   switch (bit) {
@@ -10129,7 +9967,8 @@ Perl_cando_by_name(pTHX_ I32 bit, bool effective, const char *fname)
     case S_IDUSR: case S_IDGRP: case S_IDOTH:
       access = ARM$M_DELETE; break;
     default:
-      PerlMem_free(fileified);
+      if (fileified != NULL)
+	PerlMem_free(fileified);
       return FALSE;
   }
 
@@ -10174,17 +10013,41 @@ Perl_cando_by_name(pTHX_ I32 bit, bool effective, const char *fname)
     if (retsts == SS$_NOPRIV) set_errno(EACCES);
     else if (retsts == SS$_INVFILFOROP) set_errno(EINVAL);
     else set_errno(ENOENT);
-    PerlMem_free(fileified);
+    if (fileified != NULL)
+      PerlMem_free(fileified);
     return FALSE;
   }
   if (retsts == SS$_NORMAL || retsts == SS$_ACCONFLICT) {
-    PerlMem_free(fileified);
+    if (fileified != NULL)
+      PerlMem_free(fileified);
     return TRUE;
   }
   _ckvmssts(retsts);
 
-  PerlMem_free(fileified);
+  if (fileified != NULL)
+    PerlMem_free(fileified);
   return FALSE;  /* Should never get here */
+
+}
+
+/* Do the permissions allow some operation?  Assumes PL_statcache already set. */
+/* Do this via $Check_Access on VMS, since the CRTL stat() returns only a
+ * subset of the applicable information.
+ */
+bool
+Perl_cando(pTHX_ Mode_t bit, bool effective, const Stat_t *statbufp)
+{
+  return cando_by_name_int
+	(bit, effective, statbufp->st_devnam, PERL_RMSEXPAND_M_VMS_IN);
+}  /* end of cando() */
+/*}}}*/
+
+
+/*{{{I32 cando_by_name(I32 bit, bool effective, char *fname)*/
+I32
+Perl_cando_by_name(pTHX_ I32 bit, bool effective, const char *fname)
+{
+   return cando_by_name_int(bit, effective, fname, 0);
 
 }  /* end of cando_by_name() */
 /*}}}*/
@@ -10214,7 +10077,7 @@ Perl_flex_fstat(pTHX_ int fd, Stat_t *statbufp)
 			statbufp->st_devnam, 
 			0,
 			NULL,
-			PERL_RMSEXPAND_M_VMS);
+			PERL_RMSEXPAND_M_VMS | PERL_RMSEXPAND_M_VMS_IN);
 	if (cptr == NULL)
 	    statbufp->st_devnam[0] = 0;
     }
@@ -10415,185 +10278,17 @@ my_getlogin(void)
  * of each may be found in the Perl standard distribution.
  */ /* FIXME */
 /*{{{int rmscopy(char *src, char *dst, int preserve_dates)*/
-#if defined(__VAX) || !defined(NAML$C_MAXRSS)
-int
-Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates)
-{
-    char vmsin[NAM$C_MAXRSS+1], vmsout[NAM$C_MAXRSS+1], esa[NAM$C_MAXRSS],
-         rsa[NAM$C_MAXRSS], ubf[32256];
-    unsigned long int i, sts, sts2;
-    struct FAB fab_in, fab_out;
-    struct RAB rab_in, rab_out;
-    struct NAM nam;
-    struct XABDAT xabdat;
-    struct XABFHC xabfhc;
-    struct XABRDT xabrdt;
-    struct XABSUM xabsum;
-
-    if (!spec_in  || !*spec_in  || !do_tovmsspec(spec_in,vmsin,1) ||
-        !spec_out || !*spec_out || !do_tovmsspec(spec_out,vmsout,1)) {
-      set_errno(EINVAL); set_vaxc_errno(LIB$_INVARG);
-      return 0;
-    }
-
-    fab_in = cc$rms_fab;
-    fab_in.fab$l_fna = vmsin;
-    fab_in.fab$b_fns = strlen(vmsin);
-    fab_in.fab$b_shr = FAB$M_SHRPUT | FAB$M_UPI;
-    fab_in.fab$b_fac = FAB$M_BIO | FAB$M_GET;
-    fab_in.fab$l_fop = FAB$M_SQO;
-    fab_in.fab$l_nam =  &nam;
-    fab_in.fab$l_xab = (void *) &xabdat;
-
-    nam = cc$rms_nam;
-    nam.nam$l_rsa = rsa;
-    nam.nam$b_rss = sizeof(rsa);
-    nam.nam$l_esa = esa;
-    nam.nam$b_ess = sizeof (esa);
-    nam.nam$b_esl = nam.nam$b_rsl = 0;
-#ifdef NAM$M_NO_SHORT_UPCASE
-    if (decc_efs_case_preserve)
-        nam.nam$b_nop |= NAM$M_NO_SHORT_UPCASE;
-#endif
-
-    xabdat = cc$rms_xabdat;        /* To get creation date */
-    xabdat.xab$l_nxt = (void *) &xabfhc;
-
-    xabfhc = cc$rms_xabfhc;        /* To get record length */
-    xabfhc.xab$l_nxt = (void *) &xabsum;
-
-    xabsum = cc$rms_xabsum;        /* To get key and area information */
-
-    if (!((sts = sys$open(&fab_in)) & 1)) {
-      set_vaxc_errno(sts);
-      switch (sts) {
-        case RMS$_FNF: case RMS$_DNF:
-          set_errno(ENOENT); break;
-        case RMS$_DIR:
-          set_errno(ENOTDIR); break;
-        case RMS$_DEV:
-          set_errno(ENODEV); break;
-        case RMS$_SYN:
-          set_errno(EINVAL); break;
-        case RMS$_PRV:
-          set_errno(EACCES); break;
-        default:
-          set_errno(EVMSERR);
-      }
-      return 0;
-    }
-
-    fab_out = fab_in;
-    fab_out.fab$w_ifi = 0;
-    fab_out.fab$b_fac = FAB$M_BIO | FAB$M_PUT;
-    fab_out.fab$b_shr = FAB$M_SHRGET | FAB$M_UPI;
-    fab_out.fab$l_fop = FAB$M_SQO;
-    fab_out.fab$l_fna = vmsout;
-    fab_out.fab$b_fns = strlen(vmsout);
-    fab_out.fab$l_dna = nam.nam$l_name;
-    fab_out.fab$b_dns = nam.nam$l_name ? nam.nam$b_name + nam.nam$b_type : 0;
-
-    if (preserve_dates == 0) {  /* Act like DCL COPY */
-      nam.nam$b_nop |= NAM$M_SYNCHK;
-      fab_out.fab$l_xab = NULL;  /* Don't disturb data from input file */
-      if (!((sts = sys$parse(&fab_out)) & 1)) {
-        set_errno(sts == RMS$_SYN ? EINVAL : EVMSERR);
-        set_vaxc_errno(sts);
-        return 0;
-      }
-      fab_out.fab$l_xab = (void *) &xabdat;
-      if (nam.nam$l_fnb & (NAM$M_EXP_NAME | NAM$M_EXP_TYPE)) preserve_dates = 1;
-    }
-    fab_out.fab$l_nam = (void *) 0;  /* Done with NAM block */
-    if (preserve_dates < 0)   /* Clear all bits; we'll use it as a */
-      preserve_dates =0;      /* bitmask from this point forward   */
-
-    if (!(preserve_dates & 1)) fab_out.fab$l_xab = (void *) &xabfhc;
-    if (!((sts = sys$create(&fab_out)) & 1)) {
-      set_vaxc_errno(sts);
-      switch (sts) {
-        case RMS$_DNF:
-          set_errno(ENOENT); break;
-        case RMS$_DIR:
-          set_errno(ENOTDIR); break;
-        case RMS$_DEV:
-          set_errno(ENODEV); break;
-        case RMS$_SYN:
-          set_errno(EINVAL); break;
-        case RMS$_PRV:
-          set_errno(EACCES); break;
-        default:
-          set_errno(EVMSERR);
-      }
-      return 0;
-    }
-    fab_out.fab$l_fop |= FAB$M_DLT;  /* in case we have to bail out */
-    if (preserve_dates & 2) {
-      /* sys$close() will process xabrdt, not xabdat */
-      xabrdt = cc$rms_xabrdt;
-#ifndef __GNUC__
-      xabrdt.xab$q_rdt = xabdat.xab$q_rdt;
-#else
-      /* gcc doesn't like the assignment, since its prototype for xab$q_rdt
-       * is unsigned long[2], while DECC & VAXC use a struct */
-      memcpy(xabrdt.xab$q_rdt,xabdat.xab$q_rdt,sizeof xabrdt.xab$q_rdt);
-#endif
-      fab_out.fab$l_xab = (void *) &xabrdt;
-    }
-
-    rab_in = cc$rms_rab;
-    rab_in.rab$l_fab = &fab_in;
-    rab_in.rab$l_rop = RAB$M_BIO;
-    rab_in.rab$l_ubf = ubf;
-    rab_in.rab$w_usz = sizeof ubf;
-    if (!((sts = sys$connect(&rab_in)) & 1)) {
-      sys$close(&fab_in); sys$close(&fab_out);
-      set_errno(EVMSERR); set_vaxc_errno(sts);
-      return 0;
-    }
-
-    rab_out = cc$rms_rab;
-    rab_out.rab$l_fab = &fab_out;
-    rab_out.rab$l_rbf = ubf;
-    if (!((sts = sys$connect(&rab_out)) & 1)) {
-      sys$close(&fab_in); sys$close(&fab_out);
-      set_errno(EVMSERR); set_vaxc_errno(sts);
-      return 0;
-    }
-
-    while ((sts = sys$read(&rab_in))) {  /* always true  */
-      if (sts == RMS$_EOF) break;
-      rab_out.rab$w_rsz = rab_in.rab$w_rsz;
-      if (!(sts & 1) || !((sts = sys$write(&rab_out)) & 1)) {
-        sys$close(&fab_in); sys$close(&fab_out);
-        set_errno(EVMSERR); set_vaxc_errno(sts);
-        return 0;
-      }
-    }
-
-    fab_out.fab$l_fop &= ~FAB$M_DLT;  /* We got this far; keep the output */
-    sys$close(&fab_in);  sys$close(&fab_out);
-    sts = (fab_in.fab$l_sts & 1) ? fab_out.fab$l_sts : fab_in.fab$l_sts;
-    if (!(sts & 1)) {
-      set_errno(EVMSERR); set_vaxc_errno(sts);
-      return 0;
-    }
-
-    return 1;
-
-}  /* end of rmscopy() */
-#else
-/* ODS-5 support version */
 int
 Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates)
 {
     char *vmsin, * vmsout, *esa, *esa_out,
          *rsa, *ubf;
     unsigned long int i, sts, sts2;
+    int dna_len;
     struct FAB fab_in, fab_out;
     struct RAB rab_in, rab_out;
-    struct NAML nam;
-    struct NAML nam_out;
+    rms_setup_nam(nam);
+    rms_setup_nam(nam_out);
     struct XABDAT xabdat;
     struct XABFHC xabfhc;
     struct XABRDT xabrdt;
@@ -10613,34 +10308,25 @@ Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates
 
     esa = PerlMem_malloc(VMS_MAXRSS);
     if (esa == NULL) _ckvmssts(SS$_INSFMEM);
-    nam = cc$rms_naml;
     fab_in = cc$rms_fab;
-    fab_in.fab$l_fna = (char *) -1;
-    fab_in.fab$b_fns = 0;
-    nam.naml$l_long_filename = vmsin;
-    nam.naml$l_long_filename_size = strlen(vmsin);
+    rms_set_fna(fab_in, nam, vmsin, strlen(vmsin));
     fab_in.fab$b_shr = FAB$M_SHRPUT | FAB$M_UPI;
     fab_in.fab$b_fac = FAB$M_BIO | FAB$M_GET;
     fab_in.fab$l_fop = FAB$M_SQO;
-    fab_in.fab$l_naml =  &nam;
+    rms_bind_fab_nam(fab_in, nam);
     fab_in.fab$l_xab = (void *) &xabdat;
 
     rsa = PerlMem_malloc(VMS_MAXRSS);
     if (rsa == NULL) _ckvmssts(SS$_INSFMEM);
-    nam.naml$l_rsa = NULL;
-    nam.naml$b_rss = 0;
-    nam.naml$l_long_result = rsa;
-    nam.naml$l_long_result_alloc = VMS_MAXRSS - 1;
-    nam.naml$l_esa = NULL;
-    nam.naml$b_ess = 0;
-    nam.naml$l_long_expand = esa;
-    nam.naml$l_long_expand_alloc = VMS_MAXRSS - 1;
-    nam.naml$b_esl = nam.naml$b_rsl = 0;
-    nam.naml$l_long_expand_size = 0;
-    nam.naml$l_long_result_size = 0;
+    rms_set_rsa(nam, rsa, (VMS_MAXRSS-1));
+    rms_set_esa(fab_in, nam, esa, (VMS_MAXRSS-1));
+    rms_nam_esl(nam) = 0;
+    rms_nam_rsl(nam) = 0;
+    rms_nam_esll(nam) = 0;
+    rms_nam_rsll(nam) = 0;
 #ifdef NAM$M_NO_SHORT_UPCASE
     if (decc_efs_case_preserve)
-        nam.naml$b_nop |= NAM$M_NO_SHORT_UPCASE;
+	rms_set_nam_nop(nam, NAM$M_NO_SHORT_UPCASE);
 #endif
 
     xabdat = cc$rms_xabdat;        /* To get creation date */
@@ -10680,33 +10366,19 @@ Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates
     fab_out.fab$b_fac = FAB$M_BIO | FAB$M_PUT;
     fab_out.fab$b_shr = FAB$M_SHRGET | FAB$M_UPI;
     fab_out.fab$l_fop = FAB$M_SQO;
-    fab_out.fab$l_naml = &nam_out;
-    fab_out.fab$l_fna = (char *) -1;
-    fab_out.fab$b_fns = 0;
-    nam_out.naml$l_long_filename = vmsout;
-    nam_out.naml$l_long_filename_size = strlen(vmsout);
-    fab_out.fab$l_dna = (char *) -1;
-    fab_out.fab$b_dns = 0;
-    nam_out.naml$l_long_defname = nam.naml$l_long_name;
-    nam_out.naml$l_long_defname_size =
-	nam.naml$l_long_name ?
-	   nam.naml$l_long_name_size + nam.naml$l_long_type_size : 0;
-
+    rms_bind_fab_nam(fab_out, nam_out);
+    rms_set_fna(fab_out, nam_out, vmsout, strlen(vmsout));
+    dna_len = rms_nam_namel(nam) ? rms_nam_name_type_l_size(nam) : 0;
+    rms_set_dna(fab_out, nam_out, rms_nam_namel(nam), dna_len);
     esa_out = PerlMem_malloc(VMS_MAXRSS);
     if (esa_out == NULL) _ckvmssts(SS$_INSFMEM);
-    nam_out.naml$l_rsa = NULL;
-    nam_out.naml$b_rss = 0;
-    nam_out.naml$l_long_result = NULL;
-    nam_out.naml$l_long_result_alloc = 0;
-    nam_out.naml$l_esa = NULL;
-    nam_out.naml$b_ess = 0;
-    nam_out.naml$l_long_expand = esa_out;
-    nam_out.naml$l_long_expand_alloc = VMS_MAXRSS - 1;
+    rms_set_rsa(nam_out, NULL, 0);
+    rms_set_esa(fab_out, nam_out, esa_out, (VMS_MAXRSS - 1));
 
     if (preserve_dates == 0) {  /* Act like DCL COPY */
-      nam_out.naml$b_nop |= NAM$M_SYNCHK;
+      rms_set_nam_nop(nam_out, NAM$M_SYNCHK);
       fab_out.fab$l_xab = NULL;  /* Don't disturb data from input file */
-      if (!((sts = sys$parse(&fab_out)) & 1)) {
+      if (!((sts = sys$parse(&fab_out)) & STS$K_SUCCESS)) {
 	PerlMem_free(vmsin);
 	PerlMem_free(vmsout);
 	PerlMem_free(esa);
@@ -10717,13 +10389,14 @@ Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates
         return 0;
       }
       fab_out.fab$l_xab = (void *) &xabdat;
-      if (nam.naml$l_fnb & (NAM$M_EXP_NAME | NAM$M_EXP_TYPE)) preserve_dates = 1;
+      if (rms_is_nam_fnb(nam, NAM$M_EXP_NAME | NAM$M_EXP_TYPE))
+	preserve_dates = 1;
     }
     if (preserve_dates < 0)   /* Clear all bits; we'll use it as a */
       preserve_dates =0;      /* bitmask from this point forward   */
 
     if (!(preserve_dates & 1)) fab_out.fab$l_xab = (void *) &xabfhc;
-    if (!((sts = sys$create(&fab_out)) & 1)) {
+    if (!((sts = sys$create(&fab_out)) & STS$K_SUCCESS)) {
       PerlMem_free(vmsin);
       PerlMem_free(vmsout);
       PerlMem_free(esa);
@@ -10834,7 +10507,6 @@ Perl_rmscopy(pTHX_ const char *spec_in, const char *spec_out, int preserve_dates
     return 1;
 
 }  /* end of rmscopy() */
-#endif
 /*}}}*/
 
 
