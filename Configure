@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Mar  8 09:08:03 CET 2006 [metaconfig 3.0 PL70]
+# Generated on Mon Apr  3 12:00:10 CEST 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -319,7 +319,9 @@ d_atoll=''
 baserev=''
 bin=''
 binexp=''
+initialinstalllocation=''
 installbin=''
+userelocatableinc=''
 byteorder=''
 cc=''
 ccflags=''
@@ -919,9 +921,9 @@ i_stdarg=''
 i_varargs=''
 i_varhdr=''
 i_vfork=''
+d_inc_version_list=''
 inc_version_list=''
 inc_version_list_init=''
-d_inc_version_list=''
 installprefix=''
 installprefixexp=''
 installstyle=''
@@ -964,12 +966,12 @@ sSCNfldbl=''
 lseeksize=''
 lseektype=''
 mad=''
-make_set_make=''
-d_mymalloc=''
-freetype=''
 madlyh=''
 madlyobj=''
 madlysrc=''
+make_set_make=''
+d_mymalloc=''
+freetype=''
 mallocobj=''
 mallocsrc=''
 malloctype=''
@@ -1099,10 +1101,10 @@ sig_name_init=''
 sig_num=''
 sig_num_init=''
 sig_size=''
+d_sitearch=''
 installsitearch=''
 sitearch=''
 sitearchexp=''
-d_sitearch=''
 installsitebin=''
 sitebin=''
 sitebinexp=''
@@ -1163,8 +1165,6 @@ nm_so_opt=''
 runnm=''
 usenm=''
 useperlio=''
-initialinstalllocation=''
-userelocatableinc=''
 usesocks=''
 d_oldpthreads=''
 use5005threads=''
@@ -3511,6 +3511,411 @@ case "$cf_by" in
 	esac ;;
 esac
 
+: decide how portable to be.  Allow command line overrides.
+case "$d_portable" in
+"$undef") ;;
+*)	d_portable="$define" ;;
+esac
+
+: set up shell script to do ~ expansion
+cat >filexp <<EOSS
+$startsh
+: expand filename
+case "\$1" in
+ ~/*|~)
+	echo \$1 | $sed "s|~|\${HOME-\$LOGDIR}|"
+	;;
+ ~*)
+	if $test -f /bin/csh; then
+		/bin/csh -f -c "glob \$1"
+		failed=\$?
+		echo ""
+		exit \$failed
+	else
+		name=\`$expr x\$1 : '..\([^/]*\)'\`
+		dir=\`$sed -n -e "/^\${name}:/{s/^[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\([^:]*\).*"'\$'"/\1/" -e p -e q -e '}' </etc/passwd\`
+		if $test ! -d "\$dir"; then
+			me=\`basename \$0\`
+			echo "\$me: can't locate home directory for: \$name" >&2
+			exit 1
+		fi
+		case "\$1" in
+		*/*)
+			echo \$dir/\`$expr x\$1 : '..[^/]*/\(.*\)'\`
+			;;
+		*)
+			echo \$dir
+			;;
+		esac
+	fi
+	;;
+*)
+	echo \$1
+	;;
+esac
+EOSS
+chmod +x filexp
+$eunicefix filexp
+
+: now set up to get a file name
+cat <<EOS >getfile
+$startsh
+EOS
+cat <<'EOSC' >>getfile
+tilde=''
+fullpath=''
+already=''
+skip=''
+none_ok=''
+exp_file=''
+nopath_ok=''
+orig_rp="$rp"
+orig_dflt="$dflt"
+case "$gfpth" in
+'') gfpth='.' ;;
+esac
+
+case "$fn" in
+*\(*)
+	: getfile will accept an answer from the comma-separated list
+	: enclosed in parentheses even if it does not meet other criteria.
+	expr "$fn" : '.*(\(.*\)).*' | $tr ',' $trnl >getfile.ok
+	fn=`echo $fn | sed 's/(.*)//'`
+	;;
+esac
+
+case "$fn" in
+*:*)
+	loc_file=`expr $fn : '.*:\(.*\)'`
+	fn=`expr $fn : '\(.*\):.*'`
+	;;
+esac
+
+case "$fn" in
+*~*) tilde=true;;
+esac
+case "$fn" in
+*/*) fullpath=true;;
+esac
+case "$fn" in
+*+*) skip=true;;
+esac
+case "$fn" in
+*n*) none_ok=true;;
+esac
+case "$fn" in
+*e*) exp_file=true;;
+esac
+case "$fn" in
+*p*) nopath_ok=true;;
+esac
+
+case "$fn" in
+*f*) type='File';;
+*d*) type='Directory';;
+*l*) type='Locate';;
+esac
+
+what="$type"
+case "$what" in
+Locate) what='File';;
+esac
+
+case "$exp_file" in
+'')
+	case "$d_portable" in
+	"$define") ;;
+	*) exp_file=true;;
+	esac
+	;;
+esac
+
+cd ..
+while test "$type"; do
+	redo=''
+	rp="$orig_rp"
+	dflt="$orig_dflt"
+	case "$tilde" in
+	true) rp="$rp (~name ok)";;
+	esac
+	. UU/myread
+	if test -f UU/getfile.ok && \
+		$contains "^$ans\$" UU/getfile.ok >/dev/null 2>&1
+	then
+		value="$ans"
+		ansexp="$ans"
+		break
+	fi
+	case "$ans" in
+	none)
+		value=''
+		ansexp=''
+		case "$none_ok" in
+		true) type='';;
+		esac
+		;;
+	*)
+		case "$tilde" in
+		'') value="$ans"
+			ansexp="$ans";;
+		*)
+			value=`UU/filexp $ans`
+			case $? in
+			0)
+				if test "$ans" != "$value"; then
+					echo "(That expands to $value on this system.)"
+				fi
+				;;
+			*) value="$ans";;
+			esac
+			ansexp="$value"
+			case "$exp_file" in
+			'') value="$ans";;
+			esac
+			;;
+		esac
+		case "$fullpath" in
+		true)
+			case "$ansexp" in
+			/*) value="$ansexp" ;;
+			[a-zA-Z]:/*) value="$ansexp" ;;
+			*)
+				redo=true
+				case "$already" in
+				true)
+				echo "I shall only accept a full path name, as in /bin/ls." >&4
+				echo "Use a ! shell escape if you wish to check pathnames." >&4
+					;;
+				*)
+				echo "Please give a full path name, starting with slash." >&4
+					case "$tilde" in
+					true)
+				echo "Note that using ~name is ok provided it expands well." >&4
+						already=true
+						;;
+					esac
+				esac
+				;;
+			esac
+			;;
+		esac
+		case "$redo" in
+		'')
+			case "$type" in
+			File)
+				for fp in $gfpth; do
+					if test "X$fp" = X.; then
+					    pf="$ansexp"
+					else    
+					    pf="$fp/$ansexp"
+					fi
+					if test -f "$pf"; then
+						type=''
+					elif test -r "$pf" || (test -h "$pf") >/dev/null 2>&1
+					then
+						echo "($value is not a plain file, but that's ok.)"
+						type=''
+					fi
+					if test X"$type" = X; then
+					    value="$pf"
+					    break
+					fi
+				done
+				;;
+			Directory)
+				for fp in $gfpth; do
+					if test "X$fp" = X.; then
+					    dir="$ans"
+					    direxp="$ansexp"
+					else    
+					    dir="$fp/$ansexp"
+					    direxp="$fp/$ansexp"
+					fi
+					if test -d "$direxp"; then
+						type=''
+						value="$dir"
+						break
+					fi
+				done
+				;;
+			Locate)
+				if test -d "$ansexp"; then
+					echo "(Looking for $loc_file in directory $value.)"
+					value="$value/$loc_file"
+					ansexp="$ansexp/$loc_file"
+				fi
+				if test -f "$ansexp"; then
+					type=''
+				fi
+				case "$nopath_ok" in
+				true)	case "$value" in
+					*/*) ;;
+					*)	echo "Assuming $value will be in people's path."
+						type=''
+						;;
+					esac
+					;;
+				esac
+				;;
+			esac
+
+			case "$skip" in
+			true) type='';
+			esac
+
+			case "$type" in
+			'') ;;
+			*)
+				if test "$fastread" = yes; then
+					dflt=y
+				else
+					dflt=n
+				fi
+				rp="$what $value doesn't exist.  Use that name anyway?"
+				. UU/myread
+				dflt=''
+				case "$ans" in
+				y*) type='';;
+				*) echo " ";;
+				esac
+				;;
+			esac
+			;;
+		esac
+		;;
+	esac
+done
+cd UU
+ans="$value"
+rp="$orig_rp"
+dflt="$orig_dflt"
+rm -f getfile.ok
+test "X$gfpthkeep" != Xy && gfpth=""
+EOSC
+
+: determine root of directory hierarchy where package will be installed.
+case "$prefix" in
+'')
+	dflt=`./loc . /usr/local /usr/local /local /opt /usr`
+	;;
+*?/)
+	dflt=`echo "$prefix" | sed 's/.$//'`
+	;;
+*)
+	dflt="$prefix"
+	;;
+esac
+$cat <<EOM
+
+By default, $package will be installed in $dflt/bin, manual pages
+under $dflt/man, etc..., i.e. with $dflt as prefix for all
+installation directories. Typically this is something like /usr/local.
+If you wish to have binaries under /usr/bin but other parts of the
+installation under /usr/local, that's ok: you will be prompted
+separately for each of the installation directories, the prefix being
+only used to set the defaults.
+
+EOM
+fn=d~
+rp='Installation prefix to use?'
+. ./getfile
+oldprefix=''
+case "$prefix" in
+'') ;;
+*)
+	case "$ans" in
+	"$prefix") ;;
+	*) oldprefix="$prefix";;
+	esac
+	;;
+esac
+prefix="$ans"
+prefixexp="$ansexp"
+
+case "$afsroot" in
+'')	afsroot=/afs ;;
+*)	afsroot=$afsroot ;;
+esac
+
+: is AFS running?
+echo " "
+case "$afs" in
+$define|true)	afs=true ;;
+$undef|false)	afs=false ;;
+*)	if test -d $afsroot; then
+		afs=true
+	else
+		afs=false
+	fi
+	;;
+esac
+if $afs; then
+	echo "AFS may be running... I'll be extra cautious then..." >&4
+else
+	echo "AFS does not seem to be running..." >&4
+fi
+
+: determine installation prefix for where package is to be installed.
+if $afs; then 
+$cat <<EOM
+
+Since you are running AFS, I need to distinguish the directory in which
+files will reside from the directory in which they are installed (and from
+which they are presumably copied to the former directory by occult means).
+
+EOM
+	case "$installprefix" in
+	'') dflt=`echo $prefix | sed 's#^/afs/#/afs/.#'`;;
+	*) dflt="$installprefix";;
+	esac
+else
+$cat <<EOM
+
+In some special cases, particularly when building $package for distribution,
+it is convenient to distinguish the directory in which files should be
+installed from the directory ($prefix) in which they will
+eventually reside.  For most users, these two directories are the same.
+
+EOM
+	case "$installprefix" in
+	'') dflt=$prefix ;;
+	*) dflt=$installprefix;;
+	esac
+fi
+fn=d~
+rp='What installation prefix should I use for installing files?'
+. ./getfile
+installprefix="$ans"
+installprefixexp="$ansexp"
+
+: Perform the prefixexp/installprefixexp correction if necessary
+cat <<EOS >installprefix
+$startsh
+EOS
+cat <<'EOSC' >>installprefix
+: Change installation prefix, if necessary.
+if $test X"$prefix" != X"$installprefix"; then
+    eval "install${prefixvar}=\`echo \$${prefixvar}exp | sed \"s#^\$prefixexp#\$installprefixexp#\"\`"
+else
+    eval "install${prefixvar}=\"\$${prefixvar}exp\""
+fi
+EOSC
+chmod +x installprefix
+$eunicefix installprefix
+
+: Set variables such as privlib and privlibexp from the output of ./getfile
+: performing the prefixexp/installprefixexp correction if necessary.
+cat <<EOS >setprefixvar
+$startsh
+EOS
+cat <<'EOSC' >>setprefixvar
+eval "${prefixvar}=\"\$ans\""
+eval "${prefixvar}exp=\"\$ansexp\""
+. ./installprefix
+EOSC
+chmod +x setprefixvar
+$eunicefix setprefixvar
+
 : set up the script used to warn in case of inconsistency
 cat <<EOS >whoa
 $startsh
@@ -3975,288 +4380,6 @@ case "$gccversion" in
     done
     $rm -f try try.*
 esac
-
-: decide how portable to be.  Allow command line overrides.
-case "$d_portable" in
-"$undef") ;;
-*)	d_portable="$define" ;;
-esac
-
-: set up shell script to do ~ expansion
-cat >filexp <<EOSS
-$startsh
-: expand filename
-case "\$1" in
- ~/*|~)
-	echo \$1 | $sed "s|~|\${HOME-\$LOGDIR}|"
-	;;
- ~*)
-	if $test -f /bin/csh; then
-		/bin/csh -f -c "glob \$1"
-		failed=\$?
-		echo ""
-		exit \$failed
-	else
-		name=\`$expr x\$1 : '..\([^/]*\)'\`
-		dir=\`$sed -n -e "/^\${name}:/{s/^[^:]*:[^:]*:[^:]*:[^:]*:[^:]*:\([^:]*\).*"'\$'"/\1/" -e p -e q -e '}' </etc/passwd\`
-		if $test ! -d "\$dir"; then
-			me=\`basename \$0\`
-			echo "\$me: can't locate home directory for: \$name" >&2
-			exit 1
-		fi
-		case "\$1" in
-		*/*)
-			echo \$dir/\`$expr x\$1 : '..[^/]*/\(.*\)'\`
-			;;
-		*)
-			echo \$dir
-			;;
-		esac
-	fi
-	;;
-*)
-	echo \$1
-	;;
-esac
-EOSS
-chmod +x filexp
-$eunicefix filexp
-
-: now set up to get a file name
-cat <<EOS >getfile
-$startsh
-EOS
-cat <<'EOSC' >>getfile
-tilde=''
-fullpath=''
-already=''
-skip=''
-none_ok=''
-exp_file=''
-nopath_ok=''
-orig_rp="$rp"
-orig_dflt="$dflt"
-case "$gfpth" in
-'') gfpth='.' ;;
-esac
-
-case "$fn" in
-*\(*)
-	: getfile will accept an answer from the comma-separated list
-	: enclosed in parentheses even if it does not meet other criteria.
-	expr "$fn" : '.*(\(.*\)).*' | $tr ',' $trnl >getfile.ok
-	fn=`echo $fn | sed 's/(.*)//'`
-	;;
-esac
-
-case "$fn" in
-*:*)
-	loc_file=`expr $fn : '.*:\(.*\)'`
-	fn=`expr $fn : '\(.*\):.*'`
-	;;
-esac
-
-case "$fn" in
-*~*) tilde=true;;
-esac
-case "$fn" in
-*/*) fullpath=true;;
-esac
-case "$fn" in
-*+*) skip=true;;
-esac
-case "$fn" in
-*n*) none_ok=true;;
-esac
-case "$fn" in
-*e*) exp_file=true;;
-esac
-case "$fn" in
-*p*) nopath_ok=true;;
-esac
-
-case "$fn" in
-*f*) type='File';;
-*d*) type='Directory';;
-*l*) type='Locate';;
-esac
-
-what="$type"
-case "$what" in
-Locate) what='File';;
-esac
-
-case "$exp_file" in
-'')
-	case "$d_portable" in
-	"$define") ;;
-	*) exp_file=true;;
-	esac
-	;;
-esac
-
-cd ..
-while test "$type"; do
-	redo=''
-	rp="$orig_rp"
-	dflt="$orig_dflt"
-	case "$tilde" in
-	true) rp="$rp (~name ok)";;
-	esac
-	. UU/myread
-	if test -f UU/getfile.ok && \
-		$contains "^$ans\$" UU/getfile.ok >/dev/null 2>&1
-	then
-		value="$ans"
-		ansexp="$ans"
-		break
-	fi
-	case "$ans" in
-	none)
-		value=''
-		ansexp=''
-		case "$none_ok" in
-		true) type='';;
-		esac
-		;;
-	*)
-		case "$tilde" in
-		'') value="$ans"
-			ansexp="$ans";;
-		*)
-			value=`UU/filexp $ans`
-			case $? in
-			0)
-				if test "$ans" != "$value"; then
-					echo "(That expands to $value on this system.)"
-				fi
-				;;
-			*) value="$ans";;
-			esac
-			ansexp="$value"
-			case "$exp_file" in
-			'') value="$ans";;
-			esac
-			;;
-		esac
-		case "$fullpath" in
-		true)
-			case "$ansexp" in
-			/*) value="$ansexp" ;;
-			[a-zA-Z]:/*) value="$ansexp" ;;
-			*)
-				redo=true
-				case "$already" in
-				true)
-				echo "I shall only accept a full path name, as in /bin/ls." >&4
-				echo "Use a ! shell escape if you wish to check pathnames." >&4
-					;;
-				*)
-				echo "Please give a full path name, starting with slash." >&4
-					case "$tilde" in
-					true)
-				echo "Note that using ~name is ok provided it expands well." >&4
-						already=true
-						;;
-					esac
-				esac
-				;;
-			esac
-			;;
-		esac
-		case "$redo" in
-		'')
-			case "$type" in
-			File)
-				for fp in $gfpth; do
-					if test "X$fp" = X.; then
-					    pf="$ansexp"
-					else    
-					    pf="$fp/$ansexp"
-					fi
-					if test -f "$pf"; then
-						type=''
-					elif test -r "$pf" || (test -h "$pf") >/dev/null 2>&1
-					then
-						echo "($value is not a plain file, but that's ok.)"
-						type=''
-					fi
-					if test X"$type" = X; then
-					    value="$pf"
-					    break
-					fi
-				done
-				;;
-			Directory)
-				for fp in $gfpth; do
-					if test "X$fp" = X.; then
-					    dir="$ans"
-					    direxp="$ansexp"
-					else    
-					    dir="$fp/$ansexp"
-					    direxp="$fp/$ansexp"
-					fi
-					if test -d "$direxp"; then
-						type=''
-						value="$dir"
-						break
-					fi
-				done
-				;;
-			Locate)
-				if test -d "$ansexp"; then
-					echo "(Looking for $loc_file in directory $value.)"
-					value="$value/$loc_file"
-					ansexp="$ansexp/$loc_file"
-				fi
-				if test -f "$ansexp"; then
-					type=''
-				fi
-				case "$nopath_ok" in
-				true)	case "$value" in
-					*/*) ;;
-					*)	echo "Assuming $value will be in people's path."
-						type=''
-						;;
-					esac
-					;;
-				esac
-				;;
-			esac
-
-			case "$skip" in
-			true) type='';
-			esac
-
-			case "$type" in
-			'') ;;
-			*)
-				if test "$fastread" = yes; then
-					dflt=y
-				else
-					dflt=n
-				fi
-				rp="$what $value doesn't exist.  Use that name anyway?"
-				. UU/myread
-				dflt=''
-				case "$ans" in
-				y*) type='';;
-				*) echo " ";;
-				esac
-				;;
-			esac
-			;;
-		esac
-		;;
-	esac
-done
-cd UU
-ans="$value"
-rp="$orig_rp"
-dflt="$orig_dflt"
-rm -f getfile.ok
-test "X$gfpthkeep" != Xy && gfpth=""
-EOSC
 
 : What should the include directory be ?
 echo " "
@@ -5778,101 +5901,6 @@ if $test -f archname.cbu; then
 	. ./archname.cbu
 fi
 
-: determine root of directory hierarchy where package will be installed.
-case "$prefix" in
-'')
-	dflt=`./loc . /usr/local /usr/local /local /opt /usr`
-	;;
-*?/)
-	dflt=`echo "$prefix" | sed 's/.$//'`
-	;;
-*)
-	dflt="$prefix"
-	;;
-esac
-$cat <<EOM
-
-By default, $package will be installed in $dflt/bin, manual pages
-under $dflt/man, etc..., i.e. with $dflt as prefix for all
-installation directories. Typically this is something like /usr/local.
-If you wish to have binaries under /usr/bin but other parts of the
-installation under /usr/local, that's ok: you will be prompted
-separately for each of the installation directories, the prefix being
-only used to set the defaults.
-
-EOM
-fn=d~
-rp='Installation prefix to use?'
-. ./getfile
-oldprefix=''
-case "$prefix" in
-'') ;;
-*)
-	case "$ans" in
-	"$prefix") ;;
-	*) oldprefix="$prefix";;
-	esac
-	;;
-esac
-prefix="$ans"
-prefixexp="$ansexp"
-
-case "$afsroot" in
-'')	afsroot=/afs ;;
-*)	afsroot=$afsroot ;;
-esac
-
-: is AFS running?
-echo " "
-case "$afs" in
-$define|true)	afs=true ;;
-$undef|false)	afs=false ;;
-*)	if test -d $afsroot; then
-		afs=true
-	else
-		afs=false
-	fi
-	;;
-esac
-if $afs; then
-	echo "AFS may be running... I'll be extra cautious then..." >&4
-else
-	echo "AFS does not seem to be running..." >&4
-fi
-
-: determine installation prefix for where package is to be installed.
-if $afs; then 
-$cat <<EOM
-
-Since you are running AFS, I need to distinguish the directory in which
-files will reside from the directory in which they are installed (and from
-which they are presumably copied to the former directory by occult means).
-
-EOM
-	case "$installprefix" in
-	'') dflt=`echo $prefix | sed 's#^/afs/#/afs/.#'`;;
-	*) dflt="$installprefix";;
-	esac
-else
-$cat <<EOM
-
-In some special cases, particularly when building $package for distribution,
-it is convenient to distinguish the directory in which files should be
-installed from the directory ($prefix) in which they will
-eventually reside.  For most users, these two directories are the same.
-
-EOM
-	case "$installprefix" in
-	'') dflt=$prefix ;;
-	*) dflt=$installprefix;;
-	esac
-fi
-fn=d~
-rp='What installation prefix should I use for installing files?'
-. ./getfile
-installprefix="$ans"
-installprefixexp="$ansexp"
-
 : set the prefixit variable, to compute a suitable default value
 prefixit='case "$3" in
 ""|none)
@@ -5971,81 +5999,9 @@ esac
 : confusing anyway.
 installstyle=$dflt
 
-
-: Perform the prefixexp/installprefixexp correction if necessary
-cat <<EOS >installprefix
-$startsh
-EOS
-cat <<'EOSC' >>installprefix
-: Change installation prefix, if necessary.
-if $test X"$prefix" != X"$installprefix"; then
-	eval "install${prefixvar}=\`echo \$${prefixvar}exp | sed \"s#^\$prefixexp#\$installprefixexp#\"\`"
-else
-	eval "install${prefixvar}=\"\$${prefixvar}exp\""
-fi
-EOSC
-
-: Set variables such as privlib and privlibexp from the output of ./getfile
-: performing the prefixexp/installprefixexp correction if necessary.
-cat <<EOS >setprefixvar
-$startsh
-EOS
-cat <<'EOSC' >>setprefixvar
-eval "${prefixvar}=\"\$ans\""
-eval "${prefixvar}exp=\"\$ansexp\""
-. ./installprefix
-EOSC
-
-: determine where public executables go
-echo " "
-set dflt bin bin
-eval $prefixit
-fn=d~
-rp='Pathname where the public executables will reside?'
-. ./getfile
-if $test "X$ansexp" != "X$binexp"; then
-	installbin=''
-fi
-prefixvar=bin
-: XXX Bug? -- ignores Configure -Dinstallprefix setting.
-. ./setprefixvar
-
-case "$userelocatableinc" in
-$define|true|[yY]*)	dflt='y';;
-*) dflt='n';;
-esac
-cat <<EOM
-
-Would you like to build Perl so that the installation is relocatable, so that
-library paths in @INC are determined relative to the path of the perl binary?
-This is not advised for system Perl installs, or if you need to run setid
-scripts or scripts under taint mode.
-
-If this doesn't make any sense to you, just accept the default '$dflt'.
-EOM
-rp='Use relocatable @INC?'
-. ./myread
-case "$ans" in
-y|Y)	val="$define" ;;     
-*)      val="$undef" ;;
-esac
-set userelocatableinc
-eval $setvar
-
-: Default prefix is now "up one level from where the binaries are"
-case "$userelocatableinc" in
-$define|true|[yY]*) initialinstalllocation="$binexp"
-		    bin=".../"
-		    binexp=".../"
-		    prefix=".../.."
-		    prefixexp=".../.."
-		    installprefixexp=".../..";;
-esac
-
-
 : determine where private library files go
 : Usual default is /usr/local/lib/perl5/$version.
-: Also allow things like /opt/perl/lib/$version, since 
+: Also allow things like /opt/perl/lib/$version, since
 : /opt/perl/lib/perl5... would be redundant.
 : The default "style" setting is made in installstyle.U
 case "$installstyle" in
@@ -6213,6 +6169,240 @@ EOM
 esac
 set d_dosuid
 eval $setvar
+
+: determine where public executables go
+echo " "
+set dflt bin bin
+eval $prefixit
+fn=d~
+rp='Pathname where the public executables will reside?'
+. ./getfile
+if $test "X$ansexp" != "X$binexp"; then
+	installbin=''
+fi
+prefixvar=bin
+: XXX Bug? -- ignores Configure -Dinstallprefix setting.
+. ./setprefixvar
+
+case "$userelocatableinc" in
+$define|true|[yY]*)	dflt='y' ;;
+*)			dflt='n' ;;
+esac
+cat <<EOM
+
+Would you like to build Perl so that the installation is relocatable, so that
+library paths in @INC are determined relative to the path of the perl binary?
+This is not advised for system Perl installs, or if you need to run setid
+scripts or scripts under taint mode.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+rp='Use relocatable @INC?'
+. ./myread
+case "$ans" in
+y|Y)	val="$define" ;;
+*)	val="$undef"  ;;
+esac
+set userelocatableinc
+eval $setvar
+
+: Default prefix is now "up one level from where the binaries are"
+case "$userelocatableinc" in
+$define|true|[yY]*)
+    initialinstalllocation="$binexp"
+    bin=".../"
+    binexp=".../"
+    prefix=".../.."
+    prefixexp=".../.."
+    installprefixexp=".../.."
+    ;;
+esac
+
+: Find perl5.005 or later.
+echo "Looking for a previously installed perl5.005 or later... "
+case "$perl5" in
+'')	for tdir in `echo "$binexp$path_sep$PATH" | $sed "s/$path_sep/ /g"`; do
+		: Check if this perl is recent and can load a simple module
+		if $test -x $tdir/perl$exe_ext && $tdir/perl -Mless -e 'use 5.005;' >/dev/null 2>&1; then
+			perl5=$tdir/perl
+			break;
+		elif $test -x $tdir/perl5$exe_ext && $tdir/perl5 -Mless -e 'use 5.005;' >/dev/null 2>&1; then
+			perl5=$tdir/perl5
+			break;
+		fi
+	done
+	;;
+*)	perl5="$perl5"
+	;;
+esac
+case "$perl5" in
+'')	echo "None found.  That's ok.";;
+*)	echo "Using $perl5." ;;
+esac
+
+$cat <<EOM
+
+After $package is installed, you may wish to install various
+add-on modules and utilities.  Typically, these add-ons will
+be installed under $prefix with the rest
+of this package.  However, you may wish to install such add-ons
+elsewhere under a different prefix.
+
+If you do not wish to put everything under a single prefix, that's
+ok.  You will be prompted for the individual locations; this siteprefix
+is only used to suggest the defaults.
+
+The default should be fine for most people.
+
+EOM
+fn=d~+
+rp='Installation prefix to use for add-on modules and utilities?'
+: XXX Here might be another good place for an installstyle setting.
+case "$siteprefix" in
+'') dflt=$prefix ;;
+*)  dflt=$siteprefix ;;
+esac
+. ./getfile
+: XXX Prefixit unit does not yet support siteprefix and vendorprefix
+oldsiteprefix=''
+case "$siteprefix" in
+'') ;;
+*)	case "$ans" in
+	"$prefix") ;;
+	*) oldsiteprefix="$prefix";;
+	esac
+	;;
+esac
+siteprefix="$ans"
+siteprefixexp="$ansexp"
+
+: determine where site specific libraries go.
+: Usual default is /usr/local/lib/perl5/site_perl/$version
+: The default "style" setting is made in installstyle.U
+: XXX No longer works with Prefixit stuff.
+prog=`echo $package | $sed 's/-*[0-9.]*$//'`
+case "$sitelib" in
+'') case "$installstyle" in
+	*lib/perl5*) dflt=$siteprefix/lib/$package/site_$prog/$version ;;
+	*)	 dflt=$siteprefix/lib/site_$prog/$version ;;
+	esac
+	;;
+*)	dflt="$sitelib"
+	;;
+esac
+$cat <<EOM
+
+The installation process will create a directory for
+site-specific extensions and modules.  Most users find it convenient
+to place all site-specific files in this directory rather than in the
+main distribution directory.
+
+EOM
+fn=d~+
+rp='Pathname for the site-specific library files?'
+. ./getfile
+prefixvar=sitelib
+. ./setprefixvar
+sitelib_stem=`echo "$sitelibexp" | sed "s,/$version$,,"`
+
+: Determine list of previous versions to include in @INC
+$cat > getverlist <<EOPL
+#!$perl5 -w
+use File::Basename;
+\$api_versionstring = "$api_versionstring";
+\$version = "$version";
+\$stem = "$sitelib_stem";
+\$archname = "$archname";
+EOPL
+	$cat >> getverlist <<'EOPL'
+# Can't have leading @ because metaconfig interprets it as a command!
+;@inc_version_list=();
+# XXX Redo to do opendir/readdir?
+if (-d $stem) {
+    chdir($stem);
+    ;@candidates = glob("5.*");
+}
+else {
+    ;@candidates = ();
+}
+
+# XXX ToDo:  These comparisons must be reworked when two-digit
+# subversions come along, so that 5.7.10 compares as greater than
+# 5.7.3!  By that time, hope that 5.6.x is sufficiently
+# widespread that we can use the built-in version vectors rather
+# than reinventing them here.  For 5.6.0, however, we must
+# assume this script will likely be run by 5.005_0x.  --AD 1/2000.
+foreach $d (@candidates) {
+    if ($d lt $version) {
+	if ($d ge $api_versionstring) {
+	    unshift(@inc_version_list, grep { -d } "$d/$archname", $d);
+	}
+	elsif ($d ge "5.005") {
+	    unshift(@inc_version_list, grep { -d } $d);
+	}
+    }
+    else {
+	# Skip newer version.  I.e. don't look in
+	# 5.7.0 if we're installing 5.6.1.
+    }
+}
+
+if (@inc_version_list) {
+    print join(' ', @inc_version_list);
+}
+else {
+    # Blank space to preserve value for next Configure run.
+    print " ";
+}
+EOPL
+chmod +x getverlist
+case "$inc_version_list" in
+'')	if test -x "$perl5$exe_ext"; then
+		dflt=`$perl5 getverlist`
+	else
+		dflt='none'
+	fi
+	;;
+$undef) dflt='none' ;;
+*)  eval dflt=\"$inc_version_list\" ;;
+esac
+case "$dflt" in
+''|' ') dflt=none ;;
+esac
+case "$dflt" in
+5.005) dflt=none ;;
+esac
+$cat <<EOM
+
+In order to ease the process of upgrading, this version of perl
+can be configured to use modules built and installed with earlier
+versions of perl that were installed under $prefix.  Specify here
+the list of earlier versions that this version of perl should check.
+If Configure detected no earlier versions of perl installed under
+$prefix, then the list will be empty.  Answer 'none' to tell perl
+to not search earlier versions.
+
+The default should almost always be sensible, so if you're not sure,
+just accept the default.
+EOM
+
+rp='List of earlier versions to include in @INC?'
+. ./myread
+case "$ans" in
+[Nn]one|''|' '|$undef) inc_version_list=' ' ;;
+*) inc_version_list="$ans" ;;
+esac
+case "$inc_version_list" in
+''|' ')
+	inc_version_list_init='0'
+	d_inc_version_list="$undef"
+	;;
+*)	inc_version_list_init=`echo $inc_version_list |
+		$sed -e 's/^/"/' -e 's/ /","/g' -e 's/$/",0/'`
+	d_inc_version_list="$define"
+	;;
+esac
+$rm -f getverlist
 
 : see if this is a malloc.h system
 : we want a real compile instead of Inhdr because some systems have a
@@ -6497,71 +6687,6 @@ case "$freetype" in
 esac
 echo "Your system uses $freetype free(), it would seem." >&4
 $rm -f malloc.[co]
-$cat <<EOM
-
-After $package is installed, you may wish to install various
-add-on modules and utilities.  Typically, these add-ons will
-be installed under $prefix with the rest
-of this package.  However, you may wish to install such add-ons
-elsewhere under a different prefix.
-
-If you do not wish to put everything under a single prefix, that's
-ok.  You will be prompted for the individual locations; this siteprefix
-is only used to suggest the defaults.
-
-The default should be fine for most people.
-
-EOM
-fn=d~+
-rp='Installation prefix to use for add-on modules and utilities?'
-: XXX Here might be another good place for an installstyle setting.
-case "$siteprefix" in
-'') dflt=$prefix ;;
-*)  dflt=$siteprefix ;;
-esac
-. ./getfile
-: XXX Prefixit unit does not yet support siteprefix and vendorprefix
-oldsiteprefix=''
-case "$siteprefix" in
-'') ;;
-*)	case "$ans" in
-	"$prefix") ;;
-	*) oldsiteprefix="$prefix";;
-	esac
-	;;
-esac
-siteprefix="$ans"
-siteprefixexp="$ansexp"
-
-: determine where site specific libraries go.
-: Usual default is /usr/local/lib/perl5/site_perl/$version
-: The default "style" setting is made in installstyle.U
-: XXX No longer works with Prefixit stuff.
-prog=`echo $package | $sed 's/-*[0-9.]*$//'`
-case "$sitelib" in
-'') case "$installstyle" in
-	*lib/perl5*) dflt=$siteprefix/lib/$package/site_$prog/$version ;;
-	*)	 dflt=$siteprefix/lib/site_$prog/$version ;;
-	esac
-	;;
-*)	dflt="$sitelib"
-	;;
-esac
-$cat <<EOM
-
-The installation process will create a directory for
-site-specific extensions and modules.  Most users find it convenient
-to place all site-specific files in this directory rather than in the
-main distribution directory.
-
-EOM
-fn=d~+
-rp='Pathname for the site-specific library files?'
-. ./getfile
-prefixvar=sitelib
-. ./setprefixvar
-sitelib_stem=`echo "$sitelibexp" | sed "s,/$version$,,"`
-
 : determine where site specific architecture-dependent libraries go.
 : sitelib  default is /usr/local/lib/perl5/site_perl/$version
 : sitearch default is /usr/local/lib/perl5/site_perl/$version/$archname
@@ -6841,7 +6966,7 @@ set html1dir html1dir none
 eval $prefixit
 $cat <<EOM
 
-If you wish to install html files for programs in $spackage, indicate 
+If you wish to install html files for programs in $spackage, indicate
 the appropriate directory here.  To skip installing html files,
 answer "none".
 EOM
@@ -6879,127 +7004,6 @@ prefixvar=html3dir
 . ./setprefixvar
 : Use ' ' for none so value is preserved next time through Configure
 $test X"$html3dir" = "X" && html3dir=' '
-
-: Find perl5.005 or later.
-echo "Looking for a previously installed perl5.005 or later... "
-case "$perl5" in
-'')	for tdir in `echo "$binexp$path_sep$PATH" | $sed "s/$path_sep/ /g"`; do
-		: Check if this perl is recent and can load a simple module
-		if $test -x $tdir/perl$exe_ext && $tdir/perl -Mless -e 'use 5.005;' >/dev/null 2>&1; then
-			perl5=$tdir/perl
-			break;
-		elif $test -x $tdir/perl5$exe_ext && $tdir/perl5 -Mless -e 'use 5.005;' >/dev/null 2>&1; then
-			perl5=$tdir/perl5
-			break;
-		fi
-	done
-	;;
-*)	perl5="$perl5"
-	;;
-esac
-case "$perl5" in
-'')	echo "None found.  That's ok.";;
-*)	echo "Using $perl5." ;;
-esac
-
-: Determine list of previous versions to include in @INC
-$cat > getverlist <<EOPL
-#!$perl5 -w
-use File::Basename;
-\$api_versionstring = "$api_versionstring";
-\$version = "$version";
-\$stem = "$sitelib_stem";
-\$archname = "$archname";
-EOPL
-	$cat >> getverlist <<'EOPL'
-# Can't have leading @ because metaconfig interprets it as a command!
-;@inc_version_list=();
-# XXX Redo to do opendir/readdir? 
-if (-d $stem) {
-    chdir($stem);
-    ;@candidates = glob("5.*");
-}
-else {
-    ;@candidates = ();
-}
-
-# XXX ToDo:  These comparisons must be reworked when two-digit
-# subversions come along, so that 5.7.10 compares as greater than
-# 5.7.3!  By that time, hope that 5.6.x is sufficiently
-# widespread that we can use the built-in version vectors rather
-# than reinventing them here.  For 5.6.0, however, we must
-# assume this script will likely be run by 5.005_0x.  --AD 1/2000.
-foreach $d (@candidates) {
-    if ($d lt $version) {
-	if ($d ge $api_versionstring) {
-	    unshift(@inc_version_list, grep { -d } "$d/$archname", $d);
-	}
-	elsif ($d ge "5.005") {
-	    unshift(@inc_version_list, grep { -d } $d);
-	}
-    }
-    else {
-	# Skip newer version.  I.e. don't look in
-	# 5.7.0 if we're installing 5.6.1.
-    }
-}
-
-if (@inc_version_list) {
-    print join(' ', @inc_version_list);
-}
-else {
-    # Blank space to preserve value for next Configure run.
-    print " ";
-}
-EOPL
-chmod +x getverlist
-case "$inc_version_list" in
-'')	if test -x "$perl5$exe_ext"; then
-		dflt=`$perl5 getverlist`
-	else
-		dflt='none'
-	fi
-	;;
-$undef) dflt='none' ;;
-*)  eval dflt=\"$inc_version_list\" ;;
-esac
-case "$dflt" in
-''|' ') dflt=none ;;
-esac
-case "$dflt" in
-5.005) dflt=none ;;
-esac
-$cat <<EOM
-
-In order to ease the process of upgrading, this version of perl 
-can be configured to use modules built and installed with earlier 
-versions of perl that were installed under $prefix.  Specify here
-the list of earlier versions that this version of perl should check.
-If Configure detected no earlier versions of perl installed under
-$prefix, then the list will be empty.  Answer 'none' to tell perl
-to not search earlier versions.
-
-The default should almost always be sensible, so if you're not sure,
-just accept the default.
-EOM
-
-rp='List of earlier versions to include in @INC?'
-. ./myread
-case "$ans" in
-[Nn]one|''|' '|$undef) inc_version_list=' ' ;;
-*) inc_version_list="$ans" ;;
-esac
-case "$inc_version_list" in
-''|' ') 
-	inc_version_list_init='0'
-	d_inc_version_list="$undef"
-	;;
-*)	inc_version_list_init=`echo $inc_version_list |
-		$sed -e 's/^/"/' -e 's/ /","/g' -e 's/$/",0/'`
-	d_inc_version_list="$define"
-	;;
-esac
-$rm -f getverlist
 
 : determine whether to install perl also as /usr/bin/perl
 
@@ -8116,7 +8120,7 @@ esac
 case "$d_flexfnam" in
 undef)
 	$cat <<'EOM'
-However, your system can't handle the long file names like File::Basename.3. 
+However, your system can't handle the long file names like File::Basename.3.
 EOM
 	case "$man3dir" in
 	'') man3dir="none";;
@@ -8131,8 +8135,8 @@ case "$man3dir" in
 		cat <<EOM >&4
 
 WARNING:  Previous versions of perl installed man3 pages into
-$privlib/man/man3.  This version will suggest a 
-new default of $dflt.  
+$privlib/man/man3.  This version will suggest a
+new default of $dflt.
 EOM
 		tdflt=$dflt
 		dflt='n'
@@ -8616,12 +8620,12 @@ case "$scriptdir" in
 	;;
 esac
 $cat <<EOM
- 
+
 Some installations have a separate directory just for executable scripts so
 that they can mount it across multiple architectures but keep the scripts in
 one spot.  You might, for example, have a subdirectory of /usr/share for this.
 Or you might just lump your scripts in with all your other executables.
- 
+
 EOM
 fn=d~
 rp='Where do you keep publicly executable scripts?'
@@ -8629,11 +8633,11 @@ rp='Where do you keep publicly executable scripts?'
 if $test "X$ansexp" != "X$scriptdirexp"; then
 	installscript=''
 fi
+installscriptdir=''
 prefixvar=scriptdir
 . ./setprefixvar
 : A little fix up for an irregularly named variable.
 installscript="$installscriptdir"
-
 
 : determine where add-on public executables go
 case "$sitebin" in
@@ -8681,7 +8685,7 @@ prefixvar=sitehtml3dir
 : determine where add-on manual pages go
 case "$siteman1dir" in
 '')	dflt=`echo $man1dir | $sed "s#^$prefix#$siteprefix#"` ;;
-*)  	dflt=$siteman1dir ;;
+*)	dflt=$siteman1dir ;;
 esac
 case "$dflt" in
 ''|' ') dflt=none ;;
@@ -8695,7 +8699,7 @@ prefixvar=siteman1dir
 : determine where add-on library man pages go
 case "$siteman3dir" in
 '')	dflt=`echo $man3dir | $sed "s#^$prefix#$siteprefix#"` ;;
-*)  	dflt=$siteman3dir ;;
+*)	dflt=$siteman3dir ;;
 esac
 case "$dflt" in
 ''|' ') dflt=none ;;
@@ -9127,7 +9131,7 @@ case "$vendorprefix" in
 	esac
 	$cat <<EOM
 
-The installation process will create a directory for 
+The installation process will create a directory for
 vendor-supplied scripts.
 
 EOM
@@ -21352,7 +21356,7 @@ d_grpasswd='$d_grpasswd'
 d_hasmntopt='$d_hasmntopt'
 d_htonl='$d_htonl'
 d_ilogbl='$d_ilogbl'
-d_inc_version_list="$d_inc_version_list"
+d_inc_version_list='$d_inc_version_list'
 d_index='$d_index'
 d_inetaton='$d_inetaton'
 d_int64_t='$d_int64_t'
@@ -21777,6 +21781,7 @@ inc_version_list='$inc_version_list'
 inc_version_list_init='$inc_version_list_init'
 incpath='$incpath'
 inews='$inews'
+initialinstalllocation='$initialinstalllocation'
 installarchlib='$installarchlib'
 installbin='$installbin'
 installhtml1dir='$installhtml1dir'
@@ -21846,15 +21851,15 @@ ls='$ls'
 lseeksize='$lseeksize'
 lseektype='$lseektype'
 mad='$mad'
+madlyh='$madlyh'
+madlyobj='$madlyobj'
+madlysrc='$madlysrc'
 mail='$mail'
 mailx='$mailx'
 make='$make'
 make_set_make='$make_set_make'
 mallocobj='$mallocobj'
 mallocsrc='$mallocsrc'
-madlyh='$madlyh'
-madlyobj='$madlyobj'
-madlysrc='$madlysrc'
 malloctype='$malloctype'
 man1dir='$man1dir'
 man1direxp='$man1direxp'
@@ -22080,7 +22085,6 @@ useopcode='$useopcode'
 useperlio='$useperlio'
 useposix='$useposix'
 usereentrant='$usereentrant'
-initialinstalllocation="$initialinstalllocation"
 userelocatableinc='$userelocatableinc'
 usesfio='$usesfio'
 useshrplib='$useshrplib'

@@ -1006,8 +1006,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol is the filename expanded version of the BIN symbol, for
  *	programs that do not want to deal with that at run-time.
  */
+/* PERL_RELOCATABLE_INC:
+ *	This symbol, if defined, indicates that we'd like to relocate entries
+ *	in @INC at run time based on the location of the perl binary.
+ */
 #define BIN "$bin"	/**/
 #define BIN_EXP "$binexp"	/**/
+#define PERL_RELOCATABLE_INC "$userelocatableinc" 		/**/
 
 /* INTSIZE:
  *	This symbol contains the value of sizeof(int) so that the C
@@ -3692,11 +3697,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	If defined, this symbol contains the name of a private library.
  *	The library is private in the sense that it needn't be in anyone's
  *	execution path, but it should be accessible by the world.
- *	It may have a ~ on the front. 
+ *	It may have a ~ on the front.
  *	The standard distribution will put nothing in this directory.
  *	Vendors who distribute perl may wish to place their own
  *	architecture-dependent modules and extensions in this directory with
- *		MakeMaker Makefile.PL INSTALLDIRS=vendor 
+ *		MakeMaker Makefile.PL INSTALLDIRS=vendor
  *	or equivalent.  See INSTALL for details.
  */
 /* PERL_VENDORARCH_EXP:
@@ -4096,12 +4101,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #ifndef USE_FAST_STDIO
 #$usefaststdio	USE_FAST_STDIO		/**/
 #endif
-
-/* PERL_RELOCATABLE_INC:
- *	This symbol, if defined, indicates that we'd like to relocate entries
- *	in @INC at run time based on the location of the perl binary.
- */
-#define PERL_RELOCATABLE_INC "$userelocatableinc" 		/**/
 
 /* HAS_CTERMID_R:
  *	This symbol, if defined, indicates that the ctermid_r routine
