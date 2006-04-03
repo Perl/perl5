@@ -4556,10 +4556,9 @@ exit_level:
 
     /* free all slabs above current one */
     if (orig_slab->next) {
-	regmatch_slab *osl, *sl = orig_slab->next;
+	regmatch_slab *sl = orig_slab->next;
 	orig_slab->next = NULL;
 	while (sl) {
-	    osl = sl;
 	    sl = sl->next;
 	}
     }
@@ -4590,7 +4589,7 @@ S_regrepeat(pTHX_ const regnode *p, I32 max)
     if (max == REG_INFTY)
 	max = I32_MAX;
     else if (max < loceol - scan)
-      loceol = scan + max;
+	loceol = scan + max;
     switch (OP(p)) {
     case REG_ANY:
 	if (do_utf8) {
