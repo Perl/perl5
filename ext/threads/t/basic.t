@@ -15,7 +15,7 @@ BEGIN {
 
 use ExtUtils::testlib;
 
-BEGIN { $| = 1; print "1..30\n" };
+BEGIN { $| = 1; print "1..32\n" };
 use threads;
 
 
@@ -131,28 +131,31 @@ my $thr1 = threads->create(sub {});
 my $thr2 = threads->create(sub {});
 my $thr3 = threads->object($thr1->tid());
 
-ok(20, $thr1 != $thr2,   'Treads not equal');
-ok(21, $thr1 == $thr3,   'Threads equal');
+# Make sure both overloaded '==' and '!=' are working correctly
+ok(20,   $thr1 != $thr2,  'Treads not equal');
+ok(21, !($thr1 == $thr2), 'Treads not equal');
+ok(22,   $thr1 == $thr3,  'Threads equal');
+ok(23, !($thr1 != $thr3), 'Threads equal');
 
-ok(22, $thr1->_handle(), 'Handle method');
-ok(23, $thr2->_handle(), 'Handle method');
+ok(24, $thr1->_handle(), 'Handle method');
+ok(25, $thr2->_handle(), 'Handle method');
 
-ok(24, threads->object($thr1->tid())->tid() == 11, 'Object method');
-ok(25, threads->object($thr2->tid())->tid() == 12, 'Object method');
+ok(26, threads->object($thr1->tid())->tid() == 11, 'Object method');
+ok(27, threads->object($thr2->tid())->tid() == 12, 'Object method');
 
 $thr1->join();
 $thr2->join();
 
-my $sub = sub { ok(26, shift() == 1, "Test code ref"); };
+my $sub = sub { ok(28, shift() == 1, "Test code ref"); };
 threads->create($sub, 1)->join();
 
 my $thrx = threads->object(99);
-ok(27, ! defined($thrx), 'No object');
-$thrx = threads->object();
-ok(28, ! defined($thrx), 'No object');
-$thrx = threads->object(undef);
 ok(29, ! defined($thrx), 'No object');
-$thrx = threads->object(0);
+$thrx = threads->object();
 ok(30, ! defined($thrx), 'No object');
+$thrx = threads->object(undef);
+ok(31, ! defined($thrx), 'No object');
+$thrx = threads->object(0);
+ok(32, ! defined($thrx), 'No object');
 
 # EOF

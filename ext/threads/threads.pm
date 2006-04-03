@@ -29,6 +29,7 @@ EOF
 
 use overload
     '==' => \&equal,
+    '!=' => sub { !equal(@_) },
     'fallback' => 1;
 
 BEGIN {
@@ -38,7 +39,7 @@ BEGIN {
                if($threads::shared::threads_shared);
 }
 
-our $VERSION = '1.18';
+our $VERSION = '1.18_01';
 
 
 # Load the XS code
