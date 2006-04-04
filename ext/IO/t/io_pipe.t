@@ -49,7 +49,7 @@ print "1..10\n";
 if ($is_win32) {
     print "ok $_ # skipped: $is_win32\n" for 1..4;
 } else {
-    $pipe = new IO::Pipe->reader($perl, '-e', 'print qq(not ok 1)\n"');
+    $pipe = new IO::Pipe->reader($perl, '-e', 'print qq(not ok 1\n)');
     while (<$pipe>) {
       s/^not //;
       print;
