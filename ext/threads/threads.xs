@@ -891,7 +891,7 @@ ithread__handle(...);
 #ifdef WIN32
         XST_mUV(0, PTR2UV(thread->handle));
 #else
-        XST_mUV(0, PTR2UV(thread->thr));
+        XST_mUV(0, PTR2UV(&thread->thr));
 #endif
         /* XSRETURN(1); - implied */
 
