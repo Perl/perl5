@@ -86,10 +86,9 @@ if(ckWARN_d(WARN_SYNTAX))
 END
   }
   elsif (my $feature = $feature_kw{$k}) {
-    my $feature_len = length($feature);
     $feature =~ s/([\\"])/\\$1/g;
     return <<END;
-return (FEATURE_IS_ENABLED("$feature", $feature_len) ? ${sign}KEY_$k : 0);
+return (FEATURE_IS_ENABLED("$feature") ? ${sign}KEY_$k : 0);
 END
   }
   return <<END;
