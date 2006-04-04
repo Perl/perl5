@@ -9742,15 +9742,23 @@ Perl_my_localtime(pTHX_ const time_t *timep)
 #define time(t)      my_time(t)
 
 
-/* my_utime - update modification time of a file
- * calling sequence is identical to POSIX utime(), but under
- * VMS only the modification time is changed; ODS-2 does not
- * maintain access times.  Restrictions differ from the POSIX
+/* my_utime - update modification/access time of a file
+ *
+ * VMS 7.3 and later implementation
+ * Only the UTC translation is home-grown. The rest is handled by the
+ * CRTL utime(), which will take into account the relevant feature
+ * logicals and ODS-5 volume characteristics for true access times.
+ *
+ * pre VMS 7.3 implementation:
+ * The calling sequence is identical to POSIX utime(), but under
+ * VMS with ODS-2, only the modification time is changed; ODS-2 does
+ * not maintain access times.  Restrictions differ from the POSIX
  * definition in that the time can be changed as long as the
  * caller has permission to execute the necessary IO$_MODIFY $QIO;
  * no separate checks are made to insure that the caller is the
  * owner of the file or has special privs enabled.
  * Code here is based on Joe Meadows' FILE utility.
+ *
  */
 
 /* Adjustment from Unix epoch (01-JAN-1970 00:00:00.00)
@@ -9762,6 +9770,29 @@ static const long int utime_baseadjust[2] = { 0x4beb4000, 0x7c9567 };
 /*{{{int my_utime(const char *path, const struct utimbuf *utimes)*/
 int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
 {
+#if __CRTL_VER >= 70300000
+  struct utimbuf utc_utimes, *utc_utimesp;
+
+  if (utimes != NULL) {
+    utc_utimes.actime = utimes->actime;
+    utc_utimes.modtime = utimes->modtime;
+# ifdef VMSISH_TIME
+    /* If input was local; convert to UTC for sys svc */
+    if (VMSISH_TIME) {
+      utc_utimes.actime = _toutc(utimes->actime);
+      utc_utimes.modtime = _toutc(utimes->modtime);
+    }
+# endif
+    utc_utimesp = &utc_utimes;
+  }
+  else {
+    utc_utimesp = NULL;
+  }
+
+  return utime(file, utc_utimesp);
+
+#else /* __CRTL_VER < 70300000 */
+
   register int i;
   int sts;
   long int bintime[2], len = 2, lowbit, unixtime,
@@ -9789,33 +9820,17 @@ int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
   struct dsc$descriptor fibdsc = {sizeof(myfib), DSC$K_DTYPE_Z, DSC$K_CLASS_S,(char *) &myfib},
                         devdsc = {0,DSC$K_DTYPE_T, DSC$K_CLASS_S,0},
                         fnmdsc = {0,DSC$K_DTYPE_T, DSC$K_CLASS_S,0};
-
-  if (decc_efs_charset != 0) {
-    struct utimbuf utc_utimes;
-
-    utc_utimes.actime = utimes->actime;
-    utc_utimes.modtime = utimes->modtime;
-#   ifdef VMSISH_TIME
-    /* If input was local; convert to UTC for sys svc */
-    if (VMSISH_TIME) {
-	utc_utimes.actime = _toutc(utimes->actime);
-	utc_utimes.modtime = _toutc(utimes->modtime);
-    }
-#   endif
-    sts = utime(file, &utc_utimes);
-    return sts;
-  }
 	
   if (file == NULL || *file == '\0') {
-    set_errno(ENOENT);
-    set_vaxc_errno(LIB$_INVARG);
+    SETERRNO(ENOENT, LIB$_INVARG);
     return -1;
   }
 
   /* Convert to VMS format ensuring that it will fit in 255 characters */
-  if (do_rmsexpand(file, vmsspec, 0, NULL, PERL_RMSEXPAND_M_VMS) == NULL)
-	return -1;
-
+  if (do_rmsexpand(file, vmsspec, 0, NULL, PERL_RMSEXPAND_M_VMS) == NULL) {
+      SETERRNO(ENOENT, LIB$_INVARG);
+      return -1;
+  }
   if (utimes != NULL) {
     /* Convert Unix time    (seconds since 01-JAN-1970 00:00:00.00)
      * to VMS quadword time (100 nsec intervals since 01-JAN-1858 00:00:00.00).
@@ -9832,14 +9847,12 @@ int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
     unixtime >>= 1;  secscale <<= 1;
     retsts = lib$emul(&secscale, &unixtime, &lowbit, bintime);
     if (!(retsts & 1)) {
-      set_errno(EVMSERR);
-      set_vaxc_errno(retsts);
+      SETERRNO(EVMSERR, retsts);
       return -1;
     }
     retsts = lib$addx(bintime,utime_baseadjust,bintime,&len);
     if (!(retsts & 1)) {
-      set_errno(EVMSERR);
-      set_vaxc_errno(retsts);
+      SETERRNO(EVMSERR, retsts);
       return -1;
     }
   }
@@ -9847,8 +9860,7 @@ int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
     /* Just get the current time in VMS format directly */
     retsts = sys$gettim(bintime);
     if (!(retsts & 1)) {
-      set_errno(EVMSERR);
-      set_vaxc_errno(retsts);
+      SETERRNO(EVMSERR, retsts);
       return -1;
     }
   }
@@ -9930,6 +9942,9 @@ int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
   }
 
   return 0;
+
+#endif /* #if __CRTL_VER >= 70300000 */
+
 }  /* end of my_utime() */
 /*}}}*/
 
