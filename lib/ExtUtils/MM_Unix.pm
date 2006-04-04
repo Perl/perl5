@@ -1305,19 +1305,14 @@ sub init_MANPODS {
 
     # Set up names of manual pages to generate from pods
     foreach my $man (qw(MAN1 MAN3)) {
-	$self->{"BUILD${man}PODS"} = 1;
-
 	unless ($self->{"${man}PODS"}) {
 	    $self->{"${man}PODS"} = {};
-	    $self->{"BUILD${man}PODS"} = 0 if
-              $self->{"INSTALL${man}DIR"} =~ /^(none|\s*)$/;
+	    unless ($self->{"INSTALL${man}DIR"} =~ /^(none|\s*)$/) {
+		my $init = "init_${man}PODS";
+		$self->$init();
+	    }
 	}
-	$self->{"BUILD${man}PODS"} = 0 if
-	    scalar(keys %{$self->{"${man}PODS"}}) == 0;
     }
-
-    $self->init_MAN1PODS() if $self->{BUILDMAN1PODS};
-    $self->init_MAN3PODS() if $self->{BUILDMAN3PODS};
 }
 
 
