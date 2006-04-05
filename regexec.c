@@ -3263,21 +3263,22 @@ S_regmatch(pTHX_ regnode *prog)
 	    break;
 	case EVAL:
 	{
-	    dSP;
-	    OP_4tree * const oop = PL_op;
-	    COP * const ocurcop = PL_curcop;
-	    PAD *old_comppad;
 	    SV *ret;
-	    struct regexp * const oreg = PL_reg_re;
-	
-	    n = ARG(scan);
-	    PL_op = (OP_4tree*)PL_regdata->data[n];
-	    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%"UVxf"\n", PTR2UV(PL_op)) );
-	    PAD_SAVE_LOCAL(old_comppad, (PAD*)PL_regdata->data[n + 2]);
-	    PL_regendp[0] = PL_reg_magic->mg_len = locinput - PL_bostr;
-
 	    {
+		/* execute the code in the {...} */
+		dSP;
 		SV ** const before = SP;
+		OP_4tree * const oop = PL_op;
+		COP * const ocurcop = PL_curcop;
+		PAD *old_comppad;
+		struct regexp * const oreg = PL_reg_re;
+	    
+		n = ARG(scan);
+		PL_op = (OP_4tree*)PL_regdata->data[n];
+		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%"UVxf"\n", PTR2UV(PL_op)) );
+		PAD_SAVE_LOCAL(old_comppad, (PAD*)PL_regdata->data[n + 2]);
+		PL_regendp[0] = PL_reg_magic->mg_len = locinput - PL_bostr;
+
 		CALLRUNOPS(aTHX);			/* Scalar context. */
 		SPAGAIN;
 		if (SP == before)
@@ -3286,19 +3287,25 @@ S_regmatch(pTHX_ regnode *prog)
 		    ret = POPs;
 		    PUTBACK;
 		}
+
+		PL_op = oop;
+		PAD_RESTORE_LOCAL(old_comppad);
+		PL_curcop = ocurcop;
+		if (!st->logical) {
+		    /* /(?{...})/ */
+		    sv_setsv(save_scalar(PL_replgv), ret);
+		    cache_re(oreg);
+		    break;
+		}
 	    }
+	    if (st->logical == 2) { /* Postponed subexpression: /(??{...})/ */
+		regexp *re;
+		re_cc_state state;
+		int toggleutf;
 
-	    PL_op = oop;
-	    PAD_RESTORE_LOCAL(old_comppad);
-	    PL_curcop = ocurcop;
-	    if (st->logical) {
-		if (st->logical == 2) {	/* Postponed subexpression. */
-		    regexp *re;
+		{
 		    MAGIC *mg = NULL;
-		    re_cc_state state;
-                    int toggleutf;
-		    register SV *sv;
-
+		    SV *sv;
 		    if(SvROK(ret) && SvSMAGICAL(sv = SvRV(ret)))
 			mg = mg_find(sv, PERL_MAGIC_qr);
 		    else if (SvSMAGICAL(ret)) {
@@ -3321,7 +3328,7 @@ S_regmatch(pTHX_ regnode *prog)
 			const I32 onpar = PL_regnpar;
 
 			Zero(&pm, 1, PMOP);
-                        if (DO_UTF8(ret)) pm.op_pmdynflags |= PMdf_DYN_UTF8;
+			if (DO_UTF8(ret)) pm.op_pmdynflags |= PMdf_DYN_UTF8;
 			re = CALLREGCOMP(aTHX_ (char*)t, (char*)t + len, &pm);
 			if (!(SvFLAGS(ret)
 			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY
@@ -3332,60 +3339,44 @@ S_regmatch(pTHX_ regnode *prog)
 			PL_regsize = osize;
 			PL_regnpar = onpar;
 		    }
-		    DEBUG_EXECUTE_r(
-			PerlIO_printf(Perl_debug_log,
-				      "Entering embedded \"%s%.60s%s%s\"\n",
-				      PL_colors[0],
-				      re->precomp,
-				      PL_colors[1],
-				      (strlen(re->precomp) > 60 ? "..." : ""))
-			);
-		    state.node = next;
-		    state.prev = PL_reg_call_cc;
-		    state.cc = st->cc;
-		    state.re = PL_reg_re;
+		}
+		DEBUG_EXECUTE_r(
+		    PerlIO_printf(Perl_debug_log,
+				  "Entering embedded \"%s%.60s%s%s\"\n",
+				  PL_colors[0],
+				  re->precomp,
+				  PL_colors[1],
+				  (strlen(re->precomp) > 60 ? "..." : ""))
+		    );
+		state.node = next;
+		state.prev = PL_reg_call_cc;
+		state.cc = st->cc;
+		state.re = PL_reg_re;
 
-		    st->cc = 0;
-		
-		    st->u.eval.cp = regcppush(0);	/* Save *all* the positions. */
-		    REGCP_SET(st->u.eval.lastcp);
-		    cache_re(re);
-		    state.ss = PL_savestack_ix;
-		    *PL_reglastparen = 0;
-		    *PL_reglastcloseparen = 0;
-		    PL_reg_call_cc = &state;
-		    PL_reginput = locinput;
-		    toggleutf = ((PL_reg_flags & RF_utf8) != 0) ^
-				((re->reganch & ROPT_UTF8) != 0);
-		    if (toggleutf) PL_reg_flags ^= RF_utf8;
+		st->cc = 0;
+	    
+		st->u.eval.cp = regcppush(0);	/* Save *all* the positions. */
+		REGCP_SET(st->u.eval.lastcp);
+		cache_re(re);
+		state.ss = PL_savestack_ix;
+		*PL_reglastparen = 0;
+		*PL_reglastcloseparen = 0;
+		PL_reg_call_cc = &state;
+		PL_reginput = locinput;
+		toggleutf = ((PL_reg_flags & RF_utf8) != 0) ^
+			    ((re->reganch & ROPT_UTF8) != 0);
+		if (toggleutf) PL_reg_flags ^= RF_utf8;
 
-		    /* XXXX This is too dramatic a measure... */
-		    PL_reg_maxiter = 0;
+		/* XXXX This is too dramatic a measure... */
+		PL_reg_maxiter = 0;
 
-		    /* XXX the only recursion left in regmatch() */
-		    if (regmatch(re->program + 1)) {
-			/* Even though we succeeded, we need to restore
-			   global variables, since we may be wrapped inside
-			   SUSPEND, thus the match may be not finished yet. */
+		/* XXX the only recursion left in regmatch() */
+		if (regmatch(re->program + 1)) {
+		    /* Even though we succeeded, we need to restore
+		       global variables, since we may be wrapped inside
+		       SUSPEND, thus the match may be not finished yet. */
 
-			/* XXXX Do this only if SUSPENDed? */
-			PL_reg_call_cc = state.prev;
-			st->cc = state.cc;
-			PL_reg_re = state.re;
-			cache_re(PL_reg_re);
-			if (toggleutf) PL_reg_flags ^= RF_utf8;
-
-			/* XXXX This is too dramatic a measure... */
-			PL_reg_maxiter = 0;
-
-			/* These are needed even if not SUSPEND. */
-			ReREFCNT_dec(re);
-			regcpblow(st->u.eval.cp);
-			sayYES;
-		    }
-		    ReREFCNT_dec(re);
-		    REGCP_UNWIND(st->u.eval.lastcp);
-		    regcppop();
+		    /* XXXX Do this only if SUSPENDed? */
 		    PL_reg_call_cc = state.prev;
 		    st->cc = state.cc;
 		    PL_reg_re = state.re;
@@ -3395,16 +3386,30 @@ S_regmatch(pTHX_ regnode *prog)
 		    /* XXXX This is too dramatic a measure... */
 		    PL_reg_maxiter = 0;
 
-		    st->logical = 0;
-		    sayNO;
+		    /* These are needed even if not SUSPEND. */
+		    ReREFCNT_dec(re);
+		    regcpblow(st->u.eval.cp);
+		    sayYES;
 		}
-		st->sw = SvTRUE(ret);
+		ReREFCNT_dec(re);
+		REGCP_UNWIND(st->u.eval.lastcp);
+		regcppop();
+		PL_reg_call_cc = state.prev;
+		st->cc = state.cc;
+		PL_reg_re = state.re;
+		cache_re(PL_reg_re);
+		if (toggleutf) PL_reg_flags ^= RF_utf8;
+
+		/* XXXX This is too dramatic a measure... */
+		PL_reg_maxiter = 0;
+
 		st->logical = 0;
+		sayNO;
+		/* NOTREACHED */
 	    }
-	    else {
-		sv_setsv(save_scalar(PL_replgv), ret);
-		cache_re(oreg);
-	    }
+	    /* /(?(?{...})X|Y)/ */
+	    st->sw = SvTRUE(ret);
+	    st->logical = 0;
 	    break;
 	}
 	case OPEN:
