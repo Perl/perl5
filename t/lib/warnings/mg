@@ -55,3 +55,8 @@ use warnings 'uninitialized';
 length $3;
 EXPECT
 Use of uninitialized value $3 in length at - line 3.
+########
+# mg.c
+use warnings 'uninitialized';
+$ENV{FOO} = undef; # should not warn
+EXPECT

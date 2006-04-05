@@ -1042,8 +1042,8 @@ int
 Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
-    STRLEN len, klen;
-    const char *s = SvPV_const(sv,len);
+    STRLEN len = 0, klen;
+    const char *s = SvOK(sv) ? SvPV_const(sv,len) : "";
     const char * const ptr = MgPV_const(mg,klen);
     my_setenv(ptr, s);
 
