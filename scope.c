@@ -590,9 +590,7 @@ Perl_save_alloc(pTHX_ I32 size, I32 pad)
 				- (char*)PL_savestack);
     register const I32 elems = 1 + ((size + pad - 1) / sizeof(*PL_savestack));
 
-    /* SSCHECK may not be good enough */
-    while (PL_savestack_ix + elems + 2 > PL_savestack_max)
-	savestack_grow();
+    SSGROW(elems + 2);
 
     PL_savestack_ix += elems;
     SSPUSHINT(elems);
