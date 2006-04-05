@@ -2805,6 +2805,8 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 				best = cur;
 			}
 			DEBUG_EXECUTE_r({
+			    reg_trie_data * const trie = (reg_trie_data*)
+					    PL_reg_re->data->data[ARG(scan)];
 			    SV ** const tmp = av_fetch( trie->words, st->u.trie.accept_buff[ best ].wordnum - 1, 0 );
     			    PerlIO_printf( Perl_debug_log, "%*s  %strying alternation #%d <%s> at 0x%p%s\n",
     			        REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
@@ -3279,10 +3281,10 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 		PL_op = oop;
 		PAD_RESTORE_LOCAL(old_comppad);
 		PL_curcop = ocurcop;
+		PL_reg_re = oreg;
 		if (!st->logical) {
 		    /* /(?{...})/ */
 		    sv_setsv(save_scalar(PL_replgv), ret);
-		    PL_reg_re = oreg;
 		    break;
 		}
 	    }
