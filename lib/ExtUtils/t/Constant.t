@@ -867,7 +867,7 @@ foreach (["perl", "rules", "rules"],
         ) {
   # Flag an expected error with a reference for the expect string.
   my ($string, $expect, $expect_bytes) = @$_;
-  (my $name = $string) =~ s/([^ -~])/sprintf '\x{%X}', ord $1/ges;
+  (my $name = $string) =~ s/([^ !"#\$%&'()*+,\-.\/0-9:;<=>?\@A-Z[\\\]^_`a-z{|}~])/sprintf '\x{%X}', ord $1/ges;
   print "# \"$name\" => \'$expect\'\n";
   # Try to force this to be bytes if possible.
   if ($better_than_56) {
