@@ -2973,31 +2973,7 @@ PerlIOStdio_invalidate_fileno(pTHX_ FILE *f)
     f->_fileno = -1;
     return 1;
 #  elif defined(__sun__)
-#    if defined(_LP64)
-    /* On solaris, if _LP64 is defined, the FILE structure is this:
-     *
-     *  struct FILE {
-     *      long __pad[16];
-     *  };
-     *
-     * It turns out that the fd is stored in the top 32 bits of
-     * file->__pad[4]. The lower 32 bits contain flags. file->pad[5] appears
-     * to contain a pointer or offset into another structure. All the
-     * remaining fields are zero.
-     *
-     * We set the top bits to -1 (0xFFFFFFFF).
-     */
-    f->__pad[4] |= 0xffffffff00000000L;
-    assert(fileno(f) == 0xffffffff);
-#    else /* !defined(_LP64) */
-    /* _file is just a unsigned char :-(
-       Not clear why we dup() rather than using -1
-       even if that would be treated as 0xFF - so will
-       a dup fail ...
-     */
-    f->_file = PerlLIO_dup(fileno(f));
-#    endif /* defined(_LP64) */
-    return 1;
+    return 0;
 #  elif defined(__hpux)
     f->__fileH = 0xff;
     f->__fileL = 0xff;
