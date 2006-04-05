@@ -16,19 +16,17 @@ BEGIN {
 use Config;
 
 BEGIN {
+    my $can_fork = $Config{d_fork} ||
+		    (($^O eq 'MSWin32' || $^O eq 'NetWare') and
+		     $Config{useithreads} and 
+		     $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/
+		    );
     my $reason;
     if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bIO\b/) {
 	$reason = 'IO extension unavailable';
     }
-    elsif (
-        ! eval {
-            my $pid= fork();
-            ! defined($pid) and die "Fork failed!";
-            ! $pid and exit;
-            defined waitpid($pid, 0);
-        }
-    ) {
-        $reason = "no fork: $@";
+    elsif (!$can_fork) {
+        $reason = 'no fork';
     }
     elsif ($^O eq 'MSWin32' && !$ENV{TEST_IO_PIPE}) {
 	$reason = 'Win32 testing environment not set';
