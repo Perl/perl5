@@ -984,6 +984,59 @@ Perl_leave_scope(pTHX_ I32 base)
 	    i = SSPOPINT;
 	    CopARYBASE_set((COP *)ptr, i);
 	    break;
+	case SAVEt_RE_STATE:
+	    {
+		const struct re_save_state *const state
+		    = (struct re_save_state *)
+		    (PL_savestack + PL_savestack_ix
+		     - SAVESTACK_ALLOC_FOR_RE_SAVE_STATE);
+		PL_savestack_ix -= SAVESTACK_ALLOC_FOR_RE_SAVE_STATE;
+
+		PL_reg_flags = state->re_state_reg_flags;
+		PL_bostr = state->re_state_bostr;
+		PL_reginput = state->re_state_reginput;
+		PL_regbol = state->re_state_regbol;
+		PL_regeol = state->re_state_regeol;
+		PL_regstartp = state->re_state_regstartp;
+		PL_regendp = state->re_state_regendp;
+		PL_reglastparen = state->re_state_reglastparen;
+		PL_reglastcloseparen = state->re_state_reglastcloseparen;
+		PL_regtill = state->re_state_regtill;
+		if (PL_reg_start_tmp != state->re_state_reg_start_tmp) {
+		    Safefree(PL_reg_start_tmp);
+		    PL_reg_start_tmp = state->re_state_reg_start_tmp;
+		}
+		PL_reg_start_tmpl = state->re_state_reg_start_tmpl;
+		PL_reg_eval_set = state->re_state_reg_eval_set;
+		PL_regnarrate = state->re_state_regnarrate;
+		PL_regindent = state->re_state_regindent;
+		PL_reg_call_cc = state->re_state_reg_call_cc;
+		PL_reg_re = state->re_state_reg_re;
+		PL_reg_ganch = state->re_state_reg_ganch;
+		PL_reg_sv = state->re_state_reg_sv;
+		PL_reg_match_utf8 = state->re_state_reg_match_utf8;
+		PL_reg_magic = state->re_state_reg_magic;
+		PL_reg_oldpos = state->re_state_reg_oldpos;
+		PL_reg_oldcurpm = state->re_state_reg_oldcurpm;
+		PL_reg_curpm = state->re_state_reg_curpm;
+		PL_reg_oldsaved = state->re_state_reg_oldsaved;
+		PL_reg_oldsavedlen = state->re_state_reg_oldsavedlen;
+		PL_reg_maxiter = state->re_state_reg_maxiter;
+		PL_reg_leftiter = state->re_state_reg_leftiter;
+		if (PL_reg_poscache != state->re_state_reg_poscache) {
+		    Safefree(PL_reg_poscache);
+		    PL_reg_poscache = state->re_state_reg_poscache;
+		}
+		PL_reg_poscache_size = state->re_state_reg_poscache_size;
+		PL_regsize = state->re_state_regsize;
+#ifdef DEBUGGING
+		PL_reg_starttry = state->re_state_reg_starttry;
+#endif
+#ifdef PERL_OLD_COPY_ON_WRITE
+		PL_nrs = state->re_state_nrs;
+#endif
+	    }
+	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: leave_scope inconsistency");
 	}

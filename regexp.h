@@ -287,3 +287,53 @@ typedef struct regmatch_slab {
     regmatch_state states[PERL_REGMATCH_SLAB_SLOTS];
     struct regmatch_slab *prev, *next;
 } regmatch_slab;
+
+struct re_save_state {
+    U32 re_state_reg_flags;		/* from regexec.c */
+    char *re_state_bostr;
+    char *re_state_reginput;		/* String-input pointer. */
+    char *re_state_regbol;		/* Beginning of input, for ^ check. */
+    char *re_state_regeol;		/* End of input, for $ check. */
+    I32 *re_state_regstartp;		/* Pointer to startp array. */
+    I32 *re_state_regendp;		/* Ditto for endp. */
+    U32 *re_state_reglastparen;		/* Similarly for lastparen. */
+    U32 *re_state_reglastcloseparen;	/* Similarly for lastcloseparen. */
+    char *re_state_regtill;		/* How far we are required to go. */
+    char **re_state_reg_start_tmp;	/* from regexec.c */
+    U32 re_state_reg_start_tmpl;	/* from regexec.c */
+    I32 re_state_reg_eval_set;		/* from regexec.c */
+    I32 re_state_regnarrate;		/* from regexec.c */
+    int re_state_regindent;		/* from regexec.c */
+    struct re_cc_state *re_state_reg_call_cc;		/* from regexec.c */
+    regexp *re_state_reg_re;		/* from regexec.c */
+    char *re_state_reg_ganch;		/* from regexec.c */
+    SV *re_state_reg_sv;		/* from regexec.c */
+    bool re_state_reg_match_utf8;	/* from regexec.c */
+    MAGIC *re_state_reg_magic;		/* from regexec.c */
+    I32 re_state_reg_oldpos;		/* from regexec.c */
+    PMOP *re_state_reg_oldcurpm;	/* from regexec.c */
+    PMOP *re_state_reg_curpm;		/* from regexec.c */
+    char *re_state_reg_oldsaved;	/* old saved substr during match */
+    STRLEN re_state_reg_oldsavedlen;	/* old length of saved substr during match */
+    I32 re_state_reg_maxiter;		/* max wait until caching pos */
+    I32 re_state_reg_leftiter;		/* wait until caching pos */
+    char *re_state_reg_poscache;	/* cache of pos of WHILEM */
+    STRLEN re_state_reg_poscache_size;	/* size of pos cache of WHILEM */
+    I32 re_state_regsize;		/* from regexec.c */
+    char *re_state_reg_starttry;	/* from regexec.c */
+#ifdef PERL_OLD_COPY_ON_WRITE
+    SV *re_state_nrs;
+#endif
+};
+
+#define SAVESTACK_ALLOC_FOR_RE_SAVE_STATE \
+	(1 + ((sizeof(struct re_save_state) - 1) / sizeof(*PL_savestack)))
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */

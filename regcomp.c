@@ -6167,50 +6167,65 @@ void
 Perl_save_re_context(pTHX)
 {
     dVAR;
-    SAVEI32(PL_reg_flags);		/* from regexec.c */
-    SAVEPPTR(PL_bostr);
-    SAVEPPTR(PL_reginput);		/* String-input pointer. */
-    SAVEPPTR(PL_regbol);		/* Beginning of input, for ^ check. */
-    SAVEPPTR(PL_regeol);		/* End of input, for $ check. */
-    SAVEVPTR(PL_regstartp);		/* Pointer to startp array. */
-    SAVEVPTR(PL_regendp);		/* Ditto for endp. */
-    SAVEVPTR(PL_reglastparen);		/* Similarly for lastparen. */
-    SAVEVPTR(PL_reglastcloseparen);	/* Similarly for lastcloseparen. */
-    SAVEPPTR(PL_regtill);		/* How far we are required to go. */
-    SAVEGENERICPV(PL_reg_start_tmp);		/* from regexec.c */
-    PL_reg_start_tmp = 0;
-    SAVEI32(PL_reg_start_tmpl);		/* from regexec.c */
-    PL_reg_start_tmpl = 0;
-    SAVEI32(PL_reg_eval_set);		/* from regexec.c */
-    SAVEI32(PL_regnarrate);		/* from regexec.c */
-    SAVEINT(PL_regindent);		/* from regexec.c */
+
+    struct re_save_state *state;
+
     SAVEVPTR(PL_curcop);
-    SAVEVPTR(PL_reg_call_cc);		/* from regexec.c */
-    SAVEVPTR(PL_reg_re);		/* from regexec.c */
-    SAVEPPTR(PL_reg_ganch);		/* from regexec.c */
-    SAVESPTR(PL_reg_sv);		/* from regexec.c */
-    SAVEBOOL(PL_reg_match_utf8);	/* from regexec.c */
-    SAVEVPTR(PL_reg_magic);		/* from regexec.c */
-    SAVEI32(PL_reg_oldpos);			/* from regexec.c */
-    SAVEVPTR(PL_reg_oldcurpm);		/* from regexec.c */
-    SAVEVPTR(PL_reg_curpm);		/* from regexec.c */
-    SAVEPPTR(PL_reg_oldsaved);		/* old saved substr during match */
-    PL_reg_oldsaved = NULL;
-    SAVEI32(PL_reg_oldsavedlen);	/* old length of saved substr during match */
-    PL_reg_oldsavedlen = 0;
+    SSGROW(SAVESTACK_ALLOC_FOR_RE_SAVE_STATE + 1);
+
+    state = (struct re_save_state *)(PL_savestack + PL_savestack_ix);
+    PL_savestack_ix += SAVESTACK_ALLOC_FOR_RE_SAVE_STATE;
+    SSPUSHINT(SAVEt_RE_STATE);
+
+    state->re_state_reg_flags = PL_reg_flags;
+    state->re_state_bostr = PL_bostr;
+    state->re_state_reginput = PL_reginput;
+    state->re_state_regbol = PL_regbol;
+    state->re_state_regeol = PL_regeol;
+    state->re_state_regstartp = PL_regstartp;
+    state->re_state_regendp = PL_regendp;
+    state->re_state_reglastparen = PL_reglastparen;
+    state->re_state_reglastcloseparen = PL_reglastcloseparen;
+    state->re_state_regtill = PL_regtill;
+    state->re_state_reg_start_tmp = PL_reg_start_tmp;
+    state->re_state_reg_start_tmpl = PL_reg_start_tmpl;
+    state->re_state_reg_eval_set = PL_reg_eval_set;
+    state->re_state_regnarrate = PL_regnarrate;
+    state->re_state_regindent = PL_regindent;
+    state->re_state_reg_call_cc = PL_reg_call_cc;
+    state->re_state_reg_re = PL_reg_re;
+    state->re_state_reg_ganch = PL_reg_ganch;
+    state->re_state_reg_sv = PL_reg_sv;
+    state->re_state_reg_match_utf8 = PL_reg_match_utf8;
+    state->re_state_reg_magic = PL_reg_magic;
+    state->re_state_reg_oldpos = PL_reg_oldpos;
+    state->re_state_reg_oldcurpm = PL_reg_oldcurpm;
+    state->re_state_reg_curpm = PL_reg_curpm;
+    state->re_state_reg_oldsaved = PL_reg_oldsaved;
+    state->re_state_reg_oldsavedlen = PL_reg_oldsavedlen;
+    state->re_state_reg_maxiter = PL_reg_maxiter;
+    state->re_state_reg_leftiter = PL_reg_leftiter;
+    state->re_state_reg_poscache = PL_reg_poscache;
+    state->re_state_reg_poscache_size = PL_reg_poscache_size;
+    state->re_state_regsize = PL_regsize;
+#ifdef DEBUGGING
+    state->re_state_reg_starttry = PL_reg_starttry;
+#endif
 #ifdef PERL_OLD_COPY_ON_WRITE
-    SAVESPTR(PL_nrs);
+    state->re_state_nrs = PL_nrs;
+#endif
+
+    PL_reg_start_tmp = 0;
+    PL_reg_start_tmpl = 0;
+    PL_reg_oldsaved = NULL;
+    PL_reg_oldsavedlen = 0;
+    PL_reg_maxiter = 0;
+    PL_reg_leftiter = 0;
+    PL_reg_poscache = NULL;
+    PL_reg_poscache_size = 0;
+#ifdef PERL_OLD_COPY_ON_WRITE
     PL_nrs = NULL;
 #endif
-    SAVEI32(PL_reg_maxiter);		/* max wait until caching pos */
-    PL_reg_maxiter = 0;
-    SAVEI32(PL_reg_leftiter);		/* wait until caching pos */
-    PL_reg_leftiter = 0;
-    SAVEGENERICPV(PL_reg_poscache);	/* cache of pos of WHILEM */
-    PL_reg_poscache = NULL;
-    SAVEI32(PL_reg_poscache_size);	/* size of pos cache of WHILEM */
-    PL_reg_poscache_size = 0;
-    SAVEI32(PL_regsize);		/* from regexec.c */
 
     /* Save $1..$n (#18107: UTF-8 s/(\w+)/uc($1)/e); AMS 20021106. */
     if (PL_curpm) {
