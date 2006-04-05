@@ -830,8 +830,6 @@ END_EXTERN_C
 #define PL_regbol		(*Perl_Tregbol_ptr(aTHX))
 #undef  PL_regcompp
 #define PL_regcompp		(*Perl_Tregcompp_ptr(aTHX))
-#undef  PL_regdata
-#define PL_regdata		(*Perl_Tregdata_ptr(aTHX))
 #undef  PL_regdummy
 #define PL_regdummy		(*Perl_Tregdummy_ptr(aTHX))
 #undef  PL_regendp
@@ -862,12 +860,6 @@ END_EXTERN_C
 #define PL_regmatch_state	(*Perl_Tregmatch_state_ptr(aTHX))
 #undef  PL_regnarrate
 #define PL_regnarrate		(*Perl_Tregnarrate_ptr(aTHX))
-#undef  PL_regnpar
-#define PL_regnpar		(*Perl_Tregnpar_ptr(aTHX))
-#undef  PL_regprecomp
-#define PL_regprecomp		(*Perl_Tregprecomp_ptr(aTHX))
-#undef  PL_regprogram
-#define PL_regprogram		(*Perl_Tregprogram_ptr(aTHX))
 #undef  PL_regsize
 #define PL_regsize		(*Perl_Tregsize_ptr(aTHX))
 #undef  PL_regstartp

@@ -1293,7 +1293,7 @@ Es	|void	|regtail	|NN struct RExC_state_t *state|NN regnode *p|NN regnode *val
 EsRn	|char*	|regwhite	|NN char *p|NN const char *e
 Es	|char*	|nextchar	|NN struct RExC_state_t *state
 #  ifdef DEBUGGING
-Es	|regnode*|dumpuntil	|NN regnode *start|NN regnode *node \
+Es	|regnode*|dumpuntil	|NN regexp *r|NN regnode *start|NN regnode *node \
 				|NULLOK regnode *last|NN SV* sv|I32 l
 Es	|void	|put_byte	|NN SV* sv|int c
 #  endif
@@ -1320,14 +1320,13 @@ Es	|I32	|make_trie	|NN struct RExC_state_t* state|NN regnode *startbranch \
 #endif
 
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
-ERs	|I32	|regmatch	|NN regnode *prog
+ERs	|I32	|regmatch	|NN regexp *rex|NN regnode *prog
 ERs	|I32	|regrepeat	|NN const regnode *p|I32 max
 ERs	|I32	|regtry		|NN regexp *prog|NN char *startpos
 ERs	|bool	|reginclass	|NN const regnode *n|NN const U8 *p|NULLOK STRLEN *lenp\
 				|bool do_utf8sv_is_utf8
 Es	|CHECKPOINT|regcppush	|I32 parenfloor
-Es	|char*|regcppop
-Es	|void	|cache_re	|NN regexp *prog
+Es	|char*	|regcppop	|NN regexp *rex
 ERsn	|U8*	|reghop3	|NN U8 *pos|I32 off|NN U8 *lim
 ERsn	|U8*	|reghopmaybe3	|NN U8 *pos|I32 off|NN U8 *lim
 ERs	|char*	|find_byclass	|NN regexp * prog|NN regnode *c|NN char *s|NN const char *strend|I32 norun

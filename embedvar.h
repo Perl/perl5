@@ -105,7 +105,6 @@
 #define PL_reg_sv		(vTHX->Treg_sv)
 #define PL_regbol		(vTHX->Tregbol)
 #define PL_regcompp		(vTHX->Tregcompp)
-#define PL_regdata		(vTHX->Tregdata)
 #define PL_regdummy		(vTHX->Tregdummy)
 #define PL_regendp		(vTHX->Tregendp)
 #define PL_regeol		(vTHX->Tregeol)
@@ -121,9 +120,6 @@
 #define PL_regmatch_slab	(vTHX->Tregmatch_slab)
 #define PL_regmatch_state	(vTHX->Tregmatch_state)
 #define PL_regnarrate		(vTHX->Tregnarrate)
-#define PL_regnpar		(vTHX->Tregnpar)
-#define PL_regprecomp		(vTHX->Tregprecomp)
-#define PL_regprogram		(vTHX->Tregprogram)
 #define PL_regsize		(vTHX->Tregsize)
 #define PL_regstartp		(vTHX->Tregstartp)
 #define PL_regtill		(vTHX->Tregtill)
@@ -814,7 +810,6 @@
 #define PL_Treg_sv		PL_reg_sv
 #define PL_Tregbol		PL_regbol
 #define PL_Tregcompp		PL_regcompp
-#define PL_Tregdata		PL_regdata
 #define PL_Tregdummy		PL_regdummy
 #define PL_Tregendp		PL_regendp
 #define PL_Tregeol		PL_regeol
@@ -830,9 +825,6 @@
 #define PL_Tregmatch_slab	PL_regmatch_slab
 #define PL_Tregmatch_state	PL_regmatch_state
 #define PL_Tregnarrate		PL_regnarrate
-#define PL_Tregnpar		PL_regnpar
-#define PL_Tregprecomp		PL_regprecomp
-#define PL_Tregprogram		PL_regprogram
 #define PL_Tregsize		PL_regsize
 #define PL_Tregstartp		PL_regstartp
 #define PL_Tregtill		PL_regtill

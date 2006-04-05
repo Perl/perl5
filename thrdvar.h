@@ -160,8 +160,6 @@ PERLVARI(Tmaxscream,	I32,	-1)
 PERLVAR(Tlastscream,	SV *)
 
 PERLVAR(Tregdummy,	regnode)	/* from regcomp.c */
-PERLVAR(Tregprecomp,	char *)		/* uncompiled string. */
-PERLVAR(Tregnpar,	I32)		/* () count. */
 PERLVAR(Tregsize,	I32)		/* Code size. */
 PERLVAR(Tcolorset,	int)		/* from regcomp.c */
 PERLVARA(Tcolors,6,	char *)		/* from regcomp.c */
@@ -175,13 +173,11 @@ PERLVAR(Treglastcloseparen, U32 *)	/* Similarly for lastcloseparen. */
 PERLVAR(Tregtill,	char *)		/* How far we are required to go. */
 PERLVAR(Treg_start_tmp,	char **)	/* from regexec.c */
 PERLVAR(Treg_start_tmpl,U32)		/* from regexec.c */
-PERLVAR(Tregdata,	struct reg_data *)
 					/* from regexec.c renamed was data */
 PERLVAR(Tbostr,		char *)		/* from regexec.c */
 PERLVAR(Treg_flags,	U32)		/* from regexec.c */
 PERLVAR(Treg_eval_set,	I32)		/* from regexec.c */
 PERLVAR(Tregnarrate,	I32)		/* from regexec.c */
-PERLVAR(Tregprogram,	regnode *)	/* from regexec.c */
 PERLVARI(Tregindent,	int,	    0)	/* from regexec.c */
 PERLVAR(Treg_call_cc,	struct re_cc_state *)	/* from regexec.c */
 PERLVAR(Treg_re,	regexp *)	/* from regexec.c */

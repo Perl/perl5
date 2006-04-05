@@ -3548,10 +3548,11 @@ STATIC char*	S_nextchar(pTHX_ struct RExC_state_t *state)
 			__attribute__nonnull__(pTHX_1);
 
 #  ifdef DEBUGGING
-STATIC regnode*	S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
+STATIC regnode*	S_dumpuntil(pTHX_ regexp *r, regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_4);
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_5);
 
 STATIC void	S_put_byte(pTHX_ SV* sv, int c)
 			__attribute__nonnull__(pTHX_1);
@@ -3619,9 +3620,10 @@ STATIC I32	S_make_trie(pTHX_ struct RExC_state_t* state, regnode *startbranch, r
 #endif
 
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
-STATIC I32	S_regmatch(pTHX_ regnode *prog)
+STATIC I32	S_regmatch(pTHX_ regexp *rex, regnode *prog)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 
 STATIC I32	S_regrepeat(pTHX_ const regnode *p, I32 max)
 			__attribute__warn_unused_result__
@@ -3638,8 +3640,7 @@ STATIC bool	S_reginclass(pTHX_ const regnode *n, const U8 *p, STRLEN *lenp, bool
 			__attribute__nonnull__(pTHX_2);
 
 STATIC CHECKPOINT	S_regcppush(pTHX_ I32 parenfloor);
-STATIC char*	S_regcppop(pTHX);
-STATIC void	S_cache_re(pTHX_ regexp *prog)
+STATIC char*	S_regcppop(pTHX_ regexp *rex)
 			__attribute__nonnull__(pTHX_1);
 
 STATIC U8*	S_reghop3(U8 *pos, I32 off, U8 *lim)

@@ -11432,8 +11432,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_watchok		= NULL;
 
     PL_regdummy		= proto_perl->Tregdummy;
-    PL_regprecomp	= NULL;
-    PL_regnpar		= 0;
     PL_regsize		= 0;
     PL_colorset		= 0;		/* reinits PL_colors[] */
     /*PL_colors[6]	= {0,0,0,0,0,0};*/
@@ -11447,12 +11445,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_regtill		= NULL;
     PL_reg_start_tmp	= (char**)NULL;
     PL_reg_start_tmpl	= 0;
-    PL_regdata		= (struct reg_data*)NULL;
     PL_bostr		= NULL;
     PL_reg_flags	= 0;
     PL_reg_eval_set	= 0;
     PL_regnarrate	= 0;
-    PL_regprogram	= (regnode*)NULL;
     PL_regindent	= 0;
     PL_reg_call_cc	= (struct re_cc_state*)NULL;
     PL_reg_re		= (regexp*)NULL;

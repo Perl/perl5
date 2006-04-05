@@ -1344,7 +1344,6 @@
 #define reginclass		S_reginclass
 #define regcppush		S_regcppush
 #define regcppop		S_regcppop
-#define cache_re		S_cache_re
 #define reghop3			S_reghop3
 #define reghopmaybe3		S_reghopmaybe3
 #define find_byclass		S_find_byclass
@@ -3471,7 +3470,7 @@
 #endif
 #  ifdef DEBUGGING
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define dumpuntil(a,b,c,d,e)	S_dumpuntil(aTHX_ a,b,c,d,e)
+#define dumpuntil(a,b,c,d,e,f)	S_dumpuntil(aTHX_ a,b,c,d,e,f)
 #define put_byte(a,b)		S_put_byte(aTHX_ a,b)
 #endif
 #  endif
@@ -3498,13 +3497,12 @@
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define regmatch(a)		S_regmatch(aTHX_ a)
+#define regmatch(a,b)		S_regmatch(aTHX_ a,b)
 #define regrepeat(a,b)		S_regrepeat(aTHX_ a,b)
 #define regtry(a,b)		S_regtry(aTHX_ a,b)
 #define reginclass(a,b,c,d)	S_reginclass(aTHX_ a,b,c,d)
 #define regcppush(a)		S_regcppush(aTHX_ a)
-#define regcppop()		S_regcppop(aTHX)
-#define cache_re(a)		S_cache_re(aTHX_ a)
+#define regcppop(a)		S_regcppop(aTHX_ a)
 #define reghop3			S_reghop3
 #define reghopmaybe3		S_reghopmaybe3
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)

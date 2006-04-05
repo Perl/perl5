@@ -3107,7 +3107,6 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 		       struct regnode_charclass_class);
 	    r->regstclass = (regnode*)RExC_rx->data->data[n];
 	    r->reganch &= ~ROPT_SKIP;	/* Used in find_byclass(). */
-	    PL_regdata = r->data; /* for regprop() */
 	    DEBUG_COMPILE_r({ SV *sv = sv_newmortal();
 	              regprop(sv, (regnode*)data.start_class);
 		      PerlIO_printf(Perl_debug_log,
@@ -3182,7 +3181,6 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	r->reganch |= ROPT_CANY_SEEN;
     Newxz(r->startp, RExC_npar, I32);
     Newxz(r->endp, RExC_npar, I32);
-    PL_regdata = r->data; /* for regprop() */
     DEBUG_COMPILE_r(regdump(r));
     return(r);
 }
@@ -5672,7 +5670,7 @@ Perl_regdump(pTHX_ regexp *r)
     dVAR;
     SV * const sv = sv_newmortal();
 
-    (void)dumpuntil(r->program, r->program + 1, NULL, sv, 0);
+    (void)dumpuntil(r, r->program, r->program + 1, NULL, sv, 0);
 
     /* Header fields of interest. */
     if (r->anchored_substr)
@@ -5805,17 +5803,8 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
 		       PL_colors[1]);
     } else if (k == TRIE) {
 	/*EMPTY*/;
-	/*
-	this isn't always safe, as Pl_regdata may not be for this regex yet
-	(depending on where its called from) so its being moved to dumpuntil
-	I32 n = ARG(o);
-	reg_trie_data *trie=(reg_trie_data*)PL_regdata->data[n];
-	Perl_sv_catpvf(aTHX_ sv, " (W:%d L:%d C:%d S:%d)",
-		       trie->wordcount,
-		       trie->charcount,
-		       trie->uniquecharcount,
-		       trie->laststate);
-	*/
+	/* print the details od the trie in dumpuntil instead, as
+	 * prog->data isn't available here */
     } else if (k == CURLY) {
 	if (OP(o) == CURLYM || OP(o) == CURLYN || OP(o) == CURLYX)
 	    Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags); /* Parenth number */
@@ -6192,10 +6181,8 @@ Perl_save_re_context(pTHX)
     PL_reg_start_tmp = 0;
     SAVEI32(PL_reg_start_tmpl);		/* from regexec.c */
     PL_reg_start_tmpl = 0;
-    SAVEVPTR(PL_regdata);
     SAVEI32(PL_reg_eval_set);		/* from regexec.c */
     SAVEI32(PL_regnarrate);		/* from regexec.c */
-    SAVEVPTR(PL_regprogram);		/* from regexec.c */
     SAVEINT(PL_regindent);		/* from regexec.c */
     SAVEVPTR(PL_curcop);
     SAVEVPTR(PL_reg_call_cc);		/* from regexec.c */
@@ -6223,8 +6210,6 @@ Perl_save_re_context(pTHX)
     PL_reg_poscache = NULL;
     SAVEI32(PL_reg_poscache_size);	/* size of pos cache of WHILEM */
     PL_reg_poscache_size = 0;
-    SAVEPPTR(PL_regprecomp);		/* uncompiled string. */
-    SAVEI32(PL_regnpar);		/* () count. */
     SAVEI32(PL_regsize);		/* from regexec.c */
 
     /* Save $1..$n (#18107: UTF-8 s/(\w+)/uc($1)/e); AMS 20021106. */
@@ -6274,7 +6259,8 @@ S_put_byte(pTHX_ SV *sv, int c)
 
 
 STATIC regnode *
-S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
+S_dumpuntil(pTHX_ regexp *r, regnode *start, regnode *node, regnode *last,
+    SV* sv, I32 l)
 {
     dVAR;
     register U8 op = EXACT;	/* Arbitrary non-END op. */
@@ -6306,14 +6292,14 @@ S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 				       : next);
 	    if (last && nnode > last)
 		nnode = last;
-	    node = dumpuntil(start, NEXTOPER(NEXTOPER(node)), nnode, sv, l + 1);
+	    node = dumpuntil(r, start, NEXTOPER(NEXTOPER(node)), nnode, sv, l + 1);
 	}
 	else if (PL_regkind[(U8)op] == BRANCH) {
-	    node = dumpuntil(start, NEXTOPER(node), next, sv, l + 1);
+	    node = dumpuntil(r, start, NEXTOPER(node), next, sv, l + 1);
 	}
 	else if ( PL_regkind[(U8)op]  == TRIE ) {
             const I32 n = ARG(node);
-	    const reg_trie_data * const trie = (reg_trie_data*)PL_regdata->data[n];
+	    const reg_trie_data * const trie = (reg_trie_data*)r->data->data[n];
             const I32 arry_len = av_len(trie->words)+1;
 	    I32 word_idx;
 	    PerlIO_printf(Perl_debug_log,
@@ -6350,15 +6336,15 @@ S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
 
 	}
 	else if ( op == CURLY) {   /* "next" might be very big: optimizer */
-	    node = dumpuntil(start, NEXTOPER(node) + EXTRA_STEP_2ARGS,
+	    node = dumpuntil(r, start, NEXTOPER(node) + EXTRA_STEP_2ARGS,
 			     NEXTOPER(node) + EXTRA_STEP_2ARGS + 1, sv, l + 1);
 	}
 	else if (PL_regkind[(U8)op] == CURLY && op != CURLYX) {
-	    node = dumpuntil(start, NEXTOPER(node) + EXTRA_STEP_2ARGS,
+	    node = dumpuntil(r, start, NEXTOPER(node) + EXTRA_STEP_2ARGS,
 			     next, sv, l + 1);
 	}
 	else if ( op == PLUS || op == STAR) {
-	    node = dumpuntil(start, NEXTOPER(node), NEXTOPER(node) + 1, sv, l + 1);
+	    node = dumpuntil(r, start, NEXTOPER(node), NEXTOPER(node) + 1, sv, l + 1);
 	}
 	else if (op == ANYOF) {
 	    /* arglen 1 + class block */

@@ -213,7 +213,7 @@ S_regcppush(pTHX_ I32 parenfloor)
 				(IV)(cp), (IV)PL_savestack_ix) : 0); regcpblow(cp)
 
 STATIC char *
-S_regcppop(pTHX)
+S_regcppop(pTHX_ regexp *rex)
 {
     dVAR;
     I32 i;
@@ -251,10 +251,10 @@ S_regcppop(pTHX)
 	);
     }
     DEBUG_EXECUTE_r(
-	if ((I32)(*PL_reglastparen + 1) <= PL_regnpar) {
+	if ((I32)(*PL_reglastparen + 1) <= rex->nparens) {
 	    PerlIO_printf(Perl_debug_log,
 			  "     restoring \\%"IVdf"..\\%"IVdf" to undef\n",
-			  (IV)(*PL_reglastparen + 1), (IV)PL_regnpar);
+			  (IV)(*PL_reglastparen + 1), (IV)rex->nparens);
 	}
     );
 #if 1
@@ -268,7 +268,7 @@ S_regcppop(pTHX)
      * building DynaLoader will fail:
      * "Error: '*' not in typemap in DynaLoader.xs, line 164"
      * --jhi */
-    for (paren = *PL_reglastparen + 1; (I32)paren <= PL_regnpar; paren++) {
+    for (paren = *PL_reglastparen + 1; (I32)paren <= rex->nparens; paren++) {
 	if ((I32)paren > PL_regsize)
 	    PL_regstartp[paren] = -1;
 	PL_regendp[paren] = -1;
@@ -316,18 +316,6 @@ Perl_pregexec(pTHX_ register regexp *prog, char *stringarg, register char *stren
 		      nosave ? 0 : REXEC_COPY_STR);
 }
 
-STATIC void
-S_cache_re(pTHX_ regexp *prog)
-{
-    dVAR;
-    PL_regprecomp = prog->precomp;		/* Needed for FAIL. */
-#ifdef DEBUGGING
-    PL_regprogram = prog->program;
-#endif
-    PL_regnpar = prog->nparens;
-    PL_regdata = prog->data;
-    PL_reg_re = prog;
-}
 
 /*
  * Need to implement the following flags for reg_anch:
@@ -852,7 +840,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		   : strend);
 
 	t = s;
-	cache_re(prog);
+	PL_reg_re = prog;
         s = find_byclass(prog, prog->regstclass, s, endpos, 1);
 	if (!s) {
 #ifdef DEBUGGING
@@ -1630,7 +1618,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     PERL_UNUSED_ARG(data);
     RX_MATCH_UTF8_set(prog,do_utf8);
 
-    cache_re(prog);
+    PL_reg_re = prog;
 #ifdef DEBUGGING
     PL_regnarrate = DEBUG_r_TEST;
 #endif
@@ -2026,7 +2014,7 @@ got_it:
 	    sv_setsv(oreplsv, GvSV(PL_replgv));/* So that when GvSV(replgv) is
 						  restored, the value remains
 						  the same. */
-	restore_pos(aTHX_ 0);
+	restore_pos(aTHX_ prog);
     }
 
     /* make sure $`, $&, $', and $digit will work later */
@@ -2066,7 +2054,7 @@ phooey:
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%sMatch failed%s\n",
 			  PL_colors[4], PL_colors[5]));
     if (PL_reg_eval_set)
-	restore_pos(aTHX_ 0);
+	restore_pos(aTHX_ prog);
     return 0;
 }
 
@@ -2122,7 +2110,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	    }
 	    PL_reg_magic    = mg;
 	    PL_reg_oldpos   = mg->mg_len;
-	    SAVEDESTRUCTOR_X(restore_pos, 0);
+	    SAVEDESTRUCTOR_X(restore_pos, prog);
         }
         if (!PL_reg_curpm) {
 	    Newxz(PL_reg_curpm, 1, PMOP);
@@ -2199,7 +2187,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
     }
 #endif
     REGCP_SET(lastcp);
-    if (regmatch(prog->program + 1)) {
+    if (regmatch(prog, prog->program + 1)) {
 	prog->endp[0] = PL_reginput - PL_bostr;
 	return 1;
     }
@@ -2426,7 +2414,7 @@ S_push_slab(pTHX)
  
 
 STATIC I32			/* 0 failure, 1 success */
-S_regmatch(pTHX_ regnode *prog)
+S_regmatch(pTHX_ regexp *rex, regnode *prog)
 {
     dVAR;
     register const bool do_utf8 = PL_reg_match_utf8;
@@ -2545,7 +2533,7 @@ S_regmatch(pTHX_ regnode *prog)
 			    PL_colors[1],
 			    15 - l - pref_len + 1,
 			    "",
-			    (IV)(scan - PL_regprogram), PL_regindent*2, "",
+			    (IV)(scan - rex->program), PL_regindent*2, "",
 			    SvPVX_const(prop));
 	    }
 	});
@@ -2653,7 +2641,7 @@ S_regmatch(pTHX_ regnode *prog)
 
 		/* what trie are we using right now */
 		reg_trie_data *trie
-		    = (reg_trie_data*)PL_regdata->data[ ARG( scan ) ];
+		    = (reg_trie_data*)PL_reg_re->data->data[ ARG( scan ) ];
 	    	st->u.trie.accepted = 0; /* how many accepting states we have seen */
 		result = 0;
 
@@ -3274,9 +3262,9 @@ S_regmatch(pTHX_ regnode *prog)
 		struct regexp * const oreg = PL_reg_re;
 	    
 		n = ARG(scan);
-		PL_op = (OP_4tree*)PL_regdata->data[n];
+		PL_op = (OP_4tree*)PL_reg_re->data->data[n];
 		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%"UVxf"\n", PTR2UV(PL_op)) );
-		PAD_SAVE_LOCAL(old_comppad, (PAD*)PL_regdata->data[n + 2]);
+		PAD_SAVE_LOCAL(old_comppad, (PAD*)PL_reg_re->data->data[n + 2]);
 		PL_regendp[0] = PL_reg_magic->mg_len = locinput - PL_bostr;
 
 		CALLRUNOPS(aTHX);			/* Scalar context. */
@@ -3294,7 +3282,7 @@ S_regmatch(pTHX_ regnode *prog)
 		if (!st->logical) {
 		    /* /(?{...})/ */
 		    sv_setsv(save_scalar(PL_replgv), ret);
-		    cache_re(oreg);
+		    PL_reg_re = oreg;
 		    break;
 		}
 	    }
@@ -3304,6 +3292,9 @@ S_regmatch(pTHX_ regnode *prog)
 		int toggleutf;
 
 		{
+		    /* extract RE object from returned value; compiling if
+		     * necessary */
+
 		    MAGIC *mg = NULL;
 		    SV *sv;
 		    if(SvROK(ret) && SvSMAGICAL(sv = SvRV(ret)))
@@ -3323,9 +3314,7 @@ S_regmatch(pTHX_ regnode *prog)
 			STRLEN len;
 			const char * const t = SvPV_const(ret, len);
 			PMOP pm;
-			char * const oprecomp = PL_regprecomp;
 			const I32 osize = PL_regsize;
-			const I32 onpar = PL_regnpar;
 
 			Zero(&pm, 1, PMOP);
 			if (DO_UTF8(ret)) pm.op_pmdynflags |= PMdf_DYN_UTF8;
@@ -3335,9 +3324,7 @@ S_regmatch(pTHX_ regnode *prog)
 				| SVs_GMG)))
 			    sv_magic(ret,(SV*)ReREFCNT_inc(re),
 					PERL_MAGIC_qr,0,0);
-			PL_regprecomp = oprecomp;
 			PL_regsize = osize;
-			PL_regnpar = onpar;
 		    }
 		}
 		DEBUG_EXECUTE_r(
@@ -3357,7 +3344,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    
 		st->u.eval.cp = regcppush(0);	/* Save *all* the positions. */
 		REGCP_SET(st->u.eval.lastcp);
-		cache_re(re);
+		PL_reg_re = re;
 		state.ss = PL_savestack_ix;
 		*PL_reglastparen = 0;
 		*PL_reglastcloseparen = 0;
@@ -3371,7 +3358,7 @@ S_regmatch(pTHX_ regnode *prog)
 		PL_reg_maxiter = 0;
 
 		/* XXX the only recursion left in regmatch() */
-		if (regmatch(re->program + 1)) {
+		if (regmatch(re, re->program + 1)) {
 		    /* Even though we succeeded, we need to restore
 		       global variables, since we may be wrapped inside
 		       SUSPEND, thus the match may be not finished yet. */
@@ -3380,7 +3367,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    PL_reg_call_cc = state.prev;
 		    st->cc = state.cc;
 		    PL_reg_re = state.re;
-		    cache_re(PL_reg_re);
+
 		    if (toggleutf) PL_reg_flags ^= RF_utf8;
 
 		    /* XXXX This is too dramatic a measure... */
@@ -3393,11 +3380,10 @@ S_regmatch(pTHX_ regnode *prog)
 		}
 		ReREFCNT_dec(re);
 		REGCP_UNWIND(st->u.eval.lastcp);
-		regcppop();
+		regcppop(rex);
 		PL_reg_call_cc = state.prev;
 		st->cc = state.cc;
 		PL_reg_re = state.re;
-		cache_re(PL_reg_re);
 		if (toggleutf) PL_reg_flags ^= RF_utf8;
 
 		/* XXXX This is too dramatic a measure... */
@@ -3682,7 +3668,7 @@ S_regmatch(pTHX_ regnode *prog)
 			CACHEsayYES;	/* All done. */
 		    }
 		    REGCP_UNWIND(st->u.whilem.lastcp);
-		    regcppop();
+		    regcppop(rex);
 		    if (st->cc->u.curlyx.outercc)
 			st->cc->u.curlyx.outercc->u.curlyx.cur = st->ln;
 
@@ -3715,7 +3701,7 @@ S_regmatch(pTHX_ regnode *prog)
 			CACHEsayYES;
 		    }
 		    REGCP_UNWIND(st->u.whilem.lastcp);
-		    regcppop();
+		    regcppop(rex);
 		    st->cc->u.curlyx.cur = n - 1;
 		    st->cc->u.curlyx.lastloc = st->u.whilem.lastloc;
 		    CACHEsayNO;
@@ -3735,7 +3721,7 @@ S_regmatch(pTHX_ regnode *prog)
 			CACHEsayYES;
 		    }
 		    REGCP_UNWIND(st->u.whilem.lastcp);
-		    regcppop();		/* Restore some previous $<digit>s? */
+		    regcppop(rex);	/* Restore some previous $<digit>s? */
 		    PL_reginput = locinput;
 		    DEBUG_EXECUTE_r(
 			PerlIO_printf(Perl_debug_log,
@@ -4258,14 +4244,14 @@ S_regmatch(pTHX_ regnode *prog)
 		{
 		    I32 tmp = PL_savestack_ix;
 		    PL_savestack_ix = PL_reg_call_cc->ss;
-		    regcppop();
+		    regcppop(rex);
 		    PL_savestack_ix = tmp;
 		}
 
 		/* Make position available to the callcc. */
 		PL_reginput = locinput;
 
-		cache_re(PL_reg_call_cc->re);
+		PL_reg_re = PL_reg_call_cc->re;
 		st->u.end.savecc = st->cc;
 		st->cc = PL_reg_call_cc->cc;
 		PL_reg_call_cc = PL_reg_call_cc->prev;
@@ -4277,11 +4263,10 @@ S_regmatch(pTHX_ regnode *prog)
 		    sayYES;
 		}
 		REGCP_UNWIND(st->u.end.lastcp);
-		regcppop();
+		regcppop(rex);
 		PL_reg_call_cc = st->u.end.cur_call_cc;
 		st->cc = st->u.end.savecc;
 		PL_reg_re = st->u.end.end_re;
-		cache_re(st->u.end.end_re);
 
 		DEBUG_EXECUTE_r(
 		    PerlIO_printf(Perl_debug_log,
@@ -4834,12 +4819,13 @@ Perl_regclass_swash(pTHX_ register const regnode* node, bool doinit, SV** listsv
     SV *sw  = NULL;
     SV *si  = NULL;
     SV *alt = NULL;
+    const struct reg_data *data = PL_reg_re->data;
 
-    if (PL_regdata && PL_regdata->count) {
+    if (data && data->count) {
 	const U32 n = ARG(node);
 
-	if (PL_regdata->what[n] == 's') {
-	    SV * const rv = (SV*)PL_regdata->data[n];
+	if (data->what[n] == 's') {
+	    SV * const rv = (SV*)data->data[n];
 	    AV * const av = (AV*)SvRV((SV*)rv);
 	    SV **const ary = AvARRAY(av);
 	    SV **a, **b;
@@ -5063,15 +5049,15 @@ static void
 restore_pos(pTHX_ void *arg)
 {
     dVAR;
-    PERL_UNUSED_ARG(arg);
+    regexp *rex = (regexp *)arg;
     if (PL_reg_eval_set) {
 	if (PL_reg_oldsaved) {
-	    PL_reg_re->subbeg = PL_reg_oldsaved;
-	    PL_reg_re->sublen = PL_reg_oldsavedlen;
+	    rex->subbeg = PL_reg_oldsaved;
+	    rex->sublen = PL_reg_oldsavedlen;
 #ifdef PERL_OLD_COPY_ON_WRITE
-	    PL_reg_re->saved_copy = PL_nrs;
+	    rex->saved_copy = PL_nrs;
 #endif
-	    RX_MATCH_COPIED_on(PL_reg_re);
+	    RX_MATCH_COPIED_on(rex);
 	}
 	PL_reg_magic->mg_len = PL_reg_oldpos;
 	PL_reg_eval_set = 0;
