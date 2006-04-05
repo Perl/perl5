@@ -3,7 +3,7 @@ use strict;
 require Exporter;
 
 use vars qw($VERSION @ISA @EXPORT @EXPORT_OK);
-$VERSION = 1.06;
+$VERSION = 1.07;
 @ISA = qw(Exporter);
 @EXPORT = qw(pod2html htmlify);
 @EXPORT_OK = qw(anchorify);
@@ -32,9 +32,20 @@ Converts files from pod format (see L<perlpod>) to HTML format.  It
 can automatically generate indexes and cross-references, and it keeps
 a cache of things it knows how to cross-reference.
 
-=head1 ARGUMENTS
+=head1 FUNCTIONS
 
-Pod::Html takes the following arguments:
+=head2 pod2html
+
+    pod2html("pod2html",
+             "--podpath=lib:ext:pod:vms",
+             "--podroot=/usr/src/perl",
+             "--htmlroot=/perl/nmanual",
+             "--libpods=perlfunc:perlguts:perlvar:perlrun:perlop",
+             "--recurse",
+             "--infile=foo.pod",
+             "--outfile=/perl/nmanual/foo.html");
+
+pod2html takes the following arguments:
 
 =over 4
 
@@ -187,16 +198,20 @@ Display progress messages.  By default, they won't be displayed.
 
 =back
 
-=head1 EXAMPLE
+=head2 htmlify
 
-    pod2html("pod2html",
-	     "--podpath=lib:ext:pod:vms",
-	     "--podroot=/usr/src/perl",
-	     "--htmlroot=/perl/nmanual",
-	     "--libpods=perlfunc:perlguts:perlvar:perlrun:perlop",
-	     "--recurse",
-	     "--infile=foo.pod",
-	     "--outfile=/perl/nmanual/foo.html");
+    htmlify($heading);
+
+Converts a pod section specification to a suitable section specification
+for HTML. Note that we keep spaces and special characters except 
+C<", ?> (Netscape problem) and the hyphen (writer's problem...).
+
+=head2 anchorify
+
+    anchorify(@heading);
+
+Similar to C<htmlify()>, but turns non-alphanumerics into underscores.  Note
+that C<anchorify()> is not exported by default.
 
 =head1 ENVIRONMENT
 
