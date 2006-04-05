@@ -1,6 +1,6 @@
 package B::Lint;
 
-our $VERSION = '1.05';
+our $VERSION = '1.06';
 
 =head1 NAME
 
@@ -163,7 +163,8 @@ Malcolm Beattie, mbeattie@sable.ox.ac.uk.
 use strict;
 use B qw(walkoptree_slow main_root walksymtable svref_2object parents
          class
-         OPf_WANT_LIST OPf_WANT OPf_STACKED G_ARRAY SVf_POK
+         OPpOUR_INTRO
+         OPf_WANT_VOID OPf_WANT_LIST OPf_WANT OPf_STACKED G_ARRAY SVf_POK
         );
 
 my $file = "unknown";		# shadows current filename
@@ -252,13 +253,20 @@ sub B::UNOP::lint {
 	my $parent = parents->[0];
 	my $pname = $parent->name;
 	return if gimme($op) || $implies_ok_context{$pname};
-	# Two special cases to deal with: "foreach (@foo)" and "delete $a{$b}"
+	# Three special cases to deal with: "foreach (@foo)", "delete $a{$b}", and "exists $a{$b}"
 	# null out the parent so we have to check for a parent of pp_null and
-	# a grandparent of pp_enteriter or pp_delete
+	# a grandparent of pp_enteriter, pp_delete, pp_exists
 	if ($pname eq "null") {
 	    my $gpname = parents->[1]->name;
-	    return if $gpname eq "enteriter" || $gpname eq "delete";
+	    return if $gpname eq "enteriter"
+                   or $gpname eq "delete"
+                   or $gpname eq "exists";
 	}
+	
+	# our( @bar );
+	return if $op->private & OPpOUR_INTRO
+                  and ( $op->flags & OPf_WANT ) == OPf_WANT_VOID;
+	
 	warning("Implicit scalar context for %s in %s",
 		$opname eq "rv2av" ? "array" : "hash", $parent->desc);
     }
@@ -305,7 +313,10 @@ sub B::LOOP::lint {
     if ($check{implicit_read} || $check{implicit_write}) {
 	if ($op->name eq "enteriter") {
 	    my $last = $op->last;
-	    if ($last->name eq "gv" && $last->gv->NAME eq "_") {
+	    my $body = $op->redoop;
+	    if ( $last->name eq "gv"
+		 and $last->gv->NAME eq "_"
+	         and $body->name =~ /\A(?:next|db|set)state\z/ ) {
 		warning('Implicit use of $_ in foreach');
 	    }
 	}
@@ -314,6 +325,17 @@ sub B::LOOP::lint {
     my $m;
     $m = $_->can('match'), $op->$m( \ %check ) for @plugins;
     return;
+}
+
+sub _inside_foreach_statement {
+    for my $op ( @{ parents() || [] } ) {
+	$op->name eq 'leaveloop' or next;
+	my $first = $op->first;
+	$first->name eq 'enteriter' or next;
+	$first->redoop->name !~ /\A(?:next|db|set)state\z/ or next;
+	return 1;
+    }
+    return 0;
 }
 
 sub B::SVOP::lint {
@@ -326,8 +348,14 @@ sub B::SVOP::lint {
 	    warning "Bare sub name '" . $sv->PV . "' interpreted as string";
 	}
     }
-    if ($check{dollar_underscore} && $op->name eq "gvsv"
-	&& $op->gv->NAME eq "_")
+    if ($check{dollar_underscore}
+	and $op->name eq "gvsv"
+	and $op->gv->NAME eq "_"
+	and not ( _inside_foreach_statement()
+		  or do { my $ctx = join( ' ',
+					  map $_->name,
+					  @{ parents() || [] } );
+			  $ctx =~ /(grep|map)start \1while/ } ) )
     {
 	warning('Use of $_');
     }

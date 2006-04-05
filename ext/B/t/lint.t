@@ -16,7 +16,7 @@ BEGIN {
     require 'test.pl';
 }
 
-plan tests => 18; # adjust also number of skipped tests !
+plan tests => 24; # adjust also number of skipped tests !
 
 # Runs a separate perl interpreter with the appropriate lint options
 # turned on
@@ -38,6 +38,10 @@ RESULT
 runlint 'context', '$foo = length @bar', <<'RESULT';
 Implicit scalar context for array in length at -e line 1
 RESULT
+
+runlint 'context', 'our @bar', '';
+
+runlint 'context', 'exists $BAR{BAZ}', '';
 
 runlint 'implicit-read', '/foo/', <<'RESULT';
 Implicit match on $_ at -e line 1
@@ -66,13 +70,19 @@ SKIP : {
     skip("Doesn't work with threaded perls",11)
        if $Config{useithreads} || ($] < 5.009 && $Config{use5005threads});
 
-    runlint 'implicit-read', '1 for @ARGV', <<'RESULT', 'implicit-read in foreach';
+    runlint 'implicit-read', 'for ( @ARGV ) { 1 }', <<'RESULT', 'implicit-read in foreach';
 Implicit use of $_ in foreach at -e line 1
 RESULT
+
+    runlint 'implicit-read', '1 for @ARGV', '', 'implicit-read in foreach';
 
     runlint 'dollar-underscore', '$_ = 1', <<'RESULT';
 Use of $_ at -e line 1
 RESULT
+
+    runlint 'dollar-underscore', 'foo( $_ ) for @A', '';
+    runlint 'dollar-underscore', 'map { foo( $_ ) } @A', '';
+    runlint 'dollar-underscore', 'grep { foo( $_ ) } @A', '';
 
     runlint 'dollar-underscore', 'print', <<'RESULT', 'dollar-underscore in print';
 Use of $_ at -e line 1
