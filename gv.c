@@ -575,7 +575,7 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     GV* vargv;
     SV* varsv;
     const char *packname = "";
-    STRLEN packname_len;
+    STRLEN packname_len = 0;
 
     if (len == S_autolen && strnEQ(name, S_autoload, S_autolen))
 	return NULL;
