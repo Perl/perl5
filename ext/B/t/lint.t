@@ -67,7 +67,7 @@ RESULT
 SKIP : {
 
     use Config;
-    skip("Doesn't work with threaded perls",11)
+    skip("Doesn't work with threaded perls",15)
        if $Config{useithreads} || ($] < 5.009 && $Config{use5005threads});
 
     runlint 'implicit-read', 'for ( @ARGV ) { 1 }', <<'RESULT', 'implicit-read in foreach';
