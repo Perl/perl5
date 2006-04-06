@@ -3471,6 +3471,10 @@ S_init_interp(pTHX)
 #  undef PERLVARIC
 #endif
 
+    /* As these are inside a structure, PERLVARI isn't capable of initialising
+       them  */
+    PL_regindent = 0;
+    PL_reg_oldcurpm = PL_reg_curpm = PL_reg_poscache = PL_reg_starttry = NULL;
 }
 
 STATIC void

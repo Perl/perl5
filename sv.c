@@ -11432,42 +11432,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_watchok		= NULL;
 
     PL_regdummy		= proto_perl->Tregdummy;
-    PL_regsize		= 0;
     PL_colorset		= 0;		/* reinits PL_colors[] */
     /*PL_colors[6]	= {0,0,0,0,0,0};*/
-    PL_reginput		= NULL;
-    PL_regbol		= NULL;
-    PL_regeol		= NULL;
-    PL_regstartp	= (I32*)NULL;
-    PL_regendp		= (I32*)NULL;
-    PL_reglastparen	= (U32*)NULL;
-    PL_reglastcloseparen	= (U32*)NULL;
-    PL_regtill		= NULL;
-    PL_reg_start_tmp	= (char**)NULL;
-    PL_reg_start_tmpl	= 0;
-    PL_bostr		= NULL;
-    PL_reg_flags	= 0;
-    PL_reg_eval_set	= 0;
-    PL_regnarrate	= 0;
-    PL_regindent	= 0;
-    PL_reg_call_cc	= (struct re_cc_state*)NULL;
-    PL_reg_re		= (regexp*)NULL;
-    PL_reg_ganch	= NULL;
-    PL_reg_sv		= NULL;
-    PL_reg_match_utf8	= FALSE;
-    PL_reg_magic	= (MAGIC*)NULL;
-    PL_reg_oldpos	= 0;
-    PL_reg_oldcurpm	= (PMOP*)NULL;
-    PL_reg_curpm	= (PMOP*)NULL;
-    PL_reg_oldsaved	= NULL;
-    PL_reg_oldsavedlen	= 0;
-#ifdef PERL_OLD_COPY_ON_WRITE
-    PL_nrs		= NULL;
-#endif
-    PL_reg_maxiter	= 0;
-    PL_reg_leftiter	= 0;
-    PL_reg_poscache	= NULL;
-    PL_reg_poscache_size= 0;
 
     /* RE engine - function pointers */
     PL_regcompp		= proto_perl->Tregcompp;
@@ -11475,9 +11441,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_regint_start	= proto_perl->Tregint_start;
     PL_regint_string	= proto_perl->Tregint_string;
     PL_regfree		= proto_perl->Tregfree;
-
+    Zero(&PL_reg_state, 1, struct re_save_state);
     PL_reginterp_cnt	= 0;
-    PL_reg_starttry	= 0;
     PL_regmatch_slab	= NULL;
 
     /* Pluggable optimizer */

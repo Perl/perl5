@@ -708,8 +708,6 @@ END_EXTERN_C
 #define PL_av_fetch_sv		(*Perl_Tav_fetch_sv_ptr(aTHX))
 #undef  PL_bodytarget
 #define PL_bodytarget		(*Perl_Tbodytarget_ptr(aTHX))
-#undef  PL_bostr
-#define PL_bostr		(*Perl_Tbostr_ptr(aTHX))
 #undef  PL_chopset
 #define PL_chopset		(*Perl_Tchopset_ptr(aTHX))
 #undef  PL_colors
@@ -776,8 +774,6 @@ END_EXTERN_C
 #define PL_modcount		(*Perl_Tmodcount_ptr(aTHX))
 #undef  PL_na
 #define PL_na			(*Perl_Tna_ptr(aTHX))
-#undef  PL_nrs
-#define PL_nrs			(*Perl_Tnrs_ptr(aTHX))
 #undef  PL_ofs_sv
 #define PL_ofs_sv		(*Perl_Tofs_sv_ptr(aTHX))
 #undef  PL_op
@@ -786,86 +782,26 @@ END_EXTERN_C
 #define PL_opsave		(*Perl_Topsave_ptr(aTHX))
 #undef  PL_peepp
 #define PL_peepp		(*Perl_Tpeepp_ptr(aTHX))
-#undef  PL_reg_call_cc
-#define PL_reg_call_cc		(*Perl_Treg_call_cc_ptr(aTHX))
-#undef  PL_reg_curpm
-#define PL_reg_curpm		(*Perl_Treg_curpm_ptr(aTHX))
-#undef  PL_reg_eval_set
-#define PL_reg_eval_set		(*Perl_Treg_eval_set_ptr(aTHX))
-#undef  PL_reg_flags
-#define PL_reg_flags		(*Perl_Treg_flags_ptr(aTHX))
-#undef  PL_reg_ganch
-#define PL_reg_ganch		(*Perl_Treg_ganch_ptr(aTHX))
-#undef  PL_reg_leftiter
-#define PL_reg_leftiter		(*Perl_Treg_leftiter_ptr(aTHX))
-#undef  PL_reg_magic
-#define PL_reg_magic		(*Perl_Treg_magic_ptr(aTHX))
-#undef  PL_reg_match_utf8
-#define PL_reg_match_utf8	(*Perl_Treg_match_utf8_ptr(aTHX))
-#undef  PL_reg_maxiter
-#define PL_reg_maxiter		(*Perl_Treg_maxiter_ptr(aTHX))
-#undef  PL_reg_oldcurpm
-#define PL_reg_oldcurpm		(*Perl_Treg_oldcurpm_ptr(aTHX))
-#undef  PL_reg_oldpos
-#define PL_reg_oldpos		(*Perl_Treg_oldpos_ptr(aTHX))
-#undef  PL_reg_oldsaved
-#define PL_reg_oldsaved		(*Perl_Treg_oldsaved_ptr(aTHX))
-#undef  PL_reg_oldsavedlen
-#define PL_reg_oldsavedlen	(*Perl_Treg_oldsavedlen_ptr(aTHX))
-#undef  PL_reg_poscache
-#define PL_reg_poscache		(*Perl_Treg_poscache_ptr(aTHX))
-#undef  PL_reg_poscache_size
-#define PL_reg_poscache_size	(*Perl_Treg_poscache_size_ptr(aTHX))
-#undef  PL_reg_re
-#define PL_reg_re		(*Perl_Treg_re_ptr(aTHX))
-#undef  PL_reg_start_tmp
-#define PL_reg_start_tmp	(*Perl_Treg_start_tmp_ptr(aTHX))
-#undef  PL_reg_start_tmpl
-#define PL_reg_start_tmpl	(*Perl_Treg_start_tmpl_ptr(aTHX))
-#undef  PL_reg_starttry
-#define PL_reg_starttry		(*Perl_Treg_starttry_ptr(aTHX))
-#undef  PL_reg_sv
-#define PL_reg_sv		(*Perl_Treg_sv_ptr(aTHX))
-#undef  PL_regbol
-#define PL_regbol		(*Perl_Tregbol_ptr(aTHX))
+#undef  PL_reg_state
+#define PL_reg_state		(*Perl_Treg_state_ptr(aTHX))
 #undef  PL_regcompp
 #define PL_regcompp		(*Perl_Tregcompp_ptr(aTHX))
 #undef  PL_regdummy
 #define PL_regdummy		(*Perl_Tregdummy_ptr(aTHX))
-#undef  PL_regendp
-#define PL_regendp		(*Perl_Tregendp_ptr(aTHX))
-#undef  PL_regeol
-#define PL_regeol		(*Perl_Tregeol_ptr(aTHX))
 #undef  PL_regexecp
 #define PL_regexecp		(*Perl_Tregexecp_ptr(aTHX))
 #undef  PL_regfree
 #define PL_regfree		(*Perl_Tregfree_ptr(aTHX))
-#undef  PL_regindent
-#define PL_regindent		(*Perl_Tregindent_ptr(aTHX))
-#undef  PL_reginput
-#define PL_reginput		(*Perl_Treginput_ptr(aTHX))
 #undef  PL_regint_start
 #define PL_regint_start		(*Perl_Tregint_start_ptr(aTHX))
 #undef  PL_regint_string
 #define PL_regint_string	(*Perl_Tregint_string_ptr(aTHX))
 #undef  PL_reginterp_cnt
 #define PL_reginterp_cnt	(*Perl_Treginterp_cnt_ptr(aTHX))
-#undef  PL_reglastcloseparen
-#define PL_reglastcloseparen	(*Perl_Treglastcloseparen_ptr(aTHX))
-#undef  PL_reglastparen
-#define PL_reglastparen		(*Perl_Treglastparen_ptr(aTHX))
 #undef  PL_regmatch_slab
 #define PL_regmatch_slab	(*Perl_Tregmatch_slab_ptr(aTHX))
 #undef  PL_regmatch_state
 #define PL_regmatch_state	(*Perl_Tregmatch_state_ptr(aTHX))
-#undef  PL_regnarrate
-#define PL_regnarrate		(*Perl_Tregnarrate_ptr(aTHX))
-#undef  PL_regsize
-#define PL_regsize		(*Perl_Tregsize_ptr(aTHX))
-#undef  PL_regstartp
-#define PL_regstartp		(*Perl_Tregstartp_ptr(aTHX))
-#undef  PL_regtill
-#define PL_regtill		(*Perl_Tregtill_ptr(aTHX))
 #undef  PL_restartop
 #define PL_restartop		(*Perl_Trestartop_ptr(aTHX))
 #undef  PL_rs

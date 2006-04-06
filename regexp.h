@@ -288,6 +288,40 @@ typedef struct regmatch_slab {
     struct regmatch_slab *prev, *next;
 } regmatch_slab;
 
+#define PL_reg_flags		PL_reg_state.re_state_reg_flags
+#define PL_bostr		PL_reg_state.re_state_bostr
+#define PL_reginput		PL_reg_state.re_state_reginput
+#define PL_regbol		PL_reg_state.re_state_regbol
+#define PL_regeol		PL_reg_state.re_state_regeol
+#define PL_regstartp		PL_reg_state.re_state_regstartp
+#define PL_regendp		PL_reg_state.re_state_regendp
+#define PL_reglastparen		PL_reg_state.re_state_reglastparen
+#define PL_reglastcloseparen	PL_reg_state.re_state_reglastcloseparen
+#define PL_regtill		PL_reg_state.re_state_regtill
+#define PL_reg_start_tmp	PL_reg_state.re_state_reg_start_tmp
+#define PL_reg_start_tmpl	PL_reg_state.re_state_reg_start_tmpl
+#define PL_reg_eval_set		PL_reg_state.re_state_reg_eval_set
+#define PL_regnarrate		PL_reg_state.re_state_regnarrate
+#define PL_regindent		PL_reg_state.re_state_regindent
+#define PL_reg_call_cc		PL_reg_state.re_state_reg_call_cc
+#define PL_reg_re		PL_reg_state.re_state_reg_re
+#define PL_reg_ganch		PL_reg_state.re_state_reg_ganch
+#define PL_reg_sv		PL_reg_state.re_state_reg_sv
+#define PL_reg_match_utf8	PL_reg_state.re_state_reg_match_utf8
+#define PL_reg_magic		PL_reg_state.re_state_reg_magic
+#define PL_reg_oldpos		PL_reg_state.re_state_reg_oldpos
+#define PL_reg_oldcurpm		PL_reg_state.re_state_reg_oldcurpm
+#define PL_reg_curpm		PL_reg_state.re_state_reg_curpm
+#define PL_reg_oldsaved		PL_reg_state.re_state_reg_oldsaved
+#define PL_reg_oldsavedlen	PL_reg_state.re_state_reg_oldsavedlen
+#define PL_reg_maxiter		PL_reg_state.re_state_reg_maxiter
+#define PL_reg_leftiter		PL_reg_state.re_state_reg_leftiter
+#define PL_reg_poscache		PL_reg_state.re_state_reg_poscache
+#define PL_reg_poscache_size	PL_reg_state.re_state_reg_poscache_size
+#define PL_regsize		PL_reg_state.re_state_regsize
+#define PL_reg_starttry		PL_reg_state.re_state_reg_starttry
+#define PL_nrs			PL_reg_state.re_state_nrs
+
 struct re_save_state {
     U32 re_state_reg_flags;		/* from regexec.c */
     char *re_state_bostr;
@@ -322,7 +356,7 @@ struct re_save_state {
     I32 re_state_regsize;		/* from regexec.c */
     char *re_state_reg_starttry;	/* from regexec.c */
 #ifdef PERL_OLD_COPY_ON_WRITE
-    SV *re_state_nrs;
+    SV *re_state_nrs;			/* was placeholder: unused since 5.8.0 (5.7.2 patch #12027 for bug ID 20010815.012). Used to save rx->saved_copy */
 #endif
 };
 

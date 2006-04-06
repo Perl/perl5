@@ -86,7 +86,6 @@ PERLVAR(Ttimesbuf,	struct tms)
 /* Fields used by magic variables such as $@, $/ and so on */
 PERLVAR(Ttainted,	bool)		/* using variables controlled by $< */
 PERLVAR(Tcurpm,		PMOP *)		/* what to do \ interps in REs from */
-PERLVAR(Tnrs,		SV *)		/* was placeholder: unused since 5.8.0 (5.7.2 patch #12027 for bug ID 20010815.012). Used to save rx->saved_copy */
 
 /*
 =for apidoc mn|SV*|PL_rs
@@ -159,40 +158,10 @@ PERLVAR(Tscreamnext,	I32 *)
 PERLVARI(Tmaxscream,	I32,	-1)
 PERLVAR(Tlastscream,	SV *)
 
+PERLVAR(Treg_state,	struct re_save_state)
 PERLVAR(Tregdummy,	regnode)	/* from regcomp.c */
-PERLVAR(Tregsize,	I32)		/* Code size. */
 PERLVAR(Tcolorset,	int)		/* from regcomp.c */
 PERLVARA(Tcolors,6,	char *)		/* from regcomp.c */
-PERLVAR(Treginput,	char *)		/* String-input pointer. */
-PERLVAR(Tregbol,	char *)		/* Beginning of input, for ^ check. */
-PERLVAR(Tregeol,	char *)		/* End of input, for $ check. */
-PERLVAR(Tregstartp,	I32 *)		/* Pointer to startp array. */
-PERLVAR(Tregendp,	I32 *)		/* Ditto for endp. */
-PERLVAR(Treglastparen,	U32 *)		/* Similarly for lastparen. */
-PERLVAR(Treglastcloseparen, U32 *)	/* Similarly for lastcloseparen. */
-PERLVAR(Tregtill,	char *)		/* How far we are required to go. */
-PERLVAR(Treg_start_tmp,	char **)	/* from regexec.c */
-PERLVAR(Treg_start_tmpl,U32)		/* from regexec.c */
-					/* from regexec.c renamed was data */
-PERLVAR(Tbostr,		char *)		/* from regexec.c */
-PERLVAR(Treg_flags,	U32)		/* from regexec.c */
-PERLVAR(Treg_eval_set,	I32)		/* from regexec.c */
-PERLVAR(Tregnarrate,	I32)		/* from regexec.c */
-PERLVARI(Tregindent,	int,	    0)	/* from regexec.c */
-PERLVAR(Treg_call_cc,	struct re_cc_state *)	/* from regexec.c */
-PERLVAR(Treg_re,	regexp *)	/* from regexec.c */
-PERLVAR(Treg_ganch,	char *)		/* position of \G */
-PERLVAR(Treg_sv,	SV *)		/* what we match against */
-PERLVAR(Treg_magic,	MAGIC *)	/* pos-magic of what we match */
-PERLVAR(Treg_oldpos,	I32)		/* old pos of what we match */
-PERLVARI(Treg_oldcurpm,	PMOP*, NULL)	/* curpm before match */
-PERLVARI(Treg_curpm,	PMOP*, NULL)	/* curpm during match */
-PERLVAR(Treg_oldsaved,	char*)		/* old saved substr during match */
-PERLVAR(Treg_oldsavedlen, STRLEN)	/* old length of saved substr during match */
-PERLVAR(Treg_maxiter,	I32)		/* max wait until caching pos */
-PERLVAR(Treg_leftiter,	I32)		/* wait until caching pos */
-PERLVARI(Treg_poscache, char *, NULL)	/* cache of pos of WHILEM */
-PERLVAR(Treg_poscache_size, STRLEN)	/* size of pos cache of WHILEM */
 
 PERLVARI(Tpeepp,	peep_t, MEMBER_TO_FPTR(Perl_peep))
 					/* Pointer to peephole optimizer */
@@ -208,14 +177,11 @@ PERLVARI(Tregfree,	regfree_t, MEMBER_TO_FPTR(Perl_pregfree))
 					/* Pointer to REx free()er */
 
 PERLVARI(Treginterp_cnt,int,	    0)	/* Whether "Regexp" was interpolated. */
-PERLVARI(Treg_starttry,	char *,	    0)	/* -Dr: where regtry was called. */
 PERLVARI(Twatchaddr,	char **,    0)
 PERLVAR(Twatchok,	char *)
 
 /* Note that the variables below are all explicitly referenced in the code
  * as thr->whatever and therefore don't need the 'T' prefix. */
-
-PERLVAR(Treg_match_utf8,	bool)		/* was what we matched against utf8 */
 
 /* the currently active slab in a chain of slabs of regmatch states,
  * and the currently active state within that slab */

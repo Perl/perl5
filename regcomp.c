@@ -6177,43 +6177,7 @@ Perl_save_re_context(pTHX)
     PL_savestack_ix += SAVESTACK_ALLOC_FOR_RE_SAVE_STATE;
     SSPUSHINT(SAVEt_RE_STATE);
 
-    state->re_state_reg_flags = PL_reg_flags;
-    state->re_state_bostr = PL_bostr;
-    state->re_state_reginput = PL_reginput;
-    state->re_state_regbol = PL_regbol;
-    state->re_state_regeol = PL_regeol;
-    state->re_state_regstartp = PL_regstartp;
-    state->re_state_regendp = PL_regendp;
-    state->re_state_reglastparen = PL_reglastparen;
-    state->re_state_reglastcloseparen = PL_reglastcloseparen;
-    state->re_state_regtill = PL_regtill;
-    state->re_state_reg_start_tmp = PL_reg_start_tmp;
-    state->re_state_reg_start_tmpl = PL_reg_start_tmpl;
-    state->re_state_reg_eval_set = PL_reg_eval_set;
-    state->re_state_regnarrate = PL_regnarrate;
-    state->re_state_regindent = PL_regindent;
-    state->re_state_reg_call_cc = PL_reg_call_cc;
-    state->re_state_reg_re = PL_reg_re;
-    state->re_state_reg_ganch = PL_reg_ganch;
-    state->re_state_reg_sv = PL_reg_sv;
-    state->re_state_reg_match_utf8 = PL_reg_match_utf8;
-    state->re_state_reg_magic = PL_reg_magic;
-    state->re_state_reg_oldpos = PL_reg_oldpos;
-    state->re_state_reg_oldcurpm = PL_reg_oldcurpm;
-    state->re_state_reg_curpm = PL_reg_curpm;
-    state->re_state_reg_oldsaved = PL_reg_oldsaved;
-    state->re_state_reg_oldsavedlen = PL_reg_oldsavedlen;
-    state->re_state_reg_maxiter = PL_reg_maxiter;
-    state->re_state_reg_leftiter = PL_reg_leftiter;
-    state->re_state_reg_poscache = PL_reg_poscache;
-    state->re_state_reg_poscache_size = PL_reg_poscache_size;
-    state->re_state_regsize = PL_regsize;
-#ifdef DEBUGGING
-    state->re_state_reg_starttry = PL_reg_starttry;
-#endif
-#ifdef PERL_OLD_COPY_ON_WRITE
-    state->re_state_nrs = PL_nrs;
-#endif
+    Copy(&PL_reg_state, state, 1, struct re_save_state);
 
     PL_reg_start_tmp = 0;
     PL_reg_start_tmpl = 0;
@@ -6246,10 +6210,6 @@ Perl_save_re_context(pTHX)
 	    }
 	}
     }
-
-#ifdef DEBUGGING
-    SAVEPPTR(PL_reg_starttry);		/* from regexec.c */
-#endif
 }
 
 static void
