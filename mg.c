@@ -1053,7 +1053,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
     if (!len) {
 	SV ** const valp = hv_fetch(GvHVn(PL_envgv), ptr, klen, FALSE);
 	if (valp)
-	    s = SvPV_const(*valp, len);
+	    s = SvOK(*valp) ? SvPV_const(*valp, len) : "";
     }
 #endif
 
