@@ -9,7 +9,7 @@ use File::Spec;
 use ExtUtils::CBuilder::Base;
 
 use vars qw($VERSION @ISA);
-$VERSION = '0.12';
+$VERSION = '0.12_01';
 @ISA = qw(ExtUtils::CBuilder::Base);
 
 sub new {
@@ -437,11 +437,16 @@ sub write_compiler_script {
   open( SCRIPT, ">$script" )
     or die( "Could not create script '$script': $!" );
 
+  # XXX Borland "response files" seem to be unable to accept macro
+  # definitions containing quoted strings. Escaping strings with
+  # backslash doesn't work, and any level of quotes are stripped. The
+  # result is is a floating point number in the source file where a
+  # string is expected. So we leave the macros on the command line.
   print SCRIPT join( "\n",
     map { ref $_ ? @{$_} : $_ }
     grep defined,
     delete(
-      @spec{ qw(includes cflags optimize defines perlinc) } )
+      @spec{ qw(includes cflags optimize perlinc) } )
   );
 
   close SCRIPT;
