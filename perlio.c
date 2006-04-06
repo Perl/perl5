@@ -4192,6 +4192,21 @@ typedef struct {
 				 * buffer */
 } PerlIOCrlf;
 
+/* Inherit the PERLIO_F_UTF8 flag from previous layer.
+ * Otherwise the :crlf layer would always revert back to
+ * raw mode.
+ */
+static void
+S_inherit_utf8_flag(PerlIO *f)
+{
+    PerlIO *g = PerlIONext(f);
+    if (PerlIOValid(g)) {
+	if (PerlIOBase(g)->flags & PERLIO_F_UTF8) {
+	    PerlIOBase(f)->flags |= PERLIO_F_UTF8;
+	}
+    }
+}
+
 IV
 PerlIOCrlf_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
 {
@@ -4209,17 +4224,19 @@ PerlIOCrlf_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
        * any given moment at most one CRLF-capable layer being enabled
        * in the whole layer stack. */
 	 PerlIO *g = PerlIONext(f);
-	 while (g && *g) {
+	 while (PerlIOValid(g)) {
 	      PerlIOl *b = PerlIOBase(g);
 	      if (b && b->tab == &PerlIO_crlf) {
 		   if (!(b->flags & PERLIO_F_CRLF))
 			b->flags |= PERLIO_F_CRLF;
+		   S_inherit_utf8_flag(g);
 		   PerlIO_pop(aTHX_ f);
 		   return code;
 	      }		  
 	      g = PerlIONext(g);
 	 }
     }
+    S_inherit_utf8_flag(f);
     return code;
 }
 
