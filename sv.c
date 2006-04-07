@@ -10614,7 +10614,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    TOPPTR(nss,ix) = sv_dup(sv, param);
 	    break;
 	default:
-	    Perl_croak(aTHX_ "panic: ss_dup inconsistency");
+	    Perl_croak(aTHX_ "panic: ss_dup inconsistency (%"IVdf")", (IV) i);
 	}
     }
 
