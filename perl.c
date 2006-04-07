@@ -1344,6 +1344,8 @@ perl_free(pTHXx)
 
 #if defined(__hpux) && !(defined(__ux_version) && __ux_version <= 1020) && !defined(__GNUC__)
 #pragma fini "perl_fini"
+#elif defined(__sun) && !defined(__GNUC__)
+#pragma fini (perl_fini)
 #endif
 
 static void
