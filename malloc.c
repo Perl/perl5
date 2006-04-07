@@ -409,7 +409,7 @@
 #     define pTHX		void
 #     define pTHX_
 #     ifdef HASATTRIBUTE_UNUSED
-#        define dTHX		PERL_UNUSED_DECL(extern int Perl___notused)
+#        define dTHX		extern int Perl___notused PERL_UNUSED_DECL
 #     else
 #        define dTHX            extern int Perl___notused
 #     endif

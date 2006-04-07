@@ -137,7 +137,7 @@
 #  endif
 #endif
 
-#define pVAR    PERL_UNUSED_DECL(register struct perl_vars* const my_vars)
+#define pVAR    register struct perl_vars* const my_vars PERL_UNUSED_DECL
 
 #ifdef PERL_GLOBAL_STRUCT
 #  define dVAR		pVAR    = (struct perl_vars*)PERL_GET_VARS()
@@ -150,7 +150,7 @@
 #    define MULTIPLICITY
 #  endif
 #  define tTHX	PerlInterpreter*
-#  define pTHX PERL_UNUSED_DECL(register tTHX my_perl)
+#  define pTHX  register tTHX my_perl PERL_UNUSED_DECL
 #  define aTHX	my_perl
 #  ifdef PERL_GLOBAL_STRUCT
 #    define dTHXa(a)	dVAR; pTHX = (tTHX)a
@@ -197,25 +197,31 @@
 #define CALLREG_INTUIT_STRING CALL_FPTR(PL_regint_string)
 #define CALLREGFREE CALL_FPTR(PL_regfree)
 
-/* Note that there are C compilers such as MetroWerks CodeWarrior
+/*
+ * Because of backward compatibility reasons the PERL_UNUSED_DECL
+ * cannot be changed from postfix to PERL_UNUSED_DECL(x).  Sigh.
+ *
+ * Note that there are C compilers such as MetroWerks CodeWarrior
  * which do not have an "inlined" way (like the gcc __attribute__) of
- * marking unused variables (they need e.g. a #pragma, and using e.g.
- * (void)x is considered dubious) and therefore cpp macros like
- * PERL_UNUSED_DECL(x) cannot work for this purpose. */
+ * marking unused variables (they need e.g. a #pragma) and therefore
+ * cpp macros like PERL_UNUSED_DECL cannot work for this purpose, even
+ * if it were PERL_UNUSED_DECL(x), which it cannot be (see above).
+ *
+ */
 
 #if defined(__SYMBIAN32__) && defined(__GNUC__)
 #  ifdef __cplusplus
-#    define PERL_UNUSED_DECL(x) /*@unused@*/ x
+#    define PERL_UNUSED_DECL
 #  else
-#    define PERL_UNUSED_DECL(x) /*@unused@*/ x __attribute__((unused))
+#    define PERL_UNUSED_DECL __attribute__((unused))
 #  endif
 #endif
 
 #ifndef PERL_UNUSED_DECL
 #  if defined(HASATTRIBUTE_UNUSED) && !defined(__cplusplus)
-#    define PERL_UNUSED_DECL(x) /*@unused@*/ x __attribute__unused__
+#    define PERL_UNUSED_DECL __attribute__unused__
 #  else
-#    define PERL_UNUSED_DECL(x) /*@unused@*/ x
+#    define PERL_UNUSED_DECL
 #  endif
 #endif
  
@@ -242,7 +248,7 @@
 #endif
 
 #define NOOP (void)0
-#define dNOOP PERL_UNUSED_DECL(extern int Perl___notused)
+#define dNOOP extern int Perl___notused PERL_UNUSED_DECL
 
 #ifndef pTHX
 /* Don't bother defining tTHX and sTHX; using them outside
