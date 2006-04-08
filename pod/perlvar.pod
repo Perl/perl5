@@ -374,7 +374,8 @@ will read a record of no more than 32768 bytes from FILE.  If you're
 not reading from a record-oriented file (or your OS doesn't have
 record-oriented files), then you'll likely get a full chunk of data
 with every read.  If a record is larger than the record size you've
-set, you'll get the record back in pieces.
+set, you'll get the record back in pieces.  Trying to set the record
+size to zero or less will cause reading in the (rest of the) whole file.
 
 On VMS, record reads are done with the equivalent of C<sysread>,
 so it's best not to mix record and non-record reads on the same

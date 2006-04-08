@@ -6188,7 +6188,6 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     register I32 cnt;
     I32 i = 0;
     I32 rspara = 0;
-    I32 recsize;
 
     if (SvTHINKFIRST(sv))
 	sv_force_normal_flags(sv, append ? 0 : SV_COW_DROP_PV);
@@ -6229,9 +6228,9 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     }
     else if (RsSNARF(PL_rs)) {
     	/* If it is a regular disk file use size from stat() as estimate
-	   of amount we are going to read - may result in malloc-ing
-	   more memory than we realy need if layers bellow reduce
-	   size we read (e.g. CRLF or a gzip layer)
+	   of amount we are going to read -- may result in mallocing
+	   more memory than we really need if the layers below reduce
+	   the size we read (e.g. CRLF or a gzip layer).
 	 */
 	Stat_t st;
 	if (!PerlLIO_fstat(PerlIO_fileno(fp), &st) && S_ISREG(st.st_mode))  {
@@ -6246,9 +6245,10 @@ Perl_sv_gets(pTHX_ register SV *sv, register PerlIO *fp, I32 append)
     else if (RsRECORD(PL_rs)) {
       I32 bytesread;
       char *buffer;
+      U32 recsize;
 
       /* Grab the size of the record we're getting */
-      recsize = SvIV(SvRV(PL_rs));
+      recsize = SvUV(SvRV(PL_rs)); /* RsRECORD() guarantees > 0. */
       buffer = SvGROW(sv, (STRLEN)(recsize + append + 1)) + append;
       /* Go yank in */
 #ifdef VMS
