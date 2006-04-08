@@ -3709,6 +3709,8 @@ PerlIOBuf_fill(pTHX_ PerlIO *f)
     if (!b->buf)
 	PerlIO_get_base(f);     /* allocate via vtable */
 
+    assert(b->buf);
+
     b->ptr = b->end = b->buf;
 
     if (!PerlIOValid(n)) {
