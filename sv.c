@@ -10614,6 +10614,78 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    sv = (SV*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = sv_dup(sv, param);
 	    break;
+	case SAVEt_RE_STATE:
+	    {
+		const struct re_save_state *const old_state
+		    = (struct re_save_state *)
+		    (ss + ix - SAVESTACK_ALLOC_FOR_RE_SAVE_STATE);
+		struct re_save_state *const new_state
+		    = (struct re_save_state *)
+		    (nss + ix - SAVESTACK_ALLOC_FOR_RE_SAVE_STATE);
+
+		Copy(old_state, new_state, 1, struct re_save_state);
+		ix -= SAVESTACK_ALLOC_FOR_RE_SAVE_STATE;
+
+		new_state->re_state_bostr
+		    = pv_dup(old_state->re_state_bostr);
+		new_state->re_state_reginput
+		    = pv_dup(old_state->re_state_reginput);
+		new_state->re_state_regbol
+		    = pv_dup(old_state->re_state_regbol);
+		new_state->re_state_regeol
+		    = pv_dup(old_state->re_state_regeol);
+		new_state->re_state_regstartp
+		    = any_dup(old_state->re_state_regstartp, proto_perl);
+		new_state->re_state_regendp
+		    = any_dup(old_state->re_state_regendp, proto_perl);
+		new_state->re_state_reglastparen
+		    = any_dup(old_state->re_state_reglastparen, proto_perl);
+		new_state->re_state_reglastcloseparen
+		    = any_dup(old_state->re_state_reglastcloseparen,
+			      proto_perl);
+		new_state->re_state_regtill
+		    = pv_dup(old_state->re_state_regtill);
+		/* XXX This just has to be broken. The old save_re_context
+		   code did SAVEGENERICPV(PL_reg_start_tmp);
+		   PL_reg_start_tmp is char **.
+		   Look above to what the dup code does for
+		   SAVEt_GENERIC_PVREF
+		   It can never have worked.
+		   So this is merely a faithful copy of the exiting bug:  */
+		new_state->re_state_reg_start_tmp
+		    = (char **) pv_dup((char *)
+				      old_state->re_state_reg_start_tmp);
+		/* I assume that it only ever "worked" because no-one called
+		   (pseudo)fork while the regexp engine had re-entered itself.
+		*/
+		new_state->re_state_reg_call_cc
+		    = any_dup(old_state->re_state_reg_call_cc, proto_perl);
+		new_state->re_state_reg_re
+		    = any_dup(old_state->re_state_reg_re, proto_perl);
+		new_state->re_state_reg_ganch
+		    = pv_dup(old_state->re_state_reg_ganch);
+		new_state->re_state_reg_sv
+		    = sv_dup(old_state->re_state_reg_sv, param);
+#ifdef PERL_OLD_COPY_ON_WRITE
+		new_state->re_state_nrs
+		    = sv_dup(old_state->re_state_nrs, param);
+#endif
+		new_state->re_state_reg_magic
+		    = any_dup(old_state->re_state_reg_magic, proto_perl);
+		new_state->re_state_reg_oldcurpm
+		    = any_dup(old_state->re_state_reg_oldcurpm, proto_perl);
+		new_state->re_state_reg_curpm
+		    = any_dup(old_state->re_state_reg_curpm, proto_perl);
+		new_state->re_state_reg_oldsaved
+		    = pv_dup(old_state->re_state_reg_oldsaved);
+		new_state->re_state_reg_poscache
+		    = pv_dup(old_state->re_state_reg_poscache);
+#ifdef DEBUGGING
+		new_state->re_state_reg_starttry
+		    = pv_dup(old_state->re_state_reg_starttry);
+#endif
+		break;
+	    }
 	default:
 	    Perl_croak(aTHX_ "panic: ss_dup inconsistency (%"IVdf")", (IV) i);
 	}
