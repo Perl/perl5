@@ -10382,12 +10382,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    gv = (GV*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = gv_dup_inc(gv, param);
 	    break;
-	case SAVEt_GENERIC_PVREF:		/* generic char* */
-	    c = (char*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = pv_dup(c);
-	    ptr = POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
-	    break;
 	case SAVEt_SHARED_PVREF:		/* char* in shared space */
 	    c = (char*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = savesharedpv(c);
@@ -10452,6 +10446,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
 	    break;
+	case SAVEt_GENERIC_PVREF:		/* generic char* */
 	case SAVEt_PPTR:			/* char* reference */
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);

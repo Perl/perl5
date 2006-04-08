@@ -226,8 +226,8 @@ Perl_save_generic_pvref(pTHX_ char **str)
 {
     dVAR;
     SSCHECK(3);
-    SSPUSHPTR(str);
     SSPUSHPTR(*str);
+    SSPUSHPTR(str);
     SSPUSHINT(SAVEt_GENERIC_PVREF);
 }
 
@@ -643,8 +643,8 @@ Perl_leave_scope(pTHX_ I32 base)
 		SvREFCNT_dec(av);
 	    break;
 	case SAVEt_GENERIC_PVREF:		/* generic pv */
-	    str = (char*)SSPOPPTR;
 	    ptr = SSPOPPTR;
+	    str = (char*)SSPOPPTR;
 	    if (*(char**)ptr != str) {
 		Safefree(*(char**)ptr);
 		*(char**)ptr = str;
