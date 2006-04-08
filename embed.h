@@ -1109,6 +1109,11 @@
 #define too_few_arguments	S_too_few_arguments
 #define too_many_arguments	S_too_many_arguments
 #endif
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#ifdef PERL_CORE
+#define vcall_runops		S_vcall_runops
+#endif
+#endif
 #endif
 #if defined(PL_OP_SLAB_ALLOC)
 #define Slab_Alloc		Perl_Slab_Alloc
@@ -3127,6 +3132,11 @@
 #define no_fh_allowed(a)	S_no_fh_allowed(aTHX_ a)
 #define too_few_arguments(a,b)	S_too_few_arguments(aTHX_ a,b)
 #define too_many_arguments(a,b)	S_too_many_arguments(aTHX_ a,b)
+#endif
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+#ifdef PERL_CORE
+#define vcall_runops(a)		S_vcall_runops(aTHX_ a)
+#endif
 #endif
 #endif
 #if defined(PL_OP_SLAB_ALLOC)

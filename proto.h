@@ -1624,6 +1624,9 @@ STATIC OP*	S_too_few_arguments(pTHX_ OP *o, const char* name)
 STATIC OP*	S_too_many_arguments(pTHX_ OP *o, const char* name)
 			__attribute__warn_unused_result__;
 
+#if defined(PERL_FLEXIBLE_EXCEPTIONS)
+STATIC void*	S_vcall_runops(pTHX_ va_list args);
+#endif
 #endif
 #if defined(PL_OP_SLAB_ALLOC)
 PERL_CALLCONV void*	Perl_Slab_Alloc(pTHX_ int m, size_t sz)

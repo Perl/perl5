@@ -2059,6 +2059,15 @@ Perl_jmaybe(pTHX_ OP *o)
     return o;
 }
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
+STATIC void *
+S_vcall_runops(pTHX_ va_list args)
+{
+    CALLRUNOPS(aTHX);
+    return NULL;
+}
+#endif
+
 OP *
 Perl_fold_constants(pTHX_ register OP *o)
 {
@@ -2143,11 +2152,17 @@ Perl_fold_constants(pTHX_ register OP *o)
 	    PL_in_eval = EVAL_INEVAL;
 	    sv_setpvn(ERRSV,"",0);
 	}
-    JMPENV_PUSH(ret);
 
+#ifdef PERL_FLEXIBLE_EXCEPTIONS
+    CALLPROTECT(aTHX_ pcur_env, &ret, MEMBER_TO_FPTR(S_vcall_runops));
+#else
+    JMPENV_PUSH(ret);
+#endif
     switch (ret) {
     case 0:
+#ifndef PERL_FLEXIBLE_EXCEPTIONS
 	CALLRUNOPS(aTHX);
+#endif
 	sv = *(PL_stack_sp--);
 	if (o->op_targ && sv == PAD_SV(o->op_targ))	/* grab pad temp? */
 	    pad_swipe(o->op_targ,  FALSE);
