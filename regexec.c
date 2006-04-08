@@ -4821,7 +4821,7 @@ Perl_regclass_swash(pTHX_ register const regnode* node, bool doinit, SV** listsv
     SV *sw  = NULL;
     SV *si  = NULL;
     SV *alt = NULL;
-    const struct reg_data *data = PL_reg_re->data;
+    const struct reg_data *data = PL_reg_re ? PL_reg_re->data : NULL;
 
     if (data && data->count) {
 	const U32 n = ARG(node);
