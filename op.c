@@ -2142,7 +2142,7 @@ Perl_fold_constants(pTHX_ register OP *o)
     register OP *curop;
     OP *newop;
     I32 type = o->op_type;
-    SV *sv;
+    SV *sv = NULL;
     int ret = 0;
     I32 oldscope;
     OP *old_next;
@@ -2243,6 +2243,7 @@ Perl_fold_constants(pTHX_ register OP *o)
 #ifndef PERL_MAD
     op_free(o);
 #endif
+    assert(sv);
     if (type == OP_RV2GV)
 	newop = newGVOP(OP_GV, 0, (GV*)sv);
     else

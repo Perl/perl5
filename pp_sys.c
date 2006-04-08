@@ -5194,7 +5194,6 @@ PP(pp_ggrent)
     }
 
     if (grent) {
-	SV *sv;
 	PUSHs(sv_2mortal(newSVpv(grent->gr_name, 0)));
 
 #ifdef GRPASSWD

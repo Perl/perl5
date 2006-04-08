@@ -147,17 +147,17 @@ Restore the old pad saved into the local variable opad by PAD_SAVE_LOCAL()
 	    ? AvARRAY((AV*)(AvARRAY(padlist)[1]))[po] : NULL;
     
 
-#define PAD_SET_CUR_NOSAVE(padlist,n) \
-	PL_comppad = (PAD*) (AvARRAY(padlist)[n]);		\
+#define PAD_SET_CUR_NOSAVE(padlist,nth) \
+	PL_comppad = (PAD*) (AvARRAY(padlist)[nth]);		\
 	PL_curpad = AvARRAY(PL_comppad);			\
 	DEBUG_Xv(PerlIO_printf(Perl_debug_log,			\
 	      "Pad 0x%"UVxf"[0x%"UVxf"] set_cur    depth=%d\n",	\
-	      PTR2UV(PL_comppad), PTR2UV(PL_curpad), (int)(n)));
+	      PTR2UV(PL_comppad), PTR2UV(PL_curpad), (int)(nth)));
 
 
-#define PAD_SET_CUR(padlist,n) \
+#define PAD_SET_CUR(padlist,nth) \
 	SAVECOMPPAD();						\
-	PAD_SET_CUR_NOSAVE(padlist,n);
+	PAD_SET_CUR_NOSAVE(padlist,nth);
 
 
 #define PAD_SAVE_SETNULLPAD()	SAVECOMPPAD(); \
