@@ -1374,15 +1374,13 @@ PP(pp_leavewrite)
 	    gv_efullname4(sv, fgv, NULL, FALSE);
 	    name = SvPV_nolen_const(sv);
 	    if (name && *name)
-		DIE(aTHX_ "Undefined top format \"%s\" called",name);
+		DIE(aTHX_ "Undefined top format \"%s\" called", name);
+	    else
+		DIE(aTHX_ "Undefined top format called");
 	}
-	/* why no:
-	else
-	    DIE(aTHX_ "Undefined top format called");
-	?*/
-	if (CvCLONE(cv))
+	if (cv && CvCLONE(cv))
 	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
-	return doform(cv,gv,PL_op);
+	return doform(cv, gv, PL_op);
     }
 
   forget_top:
