@@ -10428,6 +10428,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	case SAVEt_I32:				/* I32 reference */
 	case SAVEt_I16:				/* I16 reference */
 	case SAVEt_I8:				/* I8 reference */
+	case SAVEt_COP_ARYBASE:			/* call CopARYBASE_set */
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
 	    i = POPINT(ss,ix);
