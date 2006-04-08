@@ -2276,7 +2276,7 @@ PP(pp_socket)
     if (!gv || !io) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
-	if (IoIFP(io))
+	if (io && IoIFP(io))
 	    do_close(gv, FALSE);
 	SETERRNO(EBADF,LIB_INVARG);
 	RETPUSHUNDEF;
@@ -2332,9 +2332,9 @@ PP(pp_sockpair)
 	    if (!gv2 || !io2)
 		report_evil_fh(gv1, io2, PL_op->op_type);
 	}
-	if (IoIFP(io1))
+	if (io1 && IoIFP(io1))
 	    do_close(gv1, FALSE);
-	if (IoIFP(io2))
+	if (io2 && IoIFP(io2))
 	    do_close(gv2, FALSE);
 	RETPUSHUNDEF;
     }
