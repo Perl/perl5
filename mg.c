@@ -1773,11 +1773,12 @@ Perl_magic_getpos(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
     SV* const lsv = LvTARG(sv);
+    PERL_UNUSED_ARG(mg);
 
     if (SvTYPE(lsv) >= SVt_PVMG && SvMAGIC(lsv)) {
-	mg = mg_find(lsv, PERL_MAGIC_regex_global);
-	if (mg && mg->mg_len >= 0) {
-	    I32 i = mg->mg_len;
+	MAGIC * const found = mg_find(lsv, PERL_MAGIC_regex_global);
+	if (found && found->mg_len >= 0) {
+	    I32 i = found->mg_len;
 	    if (DO_UTF8(lsv))
 		sv_pos_b2u(lsv, &i);
 	    sv_setiv(sv, i + CopARYBASE_get(PL_curcop));
@@ -1796,23 +1797,26 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
     SSize_t pos;
     STRLEN len;
     STRLEN ulen = 0;
+    MAGIC *found;
 
-    mg = 0;
+    PERL_UNUSED_ARG(mg);
 
     if (SvTYPE(lsv) >= SVt_PVMG && SvMAGIC(lsv))
-	mg = mg_find(lsv, PERL_MAGIC_regex_global);
-    if (!mg) {
+	found = mg_find(lsv, PERL_MAGIC_regex_global);
+    else
+	found = NULL;
+    if (!found) {
 	if (!SvOK(sv))
 	    return 0;
 #ifdef PERL_OLD_COPY_ON_WRITE
     if (SvIsCOW(lsv))
         sv_force_normal_flags(lsv, 0);
 #endif
-	mg = sv_magicext(lsv, NULL, PERL_MAGIC_regex_global, &PL_vtbl_mglob,
+	found = sv_magicext(lsv, NULL, PERL_MAGIC_regex_global, &PL_vtbl_mglob,
 			 NULL, 0);
     }
     else if (!SvOK(sv)) {
-	mg->mg_len = -1;
+	found->mg_len = -1;
 	return 0;
     }
     len = SvPOK(lsv) ? SvCUR(lsv) : sv_len(lsv);
@@ -1839,8 +1843,8 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
 	pos = p;
     }
 
-    mg->mg_len = pos;
-    mg->mg_flags &= ~MGf_MINMATCH;
+    found->mg_len = pos;
+    found->mg_flags &= ~MGf_MINMATCH;
 
     return 0;
 }
@@ -2140,7 +2144,7 @@ Perl_magic_setutf8(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     Safefree(mg->mg_ptr);	/* The mg_ptr holds the pos cache. */
-    mg->mg_ptr = 0;
+    mg->mg_ptr = NULL;
     mg->mg_len = -1;		/* The mg_len holds the len cache. */
     return 0;
 }
