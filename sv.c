@@ -10395,8 +10395,8 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    break;
         case SAVEt_HV:				/* hash reference */
         case SAVEt_AV:				/* array reference */
-	    av = (AV*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = sv_dup_inc(av, param);
+	    sv = POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
 	    gv = (GV*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = gv_dup(gv, param);
 	    break;
