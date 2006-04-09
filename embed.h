@@ -1313,6 +1313,7 @@
 #ifdef PERL_CORE
 #define deb_curcv		S_deb_curcv
 #define debprof			S_debprof
+#define pm_description		S_pm_description
 #endif
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
@@ -3391,6 +3392,7 @@
 #ifdef PERL_CORE
 #define deb_curcv(a)		S_deb_curcv(aTHX_ a)
 #define debprof(a)		S_debprof(aTHX_ a)
+#define pm_description(a)	S_pm_description(aTHX_ a)
 #endif
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
