@@ -323,18 +323,21 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     if (!setlocale_failure) {
 #ifdef USE_LOCALE_CTYPE
+	Safefree(curctype);
 	if (! (curctype = setlocale(LC_CTYPE, "")))
 	    setlocale_failure = TRUE;
 	else
 	    curctype = savepv(curctype);
 #endif /* USE_LOCALE_CTYPE */
 #ifdef USE_LOCALE_COLLATE
+	Safefree(curcoll);
 	if (! (curcoll = setlocale(LC_COLLATE, "")))
 	    setlocale_failure = TRUE;
 	else
 	    curcoll = savepv(curcoll);
 #endif /* USE_LOCALE_COLLATE */
 #ifdef USE_LOCALE_NUMERIC
+	Safefree(curnum);
 	if (! (curnum = setlocale(LC_NUMERIC, "")))
 	    setlocale_failure = TRUE;
 	else
