@@ -3709,7 +3709,7 @@ PerlIOBuf_fill(pTHX_ PerlIO *f)
     if (!b->buf)
 	PerlIO_get_base(f);     /* allocate via vtable */
 
-    assert(b->buf);
+    assert(b->buf); /* The b->buf does get allocated via the vtable system. */
 
     b->ptr = b->end = b->buf;
 
