@@ -1293,8 +1293,9 @@ Es	|void	|regtail	|NN const struct RExC_state_t *state|NN regnode *p|NN const re
 EsRn	|char*	|regwhite	|NN char *p|NN const char *e
 Es	|char*	|nextchar	|NN struct RExC_state_t *state
 #  ifdef DEBUGGING
-Es	|regnode*|dumpuntil	|NN const regexp *r|NN regnode *start|NN regnode *node \
-				|NULLOK regnode *last|NN SV* sv|I32 l
+Es	|const regnode*|dumpuntil|NN const regexp *r|NN const regnode *start \
+				|NN const regnode *node \
+				|NULLOK const regnode *last|NN SV* sv|I32 l
 Es	|void	|put_byte	|NN SV* sv|int c
 #  endif
 Es	|void	|scan_commit	|NN const struct RExC_state_t* state|NN struct scan_data_t *data

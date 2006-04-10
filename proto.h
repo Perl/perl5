@@ -3548,7 +3548,7 @@ STATIC char*	S_nextchar(pTHX_ struct RExC_state_t *state)
 			__attribute__nonnull__(pTHX_1);
 
 #  ifdef DEBUGGING
-STATIC regnode*	S_dumpuntil(pTHX_ const regexp *r, regnode *start, regnode *node, regnode *last, SV* sv, I32 l)
+STATIC const regnode*	S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node, const regnode *last, SV* sv, I32 l)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)

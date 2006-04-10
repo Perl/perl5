@@ -6228,13 +6228,13 @@ S_put_byte(pTHX_ SV *sv, int c)
 }
 
 
-STATIC regnode *
-S_dumpuntil(pTHX_ const regexp *r, regnode *start, regnode *node, regnode *last,
-    SV* sv, I32 l)
+STATIC const regnode *
+S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
+	    const regnode *last, SV* sv, I32 l)
 {
     dVAR;
     register U8 op = EXACT;	/* Arbitrary non-END op. */
-    register regnode *next;
+    register const regnode *next;
 
     while (op != END && (!last || node < last)) {
 	/* While that wasn't END last time... */
@@ -6243,7 +6243,7 @@ S_dumpuntil(pTHX_ const regexp *r, regnode *start, regnode *node, regnode *last,
 	op = OP(node);
 	if (op == CLOSE)
 	    l--;	
-	next = regnext(node);
+	next = regnext((regnode *)node);
 	/* Where, what. */
 	if (OP(node) == OPTIMIZED)
 	    goto after_print;
@@ -6257,9 +6257,9 @@ S_dumpuntil(pTHX_ const regexp *r, regnode *start, regnode *node, regnode *last,
 	(void)PerlIO_putc(Perl_debug_log, '\n');
       after_print:
 	if (PL_regkind[(U8)op] == BRANCHJ) {
-	    register regnode *nnode = (OP(next) == LONGJMP
-				       ? regnext(next)
-				       : next);
+	    register const regnode *nnode = (OP(next) == LONGJMP
+					     ? regnext((regnode *)next)
+					     : next);
 	    if (last && nnode > last)
 		nnode = last;
 	    node = dumpuntil(r, start, NEXTOPER(NEXTOPER(node)), nnode, sv, l + 1);
