@@ -221,7 +221,26 @@ test_hv_delayfree_ent()
 	PPCODE:
 	test_freeent(&Perl_hv_delayfree_ent);
 	XSRETURN(4);
-	    
+
+SV *
+test_share_unshare_pvn(input)
+	PREINIT:
+	SV *output;
+	STRLEN len;
+	U32 hash;
+	char *pvx;
+	char *p;
+	INPUT:
+	SV *input
+	CODE:
+	pvx = SvPV(input, len);
+	PERL_HASH(hash, pvx, len);
+	p = sharepvn(pvx, len, hash);
+	RETVAL = newSVpvn(p, len);
+	unsharepvn(p, len, hash);
+	OUTPUT:
+	RETVAL
+	
 =pod
 
 sub TIEHASH  { bless {}, $_[0] }

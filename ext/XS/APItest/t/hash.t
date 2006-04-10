@@ -89,6 +89,12 @@ main_tests (\@keys, \@testkeys, ' [utf8 hash]');
     is_deeply([&XS::APItest::Hash::test_hv_delayfree_ent], [2,2,2,1],
 	      "hv_delayfree_ent keeps the value around until FREETMPS");
 }
+
+foreach my $in ("", "N", "a\0b") {
+    my $got = XS::APItest::Hash::test_share_unshare_pvn($in);
+    is ($got, $in, "test_share_unshare_pvn");
+}
+
 exit;
 
 ################################   The End   ################################
