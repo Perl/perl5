@@ -215,7 +215,6 @@ STATIC char *
 S_regcppop(pTHX)
 {
     I32 i;
-    U32 paren = 0;
     char *input;
 
     /* Pop REGCP_OTHER_ELEMS before the parentheses loop starts. */
@@ -231,7 +230,7 @@ S_regcppop(pTHX)
     for (i -= (REGCP_OTHER_ELEMS - REGCP_FRAME_ELEMS);
 	 i > 0; i -= REGCP_PAREN_ELEMS) {
 	I32 tmps;
-	paren = (U32)SSPOPINT;
+	U32 paren = (U32)SSPOPINT;
 	PL_reg_start_tmp[paren] = (char *) SSPOPPTR;
 	PL_regstartp[paren] = SSPOPINT;
 	tmps = SSPOPINT;
@@ -264,10 +263,10 @@ S_regcppop(pTHX)
      * building DynaLoader will fail:
      * "Error: '*' not in typemap in DynaLoader.xs, line 164"
      * --jhi */
-    for (paren = *PL_reglastparen + 1; (I32)paren <= PL_regnpar; paren++) {
-	if ((I32)paren > PL_regsize)
-	    PL_regstartp[paren] = -1;
-	PL_regendp[paren] = -1;
+    for (i = *PL_reglastparen + 1; i <= PL_regnpar; i++) {
+	if (i > PL_regsize)
+	    PL_regstartp[i] = -1;
+	PL_regendp[i] = -1;
     }
 #endif
     return input;
@@ -948,7 +947,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 
 /* We know what class REx starts with.  Try to find this position... */
 STATIC char *
-S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, const char *strend, I32 norun)
+S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *strend, I32 norun)
 {
 	const I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
 	char *m;
@@ -2071,7 +2070,6 @@ phooey:
 STATIC I32			/* 0 failure, 1 success */
 S_regtry(pTHX_ regexp *prog, char *startpos)
 {
-    register I32 i;
     register I32 *sp;
     register I32 *ep;
     CHECKPOINT lastcp;
@@ -2183,6 +2181,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
     sp = prog->startp;
     ep = prog->endp;
     if (prog->nparens) {
+	register I32 i;
 	for (i = prog->nparens; i > (I32)*PL_reglastparen; i--) {
 	    *++sp = -1;
 	    *++ep = -1;
@@ -4532,8 +4531,8 @@ STATIC void
 S_to_utf8_substr(pTHX_ register regexp *prog)
 {
     if (prog->float_substr && !prog->float_utf8) {
-	SV* sv;
-	prog->float_utf8 = sv = newSVsv(prog->float_substr);
+	SV* const sv = newSVsv(prog->float_substr);
+	prog->float_utf8 = sv;
 	sv_utf8_upgrade(sv);
 	if (SvTAIL(prog->float_substr))
 	    SvTAIL_on(sv);
@@ -4541,8 +4540,8 @@ S_to_utf8_substr(pTHX_ register regexp *prog)
 	    prog->check_utf8 = sv;
     }
     if (prog->anchored_substr && !prog->anchored_utf8) {
-	SV* sv;
-	prog->anchored_utf8 = sv = newSVsv(prog->anchored_substr);
+	SV* const sv = newSVsv(prog->anchored_substr);
+	prog->anchored_utf8 = sv;
 	sv_utf8_upgrade(sv);
 	if (SvTAIL(prog->anchored_substr))
 	    SvTAIL_on(sv);
@@ -4555,8 +4554,8 @@ STATIC void
 S_to_byte_substr(pTHX_ register regexp *prog)
 {
     if (prog->float_utf8 && !prog->float_substr) {
-	SV* sv;
-	prog->float_substr = sv = newSVsv(prog->float_utf8);
+	SV* sv = newSVsv(prog->float_utf8);
+	prog->float_substr = sv;
 	if (sv_utf8_downgrade(sv, TRUE)) {
 	    if (SvTAIL(prog->float_utf8))
 		SvTAIL_on(sv);
@@ -4568,8 +4567,8 @@ S_to_byte_substr(pTHX_ register regexp *prog)
 	    prog->check_substr = sv;
     }
     if (prog->anchored_utf8 && !prog->anchored_substr) {
-	SV* sv;
-	prog->anchored_substr = sv = newSVsv(prog->anchored_utf8);
+	SV* sv = newSVsv(prog->anchored_utf8);
+	prog->anchored_substr = sv;
 	if (sv_utf8_downgrade(sv, TRUE)) {
 	    if (SvTAIL(prog->anchored_utf8))
 		SvTAIL_on(sv);

@@ -1042,7 +1042,7 @@ PERL_CALLCONV void	Perl_push_return(pTHX_ OP* o);
 PERL_CALLCONV void	Perl_push_scope(pTHX);
 /* PERL_CALLCONV OP*	ref(pTHX_ OP* o, I32 type); */
 PERL_CALLCONV OP*	Perl_refkids(pTHX_ OP* o, I32 type);
-PERL_CALLCONV void	Perl_regdump(pTHX_ regexp* r);
+PERL_CALLCONV void	Perl_regdump(pTHX_ const regexp* r);
 PERL_CALLCONV SV*	Perl_regclass_swash(pTHX_ struct regnode *n, bool doinit, SV **listsvp, SV **altsvp);
 PERL_CALLCONV I32	Perl_pregexec(pTHX_ regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave);
 PERL_CALLCONV void	Perl_pregfree(pTHX_ struct regexp* r);
@@ -1812,25 +1812,25 @@ STATIC I32	S_regcurly(const char *)
 STATIC regnode*	S_reg_node(pTHX_ struct RExC_state_t *state, U8 op);
 STATIC regnode*	S_regpiece(pTHX_ struct RExC_state_t *state, I32 *flagp);
 STATIC void	S_reginsert(pTHX_ struct RExC_state_t *state, U8 op, regnode *opnd);
-STATIC void	S_regoptail(pTHX_ struct RExC_state_t *state, regnode *p, regnode *val);
-STATIC void	S_regtail(pTHX_ struct RExC_state_t *state, regnode *p, regnode *val);
+STATIC void	S_regoptail(pTHX_ const struct RExC_state_t *state, regnode *p, const regnode *val);
+STATIC void	S_regtail(pTHX_ const struct RExC_state_t *state, regnode *p, const regnode *val);
 STATIC char*	S_regwhite(char *p, const char *e)
 			__attribute__warn_unused_result__;
 
 STATIC char*	S_nextchar(pTHX_ struct RExC_state_t *state);
 #  ifdef DEBUGGING
-STATIC regnode*	S_dumpuntil(pTHX_ regnode *start, regnode *node, regnode *last, SV* sv, I32 l);
+STATIC const regnode*	S_dumpuntil(pTHX_ const regnode *start, const regnode *node, const regnode *last, SV* sv, I32 l);
 STATIC void	S_put_byte(pTHX_ SV* sv, int c);
 #  endif
-STATIC void	S_scan_commit(pTHX_ struct RExC_state_t* state, struct scan_data_t *data);
-STATIC void	S_cl_anything(struct RExC_state_t* state, struct regnode_charclass_class *cl);
+STATIC void	S_scan_commit(pTHX_ const struct RExC_state_t* state, struct scan_data_t *data);
+STATIC void	S_cl_anything(const struct RExC_state_t* state, struct regnode_charclass_class *cl);
 STATIC int	S_cl_is_anything(const struct regnode_charclass_class *cl)
 			__attribute__warn_unused_result__;
 
-STATIC void	S_cl_init(struct RExC_state_t* state, struct regnode_charclass_class *cl);
-STATIC void	S_cl_init_zero(struct RExC_state_t* state, struct regnode_charclass_class *cl);
+STATIC void	S_cl_init(const struct RExC_state_t* state, struct regnode_charclass_class *cl);
+STATIC void	S_cl_init_zero(const struct RExC_state_t* state, struct regnode_charclass_class *cl);
 STATIC void	S_cl_and(struct regnode_charclass_class *cl, const struct regnode_charclass_class *and_with);
-STATIC void	S_cl_or(struct RExC_state_t* state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with);
+STATIC void	S_cl_or(const struct RExC_state_t* state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with);
 STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t* state, regnode **scanp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags);
 STATIC I32	S_add_data(struct RExC_state_t* state, I32 n, const char *s)
 			__attribute__warn_unused_result__;
@@ -1864,7 +1864,7 @@ STATIC U8*	S_reghop3(U8 *pos, I32 off, U8 *lim)
 STATIC U8*	S_reghopmaybe3(U8 *pos, I32 off, U8 *lim)
 			__attribute__warn_unused_result__;
 
-STATIC char*	S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, const char *strend, I32 norun)
+STATIC char*	S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *strend, I32 norun)
 			__attribute__warn_unused_result__;
 
 STATIC void	S_to_utf8_substr(pTHX_ regexp * prog);
@@ -1874,9 +1874,7 @@ STATIC void	S_to_byte_substr(pTHX_ regexp * prog);
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 STATIC CV*	S_deb_curcv(pTHX_ I32 ix);
 STATIC void	S_debprof(pTHX_ const OP *o);
-STATIC SV*	S_pm_description(pTHX_ const PMOP *pm)
-			__attribute__nonnull__(pTHX_1);
-
+STATIC SV*	S_pm_description(pTHX_ const PMOP *pm);
 #endif
 
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
