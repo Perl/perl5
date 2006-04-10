@@ -2040,7 +2040,7 @@ sub depod1($;$$){
   return $res unless defined $$rstr;
   if( ! defined( $func ) ){
       # skip to next begin of an interior sequence
-      while( $$rstr =~ s/\A(.*?)([BCEFILSXZ])<(<+[^\S\n]+)?// ){
+      while( $$rstr =~ s/\A(.*?)([BCEFILSXZ])<(<+[^\S\n]+)?//s ){
          # recurse into its text
 	  $res .= $1 . depod1( $rstr, $2, closing $3);
       }
@@ -2059,7 +2059,7 @@ sub depod1($;$$){
       # all others: either recurse into new function or
       # terminate at closing angle bracket
       my $term = pattern $closing;
-      while( $$rstr =~ s/\A(.*?)(([BCEFILSXZ])<(<+[^\S\n]+)?|$term)// ){
+      while( $$rstr =~ s/\A(.*?)(([BCEFILSXZ])<(<+[^\S\n]+)?|$term)//s ){
 	  $res .= $1;
 	  last unless $3;
           $res .= depod1( $rstr, $3, closing $4 );
