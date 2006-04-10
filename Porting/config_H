@@ -1,3 +1,7 @@
+/* This file (config_H) is a sample config.h file.  If you are unable
+   to successfully run Configure, copy this file to config.h and
+   edit it to suit your system.
+*/
 /*
  * This file was produced by running the config_h.SH script, which
  * gets its values from config.sh, which is generally produced by
@@ -13,9 +17,9 @@
 /*
  * Package name      : perl5
  * Source directory  : .
- * Configuration time: Mon Jan 30 17:51:53 CET 2006
+ * Configuration time: Mon Apr 10 18:30:53 CEST 2006
  * Configured by     : yourname
- * Target system     : linux grubert.mandriva.com 2.6.12-13mdk #1 mon nov 21 18:51:12 cet 2005 i686 intel(r) pentium(r) 4 cpu 2.80ghz unknown gnulinux 
+ * Target system     : linux pc09 2.6.13-15.8-default #1 tue feb 7 11:07:24 utc 2006 i686 i686 i386 gnulinux 
  */
 
 #ifndef _config_h_
@@ -24,7 +28,7 @@
 /* LOC_SED:
  *	This symbol holds the complete pathname to the sed program.
  */
-#define LOC_SED 	"/bin/sed"	/**/
+#define LOC_SED 	"/usr/bin/sed"	/**/
 
 /* HAS_ALARM:
  *	This symbol, if defined, indicates that the alarm routine is
@@ -904,7 +908,7 @@
  *	feature tests from Configure are generally more reliable.
  */
 #define OSNAME "linux"		/**/
-#define OSVERS "2.6.12-13mdk"		/**/
+#define OSVERS "2.6.13-15.8-default"		/**/
 
 /* USE_CROSS_COMPILE:
  *	This symbol, if defined, indicates that Perl is being cross-compiled.
@@ -982,8 +986,13 @@
  *	This symbol is the filename expanded version of the BIN symbol, for
  *	programs that do not want to deal with that at run-time.
  */
+/* PERL_RELOCATABLE_INC:
+ *	This symbol, if defined, indicates that we'd like to relocate entries
+ *	in @INC at run time based on the location of the perl binary.
+ */
 #define BIN "/opt/perl/bin"	/**/
 #define BIN_EXP "/opt/perl/bin"	/**/
+#define PERL_RELOCATABLE_INC "undef" 		/**/
 
 /* INTSIZE:
  *	This symbol contains the value of sizeof(int) so that the C
@@ -1196,7 +1205,7 @@
  */
 #define HAS_CSH		/**/
 #ifdef HAS_CSH
-#define CSH "/bin/csh"	/**/
+#define CSH "/usr/bin/csh"	/**/
 #endif
 
 /* HAS_CTIME_R:
@@ -2055,7 +2064,7 @@
  *	routine is available to yield the execution of the current
  *	thread.	 sched_yield is preferable to pthread_yield.
  */
-/*#define HAS_PTHREAD_YIELD	/ **/
+#define HAS_PTHREAD_YIELD	/**/
 #define SCHED_YIELD	sched_yield()	/**/
 #define HAS_SCHED_YIELD	/**/
 
@@ -2295,7 +2304,9 @@
  *	This symbol, if defined, indicates that sitecustomize should
  *	be used.
  */
+#ifndef USE_SITECUSTOMIZE
 /*#define	USE_SITECUSTOMIZE		/ **/
+#endif
 
 /* HAS_SNPRINTF:
  *	This symbol, if defined, indicates that the snprintf () library
@@ -2784,9 +2795,9 @@
  */
 #define DB_Hash_t	u_int32_t		/**/
 #define DB_Prefix_t	size_t  	/**/
-#define DB_VERSION_MAJOR_CFG	  	/**/
-#define DB_VERSION_MINOR_CFG	  	/**/
-#define DB_VERSION_PATCH_CFG	  	/**/
+#define DB_VERSION_MAJOR_CFG	4  	/**/
+#define DB_VERSION_MINOR_CFG	3  	/**/
+#define DB_VERSION_PATCH_CFG	27  	/**/
 
 /* I_FP_CLASS:
  *	This symbol, if defined, indicates that <fp_class.h> exists and
@@ -3015,7 +3026,7 @@
  *	for a C initialization string.  See the inc_version_list entry
  *	in Porting/Glossary for more details.
  */
-#define PERL_INC_VERSION_LIST 0		/**/
+/*#define PERL_INC_VERSION_LIST 0		/ **/
 
 /* INSTALL_USR_BIN_PERL:
  *	This symbol, if defined, indicates that Perl is to be installed
@@ -3666,11 +3677,11 @@
  *	If defined, this symbol contains the name of a private library.
  *	The library is private in the sense that it needn't be in anyone's
  *	execution path, but it should be accessible by the world.
- *	It may have a ~ on the front. 
+ *	It may have a ~ on the front.
  *	The standard distribution will put nothing in this directory.
  *	Vendors who distribute perl may wish to place their own
  *	architecture-dependent modules and extensions in this directory with
- *		MakeMaker Makefile.PL INSTALLDIRS=vendor 
+ *		MakeMaker Makefile.PL INSTALLDIRS=vendor
  *	or equivalent.  See INSTALL for details.
  */
 /* PERL_VENDORARCH_EXP:
@@ -3790,7 +3801,7 @@
  *	This symbol, if defined, indicates that <ndbm.h> exists and should
  *	be included.
  */
-#define I_NDBM	/**/
+/*#define I_NDBM	/ **/
 
 /* I_STDARG:
  *	This symbol, if defined, indicates that <stdarg.h> exists and should
@@ -3835,6 +3846,16 @@
  *	available.  If copysignl is also present we can emulate modfl.
  */
 /*#define HAS_AINTL		/ **/
+
+/* HAS_BUILTIN_CHOOSE_EXPR:
+ *	Can we handle GCC builtin for compile-time ternary-like expressions
+ */
+/* HAS_BUILTIN_EXPECT:
+ *	Can we handle GCC builtin for telling that certain values are more
+ *	likely
+ */
+/*#define HAS_BUILTIN_EXPECT	/ **/
+#define HAS_BUILTIN_CHOOSE_EXPR	/**/
 
 /* HAS_CLEARENV:
  *	This symbol, if defined, indicates that the clearenv () routine is
@@ -4046,6 +4067,12 @@
  */
 #define	I_LANGINFO		/**/
 
+/* PERL_MAD:
+ *	This symbol, if defined, indicates that the Misc Attribution
+ *	Declaration code should be conditionally compiled.
+ */
+/*#define	PERL_MAD		/ **/
+
 /* USE_FAST_STDIO:
  *	This symbol, if defined, indicates that Perl should
  *	be built to use 'fast stdio'.
@@ -4054,12 +4081,6 @@
 #ifndef USE_FAST_STDIO
 /*#define	USE_FAST_STDIO		/ **/
 #endif
-
-/* PERL_RELOCATABLE_INC:
- *	This symbol, if defined, indicates that we'd like to relocate entries
- *	in @INC at run time based on the location of the perl binary.
- */
-#define PERL_RELOCATABLE_INC "undef" 		/**/
 
 /* HAS_CTERMID_R:
  *	This symbol, if defined, indicates that the ctermid_r routine
