@@ -444,7 +444,7 @@ static void clear_re(pTHX_ void *r);
    floating substrings if needed. */
 
 STATIC void
-S_scan_commit(pTHX_ RExC_state_t *pRExC_state, scan_data_t *data)
+S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data)
 {
     const STRLEN l = CHR_SVLEN(data->last_found);
     const STRLEN old_l = CHR_SVLEN(*data->longest);
@@ -476,10 +476,11 @@ S_scan_commit(pTHX_ RExC_state_t *pRExC_state, scan_data_t *data)
     SvCUR_set(data->last_found, 0);
     {
 	SV * const sv = data->last_found;
-	MAGIC * const mg =
-	    SvUTF8(sv) && SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_utf8) : NULL;
-	if (mg)
-	    mg->mg_len = 0;
+	if (SvUTF8(sv) && SvMAGICAL(sv)) {
+	    MAGIC * const mg = mg_find(sv, PERL_MAGIC_utf8);
+	    if (mg)
+		mg->mg_len = 0;
+	}
     }
     data->last_end = -1;
     data->flags &= ~SF_BEFORE_EOL;
@@ -487,7 +488,7 @@ S_scan_commit(pTHX_ RExC_state_t *pRExC_state, scan_data_t *data)
 
 /* Can match anything (initialization) */
 STATIC void
-S_cl_anything(RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
+S_cl_anything(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 {
     ANYOF_CLASS_ZERO(cl);
     ANYOF_BITMAP_SETALL(cl);
@@ -514,7 +515,7 @@ S_cl_is_anything(const struct regnode_charclass_class *cl)
 
 /* Can match anything (initialization) */
 STATIC void
-S_cl_init(RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
+S_cl_init(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 {
     Zero(cl, 1, struct regnode_charclass_class);
     cl->type = ANYOF;
@@ -522,7 +523,7 @@ S_cl_init(RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 }
 
 STATIC void
-S_cl_init_zero(RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
+S_cl_init_zero(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl)
 {
     Zero(cl, 1, struct regnode_charclass_class);
     cl->type = ANYOF;
@@ -571,7 +572,7 @@ S_cl_and(struct regnode_charclass_class *cl,
 /* 'OR' a given class with another one.  Can create false positives */
 /* We assume that cl is not inverted */
 STATIC void
-S_cl_or(RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
+S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, const struct regnode_charclass_class *or_with)
 {
     if (or_with->flags & ANYOF_INVERT) {
 	/* We do not use
@@ -4453,7 +4454,7 @@ S_regpposixcc(pTHX_ RExC_state_t *pRExC_state, I32 value)
 	/* I smell either [: or [= or [. -- POSIX has been here, right? */
 	POSIXCC(UCHARAT(RExC_parse))) {
 	const char c = UCHARAT(RExC_parse);
-	char* s = RExC_parse++;
+	char* const s = RExC_parse++;
 	
 	while (RExC_parse < RExC_end && UCHARAT(RExC_parse) != c)
 	    RExC_parse++;
@@ -4757,12 +4758,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			      n--;
 			 }
 		    }
-		    if (value == 'p')
-			 Perl_sv_catpvf(aTHX_ listsv,
-					"+utf8::%.*s\n", (int)n, RExC_parse);
-		    else
-			 Perl_sv_catpvf(aTHX_ listsv,
-					"!utf8::%.*s\n", (int)n, RExC_parse);
+		    Perl_sv_catpvf(aTHX_ listsv, "%cutf8::%.*s\n",
+			(value=='p' ? '+' : '!'), (int)n, RExC_parse);
 		}
 		RExC_parse = e + 1;
 		ANYOF_FLAGS(ret) |= ANYOF_UNICODE;
@@ -4831,14 +4828,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    if (range) {
 		if (!SIZE_ONLY) {
 		    if (ckWARN(WARN_REGEXP)) {
-			int w =
+			const int w =
 			    RExC_parse >= rangebegin ?
 			    RExC_parse - rangebegin : 0;
 			vWARN4(RExC_parse,
 			       "False [] range \"%*.*s\"",
-			       w,
-			       w,
-			       rangebegin);
+			       w, w, rangebegin);
 		    }
 		    if (prevvalue < 256) {
 			ANYOF_BITMAP_SET(ret, prevvalue);
@@ -5247,9 +5242,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 			    RExC_parse - rangebegin : 0;
 			vWARN4(RExC_parse,
 			       "False [] range \"%*.*s\"",
-			       w,
-			       w,
-			       rangebegin);
+			       w, w, rangebegin);
 		    }
 		    if (!SIZE_ONLY)
 			ANYOF_BITMAP_SET(ret, '-');
@@ -5393,7 +5386,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
     }
 
     if (!SIZE_ONLY) {
-	AV *av = newAV();
+	AV * const av = newAV();
 	SV *rv;
 
 	/* The 0th element stores the character class description
@@ -5417,7 +5410,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 STATIC char*
 S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 {
-    char* retval = RExC_parse++;
+    char* const retval = RExC_parse++;
 
     for (;;) {
 	if (*RExC_parse == '(' && RExC_parse[1] == '?' &&
@@ -5592,8 +5585,9 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd)
 /*
 - regtail - set the next-pointer at the end of a node chain of p to val.
 */
+/* TODO: All three parms should be const */
 STATIC void
-S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p, regnode *val)
+S_regtail(pTHX_ const RExC_state_t *pRExC_state, regnode *p, const regnode *val)
 {
     dVAR;
     register regnode *scan;
@@ -5621,8 +5615,9 @@ S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p, regnode *val)
 /*
 - regoptail - regtail on operand of first argument; nop if operandless
 */
+/* TODO: All three parms should be const */
 STATIC void
-S_regoptail(pTHX_ RExC_state_t *pRExC_state, regnode *p, regnode *val)
+S_regoptail(pTHX_ const RExC_state_t *pRExC_state, regnode *p, const regnode *val)
 {
     dVAR;
     /* "Operandless" and "op != BRANCH" are synonymous in practice. */
@@ -5664,7 +5659,7 @@ S_regcurly(register const char *s)
  - regdump - dump a regexp onto Perl_debug_log in vaguely comprehensible form
  */
 void
-Perl_regdump(pTHX_ regexp *r)
+Perl_regdump(pTHX_ const regexp *r)
 {
 #ifdef DEBUGGING
     dVAR;
@@ -6234,7 +6229,7 @@ S_put_byte(pTHX_ SV *sv, int c)
 
 
 STATIC regnode *
-S_dumpuntil(pTHX_ regexp *r, regnode *start, regnode *node, regnode *last,
+S_dumpuntil(pTHX_ const regexp *r, regnode *start, regnode *node, regnode *last,
     SV* sv, I32 l)
 {
     dVAR;
@@ -6288,7 +6283,7 @@ S_dumpuntil(pTHX_ regexp *r, regnode *start, regnode *node, regnode *last,
 		       node->flags ? " EVAL mode" : "");
 
 	    for (word_idx=0; word_idx < arry_len; word_idx++) {
-		SV **elem_ptr=av_fetch(trie->words,word_idx,0);
+		SV ** const elem_ptr = av_fetch(trie->words,word_idx,0);
 		if (elem_ptr) {
 		    PerlIO_printf(Perl_debug_log, "%*s<%s%s%s>\n",
 		       (int)(2*(l+4)), "",

@@ -213,11 +213,10 @@ S_regcppush(pTHX_ I32 parenfloor)
 				(IV)(cp), (IV)PL_savestack_ix) : 0); regcpblow(cp)
 
 STATIC char *
-S_regcppop(pTHX_ regexp *rex)
+S_regcppop(pTHX_ const regexp *rex)
 {
     dVAR;
     I32 i;
-    U32 paren = 0;
     char *input;
 
     GET_RE_DEBUG_FLAGS_DECL;
@@ -235,7 +234,7 @@ S_regcppop(pTHX_ regexp *rex)
     for (i -= (REGCP_OTHER_ELEMS - REGCP_FRAME_ELEMS);
 	 i > 0; i -= REGCP_PAREN_ELEMS) {
 	I32 tmps;
-	paren = (U32)SSPOPINT;
+	U32 paren = (U32)SSPOPINT;
 	PL_reg_start_tmp[paren] = (char *) SSPOPPTR;
 	PL_regstartp[paren] = SSPOPINT;
 	tmps = SSPOPINT;
@@ -268,10 +267,10 @@ S_regcppop(pTHX_ regexp *rex)
      * building DynaLoader will fail:
      * "Error: '*' not in typemap in DynaLoader.xs, line 164"
      * --jhi */
-    for (paren = *PL_reglastparen + 1; (I32)paren <= rex->nparens; paren++) {
-	if ((I32)paren > PL_regsize)
-	    PL_regstartp[paren] = -1;
-	PL_regendp[paren] = -1;
+    for (i = *PL_reglastparen + 1; i <= rex->nparens; i++) {
+	if (i > PL_regsize)
+	    PL_regstartp[i] = -1;
+	PL_regendp[i] = -1;
     }
 #endif
     return input;
@@ -934,7 +933,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 
 /* We know what class REx starts with.  Try to find this position... */
 STATIC char *
-S_find_byclass(pTHX_ regexp * prog, regnode *c, char *s, const char *strend, I32 norun)
+S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *strend, I32 norun)
 {
 	dVAR;
 	const I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
@@ -2065,7 +2064,6 @@ STATIC I32			/* 0 failure, 1 success */
 S_regtry(pTHX_ regexp *prog, char *startpos)
 {
     dVAR;
-    register I32 i;
     register I32 *sp;
     register I32 *ep;
     CHECKPOINT lastcp;
@@ -2180,6 +2178,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
     sp = prog->startp;
     ep = prog->endp;
     if (prog->nparens) {
+	register I32 i;
 	for (i = prog->nparens; i > (I32)*PL_reglastparen; i--) {
 	    *++sp = -1;
 	    *++ep = -1;
@@ -2767,7 +2766,7 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 
 		if ( st->u.trie.accepted == 1 ) {
 		    DEBUG_EXECUTE_r({
-                        SV **tmp = av_fetch( trie->words, st->u.trie.accept_buff[ 0 ].wordnum-1, 0 );
+                        SV ** const tmp = av_fetch( trie->words, st->u.trie.accept_buff[ 0 ].wordnum-1, 0 );
        	                PerlIO_printf( Perl_debug_log,
 			    "%*s  %sonly one match : #%d <%s>%s\n",
 			    REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
@@ -5051,7 +5050,7 @@ static void
 restore_pos(pTHX_ void *arg)
 {
     dVAR;
-    regexp *rex = (regexp *)arg;
+    regexp * const rex = (regexp *)arg;
     if (PL_reg_eval_set) {
 	if (PL_reg_oldsaved) {
 	    rex->subbeg = PL_reg_oldsaved;
@@ -5071,8 +5070,8 @@ STATIC void
 S_to_utf8_substr(pTHX_ register regexp *prog)
 {
     if (prog->float_substr && !prog->float_utf8) {
-	SV* sv;
-	prog->float_utf8 = sv = newSVsv(prog->float_substr);
+	SV* const sv = newSVsv(prog->float_substr);
+	prog->float_utf8 = sv;
 	sv_utf8_upgrade(sv);
 	if (SvTAIL(prog->float_substr))
 	    SvTAIL_on(sv);
@@ -5080,8 +5079,8 @@ S_to_utf8_substr(pTHX_ register regexp *prog)
 	    prog->check_utf8 = sv;
     }
     if (prog->anchored_substr && !prog->anchored_utf8) {
-	SV* sv;
-	prog->anchored_utf8 = sv = newSVsv(prog->anchored_substr);
+	SV* const sv = newSVsv(prog->anchored_substr);
+	prog->anchored_utf8 = sv;
 	sv_utf8_upgrade(sv);
 	if (SvTAIL(prog->anchored_substr))
 	    SvTAIL_on(sv);
@@ -5095,8 +5094,8 @@ S_to_byte_substr(pTHX_ register regexp *prog)
 {
     dVAR;
     if (prog->float_utf8 && !prog->float_substr) {
-	SV* sv;
-	prog->float_substr = sv = newSVsv(prog->float_utf8);
+	SV* sv = newSVsv(prog->float_utf8);
+	prog->float_substr = sv;
 	if (sv_utf8_downgrade(sv, TRUE)) {
 	    if (SvTAIL(prog->float_utf8))
 		SvTAIL_on(sv);
@@ -5108,8 +5107,8 @@ S_to_byte_substr(pTHX_ register regexp *prog)
 	    prog->check_substr = sv;
     }
     if (prog->anchored_utf8 && !prog->anchored_substr) {
-	SV* sv;
-	prog->anchored_substr = sv = newSVsv(prog->anchored_utf8);
+	SV* sv = newSVsv(prog->anchored_utf8);
+	prog->anchored_substr = sv;
 	if (sv_utf8_downgrade(sv, TRUE)) {
 	    if (SvTAIL(prog->anchored_utf8))
 		SvTAIL_on(sv);
