@@ -435,7 +435,7 @@ our(@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $VERSION);
 	      clearcache clearallcache disablecache enablecache);
 %EXPORT_TAGS=( all => [ @EXPORT, @EXPORT_OK ] ) ;
 
-$VERSION = 1.07;
+$VERSION = 1.08;
 
 # --- ':hireswallclock' special handling
 
@@ -456,6 +456,7 @@ sub import {
     my $class = shift;
     if (grep { $_ eq ":hireswallclock" } @_) {
 	@_ = grep { $_ ne ":hireswallclock" } @_;
+	local $^W=0;
 	*mytime = $hirestime if defined $hirestime;
     }
     Benchmark->export_to_level(1, $class, @_);
