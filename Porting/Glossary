@@ -3584,7 +3584,7 @@ make_set_make (make.U):
 	make_set_make="MAKE=$make"	# if it doesn't.
 
 	This uses a comment character to distinguish a
-	'set' value (from a previous config.sh or Configure -D option)
+	'set' value (from a previous config.sh or Configure '-D' option)
 	from an uncomputed value.
 
 mallocobj (mallocsrc.U):
@@ -3701,7 +3701,7 @@ myuname (Oldconfig.U):
 	whole thing is then lower-cased.
 
 n (n.U):
-	This variable contains the -n flag if that is what causes the echo
+	This variable contains the '-n' flag if that is what causes the echo
 	command to suppress newline.  Otherwise it is null.  Correct usage is
 	$echo $n "prompt for a question: $c".
 
@@ -3877,6 +3877,36 @@ perl5 (perl5.U):
 	This variable contains the full path (if any) to a previously
 	installed perl5.005 or later suitable for running the script
 	to determine inc_version_list.
+
+PERL_API_REVISION (patchlevel.h):
+	This number describes the earliest compatible PERL_REVISION of
+	Perl ("compatibility" here being defined as sufficient binary/API
+	compatibility to run XS code built with the older version).
+	Normally this does not change across maintenance releases.
+	Please read the comment in patchlevel.h.
+
+PERL_API_SUBVERSION (patchlevel.h):
+	This number describes the earliest compatible PERL_SUBVERSION of
+	Perl ("compatibility" here being defined as sufficient binary/API
+	compatibility to run XS code built with the older version).
+	Normally this does not change across maintenance releases.
+	Please read the comment in patchlevel.h.
+
+PERL_API_VERSION (patchlevel.h):
+	This number describes the earliest compatible PERL_VERSION of
+	Perl ("compatibility" here being defined as sufficient binary/API
+	compatibility to run XS code built with the older version).
+	Normally this does not change across maintenance releases.
+	Please read the comment in patchlevel.h.
+
+PERL_CONFIG_SH (Oldsyms.U):
+	This is set to 'true' in config.sh so that a shell script
+	sourcing config.sh can tell if it has been sourced already.
+
+PERL_PATCHLEVEL (Oldsyms.U):
+	This symbol reflects the patchlevel, if available. Will usually
+	come from the .patch file, which is available when the perl
+	source tree was fetched with rsync.
 
 perl_patchlevel (patchlevel.U):
 	This is the Perl patch level, a numeric change identifier,
@@ -4144,9 +4174,9 @@ sh (sh.U):
 	/bin/sh, though it's possible that some systems will have /bin/ksh,
 	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
 	D:/bin/sh.exe.
-	This unit comes before Options.U, so you can't set sh with a -D
+	This unit comes before Options.U, so you can't set sh with a '-D'
 	option, though you can override this (and startsh)
-	with -O -Dsh=/bin/whatever -Dstartsh=whatever
+	with '-O -Dsh=/bin/whatever -Dstartsh=whatever'
 
 shar (Loc.U):
 	This variable is defined but not used by Configure.
@@ -4397,7 +4427,7 @@ spackage (package.U):
 
 spitshell (spitshell.U):
 	This variable contains the command necessary to spit out a runnable
-	shell on this system.  It is either cat or a grep -v for # comments.
+	shell on this system.  It is either cat or a grep '-v' for # comments.
 
 sPRId64 (quadfio.U):
 	This variable, if defined, contains the string used by stdio to
