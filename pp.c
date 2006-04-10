@@ -4053,7 +4053,6 @@ PP(pp_splice)
     I32 newlen;
     I32 after;
     I32 diff;
-    SV **tmparyval = NULL;
     const MAGIC * const mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied);
 
     if (mg) {
@@ -4119,6 +4118,7 @@ PP(pp_splice)
     }
 
     if (diff < 0) {				/* shrinking the area */
+	SV **tmparyval;
 	if (newlen) {
 	    Newx(tmparyval, newlen, SV*);	/* so remember insertion */
 	    Copy(MARK, tmparyval, newlen, SV*);
@@ -4179,15 +4179,14 @@ PP(pp_splice)
 	}
     }
     else {					/* no, expanding (or same) */
+	SV** tmparyval = NULL;
 	if (length) {
 	    Newx(tmparyval, length, SV*);	/* so remember deletion */
 	    Copy(AvARRAY(ary)+offset, tmparyval, length, SV*);
 	}
 
 	if (diff > 0) {				/* expanding */
-
 	    /* push up or down? */
-
 	    if (offset < after && diff <= AvARRAY(ary) - AvALLOC(ary)) {
 		if (offset) {
 		    src = AvARRAY(ary);
@@ -4228,7 +4227,6 @@ PP(pp_splice)
 			dst++;
 		    }
 		}
-		Safefree(tmparyval);
 	    }
 	    MARK += length - 1;
 	}
@@ -4239,10 +4237,10 @@ PP(pp_splice)
 		while (length-- > 0)
 		    SvREFCNT_dec(tmparyval[length]);
 	    }
-	    Safefree(tmparyval);
 	}
 	else
 	    *MARK = &PL_sv_undef;
+	Safefree(tmparyval);
     }
     SP = MARK;
     RETURN;
