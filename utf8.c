@@ -283,9 +283,10 @@ Perl_is_utf8_string(pTHX_ const U8 *s, STRLEN len)
 	     c = UTF8SKIP(x);
 	     if (IS_UTF8_CHAR_FAST(c)) {
 	         if (!IS_UTF8_CHAR(x, c))
-		     goto out;
-	     } else if (!is_utf8_char_slow(x, c))
-	         goto out;
+		     c = 0;
+	     }
+	     else
+		c = is_utf8_char_slow(x, c);
 #else
 	     c = is_utf8_char(x);
 #endif /* #ifdef IS_UTF8_CHAR */
