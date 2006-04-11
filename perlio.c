@@ -2864,7 +2864,6 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 #endif
 		stdio = PerlSIO_fopen(path, mode);
 		if (stdio) {
-		    PerlIOStdio *s;
 		    if (!f) {
 			f = PerlIO_allocate(aTHX);
 		    }
@@ -2872,9 +2871,10 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		        mode = PerlIOStdio_mode(mode, tmode);
 		    f = PerlIO_push(aTHX_ f, self, mode, PerlIOArg);
 		    if (f) {
-			s = PerlIOSelf(f, PerlIOStdio);
-			s->stdio = stdio;
-			PerlIOUnix_refcnt_inc(fileno(s->stdio));
+			PerlIOSelf(f, PerlIOStdio)->stdio = stdio;
+			PerlIOUnix_refcnt_inc(fileno(stdio));
+		    } else {
+			PerlSIO_fclose(stdio);
 		    }
 		    return f;
 		}
