@@ -2577,9 +2577,19 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
     }
 
     while (chain) {
-	const U32 hash = HEK_HASH(chain->refcounted_he_hek);
+#ifdef USE_ITHREADS
+	SV *const sv = *(av_fetch(chain->refcounted_he_pad,
+				  chain->refcounted_he_hek, FALSE));
+	U32 hash = SvSHARED_HASH(sv);
+#else
+	U32 hash = HEK_HASH(chain->refcounted_he_hek);
+#endif
 	HE **oentry = &((HvARRAY(hv))[hash & max]);
 	HE *entry = *oentry;
+
+#ifdef USE_ITHREADS
+	assert(SvIsCOW_shared_hash(sv));
+#endif
 
 	for (; entry; entry = HeNEXT(entry)) {
 	    if (HeHASH(entry) == hash) {
@@ -2589,9 +2599,16 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
 	assert (!entry);
 	entry = new_HE();
 
+#ifdef USE_ITHREADS
+	HeKEY_hek(entry)
+	    = share_hek_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
+	HeVAL(entry) = *(av_fetch(chain->refcounted_he_pad,
+				  chain->refcounted_he_val, FALSE));
+#else
 	HeKEY_hek(entry) = share_hek_hek(chain->refcounted_he_hek);
-
 	HeVAL(entry) = chain->refcounted_he_val;
+#endif
+
 	if (HeVAL(entry) == &PL_sv_placeholder)
 	    placeholders++;
 	SvREFCNT_inc_void_NN(HeVAL(entry));
@@ -2648,9 +2665,21 @@ Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent,
     Newx(he, 1, struct refcounted_he);
 
     he->refcounted_he_next = parent;
+#ifdef USE_ITHREADS
+    he->refcounted_he_hek = pad_alloc(OP_CUSTOM, SVs_PADTMP);
+    SvREFCNT_dec(PAD_SVl(he->refcounted_he_hek));
+    PAD_SETSV(he->refcounted_he_hek,
+	      newSVpvn_share(p, SvUTF8(key) ? -(I32)len : len, hash));
+    he->refcounted_he_val = pad_alloc(OP_CUSTOM, SVs_PADTMP);
+    SvREFCNT_dec(PAD_SVl(he->refcounted_he_val));
+    PAD_SETSV(he->refcounted_he_val, value);
+    he->refcounted_he_pad = PL_comppad;
+    /* FIXME. This is wrong, but without it t/op/caller.t fails.  */
+    SvREFCNT_inc_simple_void_NN(he->refcounted_he_pad);
+#else
     he->refcounted_he_val = value;
-    he->refcounted_he_hek
-	= share_hek(p, SvUTF8(key) ? -(I32)len : len, hash);
+    he->refcounted_he_hek = share_hek(p, SvUTF8(key) ? -(I32)len : len, hash);
+#endif
     he->refcounted_he_refcnt = 1;
 
     return he;
@@ -2670,12 +2699,23 @@ void
 Perl_refcounted_he_free(pTHX_ struct refcounted_he *he) {
     while (he) {
 	struct refcounted_he *copy;
+	U32 new_count;
 
-	if (--he->refcounted_he_refcnt)
+	HINTS_REFCNT_LOCK;
+	new_count = --he->refcounted_he_refcnt;
+	HINTS_REFCNT_UNLOCK;
+	
+	if (new_count) {
 	    return;
+	}
 
+#ifdef USE_ITHREADS
+	/* FIXME as above */
+	SvREFCNT_dec(he->refcounted_he_pad);
+#else
 	unshare_hek_or_pvn (he->refcounted_he_hek, 0, 0, 0);
 	SvREFCNT_dec(he->refcounted_he_val);
+#endif
 	copy = he;
 	he = he->refcounted_he_next;
 	Safefree(copy);
@@ -2691,7 +2731,7 @@ Duplicates the C<struct refcounted_he *> for a new thread.
 =cut
 */
 
-#if defined(USE_ITHREADS)
+#if 0
 struct refcounted_he *
 Perl_refcounted_he_dup(pTHX_ const struct refcounted_he *const he,
 			CLONE_PARAMS* param)

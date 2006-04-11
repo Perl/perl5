@@ -3956,7 +3956,9 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
         cop->cop_io = newSVsv(PL_curcop->cop_io) ;
     cop->cop_hints = PL_curcop->cop_hints;
     if (cop->cop_hints) {
+	HINTS_REFCNT_LOCK;
 	cop->cop_hints->refcounted_he_refcnt++;
+	HINTS_REFCNT_UNLOCK;
     }
 
     if (PL_copline == NOLINE)

@@ -158,7 +158,9 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 	    GvHV(PL_hintgv) = Perl_hv_copy_hints_hv(aTHX_ GvHV(PL_hintgv)); \
 	}						\
 	if (PL_compiling.cop_hints) {			\
+	    HINTS_REFCNT_LOCK;				\
 	    PL_compiling.cop_hints->refcounted_he_refcnt++;	\
+	    HINTS_REFCNT_UNLOCK;			\
 	}						\
 	SSPUSHPTR(PL_compiling.cop_hints);		\
 	SSPUSHINT(PL_hints);				\

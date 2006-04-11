@@ -388,8 +388,14 @@ C<SV*>.
 
 struct refcounted_he {
     struct refcounted_he *refcounted_he_next;	/* next entry in chain */
+#ifdef USE_ITHREADS
+    PAD                  *refcounted_he_pad;
+    PADOFFSET             refcounted_he_hek;
+    PADOFFSET             refcounted_he_val;
+#else
     HEK                  *refcounted_he_hek;	/* hint key */
     SV                   *refcounted_he_val;	/* hint value */
+#endif
     U32	                  refcounted_he_refcnt;	/* reference count */
 };
 

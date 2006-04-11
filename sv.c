@@ -10578,7 +10578,10 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
 	    ptr = POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = Perl_refcounted_he_dup(aTHX_ ptr, param);
+	    HINTS_REFCNT_LOCK;
+	    ((COP *)ptr)->cop_hints->refcounted_he_refcnt++;
+	    HINTS_REFCNT_UNLOCK;
+	    TOPPTR(nss,ix) = ptr;
 	    if (i & HINT_LOCALIZE_HH) {
 		hv = (HV*)POPPTR(ss,ix);
 		TOPPTR(nss,ix) = hv_dup_inc(hv, param);
@@ -10939,8 +10942,11 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 	PL_compiling.cop_warnings = sv_dup_inc(PL_compiling.cop_warnings, param);
     if (!specialCopIO(PL_compiling.cop_io))
 	PL_compiling.cop_io = sv_dup_inc(PL_compiling.cop_io, param);
-    PL_compiling.cop_hints
-	= Perl_refcounted_he_dup(aTHX_ PL_compiling.cop_hints, param);
+    if (PL_compiling.cop_hints) {
+	HINTS_REFCNT_LOCK;
+	PL_compiling.cop_hints->refcounted_he_refcnt++;
+	HINTS_REFCNT_UNLOCK;
+    }
     PL_curcop		= (COP*)any_dup(proto_perl->Tcurcop, proto_perl);
 
     /* pseudo environmental stuff */
