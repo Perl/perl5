@@ -884,6 +884,8 @@ END_EXTERN_C
 #define PL_fold_locale		(*Perl_Gfold_locale_ptr(NULL))
 #undef  PL_hexdigit
 #define PL_hexdigit		(*Perl_Ghexdigit_ptr(NULL))
+#undef  PL_hints_mutex
+#define PL_hints_mutex		(*Perl_Ghints_mutex_ptr(NULL))
 #undef  PL_malloc_mutex
 #define PL_malloc_mutex		(*Perl_Gmalloc_mutex_ptr(NULL))
 #undef  PL_mmap_page_size

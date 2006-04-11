@@ -370,7 +370,7 @@ struct interp_intern {
 #define BIT_BUCKET "/dev/null"
 #endif
 #define PERL_SYS_INIT(c,v)	MALLOC_CHECK_TAINT2(*c,*v) vms_image_init((c),(v)); MALLOC_INIT
-#define PERL_SYS_TERM()		OP_REFCNT_TERM; MALLOC_TERM
+#define PERL_SYS_TERM()		HINTS_REFCNT_TERM; OP_REFCNT_TERM; MALLOC_TERM
 #define dXSUB_SYS
 #define HAS_KILL
 #define HAS_WAIT

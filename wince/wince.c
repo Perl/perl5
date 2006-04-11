@@ -2660,6 +2660,7 @@ Perl_win32_init(int *argcp, char ***argvp)
 DllExport void
 Perl_win32_term(void)
 {
+    HINTS_REFCNT_TERM;
     OP_REFCNT_TERM;
     MALLOC_TERM;
 }

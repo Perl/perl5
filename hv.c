@@ -2577,7 +2577,7 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
     }
 
     while (chain) {
-	const U32 hash = HEK_HASH(chain->refcounted_he_he.hent_hek);
+	const U32 hash = HEK_HASH(chain->refcounted_he_hek);
 	HE **oentry = &((HvARRAY(hv))[hash & max]);
 	HE *entry = *oentry;
 
@@ -2589,9 +2589,9 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
 	assert (!entry);
 	entry = new_HE();
 
-	HeKEY_hek(entry) = share_hek_hek(chain->refcounted_he_he.hent_hek);
+	HeKEY_hek(entry) = share_hek_hek(chain->refcounted_he_hek);
 
-	HeVAL(entry) = chain->refcounted_he_he.he_valu.hent_val;
+	HeVAL(entry) = chain->refcounted_he_val;
 	if (HeVAL(entry) == &PL_sv_placeholder)
 	    placeholders++;
 	SvREFCNT_inc_void_NN(HeVAL(entry));
@@ -2607,7 +2607,7 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
 	HvTOTALKEYS(hv)++;
 
     next_please:
-	chain = (struct refcounted_he *) chain->refcounted_he_he.hent_next;
+	chain = chain->refcounted_he_next;
     }
 
     if (placeholders) {
@@ -2647,9 +2647,9 @@ Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent,
 
     Newx(he, 1, struct refcounted_he);
 
-    he->refcounted_he_he.hent_next = (HE *)parent;
-    he->refcounted_he_he.he_valu.hent_val = value;
-    he->refcounted_he_he.hent_hek
+    he->refcounted_he_next = parent;
+    he->refcounted_he_val = value;
+    he->refcounted_he_hek
 	= share_hek(p, SvUTF8(key) ? -(I32)len : len, hash);
     he->refcounted_he_refcnt = 1;
 
@@ -2674,10 +2674,10 @@ Perl_refcounted_he_free(pTHX_ struct refcounted_he *he) {
 	if (--he->refcounted_he_refcnt)
 	    return;
 
-	unshare_hek_or_pvn (he->refcounted_he_he.hent_hek, 0, 0, 0);
-	SvREFCNT_dec(he->refcounted_he_he.he_valu.hent_val);
+	unshare_hek_or_pvn (he->refcounted_he_hek, 0, 0, 0);
+	SvREFCNT_dec(he->refcounted_he_val);
 	copy = he;
-	he = (struct refcounted_he *) he->refcounted_he_he.hent_next;
+	he = he->refcounted_he_next;
 	Safefree(copy);
     }
 }
@@ -2710,15 +2710,11 @@ Perl_refcounted_he_dup(pTHX_ const struct refcounted_he *const he,
     Newx(copy, 1, struct refcounted_he);
     ptr_table_store(PL_ptr_table, he, copy);
 
-    copy->refcounted_he_he.hent_next
-	= (HE *)Perl_refcounted_he_dup(aTHX_
-				       (struct refcounted_he *)
-				       he->refcounted_he_he.hent_next,
-				       param);
-    copy->refcounted_he_he.he_valu.hent_val
-	= SvREFCNT_inc(sv_dup(he->refcounted_he_he.he_valu.hent_val, param));
-    copy->refcounted_he_he.hent_hek
-	= hek_dup(he->refcounted_he_he.hent_hek, param);
+    copy->refcounted_he_next
+	= Perl_refcounted_he_dup(aTHX_ he->refcounted_he_next, param);
+    copy->refcounted_he_val
+	= SvREFCNT_inc(sv_dup(he->refcounted_he_val, param));
+    copy->refcounted_he_hek = hek_dup(he->refcounted_he_hek, param);
     copy->refcounted_he_refcnt = he->refcounted_he_refcnt;
     return copy;
 }
@@ -2741,14 +2737,11 @@ Perl_refcounted_he_copy(pTHX_ const struct refcounted_he * he)
 	return NULL;
 
     Newx(copy, 1, struct refcounted_he);
-    copy->refcounted_he_he.hent_next
-	= (HE *)Perl_refcounted_he_copy(aTHX_
-				       (struct refcounted_he *)
-				       he->refcounted_he_he.hent_next);
-    copy->refcounted_he_he.he_valu.hent_val
-	= newSVsv(he->refcounted_he_he.he_valu.hent_val);
-    hek = he->refcounted_he_he.hent_hek;
-    copy->refcounted_he_he.hent_hek
+    copy->refcounted_he_next
+	= Perl_refcounted_he_copy(aTHX_ he->refcounted_he_next);
+    copy->refcounted_he_val = newSVsv(he->refcounted_he_val);
+    hek = he->refcounted_he_hek;
+    copy->refcounted_he_hek
 	= share_hek(HEK_KEY(hek),
 		    HEK_UTF8(hek) ? -(I32)HEK_LEN(hek) : HEK_LEN(hek),
 		    HEK_HASH(hek));

@@ -148,6 +148,7 @@ S_init_tls_and_interp(PerlInterpreter *my_perl)
 	ALLOC_THREAD_KEY;
 	PERL_SET_THX(my_perl);
 	OP_REFCNT_INIT;
+	HINTS_REFCNT_INIT;
 	MUTEX_INIT(&PL_dollarzero_mutex);
 #  endif
 #ifdef PERL_IMPLICIT_CONTEXT

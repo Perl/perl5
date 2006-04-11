@@ -131,7 +131,7 @@
 #endif
 
 #ifndef PERL_SYS_TERM
-#define PERL_SYS_TERM()		OP_REFCNT_TERM; MALLOC_TERM
+#define PERL_SYS_TERM()		HINTS_REFCNT_TERM; OP_REFCNT_TERM; MALLOC_TERM
 #endif
 
 #define BIT_BUCKET "/dev/null"

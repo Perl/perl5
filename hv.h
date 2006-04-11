@@ -36,11 +36,6 @@ struct shared_he {
     struct hek shared_he_hek;
 };
 
-struct refcounted_he {
-    struct he refcounted_he_he;
-    U32 refcounted_he_refcnt;
-};
-
 /* Subject to change.
    Don't access this directly.
 */
@@ -382,6 +377,38 @@ C<SV*>.
 					      shared_he_hek)))		\
 	->shared_he_he.he_valu.hent_refcount),				\
      hek)
+
+/* This refcounted he structure is used for storing the hints used for lexical
+   pragmas. Without threads, it's basically struct he + refcount.
+   With threads, life gets more complex as the structure needs to be shared
+   between threads (because it hangs from OPs, which are shared), hence the
+   alternate definition and mutex.  */
+
+#ifdef PERL_CORE
+
+struct refcounted_he {
+    struct refcounted_he *refcounted_he_next;	/* next entry in chain */
+    HEK                  *refcounted_he_hek;	/* hint key */
+    SV                   *refcounted_he_val;	/* hint value */
+    U32	                  refcounted_he_refcnt;	/* reference count */
+};
+
+#  ifdef USE_ITHREADS
+#    define HINTS_REFCNT_LOCK		MUTEX_LOCK(&PL_hints_mutex)
+#    define HINTS_REFCNT_UNLOCK		MUTEX_UNLOCK(&PL_hints_mutex)
+#  else
+#    define HINTS_REFCNT_LOCK		NOOP
+#    define HINTS_REFCNT_UNLOCK		NOOP
+#  endif
+#endif
+
+#ifdef USE_ITHREADS
+#  define HINTS_REFCNT_INIT		MUTEX_INIT(&PL_hints_mutex)
+#  define HINTS_REFCNT_TERM		MUTEX_DESTROY(&PL_hints_mutex)
+#else
+#  define HINTS_REFCNT_INIT		NOOP
+#  define HINTS_REFCNT_TERM		NOOP
+#endif
 
 /*
  * Local variables:

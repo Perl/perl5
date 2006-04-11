@@ -134,3 +134,7 @@ PERLVAR(Gmy_ctx_mutex, perl_mutex)
 # endif
 PERLVARI(Gmy_cxt_index, int, 0)
 #endif
+
+#if defined(USE_ITHREADS)
+PERLVAR(Ghints_mutex, perl_mutex)    /* Mutex for refcounted he refcounting */
+#endif

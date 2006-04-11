@@ -820,6 +820,8 @@
 #define PL_Gfold_locale		(my_vars->Gfold_locale)
 #define PL_hexdigit		(my_vars->Ghexdigit)
 #define PL_Ghexdigit		(my_vars->Ghexdigit)
+#define PL_hints_mutex		(my_vars->Ghints_mutex)
+#define PL_Ghints_mutex		(my_vars->Ghints_mutex)
 #define PL_malloc_mutex		(my_vars->Gmalloc_mutex)
 #define PL_Gmalloc_mutex	(my_vars->Gmalloc_mutex)
 #define PL_mmap_page_size	(my_vars->Gmmap_page_size)
@@ -881,6 +883,7 @@
 #define PL_Gdollarzero_mutex	PL_dollarzero_mutex
 #define PL_Gfold_locale		PL_fold_locale
 #define PL_Ghexdigit		PL_hexdigit
+#define PL_Ghints_mutex		PL_hints_mutex
 #define PL_Gmalloc_mutex	PL_malloc_mutex
 #define PL_Gmmap_page_size	PL_mmap_page_size
 #define PL_Gmy_ctx_mutex	PL_my_ctx_mutex
