@@ -4666,8 +4666,10 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    ANYOF_FLAGS(ret) |= ANYOF_INVERT;
     }
 
-    if (SIZE_ONLY)
+    if (SIZE_ONLY) {
 	RExC_size += ANYOF_SKIP;
+	listsv = &PL_sv_undef; /* For code scanners: listsv always non-NULL. */
+    }
     else {
  	RExC_emit += ANYOF_SKIP;
 	if (FOLD)
