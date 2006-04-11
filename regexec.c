@@ -1615,18 +1615,19 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     GET_RE_DEBUG_FLAGS_DECL;
 
     PERL_UNUSED_ARG(data);
-    RX_MATCH_UTF8_set(prog,do_utf8);
-
-    PL_reg_re = prog;
-#ifdef DEBUGGING
-    PL_regnarrate = DEBUG_r_TEST;
-#endif
 
     /* Be paranoid... */
     if (prog == NULL || startpos == NULL) {
 	Perl_croak(aTHX_ "NULL regexp parameter");
 	return 0;
     }
+
+    PL_reg_re = prog;
+#ifdef DEBUGGING
+    PL_regnarrate = DEBUG_r_TEST;
+#endif
+
+    RX_MATCH_UTF8_set(prog, do_utf8);
 
     minlen = prog->minlen;
     if (strend - startpos < minlen) {
