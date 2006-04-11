@@ -6964,9 +6964,23 @@ Perl_newSVhek(pTHX_ const HEK *hek)
 	    return sv;
 	}
 	/* This will be overwhelminly the most common case.  */
-	return newSVpvn_share(HEK_KEY(hek),
-			      (HEK_UTF8(hek) ? -HEK_LEN(hek) : HEK_LEN(hek)),
-			      HEK_HASH(hek));
+	{
+	    /* Inline most of newSVpvn_share(), because share_hek_hek() is far
+	       more efficient than sharepvn().  */
+	    SV *sv;
+
+	    new_SV(sv);
+	    sv_upgrade(sv, SVt_PV);
+	    SvPV_set(sv, (char *)HEK_KEY(share_hek_hek(hek)));
+	    SvCUR_set(sv, HEK_LEN(hek));
+	    SvLEN_set(sv, 0);
+	    SvREADONLY_on(sv);
+	    SvFAKE_on(sv);
+	    SvPOK_on(sv);
+	    if (HEK_UTF8(hek))
+		SvUTF8_on(sv);
+	    return sv;
+	}
     }
 }
 
