@@ -723,12 +723,6 @@ PERL_CALLCONV void	Perl_hv_ksplit(pTHX_ HV* hv, IV newmax)
 /* PERL_CALLCONV void	Perl_hv_magic(pTHX_ HV* hv, GV* gv, int how)
 			__attribute__nonnull__(pTHX_1); */
 
-#ifdef USE_ITHREADS
-PERL_CALLCONV struct refcounted_he *	Perl_refcounted_he_copy(pTHX_ const struct refcounted_he *he);
-PERL_CALLCONV struct refcounted_he *	Perl_refcounted_he_dup(pTHX_ const struct refcounted_he *const he, CLONE_PARAMS* param)
-			__attribute__nonnull__(pTHX_2);
-
-#endif
 PERL_CALLCONV HV *	Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *c);
 PERL_CALLCONV void	Perl_refcounted_he_free(pTHX_ struct refcounted_he *he);
 PERL_CALLCONV struct refcounted_he *	Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent, SV *const key, SV *const value);

@@ -303,13 +303,6 @@ ApMdR	|HE*	|hv_iternext_flags|NN HV* tb|I32 flags
 ApdR	|SV*	|hv_iterval	|NN HV* tb|NN HE* entry
 Ap	|void	|hv_ksplit	|NN HV* hv|IV newmax
 Apdbm	|void	|hv_magic	|NN HV* hv|NULLOK GV* gv|int how
-#ifdef USE_ITHREADS
-dpoM|struct refcounted_he *|refcounted_he_copy \
-				|NULLOK const struct refcounted_he *he
-dpoM|struct refcounted_he *|refcounted_he_dup \
-				|NULLOK const struct refcounted_he *const he \
-				|NN CLONE_PARAMS* param
-#endif
 dpoM	|HV *	|refcounted_he_chain_2hv|NULLOK const struct refcounted_he *c
 dpoM	|void	|refcounted_he_free|NULLOK struct refcounted_he *he
 dpoM	|struct refcounted_he *|refcounted_he_new \
