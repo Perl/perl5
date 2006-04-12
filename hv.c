@@ -2619,7 +2619,7 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
 	    break;
 	case HVrhek_IV:
 	    value = (chain->refcounted_he_data[0] & HVrhek_UV)
-		? newSViv(chain->refcounted_he_val.refcounted_he_u_iv)
+		? newSVuv(chain->refcounted_he_val.refcounted_he_u_iv)
 		: newSViv(chain->refcounted_he_val.refcounted_he_u_uv);
 	    break;
 	case HVrhek_PV:

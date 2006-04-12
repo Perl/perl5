@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 65 );
+    plan( tests => 71 );
 }
 
 my @c;
@@ -231,4 +231,39 @@ EOE
 	$^H{dooot} = "FIP\0FOP\0FIDDIT\0FAP";
     }
     is(get_dooot(), "FIP\0FOP\0FIDDIT\0FAP", "Can do embedded 0 bytes");
+
+    BEGIN {
+	$^H{dooot} = chr 256;
+    }
+    is(get_dooot(), chr 256, "Can do Unicode");
+
+    BEGIN {
+	$^H{dooot} = -42;
+    }
+    is(get_dooot(), -42, "Can do IVs");
+
+    BEGIN {
+	$^H{dooot} = ~0;
+    }
+    cmp_ok(get_dooot(), '>', 42, "Can do UVs");
+}
+
+{
+    my ($k1, $k2, $k3);
+    BEGIN {
+	$k1 = chr 163;
+	$k2 = $k1;
+	$k3 = $k1;
+	utf8::upgrade $k2;
+	utf8::encode $k3;
+
+	$^H{$k1} = 1;
+	$^H{$k2} = 2;
+	$^H{$k3} = 3;
+    }
+
+	
+    is(get_hash()->{$k1}, 2, "UTF-8 or not, it's the same");
+    is(get_hash()->{$k2}, 2, "UTF-8 or not, it's the same");
+    is(get_hash()->{$k3}, 3, "Octect sequences and UTF-8 are distinct");
 }
