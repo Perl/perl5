@@ -386,18 +386,34 @@ C<SV*>.
 
 #ifdef PERL_CORE
 
+/* Gosh. This really isn't a good name any longer.  */
 struct refcounted_he {
     struct refcounted_he *refcounted_he_next;	/* next entry in chain */
 #ifdef USE_ITHREADS
-    PAD                  *refcounted_he_pad;
-    PADOFFSET             refcounted_he_hek;
-    PADOFFSET             refcounted_he_val;
+    U32                   refcounted_he_hash;
+    U32                   refcounted_he_keylen;
 #else
     HEK                  *refcounted_he_hek;	/* hint key */
-    SV                   *refcounted_he_val;	/* hint value */
 #endif
     U32	                  refcounted_he_refcnt;	/* reference count */
+    union {
+	IV                refcounted_he_u_iv;
+	UV                refcounted_he_u_uv;
+	STRLEN            refcounted_he_u_len;
+    } refcounted_he_val;
+    /* First byte is flags. Then NUL-terminated value. Then for ithreads,
+       non-NUL terminated key.  */
+    char                  refcounted_he_data[1];
 };
+
+/* Flag bits are HVhek_UTF8, HVhek_WASUTF8, then */
+#define HVrhek_undef	0x00 /* Value is undef. */
+#define HVrhek_PV	0x10 /* Value is a string. */
+#define HVrhek_IV	0x20 /* Value is IV/UV. */
+#define HVrhek_delete	0x30 /* Value is placeholder - signifies delete. */
+#define HVrhek_typemask	0x30
+#define HVrhek_UTF8	0x40 /* string value is utf8. */
+#define HVrhek_UV	0x40 /* integer value is UV. */
 
 #  ifdef USE_ITHREADS
 #    define HINTS_REFCNT_LOCK		MUTEX_LOCK(&PL_hints_mutex)

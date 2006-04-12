@@ -2578,18 +2578,13 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
 
     while (chain) {
 #ifdef USE_ITHREADS
-	SV *const sv = *(av_fetch(chain->refcounted_he_pad,
-				  chain->refcounted_he_hek, FALSE));
-	U32 hash = SvSHARED_HASH(sv);
+	U32 hash = chain->refcounted_he_hash;
 #else
 	U32 hash = HEK_HASH(chain->refcounted_he_hek);
 #endif
 	HE **oentry = &((HvARRAY(hv))[hash & max]);
 	HE *entry = *oentry;
-
-#ifdef USE_ITHREADS
-	assert(SvIsCOW_shared_hash(sv));
-#endif
+	SV *value;
 
 	for (; entry; entry = HeNEXT(entry)) {
 	    if (HeHASH(entry) == hash) {
@@ -2601,17 +2596,51 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
 
 #ifdef USE_ITHREADS
 	HeKEY_hek(entry)
-	    = share_hek_hek(SvSHARED_HEK_FROM_PV(SvPVX_const(sv)));
-	HeVAL(entry) = *(av_fetch(chain->refcounted_he_pad,
-				  chain->refcounted_he_val, FALSE));
+	    = share_hek_flags(/* A big expression to find the key offset */
+			      (((chain->refcounted_he_data[0]
+				 & HVrhek_typemask) == HVrhek_PV)
+			       ? chain->refcounted_he_val.refcounted_he_u_len
+			       + 1 : 0) + 1 + chain->refcounted_he_data,
+			      chain->refcounted_he_keylen,
+			      chain->refcounted_he_hash,
+			      (chain->refcounted_he_data[0]
+			       & (HVhek_UTF8|HVhek_WASUTF8)));
 #else
 	HeKEY_hek(entry) = share_hek_hek(chain->refcounted_he_hek);
-	HeVAL(entry) = chain->refcounted_he_val;
 #endif
 
-	if (HeVAL(entry) == &PL_sv_placeholder)
+	switch(chain->refcounted_he_data[0] & HVrhek_typemask) {
+	case HVrhek_undef:
+	    value = newSV(0);
+	    break;
+	case HVrhek_delete:
+	    value = &PL_sv_placeholder;
 	    placeholders++;
-	SvREFCNT_inc_void_NN(HeVAL(entry));
+	    break;
+	case HVrhek_IV:
+	    value = (chain->refcounted_he_data[0] & HVrhek_UV)
+		? newSViv(chain->refcounted_he_val.refcounted_he_u_iv)
+		: newSViv(chain->refcounted_he_val.refcounted_he_u_uv);
+	    break;
+	case HVrhek_PV:
+	    /* Create a string SV that directly points to the bytes in our
+	       structure.  */
+	    value = newSV(0);
+	    sv_upgrade(value, SVt_PV);
+	    SvPV_set(value, (char *) chain->refcounted_he_data + 1);
+	    SvCUR_set(value, chain->refcounted_he_val.refcounted_he_u_len);
+	    /* This stops anything trying to free it  */
+	    SvLEN_set(value, 0);
+	    SvPOK_on(value);
+	    SvREADONLY_on(value);
+	    if (chain->refcounted_he_data[0] & HVrhek_UTF8)
+		SvUTF8_on(value);
+	    break;
+	default:
+	    Perl_croak(aTHX_ "panic: refcounted_he_chain_2hv bad flags %x",
+		       chain->refcounted_he_data[0]);
+	}
+	HeVAL(entry) = value;
 
 	/* Link it into the chain.  */
 	HeNEXT(entry) = *oentry;
@@ -2656,30 +2685,85 @@ struct refcounted_he *
 Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent,
 		       SV *const key, SV *const value) {
     struct refcounted_he *he;
+    STRLEN key_len;
+    const char *key_p = SvPV_const(key, key_len);
+    STRLEN value_len = 0;
+    const char *value_p;
+    char value_type;
+    char flags;
+    STRLEN key_offset;
     U32 hash;
-    STRLEN len;
-    const char *p = SvPV_const(key, len);
+    bool is_utf8 = SvUTF8(key);
 
-    PERL_HASH(hash, p, len);
+    if (SvPOK(value)) {
+	value_type = HVrhek_PV;
+    } else if (SvIOK(value)) {
+	value_type = HVrhek_IV;
+    } else if (value == &PL_sv_placeholder) {
+	value_type = HVrhek_delete;
+    } else if (!SvOK(value)) {
+	value_type = HVrhek_undef;
+    } else {
+	value_type = HVrhek_PV;
+    }
 
-    Newx(he, 1, struct refcounted_he);
+    if (value_type == HVrhek_PV) {
+	value_p = SvPV_const(value, value_len);
+	key_offset = value_len + 2;
+    } else {
+	value_len = 0;
+	key_offset = 1;
+    }
+    flags = value_type;
+
+    he = PerlMemShared_malloc(sizeof(struct refcounted_he) - 1
+#ifdef USE_ITHREADS
+			      + key_len
+#endif
+			      + key_offset);
+
 
     he->refcounted_he_next = parent;
+
+    if (value_type == HVrhek_PV) {
+	Copy(value_p, he->refcounted_he_data + 1, value_len + 1, char);
+	he->refcounted_he_val.refcounted_he_u_len = value_len;
+	if (SvUTF8(value)) {
+	    flags |= HVrhek_UTF8;
+	}
+    } else if (value_type == HVrhek_IV) {
+	if (SvUOK(value)) {
+	    he->refcounted_he_val.refcounted_he_u_uv = SvUVX(value);
+	    flags |= HVrhek_UV;
+	} else {
+	    he->refcounted_he_val.refcounted_he_u_iv = SvIVX(value);
+	}
+    }
+
+    if (is_utf8) {
+	/* Hash keys are always stored normalised to (yes) ISO-8859-1.
+	   As we're going to be building hash keys from this value in future,
+	   normalise it now.  */
+	key_p = (char*)bytes_from_utf8((const U8*)key_p, &key_len, &is_utf8);
+	flags |= is_utf8 ? HVhek_UTF8 : HVhek_WASUTF8;
+    }
+    PERL_HASH(hash, key_p, key_len);
+
 #ifdef USE_ITHREADS
-    he->refcounted_he_hek = pad_alloc(OP_CUSTOM, SVs_PADTMP);
-    SvREFCNT_dec(PAD_SVl(he->refcounted_he_hek));
-    PAD_SETSV(he->refcounted_he_hek,
-	      newSVpvn_share(p, SvUTF8(key) ? -(I32)len : len, hash));
-    he->refcounted_he_val = pad_alloc(OP_CUSTOM, SVs_PADTMP);
-    SvREFCNT_dec(PAD_SVl(he->refcounted_he_val));
-    PAD_SETSV(he->refcounted_he_val, value);
-    he->refcounted_he_pad = PL_comppad;
-    /* FIXME. This is wrong, but without it t/op/caller.t fails.  */
-    SvREFCNT_inc_simple_void_NN(he->refcounted_he_pad);
+    he->refcounted_he_hash = hash;
+    he->refcounted_he_keylen = key_len;
+    Copy(key_p, he->refcounted_he_data + key_offset, key_len, char);
 #else
-    he->refcounted_he_val = value;
-    he->refcounted_he_hek = share_hek(p, SvUTF8(key) ? -(I32)len : len, hash);
+    he->refcounted_he_hek = share_hek_flags(key_p, key_len, hash, flags);
 #endif
+
+    if (flags & HVhek_WASUTF8) {
+	/* If it was downgraded from UTF-8, then the pointer returned from
+	   bytes_from_utf8 is an allocated pointer that we must free.  */
+	Safefree(key_p);
+    }
+
+    he->refcounted_he_data[0] = flags;
     he->refcounted_he_refcnt = 1;
 
     return he;
@@ -2709,16 +2793,12 @@ Perl_refcounted_he_free(pTHX_ struct refcounted_he *he) {
 	    return;
 	}
 
-#ifdef USE_ITHREADS
-	/* FIXME as above */
-	SvREFCNT_dec(he->refcounted_he_pad);
-#else
+#ifndef USE_ITHREADS
 	unshare_hek_or_pvn (he->refcounted_he_hek, 0, 0, 0);
-	SvREFCNT_dec(he->refcounted_he_val);
 #endif
 	copy = he;
 	he = he->refcounted_he_next;
-	Safefree(copy);
+	PerlMemShared_free(copy);
     }
 }
 
