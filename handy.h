@@ -717,8 +717,7 @@ Malloc_t Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int li
 
 #define Newx(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_ALLOC(n,t,(t*)safemalloc((MEM_SIZE)((n)*sizeof(t))))))
 #define Newxc(v,n,t,c)	(v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_ALLOC(n,t,(c*)safemalloc((MEM_SIZE)((n)*sizeof(t))))))
-#define Newxz(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_ALLOC(n,t,(t*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))), \
-			memzero((char*)(v), (n)*sizeof(t))
+#define Newxz(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_ALLOC(n,t,(t*)safecalloc((n),sizeof(t)))))
 
 #ifndef PERL_CORE
 /* pre 5.9.x compatibility */
