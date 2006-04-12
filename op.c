@@ -4539,7 +4539,7 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
 	loop = tmp;
     }
 #else
-    Renew(loop, 1, LOOP);
+    loop = PerlMemShared_realloc(loop, sizeof(LOOP));
 #endif
     loop->op_targ = padoff;
     wop = newWHILEOP(flags, 1, loop, forline, newOP(OP_ITER, 0), block, cont, 0);
