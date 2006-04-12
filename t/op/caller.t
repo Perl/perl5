@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 64 );
+    plan( tests => 65 );
 }
 
 my @c;
@@ -224,4 +224,11 @@ print "# which now works inside evals\n";
     is(get_dooot(), 54);
     eval "is(get_dooot(), 54); 1" or die $@;
 EOE
+}
+
+{
+    BEGIN {
+	$^H{dooot} = "FIP\0FOP\0FIDDIT\0FAP";
+    }
+    is(get_dooot(), "FIP\0FOP\0FIDDIT\0FAP", "Can do embedded 0 bytes");
 }
