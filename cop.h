@@ -146,7 +146,8 @@ struct cop {
     U32		cop_seq;	/* parse sequence number */
     I32		cop_arybase;	/* array base this line was compiled with */
     line_t      cop_line;       /* line # of this command */
-    SV *	cop_warnings;	/* lexical warnings bitmask */
+    /* Beware. mg.c and warnings.pl assume the type of this is STRLEN *:  */
+    STRLEN *	cop_warnings;	/* lexical warnings bitmask */
     SV *	cop_io;		/* lexical IO defaults */
     /* compile time state of %^H.  See the comment in op.c for how this is
        used to recreate a hash to return from caller.  */

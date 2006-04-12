@@ -1531,7 +1531,18 @@ Perl_ckwarn_d(pTHX_ U32 w)
 	;
 }
 
+/* Set buffer=NULL to get a new one.  */
+STRLEN *
+Perl_new_warnings_bitfield(STRLEN *buffer, const char *const bits,
+			   STRLEN size) {
+    const MEM_SIZE len_wanted = sizeof(STRLEN) + size;
 
+    buffer = specialWARN(buffer) ? PerlMemShared_malloc(len_wanted)
+	: PerlMemShared_realloc(buffer, len_wanted);
+    buffer[0] = size;
+    Copy(bits, (buffer + 1), size, char);
+    return buffer;
+}
 
 /* since we've already done strlen() for both nam and val
  * we can use that info to make things faster than

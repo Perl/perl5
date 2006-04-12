@@ -4293,6 +4293,11 @@ PERL_CALLCONV GV*	Perl_gv_SVadd(pTHX_ GV* gv)
 #endif
 PERL_CALLCONV bool	Perl_ckwarn(pTHX_ U32 w);
 PERL_CALLCONV bool	Perl_ckwarn_d(pTHX_ U32 w);
+PERL_CALLCONV STRLEN *	Perl_new_warnings_bitfield(STRLEN *buffer, const char *const bits, STRLEN size)
+			__attribute__malloc__
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(2);
+
 
 PERL_CALLCONV void	Perl_offer_nice_chunk(pTHX_ void *chunk, U32 chunk_size)
 			__attribute__nonnull__(pTHX_1);

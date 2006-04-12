@@ -826,7 +826,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		}
 	    }
             else {
-	        sv_setsv(sv, PL_compiling.cop_warnings);
+	        sv_setpvn(sv, (char *) (PL_compiling.cop_warnings + 1),
+			  *PL_compiling.cop_warnings);
 	    }
 	    SvPOK_only(sv);
 	}
@@ -2274,15 +2275,20 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		    }
 		    if (!accumulate)
 	                PL_compiling.cop_warnings = pWARN_NONE;
-		    else if (isWARN_on(sv, WARN_ALL) && !any_fatals) {
+		    /* Yuck. I can't see how to abstract this:  */
+		    else if (isWARN_on(((STRLEN *)SvPV_nolen_const(sv)) - 1,
+				       WARN_ALL) && !any_fatals) {
 	                PL_compiling.cop_warnings = pWARN_ALL;
 	                PL_dowarn |= G_WARN_ONCE ;
 	            }
                     else {
-	                if (specialWARN(PL_compiling.cop_warnings))
-		            PL_compiling.cop_warnings = newSVsv(sv) ;
-	                else
-	                    sv_setsv(PL_compiling.cop_warnings, sv);
+			STRLEN len;
+			const char *const p = SvPV_const(sv, len);
+
+			PL_compiling.cop_warnings
+			    = Perl_new_warnings_bitfield(PL_compiling.cop_warnings,
+							 p, len);
+
 	                if (isWARN_on(PL_compiling.cop_warnings, WARN_ONCE))
 	                    PL_dowarn |= G_WARN_ONCE ;
 	            }

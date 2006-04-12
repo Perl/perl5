@@ -1035,7 +1035,7 @@ perl_destruct(pTHXx)
     PL_utf8_idcont	= NULL;
 
     if (!specialWARN(PL_compiling.cop_warnings))
-	SvREFCNT_dec(PL_compiling.cop_warnings);
+	PerlMemShared_free(PL_compiling.cop_warnings);
     PL_compiling.cop_warnings = NULL;
     if (!specialCopIO(PL_compiling.cop_io))
 	SvREFCNT_dec(PL_compiling.cop_io);
@@ -2037,7 +2037,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #endif
 
     if (PL_taint_warn && PL_dowarn != G_WARN_ALL_OFF) {
-       PL_compiling.cop_warnings = newSVpvn(WARN_TAINTstring, WARNsize);
+        PL_compiling.cop_warnings
+	    = Perl_new_warnings_bitfield(NULL, WARN_TAINTstring, WARNsize);
     }
 
     if (!scriptname)
@@ -3369,14 +3370,14 @@ Internet, point your browser at http://www.perl.org/, the Perl Home Page.\n\n");
     case 'W':
 	PL_dowarn = G_WARN_ALL_ON|G_WARN_ON;
         if (!specialWARN(PL_compiling.cop_warnings))
-            SvREFCNT_dec(PL_compiling.cop_warnings);
+            PerlMemShared_free(PL_compiling.cop_warnings);
 	PL_compiling.cop_warnings = pWARN_ALL ;
 	s++;
 	return s;
     case 'X':
 	PL_dowarn = G_WARN_ALL_OFF;
         if (!specialWARN(PL_compiling.cop_warnings))
-            SvREFCNT_dec(PL_compiling.cop_warnings);
+            PerlMemShared_free(PL_compiling.cop_warnings);
 	PL_compiling.cop_warnings = pWARN_NONE ;
 	s++;
 	return s;

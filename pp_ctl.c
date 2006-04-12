@@ -1698,7 +1698,7 @@ PP(pp_caller)
     PUSHs(sv_2mortal(newSViv(CopHINTS_get(cx->blk_oldcop))));
     {
 	SV * mask ;
-	SV * const old_warnings = cx->blk_oldcop->cop_warnings ;
+	STRLEN * const old_warnings = cx->blk_oldcop->cop_warnings ;
 
 	if  (old_warnings == pWARN_NONE ||
 		(old_warnings == pWARN_STD && (PL_dowarn & G_WARN_ON) == 0))
@@ -1717,7 +1717,7 @@ PP(pp_caller)
 	    }
 	}
         else
-            mask = newSVsv(old_warnings);
+            mask = newSVpvn((char *) (old_warnings + 1), old_warnings[0]);
         PUSHs(sv_2mortal(mask));
     }
 
@@ -3363,13 +3363,15 @@ PP(pp_require)
     PL_rsfp = tryrsfp;
     SAVEHINTS();
     PL_hints = 0;
-    SAVESPTR(PL_compiling.cop_warnings);
+    SAVECOPWARNINGS(&PL_compiling);
     if (PL_dowarn & G_WARN_ALL_ON)
         PL_compiling.cop_warnings = pWARN_ALL ;
     else if (PL_dowarn & G_WARN_ALL_OFF)
         PL_compiling.cop_warnings = pWARN_NONE ;
-    else if (PL_taint_warn)
-        PL_compiling.cop_warnings = newSVpvn(WARN_TAINTstring, WARNsize);
+    else if (PL_taint_warn) {
+        PL_compiling.cop_warnings
+	    = Perl_new_warnings_bitfield(NULL, WARN_TAINTstring, WARNsize);
+    }
     else
         PL_compiling.cop_warnings = pWARN_STD ;
     SAVESPTR(PL_compiling.cop_io);
@@ -3461,13 +3463,8 @@ PP(pp_entereval)
     PL_hints = PL_op->op_targ;
     if (saved_hh)
 	GvHV(PL_hintgv) = saved_hh;
-    SAVESPTR(PL_compiling.cop_warnings);
-    if (specialWARN(PL_curcop->cop_warnings))
-        PL_compiling.cop_warnings = PL_curcop->cop_warnings;
-    else {
-        PL_compiling.cop_warnings = newSVsv(PL_curcop->cop_warnings);
-        SAVEFREESV(PL_compiling.cop_warnings);
-    }
+    SAVECOPWARNINGS(&PL_compiling);
+    PL_compiling.cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
     SAVESPTR(PL_compiling.cop_io);
     if (specialCopIO(PL_curcop->cop_io))
         PL_compiling.cop_io = PL_curcop->cop_io;

@@ -506,7 +506,7 @@ S_cop_free(pTHX_ COP* cop)
     CopFILE_free(cop);
     CopSTASH_free(cop);
     if (! specialWARN(cop->cop_warnings))
-	SvREFCNT_dec(cop->cop_warnings);
+	PerlMemShared_free(cop->cop_warnings);
     if (! specialCopIO(cop->cop_io)) {
 #ifdef USE_ITHREADS
 	/*EMPTY*/
@@ -1974,7 +1974,7 @@ Perl_scope(pTHX_ OP *o)
     }
     return o;
 }
-
+	
 int
 Perl_block_start(pTHX_ int full)
 {
@@ -1983,11 +1983,8 @@ Perl_block_start(pTHX_ int full)
     pad_block_start(full);
     SAVEHINTS();
     PL_hints &= ~HINT_BLOCK_SCOPE;
-    SAVESPTR(PL_compiling.cop_warnings);
-    if (! specialWARN(PL_compiling.cop_warnings)) {
-        PL_compiling.cop_warnings = newSVsv(PL_compiling.cop_warnings) ;
-        SAVEFREESV(PL_compiling.cop_warnings) ;
-    }
+    SAVECOPWARNINGS(&PL_compiling);
+    PL_compiling.cop_warnings = DUP_WARNINGS(PL_compiling.cop_warnings);
     SAVESPTR(PL_compiling.cop_io);
     if (! specialCopIO(PL_compiling.cop_io)) {
         PL_compiling.cop_io = newSVsv(PL_compiling.cop_io) ;
@@ -3946,10 +3943,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     }
     cop->cop_seq = seq;
     CopARYBASE_set(cop, CopARYBASE_get(PL_curcop));
-    if (specialWARN(PL_curcop->cop_warnings))
-        cop->cop_warnings = PL_curcop->cop_warnings ;
-    else
-        cop->cop_warnings = newSVsv(PL_curcop->cop_warnings) ;
+    cop->cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
     if (specialCopIO(PL_curcop->cop_io))
         cop->cop_io = PL_curcop->cop_io;
     else

@@ -764,6 +764,10 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    Safefree(ptr);
 	    break;
+	case SAVEt_FREESHAREDPV:
+	    ptr = SSPOPPTR;
+	    PerlMemShared_free(ptr);
+	    break;
 	case SAVEt_CLEARSV:
 	    ptr = (void*)&PL_curpad[SSPOPLONG];
 	    sv = *(SV**)ptr;
@@ -983,6 +987,17 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    i = SSPOPINT;
 	    CopARYBASE_set((COP *)ptr, i);
+	    break;
+	case SAVEt_COP_WARNINGS:
+	    {
+		COP *const cop = SSPOPPTR;
+		ptr = SSPOPPTR;
+
+		if (!specialWARN(cop->cop_warnings))
+		    PerlMemShared_free(cop->cop_warnings);
+
+		cop->cop_warnings = ptr;
+	    }
 	    break;
 	case SAVEt_RE_STATE:
 	    {
