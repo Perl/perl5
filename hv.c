@@ -2716,11 +2716,14 @@ Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent,
     }
     flags = value_type;
 
-    he = PerlMemShared_malloc(sizeof(struct refcounted_he) - 1
 #ifdef USE_ITHREADS
+    he = PerlMemShared_malloc(sizeof(struct refcounted_he) - 1
 			      + key_len
-#endif
 			      + key_offset);
+#else
+    he = PerlMemShared_malloc(sizeof(struct refcounted_he) - 1
+			      + key_offset);
+#endif
 
 
     he->refcounted_he_next = parent;
