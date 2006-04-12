@@ -159,19 +159,10 @@ typedef struct _reg_trie_accepted reg_trie_accepted;
 
 typedef I32 CHECKPOINT;
 
-typedef struct re_cc_state
-{
-    I32 ss;
-    regnode *node;
-    struct re_cc_state *prev;
-    struct regmatch_state *cc;	/* state corresponding to the current curly */
-    regexp *re;
-} re_cc_state;
-
-
 typedef enum {
     resume_TRIE1,
     resume_TRIE2,
+    resume_EVAL,
     resume_CURLYX,
     resume_WHILEM1,
     resume_WHILEM2,
@@ -187,8 +178,7 @@ typedef enum {
     resume_PLUS1,
     resume_PLUS2,
     resume_PLUS3,
-    resume_PLUS4,
-    resume_END
+    resume_PLUS4
 } regmatch_resume_states;
 
 
@@ -200,7 +190,7 @@ typedef struct regmatch_state {
     regmatch_resume_states resume_state; /* where to jump to on return */
     regnode *scan;		/* Current node. */
     regnode *next;		/* Next node. */
-    bool minmod;		/* the next "{n.m}" is a "{n,m}?" */
+    bool minmod;		/* the next "{n,m}" is a "{n,m}?" */
     bool sw;			/* the condition value in (?(cond)a|b) */
     int logical;
     I32 unwind;			/* savestack index of current unwind block */
@@ -219,8 +209,14 @@ typedef struct regmatch_state {
 	} trie;
 
 	struct {
-	    CHECKPOINT cp;	/* remember current savestack indexes */
-	    CHECKPOINT lastcp;
+	    regexp	*prev_rex;
+	    int		toggleutf;
+	    CHECKPOINT	cp;	/* remember current savestack indexes */
+	    CHECKPOINT	lastcp;
+	    struct regmatch_state  *prev_eval; /* save cur_eval */
+	    struct regmatch_slab   *prev_slab;
+	    int depth;
+
 	} eval;
 
 	struct {
@@ -263,17 +259,7 @@ typedef struct regmatch_state {
 	    char *old;
 	    int count;
 	} plus; /* and CURLYN/CURLY/STAR */
-
-	struct {
-	    CHECKPOINT cp;	/* remember current savestack indexes */
-	    CHECKPOINT lastcp;
-	    struct regmatch_state *savecc;
-	    re_cc_state *cur_call_cc;
-	    regexp *end_re;
-	} end;
     } u;
-
-    re_cc_state *reg_call_cc;	/* saved value of PL_reg_call_cc */
 } regmatch_state;
 
 /* how many regmatch_state structs to allocate as a single slab.
@@ -303,7 +289,6 @@ typedef struct regmatch_slab {
 #define PL_reg_eval_set		PL_reg_state.re_state_reg_eval_set
 #define PL_regnarrate		PL_reg_state.re_state_regnarrate
 #define PL_regindent		PL_reg_state.re_state_regindent
-#define PL_reg_call_cc		PL_reg_state.re_state_reg_call_cc
 #define PL_reg_re		PL_reg_state.re_state_reg_re
 #define PL_reg_ganch		PL_reg_state.re_state_reg_ganch
 #define PL_reg_sv		PL_reg_state.re_state_reg_sv
@@ -338,7 +323,6 @@ struct re_save_state {
     I32 re_state_reg_eval_set;		/* from regexec.c */
     I32 re_state_regnarrate;		/* from regexec.c */
     int re_state_regindent;		/* from regexec.c */
-    struct re_cc_state *re_state_reg_call_cc;		/* from regexec.c */
     regexp *re_state_reg_re;		/* from regexec.c */
     char *re_state_reg_ganch;		/* from regexec.c */
     SV *re_state_reg_sv;		/* from regexec.c */

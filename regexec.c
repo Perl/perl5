@@ -1659,9 +1659,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     /* see how far we have to get to not match where we matched before */
     PL_regtill = startpos+minend;
 
-    /* We start without call_cc context.  */
-    PL_reg_call_cc = 0;
-
     /* If there is a "must appear" string, look for it. */
     s = startpos;
 
@@ -2307,6 +2304,44 @@ S_push_slab(pTHX)
     goto start_recurse; \
     resume_point_##where:
 
+
+/* push a new regex state. Set newst to point to it */
+
+#define PUSH_STATE(newst, resume) \
+    depth++;	\
+    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "PUSH STATE(%d)\n", depth)); \
+    st->scan = scan;	\
+    st->next = next;	\
+    st->n = n;	\
+    st->locinput = locinput;	\
+    st->resume_state = resume;	\
+    newst = st+1;   \
+    if (newst >  &(PL_regmatch_slab->states[PERL_REGMATCH_SLAB_SLOTS-1])) \
+	newst = S_push_slab(aTHX);  \
+    PL_regmatch_state = newst;	\
+    newst->cc = 0;  \
+    newst->minmod = 0;	\
+    newst->sw = 0;  \
+    newst->logical = 0;	\
+    newst->unwind = 0;	\
+    locinput = PL_reginput; \
+    nextchr = UCHARAT(locinput);    
+
+#define POP_STATE \
+    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "POP STATE(%d)\n", depth)); \
+    depth--; \
+    st--; \
+    if (st < &PL_regmatch_slab->states[0]) { \
+	PL_regmatch_slab = PL_regmatch_slab->prev; \
+	st = &PL_regmatch_slab->states[PERL_REGMATCH_SLAB_SLOTS-1]; \
+    } \
+    PL_regmatch_state = st; \
+    scan	= st->scan; \
+    next	= st->next; \
+    n		= st->n; \
+    locinput	= st->locinput; \
+    nextchr = UCHARAT(locinput);
+
 /*
  - regmatch - main matching routine
  *
@@ -2437,6 +2472,8 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
     bool result;	    /* return value of S_regmatch */
     regnode *inner;	    /* Next node in internal branch. */
     int depth = 0;	    /* depth of recursion */
+    regmatch_state *newst;  /* when pushing a state, this is the new one */
+    regmatch_state *cur_eval = NULL;  /* most recent (??{}) state */
     
 #ifdef DEBUGGING
     SV *re_debug_flags = NULL;
@@ -3290,9 +3327,6 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 	    }
 	    if (st->logical == 2) { /* Postponed subexpression: /(??{...})/ */
 		regexp *re;
-		re_cc_state state;
-		int toggleutf;
-
 		{
 		    /* extract RE object from returned value; compiling if
 		     * necessary */
@@ -3329,6 +3363,9 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 			PL_regsize = osize;
 		    }
 		}
+
+		/* run the pattern returned from (??{...}) */
+
 		DEBUG_EXECUTE_r(
 		    PerlIO_printf(Perl_debug_log,
 				  "Entering embedded \"%s%.60s%s%s\"\n",
@@ -3337,62 +3374,35 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 				  PL_colors[1],
 				  (strlen(re->precomp) > 60 ? "..." : ""))
 		    );
-		state.node = next;
-		state.prev = PL_reg_call_cc;
-		state.cc = st->cc;
-		state.re = PL_reg_re;
 
-		st->cc = 0;
-	    
 		st->u.eval.cp = regcppush(0);	/* Save *all* the positions. */
 		REGCP_SET(st->u.eval.lastcp);
-		PL_reg_re = re;
-		state.ss = PL_savestack_ix;
 		*PL_reglastparen = 0;
 		*PL_reglastcloseparen = 0;
-		PL_reg_call_cc = &state;
 		PL_reginput = locinput;
-		toggleutf = ((PL_reg_flags & RF_utf8) != 0) ^
-			    ((re->reganch & ROPT_UTF8) != 0);
-		if (toggleutf) PL_reg_flags ^= RF_utf8;
-
-		/* XXXX This is too dramatic a measure... */
-		PL_reg_maxiter = 0;
-
-		/* XXX the only recursion left in regmatch() */
-		if (regmatch(re, re->program + 1)) {
-		    /* Even though we succeeded, we need to restore
-		       global variables, since we may be wrapped inside
-		       SUSPEND, thus the match may be not finished yet. */
-
-		    /* XXXX Do this only if SUSPENDed? */
-		    PL_reg_call_cc = state.prev;
-		    st->cc = state.cc;
-		    PL_reg_re = state.re;
-
-		    if (toggleutf) PL_reg_flags ^= RF_utf8;
-
-		    /* XXXX This is too dramatic a measure... */
-		    PL_reg_maxiter = 0;
-
-		    /* These are needed even if not SUSPEND. */
-		    ReREFCNT_dec(re);
-		    regcpblow(st->u.eval.cp);
-		    sayYES;
-		}
-		ReREFCNT_dec(re);
-		REGCP_UNWIND(st->u.eval.lastcp);
-		regcppop(rex);
-		PL_reg_call_cc = state.prev;
-		st->cc = state.cc;
-		PL_reg_re = state.re;
-		if (toggleutf) PL_reg_flags ^= RF_utf8;
 
 		/* XXXX This is too dramatic a measure... */
 		PL_reg_maxiter = 0;
 
 		st->logical = 0;
-		sayNO;
+		st->u.eval.toggleutf = ((PL_reg_flags & RF_utf8) != 0) ^
+			    ((re->reganch & ROPT_UTF8) != 0);
+		if (st->u.eval.toggleutf) PL_reg_flags ^= RF_utf8;
+		st->u.eval.prev_rex = rex;
+		assert(rex == PL_reg_re); /* XXX */
+		rex = re;
+		PL_reg_re = rex; /* XXX */
+
+		st->u.eval.prev_eval = cur_eval;
+		st->u.eval.prev_slab = PL_regmatch_slab;
+		st->u.eval.depth = depth;
+		cur_eval = st;
+		PUSH_STATE(newst, resume_EVAL);
+		st = newst;
+
+		/* now continue  from first node in postoned RE */
+		next = re->program + 1;
+		break;
 		/* NOTREACHED */
 	    }
 	    /* /(?(?{...})X|Y)/ */
@@ -4234,49 +4244,49 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 	    sayNO;
 	    break;
 	case END:
-	    if (PL_reg_call_cc) {
-		st->u.end.cur_call_cc = PL_reg_call_cc;
-		st->u.end.end_re = PL_reg_re;
+	    if (cur_eval) {
+		/* we have successfully completed the execution of a
+		 * postponed re. Pop all states back to the last EVAL
+		 * then continue with the node following the (??{...})
+		 */
 
-		/* Save *all* the positions. */
-		st->u.end.cp = regcppush(0);
-		REGCP_SET(st->u.end.lastcp);
+		/* this simulates a POP_STATE, except that it pops several
+		 * levels, and doesn't restore locinput */
 
-		/* Restore parens of the caller. */
+		st = cur_eval;
+		PL_regmatch_slab = st->u.eval.prev_slab;
+		cur_eval = st->u.eval.prev_eval;
+		depth = st->u.eval.depth;
+
+		PL_regmatch_state = st;
+		scan	= st->scan;
+		next	= st->next;
+		n		= st->n;
+
+		if (st->u.eval.toggleutf)
+		    PL_reg_flags ^= RF_utf8;
+		ReREFCNT_dec(rex);
+		rex = st->u.eval.prev_rex;
+		PL_reg_re = rex; /* XXX */
+		/* XXXX This is too dramatic a measure... */
+		PL_reg_maxiter = 0;
+
+		/* Restore parens of the caller without popping the
+		 * savestack */
 		{
 		    I32 tmp = PL_savestack_ix;
-		    PL_savestack_ix = PL_reg_call_cc->ss;
+		    PL_savestack_ix = st->u.eval.lastcp;
 		    regcppop(rex);
 		    PL_savestack_ix = tmp;
 		}
 
-		/* Make position available to the callcc. */
+
 		PL_reginput = locinput;
+		/* resume at node following the (??{...}) */
+		break;
 
-		PL_reg_re = PL_reg_call_cc->re;
-		st->u.end.savecc = st->cc;
-		st->cc = PL_reg_call_cc->cc;
-		PL_reg_call_cc = PL_reg_call_cc->prev;
-		REGMATCH(st->u.end.cur_call_cc->node, END);
-		/*** all unsaved local vars undefined at this point */
-		if (result) {
-		    PL_reg_call_cc = st->u.end.cur_call_cc;
-		    regcpblow(st->u.end.cp);
-		    sayYES;
-		}
-		REGCP_UNWIND(st->u.end.lastcp);
-		regcppop(rex);
-		PL_reg_call_cc = st->u.end.cur_call_cc;
-		st->cc = st->u.end.savecc;
-		PL_reg_re = st->u.end.end_re;
-
-		DEBUG_EXECUTE_r(
-		    PerlIO_printf(Perl_debug_log,
-				  "%*s  continuation failed...\n",
-				  REPORT_CODE_OFF+PL_regindent*2, "")
-		    );
-		sayNO_SILENT;
 	    }
+
 	    if (locinput < PL_regtill) {
 		DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 				      "%sMatch possible, but length=%ld is smaller than requested=%ld, failing!%s\n",
@@ -4378,7 +4388,6 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 	    oldst->next = next;
 	    oldst->n = n;
 	    oldst->locinput = locinput;
-	    oldst->reg_call_cc = PL_reg_call_cc;
 
 	    st->cc = oldst->cc;
 	    locinput = PL_reginput;
@@ -4392,6 +4401,8 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 #endif
 	}
     }
+
+
 
     /*
     * We get here only if there's trouble -- normally "case END" is
@@ -4417,7 +4428,56 @@ yes:
 #endif
 
     result = 1;
-    goto exit_level;
+    /* XXX this is duplicate(ish) code to that in the do_no section.
+     * eventually a yes should just pop the whole stack */
+    if (depth) {
+	/* restore previous state and re-enter */
+	POP_STATE;
+
+	switch (st->resume_state) {
+	case resume_TRIE1:
+	    goto resume_point_TRIE1;
+	case resume_TRIE2:
+	    goto resume_point_TRIE2;
+	case resume_EVAL:
+	    break;
+	case resume_CURLYX:
+	    goto resume_point_CURLYX;
+	case resume_WHILEM1:
+	    goto resume_point_WHILEM1;
+	case resume_WHILEM2:
+	    goto resume_point_WHILEM2;
+	case resume_WHILEM3:
+	    goto resume_point_WHILEM3;
+	case resume_WHILEM4:
+	    goto resume_point_WHILEM4;
+	case resume_WHILEM5:
+	    goto resume_point_WHILEM5;
+	case resume_WHILEM6:
+	    goto resume_point_WHILEM6;
+	case resume_CURLYM1:
+	    goto resume_point_CURLYM1;
+	case resume_CURLYM2:
+	    goto resume_point_CURLYM2;
+	case resume_CURLYM3:
+	    goto resume_point_CURLYM3;
+	case resume_CURLYM4:
+	    goto resume_point_CURLYM4;
+	case resume_IFMATCH:
+	    goto resume_point_IFMATCH;
+	case resume_PLUS1:
+	    goto resume_point_PLUS1;
+	case resume_PLUS2:
+	    goto resume_point_PLUS2;
+	case resume_PLUS3:
+	    goto resume_point_PLUS3;
+	case resume_PLUS4:
+	    goto resume_point_PLUS4;
+	default:
+	    Perl_croak(aTHX_ "regexp resume memory corruption");
+	}
+    }
+    goto final_exit;
 
 no:
     DEBUG_EXECUTE_r(
@@ -4476,33 +4536,38 @@ do_no:
 	}
 	/* NOTREACHED */
     }
+
 #ifdef DEBUGGING
     PL_regindent--;
 #endif
     result = 0;
-exit_level:
 
-    if (depth--) {
-	/* restore previous state and re-enter */
-	st--;
-	if (st < &PL_regmatch_slab->states[0]) {
-	    PL_regmatch_slab = PL_regmatch_slab->prev;
-	    st = &PL_regmatch_slab->states[PERL_REGMATCH_SLAB_SLOTS-1];
-	}
-	PL_regmatch_state = st;
-
-	PL_reg_call_cc	= st->reg_call_cc;
-	scan		= st->scan;
-	next		= st->next;
-	n		= st->n;
-	locinput	= st->locinput;
-	nextchr = UCHARAT(locinput);
-
+    if (depth) {
+	/* there's a previous state to backtrack to */
+	POP_STATE;
 	switch (st->resume_state) {
 	case resume_TRIE1:
 	    goto resume_point_TRIE1;
 	case resume_TRIE2:
 	    goto resume_point_TRIE2;
+	case resume_EVAL:
+	    /* we have failed an (??{...}). Restore state to the outer re
+	     * then re-throw the failure */
+	    if (st->u.eval.toggleutf)
+		PL_reg_flags ^= RF_utf8;
+	    ReREFCNT_dec(rex);
+	    rex = st->u.eval.prev_rex;
+	    PL_reg_re = rex; /* XXX */
+	    cur_eval = st->u.eval.prev_eval;
+
+	    /* XXXX This is too dramatic a measure... */
+	    PL_reg_maxiter = 0;
+
+	    PL_reginput = locinput;
+	    REGCP_UNWIND(st->u.eval.lastcp);
+	    regcppop(rex);
+	    goto do_no;
+
 	case resume_CURLYX:
 	    goto resume_point_CURLYX;
 	case resume_WHILEM1:
@@ -4535,13 +4600,13 @@ exit_level:
 	    goto resume_point_PLUS3;
 	case resume_PLUS4:
 	    goto resume_point_PLUS4;
-	case resume_END:
-	    goto resume_point_END;
 	default:
 	    Perl_croak(aTHX_ "regexp resume memory corruption");
 	}
-	/* NOTREACHED */
     }
+
+final_exit:
+
     /* restore original high-water mark */
     PL_regmatch_slab  = orig_slab;
     PL_regmatch_state = orig_state;
