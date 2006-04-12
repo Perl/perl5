@@ -1939,6 +1939,7 @@ typedef struct {
     regnode *next;
     char *locinput;
     I32 nextchr;
+    int minmod;
 #ifdef DEBUGGING
     int regindent;
 #endif
@@ -3143,6 +3144,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    uw->next = next;
 		    uw->locinput = locinput;
 		    uw->nextchr = nextchr;
+		    uw->minmod = minmod;
 #ifdef DEBUGGING
 		    uw->regindent = ++PL_regindent;
 #endif
@@ -3765,6 +3767,7 @@ do_no:
 		PL_regendp[n] = -1;
 	    *PL_reglastparen = n;
 	    scan = next = uwb->next;
+	    minmod = uwb->minmod;
 	    if ( !scan ||
 		 OP(scan) != (uwb->type == RE_UNWIND_BRANCH
 			      ? BRANCH : BRANCHJ) ) {		/* Failure */
