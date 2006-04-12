@@ -959,3 +959,5 @@ x(?#	x	c	-	Sequence (?#... not terminated
 ^(a*?)(?!(aa|aaaa)*$)	aaaaaaaaaaaaaaaaaaaa	y	$1	a	# [perl #34195]
 ^(a*?)(?!(aa|aaaa)*$)(?=a\z)	aaaaaaaa	y	$1	aaaaaaa
 ^(.)\s+.$(?(1))	A B	y	$1	A	# [perl #37688]
+(?:r?)*?r|(.{2,4})	abcde	y	$1	abcd
+(?!)+?|(.{2,4})	abcde	y	$1	abcd
