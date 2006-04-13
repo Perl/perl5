@@ -839,7 +839,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		   : strend);
 
 	t = s;
-        s = find_byclass(prog, prog->regstclass, s, endpos, 1);
+        s = find_byclass(prog, prog->regstclass, s, endpos, NULL);
 	if (!s) {
 #ifdef DEBUGGING
 	    const char *what = NULL;
@@ -931,8 +931,11 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 }
 
 /* We know what class REx starts with.  Try to find this position... */
+/* if reginfo is NULL, its a dryrun */
+
 STATIC char *
-S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *strend, I32 norun)
+S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char
+*strend, const regmatch_info *reginfo)
 {
 	dVAR;
 	const I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
@@ -955,7 +958,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 			  !UTF8_IS_INVARIANT((U8)s[0]) ?
 			  reginclass(prog, c, (U8*)s, 0, do_utf8) :
 			  REGINCLASS(prog, c, (U8*)s)) {
-			   if (tmp && (norun || regtry(prog, s)))
+			   if (tmp && (!reginfo || regtry(reginfo, s)))
 				goto got_it;
 			   else
 				tmp = doevery;
@@ -974,7 +977,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 			   /* The assignment of 2 is intentional:
 			    * for the folded sharp s, the skip is 2. */
 			   (skip = SHARP_S_SKIP))) {
-			   if (tmp && (norun || regtry(prog, s)))
+			   if (tmp && (!reginfo || regtry(reginfo, s)))
 				goto got_it;
 			   else
 				tmp = doevery;
@@ -987,7 +990,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    break;
 	case CANY:
 	    while (s < strend) {
-	        if (tmp && (norun || regtry(prog, s)))
+	        if (tmp && (!reginfo || regtry(reginfo, s)))
 		    goto got_it;
 		else
 		    tmp = doevery;
@@ -1032,7 +1035,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	  do_exactf:
 	    e = HOP3c(strend, -((I32)lnc), s);
 
-	    if (norun && e < s)
+	    if (!reginfo && e < s)
 		e = s;			/* Due to minlen logic of intuit() */
 
 	    /* The idea in the EXACTF* cases is to first find the
@@ -1061,7 +1064,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 			     && (ln == len ||
 				 ibcmp_utf8(s, (char **)0, 0,  do_utf8,
 					    m, (char **)0, ln, (bool)UTF))
-			     && (norun || regtry(prog, s)) )
+			     && (!reginfo || regtry(reginfo, s)) )
 			    goto got_it;
 			else {
 			     U8 foldbuf[UTF8_MAXBYTES_CASE+1];
@@ -1074,7 +1077,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 						  (char **)0, foldlen, do_utf8,
 						  m,
 						  (char **)0, ln, (bool)UTF))
-				  && (norun || regtry(prog, s)) )
+				  && (!reginfo || regtry(reginfo, s)) )
 				  goto got_it;
 			}
 			s += len;
@@ -1100,7 +1103,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 			     && (ln == len ||
 				 ibcmp_utf8(s, (char **)0, 0,  do_utf8,
 					    m, (char **)0, ln, (bool)UTF))
-			     && (norun || regtry(prog, s)) )
+			     && (!reginfo || regtry(reginfo, s)) )
 			    goto got_it;
 			else {
 			     U8 foldbuf[UTF8_MAXBYTES_CASE+1];
@@ -1113,7 +1116,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 						  (char **)0, foldlen, do_utf8,
 						  m,
 						  (char **)0, ln, (bool)UTF))
-				  && (norun || regtry(prog, s)) )
+				  && (!reginfo || regtry(reginfo, s)) )
 				  goto got_it;
 			}
 			s += len;
@@ -1127,7 +1130,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 			     && (ln == 1 || !(OP(c) == EXACTF
 					      ? ibcmp(s, m, ln)
 					      : ibcmp_locale(s, m, ln)))
-			     && (norun || regtry(prog, s)) )
+			     && (!reginfo || regtry(reginfo, s)) )
 			    goto got_it;
 			s++;
 		    }
@@ -1137,7 +1140,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 			     && (ln == 1 || !(OP(c) == EXACTF
 					      ? ibcmp(s, m, ln)
 					      : ibcmp_locale(s, m, ln)))
-			     && (norun || regtry(prog, s)) )
+			     && (!reginfo || regtry(reginfo, s)) )
 			    goto got_it;
 			s++;
 		    }
@@ -1163,7 +1166,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 				 isALNUM_LC_utf8((U8*)s)))
 		    {
 			tmp = !tmp;
-			if ((norun || regtry(prog, s)))
+			if ((!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 		    }
 		    s += uskip;
@@ -1176,13 +1179,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		    if (tmp ==
 			!(OP(c) == BOUND ? isALNUM(*s) : isALNUM_LC(*s))) {
 			tmp = !tmp;
-			if ((norun || regtry(prog, s)))
+			if ((!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 		    }
 		    s++;
 		}
 	    }
-	    if ((!prog->minlen && tmp) && (norun || regtry(prog, s)))
+	    if ((!prog->minlen && tmp) && (!reginfo || regtry(reginfo, s)))
 		goto got_it;
 	    break;
 	case NBOUNDL:
@@ -1204,7 +1207,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 				 swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8) :
 				 isALNUM_LC_utf8((U8*)s)))
 			tmp = !tmp;
-		    else if ((norun || regtry(prog, s)))
+		    else if ((!reginfo || regtry(reginfo, s)))
 			goto got_it;
 		    s += uskip;
 		}
@@ -1217,12 +1220,12 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		    if (tmp ==
 			!(OP(c) == NBOUND ? isALNUM(*s) : isALNUM_LC(*s)))
 			tmp = !tmp;
-		    else if ((norun || regtry(prog, s)))
+		    else if ((!reginfo || regtry(reginfo, s)))
 			goto got_it;
 		    s++;
 		}
 	    }
-	    if ((!prog->minlen && !tmp) && (norun || regtry(prog, s)))
+	    if ((!prog->minlen && !tmp) && (!reginfo || regtry(reginfo, s)))
 		goto got_it;
 	    break;
 	case ALNUM:
@@ -1230,7 +1233,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		LOAD_UTF8_CHARCLASS_ALNUM();
 		while (s + (uskip = UTF8SKIP(s)) <= strend) {
 		    if (swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1243,7 +1246,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    else {
 		while (s < strend) {
 		    if (isALNUM(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1259,7 +1262,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    if (do_utf8) {
 		while (s + (uskip = UTF8SKIP(s)) <= strend) {
 		    if (isALNUM_LC_utf8((U8*)s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1272,7 +1275,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    else {
 		while (s < strend) {
 		    if (isALNUM_LC(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1288,7 +1291,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		LOAD_UTF8_CHARCLASS_ALNUM();
 		while (s + (uskip = UTF8SKIP(s)) <= strend) {
 		    if (!swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1301,7 +1304,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    else {
 		while (s < strend) {
 		    if (!isALNUM(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1317,7 +1320,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    if (do_utf8) {
 		while (s + (uskip = UTF8SKIP(s)) <= strend) {
 		    if (!isALNUM_LC_utf8((U8*)s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1330,7 +1333,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    else {
 		while (s < strend) {
 		    if (!isALNUM_LC(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1346,7 +1349,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		LOAD_UTF8_CHARCLASS_SPACE();
 		while (s + (uskip = UTF8SKIP(s)) <= strend) {
 		    if (*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s, do_utf8)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1359,7 +1362,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    else {
 		while (s < strend) {
 		    if (isSPACE(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1375,7 +1378,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    if (do_utf8) {
 		while (s + (uskip = UTF8SKIP(s)) <= strend) {
 		    if (*s == ' ' || isSPACE_LC_utf8((U8*)s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1388,7 +1391,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    else {
 		while (s < strend) {
 		    if (isSPACE_LC(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1404,7 +1407,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		LOAD_UTF8_CHARCLASS_SPACE();
 		while (s + (uskip = UTF8SKIP(s)) <= strend) {
 		    if (!(*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s, do_utf8))) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1417,7 +1420,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    else {
 		while (s < strend) {
 		    if (!isSPACE(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1433,7 +1436,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    if (do_utf8) {
 		while (s + (uskip = UTF8SKIP(s)) <= strend) {
 		    if (!(*s == ' ' || isSPACE_LC_utf8((U8*)s))) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1446,7 +1449,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    else {
 		while (s < strend) {
 		    if (!isSPACE_LC(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1462,7 +1465,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		LOAD_UTF8_CHARCLASS_DIGIT();
 		while (s + (uskip = UTF8SKIP(s)) <= strend) {
 		    if (swash_fetch(PL_utf8_digit,(U8*)s, do_utf8)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1475,7 +1478,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    else {
 		while (s < strend) {
 		    if (isDIGIT(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1491,7 +1494,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    if (do_utf8) {
 		while (s + (uskip = UTF8SKIP(s)) <= strend) {
 		    if (isDIGIT_LC_utf8((U8*)s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1504,7 +1507,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    else {
 		while (s < strend) {
 		    if (isDIGIT_LC(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1520,7 +1523,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		LOAD_UTF8_CHARCLASS_DIGIT();
 		while (s + (uskip = UTF8SKIP(s)) <= strend) {
 		    if (!swash_fetch(PL_utf8_digit,(U8*)s, do_utf8)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1533,7 +1536,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    else {
 		while (s < strend) {
 		    if (!isDIGIT(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1549,7 +1552,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    if (do_utf8) {
 		while (s + (uskip = UTF8SKIP(s)) <= strend) {
 		    if (!isDIGIT_LC_utf8((U8*)s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1562,7 +1565,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    else {
 		while (s < strend) {
 		    if (!isDIGIT_LC(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
+			if (tmp && (!reginfo || regtry(reginfo, s)))
 			    goto got_it;
 			else
 			    tmp = doevery;
@@ -1610,6 +1613,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     SV* dsv0;
     SV* dsv1;
 #endif
+    regmatch_info reginfo;  /* create some info to pass to regtry etc */
 
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -1622,14 +1626,11 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
 
     multiline = prog->reganch & PMf_MULTILINE;
+    reginfo.prog = prog;
 
 #ifdef DEBUGGING
     dsv0 = PERL_DEBUG_PAD_ZERO(0);
     dsv1 = PERL_DEBUG_PAD_ZERO(1);
-#endif
-
-#ifdef DEBUGGING
-    PL_regnarrate = DEBUG_r_TEST;
 #endif
 
     RX_MATCH_UTF8_set(prog, do_utf8);
@@ -1654,37 +1655,37 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	PL_reg_flags |= RF_utf8;
 
     /* Mark beginning of line for ^ and lookbehind. */
-    PL_regbol = startpos;
+    reginfo.bol = startpos; /* XXX not used ??? */
     PL_bostr  = strbeg;
-    PL_reg_sv = sv;
+    reginfo.sv = sv;
 
     /* Mark end of line for $ (and such) */
     PL_regeol = strend;
 
     /* see how far we have to get to not match where we matched before */
-    PL_regtill = startpos+minend;
+    reginfo.till = startpos+minend;
 
     /* If there is a "must appear" string, look for it. */
     s = startpos;
 
-    if (prog->reganch & ROPT_GPOS_SEEN) { /* Need to have PL_reg_ganch */
+    if (prog->reganch & ROPT_GPOS_SEEN) { /* Need to set reginfo->ganch */
 	MAGIC *mg;
 
 	if (flags & REXEC_IGNOREPOS)	/* Means: check only at start */
-	    PL_reg_ganch = startpos;
+	    reginfo.ganch = startpos;
 	else if (sv && SvTYPE(sv) >= SVt_PVMG
 		  && SvMAGIC(sv)
 		  && (mg = mg_find(sv, PERL_MAGIC_regex_global))
 		  && mg->mg_len >= 0) {
-	    PL_reg_ganch = strbeg + mg->mg_len;	/* Defined pos() */
+	    reginfo.ganch = strbeg + mg->mg_len;	/* Defined pos() */
 	    if (prog->reganch & ROPT_ANCH_GPOS) {
-	        if (s > PL_reg_ganch)
+	        if (s > reginfo.ganch)
 		    goto phooey;
-		s = PL_reg_ganch;
+		s = reginfo.ganch;
 	    }
 	}
 	else				/* pos() not defined */
-	    PL_reg_ganch = strbeg;
+	    reginfo.ganch = strbeg;
     }
 
     if (!(flags & REXEC_CHECKED) && (prog->check_substr != NULL || prog->check_utf8 != NULL)) {
@@ -1726,7 +1727,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     /* Simplest case:  anchored match need be tried only once. */
     /*  [unless only anchor is BOL and multiline is set] */
     if (prog->reganch & (ROPT_ANCH & ~ROPT_ANCH_GPOS)) {
-	if (s == startpos && regtry(prog, startpos))
+	if (s == startpos && regtry(&reginfo, startpos))
 	    goto got_it;
 	else if (multiline || (prog->reganch & ROPT_IMPLICIT)
 		 || (prog->reganch & ROPT_ANCH_MBOL)) /* XXXX SBOL? */
@@ -1741,7 +1742,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		if (s == startpos)
 		    goto after_try;
 		while (1) {
-		    if (regtry(prog, s))
+		    if (regtry(&reginfo, s))
 			goto got_it;
 		  after_try:
 		    if (s >= end)
@@ -1759,7 +1760,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		    s--;
 		while (s < end) {
 		    if (*s++ == '\n') {	/* don't need PL_utf8skip here */
-			if (regtry(prog, s))
+			if (regtry(&reginfo, s))
 			    goto got_it;
 		    }
 		}		
@@ -1767,7 +1768,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	}
 	goto phooey;
     } else if (prog->reganch & ROPT_ANCH_GPOS) {
-	if (regtry(prog, PL_reg_ganch))
+	if (regtry(&reginfo, reginfo.ganch))
 	    goto got_it;
 	goto phooey;
     }
@@ -1788,7 +1789,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    while (s < strend) {
 		if (*s == ch) {
 		    DEBUG_EXECUTE_r( did_match = 1 );
-		    if (regtry(prog, s)) goto got_it;
+		    if (regtry(&reginfo, s)) goto got_it;
 		    s += UTF8SKIP(s);
 		    while (s < strend && *s == ch)
 			s += UTF8SKIP(s);
@@ -1800,7 +1801,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    while (s < strend) {
 		if (*s == ch) {
 		    DEBUG_EXECUTE_r( did_match = 1 );
-		    if (regtry(prog, s)) goto got_it;
+		    if (regtry(&reginfo, s)) goto got_it;
 		    s++;
 		    while (s < strend && *s == ch)
 			s++;
@@ -1878,14 +1879,14 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    }
 	    if (do_utf8) {
 		while (s <= last1) {
-		    if (regtry(prog, s))
+		    if (regtry(&reginfo, s))
 			goto got_it;
 		    s += UTF8SKIP(s);
 		}
 	    }
 	    else {
 		while (s <= last1) {
-		    if (regtry(prog, s))
+		    if (regtry(&reginfo, s))
 			goto got_it;
 		    s++;
 		}
@@ -1931,7 +1932,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 			  len0, len0, s0,
 			  len1, len1, s1);
 	});
-        if (find_byclass(prog, c, s, strend, 0))
+        if (find_byclass(prog, c, s, strend, &reginfo))
 	    goto got_it;
 	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "Contradicts stclass...\n"));
     }
@@ -1989,7 +1990,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	/* We don't know much -- general case. */
 	if (do_utf8) {
 	    for (;;) {
-		if (regtry(prog, s))
+		if (regtry(&reginfo, s))
 		    goto got_it;
 		if (s >= strend)
 		    break;
@@ -1998,7 +1999,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	}
 	else {
 	    do {
-		if (regtry(prog, s))
+		if (regtry(&reginfo, s))
 		    goto got_it;
 	    } while (s++ < strend);
 	}
@@ -2064,12 +2065,13 @@ phooey:
  - regtry - try match at specific point
  */
 STATIC I32			/* 0 failure, 1 success */
-S_regtry(pTHX_ regexp *prog, char *startpos)
+S_regtry(pTHX_ const regmatch_info *reginfo, char *startpos)
 {
     dVAR;
     register I32 *sp;
     register I32 *ep;
     CHECKPOINT lastcp;
+    regexp *prog = reginfo->prog;
     GET_RE_DEBUG_FLAGS_DECL;
 
 #ifdef DEBUGGING
@@ -2091,21 +2093,21 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
 	/* SAVEI8(cxstack[cxstack_ix].blk_gimme);
 	   cxstack[cxstack_ix].blk_gimme = G_SCALAR; */
 
-	if (PL_reg_sv) {
+	if (reginfo->sv) {
 	    /* Make $_ available to executed code. */
-	    if (PL_reg_sv != DEFSV) {
+	    if (reginfo->sv != DEFSV) {
 		SAVE_DEFSV;
-		DEFSV = PL_reg_sv;
+		DEFSV = reginfo->sv;
 	    }
 	
-	    if (!(SvTYPE(PL_reg_sv) >= SVt_PVMG && SvMAGIC(PL_reg_sv)
-		  && (mg = mg_find(PL_reg_sv, PERL_MAGIC_regex_global)))) {
+	    if (!(SvTYPE(reginfo->sv) >= SVt_PVMG && SvMAGIC(reginfo->sv)
+		  && (mg = mg_find(reginfo->sv, PERL_MAGIC_regex_global)))) {
 		/* prepare for quick setting of pos */
 #ifdef PERL_OLD_COPY_ON_WRITE
 		if (SvIsCOW(sv))
 		    sv_force_normal_flags(sv, 0);
 #endif
-		mg = sv_magicext(PL_reg_sv, (SV*)0, PERL_MAGIC_regex_global,
+		mg = sv_magicext(reginfo->sv, (SV*)0, PERL_MAGIC_regex_global,
 				 &PL_vtbl_mglob, NULL, 0);
 		mg->mg_len = -1;
 	    }
@@ -2189,7 +2191,7 @@ S_regtry(pTHX_ regexp *prog, char *startpos)
     }
 #endif
     REGCP_SET(lastcp);
-    if (regmatch(prog, prog->program + 1)) {
+    if (regmatch(reginfo, prog->program + 1)) {
 	prog->endp[0] = PL_reginput - PL_bostr;
 	return 1;
     }
@@ -2455,11 +2457,13 @@ S_push_slab(pTHX)
  
 
 STATIC I32			/* 0 failure, 1 success */
-S_regmatch(pTHX_ regexp *rex, regnode *prog)
+S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 {
     dVAR;
     register const bool do_utf8 = PL_reg_match_utf8;
     const U32 uniflags = UTF8_ALLOW_DEFAULT;
+
+    regexp *rex = reginfo->prog;
 
     regmatch_slab  *orig_slab;
     regmatch_state *orig_state;
@@ -2589,7 +2593,7 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 	case BOL:
 	    if (locinput == PL_bostr)
 	    {
-		/* regtill = regbol; */
+		/* reginfo->till = reginfo->bol; */
 		break;
 	    }
 	    sayNO;
@@ -2605,7 +2609,7 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 		break;
 	    sayNO;
 	case GPOS:
-	    if (locinput == PL_reg_ganch)
+	    if (locinput == reginfo->ganch)
 		break;
 	    sayNO;
 	case EOL:
@@ -4289,12 +4293,12 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 
 	    }
 
-	    if (locinput < PL_regtill) {
+	    if (locinput < reginfo->till) {
 		DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 				      "%sMatch possible, but length=%ld is smaller than requested=%ld, failing!%s\n",
 				      PL_colors[4],
 				      (long)(locinput - PL_reg_starttry),
-				      (long)(PL_regtill - PL_reg_starttry),
+				      (long)(reginfo->till - PL_reg_starttry),
 				      PL_colors[5]));
 		sayNO_FINAL;		/* Cannot match: too short. */
 	    }

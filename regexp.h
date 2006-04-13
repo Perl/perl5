@@ -154,6 +154,17 @@ struct _reg_trie_accepted {
 };
 typedef struct _reg_trie_accepted reg_trie_accepted;
 
+/* some basic information about the current match that is created by
+ * Perl_regexec_flags and then passed to regtry(), regmatch() etc */
+
+typedef struct {
+    regexp *prog;
+    char *bol;
+    char *till;
+    SV *sv;
+    char *ganch;
+} regmatch_info;
+ 
 
 /* structures for holding and saving the state maintained by regmatch() */
 
@@ -277,20 +288,15 @@ typedef struct regmatch_slab {
 #define PL_reg_flags		PL_reg_state.re_state_reg_flags
 #define PL_bostr		PL_reg_state.re_state_bostr
 #define PL_reginput		PL_reg_state.re_state_reginput
-#define PL_regbol		PL_reg_state.re_state_regbol
 #define PL_regeol		PL_reg_state.re_state_regeol
 #define PL_regstartp		PL_reg_state.re_state_regstartp
 #define PL_regendp		PL_reg_state.re_state_regendp
 #define PL_reglastparen		PL_reg_state.re_state_reglastparen
 #define PL_reglastcloseparen	PL_reg_state.re_state_reglastcloseparen
-#define PL_regtill		PL_reg_state.re_state_regtill
 #define PL_reg_start_tmp	PL_reg_state.re_state_reg_start_tmp
 #define PL_reg_start_tmpl	PL_reg_state.re_state_reg_start_tmpl
 #define PL_reg_eval_set		PL_reg_state.re_state_reg_eval_set
-#define PL_regnarrate		PL_reg_state.re_state_regnarrate
 #define PL_regindent		PL_reg_state.re_state_regindent
-#define PL_reg_ganch		PL_reg_state.re_state_reg_ganch
-#define PL_reg_sv		PL_reg_state.re_state_reg_sv
 #define PL_reg_match_utf8	PL_reg_state.re_state_reg_match_utf8
 #define PL_reg_magic		PL_reg_state.re_state_reg_magic
 #define PL_reg_oldpos		PL_reg_state.re_state_reg_oldpos
@@ -310,20 +316,15 @@ struct re_save_state {
     U32 re_state_reg_flags;		/* from regexec.c */
     char *re_state_bostr;
     char *re_state_reginput;		/* String-input pointer. */
-    char *re_state_regbol;		/* Beginning of input, for ^ check. */
     char *re_state_regeol;		/* End of input, for $ check. */
     I32 *re_state_regstartp;		/* Pointer to startp array. */
     I32 *re_state_regendp;		/* Ditto for endp. */
     U32 *re_state_reglastparen;		/* Similarly for lastparen. */
     U32 *re_state_reglastcloseparen;	/* Similarly for lastcloseparen. */
-    char *re_state_regtill;		/* How far we are required to go. */
     char **re_state_reg_start_tmp;	/* from regexec.c */
     U32 re_state_reg_start_tmpl;	/* from regexec.c */
     I32 re_state_reg_eval_set;		/* from regexec.c */
-    I32 re_state_regnarrate;		/* from regexec.c */
     int re_state_regindent;		/* from regexec.c */
-    char *re_state_reg_ganch;		/* from regexec.c */
-    SV *re_state_reg_sv;		/* from regexec.c */
     bool re_state_reg_match_utf8;	/* from regexec.c */
     MAGIC *re_state_reg_magic;		/* from regexec.c */
     I32 re_state_reg_oldpos;		/* from regexec.c */
