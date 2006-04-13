@@ -1605,10 +1605,10 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     char *scream_olds = NULL;
     SV* oreplsv = GvSV(PL_replgv);
     const bool do_utf8 = DO_UTF8(sv);
-    const I32 multiline = prog->reganch & PMf_MULTILINE;
+    I32 multiline;
 #ifdef DEBUGGING
-    SV * const dsv0 = PERL_DEBUG_PAD_ZERO(0);
-    SV * const dsv1 = PERL_DEBUG_PAD_ZERO(1);
+    SV* dsv0;
+    SV* dsv1;
 #endif
 
     GET_RE_DEBUG_FLAGS_DECL;
@@ -1620,6 +1620,13 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	Perl_croak(aTHX_ "NULL regexp parameter");
 	return 0;
     }
+
+    multiline = prog->reganch & PMf_MULTILINE;
+
+#ifdef DEBUGGING
+    dsv0 = PERL_DEBUG_PAD_ZERO(0);
+    dsv1 = PERL_DEBUG_PAD_ZERO(1);
+#endif
 
 #ifdef DEBUGGING
     PL_regnarrate = DEBUG_r_TEST;
