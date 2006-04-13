@@ -51,7 +51,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
     dVAR;
     register int insn;
     U32 ix;
-    SV *specialsv_list[6];
+    SV *specialsv_list[7];
 
     BYTECODE_HEADER_CHECK;	/* croak if incorrect platform */
     Newx(bstate->bs_obj_list, 32, void*); /* set op objlist */

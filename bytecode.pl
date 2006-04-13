@@ -90,7 +90,10 @@ for ($i = 0; $i < @optype - 1; $i++) {
     printf BYTERUN_C "    sizeof(%s),\n", $optype[$i], $i;
 }
 printf BYTERUN_C "    sizeof(%s)\n", $optype[$i], $i;
-print BYTERUN_C <<'EOT';
+
+my $size = @specialsv;
+
+print BYTERUN_C <<"EOT";
 };
 
 void *
@@ -110,7 +113,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
     dVAR;
     register int insn;
     U32 ix;
-    SV *specialsv_list[6];
+    SV *specialsv_list[$size];
 
     BYTECODE_HEADER_CHECK;	/* croak if incorrect platform */
     Newx(bstate->bs_obj_list, 32, void*); /* set op objlist */

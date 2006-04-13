@@ -91,7 +91,11 @@ typedef char *pvindex;
 	arg = arg ? savepv(arg) : arg;			\
     } STMT_END
 
-#define BSET_ldspecsv(sv, arg) sv = specialsv_list[arg]
+#define BSET_ldspecsv(sv, arg) STMT_START {				  \
+	assert(arg < sizeof(specialsv_list) / sizeof(specialsv_list[0])); \
+	sv = specialsv_list[arg];					  \
+    } STMT_END
+
 #define BSET_ldspecsvx(sv, arg) STMT_START {	\
 	BSET_ldspecsv(sv, arg);			\
 	BSET_OBJ_STOREX(sv);			\
