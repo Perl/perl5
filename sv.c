@@ -10578,9 +10578,9 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
 	    ptr = POPPTR(ss,ix);
-	    if (((COP *)ptr)->cop_hints) {
+	    if (ptr) {
 		HINTS_REFCNT_LOCK;
-		((COP *)ptr)->cop_hints->refcounted_he_refcnt++;
+		((struct refcounted_he *)ptr)->refcounted_he_refcnt++;
 		HINTS_REFCNT_UNLOCK;
 	    }
 	    TOPPTR(nss,ix) = ptr;
