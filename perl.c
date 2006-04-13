@@ -2038,7 +2038,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
     if (PL_taint_warn && PL_dowarn != G_WARN_ALL_OFF) {
         PL_compiling.cop_warnings
-	    = Perl_new_warnings_bitfield(NULL, WARN_TAINTstring, WARNsize);
+	    = Perl_new_warnings_bitfield(aTHX_ NULL, WARN_TAINTstring, WARNsize);
     }
 
     if (!scriptname)

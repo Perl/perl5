@@ -1533,7 +1533,7 @@ Perl_ckwarn_d(pTHX_ U32 w)
 
 /* Set buffer=NULL to get a new one.  */
 STRLEN *
-Perl_new_warnings_bitfield(STRLEN *buffer, const char *const bits,
+Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const char *const bits,
 			   STRLEN size) {
     const MEM_SIZE len_wanted = sizeof(STRLEN) + size;
 

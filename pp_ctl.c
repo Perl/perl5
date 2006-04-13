@@ -3370,7 +3370,7 @@ PP(pp_require)
         PL_compiling.cop_warnings = pWARN_NONE ;
     else if (PL_taint_warn) {
         PL_compiling.cop_warnings
-	    = Perl_new_warnings_bitfield(NULL, WARN_TAINTstring, WARNsize);
+	    = Perl_new_warnings_bitfield(aTHX_ NULL, WARN_TAINTstring, WARNsize);
     }
     else
         PL_compiling.cop_warnings = pWARN_STD ;

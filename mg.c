@@ -2286,7 +2286,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 			const char *const p = SvPV_const(sv, len);
 
 			PL_compiling.cop_warnings
-			    = Perl_new_warnings_bitfield(PL_compiling.cop_warnings,
+			    = Perl_new_warnings_bitfield(aTHX_ PL_compiling.cop_warnings,
 							 p, len);
 
 	                if (isWARN_on(PL_compiling.cop_warnings, WARN_ONCE))
