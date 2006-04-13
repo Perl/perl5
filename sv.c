@@ -3883,12 +3883,14 @@ Perl_sv_setpv_mg(pTHX_ register SV *sv, register const char *ptr)
 /*
 =for apidoc sv_usepvn
 
-Tells an SV to use C<ptr> to find its string value.  Normally the string is
-stored inside the SV but sv_usepvn allows the SV to use an outside string.
-The C<ptr> should point to memory that was allocated by C<malloc>.  The
-string length, C<len>, must be supplied.  This function will realloc the
-memory pointed to by C<ptr>, so that pointer should not be freed or used by
-the programmer after giving it to sv_usepvn.  Does not handle 'set' magic.
+Tells an SV to use C<ptr> to find its string value.  Normally the
+string is stored inside the SV but sv_usepvn allows the SV to use an
+outside string.  The C<ptr> should point to memory that was allocated
+by C<malloc>.  The string length, C<len>, must be supplied.  This
+function will realloc (i.e. move) the memory pointed to by C<ptr>,
+so that pointer should not be freed or used by the programmer after
+giving it to sv_usepvn, and neither should any pointers from "behind"
+that pointer (e.g. ptr + 1) be used.  Does not handle 'set' magic.
 See C<sv_usepvn_mg>.
 
 =cut

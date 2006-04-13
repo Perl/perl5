@@ -15,7 +15,7 @@ BEGIN {
 # If you find tests are failing, please try adding names to tests to track
 # down where the failure is, and supply your new names as a patch.
 # (Just-in-time test naming)
-plan tests => 148;
+plan tests => 160;
 
 # numerics
 ok ((0xdead & 0xbeef) == 0x9ead);
@@ -340,3 +340,75 @@ SKIP: {
     $b &= "b";
     ok($b =~ /b+$/, 'Unicode "b" is NUL-terminated');
 }
+
+{
+    $a = chr(0x101) x 0x101;
+    $b = chr(0x0FF) x 0x0FF;
+
+    $c = $a | $b;
+    is($c, chr(0x1FF) x 0xFF . chr(0x101) x 2);
+
+    $c = $b | $a;
+    is($c, chr(0x1FF) x 0xFF . chr(0x101) x 2);
+
+    $c = $a & $b;
+    is($c, chr(0x001) x 0x0FF);
+
+    $c = $b & $a;
+    is($c, chr(0x001) x 0x0FF);
+
+    $c = $a ^ $b;
+    is($c, chr(0x1FE) x 0x0FF . chr(0x101) x 2);
+
+    $c = $b ^ $a;
+    is($c, chr(0x1FE) x 0x0FF . chr(0x101) x 2);
+}
+
+{
+    $a = chr(0x101) x 0x101;
+    $b = chr(0x0FF) x 0x0FF;
+
+    $a |= $b;
+    is($a, chr(0x1FF) x 0xFF . chr(0x101) x 2);
+}
+
+{
+    $a = chr(0x101) x 0x101;
+    $b = chr(0x0FF) x 0x0FF;
+
+    $b |= $a;
+    is($b, chr(0x1FF) x 0xFF . chr(0x101) x 2);
+}
+
+{
+    $a = chr(0x101) x 0x101;
+    $b = chr(0x0FF) x 0x0FF;
+
+    $a &= $b;
+    is($a, chr(0x001) x 0x0FF);
+}
+
+{
+    $a = chr(0x101) x 0x101;
+    $b = chr(0x0FF) x 0x0FF;
+
+    $b &= $a;
+    is($b, chr(0x001) x 0x0FF);
+}
+
+{
+    $a = chr(0x101) x 0x101;
+    $b = chr(0x0FF) x 0x0FF;
+
+    $a ^= $b;
+    is($a, chr(0x1FE) x 0x0FF . chr(0x101) x 2);
+}
+
+{
+    $a = chr(0x101) x 0x101;
+    $b = chr(0x0FF) x 0x0FF;
+
+    $b ^= $a;
+    is($b, chr(0x1FE) x 0x0FF . chr(0x101) x 2);
+}
+

@@ -1221,7 +1221,8 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     (void)SvPOK_only(sv);
     if (left_utf || right_utf) {
 	UV duc, luc, ruc;
-	char * const dcsave = dc;
+	char *dcorig = dc;
+	char *dcsave = NULL;
 	STRLEN lulen = leftlen;
 	STRLEN rulen = rightlen;
 	STRLEN ulen;
@@ -1239,8 +1240,8 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 		dc = (char*)uvchr_to_utf8((U8*)dc, duc);
 	    }
 	    if (sv == left || sv == right)
-		(void)sv_usepvn(sv, dcsave, needlen);
-	    SvCUR_set(sv, dc - dcsave);
+		(void)sv_usepvn(sv, dcorig, needlen);
+	    SvCUR_set(sv, dc - dcorig);
 	    break;
 	case OP_BIT_XOR:
 	    while (lulen && rulen) {
@@ -1266,15 +1267,20 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 		dc = (char*)uvchr_to_utf8((U8*)dc, duc);
 	    }
 	  mop_up_utf:
-	    if (sv == left || sv == right)
-		(void)sv_usepvn(sv, dcsave, needlen);
-	    SvCUR_set(sv, dc - dcsave);
 	    if (rulen)
-		sv_catpvn(sv, rc, rulen);
+		dcsave = savepvn(rc, rulen);
 	    else if (lulen)
-		sv_catpvn(sv, lc, lulen);
+		dcsave = savepvn(lc, lulen);
+	    if (sv == left || sv == right)
+		(void)sv_usepvn(sv, dcorig, needlen); /* Uses Renew(). */
+	    SvCUR_set(sv, dc - dcorig);
+	    if (rulen)
+		sv_catpvn(sv, dcsave, rulen);
+	    else if (lulen)
+		sv_catpvn(sv, dcsave, lulen);
 	    else
 		*SvEND(sv) = '\0';
+	    Safefree(dcsave);
 	    break;
 	}
 	SvUTF8_on(sv);
