@@ -107,24 +107,25 @@ __DATA__
 <h2><a name="section_three">section three</a></h2>
 <p>This is section three.</p>
 <dl>
-<dt><strong><a name="item_item1">item1</a></strong><br />
-</dt>
+<dt><strong><a name="item_item1">item1</a></strong>
+
 <dd>
-This is item one.
+<p>This is item one.</p>
 </dd>
-<p></p>
-<dt><strong><a name="item_item_2">item 2</a></strong><br />
-</dt>
+</li>
+<dt><strong><a name="item_item_2">item 2</a></strong>
+
 <dd>
-This is item two.
+<p>This is item two.</p>
 </dd>
-<p></p>
-<dt><strong><a name="item_item_three">item three</a></strong><br />
-</dt>
+</li>
+<dt><strong><a name="item_item_three">item three</a></strong>
+
 <dd>
-This is item three.
+<p>This is item three.</p>
 </dd>
-<p></p></dl>
+</li>
+</dl>
 
 </body>
 
