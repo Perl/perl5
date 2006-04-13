@@ -63,8 +63,9 @@ byterun(pTHX_ register struct byteloader_state *bstate)
     specialsv_list[1] = &PL_sv_undef;
     specialsv_list[2] = &PL_sv_yes;
     specialsv_list[3] = &PL_sv_no;
-    specialsv_list[4] = pWARN_ALL;
-    specialsv_list[5] = pWARN_NONE;
+    specialsv_list[4] = (SV*)pWARN_ALL;
+    specialsv_list[5] = (SV*)pWARN_NONE;
+    specialsv_list[6] = (SV*)pWARN_STD;
 
     while ((insn = BGET_FGETC()) != EOF) {
 	switch (insn) {
@@ -985,7 +986,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    {
 		svindex arg;
 		BGET_svindex(arg);
-		cCOP->cop_warnings = arg;
+		BSET_cop_warnings(cCOP, arg);
 		break;
 	    }
 	  case INSN_MAIN_START:		/* 132 */

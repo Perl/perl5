@@ -14,7 +14,8 @@ my @optype= qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP PADOP PVOP LOOP COP);
 
 # Nullsv *must* come first in the following so that the condition
 # ($$sv == 0) can continue to be used to test (sv == Nullsv).
-my @specialsv = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no pWARN_ALL pWARN_NONE);
+my @specialsv = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no
+		   (SV*)pWARN_ALL (SV*)pWARN_NONE (SV*)pWARN_STD);
 
 my (%alias_from, $from, $tos);
 while (($from, $tos) = each %alias_to) {
@@ -496,7 +497,7 @@ cop_seq		cCOP->cop_seq				U32
 cop_arybase	cCOP					I32		x
 cop_line	cCOP->cop_line				line_t
 cop_io		cCOP->cop_io				svindex
-cop_warnings	cCOP->cop_warnings			svindex
+cop_warnings	cCOP					svindex		x
 main_start	PL_main_start				opindex
 main_root	PL_main_root				opindex
 main_cv		*(SV**)&PL_main_cv			svindex

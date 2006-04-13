@@ -349,6 +349,18 @@ typedef char *pvindex;
 
 #define BSET_xhv_name(hv, name)	hv_name_set((HV*)hv, name, strlen(name), 0)
 #define BSET_cop_arybase(c, b) CopARYBASE_set(c, b)
+#define BSET_cop_warnings(c, w) \
+	STMT_START {							\
+	    if (specialWARN((STRLEN *)w)) {				\
+		c->cop_warnings = (STRLEN *)w;				\
+	    } else {							\
+		STRLEN len;						\
+		const char *const p = SvPV_const(w, len);		\
+		c->cop_warnings =					\
+		    Perl_new_warnings_bitfield(aTHX_ NULL, p, len);	\
+		SvREFCNT_dec(w);					\
+	    }								\
+	} STMT_END
 
 /* NOTE: the bytecode header only sanity-checks the bytecode. If a script cares about
  * what version of Perl it's being called under, it should do a 'use 5.006_001' or

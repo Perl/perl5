@@ -247,6 +247,47 @@ make_sv_object(pTHX_ SV *arg, SV *sv)
 }
 
 static SV *
+make_warnings_object(pTHX_ SV *arg, STRLEN *warnings)
+{
+    const char *type = 0;
+    dMY_CXT;
+    IV iv = sizeof(specialsv_list)/sizeof(SV*);
+
+    /* Counting down is deliberate. Before the split between make_sv_object
+       and make_warnings_obj there appeared to be a bug - Nullsv and pWARN_STD
+       were both 0, so you could never get a B::SPECIAL for pWARN_STD  */
+
+    while (iv--) {
+	if ((SV*)warnings == specialsv_list[iv]) {
+	    type = "B::SPECIAL";
+	    break;
+	}
+    }
+    if (type) {
+	sv_setiv(newSVrv(arg, type), iv);
+    } else {
+	/* B assumes that warnings are a regular SV. Seems easier to keep it
+	   happy by making them into a regular SV.  */
+	SV *temp = newSVpvn((char *)(warnings + 1), *warnings);
+	SV *target;
+
+	type = svclassnames[SvTYPE(temp)];
+	target = newSVrv(arg, type);
+	iv = PTR2IV(temp);
+	sv_setiv(target, iv);
+
+	/* Need to keep our "temp" around as long as the target exists.
+	   Simplest way seems to be to hang it from magic, and let that clear
+	   it up.  No vtable, so won't actually get in the way of anything.  */
+	sv_magicext(target, temp, PERL_MAGIC_sv, NULL, NULL, 0);
+	/* magic object has had its reference count increased, so we must drop
+	   our reference.  */
+	SvREFCNT_dec(temp);
+    }
+    return arg;
+}
+
+static SV *
 make_mg_object(pTHX_ SV *arg, MAGIC *mg)
 {
     sv_setiv(newSVrv(arg, "B::MAGIC"), PTR2IV(mg));
@@ -510,9 +551,9 @@ BOOT:
     specialsv_list[1] = &PL_sv_undef;
     specialsv_list[2] = &PL_sv_yes;
     specialsv_list[3] = &PL_sv_no;
-    specialsv_list[4] = pWARN_ALL;
-    specialsv_list[5] = pWARN_NONE;
-    specialsv_list[6] = pWARN_STD;
+    specialsv_list[4] = (SV *) pWARN_ALL;
+    specialsv_list[5] = (SV *) pWARN_NONE;
+    specialsv_list[6] = (SV *) pWARN_STD;
 #if PERL_VERSION <= 8
 #  define CVf_ASSERTION	0
 #endif
@@ -1059,7 +1100,6 @@ LOOP_lastop(o)
 #define COP_cop_seq(o)	o->cop_seq
 #define COP_arybase(o)	CopARYBASE_get(o)
 #define COP_line(o)	CopLINE(o)
-#define COP_warnings(o)	o->cop_warnings
 #define COP_io(o)	o->cop_io
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
@@ -1097,9 +1137,12 @@ U32
 COP_line(o)
 	B::COP	o
 
-B::SV
+void
 COP_warnings(o)
 	B::COP	o
+	PPCODE:
+	ST(0) = make_warnings_object(aTHX_ sv_newmortal(), o->cop_warnings);
+	XSRETURN(1);
 
 B::SV
 COP_io(o)

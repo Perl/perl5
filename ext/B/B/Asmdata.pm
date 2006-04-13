@@ -19,7 +19,7 @@ use Exporter;
 our(%insn_data, @insn_name, @optype, @specialsv_name);
 
 @optype = qw(OP UNOP BINOP LOGOP LISTOP PMOP SVOP PADOP PVOP LOOP COP);
-@specialsv_name = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no pWARN_ALL pWARN_NONE);
+@specialsv_name = qw(Nullsv &PL_sv_undef &PL_sv_yes &PL_sv_no (SV*)pWARN_ALL (SV*)pWARN_NONE (SV*)pWARN_STD);
 
 # XXX insn_data is initialised this way because with a large
 # %insn_data = (foo => [...], bar => [...], ...) initialiser
