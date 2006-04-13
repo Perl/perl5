@@ -10578,9 +10578,11 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
 	    ptr = POPPTR(ss,ix);
-	    HINTS_REFCNT_LOCK;
-	    ((COP *)ptr)->cop_hints->refcounted_he_refcnt++;
-	    HINTS_REFCNT_UNLOCK;
+	    if (((COP *)ptr)->cop_hints) {
+		HINTS_REFCNT_LOCK;
+		((COP *)ptr)->cop_hints->refcounted_he_refcnt++;
+		HINTS_REFCNT_UNLOCK;
+	    }
 	    TOPPTR(nss,ix) = ptr;
 	    if (i & HINT_LOCALIZE_HH) {
 		hv = (HV*)POPPTR(ss,ix);
@@ -10696,6 +10698,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		    TOPPTR(nss,ix) = ptr;
 		}
 	    }
+	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: ss_dup inconsistency (%"IVdf")", (IV) i);
 	}
