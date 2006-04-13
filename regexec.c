@@ -3780,7 +3780,7 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 	    {
 		I32 type;
 		type = OP(scan);
-		if (OP(next) != type)	/* No choice. */
+		if (!next || OP(next) != type)	/* No choice. */
 		    next = inner;	/* Avoid recursion. */
 		else {
 		    const I32 lastparen = *PL_reglastparen;
