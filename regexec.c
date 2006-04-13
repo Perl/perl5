@@ -3524,7 +3524,7 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 		/* No need to save/restore up to this paren */
 		I32 parenfloor = scan->flags;
 
-		if (OP(PREVOPER(next)) == NOTHING) /* LONGJMP */
+		if (next && (OP(PREVOPER(next)) == NOTHING)) /* LONGJMP */
 		    next += ARG(next);
 		/* XXXX Probably it is better to teach regpush to support
 		   parenfloor > PL_regsize... */
