@@ -51,8 +51,7 @@
 #define SAVEt_SAVESWITCHSTACK	40
 #define SAVEt_COP_ARYBASE	41
 #define SAVEt_RE_STATE		42
-#define SAVEt_FREESHAREDPV	43
-#define SAVEt_COP_WARNINGS	44
+#define SAVEt_COP_WARNINGS	43
 
 #ifndef SCOPE_SAVES_SIGNAL_MASK
 #define SCOPE_SAVES_SIGNAL_MASK 0
@@ -194,14 +193,7 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 	SSPUSHINT(SAVEt_COP_ARYBASE);			\
     } STMT_END
 
-#define SAVEFREESHAREDPV(pv)				\
-    STMT_START {					\
-	SSCHECK(2);					\
-	SSPUSHPTR(pv);					\
-	SSPUSHINT(SAVEt_FREESHAREDPV);			\
-    } STMT_END
-
-/* Need to do the cop warnings like this, rather than SAVEFREESHAREDPV,
+/* Need to do the cop warnings like this, rather than a "SAVEFREESHAREDPV",
    because realloc() means that the value can actually change. Possibly
    could have done savefreesharedpvREF, but this way actually seems cleaner,
    as it simplifies the code that does the saves, and reduces the load on the

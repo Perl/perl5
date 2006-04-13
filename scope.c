@@ -764,10 +764,6 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    Safefree(ptr);
 	    break;
-	case SAVEt_FREESHAREDPV:
-	    ptr = SSPOPPTR;
-	    PerlMemShared_free(ptr);
-	    break;
 	case SAVEt_CLEARSV:
 	    ptr = (void*)&PL_curpad[SSPOPLONG];
 	    sv = *(SV**)ptr;
