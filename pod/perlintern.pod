@@ -485,26 +485,6 @@ in C<struct refcounted_he *>.
 =for hackers
 Found in file hv.c
 
-=item refcounted_he_copy
-X<refcounted_he_copy>
-
-Copies a chain of C<struct refcounted_he *>. Used by C<pp_entereval>.
-
-	struct refcounted_he *	refcounted_he_copy(const struct refcounted_he *he)
-
-=for hackers
-Found in file hv.c
-
-=item refcounted_he_dup
-X<refcounted_he_dup>
-
-Duplicates the C<struct refcounted_he *> for a new thread.
-
-	struct refcounted_he *	refcounted_he_dup(const struct refcounted_he *const he, CLONE_PARAMS* param)
-
-=for hackers
-Found in file hv.c
-
 =item refcounted_he_free
 X<refcounted_he_free>
 

@@ -1805,8 +1805,8 @@ PERL_CALLCONV OP*	Perl_refkids(pTHX_ OP* o, I32 type);
 PERL_CALLCONV void	Perl_regdump(pTHX_ const regexp* r)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV SV*	Perl_regclass_swash(pTHX_ const struct regnode *n, bool doinit, SV **listsvp, SV **altsvp)
-			__attribute__nonnull__(pTHX_1);
+PERL_CALLCONV SV*	Perl_regclass_swash(pTHX_ const regexp *prog, const struct regnode *n, bool doinit, SV **listsvp, SV **altsvp)
+			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV I32	Perl_pregexec(pTHX_ regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave)
 			__attribute__nonnull__(pTHX_1)
@@ -1840,9 +1840,9 @@ PERL_CALLCONV regnode*	Perl_regnext(pTHX_ regnode* p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV void	Perl_regprop(pTHX_ SV* sv, const regnode* o)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+PERL_CALLCONV void	Perl_regprop(pTHX_ const regexp *prog, SV* sv, const regnode* o)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
 
 PERL_CALLCONV void	Perl_repeatcpy(pTHX_ char* to, const char* from, I32 len, I32 count)
 			__attribute__nonnull__(pTHX_1)
@@ -3619,19 +3619,20 @@ STATIC I32	S_regmatch(pTHX_ regexp *rex, regnode *prog)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC I32	S_regrepeat(pTHX_ const regnode *p, I32 max)
+STATIC I32	S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 
 STATIC I32	S_regtry(pTHX_ regexp *prog, char *startpos)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC bool	S_reginclass(pTHX_ const regnode *n, const U8 *p, STRLEN *lenp, bool do_utf8sv_is_utf8)
+STATIC bool	S_reginclass(pTHX_ const regexp *prog, const regnode *n, const U8 *p, STRLEN *lenp, bool do_utf8sv_is_utf8)
 			__attribute__warn_unused_result__
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
 
 STATIC CHECKPOINT	S_regcppush(pTHX_ I32 parenfloor);
 STATIC char*	S_regcppop(pTHX_ const regexp *rex)

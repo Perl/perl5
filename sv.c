@@ -10657,8 +10657,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		/* I assume that it only ever "worked" because no-one called
 		   (pseudo)fork while the regexp engine had re-entered itself.
 		*/
-		new_state->re_state_reg_re
-		    = any_dup(old_state->re_state_reg_re, proto_perl);
 		new_state->re_state_reg_ganch
 		    = pv_dup(old_state->re_state_reg_ganch);
 		new_state->re_state_reg_sv

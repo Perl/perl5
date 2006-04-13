@@ -2833,7 +2833,7 @@
 #define refkids(a,b)		Perl_refkids(aTHX_ a,b)
 #endif
 #define regdump(a)		Perl_regdump(aTHX_ a)
-#define regclass_swash(a,b,c,d)	Perl_regclass_swash(aTHX_ a,b,c,d)
+#define regclass_swash(a,b,c,d,e)	Perl_regclass_swash(aTHX_ a,b,c,d,e)
 #define pregexec(a,b,c,d,e,f,g)	Perl_pregexec(aTHX_ a,b,c,d,e,f,g)
 #define pregfree(a)		Perl_pregfree(aTHX_ a)
 #define pregcomp(a,b,c)		Perl_pregcomp(aTHX_ a,b,c)
@@ -2842,7 +2842,7 @@
 #define regexec_flags(a,b,c,d,e,f,g,h)	Perl_regexec_flags(aTHX_ a,b,c,d,e,f,g,h)
 #define regnext(a)		Perl_regnext(aTHX_ a)
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define regprop(a,b)		Perl_regprop(aTHX_ a,b)
+#define regprop(a,b,c)		Perl_regprop(aTHX_ a,b,c)
 #endif
 #define repeatcpy(a,b,c,d)	Perl_repeatcpy(aTHX_ a,b,c,d)
 #define rninstr(a,b,c,d)	Perl_rninstr(aTHX_ a,b,c,d)
@@ -3492,9 +3492,9 @@
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define regmatch(a,b)		S_regmatch(aTHX_ a,b)
-#define regrepeat(a,b)		S_regrepeat(aTHX_ a,b)
+#define regrepeat(a,b,c)	S_regrepeat(aTHX_ a,b,c)
 #define regtry(a,b)		S_regtry(aTHX_ a,b)
-#define reginclass(a,b,c,d)	S_reginclass(aTHX_ a,b,c,d)
+#define reginclass(a,b,c,d,e)	S_reginclass(aTHX_ a,b,c,d,e)
 #define regcppush(a)		S_regcppush(aTHX_ a)
 #define regcppop(a)		S_regcppop(aTHX_ a)
 #define reghop3			S_reghop3

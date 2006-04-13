@@ -1537,7 +1537,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 	/* Peephole optimizer: */
 	DEBUG_OPTIMISE_r({
 	  SV * const mysv=sv_newmortal();
-	  regprop( mysv, scan);
+	  regprop(RExC_rx, mysv, scan);
 	  PerlIO_printf(Perl_debug_log, "%*speep: %s (0x%08"UVXf")\n",
 	    (int)depth*2, "", SvPV_nolen_const(mysv), PTR2UV(scan));
 	});
@@ -1832,7 +1832,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
                         }
 
                         DEBUG_OPTIMISE_r({
-                            regprop( mysv, tail );
+                            regprop(RExC_rx, mysv, tail );
                             PerlIO_printf( Perl_debug_log, "%*s%s%s%s\n",
                                 (int)depth * 2 + 2, "", "Tail node is:", SvPV_nolen_const( mysv ),
                                 (RExC_seen_evals) ? "[EVAL]" : ""
@@ -1869,16 +1869,16 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
                             regnode * const noper_next = regnext( noper );
 
                             DEBUG_OPTIMISE_r({
-                                regprop( mysv, cur);
+                                regprop(RExC_rx, mysv, cur);
                                 PerlIO_printf( Perl_debug_log, "%*s%s",
                                    (int)depth * 2 + 2,"  ", SvPV_nolen_const( mysv ) );
 
-                                regprop( mysv, noper);
+                                regprop(RExC_rx, mysv, noper);
                                 PerlIO_printf( Perl_debug_log, " -> %s",
                                     SvPV_nolen_const(mysv));
 
                                 if ( noper_next ) {
-                                  regprop( mysv, noper_next );
+                                  regprop(RExC_rx, mysv, noper_next );
                                   PerlIO_printf( Perl_debug_log,"\t=> %s\t",
                                     SvPV_nolen_const(mysv));
                                 }
@@ -1896,20 +1896,20 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
                                 } else {
                                     DEBUG_OPTIMISE_r(
                                         if (!last ) {
-                                            regprop( mysv, first);
+                                            regprop(RExC_rx, mysv, first);
                                             PerlIO_printf( Perl_debug_log, "%*s%s",
                                               (int)depth * 2 + 2, "F:", SvPV_nolen_const( mysv ) );
-                                            regprop( mysv, NEXTOPER(first) );
+                                            regprop(RExC_rx, mysv, NEXTOPER(first) );
                                             PerlIO_printf( Perl_debug_log, " -> %s\n",
                                               SvPV_nolen_const( mysv ) );
                                         }
                                     );
                                     last = cur;
                                     DEBUG_OPTIMISE_r({
-                                        regprop( mysv, cur);
+                                        regprop(RExC_rx, mysv, cur);
                                         PerlIO_printf( Perl_debug_log, "%*s%s",
                                           (int)depth * 2 + 2, "N:", SvPV_nolen_const( mysv ) );
-                                        regprop( mysv, noper );
+                                        regprop(RExC_rx, mysv, noper );
                                         PerlIO_printf( Perl_debug_log, " -> %s\n",
                                           SvPV_nolen_const( mysv ) );
                                     });
@@ -1937,7 +1937,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
                             }
                         }
                         DEBUG_OPTIMISE_r({
-                            regprop( mysv, cur);
+                            regprop(RExC_rx, mysv, cur);
                             PerlIO_printf( Perl_debug_log,
                               "%*s%s\t(0x%p,0x%p,0x%p)\n", (int)depth * 2 + 2,
                               "  ", SvPV_nolen_const( mysv ), first, last, cur);
@@ -3109,7 +3109,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    r->regstclass = (regnode*)RExC_rx->data->data[n];
 	    r->reganch &= ~ROPT_SKIP;	/* Used in find_byclass(). */
 	    DEBUG_COMPILE_r({ SV *sv = sv_newmortal();
-	              regprop(sv, (regnode*)data.start_class);
+	              regprop(r, sv, (regnode*)data.start_class);
 		      PerlIO_printf(Perl_debug_log,
 				    "synthetic stclass \"%s\".\n",
 				    SvPVX_const(sv));});
@@ -3164,7 +3164,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	    r->regstclass = (regnode*)RExC_rx->data->data[n];
 	    r->reganch &= ~ROPT_SKIP;	/* Used in find_byclass(). */
 	    DEBUG_COMPILE_r({ SV* sv = sv_newmortal();
-	              regprop(sv, (regnode*)data.start_class);
+	              regprop(r, sv, (regnode*)data.start_class);
 		      PerlIO_printf(Perl_debug_log,
 				    "synthetic stclass \"%s\".\n",
 				    SvPVX_const(sv));});
@@ -5719,7 +5719,7 @@ Perl_regdump(pTHX_ const regexp *r)
 	PerlIO_printf(Perl_debug_log, ") ");
 
     if (r->regstclass) {
-	regprop(sv, r->regstclass);
+	regprop(r, sv, r->regstclass);
 	PerlIO_printf(Perl_debug_log, "stclass \"%s\" ", SvPVX_const(sv));
     }
     if (r->reganch & ROPT_ANCH) {
@@ -5766,7 +5766,7 @@ Perl_regdump(pTHX_ const regexp *r)
 - regprop - printable representation of opcode
 */
 void
-Perl_regprop(pTHX_ SV *sv, const regnode *o)
+Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 {
 #ifdef DEBUGGING
     dVAR;
@@ -5887,7 +5887,7 @@ Perl_regprop(pTHX_ SV *sv, const regnode *o)
 
 	{
 	    SV *lv;
-	    SV * const sw = regclass_swash(o, FALSE, &lv, 0);
+	    SV * const sw = regclass_swash(prog, o, FALSE, &lv, 0);
 	
 	    if (lv) {
 		if (sw) {
@@ -6249,7 +6249,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	/* Where, what. */
 	if (OP(node) == OPTIMIZED)
 	    goto after_print;
-	regprop(sv, node);
+	regprop(r, sv, node);
 	PerlIO_printf(Perl_debug_log, "%4"IVdf":%*s%s", (IV)(node - start),
 		      (int)(2*l + 1), "", SvPVX_const(sv));
 	if (next == NULL)		/* Next ptr. */

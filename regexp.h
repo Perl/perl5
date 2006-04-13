@@ -289,7 +289,6 @@ typedef struct regmatch_slab {
 #define PL_reg_eval_set		PL_reg_state.re_state_reg_eval_set
 #define PL_regnarrate		PL_reg_state.re_state_regnarrate
 #define PL_regindent		PL_reg_state.re_state_regindent
-#define PL_reg_re		PL_reg_state.re_state_reg_re
 #define PL_reg_ganch		PL_reg_state.re_state_reg_ganch
 #define PL_reg_sv		PL_reg_state.re_state_reg_sv
 #define PL_reg_match_utf8	PL_reg_state.re_state_reg_match_utf8
@@ -323,7 +322,6 @@ struct re_save_state {
     I32 re_state_reg_eval_set;		/* from regexec.c */
     I32 re_state_regnarrate;		/* from regexec.c */
     int re_state_regindent;		/* from regexec.c */
-    regexp *re_state_reg_re;		/* from regexec.c */
     char *re_state_reg_ganch;		/* from regexec.c */
     SV *re_state_reg_sv;		/* from regexec.c */
     bool re_state_reg_match_utf8;	/* from regexec.c */

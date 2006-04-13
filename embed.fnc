@@ -650,7 +650,7 @@ Ap	|void	|push_scope
 Amb	|OP*	|ref		|NULLOK OP* o|I32 type
 p	|OP*	|refkids	|NULLOK OP* o|I32 type
 Ap	|void	|regdump	|NN const regexp* r
-Ap	|SV*	|regclass_swash	|NN const struct regnode *n|bool doinit|NULLOK SV **listsvp|NULLOK SV **altsvp
+Ap	|SV*	|regclass_swash	|NULLOK const regexp *prog|NN const struct regnode *n|bool doinit|NULLOK SV **listsvp|NULLOK SV **altsvp
 Ap	|I32	|pregexec	|NN regexp* prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \
 				|NN SV* screamer|U32 nosave
@@ -664,7 +664,7 @@ Ap	|I32	|regexec_flags	|NN regexp* prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \
 				|NN SV* screamer|NULLOK void* data|U32 flags
 ApR	|regnode*|regnext	|NN regnode* p
-Ep	|void	|regprop	|NN SV* sv|NN const regnode* o
+Ep	|void	|regprop	|NULLOK const regexp *prog|NN SV* sv|NN const regnode* o
 Ap	|void	|repeatcpy	|NN char* to|NN const char* from|I32 len|I32 count
 ApP	|char*	|rninstr	|NN const char* big|NN const char* bigend \
 				|NN const char* little|NN const char* lend
@@ -1315,9 +1315,9 @@ Es	|I32	|make_trie	|NN struct RExC_state_t* state|NN regnode *startbranch \
 
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
 ERs	|I32	|regmatch	|NN regexp *rex|NN regnode *prog
-ERs	|I32	|regrepeat	|NN const regnode *p|I32 max
+ERs	|I32	|regrepeat	|NN const regexp *prog|NN const regnode *p|I32 max
 ERs	|I32	|regtry		|NN regexp *prog|NN char *startpos
-ERs	|bool	|reginclass	|NN const regnode *n|NN const U8 *p|NULLOK STRLEN *lenp\
+ERs	|bool	|reginclass	|NULLOK const regexp *prog|NN const regnode *n|NN const U8 *p|NULLOK STRLEN *lenp\
 				|bool do_utf8sv_is_utf8
 Es	|CHECKPOINT|regcppush	|I32 parenfloor
 Es	|char*	|regcppop	|NN const regexp *rex

@@ -107,7 +107,7 @@
 #define	STATIC	static
 #endif
 
-#define REGINCLASS(p,c)  (ANYOF_FLAGS(p) ? reginclass(p,c,0,0) : ANYOF_BITMAP_TEST(p,*(c)))
+#define REGINCLASS(prog,p,c)  (ANYOF_FLAGS(p) ? reginclass(prog,p,c,0,0) : ANYOF_BITMAP_TEST(p,*(c)))
 
 /*
  * Forwards.
@@ -839,7 +839,6 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		   : strend);
 
 	t = s;
-	PL_reg_re = prog;
         s = find_byclass(prog, prog->regstclass, s, endpos, 1);
 	if (!s) {
 #ifdef DEBUGGING
@@ -954,8 +953,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		 while (s + (uskip = UTF8SKIP(s)) <= strend) {
 		      if ((ANYOF_FLAGS(c) & ANYOF_UNICODE) ||
 			  !UTF8_IS_INVARIANT((U8)s[0]) ?
-			  reginclass(c, (U8*)s, 0, do_utf8) :
-			  REGINCLASS(c, (U8*)s)) {
+			  reginclass(prog, c, (U8*)s, 0, do_utf8) :
+			  REGINCLASS(prog, c, (U8*)s)) {
 			   if (tmp && (norun || regtry(prog, s)))
 				goto got_it;
 			   else
@@ -970,7 +969,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		 while (s < strend) {
 		      STRLEN skip = 1;
 
-		      if (REGINCLASS(c, (U8*)s) ||
+		      if (REGINCLASS(prog, c, (U8*)s) ||
 			  (ANYOF_FOLD_SHARP_S(c, s, strend) &&
 			   /* The assignment of 2 is intentional:
 			    * for the folded sharp s, the skip is 2. */
@@ -1622,7 +1621,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	return 0;
     }
 
-    PL_reg_re = prog;
 #ifdef DEBUGGING
     PL_regnarrate = DEBUG_r_TEST;
 #endif
@@ -1912,7 +1910,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    int len0;
 	    int len1;
 
-	    regprop(prop, c);
+	    regprop(prog, prop, c);
 	    s0 = UTF ?
 	      pv_uni_display(dsv0, (U8*)SvPVX_const(prop), SvCUR(prop), 60,
 			     UNI_DISPLAY_REGEX) :
@@ -2537,7 +2535,7 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 		pref0_len = 0;
 	    if (pref0_len > pref_len)
 		pref0_len = pref_len;
-	    regprop(prop, scan);
+	    regprop(rex, prop, scan);
 	    {
 	      const char * const s0 =
 		do_utf8 && OP(scan) != CANY ?
@@ -2679,7 +2677,7 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 
 		/* what trie are we using right now */
 		reg_trie_data *trie
-		    = (reg_trie_data*)PL_reg_re->data->data[ ARG( scan ) ];
+		    = (reg_trie_data*)rex->data->data[ ARG( scan ) ];
 	    	st->u.trie.accepted = 0; /* how many accepting states we have seen */
 		result = 0;
 
@@ -2844,7 +2842,7 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 			}
 			DEBUG_EXECUTE_r({
 			    reg_trie_data * const trie = (reg_trie_data*)
-					    PL_reg_re->data->data[ARG(scan)];
+					    rex->data->data[ARG(scan)];
 			    SV ** const tmp = av_fetch( trie->words, st->u.trie.accept_buff[ best ].wordnum - 1, 0 );
     			    PerlIO_printf( Perl_debug_log, "%*s  %strying alternation #%d <%s> at 0x%p%s\n",
     			        REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
@@ -2986,7 +2984,7 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 	    if (do_utf8) {
 	        STRLEN inclasslen = PL_regeol - locinput;
 
-	        if (!reginclass(scan, (U8*)locinput, &inclasslen, do_utf8))
+	        if (!reginclass(rex, scan, (U8*)locinput, &inclasslen, do_utf8))
 		    sayNO_ANYOF;
 		if (locinput >= PL_regeol)
 		    sayNO;
@@ -2997,7 +2995,7 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 	    else {
 		if (nextchr < 0)
 		    nextchr = UCHARAT(locinput);
-		if (!REGINCLASS(scan, (U8*)locinput))
+		if (!REGINCLASS(rex, scan, (U8*)locinput))
 		    sayNO_ANYOF;
 		if (!nextchr && locinput >= PL_regeol)
 		    sayNO;
@@ -3299,12 +3297,11 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 		OP_4tree * const oop = PL_op;
 		COP * const ocurcop = PL_curcop;
 		PAD *old_comppad;
-		struct regexp * const oreg = PL_reg_re;
 	    
 		n = ARG(scan);
-		PL_op = (OP_4tree*)PL_reg_re->data->data[n];
+		PL_op = (OP_4tree*)rex->data->data[n];
 		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log, "  re_eval 0x%"UVxf"\n", PTR2UV(PL_op)) );
-		PAD_SAVE_LOCAL(old_comppad, (PAD*)PL_reg_re->data->data[n + 2]);
+		PAD_SAVE_LOCAL(old_comppad, (PAD*)rex->data->data[n + 2]);
 		PL_regendp[0] = PL_reg_magic->mg_len = locinput - PL_bostr;
 
 		CALLRUNOPS(aTHX);			/* Scalar context. */
@@ -3319,7 +3316,6 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 		PL_op = oop;
 		PAD_RESTORE_LOCAL(old_comppad);
 		PL_curcop = ocurcop;
-		PL_reg_re = oreg;
 		if (!st->logical) {
 		    /* /(?{...})/ */
 		    sv_setsv(save_scalar(PL_replgv), ret);
@@ -3390,9 +3386,7 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 			    ((re->reganch & ROPT_UTF8) != 0);
 		if (st->u.eval.toggleutf) PL_reg_flags ^= RF_utf8;
 		st->u.eval.prev_rex = rex;
-		assert(rex == PL_reg_re); /* XXX */
 		rex = re;
-		PL_reg_re = rex; /* XXX */
 
 		st->u.eval.prev_eval = cur_eval;
 		st->u.eval.prev_slab = PL_regmatch_slab;
@@ -4080,7 +4074,7 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 	    PL_reginput = locinput;
 	    if (st->minmod) {
 		st->minmod = 0;
-		if (st->ln && regrepeat(scan, st->ln) < st->ln)
+		if (st->ln && regrepeat(rex, scan, st->ln) < st->ln)
 		    sayNO;
 		locinput = PL_reginput;
 		REGCP_SET(st->u.plus.lastcp);
@@ -4152,7 +4146,7 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 			/* PL_reginput == old now */
 			if (locinput != st->u.plus.old) {
 			    st->ln = 1;	/* Did some */
-			    if (regrepeat(scan, st->u.plus.count) < st->u.plus.count)
+			    if (regrepeat(rex, scan, st->u.plus.count) < st->u.plus.count)
 				sayNO;
 			}
 			/* PL_reginput == locinput now */
@@ -4196,7 +4190,7 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 		    }
 		    /* Couldn't or didn't -- move forward. */
 		    PL_reginput = locinput;
-		    if (regrepeat(scan, 1)) {
+		    if (regrepeat(rex, scan, 1)) {
 			st->ln++;
 			locinput = PL_reginput;
 		    }
@@ -4205,7 +4199,7 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 		}
 	    }
 	    else {
-		n = regrepeat(scan, n);
+		n = regrepeat(rex, scan, n);
 		locinput = PL_reginput;
 		if (st->ln < n && PL_regkind[(U8)OP(next)] == EOL &&
 		    (OP(next) != MEOL ||
@@ -4269,7 +4263,6 @@ S_regmatch(pTHX_ regexp *rex, regnode *prog)
 		    PL_reg_flags ^= RF_utf8;
 		ReREFCNT_dec(rex);
 		rex = st->u.eval.prev_rex;
-		PL_reg_re = rex; /* XXX */
 		/* XXXX This is too dramatic a measure... */
 		PL_reg_maxiter = 0;
 
@@ -4560,7 +4553,6 @@ do_no:
 		PL_reg_flags ^= RF_utf8;
 	    ReREFCNT_dec(rex);
 	    rex = st->u.eval.prev_rex;
-	    PL_reg_re = rex; /* XXX */
 	    cur_eval = st->u.eval.prev_eval;
 
 	    /* XXXX This is too dramatic a measure... */
@@ -4638,7 +4630,7 @@ final_exit:
  * rather than incrementing count on every character.  [Er, except utf8.]]
  */
 STATIC I32
-S_regrepeat(pTHX_ const regnode *p, I32 max)
+S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max)
 {
     dVAR;
     register char *scan;
@@ -4701,12 +4693,12 @@ S_regrepeat(pTHX_ const regnode *p, I32 max)
 	if (do_utf8) {
 	    loceol = PL_regeol;
 	    while (hardcount < max && scan < loceol &&
-		   reginclass(p, (U8*)scan, 0, do_utf8)) {
+		   reginclass(prog, p, (U8*)scan, 0, do_utf8)) {
 		scan += UTF8SKIP(scan);
 		hardcount++;
 	    }
 	} else {
-	    while (scan < loceol && REGINCLASS(p, (U8*)scan))
+	    while (scan < loceol && REGINCLASS(prog, p, (U8*)scan))
 		scan++;
 	}
 	break;
@@ -4867,7 +4859,7 @@ S_regrepeat(pTHX_ const regnode *p, I32 max)
 		SV * const prop = sv_newmortal();
                 GET_RE_DEBUG_FLAGS;
                 DEBUG_EXECUTE_r({
-		regprop(prop, p);
+		regprop(prog, prop, p);
 		PerlIO_printf(Perl_debug_log,
 			      "%*s  %s can match %"IVdf" times out of %"IVdf"...\n",
 			      REPORT_CODE_OFF+1, "", SvPVX_const(prop),(IV)c,(IV)max);
@@ -4883,13 +4875,13 @@ S_regrepeat(pTHX_ const regnode *p, I32 max)
 */
 
 SV *
-Perl_regclass_swash(pTHX_ register const regnode* node, bool doinit, SV** listsvp, SV **altsvp)
+Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool doinit, SV** listsvp, SV **altsvp)
 {
     dVAR;
     SV *sw  = NULL;
     SV *si  = NULL;
     SV *alt = NULL;
-    const struct reg_data *data = PL_reg_re ? PL_reg_re->data : NULL;
+    const struct reg_data *data = prog ? prog->data : NULL;
 
     if (data && data->count) {
 	const U32 n = ARG(node);
@@ -4937,7 +4929,7 @@ Perl_regclass_swash(pTHX_ register const regnode* node, bool doinit, SV** listsv
  */
 
 STATIC bool
-S_reginclass(pTHX_ register const regnode *n, register const U8* p, STRLEN* lenp, register bool do_utf8)
+S_reginclass(pTHX_ const regexp *prog, register const regnode *n, register const U8* p, STRLEN* lenp, register bool do_utf8)
 {
     dVAR;
     const char flags = ANYOF_FLAGS(n);
@@ -4966,7 +4958,7 @@ S_reginclass(pTHX_ register const regnode *n, register const U8* p, STRLEN* lenp
 	    match = TRUE;
 	if (!match) {
 	    AV *av;
-	    SV * const sw = regclass_swash(n, TRUE, 0, (SV**)&av);
+	    SV * const sw = regclass_swash(prog, n, TRUE, 0, (SV**)&av);
 	
 	    if (sw) {
 		if (swash_fetch(sw, p, do_utf8))
