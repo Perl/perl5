@@ -1738,7 +1738,11 @@ S_glob_2inpuv(pTHX_ GV *gv, STRLEN *len, bool want_number)
 	   can tail call us and return true.  */
 	return (char *) 1;
     } else {
-	return SvPV(buffer, *len);
+	assert(SvPOK(buffer));
+	if (len) {
+	    *len = SvCUR(buffer);
+	}
+	return SvPVX(buffer);
     }
 }
 
