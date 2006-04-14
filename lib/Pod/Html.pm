@@ -2096,7 +2096,7 @@ sub fragment_id {
 
 	# honour the perlfunc manpage: func [PAR[,[ ]PAR]...]
 	# and some funnies with ... Module ...
-	return $1 if $text =~ m{^([a-z\d_]+)(\s+[A-Z\d,/& ]+)?$};
+	return $1 if $text =~ m{^([a-z\d_]+)(\s+[A-Z,/& ][A-Z\d,/& ]*)?$};
 	return $1 if $text =~ m{^([a-z\d]+)\s+Module(\s+[A-Z\d,/& ]+)?$};
 
 	# text? normalize!

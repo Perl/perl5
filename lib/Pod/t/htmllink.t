@@ -10,10 +10,7 @@ BEGIN {
 use strict;
 use Test::More tests => 1;
 
-TODO: {
-    local $TODO = "item 2 doesn't work as expected";
-    convert_n_test("htmllink", "html links");
-}
+convert_n_test("htmllink", "html links");
 
 __DATA__
 <?xml version="1.0" ?>
