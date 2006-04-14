@@ -3220,7 +3220,8 @@ PP(pp_require)
 			    }
 
 			    if (!tryrsfp) {
-				tryrsfp = PerlIO_open("/dev/null", PERL_SCRIPT_MODE);
+				tryrsfp = PerlIO_open(BIT_BUCKET,
+						      PERL_SCRIPT_MODE);
 			    }
 			}
 			SP--;
