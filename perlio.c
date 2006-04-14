@@ -2912,9 +2912,8 @@ PerlIOStdio_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
 		    f = PerlIO_allocate(aTHX);
 		}
 		if ((f = PerlIO_push(aTHX_ f, self, mode, PerlIOArg))) {
-		    PerlIOStdio * const s = PerlIOSelf(f, PerlIOStdio);
-		    s->stdio = stdio;
-		    PerlIOUnix_refcnt_inc(fileno(s->stdio));
+		    PerlIOSelf(f, PerlIOStdio)->stdio = stdio;
+		    PerlIOUnix_refcnt_inc(fileno(stdio));
 		}
 		return f;
 	    }
