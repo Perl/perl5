@@ -4536,7 +4536,10 @@ called with two parameters, the first being a reference to itself, and the
 second the name of the file to be included (e.g. "F<Foo/Bar.pm>").  The
 subroutine should return C<undef> or a filehandle, from which the file to
 include will be read.  If C<undef> is returned, C<require> will look at
-the remaining elements of @INC.
+the remaining elements of @INC.  Note that a tied file handle must be a
+real file handle (strictly a typeglob, or reference to a typeglob, blessed or
+unblessed) - tied file handles will be ignored and treated as a return of
+C<undef>.
 
 If the hook is an array reference, its first element must be a subroutine
 reference.  This subroutine is called as above, but the first parameter is
@@ -4563,8 +4566,8 @@ or:
 
 If the hook is an object, it must provide an INC method that will be
 called as above, the first parameter being the object itself.  (Note that
-you must fully qualify the sub's name, as it is always forced into package
-C<main>.)  Here is a typical code layout:
+you must fully qualify the sub's name, as unqualified C<INC> is always forced
+into package C<main>.)  Here is a typical code layout:
 
     # In Foo.pm
     package Foo;
