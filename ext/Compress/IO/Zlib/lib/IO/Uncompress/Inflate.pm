@@ -13,7 +13,7 @@ use IO::Uncompress::RawInflate ;
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $InflateError);
 
-$VERSION = '2.000_10';
+$VERSION = '2.000_11';
 $InflateError = '';
 
 @ISA    = qw( Exporter IO::Uncompress::RawInflate );

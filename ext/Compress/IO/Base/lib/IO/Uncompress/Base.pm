@@ -10,7 +10,7 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter );
 
 
-$VERSION = '2.000_10';
+$VERSION = '2.000_11';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
@@ -39,12 +39,17 @@ sub smartRead
     my $offset = 0 ;
 
 
+    if (defined *$self->{InputLength} && 
+                *$self->{InputLengthRemaining} <= 0) {
+        return 0 ;
+    }
+
     if ( length *$self->{Prime} ) {
         #$$out = substr(*$self->{Prime}, 0, $size, '') ;
         $$out = substr(*$self->{Prime}, 0, $size) ;
         substr(*$self->{Prime}, 0, $size) =  '' ;
-        if (length $$out == $size) {
-            #*$self->{InputLengthRemaining} -= length $$out;
+        if (length $$out == $size || defined *$self->{InputLength}) {
+            *$self->{InputLengthRemaining} -= length $$out;
             return length $$out ;
         }
         $offset = length $$out ;
@@ -53,9 +58,6 @@ sub smartRead
     my $get_size = $size - $offset ;
 
     if ( defined *$self->{InputLength} ) {
-        #*$self->{InputLengthRemaining} += length *$self->{Prime} ;
-        #*$self->{InputLengthRemaining} = *$self->{InputLength}
-        #    if *$self->{InputLengthRemaining} > *$self->{InputLength};
         $get_size = min($get_size, *$self->{InputLengthRemaining});
     }
 
@@ -100,6 +102,7 @@ sub pushBack
 
     if (defined *$self->{FH} || defined *$self->{InputEvent} ) {
         *$self->{Prime} = $_[0] . *$self->{Prime} ;
+        *$self->{InputLengthRemaining} += length($_[0]);
     }
     else {
         my $len = length $_[0];
@@ -260,6 +263,12 @@ sub TruncatedHeader
 {
     my ($self) = shift;
     return $self->HeaderError("Truncated in $_[0] Section");
+}
+
+sub TruncatedTrailer
+{
+    my ($self) = shift;
+    return $self->TrailerError("Truncated in $_[0] Section");
 }
 
 sub checkParams
@@ -721,7 +730,7 @@ sub _raw_read
 
         *$self->{NewStream} = 0 ;
         *$self->{EndStream} = 0 ;
-        *$self->{Uncomp}->reset();
+        $self->reset();
 
         return G_ERR
             unless  my $magic = $self->ckMagic();
@@ -760,6 +769,8 @@ sub _raw_read
 
         $self->postBlockChk($buffer) == STATUS_OK
             or return G_ERR;
+
+        $self->filterUncompressed($buffer);
 
         #$buf_len = *$self->{Uncomp}->count();
         $buf_len = length($$buffer) - $before_len;
@@ -813,6 +824,17 @@ sub _raw_read
 
     # return the number of uncompressed bytes read
     return $buf_len ;
+}
+
+sub reset
+{
+    my $self = shift ;
+
+    return *$self->{Uncomp}->reset();
+}
+
+sub filterUncompressed
+{
 }
 
 #sub isEndStream
@@ -1271,10 +1293,6 @@ sub _notAvailable
 #}
 #
 #
-#sub reset
-#{
-#    return STATUS_OK ;
-#}
 
 
 package IO::Uncompress::Base ;

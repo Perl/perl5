@@ -12,11 +12,19 @@ use IO::Uncompress::RawInflate ;
 use IO::Compress::Base::Common qw(:Status createSelfTiedObject);
 use IO::Uncompress::Adapter::Identity;
 
+use Compress::Raw::Zlib qw(crc32) ;
+BEGIN
+{
+    eval { require IO::Uncompress::Adapter::Bunzip2  ;
+           import IO::Uncompress::Adapter::Bunzip2 } ;
+}
+
+
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError);
 
-$VERSION = '2.000_10';
+$VERSION = '2.000_11';
 $UnzipError = '';
 
 @ISA    = qw(Exporter IO::Uncompress::RawInflate);
@@ -172,8 +180,8 @@ sub chkTrailer
     }
 
     if (*$self->{Strict}) {
-        #return $self->TrailerError("CRC mismatch")
-        #    if $CRC32  != *$self->{Uncomp}->crc32() ;
+        return $self->TrailerError("CRC mismatch")
+            if $CRC32  != *$self->{ZipData}{CRC32} ;
 
         my $exp_isize = *$self->{Uncomp}->compressedBytes();
         return $self->TrailerError("CSIZE mismatch. Got $cSize"
@@ -288,21 +296,21 @@ sub skipCentralDirectory
     if ($filename_length)
     {
         $self->smartReadExact(\$filename, $filename_length)
-            or return $self->TrailerError("xxx");
+            or return $self->TruncatedTrailer("filename");
         $keep .= $filename ;
     }
 
     if ($extra_length)
     {
         $self->smartReadExact(\$extraField, $extra_length)
-            or return $self->TrailerError("xxx");
+            or return $self->TruncatedTrailer("extra");
         $keep .= $extraField ;
     }
 
     if ($comment_length)
     {
         $self->smartReadExact(\$comment, $comment_length)
-            or return $self->TrailerError("xxx");
+            or return $self->TruncatedTrailer("comment");
         $keep .= $comment ;
     }
 
@@ -335,7 +343,7 @@ sub skipEndCentralDirectory
     if ($comment_length)
     {
         $self->smartReadExact(\$comment, $comment_length)
-            or return $self->TrailerError("xxx");
+            or return $self->TruncatedTrailer("comment");
         $keep .= $comment ;
     }
 
@@ -432,15 +440,29 @@ sub _readZipHeader($)
         $keep .= $extraField ;
     }
 
+    *$self->{ZipData}{Method} = $compressedMethod;
     if ($compressedMethod == 8)
     {
-        *$self->{Type} = 'zip';
+        *$self->{Type} = 'zip-deflate';
+    }
+    elsif ($compressedMethod == 12)
+    {
+    #if (! defined $IO::Uncompress::Adapter::Bunzip2::VERSION)
+        
+        *$self->{Type} = 'zip-bzip2';
+        
+        my $obj = IO::Uncompress::Adapter::Bunzip2::mkUncompObject(
+                                                              );
+
+        *$self->{Uncomp} = $obj;
+        *$self->{ZipData}{CRC32} = crc32(undef);
+
     }
     elsif ($compressedMethod == 0)
     {
         # TODO -- add support for reading uncompressed
 
-        *$self->{Type} = 'zipStored';
+        *$self->{Type} = 'zip-stored';
         
         my $obj = IO::Uncompress::Adapter::Identity::mkUncompObject(# $got->value('CRC32'),
                                                              # $got->value('ADLER32'),
@@ -493,6 +515,19 @@ sub _readZipHeader($)
 
       }
 }
+
+sub filterUncompressed
+{
+    my $self = shift ;
+
+    if (*$self->{ZipData}{Method} == 12) {
+        *$self->{ZipData}{CRC32} = crc32(${$_[0]}, *$self->{ZipData}{CRC32});
+    }
+    else {
+        *$self->{ZipData}{CRC32} = *$self->{Uncomp}->crc32() ;
+    }
+}    
+
 
 # from Archive::Zip
 sub _dosToUnixTime

@@ -16,7 +16,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %DEFLATE_CONSTANTS, %EXPORT_TAGS, $RawDeflateError);
 
-$VERSION = '2.000_10';
+$VERSION = '2.000_11';
 $RawDeflateError = '';
 
 @ISA = qw(Exporter IO::Compress::Base);
@@ -1000,7 +1000,9 @@ constants that can be used by C<IO::Compress::RawDeflate>. Same as doing this
 
 Import all symbolic constants. Same as doing this
 
+
     use IO::Compress::RawDeflate qw(:flush :level :strategy) ;
+
 
 =item :flush
 
@@ -1032,6 +1034,8 @@ These symbolic constants are used by the C<Strategy> option in the constructor.
     Z_RLE
     Z_FIXED
     Z_DEFAULT_STRATEGY
+
+    
     
 
 =back

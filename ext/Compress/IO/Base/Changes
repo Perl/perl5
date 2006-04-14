@@ -1,6 +1,11 @@
 CHANGES
 -------
 
+  2.000_11 10 April 2006
+
+      * Transparent + InputLength made more robust where input data is not
+        compressed.
+
   2.000_10 13 March 2006
 
       * AnyUncompress doesn't assume  that IO-Compress-Zlib is installed any

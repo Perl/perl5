@@ -7,7 +7,7 @@ require Exporter;
 
 our ($VERSION, @ISA, @EXPORT, %GZIP_OS_Names);
 
-$VERSION = '2.000_10';
+$VERSION = '2.000_11';
 
 @ISA = qw(Exporter);
 
@@ -25,7 +25,9 @@ $VERSION = '2.000_10';
     GZIP_FLG_FCOMMENT
     GZIP_FLG_RESERVED
 
-    GZIP_CM_DEFLATED
+    ZIP_CM_STORE
+    ZIP_CM_DEFLATED
+    ZIP_CM_BZIP2
 
     GZIP_MIN_HEADER_SIZE
     GZIP_TRAILER_SIZE
@@ -95,7 +97,9 @@ use constant GZIP_FCOMMENT_INVALID_CHAR_RE      => qr/[\x00-\x09\x11-\x1F\x7F-\x
 
 use constant GZIP_FHCRC_SIZE                    => 2 ; # aka CONTINUATION in gzip
 
-use constant GZIP_CM_DEFLATED                   => 8 ;
+use constant ZIP_CM_STORE                      => 0 ;
+use constant ZIP_CM_DEFLATE                    => 8 ;
+use constant ZIP_CM_BZIP2                      => 12 ;
 
 use constant GZIP_NULL_BYTE                     => "\x00";
 use constant GZIP_ISIZE_MAX                     => 0xFFFFFFFF ;
@@ -126,10 +130,5 @@ use constant GZIP_OS_DEFAULT=> 0xFF ;
     18              => 'THEOS',
     GZIP_OS_DEFAULT => 'Unknown',
     ) ;
-
-use constant GZIP_MINIMUM_HEADER =>   pack("C4 V C C",  
-    GZIP_ID1, GZIP_ID2, GZIP_CM_DEFLATED, GZIP_FLG_DEFAULT,
-    GZIP_MTIME_DEFAULT, GZIP_FEXTRA_DEFAULT, GZIP_OS_DEFAULT) ;
-
 
 1;

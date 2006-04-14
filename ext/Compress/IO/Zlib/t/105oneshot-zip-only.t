@@ -25,7 +25,8 @@ BEGIN {
 
     plan tests => 119 + $extra ;
 
-    use_ok('IO::Compress::Zip', qw(zip $ZipError)) ;
+    #use_ok('IO::Compress::Zip', qw(zip $ZipError :zip_method)) ;
+    use_ok('IO::Compress::Zip', qw(:all)) ;
     use_ok('IO::Uncompress::Unzip', qw(unzip $UnzipError)) ;
 
 
@@ -134,20 +135,20 @@ sub zipGetHeader
 
 for my $stream (0, 1)
 {
-    for my $store (0, 8)
+    for my $method (ZIP_CM_STORE, ZIP_CM_DEFLATE)
     {
-        title "Stream $stream, Store $store";
+        title "Stream $stream, Method $method";
 
         my $lex = new LexFile my $file1;
 
         my $content = "hello ";
         #writeFile($file1, $content);
 
-        ok zip(\$content => $file1 , Store => !$store, Stream => $stream), " zip ok" 
+        ok zip(\$content => $file1 , Method => $method, Stream => $stream), " zip ok" 
             or diag $ZipError ;
 
         my $got ;
-        if ($stream && ! $store) {
+        if ($stream && $method == ZIP_CM_STORE ) {
             #eval ' unzip($file1 => \$got) ';
             ok ! unzip($file1 => \$got), "  unzip fails"; 
             like $UnzipError, "/Streamed Stored content not supported/",
@@ -167,15 +168,15 @@ for my $stream (0, 1)
         ok $hdr, "  got header";
 
         is $hdr->{Stream}, $stream, "  stream is $stream" ;
-        is $hdr->{MethodID}, $store, "  MethodID is $store" ;
+        is $hdr->{MethodID}, $method, "  MethodID is $method" ;
     }
 }
 
 for my $stream (0, 1)
 {
-    for my $store (0, 1)
+    for my $method (ZIP_CM_STORE, ZIP_CM_DEFLATE)
     {
-        title "Stream $stream, Store $store";
+        title "Stream $stream, Method $method";
 
         my $file1;
         my $file2;
@@ -192,13 +193,13 @@ for my $stream (0, 1)
                         $file2 => $content2,
                       );
 
-        ok zip([$file1, $file2] => $zipfile , Store => !$store, Stream => $stream), " zip ok" 
+        ok zip([$file1, $file2] => $zipfile , Method => $method, Stream => $stream), " zip ok" 
             or diag $ZipError ;
 
         for my $file ($file1, $file2)
         {
             my $got ;
-            if ($stream && ! $store) {
+            if ($stream &&  $method == ZIP_CM_STORE ) {
                 #eval ' unzip($zipfile => \$got) ';
                 ok ! unzip($zipfile => \$got, Name => $file), "  unzip fails"; 
                 like $UnzipError, "/Streamed Stored content not supported/",

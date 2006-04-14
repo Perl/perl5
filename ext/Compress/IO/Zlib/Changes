@@ -1,6 +1,25 @@
 CHANGES
 -------
 
+  2.000_11 10 April 2006
+
+      * Updated Documentation for zip modules.
+
+      * Changed IO::Compress::Zip 'Store' option to 'Method' and added
+        symbolic constants ZIP_CM_STORE, ZIP_CM_DEFLATE and ZIP_CM_BZIP2 to
+        allow the compression method to be picked by the user.
+
+      * Added support to allow bzip2 compressed data to be written/read
+        with IO::Compress::Zip and IO::Uncompress::Unzip.
+
+      * Beefed up 050interop-gzip.t to check that the external gzip command
+        works as expected before starting the tests. This means that
+        this test harness will just be skipped on problematic systems.
+
+      * Merged core patch 27565 from Steve Peters. This works around a
+        problem with gzip on OpenBSD where it doesn't seem to like
+        compressing files < 10 bytes long.
+
   2.000_10 13 March 2006
 
       * Documentation updates.

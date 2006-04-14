@@ -4,24 +4,55 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common qw(createSelfTiedObject);
+use IO::Compress::Base::Common qw(:Status createSelfTiedObject);
 use IO::Compress::RawDeflate;
 use IO::Compress::Adapter::Deflate;
 use IO::Compress::Adapter::Identity;
+
+use Compress::Raw::Zlib qw(crc32) ;
+BEGIN
+{
+    eval { require IO::Compress::Adapter::Bzip2; 
+           import IO::Compress::Adapter::Bzip2; 
+           require IO::Compress::Bzip2; 
+           import IO::Compress::Bzip2; 
+         } ;
+}
+
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.000_10';
+$VERSION = '2.000_11';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
 @EXPORT_OK = qw( $ZipError zip ) ;
 %EXPORT_TAGS = %IO::Compress::RawDeflate::DEFLATE_CONSTANTS ;
 push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
+
+$EXPORT_TAGS{zip_method} = [qw( ZIP_CM_STORE ZIP_CM_DEFLATE ZIP_CM_BZIP2 )];
+push @{ $EXPORT_TAGS{all} }, @{ $EXPORT_TAGS{zip_method} };
+
 Exporter::export_ok_tags('all');
 
+use constant ZIP_CM_STORE                      => 0 ;
+use constant ZIP_CM_DEFLATE                    => 8 ;
+use constant ZIP_CM_BZIP2                      => 12 ;
+
+use constant ZIP_LOCAL_HDR_SIG                 => 0x04034b50;
+use constant ZIP_DATA_HDR_SIG                  => 0x08074b50;
+use constant ZIP_CENTRAL_HDR_SIG               => 0x02014b50;
+use constant ZIP_END_CENTRAL_HDR_SIG           => 0x06054b50;
+
+
+our (%ZIP_CM_MIN_VERSIONS);
+%ZIP_CM_MIN_VERSIONS = (
+            ZIP_CM_STORE()                      => 20,
+            ZIP_CM_DEFLATE()                    => 20,
+            ZIP_CM_BZIP2()                      => 46,
+            );
 
 sub new
 {
@@ -45,21 +76,27 @@ sub mkComp
 
     my ($obj, $errstr, $errno) ;
 
-    if (*$self->{ZipData}{Store}) {
+    if (*$self->{ZipData}{Method} == ZIP_CM_STORE) {
         ($obj, $errstr, $errno) = IO::Compress::Adapter::Identity::mkCompObject(
-                                                 $got->value('CRC32'),
-                                                 $got->value('Adler32'),
                                                  $got->value('Level'),
                                                  $got->value('Strategy')
                                                  );
     }
-    else {
+    elsif (*$self->{ZipData}{Method} == ZIP_CM_DEFLATE) {
         ($obj, $errstr, $errno) = IO::Compress::Adapter::Deflate::mkCompObject(
                                                  $got->value('CRC32'),
                                                  $got->value('Adler32'),
                                                  $got->value('Level'),
                                                  $got->value('Strategy')
                                                  );
+    }
+    elsif (*$self->{ZipData}{Method} == ZIP_CM_BZIP2) {
+        ($obj, $errstr, $errno) = IO::Compress::Adapter::Bzip2::mkCompObject(
+                                                $got->value('BlockSize100K'),
+                                                $got->value('WorkFactor'),
+                                                $got->value('Verbosity')
+                                               );
+        *$self->{ZipData}{CRC32} = crc32(undef);
     }
 
     return $self->saveErrorString(undef, $errstr, $errno)
@@ -72,7 +109,28 @@ sub mkComp
     return $obj;    
 }
 
+sub reset
+{
+    my $self = shift ;
 
+    *$self->{Compress}->reset();
+    *$self->{ZipData}{CRC32} = Compress::Raw::Zlib::crc32('');
+
+    return STATUS_OK;    
+}
+
+sub filterUncompressed
+{
+    my $self = shift ;
+
+    if (*$self->{ZipData}{Method} == ZIP_CM_DEFLATE) {
+        *$self->{ZipData}{CRC32} = *$self->{Compress}->crc32();
+    }
+    else {
+        *$self->{ZipData}{CRC32} = crc32(${$_[0]}, *$self->{ZipData}{CRC32});
+
+    }
+}
 
 sub mkHeader
 {
@@ -85,16 +143,21 @@ sub mkHeader
     my $comment = '';
     $comment = $param->value('Comment') || '';
 
-    my $extract = $param->value('OS_Code') << 8 + 20 ;
     my $hdr = '';
 
     my $time = _unixToDosTime($param->value('Time'));
     *$self->{ZipData}{StartOffset} = *$self->{ZipData}{Offset} ;
 
     my $strm = *$self->{ZipData}{Stream} ? 8 : 0 ;
-    my $method = *$self->{ZipData}{Store} ? 0 : 8 ;
+    # bzip2 is 12, deflate is 8
+    my $method = *$self->{ZipData}{Method} ;
 
-    $hdr .= pack "V", 0x04034b50 ; # signature
+    # deflate is 20
+    # bzip2 is 46
+    my $extract = $param->value('OS_Code') << 8 +
+                    $ZIP_CM_MIN_VERSIONS{$method};
+
+    $hdr .= pack "V", ZIP_LOCAL_HDR_SIG ; # signature
     $hdr .= pack 'v', $extract   ; # extract Version & OS
     $hdr .= pack 'v', $strm      ; # general purpose flag (set streaming mode)
     $hdr .= pack 'v', $method    ; # compression method (deflate)
@@ -110,7 +173,7 @@ sub mkHeader
 
     my $ctl = '';
 
-    $ctl .= pack "V", 0x02014b50 ; # signature
+    $ctl .= pack "V", ZIP_CENTRAL_HDR_SIG ; # signature
     $ctl .= pack 'v', $extract   ; # version made by
     $ctl .= pack 'v', $extract   ; # extract Version
     $ctl .= pack 'v', $strm      ; # general purpose flag (streaming mode)
@@ -142,7 +205,14 @@ sub mkTrailer
 {
     my $self = shift ;
 
-    my $crc32             = *$self->{Compress}->crc32();
+    my $crc32 ;
+    if (*$self->{ZipData}{Method} == ZIP_CM_DEFLATE) {
+        $crc32 = *$self->{Compress}->crc32();
+    }
+    else {
+        $crc32 = *$self->{ZipData}{CRC32};
+    }
+
     my $compressedBytes   = *$self->{Compress}->compressedBytes();
     my $uncompressedBytes = *$self->{Compress}->uncompressedBytes();
 
@@ -154,7 +224,7 @@ sub mkTrailer
     my $hdr = '';
 
     if (*$self->{ZipData}{Stream}) {
-        $hdr  = pack "V", 0x08074b50 ;                       # signature
+        $hdr  = pack "V", ZIP_DATA_HDR_SIG ;                       # signature
         $hdr .= $data ;
     }
     else {
@@ -185,7 +255,7 @@ sub mkFinalTrailer
     my $cd = join '', @{ *$self->{ZipData}{CentralDir} };
 
     my $ecd = '';
-    $ecd .= pack "V", 0x06054b50 ; # signature
+    $ecd .= pack "V", ZIP_END_CENTRAL_HDR_SIG ; # signature
     $ecd .= pack 'v', 0          ; # number of disk
     $ecd .= pack 'v', 0          ; # number if disk with central dir
     $ecd .= pack 'v', $entries   ; # entries in central dir on this disk
@@ -211,9 +281,24 @@ sub ckParams
     }
 
     *$self->{ZipData}{Stream} = $got->value('Stream');
-    *$self->{ZipData}{Store} = $got->value('Store');
+    #*$self->{ZipData}{Store} = $got->value('Store');
+
+    my $method = $got->value('Method');
+    #if ($method != 0 && $method != 8 && $method != 12) {
+    return $self->saveErrorString(undef, "Unknown Method '$method'")   
+        if ! defined $ZIP_CM_MIN_VERSIONS{$method};
+
+    return $self->saveErrorString(undef, "Bzip2 not available")
+        if $method == ZIP_CM_BZIP2 and 
+           ! defined $IO::Compress::Adapter::Bzip2::VERSION;
+
+    *$self->{ZipData}{Method} = $method;
+
     *$self->{ZipData}{ZipComment} = $got->value('ZipComment') ;
 
+    return undef
+        if defined $IO::Compress::Bzip2::VERSION
+            and ! IO::Compress::Bzip2::ckParams($self, $got);
 
     return 1 ;
 }
@@ -232,13 +317,18 @@ sub getExtraParams
     use IO::Compress::Base::Common qw(:Parse);
     use Compress::Raw::Zlib qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
+    my @Bzip2 = ();
+    
+    @Bzip2 = IO::Compress::Bzip2::getExtraParams($self)
+        if defined $IO::Compress::Bzip2::VERSION;
     
     return (
             # zlib behaviour
             $self->getZlibParams(),
 
             'Stream'    => [1, 1, Parse_boolean,   1],
-            'Store'     => [0, 1, Parse_boolean,   0],
+           #'Store'     => [0, 1, Parse_boolean,   0],
+            'Method'    => [0, 1, Parse_unsigned,  ZIP_CM_DEFLATE],
             
 #            # Zip header fields
 #           'Minimal'   => [0, 1, Parse_boolean,   0],
@@ -250,6 +340,8 @@ sub getExtraParams
             
 #           'TextFlag'  => [0, 1, Parse_boolean,   0],
 #           'ExtraField'=> [0, 1, Parse_string,    ''],
+
+            @Bzip2,
         );
 }
 
@@ -719,6 +811,69 @@ This parameter defaults to 0.
 
 
 
+=item -Name =E<gt> $string
+
+Stores the contents of C<$string> in the zip filename header field. If
+C<Name> is not specified, no zip filename field will be created.
+
+=item -Time =E<gt> $number
+
+Sets the last modified time field in the zip header to $number.
+
+This field defaults to the time the C<IO::Compress::Zip> object was created
+if this option is not specified.
+
+=item Method =E<gt> $method
+
+Controls which compression method is used. At present three compression
+methods are supported, namely Store (no compression at all), Deflate and
+Bzip2.
+
+The symbols, ZIP_CM_STORE, ZIP_CM_DEFLATE and ZIP_CM_BZIP2 are used to
+select the compression method.
+
+These constants are not imported by C<IO::Compress::Zip> by default.
+
+    use IO::Compress::Zip qw(:zip_method);
+    use IO::Compress::Zip qw(:constants);
+    use IO::Compress::Zip qw(:all);
+
+Note that to create Bzip2 content, the module C<IO::Compress::Bzip2> must
+be installed. A fatal error will be thrown if you attempt to create Bzip2
+content when C<IO::Compress::Bzip2> is not available.
+
+The default method is ZIP_CM_DEFLATE.
+
+=item -Stream =E<gt> 0|1
+
+This option controls whether the zip file/buffer output is created in
+streaming mode.
+
+The default is 1.
+
+=item BlockSize100K =E<gt> number
+
+Specify the number of 100K blocks bzip2 uses during compression. 
+
+Valid values are from 1 to 9, where 9 is best compression.
+
+This option is only valid if the C<Method> is ZIP_CM_BZIP2. It is ignored
+otherwise.
+
+The default is 1.
+
+=item WorkFactor =E<gt> number
+
+Specifies how much effort bzip2 should take before resorting to a slower
+fallback compression algorithm.
+
+Valid values range from 0 to 250, where 0 means use the default value 30.
+
+This option is only valid if the C<Method> is ZIP_CM_BZIP2. It is ignored
+otherwise.
+
+The default is 0.
+
 
 
 
@@ -1029,7 +1184,9 @@ constants that can be used by C<IO::Compress::Zip>. Same as doing this
 
 Import all symbolic constants. Same as doing this
 
-    use IO::Compress::Zip qw(:flush :level :strategy) ;
+
+    use IO::Compress::Zip qw(:flush :level :strategy :zip_method) ;
+
 
 =item :flush
 
@@ -1061,6 +1218,18 @@ These symbolic constants are used by the C<Strategy> option in the constructor.
     Z_RLE
     Z_FIXED
     Z_DEFAULT_STRATEGY
+
+
+=item :zip_method
+
+These symbolic constants are used by the C<Method> option in the
+constructor.
+
+    ZIP_CM_STORE
+    ZIP_CM_DEFLATE
+    ZIP_CM_BZIP2
+
+    
     
 
 =back

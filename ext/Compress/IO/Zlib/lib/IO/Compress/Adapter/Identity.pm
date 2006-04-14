@@ -5,15 +5,12 @@ use warnings;
 use bytes;
 
 use IO::Compress::Base::Common qw(:Status);
-use Compress::Raw::Zlib () ;
 our ($VERSION);
 
-$VERSION = '2.000_10';
+$VERSION = '2.000_11';
 
 sub mkCompObject
 {
-    my $crc32    = shift ;
-    my $adler32  = shift ;
     my $level    = shift ;
     my $strategy = shift ;
 
@@ -22,10 +19,6 @@ sub mkCompObject
                   'UnCompSize' => 0,
                   'Error'      => '',
                   'ErrorNo'    => 0,
-                  'wantCRC32'  => $crc32,
-                  'CRC32'      => Compress::Raw::Zlib::crc32(''),
-                  'wantADLER32'=> $adler32,
-                  'ADLER32'    => Compress::Raw::Zlib::adler32(''),                  
                  } ;     
 }
 
@@ -36,12 +29,6 @@ sub compr
     if (defined ${ $_[0] } && length ${ $_[0] }) {
         $self->{CompSize} += length ${ $_[0] } ;
         $self->{UnCompSize} = $self->{CompSize} ;
-
-        $self->{CRC32} = Compress::Raw::Zlib::crc32($_[0],  $self->{CRC32})
-            if $self->{wantCRC32};
-
-        $self->{ADLER32} = Compress::Raw::Zlib::adler32($_[0],  $self->{ADLER32})
-            if $self->{wantADLER32};
 
         ${ $_[1] } .= ${ $_[0] };
     }
@@ -69,8 +56,6 @@ sub reset
 
     $self->{CompSize}   = 0;
     $self->{UnCompSize} = 0;
-    $self->{CRC32}      = Compress::Raw::Zlib::crc32('');
-    $self->{ADLER32}    = Compress::Raw::Zlib::adler32('');                  
 
     return STATUS_OK;    
 }
@@ -105,20 +90,6 @@ sub uncompressedBytes
     my $self = shift ;
     return $self->{UnCompSize} ;
 }
-
-sub crc32
-{
-    my $self = shift ;
-    return $self->{CRC32};
-}
-
-sub adler32
-{
-    my $self = shift ;
-    return $self->{ADLER32};
-}
-
-
 
 1;
 

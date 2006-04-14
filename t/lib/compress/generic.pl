@@ -18,7 +18,7 @@ BEGIN
     $extra = 1
         if $st ;
 
-    plan(tests => 601 + $extra) ;
+    plan(tests => 615 + $extra) ;
 }
 
 sub myGZreadFile
@@ -1110,51 +1110,65 @@ EOT
 
         foreach my $type (qw(buffer filename filehandle))
         {
-            title "$UncompressClass -- InputLength, read from $type";
-
-            my $compressed ; 
-            my $string = "some data";
-            my $c = new $CompressClass(\$compressed);
-            $c->write($string);
-            $c->close();
-
-            my $appended = "append";
-            my $comp_len = length $compressed;
-            $compressed .= $appended;
-
-            my $lex = new LexFile my $name ;
-            my $input ;
-            writeFile ($name, $compressed);
-
-            if ($type eq 'buffer')
+            foreach my $good (0, 1)
             {
-                $input = \$compressed;
-            }
-            if ($type eq 'filename')
-            {
-                $input = $name;
-            }
-            elsif ($type eq 'filehandle')
-            {
-                my $fh = new IO::File "<$name" ;
-                ok $fh, "opened file $name ok";
-                $input = $fh ;
-            }
+                title "$UncompressClass -- InputLength, read from $type, good data => $good";
 
-            my $x = new $UncompressClass($input, InputLength => $comp_len)  ;
-            ok $x, "  created $UncompressClass";
+                my $compressed ; 
+                my $string = "some data";
+                my $appended = "append";
 
-            my $len ;
-            my $output;
-            $len = $x->read($output, 100);
-            is $len, length($string);
-            is $output, $string;
+                if ($good)
+                {
+                    my $c = new $CompressClass(\$compressed);
+                    $c->write($string);
+                    $c->close();
+                }
+                else
+                {
+                    $compressed = $string ;
+                }
 
-            if ($type eq 'filehandle')
-            {
-                my $rest ;
-                $input->read($rest, 1000);
-                is $rest, $appended;
+                my $comp_len = length $compressed;
+                $compressed .= $appended;
+
+                my $lex = new LexFile my $name ;
+                my $input ;
+                writeFile ($name, $compressed);
+
+                if ($type eq 'buffer')
+                {
+                    $input = \$compressed;
+                }
+                if ($type eq 'filename')
+                {
+                    $input = $name;
+                }
+                elsif ($type eq 'filehandle')
+                {
+                    my $fh = new IO::File "<$name" ;
+                    ok $fh, "opened file $name ok";
+                    $input = $fh ;
+                }
+
+                my $x = new $UncompressClass($input, 
+                                             InputLength => $comp_len,
+                                             Transparent => 1)  ;
+                ok $x, "  created $UncompressClass";
+
+                my $len ;
+                my $output;
+                $len = $x->read($output, 100);
+
+                is $len, length($string);
+                is $output, $string;
+
+                if ($type eq 'filehandle')
+                {
+                    my $rest ;
+                    $input->read($rest, 1000);
+                    is $rest, $appended;
+                }
             }
 
 

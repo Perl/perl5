@@ -15,7 +15,7 @@ use IO::Compress::Base::Common qw(createSelfTiedObject);
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $DeflateError);
 
-$VERSION = '2.000_10';
+$VERSION = '2.000_11';
 $DeflateError = '';
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -916,7 +916,9 @@ constants that can be used by C<IO::Compress::Deflate>. Same as doing this
 
 Import all symbolic constants. Same as doing this
 
+
     use IO::Compress::Deflate qw(:flush :level :strategy) ;
+
 
 =item :flush
 
@@ -948,6 +950,8 @@ These symbolic constants are used by the C<Strategy> option in the constructor.
     Z_RLE
     Z_FIXED
     Z_DEFAULT_STRATEGY
+
+    
     
 
 =back

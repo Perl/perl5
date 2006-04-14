@@ -20,7 +20,7 @@ use bytes;
 our (@ISA, $VERSION, $got_encode);
 #@ISA    = qw(Exporter IO::File);
 
-$VERSION = '2.000_10';
+$VERSION = '2.000_11';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 
@@ -548,6 +548,10 @@ sub DESTROY
 
 
 
+sub filterUncompressed
+{
+}
+
 sub syswrite
 {
     my $self = shift ;
@@ -595,6 +599,8 @@ sub syswrite
     else {
         *$self->{UnCompSize_32bit} += $buffer_length ;
     }
+
+    $self->filterUncompressed($buffer);
 
 #    if (*$self->{Encoding}) {
 #        $$buffer = *$self->{Encoding}->encode($$buffer);
@@ -695,7 +701,8 @@ sub newStream
         ${ *$self->{Buffer} } = '' ;
     }
     
-    my $status = *$self->{Compress}->reset() ;
+    #my $status = *$self->{Compress}->reset() ;
+    my $status = $self->reset() ;
     return $self->saveErrorString(0, *$self->{Compress}{Error}, 
                                   *$self->{Compress}{ErrorNo})
         if $status == STATUS_ERROR;
@@ -704,6 +711,12 @@ sub newStream
     *$self->{UnCompSize_32bit} = 0 ;
 
     return 1 ;
+}
+
+sub reset
+{
+    my $self = shift ;
+    return *$self->{Compress}->reset() ;
 }
 
 sub _writeTrailer
