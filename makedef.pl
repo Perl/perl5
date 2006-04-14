@@ -747,7 +747,6 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_sharedsv_thrcnt_inc
 		    Perl_sharedsv_unlock
 		    Perl_stashpv_hvname_match
-		    Perl_refcounted_he_dup
 		    )];
 }
 
@@ -1574,6 +1573,7 @@ sub output_symbol {
 1;
 __DATA__
 # extra globals not included above.
+Perl_new_warnings_bitfield
 Perl_cxinc
 perl_alloc
 perl_alloc_using

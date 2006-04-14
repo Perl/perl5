@@ -3906,7 +3906,7 @@
 #ifdef PERL_DONT_CREATE_GVSV
 #define gv_SVadd(a)		Perl_gv_SVadd(aTHX_ a)
 #endif
-#ifdef PERL_CORE
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #endif
 #ifdef PERL_CORE
 #define offer_nice_chunk(a,b)	Perl_offer_nice_chunk(aTHX_ a,b)

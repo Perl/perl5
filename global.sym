@@ -706,6 +706,7 @@ Perl_stashpv_hvname_match
 Perl_gv_SVadd
 Perl_ckwarn
 Perl_ckwarn_d
+Perl_new_warnings_bitfield
 Perl_my_sprintf
 Perl_my_cxt_init
 # ex: set ro:

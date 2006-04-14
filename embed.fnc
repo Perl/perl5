@@ -1666,7 +1666,7 @@ Ap	|GV*	|gv_SVadd	|NN GV* gv
 #endif
 Apo	|bool	|ckwarn		|U32 w
 Apo	|bool	|ckwarn_d	|U32 w
-opMa	|STRLEN *|new_warnings_bitfield|NULLOK STRLEN *buffer \
+XEopMa	|STRLEN *|new_warnings_bitfield|NULLOK STRLEN *buffer \
 				|NN const char *const bits|STRLEN size
 
 p	|void	|offer_nice_chunk	|NN void *chunk|U32 chunk_size
