@@ -984,16 +984,13 @@ Perl_leave_scope(pTHX_ I32 base)
 	    i = SSPOPINT;
 	    CopARYBASE_set((COP *)ptr, i);
 	    break;
-	case SAVEt_COP_WARNINGS:
-	    {
-		COP *const cop = SSPOPPTR;
-		ptr = SSPOPPTR;
+	case SAVEt_COMPILE_WARNINGS:
+	    ptr = SSPOPPTR;
 
-		if (!specialWARN(cop->cop_warnings))
-		    PerlMemShared_free(cop->cop_warnings);
+	    if (!specialWARN(PL_compiling.cop_warnings))
+		PerlMemShared_free(PL_compiling.cop_warnings);
 
-		cop->cop_warnings = ptr;
-	    }
+	    PL_compiling.cop_warnings = ptr;
 	    break;
 	case SAVEt_RE_STATE:
 	    {

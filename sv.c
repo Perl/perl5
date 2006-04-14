@@ -10681,21 +10681,9 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 #endif
 		break;
 	    }
-	case SAVEt_COP_WARNINGS:
-	    {
-		void *optr = POPPTR(ss,ix);
-		TOPPTR(nss,ix) = ptr = any_dup(optr, proto_perl);
-		if (ptr != optr) {
-		    /* We duped something in the interpreter structure.  */
-		    ptr = POPPTR(ss,ix);
-		    TOPPTR(nss,ix) = DUP_WARNINGS((STRLEN*)ptr);
-		} else {
-		    /* I don't think that this happens, but it would mean that
-		       we (didn't) dup something shared.  */
-		    ptr = POPPTR(ss,ix);
-		    TOPPTR(nss,ix) = ptr;
-		}
-	    }
+	case SAVEt_COMPILE_WARNINGS:
+	    ptr = POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = DUP_WARNINGS((STRLEN*)ptr);
 	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: ss_dup inconsistency (%"IVdf")", (IV) i);

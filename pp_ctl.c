@@ -3364,7 +3364,7 @@ PP(pp_require)
     PL_rsfp = tryrsfp;
     SAVEHINTS();
     PL_hints = 0;
-    SAVECOPWARNINGS(&PL_compiling);
+    SAVECOMPILEWARNINGS();
     if (PL_dowarn & G_WARN_ALL_ON)
         PL_compiling.cop_warnings = pWARN_ALL ;
     else if (PL_dowarn & G_WARN_ALL_OFF)
@@ -3464,7 +3464,7 @@ PP(pp_entereval)
     PL_hints = PL_op->op_targ;
     if (saved_hh)
 	GvHV(PL_hintgv) = saved_hh;
-    SAVECOPWARNINGS(&PL_compiling);
+    SAVECOMPILEWARNINGS();
     PL_compiling.cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
     SAVESPTR(PL_compiling.cop_io);
     if (specialCopIO(PL_curcop->cop_io))

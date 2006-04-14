@@ -1983,7 +1983,7 @@ Perl_block_start(pTHX_ int full)
     pad_block_start(full);
     SAVEHINTS();
     PL_hints &= ~HINT_BLOCK_SCOPE;
-    SAVECOPWARNINGS(&PL_compiling);
+    SAVECOMPILEWARNINGS();
     PL_compiling.cop_warnings = DUP_WARNINGS(PL_compiling.cop_warnings);
     SAVESPTR(PL_compiling.cop_io);
     if (! specialCopIO(PL_compiling.cop_io)) {

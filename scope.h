@@ -51,7 +51,7 @@
 #define SAVEt_SAVESWITCHSTACK	40
 #define SAVEt_COP_ARYBASE	41
 #define SAVEt_RE_STATE		42
-#define SAVEt_COP_WARNINGS	43
+#define SAVEt_COMPILE_WARNINGS	43
 
 #ifndef SCOPE_SAVES_SIGNAL_MASK
 #define SCOPE_SAVES_SIGNAL_MASK 0
@@ -198,12 +198,11 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
    could have done savefreesharedpvREF, but this way actually seems cleaner,
    as it simplifies the code that does the saves, and reduces the load on the
    save stack.  */
-#define SAVECOPWARNINGS(c) \
+#define SAVECOMPILEWARNINGS() \
     STMT_START {					\
-	SSCHECK(3);					\
-	SSPUSHPTR((c)->cop_warnings);			\
-	SSPUSHPTR(c);					\
-	SSPUSHINT(SAVEt_COP_WARNINGS);			\
+	SSCHECK(2);					\
+	SSPUSHPTR(PL_compiling.cop_warnings);		\
+	SSPUSHINT(SAVEt_COMPILE_WARNINGS);		\
     } STMT_END
 
 #ifdef USE_ITHREADS
