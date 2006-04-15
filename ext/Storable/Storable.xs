@@ -3989,8 +3989,11 @@ static SV *retrieve_blessed(pTHX_ stcxt_t *cxt, const char *cname)
 
 	TRACEME(("new class name \"%s\" will bear ID = %d", classname, cxt->classnum));
 
-	if (!av_store(cxt->aclass, cxt->classnum++, newSVpvn(classname, len)))
+	if (!av_store(cxt->aclass, cxt->classnum++, newSVpvn(classname, len))) {
+		if (classname != buf)
+			Safefree(classname);
 		return (SV *) 0;
+	}
 
 	/*
 	 * Retrieve object and bless it.
@@ -4168,8 +4171,11 @@ static SV *retrieve_hook(pTHX_ stcxt_t *cxt, const char *cname)
 		 * Record new classname.
 		 */
 
-		if (!av_store(cxt->aclass, cxt->classnum++, newSVpvn(classname, len)))
+		if (!av_store(cxt->aclass, cxt->classnum++, newSVpvn(classname, len))) {
+			if (classname != buf)
+				Safefree(classname);
 			return (SV *) 0;
+		}
 	}
 
 	TRACEME(("class name: %s", classname));
