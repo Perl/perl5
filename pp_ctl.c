@@ -4516,7 +4516,6 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     dVAR;
     SV * const datasv = FILTER_DATA(idx);
     const int filter_has_file = IoLINES(datasv);
-    GV * const filter_child_proc = (GV *)IoFMT_GV(datasv);
     SV * const filter_state = (SV *)IoTOP_GV(datasv);
     SV * const filter_sub = (SV *)IoBOTTOM_GV(datasv);
     int len = 0;
@@ -4535,6 +4534,26 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
        for PL_error_count == 0.)  Solaris doesn't segfault --
        not sure where the trouble is yet.  XXX */
 
+    if (maxlen && IoFMT_GV(datasv)) {
+	SV *const cache = (SV *)IoFMT_GV(datasv);
+	if (SvOK(cache)) {
+	    STRLEN cache_len;
+	    const char *cache_p = SvPV(cache, cache_len);
+	    /* Running in block mode and we have some cached data already.  */
+	    if (cache_len >= maxlen) {
+		/* In fact, so much data we don't even need to call
+		   filter_read.  */
+		sv_catpvn(buf_sv, cache_p, maxlen);
+		sv_chop(cache, cache_p + maxlen);
+		/* Definately not EOF  */
+		return 1;
+	    }
+	    sv_catsv(buf_sv, cache);
+	    maxlen -= cache_len;
+	    SvOK_off(cache);
+	}
+    }
+	
     if (filter_has_file) {
 	len = FILTER_READ(idx+1, upstream, maxlen);
     }
@@ -4570,12 +4589,41 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	LEAVE;
     }
 
+    if (maxlen) {
+	/* Running in block mode.  */
+	STRLEN got_len;
+	const char *got_p = SvPV(upstream, got_len);
+
+	if (got_len > maxlen) {
+	    /* Oh. Too long. Stuff some in our cache.  */
+	    SV *cache = (SV *)IoFMT_GV(datasv);
+
+	    if (!cache) {
+		IoFMT_GV(datasv) = (GV*) (cache = newSV(got_len - maxlen));
+	    } else if (SvOK(cache)) {
+		/* Cache should be empty.  */
+		assert(!SvCUR(cache));
+	    }
+
+	    sv_setpvn(cache, got_p + maxlen, got_len - maxlen);
+	    /* If you ask for block mode, you may well split UTF-8 characters.
+	       "If it breaks, you get to keep both parts"
+	       (Your code is broken if you  don't put them back together again
+	       before something notices.) */
+	    if (SvUTF8(upstream)) {
+		SvUTF8_on(cache);
+	    }
+	    SvCUR_set(upstream, maxlen);
+	}
+    }
+
+    if (upstream != buf_sv) {
+	sv_catsv(buf_sv, upstream);
+    }
+
     if (len <= 0) {
 	IoLINES(datasv) = 0;
-	if (filter_child_proc) {
-	    SvREFCNT_dec(filter_child_proc);
-	    IoFMT_GV(datasv) = NULL;
-	}
+	SvREFCNT_dec(IoFMT_GV(datasv));
 	if (filter_state) {
 	    SvREFCNT_dec(filter_state);
 	    IoTOP_GV(datasv) = NULL;
@@ -4585,10 +4633,6 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    IoBOTTOM_GV(datasv) = NULL;
 	}
 	filter_del(S_run_user_filter);
-    }
-
-    if (upstream != buf_sv) {
-	sv_catsv(buf_sv, upstream);
     }
     return len;
 }

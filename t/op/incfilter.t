@@ -14,7 +14,7 @@ BEGIN {
 use strict;
 use Filter::Util::Call;
 
-plan(tests => 19);
+plan(tests => 108);
 
 unshift @INC, sub {
     no warnings 'uninitialized';
@@ -103,8 +103,6 @@ sub prepend_rot13_filter {
 		   my $test = "fzrt!";
 		   $_ = $test;
 		   my $status = filter_read();
-		   # Sadly, doing this inside the source filter causes an
-		   # infinte loop
 		   my $got = substr $_, 0, length $test, '';
 		   is $got, $test, "Upstream didn't alter existing data";
 		   tr/A-Za-z/N-ZA-Mn-za-m/;
@@ -120,3 +118,39 @@ pass("This will rot13'ed twice");
 EOC
 
 do [$fh, sub {tr/A-Za-z/N-ZA-Mn-za-m/; return;}] or die;
+
+# This generates a heck of a lot of oks, but I think it's necessary.
+my $amount = 1;
+sub prepend_block_counting_filter {
+    filter_add(sub {
+		   my $output = defined $_ ? $_ : '';
+		   my $count = 256;
+		   while (--$count) {
+		       $_ = '';
+		       my $status = filter_read($amount);
+		       cmp_ok (length $_, '<=', $amount, "block mode works?");
+		       $output .= $_;
+		       if ($status <= 0 or /\n/s) {
+			   $_ = $output;
+			   return $status;
+		       }
+		   }
+		   die "Looping infinitely";
+			  
+	       })
+}
+
+open $fh, "<", \<<'EOC';
+BEGIN {prepend_block_counting_filter};
+pass("one by one");
+pass("and again");
+EOC
+
+do [$fh, sub {return;}] or die;
+
+open $fh, "<", \<<'EOC';
+BEGIN {prepend_block_counting_filter};
+pas("SSS make s fast SSS");
+EOC
+
+do [$fh, sub {s/s/ss/gs; s/([\nS])/$1$1$1/gs; return;}] or die;
