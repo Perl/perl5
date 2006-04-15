@@ -4575,7 +4575,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     SvUPGRADE(upstream, SVt_PV);
 	
     if (filter_has_file) {
-	status = FILTER_READ(idx+1, upstream, maxlen);
+	status = FILTER_READ(idx+1, upstream, 0);
     }
 
     assert(filter_sub);
@@ -4590,7 +4590,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 
 	DEFSV = upstream;
 	PUSHMARK(SP);
-	PUSHs(sv_2mortal(newSViv(maxlen)));
+	PUSHs(sv_2mortal(newSViv(0)));
 	if (filter_state) {
 	    PUSHs(filter_state);
 	}
