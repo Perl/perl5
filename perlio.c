@@ -1182,19 +1182,26 @@ PerlIO_push(pTHX_ PerlIO *f, PERLIO_FUNCS_DECL(*tab), const char *mode, SV *arg)
 	    goto mismatch;
 	}
 	/* Real layer with a data area */
-	Newxc(l,tab->size,char,PerlIOl);
-	if (l && f) {
-	    Zero(l, tab->size, char);
-	    l->next = *f;
-	    l->tab = (PerlIO_funcs*) tab;
-	    *f = l;
-	    PerlIO_debug("PerlIO_push f=%p %s %s %p\n", (void*)f, tab->name,
-			(mode) ? mode : "(Null)", (void*)arg);
-	    if (*l->tab->Pushed &&
-		(*l->tab->Pushed) (aTHX_ f, mode, arg, (PerlIO_funcs*) tab) != 0) {
-		PerlIO_pop(aTHX_ f);
-		return NULL;
+	if (f) {
+	    char *temp;
+	    Newxz(temp, tab->size, char);
+	    l = (PerlIOl*)temp;
+	    if (l) {
+		l->next = *f;
+		l->tab = (PerlIO_funcs*) tab;
+		*f = l;
+		PerlIO_debug("PerlIO_push f=%p %s %s %p\n",
+			     (void*)f, tab->name,
+			     (mode) ? mode : "(Null)", (void*)arg);
+		if (*l->tab->Pushed &&
+		    (*l->tab->Pushed)
+		      (aTHX_ f, mode, arg, (PerlIO_funcs*) tab) != 0) {
+		    PerlIO_pop(aTHX_ f);
+		    return NULL;
+		}
 	    }
+	    else
+		return NULL;
 	}
     }
     else if (f) {
