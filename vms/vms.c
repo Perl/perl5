@@ -9911,12 +9911,13 @@ Perl_cando_by_name_int
          {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, usrname};
   char vmsname[NAM$C_MAXRSS+1];
   char *fileified;
-  unsigned long int objtyp = ACL$C_FILE, access, retsts, privused, iosb[2];
+  unsigned long int objtyp = ACL$C_FILE, access, retsts, privused, iosb[2], flags;
   unsigned short int retlen, trnlnm_iter_count;
   struct dsc$descriptor_s namdsc = {0, DSC$K_DTYPE_T, DSC$K_CLASS_S, 0};
   union prvdef curprv;
-  struct itmlst_3 armlst[3] = {{sizeof access, CHP$_ACCESS, &access, &retlen},
-         {sizeof privused, CHP$_PRIVUSED, &privused, &retlen},{0,0,0,0}};
+  struct itmlst_3 armlst[4] = {{sizeof access, CHP$_ACCESS, &access, &retlen},
+         {sizeof privused, CHP$_PRIVUSED, &privused, &retlen},
+         {sizeof flags, CHP$_FLAGS, &flags, &retlen},{0,0,0,0}};
   struct itmlst_3 jpilst[3] = {{sizeof curprv, JPI$_CURPRIV, &curprv, &retlen},
          {sizeof usrname, JPI$_USERNAME, &usrname, &usrdsc.dsc$w_length},
          {0,0,0,0}};
@@ -9959,13 +9960,21 @@ Perl_cando_by_name_int
 
   switch (bit) {
     case S_IXUSR: case S_IXGRP: case S_IXOTH:
-      access = ARM$M_EXECUTE; break;
+      access = ARM$M_EXECUTE; 
+      flags = CHP$M_READ;
+      break;
     case S_IRUSR: case S_IRGRP: case S_IROTH:
-      access = ARM$M_READ; break;
+      access = ARM$M_READ; 
+      flags = CHP$M_READ | CHP$M_USEREADALL;
+      break;
     case S_IWUSR: case S_IWGRP: case S_IWOTH:
-      access = ARM$M_WRITE; break;
+      access = ARM$M_WRITE; 
+      flags = CHP$M_READ | CHP$M_WRITE;
+      break;
     case S_IDUSR: case S_IDGRP: case S_IDOTH:
-      access = ARM$M_DELETE; break;
+      access = ARM$M_DELETE; 
+      flags = CHP$M_READ | CHP$M_WRITE;
+      break;
     default:
       if (fileified != NULL)
 	PerlMem_free(fileified);
