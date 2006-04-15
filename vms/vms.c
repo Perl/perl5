@@ -1320,7 +1320,7 @@ Perl_vmssetenv(pTHX_ const char *lnm, const char *eqv, struct dsc$descriptor_s *
         case LIB$_NOSUCHSYM: case SS$_NOLOGNAM:
           set_errno(EINVAL); break;
         case SS$_NOPRIV:
-          set_errno(EACCES);
+          set_errno(EACCES); break;
         default:
           _ckvmssts(retsts);
           set_errno(EVMSERR);
