@@ -56,11 +56,11 @@ do [sub {
 
 open $fh, "<", \'fail("File handles and filters work from \@INC");';
 
-do [$fh, sub {s/fail/pass/}] or die;
+do [$fh, sub {s/fail/pass/; return;}] or die;
 
 open $fh, "<", \'fail("File handles and filters with state work from \@INC");';
 
-do [$fh, sub {s/$_[1]/pass/}, 'fail'] or die;
+do [$fh, sub {s/$_[1]/pass/; return;}, 'fail'] or die;
 
 print "# 2 tests with pipes from subprocesses.\n";
 
@@ -70,7 +70,7 @@ do $fh or die;
 
 open $fh, 'echo fail|' or die $!;
 
-do [$fh, sub {s/$_[1]/pass/}, 'fail'] or die;
+do [$fh, sub {s/$_[1]/pass/; return;}, 'fail'] or die;
 
 sub rot13_filter {
     filter_add(sub {
@@ -92,7 +92,7 @@ ORTVA {ebg13_svygre};
 pass("This will rot13'ed twice");
 EOC
 
-do [$fh, sub {tr/A-Za-z/N-ZA-Mn-za-m/;}] or die;
+do [$fh, sub {tr/A-Za-z/N-ZA-Mn-za-m/; return;}] or die;
 
 my $count = 32;
 sub prepend_rot13_filter {
@@ -119,4 +119,4 @@ ORTVA {cercraq_ebg13_svygre};
 pass("This will rot13'ed twice");
 EOC
 
-do [$fh, sub {tr/A-Za-z/N-ZA-Mn-za-m/;}] or die;
+do [$fh, sub {tr/A-Za-z/N-ZA-Mn-za-m/; return;}] or die;
