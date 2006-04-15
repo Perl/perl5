@@ -97,7 +97,7 @@ do [$fh, sub {tr/A-Za-z/N-ZA-Mn-za-m/; return;}] or die;
 my $count = 32;
 sub prepend_rot13_filter {
     filter_add(sub {
-		   my $previous = defined $_ ? $_ : '';
+		   my $previous = $_;
 		   # Filters should append to any existing data in $_
 		   # But (logically) shouldn't filter it twice.
 		   my $test = "fzrt!";
@@ -123,7 +123,7 @@ do [$fh, sub {tr/A-Za-z/N-ZA-Mn-za-m/; return;}] or die;
 my $amount = 1;
 sub prepend_block_counting_filter {
     filter_add(sub {
-		   my $output = defined $_ ? $_ : '';
+		   my $output = $_;
 		   my $count = 256;
 		   while (--$count) {
 		       $_ = '';
