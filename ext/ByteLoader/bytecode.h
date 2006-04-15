@@ -13,20 +13,29 @@ typedef char *pvindex;
 
 /* all this should be made endianness-agnostic */
 
-#define BGET_U8(arg)	arg = BGET_FGETC()
-#define BGET_U16(arg)	\
-	BGET_FREAD(&arg, sizeof(U16), 1)
-#define BGET_U32(arg)	\
-	BGET_FREAD(&arg, sizeof(U32), 1)
-#define BGET_UV(arg)	\
-	BGET_FREAD(&arg, sizeof(UV), 1)
-#define BGET_PADOFFSET(arg)	\
-	BGET_FREAD(&arg, sizeof(PADOFFSET), 1)
-#define BGET_long(arg)		\
-	BGET_FREAD(&arg, sizeof(long), 1)
+#define BGET_U8(arg) STMT_START {					\
+	const int _arg = BGET_FGETC();					\
+	if (_arg < 0) {							\
+	    Perl_croak(aTHX_						\
+		       "EOF or error while trying to read 1 byte for U8"); \
+	}								\
+	arg = (U8) _arg;						\
+    } STMT_END
 
-#define BGET_I32(arg)	BGET_U32(arg)
-#define BGET_IV(arg)	BGET_UV(arg)
+#define BGET_U16(arg)		BGET_OR_CROAK(arg, U16)
+#define BGET_I32(arg)		BGET_OR_CROAK(arg, U32)
+#define BGET_U32(arg)		BGET_OR_CROAK(arg, U32)
+#define BGET_IV(arg)		BGET_OR_CROAK(arg, UV)
+#define BGET_PADOFFSET(arg)	BGET_OR_CROAK(arg, UV)
+#define BGET_long(arg)		BGET_OR_CROAK(arg, long)
+
+#define BGET_OR_CROAK(arg, type) STMT_START {				\
+	if (BGET_FREAD(&arg, sizeof(type), 1) < 1) {			\
+	    Perl_croak(aTHX_						\
+		       "EOF or error while trying to read %d bytes for %s", \
+		       sizeof(type), STRINGIFY(type));			\
+	}								\
+    } STMT_END
 
 #define BGET_PV(arg)	STMT_START {					\
 	BGET_U32(arg);							\
