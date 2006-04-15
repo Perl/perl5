@@ -2784,6 +2784,8 @@ and C<refcounted_he_free> iterates onto the parent node.
 
 void
 Perl_refcounted_he_free(pTHX_ struct refcounted_he *he) {
+    PERL_UNUSED_CONTEXT;
+
     while (he) {
 	struct refcounted_he *copy;
 	U32 new_count;
@@ -2818,63 +2820,62 @@ Check that a hash is in an internally consistent state.
 void
 Perl_hv_assert(pTHX_ HV *hv)
 {
-  dVAR;
-  HE* entry;
-  int withflags = 0;
-  int placeholders = 0;
-  int real = 0;
-  int bad = 0;
-  const I32 riter = HvRITER_get(hv);
-  HE *eiter = HvEITER_get(hv);
+    dVAR;
+    HE* entry;
+    int withflags = 0;
+    int placeholders = 0;
+    int real = 0;
+    int bad = 0;
+    const I32 riter = HvRITER_get(hv);
+    HE *eiter = HvEITER_get(hv);
 
-  (void)hv_iterinit(hv);
+    (void)hv_iterinit(hv);
 
-  while ((entry = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS))) {
-    /* sanity check the values */
-    if (HeVAL(entry) == &PL_sv_placeholder) {
-      placeholders++;
-    } else {
-      real++;
+    while ((entry = hv_iternext_flags(hv, HV_ITERNEXT_WANTPLACEHOLDERS))) {
+	/* sanity check the values */
+	if (HeVAL(entry) == &PL_sv_placeholder)
+	    placeholders++;
+	else
+	    real++;
+	/* sanity check the keys */
+	if (HeSVKEY(entry)) {
+	    /*EMPTY*/ /* Don't know what to check on SV keys.  */
+	} else if (HeKUTF8(entry)) {
+	    withflags++;
+	    if (HeKWASUTF8(entry)) {
+		PerlIO_printf(Perl_debug_log,
+			    "hash key has both WASUFT8 and UTF8: '%.*s'\n",
+			    (int) HeKLEN(entry),  HeKEY(entry));
+		bad = 1;
+	    }
+	} else if (HeKWASUTF8(entry))
+	    withflags++;
     }
-    /* sanity check the keys */
-    if (HeSVKEY(entry)) {
-      /*EMPTY*/ /* Don't know what to check on SV keys.  */
-    } else if (HeKUTF8(entry)) {
-      withflags++;
-       if (HeKWASUTF8(entry)) {
-	 PerlIO_printf(Perl_debug_log,
-		       "hash key has both WASUFT8 and UTF8: '%.*s'\n",
-		       (int) HeKLEN(entry),  HeKEY(entry));
-	 bad = 1;
-       }
-    } else if (HeKWASUTF8(entry)) {
-      withflags++;
+    if (!SvTIED_mg((SV*)hv, PERL_MAGIC_tied)) {
+	static const char bad_count[] = "Count %d %s(s), but hash reports %d\n";
+	const int nhashkeys = HvUSEDKEYS(hv);
+	const int nhashplaceholders = HvPLACEHOLDERS_get(hv);
+
+	if (nhashkeys != real) {
+	    PerlIO_printf(Perl_debug_log, bad_count, real, "keys", nhashkeys );
+	    bad = 1;
+	}
+	if (nhashplaceholders != placeholders) {
+	    PerlIO_printf(Perl_debug_log, bad_count, placeholders, "placeholder", nhashplaceholders );
+	    bad = 1;
+	}
     }
-  }
-  if (!SvTIED_mg((SV*)hv, PERL_MAGIC_tied)) {
-    if (HvUSEDKEYS(hv) != real) {
-      PerlIO_printf(Perl_debug_log, "Count %d key(s), but hash reports %d\n",
-		    (int) real, (int) HvUSEDKEYS(hv));
-      bad = 1;
+    if (withflags && ! HvHASKFLAGS(hv)) {
+	PerlIO_printf(Perl_debug_log,
+		    "Hash has HASKFLAGS off but I count %d key(s) with flags\n",
+		    withflags);
+	bad = 1;
     }
-    if (HvPLACEHOLDERS_get(hv) != placeholders) {
-      PerlIO_printf(Perl_debug_log,
-		    "Count %d placeholder(s), but hash reports %d\n",
-		    (int) placeholders, (int) HvPLACEHOLDERS_get(hv));
-      bad = 1;
+    if (bad) {
+	sv_dump((SV *)hv);
     }
-  }
-  if (withflags && ! HvHASKFLAGS(hv)) {
-    PerlIO_printf(Perl_debug_log,
-		  "Hash has HASKFLAGS off but I count %d key(s) with flags\n",
-		  withflags);
-    bad = 1;
-  }
-  if (bad) {
-    sv_dump((SV *)hv);
-  }
-  HvRITER_set(hv, riter);		/* Restore hash iterator state */
-  HvEITER_set(hv, eiter);
+    HvRITER_set(hv, riter);		/* Restore hash iterator state */
+    HvEITER_set(hv, eiter);
 }
 
 #endif
