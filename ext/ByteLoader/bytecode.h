@@ -91,9 +91,11 @@ typedef char *pvindex;
 	arg = arg ? savepv(arg) : arg;			\
     } STMT_END
 
-#define BSET_ldspecsv(sv, arg) STMT_START {				  \
-	assert(arg < sizeof(specialsv_list) / sizeof(specialsv_list[0])); \
-	sv = specialsv_list[arg];					  \
+#define BSET_ldspecsv(sv, arg) STMT_START {				\
+	if(arg >= sizeof(specialsv_list) / sizeof(specialsv_list[0])) {	\
+	    Perl_croak(aTHX_ "Out of range special SV number %d", arg);	\
+	}								\
+	sv = specialsv_list[arg];					\
     } STMT_END
 
 #define BSET_ldspecsvx(sv, arg) STMT_START {	\
