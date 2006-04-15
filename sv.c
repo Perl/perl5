@@ -12089,8 +12089,10 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	 * or are optimized away, then it's unambiguous */
 	o2 = NULL;
 	for (kid=o; kid; kid = kid->op_sibling) {
+	    SV *sv;
 	    if (kid &&
-		(    (kid->op_type == OP_CONST && SvOK(cSVOPx_sv(kid)))
+		(    (kid->op_type == OP_CONST && (sv = cSVOPx_sv(kid))
+		      && SvOK(sv))
 		  || (kid->op_type == OP_NULL  && ! (kid->op_flags & OPf_KIDS))
 		  || (kid->op_type == OP_PUSHMARK)
 		)
