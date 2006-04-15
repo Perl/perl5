@@ -2329,7 +2329,11 @@ static int store_hash(pTHX_ stcxt_t *cxt, HV *hv)
 #else
 			HE *he = hv_iternext(hv);
 #endif
-			SV *key = hv_iterkeysv(he);
+			SV *key;
+
+			if (!he)
+				CROAK(("Hash %p inconsistent - expected %d keys, %dth is NULL", hv, len, i));
+			key = hv_iterkeysv(he);
 			av_store(av, AvFILLp(av)+1, key);	/* av_push(), really */
 		}
 			
