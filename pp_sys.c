@@ -1301,16 +1301,18 @@ PP(pp_leavewrite)
     dVAR; dSP;
     GV * const gv = cxstack[cxstack_ix].blk_sub.gv;
     register IO * const io = GvIOp(gv);
-    PerlIO * const ofp = IoOFP(io);
+    PerlIO *ofp;
     PerlIO *fp;
     SV **newsp;
     I32 gimme;
     register PERL_CONTEXT *cx;
 
+    if (!io || !(ofp = IoOFP(io)))
+        goto forget_top;
+
     DEBUG_f(PerlIO_printf(Perl_debug_log, "left=%ld, todo=%ld\n",
 	  (long)IoLINES_LEFT(io), (long)FmLINES(PL_formtarget)));
-    if (!io || !ofp)
-	goto forget_top;
+
     if (IoLINES_LEFT(io) < FmLINES(PL_formtarget) &&
 	PL_formtarget != PL_toptarget)
     {
