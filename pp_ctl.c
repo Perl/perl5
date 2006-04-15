@@ -3067,7 +3067,6 @@ PP(pp_require)
     const I32 gimme = GIMME_V;
     int filter_has_file = 0;
     PerlIO *tryrsfp = NULL;
-    GV *filter_child_proc = NULL;
     SV *filter_state = NULL;
     SV *filter_sub = NULL;
     SV *hook_sv = NULL;
@@ -3186,23 +3185,11 @@ PP(pp_require)
 
 			    if (io) {
 				tryrsfp = IoIFP(io);
-				if (IoTYPE(io) == IoTYPE_PIPE) {
-				    /* reading from a child process doesn't
-				       nest -- when returning from reading
-				       the inner module, the outer one is
-				       unreadable (closed?)  I've tried to
-				       save the gv to manage the lifespan of
-				       the pipe, but this didn't help. XXX */
-				    filter_child_proc = (GV *)arg;
-				    SvREFCNT_inc_simple_void(filter_child_proc);
+				if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {
+				    PerlIO_close(IoOFP(io));
 				}
-				else {
-				    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {
-					PerlIO_close(IoOFP(io));
-				    }
-				    IoIFP(io) = NULL;
-				    IoOFP(io) = NULL;
-				}
+				IoIFP(io) = NULL;
+				IoOFP(io) = NULL;
 			    }
 
 			    if (i < count) {
@@ -3237,10 +3224,6 @@ PP(pp_require)
 		    }
 
 		    filter_has_file = 0;
-		    if (filter_child_proc) {
-			SvREFCNT_dec(filter_child_proc);
-			filter_child_proc = NULL;
-		    }
 		    if (filter_state) {
 			SvREFCNT_dec(filter_state);
 			filter_state = NULL;
@@ -3378,10 +3361,9 @@ PP(pp_require)
     SAVESPTR(PL_compiling.cop_io);
     PL_compiling.cop_io = NULL;
 
-    if (filter_sub || filter_child_proc) {
+    if (filter_sub) {
 	SV * const datasv = filter_add(S_run_user_filter, NULL);
 	IoLINES(datasv) = filter_has_file;
-	IoFMT_GV(datasv) = (GV *)filter_child_proc;
 	IoTOP_GV(datasv) = (GV *)filter_state;
 	IoBOTTOM_GV(datasv) = (GV *)filter_sub;
     }
