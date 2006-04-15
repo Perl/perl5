@@ -1638,13 +1638,36 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  LINES_LEFT = %"IVdf"\n", (IV)IoLINES_LEFT(sv));
         if (IoTOP_NAME(sv))
             Perl_dump_indent(aTHX_ level, file, "  TOP_NAME = \"%s\"\n", IoTOP_NAME(sv));
-	do_gv_dump (level, file, "  TOP_GV", IoTOP_GV(sv));
+	if (!IoTOP_GV(sv) || SvTYPE(IoTOP_GV(sv)) == SVt_PVGV)
+	    do_gv_dump (level, file, "  TOP_GV", IoTOP_GV(sv));
+	else {
+	    Perl_dump_indent(aTHX_ level, file, "  TOP_GV = 0x%"UVxf"\n",
+			     PTR2UV(IoTOP_GV(sv)));
+	    do_sv_dump (level+1, file, (SV *) IoTOP_GV(sv), nest+1, maxnest,
+			dumpops, pvlim);
+	}
+	/* Source filters hide things that are not GVs in these three, so let's
+	   be careful out there.  */
         if (IoFMT_NAME(sv))
             Perl_dump_indent(aTHX_ level, file, "  FMT_NAME = \"%s\"\n", IoFMT_NAME(sv));
-	do_gv_dump (level, file, "  FMT_GV", IoFMT_GV(sv));
+	if (!IoFMT_GV(sv) || SvTYPE(IoFMT_GV(sv)) == SVt_PVGV)
+	    do_gv_dump (level, file, "  FMT_GV", IoFMT_GV(sv));
+	else {
+	    Perl_dump_indent(aTHX_ level, file, "  FMT_GV = 0x%"UVxf"\n",
+			     PTR2UV(IoFMT_GV(sv)));
+	    do_sv_dump (level+1, file, (SV *) IoFMT_GV(sv), nest+1, maxnest,
+			dumpops, pvlim);
+	}
         if (IoBOTTOM_NAME(sv))
             Perl_dump_indent(aTHX_ level, file, "  BOTTOM_NAME = \"%s\"\n", IoBOTTOM_NAME(sv));
-	do_gv_dump (level, file, "  BOTTOM_GV", IoBOTTOM_GV(sv));
+	if (!IoBOTTOM_GV(sv) || SvTYPE(IoBOTTOM_GV(sv)) == SVt_PVGV)
+	    do_gv_dump (level, file, "  BOTTOM_GV", IoBOTTOM_GV(sv));
+	else {
+	    Perl_dump_indent(aTHX_ level, file, "  BOTTOM_GV = 0x%"UVxf"\n",
+			     PTR2UV(IoBOTTOM_GV(sv)));
+	    do_sv_dump (level+1, file, (SV *) IoBOTTOM_GV(sv), nest+1, maxnest,
+			dumpops, pvlim);
+	}
 	Perl_dump_indent(aTHX_ level, file, "  SUBPROCESS = %"IVdf"\n", (IV)IoSUBPROCESS(sv));
 	if (isPRINT(IoTYPE(sv)))
             Perl_dump_indent(aTHX_ level, file, "  TYPE = '%c'\n", IoTYPE(sv));
