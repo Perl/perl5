@@ -4538,14 +4538,23 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     SV * const filter_state = (SV *)IoTOP_GV(datasv);
     SV * const filter_sub = (SV *)IoBOTTOM_GV(datasv);
     int len = 0;
+    /* Filter API says that the filter appends to the contents of the buffer.
+       Usually the buffer is "", so the details don't matter. But if it's not,
+       then clearly what it contains is already filtered by this filter, so we
+       don't want to pass it in a second time.
+       I'm going to use a mortal in case the upstream filter croaks.  */
+    SV *const upstream
+	= ((SvOK(buf_sv) && sv_len(buf_sv)) || SvGMAGICAL(buf_sv))
+	? sv_newmortal() : buf_sv;
 
+    SvUPGRADE(upstream, SVt_PV);
     /* I was having segfault trouble under Linux 2.2.5 after a
        parse error occured.  (Had to hack around it with a test
        for PL_error_count == 0.)  Solaris doesn't segfault --
        not sure where the trouble is yet.  XXX */
 
     if (filter_has_file) {
-	len = FILTER_READ(idx+1, buf_sv, maxlen);
+	len = FILTER_READ(idx+1, upstream, maxlen);
     }
 
     if (filter_sub && len >= 0) {
@@ -4557,7 +4566,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	SAVETMPS;
 	EXTEND(SP, 2);
 
-	DEFSV = buf_sv;
+	DEFSV = upstream;
 	PUSHMARK(SP);
 	PUSHs(sv_2mortal(newSViv(maxlen)));
 	if (filter_state) {
@@ -4596,6 +4605,9 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	filter_del(S_run_user_filter);
     }
 
+    if (upstream != buf_sv) {
+	sv_catsv(buf_sv, upstream);
+    }
     return len;
 }
 
