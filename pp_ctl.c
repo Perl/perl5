@@ -4518,7 +4518,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     const int filter_has_file = IoLINES(datasv);
     SV * const filter_state = (SV *)IoTOP_GV(datasv);
     SV * const filter_sub = (SV *)IoBOTTOM_GV(datasv);
-    int len = 0;
+    int status = 0;
     /* Filter API says that the filter appends to the contents of the buffer.
        Usually the buffer is "", so the details don't matter. But if it's not,
        then clearly what it contains is already filtered by this filter, so we
@@ -4527,6 +4527,9 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     SV *const upstream
 	= ((SvOK(buf_sv) && sv_len(buf_sv)) || SvGMAGICAL(buf_sv))
 	? sv_newmortal() : buf_sv;
+    STRLEN got_len;
+    const char *got_p;
+    const char *prune_from = NULL;
 
     SvUPGRADE(upstream, SVt_PV);
     /* I was having segfault trouble under Linux 2.2.5 after a
@@ -4534,31 +4537,47 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
        for PL_error_count == 0.)  Solaris doesn't segfault --
        not sure where the trouble is yet.  XXX */
 
-    if (maxlen && IoFMT_GV(datasv)) {
+    if (IoFMT_GV(datasv)) {
 	SV *const cache = (SV *)IoFMT_GV(datasv);
 	if (SvOK(cache)) {
 	    STRLEN cache_len;
 	    const char *cache_p = SvPV(cache, cache_len);
-	    /* Running in block mode and we have some cached data already.  */
-	    if (cache_len >= maxlen) {
-		/* In fact, so much data we don't even need to call
-		   filter_read.  */
-		sv_catpvn(buf_sv, cache_p, maxlen);
-		sv_chop(cache, cache_p + maxlen);
+	    STRLEN take = 0;
+
+	    if (maxlen) {
+		/* Running in block mode and we have some cached data already.
+		 */
+		if (cache_len >= maxlen) {
+		    /* In fact, so much data we don't even need to call
+		       filter_read.  */
+		    take = maxlen;
+		}
+	    } else {
+		const char *const first_nl = memchr(cache_p, '\n', cache_len);
+		if (first_nl) {
+		    take = first_nl + 1 - cache_p;
+		}
+	    }
+	    if (take) {
+		sv_catpvn(buf_sv, cache_p, take);
+		sv_chop(cache, cache_p + take);
 		/* Definately not EOF  */
 		return 1;
 	    }
+
 	    sv_catsv(buf_sv, cache);
-	    maxlen -= cache_len;
+	    if (maxlen) {
+		maxlen -= cache_len;
+	    }
 	    SvOK_off(cache);
 	}
     }
 	
     if (filter_has_file) {
-	len = FILTER_READ(idx+1, upstream, maxlen);
+	status = FILTER_READ(idx+1, upstream, maxlen);
     }
 
-    if (filter_sub && len >= 0) {
+    if (filter_sub && status >= 0) {
 	dSP;
 	int count;
 
@@ -4580,7 +4599,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	if (count > 0) {
 	    SV *out = POPs;
 	    if (SvOK(out)) {
-		len = SvIV(out);
+		status = SvIV(out);
 	    }
 	}
 
@@ -4589,39 +4608,51 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	LEAVE;
     }
 
-    if (maxlen) {
-	/* Running in block mode.  */
-	STRLEN got_len;
-	const char *got_p = SvPV(upstream, got_len);
-
-	if (got_len > maxlen) {
-	    /* Oh. Too long. Stuff some in our cache.  */
-	    SV *cache = (SV *)IoFMT_GV(datasv);
-
-	    if (!cache) {
-		IoFMT_GV(datasv) = (GV*) (cache = newSV(got_len - maxlen));
-	    } else if (SvOK(cache)) {
-		/* Cache should be empty.  */
-		assert(!SvCUR(cache));
+    if(SvOK(upstream)) {
+	got_p = SvPV(upstream, got_len);
+	if (maxlen) {
+	    if (got_len > maxlen) {
+		prune_from = got_p + maxlen;
 	    }
-
-	    sv_setpvn(cache, got_p + maxlen, got_len - maxlen);
-	    /* If you ask for block mode, you may well split UTF-8 characters.
-	       "If it breaks, you get to keep both parts"
-	       (Your code is broken if you  don't put them back together again
-	       before something notices.) */
-	    if (SvUTF8(upstream)) {
-		SvUTF8_on(cache);
+	} else {
+	    const char *const first_nl = memchr(got_p, '\n', got_len);
+	    if (first_nl && first_nl + 1 < got_p + got_len) {
+		/* There's a second line here... */
+		prune_from = first_nl + 1;
 	    }
-	    SvCUR_set(upstream, maxlen);
 	}
+    }
+    if (prune_from) {
+	/* Oh. Too long. Stuff some in our cache.  */
+	STRLEN cached_len = got_p + got_len - prune_from;
+	SV *cache = (SV *)IoFMT_GV(datasv);
+
+	if (!cache) {
+	    IoFMT_GV(datasv) = (GV*) (cache = newSV(got_len - maxlen));
+	} else if (SvOK(cache)) {
+	    /* Cache should be empty.  */
+	    assert(!SvCUR(cache));
+	}
+
+	sv_setpvn(cache, prune_from, cached_len);
+	/* If you ask for block mode, you may well split UTF-8 characters.
+	   "If it breaks, you get to keep both parts"
+	   (Your code is broken if you  don't put them back together again
+	   before something notices.) */
+	if (SvUTF8(upstream)) {
+	    SvUTF8_on(cache);
+	}
+	SvCUR_set(upstream, got_len - cached_len);
+	/* Can't yet be EOF  */
+	if (status == 0)
+	    status = 1;
     }
 
     if (upstream != buf_sv) {
 	sv_catsv(buf_sv, upstream);
     }
 
-    if (len <= 0) {
+    if (status <= 0) {
 	IoLINES(datasv) = 0;
 	SvREFCNT_dec(IoFMT_GV(datasv));
 	if (filter_state) {
@@ -4634,7 +4665,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	}
 	filter_del(S_run_user_filter);
     }
-    return len;
+    return status;
 }
 
 /* perhaps someone can come up with a better name for

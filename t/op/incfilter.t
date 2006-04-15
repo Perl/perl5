@@ -14,7 +14,7 @@ BEGIN {
 use strict;
 use Filter::Util::Call;
 
-plan(tests => 108);
+plan(tests => 128);
 
 unshift @INC, sub {
     no warnings 'uninitialized';
@@ -154,3 +154,22 @@ pas("SSS make s fast SSS");
 EOC
 
 do [$fh, sub {s/s/ss/gs; s/([\nS])/$1$1$1/gs; return;}] or die;
+
+sub prepend_line_counting_filter {
+    filter_add(sub {
+		   my $output = $_;
+		   $_ = '';
+		   my $status = filter_read();
+		   my $newlines = tr/\n//;
+		   cmp_ok ($newlines, '<=', 1, "1 line at most?");
+		   $_ = $output . $_ if defined $output;
+		   return $status;
+	       })
+}
+
+open $fh, "<", \<<'EOC';
+BEGIN {prepend_line_counting_filter};
+pass("You should see this line thrice");
+EOC
+
+do [$fh, sub {$_ .= $_ . $_; return;}] or die;
