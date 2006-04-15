@@ -4524,14 +4524,11 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
        then clearly what it contains is already filtered by this filter, so we
        don't want to pass it in a second time.
        I'm going to use a mortal in case the upstream filter croaks.  */
-    SV *const upstream
-	= ((SvOK(buf_sv) && sv_len(buf_sv)) || SvGMAGICAL(buf_sv))
-	? sv_newmortal() : buf_sv;
+    SV *upstream;
     STRLEN got_len;
     const char *got_p;
     const char *prune_from = NULL;
 
-    SvUPGRADE(upstream, SVt_PV);
     /* I was having segfault trouble under Linux 2.2.5 after a
        parse error occured.  (Had to hack around it with a test
        for PL_error_count == 0.)  Solaris doesn't segfault --
@@ -4572,12 +4569,17 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    SvOK_off(cache);
 	}
     }
+
+    upstream = ((SvOK(buf_sv) && sv_len(buf_sv)) || SvGMAGICAL(buf_sv))
+	? sv_newmortal() : buf_sv;
+    SvUPGRADE(upstream, SVt_PV);
 	
     if (filter_has_file) {
 	status = FILTER_READ(idx+1, upstream, maxlen);
     }
 
-    if (filter_sub && status >= 0) {
+    assert(filter_sub);
+    if (status >= 0) {
 	dSP;
 	int count;
 
