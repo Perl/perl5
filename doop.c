@@ -1214,7 +1214,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	needlen = ((optype == OP_BIT_AND)
 		    ? len : (leftlen > rightlen ? leftlen : rightlen));
 	Newxz(dc, needlen + 1, char);
-	(void)sv_usepvn(sv, dc, needlen);
+	sv_usepvn_flags(sv, dc, needlen, SV_HAS_TRAILING_NUL);
 	dc = SvPVX(sv);		/* sv_usepvn() calls Renew() */
     }
     SvCUR_set(sv, len);
