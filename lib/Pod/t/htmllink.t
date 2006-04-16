@@ -19,7 +19,7 @@ __DATA__
 <head>
 <title>htmllink - Test HTML links</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<link rev="made" href="mailto:" />
+<link rev="made" href="mailto:[PERLADMIN]" />
 </head>
 
 <body style="background-color: white">
