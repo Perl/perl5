@@ -113,7 +113,7 @@ PP(pp_regcomp)
 	tmpstr = POPs;
 
     if (SvROK(tmpstr)) {
-	SV *sv = SvRV(tmpstr);
+	SV * const sv = SvRV(tmpstr);
 	if(SvMAGICAL(sv))
 	    mg = mg_find(sv, PERL_MAGIC_qr);
     }
@@ -125,14 +125,14 @@ PP(pp_regcomp)
     else {
 	STRLEN len;
 	const char *t = SvPV_const(tmpstr, len);
+	regexp * const re = PM_GETRE(pm);
 
 	/* Check against the last compiled regexp. */
-	if (!PM_GETRE(pm) || !PM_GETRE(pm)->precomp ||
-	    PM_GETRE(pm)->prelen != (I32)len ||
-	    memNE(PM_GETRE(pm)->precomp, t, len))
+	if (!re || !re->precomp || re->prelen != (I32)len ||
+	    memNE(re->precomp, t, len))
 	{
-	    if (PM_GETRE(pm)) {
-	        ReREFCNT_dec(PM_GETRE(pm));
+	    if (re) {
+	        ReREFCNT_dec(re);
 		PM_SETRE(pm, NULL);	/* crucial if regcomp aborts */
 	    }
 	    if (PL_op->op_flags & OPf_SPECIAL)
