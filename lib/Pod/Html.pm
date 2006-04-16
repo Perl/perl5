@@ -1501,6 +1501,7 @@ sub process_text {
     return if $Ignore;
     my( $tref ) = @_;
     my $res = process_text1( 0, $tref );
+    $res =~ s/\s+$//s;
     $$tref = $res;
 }
 
