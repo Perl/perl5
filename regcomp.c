@@ -1733,6 +1733,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 		}
 		if (code == IFTHEN && num < 2) /* Empty ELSE branch */
 		    min1 = 0;
+		if ((flags & (SCF_DO_SUBSTR | SCF_DO_STCLASS)) && !data)
+		    Perl_croak(aTHX_ "panic: null data in study_chunk");
 		if (flags & SCF_DO_SUBSTR) {
 		    data->pos_min += min1;
 		    data->pos_delta += max1 - min1;
