@@ -104,13 +104,13 @@ perlmain$(OBJ_EXT): perlmain.c
 
 # library used to make statically linked executables
 # miniperl is linked against it to avoid libperl.dll locking
-$(LIBPERL)$(LIB_EXT): $& perl$(OBJ_EXT) $(cwobj)
-	$(AR) rcu $@ perl$(OBJ_EXT) $(cwobj)
+$(LIBPERL)$(LIB_EXT): $& $(cwobj)
+	$(AR) rcu $@ $(cwobj)
 
 # dll and import library
-$(LIBPERL).dll$(LIB_EXT): $& perl$(OBJ_EXT) $(cwobj) ld2
+$(LIBPERL).dll$(LIB_EXT): $& $(cwobj) ld2
 	$(LDLIBPTH) ld2 $(SHRPLDFLAGS) -o $(LIBPERL)$(DLSUFFIX) \
-	perl$(OBJ_EXT) $(cwobj) $(libs)
+	$(cwobj) $(libs)
 
 # How to build executables.
 
@@ -145,8 +145,8 @@ $spitshell >>Makefile <<'!NO!SUBS!'
 cwobj = $(obj)
 
 # perl library
-$(LIBPERL)$(LIB_EXT): $& perl$(OBJ_EXT) $(cwobj)
-	$(AR) rcu $@ perl$(OBJ_EXT) $(cwobj)
+$(LIBPERL)$(LIB_EXT): $& $(cwobj)
+	$(AR) rcu $@ $(cwobj)
 
 # How to build executables.
 
