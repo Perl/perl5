@@ -214,20 +214,26 @@ typedef struct regmatch_state {
     I32 ln;			/* len or last */
 
     union {
+
+	/* this is a fake union member that matches the first element
+	 * of each member that needs to store positive backtrack
+	 * information */
+	struct {
+	    struct regmatch_state *prev_yes_state;
+	} yes;
+
 	struct {
 	    reg_trie_accepted *accept_buff;
 	    U32 accepted;	/* how many accepting states we have seen */
 	} trie;
 
 	struct {
+	    /* this first element must match u.yes */
+	    struct regmatch_state *prev_yes_state;
 	    regexp	*prev_rex;
 	    int		toggleutf;
 	    CHECKPOINT	cp;	/* remember current savestack indexes */
 	    CHECKPOINT	lastcp;
-	    struct regmatch_state  *prev_eval; /* save cur_eval */
-	    struct regmatch_slab   *prev_slab;
-	    int depth;
-
 	} eval;
 
 	struct {

@@ -2486,7 +2486,8 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
     regnode *inner;	    /* Next node in internal branch. */
     int depth = 0;	    /* depth of recursion */
     regmatch_state *newst;  /* when pushing a state, this is the new one */
-    regmatch_state *cur_eval = NULL;  /* most recent (??{}) state */
+    regmatch_state *yes_state = NULL; /* state to pop to on success of
+							    subpattern */
     
 #ifdef DEBUGGING
     SV *re_debug_flags = NULL;
@@ -3402,10 +3403,9 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		st->u.eval.prev_rex = rex;
 		rex = re;
 
-		st->u.eval.prev_eval = cur_eval;
-		st->u.eval.prev_slab = PL_regmatch_slab;
-		st->u.eval.depth = depth;
-		cur_eval = st;
+		/* resume to current state on success */
+		st->u.yes.prev_yes_state = yes_state;
+		yes_state = st;
 		PUSH_STATE(newst, resume_EVAL);
 		st = newst;
 
@@ -4254,48 +4254,6 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    sayNO;
 	    break;
 	case END:
-	    if (cur_eval) {
-		/* we have successfully completed the execution of a
-		 * postponed re. Pop all states back to the last EVAL
-		 * then continue with the node following the (??{...})
-		 */
-
-		/* this simulates a POP_STATE, except that it pops several
-		 * levels, and doesn't restore locinput */
-
-		st = cur_eval;
-		PL_regmatch_slab = st->u.eval.prev_slab;
-		cur_eval = st->u.eval.prev_eval;
-		depth = st->u.eval.depth;
-
-		PL_regmatch_state = st;
-		scan	= st->scan;
-		next	= st->next;
-		n		= st->n;
-
-		if (st->u.eval.toggleutf)
-		    PL_reg_flags ^= RF_utf8;
-		ReREFCNT_dec(rex);
-		rex = st->u.eval.prev_rex;
-		/* XXXX This is too dramatic a measure... */
-		PL_reg_maxiter = 0;
-
-		/* Restore parens of the caller without popping the
-		 * savestack */
-		{
-		    I32 tmp = PL_savestack_ix;
-		    PL_savestack_ix = st->u.eval.lastcp;
-		    regcppop(rex);
-		    PL_savestack_ix = tmp;
-		}
-
-
-		PL_reginput = locinput;
-		/* resume at node following the (??{...}) */
-		break;
-
-	    }
-
 	    if (locinput < reginfo->till) {
 		DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 				      "%sMatch possible, but length=%ld is smaller than requested=%ld, failing!%s\n",
@@ -4429,6 +4387,52 @@ yes_loud:
 	);
     goto yes;
 yes_final:
+
+    if (yes_state) {
+	/* we have successfully completed a subexpression, but we must now
+	 * pop to the state marked by yes_state and continue from there */
+
+	assert(st != yes_state);
+	while (yes_state < SLAB_FIRST(PL_regmatch_slab)
+	    || yes_state > SLAB_LAST(PL_regmatch_slab))
+	{
+	    /* not in this slab, pop slab */
+	    depth -= (st - SLAB_FIRST(PL_regmatch_slab) + 1);
+	    PL_regmatch_slab = PL_regmatch_slab->prev;
+	    st = SLAB_LAST(PL_regmatch_slab);
+	}
+	depth -= (st - yes_state);
+	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "POP STATE TO (%d)\n", depth)); \
+	st = yes_state;
+	yes_state = st->u.yes.prev_yes_state;
+	PL_regmatch_state = st;
+
+	switch (st->resume_state) {
+	case resume_EVAL:
+	    if (st->u.eval.toggleutf)
+		PL_reg_flags ^= RF_utf8;
+	    ReREFCNT_dec(rex);
+	    rex = st->u.eval.prev_rex;
+	    /* XXXX This is too dramatic a measure... */
+	    PL_reg_maxiter = 0;
+	    /* Restore parens of the caller without popping the
+	     * savestack */
+	    {
+		I32 tmp = PL_savestack_ix;
+		PL_savestack_ix = st->u.eval.lastcp;
+		regcppop(rex);
+		PL_savestack_ix = tmp;
+	    }
+	    PL_reginput = locinput;
+	     /* continue at the node following the (??{...}) */
+	    next	= st->next;
+	    goto reenter;
+
+	default:
+	    Perl_croak(aTHX_ "unexpected yes reume state");
+	}
+    }
+
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%sMatch successful!%s\n",
 			  PL_colors[4], PL_colors[5]));
 yes:
@@ -4438,7 +4442,8 @@ yes:
 
     result = 1;
     /* XXX this is duplicate(ish) code to that in the do_no section.
-     * eventually a yes should just pop the whole stack */
+     * eventually a yes should just pop the stack back to the current
+     * yes_state */
     if (depth) {
 	/* restore previous state and re-enter */
 	POP_STATE;
@@ -4448,8 +4453,6 @@ yes:
 	    goto resume_point_TRIE1;
 	case resume_TRIE2:
 	    goto resume_point_TRIE2;
-	case resume_EVAL:
-	    break;
 	case resume_CURLYX:
 	    goto resume_point_CURLYX;
 	case resume_WHILEM1:
@@ -4482,6 +4485,8 @@ yes:
 	    goto resume_point_PLUS3;
 	case resume_PLUS4:
 	    goto resume_point_PLUS4;
+
+	case resume_EVAL:
 	default:
 	    Perl_croak(aTHX_ "regexp resume memory corruption");
 	}
@@ -4567,7 +4572,7 @@ do_no:
 		PL_reg_flags ^= RF_utf8;
 	    ReREFCNT_dec(rex);
 	    rex = st->u.eval.prev_rex;
-	    cur_eval = st->u.eval.prev_eval;
+	    yes_state = st->u.yes.prev_yes_state;
 
 	    /* XXXX This is too dramatic a measure... */
 	    PL_reg_maxiter = 0;
