@@ -365,38 +365,50 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
 	op_dump(pm->op_pmreplroot);
     }
     if (pm->op_pmflags || (PM_GETRE(pm) && PM_GETRE(pm)->check_substr)) {
-	SV * const tmpsv = newSVpvs("");
-	if (pm->op_pmdynflags & PMdf_USED)
-	    sv_catpv(tmpsv, ",USED");
-	if (pm->op_pmdynflags & PMdf_TAINTED)
-	    sv_catpv(tmpsv, ",TAINTED");
-	if (pm->op_pmflags & PMf_ONCE)
-	    sv_catpv(tmpsv, ",ONCE");
-	if (PM_GETRE(pm) && PM_GETRE(pm)->check_substr
-	    && !(PM_GETRE(pm)->reganch & ROPT_NOSCAN))
-	    sv_catpv(tmpsv, ",SCANFIRST");
-	if (PM_GETRE(pm) && PM_GETRE(pm)->check_substr
-	    && PM_GETRE(pm)->reganch & ROPT_CHECK_ALL)
-	    sv_catpv(tmpsv, ",ALL");
-	if (pm->op_pmflags & PMf_SKIPWHITE)
-	    sv_catpv(tmpsv, ",SKIPWHITE");
-	if (pm->op_pmflags & PMf_CONST)
-	    sv_catpv(tmpsv, ",CONST");
-	if (pm->op_pmflags & PMf_KEEP)
-	    sv_catpv(tmpsv, ",KEEP");
-	if (pm->op_pmflags & PMf_GLOBAL)
-	    sv_catpv(tmpsv, ",GLOBAL");
-	if (pm->op_pmflags & PMf_CONTINUE)
-	    sv_catpv(tmpsv, ",CONTINUE");
-	if (pm->op_pmflags & PMf_RETAINT)
-	    sv_catpv(tmpsv, ",RETAINT");
-	if (pm->op_pmflags & PMf_EVAL)
-	    sv_catpv(tmpsv, ",EVAL");
+	SV * const tmpsv = pm_description(pm);
 	Perl_dump_indent(aTHX_ level, file, "PMFLAGS = (%s)\n", SvCUR(tmpsv) ? SvPVX_const(tmpsv) + 1 : "");
 	SvREFCNT_dec(tmpsv);
     }
 
     Perl_dump_indent(aTHX_ level-1, file, "}\n");
+}
+
+static
+SV *
+S_pm_description(pTHX_ const PMOP *pm)
+{
+    SV * const desc = newSVpvs("");
+    const REGEXP * regex = PM_GETRE(pm);
+    const U32 pmflags = pm->op_pmflags;
+
+    if (pm->op_pmdynflags & PMdf_USED)
+	sv_catpv(desc, ",USED");
+    if (pm->op_pmdynflags & PMdf_TAINTED)
+	sv_catpv(desc, ",TAINTED");
+
+    if (pmflags & PMf_ONCE)
+	sv_catpv(desc, ",ONCE");
+    if (regex && regex->check_substr) {
+	if (!(regex->reganch & ROPT_NOSCAN))
+	    sv_catpv(desc, ",SCANFIRST");
+	if (regex->reganch & ROPT_CHECK_ALL)
+	    sv_catpv(desc, ",ALL");
+    }
+    if (pmflags & PMf_SKIPWHITE)
+	sv_catpv(desc, ",SKIPWHITE");
+    if (pmflags & PMf_CONST)
+	sv_catpv(desc, ",CONST");
+    if (pmflags & PMf_KEEP)
+	sv_catpv(desc, ",KEEP");
+    if (pmflags & PMf_GLOBAL)
+	sv_catpv(desc, ",GLOBAL");
+    if (pmflags & PMf_CONTINUE)
+	sv_catpv(desc, ",CONTINUE");
+    if (pmflags & PMf_RETAINT)
+	sv_catpv(desc, ",RETAINT");
+    if (pmflags & PMf_EVAL)
+	sv_catpv(desc, ",EVAL");
+    return desc;
 }
 
 void
@@ -2256,33 +2268,7 @@ Perl_do_pmop_xmldump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
     else
 	Perl_xmldump_indent(aTHX_ level, file, "pre=\"\" when=\"RUN\"\n");
     if (pm->op_pmflags || (PM_GETRE(pm) && PM_GETRE(pm)->check_substr)) {
-	SV *tmpsv = newSVpvn("", 0);
-	if (pm->op_pmdynflags & PMdf_USED)
-	    sv_catpv(tmpsv, ",USED");
-	if (pm->op_pmdynflags & PMdf_TAINTED)
-	    sv_catpv(tmpsv, ",TAINTED");
-	if (pm->op_pmflags & PMf_ONCE)
-	    sv_catpv(tmpsv, ",ONCE");
-	if (PM_GETRE(pm) && PM_GETRE(pm)->check_substr
-	    && !(PM_GETRE(pm)->reganch & ROPT_NOSCAN))
-	    sv_catpv(tmpsv, ",SCANFIRST");
-	if (PM_GETRE(pm) && PM_GETRE(pm)->check_substr
-	    && PM_GETRE(pm)->reganch & ROPT_CHECK_ALL)
-	    sv_catpv(tmpsv, ",ALL");
-	if (pm->op_pmflags & PMf_SKIPWHITE)
-	    sv_catpv(tmpsv, ",SKIPWHITE");
-	if (pm->op_pmflags & PMf_CONST)
-	    sv_catpv(tmpsv, ",CONST");
-	if (pm->op_pmflags & PMf_KEEP)
-	    sv_catpv(tmpsv, ",KEEP");
-	if (pm->op_pmflags & PMf_GLOBAL)
-	    sv_catpv(tmpsv, ",GLOBAL");
-	if (pm->op_pmflags & PMf_CONTINUE)
-	    sv_catpv(tmpsv, ",CONTINUE");
-	if (pm->op_pmflags & PMf_RETAINT)
-	    sv_catpv(tmpsv, ",RETAINT");
-	if (pm->op_pmflags & PMf_EVAL)
-	    sv_catpv(tmpsv, ",EVAL");
+	SV * const tmpsv = pmflags_description(pm);
 	Perl_xmldump_indent(aTHX_ level, file, "pmflags=\"%s\"\n", SvCUR(tmpsv) ? SvPVX(tmpsv) + 1 : "");
 	SvREFCNT_dec(tmpsv);
     }

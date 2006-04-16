@@ -1354,6 +1354,7 @@
 #define debprof			S_debprof
 #define sequence		S_sequence
 #define sequence_num		S_sequence_num
+#define pm_description		S_pm_description
 #endif
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
@@ -3508,6 +3509,7 @@
 #define debprof(a)		S_debprof(aTHX_ a)
 #define sequence(a)		S_sequence(aTHX_ a)
 #define sequence_num(a)		S_sequence_num(aTHX_ a)
+#define pm_description(a)	S_pm_description(aTHX_ a)
 #endif
 #endif
 #if defined(PERL_IN_SCOPE_C) || defined(PERL_DECL_PROT)
