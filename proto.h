@@ -2337,7 +2337,10 @@ PERL_CALLCONV void	Perl_sv_untaint(pTHX_ SV* sv)
 PERL_CALLCONV void	Perl_sv_upgrade(pTHX_ SV* sv, U32 mt)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV void	Perl_sv_usepvn(pTHX_ SV* sv, char* ptr, STRLEN len)
+/* PERL_CALLCONV void	Perl_sv_usepvn(pTHX_ SV* sv, char* ptr, STRLEN len)
+			__attribute__nonnull__(pTHX_1); */
+
+PERL_CALLCONV void	Perl_sv_usepvn_flags(pTHX_ SV* sv, char* ptr, STRLEN len, U32 flags)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV void	Perl_sv_vcatpvfn(pTHX_ SV* sv, const char* pat, STRLEN patlen, va_list* args, SV** svargs, I32 svmax, bool *maybe_tainted)
@@ -2634,8 +2637,8 @@ PERL_CALLCONV void	Perl_sv_setpvn_mg(pTHX_ SV *sv, const char *ptr, STRLEN len)
 PERL_CALLCONV void	Perl_sv_setsv_mg(pTHX_ SV *dstr, SV *sstr)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV void	Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len)
-			__attribute__nonnull__(pTHX_1);
+/* PERL_CALLCONV void	Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len)
+			__attribute__nonnull__(pTHX_1); */
 
 PERL_CALLCONV MGVTBL*	Perl_get_vtbl(pTHX_ int vtbl_id)
 			__attribute__warn_unused_result__;

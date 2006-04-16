@@ -881,7 +881,7 @@
 #define sv_unref_flags		Perl_sv_unref_flags
 #define sv_untaint		Perl_sv_untaint
 #define sv_upgrade		Perl_sv_upgrade
-#define sv_usepvn		Perl_sv_usepvn
+#define sv_usepvn_flags		Perl_sv_usepvn_flags
 #define sv_vcatpvfn		Perl_sv_vcatpvfn
 #define sv_vsetpvfn		Perl_sv_vsetpvfn
 #define str_to_version		Perl_str_to_version
@@ -989,7 +989,6 @@
 #define sv_setpv_mg		Perl_sv_setpv_mg
 #define sv_setpvn_mg		Perl_sv_setpvn_mg
 #define sv_setsv_mg		Perl_sv_setsv_mg
-#define sv_usepvn_mg		Perl_sv_usepvn_mg
 #define get_vtbl		Perl_get_vtbl
 #define pv_display		Perl_pv_display
 #define dump_indent		Perl_dump_indent
@@ -3040,7 +3039,7 @@
 #define sv_unref_flags(a,b)	Perl_sv_unref_flags(aTHX_ a,b)
 #define sv_untaint(a)		Perl_sv_untaint(aTHX_ a)
 #define sv_upgrade(a,b)		Perl_sv_upgrade(aTHX_ a,b)
-#define sv_usepvn(a,b,c)	Perl_sv_usepvn(aTHX_ a,b,c)
+#define sv_usepvn_flags(a,b,c,d)	Perl_sv_usepvn_flags(aTHX_ a,b,c,d)
 #define sv_vcatpvfn(a,b,c,d,e,f,g)	Perl_sv_vcatpvfn(aTHX_ a,b,c,d,e,f,g)
 #define sv_vsetpvfn(a,b,c,d,e,f,g)	Perl_sv_vsetpvfn(aTHX_ a,b,c,d,e,f,g)
 #define str_to_version(a)	Perl_str_to_version(aTHX_ a)
@@ -3144,7 +3143,6 @@
 #define sv_setpv_mg(a,b)	Perl_sv_setpv_mg(aTHX_ a,b)
 #define sv_setpvn_mg(a,b,c)	Perl_sv_setpvn_mg(aTHX_ a,b,c)
 #define sv_setsv_mg(a,b)	Perl_sv_setsv_mg(aTHX_ a,b)
-#define sv_usepvn_mg(a,b,c)	Perl_sv_usepvn_mg(aTHX_ a,b,c)
 #define get_vtbl(a)		Perl_get_vtbl(aTHX_ a)
 #define pv_display(a,b,c,d,e)	Perl_pv_display(aTHX_ a,b,c,d,e)
 #define dump_vindent(a,b,c,d)	Perl_dump_vindent(aTHX_ a,b,c,d)

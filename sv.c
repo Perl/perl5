@@ -3885,7 +3885,7 @@ Perl_sv_setpv_mg(pTHX_ register SV *sv, register const char *ptr)
 }
 
 /*
-=for apidoc sv_usepvn
+=for apidoc sv_usepvn_flags
 
 Tells an SV to use C<ptr> to find its string value.  Normally the
 string is stored inside the SV but sv_usepvn allows the SV to use an
@@ -3894,14 +3894,14 @@ by C<malloc>.  The string length, C<len>, must be supplied.  This
 function will realloc (i.e. move) the memory pointed to by C<ptr>,
 so that pointer should not be freed or used by the programmer after
 giving it to sv_usepvn, and neither should any pointers from "behind"
-that pointer (e.g. ptr + 1) be used.  Does not handle 'set' magic.
-See C<sv_usepvn_mg>.
+that pointer (e.g. ptr + 1) be used.  If C<flags> & SV_SMAGIC is true, will
+call SvSETMAGIC.
 
 =cut
 */
 
 void
-Perl_sv_usepvn(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
+Perl_sv_usepvn_flags(pTHX_ SV *sv, char *ptr, STRLEN len, U32 flags)
 {
     dVAR;
     STRLEN allocate;
@@ -3909,6 +3909,8 @@ Perl_sv_usepvn(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
     SvUPGRADE(sv, SVt_PV);
     if (!ptr) {
 	(void)SvOK_off(sv);
+	if (flags & SV_SMAGIC)
+	    SvSETMAGIC(sv);
 	return;
     }
     if (SvPVX_const(sv))
@@ -3933,21 +3935,8 @@ Perl_sv_usepvn(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
     *SvEND(sv) = '\0';
     (void)SvPOK_only_UTF8(sv);		/* validate pointer */
     SvTAINT(sv);
-}
-
-/*
-=for apidoc sv_usepvn_mg
-
-Like C<sv_usepvn>, but also handles 'set' magic.
-
-=cut
-*/
-
-void
-Perl_sv_usepvn_mg(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
-{
-    sv_usepvn(sv,ptr,len);
-    SvSETMAGIC(sv);
+    if (flags & SV_SMAGIC)
+	SvSETMAGIC(sv);
 }
 
 #ifdef PERL_OLD_COPY_ON_WRITE

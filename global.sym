@@ -529,6 +529,7 @@ Perl_sv_unref_flags
 Perl_sv_untaint
 Perl_sv_upgrade
 Perl_sv_usepvn
+Perl_sv_usepvn_flags
 Perl_sv_vcatpvfn
 Perl_sv_vsetpvfn
 Perl_str_to_version
