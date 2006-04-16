@@ -2287,6 +2287,9 @@ typedef union re_unwind_t {
 /* Make sure there is a test for this +1 options in re_tests */
 #define TRIE_INITAL_ACCEPT_BUFFLEN 4;
 
+#define SLAB_FIRST(s) (&(s)->states[0])
+#define SLAB_LAST(s)  (&(s)->states[PERL_REGMATCH_SLAB_SLOTS-1])
+
 /* grab a new slab and return the first slot in it */
 
 STATIC regmatch_state *
@@ -2300,7 +2303,7 @@ S_push_slab(pTHX)
 	PL_regmatch_slab->next = s;
     }
     PL_regmatch_slab = s;
-    return &s->states[0];
+    return SLAB_FIRST(s);
 }
 
 /* simulate a recursive call to regmatch */
@@ -2324,7 +2327,7 @@ S_push_slab(pTHX)
     st->locinput = locinput;	\
     st->resume_state = resume;	\
     newst = st+1;   \
-    if (newst >  &(PL_regmatch_slab->states[PERL_REGMATCH_SLAB_SLOTS-1])) \
+    if (newst >  SLAB_LAST(PL_regmatch_slab)) \
 	newst = S_push_slab(aTHX);  \
     PL_regmatch_state = newst;	\
     newst->cc = 0;  \
@@ -2339,9 +2342,9 @@ S_push_slab(pTHX)
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "POP STATE(%d)\n", depth)); \
     depth--; \
     st--; \
-    if (st < &PL_regmatch_slab->states[0]) { \
+    if (st < SLAB_FIRST(PL_regmatch_slab)) { \
 	PL_regmatch_slab = PL_regmatch_slab->prev; \
-	st = &PL_regmatch_slab->states[PERL_REGMATCH_SLAB_SLOTS-1]; \
+	st = SLAB_LAST(PL_regmatch_slab); \
     } \
     PL_regmatch_state = st; \
     scan	= st->scan; \
@@ -2496,7 +2499,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	Newx(PL_regmatch_slab, 1, regmatch_slab);
 	PL_regmatch_slab->prev = NULL;
 	PL_regmatch_slab->next = NULL;
-	PL_regmatch_state = &PL_regmatch_slab->states[0] - 1;
+	PL_regmatch_state = SLAB_FIRST(PL_regmatch_slab);
     }
 
     /* remember current high-water mark for exit */
@@ -2506,7 +2509,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
     /* grab next free state slot */
     st = ++PL_regmatch_state;
-    if (st >  &(PL_regmatch_slab->states[PERL_REGMATCH_SLAB_SLOTS-1]))
+    if (st >  SLAB_LAST(PL_regmatch_slab))
 	st = PL_regmatch_state = S_push_slab(aTHX);
 
     st->minmod = 0;
@@ -4387,7 +4390,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
 	    /* grab the next free state slot */
 	    st++;
-	    if (st >  &(PL_regmatch_slab->states[PERL_REGMATCH_SLAB_SLOTS-1]))
+	    if (st >  SLAB_LAST(PL_regmatch_slab))
 		st = S_push_slab(aTHX);
 	    PL_regmatch_state = st;
 
