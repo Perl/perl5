@@ -3129,6 +3129,18 @@ S_regmatch(pTHX_ regnode *prog)
 		/* No need to save/restore up to this paren */
 		I32 parenfloor = scan->flags;
 
+		/* Dave says:
+		   
+		   CURLYX and WHILEM are always paired: they're the moral
+		   equivalent of pp_enteriter anbd pp_iter.
+
+		   The only time next could be null is if the node tree is
+		   corrupt. This was mentioned on p5p a few days ago.
+
+		   See http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2006-04/msg00556.html
+		   So we'll assert that this is true:
+		*/
+		assert(next);
 		if (next && (OP(PREVOPER(next)) == NOTHING)) /* LONGJMP */
 		    next += ARG(next);
 		cc.oldcc = PL_regcc;
@@ -3152,7 +3164,18 @@ S_regmatch(pTHX_ regnode *prog)
 		saySAME(n);
 	    }
 	    /* NOTREACHED */
-	case WHILEM: {
+	case WHILEM:
+	    /* Dave says:
+
+	    st->cc gets initialised by CURLYX ready for use by WHILEM.
+	    So again, unless somethings been corrupted, st->cc cannot
+	    be null at that point in WHILEM.
+
+	    See http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2006-04/msg00556.html
+	    So we'll assert that this is true:
+	    */
+	    assert(PL_regcc);
+	    {
 		/*
 		 * This is really hard to understand, because after we match
 		 * what we're trying to match, we must make sure the rest of
