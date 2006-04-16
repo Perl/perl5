@@ -3067,6 +3067,7 @@ PP(pp_require)
     const I32 gimme = GIMME_V;
     int filter_has_file = 0;
     PerlIO *tryrsfp = NULL;
+    SV *filter_cache = NULL;
     SV *filter_state = NULL;
     SV *filter_sub = NULL;
     SV *hook_sv = NULL;
@@ -3174,6 +3175,16 @@ PP(pp_require)
 			SP -= count - 1;
 			arg = SP[i++];
 
+			if (SvROK(arg) && (SvTYPE(SvRV(arg)) <= SVt_PVLV)
+			    && !isGV_with_GP(SvRV(arg))) {
+			    filter_cache = SvRV(arg);
+			    SvREFCNT_inc_void_NN(filter_cache);
+
+			    if (i < count) {
+				arg = SP[i++];
+			    }
+			}
+
 			if (SvROK(arg) && SvTYPE(SvRV(arg)) == SVt_PVGV) {
 			    arg = SvRV(arg);
 			}
@@ -3205,11 +3216,11 @@ PP(pp_require)
 				filter_state = SP[i];
 				SvREFCNT_inc_simple_void(filter_state);
 			    }
+			}
 
-			    if (!tryrsfp) {
-				tryrsfp = PerlIO_open(BIT_BUCKET,
-						      PERL_SCRIPT_MODE);
-			    }
+			if (!tryrsfp && (filter_cache || filter_sub)) {
+			    tryrsfp = PerlIO_open(BIT_BUCKET,
+						  PERL_SCRIPT_MODE);
 			}
 			SP--;
 		    }
@@ -3224,6 +3235,10 @@ PP(pp_require)
 		    }
 
 		    filter_has_file = 0;
+		    if (filter_cache) {
+			SvREFCNT_dec(filter_cache);
+			filter_cache = NULL;
+		    }
 		    if (filter_state) {
 			SvREFCNT_dec(filter_state);
 			filter_state = NULL;
@@ -3361,11 +3376,12 @@ PP(pp_require)
     SAVESPTR(PL_compiling.cop_io);
     PL_compiling.cop_io = NULL;
 
-    if (filter_sub) {
+    if (filter_sub || filter_cache) {
 	SV * const datasv = filter_add(S_run_user_filter, NULL);
 	IoLINES(datasv) = filter_has_file;
 	IoTOP_GV(datasv) = (GV *)filter_state;
 	IoBOTTOM_GV(datasv) = (GV *)filter_sub;
+	IoFMT_GV(datasv) = (GV *)filter_cache;
     }
 
     /* switch to eval mode */
@@ -4519,15 +4535,11 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     SV * const filter_state = (SV *)IoTOP_GV(datasv);
     SV * const filter_sub = (SV *)IoBOTTOM_GV(datasv);
     int status = 0;
-    /* Filter API says that the filter appends to the contents of the buffer.
-       Usually the buffer is "", so the details don't matter. But if it's not,
-       then clearly what it contains is already filtered by this filter, so we
-       don't want to pass it in a second time.
-       I'm going to use a mortal in case the upstream filter croaks.  */
     SV *upstream;
     STRLEN got_len;
     const char *got_p;
     const char *prune_from = NULL;
+    bool read_from_cache = FALSE;
 
     /* I was having segfault trouble under Linux 2.2.5 after a
        parse error occured.  (Had to hack around it with a test
@@ -4567,9 +4579,15 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 		maxlen -= cache_len;
 	    }
 	    SvOK_off(cache);
+	    read_from_cache = TRUE;
 	}
     }
 
+    /* Filter API says that the filter appends to the contents of the buffer.
+       Usually the buffer is "", so the details don't matter. But if it's not,
+       then clearly what it contains is already filtered by this filter, so we
+       don't want to pass it in a second time.
+       I'm going to use a mortal in case the upstream filter croaks.  */
     upstream = ((SvOK(buf_sv) && sv_len(buf_sv)) || SvGMAGICAL(buf_sv))
 	? sv_newmortal() : buf_sv;
     SvUPGRADE(upstream, SVt_PV);
@@ -4578,8 +4596,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	status = FILTER_READ(idx+1, upstream, 0);
     }
 
-    assert(filter_sub);
-    if (status >= 0) {
+    if (filter_sub && status >= 0) {
 	dSP;
 	int count;
 
@@ -4650,7 +4667,11 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    status = 1;
     }
 
-    if (upstream != buf_sv) {
+    /* If they are at EOF but buf_sv has something in it, then they may never
+       have touched the SV upstream, so it may be undefined.  If we naively
+       concatenate it then we get a warning about use of uninitialised value.
+    */
+    if (upstream != buf_sv && (SvOK(upstream) || SvGMAGICAL(upstream))) {
 	sv_catsv(buf_sv, upstream);
     }
 
@@ -4666,6 +4687,12 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    IoBOTTOM_GV(datasv) = NULL;
 	}
 	filter_del(S_run_user_filter);
+    }
+    if (status == 0 && read_from_cache) {
+	/* If we read some data from the cache (and by getting here it implies
+	   that we emptied the cache) then we aren't yet at EOF, and mustn't
+	   report that to our caller.  */
+	return 1;
     }
     return status;
 }

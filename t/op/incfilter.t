@@ -14,7 +14,7 @@ BEGIN {
 use strict;
 use Filter::Util::Call;
 
-plan(tests => 128);
+plan(tests => 141);
 
 unshift @INC, sub {
     no warnings 'uninitialized';
@@ -44,14 +44,17 @@ do \&generator or die;
 # Check that the array dereferencing works ready for the more complex tests:
 do [\&generator] or die;
 
-do [sub {
-	my $param = $_[1];
-	is (ref $param, 'ARRAY', "Got our parameter");
-	$_ = shift @$param;
-	return defined $_ ? 1 : 0;
-    }, ["pass('Can return generators which take state');\n",
-	"pass('And return multiple lines');\n",
-	]] or die;
+sub generator_with_state {
+    my $param = $_[1];
+    is (ref $param, 'ARRAY', "Got our parameter");
+    $_ = shift @$param;
+    return defined $_ ? 1 : 0;
+}
+
+do [\&generator_with_state,
+    ["pass('Can return generators which take state');\n",
+     "pass('And return multiple lines');\n",
+    ]] or die;
    
 
 open $fh, "<", \'fail("File handles and filters work from \@INC");';
@@ -173,3 +176,27 @@ pass("You should see this line thrice");
 EOC
 
 do [$fh, sub {$_ .= $_ . $_; return;}] or die;
+
+do \"pass\n(\n'Scalar references are treated as initial file contents'\n)\n"
+or die;
+
+open $fh, "<", \"ss('The file is concatentated');";
+
+do [\'pa', $fh] or die;
+
+open $fh, "<", \"ff('Gur svygre vf bayl eha ba gur svyr');";
+
+do [\'pa', $fh, sub {tr/A-Za-z/N-ZA-Mn-za-m/; return;}] or die;
+
+open $fh, "<", \"SS('State also works');";
+
+do [\'pa', $fh, sub {s/($_[1])/lc $1/ge; return;}, "S"] or die;
+
+@lines = ('ss', '(', "'you can use a generator'", ')');
+
+do [\'pa', \&generator] or die;
+
+do [\'pa', \&generator_with_state,
+    ["ss('And generators which take state');\n",
+     "pass('And return multiple lines');\n",
+    ]] or die;
