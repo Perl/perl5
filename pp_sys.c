@@ -1277,16 +1277,17 @@ PP(pp_enterwrite)
     else
 	fgv = gv;
 
+    if (!fgv) {
+	DIE(aTHX_ "Not a format reference");
+    }
     cv = GvFORM(fgv);
     if (!cv) {
-	if (fgv) {
-	    SV * const tmpsv = sv_newmortal();
-	    const char *name;
-	    gv_efullname4(tmpsv, fgv, NULL, FALSE);
-	    name = SvPV_nolen_const(tmpsv);
-	    if (name && *name)
-		DIE(aTHX_ "Undefined format \"%s\" called", name);
-	}
+	SV * const tmpsv = sv_newmortal();
+	const char *name;
+	gv_efullname4(tmpsv, fgv, NULL, FALSE);
+	name = SvPV_nolen_const(tmpsv);
+	if (name && *name)
+	    DIE(aTHX_ "Undefined format \"%s\" called", name);
 	DIE(aTHX_ "Not a format reference");
     }
     if (CvCLONE(cv))
