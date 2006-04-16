@@ -973,6 +973,28 @@ being zero.  See C<SvROK_off>.
 =for hackers
 Found in file mathoms.c
 
+=item sv_usepvn
+X<sv_usepvn>
+
+Tells an SV to use C<ptr> to find its string value. Implemented by
+calling C<sv_usepvn_flags> with C<flags> of 0, hence does not handle 'set'
+magic. See C<sv_usepvn_flags>.
+
+	void	sv_usepvn(SV* sv, char* ptr, STRLEN len)
+
+=for hackers
+Found in file mathoms.c
+
+=item sv_usepvn_mg
+X<sv_usepvn_mg>
+
+Like C<sv_usepvn>, but also handles 'set' magic.
+
+	void	sv_usepvn_mg(SV *sv, char *ptr, STRLEN len)
+
+=for hackers
+Found in file mathoms.c
+
 =item sv_uv
 X<sv_uv>
 
@@ -5722,30 +5744,24 @@ You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 =for hackers
 Found in file sv.c
 
-=item sv_usepvn
-X<sv_usepvn>
+=item sv_usepvn_flags
+X<sv_usepvn_flags>
 
 Tells an SV to use C<ptr> to find its string value.  Normally the
 string is stored inside the SV but sv_usepvn allows the SV to use an
 outside string.  The C<ptr> should point to memory that was allocated
-by C<malloc>.  The string length, C<len>, must be supplied.  This
-function will realloc (i.e. move) the memory pointed to by C<ptr>,
+by C<malloc>.  The string length, C<len>, must be supplied.  By default
+this function will realloc (i.e. move) the memory pointed to by C<ptr>,
 so that pointer should not be freed or used by the programmer after
 giving it to sv_usepvn, and neither should any pointers from "behind"
-that pointer (e.g. ptr + 1) be used.  Does not handle 'set' magic.
-See C<sv_usepvn_mg>.
+that pointer (e.g. ptr + 1) be used.
 
-	void	sv_usepvn(SV* sv, char* ptr, STRLEN len)
+If C<flags> & SV_SMAGIC is true, will call SvSETMAGIC. If C<flags> &
+SV_HAS_TRAILING_NUL is true, then C<ptr[len]> must be NUL, and the realloc
+I<may> be skipped. (i.e. the buffer is actually at least 1 byte longer than
+C<len>, and already meets the requirements for storing in C<SvPVX>)
 
-=for hackers
-Found in file sv.c
-
-=item sv_usepvn_mg
-X<sv_usepvn_mg>
-
-Like C<sv_usepvn>, but also handles 'set' magic.
-
-	void	sv_usepvn_mg(SV *sv, char *ptr, STRLEN len)
+	void	sv_usepvn_flags(SV* sv, char* ptr, STRLEN len, U32 flags)
 
 =for hackers
 Found in file sv.c
