@@ -3915,7 +3915,18 @@ Perl_sv_usepvn(pTHX_ register SV *sv, register char *ptr, register STRLEN len)
 	SvPV_free(sv);
 
     allocate = PERL_STRLEN_ROUNDUP(len + 1);
+#ifdef DEBUGGING
+    {
+	/* Force a move to shake out bugs in callers.  */
+	char *new_ptr = safemalloc(allocate);
+	Copy(ptr, new_ptr, len, char);
+	PoisonFree(ptr,len,char);
+	Safefree(ptr);
+	ptr = new_ptr;
+    }
+#else
     ptr = saferealloc (ptr, allocate);
+#endif
     SvPV_set(sv, ptr);
     SvCUR_set(sv, len);
     SvLEN_set(sv, allocate);
