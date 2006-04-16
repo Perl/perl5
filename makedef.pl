@@ -1572,18 +1572,6 @@ sub output_symbol {
 
 1;
 __DATA__
-# extra globals not included above.
-Perl_new_warnings_bitfield
-Perl_cxinc
-perl_alloc
-perl_alloc_using
-perl_clone
-perl_clone_using
-perl_construct
-perl_destruct
-perl_free
-perl_parse
-perl_run
 # Oddities from PerlIO
 PerlIO_binmode
 PerlIO_getpos
