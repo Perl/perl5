@@ -2898,6 +2898,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     /* set up a scratch pad */
 
     CvPADLIST(PL_compcv) = pad_new(padnew_SAVE);
+    PL_op = NULL; /* avoid PL_op and PL_curpad referring to different CVs */
 
 
     if (!PL_madskills)
