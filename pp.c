@@ -2458,9 +2458,9 @@ PP(pp_complement)
 		  p = uvchr_to_utf8_flags(p, ~c, UNICODE_ALLOW_ANY);
 	      }
 	      *p = '\0';
-	      sv_setpvn(TARG, (char*)result, targlen);
+	      sv_usepvn_flags(TARG, (char*)result, targlen,
+			      SV_HAS_TRAILING_NUL);
 	      SvUTF8_on(TARG);
-	      Safefree(result);
 	  }
 	  else {
 	      U8 *result;
@@ -2474,9 +2474,8 @@ PP(pp_complement)
 		  *p++ = ~c;
 	      }
 	      *p = '\0';
-	      sv_setpvn(TARG, (char*)result, nchar);
+	      sv_usepvn_flags(TARG, (char*)result, nchar, SV_HAS_TRAILING_NUL);
 	      SvUTF8_off(TARG);
-	      Safefree(result);
 	  }
 	  SETs(TARG);
 	  RETURN;

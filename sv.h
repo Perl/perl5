@@ -1637,6 +1637,7 @@ Like C<sv_catsv> but doesn't process magic.
 #define SV_CONST_RETURN		32
 #define SV_MUTABLE_RETURN	64
 #define SV_SMAGIC		128
+#define SV_HAS_TRAILING_NUL	256
 
 #define sv_unref(sv)    	sv_unref_flags(sv, 0)
 #define sv_force_normal(sv)	sv_force_normal_flags(sv, 0)

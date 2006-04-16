@@ -3890,12 +3890,16 @@ Perl_sv_setpv_mg(pTHX_ register SV *sv, register const char *ptr)
 Tells an SV to use C<ptr> to find its string value.  Normally the
 string is stored inside the SV but sv_usepvn allows the SV to use an
 outside string.  The C<ptr> should point to memory that was allocated
-by C<malloc>.  The string length, C<len>, must be supplied.  This
-function will realloc (i.e. move) the memory pointed to by C<ptr>,
+by C<malloc>.  The string length, C<len>, must be supplied.  By default
+this function will realloc (i.e. move) the memory pointed to by C<ptr>,
 so that pointer should not be freed or used by the programmer after
 giving it to sv_usepvn, and neither should any pointers from "behind"
-that pointer (e.g. ptr + 1) be used.  If C<flags> & SV_SMAGIC is true, will
-call SvSETMAGIC.
+that pointer (e.g. ptr + 1) be used.
+
+If C<flags> & SV_SMAGIC is true, will call SvSETMAGIC. If C<flags> &
+SV_HAS_TRAILING_NUL is true, then C<ptr[len]> must be NUL, and the realloc
+I<may> be skipped. (i.e. the buffer is actually at least 1 byte longer than
+C<len>, and already meets the requirements for storing in C<SvPVX>)
 
 =cut
 */
@@ -3916,7 +3920,8 @@ Perl_sv_usepvn_flags(pTHX_ SV *sv, char *ptr, STRLEN len, U32 flags)
     if (SvPVX_const(sv))
 	SvPV_free(sv);
 
-    allocate = PERL_STRLEN_ROUNDUP(len + 1);
+    allocate = (flags & SV_HAS_TRAILING_NUL)
+	? len : PERL_STRLEN_ROUNDUP(len + 1);
 #ifdef DEBUGGING
     {
 	/* Force a move to shake out bugs in callers.  */
@@ -3927,12 +3932,16 @@ Perl_sv_usepvn_flags(pTHX_ SV *sv, char *ptr, STRLEN len, U32 flags)
 	ptr = new_ptr;
     }
 #else
-    ptr = saferealloc (ptr, allocate);
+    if (!(flags & SV_HAS_TRAILING_NUL)) {
+	ptr = saferealloc (ptr, allocate);
+    }
 #endif
     SvPV_set(sv, ptr);
     SvCUR_set(sv, len);
     SvLEN_set(sv, allocate);
-    *SvEND(sv) = '\0';
+    if (!(flags & SV_HAS_TRAILING_NUL)) {
+	*SvEND(sv) = '\0';
+    }
     (void)SvPOK_only_UTF8(sv);		/* validate pointer */
     SvTAINT(sv);
     if (flags & SV_SMAGIC)
