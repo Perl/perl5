@@ -2433,10 +2433,12 @@ PP(pp_complement)
 	  UV nchar = 0;
 	  UV nwide = 0;
 	  U8 * const send = tmps + len;
+	  U8 * const origtmps = tmps;
+	  const UV utf8flags = UTF8_ALLOW_ANYUV;
 
 	  while (tmps < send) {
-	    const UV c = utf8n_to_uvchr(tmps, send-tmps, &l, UTF8_ALLOW_ANYUV);
-	    tmps += UTF8SKIP(tmps);
+	    const UV c = utf8n_to_uvchr(tmps, send-tmps, &l, utf8flags);
+	    tmps += l;
 	    targlen += UNISKIP(~c);
 	    nchar++;
 	    if (c > 0xff)
@@ -2444,17 +2446,17 @@ PP(pp_complement)
 	  }
 
 	  /* Now rewind strings and write them. */
-	  tmps -= len;
+	  tmps = origtmps;
 
 	  if (nwide) {
 	      U8 *result;
 	      U8 *p;
 
-	      Newxz(result, targlen + 1, U8);
+	      Newx(result, targlen + 1, U8);
 	      p = result;
 	      while (tmps < send) {
-		  const UV c = utf8n_to_uvchr(tmps, send-tmps, &l, UTF8_ALLOW_ANYUV);
-		  tmps += UTF8SKIP(tmps);
+		  const UV c = utf8n_to_uvchr(tmps, send-tmps, &l, utf8flags);
+		  tmps += l;
 		  p = uvchr_to_utf8_flags(p, ~c, UNICODE_ALLOW_ANY);
 	      }
 	      *p = '\0';
@@ -2466,11 +2468,11 @@ PP(pp_complement)
 	      U8 *result;
 	      U8 *p;
 
-	      Newxz(result, nchar + 1, U8);
+	      Newx(result, nchar + 1, U8);
 	      p = result;
 	      while (tmps < send) {
-		  const U8 c = (U8)utf8n_to_uvchr(tmps, 0, &l, UTF8_ALLOW_ANY);
-		  tmps += UTF8SKIP(tmps);
+		  const U8 c = (U8)utf8n_to_uvchr(tmps, send-tmps, &l, utf8flags);
+		  tmps += l;
 		  *p++ = ~c;
 	      }
 	      *p = '\0';
