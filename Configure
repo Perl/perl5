@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Apr  3 12:00:10 CEST 2006 [metaconfig 3.0 PL70]
+# Generated on Mon Apr 17 14:14:39 CEST 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -1261,6 +1261,10 @@ locincpth="$locincpth /opt/gnu/include /usr/GNU/include /opt/GNU/include"
 :
 : no include file wanted by default
 inclwanted=''
+
+: Enable -DEBUGGING and -DDEBUGGING from the command line
+EBUGGING=''
+DEBUGGING=old
 
 groupstype=''
 libnames=''
@@ -4856,16 +4860,46 @@ case "$optimize" in
 'none') optimize=" ";;
 esac
 
+: Check what DEBUGGING is required from the command line
+: -DEBUGGING      or -DDEBUGGING or
+: -DEBUGGING=both			= -g + -DDEBUGGING
+: -DEBUGGING=-g   or -Doptimize=-g	= -g
+: -DEBUGGING=none or -UDEBUGGING	=
+: -DEBUGGING=old  or -DEBUGGING=default	= ? $optimize
+case "$EBUGGING" in
+'')	;;
+*)	DEBUGGING=$EBUGGING ;;
+esac
+
+case "$DEBUGGING" in
+-g|$define)
+    case "$optimize" in
+	*-g*) ;;
+	*)    optimize="$optimize -g" ;;
+    esac ;;
+none|$undef)
+    case "$optimize" in
+	*-g*)	set `echo "X $optimize " | sed 's/ -g / /'`
+		shift
+		optimize="$*"
+		;;
+    esac ;;
+esac
+
 dflt=''
+case "$DEBUGGING" in
+both|$define) dflt='-DDEBUGGING'
+esac
+
 : We will not override a previous value, but we might want to
 : augment a hint file
 case "$hint" in
 default|recommended)
 	case "$gccversion" in
-	1*) dflt='-fpcc-struct-return' ;;
+	1*) dflt="$dflt -fpcc-struct-return" ;;
 	esac
-	case "$optimize" in
-	*-g*) dflt="$dflt -DDEBUGGING";;
+	case "$optimize:$DEBUGGING" in
+	*-g*:old) dflt="$dflt -DDEBUGGING";;
 	esac
 	case "$gccversion" in
 	2*) if test -d /etc/conf/kconfig.d &&
@@ -5999,6 +6033,54 @@ esac
 : confusing anyway.
 installstyle=$dflt
 
+: determine where public executables go
+echo " "
+set dflt bin bin
+eval $prefixit
+fn=d~
+rp='Pathname where the public executables will reside?'
+. ./getfile
+if $test "X$ansexp" != "X$binexp"; then
+	installbin=''
+fi
+prefixvar=bin
+: XXX Bug? -- ignores Configure -Dinstallprefix setting.
+. ./setprefixvar
+
+case "$userelocatableinc" in
+$define|true|[yY]*)	dflt='y' ;;
+*)			dflt='n' ;;
+esac
+cat <<EOM
+
+Would you like to build Perl so that the installation is relocatable, so that
+library paths in @INC are determined relative to the path of the perl binary?
+This is not advised for system Perl installs, or if you need to run setid
+scripts or scripts under taint mode.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+rp='Use relocatable @INC?'
+. ./myread
+case "$ans" in
+y|Y)	val="$define" ;;
+*)	val="$undef"  ;;
+esac
+set userelocatableinc
+eval $setvar
+
+: Default prefix is now "up one level from where the binaries are"
+case "$userelocatableinc" in
+$define|true|[yY]*)
+    initialinstalllocation="$binexp"
+    bin=".../"
+    binexp=".../"
+    prefix=".../.."
+    prefixexp=".../.."
+    installprefixexp=".../.."
+    ;;
+esac
+
 : determine where private library files go
 : Usual default is /usr/local/lib/perl5/$version.
 : Also allow things like /opt/perl/lib/$version, since
@@ -6015,6 +6097,7 @@ There are some auxiliary files for $package that need to be put into a
 private library directory that is accessible by everyone.
 
 EOM
+fn=$binexp
 fn=d~+
 rp='Pathname where the private library files will reside?'
 . ./getfile
@@ -6049,6 +6132,7 @@ these files in a separate location.  Otherwise, you can just include
 them with the rest of the public library files.
 
 EOM
+fn=$binexp
 fn=d+~
 rp='Where do you want to put the public architecture-dependent libraries?'
 . ./getfile
@@ -6169,54 +6253,6 @@ EOM
 esac
 set d_dosuid
 eval $setvar
-
-: determine where public executables go
-echo " "
-set dflt bin bin
-eval $prefixit
-fn=d~
-rp='Pathname where the public executables will reside?'
-. ./getfile
-if $test "X$ansexp" != "X$binexp"; then
-	installbin=''
-fi
-prefixvar=bin
-: XXX Bug? -- ignores Configure -Dinstallprefix setting.
-. ./setprefixvar
-
-case "$userelocatableinc" in
-$define|true|[yY]*)	dflt='y' ;;
-*)			dflt='n' ;;
-esac
-cat <<EOM
-
-Would you like to build Perl so that the installation is relocatable, so that
-library paths in @INC are determined relative to the path of the perl binary?
-This is not advised for system Perl installs, or if you need to run setid
-scripts or scripts under taint mode.
-
-If this doesn't make any sense to you, just accept the default '$dflt'.
-EOM
-rp='Use relocatable @INC?'
-. ./myread
-case "$ans" in
-y|Y)	val="$define" ;;
-*)	val="$undef"  ;;
-esac
-set userelocatableinc
-eval $setvar
-
-: Default prefix is now "up one level from where the binaries are"
-case "$userelocatableinc" in
-$define|true|[yY]*)
-    initialinstalllocation="$binexp"
-    bin=".../"
-    binexp=".../"
-    prefix=".../.."
-    prefixexp=".../.."
-    installprefixexp=".../.."
-    ;;
-esac
 
 : Find perl5.005 or later.
 echo "Looking for a previously installed perl5.005 or later... "

@@ -1020,7 +1020,21 @@ as usual, and Perl will be built in /tmp/perl/build/directory.
 
 You can run perl scripts under the perl debugger at any time with
 B<perl -d your_script>.  If, however, you want to debug perl itself,
-you probably want to do
+you probably want to have support for perl internal debugging code
+(activated by adding -DDEBUGGING to ccflags), and/or support for the
+system debugger by adding -g to optimize.
+
+	sh Configure -DDEBUGGING=<mode>
+
+For a more eye appealing call, -DEBUGGING is defined to be an alias
+for -DDEBUGGING. For both, the -U calls are also supported, in order
+to be able to overrule the hints or Policy.sh settings.
+
+=over 4
+
+=item -DEBUGGING=old
+
+Which is the default, and supports the old convention of
 
 	sh Configure -Doptimize='-g'
 
@@ -1038,6 +1052,26 @@ L<"Propagating your changes to config.sh"> below.)
 
 You can actually specify -g and -DDEBUGGING independently, but usually
 it's convenient to have both.
+
+=over 4
+
+=item -DDEBUGGING
+
+=item -DEBUGGING
+
+=item -DEBUGGING=both
+
+Sets both -DDEBUGGING in the ccflags, and add -g to optimize.
+
+=item -DEBUGGING=-g
+
+Adds -g to optimize, but does not set -DDEBUGGING.
+
+=item -DEBUGGING=none
+
+Removes -g from optimize, and -DDEBUGGING from ccflags.
+
+=back
 
 If you are using a shared libperl, see the warnings about multiple
 versions of perl under L<Building a shared Perl library>.
