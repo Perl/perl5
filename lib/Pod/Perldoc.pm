@@ -676,6 +676,16 @@ sub options_sanity {
     
     # Any sanity-checking need doing here?
     
+    # But does not make sense to set either -f or -q in $ENV{"PERLDOC"} 
+    if( $self->opt_f or $self->opt_q ) { 
+	$self->usage("Only one of -f -or -q") if $self->opt_f and $self->opt_q;
+	warn 
+	    "Perldoc is only really meant for reading one word at a time.\n",
+	    "So these parameters are being ignored: ",
+	    join(' ', @{$self->{'args'}}),
+	    "\n"
+		if @{$self->{'args'}}
+    }
     return;
 }
 
@@ -929,7 +939,7 @@ sub render_findings {
     die "Nothing found?!";
     # should have been caught before here
   } elsif(@$found_things > 1) {
-    warn join '',
+    warn 
      "Perldoc is only really meant for reading one document at a time.\n",
      "So these parameters are being ignored: ",
      join(' ', @$found_things[1 .. $#$found_things] ),
