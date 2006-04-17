@@ -546,11 +546,6 @@ Study the possibility of adding a new prototype character, C<_>, meaning
 C<my $foo if 0;> is deprecated, and should be replaced with
 C<state $x = "initial value\n";> the syntax from Perl 6.
 
-=head2 @INC source filter to Filter::Simple
-
-The second return value from a sub in @INC can be a source filter. This isn't
-documented. It should be changed to use Filter::Simple, tested and documented.
-
 =head2 regexp optimiser optional
 
 The regexp optimiser is not optional. It should configurable to be, to allow
