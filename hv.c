@@ -1738,7 +1738,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 	xhv->xhv_eiter = NULL; /* HvEITER(hv) = NULL */
 	return NULL;
     }
-#ifdef DYNAMIC_ENV_FETCH  /* set up %ENV for iteration */
+#if defined(DYNAMIC_ENV_FETCH) && !defined(__riscos__)  /* set up %ENV for iteration */
     if (!entry && SvRMAGICAL((SV*)hv) && mg_find((SV*)hv, PERL_MAGIC_env)) {
 	prime_env_iter();
 #ifdef VMS

@@ -1583,16 +1583,16 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
        environ[i+1] = NULL;    /* make sure it's null terminated */
     }
     else
-       safesysfree(environ[i]);
-       nlen = strlen(nam);
-       vlen = strlen(val);
+	safesysfree(environ[i]);
+	nlen = strlen(nam);
+	vlen = strlen(val);
 
-       environ[i] = (char*)safesysmalloc((nlen+vlen+2) * sizeof(char));
-       /* all that work just for this */
-       my_setenv_format(environ[i], nam, nlen, val, vlen);
+	environ[i] = (char*)safesysmalloc((nlen+vlen+2) * sizeof(char));
+	/* all that work just for this */
+	my_setenv_format(environ[i], nam, nlen, val, vlen);
     } else {
 # endif
-#   if defined(__CYGWIN__) || defined(EPOC) || defined(SYMBIAN) 
+#   if defined(__CYGWIN__) || defined(EPOC) || defined(__SYMBIAN32__) || defined(__riscos__)
 #       if defined(HAS_UNSETENV)
         if (val == NULL) {
             (void)unsetenv(nam);

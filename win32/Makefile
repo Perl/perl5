@@ -1150,6 +1150,7 @@ utils: $(PERLEXE) $(X2P)
 	copy ..\README.os400    ..\pod\perlos400.pod
 	copy ..\README.plan9    ..\pod\perlplan9.pod
 	copy ..\README.qnx      ..\pod\perlqnx.pod
+	copy ..\README.riscos   ..\pod\perlriscos.pod
 	copy ..\README.solaris  ..\pod\perlsolaris.pod
 	copy ..\README.tru64    ..\pod\perltru64.pod
 	copy ..\README.tw       ..\pod\perltw.pod
@@ -1227,9 +1228,9 @@ distclean: realclean
 	    perljp.pod perlko.pod perllinux.pod perlmachten.pod \
 	    perlmacos.pod perlmacosx.pod perlmint.pod perlmpeix.pod \
 	    perlnetware.pod perlopenbsd.pod perlos2.pod perlos390.pod \
-	    perlos400.pod perlplan9.pod perlqnx.pod perlsolaris.pod \
-	    perltru64.pod perltw.pod perluts.pod perlvmesa.pod perlvms.pod \
-	    perlvms.pod perlvos.pod perlwin32.pod \
+	    perlos400.pod perlplan9.pod perlqnx.pod perlriscos.pod \
+	    perlsolaris.pod perltru64.pod perltw.pod perluts.pod \
+	    perlvmesa.pod perlvms.pod perlvms.pod perlvos.pod perlwin32.pod \
 	    pod2html pod2latex pod2man pod2text pod2usage \
 	    podchecker podselect
 	-cd ..\utils && del /f h2ph splain perlbug pl2pm c2ph pstruct h2xs \
