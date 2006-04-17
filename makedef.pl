@@ -715,6 +715,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_sharedsv_space
 		    PL_sharedsv_space_mutex
 		    PL_dollarzero_mutex
+		    PL_hints_mutex
 		    Perl_dirp_dup
 		    Perl_cx_dup
 		    Perl_si_dup
