@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.202 2006/02/24 19:03:29 lstein Exp $';
-$CGI::VERSION='3.17_01';
+$CGI::revision = '$Id: CGI.pm,v 1.206 2006/04/17 13:53:02 lstein Exp $';
+$CGI::VERSION='3.19';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -329,6 +329,10 @@ sub new {
   my $self = {};
 
   bless $self,ref $class || $class || $DefaultClass;
+
+  # always use a tempfile
+  $self->{'use_tempfile'} = 1;
+
   if (ref($initializer[0])
       && (UNIVERSAL::isa($initializer[0],'Apache')
 	  ||
@@ -339,6 +343,7 @@ sub new {
  if (ref($initializer[0]) 
      && (UNIVERSAL::isa($initializer[0],'CODE'))) {
     $self->upload_hook(shift @initializer, shift @initializer);
+    $self->{'use_tempfile'} = shift @initializer if (@initializer > 0);
   }
   if ($MOD_PERL) {
     if ($MOD_PERL == 1) {
@@ -392,9 +397,10 @@ sub upload_hook {
   } else {
     $self = shift;
   }
-  my ($hook,$data) = @_;
+  my ($hook,$data,$use_tempfile) = @_;
   $self->{'.upload_hook'} = $hook;
   $self->{'.upload_data'} = $data;
+  $self->{'use_tempfile'} = $use_tempfile if defined $use_tempfile;
 }
 
 #### Method: param
@@ -427,7 +433,7 @@ sub param {
 	    }
 	}
 	# If values is provided, then we set it.
-	if (@values) {
+	if (defined $value) {
 	    $self->add_parameter($name);
 	    $self->{$name}=[@values];
 	}
@@ -1426,6 +1432,7 @@ sub header {
     } else {
       $charset = $self->charset if $type =~ /^text\//;
     }
+   $charset ||= '';
 
     # rearrange() was designed for the HTML portion, so we
     # need to fix it up a little.
@@ -2392,13 +2399,13 @@ sub popup_menu {
             }
         }
         else {
-            my $attribs = $self->_set_attributes($_, $attributes);
-	my($selectit) = defined($selected) ? $self->_selected($selected eq $_) : '';
-	my($label) = $_;
-	$label = $labels->{$_} if defined($labels) && defined($labels->{$_});
-	my($value) = $self->escapeHTML($_);
-	$label=$self->escapeHTML($label,1);
-            $result .= "<option $selectit${attribs}value=\"$value\">$label</option>\n";
+          my $attribs = $self->_set_attributes($_, $attributes);
+	  my($selectit) = defined($selected) ? $self->_selected($selected eq $_) : '';
+	  my($label) = $_;
+	  $label = $labels->{$_} if defined($labels) && defined($labels->{$_});
+	  my($value) = $self->escapeHTML($_);
+	  $label=$self->escapeHTML($label,1);
+          $result .= "<option${attribs} ${selectit}value=\"$value\">$label</option>\n";
         }
     }
 
@@ -2630,7 +2637,7 @@ sub url {
 
     my $path        =  $self->path_info;
     my $script_name =  $self->script_name;
-    my $request_uri = $self->request_uri || '';
+    my $request_uri =  unescape($self->request_uri) || '';
     my $query_str   =  $self->query_string;
 
     my $rewrite_in_use = $request_uri && $request_uri !~ /^$script_name/;
@@ -2638,7 +2645,7 @@ sub url {
 
     my $uri         =  $rewrite && $request_uri ? $request_uri : $script_name;
     $uri            =~ s/\?.*$//;                                 # remove query string
-    $uri            =~ s/$path$//      if defined $path;          # remove path
+    $uri            =~ s/\Q$path\E$//      if defined $path;          # remove path
 
     if ($full) {
 	my $protocol = $self->protocol();
@@ -2656,7 +2663,7 @@ sub url {
         return $url if $base;
 	$url .= $uri;
     } elsif ($relative) {
-	($url) = $script_name =~ m!([^/]+)$!;
+	($url) = $uri =~ m!([^/]+)$!;
     } elsif ($absolute) {
 	$url = $uri;
     }
@@ -2758,9 +2765,6 @@ sub path_info {
     } elsif (! defined($self->{'.path_info'}) ) {
         my (undef,$path_info) = $self->_name_and_path_from_env;
 	$self->{'.path_info'} = $path_info || '';
-	# hack to fix broken path info in IIS
-	$self->{'.path_info'} =~ s/^\Q$ENV{'SCRIPT_NAME'}\E// if $IIS;
-
     }
     return $self->{'.path_info'};
 }
@@ -2772,11 +2776,9 @@ sub _name_and_path_from_env {
    my $self = shift;
    my $raw_script_name = $ENV{SCRIPT_NAME} || '';
    my $raw_path_info   = $ENV{PATH_INFO}   || '';
-   my $uri             = $ENV{REQUEST_URI} || '';
+   my $uri             = unescape($self->request_uri) || '';
 
-   if ($raw_script_name =~ m/$raw_path_info$/) {
-     $raw_script_name =~ s/$raw_path_info$//;
-   }
+   $raw_script_name =~ s/\Q$raw_path_info$\E//;
 
    my @uri_double_slashes  = $uri =~ m^(/{2,}?)^g;
    my @path_double_slashes = "$raw_script_name $raw_path_info" =~ m^(/{2,}?)^g;
@@ -2784,10 +2786,7 @@ sub _name_and_path_from_env {
    my $apache_bug      = @uri_double_slashes != @path_double_slashes;
    return ($raw_script_name,$raw_path_info) unless $apache_bug;
 
-   my $path_info_search = $raw_path_info;
-   # these characters will not (necessarily) be escaped
-   $path_info_search    =~ s/([^a-zA-Z0-9$()':_.,+*\/;?=&-])/uc sprintf("%%%02x",ord($1))/eg;
-   $path_info_search    = quotemeta($path_info_search);
+   my $path_info_search = quotemeta($raw_path_info);
    $path_info_search    =~ s!/!/+!g;
    if ($uri =~ m/^(.+)($path_info_search)/) {
        return ($1,$2);
@@ -3384,7 +3383,7 @@ sub read_multipart {
                   $totalbytes += length($data);
                    &{$self->{'.upload_hook'}}($filename ,$data, $totalbytes, $self->{'.upload_data'});
               }
-	      print $filehandle $data;
+              print $filehandle $data if ($self->{'use_tempfile'});
           }
 
 	  # back up to beginning of file
@@ -5885,7 +5884,7 @@ UPLOAD_HOOK facility available in Apache::Request, with the exception
 that the first argument to the callback is an Apache::Upload object,
 here it's the remote filename.
 
- $q = CGI->new(\&hook,$data);
+ $q = CGI->new(\&hook [,$data [,$use_tempfile]]);
 
  sub hook
  {
@@ -5893,10 +5892,19 @@ here it's the remote filename.
         print  "Read $bytes_read bytes of $filename\n";         
  }
 
+The $data field is optional; it lets you pass configuration
+information (e.g. a database handle) to your hook callback.
+
+The $use_tempfile field is a flag that lets you turn on and off
+CGI.pm's use of a temporary disk-based file during file upload. If you
+set this to a FALSE value (default true) then param('uploaded_file')
+will no longer work, and the only way to get at the uploaded data is
+via the hook you provide.
+
 If using the function-oriented interface, call the CGI::upload_hook()
 method before calling param() or any other CGI functions:
 
-  CGI::upload_hook(\&hook,$data);
+  CGI::upload_hook(\&hook [,$data [,$use_tempfile]]);
 
 This method is not exported by default.  You will have to import it
 explicitly if you wish to use it without the CGI:: prefix.
