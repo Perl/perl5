@@ -20,7 +20,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 210 + $extra ;
+    plan tests => 217 + $extra ;
 
     use_ok('Compress::Zlib', 2) ;
     use_ok('IO::Compress::Gzip::Constants') ;
@@ -576,4 +576,25 @@ foreach my $stdio ( ['-', '-'], [*STDIN, *STDOUT])
 
     eval { $u->gzseek(-1, SEEK_CUR) ; };
     like $@, mkErr("gzseek: cannot seek backwards");
+}
+
+{
+    title "gzread ver 1.x compat -- the output buffer is always zapped.";
+    my $lex = new LexFile my $name ;
+
+    my $a = gzopen($name, "w");
+    $a->gzwrite("fred");
+    $a->gzclose ;
+
+    my $u = gzopen($name, "r");
+
+    my $buf1 ;
+    is $u->gzread($buf1, 0), 0, "  gzread returns 0";
+    ok defined $buf1, "  output buffer defined";
+    is $buf1, "", "  output buffer empty string";
+
+    my $buf2 = "qwerty";
+    is $u->gzread($buf2, 0), 0, "  gzread returns 0";
+    ok defined $buf2, "  output buffer defined";
+    is $buf2, "", "  output buffer empty string";
 }

@@ -158,14 +158,16 @@ sub Compress::Zlib::gzFile::gzread
     return _set_gzerr(Z_STREAM_ERROR())
         if $self->[1] ne 'inflate';
 
-    if ($self->gzeof()) {
+    my $len = defined $_[1] ? $_[1] : 4096 ; 
+
+    if ($self->gzeof() || $len == 0) {
         # Zap the output buffer to match ver 1 behaviour.
         $_[0] = "" ;
         return 0 ;
     }
 
     my $gz = $self->[0] ;
-    my $status = $gz->read($_[0], defined $_[1] ? $_[1] : 4096) ; 
+    my $status = $gz->read($_[0], $len) ; 
     _save_gzerr($gz, 1);
     return $status ;
 }
