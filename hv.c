@@ -72,6 +72,7 @@ S_new_he(pTHX)
     if (!*root)
 	S_more_he(aTHX);
     he = *root;
+    assert(he);
     *root = HeNEXT(he);
     UNLOCK_SV_MUTEX;
     return he;
