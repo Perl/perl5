@@ -314,6 +314,11 @@ are as follows; listing the letters is equal to summing the numbers.
               variables (the LC_ALL, LC_TYPE, and LANG, in the order
               of decreasing precedence) -- if the variables indicate
               UTF-8, then the selected "IOEioA" are in effect
+    a   256   Set ${^UTF8CACHE} to -1, to run the UTF-8 caching code in
+              debugging mode.
+
+=for documenting_the_underdocumented
+perl.h gives W/128 as PERL_UNICODE_WIDESYSCALLS "/* for Sarathy */"
 
 =for todo
 perltodo mentions Unicode in %ENV and filenames. I guess that these will be

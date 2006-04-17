@@ -3016,6 +3016,8 @@ Perl_moreswitches(pTHX_ char *s)
     case 'C':
         s++;
         PL_unicode = parse_unicode_opts( (const char **)&s );
+	if (PL_unicode & PERL_UNICODE_UTF8CACHEASSERT_FLAG)
+	    PL_utf8cache = -1;
 	return s;
     case 'F':
 	PL_minus_F = TRUE;

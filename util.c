@@ -4924,6 +4924,8 @@ Perl_parse_unicode_opts(pTHX_ const char **popt)
 		      opt |= PERL_UNICODE_LOCALE_FLAG;	break;
 		 case PERL_UNICODE_ARGV:
 		      opt |= PERL_UNICODE_ARGV_FLAG;	break;
+		 case PERL_UNICODE_UTF8CACHEASSERT:
+		      opt |= PERL_UNICODE_UTF8CACHEASSERT_FLAG; break;
 		 default:
 		      if (*p != '\n' && *p != '\r')
 			  Perl_croak(aTHX_

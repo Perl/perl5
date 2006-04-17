@@ -543,6 +543,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     {
 	 const char *p = PerlEnv_getenv("PERL_UNICODE");
 	 PL_unicode = p ? parse_unicode_opts(&p) : 0;
+	 if (PL_unicode & PERL_UNICODE_UTF8CACHEASSERT_FLAG)
+	     PL_utf8cache = -1;
     }
 #endif
 
