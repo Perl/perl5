@@ -4567,7 +4567,7 @@ reference to the subroutine itself is passed in as C<$_[0]>.
 
 If an empty list, C<undef>, or nothing that matches the first 3 values above
 is returned then C<require> will look at the remaining elements of @INC.
-Note that a tied file handle must be a real file handle (strictly a typeglob,
+Note that this file handle must be a real file handle (strictly a typeglob,
 or reference to a typeglob, blessed or unblessed) - tied file handles will be
 ignored and return value processing will stop there.
 
