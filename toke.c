@@ -2633,6 +2633,10 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     dVAR;
     filter_t funcp;
     SV *datasv = NULL;
+    /* This API is bad. It should have been using unsigned int for maxlen.
+       Not sure if we want to change the API, but if not we should sanity
+       check the value here.  */
+    const unsigned int correct_length = maxlen < 0 ? INT_MAX : maxlen;
 
     if (!PL_rsfp_filters)
 	return -1;
@@ -2641,14 +2645,15 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 	/* Note that we append to the line. This is handy.	*/
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
 			      "filter_read %d: from rsfp\n", idx));
-	if (maxlen) {
+	if (correct_length) {
  	    /* Want a block */
 	    int len ;
 	    const int old_len = SvCUR(buf_sv);
 
 	    /* ensure buf_sv is large enough */
-	    SvGROW(buf_sv, (STRLEN)(old_len + maxlen)) ;
-	    if ((len = PerlIO_read(PL_rsfp, SvPVX(buf_sv) + old_len, maxlen)) <= 0){
+	    SvGROW(buf_sv, (STRLEN)(old_len + correct_length)) ;
+	    if ((len = PerlIO_read(PL_rsfp, SvPVX(buf_sv) + old_len,
+				   correct_length)) <= 0) {
 		if (PerlIO_error(PL_rsfp))
 	            return -1;		/* error */
 	        else
@@ -2671,7 +2676,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 	DEBUG_P(PerlIO_printf(Perl_debug_log,
 			      "filter_read %d: skipped (filter deleted)\n",
 			      idx));
-	return FILTER_READ(idx+1, buf_sv, maxlen); /* recurse */
+	return FILTER_READ(idx+1, buf_sv, correct_length); /* recurse */
     }
     /* Get function pointer hidden within datasv	*/
     funcp = DPTR2FPTR(filter_t, IoANY(datasv));
@@ -2681,7 +2686,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     /* Call function. The function is expected to 	*/
     /* call "FILTER_READ(idx+1, buf_sv)" first.		*/
     /* Return: <0:error, =0:eof, >0:not eof 		*/
-    return (*funcp)(aTHX_ idx, buf_sv, maxlen);
+    return (*funcp)(aTHX_ idx, buf_sv, correct_length);
 }
 
 STATIC char *
