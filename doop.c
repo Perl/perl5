@@ -1185,7 +1185,6 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     const bool left_utf = DO_UTF8(left);
     const bool right_utf = DO_UTF8(right);
     I32 needlen = 0;
-    bool needfree = FALSE;
 
     if (left_utf && !right_utf)
 	sv_utf8_upgrade(right);
@@ -1198,12 +1197,9 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     rsave = rc = SvPV_nomg_const(right, rightlen);
     len = leftlen < rightlen ? leftlen : rightlen;
     lensave = len;
-    SvCUR_set(sv, len);
-    (void)SvPOK_only(sv);
     if ((left_utf || right_utf) && (sv == left || sv == right)) {
 	needlen = optype == OP_BIT_AND ? len : leftlen + rightlen;
 	Newxz(dc, needlen + 1, char);
-	needfree = TRUE;
     }
     else if (SvOK(sv) || SvTYPE(sv) > SVt_PVMG) {
 	dc = SvPV_force_nomg_nolen(sv);
@@ -1221,6 +1217,8 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	sv_usepvn_flags(sv, dc, needlen, SV_HAS_TRAILING_NUL);
 	dc = SvPVX(sv);		/* sv_usepvn() calls Renew() */
     }
+    SvCUR_set(sv, len);
+    (void)SvPOK_only(sv);
     if (left_utf || right_utf) {
 	UV duc, luc, ruc;
 	char *dcorig = dc;
@@ -1241,10 +1239,8 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 		duc = luc & ruc;
 		dc = (char*)uvchr_to_utf8((U8*)dc, duc);
 	    }
-	    if (sv == left || sv == right) {
-		(void)sv_usepvn(sv, dcorig, needlen); /* Uses Renew(). */
-		needfree = FALSE; /* sv_usepvn() moved dcorig. */
-	    }
+	    if (sv == left || sv == right)
+		(void)sv_usepvn(sv, dcorig, needlen);
 	    SvCUR_set(sv, dc - dcorig);
 	    break;
 	case OP_BIT_XOR:
@@ -1270,16 +1266,13 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 		duc = luc | ruc;
 		dc = (char*)uvchr_to_utf8((U8*)dc, duc);
 	    }
-	    goto mop_up_utf; /* For consistency. */
 	  mop_up_utf:
 	    if (rulen)
 		dcsave = savepvn(rc, rulen);
 	    else if (lulen)
 		dcsave = savepvn(lc, lulen);
-	    if (sv == left || sv == right) {
+	    if (sv == left || sv == right)
 		(void)sv_usepvn(sv, dcorig, needlen); /* Uses Renew(). */
-		needfree = FALSE; /* sv_usepvn() moved dcorig. */
-	    }
 	    SvCUR_set(sv, dc - dcorig);
 	    if (rulen)
 		sv_catpvn(sv, dcsave, rulen);
@@ -1290,8 +1283,6 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 	    Safefree(dcsave);
 	    break;
 	}
-	if (needfree)
-	    Safefree(dcorig);
 	SvUTF8_on(sv);
 	goto finish;
     }
