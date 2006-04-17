@@ -25,8 +25,8 @@ typedef char *pvindex;
 #define BGET_U16(arg)		BGET_OR_CROAK(arg, U16)
 #define BGET_I32(arg)		BGET_OR_CROAK(arg, U32)
 #define BGET_U32(arg)		BGET_OR_CROAK(arg, U32)
-#define BGET_IV(arg)		BGET_OR_CROAK(arg, UV)
-#define BGET_PADOFFSET(arg)	BGET_OR_CROAK(arg, UV)
+#define BGET_IV(arg)		BGET_OR_CROAK(arg, IV)
+#define BGET_PADOFFSET(arg)	BGET_OR_CROAK(arg, PADOFFSET)
 #define BGET_long(arg)		BGET_OR_CROAK(arg, long)
 
 #define BGET_OR_CROAK(arg, type) STMT_START {				\
