@@ -134,6 +134,12 @@ sub get_files {
     } elsif ($Config{archname} eq 'epoc') {
 	# Watch out for cross compiling for EPOC (usually done on linux)
 	$file{'/usr/local/epocemx/epocsdk/include/libc/sys/errno.h'} = 1;
+    } elsif ($Config{archname} eq 'arm-riscos') {
+	# Watch out for cross compiling for RISC OS
+	my $dep = `echo "#include <errno.h>" | gcc -E -M -`;
+	if ($dep =~ /(\S+errno\.h)/) {
+	     $file{$1} = 1;
+	}
     } elsif ($^O eq 'linux' &&
 	     $Config{gccversion} ne '' # might be using, say, Intel's icc
 	     ) {

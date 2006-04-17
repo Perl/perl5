@@ -1291,6 +1291,7 @@ hints/powerux.sh		Hints for named architecture
 hints/qnx.sh			Hints for named architecture
 hints/README.hints		Notes about hints
 hints/rhapsody.sh		Hints for named architecture
+hints/riscos.sh			Hints for named architecture
 hints/sco_2_3_0.sh		Hints for named architecture
 hints/sco_2_3_1.sh		Hints for named architecture
 hints/sco_2_3_2.sh		Hints for named architecture
@@ -3021,6 +3022,7 @@ README.os390			Perl notes for OS/390
 README.os400			Perl notes for OS/400
 README.plan9			Perl notes for Plan 9
 README.qnx			Perl notes for QNX
+README.riscos			Perl notes for RISC OS
 README.solaris			Perl notes for Solaris
 README.symbian			Perl notes for Symbian
 README.tru64			Perl notes for Tru64
