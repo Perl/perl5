@@ -284,6 +284,10 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
 
     assert(av);
 
+    /* S_regclass relies on being able to pass in a NULL sv
+       (unicode_alternate may be NULL).
+    */
+
     if (!val)
 	val = &PL_sv_undef;
 
