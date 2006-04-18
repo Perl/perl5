@@ -2030,15 +2030,17 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 	    UV uc = *((U8*)STRING(scan));
 
 	    /* Search for fixed substrings supports EXACT only. */
-	    if (flags & SCF_DO_SUBSTR)
+	    if (flags & SCF_DO_SUBSTR) {
+		assert(data);
 		scan_commit(pRExC_state, data);
+	    }
 	    if (UTF) {
 		const U8 * const s = (U8 *)STRING(scan);
 		l = utf8_length(s, s + l);
 		uc = utf8_to_uvchr(s, NULL);
 	    }
 	    min += l;
-	    if (data && (flags & SCF_DO_SUBSTR))
+	    if (flags & SCF_DO_SUBSTR)
 		data->pos_min += l;
 	    if (flags & SCF_DO_STCLASS_AND) {
 		/* Check whether it is compatible with what we know already! */
