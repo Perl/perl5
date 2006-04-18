@@ -368,17 +368,23 @@ become C<char>s. Finding variables to downsize coupled with rearrangement
 could shrink the interpreter structure; a size saving which is multiplied by
 the number of threads running.
 
-=head2 am I hot or not?
+=head2 Profile Perl - am I hot or not?
 
-The idea of F<pp_hot.c> is that it contains the I<hot> ops, the ops that are
-most commonly used. The idea is that by grouping them, their object code will
-be adjacent in the executable, so they have a greater chance of already being
-in the CPU cache (or swapped in) due to being near another op already in use.
+The Perl source code is stable enough that it makes sense to profile it,
+identify and optimise the hotspots. It would be good to measure the
+performance of the Perl interpreter using free tools such as cachegrind,
+gprof, and dtrace, and work to reduce the bottlenecks they reveal.
+
+As part of this, the idea of F<pp_hot.c> is that it contains the I<hot> ops,
+the ops that are most commonly used. The idea is that by grouping them, their
+object code will be adjacent in the executable, so they have a greater chance
+of already being in the CPU cache (or swapped in) due to being near another op
+already in use.
 
 Except that it's not clear if these really are the most commonly used ops. So
-anyone feeling like exercising their skill with coverage and profiling tools
-might want to determine what ops I<really> are the most commonly used. And in
-turn suggest evictions and promotions to achieve a better F<pp_hot.c>.
+as part of exercising your skills with coverage and profiling tools you might
+want to determine what ops I<really> are the most commonly used. And in turn
+suggest evictions and promotions to achieve a better F<pp_hot.c>.
 
 =head2 Shrink struct context
 
