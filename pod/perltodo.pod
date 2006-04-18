@@ -177,12 +177,6 @@ compilation, and hence remove the duplication, and the mistakes it has caused.
 Or if you prefer, tasks that you would learn from, and broaden your skills
 base...
 
-=head2 Relocatable perl
-
-The C level patches needed to create a relocatable perl binary are done, as
-is the work on F<Config.pm>. All that's left to do is the C<Configure> tweaking
-to let people specify how they want to do the install.
-
 =head2 make HTML install work
 
 There is an C<installhtml> target in the Makefile. It's marked as
@@ -300,13 +294,6 @@ It would be good to find a way teach C<Config.pm> about the installation setup,
 possibly involving probing at install time or later, so that the C<%Config> in
 a binary distribution better describes the installed machine, when the
 installed machine differs from the build machine in some significant way.
-
-=head2 make parallel builds work
-
-Currently parallel builds (such as C<make -j3>) don't work reliably. We believe
-that this is due to incomplete dependency specification in the F<Makefile>.
-It would be good if someone were able to track down the causes of these
-problems, so that parallel builds worked properly.
 
 =head2 linker specification files
 
