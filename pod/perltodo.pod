@@ -202,9 +202,7 @@ C<endservent>, two or more C<=items> giving the different parameter lists, such
 as
 
     =item substr EXPR,OFFSET,LENGTH,REPLACEMENT
-    
     =item substr EXPR,OFFSET,LENGTH
-    
     =item substr EXPR,OFFSET
 
 and different parameter lists having different meanings. (eg C<select>)
@@ -411,7 +409,13 @@ custom allocates so it would both use less memory and less CPU to allocate
 the various OP structures from arenas. The SV arena code can probably be
 re-used for this.
 
+=head2 Merge the win32 and wince codebases
 
+Currently, code used to build Perl on Win32 and WinCE are maintained
+separately, but use much of the same code.  We currently have a very high
+probability of the code diverging when it shouldn't.  Ideally, the code
+for the two systems should be merged so that common code between the two
+could be shared.
 
 
 =head1 Tasks that need a knowledge of XS
