@@ -1282,6 +1282,11 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 		*SvEND(sv) = '\0';
 	    Safefree(dcsave);
 	    break;
+	default:
+	    if (sv == left || sv == right)
+		Safefree(dcorig);
+	    Perl_croak(aTHX_ "panic: do_vop called for op %u (%s)", optype,
+		       PL_op_name[optype]);
 	}
 	SvUTF8_on(sv);
 	goto finish;
