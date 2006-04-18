@@ -679,8 +679,8 @@ perl.valgrind.config: config.sh
 
 perl.config.dashg:
 	@echo "Checking optimize='-g' in config.sh..."
-	@grep "^optimize="     config.sh
-	@egrep "^optimize='(-g|.*-g[1-3].*)'" config.sh >/dev/null || exit 1
+	@grep "^optimize=" config.sh
+	@egrep "^optimize='(.*-g.*)'" config.sh >/dev/null || exit 1
 
 perl.third.config: config.sh
 	@echo "To build perl.third you must Configure -Doptimize=-g -Uusemymalloc, checking..."
