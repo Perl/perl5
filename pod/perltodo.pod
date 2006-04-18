@@ -532,6 +532,7 @@ Study the possibility of adding a new prototype character, C<_>, meaning
 
 C<my $foo if 0;> is deprecated, and should be replaced with
 C<state $x = "initial value\n";> the syntax from Perl 6.
+Rafael has sent a first cut patch to perl5-porters.
 
 =head2 regexp optimiser optional
 
@@ -589,6 +590,14 @@ the core has no hooks in the necessary places. It would be useful to
 investigate what hooks would need to be added to make it possible to provide
 the full assertion support from a CPAN module, so that we aren't constraining
 the imagination of future CPAN authors.
+
+=head2 Properly Unicode safe tokeniser and pads.
+
+The tokeniser isn't actually very UTF-8 clean. C<use utf8;> is a hack -
+variable names are stored in stashes as raw bytes, without the utf-8 flag
+set. The pad API only takes a C<char *> pointer, so that's all bytes too. The
+tokeniser ignores the UTF-8-ness of C<PL_rsfp>, or any SVs returned from
+source filters.  All this could be fixed.
 
 
 
