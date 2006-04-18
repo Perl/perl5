@@ -961,3 +961,4 @@ x(?#	x	c	-	Sequence (?#... not terminated
 ^(.)\s+.$(?(1))	A B	y	$1	A	# [perl #37688]
 (?:r?)*?r|(.{2,4})	abcde	y	$1	abcd
 (?!)+?|(.{2,4})	abcde	y	$1	abcd
+^(a*?)(?!(a{6}|a{5})*$)	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	y	$+[1]	12	# super-linear cache bug may return 18
