@@ -5399,13 +5399,13 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
     CV* cv;
 #ifdef USE_ITHREADS
     const char *const temp_p = CopFILE(PL_curcop);
-    const STRLEN len = strlen(temp_p);
+    const STRLEN len = temp_p ? strlen(temp_p) : 0;
 #else
     SV *const temp_sv = CopFILESV(PL_curcop);
     STRLEN len;
     const char *const temp_p = temp_sv ? SvPV_const(temp_sv, len) : NULL;
 #endif
-    char *const file = temp_p ? savepvn(temp_p, len) : NULL;
+    char *const file = savepvn(temp_p, temp_p ? len : 0);
 
     ENTER;
 
