@@ -3427,15 +3427,6 @@ Perl_my_fflush_all(pTHX)
 void
 Perl_report_evil_fh(pTHX_ const GV *gv, const IO *io, I32 op)
 {
-    const char * const func =
-	op == OP_READLINE   ? "readline"  :	/* "<HANDLE>" not nice */
-	op == OP_LEAVEWRITE ? "write" :		/* "write exit" not nice */
-	op < 0              ? "" :              /* handle phoney cases */
-	PL_op_desc[op];
-    const char * const pars = OP_IS_FILETEST(op) ? "" : "()";
-    const char * const type = OP_IS_SOCKET(op)
-	    || (gv && io && IoTYPE(io) == IoTYPE_SOCKET)
-		?  "socket" : "filehandle";
     const char * const name = gv && isGV(gv) ? GvENAME(gv) : NULL;
 
     if (op == OP_phoney_OUTPUT_ONLY || op == OP_phoney_INPUT_ONLY) {
@@ -3464,6 +3455,15 @@ Perl_report_evil_fh(pTHX_ const GV *gv, const IO *io, I32 op)
 	}
 
 	if (ckWARN(warn_type)) {
+	    const char * const pars = OP_IS_FILETEST(op) ? "" : "()";
+	    const char * const func =
+		op == OP_READLINE   ? "readline"  :	/* "<HANDLE>" not nice */
+		op == OP_LEAVEWRITE ? "write" :		/* "write exit" not nice */
+		op < 0              ? "" :              /* handle phoney cases */
+		PL_op_desc[op];
+	    const char * const type = OP_IS_SOCKET(op)
+		    || (gv && io && IoTYPE(io) == IoTYPE_SOCKET)
+			?  "socket" : "filehandle";
 	    if (name && *name) {
 		Perl_warner(aTHX_ packWARN(warn_type),
 			    "%s%s on %s %s %s", func, pars, vile, type, name);
