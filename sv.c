@@ -11889,7 +11889,7 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 		subscript_type = FUV_SUBSCRIPT_HASH;
 	}
 	else {
-	    index = S_find_array_subscript(aTHX_ (AV*)sv, uninit_sv);
+	    index = find_array_subscript((AV*)sv, uninit_sv);
 	    if (index >= 0)
 		subscript_type = FUV_SUBSCRIPT_ARRAY;
 	}
@@ -12103,13 +12103,14 @@ S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool match)
 	 * or are optimized away, then it's unambiguous */
 	o2 = NULL;
 	for (kid=o; kid; kid = kid->op_sibling) {
-	    if (kid &&
-		(    (kid->op_type == OP_CONST && SvOK(cSVOPx_sv(kid)))
-		  || (kid->op_type == OP_NULL  && ! (kid->op_flags & OPf_KIDS))
-		  || (kid->op_type == OP_PUSHMARK)
+	    if (kid) {
+		const OPCODE type = kid->op_type;
+		if ( (type == OP_CONST && SvOK(cSVOPx_sv(kid)))
+		  || (type == OP_NULL  && ! (kid->op_flags & OPf_KIDS))
+		  || (type == OP_PUSHMARK)
 		)
-	    )
 		continue;
+	    }
 	    if (o2) { /* more than one found */
 		o2 = NULL;
 		break;
