@@ -4139,11 +4139,11 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 				    st->u.plus.count++;
 				}
 			    } else {
-				STRLEN len;
 				/* count initialised to
 				 * utf8_distance(old, locinput) */
 				while (locinput <= st->u.plus.e) {
-				    UV c = utf8n_to_uvchr((U8*)locinput,
+				    STRLEN len;
+				    const UV c = utf8n_to_uvchr((U8*)locinput,
 							  UTF8_MAXBYTES, &len,
 							  uniflags);
 				    if (c == (UV)st->u.plus.c1 || c == (UV)st->u.plus.c2)
@@ -4381,8 +4381,9 @@ yes_final:
 	 * pop to the state marked by yes_state and continue from there */
 
 	/*XXX tmp for CURLYM*/
-	regmatch_slab *oslab = PL_regmatch_slab;
-	regmatch_state *ost = st, *oys=yes_state;
+	regmatch_slab * const oslab = PL_regmatch_slab;
+	regmatch_state * const ost = st;
+	regmatch_state * const oys = yes_state;
 	int odepth = depth;
 
 	assert(st != yes_state);
@@ -4411,7 +4412,7 @@ yes_final:
 	    /* Restore parens of the caller without popping the
 	     * savestack */
 	    {
-		I32 tmp = PL_savestack_ix;
+		const I32 tmp = PL_savestack_ix;
 		PL_savestack_ix = st->u.eval.lastcp;
 		regcppop(rex);
 		PL_savestack_ix = tmp;
@@ -4661,10 +4662,10 @@ final_exit:
 
     /* free all slabs above current one */
     if (orig_slab->next) {
-	regmatch_slab *osl, *sl = orig_slab->next;
+	regmatch_slab *sl = orig_slab->next;
 	orig_slab->next = NULL;
 	while (sl) {
-	    osl = sl;
+	    regmatch_slab * const osl = sl;
 	    sl = sl->next;
 	    Safefree(osl);
 	}
