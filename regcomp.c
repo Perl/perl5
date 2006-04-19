@@ -5994,9 +5994,8 @@ Perl_pregfree(pTHX_ struct regexp *r)
     dVAR;
 #ifdef DEBUGGING
     SV * const dsv = PERL_DEBUG_PAD_ZERO(0);
-    SV * const re_debug_flags=get_sv(RE_DEBUG_FLAGS,0);
 #endif
-
+    GET_RE_DEBUG_FLAGS_DECL;
 
     if (!r || (--r->refcnt > 0))
 	return;
