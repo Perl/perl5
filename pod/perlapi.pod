@@ -2121,8 +2121,8 @@ X<savepvn>
 
 Perl's version of what C<strndup()> would be if it existed. Returns a
 pointer to a newly allocated string which is a duplicate of the first
-C<len> bytes from C<pv>. The memory allocated for the new string can be
-freed with the C<Safefree()> function.
+C<len> bytes from C<pv>, plus a trailing NUL byte. The memory allocated for
+the new string can be freed with the C<Safefree()> function.
 
 	char*	savepvn(const char* pv, I32 len)
 
@@ -5758,7 +5758,7 @@ that pointer (e.g. ptr + 1) be used.
 
 If C<flags> & SV_SMAGIC is true, will call SvSETMAGIC. If C<flags> &
 SV_HAS_TRAILING_NUL is true, then C<ptr[len]> must be NUL, and the realloc
-I<may> be skipped. (i.e. the buffer is actually at least 1 byte longer than
+will be skipped. (i.e. the buffer is actually at least 1 byte longer than
 C<len>, and already meets the requirements for storing in C<SvPVX>)
 
 	void	sv_usepvn_flags(SV* sv, char* ptr, STRLEN len, U32 flags)

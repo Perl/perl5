@@ -3309,8 +3309,9 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr) {
 			}
 		    }
 		if (!intro)
-		    cv_ckproto(cv, (GV*)dstr,
-			       SvPOK(sref) ? SvPVX_const(sref) : NULL);
+		    cv_ckproto_len(cv, (GV*)dstr,
+				   SvPOK(sref) ? SvPVX_const(sref) : NULL,
+				   SvPOK(sref) ? SvCUR(sref) : 0);
 	    }
 	    GvCVGEN(dstr) = 0; /* Switch off cacheness. */
 	    GvASSUMECV_on(dstr);
@@ -3898,7 +3899,7 @@ that pointer (e.g. ptr + 1) be used.
 
 If C<flags> & SV_SMAGIC is true, will call SvSETMAGIC. If C<flags> &
 SV_HAS_TRAILING_NUL is true, then C<ptr[len]> must be NUL, and the realloc
-I<may> be skipped. (i.e. the buffer is actually at least 1 byte longer than
+will be skipped. (i.e. the buffer is actually at least 1 byte longer than
 C<len>, and already meets the requirements for storing in C<SvPVX>)
 
 =cut
@@ -3925,20 +3926,21 @@ Perl_sv_usepvn_flags(pTHX_ SV *sv, char *ptr, STRLEN len, U32 flags)
 
     allocate = (flags & SV_HAS_TRAILING_NUL)
 	? len + 1: PERL_STRLEN_ROUNDUP(len + 1);
+    if (flags & SV_HAS_TRAILING_NUL) {
+	/* It's long enough - do nothing.
+	   Specfically Perl_newCONSTSUB is relying on this.  */
+    } else {
 #ifdef DEBUGGING
-    {
 	/* Force a move to shake out bugs in callers.  */
 	char *new_ptr = safemalloc(allocate);
 	Copy(ptr, new_ptr, len, char);
 	PoisonFree(ptr,len,char);
 	Safefree(ptr);
 	ptr = new_ptr;
-    }
 #else
-    if (!(flags & SV_HAS_TRAILING_NUL)) {
 	ptr = saferealloc (ptr, allocate);
-    }
 #endif
+    }
     SvPV_set(sv, ptr);
     SvCUR_set(sv, len);
     SvLEN_set(sv, allocate);

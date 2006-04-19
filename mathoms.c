@@ -1236,6 +1236,11 @@ Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len)
     sv_usepvn_flags(sv,ptr,len, 0);
 }
 
+void
+Perl_cv_ckproto(pTHX_ const CV *cv, const GV *gv, const char *p)
+{
+    cv_ckproto_len(cv, gv, p, p ? strlen(p) : 0);
+}
 #endif /* NO_MATHOMS */
 
 /*

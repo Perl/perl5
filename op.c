@@ -4814,9 +4814,15 @@ Perl_cv_undef(pTHX_ CV *cv)
 }
 
 void
-Perl_cv_ckproto(pTHX_ const CV *cv, const GV *gv, const char *p)
+Perl_cv_ckproto_len(pTHX_ const CV *cv, const GV *gv, const char *p,
+		    const STRLEN len)
 {
-    if (((!p != !SvPOK(cv)) || (p && strNE(p, SvPVX_const(cv)))) && ckWARN_d(WARN_PROTOTYPE)) {
+    /* Can't just use a strcmp on the prototype, as CONSTSUBs "cheat" by
+       relying on SvCUR, and doubling up the buffer to hold CvFILE().  */
+    if (((!p != !SvPOK(cv)) /* One has prototype, one has not.  */
+	 || (p && (len != SvCUR(cv) /* Not the same length.  */
+		   || memNE(p, SvPVX_const(cv), len))))
+	 && ckWARN_d(WARN_PROTOTYPE)) {
 	SV* const msg = sv_newmortal();
 	SV* name = NULL;
 
@@ -4831,7 +4837,7 @@ Perl_cv_ckproto(pTHX_ const CV *cv, const GV *gv, const char *p)
 	    sv_catpvs(msg, ": none");
 	sv_catpvs(msg, " vs ");
 	if (p)
-	    Perl_sv_catpvf(aTHX_ msg, "(%s)", p);
+	    Perl_sv_catpvf(aTHX_ msg, "(%.*s)", (int) len, p);
 	else
 	    sv_catpvs(msg, "none");
 	Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "%"SVf, msg);
@@ -5036,7 +5042,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "Runaway prototype");
 	    }
-	    cv_ckproto((CV*)gv, NULL, ps);
+	    cv_ckproto_len((CV*)gv, NULL, ps, ps_len);
 	}
 	if (ps)
 	    sv_setpvn((SV*)gv, ps, ps_len);
@@ -5080,7 +5086,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
          * skipping the prototype check
          */
         if (exists || SvPOK(cv))
-	    cv_ckproto(cv, gv, ps);
+	    cv_ckproto_len(cv, gv, ps, ps_len);
 	/* already defined (or promised)? */
 	if (exists || GvASSUMECV(gv)) {
 	    if ((!block
@@ -5391,6 +5397,15 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
 {
     dVAR;
     CV* cv;
+#ifdef USE_ITHREADS
+    const char *const temp_p = CopFILE(PL_curcop);
+    const STRLEN len = strlen(temp_p);
+#else
+    SV *const temp_sv = CopFILESV(PL_curcop);
+    STRLEN len;
+    const char *const temp_p = temp_sv ? SvPV_const(temp_sv, len) : NULL;
+#endif
+    char *const file = temp_p ? savepvn(temp_p, len) : NULL;
 
     ENTER;
 
@@ -5407,10 +5422,18 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
 	CopSTASH_set(PL_curcop,stash);
     }
 
-    cv = newXS(name, const_sv_xsub, savepv(CopFILE(PL_curcop)));
+    /* file becomes the CvFILE. For an XS, it's supposed to be static storage,
+       and so doesn't get free()d.  (It's expected to be from the C pre-
+       processor __FILE__ directive). But we need a dynamically allocated one,
+       and we need it to get freed.  So we cheat, and take advantage of the
+       fact that the first 0 bytes of any string always look the same.  */
+    cv = newXS(name, const_sv_xsub, file);
     CvXSUBANY(cv).any_ptr = sv;
     CvCONST_on(cv);
-    sv_setpvn((SV*)cv, "", 0);  /* prototype is "" */
+    /* prototype is "".  But this gets free()d.  :-)  */
+    sv_usepvn_flags((SV*)cv, file, len, SV_HAS_TRAILING_NUL); 
+    /* This gives us a prototype of "", rather than the file name.  */
+    SvCUR_set(cv, 0);
 
 #ifdef USE_ITHREADS
     if (stash)
@@ -7209,6 +7232,7 @@ Perl_ck_subr(pTHX_ OP *o)
     OP *o2 = prev->op_sibling;
     OP *cvop;
     char *proto = NULL;
+    const char *proto_end = NULL;
     CV *cv = NULL;
     GV *namegv = NULL;
     int optional = 0;
@@ -7231,8 +7255,10 @@ Perl_ck_subr(pTHX_ OP *o)
 		tmpop->op_private |= OPpEARLY_CV;
 	    else {
 		if (SvPOK(cv)) {
+		    STRLEN len;
 		    namegv = CvANON(cv) ? gv : CvGV(cv);
-		    proto = SvPV_nolen((SV*)cv);
+		    proto = SvPV((SV*)cv, len);
+		    proto_end = proto + len;
 		}
 		if (CvASSERTION(cv)) {
 		    if (PL_hints & HINT_ASSERTING) {
@@ -7269,9 +7295,10 @@ Perl_ck_subr(pTHX_ OP *o)
 	else
 	    o3 = o2;
 	if (proto) {
-	    switch (*proto) {
-	    case '\0':
+	    if (proto >= proto_end)
 		return too_many_arguments(o, gv_ename(namegv));
+
+	    switch (*proto) {
 	    case ';':
 		optional = 1;
 		proto++;
@@ -7437,8 +7464,8 @@ Perl_ck_subr(pTHX_ OP *o)
 	prev = o2;
 	o2 = o2->op_sibling;
     } /* while */
-    if (proto && !optional &&
-	  (*proto && *proto != '@' && *proto != '%' && *proto != ';'))
+    if (proto && !optional && proto_end > proto &&
+	(*proto != '@' && *proto != '%' && *proto != ';'))
 	return too_few_arguments(o, gv_ename(namegv));
     if(delete_op) {
 #ifdef PERL_MAD

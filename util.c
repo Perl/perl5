@@ -895,8 +895,8 @@ Perl_savepv(pTHX_ const char *pv)
 
 Perl's version of what C<strndup()> would be if it existed. Returns a
 pointer to a newly allocated string which is a duplicate of the first
-C<len> bytes from C<pv>. The memory allocated for the new string can be
-freed with the C<Safefree()> function.
+C<len> bytes from C<pv>, plus a trailing NUL byte. The memory allocated for
+the new string can be freed with the C<Safefree()> function.
 
 =cut
 */

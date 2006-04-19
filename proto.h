@@ -304,6 +304,9 @@ PERL_CALLCONV int	Perl_printf_nocontext(const char* fmt, ...)
 PERL_CALLCONV void	Perl_cv_ckproto(pTHX_ const CV* cv, const GV* gv, const char* p)
 			__attribute__nonnull__(pTHX_1);
 
+PERL_CALLCONV void	Perl_cv_ckproto_len(pTHX_ const CV* cv, const GV* gv, const char* p, const STRLEN len)
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV CV*	Perl_cv_clone(pTHX_ CV* proto)
 			__attribute__nonnull__(pTHX_1);
 
