@@ -7231,7 +7231,7 @@ Perl_ck_subr(pTHX_ OP *o)
 	     ? cUNOPo : ((UNOP*)cUNOPo->op_first))->op_first;
     OP *o2 = prev->op_sibling;
     OP *cvop;
-    char *proto = NULL;
+    const char *proto = NULL;
     const char *proto_end = NULL;
     CV *cv = NULL;
     GV *namegv = NULL;
@@ -7381,15 +7381,13 @@ Perl_ck_subr(pTHX_ OP *o)
 		     break;
 		case ']':
 		     if (contextclass) {
-			 /* XXX We shouldn't be modifying proto, so we can const proto */
-		         char *p = proto;
-			 const char s = *p;
+		         const char *p = proto;
+			 const char *const end = proto;
 			 contextclass = 0;
-			 *p = '\0';
 			 while (*--p != '[');
-			 bad_type(arg, Perl_form(aTHX_ "one of %s", p),
-				 gv_ename(namegv), o3);
-			 *proto = s;
+			 bad_type(arg, Perl_form(aTHX_ "one of %.*s",
+						 (int)(end - p), p),
+				  gv_ename(namegv), o3);
 		     } else
 			  goto oops;
 		     break;
