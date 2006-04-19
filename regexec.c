@@ -2273,6 +2273,10 @@ typedef union re_unwind_t {
     sayNO; \
 } STMT_END
 
+
+/* this value indiciates that the c1/c2 "next char" test should be skipped */
+#define CHRTEST_VOID -1000
+
 #define REPORT_CODE_OFF 24
 
 /*
@@ -3478,10 +3482,10 @@ S_regmatch(pTHX_ regnode *prog)
 
 		    if (! HAS_TEXT(text_node)) FIND_NEXT_IMPT(text_node);
 
-		    if (! HAS_TEXT(text_node)) c1 = c2 = -1000;
+		    if (! HAS_TEXT(text_node)) c1 = c2 = CHRTEST_VOID;
 		    else {
 			if (PL_regkind[(U8)OP(text_node)] == REF) {
-			    c1 = c2 = -1000;
+			    c1 = c2 = CHRTEST_VOID;
 			    goto assume_ok_MM;
 			}
 			else { c1 = (U8)*STRING(text_node); }
@@ -3494,12 +3498,12 @@ S_regmatch(pTHX_ regnode *prog)
 		    }
 		}
 		else
-		    c1 = c2 = -1000;
+		    c1 = c2 = CHRTEST_VOID;
 	    assume_ok_MM:
 		REGCP_SET(lastcp);
 		while (n >= ln || (n == REG_INFTY && ln > 0)) { /* ln overflow ? */
 		    /* If it could work, try it. */
-		    if (c1 == -1000 ||
+		    if (c1 == CHRTEST_VOID ||
 			UCHARAT(PL_reginput) == c1 ||
 			UCHARAT(PL_reginput) == c2)
 		    {
@@ -3539,10 +3543,10 @@ S_regmatch(pTHX_ regnode *prog)
 
 			if (! HAS_TEXT(text_node)) FIND_NEXT_IMPT(text_node);
 
-			if (! HAS_TEXT(text_node)) c1 = c2 = -1000;
+			if (! HAS_TEXT(text_node)) c1 = c2 = CHRTEST_VOID;
 			else {
 			    if (PL_regkind[(U8)OP(text_node)] == REF) {
-				c1 = c2 = -1000;
+				c1 = c2 = CHRTEST_VOID;
 				goto assume_ok_REG;
 			    }
 			    else { c1 = (U8)*STRING(text_node); }
@@ -3556,13 +3560,13 @@ S_regmatch(pTHX_ regnode *prog)
 			}
 		    }
 		    else
-			c1 = c2 = -1000;
+			c1 = c2 = CHRTEST_VOID;
 		}
 	    assume_ok_REG:
 		REGCP_SET(lastcp);
 		while (matches >= ln) {
 		    /* If it could work, try it. */
-		    if (c1 == -1000 ||
+		    if (c1 == CHRTEST_VOID ||
 			UCHARAT(PL_reginput) == c1 ||
 			UCHARAT(PL_reginput) == c2)
 		    {
@@ -3639,10 +3643,10 @@ S_regmatch(pTHX_ regnode *prog)
 
 		if (! HAS_TEXT(text_node)) FIND_NEXT_IMPT(text_node);
 
-		if (! HAS_TEXT(text_node)) c1 = c2 = -1000;
+		if (! HAS_TEXT(text_node)) c1 = c2 = CHRTEST_VOID;
 		else {
 		    if (PL_regkind[(U8)OP(text_node)] == REF) {
-			c1 = c2 = -1000;
+			c1 = c2 = CHRTEST_VOID;
 			goto assume_ok_easy;
 		    }
 		    else { s = (U8*)STRING(text_node); }
@@ -3676,7 +3680,7 @@ S_regmatch(pTHX_ regnode *prog)
 		}
 	    }
 	    else
-		c1 = c2 = -1000;
+		c1 = c2 = CHRTEST_VOID;
 	assume_ok_easy:
 	    PL_reginput = locinput;
 	    if (minmod) {
@@ -3686,7 +3690,7 @@ S_regmatch(pTHX_ regnode *prog)
 		    sayNO;
 		locinput = PL_reginput;
 		REGCP_SET(lastcp);
-		if (c1 != -1000) {
+		if (c1 != CHRTEST_VOID) {
 		    char *e; /* Should not check after this */
 		    char *old = locinput;
 		    int count = 0;
@@ -3736,11 +3740,11 @@ S_regmatch(pTHX_ regnode *prog)
 				    count++;
 				}
 			    } else {
-				STRLEN len;
 				/* count initialised to
 				 * utf8_distance(old, locinput) */
 				while (locinput <= e) {
-				    UV c = utf8n_to_uvchr((U8*)locinput,
+				    STRLEN len;
+				    const UV c = utf8n_to_uvchr((U8*)locinput,
 							  UTF8_MAXBYTES, &len,
 							  uniflags);
 				    if (c == (UV)c1 || c == (UV)c2)
@@ -3774,7 +3778,7 @@ S_regmatch(pTHX_ regnode *prog)
 		else
 		while (n >= ln || (n == REG_INFTY && ln > 0)) { /* ln overflow ? */
 		    UV c;
-		    if (c1 != -1000) {
+		    if (c1 != CHRTEST_VOID) {
 			if (do_utf8)
 			    c = utf8n_to_uvchr((U8*)PL_reginput,
 					       UTF8_MAXBYTES, 0,
@@ -3789,7 +3793,7 @@ S_regmatch(pTHX_ regnode *prog)
 		        }
 		    }
 		    /* If it could work, try it. */
-		    else if (c1 == -1000)
+		    else if (c1 == CHRTEST_VOID)
 		    {
 			TRYPAREN(paren, ln, PL_reginput);
 			REGCP_UNWIND(lastcp);
@@ -3823,7 +3827,7 @@ S_regmatch(pTHX_ regnode *prog)
 		{
 		    UV c = 0;
 		    while (n >= ln) {
-			if (c1 != -1000) {
+			if (c1 != CHRTEST_VOID) {
 			    if (do_utf8)
 				c = utf8n_to_uvchr((U8*)PL_reginput,
 						   UTF8_MAXBYTES, 0,
@@ -3832,7 +3836,7 @@ S_regmatch(pTHX_ regnode *prog)
 				c = UCHARAT(PL_reginput);
 			}
 			/* If it could work, try it. */
-			if (c1 == -1000 || c == (UV)c1 || c == (UV)c2)
+			if (c1 == CHRTEST_VOID || c == (UV)c1 || c == (UV)c2)
 			    {
 				TRYPAREN(paren, n, PL_reginput);
 				REGCP_UNWIND(lastcp);
