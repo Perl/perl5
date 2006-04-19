@@ -962,3 +962,5 @@ x(?#	x	c	-	Sequence (?#... not terminated
 (?:r?)*?r|(.{2,4})	abcde	y	$1	abcd
 (?!)+?|(.{2,4})	abcde	y	$1	abcd
 ^(a*?)(?!(a{6}|a{5})*$)	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	y	$+[1]	12	# super-linear cache bug may return 18
+^((?>(?:aa)?b)?)	aab	y	$1	aab
+^((?:aa)*)(?:X+((?:\d+|-)(?:X+(.+))?))?$	aaaaX5	y	$1	aaaa

@@ -2234,7 +2234,6 @@ typedef union re_unwind_t {
 #define sayNO goto no
 #define sayNO_ANYOF goto no_anyof
 #define sayYES_FINAL goto yes_final
-#define sayYES_LOUD  goto yes_loud
 #define sayNO_FINAL  goto no_final
 #define sayNO_SILENT goto do_no
 #define saySAME(x) if (x) goto yes; else goto no
@@ -3875,7 +3874,11 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    st->u.curlym.maxwanted = st->minmod ? st->ln : n;
 	    if (st->u.curlym.maxwanted) {
 		while (PL_reginput < PL_regeol && st->u.curlym.matches < st->u.curlym.maxwanted) {
+		    /* resume to current state on success */
+		    st->u.yes.prev_yes_state = yes_state;
+		    yes_state = st;
 		    REGMATCH(scan, CURLYM1);
+		    yes_state = st->u.yes.prev_yes_state;
 		    /*** all unsaved local vars undefined at this point */
 		    if (!result)
 			break;
@@ -3945,15 +3948,24 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 			    else
 				PL_regendp[st->u.curlym.paren] = -1;
 			}
+			/* resume to current state on success */
+			st->u.yes.prev_yes_state = yes_state;
+			yes_state = st;
 			REGMATCH(next, CURLYM2);
+			yes_state = st->u.yes.prev_yes_state;
 			/*** all unsaved local vars undefined at this point */
 			if (result)
-			    sayYES;
+			    /* XXX tmp sayYES; */
+			    sayYES_FINAL;
 			REGCP_UNWIND(st->u.curlym.lastcp);
 		    }
 		    /* Couldn't or didn't -- move forward. */
 		    PL_reginput = locinput;
+		    /* resume to current state on success */
+		    st->u.yes.prev_yes_state = yes_state;
+		    yes_state = st;
 		    REGMATCH(scan, CURLYM3);
+		    yes_state = st->u.yes.prev_yes_state;
 		    /*** all unsaved local vars undefined at this point */
 		    if (result) {
 			st->ln++;
@@ -4018,10 +4030,15 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 			    else
 				PL_regendp[st->u.curlym.paren] = -1;
 			}
+			/* resume to current state on success */
+			st->u.yes.prev_yes_state = yes_state;
+			yes_state = st;
 			REGMATCH(next, CURLYM4);
+			yes_state = st->u.yes.prev_yes_state;
 			/*** all unsaved local vars undefined at this point */
 			if (result)
-			    sayYES;
+			    /* XXX tmp sayYES; */
+			    sayYES_FINAL;
 			REGCP_UNWIND(st->u.curlym.lastcp);
 		    }
 		    /* Couldn't or didn't -- back up. */
@@ -4298,60 +4315,57 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    }
 	    PL_reginput = locinput;	/* put where regtry can find it */
 	    sayYES_FINAL;		/* Success! */
-	case SUCCEED:
+
+	case SUCCEED: /* successful SUSPEND/UNLESSM/IFMATCH/CURLYM */
+	    DEBUG_EXECUTE_r(
+	    PerlIO_printf(Perl_debug_log,
+		"%*s  %ssubpattern success...%s\n",
+		REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4], PL_colors[5]));
 	    PL_reginput = locinput;	/* put where regtry can find it */
-	    sayYES_LOUD;		/* Success! */
-	case SUSPEND:
-	    n = 1;
+	    sayYES_FINAL;		/* Success! */
+
+	case SUSPEND:	/* (?>FOO) */
+	    st->u.ifmatch.wanted = 1;
 	    PL_reginput = locinput;
 	    goto do_ifmatch;	
-	case UNLESSM:
-	    n = 0;
+
+	case UNLESSM:	/* -ve lookaround: (?!FOO), or with flags, (?<!foo) */
+	    st->u.ifmatch.wanted = 0;
+	    goto ifmatch_trivial_fail_test;
+
+	case IFMATCH:	/* +ve lookaround: (?=FOO), or with flags, (?<=foo) */
+	    st->u.ifmatch.wanted = 1;
+	  ifmatch_trivial_fail_test:
 	    if (scan->flags) {
 		char * const s = HOPBACKc(locinput, scan->flags);
-		if (!s)
-		    goto say_yes;
-		PL_reginput = s;
-	    }
-	    else
-		PL_reginput = locinput;
-	    goto do_ifmatch;
-	case IFMATCH:
-	    n = 1;
-	    if (scan->flags) {
-		char * const s = HOPBACKc(locinput, scan->flags);
-		if (!s)
-		    goto say_no;
+		if (!s) {
+		    /* trivial fail */
+		    if (st->logical) {
+			st->logical = 0;
+			st->sw = 1 - st->u.ifmatch.wanted;
+		    }
+		    else if (st->u.ifmatch.wanted)
+			sayNO;
+		    next = scan + ARG(scan);
+		    if (next == scan)
+			next = NULL;
+		    break;
+		}
 		PL_reginput = s;
 	    }
 	    else
 		PL_reginput = locinput;
 
 	  do_ifmatch:
-	    REGMATCH(NEXTOPER(NEXTOPER(scan)), IFMATCH);
-	    /*** all unsaved local vars undefined at this point */
-	    if (result != n) {
-	      say_no:
-		if (st->logical) {
-		    st->logical = 0;
-		    st->sw = 0;
-		    goto do_longjump;
-		}
-		else
-		    sayNO;
-	    }
-	  say_yes:
-	    if (st->logical) {
-		st->logical = 0;
-		st->sw = 1;
-	    }
-	    if (OP(scan) == SUSPEND) {
-		locinput = PL_reginput;
-		nextchr = UCHARAT(locinput);
-	    }
-	    /* FALL THROUGH. */
+	    /* resume to current state on success */
+	    st->u.yes.prev_yes_state = yes_state;
+	    yes_state = st;
+	    PUSH_STATE(newst, resume_IFMATCH);
+	    st = newst;
+	    next = NEXTOPER(NEXTOPER(scan));
+	    break;
+
 	case LONGJMP:
-	  do_longjump:
 	    next = scan + ARG(scan);
 	    if (next == scan)
 		next = NULL;
@@ -4412,18 +4426,16 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
     /*NOTREACHED*/
     sayNO;
 
-yes_loud:
-    DEBUG_EXECUTE_r(
-	PerlIO_printf(Perl_debug_log,
-		      "%*s  %scould match...%s\n",
-		      REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4], PL_colors[5])
-	);
-    goto yes;
 yes_final:
 
     if (yes_state) {
 	/* we have successfully completed a subexpression, but we must now
 	 * pop to the state marked by yes_state and continue from there */
+
+	/*XXX tmp for CURLYM*/
+	regmatch_slab *oslab = PL_regmatch_slab;
+	regmatch_state *ost = st, *oys=yes_state;
+	int odepth = depth;
 
 	assert(st != yes_state);
 	while (yes_state < SLAB_FIRST(PL_regmatch_slab)
@@ -4435,7 +4447,7 @@ yes_final:
 	    st = SLAB_LAST(PL_regmatch_slab);
 	}
 	depth -= (st - yes_state);
-	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "POP STATE TO (%d)\n", depth)); \
+	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "POP STATE TO (%d)\n", depth));
 	st = yes_state;
 	yes_state = st->u.yes.prev_yes_state;
 	PL_regmatch_state = st;
@@ -4460,6 +4472,38 @@ yes_final:
 	     /* continue at the node following the (??{...}) */
 	    next	= st->next;
 	    goto reenter;
+
+	case resume_IFMATCH:
+	    if (st->logical) {
+		st->logical = 0;
+		st->sw = st->u.ifmatch.wanted;
+	    }
+	    else if (!st->u.ifmatch.wanted)
+		sayNO;
+
+	    if (OP(st->scan) == SUSPEND)
+		locinput = PL_reginput;
+	    else {
+		locinput = PL_reginput = st->locinput;
+		nextchr = UCHARAT(locinput);
+	    }
+	    next = st->scan + ARG(st->scan);
+	    if (next == st->scan)
+		next = NULL;
+	    goto reenter;
+
+	/* XXX tmp  don't handle yes_state yet */
+	case resume_CURLYM1:
+	case resume_CURLYM2:
+	case resume_CURLYM3:
+	case resume_CURLYM4:
+	    PL_regmatch_slab =oslab;
+	    st = ost;
+	    PL_regmatch_state = st;
+	    depth = odepth;
+	    yes_state = oys;
+	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "XXX revering a CURLYM\n"));
+	    goto yes;
 
 	default:
 	    Perl_croak(aTHX_ "unexpected yes reume state");
@@ -4508,8 +4552,6 @@ yes:
 	    goto resume_point_CURLYM3;
 	case resume_CURLYM4:
 	    goto resume_point_CURLYM4;
-	case resume_IFMATCH:
-	    goto resume_point_IFMATCH;
 	case resume_PLUS1:
 	    goto resume_point_PLUS1;
 	case resume_PLUS2:
@@ -4519,6 +4561,7 @@ yes:
 	case resume_PLUS4:
 	    goto resume_point_PLUS4;
 
+	case resume_IFMATCH:
 	case resume_EVAL:
 	default:
 	    Perl_croak(aTHX_ "regexp resume memory corruption");
@@ -4638,7 +4681,22 @@ do_no:
 	case resume_CURLYM4:
 	    goto resume_point_CURLYM4;
 	case resume_IFMATCH:
-	    goto resume_point_IFMATCH;
+	    yes_state = st->u.yes.prev_yes_state;
+	    if (st->logical) {
+		st->logical = 0;
+		st->sw = !st->u.ifmatch.wanted;
+	    }
+	    else if (st->u.ifmatch.wanted)
+		sayNO;
+
+	    assert(OP(scan) != SUSPEND); /* XXX DAPM tmp */
+	    locinput = PL_reginput = st->locinput;
+	    nextchr = UCHARAT(locinput);
+	    next = scan + ARG(scan);
+	    if (next == scan)
+		next = NULL;
+	    goto reenter;
+
 	case resume_PLUS1:
 	    goto resume_point_PLUS1;
 	case resume_PLUS2:

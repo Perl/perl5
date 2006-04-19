@@ -260,6 +260,8 @@ typedef struct regmatch_state {
 	} whilem;
 
 	struct {
+	    /* this first element must match u.yes */
+	    struct regmatch_state *prev_yes_state;
 	    I32 paren;
 	    I32 c1, c2;		/* case fold search */
 	    CHECKPOINT lastcp;
@@ -276,6 +278,12 @@ typedef struct regmatch_state {
 	    char *old;
 	    int count;
 	} plus; /* and CURLYN/CURLY/STAR */
+
+	struct {
+	    /* this first element must match u.yes */
+	    struct regmatch_state *prev_yes_state;
+	    I32 wanted;
+	} ifmatch; /* and SUSPEND/UNLESSM */
     } u;
 } regmatch_state;
 
