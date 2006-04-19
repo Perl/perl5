@@ -73,7 +73,7 @@ sub new {
     return $self;
 }
 
-=head2 $strap->_init
+=for private $strap->_init
 
   $strap->_init;
 
@@ -244,7 +244,7 @@ sub _is_diagnostic_line {
     return $line;
 }
 
-=head2 $strap->analyze_fh( $name, $test_filehandle )
+=for private $strap->analyze_fh( $name, $test_filehandle )
 
     my %results = $strap->analyze_fh($name, $test_filehandle);
 
@@ -320,7 +320,7 @@ else {
     *_wait2exit = sub { POSIX::WEXITSTATUS($_[0]) }
 }
 
-=head2 $strap->_command_line( $file )
+=for private $strap->_command_line( $file )
 
 Returns the full command line that will be run to test I<$file>.
 
@@ -340,7 +340,7 @@ sub _command_line {
 }
 
 
-=head2 $strap->_command()
+=for private $strap->_command()
 
 Returns the command that runs the test.  Combine this with C<_switches()>
 to build a command line.
@@ -357,13 +357,13 @@ such as a PHP interpreter for a PHP-based strap.
 sub _command {
     my $self = shift;
 
-    return $ENV{HARNESS_PERL}           if defined $ENV{HARNESS_PERL};
-    return qq("$^X")    if $self->{_is_win32} && $^X =~ /[^\w\.\/\\]/;
+    return $ENV{HARNESS_PERL}   if defined $ENV{HARNESS_PERL};
+    return qq["$^X"]            if $self->{_is_win32} && ($^X =~ /[^\w\.\/\\]/);
     return $^X;
 }
 
 
-=head2 $strap->_switches( $file )
+=for private $strap->_switches( $file )
 
 Formats and returns the switches necessary to run the test.
 
@@ -400,7 +400,7 @@ sub _switches {
     return join( " ", @existing_switches, @derived_switches );
 }
 
-=head2 $strap->_cleaned_switches( @switches_from_user )
+=for private $strap->_cleaned_switches( @switches_from_user )
 
 Returns only defined, non-blank, trimmed switches from the parms passed.
 
@@ -423,7 +423,7 @@ sub _cleaned_switches {
     return @switches;
 }
 
-=head2 $strap->_INC2PERL5LIB
+=for private $strap->_INC2PERL5LIB
 
   local $ENV{PERL5LIB} = $self->_INC2PERL5LIB;
 
@@ -440,7 +440,7 @@ sub _INC2PERL5LIB {
     return join $Config{path_sep}, $self->_filtered_INC;
 }
 
-=head2 $strap->_filtered_INC()
+=for private $strap->_filtered_INC()
 
   my @filtered_inc = $self->_filtered_INC;
 
@@ -483,7 +483,7 @@ sub _default_inc {
 }
 
 
-=head2 $strap->_restore_PERL5LIB()
+=for private $strap->_restore_PERL5LIB()
 
   $self->_restore_PERL5LIB;
 
@@ -506,7 +506,7 @@ sub _restore_PERL5LIB {
 
 Methods for identifying what sort of line you're looking at.
 
-=head2 C<_is_diagnostic>
+=for private _is_diagnostic
 
     my $is_diagnostic = $strap->_is_diagnostic($line, \$comment);
 
@@ -527,7 +527,7 @@ sub _is_diagnostic {
     }
 }
 
-=head2 C<_is_header>
+=for private _is_header
 
   my $is_header = $strap->_is_header($line);
 
@@ -571,7 +571,7 @@ sub _is_header {
     }
 }
 
-=head2 C<_is_bail_out>
+=for private _is_bail_out
 
   my $is_bail_out = $strap->_is_bail_out($line, \$reason);
 
@@ -592,7 +592,7 @@ sub _is_bail_out {
     }
 }
 
-=head2 C<_reset_file_state>
+=for private _reset_file_state
 
   $strap->_reset_file_state;
 
@@ -664,8 +664,8 @@ See F<examples/mini_harness.plx> for an example of use.
 
 =head1 AUTHOR
 
-Michael G Schwern C<< <schwern@pobox.com> >>, currently maintained by
-Andy Lester C<< <andy@petdance.com> >>.
+Michael G Schwern C<< <schwern at pobox.com> >>, currently maintained by
+Andy Lester C<< <andy at petdance.com> >>.
 
 =head1 SEE ALSO
 

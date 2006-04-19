@@ -2382,6 +2382,7 @@ lib/Test/Harness/t/strap-analyze.t	Test::Harness::Straps test
 lib/Test/Harness/t/strap.t		Test::Harness::Straps test
 lib/Test/Harness/t/test-harness.t	Test::Harness test
 lib/Test/Harness/t/version.t	Test::Harness test
+lib/Test/Harness/Util.pm	Various utility functions for Test::Harness
 lib/Test/More.pm		More utilities for writing tests
 lib/Test.pm			A simple framework for writing test scripts
 lib/Test/Simple/Changes		Test::Simple changes
