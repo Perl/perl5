@@ -1129,6 +1129,8 @@ ext/threads/shared/t/wait.t	Test cond_wait and cond_timedwait
 ext/threads/shared/typemap	thread::shared types
 ext/threads/t/basic.t		ithreads
 ext/threads/t/end.t		Test end functions
+ext/threads/t/free.t		Test ithread destruction
+ext/threads/t/free2.t		More ithread destruction tests
 ext/threads/threads.pm		ithreads
 ext/threads/threads.xs		ithreads
 ext/threads/t/join.t		Testing the join function
