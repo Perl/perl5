@@ -1,4 +1,12 @@
-use Test::More tests => 34;
+#!./perl
+
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+    require './test.pl';
+}
+
+plan tests => 34;
 
 $^R = undef;
 like( 'a',  qr/^a(?{1})(?:b(?{2}))?/, 'a =~ ab?' );
