@@ -5107,6 +5107,7 @@ Perl_sv_eq(pTHX_ register SV *sv1, register SV *sv2)
 	      }
 	      if (is_utf8) {
 		   /* Downgrade not possible - cannot be eq */
+		   assert (tpv == 0);
 		   return FALSE;
 	      }
 	 }
