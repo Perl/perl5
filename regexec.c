@@ -2298,6 +2298,9 @@ typedef union re_unwind_t {
 /* Make sure there is a test for this +1 options in re_tests */
 #define TRIE_INITAL_ACCEPT_BUFFLEN 4;
 
+/* this value indiciates that the c1/c2 "next char" test should be skipped */
+#define CHRTEST_VOID -1000
+
 #define SLAB_FIRST(s) (&(s)->states[0])
 #define SLAB_LAST(s)  (&(s)->states[PERL_REGMATCH_SLAB_SLOTS-1])
 
@@ -3916,7 +3919,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
 	    /* calculate c1 and c1 for possible match of 1st char
 	     * following curly */
-	    st->u.curlym.c1 = st->u.curlym.c2 = -1000;
+	    st->u.curlym.c1 = st->u.curlym.c2 = CHRTEST_VOID;
 	    if (HAS_TEXT(next) || JUMPABLE(next)) {
 		regnode *text_node = next;
 		if (! HAS_TEXT(text_node)) FIND_NEXT_IMPT(text_node);
@@ -3943,7 +3946,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    || (n == REG_INFTY && st->u.curlym.matches >= 0)))
 	    { 
 		/* If it could work, try it. */
-		if (st->u.curlym.c1 == -1000 ||
+		if (st->u.curlym.c1 == CHRTEST_VOID ||
 		    UCHARAT(PL_reginput) == st->u.curlym.c1 ||
 		    UCHARAT(PL_reginput) == st->u.curlym.c2)
 		{
@@ -4044,10 +4047,11 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
 		if (! HAS_TEXT(text_node)) FIND_NEXT_IMPT(text_node);
 
-		if (! HAS_TEXT(text_node)) st->u.plus.c1 = st->u.plus.c2 = -1000;
+		if (! HAS_TEXT(text_node))
+		    st->u.plus.c1 = st->u.plus.c2 = CHRTEST_VOID;
 		else {
 		    if (PL_regkind[(U8)OP(text_node)] == REF) {
-			st->u.plus.c1 = st->u.plus.c2 = -1000;
+			st->u.plus.c1 = st->u.plus.c2 = CHRTEST_VOID;
 			goto assume_ok_easy;
 		    }
 		    else { s = (U8*)STRING(text_node); }
@@ -4081,7 +4085,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		}
 	    }
 	    else
-		st->u.plus.c1 = st->u.plus.c2 = -1000;
+		st->u.plus.c1 = st->u.plus.c2 = CHRTEST_VOID;
 	assume_ok_easy:
 	    PL_reginput = locinput;
 	    if (st->minmod) {
@@ -4090,7 +4094,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    sayNO;
 		locinput = PL_reginput;
 		REGCP_SET(st->u.plus.lastcp);
-		if (st->u.plus.c1 != -1000) {
+		if (st->u.plus.c1 != CHRTEST_VOID) {
 		    st->u.plus.old = locinput;
 		    st->u.plus.count = 0;
 
@@ -4178,7 +4182,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		else
 		while (n >= st->ln || (n == REG_INFTY && st->ln > 0)) { /* ln overflow ? */
 		    UV c;
-		    if (st->u.plus.c1 != -1000) {
+		    if (st->u.plus.c1 != CHRTEST_VOID) {
 			if (do_utf8)
 			    c = utf8n_to_uvchr((U8*)PL_reginput,
 					       UTF8_MAXBYTES, 0,
@@ -4194,7 +4198,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		        }
 		    }
 		    /* If it could work, try it. */
-		    else if (st->u.plus.c1 == -1000)
+		    else if (st->u.plus.c1 == CHRTEST_VOID)
 		    {
 			TRYPAREN(st->u.plus.paren, st->ln, PL_reginput, PLUS3);
 			/*** all unsaved local vars undefined at this point */
@@ -4228,7 +4232,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		{
 		    UV c = 0;
 		    while (n >= st->ln) {
-			if (st->u.plus.c1 != -1000) {
+			if (st->u.plus.c1 != CHRTEST_VOID) {
 			    if (do_utf8)
 				c = utf8n_to_uvchr((U8*)PL_reginput,
 						   UTF8_MAXBYTES, 0,
@@ -4237,7 +4241,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 				c = UCHARAT(PL_reginput);
 			}
 			/* If it could work, try it. */
-			if (st->u.plus.c1 == -1000 || c == (UV)st->u.plus.c1 || c == (UV)st->u.plus.c2)
+			if (st->u.plus.c1 == CHRTEST_VOID || c == (UV)st->u.plus.c1 || c == (UV)st->u.plus.c2)
 			    {
 				TRYPAREN(st->u.plus.paren, n, PL_reginput, PLUS4);
 				/*** all unsaved local vars undefined at this point */
