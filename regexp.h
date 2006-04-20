@@ -184,7 +184,6 @@ typedef enum {
     resume_CURLYM1,
     resume_CURLYM2,
     resume_CURLYM3,
-    resume_CURLYM4,
     resume_IFMATCH,
     resume_PLUS1,
     resume_PLUS2,
@@ -268,6 +267,7 @@ typedef struct regmatch_state {
 	    I32 l;
 	    I32 matches;
 	    I32 maxwanted;
+	    bool minmod;
 	} curlym;
 
 	struct {

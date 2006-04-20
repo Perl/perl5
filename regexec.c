@@ -3872,94 +3872,109 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		scan += NEXT_OFF(scan); /* Skip former OPEN. */
 	    PL_reginput = locinput;
 	    st->u.curlym.maxwanted = st->minmod ? st->ln : n;
-	    if (st->u.curlym.maxwanted) {
-		while (PL_reginput < PL_regeol && st->u.curlym.matches < st->u.curlym.maxwanted) {
-		    /* resume to current state on success */
-		    st->u.yes.prev_yes_state = yes_state;
-		    yes_state = st;
-		    REGMATCH(scan, CURLYM1);
-		    yes_state = st->u.yes.prev_yes_state;
-		    /*** all unsaved local vars undefined at this point */
-		    if (!result)
-			break;
-		    /* on first match, determine length, u.curlym.l */
-		    if (!st->u.curlym.matches++) {
-			if (PL_reg_match_utf8) {
-			    char *s = locinput;
-			    while (s < PL_reginput) {
-				st->u.curlym.l++;
-				s += UTF8SKIP(s);
-			    }
-			}
-			else {
-			    st->u.curlym.l = PL_reginput - locinput;
-			}
-			if (st->u.curlym.l == 0) {
-			    st->u.curlym.matches = st->u.curlym.maxwanted;
-			    break;
+	    while (PL_reginput < PL_regeol && st->u.curlym.matches < st->u.curlym.maxwanted) {
+		/* resume to current state on success */
+		st->u.yes.prev_yes_state = yes_state;
+		yes_state = st;
+		REGMATCH(scan, CURLYM1);
+		yes_state = st->u.yes.prev_yes_state;
+		/*** all unsaved local vars undefined at this point */
+		if (!result)
+		    break;
+		/* on first match, determine length, u.curlym.l */
+		if (!st->u.curlym.matches++) {
+		    if (PL_reg_match_utf8) {
+			char *s = locinput;
+			while (s < PL_reginput) {
+			    st->u.curlym.l++;
+			    s += UTF8SKIP(s);
 			}
 		    }
-		    locinput = PL_reginput;
+		    else {
+			st->u.curlym.l = PL_reginput - locinput;
+		    }
+		    if (st->u.curlym.l == 0) {
+			st->u.curlym.matches = st->u.curlym.maxwanted;
+			break;
+		    }
 		}
+		locinput = PL_reginput;
 	    }
 
 	    PL_reginput = locinput;
-
-	    if (st->minmod) {
+	    if (st->u.curlym.matches < st->ln) {
 		st->minmod = 0;
-		if (st->ln && st->u.curlym.matches < st->ln)
-		    sayNO;
-		if (HAS_TEXT(next) || JUMPABLE(next)) {
-		    regnode *text_node = next;
+		sayNO;
+	    }
 
-		    if (! HAS_TEXT(text_node)) FIND_NEXT_IMPT(text_node);
+	    DEBUG_EXECUTE_r(
+		PerlIO_printf(Perl_debug_log,
+			  "%*s  matched %"IVdf" times, len=%"IVdf"...\n",
+			  (int)(REPORT_CODE_OFF+PL_regindent*2), "",
+			  (IV) st->u.curlym.matches, (IV)st->u.curlym.l)
+	    );
 
-		    if (! HAS_TEXT(text_node)) st->u.curlym.c1 = st->u.curlym.c2 = -1000;
-		    else {
-			if (PL_regkind[(U8)OP(text_node)] == REF) {
-			    st->u.curlym.c1 = st->u.curlym.c2 = -1000;
-			    goto assume_ok_MM;
-			}
-			else { st->u.curlym.c1 = (U8)*STRING(text_node); }
-			if (OP(text_node) == EXACTF || OP(text_node) == REFF)
-			    st->u.curlym.c2 = PL_fold[st->u.curlym.c1];
-			else if (OP(text_node) == EXACTFL || OP(text_node) == REFFL)
-			    st->u.curlym.c2 = PL_fold_locale[st->u.curlym.c1];
-			else
-			    st->u.curlym.c2 = st->u.curlym.c1;
-		    }
+	    /* calculate c1 and c1 for possible match of 1st char
+	     * following curly */
+	    st->u.curlym.c1 = st->u.curlym.c2 = -1000;
+	    if (HAS_TEXT(next) || JUMPABLE(next)) {
+		regnode *text_node = next;
+		if (! HAS_TEXT(text_node)) FIND_NEXT_IMPT(text_node);
+		if (HAS_TEXT(text_node)
+		    && PL_regkind[(U8)OP(text_node)] != REF)
+		{
+		    st->u.curlym.c1 = (U8)*STRING(text_node);
+		    st->u.curlym.c2 =
+			(OP(text_node) == EXACTF || OP(text_node) == REFF)
+			? PL_fold[st->u.curlym.c1]
+			: (OP(text_node) == EXACTFL || OP(text_node) == REFFL)
+			    ? PL_fold_locale[st->u.curlym.c1]
+			    : st->u.curlym.c1;
 		}
-		else
-		    st->u.curlym.c1 = st->u.curlym.c2 = -1000;
-	    assume_ok_MM:
-		REGCP_SET(st->u.curlym.lastcp);
-		while (n >= st->ln || (n == REG_INFTY && st->ln > 0)) { /* ln overflow ? */
-		    /* If it could work, try it. */
-		    if (st->u.curlym.c1 == -1000 ||
-			UCHARAT(PL_reginput) == st->u.curlym.c1 ||
-			UCHARAT(PL_reginput) == st->u.curlym.c2)
-		    {
-			if (st->u.curlym.paren) {
-			    if (st->ln) {
-				PL_regstartp[st->u.curlym.paren] =
-				    HOPc(PL_reginput, -st->u.curlym.l) - PL_bostr;
-				PL_regendp[st->u.curlym.paren] = PL_reginput - PL_bostr;
-			    }
-			    else
-				PL_regendp[st->u.curlym.paren] = -1;
+	    }
+
+	    REGCP_SET(st->u.curlym.lastcp);
+
+	    st->u.curlym.minmod = st->minmod;
+	    st->minmod = 0;
+	    while (st->u.curlym.matches >= st->ln
+		&& (st->u.curlym.matches <= n
+		    /* for REG_INFTY, ln could overflow to negative */
+		    || (n == REG_INFTY && st->u.curlym.matches >= 0)))
+	    { 
+		/* If it could work, try it. */
+		if (st->u.curlym.c1 == -1000 ||
+		    UCHARAT(PL_reginput) == st->u.curlym.c1 ||
+		    UCHARAT(PL_reginput) == st->u.curlym.c2)
+		{
+		    DEBUG_EXECUTE_r(
+			PerlIO_printf(Perl_debug_log,
+			    "%*s  trying tail with matches=%"IVdf"...\n",
+			    (int)(REPORT_CODE_OFF+PL_regindent*2),
+			    "", (IV)st->u.curlym.matches)
+			);
+		    if (st->u.curlym.paren) {
+			if (st->u.curlym.matches) {
+			    PL_regstartp[st->u.curlym.paren]
+				= HOPc(PL_reginput, -st->u.curlym.l) - PL_bostr;
+			    PL_regendp[st->u.curlym.paren] = PL_reginput - PL_bostr;
 			}
-			/* resume to current state on success */
-			st->u.yes.prev_yes_state = yes_state;
-			yes_state = st;
-			REGMATCH(next, CURLYM2);
-			yes_state = st->u.yes.prev_yes_state;
-			/*** all unsaved local vars undefined at this point */
-			if (result)
-			    /* XXX tmp sayYES; */
-			    sayYES_FINAL;
-			REGCP_UNWIND(st->u.curlym.lastcp);
+			else
+			    PL_regendp[st->u.curlym.paren] = -1;
 		    }
-		    /* Couldn't or didn't -- move forward. */
+		    /* resume to current state on success */
+		    st->u.yes.prev_yes_state = yes_state;
+		    yes_state = st;
+		    REGMATCH(next, CURLYM2);
+		    yes_state = st->u.yes.prev_yes_state;
+		    /*** all unsaved local vars undefined at this point */
+		    if (result)
+			/* XXX tmp sayYES; */
+			sayYES_FINAL;
+		    REGCP_UNWIND(st->u.curlym.lastcp);
+		}
+		/* Couldn't or didn't -- move forward/backward. */
+		if (st->u.curlym.minmod) {
 		    PL_reginput = locinput;
 		    /* resume to current state on success */
 		    st->u.yes.prev_yes_state = yes_state;
@@ -3968,80 +3983,13 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    yes_state = st->u.yes.prev_yes_state;
 		    /*** all unsaved local vars undefined at this point */
 		    if (result) {
-			st->ln++;
+			st->u.curlym.matches++;
 			locinput = PL_reginput;
 		    }
 		    else
 			sayNO;
 		}
-	    }
-	    else {
-		DEBUG_EXECUTE_r(
-		    PerlIO_printf(Perl_debug_log,
-			      "%*s  matched %"IVdf" times, len=%"IVdf"...\n",
-			      (int)(REPORT_CODE_OFF+PL_regindent*2), "",
-			      (IV) st->u.curlym.matches, (IV)st->u.curlym.l)
-		    );
-		if (st->u.curlym.matches >= st->ln) {
-		    if (HAS_TEXT(next) || JUMPABLE(next)) {
-			regnode *text_node = next;
-
-			if (! HAS_TEXT(text_node)) FIND_NEXT_IMPT(text_node);
-
-			if (! HAS_TEXT(text_node)) st->u.curlym.c1 = st->u.curlym.c2 = -1000;
-			else {
-			    if (PL_regkind[(U8)OP(text_node)] == REF) {
-				st->u.curlym.c1 = st->u.curlym.c2 = -1000;
-				goto assume_ok_REG;
-			    }
-			    else { st->u.curlym.c1 = (U8)*STRING(text_node); }
-
-			    if (OP(text_node) == EXACTF || OP(text_node) == REFF)
-				st->u.curlym.c2 = PL_fold[st->u.curlym.c1];
-			    else if (OP(text_node) == EXACTFL || OP(text_node) == REFFL)
-				st->u.curlym.c2 = PL_fold_locale[st->u.curlym.c1];
-			    else
-				st->u.curlym.c2 = st->u.curlym.c1;
-			}
-		    }
-		    else
-			st->u.curlym.c1 = st->u.curlym.c2 = -1000;
-		}
-	    assume_ok_REG:
-		REGCP_SET(st->u.curlym.lastcp);
-		while (st->u.curlym.matches >= st->ln) {
-		    /* If it could work, try it. */
-		    if (st->u.curlym.c1 == -1000 ||
-			UCHARAT(PL_reginput) == st->u.curlym.c1 ||
-			UCHARAT(PL_reginput) == st->u.curlym.c2)
-		    {
-			DEBUG_EXECUTE_r(
-			    PerlIO_printf(Perl_debug_log,
-				"%*s  trying tail with matches=%"IVdf"...\n",
-				(int)(REPORT_CODE_OFF+PL_regindent*2),
-				"", (IV)st->u.curlym.matches)
-			    );
-			if (st->u.curlym.paren) {
-			    if (st->u.curlym.matches) {
-				PL_regstartp[st->u.curlym.paren]
-				    = HOPc(PL_reginput, -st->u.curlym.l) - PL_bostr;
-				PL_regendp[st->u.curlym.paren] = PL_reginput - PL_bostr;
-			    }
-			    else
-				PL_regendp[st->u.curlym.paren] = -1;
-			}
-			/* resume to current state on success */
-			st->u.yes.prev_yes_state = yes_state;
-			yes_state = st;
-			REGMATCH(next, CURLYM4);
-			yes_state = st->u.yes.prev_yes_state;
-			/*** all unsaved local vars undefined at this point */
-			if (result)
-			    /* XXX tmp sayYES; */
-			    sayYES_FINAL;
-			REGCP_UNWIND(st->u.curlym.lastcp);
-		    }
-		    /* Couldn't or didn't -- back up. */
+		else {
 		    st->u.curlym.matches--;
 		    locinput = HOPc(locinput, -st->u.curlym.l);
 		    PL_reginput = locinput;
@@ -4496,7 +4444,6 @@ yes_final:
 	case resume_CURLYM1:
 	case resume_CURLYM2:
 	case resume_CURLYM3:
-	case resume_CURLYM4:
 	    PL_regmatch_slab =oslab;
 	    st = ost;
 	    PL_regmatch_state = st;
@@ -4550,8 +4497,6 @@ yes:
 	    goto resume_point_CURLYM2;
 	case resume_CURLYM3:
 	    goto resume_point_CURLYM3;
-	case resume_CURLYM4:
-	    goto resume_point_CURLYM4;
 	case resume_PLUS1:
 	    goto resume_point_PLUS1;
 	case resume_PLUS2:
@@ -4678,8 +4623,6 @@ do_no:
 	    goto resume_point_CURLYM2;
 	case resume_CURLYM3:
 	    goto resume_point_CURLYM3;
-	case resume_CURLYM4:
-	    goto resume_point_CURLYM4;
 	case resume_IFMATCH:
 	    yes_state = st->u.yes.prev_yes_state;
 	    if (st->logical) {
