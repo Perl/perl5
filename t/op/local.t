@@ -4,7 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
 }
-plan tests => 81;
+plan tests => 85;
 
 my $list_assignment_supported = 1;
 
@@ -313,3 +313,19 @@ while (/(o.+?),/gc) {
     { local @x{c,d,e}; }
     ok(! exists $x{c});
 }
+
+# local() and readonly magic variables
+
+eval { local $1 = 1 };
+like($@, qr/Modification of a read-only value attempted/);
+
+eval { for ($1) { local $_ = 1 } };
+like($@, qr/Modification of a read-only value attempted/);
+
+# make sure $1 is still read-only
+eval { for ($1) { local $_ = 1 } };
+is($@, "");
+
+# The s/// adds 'g' magic to $_, but it should remain non-readonly
+eval { for("a") { for $x (1,2) { local $_="b"; s/(.*)/+$1/ } } };
+is($@, "");
