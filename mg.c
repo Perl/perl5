@@ -390,6 +390,65 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
 }
 
 /*
+=for apidoc mg_localize
+
+Copy some of the magic from an existing SV to new localized version of
+that SV. Container magic (eg %ENV, $1, tie) gets copied, value magic
+doesn't (eg taint, pos).
+
+=cut
+*/
+
+void
+Perl_mg_localize(pTHX_ SV *sv, SV *nsv)
+{
+    MAGIC *mg;
+    for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
+	MGVTBL* const vtbl = mg->mg_virtual;
+	switch (mg->mg_type) {
+	/* value magic types: don't copy */
+	case PERL_MAGIC_bm:
+	case PERL_MAGIC_fm:
+	case PERL_MAGIC_regex_global:
+	case PERL_MAGIC_nkeys:
+#ifdef USE_LOCALE_COLLATE
+	case PERL_MAGIC_collxfrm:
+#endif
+	case PERL_MAGIC_qr:
+	case PERL_MAGIC_taint:
+	case PERL_MAGIC_vec:
+	case PERL_MAGIC_vstring:
+	case PERL_MAGIC_utf8:
+	case PERL_MAGIC_substr:
+	case PERL_MAGIC_defelem:
+	case PERL_MAGIC_arylen:
+	case PERL_MAGIC_pos:
+	case PERL_MAGIC_backref:
+	    continue;
+	}
+		
+	if ((mg->mg_flags & MGf_COPY) && vtbl->svt_copy) {
+	    /* XXX calling the copy method is probably not correct. DAPM */
+	    (void)CALL_FPTR(vtbl->svt_copy)(aTHX_ sv, mg, nsv,
+				    mg->mg_ptr, mg->mg_len);
+	}
+	else {
+	    sv_magicext(nsv, mg->mg_obj, mg->mg_type, vtbl,
+			    mg->mg_ptr, mg->mg_len);
+	}
+	/* container types should remain read-only across localization */
+	SvFLAGS(nsv) |= SvREADONLY(sv);
+    }
+
+    if (SvTYPE(nsv) >= SVt_PVMG && SvMAGIC(nsv)) {
+	SvFLAGS(nsv) |= SvMAGICAL(sv);
+	PL_localizing = 1;
+	SvSETMAGIC(nsv);
+	PL_localizing = 0;
+    }	    
+}
+
+/*
 =for apidoc mg_free
 
 Free any magic storage used by the SV.  See C<sv_magic>.
@@ -1848,8 +1907,7 @@ int
 Perl_magic_gettaint(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_UNUSED_ARG(sv);
-    TAINT_IF((mg->mg_len & 1) ||
-	     ((mg->mg_len & 2) && mg->mg_obj == sv));	/* kludge */
+    TAINT_IF((PL_localizing != 1) && (mg->mg_len & 1));
     return 0;
 }
 
@@ -1857,16 +1915,13 @@ int
 Perl_magic_settaint(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_UNUSED_ARG(sv);
-    if (PL_localizing) {
-	if (PL_localizing == 1)
-	    mg->mg_len <<= 1;
+    /* update taint status unless we're restoring at scope exit */
+    if (PL_localizing != 2) {
+	if (PL_tainted)
+	    mg->mg_len |= 1;
 	else
-	    mg->mg_len >>= 1;
+	    mg->mg_len &= ~1;
     }
-    else if (PL_tainted)
-	mg->mg_len |= 1;
-    else
-	mg->mg_len &= ~1;
     return 0;
 }
 

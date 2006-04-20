@@ -324,7 +324,7 @@ like($@, qr/Modification of a read-only value attempted/);
 
 # make sure $1 is still read-only
 eval { for ($1) { local $_ = 1 } };
-is($@, "");
+like($@, qr/Modification of a read-only value attempted/);
 
 # The s/// adds 'g' magic to $_, but it should remain non-readonly
 eval { for("a") { for $x (1,2) { local $_="b"; s/(.*)/+$1/ } } };

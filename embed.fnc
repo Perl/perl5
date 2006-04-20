@@ -470,6 +470,7 @@ p	|void	|qerror		|NN SV* err
 Apd	|void	|sortsv		|NN SV** array|size_t num_elts|SVCOMPARE_t cmp
 Apd	|int	|mg_clear	|NN SV* sv
 Apd	|int	|mg_copy	|NN SV* sv|NN SV* nsv|NULLOK const char* key|I32 klen
+pd	|void	|mg_localize	|NN SV* sv|NN SV* nsv
 ApdR	|MAGIC*	|mg_find	|NULLOK SV* sv|int type
 Apd	|int	|mg_free	|NN SV* sv
 Apd	|int	|mg_get		|NN SV* sv
