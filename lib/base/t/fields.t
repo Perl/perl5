@@ -41,10 +41,9 @@ is_deeply( [sort &show_fields('Foo', fields::PRIVATE)],
 # We should get compile time failures field name typos
 eval q(return; my Foo $obj = Foo->new; $obj->{notthere} = "");
 
-my $error = $Has_PH ? 'No such(?: [\w-]+)? field "notthere"'
-                    : q[No such class field "notthere" in variable $obj ].
-                      q[of type Foo];
-like( $@, qr/^\Q$error/i );
+my $error = $Has_PH ? qr/No such(?: [\w-]+)? field "notthere"/
+    : qr/No such class field "notthere" in variable \$obj of type Foo/;
+like( $@, $error );
 
 
 foreach (Foo->new) {
