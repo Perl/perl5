@@ -30984,7 +30984,7 @@ ____________________________________________________________________________
 	   ! Porting/makerel
 ____________________________________________________________________________
 [ 21323] By: rgs                                   on 2003/09/22  20:31:19
-        Log: When localising a magic value, propagæte the readonly flag
+        Log: When localising a magic value, propagate the readonly flag
              only if this scalar has \0 magic or has magic without a
              'set' method. (follows change #20479 for bug #23141.)
      Branch: perl
