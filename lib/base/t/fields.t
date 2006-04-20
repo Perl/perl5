@@ -44,7 +44,7 @@ eval q(return; my Foo $obj = Foo->new; $obj->{notthere} = "");
 my $error = $Has_PH ? 'No such(?: [\w-]+)? field "notthere"'
                     : q[No such class field "notthere" in variable $obj ].
                       q[of type Foo];
-ok( $@ && $@ =~ /^\Q$error/i );
+like( $@, qr/^\Q$error/i );
 
 
 foreach (Foo->new) {
@@ -58,7 +58,7 @@ foreach (Foo->new) {
     @{$obj}{qw(what who _up_yours)} = ('Ahh', 'Moo', 'Yip');
 
     while(my($k,$v) = each %test) {
-        ok($obj->{$k} eq $v);
+        is($obj->{$k}, $v);
     }
 }
 
