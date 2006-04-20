@@ -9,7 +9,7 @@ BEGIN {
 }
 
 require "./test.pl";
-plan( tests => 58 );
+plan( tests => 59 );
 
 eval '%@x=0;';
 like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
@@ -203,3 +203,7 @@ eval q{ foo::$bar };
 like( $@, qr/Bad name after foo::/, 'Bad name after foo::' );
 eval q{ foo''bar };
 like( $@, qr/Bad name after foo'/, 'Bad name after foo\'' );
+
+# test for ?: context error
+eval q{($a ? $x : ($y)) = 5};
+like( $@, qr/Assignment to both a list and a scalar/, 'Assignment to both a list and a scalar' );
