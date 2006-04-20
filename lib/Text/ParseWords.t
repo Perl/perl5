@@ -8,7 +8,7 @@ BEGIN {
 use warnings;
 use Text::ParseWords;
 
-print "1..22\n";
+print "1..23\n";
 
 @words = shellwords(qq(foo "bar quiz" zoo));
 print "not " if $words[0] ne 'foo';
@@ -132,3 +132,9 @@ $string = qq{"missing quote};
 $result = join('|', shellwords($string));
 print "not " unless $result eq "";
 print "ok 22\n";
+
+# make sure shellwords strips out leading whitespace and trailng undefs
+# from parse_line, so it's behavior is more like /bin/sh
+$result = join('|', shellwords(" aa \\  \\ bb ", " \\  ", "cc dd ee\\ "));
+print "not " unless $result eq "aa| | bb| |cc|dd|ee ";
+print "ok 23\n";
