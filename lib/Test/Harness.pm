@@ -39,6 +39,7 @@ Version 2.57_05
 =cut
 
 $VERSION = "2.57_05";
+$VERSION = eval $VERSION;
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -352,7 +353,7 @@ sub execute_tests {
         # state of the current test.
         my @failed = grep { !$results{details}[$_-1]{ok} }
                      1..@{$results{details}};
-        my @todo_pass = grep { $results{details}[$_-1]{ok} &&
+        my @todo_pass = grep { $results{details}[$_-1]{actual_ok} &&
                                $results{details}[$_-1]{type} eq 'todo' }
                         1..@{$results{details}};
 
@@ -362,6 +363,7 @@ sub execute_tests {
                     max         => $results{max},
                     failed      => \@failed,
                     todo_pass   => \@todo_pass,
+                    todo        => $results{todo},
                     bonus       => $results{bonus},
                     skipped     => $results{skip},
                     skip_reason => $results{skip_reason},
@@ -384,14 +386,14 @@ sub execute_tests {
                 push(@msg, "$test{skipped}/$test{max} skipped: $test{skip_reason}")
                     if $test{skipped};
                 if ($test{bonus}) {
-                    my ($txt, $canon) = _canondetail($test{max},$test{skipped},'TODO passed',
+                    my ($txt, $canon) = _canondetail($test{todo},0,'TODO passed',
                                                     @{$test{todo_pass}});
                     $todo_passed{$tfile} = {
                         canon   => $canon,
-                        max     => $test{max},
+                        max     => $test{todo},
                         failed  => $test{bonus},
                         name    => $tfile,
-                        percent => 100*$test{bonus}/$test{max},
+                        percent => 100*$test{bonus}/$test{todo},
                         estat   => '',
                         wstat   => '',
                     };
@@ -568,7 +570,7 @@ sub get_results {
     if (_all_ok($tot)) {
         $out .= "All tests successful$bonusmsg.\n";
         if ($tot->{bonus}) {
-            my($fmt_top, $fmt) = _create_fmts("Passed",$todo_passed);
+            my($fmt_top, $fmt) = _create_fmts("Passed Todo",$todo_passed);
             # Now write to formats
             for my $script (sort keys %{$todo_passed||{}}) {
                 my $Curtest = $todo_passed->{$script};
@@ -593,7 +595,7 @@ sub get_results {
                               $tot->{max} - $tot->{ok}, $tot->{max}, 
                               $percent_ok;
 
-        my($fmt_top, $fmt1, $fmt2) = _create_fmts("Failed",$failedtests);
+        my($fmt_top, $fmt1, $fmt2) = _create_fmts("Failed Test",$failedtests);
 
         # Now write to formats
         for my $script (sort keys %$failedtests) {
@@ -767,12 +769,13 @@ sub _dubious_return {
 
 
 sub _create_fmts {
-    my $type = shift;
+    my $failed_str = shift;
     my $failedtests = shift;
 
+    my ($type) = split /\s/,$failed_str;
     my $short = substr($type,0,4);
-    my $failed_str = "$type Test";
-    my $middle_str = " Stat Wstat Total $short  $type  ";
+    my $total = $short eq 'Pass' ? 'Todos' : 'Total';
+    my $middle_str = " Stat Wstat $total $short  $type  ";
     my $list_str = "List of $type";
 
     # Figure out our longest name string for formatting purposes.
@@ -812,7 +815,6 @@ sub _canondetail {
     my $skipped = shift;
     my $type = shift;
     my @detail = @_;
-
     my %seen;
     @detail = sort {$a <=> $b} grep !$seen{$_}++, @detail;
     my $detail = @detail;
