@@ -24,6 +24,7 @@ my $blib = File::Spec->catfile( File::Spec->curdir, "blib" );
 my $blib_lib = File::Spec->catfile( $blib, "lib" );
 my $blib_arch = File::Spec->catfile( $blib, "arch" );
 my $prove = File::Spec->catfile( $blib, "script", "prove" );
+$prove = "$^X $prove";
 
 CAPITAL_TAINT: {
     local $ENV{PROVE_SWITCHES};
