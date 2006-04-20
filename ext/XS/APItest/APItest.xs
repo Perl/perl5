@@ -3,6 +3,32 @@
 #include "perl.h"
 #include "XSUB.h"
 
+static void throws_exception(int throw_e)
+{
+  if (throw_e)
+    croak("boo\n");
+}
+
+static int exception(int throw_e)
+{
+  dTHR;
+  dXCPT;
+  SV *caught = get_sv("XS::APItest::exception_caught", 0);
+
+  XCPT_TRY_START {
+    throws_exception(throw_e);
+  } XCPT_TRY_END
+
+  XCPT_CATCH
+  {
+    sv_setiv(caught, 1);
+    XCPT_RETHROW;
+  }
+
+  sv_setiv(caught, 0);
+
+  return 42;
+}
 
 /* A routine to test hv_delayfree_ent
    (which itself is tested by testing on hv_free_ent  */
@@ -394,14 +420,22 @@ require_pv(pv)
 	PUTBACK;
 	require_pv(pv);
 
-
-
+int
+exception(throw_e)
+    int throw_e
+    OUTPUT:
+        RETVAL
 
 void
-mycroak(pv)
-    const char* pv
+mycroak(sv)
+    SV* sv
     CODE:
-    Perl_croak(aTHX_ "%s", pv);
+    if (SvOK(sv)) {
+        Perl_croak(aTHX_ "%s", SvPV_nolen(sv));
+    }
+    else {
+	Perl_croak(aTHX_ NULL);
+    }
 
 SV*
 strtab()

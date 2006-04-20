@@ -2287,6 +2287,53 @@ Found in file pad.c
 
 =back
 
+=head1 Simple Exception Handling Macros
+
+=over 8
+
+=item dXCPT
+
+Set up neccessary local variables for exception handling.
+See L<perlguts/"Exception Handling">.
+
+		dXCPT;
+
+=for hackers
+Found in file XSUB.h
+
+=item XCPT_CATCH
+
+Introduces a catch block.  See L<perlguts/"Exception Handling">.
+
+=for hackers
+Found in file XSUB.h
+
+=item XCPT_RETHROW
+
+Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
+
+		XCPT_RETHROW;
+
+=for hackers
+Found in file XSUB.h
+
+=item XCPT_TRY_END
+
+Ends a try block.  See L<perlguts/"Exception Handling">.
+
+=for hackers
+Found in file XSUB.h
+
+=item XCPT_TRY_START
+
+Starts a try block.  See L<perlguts/"Exception Handling">.
+
+=for hackers
+Found in file XSUB.h
+
+
+=back
+
 =head1 Stack Manipulation Macros
 
 =over 8
