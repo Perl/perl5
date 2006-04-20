@@ -1,6 +1,5 @@
 package open;
 use warnings;
-$open::hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
 our $VERSION = '1.05';
 
@@ -57,7 +56,6 @@ sub import {
     my ($class,@args) = @_;
     croak("open: needs explicit list of PerlIO layers") unless @args;
     my $std;
-    $^H |= $open::hint_bits;
     my ($in,$out) = split(/\0/,(${^OPEN} || "\0"), -1);
     while (@args) {
 	my $type = shift(@args);

@@ -2,8 +2,6 @@ package overload;
 
 our $VERSION = '1.04';
 
-$overload::hint_bits = 0x20000; # HINT_LOCALIZE_HH
-
 sub nil {}
 
 sub OVERLOAD {
@@ -149,7 +147,7 @@ sub constant {
     }
     else {
         $^H{$_[0]} = $_[1];
-        $^H |= $constants{$_[0]} | $overload::hint_bits;
+        $^H |= $constants{$_[0]};
     }
     shift, shift;
   }

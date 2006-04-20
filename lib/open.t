@@ -7,7 +7,7 @@ BEGIN {
 	require Config; import Config;
 }
 
-use Test::More tests => 16;
+use Test::More tests => 14;
 
 # open::import expects 'open' as its first argument, but it clashes with open()
 sub import {
@@ -21,10 +21,6 @@ ok( require 'open.pm', 'requiring open' );
 eval { import() };
 like( $@, qr/needs explicit list of PerlIO layers/,
 	'import should fail without args' );
-
-# the hint bits shouldn't be set yet
-is( $^H & $open::hint_bits, 0,
-	'hint bits should not be set in $^H before open import' );
 
 # prevent it from loading I18N::Langinfo, so we can test encoding failures
 my $warn;
@@ -48,8 +44,6 @@ like( $warn, qr/Unknown PerlIO layer/,
 
 # see if it sets the magic variables appropriately
 import( 'IN', ':crlf' );
-ok( $^H & $open::hint_bits,
-	'hint bits should be set in $^H after open import' );
 is( $^H{'open_IN'}, 'crlf', 'should have set crlf layer' );
 
 # it should reset them appropriately, too

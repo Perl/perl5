@@ -5,7 +5,6 @@ use File::Spec;
 our $VERSION = '1.05';
 
 use bytes ();		# for $bytes::hint_bits
-$charnames::hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
 my %alias1 = (
 		# Icky 3.2 names with parentheses.
@@ -192,7 +191,6 @@ sub import
   if (not @_) {
     carp("`use charnames' needs explicit imports list");
   }
-  $^H |= $charnames::hint_bits;
   $^H{charnames} = \&charnames ;
 
   ##
@@ -393,10 +391,8 @@ hardwired into F<charnames.pm>.  A module can install custom
 translations (inside the scope which C<use>s the module) with the
 following magic incantation:
 
-    use charnames ();		# for $charnames::hint_bits
     sub import {
 	shift;
-	$^H |= $charnames::hint_bits;
 	$^H{charnames} = \&translator;
     }
 
