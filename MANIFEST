@@ -3421,6 +3421,7 @@ t/op/regmesg.t			See if one can get regular expression errors
 t/op/repeat.t			See if x operator works
 t/op/re_tests			Regular expressions for regexp.t
 t/op/reverse.t			See if reverse operator works
+t/op/rxcode.t			See if /(?{ code })/ works
 t/op/runlevel.t			See if die() works from perl_call_*()
 t/op/sleep.t			See if sleep works
 t/op/smartmatch.t		See if the ~~ operator works
