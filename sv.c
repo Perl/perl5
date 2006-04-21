@@ -10689,10 +10689,8 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		    = pv_dup(old_state->re_state_reg_oldsaved);
 		new_state->re_state_reg_poscache
 		    = pv_dup(old_state->re_state_reg_poscache);
-#ifdef DEBUGGING
 		new_state->re_state_reg_starttry
 		    = pv_dup(old_state->re_state_reg_starttry);
-#endif
 		break;
 	    }
 	case SAVEt_COMPILE_WARNINGS:
