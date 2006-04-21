@@ -21,6 +21,8 @@ extern SV*	my_re_intuit_string (pTHX_ regexp *prog);
 
 END_EXTERN_C
 
+/* engine details need to be paired - non debugging, debuggin  */
+#define NEEDS_DEBUGGING 0x01
 struct regexp_engine {
     regexp*	(*regcomp) (pTHX_ char* exp, char* xend, PMOP* pm);
     I32		(*regexec) (pTHX_ regexp* prog, char* stringarg, char* strend,
@@ -31,14 +33,13 @@ struct regexp_engine {
 				    struct re_scream_pos_data_s *data);
     SV*		(*re_intuit_string) (pTHX_ regexp *prog);
     void	(*regfree) (pTHX_ struct regexp* r);
-    bool	enable_debugging;
 };
 
 struct regexp_engine engines[] = {
     { Perl_pregcomp, Perl_regexec_flags, Perl_re_intuit_start,
-      Perl_re_intuit_string, Perl_pregfree, FALSE },
+      Perl_re_intuit_string, Perl_pregfree },
     { my_regcomp, my_regexec, my_re_intuit_start, my_re_intuit_string,
-      my_regfree, TRUE }
+      my_regfree }
 };
 
 #define MY_CXT_KEY "re::_guts" XS_VERSION
@@ -72,15 +73,15 @@ install(pTHX_ unsigned int new_state)
     PL_regint_string = engines[new_state].re_intuit_string;
     PL_regfree = engines[new_state].regfree;
 
-    if (engines[new_state].enable_debugging) {
+    if (new_state & NEEDS_DEBUGGING) {
 	PL_colorset = 0;	/* Allow reinspection of ENV. */
-	if (!engines[MY_CXT.x_state].enable_debugging) {
+	if (!(MY_CXT.x_state & NEEDS_DEBUGGING)) {
 	    /* Debugging is turned on for the first time.  */
 	    oldflag = PL_debug & DEBUG_r_FLAG;
 	    PL_debug |= DEBUG_r_FLAG;
 	}
     } else {
-	if (!engines[MY_CXT.x_state].enable_debugging) {
+	if (!(MY_CXT.x_state & NEEDS_DEBUGGING)) {
 	    if (!oldflag)
 		PL_debug &= ~DEBUG_r_FLAG;
 	}
