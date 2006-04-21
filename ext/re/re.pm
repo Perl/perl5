@@ -1,6 +1,6 @@
 package re;
 
-our $VERSION = 0.06;
+our $VERSION = 0.06_01;
 
 =head1 NAME
 
@@ -136,6 +136,19 @@ my %flags = (
 
 my $installed = 0;
 
+sub _load_unload {
+    my $on = shift;
+    require XSLoader;
+    XSLoader::load('re');
+    if ($on) {
+	install() unless $installed;
+	$installed=1;
+    } else {
+	uninstall() if $installed;
+	$installed=0;
+    }
+}
+
 sub bits {
     my $on = shift;
     my $bits = 0;
@@ -148,8 +161,6 @@ sub bits {
         if ($s eq 'Debug' or $s eq 'Debugcolor') {
             setcolor() if $s eq 'Debugcolor';
             ${^RE_DEBUG_FLAGS} = 0 unless defined ${^RE_DEBUG_FLAGS};
-            require XSLoader;
-            XSLoader::load('re');
             for my $idx ($idx+1..$#_) {
                 if ($flags{$_[$idx]}) {
                     if ($on) {
@@ -163,25 +174,11 @@ sub bits {
                                join(", ",sort { $flags{$a} <=> $flags{$b} } keys %flags ) );
                 }
             }
-            if ($on) {
-                install() unless $installed;
-                $installed = 1;
-            } elsif (!${^RE_DEBUG_FLAGS}) {
-                uninstall() if $installed;
-                $installed = 0;
-            }
+            _load_unload($on ? 1 : ${^RE_DEBUG_FLAGS});
             last;
         } elsif ($s eq 'debug' or $s eq 'debugcolor') {
 	    setcolor() if $s eq 'debugcolor';
-	    require XSLoader;
-	    XSLoader::load('re');
-	    if ($on) {
-		install() unless $installed;
-		$installed=1;
-	    } else {
-		uninstall() if $installed;
-		$installed=0;
-	    }
+	    _load_unload($on);
         } elsif (exists $bitmask{$s}) {
 	    $bits |= $bitmask{$s};
 	} else {
