@@ -48,9 +48,6 @@
 #  define Perl_pregfree my_regfree
 #  define Perl_re_intuit_string my_re_intuit_string
 /* *These* symbols are masked to allow static link. */
-#  define Perl_regnext my_regnext
-#  define Perl_save_re_context my_save_re_context
-#  define Perl_reginitcolors my_reginitcolors
 
 #  define PERL_NO_GET_CONTEXT
 #endif
@@ -2753,6 +2750,7 @@ S_add_data(RExC_state_t *pRExC_state, I32 n, const char *s)
     return RExC_rx->data->count - n;
 }
 
+#ifndef PERL_IN_XSUB_RE
 void
 Perl_reginitcolors(pTHX)
 {
@@ -2778,7 +2776,7 @@ Perl_reginitcolors(pTHX)
     }
     PL_colorset = 1;
 }
-
+#endif
 
 /*
  - pregcomp - compile a regular expression into internal code
@@ -6106,6 +6104,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
     Safefree(r);
 }
 
+#ifndef PERL_IN_XSUB_RE
 /*
  - regnext - dig the "next" pointer out of a node
  */
@@ -6124,6 +6123,7 @@ Perl_regnext(pTHX_ register regnode *p)
 
     return(p+offset);
 }
+#endif
 
 STATIC void	
 S_re_croak2(pTHX_ const char* pat1,const char* pat2,...)
@@ -6161,6 +6161,7 @@ S_re_croak2(pTHX_ const char* pat1,const char* pat2,...)
 
 /* XXX Here's a total kludge.  But we need to re-enter for swash routines. */
 
+#ifndef PERL_IN_XSUB_RE
 void
 Perl_save_re_context(pTHX)
 {
@@ -6209,6 +6210,7 @@ Perl_save_re_context(pTHX)
 	}
     }
 }
+#endif
 
 static void
 clear_re(pTHX_ void *r)

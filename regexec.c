@@ -47,10 +47,6 @@
 #  define Perl_regdump my_regdump
 #  define Perl_regprop my_regprop
 #  define Perl_re_intuit_start my_re_intuit_start
-/* *These* symbols are masked to allow static link. */
-#  define Perl_pregexec my_pregexec
-#  define Perl_reginitcolors my_reginitcolors
-#  define Perl_regclass_swash my_regclass_swash
 
 #  define PERL_NO_GET_CONTEXT
 #endif
@@ -299,6 +295,7 @@ S_regcppop(pTHX_ const regexp *rex)
  * pregexec and friends
  */
 
+#ifndef PERL_IN_XSUB_RE
 /*
  - pregexec - match a regexp against a string
  */
@@ -314,7 +311,7 @@ Perl_pregexec(pTHX_ register regexp *prog, char *stringarg, register char *stren
 	regexec_flags(prog, stringarg, strend, strbeg, minend, screamer, NULL,
 		      nosave ? 0 : REXEC_COPY_STR);
 }
-
+#endif
 
 /*
  * Need to implement the following flags for reg_anch:
@@ -4928,6 +4925,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max)
 }
 
 
+#ifndef PERL_IN_XSUB_RE
 /*
 - regclass_swash - prepare the utf8 swash
 */
@@ -4975,6 +4973,7 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
 
     return sw;
 }
+#endif
 
 /*
  - reginclass - determine if a character falls into a character class
