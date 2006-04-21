@@ -140,13 +140,7 @@ sub _load_unload {
     my $on = shift;
     require XSLoader;
     XSLoader::load('re');
-    if ($on) {
-	install() unless $installed;
-	$installed=1;
-    } else {
-	uninstall() if $installed;
-	$installed=0;
-    }
+    install($on);
 }
 
 sub bits {

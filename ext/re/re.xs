@@ -25,6 +25,7 @@ END_EXTERN_C
 
 typedef struct {
     int		x_oldflag;		/* debug flag */
+    unsigned int x_state;
 } my_cxt_t;
 
 START_MY_CXT
@@ -32,31 +33,33 @@ START_MY_CXT
 #define oldflag		(MY_CXT.x_oldflag)
 
 static void
-uninstall(pTHX)
+install(pTHX_ unsigned int new_state)
 {
     dMY_CXT;
-    PL_regexecp = Perl_regexec_flags;
-    PL_regcompp = Perl_pregcomp;
-    PL_regint_start = Perl_re_intuit_start;
-    PL_regint_string = Perl_re_intuit_string;
-    PL_regfree = Perl_pregfree;
+    if(new_state == MY_CXT.x_state)
+	return;
 
-    if (!oldflag)
-	PL_debug &= ~DEBUG_r_FLAG;
-}
+    if (new_state) {
+	PL_colorset = 0;	/* Allow reinspection of ENV. */
+	PL_regexecp = &my_regexec;
+	PL_regcompp = &my_regcomp;
+	PL_regint_start = &my_re_intuit_start;
+	PL_regint_string = &my_re_intuit_string;
+	PL_regfree = &my_regfree;
+	oldflag = PL_debug & DEBUG_r_FLAG;
+	PL_debug |= DEBUG_r_FLAG;
+    } else {
+	PL_regexecp = Perl_regexec_flags;
+	PL_regcompp = Perl_pregcomp;
+	PL_regint_start = Perl_re_intuit_start;
+	PL_regint_string = Perl_re_intuit_string;
+	PL_regfree = Perl_pregfree;
 
-static void
-install(pTHX)
-{
-    dMY_CXT;
-    PL_colorset = 0;			/* Allow reinspection of ENV. */
-    PL_regexecp = &my_regexec;
-    PL_regcompp = &my_regcomp;
-    PL_regint_start = &my_re_intuit_start;
-    PL_regint_string = &my_re_intuit_string;
-    PL_regfree = &my_regfree;
-    oldflag = PL_debug & DEBUG_r_FLAG;
-    PL_debug |= DEBUG_r_FLAG;
+	if (!oldflag)
+	    PL_debug &= ~DEBUG_r_FLAG;
+    }
+
+    MY_CXT.x_state = new_state;
 }
 
 MODULE = re	PACKAGE = re
@@ -68,11 +71,7 @@ BOOT:
 
 
 void
-install()
+install(new_state)
+  unsigned int new_state;
   CODE:
-    install(aTHX);
-
-void
-uninstall()
-  CODE:
-    uninstall(aTHX);
+    install(aTHX_ new_state);
