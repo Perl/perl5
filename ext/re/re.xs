@@ -21,6 +21,26 @@ extern SV*	my_re_intuit_string (pTHX_ regexp *prog);
 
 END_EXTERN_C
 
+struct regexp_engine {
+    regexp*	(*regcomp) (pTHX_ char* exp, char* xend, PMOP* pm);
+    I32		(*regexec) (pTHX_ regexp* prog, char* stringarg, char* strend,
+			    char* strbeg, I32 minend, SV* screamer,
+			    void* data, U32 flags);
+    char*	(*re_intuit_start) (pTHX_ regexp *prog, SV *sv, char *strpos,
+				    char *strend, U32 flags,
+				    struct re_scream_pos_data_s *data);
+    SV*		(*re_intuit_string) (pTHX_ regexp *prog);
+    void	(*regfree) (pTHX_ struct regexp* r);
+    bool	enable_debugging;
+};
+
+struct regexp_engine engines[] = {
+    { Perl_pregcomp, Perl_regexec_flags, Perl_re_intuit_start,
+      Perl_re_intuit_string, Perl_pregfree, FALSE },
+    { my_regcomp, my_regexec, my_re_intuit_start, my_re_intuit_string,
+      my_regfree, TRUE }
+};
+
 #define MY_CXT_KEY "re::_guts" XS_VERSION
 
 typedef struct {
@@ -36,27 +56,34 @@ static void
 install(pTHX_ unsigned int new_state)
 {
     dMY_CXT;
+    const unsigned int states 
+	= sizeof(engines) / sizeof(struct regexp_engine) -1;
     if(new_state == MY_CXT.x_state)
 	return;
 
-    if (new_state) {
-	PL_colorset = 0;	/* Allow reinspection of ENV. */
-	PL_regexecp = &my_regexec;
-	PL_regcompp = &my_regcomp;
-	PL_regint_start = &my_re_intuit_start;
-	PL_regint_string = &my_re_intuit_string;
-	PL_regfree = &my_regfree;
-	oldflag = PL_debug & DEBUG_r_FLAG;
-	PL_debug |= DEBUG_r_FLAG;
-    } else {
-	PL_regexecp = Perl_regexec_flags;
-	PL_regcompp = Perl_pregcomp;
-	PL_regint_start = Perl_re_intuit_start;
-	PL_regint_string = Perl_re_intuit_string;
-	PL_regfree = Perl_pregfree;
+    if (new_state > states) {
+	Perl_croak(aTHX_ "panic: re::install state %u is illegal - max is %u",
+		   new_state, states);
+    }
 
-	if (!oldflag)
-	    PL_debug &= ~DEBUG_r_FLAG;
+    PL_regexecp = engines[new_state].regexec;
+    PL_regcompp = engines[new_state].regcomp;
+    PL_regint_start = engines[new_state].re_intuit_start;
+    PL_regint_string = engines[new_state].re_intuit_string;
+    PL_regfree = engines[new_state].regfree;
+
+    if (engines[new_state].enable_debugging) {
+	PL_colorset = 0;	/* Allow reinspection of ENV. */
+	if (!engines[MY_CXT.x_state].enable_debugging) {
+	    /* Debugging is turned on for the first time.  */
+	    oldflag = PL_debug & DEBUG_r_FLAG;
+	    PL_debug |= DEBUG_r_FLAG;
+	}
+    } else {
+	if (!engines[MY_CXT.x_state].enable_debugging) {
+	    if (!oldflag)
+		PL_debug &= ~DEBUG_r_FLAG;
+	}
     }
 
     MY_CXT.x_state = new_state;
