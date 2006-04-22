@@ -985,6 +985,8 @@ ext/POSIX/t/waitpid.t		See if waitpid works
 ext/POSIX/typemap		POSIX extension interface types
 ext/re/hints/mpeix.pl		Hints for re for named architecture
 ext/re/Makefile.PL		re extension makefile writer
+ext/re/re_top.h			re extension symbol hiding header
+ext/re/re_comp.h		re extension wrapper for regcomp.h
 ext/re/re.pm			re extension Perl module
 ext/re/re.xs			re extension external subroutines
 ext/re/t/re.t			see if re pragma works

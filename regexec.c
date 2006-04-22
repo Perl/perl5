@@ -31,24 +31,7 @@
 */
 
 #ifdef PERL_EXT_RE_BUILD
-/* need to replace pregcomp et al, so enable that */
-#  ifndef PERL_IN_XSUB_RE
-#    define PERL_IN_XSUB_RE
-#  endif
-/* need access to debugger hooks */
-#  if defined(PERL_EXT_RE_DEBUG) && !defined(DEBUGGING)
-#    define DEBUGGING
-#  endif
-#endif
-
-#ifdef PERL_IN_XSUB_RE
-/* We *really* need to overwrite these symbols: */
-#  define Perl_regexec_flags my_regexec
-#  define Perl_regdump my_regdump
-#  define Perl_regprop my_regprop
-#  define Perl_re_intuit_start my_re_intuit_start
-
-#  define PERL_NO_GET_CONTEXT
+#include "re_top.h"
 #endif
 
 /*
@@ -87,7 +70,11 @@
 #define PERL_IN_REGEXEC_C
 #include "perl.h"
 
-#include "regcomp.h"
+#ifdef PERL_IN_XSUB_RE
+#  include "re_comp.h"
+#else
+#  include "regcomp.h"
+#endif
 
 #define RF_tainted	1		/* tainted information used? */
 #define RF_warned	2		/* warned about big count? */
@@ -2306,6 +2293,9 @@ typedef union re_unwind_t {
 STATIC regmatch_state *
 S_push_slab(pTHX)
 {
+#if PERL_VERSION < 9
+    dMY_CXT;
+#endif
     regmatch_slab *s = PL_regmatch_slab->next;
     if (!s) {
 	Newx(s, 1, regmatch_slab);
@@ -2473,6 +2463,9 @@ S_push_slab(pTHX)
 STATIC I32			/* 0 failure, 1 success */
 S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 {
+#if PERL_VERSION < 9
+    dMY_CXT;
+#endif
     dVAR;
     register const bool do_utf8 = PL_reg_match_utf8;
     const U32 uniflags = UTF8_ALLOW_DEFAULT;

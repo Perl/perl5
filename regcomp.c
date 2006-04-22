@@ -30,26 +30,7 @@
 */
 
 #ifdef PERL_EXT_RE_BUILD
-/* need to replace pregcomp et al, so enable that */
-#  ifndef PERL_IN_XSUB_RE
-#    define PERL_IN_XSUB_RE
-#  endif
-/* need access to debugger hooks */
-#  if defined(PERL_EXT_RE_DEBUG) && !defined(DEBUGGING)
-#    define DEBUGGING
-#  endif
-#endif
-
-#ifdef PERL_IN_XSUB_RE
-/* We *really* need to overwrite these symbols: */
-#  define Perl_pregcomp my_regcomp
-#  define Perl_regdump my_regdump
-#  define Perl_regprop my_regprop
-#  define Perl_pregfree my_regfree
-#  define Perl_re_intuit_string my_re_intuit_string
-/* *These* symbols are masked to allow static link. */
-
-#  define PERL_NO_GET_CONTEXT
+#include "re_top.h"
 #endif
 
 /*
@@ -95,7 +76,11 @@
 #endif
 
 #define REG_COMP_C
-#include "regcomp.h"
+#ifdef PERL_IN_XSUB_RE
+#  include "re_comp.h"
+#else
+#  include "regcomp.h"
+#endif
 
 #ifdef op
 #undef op
@@ -3322,8 +3307,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 			FAIL("Eval-group not allowed at runtime, use re 'eval'");
 		    if (PL_tainting && PL_tainted)
 			FAIL("Eval-group in insecure regular expression");
+#if PERL_VERSION > 8
 		    if (IN_PERL_COMPILETIME)
 			PL_cv_has_eval = 1;
+#endif
 		}
 
 		nextchar(pRExC_state);
