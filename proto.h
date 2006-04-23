@@ -1547,22 +1547,22 @@ STATIC I32	S_avhv_index(pTHX_ AV* av, SV* sv, U32 hash);
 #endif
 
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
-STATIC I32	S_do_trans_simple(pTHX_ SV *sv)
+STATIC I32	S_do_trans_simple(pTHX_ SV * const sv)
 			__attribute__warn_unused_result__;
 
-STATIC I32	S_do_trans_count(pTHX_ SV *sv)
+STATIC I32	S_do_trans_count(pTHX_ SV * const sv)
 			__attribute__warn_unused_result__;
 
-STATIC I32	S_do_trans_complex(pTHX_ SV *sv)
+STATIC I32	S_do_trans_complex(pTHX_ SV * const sv)
 			__attribute__warn_unused_result__;
 
-STATIC I32	S_do_trans_simple_utf8(pTHX_ SV *sv)
+STATIC I32	S_do_trans_simple_utf8(pTHX_ SV * const sv)
 			__attribute__warn_unused_result__;
 
-STATIC I32	S_do_trans_count_utf8(pTHX_ SV *sv)
+STATIC I32	S_do_trans_count_utf8(pTHX_ SV * const sv)
 			__attribute__warn_unused_result__;
 
-STATIC I32	S_do_trans_complex_utf8(pTHX_ SV *sv)
+STATIC I32	S_do_trans_complex_utf8(pTHX_ SV * const sv)
 			__attribute__warn_unused_result__;
 
 #endif

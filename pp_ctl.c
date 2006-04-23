@@ -1782,7 +1782,7 @@ PP(pp_leaveloop)
 
     TAINT_NOT;
     if (gimme == G_VOID)
-	/*EMPTY*/; /* do nothing */
+	NOOP;
     else if (gimme == G_SCALAR) {
 	if (mark < SP)
 	    *++newsp = sv_mortalcopy(*SP);
