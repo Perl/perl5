@@ -48,15 +48,16 @@ struct gp {
 	   assert(SvTYPE(zzzz) == SVt_PVGV || SvTYPE(zzzz) >= SVt_PVLV); \
 	   &(GvXPVGV(zzzz)->xiv_u.xivu_namehek);			\
 	 }))
+#  define GvNAME_get(gv)	({ assert(GvNAME_HEK(gv)); HEK_KEY(GvNAME_HEK(gv)); })
+#  define GvNAMELEN_get(gv)	({ assert(GvNAME_HEK(gv)); HEK_LEN(GvNAME_HEK(gv)); })
 #else
 #  define GvGP(gv)	((gv)->sv_u.svu_gp)
 #  define GvFLAGS(gv)	(GvXPVGV(gv)->xpv_cur)
 #  define GvSTASH(gv)	(GvXPVGV(gv)->xnv_u.xgv_stash)
 #  define GvNAME_HEK(gv)	(GvXPVGV(gv)->xiv_u.xivu_namehek)
+#  define GvNAME_get(gv)	HEK_KEY(GvNAME_HEK(gv))
+#  define GvNAMELEN_get(gv)	HEK_LEN(GvNAME_HEK(gv))
 #endif
-
-#define GvNAME_get(gv)		(GvNAME_HEK(gv) ? HEK_KEY(GvNAME_HEK(gv)) : NULL)
-#define GvNAMELEN_get(gv)	(GvNAME_HEK(gv) ? HEK_LEN(GvNAME_HEK(gv)) : 0)
 
 #define GvNAME(gv)	GvNAME_get(gv)
 #define GvNAMELEN(gv)	GvNAMELEN_get(gv)

@@ -2117,6 +2117,7 @@ Perl_gv_name_set(pTHX_ GV *gv, const char *name, U32 len, U32 flags)
     dVAR;
     U32 hash;
 
+    assert(name);
     PERL_UNUSED_ARG(flags);
 
     if (len > I32_MAX)
@@ -2127,7 +2128,7 @@ Perl_gv_name_set(pTHX_ GV *gv, const char *name, U32 len, U32 flags)
     }
 
     PERL_HASH(hash, name, len);
-    GvNAME_HEK(gv) = name ? share_hek(name, len, hash) : 0;
+    GvNAME_HEK(gv) = share_hek(name, len, hash);
 }
 
 /*

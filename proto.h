@@ -650,7 +650,8 @@ PERL_CALLCONV void	Perl_gv_init(pTHX_ GV* gv, HV* stash, const char* name, STRLE
 			__attribute__nonnull__(pTHX_3);
 
 PERL_CALLCONV void	Perl_gv_name_set(pTHX_ GV* gv, const char *name, U32 len, U32 flags)
-			__attribute__nonnull__(pTHX_1);
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV HV*	Perl_gv_stashpv(pTHX_ const char* name, I32 create)
 			__attribute__nonnull__(pTHX_1);
