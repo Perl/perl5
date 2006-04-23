@@ -2064,8 +2064,12 @@ PERL_CALLCONV IO*	Perl_sv_2io(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 
 #ifdef PERL_IN_SV_C
-STATIC char*	S_glob_2inpuv(pTHX_ GV* gv, STRLEN *len, bool want_number)
+STATIC char*	S_glob_2inpuv_number(pTHX_ GV* const gv)
 			__attribute__nonnull__(pTHX_1);
+
+STATIC char*	S_glob_2inpuv(pTHX_ GV* const gv, STRLEN * const len)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
 
 #endif
 /* PERL_CALLCONV IV	sv_2iv(pTHX_ SV* sv)

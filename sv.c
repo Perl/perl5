@@ -1718,7 +1718,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
 }
 
 STATIC char *
-S_glob_2inpuv(pTHX_ GV *gv, STRLEN *len, bool want_number)
+S_glob_2inpuv_number(pTHX_ GV * const gv)
 {
     const U32 wasfake = SvFLAGS(gv) & SVf_FAKE;
     SV *const buffer = sv_newmortal();
@@ -1729,21 +1729,30 @@ S_glob_2inpuv(pTHX_ GV *gv, STRLEN *len, bool want_number)
     gv_efullname3(buffer, gv, "*");
     SvFLAGS(gv) |= wasfake;
 
-    if (want_number) {
-	/* We know that all GVs stringify to something that is not-a-number,
-	   so no need to test that.  */
-	if (ckWARN(WARN_NUMERIC))
-	    not_a_number(buffer);
-	/* We just want something true to return, so that S_sv_2iuv_common
-	   can tail call us and return true.  */
-	return (char *) 1;
-    } else {
-	assert(SvPOK(buffer));
-	if (len) {
-	    *len = SvCUR(buffer);
-	}
-	return SvPVX(buffer);
-    }
+    /* We know that all GVs stringify to something that is not-a-number,
+	so no need to test that.  */
+    if (ckWARN(WARN_NUMERIC))
+	not_a_number(buffer);
+    /* We just want something true to return, so that S_sv_2iuv_common
+	can tail call us and return true.  */
+    return (char *) 1;
+}
+
+STATIC char *
+S_glob_2inpuv(pTHX_ GV * const gv, STRLEN * const len)
+{
+    const U32 wasfake = SvFLAGS(gv) & SVf_FAKE;
+    SV *const buffer = sv_newmortal();
+
+    /* FAKE globs can get coerced, so need to turn this off temporarily if it
+       is on.  */
+    SvFAKE_off(gv);
+    gv_efullname3(buffer, gv, "*");
+    SvFLAGS(gv) |= wasfake;
+
+    assert(SvPOK(buffer));
+    *len = SvCUR(buffer);
+    return SvPVX(buffer);
 }
 
 /* Actually, ISO C leaves conversion of UV to IV undefined, but
@@ -2113,9 +2122,8 @@ S_sv_2iuv_common(pTHX_ SV *sv) {
 	}
     }
     else  {
-	if (isGV_with_GP(sv)) {
-	    return (bool)PTR2IV(glob_2inpuv((GV *)sv, NULL, TRUE));
-	}
+	if (isGV_with_GP(sv))
+	    return (bool)PTR2IV(glob_2inpuv_number((GV *)sv));
 
 	if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 	    if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
@@ -2465,7 +2473,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     }
     else  {
 	if (isGV_with_GP(sv)) {
-	    glob_2inpuv((GV *)sv, NULL, TRUE);
+	    glob_2inpuv_number((GV *)sv);
 	    return 0.0;
 	}
 
@@ -2801,9 +2809,8 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 #endif
     }
     else {
-	if (isGV_with_GP(sv)) {
-	    return glob_2inpuv((GV *)sv, lp, FALSE);
-	}
+	if (isGV_with_GP(sv))
+	    return glob_2inpuv((GV *)sv, lp);
 
 	if (!PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP) && ckWARN(WARN_UNINITIALIZED))
 	    report_uninit(sv);
