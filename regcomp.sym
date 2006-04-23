@@ -60,11 +60,6 @@ EXACT		EXACT,  sv	Match this string (preceded by length).
 EXACTF		EXACT,  sv	Match this string, folded (prec. by length).
 EXACTFL		EXACT,  sv	Match this string, folded in locale (w/len).
 
-# Trie Related (behave the same as A|LIST|OF|WORDS would)
-TRIE		TRIE,   trie 1	Match one or more of many EXACT strings
-TRIEF		TRIE,   trie 1	Match one or more of many EXACTF strings
-TRIEFL		TRIE,   trie 1	Match one or more of many EXACTFL strings
-
 # Do nothing
 NOTHING		NOTHING,no	Match empty string.
 # A variant of above which delimits a group, thus stops optimizations
@@ -119,3 +114,9 @@ RENUM		BRANCHJ,off 1 1	Group with independently numbered parens.
 # This is not really a node, but an optimized away piece of a "long" node.
 # To simplify debugging output, we mark it as if it were a node
 OPTIMIZED	NOTHING,off	Placeholder for dump.
+
+# Trie Related (behave the same as A|LIST|OF|WORDS would)
+TRIE		TRIE,   trie 1	Match one or more of many EXACT strings
+TRIEF		TRIE,   trie 1	Match one or more of many EXACTF strings
+TRIEFL		TRIE,   trie 1	Match one or more of many EXACTFL strings
+

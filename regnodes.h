@@ -40,35 +40,35 @@
 #define	EXACT	33	/* 0x21 Match this string (preceded by length). */
 #define	EXACTF	34	/* 0x22 Match this string, folded (prec. by length). */
 #define	EXACTFL	35	/* 0x23 Match this string, folded in locale (w/len). */
-#define	TRIE	36	/* 0x24 Match one or more of many EXACT strings */
-#define	TRIEF	37	/* 0x25 Match one or more of many EXACTF strings */
-#define	TRIEFL	38	/* 0x26 Match one or more of many EXACTFL strings */
-#define	NOTHING	39	/* 0x27 Match empty string. */
-#define	TAIL	40	/* 0x28 Match empty string. Can jump here from outside. */
-#define	STAR	41	/* 0x29 Match this (simple) thing 0 or more times. */
-#define	PLUS	42	/* 0x2a Match this (simple) thing 1 or more times. */
-#define	CURLY	43	/* 0x2b Match this simple thing {n,m} times. */
-#define	CURLYN	44	/* 0x2c Match next-after-this simple thing  */
-#define	CURLYM	45	/* 0x2d Match this medium-complex thing {n,m} times. */
-#define	CURLYX	46	/* 0x2e Match this complex thing {n,m} times. */
-#define	WHILEM	47	/* 0x2f Do curly processing and see if rest matches. */
-#define	OPEN	48	/* 0x30 Mark this point in input as start of #n. */
-#define	CLOSE	49	/* 0x31 Analogous to OPEN. */
-#define	REF	50	/* 0x32 Match some already matched string */
-#define	REFF	51	/* 0x33 Match already matched string, folded */
-#define	REFFL	52	/* 0x34 Match already matched string, folded in loc. */
-#define	IFMATCH	53	/* 0x35 Succeeds if the following matches. */
-#define	UNLESSM	54	/* 0x36 Fails if the following matches. */
-#define	SUSPEND	55	/* 0x37 "Independent" sub-RE. */
-#define	IFTHEN	56	/* 0x38 Switch, should be preceeded by switcher . */
-#define	GROUPP	57	/* 0x39 Whether the group matched. */
-#define	LONGJMP	58	/* 0x3a Jump far away. */
-#define	BRANCHJ	59	/* 0x3b BRANCH with long offset. */
-#define	EVAL	60	/* 0x3c Execute some Perl code. */
-#define	MINMOD	61	/* 0x3d Next operator is not greedy. */
-#define	LOGICAL	62	/* 0x3e Next opcode should set the flag only. */
-#define	RENUM	63	/* 0x3f Group with independently numbered parens. */
-#define	OPTIMIZED	64	/* 0x40 Placeholder for dump. */
+#define	NOTHING	36	/* 0x24 Match empty string. */
+#define	TAIL	37	/* 0x25 Match empty string. Can jump here from outside. */
+#define	STAR	38	/* 0x26 Match this (simple) thing 0 or more times. */
+#define	PLUS	39	/* 0x27 Match this (simple) thing 1 or more times. */
+#define	CURLY	40	/* 0x28 Match this simple thing {n,m} times. */
+#define	CURLYN	41	/* 0x29 Match next-after-this simple thing  */
+#define	CURLYM	42	/* 0x2a Match this medium-complex thing {n,m} times. */
+#define	CURLYX	43	/* 0x2b Match this complex thing {n,m} times. */
+#define	WHILEM	44	/* 0x2c Do curly processing and see if rest matches. */
+#define	OPEN	45	/* 0x2d Mark this point in input as start of #n. */
+#define	CLOSE	46	/* 0x2e Analogous to OPEN. */
+#define	REF	47	/* 0x2f Match some already matched string */
+#define	REFF	48	/* 0x30 Match already matched string, folded */
+#define	REFFL	49	/* 0x31 Match already matched string, folded in loc. */
+#define	IFMATCH	50	/* 0x32 Succeeds if the following matches. */
+#define	UNLESSM	51	/* 0x33 Fails if the following matches. */
+#define	SUSPEND	52	/* 0x34 "Independent" sub-RE. */
+#define	IFTHEN	53	/* 0x35 Switch, should be preceeded by switcher . */
+#define	GROUPP	54	/* 0x36 Whether the group matched. */
+#define	LONGJMP	55	/* 0x37 Jump far away. */
+#define	BRANCHJ	56	/* 0x38 BRANCH with long offset. */
+#define	EVAL	57	/* 0x39 Execute some Perl code. */
+#define	MINMOD	58	/* 0x3a Next operator is not greedy. */
+#define	LOGICAL	59	/* 0x3b Next opcode should set the flag only. */
+#define	RENUM	60	/* 0x3c Group with independently numbered parens. */
+#define	OPTIMIZED	61	/* 0x3d Placeholder for dump. */
+#define	TRIE	62	/* 0x3e Match one or more of many EXACT strings */
+#define	TRIEF	63	/* 0x3f Match one or more of many EXACTF strings */
+#define	TRIEFL	64	/* 0x40 Match one or more of many EXACTFL strings */
 
 #ifndef DOINIT
 EXTCONST U8 PL_regkind[];
@@ -110,9 +110,6 @@ EXTCONST U8 PL_regkind[] = {
 	EXACT,		/* EXACT */
 	EXACT,		/* EXACTF */
 	EXACT,		/* EXACTFL */
-	TRIE,		/* TRIE */
-	TRIE,		/* TRIEF */
-	TRIE,		/* TRIEFL */
 	NOTHING,		/* NOTHING */
 	NOTHING,		/* TAIL */
 	STAR,		/* STAR */
@@ -139,6 +136,9 @@ EXTCONST U8 PL_regkind[] = {
 	LOGICAL,		/* LOGICAL */
 	BRANCHJ,		/* RENUM */
 	NOTHING,		/* OPTIMIZED */
+	TRIE,		/* TRIE */
+	TRIE,		/* TRIEF */
+	TRIE,		/* TRIEFL */
 };
 #endif
 
@@ -181,9 +181,6 @@ static const U8 regarglen[] = {
 	0,		/* EXACT */
 	0,		/* EXACTF */
 	0,		/* EXACTFL */
-	EXTRA_SIZE(struct regnode_1),		/* TRIE */
-	EXTRA_SIZE(struct regnode_1),		/* TRIEF */
-	EXTRA_SIZE(struct regnode_1),		/* TRIEFL */
 	0,		/* NOTHING */
 	0,		/* TAIL */
 	0,		/* STAR */
@@ -210,6 +207,9 @@ static const U8 regarglen[] = {
 	0,		/* LOGICAL */
 	EXTRA_SIZE(struct regnode_1),		/* RENUM */
 	0,		/* OPTIMIZED */
+	EXTRA_SIZE(struct regnode_1),		/* TRIE */
+	EXTRA_SIZE(struct regnode_1),		/* TRIEF */
+	EXTRA_SIZE(struct regnode_1),		/* TRIEFL */
 };
 
 static const char reg_off_by_arg[] = {
@@ -249,9 +249,6 @@ static const char reg_off_by_arg[] = {
 	0,		/* EXACT */
 	0,		/* EXACTF */
 	0,		/* EXACTFL */
-	0,		/* TRIE */
-	0,		/* TRIEF */
-	0,		/* TRIEFL */
 	0,		/* NOTHING */
 	0,		/* TAIL */
 	0,		/* STAR */
@@ -278,6 +275,9 @@ static const char reg_off_by_arg[] = {
 	0,		/* LOGICAL */
 	1,		/* RENUM */
 	0,		/* OPTIMIZED */
+	0,		/* TRIE */
+	0,		/* TRIEF */
+	0,		/* TRIEFL */
 };
 
 #ifdef DEBUGGING
@@ -318,35 +318,35 @@ static const char * const reg_name[] = {
 	"EXACT",		/* 0x21 */
 	"EXACTF",		/* 0x22 */
 	"EXACTFL",		/* 0x23 */
-	"TRIE",		/* 0x24 */
-	"TRIEF",		/* 0x25 */
-	"TRIEFL",		/* 0x26 */
-	"NOTHING",		/* 0x27 */
-	"TAIL",		/* 0x28 */
-	"STAR",		/* 0x29 */
-	"PLUS",		/* 0x2a */
-	"CURLY",		/* 0x2b */
-	"CURLYN",		/* 0x2c */
-	"CURLYM",		/* 0x2d */
-	"CURLYX",		/* 0x2e */
-	"WHILEM",		/* 0x2f */
-	"OPEN",		/* 0x30 */
-	"CLOSE",		/* 0x31 */
-	"REF",		/* 0x32 */
-	"REFF",		/* 0x33 */
-	"REFFL",		/* 0x34 */
-	"IFMATCH",		/* 0x35 */
-	"UNLESSM",		/* 0x36 */
-	"SUSPEND",		/* 0x37 */
-	"IFTHEN",		/* 0x38 */
-	"GROUPP",		/* 0x39 */
-	"LONGJMP",		/* 0x3a */
-	"BRANCHJ",		/* 0x3b */
-	"EVAL",		/* 0x3c */
-	"MINMOD",		/* 0x3d */
-	"LOGICAL",		/* 0x3e */
-	"RENUM",		/* 0x3f */
-	"OPTIMIZED",		/* 0x40 */
+	"NOTHING",		/* 0x24 */
+	"TAIL",		/* 0x25 */
+	"STAR",		/* 0x26 */
+	"PLUS",		/* 0x27 */
+	"CURLY",		/* 0x28 */
+	"CURLYN",		/* 0x29 */
+	"CURLYM",		/* 0x2a */
+	"CURLYX",		/* 0x2b */
+	"WHILEM",		/* 0x2c */
+	"OPEN",		/* 0x2d */
+	"CLOSE",		/* 0x2e */
+	"REF",		/* 0x2f */
+	"REFF",		/* 0x30 */
+	"REFFL",		/* 0x31 */
+	"IFMATCH",		/* 0x32 */
+	"UNLESSM",		/* 0x33 */
+	"SUSPEND",		/* 0x34 */
+	"IFTHEN",		/* 0x35 */
+	"GROUPP",		/* 0x36 */
+	"LONGJMP",		/* 0x37 */
+	"BRANCHJ",		/* 0x38 */
+	"EVAL",		/* 0x39 */
+	"MINMOD",		/* 0x3a */
+	"LOGICAL",		/* 0x3b */
+	"RENUM",		/* 0x3c */
+	"OPTIMIZED",		/* 0x3d */
+	"TRIE",		/* 0x3e */
+	"TRIEF",		/* 0x3f */
+	"TRIEFL",		/* 0x40 */
 };
 
 static const int reg_num = 65;
