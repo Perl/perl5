@@ -34,12 +34,11 @@ Test::Harness - Run Perl standard test scripts with statistics
 
 =head1 VERSION
 
-Version 2.57_05
+Version 2.57_06
 
 =cut
 
-$VERSION = "2.57_05";
-$VERSION = eval $VERSION;
+$VERSION = '2.57_06';
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -123,7 +122,7 @@ flag will set this.
 
 The package variable C<$Test::Harness::switches> is exportable and can be
 used to set perl command line options used for running the test
-script(s). The default value is C<-w>. It overrides C<HARNESS_SWITCHES>.
+script(s). The default value is C<-w>. It overrides C<HARNESS_PERL_SWITCHES>.
 
 =item C<$Test::Harness::Timer>
 
@@ -145,9 +144,9 @@ When tests fail, analyze the summary report:
           Test returned status 3 (wstat 768, 0x300)
   DIED. FAILED tests 1, 3, 5, 7, 9, 11, 13, 15, 17, 19
           Failed 10/20 tests, 50.00% okay
-  Failed Test  Stat Wstat Total Fail  Failed  List of Failed
-  -----------------------------------------------------------------------
-  t/waterloo.t    3   768    20   10  50.00%  1 3 5 7 9 11 13 15 17 19
+  Failed Test  Stat Wstat Total Fail  List of Failed
+  ---------------------------------------------------------------
+  t/waterloo.t    3   768    20   10  1 3 5 7 9 11 13 15 17 19
   Failed 1/5 test scripts, 80.00% okay. 10/44 subtests failed, 77.27% okay.
 
 Everything passed but F<t/waterloo.t>.  It failed 10 of 20 tests and
@@ -176,10 +175,6 @@ Total number of tests expected to run.
 =item B<Fail>
 
 Number which failed, either from "not ok" or because they never ran.
-
-=item B<Failed>
-
-Percentage of the total tests which failed.
 
 =item B<List of Failed>
 
@@ -280,7 +275,6 @@ how that script failed.  Its keys are these:
     wstat       Script's wait status
     max         Number of individual tests
     failed      Number which failed
-    percent     Percentage of tests which failed
     canon       List of tests which failed (as string).
 
 C<$failed> should be empty if everything passed.
@@ -393,7 +387,6 @@ sub execute_tests {
                         max     => $test{todo},
                         failed  => $test{bonus},
                         name    => $tfile,
-                        percent => 100*$test{bonus}/$test{todo},
                         estat   => '',
                         wstat   => '',
                     };
@@ -443,7 +436,6 @@ sub execute_tests {
                                              max     => $test{max},
                                              failed  => scalar @{$test{failed}},
                                              name    => $tfile, 
-                                             percent => 100*(scalar @{$test{failed}})/$test{max},
                                              estat   => '',
                                              wstat   => '',
                                            };
@@ -455,7 +447,6 @@ sub execute_tests {
                                              max     => $test{max},
                                              failed  => '??',
                                              name    => $tfile, 
-                                             percent => undef,
                                              estat   => '', 
                                              wstat   => '',
                                            };
@@ -469,7 +460,6 @@ sub execute_tests {
                                          max         => '??',
                                          failed      => '??',
                                          name        => $tfile,
-                                         percent     => undef,
                                          estat       => '', 
                                          wstat       => '',
                                        };
@@ -564,19 +554,18 @@ sub get_results {
 
     my $out = '';
 
-    my $pct;
     my $bonusmsg = _bonusmsg($tot);
 
     if (_all_ok($tot)) {
         $out .= "All tests successful$bonusmsg.\n";
         if ($tot->{bonus}) {
-            my($fmt_top, $fmt) = _create_fmts("Passed Todo",$todo_passed);
+            my($fmt_top, $fmt) = _create_fmts("Passed TODO",$todo_passed);
             # Now write to formats
             for my $script (sort keys %{$todo_passed||{}}) {
                 my $Curtest = $todo_passed->{$script};
 
                 $out .= swrite( $fmt_top );
-                $out .= swrite( $fmt, @{ $Curtest }{qw(name estat wstat max failed percent canon)} );
+                $out .= swrite( $fmt, @{ $Curtest }{qw(name estat wstat max failed canon)} );
             }
         }
     }
@@ -589,11 +578,8 @@ sub get_results {
             "alas--no output ever seen\n";
     }
     else {
-        $pct = sprintf("%.2f", $tot->{good} / $tot->{tests} * 100);
-        my $percent_ok = 100*$tot->{ok}/$tot->{max};
-        my $subpct = sprintf " %d/%d subtests failed, %.2f%% okay.",
-                              $tot->{max} - $tot->{ok}, $tot->{max}, 
-                              $percent_ok;
+        my $subresults = sprintf( " %d/%d subtests failed.",
+                              $tot->{max} - $tot->{ok}, $tot->{max} );
 
         my($fmt_top, $fmt1, $fmt2) = _create_fmts("Failed Test",$failedtests);
 
@@ -601,13 +587,13 @@ sub get_results {
         for my $script (sort keys %$failedtests) {
             my $Curtest = $failedtests->{$script};
             $out .= swrite( $fmt_top );
-            $out .= swrite( $fmt1, @{ $Curtest }{qw(name estat wstat max failed percent canon)} );
+            $out .= swrite( $fmt1, @{ $Curtest }{qw(name estat wstat max failed canon)} );
             $out .= swrite( $fmt2, $Curtest->{canon} );
         }
         if ($tot->{bad}) {
             $bonusmsg =~ s/^,\s*//;
             $out .= "$bonusmsg.\n" if $bonusmsg;
-            $out .= "Failed $tot->{bad}/$tot->{tests} test scripts, $pct% okay.$subpct\n";
+            $out .= "Failed $tot->{bad}/$tot->{tests} test scripts.$subresults\n";
         }
     }
 
@@ -736,7 +722,9 @@ sub _bonusmsg {
 # Test program go boom.
 sub _dubious_return {
     my($test, $tot, $estatus, $wstatus) = @_;
-    my ($failed, $canon, $percent) = ('??', '??');
+
+    my $failed = '??';
+    my $canon  = '??';
 
     printf "$test->{ml}dubious\n\tTest returned status $estatus ".
            "(wstat %d, 0x%x)\n",
@@ -748,21 +736,18 @@ sub _dubious_return {
     if ($test->{max}) {
         if ($test->{'next'} == $test->{max} + 1 and not @{$test->{failed}}) {
             print "\tafter all the subtests completed successfully\n";
-            $percent = 0;
             $failed = 0;        # But we do not set $canon!
         }
         else {
             push @{$test->{failed}}, $test->{'next'}..$test->{max};
             $failed = @{$test->{failed}};
             (my $txt, $canon) = _canondetail($test->{max},$test->{skipped},'Failed',@{$test->{failed}});
-            $percent = 100*(scalar @{$test->{failed}})/$test->{max};
             print "DIED. ",$txt;
         }
     }
 
     return { canon => $canon,  max => $test->{max} || '??',
              failed => $failed, 
-             percent => $percent,
              estat => $estatus, wstat => $wstatus,
            };
 }
@@ -774,8 +759,8 @@ sub _create_fmts {
 
     my ($type) = split /\s/,$failed_str;
     my $short = substr($type,0,4);
-    my $total = $short eq 'Pass' ? 'Todos' : 'Total';
-    my $middle_str = " Stat Wstat $total $short  $type  ";
+    my $total = $short eq 'Pass' ? 'TODOs' : 'Total';
+    my $middle_str = " Stat Wstat $total $short  ";
     my $list_str = "List of $type";
 
     # Figure out our longest name string for formatting purposes.
@@ -802,7 +787,7 @@ sub _create_fmts {
                   . "\n";
 
     my $fmt1 =  "@" . "<" x ($max_namelen - 1)
-              . "  @>> @>>>> @>>>> @>>> ^##.##%  "
+              . "  @>> @>>>> @>>>> @>>>  "
               . "^" . "<" x ($list_len - 1) . "\n";
     my $fmt2 =  "~~" . " " x ($Columns - $list_len - 2) . "^"
               . "<" x ($list_len - 1) . "\n";
@@ -988,6 +973,12 @@ Its value will be prepended to the switches used to invoke perl on
 each test.  For example, setting C<HARNESS_PERL_SWITCHES> to C<-W> will
 run all tests with all warnings enabled.
 
+=item C<HARNESS_TIMER>
+
+Setting this to true will make the harness display the number of
+milliseconds each test took.  You can also use F<prove>'s C<--timer>
+switch.
+
 =item C<HARNESS_VERBOSE>
 
 If true, Test::Harness will output the verbose results of running
@@ -1049,8 +1040,6 @@ Implement Straps callbacks.  (experimentally implemented)
 Straps->analyze_file() not taint clean, don't know if it can be
 
 Fix that damned VMS nit.
-
-HARNESS_TODOFAIL to display TODO failures
 
 Add a test for verbose.
 
@@ -1121,7 +1110,7 @@ Current maintainer is Andy Lester C<< <andy at petdance.com> >>.
 
 =head1 COPYRIGHT
 
-Copyright 2002-2005
+Copyright 2002-2006
 by Michael G Schwern C<< <schwern at pobox.com> >>,
 Andy Lester C<< <andy at petdance.com> >>.
 

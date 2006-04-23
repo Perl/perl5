@@ -1,5 +1,29 @@
 Revision history for Perl extension Test::Harness
 
+2.57_06 Sun Apr 23 00:55:43 CDT 2006
+    [THINGS THAT MIGHT BREAK YOUR CODE]
+    * Anything that displays a percentage of tests passed has been
+      removed.  Output at the end of failing runs is now different.
+
+    [FIXES]
+    * Fixed the TODO-passing patch from 2.57_05.
+
+    [ENHANCEMENTS]
+    * The unnecessary display of percentages of tests passing and failing
+      have been removed.  Tests are not a percentage game.
+
+    * Caches the results of _default_inc(), which is expensive because
+      of shelling out to get the pathnames.  Benchmarking was showing that
+      15% of Test::Harness's time was spent in this function.  For test
+      suites with many test files, this can be significant.  With this
+      speedup, the "make test" for the Perl core speeds up 2.5%.
+      Thanks to Nicholas Clark for finding this.
+
+    [DOCUMENTATION]
+    * Fixed HARNESS_PERL_SWITCHES typo.  Thanks, Andreas Koenig.
+
+    * Added docs on HARNESS_TIMER and --timer.  Thanks, Mike O'Regan.
+
 2.57_05 Wed Apr 19 00:31:10 CDT 2006
     [ENHANCEMENTS]
     * Now shows details of the tests that unexpectedly pass, instead of

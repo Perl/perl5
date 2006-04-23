@@ -472,14 +472,18 @@ sub _filtered_INC {
 }
 
 
-sub _default_inc {
-    my $self = shift;
-
-    local $ENV{PERL5LIB};
-    my $perl = $self->_command;
-    my @inc =`$perl -le "print join qq[\\n], \@INC"`;
-    chomp @inc;
-    return @inc;
+{ # Without caching, _default_inc() takes a huge amount of time
+    my %cache;
+    sub _default_inc {
+        my $self = shift;
+        my $perl = $self->_command;
+        $cache{$perl} ||= [do {
+            local $ENV{PERL5LIB};
+            my @inc =`$perl -le "print join qq[\\n], \@INC"`;
+            chomp @inc;
+        }];
+        return @{$cache{$perl}};
+    }
 }
 
 
