@@ -4345,7 +4345,7 @@ PP(pp_reverse)
 	register I32 tmp;
 	dTARGET;
 	STRLEN len;
-	I32 padoff_du;
+	PADOFFSET padoff_du;
 
 	SvUTF8_off(TARG);				/* decontaminate */
 	if (SP - MARK > 1)

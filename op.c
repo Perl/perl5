@@ -2013,7 +2013,7 @@ STATIC OP *
 S_newDEFSVOP(pTHX)
 {
     dVAR;
-    const I32 offset = pad_findmy("$_");
+    const PADOFFSET offset = pad_findmy("$_");
     if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(offset)) {
 	return newSVREF(newGVOP(OP_GV, 0, PL_defgv));
     }
@@ -4476,7 +4476,7 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
 	    iterpflags |= OPpITER_DEF;
     }
     else {
-        const I32 offset = pad_findmy("$_");
+        const PADOFFSET offset = pad_findmy("$_");
 	if (offset == NOT_IN_PAD || PAD_COMPNAME_FLAGS_isOUR(offset)) {
 	    sv = newGVOP(OP_GV, 0, PL_defgv);
 	}
@@ -6528,7 +6528,7 @@ Perl_ck_grep(pTHX_ OP *o)
     LOGOP *gwop = NULL;
     OP *kid;
     const OPCODE type = o->op_type == OP_GREPSTART ? OP_GREPWHILE : OP_MAPWHILE;
-    I32 offset;
+    PADOFFSET offset;
 
     o->op_ppaddr = PL_ppaddr[OP_GREPSTART];
     /* don't allocate gwop here, as we may leak it if PL_error_count > 0 */
@@ -6766,7 +6766,7 @@ Perl_ck_match(pTHX_ OP *o)
 {
     dVAR;
     if (o->op_type != OP_QR && PL_compcv) {
-	const I32 offset = pad_findmy("$_");
+	const PADOFFSET offset = pad_findmy("$_");
 	if (offset != NOT_IN_PAD && !(PAD_COMPNAME_FLAGS_isOUR(offset))) {
 	    o->op_targ = offset;
 	    o->op_private |= OPpTARGET_MY;

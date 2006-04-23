@@ -592,9 +592,9 @@ Perl_pad_findmy(pTHX_ const char *name)
     SV **name_svp;
 
     pad_peg("pad_findmy");
-    offset =  pad_findlex(name, PL_compcv, PL_cop_seqmax, 1,
+    offset = pad_findlex(name, PL_compcv, PL_cop_seqmax, 1,
 		NULL, &out_sv, &out_flags);
-    if (offset != NOT_IN_PAD) 
+    if ((PADOFFSET)offset != NOT_IN_PAD) 
 	return offset;
 
     /* look for an our that's being introduced; this allows
@@ -814,7 +814,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 
     if (!CvOUTSIDE(cv))
 	return NOT_IN_PAD;
-    
+
     /* out_capture non-null means caller wants us to capture lex; in
      * addition we capture ourselves unless it's an ANON/format */
     new_capturep = out_capture ? out_capture :
@@ -822,9 +822,9 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 
     offset = pad_findlex(name, CvOUTSIDE(cv), CvOUTSIDE_SEQ(cv), 1,
 		new_capturep, out_name_sv, out_flags);
-    if (offset == NOT_IN_PAD)
+    if ((PADOFFSET)offset == NOT_IN_PAD)
 	return NOT_IN_PAD;
-    
+
     /* found in an outer CV. Add appropriate fake entry to this pad */
 
     /* don't add new fake entries (via eval) to CVs that we have already
