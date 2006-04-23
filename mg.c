@@ -2890,6 +2890,8 @@ Perl_magic_clearhint(pTHX_ SV *sv, MAGIC *mg)
     dVAR;
     assert(mg->mg_len == HEf_SVKEY);
 
+    PERL_UNUSED_ARG(sv);
+
     PL_hints |= HINT_LOCALIZE_HH;
     PL_compiling.cop_hints
 	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints,

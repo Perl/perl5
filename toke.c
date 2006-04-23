@@ -1194,8 +1194,8 @@ S_curmad(pTHX_ char slot, SV *sv)
 	addmad(newMADsv(slot, sv), where, 0);
 }
 #else
-#  define start_force(where)    /*EMPTY*/
-#  define curmad(slot, sv)      /*EMPTY*/
+#  define start_force(where)    NOOP
+#  define curmad(slot, sv)      NOOP
 #endif
 
 /*
