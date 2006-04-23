@@ -3261,12 +3261,6 @@ STATIC void*	S_parse_body(pTHX_ char **env, XSINIT_t xsinit);
 STATIC void	S_run_body(pTHX_ I32 oldscope)
 			__attribute__noreturn__;
 
-STATIC void	S_call_body(pTHX_ const OP *myop, bool is_eval)
-			__attribute__nonnull__(pTHX_1);
-
-STATIC void*	S_call_list_body(pTHX_ CV *cv)
-			__attribute__nonnull__(pTHX_1);
-
 STATIC SV *	S_incpush_if_exists(pTHX_ SV *dir)
 			__attribute__nonnull__(pTHX_1);
 

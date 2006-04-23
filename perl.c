@@ -137,6 +137,22 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 #endif
 #endif
 
+#define CALL_BODY_EVAL(myop) \
+    if (PL_op == (myop)) \
+	PL_op = Perl_pp_entereval(aTHX); \
+    if (PL_op) \
+	CALLRUNOPS(aTHX);
+
+#define CALL_BODY_SUB(myop) \
+    if (PL_op == (myop)) \
+	PL_op = Perl_pp_entersub(aTHX); \
+    if (PL_op) \
+	CALLRUNOPS(aTHX);
+
+#define CALL_LIST_BODY(cv) \
+    PUSHMARK(PL_stack_sp); \
+    call_sv((SV*)(cv), G_EVAL|G_DISCARD);
+
 static void
 S_init_tls_and_interp(PerlInterpreter *my_perl)
 {
@@ -2609,7 +2625,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 
     if (!(flags & G_EVAL)) {
 	CATCH_SET(TRUE);
-	call_body((OP*)&myop, FALSE);
+	CALL_BODY_SUB((OP*)&myop);
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
 	CATCH_SET(oldcatch);
     }
@@ -2624,7 +2640,7 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
 	switch (ret) {
 	case 0:
  redo_body:
-	    call_body((OP*)&myop, FALSE);
+	    CALL_BODY_SUB((OP*)&myop);
 	    retval = PL_stack_sp - (PL_stack_base + oldmark);
 	    if (!(flags & G_KEEPERR))
 		sv_setpvn(ERRSV,"",0);
@@ -2670,20 +2686,6 @@ Perl_call_sv(pTHX_ SV *sv, I32 flags)
     }
     PL_op = oldop;
     return retval;
-}
-
-STATIC void
-S_call_body(pTHX_ const OP *myop, bool is_eval)
-{
-    dVAR;
-    if (PL_op == myop) {
-	if (is_eval)
-	    PL_op = Perl_pp_entereval(aTHX);	/* this doesn't do a POPMARK */
-	else
-	    PL_op = Perl_pp_entersub(aTHX);	/* this does */
-    }
-    if (PL_op)
-	CALLRUNOPS(aTHX);
 }
 
 /* Eval a string. The G_EVAL flag is always assumed. */
@@ -2739,7 +2741,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     switch (ret) {
     case 0:
  redo_body:
-	call_body((OP*)&myop,TRUE);
+	CALL_BODY_EVAL((OP*)&myop);
 	retval = PL_stack_sp - (PL_stack_base + oldmark);
 	if (!(flags & G_KEEPERR))
 	    sv_setpvn(ERRSV,"",0);
@@ -5124,7 +5126,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	    if (PL_madskills)
 		PL_madskills |= 16384;
 #endif
-	    call_list_body(cv);
+	    CALL_LIST_BODY(cv);
 #ifdef PERL_MAD
 	    if (PL_madskills)
 		PL_madskills &= ~16384;
@@ -5187,15 +5189,6 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 	}
 	JMPENV_POP;
     }
-}
-
-STATIC void *
-S_call_list_body(pTHX_ CV *cv)
-{
-    dVAR;
-    PUSHMARK(PL_stack_sp);
-    call_sv((SV*)cv, G_EVAL|G_DISCARD);
-    return NULL;
 }
 
 void

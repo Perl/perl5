@@ -1198,8 +1198,6 @@ s	|int	|fd_on_nosuid_fs|int fd
 #  endif
 s	|void*	|parse_body	|NULLOK char **env|XSINIT_t xsinit
 rs	|void	|run_body	|I32 oldscope
-s	|void	|call_body	|NN const OP *myop|bool is_eval
-s	|void*	|call_list_body	|NN CV *cv
 s	|SV *	|incpush_if_exists|NN SV *dir
 #endif
 

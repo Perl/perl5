@@ -1203,8 +1203,6 @@
 #ifdef PERL_CORE
 #define parse_body		S_parse_body
 #define run_body		S_run_body
-#define call_body		S_call_body
-#define call_list_body		S_call_list_body
 #define incpush_if_exists	S_incpush_if_exists
 #endif
 #endif
@@ -3360,8 +3358,6 @@
 #ifdef PERL_CORE
 #define parse_body(a,b)		S_parse_body(aTHX_ a,b)
 #define run_body(a)		S_run_body(aTHX_ a)
-#define call_body(a,b)		S_call_body(aTHX_ a,b)
-#define call_list_body(a)	S_call_list_body(aTHX_ a)
 #define incpush_if_exists(a)	S_incpush_if_exists(aTHX_ a)
 #endif
 #endif
