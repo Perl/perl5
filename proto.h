@@ -2869,27 +2869,27 @@ PERL_CALLCONV int	Perl_nothreadhook(pTHX);
 END_EXTERN_C
 
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
-STATIC I32	S_do_trans_simple(pTHX_ SV *sv)
+STATIC I32	S_do_trans_simple(pTHX_ SV * const sv)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-STATIC I32	S_do_trans_count(pTHX_ SV *sv)
+STATIC I32	S_do_trans_count(pTHX_ SV * const sv)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-STATIC I32	S_do_trans_complex(pTHX_ SV *sv)
+STATIC I32	S_do_trans_complex(pTHX_ SV * const sv)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-STATIC I32	S_do_trans_simple_utf8(pTHX_ SV *sv)
+STATIC I32	S_do_trans_simple_utf8(pTHX_ SV * const sv)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-STATIC I32	S_do_trans_count_utf8(pTHX_ SV *sv)
+STATIC I32	S_do_trans_count_utf8(pTHX_ SV * const sv)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-STATIC I32	S_do_trans_complex_utf8(pTHX_ SV *sv)
+STATIC I32	S_do_trans_complex_utf8(pTHX_ SV * const sv)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 

@@ -1058,12 +1058,12 @@ Adp	|int	|nothreadhook
 END_EXTERN_C
 
 #if defined(PERL_IN_DOOP_C) || defined(PERL_DECL_PROT)
-sR	|I32	|do_trans_simple	|NN SV *sv
-sR	|I32	|do_trans_count		|NN SV *sv
-sR	|I32	|do_trans_complex	|NN SV *sv
-sR	|I32	|do_trans_simple_utf8	|NN SV *sv
-sR	|I32	|do_trans_count_utf8	|NN SV *sv
-sR	|I32	|do_trans_complex_utf8	|NN SV *sv
+sR	|I32	|do_trans_simple	|NN SV * const sv
+sR	|I32	|do_trans_count		|NN SV * const sv
+sR	|I32	|do_trans_complex	|NN SV * const sv
+sR	|I32	|do_trans_simple_utf8	|NN SV * const sv
+sR	|I32	|do_trans_count_utf8	|NN SV * const sv
+sR	|I32	|do_trans_complex_utf8	|NN SV * const sv
 #endif
 
 #if defined(PERL_IN_GV_C) || defined(PERL_DECL_PROT)
