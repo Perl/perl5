@@ -5603,7 +5603,7 @@ static int
 S_pending_ident(pTHX)
 {
     register char *d;
-    register I32 tmp = 0;
+    register PADOFFSET tmp = 0;
     /* pit holds the identifier we read and pending_ident is reset */
     char pit = PL_pending_ident;
     PL_pending_ident = 0;
@@ -9844,7 +9844,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 	   filehandle
 	*/
 	if (*d == '$') {
-	    I32 tmp;
+	    PADOFFSET tmp;
 
 	    /* try to find it in the pad for this block, otherwise find
 	       add symbol table ops
