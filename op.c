@@ -6860,7 +6860,7 @@ Perl_peep(pTHX_ register OP *o)
 	    if ((!SvFAKE(sv = *svp) || !SvREADONLY(sv)) && !IS_PADCONST(sv)) {
 		key = SvPV_const(sv, keylen);
 		lexname = newSVpvn_share(key,
-					 SvUTF8(sv) ? -(I32)keylen : keylen,
+					 SvUTF8(sv) ? -(I32)keylen : (I32)keylen,
 					 0);
 		SvREFCNT_dec(sv);
 		*svp = lexname;
@@ -6880,7 +6880,7 @@ Perl_peep(pTHX_ register OP *o)
 		break;
 	    key = SvPV_const(*svp, keylen);
 	    indsvp = hv_fetch(GvHV(*fields), key,
-			      SvUTF8(*svp) ? -(I32)keylen : keylen, FALSE);
+			      SvUTF8(*svp) ? -(I32)keylen : (I32)keylen, FALSE);
 	    if (!indsvp) {
 		Perl_croak(aTHX_ "No such pseudo-hash field \"%s\" "
 			   "in variable %s of type %s",
@@ -6948,7 +6948,8 @@ Perl_peep(pTHX_ register OP *o)
 		svp = cSVOPx_svp(key_op);
 		key = SvPV_const(*svp, keylen);
 		indsvp = hv_fetch(GvHV(*fields), key,
-				  SvUTF8(*svp) ? -(I32)keylen : keylen, FALSE);
+				  SvUTF8(*svp) ? -(I32)keylen : (I32)keylen,
+				  FALSE);
 		if (!indsvp) {
 		    Perl_croak(aTHX_ "No such pseudo-hash field \"%s\" "
 			       "in variable %s of type %s",

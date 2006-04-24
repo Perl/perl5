@@ -4777,7 +4777,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
 	}
 
 	if (o->flags & ANYOF_CLASS)
-	    for (i = 0; i < sizeof(anyofs)/sizeof(char*); i++)
+	    for (i = 0; i < (int)(sizeof(anyofs)/sizeof(char*)); i++)
 		if (ANYOF_CLASS_TEST(o,i))
 		    sv_catpv(sv, anyofs[i]);
 

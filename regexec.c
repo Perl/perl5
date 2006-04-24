@@ -246,7 +246,7 @@ S_regcppop(pTHX)
 	);
     }
     DEBUG_r(
-	if ((I32)(*PL_reglastparen + 1) <= PL_regnpar) {
+	if (*PL_reglastparen + 1 <= PL_regnpar) {
 	    PerlIO_printf(Perl_debug_log,
 			  "     restoring \\%"IVdf"..\\%"IVdf" to undef\n",
 			  (IV)(*PL_reglastparen + 1), (IV)PL_regnpar);
@@ -263,7 +263,7 @@ S_regcppop(pTHX)
      * building DynaLoader will fail:
      * "Error: '*' not in typemap in DynaLoader.xs, line 164"
      * --jhi */
-    for (i = *PL_reglastparen + 1; i <= PL_regnpar; i++) {
+    for (i = *PL_reglastparen + 1; (U32)i <= PL_regnpar; i++) {
 	if (i > PL_regsize)
 	    PL_regstartp[i] = -1;
 	PL_regendp[i] = -1;
@@ -410,7 +410,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	                 sv_uni_display(dsv, sv, 60, UNI_DISPLAY_REGEX) :
 	                 strpos;
 	 const int   len = PL_reg_match_utf8 ?
-	                 strlen(s) : strend - strpos;
+	                 (int)strlen(s) : strend - strpos;
 	 if (!PL_colorset)
 	      reginitcolors();
 	 if (PL_reg_match_utf8)
@@ -1173,7 +1173,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		LOAD_UTF8_CHARCLASS_ALNUM();
 		while (s + (uskip = UTF8SKIP(s)) <= strend) {
 		    if (tmp == !(OP(c) == BOUND ?
-				 swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8) :
+				 (bool)swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8) :
 				 isALNUM_LC_utf8((U8*)s)))
 		    {
 			tmp = !tmp;
@@ -1215,7 +1215,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		LOAD_UTF8_CHARCLASS_ALNUM();
 		while (s + (uskip = UTF8SKIP(s)) <= strend) {
 		    if (tmp == !(OP(c) == NBOUND ?
-				 swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8) :
+				 (bool)swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8) :
 				 isALNUM_LC_utf8((U8*)s)))
 			tmp = !tmp;
 		    else if ((norun || regtry(prog, s)))
@@ -1720,10 +1720,10 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    ? pv_uni_display(dsv0, (U8*)prog->precomp, prog->prelen, 60,
 			  UNI_DISPLAY_REGEX)
 	    : prog->precomp;
-	const int len0 = UTF ? SvCUR(dsv0) : prog->prelen;
+	const int len0 = UTF ? (int)SvCUR(dsv0) : prog->prelen;
 	const char * const s1 = do_utf8 ? sv_uni_display(dsv1, sv, 60,
 					       UNI_DISPLAY_REGEX) : startpos;
-	const int len1 = do_utf8 ? SvCUR(dsv1) : strend - startpos;
+	const int len1 = do_utf8 ? (int)SvCUR(dsv1) : strend - startpos;
 	 if (!PL_colorset)
 	     reginitcolors();
 	 PerlIO_printf(Perl_debug_log,
@@ -1941,7 +1941,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    len0 = UTF ? SvCUR(dsv0) : SvCUR(prop);
 	    s1 = UTF ?
 	      sv_uni_display(dsv1, sv, 60, UNI_DISPLAY_REGEX) : s;
-	    len1 = UTF ? SvCUR(dsv1) : strend - s;
+	    len1 = UTF ? (int)SvCUR(dsv1) : strend - s;
 	    PerlIO_printf(Perl_debug_log,
 			  "Matching stclass \"%*.*s\" against \"%*.*s\"\n",
 			  len0, len0, s0,
@@ -2362,17 +2362,17 @@ S_regmatch(pTHX_ regnode *prog)
 		pv_uni_display(dsv0, (U8*)(locinput - pref_len),
 			       pref0_len, 60, UNI_DISPLAY_REGEX) :
 		locinput - pref_len;
-	      const int len0 = do_utf8 ? strlen(s0) : pref0_len;
+	      const int len0 = do_utf8 ? (int)strlen(s0) : pref0_len;
 	      const char * const s1 = do_utf8 && OP(scan) != CANY ?
 		pv_uni_display(dsv1, (U8*)(locinput - pref_len + pref0_len),
 			       pref_len - pref0_len, 60, UNI_DISPLAY_REGEX) :
 		locinput - pref_len + pref0_len;
-	      const int len1 = do_utf8 ? strlen(s1) : pref_len - pref0_len;
+	      const int len1 = do_utf8 ? (int)strlen(s1) : pref_len - pref0_len;
 	      const char * const s2 = do_utf8 && OP(scan) != CANY ?
 		pv_uni_display(dsv2, (U8*)locinput,
 			       PL_regeol - locinput, 60, UNI_DISPLAY_REGEX) :
 		locinput;
-	      const int len2 = do_utf8 ? strlen(s2) : l;
+	      const int len2 = do_utf8 ? (int)strlen(s2) : l;
 	      PerlIO_printf(Perl_debug_log,
 			    "%4"IVdf" <%s%.*s%s%s%.*s%s%s%s%.*s%s>%*s|%3"IVdf":%*s%s\n",
 			    (IV)(locinput - PL_bostr),
@@ -2612,7 +2612,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (do_utf8) {
 		LOAD_UTF8_CHARCLASS_ALNUM();
 		if (!(OP(scan) == ALNUM
-		      ? swash_fetch(PL_utf8_alnum, (U8*)locinput, do_utf8)
+		      ? (bool)swash_fetch(PL_utf8_alnum, (U8*)locinput, do_utf8)
 		      : isALNUM_LC_utf8((U8*)locinput)))
 		{
 		    sayNO;
@@ -2635,7 +2635,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (do_utf8) {
 		LOAD_UTF8_CHARCLASS_ALNUM();
 		if (OP(scan) == NALNUM
-		    ? swash_fetch(PL_utf8_alnum, (U8*)locinput, do_utf8)
+		    ? (bool)swash_fetch(PL_utf8_alnum, (U8*)locinput, do_utf8)
 		    : isALNUM_LC_utf8((U8*)locinput))
 		{
 		    sayNO;
@@ -2700,7 +2700,7 @@ S_regmatch(pTHX_ regnode *prog)
 		if (UTF8_IS_CONTINUED(nextchr)) {
 		    LOAD_UTF8_CHARCLASS_SPACE();
 		    if (!(OP(scan) == SPACE
-			  ? swash_fetch(PL_utf8_space, (U8*)locinput, do_utf8)
+			  ? (bool)swash_fetch(PL_utf8_space, (U8*)locinput, do_utf8)
 			  : isSPACE_LC_utf8((U8*)locinput)))
 		    {
 			sayNO;
@@ -2730,7 +2730,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (do_utf8) {
 		LOAD_UTF8_CHARCLASS_SPACE();
 		if (OP(scan) == NSPACE
-		    ? swash_fetch(PL_utf8_space, (U8*)locinput, do_utf8)
+		    ? (bool)swash_fetch(PL_utf8_space, (U8*)locinput, do_utf8)
 		    : isSPACE_LC_utf8((U8*)locinput))
 		{
 		    sayNO;
@@ -2753,7 +2753,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (do_utf8) {
 		LOAD_UTF8_CHARCLASS_DIGIT();
 		if (!(OP(scan) == DIGIT
-		      ? swash_fetch(PL_utf8_digit, (U8*)locinput, do_utf8)
+		      ? (bool)swash_fetch(PL_utf8_digit, (U8*)locinput, do_utf8)
 		      : isDIGIT_LC_utf8((U8*)locinput)))
 		{
 		    sayNO;
@@ -2776,7 +2776,7 @@ S_regmatch(pTHX_ regnode *prog)
 	    if (do_utf8) {
 		LOAD_UTF8_CHARCLASS_DIGIT();
 		if (OP(scan) == NDIGIT
-		    ? swash_fetch(PL_utf8_digit, (U8*)locinput, do_utf8)
+		    ? (bool)swash_fetch(PL_utf8_digit, (U8*)locinput, do_utf8)
 		    : isDIGIT_LC_utf8((U8*)locinput))
 		{
 		    sayNO;
