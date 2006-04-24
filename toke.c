@@ -11088,7 +11088,7 @@ S_scan_inputsymbol(pTHX_ char *start)
        or if it didn't end, or if we see a newline
     */
 
-    if (len >= sizeof PL_tokenbuf)
+    if (len >= (I32)sizeof PL_tokenbuf)
 	Perl_croak(aTHX_ "Excessively long <> operator");
     if (s >= end)
 	Perl_croak(aTHX_ "Unterminated <> operator");

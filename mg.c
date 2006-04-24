@@ -1102,7 +1102,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 		s = delimcpy(tmpbuf, tmpbuf + sizeof tmpbuf,
 			     s, strend, ':', &i);
 		s++;
-		if (i >= sizeof tmpbuf   /* too long -- assume the worst */
+		if (i >= (I32)sizeof tmpbuf   /* too long -- assume the worst */
 		      || *tmpbuf != '/'
 		      || (PerlLIO_stat(tmpbuf, &st) == 0 && (st.st_mode & 2)) ) {
 		    MgTAINTEDDIR_on(mg);

@@ -6528,7 +6528,7 @@ screamer2:
 	     *
 	     * - jik 9/25/96
 	     */
-	    if (!(cnt < sizeof(buf) && PerlIO_eof(fp)))
+	    if (!(cnt < (I32)sizeof(buf) && PerlIO_eof(fp)))
 		goto screamer2;
 	}
 
@@ -10923,7 +10923,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     SvREFCNT(&PL_sv_no)		= (~(U32)0)/2;
     SvFLAGS(&PL_sv_no)		= SVp_IOK|SVf_IOK|SVp_NOK|SVf_NOK
 				  |SVp_POK|SVf_POK|SVf_READONLY|SVt_PVNV;
-    SvPV_set(&PL_sv_no, SAVEPVN(PL_No, 0));
+    SvPV_set(&PL_sv_no, savepvn(PL_No, 0));
     SvCUR_set(&PL_sv_no, 0);
     SvLEN_set(&PL_sv_no, 1);
     SvIV_set(&PL_sv_no, 0);
@@ -10934,7 +10934,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     SvREFCNT(&PL_sv_yes)	= (~(U32)0)/2;
     SvFLAGS(&PL_sv_yes)		= SVp_IOK|SVf_IOK|SVp_NOK|SVf_NOK
 				  |SVp_POK|SVf_POK|SVf_READONLY|SVt_PVNV;
-    SvPV_set(&PL_sv_yes, SAVEPVN(PL_Yes, 1));
+    SvPV_set(&PL_sv_yes, savepvn(PL_Yes, 1));
     SvCUR_set(&PL_sv_yes, 1);
     SvLEN_set(&PL_sv_yes, 2);
     SvIV_set(&PL_sv_yes, 1);

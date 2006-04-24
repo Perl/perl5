@@ -9,7 +9,7 @@ require ExtUtils::Constant::XS;
 use ExtUtils::Constant::Utils qw(C_stringify);
 use ExtUtils::Constant::XS qw(%XS_TypeSet);
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 @ISA = 'ExtUtils::Constant::XS';
 
 %type_to_struct =
@@ -456,7 +456,7 @@ $xs_subname(sv)
 	SV *		sv;
         const char *	s = SvPV(sv, len);
     PPCODE:
-	if (hv_exists(${c_subname}_missing, s, SvUTF8(sv) ? -(I32)len : len)) {
+	if (hv_exists(${c_subname}_missing, s, SvUTF8(sv) ? -(I32)len : (I32)len)) {
 	    sv = newSVpvf("Your vendor has not defined $package_sprintf_safe macro %" SVf
 			  ", used", sv);
 	} else {

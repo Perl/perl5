@@ -215,7 +215,7 @@ S_do_trans_complex(pTHX_ SV * const sv)
 		    else {
 			matches++;
 			if (!del) {
-			    ch = (rlen == 0) ? comp :
+			    ch = (rlen == 0) ? (I32)comp :
 				(comp - 0x100 < rlen) ?
 				tbl[comp+1] : tbl[0x100+rlen];
 			    if ((UV)ch != pch) {
@@ -726,7 +726,7 @@ UV
 Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
 {
     dVAR;
-    STRLEN srclen, len;
+    STRLEN srclen, len, uoffset;
     const unsigned char *s = (const unsigned char *) SvPV_const(sv, srclen);
     UV retnum = 0;
 
@@ -738,118 +738,118 @@ Perl_do_vecget(pTHX_ SV *sv, I32 offset, I32 size)
     if (SvUTF8(sv))
 	(void) Perl_sv_utf8_downgrade(aTHX_ sv, TRUE);
 
-    offset *= size;	/* turn into bit offset */
-    len = (offset + size + 7) / 8;	/* required number of bytes */
+    uoffset = offset*size;	/* turn into bit offset */
+    len = (uoffset + size + 7) / 8;	/* required number of bytes */
     if (len > srclen) {
 	if (size <= 8)
 	    retnum = 0;
 	else {
-	    offset >>= 3;	/* turn into byte offset */
+	    uoffset >>= 3;	/* turn into byte offset */
 	    if (size == 16) {
-		if ((STRLEN)offset >= srclen)
+		if (uoffset >= srclen)
 		    retnum = 0;
 		else
-		    retnum = (UV) s[offset] <<  8;
+		    retnum = (UV) s[uoffset] <<  8;
 	    }
 	    else if (size == 32) {
-		if ((STRLEN)offset >= srclen)
+		if (uoffset >= srclen)
 		    retnum = 0;
-		else if ((STRLEN)(offset + 1) >= srclen)
+		else if (uoffset + 1 >= srclen)
 		    retnum =
-			((UV) s[offset    ] << 24);
-		else if ((STRLEN)(offset + 2) >= srclen)
+			((UV) s[uoffset    ] << 24);
+		else if (uoffset + 2 >= srclen)
 		    retnum =
-			((UV) s[offset    ] << 24) +
-			((UV) s[offset + 1] << 16);
+			((UV) s[uoffset    ] << 24) +
+			((UV) s[uoffset + 1] << 16);
 		else
 		    retnum =
-			((UV) s[offset    ] << 24) +
-			((UV) s[offset + 1] << 16) +
-			(     s[offset + 2] <<  8);
+			((UV) s[uoffset    ] << 24) +
+			((UV) s[uoffset + 1] << 16) +
+			(     s[uoffset + 2] <<  8);
 	    }
 #ifdef UV_IS_QUAD
 	    else if (size == 64) {
 		if (ckWARN(WARN_PORTABLE))
 		    Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
 				"Bit vector size > 32 non-portable");
-		if (offset >= srclen)
+		if (uoffset >= srclen)
 		    retnum = 0;
-		else if (offset + 1 >= srclen)
+		else if (uoffset + 1 >= srclen)
 		    retnum =
-			(UV) s[offset     ] << 56;
-		else if (offset + 2 >= srclen)
+			(UV) s[uoffset     ] << 56;
+		else if (uoffset + 2 >= srclen)
 		    retnum =
-			((UV) s[offset    ] << 56) +
-			((UV) s[offset + 1] << 48);
-		else if (offset + 3 >= srclen)
+			((UV) s[uoffset    ] << 56) +
+			((UV) s[uoffset + 1] << 48);
+		else if (uoffset + 3 >= srclen)
 		    retnum =
-			((UV) s[offset    ] << 56) +
-			((UV) s[offset + 1] << 48) +
-			((UV) s[offset + 2] << 40);
-		else if (offset + 4 >= srclen)
+			((UV) s[uoffset    ] << 56) +
+			((UV) s[uoffset + 1] << 48) +
+			((UV) s[uoffset + 2] << 40);
+		else if (uoffset + 4 >= srclen)
 		    retnum =
-			((UV) s[offset    ] << 56) +
-			((UV) s[offset + 1] << 48) +
-			((UV) s[offset + 2] << 40) +
-			((UV) s[offset + 3] << 32);
-		else if (offset + 5 >= srclen)
+			((UV) s[uoffset    ] << 56) +
+			((UV) s[uoffset + 1] << 48) +
+			((UV) s[uoffset + 2] << 40) +
+			((UV) s[uoffset + 3] << 32);
+		else if (uoffset + 5 >= srclen)
 		    retnum =
-			((UV) s[offset    ] << 56) +
-			((UV) s[offset + 1] << 48) +
-			((UV) s[offset + 2] << 40) +
-			((UV) s[offset + 3] << 32) +
-			(     s[offset + 4] << 24);
-		else if (offset + 6 >= srclen)
+			((UV) s[uoffset    ] << 56) +
+			((UV) s[uoffset + 1] << 48) +
+			((UV) s[uoffset + 2] << 40) +
+			((UV) s[uoffset + 3] << 32) +
+			(     s[uoffset + 4] << 24);
+		else if (uoffset + 6 >= srclen)
 		    retnum =
-			((UV) s[offset    ] << 56) +
-			((UV) s[offset + 1] << 48) +
-			((UV) s[offset + 2] << 40) +
-			((UV) s[offset + 3] << 32) +
-			((UV) s[offset + 4] << 24) +
-			((UV) s[offset + 5] << 16);
+			((UV) s[uoffset    ] << 56) +
+			((UV) s[uoffset + 1] << 48) +
+			((UV) s[uoffset + 2] << 40) +
+			((UV) s[uoffset + 3] << 32) +
+			((UV) s[uoffset + 4] << 24) +
+			((UV) s[uoffset + 5] << 16);
 		else
 		    retnum =
-			((UV) s[offset    ] << 56) +
-			((UV) s[offset + 1] << 48) +
-			((UV) s[offset + 2] << 40) +
-			((UV) s[offset + 3] << 32) +
-			((UV) s[offset + 4] << 24) +
-			((UV) s[offset + 5] << 16) +
-			(     s[offset + 6] <<  8);
+			((UV) s[uoffset    ] << 56) +
+			((UV) s[uoffset + 1] << 48) +
+			((UV) s[uoffset + 2] << 40) +
+			((UV) s[uoffset + 3] << 32) +
+			((UV) s[uoffset + 4] << 24) +
+			((UV) s[uoffset + 5] << 16) +
+			(     s[uoffset + 6] <<  8);
 	    }
 #endif
 	}
     }
     else if (size < 8)
-	retnum = (s[offset >> 3] >> (offset & 7)) & ((1 << size) - 1);
+	retnum = (s[uoffset >> 3] >> (uoffset & 7)) & ((1 << size) - 1);
     else {
-	offset >>= 3;	/* turn into byte offset */
+	uoffset >>= 3;	/* turn into byte offset */
 	if (size == 8)
-	    retnum = s[offset];
+	    retnum = s[uoffset];
 	else if (size == 16)
 	    retnum =
-		((UV) s[offset] <<      8) +
-		      s[offset + 1];
+		((UV) s[uoffset] <<      8) +
+		      s[uoffset + 1];
 	else if (size == 32)
 	    retnum =
-		((UV) s[offset    ] << 24) +
-		((UV) s[offset + 1] << 16) +
-		(     s[offset + 2] <<  8) +
-		      s[offset + 3];
+		((UV) s[uoffset    ] << 24) +
+		((UV) s[uoffset + 1] << 16) +
+		(     s[uoffset + 2] <<  8) +
+		      s[uoffset + 3];
 #ifdef UV_IS_QUAD
 	else if (size == 64) {
 	    if (ckWARN(WARN_PORTABLE))
 		Perl_warner(aTHX_ packWARN(WARN_PORTABLE),
 			    "Bit vector size > 32 non-portable");
 	    retnum =
-		((UV) s[offset    ] << 56) +
-		((UV) s[offset + 1] << 48) +
-		((UV) s[offset + 2] << 40) +
-		((UV) s[offset + 3] << 32) +
-		((UV) s[offset + 4] << 24) +
-		((UV) s[offset + 5] << 16) +
-		(     s[offset + 6] <<  8) +
-		      s[offset + 7];
+		((UV) s[uoffset    ] << 56) +
+		((UV) s[uoffset + 1] << 48) +
+		((UV) s[uoffset + 2] << 40) +
+		((UV) s[uoffset + 3] << 32) +
+		((UV) s[uoffset + 4] << 24) +
+		((UV) s[uoffset + 5] << 16) +
+		(     s[uoffset + 6] <<  8) +
+		      s[uoffset + 7];
 	}
 #endif
     }
@@ -1169,13 +1169,13 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     STRLEN rightlen;
     register const char *lc;
     register const char *rc;
-    register I32 len;
-    I32 lensave;
+    register STRLEN len;
+    STRLEN lensave;
     const char *lsave;
     const char *rsave;
     const bool left_utf = DO_UTF8(left);
     const bool right_utf = DO_UTF8(right);
-    I32 needlen = 0;
+    STRLEN needlen = 0;
 
     if (left_utf && !right_utf)
 	sv_utf8_upgrade(right);
@@ -1196,16 +1196,16 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     }
     else if (SvOK(sv) || SvTYPE(sv) > SVt_PVMG) {
 	dc = SvPV_force_nomg_nolen(sv);
-	if (SvLEN(sv) < (STRLEN)(len + 1)) {
-	    dc = SvGROW(sv, (STRLEN)(len + 1));
+	if (SvLEN(sv) < len + 1) {
+	    dc = SvGROW(sv, len + 1);
 	    (void)memzero(dc + SvCUR(sv), len - SvCUR(sv) + 1);
 	}
 	if (optype != OP_BIT_AND && (left_utf || right_utf))
 	    dc = SvGROW(sv, leftlen + rightlen + 1);
     }
     else {
-	needlen = ((optype == OP_BIT_AND)
-		    ? len : (leftlen > rightlen ? leftlen : rightlen));
+	needlen = optype == OP_BIT_AND
+		    ? len : (leftlen > rightlen ? leftlen : rightlen);
 	Newxz(dc, needlen + 1, char);
 	sv_usepvn_flags(sv, dc, needlen, SV_HAS_TRAILING_NUL);
 	dc = SvPVX(sv);		/* sv_usepvn() calls Renew() */
@@ -1285,11 +1285,11 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     else
 #ifdef LIBERAL
     if (len >= sizeof(long)*4 &&
-	!((long)dc % sizeof(long)) &&
-	!((long)lc % sizeof(long)) &&
-	!((long)rc % sizeof(long)))	/* It's almost always aligned... */
+	!((unsigned long)dc % sizeof(long)) &&
+	!((unsigned long)lc % sizeof(long)) &&
+	!((unsigned long)rc % sizeof(long)))	/* It's almost always aligned... */
     {
-	const I32 remainder = len % (sizeof(long)*4);
+	const STRLEN remainder = len % (sizeof(long)*4);
 	len /= (sizeof(long)*4);
 
 	dl = (long*)dc;
@@ -1345,7 +1345,7 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
 		*dc++ = *lc++ | *rc++;
 	  mop_up:
 	    len = lensave;
-	    if (rightlen > (STRLEN)len)
+	    if (rightlen > len)
 		sv_catpvn(sv, rsave + len, rightlen - len);
 	    else if (leftlen > (STRLEN)len)
 		sv_catpvn(sv, lsave + len, leftlen - len);

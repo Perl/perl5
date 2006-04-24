@@ -4541,6 +4541,10 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     const char *got_p;
     const char *prune_from = NULL;
     bool read_from_cache = FALSE;
+    STRLEN umaxlen;
+
+    assert(maxlen >= 0);
+    umaxlen = maxlen;
 
     /* I was having segfault trouble under Linux 2.2.5 after a
        parse error occured.  (Had to hack around it with a test
@@ -4554,13 +4558,13 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    const char *cache_p = SvPV(cache, cache_len);
 	    STRLEN take = 0;
 
-	    if (maxlen) {
+	    if (umaxlen) {
 		/* Running in block mode and we have some cached data already.
 		 */
-		if (cache_len >= maxlen) {
+		if (cache_len >= umaxlen) {
 		    /* In fact, so much data we don't even need to call
 		       filter_read.  */
-		    take = maxlen;
+		    take = umaxlen;
 		}
 	    } else {
 		const char *const first_nl = memchr(cache_p, '\n', cache_len);
@@ -4576,8 +4580,8 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    }
 
 	    sv_catsv(buf_sv, cache);
-	    if (maxlen) {
-		maxlen -= cache_len;
+	    if (umaxlen) {
+		umaxlen -= cache_len;
 	    }
 	    SvOK_off(cache);
 	    read_from_cache = TRUE;
@@ -4630,9 +4634,9 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 
     if(SvOK(upstream)) {
 	got_p = SvPV(upstream, got_len);
-	if (maxlen) {
-	    if (got_len > maxlen) {
-		prune_from = got_p + maxlen;
+	if (umaxlen) {
+	    if (got_len > umaxlen) {
+		prune_from = got_p + umaxlen;
 	    }
 	} else {
 	    const char *const first_nl = memchr(got_p, '\n', got_len);
@@ -4648,7 +4652,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	SV *cache = (SV *)IoFMT_GV(datasv);
 
 	if (!cache) {
-	    IoFMT_GV(datasv) = (GV*) (cache = newSV(got_len - maxlen));
+	    IoFMT_GV(datasv) = (GV*) (cache = newSV(got_len - umaxlen));
 	} else if (SvOK(cache)) {
 	    /* Cache should be empty.  */
 	    assert(!SvCUR(cache));

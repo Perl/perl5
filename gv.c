@@ -799,7 +799,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		char smallbuf[128];
 		char *tmpbuf;
 
-		if (len + 3 < sizeof (smallbuf))
+		if (len + 3 < (I32)sizeof (smallbuf))
 		    tmpbuf = smallbuf;
 		else
 		    Newx(tmpbuf, len+3, char);

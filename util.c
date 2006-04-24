@@ -1894,8 +1894,8 @@ Perl_my_ntohl(pTHX_ long l)
 		type value;					\
 		char c[sizeof(type)];				\
 	    } u;						\
-	    register I32 i;					\
-	    register I32 s = 0;					\
+	    register U32 i;					\
+	    register U32 s = 0;					\
 	    for (i = 0; i < sizeof(u.c); i++, s += 8) {		\
 		u.c[i] = (n >> s) & 0xFF;			\
 	    }							\
@@ -1910,8 +1910,8 @@ Perl_my_ntohl(pTHX_ long l)
 		type value;					\
 		char c[sizeof(type)];				\
 	    } u;						\
-	    register I32 i;					\
-	    register I32 s = 0;					\
+	    register U32 i;					\
+	    register U32 s = 0;					\
 	    u.value = n;					\
 	    n = 0;						\
 	    for (i = 0; i < sizeof(u.c); i++, s += 8) {		\
@@ -1932,8 +1932,8 @@ Perl_my_ntohl(pTHX_ long l)
 		type value;					\
 		char c[sizeof(type)];				\
 	    } u;						\
-	    register I32 i;					\
-	    register I32 s = 8*(sizeof(u.c)-1);			\
+	    register U32 i;					\
+	    register U32 s = 8*(sizeof(u.c)-1);			\
 	    for (i = 0; i < sizeof(u.c); i++, s -= 8) {		\
 		u.c[i] = (n >> s) & 0xFF;			\
 	    }							\
@@ -1948,8 +1948,8 @@ Perl_my_ntohl(pTHX_ long l)
 		type value;					\
 		char c[sizeof(type)];				\
 	    } u;						\
-	    register I32 i;					\
-	    register I32 s = 8*(sizeof(u.c)-1);			\
+	    register U32 i;					\
+	    register U32 s = 8*(sizeof(u.c)-1);			\
 	    u.value = n;					\
 	    n = 0;						\
 	    for (i = 0; i < sizeof(u.c); i++, s -= 8) {		\
@@ -2224,7 +2224,8 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
     /* If we managed to get status pipe check for exec fail */
     if (did_pipes && pid > 0) {
 	int errkid;
-	int n = 0, n1;
+	unsigned n = 0;
+	SSize_t n1;
 
 	while (n < sizeof(int)) {
 	    n1 = PerlLIO_read(pp[0],
@@ -2376,7 +2377,8 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
     PL_forkprocess = pid;
     if (did_pipes && pid > 0) {
 	int errkid;
-	int n = 0, n1;
+	unsigned n = 0;
+	SSize_t n1;
 
 	while (n < sizeof(int)) {
 	    n1 = PerlLIO_read(pp[0],

@@ -2488,7 +2488,7 @@ PP(pp_complement)
 	    for ( ; anum && (unsigned long)tmps % sizeof(long); anum--, tmps++)
 		*tmps = ~*tmps;
 	    tmpl = (long*)tmps;
-	    for ( ; anum >= sizeof(long); anum -= sizeof(long), tmpl++)
+	    for ( ; anum >= (I32)sizeof(long); anum -= (I32)sizeof(long), tmpl++)
 		*tmpl = ~*tmpl;
 	    tmps = (U8*)tmpl;
 	}
@@ -4412,7 +4412,7 @@ PP(pp_split)
     register SV *dstr;
     register const char *m;
     I32 iters = 0;
-    const STRLEN slen = do_utf8 ? utf8_length((U8*)s, (U8*)strend) : (strend - s);
+    const STRLEN slen = do_utf8 ? utf8_length((U8*)s, (U8*)strend) : (STRLEN)(strend - s);
     I32 maxiters = slen + 10;
     const char *orig;
     const I32 origlimit = limit;

@@ -3285,7 +3285,7 @@ Perl_moreswitches(pTHX_ char *s)
 	    PerlIO_printf(PerlIO_stdout(),
 			  "\n(with %d registered patch%s, "
 			  "see perl -V for more detail)",
-			  (int)LOCAL_PATCH_COUNT,
+			  LOCAL_PATCH_COUNT,
 			  (LOCAL_PATCH_COUNT!=1) ? "es" : "");
 #endif
 

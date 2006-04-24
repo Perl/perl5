@@ -125,7 +125,7 @@ static const char * const local_patches[] = {
 
 /* Initial space prevents this variable from being inserted in config.sh  */
 #  define	LOCAL_PATCH_COUNT	\
-	(sizeof(local_patches)/sizeof(local_patches[0])-2)
+	((int)(sizeof(local_patches)/sizeof(local_patches[0])-2))
 
 /* the old terms of reference, add them only when explicitly included */
 #define PATCHLEVEL		PERL_VERSION

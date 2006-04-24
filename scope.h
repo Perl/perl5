@@ -57,8 +57,8 @@
 #define SCOPE_SAVES_SIGNAL_MASK 0
 #endif
 
-#define SSCHECK(need) if (PL_savestack_ix + (need) > PL_savestack_max) savestack_grow()
-#define SSGROW(need) if (PL_savestack_ix + (need) > PL_savestack_max) savestack_grow_cnt(need)
+#define SSCHECK(need) if (PL_savestack_ix + (I32)(need) > PL_savestack_max) savestack_grow()
+#define SSGROW(need) if (PL_savestack_ix + (I32)(need) > PL_savestack_max) savestack_grow_cnt(need)
 #define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
 #define SSPUSHLONG(i) (PL_savestack[PL_savestack_ix++].any_long = (long)(i))
 #define SSPUSHBOOL(p) (PL_savestack[PL_savestack_ix++].any_bool = (p))

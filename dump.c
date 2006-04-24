@@ -1448,7 +1448,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (HvARRAY(sv) && HvKEYS(sv)) {
 	    /* Show distribution of HEs in the ARRAY */
 	    int freq[200];
-#define FREQ_MAX (sizeof freq / sizeof freq[0] - 1)
+#define FREQ_MAX ((int)(sizeof freq / sizeof freq[0] - 1))
 	    int i;
 	    int max = 0;
 	    U32 pow2 = 2, keys = HvKEYS(sv);

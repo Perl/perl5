@@ -2104,7 +2104,7 @@ PerlIOBase_read(pTHX_ PerlIO *f, void *vbuf, Size_t count)
 	    SSize_t avail = PerlIO_get_cnt(f);
 	    SSize_t take = 0;
 	    if (avail > 0)
-		take = ((SSize_t)count < avail) ? count : avail;
+		take = ((SSize_t)count < avail) ? (SSize_t)count : avail;
 	    if (take > 0) {
 		STDCHAR *ptr = PerlIO_get_ptr(f);
 		Copy(ptr, buf, take, STDCHAR);

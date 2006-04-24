@@ -4013,7 +4013,8 @@ PP(pp_system)
 	    SP = ORIGMARK;
 	    if (did_pipes) {
 		int errkid;
-		int n = 0, n1;
+		unsigned n = 0;
+		SSize_t n1;
 
 		while (n < sizeof(int)) {
 		    n1 = PerlLIO_read(pp[0],
