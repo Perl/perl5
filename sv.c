@@ -1717,8 +1717,8 @@ Perl_looks_like_number(pTHX_ SV *sv)
     return grok_number(sbegin, len, NULL);
 }
 
-STATIC char *
-S_glob_2inpuv_number(pTHX_ GV * const gv)
+STATIC bool
+S_glob_2number(pTHX_ GV * const gv)
 {
     const U32 wasfake = SvFLAGS(gv) & SVf_FAKE;
     SV *const buffer = sv_newmortal();
@@ -1735,11 +1735,11 @@ S_glob_2inpuv_number(pTHX_ GV * const gv)
 	not_a_number(buffer);
     /* We just want something true to return, so that S_sv_2iuv_common
 	can tail call us and return true.  */
-    return (char *) 1;
+    return TRUE;
 }
 
 STATIC char *
-S_glob_2inpuv(pTHX_ GV * const gv, STRLEN * const len)
+S_glob_2pv(pTHX_ GV * const gv, STRLEN * const len)
 {
     const U32 wasfake = SvFLAGS(gv) & SVf_FAKE;
     SV *const buffer = sv_newmortal();
@@ -2123,7 +2123,7 @@ S_sv_2iuv_common(pTHX_ SV *sv) {
     }
     else  {
 	if (isGV_with_GP(sv))
-	    return (bool)PTR2IV(glob_2inpuv_number((GV *)sv));
+	    return PTR2IV(glob_2number((GV *)sv));
 
 	if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 	    if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
@@ -2473,7 +2473,7 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     }
     else  {
 	if (isGV_with_GP(sv)) {
-	    glob_2inpuv_number((GV *)sv);
+	    glob_2number((GV *)sv);
 	    return 0.0;
 	}
 
@@ -2810,7 +2810,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
     }
     else {
 	if (isGV_with_GP(sv))
-	    return glob_2inpuv((GV *)sv, lp);
+	    return glob_2pv((GV *)sv, lp);
 
 	if (!PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP) && ckWARN(WARN_UNINITIALIZED))
 	    report_uninit(sv);

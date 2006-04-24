@@ -793,8 +793,8 @@
 #define sv_2io			Perl_sv_2io
 #ifdef PERL_IN_SV_C
 #ifdef PERL_CORE
-#define glob_2inpuv_number	S_glob_2inpuv_number
-#define glob_2inpuv		S_glob_2inpuv
+#define glob_2number		S_glob_2number
+#define glob_2pv		S_glob_2pv
 #endif
 #endif
 #define sv_2iv_flags		Perl_sv_2iv_flags
@@ -2954,8 +2954,8 @@
 #define sv_2io(a)		Perl_sv_2io(aTHX_ a)
 #ifdef PERL_IN_SV_C
 #ifdef PERL_CORE
-#define glob_2inpuv_number(a)	S_glob_2inpuv_number(aTHX_ a)
-#define glob_2inpuv(a,b)	S_glob_2inpuv(aTHX_ a,b)
+#define glob_2number(a)		S_glob_2number(aTHX_ a)
+#define glob_2pv(a,b)		S_glob_2pv(aTHX_ a,b)
 #endif
 #endif
 #define sv_2iv_flags(a,b)	Perl_sv_2iv_flags(aTHX_ a,b)
