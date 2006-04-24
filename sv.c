@@ -2123,7 +2123,7 @@ S_sv_2iuv_common(pTHX_ SV *sv) {
     }
     else  {
 	if (isGV_with_GP(sv))
-	    return PTR2IV(glob_2number((GV *)sv));
+	    return glob_2number((GV *)sv);
 
 	if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 	    if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
