@@ -1154,41 +1154,6 @@ first_symbol(const char *pat, const char *patend) {
 }
 
 /*
-=for apidoc unpack_str
-
-The engine implementing unpack() Perl function. Note: parameters strbeg, new_s
-and ocnt are not used. This call should not be used, use unpackstring instead.
-
-=cut */
-
-I32
-Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s, const char *strbeg, const char *strend, char **new_s, I32 ocnt, U32 flags)
-{
-    tempsym_t sym;
-    PERL_UNUSED_ARG(strbeg);
-    PERL_UNUSED_ARG(new_s);
-    PERL_UNUSED_ARG(ocnt);
-
-    if (flags & FLAG_DO_UTF8) flags |= FLAG_WAS_UTF8;
-    else if (need_utf8(pat, patend)) {
-	/* We probably should try to avoid this in case a scalar context call
-	   wouldn't get to the "U0" */
-	STRLEN len = strend - s;
-	s = (char *) bytes_to_utf8((U8 *) s, &len);
-	SAVEFREEPV(s);
-	strend = s + len;
-	flags |= FLAG_DO_UTF8;
-    }
-
-    if (first_symbol(pat, patend) != 'U' && (flags & FLAG_DO_UTF8))
-	flags |= FLAG_PARSE_UTF8;
-
-    TEMPSYM_INIT(&sym, pat, patend, flags);
-
-    return unpack_rec(&sym, s, s, strend, NULL );
-}
-
-/*
 =for apidoc unpackstring
 
 The engine implementing unpack() Perl function. C<unpackstring> puts the
