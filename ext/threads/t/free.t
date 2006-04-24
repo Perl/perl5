@@ -15,8 +15,24 @@ BEGIN {
 
 use ExtUtils::testlib;
 
+use threads;
+use threads::shared;
+
+BEGIN {
+    $| = 1;
+    print("1..29\n");   ### Number of tests that will be run ###
+};
+
+my $TEST = 1;
+share($TEST);
+
+ok(1, 'Loaded');
+
 sub ok {
-    my ($id, $ok, $name) = @_;
+    my ($ok, $name) = @_;
+
+    lock($TEST);
+    my $id = $TEST++;
 
     # You have to do it this way or VMS will get confused.
     if ($ok) {
@@ -29,14 +45,6 @@ sub ok {
     return ($ok);
 }
 
-BEGIN {
-    $| = 1;
-    print("1..29\n");   ### Number of tests that will be run ###
-};
-
-use threads;
-use threads::shared;
-ok(1, 1, 'Loaded');
 
 ### Start of Testing ###
 
@@ -45,12 +53,10 @@ ok(1, 1, 'Loaded');
 
 my $COUNT;
 share($COUNT);
-my $TEST = 2;
-share($TEST);
 
 sub threading_1 {
     my $tid = threads->tid();
-    ok($TEST++, $tid, "Thread $tid started");
+    ok($tid, "Thread $tid started");
 
     if ($tid < 5) {
         sleep(1);
@@ -74,7 +80,7 @@ sub threading_1 {
     lock($COUNT);
     $COUNT++;
     cond_signal($COUNT);
-    ok($TEST++, $tid, "Thread $tid done");
+    ok($tid, "Thread $tid done");
 }
 
 {
@@ -97,12 +103,12 @@ sub threading_1 {
     threads->yield();
     sleep(1);
 }
-ok($TEST++, $COUNT == 5, "Done - $COUNT threads");
+ok($COUNT == 5, "Done - $COUNT threads");
 
 
 sub threading_2 {
     my $tid = threads->tid();
-    ok($TEST++, $tid, "Thread $tid started");
+    ok($tid, "Thread $tid started");
 
     if ($tid < 10) {
         threads->create('threading_2')->detach();
@@ -114,7 +120,7 @@ sub threading_2 {
     $COUNT++;
     cond_signal($COUNT);
 
-    ok($TEST++, $tid, "Thread $tid done");
+    ok($tid, "Thread $tid done");
 }
 
 {
@@ -129,23 +135,23 @@ sub threading_2 {
     threads->yield();
     sleep(1);
 }
-ok($TEST++, $COUNT == 5, "Done - $COUNT threads");
+ok($COUNT == 5, "Done - $COUNT threads");
 
 
 {
     threads->create(sub { })->join();
 }
-ok($TEST++, 1, 'Join');
+ok(1, 'Join');
 
 
 sub threading_3 {
     my $tid = threads->tid();
-    ok($TEST++, $tid, "Thread $tid started");
+    ok($tid, "Thread $tid started");
 
     {
         threads->create(sub {
             my $tid = threads->tid();
-            ok($TEST++, $tid, "Thread $tid started");
+            ok($tid, "Thread $tid started");
 
             threads->yield();
             sleep(1);
@@ -154,7 +160,7 @@ sub threading_3 {
             $COUNT++;
             cond_signal($COUNT);
 
-            ok($TEST++, $tid, "Thread $tid done");
+            ok($tid, "Thread $tid done");
         })->join();
     }
 
@@ -162,7 +168,7 @@ sub threading_3 {
     $COUNT++;
     cond_signal($COUNT);
 
-    ok($TEST++, $tid, "Thread $tid done");
+    ok($tid, "Thread $tid done");
 }
 
 {
@@ -179,6 +185,6 @@ sub threading_3 {
     threads->yield();
     sleep(1);
 }
-ok($TEST++, $COUNT == 2, "Done - $COUNT threads");
+ok($COUNT == 2, "Done - $COUNT threads");
 
 # EOF

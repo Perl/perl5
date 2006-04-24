@@ -39,7 +39,7 @@ BEGIN {
                if($threads::shared::threads_shared);
 }
 
-our $VERSION = '1.18_02';
+our $VERSION = '1.18_03';
 
 
 # Load the XS code

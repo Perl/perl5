@@ -36,8 +36,8 @@ typedef perl_os_thread pthread_t;
 /* Values for 'state' member */
 #define PERL_ITHR_JOINABLE		0
 #define PERL_ITHR_DETACHED		1
-#define PERL_ITHR_FINISHED		4
 #define PERL_ITHR_JOINED		2
+#define PERL_ITHR_FINISHED		4
 
 typedef struct ithread_s {
     struct ithread_s *next;	/* Next thread in the list */
@@ -45,8 +45,8 @@ typedef struct ithread_s {
     PerlInterpreter *interp;	/* The threads interpreter */
     UV tid;              	/* Threads module's thread id */
     perl_mutex mutex; 		/* Mutex for updating things in this struct */
-    IV count;			/* How many SVs have a reference to us */
-    signed char state;		/* Are we detached ? */
+    int count;                  /* How many SVs have a reference to us */
+    int state;                  /* Are we detached ? */
     int gimme;			/* Context of create */
     SV* init_function;          /* Code to run */
     SV* params;                 /* Args to pass function */
@@ -144,8 +144,11 @@ S_ithread_destruct (pTHX_ ithread* thread)
 		return;
 	}
 
-	/* Remove from circular list of threads */
 	MUTEX_LOCK(&create_destruct_mutex);
+        /* Main thread (0) is immortal and should never get here */
+        assert(thread->tid != 0);
+
+	/* Remove from circular list of threads */
 	thread->next->prev = thread->prev;
 	thread->prev->next = thread->next;
 	thread->next = NULL;
@@ -337,7 +340,6 @@ S_ithread_run(void * arg) {
 	}
 	MUTEX_LOCK(&create_destruct_mutex);
 	active_threads--;
-	assert( active_threads >= 0 );
 	MUTEX_UNLOCK(&create_destruct_mutex);
 
 #ifdef WIN32
@@ -395,8 +397,8 @@ S_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* params)
 	SV**            tmps_tmp = PL_tmps_stack;
 	IV              tmps_ix  = PL_tmps_ix;
 #ifndef WIN32
-	int		failure;
-	const char*	panic = NULL;
+        int             rc_stack_size = 0;
+        int             rc_thread_create = 0;
 #endif
 
 
@@ -523,38 +525,42 @@ S_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* params)
             PTHREAD_ATTR_SETDETACHSTATE(&attr, attr_joinable);
 #  endif
 #  ifdef THREAD_CREATE_NEEDS_STACK
-	    if(pthread_attr_setstacksize(&attr, THREAD_CREATE_NEEDS_STACK))
-	      panic = "panic: pthread_attr_setstacksize failed";
+            rc_stack_size = pthread_attr_setstacksize(&attr, THREAD_CREATE_NEEDS_STACK);
 #  endif
 
+            if (! rc_stack_size) {
 #ifdef OLD_PTHREADS_API
-	    failure
-	      = panic ? 1 : pthread_create( &thread->thr, attr,
+	        rc_thread_create = pthread_create( &thread->thr, attr,
 					    S_ithread_run, (void *)thread);
 #else
 #  if defined(HAS_PTHREAD_ATTR_SETSCOPE) && defined(PTHREAD_SCOPE_SYSTEM)
 	  pthread_attr_setscope( &attr, PTHREAD_SCOPE_SYSTEM );
 #  endif
-	  failure
-	    = panic ? 1 : pthread_create( &thread->thr, &attr,
+	        rc_thread_create = pthread_create( &thread->thr, &attr,
 					  S_ithread_run, (void *)thread);
 #endif
+	    }
 	}
 #endif
 
-	if (
+        /* Check for errors */
 #ifdef WIN32
-	    thread->handle == NULL
+	if (thread->handle == NULL) {
 #else
-	    failure
+        if (rc_stack_size || rc_thread_create) {
 #endif
-	    ) {
 	  MUTEX_UNLOCK(&create_destruct_mutex);
 	  sv_2mortal(params);
 	  S_ithread_destruct(aTHX_ thread);
 #ifndef WIN32
-	  if (panic)
-	    Perl_croak(aTHX_ panic);
+            if (ckWARN_d(WARN_THREADS)) {
+#  ifdef THREAD_CREATE_NEEDS_STACK
+                if (rc_stack_size)
+                    Perl_warn(aTHX_ "Thread creation failed: pthread_attr_setstacksize(%" IVdf ") returned %d", (IV)THREAD_CREATE_NEEDS_STACK, rc_stack_size);
+                else
+#  endif
+                    Perl_warn(aTHX_ "Thread creation failed: pthread_create returned %d", rc_thread_create);
+            }
 #endif
 	  return &PL_sv_undef;
 	}
@@ -899,8 +905,12 @@ ithread__handle(...);
 BOOT:
 {
 #ifdef USE_ITHREADS
-        MY_CXT_INIT;
+        /* The 'main' thread is thread 0.
+         * It is detached (unjoinable) and immortal.
+         */
 	ithread* thread;
+        MY_CXT_INIT;
+
 	PL_perl_destruct_level = 2;
 	MUTEX_INIT(&create_destruct_mutex);
 	MUTEX_LOCK(&create_destruct_mutex);
