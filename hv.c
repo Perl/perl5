@@ -2840,7 +2840,7 @@ Perl_hv_assert(pTHX_ HV *hv)
 	    real++;
 	/* sanity check the keys */
 	if (HeSVKEY(entry)) {
-	    /*EMPTY*/ /* Don't know what to check on SV keys.  */
+	    NOOP;   /* Don't know what to check on SV keys.  */
 	} else if (HeKUTF8(entry)) {
 	    withflags++;
 	    if (HeKWASUTF8(entry)) {

@@ -247,8 +247,8 @@
 #  define PERL_UNUSED_CONTEXT
 #endif
 
-#define NOOP (void)0
-#define dNOOP extern int Perl___notused PERL_UNUSED_DECL
+#define NOOP /*EMPTY*/(void)0
+#define dNOOP extern int /*@unused@*/ Perl___notused PERL_UNUSED_DECL
 
 #ifndef pTHX
 /* Don't bother defining tTHX and sTHX; using them outside

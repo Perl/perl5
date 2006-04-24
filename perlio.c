@@ -2566,7 +2566,7 @@ PerlIOUnix_open(pTHX_ PerlIO_funcs *self, PerlIO_list_t *layers,
     }
     else {
 	if (f) {
-	    /*EMPTY*/;
+	    NOOP;
 	    /*
 	     * FIXME: pop layers ???
 	     */
@@ -2946,7 +2946,7 @@ PerlIOStdio_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
 		goto set_this;
 	    }
 	    else {
-		/*EMPTY*/;
+		NOOP;
 		/* FIXME: To avoid messy error recovery if dup fails
 		   re-use the existing stdio as though flag was not set
 		 */
@@ -3235,7 +3235,7 @@ PerlIOStdio_flush(pTHX_ PerlIO *f)
 	return PerlSIO_fflush(stdio);
     }
     else {
-	/*EMPTY*/;
+	NOOP;
 #if 0
 	/*
 	 * FIXME: This discards ungetc() and pre-read stuff which is not
@@ -4377,7 +4377,7 @@ PerlIOCrlf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 	ptr -= cnt;
     }
     else {
-	/*EMPTY*/;
+	NOOP;
 #if 0
 	/*
 	 * Test code - delete when it works ...

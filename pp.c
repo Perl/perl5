@@ -1097,7 +1097,7 @@ PP(pp_multiply)
 	    bhigh = blow >> (4 * sizeof (UV));
 	    blow &= botmask;
 	    if (ahigh && bhigh) {
-		/*EMPTY*/;
+		NOOP;
 		/* eg 32 bit is at least 0x10000 * 0x10000 == 0x100000000
 		   which is overflow. Drop to NVs below.  */
 	    } else if (!ahigh && !bhigh) {
@@ -3588,7 +3588,7 @@ PP(pp_lc)
 
 #define GREEK_CAPITAL_LETTER_SIGMA 0x03A3 /* Unicode U+03A3 */
 		if (uv == GREEK_CAPITAL_LETTER_SIGMA) {
-		    /*EMPTY*/
+		    NOOP;
 		     /*
 		      * Now if the sigma is NOT followed by
 		      * /$ignorable_sequence$cased_letter/;

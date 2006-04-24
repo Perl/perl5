@@ -998,7 +998,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 		});
 
 	    } else {
-		/*EMPTY*/;   /* It's a dupe. So ignore it. */
+		NOOP;   /* It's a dupe. So ignore it. */
 	    }
 
         } /* end second pass */
@@ -1204,7 +1204,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                 });
 
             } else {
-		/*EMPTY*/;  /* Its a dupe. So ignore it. */
+		NOOP;  /* Its a dupe. So ignore it. */
             }
 
         } /* end second pass */
@@ -2938,7 +2938,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
       again:
 	if (PL_regkind[(U8)OP(first)] == EXACT) {
 	    if (OP(first) == EXACT)
-	        /*EMPTY*/;	/* Empty, get anchored substr later. */
+		NOOP;	/* Empty, get anchored substr later. */
 	    else if ((OP(first) == EXACTF || OP(first) == EXACTFL))
 		r->regstclass = first;
 	}
@@ -5786,7 +5786,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 		       len, s,
 		       PL_colors[1]);
     } else if (k == TRIE) {
-	/*EMPTY*/;
+	NOOP;
 	/* print the details od the trie in dumpuntil instead, as
 	 * prog->data isn't available here */
     } else if (k == CURLY) {

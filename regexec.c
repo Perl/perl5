@@ -574,7 +574,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		    && (!do_utf8
 			|| ((t = reghopmaybe3_c(s, -(prog->check_offset_max), strpos))
 			    && t > strpos)))
-		    /* EMPTY */;
+		    NOOP;
 		else
 		    t = strpos;
 		t = HOP3c(t, prog->anchored_offset, strend);

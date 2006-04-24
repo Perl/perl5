@@ -35,13 +35,13 @@
  *   lib/utf8.t lib/Unicode/Collate/t/index.t
  * --jhi
  */
-#define ASSERT_UTF8_CACHE(cache) \
+#   define ASSERT_UTF8_CACHE(cache) \
     STMT_START { if (cache) { assert((cache)[0] <= (cache)[1]); \
 			      assert((cache)[2] <= (cache)[3]); \
 			      assert((cache)[3] <= (cache)[1]);} \
 			      } STMT_END
 #else
-#define ASSERT_UTF8_CACHE(cache) NOOP
+#   define ASSERT_UTF8_CACHE(cache) NOOP
 #endif
 
 #ifdef PERL_OLD_COPY_ON_WRITE
@@ -2063,7 +2063,7 @@ S_sv_2iuv_common(pTHX_ SV *sv) {
                 if ((NV)(SvIVX(sv)) == SvNVX(sv)) {
                     SvIOK_on(sv);
                 } else {
-		    /*EMPTY*/;  /* Integer is imprecise. NOK, IOKp */
+		    NOOP;  /* Integer is imprecise. NOK, IOKp */
                 }
                 /* UV will not work better than IV */
             } else {
@@ -2078,7 +2078,7 @@ S_sv_2iuv_common(pTHX_ SV *sv) {
                     if ((NV)(SvUVX(sv)) == SvNVX(sv)) {
                         SvIOK_on(sv);
                     } else {
-			/*EMPTY*/;   /* Integer is imprecise. NOK, IOKp, is UV */
+			NOOP;   /* Integer is imprecise. NOK, IOKp, is UV */
                     }
                 }
 		SvIsUV_on(sv);
@@ -3294,7 +3294,7 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr) {
 			   it was a const and its value changed. */
 			if (CvCONST(cv)	&& CvCONST((CV*)sref)
 			    && cv_const_sv(cv) == cv_const_sv((CV*)sref)) {
-			    /*EMPTY*/
+			    NOOP;
 			    /* They are 2 constant subroutines generated from
 			       the same constant. This probably means that
 			       they are really the "same" proxy subroutine
@@ -9986,7 +9986,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 
 	    case SVt_PVGV:
 		if (GvUNIQUE((GV*)sstr)) {
-		    /*EMPTY*/;   /* Do sharing here, and fall through */
+		    NOOP;   /* Do sharing here, and fall through */
 		}
 	    case SVt_PVIO:
 	    case SVt_PVFM:
@@ -10097,7 +10097,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		    if (IoDIRP(dstr)) {
 			IoDIRP(dstr)	= dirp_dup(IoDIRP(dstr));
 		    } else {
-			/*EMPTY*/;
+			NOOP;
 			/* IoDIRP(dstr) is already a copy of IoDIRP(sstr)  */
 		    }
 		}

@@ -853,7 +853,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 
 	SvNV_set(new_namesv, (NV)0);
 	if (SvPAD_OUR(new_namesv)) {
-	    /*EMPTY*/;   /* do nothing */
+	    NOOP;   /* do nothing */
 	}
 	else if (CvLATE(cv)) {
 	    /* delayed creation - just note the offset within parent pad */
