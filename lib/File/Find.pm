@@ -215,8 +215,6 @@ through a collection of variables.
 
 =back
 
-Don't modify these variables.
-
 For example, when examining the file F</some/path/foo.ext> you will have:
 
     $File::Find::dir  = /some/path/
@@ -239,6 +237,18 @@ table below summarizes all variants:
               /etc               /                 /etc
               /etc/x             /etc              /etc/x
 
+Do not modify these variables. If you want to use C<$_>, it must
+be restored to its initial value before returning from the
+function. C<local> may be used for this purpose:
+
+  sub callback {
+    open my $fh, '<', $_ or die "Cannot open $_ for input: $!\n";
+    local $_; # localize $_ for the remainder of the routine
+    while (<$fh>) {
+      # manipulate $_
+    }
+    # $_ will be restored upon leaving
+  }
 
 When <follow> or <follow_fast> are in effect, there is
 also a C<$File::Find::fullname>.  The function may set
