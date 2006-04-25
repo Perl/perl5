@@ -6184,7 +6184,11 @@ Perl_save_re_context(pTHX)
 	    U32 i;
 	    for (i = 1; i <= rx->nparens; i++) {
 		char digits[TYPE_CHARS(long)];
+#ifdef USE_SNPRINTF
+		const STRLEN len = snprintf(digits, sizeof(digits), "%lu", (long)i);
+#else
 		const STRLEN len = my_sprintf(digits, "%lu", (long)i);
+#endif /* #ifdef USE_SNPRINTF */
 		GV *const *const gvp
 		    = (GV**)hv_fetch(PL_defstash, digits, len, 0);
 

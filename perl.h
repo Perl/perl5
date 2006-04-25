@@ -1435,6 +1435,12 @@ int sockatmark(int);
 */
 #ifdef SPRINTF_RETURNS_STRLEN
 #  define my_sprintf sprintf
+#  ifdef HAS_SNPRINTF
+#    define USE_SNPRINTF
+#  endif
+#  ifdef HAS_VSNPRINTF
+#    define USE_VSNPRINTF
+#  endif
 #else
 #  define my_sprintf Perl_my_sprintf
 #endif

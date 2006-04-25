@@ -3115,9 +3115,13 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 	    if (len == 2 && tmpbuf[0] == '.')
 		seen_dot = 1;
 #endif
+#ifdef HAS_STRLCAT
+	    (void)strlcpy(tmpbuf + len, scriptname, sizeof(tmpbuf) - len);
+#else
 	    /* FIXME? Convert to memcpy by storing previous strlen(scriptname)
 	     */
 	    (void)strcpy(tmpbuf + len, scriptname);
+#endif /* #ifdef HAS_STRLCAT */
 #endif  /* !VMS */
 
 #ifdef SEARCH_EXTS
@@ -4290,7 +4294,11 @@ Perl_upg_version(pTHX_ SV *ver)
     if ( SvNOK(ver) ) /* may get too much accuracy */ 
     {
 	char tbuf[64];
-	const STRLEN len = my_sprintf(tbuf,"%.9"NVgf, SvNVX(ver));
+#ifdef USE_SNPRINTF
+	const STRLEN len = snprintf(tbuf, sizeof(tbuf), "%.9"NVgf, SvNVX(ver));
+#else
+	const STRLEN len = my_sprintf(tbuf, "%.9"NVgf, SvNVX(ver));
+#endif /* #ifdef USE_SNPRINTF */
 	version = savepvn(tbuf, len);
     }
 #ifdef SvVOK

@@ -831,7 +831,11 @@ PP(pp_formline)
 	    /* Formats aren't yet marked for locales, so assume "yes". */
 	    {
 		STORE_NUMERIC_STANDARD_SET_LOCAL();
+#ifdef USE_SNPRINTF
+		snprintf(t, SvLEN(PL_formtarget) - (t - SvPVX(PL_formtarget)), fmt, (int) fieldsize, (int) arg & 255, value);
+#else
 		sprintf(t, fmt, (int) fieldsize, (int) arg & 255, value);
+#endif /* ifdef USE_SNPRINTF */
 		RESTORE_NUMERIC_STANDARD();
 	    }
 	    t += fieldsize;
@@ -2769,8 +2773,13 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, const char *code, PAD** padp)
 	len = SvCUR(sv);
     }
     else
+#ifdef USE_SNPRINTF
+	len = snprintf(tmpbuf, sizeof(tbuf), "_<(%.10s_eval %lu)", code,
+		       (unsigned long)++PL_evalseq);
+#else
 	len = my_sprintf(tmpbuf, "_<(%.10s_eval %lu)", code,
 			 (unsigned long)++PL_evalseq);
+#endif /* ifdef USE_SNPRINTF */
     SAVECOPFILE_FREE(&PL_compiling);
     CopFILE_set(&PL_compiling, tmpbuf+2);
     SAVECOPLINE(&PL_compiling);
@@ -3422,6 +3431,10 @@ PP(pp_entereval)
     CV* runcv;
     U32 seq;
     HV *saved_hh = NULL;
+    const char * const fakestr = "_<(eval )";
+#ifdef HAS_STRLCPY
+    const int fakelen = 9 + 1;
+#endif
     
     if (PL_op->op_private & OPpEVAL_HAS_HH) {
 	saved_hh = (HV*) SvREFCNT_inc(POPs);
@@ -3447,7 +3460,11 @@ PP(pp_entereval)
 	len = SvCUR(temp_sv);
     }
     else
+#ifdef USE_SNPRINTF
+	len = snprintf(tmpbuf, sizeof(tbuf), "_<(eval %lu)", (unsigned long)++PL_evalseq);
+#else
 	len = my_sprintf(tmpbuf, "_<(eval %lu)", (unsigned long)++PL_evalseq);
+#endif /* ifdef USE_SNPRINTF */
     SAVECOPFILE_FREE(&PL_compiling);
     CopFILE_set(&PL_compiling, tmpbuf+2);
     SAVECOPLINE(&PL_compiling);
@@ -3500,7 +3517,12 @@ PP(pp_entereval)
     ret = doeval(gimme, NULL, runcv, seq);
     if (PERLDB_INTER && was != (I32)PL_sub_generation /* Some subs defined here. */
 	&& ret != PL_op->op_next) {	/* Successive compilation. */
-	strcpy(safestr, "_<(eval )");	/* Anything fake and short. */
+	/* Copy in anything fake and short. */
+#ifdef HAS_STRLCPY
+	strlcpy(safestr, fakestr, fakelen);
+#else
+	strcpy(safestr, fakestr);
+#endif /* #ifdef HAS_STRLCPY */
     }
     return DOCATCH(ret);
 }

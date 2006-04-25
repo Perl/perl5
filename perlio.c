@@ -475,7 +475,11 @@ PerlIO_debug(const char *fmt, ...)
 	/* Use fixed buffer as sv_catpvf etc. needs SVs */
 	char buffer[1024];
 	const STRLEN len = my_sprintf(buffer, "%.40s:%" IVdf " ", s ? s : "(none)", (IV) CopLINE(PL_curcop));
+# ifdef USE_VSNPRINTF
+	const STRLEN len2 = vnsprintf(buffer+len, sizeof(buffer) - len, fmt, ap);
+# else
 	const STRLEN len2 = vsprintf(buffer+len, fmt, ap);
+# endif /* USE_VSNPRINTF */
 	PerlLIO_write(PL_perlio_debug_fd, buffer, len + len2);
 #else
 	const char *s = CopFILE(PL_curcop);
@@ -5135,7 +5139,11 @@ int
 PerlIO_vsprintf(char *s, int n, const char *fmt, va_list ap)
 {
     dVAR;
+#ifdef USE_VSNPRINTF
+    const int val = vsnprintf(s, n, fmt, ap);
+#else
     const int val = vsprintf(s, fmt, ap);
+#endif /* #ifdef USE_VSNPRINTF */
     if (n >= 0) {
 	if (strlen(s) >= (STRLEN) n) {
 	    dTHX;

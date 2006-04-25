@@ -250,9 +250,13 @@ Perl_allocmy(pTHX_ char *name)
 	    p = strchr(name, '\0');
 	    /* The next block assumes the buffer is at least 205 chars
 	       long.  At present, it's always at least 256 chars. */
-	    if (p-name > 200) {
-		strcpy(name+200, "...");
-		p = name+199;
+	    if (p - name > 200) {
+#ifdef HAS_STRLCPY
+		strlcpy(name + 200, "...", 4);
+#else
+		strcpy(name + 200, "...");
+#endif
+		p = name + 199;
 	    }
 	    else {
 		p[1] = '\0';

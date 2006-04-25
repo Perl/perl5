@@ -5975,7 +5975,11 @@ Perl_yylex(pTHX)
 		if (!PL_in_my_stash) {
 		    char tmpbuf[1024];
 		    PL_bufptr = s;
+#ifdef USE_SNPRINTF
+		    snprintf(tmpbuf, sizeof(tmpbuf), "No such class %.1000s", PL_tokenbuf);
+#else
 		    sprintf(tmpbuf, "No such class %.1000s", PL_tokenbuf);
+#endif /* #ifdef USE_SNPRINTF */
 		    yyerror(tmpbuf);
 		}
 #ifdef PERL_MAD

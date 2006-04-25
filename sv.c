@@ -2656,8 +2656,14 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    STRLEN len;
 
 	    if (SvIOKp(sv)) {
-		len = SvIsUV(sv) ? my_sprintf(tbuf,"%"UVuf, (UV)SvUVX(sv))
-		    : my_sprintf(tbuf,"%"IVdf, (IV)SvIVX(sv));
+		len = SvIsUV(sv)
+#ifdef USE_SNPRINTF
+		    ? snprintf(tbuf, sizeof(tbuf), "%"UVuf, (UV)SvUVX(sv))
+		    : snprintf(tbuf, sizeof(tbuf), "%"IVdf, (IV)SvIVX(sv));
+#else
+		    ? my_sprintf(tbuf, "%"UVuf, (UV)SvUVX(sv))
+		    : my_sprintf(tbuf, "%"IVdf, (IV)SvIVX(sv));
+#endif /* #ifdef USE_SNPRINTF */
 	    } else {
 		Gconvert(SvNVX(sv), NV_DIG, 0, tbuf);
 		len = strlen(tbuf);
@@ -9260,8 +9266,13 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		 * --jhi */
 #if defined(HAS_LONG_DOUBLE)
 		elen = ((intsize == 'q')
+# ifdef USE_SNPRINTF
+			? snprintf(PL_efloatbuf, PL_efloatsize, ptr, nv)
+			: snprintf(PL_efloatbuf, PL_efloatsize, ptr, (double)nv));
+# else
 			? my_sprintf(PL_efloatbuf, ptr, nv)
 			: my_sprintf(PL_efloatbuf, ptr, (double)nv));
+# endif /* #ifdef USE_SNPRINTF */
 #else
 		elen = my_sprintf(PL_efloatbuf, ptr, nv);
 #endif
