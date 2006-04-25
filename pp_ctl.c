@@ -2995,7 +2995,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
     DEBUG_x(dump_eval());
 
     /* Register with debugger: */
-    if (PERLDB_INTER && saveop->op_type == OP_REQUIRE) {
+    if (PERLDB_INTER && saveop && saveop->op_type == OP_REQUIRE) {
 	CV * const cv = get_cv("DB::postponed", FALSE);
 	if (cv) {
 	    dSP;
