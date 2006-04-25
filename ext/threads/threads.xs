@@ -192,28 +192,6 @@ Perl_ithread_hook(pTHX)
     return veto_cleanup;
 }
 
-static void
-S_ithread_detach(pTHX_ ithread *thread)
-{
-    MUTEX_LOCK(&thread->mutex);
-    if (!(thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED))) {
-	thread->state |= PERL_ITHR_DETACHED;
-#ifdef WIN32
-	CloseHandle(thread->handle);
-	thread->handle = 0;
-#else
-	PERL_THREAD_DETACH(thread->thr);
-#endif
-    }
-    if ((thread->state & PERL_ITHR_FINISHED) &&
-        (thread->state & PERL_ITHR_DETACHED)) {
-	MUTEX_UNLOCK(&thread->mutex);
-	S_ithread_destruct(aTHX_ thread);
-    }
-    else {
-	MUTEX_UNLOCK(&thread->mutex);
-    }
-}
 
 /* MAGIC (in mg.h sense) hooks */
 
@@ -571,111 +549,8 @@ S_ithread_create(pTHX_ SV *obj, char* classname, SV* init_function, SV* params)
 	return ithread_to_SV(aTHX_ obj, thread, classname, FALSE);
 }
 
-static SV*
-S_ithread_self (pTHX_ SV *obj, char* Class)
-{
-   ithread *thread = S_ithread_get(aTHX);
-   if (thread)
-	return ithread_to_SV(aTHX_ obj, thread, Class, TRUE);
-   else
-	Perl_croak(aTHX_ "panic: cannot find thread data");
-   return NULL; /* silence compiler warning */
-}
-
-
-/* Joins the thread.
- * This code takes the return value from the call_sv and sends it back.
- */
-static AV*
-S_ithread_join(pTHX_ SV *obj)
-{
-    ithread *thread = SV_to_ithread(aTHX_ obj);
-    MUTEX_LOCK(&thread->mutex);
-    if (thread->state & PERL_ITHR_DETACHED) {
-	MUTEX_UNLOCK(&thread->mutex);
-	Perl_croak(aTHX_ "Cannot join a detached thread");
-    }
-    else if (thread->state & PERL_ITHR_JOINED) {
-	MUTEX_UNLOCK(&thread->mutex);
-	Perl_croak(aTHX_ "Thread already joined");
-    }
-    else {
-        AV* retparam;
-#ifdef WIN32
-	DWORD waitcode;
-#else
-	void *retval;
-#endif
-	MUTEX_UNLOCK(&thread->mutex);
-#ifdef WIN32
-	waitcode = WaitForSingleObject(thread->handle, INFINITE);
-	CloseHandle(thread->handle);
-	thread->handle = 0;
-#else
-	pthread_join(thread->thr,&retval);
-#endif
-	MUTEX_LOCK(&thread->mutex);
-	
-	/* sv_dup over the args */
-	{
-	  ithread*        current_thread;
-	  AV* params = (AV*) SvRV(thread->params);	
-	  PerlInterpreter *other_perl = thread->interp;
-	  CLONE_PARAMS clone_params;
-	  clone_params.stashes = newAV();
-	  clone_params.flags = CLONEf_JOIN_IN;
-	  PL_ptr_table = ptr_table_new();
-	  current_thread = S_ithread_get(aTHX);
-	  S_ithread_set(aTHX_ thread);
-	  /* ensure 'meaningful' addresses retain their meaning */
-	  ptr_table_store(PL_ptr_table, &other_perl->Isv_undef, &PL_sv_undef);
-	  ptr_table_store(PL_ptr_table, &other_perl->Isv_no, &PL_sv_no);
-	  ptr_table_store(PL_ptr_table, &other_perl->Isv_yes, &PL_sv_yes);
-
-#if 0
-	  {
-	    I32 len = av_len(params)+1;
-	    I32 i;
-	    for(i = 0; i < len; i++) {
-	      sv_dump(SvRV(AvARRAY(params)[i]));
-	    }
-	  }
-#endif
-	  retparam = (AV*) sv_dup((SV*)params, &clone_params);
-#if 0
-	  {
-	    I32 len = av_len(retparam)+1;
-	    I32 i;
-	    for(i = 0; i < len; i++) {
-		sv_dump(SvRV(AvARRAY(retparam)[i]));
-	    }
-	  }
-#endif
-	  S_ithread_set(aTHX_ current_thread);
-	  SvREFCNT_dec(clone_params.stashes);
-	  SvREFCNT_inc(retparam);
-	  ptr_table_free(PL_ptr_table);
-	  PL_ptr_table = NULL;
-
-	}
-	/* We are finished with it */
-	thread->state |= PERL_ITHR_JOINED;
-	S_ithread_clear(aTHX_ thread);
-	MUTEX_UNLOCK(&thread->mutex);
-    	
-	return retparam;
-    }
-    return (AV*)NULL;
-}
-
-static void
-S_ithread_DESTROY(pTHX_ SV *sv)
-{
-    ithread *thread = SV_to_ithread(aTHX_ sv);
-    sv_unmagic(SvRV(sv),PERL_MAGIC_shared_scalar);
-}
-
 #endif /* USE_ITHREADS */
+
 
 MODULE = threads		PACKAGE = threads	PREFIX = ithread_
 PROTOTYPES: DISABLE
@@ -755,13 +630,16 @@ void
 ithread_self(...)
     PREINIT:
         char *classname;
+        ithread *thread;
     CODE:
         /* Class method only */
         if (SvROK(ST(0)))
             Perl_croak(aTHX_ "Usage: threads->self()");
         classname = (char *)SvPV_nolen(ST(0));
 
-        ST(0) = sv_2mortal(S_ithread_self(aTHX_ Nullsv, classname));
+        thread = S_ithread_get(aTHX);
+
+        ST(0) = sv_2mortal(ithread_to_SV(aTHX_ Nullsv, thread, classname, TRUE));
         /* XSRETURN(1); - implied */
 
 
@@ -778,16 +656,76 @@ ithread_tid(...)
 void
 ithread_join(...)
     PREINIT:
+        ithread *thread;
+        int join_err;
         AV *params;
         int len;
         int ii;
+#ifdef WIN32
+        DWORD waitcode;
+#else
+        void *retval;
+#endif
     PPCODE:
         /* Object method only */
         if (! sv_isobject(ST(0)))
             Perl_croak(aTHX_ "Usage: $thr->join()");
 
-        /* Join thread and get return values */
-        params = S_ithread_join(aTHX_ ST(0));
+        /* Check if the thread is joinable */
+        thread = SV_to_ithread(aTHX_ ST(0));
+        MUTEX_LOCK(&thread->mutex);
+        join_err = (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED));
+        MUTEX_UNLOCK(&thread->mutex);
+        if (join_err) {
+            if (join_err & PERL_ITHR_DETACHED) {
+                Perl_croak(aTHX_ "Cannot join a detached thread");
+            } else {
+                Perl_croak(aTHX_ "Thread already joined");
+            }
+        }
+
+        /* Join the thread */
+#ifdef WIN32
+        waitcode = WaitForSingleObject(thread->handle, INFINITE);
+#else
+        pthread_join(thread->thr, &retval);
+#endif
+
+        MUTEX_LOCK(&thread->mutex);
+        /* Mark as joined */
+        thread->state |= PERL_ITHR_JOINED;
+
+        /* Get the return value from the call_sv */
+        {
+            AV *params_copy;
+            PerlInterpreter *other_perl;
+            CLONE_PARAMS clone_params;
+            ithread *current_thread;
+
+            params_copy = (AV *)SvRV(thread->params);
+            other_perl = thread->interp;
+            clone_params.stashes = newAV();
+            clone_params.flags = CLONEf_JOIN_IN;
+            PL_ptr_table = ptr_table_new();
+            current_thread = S_ithread_get(aTHX);
+            S_ithread_set(aTHX_ thread);
+            /* Ensure 'meaningful' addresses retain their meaning */
+            ptr_table_store(PL_ptr_table, &other_perl->Isv_undef, &PL_sv_undef);
+            ptr_table_store(PL_ptr_table, &other_perl->Isv_no, &PL_sv_no);
+            ptr_table_store(PL_ptr_table, &other_perl->Isv_yes, &PL_sv_yes);
+            params = (AV *)sv_dup((SV*)params_copy, &clone_params);
+            S_ithread_set(aTHX_ current_thread);
+            SvREFCNT_dec(clone_params.stashes);
+            SvREFCNT_inc(params);
+            ptr_table_free(PL_ptr_table);
+            PL_ptr_table = NULL;
+        }
+
+        /* We are finished with the thread */
+        S_ithread_clear(aTHX_ thread);
+        MUTEX_UNLOCK(&thread->mutex);
+
+        /* If no return values, then just return */
         if (! params) {
             XSRETURN_UNDEF;
         }
@@ -813,15 +751,41 @@ void
 ithread_detach(...)
     PREINIT:
         ithread *thread;
+        int detach_err;
+        int cleanup;
     CODE:
         thread = SV_to_ithread(aTHX_ ST(0));
-        S_ithread_detach(aTHX_ thread);
+        MUTEX_LOCK(&thread->mutex);
+
+        /* Check if the thread is detachable */
+        if ((detach_err = (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)))) {
+            MUTEX_UNLOCK(&thread->mutex);
+            if (detach_err & PERL_ITHR_DETACHED) {
+                Perl_croak(aTHX_ "Thread already detached");
+            } else {
+                Perl_croak(aTHX_ "Cannot detach a joined thread");
+            }
+        }
+
+        /* Detach the thread */
+        thread->state |= PERL_ITHR_DETACHED;
+#ifdef WIN32
+        /* Windows has no 'detach thread' function */
+#else
+        PERL_THREAD_DETACH(thread->thr);
+#endif
+        /* Cleanup if finished */
+        cleanup = (thread->state & PERL_ITHR_FINISHED);
+        MUTEX_UNLOCK(&thread->mutex);
+
+        if (cleanup)
+            S_ithread_destruct(aTHX_ thread);
 
 
 void
 ithread_DESTROY(...)
     CODE:
-        S_ithread_DESTROY(aTHX_ ST(0));
+        sv_unmagic(SvRV(ST(0)), PERL_MAGIC_shared_scalar);
 
 
 void
@@ -894,7 +858,7 @@ ithread__handle(...);
     CODE:
         thread = SV_to_ithread(aTHX_ ST(0));
 #ifdef WIN32
-        XST_mUV(0, PTR2UV(thread->handle));
+        XST_mUV(0, PTR2UV(&thread->handle));
 #else
         XST_mUV(0, PTR2UV(&thread->thr));
 #endif

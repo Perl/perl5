@@ -1,50 +1,38 @@
 package threads;
 
 use 5.008;
+
 use strict;
 use warnings;
-use Config;
+
+our $VERSION = '1.24_01';
+my $XS_VERSION = $VERSION;
+$VERSION = eval $VERSION;
+
 
 BEGIN {
-    unless ($Config{useithreads}) {
-	my @caller = caller(2);
-        die <<EOF;
-$caller[1] line $caller[2]:
-
-This Perl hasn't been configured and built properly for the threads
-module to work.  (The 'useithreads' configuration option hasn't been used.)
-
-Having threads support requires all of Perl and all of the XS modules in
-the Perl installation to be rebuilt, it is not just a question of adding
-the threads module.  (In other words, threaded and non-threaded Perls
-are binary incompatible.)
-
-If you want to the use the threads module, please contact the people
-who built your Perl.
-
-Cannot continue, aborting.
-EOF
+    # Verify this Perl supports threads
+    use Config;
+    if (! $Config{useithreads}) {
+        die("This Perl not built to support threads\n");
     }
+
+    # Declare that we have been loaded
+    $threads::threads = 1;
+
+    # Complain if 'threads' is loaded after 'threads::shared'
+    if ($threads::shared::threads_shared) {
+        warn <<'_MSG_';
+Warning, threads::shared has already been loaded.  To
+enable shared variables, 'use threads' must be called
+before threads::shared or any module that uses it.
+_MSG_
+   }
 }
-
-use overload
-    '==' => \&equal,
-    '!=' => sub { !equal(@_) },
-    'fallback' => 1;
-
-BEGIN {
-    warn "Warning, threads::shared has already been loaded. ".
-       "To enable shared variables for these modules 'use threads' ".
-       "must be called before any of those modules are loaded\n"
-               if($threads::shared::threads_shared);
-}
-
-our $VERSION = '1.18_03';
-
 
 # Load the XS code
 require XSLoader;
-XSLoader::load('threads', $VERSION);
+XSLoader::load('threads', $XS_VERSION);
 
 
 ### Export ###
@@ -77,14 +65,23 @@ sub import
 
 ### Methods, etc. ###
 
-# use "goto" trick to avoid pad problems from 5.8.1 (fixed in 5.8.2)
-# should also be faster
-sub async (&;@) { unshift @_,'threads'; goto &new }
-
-$threads::threads = 1;
-
 # 'new' is an alias for 'create'
 *new = \&create;
+
+# 'async' is a function alias for the 'threads->create()' method
+sub async (&;@)
+{
+    unshift(@_, 'threads');
+    # Use "goto" trick to avoid pad problems from 5.8.1 (fixed in 5.8.2)
+    goto &create;
+}
+
+# Thread object equality checking
+use overload (
+    '==' => \&equal,
+    '!=' => sub { ! equal(@_) },
+    'fallback' => 1
+);
 
 1;
 
@@ -96,7 +93,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.18
+This document describes threads version 1.24
 
 =head1 SYNOPSIS
 
@@ -131,6 +128,7 @@ This document describes threads version 1.18
     yield();
 
     my @threads = threads->list();
+    my $thread_count = threads->list();
 
     if ($thr1 == $thr2) {
         ...
@@ -226,20 +224,24 @@ detached, then a warning will be issued. (A program exits either because one
 of its threads explicitly calls L<exit()|perlfunc/"exit EXPR">, or in the case
 of the main thread, reaches the end of the main program file.)
 
-=item $thread->detach
+Calling C<-E<gt>join()> or C<-E<gt>detach()> on an already joined thread will
+cause an error to be thrown.
 
-Will make the thread unjoinable, and cause any eventual return value
-to be discarded.
+=item $thr->detach()
 
-Calling C<-E<gt>join()> on a detached thread will cause an error to be thrown.
+Makes the thread unjoinable, and causes any eventual return value to be
+discarded.
+
+Calling C<-E<gt>join()> or C<-E<gt>detach()> on an already detached thread
+will cause an error to be thrown.
 
 =item threads->detach()
 
 Class method that allows a thread to detach itself.
 
-=item threads->self
+=item threads->self()
 
-This will return the thread object for the current thread.
+Class method that allows a thread to obtain its own I<threads> object.
 
 =item $thr->tid()
 
@@ -257,13 +259,13 @@ with the specified thread ID.  Returns C<undef> if there is no thread
 associated with the TID, if the thread is joined or detached, if no TID is
 specified or if the specified TID is undef.
 
-=item threads->yield();
+=item threads->yield()
 
 This is a suggestion to the OS to let this thread yield CPU time to other
 threads.  What actually happens is highly dependent upon the underlying
 thread implementation.
 
-You may do C<use threads qw(yield)> then use just a bare C<yield> in your
+You may do C<use threads qw(yield)>, and then just use C<yield()> in your
 code.
 
 =item threads->list()
@@ -274,10 +276,14 @@ objects.  In a scalar context, returns a count of the same.
 =item $thr1->equal($thr2)
 
 Tests if two threads objects are the same thread or not.  This is overloaded
-to the more natural form:
+to the more natural forms:
 
     if ($thr1 == $thr2) {
         print("Threads are the same\n");
+    }
+    # or
+    if ($thr1 != $thr2) {
+        print("Threads differ\n");
     }
 
 (Thread comparison is based on thread IDs.)
@@ -285,16 +291,17 @@ to the more natural form:
 =item async BLOCK;
 
 C<async> creates a thread to execute the block immediately following
-it.  This block is treated as an anonymous sub, and so must have a
-semi-colon after the closing brace. Like C<< threads->new >>, C<async>
-returns a thread object.
+it.  This block is treated as an anonymous subroutine, and so must have a
+semi-colon after the closing brace.  Like C<threads->create()>, C<async>
+returns a I<threads> object.
 
 =item $thr->_handle()
 
 This I<private> method returns the memory location of the internal thread
-structure associated with a threads object.  For Win32, this is the handle
-returned by C<CreateThread>; for other platforms, it is the pointer returned
-by C<pthread_create>.
+structure associated with a threads object.  For Win32, this is a pointer to
+the C<HANDLE> value returned by C<CreateThread> (i.e., C<HANDLE *>); for other
+platforms, it is a pointer to the C<pthread_t> structure used in the
+C<pthread_create> call (i.e., C<pthread_t *>.
 
 This method is of no use for general Perl threads programming.  Its intent is
 to provide other (XS-based) thread modules with the capability to access, and
@@ -311,7 +318,7 @@ Class method that allows a thread to obtain its own I<handle>.
 
 =over 4
 
-=item A thread exited while %d other threads were still running
+=item A thread exited while # other threads were still running
 
 A thread (not necessarily the main thread) exited while there were
 still other threads running.  Usually it's a good idea to first collect
@@ -324,7 +331,7 @@ exit from the main thread.
 
 =over 4
 
-=item This Perl hasn't been configured and built properly for the threads...
+=item This Perl not built to support threads
 
 The particular copy of Perl that you're trying to use was not built using the
 C<useithreads> configuration option.
@@ -340,10 +347,10 @@ incompatible.)
 
 =over
 
-=item Parent-Child threads.
+=item Parent-child threads
 
-On some platforms it might not be possible to destroy "parent"
-threads while there are still existing child "threads".
+On some platforms, it might not be possible to destroy I<parent> threads while
+there are still existing I<child> threads.
 
 =item Creating threads inside BEGIN blocks
 
@@ -387,7 +394,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.18/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.24/shared.pm>
 
 L<threads::shared>, L<perlthrtut>
 
