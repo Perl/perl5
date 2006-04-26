@@ -28,6 +28,8 @@ share($test_id);
 sub ok {
     my ($ok, $name) = @_;
 
+    lock($test_id);
+
     # You have to do it this way or VMS will get confused.
     print $ok ? "ok $test_id - $name\n" : "not ok $test_id - $name\n";
 

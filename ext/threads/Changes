@@ -1,5 +1,24 @@
 Revision history for Perl extension threads.
 
+1.24 Mon Apr 24 10:29:11 EDT 2006
+	- assert() that thread 0 is never destructed
+	- Determinancy in free.t
+
+1.23 Thu Apr 13 16:57:00 EDT 2006
+	- BUG (RE)FIX: Properly free thread's Perl interpreter
+	- It's an error to detach a thread twice
+	- More XS code cleanups
+
+1.22 Fri Apr  7 21:35:06 EDT 2006
+	- Documented maximum stack size error
+
+1.21 Tue Apr  4 13:57:23 EDT 2006
+	- Corrected ->_handle() to return a pointer
+	- Overload !=
+
+1.19 Sat Mar 25 18:46:02 EST 2006
+	- Use 'DEFINE' instead of 'CCFLAGS' in Makefile.PL
+
 1.18 Fri Mar 24 14:21:36 EST 2006
 	- ->equal returns 0 on false for backwards compatibility
 	- Changed UVs to IVs in XS code (except for TID)
@@ -24,7 +43,7 @@ Revision history for Perl extension threads.
 	- Use $ENV{PERL_CORE} in tests
 
 1.11 Fri Mar 17 13:24:35 EST 2006
-	- BUG FIX: Proper freeing thread's Perl interpreter
+	- BUG FIX: Properly free thread's Perl interpreter
 	- Removed BUGS POD item regarding returning objects from threads
 	- Enabled closure return test in t/problems.t
 	- Handle deprecation of :unique in tests

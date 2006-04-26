@@ -18,7 +18,7 @@ use ExtUtils::testlib;
 BEGIN {
     $| = 1;
     if ($] == 5.008) {
-        print("1..14\n");   ### Number of tests that will be run ###
+        print("1..11\n");   ### Number of tests that will be run ###
     } else {
         print("1..15\n");   ### Number of tests that will be run ###
     }
@@ -42,6 +42,7 @@ my $test : shared = 2;
 
 sub is($$$) {
     my ($got, $want, $desc) = @_;
+    lock($test);
     unless ($got eq $want) {
 	print "# EXPECTED: $want\n";
 	print "# GOT:      $got\n";
@@ -58,7 +59,7 @@ sub is($$$) {
 # on join which led to double the dataspace
 #
 #########################
-
+if ($] != 5.008)
 { 
     sub Foo::DESTROY { 
 	my $self = shift;
@@ -83,15 +84,17 @@ sub is($$$) {
 # with the : unique attribute.
 #
 #########################
-
-if ($] == 5.008 || $] >= 5.008003) {
-    threads->create( sub {1} )->join;
-    my $not = eval { Config::myconfig() } ? '' : 'not ';
-    print "${not}ok $test - Are we able to call Config::myconfig after clone\n";
-} else {
-    print "ok $test # Skip Are we able to call Config::myconfig after clone\n";
+{
+    lock($test);
+    if ($] == 5.008 || $] >= 5.008003) {
+        threads->create( sub {1} )->join;
+        my $not = eval { Config::myconfig() } ? '' : 'not ';
+        print "${not}ok $test - Are we able to call Config::myconfig after clone\n";
+    } else {
+        print "ok $test # Skip Are we able to call Config::myconfig after clone\n";
+    }
+    $test++;
 }
-$test++;
 
 # bugid 24383 - :unique hashes weren't being made readonly on interpreter
 # clone; check that they are.
@@ -101,6 +104,7 @@ our @unique_array : unique;
 our %unique_hash : unique;
 threads->create(
     sub {
+        lock($test);
 	my $TODO = ":unique needs to be re-implemented in a non-broken way";
 	eval { $unique_scalar = 1 };
 	print $@ =~ /read-only/
@@ -124,14 +128,17 @@ threads->create(
 # bugid #24940 :unique should fail on my and sub declarations
 
 for my $decl ('my $x : unique', 'sub foo : unique') {
-    if ($] >= 5.008005) {
-        eval $decl;
-        print $@ =~ /^The 'unique' attribute may only be applied to 'our' variables/
-                ? '' : 'not ', "ok $test - $decl\n";
-    } else {
-        print("ok $test # Skip $decl\n");
+    {
+        lock($test);
+        if ($] >= 5.008005) {
+            eval $decl;
+            print $@ =~ /^The 'unique' attribute may only be applied to 'our' variables/
+                    ? '' : 'not ', "ok $test - $decl\n";
+        } else {
+            print("ok $test # Skip $decl\n");
+        }
+        $test++;
     }
-    $test++;
 }
 
 

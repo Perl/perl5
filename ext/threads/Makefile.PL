@@ -16,7 +16,7 @@ if (grep { $_ eq 'PERL_CORE=1' } @ARGV) {
                               'NORECURS' => 1);
 } else {
     # CPAN
-    push(@conditional_params, 'CCFLAGS'  => '-DHAS_PPPORT_H');
+    push(@conditional_params, 'DEFINE'   => '-DHAS_PPPORT_H');
 }
 
 
@@ -41,20 +41,5 @@ WriteMakefile(
 
     @conditional_params
 );
-
-
-# Add additional target(s) to Makefile for use by module maintainer
-sub MY::postamble
-{
-    return <<'_EXTRAS_';
-ppport:
-	@( cd /tmp; perl -e 'use Devel::PPPort; Devel::PPPort::WriteFile("ppport.h");' )
-	@if ! cmp -s ppport.h /tmp/ppport.h; then \
-	    diff ppport.h /tmp/ppport.h ; \
-	    echo; \
-	    perl /tmp/ppport.h; \
-	fi
-_EXTRAS_
-}
 
 # EOF

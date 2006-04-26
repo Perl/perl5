@@ -15,24 +15,37 @@ BEGIN {
 
 use ExtUtils::testlib;
 
-BEGIN { $| = 1; print "1..11\n"};
+sub ok {
+    my ($id, $ok, $name) = @_;
+
+    # You have to do it this way or VMS will get confused.
+    if ($ok) {
+        print("ok $id - $name\n");
+    } else {
+        print("not ok $id - $name\n");
+        printf("# Failed test at line %d\n", (caller)[2]);
+    }
+
+    return ($ok);
+}
+
+BEGIN { $| = 1; print "1..12\n"};
 
 use threads;
 use threads::shared;
+ok(1, 1, 'Loaded');
+
 my $i = 10;
 my $y = 20000;
 my %localtime;
 for(0..$i) {
 	$localtime{$_} = localtime($_);
 };
-my $mutex = 1;
+my $mutex = 2;
 share($mutex);
 sub localtime_r {
-#  print "Waiting for lock\n";
   lock($mutex);
-#  print "foo\n";
   my $retval = localtime(shift());
-#  unlock($mutex);
   return $retval;
 }
 my @threads;
@@ -48,11 +61,7 @@ for(0..$i) {
 		      }	
 		    }
 				 lock($mutex);
-				 if($error) {
-				   print "not ok $mutex # not a safe localtime\n";
-				 } else {
-				   print "ok $mutex\n";
-				 }
+                                 ok($mutex, ! $error, 'localtime safe');
 				 $mutex++;
 		  });	
   push @threads, $thread;

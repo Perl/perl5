@@ -15,13 +15,12 @@ BEGIN {
 
 use ExtUtils::testlib;
 
-BEGIN { print "1..14\n" };
+BEGIN { print "1..17\n" };
 use threads;
 use threads::shared;
 
 my $test_id = 1;
 share($test_id);
-use Devel::Peek qw(Dump);
 
 sub ok {
     my ($ok, $name) = @_;
@@ -136,15 +135,22 @@ if ($^O eq 'linux') {
 
 {
     my $t = threads->create(sub {});
-    $t->join;
-    my $x = threads->create(sub {});
-    $x->join;
-    eval {
-      $t->join;
-    };
-    my $ok = 0;
-    $ok++ if($@ =~/Thread already joined/);
-    ok($ok, "Double join works");
+    $t->join();
+    threads->create(sub {})->join();
+    eval { $t->join(); };
+    ok(($@ =~ /Thread already joined/), "Double join works");
+    eval { $t->detach(); };
+    ok(($@ =~ /Cannot detach a joined thread/), "Detach joined thread");
+}
+
+{
+    my $t = threads->create(sub {});
+    $t->detach();
+    threads->create(sub {})->join();
+    eval { $t->detach(); };
+    ok(($@ =~ /Thread already detached/), "Double detach works");
+    eval { $t->join(); };
+    ok(($@ =~ /Cannot join a detached thread/), "Join detached thread");
 }
 
 {

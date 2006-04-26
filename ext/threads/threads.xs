@@ -100,18 +100,13 @@ S_ithread_clear(pTHX_ ithread* thread)
 {
     PerlInterpreter *interp;
     assert(thread->state & PERL_ITHR_FINISHED &&
-    	    (thread->state & PERL_ITHR_DETACHED ||
-	    thread->state & PERL_ITHR_JOINED));
+           thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED));
 
     interp = thread->interp;
     if (interp) {
 	dTHXa(interp);
-	ithread* current_thread;
-#ifdef OEMVS
-	void *ptr;
-#endif
+
 	PERL_SET_CONTEXT(interp);
-	current_thread = S_ithread_get(aTHX);
 	S_ithread_set(aTHX_ thread);
 	
 	SvREFCNT_dec(thread->params);
@@ -207,24 +202,17 @@ ithread_mg_get(pTHX_ SV *sv, MAGIC *mg)
 int
 ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
-    ithread *thread = (ithread *) mg->mg_ptr;
+    ithread *thread = (ithread *)mg->mg_ptr;
+    int cleanup;
+
     MUTEX_LOCK(&thread->mutex);
-    thread->count--;
-    if (thread->count == 0) {
-       if(thread->state & PERL_ITHR_FINISHED &&
-          (thread->state & PERL_ITHR_DETACHED ||
-           thread->state & PERL_ITHR_JOINED))
-       {
-            MUTEX_UNLOCK(&thread->mutex);
-            S_ithread_destruct(aTHX_ thread);
-       }
-       else {
-	    MUTEX_UNLOCK(&thread->mutex);
-       }    
-    }
-    else {
-	MUTEX_UNLOCK(&thread->mutex);
-    }
+    cleanup = ((--thread->count == 0) &&
+               (thread->state & PERL_ITHR_FINISHED) &&
+               (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)));
+    MUTEX_UNLOCK(&thread->mutex);
+
+    if (cleanup)
+        S_ithread_destruct(aTHX_ thread);
     return 0;
 }
 
@@ -262,6 +250,8 @@ static void*
 S_ithread_run(void * arg) {
 #endif
 	ithread* thread = (ithread*) arg;
+        int cleanup;
+
 	dTHXa(thread->interp);
 	PERL_SET_CONTEXT(thread->interp);
 	S_ithread_set(aTHX_ thread);
@@ -303,19 +293,24 @@ S_ithread_run(void * arg) {
 		}
 		FREETMPS;
 		LEAVE;
-		SvREFCNT_dec(thread->init_function);
+
+                /* Release function ref */
+                SvREFCNT_dec(thread->init_function);
+                thread->init_function = Nullsv;
 	}
 
 	PerlIO_flush((PerlIO*)NULL);
-	MUTEX_LOCK(&thread->mutex);
-	thread->state |= PERL_ITHR_FINISHED;
 
-	if (thread->state & PERL_ITHR_DETACHED) {
-		MUTEX_UNLOCK(&thread->mutex);
-		S_ithread_destruct(aTHX_ thread);
-	} else {
-		MUTEX_UNLOCK(&thread->mutex);
-	}
+	MUTEX_LOCK(&thread->mutex);
+        /* Mark as finished */
+	thread->state |= PERL_ITHR_FINISHED;
+        /* Cleanup if detached */
+        cleanup = (thread->state & PERL_ITHR_DETACHED);
+        MUTEX_UNLOCK(&thread->mutex);
+
+        if (cleanup)
+            S_ithread_destruct(aTHX_ thread);
+
 	MUTEX_LOCK(&create_destruct_mutex);
 	active_threads--;
 	MUTEX_UNLOCK(&create_destruct_mutex);
