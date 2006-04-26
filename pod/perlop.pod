@@ -752,7 +752,8 @@ its left argument, throws that value away, then evaluates its right
 argument and returns that value.  This is just like C's comma operator.
 
 In list context, it's just the list argument separator, and inserts
-both its arguments into the list.
+both its arguments into the list.  These arguments are also evaluated
+from left to right.
 
 The C<< => >> operator is a synonym for the comma, but forces any word
 (consisting entirely of word characters) to its left to be interpreted
