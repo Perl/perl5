@@ -1136,16 +1136,19 @@ sR	|SV*	|refto		|NN SV* sv
 #endif
 
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
-s	|I32	|unpack_rec	|NN tempsym_t* symptr|NN char *s \
-				|NN char *strbeg|NN char *strend|NULLOK char **new_s
-s	|SV **	|pack_rec	|NN SV *cat|NN tempsym_t* symptr|NN SV **beglist|NN SV **endlist
+s	|I32	|unpack_rec	|NN struct tempsym_t* symptr|NN const char *s \
+				|NN const char *strbeg|NN const char *strend \
+				|NULLOK const char **new_s
+s	|SV **	|pack_rec	|NN SV *cat|NN struct tempsym_t* symptr \
+				|NN SV **beglist|NN SV **endlist
 s	|SV*	|mul128		|NN SV *sv|U8 m
-s	|I32	|measure_struct	|NN tempsym_t* symptr
-s	|const char *	|group_end	|NN const char *pat|NN const char *patend|char ender
-s	|const char *	|get_num	|NN const char *ppat|NN I32 *
-s	|bool	|next_symbol	|NN tempsym_t* symptr
+s	|I32	|measure_struct	|struct tempsym* symptr
+s	|bool	|next_symbol	|struct tempsym* symptr
 sR	|SV*	|is_an_int	|NN const char *s|STRLEN l
 s	|int	|div128		|NN SV *pnum|NN bool *done
+s	|const char *|group_end	|NN const char *pat|NN const char *patend \
+				|char ender
+s	|const char *|get_num	|NN const char *ppat|NN I32 *lenptr
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
