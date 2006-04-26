@@ -148,7 +148,7 @@ is a lexical $_ in scope.
 #define XSINTERFACE_FUNC_SET(cv,f)	\
 		CvXSUBANY(cv).any_dxptr = (void (*) (pTHX_ void*))(f)
 
-#define dUNDERBAR I32 padoff_du = find_rundefsvoffset()
+#define dUNDERBAR PADOFFSET padoff_du = find_rundefsvoffset()
 #define UNDERBAR ((padoff_du == NOT_IN_PAD \
 	    || PAD_COMPNAME_FLAGS_isOUR(padoff_du)) \
 	? DEFSV : PAD_SVl(padoff_du))
