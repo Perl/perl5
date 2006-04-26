@@ -3587,7 +3587,7 @@ count should not be more than 65.
 
 The C<a>, C<A>, and C<Z> types gobble just one value, but pack it as a
 string of length count, padding with nulls or spaces as necessary.  When
-unpacking, C<A> strips trailing spaces and nulls, C<Z> strips everything
+unpacking, C<A> strips trailing whitespace and nulls, C<Z> strips everything
 after the first null, and C<a> returns data verbatim.
 
 If the value-to-pack is too long, it is truncated.  If too long and an
@@ -3659,24 +3659,32 @@ C<P> is C<undef>, similarly for unpack().
 
 =item *
 
-The C</> template character allows packing and unpacking of strings where
-the packed structure contains a byte count followed by the string itself.
-You write I<length-item>C</>I<string-item>.
+The C</> template character allows packing and unpacking of a sequence of
+items where the packed structure contains a packed item count followed by 
+the packed items themselves.
+You write I<length-item>C</>I<sequence-item>.
 
 The I<length-item> can be any C<pack> template letter, and describes
 how the length value is packed.  The ones likely to be of most use are
 integer-packing ones like C<n> (for Java strings), C<w> (for ASN.1 or
 SNMP) and C<N> (for Sun XDR).
 
-For C<pack>, the I<string-item> must, at present, be C<"A*">, C<"a*"> or
-C<"Z*">. For C<unpack> the length of the string is obtained from the
-I<length-item>, but if you put in the '*' it will be ignored. For all other
-codes, C<unpack> applies the length value to the next item, which must not
-have a repeat count.
+For C<pack>, the I<sequence-item> may have a repeat count, in which case
+the minimum of that and the number of available items is used as argument
+for the I<length-item>. If it has no repeat count or uses a '*', the number
+of available items is used. For C<unpack> the repeat count is always obtained
+by decoding the packed item count, and the I<sequence-item> must not have a
+repeat count.
+
+If the I<sequence-item> refers to a string type (C<"A">, C<"a"> or C<"Z">),
+the I<length-item> is a string length, not a number of strings. If there is
+an explicit repeat count for pack, the packed string will be adjusted to that
+given length.
 
     unpack 'C/a', "\04Gurusamy";        gives 'Guru'
     unpack 'a3/A* A*', '007 Bond  J ';  gives (' Bond','J')
     pack 'n/a* w/a*','hello,','world';  gives "\000\006hello,\005world"
+    pack 'a/C2', ord('a') .. ord('z');  gives '2ab'
 
 The I<length-item> is not returned explicitly from C<unpack>.
 

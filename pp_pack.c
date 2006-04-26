@@ -1421,9 +1421,22 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, char *s, char *strbeg, char *strend, char 
 	    } else if (datumtype == 'A') {
 		/* 'A' strips both nulls and spaces */
 		char *ptr;
-		for (ptr = s+len-1; ptr >= s; ptr--)
-		    if (*ptr != 0 && !isSPACE(*ptr)) break;
-		ptr++;
+#ifndef PERL_PACK_CHAR_TEMPLATE_BUG_COMPATIBILITY
+		if (utf8 && (symptr->flags & FLAG_WAS_UTF8)) {
+		    for (ptr = s+len-1; ptr >= s; ptr--)
+			if (*ptr != 0 && !UTF8_IS_CONTINUATION(*ptr) &&
+			    !is_utf8_space(ptr)) break;
+		    if (ptr >= s) ptr += UTF8SKIP(ptr);
+		    else ptr++;
+		    if (ptr > s+len) 
+			Perl_croak(aTHX_ "Malformed UTF-8 string in unpack");
+		} else
+#endif
+		{
+		    for (ptr = s+len-1; ptr >= s; ptr--)
+			if (*ptr != 0 && !isSPACE(*ptr)) break;
+		    ptr++;
+		}
 		sv = newSVpvn(s, ptr-s);
 	    } else sv = newSVpvn(s, len);
 
@@ -2569,13 +2582,26 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
         /* Look ahead for next symbol. Do we have code/code? */
         lookahead = *symptr;
         found = next_symbol(&lookahead);
-	if ( symptr->flags & FLAG_SLASH ) {
+	if (symptr->flags & FLAG_SLASH) {
+	    IV count;
 	    if (!found) Perl_croak(aTHX_ "Code missing after '/' in pack");
- 	        if ( 0 == strchr( "aAZ", lookahead.code ) ||
-                     e_star != lookahead.howlen )
- 		    Perl_croak(aTHX_ "'/' must be followed by 'a*', 'A*' or 'Z*' in pack");
-	    lengthcode =
-		sv_2mortal(newSViv((items > 0 ? DO_UTF8(*beglist) ? sv_len_utf8(*beglist) : sv_len(*beglist) : 0) + (lookahead.code == 'Z' ? 1 : 0)));
+	    if (strchr("aAZ", lookahead.code)) {
+		if (lookahead.howlen == e_number) count = lookahead.length;
+		else {
+		    if (items > 0)
+			count = DO_UTF8(*beglist) ?
+			    sv_len_utf8(*beglist) : sv_len(*beglist);
+		    else count = 0;
+		    if (lookahead.code == 'Z') count++;
+		}
+	    } else {
+		if (lookahead.howlen == e_number && lookahead.length < items)
+		    count = lookahead.length;
+		else count = items;
+	    }
+	    lookahead.howlen = e_number;
+	    lookahead.length = count;
+	    lengthcode = sv_2mortal(newSViv(count));
 	}
 
 	/* Code inside the switch must take care to properly update

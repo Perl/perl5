@@ -14,9 +14,9 @@ my $no_signedness = $] > 5.009 ? '' :
   "Signed/unsigned pack modifiers not available on this perl";
 
 if ($] > 5.009) {
-    plan tests => 14606;
+    plan tests => 14627;
 } else {
-    plan tests => 14262;
+    plan tests => 14283;
 }
 
 use strict;
@@ -1808,4 +1808,61 @@ if ($] > 5.009) {
     is(pack("U0a*", $high), "\xfeb");
     is(pack("U0A*", $high), "\xfeb");
     is(pack("U0Z*", $high), "\xfeb\x00");
+}
+{
+    # pack /
+    my @array = 1..14;
+    my @out = unpack("N/S", pack("N/S", @array) . "abcd");
+    is("@out", "@array", "pack N/S works");
+    @out = unpack("N/S*", pack("N/S*", @array) . "abcd");
+    is("@out", "@array", "pack N/S* works");
+    @out = unpack("N/S*", pack("N/S14", @array) . "abcd");
+    is("@out", "@array", "pack N/S14 works");
+    @out = unpack("N/S*", pack("N/S15", @array) . "abcd");
+    is("@out", "@array", "pack N/S15 works");
+    @out = unpack("N/S*", pack("N/S13", @array) . "abcd");
+    is("@out", "@array[0..12]", "pack N/S13 works");
+    @out = unpack("N/S*", pack("N/S0", @array) . "abcd");
+    is("@out", "", "pack N/S0 works");
+    is(pack("Z*/a0", "abc"), "0\0", "pack Z*/a0 makes a short string");
+    is(pack("Z*/Z0", "abc"), "0\0", "pack Z*/Z0 makes a short string");
+    is(pack("Z*/a3", "abc"), "3\0abc", "pack Z*/a3 makes a full string");
+    is(pack("Z*/Z3", "abc"), "3\0ab\0", "pack Z*/Z3 makes a short string");
+    is(pack("Z*/a5", "abc"), "5\0abc\0\0", "pack Z*/a5 makes a long string");
+    is(pack("Z*/Z5", "abc"), "5\0abc\0\0", "pack Z*/Z5 makes a long string");
+    is(pack("Z*/Z"), "1\0\0", "pack Z*/Z makes an extended string");
+    is(pack("Z*/Z", ""), "1\0\0", "pack Z*/Z makes an extended string");
+    is(pack("Z*/a", ""), "0\0", "pack Z*/a makes an extended string");
+}
+{
+    # unpack("A*", $unicode) strips general unicode spaces
+    is(unpack("A*", "ab \n\xa0 \0"), "ab \n\xa0", 
+       'normal A* strip leaves \xa0');
+    is(unpack("U0C0A*", "ab \n\xa0 \0"), "ab \n\xa0", 
+       'normal A* strip leaves \xa0 even if it got upgraded for technical reasons');
+    if ($] > 5.009) {
+	is(unpack("A*", pack("a*(U0U)a*", "ab \n", 0xa0, " \0")), "ab",
+	   'upgraded strings A* removes \xa0');
+	is(unpack("A*", pack("a*(U0UU)a*", "ab \n", 0xa0, 0x1680, " \0")), "ab",
+	   'upgraded strings A* removes all unicode whitespace');
+	is(unpack("A5", pack("a*(U0U)a*", "ab \n", 0x1680, "def", "ab")), "ab",
+	   'upgraded strings A5 removes all unicode whitespace');
+	is(unpack("A*", pack("U", 0x1680)), "",
+	   'upgraded strings A* with nothing left');
+    } else {
+	my $NBSP = chr 0xa0;
+	my $OSM = chr 0x1680; # Ogham Space Mark
+	utf8::encode($NBSP);
+	utf8::encode($OSM);
+	is(unpack("A*", pack("U0a*Ua*", "ab \n", 0xa0, " \0")), "ab \n$NBSP",
+	   'upgraded strings A* leaves \xa0, which in turn leaks UTF-8');
+	is(unpack("A*", pack("U0a*UUa*", "ab \n", 0xa0, 0x1680, " \0")),
+	   "ab \n$NBSP$OSM",
+	   'upgraded strings A* leaves all unicode whitespace');
+	is(unpack("A6", pack("U0a*Ua*", "ab \n", 0x1680, " def", "ab")),
+	   "ab \n" . substr($OSM, 0, 2),
+	   'upgraded strings A6 leaves all unicode whitespace but leaks UTF-8 and then mangles it');
+	is(unpack("A*", pack("U0U", ord " ")), "",
+	   'upgraded strings A* with nothing left');
+    }
 }
