@@ -17,7 +17,7 @@ my $only510 = 414;
 plan tests => 14283 + ($] > 5.009 ? $only510 : 0);
 
 use strict;
-# use warnings;
+# use warnings qw(FATAL all);
 use Config;
 
 my $Is_EBCDIC = (defined $Config{ebcdic} && $Config{ebcdic} eq 'define');
@@ -131,6 +131,7 @@ sub list_eq ($$) {
 
     my $foo;
     open(BIN, $Perl) || die "Can't open $Perl: $!\n";
+    binmode BIN;
     sysread BIN, $foo, 8192;
     close BIN;
 
@@ -370,7 +371,7 @@ SKIP: {
 # temps
 sub foo { my $a = "a"; return $a . $a++ . $a++ }
 {
-  use warnings;
+  use warnings qw(NONFATAL all);;
   my $warning;
   local $SIG{__WARN__} = sub {
       $warning = $_[0];
@@ -945,6 +946,8 @@ SKIP: {
 
     # does unpack U0U on byte data warn?
     {
+	use warnings qw(NONFATAL all);;
+
         my $bad = pack("U0C", 255);
         local $SIG{__WARN__} = sub { $@ = "@_" };
         my @null = unpack('U0U', $bad);
@@ -1193,11 +1196,6 @@ SKIP: {
 }
 
 {  # more on grouping (W.Laun)
-  use warnings;
-  my $warning;
-  local $SIG{__WARN__} = sub {
-      $warning = $_[0];
-  };
   # @ absolute within ()-group
   my $badc = pack( '(a)*', unpack( '(@1a @0a @2)*', 'abcd' ) );
   is( $badc, 'badc' );
@@ -1236,7 +1234,7 @@ SKIP: {
 }
 
 { # syntax checks (W.Laun)
-  use warnings;
+  use warnings qw(NONFATAL all);;
   my @warning;
   local $SIG{__WARN__} = sub {
       push( @warning, $_[0] );
@@ -1408,6 +1406,7 @@ is(scalar unpack('A /A /A Z20', '3004bcde'), 'bcde');
   $b =~ s/(?:17000+|16999+)\d+(e-45) /17$1 /gi; # stringification is gamble
   is($b, "@a @a");
 
+  use warnings qw(NONFATAL all);;
   my $warning;
   local $SIG{__WARN__} = sub {
       $warning = $_[0];
@@ -1501,6 +1500,7 @@ like ($@, qr/Not enough arguments for unpack/,
 }
 
 {
+    use warnings qw(NONFATAL all);;
     my $warning;
     local $SIG{__WARN__} = sub {
         $warning = $_[0];
