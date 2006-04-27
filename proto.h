@@ -1683,8 +1683,8 @@ STATIC SV*	S_refto(pTHX_ SV* sv)
 #endif
 
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
-STATIC I32	S_unpack_rec(pTHX_ struct tempsym_t* symptr, const char *s, const char *strbeg, const char *strend, const char **new_s);
-STATIC SV **	S_pack_rec(pTHX_ SV *cat, struct tempsym_t* symptr, SV **beglist, SV **endlist);
+STATIC I32	S_unpack_rec(pTHX_ struct tempsym* symptr, const char *s, const char *strbeg, const char *strend, const char **new_s);
+STATIC SV **	S_pack_rec(pTHX_ SV *cat, struct tempsym* symptr, SV **beglist, SV **endlist);
 STATIC SV*	S_mul128(pTHX_ SV *sv, U8 m);
 STATIC I32	S_measure_struct(pTHX_ struct tempsym* symptr);
 STATIC bool	S_next_symbol(pTHX_ struct tempsym* symptr);

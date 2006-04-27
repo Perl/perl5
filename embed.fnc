@@ -1139,14 +1139,14 @@ sR	|SV*	|refto		|NN SV* sv
 #endif
 
 #if defined(PERL_IN_PP_PACK_C) || defined(PERL_DECL_PROT)
-s	|I32	|unpack_rec	|NN struct tempsym_t* symptr|NN const char *s \
+s	|I32	|unpack_rec	|NN struct tempsym* symptr|NN const char *s \
 				|NN const char *strbeg|NN const char *strend \
 				|NULLOK const char **new_s
-s	|SV **	|pack_rec	|NN SV *cat|NN struct tempsym_t* symptr \
+s	|SV **	|pack_rec	|NN SV *cat|NN struct tempsym* symptr \
 				|NN SV **beglist|NN SV **endlist
 s	|SV*	|mul128		|NN SV *sv|U8 m
-s	|I32	|measure_struct	|struct tempsym* symptr
-s	|bool	|next_symbol	|struct tempsym* symptr
+s	|I32	|measure_struct	|NN struct tempsym* symptr
+s	|bool	|next_symbol	|NN struct tempsym* symptr
 sR	|SV*	|is_an_int	|NN const char *s|STRLEN l
 s	|int	|div128		|NN SV *pnum|NN bool *done
 s	|const char *|group_end	|NN const char *pat|NN const char *patend \
@@ -1580,7 +1580,7 @@ p	|void	|offer_nice_chunk	|NN void *chunk|U32 chunk_size
 p	|void	|dump_sv_child	|NN SV *sv
 #endif
 
-Apod	|void	|hv_assert	|HV* tb
+Apod	|void	|hv_assert	|NN HV* tb
 
 #ifdef PERL_DONT_CREATE_GVSV
 Ap	|GV*	|gv_SVadd	|NN GV* gv
