@@ -4,10 +4,21 @@ use 5.00503;
 use strict;
 use Carp qw();
 use vars qw($VERSION);
-$VERSION = '0.04_01';
+$VERSION = '1.38';
+$VERSION = eval $VERSION;
 
 # Used for generating filehandle globs.  IO::File might not be available!
 my $fhname = "FH1";
+
+=begin _undocumented
+
+=item mkfh()
+
+Make a filehandle. Same kind of idea as Symbol::gensym().
+
+=end _undocumented
+
+=cut
 
 sub mkfh()
 {

@@ -16,7 +16,8 @@ my $DOSISH = ($^O =~ /^(MSWin\d\d|os2|dos|mint)$/);
 require VMS::Filespec if $Is_VMS;
 
 use vars qw($VERSION);
-$VERSION = '0.08_01';
+$VERSION = '1.38';
+$VERSION = eval $VERSION;
 
 sub _is_prefix {
     my ($self, $path, $prefix) = @_;
@@ -41,7 +42,7 @@ sub _is_prefix {
     return(0);
 }
 
-sub _is_doc { 
+sub _is_doc {
     my ($self, $path) = @_;
     my $man1dir = $Config{man1direxp};
     my $man3dir = $Config{man3direxp};
@@ -50,7 +51,7 @@ sub _is_doc {
            ($man3dir && $self->_is_prefix($path, $man3dir))
            ? 1 : 0)
 }
- 
+
 sub _is_type {
     my ($self, $path, $type) = @_;
     return 1 if $type eq "all";
@@ -127,7 +128,7 @@ sub new {
         }
 
         # Read the .packlist
-        $self->{$module}{packlist} = 
+        $self->{$module}{packlist} =
           ExtUtils::Packlist->new($File::Find::name);
     };
 
@@ -186,7 +187,7 @@ sub files {
     my (@files);
     foreach my $file (keys(%{$self->{$module}{packlist}})) {
         push(@files, $file)
-          if ($self->_is_type($file, $type) && 
+          if ($self->_is_type($file, $type) &&
               $self->_is_under($file, @under));
     }
     return(@files);
