@@ -3026,10 +3026,11 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 }
 
 STATIC PerlIO *
-S_check_type_and_open(pTHX_ const char *name, const char *mode)
+S_check_type_and_open(const char *name, const char *mode)
 {
     Stat_t st;
     const int st_rc = PerlLIO_stat(name, &st);
+
     if (st_rc < 0 || S_ISDIR(st.st_mode) || S_ISBLK(st.st_mode)) {
 	return NULL;
     }
@@ -3147,7 +3148,7 @@ PP(pp_require)
 	{
 	    namesv = newSV(0);
 	    for (i = 0; i <= AvFILL(ar); i++) {
-		SV *dirsv = *av_fetch(ar, i, TRUE);
+		SV * const dirsv = *av_fetch(ar, i, TRUE);
 
 		if (SvROK(dirsv)) {
 		    int count;
@@ -3200,7 +3201,7 @@ PP(pp_require)
 			}
 
 			if (SvTYPE(arg) == SVt_PVGV) {
-			    IO *io = GvIO((GV *)arg);
+			    IO * const io = GvIO((GV *)arg);
 
 			    ++filter_has_file;
 
@@ -3644,7 +3645,7 @@ Perl_create_eval_scope(pTHX_ U32 flags)
 PP(pp_entertry)
 {
     dVAR;
-    PERL_CONTEXT *cx = create_eval_scope(0);
+    PERL_CONTEXT * const cx = create_eval_scope(0);
     cx->blk_eval.retop = cLOGOP->op_other->op_next;
     return DOCATCH(PL_op->op_next);
 }
@@ -3914,7 +3915,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	if (c == 0)
 	    PUSHs(&PL_sv_no);
 	else if (SvTEMP(TOPs))
-	    SvREFCNT_inc(TOPs);
+	    SvREFCNT_inc_void(TOPs);
 	FREETMPS;
 	LEAVE;
 	RETURN;
@@ -4155,7 +4156,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	if (c == 0)
 	    PUSHs(&PL_sv_undef);
 	else if (SvTEMP(TOPs))
-	    SvREFCNT_inc(TOPs);
+	    SvREFCNT_inc_void(TOPs);
 
 	if (SM_OTHER_REF(PVCV)) {
 	    /* This one has to be null-proto'd too.
@@ -4166,7 +4167,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    if (c == 0)
 		PUSHs(&PL_sv_undef);
 	    else if (SvTEMP(TOPs))
-		SvREFCNT_inc(TOPs);
+		SvREFCNT_inc_void(TOPs);
 	    FREETMPS;
 	    LEAVE;
 	    PUTBACK;
