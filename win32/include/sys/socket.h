@@ -10,11 +10,49 @@
 extern "C" {
 #endif
 
+#ifndef   _WINCE
+
 #define WIN32_LEAN_AND_MEAN
 #ifdef __GNUC__
 #  define Win32_Winsock
 #endif
 #include <windows.h>
+
+#else
+/*_WINCE*/
+#ifndef FAR
+#define  FAR
+#endif
+
+#define  PASCAL     __stdcall
+#define  WINAPI     __stdcall
+
+#undef WORD
+typedef  int        BOOL;
+typedef  unsigned short WORD;
+typedef  void*      HANDLE;
+typedef  void*      HWND;
+typedef  int (FAR WINAPI *FARPROC)();
+
+typedef unsigned long       DWORD;
+typedef void *PVOID;
+
+#define IN
+#define OUT
+
+#ifndef UNDER_CE
+typedef struct _OVERLAPPED {
+   DWORD   Internal;
+   DWORD   InternalHigh;
+   DWORD   Offset;
+   DWORD   OffsetHigh;
+   HANDLE  hEvent;
+} OVERLAPPED, *LPOVERLAPPED;
+#endif
+
+#undef   HOST_NOT_FOUND
+
+#endif  /*_WINCE*/
 
 /* Too late to include winsock2.h if winsock.h has already been loaded */
 #ifndef _WINSOCKAPI_
