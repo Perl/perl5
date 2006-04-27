@@ -960,6 +960,7 @@ PERL_CALLCONV OP*	Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP* loop, I
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
+PERL_CALLCONV OP*	Perl_newWHILEOP8(pTHX_ I32 flags, I32 debuggable, LOOP* loop, I32 whileline, OP* expr, OP* block, OP* cont, I32 has_my);
 PERL_CALLCONV PERL_SI*	Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;

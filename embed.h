@@ -587,6 +587,7 @@
 #define newSVsv			Perl_newSVsv
 #define newUNOP			Perl_newUNOP
 #define newWHILEOP		Perl_newWHILEOP
+#define newWHILEOP8		Perl_newWHILEOP8
 #define new_stackinfo		Perl_new_stackinfo
 #define scan_vstring		Perl_scan_vstring
 #ifdef PERL_CORE
@@ -2622,6 +2623,7 @@
 #define newSVsv(a)		Perl_newSVsv(aTHX_ a)
 #define newUNOP(a,b,c)		Perl_newUNOP(aTHX_ a,b,c)
 #define newWHILEOP(a,b,c,d,e,f,g)	Perl_newWHILEOP(aTHX_ a,b,c,d,e,f,g)
+#define newWHILEOP8(a,b,c,d,e,f,g,h)	Perl_newWHILEOP8(aTHX_ a,b,c,d,e,f,g,h)
 #define new_stackinfo(a,b)	Perl_new_stackinfo(aTHX_ a,b)
 #define scan_vstring(a,b)	Perl_scan_vstring(aTHX_ a,b)
 #ifdef PERL_CORE

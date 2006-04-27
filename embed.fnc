@@ -566,8 +566,11 @@ Apa	|SV*	|vnewSVpvf	|NN const char* pat|NULLOK va_list* args
 Apd	|SV*	|newSVrv	|NN SV* rv|NULLOK const char* classname
 Apda	|SV*	|newSVsv	|NULLOK SV* old
 Apa	|OP*	|newUNOP	|I32 type|I32 flags|NULLOK OP* first
-Apa	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|NULLOK LOOP* loop \
+AMpa	|OP*	|newWHILEOP	|I32 flags|I32 debuggable|NULLOK LOOP* loop \
 				|I32 whileline|NULLOK OP* expr|NULLOK OP* block|NULLOK OP* cont
+AMp	|OP*	|newWHILEOP8	|I32 flags|I32 debuggable|NULLOK LOOP* loop \
+				|I32 whileline|NULLOK OP* expr \
+				|NULLOK OP* block|NULLOK OP* cont|I32 has_my
 Apa	|PERL_SI*|new_stackinfo|I32 stitems|I32 cxitems
 Ap	|char*	|scan_vstring	|NN char *vstr|NN SV *sv
 p	|PerlIO*|nextargv	|NN GV* gv
