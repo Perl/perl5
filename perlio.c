@@ -2271,6 +2271,7 @@ perl_mutex PerlIO_mutex;
 /* Must be called with PerlIO_mutex locked.  */
 static void
 S_more_refcounted_fds(pTHX_ const int new_fd) {
+    dVAR;
     const int old_max = PL_perlio_fd_refcnt_size;
     const int new_max = 16 + (new_fd & ~15);
     int *new_array;

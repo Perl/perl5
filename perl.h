@@ -137,7 +137,7 @@
 #  endif
 #endif
 
-#define pVAR    register struct perl_vars* const my_vars PERL_UNUSED_DECL
+#define pVAR    register struct perl_vars* my_vars PERL_UNUSED_DECL
 
 #ifdef PERL_GLOBAL_STRUCT
 #  define dVAR		pVAR    = (struct perl_vars*)PERL_GET_VARS()

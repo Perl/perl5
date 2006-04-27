@@ -678,6 +678,7 @@ Perl_sv_free_arenas(pTHX)
 void*
 Perl_get_arena(pTHX_ int arena_size)
 {
+    dVAR;
     struct arena_desc* adesc;
     struct arena_set *newroot, **aroot = (struct arena_set**) &PL_body_arenas;
     int curr;

@@ -2564,6 +2564,7 @@ in C<struct refcounted_he *>.
 HV *
 Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
 {
+    dVAR;
     HV *hv = newHV();
     U32 placeholders = 0;
     /* We could chase the chain once to get an idea of the number of keys,
@@ -2685,6 +2686,7 @@ reference count of 1.
 struct refcounted_he *
 Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent,
 		       SV *const key, SV *const value) {
+    dVAR;
     struct refcounted_he *he;
     STRLEN key_len;
     const char *key_p = SvPV_const(key, key_len);
