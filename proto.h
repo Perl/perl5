@@ -3737,13 +3737,13 @@ STATIC I32	S_expect_number(pTHX_ char** pattern)
 			__attribute__nonnull__(pTHX_1);
 
 #
-STATIC STRLEN	S_sv_pos_u2b_forwards(pTHX_ const U8 *const start, const U8 *const send, STRLEN uoffset)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+STATIC STRLEN	S_sv_pos_u2b_forwards(const U8 *const start, const U8 *const send, STRLEN uoffset)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
 
-STATIC STRLEN	S_sv_pos_u2b_midway(pTHX_ const U8 *const start, const U8 *send, STRLEN uoffset, STRLEN uend)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+STATIC STRLEN	S_sv_pos_u2b_midway(const U8 *const start, const U8 *send, STRLEN uoffset, STRLEN uend)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
 
 STATIC STRLEN	S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start, const U8 *const send, STRLEN uoffset, STRLEN uoffset0, STRLEN boffset0)
 			__attribute__nonnull__(pTHX_1)

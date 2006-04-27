@@ -1368,9 +1368,9 @@ s	|int	|sv_2iuv_non_preserve	|NN SV *sv|I32 numtype
 #  endif
 sR	|I32	|expect_number	|NN char** pattern
 #
-s	|STRLEN	|sv_pos_u2b_forwards|NN const U8 *const start \
+sn	|STRLEN	|sv_pos_u2b_forwards|NN const U8 *const start \
 		|NN const U8 *const send|STRLEN uoffset
-s	|STRLEN	|sv_pos_u2b_midway|NN const U8 *const start \
+sn	|STRLEN	|sv_pos_u2b_midway|NN const U8 *const start \
 		|NN const U8 *send|STRLEN uoffset|STRLEN uend
 s	|STRLEN	|sv_pos_u2b_cached|NN SV *sv|NN MAGIC **mgp \
 		|NN const U8 *const start|NN const U8 *const send \

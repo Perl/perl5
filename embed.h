@@ -3548,8 +3548,8 @@
 #define expect_number(a)	S_expect_number(aTHX_ a)
 #endif
 #ifdef PERL_CORE
-#define sv_pos_u2b_forwards(a,b,c)	S_sv_pos_u2b_forwards(aTHX_ a,b,c)
-#define sv_pos_u2b_midway(a,b,c,d)	S_sv_pos_u2b_midway(aTHX_ a,b,c,d)
+#define sv_pos_u2b_forwards	S_sv_pos_u2b_forwards
+#define sv_pos_u2b_midway	S_sv_pos_u2b_midway
 #define sv_pos_u2b_cached(a,b,c,d,e,f,g)	S_sv_pos_u2b_cached(aTHX_ a,b,c,d,e,f,g)
 #define utf8_mg_pos_cache_update(a,b,c,d,e)	S_utf8_mg_pos_cache_update(aTHX_ a,b,c,d,e)
 #define sv_pos_b2u_forwards(a,b)	S_sv_pos_b2u_forwards(aTHX_ a,b)
