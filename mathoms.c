@@ -1187,6 +1187,26 @@ Perl_save_destructor(pTHX_ DESTRUCTORFUNC_NOCONTEXT_t f, void* p)
     SSPUSHINT(SAVEt_DESTRUCTOR);
 }
 
+
+/*
+=for apidoc unpack_str
+
+The engine implementing unpack() Perl function. Note: parameters strbeg, new_s
+and ocnt are not used. This call should not be used, use unpackstring instead.
+
+=cut */
+
+I32
+Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s,
+		const char *strbeg, const char *strend, char **new_s, I32 ocnt,
+		U32 flags)
+{
+    PERL_UNUSED_ARG(strbeg);
+    PERL_UNUSED_ARG(new_s);
+    PERL_UNUSED_ARG(ocnt);
+
+    return unpackstring(pat, patend, s, strend, flags);
+}
 #endif /* NO_MATHOMS */
 
 /*

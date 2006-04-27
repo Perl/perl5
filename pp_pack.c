@@ -329,6 +329,11 @@ S_mul128(pTHX_ SV *sv, U8 m)
 #  define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, l, long, void)
 #  define DO_BO_UNPACK_PC(var)	DO_BO_UNPACK_PTR(var, l, long, char)
 #  define DO_BO_PACK_PC(var)	DO_BO_PACK_PTR(var, l, long, char)
+# elif PTRSIZE == IVSIZE
+#  define DO_BO_UNPACK_P(var)	DO_BO_UNPACK_PTR(var, l, IV, void)
+#  define DO_BO_PACK_P(var)	DO_BO_PACK_PTR(var, l, IV, void)
+#  define DO_BO_UNPACK_PC(var)	DO_BO_UNPACK_PTR(var, l, IV, char)
+#  define DO_BO_PACK_PC(var)	DO_BO_PACK_PTR(var, l, IV, char)
 # else
 #  define DO_BO_UNPACK_P(var)	BO_CANT_DOIT(unpack, pointer)
 #  define DO_BO_PACK_P(var)	BO_CANT_DOIT(pack, pointer)
@@ -376,7 +381,7 @@ S_mul128(pTHX_ SV *sv, U8 m)
 typedef U8 packprops_t;
 #if 'J'-'I' == 1
 /* ASCII */
-const packprops_t packprops[512] = {
+STATIC const packprops_t packprops[512] = {
     /* normal */
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -501,7 +506,7 @@ const packprops_t packprops[512] = {
 };
 #else
 /* EBCDIC (or bust) */
-const packprops_t packprops[512] = {
+STATIC const packprops_t packprops[512] = {
     /* normal */
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -1171,46 +1176,6 @@ first_symbol(const char *pat, const char *patend) {
     return 0;
 }
 #endif
-
-/*
-=for apidoc unpack_str
-
-The engine implementing unpack() Perl function. Note: parameters strbeg, new_s
-and ocnt are not used. This call should not be used, use unpackstring instead.
-
-=cut */
-
-I32
-Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s, const char *strbeg, const char *strend, char **new_s, I32 ocnt, U32 flags)
-{
-    tempsym_t sym;
-    PERL_UNUSED_ARG(strbeg);
-    PERL_UNUSED_ARG(new_s);
-    PERL_UNUSED_ARG(ocnt);
-
-    if (flags & FLAG_DO_UTF8) flags |= FLAG_WAS_UTF8;
-#ifndef PERL_PACK_NEVER_UPGRADE_COMPATIBILITY
-    else if (need_utf8(pat, patend)) {
-	/* We probably should try to avoid this in case a scalar context call
-	   wouldn't get to the "U0" */
-	STRLEN len = strend - s;
-	s = (char *) bytes_to_utf8((U8 *) s, &len);
-	SAVEFREEPV(s);
-	strend = s + len;
-	flags |= FLAG_DO_UTF8;
-    }
-
-    if (first_symbol(pat, patend) != 'U' && (flags & FLAG_DO_UTF8))
-	flags |= FLAG_PARSE_UTF8;
-#else
-    if (flags & FLAG_DO_UTF8)
-	flags |= FLAG_PARSE_UTF8;
-#endif
-
-    TEMPSYM_INIT(&sym, pat, patend, flags);
-
-    return unpack_rec(&sym, s, s, strend, NULL );
-}
 
 /*
 =for apidoc unpackstring
@@ -2130,7 +2095,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 	    if (symptr->howlen == e_star)
 	        Perl_croak(aTHX_ "'P' must have an explicit size in unpack");
 	    EXTEND(SP, 1);
-	    if (sizeof(char*) <= strend - s) {
+	    if (s + sizeof(char*) <= strend) {
 		char *aptr;
 		SHIFT_VAR(utf8, s, strend, aptr, datumtype);
 		DO_BO_UNPACK_PC(aptr);
@@ -2222,9 +2187,9 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
              * (and just as fast as doing character arithmetic)
              */
             if (PL_uudmap['M'] == 0) {
-                int i;
+		size_t i;
 
-                for (i = 0; i < sizeof(PL_uuemap); i += 1)
+		for (i = 0; i < sizeof(PL_uuemap); ++i)
                     PL_uudmap[(U8)PL_uuemap[i]] = i;
                 /*
                  * Because ' ' and '`' map to the same value,
@@ -3104,7 +3069,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    ckWARN(WARN_PACK))
 		    Perl_warner(aTHX_ packWARN(WARN_PACK),
 				"Character in 'c' format wrapped in pack");
-		PUSH_BYTE(utf8, cur, aiv & 0xff);
+		PUSH_BYTE(utf8, cur, (U8)(aiv & 0xff));
 	    }
 	    break;
 	case 'C':
@@ -3123,7 +3088,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		    ckWARN(WARN_PACK))
 		    Perl_warner(aTHX_ packWARN(WARN_PACK),
 				"Character in 'C' format wrapped in pack");
-		*cur++ = aiv & 0xff;
+		*cur++ = (char)(aiv & 0xff);
 	    }
 	    break;
 #ifdef PERL_PACK_CAN_W
@@ -3677,7 +3642,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    if (len <= 2) len = 45;
 	    else len = len / 3 * 3;
 	    if (len >= 64) {
-		Perl_warner(aTHX_ packWARN(WARN_PACK),
+		if (ckWARN(WARN_PACK))
+		    Perl_warner(aTHX_ packWARN(WARN_PACK),
 			    "Field too wide in 'u' format in pack");
 		len = 63;
 	    }
