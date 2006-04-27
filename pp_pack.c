@@ -1187,7 +1187,8 @@ Issue C<PUTBACK> before and C<SPAGAIN> after the call to this function.
 =cut */
 
 I32
-Perl_unpackstring(pTHX_ const char *pat, const char *patend, const char *s, const char *strend, U32 flags)
+Perl_unpackstring(pTHX_ char *pat, char *patend, char *s, char *strend,
+		  U32 flags)
 {
     tempsym_t sym;
 
@@ -2458,7 +2459,8 @@ flags are not used. This call should not be used; use packlist instead.
 
 
 void
-Perl_pack_cat(pTHX_ SV *cat, const char *pat, const char *patend, register SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
+Perl_pack_cat(pTHX_ SV *cat, char *pat, char *patend, register SV **beglist,
+	      SV **endlist, SV ***next_in_list, U32 flags)
 {
     tempsym_t sym;
     PERL_UNUSED_ARG(next_in_list);
@@ -2479,7 +2481,8 @@ The engine implementing pack() Perl function.
 
 
 void
-Perl_packlist(pTHX_ SV *cat, const char *pat, const char *patend, register SV **beglist, SV **endlist )
+Perl_packlist(pTHX_ SV *cat, char *pat, char *patend, register SV **beglist,
+	      SV **endlist)
 {
     STRLEN no_len;
     tempsym_t sym;
