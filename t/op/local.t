@@ -4,7 +4,7 @@ BEGIN {
     chdir 't' if -d 't';
     require './test.pl';
 }
-plan tests => 113;
+plan tests => 114;
 
 my $list_assignment_supported = 1;
 
@@ -415,3 +415,15 @@ sub f { ok(0 == $[); }
     is($h{"\243"}, "pound");
     is($h{"\302\240"}, "octects");
 }
+
+# [perl #39012] localizing @_ element then shifting frees element too # soon
+
+{
+    my $x;
+    my $y = bless [], 'X39012';
+    sub X39012::DESTROY { $x++ }
+    sub { local $_[0]; shift }->($y);
+    ok(!$x,  '[perl #39012]');
+    
+}
+
