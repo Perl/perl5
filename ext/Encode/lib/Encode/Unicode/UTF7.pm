@@ -51,10 +51,11 @@ sub encode($$;$){
     return $bytes;
 }
 	   
-sub decode{
+sub decode($$;$){
     my ($obj, $bytes, $chk) = @_;
     my $len = length($bytes);
     my $str = "";
+    no warnings 'uninitialized';
     while (pos($bytes) < $len) {
 	if    ($bytes =~ /\G([^+]+)/ogc) {
 	    $str .= $1;

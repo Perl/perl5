@@ -1,9 +1,9 @@
 #
-# $Id: Encode.pm,v 2.14 2006/01/15 15:43:36 dankogai Exp dankogai $
+# $Id: Encode.pm,v 2.15 2006/04/06 15:44:11 dankogai Exp dankogai $
 #
 package Encode;
 use strict;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.14 $ =~ /(\d+)/g;
+our $VERSION = sprintf "%d.%02d", q$Revision: 2.15 $ =~ /(\d+)/g;
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load(__PACKAGE__, $VERSION);
@@ -14,7 +14,7 @@ use base qw/Exporter/;
 # Public, encouraged API is exported by default
 
 our @EXPORT = qw(
-  decode  decode_utf8  encode  encode_utf8
+  decode  decode_utf8  encode  encode_utf8 str2bytes bytes2str
   encodings  find_encoding clone_encoding
 );
 
@@ -151,6 +151,7 @@ sub encode($$;$)
     $_[1] = $string if $check and !($check & LEAVE_SRC());
     return $octets;
 }
+*str2bytes = \&encode;
 
 sub decode($$;$)
 {
@@ -167,6 +168,7 @@ sub decode($$;$)
     $_[1] = $octets if $check and !($check & LEAVE_SRC());
     return $string;
 }
+*bytes2str = \&decode;
 
 sub from_to($$$;$)
 {

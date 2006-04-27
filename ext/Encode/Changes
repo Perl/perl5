@@ -1,10 +1,24 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.14 2006/01/15 15:43:36 dankogai Exp dankogai $
+# $Id: Changes,v 2.15 2006/04/06 15:44:11 dankogai Exp dankogai $
 #
 
-$Revision: 2.14 $ $Date: 2006/01/15 15:43:36 $
-2.14  2006/01/15 15:06:36 $
+$Revision: 2.15 $ $Date: 2006/04/06 15:44:11 $
+! Unicode/Unicode.xs
+  Addressed: UTF-16, UTF-32, UCS, UTF-7 decoders mishandle illegal characters
+  http://rt.cpan.org/NoAuth/Bug.html?id=#18556
+! Encode.pm
+  added str2bytes() as an alias to encode() and  bytes2str() as an alias 
+  to decode()
+  http://rt.cpan.org/NoAuth/Bug.html?id=#17103
+! Encode.xs
+  Change 26922: Avoid warning with MS Visual C compiler.
+  Message-Id: <200601231245.k0NCj2dw009484@smtp3.ActiveState.com>
+! t/perlio.t
+  Change 26067: As using -C to turn on utf8 IO is equivalent to the open pragma
+  Message-Id: <200511092227.jA9MRcYD009025@smtp3.ActiveState.com>
+
+2.14 2006/01/15 15:43:36
 ! Makefile.PL 
   Change 26295: Don't build manpages for Encode and Unicode::Normalize
   Message-Id: <200512071540.jB7Fe4Gt017960@smtp3.ActiveState.com>

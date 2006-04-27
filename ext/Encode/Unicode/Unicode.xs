@@ -1,5 +1,5 @@
 /*
- $Id: Unicode.xs,v 2.1 2004/10/24 13:00:29 dankogai Exp $
+ $Id: Unicode.xs,v 2.2 2006/04/06 15:44:11 dankogai Exp dankogai $
  */
 
 #define PERL_NO_GET_CONTEXT
@@ -132,8 +132,8 @@ CODE:
     while (s < e && s+size <= e) {
 	UV ord = enc_unpack(aTHX_ &s,e,size,endian);
 	U8 *d;
-	if (size != 4 && invalid_ucs2(ord)) {
-	    if (ucs2) {
+	if (issurrogate(ord)) {
+	    if (ucs2 || size == 4) {
 		if (check) {
 		    croak("%"SVf":no surrogates allowed %"UVxf,
 			  *hv_fetch((HV *)SvRV(obj),"Name",4,0),
@@ -148,24 +148,49 @@ CODE:
 	    else {
 		UV lo;
 		if (!isHiSurrogate(ord)) {
-		    croak("%"SVf":Malformed HI surrogate %"UVxf,
-			  *hv_fetch((HV *)SvRV(obj),"Name",4,0),
-			  ord);
+		    if (check) {
+			croak("%"SVf":Malformed HI surrogate %"UVxf,
+			      *hv_fetch((HV *)SvRV(obj),"Name",4,0),
+			      ord);
+		    }
+		    else {
+			ord = FBCHAR;
+		    }
 		}
-		if (s+size > e) {
-		    /* Partial character */
-		    s -= size;   /* back up to 1st half */
-		    break;       /* And exit loop */
+	        else {
+		    if (s+size > e) {
+			/* Partial character */
+			s -= size;   /* back up to 1st half */
+			break;       /* And exit loop */
+		    }
+		    lo = enc_unpack(aTHX_ &s,e,size,endian);
+		    if (!isLoSurrogate(lo)){
+			if (check) {
+			    croak("%"SVf":Malformed LO surrogate %"UVxf,
+				  *hv_fetch((HV *)SvRV(obj),"Name",4,0),
+				  ord);
+			}
+			else {
+			    ord = FBCHAR;
+			}
+		    }
+		    else {
+			ord = 0x10000 + ((ord - 0xD800) << 10) + (lo - 0xDC00);
+		    }
 		}
-		lo = enc_unpack(aTHX_ &s,e,size,endian);
-		if (!isLoSurrogate(lo)){
-		    croak("%"SVf":Malformed LO surrogate %"UVxf,
-			  *hv_fetch((HV *)SvRV(obj),"Name",4,0),
-			  ord);
-		}
-		ord = 0x10000 + ((ord - 0xD800) << 10) + (lo - 0xDC00);
 	    }
 	}
+
+	if ((ord & 0xFFFE) == 0xFFFE || (ord >= 0xFDD0 && ord <= 0xFDEF)) {
+	    if (check) {
+		croak("%"SVf":Unicode character %"UVxf" is illegal",
+		      *hv_fetch((HV *)SvRV(obj),"Name",4,0),
+		      ord);
+	    } else {
+		ord = FBCHAR;
+	    }
+	}
+
 	d = (U8 *) SvGROW(result,SvCUR(result)+UTF8_MAXLEN+1);
 	d = uvuni_to_utf8_flags(d+SvCUR(result), ord, 0);
 	SvCUR_set(result,d - (U8 *)SvPVX(result));
