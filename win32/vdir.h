@@ -150,7 +150,7 @@ void VDir::Init(VDir* pDir, VMem *p)
 	bManageDirectory = 0;
 	driveBits = GetLogicalDrives();
 	if (GetLogicalDriveStrings(sizeof(szBuffer), szBuffer)) {
-	    char* pEnv = GetEnvironmentStrings();
+	    char* pEnv = (char*)GetEnvironmentStrings();
 	    char* ptr = szBuffer;
 	    for (index = 0; index < driveCount; ++index) {
 		if (driveBits & (1<<index)) {

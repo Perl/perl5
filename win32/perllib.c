@@ -40,6 +40,9 @@ xs_init(pTHX)
 
 #ifdef PERL_IMPLICIT_SYS
 
+/* WINCE: include replaced by:
+extern "C" void win32_checkTLS(PerlInterpreter *host_perl);
+*/
 #include "perlhost.h"
 
 void
@@ -48,10 +51,44 @@ win32_checkTLS(PerlInterpreter *host_perl)
     dTHX;
     if (host_perl != my_perl) {
 	int *nowhere = NULL;
-        *nowhere = 0; 
+#ifdef _WIN_CE
+	printf(" ... bad in win32_checkTLS\n");
+	printf("  %08X ne %08X\n",host_perl,my_perl);
+#endif
 	abort();
     }
 }
+
+#ifdef UNDER_CE
+int GetLogicalDrives() {
+    return 0; /* no logical drives on CE */
+}
+int GetLogicalDriveStrings(int size, char addr[]) {
+    return 0; /* no logical drives on CE */
+}
+/* TBD */
+DWORD GetFullPathNameA(LPCSTR fn, DWORD blen, LPTSTR buf,  LPSTR *pfile) {
+    return 0;
+}
+/* TBD */
+DWORD GetFullPathNameW(CONST WCHAR *fn, DWORD blen, WCHAR * buf,  WCHAR **pfile) {
+    return 0;
+}
+/* TBD */
+DWORD SetCurrentDirectoryA(LPSTR pPath) {
+    return 0;
+}
+/* TBD */
+DWORD SetCurrentDirectoryW(CONST WCHAR *pPath) {
+    return 0;
+}
+int xcesetuid(uid_t id){return 0;}
+int xceseteuid(uid_t id){  return 0;}
+int xcegetuid() {return 0;}
+int xcegeteuid(){ return 0;}
+#endif
+
+/* WINCE??: include "perlhost.h" */
 
 EXTERN_C void
 perl_get_host_info(struct IPerlMemInfo* perlMemInfo,
@@ -177,7 +214,7 @@ RunPerl(int argc, char **argv, char **env)
      * Borland's CRT does the right thing to argv[0] already. */
     char szModuleName[MAX_PATH];
 
-    GetModuleFileName(NULL, szModuleName, sizeof(szModuleName));
+    Win_GetModuleFileName(NULL, szModuleName, sizeof(szModuleName));
     (void)win32_longpath(szModuleName);
     argv[0] = szModuleName;
 #endif
@@ -254,7 +291,11 @@ DllMain(HANDLE hModule,		/* DLL module handle */
 	setmode( fileno( stderr ), O_BINARY );
 	_fmode = O_BINARY;
 #endif
+
+#ifndef UNDER_CE
 	DisableThreadLibraryCalls((HMODULE)hModule);
+#endif
+
 	w32_perldll_handle = hModule;
 	set_w32_module_name();
 	break;
@@ -289,6 +330,7 @@ DllMain(HANDLE hModule,		/* DLL module handle */
     }
     return TRUE;
 }
+
 
 #if defined(USE_ITHREADS) && defined(PERL_IMPLICIT_SYS)
 EXTERN_C PerlInterpreter *

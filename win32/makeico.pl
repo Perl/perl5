@@ -1,7 +1,12 @@
-binmode STDOUT;
+if (@ARGV) {
+    open ICO, ">", shift or die $!;
+} else {
+    *ICO= *STDOUT;
+}
+binmode ICO;
 while (<DATA>) {
   chomp;
-  print pack "H*", $_;
+  print ICO pack "H*", $_;
 }
 
 # Create new hex data with
@@ -98,3 +103,4 @@ ff00ffffff00060606060606060606060606060606060606060606060606060d
 0000000000000000000000000000ffff9e5cfbb77420fd9b7865fd9b2074fd5b
 7320fd5b6e20fd137573f0017072e0036c65e0032077e4076e20e6076577c30f
 6720ff9f6520ffff6f6effff6e20
+
