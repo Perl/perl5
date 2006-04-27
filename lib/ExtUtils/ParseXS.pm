@@ -5,6 +5,7 @@ use Cwd;
 use Config;
 use File::Basename;
 use File::Spec;
+use Symbol;
 
 require Exporter;
 
@@ -17,7 +18,7 @@ my(@XSStack);	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
 use vars qw($VERSION);
-$VERSION = '2.10';
+$VERSION = '2.15';
 
 use vars qw(%input_expr %output_expr $ProtoUsed @InitFileCode $FH $proto_re $Overload $errors $Fallback
 	    $cplusplus $hiertype $WantPrototypes $WantVersionChk $except $WantLineNumbers
@@ -71,7 +72,7 @@ sub process_file {
   @XSStack = ({type => 'none'});
   ($XSS_work_idx, $cpp_next_tmp) = (0, "XSubPPtmpAAAA");
   @InitFileCode = ();
-  $FH = 'File0000' ;
+  $FH = Symbol::gensym();
   $proto_re = "[" . quotemeta('\$%&*@;[]') . "]" ;
   $Overload = 0;
   $errors = 0;
@@ -196,8 +197,8 @@ sub process_file {
     $input_expr{$key} =~ s/;*\s+\z//;
   }
 
-  my ($bal, $cast, $size);
-  $bal = qr[(?:(?>[^()]+)|\((??{ $bal })\))*]; # ()-balanced
+  my ($cast, $size);
+  our $bal = qr[(?:(?>[^()]+)|\((??{ $bal })\))*]; # ()-balanced
   $cast = qr[(?:\(\s*SV\s*\*\s*\)\s*)?]; # Optional (SV*) cast
   $size = qr[,\s* (??{ $bal }) ]x; # Third arg (to setpvn)
 
@@ -225,7 +226,7 @@ sub process_file {
 				  )) . "|$END)\\s*:";
 
   
-  my ($C_group_rex, $C_arg);
+  our ($C_group_rex, $C_arg);
   # Group in C (no support for comments or literals)
   $C_group_rex = qr/ [({\[]
 		       (?: (?> [^()\[\]{}]+ ) | (??{ $C_group_rex }) )*
@@ -983,6 +984,7 @@ EOF
   chdir($orig_cwd);
   select($orig_fh);
   untie *PSEUDO_STDOUT if tied *PSEUDO_STDOUT;
+  close $FH;
 
   return 1;
 }
@@ -1439,7 +1441,7 @@ sub INCLUDE_handler ()
 		    Handle          => $FH,
 		   }) ;
 
-    ++ $FH ;
+    $FH = Symbol::gensym();
 
     # open the new file
     open ($FH, "$_") or death("Cannot open '$_': $!") ;
