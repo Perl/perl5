@@ -20,6 +20,7 @@ struct mgvtbl {
     int		(CPERLscope(*svt_copy))	(pTHX_ SV *sv, MAGIC* mg,
     					SV *nsv, const char *name, int namlen);
     int		(CPERLscope(*svt_dup))	(pTHX_ MAGIC *mg, CLONE_PARAMS *param);
+    int		(CPERLscope(*svt_local))(pTHX_ SV *nsv, MAGIC *mg);
 };
 #endif
 
@@ -38,8 +39,9 @@ struct magic {
 #define MGf_MINMATCH   1        /* PERL_MAGIC_regex_global only */
 #define MGf_REFCOUNTED 2
 #define MGf_GSKIP      4
-#define MGf_COPY       8
-#define MGf_DUP        16
+#define MGf_COPY       8	/* has an svt_copy  MGVTBL entry */
+#define MGf_DUP     0x10 	/* has an svt_dup   MGVTBL entry */
+#define MGf_LOCAL   0x20	/* has an svt_local MGVTBL entry */
 
 #define MgTAINTEDDIR(mg)	(mg->mg_flags & MGf_TAINTEDDIR)
 #define MgTAINTEDDIR_on(mg)	(mg->mg_flags |= MGf_TAINTEDDIR)
