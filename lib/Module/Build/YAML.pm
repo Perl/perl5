@@ -1,11 +1,11 @@
 package Module::Build::YAML;
 
 use strict;
-use warnings;
 
-our $VERSION = "0.50";
-our @EXPORT = ();
-our @EXPORT_OK = qw(Dump Load DumpFile LoadFile);
+use vars qw($VERSION @EXPORT @EXPORT_OK);
+$VERSION = "0.50";
+@EXPORT = ();
+@EXPORT_OK = qw(Dump Load DumpFile LoadFile);
 
 sub new {
     my $this = shift;
@@ -39,7 +39,7 @@ sub DumpFile {
     if ($filename =~ /^\s*(>{1,2})\s*(.*)$/) {
         ($mode, $filename) = ($1, $2);
     }
-    open my $OUT, $mode, $filename
+    open my $OUT, "$mode $filename"
       or die "Can't open $filename for writing: $!";
     print $OUT Dump(@_);
     close $OUT;

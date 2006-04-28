@@ -6,7 +6,7 @@ use base qw(Module::Build::Base);
 
 use ExtUtils::Install;
 
-sub have_multiarg_pipeopen { 0 }
+sub have_forkpipe { 0 }
 
 sub new {
   my $class = shift;

@@ -1,6 +1,46 @@
 Revision history for Perl extension Module::Build.
 
-0.27_11  Tue Mar 28 22:50:50 CST 2006
+0.28  Thu Apr 27 22:25:00 CDT 2006
+
+ - When y_n() or prompt() are called without a default value and the
+   build seems to be unattended (e.g. in automatic CPAN testing), we
+   now die() with an error message rather than silently returning
+   undef for prompt(), or looping indefinitely for y_n().
+
+ - When searching for '.modulebuildrc', return the first HOME-like
+   directory that actually contains the file instead of the first
+   existing directory. Document the search locations and the order
+   searched. [Spotted by David Golden]
+
+ - Split the API documentation out of Module::Build::Authoring into
+   its own document: Module::Build::API.
+
+ - We should not emit a warning if a Module::Build subclass is
+   required in a Makefile.PL that is not bundled in the current
+   distribution; it may be installed on the user's system. [Spotted by
+   Tyler MacDonald]
+
+ - copy_if_modified() now preserves the executable bit of the source
+   file. [Spotted by Julian Mehnle]
+
+ - Fixed compatibility of our screen-scraping the Test::Harness output
+   so we can recognize the most recent Test::Harness version. [Steve
+   Hay]
+
+ - Backing out a requirement added in 0.27_06 on the method y_n()
+   to always include a default. This behavior would cause existing
+   build scripts to start failing. We now fail with a missing default
+   only when $ENV{PERL_MM_USE_DEFAULT} is set because there is no
+   reasonable default.
+
+ - Make install_types() method smarter with respect to custom install
+   types.
+
+ - Add documentation for the install_base_relpaths() and
+   prefix_relpaths() methods. Improved their usage for a public API,
+   and added tests.
+
+0.27_10  Tue Mar 28 22:50:50 CST 2006
 
  - Added the create_packlist property, default true, which controls
    whether packlist files will be written during installation.  This

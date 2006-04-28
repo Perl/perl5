@@ -1,8 +1,8 @@
 #!/usr/local/bin/perl -w
 
-use Test::More qw(no_plan);
-use lib "lib";
-use lib "../lib";
+use strict;
+use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
+use MBTest 'no_plan';
 
 my ($dir);
 $dir = ".";

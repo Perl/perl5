@@ -2,7 +2,7 @@
 
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
-use MBTest tests => 53;
+use MBTest tests => 64;
 
 use Cwd ();
 my $cwd = Cwd::cwd;
@@ -204,6 +204,62 @@ print "Hello, World!\n";
   is_deeply $data{conflicts}, {'Foo::Bazxx' => 0, 'Foo::Fooxx' => 0};
 }
 
+{
+  # Test interactive prompting
+
+  my $ans;
+  local $ENV{PERL_MM_USE_DEFAULT};
+
+  local $^W = 0;
+  local *{Module::Build::_readline} = sub { 'y' };
+
+  ok my $mb = Module::Build->new(
+				  module_name => $dist->name,
+				  license => 'perl',
+			        );
+
+  eval{ $mb->prompt() };
+  like $@, qr/called without a prompt/, 'prompt() requires a prompt';
+
+  eval{ $mb->y_n() };
+  like $@, qr/called without a prompt/, 'y_n() requires a prompt';
+
+  eval{ $mb->y_n('Prompt?', 'invalid default') };
+  like $@, qr/Invalid default/, "y_n() requires a default of 'y' or 'n'";
+
+
+  $ENV{PERL_MM_USE_DEFAULT} = 1;
+
+  eval{ $mb->y_n("Is this a question?") };
+  like $@, qr/ERROR:/, 'Do not allow default-less y_n() for unattended builds';
+
+  eval{ $ans = $mb->prompt('Is this a question?') };
+  like $@, qr/ERROR:/, 'Do not allow default-less prompt() for unattended builds';
+
+
+  $ENV{PERL_MM_USE_DEFAULT} = 0;
+
+  $ans = $mb->prompt('Is this a question?');
+  print "\n"; # fake <enter> after input
+  is $ans, 'y', "prompt() doesn't require default for interactive builds";
+
+  $ans = $mb->y_n('Say yes');
+  print "\n"; # fake <enter> after input
+  ok $ans, "y_n() doesn't require default for interactive build";
+
+
+  # Test Defaults
+  *{Module::Build::_readline} = sub { '' };
+
+  $ans = $mb->prompt("Is this a question");
+  is $ans, '', "default for prompt() without a default is ''";
+
+  $ans = $mb->prompt("Is this a question", 'y');
+  is $ans, 'y', "  prompt() with a default";
+
+  $ans = $mb->y_n("Is this a question", 'y');
+  ok $ans, "  y_n() with a default";
+}
 
 # cleanup
 chdir( $cwd ) or die "Can''t chdir to '$cwd': $!";

@@ -2,7 +2,7 @@
 
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
-use MBTest tests => 92;
+use MBTest tests => 113;
 
 use Cwd ();
 my $cwd = Cwd::cwd;
@@ -56,6 +56,85 @@ isa_ok( $mb, 'Module::Build::Base' );
 # Get us into a known state.
 $mb->install_base(undef);
 $mb->prefix(undef);
+
+
+# Check install_path() accessor
+{
+    my( $map, $path );
+
+    $map = $mb->install_path();
+    is_deeply( $map, {}, 'install_path() accessor' );
+
+    $path = $mb->install_path('elem' => '/foo/bar');
+    is( $path, '/foo/bar', '  returns assigned path' );
+
+    $path = $mb->install_path('elem');
+    is( $path, '/foo/bar', '  can read stored path' );
+
+    $map = $mb->install_path();
+    is_deeply( $map, { 'elem' => '/foo/bar' }, '  can access map' );
+
+    $path = $mb->install_path('elem' => undef);
+    is( $path, undef, '  can delete a path element' );
+
+    $map = $mb->install_path();
+    is_deeply( $map, {}, '  deletes path from map' );
+}
+
+# Check install_base_relpaths() accessor
+{
+    my( $map, $path );
+
+    $map = $mb->install_base_relpaths();
+    is( ref($map), 'HASH', 'install_base_relpaths() accessor' );
+
+    eval{ $path = $mb->install_base_relpaths('elem' => '/foo/bar') };
+    like( $@, qr/Value must be a relative path/, '  emits error if path not relative' );
+
+    $path = $mb->install_base_relpaths('elem' => 'foo/bar');
+    is( $path, catdir(qw(foo bar)), '  returns assigned path' );
+
+    $path = $mb->install_base_relpaths('elem');
+    is( $path, catdir(qw(foo/bar)), '  can read stored path' );
+
+    $map = $mb->install_base_relpaths();
+    is_deeply( $map->{elem}, [qw(foo bar)], '  can access map' );
+
+    $path = $mb->install_base_relpaths('elem' => undef);
+    is( $path, undef, '  can delete a path element' );
+
+    $map = $mb->install_base_relpaths();
+    is( $map->{elem}, undef, '  deletes path from map' );
+}
+
+# Check prefix_relpaths() accessor
+{
+    my( $map, $path );
+
+    $map = $mb->prefix_relpaths();
+    is( ref($map), 'HASH', 'prefix_relpaths() accessor' );
+
+    is_deeply( $mb->prefix_relpaths(), $mb->prefix_relpaths('site'),
+               '  defaults to \'site\'' );
+
+    eval{ $path = $mb->prefix_relpaths('site', 'elem' => '/foo/bar') };
+    like( $@, qr/Value must be a relative path/, '  emits error if path not relative' );
+
+    $path = $mb->prefix_relpaths('site', 'elem' => 'foo/bar');
+    is( $path, catdir(qw(foo bar)), '  returns assigned path' );
+
+    $path = $mb->prefix_relpaths('site', 'elem');
+    is( $path, catdir(qw(foo bar)), '  can read stored path' );
+
+    $map = $mb->prefix_relpaths();
+    is_deeply( $map->{elem}, [qw(foo bar)], '  can access map' );
+
+    $path = $mb->prefix_relpaths('site', 'elem' => undef);
+    is( $path, undef, '  can delete a path element' );
+
+    $map = $mb->prefix_relpaths();
+    is( $map->{elem}, undef, '  deletes path from map' );
+}
 
 
 # Check that we install into the proper default locations.

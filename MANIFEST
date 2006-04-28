@@ -1948,6 +1948,7 @@ lib/Memoize/t/tie_sdbm.t	Memoize SDBM interface test
 lib/Memoize/t/tie_storable.t	Memoize Storable interface test
 lib/Memoize/t/tie.t		Memoize tied file test
 lib/Memoize/t/unmemoize.t	Memoize 'unmemoize' function test
+lib/Module/Build/API.pm		Module::Build
 lib/Module/Build/Authoring.pod	Module::Build
 lib/Module/Build/Base.pm	Module::Build
 lib/Module/Build/Changes	Module::Build

@@ -2,6 +2,8 @@ package Module::Build::Base;
 
 use strict;
 BEGIN { require 5.00503 }
+
+use Carp;
 use Config;
 use File::Copy ();
 use File::Find ();
@@ -338,21 +340,23 @@ sub _quote_args {
 }
 
 sub _backticks {
-  # Tries to avoid using true backticks, when possible, so that we
-  # don't have to worry about shell args.
-
   my ($self, @cmd) = @_;
-  if ($self->have_multiarg_pipeopen) {
+  if ($self->have_forkpipe) {
     local *FH;
-    open FH, "-|", @cmd or die "Can't run @cmd: $!";
-    return wantarray ? <FH> : join '', <FH>;
+    my $pid = open FH, "-|";
+    if ($pid) {
+      return wantarray ? <FH> : join '', <FH>;
+    } else {
+      die "Can't execute @cmd: $!\n" unless defined $pid;
+      exec { $cmd[0] } @cmd;
+    }
   } else {
     my $cmd = $self->_quote_args(@cmd);
     return `$cmd`;
   }
 }
 
-sub have_multiarg_pipeopen { $] >= 5.008 }
+sub have_forkpipe { 1 }
 
 # Determine whether a given binary is the same as the perl
 # (configuration) that started this process.
@@ -461,47 +465,71 @@ sub _is_interactive {
   return -t STDIN && (-t STDOUT || !(-f STDOUT || -c STDOUT)) ;   # Pipe?
 }
 
+sub _is_unattended {
+  my $self = shift;
+  return $ENV{PERL_MM_USE_DEFAULT} || ( !$self->_is_interactive && eof STDIN );
+}
+
+sub _readline {
+  my $self = shift;
+  return undef if $self->_is_unattended;
+
+  my $answer = <STDIN>;
+  chomp $answer if defined $answer;
+  return $answer;
+}
+
 sub prompt {
   my $self = shift;
-  my ($mess, $def) = @_;
-  die "prompt() called without a prompt message" unless @_;
-  
+  my $mess = shift
+    or die "prompt() called without a prompt message";
+
+  my $def;
+  if ( $self->_is_unattended && !@_ ) {
+    die <<EOF;
+ERROR: This build seems to be unattended, but there is no default value
+for this question.  Aborting.
+EOF
+  }
+  $def = shift if @_;
   ($def, my $dispdef) = defined $def ? ($def, "[$def] ") : ('', ' ');
 
-  {
-    local $|=1;
-    print "$mess $dispdef";
-  }
-  my $ans;
-  if ( ! $ENV{PERL_MM_USE_DEFAULT} &&
-       ( $self->_is_interactive || ! eof STDIN ) ) {
-    $ans = <STDIN>;
-    if ( defined $ans ) {
-      chomp $ans;
-    } else { # user hit ctrl-D
-      print "\n";
-    }
-  }
-  
-  unless (defined($ans) and length($ans)) {
+  local $|=1;
+  print "$mess $dispdef";
+
+  my $ans = $self->_readline();
+
+  if ( !defined($ans) ) {     # Ctrl-D
+    print "\n";
+  } elsif ( !length($ans) ) { # Default
     print "$def\n";
     $ans = $def;
   }
-  
+
   return $ans;
 }
 
 sub y_n {
   my $self = shift;
-  die "y_n() called without a prompt message" unless @_;
-  die "y_n() called without y or n default" unless ($_[1]||"")=~/^[yn]/i;
+  my ($mess, $def)  = @_;
 
-  my $interactive = $self->_is_interactive;
+  die "y_n() called without a prompt message" unless $mess;
+  die "Invalid default value: y_n() default must be 'y' or 'n'"
+    if $def && $def !~ /^[yn]/i;
+
+  if ( $self->_is_unattended && !$def ) {
+    die <<EOF;
+ERROR: This build seems to be unattended, but there is no default value
+for this question.  Aborting.
+EOF
+  }
+
   my $answer;
-  while (1) {
+  while (1) { # XXX Infinite or a large number followed by an exception ?
     $answer = $self->prompt(@_);
     return 1 if $answer =~ /^y/i;
     return 0 if $answer =~ /^n/i;
+    local $|=1;
     print "Please answer 'y' or 'n'.\n";
   }
 }
@@ -1656,15 +1684,30 @@ sub _merge_arglist {
   return %new_opts;
 }
 
-# Look for a home directory on various systems.  CPANPLUS does something like this.
+# Look for a home directory on various systems.
 sub _home_dir {
-  my @os_home_envs = qw( APPDATA HOME USERPROFILE WINDIR SYS$LOGIN );
-  
-  foreach ( @os_home_envs ) {
-    return $ENV{$_} if exists $ENV{$_} && defined $ENV{$_} && length $ENV{$_} && -d $ENV{$_};
+  my @home_dirs;
+  push( @home_dirs, $ENV{HOME} ) if $ENV{HOME};
+
+  push( @home_dirs, File::Spec->catpath($ENV{HOMEDRIVE}, $ENV{HOMEPATH}, '') )
+      if $ENV{HOMEDRIVE} && $ENV{HOMEPATH};
+
+  my @other_home_envs = qw( USERPROFILE APPDATA WINDIR SYS$LOGIN );
+  push( @home_dirs, map $ENV{$_}, grep $ENV{$_}, @other_home_envs );
+
+  my @real_home_dirs = grep -d, @home_dirs;
+
+  return wantarray ? @real_home_dirs : shift( @real_home_dirs );
+}
+
+sub _find_user_config {
+  my $self = shift;
+  my $file = shift;
+  foreach my $dir ( $self->_home_dir ) {
+    my $path = File::Spec->catfile( $dir, $file );
+    return $path if -e $path;
   }
-  
-  return;
+  return undef;
 }
 
 # read ~/.modulebuildrc returning global options '*' and
@@ -1685,10 +1728,8 @@ sub read_modulebuildrc {
 		    "No options loaded\n");
     return ();
   } else {
-    my $home = $self->_home_dir;
-    return () unless defined $home;
-    $modulebuildrc = File::Spec->catfile( $home, '.modulebuildrc' );
-    return () unless -e $modulebuildrc;
+    $modulebuildrc = $self->_find_user_config( '.modulebuildrc' );
+    return () unless $modulebuildrc;
   }
 
   my $fh = IO::File->new( $modulebuildrc )
@@ -2909,8 +2950,6 @@ sub ACTION_distdir {
   
   foreach my $file (keys %$dist_files) {
     my $new = $self->copy_if_modified(from => $file, to_dir => $dist_dir, verbose => 0);
-    chmod +(stat $file)[2], $new
-      or $self->log_warn("Couldn't set permissions on $new: $!");
   }
   
   $self->_sign_dir($dist_dir) if $self->{properties}{sign};
@@ -3397,15 +3436,39 @@ sub make_tarball {
   }
 }
 
+sub install_path {
+  my $self = shift;
+  my( $type, $value ) = ( @_, '<empty>' );
+
+  Carp::croak( 'Type argument missing' )
+    unless defined( $type );
+
+  my $map = $self->{properties}{install_path};
+  return $map unless @_;
+
+  # delete existing value if $value is literal undef()
+  unless ( defined( $value ) ) {
+    delete( $map->{$type} );
+    return undef;
+  }
+
+  # return existing value if no new $value is given
+  if ( $value eq '<empty>' ) {
+    return undef unless exists $map->{$type};
+    return $map->{$type};
+  }
+
+  # set value if $value is a valid relative path
+  return $map->{$type} = $value;
+}
+
 sub install_base_relpaths {
-  # Usage: install_base_relpaths('lib')  or install_base_relpaths();
+  # Usage: install_base_relpaths(), install_base_relpaths('lib'),
+  #   or install_base_relpaths('lib' => $value);
   my $self = shift;
   my $map = $self->{properties}{install_base_relpaths};
   return $map unless @_;
-  
-  my $type = shift;
-  return unless exists $map->{$type};
-  return File::Spec->catdir(@{$map->{$type}});
+  return $self->_relpaths($map, @_);
 }
 
 
@@ -3422,18 +3485,48 @@ sub prefix_relative {
 			  );
 }
 
+sub _relpaths {
+  my $self = shift;
+  my( $map, $type, $value ) = ( @_, '<empty>' );
+
+  Carp::croak( 'Type argument missing' )
+    unless defined( $type );
+
+  my @value = ();
+
+  # delete existing value if $value is literal undef()
+  unless ( defined( $value ) ) {
+    delete( $map->{$type} );
+    return undef;
+  }
+
+  # return existing value if no new $value is given
+  elsif ( $value eq '<empty>' ) {
+    return undef unless exists $map->{$type};
+    @value = @{ $map->{$type} };
+  }
+
+  # set value if $value is a valid relative path
+  else {
+    Carp::croak( "Value must be a relative path" )
+      if File::Spec::Unix->file_name_is_absolute($value);
+
+    @value = split( /\//, $value );
+    $map->{$type} = \@value;
+  }
+
+  return File::Spec->catdir( @value );
+}
 
 # Defaults to use in case the config install paths cannot be prefixified.
 sub prefix_relpaths {
-  # Usage: prefix_relpaths('site', 'lib')  or prefix_relpaths('site');
+  # Usage: prefix_relpaths('site'), prefix_relpaths('site', 'lib'),
+  #   or prefix_relpaths('site', 'lib' => $value);
   my $self = shift;
   my $installdirs = shift || $self->installdirs;
   my $map = $self->{properties}{prefix_relpaths}{$installdirs};
   return $map unless @_;
-  
-  my $type = shift;
-  return unless exists $map->{$type};
-  return File::Spec->catdir(@{$map->{$type}});
+  return $self->_relpaths($map, @_);
 }
 
 
@@ -3498,7 +3591,18 @@ sub install_destination {
 
 sub install_types {
   my $self = shift;
-  my %types = (%{$self->install_path}, %{ $self->install_sets($self->installdirs) });
+
+  my %types;
+  if ( $self->install_base ) {
+    %types = %{$self->install_base_relpaths};
+  } elsif ( $self->prefix ) {
+    %types = %{$self->prefix_relpaths};
+  } else {
+    %types = %{$self->install_sets($self->installdirs)};
+  }
+
+  %types = (%types, %{$self->install_path});
+
   return sort keys %types;
 }
 
@@ -3842,12 +3946,18 @@ sub copy_if_modified {
   }
   
   return if $self->up_to_date($file, $to_path); # Already fresh
-  
+
+  $self->delete_filetree($to_path); # delete destination if exists
+
   # Create parent directories
   File::Path::mkpath(File::Basename::dirname($to_path), 0, 0777);
   
   $self->log_info("$file -> $to_path\n") if $args{verbose};
   File::Copy::copy($file, $to_path) or die "Can't copy('$file', '$to_path'): $!";
+  # mode is read-only + (executable if source is executable)
+  my $mode = 0444 | ( -x $file ? 0111 : 0 );
+  chmod( $mode, $to_path );
+
   return $to_path;
 }
 

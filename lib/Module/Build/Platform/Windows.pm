@@ -17,7 +17,7 @@ sub manpage_separator {
     return '.';
 }
 
-sub have_multiarg_pipeopen { 0 }
+sub have_forkpipe { 0 }
 
 sub ACTION_realclean {
   my ($self) = @_;

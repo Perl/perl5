@@ -126,6 +126,7 @@ To do this, specify the C<destdir> parameter to the C<install> action:
 This essentially just prepends all the installation paths with the
 F</tmp/my-package-1.003> directory.
 
+
 =head2 Installing to a non-standard directory
 
 To install to a non-standard directory (for example, if you don't have
@@ -145,9 +146,10 @@ often your best choice.
 See L<Module::Build/"INSTALL PATHS"> for a much more complete
 discussion of how installation paths are determined.
 
+
 =head2 Running a single test file
 
-C<Module::Builde> supports running a single test, which enables you to
+C<Module::Build> supports running a single test, which enables you to
 track down errors more quickly.  Use the following format:
 
   ./Build test --test_files t/mytest.t
@@ -347,21 +349,22 @@ it would work for C<install>:
   my $class = Module::Build->subclass(
       class => "Module::Build::Custom",
       code => <<'SUBCLASS' );
-  
+
   sub ACTION_install {
       my $self = shift;
       # YOUR CODE HERE
       $self->SUPER::ACTION_install;
   }
   SUBCLASS
-  
+
   $class->new(
       module_name => 'Your::Module',
       # rest of the usual Module::Build parameters
   )->create_build_script;
 
-See the C<Module::Build::Authoring> pod in 0.27 or above for more
+See the L<Module::Build::Authoring> pod in 0.27 or above for more
 complete documentation on this.
+
 
 =head1 AUTHOR
 
@@ -378,6 +381,7 @@ modify it under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-perl(1), Module::Build(3)
+perl(1), L<Module::Build>(3), L<Module::Build::Authoring>(3),
+L<Module::Build::API>(3)
 
 =cut

@@ -15,7 +15,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.27_10';
+$VERSION = '0.28';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -185,14 +185,14 @@ scripts at the command line.
 
 =item Authoring Reference (L<Module::Build::Authoring>)
 
-This document describes the C<Module::Build> API for authors who are
+This document describes the structure and organization of
+C<Module::Build>, and the relevant concepts needed by authors who are
 writing F<Build.PL> scripts for a distribution or controlling
-C<Module::Build> processes programmatically.  It describes the
-methods available as well as providing general information on
-subclassing C<Module::Build> to alter and extend its behavior.  Also,
-there is a section on controlling the Build process from other
-scripts, including how to construct an object and how to invoke
-actions through it from an external script.
+C<Module::Build> processes programmatically.
+
+=item API Reference (L<Module::Build::API>)
+
+This is a reference to the C<Module::Build> API.
 
 =item Cookbook (L<Module::Build::Cookbook>)
 
@@ -413,7 +413,7 @@ and/or C<libhtml> installation targets.
 [version 0.01]
 
 This action will use C<ExtUtils::Install> to install the files from
-C<blib/> into the system.  See L<INSTALL PATHS>
+C<blib/> into the system.  See L<"INSTALL PATHS">
 for details about how Module::Build determines where to install
 things, and how to influence this process.
 
@@ -667,8 +667,11 @@ Display extra information about the Build on output.
 
 [version 0.28]
 
-When Module::Build starts up, it will look for a file,
-F<$ENV{HOME}/.modulebuildrc>.  If the file exists, the options
+When Module::Build starts up, it will look first for a file,
+F<$ENV{HOME}/.modulebuildrc>.  If it's not found there, it will look
+in the the F<.modulebuildrc> file in the directories referred to by
+the environment variables C<HOMEDRIVE> + C<HOMEDIR>, C<USERPROFILE>,
+C<APPDATA>, C<WINDIR>, C<SYS$LOGIN>.  If the file exists, the options
 specified there will be used as defaults, as if they were typed on the
 command line.  The defaults can be overridden by specifying new values
 on the command line.
@@ -866,6 +869,7 @@ platform you're installing on.
 
 =back
 
+
 =head2 About PREFIX Support
 
 [version 0.28]
@@ -968,7 +972,7 @@ In short, using C<install_base> is similar to the following MakeMaker usage:
 
   perl Makefile.PL PREFIX=/home/spurkis LIB=/home/spurkis/lib/perl5
 
-See L</INSTALL PATHS> for details on other
+See L</"INSTALL PATHS"> for details on other
 installation options available and how to configure them.
 
 =back
@@ -1065,9 +1069,8 @@ Module-Build mailing list at <module-build-general@lists.sourceforge.net>.
 Bug reports are also welcome at
 <http://rt.cpan.org/NoAuth/Bugs.html?Dist=Module-Build>.
 
-An anonymous CVS repository containing the latest development version
-is available; see <http://sourceforge.net/cvs/?group_id=45731> for the
-details of how to access it.
+The latest development version is available from the Subversion
+repository at <https://svn.perl.org/modules/Module-Build/trunk/>
 
 
 =head1 COPYRIGHT
@@ -1080,12 +1083,14 @@ modify it under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-perl(1), Module::Build::Cookbook(3), Module::Build::Authoring(3),
-ExtUtils::MakeMaker(3), YAML(3)
+perl(1), L<Module::Build::Cookbook>(3), L<Module::Build::Authoring>(3),
+L<Module::Build::API>(3), L<ExtUtils::MakeMaker>(3), L<YAML>(3)
 
 F<META.yml> Specification:
 L<http://module-build.sourceforge.net/META-spec-v1.2.html>
 
 L<http://www.dsmit.com/cons/>
+
+L<http://search.cpan.org/dist/PerlBuildSystem/>
 
 =cut
