@@ -85,9 +85,10 @@ cases (e.g. elements other than the first being absolute filespecs).
 =cut
 
 sub catdir {
-    my ($self,@dirs) = @_;
-    my $dir = pop @dirs;
-    @dirs = grep($_,@dirs);
+    my $self = shift;
+    my $dir = pop;
+    my @dirs = grep {defined() && length()} @_;
+
     my $rslt;
     if (@dirs) {
 	my $path = (@dirs == 1 ? $dirs[0] : $self->catdir(@dirs));
@@ -118,9 +119,10 @@ VMS-syntax file specification.
 =cut
 
 sub catfile {
-    my ($self,@files) = @_;
-    my $file = $self->canonpath(pop @files);
-    @files = grep($_,@files);
+    my $self = shift;
+    my $file = $self->canonpath(pop());
+    my @files = grep {defined() && length()} @_;
+
     my $rslt;
     if (@files) {
 	my $path = (@files == 1 ? $files[0] : $self->catdir(@files));
@@ -131,7 +133,7 @@ sub catfile {
 	}
 	else {
 	    $rslt = $self->eliminate_macros($spath);
-	    $rslt = vmsify($rslt.($rslt ? '/' : '').unixify($file));
+	    $rslt = vmsify($rslt.((defined $rslt) && ($rslt ne '') ? '/' : '').unixify($file));
 	}
     }
     else { $rslt = (defined($file) && length($file)) ? vmsify($file) : ''; }
@@ -425,7 +427,7 @@ sub rel2abs {
 # patch the ones in ExtUtils::MM_VMS instead.
 sub eliminate_macros {
     my($self,$path) = @_;
-    return '' unless $path;
+    return '' unless (defined $path) && ($path ne '');
     $self = {} unless ref $self;
 
     if ($path =~ /\s/) {

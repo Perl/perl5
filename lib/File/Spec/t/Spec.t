@@ -90,6 +90,7 @@ if ($^O eq 'MacOS') {
 [ "Unix->catdir('d1','d2','d3','')",    'd1/d2/d3'  ],
 [ "Unix->catdir('','d1','d2','d3')",    '/d1/d2/d3' ],
 [ "Unix->catdir('d1','d2','d3')",       'd1/d2/d3'  ],
+[ "Unix->catdir('/','d2/d3')",          '/d2/d3'    ],
 
 [ "Unix->canonpath('///../../..//./././a//b/.././c/././')",   '/a/b/../c' ],
 [ "Unix->canonpath('')",                       ''               ],
@@ -113,6 +114,8 @@ if ($^O eq 'MacOS') {
 [  "Unix->abs2rel('/.','/t1/t2/t3')",                 '../../..'           ],
 [  "Unix->abs2rel('/./','/t1/t2/t3')",                '../../..'           ],
 #[ "Unix->abs2rel('../t4','/t1/t2/t3')",              '../t4'              ],
+[  "Unix->abs2rel('/t1/t2/t3', '/')",                 't1/t2/t3'           ],
+[  "Unix->abs2rel('/t1/t2/t3', '/t1')",               't2/t3'              ],
 
 [ "Unix->rel2abs('t4','/t1/t2/t3')",             '/t1/t2/t3/t4'    ],
 [ "Unix->rel2abs('t4/t5','/t1/t2/t3')",          '/t1/t2/t3/t4/t5' ],
@@ -275,6 +278,15 @@ if ($^O eq 'MacOS') {
 [ "VMS->catfile('[.a]','b','c')",       '[.a.b]c'  ],
 [ "VMS->catfile('c')",                 'c' ],
 [ "VMS->catfile('[]c')",               'c' ],
+
+[ "VMS->catfile('0','b','c')",     '[.0.b]c' ],
+[ "VMS->catfile('a','0','c')",     '[.a.0]c' ],
+[ "VMS->catfile('a','b','0')",     '[.a.b]0' ],
+[ "VMS->catfile('0','0','c')",     '[.0.0]c' ],
+[ "VMS->catfile('a','0','0')",     '[.a.0]0' ],
+[ "VMS->catfile('0','b','0')",     '[.0.b]0' ],
+[ "VMS->catfile('0','0','0')",     '[.0.0]0' ],
+
 
 [ "VMS->splitpath('file')",                                       ',,file'                                   ],
 [ "VMS->splitpath('[d1.d2.d3]')",                                 ',[d1.d2.d3],'                               ],
@@ -598,6 +610,7 @@ if ($^O eq 'MacOS') {
 #[ "Epoc->canonpath('/.')",                                    '/'         ],
 
 [ "Cygwin->case_tolerant()",         '0'  ],
+[ "Cygwin->catdir('/','d2/d3')",     '/d2/d3'  ],
 
 ) ;
 
