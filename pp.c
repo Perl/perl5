@@ -2950,7 +2950,22 @@ PP(pp_length)
     dVAR; dSP; dTARGET;
     SV * const sv = TOPs;
 
-    if (DO_UTF8(sv))
+    if (SvAMAGIC(sv)) {
+	/* For an overloaded scalar, we can't know in advance if it's going to
+	   be UTF-8 or not. Also, we can't call sv_len_utf8 as it likes to
+	   cache the length. Maybe that should be a documented feature of it.
+	*/
+	STRLEN len;
+	const char *const p = SvPV_const(sv, len);
+
+	if (DO_UTF8(sv)) {
+	    SETi(Perl_utf8_length(aTHX_ p, p + len));
+	}
+	else
+	    SETi(len);
+
+    }
+    else if (DO_UTF8(sv))
 	SETi(sv_len_utf8(sv));
     else
 	SETi(sv_len(sv));
