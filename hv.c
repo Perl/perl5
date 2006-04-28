@@ -1593,8 +1593,8 @@ Perl_hv_clear(pTHX_ HV *hv)
 		    if (HeVAL(entry) && SvREADONLY(HeVAL(entry))) {
 			SV* const keysv = hv_iterkeysv(entry);
 			Perl_croak(aTHX_
-	"Attempt to delete readonly key '%"SVf"' from a restricted hash",
-				   keysv);
+				   "Attempt to delete readonly key '%"SVf"' from a restricted hash",
+				   (void*)keysv);
 		    }
 		    SvREFCNT_dec(HeVAL(entry));
 		    HeVAL(entry) = &PL_sv_placeholder;
@@ -2691,7 +2691,7 @@ Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent,
     STRLEN key_len;
     const char *key_p = SvPV_const(key, key_len);
     STRLEN value_len = 0;
-    const char *value_p;
+    const char *value_p = NULL;
     char value_type;
     char flags;
     STRLEN key_offset;

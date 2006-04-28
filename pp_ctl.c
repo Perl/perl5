@@ -1454,7 +1454,7 @@ Perl_qerror(pTHX_ SV *err)
     else if (PL_errors)
 	sv_catsv(PL_errors, err);
     else
-	Perl_warn(aTHX_ "%"SVf, err);
+	Perl_warn(aTHX_ "%"SVf, (void*)err);
     ++PL_error_count;
 }
 
@@ -2016,7 +2016,7 @@ PP(pp_return)
 	    /* Unassume the success we assumed earlier. */
 	    SV * const nsv = cx->blk_eval.old_namesv;
 	    (void)hv_delete(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv), G_DISCARD);
-	    DIE(aTHX_ "%"SVf" did not return a true value", nsv);
+	    DIE(aTHX_ "%"SVf" did not return a true value", (void*)nsv);
 	}
 	break;
     case CXt_FORMAT:
@@ -2324,7 +2324,7 @@ PP(pp_goto)
 			goto retry;
 		    tmpstr = sv_newmortal();
 		    gv_efullname3(tmpstr, gv, NULL);
-		    DIE(aTHX_ "Goto undefined subroutine &%"SVf"",tmpstr);
+		    DIE(aTHX_ "Goto undefined subroutine &%"SVf"",(void*)tmpstr);
 		}
 		DIE(aTHX_ "Goto undefined subroutine");
 	    }
@@ -3097,12 +3097,12 @@ PP(pp_require)
 	if (cUNOP->op_first->op_type == OP_CONST && cUNOP->op_first->op_private & OPpCONST_NOVER) {
 	    if ( vcmp(sv,PL_patchlevel) < 0 )
 		DIE(aTHX_ "Perls since %"SVf" too modern--this is %"SVf", stopped",
-		    vnormal(sv), vnormal(PL_patchlevel));
+		    (void*)vnormal(sv), (void*)vnormal(PL_patchlevel));
 	}
 	else {
 	    if ( vcmp(sv,PL_patchlevel) > 0 )
 		DIE(aTHX_ "Perl %"SVf" required--this is only %"SVf", stopped",
-		    vnormal(sv), vnormal(PL_patchlevel));
+		    (void*)vnormal(sv), (void*)vnormal(PL_patchlevel));
 	}
 
 	    RETPUSHYES;
@@ -3584,7 +3584,7 @@ PP(pp_leaveeval)
 	/* Unassume the success we assumed earlier. */
 	SV * const nsv = cx->blk_eval.old_namesv;
 	(void)hv_delete(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv), G_DISCARD);
-	retop = Perl_die(aTHX_ "%"SVf" did not return a true value", nsv);
+	retop = Perl_die(aTHX_ "%"SVf" did not return a true value", (void*)nsv);
 	/* die_where() did LEAVE, or we won't be here */
     }
     else {
@@ -4561,7 +4561,7 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
     int status = 0;
     SV *upstream;
     STRLEN got_len;
-    const char *got_p;
+    const char *got_p = NULL;
     const char *prune_from = NULL;
     bool read_from_cache = FALSE;
     STRLEN umaxlen;

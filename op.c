@@ -224,7 +224,7 @@ S_no_bareword_allowed(pTHX_ const OP *o)
 	return;		/* various ok barewords are hidden in extra OP_NULL */
     qerror(Perl_mess(aTHX_
 		     "Bareword \"%"SVf"\" not allowed while \"strict subs\" in use",
-		     cSVOPo_sv));
+		     (void*)cSVOPo_sv));
 }
 
 /* "register" allocation */
@@ -4834,9 +4834,9 @@ Perl_cv_ckproto_len(pTHX_ const CV *cv, const GV *gv, const char *p,
 	    gv_efullname3(name = sv_newmortal(), gv, NULL);
 	sv_setpv(msg, "Prototype mismatch:");
 	if (name)
-	    Perl_sv_catpvf(aTHX_ msg, " sub %"SVf, name);
+	    Perl_sv_catpvf(aTHX_ msg, " sub %"SVf, (void*)name);
 	if (SvPOK(cv))
-	    Perl_sv_catpvf(aTHX_ msg, " (%"SVf")", (const SV *)cv);
+	    Perl_sv_catpvf(aTHX_ msg, " (%"SVf")", (void*)cv);
 	else
 	    sv_catpvs(msg, ": none");
 	sv_catpvs(msg, " vs ");
@@ -4844,7 +4844,7 @@ Perl_cv_ckproto_len(pTHX_ const CV *cv, const GV *gv, const char *p,
 	    Perl_sv_catpvf(aTHX_ msg, "(%.*s)", (int) len, p);
 	else
 	    sv_catpvs(msg, "none");
-	Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "%"SVf, msg);
+	Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE), "%"SVf, (void*)msg);
     }
 }
 
@@ -5255,7 +5255,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		else {
 		    /* force display of errors found but not reported */
 		    sv_catpv(ERRSV, not_safe);
-		    Perl_croak(aTHX_ "%"SVf, ERRSV);
+		    Perl_croak(aTHX_ "%"SVf, (void*)ERRSV);
 		}
 	    }
 	}
@@ -5597,7 +5597,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 		CopLINE_set(PL_curcop, PL_copline);
 	    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
 			o ? "Format %"SVf" redefined"
-			: "Format STDOUT redefined" ,cSVOPo->op_sv);
+			: "Format STDOUT redefined", (void*)cSVOPo->op_sv);
 	    CopLINE_set(PL_curcop, oldline);
 	}
 	SvREFCNT_dec(cv);
@@ -6103,8 +6103,8 @@ Perl_ck_rvconst(pTHX_ register OP *o)
 	    }
 	    if (badthing)
 		Perl_croak(aTHX_
-	  "Can't use bareword (\"%"SVf"\") as %s ref while \"strict refs\" in use",
-		      kidsv, badthing);
+			   "Can't use bareword (\"%"SVf"\") as %s ref while \"strict refs\" in use",
+			   (void*)kidsv, badthing);
 	}
 	/*
 	 * This is a little tricky.  We only want to add the symbol if we
@@ -6262,7 +6262,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		    if (ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
 			Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 			    "Array @%"SVf" missing the @ in argument %"IVdf" of %s()",
-			    ((SVOP*)kid)->op_sv, (IV)numargs, PL_op_desc[type]);
+			    (void*)((SVOP*)kid)->op_sv, (IV)numargs, PL_op_desc[type]);
 #ifdef PERL_MAD
 		    op_getmad(kid,newop,'K');
 #else
@@ -6285,7 +6285,7 @@ Perl_ck_fun(pTHX_ OP *o)
 		    if (ckWARN2(WARN_DEPRECATED, WARN_SYNTAX))
 			Perl_warner(aTHX_ packWARN2(WARN_DEPRECATED, WARN_SYNTAX),
 			    "Hash %%%"SVf" missing the %% in argument %"IVdf" of %s()",
-			    ((SVOP*)kid)->op_sv, (IV)numargs, PL_op_desc[type]);
+			    (void*)((SVOP*)kid)->op_sv, (IV)numargs, PL_op_desc[type]);
 #ifdef PERL_MAD
 		    op_getmad(kid,newop,'K');
 #else
@@ -7457,7 +7457,7 @@ Perl_ck_subr(pTHX_ OP *o)
 	    default:
 	      oops:
 		Perl_croak(aTHX_ "Malformed prototype for %s: %"SVf,
-			   gv_ename(namegv), cv);
+			   gv_ename(namegv), (void*)cv);
 	    }
 	}
 	else
@@ -7728,7 +7728,7 @@ Perl_peep(pTHX_ register OP *o)
 		    gv_efullname3(sv, gv, NULL);
 		    Perl_warner(aTHX_ packWARN(WARN_PROTOTYPE),
 				"%"SVf"() called too early to check prototype",
-				sv);
+				(void*)sv);
 		}
 	    }
 	    else if (o->op_next->op_type == OP_READLINE

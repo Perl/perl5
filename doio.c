@@ -825,7 +825,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 		        if (ckWARN_d(WARN_INPLACE))	
 			    Perl_warner(aTHX_ packWARN(WARN_INPLACE),
 			      "Can't rename %s to %"SVf": %s, skipping file",
-			      PL_oldname, sv, Strerror(errno) );
+			      PL_oldname, (void*)sv, Strerror(errno));
 			do_close(gv,FALSE);
 			continue;
 		    }
@@ -2007,7 +2007,9 @@ Perl_do_ipcctl(pTHX_ I32 optype, SV **mark, SV **sp)
     char *a;
     I32 ret = -1;
     const I32 id  = SvIVx(*++mark);
+#ifdef Semctl
     const I32 n   = (optype == OP_SEMCTL) ? SvIVx(*++mark) : 0;
+#endif
     const I32 cmd = SvIVx(*++mark);
     SV * const astr = *++mark;
     STRLEN infosize = 0;

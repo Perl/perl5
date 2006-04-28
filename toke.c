@@ -5482,7 +5482,7 @@ Perl_yylex(pTHX)
 			PUTBACK;
 			PerlIO_apply_layers(aTHX_ PL_rsfp, NULL,
 					    Perl_form(aTHX_ ":encoding(%"SVf")",
-						      name));
+						      (void*)name));
 			FREETMPS;
 			LEAVE;
 		    }
@@ -6469,7 +6469,7 @@ Perl_yylex(pTHX)
 		    if (bad_proto && ckWARN(WARN_SYNTAX))
 			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 				    "Illegal character in prototype for %"SVf" : %s",
-				    PL_subname, d);
+				    (void*)PL_subname, d);
 		    SvCUR_set(PL_lex_stuff, tmp);
 		    have_proto = TRUE;
 
@@ -6498,7 +6498,7 @@ Perl_yylex(pTHX)
 		    if (!have_name)
 			Perl_croak(aTHX_ "Illegal declaration of anonymous subroutine");
 		    else if (*s != ';')
-			Perl_croak(aTHX_ "Illegal declaration of subroutine %"SVf, PL_subname);
+			Perl_croak(aTHX_ "Illegal declaration of subroutine %"SVf, (void*)PL_subname);
 		}
 
 #ifdef PERL_MAD
@@ -12257,13 +12257,13 @@ Perl_yyerror(pTHX_ const char *s)
         PL_multi_end = 0;
     }
     if (PL_in_eval & EVAL_WARNONLY && ckWARN_d(WARN_SYNTAX))
-	Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "%"SVf, msg);
+	Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "%"SVf, (void*)msg);
     else
 	qerror(msg);
     if (PL_error_count >= 10) {
 	if (PL_in_eval && SvCUR(ERRSV))
 	    Perl_croak(aTHX_ "%"SVf"%s has too many errors.\n",
-            ERRSV, OutCopFILE(PL_curcop));
+		       (void*)ERRSV, OutCopFILE(PL_curcop));
 	else
 	    Perl_croak(aTHX_ "%s has too many errors.\n",
             OutCopFILE(PL_curcop));

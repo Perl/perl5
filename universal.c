@@ -111,7 +111,7 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
 		    if (ckWARN(WARN_MISC))
 			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 				    "Can't locate package %"SVf" for @%s::ISA",
-				    sv, hvname);
+				    (void*)sv, hvname);
 		    continue;
 		}
 		if (isa_lookup(basestash, name, name_stash, len, level + 1)) {
@@ -382,8 +382,11 @@ XS(XS_UNIVERSAL_VERSION)
 
 	if ( vcmp( req, sv ) > 0 )
 	    Perl_croak(aTHX_ "%s version %"SVf" (%"SVf") required--"
-		    "this is only version %"SVf" (%"SVf")", HvNAME_get(pkg),
-		    vnumify(req),vnormal(req),vnumify(sv),vnormal(sv));
+		       "this is only version %"SVf" (%"SVf")", HvNAME_get(pkg),
+		       (void*)vnumify(req),
+		       (void*)vnormal(req),
+		       (void*)vnumify(sv),
+		       (void*)vnormal(sv));
     }
 
     if ( SvOK(sv) && sv_derived_from(sv, "version") ) {
@@ -921,9 +924,11 @@ XS(XS_PerlIO_get_layers)
 		  else {
 		       if (namok && argok)
 			    XPUSHs(Perl_newSVpvf(aTHX_ "%"SVf"(%"SVf")",
-					       *namsvp, *argsvp));
+						 (void*)*namsvp,
+						 (void*)*argsvp));
 		       else if (namok)
-			    XPUSHs(Perl_newSVpvf(aTHX_ "%"SVf, *namsvp));
+			    XPUSHs(Perl_newSVpvf(aTHX_ "%"SVf,
+						 (void*)*namsvp));
 		       else
 			    XPUSHs(&PL_sv_undef);
 		       nitem++;

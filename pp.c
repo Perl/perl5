@@ -4139,7 +4139,7 @@ PP(pp_splice)
     }
 
     if (diff < 0) {				/* shrinking the area */
-	SV **tmparyval;
+	SV **tmparyval = NULL;
 	if (newlen) {
 	    Newx(tmparyval, newlen, SV*);	/* so remember insertion */
 	    Copy(MARK, tmparyval, newlen, SV*);

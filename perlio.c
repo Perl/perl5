@@ -2301,7 +2301,9 @@ S_more_refcounted_fds(pTHX_ const int new_fd) {
     PL_perlio_fd_refcnt_size = new_max;
     PL_perlio_fd_refcnt = new_array;
 
-    PerlIO_debug("Zeroing %p, %d\n", new_array + old_max, new_max - old_max);
+    PerlIO_debug("Zeroing %p, %d\n",
+		 (void*)(new_array + old_max),
+		 new_max - old_max);
 
     Zero(new_array + old_max, new_max - old_max, int);
 }

@@ -3265,8 +3265,8 @@ Perl_moreswitches(pTHX_ char *s)
 			  " DEVEL" STRINGIFY(PERL_PATCHNUM)
 #endif
 			  " built for %s",
-		    vstringify(PL_patchlevel),
-		    ARCHNAME));
+			  (void*)vstringify(PL_patchlevel),
+			  ARCHNAME));
 #else /* DGUX */
 /* Adjust verbose output as in the perl that ships with the DG/UX OS from EMC */
 	PerlIO_printf(PerlIO_stdout(),
@@ -3671,8 +3671,8 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv,
 
         Perl_sv_setpvf(aTHX_ cmd, "\
 %s -ne%s%s%s %s | %"SVf" %s %"SVf" %s",
-                       perl, quote, code, quote, scriptname, cpp,
-                       cpp_discard_flag, sv, CPPMINUS);
+                       perl, quote, code, quote, scriptname, (void*)cpp,
+                       cpp_discard_flag, (void*)sv, CPPMINUS);
 
 	PL_doextract = FALSE;
 
@@ -5051,19 +5051,21 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 #endif
 		/* .../version/archname if -d .../version/archname */
 		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT_PATH PERL_ARCH_FMT,
-				libdir,
+			       (void*)libdir,
 			       (int)PERL_REVISION, (int)PERL_VERSION,
 			       (int)PERL_SUBVERSION, ARCHNAME);
 		subdir = S_incpush_if_exists(aTHX_ subdir);
 
 		/* .../version if -d .../version */
-		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT_PATH, libdir,
+		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT_PATH,
+			       (void*)libdir,
 			       (int)PERL_REVISION, (int)PERL_VERSION,
 			       (int)PERL_SUBVERSION);
 		subdir = S_incpush_if_exists(aTHX_ subdir);
 
 		/* .../archname if -d .../archname */
-		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT, libdir, ARCHNAME);
+		Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT,
+			       (void*)libdir, ARCHNAME);
 		subdir = S_incpush_if_exists(aTHX_ subdir);
 
 	    }
@@ -5149,7 +5151,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 		while (PL_scopestack_ix > oldscope)
 		    LEAVE;
 		JMPENV_POP;
-		Perl_croak(aTHX_ "%"SVf"", atsv);
+		Perl_croak(aTHX_ "%"SVf"", (void*)atsv);
 	    }
 	    break;
 	case 1:

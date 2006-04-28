@@ -1031,7 +1031,8 @@ Perl_pad_leavemy(pTHX)
 	    if (sv && sv != &PL_sv_undef
 		    && !SvFAKE(sv) && ckWARN_d(WARN_INTERNAL))
 		Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
-					"%"SVf" never introduced", sv);
+			    "%"SVf" never introduced",
+			    (void*)sv);
 	}
     }
     /* "Deintroduce" my variables that are leaving with this scope. */
