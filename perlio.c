@@ -476,7 +476,7 @@ PerlIO_debug(const char *fmt, ...)
 	char buffer[1024];
 	const STRLEN len = my_sprintf(buffer, "%.40s:%" IVdf " ", s ? s : "(none)", (IV) CopLINE(PL_curcop));
 # ifdef USE_VSNPRINTF
-	const STRLEN len2 = vnsprintf(buffer+len, sizeof(buffer) - len, fmt, ap);
+	const STRLEN len2 = vsnprintf(buffer+len, sizeof(buffer) - len, fmt, ap);
 # else
 	const STRLEN len2 = vsprintf(buffer+len, fmt, ap);
 # endif /* USE_VSNPRINTF */
