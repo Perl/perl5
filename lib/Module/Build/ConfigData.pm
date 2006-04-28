@@ -167,13 +167,13 @@ __DATA__
                                 'requires' => {
                                                 'YAML' => ' >= 0.35, != 0.49_01 '
                                               },
-                                'description' => 'Can write fully-functional META.yml files'
+                                'description' => 'Use YAML.pm to write META.yml files'
                               },
             'manpage_support' => {
                                    'requires' => {
                                                    'Pod::Man' => 0
                                                  },
-                                   'description' => 'Can create Unix man pages'
+                                   'description' => 'Create Unix man pages'
                                  },
             'C_support' => {
                              'requires' => {
@@ -182,13 +182,13 @@ __DATA__
                              'recommends' => {
                                                'ExtUtils::ParseXS' => '1.02'
                                              },
-                             'description' => 'Can compile/link C & XS code'
+                             'description' => 'Compile/link C & XS code'
                            },
             'HTML_support' => {
                                 'requires' => {
                                                 'Pod::Html' => 0
                                               },
-                                'description' => 'Can create HTML documentation'
+                                'description' => 'Create HTML documentation'
                               }
           }
         ]
