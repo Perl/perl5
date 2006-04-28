@@ -222,19 +222,20 @@ Consider using the latest STABLE release.
 EOM
 		 exit 1
 	      fi
-	      case "$osvers" in
 	      # 500016 is the first osreldate in which one could
 	      # just link against libc_r without disposing of libc
 	      # at the same time.  500016 ... up to whatever it was
 	      # on the 31st of August 2003 can still be used with -pthread,
 	      # but it is not necessary.
-	      5.*)	if [ `/sbin/sysctl -n kern.osreldate` -lt 500016 ]; then
-                                ldflags="-pthread $ldflags"
-                        fi
-			;;
-	      *)	ldflags="-pthread $ldflags"
-			;;
-	      esac
+
+	      # Anton Berezin says that post 500something we're wrong to be
+	      # to be using -lc_r, and should just be using -pthread on the
+	      # linker line.
+	      # So presumably really we should be checking that $osver is 5.*)
+	      # and that `/sbin/sysctl -n kern.osreldate` -ge 500016
+	      # or -lt 500something and only in that range not doing this:
+	      ldflags="-pthread $ldflags"
+
 	      # Both in 4.x and 5.x gethostbyaddr_r exists but
 	      # it is "Temporary function, not threadsafe"...
 	      # Presumably earlier it didn't even exist.
@@ -244,9 +245,19 @@ EOM
 
 	esac
 
-	set `echo X "$libswanted "| sed -e 's/ c / c_r /'`
-	shift
-	libswanted="$*"
+        case "$osvers" in
+        [1-4]*)
+	    set `echo X "$libswanted "| sed -e 's/ c / c_r /'`
+	    shift
+	    libswanted="$*"
+	    ;;
+        *)
+	    set `echo X "$libswanted "| sed -e 's/ c //'`
+	    shift
+	    libswanted="$*"
+	    ;;
+	esac
+	    
 	# Configure will probably pick the wrong libc to use for nm scan.
 	# The safest quick-fix is just to not use nm at all...
 	usenm=false
