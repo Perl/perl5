@@ -1,5 +1,41 @@
 Revision history for Perl distribution PathTools.
 
+3.18  Thu Apr 27 22:01:38 CDT 2006
+
+ - Fixed some problems on VMS in which a directory called "0" would be
+   treated as a second-class citizen. [Peter (Stig) Edwards]
+
+ - Added a couple of regression tests to make sure abs2rel('/foo/bar',
+   '/') works as expected.  [Chia-liang Kao]
+
+ - Added a couple of regression tests to make sure catdir('/',
+   'foo/bar') works as expected.  [Mark Grimes]
+
+3.17  Fri Mar  3 16:52:30 CST 2006
+
+ - The Cygwin version of Cwd::cwd() will croak if given any arguments
+   (which can happen if, for example, it's called as Cwd->cwd).  Since
+   that croaking is bad, we now wrap the original cwd() in a
+   subroutine that ignores its arguments.  We could skip this wrapping
+   if a future version of perl changes cygwin.c's cwd() to not barf
+   when fed an argument. [Jerry D. Hedden]
+
+3.16  Mon Jan 30 20:48:41 CST 2006
+
+ - Updated to version 3.06 of ppport.h, which provides backward
+   compatibility XS layers for older perl versions.
+
+ - Clarify in the docs for File::Spec's abs2rel() and rel2abs()
+   methods that the cwd() function it discusses is
+   Cwd::cwd(). [Spotted by Steven Lembark]
+
+ - Apparently the version of File::Path that ships with perl 5.8.5
+   (and perhaps others) calls Cwd::getcwd() with an argument (perhaps
+   as a method?), which causes it to die with a prototyping error.
+   We've eliminated the prototype by using the "(...)" arglist, since
+   "PROTOTYPE: DISABLE" for the function didn't seem to work. [Spotted
+   by Eamon Daly and others]
+
 3.15  Tue Dec 27 14:17:39 CST 2005
 
  - The Cwd::getcwd() function on *nix is now a direct pass-through to
