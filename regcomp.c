@@ -4503,6 +4503,9 @@ STATIC void
 S_regtail(pTHX_ const RExC_state_t *pRExC_state, regnode *p, const regnode *val)
 {
     register regnode *scan;
+#ifndef DEBUGGING
+    PERL_UNUSED_ARG(depth);
+#endif
 
     if (SIZE_ONLY)
 	return;
@@ -4858,6 +4861,7 @@ Perl_regprop(pTHX_ SV *sv, regnode *o)
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(o);
+    PERL_UNUSED_ARG(prog);
 #endif	/* DEBUGGING */
 }
 

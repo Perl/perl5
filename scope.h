@@ -346,7 +346,7 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
     STMT_START {						\
 	if (!(ce).je_noset) {					\
 	    DEBUG_l(Perl_deb(aTHX_ "Setting up jumplevel %p, was %p\n",	\
-			     ce, PL_top_env));			\
+			     (void*)ce, (void*)PL_top_env));	\
 	    JMPENV_PUSH_INIT_ENV(ce,NULL);			\
 	    EXCEPT_SET_ENV(ce,PerlProc_setjmp((ce).je_buf, SCOPE_SAVES_SIGNAL_MASK));\
 	    (ce).je_noset = 1;					\
@@ -394,7 +394,7 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
 #define JMPENV_PUSH(v) \
     STMT_START {							\
 	DEBUG_l(Perl_deb(aTHX_ "Setting up jumplevel %p, was %p\n",	\
-			 &cur_env, PL_top_env));			\
+			 (void*)&cur_env, (void*)PL_top_env));		\
 	cur_env.je_prev = PL_top_env;					\
 	OP_REG_TO_MEM;							\
 	cur_env.je_ret = PerlProc_setjmp(cur_env.je_buf, SCOPE_SAVES_SIGNAL_MASK);		\

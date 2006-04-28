@@ -2951,7 +2951,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    if (datumtype == 'B')
 		while (l++ < len) {
 		    if (utf8_source) {
-			UV val;
+			UV val = 0;
 			NEXT_UNI_VAL(val, cur, str, end, utf8_flags);
 			bits |= val & 1;
 		    } else bits |= *str++ & 1;
@@ -2965,7 +2965,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		/* datumtype == 'b' */
 		while (l++ < len) {
 		    if (utf8_source) {
-			UV val;
+			UV val = 0;
 			NEXT_UNI_VAL(val, cur, str, end, utf8_flags);
 			if (val & 1) bits |= 0x80;
 		    } else if (*str++ & 1)
@@ -3023,7 +3023,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    if (datumtype == 'H')
 		while (l++ < len) {
 		    if (utf8_source) {
-			UV val;
+			UV val = 0;
 			NEXT_UNI_VAL(val, cur, str, end, utf8_flags);
 			if (val < 256 && isALPHA(val))
 			    bits |= (val + 9) & 0xf;
@@ -3042,7 +3042,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    else
 		while (l++ < len) {
 		    if (utf8_source) {
-			UV val;
+			UV val = 0;
 			NEXT_UNI_VAL(val, cur, str, end, utf8_flags);
 			if (val < 256 && isALPHA(val))
 			    bits |= ((val + 9) & 0xf) << 4;

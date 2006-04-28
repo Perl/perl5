@@ -451,7 +451,7 @@ PP(pp_warn)
     if (!tmps || !len)
 	tmpsv = sv_2mortal(newSVpvs("Warning: something's wrong"));
 
-    Perl_warn(aTHX_ "%"SVf, tmpsv);
+    Perl_warn(aTHX_ "%"SVf, (void*)tmpsv);
     RETSETYES;
 }
 
@@ -515,7 +515,7 @@ PP(pp_die)
     if (!tmps || !len)
 	tmpsv = sv_2mortal(newSVpvs("Died"));
 
-    DIE(aTHX_ "%"SVf, tmpsv);
+    DIE(aTHX_ "%"SVf, (void*)tmpsv);
 }
 
 /* I/O. */
@@ -832,7 +832,7 @@ PP(pp_tie)
 	stash = gv_stashsv(*MARK, FALSE);
 	if (!stash || !(gv = gv_fetchmethod(stash, methname))) {
 	    DIE(aTHX_ "Can't locate object method \"%s\" via package \"%"SVf"\"",
-		 methname, *MARK);
+		 methname, (void*)*MARK);
 	}
 	ENTER;
 	PUSHSTACKi(PERLSI_MAGIC);
