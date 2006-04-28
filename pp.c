@@ -2959,7 +2959,7 @@ PP(pp_length)
 	const char *const p = SvPV_const(sv, len);
 
 	if (DO_UTF8(sv)) {
-	    SETi(Perl_utf8_length(aTHX_ p, p + len));
+	    SETi(utf8_length((U8*)p, (U8*)p + len));
 	}
 	else
 	    SETi(len);

@@ -1295,6 +1295,7 @@ write2(char *mess)
 static void
 botch(char *diag, char *s, char *file, int line)
 {
+    dVAR;
     if (!(PERL_MAYBE_ALIVE && PERL_GET_THX))
 	goto do_write;
     else {
@@ -1408,6 +1409,7 @@ cmp_pat_4bytes(unsigned char *s, size_t nbytes, const unsigned char *fill)
 Malloc_t
 Perl_malloc(register size_t nbytes)
 {
+        dVAR;
   	register union overhead *p;
   	register int bucket;
   	register MEM_SIZE shiftr;
@@ -1665,6 +1667,7 @@ get_from_bigger_buckets(int bucket, MEM_SIZE size)
 static union overhead *
 getpages(MEM_SIZE needed, int *nblksp, int bucket)
 {
+    dVAR;
     /* Need to do (possibly expensive) system call. Try to
        optimize it for rare calling. */
     MEM_SIZE require = needed - sbrked_remains;
@@ -1865,6 +1868,7 @@ getpages_adjacent(MEM_SIZE require)
 static void
 morecore(register int bucket)
 {
+        dVAR;
   	register union overhead *ovp;
   	register int rnu;       /* 2^rnu bytes will be requested */
   	int nblks;		/* become nblks blocks of the desired size */
@@ -1999,6 +2003,7 @@ morecore(register int bucket)
 Free_t
 Perl_mfree(void *mp)
 {
+        dVAR;
   	register MEM_SIZE size;
 	register union overhead *ovp;
 	char *cp = (char*)mp;
@@ -2103,6 +2108,7 @@ Perl_mfree(void *mp)
 Malloc_t
 Perl_realloc(void *mp, size_t nbytes)
 {
+        dVAR;
   	register MEM_SIZE onb;
 	union overhead *ovp;
   	char *res;
