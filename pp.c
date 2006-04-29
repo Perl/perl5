@@ -3453,7 +3453,7 @@ PP(pp_ucfirst)
     if (SvOK(source)) {
 	s = (const U8*)SvPV_nomg_const(source, slen);
     } else {
-	s = "";
+	s = (U8*)"";
 	slen = 0;
     }
 
@@ -3484,7 +3484,7 @@ PP(pp_ucfirst)
 	dest = TARG;
 
 	SvUPGRADE(dest, SVt_PV);
-	d = SvGROW(dest, need);
+	d = (U8*)SvGROW(dest, need);
 	(void)SvPOK_only(dest);
 
 	SETs(dest);
@@ -3577,13 +3577,13 @@ PP(pp_uc)
 	if (SvOK(source)) {
 	    s = (const U8*)SvPV_nomg_const(source, len);
 	} else {
-	    s = "";
+	    s = (U8*)"";
 	    len = 0;
 	}
 	min = len + 1;
 
 	SvUPGRADE(dest, SVt_PV);
-	d = SvGROW(dest, min);
+	d = (U8*)SvGROW(dest, min);
 	(void)SvPOK_only(dest);
 
 	SETs(dest);
@@ -3677,13 +3677,13 @@ PP(pp_lc)
 	if (SvOK(source)) {
 	    s = (const U8*)SvPV_nomg_const(source, len);
 	} else {
-	    s = "";
+	    s = (U8*)"";
 	    len = 0;
 	}
 	min = len + 1;
 
 	SvUPGRADE(dest, SVt_PV);
-	d = SvGROW(dest, min);
+	d = (U8*)SvGROW(dest, min);
 	(void)SvPOK_only(dest);
 
 	SETs(dest);
