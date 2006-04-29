@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 24;
+use Test::More tests => 56;
 
 package UTF8Toggle;
 use strict;
@@ -43,6 +43,50 @@ foreach my $t ("ASCII", "B\366se") {
     is (length $u, $length, "length of '$t'");
 }
 
+my $u = UTF8Toggle->new("\311");
+my $lc = lc $u;
+is (length $lc, 1);
+is ($lc, "\311", "E accute -> e accute");
+$lc = lc $u;
+is (length $lc, 1);
+is ($lc, "\351", "E accute -> e accute");
+$lc = lc $u;
+is (length $lc, 1);
+is ($lc, "\311", "E accute -> e accute");
+
+$u = UTF8Toggle->new("\351");
+my $uc = uc $u;
+is (length $uc, 1);
+is ($uc, "\351", "e accute -> E accute");
+$uc = uc $u;
+is (length $uc, 1);
+is ($uc, "\311", "e accute -> E accute");
+$uc = uc $u;
+is (length $uc, 1);
+is ($uc, "\351", "e accute -> E accute");
+
+$u = UTF8Toggle->new("\311");
+$lc = lcfirst $u;
+is (length $lc, 1);
+is ($lc, "\311", "E accute -> e accute");
+$lc = lcfirst $u;
+is (length $lc, 1);
+is ($lc, "\351", "E accute -> e accute");
+$lc = lcfirst $u;
+is (length $lc, 1);
+is ($lc, "\311", "E accute -> e accute");
+
+$u = UTF8Toggle->new("\351");
+$uc = ucfirst $u;
+is (length $uc, 1);
+is ($uc, "\351", "e accute -> E accute");
+$uc = ucfirst $u;
+is (length $uc, 1);
+is ($uc, "\311", "e accute -> E accute");
+$uc = ucfirst $u;
+is (length $uc, 1);
+is ($uc, "\351", "e accute -> E accute");
+
 my $have_setlocale = 0;
 eval {
     require POSIX;
@@ -52,13 +96,16 @@ eval {
 
 SKIP: {
     if (!$have_setlocale) {
-	skip "No setlocale", 4;
+	skip "No setlocale", 24;
     } elsif (!setlocale(&POSIX::LC_ALL, "en_GB.ISO8859-1")) {
-	skip "Could not setlocale to en_GB.ISO8859-1", 4;
+	skip "Could not setlocale to en_GB.ISO8859-1", 24;
     } else {
 	use locale;
 	my $u = UTF8Toggle->new("\311");
 	my $lc = lc $u;
+	is (length $lc, 1);
+	is ($lc, "\351", "E accute -> e accute");
+	$lc = lc $u;
 	is (length $lc, 1);
 	is ($lc, "\351", "E accute -> e accute");
 	$lc = lc $u;
@@ -72,6 +119,9 @@ SKIP: {
 	$uc = uc $u;
 	is (length $uc, 1);
 	is ($uc, "\311", "e accute -> E accute");
+	$uc = uc $u;
+	is (length $uc, 1);
+	is ($uc, "\311", "e accute -> E accute");
 
 	$u = UTF8Toggle->new("\311");
 	$lc = lcfirst $u;
@@ -80,8 +130,14 @@ SKIP: {
 	$lc = lcfirst $u;
 	is (length $lc, 1);
 	is ($lc, "\351", "E accute -> e accute");
+	$lc = lcfirst $u;
+	is (length $lc, 1);
+	is ($lc, "\351", "E accute -> e accute");
 
 	$u = UTF8Toggle->new("\351");
+	$uc = ucfirst $u;
+	is (length $uc, 1);
+	is ($uc, "\311", "e accute -> E accute");
 	$uc = ucfirst $u;
 	is (length $uc, 1);
 	is ($uc, "\311", "e accute -> E accute");
