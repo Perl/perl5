@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 12;
+use Test::More tests => 16;
 
 package UTF8Toggle;
 use strict;
@@ -64,5 +64,13 @@ SKIP: {
 	$lc = lc $u;
 	is (length $lc, 1);
 	is ($lc, "\351", "E accute -> e accute");
+
+	$u = UTF8Toggle->new("\351");
+	my $uc = uc $u;
+	is (length $uc, 1);
+	is ($uc, "\311", "e accute -> E accute");
+	$uc = uc $u;
+	is (length $uc, 1);
+	is ($uc, "\311", "e accute -> E accute");
     }
 }

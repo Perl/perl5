@@ -3479,90 +3479,106 @@ PP(pp_ucfirst)
     RETURN;
 }
 
+/* There's so much setup/teardown code common between uc and lc, I wonder if
+   it would be worth merging the two, and just having a switch outside each
+   of the three tight loops.  */
 PP(pp_uc)
 {
     dVAR;
     dSP;
-    SV *sv = TOPs;
+    SV *source = TOPs;
     STRLEN len;
+    STRLEN min;
+    SV *dest;
+    const U8 *s;
+    U8 *d;
 
-    SvGETMAGIC(sv);
-    if (DO_UTF8(sv)) {
+    SvGETMAGIC(source);
+
+    if (SvPADTMP(source) && !SvREADONLY(source) && !SvAMAGIC(source)
+	&& !DO_UTF8(source)) {
+	/* We can convert in place.  */
+
+	dest = source;
+	s = d = (U8*)SvPV_force_nomg(source, len);
+	min = len + 1;
+    } else {
 	dTARGET;
-	STRLEN ulen;
-	register U8 *d;
-	const U8 *s;
-	const U8 *send;
+
+	dest = TARG;
+
+	/* The old implementation would copy source into TARG at this point.
+	   This had the side effect that if source was undef, TARG was now
+	   an undefined SV with PADTMP set, and they don't warn inside
+	   sv_2pv_flags(). However, we're now getting the PV direct from
+	   source, which doesn't have PADTMP set, so it would warn. Hence the
+	   little games.  */
+
+	if (SvOK(source)) {
+	    s = (const U8*)SvPV_nomg_const(source, len);
+	} else {
+	    s = "";
+	    len = 0;
+	}
+	min = len + 1;
+
+	SvUPGRADE(dest, SVt_PV);
+	d = SvGROW(dest, min);
+	(void)SvPOK_only(dest);
+
+	SETs(dest);
+    }
+
+    /* Overloaded values may have toggled the UTF-8 flag on source, so we need
+       to check DO_UTF8 again here.  */
+
+    if (DO_UTF8(source)) {
+	const U8 *const send = s + len;
 	U8 tmpbuf[UTF8_MAXBYTES+1];
 
-	s = (const U8*)SvPV_nomg_const(sv,len);
-	if (!len) {
-	    SvUTF8_off(TARG);				/* decontaminate */
-	    sv_setpvn(TARG, "", 0);
-	    sv = TARG;
-	    SETs(sv);
-	}
-	else {
-	    STRLEN min = len + 1;
+	while (s < send) {
+	    const STRLEN u = UTF8SKIP(s);
+	    STRLEN ulen;
 
-	    SvUPGRADE(TARG, SVt_PV);
-	    SvGROW(TARG, min);
-	    (void)SvPOK_only(TARG);
-	    d = (U8*)SvPVX(TARG);
-	    send = s + len;
-	    while (s < send) {
-		STRLEN u = UTF8SKIP(s);
+	    toUPPER_utf8(s, tmpbuf, &ulen);
+	    if (ulen > u && (SvLEN(dest) < (min += ulen - u))) {
+		/* If the eventually required minimum size outgrows
+		 * the available space, we need to grow. */
+		const UV o = d - (U8*)SvPVX_const(dest);
 
-		toUPPER_utf8(s, tmpbuf, &ulen);
-		if (ulen > u && (SvLEN(TARG) < (min += ulen - u))) {
-		    /* If the eventually required minimum size outgrows
-		     * the available space, we need to grow. */
-		    const UV o = d - (U8*)SvPVX_const(TARG);
-
-		    /* If someone uppercases one million U+03B0s we
-		     * SvGROW() one million times.  Or we could try
-		     * guessing how much to allocate without allocating
-		     * too much. Such is life. */
-		    SvGROW(TARG, min);
-		    d = (U8*)SvPVX(TARG) + o;
-		}
-		Copy(tmpbuf, d, ulen, U8);
-		d += ulen;
-		s += u;
+		/* If someone uppercases one million U+03B0s we SvGROW() one
+		 * million times.  Or we could try guessing how much to
+		 allocate without allocating too much.  Such is life. */
+		SvGROW(dest, min);
+		d = (U8*)SvPVX(dest) + o;
 	    }
-	    *d = '\0';
-	    SvUTF8_on(TARG);
-	    SvCUR_set(TARG, d - (U8*)SvPVX_const(TARG));
-	    sv = TARG;
-	    SETs(sv);
+	    Copy(tmpbuf, d, ulen, U8);
+	    d += ulen;
+	    s += u;
 	}
-    }
-    else {
-	U8 *s;
-	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
-	    dTARGET;
-	    SvUTF8_off(TARG);				/* decontaminate */
-	    sv_setsv_nomg(TARG, sv);
-	    sv = TARG;
-	    SETs(sv);
-	}
-	s = (U8*)SvPV_force_nomg(sv, len);
+	SvUTF8_on(dest);
+	*d = '\0';
+	SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
+    } else {
 	if (len) {
-	    register const U8 *send = s + len;
-
+	    const U8 *const send = s + len;
 	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
-		SvTAINTED_on(sv);
-		for (; s < send; s++)
-		    *s = toUPPER_LC(*s);
+		SvTAINTED_on(dest);
+		for (; s < send; d++, s++)
+		    *d = toUPPER_LC(*s);
 	    }
 	    else {
-		for (; s < send; s++)
-		    *s = toUPPER(*s);
+		for (; s < send; d++, s++)
+		    *d = toUPPER(*s);
 	    }
 	}
+	if (source != dest) {
+	    *d = '\0';
+	    SvCUR_set(dest, d - (U8*)SvPVX_const(dest));
+	}
     }
-    SvSETMAGIC(sv);
+    SvSETMAGIC(dest);
     RETURN;
 }
 
