@@ -1240,7 +1240,7 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	return TRUE;
     case SVt_IV:
 	if (SvIOK(sv)) {
-	    SvGETMAGIC(sv);
+	    assert(!SvGMAGICAL(sv));
 	    if (SvIsUV(sv))
 		PerlIO_printf(fp, "%"UVuf, (UV)SvUVX(sv));
 	    else
