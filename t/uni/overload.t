@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 16;
+use Test::More tests => 24;
 
 package UTF8Toggle;
 use strict;
@@ -70,6 +70,22 @@ SKIP: {
 	is (length $uc, 1);
 	is ($uc, "\311", "e accute -> E accute");
 	$uc = uc $u;
+	is (length $uc, 1);
+	is ($uc, "\311", "e accute -> E accute");
+
+	$u = UTF8Toggle->new("\311");
+	$lc = lcfirst $u;
+	is (length $lc, 1);
+	is ($lc, "\351", "E accute -> e accute");
+	$lc = lcfirst $u;
+	is (length $lc, 1);
+	is ($lc, "\351", "E accute -> e accute");
+
+	$u = UTF8Toggle->new("\351");
+	$uc = ucfirst $u;
+	is (length $uc, 1);
+	is ($uc, "\311", "e accute -> E accute");
+	$uc = ucfirst $u;
 	is (length $uc, 1);
 	is ($uc, "\311", "e accute -> E accute");
     }

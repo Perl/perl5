@@ -3413,28 +3413,64 @@ PP(pp_ucfirst)
 {
     dVAR;
     dSP;
-    SV *sv = TOPs;
-    const U8 *s;
+    SV *source = TOPs;
     STRLEN slen;
+    STRLEN need;
+    SV *dest;
+    bool inplace = TRUE;
+    bool doing_utf8;
     const int op_type = PL_op->op_type;
+    const U8 *s;
+    U8 *d;
+    U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
+    STRLEN ulen;
+    STRLEN tculen;
 
-    SvGETMAGIC(sv);
-    if (DO_UTF8(sv) &&
-	(s = (const U8*)SvPV_nomg_const(sv, slen)) && slen &&
-	UTF8_IS_START(*s)) {
-	U8 tmpbuf[UTF8_MAXBYTES_CASE+1];
-	STRLEN ulen;
-	STRLEN tculen;
+    SvGETMAGIC(source);
+    if (SvOK(source)) {
+	s = (const U8*)SvPV_nomg_const(source, slen);
+    } else {
+	s = "";
+	slen = 0;
+    }
 
+    if (slen && DO_UTF8(source) && UTF8_IS_START(*s)) {
+	doing_utf8 = TRUE;
 	utf8_to_uvchr(s, &ulen);
 	if (op_type == OP_UCFIRST) {
 	    toTITLE_utf8(s, tmpbuf, &tculen);
 	} else {
 	    toLOWER_utf8(s, tmpbuf, &tculen);
 	}
+	/* If the two differ, we definately cannot do inplace.  */
+	inplace = ulen == tculen;
+	need = slen + 1 - ulen + tculen;
+    } else {
+	doing_utf8 = FALSE;
+	need = slen + 1;
+    }
 
-	if (!SvPADTMP(sv) || SvREADONLY(sv) || ulen != tculen) {
-	    dTARGET;
+    if (SvPADTMP(source) && !SvREADONLY(source) && inplace) {
+	/* We can convert in place.  */
+
+	dest = source;
+	s = d = (U8*)SvPV_force_nomg(source, slen);
+    } else {
+	dTARGET;
+
+	dest = TARG;
+
+	SvUPGRADE(dest, SVt_PV);
+	d = SvGROW(dest, need);
+	(void)SvPOK_only(dest);
+
+	SETs(dest);
+
+	inplace = FALSE;
+    }
+
+    if (doing_utf8) {
+	if(!inplace) {
 	    /* slen is the byte length of the whole SV.
 	     * ulen is the byte length of the original Unicode character
 	     * stored as UTF-8 at s.
@@ -3442,40 +3478,41 @@ PP(pp_ucfirst)
 	     * lowercased) Unicode character stored as UTF-8 at tmpbuf.
 	     * We first set the result to be the titlecased (/lowercased)
 	     * character, and then append the rest of the SV data. */
-	    sv_setpvn(TARG, (char*)tmpbuf, tculen);
+	    sv_setpvn(dest, (char*)tmpbuf, tculen);
 	    if (slen > ulen)
-	        sv_catpvn(TARG, (char*)(s + ulen), slen - ulen);
-	    SvUTF8_on(TARG);
-	    sv = TARG;
-	    SETs(sv);
+	        sv_catpvn(dest, (char*)(s + ulen), slen - ulen);
+	    SvUTF8_on(dest);
 	}
 	else {
-	    s = (U8*)SvPV_force_nomg(sv, slen);
-	    Copy(tmpbuf, s, tculen, U8);
+	    Copy(tmpbuf, d, tculen, U8);
+	    SvCUR_set(dest, need - 1);
 	}
     }
     else {
-	U8 *s1;
-	if (!SvPADTMP(sv) || SvREADONLY(sv)) {
-	    dTARGET;
-	    SvUTF8_off(TARG);				/* decontaminate */
-	    sv_setsv_nomg(TARG, sv);
-	    sv = TARG;
-	    SETs(sv);
-	}
-	s1 = (U8*)SvPV_force_nomg(sv, slen);
-	if (*s1) {
+	if (*s) {
 	    if (IN_LOCALE_RUNTIME) {
 		TAINT;
-		SvTAINTED_on(sv);
-		*s1 = (op_type == OP_UCFIRST)
-		    ? toUPPER_LC(*s1) : toLOWER_LC(*s1);
+		SvTAINTED_on(dest);
+		*d = (op_type == OP_UCFIRST)
+		    ? toUPPER_LC(*s) : toLOWER_LC(*s);
 	    }
 	    else
-		*s1 = (op_type == OP_UCFIRST) ? toUPPER(*s1) : toLOWER(*s1);
+		*d = (op_type == OP_UCFIRST) ? toUPPER(*s) : toLOWER(*s);
+	} else {
+	    /* See bug #39028  */
+	    *d = *s;
+	}
+
+	if (SvUTF8(source))
+	    SvUTF8_on(dest);
+
+	if (!inplace) {
+	    /* This will copy the trailing NUL  */
+	    Copy(s + 1, d + 1, slen, U8);
+	    SvCUR_set(dest, need - 1);
 	}
     }
-    SvSETMAGIC(sv);
+    SvSETMAGIC(dest);
     RETURN;
 }
 
