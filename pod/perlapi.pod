@@ -1006,6 +1006,17 @@ cope with complex macro expressions. Always use the macro instead.
 =for hackers
 Found in file mathoms.c
 
+=item unpack_str
+X<unpack_str>
+
+The engine implementing unpack() Perl function. Note: parameters strbeg, new_s
+and ocnt are not used. This call should not be used, use unpackstring instead.
+
+	I32	unpack_str(const char *pat, const char *patend, const char *s, const char *strbeg, const char *strend, char **new_s, I32 ocnt, U32 flags)
+
+=for hackers
+Found in file mathoms.c
+
 
 =back
 
@@ -1043,17 +1054,6 @@ extracted list items on the stack and returns the number of elements.
 Issue C<PUTBACK> before and C<SPAGAIN> after the call to this function.
 
 	I32	unpackstring(const char *pat, const char *patend, const char *s, const char *strend, U32 flags)
-
-=for hackers
-Found in file pp_pack.c
-
-=item unpack_str
-X<unpack_str>
-
-The engine implementing unpack() Perl function. Note: parameters strbeg, new_s
-and ocnt are not used. This call should not be used, use unpackstring instead.
-
-	I32	unpack_str(const char *pat, const char *patend, const char *s, const char *strbeg, const char *strend, char **new_s, I32 ocnt, U32 flags)
 
 =for hackers
 Found in file pp_pack.c
@@ -6313,6 +6313,8 @@ Converts a string C<s> of length C<len> from UTF-8 into byte encoding.
 Unlike C<bytes_to_utf8>, this over-writes the original string, and
 updates len to contain the new length.
 Returns zero on failure, setting C<len> to -1.
+
+If you need a copy of the string, see C<bytes_from_utf8>.
 
 NOTE: this function is experimental and may change or be
 removed without notice.

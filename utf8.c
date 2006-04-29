@@ -750,6 +750,8 @@ Unlike C<bytes_to_utf8>, this over-writes the original string, and
 updates len to contain the new length.
 Returns zero on failure, setting C<len> to -1.
 
+If you need a copy of the string, see C<bytes_from_utf8>.
+
 =cut
 */
 
