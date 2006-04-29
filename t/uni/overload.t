@@ -7,9 +7,9 @@ BEGIN {
     }
 }
 
-use Test::More tests => 8;
+use Test::More tests => 12;
 
-package UTF8Field;
+package UTF8Toggle;
 use strict;
 
 use overload '""' => 'stringify';
@@ -36,9 +36,33 @@ package main;
 foreach my $t ("ASCII", "B\366se") {
     my $length = length $t;
 
-    my $u = UTF8Field->new($t);
+    my $u = UTF8Toggle->new($t);
     is (length $u, $length, "length of '$t'");
     is (length $u, $length, "length of '$t'");
     is (length $u, $length, "length of '$t'");
     is (length $u, $length, "length of '$t'");
+}
+
+my $have_setlocale = 0;
+eval {
+    require POSIX;
+    import POSIX ':locale_h';
+    $have_setlocale++;
+};
+
+SKIP: {
+    if (!$have_setlocale) {
+	skip "No setlocale", 4;
+    } elsif (!setlocale(&POSIX::LC_ALL, "en_GB.ISO8859-1")) {
+	skip "Could not setlocale to en_GB.ISO8859-1", 4;
+    } else {
+	use locale;
+	my $u = UTF8Toggle->new("\311");
+	my $lc = lc $u;
+	is (length $lc, 1);
+	is ($lc, "\351", "E accute -> e accute");
+	$lc = lc $u;
+	is (length $lc, 1);
+	is ($lc, "\351", "E accute -> e accute");
+    }
 }
