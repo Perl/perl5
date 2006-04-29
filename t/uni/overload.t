@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 56;
+use Test::More tests => 68;
 
 package UTF8Toggle;
 use strict;
@@ -16,7 +16,9 @@ use overload '""' => 'stringify';
 
 sub new {
     my $class = shift;
-    return bless [shift, 0], $class;
+    my $value = shift;
+    my $state = shift||0;
+    return bless [$value, $state], $class;
 }
 
 sub stringify {
@@ -145,4 +147,43 @@ SKIP: {
 	is (length $uc, 1);
 	is ($uc, "\311", "e accute -> E accute");
     }
+}
+
+my $tmpfile = 'overload.tmp';
+
+foreach my $operator (qw (print)) {
+    foreach my $layer ('', ':utf8') {
+	open my $fh, "+>$layer", $tmpfile or die $!;
+	my $u = UTF8Toggle->new("\311\n");
+	print $fh $u;
+	print $fh $u;
+	print $fh $u;
+	my $l = UTF8Toggle->new("\351\n", 1);
+	print $fh $l;
+	print $fh $l;
+	print $fh $l;
+
+	seek $fh, 0, 0 or die $!;
+	my $line;
+	chomp ($line = <$fh>);
+	is ($line, "\311", "$operator $layer");
+	chomp ($line = <$fh>);
+	is ($line, "\311", "$operator $layer");
+	chomp ($line = <$fh>);
+	is ($line, "\311", "$operator $layer");
+	chomp ($line = <$fh>);
+	is ($line, "\351", "$operator $layer");
+	chomp ($line = <$fh>);
+	is ($line, "\351", "$operator $layer");
+	chomp ($line = <$fh>);
+	is ($line, "\351", "$operator $layer");
+
+	close $fh or die $!;
+	unlink $tmpfile or die $!;
+    }
+}
+
+
+END {
+    1 while -f $tmpfile and unlink $tmpfile || die "unlink '$tmpfile': $!";
 }

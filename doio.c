@@ -1227,6 +1227,8 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
     dVAR;
     register const char *tmps;
     STRLEN len;
+    U8 *tmpbuf = NULL;
+    bool happy = TRUE;
 
     /* assuming fp is checked earlier */
     if (!sv)
@@ -1247,19 +1249,32 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	}
 	/* FALL THROUGH */
     default:
+	/* Do this first to trigger any overloading.  */
+	tmps = SvPV_const(sv, len);
 	if (PerlIO_isutf8(fp)) {
-	    if (!SvUTF8(sv))
-		sv_utf8_upgrade_flags(sv = sv_mortalcopy(sv),
-				      SV_GMAGIC|SV_UTF8_NO_ENCODING);
-	}
-	else if (DO_UTF8(sv)) {
-	    if (!sv_utf8_downgrade((sv = sv_mortalcopy(sv)), TRUE)
-		&& ckWARN_d(WARN_UTF8))
-	    {
-		Perl_warner(aTHX_ packWARN(WARN_UTF8), "Wide character in print");
+	    if (!SvUTF8(sv)) {
+		/* We don't modify the original scalar.  */
+		tmpbuf = bytes_to_utf8((const U8*) tmps, &len);
+		tmps = (char *) tmpbuf;
 	    }
 	}
-	tmps = SvPV_const(sv, len);
+	else if (DO_UTF8(sv)) {
+	    STRLEN tmplen = len;
+	    bool utf8 = TRUE;
+	    U8 *result = bytes_from_utf8((const U8*) tmps, &tmplen, &utf8);
+	    if (!utf8) {
+		tmpbuf = result;
+		tmps = (char *) tmpbuf;
+		len = tmplen;
+	    }
+	    else {
+		assert((char *)result == tmps);
+		if (ckWARN_d(WARN_UTF8)) {
+		    Perl_warner(aTHX_ packWARN(WARN_UTF8),
+				"Wide character in print");
+		}
+	    }
+	}
 	break;
     }
     /* To detect whether the process is about to overstep its
@@ -1269,8 +1284,10 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
      * at which we would get EPERM.  Note that when using buffered
      * io the write failure can be delayed until the flush/close. --jhi */
     if (len && (PerlIO_write(fp,tmps,len) == 0))
-	return FALSE;
-    return !PerlIO_error(fp);
+	happy = FALSE;
+    if (tmpbuf)
+	Safefree(tmpbuf);
+    return happy ? !PerlIO_error(fp) : FALSE;
 }
 
 I32
