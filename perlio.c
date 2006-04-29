@@ -5143,7 +5143,7 @@ PerlIO_vsprintf(char *s, int n, const char *fmt, va_list ap)
 {
     dVAR;
 #ifdef USE_VSNPRINTF
-    const int val = vsnprintf(s, n, fmt, ap);
+    const int val = vsnprintf(s, n > 0 ? n : 0, fmt, ap);
 #else
     const int val = vsprintf(s, fmt, ap);
 #endif /* #ifdef USE_VSNPRINTF */
