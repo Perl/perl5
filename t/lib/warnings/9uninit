@@ -1162,7 +1162,7 @@ our ($g1);
 
 eval { my $x; seek    $x,$m1, $g1 };
 eval { my $x; sysseek $x,$m1, $g1 };
-eval { syswrite $m1, $g1 };
+eval { syswrite $m1, $g1 }; # logic changed - now won't try $g1 if $m1 is bad
 # eval { syswrite STDERR, $m1 };        # XXX under utf8, can give
 # eval { syswrite STDERR, $m1, $g1 };   # XXX different warnings
 # eval { syswrite STDERR, $m1, $g1, $m2 };
@@ -1176,7 +1176,6 @@ Use of uninitialized value $x in ref-to-glob cast at - line 6.
 Use of uninitialized value $g1 in sysseek at - line 6.
 Use of uninitialized value $m1 in sysseek at - line 6.
 Use of uninitialized value $m1 in ref-to-glob cast at - line 7.
-Use of uninitialized value $g1 in syswrite at - line 7.
 Use of uninitialized value $m2 in socket at - line 11.
 Use of uninitialized value $g1 in socket at - line 11.
 Use of uninitialized value $m1 in socket at - line 11.

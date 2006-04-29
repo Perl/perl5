@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 68;
+use Test::More tests => 116;
 
 package UTF8Toggle;
 use strict;
@@ -151,17 +151,46 @@ SKIP: {
 
 my $tmpfile = 'overload.tmp';
 
-foreach my $operator (qw (print)) {
+foreach my $operator ('print', 'syswrite', 'syswrite len', 'syswrite off',
+		      'syswrite len off') {
     foreach my $layer ('', ':utf8') {
 	open my $fh, "+>$layer", $tmpfile or die $!;
-	my $u = UTF8Toggle->new("\311\n");
-	print $fh $u;
-	print $fh $u;
-	print $fh $u;
-	my $l = UTF8Toggle->new("\351\n", 1);
-	print $fh $l;
-	print $fh $l;
-	print $fh $l;
+	my $pad = $operator =~ /\boff\b/ ? "\243" : "";
+	my $trail = $operator =~ /\blen\b/ ? "!" : "";
+	my $u = UTF8Toggle->new("$pad\311\n$trail");
+	my $l = UTF8Toggle->new("$pad\351\n$trail", 1);
+	if ($operator eq 'print') {
+	    print $fh $u;
+	    print $fh $u;
+	    print $fh $u;
+	    print $fh $l;
+	    print $fh $l;
+	    print $fh $l;
+	} elsif ($operator eq 'syswrite') {
+	    syswrite $fh, $u;
+	    syswrite $fh, $u;
+	    syswrite $fh, $u;
+	    syswrite $fh, $l;
+	    syswrite $fh, $l;
+	    syswrite $fh, $l;
+	} elsif ($operator eq 'syswrite len') {
+	    syswrite $fh, $u, 2;
+	    syswrite $fh, $u, 2;
+	    syswrite $fh, $u, 2;
+	    syswrite $fh, $l, 2;
+	    syswrite $fh, $l, 2;
+	    syswrite $fh, $l, 2;
+	} elsif ($operator eq 'syswrite off'
+		 || $operator eq 'syswrite len off') {
+	    syswrite $fh, $u, 2, 1;
+	    syswrite $fh, $u, 2, 1;
+	    syswrite $fh, $u, 2, 1;
+	    syswrite $fh, $l, 2, 1;
+	    syswrite $fh, $l, 2, 1;
+	    syswrite $fh, $l, 2, 1;
+	} else {
+	    die $operator;
+	}
 
 	seek $fh, 0, 0 or die $!;
 	my $line;

@@ -1777,11 +1777,13 @@ PP(pp_send)
     IO *io;
     SV *bufsv;
     const char *buffer;
-    Size_t length = 0;
     SSize_t retval;
     STRLEN blen;
+    STRLEN orig_blen_bytes;
     MAGIC *mg;
     const int op_type = PL_op->op_type;
+    bool doing_utf8;
+    U8 *tmpbuf = NULL;
     
     GV *const gv = (GV*)*++MARK;
     if (PL_op->op_type == OP_SYSWRITE
@@ -1813,19 +1815,6 @@ PP(pp_send)
 
     bufsv = *++MARK;
 
-    if (op_type == OP_SYSWRITE) {
-	if (MARK >= SP) {
-	    length = (Size_t) sv_len(bufsv);
-	} else {
-#if Size_t_size > IVSIZE
-	    length = (Size_t)SvNVx(*++MARK);
-#else
-	    length = (Size_t)SvIVx(*++MARK);
-#endif
-	    if ((SSize_t)length < 0)
-		DIE(aTHX_ "Negative length");
-	}
-    }
     SETERRNO(0,0);
     io = GvIO(gv);
     if (!io || !IoIFP(io)) {
@@ -1836,43 +1825,105 @@ PP(pp_send)
 	goto say_undef;
     }
 
+    /* Do this first to trigger any overloading.  */
+    buffer = SvPV_const(bufsv, blen);
+    orig_blen_bytes = blen;
+    doing_utf8 = DO_UTF8(bufsv);
+
     if (PerlIO_isutf8(IoIFP(io))) {
 	if (!SvUTF8(bufsv)) {
-	    bufsv = sv_2mortal(newSVsv(bufsv));
-	    buffer = sv_2pvutf8(bufsv, &blen);
-	} else
-	    buffer = SvPV_const(bufsv, blen);
+	    /* We don't modify the original scalar.  */
+	    tmpbuf = bytes_to_utf8((const U8*) buffer, &blen);
+	    buffer = (char *) tmpbuf;
+	    doing_utf8 = TRUE;
+	}
     }
-    else {
-	 if (DO_UTF8(bufsv)) {
-	      /* Not modifying source SV, so making a temporary copy. */
-	      bufsv = sv_2mortal(newSVsv(bufsv));
-	      sv_utf8_downgrade(bufsv, FALSE);
-	 }
-	 buffer = SvPV_const(bufsv, blen);
+    else if (doing_utf8) {
+	STRLEN tmplen = blen;
+	U8 *result = bytes_from_utf8((const U8*) buffer, &tmplen, &doing_utf8);
+	if (!doing_utf8) {
+	    tmpbuf = result;
+	    buffer = (char *) tmpbuf;
+	    blen = tmplen;
+	}
+	else {
+	    assert((char *)result == buffer);
+	    Perl_croak(aTHX_ "Wide character in %s", OP_DESC(PL_op));
+	}
     }
 
     if (op_type == OP_SYSWRITE) {
+	Size_t length = 0; /* This length is in characters.  */
+	STRLEN blen_chars;
 	IV offset;
-	if (DO_UTF8(bufsv)) {
-	    /* length and offset are in chars */
-	    blen   = sv_len_utf8(bufsv);
+
+	if (doing_utf8) {
+	    if (tmpbuf) {
+		/* The SV is bytes, and we've had to upgrade it.  */
+		blen_chars = orig_blen_bytes;
+	    } else {
+		/* The SV really is UTF-8.  */
+		if (SvGMAGICAL(bufsv) || SvAMAGIC(bufsv)) {
+		    /* Don't call sv_len_utf8 again because it will call magic
+		       or overloading a second time, and we might get back a
+		       different result.  */
+		    blen_chars = utf8_length(buffer, buffer + blen);
+		} else {
+		    /* It's safe, and it may well be cached.  */
+		    blen_chars = sv_len_utf8(bufsv);
+		}
+	    }
+	} else {
+	    blen_chars = blen;
 	}
+
+	if (MARK >= SP) {
+	    length = blen_chars;
+	} else {
+#if Size_t_size > IVSIZE
+	    length = (Size_t)SvNVx(*++MARK);
+#else
+	    length = (Size_t)SvIVx(*++MARK);
+#endif
+	    if ((SSize_t)length < 0)
+		DIE(aTHX_ "Negative length");
+	}
+
 	if (MARK < SP) {
 	    offset = SvIVx(*++MARK);
 	    if (offset < 0) {
-		if (-offset > (IV)blen)
+		if (-offset > (IV)blen_chars)
 		    DIE(aTHX_ "Offset outside string");
-		offset += blen;
-	    } else if (offset >= (IV)blen && blen > 0)
+		offset += blen_chars;
+	    } else if (offset >= (IV)blen_chars && blen_chars > 0)
 		DIE(aTHX_ "Offset outside string");
 	} else
 	    offset = 0;
-	if (length > blen - offset)
-	    length = blen - offset;
-	if (DO_UTF8(bufsv)) {
-	    buffer = (const char*)utf8_hop((const U8 *)buffer, offset);
-	    length = utf8_hop((U8 *)buffer, length) - (U8 *)buffer;
+	if (length > blen_chars - offset)
+	    length = blen_chars - offset;
+	if (doing_utf8) {
+	    /* Here we convert length from characters to bytes.  */
+	    if (tmpbuf || SvGMAGICAL(bufsv) || SvAMAGIC(bufsv)) {
+		/* Either we had to convert the SV, or the SV is magical, or
+		   the SV has overloading, in which case we can't or mustn't
+		   or mustn't call it again.  */
+
+		buffer = (const char*)utf8_hop((const U8 *)buffer, offset);
+		length = utf8_hop((U8 *)buffer, length) - (U8 *)buffer;
+	    } else {
+		/* It's a real UTF-8 SV, and it's not going to change under
+		   us.  Take advantage of any cache.  */
+		I32 start = offset;
+		I32 len_I32 = length;
+
+		/* Convert the start and end character positions to bytes.
+		   Remember that the second argument to sv_pos_u2b is relative
+		   to the first.  */
+		sv_pos_u2b(bufsv, &start, &len_I32);
+
+		buffer += start;
+		length = len_I32;
+	    }
 	}
 	else {
 	    buffer = buffer+offset;
@@ -1908,10 +1959,13 @@ PP(pp_send)
     else
 	DIE(aTHX_ PL_no_sock_func, "send");
 #endif
+    if (tmpbuf)
+	Safefree(tmpbuf);
+
     if (retval < 0)
 	goto say_undef;
     SP = ORIGMARK;
-    if (DO_UTF8(bufsv))
+    if (doing_utf8)
         retval = utf8_length((U8*)buffer, (U8*)buffer + retval);
 #if Size_t_size > IVSIZE
     PUSHn(retval);
