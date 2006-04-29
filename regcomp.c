@@ -1865,7 +1865,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
                                     SvPV_nolen_const(mysv));
                                 }
                                 PerlIO_printf( Perl_debug_log, "0x%p,0x%p,0x%p)\n",
-                                   first, last, cur );
+                                   (void*)first, (void*)last, (void*)cur );
                             });
                             if ( ( first ? OP( noper ) == optype
                                          : PL_regkind[ (U8)OP( noper ) ] == EXACT )
@@ -1922,7 +1922,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
                             regprop(RExC_rx, mysv, cur);
                             PerlIO_printf( Perl_debug_log,
                               "%*s%s\t(0x%p,0x%p,0x%p)\n", (int)depth * 2 + 2,
-                              "  ", SvPV_nolen_const( mysv ), first, last, cur);
+                              "  ", SvPV_nolen_const( mysv ), (void*)first, (void*)last, (void*)cur);
 
                         });
                         if ( last ) {

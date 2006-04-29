@@ -2607,7 +2607,7 @@ Perl_filter_del(pTHX_ filter_t funcp)
     SV *datasv;
 
 #ifdef DEBUGGING
-    DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_del func %p", FPTR2DPTR(XPVIO *, funcp)));
+    DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_del func %p", (void*)FPTR2DPTR(XPVIO *, funcp)));
 #endif
     if (!PL_rsfp_filters || AvFILLp(PL_rsfp_filters)<0)
 	return;
@@ -2689,7 +2689,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     funcp = DPTR2FPTR(filter_t, IoANY(datasv));
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "filter_read %d: via function %p (%s)\n",
-			  idx, datasv, SvPV_nolen_const(datasv)));
+			  idx, (void*)datasv, SvPV_nolen_const(datasv)));
     /* Call function. The function is expected to 	*/
     /* call "FILTER_READ(idx+1, buf_sv)" first.		*/
     /* Return: <0:error, =0:eof, >0:not eof 		*/
@@ -12407,7 +12407,7 @@ utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     const I32 count = FILTER_READ(idx+1, sv, maxlen);
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "utf16_textfilter(%p): %d %d (%d)\n",
-			  utf16_textfilter, idx, maxlen, (int) count));
+			  (void*)utf16_textfilter, idx, maxlen, (int) count));
     if (count) {
 	U8* tmps;
 	I32 newlen;
@@ -12429,7 +12429,7 @@ utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     const I32 count = FILTER_READ(idx+1, sv, maxlen);
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "utf16rev_textfilter(%p): %d %d (%d)\n",
-			  utf16rev_textfilter, idx, maxlen, (int) count));
+			  (void*)utf16rev_textfilter, idx, maxlen, (int) count));
     if (count) {
 	U8* tmps;
 	I32 newlen;

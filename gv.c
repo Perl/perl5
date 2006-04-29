@@ -1526,7 +1526,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 
 		DEBUG_o( Perl_deb(aTHX_ "Resolving method \"%"SVf256\
 			"\" for overloaded \"%s\" in package \"%.256s\"\n",
-			     GvSV(gv), cp, hvname) );
+			     (void*)GvSV(gv), cp, hvname) );
 		if (!gvsv || !SvPOK(gvsv)
 		    || !(ngv = gv_fetchmethod_autoload(stash, SvPVX_const(gvsv),
 						       FALSE)))

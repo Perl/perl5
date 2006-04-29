@@ -2866,7 +2866,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
     			    PerlIO_printf( Perl_debug_log, "%*s  %strying alternation #%d <%s> at 0x%p%s\n",
     			        REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
     			        st->u.trie.accept_buff[best].wordnum,
-        		        tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr",scan,
+        		        tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr", (void*)scan,
         		        PL_colors[5] );
 			});
 			if ( best<st->u.trie.accepted ) {

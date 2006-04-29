@@ -693,7 +693,7 @@ Perl_get_arena(pTHX_ int arena_size)
 	newroot->set_size = ARENAS_PER_SET;
 	newroot->next = *aroot;
 	*aroot = newroot;
-	DEBUG_m(PerlIO_printf(Perl_debug_log, "new arenaset %p\n", *aroot));
+	DEBUG_m(PerlIO_printf(Perl_debug_log, "new arenaset %p\n", (void*)*aroot));
     }
 
     /* ok, now have arena-set with at least 1 empty/available arena-desc */
