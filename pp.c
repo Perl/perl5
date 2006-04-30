@@ -3251,7 +3251,7 @@ PP(pp_index)
 	    SvUTF8_on(big);
 	big_p = SvPVX(big);
     }
-    if (SvGAMAGIC(little) || index && !SvOK(little)) {
+    if (SvGAMAGIC(little) || (is_index && !SvOK(little))) {
 	/* index && SvOK() is a hack. fbm_instr() calls SvPV_const, which will
 	   warn on undef, and we've already triggered a warning with the
 	   SvPV_const some lines above. We can't remove that, as we need to
