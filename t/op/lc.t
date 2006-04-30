@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 77;
+plan tests => 87;
 
 $a = "HELLO.* world";
 $b = "hello.* WORLD";
@@ -199,3 +199,9 @@ for (map { $_ } "A\x{100}", "ABC\x{100}", "\x{100}") {
     is($result, $expect, "[perl #38619]");
 }
 
+for (1, 4, 9, 16, 25) {
+    is(uc "\x{03B0}" x $_, "\x{3a5}\x{308}\x{301}" x $_,
+       'uc U+03B0 grows threefold');
+
+    is(lc "\x{0130}" x $_, "i\x{307}" x $_, 'lc U+0130 grows');
+}
