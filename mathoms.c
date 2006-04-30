@@ -1261,6 +1261,24 @@ Perl_unpack_str(pTHX_ const char *pat, const char *patend, const char *s,
 
     return unpackstring(pat, patend, s, strend, flags);
 }
+
+/*
+=for apidoc pack_cat
+
+The engine implementing pack() Perl function. Note: parameters next_in_list and
+flags are not used. This call should not be used; use packlist instead.
+
+=cut
+*/
+
+void
+Perl_pack_cat(pTHX_ SV *cat, const char *pat, const char *patend, register SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
+{
+    PERL_UNUSED_ARG(next_in_list);
+    PERL_UNUSED_ARG(flags);
+
+    packlist(cat, pat, patend, beglist, endlist);
+}
 #endif /* NO_MATHOMS */
 
 /*

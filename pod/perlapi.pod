@@ -768,6 +768,17 @@ See L<gv_fetchmethod_autoload>.
 =for hackers
 Found in file mathoms.c
 
+=item pack_cat
+X<pack_cat>
+
+The engine implementing pack() Perl function. Note: parameters next_in_list and
+flags are not used. This call should not be used; use packlist instead.
+
+	void	pack_cat(SV *cat, const char *pat, const char *patend, SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
+
+=for hackers
+Found in file mathoms.c
+
 =item sv_2pvbyte_nolen
 X<sv_2pvbyte_nolen>
 
@@ -1031,17 +1042,6 @@ X<packlist>
 The engine implementing pack() Perl function.
 
 	void	packlist(SV *cat, const char *pat, const char *patend, SV **beglist, SV **endlist)
-
-=for hackers
-Found in file pp_pack.c
-
-=item pack_cat
-X<pack_cat>
-
-The engine implementing pack() Perl function. Note: parameters next_in_list and
-flags are not used. This call should not be used; use packlist instead.
-
-	void	pack_cat(SV *cat, const char *pat, const char *patend, SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
 
 =for hackers
 Found in file pp_pack.c

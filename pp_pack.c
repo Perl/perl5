@@ -2359,28 +2359,6 @@ S_div128(pTHX_ SV *pnum, bool *done)
 }
 
 /*
-=for apidoc pack_cat
-
-The engine implementing pack() Perl function. Note: parameters next_in_list and
-flags are not used. This call should not be used; use packlist instead.
-
-=cut
-*/
-
-void
-Perl_pack_cat(pTHX_ SV *cat, const char *pat, const char *patend, register SV **beglist, SV **endlist, SV ***next_in_list, U32 flags)
-{
-    tempsym_t sym;
-    PERL_UNUSED_ARG(next_in_list);
-    PERL_UNUSED_ARG(flags);
-
-    TEMPSYM_INIT(&sym, pat, patend, FLAG_PACK);
-
-    (void)pack_rec( cat, &sym, beglist, endlist );
-}
-
-
-/*
 =for apidoc packlist
 
 The engine implementing pack() Perl function.
