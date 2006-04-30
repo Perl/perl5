@@ -2370,14 +2370,13 @@ void
 Perl_packlist(pTHX_ SV *cat, const char *pat, const char *patend, register SV **beglist, SV **endlist )
 {
     dVAR;
-    STRLEN no_len;
     tempsym_t sym;
 
     TEMPSYM_INIT(&sym, pat, patend, FLAG_PACK);
 
     /* We're going to do changes through SvPVX(cat). Make sure it's valid.
        Also make sure any UTF8 flag is loaded */
-    SvPV_force(cat, no_len);
+    SvPV_force_nolen(cat);
     if (DO_UTF8(cat))
 	sym.flags |= FLAG_PARSE_UTF8 | FLAG_DO_UTF8;
 
