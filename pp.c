@@ -3183,8 +3183,8 @@ PP(pp_index)
     STRLEN llen = 0;
     I32 offset;
     I32 retval;
-    const char *tmps;
-    const char *tmps2;
+    const char *big_p;
+    const char *little_p;
     const I32 arybase = CopARYBASE_get(PL_curcop);
     bool big_utf8;
     bool little_utf8;
@@ -3197,6 +3197,9 @@ PP(pp_index)
     }
     little = POPs;
     big = POPs;
+    big_p = SvPV_const(big, biglen);
+    little_p = SvPV_const(little, llen);
+
     big_utf8 = DO_UTF8(big);
     little_utf8 = DO_UTF8(little);
     if (big_utf8 ^ little_utf8) {
@@ -3204,9 +3207,7 @@ PP(pp_index)
 	if (little_utf8 && !PL_encoding) {
 	    /* Well, maybe instead we might be able to downgrade the small
 	       string?  */
-	    STRLEN little_len;
-	    const U8 * const little_pv = (U8*) SvPV_const(little, little_len);
-	    char * const pv = (char*)bytes_from_utf8(little_pv, &little_len,
+	    char * const pv = (char*)bytes_from_utf8(little_p, &llen,
 						     &little_utf8);
 	    if (little_utf8) {
 		/* If the large string is ISO-8859-1, and it's not possible to
@@ -3219,13 +3220,11 @@ PP(pp_index)
 	    /* At this point, pv is a malloc()ed string. So donate it to temp
 	       to ensure it will get free()d  */
 	    little = temp = newSV(0);
-	    sv_usepvn(temp, pv, little_len);
+	    sv_usepvn(temp, pv, llen);
+	    little_p = SvPVX(little);
 	} else {
-	    SV * const bytes = little_utf8 ? big : little;
-	    STRLEN len;
-	    const char * const p = SvPV_const(bytes, len);
-
-	    temp = newSVpvn(p, len);
+	    temp = little_utf8
+		? newSVpvn(big_p, biglen) : newSVpvn(little_p, llen);
 
 	    if (PL_encoding) {
 		sv_recode_to_utf8(temp, PL_encoding);
@@ -3235,34 +3234,58 @@ PP(pp_index)
 	    if (little_utf8) {
 		big = temp;
 		big_utf8 = TRUE;
+		big_p = SvPV_const(big, biglen);
 	    } else {
 		little = temp;
+		little_p = SvPV_const(little, llen);
 	    }
 	}
     }
-    /* Don't actually need the NULL initialisation, but it keeps gcc quiet.  */
-    tmps2 = is_index ? NULL : SvPV_const(little, llen);
-    tmps = SvPV_const(big, biglen);
+    if (SvGAMAGIC(big)) {
+	/* Life just becomes a lot easier if I use a temporary here.
+	   Otherwise I need to avoid calls to sv_pos_u2b(), which (dangerously)
+	   will trigger magic and overloading again, as will fbm_instr()
+	*/
+	big = sv_2mortal(newSVpvn(big_p, biglen));
+	if (big_utf8)
+	    SvUTF8_on(big);
+	big_p = SvPVX(big);
+    }
+    if (SvGAMAGIC(little) || index && !SvOK(little)) {
+	/* index && SvOK() is a hack. fbm_instr() calls SvPV_const, which will
+	   warn on undef, and we've already triggered a warning with the
+	   SvPV_const some lines above. We can't remove that, as we need to
+	   call some SvPV to trigger overloading early and find out if the
+	   string is UTF-8.
+	   This is all getting to messy. The API isn't quite clean enough,
+	   because data access has side effects.
+	*/
+	little = sv_2mortal(newSVpvn(little_p, llen));
+	if (little_utf8)
+	    SvUTF8_on(little);
+	little_p = SvPVX(little);
+    }
 
     if (MAXARG < 3)
 	offset = is_index ? 0 : biglen;
     else {
 	if (big_utf8 && offset > 0)
 	    sv_pos_u2b(big, &offset, 0);
-	offset += llen;
+	if (!is_index)
+	    offset += llen;
     }
     if (offset < 0)
 	offset = 0;
     else if (offset > (I32)biglen)
 	offset = biglen;
-    if (!(tmps2 = is_index
-	  ? fbm_instr((unsigned char*)tmps + offset,
-		      (unsigned char*)tmps + biglen, little, 0)
-	  : rninstr(tmps,  tmps  + offset,
-		    tmps2, tmps2 + llen)))
+    if (!(little_p = is_index
+	  ? fbm_instr((unsigned char*)big_p + offset,
+		      (unsigned char*)big_p + biglen, little, 0)
+	  : rninstr(big_p,  big_p  + offset,
+		    little_p, little_p + llen)))
 	retval = -1;
     else {
-	retval = tmps2 - tmps;
+	retval = little_p - big_p;
 	if (retval > 0 && big_utf8)
 	    sv_pos_b2u(big, &retval);
     }

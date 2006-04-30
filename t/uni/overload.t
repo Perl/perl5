@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 116;
+use Test::More tests => 190;
 
 package UTF8Toggle;
 use strict;
@@ -212,6 +212,36 @@ foreach my $operator ('print', 'syswrite', 'syswrite len', 'syswrite off',
     }
 }
 
+my $little = "\243\243";
+my $big = " \243 $little ! $little ! $little \243 ";
+my $right = rindex $big, $little;
+my $right1 = rindex $big, $little, 11;
+my $left = index $big, $little;
+my $left1 = index $big, $little, 4;
+
+cmp_ok ($right, ">", $right1, "Sanity check our rindex tests");
+cmp_ok ($left, "<", $left1, "Sanity check our index tests");
+
+foreach my $b ($big, UTF8Toggle->new($big)) {
+    foreach my $l ($little, UTF8Toggle->new($little),
+		   UTF8Toggle->new($little, 1)) {
+	is (rindex ($b, $l), $right, "rindex");
+	is (rindex ($b, $l), $right, "rindex");
+	is (rindex ($b, $l), $right, "rindex");
+
+	is (rindex ($b, $l, 11), $right1, "rindex 11");
+	is (rindex ($b, $l, 11), $right1, "rindex 11");
+	is (rindex ($b, $l, 11), $right1, "rindex 11");
+
+	is (index ($b, $l), $left, "index");
+	is (index ($b, $l), $left, "index");
+	is (index ($b, $l), $left, "index");
+
+	is (index ($b, $l, 4), $left1, "index 4");
+	is (index ($b, $l, 4), $left1, "index 4");
+	is (index ($b, $l, 4), $left1, "index 4");
+    }
+}
 
 END {
     1 while -f $tmpfile and unlink $tmpfile || die "unlink '$tmpfile': $!";
