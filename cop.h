@@ -270,8 +270,8 @@ struct block_sub {
 	cx->blk_sub.hasargs = hasargs;					\
 	cx->blk_sub.retop = NULL;					\
 	if (!CvDEPTH(cv)) {						\
-	    SvREFCNT_inc_void(cv);					\
-	    SvREFCNT_inc_void(cv);					\
+	    SvREFCNT_inc_simple_void_NN(cv);				\
+	    SvREFCNT_inc_simple_void_NN(cv);				\
 	    SAVEFREESV(cv);						\
 	}
 

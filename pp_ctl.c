@@ -2417,7 +2417,7 @@ PP(pp_goto)
 
 		CvDEPTH(cv)++;
 		if (CvDEPTH(cv) < 2)
-		    SvREFCNT_inc_void_NN(cv);
+		    SvREFCNT_inc_simple_void_NN(cv);
 		else {
 		    if (CvDEPTH(cv) == 100 && ckWARN(WARN_RECURSION))
 			sub_crush_depth(cv);
@@ -3189,7 +3189,7 @@ PP(pp_require)
 			if (SvROK(arg) && (SvTYPE(SvRV(arg)) <= SVt_PVLV)
 			    && !isGV_with_GP(SvRV(arg))) {
 			    filter_cache = SvRV(arg);
-			    SvREFCNT_inc_void_NN(filter_cache);
+			    SvREFCNT_inc_simple_void_NN(filter_cache);
 
 			    if (i < count) {
 				arg = SP[i++];
@@ -3221,7 +3221,7 @@ PP(pp_require)
 
 			if (SvROK(arg) && SvTYPE(SvRV(arg)) == SVt_PVCV) {
 			    filter_sub = arg;
-			    SvREFCNT_inc_void_NN(filter_sub);
+			    SvREFCNT_inc_simple_void_NN(filter_sub);
 
 			    if (i < count) {
 				filter_state = SP[i];
