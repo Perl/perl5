@@ -152,7 +152,7 @@ Perl_mg_get(pTHX_ SV *sv)
        cause the SV's buffer to get stolen (and maybe other stuff).
        So restore it.
     */
-    sv_2mortal(SvREFCNT_inc_simple(sv));
+    sv_2mortal(SvREFCNT_inc_simple_NN(sv));
     if (!was_temp) {
 	SvTEMP_off(sv);
     }
@@ -1179,20 +1179,21 @@ Perl_magic_getsig(pTHX_ SV *sv, MAGIC *mg)
     	if(PL_psig_ptr[i])
     	    sv_setsv(sv,PL_psig_ptr[i]);
     	else {
-    	    Sighandler_t sigstate;
-    	    sigstate = rsignal_state(i);
+	    Sighandler_t sigstate = rsignal_state(i);
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
-    	    if (PL_sig_handlers_initted && PL_sig_ignoring[i]) sigstate = SIG_IGN;
+	    if (PL_sig_handlers_initted && PL_sig_ignoring[i])
+		sigstate = SIG_IGN;
 #endif
 #ifdef FAKE_DEFAULT_SIGNAL_HANDLERS
-    	    if (PL_sig_handlers_initted && PL_sig_defaulting[i]) sigstate = SIG_DFL;
+	    if (PL_sig_handlers_initted && PL_sig_defaulting[i])
+		sigstate = SIG_DFL;
 #endif
     	    /* cache state so we don't fetch it again */
     	    if(sigstate == (Sighandler_t) SIG_IGN)
     	    	sv_setpv(sv,"IGNORE");
     	    else
     	    	sv_setsv(sv,&PL_sv_undef);
-	    PL_psig_ptr[i] = SvREFCNT_inc_simple(sv);
+	    PL_psig_ptr[i] = SvREFCNT_inc_simple_NN(sv);
     	    SvTEMP_off(sv);
     	}
     }
@@ -1404,7 +1405,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 #endif
 	SvREFCNT_dec(PL_psig_name[i]);
 	to_dec = PL_psig_ptr[i];
-	PL_psig_ptr[i] = SvREFCNT_inc_simple(sv);
+	PL_psig_ptr[i] = SvREFCNT_inc_simple_NN(sv);
 	SvTEMP_off(sv); /* Make sure it doesn't go away on us */
 	PL_psig_name[i] = newSVpvn(s, len);
 	SvREADONLY_on(PL_psig_name[i]);
@@ -1455,7 +1456,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	if (i)
 	    (void)rsignal(i, PL_csighandlerp);
 	else
-	    *svp = SvREFCNT_inc_simple(sv);
+	    *svp = SvREFCNT_inc_simple_NN(sv);
     }
 #ifdef HAS_SIGPROCMASK
     if(i)
@@ -1992,7 +1993,7 @@ Perl_magic_getdefelem(pTHX_ SV *sv, MAGIC *mg)
 	    if ((I32)LvTARGOFF(sv) <= AvFILL(av))
 		targ = AvARRAY(av)[LvTARGOFF(sv)];
 	}
-	if (targ && targ != &PL_sv_undef) {
+	if (targ && (targ != &PL_sv_undef)) {
 	    /* somebody else defined it for us */
 	    SvREFCNT_dec(LvTARG(sv));
 	    LvTARG(sv) = SvREFCNT_inc_simple_NN(targ);
