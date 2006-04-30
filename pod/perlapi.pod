@@ -3525,6 +3525,20 @@ See C<SvCUR>.  Access the character as *(SvEND(sv)).
 =for hackers
 Found in file sv.h
 
+=item SvGAMAGIC
+X<SvGAMAGIC>
+
+Returns true if the SV has get magic or overloading. If either is true then
+the scalar is active data, and has the potential to return a new value every
+time it is accessed. Hence you must be careful to only read it once per user
+logical operation and work with that returned value. If neither is true then
+the scalar's value cannot change unless written to.
+
+	char*	SvGAMAGIC(SV* sv)
+
+=for hackers
+Found in file sv.h
+
 =item SvGROW
 X<SvGROW>
 

@@ -992,6 +992,18 @@ in gv.h: */
 	(SvROK(sv) && (SvFLAGS(SvRV(sv)) &= ~SVf_AMAGIC))
 #endif
 
+/*
+=for apidoc Am|char*|SvGAMAGIC|SV* sv
+
+Returns true if the SV has get magic or overloading. If either is true then
+the scalar is active data, and has the potential to return a new value every
+time it is accessed. Hence you must be careful to only read it once per user
+logical operation and work with that returned value. If neither is true then
+the scalar's value cannot change unless written to.
+
+=cut
+*/
+
 #define SvGAMAGIC(sv)           (SvGMAGICAL(sv) || SvAMAGIC(sv))
 
 #define Gv_AMG(stash)           (PL_amagic_generation && Gv_AMupdate(stash))
