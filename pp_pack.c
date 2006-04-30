@@ -2544,9 +2544,20 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    if (strchr("aAZ", lookahead.code)) {
 		if (lookahead.howlen == e_number) count = lookahead.length;
 		else {
-		    if (items > 0)
+		    if (items > 0) {
+			if (SvGAMAGIC(*beglist)) {
+			    /* Avoid reading the active data more than once
+			       by copying it to a temporary.  */
+			    STRLEN len;
+			    const char *const pv = SvPV_const(*beglist, len);
+			    SV *const temp = sv_2mortal(newSVpvn(pv, len));
+			    if (SvUTF8(*beglist))
+				SvUTF8_on(temp);
+			    *beglist = temp;
+			}
 			count = DO_UTF8(*beglist) ?
 			    sv_len_utf8(*beglist) : sv_len(*beglist);
+		    }
 		    else count = 0;
 		    if (lookahead.code == 'Z') count++;
 		}

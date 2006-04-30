@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-use Test::More tests => 202;
+use Test::More tests => 208;
 
 package UTF8Toggle;
 use strict;
@@ -252,6 +252,13 @@ foreach my $pieces ($bits, UTF8Toggle->new($bits)) {
     like ($pieces ^ $bits, qr/\A\0+\z/, "something xor itself is zeros");
     like ($pieces ^ $bits, qr/\A\0+\z/, "something xor itself is zeros");
     like ($pieces ^ $bits, qr/\A\0+\z/, "something xor itself is zeros");
+}
+
+foreach my $value ("\243", UTF8Toggle->new("\243")) {
+    is (pack ("A/A", $value), pack ("A/A", "\243"),
+	"pack copes with overloading");
+    is (pack ("A/A", $value), pack ("A/A", "\243"));
+    is (pack ("A/A", $value), pack ("A/A", "\243"));
 }
 
 END {
