@@ -340,7 +340,7 @@ PP(pp_rv2cv)
 {
     dSP;
     GV *gv;
-    HV *stash;
+    HV *stash_unused;
     const I32 flags = (PL_op->op_flags & OPf_SPECIAL)
 	? 0
 	: ((PL_op->op_private & (OPpLVAL_INTRO|OPpMAY_RETURN_CONSTANT)) == OPpMAY_RETURN_CONSTANT)
@@ -349,7 +349,7 @@ PP(pp_rv2cv)
     /* We usually try to add a non-existent subroutine in case of AUTOLOAD. */
     /* (But not in defined().) */
 
-    CV *cv = sv_2cv(TOPs, &stash, &gv, flags);
+    CV *cv = sv_2cv(TOPs, &stash_unused, &gv, flags);
     if (cv) {
 	if (CvCLONE(cv))
 	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
@@ -3310,13 +3310,13 @@ PP(pp_sprintf)
 PP(pp_ord)
 {
     dSP; dTARGET;
+
     SV *argsv = POPs;
     STRLEN len;
     const U8 *s = (U8*)SvPV_const(argsv, len);
-    SV *tmpsv;
 
     if (PL_encoding && SvPOK(argsv) && !DO_UTF8(argsv)) {
-        tmpsv = sv_2mortal(newSVsv(argsv));
+        SV * const tmpsv = sv_2mortal(newSVsv(argsv));
         s = (U8*)sv_recode_to_utf8(tmpsv, PL_encoding);
         argsv = tmpsv;
     }
@@ -3440,7 +3440,7 @@ PP(pp_ucfirst)
     if (SvOK(source)) {
 	s = (const U8*)SvPV_nomg_const(source, slen);
     } else {
-	s = (U8*)"";
+	s = (const U8*)"";
 	slen = 0;
     }
 
@@ -3453,7 +3453,7 @@ PP(pp_ucfirst)
 	    toLOWER_utf8((U8 *)s, tmpbuf, &tculen);
 	}
 	/* If the two differ, we definately cannot do inplace.  */
-	inplace = ulen == tculen;
+	inplace = (ulen == tculen);
 	need = slen + 1 - ulen + tculen;
     } else {
 	doing_utf8 = FALSE;
@@ -3563,7 +3563,7 @@ PP(pp_uc)
 	if (SvOK(source)) {
 	    s = (const U8*)SvPV_nomg_const(source, len);
 	} else {
-	    s = (U8*)"";
+	    s = (const U8*)"";
 	    len = 0;
 	}
 	min = len + 1;
@@ -3662,7 +3662,7 @@ PP(pp_lc)
 	if (SvOK(source)) {
 	    s = (const U8*)SvPV_nomg_const(source, len);
 	} else {
-	    s = (U8*)"";
+	    s = (const U8*)"";
 	    len = 0;
 	}
 	min = len + 1;
@@ -4357,7 +4357,7 @@ PP(pp_splice)
 PP(pp_push)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
-    register AV *ary = (AV*)*++MARK;
+    register AV * const ary = (AV*)*++MARK;
     const MAGIC * const mg = SvTIED_mg((SV*)ary, PERL_MAGIC_tied);
 
     if (mg) {

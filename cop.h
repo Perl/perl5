@@ -137,8 +137,8 @@ struct block_sub {
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
 	cx->blk_sub.hasargs = hasargs;					\
 	if (!CvDEPTH(cv)) {						\
-	    SvREFCNT_inc_void(cv);					\
-	    SvREFCNT_inc_void(cv);					\
+	    SvREFCNT_inc_simple_void_NN(cv);				\
+	    SvREFCNT_inc_simple_void_NN(cv);				\
 	    SAVEFREESV(cv);						\
 	}
 
