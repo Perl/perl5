@@ -7,12 +7,12 @@ BEGIN {
     }
 }
 
-use Test::More tests => 190;
+use Test::More tests => 202;
 
 package UTF8Toggle;
 use strict;
 
-use overload '""' => 'stringify';
+use overload '""' => 'stringify', fallback => 1;
 
 sub new {
     my $class = shift;
@@ -241,6 +241,17 @@ foreach my $b ($big, UTF8Toggle->new($big)) {
 	is (index ($b, $l, 4), $left1, "index 4");
 	is (index ($b, $l, 4), $left1, "index 4");
     }
+}
+
+my $bits = "\311";
+foreach my $pieces ($bits, UTF8Toggle->new($bits)) {
+    like ($bits ^ $pieces, qr/\A\0+\z/, "something xor itself is zeros");
+    like ($bits ^ $pieces, qr/\A\0+\z/, "something xor itself is zeros");
+    like ($bits ^ $pieces, qr/\A\0+\z/, "something xor itself is zeros");
+
+    like ($pieces ^ $bits, qr/\A\0+\z/, "something xor itself is zeros");
+    like ($pieces ^ $bits, qr/\A\0+\z/, "something xor itself is zeros");
+    like ($pieces ^ $bits, qr/\A\0+\z/, "something xor itself is zeros");
 }
 
 END {

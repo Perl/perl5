@@ -1173,19 +1173,38 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
     STRLEN lensave;
     const char *lsave;
     const char *rsave;
-    const bool left_utf = DO_UTF8(left);
-    const bool right_utf = DO_UTF8(right);
+    bool left_utf;
+    bool right_utf;
     STRLEN needlen = 0;
 
-    if (left_utf && !right_utf)
-	sv_utf8_upgrade(right);
-    else if (!left_utf && right_utf)
-	sv_utf8_upgrade(left);
 
     if (sv != left || (optype != OP_BIT_AND && !SvOK(sv) && !SvGMAGICAL(sv)))
 	sv_setpvn(sv, "", 0);	/* avoid undef warning on |= and ^= */
     lsave = lc = SvPV_nomg_const(left, leftlen);
     rsave = rc = SvPV_nomg_const(right, rightlen);
+
+    /* This need to come after SvPV to ensure that string overloading has
+       fired off.  */
+
+    left_utf = DO_UTF8(left);
+    right_utf = DO_UTF8(right);
+
+    if (left_utf && !right_utf) {
+	/* Avoid triggering overloading again by using temporaries.
+	   Maybe there should be a variant of sv_utf8_upgrade that takes pvn
+	*/
+	right = sv_2mortal(newSVpvn(rsave, rightlen));
+	sv_utf8_upgrade(right);
+	rsave = rc = SvPV_nomg_const(right, rightlen);
+	right_utf = TRUE;
+    }
+    else if (!left_utf && right_utf) {
+	left = sv_2mortal(newSVpvn(lsave, leftlen));
+	sv_utf8_upgrade(left);
+	lsave = lc = SvPV_nomg_const(left, leftlen);
+	left_utf = TRUE;
+    }
+
     len = leftlen < rightlen ? leftlen : rightlen;
     lensave = len;
     SvCUR_set(sv, len);
