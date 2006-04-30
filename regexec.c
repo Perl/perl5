@@ -104,7 +104,7 @@
 	    : (U8*)(pos + off)))
 #define HOPBACKc(pos, off) ((char*)	\
     ((PL_reg_match_utf8)		\
-	? reghopmaybe3((U8*)pos, -off, ((U8*)(off < 0 ? PL_regeol : PL_bostr))) \
+	? reghopmaybe3((U8*)pos, -off, (U8*)PL_bostr) \
     : (pos - off >= PL_bostr)		\
 	? (U8*)(pos - off)		\
     : (U8*)NULL)			\
