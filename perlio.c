@@ -649,7 +649,7 @@ PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param)
     PL_known_layers = PerlIO_clone_list(aTHX_ proto->Iknown_layers, param);
     PL_def_layerlist = PerlIO_clone_list(aTHX_ proto->Idef_layerlist, param);
     PerlIO_allocate(aTHX); /* root slot is never used */
-    PerlIO_debug("Clone %p from %p\n",aTHX,proto);
+    PerlIO_debug("Clone %p from %p\n",(void*)aTHX,(void*)proto);
     while ((f = *table)) {
 	    int i;
 	    table = (PerlIO **) (f++);
@@ -661,6 +661,7 @@ PerlIO_clone(pTHX_ PerlInterpreter *proto, CLONE_PARAMS *param)
 	    }
 	}
 #else
+    PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(proto);
     PERL_UNUSED_ARG(param);
 #endif
@@ -673,7 +674,7 @@ PerlIO_destruct(pTHX)
     PerlIO **table = &PL_perlio;
     PerlIO *f;
 #ifdef USE_ITHREADS
-    PerlIO_debug("Destruct %p\n",aTHX);
+    PerlIO_debug("Destruct %p\n",(void*)aTHX);
 #endif
     while ((f = *table)) {
 	int i;
@@ -2372,7 +2373,7 @@ PerlIO_cleanup(pTHX)
     dVAR;
     int i;
 #ifdef USE_ITHREADS
-    PerlIO_debug("Cleanup layers for %p\n",aTHX);
+    PerlIO_debug("Cleanup layers for %p\n",(void*)aTHX);
 #else
     PerlIO_debug("Cleanup layers\n");
 #endif
