@@ -1885,18 +1885,24 @@ PP(pp_send)
 #else
 	    length = (Size_t)SvIVx(*++MARK);
 #endif
-	    if ((SSize_t)length < 0)
+	    if ((SSize_t)length < 0) {
+		Safefree(tmpbuf);
 		DIE(aTHX_ "Negative length");
+	    }
 	}
 
 	if (MARK < SP) {
 	    offset = SvIVx(*++MARK);
 	    if (offset < 0) {
-		if (-offset > (IV)blen_chars)
+		if (-offset > (IV)blen_chars) {
+		    Safefree(tmpbuf);
 		    DIE(aTHX_ "Offset outside string");
+		}
 		offset += blen_chars;
-	    } else if (offset >= (IV)blen_chars && blen_chars > 0)
+	    } else if (offset >= (IV)blen_chars && blen_chars > 0) {
+		Safefree(tmpbuf);
 		DIE(aTHX_ "Offset outside string");
+	    }
 	} else
 	    offset = 0;
 	if (length > blen_chars - offset)
@@ -1959,14 +1965,15 @@ PP(pp_send)
     else
 	DIE(aTHX_ PL_no_sock_func, "send");
 #endif
-    if (tmpbuf)
-	Safefree(tmpbuf);
 
     if (retval < 0)
 	goto say_undef;
     SP = ORIGMARK;
     if (doing_utf8)
         retval = utf8_length((U8*)buffer, (U8*)buffer + retval);
+
+    if (tmpbuf)
+	Safefree(tmpbuf);
 #if Size_t_size > IVSIZE
     PUSHn(retval);
 #else
@@ -1975,6 +1982,8 @@ PP(pp_send)
     RETURN;
 
   say_undef:
+    if (tmpbuf)
+	Safefree(tmpbuf);
     SP = ORIGMARK;
     RETPUSHUNDEF;
 }
