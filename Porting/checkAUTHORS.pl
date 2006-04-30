@@ -5,16 +5,20 @@ $Text::Wrap::columns = 80;
 my ($committer, $patch, $log);
 use Getopt::Long;
 
-my ($rank, $ta, @authors, %authors, %untraced, %patchers, %committers);
+my ($rank, $percentage, $ta, @authors, %authors, %untraced, %patchers,
+    %committers);
 my $result = GetOptions ("rank" => \$rank,		    # rank authors
 			 "thanks-applied" => \$ta,	    # ranks committers
-			 "acknowledged=s"   => \@authors);  # authors files
+			 "acknowledged=s"   => \@authors ,  # authors files
+			 "percentage" => \$percentage,      # show as %age
+			);
 
 if (!$result or (($rank||0) + ($ta||0) + (@authors ? 1 : 0) != 1) or !@ARGV) {
   die <<"EOS";
 $0 --rank Changelogs                        # rank authors by patches
 $0 --acknowledged <authors file> Changelogs # Display unacknowledged authors
 $0 --thanks-applied Changelogs		    # ranks committers
+$0 --percentage ...                         # show rankings as percentages
 Specify stdin as - if needs be. Remember that option names can be abbreviated.
 EOS
 }
@@ -270,15 +274,23 @@ if ($rank) {
 sub display_ordered {
   my $what = shift;
   my @sorted;
+  my $total;
   while (my ($name, $count) = each %$what) {
     push @{$sorted[$count]}, $name;
+    $total += $count;
   }
 
   my $i = @sorted;
   return unless $i;
   while (--$i) {
     next unless $sorted[$i];
-    print wrap ("$i:\t", "\t", join (" ", sort @{$sorted[$i]}), "\n");
+    my $prefix;
+    if ($percentage) {
+	$prefix = sprintf "% 6.2f:\t", 100 * $i / $total;
+    } else {
+	$prefix = "$i:\t";
+    }
+    print wrap ($prefix, "\t", join (" ", sort @{$sorted[$i]}), "\n");
   }
 }
 
