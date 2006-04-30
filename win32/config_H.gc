@@ -2317,8 +2317,8 @@
  *	This symbol, if defined, indicates that the vsnprintf () library
  *	function is available for use.
  */
-/*#define HAS_SNPRINTF	/**/
-/*#define HAS_VSNPRINTF	/**/
+#define HAS_SNPRINTF	/**/
+#define HAS_VSNPRINTF	/**/
 
 /* HAS_SOCKET:
  *	This symbol, if defined, indicates that the BSD socket interface is
