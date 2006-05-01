@@ -3026,7 +3026,7 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 }
 
 STATIC PerlIO *
-S_check_type_and_open(const char *name, const char *mode)
+S_check_type_and_open(pTHX_ const char *name, const char *mode)
 {
     Stat_t st;
     const int st_rc = PerlLIO_stat(name, &st);
