@@ -200,9 +200,12 @@ struct utsname {
 
 #ifdef _MSC_VER			/* Microsoft Visual C++ */
 
+#ifndef UNDER_CE
 typedef long		uid_t;
 typedef long		gid_t;
 typedef unsigned short	mode_t;
+#endif
+
 #pragma  warning(disable: 4102)	/* "unreferenced label" */
 
 /* Visual C thinks that a pointer to a member variable is 16 bytes in size. */
