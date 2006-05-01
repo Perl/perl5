@@ -177,6 +177,12 @@ values are ignored.  For example
 	# not checked, so error raises an exception
 	close FH;
 
+=head1 BUGS
+
+You should not fatalize functions that are called in list context, because this
+module tests whether a function has failed by testing the boolean truth of its
+return value in scalar context.
+
 =head1 AUTHOR
 
 Lionel Cons (CERN).
