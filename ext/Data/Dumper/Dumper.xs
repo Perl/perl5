@@ -642,8 +642,8 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    hval = hv_iterval((HV*)ival, entry);
 		}
 
-		do_utf8 = DO_UTF8(keysv);
 		key = SvPV(keysv, keylen);
+		do_utf8 = DO_UTF8(keysv);
 		klen = keylen;
 
                 sv_catsv(retval, totpad);
