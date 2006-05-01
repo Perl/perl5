@@ -5,6 +5,14 @@ BEGIN { @INC = '../../lib';}
 use ExtUtils::MakeMaker;
 use ExtUtils::Constant 0.11 'WriteConstants';
 use Config;
+my $rt_signals;
+if ($Config{sig_name} =~ /\bRTMIN\b/ && $Config{sig_name} =~ /\bRTMAX\b/) {
+    # Yes, it really has them. (Some systems define the C pre-processor
+    # symbols, but they depend on other macros that are only defined during
+    # kernel compilation
+    $rt_signals++;
+}
+
 my @libs;
 if ($^O ne 'MSWin32') {
     @libs = ('LIBS' => ["-lm -lposix -lcposix"]);
@@ -56,8 +64,6 @@ my @names =
       _SC_VERSION),
    {name=>"CLK_TCK", not_constant=>1},
    {name=>"MB_CUR_MAX", not_constant=>1},
-   {name=>"SIGRTMAX", not_constant=>1},
-   {name=>"SIGRTMIN", not_constant=>1},
    {name=>"EXIT_FAILURE", default=>["IV", "1"]},
    {name=>"EXIT_SUCCESS", default=>["IV", "0"]},
    {name=>"SIG_DFL", value=>"(IV)SIG_DFL", not_constant=>1},
@@ -104,6 +110,16 @@ push @names, {name=>$_, type=>"IV", default=>["IV", "0"]}
               _POSIX_PATH_MAX _POSIX_PIPE_BUF _POSIX_SSIZE_MAX
               _POSIX_STREAM_MAX _POSIX_TZNAME_MAX _POSIX_VDISABLE _POSIX_VERSION
              ));
+
+if ($rt_signals) {
+    push @names, {name=>"SIGRTMAX", not_constant=>1},
+    {name=>"SIGRTMIN", not_constant=>1},
+} else {
+    # Well, it seems that your vendor has defined them, but not in a way that
+    # would actually compile.
+    push @names, {name=>"SIGRTMAX", macro=>0},
+    {name=>"SIGRTMIN", macro=>0},
+}
 
 WriteConstants(
     PROXYSUBS => 1,
