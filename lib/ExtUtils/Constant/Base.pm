@@ -5,7 +5,7 @@ use vars qw($VERSION $is_perl56);
 use Carp;
 use Text::Wrap;
 use ExtUtils::Constant::Utils qw(C_stringify perl_stringify);
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 $is_perl56 = ($] < 5.007 && $] > 5.005_50);
 
@@ -78,7 +78,7 @@ sub macro_to_ifdef {
 	return $macro->[0];
     }
     if (defined $macro && $macro ne "" && $macro ne "1") {
-	return "#ifdef $macro\n";
+	return $macro ? "#ifdef $macro\n" : "#if 0\n";
     }
     return "";
 }
