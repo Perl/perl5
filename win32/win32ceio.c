@@ -290,9 +290,9 @@ PerlIOWin32_close(pTHX_ PerlIO *f)
  PerlIOWin32 *s = PerlIOSelf(f,PerlIOWin32);
  if (s->refcnt == 1)
   {
-   IV code = 0;	
+   IV code = 0;
 #if 0
-   /* This does not do pipes etc. correctly */	
+   /* This does not do pipes etc. correctly */
    if (!CloseHandle(s->h))
     {
      s->h = INVALID_HANDLE_VALUE;

@@ -55,7 +55,7 @@ typedef HANDLE perl_mutex;
 #define COND_INIT(c) \
     STMT_START {						\
 	(c)->waiters = 0;					\
-	(c)->sem = CreateSemaphore(NULL,0,LONG_MAX,NULL);	\
+	(c)->sem = Win_CreateSemaphore(NULL,0,LONG_MAX,NULL);	\
 	if ((c)->sem == NULL)					\
 	    Perl_croak_nocontext("panic: COND_INIT (%ld)",GetLastError());	\
     } STMT_END

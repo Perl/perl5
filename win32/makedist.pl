@@ -10,7 +10,7 @@ my %opts = (
     'unicode' => 1, # include unicode by default
     'minimal' => 0, # minimal possible distribution.
                     # actually this is just perl.exe and perlXX.dll
-		    # but can be extended by additional exts 
+		    # but can be extended by additional exts
 		    #  ... (as soon as this will be implemented :)
     'cross-name' => 'wince',
     'strip-pod' => 0, # strip POD from perl modules
@@ -220,7 +220,7 @@ sub bootstrap {
 	next unless -d $dir;
 	my $try = "$dir/$modfname.dll";
 	last if $file = ( (-f $try) && $try);
-	
+
 	$try = "$dir/${modfname}_1.dll";
 	last if $file = ( (-f $try) && $try);
 	push @dirs, $dir;

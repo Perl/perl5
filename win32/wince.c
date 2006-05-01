@@ -11,7 +11,7 @@
 #include <windows.h>
 #include <signal.h>
 
-#define PERLIO_NOT_STDIO 0 
+#define PERLIO_NOT_STDIO 0
 
 #if !defined(PERLIO_IS_STDIO) && !defined(USE_SFIO)
 #define PerlIO FILE
@@ -91,7 +91,7 @@ END_EXTERN_C
 
 static DWORD	w32_platform = (DWORD)-1;
 
-int 
+int
 IsWin95(void)
 {
   return (win32_os_id() == VER_PLATFORM_WIN32_WINDOWS);
@@ -1046,7 +1046,7 @@ win32_uname(struct utsname *name)
 /* Timing related stuff */
 
 int
-do_raise(pTHX_ int sig) 
+do_raise(pTHX_ int sig)
 {
     if (sig < SIG_SIZE) {
 	Sighandler_t handler = w32_sighandler[sig];
@@ -1082,8 +1082,8 @@ void
 sig_terminate(pTHX_ int sig)
 {
     Perl_warn(aTHX_ "Terminating on signal SIG%s(%d)\n",PL_sig_name[sig], sig);
-    /* exit() seems to be safe, my_exit() or die() is a problem in ^C 
-       thread 
+    /* exit() seems to be safe, my_exit() or die() is a problem in ^C
+       thread
      */
     exit(sig);
 }
@@ -1195,7 +1195,7 @@ static VOID CALLBACK TimerProc(HWND win, UINT msg, UINT id, DWORD time)
 {
     dTHX;
     KillTimer(NULL,timerid);
-    timerid=0;  
+    timerid=0;
     sighandler(14);
 }
 
@@ -1208,28 +1208,28 @@ win32_sleep(unsigned int t)
 DllExport unsigned int
 win32_alarm(unsigned int sec)
 {
-    /* 
+    /*
      * the 'obvious' implentation is SetTimer() with a callback
-     * which does whatever receiving SIGALRM would do 
-     * we cannot use SIGALRM even via raise() as it is not 
+     * which does whatever receiving SIGALRM would do
+     * we cannot use SIGALRM even via raise() as it is not
      * one of the supported codes in <signal.h>
      *
      * Snag is unless something is looking at the message queue
      * nothing happens :-(
-     */ 
+     */
     dTHX;
     if (sec)
      {
       timerid = SetTimer(NULL,timerid,sec*1000,(TIMERPROC)TimerProc);
       if (!timerid)
        Perl_croak_nocontext("Cannot set timer");
-     } 
+     }
     else
      {
       if (timerid)
        {
         KillTimer(NULL,timerid);
-        timerid=0;  
+        timerid=0;
        }
      }
     return 0;
@@ -1307,7 +1307,7 @@ win32_feof(FILE *fp)
 }
 
 /*
- * Since the errors returned by the socket error function 
+ * Since the errors returned by the socket error function
  * WSAGetLastError() are not known by the library routine strerror
  * we have to roll our own.
  */
@@ -2236,7 +2236,7 @@ sbrk(int need)
    allocsize = info.dwAllocationGranularity;
   }
  /* This scheme fails eventually if request for contiguous
-  * block is denied so reserve big blocks - this is only 
+  * block is denied so reserve big blocks - this is only
   * address space not memory ...
   */
  if (brk+need >= reserved)
@@ -2250,7 +2250,7 @@ sbrk(int need)
      if (addr)
       committed = reserved;
     }
-   /* Reserve some (more) space 
+   /* Reserve some (more) space
     * Note this is a little sneaky, 1st call passes NULL as reserved
     * so lets system choose where we start, subsequent calls pass
     * the old end address so ask for a contiguous block
@@ -2510,7 +2510,7 @@ XS(w32_CopyFile)
     {
       char szSourceFile[MAX_PATH+1];
       strcpy(szSourceFile, PerlDir_mapA(SvPV_nolen(ST(0))));
-      bResult = XCECopyFileA(szSourceFile, SvPV_nolen(ST(1)), 
+      bResult = XCECopyFileA(szSourceFile, SvPV_nolen(ST(1)),
 			     !SvTRUE(ST(2)));
     }
 
@@ -2530,7 +2530,7 @@ XS(w32_MessageBox)
     unsigned int flags = MB_OK;
 
     txt = SvPV_nolen(ST(0));
-    
+
     if (items < 1 || items > 2)
 	Perl_croak(aTHX_ "usage: Win32::MessageBox($txt, [$flags])");
 
@@ -2589,11 +2589,11 @@ XS(w32_ShellEx)
   si.cbSize = sizeof(si);
   si.fMask = SEE_MASK_FLAG_NO_UI;
 
-  MultiByteToWideChar(CP_ACP, 0, verb, -1, 
+  MultiByteToWideChar(CP_ACP, 0, verb, -1,
 		      wverb, sizeof(wverb)/2);
   si.lpVerb = (TCHAR *)wverb;
 
-  MultiByteToWideChar(CP_ACP, 0, file, -1, 
+  MultiByteToWideChar(CP_ACP, 0, file, -1,
 		      wfile, sizeof(wfile)/2);
   si.lpFile = (TCHAR *)wfile;
 
@@ -2698,7 +2698,7 @@ win32_wait(int *status)
 
 int
 wce_reopen_stdout(char *fname)
-{     
+{
   if(xcefreopen(fname, "w", stdout) == NULL)
     return -1;
 
@@ -2726,7 +2726,7 @@ getcwd(char *buf, size_t size)
   return xcegetcwd(buf, size);
 }
 
-int 
+int
 isnan(double d)
 {
   return _isnan(d);
@@ -2750,118 +2750,7 @@ win32_popenlist(const char *mode, IV narg, SV **args)
 DllExport PerlIO*
 win32_popen(const char *command, const char *mode)
 {
-#ifdef USE_RTL_POPEN
     return _popen(command, mode);
-#else
-    dTHX;
-    int p[2];
-    int parent, child;
-    int stdfd, oldfd;
-    int ourmode;
-    int childpid;
-    DWORD nhandle;
-    HANDLE old_h;
-    int lock_held = 0;
-
-    /* establish which ends read and write */
-    if (strchr(mode,'w')) {
-        stdfd = 0;		/* stdin */
-        parent = 1;
-        child = 0;
-	nhandle = STD_INPUT_HANDLE;
-    }
-    else if (strchr(mode,'r')) {
-        stdfd = 1;		/* stdout */
-        parent = 0;
-        child = 1;
-	nhandle = STD_OUTPUT_HANDLE;
-    }
-    else
-        return NULL;
-
-    /* set the correct mode */
-    if (strchr(mode,'b'))
-        ourmode = O_BINARY;
-    else if (strchr(mode,'t'))
-        ourmode = O_TEXT;
-    else
-        ourmode = _fmode & (O_TEXT | O_BINARY);
-
-    /* the child doesn't inherit handles */
-    ourmode |= O_NOINHERIT;
-
-    if (win32_pipe(p, 512, ourmode) == -1)
-        return NULL;
-
-    /* save current stdfd */
-    if ((oldfd = win32_dup(stdfd)) == -1)
-        goto cleanup;
-
-    /* save the old std handle (this needs to happen before the
-     * dup2(), since that might call SetStdHandle() too) */
-    OP_REFCNT_LOCK;
-    lock_held = 1;
-    old_h = GetStdHandle(nhandle);
-
-    /* make stdfd go to child end of pipe (implicitly closes stdfd) */
-    /* stdfd will be inherited by the child */
-    if (win32_dup2(p[child], stdfd) == -1)
-        goto cleanup;
-
-    /* close the child end in parent */
-    win32_close(p[child]);
-
-    /* set the new std handle (in case dup2() above didn't) */
-    SetStdHandle(nhandle, (HANDLE)_get_osfhandle(stdfd));
-
-    /* start the child */
-    {
-	dTHX;
-	if ((childpid = do_spawn_nowait((char*)command)) == -1)
-	    goto cleanup;
-
-	/* revert stdfd to whatever it was before */
-	if (win32_dup2(oldfd, stdfd) == -1)
-	    goto cleanup;
-
-	/* restore the old std handle (this needs to happen after the
-	 * dup2(), since that might call SetStdHandle() too */
-	if (lock_held) {
-	    SetStdHandle(nhandle, old_h);
-	    OP_REFCNT_UNLOCK;
-	    lock_held = 0;
-	}
-
-	/* close saved handle */
-	win32_close(oldfd);
-
-	LOCK_FDPID_MUTEX;
-	sv_setiv(*av_fetch(w32_fdpid, p[parent], TRUE), childpid);
-	UNLOCK_FDPID_MUTEX;
-
-	/* set process id so that it can be returned by perl's open() */
-	PL_forkprocess = childpid;
-    }
-
-    /* we have an fd, return a file stream */
-    return (PerlIO_fdopen(p[parent], (char *)mode));
-
-cleanup:
-    /* we don't need to check for errors here */
-    win32_close(p[0]);
-    win32_close(p[1]);
-    if (lock_held) {
-	SetStdHandle(nhandle, old_h);
-	OP_REFCNT_UNLOCK;
-	lock_held = 0;
-    }
-    if (oldfd != -1) {
-        win32_dup2(oldfd, stdfd);
-        win32_close(oldfd);
-    }
-    return (NULL);
-
-#endif /* USE_RTL_POPEN */
 }
 
 /*
@@ -2871,41 +2760,7 @@ cleanup:
 DllExport int
 win32_pclose(PerlIO *pf)
 {
-#ifdef USE_RTL_POPEN
     return _pclose(pf);
-#else
-    dTHX;
-    int childpid, status;
-    SV *sv;
-
-    LOCK_FDPID_MUTEX;
-    sv = *av_fetch(w32_fdpid, PerlIO_fileno(pf), TRUE);
-
-    if (SvIOK(sv))
-	childpid = SvIVX(sv);
-    else
-	childpid = 0;
-
-    if (!childpid) {
-        UNLOCK_FDPID_MUTEX;
-	errno = EBADF;
-        return -1;
-    }
-
-#ifdef USE_PERLIO
-    PerlIO_close(pf);
-#else
-    fclose(pf);
-#endif
-    SvIVX(sv) = 0;
-    UNLOCK_FDPID_MUTEX;
-
-    if (win32_waitpid(childpid, &status, 0) == -1)
-        return -1;
-
-    return status;
-
-#endif /* USE_RTL_POPEN */
 }
 
 #ifdef HAVE_INTERP_INTERN

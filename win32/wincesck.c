@@ -2,7 +2,7 @@
 
 /* wincesck.c
  *
- * (c) 1995 Microsoft Corporation. All rights reserved. 
+ * (c) 1995 Microsoft Corporation. All rights reserved.
  * 		Developed by hip communications inc., http://info.hip.com/info/
  * Portions (c) 1993 Intergraph Corporation. All rights reserved.
  *
@@ -65,12 +65,6 @@ XCE_EXPORT struct protoent *xcegetprotobynumber(int number);
 	}						\
     } STMT_END
 
-#define EndSockets() \
-    STMT_START {					\
-	if (wsock_started)				\
-	    WSACleanup();				\
-    } STMT_END
-
 #define SOCKET_TEST(x, y) \
     STMT_START {					\
 	StartSockets();					\
@@ -86,8 +80,15 @@ static struct servent* win32_savecopyservent(struct servent*d,
 
 static int wsock_started = 0;
 
+EXTERN_C void
+EndSockets(void)
+{
+    if (wsock_started)
+	WSACleanup();
+}
+
 void
-start_sockets(void) 
+start_sockets(void)
 {
     dTHX;
     unsigned short version;
@@ -213,7 +214,7 @@ win32_recv(SOCKET s, char *buf, int len, int flags)
 }
 
 int
-win32_recvfrom(SOCKET s, char *buf, int len, int flags, 
+win32_recvfrom(SOCKET s, char *buf, int len, int flags,
 	       struct sockaddr *from, int *fromlen)
 {
   StartSockets();
@@ -221,7 +222,7 @@ win32_recvfrom(SOCKET s, char *buf, int len, int flags,
 }
 
 int
-win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr, 
+win32_select(int nfds, Perl_fd_set* rd, Perl_fd_set* wr,
 	     Perl_fd_set* ex, const struct timeval* timeout)
 {
   StartSockets();
@@ -246,13 +247,13 @@ win32_sendto(SOCKET s, const char *buf, int len, int flags,
 }
 
 int
-win32_setsockopt(SOCKET s, int level, int optname, 
+win32_setsockopt(SOCKET s, int level, int optname,
 		 const char *optval, int optlen)
 {
   StartSockets();
   return xcesetsockopt(s, level, optname, optval, optlen);
 }
-    
+
 int
 win32_shutdown(SOCKET s, int how)
 {
@@ -315,7 +316,7 @@ win32_getprotobynumber(int num)
 struct servent *
 win32_getservbyname(const char *name, const char *proto)
 {
-    dTHX;    
+    dTHX;
     struct servent *r;
 
     SOCKET_TEST(r = getservbyname(name, proto), NULL);
@@ -328,7 +329,7 @@ win32_getservbyname(const char *name, const char *proto)
 struct servent *
 win32_getservbyport(int port, const char *proto)
 {
-    dTHX; 
+    dTHX;
     struct servent *r;
 
     SOCKET_TEST(r = getservbyport(port, proto), NULL);
@@ -380,7 +381,7 @@ win32_inet_addr(const char FAR *cp)
  */
 
 void
-win32_endhostent() 
+win32_endhostent()
 {
     dTHX;
     Perl_croak_nocontext("endhostent not implemented!\n");
@@ -409,7 +410,7 @@ win32_endservent()
 
 
 struct netent *
-win32_getnetent(void) 
+win32_getnetent(void)
 {
     dTHX;
     Perl_croak_nocontext("getnetent not implemented!\n");
@@ -417,7 +418,7 @@ win32_getnetent(void)
 }
 
 struct netent *
-win32_getnetbyname(char *name) 
+win32_getnetbyname(char *name)
 {
     dTHX;
     Perl_croak_nocontext("getnetbyname not implemented!\n");
@@ -425,7 +426,7 @@ win32_getnetbyname(char *name)
 }
 
 struct netent *
-win32_getnetbyaddr(long net, int type) 
+win32_getnetbyaddr(long net, int type)
 {
     dTHX;
     Perl_croak_nocontext("getnetbyaddr not implemented!\n");
@@ -433,7 +434,7 @@ win32_getnetbyaddr(long net, int type)
 }
 
 struct protoent *
-win32_getprotoent(void) 
+win32_getprotoent(void)
 {
     dTHX;
     Perl_croak_nocontext("getprotoent not implemented!\n");
@@ -441,7 +442,7 @@ win32_getprotoent(void)
 }
 
 struct servent *
-win32_getservent(void) 
+win32_getservent(void)
 {
     dTHX;
     Perl_croak_nocontext("getservent not implemented!\n");
@@ -494,6 +495,6 @@ win32_savecopyservent(struct servent*d, struct servent*s, const char *proto)
 	d->s_proto = (char *)proto;
     else
 	d->s_proto = "tcp";
-   
+
     return d;
 }

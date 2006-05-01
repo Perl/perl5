@@ -3621,91 +3621,73 @@ vos/vos.c			VOS emulations for missing POSIX functions
 vos/vosish.h			VOS-specific header file
 warnings.h			The warning numbers
 warnings.pl			Program to write warnings.h and lib/warnings.pm
+win32/FindExt.pm		Scan for extensions
+win32/Makefile			Win32 makefile for NMAKE (Visual C++ build)
+win32/Makefile.ce		WinCE port
 win32/bin/exetype.pl		Set executable type to CONSOLE or WINDOWS
 win32/bin/perlglob.pl		Win32 globbing
 win32/bin/pl2bat.pl		wrap perl scripts into batch files
 win32/bin/runperl.pl		run perl script via batch file namesake
 win32/bin/search.pl		Win32 port
 win32/buildext.pl		Build extensions once miniperl is built
+win32/cecopy-lib.pl		WinCE port
+win32/comp.pl			WinCE port
+win32/compile-all.bat		WinCE port
+win32/compile.bat		WinCE port
 win32/config.bc			Win32 base line config.sh (Borland C++ build)
+win32/config.ce			WinCE port
 win32/config.gc			Win32 base line config.sh (mingw32/gcc build)
-win32/config_H.bc		Win32 config header (Borland C++ build)
-win32/config_H.gc		Win32 config header (GNU build)?
-win32/config_h.PL		Perl code to convert Win32 config.sh to config.h
-win32/config_H.vc		Win32 config header (Visual C++ build)
-win32/config_H.vc64		Win64 config header (Visual C++ build)
-win32/config_sh.PL		Perl code to update Win32 config.sh from Makefile
 win32/config.vc			Win32 base line config.sh (Visual C++ build)
 win32/config.vc64		Win64 base line config.sh (Visual C++ build)
+win32/config_H.bc		Win32 config header (Borland C++ build)
+win32/config_H.ce		WinCE port
+win32/config_H.gc		Win32 config header (GNU build)?
+win32/config_H.vc		Win32 config header (Visual C++ build)
+win32/config_H.vc64		Win64 config header (Visual C++ build)
+win32/config_h.PL		Perl code to convert Win32 config.sh to config.h
+win32/config_sh.PL		Perl code to update Win32 config.sh from Makefile
 win32/distclean.bat		Remove _ALL_ files not listed here in MANIFEST
 win32/dl_win32.xs		Win32 port
 win32/ext/Win32/Makefile.PL	Win32 extension makefile writer
 win32/ext/Win32/Win32.pm	Win32 extension Perl module
 win32/ext/Win32/Win32.xs	Win32 extension external subroutines
 win32/fcrypt.c			crypt() implementation
-win32/FindExt.pm		Scan for extensions
 win32/genmk95.pl		Perl code to generate command.com-usable makefile.95
 win32/include/arpa/inet.h	Win32 port
 win32/include/dirent.h		Win32 port
 win32/include/netdb.h		Win32 port
 win32/include/sys/socket.h	Win32 port
-win32/Makefile			Win32 makefile for NMAKE (Visual C++ build)
+win32/makedist.pl		WinCE port
 win32/makefile.mk		Win32 makefile for DMAKE (BC++, VC++ builds)
 win32/makeico.pl		script to create perlexe.ico image file
 win32/mdelete.bat		multifile delete
+win32/perl.rc			WinCE port
 win32/perlexe.rc		associated perl binary with icon
 win32/perlglob.c		Win32 port
 win32/perlhost.h		Perl "host" implementation
 win32/perllib.c			Win32 port
+win32/perlmain.c		WinCE port
 win32/pod.mak			Win32 port
+win32/registry.bat		WinCE port
 win32/runperl.c			Win32 port
 win32/splittree.pl		Win32 port
 win32/sync_ext.pl		Win32 port
-win32/vdir.h			Perl "host" virtual directory manager
-win32/vmem.h			Perl "host" memory manager
+win32/vdir.h			Perl "host" virtual directory manager for CE
+win32/vmem.h			Perl "host" memory manager for CE
 win32/win32.c			Win32 port
 win32/win32.h			Win32 port
+win32/win32-d.h			WinCE port
+win32/win32ceio.c		Win32/WinCE PerlIO layer support
 win32/win32io.c			Win32 PerlIO layer support
 win32/win32iop.h		Win32 port
+win32/win32iop-o.h		WinCE port
 win32/win32sck.c		Win32 port
 win32/win32thread.c		Win32 functions for threads
 win32/win32thread.h		Win32 port mapping to threads
-wince/bin/exetype.pl			WinCE port
-wince/bin/perlglob.pl			WinCE port
-wince/bin/pl2bat.pl			WinCE port
-wince/bin/runperl.pl			WinCE port
-wince/bin/search.pl			WinCE port
-wince/cecopy-lib.pl			WinCE port
-wince/compile-all.bat			WinCE port
-wince/compile.bat			WinCE port
-wince/comp.pl				WinCE port
-wince/config.ce				WinCE port
-wince/config_H.ce			WinCE port
-wince/config_h.PL			WinCE port
-wince/config_sh.PL			WinCE port
-wince/dl_win32.xs			WinCE port
-wince/include/arpa/inet.h		WinCE port
-wince/include/sys/socket.h		WinCE port
-wince/makedist.pl			WinCE port
-wince/Makefile.ce			WinCE port
-wince/makeico.pl			WinCE port
-wince/perlhost.h	Perl "host" implementation
-wince/perllib.c				WinCE port
-wince/perlmain.c			WinCE port
-wince/perl.rc				WinCE port
-wince/registry.bat			WinCE port
-wince/runperl.c				WinCE port
-wince/splittree.pl			WinCE port
-wince/vdir.h			Perl "host" virtual directory manager for CE
-wince/vmem.h			Perl "host" memory manager for CE
-wince/win32.h				WinCE port
-wince/win32io.c				WinCE port
-wince/win32iop.h			WinCE port
-wince/win32thread.c			WinCE port
-wince/win32thread.h			WinCE port
-wince/wince.c				WinCE port
-wince/wince.h				WinCE port
-wince/wincesck.c			WinCE port
+win32/wince.c			WinCE port
+win32/wince.h			WinCE port
+win32/wincesck.c		WinCE port
+win32/xconfig.h			WinCE port
 writemain.SH			Generate perlmain.c from miniperlmain.c+extensions
 x2p/a2p.c			Output of a2p.y run through byacc
 x2p/a2p.h			Global declarations

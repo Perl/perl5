@@ -30,7 +30,7 @@
 #endif
 #endif
 
-START_EXTERN_C 
+START_EXTERN_C
 
 #ifndef _IOFBF
 #define _IOFBF          0x0000
@@ -65,16 +65,6 @@ XCE_EXPORT void XCEShowMessageA(const char *fmt, ...);
 #define ctime xcectime
 #define gettimeofday xcegettimeofday
 #define GetSystemTimeAsFileTime XCEGetSystemTimeAsFileTime
-
-XCE_EXPORT int xcesetuid(uid_t id);
-XCE_EXPORT int xceseteuid(uid_t id);
-XCE_EXPORT int xcegetuid();
-XCE_EXPORT int xcegeteuid();
-
-XCE_EXPORT int xcesetgid(int id);
-XCE_EXPORT int xcesetegid(int id);
-XCE_EXPORT int xcegetgid();
-XCE_EXPORT int xcegetegid();
 
 #define setuid xcesetuid
 #define getuid xcegetuid
@@ -151,6 +141,6 @@ XCE_EXPORT BOOL XCEFreeEnvironmentStrings(LPCSTR buf);
 
 void wce_hitreturn();
 
-END_EXTERN_C 
+END_EXTERN_C
 
 #endif

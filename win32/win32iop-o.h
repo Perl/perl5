@@ -9,8 +9,8 @@
 #  define END_EXTERN_C }
 #  define EXTERN_C extern "C"
 #else
-#  define START_EXTERN_C 
-#  define END_EXTERN_C 
+#  define START_EXTERN_C
+#  define END_EXTERN_C
 #  define EXTERN_C
 #endif
 #endif
