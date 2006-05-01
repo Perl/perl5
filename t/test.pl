@@ -1,6 +1,20 @@
 #
 # t/test.pl - most of Test::More functionality without the fuss
+
+
+# NOTE:
 #
+# Increment ($x++) has a certain amount of cleverness for things like
+#
+#   $x = 'zz';
+#   $x++; # $x eq 'aaa';
+#
+# stands more chance of breaking than just a simple
+#
+#   $x = $x + 1
+#
+# In this file, we use the latter "Baby Perl" approach, and increment
+# will be worked over by t/op/inc.t
 
 $Level = 1;
 my $test = 1;
@@ -49,6 +63,10 @@ sub _diag {
 
 }
 
+sub diag {
+    _diag(@_);
+}
+
 sub skip_all {
     if (@_) {
 	print STDOUT "1..0 # Skipped: @_\n";
@@ -81,7 +99,7 @@ sub _ok {
     # Ensure that the message is properly escaped.
     _diag @mess;
 
-    $test++;
+    $test = $test + 1; # don't use ++
 
     return $pass;
 }
@@ -276,7 +294,7 @@ sub curr_test {
 }
 
 sub next_test {
-  $test++;
+  $test = $test + 1; # don't use ++
 }
 
 # Note: can't pass multipart messages since we try to
@@ -286,7 +304,7 @@ sub skip {
     my $n    = @_ ? shift : 1;
     for (1..$n) {
         print STDOUT "ok $test # skip: $why\n";
-        $test++;
+        $test = $test + 1;
     }
     local $^W = 0;
     last SKIP;
@@ -298,7 +316,7 @@ sub todo_skip {
 
     for (1..$n) {
         print STDOUT "not ok $test # TODO & SKIP: $why\n";
-        $test++;
+        $test = $test + 1;
     }
     local $^W = 0;
     last TODO;
@@ -485,7 +503,7 @@ sub runperl {
 
     my $tainted = ${^TAINT};
     my %args = @_;
-    exists $args{switches} && grep m/^-T$/, @{$args{switches}} and $tainted++;
+    exists $args{switches} && grep m/^-T$/, @{$args{switches}} and $tainted = $tainted + 1;
 
     if ($tainted) {
 	# We will assume that if you're running under -T, you really mean to
