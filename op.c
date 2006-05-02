@@ -5481,6 +5481,7 @@ Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr,
 	} else {
 	    SvPOK_off(cv);
 	}
+	CvFILE(cv) = proto_and_file + proto_len;
     } else {
 	sv_setpv((SV *)cv, proto);
     }
