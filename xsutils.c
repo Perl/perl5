@@ -43,11 +43,11 @@ PERL_XS_EXPORT_C void XS_attributes_bootstrap(pTHX_ CV *cv);
  * version checks in these bootstrap calls are optional.
  */
 
+static const char file[] = __FILE__;
+
 void
 Perl_boot_core_xsutils(pTHX)
 {
-    const char file[] = __FILE__;
-
     newXS("attributes::bootstrap",	XS_attributes_bootstrap,	file);
 }
 
@@ -162,7 +162,6 @@ XS(XS_attributes_bootstrap)
 {
     dVAR;
     dXSARGS;
-    const char file[] = __FILE__;
 
     if( items > 1 )
         Perl_croak(aTHX_ "Usage: attributes::bootstrap $module");
