@@ -11753,16 +11753,17 @@ STATIC I32
 S_find_array_subscript(pTHX_ AV *av, SV* val)
 {
     dVAR;
-    SV** svp;
-    I32 i;
     if (!av || SvMAGICAL(av) || !AvARRAY(av) ||
 			(AvFILLp(av) > FUV_MAX_SEARCH_SIZE))
 	return -1;
 
-    svp = AvARRAY(av);
-    for (i=AvFILLp(av); i>=0; i--) {
-	if (svp[i] == val && svp[i] != &PL_sv_undef)
-	    return i;
+    if (val != &PL_sv_undef) {
+	SV ** const svp = AvARRAY(av);
+	I32 i;
+
+	for (i=AvFILLp(av); i>=0; i--)
+	    if (svp[i] == val)
+		return i;
     }
     return -1;
 }
