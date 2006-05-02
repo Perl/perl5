@@ -376,6 +376,17 @@ typedef char *pvindex;
 		SvREFCNT_dec(w);					\
 	    }								\
 	} STMT_END
+#define BSET_gp_file(gv, file) \
+	STMT_START {							\
+	    STRLEN len = strlen(file);					\
+	    U32 hash;							\
+	    PERL_HASH(hash, file, len);					\
+	    if(GvFILE_HEK(gv)) {					\
+		Perl_unshare_hek(aTHX_ GvFILE_HEK(gv));			\
+	    }								\
+	    GvGP(gv)->gp_file_hek = share_hek(file, len, hash);		\
+	    Safefree(file);						\
+	} STMT_END
 
 /* NOTE: the bytecode header only sanity-checks the bytecode. If a script cares about
  * what version of Perl it's being called under, it should do a 'use 5.006_001' or

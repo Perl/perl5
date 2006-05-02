@@ -161,6 +161,12 @@ GP *
 Perl_newGP(pTHX_ GV *const gv)
 {
     GP *gp;
+    const char *const file = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : "";
+    STRLEN len = strlen(file);
+    U32 hash;
+
+    PERL_HASH(hash, file, len);
+
     Newxz(gp, 1, GP);
 
 #ifndef PERL_DONT_CREATE_GVSV
@@ -170,7 +176,7 @@ Perl_newGP(pTHX_ GV *const gv)
     gp->gp_line = CopLINE(PL_curcop);
     /* XXX Ideally this cast would be replaced with a change to const char*
        in the struct.  */
-    gp->gp_file = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : (char *) "";
+    gp->gp_file_hek = share_hek(file, len, hash);
     gp->gp_egv = gv;
     gp->gp_refcnt = 1;
 
@@ -1416,6 +1422,7 @@ Perl_gp_free(pTHX_ GV *gv)
         return;
     }
 
+    unshare_hek(gp->gp_file_hek);
     SvREFCNT_dec(gp->gp_sv);
     SvREFCNT_dec(gp->gp_av);
     /* FIXME - another reference loop GV -> symtab -> GV ?

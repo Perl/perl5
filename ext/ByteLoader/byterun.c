@@ -658,7 +658,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    {
 		pvindex arg;
 		BGET_pvindex(arg);
-		GvFILE(bstate->bs_sv) = arg;
+		BSET_gp_file(bstate->bs_sv, arg);
 		break;
 	    }
 	  case INSN_GP_IO:		/* 86 */

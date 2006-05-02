@@ -9645,7 +9645,7 @@ Perl_gp_dup(pTHX_ GP *gp, CLONE_PARAMS* param)
     ret->gp_cv		= cv_dup_inc(gp->gp_cv, param);
     ret->gp_cvgen	= gp->gp_cvgen;
     ret->gp_line	= gp->gp_line;
-    ret->gp_file	= gp->gp_file;		/* points to COP.cop_file */
+    ret->gp_file_hek	= hek_dup(gp->gp_file_hek, param);
     return ret;
 }
 

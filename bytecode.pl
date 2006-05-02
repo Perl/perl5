@@ -448,7 +448,7 @@ gp_refcnt_add	GvREFCNT(bstate->bs_sv)			I32		x
 gp_av		*(SV**)&GvAV(bstate->bs_sv)		svindex
 gp_hv		*(SV**)&GvHV(bstate->bs_sv)		svindex
 gp_cv		*(SV**)&GvCV(bstate->bs_sv)		svindex
-gp_file		GvFILE(bstate->bs_sv)			pvindex
+gp_file		bstate->bs_sv				pvindex		x
 gp_io		*(SV**)&GvIOp(bstate->bs_sv)		svindex
 gp_form		*(SV**)&GvFORM(bstate->bs_sv)		svindex
 gp_cvgen	GvCVGEN(bstate->bs_sv)			U32

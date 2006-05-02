@@ -19,7 +19,7 @@ struct gp {
     CV *	gp_cv;		/* subroutine value */
     U32		gp_cvgen;	/* generational validity of cached gv_cv */
     line_t	gp_line;	/* line first declared at (for -w) */
-    char *	gp_file;	/* file first declared in (for -w) */
+    HEK *	gp_file_hek;	/* file first declared in (for -w) */
 };
 
 #define GvXPVGV(gv)	((XPVGV*)SvANY(gv))
@@ -111,7 +111,8 @@ Return the SV from the GV.
 #define GvCVu(gv)	(GvGP(gv)->gp_cvgen ? NULL : GvGP(gv)->gp_cv)
 
 #define GvLINE(gv)	(GvGP(gv)->gp_line)
-#define GvFILE(gv)	(GvGP(gv)->gp_file)
+#define GvFILE_HEK(gv)	(GvGP(gv)->gp_file_hek)
+#define GvFILE(gv)	HEK_KEY(GvFILE_HEK(gv))
 #define GvFILEGV(gv)	(gv_fetchfile(GvFILE(gv)))
 
 #define GvEGV(gv)	(GvGP(gv)->gp_egv)
@@ -208,3 +209,13 @@ Return the SV from the GV.
 #define gv_fullname3(sv,gv,prefix) gv_fullname4(sv,gv,prefix,TRUE)
 #define gv_efullname3(sv,gv,prefix) gv_efullname4(sv,gv,prefix,TRUE)
 #define gv_fetchmethod(stash, name) gv_fetchmethod_autoload(stash, name, TRUE)
+
+/*
+ * Local variables:
+ * c-indentation-style: bsd
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ *
+ * ex: set ts=8 sts=4 sw=4 noet:
+ */
