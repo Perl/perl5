@@ -1608,8 +1608,7 @@ Perl_hv_clear(pTHX_ HV *hv)
     hfreeentries(hv);
     HvPLACEHOLDERS_set(hv, 0);
     if (HvARRAY(hv))
-	(void)memzero(HvARRAY(hv),
-		      (xhv->xhv_max+1 /* HvMAX(hv)+1 */) * sizeof(HE*));
+	Zero(HvARRAY(hv), xhv->xhv_max+1 /* HvMAX(hv)+1 */, HE*);
 
     if (SvRMAGICAL(hv))
 	mg_clear((SV*)hv);
