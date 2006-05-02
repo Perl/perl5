@@ -141,7 +141,7 @@ sub get_files {
 	     $file{$1} = 1;
 	}
     } elsif ($^O eq 'linux' &&
-	     ($Config{gccversion} ne '' && 
+	      $Config{gccversion} ne '' && 
 	      $Config{gccversion} !~ /intel/i
 	      # might be using, say, Intel's icc
 	     ) {
