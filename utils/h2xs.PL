@@ -904,6 +904,7 @@ if( @path_h ){
             next if $opt_e && $enum_name =~ /$opt_e/;
             my $val = 0;
             for my $item (split /,/, $enum_body) {
+                next if $item =~ /\A\s*\Z/;
                 my ($key, $declared_val) = $item =~ /(\w+)\s*(?:=\s*(.*))?/;
                 $val = defined($declared_val) && length($declared_val) ? $declared_val : 1 + $val;
                 $seen_define{$key} = $val;
