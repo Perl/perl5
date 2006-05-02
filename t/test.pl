@@ -294,7 +294,9 @@ sub curr_test {
 }
 
 sub next_test {
+  my $retval = $test;
   $test = $test + 1; # don't use ++
+  $retval;
 }
 
 # Note: can't pass multipart messages since we try to
