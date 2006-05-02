@@ -423,11 +423,7 @@ STATIC void
 S_sequence(pTHX_ register const OP *o)
 {
     dVAR;
-    SV      *op;
-    const char *key;
-    STRLEN   len;
     const OP *oldop = NULL;
-    OP      *l;
 
     if (!o)
 	return;
@@ -441,8 +437,10 @@ S_sequence(pTHX_ register const OP *o)
 	Sequence = newHV();
 
     for (; o; o = o->op_next) {
-	op = newSVuv(PTR2UV(o));
-	key = SvPV_const(op, len);
+	STRLEN len;
+	SV * const op = newSVuv(PTR2UV(o));
+	const char * const key = SvPV_const(op, len);
+
 	if (hv_exists(Sequence, key, len))
 	    break;
 
@@ -481,32 +479,22 @@ S_sequence(pTHX_ register const OP *o)
 	case OP_COND_EXPR:
 	case OP_RANGE:
 	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
-	    for (l = cLOGOPo->op_other; l && l->op_type == OP_NULL; l = l->op_next)
-		;
-	    sequence(l);
+	    sequence_tail(cLOGOPo->op_other);
 	    break;
 
 	case OP_ENTERLOOP:
 	case OP_ENTERITER:
 	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
-	    for (l = cLOOPo->op_redoop; l && l->op_type == OP_NULL; l = l->op_next)
-		;
-	    sequence(l);
-	    for (l = cLOOPo->op_nextop; l && l->op_type == OP_NULL; l = l->op_next)
-		;
-	    sequence(l);
-	    for (l = cLOOPo->op_lastop; l && l->op_type == OP_NULL; l = l->op_next)
-		;
-	    sequence(l);
+	    sequence_tail(cLOOPo->op_redoop);
+	    sequence_tail(cLOOPo->op_nextop);
+	    sequence_tail(cLOOPo->op_lastop);
 	    break;
 
 	case OP_QR:
 	case OP_MATCH:
 	case OP_SUBST:
 	    hv_store(Sequence, key, len, newSVuv(++PL_op_seq), 0);
-	    for (l = cPMOPo->op_pmreplstart; l && l->op_type == OP_NULL; l = l->op_next)
-		;
-	    sequence(l);
+	    sequence_tail(cPMOPo->op_pmreplstart);
 	    break;
 
 	case OP_HELEM:
@@ -518,6 +506,14 @@ S_sequence(pTHX_ register const OP *o)
 	}
 	oldop = o;
     }
+}
+
+static void
+S_sequence_tail(pTHX_ const OP *o)
+{
+    while (o && (o->op_type == OP_NULL))
+	o = o->op_next;
+    sequence(o);
 }
 
 STATIC UV

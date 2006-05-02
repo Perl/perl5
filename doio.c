@@ -195,7 +195,8 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	SAVEFREEPV(type);
 
         /* Lose leading and trailing white space */
-        for (; isSPACE(*type); type++) ;
+	while (isSPACE(*type))
+	    type++;
         while (tend > type && isSPACE(tend[-1]))
 	    *--tend = '\0';
 
@@ -234,7 +235,9 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 		}
 		type++;
 	    }
-	    for (type++; isSPACE(*type); type++) ;
+	    do {
+		type++;
+	    } while (isSPACE(*type));
 	    if (!num_svs) {
 		name = type;
 		len = tend-type;
@@ -321,7 +324,8 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 		    if (num_svs > 1) {
 			Perl_croak(aTHX_ "More than one argument to '%c&' open",IoTYPE(io));
 		    }
-		    for (; isSPACE(*type); type++) ;
+		    while (isSPACE(*type))
+			type++;
 		    if (num_svs && (SvIOK(*svp) || (SvPOK(*svp) && looks_like_number(*svp)))) {
 			fd = SvUV(*svp);
 			num_svs = 0;
@@ -398,7 +402,8 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 		}
 	    } /* & */
 	    else {
-		for (; isSPACE(*type); type++) ;
+		while (isSPACE(*type))
+		    type++;
 		if (*type == IoTYPE_STD && (!type[1] || isSPACE(type[1]) || type[1] == ':')) {
 		    type++;
 		    fp = PerlIO_stdout();
@@ -421,7 +426,9 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	       goto unknown_open_mode;
 	} /* IoTYPE_WRONLY */
 	else if (*type == IoTYPE_RDONLY) {
-	    for (type++; isSPACE(*type); type++) ;
+	    do {
+		type++;
+	    } while (isSPACE(*type));
 	    mode[0] = 'r';
 #ifdef HAS_STRLCAT
             if (in_raw)
@@ -504,7 +511,8 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	    }
 	    IoTYPE(io) = IoTYPE_PIPE;
 	    if (num_svs) {
-		for (; isSPACE(*type); type++) ;
+		while (isSPACE(*type))
+		    type++;
 		if (*type) {
 		    if (PerlIO_apply_layers(aTHX_ fp, mode, type) != 0) {
 			goto say_false;
@@ -740,7 +748,8 @@ Perl_nextargv(pTHX_ register GV *gv)
 	if (PL_inplace) {
 	    if (!PL_argvout_stack)
 		PL_argvout_stack = newAV();
-	    av_push(PL_argvout_stack, SvREFCNT_inc_simple(PL_defoutgv));
+	    assert(PL_defoutgv);
+	    av_push(PL_argvout_stack, SvREFCNT_inc_simple_NN(PL_defoutgv));
 	}
     }
     if (PL_filemode & (S_ISUID|S_ISGID)) {
@@ -1518,7 +1527,9 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     if (strnEQ(cmd,"exec",4) && isSPACE(cmd[4]))
 	goto doshell;
 
-    for (s = cmd; *s && isALNUM(*s); s++) ;	/* catch VAR=val gizmo */
+    s = cmd;
+    while (isALNUM(*s))
+	s++;	/* catch VAR=val gizmo */
     if (*s == '=')
 	goto doshell;
 
@@ -1556,10 +1567,12 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     PL_Cmd = savepvn(cmd, s-cmd);
     a = PL_Argv;
     for (s = PL_Cmd; *s;) {
-	while (*s && isSPACE(*s)) s++;
+	while (isSPACE(*s))
+	    s++;
 	if (*s)
 	    *(a++) = s;
-	while (*s && !isSPACE(*s)) s++;
+	while (*s && !isSPACE(*s))
+	    s++;
 	if (*s)
 	    *s++ = '\0';
     }
