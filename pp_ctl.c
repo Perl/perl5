@@ -2975,12 +2975,12 @@ PP(pp_require)
     SV *namesv = Nullsv;
     SV** svp;
     const I32 gimme = GIMME_V;
-    PerlIO *tryrsfp = 0;
     int filter_has_file = 0;
-    GV *filter_child_proc = 0;
-    SV *filter_state = 0;
-    SV *filter_sub = 0;
-    SV *hook_sv = 0;
+    PerlIO *tryrsfp = NULL;
+    SV *filter_cache = NULL;
+    SV *filter_state = NULL;
+    SV *filter_sub = NULL;
+    SV *hook_sv = NULL;
     SV *encoding;
     OP *op;
 
@@ -3117,6 +3117,16 @@ PP(pp_require)
 			SP -= count - 1;
 			arg = SP[i++];
 
+			if (SvROK(arg) && (SvTYPE(SvRV(arg)) <= SVt_PVLV)
+			    && !isGV_with_GP(SvRV(arg))) {
+			    filter_cache = SvRV(arg);
+			    SvREFCNT_inc_void_NN(filter_cache);
+
+			    if (i < count) {
+				arg = SP[i++];
+			    }
+			}
+
 			if (SvROK(arg) && SvTYPE(SvRV(arg)) == SVt_PVGV) {
 			    arg = SvRV(arg);
 			}
@@ -3128,23 +3138,11 @@ PP(pp_require)
 
 			    if (io) {
 				tryrsfp = IoIFP(io);
-				if (IoTYPE(io) == IoTYPE_PIPE) {
-				    /* reading from a child process doesn't
-				       nest -- when returning from reading
-				       the inner module, the outer one is
-				       unreadable (closed?)  I've tried to
-				       save the gv to manage the lifespan of
-				       the pipe, but this didn't help. XXX */
-				    filter_child_proc = (GV *)arg;
-				    SvREFCNT_inc_simple_void(filter_child_proc);
+				if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {
+				    PerlIO_close(IoOFP(io));
 				}
-				else {
-				    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {
-					PerlIO_close(IoOFP(io));
-				    }
-				    IoIFP(io) = NULL;
-				    IoOFP(io) = NULL;
-				}
+				IoIFP(io) = NULL;
+				IoOFP(io) = NULL;
 			    }
 
 			    if (i < count) {
@@ -3160,11 +3158,11 @@ PP(pp_require)
 				filter_state = SP[i];
 				SvREFCNT_inc_simple_void(filter_state);
 			    }
+			}
 
-			    if (tryrsfp == 0) {
-				tryrsfp = PerlIO_open("/dev/null",
-						      PERL_SCRIPT_MODE);
-			    }
+			if (!tryrsfp && (filter_cache || filter_sub)) {
+			    tryrsfp = PerlIO_open(BIT_BUCKET,
+						  PERL_SCRIPT_MODE);
 			}
 			SP--;
 		    }
@@ -3179,9 +3177,9 @@ PP(pp_require)
 		    }
 
 		    filter_has_file = 0;
-		    if (filter_child_proc) {
-			SvREFCNT_dec(filter_child_proc);
-			filter_child_proc = 0;
+		    if (filter_cache) {
+			SvREFCNT_dec(filter_cache);
+			filter_cache = NULL;
 		    }
 		    if (filter_state) {
 			SvREFCNT_dec(filter_state);
@@ -3319,12 +3317,12 @@ PP(pp_require)
     SAVESPTR(PL_compiling.cop_io);
     PL_compiling.cop_io = Nullsv;
 
-    if (filter_sub || filter_child_proc) {
+    if (filter_sub || filter_cache) {
 	SV * const datasv = filter_add(run_user_filter, Nullsv);
 	IoLINES(datasv) = filter_has_file;
-	IoFMT_GV(datasv) = (GV *)filter_child_proc;
 	IoTOP_GV(datasv) = (GV *)filter_state;
 	IoBOTTOM_GV(datasv) = (GV *)filter_sub;
+	IoFMT_GV(datasv) = (GV *)filter_cache;
     }
 
     /* switch to eval mode */
@@ -3836,21 +3834,71 @@ run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 {
     SV *datasv = FILTER_DATA(idx);
     const int filter_has_file = IoLINES(datasv);
-    GV *filter_child_proc = (GV *)IoFMT_GV(datasv);
-    SV *filter_state = (SV *)IoTOP_GV(datasv);
-    SV *filter_sub = (SV *)IoBOTTOM_GV(datasv);
-    int len = 0;
+    SV * const filter_state = (SV *)IoTOP_GV(datasv);
+    SV * const filter_sub = (SV *)IoBOTTOM_GV(datasv);
+    int status = 0;
+    SV *upstream;
+    STRLEN got_len;
+    const char *got_p;
+    const char *prune_from = NULL;
+    bool read_from_cache = FALSE;
 
     /* I was having segfault trouble under Linux 2.2.5 after a
        parse error occured.  (Had to hack around it with a test
        for PL_error_count == 0.)  Solaris doesn't segfault --
        not sure where the trouble is yet.  XXX */
 
-    if (filter_has_file) {
-	len = FILTER_READ(idx+1, buf_sv, maxlen);
+    if (IoFMT_GV(datasv)) {
+	SV *const cache = (SV *)IoFMT_GV(datasv);
+	if (SvOK(cache)) {
+	    STRLEN cache_len;
+	    const char *cache_p = SvPV(cache, cache_len);
+	    STRLEN take = 0;
+
+	    if (maxlen) {
+		/* Running in block mode and we have some cached data already.
+		 */
+		if (cache_len >= maxlen) {
+		    /* In fact, so much data we don't even need to call
+		       filter_read.  */
+		    take = maxlen;
+		}
+	    } else {
+		const char *const first_nl = memchr(cache_p, '\n', cache_len);
+		if (first_nl) {
+		    take = first_nl + 1 - cache_p;
+		}
+	    }
+	    if (take) {
+		sv_catpvn(buf_sv, cache_p, take);
+		sv_chop(cache, cache_p + take);
+		/* Definately not EOF  */
+		return 1;
+	    }
+
+	    sv_catsv(buf_sv, cache);
+	    if (maxlen) {
+		maxlen -= cache_len;
+	    }
+	    SvOK_off(cache);
+	    read_from_cache = TRUE;
+	}
     }
 
-    if (filter_sub && len >= 0) {
+    /* Filter API says that the filter appends to the contents of the buffer.
+       Usually the buffer is "", so the details don't matter. But if it's not,
+       then clearly what it contains is already filtered by this filter, so we
+       don't want to pass it in a second time.
+       I'm going to use a mortal in case the upstream filter croaks.  */
+    upstream = ((SvOK(buf_sv) && sv_len(buf_sv)) || SvGMAGICAL(buf_sv))
+	? sv_newmortal() : buf_sv;
+    SvUPGRADE(upstream, SVt_PV);
+	
+    if (filter_has_file) {
+	status = FILTER_READ(idx+1, upstream, 0);
+    }
+
+    if (filter_sub && status >= 0) {
 	dSP;
 	int count;
 
@@ -3859,9 +3907,9 @@ run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	SAVETMPS;
 	EXTEND(SP, 2);
 
-	DEFSV = buf_sv;
+	DEFSV = upstream;
 	PUSHMARK(SP);
-	PUSHs(sv_2mortal(newSViv(maxlen)));
+	PUSHs(sv_2mortal(newSViv(0)));
 	if (filter_state) {
 	    PUSHs(filter_state);
 	}
@@ -3872,7 +3920,7 @@ run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	if (count > 0) {
 	    SV *out = POPs;
 	    if (SvOK(out)) {
-		len = SvIV(out);
+		status = SvIV(out);
 	    }
 	}
 
@@ -3881,12 +3929,57 @@ run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	LEAVE;
     }
 
-    if (len <= 0) {
-	IoLINES(datasv) = 0;
-	if (filter_child_proc) {
-	    SvREFCNT_dec(filter_child_proc);
-	    IoFMT_GV(datasv) = NULL;
+    if(SvOK(upstream)) {
+	got_p = SvPV(upstream, got_len);
+	if (maxlen) {
+	    if (got_len > maxlen) {
+		prune_from = got_p + maxlen;
+	    }
+	} else {
+	    const char *const first_nl = memchr(got_p, '\n', got_len);
+	    if (first_nl && first_nl + 1 < got_p + got_len) {
+		/* There's a second line here... */
+		prune_from = first_nl + 1;
+	    }
 	}
+    }
+    if (prune_from) {
+	/* Oh. Too long. Stuff some in our cache.  */
+	STRLEN cached_len = got_p + got_len - prune_from;
+	SV *cache = (SV *)IoFMT_GV(datasv);
+
+	if (!cache) {
+	    IoFMT_GV(datasv) = (GV*) (cache = newSV(got_len - maxlen));
+	} else if (SvOK(cache)) {
+	    /* Cache should be empty.  */
+	    assert(!SvCUR(cache));
+	}
+
+	sv_setpvn(cache, prune_from, cached_len);
+	/* If you ask for block mode, you may well split UTF-8 characters.
+	   "If it breaks, you get to keep both parts"
+	   (Your code is broken if you  don't put them back together again
+	   before something notices.) */
+	if (SvUTF8(upstream)) {
+	    SvUTF8_on(cache);
+	}
+	SvCUR_set(upstream, got_len - cached_len);
+	/* Can't yet be EOF  */
+	if (status == 0)
+	    status = 1;
+    }
+
+    /* If they are at EOF but buf_sv has something in it, then they may never
+       have touched the SV upstream, so it may be undefined.  If we naively
+       concatenate it then we get a warning about use of uninitialised value.
+    */
+    if (upstream != buf_sv && (SvOK(upstream) || SvGMAGICAL(upstream))) {
+	sv_catsv(buf_sv, upstream);
+    }
+
+    if (status <= 0) {
+	IoLINES(datasv) = 0;
+	SvREFCNT_dec(IoFMT_GV(datasv));
 	if (filter_state) {
 	    SvREFCNT_dec(filter_state);
 	    IoTOP_GV(datasv) = NULL;
@@ -3897,8 +3990,13 @@ run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	}
 	filter_del(run_user_filter);
     }
-
-    return len;
+    if (status == 0 && read_from_cache) {
+	/* If we read some data from the cache (and by getting here it implies
+	   that we emptied the cache) then we aren't yet at EOF, and mustn't
+	   report that to our caller.  */
+	return 1;
+    }
+    return status;
 }
 
 /* perhaps someone can come up with a better name for

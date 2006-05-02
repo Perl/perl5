@@ -1484,6 +1484,10 @@ Returns a pointer to the character buffer.
 #define boolSV(b) ((b) ? &PL_sv_yes : &PL_sv_no)
 
 #define isGV(sv) (SvTYPE(sv) == SVt_PVGV)
+/* If I give every macro argument a different name, then there won't be bugs
+   where nested macros get confused. Been there, done that.  */
+#define isGV_with_GP(pwadak) \
+	((SvTYPE(pwadak) == SVt_PVGV || SvTYPE(pwadak) == SVt_PVLV))
 
 #define SvGROW(sv,len) (SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
 #define SvGROW_mutable(sv,len) \
