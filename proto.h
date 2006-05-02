@@ -645,6 +645,9 @@ PERL_CALLCONV void	Perl_gv_fullname4(pTHX_ SV* sv, const GV* gv, const char* pre
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
+PERL_CALLCONV GP *	Perl_newGP(pTHX_ GV *const gv)
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV void	Perl_gv_init(pTHX_ GV* gv, HV* stash, const char* name, STRLEN len, int multi)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);

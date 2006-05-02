@@ -267,9 +267,7 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
     SSPUSHINT(SAVEt_GP);
 
     if (empty) {
-	register GP *gp;
-
-	Newxz(gp, 1, GP);
+	GP *gp = Perl_newGP(aTHX_ gv);
 
 	if (GvCVu(gv))
 	    PL_sub_generation++;	/* taking a method out of circulation */
@@ -277,15 +275,7 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
 	    gp->gp_io = newIO();
 	    IoFLAGS(gp->gp_io) |= IOf_ARGV|IOf_START;
 	}
-	GvGP(gv) = gp_ref(gp);
-#ifndef PERL_DONT_CREATE_GVSV
-	GvSV(gv) = newSV(0);
-#endif
-	GvLINE(gv) = CopLINE(PL_curcop);
-	/* XXX Ideally this cast would be replaced with a change to const char*
-	   in the struct.  */
-	GvFILE(gv) = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : (char *) "";
-	GvEGV(gv) = gv;
+	GvGP(gv) = gp;
     }
     else {
 	gp_ref(GvGP(gv));

@@ -157,11 +157,30 @@ Perl_gv_const_sv(pTHX_ GV *gv)
     return SvROK(gv) ? SvRV(gv) : NULL;
 }
 
+GP *
+Perl_newGP(pTHX_ GV *const gv)
+{
+    GP *gp;
+    Newxz(gp, 1, GP);
+
+#ifndef PERL_DONT_CREATE_GVSV
+    gp->gv_sv = newSV(0);
+#endif
+
+    gp->gp_line = CopLINE(PL_curcop);
+    /* XXX Ideally this cast would be replaced with a change to const char*
+       in the struct.  */
+    gp->gp_file = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : (char *) "";
+    gp->gp_egv = gv;
+    gp->gp_refcnt = 1;
+
+    return gp;
+}
+
 void
 Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 {
     dVAR;
-    register GP *gp;
     const U32 old_type = SvTYPE(gv);
     const bool doproto = old_type > SVt_NULL;
     const char * const proto = (doproto && SvPOK(gv)) ? SvPVX_const(gv) : NULL;
@@ -198,20 +217,9 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	} else
 	    Safefree(SvPVX_mutable(gv));
     }
-    Newxz(gp, 1, GP);
     SvSCREAM_on(gv);
-    GvGP(gv) = gp_ref(gp);
-#ifdef PERL_DONT_CREATE_GVSV
-    GvSV(gv) = NULL;
-#else
-    GvSV(gv) = newSV(0);
-#endif
-    GvLINE(gv) = CopLINE(PL_curcop);
-    /* XXX Ideally this cast would be replaced with a change to const char*
-       in the struct.  */
-    GvFILE(gv) = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : (char *) "";
-    GvCVGEN(gv) = 0;
-    GvEGV(gv) = gv;
+
+    GvGP(gv) = Perl_newGP(aTHX_ gv);
     GvSTASH(gv) = stash;
     if (stash)
 	Perl_sv_add_backref(aTHX_ (SV*)stash, (SV*)gv);
