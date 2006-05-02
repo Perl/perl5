@@ -942,14 +942,14 @@ $(UNIDATAFILES) : $(HPERL) $(CONFIGPM) ..\lib\unicore\mktables
 	$(HPERL) -I.. mktables
 
 dist: all
-	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) makedist.pl --distdir=dist-$(CROSS_NAME) --cross-name=$(CROSS_NAME)
+	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) ce-helpers\makedist.pl --distdir=dist-$(CROSS_NAME) --cross-name=$(CROSS_NAME)
 
 zipdist: all
-	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) makedist.pl --distdir=dist-$(CROSS_NAME) --cross-name=$(CROSS_NAME)
-	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) makedist.pl --distdir=dist-$(CROSS_NAME) --cross-name=$(CROSS_NAME) --zip
+	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) ce-helpers\makedist.pl --distdir=dist-$(CROSS_NAME) --cross-name=$(CROSS_NAME)
+	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) ce-helpers\makedist.pl --distdir=dist-$(CROSS_NAME) --cross-name=$(CROSS_NAME) --zip
 
 zip:
-	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) makedist.pl --distdir=dist-$(CROSS_NAME) --cross-name=$(CROSS_NAME) --zip
+	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) ce-helpers\makedist.pl --distdir=dist-$(CROSS_NAME) --cross-name=$(CROSS_NAME) --zip
 
 perl.ico:
 	$(HPERL) makeico.pl perl.ico
