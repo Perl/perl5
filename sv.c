@@ -10042,7 +10042,6 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 	       missing by always going for the destination.
 	       FIXME - instrument and check that assumption  */
 	    if (sv_type >= SVt_PVMG) {
-		HV *ourstash;
 		if ((sv_type == SVt_PVMG) && SvPAD_OUR(dstr)) {
 		    OURSTASH_set(dstr, hv_dup_inc(OURSTASH(dstr), param));
 		} else if (SvMAGIC(dstr))
