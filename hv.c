@@ -104,7 +104,7 @@ S_save_hek_flags(const char *str, I32 len, U32 hash, int flags)
     HEK_KEY(hek)[len] = 0;
     HEK_LEN(hek) = len;
     HEK_HASH(hek) = hash;
-    HEK_FLAGS(hek) = (unsigned char)flags_masked;
+    HEK_FLAGS(hek) = (unsigned char)flags_masked | HVhek_UNSHARED;
 
     if (flags & HVhek_FREEKEY)
 	Safefree(str);

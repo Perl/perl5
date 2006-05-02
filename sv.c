@@ -6981,12 +6981,15 @@ Perl_newSVhek(pTHX_ const HEK *hek)
 	    SvUTF8_on (sv);
 	    Safefree (as_utf8); /* bytes_to_utf8() allocates a new string */
 	    return sv;
-	} else if (flags & HVhek_REHASH) {
+	} else if (flags & (HVhek_REHASH|HVhek_UNSHARED)) {
 	    /* We don't have a pointer to the hv, so we have to replicate the
 	       flag into every HEK. This hv is using custom a hasing
 	       algorithm. Hence we can't return a shared string scalar, as
 	       that would contain the (wrong) hash value, and might get passed
-	       into an hv routine with a regular hash  */
+	       into an hv routine with a regular hash.
+	       Similarly, a hash that isn't using shared hash keys has to have
+	       the flag in every key so that we know not to try to call
+	       share_hek_kek on it.  */
 
 	    SV * const sv = newSVpvn (HEK_KEY(hek), HEK_LEN(hek));
 	    if (HEK_UTF8(hek))
