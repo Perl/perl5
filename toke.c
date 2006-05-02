@@ -2592,7 +2592,8 @@ Perl_filter_add(pTHX_ filter_t funcp, SV *datasv)
     IoANY(datasv) = FPTR2DPTR(void *, funcp); /* stash funcp into spare field */
     IoFLAGS(datasv) |= IOf_FAKE_DIRP;
     DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_add func %p (%s)\n",
-			  IoANY(datasv), SvPV_nolen(datasv)));
+			  FPTR2DPTR(void *, IoANY(datasv)),
+			  SvPV_nolen(datasv)));
     av_unshift(PL_rsfp_filters, 1);
     av_store(PL_rsfp_filters, 0, datasv) ;
     return(datasv);
@@ -2607,7 +2608,8 @@ Perl_filter_del(pTHX_ filter_t funcp)
     SV *datasv;
 
 #ifdef DEBUGGING
-    DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_del func %p", (void*)FPTR2DPTR(XPVIO *, funcp)));
+    DEBUG_P(PerlIO_printf(Perl_debug_log, "filter_del func %p",
+			  FPTR2DPTR(void*, funcp)));
 #endif
     if (!PL_rsfp_filters || AvFILLp(PL_rsfp_filters)<0)
 	return;
@@ -12407,7 +12409,8 @@ utf16_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     const I32 count = FILTER_READ(idx+1, sv, maxlen);
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "utf16_textfilter(%p): %d %d (%d)\n",
-			  (void*)utf16_textfilter, idx, maxlen, (int) count));
+			  FPTR2DPTR(void *, utf16_textfilter),
+			  idx, maxlen, (int) count));
     if (count) {
 	U8* tmps;
 	I32 newlen;
@@ -12429,7 +12432,8 @@ utf16rev_textfilter(pTHX_ int idx, SV *sv, int maxlen)
     const I32 count = FILTER_READ(idx+1, sv, maxlen);
     DEBUG_P(PerlIO_printf(Perl_debug_log,
 			  "utf16rev_textfilter(%p): %d %d (%d)\n",
-			  (void*)utf16rev_textfilter, idx, maxlen, (int) count));
+			  FPTR2DPTR(void *, utf16rev_textfilter),
+			  idx, maxlen, (int) count));
     if (count) {
 	U8* tmps;
 	I32 newlen;
