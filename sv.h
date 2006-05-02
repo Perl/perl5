@@ -1164,6 +1164,8 @@ the scalar's value cannot change unless written to.
 #    define SvMAGIC(sv)							\
 	(*({ SV *const _svi = (SV *) sv;				\
 	    assert(SvTYPE(_svi) >= SVt_PVMG);				\
+	    if(SvTYPE(_svi) == SVt_PVMG)				\
+		assert(!SvPAD_OUR(_svi));				\
 	    &(((XPVMG*) SvANY(_svi))->xmg_u.xmg_magic);			\
 	  }))
 #    define SvSTASH(sv)							\
