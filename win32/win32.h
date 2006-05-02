@@ -195,8 +195,6 @@ struct utsname {
 #define PERL_MEMBER_PTR_SIZE	12
 
 #define isnan		_isnan
-#define snprintf	_snprintf
-#define vsnprintf	_vsnprintf
 
 #endif
 
@@ -211,6 +209,8 @@ typedef unsigned short	mode_t;
 #define PERL_MEMBER_PTR_SIZE	16
 
 #define isnan		_isnan
+#define snprintf	_snprintf
+#define vsnprintf	_vsnprintf
 
 #if _MSC_VER < 1300
 /* VC6 has broken NaN semantics: NaN == NaN returns true instead of false */
