@@ -1867,7 +1867,7 @@ PP(pp_send)
 		    /* Don't call sv_len_utf8 again because it will call magic
 		       or overloading a second time, and we might get back a
 		       different result.  */
-		    blen_chars = utf8_length(buffer, buffer + blen);
+		    blen_chars = utf8_length((U8*)buffer, (U8*)buffer + blen);
 		} else {
 		    /* It's safe, and it may well be cached.  */
 		    blen_chars = sv_len_utf8(bufsv);
