@@ -273,7 +273,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #define XSRETURN_UNDEF STMT_START { XST_mUNDEF(0); XSRETURN(1); } STMT_END
 #define XSRETURN_EMPTY STMT_START {                XSRETURN(0); } STMT_END
 
-#define newXSproto(a,b,c,d)	sv_setpv((SV*)newXS(a,b,c), d)
+#define newXSproto(a,b,c,d)	newXS_flags(a,b,c,d,0)
 
 #ifdef XS_VERSION
 #  define XS_VERSION_BOOTCHECK \

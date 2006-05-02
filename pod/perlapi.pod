@@ -2725,7 +2725,8 @@ Found in file op.c
 =item newXS
 X<newXS>
 
-Used by C<xsubpp> to hook up XSUBs as Perl subs.
+Used by C<xsubpp> to hook up XSUBs as Perl subs.  I<filename> needs to be
+static storage, as it is used directly as CvFILE(), without a copy being made.
 
 =for hackers
 Found in file op.c

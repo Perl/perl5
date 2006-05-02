@@ -5429,15 +5429,10 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
     /* file becomes the CvFILE. For an XS, it's supposed to be static storage,
        and so doesn't get free()d.  (It's expected to be from the C pre-
        processor __FILE__ directive). But we need a dynamically allocated one,
-       and we need it to get freed.  So we cheat, and take advantage of the
-       fact that the first 0 bytes of any string always look the same.  */
-    cv = newXS(name, const_sv_xsub, file);
+       and we need it to get freed.  */
+    cv = newXS_flags(name, const_sv_xsub, file, "", XS_DYNAMIC_FILENAME);
     CvXSUBANY(cv).any_ptr = sv;
     CvCONST_on(cv);
-    /* prototype is "".  But this gets free()d.  :-)  */
-    sv_usepvn_flags((SV*)cv, file, len, SV_HAS_TRAILING_NUL); 
-    /* This gives us a prototype of "", rather than the file name.  */
-    SvCUR_set(cv, 0);
 
 #ifdef USE_ITHREADS
     if (stash)
@@ -5448,10 +5443,55 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
     return cv;
 }
 
+CV *
+Perl_newXS_flags(pTHX_ const char *name, XSUBADDR_t subaddr,
+		 const char *const filename, const char *const proto,
+		 U32 flags)
+{
+    CV *cv = newXS(name, subaddr, filename);
+
+    if (flags & XS_DYNAMIC_FILENAME) {
+	/* We need to "make arrangements" (ie cheat) to ensure that the
+	   filename lasts as long as the PVCV we just created, but also doesn't
+	   leak  */
+	STRLEN filename_len = strlen(filename);
+	STRLEN proto_and_file_len = filename_len;
+	char *proto_and_file;
+	STRLEN proto_len;
+
+	if (proto) {
+	    proto_len = strlen(proto);
+	    proto_and_file_len += proto_len;
+
+	    Newx(proto_and_file, proto_and_file_len + 1, char);
+	    Copy(proto, proto_and_file, proto_len, char);
+	    Copy(filename, proto_and_file + proto_len, filename_len + 1, char);
+	} else {
+	    proto_len = 0;
+	    proto_and_file = savepvn(filename, filename_len);
+	}
+
+	/* This gets free()d.  :-)  */
+	sv_usepvn_flags((SV*)cv, proto_and_file, proto_and_file_len,
+			SV_HAS_TRAILING_NUL);
+	if (proto) {
+	    /* This gives us the correct prototype, rather than one with the
+	       file name appended.  */
+	    SvCUR_set(cv, proto_len);
+	} else {
+	    SvPOK_off(cv);
+	}
+    } else {
+	sv_setpv((SV *)cv, proto);
+    }
+    return cv;
+}
+
 /*
 =for apidoc U||newXS
 
-Used by C<xsubpp> to hook up XSUBs as Perl subs.
+Used by C<xsubpp> to hook up XSUBs as Perl subs.  I<filename> needs to be
+static storage, as it is used directly as CvFILE(), without a copy being made.
 
 =cut
 */

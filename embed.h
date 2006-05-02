@@ -542,6 +542,7 @@
 #define newSLICEOP		Perl_newSLICEOP
 #define newSTATEOP		Perl_newSTATEOP
 #define newSUB			Perl_newSUB
+#define newXS_flags		Perl_newXS_flags
 #define newXS			Perl_newXS
 #define newAV			Perl_newAV
 #define newAVREF		Perl_newAVREF
@@ -2709,6 +2710,7 @@
 #define newSLICEOP(a,b,c)	Perl_newSLICEOP(aTHX_ a,b,c)
 #define newSTATEOP(a,b,c)	Perl_newSTATEOP(aTHX_ a,b,c)
 #define newSUB(a,b,c,d)		Perl_newSUB(aTHX_ a,b,c,d)
+#define newXS_flags(a,b,c,d,e)	Perl_newXS_flags(aTHX_ a,b,c,d,e)
 #define newXS(a,b,c)		Perl_newXS(aTHX_ a,b,c)
 #define newAV()			Perl_newAV(aTHX)
 #define newAVREF(a)		Perl_newAVREF(aTHX_ a)

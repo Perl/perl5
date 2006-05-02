@@ -202,6 +202,9 @@ Returns the stash of the CV.
 #define CvISXSUB_on(cv)		(CvFLAGS(cv) |= CVf_ISXSUB)
 #define CvISXSUB_off(cv)	(CvFLAGS(cv) &= ~CVf_ISXSUB)
 
+/* Flags for newXS_flags  */
+#define XS_DYNAMIC_FILENAME	0x01	/* The filename isn't static  */
+
 /*
 =head1 CV reference counts and CvOUTSIDE
 
