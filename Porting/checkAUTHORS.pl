@@ -5,12 +5,14 @@ $Text::Wrap::columns = 80;
 my ($committer, $patch, $log);
 use Getopt::Long;
 
-my ($rank, $percentage, $ta, @authors, %authors, %untraced, %patchers,
-    %committers);
+my ($rank, $percentage, $cumulative, $reverse, $ta, @authors, %authors,
+    %untraced, %patchers, %committers);
 my $result = GetOptions ("rank" => \$rank,		    # rank authors
 			 "thanks-applied" => \$ta,	    # ranks committers
 			 "acknowledged=s"   => \@authors ,  # authors files
 			 "percentage" => \$percentage,      # show as %age
+			 "cumulative" => \$cumulative,
+			 "reverse" => \$reverse,
 			);
 
 if (!$result or (($rank||0) + ($ta||0) + (@authors ? 1 : 0) != 1) or !@ARGV) {
@@ -19,6 +21,8 @@ $0 --rank Changelogs                        # rank authors by patches
 $0 --acknowledged <authors file> Changelogs # Display unacknowledged authors
 $0 --thanks-applied Changelogs		    # ranks committers
 $0 --percentage ...                         # show rankings as percentages
+$0 --cumulative ...                         # show rankings cumulatively
+$0 --reverse ...                            # show rankings in reverse
 Specify stdin as - if needs be. Remember that option names can be abbreviated.
 EOS
 }
@@ -281,14 +285,18 @@ sub display_ordered {
   }
 
   my $i = @sorted;
-  return unless $i;
-  while (--$i) {
+  return unless @sorted;
+  my $sum = 0;
+  foreach my $i ($reverse ? 0 .. $#sorted : reverse 0 .. $#sorted) {
     next unless $sorted[$i];
     my $prefix;
+    $sum += $i * @{$sorted[$i]};
+    # Value to display is either this one, or the cumulative sum.
+    my $value = $cumulative ? $sum : $i;
     if ($percentage) {
-	$prefix = sprintf "% 6.2f:\t", 100 * $i / $total;
+	$prefix = sprintf "%6.2f:\t", 100 * $value / $total;
     } else {
-	$prefix = "$i:\t";
+	$prefix = "$value:\t";
     }
     print wrap ($prefix, "\t", join (" ", sort @{$sorted[$i]}), "\n");
   }
