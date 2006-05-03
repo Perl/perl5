@@ -10,7 +10,7 @@ We assume ANSI C89 plus the following:
 - <stdlib.h>
 - rename()
 - opendir(), readdir(), closedir() (via dirent.h)
-- memchr (via string.h)
+- memchr(), memcmp(), memcpy() (via string.h)
 - (a safe) putenv() (via stdlib.h)
 - strtoul() (via stdlib.h)
 (grep for 'define' in uconfig.sh.)
