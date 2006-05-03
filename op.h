@@ -149,6 +149,9 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpASSIGN_BACKWARDS	64	/* Left & right switched. */
 #define OPpASSIGN_CV_TO_GV	128	/* Possible optimisation for constants. */
 
+/* Private for OP_[AS]ASSIGN */
+#define OPpASSIGN_STATE		32	/* Assign to a "state" variable */
+
 /* Private for OP_MATCH and OP_SUBST{,CONST} */
 #define OPpRUNTIME		64	/* Pattern coming in on the stack */
 
@@ -187,6 +190,8 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPpOUR_INTRO		16	/* Variable was in an our() */
   /* OP_RV2[AH]V, OP_PAD[AH]V, OP_[AH]ELEM */
 #define OPpMAYBE_LVSUB		8	/* We might be an lvalue to return */
+  /* OP_PADSV only */
+#define OPpPAD_STATE		16	/* is a "state" pad */
   /* for OP_RV2?V, lower bits carry hints (currently only HINT_STRICT_REFS) */
 
   /* OP_RV2GV only */

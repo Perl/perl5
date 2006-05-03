@@ -284,6 +284,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVphv_CLONEABLE	0x00008000	/* PVHV (stashes) clone its objects */
 
 #define SVs_PADSTALE	0x00010000	/* lexical has gone out of scope */
+#define SVpad_STATE	0x00010000	/* pad name is a "state" var */
 #define SVs_PADTMP	0x00020000	/* in use as tmp */
 #define SVpad_TYPED	0x00020000	/* pad name is a Typed Lexical */
 #define SVs_PADMY	0x00040000	/* in use a "my" variable */
@@ -339,7 +340,8 @@ perform the upgrade if necessary.  See C<svtype>.
 					   keys live on shared string table */
 /* PVNV, PVMG, PVGV, presumably only inside pads */
 #define SVpad_NAME	0x40000000	/* This SV is a name in the PAD, so
-					   SVpad_TYPED and SVpad_OUR apply */
+					   SVpad_TYPED, SVpad_OUR and
+					   SVpad_STATE apply */
 /* PVAV */
 #define SVpav_REAL	0x40000000	/* free old entries */
 /* PVHV */
@@ -1073,6 +1075,10 @@ the scalar's value cannot change unless written to.
 #define SvPAD_OUR(sv)	\
 	((SvFLAGS(sv) & (SVpad_NAME|SVpad_OUR)) == (SVpad_NAME|SVpad_OUR))
 #define SvPAD_OUR_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_OUR)
+
+#define SvPAD_STATE(sv)	\
+	((SvFLAGS(sv) & (SVpad_NAME|SVpad_STATE)) == (SVpad_NAME|SVpad_STATE))
+#define SvPAD_STATE_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_STATE)
 
 #define OURSTASH(sv)	\
 	(SvPAD_OUR(sv) ? ((XPVMG*) SvANY(sv))->xmg_u.xmg_ourstash : NULL)

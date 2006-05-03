@@ -109,6 +109,7 @@ to be generated in evals, such as
 #include "EXTERN.h"
 #define PERL_IN_PAD_C
 #include "perl.h"
+#include "keywords.h"
 
 
 #define PAD_MAX 999999999
@@ -333,7 +334,7 @@ If fake, it means we're cloning an existing entry
 */
 
 PADOFFSET
-Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake)
+Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake, bool state)
 {
     dVAR;
     const PADOFFSET offset = pad_alloc(OP_PADSV, SVs_PADMY);
@@ -353,6 +354,9 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
 	SvPAD_OUR_on(namesv);
 	OURSTASH_set(namesv, ourstash);
 	SvREFCNT_inc_simple_void_NN(ourstash);
+    }
+    else if (state) {
+	SvPAD_STATE_on(namesv);
     }
 
     av_store(PL_comppad_name, offset, namesv);
@@ -539,7 +543,7 @@ Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
 		break; /* "our" masking "our" */
 	    Perl_warner(aTHX_ packWARN(WARN_MISC),
 		"\"%s\" variable %s masks earlier declaration in same %s",
-		(is_our ? "our" : "my"),
+		(is_our ? "our" : PL_in_my == KEY_my ? "my" : "state"),
 		name,
 		(SvIVX(sv) == PAD_MAX ? "scope" : "statement"));
 	    --off;
@@ -845,7 +849,8 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 	    SvPAD_TYPED(*out_name_sv)
 		    ? SvSTASH(*out_name_sv) : NULL,
 	    OURSTASH(*out_name_sv),
-	    1  /* fake */
+	    1,  /* fake */
+	    0   /* not a state variable */
 	);
 
 	new_namesv = AvARRAY(PL_comppad_name)[new_offset];

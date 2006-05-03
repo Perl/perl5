@@ -120,6 +120,12 @@ PP(pp_sassign)
 	SV * const temp = left;
 	left = right; right = temp;
     }
+    else if (PL_op->op_private & OPpASSIGN_STATE) {
+	if (SvPADSTALE(right))
+	    SvPADSTALE_off(right);
+	else
+	    RETURN; /* ignore assignment */
+    }
     if (PL_tainting && PL_tainted && !SvTAINTED(left))
 	TAINT_NOT;
     if (PL_op->op_private & OPpASSIGN_CV_TO_GV) {
@@ -273,7 +279,8 @@ PP(pp_padsv)
     XPUSHs(TARG);
     if (PL_op->op_flags & OPf_MOD) {
 	if (PL_op->op_private & OPpLVAL_INTRO)
-	    SAVECLEARSV(PAD_SVl(PL_op->op_targ));
+	    if (!(PL_op->op_private & OPpPAD_STATE))
+		SAVECLEARSV(PAD_SVl(PL_op->op_targ));
         if (PL_op->op_private & OPpDEREF) {
 	    PUTBACK;
 	    vivify_ref(PAD_SVl(PL_op->op_targ), PL_op->op_private & OPpDEREF);

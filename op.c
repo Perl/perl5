@@ -276,7 +276,8 @@ Perl_allocmy(pTHX_ char *name)
     if (PL_in_my_stash && *name != '$') {
 	yyerror(Perl_form(aTHX_
 		    "Can't declare class for non-scalar %s in \"%s\"",
-		     name, is_our ? "our" : "my"));
+ 		     name,
+ 		     is_our ? "our" : PL_in_my == KEY_state ? "state" : "my"));
     }
 
     /* allocate a spare slot and store the name in that slot */
@@ -288,7 +289,8 @@ Perl_allocmy(pTHX_ char *name)
 			? (PL_curstash && !strEQ(name,"$_") ? PL_curstash : PL_defstash)
 			: NULL
 		    ),
-		    0 /*  not fake */
+		    0, /*  not fake */
+		    PL_in_my == KEY_state
     );
     return off;
 }
@@ -1793,7 +1795,8 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
 	       type == OP_RV2HV) { /* XXX does this let anything illegal in? */
 	if (cUNOPo->op_first->op_type != OP_GV) { /* MJD 20011224 */
 	    yyerror(Perl_form(aTHX_ "Can't declare %s in %s",
-			OP_DESC(o), PL_in_my == KEY_our ? "our" : "my"));
+			OP_DESC(o),
+			PL_in_my == KEY_our ? "our" : PL_in_my == KEY_state ? "state" : "my"));
 	} else if (attrs) {
 	    GV * const gv = cGVOPx_gv(cUNOPo->op_first);
 	    PL_in_my = FALSE;
@@ -1814,7 +1817,7 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
     {
 	yyerror(Perl_form(aTHX_ "Can't declare %s in \"%s\"",
 			  OP_DESC(o),
-			  PL_in_my == KEY_our ? "our" : "my"));
+			  PL_in_my == KEY_our ? "our" : PL_in_my == KEY_state ? "state" : "my"));
 	return o;
     }
     else if (attrs && type != OP_PUSHMARK) {
@@ -1831,6 +1834,8 @@ S_my_kid(pTHX_ OP *o, OP *attrs, OP **imopsp)
     }
     o->op_flags |= OPf_MOD;
     o->op_private |= OPpLVAL_INTRO;
+    if (PL_in_my == KEY_state)
+	o->op_private |= OPpPAD_STATE;
     return o;
 }
 
@@ -2112,7 +2117,7 @@ Perl_localize(pTHX_ OP *o, I32 lex)
 	    if (sigil && (*s == ';' || *s == '=')) {
 		Perl_warner(aTHX_ packWARN(WARN_PARENTHESIS),
 				"Parentheses missing around \"%s\" list",
-				lex ? (PL_in_my == KEY_our ? "our" : "my")
+				lex ? (PL_in_my == KEY_our ? "our" : PL_in_my == KEY_state ? "state" : "my")
 				: "local");
 	    }
 	}
@@ -6800,6 +6805,16 @@ Perl_ck_sassign(pTHX_ OP *o)
 #endif
 	    kid->op_private |= OPpTARGET_MY;	/* Used for context settings */
 	    return kid;
+	}
+    }
+    if (kid->op_sibling) {
+	OP *kkid = kid->op_sibling;
+	if (kkid->op_type == OP_PADSV
+		&& (kkid->op_private & OPpLVAL_INTRO)
+		&& SvPAD_STATE(*av_fetch(PL_comppad_name, kkid->op_targ, FALSE))) {
+	    o->op_private |= OPpASSIGN_STATE;
+	    /* hijacking PADSTALE for uninitialized state variables */
+	    SvPADSTALE_on(PAD_SVl(kkid->op_targ));
 	}
     }
     return o;

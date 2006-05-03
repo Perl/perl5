@@ -3866,7 +3866,7 @@ EXTCONST char PL_no_dir_func[]
 EXTCONST char PL_no_func[]
   INIT("The %s function is unimplemented");
 EXTCONST char PL_no_myglob[]
-  INIT("\"my\" variable %s can't be in a package");
+  INIT("\"%s\" variable %s can't be in a package");
 EXTCONST char PL_no_localize_ref[]
   INIT("Can't localize through a reference");
 EXTCONST char PL_memory_wrap[]

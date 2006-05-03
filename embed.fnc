@@ -1535,7 +1535,7 @@ s	|void	|deb_stack_n	|NN SV** stack_base|I32 stack_min \
 pda	|PADLIST*|pad_new	|int flags
 pd	|void	|pad_undef	|NN CV* cv
 pd	|PADOFFSET|pad_add_name	|NN const char *name\
-				|NULLOK HV* typestash|NULLOK HV* ourstash|bool clone
+				|NULLOK HV* typestash|NULLOK HV* ourstash|bool clone|bool state
 pd	|PADOFFSET|pad_add_anon	|NN SV* sv|OPCODE op_type
 pd	|void	|pad_check_dup	|NN const char* name|bool is_our|NN const HV* ourstash
 #ifdef DEBUGGING

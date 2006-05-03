@@ -5964,6 +5964,7 @@ Perl_yylex(pTHX)
 
 	case KEY_our:
 	case KEY_my:
+	case KEY_state:
 	    PL_in_my = tmp;
 	    s = SKIPSPACE1(s);
 	    if (isIDFIRST_lazy_if(s,UTF)) {
@@ -6712,7 +6713,8 @@ S_pending_ident(pTHX)
         }
         else {
             if (strchr(PL_tokenbuf,':'))
-                yyerror(Perl_form(aTHX_ PL_no_myglob,PL_tokenbuf));
+                yyerror(Perl_form(aTHX_ PL_no_myglob,
+			    PL_in_my == KEY_my ? "my" : "state", PL_tokenbuf));
 
             yylval.opval = newOP(OP_PADANY, 0);
             yylval.opval->op_targ = allocmy(PL_tokenbuf);
@@ -6830,7 +6832,7 @@ S_pending_ident(pTHX)
 I32
 Perl_keyword (pTHX_ const char *name, I32 len)
 {
-  dVAR;
+    dVAR;
   switch (len)
   {
     case 1: /* 5 tokens of length 1 */
@@ -7737,46 +7739,46 @@ Perl_keyword (pTHX_ const char *name, I32 len)
           switch (name[1])
           {
             case 'a':
-            switch (name[2])
-            {
-              case 'i':
-                if (name[3] == 't')
-                {                                 /* wait       */
-                  return -KEY_wait;
-                }
+              switch (name[2])
+              {
+                case 'i':
+                  if (name[3] == 't')
+                  {                               /* wait       */
+                    return -KEY_wait;
+                  }
 
-                goto unknown;
+                  goto unknown;
 
-              case 'r':
-                if (name[3] == 'n')
-                {                                 /* warn       */
-                  return -KEY_warn;
-                }
+                case 'r':
+                  if (name[3] == 'n')
+                  {                               /* warn       */
+                    return -KEY_warn;
+                  }
 
-                goto unknown;
+                  goto unknown;
 
-              default:
-                goto unknown;
-            }
+                default:
+                  goto unknown;
+              }
 
             case 'h':
               if (name[2] == 'e' &&
                   name[3] == 'n')
               {                                   /* when       */
                 return (FEATURE_IS_ENABLED("switch") ? KEY_when : 0);
+              }
+
+              goto unknown;
+
+            default:
+              goto unknown;
           }
 
-          goto unknown;
-
         default:
           goto unknown;
       }
 
-        default:
-          goto unknown;
-      }
-
-    case 5: /* 38 tokens of length 5 */
+    case 5: /* 39 tokens of length 5 */
       switch (name[0])
       {
         case 'B':
@@ -7833,13 +7835,13 @@ Perl_keyword (pTHX_ const char *name, I32 len)
           {
             case 'l':
               if (name[2] == 'e' &&
-              name[3] == 's' &&
-              name[4] == 's')
-          {                                       /* bless      */
-            return -KEY_bless;
-          }
+                  name[3] == 's' &&
+                  name[4] == 's')
+              {                                   /* bless      */
+                return -KEY_bless;
+              }
 
-          goto unknown;
+              goto unknown;
 
             case 'r':
               if (name[2] == 'e' &&
@@ -8136,14 +8138,29 @@ Perl_keyword (pTHX_ const char *name, I32 len)
               goto unknown;
 
             case 't':
-              if (name[2] == 'u' &&
-                  name[3] == 'd' &&
-                  name[4] == 'y')
-              {                                   /* study      */
-                return KEY_study;
-              }
+              switch (name[2])
+              {
+                case 'a':
+                  if (name[3] == 't' &&
+                      name[4] == 'e')
+                  {                               /* state      */
+                    return KEY_state;
+                  }
 
-              goto unknown;
+                  goto unknown;
+
+                case 'u':
+                  if (name[3] == 'd' &&
+                      name[4] == 'y')
+                  {                               /* study      */
+                    return KEY_study;
+                  }
+
+                  goto unknown;
+
+                default:
+                  goto unknown;
+              }
 
             default:
               goto unknown;
@@ -8802,17 +8819,17 @@ Perl_keyword (pTHX_ const char *name, I32 len)
 
                   case 'i':
                     if (name[4] == 'n' &&
-                  name[5] == 'e' &&
-                  name[6] == 'd')
-              {                                   /* defined    */
-                return KEY_defined;
-              }
+                        name[5] == 'e' &&
+                        name[6] == 'd')
+                    {                             /* defined    */
+                      return KEY_defined;
+                    }
 
-              goto unknown;
+                    goto unknown;
 
-            default:
-              goto unknown;
-          }
+                  default:
+                    goto unknown;
+                }
               }
 
               goto unknown;

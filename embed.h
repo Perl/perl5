@@ -3719,7 +3719,7 @@
 #ifdef PERL_CORE
 #define pad_new(a)		Perl_pad_new(aTHX_ a)
 #define pad_undef(a)		Perl_pad_undef(aTHX_ a)
-#define pad_add_name(a,b,c,d)	Perl_pad_add_name(aTHX_ a,b,c,d)
+#define pad_add_name(a,b,c,d,e)	Perl_pad_add_name(aTHX_ a,b,c,d,e)
 #define pad_add_anon(a,b)	Perl_pad_add_anon(aTHX_ a,b)
 #define pad_check_dup(a,b,c)	Perl_pad_check_dup(aTHX_ a,b,c)
 #endif

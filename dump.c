@@ -1244,6 +1244,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (GvASSUMECV(sv))	sv_catpv(d, "ASSUMECV,");
 	if (GvIN_PAD(sv))       sv_catpv(d, "IN_PAD,");
 	if (SvPAD_OUR(sv))	sv_catpv(d, "OUR,");
+	if (SvPAD_STATE(sv))	sv_catpv(d, "STATE,");
 	if (SvPAD_TYPED(sv))	sv_catpv(d, "TYPED,");
 	if (GvIMPORTED(sv)) {
 	    sv_catpv(d, "IMPORT");

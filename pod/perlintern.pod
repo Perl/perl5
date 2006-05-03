@@ -712,7 +712,7 @@ OURSTASH to that value
 
 If fake, it means we're cloning an existing entry
 
-	PADOFFSET	pad_add_name(const char *name, HV* typestash, HV* ourstash, bool clone)
+	PADOFFSET	pad_add_name(const char *name, HV* typestash, HV* ourstash, bool clone, bool state)
 
 =for hackers
 Found in file pad.c
