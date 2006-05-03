@@ -1880,8 +1880,11 @@ Not implemented. (S<Mac OS>, MPE/iX, S<RISC OS>)
 Link count not updated because hard links are not quite that hard
 (They are sort of half-way between hard and soft links). (AmigaOS)
 
-Hard links are implemented on Win32 (Windows NT and Windows 2000)
-under NTFS only.
+Hard links are implemented on Win32 under NTFS only. They are
+natively supported on Windows 2000 and later.  On Windows NT they
+are implemented using the Windows POSIX subsystem support and the
+Perl process will need Administrator or Backup Operator privileges
+to create hard links.
 
 Available on 64 bit OpenVMS 8.2 and later.  (VMS)
 
