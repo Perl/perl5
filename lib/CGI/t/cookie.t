@@ -363,7 +363,7 @@ sub isa {
     return $pkg eq 'Apache';
 }
 sub headers_out { shift }
-sub set { shift->{check} = \@_; }
+sub add { shift->{check} = \@_; }
 
 package Apache2::Faker;
 sub new { bless {}, shift }
@@ -372,4 +372,4 @@ sub isa {
     return $pkg eq 'Apache2::RequestReq';
 }
 sub headers_out { shift }
-sub set { shift->{check} = \@_; }
+sub add { shift->{check} = \@_; }

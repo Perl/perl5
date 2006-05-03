@@ -18,8 +18,8 @@ use Carp 'croak';
 # The most recent version and complete docs are available at:
 #   http://stein.cshl.org/WWW/software/CGI/
 
-$CGI::revision = '$Id: CGI.pm,v 1.206 2006/04/17 13:53:02 lstein Exp $';
-$CGI::VERSION='3.19';
+$CGI::revision = '$Id: CGI.pm,v 1.208 2006/04/23 14:25:14 lstein Exp $';
+$CGI::VERSION='3.20';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -39,6 +39,7 @@ use constant XHTML_DTD => ['-//W3C//DTD XHTML 1.0 Transitional//EN',
 
 $MOD_PERL = 0; # no mod_perl by default
 @SAVED_SYMBOLS = ();
+
 
 # >>>>> Here are some globals that you might want to adjust <<<<<<
 sub initialize_globals {
@@ -1825,9 +1826,7 @@ END_OF_FUNC
 sub start_multipart_form {
     my($self,@p) = self_or_default(@_);
     if (defined($p[0]) && substr($p[0],0,1) eq '-') {
-	my(%p) = @p;
-	$p{'-enctype'}=&MULTIPART;
-	return $self->startform(%p);
+      return $self->startform(-enctype=>&MULTIPART,@p);
     } else {
 	my($method,$action,@other) = 
 	    rearrange([METHOD,ACTION],@p);
@@ -2645,7 +2644,7 @@ sub url {
 
     my $uri         =  $rewrite && $request_uri ? $request_uri : $script_name;
     $uri            =~ s/\?.*$//;                                 # remove query string
-    $uri            =~ s/\Q$path\E$//      if defined $path;          # remove path
+    $uri            =~ s/\Q$path\E$//      if defined $path;      # remove path
 
     if ($full) {
 	my $protocol = $self->protocol();
@@ -2778,7 +2777,8 @@ sub _name_and_path_from_env {
    my $raw_path_info   = $ENV{PATH_INFO}   || '';
    my $uri             = unescape($self->request_uri) || '';
 
-   $raw_script_name =~ s/\Q$raw_path_info$\E//;
+   my $protected    = quotemeta($raw_path_info);
+   $raw_script_name =~ s/$protected$//;
 
    my @uri_double_slashes  = $uri =~ m^(/{2,}?)^g;
    my @path_double_slashes = "$raw_script_name $raw_path_info" =~ m^(/{2,}?)^g;

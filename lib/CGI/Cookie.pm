@@ -182,7 +182,7 @@ sub bake {
           : Apache->request
   } if $MOD_PERL;
   if ($r) {
-      $r->headers_out->set('Set-Cookie' => $self->as_string);
+      $r->headers_out->add('Set-Cookie' => $self->as_string);
   } else {
       print CGI::header(-cookie => $self);
   }

@@ -4,9 +4,9 @@ use lib qw(t/lib);
 
 # Test ability to retrieve HTTP request info
 ######################### We start with some black magic to print on failure.
-use lib '../blib/lib','../blib/arch';
+use lib '.','..','../blib/lib','../blib/arch';
 
-BEGIN {$| = 1; print "1..31\n"; }
+BEGIN {$| = 1; print "1..32\n"; }
 END {print "not ok 1\n" unless $loaded;}
 use Config;
 use CGI (':standard','keywords');
@@ -113,3 +113,5 @@ test(29, charset("UTF-8") && header() eq "Content-Type: text/html; charset=UTF-8
 test(30, !charset("") && header() eq "Content-Type: text/html${CRLF}${CRLF}", "Empty charset");
 
 test(31, header(-foo=>'bar') eq "Foo: bar${CRLF}Content-Type: text/html${CRLF}${CRLF}", "Custom header");
+
+test(32, start_form(-action=>'one',name=>'two',onsubmit=>'three') eq qq(<form method="post" action="one" enctype="multipart/form-data" onsubmit="three" name="two">\n), "initial dash followed by undashed arguments");

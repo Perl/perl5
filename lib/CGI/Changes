@@ -1,3 +1,11 @@
+  Version 3.20
+  1. Patch from David Wheeler for CGI::Cookie->bake(). Uses mod_perl headers_out->add()
+	rather than headers_out->set().
+  2. Fixed problem identified by Andrei Voronkov in which start_form() output was screwed
+	up when initial argument begins with a dash and subsequent arguments do not.
+  3. Quashed uninitialized variable warnings coming from script_name(), url() and other
+        functions that require access to the PATH_INFO environment variable.
+
   Version 3.19
   1. Added patch from Stephen Frost that allows one to suppress use of the temp file that is
 	created during uploads.
