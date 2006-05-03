@@ -1152,15 +1152,14 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		CV *cv;
 		OP *okid;
 
-		if (kid->op_type == OP_PUSHMARK)
-		    goto skip_kids;
-		if (kid->op_type != OP_NULL || kid->op_targ != OP_LIST)
-		    Perl_croak(aTHX_
-			       "panic: unexpected lvalue entersub "
-			       "args: type/targ %ld:%"UVuf,
-			       (long)kid->op_type, (UV)kid->op_targ);
-		kid = kLISTOP->op_first;
-	      skip_kids:
+		if (kid->op_type != OP_PUSHMARK) {
+		    if (kid->op_type != OP_NULL || kid->op_targ != OP_LIST)
+			Perl_croak(aTHX_
+				"panic: unexpected lvalue entersub "
+				"args: type/targ %ld:%"UVuf,
+				(long)kid->op_type, (UV)kid->op_targ);
+		    kid = kLISTOP->op_first;
+		}
 		while (kid->op_sibling)
 		    kid = kid->op_sibling;
 		if (!(kid->op_type == OP_NULL && kid->op_targ == OP_RV2CV)) {
