@@ -3667,7 +3667,7 @@ win32/perlexe.rc		associated perl binary with icon
 win32/perlglob.c		Win32 port
 win32/perlhost.h		Perl "host" implementation
 win32/perllib.c			Win32 port
-win32/perlmain.c		WinCE port
+win32/perlmaince.c		WinCE port
 win32/pod.mak			Win32 port
 win32/runperl.c			Win32 port
 win32/splittree.pl		Win32 port
