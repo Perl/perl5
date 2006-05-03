@@ -654,8 +654,6 @@ CORE_NOCFG_H	=		\
 		.\include\sys\socket.h	\
 		.\win32.h
 
-CORE_H		= $(CORE_NOCFG_H) .\config.h
-
 MICROCORE_OBJ	= $(MICROCORE_SRC:.c=.obj)
 CORE_OBJ	= $(MICROCORE_OBJ) $(EXTRACORE_SRC:.c=.obj)
 WIN32_OBJ	= $(WIN32_SRC:.c=.obj)
@@ -730,18 +728,18 @@ CFG_VARS = \
 
 all: hostminiperl $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE) Extensions
 
-$(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
+$(DYNALOADER)$(o) : $(DYNALOADER).c xconfig.h $(EXTDIR)\DynaLoader\dlutils.c
 
-$(CONFIGPM): .\xconfig.h ..\config.sh ..\minimod.pl
+$(CONFIGPM) : $(HPERL) ..\config.sh config_h.PL ..\minimod.pl
 	cd .. && $(HPERL) configpm --cross=$(CROSS_NAME) --no-glossary
 	-mkdir $(XCOREDIR)
 	$(XCOPY) ..\*.h $(XCOREDIR)\*.*
 	$(XCOPY) ..\*.inc $(XCOREDIR)\*.*
 	$(XCOPY) *.h $(XCOREDIR)\*.*
-	$(XCOPY) xconfig.h $(XCOREDIR)\config.h
 	$(XCOPY) ..\ext\re\re.pm $(LIBDIR)\*.*
 	$(RCOPY) include $(XCOREDIR)\*.*
-	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) config_h.PL "INST_VER=$(INST_VER)" "CORE_DIR=$(XCOREDIR)" "CONFIG_H=xconfig.h"
+	-$(HPERL) -I..\lib -MCross=$(CROSS_NAME) config_h.PL "INST_VER=$(INST_VER)" "CORE_DIR=$(XCOREDIR)" "CONFIG_H=xconfig.h"
+	$(XCOPY) xconfig.h $(XCOREDIR)\config.h
 
 .\xconfig.h:
 	-del /f xconfig.h
@@ -799,7 +797,7 @@ clean:
 	-rm -f $(MACHINE)/*.dll
 	-rm -f $(MACHINE)/*.lib
 	-rm -f ../config.sh ../lib/Config.pm
-	-rm -f config.h perl.res
+	-rm -f config.h xconfig.h perl.res
 
 XDLLOBJS = \
 $(DLLDIR)\av.obj \
