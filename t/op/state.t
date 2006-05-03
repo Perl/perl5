@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use feature "state";
 
-plan tests => 23;
+plan tests => 25;
 
 ok( ! defined state $uninit, q(state vars are undef by default) );
 
@@ -77,3 +77,11 @@ is( $f2->(), 2, 'generator 2 once more' );
     ::is( foo(), 20, "increments correctly, twice" );
     ::is( $fetchcount, 1, "fetch only called once" );
 }
+
+sub stateless {
+    # stateless assignment
+    (state $reinitme) = 42;
+    ++$reinitme;
+}
+is( stateless(), 43, 'stateless function, first time' );
+is( stateless(), 43, 'stateless function, second time' );
