@@ -886,7 +886,7 @@ Apd	|I32	|unpack_str	|NN const char *pat|NN const char *patend|NN const char *s 
 Apd	|I32	|unpackstring	|NN const char *pat|NN const char *patend|NN const char *s \
 				|NN const char *strend|U32 flags
 Ap	|void	|unsharepvn	|NULLOK const char* sv|I32 len|U32 hash
-p	|void	|unshare_hek	|NULLOK HEK* hek
+Ap	|void	|unshare_hek	|NULLOK HEK* hek
 #ifdef PERL_MAD
 p	|OP *	|utilize	|int aver|I32 floor|NULLOK OP* version \
 				|NN OP* idop|NULLOK OP* arg
