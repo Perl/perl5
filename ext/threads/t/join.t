@@ -7,40 +7,50 @@ BEGIN {
         unshift @INC, '../lib';
     }
     use Config;
-    unless ($Config{'useithreads'}) {
-        print "1..0 # Skip: no useithreads\n";
-        exit 0;
+    if (! $Config{'useithreads'}) {
+        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        exit(0);
     }
 }
 
 use ExtUtils::testlib;
 
-BEGIN { print "1..17\n" };
 use threads;
 use threads::shared;
 
-my $test_id = 1;
-share($test_id);
+BEGIN {
+    $| = 1;
+    print("1..17\n");   ### Number of tests that will be run ###
+};
+
+my $TEST = 1;
+share($TEST);
+
+ok(1, 'Loaded');
 
 sub ok {
     my ($ok, $name) = @_;
 
-    lock $test_id; # make print and increment atomic
+    lock($TEST);
+    my $id = $TEST++;
 
     # You have to do it this way or VMS will get confused.
-    print $ok ? "ok $test_id - $name\n" : "not ok $test_id - $name\n";
+    if ($ok) {
+        print("ok $id - $name\n");
+    } else {
+        print("not ok $id - $name\n");
+        printf("# Failed test at line %d\n", (caller)[2]);
+    }
 
-    printf "# Failed test at line %d\n", (caller)[2] unless $ok;
-    $test_id++;
-    return $ok;
+    return ($ok);
 }
 
 sub skip {
-    ok(1, "# Skipped: @_");
+    ok(1, '# Skipped: ' . $_[0]);
 }
 
-ok(1,"");
 
+### Start of Testing ###
 
 {
     my $retval = threads->create(sub { return ("hi") })->join();
@@ -61,14 +71,12 @@ ok(1,"");
 }
 {
     my $retval = threads->create( sub {
-	open(my $fh, "+>threadtest") || die $!;
-	print $fh "test\n";
-	return $fh;
+        open(my $fh, "+>threadtest") || die $!;
+        print $fh "test\n";
+        return $fh;
     })->join();
     ok(ref($retval) eq 'GLOB', "Check that we can return FH $retval");
     print $retval "test2\n";
-#    seek($retval,0,0);
-#    ok(<$retval> eq "test\n");
     close($retval);
     unlink("threadtest");
 }
@@ -89,48 +97,48 @@ ok(1,"");
     my %foo;
     share(%foo);
     threads->create(sub { 
-	my $foo;
-	share($foo);
-	$foo = "thread1";
-	return $foo{bar} = \$foo;
+        my $foo;
+        share($foo);
+        $foo = "thread1";
+        return $foo{bar} = \$foo;
     })->join();
     ok(1,"");
 }
 
 # We parse ps output so this is OS-dependent.
 if ($^O eq 'linux') {
-  # First modify $0 in a subthread.
-  print "# mainthread: \$0 = $0\n";
-  threads->create( sub {
-		  print "# subthread: \$0 = $0\n";
-		  $0 = "foobar";
-		  print "# subthread: \$0 = $0\n" } )->join;
-  print "# mainthread: \$0 = $0\n";
-  print "# pid = $$\n";
-  if (open PS, "ps -f |") { # Note: must work in (all) systems.
-    my ($sawpid, $sawexe);
-    while (<PS>) {
-      chomp;
-      print "# [$_]\n";
-      if (/^\S+\s+$$\s/) {
-	$sawpid++;
-	if (/\sfoobar\s*$/) { # Linux 2.2 leaves extra trailing spaces.
-	  $sawexe++;
+    # First modify $0 in a subthread.
+    #print "# mainthread: \$0 = $0\n";
+    threads->create(sub{ #print "# subthread: \$0 = $0\n";
+                        $0 = "foobar";
+                        #print "# subthread: \$0 = $0\n"
+                 })->join;
+    #print "# mainthread: \$0 = $0\n";
+    #print "# pid = $$\n";
+    if (open PS, "ps -f |") { # Note: must work in (all) systems.
+        my ($sawpid, $sawexe);
+        while (<PS>) {
+            chomp;
+            #print "# [$_]\n";
+            if (/^\s*\S+\s+$$\s/) {
+                $sawpid++;
+                if (/\sfoobar\s*$/) { # Linux 2.2 leaves extra trailing spaces.
+                    $sawexe++;
+                }
+                last;
+            }
         }
-	last;
-      }
-    }
-    close PS or die;
-    if ($sawpid) {
-      ok($sawpid && $sawexe, 'altering $0 is effective');
+        close PS or die;
+        if ($sawpid) {
+            ok($sawpid && $sawexe, 'altering $0 is effective');
+        } else {
+            skip("\$0 check: did not see pid $$ in 'ps -f |'");
+        }
     } else {
-      skip("\$0 check: did not see pid $$ in 'ps -f |'");
+        skip("\$0 check: opening 'ps -f |' failed: $!");
     }
-  } else {
-    skip("\$0 check: opening 'ps -f |' failed: $!");
-  }
 } else {
-  skip("\$0 check: only on Linux");
+    skip("\$0 check: only on Linux");
 }
 
 {
@@ -154,11 +162,12 @@ if ($^O eq 'linux') {
 }
 
 {
-    # The "use IO::File" is not actually used for anything; its only
-    # purpose is to incite a lot of calls to newCONSTSUB.  See the p5p
-    # archives for the thread "maint@20974 or before broke mp2 ithreads test".
+    # The "use IO::File" is not actually used for anything; its only purpose
+    # is incite a lot of calls to newCONSTSUB.  See the p5p archives for
+    # the thread "maint@20974 or before broke mp2 ithreads test".
     use IO::File;
-    # this coredumped between #20930 and #21000
+    # This coredumped between #20930 and #21000
     $_->join for map threads->create(sub{ok($_, "stress newCONSTSUB")}), 1..2;
 }
 
+# EOF

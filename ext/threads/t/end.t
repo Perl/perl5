@@ -1,49 +1,67 @@
 use strict;
 use warnings;
 
-# test that END blocks are run in the thread that created them and
-# not in any child threads
-
 BEGIN {
     if ($ENV{'PERL_CORE'}){
         chdir 't';
         unshift @INC, '../lib';
     }
     use Config;
-    unless ($Config{'useithreads'}) {
-        print "1..0 # Skip: no useithreads\n";
-        exit 0;
+    if (! $Config{'useithreads'}) {
+        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        exit(0);
     }
 }
 
 use ExtUtils::testlib;
 
-BEGIN { print "1..6\n" };
 use threads;
 use threads::shared;
 
-my $test_id = 1;
-share($test_id);
+BEGIN {
+    $| = 1;
+    print("1..6\n");   ### Number of tests that will be run ###
+};
+
+my $TEST = 1;
+share($TEST);
+
+ok(1, 'Loaded');
 
 sub ok {
     my ($ok, $name) = @_;
 
-    lock($test_id);
+    lock($TEST);
+    my $id = $TEST++;
 
     # You have to do it this way or VMS will get confused.
-    print $ok ? "ok $test_id - $name\n" : "not ok $test_id - $name\n";
+    if ($ok) {
+        print("ok $id - $name\n");
+    } else {
+        print("not ok $id - $name\n");
+        printf("# Failed test at line %d\n", (caller)[2]);
+    }
 
-    printf "# Failed test at line %d\n", (caller)[2] unless $ok;
-    $test_id++;
-    return $ok;
+    return ($ok);
 }
-ok(1,'Loaded');
-END { ok(1,"End block run once") }
-threads->create(sub { eval "END { ok(1,'') }"})->join();
-threads->create(sub { eval "END { ok(1,'') }"})->join();
-threads->create(\&thread)->join();
+
+
+### Start of Testing ###
+
+# Test that END blocks are run in the thread that created them,
+# and not in any child threads.
+
+END {
+    ok(1, 'Main END block')
+}
+
+threads->create(sub { eval "END { ok(1, '1st thread END block') }"})->join();
+threads->create(sub { eval "END { ok(1, '2nd thread END block') }"})->join();
 
 sub thread {
-	eval "END { ok(1,'') }";
-	threads->create(sub { eval "END { ok(1,'') }"})->join();
+    eval "END { ok(1, '4th thread END block') }";
+    threads->create(sub { eval "END { ok(1, '5th thread END block') }"})->join();
 }
+threads->create(\&thread)->join();
+
+# EOF

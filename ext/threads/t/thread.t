@@ -7,9 +7,9 @@ BEGIN {
         unshift @INC, '../lib';
     }
     use Config;
-    unless ($Config{'useithreads'}) {
-        print "1..0 # Skip: no useithreads\n";
-        exit 0;
+    if (! $Config{'useithreads'}) {
+        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        exit(0);
     }
 
     require($ENV{PERL_CORE} ? "./test.pl" : "./t/test.pl");
@@ -17,11 +17,16 @@ BEGIN {
 
 use ExtUtils::testlib;
 
-BEGIN { $| = 1; print "1..31\n" };
+BEGIN {
+    $| = 1;
+    print("1..31\n");   ### Number of tests that will be run ###
+};
+
 use threads;
 use threads::shared;
+print("ok 1 - Loaded\n");
 
-print "ok 1\n";
+### Start of Testing ###
 
 sub content {
     print shift;
@@ -35,9 +40,9 @@ sub content {
     my $lock : shared;
     my $t;
     {
-	lock($lock);
-	$t = threads->create(sub { lock($lock); print "ok 5\n"});
-	print "ok 4\n";
+        lock($lock);
+        $t = threads->create(sub { lock($lock); print "ok 5\n"});
+        print "ok 4\n";
     }
     $t->join();
 }
@@ -47,8 +52,8 @@ sub dorecurse {
     my $ret;
     print $val;
     if(@_) {
-	$ret = threads->create(\&dorecurse, @_);
-	$ret->join;
+        $ret = threads->create(\&dorecurse, @_);
+        $ret->join;
     }
 }
 {
@@ -67,14 +72,14 @@ sub dorecurse {
 {
     my $lock : shared;
     sub islocked {
-	lock($lock);
-	my $val = shift;
-	my $ret;
-	print $val;
-	if (@_) {
-	    $ret = threads->create(\&islocked, shift);
-	}
-	return $ret;
+        lock($lock);
+        my $val = shift;
+        my $ret;
+        print $val;
+        if (@_) {
+            $ret = threads->create(\&islocked, shift);
+        }
+        return $ret;
     }
 my $t = threads->create(\&islocked, "ok 13\n", "ok 14\n");
 $t->join->join;
@@ -147,7 +152,7 @@ package main;
 }
 {
     # there is a little chance this test case will falsly fail
-    # since it tests rand	
+    # since it tests rand       
     my %rand : shared;
     rand(10);
     threads->create( sub { $rand{int(rand(10000000000))}++ } ) foreach 1..25;
@@ -222,56 +227,56 @@ if ($] >= 5.008007) {
     package main;
 
     {
-	my @objs;
-	for my $class (qw(A A1 A2 B B1 B2 C C1 C2 D D1)) {
-	    push @objs, bless [], $class;
-	}
+        my @objs;
+        for my $class (qw(A A1 A2 B B1 B2 C C1 C2 D D1)) {
+            push @objs, bless [], $class;
+        }
 
-	sub f {
-	    my $depth = shift;
-	    my $cloned = ""; # XXX due to recursion, doesn't get initialized
-	    $cloned .= "$_" =~ /ARRAY/ ? '1' : '0' for @objs;
-	    is($cloned, ($depth ? '00010001111' : '11111111111'),
-		"objs clone skip at depth $depth");
-	    threads->create( \&f, $depth+1)->join if $depth < 2;
-	    @objs = ();
-	}
-	f(0);
+        sub f {
+            my $depth = shift;
+            my $cloned = ""; # XXX due to recursion, doesn't get initialized
+            $cloned .= "$_" =~ /ARRAY/ ? '1' : '0' for @objs;
+            is($cloned, ($depth ? '00010001111' : '11111111111'),
+                "objs clone skip at depth $depth");
+            threads->create( \&f, $depth+1)->join if $depth < 2;
+            @objs = ();
+        }
+        f(0);
     }
 
     curr_test(curr_test()+2);
     ok(eq_hash(\%c,
-	{
-	    qw(
-		A-A	2
-		A1-A1	2
-		A1-A2	2
-		B-B	2
-		B1-B1	2
-		B1-B2	2
-		C-C	2
-		C1-C1	2
-		C1-C2	2
-	    )
-	}),
-	"counts of calls to CLONE_SKIP");
+        {
+            qw(
+                A-A     2
+                A1-A1   2
+                A1-A2   2
+                B-B     2
+                B1-B1   2
+                B1-B2   2
+                C-C     2
+                C1-C1   2
+                C1-C2   2
+            )
+        }),
+        "counts of calls to CLONE_SKIP");
     ok(eq_hash(\%d,
-	{
-	    qw(
-		A-A	1
-		A1-A1	1
-		A1-A2	1
-		B-B	3
-		B1-B1	1
-		B1-B2	1
-		C-C	1
-		C1-C1	3
-		C1-C2	3
-		D-D	3
-		D-D1	3
-	    )
-	}),
-	"counts of calls to DESTROY");
+        {
+            qw(
+                A-A     1
+                A1-A1   1
+                A1-A2   1
+                B-B     3
+                B1-B1   1
+                B1-B2   1
+                C-C     1
+                C1-C1   3
+                C1-C2   3
+                D-D     3
+                D-D1    3
+            )
+        }),
+        "counts of calls to DESTROY");
 
 } else {
     print("ok 27 # Skip objs clone skip at depth 0\n");

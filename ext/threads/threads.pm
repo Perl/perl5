@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.24_01';
+our $VERSION = '1.24_02';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -29,6 +29,7 @@ before threads::shared or any module that uses it.
 _MSG_
    }
 }
+
 
 # Load the XS code
 require XSLoader;
@@ -136,26 +137,25 @@ This document describes threads version 1.24
 
 =head1 DESCRIPTION
 
-Perl 5.6 introduced something called interpreter threads.  Interpreter
-threads are different from "5005threads" (the thread model of Perl
-5.005) by creating a new perl interpreter per thread and not sharing
-any data or state between threads by default.
+Perl 5.6 introduced something called interpreter threads.  Interpreter threads
+are different from I<5005threads> (the thread model of Perl 5.005) by creating
+a new Perl interpreter per thread, and not sharing any data or state between
+threads by default.
 
-Prior to perl 5.8 this has only been available to people embedding
-perl and for emulating fork() on windows.
+Prior to Perl 5.8, this has only been available to people embedding Perl, and
+for emulating fork() on Windows.
 
-The threads API is loosely based on the old Thread.pm API. It is very
-important to note that variables are not shared between threads, all
-variables are per default thread local.  To use shared variables one
-must use threads::shared.
+The I<threads> API is loosely based on the old Thread.pm API. It is very
+important to note that variables are not shared between threads, all variables
+are by default thread local.  To use shared variables one must use
+L<threads::shared>.
 
-It is also important to note that you must enable threads by doing
-C<use threads> as early as possible in the script itself and that it
-is not possible to enable threading inside an C<eval "">, C<do>,
-C<require>, or C<use>.  In particular, if you are intending to share
-variables with threads::shared, you must C<use threads> before you
-C<use threads::shared> and C<threads> will emit a warning if you do
-it the other way around.
+It is also important to note that you must enable threads by doing C<use
+threads> as early as possible in the script itself, and that it is not
+possible to enable threading inside an C<eval "">, C<do>, C<require>, or
+C<use>.  In particular, if you are intending to share variables with
+L<threads::shared>, you must C<use threads> before you C<use threads::shared>.
+(C<threads> will emit a warning if you do it the other way around.)
 
 =over
 
@@ -320,10 +320,10 @@ Class method that allows a thread to obtain its own I<handle>.
 
 =item A thread exited while # other threads were still running
 
-A thread (not necessarily the main thread) exited while there were
-still other threads running.  Usually it's a good idea to first collect
-the return values of the created threads by joining them, and only then
-exit from the main thread.
+A thread (not necessarily the main thread) exited while there were still other
+threads running.  Usually, it's a good idea to first collect the return values
+of the created threads by joining them, and only then exit from the main
+thread.
 
 =back
 
@@ -354,16 +354,15 @@ there are still existing I<child> threads.
 
 =item Creating threads inside BEGIN blocks
 
-Creating threads inside BEGIN blocks (or during the compilation phase
-in general) does not work.  (In Windows, trying to use fork() inside
-BEGIN blocks is an equally losing proposition, since it has been
-implemented in very much the same way as threads.)
+Creating threads inside BEGIN blocks (or during the compilation phase in
+general) does not work.  (In Windows, trying to use fork() inside BEGIN blocks
+is an equally losing proposition, since it has been implemented in very much
+the same way as threads.)
 
 =item PERL_OLD_SIGNALS are not threadsafe, will not be.
 
-If your Perl has been built with PERL_OLD_SIGNALS (one has
-to explicitly add that symbol to ccflags, see C<perl -V>),
-signal handling is not threadsafe.
+If your Perl has been built with PERL_OLD_SIGNALS (one has to explicitly add
+that symbol to I<ccflags>, see C<perl -V>), signal handling is not threadsafe.
 
 =item Returning closures from threads
 

@@ -7,9 +7,9 @@ BEGIN {
         unshift @INC, '../lib';
     }
     use Config;
-    unless ($Config{'useithreads'}) {
-        print "1..0 # Skip: no useithreads\n";
-        exit 0;
+    if (! $Config{'useithreads'}) {
+        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        exit(0);
     }
 }
 
@@ -29,45 +29,55 @@ sub ok {
     return ($ok);
 }
 
-BEGIN { $| = 1; print "1..12\n"};
+BEGIN {
+    $| = 1;
+    print("1..12\n");   ### Number of tests that will be run ###
+};
 
 use threads;
 use threads::shared;
 ok(1, 1, 'Loaded');
 
+### Start of Testing ###
+
 my $i = 10;
 my $y = 20000;
+
 my %localtime;
-for(0..$i) {
-	$localtime{$_} = localtime($_);
+for (0..$i) {
+    $localtime{$_} = localtime($_);
 };
+
 my $mutex = 2;
 share($mutex);
+
 sub localtime_r {
-  lock($mutex);
-  my $retval = localtime(shift());
-  return $retval;
+    lock($mutex);
+    my $retval = localtime(shift());
+    return $retval;
 }
+
 my @threads;
-for(0..$i) {
-  my $thread = threads->create(sub {
-				 my $arg = $_;
-		    my $localtime = $localtime{$arg};
-		    my $error = 0;
-		    for(0..$y) {
-		      my $lt = localtime($arg);
-		      if($localtime ne $lt) {
-			$error++;
-		      }	
-		    }
-				 lock($mutex);
-                                 ok($mutex, ! $error, 'localtime safe');
-				 $mutex++;
-		  });	
-  push @threads, $thread;
+for (0..$i) {
+    my $thread = threads->create(sub {
+                    my $arg = $_;
+                    my $localtime = $localtime{$arg};
+                    my $error = 0;
+                    for (0..$y) {
+                        my $lt = localtime($arg);
+                        if($localtime ne $lt) {
+                            $error++;
+                        }
+                    }
+                    lock($mutex);
+                    ok($mutex, ! $error, 'localtime safe');
+                    $mutex++;
+                  });
+    push @threads, $thread;
 }
 
-for(@threads) {
-  $_->join();
+for (@threads) {
+    $_->join();
 }
 
+# EOF

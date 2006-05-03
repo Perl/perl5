@@ -7,35 +7,35 @@ BEGIN {
         unshift @INC, '../lib';
     }
     use Config;
-    unless ($Config{'useithreads'}) {
-        print "1..0 # Skip: no useithreads\n";
-        exit 0;
+    if (! $Config{'useithreads'}) {
+        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        exit(0);
     }
 }
 
 use ExtUtils::testlib;
 
-
-
-BEGIN { $| = 1; print "1..15\n" };
-use threads;
-
-
-
-print "ok 1\n";
-
-
-#########################
-sub ok {	
+sub ok {
     my ($id, $ok, $name) = @_;
 
     # You have to do it this way or VMS will get confused.
-    print $ok ? "ok $id - $name\n" : "not ok $id - $name\n";
+    if ($ok) {
+        print("ok $id - $name\n");
+    } else {
+        print("not ok $id - $name\n");
+        printf("# Failed test at line %d\n", (caller)[2]);
+    }
 
-    printf "# Failed test at line %d\n", (caller)[2] unless $ok;
-
-    return $ok;
+    return ($ok);
 }
+
+BEGIN {
+    $| = 1;
+    print("1..15\n");   ### Number of tests that will be run ###
+};
+
+use threads;
+ok(1, 1, 'Loaded');
 
 ### Start of Testing ###
 
