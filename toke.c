@@ -8144,7 +8144,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
                   if (name[3] == 't' &&
                       name[4] == 'e')
                   {                               /* state      */
-                    return KEY_state;
+                    return (FEATURE_IS_ENABLED("state") ? KEY_state : 0);
                   }
 
                   goto unknown;

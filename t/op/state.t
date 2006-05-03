@@ -7,6 +7,7 @@ BEGIN {
 }
 
 use strict;
+use feature "state";
 
 plan tests => 19;
 

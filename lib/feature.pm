@@ -1,6 +1,6 @@
 package feature;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 
 # (feature name) => (internal name, used in %^H)
 my %feature = (
@@ -8,10 +8,11 @@ my %feature = (
     "~~"   => "feature_~~",
     say    => "feature_say",
     err    => "feature_err",
+    state  => "feature_state",
 );
 
 my %feature_bundle = (
-    "5.10" => [qw(switch ~~ say err)],
+    "5.10" => [qw(switch ~~ say err state)],
 );
 
 
@@ -81,13 +82,18 @@ operator from here to the end of the enclosing BLOCK.
 C<err> is a low-precedence variant of the C<//> operator:
 see C<perlop> for details.
 
+=head2 the 'state' feature
+
+C<use feature 'state'> tells the compiler to enable C<state>
+variables from here to the end of the enclosing BLOCK.
+
 =head1 FEATURE BUNDLES
 
 It's possible to load a whole slew of features in one go, using
 a I<feature bundle>. The name of a feature bundle is prefixed with
 a colon, to distinguish it from an actual feature. At present, the
 only feature bundle is C<use feature ":5.10">, which is equivalent
-to C<use feature qw(switch ~~ say err)>.
+to C<use feature qw(switch ~~ say err state)>.
 
 =cut
 
