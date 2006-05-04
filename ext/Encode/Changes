@@ -1,9 +1,18 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.15 2006/04/06 15:44:11 dankogai Exp dankogai $
+# $Id: Changes,v 2.16 2006/05/03 18:24:10 dankogai Exp $
 #
+$Revision: 2.16 $ $Date: 2006/05/03 18:24:10 $
+! bin/piconv
+  --xmlcref and --htmlcref added.
+! Encode.pm
+  Copyright Notice Added.
+  http://rt.cpan.org/NoAuth/Bug.html?id=#19056  
+! *
+  Replaced remaining ^\t with q( ) x 4. -- Perl Best Practice pp. 20
+  And all .pm's are now perltidy-ed.
 
-$Revision: 2.15 $ $Date: 2006/04/06 15:44:11 $
+2.15 2006/04/06 15:44:11
 ! Unicode/Unicode.xs
   Addressed: UTF-16, UTF-32, UCS, UTF-7 decoders mishandle illegal characters
   http://rt.cpan.org/NoAuth/Bug.html?id=#18556

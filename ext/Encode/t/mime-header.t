@@ -1,5 +1,5 @@
 #
-# $Id: mime-header.t,v 2.1 2006/01/15 15:06:36 dankogai Exp $
+# $Id: mime-header.t,v 2.2 2006/05/03 18:24:10 dankogai Exp $
 # This script is written in utf8
 #
 BEGIN {
@@ -13,8 +13,8 @@ BEGIN {
       exit 0;
     }
     if (ord("A") == 193) {
-	print "1..0 # Skip: EBCDIC\n";
-	exit 0;
+    print "1..0 # Skip: EBCDIC\n";
+    exit 0;
     }
     $| = 1;
 }

@@ -9,8 +9,8 @@ BEGIN {
       exit 0;
     }
     if (ord("A") == 193) {
-	print "1..0 # Skip: EBCDIC\n";
-	exit 0;
+    print "1..0 # Skip: EBCDIC\n";
+    exit 0;
     }
     $| = 1;
 }

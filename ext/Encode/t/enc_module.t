@@ -1,4 +1,4 @@
-# $Id: enc_module.t,v 2.0 2004/05/16 20:55:18 dankogai Exp $
+# $Id: enc_module.t,v 2.1 2006/05/03 18:24:10 dankogai Exp $
 # This file is in euc-jp
 BEGIN {
     require Config; import Config;
@@ -7,16 +7,16 @@ BEGIN {
       exit 0;
     }
     unless (find PerlIO::Layer 'perlio') {
-	print "1..0 # Skip: PerlIO was not built\n";
-	exit 0;
+    print "1..0 # Skip: PerlIO was not built\n";
+    exit 0;
     }
     if (defined ${^UNICODE} and ${^UNICODE} != 0){
-	print "1..0 # Skip: \${^UNICODE} == ${^UNICODE}\n";
-	exit 0;
+    print "1..0 # Skip: \${^UNICODE} == ${^UNICODE}\n";
+    exit 0;
     }
     if (ord("A") == 193) {
-	print "1..0 # encoding pragma does not support EBCDIC platforms\n";
-	exit(0);
+    print "1..0 # encoding pragma does not support EBCDIC platforms\n";
+    exit(0);
     }
 }
 use lib qw(t ext/Encode/t ../ext/Encode/t); # latter 2 for perl core
