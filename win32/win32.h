@@ -572,7 +572,7 @@ EXTERN_C _CRTIMP ioinfo* __pioinfo[];
 DllExport void *win32_signal_context(void);
 #define PERL_GET_SIG_CONTEXT win32_signal_context()
 
-#ifdef _WIN_CE
+#ifdef UNDER_CE
 #define Win_GetModuleHandle   XCEGetModuleHandleA
 #define Win_GetProcAddress    XCEGetProcAddressA
 #define Win_GetModuleFileName XCEGetModuleFileNameA
