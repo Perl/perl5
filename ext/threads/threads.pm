@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.24_02';
+our $VERSION = '1.25';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -47,7 +47,10 @@ sub import
 
     # Handle args
     while (my $sym = shift) {
-        if ($sym =~ /all/) {
+        if ($sym =~ /^stack/) {
+            threads->set_stack_size(shift);
+
+        } elsif ($sym =~ /all/) {
             push(@EXPORT, qw(yield));
 
         } else {
@@ -60,6 +63,11 @@ sub import
     foreach my $sym (@EXPORT) {
         no strict 'refs';
         *{$caller.'::'.$sym} = \&{$sym};
+    }
+
+    # Set stack size via environment variable
+    if (exists($ENV{'PERL5_ITHREADS_STACK_SIZE'})) {
+        threads->set_stack_size($ENV{'PERL5_ITHREADS_STACK_SIZE'});
     }
 }
 
@@ -94,11 +102,11 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.24
+This document describes threads version 1.25
 
 =head1 SYNOPSIS
 
-    use threads ('yield');
+    use threads ('yield', 'stack_size' => 64*4096);
 
     sub start_thread {
         my @args = @_;
@@ -134,6 +142,9 @@ This document describes threads version 1.24
     if ($thr1 == $thr2) {
         ...
     }
+
+    $stack_size = threads->get_stack_size();
+    $old_size = threads->set_stack_size(32*4096);
 
 =head1 DESCRIPTION
 
@@ -314,6 +325,86 @@ Class method that allows a thread to obtain its own I<handle>.
 
 =back
 
+=head1 THREAD STACK SIZE
+
+The default per-thread stack size for different platforms varies
+significantly, and is almost always far more than is needed for most
+applications.  On Win32, Perl's makefile explicitly sets the default stack to
+16 MB; on most other platforms, the system default is used, which again may be
+much larger than is needed.
+
+By tuning the stack size to more accurately reflect your application's needs,
+you may significantly reduce your application's memory usage, and increase the
+number of simultaneously running threads.
+
+N.B., on Windows, Address space allocation granularity is 64 KB, therefore,
+setting the stack smaller than that on Win32 Perl will not save any more
+memory.
+
+=over
+
+=item threads->get_stack_size();
+
+Returns the current default per-thread stack size.  The default is zero, which
+means the system default stack size is currently in use.
+
+=item $size = $thr->get_stack_size();
+
+Returns the stack size for a particular thread.  A return value of zero
+indicates the system default stack size was used for the thread.
+
+=item $old_size = threads->set_stack_size($new_size);
+
+Sets a new default per-thread stack size, and returns the previous setting.
+
+Some platforms have a minimum thread stack size.  Trying to set the stack size
+below this value will result in a warning, and the minimum stack size will be
+used.
+
+Some Linux platforms have a maximum stack size.  Setting too large of a stack
+size will cause thread creation to fail.
+
+If needed, C<$new_size> will be rounded up to the next multiple of the memory
+page size (usually 4096 or 8192).
+
+Threads created after the stack size is set will then either call
+C<pthread_attr_setstacksize()> I<(for pthreads platforms)>, or supply the
+stack size to C<CreateThread()> I<(for Win32 Perl)>.
+
+(Obviously, this call does not affect any currently extant threads.)
+
+=item use threads ('stack_size' => VALUE);
+
+This sets the default per-thread stack size at the start of the application.
+
+=item $ENV{'PERL5_ITHREADS_STACK_SIZE'}
+
+The default per-thread stack size may be set at the start of the application
+through the use of the environment variable C<PERL5_ITHREADS_STACK_SIZE>:
+
+    PERL5_ITHREADS_STACK_SIZE=1048576
+    export PERL5_ITHREADS_STACK_SIZE
+    perl -e'use threads; print(threads->get_stack_size(), "\n")'
+
+This value overrides any C<stack_size> parameter given to C<use threads>.  Its
+primary purpose is to permit setting the per-thread stack size for legacy
+threaded applications.
+
+=item threads->create({'stack_size' => VALUE}, FUNCTION, ARGS)
+
+This change to the thread creation method permits specifying the stack size
+for an individual thread.
+
+=item $thr2 = $thr1->create(FUNCTION, ARGS)
+
+This creates a new thread (C<$thr2>) that inherits the stack size from an
+existing thread (C<$thr1>).  This is shorthand for the following:
+
+    my $stack_size = $thr1->get_stack_size();
+    my $thr2 = threads->create({'stack_size' => $stack_size}, FUNCTION, ARGS);
+
+=back
+
 =head1 WARNINGS
 
 =over 4
@@ -324,6 +415,12 @@ A thread (not necessarily the main thread) exited while there were still other
 threads running.  Usually, it's a good idea to first collect the return values
 of the created threads by joining them, and only then exit from the main
 thread.
+
+=item Using minimum thread stack size of #
+
+Some platforms have a minimum thread stack size.  Trying to set the stack size
+below this value will result in the above warning, and the stack size will be
+set to the minimum.
 
 =back
 
@@ -340,6 +437,18 @@ Having threads support requires all of Perl and all of the XS modules in the
 Perl installation to be rebuilt; it is not just a question of adding the
 L<threads> module (i.e., threaded and non-threaded Perls are binary
 incompatible.)
+
+=item Cannot change stack size of an existing thread
+
+The stack size of currently extant threads cannot be changed, therefore, the
+following results in the above error:
+
+    $thr->set_stack_size($size);
+
+=item Thread creation failed: pthread_attr_setstacksize(I<SIZE>) returned 22
+
+The specified I<SIZE> exceeds the system's maximum stack size.  Use a smaller
+value for the stack size.
 
 =back
 
@@ -393,7 +502,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.24/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.25/shared.pm>
 
 L<threads::shared>, L<perlthrtut>
 
@@ -402,6 +511,9 @@ L<http://www.perl.com/pub/a/2002/09/04/threads.html>
 
 Perl threads mailing list:
 L<http://lists.cpan.org/showlist.cgi?name=iThreads>
+
+Stack size discussion:
+L<http://www.perlmonks.org/?node_id=532956>
 
 =head1 AUTHOR
 
@@ -423,5 +535,8 @@ Rocco Caputo E<lt>troc AT netrus DOT netE<gt>
 
 Vipul Ved Prakash E<lt>mail AT vipul DOT netE<gt> -
 Helping with debugging
+
+Dean Arnold E<lt>darnold AT presicient DOT comE<gt> -
+Stack size API
 
 =cut

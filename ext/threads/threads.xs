@@ -13,6 +13,10 @@
 
 #ifdef WIN32
 #  include <windows.h>
+   /* Supposed to be in Winbase.h */
+#  ifndef STACK_SIZE_PARAM_IS_A_RESERVATION
+#    define STACK_SIZE_PARAM_IS_A_RESERVATION 0x00010000
+#  endif
 #  include <win32thread.h>
 #else
 #  ifdef OS2
@@ -52,6 +56,7 @@ typedef struct _ithread {
 #else
     pthread_t thr;              /* OS's handle for the thread */
 #endif
+    IV stack_size;
 } ithread;
 
 
@@ -73,6 +78,12 @@ static perl_mutex create_destruct_mutex;
 
 static UV tid_counter = 0;
 static IV active_threads = 0;
+#ifdef THREAD_CREATE_NEEDS_STACK
+static IV default_stack_size = THREAD_CREATE_NEEDS_STACK;
+#else
+static IV default_stack_size = 0;
+#endif
+static IV page_size = 0;
 
 
 /* Used by Perl interpreter for thread context switching */
@@ -239,6 +250,68 @@ MGVTBL ithread_vtbl = {
 };
 
 
+/* Provided default, minimum and rational stack sizes */
+static IV
+good_stack_size(pTHX_ IV stack_size)
+{
+    /* Use default stack size if no stack size specified */
+    if (! stack_size)
+        return (default_stack_size);
+
+#ifdef PTHREAD_STACK_MIN
+    /* Can't use less than minimum */
+    if (stack_size < PTHREAD_STACK_MIN) {
+        if (ckWARN_d(WARN_THREADS)) {
+            Perl_warn(aTHX_ "Using minimum thread stack size of %" IVdf, (IV)PTHREAD_STACK_MIN);
+        }
+        return (PTHREAD_STACK_MIN);
+    }
+#endif
+
+    /* Round up to page size boundary */
+    if (page_size <= 0) {
+#ifdef PL_mmap_page_size
+        page_size = PL_mmap_page_size;
+#else
+#  ifdef HAS_MMAP
+#    if defined(HAS_SYSCONF) && (defined(_SC_PAGESIZE) || defined(_SC_MMAP_PAGE_SIZE))
+        SETERRNO(0, SS_NORMAL);
+#      ifdef _SC_PAGESIZE
+        page_size = sysconf(_SC_PAGESIZE);
+#      else
+        page_size = sysconf(_SC_MMAP_PAGE_SIZE);
+#      endif
+        if ((long)page_size < 0) {
+            if (errno) {
+                SV * const error = get_sv("@", FALSE);
+                (void)SvUPGRADE(error, SVt_PV);
+                Perl_croak(aTHX_ "PANIC: sysconf: %s", SvPV_nolen(error));
+            } else {
+                Perl_croak(aTHX_ "PANIC: sysconf: pagesize unknown");
+            }
+        }
+#    else
+#      ifdef HAS_GETPAGESIZE
+        page_size = getpagesize();
+#      else
+#        if defined(I_SYS_PARAM) && defined(PAGESIZE)
+        page_size = PAGESIZE;
+#        endif
+#      endif
+        if (page_size <= 0)
+            Perl_croak(aTHX_ "PANIC: bad pagesize %" IVdf, (IV)page_size);
+#    endif
+#  else
+        page_size = 8192;   /* A conservative default */
+#  endif
+#endif
+    }
+    stack_size = ((stack_size + (page_size - 1)) / page_size) * page_size;
+
+    return (stack_size);
+}
+
+
 /* Starts executing the thread.
  * Passed as the C level function to run in the new thread.
  */
@@ -379,6 +452,7 @@ S_ithread_create(
         pTHX_ SV *obj,
         char     *classname,
         SV       *init_function,
+        IV        stack_size,
         SV       *params)
 {
     ithread     *thread;
@@ -416,6 +490,7 @@ S_ithread_create(
 
     MUTEX_INIT(&thread->mutex);
     thread->tid = tid_counter++;
+    thread->stack_size = good_stack_size(aTHX_ stack_size);
     thread->gimme = GIMME_V;
 
     /* "Clone" our interpreter into the thread's interpreter.
@@ -491,10 +566,10 @@ S_ithread_create(
     /* Create/start the thread */
 #ifdef WIN32
     thread->handle = CreateThread(NULL,
-                                  (DWORD)0,
+                                  (DWORD)thread->stack_size,
                                   S_ithread_run,
                                   (LPVOID)thread,
-                                  0,
+                                  STACK_SIZE_PARAM_IS_A_RESERVATION,
                                   &thread->thr);
 #else
     {
@@ -511,9 +586,11 @@ S_ithread_create(
         PTHREAD_ATTR_SETDETACHSTATE(&attr, attr_joinable);
 #  endif
 
-#  ifdef THREAD_CREATE_NEEDS_STACK
+#  ifdef _POSIX_THREAD_ATTR_STACKSIZE
         /* Set thread's stack size */
-        rc_stack_size = pthread_attr_setstacksize(&attr, THREAD_CREATE_NEEDS_STACK);
+        if (thread->stack_size > 0) {
+            rc_stack_size = pthread_attr_setstacksize(&attr, (size_t)thread->stack_size);
+        }
 #  endif
 
         /* Create the thread */
@@ -533,6 +610,18 @@ S_ithread_create(
                                               (void *)thread);
 #  endif
         }
+
+#  ifdef _POSIX_THREAD_ATTR_STACKSIZE
+        /* Try to get thread's actual stack size */
+        {
+            size_t stacksize;
+            if (! pthread_attr_getstacksize(&attr, &stacksize)) {
+                if (stacksize) {
+                    thread->stack_size = (IV)stacksize;
+                }
+            }
+        }
+#  endif
     }
 #endif
 
@@ -546,14 +635,12 @@ S_ithread_create(
         sv_2mortal(params);
         S_ithread_destruct(aTHX_ thread);
 #ifndef WIN32
-            if (ckWARN_d(WARN_THREADS)) {
-#  ifdef THREAD_CREATE_NEEDS_STACK
-                if (rc_stack_size)
-                    Perl_warn(aTHX_ "Thread creation failed: pthread_attr_setstacksize(%" IVdf ") returned %d", (IV)THREAD_CREATE_NEEDS_STACK, rc_stack_size);
-                else
-#  endif
-                    Perl_warn(aTHX_ "Thread creation failed: pthread_create returned %d", rc_thread_create);
-            }
+        if (ckWARN_d(WARN_THREADS)) {
+            if (rc_stack_size)
+                Perl_warn(aTHX_ "Thread creation failed: pthread_attr_setstacksize(%" IVdf ") returned %d", thread->stack_size, rc_stack_size);
+            else
+                Perl_warn(aTHX_ "Thread creation failed: pthread_create returned %d", rc_thread_create);
+        }
 #endif
         return (&PL_sv_undef);
     }
@@ -578,29 +665,64 @@ void
 ithread_create(...)
     PREINIT:
         char *classname;
+        ithread *thread;
         SV *function_to_call;
         AV *params;
+        HV *specs;
+        IV stack_size;
+        int idx;
         int ii;
     CODE:
-        if (items < 2)
-            Perl_croak(aTHX_ "Usage: threads->create(function, ...)");
+        if ((items >= 2) && SvROK(ST(1)) && SvTYPE(SvRV(ST(1)))==SVt_PVHV) {
+            if (--items < 2)
+                Perl_croak(aTHX_ "Usage: threads->create(\\%specs, function, ...)");
+            specs = (HV*)SvRV(ST(1));
+            idx = 1;
+        } else {
+            if (items < 2)
+                Perl_croak(aTHX_ "Usage: threads->create(function, ...)");
+            specs = NULL;
+            idx = 0;
+        }
 
-        classname = (char *)SvPV_nolen(ST(0));
-        function_to_call = ST(1);
+        if (sv_isobject(ST(0))) {
+            /* $thr->create() */
+            classname = HvNAME(SvSTASH(SvRV(ST(0))));
+            thread = INT2PTR(ithread *, SvIV(SvRV(ST(0))));
+            stack_size = thread->stack_size;
+        } else {
+            /* threads->create() */
+            classname = (char *)SvPV_nolen(ST(0));
+            stack_size = default_stack_size;
+        }
+
+        function_to_call = ST(idx+1);
+
+        if (specs) {
+            /* stack_size */
+            if (hv_exists(specs, "stack", 5)) {
+                stack_size = SvIV(*hv_fetch(specs, "stack", 5, 0));
+            } else if (hv_exists(specs, "stacksize", 9)) {
+                stack_size = SvIV(*hv_fetch(specs, "stacksize", 9, 0));
+            } else if (hv_exists(specs, "stack_size", 10)) {
+                stack_size = SvIV(*hv_fetch(specs, "stack_size", 10, 0));
+            }
+        }
 
         /* Function args */
         params = newAV();
         if (items > 2) {
-            for (ii=2; ii < items; ii++) {
-                av_push(params, SvREFCNT_inc(ST(ii)));
+            for (ii=2; ii < items ; ii++) {
+                av_push(params, SvREFCNT_inc(ST(idx+ii)));
             }
         }
 
         /* Create thread */
         ST(0) = sv_2mortal(S_ithread_create(aTHX_ Nullsv,
-                                               classname,
-                                               function_to_call,
-                                               newRV_noinc((SV*)params)));
+                                            classname,
+                                            function_to_call,
+                                            stack_size,
+                                            newRV_noinc((SV*)params)));
         /* XSRETURN(1); - implied */
 
 
@@ -882,6 +1004,39 @@ ithread__handle(...);
 #endif
         /* XSRETURN(1); - implied */
 
+
+void
+ithread_get_stack_size(...)
+    PREINIT:
+        IV stack_size;
+    CODE:
+        if (sv_isobject(ST(0))) {
+            /* $thr->get_stack_size() */
+            ithread *thread = INT2PTR(ithread *, SvIV(SvRV(ST(0))));
+            stack_size = thread->stack_size;
+        } else {
+            /* threads->get_stack_size() */
+            stack_size = default_stack_size;
+        }
+        XST_mIV(0, stack_size);
+        /* XSRETURN(1); - implied */
+
+
+void
+ithread_set_stack_size(...)
+    PREINIT:
+        IV old_size;
+    CODE:
+        if (items != 2)
+            Perl_croak(aTHX_ "Usage: threads->set_stack_size($size)");
+        if (sv_isobject(ST(0)))
+            Perl_croak(aTHX_ "Cannot change stack size of an existing thread");
+
+        old_size = default_stack_size;
+        default_stack_size = good_stack_size(aTHX_ SvIV(ST(1)));
+        XST_mIV(0, old_size);
+        /* XSRETURN(1); - implied */
+
 #endif /* USE_ITHREADS */
 
 
@@ -922,6 +1077,7 @@ BOOT:
 
     thread->interp = aTHX;
     thread->state = PERL_ITHR_DETACHED; /* Detached */
+    thread->stack_size = default_stack_size;
 #  ifdef WIN32
     thread->thr = GetCurrentThreadId();
 #  else

@@ -1,5 +1,9 @@
 Revision history for Perl extension threads.
 
+1.25 Thu May  4 12:34:02 EDT 2006
+	- Final sync with blead
+	- Lock counters in tests
+
 1.24 Mon Apr 24 10:29:11 EDT 2006
 	- assert() that thread 0 is never destructed
 	- Determinancy in free.t
