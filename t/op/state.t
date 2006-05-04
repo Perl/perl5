@@ -1,4 +1,5 @@
 #!./perl -w
+# tests state variables
 
 BEGIN {
     chdir 't' if -d 't';
@@ -9,9 +10,11 @@ BEGIN {
 use strict;
 use feature "state";
 
-plan tests => 25;
+plan tests => 26;
 
 ok( ! defined state $uninit, q(state vars are undef by default) );
+
+# basic functionality
 
 sub stateful {
     state $x;
@@ -35,6 +38,8 @@ is( $x, 2, 'incremented state var' );
 is( $y, 3, 'incremented state var' );
 is( $z, 2, 'reinitialized lexical' );
 
+# in a nested block
+
 sub nesting {
     state $foo = 10;
     my $t;
@@ -51,6 +56,8 @@ is( $y, 13, 'inner state var' );
 is( $x, 12, 'outer state var' );
 is( $y, 14, 'inner state var' );
 
+# in a closure
+
 sub generator {
     my $outer;
     # we use $outer to generate a closure
@@ -65,6 +72,7 @@ is( $f2->(), 1, 'generator 2' );
 is( $f1->(), 3, 'generator 1 again' );
 is( $f2->(), 2, 'generator 2 once more' );
 
+# with ties
 {
     package countfetches;
     our $fetchcount = 0;
@@ -78,8 +86,25 @@ is( $f2->(), 2, 'generator 2 once more' );
     ::is( $fetchcount, 1, "fetch only called once" );
 }
 
+# state variables are shared among closures
+
+sub gen_cashier {
+    my $amount = shift;
+    state $cash_in_store = 0;
+    return {
+	add => sub { $cash_in_store += $amount },
+	del => sub { $cash_in_store -= $amount },
+	bal => sub { $cash_in_store },
+    };
+}
+
+gen_cashier(59)->{add}->();
+gen_cashier(17)->{del}->();
+is( gen_cashier()->{bal}->(), 42, '$42 in my drawer' );
+
+# stateless assignment to a state variable
+
 sub stateless {
-    # stateless assignment
     (state $reinitme) = 42;
     ++$reinitme;
 }
