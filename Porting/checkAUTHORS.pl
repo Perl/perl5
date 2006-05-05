@@ -198,6 +198,7 @@ $map{"h.m.brand\100hccnet.nl"} = $map{"merijn\100l1.procura.nl"} = "merijn";
 $map{"nik\100tiuk.ti.com"} = $map{"nick.ing-simmons\100elixent.com"} = "nick";
 $map{"hv\100crypt.org"} = "hv";
 $map{"gisle\100aas.no"} = "gisle";
+$map{"gsar\100cpan.org"} = "gsar";
 
 if (@authors) {
   my %raw;
