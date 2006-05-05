@@ -10,7 +10,7 @@ BEGIN {
 use strict;
 use feature "state";
 
-plan tests => 26;
+plan tests => 30;
 
 ok( ! defined state $uninit, q(state vars are undef by default) );
 
@@ -110,3 +110,30 @@ sub stateless {
 }
 is( stateless(), 43, 'stateless function, first time' );
 is( stateless(), 43, 'stateless function, second time' );
+
+# array state vars
+
+sub stateful_array {
+    state @x;
+    push @x, 'x';
+    return $#x;
+}
+
+my $xsize = stateful_array();
+is( $xsize, 0, 'uninitialized state array' );
+
+$xsize = stateful_array();
+is( $xsize, 1, 'uninitialized state array after one iteration' );
+
+# hash state vars
+
+sub stateful_hash {
+    state %hx;
+    return $hx{foo}++;
+}
+
+my $xhval = stateful_hash();
+is( $xhval, 0, 'uninitialized state hash' );
+
+$xhval = stateful_hash();
+is( $xhval, 1, 'uninitialized state hash after one iteration' );

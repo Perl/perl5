@@ -61,7 +61,8 @@ PP(pp_padav)
     dVAR; dSP; dTARGET;
     I32 gimme;
     if (PL_op->op_private & OPpLVAL_INTRO)
-	SAVECLEARSV(PAD_SVl(PL_op->op_targ));
+	if (!(PL_op->op_private & OPpPAD_STATE))
+	    SAVECLEARSV(PAD_SVl(PL_op->op_targ));
     EXTEND(SP, 1);
     if (PL_op->op_flags & OPf_REF) {
 	PUSHs(TARG);
@@ -104,7 +105,8 @@ PP(pp_padhv)
 
     XPUSHs(TARG);
     if (PL_op->op_private & OPpLVAL_INTRO)
-	SAVECLEARSV(PAD_SVl(PL_op->op_targ));
+	if (!(PL_op->op_private & OPpPAD_STATE))
+	    SAVECLEARSV(PAD_SVl(PL_op->op_targ));
     if (PL_op->op_flags & OPf_REF)
 	RETURN;
     else if (LVRET) {

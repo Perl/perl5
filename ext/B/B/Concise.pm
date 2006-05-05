@@ -572,7 +572,7 @@ $priv{"repeat"}{64} = "DOLIST";
 $priv{"leaveloop"}{64} = "CONT";
 @{$priv{$_}}{32,64,96} = ("DREFAV", "DREFHV", "DREFSV")
   for (qw(rv2gv rv2sv padsv aelem helem));
-$priv{"padsv"}{16} = "STATE";
+$priv{$_}{16} = "STATE" for ("padav", "padhv", "padsv");
 @{$priv{"entersub"}}{16,32,64} = ("DBG","TARG","NOMOD");
 @{$priv{$_}}{4,8,128} = ("INARGS","AMPER","NO()") for ("entersub", "rv2cv");
 $priv{"gv"}{32} = "EARLYCV";
