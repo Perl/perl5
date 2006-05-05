@@ -1758,7 +1758,7 @@ restart:
 	    PL_curstash = PL_defstash;
 	    if (PL_endav && !PL_minus_c)
 		call_list(oldscope, PL_endav);
-	    status = STATUS_NATIVE_EXPORT;
+	    status = STATUS_EXIT;
 	    break;
 	case 3:
 	    if (PL_restartop) {

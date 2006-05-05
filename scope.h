@@ -364,7 +364,7 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
 		PerlProc_longjmp(PL_top_env->je_buf, (v));	\
 	}							\
 	if ((v) == 2)						\
-	    PerlProc_exit(STATUS_NATIVE_EXPORT);		\
+	    PerlProc_exit(STATUS_EXIT);				\
 	PerlIO_printf(Perl_error_log, "panic: top_env\n");	\
 	PerlProc_exit(1);					\
     } STMT_END
@@ -400,7 +400,7 @@ typedef void *(CPERLscope(*protect_proc_t)) (pTHX_ volatile JMPENV *pcur_env,
 	if (PL_top_env->je_prev)				\
 	    PerlProc_longjmp(PL_top_env->je_buf, (v));		\
 	if ((v) == 2)						\
-	    PerlProc_exit(STATUS_NATIVE_EXPORT);		\
+	    PerlProc_exit(STATUS_EXIT);				\
 	PerlIO_printf(PerlIO_stderr(), "panic: top_env\n");	\
 	PerlProc_exit(1);					\
     } STMT_END

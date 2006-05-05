@@ -333,7 +333,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #define DOSISH 1
 #endif
 
-#if defined(__STDC__) || defined(vax11c) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus) || defined( EPOC) || defined(NETWARE)
+#if defined(__STDC__) || defined(_AIX) || defined(__stdc__) || defined(__cplusplus) || defined( EPOC) || defined(NETWARE)
 # define STANDARD_C 1
 #endif
 
@@ -2446,55 +2446,188 @@ typedef pthread_key_t	perl_key;
 #define STATUS_UNIX	PL_statusvalue
 #ifdef VMS
 #   define STATUS_NATIVE	PL_statusvalue_vms
-#   define STATUS_NATIVE_EXPORT \
-	(((I32)PL_statusvalue_vms == -1 ? 44 : PL_statusvalue_vms) | (VMSISH_HUSHED ? 0x10000000 : 0))
-#   define STATUS_NATIVE_SET(n) STATUS_NATIVE_SET_PORC(n, 0)
-#   define STATUS_NATIVE_CHILD_SET(n) STATUS_NATIVE_SET_PORC(n, 1)
-#   define STATUS_NATIVE_SET_PORC(n, _x)				\
+/*
+ * vaxc$errno is only guaranteed to be valid if errno == EVMSERR, otherwise
+ * it's contents can not be trusted.  Unfortunately, Perl seems to check
+ * it on exit, so it when PL_statusvalue_vms is updated, vaxc$errno should
+ * be updated also.
+ */
+#  include <stsdef.h>
+#  include <ssdef.h>
+/* Presume this because if VMS changes it, it will require a new
+ * set of APIs for waiting on children for binary compatibility.
+ */
+#  define child_offset_bits (8)
+#  ifndef C_FAC_POSIX
+#  define C_FAC_POSIX 0x35A000
+#  endif
+
+/*  STATUS_EXIT - validates and returns a NATIVE exit status code for the
+ * platform from the existing UNIX or Native status values.
+ */
+
+#   define STATUS_EXIT \
+	(((I32)PL_statusvalue_vms == -1 ? SS$_ABORT : PL_statusvalue_vms) | \
+	   (VMSISH_HUSHED ? STS$M_INHIB_MSG : 0))
+
+
+/* STATUS_NATIVE_CHILD_SET - Calculate UNIX status that matches the child
+ * exit code and shifts the UNIX value over the correct number of bits to
+ * be a child status.  Usually the number of bits is 8, but that could be
+ * platform dependent.  The NATIVE status code is presumed to have either
+ * from a child process.
+ */
+
+/* This is complicated.  The child processes return a true native VMS
+   status which must be saved.  But there is an assumption in Perl that
+   the UNIX child status has some relationship to errno values, so
+   Perl tries to translate it to text in some of the tests.  
+   In order to get the string translation correct, for the error, errno
+   must be EVMSERR, but that generates a different text message
+   than what the test programs are expecting.  So an errno value must
+   be derived from the native status value when an error occurs.
+   That will hide the true native status message.  With this version of
+   perl, the true native child status can always be retrieved so that
+   is not a problem.  But in this case, Pl_statusvalue and errno may
+   have different values in them.
+ */
+
+#   define STATUS_NATIVE_CHILD_SET(n) \
 	STMT_START {							\
 	    I32 evalue = (I32)n;					\
 	    if (evalue == EVMSERR) {					\
 	      PL_statusvalue_vms = vaxc$errno;				\
 	      PL_statusvalue = evalue;					\
-	    }								\
-	    else {							\
+	    } else {							\
 	      PL_statusvalue_vms = evalue;				\
-	      if ((I32)PL_statusvalue_vms == -1)			\
+	      if (evalue == -1) {					\
 		PL_statusvalue = -1;					\
-	      else							\
-		PL_statusvalue = vms_status_to_unix(evalue);		\
+		PL_statusvalue_vms = SS$_ABORT; /* Should not happen */ \
+	      } else							\
+		PL_statusvalue = Perl_vms_status_to_unix(evalue, 1);	\
 	      set_vaxc_errno(evalue);					\
-	      set_errno(PL_statusvalue);				\
-	      if (_x) PL_statusvalue = PL_statusvalue << 8;		\
+	      if ((PL_statusvalue_vms & C_FAC_POSIX) == C_FAC_POSIX)	\
+		  set_errno(EVMSERR);					\
+	      else set_errno(Perl_vms_status_to_unix(evalue, 0));	\
+	      PL_statusvalue = PL_statusvalue << child_offset_bits;	\
 	    }								\
 	} STMT_END
+
 #   ifdef VMSISH_STATUS
 #	define STATUS_CURRENT	(VMSISH_STATUS ? STATUS_NATIVE : STATUS_UNIX)
 #   else
 #	define STATUS_CURRENT	STATUS_UNIX
 #   endif
+
+  /* STATUS_UNIX_SET - takes a UNIX/POSIX errno value and attempts to update
+   * the NATIVE status to an equivalent value.  Can not be used to translate
+   * exit code values as exit code values are not guaranteed to have any
+   * relationship at all to errno values.
+   * This is used when Perl is forcing errno to have a specific value.
+   */
 #   define STATUS_UNIX_SET(n)				\
 	STMT_START {					\
-	    PL_statusvalue = (n);				\
+	    I32 evalue = (I32)n;			\
+	    PL_statusvalue = evalue;			\
 	    if (PL_statusvalue != -1) {			\
-		if (PL_statusvalue != EVMSERR) {		\
-		  PL_statusvalue &= 0xFFFF;			\
-		  PL_statusvalue_vms = PL_statusvalue ? 44 : 1;	\
-		}						\
-		else {						\
-		  PL_statusvalue_vms = vaxc$errno;		\
-		}						\
+		if (PL_statusvalue != EVMSERR) {	\
+		  PL_statusvalue &= 0xFFFF;		\
+		  if (MY_POSIX_EXIT)			\
+		    PL_statusvalue_vms=PL_statusvalue ? SS$_ABORT : SS$_NORMAL;\
+		  else PL_statusvalue_vms = Perl_unix_status_to_vms(evalue); \
+		}					\
+		else {					\
+		  PL_statusvalue_vms = vaxc$errno;	\
+		}					\
 	    }						\
-	    else PL_statusvalue_vms = -1;			\
+	    else PL_statusvalue_vms = SS$_ABORT;	\
+	    set_vaxc_errno(PL_statusvalue_vms);		\
 	} STMT_END
-#   define STATUS_ALL_SUCCESS	(PL_statusvalue = 0, PL_statusvalue_vms = 1)
-#   define STATUS_ALL_FAILURE	(PL_statusvalue = 1, PL_statusvalue_vms = 44)
+
+  /* STATUS_UNIX_EXIT_SET - Takes a UNIX/POSIX exit code and sets
+   * the NATIVE error status based on it.  It does not assume that
+   * the UNIX/POSIX exit codes have any relationship to errno, except
+   * that 0 indicates a success.  When in the default mode to comply
+   * with the Perl VMS documentation, any other code sets the NATIVE
+   * status to a failure code of SS$_ABORT.
+   *
+   * In the new POSIX EXIT mode, native status will be set so that the
+   * actual exit code will can be retrieved by the calling program or
+   * shell.
+   *
+   * If the exit code is not clearly a UNIX parent or child exit status,
+   * it will be passed through as a VMS status.
+   */
+
+#   define STATUS_UNIX_EXIT_SET(n)			\
+	STMT_START {					\
+	    I32 evalue = (I32)n;			\
+	    PL_statusvalue = evalue;			\
+	    if (evalue != -1) {				\
+	      if (evalue <= 0xFF00) {			\
+		if (evalue > 0xFF)			\
+		  evalue = (evalue >> child_offset_bits) & 0xFF; \
+		if (evalue == 0)			\
+		  PL_statusvalue_vms == SS$_NORMAL;	\
+		else					\
+		  if (MY_POSIX_EXIT)			\
+		    PL_statusvalue_vms =	\
+		       (C_FAC_POSIX | (evalue << 3 ) | (evalue == 1)? \
+		        (STS$K_ERROR | STS$M_INHIB_MSG) : 1); \
+		  else					\
+		    PL_statusvalue_vms = SS$_ABORT; \
+	      } else { /* forgive them Perl, for they have sinned */ \
+		if (evalue != EVMSERR) PL_statusvalue_vms = evalue; \
+		else PL_statusvalue_vms = vaxc$errno;		\
+	        /* And obviously used a VMS status value instead of UNIX */ \
+	        PL_statusvalue = EVMSERR;				\
+	      }							\
+	    }							\
+	    else PL_statusvalue_vms = SS$_ABORT;		\
+	    set_vaxc_errno(PL_statusvalue_vms);			\
+	} STMT_END
+
+  /* STATUS_EXIT_SET - Takes a NATIVE/UNIX/POSIX exit code
+   * and sets the NATIVE error status based on it.  This special case
+   * is needed to maintain compatibility with past VMS behavior.
+   *
+   * In the default mode on VMS, this number is passed through as
+   * both the NATIVE and UNIX status.  Which makes it different
+   * that the STATUS_UNIX_EXIT_SET.
+   *
+   * In the new POSIX EXIT mode, native status will be set so that the
+   * actual exit code will can be retrieved by the calling program or
+   * shell.
+   *
+   */
+
+#   define STATUS_EXIT_SET(n)				\
+	STMT_START {					\
+	    I32 evalue = (I32)n;			\
+	    PL_statusvalue = evalue;			\
+	    if (MY_POSIX_EXIT)				\
+		PL_statusvalue_vms =			\
+		  (C_FAC_POSIX | (evalue << 3 ) | (evalue == 1)? \
+		   (STS$K_ERROR | STS$M_INHIB_MSG) : 1); \
+	    else					\
+		PL_statusvalue_vms = evalue ? evalue : SS$_NORMAL; \
+	    set_vaxc_errno(PL_statusvalue_vms);		\
+	} STMT_END
+
+
+ /* This macro forces a success status */
+#   define STATUS_ALL_SUCCESS	\
+	(PL_statusvalue = 0, PL_statusvalue_vms = SS$_NORMAL)
+
+ /* This macro forces a failure status */
+#   define STATUS_ALL_FAILURE	(PL_statusvalue = 1, \
+     vaxc$errno = PL_statusvalue_vms = MY_POSIX_EXIT ? \
+	(C_FAC_POSIX | (1 << 3) | STS$K_ERROR | STS$M_INHIB_MSG) : SS$_ABORT)
+
 #else
 #   define STATUS_NATIVE	PL_statusvalue_posix
-#   define STATUS_NATIVE_EXPORT	STATUS_NATIVE
 #   if defined(WCOREDUMP)
-#       define STATUS_NATIVE_CHILD_SET(n) STATUS_NATIVE_SET(n)
-#       define STATUS_NATIVE_SET(n)                        \
+#       define STATUS_NATIVE_CHILD_SET(n)                  \
             STMT_START {                                   \
                 PL_statusvalue_posix = (n);                \
                 if (PL_statusvalue_posix == -1)            \
@@ -2507,8 +2640,7 @@ typedef pthread_key_t	perl_key;
                 }                                          \
             } STMT_END
 #   elif defined(WIFEXITED)
-#       define STATUS_NATIVE_CHILD_SET(n) STATUS_NATIVE_SET(n)
-#       define STATUS_NATIVE_SET(n)                        \
+#       define STATUS_NATIVE_CHILD_SET(n)                  \
             STMT_START {                                   \
                 PL_statusvalue_posix = (n);                \
                 if (PL_statusvalue_posix == -1)            \
@@ -2520,8 +2652,7 @@ typedef pthread_key_t	perl_key;
                 }                                          \
             } STMT_END
 #   else
-#       define STATUS_NATIVE_CHILD_SET(n) STATUS_NATIVE_SET(n)
-#       define STATUS_NATIVE_SET(n)                        \
+#       define STATUS_NATIVE_CHILD_SET(n)                  \
             STMT_START {                                   \
                 PL_statusvalue_posix = (n);                \
                 if (PL_statusvalue_posix == -1)            \
@@ -2535,11 +2666,13 @@ typedef pthread_key_t	perl_key;
 #   define STATUS_UNIX_SET(n)		\
 	STMT_START {			\
 	    PL_statusvalue = (n);		\
-            PL_statusvalue_posix = PL_statusvalue;       \
 	    if (PL_statusvalue != -1)	\
 		PL_statusvalue &= 0xFFFF;	\
 	} STMT_END
+#   define STATUS_UNIX_EXIT_SET(n) STATUS_UNIX_SET(n)
+#   define STATUS_EXIT_SET(n) STATUS_UNIX_SET(n)
 #   define STATUS_CURRENT STATUS_UNIX
+#   define STATUS_EXIT STATUS_UNIX
 #   define STATUS_ALL_SUCCESS	(PL_statusvalue = 0, PL_statusvalue_posix = 0)
 #   define STATUS_ALL_FAILURE	(PL_statusvalue = 1, PL_statusvalue_posix = 1)
 #endif
@@ -3400,6 +3533,8 @@ char *getlogin (void);
 #endif
 #endif /* !__cplusplus */
 
+/* Fixme on VMS.  This needs to be a run-time, not build time options */
+/* Also rename() is affected by this */
 #ifdef UNLINK_ALL_VERSIONS /* Currently only makes sense for VMS */
 #define UNLINK unlnk
 I32 unlnk (char*);

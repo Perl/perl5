@@ -300,10 +300,12 @@
 #define HAVE_INTERP_INTERN
 struct interp_intern {
     int    hushed;
+    int	   posix_exit;
     double inv_rand_max;
 };
 #define VMSISH_HUSHED     (PL_sys_intern.hushed)
 #define MY_INV_RAND_MAX   (PL_sys_intern.inv_rand_max)
+#define MY_POSIX_EXIT	(PL_sys_intern.posix_exit)
 
 /* Flags for vmstrnenv() */
 #define PERL__TRNENV_SECURE 0x01
@@ -762,7 +764,8 @@ typedef unsigned myino_t;
 
 void	prime_env_iter (void);
 void	init_os_extras (void);
-int	vms_status_to_unix(int vms_status);
+int	Perl_vms_status_to_unix(int vms_status, int child_flag);
+int	Perl_unix_status_to_vms(int unix_status);
 /* prototype section start marker; `typedef' passes through cpp */
 typedef char  __VMS_PROTOTYPES__;
 int	Perl_vmstrnenv (const char *, char *, unsigned long int, struct dsc$descriptor_s **, unsigned long int);

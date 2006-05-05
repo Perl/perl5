@@ -650,7 +650,7 @@ perl_destruct(pTHXx)
 
     if (CALL_FPTR(PL_threadhook)(aTHX)) {
         /* Threads hook has vetoed further cleanup */
-        return STATUS_NATIVE_EXPORT;
+        return STATUS_EXIT;
     }
 
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
@@ -872,7 +872,7 @@ perl_destruct(pTHXx)
 #endif
 
 	/* The exit() function will do everything that needs doing. */
-        return STATUS_NATIVE_EXPORT;
+        return STATUS_EXIT;
     }
 
     /* jettison our possibly duplicated environment */
@@ -1364,7 +1364,7 @@ perl_destruct(pTHXx)
 	Safefree(PL_mess_sv);
 	PL_mess_sv = Nullsv;
     }
-    return STATUS_NATIVE_EXPORT;
+    return STATUS_EXIT;
 }
 
 /*
@@ -1615,7 +1615,7 @@ setuid perl scripts securely.\n");
 	PL_curstash = PL_defstash;
 	if (PL_checkav)
 	    call_list(oldscope, PL_checkav);
-	ret = STATUS_NATIVE_EXPORT;
+	ret = STATUS_EXIT;
 	break;
     case 3:
 	PerlIO_printf(Perl_error_log, "panic: top_env\n");
@@ -2301,7 +2301,7 @@ perl_run(pTHXx)
 	if (PerlEnv_getenv("PERL_DEBUG_MSTATS"))
 	    dump_mstats("after execution:  ");
 #endif
-	ret = STATUS_NATIVE_EXPORT;
+	ret = STATUS_EXIT;
 	break;
     case 3:
 	if (PL_restartop) {
@@ -5221,7 +5221,7 @@ Perl_my_exit(pTHX_ U32 status)
 	STATUS_ALL_FAILURE;
 	break;
     default:
-	STATUS_NATIVE_SET(status);
+	STATUS_EXIT_SET(status);
 	break;
     }
     my_exit_jump();
@@ -5231,16 +5231,60 @@ void
 Perl_my_failure_exit(pTHX)
 {
 #ifdef VMS
-    if (vaxc$errno & 1) {
-	if (STATUS_NATIVE & 1)		/* fortuitiously includes "-1" */
-	    STATUS_NATIVE_SET(44);
+     /* We have been called to fall on our sword.  The desired exit code
+      * should be already set in STATUS_UNIX, but could be shifted over
+      * by 8 bits.  STATUS_UNIX_EXIT_SET will handle the cases where a
+      * that code is set.
+      *
+      * If an error code has not been set, then force the issue.
+      */
+    if (MY_POSIX_EXIT) {
+
+	/* In POSIX_EXIT mode follow Perl documentations and use 255 for
+	 * the exit code when there isn't an error.
+	 */
+
+	if (STATUS_UNIX == 0)
+	    STATUS_UNIX_EXIT_SET(255);
+	else {
+	    STATUS_UNIX_EXIT_SET(STATUS_UNIX);
+
+	    /* The exit code could have been set by $? or vmsish which
+	     * means that it may not be fatal.  So convert
+	     * success/warning codes to fatal.
+	     */
+	    if ((STATUS_NATIVE & (STS$K_SEVERE|STS$K_ERROR)) == 0)
+		STATUS_UNIX_EXIT_SET(255);
+	}
     }
     else {
-	if (!vaxc$errno)		/* unlikely */
-	    STATUS_NATIVE_SET(44);
-	else
-	    STATUS_NATIVE_SET(vaxc$errno);
+	/* Traditionally Perl on VMS always expects a Fatal Error. */
+	if (vaxc$errno & 1) {
+
+	    /* So force success status to failure */
+	    if (STATUS_NATIVE & 1)
+		STATUS_ALL_FAILURE;
+	}
+	else {
+	    if (!vaxc$errno) {
+		STATUS_UNIX = EINTR; /* In case something cares */
+		STATUS_ALL_FAILURE;
+	    }
+	    else {
+		int severity;
+		STATUS_NATIVE = vaxc$errno; /* Should already be this */
+
+		/* Encode the severity code */
+		severity = STATUS_NATIVE & STS$M_SEVERITY;
+		STATUS_UNIX = (severity ? severity : 1) << 8;
+
+		/* Perl expects this to be a fatal error */
+		if (severity != STS$K_SEVERE)
+		    STATUS_ALL_FAILURE;
+	    }
+	}
     }
+
 #else
     int exitstatus;
     if (errno & 255)
