@@ -9,7 +9,7 @@ package Text::Balanced;
 use Exporter;
 use vars qw { $VERSION @ISA %EXPORT_TAGS };
 
-$VERSION = '1.95_01';
+$VERSION = '1.97';
 @ISA		= qw ( Exporter );
 		     
 %EXPORT_TAGS	= ( ALL => [ qw(
@@ -55,7 +55,7 @@ sub _fail
 {
 	my ($wantarray, $textref, $message, $pos) = @_;
 	_failmsg $message, $pos if $message;
-	return ("",$$textref,"") if $wantarray;
+	return (undef,$$textref,undef) if $wantarray;
 	return undef;
 }
 
@@ -64,8 +64,7 @@ sub _succeed
 	$@ = undef;
 	my ($wantarray,$textref) = splice @_, 0, 2;
 	my ($extrapos, $extralen) = @_>18 ? splice(@_, -2, 2) : (0,0);
-	my ($startlen) = $_[5];
-	my $oppos = $_[6];
+	my ($startlen, $oppos) = $_[5,6];
 	my $remainderpos = $_[2];
 	if ($wantarray)
 	{
@@ -274,7 +273,7 @@ sub _match_bracketed($$$$$$)	# $textref, $pre, $ldel, $qdel, $quotelike, $rdel
 	       );
 }
 
-sub revbracket($)
+sub _revbracket($)
 {
 	my $brack = reverse $_[0];
 	$brack =~ tr/[({</])}>/;
@@ -337,7 +336,7 @@ sub _match_tagged	# ($$$$$$$)
 	if (!defined $rdel)
 	{
 		$rdelspec = $&;
-		unless ($rdelspec =~ s/\A([[(<{]+)($XMLNAME).*/ quotemeta "$1\/$2". revbracket($1) /oes)
+		unless ($rdelspec =~ s/\A([[(<{]+)($XMLNAME).*/ quotemeta "$1\/$2". _revbracket($1) /oes)
 		{
 			_failmsg "Unable to construct closing tag to match: $rdel",
 				 pos $$textref;
@@ -729,7 +728,8 @@ sub _match_quotelike($$$$)	# ($textref, $prepat, $allow_raw_match)
 		       );
 	}
 
-	unless ($$textref =~ m{\G(\b(?:m|s|qq|qx|qw|q|qr|tr|y)\b(?=\s*\S)|<<)}gc)
+	unless ($$textref =~
+    m{\G(\b(?:m|s|qq|qx|qw|q|qr|tr|y)\b(?=\s*\S)|<<(?=\s*["'A-Za-z_]))}gc)
 	{
 		_failmsg q{No quotelike operator found after prefix at "} .
 			     substr($$textref, pos($$textref), 20) .
@@ -928,9 +928,7 @@ sub extract_multiple (;$$$$)	# ($text, $functions_ref, $max_fields, $ignoreunkno
 				$class = $class[$i];
 				$lastpos = pos $$textref;
 				if (ref($func) eq 'CODE')
-					{ ($field,$rem,$pref) = @bits = $func->($$textref);
-					# print "[$field|$rem]" if $field;
-					}
+					{ ($field,$rem,$pref) = @bits = $func->($$textref) }
 				elsif (ref($func) eq 'Text::Balanced::Extractor')
 					{ @bits = $field = $func->extract($$textref) }
 				elsif( $$textref =~ m/\G$func/gc )
@@ -1153,7 +1151,7 @@ elements of which are always:
 =item [0]
 
 The extracted string, including the specified delimiters.
-If the extraction fails an empty string is returned.
+If the extraction fails C<undef> is returned.
 
 =item [1]
 
@@ -1163,7 +1161,7 @@ extracted string). On failure, the entire string is returned.
 =item [2]
 
 The skipped prefix (i.e. the characters before the extracted string).
-On failure, the empty string is returned.
+On failure, C<undef> is returned.
 
 =back 
 
@@ -2149,9 +2147,10 @@ If more delimiters than escape chars are specified, the last escape char
 is used for the remaining delimiters.
 If no escape char is specified for a given specified delimiter, '\' is used.
 
-Note that 
-C<gen_delimited_pat> was previously called
-C<delimited_pat>. That name may still be used, but is now deprecated.
+=head2 C<delimited_pat>
+
+Note that C<gen_delimited_pat> was previously called C<delimited_pat>.
+That name may still be used, but is now deprecated.
         
 
 =head1 DIAGNOSTICS
