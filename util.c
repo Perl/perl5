@@ -5170,20 +5170,92 @@ Perl_free_global_struct(pTHX_ struct perl_vars *plvarsp)
 
 #ifdef PERL_MEM_LOG
 
+/*
+ * PERL_MEM_LOG: the Perl_mem_log_..() will be compiled.
+ *
+ * PERL_MEM_LOG_ENV: if defined, during run time the environment
+ * variable PERL_MEM_LOG will be consulted, and if the integer value
+ * of that is true, the logging will happen.  (The default is to
+ * always log if the PERL_MEM_LOG define was in effect.)
+ */
+
+/*
+ * PERL_MEM_LOG_SPRINTF_BUF_SIZE: size of a (stack-allocated) buffer
+ * the Perl_mem_log_...() will use (either via sprintf or snprintf).
+ */
 #define PERL_MEM_LOG_SPRINTF_BUF_SIZE 128
+
+/*
+ * PERL_MEM_LOG_FD: the file descriptor the Perl_mem_log_...() will
+ * log to.  You can also define in compile time PERL_MEM_LOG_ENV_FD,
+ * in which case the environment variable PERL_MEM_LOG_FD will be
+ * consulted for the file descriptor number to use.
+ */
+#ifndef PERL_MEM_LOG_FD
+#  define PERL_MEM_LOG_FD 2 /* If STDERR is too boring for you. */
+#endif
 
 Malloc_t
 Perl_mem_log_alloc(const UV n, const UV typesize, const char *typename, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
 {
 #ifdef PERL_MEM_LOG_STDERR
-    /* We can't use PerlIO for obvious reasons. */
-    char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
-    const STRLEN len = my_sprintf(buf,
-				  "alloc: %s:%d:%s: %"IVdf" %"UVuf
-				  " %s = %"IVdf": %"UVxf"\n",
-				  filename, linenumber, funcname, n, typesize,
-				  typename, n * typesize, PTR2UV(newalloc));
-    PerlLIO_write(2,  buf, len);
+# if defined(PERL_MEM_LOG_ENV) || defined(PERL_MEM_LOG_ENV_FD)
+    char *s;
+# endif
+# ifdef PERL_MEM_LOG_ENV
+    s = getenv("PERL_MEM_LOG");
+    if (s ? atoi(s) : 0)
+# endif
+    {
+	/* We can't use SVs or PerlIO for obvious reasons,
+	 * so we'll use stdio and low-level IO instead. */
+	char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
+# if defined(PERL_MEM_LOG_TIMESTAMP) && defined(HAS_GETTIMEOFDAY)
+	struct timeval tv;
+	gettimeofday(&tv, 0);
+	{
+	    const STRLEN len =
+#  ifdef USE_SNPRINTF
+		snprintf(buf,
+			 PERL_MEM_LOG_SPRINTF_BUF_SIZE,
+			 "%10d.%06d: alloc: %s:%d:%s: %"IVdf" %"UVuf
+			 " %s = %"IVdf": %"UVxf"\n",
+			 (int)tv.tv_sec, (int)tv.tv_usec,
+			 filename, linenumber, funcname, n, typesize,
+			 typename, n * typesize, PTR2UV(newalloc));
+#  else
+		my_sprintf(buf,
+			   "%10d.%06d: alloc: %s:%d:%s: %"IVdf" %"UVuf
+			   " %s = %"IVdf": %"UVxf"\n",
+			   (int)tv.tv_sec, (int)tv.tv_usec,
+			   filename, linenumber, funcname, n, typesize,
+			   typename, n * typesize, PTR2UV(newalloc));
+#  endif
+# else
+	    const STRLEN len =
+#  ifdef USE_SNPRINTF
+		snprintf(buf,
+			 PERL_MEM_LOG_SPRINTF_BUF_SIZE,
+			 "alloc: %s:%d:%s: %"IVdf" %"UVuf
+			 " %s = %"IVdf": %"UVxf"\n",
+			 filename, linenumber, funcname, n, typesize,
+			 typename, n * typesize, PTR2UV(newalloc));
+#  else
+		my_sprintf(buf,
+			   "alloc: %s:%d:%s: %"IVdf" %"UVuf
+			   " %s = %"IVdf": %"UVxf"\n",
+			   filename, linenumber, funcname, n, typesize,
+			   typename, n * typesize, PTR2UV(newalloc));
+#  endif
+# endif
+# ifdef PERL_MEM_LOG_ENV_FD
+	    s = PerlEnv_getenv("PERL_MEM_LOG_FD");
+	    PerlLIO_write(s ? atoi(s) : PERL_MEM_LOG_FD, buf, len);
+# else
+	    PerlLIO_write(PERL_MEM_LOG_FD, buf, len);
+#endif
+	}
+    }
 #endif
     return newalloc;
 }
@@ -5192,14 +5264,67 @@ Malloc_t
 Perl_mem_log_realloc(const UV n, const UV typesize, const char *typename, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
 {
 #ifdef PERL_MEM_LOG_STDERR
-    /* We can't use PerlIO for obvious reasons. */
-    char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
-    const STRLEN len = my_sprintf(buf, "realloc: %s:%d:%s: %"IVdf" %"UVuf
-				  " %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
-				  filename, linenumber, funcname, n, typesize,
-				  typename, n * typesize, PTR2UV(oldalloc),
-				  PTR2UV(newalloc));
-    PerlLIO_write(2,  buf, len);
+# if defined(PERL_MEM_LOG_ENV) || defined(PERL_MEM_LOG_ENV_FD)
+    char *s;
+# endif
+# ifdef PERL_MEM_LOG_ENV
+    s = PerlEnv_getenv("PERL_MEM_LOG");
+    if (s ? atoi(s) : 0)
+# endif
+    {
+	/* We can't use SVs or PerlIO for obvious reasons,
+	 * so we'll use stdio and low-level IO instead. */
+	char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
+# if defined(PERL_MEM_LOG_TIMESTAMP) && defined(HAS_GETTIMEOFDAY)
+	struct timeval tv;
+	gettimeofday(&tv, 0);
+	{
+	    const STRLEN len =
+#  ifdef USE_SNPRINTF
+		snprintf(buf,
+			 PERL_MEM_LOG_SPRINTF_BUF_SIZE,
+			 "%10d.%06d: realloc: %s:%d:%s: %"IVdf" %"UVuf
+			 " %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
+			 (int)tv.tv_sec, (int)tv.tv_usec,
+			 filename, linenumber, funcname, n, typesize,
+			 typename, n * typesize, PTR2UV(oldalloc),
+			 PTR2UV(newalloc));
+#  else
+		my_sprintf(buf,
+			   "%10d.%06d: realloc: %s:%d:%s: %"IVdf" %"UVuf
+			   " %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
+			   (int)tv.tv_sec, (int)tv.tv_usec,
+			   filename, linenumber, funcname, n, typesize,
+			   typename, n * typesize, PTR2UV(oldalloc),
+			   PTR2UV(newalloc));
+#  endif
+# else
+	    const STRLEN len =
+#  ifdef USE_SNPRINTF
+		snprintf(buf,
+			 PERL_MEM_LOG_SPRINTF_BUF_SIZE,
+			 "realloc: %s:%d:%s: %"IVdf" %"UVuf
+			 " %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
+			 filename, linenumber, funcname, n, typesize,
+			 typename, n * typesize, PTR2UV(oldalloc),
+			 PTR2UV(newalloc));
+#  else
+		my_sprintf(buf,
+			   "realloc: %s:%d:%s: %"IVdf" %"UVuf
+			   " %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
+			   filename, linenumber, funcname, n, typesize,
+			   typename, n * typesize, PTR2UV(oldalloc),
+			   PTR2UV(newalloc));
+#  endif
+# endif
+# ifdef PERL_MEM_LOG_ENV_FD
+	    s = PerlEnv_getenv("PERL_MEM_LOG_FD");
+	    PerlLIO_write(s ? atoi(s) : PERL_MEM_LOG_FD, buf, len);
+# else
+	    PerlLIO_write(PERL_MEM_LOG_FD, buf, len);
+# endif
+	}
+    }
 #endif
     return newalloc;
 }
@@ -5208,12 +5333,51 @@ Malloc_t
 Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int linenumber, const char *funcname)
 {
 #ifdef PERL_MEM_LOG_STDERR
-    /* We can't use PerlIO for obvious reasons. */
-    char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
-    const STRLEN len = my_sprintf(buf, "free: %s:%d:%s: %"UVxf"\n",
-				  filename, linenumber, funcname,
-				  PTR2UV(oldalloc));
-    PerlLIO_write(2,  buf, len);
+# if defined(PERL_MEM_LOG_ENV) || defined(PERL_MEM_LOG_ENV_FD)
+    char *s;
+# endif
+# ifdef PERL_MEM_LOG_ENV
+    s = PerlEnv_getenv("PERL_MEM_LOG");
+    if (s ? atoi(s) : 0)
+# endif
+    {
+	/* We can't use SVs or PerlIO for obvious reasons,
+	 * so we'll use stdio and low-level IO instead. */
+	char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
+# if defined(PERL_MEM_LOG_TIMESTAMP) && defined(HAS_GETTIMEOFDAY)
+	struct timeval tv;
+	gettimeofday(&tv, 0);
+	{
+	    const STRLEN len =
+#  ifdef USE_SNPRINTF
+		snprintf(buf,
+			 PERL_MEM_LOG_SPRINTF_BUF_SIZE,
+			 "%10d.%06d: free: %s:%d:%s: %"UVxf"\n",
+			 (int)tv.tv_sec, (int)tv.tv_usec,
+			 filename, linenumber, funcname,
+			 PTR2UV(oldalloc));
+#  else
+		my_sprintf(buf,
+			   "%10d.%06d: free: %s:%d:%s: %"UVxf"\n",
+			   (int)tv.tv_sec, (int)tv.tv_usec,
+			   filename, linenumber, funcname,
+			   PTR2UV(oldalloc));
+#  endif
+# else
+	    const STRLEN len =
+		my_sprintf(buf,
+			   "free: %s:%d:%s: %"UVxf"\n",
+			   filename, linenumber, funcname,
+			   PTR2UV(oldalloc));
+# endif
+# ifdef PERL_MEM_LOG_ENV_FD
+	    s = PerlEnv_getenv("PERL_MEM_LOG_FD");
+	    PerlLIO_write(s ? atoi(s) : PERL_MEM_LOG_FD, buf, len);
+# else
+	    PerlLIO_write(PERL_MEM_LOG_FD, buf, len);
+# endif
+	}
+    }
 #endif
     return oldalloc;
 }
