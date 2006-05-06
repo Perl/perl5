@@ -119,7 +119,7 @@ well as subroutine and method calls, and the anonymous
 constructors C<[]> and C<{}>.
 
 See also L<Quote and Quote-like Operators> toward the end of this section,
-as well as L<"I/O Operators">.
+as well as L</"I/O Operators">.
 
 =head2 The Arrow Operator
 X<arrow> X<dereference> X<< -> >>
@@ -1380,7 +1380,7 @@ when they're the right way to get something done.  Perl was made to be
 a glue language, and one of the things it glues together is commands.
 Just understand what you're getting yourself into.
 
-See L<"I/O Operators"> for more discussion.
+See L</"I/O Operators"> for more discussion.
 
 =item qw/STRING/
 X<qw> X<quote, list> X<quote, words>
