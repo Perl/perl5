@@ -1297,7 +1297,7 @@ Signal_t
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 Perl_csighandler(int sig)
 {
-    return Perl_csighandler_va(sig);
+    Perl_csighandler_va(sig);
 }
 
 Signal_t
@@ -2669,7 +2669,7 @@ Signal_t
 #if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
 Perl_sighandler(int sig)
 {
-    return Perl_sighandler_va(sig);
+    Perl_sighandler_va(sig);
 }
 
 Signal_t
