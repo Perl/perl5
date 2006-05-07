@@ -729,8 +729,12 @@ p	|I32	|setenv_getix	|NN char* nam
 #endif
 p	|void	|setdefout	|NULLOK GV* gv
 Ap	|HEK*	|share_hek	|NN const char* str|I32 len|U32 hash
-np	|Signal_t |sighandler	|int sig
-Anp	|Signal_t |csighandler	|int sig
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+nop	|Signal_t |sighandler_va|int sig|...
+Anop	|Signal_t |csighandler_va|int sig|...
+#endif
+nop	|Signal_t |sighandler	|int sig
+Anop	|Signal_t |csighandler	|int sig
 Ap	|SV**	|stack_grow	|NN SV** sp|NN SV**p|int n
 Ap	|I32	|start_subparse	|I32 is_format|U32 flags
 p	|void	|sub_crush_depth|NN CV* cv
@@ -916,7 +920,7 @@ p	|int	|yyparse
 p	|int	|yywarn		|NN char* s
 #if defined(MYMALLOC)
 Ap	|void	|dump_mstats	|NN char* s
-ApR	|int	|get_mstats	|NN perl_mstats_t *buf|int buflen|int level
+Ap	|int	|get_mstats	|NN perl_mstats_t *buf|int buflen|int level
 #endif
 Anpa	|Malloc_t|safesysmalloc	|MEM_SIZE nbytes
 Anpa	|Malloc_t|safesyscalloc	|MEM_SIZE elements|MEM_SIZE size

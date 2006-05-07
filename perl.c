@@ -308,7 +308,11 @@ perl_construct(pTHXx)
 	    SvREFCNT(&PL_sv_placeholder) = (~(U32)0)/2;
 	}
 
-	PL_sighandlerp = Perl_sighandler;
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+	PL_sighandlerp = (Sighandler_t) Perl_sighandler_va;
+#else
+	PL_sighandlerp = (Sighandler_t) Perl_sighandler;
+#endif
 	PL_pidstatus = newHV();
     }
 
@@ -2080,7 +2084,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  define SIGCHLD SIGCLD
 #endif
 	Sighandler_t sigstate = rsignal_state(SIGCHLD);
-	if (sigstate == SIG_IGN) {
+	if (sigstate == (Sighandler_t) SIG_IGN) {
 	    if (ckWARN(WARN_SIGNAL))
 		Perl_warner(aTHX_ packWARN(WARN_SIGNAL),
 			    "Can't ignore signal CHLD, forcing to default");

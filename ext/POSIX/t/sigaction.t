@@ -1,7 +1,5 @@
 #!./perl
 
-use Test::More tests => 29;
-
 BEGIN {
 	chdir 't' if -d 't';
 	unshift @INC, '../lib';
@@ -17,6 +15,8 @@ BEGIN{
 		exit 0;
 	}
 }
+
+use Test::More tests => 31;
 
 use strict;
 use vars qw/$bad $bad7 $ok10 $bad18 $ok/;
@@ -179,9 +179,12 @@ kill 'HUP', $$;
 ok($ok, "safe signal delivery must work");
 
 SKIP: {
-    eval 'use POSIX qw(%SIGRT SIGRTMIN SIGRTMAX); SIGRTMIN + SIGRTMAX';
-    skip("no SIGRT signals", 4) if $@;
-    ok(SIGRTMAX > SIGRTMIN, "SIGRTMAX > SIGRTMIN");
+    eval 'use POSIX qw(%SIGRT SIGRTMIN SIGRTMAX); scalar %SIGRT + SIGRTMIN() + SIGRTMAX()';
+    $@					# POSIX did not exort
+    || SIGRTMIN() < 0 || SIGRTMAX() < 0	# HP-UX 10.20 exports both as -1
+    || SIGRTMIN() > $Config{sig_count}	# AIX 4.3.3 exports bogus 888 and 999
+	and skip("no SIGRT signals", 4);
+    ok(SIGRTMAX() > SIGRTMIN(), "SIGRTMAX > SIGRTMIN");
     is(scalar %SIGRT, SIGRTMAX() - SIGRTMIN() + 1, "scalar SIGRT");
     my $sigrtmin;
     my $h = sub { $sigrtmin = 1 };
@@ -190,3 +193,18 @@ SKIP: {
     kill 'SIGRTMIN', $$;
     is($sigrtmin, 1, "SIGRTMIN handler works");
 }
+
+SKIP: {
+    eval 'use POSIX qw(SA_SIGINFO); SA_SIGINFO';
+    skip("no SA_SIGINFO", 1) if $@;
+    sub hiphup {
+	is($_[1]->{signo}, SIGHUP, "SA_SIGINFO got right signal");
+    }
+    my $act = POSIX::SigAction->new('hiphup', 0, SA_SIGINFO);
+    sigaction(SIGHUP, $act);
+    kill 'HUP', $$;
+}
+
+eval { sigaction(-999, "foo"); };
+like($@, qr/Negative signals/,
+    "Prevent negative signals instead of core dumping");

@@ -1258,6 +1258,10 @@ sigaction(sig, optaction, oldaction = 0)
 	    SV** svp;
 	    SV** sigsvp;
 
+            if (sig < 0) {
+                croak("Negative signals are not allowed");
+            }
+
 	    if (sig == 0 && SvPOK(ST(0))) {
 	        const char *s = SvPVX_const(ST(0));
 		int i = whichsig((char *)s);

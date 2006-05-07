@@ -2347,6 +2347,18 @@ typedef struct clone_params CLONE_PARAMS;
 #endif
 /* <-- NSIG logic from Configure */
 
+#if defined(HAS_SIGACTION) && defined(SA_SIGINFO)
+#  ifdef PERL_CORE
+#    define sighandler		Perl_sighandler_va
+#  endif
+#  define csighandler		Perl_csighandler_va
+#else
+#  ifdef PERL_CORE
+#    define sighandler		Perl_sighandler
+#  endif
+#  define csighandler		Perl_csighandler
+#endif
+
 #ifndef NO_ENVIRON_ARRAY
 #  define USE_ENVIRON_ARRAY
 #endif
@@ -2362,7 +2374,7 @@ typedef struct clone_params CLONE_PARAMS;
 #    define PERL_FPU_INIT fpsetmask(0);
 #  else
 #    if defined(SIGFPE) && defined(SIG_IGN) && !defined(PERL_MICRO)
-#      define PERL_FPU_INIT       PL_sigfpe_saved = signal(SIGFPE, SIG_IGN);
+#      define PERL_FPU_INIT       PL_sigfpe_saved = (Sighandler_t) signal(SIGFPE, SIG_IGN);
 #      define PERL_FPU_PRE_EXEC   { Sigsave_t xfpe; rsignal_save(SIGFPE, PL_sigfpe_saved, &xfpe);
 #      define PERL_FPU_POST_EXEC    rsignal_restore(SIGFPE, &xfpe); }
 #    else

@@ -5,6 +5,14 @@ BEGIN { @INC = '../../lib';}
 use ExtUtils::MakeMaker;
 use ExtUtils::Constant 0.11 'WriteConstants';
 use Config;
+my $rt_signals;
+if ($Config{sig_name} =~ /\bRTMIN\b/ && $Config{sig_name} =~ /\bRTMAX\b/) {
+    # Yes, it really has them. (Some systems define the C pre-processor
+    # symbols, but they depend on other macros that are only defined during
+    # kernel compilation
+    $rt_signals++;
+}
+
 my @libs;
 if ($^O ne 'MSWin32') {
     @libs = ('LIBS' => ["-lm -lposix -lcposix"]);
@@ -44,7 +52,7 @@ my @names =
       PARENB PARMRK PARODD PATH_MAX PIPE_BUF RAND_MAX R_OK SCHAR_MAX
       SCHAR_MIN SEEK_CUR SEEK_END SEEK_SET SHRT_MAX SHRT_MIN SIGABRT SIGALRM
       SIGCHLD SIGCONT SIGFPE SIGHUP SIGILL SIGINT SIGKILL SIGPIPE SIGQUIT
-      SIGRTMAX SIGRTMIN SIGSEGV SIGSTOP SIGTERM SIGTSTP SIGTTIN SIGTTOU
+      SIGSEGV SIGSTOP SIGTERM SIGTSTP SIGTTIN SIGTTOU
       SIGUSR1 SIGUSR2 SIG_BLOCK SIG_SETMASK SIG_UNBLOCK SSIZE_MAX
       STDERR_FILENO STDIN_FILENO STDOUT_FILENO STREAM_MAX
       S_IRGRP S_IROTH S_IRUSR S_IRWXG S_IRWXO S_IRWXU S_ISGID S_ISUID
@@ -100,6 +108,16 @@ push @names, {name=>$_, type=>"IV", default=>["IV", "0"]}
               _POSIX_PATH_MAX _POSIX_PIPE_BUF _POSIX_SSIZE_MAX
               _POSIX_STREAM_MAX _POSIX_TZNAME_MAX _POSIX_VDISABLE _POSIX_VERSION
              ));
+
+if ($rt_signals) {
+    push @names, {name=>"SIGRTMAX", not_constant=>1},
+    {name=>"SIGRTMIN", not_constant=>1},
+} else {
+    # Well, it seems that your vendor has defined them, but not in a way that
+    # would actually compile.
+    push @names, {name=>"SIGRTMAX", macro=>0},
+    {name=>"SIGRTMIN", macro=>0},
+}
 
 WriteConstants(
     NAME => 'POSIX',

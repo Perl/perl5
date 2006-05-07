@@ -329,6 +329,7 @@ Perl_newSVrv
 Perl_newSVsv
 Perl_newUNOP
 Perl_newWHILEOP
+Perl_newWHILEOP8
 Perl_new_stackinfo
 Perl_scan_vstring
 Perl_ninstr
@@ -426,6 +427,7 @@ Perl_scan_num
 Perl_scan_oct
 Perl_screaminstr
 Perl_share_hek
+Perl_csighandler_va
 Perl_csighandler
 Perl_stack_grow
 Perl_start_subparse
@@ -720,6 +722,7 @@ Perl_ck_trunc
 Perl_is_utf8_string_loclen
 Perl_newSVhek
 Perl_stashpv_hvname_match
+Perl_hv_assert
 Perl_gv_SVadd
 Perl_ckwarn
 Perl_ckwarn_d
