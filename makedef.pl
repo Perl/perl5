@@ -797,6 +797,16 @@ unless ($define{'PERL_DONT_CREATE_GVSV'}) {
 		    )];
 }
 
+# Ideally this would also check SA_SIGINFO, but there doesn't seem to be an
+# easy way to find that out from here. Fix it if it breaks because there is
+# a platform where the logic here doesn't work, *and* the export lists have to
+# be accurate there.
+unless ($define{'d_sigaction'}) {
+    skip_symbols [qw(
+		    Perl_csighandler_va
+		    )];
+}
+
 sub readvar {
     my $file = shift;
     my $proc = shift || sub { "PL_$_[2]" };
