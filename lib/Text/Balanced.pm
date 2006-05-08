@@ -9,7 +9,7 @@ package Text::Balanced;
 use Exporter;
 use vars qw { $VERSION @ISA %EXPORT_TAGS };
 
-$VERSION = '1.97';
+$VERSION = '1.98_01';
 @ISA		= qw ( Exporter );
 		     
 %EXPORT_TAGS	= ( ALL => [ qw(
@@ -64,7 +64,7 @@ sub _succeed
 	$@ = undef;
 	my ($wantarray,$textref) = splice @_, 0, 2;
 	my ($extrapos, $extralen) = @_>18 ? splice(@_, -2, 2) : (0,0);
-	my ($startlen, $oppos) = $_[5];
+	my ($startlen) = $_[5];
         my $oppos = $_[6];
 	my $remainderpos = $_[2];
 	if ($wantarray)
