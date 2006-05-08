@@ -4735,7 +4735,7 @@ static STRLEN
 S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
 		    const U8 *const send, STRLEN uoffset,
 		    STRLEN uoffset0, STRLEN boffset0) {
-    STRLEN boffset;
+    STRLEN boffset = 0; /* Actually always set, but let's keep gcc happy.  */
     bool found = FALSE;
 
     assert (uoffset >= uoffset0);
@@ -4931,7 +4931,7 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8,
     assert(cache);
 
     if (PL_utf8cache < 0) {
-	const char *start = SvPVX_const(sv);
+	const U8 *start = (const U8 *) SvPVX_const(sv);
 	const U8 *const end = start + byte;
 	STRLEN realutf8 = 0;
 
@@ -5122,7 +5122,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 {
     const U8* s;
     const STRLEN byte = *offsetp;
-    STRLEN len;
+    STRLEN len = 0; /* Actually always set, but let's keep gcc happy.  */
     STRLEN blen;
     MAGIC* mg = NULL;
     const U8* send;
