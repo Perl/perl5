@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2006 Mark Shelor, All Rights Reserved
  *
- * Version: 5.34
- * Thu Feb  2 18:55:40 MST 2006
+ * Version: 5.36
+ * Mon May  8 01:38:36 MST 2006
  *
  */
 
@@ -16,7 +16,6 @@
 #include <limits.h>
 
 #define SHA32_MAX	4294967295U
-#define SHA64_MAX	18446744073709551615U
 
 #define SHA32_SHR(x, n)	((x) >> (n))
 #define SHA32_SHL(x, n)	((x) << (n))
@@ -61,6 +60,7 @@
 #elif defined(SHA_ULL_EXISTS)
 	#undef  SHA64_ALIGNED
 	#undef  SHA64_SHR
+	#define SHA64_MAX	18446744073709551615ULL
 	#define SHA64_SHR(x, n)	(((x) & SHA64_MAX) >> (n))
 	#define SHA64	unsigned long long
 	#define SHA64_CONST(c)	c ## ULL

@@ -1,3 +1,5 @@
+require 5.006000;
+
 use ExtUtils::MakeMaker;
 use Getopt::Std;
 use Config;
