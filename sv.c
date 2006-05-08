@@ -4652,7 +4652,8 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
 	    if (mg && mg->mg_len != -1) {
 		ulen = mg->mg_len;
 		if (PL_utf8cache < 0) {
-		    const STRLEN real = Perl_utf8_length(aTHX_ s, s + len);
+		    const STRLEN real = Perl_utf8_length(aTHX_ (U8 *)s,
+							 (U8 *)s + len);
 		    if (real != ulen) {
 			/* Need to turn the assertions off otherwise we may
 			   recurse infinitely while printing error messages.
@@ -4666,7 +4667,7 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
 		}
 	    }
 	    else {
-		ulen = Perl_utf8_length(aTHX_ s, s + len);
+		ulen = Perl_utf8_length(aTHX_ (U8 *)s, (U8 *)s + len);
 		if (!SvREADONLY(sv)) {
 		    if (!mg) {
 			mg = sv_magicext(sv, 0, PERL_MAGIC_utf8,
@@ -4678,7 +4679,7 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
 	    }
 	    return ulen;
 	}
-	return Perl_utf8_length(aTHX_ s, s + len);
+	return Perl_utf8_length(aTHX_ (U8 *)s, (U8 *)s + len);
     }
 }
 
@@ -5066,7 +5067,7 @@ S_sv_pos_b2u_forwards(pTHX_ const U8 *s, const U8 *const target)
 	/* Call utf8n_to_uvchr() to validate the sequence
 	 * (unless a simple non-UTF character) */
 	if (!UTF8_IS_INVARIANT(*s))
-	    utf8n_to_uvchr(s, UTF8SKIP(s), &n, 0);
+	    utf8n_to_uvchr((U8 *)s, UTF8SKIP(s), &n, 0);
 	if (n > 0) {
 	    s += n;
 	    len++;
