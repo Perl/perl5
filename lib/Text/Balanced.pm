@@ -64,7 +64,8 @@ sub _succeed
 	$@ = undef;
 	my ($wantarray,$textref) = splice @_, 0, 2;
 	my ($extrapos, $extralen) = @_>18 ? splice(@_, -2, 2) : (0,0);
-	my ($startlen, $oppos) = $_[5,6];
+	my ($startlen, $oppos) = $_[5];
+        my $oppos = $_[6];
 	my $remainderpos = $_[2];
 	if ($wantarray)
 	{
@@ -728,8 +729,7 @@ sub _match_quotelike($$$$)	# ($textref, $prepat, $allow_raw_match)
 		       );
 	}
 
-	unless ($$textref =~
-    m{\G(\b(?:m|s|qq|qx|qw|q|qr|tr|y)\b(?=\s*\S)|<<(?=\s*["'A-Za-z_]))}gc)
+	unless ($$textref =~ m{\G(\b(?:m|s|qq|qx|qw|q|qr|tr|y)\b(?=\s*\S)|<<)}gc)
 	{
 		_failmsg q{No quotelike operator found after prefix at "} .
 			     substr($$textref, pos($$textref), 20) .
