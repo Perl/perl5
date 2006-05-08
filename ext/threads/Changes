@@ -1,5 +1,8 @@
 Revision history for Perl extension threads.
 
+1.26 Mon May  8 13:18:29 EDT 2006
+	- Fix for Win32 build WRT page size
+
 1.25 Thu May  4 12:34:02 EDT 2006
 	- Final sync with blead
 	- Lock counters in tests

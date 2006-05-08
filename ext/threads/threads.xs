@@ -32,6 +32,9 @@ typedef perl_os_thread pthread_t;
 #    define PERL_THREAD_DETACH(t) pthread_detach((t))
 #  endif
 #endif
+#if !defined(HAS_GETPAGESIZE) && defined(I_SYS_PARAM)
+#  include <sys/param.h>
+#endif
 
 /* Values for 'state' member */
 #define PERL_ITHR_JOINABLE      0
@@ -270,17 +273,13 @@ good_stack_size(pTHX_ IV stack_size)
 
     /* Round up to page size boundary */
     if (page_size <= 0) {
-#ifdef PL_mmap_page_size
-        page_size = PL_mmap_page_size;
-#else
-#  ifdef HAS_MMAP
-#    if defined(HAS_SYSCONF) && (defined(_SC_PAGESIZE) || defined(_SC_MMAP_PAGE_SIZE))
+#if defined(HAS_SYSCONF) && (defined(_SC_PAGESIZE) || defined(_SC_MMAP_PAGE_SIZE))
         SETERRNO(0, SS_NORMAL);
-#      ifdef _SC_PAGESIZE
+#  ifdef _SC_PAGESIZE
         page_size = sysconf(_SC_PAGESIZE);
-#      else
+#  else
         page_size = sysconf(_SC_MMAP_PAGE_SIZE);
-#      endif
+#  endif
         if ((long)page_size < 0) {
             if (errno) {
                 SV * const error = get_sv("@", FALSE);
@@ -290,20 +289,18 @@ good_stack_size(pTHX_ IV stack_size)
                 Perl_croak(aTHX_ "PANIC: sysconf: pagesize unknown");
             }
         }
-#    else
-#      ifdef HAS_GETPAGESIZE
+#else
+#  ifdef HAS_GETPAGESIZE
         page_size = getpagesize();
-#      else
-#        if defined(I_SYS_PARAM) && defined(PAGESIZE)
+#  else
+#    if defined(I_SYS_PARAM) && defined(PAGESIZE)
         page_size = PAGESIZE;
-#        endif
-#      endif
+#    else
+        page_size = 8192;   /* A conservative default */
+#    endif
+#  endif
         if (page_size <= 0)
             Perl_croak(aTHX_ "PANIC: bad pagesize %" IVdf, (IV)page_size);
-#    endif
-#  else
-        page_size = 8192;   /* A conservative default */
-#  endif
 #endif
     }
     stack_size = ((stack_size + (page_size - 1)) / page_size) * page_size;
