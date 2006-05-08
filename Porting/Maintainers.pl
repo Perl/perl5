@@ -43,6 +43,7 @@ package Maintainers;
 	'muir'		=> 'David Muir Sharnoff <muir@cpan.org>',
 	'neilb'		=> 'Neil Bowers <neilb@cpan.org>',
 	'ni-s'		=> 'Nick Ing-Simmons <nick@ing-simmons.net>',
+	'nuffin'	=> 'Yuval Kogman <nothingmuch@woobling.org>',
 	'p5p'		=> 'perl5-porters <perl5-porters@perl.org>',
 	'perlfaq'	=> 'perlfaq-workers <perlfaq-workers@perl.org>',
 	'petdance'	=> 'Andy Lester <andy@petdance.com>',
@@ -633,6 +634,13 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'mjd',
 		'FILES'		=> q[lib/Tie/File.pm lib/Tie/File],
+		'CPAN'		=> 1,
+		},
+
+	'Tie::RefHash' =>
+		{
+		'MAINTAINER'	=> 'nuffin',
+		'FILES'		=> q[lib/Tie/RefHash.pm lib/Tie/RefHash],
 		'CPAN'		=> 1,
 		},
 
