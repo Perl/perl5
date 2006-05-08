@@ -1876,8 +1876,12 @@ STATIC I32	S_expect_number(pTHX_ char** pattern)
 			__attribute__warn_unused_result__;
 
 #
-STATIC bool	S_utf8_mg_pos(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 *offsetp, I32 uoff, const U8 **sp, const U8 *start, const U8 *send);
-STATIC bool	S_utf8_mg_pos_init(pTHX_ SV *sv, MAGIC **mgp, STRLEN **cachep, I32 i, I32 offsetp, const U8 *s, const U8 *start);
+STATIC STRLEN	S_sv_pos_u2b_forwards(pTHX_ const U8 *const start, const U8 *const send, STRLEN uoffset);
+STATIC STRLEN	S_sv_pos_u2b_midway(pTHX_ const U8 *const start, const U8 *const send, STRLEN uoffset, STRLEN uend);
+STATIC STRLEN	S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start, const U8 *const send, STRLEN uoffset, STRLEN uoffset0, STRLEN boffset0);
+STATIC void	S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8, STRLEN blen);
+STATIC STRLEN	S_sv_pos_b2u_forwards(pTHX_ const U8 *s, const U8 *const target);
+STATIC STRLEN	S_sv_pos_b2u_midway(pTHX_ const U8 *s, const U8 *const target, const U8 *end, STRLEN endu);
 STATIC void	S_reset_amagic(pTHX_ SV *rv, const bool on);
 #endif
 

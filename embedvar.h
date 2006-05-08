@@ -472,6 +472,7 @@
 #define PL_utf8_toupper		(PERL_GET_INTERP->Iutf8_toupper)
 #define PL_utf8_upper		(PERL_GET_INTERP->Iutf8_upper)
 #define PL_utf8_xdigit		(PERL_GET_INTERP->Iutf8_xdigit)
+#define PL_utf8cache		(PERL_GET_INTERP->Iutf8cache)
 #define PL_utf8locale		(PERL_GET_INTERP->Iutf8locale)
 #define PL_uudmap		(PERL_GET_INTERP->Iuudmap)
 #define PL_warnhook		(PERL_GET_INTERP->Iwarnhook)
@@ -800,6 +801,7 @@
 #define PL_utf8_toupper		(vTHX->Iutf8_toupper)
 #define PL_utf8_upper		(vTHX->Iutf8_upper)
 #define PL_utf8_xdigit		(vTHX->Iutf8_xdigit)
+#define PL_utf8cache		(vTHX->Iutf8cache)
 #define PL_utf8locale		(vTHX->Iutf8locale)
 #define PL_uudmap		(vTHX->Iuudmap)
 #define PL_warnhook		(vTHX->Iwarnhook)
@@ -1131,6 +1133,7 @@
 #define PL_Iutf8_toupper	PL_utf8_toupper
 #define PL_Iutf8_upper		PL_utf8_upper
 #define PL_Iutf8_xdigit		PL_utf8_xdigit
+#define PL_Iutf8cache		PL_utf8cache
 #define PL_Iutf8locale		PL_utf8locale
 #define PL_Iuudmap		PL_uudmap
 #define PL_Iwarnhook		PL_warnhook

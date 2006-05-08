@@ -447,10 +447,6 @@ from C<Perl_sv_2iv_flags> around 5.005_50 time, and it may be possible to
 replace both with a single function that returns a value or union which is
 split out by the macros in F<sv.h>
 
-=head2 UTF8 caching code
-
-The string position/offset cache is not optional. It should be.
-
 =head2 Implicit Latin 1 => Unicode translation
 
 Conversions from byte strings to UTF-8 currently map high bit characters

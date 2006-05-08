@@ -971,6 +971,8 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		    goto ro_magicalize;
 		if (strEQ(name2, "TF8LOCALE"))
 		    goto ro_magicalize;
+		if (strEQ(name2, "TF8CACHE"))
+		    goto magicalize;
 		break;
 	    case '\027':	/* $^WARNING_BITS */
 		if (strEQ(name2, "ARNING_BITS"))
