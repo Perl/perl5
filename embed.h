@@ -1472,6 +1472,7 @@
 #  if defined(DEBUGGING)
 #ifdef PERL_CORE
 #define tokereport		S_tokereport
+#define printbuf		S_printbuf
 #endif
 #  endif
 #endif
@@ -3635,6 +3636,7 @@
 #  if defined(DEBUGGING)
 #ifdef PERL_CORE
 #define tokereport(a)		S_tokereport(aTHX_ a)
+#define printbuf(a,b)		S_printbuf(aTHX_ a,b)
 #endif
 #  endif
 #endif

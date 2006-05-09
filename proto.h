@@ -3944,6 +3944,10 @@ STATIC void	S_strip_return(pTHX_ SV *sv)
 #  endif
 #  if defined(DEBUGGING)
 STATIC int	S_tokereport(pTHX_ I32 rv);
+STATIC void	S_printbuf(pTHX_ const char* fmt, const char* s)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
 #  endif
 #endif
 

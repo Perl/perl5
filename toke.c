@@ -3816,9 +3816,7 @@ Perl_yylex(pTHX)
 
 	    if (strnEQ(s,"=>",2)) {
 		s = force_word(PL_bufptr,WORD,FALSE,FALSE,FALSE);
-                DEBUG_T( { S_printbuf(aTHX_
-			"### Saw unary minus before =>, forcing word %s\n", s);
-                } );
+		DEBUG_T( { printbuf("### Saw unary minus before =>, forcing word %s\n", s); } );
 		OPERATOR('-');		/* unary minus */
 	    }
 	    PL_last_uni = PL_oldbufptr;
@@ -4788,14 +4786,14 @@ Perl_yylex(pTHX)
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
 	s = scan_num(s, &yylval);
-	DEBUG_T( { S_printbuf(aTHX_ "### Saw number in %s\n", s); } );
+	DEBUG_T( { printbuf("### Saw number in %s\n", s); } );
 	if (PL_expect == XOPERATOR)
 	    no_op("Number",s);
 	TERM(THING);
 
     case '\'':
 	s = scan_str(s,!!PL_madskills,FALSE);
-	DEBUG_T( { S_printbuf(aTHX_ "### Saw string before %s\n", s); } );
+	DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
@@ -4812,7 +4810,7 @@ Perl_yylex(pTHX)
 
     case '"':
 	s = scan_str(s,!!PL_madskills,FALSE);
-	DEBUG_T( { S_printbuf(aTHX_ "### Saw string before %s\n", s); } );
+	DEBUG_T( { printbuf("### Saw string before %s\n", s); } );
 	if (PL_expect == XOPERATOR) {
 	    if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack) {
 		PL_expect = XTERM;
@@ -4837,7 +4835,7 @@ Perl_yylex(pTHX)
 
     case '`':
 	s = scan_str(s,!!PL_madskills,FALSE);
-	DEBUG_T( { S_printbuf(aTHX_ "### Saw backtick string before %s\n", s); } );
+	DEBUG_T( { printbuf("### Saw backtick string before %s\n", s); } );
 	if (PL_expect == XOPERATOR)
 	    no_op("Backticks",s);
 	if (!s)

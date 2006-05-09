@@ -4647,7 +4647,7 @@ PP(pp_ghostent)
 
     if (hent) {
 	PUSHs(sv_2mortal(newSVpv((char*)hent->h_name, 0)));
-	PUSHs(S_space_join_names_mortal(aTHX_ hent->h_aliases));
+	PUSHs(space_join_names_mortal(hent->h_aliases));
 	PUSHs(sv_2mortal(newSViv((IV)hent->h_addrtype)));
 	len = hent->h_length;
 	PUSHs(sv_2mortal(newSViv((IV)len)));
@@ -4730,7 +4730,7 @@ PP(pp_gnetent)
 
     if (nent) {
 	PUSHs(sv_2mortal(newSVpv(nent->n_name, 0)));
-	PUSHs(S_space_join_names_mortal(aTHX_ nent->n_aliases));
+	PUSHs(space_join_names_mortal(nent->n_aliases));
 	PUSHs(sv_2mortal(newSViv((IV)nent->n_addrtype)));
 	PUSHs(sv_2mortal(newSViv((IV)nent->n_net)));
     }
@@ -4791,7 +4791,7 @@ PP(pp_gprotoent)
 
     if (pent) {
 	PUSHs(sv_2mortal(newSVpv(pent->p_name, 0)));
-	PUSHs(S_space_join_names_mortal(aTHX_ pent->p_aliases));
+	PUSHs(space_join_names_mortal(pent->p_aliases));
 	PUSHs(sv_2mortal(newSViv((IV)pent->p_proto)));
     }
 
@@ -4861,7 +4861,7 @@ PP(pp_gservent)
 
     if (sent) {
 	PUSHs(sv_2mortal(newSVpv(sent->s_name, 0)));
-	PUSHs(S_space_join_names_mortal(aTHX_ sent->s_aliases));
+	PUSHs(space_join_names_mortal(sent->s_aliases));
 #ifdef HAS_NTOHS
 	PUSHs(sv_2mortal(newSViv((IV)PerlSock_ntohs(sent->s_port))));
 #else
@@ -5278,7 +5278,7 @@ PP(pp_ggrent)
 	 * but the gr_mem is poisonous anyway.
 	 * So yes, you cannot get the list of group
 	 * members if building multithreaded in UNICOS/mk. */
-	PUSHs(S_space_join_names_mortal(aTHX_ grent->gr_mem));
+	PUSHs(space_join_names_mortal(grent->gr_mem));
 #endif
     }
 
