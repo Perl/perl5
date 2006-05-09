@@ -914,8 +914,8 @@
  *	Perl has been cross-compiled to.  Undefined if not a cross-compile.
  */
 #ifndef USE_CROSS_COMPILE
-/*#define	USE_CROSS_COMPILE	/**/
-#define	PERL_TARGETARCH	"undef"	/**/
+#define	USE_CROSS_COMPILE	/**/
+#define	PERL_TARGETARCH	"wince"	/**/
 #endif
 
 /* MULTIARCH:

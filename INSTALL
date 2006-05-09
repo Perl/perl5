@@ -1971,7 +1971,8 @@ has to be used is C<-Dusecrosscompile>.
    sh ./Configure -des -Dusecrosscompile -D...
 
 This will make the cpp symbol USE_CROSS_COMPILE and the %Config
-symbol C<usecrosscompile> available.
+symbol C<usecrosscompile> available, and C<xconfig.h> will be used
+for cross-compilation.
 
 During the Configure and build, certain helper scripts will be created
 into the Cross/ subdirectory.  The scripts are used to execute a

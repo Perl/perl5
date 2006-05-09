@@ -30,7 +30,11 @@
 #ifdef PERL_MICRO
 #   include "uconfig.h"
 #else
-#   include "config.h"
+#   ifndef USE_CROSS_COMPILE
+#       include "config.h"
+#   else
+#       include "xconfig.h"
+#   endif
 #endif
 
 #define PERLIO_NOT_STDIO 0

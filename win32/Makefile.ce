@@ -1,6 +1,8 @@
-# perl makefile for wince
 #
-# Time-stamp: <26/10/01 15:10:06 keuchel@keuchelnt>
+# perl makefile for wince
+# During the cross-compilation, it first uses Makefile file to build
+# miniperl on HOST and then build required platform
+#
 
 SRCDIR     = ..
 PV         = 59
@@ -380,7 +382,7 @@ LIB=$(WCEROOT)\$(OSVERSION)\$(PLATFORM)\lib\$(ARCH)
 # Additional compiler flags can be specified here.
 #
 
-BUILDOPT	= $(BUILDOPT) $(CECFLAGS)
+BUILDOPT	= $(BUILDOPT) $(CECFLAGS) -DUSE_CROSS_COMPILE
 
 
 !IF "$(CRYPT_SRC)$(CRYPT_LIB)" == ""
