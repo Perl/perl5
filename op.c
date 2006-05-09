@@ -6416,6 +6416,7 @@ Perl_ck_fun(pTHX_ OP *o)
 			    else if (kid->op_type == OP_AELEM
 				     || kid->op_type == OP_HELEM)
 			    {
+				 OP *firstop;
 				 OP *op = ((BINOP*)kid)->op_first;
 				 name = NULL;
 				 if (op) {
@@ -6425,10 +6426,10 @@ Perl_ck_fun(pTHX_ OP *o)
 					   "[]" : "{}";
 				      if (((op->op_type == OP_RV2AV) ||
 					   (op->op_type == OP_RV2HV)) &&
-					  (op = ((UNOP*)op)->op_first) &&
-					  (op->op_type == OP_GV)) {
+					  (firstop = ((UNOP*)op)->op_first) &&
+					  (firstop->op_type == OP_GV)) {
 					   /* packagevar $a[] or $h{} */
-					   GV * const gv = cGVOPx_gv(op);
+					   GV * const gv = cGVOPx_gv(firstop);
 					   if (gv)
 						tmpstr =
 						     Perl_newSVpvf(aTHX_
