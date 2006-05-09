@@ -1695,7 +1695,7 @@ PERL_CALLCONV void	Perl_package(pTHX_ OP* o)
 
 #endif
 PERL_CALLCONV PADOFFSET	Perl_pad_alloc(pTHX_ I32 optype, U32 tmptype);
-PERL_CALLCONV PADOFFSET	Perl_allocmy(pTHX_ char* name)
+PERL_CALLCONV PADOFFSET	Perl_allocmy(pTHX_ const char *const name)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV PADOFFSET	Perl_pad_findmy(pTHX_ const char* name)

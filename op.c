@@ -230,7 +230,7 @@ S_no_bareword_allowed(pTHX_ const OP *o)
 /* "register" allocation */
 
 PADOFFSET
-Perl_allocmy(pTHX_ char *name)
+Perl_allocmy(pTHX_ const char *const name)
 {
     dVAR;
     PADOFFSET off;
