@@ -248,6 +248,7 @@ Perl_allocmy(pTHX_ char *name)
 	    /* 1999-02-27 mjd@plover.com */
 	    char *p;
 	    p = strchr(name, '\0');
+	    assert(p);
 	    /* The next block assumes the buffer is at least 205 chars
 	       long.  At present, it's always at least 256 chars. */
 	    if (p - name > 200) {
