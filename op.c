@@ -2227,6 +2227,11 @@ Perl_fold_constants(pTHX_ register OP *o)
 	    SvTEMP_off(sv);
 	}
 	break;
+    case 2:
+	/* my_exit() was called; propagate it */
+	JMPENV_POP;
+	JMPENV_JUMP(2);
+	/* NOTREACHED */
     case 3:
 	/* Something tried to die.  Abandon constant folding.  */
 	/* Pretend the error never happened.  */
@@ -2235,7 +2240,7 @@ Perl_fold_constants(pTHX_ register OP *o)
 	break;
     default:
 	JMPENV_POP;
-	/* Don't expect 1 (setjmp failed) or 2 (something called my_exit)  */
+	/* Don't expect 1 (setjmp failed) */
 	Perl_croak(aTHX_ "panic: fold_constants JMPENV_PUSH returned %d", ret);
     }
 
