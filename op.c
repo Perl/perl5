@@ -245,30 +245,11 @@ Perl_allocmy(pTHX_ char *name)
     {
 	/* name[2] is true if strlen(name) > 2  */
 	if (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1])) {
-	    /* 1999-02-27 mjd@plover.com */
-	    char *p;
-	    p = strchr(name, '\0');
-	    assert(p);
-	    /* The next block assumes the buffer is at least 205 chars
-	       long.  At present, it's always at least 256 chars. */
-	    if (p - name > 200) {
-#ifdef HAS_STRLCPY
-		strlcpy(name + 200, "...", 4);
-#else
-		strcpy(name + 200, "...");
-#endif
-		p = name + 199;
-	    }
-	    else {
-		p[1] = '\0';
-	    }
-	    /* Move everything else down one character */
-	    for (; p-name > 2; p--)
-		*p = *(p-1);
-	    name[2] = toCTRL(name[1]);
-	    name[1] = '^';
+	    yyerror(Perl_form(aTHX_ "Can't use global %c^%c%s in \"my\"",
+			      name[0], toCTRL(name[1]), name + 2));
+	} else {
+	    yyerror(Perl_form(aTHX_ "Can't use global %s in \"my\"",name));
 	}
-	yyerror(Perl_form(aTHX_ "Can't use global %s in \"my\"",name));
     }
 
     /* check for duplicate declaration */
