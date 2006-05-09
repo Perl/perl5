@@ -696,10 +696,12 @@ CODE:
         /* Must do things the slow way */
         U8 *dest;
             /* We need a copy to pass to check() */
-        U8 *src  = (U8*)savepv((char *)s);
+        U8 *src  = s;
         U8 *send = s + len;
+        U8 *d0;
 
         New(83, dest, len, U8); /* I think */
+        d0 = dest;
 
         while (s < send) {
                 if (*s < 0x80){
@@ -735,6 +737,9 @@ CODE:
           *dest++ = (U8)uv;
         }
         }
+        RETVAL = dest - d0;
+        sv_usepvn(sv, (char *)dest, RETVAL);
+        SvUTF8_off(sv);
     } else {
         RETVAL = (utf8_to_bytes(s, &len) ? len : 0);
     }
