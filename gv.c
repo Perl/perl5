@@ -1601,6 +1601,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 	Gv_AMupdate(stash);
 	mg = mg_find((SV*)stash, PERL_MAGIC_overload_table);
     }
+    assert(mg);
     amtp = (AMT*)mg->mg_ptr;
     if ( amtp->was_ok_am != PL_amagic_generation
 	 || amtp->was_ok_sub != PL_sub_generation )
