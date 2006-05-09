@@ -2,10 +2,12 @@ BEGIN {
     chdir 't' if -d 't';
 
     @INC = qw(. ../lib);
-
-    require Config; import Config;
     require 'test.pl';
 }
+
+require Config; import Config;
+
+$TEST_COUNT = 11;
 
 if ($Config{'extensions'} !~ /\bIPC\/SysV\b/) {
     skip_all('IPC::SysV was not built');
@@ -17,7 +19,7 @@ elsif ($Config{'d_msg'} ne 'define') {
     skip_all('$Config{d_msg} undefined');
 }
 else {
-    plan( tests => 11 );
+    plan( tests => $TEST_COUNT );
 }
 
 use IPC::SysV qw(
@@ -33,17 +35,18 @@ use IPC::SysV qw(
 );
 use IPC::Semaphore;
 
+SKIP: {
+
 my $sem =
     IPC::Semaphore->new(IPC_PRIVATE, 10, S_IRWXU | S_IRWXG | S_IRWXO | IPC_CREAT);
 if (!$sem) {
     if ($! eq 'No space left on device') {
         # "normal" error
-        diag("Bail out! cannot acquire a semaphore: $!");
-        exit(1);
+        skip( "cannot proceed: IPC::Semaphore->new() said: $!", $TEST_COUNT);
     }
     else {
         # unexpected error
-        die "semget: ",$!+0," $!\n";
+        die "IPC::Semaphore->new(): ",$!+0," $!\n";
     }
 }
 
@@ -75,3 +78,5 @@ END {
         ok($sem->remove,'release');
     }
 }
+
+} # SKIP
