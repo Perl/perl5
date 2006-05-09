@@ -1468,13 +1468,16 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 {
   dVAR;
   MAGIC* const mg = mg_find((SV*)stash, PERL_MAGIC_overload_table);
-  AMT * const amtp = (mg) ? (AMT*)mg->mg_ptr: (AMT *) NULL;
   AMT amt;
 
-  if (mg && amtp->was_ok_am == PL_amagic_generation
-      && amtp->was_ok_sub == PL_sub_generation)
-      return (bool)AMT_OVERLOADED(amtp);
-  sv_unmagic((SV*)stash, PERL_MAGIC_overload_table);
+  if (mg) {
+      const AMT * const amtp = (AMT*)mg->mg_ptr;
+      if (amtp->was_ok_am == PL_amagic_generation
+	  && amtp->was_ok_sub == PL_sub_generation) {
+	  return (bool)AMT_OVERLOADED(amtp);
+      }
+      sv_unmagic((SV*)stash, PERL_MAGIC_overload_table);
+  }
 
   DEBUG_o( Perl_deb(aTHX_ "Recalcing overload magic in package %s\n",HvNAME_get(stash)) );
 
