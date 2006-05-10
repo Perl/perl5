@@ -3271,14 +3271,18 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
 }
 
 OP *
-Perl_dofile(pTHX_ OP *term)
+Perl_dofile(pTHX_ OP *term, I32 force_builtin)
 {
     OP *doop;
-    GV *gv;
+    GV *gv = Nullgv;
 
-    gv = gv_fetchpv("do", FALSE, SVt_PVCV);
-    if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv)))
-	gv = gv_fetchpv("CORE::GLOBAL::do", FALSE, SVt_PVCV);
+    if (!force_builtin) {
+	gv = gv_fetchpv("do", FALSE, SVt_PVCV);
+	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv))) {
+	    GV **gvp = (GV**)hv_fetch(PL_globalstash, "do", 2, FALSE);
+	    if (gvp) gv = *gvp; else gv = Nullgv;
+	}
+    }
 
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
 	doop = ck_subr(newUNOP(OP_ENTERSUB, OPf_STACKED,
@@ -5943,7 +5947,7 @@ Perl_ck_repeat(pTHX_ OP *o)
 OP *
 Perl_ck_require(pTHX_ OP *o)
 {
-    GV* gv;
+    GV* gv = Nullgv;
 
     if (o->op_flags & OPf_KIDS) {	/* Shall we supply missing .pm? */
 	SVOP * const kid = (SVOP*)cUNOPo->op_first;
@@ -5975,10 +5979,12 @@ Perl_ck_require(pTHX_ OP *o)
 	}
     }
 
-    /* handle override, if any */
-    gv = gv_fetchpv("require", FALSE, SVt_PVCV);
-    if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv)))
-	gv = gv_fetchpv("CORE::GLOBAL::require", FALSE, SVt_PVCV);
+    if (!(o->op_flags & OPf_SPECIAL)) { /* Wasn't written as CORE::require */
+	/* handle override, if any */
+	gv = gv_fetchpv("require", FALSE, SVt_PVCV);
+	if (!(gv && GvCVu(gv) && GvIMPORTED_CV(gv)))
+	    gv = gv_fetchpv("CORE::GLOBAL::require", FALSE, SVt_PVCV);
+    }
 
     if (gv && GvCVu(gv) && GvIMPORTED_CV(gv)) {
 	OP * const kid = cUNOPo->op_first;

@@ -3001,7 +3001,8 @@ PP(pp_require)
 			sver = utf8n_to_uvchr(s, end - s, &len, 0);
 		}
 	    }
-	    if (cUNOP->op_first->op_private & OPpCONST_NOVER) {
+	    if (cUNOP->op_first->op_type == OP_CONST
+		&& cUNOP->op_first->op_private & OPpCONST_NOVER) {
 		if (PERL_REVISION > rev
 		    || (PERL_REVISION == rev
 			&& (PERL_VERSION > ver
@@ -3031,7 +3032,8 @@ PP(pp_require)
 	}
 	else if (!SvPOKp(sv)) {			/* require 5.005_03 */
 	    const NV nrev = SvNV(sv);
-	    if (cUNOP->op_first->op_private & OPpCONST_NOVER) {
+	    if (cUNOP->op_first->op_type == OP_CONST
+		&& cUNOP->op_first->op_private & OPpCONST_NOVER) {
 		if ((NV)PERL_REVISION + ((NV)PERL_VERSION/(NV)1000)
 		    + ((NV)PERL_SUBVERSION/(NV)1000000)
 		    + 0.00000099 > nrev) {
