@@ -120,6 +120,7 @@ static void yydestruct(pTHX_ void *ptr);
 %nonassoc EQOP
 %nonassoc RELOP
 %nonassoc UNIOP UNIOPSUB
+%nonassoc REQUIRE
 %left <ival> SHIFTOP
 %left ADDOP
 %left MULOP
@@ -602,7 +603,7 @@ anonymous:	'[' expr ']'
 
 /* Things called with "do" */
 termdo	:       DO term	%prec UNIOP                     /* do $filename */
-			{ $$ = dofile($2, $1); }
+			{ $$ = dofile2($2, $1); }
 	|	DO block	%prec '('               /* do { code */
 			{ $$ = newUNOP(OP_NULL, OPf_SPECIAL, scope($2)); }
 	|	DO WORD '(' ')'                         /* do somesub() */

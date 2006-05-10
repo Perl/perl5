@@ -225,6 +225,7 @@
 #define do_vecget		Perl_do_vecget
 #define do_vecset		Perl_do_vecset
 #define do_vop			Perl_do_vop
+#define dofile2			Perl_dofile2
 #define dofile			Perl_dofile
 #endif
 #define dowantarray		Perl_dowantarray
@@ -2268,7 +2269,8 @@
 #define do_vecget(a,b,c)	Perl_do_vecget(aTHX_ a,b,c)
 #define do_vecset(a)		Perl_do_vecset(aTHX_ a)
 #define do_vop(a,b,c,d)		Perl_do_vop(aTHX_ a,b,c,d)
-#define dofile(a,b)		Perl_dofile(aTHX_ a,b)
+#define dofile2(a,b)		Perl_dofile2(aTHX_ a,b)
+#define dofile(a)		Perl_dofile(aTHX_ a)
 #endif
 #define dowantarray()		Perl_dowantarray(aTHX)
 #define dump_all()		Perl_dump_all(aTHX)

@@ -310,7 +310,8 @@ PERL_CALLCONV I32	Perl_do_trans(pTHX_ SV* sv);
 PERL_CALLCONV UV	Perl_do_vecget(pTHX_ SV* sv, I32 offset, I32 size);
 PERL_CALLCONV void	Perl_do_vecset(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_do_vop(pTHX_ I32 optype, SV* sv, SV* left, SV* right);
-PERL_CALLCONV OP*	Perl_dofile(pTHX_ OP* term, I32 force_builtin);
+PERL_CALLCONV OP*	Perl_dofile2(pTHX_ OP* term, I32 force_builtin);
+PERL_CALLCONV OP*	Perl_dofile(pTHX_ OP* term);
 PERL_CALLCONV I32	Perl_dowantarray(pTHX)
 			__attribute__warn_unused_result__;
 

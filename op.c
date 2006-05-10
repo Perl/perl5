@@ -3271,7 +3271,13 @@ Perl_vload_module(pTHX_ U32 flags, SV *name, SV *ver, va_list *args)
 }
 
 OP *
-Perl_dofile(pTHX_ OP *term, I32 force_builtin)
+Perl_dofile(pTHX_ OP *term)
+{
+    return dofile2(term, 0);
+}
+
+OP *
+Perl_dofile2(pTHX_ OP *term, I32 force_builtin)
 {
     OP *doop;
     GV *gv = Nullgv;

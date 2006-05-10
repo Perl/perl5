@@ -1,5 +1,5 @@
---- perly.c.orig	Wed May 10 18:12:01 2006
-+++ perly.c	Wed May 10 18:12:01 2006
+--- perly.c.orig	Wed May 10 18:57:57 2006
++++ perly.c	Wed May 10 18:57:57 2006
 @@ -1,5 +1,5 @@
  #ifndef lint
 -static char yysccsid[] = "@(#)yaccpar 1.8 (Berkeley) 01/20/91";
@@ -147,22 +147,22 @@
 @@ -301,7 +239,7 @@
      0,    0,    0,    0,    0,    0,    0,    0,    0,
  };
- #define YYTABLESIZE 4834
+ #define YYTABLESIZE 4871
 -short yytable[] = {                                      72,
 +static short yytable[] = {                                      72,
     56,  199,  222,   66,   68,   54,   60,   61,   70,   69,
     65,   22,   64,   66,  316,   60,  229,  112,  200,  377,
    326,   62,   66,  277,  297,  230,  306,  360,   64,   15,
-@@ -787,7 +725,7 @@
-     0,    0,    0,    0,    0,    0,    0,    0,  112,  112,
-     0,  112,  112,  112,
+@@ -791,7 +729,7 @@
+     0,    0,    0,    0,    0,  112,  112,    0,  112,  112,
+   112,
  };
 -short yycheck[] = {                                      15,
 +static short yycheck[] = {                                      15,
     33,   96,   59,   36,   37,   38,  123,   40,   15,   42,
     43,   59,   45,   36,   59,   59,   41,   40,  101,  363,
     59,   59,   36,  201,   41,   93,   41,  336,   59,   41,
-@@ -1279,7 +1217,7 @@
+@@ -1287,7 +1225,7 @@
  #endif
  #define YYMAXTOKEN 318
  #if YYDEBUG
@@ -171,7 +171,7 @@
  "end-of-file",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
  "'!'",0,0,"'$'","'%'","'&'",0,"'('","')'","'*'","'+'","','","'-'",0,0,0,0,0,0,0,
  0,0,0,0,0,"':'","';'",0,0,0,"'?'","'@'",0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-@@ -1296,7 +1234,7 @@
+@@ -1304,7 +1242,7 @@
  "OROR","ANDAND","BITOROP","BITANDOP","SHIFTOP","MATCHOP","UMINUS","REFGEN",
  "POWOP","PREINC","PREDEC","POSTINC","POSTDEC","ARROW",
  };
@@ -180,7 +180,7 @@
  "$accept : prog",
  "prog : progstart lineseq",
  "block : '{' remember lineseq '}'",
-@@ -1513,17 +1451,6 @@
+@@ -1521,17 +1459,6 @@
  #define YYMAXDEPTH 500
  #endif
  #endif
@@ -195,19 +195,19 @@
 -short yyss[YYSTACKSIZE];
 -YYSTYPE yyvs[YYSTACKSIZE];
 -#define yystacksize YYSTACKSIZE
- #line 811 "perly.y"
+ #line 812 "perly.y"
   /* PROGRAM */
  
-@@ -1534,7 +1461,7 @@
+@@ -1542,7 +1469,7 @@
  #endif
  #define yyparse() Perl_yyparse(pTHX)
  
--#line 1538 "y.tab.c"
-+#line 1465 "perly.c"
+-#line 1546 "y.tab.c"
++#line 1473 "perly.c"
  #define YYABORT goto yyabort
  #define YYACCEPT goto yyaccept
  #define YYERROR goto yyerrlab
-@@ -1542,11 +1469,31 @@
+@@ -1550,11 +1477,31 @@
  yyparse()
  {
      register int yym, yyn, yystate;
@@ -241,7 +241,7 @@
      {
          yyn = *yys;
          if (yyn >= '0' && yyn <= '9')
-@@ -1558,12 +1505,22 @@
+@@ -1566,12 +1513,22 @@
      yyerrflag = 0;
      yychar = (-1);
  
@@ -265,7 +265,7 @@
      if (yychar < 0)
      {
          if ((yychar = yylex()) < 0) yychar = 0;
-@@ -1573,7 +1530,7 @@
+@@ -1581,7 +1538,7 @@
              yys = 0;
              if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
              if (!yys) yys = "illegal-symbol";
@@ -274,7 +274,7 @@
                      yychar, yys);
          }
  #endif
-@@ -1583,12 +1540,24 @@
+@@ -1591,12 +1548,24 @@
      {
  #if YYDEBUG
          if (yydebug)
@@ -300,7 +300,7 @@
          }
          *++yyssp = yystate = yytable[yyn];
          *++yyvsp = yylval;
-@@ -1604,14 +1573,14 @@
+@@ -1612,14 +1581,14 @@
      }
      if (yyerrflag) goto yyinrecovery;
  #ifdef lint
@@ -319,7 +319,7 @@
      ++yynerrs;
  yyinrecovery:
      if (yyerrflag < 3)
-@@ -1624,12 +1593,24 @@
+@@ -1632,12 +1601,24 @@
              {
  #if YYDEBUG
                  if (yydebug)
@@ -345,7 +345,7 @@
                  }
                  *++yyssp = yystate = yytable[yyn];
                  *++yyvsp = yylval;
-@@ -1639,7 +1620,7 @@
+@@ -1647,7 +1628,7 @@
              {
  #if YYDEBUG
                  if (yydebug)
@@ -354,7 +354,7 @@
                              *yyssp);
  #endif
                  if (yyssp <= yyss) goto yyabort;
-@@ -1657,7 +1638,7 @@
+@@ -1665,7 +1646,7 @@
              yys = 0;
              if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
              if (!yys) yys = "illegal-symbol";
@@ -363,7 +363,7 @@
                      yystate, yychar, yys);
          }
  #endif
-@@ -1667,7 +1648,7 @@
+@@ -1675,7 +1656,7 @@
  yyreduce:
  #if YYDEBUG
      if (yydebug)
@@ -372,16 +372,16 @@
                  yystate, yyn, yyrule[yyn]);
  #endif
      yym = yylen[yyn];
-@@ -2542,7 +2523,7 @@
- #line 808 "perly.y"
+@@ -2550,7 +2531,7 @@
+ #line 809 "perly.y"
  { yyval.opval = yyvsp[0].opval; }
  break;
--#line 2546 "y.tab.c"
-+#line 2527 "perly.c"
+-#line 2554 "y.tab.c"
++#line 2535 "perly.c"
      }
      yyssp -= yym;
      yystate = *yyssp;
-@@ -2552,7 +2533,7 @@
+@@ -2560,7 +2541,7 @@
      {
  #if YYDEBUG
          if (yydebug)
@@ -390,7 +390,7 @@
   state %d\n", YYFINAL);
  #endif
          yystate = YYFINAL;
-@@ -2567,7 +2548,7 @@
+@@ -2575,7 +2556,7 @@
                  yys = 0;
                  if (yychar <= YYMAXTOKEN) yys = yyname[yychar];
                  if (!yys) yys = "illegal-symbol";
@@ -399,7 +399,7 @@
                          YYFINAL, yychar, yys);
              }
  #endif
-@@ -2582,20 +2563,50 @@
+@@ -2590,20 +2571,50 @@
          yystate = yydgoto[yym];
  #if YYDEBUG
      if (yydebug)
