@@ -98,8 +98,18 @@ case "$optimize" in
     case "`uname -m`" in
         ppc*)
             # on ppc, it seems that gcc (at least gcc 3.3.2) isn't happy
-	    # with -O2 ; so downgrade to -O1.
+            # with -O2 ; so downgrade to -O1.
             optimize='-O1'
+        ;;
+        ia64*)
+            # This architecture has had various problems with gcc's
+            # in the 3.2, 3.3, and 3.4 releases when optimized to -O2.  See
+            # RT #37156 for a discussion of the problem.
+            case "`${cc:-gcc} -v 2>&1`" in
+            *"version 3.2"*|*"version 3.3"*|*"version 3.4"*)
+                ccflags="-fno-delete-null-pointer-checks $ccflags"
+            ;;
+            esac
         ;;
     esac
     ;;
