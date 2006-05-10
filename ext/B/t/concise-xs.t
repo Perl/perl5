@@ -92,10 +92,9 @@ BEGIN {
 
 use Getopt::Std;
 use Carp;
-# One 5.009-only test to go when no 6; is integrated (25344)
 use Test::More tests => ( 1 * !!$Config::Config{useithreads}
-			  + 1 * ($] > 5.009)
-			  + 778);
+			  + 0 * ($] > 5.009)
+			  + 779);
 
 require_ok("B::Concise");
 

@@ -3001,24 +3001,54 @@ PP(pp_require)
 			sver = utf8n_to_uvchr(s, end - s, &len, 0);
 		}
 	    }
-	    if (PERL_REVISION < rev
-		|| (PERL_REVISION == rev
-		    && (PERL_VERSION < ver
-			|| (PERL_VERSION == ver
-			    && PERL_SUBVERSION < sver))))
-	    {
-		DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf" required--this is only "
-		    "v%d.%d.%d, stopped", rev, ver, sver, PERL_REVISION,
-		    PERL_VERSION, PERL_SUBVERSION);
+	    if (cUNOP->op_first->op_private & OPpCONST_NOVER) {
+		if (PERL_REVISION > rev
+		    || (PERL_REVISION == rev
+			&& (PERL_VERSION > ver
+			    || (PERL_VERSION == ver
+				&& PERL_SUBVERSION >= sver))))
+		    {
+			DIE(aTHX_ "Perls since v%"UVuf".%"UVuf".%"UVuf
+			    " too modern--this is v%d.%d.%d, stopped",
+			    rev, ver, sver,
+			    PERL_REVISION, PERL_VERSION, PERL_SUBVERSION);
+		    }
+
+	    } else {
+		if (PERL_REVISION < rev
+		    || (PERL_REVISION == rev
+			&& (PERL_VERSION < ver
+			    || (PERL_VERSION == ver
+				&& PERL_SUBVERSION < sver))))
+		    {
+			DIE(aTHX_ "Perl v%"UVuf".%"UVuf".%"UVuf
+			    " required--this is only v%d.%d.%d, stopped",
+			    rev, ver, sver,
+			    PERL_REVISION, PERL_VERSION, PERL_SUBVERSION);
+		    }
 	    }
 	    RETPUSHYES;
 	}
 	else if (!SvPOKp(sv)) {			/* require 5.005_03 */
-	    if ((NV)PERL_REVISION + ((NV)PERL_VERSION/(NV)1000)
-		+ ((NV)PERL_SUBVERSION/(NV)1000000)
-		+ 0.00000099 < SvNV(sv))
-	    {
-		NV nrev = SvNV(sv);
+	    const NV nrev = SvNV(sv);
+	    if (cUNOP->op_first->op_private & OPpCONST_NOVER) {
+		if ((NV)PERL_REVISION + ((NV)PERL_VERSION/(NV)1000)
+		    + ((NV)PERL_SUBVERSION/(NV)1000000)
+		    + 0.00000099 > nrev) {
+		    UV rev = (UV)nrev;
+		    NV nver = (nrev - rev) * 1000;
+		    UV ver = (UV)(nver + 0.0009);
+		    NV nsver = (nver - ver) * 1000;
+		    UV sver = (UV)(nsver + 0.0009);
+
+		    DIE(aTHX_ "Perls since v%"UVuf".%"UVuf".%"UVuf
+			" too modern--this is v%d.%d.%d, stopped",
+			rev, ver, sver, PERL_REVISION, PERL_VERSION,
+			PERL_SUBVERSION);
+		}
+	    } else if ((NV)PERL_REVISION + ((NV)PERL_VERSION/(NV)1000)
+		       + ((NV)PERL_SUBVERSION/(NV)1000000)
+		       + 0.00000099 < nrev) {
 		UV rev = (UV)nrev;
 		NV nver = (nrev - rev) * 1000;
 		UV ver = (UV)(nver + 0.0009);

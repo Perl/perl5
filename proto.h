@@ -1950,6 +1950,9 @@ STATIC char *	S_filter_gets(pTHX_ SV *sv, PerlIO *fp, STRLEN append)
 STATIC HV *	S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
 			__attribute__warn_unused_result__;
 
+STATIC char *	S_tokenize_use(pTHX_ int, char*)
+			__attribute__warn_unused_result__;
+
 STATIC SV*	S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv, const char *type);
 #  if defined(DEBUGGING)
 STATIC int	S_tokereport(pTHX_ const char *s, I32 rv);
