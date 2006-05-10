@@ -282,6 +282,9 @@ print WARN <<'EOM' ;
 
 #define specialWARN(x)		((x) == pWARN_STD || (x) == pWARN_ALL ||	\
 				 (x) == pWARN_NONE)
+
+/* if PL_warnhook is set to this value, then warnings die */
+#define PERL_WARNHOOK_FATAL	(((SV*)0) + 1)
 EOM
 
 my $offset = 0 ;

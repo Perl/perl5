@@ -24,6 +24,9 @@
 #define specialWARN(x)		((x) == pWARN_STD || (x) == pWARN_ALL ||	\
 				 (x) == pWARN_NONE)
 
+/* if PL_warnhook is set to this value, then warnings die */
+#define PERL_WARNHOOK_FATAL	(((SV*)0) + 1)
+
 /* Warnings Categories added in Perl 5.008 */
 
 #define WARN_ALL		0
