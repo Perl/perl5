@@ -3,6 +3,17 @@
 # $Id: Changes,v 2.16 2006/05/03 18:24:10 dankogai Exp $
 #
 $Revision: 2.16 $ $Date: 2006/05/03 18:24:10 $
+! encode.pm
+  'chin' =~ /^zh_CN|chin(?:a|ese)?$/i is true
+  but chin is not china or chinese.
+  http://d.hatena.ne.jp/jankogai/20060508/1147090316
+! Encode.xs
+  Integrated maintperl change (27824|27824) which I overlooked
+  -- sorry, Nicholas and Coverity Scan.
+  Message-Id: <200604152115.k3FLF1Ar014538@smtp3.ActiveState.com>
+  Message-Id: <200605091615.k49GF1gJ016777@smtp3.ActiveState.com>
+
+2.16 2006/05/03 18:24:10
 ! bin/piconv
   --xmlcref and --htmlcref added.
 ! Encode.pm

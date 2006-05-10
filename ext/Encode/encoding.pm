@@ -83,7 +83,7 @@ sub _get_locale_encoding {
         elsif ( $country_language =~ /^ko_KR|korean?$/i ) {
             $locale_encoding = 'euc-kr';
         }
-        elsif ( $country_language =~ /^zh_CN|chin(?:a|ese)?$/i ) {
+        elsif ( $country_language =~ /^zh_CN|chin(?:a|ese)$/i ) {
             $locale_encoding = 'euc-cn';
         }
         elsif ( $country_language =~ /^zh_TW|taiwan(?:ese)?$/i ) {
