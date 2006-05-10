@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..31\n";
+print "1..59\n";
 
 # Can't require test.pl, as we're testing the use/require mechanism here.
 
@@ -13,12 +13,6 @@ my $test = 1;
 
 sub _ok {
     my ($type, $got, $expected, $name) = @_;
-
-    my @caller = caller(2);
-    if ($name) {
-	$name = " $name";
-    }
-    $name .= " at $caller[1] line $caller[2]";
 
     my $result;
     if ($type eq 'is') {
@@ -31,10 +25,19 @@ sub _ok {
 	die "Unexpected type '$type'$name";
     }
     if ($result) {
-	print "ok $test\n";
+	if ($name) {
+	    print "ok $test - $name\n";
+	} else {
+	    print "ok $test\n";
+	}
     } else {
-	print "not ok $test\n";
-	print "# Failed test $name\n";
+	if ($name) {
+	    print "not ok $test - $name\n";
+	} else {
+	    print "not ok $test\n";
+	}
+	my @caller = caller(2);
+	print "# Failed test at $caller[1] line $caller[2]\n";
 	print "# Got      '$got'\n";
 	if ($type eq 'is') {
 	    print "# Expected '$expected'\n";
@@ -181,3 +184,50 @@ if ($^O eq 'MacOS') {
     like ($@, qr/^xxx defines neither package nor VERSION--version check failed at/);
     unlink 'xxx.pm';
 }
+
+my @ver = split /\./, sprintf "%vd", $^V;
+
+foreach my $index (-3..+3) {
+    foreach my $v (0, 1) {
+	my @parts = @ver;
+	if ($index) {
+	    if ($index < 0) {
+		# Jiggle one of the parts down
+		--$parts[-$index - 1];
+	    } else {
+		# Jiggle one of the parts up
+		++$parts[$index - 1];
+	    }
+	}
+	my $v_version = sprintf "v%d.%d.%d", @parts;
+	my $version;
+	if ($v) {
+	    $version = $v_version;
+	} else {
+	    $version = $parts[0] + $parts[1] / 1000 + $parts[2] / 1000000;
+	}
+
+	eval "use $version";
+	if ($index > 0) {
+	    # The future
+	    like ($@,
+		  qr/Perl $v_version required--this is only \Q$^V\E, stopped/,
+		  "use $version");
+	} else {
+	    # The present or past
+	    is ($@, '', "use $version");
+	}
+
+	eval "no $version";
+	if ($index <= 0) {
+	    # The present or past
+	    like ($@,
+		  qr/Perls since $v_version too modern--this is \Q$^V\E, stopped/,
+		  "no $version");
+	} else {
+	    # future
+	    is ($@, '', "no $version");
+	}
+    }
+}
+
