@@ -1717,6 +1717,9 @@ STATIC const char *	S_get_num(pTHX_ const char *ppat, I32 *lenptr);
 STATIC char *	S_sv_exp_grow(pTHX_ SV *sv, STRLEN needed)
 			__attribute__warn_unused_result__;
 
+STATIC char *	S_bytes_to_uni(pTHX_ const U8 *start, STRLEN len, char *dest)
+			__attribute__warn_unused_result__;
+
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
@@ -1808,7 +1811,7 @@ STATIC regnode*	S_reg(pTHX_ struct RExC_state_t *state, I32 paren, I32 *flagp);
 STATIC regnode*	S_reganode(pTHX_ struct RExC_state_t *state, U8 op, U32 arg);
 STATIC regnode*	S_regatom(pTHX_ struct RExC_state_t *state, I32 *flagp);
 STATIC regnode*	S_regbranch(pTHX_ struct RExC_state_t *state, I32 *flagp, I32 first);
-STATIC void	S_reguni(pTHX_ const struct RExC_state_t *state, UV uv, char *s, STRLEN *lenp);
+STATIC STRLEN	S_reguni(pTHX_ const struct RExC_state_t *state, UV uv, char *s);
 STATIC regnode*	S_regclass(pTHX_ struct RExC_state_t *state);
 STATIC I32	S_regcurly(const char *)
 			__attribute__warn_unused_result__;
@@ -2002,6 +2005,7 @@ STATIC void	S_strip_return(pTHX_ SV *sv);
 #  endif
 #  if defined(DEBUGGING)
 STATIC int	S_tokereport(pTHX_ I32 rv);
+STATIC void	S_printbuf(pTHX_ const char* fmt, const char* s);
 #  endif
 #endif
 

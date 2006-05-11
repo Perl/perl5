@@ -3209,8 +3209,6 @@ tryagain:
 		    if (len)
 			p = oldp;
 		    else if (UTF) {
-		         STRLEN unilen;
-
 			 if (FOLD) {
 			      /* Emit all the Unicode characters. */
 			      STRLEN numlen;
@@ -3219,7 +3217,7 @@ tryagain:
 				   foldlen -= numlen) {
 				   ender = utf8_to_uvchr(foldbuf, &numlen);
 				   if (numlen > 0) {
-					reguni(pRExC_state, ender, s, &unilen);
+					const STRLEN unilen = reguni(pRExC_state, ender, s);
 					s       += unilen;
 					len     += unilen;
 					/* In EBCDIC the numlen
@@ -3233,7 +3231,7 @@ tryagain:
 			      }
 			 }
 			 else {
-			      reguni(pRExC_state, ender, s, &unilen);
+			      const STRLEN unilen = reguni(pRExC_state, ender, s);
 			      if (unilen > 0) {
 				   s   += unilen;
 				   len += unilen;
@@ -3247,8 +3245,6 @@ tryagain:
 		    break;
 		}
 		if (UTF) {
-		     STRLEN unilen;
-
 		     if (FOLD) {
 		          /* Emit all the Unicode characters. */
 			  STRLEN numlen;
@@ -3257,7 +3253,7 @@ tryagain:
 			       foldlen -= numlen) {
 			       ender = utf8_to_uvchr(foldbuf, &numlen);
 			       if (numlen > 0) {
-				    reguni(pRExC_state, ender, s, &unilen);
+				    const STRLEN unilen = reguni(pRExC_state, ender, s);
 				    len     += unilen;
 				    s       += unilen;
 				    /* In EBCDIC the numlen
@@ -3271,7 +3267,7 @@ tryagain:
 			  }
 		     }
 		     else {
-			  reguni(pRExC_state, ender, s, &unilen);
+			  const STRLEN unilen = reguni(pRExC_state, ender, s);
 			  if (unilen > 0) {
 			       s   += unilen;
 			       len += unilen;
@@ -4429,10 +4425,10 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 /*
 - reguni - emit (if appropriate) a Unicode character
 */
-STATIC void
-S_reguni(pTHX_ const RExC_state_t *pRExC_state, UV uv, char* s, STRLEN* lenp)
+STATIC STRLEN
+S_reguni(pTHX_ const RExC_state_t *pRExC_state, UV uv, char* s)
 {
-    *lenp = SIZE_ONLY ? UNISKIP(uv) : (uvchr_to_utf8((U8*)s, uv) - (U8*)s);
+    return SIZE_ONLY ? UNISKIP(uv) : (uvchr_to_utf8((U8*)s, uv) - (U8*)s);
 }
 
 /*

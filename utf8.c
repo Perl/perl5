@@ -332,13 +332,12 @@ Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN 
     const U8* x = s;
     const U8* send;
     STRLEN c;
+    STRLEN outlen = 0;
     PERL_UNUSED_CONTEXT;
 
     if (!len)
         len = strlen((const char *)s);
     send = s + len;
-    if (el)
-        *el = 0;
 
     while (x < send) {
 	 /* Inline the easy bits of is_utf8_char() here for speed... */
@@ -362,17 +361,16 @@ Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN 
 	         goto out;
 	 }
          x += c;
-	 if (el)
-	     (*el)++;
+	 outlen++;
     }
 
  out:
+    if (el)
+        *el = outlen;
+
     if (ep)
         *ep = x;
-    if (x != send)
-	return FALSE;
-
-    return TRUE;
+    return (x == send);
 }
 
 /*

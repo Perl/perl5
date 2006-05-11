@@ -1188,6 +1188,7 @@
 #define group_end		S_group_end
 #define get_num			S_get_num
 #define sv_exp_grow		S_sv_exp_grow
+#define bytes_to_uni		S_bytes_to_uni
 #endif
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
@@ -1416,6 +1417,7 @@
 #  if defined(DEBUGGING)
 #ifdef PERL_CORE
 #define tokereport		S_tokereport
+#define printbuf		S_printbuf
 #endif
 #  endif
 #endif
@@ -3271,6 +3273,7 @@
 #define group_end(a,b,c)	S_group_end(aTHX_ a,b,c)
 #define get_num(a,b)		S_get_num(aTHX_ a,b)
 #define sv_exp_grow(a,b)	S_sv_exp_grow(aTHX_ a,b)
+#define bytes_to_uni(a,b,c)	S_bytes_to_uni(aTHX_ a,b,c)
 #endif
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
@@ -3341,7 +3344,7 @@
 #define reganode(a,b,c)		S_reganode(aTHX_ a,b,c)
 #define regatom(a,b)		S_regatom(aTHX_ a,b)
 #define regbranch(a,b,c)	S_regbranch(aTHX_ a,b,c)
-#define reguni(a,b,c,d)		S_reguni(aTHX_ a,b,c,d)
+#define reguni(a,b,c)		S_reguni(aTHX_ a,b,c)
 #define regclass(a)		S_regclass(aTHX_ a)
 #define regcurly		S_regcurly
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)
@@ -3498,6 +3501,7 @@
 #  if defined(DEBUGGING)
 #ifdef PERL_CORE
 #define tokereport(a)		S_tokereport(aTHX_ a)
+#define printbuf(a,b)		S_printbuf(aTHX_ a,b)
 #endif
 #  endif
 #endif

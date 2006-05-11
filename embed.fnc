@@ -1179,6 +1179,7 @@ s	|const char *|group_end	|NN const char *pat|NN const char *patend \
 				|char ender
 s	|const char *|get_num	|NN const char *ppat|NN I32 *lenptr
 sR	|char *	|sv_exp_grow	|NN SV *sv|STRLEN needed
+sR	|char *	|bytes_to_uni	|NN const U8 *start|STRLEN len|NN char *dest
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
@@ -1237,7 +1238,7 @@ Es	|regnode*|reg		|NN struct RExC_state_t *state|I32 paren|NN I32 *flagp
 Es	|regnode*|reganode	|NN struct RExC_state_t *state|U8 op|U32 arg
 Es	|regnode*|regatom	|NN struct RExC_state_t *state|NN I32 *flagp
 Es	|regnode*|regbranch	|NN struct RExC_state_t *state|NN I32 *flagp|I32 first
-Es	|void	|reguni		|NN const struct RExC_state_t *state|UV uv|NN char *s|NN STRLEN *lenp
+Es	|STRLEN	|reguni		|NN const struct RExC_state_t *state|UV uv|NN char *s
 Es	|regnode*|regclass	|NN struct RExC_state_t *state
 ERsn	|I32	|regcurly	|NN const char *
 Es	|regnode*|reg_node	|NN struct RExC_state_t *state|U8 op
@@ -1385,6 +1386,7 @@ s	|void	|strip_return	|NN SV *sv
 #  endif
 #  if defined(DEBUGGING)
 s	|int	|tokereport	|I32 rv
+s	|void	|printbuf	|NN const char* fmt|NN const char* s
 #  endif
 #endif
 
