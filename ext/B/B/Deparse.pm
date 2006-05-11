@@ -11,7 +11,7 @@ package B::Deparse;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
-	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL OPf_MOD
+	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL OPf_MOD OPpPAD_STATE
 	 OPpLVAL_INTRO OPpOUR_INTRO OPpENTERSUB_AMPER OPpSLICE OPpCONST_BARE
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpCONST_ARYBASE OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER
@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.74;
+$VERSION = 0.75;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1056,10 +1056,11 @@ sub maybe_my {
     my $self = shift;
     my($op, $cx, $text) = @_;
     if ($op->private & OPpLVAL_INTRO and not $self->{'avoid_local'}{$$op}) {
+	my $my = $op->private & OPpPAD_STATE ? "state" : "my";
 	if (want_scalar($op)) {
-	    return "my $text";
+	    return "$my $text";
 	} else {
-	    return $self->maybe_parens_func("my", $text, $cx, 16);
+	    return $self->maybe_parens_func($my, $text, $cx, 16);
 	}
     } else {
 	return $text;
@@ -2425,7 +2426,7 @@ sub pp_list {
     my($expr, @exprs);
     my $kid = $op->first->sibling; # skip pushmark
     my $lop;
-    my $local = "either"; # could be local(...), my(...) or our(...)
+    my $local = "either"; # could be local(...), my(...), state(...) or our(...)
     for ($lop = $kid; !null($lop); $lop = $lop->sibling) {
 	# This assumes that no other private flags equal 128, and that
 	# OPs that store things other than flags in their op_private,
@@ -2443,14 +2444,19 @@ sub pp_list {
 	    $local = ""; # or not
 	    last;
 	}
-	if ($lop->name =~ /^pad[ash]v$/) { # my()
-	    ($local = "", last) if $local eq "local" || $local eq "our";
-	    $local = "my";
+	if ($lop->name =~ /^pad[ash]v$/) {
+	    if ($lop->private & OPpPAD_STATE) { # state()
+		($local = "", last) if $local =~ /^(?:local|our|my)$/;
+		$local = "state";
+	    } else { # my()
+		($local = "", last) if $local =~ /^(?:local|our|state)$/;
+		$local = "my";
+	    }
 	} elsif ($lop->name =~ /^(gv|rv2)[ash]v$/
 			&& $lop->private & OPpOUR_INTRO
 		or $lop->name eq "null" && $lop->first->name eq "gvsv"
 			&& $lop->first->private & OPpOUR_INTRO) { # our()
-	    ($local = "", last) if $local eq "my" || $local eq "local";
+	    ($local = "", last) if $local =~ /^(?:my|local|state)$/;
 	    $local = "our";
 	} elsif ($lop->name ne "undef"
 		# specifically avoid the "reverse sort" optimisation,
@@ -2458,7 +2464,7 @@ sub pp_list {
 		&& !($lop->name eq 'sort' && ($lop->flags & OPpSORT_REVERSE)))
 	{
 	    # local()
-	    ($local = "", last) if $local eq "my" || $local eq "our";
+	    ($local = "", last) if $local =~ /^(?:my|our|state)$/;
 	    $local = "local";
 	}
     }
