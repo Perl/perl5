@@ -107,11 +107,12 @@ Perl_taint_env(pTHX)
     {
     int i = 0;
     char name[10 + TYPE_DIGITS(int)] = "DCL$PATH";
+    STRLEN len = 8; /* strlen(name)  */
 
     while (1) {
 	if (i)
-	    (void)sprintf(name,"DCL$PATH;%d", i);
-	svp = hv_fetch(GvHVn(PL_envgv), name, strlen(name), FALSE);
+	    len = my_sprintf(name,"DCL$PATH;%d", i);
+	svp = hv_fetch(GvHVn(PL_envgv), name, len, FALSE);
 	if (!svp || *svp == &PL_sv_undef)
 	    break;
 	if (SvTAINTED(*svp)) {

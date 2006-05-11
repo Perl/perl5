@@ -796,6 +796,11 @@ unless ($define{'PERL_DONT_CREATE_GVSV'}) {
 		     Perl_gv_SVadd
 		    )];
 }
+if ($define{'SPRINTF_RETURNS_STRLEN'}) {
+    skip_symbols [qw(
+		     Perl_my_sprintf
+		    )];
+}
 
 # Ideally this would also check SA_SIGINFO, but there doesn't seem to be an
 # easy way to find that out from here. Fix it if it breaks because there is

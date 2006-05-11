@@ -2329,6 +2329,13 @@ PERL_CALLCONV bool	Perl_ckwarn_d(pTHX_ U32 w);
 
 PERL_CALLCONV void	Perl_my_clearenv(pTHX);
 
+#ifndef SPRINTF_RETURNS_STRLEN
+PERL_CALLCONV int	Perl_my_sprintf(char *buffer, const char *pat, ...)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(2);
+
+#endif
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

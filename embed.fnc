@@ -1605,6 +1605,10 @@ Ap	|GV*	|gv_fetchpvn_flags|const char* name|STRLEN len|I32 flags|I32 sv_type
 Ap	|GV*	|gv_fetchsv|SV *name|I32 flags|I32 sv_type
 dp	|bool	|is_gv_magical_sv|SV *name|U32 flags
 
+#ifndef SPRINTF_RETURNS_STRLEN
+Apnod	|int	|my_sprintf	|NN char *buffer|NN const char *pat|...
+#endif
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:
