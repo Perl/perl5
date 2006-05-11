@@ -72,6 +72,7 @@ t/enc_module.t	test script
 t/enc_utf8.t	test script
 t/encoding.t	test script
 t/fallback.t	test script
+t/from_to.t	test script
 t/gb2312.enc	test data
 t/gb2312.utf	test data
 t/grow.t	test script

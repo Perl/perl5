@@ -202,7 +202,6 @@ ext/Devel/PPPort/HACKERS	Devel::PPPort hackers documentation
 ext/Devel/PPPort/Makefile.PL	Devel::PPPort makefile writer
 ext/Devel/PPPort/MANIFEST	Devel::PPPort Manifest
 ext/Devel/PPPort/MANIFEST.SKIP	Devel::PPPort Manifest skip specs
-ext/Devel/PPPort/META.yml	Devel::PPPort meta-data in YAML
 ext/Devel/PPPort/mktests.PL	Devel::PPPort test file writer
 ext/Devel/PPPort/module2.c	Devel::PPPort test file
 ext/Devel/PPPort/module3.c	Devel::PPPort test file
@@ -399,7 +398,6 @@ ext/Encode/lib/Encode/Supported.pod	Documents for supported encodings
 ext/Encode/lib/Encode/Unicode/UTF7.pm	Encode extension
 ext/Encode/Makefile.PL		Encode extension makefile writer
 ext/Encode/MANIFEST		Encode extension
-ext/Encode/META.yml		Module meta-data in YAML
 ext/Encode/README		Encode extension
 ext/Encode/Symbol/Makefile.PL	Encode extension
 ext/Encode/Symbol/Symbol.pm	Encode extension
@@ -420,6 +418,7 @@ ext/Encode/t/Encode.t		test script
 ext/Encode/t/encoding.t		test script
 ext/Encode/t/enc_utf8.t		test script
 ext/Encode/t/fallback.t		test script
+ext/Encode/t/from_to.t		test script
 ext/Encode/t/gb2312.enc		test data
 ext/Encode/t/gb2312.utf		test data
 ext/Encode/t/grow.t		test script

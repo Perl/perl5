@@ -1,6 +1,6 @@
 #!/usr/local/bin/perl
 #
-# $Id: ucmsort,v 2.1 2004/08/31 10:55:34 dankogai Exp $
+# $Id: ucmsort,v 2.2 2006/05/03 18:24:10 dankogai Exp $
 #
 use strict;
 my @lines;
@@ -8,11 +8,11 @@ my ($head, $tail);
 while (<>){
     unless (m/^<U/o){
         unless(@lines){
-	    $head .= $_;
-	}else{ 
-	    $tail .= $_;
-	}
-	next;
+        $head .= $_;
+    }else{ 
+        $tail .= $_;
+    }
+    next;
     }
     chomp;
     my @words = split;
@@ -24,8 +24,8 @@ while (<>){
 print $head;
 for (sort {
     hex($a->[0]) <=> hex($b->[0]) # Unicode descending order
-	or $a->[2] cmp $b->[2] # fallback descending order
-	or $a->[1] cmp $b->[1] # Encoding descending order
+    or $a->[2] cmp $b->[2] # fallback descending order
+    or $a->[1] cmp $b->[1] # Encoding descending order
     }
      @lines) {
     my $u = shift @$_;
