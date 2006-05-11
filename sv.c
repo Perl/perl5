@@ -1884,8 +1884,28 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 	if (SvNOKp(sv)) {
 	    return I_V(SvNVX(sv));
 	}
-	if (SvPOKp(sv) && SvLEN(sv))
-	    return asIV(sv);
+	if (SvPOKp(sv) && SvLEN(sv)) {
+	    UV value;
+	    const int numtype
+		= grok_number(SvPVX_const(sv), SvCUR(sv), &value);
+
+	    if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
+		== IS_NUMBER_IN_UV) {
+		/* It's definitely an integer */
+		if (numtype & IS_NUMBER_NEG) {
+		    if (value < (UV)IV_MIN)
+			return -(IV)value;
+		} else {
+		    if (value < (UV)IV_MAX)
+			return (IV)value;
+		}
+	    }
+	    if (!numtype) {
+		if (ckWARN(WARN_NUMERIC))
+		    not_a_number(sv);
+	    }
+	    return I_V(Atof(SvPVX_const(sv)));
+	}
 	if (!SvROK(sv)) {
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
@@ -1893,6 +1913,8 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 	    }
 	    return 0;
 	}
+	/* Else this will drop through into the SvROK case just below, which
+	   will return within the {} for all code paths.  */
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
@@ -1944,8 +1966,23 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
 	    return SvUVX(sv);
 	if (SvNOKp(sv))
 	    return U_V(SvNVX(sv));
-	if (SvPOKp(sv) && SvLEN(sv))
-	    return asUV(sv);
+	if (SvPOKp(sv) && SvLEN(sv)) {
+	    UV value;
+	    const int numtype
+		= grok_number(SvPVX_const(sv), SvCUR(sv), &value);
+
+	    if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
+		== IS_NUMBER_IN_UV) {
+		/* It's definitely an integer */
+		if (!(numtype & IS_NUMBER_NEG))
+		    return value;
+	    }
+	    if (!numtype) {
+		if (ckWARN(WARN_NUMERIC))
+		    not_a_number(sv);
+	    }
+	    return U_V(Atof(SvPVX_const(sv)));
+	}
 	if (!SvROK(sv)) {
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
 		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
@@ -1953,6 +1990,8 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
 	    }
 	    return 0;
 	}
+	/* Else this will drop through into the SvROK case just below, which
+	   will return within the {} for all code paths.  */
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
@@ -2019,6 +2058,8 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	    }
             return (NV)0;
         }
+	/* Else this will drop through into the SvROK case just below, which
+	   will return within the {} for all code paths.  */
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
@@ -2190,55 +2231,6 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     return SvNVX(sv);
 }
 
-/* asIV(): extract an integer from the string value of an SV.
- * Caller must validate PVX  */
-
-STATIC IV
-S_asIV(pTHX_ SV *sv)
-{
-    UV value;
-    const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
-
-    if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
-	== IS_NUMBER_IN_UV) {
-	/* It's definitely an integer */
-	if (numtype & IS_NUMBER_NEG) {
-	    if (value < (UV)IV_MIN)
-		return -(IV)value;
-	} else {
-	    if (value < (UV)IV_MAX)
-		return (IV)value;
-	}
-    }
-    if (!numtype) {
-	if (ckWARN(WARN_NUMERIC))
-	    not_a_number(sv);
-    }
-    return I_V(Atof(SvPVX_const(sv)));
-}
-
-/* asUV(): extract an unsigned integer from the string value of an SV
- * Caller must validate PVX  */
-
-STATIC UV
-S_asUV(pTHX_ SV *sv)
-{
-    UV value;
-    const int numtype = grok_number(SvPVX_const(sv), SvCUR(sv), &value);
-
-    if ((numtype & (IS_NUMBER_IN_UV | IS_NUMBER_NOT_INT))
-	== IS_NUMBER_IN_UV) {
-	/* It's definitely an integer */
-	if (!(numtype & IS_NUMBER_NEG))
-	    return value;
-    }
-    if (!numtype) {
-	if (ckWARN(WARN_NUMERIC))
-	    not_a_number(sv);
-    }
-    return U_V(Atof(SvPVX_const(sv)));
-}
-
 /* uiv_2buf(): private routine for use by sv_2pv_flags(): print an IV or
  * UV as a string towards the end of buf, and return pointers to start and
  * end of it.
@@ -2271,6 +2263,86 @@ S_uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
     return ptr;
 }
 
+/* stringify_regexp(): private routine for use by sv_2pv_flags(): converts
+ * a regexp to its stringified form.
+ */
+
+static char *
+S_stringify_regexp(pTHX_ SV *sv, MAGIC *mg, STRLEN *lp) {
+    const regexp *re = (regexp *)mg->mg_obj;
+
+    if (!mg->mg_ptr) {
+	const char *fptr = "msix";
+	char reflags[6];
+	char ch;
+	int left = 0;
+	int right = 4;
+	char need_newline = 0;
+	U16 reganch = (U16)((re->reganch & PMf_COMPILETIME) >> 12);
+
+	while((ch = *fptr++)) {
+	    if(reganch & 1) {
+		reflags[left++] = ch;
+	    }
+	    else {
+		reflags[right--] = ch;
+	    }
+	    reganch >>= 1;
+	}
+	if(left != 4) {
+	    reflags[left] = '-';
+	    left = 5;
+	}
+
+	mg->mg_len = re->prelen + 4 + left;
+	/*
+	 * If /x was used, we have to worry about a regex ending with a
+	 * comment later being embedded within another regex. If so, we don't
+	 * want this regex's "commentization" to leak out to the right part of
+	 * the enclosing regex, we must cap it with a newline.
+	 *
+	 * So, if /x was used, we scan backwards from the end of the regex. If
+	 * we find a '#' before we find a newline, we need to add a newline
+	 * ourself. If we find a '\n' first (or if we don't find '#' or '\n'),
+	 * we don't need to add anything.  -jfriedl
+	 */
+	if (PMf_EXTENDED & re->reganch) {
+	    const char *endptr = re->precomp + re->prelen;
+	    while (endptr >= re->precomp) {
+		const char c = *(endptr--);
+		if (c == '\n')
+		    break; /* don't need another */
+		if (c == '#') {
+		    /* we end while in a comment, so we need a newline */
+		    mg->mg_len++; /* save space for it */
+		    need_newline = 1; /* note to add it */
+		    break;
+		}
+	    }
+	}
+
+	Newx(mg->mg_ptr, mg->mg_len + 1 + left, char);
+	mg->mg_ptr[0] = '(';
+	mg->mg_ptr[1] = '?';
+	Copy(reflags, mg->mg_ptr+2, left, char);
+	*(mg->mg_ptr+left+2) = ':';
+	Copy(re->precomp, mg->mg_ptr+3+left, re->prelen, char);
+	if (need_newline)
+	    mg->mg_ptr[mg->mg_len - 2] = '\n';
+	mg->mg_ptr[mg->mg_len - 1] = ')';
+	mg->mg_ptr[mg->mg_len] = 0;
+    }
+    PL_reginterp_cnt += re->program[0].next_off;
+    
+    if (re->reganch & ROPT_UTF8)
+	SvUTF8_on(sv);
+    else
+	SvUTF8_off(sv);
+    if (lp)
+	*lp = mg->mg_len;
+    return mg->mg_ptr;
+}
+
 /*
 =for apidoc sv_2pv_flags
 
@@ -2288,9 +2360,6 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 {
     register char *s;
     int olderrno;
-    SV *tsv, *origsv;
-    char tbuf[64];	/* Must fit sprintf/Gconvert of longest IV/NV */
-    char *tmpbuf = tbuf;
 
     if (!sv) {
 	if (lp)
@@ -2309,18 +2378,43 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		return (char *)SvPVX_const(sv);
 	    return SvPVX(sv);
 	}
-	if (SvIOKp(sv)) {
-	    if (SvIsUV(sv))
-		(void)sprintf(tmpbuf,"%"UVuf, (UV)SvUVX(sv));
-	    else
-		(void)sprintf(tmpbuf,"%"IVdf, (IV)SvIVX(sv));
-	    tsv = Nullsv;
-	    goto tokensave;
-	}
-	if (SvNOKp(sv)) {
-	    Gconvert(SvNVX(sv), NV_DIG, 0, tmpbuf);
-	    tsv = Nullsv;
-	    goto tokensave;
+	if (SvIOKp(sv) || SvNOKp(sv)) {
+	    char tbuf[64];  /* Must fit sprintf/Gconvert of longest IV/NV */
+	    STRLEN len;
+
+	    if (SvIOKp(sv)) {
+		len = SvIsUV(sv) ? my_sprintf(tbuf,"%"UVuf, (UV)SvUVX(sv))
+		    : my_sprintf(tbuf,"%"IVdf, (IV)SvIVX(sv));
+	    } else {
+		Gconvert(SvNVX(sv), NV_DIG, 0, tbuf);
+		len = strlen(tbuf);
+	    }
+	    if (SvROK(sv)) {	/* XXX Skip this when sv_pvn_force calls */
+		/* Sneaky stuff here */
+		SV *tsv = newSVpvn(tbuf, len);
+
+		sv_2mortal(tsv);
+		if (lp)
+		    *lp = SvCUR(tsv);
+		return SvPVX(tsv);
+	    }
+	    else {
+
+#ifdef FIXNEGATIVEZERO
+		if (len == 2 && tbuf[0] == '-' && tbuf[1] == '0') {
+		    tbuf[0] = '0';
+		    tbuf[1] = 0;
+		    len = 1;
+		}
+#endif
+		SvUPGRADE(sv, SVt_PV);
+		if (lp)
+		    *lp = len;
+		s = SvGROW_mutable(sv, len + 1);
+		SvCUR_set(sv, len);
+		SvPOKp_on(sv);
+		return memcpy(s, tbuf, len + 1);
+	    }
 	}
         if (!SvROK(sv)) {
 	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
@@ -2331,11 +2425,13 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		*lp = 0;
             return (char *)"";
         }
+	/* Else this will drop through into the SvROK case just below, which
+	   will return within the {} for all code paths.  */
     }
     if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
 	    SV* tmpstr;
-            register const char *typestr;
+
             if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
                 (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
 		/* Unwrap this:  */
@@ -2359,134 +2455,37 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
                 else
                     SvUTF8_off(sv);
                 return pv;
-            }
-	    origsv = sv;
-	    sv = (SV*)SvRV(sv);
-	    if (!sv)
-		typestr = "NULLREF";
-	    else {
+            } else {
+		SV *tsv;
 		MAGIC *mg;
-		
-		switch (SvTYPE(sv)) {
-		case SVt_PVMG:
-		    if ( ((SvFLAGS(sv) &
-			   (SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
-			  == (SVs_OBJECT|SVs_SMG))
-			 && (mg = mg_find(sv, PERL_MAGIC_qr))) {
-                        const regexp *re = (regexp *)mg->mg_obj;
+		const SV *const referent = (SV*)SvRV(sv);
 
-			if (!mg->mg_ptr) {
-                            const char *fptr = "msix";
-			    char reflags[6];
-			    char ch;
-			    int left = 0;
-			    int right = 4;
-                            char need_newline = 0;
- 			    U16 reganch = (U16)((re->reganch & PMf_COMPILETIME) >> 12);
+		if (!referent) {
+		    tsv = sv_2mortal(newSVpvn("NULLREF", 7));
+		} else if (SvTYPE(referent) == SVt_PVMG
+			   && ((SvFLAGS(referent) &
+				(SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
+			       == (SVs_OBJECT|SVs_SMG))
+			   && (mg = mg_find((SV *) referent, PERL_MAGIC_qr))) {
+		    return S_stringify_regexp(aTHX_ sv, mg, lp);
+		} else {
+		    const char *const typestr = sv_reftype((SV *) referent, 0);
 
- 			    while((ch = *fptr++)) {
- 				if(reganch & 1) {
- 				    reflags[left++] = ch;
- 				}
- 				else {
- 				    reflags[right--] = ch;
- 				}
- 				reganch >>= 1;
- 			    }
- 			    if(left != 4) {
- 				reflags[left] = '-';
- 				left = 5;
- 			    }
-
-			    mg->mg_len = re->prelen + 4 + left;
-                            /*
-                             * If /x was used, we have to worry about a regex
-                             * ending with a comment later being embedded
-                             * within another regex. If so, we don't want this
-                             * regex's "commentization" to leak out to the
-                             * right part of the enclosing regex, we must cap
-                             * it with a newline.
-                             *
-                             * So, if /x was used, we scan backwards from the
-                             * end of the regex. If we find a '#' before we
-                             * find a newline, we need to add a newline
-                             * ourself. If we find a '\n' first (or if we
-                             * don't find '#' or '\n'), we don't need to add
-                             * anything.  -jfriedl
-                             */
-                            if (PMf_EXTENDED & re->reganch)
-                            {
-                                const char *endptr = re->precomp + re->prelen;
-                                while (endptr >= re->precomp)
-                                {
-                                    const char c = *(endptr--);
-                                    if (c == '\n')
-                                        break; /* don't need another */
-                                    if (c == '#') {
-                                        /* we end while in a comment, so we
-                                           need a newline */
-                                        mg->mg_len++; /* save space for it */
-                                        need_newline = 1; /* note to add it */
-					break;
-                                    }
-                                }
-                            }
-
-			    Newx(mg->mg_ptr, mg->mg_len + 1 + left, char);
-			    Copy("(?", mg->mg_ptr, 2, char);
-			    Copy(reflags, mg->mg_ptr+2, left, char);
-			    Copy(":", mg->mg_ptr+left+2, 1, char);
-			    Copy(re->precomp, mg->mg_ptr+3+left, re->prelen, char);
-                            if (need_newline)
-                                mg->mg_ptr[mg->mg_len - 2] = '\n';
-			    mg->mg_ptr[mg->mg_len - 1] = ')';
-			    mg->mg_ptr[mg->mg_len] = 0;
-			}
-			PL_reginterp_cnt += re->program[0].next_off;
-
-			if (re->reganch & ROPT_UTF8)
-			    SvUTF8_on(origsv);
-			else
-			    SvUTF8_off(origsv);
-			if (lp)
-			    *lp = mg->mg_len;
-			return mg->mg_ptr;
+		    tsv = sv_newmortal();
+		    if (SvOBJECT(referent)) {
+			const char *const name = HvNAME_get(SvSTASH(referent));
+			Perl_sv_setpvf(aTHX_ tsv, "%s=%s(0x%"UVxf")",
+				       name ? name : "__ANON__" , typestr,
+				       PTR2UV(referent));
 		    }
-					/* Fall through */
-		case SVt_NULL:
-		case SVt_IV:
-		case SVt_NV:
-		case SVt_RV:
-		case SVt_PV:
-		case SVt_PVIV:
-		case SVt_PVNV:
-		case SVt_PVBM:	typestr = SvROK(sv) ? "REF" : "SCALAR"; break;
-		case SVt_PVLV:	typestr = SvROK(sv) ? "REF"
-				/* tied lvalues should appear to be
-				 * scalars for backwards compatitbility */
-				: (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T')
-				    ? "SCALAR" : "LVALUE";	break;
-		case SVt_PVAV:	typestr = "ARRAY";	break;
-		case SVt_PVHV:	typestr = "HASH";	break;
-		case SVt_PVCV:	typestr = "CODE";	break;
-		case SVt_PVGV:	typestr = "GLOB";	break;
-		case SVt_PVFM:	typestr = "FORMAT";	break;
-		case SVt_PVIO:	typestr = "IO";		break;
-		default:	typestr = "UNKNOWN";	break;
+		    else
+			Perl_sv_setpvf(aTHX_ tsv, "%s(0x%"UVxf")", typestr,
+				       PTR2UV(referent));
 		}
-		tsv = NEWSV(0,0);
-		if (SvOBJECT(sv)) {
-		    const char *name = HvNAME_get(SvSTASH(sv));
-		    Perl_sv_setpvf(aTHX_ tsv, "%s=%s(0x%"UVxf")",
-				   name ? name : "__ANON__" , typestr, PTR2UV(sv));
-		}
-		else
-		    Perl_sv_setpvf(aTHX_ tsv, "%s(0x%"UVxf")", typestr, PTR2UV(sv));
-		goto tokensaveref;
+		if (lp)
+		    *lp = SvCUR(tsv);
+		return SvPVX(tsv);
 	    }
-	    if (lp)
-		*lp = strlen(typestr);
-	    return (char *)typestr;
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
 	    if (ckWARN(WARN_UNINITIALIZED))
@@ -2572,46 +2571,6 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
     if (flags & SV_MUTABLE_RETURN)
 	return SvPVX_mutable(sv);
     return SvPVX(sv);
-
-  tokensave:
-    if (SvROK(sv)) {	/* XXX Skip this when sv_pvn_force calls */
-	/* Sneaky stuff here */
-
-      tokensaveref:
-	if (!tsv)
-	    tsv = newSVpv(tmpbuf, 0);
-	sv_2mortal(tsv);
-	if (lp)
-	    *lp = SvCUR(tsv);
-	return SvPVX(tsv);
-    }
-    else {
-    	STRLEN len;
-        const char *t;
-
-	if (tsv) {
-	    sv_2mortal(tsv);
-	    t = SvPVX_const(tsv);
-	    len = SvCUR(tsv);
-	}
-	else {
-	    t = tmpbuf;
-	    len = strlen(tmpbuf);
-	}
-#ifdef FIXNEGATIVEZERO
-	if (len == 2 && t[0] == '-' && t[1] == '0') {
-	    t = "0";
-	    len = 1;
-	}
-#endif
-	(void)SvUPGRADE(sv, SVt_PV);
-	if (lp)
-	    *lp = len;
-	s = SvGROW_mutable(sv, len + 1);
-	SvCUR_set(sv, len);
-	SvPOKp_on(sv);
-	return memcpy(s, t, len + 1);
-    }
 }
 
 /*

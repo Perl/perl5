@@ -1856,12 +1856,6 @@ STATIC SV*	S_save_scalar_at(pTHX_ SV **sptr);
 STATIC char *	S_uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
 			__attribute__warn_unused_result__;
 
-STATIC IV	S_asIV(pTHX_ SV* sv)
-			__attribute__warn_unused_result__;
-
-STATIC UV	S_asUV(pTHX_ SV* sv)
-			__attribute__warn_unused_result__;
-
 STATIC void	S_sv_unglob(pTHX_ SV* sv);
 STATIC void	S_not_a_number(pTHX_ SV *sv);
 STATIC I32	S_visit(pTHX_ SVFUNC_t f, U32 flags, U32 mask);
