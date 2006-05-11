@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.26';
+our $VERSION = '1.27';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -102,7 +102,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.26
+This document describes threads version 1.27
 
 =head1 SYNOPSIS
 
@@ -145,6 +145,8 @@ This document describes threads version 1.26
 
     $stack_size = threads->get_stack_size();
     $old_size = threads->set_stack_size(32*4096);
+
+    $thr->kill('SIGUSR1');
 
 =head1 DESCRIPTION
 
@@ -405,6 +407,90 @@ existing thread (C<$thr1>).  This is shorthand for the following:
 
 =back
 
+=head1 THREAD SIGNALLING
+
+If Perl has been compiled to use safe signals (i.e., was not built with
+C<PERL_OLD_SIGNALS> - see C<perl -V>), then signals may be sent and acted upon
+by individual threads.
+
+=over 4
+
+=item $thr->kill('SIG...');
+
+Sends the specified signal to the thread.  Signal names and (positive) signal
+numbers are the same as those supported by
+L<kill()|perlfunc/"kill SIGNAL, LIST">.  For example, 'SIGTERM', 'TERM' and
+(depending on the OS) 15 are all valid arguments to C<-E<gt>kill()>.
+
+Returns the thread object to allow for method chaining:
+
+    $thr->kill('SIG...')->join();
+
+=back
+
+Signal handlers need to be set up in the threads for the signals they are
+expected to act upon.  Here's an example for I<cancelling> a thread:
+
+    use threads;
+
+    # Suppress warning message when thread is 'killed'
+    no warnings 'threads';
+
+    sub thr_func
+    {
+        # Thread 'cancellation' signal handler
+        $SIG{'KILL'} = sub { die("Thread killed\n"); };
+
+        ...
+    }
+
+    # Create a thread
+    my $thr = threads->create('thr_func');
+
+    ...
+
+    # Signal the thread to terminate, and then detach
+    # it so that it will get cleaned up automatically
+    $thr->kill('KILL')->detach();
+
+Here's another example that uses a semaphore to provide I<suspend> and
+I<resume> capabilities:
+
+    use threads;
+    use Thread::Semaphore;
+
+    sub thr_func
+    {
+        my $sema = shift;
+
+        # Thread 'suspend/resume' signal handler
+        $SIG{'STOP'} = sub {
+            $sema->down();      # Thread suspended
+            $sema->up();        # Thread resumes
+        };
+
+        ...
+    }
+
+    # Create a semaphore and send it to a thread
+    my $sema = Thread::Semaphore->new();
+    my $thr = threads->create('thr_func', $sema);
+
+    # Suspend the thread
+    $sema->down();
+    $thr->kill('STOP');
+
+    ...
+
+    # Allow the thread to continue
+    $sema->up();
+
+CAVEAT:  Sending a signal to a thread does not disrupt the operation the
+thread is currently working on:  The signal will be acted upon after the
+current operation has completed.  For instance, if the thread is I<stuck> on
+an I/O call, sending it a signal will not cause the I/O call to be interrupted
+such that the signal is acted up immediately.
+
 =head1 WARNINGS
 
 =over 4
@@ -416,13 +502,34 @@ threads running.  Usually, it's a good idea to first collect the return values
 of the created threads by joining them, and only then exit from the main
 thread.
 
+=item Thread creation failed: pthread_create returned #
+
+See the appropriate I<man> page for C<pthread_create> to determine the actual
+cause for the failure.
+
+=item Thread # terminated abnormally: ...
+
+A thread terminated in some manner other than just returning from its entry
+point function.  For example, the thread may have exited via C<die>.
+
 =item Using minimum thread stack size of #
 
 Some platforms have a minimum thread stack size.  Trying to set the stack size
 below this value will result in the above warning, and the stack size will be
 set to the minimum.
 
+=item Thread creation failed: pthread_attr_setstacksize(I<SIZE>) returned 22
+
+The specified I<SIZE> exceeds the system's maximum stack size.  Use a smaller
+value for the stack size.
+
 =back
+
+If needed, thread warnings can be suppressed by using:
+
+    no warnings 'threads';
+
+in the appropriate scope.
 
 =head1 ERRORS
 
@@ -445,10 +552,16 @@ following results in the above error:
 
     $thr->set_stack_size($size);
 
-=item Thread creation failed: pthread_attr_setstacksize(I<SIZE>) returned 22
+=item Cannot signal other threads without safe signals
 
-The specified I<SIZE> exceeds the system's maximum stack size.  Use a smaller
-value for the stack size.
+The particular copy of Perl that you're trying to use was built using
+C<PERL_OLD_SIGNALS>.  As a result, the C<-E<gt>kill()> signalling method
+cannot be used.
+
+=item Unrecognized signal name: ...
+
+The particular copy of Perl that you're trying to use does not support the
+specified signal being used in a C<-E<gt>kill()> call.
 
 =back
 
@@ -502,7 +615,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.26/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.27/shared.pm>
 
 L<threads::shared>, L<perlthrtut>
 

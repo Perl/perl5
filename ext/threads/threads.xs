@@ -368,7 +368,7 @@ S_ithread_run(void * arg)
 
         /* Check for failure */
         if (SvTRUE(ERRSV) && ckWARN_d(WARN_THREADS)) {
-            Perl_warn(aTHX_ "Thread failed to start: %" SVf, ERRSV);
+            Perl_warn(aTHX_ "Thread %" UVuf " terminated abnormally: %" SVf, thread->tid, ERRSV);
         }
 
         FREETMPS;
@@ -916,6 +916,46 @@ ithread_detach(...)
 
         if (cleanup)
             S_ithread_destruct(aTHX_ thread);
+
+
+void
+ithread_kill(...)
+    PREINIT:
+        ithread *thread;
+        char *sig_name;
+        IV signal;
+    CODE:
+        /* Must have safe signals */
+        if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
+            Perl_croak(aTHX_ "Cannot signal other threads without safe signals");
+
+        /* Object method only */
+        if (! sv_isobject(ST(0)))
+            Perl_croak(aTHX_ "Usage: $thr->kill('SIG...')");
+
+        /* Get thread */
+        thread = SV_to_ithread(aTHX_ ST(0));
+
+        /* Get signal */
+        sig_name = SvPV_nolen(ST(1));
+        if (isALPHA(*sig_name)) {
+            if (*sig_name == 'S' && sig_name[1] == 'I' && sig_name[2] == 'G')
+                sig_name += 3;
+            if ((signal = Perl_whichsig(aTHX_ sig_name)) < 0)
+                Perl_croak(aTHX_ "Unrecognized signal name: %s", sig_name);
+        } else
+            signal = SvIV(ST(1));
+
+        /* Set the signal for the thread */
+        {
+            dTHXa(thread->interp);
+            PL_psig_pend[signal]++;
+            PL_sig_pending = 1;
+        }
+
+        /* Return the thread to allow for method chaining */
+        ST(0) = ST(0);
+        /* XSRETURN(1); - implied */
 
 
 void

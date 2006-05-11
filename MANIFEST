@@ -1136,6 +1136,7 @@ ext/threads/t/free2.t		More ithread destruction tests
 ext/threads/threads.pm		ithreads
 ext/threads/threads.xs		ithreads
 ext/threads/t/join.t		Testing the join function
+ext/threads/t/kill.t		Tests thread signalling
 ext/threads/t/libc.t		testing libc functions for threadsafety
 ext/threads/t/list.t		Test threads->list()
 ext/threads/t/problems.t	Test various memory problems
