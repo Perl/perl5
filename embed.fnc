@@ -761,7 +761,7 @@ Apd	|CV*	|sv_2cv		|NULLOK SV* sv|NN HV** st|NN GV** gvp|I32 lref
 Apd	|IO*	|sv_2io		|NN SV* sv
 #ifdef PERL_IN_SV_C
 s	|bool	|glob_2number	|NN GV* const gv
-s	|char*	|glob_2pv	|NN GV* const gv|NN STRLEN * const len
+s	|char*	|glob_2pv	|NN GV* const gv|NULLOK STRLEN * const len
 #endif
 Amb	|IV	|sv_2iv		|NN SV* sv
 Apd	|IV	|sv_2iv_flags	|NN SV* sv|I32 flags

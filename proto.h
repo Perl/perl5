@@ -2076,8 +2076,7 @@ STATIC bool	S_glob_2number(pTHX_ GV* const gv)
 			__attribute__nonnull__(pTHX_1);
 
 STATIC char*	S_glob_2pv(pTHX_ GV* const gv, STRLEN * const len)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_1);
 
 #endif
 /* PERL_CALLCONV IV	sv_2iv(pTHX_ SV* sv)
