@@ -1752,7 +1752,9 @@ S_glob_2pv(pTHX_ GV * const gv, STRLEN * const len)
     SvFLAGS(gv) |= wasfake;
 
     assert(SvPOK(buffer));
-    *len = SvCUR(buffer);
+    if (len) {
+	*len = SvCUR(buffer);
+    }
     return SvPVX(buffer);
 }
 
