@@ -1601,6 +1601,10 @@ Apo	|bool	|ckwarn_d	|U32 w
 
 px	|void	|my_clearenv
 
+Ap	|GV*	|gv_fetchpvn_flags|const char* name|STRLEN len|I32 flags|I32 sv_type
+Ap	|GV*	|gv_fetchsv|SV *name|I32 flags|I32 sv_type
+dp	|bool	|is_gv_magical_sv|SV *name|U32 flags
+
 END_EXTERN_C
 /*
  * ex: set ts=8 sts=4 sw=4 noet:

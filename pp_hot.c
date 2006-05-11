@@ -695,9 +695,6 @@ PP(pp_rv2av)
 	    GV *gv;
 	
 	    if (SvTYPE(sv) != SVt_PVGV) {
-		char *sym;
-		STRLEN len;
-
 		if (SvGMAGICAL(sv)) {
 		    mg_get(sv);
 		    if (SvROK(sv))
@@ -715,22 +712,21 @@ PP(pp_rv2av)
 		    }
 		    RETSETUNDEF;
 		}
-		sym = SvPV(sv,len);
 		if ((PL_op->op_flags & OPf_SPECIAL) &&
 		    !(PL_op->op_flags & OPf_MOD))
 		{
-		    gv = (GV*)gv_fetchpv(sym, FALSE, SVt_PVAV);
+		    gv = (GV*)gv_fetchsv(sv, 0, SVt_PVAV);
 		    if (!gv
-			&& (!is_gv_magical(sym,len,0)
-			    || !(gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVAV))))
+			&& (!is_gv_magical_sv(sv,0)
+			    || !(gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PVAV))))
 		    {
 			RETSETUNDEF;
 		    }
 		}
 		else {
 		    if (PL_op->op_private & HINT_STRICT_REFS)
-			DIE(aTHX_ PL_no_symref, sym, "an ARRAY");
-		    gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVAV);
+			DIE(aTHX_ PL_no_symref_sv, sv, "an ARRAY");
+		    gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PVAV);
 		}
 	    }
 	    else {
@@ -826,9 +822,6 @@ PP(pp_rv2hv)
 	    GV *gv;
 	
 	    if (SvTYPE(sv) != SVt_PVGV) {
-		char *sym;
-		STRLEN len;
-
 		if (SvGMAGICAL(sv)) {
 		    mg_get(sv);
 		    if (SvROK(sv))
@@ -846,22 +839,21 @@ PP(pp_rv2hv)
 		    }
 		    RETSETUNDEF;
 		}
-		sym = SvPV(sv,len);
 		if ((PL_op->op_flags & OPf_SPECIAL) &&
 		    !(PL_op->op_flags & OPf_MOD))
 		{
-		    gv = (GV*)gv_fetchpv(sym, FALSE, SVt_PVHV);
+		    gv = (GV*)gv_fetchsv(sv, 0, SVt_PVHV);
 		    if (!gv
-			&& (!is_gv_magical(sym,len,0)
-			    || !(gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVHV))))
+			&& (!is_gv_magical_sv(sv,0)
+			    || !(gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PVHV))))
 		    {
 			RETSETUNDEF;
 		    }
 		}
 		else {
 		    if (PL_op->op_private & HINT_STRICT_REFS)
-			DIE(aTHX_ PL_no_symref, sym, "a HASH");
-		    gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PVHV);
+			DIE(aTHX_ PL_no_symref_sv, sv, "a HASH");
+		    gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PVHV);
 		}
 	    }
 	    else {
@@ -2636,7 +2628,7 @@ PP(pp_entersub)
 	break;
     case SVt_PVGV:
 	if (!(cv = GvCVu((GV*)sv)))
-	    cv = sv_2cv(sv, &stash, &gv, FALSE);
+	    cv = sv_2cv(sv, &stash, &gv, 0);
 	if (!cv) {
 	    ENTER;
 	    SAVETMPS;
@@ -3147,7 +3139,7 @@ S_method_common(pTHX_ SV* meth, U32* hashp)
 
 	if (!SvOK(sv) ||
 	    !(packname) ||
-	    !(iogv = gv_fetchpv(packname, FALSE, SVt_PVIO)) ||
+	    !(iogv = gv_fetchsv(sv, 0, SVt_PVIO)) ||
 	    !(ob=(SV*)GvIO(iogv)))
 	{
 	    /* this isn't the name of a filehandle either */

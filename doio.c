@@ -335,7 +335,8 @@ Perl_do_openn(pTHX_ GV *gv, register char *oname, I32 len, int as_raw,
 			}
 			else {
 			    GV *thatgv;
-			    thatgv = gv_fetchpv(type,FALSE,SVt_PVIO);
+			    thatgv = gv_fetchpvn_flags(type, tend - type,
+						       0, SVt_PVIO);
 			    thatio = GvIO(thatgv);
 			}
 			if (!thatio) {

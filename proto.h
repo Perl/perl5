@@ -2179,6 +2179,10 @@ PERL_CALLCONV long	Perl_my_betohl(long n);
 
 PERL_CALLCONV void	Perl_my_swabn(void* ptr, int n);
 
+PERL_CALLCONV GV*	Perl_gv_fetchpvn_flags(pTHX_ const char* name, STRLEN len, I32 flags, I32 sv_type);
+PERL_CALLCONV GV*	Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, I32 sv_type);
+PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags);
+
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 PERL_CALLCONV OP*	Perl_ck_anoncode(pTHX_ OP *o)
 			__attribute__warn_unused_result__;

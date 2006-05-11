@@ -687,28 +687,48 @@ Perl_gv_stashsv(pTHX_ SV *sv, I32 create)
 
 
 GV *
-Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
+Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type) {
+    STRLEN len = strlen (nambeg);
+    return gv_fetchpvn_flags(nambeg, len, add, sv_type);
+}
+
+GV *
+Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, I32 sv_type) {
+    STRLEN len;
+    const char *nambeg = SvPV(name, len);
+    return gv_fetchpvn_flags(nambeg, len, flags | SvUTF8(name), sv_type);
+}
+
+GV *
+Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
+		       I32 sv_type)
 {
     register const char *name = nambeg;
     register GV *gv = 0;
     GV**gvp;
     I32 len;
-    register const char *namend;
+    register const char *name_cursor;
     HV *stash = 0;
+    I32 add = flags & ~SVf_UTF8;
+    const char *const name_end = nambeg + full_len;
+    const char *const name_em1 = name_end - 1;
 
-    if (*name == '*' && isALPHA(name[1])) /* accidental stringify on a GV? */
+    if (full_len > 2 && *name == '*' && isALPHA(name[1])) {
+	/* accidental stringify on a GV? */
 	name++;
+    }
 
-    for (namend = name; *namend; namend++) {
-	if ((*namend == ':' && namend[1] == ':')
-	    || (*namend == '\'' && namend[1]))
+    for (name_cursor = name; name_cursor < name_end; name_cursor++) {
+	if ((*name_cursor == ':' && name_cursor < name_em1
+	     && name_cursor[1] == ':')
+	    || (*name_cursor == '\'' && name_cursor[1]))
 	{
 	    if (!stash)
 		stash = PL_defstash;
 	    if (!stash || !SvREFCNT(stash)) /* symbol table under destruction */
 		return NULL;
 
-	    len = namend - name;
+	    len = name_cursor - name;
 	    if (len > 0) {
 		char smallbuf[256];
 		char *tmpbuf;
@@ -738,47 +758,56 @@ Perl_gv_fetchpv(pTHX_ const char *nambeg, I32 add, I32 sv_type)
 		    stash = GvHV(gv) = newHV();
 
 		if (!HvNAME_get(stash))
-		    hv_name_set(stash, nambeg, namend - nambeg, 0);
+		    hv_name_set(stash, nambeg, name_cursor - nambeg, 0);
 	    }
 
-	    if (*namend == ':')
-		namend++;
-	    namend++;
-	    name = namend;
-	    if (!*name)
+	    if (*name_cursor == ':')
+		name_cursor++;
+	    name_cursor++;
+	    name = name_cursor;
+	    if (name == name_end)
 		return gv ? gv : (GV*)*hv_fetch(PL_defstash, "main::", 6, TRUE);
 	}
     }
-    len = namend - name;
+    len = name_cursor - name;
 
     /* No stash in name, so see how we can default */
 
     if (!stash) {
-	if (isIDFIRST_lazy(name)) {
+	if (len && isIDFIRST_lazy(name)) {
 	    bool global = FALSE;
 
-	    /* name is always \0 terminated, and initial \0 wouldn't return
-	       true from isIDFIRST_lazy, so we know that name[1] is defined  */
-	    switch (name[1]) {
-	    case '\0':
+	    switch (len) {
+	    case 1:
 		if (*name == '_')
 		    global = TRUE;
 		break;
-	    case 'N':
-		if (strEQ(name, "INC") || strEQ(name, "ENV"))
+	    case 3:
+		if ((name[0] == 'I' && name[1] == 'N' && name[2] == 'C')
+		    || (name[0] == 'E' && name[1] == 'N' && name[2] == 'V')
+		    || (name[0] == 'S' && name[1] == 'I' && name[2] == 'G'))
 		    global = TRUE;
 		break;
-	    case 'I':
-		if (strEQ(name, "SIG"))
+	    case 4:
+		if (name[0] == 'A' && name[1] == 'R' && name[2] == 'G'
+		    && name[3] == 'V')
 		    global = TRUE;
 		break;
-	    case 'T':
-		if (strEQ(name, "STDIN") || strEQ(name, "STDOUT") ||
-		    strEQ(name, "STDERR"))
+	    case 5:
+		if (name[0] == 'S' && name[1] == 'T' && name[2] == 'D'
+		    && name[3] == 'I' && name[4] == 'N')
 		    global = TRUE;
 		break;
-	    case 'R':
-		if (strEQ(name, "ARGV") || strEQ(name, "ARGVOUT"))
+	    case 6:
+		if ((name[0] == 'S' && name[1] == 'T' && name[2] == 'D')
+		    &&((name[3] == 'O' && name[4] == 'U' && name[5] == 'T')
+		       ||(name[3] == 'E' && name[4] == 'R' && name[5] == 'R')))
+		    global = TRUE;
+		break;
+	    case 7:
+		if (name[0] == 'A' && name[1] == 'R' && name[2] == 'G'
+		    && name[3] == 'V' && name[4] == 'O' && name[5] == 'U'
+		    && name[6] == 'T')
 		    global = TRUE;
 		break;
 	    }
@@ -1183,7 +1212,7 @@ Perl_newIO(pTHX)
     SvOBJECT_on(io);
     /* Clear the stashcache because a new IO could overrule a package name */
     hv_clear(PL_stashcache);
-    iogv = gv_fetchpv("FileHandle::", FALSE, SVt_PVHV);
+    iogv = gv_fetchpv("FileHandle::", 0, SVt_PVHV);
     /* unless exists($main::{FileHandle}) and defined(%main::FileHandle::) */
     if (!(iogv && GvHV(iogv) && HvARRAY(GvHV(iogv))))
       iogv = gv_fetchpv("IO::Handle::", TRUE, SVt_PVHV);
@@ -1839,6 +1868,22 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
       return res;
     }
   }
+}
+
+/*
+=for apidoc is_gv_magical
+
+Returns C<TRUE> if given the name of a magical GV. Calls is_gv_magical.
+
+=cut
+*/
+
+bool
+Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags)
+{
+    STRLEN len;
+    char *temp = SvPV(name, len);
+    return is_gv_magical(temp, len, flags);
 }
 
 /*

@@ -6613,7 +6613,6 @@ Perl_sv_2io(pTHX_ SV *sv)
 {
     IO* io;
     GV* gv;
-    STRLEN n_a;
 
     switch (SvTYPE(sv)) {
     case SVt_PVIO:
@@ -6630,7 +6629,7 @@ Perl_sv_2io(pTHX_ SV *sv)
 	    Perl_croak(aTHX_ PL_no_usym, "filehandle");
 	if (SvROK(sv))
 	    return sv_2io(SvRV(sv));
-	gv = gv_fetchpv(SvPV(sv,n_a), FALSE, SVt_PVIO);
+	gv = gv_fetchsv(sv, 0, SVt_PVIO);
 	if (gv)
 	    io = GvIO(gv);
 	else
@@ -6647,6 +6646,7 @@ Perl_sv_2io(pTHX_ SV *sv)
 
 Using various gambits, try to get a CV from an SV; in addition, try if
 possible to set C<*st> and C<*gvp> to the stash and GV associated with it.
+The flags in C<lref> are passed to sv_fetchsv.
 
 =cut
 */
@@ -6656,7 +6656,6 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 {
     GV *gv = NULL;
     CV *cv = Nullcv;
-    STRLEN n_a;
 
     if (!sv)
 	return *gvp = NULL, NULL;
@@ -6696,7 +6695,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	else if (isGV(sv))
 	    gv = (GV*)sv;
 	else
-	    gv = gv_fetchpv(SvPV(sv, n_a), lref, SVt_PVCV);
+	    gv = gv_fetchsv(sv, lref, SVt_PVCV);
 	*gvp = gv;
 	if (!gv)
 	    return Nullcv;

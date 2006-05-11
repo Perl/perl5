@@ -145,9 +145,6 @@ PP(pp_rv2gv)
     }
     else {
 	if (SvTYPE(sv) != SVt_PVGV) {
-	    char *sym;
-	    STRLEN len;
-
 	    if (SvGMAGICAL(sv)) {
 		mg_get(sv);
 		if (SvROK(sv))
@@ -191,22 +188,21 @@ PP(pp_rv2gv)
 		    report_uninit();
 		RETSETUNDEF;
 	    }
-	    sym = SvPV(sv,len);
 	    if ((PL_op->op_flags & OPf_SPECIAL) &&
 		!(PL_op->op_flags & OPf_MOD))
 	    {
-		sv = (SV*)gv_fetchpv(sym, FALSE, SVt_PVGV);
-		if (!sv
-		    && (!is_gv_magical(sym,len,0)
-			|| !(sv = (SV*)gv_fetchpv(sym, TRUE, SVt_PVGV))))
-		{
+		SV * temp = (SV*)gv_fetchsv(sv, 0, SVt_PVGV);
+		if (!temp
+		    && (!is_gv_magical_sv(sv,0)
+			|| !(sv = (SV*)gv_fetchsv(sv, GV_ADD, SVt_PVGV)))) {
 		    RETSETUNDEF;
 		}
+		sv = temp;
 	    }
 	    else {
 		if (PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(aTHX_ PL_no_symref, sym, "a symbol");
-		sv = (SV*)gv_fetchpv(sym, TRUE, SVt_PVGV);
+		    DIE(aTHX_ PL_no_symref_sv, sv, "a symbol");
+		sv = (SV*)gv_fetchsv(sv, GV_ADD, SVt_PVGV);
 	    }
 	}
     }
@@ -234,8 +230,6 @@ PP(pp_rv2sv)
 	}
     }
     else {
-	char *sym;
-	STRLEN len;
 	gv = (GV*)sv;
 
 	if (SvTYPE(gv) != SVt_PVGV) {
@@ -252,22 +246,21 @@ PP(pp_rv2sv)
 		    report_uninit();
 		RETSETUNDEF;
 	    }
-	    sym = SvPV(sv, len);
 	    if ((PL_op->op_flags & OPf_SPECIAL) &&
 		!(PL_op->op_flags & OPf_MOD))
 	    {
-		gv = (GV*)gv_fetchpv(sym, FALSE, SVt_PV);
+		gv = (GV*)gv_fetchsv(sv, 0, SVt_PV);
 		if (!gv
-		    && (!is_gv_magical(sym,len,0)
-			|| !(gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PV))))
+		    && (!is_gv_magical_sv(sv, 0)
+			|| !(gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PV))))
 		{
 		    RETSETUNDEF;
 		}
 	    }
 	    else {
 		if (PL_op->op_private & HINT_STRICT_REFS)
-		    DIE(aTHX_ PL_no_symref, sym, "a SCALAR");
-		gv = (GV*)gv_fetchpv(sym, TRUE, SVt_PV);
+		    DIE(aTHX_ PL_no_symref_sv, sv, "a SCALAR");
+		gv = (GV*)gv_fetchsv(sv, GV_ADD, SVt_PV);
 	    }
 	}
 	sv = GvSVn(gv);
@@ -344,7 +337,8 @@ PP(pp_rv2cv)
 
     /* We usually try to add a non-existent subroutine in case of AUTOLOAD. */
     /* (But not in defined().) */
-    CV *cv = sv_2cv(TOPs, &stash, &gv, !(PL_op->op_flags & OPf_SPECIAL));
+    CV *cv = sv_2cv(TOPs, &stash, &gv,
+		    (PL_op->op_flags & OPf_SPECIAL) ? 0 : GV_ADD);
     if (cv) {
 	if (CvCLONE(cv))
 	    cv = (CV*)sv_2mortal((SV*)cv_clone(cv));
@@ -420,7 +414,7 @@ PP(pp_prototype)
 	    }
 	}
     }
-    cv = sv_2cv(TOPs, &stash, &gv, FALSE);
+    cv = sv_2cv(TOPs, &stash, &gv, 0);
     if (cv && SvPOK(cv))
 	ret = sv_2mortal(newSVpvn(SvPVX_const(cv), SvCUR(cv)));
   set:
@@ -3771,7 +3765,7 @@ PP(pp_exists)
     if (PL_op->op_private & OPpEXISTS_SUB) {
 	GV *gv;
 	SV *sv = POPs;
-	CV * const cv = sv_2cv(sv, &hv, &gv, FALSE);
+	CV * const cv = sv_2cv(sv, &hv, &gv, 0);
 	if (cv)
 	    RETPUSHYES;
 	if (gv && isGV(gv) && GvCV(gv) && !GvCVGEN(gv))

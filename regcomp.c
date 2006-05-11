@@ -5109,7 +5109,7 @@ Perl_save_re_context(pTHX)
 		GV *mgv;
 		char digits[TYPE_CHARS(long)];
 		sprintf(digits, "%lu", (long)i);
-		if ((mgv = gv_fetchpv(digits, FALSE, SVt_PV)))
+		if ((mgv = gv_fetchpv(digits, 0, SVt_PV)))
 		    save_scalar(mgv);
 	    }
 	}

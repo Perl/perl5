@@ -1332,14 +1332,14 @@ PP(pp_leavewrite)
 		if (!IoFMT_NAME(io))
 		    IoFMT_NAME(io) = savepv(GvNAME(gv));
 		topname = sv_2mortal(Perl_newSVpvf(aTHX_ "%s_TOP", GvNAME(gv)));
-		topgv = gv_fetchpv(SvPVX(topname), FALSE, SVt_PVFM);
+		topgv = gv_fetchsv(topname, 0, SVt_PVFM);
 		if ((topgv && GvFORM(topgv)) ||
-		  !gv_fetchpv("top",FALSE,SVt_PVFM))
+		  !gv_fetchpv("top", 0, SVt_PVFM))
 		    IoTOP_NAME(io) = savesvpv(topname);
 		else
 		    IoTOP_NAME(io) = savepv("top");
 	    }
-	    topgv = gv_fetchpv(IoTOP_NAME(io),FALSE, SVt_PVFM);
+	    topgv = gv_fetchpv(IoTOP_NAME(io), 0, SVt_PVFM);
 	    if (!topgv || !GvFORM(topgv)) {
 		IoLINES_LEFT(io) = IoPAGE_LEN(io);
 		goto forget_top;
@@ -2095,7 +2095,7 @@ PP(pp_truncate)
 	IO *io;
 
 	if (PL_op->op_flags & OPf_SPECIAL) {
-	    tmpgv = gv_fetchpv(POPpx, FALSE, SVt_PVIO);
+	    tmpgv = gv_fetchsv(POPs, 0, SVt_PVIO);
 
 	do_ftruncate_gv:
 	    if (!GvIO(tmpgv))
@@ -2122,7 +2122,7 @@ PP(pp_truncate)
 	else {
 	    SV *sv = POPs;
 	    const  char *name;
-	
+
 	    if (SvTYPE(sv) == SVt_PVGV) {
 	        tmpgv = (GV*)sv;		/* *main::FRED for example */
 		goto do_ftruncate_gv;
@@ -3085,7 +3085,8 @@ PP(pp_fttty)
     dSP;
     int fd;
     GV *gv;
-    char *tmps = NULL;
+    SV *tmpsv = NULL;
+
 
     if (PL_op->op_flags & OPf_REF)
 	gv = cGVOP_gv;
@@ -3094,12 +3095,18 @@ PP(pp_fttty)
     else if (SvROK(TOPs) && isGV(SvRV(TOPs)))
 	gv = (GV*)SvRV(POPs);
     else
-	gv = gv_fetchpv(tmps = POPpx, FALSE, SVt_PVIO);
+	gv = gv_fetchsv(tmpsv = POPs, 0, SVt_PVIO);
 
     if (GvIO(gv) && IoIFP(GvIOp(gv)))
 	fd = PerlIO_fileno(IoIFP(GvIOp(gv)));
-    else if (tmps && isDIGIT(*tmps))
-	fd = atoi(tmps);
+    else if (tmpsv && SvOK(tmpsv)) {
+	STRLEN n_a;
+	char *tmps = SvPV(tmpsv, n_a);
+	if (isDIGIT(*tmps))
+	    fd = atoi(tmps);
+	else 
+	    RETPUSHUNDEF;
+    }
     else
 	RETPUSHUNDEF;
     if (PerlLIO_isatty(fd))
@@ -3822,7 +3829,7 @@ PP(pp_fork)
     if (childpid < 0)
 	RETSETUNDEF;
     if (!childpid) {
-	if ((tmpgv = gv_fetchpv("$", TRUE, SVt_PV))) {
+	if ((tmpgv = gv_fetchpv("$", GV_ADD, SVt_PV))) {
             SvREADONLY_off(GvSV(tmpgv));
 	    sv_setiv(GvSV(tmpgv), (IV)PerlProc_getpid());
             SvREADONLY_on(GvSV(tmpgv));

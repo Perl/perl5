@@ -609,7 +609,7 @@ XS(XS_PerlIO_get_layers)
 	     if (SvROK(sv) && isGV(SvRV(sv)))
 		  gv = (GV*)SvRV(sv);
 	     else if (SvPOKp(sv))
-		  gv = gv_fetchpv(SvPVX(sv), FALSE, SVt_PVIO);
+		  gv = gv_fetchsv(sv, 0, SVt_PVIO);
 	}
 
 	if (gv && (io = GvIO(gv))) {
