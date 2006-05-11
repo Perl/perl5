@@ -1906,18 +1906,14 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
 	    }
 	    return I_V(Atof(SvPVX_const(sv)));
 	}
-	if (!SvROK(sv)) {
-	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
-		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
-		    report_uninit();
-	    }
-	    return 0;
+        if (SvROK(sv)) {
+	    goto return_rok;
 	}
-	/* Else this will drop through into the SvROK case just below, which
-	   will return within the {} for all code paths.  */
-    }
-    if (SvTHINKFIRST(sv)) {
+	assert(SvTYPE(sv) >= SVt_PVMG);
+	/* This falls through to the report_uninit inside S_sv_2iuv_common.  */
+    } else if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
+	return_rok:
 	    if (SvAMAGIC(sv)) {
 		SV * const tmpstr=AMG_CALLun(sv,numer);
 		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
@@ -1983,23 +1979,21 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
 	    }
 	    return U_V(Atof(SvPVX_const(sv)));
 	}
-	if (!SvROK(sv)) {
-	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
-		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
-		    report_uninit();
-	    }
-	    return 0;
+        if (SvROK(sv)) {
+	    goto return_rok;
 	}
-	/* Else this will drop through into the SvROK case just below, which
-	   will return within the {} for all code paths.  */
-    }
-    if (SvTHINKFIRST(sv)) {
+	assert(SvTYPE(sv) >= SVt_PVMG);
+	/* This falls through to the report_uninit inside S_sv_2iuv_common.  */
+    } else if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
-	  SV* tmpstr;
-          if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
-                (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv))))
-	      return SvUV(tmpstr);
-	  return PTR2UV(SvRV(sv));
+	return_rok:
+	    if (SvAMAGIC(sv)) {
+		SV *const tmpstr = AMG_CALLun(sv,numer);
+		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
+		    return SvUV(tmpstr);
+		}
+	    }
+	    return PTR2UV(SvRV(sv));
 	}
 	if (SvREADONLY(sv) && SvFAKE(sv)) {
 	    sv_force_normal(sv);
@@ -2050,24 +2044,23 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 		return (NV)SvUVX(sv);
 	    else
 		return (NV)SvIVX(sv);
-	}	
-        if (!SvROK(sv)) {
-	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
-		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
-		    report_uninit();
-	    }
-            return (NV)0;
-        }
-	/* Else this will drop through into the SvROK case just below, which
-	   will return within the {} for all code paths.  */
-    }
-    if (SvTHINKFIRST(sv)) {
+	}
+        if (SvROK(sv)) {
+	    goto return_rok;
+	}
+	assert(SvTYPE(sv) >= SVt_PVMG);
+	/* This falls through to the report_uninit near the end of the
+	   function. */
+    } else if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
-	  SV* tmpstr;
-          if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,numer)) &&
-                (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv))))
-	      return SvNV(tmpstr);
-	  return PTR2NV(SvRV(sv));
+	return_rok:
+	    if (SvAMAGIC(sv)) {
+		SV *const tmpstr = AMG_CALLun(sv,numer);
+                if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
+		    return SvNV(tmpstr);
+		}
+	    }
+	    return PTR2NV(SvRV(sv));
 	}
 	if (SvREADONLY(sv) && SvFAKE(sv)) {
 	    sv_force_normal(sv);
@@ -2079,10 +2072,8 @@ Perl_sv_2nv(pTHX_ register SV *sv)
 	}
     }
     if (SvTYPE(sv) < SVt_NV) {
-	if (SvTYPE(sv) == SVt_IV)
-	    sv_upgrade(sv, SVt_PVNV);
-	else
-	    sv_upgrade(sv, SVt_NV);
+	/* The logic to use SVt_PVNV if necessary is in sv_upgrade.  */
+	sv_upgrade(sv, SVt_NV);
 #ifdef USE_LONG_DOUBLE
 	DEBUG_c({
 	    STORE_NUMERIC_LOCAL_SET_STANDARD();
@@ -2206,11 +2197,10 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     else  {
 	if (!PL_localizing && !(SvFLAGS(sv) & SVs_PADTMP) && ckWARN(WARN_UNINITIALIZED))
 	    report_uninit();
-	if (SvTYPE(sv) < SVt_NV)
-	    /* Typically the caller expects that sv_any is not NULL now.  */
-	    /* XXX Ilya implies that this is a bug in callers that assume this
-	       and ideally should be fixed.  */
-	    sv_upgrade(sv, SVt_NV);
+	assert (SvTYPE(sv) >= SVt_NV);
+	/* Typically the caller expects that sv_any is not NULL now.  */
+	/* XXX Ilya implies that this is a bug in callers that assume this
+	   and ideally should be fixed.  */
 	return 0.0;
     }
 #if defined(USE_LONG_DOUBLE)
@@ -2359,7 +2349,6 @@ char *
 Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 {
     register char *s;
-    int olderrno;
 
     if (!sv) {
 	if (lp)
@@ -2416,46 +2405,43 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		return memcpy(s, tbuf, len + 1);
 	    }
 	}
-        if (!SvROK(sv)) {
-	    if (!(SvFLAGS(sv) & SVs_PADTMP)) {
-		if (!PL_localizing && ckWARN(WARN_UNINITIALIZED))
-		    report_uninit();
-	    }
-	    if (lp)
-		*lp = 0;
-            return (char *)"";
-        }
-	/* Else this will drop through into the SvROK case just below, which
-	   will return within the {} for all code paths.  */
-    }
-    if (SvTHINKFIRST(sv)) {
+        if (SvROK(sv)) {
+	    goto return_rok;
+	}
+	assert(SvTYPE(sv) >= SVt_PVMG);
+	/* This falls through to the report_uninit near the end of the
+	   function. */
+    } else if (SvTHINKFIRST(sv)) {
 	if (SvROK(sv)) {
-	    SV* tmpstr;
+	return_rok:
+            if (SvAMAGIC(sv)) {
+		SV *const tmpstr = AMG_CALLun(sv,string);
+		if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
+		    /* Unwrap this:  */
+		    /* char *pv = lp ? SvPV(tmpstr, *lp) : SvPV_nolen(tmpstr);
+		     */
 
-            if (SvAMAGIC(sv) && (tmpstr=AMG_CALLun(sv,string)) &&
-                (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
-		/* Unwrap this:  */
-		/* char *pv = lp ? SvPV(tmpstr, *lp) : SvPV_nolen(tmpstr); */
-
-                char *pv;
-		if ((SvFLAGS(tmpstr) & (SVf_POK)) == SVf_POK) {
-		    if (flags & SV_CONST_RETURN) {
-			pv = (char *) SvPVX_const(tmpstr);
+		    char *pv;
+		    if ((SvFLAGS(tmpstr) & (SVf_POK)) == SVf_POK) {
+			if (flags & SV_CONST_RETURN) {
+			    pv = (char *) SvPVX_const(tmpstr);
+			} else {
+			    pv = (flags & SV_MUTABLE_RETURN)
+				? SvPVX_mutable(tmpstr) : SvPVX(tmpstr);
+			}
+			if (lp)
+			    *lp = SvCUR(tmpstr);
 		    } else {
-			pv = (flags & SV_MUTABLE_RETURN)
-			    ? SvPVX_mutable(tmpstr) : SvPVX(tmpstr);
+			pv = sv_2pv_flags(tmpstr, lp, flags);
 		    }
-		    if (lp)
-			*lp = SvCUR(tmpstr);
-		} else {
-		    pv = sv_2pv_flags(tmpstr, lp, flags);
+		    if (SvUTF8(tmpstr))
+			SvUTF8_on(sv);
+		    else
+			SvUTF8_off(sv);
+		    return pv;
 		}
-                if (SvUTF8(tmpstr))
-                    SvUTF8_on(sv);
-                else
-                    SvUTF8_off(sv);
-                return pv;
-            } else {
+	    }
+	    {
 		SV *tsv;
 		MAGIC *mg;
 		const SV *const referent = (SV*)SvRV(sv);
@@ -2505,10 +2491,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 
 	if (SvTYPE(sv) < SVt_PVIV)
 	    sv_upgrade(sv, SVt_PVIV);
-	if (isUIOK)
-	    ptr = uiv_2buf(buf, 0, SvUVX(sv), 1, &ebuf);
-	else
-	    ptr = uiv_2buf(buf, SvIVX(sv), 0, 0, &ebuf);
+ 	ptr = uiv_2buf(buf, SvIVX(sv), SvUVX(sv), isUIOK, &ebuf);
 	/* inlined from sv_setpvn */
 	SvGROW_mutable(sv, (STRLEN)(ebuf - ptr + 1));
 	Move(ptr,SvPVX_mutable(sv),ebuf - ptr,char);
@@ -2523,11 +2506,12 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 	    SvIsUV_on(sv);
     }
     else if (SvNOKp(sv)) {
+	const int olderrno = errno;
 	if (SvTYPE(sv) < SVt_PVNV)
 	    sv_upgrade(sv, SVt_PVNV);
 	/* The +20 is pure guesswork.  Configure test needed. --jhi */
 	s = SvGROW_mutable(sv, NV_DIG + 20);
-	olderrno = errno;	/* some Xenix systems wipe out errno here */
+	/* some Xenix systems wipe out errno here */
 #ifdef apollo
 	if (SvNVX(sv) == 0.0)
 	    (void)strcpy(s,"0");
