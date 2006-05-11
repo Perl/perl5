@@ -409,9 +409,9 @@ existing thread (C<$thr1>).  This is shorthand for the following:
 
 =head1 THREAD SIGNALLING
 
-If Perl has been compiled to use safe signals (i.e., was not built with
-C<PERL_OLD_SIGNALS> - see C<perl -V>), then signals may be sent and acted upon
-by individual threads.
+When safe signals is in effect (the default behavior - see L<Unsafe signals>
+for more details), then signals may be sent and acted upon by individual
+threads.
 
 =over 4
 
@@ -554,9 +554,8 @@ following results in the above error:
 
 =item Cannot signal other threads without safe signals
 
-The particular copy of Perl that you're trying to use was built using
-C<PERL_OLD_SIGNALS>.  As a result, the C<-E<gt>kill()> signalling method
-cannot be used.
+Safe signals must be in effect to use the C<-E<gt>kill()> signalling method.
+See L<Unsafe signals> for more details.
 
 =item Unrecognized signal name: ...
 
@@ -581,10 +580,28 @@ general) does not work.  (In Windows, trying to use fork() inside BEGIN blocks
 is an equally losing proposition, since it has been implemented in very much
 the same way as threads.)
 
-=item PERL_OLD_SIGNALS are not threadsafe, will not be.
+=item Unsafe signals
 
-If your Perl has been built with PERL_OLD_SIGNALS (one has to explicitly add
-that symbol to I<ccflags>, see C<perl -V>), signal handling is not threadsafe.
+Since Perl 5.8.0, signals have been made safer in Perl by postponing their
+handling until the interpreter is in a I<safe> state.  See
+L<perl58delta/"Safe Signals">) and L<perlipc/"Deferred Signals (Safe Signals)">
+for more details.
+
+Safe signals is the default behavior, and the old, immediate, unsafe
+signalling behavior is only in effect in the following situations:
+
+=over 4
+
+=item * Perl was been built with C<PERL_OLD_SIGNALS> (see C<perl -V>).
+
+=item * The environment variable C<PERL_SIGNALS> is set to C<unsafe> (see L<perlrun/"PERL_SIGNALS">).
+
+=item * The module L<Perl::Unsafe::Signals> is used.
+
+=back
+
+If unsafe signals is in effect, then signal handling is not thread-safe, and
+the C<-E<gt>kill()> signalling method cannot be used.
 
 =item Returning closures from threads
 
