@@ -514,7 +514,7 @@ sub expr {
 		}
 	    } else {
 		if ($inif && $new !~ /defined\s*\($/) {
-		    $new .= '(defined(&' . $id . ') ? &' . $id . ' : 0)';
+		    $new .= '(defined(&' . $id . ') ? &' . $id . ' : undef)';
 		} elsif (/^\[/) {
 		    $new .= " \$$id";
 		} else {
