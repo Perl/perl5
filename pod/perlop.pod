@@ -1340,6 +1340,15 @@ when the program is done:
 
     system("program args 1>program.stdout 2>program.stderr");
 
+The STDIN filehandle used by the command is inherited from Perl's STDIN.
+For example:
+
+    open BLAM, "blam" || die "Can't open: $!";
+    open STDIN, "<&BLAM";
+    print `sort`;
+
+will print the sorted contents of the file "blam".
+
 Using single-quote as a delimiter protects the command from Perl's
 double-quote interpolation, passing it on to the shell instead:
 
