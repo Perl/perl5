@@ -1530,6 +1530,13 @@ Perl_swash_init(pTHX_ char* pkg, char* name, SV *listsv, I32 minbits, I32 none)
     if (!gv_fetchmeth(stash, "SWASHNEW", 8, -1)) {	/* demand load utf8 */
 	ENTER;
 	errsv_save = newSVsv(ERRSV);
+	/* It is assumed that callers of this routine are not passing in any
+	   user derived data.  */
+	/* Need to do this after save_re_context() as it will set PL_tainted to
+	   1 while saving $1 etc (see the code after getrx: in Perl_magic_get).
+	   Even line to create errsv_save can turn on PL_tainted.  */
+	SAVEBOOL(PL_tainted);
+	PL_tainted = 0;
 	Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn(pkg,pkg_len),
 			 NULL);
 	if (!SvTRUE(ERRSV))
