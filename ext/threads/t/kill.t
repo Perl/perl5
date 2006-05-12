@@ -90,7 +90,10 @@ sub thr_func {
 
     # Thread sleeps until signalled
     ok(1, 'Thread sleeping');
-    sleep(5);
+    {
+	local $SIG{'INT'} = sub {};
+	sleep(5);
+    }
     # Should not go past here
     ok(0, 'Thread terminated normally');
     return ('ERROR');
@@ -109,6 +112,8 @@ threads->yield();
 
 # Interrupt thread's sleep call
 {
+    # We can't be sure whether the signal itself will get delivered to this
+    # thread or the sleeping thread
     local $SIG{'INT'} = sub {};
     ok(kill('INT', $$) || $^O eq 'MSWin32', q/Interrupt thread's sleep call/);
 }
