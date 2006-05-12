@@ -4294,11 +4294,7 @@ Perl_upg_version(pTHX_ SV *ver)
     if ( SvNOK(ver) ) /* may get too much accuracy */ 
     {
 	char tbuf[64];
-#ifdef USE_SNPRINTF
-	const STRLEN len = snprintf(tbuf, sizeof(tbuf), "%.9"NVgf, SvNVX(ver));
-#else
-	const STRLEN len = my_sprintf(tbuf, "%.9"NVgf, SvNVX(ver));
-#endif /* #ifdef USE_SNPRINTF */
+	const STRLEN len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVgf, SvNVX(ver));
 	version = savepvn(tbuf, len);
     }
 #ifdef SvVOK
@@ -5215,38 +5211,21 @@ Perl_mem_log_alloc(const UV n, const UV typesize, const char *typename, Malloc_t
 	gettimeofday(&tv, 0);
 	{
 	    const STRLEN len =
-#  ifdef USE_SNPRINTF
-		snprintf(buf,
-			 PERL_MEM_LOG_SPRINTF_BUF_SIZE,
-			 "%10d.%06d: alloc: %s:%d:%s: %"IVdf" %"UVuf
-			 " %s = %"IVdf": %"UVxf"\n",
-			 (int)tv.tv_sec, (int)tv.tv_usec,
-			 filename, linenumber, funcname, n, typesize,
-			 typename, n * typesize, PTR2UV(newalloc));
-#  else
-		my_sprintf(buf,
-			   "%10d.%06d: alloc: %s:%d:%s: %"IVdf" %"UVuf
-			   " %s = %"IVdf": %"UVxf"\n",
-			   (int)tv.tv_sec, (int)tv.tv_usec,
-			   filename, linenumber, funcname, n, typesize,
-			   typename, n * typesize, PTR2UV(newalloc));
-#  endif
+		my_snprintf(buf,
+			    PERL_MEM_LOG_SPRINTF_BUF_SIZE,
+			    "%10d.%06d: alloc: %s:%d:%s: %"IVdf" %"UVuf
+			    " %s = %"IVdf": %"UVxf"\n",
+			    (int)tv.tv_sec, (int)tv.tv_usec,
+			    filename, linenumber, funcname, n, typesize,
+			    typename, n * typesize, PTR2UV(newalloc));
 # else
 	    const STRLEN len =
-#  ifdef USE_SNPRINTF
-		snprintf(buf,
-			 PERL_MEM_LOG_SPRINTF_BUF_SIZE,
-			 "alloc: %s:%d:%s: %"IVdf" %"UVuf
-			 " %s = %"IVdf": %"UVxf"\n",
-			 filename, linenumber, funcname, n, typesize,
-			 typename, n * typesize, PTR2UV(newalloc));
-#  else
-		my_sprintf(buf,
-			   "alloc: %s:%d:%s: %"IVdf" %"UVuf
-			   " %s = %"IVdf": %"UVxf"\n",
-			   filename, linenumber, funcname, n, typesize,
-			   typename, n * typesize, PTR2UV(newalloc));
-#  endif
+		my_snprintf(buf,
+			    PERL_MEM_LOG_SPRINTF_BUF_SIZE,
+			    "alloc: %s:%d:%s: %"IVdf" %"UVuf
+			    " %s = %"IVdf": %"UVxf"\n",
+			    filename, linenumber, funcname, n, typesize,
+			    typename, n * typesize, PTR2UV(newalloc));
 # endif
 # ifdef PERL_MEM_LOG_ENV_FD
 	    s = PerlEnv_getenv("PERL_MEM_LOG_FD");
@@ -5280,42 +5259,23 @@ Perl_mem_log_realloc(const UV n, const UV typesize, const char *typename, Malloc
 	gettimeofday(&tv, 0);
 	{
 	    const STRLEN len =
-#  ifdef USE_SNPRINTF
-		snprintf(buf,
-			 PERL_MEM_LOG_SPRINTF_BUF_SIZE,
-			 "%10d.%06d: realloc: %s:%d:%s: %"IVdf" %"UVuf
-			 " %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
-			 (int)tv.tv_sec, (int)tv.tv_usec,
-			 filename, linenumber, funcname, n, typesize,
-			 typename, n * typesize, PTR2UV(oldalloc),
-			 PTR2UV(newalloc));
-#  else
-		my_sprintf(buf,
-			   "%10d.%06d: realloc: %s:%d:%s: %"IVdf" %"UVuf
-			   " %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
-			   (int)tv.tv_sec, (int)tv.tv_usec,
-			   filename, linenumber, funcname, n, typesize,
-			   typename, n * typesize, PTR2UV(oldalloc),
-			   PTR2UV(newalloc));
-#  endif
+		my_snprintf(buf,
+			    PERL_MEM_LOG_SPRINTF_BUF_SIZE,
+			    "%10d.%06d: realloc: %s:%d:%s: %"IVdf" %"UVuf
+			    " %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
+			    (int)tv.tv_sec, (int)tv.tv_usec,
+			    filename, linenumber, funcname, n, typesize,
+			    typename, n * typesize, PTR2UV(oldalloc),
+			    PTR2UV(newalloc));
 # else
 	    const STRLEN len =
-#  ifdef USE_SNPRINTF
-		snprintf(buf,
-			 PERL_MEM_LOG_SPRINTF_BUF_SIZE,
-			 "realloc: %s:%d:%s: %"IVdf" %"UVuf
-			 " %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
-			 filename, linenumber, funcname, n, typesize,
-			 typename, n * typesize, PTR2UV(oldalloc),
-			 PTR2UV(newalloc));
-#  else
-		my_sprintf(buf,
-			   "realloc: %s:%d:%s: %"IVdf" %"UVuf
-			   " %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
-			   filename, linenumber, funcname, n, typesize,
-			   typename, n * typesize, PTR2UV(oldalloc),
-			   PTR2UV(newalloc));
-#  endif
+		my_snprintf(buf,
+			    PERL_MEM_LOG_SPRINTF_BUF_SIZE,
+			    "realloc: %s:%d:%s: %"IVdf" %"UVuf
+			    " %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
+			    filename, linenumber, funcname, n, typesize,
+			    typename, n * typesize, PTR2UV(oldalloc),
+			    PTR2UV(newalloc));
 # endif
 # ifdef PERL_MEM_LOG_ENV_FD
 	    s = PerlEnv_getenv("PERL_MEM_LOG_FD");
@@ -5349,20 +5309,12 @@ Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int linenumber,
 	gettimeofday(&tv, 0);
 	{
 	    const STRLEN len =
-#  ifdef USE_SNPRINTF
-		snprintf(buf,
-			 PERL_MEM_LOG_SPRINTF_BUF_SIZE,
-			 "%10d.%06d: free: %s:%d:%s: %"UVxf"\n",
-			 (int)tv.tv_sec, (int)tv.tv_usec,
-			 filename, linenumber, funcname,
-			 PTR2UV(oldalloc));
-#  else
-		my_sprintf(buf,
-			   "%10d.%06d: free: %s:%d:%s: %"UVxf"\n",
-			   (int)tv.tv_sec, (int)tv.tv_usec,
-			   filename, linenumber, funcname,
-			   PTR2UV(oldalloc));
-#  endif
+		my_snprintf(buf,
+			    PERL_MEM_LOG_SPRINTF_BUF_SIZE,
+			    "%10d.%06d: free: %s:%d:%s: %"UVxf"\n",
+			    (int)tv.tv_sec, (int)tv.tv_usec,
+			    filename, linenumber, funcname,
+			    PTR2UV(oldalloc));
 # else
 	    const STRLEN len =
 		my_sprintf(buf,
@@ -5404,6 +5356,72 @@ Perl_my_sprintf(char *buffer, const char* pat, ...)
     return strlen(buffer);
 }
 #endif
+
+/*
+=for apidoc my_snprintf
+
+The C library C<snprintf> functionality, if available and
+standards-compliant (uses C<vsnprintf>, actually).  If the
+C<vsnprintf> is not available, will unfortunately use the unsafe
+C<vsprintf>.  Consider using C<sv_vcatpvf> instead.
+
+=cut
+*/
+int
+Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
+/* Cannot do this using variadic macros because that is too unportable. */
+{
+    dTHX;
+    int retval;
+    va_list ap;
+#ifndef USE_VSNPRINTF
+    PERL_UNUSED_ARG(len);
+#endif
+    va_start(ap, format);
+#ifdef USE_VSNPRINTF
+    retval = vsnprintf(buffer, len, format, ap);
+#else
+    retval = vsprintf(buffer, format, ap);
+#endif
+    va_end(ap);
+    return retval;
+}
+
+/*
+=for apidoc my_vsnprintf
+
+The C library C<vsnprintf> if available and standards-compliant,
+but if the C<vsnprintf> is not available, will unfortunately use
+the unsafe C<vsprintf>.  Consider using C<sv_vcatpvf> instead.
+
+=cut
+*/
+int
+Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap)
+/* Cannot do this using variadic macros because that is too unportable. */
+{
+    dTHX;
+    int retval;
+#ifndef USE_VSNPRINTF
+    PERL_UNUSED_ARG(len);
+#endif
+#ifdef NEED_VA_COPY
+    va_list apc;
+    Perl_va_copy(apc);
+# ifdef USE_VSNPRINTF
+    retval = vsnprintf(buffer, len, format, apc);
+# else
+    retval = vsprintf(buffer, format, apc);
+# endif
+#else
+# ifdef USE_VSNPRINTF
+    retval = vsnprintf(buffer, len, format, ap);
+# else
+    retval = vsprintf(buffer, format, ap);
+# endif
+#endif
+    return retval;
+}
 
 void
 Perl_my_clearenv(pTHX)

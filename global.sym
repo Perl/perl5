@@ -713,5 +713,7 @@ Perl_ckwarn
 Perl_ckwarn_d
 Perl_new_warnings_bitfield
 Perl_my_sprintf
+Perl_my_snprintf
+Perl_my_vsnprintf
 Perl_my_cxt_init
 # ex: set ro:

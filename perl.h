@@ -1449,6 +1449,9 @@ int sockatmark(int);
 #  define my_sprintf Perl_my_sprintf
 #endif
 
+#define my_snprintf  Perl_my_snprintf
+#define my_vsnprintf Perl_my_vsnprintf
+
 /* Configure gets this right but the UTS compiler gets it wrong.
    -- Hal Morris <hom00@utsglobal.com> */
 #ifdef UTS

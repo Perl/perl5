@@ -1687,6 +1687,9 @@ p	|void	|offer_nice_chunk	|NN void *chunk|U32 chunk_size
 Apnod	|int	|my_sprintf	|NN char *buffer|NN const char *pat|...
 #endif
 
+Apnod	|int	|my_snprintf	|NN char *buffer|const Size_t len|NN const char *format|...
+Apnod	|int	|my_vsnprintf	|NN char *buffer|const Size_t len|NN const char *format|va_list ap
+
 px	|void	|my_clearenv
 
 #ifdef PERL_IMPLICIT_CONTEXT

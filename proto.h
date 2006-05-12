@@ -4335,6 +4335,15 @@ PERL_CALLCONV int	Perl_my_sprintf(char *buffer, const char *pat, ...)
 
 #endif
 
+PERL_CALLCONV int	Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(3);
+
+PERL_CALLCONV int	Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap)
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(3);
+
+
 PERL_CALLCONV void	Perl_my_clearenv(pTHX);
 
 #ifdef PERL_IMPLICIT_CONTEXT

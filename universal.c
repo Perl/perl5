@@ -622,11 +622,7 @@ XS(XS_version_qv)
 	    if ( SvNOK(ver) ) /* may get too much accuracy */
 	    {
 		char tbuf[64];
-#ifdef USE_SNPRINTF
-		const STRLEN len = snprintf(tbuf, sizeof(tbuf), "%.9"NVgf, SvNVX(ver));
-#else
-		const STRLEN len = my_sprintf(tbuf, "%.9"NVgf, SvNVX(ver));
-#endif /* #ifdef USE_SNPRINTF  */
+		const STRLEN len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVgf, SvNVX(ver));
 		version = savepvn(tbuf, len);
 	    }
 	    else
