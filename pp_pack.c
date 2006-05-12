@@ -702,21 +702,21 @@ next_uni_uu(pTHX_ const char **s, const char *end, I32 *out)
     return TRUE;
 }
 
-STATIC void
-bytes_to_uni(pTHX_ const U8 *start, STRLEN len, char **dest) {
-    U8 buffer[UTF8_MAXLEN];
+STATIC char *
+S_bytes_to_uni(pTHX_ const U8 *start, STRLEN len, char *dest) {
     const U8 * const end = start + len;
-    char *d = *dest;
+
     while (start < end) {
+	U8 buffer[UTF8_MAXLEN];
         const int length =
 	    uvuni_to_utf8_flags(buffer, NATIVE_TO_UNI(*start), 0) - buffer;
 	switch(length) {
 	  case 1:
-	    *d++ = buffer[0];
+	    *dest++ = buffer[0];
 	    break;
 	  case 2:
-	    *d++ = buffer[0];
-	    *d++ = buffer[1];
+	    *dest++ = buffer[0];
+	    *dest++ = buffer[1];
 	    break;
 	  default:
 	    Perl_croak(aTHX_ "Perl bug: value %d UTF-8 expands to %d bytes",
@@ -724,12 +724,13 @@ bytes_to_uni(pTHX_ const U8 *start, STRLEN len, char **dest) {
 	}
 	start++;
     }
-    *dest = d;
+    return dest;
 }
 
 #define PUSH_BYTES(utf8, cur, buf, len)				\
 STMT_START {							\
-    if (utf8) bytes_to_uni(aTHX_ (U8 *) buf, len, &(cur));	\
+    if (utf8)							\
+	(cur) = bytes_to_uni((U8 *) buf, len, (cur));		\
     else {							\
 	Copy(buf, cur, len, char);				\
 	(cur) += (len);						\
@@ -764,7 +765,7 @@ STMT_START {					\
 STMT_START {					\
     if (utf8) {					\
 	const U8 au8 = (byte);			\
-	bytes_to_uni(aTHX_ &au8, 1, &(s));	\
+	(s) = bytes_to_uni(&au8, 1, (s));	\
     } else *(U8 *)(s)++ = (byte);		\
 } STMT_END
 
@@ -3052,7 +3053,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 				len+(endb-buffer)*UTF8_EXPAND);
 			end = start+SvLEN(cat);
 		    }
-		    bytes_to_uni(aTHX_ buffer, endb-buffer, &cur);
+		    cur = bytes_to_uni(buffer, endb-buffer, cur);
 		} else {
 		    if (cur >= end) {
 			*cur = '\0';

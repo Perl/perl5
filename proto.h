@@ -3335,6 +3335,11 @@ STATIC char *	S_sv_exp_grow(pTHX_ SV *sv, STRLEN needed)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
+STATIC char *	S_bytes_to_uni(pTHX_ const U8 *start, STRLEN len, char *dest)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_3);
+
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)

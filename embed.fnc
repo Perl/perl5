@@ -1224,6 +1224,7 @@ sR	|const char *|get_num	|NN const char *ppat|NN I32 *lenptr
 ns	|bool	|need_utf8	|NN const char *pat|NN const char *patend
 ns	|char	|first_symbol	|NN const char *pat|NN const char *patend
 sR	|char *	|sv_exp_grow	|NN SV *sv|STRLEN needed
+sR	|char *	|bytes_to_uni	|NN const U8 *start|STRLEN len|NN char *dest
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
