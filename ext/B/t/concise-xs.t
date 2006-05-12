@@ -117,7 +117,7 @@ use Getopt::Std;
 use Carp;
 use Test::More tests => ( # per-pkg tests (function ct + require_ok)
 			  40 + 16	# Data::Dumper, Digest::MD5
-			  + 511 + 235	# B::Deparse, B
+			  + 512 + 235	# B::Deparse, B
 			  + 588 + 190	# POSIX, IO::Socket
 			  + 3 * ($] > 5.009)
 			  + 16 * ($] >= 5.009003)
@@ -178,7 +178,7 @@ my $testpkgs = {
 		     PMf_EVAL PMf_EXTENDED PMf_FOLD PMf_GLOBAL PMf_KEEP
 		     PMf_MULTILINE PMf_ONCE PMf_SINGLELINE PMf_SKIPWHITE
 		     POSTFIX SVf_FAKE SVf_IOK SVf_NOK SVf_POK SVf_ROK
-		     SVpad_OUR SVs_RMG SVs_SMG SWAP_CHILDREN
+		     SVpad_OUR SVs_RMG SVs_SMG SWAP_CHILDREN OPpPAD_STATE
 		     /],
 		 },
 
