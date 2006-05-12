@@ -2553,6 +2553,8 @@ lib/Tie/Memoize.pm		Base class for memoized tied hashes
 lib/Tie/Memoize.t		Test for Memoize.t
 lib/Tie/RefHash.pm		Base class for tied hashes with references as keys
 lib/Tie/RefHash/refhash.t	Test for Tie::RefHash and Tie::RefHash::Nestable
+lib/Tie/RefHash/rebless.t	Test for Tie::RefHash with rebless
+lib/Tie/RefHash/storable.t	Test for Tie::RefHash with storable
 lib/Tie/RefHash/threaded.t	Test for Tie::RefHash with threads
 lib/Tie/Scalar.pm		Base class for tied scalars
 lib/Tie/Scalar.t		See if Tie::Scalar works

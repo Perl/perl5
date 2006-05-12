@@ -1,6 +1,8 @@
 package Tie::RefHash;
 
-our $VERSION = 1.33;
+use vars qw/$VERSION/;
+
+$VERSION = "1.34";
 
 =head1 NAME
 
@@ -53,6 +55,24 @@ store a reference to one of your own hashes in the tied hash.
        print ref($_), "\n";
     }
 
+=head1 THREAD SUPPORT
+
+L<Tie::RefHash> fully supports threading using the C<CLONE> method.
+
+=head1 STORABLE SUPPORT
+
+L<Storable> hooks are provided for semantically correct serialization and
+cloning of tied refhashes.
+
+=head1 RELIC SUPPORT
+
+This version of Tie::RefHash seems to no longer work with 5.004. This has not
+been throughly investigated. Patches welcome ;-)
+
+=head1 MAINTAINER
+
+Yuval Kogman E<lt>nothingmuch@woobling.orgE<gt>
+
 =head1 AUTHOR
 
 Gurusamy Sarathy        gsar@activestate.com
@@ -69,15 +89,33 @@ use Tie::Hash;
 use vars '@ISA';
 @ISA = qw(Tie::Hash);
 use strict;
+use Carp qw/croak/;
 
 BEGIN {
+  # determine whether we need to take care of threads
   use Config ();
   my $usethreads = $Config::Config{usethreads}; # && exists $INC{"threads.pm"}
   *_HAS_THREADS = $usethreads ? sub () { 1 } : sub () { 0 };
   require Scalar::Util if $usethreads; # we need weaken()
 }
 
-require overload; # to support objects with overloaded ""
+BEGIN {
+  # create a refaddr function
+
+  if ( eval { require Scalar::Util; 1 } ) {
+    Scalar::Util->import("refaddr");
+  } else {
+    require overload;
+
+    *refaddr = sub {
+      if ( overload::StrVal($_[0]) =~ /\( 0x ([a-zA-Z0-9]+) \)$/x) {
+          return $1;
+      } else {
+        die "couldn't parse StrVal: " . overload::StrVal($_[0]);
+      }
+    };
+  }
+}
 
 my (@thread_object_registry, $count); # used by the CLONE method to rehash the keys after their refaddr changed
 
@@ -105,24 +143,41 @@ sub TIEHASH {
   return $s;
 }
 
+my $storable_format_version = join("/", __PACKAGE__, "0.01");
+
+sub STORABLE_freeze {
+  my ( $self, $is_cloning ) = @_;
+  my ( $refs, $reg ) = @$self;
+  return ( $storable_format_version, [ values %$refs ], $reg );
+}
+
+sub STORABLE_thaw {
+  my ( $self, $is_cloning, $version, $refs, $reg ) = @_;
+  croak "incompatible versions of Tie::RefHash between freeze and thaw"
+    unless $version eq $storable_format_version;
+
+  @$self = ( {}, $reg );
+  $self->_reindex_keys( $refs );
+}
+
 sub CLONE {
   my $pkg = shift;
   # when the thread has been cloned all the objects need to be updated.
   # dead weakrefs are undefined, so we filter them out
-  @thread_object_registry = grep { defined && do { $_->CLONE_OBJ; 1 } } @thread_object_registry;
+  @thread_object_registry = grep { defined && do { $_->_reindex_keys; 1 } } @thread_object_registry;
   $count = 0; # we just cleaned up
 }
 
-sub CLONE_OBJ {
-  my $self = shift;
+sub _reindex_keys {
+  my ( $self, $extra_keys ) = @_;
   # rehash all the ref keys based on their new StrVal
-  %{ $self->[0] } = map { overload::StrVal($_->[0]) => $_ } values %{ $self->[0] };
+  %{ $self->[0] } = map { refaddr($_->[0]) => $_ } (values(%{ $self->[0] }), @{ $extra_keys || [] });
 }
 
 sub FETCH {
   my($s, $k) = @_;
   if (ref $k) {
-      my $kstr = overload::StrVal($k);
+      my $kstr = refaddr($k);
       if (defined $s->[0]{$kstr}) {
         $s->[0]{$kstr}[1];
       }
@@ -138,7 +193,7 @@ sub FETCH {
 sub STORE {
   my($s, $k, $v) = @_;
   if (ref $k) {
-    $s->[0]{overload::StrVal($k)} = [$k, $v];
+    $s->[0]{refaddr($k)} = [$k, $v];
   }
   else {
     $s->[1]{$k} = $v;
@@ -149,19 +204,19 @@ sub STORE {
 sub DELETE {
   my($s, $k) = @_;
   (ref $k)
-    ? (delete($s->[0]{overload::StrVal($k)}) || [])->[1]
+    ? (delete($s->[0]{refaddr($k)}) || [])->[1]
     : delete($s->[1]{$k});
 }
 
 sub EXISTS {
   my($s, $k) = @_;
-  (ref $k) ? exists($s->[0]{overload::StrVal($k)}) : exists($s->[1]{$k});
+  (ref $k) ? exists($s->[0]{refaddr($k)}) : exists($s->[1]{$k});
 }
 
 sub FIRSTKEY {
   my $s = shift;
-  keys %{$s->[0]};	# reset iterator
-  keys %{$s->[1]};	# reset iterator
+  keys %{$s->[0]};  # reset iterator
+  keys %{$s->[1]};  # reset iterator
   $s->[2] = 0;      # flag for iteration, see NEXTKEY
   $s->NEXTKEY;
 }
