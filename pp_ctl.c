@@ -3903,7 +3903,7 @@ run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 	    }
 	    if (take) {
 		sv_catpvn(buf_sv, cache_p, take);
-		sv_chop(cache, cache_p + take);
+		sv_chop(cache, (char *)cache_p + take);
 		/* Definately not EOF  */
 		return 1;
 	    }

@@ -1259,14 +1259,14 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	if (PerlIO_isutf8(fp)) {
 	    if (!SvUTF8(sv)) {
 		/* We don't modify the original scalar.  */
-		tmpbuf = bytes_to_utf8((const U8*) tmps, &len);
+		tmpbuf = bytes_to_utf8((U8*) tmps, &len);
 		tmps = (char *) tmpbuf;
 	    }
 	}
 	else if (DO_UTF8(sv)) {
 	    STRLEN tmplen = len;
 	    bool utf8 = TRUE;
-	    U8 *result = bytes_from_utf8((const U8*) tmps, &tmplen, &utf8);
+	    U8 *result = bytes_from_utf8((U8*) tmps, &tmplen, &utf8);
 	    if (!utf8) {
 		tmpbuf = result;
 		tmps = (char *) tmpbuf;
