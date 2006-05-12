@@ -3100,13 +3100,13 @@ flag off so that it looks like octets again.
 void
 Perl_sv_utf8_encode(pTHX_ register SV *sv)
 {
-    (void) sv_utf8_upgrade(sv);
     if (SvIsCOW(sv)) {
         sv_force_normal_flags(sv, 0);
     }
     if (SvREADONLY(sv)) {
 	Perl_croak(aTHX_ PL_no_modify);
     }
+    (void) sv_utf8_upgrade(sv);
     SvUTF8_off(sv);
 }
 
