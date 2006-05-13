@@ -2,7 +2,7 @@ package Tie::RefHash;
 
 use vars qw/$VERSION/;
 
-$VERSION = "1.34";
+$VERSION = "1.34_01";
 
 =head1 NAME
 
@@ -96,7 +96,12 @@ BEGIN {
   use Config ();
   my $usethreads = $Config::Config{usethreads}; # && exists $INC{"threads.pm"}
   *_HAS_THREADS = $usethreads ? sub () { 1 } : sub () { 0 };
-  require Scalar::Util if $usethreads; # we need weaken()
+  if ($usethreads) {
+    # The magic of taint tunneling means that we can't do this require in the
+    # same statement as the boolean check on $usethreads, as $usethreads is
+    # tainted.
+    require Scalar::Util;
+  }
 }
 
 BEGIN {
