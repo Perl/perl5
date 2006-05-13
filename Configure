@@ -383,6 +383,7 @@ d_ctermid_r=''
 ctime_r_proto=''
 d_ctime_r=''
 d_cuserid=''
+d_c99_variadic_macros=''
 d_dbl_dig=''
 d_dbminitproto=''
 d_difftime=''
@@ -19164,6 +19165,46 @@ EOCP
 	;;
 esac
 
+: see if the Compiler supports C99 variadic macros 
+case "$i_stdarg$i_stdlib" in
+    "$define$define")
+    echo "You have <stdarg.h> and <stdlib.h>, so checking for C99 variadic macros." >&4
+    $cat >try.c <<EOCP
+#include <stdio.h>
+#include <stdarg.h>
+
+#define foo(buffer, format, ...) sprintf(buffer, format, __VA_ARGS__)
+
+int main() {
+  char buf[20];
+  foo(buf, "%d %g %.*s", 123, 456.0, (int)3, "789fail");
+  puts(buf);
+  return 0;
+}
+EOCP
+    set try
+    if eval $compile && $run ./try 2>&1 >/dev/null; then
+	case "`$run ./try`" in
+	    "123 456 789")
+	    echo "You have C99 variadic macros." >&4
+	    d_c99_variadic_macros="$define"
+	    ;;
+	    *)
+	    echo "You don't have functional C99 variadic macros." >&4
+	    d_c99_variadic_macros="$undef"
+	    ;;
+	esac
+    else
+	echo "I couldn't compile and run the test program, so I assume that you don't have functional C99 variadic macros." >&4
+	d_c99_variadic_macros="$undef"
+    fi
+    ;;
+    *)
+    echo "You don't have <stdarg.h> and <stdlib.h>, so not checking for C99 variadic macros." >&4
+    d_c99_variadic_macros="$undef"
+    ;;
+esac
+
 : see what type is used for size_t
 rp="What is the type used for the length parameter for string functions?"
 set size_t sizetype 'unsigned int' stdio.h sys/types.h
@@ -21276,6 +21317,7 @@ d_csh='$d_csh'
 d_ctermid_r='$d_ctermid_r'
 d_ctime_r='$d_ctime_r'
 d_cuserid='$d_cuserid'
+d_c99_variadic_macros='$d_c99_variadic_macros'
 d_dbl_dig='$d_dbl_dig'
 d_dbminitproto='$d_dbminitproto'
 d_difftime='$d_difftime'

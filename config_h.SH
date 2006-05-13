@@ -4421,4 +4421,10 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #endif
 
 #endif
+
+/* HAS_C99_VARIADIC_MACROS:
+ *	If defined, the compiler supports C99 variadic macros.
+ */
+#$d_c99_variadic_macros	HAS_C99_VARIADIC_MACROS	/**/
+
 !GROK!THIS!

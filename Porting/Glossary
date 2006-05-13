@@ -558,6 +558,11 @@ d_ctime_r (d_ctime_r.U):
 	which indicates to the C program that the ctime_r()
 	routine is available.
 
+d_c99_variadic_macros (d_c99_variadic_macros.U):
+	This variable conditionally defines the HAS_C99_VARIADIC_MACROS
+	symbol, which indicates to the C program that C99 variadic macros
+	are available.
+
 d_cuserid (d_cuserid.U):
 	This variable conditionally defines the HAS_CUSERID symbol, which
 	indicates to the C program that the cuserid() routine is available
