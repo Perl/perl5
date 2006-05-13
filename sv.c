@@ -1066,8 +1066,9 @@ S_more_bodies (pTHX_ svtype sv_type)
     /* computed count doesnt reflect the 1st slot reservation */
     DEBUG_m(PerlIO_printf(Perl_debug_log,
 			  "arena %p end %p arena-size %d type %d size %d ct %d\n",
-			  start, end, bdp->arena_size, sv_type, body_size,
-			  bdp->arena_size / body_size));
+			  start, end,
+			  (int)bdp->arena_size, sv_type, (int)body_size,
+			  (int)bdp->arena_size / (int)body_size));
 
     *root = (void *)start;
 
