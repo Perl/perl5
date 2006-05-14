@@ -3367,20 +3367,21 @@ PP(pp_chr)
     *tmps++ = (char)value;
     *tmps = '\0';
     (void)SvPOK_only(TARG);
+
     if (PL_encoding && !IN_BYTES) {
         sv_recode_to_utf8(TARG, PL_encoding);
 	tmps = SvPVX(TARG);
 	if (SvCUR(TARG) == 0 || !is_utf8_string((U8*)tmps, SvCUR(TARG)) ||
-	    memEQ(tmps, "\xef\xbf\xbd\0", 4)) {
-	    SvGROW(TARG, 3);
+	    UNICODE_IS_REPLACEMENT(utf8_to_uvchr((U8*)tmps, NULL))) {
+	    SvGROW(TARG, 2);
 	    tmps = SvPVX(TARG);
-	    SvCUR_set(TARG, 2);
-	    *tmps++ = (U8)UTF8_EIGHT_BIT_HI(value);
-	    *tmps++ = (U8)UTF8_EIGHT_BIT_LO(value);
+	    SvCUR_set(TARG, 1);
+	    *tmps++ = (char)value;
 	    *tmps = '\0';
-	    SvUTF8_on(TARG);
+	    SvUTF8_off(TARG);
 	}
     }
+
     XPUSHs(TARG);
     RETURN;
 }
