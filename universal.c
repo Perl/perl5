@@ -130,9 +130,9 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
 
 =for apidoc sv_derived_from
 
-Returns a boolean indicating whether the SV is derived from the specified
-class.  This is the function that implements C<UNIVERSAL::isa>.  It works
-for class names as well as for objects.
+Returns a boolean indicating whether the SV is derived from the specified class
+I<at the C level>.  To check derivation at the Perl level, call C<isa()> as a
+normal Perl method.
 
 =cut
 */
