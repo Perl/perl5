@@ -1284,7 +1284,7 @@ Es	|regnode*|reg		|NN struct RExC_state_t *state|I32 paren|NN I32 *flagp
 Es	|regnode*|reganode	|NN struct RExC_state_t *state|U8 op|U32 arg
 Es	|regnode*|regatom	|NN struct RExC_state_t *state|NN I32 *flagp
 Es	|regnode*|regbranch	|NN struct RExC_state_t *state|NN I32 *flagp|I32 first
-Es	|void	|reguni		|NN const struct RExC_state_t *state|UV uv|NN char *s|NN STRLEN *lenp
+Es	|STRLEN	|reguni		|NN const struct RExC_state_t *state|UV uv|NN char *s
 Es	|regnode*|regclass	|NN struct RExC_state_t *state
 ERsn	|I32	|regcurly	|NN const char *
 Es	|regnode*|reg_node	|NN struct RExC_state_t *state|U8 op

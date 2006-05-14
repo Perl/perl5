@@ -3516,10 +3516,9 @@ STATIC regnode*	S_regbranch(pTHX_ struct RExC_state_t *state, I32 *flagp, I32 fi
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC void	S_reguni(pTHX_ const struct RExC_state_t *state, UV uv, char *s, STRLEN *lenp)
+STATIC STRLEN	S_reguni(pTHX_ const struct RExC_state_t *state, UV uv, char *s)
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_4);
+			__attribute__nonnull__(pTHX_3);
 
 STATIC regnode*	S_regclass(pTHX_ struct RExC_state_t *state)
 			__attribute__nonnull__(pTHX_1);

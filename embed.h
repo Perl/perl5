@@ -3458,7 +3458,7 @@
 #define reganode(a,b,c)		S_reganode(aTHX_ a,b,c)
 #define regatom(a,b)		S_regatom(aTHX_ a,b)
 #define regbranch(a,b,c)	S_regbranch(aTHX_ a,b,c)
-#define reguni(a,b,c,d)		S_reguni(aTHX_ a,b,c,d)
+#define reguni(a,b,c)		S_reguni(aTHX_ a,b,c)
 #define regclass(a)		S_regclass(aTHX_ a)
 #define regcurly		S_regcurly
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)
