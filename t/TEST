@@ -406,6 +406,11 @@ EOT
 	    open(RESULTS, $compile_cmd)
 		or print "can't compile '$compile_cmd': $!.\n";
 	}
+	# Our environment may force us to use UTF-8, but we can't be sure that
+	# anything we're reading from will be generating (well formed) UTF-8
+	# This may not be the best way - possibly we should unset ${^OPEN} up
+	# top?
+	binmode RESULTS;
 
 	my $failure;
 	my $next = 0;
