@@ -1290,7 +1290,6 @@ ERsn	|I32	|regcurly	|NN const char *
 Es	|regnode*|reg_node	|NN struct RExC_state_t *state|U8 op
 Es	|regnode*|regpiece	|NN struct RExC_state_t *state|NN I32 *flagp
 Es	|void	|reginsert	|NN struct RExC_state_t *state|U8 op|NN regnode *opnd
-Es	|void	|regoptail	|NN const struct RExC_state_t *state|NN regnode *p|NN const regnode *val
 Es	|void	|regtail	|NN const struct RExC_state_t *state|NN regnode *p|NN const regnode *val
 EsRn	|char*	|regwhite	|NN char *p|NN const char *e
 Es	|char*	|nextchar	|NN struct RExC_state_t *state

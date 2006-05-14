@@ -1302,7 +1302,6 @@
 #define reg_node		S_reg_node
 #define regpiece		S_regpiece
 #define reginsert		S_reginsert
-#define regoptail		S_regoptail
 #define regtail			S_regtail
 #define regwhite		S_regwhite
 #define nextchar		S_nextchar
@@ -3464,7 +3463,6 @@
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)
 #define regpiece(a,b)		S_regpiece(aTHX_ a,b)
 #define reginsert(a,b,c)	S_reginsert(aTHX_ a,b,c)
-#define regoptail(a,b,c)	S_regoptail(aTHX_ a,b,c)
 #define regtail(a,b,c)		S_regtail(aTHX_ a,b,c)
 #define regwhite		S_regwhite
 #define nextchar(a)		S_nextchar(aTHX_ a)

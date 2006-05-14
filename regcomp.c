@@ -3543,10 +3543,16 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp)
 	}
 	regtail(pRExC_state, lastbr, ender);
 
-	if (have_branch) {
+	if (have_branch && !SIZE_ONLY) {
 	    /* Hook the tails of the branches to the closing node. */
-	    for (br = ret; br != NULL; br = regnext(br)) {
-		regoptail(pRExC_state, br, ender);
+	    for (br = ret; br; br = regnext(br)) {
+		const U8 op = PL_regkind[OP(br)];
+		if (op == BRANCH) {
+		    regtail(pRExC_state, NEXTOPER(br), ender);
+		}
+		else if (op == BRANCHJ) {
+		    regtail(pRExC_state, NEXTOPER(NEXTOPER(br)), ender);
+		}
 	    }
 	}
     }
@@ -5595,27 +5601,6 @@ S_regtail(pTHX_ const RExC_state_t *pRExC_state, regnode *p, const regnode *val)
     else {
 	NEXT_OFF(scan) = val - scan;
     }
-}
-
-/*
-- regoptail - regtail on operand of first argument; nop if operandless
-*/
-/* TODO: All three parms should be const */
-STATIC void
-S_regoptail(pTHX_ const RExC_state_t *pRExC_state, regnode *p, const regnode *val)
-{
-    dVAR;
-    /* "Operandless" and "op != BRANCH" are synonymous in practice. */
-    if (p == NULL || SIZE_ONLY)
-	return;
-    if (PL_regkind[(U8)OP(p)] == BRANCH) {
-	regtail(pRExC_state, NEXTOPER(p), val);
-    }
-    else if ( PL_regkind[(U8)OP(p)] == BRANCHJ) {
-	regtail(pRExC_state, NEXTOPER(NEXTOPER(p)), val);
-    }
-    else
-	return;
 }
 
 /*

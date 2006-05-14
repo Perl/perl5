@@ -3538,11 +3538,6 @@ STATIC void	S_reginsert(pTHX_ struct RExC_state_t *state, U8 op, regnode *opnd)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 
-STATIC void	S_regoptail(pTHX_ const struct RExC_state_t *state, regnode *p, const regnode *val)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3);
-
 STATIC void	S_regtail(pTHX_ const struct RExC_state_t *state, regnode *p, const regnode *val)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
