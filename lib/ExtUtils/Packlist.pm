@@ -3,8 +3,9 @@ package ExtUtils::Packlist;
 use 5.00503;
 use strict;
 use Carp qw();
+use Config;
 use vars qw($VERSION);
-$VERSION = '1.38';
+$VERSION = '1.39_01';
 $VERSION = eval $VERSION;
 
 # Used for generating filehandle globs.  IO::File might not be available!
@@ -101,27 +102,14 @@ my ($line);
 while (defined($line = <$fh>))
    {
    chomp $line;
-   my ($key, @kvs) = $line;
+   my ($key, $data) = $line;
    if ($key =~ /^(.*?)( \w+=.*)$/)
       {
       $key = $1;
-      @kvs = split(' ', $2);
+      $data = { map { split('=', $_) } split(' ', $2)};
       }
    $key =~ s!/\./!/!g;   # Some .packlists have spurious '/./' bits in the paths
-   if (! @kvs)
-      {
-      $self->{data}->{$key} = undef;
-      }
-   else
-      {
-      my ($data) = {};
-      foreach my $kv (@kvs)
-         {
-         my ($k, $v) = split('=', $kv);
-         $data->{$k} = $v;
-         }
-      $self->{data}->{$key} = $data;
-      }
+   $self->{data}->{$key} = $data;
    }
 close($fh);
 }
