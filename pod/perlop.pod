@@ -260,7 +260,9 @@ operands C<$a> and C<$b>: If C<$b> is positive, then C<$a % $b> is
 C<$a> minus the largest multiple of C<$b> that is not greater than
 C<$a>.  If C<$b> is negative, then C<$a % $b> is C<$a> minus the
 smallest multiple of C<$b> that is not less than C<$a> (i.e. the
-result will be less than or equal to zero). 
+result will be less than or equal to zero).  If the operands
+C<$a> and C<$b> are floting point values, only the integer portion 
+of C<$a> and C<$b> will be used in the operation.
 Note that when C<use integer> is in scope, "%" gives you direct access
 to the modulus operator as implemented by your C compiler.  This
 operator is not as well defined for negative operands, but it will
