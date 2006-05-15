@@ -707,20 +707,12 @@ S_bytes_to_uni(pTHX_ const U8 *start, STRLEN len, char *dest) {
     const U8 * const end = start + len;
 
     while (start < end) {
-	U8 buffer[UTF8_MAXLEN];
-        const int length =
-	    uvuni_to_utf8_flags(buffer, NATIVE_TO_UNI(*start), 0) - buffer;
-	switch(length) {
-	  case 1:
-	    *dest++ = buffer[0];
-	    break;
-	  case 2:
-	    *dest++ = buffer[0];
-	    *dest++ = buffer[1];
-	    break;
-	  default:
-	    Perl_croak(aTHX_ "Perl bug: value %d UTF-8 expands to %d bytes",
-		       *start, length);
+	const UV uv = NATIVE_TO_ASCII(*start);
+	if (UNI_IS_INVARIANT(uv))
+	    *dest++ = (char)(U8)UTF_TO_NATIVE(uv);
+	else {
+	    *dest++ = (char)(U8)UTF8_EIGHT_BIT_HI(uv);
+	    *dest++ = (char)(U8)UTF8_EIGHT_BIT_LO(uv);
 	}
 	start++;
     }
