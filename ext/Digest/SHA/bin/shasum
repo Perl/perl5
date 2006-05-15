@@ -4,8 +4,8 @@
 	#
 	# Copyright (C) 2003-2006 Mark Shelor, All Rights Reserved
 	#
-	# Version: 5.36
-	# Mon May  8 01:38:36 MST 2006
+	# Version: 5.37
+	# Mon May  8 04:30:09 MST 2006
 
 =head1 NAME
 
@@ -52,7 +52,7 @@ L<Digest::SHA::PurePerl>.
 use strict;
 use Getopt::Long;
 
-my $VERSION = "5.36";
+my $VERSION = "5.37";
 
 
 	# Try to use Digest::SHA, since it's faster.  If not installed,
@@ -174,25 +174,29 @@ my $mode = $binary ? '*' : ($portable ? '?' : ' ');
 	# sumfile($file): computes SHA digest of $file
 
 sub sumfile {
-	my($file) = @_;
-	my($fh, $digest);
+	my $file = shift;
 
-	unless (open($fh, "<$file")) {
-		print STDERR "shasum: $file: No such file or directory\n";
-		return;
-	}
-	binmode($fh) if $binary || $portable;
+	local *F;
+	return unless open(F, "<$file");
+	binmode(F) if $binary || $portable;
 
-	local $/;
-	my $buf = <$fh>;
-	close($fh);
-
+	my $digest = $module->new($alg);
 	if ($portable && -T $file) {
-		$buf =~ s/\015\012/\012/g;
-		$buf =~ s/\015/\012/g;
+		local $/ = \4096;
+		while (defined (my $rec = <F>)) {
+			while (substr($rec, -1) eq "\015") {
+				defined (my $extra = <F>) or last;
+				$rec .= $extra;
+			}
+			$rec =~ s/\015+\012/\012/g;
+			$rec =~ s/\015/\012/g;
+			$digest->add($rec);
+		}
 	}
+	else { $digest->addfile(*F) }
+	close(F);
 
-	$digest = $module->new($alg)->add($buf)->hexdigest;
+	$digest->hexdigest;
 }
 
 
@@ -213,16 +217,26 @@ if ($check) {
 	while (<$fh>) {
 		s/\s+$//;
 		($sum, $mode, $fname) = /^(\S+) (.)(.*)$/;
+		unless (-e $fname) {
+			warn "shasum: $fname: No such file or directory\n";
+			next;
+		}
 		($binary, $portable, $text) =
 			map { $_ eq $mode } ('*', '?', ' ');
 		unless ($alg = $len2alg{length($sum)}) {
-			print STDERR "shasum: $checkfile: $.: improperly ",
-				"formatted SHA checksum line\n" if $warn;
+			warn("shasum: $checkfile: $.: improperly " .
+				"formatted SHA checksum line\n") if $warn;
 			next;
 		}
 		$rsp = "$fname: ";
-		if (lc($sum) eq sumfile($fname)) { $rsp .= "OK\n" }
-		else { $rsp .= "FAILED\n"; $err = 1 }
+		unless (my $digest = sumfile($fname)) {
+			$rsp .= "FAILED open or read\n";
+			$err = 1;
+		}
+		else {
+			if (lc($sum) eq $digest) { $rsp .= "OK\n" }
+			else { $rsp .= "FAILED\n"; $err = 1 }
+		}
 		print $rsp unless $status;
 	}
 	close($fh);
@@ -232,11 +246,11 @@ if ($check) {
 
 	# Compute and display SHA checksums of requested files
 
-for (@ARGV) {
-	if (-d $_) {
-		print STDERR "shasum: $_: Is a directory\n";
+for my $arg (@ARGV) {
+	if (-d $arg) {
+		print STDERR "shasum: $arg: Is a directory\n";
 		next;
 	}
-	next unless my $digest = sumfile($_);
-	print "$digest $mode", "$_\n";
+	next unless my $digest = sumfile($arg);
+	print "$digest $mode", "$arg\n";
 }

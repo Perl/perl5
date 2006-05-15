@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2006 Mark Shelor, All Rights Reserved
  *
- * Version: 5.36
- * Mon May  8 01:38:36 MST 2006
+ * Version: 5.37
+ * Mon May  8 04:30:09 MST 2006
  *
  */
 
@@ -517,7 +517,7 @@ int shadump(file, s)
 char *file;
 SHA *s;
 {
-	unsigned int i, j;
+	int i, j;
 	SHA_FILE *f;
 	UCHR *p = shadigest(s);
 
@@ -530,7 +530,7 @@ SHA *s;
 		for (j = 0; j < (UINT) (s->alg <= 256 ? 4 : 8); j++)
 			SHA_fprintf(f, "%s%02x", j==0 ? ":" : "", *p++);
 	SHA_fprintf(f, "\nblock");
-	for (i = 0; i < s->blocksize>>3; i++)
+	for (i = 0; i < (int) (s->blocksize >> 3); i++)
 		SHA_fprintf(f, ":%02x", s->block[i]);
 	SHA_fprintf(f, "\nblockcnt:%u\n", s->blockcnt);
 	SHA_fprintf(f, "lenhh:%lu\nlenhl:%lu\nlenlh:%lu\nlenll:%lu\n",

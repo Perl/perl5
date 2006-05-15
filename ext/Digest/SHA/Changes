@@ -1,5 +1,15 @@
 Revision history for Perl extension Digest::SHA.
 
+5.37  Mon May  8 04:30:09 MST 2006
+	- modified shasum to avoid file slurping (ref. sub sumfile)
+	- improved error handling of checksum files in shasum
+		-- to better mimic the behavior of md5sum
+	- refined line-break regex in shasum (ref. sub sumfile)
+		-- catches multiple CR's preceding LF
+			thanks to Gisle Aas for suggested patch
+	- changed loop vars to signed int's in shadump (ref. src/sha.c)
+		-- to prevent type mismatch warnings
+
 5.36  Mon May  8 01:38:36 MST 2006
 	- fixed the "portable" option in shasum
 		-- normalize line-breaks in text files only
