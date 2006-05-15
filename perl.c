@@ -4958,6 +4958,9 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 	    sv_catpv(libdir, ":");
 #endif
 
+	/* Do the if() outside the #ifdef to avoid warnings about an unused
+	   parameter.  */
+	if (canrelocate) {
 #ifdef PERL_RELOCATABLE_INC
 	/*
 	 * Relocatable include entries are marked with a leading .../
@@ -4975,7 +4978,6 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 	 * The intent is that /usr/local/bin/perl and .../../lib/perl5
 	 * generates /usr/local/lib/perl5
 	 */
-	{
 	    char *libpath = SvPVX(libdir);
 	    STRLEN libpath_len = SvCUR(libdir);
 	    if (libpath_len >= 4 && memEQ (libpath, ".../", 4)) {
@@ -5052,8 +5054,8 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 		}
 		SvREFCNT_dec(prefix_sv);
 	    }
-	}
 #endif
+	}
 	/*
 	 * BEFORE pushing libdir onto @INC we may first push version- and
 	 * archname-specific sub-directories.
