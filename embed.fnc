@@ -1329,8 +1329,8 @@ ERs	|bool	|reginclass	|NULLOK const regexp *prog|NN const regnode *n|NN const U8
 				|bool do_utf8sv_is_utf8
 Es	|CHECKPOINT|regcppush	|I32 parenfloor
 Es	|char*	|regcppop	|NN const regexp *rex
-ERsn	|U8*	|reghop3	|NN U8 *pos|I32 off|NN U8 *lim
-ERsn	|U8*	|reghopmaybe3	|NN U8 *pos|I32 off|NN U8 *lim
+ERsn	|U8*	|reghop3	|NN U8 *pos|I32 off|NN const U8 *lim
+ERsn	|U8*	|reghopmaybe3	|NN U8 *pos|I32 off|NN const U8 *lim
 ERs	|char*	|find_byclass	|NN regexp * prog|NN const regnode *c|NN char *s|NN const char *strend|NULLOK const regmatch_info *reginfo
 Es	|void	|to_utf8_substr	|NN regexp * prog
 Es	|void	|to_byte_substr	|NN regexp * prog

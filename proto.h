@@ -3648,12 +3648,12 @@ STATIC CHECKPOINT	S_regcppush(pTHX_ I32 parenfloor);
 STATIC char*	S_regcppop(pTHX_ const regexp *rex)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC U8*	S_reghop3(U8 *pos, I32 off, U8 *lim)
+STATIC U8*	S_reghop3(U8 *pos, I32 off, const U8 *lim)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(3);
 
-STATIC U8*	S_reghopmaybe3(U8 *pos, I32 off, U8 *lim)
+STATIC U8*	S_reghopmaybe3(U8 *pos, I32 off, const U8 *lim)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(3);
