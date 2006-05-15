@@ -1153,6 +1153,7 @@ nm_so_opt=''
 runnm=''
 usenm=''
 useperlio=''
+userelocatableinc=''
 usesocks=''
 d_oldpthreads=''
 use5005threads=''
@@ -9009,6 +9010,11 @@ EOCP
 	fi
 	;;
 esac
+
+# probably will refer to
+#   $archlib $privlib $sitearch $sitelib $vendorarch $vendorlib
+need_relocation=0
+userelocatableinc=undef
 
 case "$vendorprefix" in
 '')	d_vendorbin="$undef"
@@ -21935,6 +21941,7 @@ useopcode='$useopcode'
 useperlio='$useperlio'
 useposix='$useposix'
 usereentrant='$usereentrant'
+userelocatableinc='$userelocatableinc'
 usesfio='$usesfio'
 useshrplib='$useshrplib'
 usesitecustomize='$usesitecustomize'

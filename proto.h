@@ -1644,7 +1644,7 @@ PERL_CALLCONV void	Perl_Slab_Free(pTHX_ void *op);
 #if defined(PERL_IN_PERL_C) || defined(PERL_DECL_PROT)
 STATIC void	S_find_beginning(pTHX);
 STATIC void	S_forbid_setid(pTHX_ const char * s);
-STATIC void	S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep);
+STATIC void	S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep, bool canrelocate);
 STATIC void	S_init_interp(pTHX);
 STATIC void	S_init_ids(pTHX);
 STATIC void	S_init_lexer(pTHX);

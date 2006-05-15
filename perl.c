@@ -1433,6 +1433,57 @@ Perl_call_atexit(pTHX_ ATEXIT_t fn, void *ptr)
     ++PL_exitlistlen;
 }
 
+#ifdef HAS_PROCSELFEXE
+/* This is a function so that we don't hold on to MAXPATHLEN
+   bytes of stack longer than necessary
+ */
+STATIC void
+S_procself_val(pTHX_ SV *sv, char *arg0)
+{
+    char buf[MAXPATHLEN];
+    int len = readlink(PROCSELFEXE_PATH, buf, sizeof(buf) - 1);
+
+    /* On Playstation2 Linux V1.0 (kernel 2.2.1) readlink(/proc/self/exe)
+       includes a spurious NUL which will cause $^X to fail in system
+       or backticks (this will prevent extensions from being built and
+       many tests from working). readlink is not meant to add a NUL.
+       Normal readlink works fine.
+     */
+    if (len > 0 && buf[len-1] == '\0') {
+      len--;
+    }
+
+    /* FreeBSD's implementation is acknowledged to be imperfect, sometimes
+       returning the text "unknown" from the readlink rather than the path
+       to the executable (or returning an error from the readlink).  Any valid
+       path has a '/' in it somewhere, so use that to validate the result.
+       See http://www.freebsd.org/cgi/query-pr.cgi?pr=35703
+    */
+    if (len > 0 && memchr(buf, '/', len)) {
+	sv_setpvn(sv,buf,len);
+    }
+    else {
+	sv_setpv(sv,arg0);
+    }
+}
+#endif /* HAS_PROCSELFEXE */
+
+STATIC void
+S_set_caret_X(pTHX) {
+    GV* tmpgv = gv_fetchpv("\030",TRUE, SVt_PV); /* $^X */
+    if (tmpgv) {
+#ifdef HAS_PROCSELFEXE
+	S_procself_val(aTHX_ GvSV(tmpgv), PL_origargv[0]);
+#else
+#ifdef OS2
+	sv_setpv(GvSV(tmpgv), os2_execname(aTHX));
+#else
+	sv_setpv(GvSV(tmpgv),PL_origargv[0]);
+#endif
+#endif
+    }
+}
+
 /*
 =for apidoc perl_parse
 
@@ -1578,6 +1629,10 @@ setuid perl scripts securely.\n");
 	PL_do_undump = FALSE;
 	cxstack_ix = -1;		/* start label stack again */
 	init_ids();
+	assert (!PL_tainted);
+	TAINT;
+	S_set_caret_X(aTHX);
+	TAINT_NOT;
 	init_postdump_symbols(argc,argv,env);
 	return 0;
     }
@@ -1762,7 +1817,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	    if (s && *s) {
 		STRLEN len = strlen(s);
 		const char * const p = savepvn(s, len);
-		incpush(p, TRUE, TRUE, FALSE);
+		incpush(p, TRUE, TRUE, FALSE, FALSE);
 		sv_catpvn(sv, "-I", 2);
 		sv_catpvn(sv, p, len);
 		sv_catpvn(sv, " ", 1);
@@ -2071,6 +2126,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 	scriptname = "-";
     }
 
+    /* Set $^X early so that it can be used for relocatable paths in @INC  */
+    assert (!PL_tainted);
+    TAINT;
+    S_set_caret_X(aTHX);
+    TAINT_NOT;
     init_perllib();
 
     open_script(scriptname,dosearch,sv);
@@ -3182,7 +3242,7 @@ Perl_moreswitches(pTHX_ char *s)
 		    p++;
 	    } while (*p && *p != '-');
 	    e = savepvn(s, e-s);
-	    incpush(e, TRUE, TRUE, FALSE);
+	    incpush(e, TRUE, TRUE, FALSE, FALSE);
 	    Safefree(e);
 	    s = p;
 	    if (*s == '-')
@@ -4602,57 +4662,6 @@ Perl_init_argv_symbols(pTHX_ register int argc, register char **argv)
     }
 }
 
-#ifdef HAS_PROCSELFEXE
-/* This is a function so that we don't hold on to MAXPATHLEN
-   bytes of stack longer than necessary
- */
-STATIC void
-S_procself_val(pTHX_ SV *sv, char *arg0)
-{
-    char buf[MAXPATHLEN];
-    int len = readlink(PROCSELFEXE_PATH, buf, sizeof(buf) - 1);
-
-    /* On Playstation2 Linux V1.0 (kernel 2.2.1) readlink(/proc/self/exe)
-       includes a spurious NUL which will cause $^X to fail in system
-       or backticks (this will prevent extensions from being built and
-       many tests from working). readlink is not meant to add a NUL.
-       Normal readlink works fine.
-     */
-    if (len > 0 && buf[len-1] == '\0') {
-      len--;
-    }
-
-    /* FreeBSD's implementation is acknowledged to be imperfect, sometimes
-       returning the text "unknown" from the readlink rather than the path
-       to the executable (or returning an error from the readlink).  Any valid
-       path has a '/' in it somewhere, so use that to validate the result.
-       See http://www.freebsd.org/cgi/query-pr.cgi?pr=35703
-    */
-    if (len > 0 && memchr(buf, '/', len)) {
-	sv_setpvn(sv,buf,len);
-    }
-    else {
-	sv_setpv(sv,arg0);
-    }
-}
-#endif /* HAS_PROCSELFEXE */
-
-STATIC void
-S_set_caret_X(pTHX) {
-    GV* tmpgv = gv_fetchpv("\030",TRUE, SVt_PV); /* $^X */
-    if (tmpgv) {
-#ifdef HAS_PROCSELFEXE
-	S_procself_val(aTHX_ GvSV(tmpgv), PL_origargv[0]);
-#else
-#ifdef OS2
-	sv_setpv(GvSVn(tmpgv), os2_execname(aTHX));
-#else
-	sv_setpv(GvSVn(tmpgv),PL_origargv[0]);
-#endif
-#endif
-    }
-}
-
 STATIC void
 S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register char **env)
 {
@@ -4679,7 +4688,6 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	magicname("0", "0", 1);
 #endif
     }
-    S_set_caret_X(aTHX);
     if ((PL_envgv = gv_fetchpv("ENV",TRUE, SVt_PVHV))) {
 	HV *hv;
 	GvMULTI_on(PL_envgv);
@@ -4764,9 +4772,9 @@ S_init_perllib(pTHX)
 #else
 	if (s)
 #endif
-	    incpush(s, TRUE, TRUE, TRUE);
+	    incpush(s, TRUE, TRUE, TRUE, FALSE);
 	else
-	    incpush(PerlEnv_getenv("PERLLIB"), FALSE, FALSE, TRUE);
+	    incpush(PerlEnv_getenv("PERLLIB"), FALSE, FALSE, TRUE, FALSE);
 #else /* VMS */
 	/* Treat PERL5?LIB as a possible search list logical name -- the
 	 * "natural" VMS idiom for a Unix path string.  We allow each
@@ -4775,9 +4783,9 @@ S_init_perllib(pTHX)
 	char buf[256];
 	int idx = 0;
 	if (my_trnlnm("PERL5LIB",buf,0))
-	    do { incpush(buf,TRUE,TRUE,TRUE); } while (my_trnlnm("PERL5LIB",buf,++idx));
+	    do { incpush(buf,TRUE,TRUE,TRUE,FALSE); } while (my_trnlnm("PERL5LIB",buf,++idx));
 	else
-	    while (my_trnlnm("PERLLIB",buf,idx++)) incpush(buf,FALSE,FALSE,TRUE);
+	    while (my_trnlnm("PERLLIB",buf,idx++)) incpush(buf,FALSE,FALSE,TRUE,FALSE);
 #endif /* VMS */
     }
 
@@ -4785,11 +4793,11 @@ S_init_perllib(pTHX)
     ARCHLIB PRIVLIB SITEARCH SITELIB VENDORARCH and VENDORLIB
 */
 #ifdef APPLLIB_EXP
-    incpush(APPLLIB_EXP, TRUE, TRUE, TRUE);
+    incpush(APPLLIB_EXP, TRUE, TRUE, TRUE, TRUE);
 #endif
 
 #ifdef ARCHLIB_EXP
-    incpush(ARCHLIB_EXP, FALSE, FALSE, TRUE);
+    incpush(ARCHLIB_EXP, FALSE, FALSE, TRUE, TRUE);
 #endif
 #ifdef MACOS_TRADITIONAL
     {
@@ -4802,72 +4810,72 @@ S_init_perllib(pTHX)
 	
 	Perl_sv_setpvf(aTHX_ privdir, "%slib:", macperl);
 	if (PerlLIO_stat(SvPVX(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
-	    incpush(SvPVX(privdir), TRUE, FALSE, TRUE);
+	    incpush(SvPVX(privdir), TRUE, FALSE, TRUE, FALSE);
 	Perl_sv_setpvf(aTHX_ privdir, "%ssite_perl:", macperl);
 	if (PerlLIO_stat(SvPVX(privdir), &tmpstatbuf) >= 0 && S_ISDIR(tmpstatbuf.st_mode))
-	    incpush(SvPVX(privdir), TRUE, FALSE, TRUE);
+	    incpush(SvPVX(privdir), TRUE, FALSE, TRUE, FALSE);
 	
    	SvREFCNT_dec(privdir);
     }
     if (!PL_tainting)
-	incpush(":", FALSE, FALSE, TRUE);
+	incpush(":", FALSE, FALSE, TRUE, FALSE);
 #else
 #ifndef PRIVLIB_EXP
 #  define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
 #endif
 #if defined(WIN32)
-    incpush(PRIVLIB_EXP, TRUE, FALSE, TRUE);
+    incpush(PRIVLIB_EXP, TRUE, FALSE, TRUE, TRUE);
 #else
-    incpush(PRIVLIB_EXP, FALSE, FALSE, TRUE);
+    incpush(PRIVLIB_EXP, FALSE, FALSE, TRUE, TRUE);
 #endif
 
 #ifdef SITEARCH_EXP
     /* sitearch is always relative to sitelib on Windows for
      * DLL-based path intuition to work correctly */
 #  if !defined(WIN32)
-    incpush(SITEARCH_EXP, FALSE, FALSE, TRUE);
+    incpush(SITEARCH_EXP, FALSE, FALSE, TRUE, TRUE);
 #  endif
 #endif
 
 #ifdef SITELIB_EXP
 #  if defined(WIN32)
     /* this picks up sitearch as well */
-    incpush(SITELIB_EXP, TRUE, FALSE, TRUE);
+    incpush(SITELIB_EXP, TRUE, FALSE, TRUE, TRUE);
 #  else
-    incpush(SITELIB_EXP, FALSE, FALSE, TRUE);
+    incpush(SITELIB_EXP, FALSE, FALSE, TRUE, TRUE);
 #  endif
 #endif
 
 #ifdef SITELIB_STEM /* Search for version-specific dirs below here */
-    incpush(SITELIB_STEM, FALSE, TRUE, TRUE);
+    incpush(SITELIB_STEM, FALSE, TRUE, TRUE, TRUE);
 #endif
 
 #ifdef PERL_VENDORARCH_EXP
     /* vendorarch is always relative to vendorlib on Windows for
      * DLL-based path intuition to work correctly */
 #  if !defined(WIN32)
-    incpush(PERL_VENDORARCH_EXP, FALSE, FALSE, TRUE);
+    incpush(PERL_VENDORARCH_EXP, FALSE, FALSE, TRUE, TRUE);
 #  endif
 #endif
 
 #ifdef PERL_VENDORLIB_EXP
 #  if defined(WIN32)
-    incpush(PERL_VENDORLIB_EXP, TRUE, FALSE, TRUE);	/* this picks up vendorarch as well */
+    incpush(PERL_VENDORLIB_EXP, TRUE, FALSE, TRUE, TRUE);	/* this picks up vendorarch as well */
 #  else
-    incpush(PERL_VENDORLIB_EXP, FALSE, FALSE, TRUE);
+    incpush(PERL_VENDORLIB_EXP, FALSE, FALSE, TRUE, TRUE);
 #  endif
 #endif
 
 #ifdef PERL_VENDORLIB_STEM /* Search for version-specific dirs below here */
-    incpush(PERL_VENDORLIB_STEM, FALSE, TRUE, TRUE);
+    incpush(PERL_VENDORLIB_STEM, FALSE, TRUE, TRUE, TRUE);
 #endif
 
 #ifdef PERL_OTHERLIBDIRS
-    incpush(PERL_OTHERLIBDIRS, TRUE, TRUE, TRUE);
+    incpush(PERL_OTHERLIBDIRS, TRUE, TRUE, TRUE, TRUE);
 #endif
 
     if (!PL_tainting)
-	incpush(".", FALSE, FALSE, TRUE);
+	incpush(".", FALSE, FALSE, TRUE, FALSE);
 #endif /* MACOS_TRADITIONAL */
 }
 
@@ -4904,7 +4912,8 @@ S_incpush_if_exists(pTHX_ SV *dir)
 }
 
 STATIC void
-S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep)
+S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
+	  bool canrelocate)
 {
     SV *subdir = NULL;
     const char *p = dir;
@@ -4949,6 +4958,102 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep)
 	    sv_catpv(libdir, ":");
 #endif
 
+#ifdef PERL_RELOCATABLE_INC
+	/*
+	 * Relocatable include entries are marked with a leading .../
+	 *
+	 * The algorithm is
+	 * 0: Remove that leading ".../"
+	 * 1: Remove trailing executable name (anything after the last '/')
+	 *    from the perl path to give a perl prefix
+	 * Then
+	 * While the @INC element starts "../" and the prefix ends with a real
+	 * directory (ie not . or ..) chop that real directory off the prefix
+	 * and the leading "../" from the @INC element. ie a logical "../"
+	 * cleanup
+	 * Finally concatenate the prefix and the remainder of the @INC element
+	 * The intent is that /usr/local/bin/perl and .../../lib/perl5
+	 * generates /usr/local/lib/perl5
+	 */
+	{
+	    char *libpath = SvPVX(libdir);
+	    STRLEN libpath_len = SvCUR(libdir);
+	    if (libpath_len >= 4 && memEQ (libpath, ".../", 4)) {
+		/* Game on!  */
+		SV *caret_X = get_sv("\030", 0);
+		/* Going to use the SV just as a scratch buffer holding a C
+		   string:  */
+		SV *prefix_sv;
+		char *prefix;
+		char *lastslash;
+
+		/* $^X is *the* source of taint if tainting is on, hence
+		   SvPOK() won't be true.  */
+		assert(caret_X);
+		assert(SvPOKp(caret_X));
+		prefix_sv = newSVpvn(SvPVX(caret_X), SvCUR(caret_X));
+		/* Firstly take off the leading .../
+		   If all else fail we'll do the paths relative to the current
+		   directory.  */
+		sv_chop(libdir, libpath + 4);
+		/* Don't use SvPV as we're intentionally bypassing taining,
+		   mortal copies that the mg_get of tainting creates, and
+		   corruption that seems to come via the save stack.
+		   I guess that the save stack isn't correctly set up yet.  */
+		libpath = SvPVX(libdir);
+		libpath_len = SvCUR(libdir);
+
+		/* This would work more efficiently with memrchr, but as it's
+		   only a GNU extension we'd need to probe for it and
+		   implement our own. Not hard, but maybe not worth it?  */
+
+		prefix = SvPVX(prefix_sv);
+		lastslash = strrchr(prefix, '/');
+
+		/* First time in with the *lastslash = '\0' we just wipe off
+		   the trailing /perl from (say) /usr/foo/bin/perl
+		*/
+		if (lastslash) {
+		    SV *tempsv;
+		    while ((*lastslash = '\0'), /* Do that, come what may.  */
+			   (libpath_len >= 3 && memEQ(libpath, "../", 3)
+			    && (lastslash = strrchr(prefix, '/')))) {
+			if (lastslash[1] == '\0'
+			    || (lastslash[1] == '.'
+				&& (lastslash[2] == '/' /* ends "/."  */
+				    || (lastslash[2] == '/'
+					&& lastslash[3] == '/' /* or "/.."  */
+					)))) {
+			    /* Prefix ends "/" or "/." or "/..", any of which
+			       are fishy, so don't do any more logical cleanup.
+			    */
+			    break;
+			}
+			/* Remove leading "../" from path  */
+			libpath += 3;
+			libpath_len -= 3;
+			/* Next iteration round the loop removes the last
+			   directory name from prefix by writing a '\0' in
+			   the while clause.  */
+		    }
+		    /* prefix has been terminated with a '\0' to the correct
+		       length. libpath points somewhere into the libdir SV.
+		       We need to join the 2 with '/' and drop the result into
+		       libdir.  */
+		    tempsv = Perl_newSVpvf(aTHX_ "%s/%s", prefix, libpath);
+		    SvREFCNT_dec(libdir);
+		    /* And this is the new libdir.  */
+		    libdir = tempsv;
+		    if (PL_tainting &&
+			(PL_uid != PL_euid || PL_gid != PL_egid)) {
+			/* Need to taint reloccated paths if running set ID  */
+			SvTAINTED_on(libdir);
+		    }
+		}
+		SvREFCNT_dec(prefix_sv);
+	    }
+	}
+#endif
 	/*
 	 * BEFORE pushing libdir onto @INC we may first push version- and
 	 * archname-specific sub-directories.

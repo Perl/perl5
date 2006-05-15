@@ -3166,7 +3166,7 @@
 #ifdef PERL_CORE
 #define find_beginning()	S_find_beginning(aTHX)
 #define forbid_setid(a)		S_forbid_setid(aTHX_ a)
-#define incpush(a,b,c,d)	S_incpush(aTHX_ a,b,c,d)
+#define incpush(a,b,c,d,e)	S_incpush(aTHX_ a,b,c,d,e)
 #define init_interp()		S_init_interp(aTHX)
 #define init_ids()		S_init_ids(aTHX)
 #define init_lexer()		S_init_lexer(aTHX)

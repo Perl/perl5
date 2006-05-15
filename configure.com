@@ -6316,6 +6316,7 @@ $ WC "usemymalloc='" + usemymalloc + "'"
 $ WC "useperlio='" + useperlio + "'"
 $ WC "useposix='false'"
 $ WC "usereentrant='undef'"
+$ WC "userelocatableinc='undef'"
 $ WC "usesecurelog='" + usesecurelog + "'"  ! VMS-specific
 $ WC "usesitecustomize='" + usesitecustomize + "'"
 $ WC "usesocks='undef'"

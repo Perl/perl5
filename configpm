@@ -295,6 +295,70 @@ EOT
     $byteorder_code = "our \$byteorder = '?'x$s;\n";
 }
 
+my @need_relocation;
+
+if (fetch_string({},'userelocatableinc')) {
+    foreach my $what (qw(archlibexp
+			 privlibexp
+			 sitearchexp
+			 sitelibexp
+			 sitelib_stem
+			 vendorarchexp
+			 vendorlibexp
+			 vendorlib_stem)) {
+	push @need_relocation, $what if fetch_string({}, $what) =~ m!^\.\.\./!;
+    }
+}
+
+my %need_relocation;
+@need_relocation{@need_relocation} = @need_relocation;
+
+# This can have .../ anywhere:
+if (fetch_string({}, 'otherlibdirs') =~ m!\.\.\./!) {
+    $need_relocation{otherlibdirs} = 'otherlibdirs';
+}
+
+my $relocation_code = <<'EOT';
+
+sub relocate_inc {
+  my $libdir = shift;
+  return $libdir unless $libdir =~ s!^\.\.\./!!;
+  my $prefix = $^X;
+  if ($prefix =~ s!/[^/]*$!!) {
+    while ($libdir =~ m!^\.\./!) {
+      # Loop while $libdir starts "../" and $prefix still has a trailing
+      # directory
+      last unless $prefix =~ s!/([^/]+)$!!;
+      # but bail out if the directory we picked off the end of $prefix is .
+      # or ..
+      if ($1 eq '.' or $1 eq '..') {
+	# Undo! This should be rare, hence code it this way rather than a
+	# check each time before the s!!! above.
+	$prefix = "$prefix/$1";
+	last;
+      }
+      # Remove that leading ../ and loop again
+      substr ($libdir, 0, 3, '');
+    }
+    $libdir = "$prefix/$libdir";
+  }
+  $libdir;
+}
+EOT
+
+if (%need_relocation) {
+  my $relocations_in_common;
+  # otherlibdirs only features in the hash
+  foreach (keys %need_relocation) {
+    $relocations_in_common++ if $Common{$_};
+  }
+  if ($relocations_in_common) {
+    print CONFIG $relocation_code;
+  } else {
+    print CONFIG_HEAVY $relocation_code;
+  }
+}
+
 print CONFIG_HEAVY @non_v, "\n";
 
 # copy config summary format from the myconfig.SH script
@@ -328,6 +392,23 @@ if ($Common{byteorder}) {
     print CONFIG_HEAVY $byteorder_code;
 }
 
+if (@need_relocation) {
+print CONFIG_HEAVY 'foreach my $what (qw(', join (' ', @need_relocation),
+      ")) {\n", <<'EOT';
+    s/^($what=)(['"])(.*?)\2/$1 . $2 . relocate_inc($3) . $2/me;
+}
+EOT
+# Currently it only makes sense to do the ... relocation on Unix, so there's
+# no need to emulate the "which separator for this platform" logic in perl.c -
+# ':' will always be applicable
+if ($need_relocation{otherlibdirs}) {
+print CONFIG_HEAVY << 'EOT';
+s{^(otherlibdirs=)(['"])(.*?)\2}
+ {$1 . $2 . join ':', map {relocate_inc($_)} split ':', $3 . $2}me;
+EOT
+}
+}
+
 print CONFIG_HEAVY <<'EOT';
 s/(byteorder=)(['"]).*?\2/$1$2$Config::byteorder$2/m;
 
@@ -339,12 +420,16 @@ EOT
 foreach my $prefix (qw(ccflags ldflags)) {
     my $value = fetch_string ({}, $prefix);
     my $withlargefiles = fetch_string ({}, $prefix . "_uselargefiles");
-    $value =~ s/\Q$withlargefiles\E\b//;
-    print CONFIG_HEAVY "${prefix}_nolargefiles='$value'\n";
+    if (defined $withlargefiles) {
+        $value =~ s/\Q$withlargefiles\E\b//;
+        print CONFIG_HEAVY "${prefix}_nolargefiles='$value'\n";
+    }
 }
 
 foreach my $prefix (qw(libs libswanted)) {
     my $value = fetch_string ({}, $prefix);
+    my $withlf = fetch_string ({}, 'libswanted_uselargefiles');
+    next unless defined $withlf;
     my @lflibswanted
        = split(' ', fetch_string ({}, 'libswanted_uselargefiles'));
     if (@lflibswanted) {
@@ -512,6 +597,11 @@ foreach my $key (keys %Common) {
 	$value =~ s!\\!\\\\!g;
 	$value =~ s!'!\\'!g;
 	$value = "'$value'";
+	if ($key eq 'otherlibdirs') {
+	    $value = "join (':', map {relocate_inc(\$_)} split (':', $value))";
+	} elsif ($need_relocation{$key}) {
+	    $value = "relocate_inc($value)";
+	}
     } else {
 	$value = "undef";
     }
@@ -773,6 +863,7 @@ EOS
 
 # Now do some simple tests on the Config.pm file we have created
 unshift(@INC,'lib');
+unshift(@INC,'xlib/symbian') if $Opts{cross};
 require $Config_PM;
 require $Config_heavy;
 import Config;
