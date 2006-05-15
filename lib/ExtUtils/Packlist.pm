@@ -4,8 +4,8 @@ use 5.00503;
 use strict;
 use Carp qw();
 use Config;
-use vars qw($VERSION);
-$VERSION = '1.39_01';
+use vars qw($VERSION $Relocations);
+$VERSION = '1.39_02';
 $VERSION = eval $VERSION;
 
 # Used for generating filehandle globs.  IO::File might not be available!
@@ -17,8 +17,6 @@ my $fhname = "FH1";
 
 Make a filehandle. Same kind of idea as Symbol::gensym().
 
-=end _undocumented
-
 =cut
 
 sub mkfh()
@@ -27,6 +25,30 @@ no strict;
 my $fh = \*{$fhname++};
 use strict;
 return($fh);
+}
+
+=item __find_relocations
+
+Works out what absolute paths in the configuration have been located at run
+time relative to $^X, and generates a regexp that matches them
+
+=end _undocumented
+
+=cut
+
+sub __find_relocations
+{
+    my %paths;
+    while (my ($raw_key, $raw_val) = each %Config) {
+	my $exp_key = $raw_key . "exp";
+	next unless exists $Config{$exp_key};
+	next unless $raw_val =~ m!\.\.\./!;
+	$paths{$Config{$exp_key}}++;
+    }
+    # Longest prefixes go first in the alternatives
+    my $alternations = join "|", map {quotemeta $_}
+    sort {length $b <=> length $a} keys %paths;
+    qr/^($alternations)/o;
 }
 
 sub new($$)
@@ -107,6 +129,15 @@ while (defined($line = <$fh>))
       {
       $key = $1;
       $data = { map { split('=', $_) } split(' ', $2)};
+
+      if ($Config{userelocatableinc} && $data->{relocate_as})
+          {
+	  require File::Spec;
+	  require Cwd;
+	  my ($vol, $dir) = File::Spec->splitpath($packfile);
+	  my $newpath = File::Spec->catpath($vol, $dir, $data->{relocate_as});
+	  $key = Cwd::realpath($newpath);
+          }
       }
    $key =~ s!/\./!/!g;   # Some .packlists have spurious '/./' bits in the paths
    $self->{data}->{$key} = $data;
@@ -125,10 +156,33 @@ my $fh = mkfh();
 open($fh, ">$packfile") || Carp::croak("Can't open file $packfile: $!");
 foreach my $key (sort(keys(%{$self->{data}})))
    {
+       my $data = $self->{data}->{$key};
+       if ($Config{userelocatableinc}) {
+	   $Relocations ||= __find_relocations();
+	   if ($packfile =~ $Relocations) {
+	       # We are writing into a subdirectory of a run-time relocated
+	       # path. Figure out if the this file is also within a subdir.
+	       my $prefix = $1;
+	       if (File::Spec->no_upwards(File::Spec->abs2rel($key, $prefix)))
+	       {
+		   # The relocated path is within the found prefix
+		   my $packfile_prefix;
+		   (undef, $packfile_prefix)
+		       = File::Spec->splitpath($packfile);
+
+		   my $relocate_as
+		       = File::Spec->abs2rel($key, $packfile_prefix);
+
+		   if (!ref $data) {
+		       $data = {};
+		   }
+		   $data->{relocate_as} = $relocate_as;
+	       }
+	   }
+       }
    print $fh ("$key");
-   if (ref($self->{data}->{$key}))
+   if (ref($data))
       {
-      my $data = $self->{data}->{$key};
       foreach my $k (sort(keys(%$data)))
          {
          print $fh (" $k=$data->{$k}");
