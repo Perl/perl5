@@ -481,9 +481,7 @@ if ($Common{byteorder}) {
 if (@need_relocation) {
 $heavy_txt .= 'foreach my $what (qw(' . join (' ', @need_relocation) .
       ")) {\n" . <<'EOT';
-    s<^($what=)(['"])(.*?)\2>
-     <$1 . $2 . relocate_inc($3) . $2 . "\n" .
-      'raw_' . $1 . $2 . $3 . $2>me;
+    s/^($what=)(['"])(.*?)\2/$1 . $2 . relocate_inc($3) . $2/me;
 }
 EOT
 # Currently it only makes sense to do the ... relocation on Unix, so there's
