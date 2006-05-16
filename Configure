@@ -6046,6 +6046,8 @@ if $test "X$ansexp" != "X$binexp"; then
 fi
 prefixvar=bin
 : XXX Bug? -- ignores Configure -Dinstallprefix setting.
+: XXX If this is fixed, also fix the "start perl" hunk below, which relies on
+: this via initialinstalllocation
 . ./setprefixvar
 
 case "$userelocatableinc" in
@@ -8567,6 +8569,9 @@ case "$versiononly" in
 esac
 
 : figure out how to guarantee perl startup
+: XXX Note that this currently takes advantage of the bug that binexp ignores
+: the Configure -Dinstallprefix setting, which in turn means that under
+: relocatable @INC, initialinstalllocation is what binexp started as.
 case "$startperl" in
 '')
 	case "$sharpbang" in
@@ -8576,13 +8581,13 @@ case "$startperl" in
 I can use the #! construct to start perl on your system. This will
 make startup of perl scripts faster, but may cause problems if you
 want to share those scripts and perl is not in a standard place
-($binexp/perl) on all your platforms. The alternative is to force
+($initialinstalllocation/perl) on all your platforms. The alternative is to force
 a shell by starting the script with a single ':' character.
 
 EOH
 		case "$versiononly" in
-		"$define")      dflt="$binexp/perl$version";;  
-		*)              dflt="$binexp/perl";;
+		"$define")      dflt="$initialinstalllocation/perl$version";;  
+		*)              dflt="$initialinstalllocation/perl";;
 		esac
 		rp='What shall I put after the #! to start up perl ("none" to not use #!)?'
 		. ./myread
@@ -8611,8 +8616,8 @@ echo "I'll use $startperl to start perl scripts."
 case "$perlpath" in
 '')
 	case "$versiononly" in
-	"$define")	perlpath="$binexp/perl$version";;
-	*)		perlpath="$binexp/perl";;
+	"$define")	perlpath="$initialinstalllocation/perl$version";;
+	*)		perlpath="$initialinstalllocation/perl";;
 	esac
 	case "$startperl" in
 	*!*) ;;
@@ -8622,10 +8627,10 @@ case "$perlpath" in
 I will use the "eval 'exec'" idiom to start Perl on your system.
 I can use the full path of your Perl binary for this purpose, but
 doing so may cause problems if you want to share those scripts and
-Perl is not always in a standard place ($binexp/perl).
+Perl is not always in a standard place ($initialinstalllocation/perl).
 
 EOH
-		dflt="$binexp/perl"
+		dflt="$initialinstalllocation/perl"
 		rp="What path shall I use in \"eval 'exec'\"?"
 		. ./myread
 		perlpath="$ans"
