@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Sun Jan  1 11:31:40 CET 2006 [metaconfig 3.0 PL70]
+# Generated on Wed Mar  8 09:08:03 CET 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -917,6 +917,7 @@ i_varhdr=''
 i_vfork=''
 inc_version_list=''
 inc_version_list_init=''
+d_inc_version_list=''
 installprefix=''
 installprefixexp=''
 installstyle=''
@@ -958,9 +959,13 @@ sPRIgldbl=''
 sSCNfldbl=''
 lseeksize=''
 lseektype=''
+mad=''
 make_set_make=''
 d_mymalloc=''
 freetype=''
+madlyh=''
+madlyobj=''
+madlysrc=''
 mallocobj=''
 mallocsrc=''
 malloctype=''
@@ -1093,6 +1098,7 @@ sig_size=''
 installsitearch=''
 sitearch=''
 sitearchexp=''
+d_sitearch=''
 installsitebin=''
 sitebin=''
 sitebinexp=''
@@ -6524,6 +6530,11 @@ if $test X"$prefix" != X"$installprefix"; then
 else
 	installsitearch="$sitearchexp"
 fi
+if $test X"$sitearch" = X"$sitelib"; then
+	d_sitearch="$undef"
+else
+	d_sitearch="$define"
+fi
 
 $cat <<EOM
 
@@ -6964,9 +6975,12 @@ case "$ans" in
 esac
 case "$inc_version_list" in
 ''|' ') 
-	inc_version_list_init='0';;
+	inc_version_list_init='0'
+	d_inc_version_list="$undef"
+	;;
 *)	inc_version_list_init=`echo $inc_version_list |
 		$sed -e 's/^/"/' -e 's/ /","/g' -e 's/$/",0/'`
+	d_inc_version_list="$define"
 	;;
 esac
 $rm -f getverlist
@@ -18824,6 +18838,34 @@ EOM
 *)  groupstype="$gidtype";;
 esac
 
+
+case "$mad" in
+$define|true|[yY]*)	dflt='y' ;;
+*)			dflt='n' ;;
+esac
+cat <<EOM
+
+Would you like to build with Misc Attribute Decoration? This is development
+work leading to a Perl 5 to Perl 6 convertor, which imposes a space and speed
+overhead on the interpreter.
+
+If this doesn't make any sense to you, just accept the default '$dflt'.
+EOM
+rp='Build Perl with MAD?'
+. ./myread
+case "$ans" in
+y|Y)	val="$define"
+	madlyh='madly.h madly.act madly.tab'
+	madlysrc='madly.c'
+	madlyobj="madly$_o" ;;
+*)	val="$undef"
+	madlyh=''
+	madlysrc=''
+	madlyobj='' ;;
+esac
+set mad
+eval $setvar
+
 echo " "
 echo "Checking if your $make program sets \$(MAKE)..." >&4
 case "$make_set_make" in
@@ -21221,6 +21263,7 @@ d_grpasswd='$d_grpasswd'
 d_hasmntopt='$d_hasmntopt'
 d_htonl='$d_htonl'
 d_ilogbl='$d_ilogbl'
+d_inc_version_list="$d_inc_version_list"
 d_index='$d_index'
 d_inetaton='$d_inetaton'
 d_int64_t='$d_int64_t'
@@ -21375,6 +21418,7 @@ d_shmget='$d_shmget'
 d_sigaction='$d_sigaction'
 d_sigprocmask='$d_sigprocmask'
 d_sigsetjmp='$d_sigsetjmp'
+d_sitearch='$d_sitearch'
 d_sockatmark='$d_sockatmark'
 d_sockatmarkproto='$d_sockatmarkproto'
 d_socket='$d_socket'
@@ -21710,12 +21754,16 @@ lpr='$lpr'
 ls='$ls'
 lseeksize='$lseeksize'
 lseektype='$lseektype'
+mad='$mad'
 mail='$mail'
 mailx='$mailx'
 make='$make'
 make_set_make='$make_set_make'
 mallocobj='$mallocobj'
 mallocsrc='$mallocsrc'
+madlyh='$madlyh'
+madlyobj='$madlyobj'
+madlysrc='$madlysrc'
 malloctype='$malloctype'
 man1dir='$man1dir'
 man1direxp='$man1direxp'

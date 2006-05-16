@@ -1889,6 +1889,9 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #  ifdef PERL_IMPLICIT_SYS
 			     " PERL_IMPLICIT_SYS"
 #  endif
+#  ifdef PERL_MAD
+			     " PERL_MAD"
+#  endif
 #  ifdef PERL_MALLOC_WRAP
 			     " PERL_MALLOC_WRAP"
 #  endif
@@ -4849,7 +4852,8 @@ S_init_perllib(pTHX)
 #  endif
 #endif
 
-#ifdef SITELIB_STEM /* Search for version-specific dirs below here */
+#if defined(SITELIB_STEM) && defined(PERL_INC_VERSION_LIST)
+    /* Search for version-specific dirs below here */
     incpush(SITELIB_STEM, FALSE, TRUE, TRUE, TRUE);
 #endif
 

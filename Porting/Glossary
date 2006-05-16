@@ -1137,6 +1137,10 @@ d_ilogbl (d_ilogbl.U):
 	indicates to the C program that the ilogbl() routine is available.
 	If scalbnl is also present we can emulate frexpl.
 
+d_inc_version_list (inc_version_list.U):
+	This variable conditionally defines PERL_INC_VERSION_LIST.
+	It is set to undef when PERL_INC_VERSION_LIST is empty.
+
 d_index (d_strchr.U):
 	This variable conditionally defines HAS_INDEX if index() and
 	rindex() are available for string searching.
@@ -1896,6 +1900,11 @@ d_sigsetjmp (d_sigsetjmp.U):
 	This variable conditionally defines the HAS_SIGSETJMP symbol,
 	which indicates that the sigsetjmp() routine is available to
 	call setjmp() and optionally save the process's signal mask.
+
+d_sitearch (sitearch.U):
+	This variable conditionally defines SITEARCH to hold the pathname
+	of architecture-dependent library files for $package.  If
+	$sitearch is the same as $archlib, then this is set to undef.
 
 d_sockatmark (d_sockatmark.U):
 	This variable conditionally defines the HAS_SOCKATMARK symbol, which
@@ -3496,6 +3505,22 @@ lseektype (lseektype.U):
 	This variable defines lseektype to be something like off_t, long, 
 	or whatever type is used to declare lseek offset's type in the
 	kernel (which also appears to be lseek's return type).
+
+mad (mad.U):
+	This variable indicates that the Misc Attribute Definition code is to
+	be compiled.
+
+madlyh (mad.U):
+	If the Misc Attribute Decoration is to be compiled, this variable is
+	set to the name of the extra header files to be used, else it is ''
+
+madlyobj (mad.U):
+	If the Misc Attribute Decoration is to be compiled, this variable is
+	set to the name of the extra object files to be used, else it is ''
+
+madlysrc (mad.U):
+	If the Misc Attribute Decoration is to be compiled, this variable is
+	set to the name of the extra C source files to be used, else it is ''
 
 mail (Loc.U):
 	This variable is defined but not used by Configure.
