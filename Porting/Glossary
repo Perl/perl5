@@ -3836,9 +3836,35 @@ perl5 (perl5.U):
 	installed perl5.005 or later suitable for running the script
 	to determine inc_version_list.
 
-perl (Loc.U):
-	This variable is defined but not used by Configure.
-	The value is a plain '' and is not useful.
+PERL_API_REVISION (patchlevel.h):
+	This number describes the earliest compatible PERL_REVISION of
+	Perl ("compatibility" here being defined as sufficient binary/API
+	compatibility to run XS code built with the older version).
+	Normally this does not change across maintenance releases.
+	Please read the comment in patchlevel.h.
+
+PERL_API_SUBVERSION (patchlevel.h):
+	This number describes the earliest compatible PERL_SUBVERSION of
+	Perl ("compatibility" here being defined as sufficient binary/API
+	compatibility to run XS code built with the older version).
+	Normally this does not change across maintenance releases.
+	Please read the comment in patchlevel.h.
+
+PERL_API_VERSION (patchlevel.h):
+	This number describes the earliest compatible PERL_VERSION of
+	Perl ("compatibility" here being defined as sufficient binary/API
+	compatibility to run XS code built with the older version).
+	Normally this does not change across maintenance releases.
+	Please read the comment in patchlevel.h.
+
+PERL_CONFIG_SH (Oldsyms.U):
+	This is set to 'true' in config.sh so that a shell script
+	sourcing config.sh can tell if it has been sourced already.
+
+PERL_PATCHLEVEL (Oldsyms.U):
+	This symbol reflects the patchlevel, if available. Will usually
+	come from the .patch file, which is available when the perl
+	source tree was fetched with rsync.
 
 perl_patchlevel (patchlevel.U):
 	This is the Perl patch level, a numeric change identifier,
