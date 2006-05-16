@@ -672,7 +672,7 @@ PP(pp_formline)
 	    {
 		const char *s = chophere;
 		if (chopspace) {
-		    while (*s && isSPACE(*s))
+		    while (isSPACE(*s))
 			s++;
 		}
 		sv_chop(sv,(char *)s);
@@ -810,7 +810,7 @@ PP(pp_formline)
 		const char *s = chophere;
 		const char *send = item + len;
 		if (chopspace) {
-		    while (*s && isSPACE(*s) && s < send)
+		    while (isSPACE(*s) && (s < send))
 			s++;
 		}
 		if (s < send) {
@@ -2626,6 +2626,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
 /* startop op_free() this to undo. */
 /* code Short string id of the caller. */
 {
+    /* FIXME - how much of this code is common with pp_entereval?  */
     dSP;				/* Make POPBLOCK work. */
     PERL_CONTEXT *cx;
     SV **newsp;
@@ -2638,6 +2639,7 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
     char *safestr;
     int runtime;
     CV* runcv = Nullcv;	/* initialise to avoid compiler warnings */
+    STRLEN len;
 
     ENTER;
     lex_start(sv);
@@ -2654,9 +2656,11 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
 		       code, (unsigned long)++PL_evalseq,
 		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
 	tmpbuf = SvPVX(sv);
+	len = SvCUR(sv);
     }
     else
-	sprintf(tmpbuf, "_<(%.10s_eval %lu)", code, (unsigned long)++PL_evalseq);
+	len = my_sprintf(tmpbuf, "_<(%.10s_eval %lu)", code,
+			 (unsigned long)++PL_evalseq);
     SAVECOPFILE_FREE(&PL_compiling);
     CopFILE_set(&PL_compiling, tmpbuf+2);
     SAVECOPLINE(&PL_compiling);
@@ -2666,8 +2670,8 @@ Perl_sv_compile_2op(pTHX_ SV *sv, OP** startop, char *code, PAD** padp)
        (i.e. before run-time proper). To work around the coredump that
        ensues, we always turn GvMULTI_on for any globals that were
        introduced within evals. See force_ident(). GSAR 96-10-12 */
-    safestr = savepv(tmpbuf);
-    SAVEDELETE(PL_defstash, safestr, strlen(safestr));
+    safestr = savepvn(tmpbuf, len);
+    SAVEDELETE(PL_defstash, safestr, len);
     SAVEHINTS();
 #ifdef OP_IN_REGISTER
     PL_opsave = op;
@@ -3318,7 +3322,7 @@ PP(pp_require)
 	SETERRNO(0, SS_NORMAL);
 
     /* Assume success here to prevent recursive requirement. */
-    len = strlen(name);
+    /* name is never assigned to again, so len is still strlen(name)  */
     /* Check whether a hook in @INC has already filled %INC */
     if (!hook_sv) {
 	(void)hv_store(GvHVn(PL_incgv), name, len, newSVpv(CopFILE(&PL_compiling),0),0);
@@ -3402,7 +3406,7 @@ PP(pp_entereval)
     CV* runcv;
     U32 seq;
 
-    if (!SvPV_const(sv,len))
+    if (!SvPV_nolen_const(sv))
 	RETPUSHUNDEF;
     TAINT_PROPER("eval");
 
@@ -3418,9 +3422,10 @@ PP(pp_entereval)
 		       (unsigned long)++PL_evalseq,
 		       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
 	tmpbuf = SvPVX(sv);
+	len = SvCUR(sv);
     }
     else
-	sprintf(tmpbuf, "_<(eval %lu)", (unsigned long)++PL_evalseq);
+	len = my_sprintf(tmpbuf, "_<(eval %lu)", (unsigned long)++PL_evalseq);
     SAVECOPFILE_FREE(&PL_compiling);
     CopFILE_set(&PL_compiling, tmpbuf+2);
     SAVECOPLINE(&PL_compiling);
@@ -3430,8 +3435,8 @@ PP(pp_entereval)
        (i.e. before run-time proper). To work around the coredump that
        ensues, we always turn GvMULTI_on for any globals that were
        introduced within evals. See force_ident(). GSAR 96-10-12 */
-    safestr = savepv(tmpbuf);
-    SAVEDELETE(PL_defstash, safestr, strlen(safestr));
+    safestr = savepvn(tmpbuf, len);
+    SAVEDELETE(PL_defstash, safestr, len);
     SAVEHINTS();
     PL_hints = PL_op->op_targ;
     SAVESPTR(PL_compiling.cop_warnings);

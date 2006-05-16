@@ -3955,6 +3955,7 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
     if (PL_statbuf.st_mode & (S_ISUID|S_ISGID)) {
 	I32 len;
 	const char *linestr;
+	const char *s_end;
 
 #ifdef IAMSUID
 	if (PL_fdscript < 0 || PL_suidscript != 1)
@@ -4062,7 +4063,8 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
 	s = linestr;
 	/* PSz 27 Feb 04 */
 	/* Sanity check on line length */
-	if (strlen(s) < 1 || strlen(s) > 4000)
+	s_end = s + strlen(s);
+	if (s_end == s || (s_end - s) > 4000)
 	    Perl_croak(aTHX_ "Very long #! line");
 	/* Allow more than a single space after #! */
 	while (isSPACE(*s)) s++;
@@ -4101,7 +4103,8 @@ S_validate_suid(pTHX_ const char *validarg, const char *scriptname)
 	len = strlen(validarg);
 	if (strEQ(validarg," PHOOEY ") ||
 	    strnNE(s,validarg,len) || !isSPACE(s[len]) ||
-	    !(strlen(s) == len+1 || (strlen(s) == len+2 && isSPACE(s[len+1]))))
+	    !((s_end - s) == len+1
+	      || ((s_end - s) == len+2 && isSPACE(s[len+1]))))
 	    Perl_croak(aTHX_ "Args must match #! line");
 
 #ifndef IAMSUID

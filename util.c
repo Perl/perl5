@@ -57,6 +57,16 @@ int putenv(char *);
  * XXX This advice seems to be widely ignored :-(   --AD  August 1996.
  */
 
+static char *
+S_write_no_mem(pTHX)
+{
+    /* Can't use PerlIO to write as it allocates memory */
+    PerlLIO_write(PerlIO_fileno(Perl_error_log),
+		  PL_no_mem, strlen(PL_no_mem));
+    my_exit(1);
+    return Nullch;
+}
+
 /* paranoid version of system's malloc() */
 
 Malloc_t
@@ -83,11 +93,7 @@ Perl_safesysmalloc(MEM_SIZE size)
     else if (PL_nomemok)
 	return NULL;
     else {
-	/* Can't use PerlIO to write as it allocates memory */
-	PerlLIO_write(PerlIO_fileno(Perl_error_log),
-		      PL_no_mem, strlen(PL_no_mem));
-	my_exit(1);
-	return Nullch;
+	return S_write_no_mem(aTHX);
     }
     /*NOTREACHED*/
 }
@@ -132,11 +138,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     else if (PL_nomemok)
 	return NULL;
     else {
-	/* Can't use PerlIO to write as it allocates memory */
-	PerlLIO_write(PerlIO_fileno(Perl_error_log),
-		      PL_no_mem, strlen(PL_no_mem));
-	my_exit(1);
-	return Nullch;
+	return S_write_no_mem(aTHX);
     }
     /*NOTREACHED*/
 }
@@ -185,11 +187,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
     else if (PL_nomemok)
 	return NULL;
     else {
-	/* Can't use PerlIO to write as it allocates memory */
-	PerlLIO_write(PerlIO_fileno(Perl_error_log),
-		      PL_no_mem, strlen(PL_no_mem));
-	my_exit(1);
-	return Nullch;
+	return S_write_no_mem(aTHX);
     }
     /*NOTREACHED*/
 }
@@ -817,9 +815,7 @@ Perl_savesharedpv(pTHX_ const char *pv)
     pvlen = strlen(pv)+1;
     newaddr = (char*)PerlMemShared_malloc(pvlen);
     if (!newaddr) {
-	PerlLIO_write(PerlIO_fileno(Perl_error_log),
-		      PL_no_mem, strlen(PL_no_mem));
-	my_exit(1);
+	return S_write_no_mem(aTHX);
     }
     return memcpy(newaddr,pv,pvlen);
 }
@@ -4037,7 +4033,7 @@ Perl_getcwd_sv(pTHX_ register SV *sv)
 	 * size from the heap if they are given a NULL buffer pointer.
 	 * The problem is that this behaviour is not portable. */
 	if (getcwd(buf, sizeof(buf) - 1)) {
-	    sv_setpvn(sv, buf, strlen(buf));
+	    sv_setpv(sv, buf);
 	    return TRUE;
 	}
 	else {

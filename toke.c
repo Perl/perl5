@@ -690,13 +690,13 @@ S_incline(pTHX_ char *s)
     if (t - s > 0) {
 #ifndef USE_ITHREADS
 	const char *cf = CopFILE(PL_curcop);
-	if (cf && strlen(cf) > 7 && strnEQ(cf, "(eval ", 6)) {
+	STRLEN tmplen = cf ? strlen(cf) : 0;
+	if (tmplen > 7 && strnEQ(cf, "(eval ", 6)) {
 	    /* must copy *{"::_<(eval N)[oldfilename:L]"}
 	     * to *{"::_<newfilename"} */
 	    char smallbuf[256], smallbuf2[256];
 	    char *tmpbuf, *tmpbuf2;
 	    GV **gvp, *gv2;
-	    STRLEN tmplen = strlen(cf);
 	    STRLEN tmplen2 = strlen(s);
 	    if (tmplen + 3 < sizeof smallbuf)
 		tmpbuf = smallbuf;

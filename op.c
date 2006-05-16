@@ -211,11 +211,13 @@ Perl_allocmy(pTHX_ char *name)
     PADOFFSET off;
 
     /* complain about "my $_" etc etc */
-    if (!(PL_in_my == KEY_our ||
+    if (*name &&
+	!(PL_in_my == KEY_our ||
 	  isALPHA(name[1]) ||
 	  (USE_UTF8_IN_NAMES && UTF8_IS_START(name[1])) ||
-	  (name[1] == '_' && (int)strlen(name) > 2)))
+	  (name[1] == '_' && name[2])))
     {
+	/* name[2] is true if strlen(name) > 2  */
 	if (!isPRINT(name[1]) || strchr("\t\n\r\f", name[1])) {
 	    /* 1999-02-27 mjd@plover.com */
 	    char *p;
@@ -5968,8 +5970,9 @@ Perl_ck_require(pTHX_ OP *o)
 
 	    for (s = SvPVX(sv); *s; s++) {
 		if (*s == ':' && s[1] == ':') {
+		    const STRLEN len = strlen(s+2)+1;
 		    *s = '/';
-		    Move(s+2, s+1, strlen(s+2)+1, char);
+		    Move(s+2, s+1, len, char);
 		    SvCUR_set(sv, SvCUR(sv) - 1);
 		}
 	    }

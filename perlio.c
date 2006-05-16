@@ -478,8 +478,8 @@ PerlIO_debug(const char *fmt, ...)
 	if (!s)
 	    s = "(none)";
 	len = sprintf(buffer, "%.40s:%" IVdf " ", s, (IV) CopLINE(PL_curcop));
-	vsprintf(buffer+len, fmt, ap);
-	PerlLIO_write(dbg, buffer, strlen(buffer));
+	const STRLEN len2 = vsprintf(buffer+len, fmt, ap);
+	PerlLIO_write(dbg, buffer, len + len2);
 #else
 	SV *sv = newSVpvn("", 0);
 	if (!s)
@@ -4823,7 +4823,7 @@ PerlIO *
 PerlIO_open(const char *path, const char *mode)
 {
     dTHX;
-    SV *name = sv_2mortal(newSVpvn(path, strlen(path)));
+    SV *name = sv_2mortal(newSVpv(path, 0));
     return PerlIO_openn(aTHX_ NULL, mode, -1, 0, 0, NULL, 1, &name);
 }
 
@@ -4832,7 +4832,7 @@ PerlIO *
 PerlIO_reopen(const char *path, const char *mode, PerlIO *f)
 {
     dTHX;
-    SV *name = sv_2mortal(newSVpvn(path, strlen(path)));
+    SV *name = sv_2mortal(newSVpv(path,0));
     return PerlIO_openn(aTHX_ NULL, mode, -1, 0, 0, f, 1, &name);
 }
 
