@@ -10271,6 +10271,8 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_sub.hasargs	= cx->blk_sub.hasargs;
 		ncx->blk_sub.lval	= cx->blk_sub.lval;
 		ncx->blk_sub.retop	= cx->blk_sub.retop;
+		ncx->blk_sub.oldcomppad = (PAD*)ptr_table_fetch(PL_ptr_table,
+					   cx->blk_sub.oldcomppad);
 		break;
 	    case CXt_EVAL:
 		ncx->blk_eval.old_in_eval = cx->blk_eval.old_in_eval;

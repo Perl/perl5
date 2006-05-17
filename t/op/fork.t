@@ -462,3 +462,9 @@ if ($pid == 0) {
 }
 EXPECT
 1
+########
+# [perl #39145] Perl_dounwind() crashing with Win32's fork() emulation
+sub { @_ = 3; fork ? die "1\n" : die "1\n" }->(2);
+EXPECT
+1
+1
