@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.27';
+our $VERSION = '1.28';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -102,7 +102,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.27
+This document describes threads version 1.28
 
 =head1 SYNOPSIS
 
@@ -314,7 +314,7 @@ This I<private> method returns the memory location of the internal thread
 structure associated with a threads object.  For Win32, this is a pointer to
 the C<HANDLE> value returned by C<CreateThread> (i.e., C<HANDLE *>); for other
 platforms, it is a pointer to the C<pthread_t> structure used in the
-C<pthread_create> call (i.e., C<pthread_t *>.
+C<pthread_create> call (i.e., C<pthread_t *>).
 
 This method is of no use for general Perl threads programming.  Its intent is
 to provide other (XS-based) thread modules with the capability to access, and
@@ -453,8 +453,9 @@ expected to act upon.  Here's an example for I<cancelling> a thread:
     # it so that it will get cleaned up automatically
     $thr->kill('KILL')->detach();
 
-Here's another example that uses a semaphore to provide I<suspend> and
-I<resume> capabilities:
+Here's another simplistic example that illustrates the use of thread
+signalling in conjunction with a semaphore to provide rudimentary I<suspend>
+and I<resume> capabilities:
 
     use threads;
     use Thread::Semaphore;
@@ -485,8 +486,19 @@ I<resume> capabilities:
     # Allow the thread to continue
     $sema->up();
 
-CAVEAT:  Sending a signal to a thread does not disrupt the operation the
-thread is currently working on:  The signal will be acted upon after the
+CAVEAT:  The thread signalling capability provided by this module does not
+actually send signals via the OS.  It I<emulates> signals at the Perl-level
+such that signal handlers are called in the appropriate thread.  For example,
+sending C<$thr-E<gt>kill('STOP')> does not actually suspend a thread (or the
+whole process), but does cause a C<$SIG{'STOP'}> handler to be called in that
+thread (as illustrated above).
+
+As such, signals that would normally not be appropriate to use in the
+C<kill()> command (e.g., C<kill('KILL', $$)>) are okay to use with the
+C<-E<gt>kill()> method (again, as illustrated above).
+
+Correspondingly, sending a signal to a thread does not disrupt the operation
+the thread is currently working on:  The signal will be acted upon after the
 current operation has completed.  For instance, if the thread is I<stuck> on
 an I/O call, sending it a signal will not cause the I/O call to be interrupted
 such that the signal is acted up immediately.
@@ -573,18 +585,19 @@ specified signal being used in a C<-E<gt>kill()> call.
 On some platforms, it might not be possible to destroy I<parent> threads while
 there are still existing I<child> threads.
 
-=item Creating threads inside BEGIN blocks
+=item Creating threads inside special blocks
 
-Creating threads inside BEGIN blocks (or during the compilation phase in
-general) does not work.  (In Windows, trying to use fork() inside BEGIN blocks
-is an equally losing proposition, since it has been implemented in very much
-the same way as threads.)
+Creating threads inside C<BEGIN>, C<CHECK> or C<INIT> blocks cannot be relied
+upon.  Depending on the Perl version and the application code, results may
+range from success, to (apparently harmless) warnings of leaked scalar or
+attempts to free unreferenced scalars, all the way up to crashing of the Perl
+interpreter.
 
 =item Unsafe signals
 
 Since Perl 5.8.0, signals have been made safer in Perl by postponing their
 handling until the interpreter is in a I<safe> state.  See
-L<perl58delta/"Safe Signals">) and L<perlipc/"Deferred Signals (Safe Signals)">
+L<perl58delta/"Safe Signals"> and L<perlipc/"Deferred Signals (Safe Signals)">
 for more details.
 
 Safe signals is the default behavior, and the old, immediate, unsafe
@@ -605,8 +618,10 @@ the C<-E<gt>kill()> signalling method cannot be used.
 
 =item Returning closures from threads
 
-Returning a closure from a thread does not work, usually crashing Perl in the
-process.
+Returning closures from threads cannot be relied upon.  Depending of the Perl
+version and the application code, results may range from success, to
+(apparently harmless) warnings of leaked scalar, all the way up to crashing of
+the Perl interpreter.
 
 =item Perl Bugs and the CPAN Version of L<threads>
 
@@ -632,7 +647,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.27/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.28/shared.pm>
 
 L<threads::shared>, L<perlthrtut>
 

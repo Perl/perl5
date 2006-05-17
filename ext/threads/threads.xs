@@ -3,6 +3,7 @@
 #include "perl.h"
 #include "XSUB.h"
 #ifdef HAS_PPPORT_H
+#  define NEED_PL_signals
 #  define NEED_newRV_noinc
 #  define NEED_sv_2pv_nolen
 #  include "ppport.h"
@@ -520,6 +521,7 @@ S_ithread_create(
          */
         SvREFCNT_dec(PL_endav);
         PL_endav = newAV();
+
         clone_param.flags = 0;
         thread->init_function = sv_dup(init_function, &clone_param);
         if (SvREFCNT(thread->init_function) == 0) {
@@ -941,7 +943,7 @@ ithread_kill(...)
         if (isALPHA(*sig_name)) {
             if (*sig_name == 'S' && sig_name[1] == 'I' && sig_name[2] == 'G')
                 sig_name += 3;
-            if ((signal = Perl_whichsig(aTHX_ sig_name)) < 0)
+            if ((signal = whichsig(sig_name)) < 0)
                 Perl_croak(aTHX_ "Unrecognized signal name: %s", sig_name);
         } else
             signal = SvIV(ST(1));

@@ -1,6 +1,10 @@
 Revision history for Perl extension threads.
 
-1.27 Wed May 10 14:01:17 EDT 2006
+1.28 Wed May 17 14:33:13 EDT 2006
+	- Fix for build failure under older Perl versions
+	- Skip signalling tests if using unsafe signals
+
+1.27 Thu May 11 11:52:21 EDT 2006
 	- Added $thr->kill() method for thread signalling
 	- Check for 'C' compiler when building module
 

@@ -18,6 +18,17 @@ use ExtUtils::testlib;
 use threads;
 use threads::shared;
 
+BEGIN {
+    local $SIG{'HUP'} = sub {};
+    my $thr = threads->create(sub {});
+    eval { $thr->kill('HUP') };
+    $thr->join();
+    if ($@ && $@ =~ /safe signals/) {
+        print("1..0 # Skip: Not using safe signals\n");
+        exit(0);
+    }
+}
+
 {
     package Thread::Semaphore;
     use threads::shared;
@@ -91,8 +102,8 @@ sub thr_func {
     # Thread sleeps until signalled
     ok(1, 'Thread sleeping');
     {
-	local $SIG{'INT'} = sub {};
-	sleep(5);
+        local $SIG{'INT'} = sub {};
+        sleep(5);
     }
     # Should not go past here
     ok(0, 'Thread terminated normally');
@@ -102,7 +113,7 @@ sub thr_func {
 
 # Create thread
 my $thr = threads->create('thr_func');
-ok($thr && $thr->tid() == 1, 'Created thread');
+ok($thr && $thr->tid() == 2, 'Created thread');
 threads->yield();
 sleep(1);
 
@@ -164,7 +175,7 @@ ok($sema, 'Semaphore created');
 
 # Create a thread and send it the semaphore
 $thr = threads->create('thr_func2', $sema);
-ok($thr && $thr->tid() == 2, 'Created thread');
+ok($thr && $thr->tid() == 3, 'Created thread');
 threads->yield();
 sleep(1);
 
