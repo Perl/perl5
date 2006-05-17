@@ -4298,7 +4298,7 @@ Perl_upg_version(pTHX_ SV *ver)
 	version = savepvn(tbuf, len);
     }
 #ifdef SvVOK
-    else if ( (mg = SvVOK(ver)) ) { /* already a v-string */
+    else if ( (mg = SvVSTRING_mg(ver)) ) { /* already a v-string */
 	version = savepvn( (const char*)mg->mg_ptr,mg->mg_len );
 	qv = 1;
     }
