@@ -4253,7 +4253,7 @@ Perl_new_version(pTHX_ SV *ver)
     }
 #ifdef SvVOK
     {
-	const MAGIC* const mg = SvVOK(ver);
+	const MAGIC* const mg = SvVSTRING_mg(ver);
 	if ( mg ) { /* already a v-string */
 	    const STRLEN len = mg->mg_len;
 	    char * const version = savepvn( (const char*)mg->mg_ptr, len);
