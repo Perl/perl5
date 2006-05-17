@@ -19,7 +19,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 29 + $extra ;
+    plan tests => 33 + $extra ;
 
 
     use_ok('IO::Compress::Base::Common');
@@ -66,6 +66,16 @@ sub My::testParseParameters()
 
     $got = ParseParameters(1, {'Fred' => [1, 1, 0x1000000, 0]}, Fred => 'abc') ;
     is $got->value('Fred'), "abc", "other" ;
+
+    $got = ParseParameters(1, {'Fred' => [0, 1, Parse_any, undef]}, Fred =>
+undef) ;
+    ok $got->parsed('Fred'), "undef" ;
+    ok ! defined $got->value('Fred'), "undef" ;
+
+    $got = ParseParameters(1, {'Fred' => [0, 1, Parse_string, undef]}, Fred =>
+undef) ;
+    ok $got->parsed('Fred'), "undef" ;
+    is $got->value('Fred'), "", "empty string" ;
 
 }
 

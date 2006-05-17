@@ -1,6 +1,29 @@
 CHANGES
 -------
 
+  2.000_12 3 May 2006
+
+      * Moved the code for creating and parsing the gzip extra field into
+        IO::Compress::Zlib::Extra.pm so that IO::Compress::Zip &
+        IO::Uncompress::Unzip can use it as well. 
+
+      * Added ExtraFieldLocal & ExtraFieldCentral options to IO::Compress::Zip.
+        These allow the creation of user-defined extra fields in the local
+        and central headers, just like the ExtraField option in
+        IO::Compress::Gzip.
+
+      * Moved the zip constants into IO::Compress::Zip::Constants
+
+      * Added exTime option to IO::Compress::Zip. 
+        This allows creation of the extended timestamp extra field.
+
+      * Added Minimal option to IO::Compress::Zip. 
+        This disables the creation of all extended fields.
+
+      * Added TextFlag option to IO::Compress::Zip. 
+
+      * Documented Comment and ZipComment options in IO::Compress::Zip. 
+
   2.000_11 10 April 2006
 
       * Updated Documentation for zip modules.

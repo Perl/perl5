@@ -380,20 +380,20 @@ for my $value ( "0D", "0A", "0A0D", "0D0A", "0A0A", "0D0D")
 
     my @tests = (
         ["Sub-field truncated",           
-            "Error with ExtraField Parameter: FEXTRA Body",
+            "Error with ExtraField Parameter: Truncated in FEXTRA Body Section",
             "Header Error: Truncated in FEXTRA Body Section",
             ['a', undef, undef]              ],
         ["Length of field incorrect",     
-            "Error with ExtraField Parameter: FEXTRA Body",
+            "Error with ExtraField Parameter: Truncated in FEXTRA Body Section",
             "Header Error: Truncated in FEXTRA Body Section",
             ["ab", 255, "abc"]               ],
         ["Length of 2nd field incorrect", 
-            "Error with ExtraField Parameter: FEXTRA Body",
+            "Error with ExtraField Parameter: Truncated in FEXTRA Body Section",
             "Header Error: Truncated in FEXTRA Body Section",
             ["ab", 3, "abc"], ["de", 7, "x"] ],
         ["Length of 2nd field incorrect", 
             "Error with ExtraField Parameter: SubField ID 2nd byte is 0x00",
-            "Header Error: Truncated in FEXTRA Body Section",
+            "Header Error: SubField ID 2nd byte is 0x00",
             ["a\x00", 3, "abc"], ["de", 7, "x"] ],
         );
 
@@ -428,16 +428,19 @@ for my $value ( "0D", "0A", "0A0D", "0D0A", "0A0A", "0D0D")
 
         foreach my $check (0, 1)    
         {
-            ok $x = new IO::Compress::Gzip \$buffer, -ExtraField  => $input, Strict => 0
-                or diag "GzipError is $GzipError" ;                            ;
+            ok $x = new IO::Compress::Gzip \$buffer, 
+                                           ExtraField => $input, 
+                                           Strict     => 0
+                or diag "GzipError is $GzipError" ;
             my $string = "abcd" ;
             $x->write($string) ;
             $x->close ;
             is anyUncompress(\$buffer), $string ;
 
-            $x = new IO::Uncompress::Gunzip \$buffer, Strict => 0,
+            $x = new IO::Uncompress::Gunzip \$buffer, 
+                                       Strict      => 0,
                                        Transparent => 0,
-                                       ParseExtra => $check;
+                                       ParseExtra  => $check;
             if ($check) {
                 ok ! $x ;
                 like $GunzipError, "/^$gunzip_error/";  

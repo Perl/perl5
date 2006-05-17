@@ -16,7 +16,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %DEFLATE_CONSTANTS, %EXPORT_TAGS, $RawDeflateError);
 
-$VERSION = '2.000_11';
+$VERSION = '2.000_12';
 $RawDeflateError = '';
 
 @ISA = qw(Exporter IO::Compress::Base);
@@ -462,9 +462,14 @@ If the C<$output> parameter is any other type, C<undef> will be returned.
 
 =head2 Notes
 
+
+
 When C<$input> maps to multiple files/buffers and C<$output> is a single
-file/buffer the compressed input files/buffers will all be stored
-in C<$output> as a single compressed stream.
+file/buffer the input files/buffers will be stored
+in C<$output> as a concatenated series of compressed data streams.
+
+
+
 
 
 

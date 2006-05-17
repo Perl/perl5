@@ -10,7 +10,7 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter );
 
 
-$VERSION = '2.000_11';
+$VERSION = '2.000_12';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;

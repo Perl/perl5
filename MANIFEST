@@ -154,6 +154,7 @@ ext/Compress/Raw/Zlib/typemap		Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/Makefile.PL	Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/ppport.h		Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/config.in		Compress::Raw::Zlib
+ext/Compress/Raw/Zlib/Changes		Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/zlib-src/adler32.c	Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/zlib-src/compress.c	Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/zlib-src/crc32.c	Compress::Raw::Zlib
@@ -283,6 +284,7 @@ ext/Compress/IO/Zlib/lib/IO/Compress/Zip.pm	IO::Compress::Zlib
 ext/Compress/IO/Zlib/lib/IO/Compress/Zip/Constants.pm	IO::Compress::Zlib
 ext/Compress/IO/Zlib/lib/IO/Compress/Gzip/Constants.pm	IO::Compress::Zlib
 ext/Compress/IO/Zlib/lib/IO/Compress/Zlib/Constants.pm	IO::Compress::Zlib
+ext/Compress/IO/Zlib/lib/IO/Compress/Zlib/Extra.pm	IO::Compress::Zlib
 ext/Compress/IO/Zlib/lib/IO/Compress/Adapter/Deflate.pm	IO::Compress::Zlib
 ext/Compress/IO/Zlib/lib/IO/Compress/Adapter/Identity.pm	IO::Compress::Zlib
 ext/Compress/IO/Zlib/Makefile.PL	IO::Compress::Zlib

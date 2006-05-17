@@ -501,16 +501,19 @@ sub mkComplete
 
     if ($class eq 'IO::Compress::Gzip') {
         %params = (
-            -Name       => "My name",
-            -Comment    => "a comment",
-            -ExtraField => ['ab' => "extra"],
-            -HeaderCRC  => 1);
+            Name       => "My name",
+            Comment    => "a comment",
+            ExtraField => ['ab' => "extra"],
+            HeaderCRC  => 1);
     }
     elsif ($class eq 'IO::Compress::Zip'){
         %params = (
-            # TODO -- add more here
-            -Name       => "My name",
-            -Comment    => "a comment",
+            Name              => "My name",
+            Comment           => "a comment",
+            ZipComment        => "last comment",
+            exTime            => [100, 200, 300],
+            ExtraFieldLocal   => ["ab" => "extra1"],
+            ExtraFieldCentral => ["cd" => "extra2"],
         );
     }
 

@@ -14,6 +14,7 @@ use IO::Uncompress::RawInflate ;
 use Compress::Raw::Zlib qw( crc32 ) ;
 use IO::Compress::Base::Common qw(:Status createSelfTiedObject);
 use IO::Compress::Gzip::Constants;
+use IO::Compress::Zlib::Extra;
 
 require Exporter ;
 
@@ -27,7 +28,7 @@ Exporter::export_ok_tags('all');
 
 $GunzipError = '';
 
-$VERSION = '2.000_11';
+$VERSION = '2.000_12';
 
 sub new
 {
@@ -179,28 +180,10 @@ sub _readGzipHeader($)
         $keep .= $buffer . $EXTRA ;
 
         if ($XLEN && *$self->{'ParseExtra'}) {
-            my $offset = 0 ;
-            while ($offset < $XLEN) {
-
-                return $self->TruncatedHeader("FEXTRA Body")
-                    if $offset + GZIP_FEXTRA_SUBFIELD_HEADER_SIZE > $XLEN ;
-
-                my $id = substr($EXTRA, $offset, GZIP_FEXTRA_SUBFIELD_ID_SIZE);
-                $offset += GZIP_FEXTRA_SUBFIELD_ID_SIZE ;
-
-                return $self->HeaderError("SubField ID 2nd byte is 0x00")
-                    if *$self->{Strict} && substr($id, 1, 1) eq "\x00" ;
-
-                my ($subLen) = unpack("v", substr($EXTRA, $offset, 
-                                        GZIP_FEXTRA_SUBFIELD_LEN_SIZE)) ;
-                $offset += GZIP_FEXTRA_SUBFIELD_LEN_SIZE ;
-
-                return $self->TruncatedHeader("FEXTRA Body")
-                    if $offset + $subLen > $XLEN ;
-
-                push @EXTRA, [$id => substr($EXTRA, $offset, $subLen)];
-                $offset += $subLen ;
-            }
+            my $bad = IO::Compress::Zlib::Extra::parseRawExtra($EXTRA,
+                                                \@EXTRA, 1, 1);
+            return $self->HeaderError($bad)
+                if defined $bad;
         }
     }
 
@@ -504,9 +487,13 @@ If the C<$output> parameter is any other type, C<undef> will be returned.
 
 =head2 Notes
 
-When C<$input> maps to multiple files/buffers and C<$output> is a single
-file/buffer the uncompressed input files/buffers will all be stored
-in C<$output> as a single uncompressed stream.
+
+When C<$input> maps to multiple compressed files/buffers and C<$output> is
+a single file/buffer, after uncompression C<$output> will contain a
+concatenation of all the uncompressed data from each of the input
+files/buffers.
+
+
 
 
 

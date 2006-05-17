@@ -1,6 +1,15 @@
 CHANGES
 -------
 
+  2.000_12 16 April 2006
+
+      * Fixed gzread to zap the output buffer to an empty string when zero
+        bytes are requested. This matches the behaviour of C::Z 1.x
+
+  2.000_11 10 April 2006
+
+      * No changes.
+
   2.000_10 13 March 2006
 
       * Changed gzread so that its behaviour matches C::Z::gzread 1.x if it

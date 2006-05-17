@@ -8,14 +8,16 @@ use IO::Compress::Base::Common qw(:Status createSelfTiedObject);
 use IO::Compress::RawDeflate;
 use IO::Compress::Adapter::Deflate;
 use IO::Compress::Adapter::Identity;
+use IO::Compress::Zip::Constants;
+
 
 use Compress::Raw::Zlib qw(crc32) ;
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2; 
-           import IO::Compress::Adapter::Bzip2; 
+           import  IO::Compress::Adapter::Bzip2; 
            require IO::Compress::Bzip2; 
-           import IO::Compress::Bzip2; 
+           import  IO::Compress::Bzip2; 
          } ;
 }
 
@@ -24,7 +26,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.000_11';
+$VERSION = '2.000_12';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -36,23 +38,6 @@ $EXPORT_TAGS{zip_method} = [qw( ZIP_CM_STORE ZIP_CM_DEFLATE ZIP_CM_BZIP2 )];
 push @{ $EXPORT_TAGS{all} }, @{ $EXPORT_TAGS{zip_method} };
 
 Exporter::export_ok_tags('all');
-
-use constant ZIP_CM_STORE                      => 0 ;
-use constant ZIP_CM_DEFLATE                    => 8 ;
-use constant ZIP_CM_BZIP2                      => 12 ;
-
-use constant ZIP_LOCAL_HDR_SIG                 => 0x04034b50;
-use constant ZIP_DATA_HDR_SIG                  => 0x08074b50;
-use constant ZIP_CENTRAL_HDR_SIG               => 0x02014b50;
-use constant ZIP_END_CENTRAL_HDR_SIG           => 0x06054b50;
-
-
-our (%ZIP_CM_MIN_VERSIONS);
-%ZIP_CM_MIN_VERSIONS = (
-            ZIP_CM_STORE()                      => 20,
-            ZIP_CM_DEFLATE()                    => 20,
-            ZIP_CM_BZIP2()                      => 46,
-            );
 
 sub new
 {
@@ -137,6 +122,8 @@ sub mkHeader
     my $self  = shift;
     my $param = shift ;
     
+    *$self->{ZipData}{StartOffset} = *$self->{ZipData}{Offset} ;
+
     my $filename = '';
     $filename = $param->value('Name') || '';
 
@@ -146,52 +133,89 @@ sub mkHeader
     my $hdr = '';
 
     my $time = _unixToDosTime($param->value('Time'));
-    *$self->{ZipData}{StartOffset} = *$self->{ZipData}{Offset} ;
 
-    my $strm = *$self->{ZipData}{Stream} ? 8 : 0 ;
-    # bzip2 is 12, deflate is 8
+    my $extra = '';
+    my $ctlExtra = '';
+
+    if (! $param->value('Minimal')) {
+        if (defined $param->value('exTime'))
+        {
+            $extra .= mkExtendedTime($param->value('MTime'), 
+                                    $param->value('ATime'), 
+                                    $param->value('CTime'));
+
+            $ctlExtra .= mkExtendedTime($param->value('MTime'));
+        }
+
+    #    if ( $param->value('UID'))
+    #    {
+    #        $extra    .= mkUnixExtra( $param->value('UID'), $param->value('GID'));
+    #        $ctlExtra .= mkUnixExtra();
+    #    }
+
+        $extra .= $param->value('ExtraFieldLocal') 
+            if defined $param->value('ExtraFieldLocal');
+
+        $ctlExtra .= $param->value('ExtraFieldCentral') 
+            if defined $param->value('ExtraFieldCentral');
+    }
+
+    my $extAttr = 0;
+    $extAttr = $param->value('Mode') << 16
+        if defined $param->value('Mode') ;
+
+    my $gpFlag = 0 ;    
+    $gpFlag |= ZIP_GP_FLAG_STREAMING_MASK
+        if *$self->{ZipData}{Stream} ;
+
     my $method = *$self->{ZipData}{Method} ;
 
     # deflate is 20
     # bzip2 is 46
-    my $extract = $param->value('OS_Code') << 8 +
+    my $madeBy = ($param->value('OS_Code') << 8) +
                     $ZIP_CM_MIN_VERSIONS{$method};
+    my $extract = $ZIP_CM_MIN_VERSIONS{$method};
+
+    my $ifa = 0;
+    $ifa |= ZIP_IFA_TEXT_MASK
+        if $param->value('TextFlag');
 
     $hdr .= pack "V", ZIP_LOCAL_HDR_SIG ; # signature
     $hdr .= pack 'v', $extract   ; # extract Version & OS
-    $hdr .= pack 'v', $strm      ; # general purpose flag (set streaming mode)
+    $hdr .= pack 'v', $gpFlag    ; # general purpose flag (set streaming mode)
     $hdr .= pack 'v', $method    ; # compression method (deflate)
     $hdr .= pack 'V', $time      ; # last mod date/time
     $hdr .= pack 'V', 0          ; # crc32               - 0 when streaming
     $hdr .= pack 'V', 0          ; # compressed length   - 0 when streaming
     $hdr .= pack 'V', 0          ; # uncompressed length - 0 when streaming
     $hdr .= pack 'v', length $filename ; # filename length
-    $hdr .= pack 'v', 0          ; # extra length
+    $hdr .= pack 'v', length $extra ; # extra length
     
     $hdr .= $filename ;
+    $hdr .= $extra ;
 
 
     my $ctl = '';
 
     $ctl .= pack "V", ZIP_CENTRAL_HDR_SIG ; # signature
-    $ctl .= pack 'v', $extract   ; # version made by
+    $ctl .= pack 'v', $madeBy    ; # version made by
     $ctl .= pack 'v', $extract   ; # extract Version
-    $ctl .= pack 'v', $strm      ; # general purpose flag (streaming mode)
+    $ctl .= pack 'v', $gpFlag    ; # general purpose flag (streaming mode)
     $ctl .= pack 'v', $method    ; # compression method (deflate)
     $ctl .= pack 'V', $time      ; # last mod date/time
     $ctl .= pack 'V', 0          ; # crc32
     $ctl .= pack 'V', 0          ; # compressed length
     $ctl .= pack 'V', 0          ; # uncompressed length
     $ctl .= pack 'v', length $filename ; # filename length
-    $ctl .= pack 'v', 0          ; # extra length
+    $ctl .= pack 'v', length $ctlExtra ; # extra length
     $ctl .= pack 'v', length $comment ;  # file comment length
     $ctl .= pack 'v', 0          ; # disk number start 
-    $ctl .= pack 'v', 0          ; # internal file attributes
-    $ctl .= pack 'V', 0          ; # external file attributes
+    $ctl .= pack 'v', $ifa       ; # internal file attributes
+    $ctl .= pack 'V', $extAttr   ; # external file attributes
     $ctl .= pack 'V', *$self->{ZipData}{Offset}  ; # offset to local header
     
     $ctl .= $filename ;
-    #$ctl .= $extra ;
+    $ctl .= $ctlExtra ;
     $ctl .= $comment ;
 
     *$self->{ZipData}{Offset} += length $hdr ;
@@ -234,9 +258,6 @@ sub mkTrailer
 
     my $ctl = *$self->{ZipData}{CentralHeader} ;
     substr($ctl, 16, 12) = $data ;
-    #substr($ctl, 16, 4) = pack "V", $crc32 ;             # CRC32
-    #substr($ctl, 20, 4) = pack "V", $compressedBytes   ; # Compressed Size
-    #substr($ctl, 24, 4) = pack "V", $uncompressedBytes ; # Uncompressed Size
 
     *$self->{ZipData}{Offset} += length($hdr) + $compressedBytes;
     push @{ *$self->{ZipData}{CentralDir} }, $ctl ;
@@ -280,11 +301,21 @@ sub ckParams
         $got->value('Time' => time) ;
     }
 
+    if (! $got->parsed('exTime') ) {
+        my $timeRef = $got->value('exTime');
+        if ( defined $timeRef) {
+            return $self->saveErrorString(undef, "exTime not a 3-element array ref")   
+                if ref $timeRef ne 'ARRAY' || @$timeRef != 3;
+        }
+
+        $got->value("MTime", $timeRef->[1]);
+        $got->value("ATime", $timeRef->[0]);
+        $got->value("CTime", $timeRef->[2]);
+    }
+
     *$self->{ZipData}{Stream} = $got->value('Stream');
-    #*$self->{ZipData}{Store} = $got->value('Store');
 
     my $method = $got->value('Method');
-    #if ($method != 0 && $method != 8 && $method != 12) {
     return $self->saveErrorString(undef, "Unknown Method '$method'")   
         if ! defined $ZIP_CM_MIN_VERSIONS{$method};
 
@@ -295,6 +326,18 @@ sub ckParams
     *$self->{ZipData}{Method} = $method;
 
     *$self->{ZipData}{ZipComment} = $got->value('ZipComment') ;
+
+    for my $name (qw( ExtraFieldLocal ExtraFieldCentral ))
+    {
+        my $data = $got->value($name) ;
+        if (defined $data) {
+            my $bad = IO::Compress::Zlib::Extra::parseExtraField($data, 1, 0) ;
+            return $self->saveErrorString(undef, "Error with $name Parameter: $bad")
+                if $bad ;
+
+            $got->value($name, $data) ;
+        }
+    }
 
     return undef
         if defined $IO::Compress::Bzip2::VERSION
@@ -331,15 +374,17 @@ sub getExtraParams
             'Method'    => [0, 1, Parse_unsigned,  ZIP_CM_DEFLATE],
             
 #            # Zip header fields
-#           'Minimal'   => [0, 1, Parse_boolean,   0],
+            'Minimal'   => [0, 1, Parse_boolean,   0],
             'Comment'   => [0, 1, Parse_any,       ''],
             'ZipComment'=> [0, 1, Parse_any,       ''],
             'Name'      => [0, 1, Parse_any,       ''],
             'Time'      => [0, 1, Parse_any,       undef],
+            'exTime'    => [0, 1, Parse_any,       undef],
             'OS_Code'   => [0, 1, Parse_unsigned,  $Compress::Raw::Zlib::gzip_os_code],
             
-#           'TextFlag'  => [0, 1, Parse_boolean,   0],
-#           'ExtraField'=> [0, 1, Parse_string,    ''],
+           'TextFlag'  => [0, 1, Parse_boolean,   0],
+           'ExtraFieldLocal'  => [0, 1, Parse_any,    undef],
+           'ExtraFieldCentral'=> [0, 1, Parse_any,    undef],
 
             @Bzip2,
         );
@@ -357,16 +402,65 @@ sub getFileInfo
     my $params = shift;
     my $filename = shift ;
 
-    my $defaultTime = (stat($filename))[9] ;
+    my ($mode, $uid, $gid, $atime, $mtime, $ctime) 
+                = (stat($filename))[2, 4,5, 8,9,10] ;
 
     $params->value('Name' => $filename)
         if ! $params->parsed('Name') ;
 
-    $params->value('Time' => $defaultTime) 
+    $params->value('Time' => $mtime) 
         if ! $params->parsed('Time') ;
     
+    if ( ! $params->parsed('exTime'))
+    {
+        $params->value('MTime' => $mtime) ;
+        $params->value('ATime' => $atime) ;
+        $params->value('CTime' => $ctime) ;
+    }
+
+    $params->value('Mode' => $mode) ;
+
+    $params->value('UID' => $uid) ;
+    $params->value('GID' => $gid) ;
     
 }
+
+sub mkExtendedTime
+{
+    # order expected is m, a, c
+
+    my $times = '';
+    my $bit = 1 ;
+    my $flags = 0;
+
+    for my $time (@_)
+    {
+        if (defined $time)
+        {
+            $flags |= $bit;
+            $times .= pack("V", $time);
+        }
+
+        $bit <<= 1 ;
+    }
+
+    #return "UT" . pack("v C", length($times) + 1, $flags) . $times;
+    return IO::Compress::Zlib::Extra::mkSubField(ZIP_EXTRA_ID_EXT_TIMESTAMP,
+                                                 pack("C", $flags) .  $times);
+}
+
+sub mkUnixExtra
+{
+    my $ids = '';
+    for my $id (@_)
+    {
+        $ids .= pack("v", $id);
+    }
+
+    #return "Ux" . pack("v", length $ids) . $ids;
+    return IO::Compress::Zlib::Extra::mkSubField(ZIP_EXTRA_ID_INFO_ZIP_UNIX, $ids);
+}
+
 
 # from Archive::Zip
 sub _unixToDosTime    # Archive::Zip::Member
@@ -559,10 +653,10 @@ If the C<$input> parameter is any other type, C<undef> will be returned.
 
 
 In addition, if C<$input> is a simple filename, the default values for
-the C<Name> and C<Time> options will be sourced from that file.
+the C<Name>, C<Time> and C<exTime> options will be sourced from that file.
 
 If you do not want to use these defaults they can be overridden by
-explicitly setting the C<Name> and C<Time> options or by setting the
+explicitly setting the C<Name>, C<Time> and C<exTime> options or by setting the
 C<Minimal> parameter.
 
 
@@ -616,9 +710,14 @@ If the C<$output> parameter is any other type, C<undef> will be returned.
 
 =head2 Notes
 
+
+
 When C<$input> maps to multiple files/buffers and C<$output> is a single
-file/buffer the compressed input files/buffers will all be stored
-in C<$output> as a single compressed stream.
+file/buffer the input files/buffers will each be stored
+in C<$output> as a distinct entry.
+
+
+
 
 
 
@@ -823,6 +922,34 @@ Sets the last modified time field in the zip header to $number.
 This field defaults to the time the C<IO::Compress::Zip> object was created
 if this option is not specified.
 
+=item -exTime =E<gt> [$atime, $mtime, $ctime]
+
+This option expects an array reference with exactly three elements:
+C<$atime>, C<mtime> and C<$ctime>. These correspond to the last access
+time, last modification time and creation time respectively.
+
+It uses these values to set the extended timestamp field in the local zip
+header to the three values, $atime, $mtime, $ctime and sets the extended
+timestamp field in the central zip header to C<$mtime>.
+
+If the C<Minimal> option is set to true, this option will be ignored.
+
+By default no extended time field is created.
+
+=item -Comment =E<gt> $comment
+
+Stores the contents of C<$comment> in the Central File Header of
+the zip file.
+
+By default, no comment field is written to the zip file.
+
+=item -ZipComment =E<gt> $comment
+
+Stores the contents of C<$comment> in the End of Central Directory record
+of the zip file.
+
+By default, no comment field is written to the zip file.
+
 =item Method =E<gt> $method
 
 Controls which compression method is used. At present three compression
@@ -844,12 +971,72 @@ content when C<IO::Compress::Bzip2> is not available.
 
 The default method is ZIP_CM_DEFLATE.
 
-=item -Stream =E<gt> 0|1
+=item Stream =E<gt> 0|1
 
 This option controls whether the zip file/buffer output is created in
 streaming mode.
 
+Note that when outputting to a file with streaming mode disabled (C<Stream>
+is 0), the output file must be seekable.
+
 The default is 1.
+
+=item -TextFlag =E<gt> 0|1
+
+This parameter controls the setting of a bit in the zip central header. It
+is used to signal that the data stored in the zip file/buffer is probably
+text.
+
+The default is 0. 
+
+=item ExtraFieldLocal =E<gt> $data
+=item ExtraFieldCentral =E<gt> $data
+
+These options allows additional metadata to be stored in the local and
+central headers in the zip file/buffer.
+
+An extra field consists of zero or more subfields. Each subfield consists
+of a two byte header followed by the subfield data.
+
+The list of subfields can be supplied in any of the following formats
+
+    ExtraFieldLocal => [$id1, $data1,
+                        $id2, $data2,
+                         ...
+                       ]
+
+    ExtraFieldLocal => [ [$id1 => $data1],
+                         [$id2 => $data2],
+                         ...
+                       ]
+
+    ExtraFieldLocal => { $id1 => $data1,
+                         $id2 => $data2,
+                         ...
+                       }
+
+Where C<$id1>, C<$id2> are two byte subfield ID's. 
+
+If you use the hash syntax, you have no control over the order in which
+the ExtraSubFields are stored, plus you cannot have SubFields with
+duplicate ID.
+
+Alternatively the list of subfields can by supplied as a scalar, thus
+
+    ExtraField => $rawdata
+
+
+
+If the C<Minimal> option is set to true, this option will be ignored.
+
+The maximum size of an extra field 65535 bytes.
+
+=item Minimal =E<gt> 1|0
+
+If specified, this option will disable the creation of all extended fields
+in the zip local and central headers.
+
+This parameter defaults to 0.
 
 =item BlockSize100K =E<gt> number
 

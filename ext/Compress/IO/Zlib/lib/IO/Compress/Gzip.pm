@@ -13,6 +13,7 @@ use IO::Compress::RawDeflate;
 use Compress::Raw::Zlib ;
 use IO::Compress::Base::Common qw(:Status :Parse createSelfTiedObject);
 use IO::Compress::Gzip::Constants;
+use IO::Compress::Zlib::Extra;
 
 BEGIN
 {
@@ -26,7 +27,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $GzipError);
 
-$VERSION = '2.000_11';
+$VERSION = '2.000_12';
 $GzipError = '' ;
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -74,7 +75,7 @@ sub getExtraParams
             'TextFlag'  => [0, 1, Parse_boolean,   0],
             'HeaderCRC' => [0, 1, Parse_boolean,   0],
             'OS_Code'   => [0, 1, Parse_unsigned,  $Compress::Raw::Zlib::gzip_os_code],
-            'ExtraField'=> [0, 1, Parse_string,    undef],
+            'ExtraField'=> [0, 1, Parse_any,       undef],
             'ExtraFlags'=> [0, 1, Parse_any,       undef],
 
         );
@@ -92,7 +93,7 @@ sub ckParams
     return 1
         if $got->value('Merge') ;
 
-    my $lax = ! $got->value('Strict') ;
+    my $strict = $got->value('Strict') ;
 
 
     {
@@ -108,11 +109,11 @@ sub ckParams
                 
             return $self->saveErrorString(undef, "Null Character found in Name",
                                                 Z_DATA_ERROR)
-                if ! $lax && $name =~ /\x00/ ;
+                if $strict && $name =~ /\x00/ ;
 
             return $self->saveErrorString(undef, "Non ISO 8859-1 Character found in Name",
                                                 Z_DATA_ERROR)
-                if ! $lax && $name =~ /$GZIP_FNAME_INVALID_CHAR_RE/o ;
+                if $strict && $name =~ /$GZIP_FNAME_INVALID_CHAR_RE/o ;
         }
 
         if ($got->parsed('Comment') && defined $got->value('Comment')) {
@@ -120,11 +121,11 @@ sub ckParams
 
             return $self->saveErrorString(undef, "Null Character found in Comment",
                                                 Z_DATA_ERROR)
-                if ! $lax && $comment =~ /\x00/ ;
+                if $strict && $comment =~ /\x00/ ;
 
             return $self->saveErrorString(undef, "Non ISO 8859-1 Character found in Comment",
                                                 Z_DATA_ERROR)
-                if ! $lax && $comment =~ /$GZIP_FCOMMENT_INVALID_CHAR_RE/o;
+                if $strict && $comment =~ /$GZIP_FCOMMENT_INVALID_CHAR_RE/o;
         }
 
         if ($got->parsed('OS_Code') ) {
@@ -145,16 +146,13 @@ sub ckParams
                 if $got->value('Level') == Z_BEST_COMPRESSION ;
         }
 
-        if ($got->parsed('ExtraField')) {
-
-            my $bad = $self->parseExtraField($got, $lax) ;
-            return $self->saveErrorString(undef, $bad, Z_DATA_ERROR)
+        my $data = $got->value('ExtraField') ;
+        if (defined $data) {
+            my $bad = IO::Compress::Zlib::Extra::parseExtraField($data, $strict, 1) ;
+            return $self->saveErrorString(undef, "Error with ExtraField Parameter: $bad", Z_DATA_ERROR)
                 if $bad ;
 
-            my $len = length $got->value('ExtraField') ;
-            return $self->saveErrorString(undef, ExtraFieldError("Too Large"), 
-                                                        Z_DATA_ERROR)
-                if $len > GZIP_FEXTRA_MAX_SIZE;
+            $got->value('ExtraField', $data) ;
         }
     }
 
@@ -263,158 +261,6 @@ sub mkHeader
     noUTF8($out);
 
     return $out ;
-}
-
-sub ExtraFieldError
-{
-    return "Error with ExtraField Parameter: $_[0]" ;
-}
-
-sub validateExtraFieldPair
-{
-    my $pair = shift ;
-    my $lax  = shift ;
-
-    return ExtraFieldError("Not an array ref")
-        unless ref $pair &&  ref $pair eq 'ARRAY';
-
-    return ExtraFieldError("SubField must have two parts")
-        unless @$pair == 2 ;
-
-    return ExtraFieldError("SubField ID is a reference")
-        if ref $pair->[0] ;
-
-    return ExtraFieldError("SubField Data is a reference")
-        if ref $pair->[1] ;
-
-    # ID is exactly two chars   
-    return ExtraFieldError("SubField ID not two chars long")
-        unless length $pair->[0] == GZIP_FEXTRA_SUBFIELD_ID_SIZE ;
-
-    # Check that the 2nd byte of the ID isn't 0    
-    return ExtraFieldError("SubField ID 2nd byte is 0x00")
-        if ! $lax && substr($pair->[0], 1, 1) eq "\x00" ;
-
-    return ExtraFieldError("SubField Data too long")
-        if length $pair->[1] > GZIP_FEXTRA_SUBFIELD_MAX_SIZE ;
-
-
-    return undef ;
-}
-
-sub parseExtra
-{
-    my $data = shift ;
-    my $lax = shift ;
-
-    return undef
-        if $lax ;
-
-    my $XLEN = length $data ;
-
-    return ExtraFieldError("Too Large")
-        if $XLEN > GZIP_FEXTRA_MAX_SIZE;
-
-    my $offset = 0 ;
-    while ($offset < $XLEN) {
-
-        return ExtraFieldError("FEXTRA Body")
-            if $offset + GZIP_FEXTRA_SUBFIELD_HEADER_SIZE  > $XLEN ;
-
-        my $id = substr($data, $offset, GZIP_FEXTRA_SUBFIELD_ID_SIZE);    
-        $offset += GZIP_FEXTRA_SUBFIELD_ID_SIZE;
-
-        my $subLen =  unpack("v", substr($data, $offset,
-                                            GZIP_FEXTRA_SUBFIELD_LEN_SIZE));
-        $offset += GZIP_FEXTRA_SUBFIELD_LEN_SIZE ;
-
-        return ExtraFieldError("FEXTRA Body")
-            if $offset + $subLen > $XLEN ;
-
-        my $bad = validateExtraFieldPair( [$id, 
-                                            substr($data, $offset, $subLen)], $lax );
-        return $bad if $bad ;
-
-        $offset += $subLen ;
-    }
-        
-    return undef ;
-}
-
-sub parseExtraField
-{
-    my $self = shift ;
-    my $got  = shift ;
-    my $lax  = shift ;
-
-    # ExtraField can be any of
-    #
-    #    -ExtraField => $data
-    #    -ExtraField => [$id1, $data1,
-    #                    $id2, $data2]
-    #                     ...
-    #                   ]
-    #    -ExtraField => [ [$id1 => $data1],
-    #                     [$id2 => $data2],
-    #                     ...
-    #                   ]
-    #    -ExtraField => { $id1 => $data1,
-    #                     $id2 => $data2,
-    #                     ...
-    #                   }
-
-    
-    return undef
-        unless $got->parsed('ExtraField') ;
-
-    return parseExtra($got->value('ExtraField'), $lax)
-        unless ref $got->value('ExtraField') ;
-
-    my $data = $got->value('ExtraField');
-    my $out = '' ;
-
-    if (ref $data eq 'ARRAY') {    
-        if (ref $data->[0]) {
-
-            foreach my $pair (@$data) {
-                return ExtraFieldError("Not list of lists")
-                    unless ref $pair eq 'ARRAY' ;
-
-                my $bad = validateExtraFieldPair($pair, $lax) ;
-                return $bad if $bad ;
-
-                $out .= $pair->[0] . pack("v", length $pair->[1]) . 
-                        $pair->[1] ;
-            }   
-        }   
-        else {
-            return ExtraFieldError("Not even number of elements")
-                unless @$data % 2  == 0;
-
-            for (my $ix = 0; $ix <= length(@$data) -1 ; $ix += 2) {
-                my $bad = validateExtraFieldPair([$data->[$ix], $data->[$ix+1]], $lax) ;
-                return $bad if $bad ;
-
-                $out .= $data->[$ix] . pack("v", length $data->[$ix+1]) . 
-                        $data->[$ix+1] ;
-            }   
-        }
-    }   
-    elsif (ref $data eq 'HASH') {    
-        while (my ($id, $info) = each %$data) {
-            my $bad = validateExtraFieldPair([$id, $info], $lax);
-            return $bad if $bad ;
-
-            $out .= $id .  pack("v", length $info) . $info ;
-        }   
-    }   
-    else {
-        return ExtraFieldError("Not a scalar, array ref or hash ref") ;
-    }
-
-    $got->value('ExtraField' => $out);
-
-    return undef;
 }
 
 sub mkFinalTrailer
@@ -651,9 +497,14 @@ If the C<$output> parameter is any other type, C<undef> will be returned.
 
 =head2 Notes
 
+
+
 When C<$input> maps to multiple files/buffers and C<$output> is a single
-file/buffer the compressed input files/buffers will all be stored
-in C<$output> as a single compressed stream.
+file/buffer the input files/buffers will be stored
+in C<$output> as a concatenated series of compressed data streams.
+
+
+
 
 
 

@@ -11,12 +11,15 @@ use bytes;
 use IO::Uncompress::RawInflate ;
 use IO::Compress::Base::Common qw(:Status createSelfTiedObject);
 use IO::Uncompress::Adapter::Identity;
+use IO::Compress::Zlib::Extra;
+use IO::Compress::Zip::Constants;
 
 use Compress::Raw::Zlib qw(crc32) ;
+
 BEGIN
 {
-    eval { require IO::Uncompress::Adapter::Bunzip2  ;
-           import IO::Uncompress::Adapter::Bunzip2 } ;
+    eval { require IO::Uncompress::Adapter::Bunzip2 ;
+           import  IO::Uncompress::Adapter::Bunzip2 } ;
 }
 
 
@@ -24,7 +27,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError);
 
-$VERSION = '2.000_11';
+$VERSION = '2.000_12';
 $UnzipError = '';
 
 @ISA    = qw(Exporter IO::Uncompress::RawInflate);
@@ -32,7 +35,6 @@ $UnzipError = '';
 %EXPORT_TAGS = %IO::Uncompress::RawInflate::EXPORT_TAGS ;
 push @{ $EXPORT_TAGS{all} }, @EXPORT_OK ;
 Exporter::export_ok_tags('all');
-
 
 sub new
 {
@@ -170,7 +172,7 @@ sub chkTrailer
     if (*$self->{ZipData}{Streaming}) {
         ($sig, $CRC32, $cSize, $uSize) = unpack("V V V V", $trailer) ;
         return $self->TrailerError("Data Descriptor signature, got $sig")
-            if $sig != 0x08074b50;
+            if $sig != ZIP_DATA_HDR_SIG;
     }
     else {
         ($CRC32, $cSize, $uSize) = 
@@ -217,7 +219,7 @@ sub chkTrailer
 
         my $sig = unpack("V", $magic) ;
 
-        if ($sig == 0x02014b50)
+        if ($sig == ZIP_CENTRAL_HDR_SIG)
         {
             if ($self->skipCentralDirectory($magic) != STATUS_OK ) {
                 if (*$self->{Strict}) {
@@ -229,7 +231,7 @@ sub chkTrailer
                 }
             }
         }
-        elsif ($sig == 0x06054b50)
+        elsif ($sig == ZIP_END_CENTRAL_HDR_SIG)
         {
             if ($self->skipEndCentralDirectory($magic) != STATUS_OK) {
                 if (*$self->{Strict}) {
@@ -244,7 +246,7 @@ sub chkTrailer
             return STATUS_OK ;
             last;
         }
-        elsif ($sig == 0x04034b50)
+        elsif ($sig == ZIP_LOCAL_HDR_SIG)
         {
             $self->pushBack($magic)  ;
             return STATUS_OK ;
@@ -358,7 +360,7 @@ sub _isZipMagic
     my $buffer = shift ;
     return 0 if length $buffer < 4 ;
     my $sig = unpack("V", $buffer) ;
-    return $sig == 0x04034b50 ;
+    return $sig == ZIP_LOCAL_HDR_SIG ;
 }
 
 
@@ -409,7 +411,8 @@ sub _readZipHeader($)
 
     my $filename;
     my $extraField;
-    my $streamingMode = ($gpFlag & 0x08) ? 1 : 0 ;
+    my @EXTRA = ();
+    my $streamingMode = ($gpFlag & ZIP_GP_FLAG_STREAMING_MASK) ? 1 : 0 ;
 
     return $self->HeaderError("Streamed Stored content not supported")
         if $streamingMode && $compressedMethod == 0 ;
@@ -429,23 +432,29 @@ sub _readZipHeader($)
     if ($filename_length)
     {
         $self->smartReadExact(\$filename, $filename_length)
-            or return $self->HeaderError("xxx");
+            or return $self->TruncatedHeader("Filename");
         $keep .= $filename ;
     }
 
     if ($extra_length)
     {
         $self->smartReadExact(\$extraField, $extra_length)
-            or return $self->HeaderError("xxx");
+            or return $self->TruncatedHeader("Extra Field");
+
+        my $bad = IO::Compress::Zlib::Extra::parseRawExtra($extraField,
+                                                \@EXTRA, 1, 0);
+        return $self->HeaderError($bad)
+            if defined $bad;
+
         $keep .= $extraField ;
     }
 
     *$self->{ZipData}{Method} = $compressedMethod;
-    if ($compressedMethod == 8)
+    if ($compressedMethod == ZIP_CM_DEFLATE)
     {
         *$self->{Type} = 'zip-deflate';
     }
-    elsif ($compressedMethod == 12)
+    elsif ($compressedMethod == ZIP_CM_BZIP2)
     {
     #if (! defined $IO::Uncompress::Adapter::Bunzip2::VERSION)
         
@@ -458,7 +467,7 @@ sub _readZipHeader($)
         *$self->{ZipData}{CRC32} = crc32(undef);
 
     }
-    elsif ($compressedMethod == 0)
+    elsif ($compressedMethod == ZIP_CM_STORE)
     {
         # TODO -- add support for reading uncompressed
 
@@ -491,11 +500,13 @@ sub _readZipHeader($)
         'Stream'             => $streamingMode,
 
         'MethodID'           => $compressedMethod,
-        'MethodName'         => $compressedMethod == 8 
+        'MethodName'         => $compressedMethod == ZIP_CM_DEFLATE 
                                  ? "Deflated" 
-                                 : $compressedMethod == 0
-                                     ? "Stored"
-                                     : "Unknown" ,
+                                 : $compressedMethod == ZIP_CM_BZIP2
+                                     ? "Bzip2"
+                                     : $compressedMethod == ZIP_CM_STORE
+                                         ? "Stored"
+                                         : "Unknown" ,
 
 #        'TextFlag'      => $flag & GZIP_FLG_FTEXT ? 1 : 0,
 #        'HeaderCRCFlag' => $flag & GZIP_FLG_FHCRC ? 1 : 0,
@@ -509,8 +520,8 @@ sub _readZipHeader($)
 #        'HeaderCRC'     => $HeaderCRC,
 #        'Flags'         => $flag,
 #        'ExtraFlags'    => $xfl,
-#        'ExtraFieldRaw' => $EXTRA,
-#        'ExtraField'    => [ @EXTRA ],
+        'ExtraFieldRaw' => $extraField,
+        'ExtraField'    => [ @EXTRA ],
 
 
       }
@@ -770,9 +781,13 @@ If the C<$output> parameter is any other type, C<undef> will be returned.
 
 =head2 Notes
 
-When C<$input> maps to multiple files/buffers and C<$output> is a single
-file/buffer the uncompressed input files/buffers will all be stored
-in C<$output> as a single uncompressed stream.
+
+When C<$input> maps to multiple compressed files/buffers and C<$output> is
+a single file/buffer, after uncompression C<$output> will contain a
+concatenation of all the uncompressed data from each of the input
+files/buffers.
+
+
 
 
 

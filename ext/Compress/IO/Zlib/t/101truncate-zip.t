@@ -18,7 +18,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 1986 + $extra;
+    plan tests => 2316 + $extra;
 
 };
 
