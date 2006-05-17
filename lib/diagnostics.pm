@@ -185,7 +185,7 @@ use 5.006;
 use Carp;
 $Carp::Internal{__PACKAGE__.""}++;
 
-our $VERSION = 1.15;
+our $VERSION = 1.16;
 our $DEBUG;
 our $VERBOSE;
 our $PRETTY;
@@ -466,12 +466,12 @@ sub import {
 				    $PRETTY++;
 				    next;
 			       };
-
-	/^-t(race)?$/ 		&& do {
+	# matches trace and traceonly for legacy doc mixup reasons
+	/^-t(race(only)?)?$/	&& do {
 				    $TRACEONLY++;
 				    next;
 			       };
-	/^-w(arntrace)?$/ 		&& do {
+	/^-w(arntrace)?$/ 	&& do {
 				    $WARNTRACE++;
 				    next;
 			       };
