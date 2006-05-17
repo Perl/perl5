@@ -5142,7 +5142,7 @@ vfprintf(FILE *fd, char *pat, char *args)
 int
 PerlIO_vsprintf(char *s, int n, const char *fmt, va_list ap)
 {
-    dVAR;
+    dTHX;
     const int val = my_vsnprintf(s, n > 0 ? n : 0, fmt, ap);
     if (n >= 0) {
 	if (strlen(s) >= (STRLEN) n) {

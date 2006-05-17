@@ -348,8 +348,14 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #endif
 
 #if defined(PERL_GCC_PEDANTIC)
-#  if !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  ifndef PERL_GCC_BRACE_GROUPS_FORBIDDEN
 #    define PERL_GCC_BRACE_GROUPS_FORBIDDEN
+#  endif
+#endif
+
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN) && !defined(__cplusplus)
+#  ifndef PERL_USE_GCC_BRACE_GROUPS
+#    define PERL_USE_GCC_BRACE_GROUPS
 #  endif
 #endif
 
@@ -361,7 +367,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
  * Trying to select a version that gives no warnings...
  */
 #if !(defined(STMT_START) && defined(STMT_END))
-# if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN) && !defined(__cplusplus)
+# ifdef PERL_USE_GCC_BRACE_GROUPS
 #   define STMT_START	(void)(	/* gcc supports "({ STATEMENTS; })" */
 #   define STMT_END	)
 # else
@@ -1439,18 +1445,38 @@ int sockatmark(int);
 */
 #ifdef SPRINTF_RETURNS_STRLEN
 #  define my_sprintf sprintf
-#  ifdef HAS_SNPRINTF
-#    define USE_SNPRINTF
-#  endif
-#  ifdef HAS_VSNPRINTF
-#    define USE_VSNPRINTF
-#  endif
 #else
 #  define my_sprintf Perl_my_sprintf
 #endif
 
-#define my_snprintf  Perl_my_snprintf
-#define my_vsnprintf Perl_my_vsnprintf
+/*
+ * If we have v?snprintf() and the C99 variadic macros, we can just
+ * use just the v?snprintf().  It is nice to try to trap the buffer
+ * overflow, however, so if we are DEBUGGING, and we cannot use the
+ * gcc brace groups, then use the function wrappers which try to trap
+ * the overflow.  If we can use the gcc brace groups, we can try that
+ * even with the version that uses the C99 variadic macros.
+ */
+
+#if defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS))
+#  ifdef PERL_USE_GCC_BRACE_GROUPS
+#      define my_snprintf(buffer, len, ...) ({ int __len__ = snprintf(buffer, len, __VA_ARGS__); if (__len__ >= len) Perl_croak(aTHX_ "panic: snprintf buffer overflow"); __len__; })
+#  else
+#    define my_snprintf(buffer, len, ...) snprintf(buffer, len, __VA_ARGS__)
+#  endif
+#else
+#  define my_snprintf  Perl_my_snprintf
+#endif
+
+#if defined(HAS_C99_VARIADIC_MACROS)
+#  ifdef PERL_USE_GCC_BRACE_GROUPS
+#      define my_vsnprintf(buffer, len, ...) ({ int __len__ = vsnprintf(buffer, len, __VA_ARGS__); if (__len__ >= len) Perl_croak(aTHX_ "panic: vsnprintf buffer overflow"); __len__; })
+#  else
+#    define my_vsnprintf(buffer, len, ...) vsnprintf(buffer, len, __VA_ARGS__)
+#  endif
+#else
+#  define my_vsnprintf Perl_my_vsnprintf
+#endif
 
 /* Configure gets this right but the UTS compiler gets it wrong.
    -- Hal Morris <hom00@utsglobal.com> */

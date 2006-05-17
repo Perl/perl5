@@ -5206,27 +5206,30 @@ Perl_mem_log_alloc(const UV n, const UV typesize, const char *typename, Malloc_t
 	/* We can't use SVs or PerlIO for obvious reasons,
 	 * so we'll use stdio and low-level IO instead. */
 	char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
-# if defined(PERL_MEM_LOG_TIMESTAMP) && defined(HAS_GETTIMEOFDAY)
+# ifdef PERL_MEM_LOG_TIMESTAMP
 	struct timeval tv;
+#   ifdef HAS_GETTIMEOFDAY
 	gettimeofday(&tv, 0);
+#   endif
+	/* If there are other OS specific ways of hires time than
+	 * gettimeofday() (see ext/Time/HiRes), the easiest way is
+	 * probably that they would be used to fill in the struct
+	 * timeval. */
+# endif
 	{
 	    const STRLEN len =
 		my_snprintf(buf,
 			    PERL_MEM_LOG_SPRINTF_BUF_SIZE,
-			    "%10d.%06d: alloc: %s:%d:%s: %"IVdf" %"UVuf
-			    " %s = %"IVdf": %"UVxf"\n",
-			    (int)tv.tv_sec, (int)tv.tv_usec,
-			    filename, linenumber, funcname, n, typesize,
-			    typename, n * typesize, PTR2UV(newalloc));
-# else
-	    const STRLEN len =
-		my_snprintf(buf,
-			    PERL_MEM_LOG_SPRINTF_BUF_SIZE,
+#  ifdef PERL_MEM_LOG_TIMESTAMP
+			    "%10d.%06d: "
+# endif
 			    "alloc: %s:%d:%s: %"IVdf" %"UVuf
 			    " %s = %"IVdf": %"UVxf"\n",
+#  ifdef PERL_MEM_LOG_TIMESTAMP
+			    (int)tv.tv_sec, (int)tv.tv_usec,
+# endif
 			    filename, linenumber, funcname, n, typesize,
 			    typename, n * typesize, PTR2UV(newalloc));
-# endif
 # ifdef PERL_MEM_LOG_ENV_FD
 	    s = PerlEnv_getenv("PERL_MEM_LOG_FD");
 	    PerlLIO_write(s ? atoi(s) : PERL_MEM_LOG_FD, buf, len);
@@ -5254,29 +5257,25 @@ Perl_mem_log_realloc(const UV n, const UV typesize, const char *typename, Malloc
 	/* We can't use SVs or PerlIO for obvious reasons,
 	 * so we'll use stdio and low-level IO instead. */
 	char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
-# if defined(PERL_MEM_LOG_TIMESTAMP) && defined(HAS_GETTIMEOFDAY)
+#  ifdef PERL_MEM_LOG_TIMESTAMP
 	struct timeval tv;
 	gettimeofday(&tv, 0);
+# endif
 	{
 	    const STRLEN len =
 		my_snprintf(buf,
 			    PERL_MEM_LOG_SPRINTF_BUF_SIZE,
-			    "%10d.%06d: realloc: %s:%d:%s: %"IVdf" %"UVuf
-			    " %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
-			    (int)tv.tv_sec, (int)tv.tv_usec,
-			    filename, linenumber, funcname, n, typesize,
-			    typename, n * typesize, PTR2UV(oldalloc),
-			    PTR2UV(newalloc));
-# else
-	    const STRLEN len =
-		my_snprintf(buf,
-			    PERL_MEM_LOG_SPRINTF_BUF_SIZE,
+#  ifdef PERL_MEM_LOG_TIMESTAMP
+			    "%10d.%06d: "
+# endif
 			    "realloc: %s:%d:%s: %"IVdf" %"UVuf
 			    " %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
+#  ifdef PERL_MEM_LOG_TIMESTAMP
+			    (int)tv.tv_sec, (int)tv.tv_usec,
+# endif
 			    filename, linenumber, funcname, n, typesize,
 			    typename, n * typesize, PTR2UV(oldalloc),
 			    PTR2UV(newalloc));
-# endif
 # ifdef PERL_MEM_LOG_ENV_FD
 	    s = PerlEnv_getenv("PERL_MEM_LOG_FD");
 	    PerlLIO_write(s ? atoi(s) : PERL_MEM_LOG_FD, buf, len);
@@ -5304,24 +5303,23 @@ Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int linenumber,
 	/* We can't use SVs or PerlIO for obvious reasons,
 	 * so we'll use stdio and low-level IO instead. */
 	char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
-# if defined(PERL_MEM_LOG_TIMESTAMP) && defined(HAS_GETTIMEOFDAY)
+#  ifdef PERL_MEM_LOG_TIMESTAMP
 	struct timeval tv;
 	gettimeofday(&tv, 0);
+# endif
 	{
 	    const STRLEN len =
 		my_snprintf(buf,
 			    PERL_MEM_LOG_SPRINTF_BUF_SIZE,
-			    "%10d.%06d: free: %s:%d:%s: %"UVxf"\n",
+#  ifdef PERL_MEM_LOG_TIMESTAMP
+			    "%10d.%06d: "
+# endif
+			    "free: %s:%d:%s: %"UVxf"\n",
+#  ifdef PERL_MEM_LOG_TIMESTAMP
 			    (int)tv.tv_sec, (int)tv.tv_usec,
+# endif
 			    filename, linenumber, funcname,
 			    PTR2UV(oldalloc));
-# else
-	    const STRLEN len =
-		my_sprintf(buf,
-			   "free: %s:%d:%s: %"UVxf"\n",
-			   filename, linenumber, funcname,
-			   PTR2UV(oldalloc));
-# endif
 # ifdef PERL_MEM_LOG_ENV_FD
 	    s = PerlEnv_getenv("PERL_MEM_LOG_FD");
 	    PerlLIO_write(s ? atoi(s) : PERL_MEM_LOG_FD, buf, len);
@@ -5361,65 +5359,65 @@ Perl_my_sprintf(char *buffer, const char* pat, ...)
 =for apidoc my_snprintf
 
 The C library C<snprintf> functionality, if available and
-standards-compliant (uses C<vsnprintf>, actually).  If the
+standards-compliant (uses C<vsnprintf>, actually).  However, if the
 C<vsnprintf> is not available, will unfortunately use the unsafe
-C<vsprintf>.  Consider using C<sv_vcatpvf> instead.
+C<vsprintf> which can overrun the buffer (there is an overrun check,
+but that may be too late).  Consider using C<sv_vcatpvf> instead, or
+getting C<vsnprintf>.
 
 =cut
 */
 int
 Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
-/* Cannot do this using variadic macros because that is too unportable. */
 {
     dTHX;
     int retval;
     va_list ap;
-#ifndef USE_VSNPRINTF
-    PERL_UNUSED_ARG(len);
-#endif
     va_start(ap, format);
-#ifdef USE_VSNPRINTF
+#ifdef HAS_VSNPRINTF
     retval = vsnprintf(buffer, len, format, ap);
 #else
     retval = vsprintf(buffer, format, ap);
 #endif
     va_end(ap);
+    if (retval >= len)
+	Perl_croak(aTHX_ "panic: my_snprintf buffer overflow");
     return retval;
 }
 
 /*
 =for apidoc my_vsnprintf
 
-The C library C<vsnprintf> if available and standards-compliant,
-but if the C<vsnprintf> is not available, will unfortunately use
-the unsafe C<vsprintf>.  Consider using C<sv_vcatpvf> instead.
+The C library C<vsnprintf> if available and standards-compliant.
+However, if if the C<vsnprintf> is not available, will unfortunately
+use the unsafe C<vsprintf> which can overrun the buffer (there is an
+overrun check, but that may be too late).  Consider using
+C<sv_vcatpvf> instead, or getting C<vsnprintf>.
 
 =cut
 */
 int
 Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap)
-/* Cannot do this using variadic macros because that is too unportable. */
 {
     dTHX;
     int retval;
-#ifndef USE_VSNPRINTF
-    PERL_UNUSED_ARG(len);
-#endif
 #ifdef NEED_VA_COPY
     va_list apc;
     Perl_va_copy(apc);
-# ifdef USE_VSNPRINTF
+# ifdef HAS_VSNPRINTF
     retval = vsnprintf(buffer, len, format, apc);
 # else
     retval = vsprintf(buffer, format, apc);
 # endif
 #else
-# ifdef USE_VSNPRINTF
+# ifdef HAS_VSNPRINTF
     retval = vsnprintf(buffer, len, format, ap);
 # else
     retval = vsprintf(buffer, format, ap);
 # endif
-#endif
+#endif /* #ifdef NEED_VA_COPY */
+    if (retval >= len)
+	Perl_croak(aTHX_ "panic: my_vsnprintf buffer overflow");
     return retval;
 }
 
