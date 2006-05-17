@@ -3676,7 +3676,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK|SVf_UTF8
 				   |SVf_AMAGIC);
 	{
-	    const MAGIC * const smg = SvVOK(sstr);
+	    const MAGIC * const smg = SvVSTRING_mg(sstr);
 	    if (smg) {
 		sv_magic(dstr, NULL, PERL_MAGIC_vstring,
 			 smg->mg_ptr, smg->mg_len);
