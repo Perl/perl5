@@ -72,4 +72,3 @@ sub compile_module {
 # http://www.pobox.com/~schwern/cgi-bin/perl-qa-wiki.cgi?UntestedModules
 # and vice-versa.  The list should only shrink.
 __DATA__
-DynaLoader
