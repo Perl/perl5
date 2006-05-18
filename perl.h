@@ -1458,24 +1458,34 @@ int sockatmark(int);
  * even with the version that uses the C99 variadic macros.
  */
 
-#if defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS))
+/* Note that we do not check against snprintf()/vsnprintf() returning
+ * negative values because that is non-standard behaviour and we use
+ * snprintf/vsnprintf only iff HAS_VSNPRINTF has been defined, and
+ * that should be true only if the snprintf()/vsnprintf() are true
+ * to the standard. */
+
+#if defined(HAS_SNPRINTF) && defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS))
 #  ifdef PERL_USE_GCC_BRACE_GROUPS
-#      define my_snprintf(buffer, len, ...) ({ int __len__ = snprintf(buffer, len, __VA_ARGS__); if (__len__ >= (len)) Perl_croak(aTHX_ "panic: snprintf buffer overflow"); __len__; })
+#      define my_snprintf(buffer, len, ...) ({ int __len__ = snprintf(buffer, len, __VA_ARGS__); if ((len) > 0 && __len__ >= (len)) Perl_croak(aTHX_ "panic: snprintf buffer overflow"); __len__; })
+#      define PERL_MY_SNPRINTF_GUARDED
 #  else
 #    define my_snprintf(buffer, len, ...) snprintf(buffer, len, __VA_ARGS__)
 #  endif
 #else
 #  define my_snprintf  Perl_my_snprintf
+#  define PERL_MY_SNPRINTF_GUARDED
 #endif
 
-#if defined(HAS_C99_VARIADIC_MACROS)
+#if defined(HAS_VSNPRINTF) && defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS))
 #  ifdef PERL_USE_GCC_BRACE_GROUPS
-#      define my_vsnprintf(buffer, len, ...) ({ int __len__ = vsnprintf(buffer, len, __VA_ARGS__); if (__len__ >= (len)) Perl_croak(aTHX_ "panic: vsnprintf buffer overflow"); __len__; })
+#      define my_vsnprintf(buffer, len, ...) ({ int __len__ = vsnprintf(buffer, len, __VA_ARGS__); if ((len) > 0 && __len__ >= (len)) Perl_croak(aTHX_ "panic: vsnprintf buffer overflow"); __len__; })
+#      define PERL_MY_VSNPRINTF_GUARDED
 #  else
 #    define my_vsnprintf(buffer, len, ...) vsnprintf(buffer, len, __VA_ARGS__)
 #  endif
 #else
 #  define my_vsnprintf Perl_my_vsnprintf
+#  define PERL_MY_VSNPRINTF_GUARDED
 #endif
 
 /* Configure gets this right but the UTS compiler gets it wrong.

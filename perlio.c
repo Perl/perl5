@@ -478,9 +478,9 @@ PerlIO_debug(const char *fmt, ...)
 	const char * const s = CopFILE(PL_curcop);
 	/* Use fixed buffer as sv_catpvf etc. needs SVs */
 	char buffer[1024];
-	const STRLEN len = my_sprintf(buffer, "%.40s:%" IVdf " ", s ? s : "(none)", (IV) CopLINE(PL_curcop));
-	const STRLEN len2 = my_vsnprintf(buffer+len, sizeof(buffer) - len, fmt, ap);
-	PerlLIO_write(PL_perlio_debug_fd, buffer, len + len2);
+	const STRLEN len1 = my_snprintf(buffer, sizeof(buffer), "%.40s:%" IVdf " ", s ? s : "(none)", (IV) CopLINE(PL_curcop));
+	const STRLEN len2 = my_vsnprintf(buffer + len1, sizeof(buffer) - len1, fmt, ap);
+	PerlLIO_write(PL_perlio_debug_fd, buffer, len1 + len2);
 #else
 	const char *s = CopFILE(PL_curcop);
 	STRLEN len;
@@ -5144,14 +5144,12 @@ PerlIO_vsprintf(char *s, int n, const char *fmt, va_list ap)
 {
     dTHX;
     const int val = my_vsnprintf(s, n > 0 ? n : 0, fmt, ap);
-    if (n >= 0) {
-	if (strlen(s) >= (STRLEN) n) {
-	    dTHX;
-	    (void) PerlIO_puts(Perl_error_log,
-			       "panic: sprintf overflow - memory corrupted!\n");
-	    my_exit(1);
-	}
+#ifndef PERL_MY_VSNPRINTF_GUARDED
+    if (val < 0 || (n > 0 ? val >= n : 0)) {
+	dTHX;
+	Perl_croak("panic: my_vsnprintf overflow in PerlIO_vsprintf\n");
     }
+#endif
     return val;
 }
 #endif
