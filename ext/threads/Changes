@@ -1,5 +1,8 @@
 Revision history for Perl extension threads.
 
+1.29 Thu May 18 16:09:28 EDT 2006
+	- Fix warning/core dump from ->create('foo') in BEGIN block
+
 1.28 Wed May 17 14:33:13 EDT 2006
 	- Fix for build failure under older Perl versions
 	- Skip signalling tests if using unsafe signals

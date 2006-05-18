@@ -522,10 +522,15 @@ S_ithread_create(
         SvREFCNT_dec(PL_endav);
         PL_endav = newAV();
 
-        clone_param.flags = 0;
-        thread->init_function = sv_dup(init_function, &clone_param);
-        if (SvREFCNT(thread->init_function) == 0) {
-            SvREFCNT_inc(thread->init_function);
+        if (SvPOK(init_function)) {
+            thread->init_function = newSV(0);
+            sv_copypv(thread->init_function, init_function);
+        } else {
+            clone_param.flags = 0;
+            thread->init_function = sv_dup(init_function, &clone_param);
+            if (SvREFCNT(thread->init_function) == 0) {
+                SvREFCNT_inc(thread->init_function);
+            }
         }
 
         thread->params = sv_dup(params, &clone_param);

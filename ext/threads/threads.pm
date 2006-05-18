@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.28';
+our $VERSION = '1.29';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -102,7 +102,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.28
+This document describes threads version 1.29
 
 =head1 SYNOPSIS
 
@@ -587,11 +587,10 @@ there are still existing I<child> threads.
 
 =item Creating threads inside special blocks
 
-Creating threads inside C<BEGIN>, C<CHECK> or C<INIT> blocks cannot be relied
-upon.  Depending on the Perl version and the application code, results may
-range from success, to (apparently harmless) warnings of leaked scalar or
-attempts to free unreferenced scalars, all the way up to crashing of the Perl
-interpreter.
+Creating threads inside C<BEGIN>, C<CHECK> or C<INIT> blocks should not be
+relied upon.  Depending on the Perl version and the application code, results
+may range from success, to (apparently harmless) warnings of leaked scalar,
+all the way up to crashing of the Perl interpreter.
 
 =item Unsafe signals
 
@@ -618,8 +617,8 @@ the C<-E<gt>kill()> signalling method cannot be used.
 
 =item Returning closures from threads
 
-Returning closures from threads cannot be relied upon.  Depending of the Perl
-version and the application code, results may range from success, to
+Returning closures from threads should not be relied upon.  Depending of the
+Perl version and the application code, results may range from success, to
 (apparently harmless) warnings of leaked scalar, all the way up to crashing of
 the Perl interpreter.
 
@@ -647,7 +646,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.28/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.29/shared.pm>
 
 L<threads::shared>, L<perlthrtut>
 
