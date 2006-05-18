@@ -5403,7 +5403,7 @@ Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap
     int retval;
 #ifdef NEED_VA_COPY
     va_list apc;
-    Perl_va_copy(apc);
+    Perl_va_copy(ap, apc);
 # ifdef HAS_VSNPRINTF
     retval = vsnprintf(buffer, len, format, apc);
 # else
