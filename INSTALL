@@ -966,7 +966,12 @@ answers (such as installation directories and the local perl contact
 person) in the Policy.sh file.  If you want to build perl on another
 system using the same policy defaults, simply copy the Policy.sh file
 to the new system and Configure will use it along with the appropriate
-hint file for your system.
+hint file for your system. This will work even if Policy.sh was
+generated for another version of Perl, or on a system with a
+different architecture an/or operating system. However, in such cases,
+you should review the contents of the file before using it: for
+example, your new target may not keep its man pages in the same place
+as the system on which the file was generated.
 
 Alternatively, if you wish to change some or all of those policy
 answers, you should
@@ -1347,15 +1352,44 @@ instead.  You'll probably save yourself time in the long run.
 
 =item Hint files
 
-The perl distribution includes a number of system-specific hints files
-in the hints/ directory.  If one of them matches your system, Configure
-will offer to use that hint file.
+Hint files tell Configure about a number of things:
+
+=over 4
+
+=item o
+
+The peculiarities or conventions of particular platforms -- non-standard
+library locations and names, default installation locations for binaries,
+and so on.
+
+=item o
+
+The deficiencies of the platform -- for example, library functions that,
+although present, are too badly broken to be usable; or limits on
+resources that are generously available on most platforms.
+
+=item o
+
+How best to optimize for the platform, both in terms of binary size and/or
+speed, and for Perl feature support. Because of wide variations in the
+implementation of shared libraries and of threading, for example, Configure
+often needs hints in order to be able to use these features.
+
+=back
+
+The perl distribution includes many system-specific hints files
+in the hints/ directory. If one of them matches your system, Configure
+will offer to use that hint file. Unless you have a very good reason
+not to, you should accept its offer.
 
 Several of the hint files contain additional important information.
 If you have any problems, it is a good idea to read the relevant hint file
 for further information.  See hints/solaris_2.sh for an extensive example.
 More information about writing good hints is in the hints/README.hints
-file.
+file, which also explains hint files known as callback-units.
+
+Note that any hint file is read before any Policy file, meaning that
+Policy overrides hints -- see L</Site-wide Policy settings>.
 
 =item *** WHOA THERE!!! ***
 
@@ -2641,7 +2675,7 @@ size about 1.9MB in its i386 version:
 A nice trick to find out the minimal set of Perl library files you will
 need to run a Perl program is
 
-   perl -e 'do "prog.pl"; END { print "$_\n" for sort keys %INC }' 
+   perl -e 'do "prog.pl"; END { print "$_\n" for sort keys %INC }'
 
 (this will not find libraries required in runtime, unfortunately, but
 it's a minimal set) and if you want to find out all the files you can
