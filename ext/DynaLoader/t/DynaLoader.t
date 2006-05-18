@@ -61,12 +61,12 @@ eval { DynaLoader::dl_load_file() };
 like( $@, q{/^Usage: DynaLoader::dl_load_file\(filename, flags=0\)/},
         "calling DynaLoader::dl_load_file() with no argument" );
 
-eval { DynaLoader::dl_load_file(undef) };
+eval { no warnings 'uninitialized'; DynaLoader::dl_load_file(undef) };
 is( $@, '', "calling DynaLoader::dl_load_file() with undefined argument" );     # is this expected ?
 
 eval { DynaLoader::dl_load_file("egg_bacon_sausage_and_spam") };
 is( $@, '', "calling DynaLoader::dl_load_file() with undefined argument" );
-like( DynaLoader::dl_error(), q{/^egg_bacon_sausage_and_spam: cannot open shared object file:/}, 
+like( DynaLoader::dl_error(), q{/egg_bacon_sausage_and_spam/}, 
         "calling DynaLoader::dl_load_file() with a package without binary object" );
 
 # ... dl_findfile()
