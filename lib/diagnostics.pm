@@ -562,6 +562,7 @@ sub splainthis {
     # but be aware of messsages containing " at this-or-that"
     my $real = 0;
     my @secs = split( / at / );
+    return unless @secs;
     $_ = $secs[0];
     for my $i ( 1..$#secs ){
         if( $secs[$i] =~ /.+? (?:line|chunk) \d+/ ){
