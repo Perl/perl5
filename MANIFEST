@@ -2923,6 +2923,7 @@ pod/perl.pod			Perl overview (this section)
 pod/perlpod.pod			Perl plain old documentation
 pod/perlpodspec.pod		Perl plain old documentation format specification
 pod/perlport.pod		Perl portability guide
+pod/perlpragma.pod		Perl modules: writing a user pragma
 pod/perlref.pod			Perl references, the rest of the story
 pod/perlreftut.pod		Perl references short introduction
 pod/perlre.pod			Perl regular expressions, the rest of the story
