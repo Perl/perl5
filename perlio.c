@@ -1423,11 +1423,11 @@ PerlIO_context_layers(pTHX_ const char *mode)
 	    type = SvPV_const(layers, len);
 	    if (type && mode[0] != 'r') {
 		/*
-		 * Skip to write part
+		 * Skip to write part, which is separated by a '\0'
 		 */
-		const char * const s = strchr(type, 0);
-		if (s && (STRLEN)(s - type) < len) {
-		    type = s + 1;
+		STRLEN read_len = strlen(type);
+		if (read_len < len) {
+		    type += read_len + 1;
 		}
 	    }
 	}
