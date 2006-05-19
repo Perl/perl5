@@ -200,6 +200,7 @@ For ease of access, the Perl manual has been split up into several sections.
     perlos400		Perl notes for OS/400
     perlplan9		Perl notes for Plan 9
     perlqnx		Perl notes for QNX
+    perlriscos		Perl notes for RISC OS
     perlsolaris 	Perl notes for Solaris
     perlsymbian 	Perl notes for Symbian
     perltru64		Perl notes for Tru64
