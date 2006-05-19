@@ -76,7 +76,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
     bool was_fdopen = FALSE;
     bool in_raw = 0, in_crlf = 0, out_raw = 0, out_crlf = 0;
     char *type  = NULL;
-    char mode[PERL_MODE_MAX];	/* stdio file mode ("r\0", "rb\0", "r+b\0" etc.) */
+    char mode[PERL_MODE_MAX];	/* file mode ("r\0", "rb\0", "ab\0" etc.) */
     SV *namesv;
 
     Zero(mode,sizeof(mode),char);
@@ -261,9 +261,9 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	    writing = 1;
 #ifdef HAS_STRLCAT
             if (out_raw)
-                strlcat(mode, "b", PERL_MODE_MAX);
+                strlcat(mode, "b", PERL_MODE_MAX - 1);
             else if (out_crlf)
-                strlcat(mode, "t", PERL_MODE_MAX); 
+                strlcat(mode, "t", PERL_MODE_MAX - 1); 
 #else
 	    if (out_raw)
 		strcat(mode, "b");
@@ -299,9 +299,9 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 
 #ifdef HAS_STRLCAT
             if (out_raw)
-                strlcat(mode, "b", PERL_MODE_MAX);
+                strlcat(mode, "b", PERL_MODE_MAX - 1);
             else if (out_crlf)
-                strlcat(mode, "t", PERL_MODE_MAX);
+                strlcat(mode, "t", PERL_MODE_MAX - 1);
 #else
 	    if (out_raw)
 		strcat(mode, "b");
@@ -432,9 +432,9 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	    mode[0] = 'r';
 #ifdef HAS_STRLCAT
             if (in_raw)
-                strlcat(mode, "b", PERL_MODE_MAX);
+                strlcat(mode, "b", PERL_MODE_MAX - 1);
             else if (in_crlf)
-                strlcat(mode, "t", PERL_MODE_MAX);
+                strlcat(mode, "t", PERL_MODE_MAX - 1);
 #else
 	    if (in_raw)
 		strcat(mode, "b");
@@ -493,9 +493,9 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 
 #ifdef HAS_STRLCAT
             if (in_raw)
-                strlcat(mode, "b", PERL_MODE_MAX);
+                strlcat(mode, "b", PERL_MODE_MAX - 1);
             else if (in_crlf)
-                strlcat(mode, "t", PERL_MODE_MAX);
+                strlcat(mode, "t", PERL_MODE_MAX - 1);
 #else
 	    if (in_raw)
 		strcat(mode, "b");
@@ -531,9 +531,9 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 
 #ifdef HAS_STRLCAT
             if (in_raw)
-                strlcat(mode, "b", PERL_MODE_MAX);
+                strlcat(mode, "b", PERL_MODE_MAX - 1);
             else if (in_crlf)
-                strlcat(mode, "t", PERL_MODE_MAX);
+                strlcat(mode, "t", PERL_MODE_MAX - 1);
 #else
 	    if (in_raw)
 		strcat(mode, "b");
@@ -1491,7 +1491,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	  if (*s == 'f') {
 	      s++;
 #ifdef HAS_STRLCPY
-              strlcat(flags, "f", PERL_FLAGS_MAX);
+              strlcat(flags, "f", PERL_FLAGS_MAX - 2);
 #else
 	      strcat(flags,"f");
 #endif
