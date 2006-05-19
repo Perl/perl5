@@ -839,7 +839,7 @@ Set the value of the RV pointer in sv to val.  See C<SvIV_set>.
 =for apidoc Am|void|SvMAGIC_set|SV* sv|MAGIC* val
 Set the value of the MAGIC pointer in sv to val.  See C<SvIV_set>.
 
-=for apidoc Am|void|SvSTASH_set|SV* sv|STASH* val
+=for apidoc Am|void|SvSTASH_set|SV* sv|HV* val
 Set the value of the STASH pointer in sv to val.  See C<SvIV_set>.
 
 =for apidoc Am|void|SvCUR_set|SV* sv|STRLEN len
