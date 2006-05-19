@@ -806,7 +806,7 @@ LIMIT specified
 
 =back
 
-=head2 perlfaq - frequently asked questions about Perl
+=head2 perlfaq - frequently asked questions about Perl ($Revision: 3606 $)
 
 =over 4
 
@@ -861,8 +861,7 @@ Interaction, perlfaq9 - Networking
 
 =back
 
-=head2 perlfaq1 - General Questions About Perl ($Revision: 1.19 $, $Date:
-2005/12/31 00:54:37 $)
+=head2 perlfaq1 - General Questions About Perl ($Revision: 3606 $)
 
 =over 4
 
@@ -901,17 +900,20 @@ Scheme, or Tcl?
 
 =item Where can I get a list of Larry Wall witticisms?
 
-=item How can I convince my sysadmin/supervisor/employees to use version
-5/5.6.1/Perl instead of some other language?
+=item How can I convince others to use Perl?
+
+http://perltraining.com.au/whyperl.html,
+http://www.perl.org/advocacy/whyperl.html
 
 =back
+
+=item REVISION
 
 =item AUTHOR AND COPYRIGHT
 
 =back
 
-=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 1.39 $,
-$Date: 2006/01/08 14:27:07 $)
+=head2 perlfaq2 - Obtaining and Learning about Perl ($Revision: 3606 $)
 
 =over 4
 
@@ -960,12 +962,13 @@ References, Tutorials, Task-Oriented, Special Topics
 
 =back
 
+=item REVISION
+
 =item AUTHOR AND COPYRIGHT
 
 =back
 
-=head2 perlfaq3 - Programming Tools ($Revision: 1.56 $, $Date: 2005/12/31
-00:54:37 $)
+=head2 perlfaq3 - Programming Tools ($Revision: 3606 $)
 
 =over 4
 
@@ -1046,12 +1049,13 @@ program; what am I doing wrong?
 
 =back
 
+=item REVISION
+
 =item AUTHOR AND COPYRIGHT
 
 =back
 
-=head2 perlfaq4 - Data Manipulation ($Revision: 1.73 $, $Date: 2005/12/31
-00:54:37 $)
+=head2 perlfaq4 - Data Manipulation ($Revision: 3606 $)
 
 =over 4
 
@@ -1263,12 +1267,13 @@ array of hashes or arrays?
 
 =back
 
+=item REVISION
+
 =item AUTHOR AND COPYRIGHT
 
 =back
 
-=head2 perlfaq5 - Files and Formats ($Revision: 1.42 $, $Date: 2005/12/31
-00:54:37 $)
+=head2 perlfaq5 - Files and Formats ($Revision: 3606 $)
 
 =over 4
 
@@ -1299,7 +1304,7 @@ X<file, temporary>
 X<fixed-length> X<file, fixed-length records>
 
 =item How can I make a filehandle local to a subroutine?  How do I pass
-filehandles between subroutines?  How do I make an array of filehandles?
+filehandles between subroutines?  How do I make an array of filehandles? 
 X<filehandle, local> X<filehandle, passing> X<filehandle, reference>
 
 =item How can I use a filehandle indirectly?
@@ -1396,12 +1401,13 @@ X<file, selecting a random line>
 
 =back
 
+=item REVISION
+
 =item AUTHOR AND COPYRIGHT
 
 =back
 
-=head2 perlfaq6 - Regular Expressions ($Revision: 1.38 $, $Date: 2005/12/31
-00:54:37 $)
+=head2 perlfaq6 - Regular Expressions ($Revision: 3606 $)
 
 =over 4
 
@@ -1489,12 +1495,13 @@ X<regular expression, and multibyte characters>
 
 =back
 
+=item REVISION
+
 =item AUTHOR AND COPYRIGHT
 
 =back
 
-=head2 perlfaq7 - General Perl Language Issues ($Revision: 1.28 $, $Date:
-2005/12/31 00:54:37 $)
+=head2 perlfaq7 - General Perl Language Issues ($Revision: 3606 $)
 
 =over 4
 
@@ -1571,12 +1578,13 @@ methods?
 
 =back
 
+=item REVISION
+
 =item AUTHOR AND COPYRIGHT
 
 =back
 
-=head2 perlfaq8 - System Interaction ($Revision: 1.27 $, $Date: 2005/12/31
-00:54:37 $)
+=head2 perlfaq8 - System Interaction ($Revision: 3606 $)
 
 =over 4
 
@@ -1701,12 +1709,13 @@ search path?
 
 =back
 
+=item REVISION
+
 =item AUTHOR AND COPYRIGHT
 
 =back
 
-=head2 perlfaq9 - Networking ($Revision: 1.28 $, $Date: 2005/12/31 00:54:37
-$)
+=head2 perlfaq9 - Networking ($Revision: 3606 $)
 
 =over 4
 
@@ -1772,6 +1781,8 @@ gethostbyname, Socket, Net::Domain, Sys::Hostname>
 =item How can I do RPC in Perl?
 
 =back
+
+=item REVISION
 
 =item AUTHOR AND COPYRIGHT
 
@@ -2764,9 +2775,10 @@ $SYSTEM_FD_MAX, $^F, $^H, %^H, $INPLACE_EDIT, $^I, $^M, $OSNAME, $^O,
 ${^OPEN}, $PERLDB, $^P, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
 0x100, 0x200, 0x400, $LAST_REGEXP_CODE_RESULT, $^R,
 $EXCEPTIONS_BEING_CAUGHT, $^S, $BASETIME, $^T, ${^TAINT}, ${^UNICODE},
-${^UTF8LOCALE}, $PERL_VERSION, $^V, $WARNING, $^W, ${^WARNING_BITS},
-$EXECUTABLE_NAME, $^X, ARGV, $ARGV, @ARGV, ARGVOUT, @F, @INC, @_, %INC,
-%ENV, $ENV{expr}, %SIG, $SIG{expr}
+${^UTF8CACHE}, ${^UTF8LOCALE}, $PERL_VERSION, $^V, $WARNING, $^W,
+${^WARNING_BITS}, ${^WIN32_SLOPPY_STAT}, $EXECUTABLE_NAME, $^X, ARGV,
+$ARGV, @ARGV, ARGVOUT, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG,
+$SIG{expr}
 
 =item Error Indicators
 
@@ -4331,37 +4343,60 @@ tarball, Announce to the modules list, Announce to clpa, Fix bugs!
 
 =back
 
+=head2 perlpragma - how to write a user pragma
+
+=over 4
+
+=item DESCRIPTION
+
+=item A basic example
+
+=item Implementation details
+
+=back
+
 =head2 perlutil - utilities packaged with the Perl distribution
 
 =over 4
 
 =item DESCRIPTION
 
+=item LIST OF UTILITIES
+
 =over 4
 
-=item DOCUMENTATION
+=item Documentation
 
 L<perldoc|perldoc>, L<pod2man|pod2man> and L<pod2text|pod2text>,
 L<pod2html|pod2html> and L<pod2latex|pod2latex>, L<pod2usage|pod2usage>,
 L<podselect|podselect>, L<podchecker|podchecker>, L<splain|splain>,
 L<roffitall|roffitall>
 
-=item CONVERTORS
+=item Convertors
 
-L<a2p|a2p>, L<s2p|s2p>, L<find2perl|find2perl>
+L<a2p|a2p>, L<s2p|s2p> and L<psed>, L<find2perl|find2perl>
 
 =item Administration
 
-L<libnetcfg|libnetcfg>
+L<config_data|config_data>, L<libnetcfg|libnetcfg>, L<perlivp>
 
 =item Development
 
 L<perlbug|perlbug>, L<h2ph|h2ph>, L<c2ph|c2ph> and L<pstruct|pstruct>,
-L<h2xs|h2xs>, L<dprofpp|dprofpp>, L<perlcc|perlcc>
+L<h2xs|h2xs>, L<enc2xs>, L<xsubpp>, L<dprofpp|dprofpp>, L<perlcc|perlcc>,
+L<prove>, L<corelist>
 
-=item SEE ALSO
+=item General tools
+
+L<piconv>, L<ptar>, L<ptardiff>, L<shasum>
+
+=item Installation
+
+L<cpan>, L<instmodsh>
 
 =back
+
+=item SEE ALSO
 
 =back
 
@@ -5277,19 +5312,19 @@ perl_parse X<perl_parse>, perl_run X<perl_run>, require_pv X<require_pv>
 
 =item Functions in file mathoms.c
 
-gv_fetchmethod X<gv_fetchmethod>, sv_2pvbyte_nolen X<sv_2pvbyte_nolen>,
-sv_2pvutf8_nolen X<sv_2pvutf8_nolen>, sv_2pv_nolen X<sv_2pv_nolen>,
-sv_catpvn_mg X<sv_catpvn_mg>, sv_catsv_mg X<sv_catsv_mg>, sv_force_normal
-X<sv_force_normal>, sv_iv X<sv_iv>, sv_nolocking X<sv_nolocking>,
-sv_nounlocking X<sv_nounlocking>, sv_nv X<sv_nv>, sv_pv X<sv_pv>, sv_pvbyte
-X<sv_pvbyte>, sv_pvbyten X<sv_pvbyten>, sv_pvn X<sv_pvn>, sv_pvutf8
-X<sv_pvutf8>, sv_pvutf8n X<sv_pvutf8n>, sv_taint X<sv_taint>, sv_unref
-X<sv_unref>, sv_uv X<sv_uv>
+gv_fetchmethod X<gv_fetchmethod>, pack_cat X<pack_cat>, sv_2pvbyte_nolen
+X<sv_2pvbyte_nolen>, sv_2pvutf8_nolen X<sv_2pvutf8_nolen>, sv_2pv_nolen
+X<sv_2pv_nolen>, sv_catpvn_mg X<sv_catpvn_mg>, sv_catsv_mg X<sv_catsv_mg>,
+sv_force_normal X<sv_force_normal>, sv_iv X<sv_iv>, sv_nolocking
+X<sv_nolocking>, sv_nounlocking X<sv_nounlocking>, sv_nv X<sv_nv>, sv_pv
+X<sv_pv>, sv_pvbyte X<sv_pvbyte>, sv_pvbyten X<sv_pvbyten>, sv_pvn
+X<sv_pvn>, sv_pvutf8 X<sv_pvutf8>, sv_pvutf8n X<sv_pvutf8n>, sv_taint
+X<sv_taint>, sv_unref X<sv_unref>, sv_usepvn X<sv_usepvn>, sv_usepvn_mg
+X<sv_usepvn_mg>, sv_uv X<sv_uv>, unpack_str X<unpack_str>
 
 =item Functions in file pp_pack.c
 
-packlist X<packlist>, pack_cat X<pack_cat>, unpackstring X<unpackstring>,
-unpack_str X<unpack_str>
+packlist X<packlist>, unpackstring X<unpackstring>
 
 =item Global Variables
 
@@ -5337,20 +5372,22 @@ X<SvUNLOCK>
 =item Memory Management
 
 Copy X<Copy>, CopyD X<CopyD>, Move X<Move>, MoveD X<MoveD>, Newx X<Newx>,
-Newxc X<Newxc>, Newxz X<Newxz>, Poison X<Poison>, Renew X<Renew>, Renewc
-X<Renewc>, Safefree X<Safefree>, savepv X<savepv>, savepvn X<savepvn>,
-savesharedpv X<savesharedpv>, savesvpv X<savesvpv>, StructCopy
-X<StructCopy>, Zero X<Zero>, ZeroD X<ZeroD>
+Newxc X<Newxc>, Newxz X<Newxz>, Poison X<Poison>, PoisonNew X<PoisonNew>,
+PoisonWith X<PoisonWith>, Renew X<Renew>, Renewc X<Renewc>, Safefree
+X<Safefree>, savepv X<savepv>, savepvn X<savepvn>, savesharedpv
+X<savesharedpv>, savesvpv X<savesvpv>, StructCopy X<StructCopy>, Zero
+X<Zero>, ZeroD X<ZeroD>
 
 =item Miscellaneous Functions
 
 fbm_compile X<fbm_compile>, fbm_instr X<fbm_instr>, form X<form>, getcwd_sv
-X<getcwd_sv>, my_sprintf X<my_sprintf>, new_version X<new_version>,
-scan_version X<scan_version>, strEQ X<strEQ>, strGE X<strGE>, strGT
-X<strGT>, strLE X<strLE>, strLT X<strLT>, strNE X<strNE>, strnEQ X<strnEQ>,
-strnNE X<strnNE>, sv_nosharing X<sv_nosharing>, upg_version X<upg_version>,
-vcmp X<vcmp>, vnormal X<vnormal>, vnumify X<vnumify>, vstringify
-X<vstringify>, vverify X<vverify>
+X<getcwd_sv>, my_snprintf X<my_snprintf>, my_sprintf X<my_sprintf>,
+my_vsnprintf X<my_vsnprintf>, new_version X<new_version>, scan_version
+X<scan_version>, strEQ X<strEQ>, strGE X<strGE>, strGT X<strGT>, strLE
+X<strLE>, strLT X<strLT>, strNE X<strNE>, strnEQ X<strnEQ>, strnNE
+X<strnNE>, sv_nosharing X<sv_nosharing>, upg_version X<upg_version>, vcmp
+X<vcmp>, vnormal X<vnormal>, vnumify X<vnumify>, vstringify X<vstringify>,
+vverify X<vverify>
 
 =item Multicall Functions
 
@@ -5403,15 +5440,11 @@ X<SVt_PVMG>
 
 =item SV Manipulation Functions
 
-get_sv X<get_sv>, looks_like_number X<looks_like_number>, newRV_inc
-X<newRV_inc>, newRV_noinc X<newRV_noinc>, newSV X<newSV>, newSVhek
-X<newSVhek>, newSViv X<newSViv>, newSVnv X<newSVnv>, newSVpv X<newSVpv>,
-newSVpvf X<newSVpvf>, newSVpvn X<newSVpvn>, newSVpvn_share
-X<newSVpvn_share>, newSVrv X<newSVrv>, newSVsv X<newSVsv>, newSVuv
-X<newSVuv>, SvCUR X<SvCUR>, SvCUR_set X<SvCUR_set>, SvEND X<SvEND>, SvGROW
-X<SvGROW>, SvIOK X<SvIOK>, SvIOKp X<SvIOKp>, SvIOK_notUV X<SvIOK_notUV>,
-SvIOK_off X<SvIOK_off>, SvIOK_on X<SvIOK_on>, SvIOK_only X<SvIOK_only>,
-SvIOK_only_UV X<SvIOK_only_UV>, SvIOK_UV X<SvIOK_UV>, SvIsCOW X<SvIsCOW>,
+get_sv X<get_sv>, newRV_inc X<newRV_inc>, SvCUR X<SvCUR>, SvCUR_set
+X<SvCUR_set>, SvEND X<SvEND>, SvGAMAGIC X<SvGAMAGIC>, SvGROW X<SvGROW>,
+SvIOK X<SvIOK>, SvIOKp X<SvIOKp>, SvIOK_notUV X<SvIOK_notUV>, SvIOK_off
+X<SvIOK_off>, SvIOK_on X<SvIOK_on>, SvIOK_only X<SvIOK_only>, SvIOK_only_UV
+X<SvIOK_only_UV>, SvIOK_UV X<SvIOK_UV>, SvIsCOW X<SvIsCOW>,
 SvIsCOW_shared_hash X<SvIsCOW_shared_hash>, SvIV X<SvIV>, SvIVX X<SvIVX>,
 SvIVx X<SvIVx>, SvIV_nomg X<SvIV_nomg>, SvIV_set X<SvIV_set>, SvLEN
 X<SvLEN>, SvLEN_set X<SvLEN_set>, SvMAGIC_set X<SvMAGIC_set>, SvNIOK
@@ -5429,34 +5462,46 @@ X<SvPVutf8_nolen>, SvPVX X<SvPVX>, SvPVx X<SvPVx>, SvPV_force
 X<SvPV_force>, SvPV_force_nomg X<SvPV_force_nomg>, SvPV_nolen
 X<SvPV_nolen>, SvPV_nomg X<SvPV_nomg>, SvPV_set X<SvPV_set>, SvREFCNT
 X<SvREFCNT>, SvREFCNT_dec X<SvREFCNT_dec>, SvREFCNT_inc X<SvREFCNT_inc>,
-SvROK X<SvROK>, SvROK_off X<SvROK_off>, SvROK_on X<SvROK_on>, SvRV X<SvRV>,
+SvREFCNT_inc_NN X<SvREFCNT_inc_NN>, SvREFCNT_inc_simple
+X<SvREFCNT_inc_simple>, SvREFCNT_inc_simple_NN X<SvREFCNT_inc_simple_NN>,
+SvREFCNT_inc_simple_void X<SvREFCNT_inc_simple_void>, SvREFCNT_inc_void
+X<SvREFCNT_inc_void>, SvREFCNT_inc_void_NN X<SvREFCNT_inc_void_NN>, SvROK
+X<SvROK>, SvROK_off X<SvROK_off>, SvROK_on X<SvROK_on>, SvRV X<SvRV>,
 SvRV_set X<SvRV_set>, SvSTASH X<SvSTASH>, SvSTASH_set X<SvSTASH_set>,
 SvTAINT X<SvTAINT>, SvTAINTED X<SvTAINTED>, SvTAINTED_off X<SvTAINTED_off>,
 SvTAINTED_on X<SvTAINTED_on>, SvTRUE X<SvTRUE>, SvTYPE X<SvTYPE>, SvUOK
 X<SvUOK>, SvUPGRADE X<SvUPGRADE>, SvUTF8 X<SvUTF8>, SvUTF8_off
 X<SvUTF8_off>, SvUTF8_on X<SvUTF8_on>, SvUV X<SvUV>, SvUVX X<SvUVX>, SvUVx
 X<SvUVx>, SvUV_nomg X<SvUV_nomg>, SvUV_set X<SvUV_set>, SvVOK X<SvVOK>,
-sv_2bool X<sv_2bool>, sv_2cv X<sv_2cv>, sv_2io X<sv_2io>, sv_2iv_flags
-X<sv_2iv_flags>, sv_2mortal X<sv_2mortal>, sv_2nv X<sv_2nv>, sv_2pvbyte
-X<sv_2pvbyte>, sv_2pvutf8 X<sv_2pvutf8>, sv_2pv_flags X<sv_2pv_flags>,
-sv_2uv_flags X<sv_2uv_flags>, sv_backoff X<sv_backoff>, sv_bless
-X<sv_bless>, sv_catpv X<sv_catpv>, sv_catpvf X<sv_catpvf>, sv_catpvf_mg
-X<sv_catpvf_mg>, sv_catpvn X<sv_catpvn>, sv_catpvn_flags
-X<sv_catpvn_flags>, sv_catpvn_nomg X<sv_catpvn_nomg>, sv_catpv_mg
-X<sv_catpv_mg>, sv_catsv X<sv_catsv>, sv_catsv_flags X<sv_catsv_flags>,
-sv_catsv_nomg X<sv_catsv_nomg>, sv_chop X<sv_chop>, sv_clear X<sv_clear>,
+sv_catpvn_nomg X<sv_catpvn_nomg>, sv_catsv_nomg X<sv_catsv_nomg>,
+sv_derived_from X<sv_derived_from>, sv_report_used X<sv_report_used>,
+sv_setsv_nomg X<sv_setsv_nomg>
+
+=item SV-Body Allocation
+
+looks_like_number X<looks_like_number>, newRV_noinc X<newRV_noinc>, newSV
+X<newSV>, newSVhek X<newSVhek>, newSViv X<newSViv>, newSVnv X<newSVnv>,
+newSVpv X<newSVpv>, newSVpvf X<newSVpvf>, newSVpvn X<newSVpvn>,
+newSVpvn_share X<newSVpvn_share>, newSVrv X<newSVrv>, newSVsv X<newSVsv>,
+newSVuv X<newSVuv>, sv_2bool X<sv_2bool>, sv_2cv X<sv_2cv>, sv_2io
+X<sv_2io>, sv_2iv_flags X<sv_2iv_flags>, sv_2mortal X<sv_2mortal>, sv_2nv
+X<sv_2nv>, sv_2pvbyte X<sv_2pvbyte>, sv_2pvutf8 X<sv_2pvutf8>, sv_2pv_flags
+X<sv_2pv_flags>, sv_2uv_flags X<sv_2uv_flags>, sv_backoff X<sv_backoff>,
+sv_bless X<sv_bless>, sv_catpv X<sv_catpv>, sv_catpvf X<sv_catpvf>,
+sv_catpvf_mg X<sv_catpvf_mg>, sv_catpvn X<sv_catpvn>, sv_catpvn_flags
+X<sv_catpvn_flags>, sv_catpv_mg X<sv_catpv_mg>, sv_catsv X<sv_catsv>,
+sv_catsv_flags X<sv_catsv_flags>, sv_chop X<sv_chop>, sv_clear X<sv_clear>,
 sv_cmp X<sv_cmp>, sv_cmp_locale X<sv_cmp_locale>, sv_collxfrm
-X<sv_collxfrm>, sv_copypv X<sv_copypv>, sv_dec X<sv_dec>, sv_derived_from
-X<sv_derived_from>, sv_eq X<sv_eq>, sv_force_normal_flags
-X<sv_force_normal_flags>, sv_free X<sv_free>, sv_gets X<sv_gets>, sv_grow
-X<sv_grow>, sv_inc X<sv_inc>, sv_insert X<sv_insert>, sv_isa X<sv_isa>,
-sv_isobject X<sv_isobject>, sv_len X<sv_len>, sv_len_utf8 X<sv_len_utf8>,
-sv_magic X<sv_magic>, sv_magicext X<sv_magicext>, sv_mortalcopy
-X<sv_mortalcopy>, sv_newmortal X<sv_newmortal>, sv_newref X<sv_newref>,
-sv_pos_b2u X<sv_pos_b2u>, sv_pos_u2b X<sv_pos_u2b>, sv_pvbyten_force
-X<sv_pvbyten_force>, sv_pvn_force X<sv_pvn_force>, sv_pvn_force_flags
-X<sv_pvn_force_flags>, sv_pvutf8n_force X<sv_pvutf8n_force>, sv_reftype
-X<sv_reftype>, sv_replace X<sv_replace>, sv_report_used X<sv_report_used>,
+X<sv_collxfrm>, sv_copypv X<sv_copypv>, sv_dec X<sv_dec>, sv_eq X<sv_eq>,
+sv_force_normal_flags X<sv_force_normal_flags>, sv_free X<sv_free>, sv_gets
+X<sv_gets>, sv_grow X<sv_grow>, sv_inc X<sv_inc>, sv_insert X<sv_insert>,
+sv_isa X<sv_isa>, sv_isobject X<sv_isobject>, sv_len X<sv_len>, sv_len_utf8
+X<sv_len_utf8>, sv_magic X<sv_magic>, sv_magicext X<sv_magicext>,
+sv_mortalcopy X<sv_mortalcopy>, sv_newmortal X<sv_newmortal>, sv_newref
+X<sv_newref>, sv_pos_b2u X<sv_pos_b2u>, sv_pos_u2b X<sv_pos_u2b>,
+sv_pvbyten_force X<sv_pvbyten_force>, sv_pvn_force X<sv_pvn_force>,
+sv_pvn_force_flags X<sv_pvn_force_flags>, sv_pvutf8n_force
+X<sv_pvutf8n_force>, sv_reftype X<sv_reftype>, sv_replace X<sv_replace>,
 sv_reset X<sv_reset>, sv_rvweaken X<sv_rvweaken>, sv_setiv X<sv_setiv>,
 sv_setiv_mg X<sv_setiv_mg>, sv_setnv X<sv_setnv>, sv_setnv_mg
 X<sv_setnv_mg>, sv_setpv X<sv_setpv>, sv_setpvf X<sv_setpvf>, sv_setpvf_mg
@@ -5465,16 +5510,15 @@ sv_setpvn X<sv_setpvn>, sv_setpvn_mg X<sv_setpvn_mg>, sv_setpv_mg
 X<sv_setpv_mg>, sv_setref_iv X<sv_setref_iv>, sv_setref_nv X<sv_setref_nv>,
 sv_setref_pv X<sv_setref_pv>, sv_setref_pvn X<sv_setref_pvn>, sv_setref_uv
 X<sv_setref_uv>, sv_setsv X<sv_setsv>, sv_setsv_flags X<sv_setsv_flags>,
-sv_setsv_mg X<sv_setsv_mg>, sv_setsv_nomg X<sv_setsv_nomg>, sv_setuv
-X<sv_setuv>, sv_setuv_mg X<sv_setuv_mg>, sv_tainted X<sv_tainted>, sv_true
-X<sv_true>, sv_unmagic X<sv_unmagic>, sv_unref_flags X<sv_unref_flags>,
-sv_untaint X<sv_untaint>, sv_upgrade X<sv_upgrade>, sv_usepvn X<sv_usepvn>,
-sv_usepvn_mg X<sv_usepvn_mg>, sv_utf8_decode X<sv_utf8_decode>,
-sv_utf8_downgrade X<sv_utf8_downgrade>, sv_utf8_encode X<sv_utf8_encode>,
-sv_utf8_upgrade X<sv_utf8_upgrade>, sv_utf8_upgrade_flags
-X<sv_utf8_upgrade_flags>, sv_vcatpvf X<sv_vcatpvf>, sv_vcatpvfn
-X<sv_vcatpvfn>, sv_vcatpvf_mg X<sv_vcatpvf_mg>, sv_vsetpvf X<sv_vsetpvf>,
-sv_vsetpvfn X<sv_vsetpvfn>, sv_vsetpvf_mg X<sv_vsetpvf_mg>
+sv_setsv_mg X<sv_setsv_mg>, sv_setuv X<sv_setuv>, sv_setuv_mg
+X<sv_setuv_mg>, sv_tainted X<sv_tainted>, sv_true X<sv_true>, sv_unmagic
+X<sv_unmagic>, sv_unref_flags X<sv_unref_flags>, sv_untaint X<sv_untaint>,
+sv_upgrade X<sv_upgrade>, sv_usepvn_flags X<sv_usepvn_flags>,
+sv_utf8_decode X<sv_utf8_decode>, sv_utf8_downgrade X<sv_utf8_downgrade>,
+sv_utf8_encode X<sv_utf8_encode>, sv_utf8_upgrade X<sv_utf8_upgrade>,
+sv_utf8_upgrade_flags X<sv_utf8_upgrade_flags>, sv_vcatpvf X<sv_vcatpvf>,
+sv_vcatpvfn X<sv_vcatpvfn>, sv_vcatpvf_mg X<sv_vcatpvf_mg>, sv_vsetpvf
+X<sv_vsetpvf>, sv_vsetpvfn X<sv_vsetpvfn>, sv_vsetpvf_mg X<sv_vsetpvf_mg>
 
 =item Unicode Support
 
@@ -5550,13 +5594,18 @@ X<PL_ofs_sv>, PL_rs X<PL_rs>
 
 is_gv_magical X<is_gv_magical>, is_gv_magical_sv X<is_gv_magical_sv>
 
+=item Hash Manipulation Functions
+
+refcounted_he_chain_2hv X<refcounted_he_chain_2hv>, refcounted_he_free
+X<refcounted_he_free>, refcounted_he_new X<refcounted_he_new>
+
 =item IO Functions
 
 start_glob X<start_glob>
 
 =item Magical Functions
 
-mg_localize X<mg_localize>
+magic_sethint X<magic_sethint>, mg_localize X<mg_localize>
 
 =item Pad Data Structures
 
@@ -5888,13 +5937,13 @@ Implement L</_ prototype character>, Implement L</state variables>
 
 =item POSIX memory footprint
 
+=item embed.pl/makedef.pl
+
 =back
 
 =item Tasks that need a little sysadmin-type knowledge
 
 =over 4
-
-=item Relocatable perl
 
 =item make HTML install work
 
@@ -5903,8 +5952,6 @@ Implement L</_ prototype character>, Implement L</state variables>
 =item Add a code coverage target to the Makefile
 
 =item Make Config.pm cope with differences between build and installed perl
-
-=item make parallel builds work
 
 =item linker specification files
 
@@ -5916,17 +5963,15 @@ Implement L</_ prototype character>, Implement L</state variables>
 
 =item Make it clear from -v if this is the exact official release
 
-=item Tidy up global variables
-
 =item Ordering of "global" variables.
 
-=item bincompat functions
+=item Profile Perl - am I hot or not?
 
-=item am I hot or not?
+=item Shrink struct context
 
-=item emulate the per-thread memory pool on Unix
+=item Allocate OPs from arenas
 
-=item reduce duplication in sv_setsv_flags
+=item Merge the win32 and wince codebases
 
 =back
 
@@ -5934,13 +5979,7 @@ Implement L</_ prototype character>, Implement L</state variables>
 
 =over 4
 
-=item IPv6
-
-=item shrink C<GV>s, C<CV>s
-
-=item merge Perl_sv_2[inpu]v
-
-=item UTF8 caching code
+=item shrink C<PVBM>s
 
 =item Implicit Latin 1 => Unicode translation
 
@@ -5968,8 +6007,6 @@ Implement L</_ prototype character>, Implement L</state variables>
 
 =item Attach/detach debugger from running program
 
-=item Constant folding
-
 =item LVALUE functions for lists
 
 =item LVALUE functions in the debugger
@@ -5977,8 +6014,6 @@ Implement L</_ prototype character>, Implement L</state variables>
 =item _ prototype character
 
 =item state variables
-
-=item @INC source filter to Filter::Simple
 
 =item regexp optimiser optional
 
@@ -5997,6 +6032,8 @@ Implement L</_ prototype character>, Implement L</state variables>
 =item Optimize away @_
 
 =item What hooks would assertions need?
+
+=item Properly Unicode safe tokeniser and pads.
 
 =back
 
@@ -6079,6 +6116,12 @@ B<-V>
 
 =item Incompatible Changes
 
+=over 4
+
+=item chdir FOO
+
+=back
+
 =item Core Enhancements
 
 =item Modules and Pragmata
@@ -6118,6 +6161,12 @@ B<-V>
 =item DESCRIPTION
 
 =item Incompatible Changes
+
+=over 4
+
+=item chdir FOO
+
+=back
 
 =item Core Enhancements
 
@@ -9128,9 +9177,9 @@ B<Unix emulation for AmigaOS: ixemul.library>, B<Version of Amiga OS>
 =item BUILD
 
 Microsoft Embedded Visual Tools, Microsoft Visual C++, Rainer Keuchel's
-celib-sources, Rainer Keuchel's console-sources, go to ./wince
-subdirectory, edit file compile.bat, run    compile.bat, run	compile.bat
-dist
+celib-sources, Rainer Keuchel's console-sources, go to C<./win32>
+subdirectory, edit file C<compile.bat>, run    compile.bat, run   
+compile.bat dist
 
 =back
 
@@ -9144,9 +9193,9 @@ dist
 
 =item ENVIRONMENT
 
-=item REGISTRY
+PERL5LIB, PATH, TMP, UNIXROOTPATH, ROWS/COLS, HOME, CONSOLEFONTSIZE
 
-=item PERLFILES
+=item REGISTRY
 
 =item XS
 
@@ -9157,6 +9206,8 @@ dist
 =back
 
 =item ACKNOWLEDGEMENTS
+
+=item History of WinCE port
 
 =item AUTHORS
 
@@ -9562,6 +9613,8 @@ op/lexassign.t, pragma/warnings.t
 =item SDK support
 
 =item Universal Binary support
+
+=item 64-bit PPC support
 
 =item libperl and Prebinding
 
@@ -10103,6 +10156,18 @@ qnx/ar, qnx/cpp
 
 =back
 
+=head2 perlriscos, README.riscos - Perl version 5 for RISC OS
+
+=over 4
+
+=item DESCRIPTION
+
+=item BUILD
+
+=item AUTHOR
+
+=back
+
 =head2 perlsolaris, README.solaris - Perl version 5 on Solaris systems
 
 =over 4
@@ -10346,6 +10411,8 @@ Digital UNIX formerly known as DEC OSF/1) systems
 
 =item PERL5LIB and PERLLIB
 
+=item PERL_VMS_EXCEPTION_DEBUG
+
 =item Command line
 
 =over 4
@@ -10515,33 +10582,61 @@ ABS_TIMEOUT, LOCKVAR, cond_signal VARIABLE, cond_broadcast VARIABLE
 
 =back
 
-=head2 threads - Perl extension allowing use of interpreter based threads
-from perl
+=head2 threads - Perl interpreter-based threads
 
 =over 4
+
+=item VERSION
 
 =item SYNOPSIS
 
 =item DESCRIPTION
 
-$thread = threads->create(function, LIST), $thread->join, $thread->detach,
-threads->self, $thread->tid, threads->object( tid ), threads->yield();,
-threads->list();, async BLOCK;
+$thr = threads->create(FUNCTION, ARGS), $thr->join(), $thr->detach(),
+threads->detach(), threads->self(), $thr->tid(), threads->tid(),
+threads->object($tid), threads->yield(), threads->list(),
+$thr1->equal($thr2), async BLOCK;, $thr->_handle(), threads->_handle()
+
+=item THREAD STACK SIZE
+
+threads->get_stack_size();, $size = $thr->get_stack_size();, $old_size =
+threads->set_stack_size($new_size);, use threads ('stack_size' => VALUE);,
+$ENV{'PERL5_ITHREADS_STACK_SIZE'}, threads->create({'stack_size' => VALUE},
+FUNCTION, ARGS), $thr2 = $thr1->create(FUNCTION, ARGS)
+
+=item THREAD SIGNALLING
+
+$thr->kill('SIG...');
 
 =item WARNINGS
 
-A thread exited while %d other threads were still running
+A thread exited while # other threads were still running, Thread creation
+failed: pthread_create returned #, Thread # terminated abnormally: ..,
+Using minimum thread stack size of #, Thread creation failed:
+pthread_attr_setstacksize(I<SIZE>) returned 22
 
-=item TODO
+=item ERRORS
+
+This Perl not built to support threads, Cannot change stack size of an
+existing thread, Cannot signal other threads without safe signals,
+Unrecognized signal name: ..
 
 =item BUGS
 
-Parent-Child threads, tid is I32, Returning objects, Creating threads
-inside BEGIN blocks, PERL_OLD_SIGNALS are not threadsafe, will not be
+Parent-child threads, Creating threads inside special blocks, Unsafe
+signals, Perl was been built with C<PERL_OLD_SIGNALS> (see C<perl -V>), The
+environment variable C<PERL_SIGNALS> is set to C<unsafe> (see
+L<perlrun/"PERL_SIGNALS">), The module L<Perl::Unsafe::Signals> is used,
+Returning closures from threads, Perl Bugs and the CPAN Version of
+L<threads>
 
-=item AUTHOR and COPYRIGHT
+=item REQUIREMENTS
 
 =item SEE ALSO
+
+=item AUTHOR
+
+=item ACKNOWLEDGEMENTS
 
 =back
 
@@ -11057,6 +11152,8 @@ upgrading for byte-strings
 
 =item the 'err' feature
 
+=item the 'state' feature
+
 =back
 
 =item FEATURE BUNDLES
@@ -11238,9 +11335,9 @@ is inherited by derived classes
 
 =item Fallback
 
-=item Smart Match
-
 C<undef>, TRUE, defined, but FALSE
+
+=item Smart Match
 
 =item Copy Constructor
 
@@ -11254,6 +11351,8 @@ I<Assignment forms of arithmetic operations>, I<Conversion operations>,
 I<Increment and decrement>, C<abs($a)>, I<Unary minus>, I<Negation>,
 I<Concatenation>, I<Comparison operations>, I<Iterator>, I<Dereferencing>,
 I<Copy operator>
+
+=item Minimal set of overloaded operations
 
 =item Losing overloading
 
@@ -11721,7 +11820,8 @@ What's the minimum perl version required to run Archive::Tar?, Isn't
 Archive::Tar slow?, Isn't Archive::Tar heavier on memory than /bin/tar?,
 Can't you lazy-load data instead?, How much memory will an X kb tar file
 need?, What do you do with unsupported filetypes in an archive?, How do I
-access .tar.Z files?
+extract only files that have property X from an archive?, How do I access
+.tar.Z files?
 
 =item TODO
 
@@ -13034,6 +13134,8 @@ FCGI_SOCKET_PATH, FCGI_LISTEN_QUEUE
 
 =item STATUS
 
+=item COMPATIBILITY
+
 =item DESCRIPTION
 
 =over 4
@@ -13050,6 +13152,8 @@ Signals
 =item autobundle
 
 =item recompile
+
+=item mkmyconfig
 
 =item The four C<CPAN::*> Classes: Author, Bundle, Module, Distribution
 
@@ -13068,23 +13172,25 @@ CPAN::Bundle::inst_file(), CPAN::Bundle::inst_version(),
 CPAN::Bundle::uptodate(), CPAN::Bundle::install(), CPAN::Bundle::make(),
 CPAN::Bundle::readme(), CPAN::Bundle::test(),
 CPAN::Distribution::as_glimpse(), CPAN::Distribution::as_string(),
-CPAN::Distribution::clean(), CPAN::Distribution::containsmods(),
-CPAN::Distribution::cvs_import(), CPAN::Distribution::dir(),
-CPAN::Distribution::force($method,@args), CPAN::Distribution::get(),
-CPAN::Distribution::install(), CPAN::Distribution::isa_perl(),
-CPAN::Distribution::look(), CPAN::Distribution::make(),
+CPAN::Distribution::author, CPAN::Distribution::clean(),
+CPAN::Distribution::containsmods(), CPAN::Distribution::cvs_import(),
+CPAN::Distribution::dir(), CPAN::Distribution::force($method,@args),
+CPAN::Distribution::get(), CPAN::Distribution::install(),
+CPAN::Distribution::isa_perl(), CPAN::Distribution::look(),
+CPAN::Distribution::make(), CPAN::Distribution::perldoc(),
 CPAN::Distribution::prereq_pm(), CPAN::Distribution::readme(),
-CPAN::Distribution::perldoc(), CPAN::Distribution::test(),
+CPAN::Distribution::read_yaml(), CPAN::Distribution::test(),
 CPAN::Distribution::uptodate(), CPAN::Index::force_reload(),
 CPAN::Index::reload(), CPAN::InfoObj::dump(), CPAN::Module::as_glimpse(),
 CPAN::Module::as_string(), CPAN::Module::clean(),
 CPAN::Module::cpan_file(), CPAN::Module::cpan_version(),
 CPAN::Module::cvs_import(), CPAN::Module::description(),
+CPAN::Module::distribution(), CPAN::Module::dslip_status(),
 CPAN::Module::force($method,@args), CPAN::Module::get(),
 CPAN::Module::inst_file(), CPAN::Module::inst_version(),
 CPAN::Module::install(), CPAN::Module::look(), CPAN::Module::make(),
-CPAN::Module::manpage_headline(), CPAN::Module::readme(),
-CPAN::Module::perldoc(), CPAN::Module::test(), CPAN::Module::uptodate(),
+CPAN::Module::manpage_headline(), CPAN::Module::perldoc(),
+CPAN::Module::readme(), CPAN::Module::test(), CPAN::Module::uptodate(),
 CPAN::Module::userid()
 
 =item Cache Manager
@@ -13146,7 +13252,7 @@ http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 
 =item FAQ
 
-1), 2), 3), 4), 5), 6), 7), 8), 9), 10), 11)
+1), 2), 3), 4), 5), 6), 7), 8), 9), 10), 11), 12), 13), 14)
 
 =item BUGS
 
@@ -13280,183 +13386,8 @@ Example 1, Example 2, Example 3
 
 =back
 
-=head2 Compress::Zlib - Interface to zlib compression library
-
-=over 4
-
-=item SYNOPSIS
-
-=item DESCRIPTION
-
-=item GZIP INTERFACE
-
-B<$gz = gzopen($filename, $mode)>, B<$gz = gzopen($filehandle, $mode)>,
-B<$bytesread = $gz-E<gt>gzread($buffer [, $size]) ;>, B<$bytesread =
-$gz-E<gt>gzreadline($line) ;>, B<$byteswritten = $gz-E<gt>gzwrite($buffer)
-;>, B<$status = $gz-E<gt>gzflush($flush_type) ;>, B<$offset =
-$gz-E<gt>gztell() ;>, B<$status = $gz-E<gt>gzseek($offset, $whence) ;>,
-B<$gz-E<gt>gzclose>, B<$gz-E<gt>gzsetparams($level, $strategy>, B<$level>,
-B<$strategy>, B<$gz-E<gt>gzerror>, B<$gzerrno>
-
-=over 4
-
-=item Examples
-
-=item Compress::Zlib::memGzip
-
-=item Compress::Zlib::memGunzip
-
-=back
-
-=item COMPRESS/UNCOMPRESS
-
-B<$dest = compress($source [, $level] ) ;>, B<$dest = uncompress($source)
-;>
-
-=item CHECKSUM FUNCTIONS
-
-=item Compress::Zlib::Deflate
-
-=over 4
-
-=item B<($d, $status) = new Compress::Zlib::Deflate( [OPT] ) >
-
-B<-Level>, B<-Method>, B<-WindowBits>, B<-MemLevel>, B<-Strategy>,
-B<-Dictionary>, B<-Bufsize>, B<-AppendOutput>, B<-CRC32>, B<-ADLER32>
-
-=item B<$status = $d-E<gt>deflate($input, $output)>
-
-=item B<$status = $d-E<gt>flush($output [, $flush_type]) >
-
-=item B<$status = $d-E<gt>deflateParams([OPT])>
-
-B<-Level>, B<-Strategy>, B<-BufSize>
-
-=item B<$status = $d-E<gt>deflateTune($good_length, $max_lazy,
-$nice_length, $max_chain)>
-
-=item B<$d-E<gt>dict_adler()>
-
-=item B<$d-E<gt>crc32()>
-
-=item B<$d-E<gt>adler32()>
-
-=item B<$d-E<gt>msg()>
-
-=item B<$d-E<gt>total_in()>
-
-=item B<$d-E<gt>total_out()>
-
-=item B<$d-E<gt>get_Strategy()>
-
-=item B<$d-E<gt>get_Level()>
-
-=item B<$d-E<gt>get_BufSize()>
-
-=item Example
-
-=back
-
-=item Compress::Zlib::Inflate
-
-=over 4
-
-=item B< ($i, $status) = new Compress::Zlib::Inflate( [OPT] ) >
-
-B<-WindowBits>, B<-Bufsize>, B<-Dictionary>, B<-AppendOutput>, B<-CRC32>,
-B<-ADLER32>, B<-ConsumeInput>
-
-=item B< $status = $i-E<gt>inflate($input, $output [,$eof]) >
-
-=item B<$status = $i-E<gt>inflateSync($input)>
-
-=item B<$i-E<gt>dict_adler()>
-
-=item B<$i-E<gt>crc32()>
-
-=item B<$i-E<gt>adler32()>
-
-=item B<$i-E<gt>msg()>
-
-=item B<$i-E<gt>total_in()>
-
-=item B<$i-E<gt>total_out()>
-
-=item B<$d-E<gt>get_BufSize()>
-
-=item Example
-
-=back
-
-=item Compress::Zlib 1.x Deflate Interface
-
-=over 4
-
-=item B<($d, $status) = deflateInit( [OPT] )>
-
-B<-Level>, B<-Method>, B<-WindowBits>, B<-MemLevel>, B<-Strategy>,
-B<-Dictionary>, B<-Bufsize>
-
-=item B<($out, $status) = $d-E<gt>deflate($buffer)>
-
-=item B<($out, $status) = $d-E<gt>flush([flush_type])>
-
-=item B<$status = $d-E<gt>deflateParams([OPT])>
-
-B<-Level>, B<-Strategy>
-
-=item B<$d-E<gt>dict_adler()>
-
-=item B<$d-E<gt>msg()>
-
-=item B<$d-E<gt>total_in()>
-
-=item B<$d-E<gt>total_out()>
-
-=item Example
-
-=back
-
-=item Compress::Zlib 1.x Inflate Interface
-
-=over 4
-
-=item B<($i, $status) = inflateInit()>
-
-B<-WindowBits>, B<-Bufsize>, B<-Dictionary>
-
-=item B<($out, $status) = $i-E<gt>inflate($buffer)>
-
-=item B<$status = $i-E<gt>inflateSync($buffer)>
-
-=item B<$i-E<gt>dict_adler()>
-
-=item B<$i-E<gt>msg()>
-
-=item B<$i-E<gt>total_in()>
-
-=item B<$i-E<gt>total_out()>
-
-=item Example
-
-=back
-
-=item ACCESSING ZIP FILES
-
-=item CONSTANTS
-
-=item SEE ALSO
-
-=item AUTHOR
-
-=item MODIFICATION HISTORY
-
-=item COPYRIGHT AND LICENSE
-
-=back
-
-=head2 Compress::Zlib::File::GlobMapper, File::GlobMapper - Extend File
-Glob to Allow Input and Output Files
+=head2 Compress::IO::Base::lib::File::GlobMapper, File::GlobMapper - Extend
+File Glob to Allow Input and Output Files
 
 =over 4
 
@@ -13504,8 +13435,151 @@ B<~>, B<~user>, B<.>, B<*>, B<?>, B<\>,  B<[]>,  B<{,}>,  B<()>
 
 =back
 
-=head2 Compress::Zlib::IO::Compress::Deflate, IO::Compress::Deflate	-
-Perl interface to write RFC 1950 files/buffers
+=head2 Compress::IO::Base::lib::IO::Compress::Base, IO::Compress::Base -
+Base Class for IO::Compress modules 
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Compress::IO::Base::lib::IO::Uncompress::AnyUncompress,
+IO::Uncompress::AnyUncompress - Uncompress gzip, zip, bzip2 or lzop
+file/buffer
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+DO NOT use in production code, The documentation is incomplete in places,
+Parts of the interface defined here are tentative, Please report any
+problems you find, RFC 1950, RFC 1951, gzip (RFC 1952), zip, bzip2, lzop
+
+=item Functional Interface
+
+=over 4
+
+=item anyuncompress $input => $output [, OPTS]
+
+A filename, A filehandle, A scalar reference, An array reference, An Input
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
+
+=item Notes
+
+=item Optional Parameters
+
+AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
+-MultiStream =E<gt> 0|1
+
+=item Examples
+
+=back
+
+=item OO Interface
+
+=over 4
+
+=item Constructor
+
+A filename, A filehandle, A scalar reference
+
+=item Constructor Options
+
+-AutoClose =E<gt> 0|1, -MultiStream =E<gt> 0|1, -Prime =E<gt> $string,
+-Transparent =E<gt> 0|1, -BlockSize =E<gt> $num, -InputLength =E<gt> $size,
+-Append =E<gt> 0|1, -Strict =E<gt> 0|1
+
+=item Examples
+
+=back
+
+=item Methods 
+
+=over 4
+
+=item read
+
+=item read
+
+=item getline
+
+=item getc
+
+=item ungetc
+
+=item getHeaderInfo
+
+=item tell
+
+=item eof
+
+=item seek
+
+=item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
+=item fileno
+
+=item close
+
+=back
+
+=item Importing 
+
+:all
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Compress::IO::Base::lib::IO::Uncompress::Base, IO::Uncompress::Base
+- Base Class for IO::Uncompress modules 
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Compress::IO::Zlib::IO::Compress::Deflate, IO::Compress::Deflate -
+Write RFC 1950 files/buffers
 
 =over 4
 
@@ -13547,8 +13621,8 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -Append =E<gt> 0|1, A Buffer, A Filename, A
-Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
+AutoClose =E<gt> 0|1, Append =E<gt> 0|1, A Buffer, A Filename, A
+Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
 
 =item Examples
 
@@ -13576,13 +13650,19 @@ Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
 
 =item binmode
 
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
 =item fileno
 
 =item close
 
 =item newStream([OPTS])
 
-Level, TODO
+Level
 
 =item deflateParams
 
@@ -13604,8 +13684,8 @@ Level, TODO
 
 =back
 
-=head2 Compress::Zlib::IO::Compress::Gzip, IO::Compress::Gzip	  - Perl
-interface to write RFC 1952 files/buffers
+=head2 Compress::IO::Zlib::IO::Compress::Gzip, IO::Compress::Gzip - Write
+RFC 1952 files/buffers
 
 =over 4
 
@@ -13647,8 +13727,8 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -Append =E<gt> 0|1, A Buffer, A Filename, A
-Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Minimal =E<gt> 0|1,
+AutoClose =E<gt> 0|1, Append =E<gt> 0|1, A Buffer, A Filename, A
+Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Minimal =E<gt> 0|1,
 -Comment =E<gt> $comment, -Name =E<gt> $string, -Time =E<gt> $number,
 -TextFlag =E<gt> 0|1, -HeaderCRC =E<gt> 0|1, -OS_Code =E<gt> $value,
 -ExtraField =E<gt> $data, -ExtraFlags =E<gt> $value, -Strict =E<gt> 0|1
@@ -13679,13 +13759,19 @@ Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Minimal =E<gt> 0|1,
 
 =item binmode
 
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
 =item fileno
 
 =item close
 
 =item newStream([OPTS])
 
-Level, TODO
+Level
 
 =item deflateParams
 
@@ -13707,8 +13793,8 @@ Level, TODO
 
 =back
 
-=head2 Compress::Zlib::IO::Compress::RawDeflate, IO::Compress::RawDeflate  
-  - Perl interface to write RFC 1951 files/buffers
+=head2 Compress::IO::Zlib::IO::Compress::RawDeflate,
+IO::Compress::RawDeflate - Write RFC 1951 files/buffers
 
 =over 4
 
@@ -13750,8 +13836,8 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -Append =E<gt> 0|1, A Buffer, A Filename, A
-Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
+AutoClose =E<gt> 0|1, Append =E<gt> 0|1, A Buffer, A Filename, A
+Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
 
 =item Examples
 
@@ -13779,13 +13865,19 @@ Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
 
 =item binmode
 
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
 =item fileno
 
 =item close
 
 =item newStream([OPTS])
 
-Level, TODO
+Level
 
 =item deflateParams
 
@@ -13807,8 +13899,7 @@ Level, TODO
 
 =back
 
-=head2 Compress::Zlib::IO::Uncompress::AnyInflate,
-IO::Uncompress::AnyInflate - Perl interface to read RFC 1950, 1951 & 1952
+=head2 Compress::IO::Zlib::IO::Compress::Zip, IO::Compress::Zip - Write zip
 files/buffers
 
 =over 4
@@ -13820,6 +13911,117 @@ files/buffers
 DO NOT use in production code, The documentation is incomplete in places,
 Parts of the interface defined here are tentative, Please report any
 problems you find
+
+=item Functional Interface
+
+=over 4
+
+=item zip $input => $output [, OPTS]
+
+A filename, A filehandle, A scalar reference, An array reference, An Input
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
+
+=item Notes
+
+=item Optional Parameters
+
+AutoClose =E<gt> 0|1, BinModeIn =E<gt> 0|1, -Append =E<gt> 0|1
+
+=item Examples
+
+=back
+
+=item OO Interface
+
+=over 4
+
+=item Constructor
+
+A filename, A filehandle, A scalar reference
+
+=item Constructor Options
+
+AutoClose =E<gt> 0|1, Append =E<gt> 0|1, A Buffer, A Filename, A
+Filehandle, -Name =E<gt> $string, -Time =E<gt> $number, -exTime =E<gt>
+[$atime, $mtime, $ctime], -Comment =E<gt> $comment, -ZipComment =E<gt>
+$comment, Method =E<gt> $method, Stream =E<gt> 0|1, -TextFlag =E<gt> 0|1,
+ExtraFieldLocal =E<gt> $data =item ExtraFieldCentral =E<gt> $data, Minimal
+=E<gt> 1|0, BlockSize100K =E<gt> number, WorkFactor =E<gt> number, -Level,
+-Strategy, -Strict =E<gt> 0|1
+
+=item Examples
+
+=back
+
+=item Methods 
+
+=over 4
+
+=item print
+
+=item printf
+
+=item syswrite
+
+=item write
+
+=item flush
+
+=item tell
+
+=item eof
+
+=item seek
+
+=item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
+=item fileno
+
+=item close
+
+=item newStream([OPTS])
+
+Level
+
+=item deflateParams
+
+=back
+
+=item Importing 
+
+:all, :constants, :flush, :level, :strategy, :zip_method
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Compress::IO::Zlib::IO::Uncompress::AnyInflate,
+IO::Uncompress::AnyInflate - Uncompress zlib-based (zip, gzip) file/buffer
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+DO NOT use in production code, The documentation is incomplete in places,
+Parts of the interface defined here are tentative, Please report any
+problems you find, RFC 1950, RFC 1951, gzip (RFC 1952), zip
 
 =item Functional Interface
 
@@ -13886,6 +14088,12 @@ A filename, A filehandle, A scalar reference
 
 =item binmode
 
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
 =item fileno
 
 =item close
@@ -13908,8 +14116,8 @@ A filename, A filehandle, A scalar reference
 
 =back
 
-=head2 Compress::Zlib::IO::Uncompress::Gunzip, IO::Uncompress::Gunzip -
-Perl interface to read RFC 1952 files/buffers
+=head2 Compress::IO::Zlib::IO::Uncompress::Gunzip, IO::Uncompress::Gunzip -
+Read RFC 1952 files/buffers
 
 =over 4
 
@@ -13988,6 +14196,12 @@ Name, Comment
 
 =item binmode
 
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
 =item fileno
 
 =item close
@@ -14010,8 +14224,8 @@ Name, Comment
 
 =back
 
-=head2 Compress::Zlib::IO::Uncompress::Inflate, IO::Uncompress::Inflate -
-Perl interface to read RFC 1950 files/buffers
+=head2 Compress::IO::Zlib::IO::Uncompress::Inflate, IO::Uncompress::Inflate
+- Read RFC 1950 files/buffers
 
 =over 4
 
@@ -14088,6 +14302,12 @@ A filename, A filehandle, A scalar reference
 
 =item binmode
 
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
 =item fileno
 
 =item close
@@ -14110,8 +14330,8 @@ A filename, A filehandle, A scalar reference
 
 =back
 
-=head2 Compress::Zlib::IO::Uncompress::RawInflate,
-IO::Uncompress::RawInflate - Perl interface to read RFC 1951 files/buffers
+=head2 Compress::IO::Zlib::IO::Uncompress::RawInflate,
+IO::Uncompress::RawInflate - Read RFC 1951 files/buffers
 
 =over 4
 
@@ -14188,6 +14408,12 @@ A filename, A filehandle, A scalar reference
 
 =item binmode
 
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
 =item fileno
 
 =item close
@@ -14210,24 +14436,514 @@ A filename, A filehandle, A scalar reference
 
 =back
 
-=head2 Compress::Zlib::pod::FAQ, Compress::Zlib::FAQ -- Frequently Asked
-Questions about Compress::Zlib 
+=head2 Compress::IO::Zlib::IO::Uncompress::Unzip, IO::Uncompress::Unzip -
+Read zip files/buffers
 
 =over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+DO NOT use in production code, The documentation is incomplete in places,
+Parts of the interface defined here are tentative, Please report any
+problems you find
+
+=item Functional Interface
+
+=over 4
+
+=item unzip $input => $output [, OPTS]
+
+A filename, A filehandle, A scalar reference, An array reference, An Input
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
+
+=item Notes
+
+=item Optional Parameters
+
+AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
+-MultiStream =E<gt> 0|1
+
+=item Examples
+
+=back
+
+=item OO Interface
+
+=over 4
+
+=item Constructor
+
+A filename, A filehandle, A scalar reference
+
+=item Constructor Options
+
+-AutoClose =E<gt> 0|1, -MultiStream =E<gt> 0|1, -Prime =E<gt> $string,
+-Transparent =E<gt> 0|1, -BlockSize =E<gt> $num, -InputLength =E<gt> $size,
+-Append =E<gt> 0|1, -Strict =E<gt> 0|1
+
+=item Examples
+
+=back
+
+=item Methods 
+
+=over 4
+
+=item read
+
+=item read
+
+=item getline
+
+=item getc
+
+=item ungetc
+
+=item inflateSync
+
+=item getHeaderInfo
+
+=item tell
+
+=item eof
+
+=item seek
+
+=item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
+=item fileno
+
+=item close
+
+=back
+
+=item Importing 
+
+:all
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Compress::Raw::Zlib - Low-Level Interface to zlib compression
+library
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Compress::Raw::Zlib::Deflate
+
+=over 4
+
+=item B<($d, $status) = new Compress::Raw::Zlib::Deflate( [OPT] ) >
+
+B<-Level>, B<-Method>, B<-WindowBits>, B<-MemLevel>, B<-Strategy>,
+B<-Dictionary>, B<-Bufsize>, B<-AppendOutput>, B<-CRC32>, B<-ADLER32>
+
+=item B<$status = $d-E<gt>deflate($input, $output)>
+
+=item B<$status = $d-E<gt>flush($output [, $flush_type]) >
+
+=item B<$status = $d-E<gt>deflateParams([OPT])>
+
+B<-Level>, B<-Strategy>, B<-BufSize>
+
+=item B<$status = $d-E<gt>deflateTune($good_length, $max_lazy,
+$nice_length, $max_chain)>
+
+=item B<$d-E<gt>dict_adler()>
+
+=item B<$d-E<gt>crc32()>
+
+=item B<$d-E<gt>adler32()>
+
+=item B<$d-E<gt>msg()>
+
+=item B<$d-E<gt>total_in()>
+
+=item B<$d-E<gt>total_out()>
+
+=item B<$d-E<gt>get_Strategy()>
+
+=item B<$d-E<gt>get_Level()>
+
+=item B<$d-E<gt>get_BufSize()>
+
+=item Example
+
+=back
+
+=item Compress::Raw::Zlib::Inflate
+
+=over 4
+
+=item B< ($i, $status) = new Compress::Raw::Zlib::Inflate( [OPT] ) >
+
+B<-WindowBits>, B<-Bufsize>, B<-Dictionary>, B<-AppendOutput>, B<-CRC32>,
+B<-ADLER32>, B<-ConsumeInput>
+
+=item B< $status = $i-E<gt>inflate($input, $output [,$eof]) >
+
+=item B<$status = $i-E<gt>inflateSync($input)>
+
+=item B<$i-E<gt>dict_adler()>
+
+=item B<$i-E<gt>crc32()>
+
+=item B<$i-E<gt>adler32()>
+
+=item B<$i-E<gt>msg()>
+
+=item B<$i-E<gt>total_in()>
+
+=item B<$i-E<gt>total_out()>
+
+=item B<$d-E<gt>get_BufSize()>
+
+=item Example
+
+=back
+
+=item CHECKSUM FUNCTIONS
+
+=item ACCESSING ZIP FILES
+
+=item CONSTANTS
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Compress::Raw::Zlib::Compress::Raw::Zlib, Compress::Raw::Zlib -
+Low-Level Interface to zlib compression library
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Compress::Raw::Zlib::Deflate
+
+=over 4
+
+=item B<($d, $status) = new Compress::Raw::Zlib::Deflate( [OPT] ) >
+
+B<-Level>, B<-Method>, B<-WindowBits>, B<-MemLevel>, B<-Strategy>,
+B<-Dictionary>, B<-Bufsize>, B<-AppendOutput>, B<-CRC32>, B<-ADLER32>
+
+=item B<$status = $d-E<gt>deflate($input, $output)>
+
+=item B<$status = $d-E<gt>flush($output [, $flush_type]) >
+
+=item B<$status = $d-E<gt>deflateParams([OPT])>
+
+B<-Level>, B<-Strategy>, B<-BufSize>
+
+=item B<$status = $d-E<gt>deflateTune($good_length, $max_lazy,
+$nice_length, $max_chain)>
+
+=item B<$d-E<gt>dict_adler()>
+
+=item B<$d-E<gt>crc32()>
+
+=item B<$d-E<gt>adler32()>
+
+=item B<$d-E<gt>msg()>
+
+=item B<$d-E<gt>total_in()>
+
+=item B<$d-E<gt>total_out()>
+
+=item B<$d-E<gt>get_Strategy()>
+
+=item B<$d-E<gt>get_Level()>
+
+=item B<$d-E<gt>get_BufSize()>
+
+=item Example
+
+=back
+
+=item Compress::Raw::Zlib::Inflate
+
+=over 4
+
+=item B< ($i, $status) = new Compress::Raw::Zlib::Inflate( [OPT] ) >
+
+B<-WindowBits>, B<-Bufsize>, B<-Dictionary>, B<-AppendOutput>, B<-CRC32>,
+B<-ADLER32>, B<-ConsumeInput>
+
+=item B< $status = $i-E<gt>inflate($input, $output [,$eof]) >
+
+=item B<$status = $i-E<gt>inflateSync($input)>
+
+=item B<$i-E<gt>dict_adler()>
+
+=item B<$i-E<gt>crc32()>
+
+=item B<$i-E<gt>adler32()>
+
+=item B<$i-E<gt>msg()>
+
+=item B<$i-E<gt>total_in()>
+
+=item B<$i-E<gt>total_out()>
+
+=item B<$d-E<gt>get_BufSize()>
+
+=item Example
+
+=back
+
+=item CHECKSUM FUNCTIONS
+
+=item ACCESSING ZIP FILES
+
+=item CONSTANTS
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Compress::Zlib - Interface to zlib compression library
+
+=over 4
+
+=item SYNOPSIS
 
 =item DESCRIPTION
 
 =over 4
 
-=item Compatibility with Unix compress/uncompress.
-
-=item Accessing .tar.Z files
-
-=item Accessing Zip Files
-
-=item Zlib Library Version Support
+=item Notes for users of Compress::Zlib version 1
 
 =back
+
+=item GZIP INTERFACE
+
+B<$gz = gzopen($filename, $mode)>, B<$gz = gzopen($filehandle, $mode)>,
+B<$bytesread = $gz-E<gt>gzread($buffer [, $size]) ;>, B<$bytesread =
+$gz-E<gt>gzreadline($line) ;>, B<$byteswritten = $gz-E<gt>gzwrite($buffer)
+;>, B<$status = $gz-E<gt>gzflush($flush_type) ;>, B<$offset =
+$gz-E<gt>gztell() ;>, B<$status = $gz-E<gt>gzseek($offset, $whence) ;>,
+B<$gz-E<gt>gzclose>, B<$gz-E<gt>gzsetparams($level, $strategy>, B<$level>,
+B<$strategy>, B<$gz-E<gt>gzerror>, B<$gzerrno>
+
+=over 4
+
+=item Examples
+
+=item Compress::Zlib::memGzip
+
+=item Compress::Zlib::memGunzip
+
+=back
+
+=item COMPRESS/UNCOMPRESS
+
+B<$dest = compress($source [, $level] ) ;>, B<$dest = uncompress($source)
+;>
+
+=item Deflate Interface
+
+=over 4
+
+=item B<($d, $status) = deflateInit( [OPT] )>
+
+B<-Level>, B<-Method>, B<-WindowBits>, B<-MemLevel>, B<-Strategy>,
+B<-Dictionary>, B<-Bufsize>
+
+=item B<($out, $status) = $d-E<gt>deflate($buffer)>
+
+=item B<($out, $status) = $d-E<gt>flush([flush_type])>
+
+=item B<$status = $d-E<gt>deflateParams([OPT])>
+
+B<-Level>, B<-Strategy>
+
+=item B<$d-E<gt>dict_adler()>
+
+=item B<$d-E<gt>msg()>
+
+=item B<$d-E<gt>total_in()>
+
+=item B<$d-E<gt>total_out()>
+
+=item Example
+
+=back
+
+=item Inflate Interface
+
+=over 4
+
+=item B<($i, $status) = inflateInit()>
+
+B<-WindowBits>, B<-Bufsize>, B<-Dictionary>
+
+=item B<($out, $status) = $i-E<gt>inflate($buffer)>
+
+=item B<$status = $i-E<gt>inflateSync($buffer)>
+
+=item B<$i-E<gt>dict_adler()>
+
+=item B<$i-E<gt>msg()>
+
+=item B<$i-E<gt>total_in()>
+
+=item B<$i-E<gt>total_out()>
+
+=item Example
+
+=back
+
+=item CHECKSUM FUNCTIONS
+
+=item ACCESSING ZIP FILES
+
+=item CONSTANTS
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Compress::Zlib::Compress::Zlib, Compress::Zlib - Interface to zlib
+compression library
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Notes for users of Compress::Zlib version 1
+
+=back
+
+=item GZIP INTERFACE
+
+B<$gz = gzopen($filename, $mode)>, B<$gz = gzopen($filehandle, $mode)>,
+B<$bytesread = $gz-E<gt>gzread($buffer [, $size]) ;>, B<$bytesread =
+$gz-E<gt>gzreadline($line) ;>, B<$byteswritten = $gz-E<gt>gzwrite($buffer)
+;>, B<$status = $gz-E<gt>gzflush($flush_type) ;>, B<$offset =
+$gz-E<gt>gztell() ;>, B<$status = $gz-E<gt>gzseek($offset, $whence) ;>,
+B<$gz-E<gt>gzclose>, B<$gz-E<gt>gzsetparams($level, $strategy>, B<$level>,
+B<$strategy>, B<$gz-E<gt>gzerror>, B<$gzerrno>
+
+=over 4
+
+=item Examples
+
+=item Compress::Zlib::memGzip
+
+=item Compress::Zlib::memGunzip
+
+=back
+
+=item COMPRESS/UNCOMPRESS
+
+B<$dest = compress($source [, $level] ) ;>, B<$dest = uncompress($source)
+;>
+
+=item Deflate Interface
+
+=over 4
+
+=item B<($d, $status) = deflateInit( [OPT] )>
+
+B<-Level>, B<-Method>, B<-WindowBits>, B<-MemLevel>, B<-Strategy>,
+B<-Dictionary>, B<-Bufsize>
+
+=item B<($out, $status) = $d-E<gt>deflate($buffer)>
+
+=item B<($out, $status) = $d-E<gt>flush([flush_type])>
+
+=item B<$status = $d-E<gt>deflateParams([OPT])>
+
+B<-Level>, B<-Strategy>
+
+=item B<$d-E<gt>dict_adler()>
+
+=item B<$d-E<gt>msg()>
+
+=item B<$d-E<gt>total_in()>
+
+=item B<$d-E<gt>total_out()>
+
+=item Example
+
+=back
+
+=item Inflate Interface
+
+=over 4
+
+=item B<($i, $status) = inflateInit()>
+
+B<-WindowBits>, B<-Bufsize>, B<-Dictionary>
+
+=item B<($out, $status) = $i-E<gt>inflate($buffer)>
+
+=item B<$status = $i-E<gt>inflateSync($buffer)>
+
+=item B<$i-E<gt>dict_adler()>
+
+=item B<$i-E<gt>msg()>
+
+=item B<$i-E<gt>total_in()>
+
+=item B<$i-E<gt>total_out()>
+
+=item Example
+
+=back
+
+=item CHECKSUM FUNCTIONS
+
+=item ACCESSING ZIP FILES
+
+=item CONSTANTS
 
 =item SEE ALSO
 
@@ -14265,7 +14981,7 @@ C<_a>, C<_exe>, C<_o>
 
 C<afs>, C<afsroot>, C<alignbytes>, C<ansi2knr>, C<aphostname>,
 C<api_revision>, C<api_subversion>, C<api_version>, C<api_versionstring>,
-C<ar>, C<archlib>, C<archlibexp>, C<archname64>, C<archname>, C<archobjs>,
+C<ar>, C<archlib>, C<archlibexp>, C<archname>, C<archname64>, C<archobjs>,
 C<asctime_r_proto>, C<awk>
 
 =item b
@@ -14289,47 +15005,50 @@ C<d_archlib>, C<d_asctime_r>, C<d_atolf>, C<d_atoll>,
 C<d_attribute_format>, C<d_attribute_malloc>, C<d_attribute_nonnull>,
 C<d_attribute_noreturn>, C<d_attribute_pure>, C<d_attribute_unused>,
 C<d_attribute_warn_unused_result>, C<d_bcmp>, C<d_bcopy>, C<d_bsd>,
-C<d_bsdgetpgrp>, C<d_bsdsetpgrp>, C<d_bzero>, C<d_casti32>, C<d_castneg>,
-C<d_charvspr>, C<d_chown>, C<d_chroot>, C<d_chsize>, C<d_class>,
-C<d_clearenv>, C<d_closedir>, C<d_cmsghdr_s>, C<d_const>, C<d_copysignl>,
-C<d_crypt>, C<d_crypt_r>, C<d_csh>, C<d_ctermid_r>, C<d_ctime_r>,
-C<d_cuserid>, C<d_dbl_dig>, C<d_dbminitproto>, C<d_difftime>, C<d_dirfd>,
-C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>, C<d_dlsymun>, C<d_dosuid>,
-C<d_drand48_r>, C<d_drand48proto>, C<d_dup2>, C<d_eaccess>, C<d_endgrent>,
-C<d_endgrent_r>, C<d_endhent>, C<d_endhostent_r>, C<d_endnent>,
-C<d_endnetent_r>, C<d_endpent>, C<d_endprotoent_r>, C<d_endpwent>,
-C<d_endpwent_r>, C<d_endsent>, C<d_endservent_r>, C<d_eofnblk>,
-C<d_eunice>, C<d_faststdio>, C<d_fchdir>, C<d_fchmod>, C<d_fchown>,
-C<d_fcntl>, C<d_fcntl_can_lock>, C<d_fd_macros>, C<d_fd_set>,
-C<d_fds_bits>, C<d_fgetpos>, C<d_finite>, C<d_finitel>, C<d_flexfnam>,
-C<d_flock>, C<d_flockproto>, C<d_fork>, C<d_fp_class>, C<d_fpathconf>,
-C<d_fpclass>, C<d_fpclassify>, C<d_fpclassl>, C<d_fpos64_t>, C<d_frexpl>,
-C<d_fs_data_s>, C<d_fseeko>, C<d_fsetpos>, C<d_fstatfs>, C<d_fstatvfs>,
-C<d_fsync>, C<d_ftello>, C<d_ftime>, C<d_futimes>, C<d_Gconvert>,
-C<d_getcwd>, C<d_getespwnam>, C<d_getfsstat>, C<d_getgrent>,
-C<d_getgrent_r>, C<d_getgrgid_r>, C<d_getgrnam_r>, C<d_getgrps>,
-C<d_gethbyaddr>, C<d_gethbyname>, C<d_gethent>, C<d_gethname>,
-C<d_gethostbyaddr_r>, C<d_gethostbyname_r>, C<d_gethostent_r>,
-C<d_gethostprotos>, C<d_getitimer>, C<d_getlogin>, C<d_getlogin_r>,
-C<d_getmnt>, C<d_getmntent>, C<d_getnbyaddr>, C<d_getnbyname>,
-C<d_getnent>, C<d_getnetbyaddr_r>, C<d_getnetbyname_r>, C<d_getnetent_r>,
-C<d_getnetprotos>, C<d_getpagsz>, C<d_getpbyname>, C<d_getpbynumber>,
-C<d_getpent>, C<d_getpgid>, C<d_getpgrp2>, C<d_getpgrp>, C<d_getppid>,
-C<d_getprior>, C<d_getprotobyname_r>, C<d_getprotobynumber_r>,
-C<d_getprotoent_r>, C<d_getprotoprotos>, C<d_getprpwnam>, C<d_getpwent>,
-C<d_getpwent_r>, C<d_getpwnam_r>, C<d_getpwuid_r>, C<d_getsbyname>,
-C<d_getsbyport>, C<d_getsent>, C<d_getservbyname_r>, C<d_getservbyport_r>,
-C<d_getservent_r>, C<d_getservprotos>, C<d_getspnam>, C<d_getspnam_r>,
-C<d_gettimeod>, C<d_gmtime_r>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>,
-C<d_htonl>, C<d_ilogbl>, C<d_index>, C<d_inetaton>, C<d_int64_t>,
-C<d_isascii>, C<d_isfinite>, C<d_isinf>, C<d_isnan>, C<d_isnanl>,
-C<d_killpg>, C<d_lchown>, C<d_ldbl_dig>, C<d_link>, C<d_localtime_r>,
-C<d_locconv>, C<d_lockf>, C<d_longdbl>, C<d_longlong>, C<d_lseekproto>,
-C<d_lstat>, C<d_madvise>, C<d_malloc_size>, C<d_malloc_good_size>,
-C<d_mblen>, C<d_mbstowcs>, C<d_mbtowc>, C<d_memchr>, C<d_memcmp>,
-C<d_memcpy>, C<d_memmove>, C<d_memset>, C<d_mkdir>, C<d_mkdtemp>,
-C<d_mkfifo>, C<d_mkstemp>, C<d_mkstemps>, C<d_mktime>, C<d_mmap>,
-C<d_modfl>, C<d_modfl_pow32_bug>, C<d_modflproto>, C<d_mprotect>, C<d_msg>,
+C<d_bsdgetpgrp>, C<d_bsdsetpgrp>, C<d_builtin_choose_expr>,
+C<d_builtin_expect>, C<d_bzero>, C<d_casti32>, C<d_castneg>, C<d_charvspr>,
+C<d_chown>, C<d_chroot>, C<d_chsize>, C<d_class>, C<d_clearenv>,
+C<d_closedir>, C<d_cmsghdr_s>, C<d_const>, C<d_copysignl>, C<d_crypt>,
+C<d_crypt_r>, C<d_csh>, C<d_ctermid_r>, C<d_ctime_r>,
+C<d_c99_variadic_macros>, C<d_cuserid>, C<d_dbl_dig>, C<d_dbminitproto>,
+C<d_difftime>, C<d_dirfd>, C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>,
+C<d_dlsymun>, C<d_dosuid>, C<d_drand48_r>, C<d_drand48proto>, C<d_dup2>,
+C<d_eaccess>, C<d_endgrent>, C<d_endgrent_r>, C<d_endhent>,
+C<d_endhostent_r>, C<d_endnent>, C<d_endnetent_r>, C<d_endpent>,
+C<d_endprotoent_r>, C<d_endpwent>, C<d_endpwent_r>, C<d_endsent>,
+C<d_endservent_r>, C<d_eofnblk>, C<d_eunice>, C<d_faststdio>, C<d_fchdir>,
+C<d_fchmod>, C<d_fchown>, C<d_fcntl>, C<d_fcntl_can_lock>, C<d_fd_macros>,
+C<d_fd_set>, C<d_fds_bits>, C<d_fgetpos>, C<d_finite>, C<d_finitel>,
+C<d_flexfnam>, C<d_flock>, C<d_flockproto>, C<d_fork>, C<d_fp_class>,
+C<d_fpathconf>, C<d_fpclass>, C<d_fpclassify>, C<d_fpclassl>,
+C<d_fpos64_t>, C<d_frexpl>, C<d_fs_data_s>, C<d_fseeko>, C<d_fsetpos>,
+C<d_fstatfs>, C<d_fstatvfs>, C<d_fsync>, C<d_ftello>, C<d_ftime>,
+C<d_futimes>, C<d_Gconvert>, C<d_getcwd>, C<d_getespwnam>, C<d_getfsstat>,
+C<d_getgrent>, C<d_getgrent_r>, C<d_getgrgid_r>, C<d_getgrnam_r>,
+C<d_getgrps>, C<d_gethbyaddr>, C<d_gethbyname>, C<d_gethent>,
+C<d_gethname>, C<d_gethostbyaddr_r>, C<d_gethostbyname_r>,
+C<d_gethostent_r>, C<d_gethostprotos>, C<d_getitimer>, C<d_getlogin>,
+C<d_getlogin_r>, C<d_getmnt>, C<d_getmntent>, C<d_getnbyaddr>,
+C<d_getnbyname>, C<d_getnent>, C<d_getnetbyaddr_r>, C<d_getnetbyname_r>,
+C<d_getnetent_r>, C<d_getnetprotos>, C<d_getpagsz>, C<d_getpbyname>,
+C<d_getpbynumber>, C<d_getpent>, C<d_getpgid>, C<d_getpgrp>, C<d_getpgrp2>,
+C<d_getppid>, C<d_getprior>, C<d_getprotobyname_r>,
+C<d_getprotobynumber_r>, C<d_getprotoent_r>, C<d_getprotoprotos>,
+C<d_getprpwnam>, C<d_getpwent>, C<d_getpwent_r>, C<d_getpwnam_r>,
+C<d_getpwuid_r>, C<d_getsbyname>, C<d_getsbyport>, C<d_getsent>,
+C<d_getservbyname_r>, C<d_getservbyport_r>, C<d_getservent_r>,
+C<d_getservprotos>, C<d_getspnam>, C<d_getspnam_r>, C<d_gettimeod>,
+C<d_gmtime_r>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>, C<d_htonl>,
+C<d_ilogbl>, C<d_inc_version_list>, C<d_index>, C<d_inetaton>,
+C<d_int64_t>, C<d_isascii>, C<d_isfinite>, C<d_isinf>, C<d_isnan>,
+C<d_isnanl>, C<d_killpg>, C<d_lchown>, C<d_ldbl_dig>,
+C<d_libm_lib_version>, C<d_link>, C<d_localtime_r>, C<d_locconv>,
+C<d_lockf>, C<d_longdbl>, C<d_longlong>, C<d_lseekproto>, C<d_lstat>,
+C<d_madvise>, C<d_malloc_good_size>, C<d_malloc_size>, C<d_mblen>,
+C<d_mbstowcs>, C<d_mbtowc>, C<d_memchr>, C<d_memcmp>, C<d_memcpy>,
+C<d_memmove>, C<d_memset>, C<d_mkdir>, C<d_mkdtemp>, C<d_mkfifo>,
+C<d_mkstemp>, C<d_mkstemps>, C<d_mktime>, C<d_mmap>, C<d_modfl>,
+C<d_modfl_pow32_bug>, C<d_modflproto>, C<d_mprotect>, C<d_msg>,
 C<d_msg_ctrunc>, C<d_msg_dontroute>, C<d_msg_oob>, C<d_msg_peek>,
 C<d_msg_proxy>, C<d_msgctl>, C<d_msgget>, C<d_msghdr_s>, C<d_msgrcv>,
 C<d_msgsnd>, C<d_msync>, C<d_munmap>, C<d_mymalloc>, C<d_nice>,
@@ -14343,7 +15062,7 @@ C<d_PRIu64>, C<d_PRIx64>, C<d_PRIXU64>, C<d_procselfexe>,
 C<d_pthread_atfork>, C<d_pthread_attr_setscope>, C<d_pthread_yield>,
 C<d_pwage>, C<d_pwchange>, C<d_pwclass>, C<d_pwcomment>, C<d_pwexpire>,
 C<d_pwgecos>, C<d_pwpasswd>, C<d_pwquota>, C<d_qgcvt>, C<d_quad>,
-C<d_random_r>, C<d_readdir64_r>, C<d_readdir>, C<d_readdir_r>,
+C<d_random_r>, C<d_readdir>, C<d_readdir64_r>, C<d_readdir_r>,
 C<d_readlink>, C<d_readv>, C<d_recvmsg>, C<d_rename>, C<d_rewinddir>,
 C<d_rmdir>, C<d_safebcpy>, C<d_safemcpy>, C<d_sanemcmp>, C<d_sbrkproto>,
 C<d_scalbnl>, C<d_sched_yield>, C<d_scm_rights>, C<d_SCNfldbl>,
@@ -14352,33 +15071,34 @@ C<d_semctl_semun>, C<d_semget>, C<d_semop>, C<d_sendmsg>, C<d_setegid>,
 C<d_seteuid>, C<d_setgrent>, C<d_setgrent_r>, C<d_setgrps>, C<d_sethent>,
 C<d_sethostent_r>, C<d_setitimer>, C<d_setlinebuf>, C<d_setlocale>,
 C<d_setlocale_r>, C<d_setnent>, C<d_setnetent_r>, C<d_setpent>,
-C<d_setpgid>, C<d_setpgrp2>, C<d_setpgrp>, C<d_setprior>,
+C<d_setpgid>, C<d_setpgrp>, C<d_setpgrp2>, C<d_setprior>,
 C<d_setproctitle>, C<d_setprotoent_r>, C<d_setpwent>, C<d_setpwent_r>,
 C<d_setregid>, C<d_setresgid>, C<d_setresuid>, C<d_setreuid>, C<d_setrgid>,
 C<d_setruid>, C<d_setsent>, C<d_setservent_r>, C<d_setsid>, C<d_setvbuf>,
 C<d_sfio>, C<d_shm>, C<d_shmat>, C<d_shmatprototype>, C<d_shmctl>,
 C<d_shmdt>, C<d_shmget>, C<d_sigaction>, C<d_sigprocmask>, C<d_sigsetjmp>,
-C<d_sockatmark>, C<d_sockatmarkproto>, C<d_socket>, C<d_socklen_t>,
-C<d_sockpair>, C<d_socks5_init>, C<d_sprintf_returns_strlen>, C<d_sqrtl>,
-C<d_srand48_r>, C<d_srandom_r>, C<d_sresgproto>, C<d_sresuproto>,
-C<d_statblks>, C<d_statfs_f_flags>, C<d_statfs_s>, C<d_statvfs>,
-C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>, C<d_stdio_ptr_lval_nochange_cnt>,
-C<d_stdio_ptr_lval_sets_cnt>, C<d_stdio_stream_array>, C<d_stdiobase>,
-C<d_stdstdio>, C<d_strchr>, C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>,
-C<d_strerror>, C<d_strerror_r>, C<d_strftime>, C<d_strlcat>, C<d_strlcpy>,
-C<d_strtod>, C<d_strtol>, C<d_strtold>, C<d_strtoll>, C<d_strtoq>,
-C<d_strtoul>, C<d_strtoull>, C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>,
-C<d_symlink>, C<d_syscall>, C<d_syscallproto>, C<d_sysconf>,
-C<d_sysernlst>, C<d_syserrlst>, C<d_system>, C<d_tcgetpgrp>,
-C<d_tcsetpgrp>, C<d_telldir>, C<d_telldirproto>, C<d_time>, C<d_times>,
-C<d_tm_tm_gmtoff>, C<d_tm_tm_zone>, C<d_tmpnam_r>, C<d_truncate>,
-C<d_ttyname_r>, C<d_tzname>, C<d_u32align>, C<d_ualarm>, C<d_umask>,
-C<d_uname>, C<d_union_semun>, C<d_unordered>, C<d_unsetenv>, C<d_usleep>,
-C<d_usleepproto>, C<d_ustat>, C<d_vendorarch>, C<d_vendorbin>,
-C<d_vendorlib>, C<d_vendorscript>, C<d_vfork>, C<d_void_closedir>,
-C<d_voidsig>, C<d_voidtty>, C<d_volatile>, C<d_vprintf>, C<d_wait4>,
-C<d_waitpid>, C<d_wcstombs>, C<d_wctomb>, C<d_writev>, C<d_xenix>, C<date>,
-C<db_hashtype>, C<db_prefixtype>, C<db_version_major>, C<db_version_minor>,
+C<d_sitearch>, C<d_snprintf>, C<d_sockatmark>, C<d_sockatmarkproto>,
+C<d_socket>, C<d_socklen_t>, C<d_sockpair>, C<d_socks5_init>,
+C<d_sprintf_returns_strlen>, C<d_sqrtl>, C<d_srand48_r>, C<d_srandom_r>,
+C<d_sresgproto>, C<d_sresuproto>, C<d_statblks>, C<d_statfs_f_flags>,
+C<d_statfs_s>, C<d_statvfs>, C<d_stdio_cnt_lval>, C<d_stdio_ptr_lval>,
+C<d_stdio_ptr_lval_nochange_cnt>, C<d_stdio_ptr_lval_sets_cnt>,
+C<d_stdio_stream_array>, C<d_stdiobase>, C<d_stdstdio>, C<d_strchr>,
+C<d_strcoll>, C<d_strctcpy>, C<d_strerrm>, C<d_strerror>, C<d_strerror_r>,
+C<d_strftime>, C<d_strlcat>, C<d_strlcpy>, C<d_strtod>, C<d_strtol>,
+C<d_strtold>, C<d_strtoll>, C<d_strtoq>, C<d_strtoul>, C<d_strtoull>,
+C<d_strtouq>, C<d_strxfrm>, C<d_suidsafe>, C<d_symlink>, C<d_syscall>,
+C<d_syscallproto>, C<d_sysconf>, C<d_sysernlst>, C<d_syserrlst>,
+C<d_system>, C<d_tcgetpgrp>, C<d_tcsetpgrp>, C<d_telldir>,
+C<d_telldirproto>, C<d_time>, C<d_times>, C<d_tm_tm_gmtoff>,
+C<d_tm_tm_zone>, C<d_tmpnam_r>, C<d_truncate>, C<d_ttyname_r>, C<d_tzname>,
+C<d_u32align>, C<d_ualarm>, C<d_umask>, C<d_uname>, C<d_union_semun>,
+C<d_unordered>, C<d_unsetenv>, C<d_usleep>, C<d_usleepproto>, C<d_ustat>,
+C<d_vendorarch>, C<d_vendorbin>, C<d_vendorlib>, C<d_vendorscript>,
+C<d_vfork>, C<d_void_closedir>, C<d_voidsig>, C<d_voidtty>, C<d_volatile>,
+C<d_vprintf>, C<d_vsnprintf>, C<d_wait4>, C<d_waitpid>, C<d_wcstombs>,
+C<d_wctomb>, C<d_writev>, C<d_xenix>, C<date>, C<db_hashtype>,
+C<db_prefixtype>, C<db_version_major>, C<db_version_minor>,
 C<db_version_patch>, C<defvoidused>, C<direntrytype>, C<dlext>, C<dlsrc>,
 C<doublesize>, C<drand01>, C<drand48_r_proto>, C<dynamic_ext>
 
@@ -14433,16 +15153,17 @@ C<i_sysuio>, C<i_sysun>, C<i_sysutsname>, C<i_sysvfs>, C<i_syswait>,
 C<i_termio>, C<i_termios>, C<i_time>, C<i_unistd>, C<i_ustat>, C<i_utime>,
 C<i_values>, C<i_varargs>, C<i_varhdr>, C<i_vfork>,
 C<ignore_versioned_solibs>, C<inc_version_list>, C<inc_version_list_init>,
-C<incpath>, C<inews>, C<installarchlib>, C<installbin>, C<installhtml1dir>,
-C<installhtml3dir>, C<installman1dir>, C<installman3dir>, C<installprefix>,
-C<installprefixexp>, C<installprivlib>, C<installscript>,
-C<installsitearch>, C<installsitebin>, C<installsitehtml1dir>,
-C<installsitehtml3dir>, C<installsitelib>, C<installsiteman1dir>,
-C<installsiteman3dir>, C<installsitescript>, C<installstyle>,
-C<installusrbinperl>, C<installvendorarch>, C<installvendorbin>,
-C<installvendorhtml1dir>, C<installvendorhtml3dir>, C<installvendorlib>,
-C<installvendorman1dir>, C<installvendorman3dir>, C<installvendorscript>,
-C<intsize>, C<issymlink>, C<ivdformat>, C<ivsize>, C<ivtype>
+C<incpath>, C<inews>, C<initialinstalllocation>, C<installarchlib>,
+C<installbin>, C<installhtml1dir>, C<installhtml3dir>, C<installman1dir>,
+C<installman3dir>, C<installprefix>, C<installprefixexp>,
+C<installprivlib>, C<installscript>, C<installsitearch>, C<installsitebin>,
+C<installsitehtml1dir>, C<installsitehtml3dir>, C<installsitelib>,
+C<installsiteman1dir>, C<installsiteman3dir>, C<installsitescript>,
+C<installstyle>, C<installusrbinperl>, C<installvendorarch>,
+C<installvendorbin>, C<installvendorhtml1dir>, C<installvendorhtml3dir>,
+C<installvendorlib>, C<installvendorman1dir>, C<installvendorman3dir>,
+C<installvendorscript>, C<intsize>, C<issymlink>, C<ivdformat>, C<ivsize>,
+C<ivtype>
 
 =item k
 
@@ -14460,9 +15181,9 @@ C<lseektype>
 
 =item m
 
-C<mail>, C<mailx>, C<make>, C<make_set_make>, C<mallocobj>, C<mallocsrc>,
-C<malloctype>, C<man1dir>, C<man1direxp>, C<man1ext>, C<man3dir>,
-C<man3direxp>, C<man3ext>
+C<mad>, C<madlyh>, C<madlyobj>, C<madlysrc>, C<mail>, C<mailx>, C<make>,
+C<make_set_make>, C<mallocobj>, C<mallocsrc>, C<malloctype>, C<man1dir>,
+C<man1direxp>, C<man1ext>, C<man3dir>, C<man3direxp>, C<man3ext>
 
 =item M
 
@@ -14485,11 +15206,13 @@ C<orderlib>, C<osname>, C<osvers>, C<otherlibdirs>
 
 =item p
 
-C<package>, C<pager>, C<passcat>, C<patchlevel>, C<path_sep>, C<perl5>,
-C<perl>, C<perl_patchlevel>
+C<package>, C<pager>, C<passcat>, C<patchlevel>, C<path_sep>, C<perl>,
+C<perl5>
 
 =item P
 
+C<PERL_API_REVISION>, C<PERL_API_SUBVERSION>, C<PERL_API_VERSION>,
+C<PERL_CONFIG_SH>, C<PERL_PATCHLEVEL>, C<perl_patchlevel>,
 C<PERL_REVISION>, C<PERL_SUBVERSION>, C<PERL_VERSION>, C<perladmin>,
 C<perllibs>, C<perlpath>, C<pg>, C<phostname>, C<pidtype>, C<plibpth>,
 C<pmake>, C<pr>, C<prefix>, C<prefixexp>, C<privlib>, C<privlibexp>,
@@ -14543,9 +15266,9 @@ C<use64bitint>, C<usecrosscompile>, C<usedl>, C<usefaststdio>,
 C<useithreads>, C<uselargefiles>, C<uselongdouble>, C<usemallocwrap>,
 C<usemorebits>, C<usemultiplicity>, C<usemymalloc>, C<usenm>, C<useopcode>,
 C<useperlio>, C<useposix>, C<usereentrant>, C<userelocatableinc>,
-C<usesfio>, C<useshrplib>, C<usesocks>, C<usethreads>, C<usevendorprefix>,
-C<usevfork>, C<usrinc>, C<uuname>, C<uvoformat>, C<uvsize>, C<uvtype>,
-C<uvuformat>, C<uvxformat>, C<uvXUformat>
+C<usesfio>, C<useshrplib>, C<usesitecustomize>, C<usesocks>, C<usethreads>,
+C<usevendorprefix>, C<usevfork>, C<usrinc>, C<uuname>, C<uvoformat>,
+C<uvsize>, C<uvtype>, C<uvuformat>, C<uvxformat>, C<uvXUformat>
 
 =item v
 
@@ -14717,6 +15440,76 @@ utf8, encode, compress, int32, null
 =back
 
 =item EXAMPLE
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 DBM_Filter::compress - filter for DBM_Filter
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 DBM_Filter::encode - filter for DBM_Filter
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 DBM_Filter::int32 - filter for DBM_Filter
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 DBM_Filter::null - filter for DBM_Filter
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=back
+
+=head2 DBM_Filter::utf8 - filter for DBM_Filter
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
 
 =item SEE ALSO
 
@@ -14908,6 +15701,32 @@ Dumper
 
 =back
 
+=head2 Devel::Arena - Perl extension for inspecting the core's arena
+structures
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item EXPORT
+
+sv_stats [DONT_SHARE], shared_string_table, sizes, HEK_size STRING,
+shared_string_table_effectiveness, write_stats_at_END
+
+=back
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
 =head2 Devel::DProf - a Perl code profiler
 
 =over 4
@@ -15038,6 +15857,59 @@ perl 5.005_03, perl 5.005, perl 5.004_05, perl 5.004
 
 =back
 
+=head2 Devel::Size - Perl extension for finding the memory usage of Perl
+variables
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item FUNCTIONS
+
+=over 4
+
+=item size($ref)
+
+=item total_size($ref)
+
+=back
+
+=item EXPORT
+
+=item UNDERSTANDING MEMORY ALLOCATION
+
+=over 4
+
+=item The C library
+
+=item Perl
+
+=back
+
+=item DANGERS
+
+=item Messages: texts originating from this module.
+
+=over 4
+
+=item Errors
+
+=item warnings
+
+=back
+
+=item BUGS
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=item SEE ALSO
+
+=back
+
 =head2 Digest - Modules that calculate message digests
 
 =over 4
@@ -15052,9 +15924,9 @@ I<binary>, I<hex>, I<base64>
 
 $ctx = Digest->XXX($arg,...), $ctx = Digest->new(XXX => $arg,...), $ctx =
 Digest::XXX->new($arg,...), $other_ctx = $ctx->clone, $ctx->reset,
-$ctx->add( $data, ... ), $ctx->addfile( $io_handle ), $ctx->add_bits(
-$data, $nbits ), $ctx->add_bits( $bitstring ), $ctx->digest,
-$ctx->hexdigest, $ctx->b64digest
+$ctx->add( $data ), $ctx->add( $chunk1, $chunk2, ... ), $ctx->addfile(
+$io_handle ), $ctx->add_bits( $data, $nbits ), $ctx->add_bits( $bitstring
+), $ctx->digest, $ctx->hexdigest, $ctx->b64digest
 
 =item Digest speed
 
@@ -15337,6 +16209,8 @@ is_utf8(STRING [, CHECK]), _utf8_on(STRING), _utf8_off(STRING)
 =item SEE ALSO
 
 =item MAINTAINER
+
+=item COPYRIGHT
 
 =back
 
@@ -16408,6 +17282,14 @@ ccopts(), xsi_header(), xsi_protos(@modules), xsi_body(@modules)
 
 =item DESCRIPTION
 
+_chmod($$;$), _warnonce(@), _choke(@)
+
+=back
+
+_move_file_at_boot( $file, $target, $moan  )
+
+_unlink_or_rename( $file, $tryhard, $installing )
+
 =over 4
 
 =item Functions
@@ -16416,21 +17298,46 @@ B<install>
 
 =back
 
-=back
+_get_install_skip
+
+_have_write_access
+
+_can_write_dir(C<$dir>)
+
+_mkpath($dir,$show,$mode,$verbose,$fake)
+
+_copy($from,$to,$verbose,$fake)
+
+_chdir($from)
+
+_do_cleanup
+
+install_rooted_file( $file ), install_rooted_dir( $dir )
+
+forceunlink( $file, $tryhard )
+
+directory_not_empty( $dir )
 
 B<install_default> I<DISCOURAGED>
 
 B<uninstall>
 
+inc_uninstall($filepath,$libdir,$verbose,$nonono,$ignore)
+
+run_filter($cmd,$src,$dest)
+
 B<pm_to_blib>
 
 _autosplit
+
+_invokant
 
 =over 4
 
 =item ENVIRONMENT
 
-B<PERL_INSTALL_ROOT>
+B<PERL_INSTALL_ROOT>, B<EU_INSTALL_IGNORE_SKIP>,
+B<EU_INSTALL_SITE_SKIPFILE>
 
 =item AUTHOR
 
@@ -16828,6 +17735,14 @@ has_link_code
 
 init_dirscan
 
+init_MANPODS
+
+init_MAN1PODS
+
+init_MAN3PODS
+
+init_PM
+
 init_DIRFILESEP
 
 init_main
@@ -17216,7 +18131,7 @@ os_flavor
 
 ABSTRACT, ABSTRACT_FROM, AUTHOR, BINARY_LOCATION, C, CCFLAGS, CONFIG,
 CONFIGURE, DEFINE, DESTDIR, DIR, DISTNAME, DISTVNAME, DL_FUNCS, DL_VARS,
-EXCLUDE_EXT, EXE_FILES, FIRST_MAKEFILE, FULLPERL, FULLPERLRUN,
+EXCLUDE_EXT, EXE_FILES, EXTRA_META, FIRST_MAKEFILE, FULLPERL, FULLPERLRUN,
 FULLPERLRUNINST, FUNCLIST, H, IMPORTS, INC, INCLUDE_EXT, INSTALLARCHLIB,
 INSTALLBIN, INSTALLDIRS, INSTALLMAN1DIR, INSTALLMAN3DIR, INSTALLPRIVLIB,
 INSTALLSCRIPT, INSTALLSITEARCH, INSTALLSITEBIN, INSTALLSITELIB,
@@ -17224,8 +18139,8 @@ INSTALLSITEMAN1DIR, INSTALLSITEMAN3DIR, INSTALLSITESCRIPT,
 INSTALLVENDORARCH, INSTALLVENDORBIN, INSTALLVENDORLIB,
 INSTALLVENDORMAN1DIR, INSTALLVENDORMAN3DIR, INSTALLVENDORSCRIPT,
 INST_ARCHLIB, INST_BIN, INST_LIB, INST_MAN1DIR, INST_MAN3DIR, INST_SCRIPT,
-LD, LDDLFLAGS, LDFROM, LIB, LIBPERL_A, LIBS, LINKTYPE, MAKEAPERL,
-MAKEFILE_OLD, MAN1PODS, MAN3PODS, MAP_TARGET, MYEXTLIB, NAME,
+LD, LDDLFLAGS, LDFROM, LIB, LIBPERL_A, LIBS, LICENSE, LINKTYPE, MAKE,
+MAKEAPERL, MAKEFILE_OLD, MAN1PODS, MAN3PODS, MAP_TARGET, MYEXTLIB, NAME,
 NEEDS_LINKING, NOECHO, NORECURS, NO_META, NO_VC, OBJECT, OPTIMIZE, PERL,
 PERL_CORE, PERLMAINCC, PERL_ARCHLIB, PERL_LIB, PERL_MALLOC_OK, PERLPREFIX,
 PERLRUN, PERLRUNINST, PERL_SRC, PERM_RW, PERM_RWX, PL_FILES, PM, PMLIBDIRS,
@@ -17469,7 +18384,11 @@ DLBASE, DL_FUNCS, DL_VARS, FILE, FUNCLIST, IMPORTS, NAME
 
 =item REVISION
 
+mkfh()
+
 =back
+
+__find_relocations
 
 =head2 ExtUtils::Packlist - manage .packlist files
 
@@ -17530,6 +18449,8 @@ errors()
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item BUGS
 
 =item AUTHOR
 
@@ -18496,21 +19417,96 @@ with switch clustering
 
 =item Restricted hashes
 
-lock_keys, unlock_keys
+B<lock_keys>, B<unlock_keys>
 
 =back
 
 =back
 
-lock_value, unlock_value
+B<lock_keys_plus>
+
+B<lock_value>, B<unlock_value>
 
 B<lock_hash>, B<unlock_hash>
 
-B<hash_seed>
+B<lock_hash_recurse>, B<unlock_hash_recurse>
+
+B<hash_unlocked>
+
+b<legal_keys>, B<hidden_keys>, B<all_keys>, B<hash_seed>
+
+B<hv_store>
+
+=over 4
+
+=item Operating on references to hashes.
+
+lock_ref_keys, unlock_ref_keys, lock_ref_keys_plus, lock_ref_value,
+unlock_ref_value, lock_hashref, unlock_hashref, lock_hashref_recurse,
+unlock_hashref_recurse, hash_ref_unlocked, legal_ref_keys, hidden_ref_keys
+
+=back
 
 =over 4
 
 =item CAVEATS
+
+=item BUGS
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Hash::Utilib::Hash::Util, Hash::Util - A selection of
+general-utility hash subroutines
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=over 4
+
+=item Restricted hashes
+
+B<lock_keys>, B<unlock_keys>
+
+=back
+
+=back
+
+B<lock_keys_plus>
+
+B<lock_value>, B<unlock_value>
+
+B<lock_hash>, B<unlock_hash>
+
+B<lock_hash_recurse>, B<unlock_hash_recurse>
+
+B<hash_unlocked>
+
+b<legal_keys>, B<hidden_keys>, B<all_keys>, B<hash_seed>
+
+B<hv_store>
+
+=over 4
+
+=item Operating on references to hashes.
+
+lock_ref_keys, unlock_ref_keys, lock_ref_keys_plus, lock_ref_value,
+unlock_ref_value, lock_hashref, unlock_hashref, lock_hashref_recurse,
+unlock_hashref_recurse, hash_ref_unlocked, legal_ref_keys, hidden_ref_keys
+
+=back
+
+=over 4
+
+=item CAVEATS
+
+=item BUGS
 
 =item AUTHOR
 
@@ -18779,8 +19775,25 @@ Sichuan Yi, {yi} : Yiddish, {yo} : Yoruba, [{ypk} : Yupik languages], {znd}
 
 =back
 
-=head2 IO::Compress::Deflate	 - Perl interface to write RFC 1950
-files/buffers
+=head2 IO::Compress::Base - Base Class for IO::Compress modules 
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO::Compress::Deflate - Write RFC 1950 files/buffers
 
 =over 4
 
@@ -18822,8 +19835,8 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -Append =E<gt> 0|1, A Buffer, A Filename, A
-Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
+AutoClose =E<gt> 0|1, Append =E<gt> 0|1, A Buffer, A Filename, A
+Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
 
 =item Examples
 
@@ -18851,13 +19864,19 @@ Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
 
 =item binmode
 
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
 =item fileno
 
 =item close
 
 =item newStream([OPTS])
 
-Level, TODO
+Level
 
 =item deflateParams
 
@@ -18879,8 +19898,7 @@ Level, TODO
 
 =back
 
-=head2 IO::Compress::Gzip     - Perl interface to write RFC 1952
-files/buffers
+=head2 IO::Compress::Gzip - Write RFC 1952 files/buffers
 
 =over 4
 
@@ -18922,8 +19940,8 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -Append =E<gt> 0|1, A Buffer, A Filename, A
-Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Minimal =E<gt> 0|1,
+AutoClose =E<gt> 0|1, Append =E<gt> 0|1, A Buffer, A Filename, A
+Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Minimal =E<gt> 0|1,
 -Comment =E<gt> $comment, -Name =E<gt> $string, -Time =E<gt> $number,
 -TextFlag =E<gt> 0|1, -HeaderCRC =E<gt> 0|1, -OS_Code =E<gt> $value,
 -ExtraField =E<gt> $data, -ExtraFlags =E<gt> $value, -Strict =E<gt> 0|1
@@ -18954,13 +19972,19 @@ Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Minimal =E<gt> 0|1,
 
 =item binmode
 
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
 =item fileno
 
 =item close
 
 =item newStream([OPTS])
 
-Level, TODO
+Level
 
 =item deflateParams
 
@@ -18982,8 +20006,7 @@ Level, TODO
 
 =back
 
-=head2 IO::Compress::RawDeflate     - Perl interface to write RFC 1951
-files/buffers
+=head2 IO::Compress::RawDeflate - Write RFC 1951 files/buffers
 
 =over 4
 
@@ -19025,8 +20048,8 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -Append =E<gt> 0|1, A Buffer, A Filename, A
-Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
+AutoClose =E<gt> 0|1, Append =E<gt> 0|1, A Buffer, A Filename, A
+Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
 
 =item Examples
 
@@ -19054,13 +20077,19 @@ Filehandle, -Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
 
 =item binmode
 
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
 =item fileno
 
 =item close
 
 =item newStream([OPTS])
 
-Level, TODO
+Level
 
 =item deflateParams
 
@@ -19069,6 +20098,116 @@ Level, TODO
 =item Importing 
 
 :all, :constants, :flush, :level, :strategy
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO::Compress::Zip - Write zip files/buffers
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+DO NOT use in production code, The documentation is incomplete in places,
+Parts of the interface defined here are tentative, Please report any
+problems you find
+
+=item Functional Interface
+
+=over 4
+
+=item zip $input => $output [, OPTS]
+
+A filename, A filehandle, A scalar reference, An array reference, An Input
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
+
+=item Notes
+
+=item Optional Parameters
+
+AutoClose =E<gt> 0|1, BinModeIn =E<gt> 0|1, -Append =E<gt> 0|1
+
+=item Examples
+
+=back
+
+=item OO Interface
+
+=over 4
+
+=item Constructor
+
+A filename, A filehandle, A scalar reference
+
+=item Constructor Options
+
+AutoClose =E<gt> 0|1, Append =E<gt> 0|1, A Buffer, A Filename, A
+Filehandle, -Name =E<gt> $string, -Time =E<gt> $number, -exTime =E<gt>
+[$atime, $mtime, $ctime], -Comment =E<gt> $comment, -ZipComment =E<gt>
+$comment, Method =E<gt> $method, Stream =E<gt> 0|1, -TextFlag =E<gt> 0|1,
+ExtraFieldLocal =E<gt> $data =item ExtraFieldCentral =E<gt> $data, Minimal
+=E<gt> 1|0, BlockSize100K =E<gt> number, WorkFactor =E<gt> number, -Level,
+-Strategy, -Strict =E<gt> 0|1
+
+=item Examples
+
+=back
+
+=item Methods 
+
+=over 4
+
+=item print
+
+=item printf
+
+=item syswrite
+
+=item write
+
+=item flush
+
+=item tell
+
+=item eof
+
+=item seek
+
+=item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
+=item fileno
+
+=item close
+
+=item newStream([OPTS])
+
+Level
+
+=item deflateParams
+
+=back
+
+=item Importing 
+
+:all, :constants, :flush, :level, :strategy, :zip_method
 
 =item EXAMPLES
 
@@ -19322,8 +20461,8 @@ hostpath(), peerpath()
 
 =back
 
-=head2 IO::Uncompress::AnyInflate - Perl interface to read RFC 1950, 1951 &
-1952 files/buffers
+=head2 IO::Uncompress::AnyInflate - Uncompress zlib-based (zip, gzip)
+file/buffer
 
 =over 4
 
@@ -19333,7 +20472,7 @@ hostpath(), peerpath()
 
 DO NOT use in production code, The documentation is incomplete in places,
 Parts of the interface defined here are tentative, Please report any
-problems you find
+problems you find, RFC 1950, RFC 1951, gzip (RFC 1952), zip
 
 =item Functional Interface
 
@@ -19400,6 +20539,12 @@ A filename, A filehandle, A scalar reference
 
 =item binmode
 
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
 =item fileno
 
 =item close
@@ -19422,8 +20567,129 @@ A filename, A filehandle, A scalar reference
 
 =back
 
-=head2 IO::Uncompress::Gunzip - Perl interface to read RFC 1952
-files/buffers
+=head2 IO::Uncompress::AnyUncompress - Uncompress gzip, zip, bzip2 or lzop
+file/buffer
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+DO NOT use in production code, The documentation is incomplete in places,
+Parts of the interface defined here are tentative, Please report any
+problems you find, RFC 1950, RFC 1951, gzip (RFC 1952), zip, bzip2, lzop
+
+=item Functional Interface
+
+=over 4
+
+=item anyuncompress $input => $output [, OPTS]
+
+A filename, A filehandle, A scalar reference, An array reference, An Input
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
+
+=item Notes
+
+=item Optional Parameters
+
+AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
+-MultiStream =E<gt> 0|1
+
+=item Examples
+
+=back
+
+=item OO Interface
+
+=over 4
+
+=item Constructor
+
+A filename, A filehandle, A scalar reference
+
+=item Constructor Options
+
+-AutoClose =E<gt> 0|1, -MultiStream =E<gt> 0|1, -Prime =E<gt> $string,
+-Transparent =E<gt> 0|1, -BlockSize =E<gt> $num, -InputLength =E<gt> $size,
+-Append =E<gt> 0|1, -Strict =E<gt> 0|1
+
+=item Examples
+
+=back
+
+=item Methods 
+
+=over 4
+
+=item read
+
+=item read
+
+=item getline
+
+=item getc
+
+=item ungetc
+
+=item getHeaderInfo
+
+=item tell
+
+=item eof
+
+=item seek
+
+=item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
+=item fileno
+
+=item close
+
+=back
+
+=item Importing 
+
+:all
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO::Uncompress::Base - Base Class for IO::Uncompress modules 
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO::Uncompress::Gunzip - Read RFC 1952 files/buffers
 
 =over 4
 
@@ -19502,6 +20768,12 @@ Name, Comment
 
 =item binmode
 
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
 =item fileno
 
 =item close
@@ -19524,8 +20796,7 @@ Name, Comment
 
 =back
 
-=head2 IO::Uncompress::Inflate - Perl interface to read RFC 1950
-files/buffers
+=head2 IO::Uncompress::Inflate - Read RFC 1950 files/buffers
 
 =over 4
 
@@ -19602,6 +20873,12 @@ A filename, A filehandle, A scalar reference
 
 =item binmode
 
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
 =item fileno
 
 =item close
@@ -19624,8 +20901,7 @@ A filename, A filehandle, A scalar reference
 
 =back
 
-=head2 IO::Uncompress::RawInflate - Perl interface to read RFC 1951
-files/buffers
+=head2 IO::Uncompress::RawInflate - Read RFC 1951 files/buffers
 
 =over 4
 
@@ -19701,6 +20977,117 @@ A filename, A filehandle, A scalar reference
 =item seek
 
 =item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
+
+=item fileno
+
+=item close
+
+=back
+
+=item Importing 
+
+:all
+
+=item EXAMPLES
+
+=item SEE ALSO
+
+=item AUTHOR
+
+=item MODIFICATION HISTORY
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 IO::Uncompress::Unzip - Read zip files/buffers
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+DO NOT use in production code, The documentation is incomplete in places,
+Parts of the interface defined here are tentative, Please report any
+problems you find
+
+=item Functional Interface
+
+=over 4
+
+=item unzip $input => $output [, OPTS]
+
+A filename, A filehandle, A scalar reference, An array reference, An Input
+FileGlob string, A filename, A filehandle, A scalar reference, An Array
+Reference, An Output FileGlob
+
+=item Notes
+
+=item Optional Parameters
+
+AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
+-MultiStream =E<gt> 0|1
+
+=item Examples
+
+=back
+
+=item OO Interface
+
+=over 4
+
+=item Constructor
+
+A filename, A filehandle, A scalar reference
+
+=item Constructor Options
+
+-AutoClose =E<gt> 0|1, -MultiStream =E<gt> 0|1, -Prime =E<gt> $string,
+-Transparent =E<gt> 0|1, -BlockSize =E<gt> $num, -InputLength =E<gt> $size,
+-Append =E<gt> 0|1, -Strict =E<gt> 0|1
+
+=item Examples
+
+=back
+
+=item Methods 
+
+=over 4
+
+=item read
+
+=item read
+
+=item getline
+
+=item getc
+
+=item ungetc
+
+=item inflateSync
+
+=item getHeaderInfo
+
+=item tell
+
+=item eof
+
+=item seek
+
+=item binmode
+
+=item opened
+
+=item autoflush
+
+=item input_line_number
 
 =item fileno
 
@@ -21178,6 +22565,553 @@ Storable use
 
 =back
 
+=head2 Module::Build - Build and install Perl modules
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item GUIDE TO DOCUMENTATION
+
+General Usage (L<Module::Build>), Authoring Reference
+(L<Module::Build::Authoring>), API Reference (L<Module::Build::API>),
+Cookbook (L<Module::Build::Cookbook>)
+
+=item ACTIONS
+
+build, clean, code, config_data, diff, dist, distcheck, distclean, distdir,
+distmeta, distsign, disttest, docs, fakeinstall, help, html, install,
+manifest, manpages, ppd, ppmdist, prereq_report, pure_install, realclean,
+skipcheck, test, testcover, testdb, testpod, testpodcoverage,
+versioninstall
+
+=item OPTIONS
+
+=over 4
+
+=item Command Line Options
+
+quiet, use_rcfile, verbose
+
+=item Default Options File (F<.modulebuildrc>)
+
+=back
+
+=item INSTALL PATHS
+
+lib, arch, script, bin, bindoc, libdoc, binhtml, libhtml, installdirs,
+install_path, install_base, destdir
+
+=over 4
+
+=item About PREFIX Support
+
+Why PREFIX is not recommended, Alternatives to PREFIX
+
+=back
+
+=item MOTIVATIONS
+
++, +
+
+=item TO DO
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::API - API Reference for Module Authors
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item CONSTRUCTORS
+
+current(), new(), add_to_cleanup, auto_features, autosplit, build_class,
+build_requires, create_packlist, c_source, conflicts, create_makefile_pl,
+create_readme, dist_abstract, dist_author, dist_name, dist_version,
+dist_version_from, dynamic_config, extra_compiler_flags,
+extra_linker_flags, get_options, type, store, default, include_dirs,
+install_path, installdirs, license, apache, artistic, bsd, gpl, lgpl, mit,
+mozilla, open_source, perl, restrictive, unrestricted, meta_add,
+meta_merge, module_name, PL_files, pm_files, pod_files, recommends,
+recursive_test_files, requires, script_files, sign, test_files, xs_files,
+new_from_context(%args), resume(), subclass()
+
+=item METHODS
+
+add_build_element($type), add_to_cleanup(@files), args(),
+autosplit_file($from, $to), base_dir(), build_requires(),
+check_installed_status($module, $version), check_installed_version($module,
+$version), compare_versions($v1, $op, $v2), config(), config_data($name),
+config_data($name => $value), conflicts(), contains_pod($file),
+copy_if_modified(%parameters), create_build_script(), current_action(),
+depends_on(@actions), dir_contains($first_dir, $second_dir),
+dispatch($action, %args), dist_dir(), dist_name(), dist_version(),
+do_system($cmd, @args), feature($name), feature($name => $value),
+have_c_compiler(), install_base_relpaths(), install_base_relpaths($type),
+install_base_relpaths($type => $path), install_destination($type),
+install_path(), install_path($type), install_path($type => $path),
+install_types(), invoked_action(), notes(), notes($key), notes($key =>
+$value), orig_dir(), os_type(), prefix_relpaths(),
+prefix_relpaths($installdirs), prefix_relpaths($installdirs, $type),
+prefix_relpaths($installdirs, $type => $path), prepare_metadata(),
+prereq_failures(), prereq_report(), prompt($message, $default),
+recommends(), requires(), rscan_dir($dir, $pattern), runtime_params(),
+runtime_params($key), script_files(), up_to_date($source_file,
+$derived_file), up_to_date(\@source_files, \@derived_files), y_n($message,
+$default)
+
+=item Autogenerated Accessors
+
+PL_files(), autosplit(), base_dir(), bindoc_dirs(), blib(), build_bat(),
+build_class(), build_elements(), build_requires(), build_script(),
+c_source(), config(), config_dir(), conflicts(), create_makefile_pl(),
+create_packlist(), create_readme(), debugger(), destdir(), get_options(),
+html_css(), include_dirs(), install_base(), install_sets(), installdirs(),
+libdoc_dirs(), license(), magic_number(), mb_version(), meta_add(),
+meta_merge(), metafile(), module_name(), orig_dir(), original_prefix(),
+perl(), pm_files(), pod_files(), pollute(), prefix(),
+prereq_action_types(), quiet(), recommends(), recurse_into(),
+recursive_test_files(), requires(), scripts(), use_rcfile(), verbose(),
+xs_files()
+
+=back
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Authoring - Authoring Module::Build modules
+
+=over 4
+
+=item DESCRIPTION
+
+=item STRUCTURE
+
+=item SUBCLASSING
+
+=item PREREQUISITES
+
+=over 4
+
+=item Format of prerequisites
+
+=back
+
+=item SAVING CONFIGURATION INFORMATION
+
+=item STARTING MODULE DEVELOPMENT
+
+=item AUTOMATION
+
+=item MIGRATION
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Base - Default methods for Module::Build
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Compat - Compatibility with ExtUtils::MakeMaker
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+create_makefile_pl($style, $build), small, passthrough, traditional,
+run_build_pl(args => \@ARGV), args, script, write_makefile(), makefile
+
+=item SCENARIOS
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::ConfigData - Configuration for Module::Build
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+config($name), feature($name), set_config($name, $value),
+set_feature($name, $value), config_names(), feature_names(),
+auto_feature_names(), write()
+
+=item AUTHOR
+
+=back
+
+=head2 Module::Build::Cookbook - Examples of Module::Build Usage
+
+=over 4
+
+=item DESCRIPTION
+
+=item BASIC RECIPES
+
+=over 4
+
+=item The basic installation recipe for modules that use Module::Build
+
+=item Making a CPAN.pm-compatible distribution
+
+=item Installing modules using the programmatic interface
+
+=item Installing to a temporary directory
+
+=item Installing to a non-standard directory
+
+=item Running a single test file
+
+=back
+
+=item ADVANCED RECIPES
+
+=over 4
+
+=item Changing the order of the build process
+
+=item Adding new file types to the build process
+
+=item Adding new elements to the install process
+
+=back
+
+=item EXAMPLES ON CPAN
+
+=over 4
+
+=item SVN-Notify-Mirror
+
+1. Using C<auto_features>, I check to see whether two optional modules are
+available - SVN::Notify::Config and Net::SSH;, 2. If the S::N::Config
+module is loaded, I automatically generate testfiles for it during Build
+(using the C<PL_files> property), 3. If the C<ssh_feature> is available, I
+ask if the user wishes to perform the ssh tests (since it requires a little
+preliminary setup);, 4. Only if the user has C<ssh_feature> and answers yes
+to the testing, do I generate a test file
+
+=item Modifying an action
+
+=back
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::ModuleInfo, ModuleInfo - Gather package and POD
+information from a perl module files
+
+=over 4
+
+=item DESCRIPTION
+
+new_from_file($filename, collect_pod => 1), new_from_module($module,
+collect_pod => 1, inc => \@dirs), name(), version($package), filename(),
+packages_inside(), pod_inside(), contains_pod(), pod($section),
+find_module_by_name($module, \@dirs), find_module_dir_by_name($module,
+\@dirs)
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Notes, $notes_name - Configuration for $module_name
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item METHODS
+
+config(\$name), feature(\$name), set_config(\$name, \$value),
+set_feature(\$name, \$value), config_names(), feature_names(),
+auto_feature_names(), write()
+
+=item AUTHOR
+
+=back
+
+=head2 Module::Build::PPMMaker - Perl Package Manager file creation
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Platform::Amiga - Builder class for Amiga platforms
+
+=over 4
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Platform::Default - Stub class for unknown platforms
+
+=over 4
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Platform::EBCDIC - Builder class for EBCDIC platforms
+
+=over 4
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Platform::MPEiX - Builder class for MPEiX platforms
+
+=over 4
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Platform::MacOS - Builder class for MacOS platforms
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Overriden Methods
+
+new(), make_executable(), dispatch(), ACTION_realclean()
+
+=back
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Platform::RiscOS - Builder class for RiscOS platforms
+
+=over 4
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Platform::Unix - Builder class for Unix platforms
+
+=over 4
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Platform::VMS - Builder class for VMS platforms
+
+=over 4
+
+=item DESCRIPTION
+
+=over 4
+
+=item Overridden Methods
+
+new
+
+=back
+
+=back
+
+cull_args
+
+manpage_separator
+
+prefixify
+
+=over 4
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Platform::VOS - Builder class for VOS platforms
+
+=over 4
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Platform::Windows - Builder class for Windows
+platforms
+
+=over 4
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Platform::aix - Builder class for AIX platform
+
+=over 4
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Platform::cygwin - Builder class for Cygwin platform
+
+=over 4
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Platform::darwin - Builder class for Mac OS X
+platform
+
+=over 4
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::Platform::os2 - Builder class for OS/2 platform
+
+=over 4
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item SEE ALSO
+
+=back
+
+=head2 Module::Build::YAML - Provides just enough YAML support so that
+Module::Build works even if YAML.pm is not installed
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
 =head2 Module::CoreList - what modules shipped with versions of perl
 
 =over 4
@@ -22264,13 +24198,21 @@ C<-inc =E<gt> 1>, C<-dirs =E<gt> [ $dir1, $dir2, ... ]>, C<-verbose =E<gt>
 
 =item DESCRIPTION
 
-=item ARGUMENTS
+=item FUNCTIONS
+
+=over 4
+
+=item pod2html
 
 backlink, cachedir, css, flush, header, help, hiddendirs, htmldir,
 htmlroot, index, infile, libpods, netscape, outfile, podpath, podroot,
 quiet, recurse, title, verbose
 
-=item EXAMPLE
+=item htmlify
+
+=item anchorify
+
+=back
 
 =item ENVIRONMENT
 
@@ -24750,26 +26692,25 @@ C<$Test::Harness::Timer>
 
 =item Failure
 
-B<Failed Test>, B<Stat>, B<Wstat>, B<Total>, B<Fail>, B<Failed>, B<List of
-Failed>
+B<Failed Test>, B<Stat>, B<Wstat>, B<Total>, B<Fail>, B<List of Failed>
 
-=item Functions
+=back
 
-B<runtests>
+=item FUNCTIONS
+
+=over 4
+
+=item runtests( @test_files )
 
 =back
 
 =back
 
-B<_all_ok>
+=over 4
 
-B<_globdir>
+=item execute_tests( tests => \@test_files, out => \*FH )
 
-B<_run_all_tests>
-
-B<_mk_leader>
-
-B<_leader_width>
+=back
 
 =over 4
 
@@ -24789,8 +26730,8 @@ C<HARNESS_ACTIVE>, C<HARNESS_VERSION>
 =item ENVIRONMENT VARIABLES THAT AFFECT TEST::HARNESS
 
 C<HARNESS_COLUMNS>, C<HARNESS_COMPILE_TEST>, C<HARNESS_DEBUG>,
-C<HARNESS_FILELEAK_IN_DIR>, C<HARNESS_IGNORE_EXITCODE>, C<HARNESS_NOTTY>,
-C<HARNESS_PERL>, C<HARNESS_PERL_SWITCHES>, C<HARNESS_VERBOSE>
+C<HARNESS_FILELEAK_IN_DIR>, C<HARNESS_NOTTY>, C<HARNESS_PERL>,
+C<HARNESS_PERL_SWITCHES>, C<HARNESS_TIMER>, C<HARNESS_VERBOSE>
 
 =item EXAMPLE
 
@@ -24799,6 +26740,13 @@ C<HARNESS_PERL>, C<HARNESS_PERL_SWITCHES>, C<HARNESS_VERBOSE>
 =item TODO
 
 =item BUGS
+
+=item SUPPORT
+
+AnnoCPAN: Annotated CPAN documentation, CPAN Ratings, RT: CPAN's request
+tracker, Search CPAN
+
+=item SOURCE CODE
 
 =item AUTHORS
 
@@ -24900,12 +26848,6 @@ ok, number
 
 =over 4
 
-=item $strap->_init
-
-=back
-
-=over 4
-
 =item ANALYSIS
 
 =over 4
@@ -24918,85 +26860,13 @@ ok, number
 
 =over 4
 
-=item $strap->analyze_fh( $name, $test_filehandle )
-
-=back
-
-=over 4
-
 =item $strap->analyze_file( $test_file )
 
 =back
 
 =over 4
 
-=item $strap->_command_line( $file )
-
-=back
-
-=over 4
-
-=item $strap->_command()
-
-=back
-
-=over 4
-
-=item $strap->_switches( $file )
-
-=back
-
-=over 4
-
-=item $strap->_cleaned_switches( @switches_from_user )
-
-=back
-
-=over 4
-
-=item $strap->_INC2PERL5LIB
-
-=back
-
-=over 4
-
-=item $strap->_filtered_INC()
-
-=back
-
-=over 4
-
-=item $strap->_restore_PERL5LIB()
-
-=back
-
-=over 4
-
 =item Parsing
-
-=over 4
-
-=item C<_is_diagnostic>
-
-=back
-
-=back
-
-=over 4
-
-=item C<_is_header>
-
-=back
-
-=over 4
-
-=item C<_is_bail_out>
-
-=back
-
-=over 4
-
-=item C<_reset_file_state>
 
 =back
 
@@ -25080,11 +26950,60 @@ C<ok> or C<not ok>, Test number, Description, Directive, ok/not ok
 
 =back
 
+=item Non-Perl TAP
+
+=over 4
+
+=item C/C++
+
+Specify a test plan, Run tests, Skip tests in certain situations, Have TODO
+tests, Produce TAP compatible diagnostics
+
+=item Python
+
+=item JavaScript
+
+=item PHP
+
+phpt, PHPUnit, SimpleTest, Apache-Test
+
+=back
+
 =item AUTHORS
 
 =item ACKNOWLEDGEMENTS
 
 =item COPYRIGHT
+
+=back
+
+=head2 Test::Harness::Util - Utility functions for Test::Harness::*
+
+=over 4
+
+=item SYNOPSIS
+
+=item PUBLIC FUNCTIONS
+
+=over 4
+
+=item all_in( {parm => value, parm => value} )
+
+start, recurse
+
+=back
+
+=back
+
+=over 4
+
+=item shuffle( @list )
+
+=back
+
+=over 4
+
+=item blibdir()
 
 =back
 
@@ -25343,6 +27262,8 @@ C<reject =E<gt> $listref>, C<ignore =E<gt> $listref>, C<fail =E<gt> $str>,
 =item C<extract_multiple>
 
 =item C<gen_delimited_pat>
+
+=item C<delimited_pat>
 
 =back
 
@@ -25672,9 +27593,15 @@ this, SCALAR this
 
 =item EXAMPLE
 
-=item AUTHOR
+=item THREAD SUPPORT
 
-=item VERSION
+=item STORABLE SUPPORT
+
+=item RELIC SUPPORT
+
+=item MAINTAINER
+
+=item AUTHOR
 
 =item SEE ALSO
 
