@@ -2674,10 +2674,9 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
 /*
 =for apidoc refcounted_he_new
 
-Creates a new C<struct refcounted_he>. Assumes ownership of one reference
-to I<value>. As S<key> is copied into a shared hash key, all references remain
-the property of the caller. The C<struct refcounted_he> is returned with a
-reference count of 1.
+Creates a new C<struct refcounted_he>. As S<key> is copied, and value is
+stored in a compact form, all references remain the property of the caller.
+The C<struct refcounted_he> is returned with a reference count of 1.
 
 =cut
 */

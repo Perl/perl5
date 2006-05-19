@@ -2877,7 +2877,7 @@ Perl_magic_sethint(pTHX_ SV *sv, MAGIC *mg)
     PL_hints |= HINT_LOCALIZE_HH;
     PL_compiling.cop_hints
 	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints,
-				 (SV *)mg->mg_ptr, newSVsv(sv));
+				 (SV *)mg->mg_ptr, sv);
     return 0;
 }
 
