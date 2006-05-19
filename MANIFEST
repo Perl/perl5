@@ -2264,7 +2264,7 @@ lib/Pod/Simple/t/search_10survey_specific.t	Pod::Simple test file
 lib/Pod/Simple/t/search_12survey_cwd.t	Pod::Simple test file
 lib/Pod/Simple/t/search_20survey_two.t	Pod::Simple test file
 lib/Pod/Simple/t/search_22survey_two_shadowing.t	Pod::Simple test file
-lib/Pod/Simple/t/search_25_glob_squaa_coloncolon_kleene.t	Pod::Simple test file
+lib/Pod/Simple/t/search_25_glob_squaa.t	Pod::Simple test file
 lib/Pod/Simple/t/search_26_glob_kleene_k.t	Pod::Simple test file
 lib/Pod/Simple/t/search_27_glob_squaa_kleene.t	Pod::Simple test file
 lib/Pod/Simple/t/search_28_glob_z_kleene_k.t	Pod::Simple test file
