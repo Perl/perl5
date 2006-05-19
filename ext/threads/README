@@ -1,4 +1,4 @@
-threads version 1.29
+threads version 1.31
 ====================
 
 This module needs perl 5.8.0 or later compiled with 'useithreads'.

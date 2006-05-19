@@ -1,5 +1,8 @@
 Revision history for Perl extension threads.
 
+1.31 Fri May 19 16:06:42 EDT 2006
+	- Explicit thread context
+
 1.29 Thu May 18 16:09:28 EDT 2006
 	- Fix warning/core dump from ->create('foo') in BEGIN block
 

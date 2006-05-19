@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.29';
+our $VERSION = '1.31';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -102,7 +102,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.29
+This document describes threads version 1.31
 
 =head1 SYNOPSIS
 
@@ -110,7 +110,7 @@ This document describes threads version 1.29
 
     sub start_thread {
         my @args = @_;
-        print "Thread started: @args\n";
+        print('Thread started: ', join(' ', @args), "\n");
     }
     my $thread = threads->create('start_thread', 'argument');
     $thread->join();
@@ -120,8 +120,11 @@ This document describes threads version 1.29
     my $thread3 = async { foreach (@files) { ... } };
     $thread3->join();
 
-    # Invoke thread in list context so it can return a list
+    # Invoke thread in list context (implicit) so it can return a list
     my ($thr) = threads->create(sub { return (qw/a b c/); });
+    # or specify list context explicitly
+    my $thr = threads->create({'context' => 'list'},
+                              sub { return (qw/a b c/); });
     my @results = $thr->join();
 
     $thread->detach();
@@ -145,6 +148,12 @@ This document describes threads version 1.29
 
     $stack_size = threads->get_stack_size();
     $old_size = threads->set_stack_size(32*4096);
+
+    # Create a thread with a specific context and stack size
+    my $thr = threads->create({ 'context'    => 'list',
+                                'stack_size' => 32*4096 },
+                              \&foo);
+    my @results = $thr->join();
 
     $thr->kill('SIGUSR1');
 
@@ -187,22 +196,6 @@ a code ref.
         # or
     my $thr = threads->create(\&func, ...);
 
-The thread may be created in I<list> context, or I<scalar> context as follows:
-
-    # Create thread in list context
-    my ($thr) = threads->create(...);
-
-    # Create thread in scalar context
-    my $thr = threads->create(...);
-
-This has consequences for the C<-E<gt>join()> method describe below.
-
-Although a thread may be created in I<void> context, to do so you must
-I<chain> either the C<-E<gt>join()> or C<-E<gt>detach()> method to the
-C<-E<gt>create()> call:
-
-    threads->create(...)->join();
-
 The C<-E<gt>new()> method is an alias for C<-E<gt>create()>.
 
 =item $thr->join()
@@ -211,26 +204,38 @@ This will wait for the corresponding thread to complete its execution.  When
 the thread finishes, C<-E<gt>join()> will return the return value(s) of the
 entry point function.
 
-The context (void, scalar or list) of the thread creation is also the
-context for C<-E<gt>join()>.  This means that if you intend to return an array
-from a thread, you must use C<my ($thr) = threads->create(...)>, and that
-if you intend to return a scalar, you must use C<my $thr = ...>:
+The context (void, scalar or list) for the return value(s) for C<-E<gt>join()>
+is determined at the time of thread creation.
 
-    # Create thread in list context
+    # Create thread in list context (implicit)
     my ($thr1) = threads->create(sub {
                                     my @results = qw(a b c);
                                     return (@results);
-                                 };
+                                 });
+    #   or (explicit)
+    my $thr1 = threads->create({'context' => 'list'},
+                               sub {
+                                    my @results = qw(a b c);
+                                    return (@results);
+                               });
     # Retrieve list results from thread
     my @res1 = $thr1->join();
 
-    # Create thread in scalar context
+    # Create thread in scalar context (implicit)
     my $thr2 = threads->create(sub {
                                     my $result = 42;
                                     return ($result);
-                                 };
+                                 });
     # Retrieve scalar result from thread
     my $res2 = $thr2->join();
+
+    # Create a thread in void context (explicit)
+    my $thr3 = threads->create({'void' => 1},
+                               sub { print("Hello, world\n"); });
+    # Join the thread in void context (i.e., no return value)
+    $thr3->join();
+
+See L</"THREAD CONTEXT"> for more details.
 
 If the program exits without all other threads having been either joined or
 detached, then a warning will be issued. (A program exits either because one
@@ -327,6 +332,58 @@ Class method that allows a thread to obtain its own I<handle>.
 
 =back
 
+=head1 THREAD CONTEXT
+
+As with subroutines, the type of value returned from a thread's entry point
+function may be determined by the thread's I<context>:  list, scalar or void.
+The thread's context is determined at thread creation.  This is necessary so
+that the context is available to the entry point function via
+L<wantarry()|perlfunc/"wantarray">.  The thread may then specify a value of
+the appropriate type to be returned from C<-E<gt>join()>.
+
+=head2 Explicit context
+
+Because thread creation and thread joining may occur in different contexts, it
+may be desirable to state the context explicitly to the thread's entry point
+function.  This may be done by calling C<-E<gt>create()> with a parameter hash
+as the first argument:
+
+    my $thr = threads->create({'context' => 'list'}, \&foo);
+    ...
+    my @results = $thr->join();
+
+In the above, the threads object is returned to the parent thread in scalar
+context, and the thread's entry point function C<foo> will be called in list
+context such that the parent thread can receive a list from the C<-E<gt>join()>
+call.  Similarly, if you need the threads object, but your thread will not be
+returning a value (i.e., I<void> context), you would do the following:
+
+    my $thr = threads->create({'context' => 'void'}, \&foo);
+    ...
+    $thr->join();
+
+The context type may also be used as the I<key> in the parameter hash followed
+by a I<true> value:
+
+    threads->create({'scalar' => 1}, \&foo);
+    ...
+    my ($thr) = threads->list();
+    my $result = $thr->join();
+
+=head2 Implicit context
+
+If not explicitly stated, the thread's context is implied from the context
+of the C<-E<gt>create()> call:
+
+    # Create thread in list context
+    my ($thr) = threads->create(...);
+
+    # Create thread in scalar context
+    my $thr = threads->create(...);
+
+    # Create thread in void context
+    threads->create(...);
+
 =head1 THREAD STACK SIZE
 
 The default per-thread stack size for different platforms varies
@@ -394,8 +451,10 @@ threaded applications.
 
 =item threads->create({'stack_size' => VALUE}, FUNCTION, ARGS)
 
-This change to the thread creation method permits specifying the stack size
-for an individual thread.
+The stack size an individual threads may also be specified.  This may be done
+by calling C<-E<gt>create()> with a parameter hash as the first argument:
+
+    my $thr = threads->create({'stack_size' => 32*4096}, \&foo, @args);
 
 =item $thr2 = $thr1->create(FUNCTION, ARGS)
 
@@ -409,7 +468,7 @@ existing thread (C<$thr1>).  This is shorthand for the following:
 
 =head1 THREAD SIGNALLING
 
-When safe signals is in effect (the default behavior - see L<Unsafe signals>
+When safe signals is in effect (the default behavior - see L</"Unsafe signals">
 for more details), then signals may be sent and acted upon by individual
 threads.
 
@@ -567,7 +626,7 @@ following results in the above error:
 =item Cannot signal other threads without safe signals
 
 Safe signals must be in effect to use the C<-E<gt>kill()> signalling method.
-See L<Unsafe signals> for more details.
+See L</"Unsafe signals"> for more details.
 
 =item Unrecognized signal name: ...
 
@@ -646,7 +705,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.29/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.31/shared.pm>
 
 L<threads::shared>, L<perlthrtut>
 

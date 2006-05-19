@@ -451,6 +451,7 @@ S_ithread_create(
         char     *classname,
         SV       *init_function,
         IV        stack_size,
+        int       gimme,
         SV       *params)
 {
     ithread     *thread;
@@ -489,7 +490,7 @@ S_ithread_create(
     MUTEX_INIT(&thread->mutex);
     thread->tid = tid_counter++;
     thread->stack_size = good_stack_size(aTHX_ stack_size);
-    thread->gimme = GIMME_V;
+    thread->gimme = gimme;
 
     /* "Clone" our interpreter into the thread's interpreter.
      * This gives thread access to "static data" and code.
@@ -674,6 +675,9 @@ ithread_create(...)
         AV *params;
         HV *specs;
         IV stack_size;
+        int context;
+        char *str;
+        char ch;
         int idx;
         int ii;
     CODE:
@@ -702,6 +706,7 @@ ithread_create(...)
 
         function_to_call = ST(idx+1);
 
+        context = -1;
         if (specs) {
             /* stack_size */
             if (hv_exists(specs, "stack", 5)) {
@@ -711,6 +716,44 @@ ithread_create(...)
             } else if (hv_exists(specs, "stack_size", 10)) {
                 stack_size = SvIV(*hv_fetch(specs, "stack_size", 10, 0));
             }
+
+            /* context */
+            if (hv_exists(specs, "context", 7)) {
+                str = (char *)SvPV_nolen(*hv_fetch(specs, "context", 7, 0));
+                switch (*str) {
+                    case 'a':
+                    case 'A':
+                        context = G_ARRAY;
+                        break;
+                    case 's':
+                    case 'S':
+                        context = G_SCALAR;
+                        break;
+                    case 'v':
+                    case 'V':
+                        context = G_VOID;
+                        break;
+                    default:
+                        Perl_croak(aTHX_ "Invalid context: %s", str);
+                }
+            } else if (hv_exists(specs, "array", 5)) {
+                if (SvTRUE(*hv_fetch(specs, "array", 5, 0))) {
+                    context = G_ARRAY;
+                }
+            } else if (hv_exists(specs, "scalar", 6)) {
+                if (SvTRUE(*hv_fetch(specs, "scalar", 6, 0))) {
+                    context = G_SCALAR;
+                }
+            } else if (hv_exists(specs, "void", 4)) {
+                if (SvTRUE(*hv_fetch(specs, "void", 4, 0))) {
+                    context = G_VOID;
+                }
+            }
+        }
+        if (context == -1) {
+            context = GIMME_V;  /* Implicit context */
+        } else {
+            context |= (GIMME_V & (~(G_ARRAY|G_SCALAR|G_VOID)));
         }
 
         /* Function args */
@@ -726,6 +769,7 @@ ithread_create(...)
                                             classname,
                                             function_to_call,
                                             stack_size,
+                                            context,
                                             newRV_noinc((SV*)params)));
         /* XSRETURN(1); - implied */
 
