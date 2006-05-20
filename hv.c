@@ -2552,6 +2552,51 @@ Perl_hv_placeholders_set(pTHX_ HV *hv, I32 ph)
     /* else we don't need to add magic to record 0 placeholders.  */
 }
 
+SV *
+S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
+{
+    SV *value;
+    switch(he->refcounted_he_data[0] & HVrhek_typemask) {
+    case HVrhek_undef:
+	value = newSV(0);
+	break;
+    case HVrhek_delete:
+	value = &PL_sv_placeholder;
+	break;
+    case HVrhek_IV:
+	value = (he->refcounted_he_data[0] & HVrhek_UV)
+	    ? newSVuv(he->refcounted_he_val.refcounted_he_u_iv)
+	    : newSViv(he->refcounted_he_val.refcounted_he_u_uv);
+	break;
+    case HVrhek_PV:
+	/* Create a string SV that directly points to the bytes in our
+	   structure.  */
+	value = newSV(0);
+	sv_upgrade(value, SVt_PV);
+	SvPV_set(value, (char *) he->refcounted_he_data + 1);
+	SvCUR_set(value, he->refcounted_he_val.refcounted_he_u_len);
+	/* This stops anything trying to free it  */
+	SvLEN_set(value, 0);
+	SvPOK_on(value);
+	SvREADONLY_on(value);
+	if (he->refcounted_he_data[0] & HVrhek_UTF8)
+	    SvUTF8_on(value);
+	break;
+    default:
+	Perl_croak(aTHX_ "panic: refcounted_he_value bad flags %x",
+		   he->refcounted_he_data[0]);
+    }
+    return value;
+}
+
+#ifdef USE_ITHREADS
+/* A big expression to find the key offset */
+#define REF_HE_KEY(chain) \
+	((((chain->refcounted_he_data[0] & HVrhek_typemask) == HVrhek_PV) \
+	    ? chain->refcounted_he_val.refcounted_he_u_len + 1 : 0)	  \
+	 + 1 + chain->refcounted_he_data)
+#endif
+
 /*
 =for apidoc refcounted_he_chain_2hv
 
@@ -2597,11 +2642,7 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
 
 #ifdef USE_ITHREADS
 	HeKEY_hek(entry)
-	    = share_hek_flags(/* A big expression to find the key offset */
-			      (((chain->refcounted_he_data[0]
-				 & HVrhek_typemask) == HVrhek_PV)
-			       ? chain->refcounted_he_val.refcounted_he_u_len
-			       + 1 : 0) + 1 + chain->refcounted_he_data,
+	    = share_hek_flags(REF_HE_KEY(chain),
 			      chain->refcounted_he_keylen,
 			      chain->refcounted_he_hash,
 			      (chain->refcounted_he_data[0]
@@ -2609,38 +2650,9 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
 #else
 	HeKEY_hek(entry) = share_hek_hek(chain->refcounted_he_hek);
 #endif
-
-	switch(chain->refcounted_he_data[0] & HVrhek_typemask) {
-	case HVrhek_undef:
-	    value = newSV(0);
-	    break;
-	case HVrhek_delete:
-	    value = &PL_sv_placeholder;
+	value = refcounted_he_value(chain);
+	if (value == &PL_sv_placeholder)
 	    placeholders++;
-	    break;
-	case HVrhek_IV:
-	    value = (chain->refcounted_he_data[0] & HVrhek_UV)
-		? newSVuv(chain->refcounted_he_val.refcounted_he_u_iv)
-		: newSViv(chain->refcounted_he_val.refcounted_he_u_uv);
-	    break;
-	case HVrhek_PV:
-	    /* Create a string SV that directly points to the bytes in our
-	       structure.  */
-	    value = newSV(0);
-	    sv_upgrade(value, SVt_PV);
-	    SvPV_set(value, (char *) chain->refcounted_he_data + 1);
-	    SvCUR_set(value, chain->refcounted_he_val.refcounted_he_u_len);
-	    /* This stops anything trying to free it  */
-	    SvLEN_set(value, 0);
-	    SvPOK_on(value);
-	    SvREADONLY_on(value);
-	    if (chain->refcounted_he_data[0] & HVrhek_UTF8)
-		SvUTF8_on(value);
-	    break;
-	default:
-	    Perl_croak(aTHX_ "panic: refcounted_he_chain_2hv bad flags %x",
-		       chain->refcounted_he_data[0]);
-	}
 	HeVAL(entry) = value;
 
 	/* Link it into the chain.  */
@@ -2669,6 +2681,60 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
     DEBUG_A(Perl_hv_assert(aTHX_ hv));
 
     return hv;
+}
+
+SV *
+Perl_refcounted_he_fetch(pTHX_ const struct refcounted_he *chain, SV *keysv,
+			 const char *key, STRLEN klen, int flags, U32 hash)
+{
+    /* Just to be awkward, if you're using this interface the UTF-8-or-not-ness
+       of your key has to exactly match that which is stored.  */
+    SV *value = &PL_sv_placeholder;
+    bool is_utf8;
+
+    if (keysv) {
+	if (flags & HVhek_FREEKEY)
+	    Safefree(key);
+	key = SvPV_const(keysv, klen);
+	flags = 0;
+	is_utf8 = (SvUTF8(keysv) != 0);
+    } else {
+	is_utf8 = ((flags & HVhek_UTF8) ? TRUE : FALSE);
+    }
+
+    if (!hash) {
+	if (keysv && (SvIsCOW_shared_hash(keysv))) {
+            hash = SvSHARED_HASH(keysv);
+        } else {
+            PERL_HASH(hash, key, klen);
+        }
+    }
+
+    for (; chain; chain = chain->refcounted_he_next) {
+#ifdef USE_ITHREADS
+	if (hash != chain->refcounted_he_hash)
+	    continue;
+	if (klen != chain->refcounted_he_keylen)
+	    continue;
+	if (memNE(REF_HE_KEY(chain),key,klen))
+	    continue;
+#else
+	if (hash != HEK_HASH(chain->refcounted_he_hek))
+	    continue;
+	if (klen != HEK_LEN(chain->refcounted_he_hek))
+	    continue;
+	if (memNE(HEK_KEY(chain->refcounted_he_hek),key,klen))
+	    continue;
+#endif
+
+	value = sv_2mortal(refcounted_he_value(chain));
+	break;
+    }
+
+    if (flags & HVhek_FREEKEY)
+	Safefree(key);
+
+    return value;
 }
 
 /*

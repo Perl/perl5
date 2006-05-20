@@ -1096,6 +1096,7 @@
 #define hv_delete_common	S_hv_delete_common
 #define hv_fetch_common		S_hv_fetch_common
 #define clear_placeholders	S_clear_placeholders
+#define refcounted_he_value	S_refcounted_he_value
 #endif
 #endif
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
@@ -2460,6 +2461,10 @@
 #define hv_ksplit(a,b)		Perl_hv_ksplit(aTHX_ a,b)
 #ifdef PERL_CORE
 #endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#endif
+#ifdef PERL_CORE
+#endif
 #define hv_store(a,b,c,d,e)	Perl_hv_store(aTHX_ a,b,c,d,e)
 #define hv_store_ent(a,b,c,d)	Perl_hv_store_ent(aTHX_ a,b,c,d)
 #define hv_store_flags(a,b,c,d,e,f)	Perl_hv_store_flags(aTHX_ a,b,c,d,e,f)
@@ -3257,6 +3262,7 @@
 #define hv_delete_common(a,b,c,d,e,f,g)	S_hv_delete_common(aTHX_ a,b,c,d,e,f,g)
 #define hv_fetch_common(a,b,c,d,e,f,g,h)	S_hv_fetch_common(aTHX_ a,b,c,d,e,f,g,h)
 #define clear_placeholders(a,b)	S_clear_placeholders(aTHX_ a,b)
+#define refcounted_he_value(a)	S_refcounted_he_value(aTHX_ a)
 #endif
 #endif
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)

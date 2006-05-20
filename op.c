@@ -3946,7 +3946,8 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
 	PL_hints |= HINT_BLOCK_SCOPE;
     }
     cop->cop_seq = seq;
-    CopARYBASE_set(cop, CopARYBASE_get(PL_curcop));
+    /* CopARYBASE is now "virtual", in that it's stored as a flag bit in
+       CopHINTS and a possible value in cop_hints, so no need to copy it.  */
     cop->cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
     if (specialCopIO(PL_curcop->cop_io))
         cop->cop_io = PL_curcop->cop_io;
