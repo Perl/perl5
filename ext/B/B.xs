@@ -1148,12 +1148,12 @@ B::SV
 COP_io(o)
 	B::COP	o
 	PPCODE:
-	if (!(CopHINTS_get(o) & HINT_LEXICAL_IO)) {
-	    ST(0) = &PL_sv_undef;
-	} else {
-	    ST(0) = Perl_refcounted_he_fetch(aTHX_ o->cop_hints_hash, 0,
-					     "open", 4, 0, 0);
-	}
+	ST(0) =
+	    make_sv_object(aTHX_ sv_newmortal(),
+			   (CopHINTS_get(o) & HINT_LEXICAL_IO)
+			   ? Perl_refcounted_he_fetch(aTHX_ o->cop_hints_hash,
+						      0, "open", 4, 0, 0)
+			   : NULL);
 	XSRETURN(1);
 
 U32
