@@ -5142,10 +5142,10 @@ vfprintf(FILE *fd, char *pat, char *args)
 int
 PerlIO_vsprintf(char *s, int n, const char *fmt, va_list ap)
 {
+    dTHX; 
     const int val = my_vsnprintf(s, n > 0 ? n : 0, fmt, ap);
 #ifndef PERL_MY_VSNPRINTF_GUARDED
     if (val < 0 || (n > 0 ? val >= n : 0)) {
-	dTHX;
 	Perl_croak(aTHX_ "panic: my_vsnprintf overflow in PerlIO_vsprintf\n");
     }
 #endif
