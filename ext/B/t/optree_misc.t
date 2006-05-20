@@ -37,7 +37,7 @@ checkOptree ( name	=> 'OP_AELEMFAST opclass',
 # 3        <;> nextstate(main 635 optree_misc.t:25) v ->4
 # 5        <1> rv2av[t4] vK/OURINTR,1 ->6
 # 4           <#> gv[*y] s ->5
-# 6        <;> nextstate(main 636 optree_misc.t:25) v ->7
+# 6        <;> nextstate(main 636 optree_misc.t:25) v:{ ->7
 # 9        <2> add[t6] sK/2 ->a
 # -           <1> ex-aelem sK/2 ->8
 # 7              <0> aelemfast[@x:634,636] sR* ->8
@@ -54,7 +54,7 @@ EOT_EOT
 # 3        <;> nextstate(main 635 optree_misc.t:27) v ->4
 # 5        <1> rv2av[t3] vK/OURINTR,1 ->6
 # 4           <$> gv(*y) s ->5
-# 6        <;> nextstate(main 636 optree_misc.t:27) v ->7
+# 6        <;> nextstate(main 636 optree_misc.t:27) v:{ ->7
 # 9        <2> add[t4] sK/2 ->a
 # -           <1> ex-aelem sK/2 ->8
 # 7              <0> aelemfast[@x:634,636] sR* ->8

@@ -143,6 +143,7 @@ struct cop {
     HV *	cop_stash;	/* package line was compiled in */
     GV *	cop_filegv;	/* file the following line # is from */
 #endif
+    U32		cop_hints;	/* hints bits from pragmata */
     U32		cop_seq;	/* parse sequence number */
     line_t      cop_line;       /* line # of this command */
     /* Beware. mg.c and warnings.pl assume the type of this is STRLEN *:  */
@@ -239,8 +240,8 @@ struct cop {
 					 "$[", 2, 0, 0))		\
 	 : 0)
 #define CopARYBASE_set(c, b) STMT_START { \
-	if (b || ((c)->op_private & HINT_ARYBASE)) {			\
-	    (c)->op_private |= HINT_ARYBASE;				\
+	if (b || ((c)->cop_hints & HINT_ARYBASE)) {			\
+	    (c)->cop_hints |= HINT_ARYBASE;				\
 	    if ((c) == &PL_compiling)					\
 		PL_hints |= HINT_LOCALIZE_HH | HINT_ARYBASE;		\
 	    (c)->cop_hints_hash						\
@@ -251,10 +252,9 @@ struct cop {
     } STMT_END
 
 /* FIXME NATIVE_HINTS if this is changed from op_private (see perl.h)  */
-#define CopHINTS_get(c)		((c)->op_private + 0)
+#define CopHINTS_get(c)		((c)->cop_hints + 0)
 #define CopHINTS_set(c, h)	STMT_START {				\
-				    (c)->op_private			\
-					 = (U8)((h) & HINT_PRIVATE_MASK); \
+				    (c)->cop_hints = (h);		\
 				} STMT_END
 
 /*

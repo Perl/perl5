@@ -1101,6 +1101,7 @@ LOOP_lastop(o)
 #define COP_arybase(o)	CopARYBASE_get(o)
 #define COP_line(o)	CopLINE(o)
 #define COP_io(o)	o->cop_io
+#define COP_hints(o)	CopHINTS_get(o)
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
 
@@ -1146,6 +1147,10 @@ COP_warnings(o)
 
 B::SV
 COP_io(o)
+	B::COP	o
+
+U32
+COP_hints(o)
 	B::COP	o
 
 MODULE = B	PACKAGE = B::SV

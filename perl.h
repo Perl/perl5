@@ -4208,9 +4208,10 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_hintselem
 };
 
-				/* Note: the lowest 8 bits are reserved for
-				   stuffing into op->op_private */
-#define HINT_PRIVATE_MASK	0x000000ff
+
+/* Hints are now stored in a dedicated U32, so the bottom 8 bits are no longer
+   special and there is no need for HINT_PRIVATE_MASK for COPs
+   However, bitops store HINT_INTEGER in their op_private.  */
 #define HINT_INTEGER		0x00000001 /* integer pragma */
 #define HINT_STRICT_REFS	0x00000002 /* strict pragma */
 #define HINT_LOCALE		0x00000004 /* locale pragma */

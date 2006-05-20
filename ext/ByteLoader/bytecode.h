@@ -332,7 +332,7 @@ typedef char *pvindex;
 	    GvCV(CvGV(cv)) = 0;               /* cv has been hijacked */\
             call_list(oldscope, PL_beginav);		\
             PL_curcop = &PL_compiling;			\
-            PL_compiling.op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);\
+            CopHINTS_set(&PL_compiling, PL_hints);	\
             LEAVE;					\
 	} STMT_END
 #define BSET_push_init(ary,cv)				\

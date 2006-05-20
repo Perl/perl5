@@ -173,12 +173,12 @@ checkOptree ( name	=> 'constant sub returning list',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 3  <1> leavesub[2 refs] K/REFC,1 ->(end)
 # -     <@> lineseq K ->3
-# 1        <;> nextstate(constant 685 constant.pm:121) v ->2
+# 1        <;> nextstate(constant 685 constant.pm:121) v:*,& ->2
 # 2        <0> padav[@list:FAKE:m:102] ->3
 EOT_EOT
 # 3  <1> leavesub[2 refs] K/REFC,1 ->(end)
 # -     <@> lineseq K ->3
-# 1        <;> nextstate(constant 685 constant.pm:121) v ->2
+# 1        <;> nextstate(constant 685 constant.pm:121) v:*,& ->2
 # 2        <0> padav[@list:FAKE:m:76] ->3
 EONT_EONT
 

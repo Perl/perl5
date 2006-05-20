@@ -5832,7 +5832,7 @@ Perl_ck_bitop(pTHX_ OP *o)
 	 (op) == OP_EQ   || (op) == OP_I_EQ || \
 	 (op) == OP_NE   || (op) == OP_I_NE || \
 	 (op) == OP_NCMP || (op) == OP_I_NCMP)
-    o->op_private = (U8)(PL_hints & HINT_PRIVATE_MASK);
+    o->op_private = (U8)(PL_hints & HINT_INTEGER);
     if (!(o->op_flags & OPf_STACKED) /* Not an assignment */
 	    && (o->op_type == OP_BIT_OR
 	     || o->op_type == OP_BIT_AND

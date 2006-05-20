@@ -7,7 +7,7 @@
 #
 package B;
 
-our $VERSION = '1.10';
+our $VERSION = '1.11';
 
 use XSLoader ();
 require Exporter;
@@ -1109,6 +1109,8 @@ Only when perl was compiled with ithreads.
 =item warnings
 
 =item io
+
+=item hints
 
 =back
 

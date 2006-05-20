@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.75;
+$VERSION = 0.76;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -607,7 +607,7 @@ sub init {
     $self->{'warnings'} = defined ($self->{'ambient_warnings'})
 				? $self->{'ambient_warnings'} & WARN_MASK
 				: undef;
-    $self->{'hints'}    = $self->{'ambient_hints'} & 0xFF;
+    $self->{'hints'}    = $self->{'ambient_hints'};
 
     # also a convenient place to clear out subs_declared
     delete $self->{'subs_declared'};
@@ -1402,9 +1402,9 @@ sub pp_nextstate {
 	$self->{'warnings'} = $warning_bits;
     }
 
-    if ($self->{'hints'} != $op->private) {
-	push @text, declare_hints($self->{'hints'}, $op->private);
-	$self->{'hints'} = $op->private;
+    if ($self->{'hints'} != $op->hints) {
+	push @text, declare_hints($self->{'hints'}, $op->hints);
+	$self->{'hints'} = $op->hints;
     }
 
     # This should go after of any branches that add statements, to
