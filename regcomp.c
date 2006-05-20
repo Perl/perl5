@@ -3846,7 +3846,9 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
  * faster to run.  Backslashed characters are exceptions, each becoming a
  * separate node; the code is simpler that way and it's not worth fixing.
  *
- * [Yes, it is worth fixing, some scripts can run twice the speed.] */
+ * [Yes, it is worth fixing, some scripts can run twice the speed.]
+ * [It looks like its ok, as in S_study_chunk we merge adjacent EXACT nodes]
+ */
 STATIC regnode *
 S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
 {
@@ -4621,6 +4623,12 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
     }
 }
 
+
+/*
+   parse a class specification and produce either an ANYOF node that
+   matches the pattern. If the pattern matches a single char only and
+   that char is < 256 then we produce an EXACT node instead.
+*/
 STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state)
 {
@@ -4642,7 +4650,12 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 #ifdef EBCDIC
     UV literal_endpoint = 0;
 #endif
+    UV stored = 0;  /* number of chars stored in the class */
 
+    regnode *orig_emit = RExC_emit; /* Save the original RExC_emit in
+        case we need to change the emitted regop to an EXACT. */
+
+    /* Assume we are going to generate an ANYOF node. */
     ret = reganode(pRExC_state, ANYOF, 0);
 
     if (!SIZE_ONLY)
@@ -4694,6 +4707,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	}
 	else
 	    value = UCHARAT(RExC_parse++);
+
 	nextvalue = RExC_parse < RExC_end ? UCHARAT(RExC_parse) : 0;
 	if (value == '[' && POSIXCC(nextvalue))
 	    namedclass = regpposixcc(pRExC_state, value);
@@ -5244,9 +5258,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	}
 
 	/* now is the next time */
+        stored += (value - prevvalue + 1);
 	if (!SIZE_ONLY) {
 	    IV i;
-
 	    if (prevvalue < 256) {
 	        const IV ceilvalue = value < 256 ? value : 255;
 
@@ -5351,9 +5365,26 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	    RExC_emit += ANYOF_CLASS_ADD_SKIP;
     }
 
+
+    if (SIZE_ONLY)
+        return ret;
+    /****** !SIZE_ONLY AFTER HERE *********/
+
+    if( stored == 1 && value < 256
+        && !( ANYOF_FLAGS(ret) & ( ANYOF_FLAGS_ALL ^ ANYOF_FOLD ) )
+    ) {
+        /* optimize single char class to an EXACT node
+           but *only* when its not a UTF/high char  */
+        RExC_emit = orig_emit;
+        ret = reg_node(pRExC_state,
+                       (U8)((ANYOF_FLAGS(ret) & ANYOF_FOLD) ? EXACTF : EXACT));
+        *STRING(ret)= (char)value;
+        STR_LEN(ret)= 1;
+        RExC_emit += STR_SZ(1);
+        return ret;
+    }
     /* optimize case-insensitive simple patterns (e.g. /[a-z]/i) */
-    if (!SIZE_ONLY &&
-	 /* If the only flag is folding (plus possibly inversion). */
+    if ( /* If the only flag is folding (plus possibly inversion). */
 	((ANYOF_FLAGS(ret) & (ANYOF_FLAGS_ALL ^ ANYOF_INVERT)) == ANYOF_FOLD)
        ) {
 	for (value = 0; value < 256; ++value) {
@@ -5368,18 +5399,16 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
     }
 
     /* optimize inverted simple patterns (e.g. [^a-z]) */
-    if (!SIZE_ONLY && optimize_invert &&
+    if (optimize_invert &&
 	/* If the only flag is inversion. */
 	(ANYOF_FLAGS(ret) & ANYOF_FLAGS_ALL) ==	ANYOF_INVERT) {
 	for (value = 0; value < ANYOF_BITMAP_SIZE; ++value)
 	    ANYOF_BITMAP(ret)[value] ^= ANYOF_FLAGS_ALL;
 	ANYOF_FLAGS(ret) = ANYOF_UNICODE_ALL;
     }
-
-    if (!SIZE_ONLY) {
+    {
 	AV * const av = newAV();
 	SV *rv;
-
 	/* The 0th element stores the character class description
 	 * in its textual form: used later (regexec.c:Perl_regclass_swash())
 	 * to initialize the appropriate swash (which gets stored in
@@ -5394,7 +5423,6 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 	RExC_rx->data->data[n] = (void*)rv;
 	ARG_SET(ret, n);
     }
-
     return ret;
 }
 
