@@ -245,7 +245,6 @@ PP(pp_substcont)
 	    if (DO_UTF8(dstr))
 		SvUTF8_on(targ);
 	    SvPV_set(dstr, NULL);
-	    sv_free(dstr);
 
 	    TAINT_IF(cx->sb_rxtainted & 1);
 	    PUSHs(sv_2mortal(newSViv(saviters - 1)));
