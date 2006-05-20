@@ -38,7 +38,6 @@ my_socketpair                  # E
 pack_cat                       # E
 perl_destruct                  # E (perl_destruct)
 pv_uni_display                 # E
-regclass_swash                 # E (Perl_regclass_swash)
 save_shared_pvref              # E
 savesharedpv                   # E
 sortsv                         # E
@@ -46,7 +45,6 @@ sv_copypv                      # E
 sv_magicext                    # E
 sv_nolocking                   # E
 sv_nosharing                   # E
-sv_nounlocking                 # E
 sv_recode_to_utf8              # E
 sv_uni_display                 # E
 to_uni_fold                    # E

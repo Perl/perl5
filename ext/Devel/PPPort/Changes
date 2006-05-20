@@ -1,3 +1,26 @@
+3.08_01 - 2006-05-20
+
+    * update NOOP and dNOOP to include lint directives
+    * update API info (for 5.8.8 and 5.9.3)
+    * added support for the following API
+        ckWARN
+        dVAR
+        hv_fetchs
+        hv_stores
+        my_snprintf
+        newSVpvs
+        packWARN
+        PERL_ABS
+        PERL_UNUSED_ARG
+        PERL_UNUSED_CONTEXT
+        PERL_UNUSED_VAR
+        STR_WITH_LEN
+        sv_catpvs
+        sv_setpvs
+        SVf
+        SvVSTRING_mg
+        warner
+
 3.08 - 2006-01-19
 
     * thanks to Craig Berry for fixing my broken ppphtest

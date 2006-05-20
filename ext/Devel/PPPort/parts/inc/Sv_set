@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 3 $
+##  $Revision: 4 $
 ##  $Author: mhx $
-##  $Date: 2006/01/14 18:07:58 +0100 $
+##  $Date: 2006/05/19 23:58:03 +0200 $
 ##
 ################################################################################
 ##
@@ -91,9 +91,34 @@ TestSvPVX_mutable(sv)
         OUTPUT:
                 RETVAL
 
-=tests plan => 3
+void
+TestSvSTASH_set(sv, name)
+        SV *sv
+	char *name
+        CODE:
+		sv = SvRV(sv);
+		SvREFCNT_dec(SvSTASH(sv));
+                SvSTASH_set(sv, (HV*) SvREFCNT_inc(gv_stashpv(name, 0)));
+
+=tests plan => 5
 
 my $foo = 5;
 ok(&Devel::PPPort::TestSvUV_set($foo, 12345), 42);
 ok(&Devel::PPPort::TestSvPVX_const("mhx"), 43);
 ok(&Devel::PPPort::TestSvPVX_mutable("mhx"), 44);
+
+my $bar = [];
+
+bless $bar, 'foo';
+ok($bar->x(), 'foobar');
+
+Devel::PPPort::TestSvSTASH_set($bar, 'bar');
+ok($bar->x(), 'hacker');
+
+package foo;
+
+sub x { 'foobar' }
+
+package bar;
+
+sub x { 'hacker' }

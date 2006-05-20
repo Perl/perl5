@@ -8,9 +8,9 @@
 #
 ################################################################################
 #
-#  $Revision: 41 $
+#  $Revision: 42 $
 #  $Author: mhx $
-#  $Date: 2006/01/14 18:07:56 +0100 $
+#  $Date: 2006/05/18 23:13:47 +0200 $
 #
 ################################################################################
 #
@@ -120,6 +120,7 @@ in older Perl releases:
     call_method
     call_pv
     call_sv
+    ckWARN
     CopFILE
     CopFILE_set
     CopFILEAV
@@ -144,6 +145,7 @@ in older Perl releases:
     dTHXa
     dTHXoa
     dUNDERBAR
+    dVAR
     dXCPT
     dXSTARG
     END_EXTERN_C
@@ -162,6 +164,8 @@ in older Perl releases:
     grok_numeric_radix
     grok_oct
     gv_stashpvn
+    hv_fetchs
+    hv_stores
     IN_LOCALE
     IN_LOCALE_COMPILETIME
     IN_LOCALE_RUNTIME
@@ -190,10 +194,12 @@ in older Perl releases:
     MY_CXT
     MY_CXT_CLONE
     MY_CXT_INIT
+    my_snprintf
     newCONSTSUB
     newRV_inc
     newRV_noinc
     newSVpvn
+    newSVpvs
     newSVuv
     Newx
     Newxc
@@ -204,6 +210,8 @@ in older Perl releases:
     NVff
     NVgf
     NVTYPE
+    packWARN
+    PERL_ABS
     PERL_BCDVERSION
     PERL_GCC_BRACE_GROUPS_FORBIDDEN
     PERL_INT_MAX
@@ -266,12 +274,17 @@ in older Perl releases:
     PERL_UINT_MIN
     PERL_ULONG_MAX
     PERL_ULONG_MIN
+    PERL_UNUSED_ARG
+    PERL_UNUSED_CONTEXT
     PERL_UNUSED_DECL
+    PERL_UNUSED_VAR
     PERL_UQUAD_MAX
     PERL_UQUAD_MIN
     PERL_USHORT_MAX
     PERL_USHORT_MIN
     PERL_VERSION
+    Perl_warner
+    Perl_warner_nocontext
     PL_compiling
     PL_copline
     PL_curcop
@@ -321,6 +334,7 @@ in older Perl releases:
     START_MY_CXT
     STMT_END
     STMT_START
+    STR_WITH_LEN
     sv_2pv_nolen
     sv_2pvbyte
     sv_2uv
@@ -329,6 +343,7 @@ in older Perl releases:
     sv_catpvf_mg_nocontext
     sv_catpvn_mg
     sv_catpvn_nomg
+    sv_catpvs
     sv_catsv_mg
     sv_catsv_nomg
     sv_pvn
@@ -340,6 +355,7 @@ in older Perl releases:
     sv_setpvf_mg
     sv_setpvf_mg_nocontext
     sv_setpvn_mg
+    sv_setpvs
     sv_setsv_mg
     sv_setsv_nomg
     sv_setuv
@@ -350,6 +366,7 @@ in older Perl releases:
     sv_vcatpvf_mg
     sv_vsetpvf
     sv_vsetpvf_mg
+    SVf
     SvGETMAGIC
     SvIV_nomg
     SvMAGIC_set
@@ -367,6 +384,7 @@ in older Perl releases:
     SvUVX
     SvUVx
     SvUVXx
+    SvVSTRING_mg
     UNDERBAR
     UVof
     UVSIZE
@@ -375,6 +393,54 @@ in older Perl releases:
     UVXf
     UVxf
     vnewSVpvf
+    WARN_ALL
+    WARN_AMBIGUOUS
+    WARN_ASSERTIONS
+    WARN_BAREWORD
+    WARN_CLOSED
+    WARN_CLOSURE
+    WARN_DEBUGGING
+    WARN_DEPRECATED
+    WARN_DIGIT
+    WARN_EXEC
+    WARN_EXITING
+    WARN_GLOB
+    WARN_INPLACE
+    WARN_INTERNAL
+    WARN_IO
+    WARN_LAYER
+    WARN_MALLOC
+    WARN_MISC
+    WARN_NEWLINE
+    WARN_NUMERIC
+    WARN_ONCE
+    WARN_OVERFLOW
+    WARN_PACK
+    WARN_PARENTHESIS
+    WARN_PIPE
+    WARN_PORTABLE
+    WARN_PRECEDENCE
+    WARN_PRINTF
+    WARN_PROTOTYPE
+    WARN_QW
+    WARN_RECURSION
+    WARN_REDEFINE
+    WARN_REGEXP
+    WARN_RESERVED
+    WARN_SEMICOLON
+    WARN_SEVERE
+    WARN_SIGNAL
+    WARN_SUBSTR
+    WARN_SYNTAX
+    WARN_TAINT
+    WARN_THREADS
+    WARN_UNINITIALIZED
+    WARN_UNOPENED
+    WARN_UNPACK
+    WARN_UNTIE
+    WARN_UTF8
+    WARN_VOID
+    warner
     XCPT_CATCH
     XCPT_RETHROW
     XCPT_TRY_END
@@ -398,12 +464,29 @@ Perl below which it is unsupported:
 
 =over 4
 
-=item perl 5.9.3
+=item perl 5.9.4
 
   MULTICALL
   POP_MULTICALL
   PUSH_MULTICALL
-  SvSTASH_set
+  PoisonNew
+  PoisonWith
+  SvREFCNT_inc_NN
+  SvREFCNT_inc_simple
+  SvREFCNT_inc_simple_NN
+  SvREFCNT_inc_simple_void
+  SvREFCNT_inc_void
+  SvREFCNT_inc_void_NN
+  gv_name_set
+  my_vsnprintf
+  newXS_flags
+  pad_sv
+  regclass_swash
+  stashpv_hvname_match
+  sv_usepvn_flags
+
+=item perl 5.9.3
+
   av_arylen_p
   ckwarn
   ckwarn_d
@@ -427,7 +510,6 @@ Perl below which it is unsupported:
   newWHILEOP
   ref
   sortsv_flags
-  stashpv_hvname_match
   vverify
 
 =item perl 5.9.2
@@ -528,7 +610,6 @@ Perl below which it is unsupported:
   pack_cat
   perl_destruct
   pv_uni_display
-  regclass_swash
   save_shared_pvref
   savesharedpv
   sortsv
@@ -536,7 +617,6 @@ Perl below which it is unsupported:
   sv_magicext
   sv_nolocking
   sv_nosharing
-  sv_nounlocking
   sv_recode_to_utf8
   sv_uni_display
   to_uni_fold
@@ -599,6 +679,7 @@ Perl below which it is unsupported:
 
 =item perl 5.6.1
 
+  SvGAMAGIC
   apply_attrs_string
   bytes_to_utf8
   gv_efullname4
@@ -704,7 +785,6 @@ Perl below which it is unsupported:
   my_fflush_all
   newANONATTRSUB
   newATTRSUB
-  newMYSUB
   newPADOP
   newXS
   newXSproto
@@ -765,7 +845,6 @@ Perl below which it is unsupported:
   vmess
   vwarn
   vwarner
-  warner
 
 =item perl 5.005_03
 
@@ -795,7 +874,6 @@ Perl below which it is unsupported:
   runops_standard
   save_hints
   save_iv
-  save_threadsv
   screaminstr
   sv_iv
   sv_nv
@@ -875,6 +953,7 @@ Perl below which it is unsupported:
   sv_vsetpvfn
   unsharepvn
   vnewSVpvf
+  warner
 
 =back
 
@@ -925,7 +1004,7 @@ require DynaLoader;
 use strict;
 use vars qw($VERSION @ISA $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.08 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.08_01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 @ISA = qw(DynaLoader);
 
@@ -1174,6 +1253,7 @@ SKIP
 |>    grok_number()             NEED_grok_number             NEED_grok_number_GLOBAL
 |>    grok_numeric_radix()      NEED_grok_numeric_radix      NEED_grok_numeric_radix_GLOBAL
 |>    grok_oct()                NEED_grok_oct                NEED_grok_oct_GLOBAL
+|>    my_snprintf()             NEED_my_snprintf             NEED_my_snprintf_GLOBAL
 |>    newCONSTSUB()             NEED_newCONSTSUB             NEED_newCONSTSUB_GLOBAL
 |>    newRV_noinc()             NEED_newRV_noinc             NEED_newRV_noinc_GLOBAL
 |>    sv_2pv_nolen()            NEED_sv_2pv_nolen            NEED_sv_2pv_nolen_GLOBAL
@@ -1183,6 +1263,7 @@ SKIP
 |>    sv_setpvf_mg()            NEED_sv_setpvf_mg            NEED_sv_setpvf_mg_GLOBAL
 |>    sv_setpvf_mg_nocontext()  NEED_sv_setpvf_mg_nocontext  NEED_sv_setpvf_mg_nocontext_GLOBAL
 |>    vnewSVpvf()               NEED_vnewSVpvf               NEED_vnewSVpvf_GLOBAL
+|>    warner()                  NEED_warner                  NEED_warner_GLOBAL
 |>
 |>To avoid namespace conflicts, you can change the namespace of the
 |>explicitly exported functions / variables using the C<DPPP_NAMESPACE>
@@ -1433,13 +1514,12 @@ IVdf|5.006000||p
 LEAVE|||
 LVRET|||
 MARK|||
-MULTICALL||5.009003|
+MULTICALL||5.009004|
 MY_CXT_CLONE|5.009002||p
 MY_CXT_INIT|5.007003||p
 MY_CXT|5.007003||p
 MoveD|5.009002||p
 Move|||
-NEWSV|||
 NOOP|5.005000||p
 NUM2PTR|5.006000||p
 NVTYPE|5.006000||p
@@ -1471,7 +1551,8 @@ PAD_SET_CUR_NOSAVE|||
 PAD_SET_CUR|||
 PAD_SVl|||
 PAD_SV|||
-PERL_BCDVERSION|5.009003||p
+PERL_ABS|5.008001||p
+PERL_BCDVERSION|5.009004||p
 PERL_GCC_BRACE_GROUPS_FORBIDDEN|5.008001||p
 PERL_INT_MAX|5.004000||p
 PERL_INT_MIN|5.004000||p
@@ -1533,7 +1614,10 @@ PERL_UINT_MAX|5.004000||p
 PERL_UINT_MIN|5.004000||p
 PERL_ULONG_MAX|5.004000||p
 PERL_ULONG_MIN|5.004000||p
+PERL_UNUSED_ARG|5.009003||p
+PERL_UNUSED_CONTEXT|5.009004||p
 PERL_UNUSED_DECL|5.007002||p
+PERL_UNUSED_VAR|5.007002||p
 PERL_UQUAD_MAX|5.004000||p
 PERL_UQUAD_MIN|5.004000||p
 PERL_USHORT_MAX|5.004000||p
@@ -1576,7 +1660,7 @@ PL_sv_undef|5.004050||pn
 PL_sv_yes|5.004050||pn
 PL_tainted|5.004050||p
 PL_tainting|5.004050||p
-POP_MULTICALL||5.009003|
+POP_MULTICALL||5.009004|
 POPi|||n
 POPl|||n
 POPn|||n
@@ -1590,7 +1674,7 @@ PTR2UV|5.006000||p
 PTR2ul|5.007001||p
 PTRV|5.006000||p
 PUSHMARK|||
-PUSH_MULTICALL||5.009003|
+PUSH_MULTICALL||5.009004|
 PUSHi|||
 PUSHmortal|5.009002||p
 PUSHn|||
@@ -1620,6 +1704,10 @@ PerlIO_stdout||5.007003|
 PerlIO_tell||5.007003|
 PerlIO_unread||5.007003|
 PerlIO_write||5.007003|
+Perl_warner_nocontext|5.006000||p
+Perl_warner|5.006000||p
+PoisonNew||5.009004|
+PoisonWith||5.009004|
 Poison|5.008000||p
 RETVAL|||n
 Renewc|||
@@ -1635,7 +1723,9 @@ START_EXTERN_C|5.005000||p
 START_MY_CXT|5.007003||p
 STMT_END|||p
 STMT_START|||p
+STR_WITH_LEN|5.009003||p
 ST|||
+SVf|||p
 SVt_IV|||
 SVt_NV|||
 SVt_PVAV|||
@@ -1650,6 +1740,7 @@ StructCopy|||
 SvCUR_set|||
 SvCUR|||
 SvEND|||
+SvGAMAGIC||5.006001|
 SvGETMAGIC|5.004050||p
 SvGROW|||
 SvIOK_UV||5.006000|
@@ -1712,6 +1803,12 @@ SvPVutf8||5.006000|
 SvPVx|||
 SvPV|||
 SvREFCNT_dec|||
+SvREFCNT_inc_NN||5.009004|
+SvREFCNT_inc_simple_NN||5.009004|
+SvREFCNT_inc_simple_void||5.009004|
+SvREFCNT_inc_simple||5.009004|
+SvREFCNT_inc_void_NN||5.009004|
+SvREFCNT_inc_void||5.009004|
 SvREFCNT_inc|||
 SvREFCNT|||
 SvROK_off|||
@@ -1721,7 +1818,7 @@ SvRV_set|5.009003||p
 SvRV|||
 SvSETMAGIC|||
 SvSHARE||5.007003|
-SvSTASH_set|5.009003|5.009003|p
+SvSTASH_set|5.009004||p
 SvSTASH|||
 SvSetMagicSV_nosteal||5.004000|
 SvSetMagicSV||5.004000|
@@ -1746,6 +1843,7 @@ SvUV_set|5.009003||p
 SvUVx|5.004000||p
 SvUV|5.004000||p
 SvVOK||5.008001|
+SvVSTRING_mg|5.009004||p
 THIS|||n
 UNDERBAR|5.009002||p
 UVSIZE|5.006000||p
@@ -1754,6 +1852,53 @@ UVXf|5.007001||p
 UVof|5.006000||p
 UVuf|5.006000||p
 UVxf|5.006000||p
+WARN_ALL|5.006000||p
+WARN_AMBIGUOUS|5.006000||p
+WARN_ASSERTIONS|5.009000||p
+WARN_BAREWORD|5.006000||p
+WARN_CLOSED|5.006000||p
+WARN_CLOSURE|5.006000||p
+WARN_DEBUGGING|5.006000||p
+WARN_DEPRECATED|5.006000||p
+WARN_DIGIT|5.006000||p
+WARN_EXEC|5.006000||p
+WARN_EXITING|5.006000||p
+WARN_GLOB|5.006000||p
+WARN_INPLACE|5.006000||p
+WARN_INTERNAL|5.006000||p
+WARN_IO|5.006000||p
+WARN_LAYER|5.008000||p
+WARN_MALLOC|5.006000||p
+WARN_MISC|5.006000||p
+WARN_NEWLINE|5.006000||p
+WARN_NUMERIC|5.006000||p
+WARN_ONCE|5.006000||p
+WARN_OVERFLOW|5.006000||p
+WARN_PACK|5.006000||p
+WARN_PARENTHESIS|5.006000||p
+WARN_PIPE|5.006000||p
+WARN_PORTABLE|5.006000||p
+WARN_PRECEDENCE|5.006000||p
+WARN_PRINTF|5.006000||p
+WARN_PROTOTYPE|5.006000||p
+WARN_QW|5.006000||p
+WARN_RECURSION|5.006000||p
+WARN_REDEFINE|5.006000||p
+WARN_REGEXP|5.006000||p
+WARN_RESERVED|5.006000||p
+WARN_SEMICOLON|5.006000||p
+WARN_SEVERE|5.006000||p
+WARN_SIGNAL|5.006000||p
+WARN_SUBSTR|5.006000||p
+WARN_SYNTAX|5.006000||p
+WARN_TAINT|5.006000||p
+WARN_THREADS|5.008000||p
+WARN_UNINITIALIZED|5.006000||p
+WARN_UNOPENED|5.006000||p
+WARN_UNPACK|5.006000||p
+WARN_UNTIE|5.006000||p
+WARN_UTF8|5.006000||p
+WARN_VOID|5.006000||p
 XCPT_CATCH|5.009002||p
 XCPT_RETHROW|5.009002||p
 XCPT_TRY_END|5.009002||p
@@ -1792,7 +1937,8 @@ aMY_CXT_|5.007003||p
 aMY_CXT|5.007003||p
 aTHX_|5.006000||p
 aTHX|5.006000||p
-add_data|||
+add_data|||n
+addmad|||
 allocmy|||
 amagic_call|||
 amagic_cmp_locale|||
@@ -1803,6 +1949,7 @@ any_dup|||
 ao|||
 append_elem|||
 append_list|||
+append_madprops|||
 apply_attrs_my|||
 apply_attrs_string||5.006001|
 apply_attrs|||
@@ -1837,12 +1984,10 @@ boot_core_PerlIO|||
 boot_core_UNIVERSAL|||
 boot_core_xsutils|||
 bytes_from_utf8||5.007001|
+bytes_to_uni|||
 bytes_to_utf8||5.006001|
-cache_re|||
 call_argv|5.006000||p
 call_atexit||5.006000|
-call_body|||
-call_list_body|||
 call_list||5.004000|
 call_method|5.006000||p
 call_pv|5.006000||p
@@ -1857,6 +2002,7 @@ check_type_and_open|||
 check_uni|||
 checkcomma|||
 checkposixcc|||
+ckWARN|||p
 ck_anoncode|||
 ck_bitop|||
 ck_concat|||
@@ -1901,21 +2047,25 @@ ck_trunc|||
 ck_unpack|||
 ckwarn_d||5.009003|
 ckwarn||5.009003|
-cl_and|||
-cl_anything|||
-cl_init_zero|||
-cl_init|||
-cl_is_anything|||
-cl_or|||
+cl_and|||n
+cl_anything|||n
+cl_init_zero|||n
+cl_init|||n
+cl_is_anything|||n
+cl_or|||n
+clear_placeholders|||
 closest_cop|||
 convert|||
 cop_free|||
 cr_textfilter|||
+create_eval_scope|||
 croak_nocontext|||vn
 croak|||v
 csighandler||5.009003|n
+curmad|||
 custom_op_desc||5.007003|
 custom_op_name||5.007003|
+cv_ckproto_len|||
 cv_ckproto|||
 cv_clone|||
 cv_const_sv||5.004000|
@@ -1939,6 +2089,7 @@ dTHXa|5.006000||p
 dTHXoa|5.006000||p
 dTHX|5.006000||p
 dUNDERBAR|5.009002||p
+dVAR|5.009003||p
 dXCPT|5.009002||p
 dXSARGS|||
 dXSI32|||
@@ -1954,6 +2105,7 @@ debstackptrs||5.007003|
 debstack||5.007003|
 deb||5.007003|v
 del_sv|||
+delete_eval_scope|||
 delimcpy||5.004000|
 deprecate_old|||
 deprecate|||
@@ -1989,11 +2141,13 @@ do_msgrcv|||
 do_msgsnd|||
 do_oddball|||
 do_op_dump||5.006000|
+do_op_xmldump|||
 do_open9||5.006000|
 do_openn||5.007001|
 do_open||5.004000|
 do_pipe|||
 do_pmop_dump||5.006000|
+do_pmop_xmldump|||
 do_print|||
 do_readline|||
 do_seek|||
@@ -2060,8 +2214,10 @@ filter_add|||
 filter_del|||
 filter_gets|||
 filter_read|||
+find_array_subscript|||
 find_beginning|||
 find_byclass|||
+find_hash_subscript|||
 find_in_my_stash|||
 find_runcv|||
 find_rundefsvoffset||5.009002|
@@ -2083,6 +2239,7 @@ free_global_struct|||
 free_tied_hv_pool|||
 free_tmps|||
 gen_constant_list|||
+get_arena|||
 get_av|5.006000||p
 get_context||5.006000|n
 get_cv|5.006000||p
@@ -2101,6 +2258,10 @@ get_sv|5.006000||p
 get_vtbl||5.005030|
 getcwd_sv||5.007002|
 getenv_len|||
+glob_2number|||
+glob_2pv|||
+glob_assign_glob|||
+glob_assign_ref|||
 gp_dup|||
 gp_free|||
 gp_ref|||
@@ -2136,6 +2297,7 @@ gv_fullname|||
 gv_handler||5.007001|
 gv_init_sv|||
 gv_init|||
+gv_name_set||5.009004|
 gv_stashpvn|5.006000||p
 gv_stashpv|||
 gv_stashsv|||
@@ -2144,10 +2306,11 @@ hek_dup|||
 hfreeentries|||
 hsplit|||
 hv_assert||5.009001|
-hv_auxinit|||
+hv_auxinit|||n
 hv_backreferences_p|||
 hv_clear_placeholders||5.009001|
 hv_clear|||
+hv_copy_hints_hv|||
 hv_delayfree_ent||5.004000|
 hv_delete_common|||
 hv_delete_ent||5.004000|
@@ -2158,6 +2321,7 @@ hv_exists_ent||5.004000|
 hv_exists|||
 hv_fetch_common|||
 hv_fetch_ent||5.004000|
+hv_fetchs|5.009003||p
 hv_fetch|||
 hv_free_ent||5.004000|
 hv_iterinit|||
@@ -2169,7 +2333,7 @@ hv_iternext|||
 hv_iterval|||
 hv_kill_backrefs|||
 hv_ksplit||5.004000|
-hv_magic_check|||
+hv_magic_check|||n
 hv_magic|||
 hv_name_set||5.009003|
 hv_notallowed|||
@@ -2181,6 +2345,7 @@ hv_riter_set||5.009003|
 hv_scalar||5.009001|
 hv_store_ent||5.004000|
 hv_store_flags||5.008000|
+hv_stores|5.009004||p
 hv_store|||
 hv_undef|||
 ibcmp_locale||5.004000|
@@ -2220,7 +2385,7 @@ isUPPER|||
 is_an_int|||
 is_gv_magical_sv|||
 is_gv_magical|||
-is_handle_constructor|||
+is_handle_constructor|||n
 is_list_assignment|||
 is_lvalue_sub||5.007001|
 is_uni_alnum_lc||5.006000|
@@ -2255,7 +2420,7 @@ is_utf8_alnumc||5.006000|
 is_utf8_alnum||5.006000|
 is_utf8_alpha||5.006000|
 is_utf8_ascii||5.006000|
-is_utf8_char_slow|||
+is_utf8_char_slow|||n
 is_utf8_char||5.006000|
 is_utf8_cntrl||5.006000|
 is_utf8_common|||
@@ -2298,8 +2463,12 @@ mXPUSHi|5.009002||p
 mXPUSHn|5.009002||p
 mXPUSHp|5.009002||p
 mXPUSHu|5.009002||p
+mad_free|||
+madlex|||
+madparse|||
 magic_clear_all_env|||
 magic_clearenv|||
+magic_clearhint|||
 magic_clearpack|||
 magic_clearsig|||
 magic_dump||5.006000|
@@ -2309,7 +2478,6 @@ magic_freeovrld|||
 magic_freeregexp|||
 magic_getarylen|||
 magic_getdefelem|||
-magic_getglob|||
 magic_getnkeys|||
 magic_getpack|||
 magic_getpos|||
@@ -2338,6 +2506,7 @@ magic_setdefelem|||
 magic_setenv|||
 magic_setfm|||
 magic_setglob|||
+magic_sethint|||
 magic_setisa|||
 magic_setmglob|||
 magic_setnkeys|||
@@ -2385,6 +2554,8 @@ missingterm|||
 mode_from_discipline|||
 modkids|||
 mod|||
+more_bodies|||
+more_sv|||
 moreswitches|||
 mul128|||
 mulexp10|||n
@@ -2435,6 +2606,7 @@ my_pclose||5.004000|
 my_popen_list||5.007001|
 my_popen||5.004000|
 my_setenv|||
+my_snprintf|5.009004||pvn
 my_socketpair||5.007003|n
 my_sprintf||5.009003|vn
 my_stat|||
@@ -2442,6 +2614,7 @@ my_strftime||5.007002|
 my_swabn|||n
 my_swap|||
 my_unexec|||
+my_vsnprintf||5.009004|n
 my|||
 need_utf8|||n
 newANONATTRSUB||5.006000|
@@ -2461,6 +2634,7 @@ newFORM|||
 newFOROP|||
 newGIVENOP||5.009003|
 newGIVWHENOP|||
+newGP|||
 newGVOP|||
 newGVREF|||
 newGVgen|||
@@ -2472,7 +2646,9 @@ newLISTOP|||
 newLOGOP|||
 newLOOPEX|||
 newLOOPOP|||
-newMYSUB||5.006000|
+newMADPROP|||
+newMADsv|||
+newMYSUB|||
 newNULLLIST|||
 newOP|||
 newPADOP||5.006000|
@@ -2495,14 +2671,17 @@ newSVpvf_nocontext|||vn
 newSVpvf||5.004000|v
 newSVpvn_share||5.007001|
 newSVpvn|5.006000||p
+newSVpvs|5.009003||p
 newSVpv|||
 newSVrv|||
 newSVsv|||
 newSVuv|5.006000||p
 newSV|||
+newTOKEN|||
 newUNOP|||
 newWHENOP||5.009003|
 newWHILEOP||5.009003|
+newXS_flags||5.009004|
 newXSproto||5.006000|
 newXS||5.006000|
 new_collate||5.006000|
@@ -2513,6 +2692,7 @@ new_logop|||
 new_numeric||5.006000|
 new_stackinfo||5.005000|
 new_version||5.009000|
+new_warnings_bitfield|||
 next_symbol|||
 nextargv|||
 nextchar|||
@@ -2532,14 +2712,18 @@ op_clear|||
 op_const_sv|||
 op_dump||5.006000|
 op_free|||
+op_getmad_weak|||
+op_getmad|||
 op_null||5.007002|
 op_refcnt_lock||5.009002|
 op_refcnt_unlock||5.009002|
+op_xmldump|||
 open_script|||
 pMY_CXT_|5.007003||p
 pMY_CXT|5.007003||p
 pTHX_|5.006000||p
 pTHX|5.006000||p
+packWARN|5.007003||p
 pack_cat||5.007003|
 pack_rec|||
 package|||
@@ -2556,16 +2740,17 @@ pad_fixup_inner_anons|||
 pad_free|||
 pad_leavemy|||
 pad_new|||
+pad_peg|||n
 pad_push|||
 pad_reset|||
 pad_setsv|||
-pad_sv|||
+pad_sv||5.009004|
 pad_swipe|||
 pad_tidy|||
 pad_undef|||
 parse_body|||
 parse_unicode_opts|||
-path_is_absolute|||
+path_is_absolute|||n
 peep|||
 pending_ident|||
 perl_alloc_using|||n
@@ -2578,8 +2763,10 @@ perl_free|||n
 perl_parse||5.006000|n
 perl_run|||n
 pidgone|||
+pm_description|||
 pmflag|||
 pmop_dump||5.006000|
+pmop_xmldump|||
 pmruntime|||
 pmtrans|||
 pop_scope|||
@@ -2587,9 +2774,12 @@ pregcomp|||
 pregexec|||
 pregfree|||
 prepend_elem|||
+prepend_madprops|||
+printbuf|||
 printf_nocontext|||vn
 ptr_table_clear|||
 ptr_table_fetch|||
+ptr_table_find|||n
 ptr_table_free|||
 ptr_table_new|||
 ptr_table_split|||
@@ -2609,6 +2799,9 @@ reentrant_init|||
 reentrant_retry|||vn
 reentrant_size|||
 ref_array_or_hash|||
+refcounted_he_chain_2hv|||
+refcounted_he_free|||
+refcounted_he_new|||
 refkids|||
 refto|||
 ref||5.009003|
@@ -2616,32 +2809,28 @@ reg_node|||
 reganode|||
 regatom|||
 regbranch|||
-regclass_swash||5.007003|
+regclass_swash||5.009004|
 regclass|||
 regcppop|||
 regcppush|||
-regcurly|||
+regcurly|||n
 regdump||5.005000|
 regexec_flags||5.005000|
-reghop3|||
-reghopmaybe3|||
-reghopmaybe|||
-reghop|||
+reghop3|||n
+reghopmaybe3|||n
 reginclass|||
 reginitcolors||5.006000|
 reginsert|||
 regmatch|||
 regnext||5.005000|
-regoptail|||
 regpiece|||
 regpposixcc|||
 regprop|||
-regrepeat_hard|||
 regrepeat|||
 regtail|||
 regtry|||
 reguni|||
-regwhite|||
+regwhite|||n
 reg|||
 repeatcpy|||
 report_evil_fh|||
@@ -2686,7 +2875,7 @@ save_generic_pvref||5.006001|
 save_generic_svref||5.005030|
 save_gp||5.004000|
 save_hash|||
-save_hek_flags|||
+save_hek_flags|||n
 save_helem||5.004050|
 save_hints||5.005000|
 save_hptr|||
@@ -2709,7 +2898,6 @@ save_set_svflags||5.009000|
 save_shared_pvref||5.007003|
 save_sptr|||
 save_svref|||
-save_threadsv||5.005000|
 save_vptr||5.006000|
 savepvn|||
 savepv|||
@@ -2718,7 +2906,7 @@ savestack_grow_cnt||5.008001|
 savestack_grow|||
 savesvpv||5.009002|
 sawparens|||
-scalar_mod_type|||
+scalar_mod_type|||n
 scalarboolean|||
 scalarkids|||
 scalarseq|||
@@ -2745,6 +2933,7 @@ scope|||
 screaminstr||5.005000|
 seed||5.008001|
 sequence_num|||
+sequence_tail|||
 sequence|||
 set_context||5.006000|n
 set_csh|||
@@ -2758,17 +2947,22 @@ share_hek||5.004000|
 si_dup|||
 sighandler|||n
 simplify_sort|||
+skipspace0|||
+skipspace1|||
+skipspace2|||
 skipspace|||
 sortcv_stacked|||
 sortcv_xsub|||
 sortcv|||
 sortsv_flags||5.009003|
 sortsv||5.007003|
+space_join_names_mortal|||
 ss_dup|||
 stack_grow|||
+start_force|||
 start_glob|||
 start_subparse||5.004000|
-stashpv_hvname_match||5.009003|
+stashpv_hvname_match||5.009004|
 stdize_locale|||
 strEQ|||
 strGE|||
@@ -2789,6 +2983,7 @@ sublex_start|||
 sv_2bool|||
 sv_2cv|||
 sv_2io|||
+sv_2iuv_common|||
 sv_2iuv_non_preserve|||
 sv_2iv_flags||5.009001|
 sv_2iv|||
@@ -2817,11 +3012,14 @@ sv_catpvn_flags||5.007002|
 sv_catpvn_mg|5.004050||p
 sv_catpvn_nomg|5.007002||p
 sv_catpvn|||
+sv_catpvs|5.009003||p
 sv_catpv|||
 sv_catsv_flags||5.007002|
 sv_catsv_mg|5.004050||p
 sv_catsv_nomg|5.007002||p
 sv_catsv|||
+sv_catxmlpvn|||
+sv_catxmlsv|||
 sv_chop|||
 sv_clean_all|||
 sv_clean_objs|||
@@ -2862,10 +3060,15 @@ sv_newmortal|||
 sv_newref|||
 sv_nolocking||5.007003|
 sv_nosharing||5.007003|
-sv_nounlocking||5.007003|
+sv_nounlocking|||
 sv_nv||5.005000|
 sv_peek||5.005000|
+sv_pos_b2u_forwards|||
+sv_pos_b2u_midway|||
 sv_pos_b2u||5.006000|
+sv_pos_u2b_cached|||
+sv_pos_u2b_forwards|||n
+sv_pos_u2b_midway|||n
 sv_pos_u2b||5.006000|
 sv_pvbyten_force||5.006000|
 sv_pvbyten||5.006000|
@@ -2899,6 +3102,7 @@ sv_setpviv_mg||5.008001|
 sv_setpviv||5.008001|
 sv_setpvn_mg|5.006000||p
 sv_setpvn|||
+sv_setpvs|5.009004||p
 sv_setpv|||
 sv_setref_iv|||
 sv_setref_nv|||
@@ -2922,7 +3126,8 @@ sv_unref_flags||5.007001|
 sv_unref|||
 sv_untaint||5.004000|
 sv_upgrade|||
-sv_usepvn_mg|5.006000||p
+sv_usepvn_flags||5.009004|
+sv_usepvn_mg|5.004050||p
 sv_usepvn|||
 sv_utf8_decode||5.006000|
 sv_utf8_downgrade||5.006000|
@@ -2936,6 +3141,7 @@ sv_vcatpvf|5.006000|5.004000|p
 sv_vsetpvf_mg|5.006000|5.004000|p
 sv_vsetpvfn||5.004000|
 sv_vsetpvf|5.006000|5.004000|p
+sv_xmlpeek|||
 svtype|||
 swallow_bom|||
 swash_fetch||5.007002|
@@ -2963,6 +3169,8 @@ to_utf8_lower||5.007003|
 to_utf8_substr|||
 to_utf8_title||5.007003|
 to_utf8_upper||5.007003|
+token_free|||
+token_getmad|||
 tokenize_use|||
 tokeq|||
 tokereport|||
@@ -2984,8 +3192,7 @@ utf16_to_utf8||5.006001|
 utf8_distance||5.006000|
 utf8_hop||5.006000|
 utf8_length||5.007001|
-utf8_mg_pos_init|||
-utf8_mg_pos|||
+utf8_mg_pos_cache_update|||
 utf8_to_bytes||5.006001|
 utf8_to_uvchr||5.007001|
 utf8_to_uvuni||5.007001|
@@ -3020,12 +3227,20 @@ vwarn||5.006000|
 wait4pid|||
 warn_nocontext|||vn
 warner_nocontext|||vn
-warner||5.006000|v
+warner|5.006000|5.004000|pv
 warn|||v
 watch|||
 whichsig|||
 write_no_mem|||
 write_to_stderr|||
+xmldump_all|||
+xmldump_attr|||
+xmldump_eval|||
+xmldump_form|||
+xmldump_indent|||v
+xmldump_packsubs|||
+xmldump_sub|||
+xmldump_vindent|||
 yyerror|||
 yylex|||
 yyparse|||
@@ -4219,12 +4434,33 @@ __DATA__
 #    define PERL_UNUSED_DECL
 #  endif
 #endif
+
+#ifndef PERL_UNUSED_ARG
+#  if defined(lint) && defined(S_SPLINT_S) /* www.splint.org */
+#    include <note.h>
+#    define PERL_UNUSED_ARG(x) NOTE(ARGUNUSED(x))
+#  else
+#    define PERL_UNUSED_ARG(x) ((void)x)
+#  endif
+#endif
+
+#ifndef PERL_UNUSED_VAR
+#  define PERL_UNUSED_VAR(x) ((void)x)
+#endif
+
+#ifndef PERL_UNUSED_CONTEXT
+#  ifdef USE_ITHREADS
+#    define PERL_UNUSED_CONTEXT PERL_UNUSED_ARG(my_perl)
+#  else
+#    define PERL_UNUSED_CONTEXT
+#  endif
+#endif
 #ifndef NOOP
-#  define NOOP                           (void)0
+#  define NOOP                           /*EMPTY*/(void)0
 #endif
 
 #ifndef dNOOP
-#  define dNOOP                          extern int Perl___notused PERL_UNUSED_DECL
+#  define dNOOP                          extern int /*@unused@*/ Perl___notused PERL_UNUSED_DECL
 #endif
 
 #ifndef NVTYPE
@@ -4382,6 +4618,15 @@ typedef NVTYPE NV;
           PL_stack_sp = PL_stack_base + ax + ((off) - 1); \
           return;                                         \
       } STMT_END
+#endif
+#ifndef PERL_ABS
+#  define PERL_ABS(x)                    ((x) < 0 ? -(x) : (x))
+#endif
+#ifndef dVAR
+#  define dVAR                           dNOOP
+#endif
+#ifndef SVf
+#  define SVf                            "_"
 #endif
 
 #ifndef PERL_SIGNALS_UNSAFE_FLAG
@@ -5097,6 +5342,267 @@ DPPP_(my_sv_setpvf_mg_nocontext)(SV *sv, const char *pat, ...)
      SvSETMAGIC(sv);                                                       \
    } STMT_END
 #endif
+#ifndef WARN_ALL
+#  define WARN_ALL                       0
+#endif
+
+#ifndef WARN_CLOSURE
+#  define WARN_CLOSURE                   1
+#endif
+
+#ifndef WARN_DEPRECATED
+#  define WARN_DEPRECATED                2
+#endif
+
+#ifndef WARN_EXITING
+#  define WARN_EXITING                   3
+#endif
+
+#ifndef WARN_GLOB
+#  define WARN_GLOB                      4
+#endif
+
+#ifndef WARN_IO
+#  define WARN_IO                        5
+#endif
+
+#ifndef WARN_CLOSED
+#  define WARN_CLOSED                    6
+#endif
+
+#ifndef WARN_EXEC
+#  define WARN_EXEC                      7
+#endif
+
+#ifndef WARN_LAYER
+#  define WARN_LAYER                     8
+#endif
+
+#ifndef WARN_NEWLINE
+#  define WARN_NEWLINE                   9
+#endif
+
+#ifndef WARN_PIPE
+#  define WARN_PIPE                      10
+#endif
+
+#ifndef WARN_UNOPENED
+#  define WARN_UNOPENED                  11
+#endif
+
+#ifndef WARN_MISC
+#  define WARN_MISC                      12
+#endif
+
+#ifndef WARN_NUMERIC
+#  define WARN_NUMERIC                   13
+#endif
+
+#ifndef WARN_ONCE
+#  define WARN_ONCE                      14
+#endif
+
+#ifndef WARN_OVERFLOW
+#  define WARN_OVERFLOW                  15
+#endif
+
+#ifndef WARN_PACK
+#  define WARN_PACK                      16
+#endif
+
+#ifndef WARN_PORTABLE
+#  define WARN_PORTABLE                  17
+#endif
+
+#ifndef WARN_RECURSION
+#  define WARN_RECURSION                 18
+#endif
+
+#ifndef WARN_REDEFINE
+#  define WARN_REDEFINE                  19
+#endif
+
+#ifndef WARN_REGEXP
+#  define WARN_REGEXP                    20
+#endif
+
+#ifndef WARN_SEVERE
+#  define WARN_SEVERE                    21
+#endif
+
+#ifndef WARN_DEBUGGING
+#  define WARN_DEBUGGING                 22
+#endif
+
+#ifndef WARN_INPLACE
+#  define WARN_INPLACE                   23
+#endif
+
+#ifndef WARN_INTERNAL
+#  define WARN_INTERNAL                  24
+#endif
+
+#ifndef WARN_MALLOC
+#  define WARN_MALLOC                    25
+#endif
+
+#ifndef WARN_SIGNAL
+#  define WARN_SIGNAL                    26
+#endif
+
+#ifndef WARN_SUBSTR
+#  define WARN_SUBSTR                    27
+#endif
+
+#ifndef WARN_SYNTAX
+#  define WARN_SYNTAX                    28
+#endif
+
+#ifndef WARN_AMBIGUOUS
+#  define WARN_AMBIGUOUS                 29
+#endif
+
+#ifndef WARN_BAREWORD
+#  define WARN_BAREWORD                  30
+#endif
+
+#ifndef WARN_DIGIT
+#  define WARN_DIGIT                     31
+#endif
+
+#ifndef WARN_PARENTHESIS
+#  define WARN_PARENTHESIS               32
+#endif
+
+#ifndef WARN_PRECEDENCE
+#  define WARN_PRECEDENCE                33
+#endif
+
+#ifndef WARN_PRINTF
+#  define WARN_PRINTF                    34
+#endif
+
+#ifndef WARN_PROTOTYPE
+#  define WARN_PROTOTYPE                 35
+#endif
+
+#ifndef WARN_QW
+#  define WARN_QW                        36
+#endif
+
+#ifndef WARN_RESERVED
+#  define WARN_RESERVED                  37
+#endif
+
+#ifndef WARN_SEMICOLON
+#  define WARN_SEMICOLON                 38
+#endif
+
+#ifndef WARN_TAINT
+#  define WARN_TAINT                     39
+#endif
+
+#ifndef WARN_THREADS
+#  define WARN_THREADS                   40
+#endif
+
+#ifndef WARN_UNINITIALIZED
+#  define WARN_UNINITIALIZED             41
+#endif
+
+#ifndef WARN_UNPACK
+#  define WARN_UNPACK                    42
+#endif
+
+#ifndef WARN_UNTIE
+#  define WARN_UNTIE                     43
+#endif
+
+#ifndef WARN_UTF8
+#  define WARN_UTF8                      44
+#endif
+
+#ifndef WARN_VOID
+#  define WARN_VOID                      45
+#endif
+
+#ifndef WARN_ASSERTIONS
+#  define WARN_ASSERTIONS                46
+#endif
+#ifndef packWARN
+#  define packWARN(a)                    (a)
+#endif
+
+#ifndef ckWARN
+#  ifdef G_WARN_ON
+#    define  ckWARN(a)                  (PL_dowarn & G_WARN_ON)
+#  else
+#    define  ckWARN(a)                  PL_dowarn
+#  endif
+#endif
+
+/* warner depends on vnewSVpvf */
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0))) && !defined(warner)
+#if defined(NEED_warner)
+static void DPPP_(my_warner)(U32 err, const char *pat, ...);
+static
+#else
+extern void DPPP_(my_warner)(U32 err, const char *pat, ...);
+#endif
+
+#define Perl_warner DPPP_(my_warner)
+
+#if defined(NEED_warner) || defined(NEED_warner_GLOBAL)
+
+void
+DPPP_(my_warner)(U32 err, const char *pat, ...)
+{
+  SV *sv;
+  va_list args;
+
+  PERL_UNUSED_ARG(err);
+
+  va_start(args, pat);
+  sv = vnewSVpvf(pat, &args);
+  va_end(args);
+  sv_2mortal(sv);
+  warn("%s", SvPV_nolen(sv));
+}
+
+#define warner  Perl_warner
+
+/* Perl_warner_nocontext depends on warner */
+#define Perl_warner_nocontext  Perl_warner
+
+#endif
+#endif
+
+/* concatenating with "" ensures that only literal strings are accepted as argument
+ * note that STR_WITH_LEN() can't be used as argument to macros or functions that
+ * under some configurations might be macros
+ */
+#ifndef STR_WITH_LEN
+#  define STR_WITH_LEN(s)                (s ""), (sizeof(s)-1)
+#endif
+#ifndef newSVpvs
+#  define newSVpvs(str)                  newSVpvn(str "", sizeof(str) - 1)
+#endif
+
+#ifndef sv_catpvs
+#  define sv_catpvs(sv, str)             sv_catpvn(sv, str "", sizeof(str) - 1)
+#endif
+
+#ifndef sv_setpvs
+#  define sv_setpvs(sv, str)             sv_setpvn(sv, str "", sizeof(str) - 1)
+#endif
+
+#ifndef hv_fetchs
+#  define hv_fetchs(hv,key,lval)         hv_fetch(hv, key "", sizeof(key) - 1, lval)
+#endif
+
+#ifndef hv_stores
+#  define hv_stores(hv,key,val,hash)     hv_store(hv, key "", sizeof(key) - 1, val, hash)
+#endif
 #ifndef SvGETMAGIC
 #  define SvGETMAGIC(x)                  STMT_START { if (SvGMAGICAL(x)) mg_get(x); } STMT_END
 #endif
@@ -5377,6 +5883,9 @@ DPPP_(my_sv_setpvf_mg_nocontext)(SV *sv, const char *pat, ...)
      sv_usepvn(TeMpSv,ptr,len);         \
      SvSETMAGIC(TeMpSv);                \
    } STMT_END
+#endif
+#ifndef SvVSTRING_mg
+#  define SvVSTRING_mg(sv)               (SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_vstring) : NULL)
 #endif
 
 #ifdef USE_ITHREADS
@@ -6093,6 +6602,40 @@ DPPP_(my_grok_oct)(pTHX_ char *start, STRLEN *len_p, I32 *flags, NV *result)
         *result = value_nv;
     return UV_MAX;
 }
+#endif
+#endif
+
+#if !defined(my_snprintf)
+#if defined(NEED_my_snprintf)
+static int DPPP_(my_my_snprintf)(char * buffer, const Size_t len, const char * format, ...);
+static
+#else
+extern int DPPP_(my_my_snprintf)(char * buffer, const Size_t len, const char * format, ...);
+#endif
+
+#define my_snprintf DPPP_(my_my_snprintf)
+#define Perl_my_snprintf DPPP_(my_my_snprintf)
+
+#if defined(NEED_my_snprintf) || defined(NEED_my_snprintf_GLOBAL)
+
+int
+DPPP_(my_my_snprintf)(char *buffer, const Size_t len, const char *format, ...)
+{
+    dTHX;
+    int retval;
+    va_list ap;
+    va_start(ap, format);
+#ifdef HAS_VSNPRINTF
+    retval = vsnprintf(buffer, len, format, ap);
+#else
+    retval = vsprintf(buffer, format, ap);
+#endif
+    va_end(ap);
+    if (retval >= (int)len)
+	Perl_croak(aTHX_ "panic: my_snprintf buffer overflow");
+    return retval;
+}
+
 #endif
 #endif
 

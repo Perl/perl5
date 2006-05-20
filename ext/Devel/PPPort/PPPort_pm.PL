@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 41 $
+#  $Revision: 42 $
 #  $Author: mhx $
-#  $Date: 2006/01/14 18:07:56 +0100 $
+#  $Date: 2006/05/18 23:13:47 +0200 $
 #
 ################################################################################
 #
@@ -335,9 +335,9 @@ __DATA__
 #
 ################################################################################
 #
-#  $Revision: 41 $
+#  $Revision: 42 $
 #  $Author: mhx $
-#  $Date: 2006/01/14 18:07:56 +0100 $
+#  $Date: 2006/05/18 23:13:47 +0200 $
 #
 ################################################################################
 #
@@ -499,7 +499,7 @@ require DynaLoader;
 use strict;
 use vars qw($VERSION @ISA $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.08 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.08_01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 @ISA = qw(DynaLoader);
 
@@ -603,11 +603,17 @@ __DATA__
 
 %include sv_xpvf
 
+%include warn
+
+%include pvs
+
 %include magic
 
 %include cop
 
 %include grok
+
+%include snprintf
 
 %include exception
 

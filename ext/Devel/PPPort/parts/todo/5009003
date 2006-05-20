@@ -1,8 +1,4 @@
 5.009003
-MULTICALL                      # E
-POP_MULTICALL                  # E
-PUSH_MULTICALL                 # E
-SvSTASH_set                    # E
 av_arylen_p                    # E
 ckwarn                         # U
 ckwarn_d                       # U
@@ -26,5 +22,4 @@ newWHENOP                      # E
 newWHILEOP                     # E (Perl_newWHILEOP)
 ref                            # E (Perl_ref)
 sortsv_flags                   # U
-stashpv_hvname_match           # U
 vverify                        # U

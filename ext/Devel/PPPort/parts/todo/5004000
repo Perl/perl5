@@ -64,3 +64,4 @@ sv_vsetpvf_mg                  # U
 sv_vsetpvfn                    # U
 unsharepvn                     # U
 vnewSVpvf                      # E
+warner                         # U

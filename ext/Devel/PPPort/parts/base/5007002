@@ -69,3 +69,4 @@ PERL_MAGIC_tiedscalar          # added by devel/scanprov
 PERL_MAGIC_uvar                # added by devel/scanprov
 PERL_MAGIC_vec                 # added by devel/scanprov
 PERL_UNUSED_DECL               # added by devel/scanprov
+PERL_UNUSED_VAR                # added by devel/scanprov

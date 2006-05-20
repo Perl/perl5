@@ -1,13 +1,9 @@
 5.009003
-MULTICALL                      # E
 Newx                           # E
 Newxc                          # E
 Newxz                          # E
-POP_MULTICALL                  # E
-PUSH_MULTICALL                 # E
 SvMAGIC_set                    # U
 SvRV_set                       # U
-SvSTASH_set                    # E
 SvUV_set                       # U
 av_arylen_p                    # E
 ckwarn                         # U
@@ -33,8 +29,12 @@ newWHENOP                      # E
 newWHILEOP                     # E (Perl_newWHILEOP)
 ref                            # E (Perl_ref)
 sortsv_flags                   # U
-stashpv_hvname_match           # U
 vverify                        # U
-PERL_BCDVERSION                # added by devel/scanprov
+PERL_UNUSED_ARG                # added by devel/scanprov
+STR_WITH_LEN                   # added by devel/scanprov
 SvPVX_const                    # added by devel/scanprov
 SvPVX_mutable                  # added by devel/scanprov
+dVAR                           # added by devel/scanprov
+hv_fetchs                      # added by devel/scanprov
+newSVpvs                       # added by devel/scanprov
+sv_catpvs                      # added by devel/scanprov

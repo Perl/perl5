@@ -5,3 +5,4 @@ upg_version                    # E
 vcmp                           # U
 vnumify                        # E
 vstringify                     # E
+WARN_ASSERTIONS                # added by devel/scanprov

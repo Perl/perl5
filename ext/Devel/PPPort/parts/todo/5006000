@@ -92,7 +92,6 @@ my_atof                        # U
 my_fflush_all                  # U
 newANONATTRSUB                 # E
 newATTRSUB                     # E
-newMYSUB                       # U
 newPADOP                       # E
 newXS                          # E (Perl_newXS)
 newXSproto                     # E
@@ -153,4 +152,3 @@ vload_module                   # U
 vmess                          # E
 vwarn                          # U
 vwarner                        # U
-warner                         # U

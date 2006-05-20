@@ -222,7 +222,6 @@ newBINOP                       # E (Perl_newBINOP)
 newCONDOP                      # E (Perl_newCONDOP)
 newCONSTSUB                    # E (Perl_newCONSTSUB)
 newCVREF                       # E (Perl_newCVREF)
-newFORM                        # E (Perl_newFORM)
 newFOROP                       # E (Perl_newFOROP)
 newGVOP                        # E (Perl_newGVOP)
 newGVREF                       # E (Perl_newGVREF)
@@ -235,7 +234,6 @@ newLISTOP                      # E (Perl_newLISTOP)
 newLOGOP                       # E (Perl_newLOGOP)
 newLOOPEX                      # E (Perl_newLOOPEX)
 newLOOPOP                      # E (Perl_newLOOPOP)
-newMYSUB                       # E
 newNULLLIST                    # E (Perl_newNULLLIST)
 newOP                          # E (Perl_newOP)
 newPADOP                       # E
@@ -269,7 +267,6 @@ new_stackinfo                  # E (Perl_new_stackinfo)
 ninstr                         # E (Perl_ninstr)
 op_dump                        # E
 op_free                        # E (Perl_op_free)
-pad_sv                         # E (Perl_pad_sv)
 perl_parse                     # E (perl_parse)
 pmflag                         # E (Perl_pmflag)
 pmop_dump                      # E
@@ -326,7 +323,6 @@ save_re_context                # E
 save_scalar                    # E (Perl_save_scalar)
 save_sptr                      # E (Perl_save_sptr)
 save_svref                     # E (Perl_save_svref)
-save_threadsv                  # E (Perl_save_threadsv)
 save_vptr                      # E
 savepv                         # E (Perl_savepv)
 savepvn                        # E (Perl_savepvn)
@@ -422,8 +418,6 @@ sv_true                        # E (Perl_sv_true)
 sv_unmagic                     # E (Perl_sv_unmagic)
 sv_untaint                     # E (Perl_sv_untaint)
 sv_upgrade                     # E (Perl_sv_upgrade)
-sv_usepvn                      # E (Perl_sv_usepvn)
-sv_usepvn_mg                   # E (Perl_sv_usepvn_mg)
 sv_utf8_decode                 # E
 sv_utf8_downgrade              # E
 sv_utf8_encode                 # E
@@ -480,11 +474,57 @@ PTR2IV                         # added by devel/scanprov
 PTR2NV                         # added by devel/scanprov
 PTR2UV                         # added by devel/scanprov
 PTRV                           # added by devel/scanprov
+Perl_warner                    # added by devel/scanprov
+Perl_warner_nocontext          # added by devel/scanprov
 UVSIZE                         # added by devel/scanprov
 UVTYPE                         # added by devel/scanprov
 UVof                           # added by devel/scanprov
 UVuf                           # added by devel/scanprov
 UVxf                           # added by devel/scanprov
+WARN_ALL                       # added by devel/scanprov
+WARN_AMBIGUOUS                 # added by devel/scanprov
+WARN_BAREWORD                  # added by devel/scanprov
+WARN_CLOSED                    # added by devel/scanprov
+WARN_CLOSURE                   # added by devel/scanprov
+WARN_DEBUGGING                 # added by devel/scanprov
+WARN_DEPRECATED                # added by devel/scanprov
+WARN_DIGIT                     # added by devel/scanprov
+WARN_EXEC                      # added by devel/scanprov
+WARN_EXITING                   # added by devel/scanprov
+WARN_GLOB                      # added by devel/scanprov
+WARN_INPLACE                   # added by devel/scanprov
+WARN_INTERNAL                  # added by devel/scanprov
+WARN_IO                        # added by devel/scanprov
+WARN_MALLOC                    # added by devel/scanprov
+WARN_MISC                      # added by devel/scanprov
+WARN_NEWLINE                   # added by devel/scanprov
+WARN_NUMERIC                   # added by devel/scanprov
+WARN_ONCE                      # added by devel/scanprov
+WARN_OVERFLOW                  # added by devel/scanprov
+WARN_PACK                      # added by devel/scanprov
+WARN_PARENTHESIS               # added by devel/scanprov
+WARN_PIPE                      # added by devel/scanprov
+WARN_PORTABLE                  # added by devel/scanprov
+WARN_PRECEDENCE                # added by devel/scanprov
+WARN_PRINTF                    # added by devel/scanprov
+WARN_PROTOTYPE                 # added by devel/scanprov
+WARN_QW                        # added by devel/scanprov
+WARN_RECURSION                 # added by devel/scanprov
+WARN_REDEFINE                  # added by devel/scanprov
+WARN_REGEXP                    # added by devel/scanprov
+WARN_RESERVED                  # added by devel/scanprov
+WARN_SEMICOLON                 # added by devel/scanprov
+WARN_SEVERE                    # added by devel/scanprov
+WARN_SIGNAL                    # added by devel/scanprov
+WARN_SUBSTR                    # added by devel/scanprov
+WARN_SYNTAX                    # added by devel/scanprov
+WARN_TAINT                     # added by devel/scanprov
+WARN_UNINITIALIZED             # added by devel/scanprov
+WARN_UNOPENED                  # added by devel/scanprov
+WARN_UNPACK                    # added by devel/scanprov
+WARN_UNTIE                     # added by devel/scanprov
+WARN_UTF8                      # added by devel/scanprov
+WARN_VOID                      # added by devel/scanprov
 XSprePUSH                      # added by devel/scanprov
 aTHX                           # added by devel/scanprov
 aTHX_                          # added by devel/scanprov

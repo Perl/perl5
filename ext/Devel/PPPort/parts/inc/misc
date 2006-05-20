@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 30 $
+##  $Revision: 35 $
 ##  $Author: mhx $
-##  $Date: 2006/01/14 18:08:03 +0100 $
+##  $Date: 2006/05/19 23:57:26 +0200 $
 ##
 ################################################################################
 ##
@@ -19,6 +19,9 @@
 
 __UNDEFINED__
 PERL_UNUSED_DECL
+PERL_UNUSED_ARG
+PERL_UNUSED_VAR
+PERL_UNUSED_CONTEXT
 PERL_GCC_BRACE_GROUPS_FORBIDDEN
 NVTYPE
 INT2PTR
@@ -86,8 +89,29 @@ XSRETURN
 #  endif
 #endif
 
-__UNDEFINED__  NOOP          (void)0
-__UNDEFINED__  dNOOP         extern int Perl___notused PERL_UNUSED_DECL
+#ifndef PERL_UNUSED_ARG
+#  if defined(lint) && defined(S_SPLINT_S) /* www.splint.org */
+#    include <note.h>
+#    define PERL_UNUSED_ARG(x) NOTE(ARGUNUSED(x))
+#  else
+#    define PERL_UNUSED_ARG(x) ((void)x)
+#  endif
+#endif
+
+#ifndef PERL_UNUSED_VAR
+#  define PERL_UNUSED_VAR(x) ((void)x)
+#endif
+
+#ifndef PERL_UNUSED_CONTEXT
+#  ifdef USE_ITHREADS
+#    define PERL_UNUSED_CONTEXT PERL_UNUSED_ARG(my_perl)
+#  else
+#    define PERL_UNUSED_CONTEXT
+#  endif
+#endif
+
+__UNDEFINED__  NOOP          /*EMPTY*/(void)0
+__UNDEFINED__  dNOOP         extern int /*@unused@*/ Perl___notused PERL_UNUSED_DECL
 
 #ifndef NVTYPE
 #  if defined(USE_LONG_DOUBLE) && defined(HAS_LONG_DOUBLE)
@@ -212,6 +236,12 @@ __UNDEFINED__  XSprePUSH       (sp = PL_stack_base + ax - 1)
           return;                                         \
       } STMT_END
 #endif
+
+__UNDEFINED__  PERL_ABS(x)     ((x) < 0 ? -(x) : (x))
+
+__UNDEFINED__  dVAR            dNOOP
+
+__UNDEFINED__  SVf             "_"
 
 =xsmisc
 
@@ -386,7 +416,21 @@ prepush()
 		  XSRETURN(1);
 		}
 
-=tests plan => 38
+int
+PERL_ABS(a)
+	int a
+
+void
+SVf(x)
+	SV *x
+	PPCODE:
+#if { VERSION >= 5.004 }
+		x = newSVpvf("[%"SVf"]", x);
+#endif
+		XPUSHs(x);
+		XSRETURN(1);
+
+=tests plan => 42
 
 use vars qw($my_sv @my_av %my_hv);
 
@@ -458,3 +502,10 @@ ok(Devel::PPPort::prepush(), 42);
 
 ok(join(':', Devel::PPPort::xsreturn(0)), 'test1');
 ok(join(':', Devel::PPPort::xsreturn(1)), 'test1:test2');
+
+ok(Devel::PPPort::PERL_ABS(42), 42);
+ok(Devel::PPPort::PERL_ABS(-13), 13);
+
+ok(Devel::PPPort::SVf(42), $] >= 5.004 ? '[42]' : '42');
+ok(Devel::PPPort::SVf('abc'), $] >= 5.004 ? '[abc]' : 'abc');
+

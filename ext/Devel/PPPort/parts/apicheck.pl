@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 14 $
+#  $Revision: 16 $
 #  $Author: mhx $
-#  $Date: 2006/01/14 18:07:58 +0100 $
+#  $Date: 2006/05/19 16:15:51 +0200 $
 #
 ################################################################################
 #
@@ -152,6 +152,7 @@ print OUT <<HEAD;
 #define NEED_grok_number
 #define NEED_grok_numeric_radix
 #define NEED_grok_oct
+#define NEED_my_snprintf
 #define NEED_newCONSTSUB
 #define NEED_newRV_noinc
 #define NEED_sv_2pv_nolen
@@ -161,6 +162,7 @@ print OUT <<HEAD;
 #define NEED_sv_setpvf_mg
 #define NEED_sv_setpvf_mg_nocontext
 #define NEED_vnewSVpvf
+#define NEED_warner
 
 
 #include "ppport.h"
@@ -200,6 +202,7 @@ for $f (@f) {
     }
     my($n, $p, $d) = $a =~ /^ (\w+(?:\s+\w+)*)\s*  # type name  => $n
                               (\**)                # pointer    => $p
+                              (?:\s*const\s*)?     # const
                               ((?:\[[^\]]*\])*)    # dimension  => $d
                             $/x
                      or die "$0 - cannot parse argument: [$a]\n";

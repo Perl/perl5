@@ -41,7 +41,6 @@ my_socketpair                  # E
 pack_cat                       # E
 perl_destruct                  # E (perl_destruct)
 pv_uni_display                 # E
-regclass_swash                 # E (Perl_regclass_swash)
 save_shared_pvref              # E
 savesharedpv                   # E
 sortsv                         # E
@@ -49,7 +48,6 @@ sv_copypv                      # E
 sv_magicext                    # E
 sv_nolocking                   # E
 sv_nosharing                   # E
-sv_nounlocking                 # E
 sv_pvn_nomg                    # E
 sv_recode_to_utf8              # E
 sv_uni_display                 # E
@@ -84,3 +82,4 @@ dMY_CXT                        # added by devel/scanprov
 dMY_CXT_SV                     # added by devel/scanprov
 pMY_CXT                        # added by devel/scanprov
 pMY_CXT_                       # added by devel/scanprov
+packWARN                       # added by devel/scanprov

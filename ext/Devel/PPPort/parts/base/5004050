@@ -6,6 +6,7 @@ PL_sv_yes                      # E
 SvGETMAGIC                     # U
 sv_catpvn_mg                   # U
 sv_catsv_mg                    # U
+sv_usepvn_mg                   # U
 AvFILLp                        # added by devel/scanprov
 DEFSV                          # added by devel/scanprov
 ERRSV                          # added by devel/scanprov

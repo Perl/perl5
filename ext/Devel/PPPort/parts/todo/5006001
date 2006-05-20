@@ -1,4 +1,5 @@
 5.006001
+SvGAMAGIC                      # E
 apply_attrs_string             # U
 bytes_to_utf8                  # E
 gv_efullname4                  # U

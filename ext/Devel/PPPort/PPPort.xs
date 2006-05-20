@@ -51,6 +51,9 @@
 /* ---- from parts/inc/newRV ---- */
 #define NEED_newRV_noinc
 
+/* ---- from parts/inc/snprintf ---- */
+#define NEED_my_snprintf
+
 /* ---- from parts/inc/sv_xpvf ---- */
 #define NEED_vnewSVpvf
 #define NEED_sv_catpvf_mg
@@ -64,6 +67,9 @@
 
 /* ---- from parts/inc/variables ---- */
 #define NEED_PL_signals
+
+/* ---- from parts/inc/warn ---- */
+#define NEED_warner
 
 /* =========== END XSINIT =================================================== */
 
@@ -563,6 +569,14 @@ sv_usepvn_mg(sv, sv2)
 		Copy(str, copy, len+1, char);
 		sv_usepvn_mg(sv, copy, len);
 
+int
+SvVSTRING_mg(sv)
+	SV *sv;
+	CODE:
+		RETVAL = SvVSTRING_mg(sv) != NULL;
+	OUTPUT:
+		RETVAL
+
 ##----------------------------------------------------------------------
 ##  XSUBs from parts/inc/memory
 ##----------------------------------------------------------------------
@@ -740,6 +754,20 @@ prepush()
 		  XSRETURN(1);
 		}
 
+int
+PERL_ABS(a)
+	int a
+
+void
+SVf(x)
+	SV *x
+	PPCODE:
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0)))
+		x = newSVpvf("[%"SVf"]", x);
+#endif
+		XPUSHs(x);
+		XSRETURN(1);
+
 ##----------------------------------------------------------------------
 ##  XSUBs from parts/inc/mPUSH
 ##----------------------------------------------------------------------
@@ -884,6 +912,60 @@ newRV_noinc_REFCNT()
 		RETVAL
 
 ##----------------------------------------------------------------------
+##  XSUBs from parts/inc/pvs
+##----------------------------------------------------------------------
+
+void
+newSVpvs()
+	PPCODE:
+		XPUSHs(newSVpvs("newSVpvs"));
+		XSRETURN(1);
+
+void
+sv_catpvs(sv)
+	SV *sv
+	PPCODE:
+		sv_catpvs(sv, "sv_catpvs");
+
+void
+sv_setpvs(sv)
+	SV *sv
+	PPCODE:
+		sv_setpvs(sv, "sv_setpvs");
+
+void
+hv_fetchs(hv)
+	SV *hv
+	PREINIT:
+		SV **s;
+	PPCODE:
+		s = hv_fetchs((HV *) SvRV(hv), "hv_fetchs", 0);
+		XPUSHs(sv_mortalcopy(*s));
+		XSRETURN(1);
+
+void
+hv_stores(hv, sv)
+	SV *hv
+	SV *sv
+	PPCODE:
+		hv_stores((HV *) SvRV(hv), "hv_stores", SvREFCNT_inc(sv), 0);
+
+##----------------------------------------------------------------------
+##  XSUBs from parts/inc/snprintf
+##----------------------------------------------------------------------
+
+void
+my_snprintf()
+	PREINIT:
+		char buf[128];
+		int len;
+	PPCODE:
+		len = my_snprintf(buf, sizeof buf, "foo%s%d", "bar", 42);
+		XPUSHs(newSViv(len));
+		XPUSHs(newSVpv(buf, 0));
+		XSRETURN(2);
+
+##----------------------------------------------------------------------
 ##  XSUBs from parts/inc/Sv_set
 ##----------------------------------------------------------------------
 
@@ -912,6 +994,15 @@ TestSvPVX_mutable(sv)
                 RETVAL = strEQ(SvPVX_mutable(sv), "mhx") ? 44 : -1;
         OUTPUT:
                 RETVAL
+
+void
+TestSvSTASH_set(sv, name)
+        SV *sv
+	char *name
+        CODE:
+		sv = SvRV(sv);
+		SvREFCNT_dec(SvSTASH(sv));
+                SvSTASH_set(sv, (HV*) SvREFCNT_inc(gv_stashpv(name, 0)));
 
 ##----------------------------------------------------------------------
 ##  XSUBs from parts/inc/sv_xpvf
@@ -1118,3 +1209,36 @@ compare_PL_signals()
 		}
 	OUTPUT:
 		RETVAL
+
+##----------------------------------------------------------------------
+##  XSUBs from parts/inc/warn
+##----------------------------------------------------------------------
+
+void
+warner()
+	CODE:
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0)))
+		warner(packWARN(WARN_MISC), "warner %s:%d", "bar", 42);
+#endif
+
+void
+Perl_warner()
+	CODE:
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0)))
+		Perl_warner(aTHX_ packWARN(WARN_MISC), "Perl_warner %s:%d", "bar", 42);
+#endif
+
+void
+Perl_warner_nocontext()
+	CODE:
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0)))
+		Perl_warner_nocontext(packWARN(WARN_MISC), "Perl_warner_nocontext %s:%d", "bar", 42);
+#endif
+
+void
+ckWARN()
+	CODE:
+#if ((PERL_VERSION > 4) || ((PERL_VERSION == 4) && (PERL_SUBVERSION >= 0)))
+		if (ckWARN(WARN_MISC))
+		  Perl_warner_nocontext(packWARN(WARN_MISC), "ckWARN %s:%d", "bar", 42);
+#endif

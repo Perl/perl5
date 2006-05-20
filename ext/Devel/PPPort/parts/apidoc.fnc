@@ -34,6 +34,7 @@ Am|bool|SvVOK|SV* sv
 Am|char*|HePV|HE* he|STRLEN len
 Am|char*|HvNAME|HV* stash
 Am|char*|SvEND|SV* sv
+Am|char*|SvGAMAGIC|SV* sv
 Am|char *|SvGROW|SV* sv|STRLEN len
 Am|char*|SvPVbyte_force|SV* sv|STRLEN len
 Am|char*|SvPVbyte_nolen|SV* sv
@@ -113,9 +114,14 @@ Am|SV*|HeSVKEY|HE* he
 Am|SV*|HeSVKEY_set|HE* he|SV* sv
 Am|SV*|HeVAL|HE* he
 Am|SV*|newRV_inc|SV* sv
-Am|SV*|NEWSV|int id|STRLEN len
 Am|SV*|ST|int ix
+Am|SV*|SvREFCNT_inc_NN|SV* sv
+Am|SV*|SvREFCNT_inc_simple_NN|SV* sv
+Am|SV*|SvREFCNT_inc_simple|SV* sv
+Am|SV*|SvREFCNT_inc_simple_void|SV* sv
 Am|SV*|SvREFCNT_inc|SV* sv
+Am|SV*|SvREFCNT_inc_void_NN|SV* sv
+Am|SV*|SvREFCNT_inc_void|SV* sv
 Am|SV*|SvRV|SV* sv
 Am|svtype|SvTYPE|SV* sv
 Ams||XCPT_RETHROW
@@ -177,7 +183,9 @@ Am|void|mXPUSHu|UV uv
 Am|void|Newxc|void* ptr|int nitems|type|cast
 Am|void|Newx|void* ptr|int nitems|type
 Am|void|Newxz|void* ptr|int nitems|type
+Am|void|PoisonNew|void* dest|int nitems|type
 Am|void|Poison|void* dest|int nitems|type
+Am|void|PoisonWith|void* dest|int nitems|type|U8 byte
 Am|void|PUSHi|IV iv
 Am|void|PUSHMARK|SP
 Am|void|PUSHmortal
@@ -222,7 +230,7 @@ Am|void|sv_setsv_nomg|SV* dsv|SV* ssv
 Am|void|SvSetSV_nosteal|SV* dsv|SV* ssv
 Am|void|SvSetSV|SV* dsb|SV* ssv
 Am|void|SvSHARE|SV* sv
-Am|void|SvSTASH_set|SV* sv|STASH* val
+Am|void|SvSTASH_set|SV* sv|HV* val
 Am|void|SvTAINTED_off|SV* sv
 Am|void|SvTAINTED_on|SV* sv
 Am|void|SvTAINT|SV* sv

@@ -346,7 +346,6 @@ ext/Devel/PPPort/devel/mktodo.pl	Devel::PPPort baseline/todo generator
 ext/Devel/PPPort/devel/scanprov	Devel::PPPort provided API scanner
 ext/Devel/PPPort/HACKERS	Devel::PPPort hackers documentation
 ext/Devel/PPPort/Makefile.PL	Devel::PPPort makefile writer
-ext/Devel/PPPort/MANIFEST	Devel::PPPort Manifest
 ext/Devel/PPPort/MANIFEST.SKIP	Devel::PPPort Manifest skip specs
 ext/Devel/PPPort/mktests.PL	Devel::PPPort test file writer
 ext/Devel/PPPort/module2.c	Devel::PPPort test file
@@ -379,10 +378,12 @@ ext/Devel/PPPort/parts/base/5008004	Devel::PPPort baseline todo file
 ext/Devel/PPPort/parts/base/5008005	Devel::PPPort baseline todo file
 ext/Devel/PPPort/parts/base/5008006	Devel::PPPort baseline todo file
 ext/Devel/PPPort/parts/base/5008007	Devel::PPPort baseline todo file
+ext/Devel/PPPort/parts/base/5008008	Devel::PPPort baseline todo file
 ext/Devel/PPPort/parts/base/5009000	Devel::PPPort baseline todo file
 ext/Devel/PPPort/parts/base/5009001	Devel::PPPort baseline todo file
 ext/Devel/PPPort/parts/base/5009002	Devel::PPPort baseline todo file
 ext/Devel/PPPort/parts/base/5009003	Devel::PPPort baseline todo file
+ext/Devel/PPPort/parts/base/5009004	Devel::PPPort baseline todo file
 ext/Devel/PPPort/parts/embed.fnc	Devel::PPPort Perl API listing
 ext/Devel/PPPort/parts/inc/call	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/cop	Devel::PPPort include
@@ -400,6 +401,8 @@ ext/Devel/PPPort/parts/inc/newRV	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/ppphbin	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/ppphdoc	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/ppphtest	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/pvs	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/snprintf	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/SvPV	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/Sv_set	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/sv_xpvf	Devel::PPPort include
@@ -407,6 +410,7 @@ ext/Devel/PPPort/parts/inc/threads	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/uv	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/variables	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/version	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/warn	Devel::PPPort include
 ext/Devel/PPPort/parts/ppptools.pl	Devel::PPPort various utilities
 ext/Devel/PPPort/parts/todo/5004000	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5004010	Devel::PPPort todo file
@@ -434,10 +438,12 @@ ext/Devel/PPPort/parts/todo/5008004	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5008005	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5008006	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5008007	Devel::PPPort todo file
+ext/Devel/PPPort/parts/todo/5008008	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009000	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009001	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009002	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009003	Devel::PPPort todo file
+ext/Devel/PPPort/parts/todo/5009004	Devel::PPPort todo file
 ext/Devel/PPPort/ppport_h.PL	Devel::PPPort ppport.h writer
 ext/Devel/PPPort/PPPort.pm	Devel::PPPort extension
 ext/Devel/PPPort/PPPort_pm.PL	Devel::PPPort PPPort.pm writer
@@ -459,6 +465,8 @@ ext/Devel/PPPort/t/newCONSTSUB.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newRV.t	Devel::PPPort test file
 ext/Devel/PPPort/TODO		Devel::PPPort Todo
 ext/Devel/PPPort/t/ppphtest.t	Devel::PPPort test file
+ext/Devel/PPPort/t/pvs.t	Devel::PPPort test file
+ext/Devel/PPPort/t/snprintf.t	Devel::PPPort test file
 ext/Devel/PPPort/t/SvPV.t	Devel::PPPort test file
 ext/Devel/PPPort/t/Sv_set.t	Devel::PPPort test file
 ext/Devel/PPPort/t/sv_xpvf.t	Devel::PPPort test file
@@ -466,6 +474,7 @@ ext/Devel/PPPort/t/testutil.pl	Devel::PPPort test utilities
 ext/Devel/PPPort/t/threads.t	Devel::PPPort test file
 ext/Devel/PPPort/t/uv.t		Devel::PPPort test file
 ext/Devel/PPPort/t/variables.t	Devel::PPPort test file
+ext/Devel/PPPort/t/warn.t	Devel::PPPort test file
 ext/Devel/PPPort/typemap	Devel::PPPort Typemap
 ext/Digest/MD5/Changes		Digest::MD5 extension changes
 ext/Digest/MD5/hints/dec_osf.pl	Hints for named architecture

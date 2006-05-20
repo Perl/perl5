@@ -1,5 +1,13 @@
 TODO:
 
+* see if we can add more stuff from recent perls
+
+* see if we can implement sv_catpvf() for < 5.004
+
+* add hv_stores() to blead
+
+* Andy's SvREFCNT_inc patches?
+
 * MULTICALL ?
 
 * improve apicheck (things like utf8_mg_pos_init() are

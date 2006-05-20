@@ -12,14 +12,13 @@ mg_length                      # U
 mg_size                        # U
 newHVhv                        # E
 new_stackinfo                  # E
-regdump                        # U
+regdump                        # E
 regexec_flags                  # U
 regnext                        # E (Perl_regnext)
 runops_debug                   # U
 runops_standard                # U
 save_hints                     # U
 save_iv                        # U (save_iv)
-save_threadsv                  # E
 screaminstr                    # E (Perl_screaminstr)
 sv_iv                          # U
 sv_nv                          # U

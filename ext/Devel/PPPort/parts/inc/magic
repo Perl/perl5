@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 9 $
+##  $Revision: 10 $
 ##  $Author: mhx $
-##  $Date: 2006/01/14 18:08:03 +0100 $
+##  $Date: 2006/05/18 23:10:24 +0200 $
 ##
 ################################################################################
 ##
@@ -164,6 +164,8 @@ __UNDEFINED__  SvUV_nomg          SvUV
    } STMT_END
 #endif
 
+__UNDEFINED__  SvVSTRING_mg(sv)  (SvMAGICAL(sv) ? mg_find(sv, PERL_MAGIC_vstring) : NULL)
+
 =xsubs
 
 void
@@ -250,7 +252,15 @@ sv_usepvn_mg(sv, sv2)
 		Copy(str, copy, len+1, char);
 		sv_usepvn_mg(sv, copy, len);
 
-=tests plan => 10
+int
+SvVSTRING_mg(sv)
+	SV *sv;
+	CODE:
+		RETVAL = SvVSTRING_mg(sv) != NULL;
+	OUTPUT:
+		RETVAL
+
+=tests plan => 13
 
 use Tie::Hash;
 my %h;
@@ -287,4 +297,9 @@ ok($h{sv}, 4711);
 
 &Devel::PPPort::sv_usepvn_mg($h{sv}, 'Perl');
 ok($h{sv}, 'Perl');
+
+my $ver = eval qq[qv("v1.2.0")];
+ok($[ < 5.009 || $@ eq '');
+ok($@ || Devel::PPPort::SvVSTRING_mg($ver));
+ok(!Devel::PPPort::SvVSTRING_mg(4711));
 

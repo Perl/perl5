@@ -4,3 +4,5 @@ hv_iternext_flags              # E
 hv_store_flags                 # E
 is_utf8_idcont                 # U
 nothreadhook                   # U
+WARN_LAYER                     # added by devel/scanprov
+WARN_THREADS                   # added by devel/scanprov
