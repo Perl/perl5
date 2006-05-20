@@ -968,7 +968,7 @@ system using the same policy defaults, simply copy the Policy.sh file
 to the new system and Configure will use it along with the appropriate
 hint file for your system. This will work even if Policy.sh was
 generated for another version of Perl, or on a system with a
-different architecture an/or operating system. However, in such cases,
+different architecture and/or operating system. However, in such cases,
 you should review the contents of the file before using it: for
 example, your new target may not keep its man pages in the same place
 as the system on which the file was generated.
