@@ -3652,6 +3652,9 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 			*that* much linear. */
 		if (!PL_reg_maxiter) {
 		    PL_reg_maxiter = (PL_regeol - PL_bostr + 1) * (scan->flags>>4);
+		    /* possible overflow for long strings and many CURLYX's */
+		    if (PL_reg_maxiter < 0)
+			PL_reg_maxiter = I32_MAX;
 		    PL_reg_leftiter = PL_reg_maxiter;
 		}
 		if (PL_reg_leftiter-- == 0) {
