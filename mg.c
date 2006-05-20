@@ -2855,8 +2855,9 @@ S_unwind_handler_stack(pTHX_ const void *p)
 =for apidoc magic_sethint
 
 Triggered by a store to %^H, records the key/value pair to
-C<PL_compiling.cop_hints>.  It is assumed that hints aren't storing anything
-that would need a deep copy.  Maybe we should warn if we find a reference.
+C<PL_compiling.cop_hints_hash>.  It is assumed that hints aren't storing
+anything that would need a deep copy.  Maybe we should warn if we find a
+reference.
 
 =cut
 */
@@ -2875,8 +2876,8 @@ Perl_magic_sethint(pTHX_ SV *sv, MAGIC *mg)
        Doing this here saves a lot of doing it manually in perl code (and
        forgetting to do it, and consequent subtle errors.  */
     PL_hints |= HINT_LOCALIZE_HH;
-    PL_compiling.cop_hints
-	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints,
+    PL_compiling.cop_hints_hash
+	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints_hash,
 				 (SV *)mg->mg_ptr, sv);
     return 0;
 }
@@ -2884,7 +2885,8 @@ Perl_magic_sethint(pTHX_ SV *sv, MAGIC *mg)
 /*
 =for apidoc magic_sethint
 
-Triggered by a delete from %^H, records the key to C<PL_compiling.cop_hints>.
+Triggered by a delete from %^H, records the key to
+C<PL_compiling.cop_hints_hash>.
 
 =cut
 */
@@ -2897,8 +2899,8 @@ Perl_magic_clearhint(pTHX_ SV *sv, MAGIC *mg)
     PERL_UNUSED_ARG(sv);
 
     PL_hints |= HINT_LOCALIZE_HH;
-    PL_compiling.cop_hints
-	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints,
+    PL_compiling.cop_hints_hash
+	= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints_hash,
 				 (SV *)mg->mg_ptr, &PL_sv_placeholder);
     return 0;
 }

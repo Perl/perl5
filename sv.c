@@ -10965,9 +10965,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_compiling.cop_warnings = DUP_WARNINGS(PL_compiling.cop_warnings);
     if (!specialCopIO(PL_compiling.cop_io))
 	PL_compiling.cop_io = sv_dup_inc(PL_compiling.cop_io, param);
-    if (PL_compiling.cop_hints) {
+    if (PL_compiling.cop_hints_hash) {
 	HINTS_REFCNT_LOCK;
-	PL_compiling.cop_hints->refcounted_he_refcnt++;
+	PL_compiling.cop_hints_hash->refcounted_he_refcnt++;
 	HINTS_REFCNT_UNLOCK;
     }
     PL_curcop		= (COP*)any_dup(proto_perl->Tcurcop, proto_perl);

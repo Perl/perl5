@@ -150,7 +150,7 @@ struct cop {
     SV *	cop_io;		/* lexical IO defaults */
     /* compile time state of %^H.  See the comment in op.c for how this is
        used to recreate a hash to return from caller.  */
-    struct refcounted_he * cop_hints;
+    struct refcounted_he * cop_hints_hash;
 };
 
 #ifdef USE_ITHREADS
@@ -235,16 +235,16 @@ struct cop {
    using $[ is highly discouraged, no sane Perl code will be using it.  */
 #define CopARYBASE_get(c)	\
 	((CopHINTS_get(c) & HINT_ARYBASE)				\
-	 ? SvIV(Perl_refcounted_he_fetch(aTHX_ (c)->cop_hints, 0, "$[", 2, 0, \
-					 0))				\
+	 ? SvIV(Perl_refcounted_he_fetch(aTHX_ (c)->cop_hints_hash, 0,	\
+					 "$[", 2, 0, 0))		\
 	 : 0)
 #define CopARYBASE_set(c, b) STMT_START { \
 	if (b || ((c)->op_private & HINT_ARYBASE)) {			\
 	    (c)->op_private |= HINT_ARYBASE;				\
 	    if ((c) == &PL_compiling)					\
 		PL_hints |= HINT_LOCALIZE_HH | HINT_ARYBASE;		\
-	    (c)->cop_hints						\
-	       = Perl_refcounted_he_new(aTHX_ (c)->cop_hints,		\
+	    (c)->cop_hints_hash						\
+	       = Perl_refcounted_he_new(aTHX_ (c)->cop_hints_hash,	\
 					sv_2mortal(newSVpvs("$[")),	\
 					sv_2mortal(newSViv(b)));	\
 	}								\

@@ -89,10 +89,10 @@ recursive, but it's recursive on basic blocks, not on tree nodes.
    To cause actions on %^H to write out the serialisation records, it has
    magic type 'H'. This magic (itself) does nothing, but its presence causes
    the values to gain magic type 'h', which has entries for set and clear.
-   C<Perl_magic_sethint> updates C<PL_compiling.cop_hints> with a store
+   C<Perl_magic_sethint> updates C<PL_compiling.cop_hints_hash> with a store
    record, with deletes written by C<Perl_magic_clearhint>. C<SAVE_HINTS>
-   saves the current C<PL_compiling.cop_hints> on the save stack, so that it
-   will be correctly restored when any inner compiling scope is exited.
+   saves the current C<PL_compiling.cop_hints_hash> on the save stack, so that
+   it will be correctly restored when any inner compiling scope is exited.
 */
 
 #include "EXTERN.h"
@@ -502,7 +502,7 @@ S_cop_free(pTHX_ COP* cop)
 	SvREFCNT_dec(cop->cop_io);
 #endif
     }
-    Perl_refcounted_he_free(aTHX_ cop->cop_hints);
+    Perl_refcounted_he_free(aTHX_ cop->cop_hints_hash);
 }
 
 void
@@ -3947,16 +3947,17 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     }
     cop->cop_seq = seq;
     /* CopARYBASE is now "virtual", in that it's stored as a flag bit in
-       CopHINTS and a possible value in cop_hints, so no need to copy it.  */
+       CopHINTS and a possible value in cop_hints_hash, so no need to copy it.
+    */
     cop->cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
     if (specialCopIO(PL_curcop->cop_io))
         cop->cop_io = PL_curcop->cop_io;
     else
         cop->cop_io = newSVsv(PL_curcop->cop_io) ;
-    cop->cop_hints = PL_curcop->cop_hints;
-    if (cop->cop_hints) {
+    cop->cop_hints_hash = PL_curcop->cop_hints_hash;
+    if (cop->cop_hints_hash) {
 	HINTS_REFCNT_LOCK;
-	cop->cop_hints->refcounted_he_refcnt++;
+	cop->cop_hints_hash->refcounted_he_refcnt++;
 	HINTS_REFCNT_UNLOCK;
     }
 

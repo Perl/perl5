@@ -1720,10 +1720,10 @@ PP(pp_caller)
         PUSHs(sv_2mortal(mask));
     }
 
-    PUSHs(cx->blk_oldcop->cop_hints ?
+    PUSHs(cx->blk_oldcop->cop_hints_hash ?
 	  sv_2mortal(newRV_noinc(
-		(SV*)Perl_refcounted_he_chain_2hv(aTHX_
-						  cx->blk_oldcop->cop_hints)))
+	    (SV*)Perl_refcounted_he_chain_2hv(aTHX_
+					      cx->blk_oldcop->cop_hints_hash)))
 	  : &PL_sv_undef);
     RETURN;
 }
@@ -3476,13 +3476,13 @@ PP(pp_entereval)
         PL_compiling.cop_io = newSVsv(PL_curcop->cop_io);
         SAVEFREESV(PL_compiling.cop_io);
     }
-    if (PL_compiling.cop_hints) {
-	Perl_refcounted_he_free(aTHX_ PL_compiling.cop_hints);
+    if (PL_compiling.cop_hints_hash) {
+	Perl_refcounted_he_free(aTHX_ PL_compiling.cop_hints_hash);
     }
-    PL_compiling.cop_hints = PL_curcop->cop_hints;
-    if (PL_compiling.cop_hints) {
+    PL_compiling.cop_hints_hash = PL_curcop->cop_hints_hash;
+    if (PL_compiling.cop_hints_hash) {
 	HINTS_REFCNT_LOCK;
-	PL_compiling.cop_hints->refcounted_he_refcnt++;
+	PL_compiling.cop_hints_hash->refcounted_he_refcnt++;
 	HINTS_REFCNT_UNLOCK;
     }
     /* special case: an eval '' executed within the DB package gets lexically

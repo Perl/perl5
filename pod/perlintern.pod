@@ -539,7 +539,8 @@ Found in file doio.c
 =item magic_sethint
 X<magic_sethint>
 
-Triggered by a delete from %^H, records the key to C<PL_compiling.cop_hints>.
+Triggered by a delete from %^H, records the key to
+C<PL_compiling.cop_hints_hash>.
 
 	int	magic_sethint(SV* sv, MAGIC* mg)
 
