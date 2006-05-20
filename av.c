@@ -39,7 +39,7 @@ Perl_av_reify(pTHX_ AV *av)
 	SV * const sv = AvARRAY(av)[--key];
 	assert(sv);
 	if (sv != &PL_sv_undef)
-	    SvREFCNT_inc_void_NN(sv);
+	    SvREFCNT_inc_simple_void_NN(sv);
     }
     key = AvARRAY(av) - AvALLOC(av);
     while (key)
@@ -187,7 +187,6 @@ more information on how to use this function on tied arrays.
 SV**
 Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
 {
-    SV *sv;
 
     if (!av)
 	return 0;
@@ -195,25 +194,25 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
     if (SvRMAGICAL(av)) {
         const MAGIC * const tied_magic = mg_find((SV*)av, PERL_MAGIC_tied);
         if (tied_magic || mg_find((SV*)av, PERL_MAGIC_regdata)) {
-            U32 adjust_index = 1;
+	    SV *sv;
+	    if (key < 0) {
+		I32 adjust_index = 1;
+		if (tied_magic) {
+		    /* Handle negative array indices 20020222 MJD */
+		    SV * const * const negative_indices_glob =
+			hv_fetch(SvSTASH(SvRV(SvTIED_obj((SV *)av, tied_magic))),
+				NEGATIVE_INDICES_VAR, 16, 0);
 
-            if (tied_magic && key < 0) {
-                /* Handle negative array indices 20020222 MJD */
-		SV * const * const negative_indices_glob =
-                    hv_fetch(SvSTASH(SvRV(SvTIED_obj((SV *)av, 
-                                                     tied_magic))), 
-                             NEGATIVE_INDICES_VAR, 16, 0);
+		    if (negative_indices_glob && SvTRUE(GvSV(*negative_indices_glob)))
+			adjust_index = 0;
+		}
 
-                if (negative_indices_glob
-                    && SvTRUE(GvSV(*negative_indices_glob)))
-                    adjust_index = 0;
-            }
-
-            if (key < 0 && adjust_index) {
-                key += AvFILL(av) + 1;
-                if (key < 0)
-                    return 0;
-            }
+		if (adjust_index) {
+		    key += AvFILL(av) + 1;
+		    if (key < 0)
+			return NULL;
+		}
+	    }
 
             sv = sv_newmortal();
 	    sv_upgrade(sv, SVt_PVLV);
@@ -227,22 +226,19 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
     if (key < 0) {
 	key += AvFILL(av) + 1;
 	if (key < 0)
-	    return 0;
+	    return NULL;
     }
 
     if (key > AvFILLp(av)) {
 	if (!lval)
-	    return 0;
-	sv = newSV(0);
-	return av_store(av,key,sv);
+	    return NULL;
+	return av_store(av,key,newSV(0));
     }
     if (AvARRAY(av)[key] == &PL_sv_undef) {
     emptyness:
-	if (lval) {
-	    sv = newSV(0);
-	    return av_store(av,key,sv);
-	}
-	return 0;
+	if (lval)
+	    return av_store(av,key,newSV(0));
+	return NULL;
     }
     else if (AvREIFY(av)
 	     && (!AvARRAY(av)[key]	/* eg. @_ could have freed elts */
@@ -289,7 +285,7 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
         if (tied_magic) {
             /* Handle negative array indices 20020222 MJD */
             if (key < 0) {
-                unsigned adjust_index = 1;
+		bool adjust_index = 1;
 		SV * const * const negative_indices_glob =
                     hv_fetch(SvSTASH(SvRV(SvTIED_obj((SV *)av, 
                                                      tied_magic))), 
@@ -306,7 +302,7 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
 	    if (val != &PL_sv_undef) {
 		mg_copy((SV*)av, val, 0, key);
 	    }
-	    return 0;
+	    return NULL;
         }
     }
 
@@ -314,7 +310,7 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
     if (key < 0) {
 	key += AvFILL(av) + 1;
 	if (key < 0)
-	    return 0;
+	    return NULL;
     }
 
     if (SvREADONLY(av) && key >= AvFILL(av))
@@ -329,9 +325,9 @@ Perl_av_store(pTHX_ register AV *av, I32 key, SV *val)
 	if (!AvREAL(av)) {
 	    if (av == PL_curstack && key > PL_stack_sp - PL_stack_base)
 		PL_stack_sp = PL_stack_base + key;	/* XPUSH in disguise */
-	    do
+	    do {
 		ary[++AvFILLp(av)] = &PL_sv_undef;
-	    while (AvFILLp(av) < key);
+	    } while (AvFILLp(av) < key);
 	}
 	AvFILLp(av) = key;
     }
@@ -392,8 +388,7 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
 	Newx(ary,size,SV*);
 	AvALLOC(av) = ary;
 	SvPV_set(av, (char*)ary);
-	AvFILLp(av) = size - 1;
-	AvMAX(av) = size - 1;
+	AvFILLp(av) = AvMAX(av) = size - 1;
 	for (i = 0; i < size; i++) {
 	    assert (*strp);
 	    ary[i] = newSV(0);
@@ -416,7 +411,7 @@ array itself.
 void
 Perl_av_clear(pTHX_ register AV *av)
 {
-    register I32 key;
+    I32 extra;
 
 /* XXX Should av_clear really be NN? */
 #ifdef DEBUGGING
@@ -439,17 +434,18 @@ Perl_av_clear(pTHX_ register AV *av)
 
     if (AvREAL(av)) {
 	SV** const ary = AvARRAY(av);
-	key = AvFILLp(av) + 1;
-	while (key) {
-	    SV * const sv = ary[--key];
+	I32 index = AvFILLp(av) + 1;
+	while (index) {
+	    SV * const sv = ary[--index];
 	    /* undef the slot before freeing the value, because a
-	     * destructor might try to modify this arrray */
-	    ary[key] = &PL_sv_undef;
+	     * destructor might try to modify this array */
+	    ary[index] = &PL_sv_undef;
 	    SvREFCNT_dec(sv);
 	}
     }
-    if ((key = AvARRAY(av) - AvALLOC(av))) {
-	AvMAX(av) += key;
+    extra = AvARRAY(av) - AvALLOC(av);
+    if (extra) {
+	AvMAX(av) += extra;
 	SvPV_set(av, (char*)AvALLOC(av));
     }
     AvFILLp(av) = -1;
@@ -480,7 +476,7 @@ Perl_av_undef(pTHX_ register AV *av)
 	    SvREFCNT_dec(AvARRAY(av)[--key]);
     }
     Safefree(AvALLOC(av));
-    AvALLOC(av) = 0;
+    AvALLOC(av) = NULL;
     SvPV_set(av, NULL);
     AvMAX(av) = AvFILLp(av) = -1;
     /* Need to check SvMAGICAL, as during global destruction it may be that

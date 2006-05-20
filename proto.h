@@ -1717,7 +1717,7 @@ STATIC const char *	S_get_num(pTHX_ const char *ppat, I32 *lenptr);
 STATIC char *	S_sv_exp_grow(pTHX_ SV *sv, STRLEN needed)
 			__attribute__warn_unused_result__;
 
-STATIC char *	S_bytes_to_uni(pTHX_ const U8 *start, STRLEN len, char *dest)
+STATIC char *	S_bytes_to_uni(const U8 *start, STRLEN len, char *dest)
 			__attribute__warn_unused_result__;
 
 #endif

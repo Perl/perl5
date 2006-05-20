@@ -3272,7 +3272,7 @@
 #define group_end(a,b,c)	S_group_end(aTHX_ a,b,c)
 #define get_num(a,b)		S_get_num(aTHX_ a,b)
 #define sv_exp_grow(a,b)	S_sv_exp_grow(aTHX_ a,b)
-#define bytes_to_uni(a,b,c)	S_bytes_to_uni(aTHX_ a,b,c)
+#define bytes_to_uni		S_bytes_to_uni
 #endif
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)

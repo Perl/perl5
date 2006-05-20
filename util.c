@@ -338,16 +338,15 @@ Perl_delimcpy(pTHX_ register char *to, register char *toend, register char *from
 {
     register I32 tolen;
     PERL_UNUSED_CONTEXT;
+
     for (tolen = 0; from < fromend; from++, tolen++) {
 	if (*from == '\\') {
-	    if (from[1] == delim)
-		from++;
-	    else {
+	    if (from[1] != delim) {
 		if (to < toend)
 		    *to++ = *from;
 		tolen++;
-		from++;
 	    }
+	    from++;
 	}
 	else if (*from == delim)
 	    break;
@@ -1523,8 +1522,6 @@ Perl_ckwarn_d(pTHX_ U32 w)
 	;
 }
 
-
-
 /* since we've already done strlen() for both nam and val
  * we can use that info to make things faster than
  * sprintf(s, "%s=%s", nam, val)
@@ -1557,7 +1554,9 @@ Perl_my_setenv(pTHX_ char *nam, char *val)
 	I32 max;
 	char **tmpenv;
 
-	for (max = i; environ[max]; max++) ;
+	max = i;
+	while (environ[max])
+	    max++;
 	tmpenv = (char**)safesysmalloc((max+2) * sizeof(char*));
 	for (j=0; j<max; j++) {		/* copy environment */
 	    const int len = strlen(environ[j]);
@@ -1680,10 +1679,11 @@ Perl_setenv_getix(pTHX_ char *nam)
 I32
 Perl_unlnk(pTHX_ char *f)	/* unlink all versions of a file */
 {
-    I32 i;
+    I32 retries = 0;
 
-    for (i = 0; PerlLIO_unlink(f) >= 0; i++) ;
-    return i ? 0 : -1;
+    while (PerlLIO_unlink(f) >= 0)
+	retries++;
+    return retries ? 0 : -1;
 }
 #endif
 
@@ -4565,7 +4565,8 @@ Perl_parse_unicode_opts(pTHX_ char **popt)
   if (*p) {
        if (isDIGIT(*p)) {
 	    opt = (U32) atoi(p);
-	    while (isDIGIT(*p)) p++;
+	    while (isDIGIT(*p))
+		p++;
 	    if (*p && *p != '\n' && *p != '\r')
 		 Perl_croak(aTHX_ "Unknown Unicode option letter '%c'", *p);
        }
@@ -4701,7 +4702,8 @@ Perl_get_hash_seed(pTHX)
      UV myseed = 0;
 
      if (s)
-	  while (isSPACE(*s)) s++;
+	while (isSPACE(*s))
+	    s++;
      if (s && isDIGIT(*s))
 	  myseed = (UV)Atoul(s);
      else

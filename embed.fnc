@@ -1179,7 +1179,7 @@ s	|const char *|group_end	|NN const char *pat|NN const char *patend \
 				|char ender
 s	|const char *|get_num	|NN const char *ppat|NN I32 *lenptr
 sR	|char *	|sv_exp_grow	|NN SV *sv|STRLEN needed
-sR	|char *	|bytes_to_uni	|NN const U8 *start|STRLEN len|NN char *dest
+snR	|char *	|bytes_to_uni	|NN const U8 *start|STRLEN len|NN char *dest
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
