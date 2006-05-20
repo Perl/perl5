@@ -495,13 +495,6 @@ S_cop_free(pTHX_ COP* cop)
     CopSTASH_free(cop);
     if (! specialWARN(cop->cop_warnings))
 	PerlMemShared_free(cop->cop_warnings);
-    if (! specialCopIO(cop->cop_io)) {
-#ifdef USE_ITHREADS
-	NOOP;
-#else
-	SvREFCNT_dec(cop->cop_io);
-#endif
-    }
     Perl_refcounted_he_free(aTHX_ cop->cop_hints_hash);
 }
 
@@ -1977,11 +1970,6 @@ Perl_block_start(pTHX_ int full)
     PL_hints &= ~HINT_BLOCK_SCOPE;
     SAVECOMPILEWARNINGS();
     PL_compiling.cop_warnings = DUP_WARNINGS(PL_compiling.cop_warnings);
-    SAVESPTR(PL_compiling.cop_io);
-    if (! specialCopIO(PL_compiling.cop_io)) {
-        PL_compiling.cop_io = newSVsv(PL_compiling.cop_io) ;
-        SAVEFREESV(PL_compiling.cop_io) ;
-    }
     return retval;
 }
 
@@ -3950,10 +3938,6 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
        CopHINTS and a possible value in cop_hints_hash, so no need to copy it.
     */
     cop->cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
-    if (specialCopIO(PL_curcop->cop_io))
-        cop->cop_io = PL_curcop->cop_io;
-    else
-        cop->cop_io = newSVsv(PL_curcop->cop_io) ;
     cop->cop_hints_hash = PL_curcop->cop_hints_hash;
     if (cop->cop_hints_hash) {
 	HINTS_REFCNT_LOCK;

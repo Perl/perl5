@@ -148,7 +148,6 @@ struct cop {
     line_t      cop_line;       /* line # of this command */
     /* Beware. mg.c and warnings.pl assume the type of this is STRLEN *:  */
     STRLEN *	cop_warnings;	/* lexical warnings bitmask */
-    SV *	cop_io;		/* lexical IO defaults */
     /* compile time state of %^H.  See the comment in op.c for how this is
        used to recreate a hash to return from caller.  */
     struct refcounted_he * cop_hints_hash;

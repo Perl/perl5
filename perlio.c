@@ -1408,20 +1408,23 @@ Perl_PerlIO_fileno(pTHX_ PerlIO *f)
      Perl_PerlIO_or_Base(f, Fileno, fileno, -1, (aTHX_ f));
 }
 
-static const char *
-PerlIO_context_layers(pTHX_ const char *mode)
+const char *
+Perl_PerlIO_context_layers(pTHX_ const char *mode)
 {
     dVAR;
     const char *type = NULL;
     /*
      * Need to supply default layer info from open.pm
      */
-    if (PL_curcop) {
-	SV * const layers = PL_curcop->cop_io;
-	if (layers) {
+    if (PL_curcop && PL_curcop->cop_hints & HINT_LEXICAL_IO) {
+	SV * const layers
+	    = Perl_refcounted_he_fetch(aTHX_ PL_curcop->cop_hints_hash, 0,
+				       "open", 4, 0, 0);
+	assert(layers);
+	if (SvOK(layers)) {
 	    STRLEN len;
 	    type = SvPV_const(layers, len);
-	    if (type && mode[0] != 'r') {
+	    if (type && mode && mode[0] != 'r') {
 		/*
 		 * Skip to write part, which is separated by a '\0'
 		 */
@@ -1491,7 +1494,7 @@ PerlIO_resolve_layers(pTHX_ const char *layers,
 	}
     }
     if (!layers || !*layers)
-	layers = PerlIO_context_layers(aTHX_ mode);
+	layers = Perl_PerlIO_context_layers(aTHX_ mode);
     if (layers && *layers) {
 	PerlIO_list_t *av;
 	if (incdef) {
@@ -1528,7 +1531,7 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
     if (!f && narg == 1 && *args == &PL_sv_undef) {
 	if ((f = PerlIO_tmpfile())) {
 	    if (!layers || !*layers)
-		layers = PerlIO_context_layers(aTHX_ mode);
+		layers = Perl_PerlIO_context_layers(aTHX_ mode);
 	    if (layers && *layers)
 		PerlIO_apply_layers(aTHX_ f, mode, layers);
 	}

@@ -330,7 +330,7 @@ PP(pp_backtick)
 	mode = "rt";
     fp = PerlProc_popen(tmps, mode);
     if (fp) {
-        const char * const type = PL_curcop->cop_io ? SvPV_nolen_const(PL_curcop->cop_io) : NULL;
+        const char * const type = Perl_PerlIO_context_layers(aTHX_ NULL);
 	if (type && *type)
 	    PerlIO_apply_layers(aTHX_ fp,mode,type);
 

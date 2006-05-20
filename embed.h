@@ -3692,6 +3692,8 @@
 #define sv_setsv_cow(a,b)	Perl_sv_setsv_cow(aTHX_ a,b)
 #endif
 #endif
+#ifdef PERL_CORE
+#endif
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 #define PerlIO_close(a)		Perl_PerlIO_close(aTHX_ a)
 #define PerlIO_fill(a)		Perl_PerlIO_fill(aTHX_ a)

@@ -3373,8 +3373,6 @@ PP(pp_require)
     }
     else
         PL_compiling.cop_warnings = pWARN_STD ;
-    SAVESPTR(PL_compiling.cop_io);
-    PL_compiling.cop_io = NULL;
 
     if (filter_sub || filter_cache) {
 	SV * const datasv = filter_add(S_run_user_filter, NULL);
@@ -3468,13 +3466,6 @@ PP(pp_entereval)
 	GvHV(PL_hintgv) = saved_hh;
     SAVECOMPILEWARNINGS();
     PL_compiling.cop_warnings = DUP_WARNINGS(PL_curcop->cop_warnings);
-    SAVESPTR(PL_compiling.cop_io);
-    if (specialCopIO(PL_curcop->cop_io))
-        PL_compiling.cop_io = PL_curcop->cop_io;
-    else {
-        PL_compiling.cop_io = newSVsv(PL_curcop->cop_io);
-        SAVEFREESV(PL_compiling.cop_io);
-    }
     if (PL_compiling.cop_hints_hash) {
 	Perl_refcounted_he_free(aTHX_ PL_compiling.cop_hints_hash);
     }

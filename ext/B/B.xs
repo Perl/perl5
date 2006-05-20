@@ -1100,7 +1100,6 @@ LOOP_lastop(o)
 #define COP_cop_seq(o)	o->cop_seq
 #define COP_arybase(o)	CopARYBASE_get(o)
 #define COP_line(o)	CopLINE(o)
-#define COP_io(o)	o->cop_io
 #define COP_hints(o)	CopHINTS_get(o)
 
 MODULE = B	PACKAGE = B::COP		PREFIX = COP_
@@ -1148,6 +1147,14 @@ COP_warnings(o)
 B::SV
 COP_io(o)
 	B::COP	o
+	PPCODE:
+	if (!(CopHINTS_get(o) & HINT_LEXICAL_IO)) {
+	    ST(0) = &PL_sv_undef;
+	} else {
+	    ST(0) = Perl_refcounted_he_fetch(aTHX_ o->cop_hints_hash, 0,
+					     "open", 4, 0, 0);
+	}
+	XSRETURN(1);
 
 U32
 COP_hints(o)

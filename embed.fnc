@@ -1504,6 +1504,8 @@ Apn	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
 pMXE	|SV*	|sv_setsv_cow	|NN SV* dsv|NN SV* ssv
 #endif
 
+op	|const char *|PerlIO_context_layers|NULLOK const char *mode
+
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 Ap	|int	|PerlIO_close		|NULLOK PerlIO *f
 Ap	|int	|PerlIO_fill		|NULLOK PerlIO *f

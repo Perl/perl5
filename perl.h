@@ -4231,6 +4231,7 @@ enum {		/* pass one of these to get_vtbl */
 #define HINT_NEW_STRING		0x00008000
 #define HINT_NEW_RE		0x00010000
 #define HINT_LOCALIZE_HH	0x00020000 /* %^H needs to be copied */
+#define HINT_LEXICAL_IO		0x00040000 /* ${^OPEN} is set */
 
 #define HINT_RE_TAINT		0x00100000 /* re pragma */
 #define HINT_RE_EVAL		0x00200000 /* re pragma */

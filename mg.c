@@ -758,10 +758,13 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    SvTAINTED_off(sv);
 	}
 	else if (strEQ(remaining, "PEN")) {
-	    if (!PL_compiling.cop_io)
+	    if (!(CopHINTS_get(&PL_compiling) & HINT_LEXICAL_IO))
 		sv_setsv(sv, &PL_sv_undef);
             else {
-	        sv_setsv(sv, PL_compiling.cop_io);
+	        sv_setsv(sv,
+			 Perl_refcounted_he_fetch(aTHX_
+						  PL_compiling.cop_hints_hash,
+						  0, "open", 4, 0, 0));
 	    }
 	}
 	break;
@@ -2230,10 +2233,11 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	}
 	else if (strEQ(mg->mg_ptr, "\017PEN")) {
-	    if (!PL_compiling.cop_io)
-		PL_compiling.cop_io = newSVsv(sv);
-	    else
-		sv_setsv(PL_compiling.cop_io,sv);
+	    PL_compiling.cop_hints |= HINT_LEXICAL_IO;
+	    PL_hints |= HINT_LOCALIZE_HH | HINT_LEXICAL_IO;
+	    PL_compiling.cop_hints_hash
+		= Perl_refcounted_he_new(aTHX_ PL_compiling.cop_hints_hash,
+					 sv_2mortal(newSVpvs("open")), sv);
 	}
 	break;
     case '\020':	/* ^P */

@@ -4037,6 +4037,8 @@ PERL_CALLCONV SV*	Perl_sv_setsv_cow(pTHX_ SV* dsv, SV* ssv)
 
 #endif
 
+PERL_CALLCONV const char *	Perl_PerlIO_context_layers(pTHX_ const char *mode);
+
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 PERL_CALLCONV int	Perl_PerlIO_close(pTHX_ PerlIO *f);
 PERL_CALLCONV int	Perl_PerlIO_fill(pTHX_ PerlIO *f);

@@ -174,8 +174,6 @@ PERL_EXPORT_C void PerlIO_clone(pTHX_ PerlInterpreter *proto,
 #endif				/* ifndef PERLIO_NOT_STDIO */
 #endif				/* PERLIO_IS_STDIO */
 
-#define specialCopIO(sv) ((sv) == NULL)
-
 /* ----------- fill in things that have not got #define'd  ---------- */
 
 #ifndef Fpos_t
