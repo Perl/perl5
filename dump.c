@@ -1237,16 +1237,19 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (HvREHASH(sv))	sv_catpv(d, "REHASH,");
 	if (flags & SVphv_CLONEABLE) sv_catpv(d, "CLONEABLE,");
 	break;
-    case SVt_PVGV: case SVt_PVLV:
-	if (GvINTRO(sv))	sv_catpv(d, "INTRO,");
-	if (GvMULTI(sv))	sv_catpv(d, "MULTI,");
-	if (GvUNIQUE(sv))       sv_catpv(d, "UNIQUE,");
-	if (GvASSUMECV(sv))	sv_catpv(d, "ASSUMECV,");
-	if (GvIN_PAD(sv))       sv_catpv(d, "IN_PAD,");
+    case SVt_PVGV:
+    case SVt_PVLV:
+	if (isGV_with_GP(sv)) {
+	    if (GvINTRO(sv))	sv_catpv(d, "INTRO,");
+	    if (GvMULTI(sv))	sv_catpv(d, "MULTI,");
+	    if (GvUNIQUE(sv))   sv_catpv(d, "UNIQUE,");
+	    if (GvASSUMECV(sv))	sv_catpv(d, "ASSUMECV,");
+	    if (GvIN_PAD(sv))   sv_catpv(d, "IN_PAD,");
+	}
 	if (SvPAD_OUR(sv))	sv_catpv(d, "OUR,");
 	if (SvPAD_STATE(sv))	sv_catpv(d, "STATE,");
 	if (SvPAD_TYPED(sv))	sv_catpv(d, "TYPED,");
-	if (GvIMPORTED(sv)) {
+	if (isGV_with_GP(sv) && GvIMPORTED(sv)) {
 	    sv_catpv(d, "IMPORT");
 	    if (GvIMPORTED(sv) == GVf_IMPORTED)
 		sv_catpv(d, "ALL,");
@@ -1610,7 +1613,8 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	if (nest < maxnest && (CvCLONE(sv) || CvCLONED(sv)))
 	    do_sv_dump(level+1, file, (SV*)CvOUTSIDE(sv), nest+1, maxnest, dumpops, pvlim);
 	break;
-    case SVt_PVGV: case SVt_PVLV:
+    case SVt_PVGV:
+    case SVt_PVLV:
     if (type == SVt_PVLV) {
         Perl_dump_indent(aTHX_ level, file, "  TYPE = %c\n", LvTYPE(sv));
         Perl_dump_indent(aTHX_ level, file, "  TARGOFF = %"IVdf"\n", (IV)LvTARGOFF(sv));
@@ -1620,11 +1624,11 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
             do_sv_dump(level+1, file, LvTARG(sv), nest+1, maxnest,
                 dumpops, pvlim);
     }
+	if (!isGV_with_GP(sv))
+	    break;
 	Perl_dump_indent(aTHX_ level, file, "  NAME = \"%s\"\n", GvNAME(sv));
 	Perl_dump_indent(aTHX_ level, file, "  NAMELEN = %"IVdf"\n", (IV)GvNAMELEN(sv));
 	do_hv_dump (level, file, "  GvSTASH", GvSTASH(sv));
-	if (!isGV_with_GP(sv))
-	    break;
 	Perl_dump_indent(aTHX_ level, file, "  GP = 0x%"UVxf"\n", PTR2UV(GvGP(sv)));
 	if (!GvGP(sv))
 	    break;
