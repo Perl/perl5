@@ -576,10 +576,12 @@ struct subst {
 	cx->sb_rxres		= NULL,					\
 	cx->sb_rx		= rx,					\
 	cx->cx_type		= CXt_SUBST;				\
-	rxres_save(&cx->sb_rxres, rx)
+	rxres_save(&cx->sb_rxres, rx);					\
+	ReREFCNT_inc(rx)
 
 #define POPSUBST(cx) cx = &cxstack[cxstack_ix--];			\
-	rxres_free(&cx->sb_rxres)
+	rxres_free(&cx->sb_rxres);					\
+	ReREFCNT_dec(cx->sb_rx)
 
 struct context {
     U32		cx_type;	/* what kind of context this is */

@@ -197,7 +197,7 @@ PP(pp_substcont)
     if(old != rx) {
 	if(old)
 	    ReREFCNT_dec(old);
-	PM_SETRE(pm,rx);
+	PM_SETRE(pm,ReREFCNT_inc(rx));
     }
 
     rxres_restore(&cx->sb_rxres, rx);
@@ -256,7 +256,6 @@ PP(pp_substcont)
 	    SvTAINT(targ);
 
 	    LEAVE_SCOPE(cx->sb_oldsave);
-	    ReREFCNT_dec(rx);
 	    POPSUBST(cx);
 	    RETURNOP(pm->op_next);
 	}
