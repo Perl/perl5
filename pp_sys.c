@@ -337,7 +337,7 @@ PP(pp_backtick)
 	if (gimme == G_VOID) {
 	    char tmpbuf[256];
 	    while (PerlIO_read(fp, tmpbuf, sizeof tmpbuf) > 0)
-		;
+		NOOP;
 	}
 	else if (gimme == G_SCALAR) {
 	    ENTER;
@@ -345,7 +345,7 @@ PP(pp_backtick)
 	    PL_rs = &PL_sv_undef;
 	    sv_setpvn(TARG, "", 0);	/* note that this preserves previous buffer */
 	    while (sv_gets(TARG, fp, SvCUR(TARG)) != NULL)
-		;
+		NOOP;
 	    LEAVE;
 	    XPUSHs(TARG);
 	    SvTAINTED_on(TARG);
@@ -537,11 +537,11 @@ PP(pp_open)
 
     if (!isGV(gv))
 	DIE(aTHX_ PL_no_usym, "filehandle");
-    if ((io = GvIOp(gv)))
+    if ((io = GvIOp(gv))) {
+	MAGIC *mg;
 	IoFLAGS(GvIOp(gv)) &= ~IOf_UNTAINT;
 
-    if (io) {
-	MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
 	if (mg) {
 	    /* Method's args are same as ours ... */
 	    /* ... except handle is replaced by the object */
@@ -578,21 +578,23 @@ PP(pp_open)
 PP(pp_close)
 {
     dVAR; dSP;
-    IO *io;
-    MAGIC *mg;
     GV * const gv = (MAXARG == 0) ? PL_defoutgv : (GV*)POPs;
 
-    if (gv && (io = GvIO(gv))
-	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
-    {
-	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)io, mg));
-	PUTBACK;
-	ENTER;
-	call_method("CLOSE", G_SCALAR);
-	LEAVE;
-	SPAGAIN;
-	RETURN;
+    if (gv) {
+	IO * const io = GvIO(gv);
+	if (io) {
+	    MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	    if (mg) {
+		PUSHMARK(SP);
+		XPUSHs(SvTIED_obj((SV*)io, mg));
+		PUTBACK;
+		ENTER;
+		call_method("CLOSE", G_SCALAR);
+		LEAVE;
+		SPAGAIN;
+		RETURN;
+	    }
+	}
     }
     EXTEND(SP, 1);
     PUSHs(boolSV(do_close(gv, TRUE)));
@@ -635,10 +637,14 @@ PP(pp_pipe_op)
     IoTYPE(wstio) = IoTYPE_WRONLY;
 
     if (!IoIFP(rstio) || !IoOFP(wstio)) {
-	if (IoIFP(rstio)) PerlIO_close(IoIFP(rstio));
-	else PerlLIO_close(fd[0]);
-	if (IoOFP(wstio)) PerlIO_close(IoOFP(wstio));
-	else PerlLIO_close(fd[1]);
+	if (IoIFP(rstio))
+	    PerlIO_close(IoIFP(rstio));
+	else
+	    PerlLIO_close(fd[0]);
+	if (IoOFP(wstio))
+	    PerlIO_close(IoOFP(wstio));
+	else
+	    PerlLIO_close(fd[1]);
 	goto badexit;
     }
 #if defined(HAS_FCNTL) && defined(F_SETFD)
@@ -725,7 +731,6 @@ PP(pp_binmode)
     GV *gv;
     IO *io;
     PerlIO *fp;
-    MAGIC *mg;
     SV *discp = NULL;
 
     if (MAXARG < 1)
@@ -736,19 +741,20 @@ PP(pp_binmode)
 
     gv = (GV*)POPs;
 
-    if (gv && (io = GvIO(gv))
-	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
-    {
-	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)io, mg));
-	if (discp)
-	    XPUSHs(discp);
-	PUTBACK;
-	ENTER;
-	call_method("BINMODE", G_SCALAR);
-	LEAVE;
-	SPAGAIN;
-	RETURN;
+    if (gv && (io = GvIO(gv))) {
+	MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	if (mg) {
+	    PUSHMARK(SP);
+	    XPUSHs(SvTIED_obj((SV*)io, mg));
+	    if (discp)
+		XPUSHs(discp);
+	    PUTBACK;
+	    ENTER;
+	    call_method("BINMODE", G_SCALAR);
+	    LEAVE;
+	    SPAGAIN;
+	    RETURN;
+	}
     }
 
     EXTEND(SP, 1);
@@ -1157,7 +1163,7 @@ PP(pp_select)
 {
     dVAR; dSP; dTARGET;
     HV *hv;
-    GV * const newdefout = (PL_op->op_private > 0) ? ((GV *) POPs) : (GV *) NULL;
+    GV * const newdefout = (PL_op->op_private > 0) ? ((GV *) POPs) : NULL;
     GV * egv = GvEGV(PL_defoutgv);
 
     if (!egv)
@@ -1189,23 +1195,23 @@ PP(pp_getc)
 {
     dVAR; dSP; dTARGET;
     IO *io = NULL;
-    MAGIC *mg;
     GV * const gv = (MAXARG==0) ? PL_stdingv : (GV*)POPs;
 
-    if (gv && (io = GvIO(gv))
-	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
-    {
-	const I32 gimme = GIMME_V;
-	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)io, mg));
-	PUTBACK;
-	ENTER;
-	call_method("GETC", gimme);
-	LEAVE;
-	SPAGAIN;
-	if (gimme == G_SCALAR)
-	    SvSetMagicSV_nosteal(TARG, TOPs);
-	RETURN;
+    if (gv && (io = GvIO(gv))) {
+	MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	if (mg) {
+	    const I32 gimme = GIMME_V;
+	    PUSHMARK(SP);
+	    XPUSHs(SvTIED_obj((SV*)io, mg));
+	    PUTBACK;
+	    ENTER;
+	    call_method("GETC", gimme);
+	    LEAVE;
+	    SPAGAIN;
+	    if (gimme == G_SCALAR)
+		SvSetMagicSV_nosteal(TARG, TOPs);
+	    RETURN;
+	}
     }
     if (!gv || do_eof(gv)) { /* make sure we have fp with something */
 	if ((!io || (!IoIFP(io) && IoTYPE(io) != IoTYPE_WRONLY))
@@ -1277,9 +1283,9 @@ PP(pp_enterwrite)
     else
 	fgv = gv;
 
-    if (!fgv) {
-	DIE(aTHX_ "Not a format reference");
-    }
+    if (!fgv)
+	goto not_a_format_reference;
+
     cv = GvFORM(fgv);
     if (!cv) {
 	SV * const tmpsv = sv_newmortal();
@@ -1288,6 +1294,8 @@ PP(pp_enterwrite)
 	name = SvPV_nolen_const(tmpsv);
 	if (name && *name)
 	    DIE(aTHX_ "Undefined format \"%s\" called", name);
+
+	not_a_format_reference:
 	DIE(aTHX_ "Not a format reference");
     }
     if (CvCLONE(cv))
@@ -1431,30 +1439,30 @@ PP(pp_prtf)
     IO *io;
     PerlIO *fp;
     SV *sv;
-    MAGIC *mg;
 
     GV * const gv = (PL_op->op_flags & OPf_STACKED) ? (GV*)*++MARK : PL_defoutgv;
 
-    if (gv && (io = GvIO(gv))
-	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
-    {
-	if (MARK == ORIGMARK) {
-	    MEXTEND(SP, 1);
-	    ++MARK;
-	    Move(MARK, MARK + 1, (SP - MARK) + 1, SV*);
-	    ++SP;
+    if (gv && (io = GvIO(gv))) {
+	MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	if (mg) {
+	    if (MARK == ORIGMARK) {
+		MEXTEND(SP, 1);
+		++MARK;
+		Move(MARK, MARK + 1, (SP - MARK) + 1, SV*);
+		++SP;
+	    }
+	    PUSHMARK(MARK - 1);
+	    *MARK = SvTIED_obj((SV*)io, mg);
+	    PUTBACK;
+	    ENTER;
+	    call_method("PRINTF", G_SCALAR);
+	    LEAVE;
+	    SPAGAIN;
+	    MARK = ORIGMARK + 1;
+	    *MARK = *SP;
+	    SP = MARK;
+	    RETURN;
 	}
-	PUSHMARK(MARK - 1);
-	*MARK = SvTIED_obj((SV*)io, mg);
-	PUTBACK;
-	ENTER;
-	call_method("PRINTF", G_SCALAR);
-	LEAVE;
-	SPAGAIN;
-	MARK = ORIGMARK + 1;
-	*MARK = *SP;
-	SP = MARK;
-	RETURN;
     }
 
     sv = newSV(0);
@@ -1780,35 +1788,35 @@ PP(pp_send)
     SSize_t retval;
     STRLEN blen;
     STRLEN orig_blen_bytes;
-    MAGIC *mg;
     const int op_type = PL_op->op_type;
     bool doing_utf8;
     U8 *tmpbuf = NULL;
     
     GV *const gv = (GV*)*++MARK;
     if (PL_op->op_type == OP_SYSWRITE
-	&& gv && (io = GvIO(gv))
-	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
-    {
-	SV *sv;
+	&& gv && (io = GvIO(gv))) {
+	MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	if (mg) {
+	    SV *sv;
 
-	if (MARK == SP - 1) {
-	    EXTEND(SP, 1000);
-	    sv = sv_2mortal(newSViv(sv_len(*SP)));
+	    if (MARK == SP - 1) {
+		EXTEND(SP, 1000);
+		sv = sv_2mortal(newSViv(sv_len(*SP)));
+		PUSHs(sv);
+		PUTBACK;
+	    }
+
+	    PUSHMARK(ORIGMARK);
+	    *(ORIGMARK+1) = SvTIED_obj((SV*)io, mg);
+	    ENTER;
+	    call_method("WRITE", G_SCALAR);
+	    LEAVE;
+	    SPAGAIN;
+	    sv = POPs;
+	    SP = ORIGMARK;
 	    PUSHs(sv);
-	    PUTBACK;
+	    RETURN;
 	}
-	
-	PUSHMARK(ORIGMARK);
-	*(ORIGMARK+1) = SvTIED_obj((SV*)io, mg);
-	ENTER;
-	call_method("WRITE", G_SCALAR);
-	LEAVE;
-	SPAGAIN;
-	sv = POPs;
-	SP = ORIGMARK;
-	PUSHs(sv);
-	RETURN;
     }
     if (!gv)
 	goto say_undef;
@@ -1840,7 +1848,7 @@ PP(pp_send)
     }
     else if (doing_utf8) {
 	STRLEN tmplen = blen;
-	U8 *result = bytes_from_utf8((const U8*) buffer, &tmplen, &doing_utf8);
+	U8 * const result = bytes_from_utf8((const U8*) buffer, &tmplen, &doing_utf8);
 	if (!doing_utf8) {
 	    tmpbuf = result;
 	    buffer = (char *) tmpbuf;
@@ -1972,8 +1980,7 @@ PP(pp_send)
     if (doing_utf8)
         retval = utf8_length((U8*)buffer, (U8*)buffer + retval);
 
-    if (tmpbuf)
-	Safefree(tmpbuf);
+    Safefree(tmpbuf);
 #if Size_t_size > IVSIZE
     PUSHn(retval);
 #else
@@ -1982,8 +1989,7 @@ PP(pp_send)
     RETURN;
 
   say_undef:
-    if (tmpbuf)
-	Safefree(tmpbuf);
+    Safefree(tmpbuf);
     SP = ORIGMARK;
     RETPUSHUNDEF;
 }
@@ -2040,23 +2046,23 @@ PP(pp_tell)
     dVAR; dSP; dTARGET;
     GV *gv;
     IO *io;
-    MAGIC *mg;
 
     if (MAXARG != 0)
 	PL_last_in_gv = (GV*)POPs;
     gv = PL_last_in_gv;
 
-    if (gv && (io = GvIO(gv))
-	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
-    {
-	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)io, mg));
-	PUTBACK;
-	ENTER;
-	call_method("TELL", G_SCALAR);
-	LEAVE;
-	SPAGAIN;
-	RETURN;
+    if (gv && (io = GvIO(gv))) {
+	MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	if (mg) {
+	    PUSHMARK(SP);
+	    XPUSHs(SvTIED_obj((SV*)io, mg));
+	    PUTBACK;
+	    ENTER;
+	    call_method("TELL", G_SCALAR);
+	    LEAVE;
+	    SPAGAIN;
+	    RETURN;
+	}
     }
 
 #if LSEEKSIZE > IVSIZE
@@ -2070,34 +2076,34 @@ PP(pp_tell)
 PP(pp_sysseek)
 {
     dVAR; dSP;
-    IO *io;
     const int whence = POPi;
 #if LSEEKSIZE > IVSIZE
     const Off_t offset = (Off_t)SvNVx(POPs);
 #else
     const Off_t offset = (Off_t)SvIVx(POPs);
 #endif
-    MAGIC *mg;
 
     GV * const gv = PL_last_in_gv = (GV*)POPs;
+    IO *io;
 
-    if (gv && (io = GvIO(gv))
-	&& (mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar)))
-    {
-	PUSHMARK(SP);
-	XPUSHs(SvTIED_obj((SV*)io, mg));
+    if (gv && (io = GvIO(gv))) {
+	MAGIC * const mg = SvTIED_mg((SV*)io, PERL_MAGIC_tiedscalar);
+	if (mg) {
+	    PUSHMARK(SP);
+	    XPUSHs(SvTIED_obj((SV*)io, mg));
 #if LSEEKSIZE > IVSIZE
-	XPUSHs(sv_2mortal(newSVnv((NV) offset)));
+	    XPUSHs(sv_2mortal(newSVnv((NV) offset)));
 #else
-	XPUSHs(sv_2mortal(newSViv(offset)));
+	    XPUSHs(sv_2mortal(newSViv(offset)));
 #endif
-	XPUSHs(sv_2mortal(newSViv(whence)));
-	PUTBACK;
-	ENTER;
-	call_method("SEEK", G_SCALAR);
-	LEAVE;
-	SPAGAIN;
-	RETURN;
+	    XPUSHs(sv_2mortal(newSViv(whence)));
+	    PUTBACK;
+	    ENTER;
+	    call_method("SEEK", G_SCALAR);
+	    LEAVE;
+	    SPAGAIN;
+	    RETURN;
+	}
     }
 
     if (PL_op->op_type == OP_SEEK)
@@ -2447,19 +2453,13 @@ PP(pp_bind)
     GV * const gv = (GV*)POPs;
     register IO * const io = GvIOn(gv);
     STRLEN len;
-    int bind_ok = 0;
 
     if (!io || !IoIFP(io))
 	goto nuts;
 
     addr = SvPV_const(addrsv, len);
     TAINT_PROPER("bind");
-    if (PerlSock_bind(PerlIO_fileno(IoIFP(io)),
-		      (struct sockaddr *)addr, len) >= 0)
-	bind_ok = 1;
-
-
-    if (bind_ok)
+    if (PerlSock_bind(PerlIO_fileno(IoIFP(io)), (struct sockaddr *)addr, len) >= 0)
 	RETPUSHYES;
     else
 	RETPUSHUNDEF;
@@ -3774,8 +3774,7 @@ PP(pp_readdir)
             SvTAINTED_on(sv);
 #endif
         XPUSHs(sv_2mortal(sv));
-    }
-    while (gimme == G_ARRAY);
+    } while (gimme == G_ARRAY);
 
     if (!dp && gimme != G_ARRAY)
         goto nope;
