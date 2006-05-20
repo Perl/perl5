@@ -6072,10 +6072,10 @@ esac
 set userelocatableinc
 eval $setvar
 
+initialinstalllocation="$binexp"
 : Default prefix is now "up one level from where the binaries are"
 case "$userelocatableinc" in
 $define|true|[yY]*)
-    initialinstalllocation="$binexp"
     bin=".../"
     binexp=".../"
     prefix=".../.."
