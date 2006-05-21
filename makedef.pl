@@ -979,6 +979,7 @@ my @layer_syms = qw(
 		    PerlIO_sv_dup
 		    Perl_PerlIO_clearerr
 		    Perl_PerlIO_close
+		    Perl_PerlIO_context_layers
 		    Perl_PerlIO_eof
 		    Perl_PerlIO_error
 		    Perl_PerlIO_fileno

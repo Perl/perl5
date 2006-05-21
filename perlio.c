@@ -1408,35 +1408,6 @@ Perl_PerlIO_fileno(pTHX_ PerlIO *f)
      Perl_PerlIO_or_Base(f, Fileno, fileno, -1, (aTHX_ f));
 }
 
-const char *
-Perl_PerlIO_context_layers(pTHX_ const char *mode)
-{
-    dVAR;
-    const char *type = NULL;
-    /*
-     * Need to supply default layer info from open.pm
-     */
-    if (PL_curcop && PL_curcop->cop_hints & HINT_LEXICAL_IO) {
-	SV * const layers
-	    = Perl_refcounted_he_fetch(aTHX_ PL_curcop->cop_hints_hash, 0,
-				       "open", 4, 0, 0);
-	assert(layers);
-	if (SvOK(layers)) {
-	    STRLEN len;
-	    type = SvPV_const(layers, len);
-	    if (type && mode && mode[0] != 'r') {
-		/*
-		 * Skip to write part, which is separated by a '\0'
-		 */
-		STRLEN read_len = strlen(type);
-		if (read_len < len) {
-		    type += read_len + 1;
-		}
-	    }
-	}
-    }
-    return type;
-}
 
 static PerlIO_funcs *
 PerlIO_layer_from_ref(pTHX_ SV *sv)
@@ -5055,6 +5026,36 @@ PerlIO_tmpfile(void)
  * Now some functions in terms of above which may be needed even if we are
  * not in true PerlIO mode
  */
+const char *
+Perl_PerlIO_context_layers(pTHX_ const char *mode)
+{
+    dVAR;
+    const char *type = NULL;
+    /*
+     * Need to supply default layer info from open.pm
+     */
+    if (PL_curcop && PL_curcop->cop_hints & HINT_LEXICAL_IO) {
+	SV * const layers
+	    = Perl_refcounted_he_fetch(aTHX_ PL_curcop->cop_hints_hash, 0,
+				       "open", 4, 0, 0);
+	assert(layers);
+	if (SvOK(layers)) {
+	    STRLEN len;
+	    type = SvPV_const(layers, len);
+	    if (type && mode && mode[0] != 'r') {
+		/*
+		 * Skip to write part, which is separated by a '\0'
+		 */
+		STRLEN read_len = strlen(type);
+		if (read_len < len) {
+		    type += read_len + 1;
+		}
+	    }
+	}
+    }
+    return type;
+}
+
 
 #ifndef HAS_FSETPOS
 #undef PerlIO_setpos
