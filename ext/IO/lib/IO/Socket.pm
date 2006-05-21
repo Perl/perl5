@@ -117,6 +117,7 @@ sub connect {
 
 	    my $sel = new IO::Select $sock;
 
+	    undef $!;
 	    if (!$sel->can_write($timeout)) {
 		$err = $! || (exists &Errno::ETIMEDOUT ? &Errno::ETIMEDOUT : 1);
 		$@ = "connect: timeout";
