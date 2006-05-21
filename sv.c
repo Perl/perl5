@@ -9338,26 +9338,28 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    continue;	/* not "break" */
 	}
 
-	/* calculate width before utf8_upgrade changes it */
+	if (is_utf8 != has_utf8) {
+	    if (is_utf8) {
+		if (SvCUR(sv))
+		    sv_utf8_upgrade(sv);
+	    }
+	    else {
+		const STRLEN old_elen = elen;
+		SV * const nsv = sv_2mortal(newSVpvn(eptr, elen));
+		sv_utf8_upgrade(nsv);
+		eptr = SvPVX_const(nsv);
+		elen = SvCUR(nsv);
+
+		if (width) { /* fudge width (can't fudge elen) */
+		    width += elen - old_elen;
+		}
+		is_utf8 = TRUE;
+	    }
+	}
+
 	have = esignlen + zeros + elen;
 	if (have < zeros)
 	    Perl_croak_nocontext(PL_memory_wrap);
-
-	if (is_utf8 != has_utf8) {
-	     if (is_utf8) {
-		  if (SvCUR(sv))
-		       sv_utf8_upgrade(sv);
-	     }
-	     else {
-		  SV * const nsv = sv_2mortal(newSVpvn(eptr, elen));
-		  sv_utf8_upgrade(nsv);
-		  eptr = SvPVX_const(nsv);
-		  elen = SvCUR(nsv);
-	     }
-	     SvGROW(sv, SvCUR(sv) + elen + 1);
-	     p = SvEND(sv);
-	     *p = '\0';
-	}
 
 	need = (have > width ? have : width);
 	gap = need - have;
