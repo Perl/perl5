@@ -70,6 +70,11 @@ a.*c	axyzc	y	$&	axyzc
 a.*c	axyzd	n	-	-
 a[bc]d	abc	n	-	-
 a[bc]d	abd	y	$&	abd
+a[b]d	abd	y	$&	abd
+[a][b][d]	abd	y	$&	abd
+.[b].	abd	y	$&	abd
+.[b].	aBd	n	-	-
+(?i:.[b].)	abd	y	$&	abd
 a[b-d]e	abd	n	-	-
 a[b-d]e	ace	y	$&	ace
 a[b-d]	aac	y	$&	ac
