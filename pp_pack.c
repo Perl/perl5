@@ -703,7 +703,7 @@ next_uni_uu(pTHX_ const char **s, const char *end, I32 *out)
 }
 
 STATIC char *
-S_bytes_to_uni(pTHX_ const U8 *start, STRLEN len, char *dest) {
+S_bytes_to_uni(const U8 *start, STRLEN len, char *dest) {
     const U8 * const end = start + len;
 
     while (start < end) {

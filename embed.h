@@ -3396,7 +3396,7 @@
 #define need_utf8		S_need_utf8
 #define first_symbol		S_first_symbol
 #define sv_exp_grow(a,b)	S_sv_exp_grow(aTHX_ a,b)
-#define bytes_to_uni(a,b,c)	S_bytes_to_uni(aTHX_ a,b,c)
+#define bytes_to_uni		S_bytes_to_uni
 #endif
 #endif
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
