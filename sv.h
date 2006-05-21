@@ -182,8 +182,11 @@ and smaller.
 Same as SvREFCNT_inc_simple, but can only be used if you don't need the
 return value.  The macro doesn't need to return a meaningful value.
 
-=for apidoc Am|SV*|SvREFCNT_inc|SV* sv
-Increments the reference count of the given SV.
+=for apidoc Am|SV*|SvREFCNT_inc_simple_void_NN|SV* sv
+Same as SvREFCNT_inc, but can only be used if you don't need the return
+value, and you know that I<sv> is not NULL.  The macro doesn't need
+to return a meaningful value, or check for NULLness, so it's smaller
+and faster.
 
 =for apidoc Am|void|SvREFCNT_dec|SV* sv
 Decrements the reference count of the given SV.
@@ -240,7 +243,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #endif
 
 /* These guys don't need the curly blocks */
-#define SvREFCNT_inc_simple_void(sv)	if (sv) (SvREFCNT(sv)++);
+#define SvREFCNT_inc_simple_void(sv)	STMT_START { if (sv) SvREFCNT(sv)++; } STMT_END
 #define SvREFCNT_inc_simple_NN(sv)	(++(SvREFCNT(sv)),(SV*)(sv))
 #define SvREFCNT_inc_void_NN(sv)	(void)(++SvREFCNT((SV*)(sv)))
 #define SvREFCNT_inc_simple_void_NN(sv)	(void)(++SvREFCNT((SV*)(sv)))
