@@ -3,11 +3,11 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
+    require './test.pl';
 }
 
 use strict;
-require './test.pl';
-plan( tests => 66 );
+plan( tests => 69 );
 
 my $foo = 'Now is the time for all good men to come to the aid of their country.';
 
@@ -139,4 +139,19 @@ foreach my $utf8 ('', ', utf-8') {
 
 	fresh_perl_is($prog, $expect_pos, {}, "\$[ = $arraybase$utf8");
     }
+}
+
+SKIP: {
+    skip "UTF-EBCDIC is limited to 0x7fffffff", 3 if ord("A") == 193;
+
+    my $a = "\x{80000000}";
+    my $s = $a.'defxyz';
+    is(index($s, 'def'), 1, "0x80000000 is a single character");
+
+    my $b = "\x{fffffffd}";
+    my $t = $b.'pqrxyz';
+    is(index($t, 'pqr'), 1, "0xfffffffd is a single character");
+
+    local ${^UTF8CACHE} = -1;
+    is(index($t, 'xyz'), 4, "0xfffffffd and utf8cache");
 }

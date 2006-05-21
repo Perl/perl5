@@ -5687,18 +5687,7 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8,
 
     if (PL_utf8cache < 0) {
 	const U8 *start = (const U8 *) SvPVX_const(sv);
-	const U8 *const end = start + byte;
-	STRLEN realutf8 = 0;
-
-	while (start < end) {
-	    start += UTF8SKIP(start);
-	    realutf8++;
-	}
-
-	/* Can't use S_sv_pos_b2u_forwards as it will scream warnings on
-	   surrogates.  FIXME - is it inconsistent that b2u warns, but u2b
-	   doesn't?  I don't know whether this difference was introduced with
-	   the caching code in 5.8.1.  */
+	const STRLEN realutf8 = utf8_length(start, start + byte);
 
 	if (realutf8 != utf8) {
 	    /* Need to turn the assertions off otherwise we may recurse
@@ -5809,29 +5798,6 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8,
     ASSERT_UTF8_CACHE(cache);
 }
 
-/* If we don't know the character offset of the end of a region, our only
-   option is to walk forwards to the target byte offset.  */
-static STRLEN
-S_sv_pos_b2u_forwards(pTHX_ const U8 *s, const U8 *const target)
-{
-    STRLEN len = 0;
-    while (s < target) {
-	STRLEN n = 1;
-
-	/* Call utf8n_to_uvchr() to validate the sequence
-	 * (unless a simple non-UTF character) */
-	if (!UTF8_IS_INVARIANT(*s))
-	    utf8n_to_uvchr(s, UTF8SKIP(s), &n, 0);
-	if (n > 0) {
-	    s += n;
-	    len++;
-	}
-	else
-	    break;
-    }
-    return len;
-}
-
 /* We already know all of the way, now we may be able to walk back.  The same
    assumption is made as in S_sv_pos_u2b_midway(), namely that walking
    backward is half the speed of walking forward. */
@@ -5843,7 +5809,7 @@ S_sv_pos_b2u_midway(pTHX_ const U8 *s, const U8 *const target, const U8 *end,
     STRLEN backw = end - target;
 
     if (forw < 2 * backw) {
-	return S_sv_pos_b2u_forwards(aTHX_ s, target);
+	return utf8_length(s, target);
     }
 
     while (end > target) {
@@ -5916,8 +5882,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 			+ S_sv_pos_b2u_midway(aTHX_ s + cache[1], send,
 					      s + blen, mg->mg_len - cache[0]);
 		} else {
-		    len = cache[0]
-			+ S_sv_pos_b2u_forwards(aTHX_ s + cache[1], send);
+		    len = cache[0] + utf8_length(s + cache[1], send);
 		}
 	    }
 	    else if (cache[3] < byte) {
@@ -5943,7 +5908,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 	}
     }
     if (!found || PL_utf8cache < 0) {
-	const STRLEN real_len = S_sv_pos_b2u_forwards(aTHX_ s, send);
+	const STRLEN real_len = utf8_length(s, send);
 
 	if (found && PL_utf8cache < 0) {
 	    if (len != real_len) {
