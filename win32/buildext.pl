@@ -4,7 +4,7 @@ buildext.pl - build extensions
 
 =head1 SYNOPSIS
 
-    buildext.pl make [-make_opts] dep directory [target] [--static|--dynamic] !ext1 !ext2
+    buildext.pl make [-make_opts] dep directory [target] [--static|--dynamic] +ext2 !ext1
 
 E.g.
 
@@ -18,6 +18,10 @@ E.g.
 
 Will skip building extensions which are marked with an '!' char.
 Mostly because they still not ported to specified platform.
+
+If any extensions are listed with a '+' char then only those
+extensions will be built, but only if they arent countermanded
+by an '!ext' and are appropriate to the type of building being done.
 
 If '--static' specified, only static extensions will be built.
 If '--dynamic' specified, only dynamic extensions will be built.
@@ -36,6 +40,9 @@ use Config;
 # @ARGV with '!' at first position are exclusions
 my %excl = map {$_=>1} map {/^!(.*)$/} @ARGV;
 @ARGV = grep {!/^!/} @ARGV;
+# @ARGV with '+' at first position are inclusions
+my %incl = map {$_=>1} map {/^\+(.*)$/} @ARGV;
+@ARGV = grep {!/^\+/} @ARGV;
 
 # --static/--dynamic
 my %opts = map {$_=>1} map {/^--([\w\-]+)$/} @ARGV;
@@ -47,13 +54,15 @@ if ("$static,$dynamic" eq "0,0") {
 if ($opts{'list-static-libs'} || $opts{'create-perllibst-h'}) {
   my @statics = split /\s+/, $Config{static_ext};
   if ($opts{'create-perllibst-h'}) {
-    open my $fh, ">perllibst.h";
+    open my $fh, ">perllibst.h"
+        or die "Failed to write to perllibst.h:$!";
     my @statics1 = map {local $_=$_;s/\//__/g;$_} @statics;
     my @statics2 = map {local $_=$_;s/\//::/g;$_} @statics;
     print $fh "/*DO NOT EDIT\n  this file is included from perllib.c to init static extensions */\n";
     print $fh "#ifdef STATIC1\n",(map {"    \"$_\",\n"} @statics),"#undef STATIC1\n#endif\n";
     print $fh "#ifdef STATIC2\n",(map {"    EXTERN_C void boot_$_ (pTHX_ CV* cv);\n"} @statics1),"#undef STATIC2\n#endif\n";
     print $fh "#ifdef STATIC3\n",(map {"    newXS(\"$statics2[$_]::bootstrap\", boot_$statics1[$_], file);\n"} 0 .. $#statics),"#undef STATIC3\n#endif\n";
+    close $fh;
   }
   else {
     my %extralibs;
@@ -64,7 +73,7 @@ if ($opts{'list-static-libs'} || $opts{'create-perllibst-h'}) {
     print map {s|/|\\|g;m|([^\\]+)$|;"..\\lib\\auto\\$_\\$1$Config{_a} "} @statics;
     print map {"$_ "} sort keys %extralibs;
   }
-  exit;
+  exit(0);
 }
 
 my $here = getcwd();
@@ -100,8 +109,13 @@ my @ext;
 push @ext, FindExt::static_ext() if $static;
 push @ext, FindExt::dynamic_ext(), FindExt::nonxs_ext() if $dynamic;
 
+
 foreach $dir (sort @ext)
  {
+  if (%incl and !exists $incl{$dir}) {
+    #warn "Skipping extension $ext\\$dir, not in inclusion list\n";
+    next;
+  }
   if (exists $excl{$dir}) {
     warn "Skipping extension $ext\\$dir, not ported to current platform";
     next;
