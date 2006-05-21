@@ -4351,7 +4351,7 @@ X<SvSTASH_set>
 
 Set the value of the STASH pointer in sv to val.  See C<SvIV_set>.
 
-	void	SvSTASH_set(SV* sv, STASH* val)
+	void	SvSTASH_set(SV* sv, HV* val)
 
 =for hackers
 Found in file sv.h
