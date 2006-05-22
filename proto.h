@@ -103,12 +103,14 @@ PERL_CALLCONV AV*	Perl_av_make(pTHX_ I32 size, SV** svp)
 
 PERL_CALLCONV SV*	Perl_av_pop(pTHX_ AV* ar);
 PERL_CALLCONV void	Perl_av_push(pTHX_ AV* ar, SV* val);
+PERL_CALLCONV void	Perl_av_create_and_push(pTHX_ AV **const avp, SV *const val);
 PERL_CALLCONV void	Perl_av_reify(pTHX_ AV* ar);
 PERL_CALLCONV SV*	Perl_av_shift(pTHX_ AV* ar)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV SV**	Perl_av_store(pTHX_ AV* ar, I32 key, SV* val);
 PERL_CALLCONV void	Perl_av_undef(pTHX_ AV* ar);
+PERL_CALLCONV SV**	Perl_av_create_and_unshift_one(pTHX_ AV **const avp, SV *const val);
 PERL_CALLCONV void	Perl_av_unshift(pTHX_ AV* ar, I32 num);
 PERL_CALLCONV OP*	Perl_bind_match(pTHX_ I32 type, OP* left, OP* pat)
 			__attribute__warn_unused_result__;
@@ -368,6 +370,7 @@ PERL_CALLCONV void	Perl_gv_efullname(pTHX_ SV* sv, GV* gv);
 /* PERL_CALLCONV void	Perl_gv_efullname3(pTHX_ SV* sv, GV* gv, const char* prefix); */
 PERL_CALLCONV void	Perl_gv_efullname4(pTHX_ SV* sv, GV* gv, const char* prefix, bool keepmain);
 PERL_CALLCONV GV*	Perl_gv_fetchfile(pTHX_ const char* name);
+PERL_CALLCONV GV*	Perl_gv_fetchfile_flags(pTHX_ const char *const name, const STRLEN len, const U32 flags);
 PERL_CALLCONV GV*	Perl_gv_fetchmeth(pTHX_ HV* stash, const char* name, STRLEN len, I32 level);
 PERL_CALLCONV GV*	Perl_gv_fetchmeth_autoload(pTHX_ HV* stash, const char* name, STRLEN len, I32 level);
 /* PERL_CALLCONV GV*	Perl_gv_fetchmethod(pTHX_ HV* stash, const char* name); */
@@ -1083,6 +1086,10 @@ PERL_CALLCONV char*	Perl_savepvn(pTHX_ const char* pv, I32 len)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV char*	Perl_savesharedpv(pTHX_ const char* pv)
+			__attribute__malloc__
+			__attribute__warn_unused_result__;
+
+PERL_CALLCONV char*	Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN len)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 
@@ -1966,7 +1973,7 @@ STATIC char*	S_swallow_bom(pTHX_ U8 *s)
 
 STATIC void	S_checkcomma(pTHX_ const char *s, const char *name, const char *what);
 STATIC void	S_force_ident(pTHX_ const char *s, int kind);
-STATIC void	S_incline(pTHX_ char *s);
+STATIC void	S_incline(pTHX_ const char *s);
 STATIC int	S_intuit_method(pTHX_ char *s, GV *gv, CV *cv);
 STATIC int	S_intuit_more(pTHX_ char *s);
 STATIC I32	S_lop(pTHX_ I32 f, int x, char *s);

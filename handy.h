@@ -236,6 +236,44 @@ typedef U64TYPE U64;
 
 #define Ctl(ch) ((ch) & 037)
 
+/*
+=head1 SV-Body Allocation
+
+=for apidoc Ama|SV*|newSVpvs|const char* s
+Like C<newSVpvn>, but takes a literal string instead of a string/length pair.
+
+=for apidoc Ama|SV*|newSVpvs_share|const char* s
+Like C<newSVpvn_share>, but takes a literal string instead of a string/length
+pair and omits the hash parameter.
+
+=for apidoc Am|SV*|sv_catpvs|SV* sv|const char* s
+Like C<sv_catpvn>, but takes a literal string instead of a string/length pair.
+
+=for apidoc Am|SV*|sv_setpvs|SV* sv|const char* s
+Like C<sv_setpvn>, but takes a literal string instead of a string/length pair.
+
+=head1 Memory Management
+
+=for apidoc Ama|char*|savepvs|const char* s
+Like C<savepvn>, but takes a literal string instead of a string/length pair.
+
+=head1 GV Functions
+
+=for apidoc Am|HV*|gv_stashpvs|const char* name|I32 create
+Like C<gv_stashpvn>, but takes a literal string instead of a string/length pair.
+
+=head1 Hash Manipulation Functions
+
+=for apidoc Am|SV**|hv_fetchs|HV* tb|const char* key|I32 lval
+Like C<hv_fetch>, but takes a literal string instead of a string/length pair.
+
+=for apidoc Am|SV**|hv_stores|HV* tb|const char* key|NULLOK SV* val
+Like C<hv_store>, but takes a literal string instead of a string/length pair
+and omits the hash parameter.
+
+=cut
+*/
+
 /* concatenating with "" ensures that only literal strings are accepted as argument */
 #define STR_WITH_LEN(s)  (s ""), (sizeof(s)-1)
 
@@ -248,10 +286,12 @@ typedef U64TYPE U64;
 #define newSVpvs(str) Perl_newSVpvn(aTHX_ STR_WITH_LEN(str))
 #define newSVpvs_share(str) Perl_newSVpvn_share(aTHX_ STR_WITH_LEN(str), 0)
 #define sv_catpvs(sv, str) Perl_sv_catpvn_flags(aTHX_ sv, STR_WITH_LEN(str), SV_GMAGIC)
+#define sv_setpvs(sv, str) Perl_sv_setpvn(aTHX_ sv, STR_WITH_LEN(str))
 #define savepvs(str) Perl_savepvn(aTHX_ STR_WITH_LEN(str))
 #define gv_stashpvs(str, create) Perl_gv_stashpvn(aTHX_ STR_WITH_LEN(str), create)
 #define gv_fetchpvs(namebeg, add, sv_type) Perl_gv_fetchpvn_flags(aTHX_ STR_WITH_LEN(namebeg), add, sv_type)
 #define hv_fetchs(hv,key,lval) Perl_hv_fetch(aTHX_ hv, STR_WITH_LEN(key), lval)
+#define hv_stores(hv,key,val) Perl_hv_store(aTHX_ hv, STR_WITH_LEN(key), val, 0)
 
 
 /*

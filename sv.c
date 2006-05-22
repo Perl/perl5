@@ -402,9 +402,9 @@ Perl_sv_report_used(pTHX)
 static void
 do_clean_objs(pTHX_ SV *sv)
 {
-    SV* rv;
+    SV *const rv = SvRV(sv);
 
-    if (SvROK(sv) && SvOBJECT(rv = SvRV(sv))) {
+    if (SvOBJECT(rv)) {
 	DEBUG_D((PerlIO_printf(Perl_debug_log, "Cleaning object ref:\n "), sv_dump(sv)));
 	if (SvWEAKREF(sv)) {
 	    sv_del_backref(sv);
@@ -426,7 +426,7 @@ do_clean_objs(pTHX_ SV *sv)
 static void
 do_clean_named_objs(pTHX_ SV *sv)
 {
-    if (SvTYPE(sv) == SVt_PVGV && GvGP(sv)) {
+    if (GvGP(sv)) {
 	if ((
 #ifdef PERL_DONT_CREATE_GVSV
 	     GvSV(sv) &&

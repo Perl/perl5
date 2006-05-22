@@ -114,11 +114,13 @@ Apd	|void	|av_fill	|NN AV* ar|I32 fill
 ApdR	|I32	|av_len		|NN AV* ar
 ApdR	|AV*	|av_make	|I32 size|NN SV** svp
 Apd	|SV*	|av_pop		|NULLOK AV* ar
+ApdoxM	|void	|av_create_and_push|NN AV **const avp|NN SV *const val
 Apd	|void	|av_push	|NULLOK AV* ar|NN SV* val
 p	|void	|av_reify	|NN AV* ar
 ApdR	|SV*	|av_shift	|NULLOK AV* ar
 Apd	|SV**	|av_store	|NULLOK AV* ar|I32 key|NULLOK SV* val
 Apd	|void	|av_undef	|NULLOK AV* ar
+ApdoxM	|SV**	|av_create_and_unshift_one|NN AV **const avp|NN SV *const val
 Apd	|void	|av_unshift	|NULLOK AV* ar|I32 num
 pR	|OP*	|bind_match	|I32 type|NN OP* left|NN OP* pat
 pR	|OP*	|block_end	|I32 floor|NULLOK OP* seq
@@ -291,6 +293,8 @@ Ap	|void	|gv_efullname	|NN SV* sv|NN GV* gv
 Apmb	|void	|gv_efullname3	|NN SV* sv|NN GV* gv|NULLOK const char* prefix
 Ap	|void	|gv_efullname4	|NN SV* sv|NN GV* gv|NULLOK const char* prefix|bool keepmain
 Ap	|GV*	|gv_fetchfile	|NN const char* name
+Ap	|GV*	|gv_fetchfile_flags|NN const char *const name|const STRLEN len\
+				|const U32 flags
 Apd	|GV*	|gv_fetchmeth	|NULLOK HV* stash|NN const char* name|STRLEN len|I32 level
 Apd	|GV*	|gv_fetchmeth_autoload	|NULLOK HV* stash|NN const char* name|STRLEN len|I32 level
 Apdmb	|GV*	|gv_fetchmethod	|NULLOK HV* stash|NN const char* name
@@ -682,6 +686,7 @@ p	|I32	|same_dirent	|NN char* a|NN char* b
 Apda	|char*	|savepv		|NULLOK const char* pv
 Apda	|char*	|savepvn	|NULLOK const char* pv|I32 len
 Apda	|char*	|savesharedpv	|NULLOK const char* pv
+Apda	|char*	|savesharedpvn	|NN const char *const pv|const STRLEN len
 Ap	|void	|savestack_grow
 Ap	|void	|savestack_grow_cnt	|I32 need
 Ap	|void	|save_aelem	|NN AV* av|I32 idx|NN SV **sptr
@@ -1378,7 +1383,7 @@ sR	|char*	|swallow_bom	|NN U8 *s
 s	|void	|checkcomma	|NN const char *s|NN const char *name \
 				|NN const char *what
 s	|void	|force_ident	|NN const char *s|int kind
-s	|void	|incline	|NN char *s
+s	|void	|incline	|NN const char *s
 s	|int	|intuit_method	|NN char *s|NULLOK GV *gv|NULLOK CV *cv
 s	|int	|intuit_more	|NN char *s
 s	|I32	|lop		|I32 f|int x|NN char *s

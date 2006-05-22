@@ -103,30 +103,38 @@ Perl_gv_IOadd(pTHX_ register GV *gv)
 GV *
 Perl_gv_fetchfile(pTHX_ const char *name)
 {
-    char smallbuf[256];
+    return gv_fetchfile_flags(name, strlen(name), 0);
+}
+
+GV *
+Perl_gv_fetchfile_flags(pTHX_ const char *const name, const STRLEN namelen,
+			const U32 flags)
+{
+    char smallbuf[128];
     char *tmpbuf;
-    STRLEN tmplen;
+    const STRLEN tmplen = namelen + 2;
     GV *gv;
+
+    PERL_UNUSED_ARG(flags);
 
     if (!PL_defstash)
 	return NULL;
 
-    tmplen = strlen(name) + 2;
-    if (tmplen < sizeof smallbuf)
+    if (tmplen <= sizeof smallbuf)
 	tmpbuf = smallbuf;
     else
-	Newx(tmpbuf, tmplen + 1, char);
+	Newx(tmpbuf, tmplen, char);
     /* This is where the debugger's %{"::_<$filename"} hash is created */
     tmpbuf[0] = '_';
     tmpbuf[1] = '<';
-    memcpy(tmpbuf + 2, name, tmplen - 1);
+    memcpy(tmpbuf + 2, name, namelen);
     gv = *(GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, TRUE);
     if (!isGV(gv)) {
 	gv_init(gv, PL_defstash, tmpbuf, tmplen, FALSE);
 #ifdef PERL_DONT_CREATE_GVSV
-	GvSV(gv) = newSVpvn(name, tmplen - 2);
+	GvSV(gv) = newSVpvn(name, namelen);
 #else
-	sv_setpvn(GvSV(gv), name, tmplen - 2);
+	sv_setpvn(GvSV(gv), name, namelen);
 #endif
 	if (PERLDB_LINE)
 	    hv_magic(GvHVn(gv_AVadd(gv)), NULL, PERL_MAGIC_dbfile);
@@ -713,14 +721,13 @@ Perl_gv_stashpvn(pTHX_ const char *name, U32 namelen, I32 create)
     HV *stash;
     GV *tmpgv;
 
-    if (namelen + 3 < sizeof smallbuf)
+    if (namelen + 2 <= sizeof smallbuf)
 	tmpbuf = smallbuf;
     else
-	Newx(tmpbuf, namelen + 3, char);
+	Newx(tmpbuf, namelen + 2, char);
     Copy(name,tmpbuf,namelen,char);
     tmpbuf[namelen++] = ':';
     tmpbuf[namelen++] = ':';
-    tmpbuf[namelen] = '\0';
     tmpgv = gv_fetchpvn_flags(tmpbuf, namelen, create, SVt_PVHV);
     if (tmpbuf != smallbuf)
 	Safefree(tmpbuf);
@@ -808,14 +815,13 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		char smallbuf[128];
 		char *tmpbuf;
 
-		if (len + 3 < (I32)sizeof (smallbuf))
+		if (len + 2 <= (I32)sizeof (smallbuf))
 		    tmpbuf = smallbuf;
 		else
-		    Newx(tmpbuf, len+3, char);
+		    Newx(tmpbuf, len+2, char);
 		Copy(name, tmpbuf, len, char);
 		tmpbuf[len++] = ':';
 		tmpbuf[len++] = ':';
-		tmpbuf[len] = '\0';
 		gvp = (GV**)hv_fetch(stash,tmpbuf,len,add);
 		gv = gvp ? *gvp : NULL;
 		if (gv && gv != (GV*)&PL_sv_undef) {

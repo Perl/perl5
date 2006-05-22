@@ -653,12 +653,11 @@ Perl_lex_end(pTHX)
  */
 
 STATIC void
-S_incline(pTHX_ char *s)
+S_incline(pTHX_ const char *s)
 {
-    char *t;
-    char *n;
-    char *e;
-    char ch;
+    const char *t;
+    const char *n;
+    const char *e;
 
     CopLINE_inc(PL_curcop);
     if (*s++ != '#')
@@ -698,34 +697,48 @@ S_incline(pTHX_ char *s)
     if (*e != '\n' && *e != '\0')
 	return;		/* false alarm */
 
-    ch = *t;
-    *t = '\0';
     if (t - s > 0) {
+	const STRLEN len = t - s;
 #ifndef USE_ITHREADS
 	const char * const cf = CopFILE(PL_curcop);
 	STRLEN tmplen = cf ? strlen(cf) : 0;
 	if (tmplen > 7 && strnEQ(cf, "(eval ", 6)) {
 	    /* must copy *{"::_<(eval N)[oldfilename:L]"}
 	     * to *{"::_<newfilename"} */
-	    char smallbuf[256], smallbuf2[256];
-	    char *tmpbuf, *tmpbuf2;
-	    GV **gvp, *gv2;
-	    STRLEN tmplen2 = strlen(s);
-	    if (tmplen + 3 < sizeof smallbuf)
+	    /* However, the long form of evals is only turned on by the
+	       debugger - usually they're "(eval %lu)" */
+	    char smallbuf[128];
+	    char *tmpbuf;
+	    GV **gvp;
+	    STRLEN tmplen2 = len;
+	    if (tmplen + 2 <= sizeof smallbuf)
 		tmpbuf = smallbuf;
 	    else
-		Newx(tmpbuf, tmplen + 3, char);
-	    if (tmplen2 + 3 < sizeof smallbuf2)
-		tmpbuf2 = smallbuf2;
-	    else
-		Newx(tmpbuf2, tmplen2 + 3, char);
-	    tmpbuf[0] = tmpbuf2[0] = '_';
-	    tmpbuf[1] = tmpbuf2[1] = '<';
-	    memcpy(tmpbuf + 2, cf, ++tmplen);
-	    memcpy(tmpbuf2 + 2, s, ++tmplen2);
-	    ++tmplen; ++tmplen2;
+		Newx(tmpbuf, tmplen + 2, char);
+	    tmpbuf[0] = '_';
+	    tmpbuf[1] = '<';
+	    memcpy(tmpbuf + 2, cf, tmplen);
+	    tmplen += 2;
 	    gvp = (GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, FALSE);
 	    if (gvp) {
+		char *tmpbuf2;
+		GV *gv2;
+
+		if (tmplen2 + 2 <= sizeof smallbuf)
+		    tmpbuf2 = smallbuf;
+		else
+		    Newx(tmpbuf2, tmplen2 + 2, char);
+
+		if (tmpbuf2 != smallbuf || tmpbuf != smallbuf) {
+		    /* Either they malloc'd it, or we malloc'd it,
+		       so no prefix is present in ours.  */
+		    tmpbuf2[0] = '_';
+		    tmpbuf2[1] = '<';
+		}
+
+		memcpy(tmpbuf2 + 2, s, tmplen2);
+		tmplen2 += 2;
+
 		gv2 = *(GV**)hv_fetch(PL_defstash, tmpbuf2, tmplen2, TRUE);
 		if (!isGV(gv2)) {
 		    gv_init(gv2, PL_defstash, tmpbuf2, tmplen2, FALSE);
@@ -734,15 +747,15 @@ S_incline(pTHX_ char *s)
 		    GvHV(gv2) = (HV*)SvREFCNT_inc(GvHV(*gvp));
 		    GvAV(gv2) = (AV*)SvREFCNT_inc(GvAV(*gvp));
 		}
+
+		if (tmpbuf2 != smallbuf) Safefree(tmpbuf2);
 	    }
 	    if (tmpbuf != smallbuf) Safefree(tmpbuf);
-	    if (tmpbuf2 != smallbuf2) Safefree(tmpbuf2);
 	}
 #endif
 	CopFILE_free(PL_curcop);
-	CopFILE_set(PL_curcop, s);
+	CopFILE_setn(PL_curcop, s, len);
     }
-    *t = ch;
     CopLINE_set(PL_curcop, atoi(n)-1);
 }
 
@@ -814,7 +827,7 @@ S_skipspace(pTHX_ register char *s)
 	{
 	    /* end of file.  Add on the -p or -n magic */
 	    if (PL_minus_p) {
-		sv_setpv(PL_linestr,
+		sv_setpvs(PL_linestr,
 			 ";}continue{print or die qq(-p destination: $!\\n);}");
 		PL_minus_n = PL_minus_p = 0;
 	    }
@@ -5504,8 +5517,8 @@ Perl_yylex(pTHX)
 		    /* remember buffer pos'n for later force_word */
 		    tboffset = s - PL_oldbufptr;
 		    d = scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
-		    if (strchr(tmpbuf, ':'))
-			sv_setpv(PL_subname, tmpbuf);
+		    if (memchr(tmpbuf, ':', len))
+			sv_setpvn(PL_subname, tmpbuf, len);
 		    else {
 			sv_setsv(PL_subname,PL_curstname);
 			sv_catpvs(PL_subname,"::");
