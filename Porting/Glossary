@@ -482,6 +482,11 @@ d_bzero (d_bzero.U):
 	This variable conditionally defines the HAS_BZERO symbol if
 	the bzero() routine is available to set memory to 0.
 
+d_c99_variadic_macros (d_c99_variadic.U):
+	This variable conditionally defines the HAS_C99_VARIADIC_MACROS
+	symbol, which indicates to the C program that C99 variadic macros
+	are available.
+
 d_casti32 (d_casti32.U):
 	This variable conditionally defines CASTI32, which indicates
 	whether the C compiler can cast large floats to 32-bit ints.
@@ -557,11 +562,6 @@ d_ctime_r (d_ctime_r.U):
 	This variable conditionally defines the HAS_CTIME_R symbol,
 	which indicates to the C program that the ctime_r()
 	routine is available.
-
-d_c99_variadic_macros (d_c99_variadic_macros.U):
-	This variable conditionally defines the HAS_C99_VARIADIC_MACROS
-	symbol, which indicates to the C program that C99 variadic macros
-	are available.
 
 d_cuserid (d_cuserid.U):
 	This variable conditionally defines the HAS_CUSERID symbol, which

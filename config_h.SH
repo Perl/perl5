@@ -1198,6 +1198,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_builtin_expect HAS_BUILTIN_EXPECT	/**/
 #$d_builtin_choose_expr HAS_BUILTIN_CHOOSE_EXPR	/**/
 
+/* HAS_C99_VARIADIC_MACROS:
+ *	If defined, the compiler supports C99 variadic macros.
+ */
+#$d_c99_variadic_macros	HAS_C99_VARIADIC_MACROS	/**/
+
 /* CASTI32:
  *	This symbol is defined if the C compiler can cast negative
  *	or large floating point numbers to 32-bit ints.
@@ -4421,10 +4426,4 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #endif
 
 #endif
-
-/* HAS_C99_VARIADIC_MACROS:
- *	If defined, the compiler supports C99 variadic macros.
- */
-#$d_c99_variadic_macros	HAS_C99_VARIADIC_MACROS	/**/
-
 !GROK!THIS!
