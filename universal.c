@@ -415,11 +415,8 @@ XS(XS_version_new)
 
 	if ( items == 1 ) {
 	    /* no parameter provided */
-	    if ( sv_isobject(ST(0)) ) {
-		/* copy existing object */
-		vs = ST(0);
-	    }
-	    else {
+	    if ( sv_isobject(ST(0)) )
+	    {
 		/* create empty object */
 		vs = sv_newmortal();
 		sv_setpvn(vs,"",0);

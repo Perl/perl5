@@ -4148,7 +4148,7 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
 
   	    /* Append revision */
 	    av_push(av, newSViv(rev));
-	    if ( *pos == '.' && isDIGIT(pos[1]) )
+	    if ( *pos == '.' )
 		s = ++pos;
 	    else if ( *pos == '_' && isDIGIT(pos[1]) )
 		s = ++pos;
@@ -4294,7 +4294,8 @@ Perl_upg_version(pTHX_ SV *ver)
     if ( SvNOK(ver) ) /* may get too much accuracy */ 
     {
 	char tbuf[64];
-	const STRLEN len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVgf, SvNVX(ver));
+	STRLEN len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVff, SvNVX(ver));
+	while (tbuf[len-1] == '0' && len > 0) len--;
 	version = savepvn(tbuf, len);
     }
 #ifdef SvVOK
