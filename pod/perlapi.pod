@@ -1249,6 +1249,16 @@ package does not exist then NULL is returned.
 =for hackers
 Found in file gv.c
 
+=item gv_stashpvs
+X<gv_stashpvs>
+
+Like C<gv_stashpvn>, but takes a literal string instead of a string/length pair.
+
+	HV*	gv_stashpvs(const char* name, I32 create)
+
+=for hackers
+Found in file handy.h
+
 =item gv_stashsv
 X<gv_stashsv>
 
@@ -1548,6 +1558,16 @@ information on how to use this function on tied hashes.
 =for hackers
 Found in file hv.c
 
+=item hv_fetchs
+X<hv_fetchs>
+
+Like C<hv_fetch>, but takes a literal string instead of a string/length pair.
+
+	SV**	hv_fetchs(HV* tb, const char* key, I32 lval)
+
+=for hackers
+Found in file handy.h
+
 =item hv_fetch_ent
 X<hv_fetch_ent>
 
@@ -1714,6 +1734,17 @@ information on how to use this function on tied hashes.
 
 =for hackers
 Found in file hv.c
+
+=item hv_stores
+X<hv_stores>
+
+Like C<hv_store>, but takes a literal string instead of a string/length pair
+and omits the hash parameter.
+
+	SV**	hv_stores(HV* tb, const char* key, NULLOK SV* val)
+
+=for hackers
+Found in file handy.h
 
 =item hv_store_ent
 X<hv_store_ent>
@@ -2051,6 +2082,16 @@ PoisonWith(0xEF) for catching access to freed memory.
 =for hackers
 Found in file handy.h
 
+=item PoisonFree
+X<PoisonFree>
+
+PoisonWith(0xEF) for catching access to freed memory.
+
+	void	PoisonFree(void* dest, int nitems, type)
+
+=for hackers
+Found in file handy.h
+
 =item PoisonNew
 X<PoisonNew>
 
@@ -2128,6 +2169,16 @@ the new string can be freed with the C<Safefree()> function.
 
 =for hackers
 Found in file util.c
+
+=item savepvs
+X<savepvs>
+
+Like C<savepvn>, but takes a literal string instead of a string/length pair.
+
+	char*	savepvs(const char* s)
+
+=for hackers
+Found in file handy.h
 
 =item savesharedpv
 X<savesharedpv>
@@ -4210,6 +4261,9 @@ X<SvREFCNT_inc>
 
 Increments the reference count of the given SV.
 
+All of the following SvREFCNT_inc* macros are optimized versions of
+SvREFCNT_inc, and can be replaced with SvREFCNT_inc.
+
 	SV*	SvREFCNT_inc(SV* sv)
 
 =for hackers
@@ -4258,6 +4312,19 @@ Same as SvREFCNT_inc_simple, but can only be used if you don't need the
 return value.  The macro doesn't need to return a meaningful value.
 
 	SV*	SvREFCNT_inc_simple_void(SV* sv)
+
+=for hackers
+Found in file sv.h
+
+=item SvREFCNT_inc_simple_void_NN
+X<SvREFCNT_inc_simple_void_NN>
+
+Same as SvREFCNT_inc, but can only be used if you don't need the return
+value, and you know that I<sv> is not NULL.  The macro doesn't need
+to return a meaningful value, or check for NULLness, so it's smaller
+and faster.
+
+	SV*	SvREFCNT_inc_simple_void_NN(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -4725,6 +4792,27 @@ hash lookup will avoid string compare.
 =for hackers
 Found in file sv.c
 
+=item newSVpvs
+X<newSVpvs>
+
+Like C<newSVpvn>, but takes a literal string instead of a string/length pair.
+
+	SV*	newSVpvs(const char* s)
+
+=for hackers
+Found in file handy.h
+
+=item newSVpvs_share
+X<newSVpvs_share>
+
+Like C<newSVpvn_share>, but takes a literal string instead of a string/length
+pair and omits the hash parameter.
+
+	SV*	newSVpvs_share(const char* s)
+
+=for hackers
+Found in file handy.h
+
 =item newSVrv
 X<newSVrv>
 
@@ -4974,6 +5062,16 @@ in terms of this function.
 
 =for hackers
 Found in file sv.c
+
+=item sv_catpvs
+X<sv_catpvs>
+
+Like C<sv_catpvn>, but takes a literal string instead of a string/length pair.
+
+	SV*	sv_catpvs(SV* sv, const char* s)
+
+=for hackers
+Found in file handy.h
 
 =item sv_catpv_mg
 X<sv_catpv_mg>
@@ -5556,6 +5654,16 @@ Like C<sv_setpvn>, but also handles 'set' magic.
 
 =for hackers
 Found in file sv.c
+
+=item sv_setpvs
+X<sv_setpvs>
+
+Like C<sv_setpvn>, but takes a literal string instead of a string/length pair.
+
+	SV*	sv_setpvs(SV* sv, const char* s)
+
+=for hackers
+Found in file handy.h
 
 =item sv_setpv_mg
 X<sv_setpv_mg>
