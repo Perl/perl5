@@ -128,10 +128,10 @@ overloaded addition.
 
 =head1 Implementation details
 
-The optree is shared between threads, which means there is a possibility that
-the optree will outlive the particular thread (and therefore interpreter
+The optree is shared between threads.  This means there is a possibility that
+the optree will outlive the particular thread (and therefore the interpreter
 instance) that created it, so true Perl scalars cannot be stored in the
-optree. Instead a compact form is used, which can only store values that are
+optree.  Instead a compact form is used, which can only store values that are
 integers (signed and unsigned), strings or C<undef> - references and
 floating point values are stringified.  If you need to store multiple values
 or complex structures, you should serialise them, for example with C<pack>.
