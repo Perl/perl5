@@ -995,11 +995,8 @@ version of the same lexical pragma:
 
 =item %^H
 
-WARNING: This variable is strictly for internal use only.  Its availability,
-behavior, and contents are subject to change without notice.
-
 The %^H hash provides the same scoping semantic as $^H.  This makes it
-useful for implementation of lexically scoped pragmas.
+useful for implementation of lexically scoped pragmas. See L<perlpragma>.
 
 =item $INPLACE_EDIT
 
