@@ -9,6 +9,7 @@ BEGIN {
 
 use strict;
 use Config;
+use Errno qw(ENOENT);
 use Test::More;
 my %modules;
 
@@ -21,7 +22,7 @@ my %modules;
     'Time::HiRes'=> q| ::is( ref Time::HiRes->can('usleep'),'CODE' ) |,  # 5.7.3
 );
 
-plan tests => 27 + keys(%modules) * 2;
+plan tests => 28 + keys(%modules) * 2;
 
 
 # Try to load the module
@@ -65,9 +66,9 @@ eval { no warnings 'uninitialized'; DynaLoader::dl_load_file(undef) };
 is( $@, '', "calling DynaLoader::dl_load_file() with undefined argument" );     # is this expected ?
 
 eval { DynaLoader::dl_load_file("egg_bacon_sausage_and_spam") };
-is( $@, '', "calling DynaLoader::dl_load_file() with undefined argument" );
-like( DynaLoader::dl_error(), q{/egg_bacon_sausage_and_spam/}, 
-        "calling DynaLoader::dl_load_file() with a package without binary object" );
+is( $@, '', "calling DynaLoader::dl_load_file() with a package without binary object" );
+is( 0+$!, ENOENT, "checking errno value" );
+like( DynaLoader::dl_error(), "/$!/", "checking error message returned by dl_error()" );
 
 # ... dl_findfile()
 my @files = ();
