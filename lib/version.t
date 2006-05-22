@@ -57,6 +57,12 @@ eval { my $test = $testobj > 1.0 };
 like($@, qr/Invalid version object/,
     "Bad subclass vcmp");
 
+# dummy up a redundant call to satify David Wheeler
+local $SIG{__WARN__} = sub { die $_[0] };
+eval 'use version;';
+unlike ($@, qr/^Subroutine main::qv redefined/,
+    "Only export qv once per package (to prevent redefined warnings)."); 
+
 sub BaseTests {
 
 	my ($CLASS, $no_qv) = @_;

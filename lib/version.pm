@@ -6,7 +6,7 @@ use strict;
 
 use vars qw(@ISA $VERSION $CLASS *qv);
 
-$VERSION = "0.60_01";
+$VERSION = "0.60_02";
 $VERSION = eval($VERSION);
 
 $CLASS = 'version';
@@ -18,7 +18,9 @@ sub import {
     no strict 'refs';
     
     *{$callpkg."::qv"} = 
-	    sub {return bless version::qv(shift), $class };
+	    sub {return bless version::qv(shift), $class }
+	unless $callpkg->can('qv');
+
 }
 
 1;
