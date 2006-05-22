@@ -116,10 +116,10 @@ Hence the C<import> and C<unimport> routines are called at B<compile time>
 for the user's code.
 
 User pragmata store their state by writing to C<%^H>, hence these two
-routines manipulate C<%^H>. The state information in C<%^H> stored in the
+routines manipulate C<%^H>. The state information in C<%^H> is stored in the
 optree, and can be retrieved at runtime with C<caller>, at index 10 of the
 list of returned results. In the example pragma, retrieval is encapsulated
-into the routine C<in_effect()>. This uses C<caller(1)> to determine the
+into the routine C<in_effect()>. This uses C<caller(0)> to determine the
 state of C<$^H{myint}> when each line of the user's script was called, and
 therefore provide the correct semantics in the subroutine implementing the
 overloaded addition.
