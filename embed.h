@@ -2465,6 +2465,8 @@
 #endif
 #ifdef PERL_CORE
 #endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#endif
 #define hv_store(a,b,c,d,e)	Perl_hv_store(aTHX_ a,b,c,d,e)
 #define hv_store_ent(a,b,c,d)	Perl_hv_store_ent(aTHX_ a,b,c,d)
 #define hv_store_flags(a,b,c,d,e,f)	Perl_hv_store_flags(aTHX_ a,b,c,d,e,f)

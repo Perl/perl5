@@ -312,7 +312,7 @@ XEpoM	|SV *	|refcounted_he_fetch|NN const struct refcounted_he *chain \
 				|NULLOK SV *keysv|NULLOK const char *key \
 				|STRLEN klen, int flags, U32 hash
 dpoM	|void	|refcounted_he_free|NULLOK struct refcounted_he *he
-dpoM	|struct refcounted_he *|refcounted_he_new \
+XEdpoM	|struct refcounted_he *|refcounted_he_new \
 				|NULLOK struct refcounted_he *const parent \
 				|NULLOK SV *const key|NULLOK SV *const value
 Apd	|SV**	|hv_store	|NULLOK HV* tb|NULLOK const char* key|I32 klen|NULLOK SV* val \
