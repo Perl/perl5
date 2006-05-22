@@ -398,12 +398,14 @@ ext/Devel/PPPort/parts/inc/mPUSH	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/MY_CXT	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/newCONSTSUB	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/newRV	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/podtest	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/ppphbin	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/ppphdoc	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/ppphtest	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/pvs	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/snprintf	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/SvPV	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/SvREFCNT	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/Sv_set	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/sv_xpvf	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/threads	Devel::PPPort include
@@ -464,10 +466,12 @@ ext/Devel/PPPort/t/MY_CXT.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newCONSTSUB.t	Devel::PPPort test file
 ext/Devel/PPPort/t/newRV.t	Devel::PPPort test file
 ext/Devel/PPPort/TODO		Devel::PPPort Todo
+ext/Devel/PPPort/t/podtest.t	Devel::PPPort test file
 ext/Devel/PPPort/t/ppphtest.t	Devel::PPPort test file
 ext/Devel/PPPort/t/pvs.t	Devel::PPPort test file
 ext/Devel/PPPort/t/snprintf.t	Devel::PPPort test file
 ext/Devel/PPPort/t/SvPV.t	Devel::PPPort test file
+ext/Devel/PPPort/t/SvREFCNT.t	Devel::PPPort test file
 ext/Devel/PPPort/t/Sv_set.t	Devel::PPPort test file
 ext/Devel/PPPort/t/sv_xpvf.t	Devel::PPPort test file
 ext/Devel/PPPort/t/testutil.pl	Devel::PPPort test utilities

@@ -118,6 +118,7 @@ Am|SV*|ST|int ix
 Am|SV*|SvREFCNT_inc_NN|SV* sv
 Am|SV*|SvREFCNT_inc_simple_NN|SV* sv
 Am|SV*|SvREFCNT_inc_simple|SV* sv
+Am|SV*|SvREFCNT_inc_simple_void_NN|SV* sv
 Am|SV*|SvREFCNT_inc_simple_void|SV* sv
 Am|SV*|SvREFCNT_inc|SV* sv
 Am|SV*|SvREFCNT_inc_void_NN|SV* sv
@@ -183,6 +184,7 @@ Am|void|mXPUSHu|UV uv
 Am|void|Newxc|void* ptr|int nitems|type|cast
 Am|void|Newx|void* ptr|int nitems|type
 Am|void|Newxz|void* ptr|int nitems|type
+Am|void|PoisonFree|void* dest|int nitems|type
 Am|void|PoisonNew|void* dest|int nitems|type
 Am|void|Poison|void* dest|int nitems|type
 Am|void|PoisonWith|void* dest|int nitems|type|U8 byte

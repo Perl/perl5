@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 21 $
+#  $Revision: 22 $
 #  $Author: mhx $
-#  $Date: 2006/01/14 18:07:56 +0100 $
+#  $Date: 2006/05/21 23:15:21 +0200 $
 #
 ################################################################################
 #
@@ -77,12 +77,13 @@ BEGIN {
     unshift @INC, 't';
   }
 
-  eval "use Test";
-  if ($@) {
-    require 'testutil.pl';
-    print "1..__PLAN__\n";
+  sub load {
+    eval "use Test";
+    require 'testutil.pl' if $@;
   }
-  else {
+
+  if (__PLAN__) {
+    load();
     plan(tests => __PLAN__);
   }
 }

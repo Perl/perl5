@@ -1,12 +1,12 @@
 ################################################################################
 ##
-##  $Revision: 1 $
+##  $Revision: 2 $
 ##  $Author: mhx $
-##  $Date: 2005/10/30 11:26:42 +0100 $
+##  $Date: 2006/05/22 00:50:25 +0200 $
 ##
 ################################################################################
 ##
-##  Version 3.x, Copyright (C) 2004-2005, Marcus Holland-Moritz.
+##  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
 ##  Version 2.x, Copyright (C) 2001, Paul Marquess.
 ##  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
 ##
@@ -37,7 +37,10 @@ __UNDEFINED__  ZeroD(d,n,t)    memzero((char*)(d), (n) * sizeof(t))
 __UNDEFINED__  ZeroD(d,n,t)    ((void)memzero((char*)(d), (n) * sizeof(t)), d)
 #endif
 
-__UNDEFINED__  Poison(d,n,t)   (void)memset((char*)(d), 0xAB, (n) * sizeof(t))
+__UNDEFINED__  PoisonWith(d,n,t,b)  (void)memset((char*)(d), (U8)(b), (n) * sizeof(t))
+__UNDEFINED__  PoisonNew(d,n,t)     PoisonWith(d,n,t,0xAB)
+__UNDEFINED__  PoisonFree(d,n,t)    PoisonWith(d,n,t,0xEF)
+__UNDEFINED__  Poison(d,n,t)        PoisonFree(d,n,t)
 
 __UNDEFINED__  Newx(v,n,t)     New(0,v,n,t)
 __UNDEFINED__  Newxc(v,n,t,c)  Newc(0,v,n,t,c)

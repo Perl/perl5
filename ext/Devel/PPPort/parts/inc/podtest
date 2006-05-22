@@ -1,0 +1,46 @@
+################################################################################
+##
+##  $Revision: 2 $
+##  $Author: mhx $
+##  $Date: 2006/05/22 00:50:40 +0200 $
+##
+################################################################################
+##
+##  Version 3.x, Copyright (C) 2004-2006, Marcus Holland-Moritz.
+##  Version 2.x, Copyright (C) 2001, Paul Marquess.
+##  Version 1.x, Copyright (C) 1999, Kenneth Albanowski.
+##
+##  This program is free software; you can redistribute it and/or
+##  modify it under the same terms as Perl itself.
+##
+################################################################################
+
+=tests plan => 0
+
+my @pods = qw( HACKERS PPPort.pm ppport.h );
+
+# Try loading Test::Pod
+eval q{
+  use Test::Pod;
+  $Test::Pod::VERSION >= 0.95
+      or die "Test::Pod version only $Test::Pod::VERSION";
+  import Test::Pod tests => scalar @pods;
+};
+
+my $TP = $@ eq '';
+
+unless ($TP) {
+  load();
+  plan(tests => scalar @pods);
+}
+
+for (@pods) {
+  print "# checking $_\n";
+  if ($TP) {
+    pod_file_ok($_);
+  }
+  else {
+    skip("skip: Test::Pod >= 0.95 required", 0);
+  }
+}
+

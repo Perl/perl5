@@ -7,9 +7,9 @@
 #
 ################################################################################
 #
-#  $Revision: 9 $
+#  $Revision: 11 $
 #  $Author: mhx $
-#  $Date: 2006/01/14 18:07:57 +0100 $
+#  $Date: 2006/05/22 01:57:33 +0200 $
 #
 ################################################################################
 #
@@ -29,10 +29,11 @@ use warnings;
 use ExtUtils::MakeMaker;
 use Getopt::Long;
 use Pod::Usage;
+use File::Find;
 use List::Util qw(max);
 use Config;
 
-my $VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.08_01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+my $VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.08_02 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 $| = 1;
 my $verbose = 0;
@@ -40,13 +41,17 @@ my $MAKE = $Config{make} || 'make';
 my %OPT = (
   verbose => 0,
   make    => $Config{make} || 'make',
+  min     => '5.000',
 );
 
-GetOptions(\%OPT, qw(verbose make=s mmargs=s@)) or pod2usage(2);
+GetOptions(\%OPT, qw(verbose make=s min=s mmargs=s@)) or pod2usage(2);
 
 $OPT{mmargs} = [''] unless exists $OPT{mmargs};
+$OPT{min}    = parse_version($OPT{min}) - 1e-10;
 
-my @GoodPerls = @ARGV ? @ARGV : FindPerls();
+my @GoodPerls = sort { eval { parse_version($a) <=> parse_version($b) } or $a cmp $b }
+                grep { my $v = eval { parse_version($_) }; $@ or $v >= $OPT{min} }
+                @ARGV ? SearchPerls(@ARGV) : FindPerls();
 my $maxlen = max(map length, @GoodPerls) + 3;
 my $mmalen = max(map length, @{$OPT{mmargs}});
 $maxlen += $mmalen+3 if $mmalen > 0;
@@ -57,6 +62,8 @@ my(@good, @bad, $total);
 # prime the pump, so the first "make realclean" will work.
 runit("$^X Makefile.PL") && runit("$MAKE realclean")
     or die "Cannot run $^X Makefile.PL && $MAKE realclean\n";
+
+print "Testing ", scalar @GoodPerls, " versions/configurations...\n\n";
 
 for my $perl (@GoodPerls) {
   for my $mm (@{$OPT{mmargs}}) {
@@ -82,9 +89,15 @@ for my $perl (@GoodPerls) {
   }
 }
 
-if ($verbose && @bad) {
-  print "\nFailed with:\n", map "    $_\n", @bad;
+if (@bad) {
+  print "\nFailed with:\n";
+  for my $fail (@bad) {
+    my($perl, $mm) = @$fail;
+    my $config = $mm =~ /\S+/ ? " ($mm)" : '';
+    print "    $perl$config\n";
+  }
 }
+
 print "\nPassed with ", scalar @good, " of $total versions/configurations.\n\n";
 exit scalar @bad;
 
@@ -147,6 +160,49 @@ sub FindPerls
   return @GoodPerls;
 }
 
+sub SearchPerls
+{
+  my @args = @_;
+  my @perls;
+
+  for my $arg (@args) {
+    if (-d $arg) {
+      my @found;
+      print "Searching for Perl binaries in '$arg'...\n";
+      find(sub {
+             if ($File::Find::name =~ m!bin/perl5\.!) {
+               eval { parse_version($File::Find::name) };
+               $@ or push @found, $File::Find::name;
+             }
+           }, $arg);
+      printf "Found %d Perl binar%s in '%s'.\n\n", scalar @found, @found == 1 ? 'y' : 'ies', $arg;
+      push @perls, @found;
+    }
+    else {
+      push @perls, $arg;
+    }
+  }
+
+  return @perls;
+}
+
+sub parse_version
+{
+  my $ver = shift;
+
+  $ver = $1 if $ver =~ /perl(5\.[\d\._]+)/;
+
+  if ($ver =~ /^(\d+)\.(\d+)\.(\d+)$/) {
+    return $1 + 1e-3*$2 + 1e-6*$3;
+  }
+  elsif ($ver =~ /^\d+\.[\d_]+$/) {
+    $ver =~ s/_//g;
+    return $ver;
+  }
+
+  die "cannot parse version '$ver'\n";
+}
+
 package NoSTDOUT;
 
 use Tie::Handle;
@@ -167,6 +223,7 @@ soak - Test Perl modules with multiple Perl releases
   soak [options] [perl ...]
 
   --make=program     override name of make program ($Config{make})
+  --min=version      use at least this version of perl
   --mmargs=options   pass options to Makefile.PL (multiple --mmargs possible)
   --verbose          be verbose
 

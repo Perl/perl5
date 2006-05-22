@@ -21,12 +21,13 @@ BEGIN {
     unshift @INC, 't';
   }
 
-  eval "use Test";
-  if ($@) {
-    require 'testutil.pl';
-    print "1..5\n";
+  sub load {
+    eval "use Test";
+    require 'testutil.pl' if $@;
   }
-  else {
+
+  if (5) {
+    load();
     plan(tests => 5);
   }
 }

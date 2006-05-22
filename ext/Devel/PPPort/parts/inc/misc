@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 35 $
+##  $Revision: 36 $
 ##  $Author: mhx $
-##  $Date: 2006/05/19 23:57:26 +0200 $
+##  $Date: 2006/05/22 00:51:01 +0200 $
 ##
 ################################################################################
 ##
@@ -23,6 +23,7 @@ PERL_UNUSED_ARG
 PERL_UNUSED_VAR
 PERL_UNUSED_CONTEXT
 PERL_GCC_BRACE_GROUPS_FORBIDDEN
+PERL_USE_GCC_BRACE_GROUPS
 NVTYPE
 INT2PTR
 PTRV
@@ -162,15 +163,21 @@ typedef NVTYPE NV;
 #  define EXTERN_C extern
 #endif
 
-#ifndef PERL_GCC_BRACE_GROUPS_FORBIDDEN
-#  if defined(__STRICT_ANSI__) && defined(PERL_GCC_PEDANTIC)
+#if defined(PERL_GCC_PEDANTIC)
+#  ifndef PERL_GCC_BRACE_GROUPS_FORBIDDEN
 #    define PERL_GCC_BRACE_GROUPS_FORBIDDEN
+#  endif
+#endif
+
+#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN) && !defined(__cplusplus)
+#  ifndef PERL_USE_GCC_BRACE_GROUPS
+#    define PERL_USE_GCC_BRACE_GROUPS
 #  endif
 #endif
 
 #undef STMT_START
 #undef STMT_END
-#if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN) && !defined(__cplusplus)
+#ifdef PERL_USE_GCC_BRACE_GROUPS
 #  define STMT_START	(void)(	/* gcc supports ``({ STATEMENTS; })'' */
 #  define STMT_END	)
 #else

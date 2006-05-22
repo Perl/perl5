@@ -948,7 +948,7 @@ hv_stores(hv, sv)
 	SV *hv
 	SV *sv
 	PPCODE:
-		hv_stores((HV *) SvRV(hv), "hv_stores", SvREFCNT_inc(sv), 0);
+		hv_stores((HV *) SvRV(hv), "hv_stores", SvREFCNT_inc(sv));
 
 ##----------------------------------------------------------------------
 ##  XSUBs from parts/inc/snprintf
@@ -1115,6 +1115,43 @@ SvPV_nolen(sv)
 		RETVAL = strEQ(str, "mhx") ? 42 : 0;
 	OUTPUT:
 		RETVAL
+
+##----------------------------------------------------------------------
+##  XSUBs from parts/inc/SvREFCNT
+##----------------------------------------------------------------------
+
+void
+SvREFCNT()
+	PREINIT:
+		SV *sv, *svr;
+	PPCODE:
+		sv = newSV(0);
+		XPUSHs(newSViv(SvREFCNT(sv) == 1));
+		svr = SvREFCNT_inc(sv);
+		XPUSHs(newSViv(sv == svr));
+		XPUSHs(newSViv(SvREFCNT(sv) == 2));
+		svr = SvREFCNT_inc_simple(sv);
+		XPUSHs(newSViv(sv == svr));
+		XPUSHs(newSViv(SvREFCNT(sv) == 3));
+		svr = SvREFCNT_inc_NN(sv);
+		XPUSHs(newSViv(sv == svr));
+		XPUSHs(newSViv(SvREFCNT(sv) == 4));
+		svr = SvREFCNT_inc_simple_NN(sv);
+		XPUSHs(newSViv(sv == svr));
+		XPUSHs(newSViv(SvREFCNT(sv) == 5));
+		SvREFCNT_inc_void(sv);
+		XPUSHs(newSViv(SvREFCNT(sv) == 6));
+		SvREFCNT_inc_simple_void(sv);
+		XPUSHs(newSViv(SvREFCNT(sv) == 7));
+		SvREFCNT_inc_void_NN(sv);
+		XPUSHs(newSViv(SvREFCNT(sv) == 8));
+		SvREFCNT_inc_simple_void_NN(sv);
+		XPUSHs(newSViv(SvREFCNT(sv) == 9));
+		while (SvREFCNT(sv) > 1)
+		  SvREFCNT_dec(sv);
+		XPUSHs(newSViv(SvREFCNT(sv) == 1));
+		SvREFCNT_dec(sv);
+		XSRETURN(14);
 
 ##----------------------------------------------------------------------
 ##  XSUBs from parts/inc/threads

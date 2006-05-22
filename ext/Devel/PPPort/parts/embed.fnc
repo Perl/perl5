@@ -308,6 +308,9 @@ ApdR	|SV*	|hv_iterval	|NN HV* tb|NN HE* entry
 Ap	|void	|hv_ksplit	|NN HV* hv|IV newmax
 Apdbm	|void	|hv_magic	|NN HV* hv|NULLOK GV* gv|int how
 dpoM	|HV *	|refcounted_he_chain_2hv|NULLOK const struct refcounted_he *c
+XEpoM	|SV *	|refcounted_he_fetch|NN const struct refcounted_he *chain \
+				|NULLOK SV *keysv|NULLOK const char *key \
+				|STRLEN klen, int flags, U32 hash
 dpoM	|void	|refcounted_he_free|NULLOK struct refcounted_he *he
 dpoM	|struct refcounted_he *|refcounted_he_new \
 				|NULLOK struct refcounted_he *const parent \
@@ -1094,6 +1097,7 @@ sM	|SV*	|hv_delete_common|NULLOK HV* tb|NULLOK SV* keysv|NULLOK const char* key 
 sM	|HE*	|hv_fetch_common|NULLOK HV* tb|NULLOK SV* keysv|NULLOK const char* key \
 		|STRLEN klen|int flags|int action|NULLOK SV* val|U32 hash
 sM	|void	|clear_placeholders	|NN HV* hb|U32 items
+sM	|SV *	|refcounted_he_value	|NN const struct refcounted_he *he
 #endif
 
 #if defined(PERL_IN_MG_C) || defined(PERL_DECL_PROT)
@@ -1499,6 +1503,8 @@ Apn	|int	|my_socketpair	|int family|int type|int protocol|int fd[2]
 #ifdef PERL_OLD_COPY_ON_WRITE
 pMXE	|SV*	|sv_setsv_cow	|NN SV* dsv|NN SV* ssv
 #endif
+
+Aop	|const char *|PerlIO_context_layers|NULLOK const char *mode
 
 #if defined(USE_PERLIO) && !defined(USE_SFIO)
 Ap	|int	|PerlIO_close		|NULLOK PerlIO *f

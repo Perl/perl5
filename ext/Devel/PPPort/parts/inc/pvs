@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 2 $
+##  $Revision: 3 $
 ##  $Author: mhx $
-##  $Date: 2006/05/19 23:00:18 +0200 $
+##  $Date: 2006/05/22 12:27:50 +0200 $
 ##
 ################################################################################
 ##
@@ -31,8 +31,8 @@ __UNDEFINED__  STR_WITH_LEN(s)             (s ""), (sizeof(s)-1)
 __UNDEFINED__  newSVpvs(str)               newSVpvn(str "", sizeof(str) - 1)
 __UNDEFINED__  sv_catpvs(sv, str)          sv_catpvn(sv, str "", sizeof(str) - 1)
 __UNDEFINED__  sv_setpvs(sv, str)          sv_setpvn(sv, str "", sizeof(str) - 1)
-__UNDEFINED__  hv_fetchs(hv,key,lval)      hv_fetch(hv, key "", sizeof(key) - 1, lval)
-__UNDEFINED__  hv_stores(hv,key,val,hash)  hv_store(hv, key "", sizeof(key) - 1, val, hash)
+__UNDEFINED__  hv_fetchs(hv, key, lval)    hv_fetch(hv, key "", sizeof(key) - 1, lval)
+__UNDEFINED__  hv_stores(hv, key, val)     hv_store(hv, key "", sizeof(key) - 1, val, 0)
 
 =xsubs
 
@@ -69,7 +69,7 @@ hv_stores(hv, sv)
 	SV *hv
 	SV *sv
 	PPCODE:
-		hv_stores((HV *) SvRV(hv), "hv_stores", SvREFCNT_inc(sv), 0);
+		hv_stores((HV *) SvRV(hv), "hv_stores", SvREFCNT_inc(sv));
 
 =tests plan => 7
 

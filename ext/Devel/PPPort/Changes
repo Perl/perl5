@@ -1,3 +1,28 @@
+3.08_02 - 2006-05-22
+
+    * fix a POD error
+    * added POD test
+    * changed hv_stores() to omit the hash parameter
+    * improve soak script
+      - can now search directories for perl executables
+      - can use only perl binaries of at least a certain
+        revision using the --min option
+      - sorts tests by perl version
+      - shows a summary of failed versions
+    * added support for the following API
+        PERL_USE_GCC_BRACE_GROUPS
+        PoisonFree
+        PoisonNew
+        PoisonWith
+        SvREFCNT_inc
+        SvREFCNT_inc_NN
+        SvREFCNT_inc_simple
+        SvREFCNT_inc_simple_NN
+        SvREFCNT_inc_simple_void
+        SvREFCNT_inc_simple_void_NN
+        SvREFCNT_inc_void
+        SvREFCNT_inc_void_NN
+
 3.08_01 - 2006-05-20
 
     * update NOOP and dNOOP to include lint directives
