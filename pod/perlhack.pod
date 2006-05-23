@@ -1344,8 +1344,8 @@ stack usable by each function. For instance, when dealing with a tied
 variable, (internally, something with "P" magic) Perl has to call
 methods for accesses to the tied variables. However, we need to separate
 the arguments exposed to the method to the argument exposed to the
-original function - the store or fetch or whatever it may be. Here's how
-the tied C<push> is implemented; see C<av_push> in F<av.c>:
+original function - the store or fetch or whatever it may be. Here's
+roughly how the tied C<push> is implemented; see C<av_push> in F<av.c>:
 
      1	PUSHMARK(SP);
      2	EXTEND(SP,2);
@@ -1355,7 +1355,7 @@ the tied C<push> is implemented; see C<av_push> in F<av.c>:
      6	ENTER;
      7	call_method("PUSH", G_SCALAR|G_DISCARD);
      8	LEAVE;
-     9	POPSTACK;
+     9	(void)POPMARK;
 
 The lines which concern the mark stack are the first, fifth and last
 lines: they save away, restore and remove the current position of the
@@ -1397,7 +1397,7 @@ Perl space: C<call_method> takes care of that, and it's described in
 L<perlcall>. We call the C<PUSH> method in scalar context, and we're
 going to discard its return value.
 
-     9	POPSTACK;
+     9	(void)POPMARK;
 
 Finally, we remove the value we placed on the mark stack, since we
 don't need it any more.
