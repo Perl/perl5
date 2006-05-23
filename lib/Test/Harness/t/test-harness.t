@@ -504,11 +504,12 @@ SKIP: {
     my $expect = $samples{$test};
 
     # execute_tests() runs the tests but skips the formatting.
-    my($totals, $failed);
-    my $warning = '';
     my $test_path = File::Spec->catfile($SAMPLE_TESTS, $test);
 
     print STDERR "# $test\n" if $ENV{TEST_VERBOSE};
+    my $totals;
+    my $failed;
+    my $warning = '';
     eval {
         local $SIG{__WARN__} = sub { $warning .= join '', @_; };
         ($totals, $failed) = Test::Harness::execute_tests(tests => [$test_path], out => \*NULL);
@@ -524,7 +525,7 @@ SKIP: {
 
     SKIP: {
         skip "don't apply to a bailout", 6 if $test eq 'bailout';
-        is( $@, '' );
+        is( $@, '', '$@ is empty' );
         is( Test::Harness::_all_ok($totals), $expect->{all_ok},
                                                   "$test - all ok" );
         ok( defined $expect->{total},             "$test - has total" );
@@ -539,7 +540,7 @@ SKIP: {
         skip "No tests were run", 1 unless $totals->{max};
 
         my $output = Test::Harness::get_results($totals, $failed);
-        like( $output, '/All tests successful|List of Failed/' );
+        like( $output, '/All tests successful|List of Failed/', 'Got what looks like a valid summary' );
     }
 
     my $expected_warnings = "";
