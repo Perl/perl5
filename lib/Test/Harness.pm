@@ -38,7 +38,7 @@ Version 2.58
 
 =cut
 
-$VERSION = '2.58';
+$VERSION = '2.58_01';
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -561,10 +561,9 @@ sub get_results {
         if ($tot->{bonus}) {
             my($fmt_top, $fmt) = _create_fmts("Passed TODO",$todo_passed);
             # Now write to formats
+            $out .= swrite( $fmt_top );
             for my $script (sort keys %{$todo_passed||{}}) {
                 my $Curtest = $todo_passed->{$script};
-
-                $out .= swrite( $fmt_top );
                 $out .= swrite( $fmt, @{ $Curtest }{qw(name estat wstat max failed canon)} );
             }
         }
@@ -584,9 +583,9 @@ sub get_results {
         my($fmt_top, $fmt1, $fmt2) = _create_fmts("Failed Test",$failedtests);
 
         # Now write to formats
+        $out .= swrite( $fmt_top );
         for my $script (sort keys %$failedtests) {
             my $Curtest = $failedtests->{$script};
-            $out .= swrite( $fmt_top );
             $out .= swrite( $fmt1, @{ $Curtest }{qw(name estat wstat max failed canon)} );
             $out .= swrite( $fmt2, $Curtest->{canon} );
         }
