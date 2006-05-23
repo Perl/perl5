@@ -338,7 +338,7 @@ As with subroutines, the type of value returned from a thread's entry point
 function may be determined by the thread's I<context>:  list, scalar or void.
 The thread's context is determined at thread creation.  This is necessary so
 that the context is available to the entry point function via
-L<wantarry()|perlfunc/"wantarray">.  The thread may then specify a value of
+L<wantarray()|perlfunc/"wantarray">.  The thread may then specify a value of
 the appropriate type to be returned from C<-E<gt>join()>.
 
 =head2 Explicit context
