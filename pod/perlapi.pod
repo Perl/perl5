@@ -4311,7 +4311,7 @@ X<SvREFCNT_inc_simple_void>
 Same as SvREFCNT_inc_simple, but can only be used if you don't need the
 return value.  The macro doesn't need to return a meaningful value.
 
-	SV*	SvREFCNT_inc_simple_void(SV* sv)
+	void	SvREFCNT_inc_simple_void(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -4324,7 +4324,7 @@ value, and you know that I<sv> is not NULL.  The macro doesn't need
 to return a meaningful value, or check for NULLness, so it's smaller
 and faster.
 
-	SV*	SvREFCNT_inc_simple_void_NN(SV* sv)
+	void	SvREFCNT_inc_simple_void_NN(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -4335,7 +4335,7 @@ X<SvREFCNT_inc_void>
 Same as SvREFCNT_inc, but can only be used if you don't need the
 return value.  The macro doesn't need to return a meaningful value.
 
-	SV*	SvREFCNT_inc_void(SV* sv)
+	void	SvREFCNT_inc_void(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -4348,7 +4348,7 @@ value, and you know that I<sv> is not NULL.  The macro doesn't need
 to return a meaningful value, or check for NULLness, so it's smaller
 and faster.
 
-	SV*	SvREFCNT_inc_void_NN(SV* sv)
+	void	SvREFCNT_inc_void_NN(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -5068,7 +5068,7 @@ X<sv_catpvs>
 
 Like C<sv_catpvn>, but takes a literal string instead of a string/length pair.
 
-	SV*	sv_catpvs(SV* sv, const char* s)
+	void	sv_catpvs(SV* sv, const char* s)
 
 =for hackers
 Found in file handy.h
@@ -5660,7 +5660,7 @@ X<sv_setpvs>
 
 Like C<sv_setpvn>, but takes a literal string instead of a string/length pair.
 
-	SV*	sv_setpvs(SV* sv, const char* s)
+	void	sv_setpvs(SV* sv, const char* s)
 
 =for hackers
 Found in file handy.h
