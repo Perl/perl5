@@ -1355,7 +1355,6 @@ roughly how the tied C<push> is implemented; see C<av_push> in F<av.c>:
      6	ENTER;
      7	call_method("PUSH", G_SCALAR|G_DISCARD);
      8	LEAVE;
-     9	(void)POPMARK;
 
 The lines which concern the mark stack are the first, fifth and last
 lines: they save away, restore and remove the current position of the
@@ -1396,11 +1395,6 @@ To actually do the magic method call, we have to call a subroutine in
 Perl space: C<call_method> takes care of that, and it's described in
 L<perlcall>. We call the C<PUSH> method in scalar context, and we're
 going to discard its return value.
-
-     9	(void)POPMARK;
-
-Finally, we remove the value we placed on the mark stack, since we
-don't need it any more.
 
 =item Save stack
 
