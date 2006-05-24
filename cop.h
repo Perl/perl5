@@ -330,7 +330,7 @@ struct block_sub {
 	    POP_SAVEARRAY();						\
 	    /* abandon @_ if it got reified */				\
 	    if (AvREAL(cx->blk_sub.argarray)) {				\
-		SSize_t fill = AvFILLp(cx->blk_sub.argarray);		\
+		const SSize_t fill = AvFILLp(cx->blk_sub.argarray);	\
 		SvREFCNT_dec(cx->blk_sub.argarray);			\
 		cx->blk_sub.argarray = newAV();				\
 		av_extend(cx->blk_sub.argarray, fill);			\
