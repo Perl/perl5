@@ -267,7 +267,6 @@ my %Items = ();			# associative array used to find the location
 
 my %Local_Items;
 my $Is83;
-my $PTQuote;
 
 my $Curdir = File::Spec->curdir;
 
@@ -318,7 +317,6 @@ sub init_globals {
 				#   to prevent the first <hr /> directive.
     $Paragraph = '';		# which paragraph we're processing (used
 				#   for error messages)
-    $PTQuote = 0;               # status of double-quote conversion
     %Sections = ();		# sections within this page
 
     %Local_Items = ();
@@ -513,8 +511,6 @@ END_OF_HEAD
     my $need_dd = 0;
     warn "Converting input file $Podfile\n" if $Verbose;
     foreach my $i (0..$#poddata){
-        $PTQuote = 0; # status of quote conversion
-
 	$_ = $poddata[$i];
 	$Paragraph = $i+1;
 	if (/^(=.*)/s) {	# is it a pod directive?
@@ -1408,12 +1404,12 @@ sub process_pre {
 #
 sub pure_text($){
     my $text = shift();
-    process_puretext( $text, \$PTQuote, 1 );
+    process_puretext( $text, 1 );
 }
 
 sub inIS_text($){
     my $text = shift();
-    process_puretext( $text, \$PTQuote, 0 );
+    process_puretext( $text, 0 );
 }
 
 #
@@ -1421,20 +1417,13 @@ sub inIS_text($){
 #  double-quotes and handling implicit C<> links.
 #
 sub process_puretext {
-    my($text, $quote, $notinIS) = @_;
+    my($text, $notinIS) = @_;
 
     ## Guessing at func() or [\$\@%&]*var references in plain text is destined
     ## to produce some strange looking ref's. uncomment to disable:
     ## $notinIS = 0;
 
     my(@words, $lead, $trail);
-
-    # convert double-quotes to single-quotes
-    if( $$quote && $text =~ s/"/''/s ){
-        $$quote = 0;
-    }
-    while ($text =~ s/"([^"]*)"/``$1''/sg) {};
-    $$quote = 1 if $text =~ s/"/``/s;
 
     # keep track of leading and trailing white-space
     $lead  = ($text =~ s/\A(\s+)//s ? $1 : "");
