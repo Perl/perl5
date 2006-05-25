@@ -309,7 +309,7 @@ There were two things you could do, knowing this: be paranoid or be
 pragmatic.  The paranoid approach was to do as little as possible in your
 signal handler.  Set an existing integer variable that already has a
 value, and return.  This doesn't help you if you're in a slow system call,
-which will just restart.  That means you have to C<die> to longjump(3) out
+which will just restart.  That means you have to C<die> to longjmp(3) out
 of the handler.  Even this is a little cavalier for the true paranoiac,
 who avoids C<die> in a handler because the system I<is> out to get you.
 The pragmatic approach was to say "I know the risks, but prefer the
@@ -1537,10 +1537,10 @@ you weren't wanting it to.
 
 Here's a small example showing shared memory usage.
 
-    use IPC::SysV qw(IPC_PRIVATE IPC_RMID S_IRWXU);
+    use IPC::SysV qw(IPC_PRIVATE IPC_RMID S_IRUSR S_IWUSR);
 
     $size = 2000;
-    $id = shmget(IPC_PRIVATE, $size, S_IRWXU) || die "$!";
+    $id = shmget(IPC_PRIVATE, $size, S_IRUSR|S_IWUSR) || die "$!";
     print "shm key $id\n";
 
     $message = "Message #1";
@@ -1615,9 +1615,9 @@ which is included with Perl starting from Perl 5.005.
 
 A small example demonstrating SysV message queues:
 
-    use IPC::SysV qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRWXU);
+    use IPC::SysV qw(IPC_PRIVATE IPC_RMID IPC_CREAT S_IRUSR S_IWUSR);
 
-    my $id = msgget(IPC_PRIVATE, IPC_CREAT | S_IRWXU);
+    my $id = msgget(IPC_PRIVATE, IPC_CREAT | S_IRUSR | S_IWUSR);
 
     my $sent = "message";
     my $type_sent = 1234;
