@@ -65,17 +65,29 @@ like( $@, q{/^Usage: DynaLoader::dl_load_file\(filename, flags=0\)/},
 eval { no warnings 'uninitialized'; DynaLoader::dl_load_file(undef) };
 is( $@, '', "calling DynaLoader::dl_load_file() with undefined argument" );     # is this expected ?
 
+my ($eint,$estr,$eestr,$dlerr);
 eval { DynaLoader::dl_load_file("egg_bacon_sausage_and_spam") };
-is( $@, '', "calling DynaLoader::dl_load_file() with a package without binary object" );
-is( 0+$!, ENOENT, "checking errno value" );
-like( DynaLoader::dl_error(), "/$!/", "checking error message returned by dl_error()" );
+$eint = 0+$!; $estr = "\Q$!\E";
+$estr .= "|\Q$^E\E" if $^E ne $!;
+$estr = "/$estr/";
+$dlerr = DynaLoader::dl_error();
+SKIP: {
+    is( $@, '', "calling DynaLoader::dl_load_file() with a package without binary object" )
+        or skip "Errvalue irrelevent after eval failure (this should not happen)", 2;
+    is( $eint, ENOENT, "checking errno value" );
+    like( $dlerr, $estr, "checking error message returned by dl_error()" );
+}
+
 
 # ... dl_findfile()
-my @files = ();
-eval { @files = DynaLoader::dl_findfile("c") };
-is( $@, '', "calling dl_findfile()" );
-cmp_ok( scalar @files, '>=', 1, " - array should contain one result result or more: libc => (@files)" );
-
+SKIP: {
+    my @files = ();
+    eval { @files = DynaLoader::dl_findfile("c") };
+    is( $@, '', "calling dl_findfile()" );
+    skip "dl_findfile test not appropriate on Win32", 1
+	if $^O =~ /win32/i;
+    cmp_ok( scalar @files, '>=', 1, " - array should contain one result result or more: libc => (@files)" );
+}
 
 # Now try to load well known XS modules
 my $extensions = $Config{'extensions'};
@@ -83,7 +95,7 @@ $extensions =~ s|/|::|g;
 
 for my $module (sort keys %modules) {
     SKIP: {
-        skip "$module not available", 2 if $extensions !~ /\b$module\b/;
+        skip "$module not available", 1 if $extensions !~ /\b$module\b/;
         eval "use $module";
         is( $@, '', "loading $module" );
     }
