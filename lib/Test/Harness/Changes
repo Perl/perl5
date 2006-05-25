@@ -1,5 +1,12 @@
 Revision history for Perl extension Test::Harness
 
+2.60 Wed May 24 14:48:44 CDT 2006
+    [FIXES]
+    * Fixed the headers in the summary failure table.
+
+2.58 Sat May 13 22:53:53 CDT 2006
+    No changes.  Released to the world with a non-beta number.
+
 2.57_06 Sun Apr 23 00:55:43 CDT 2006
     [THINGS THAT MIGHT BREAK YOUR CODE]
     * Anything that displays a percentage of tests passed has been
