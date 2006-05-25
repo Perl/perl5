@@ -1,5 +1,17 @@
 Revision history for Perl extension Digest::SHA.
 
+5.38  Thu May 25 02:02:02 MST 2006
+	- added new capabilities to the "addfile" method
+		-- now able to accept file names as well as handles
+		-- includes mode for portable digest calculation
+			-- thanks to Adam Kennedy for emails and ideas
+				ref. File::LocalizeNewlines
+	- used expanded addfile interface to simplify shasum (sumfile)
+		-- regex a tad less general than 5.37, but handles all
+			known newline variants in UNIX/Windows/MacOS
+	- enhanced WARNING messages from shasum checkfile processing
+		-- to mimic behavior of md5sum
+
 5.37  Mon May  8 04:30:09 MST 2006
 	- modified shasum to avoid file slurping (ref. sub sumfile)
 	- improved error handling of checksum files in shasum

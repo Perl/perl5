@@ -4,8 +4,8 @@
 	#
 	# Copyright (C) 2003-2006 Mark Shelor, All Rights Reserved
 	#
-	# Version: 5.37
-	# Mon May  8 04:30:09 MST 2006
+	# Version: 5.38
+	# Thu May 25 02:02:02 MST 2006
 
 =head1 NAME
 
@@ -22,7 +22,7 @@ shasum - Print or Check SHA Checksums
   -b, --binary       read files in binary mode (default on DOS/Windows)
   -c, --check        check SHA sums against given list
   -p, --portable     read files in portable mode
-                         produces same digest on Windows/Unix/MacOS
+                         produces same digest on Windows/Unix/MacOS 9
   -t, --text         read files in text mode (default)
 
  The following two options are useful only when verifying checksums:
@@ -52,7 +52,7 @@ L<Digest::SHA::PurePerl>.
 use strict;
 use Getopt::Long;
 
-my $VERSION = "5.37";
+my $VERSION = "5.38";
 
 
 	# Try to use Digest::SHA, since it's faster.  If not installed,
@@ -79,10 +79,10 @@ sub usage {
 
 	$msg = "" unless defined $msg;
 	if ($err) {
-		print STDERR "$msg", "Type shasum -h for help\n";
+		warn($msg . "Type shasum -h for help\n");
 		exit($err);
 	}
-	print STDOUT <<'END_OF_USAGE';
+	print <<'END_OF_USAGE';
 Usage: shasum [OPTION] [FILE]...
    or: shasum [OPTION] --check [FILE]
 Print or check SHA checksums.
@@ -92,7 +92,7 @@ With no FILE, or when FILE is -, read standard input.
   -b, --binary       read files in binary mode (default on DOS/Windows)
   -c, --check        check SHA sums against given list
   -p, --portable     read files in portable mode
-                         produces same digest on Windows/Unix/MacOS
+                         produces same digest on Windows/Unix/MacOS 9
   -t, --text         read files in text mode (default)
 
 The following two options are useful only when verifying checksums:
@@ -132,11 +132,11 @@ GetOptions(
 
 usage(0)
 	if $help;
-usage(1, "ambiguous file mode\n")
+usage(1, "Ambiguous file mode\n")
 	if scalar(grep { defined $_ } ($binary, $portable, $text)) > 1;
-usage(1, "warn option used only when verifying checksums\n")
+usage(1, "shasum: --warn option used only when verifying checksums\n")
 	if $warn && !$check;
-usage(1, "status option used only when verifying checksums\n")
+usage(1, "shasum: --status option used only when verifying checksums\n")
 	if $status && !$check;
 
 
@@ -144,7 +144,7 @@ usage(1, "status option used only when verifying checksums\n")
 
 $alg = 1 unless $alg;
 grep { $_ == $alg } (1, 224, 256, 384, 512)
-	or usage(1, "unrecognized algorithm\n");
+	or usage(1, "Unrecognized algorithm\n");
 
 
 	# Display version information if requested
@@ -157,13 +157,13 @@ if ($version) {
 
 	# Try to figure out if the OS is DOS-like.  If it is,
 	# default to binary mode when reading files, unless
-	# explicitly overriden by command line "text" or
-	# "portable" options.
+	# explicitly overriden by command line "--text" or
+	# "--portable" options.
 
 my $isDOSish = ($^O =~ /^(MSWin\d\d|os2|dos|mint|cygwin)$/);
 if ($isDOSish) { $binary = 1 unless $text || $portable }
 
-my $mode = $binary ? '*' : ($portable ? '?' : ' ');
+my $modesym = $binary ? '*' : ($portable ? '?' : ' ');
 
 
 	# Read from STDIN (-) if no files listed on command line
@@ -176,27 +176,24 @@ my $mode = $binary ? '*' : ($portable ? '?' : ' ');
 sub sumfile {
 	my $file = shift;
 
-	local *F;
-	return unless open(F, "<$file");
-	binmode(F) if $binary || $portable;
+	unless (-e $file) {
+		warn "shasum: $file: No such file or directory\n";
+		return;
+	}
+	unless (-r $file) {
+		warn "shasum: $file: FAILED open or read\n";
+		return;
+	}
 
 	my $digest = $module->new($alg);
-	if ($portable && -T $file) {
-		local $/ = \4096;
-		while (defined (my $rec = <F>)) {
-			while (substr($rec, -1) eq "\015") {
-				defined (my $extra = <F>) or last;
-				$rec .= $extra;
-			}
-			$rec =~ s/\015+\012/\012/g;
-			$rec =~ s/\015/\012/g;
-			$digest->add($rec);
-		}
+	unless ($digest) {
+		warn "shasum: $file: FAILED digest creation\n";
+		return;
 	}
-	else { $digest->addfile(*F) }
-	close(F);
 
-	$digest->hexdigest;
+	my $readmode = $portable ? 'p' : ($binary ? 'b' : '');
+
+	$digest->addfile($file, $readmode)->hexdigest;
 }
 
 
@@ -209,37 +206,41 @@ my %len2alg = (40 => 1, 56 => 224, 64 => 256, 96 => 384, 128 => 512);
 
 if ($check) {
 	my $checkfile = shift(@ARGV);
-	my $err = 0;
+	my ($err, $read_errs, $match_errs) = (0, 0, 0);
+	my ($num_files, $num_checksums) = (0, 0);
 	my ($fh, $sum, $fname, $rsp);
 
 	die "shasum: $checkfile: No such file or directory\n"
 		unless open($fh, "<$checkfile");
 	while (<$fh>) {
 		s/\s+$//;
-		($sum, $mode, $fname) = /^(\S+) (.)(.*)$/;
-		unless (-e $fname) {
-			warn "shasum: $fname: No such file or directory\n";
-			next;
-		}
+		($sum, $modesym, $fname) = /^(\S+) (.)(.*)$/;
 		($binary, $portable, $text) =
-			map { $_ eq $mode } ('*', '?', ' ');
+			map { $_ eq $modesym } ('*', '?', ' ');
 		unless ($alg = $len2alg{length($sum)}) {
 			warn("shasum: $checkfile: $.: improperly " .
 				"formatted SHA checksum line\n") if $warn;
 			next;
 		}
-		$rsp = "$fname: ";
+		$rsp = "$fname: "; $num_files++;
 		unless (my $digest = sumfile($fname)) {
 			$rsp .= "FAILED open or read\n";
-			$err = 1;
+			$err = 1; $read_errs++;
 		}
 		else {
+			$num_checksums++;
 			if (lc($sum) eq $digest) { $rsp .= "OK\n" }
-			else { $rsp .= "FAILED\n"; $err = 1 }
+			else { $rsp .= "FAILED\n"; $err = 1; $match_errs++ }
 		}
 		print $rsp unless $status;
 	}
 	close($fh);
+	unless ($status) {
+		warn("shasum: WARNING: $read_errs of $num_files listed " .
+			"files could not be read\n") if $read_errs;
+		warn("shasum: WARNING: $match_errs of $num_checksums " .
+			"computed checksums did NOT match\n") if $match_errs;
+	}
 	exit($err);
 }
 
@@ -248,9 +249,9 @@ if ($check) {
 
 for my $arg (@ARGV) {
 	if (-d $arg) {
-		print STDERR "shasum: $arg: Is a directory\n";
+		warn "shasum: $arg: Is a directory\n";
 		next;
 	}
-	next unless my $digest = sumfile($arg);
-	print "$digest $mode", "$arg\n";
+	my $digest = sumfile($arg) or next;
+	print "$digest $modesym$arg\n";
 }

@@ -20,7 +20,7 @@ BEGIN {
 "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
 	);
 
-	plan tests => 1 + scalar(@vec);
+	plan tests => 5 + scalar(@vec);
 }
 
 	# attempt to use an invalid algorithm, and check for failure
@@ -46,6 +46,37 @@ ok($ctx->clone->add("b", "c")->b64digest, $rsp);
 $rsp = shift(@vec);
 open(FILE, "<$file");
 binmode(FILE);
-ok($ctx->addfile(*FILE)->hexdigest, $rsp);
+ok($ctx->clone->addfile(*FILE)->hexdigest, $rsp);
 close(FILE);
+
+	# test addfile using file name instead of handle
+
+ok($ctx->addfile($file, "b")->hexdigest, $rsp);
+
+	# test addfile portable mode
+
+open(FILE, ">$file");
+binmode(FILE);
+print FILE "abc\012" x 2048;		# using UNIX newline
+close(FILE);
+
+ok($ctx->new(1)->addfile($file, "p")->hexdigest,
+	"d449e19c1b0b0c191294c8dc9fa2e4a6ff77fc51");
+
+open(FILE, ">$file");
+binmode(FILE);
+print FILE "abc\015\012" x 2048;	# using DOS/Windows newline
+close(FILE);
+
+ok($ctx->new(1)->addfile($file, "p")->hexdigest,
+	"d449e19c1b0b0c191294c8dc9fa2e4a6ff77fc51");
+
+open(FILE, ">$file");
+binmode(FILE);
+print FILE "abc\015" x 2048;		# using Apple/Mac newline
+close(FILE);
+
+ok($ctx->new(1)->addfile($file, "p")->hexdigest,
+	"d449e19c1b0b0c191294c8dc9fa2e4a6ff77fc51");
+
 unlink($file);
