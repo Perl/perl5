@@ -1356,10 +1356,6 @@ roughly how the tied C<push> is implemented; see C<av_push> in F<av.c>:
      7	call_method("PUSH", G_SCALAR|G_DISCARD);
      8	LEAVE;
 
-The lines which concern the mark stack are the first, fifth and last
-lines: they save away, restore and remove the current position of the
-argument stack. 
-
 Let's examine the whole implementation, for practice:
 
      1	PUSHMARK(SP);
@@ -1379,8 +1375,8 @@ retrieved with C<SvTIED_obj>, and the value, the SV C<val>.
 
      5	PUTBACK;
 
-Next we tell Perl to make the change to the global stack pointer: C<dSP>
-only gave us a local copy, not a reference to the global.
+Next we tell Perl to update the global stack pointer from our internal
+variable: C<dSP> only gave us a local copy, not a reference to the global.
 
      6	ENTER;
      7	call_method("PUSH", G_SCALAR|G_DISCARD);
@@ -1394,7 +1390,9 @@ C<}> of a Perl block.
 To actually do the magic method call, we have to call a subroutine in
 Perl space: C<call_method> takes care of that, and it's described in
 L<perlcall>. We call the C<PUSH> method in scalar context, and we're
-going to discard its return value.
+going to discard its return value.  The call_method() function
+removes the top element of the mark stack, so there is nothing for
+the caller to clean up.
 
 =item Save stack
 
