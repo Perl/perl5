@@ -8,9 +8,9 @@
 #
 ################################################################################
 #
-#  $Revision: 43 $
+#  $Revision: 44 $
 #  $Author: mhx $
-#  $Date: 2006/05/22 00:51:20 +0200 $
+#  $Date: 2006/05/22 20:28:47 +0200 $
 #
 ################################################################################
 #
@@ -45,7 +45,7 @@ C<Devel::PPPort> contains a single function, called C<WriteFile>. Its
 only purpose is to write the F<ppport.h> C header file. This file
 contains a series of macros and, if explicitly requested, functions that
 allow XS modules to be built using older versions of Perl. Currently,
-Perl versions from 5.003 to 5.9.3 are supported.
+Perl versions from 5.003 to 5.9.4 are supported.
 
 This module is used by C<h2xs> to write the file F<ppport.h>.
 
@@ -99,7 +99,7 @@ Otherwise it returns a false value.
 
 =head1 COMPATIBILITY
 
-F<ppport.h> supports Perl versions from 5.003 to 5.9.3
+F<ppport.h> supports Perl versions from 5.003 to 5.9.4
 in threaded and non-threaded configurations.
 
 =head2 Provided Perl compatibility API
@@ -481,6 +481,7 @@ Perl below which it is unsupported:
   MULTICALL
   POP_MULTICALL
   PUSH_MULTICALL
+  PerlIO_context_layers
   gv_name_set
   my_vsnprintf
   newXS_flags
@@ -498,6 +499,7 @@ Perl below which it is unsupported:
   dMULTICALL
   doref
   gv_const_sv
+  gv_stashpvs
   hv_eiter_p
   hv_eiter_set
   hv_name_set
@@ -510,9 +512,11 @@ Perl below which it is unsupported:
   my_sprintf
   newGIVENOP
   newSVhek
+  newSVpvs_share
   newWHENOP
   newWHILEOP
   ref
+  savepvs
   sortsv_flags
   vverify
 
@@ -1008,7 +1012,7 @@ require DynaLoader;
 use strict;
 use vars qw($VERSION @ISA $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.08_02 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.08_03 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 @ISA = qw(DynaLoader);
 
@@ -1100,7 +1104,7 @@ SKIP
 |>=head1 COMPATIBILITY
 |>
 |>This version of F<ppport.h> is designed to support operation with Perl
-|>installations back to 5.003, and has been tested up to 5.9.3.
+|>installations back to 5.003, and has been tested up to 5.9.4.
 |>
 |>=head1 OPTIONS
 |>
@@ -1624,7 +1628,7 @@ PERL_UNUSED_DECL|5.007002||p
 PERL_UNUSED_VAR|5.007002||p
 PERL_UQUAD_MAX|5.004000||p
 PERL_UQUAD_MIN|5.004000||p
-PERL_USE_GCC_BRACE_GROUPS|||p
+PERL_USE_GCC_BRACE_GROUPS|5.009004||p
 PERL_USHORT_MAX|5.004000||p
 PERL_USHORT_MIN|5.004000||p
 PERL_VERSION|5.006000||p
@@ -1689,7 +1693,7 @@ PUSHu|5.004000||p
 PUTBACK|||
 PerlIO_clearerr||5.007003|
 PerlIO_close||5.007003|
-PerlIO_context_layers|||
+PerlIO_context_layers||5.009004|
 PerlIO_eof||5.007003|
 PerlIO_error||5.007003|
 PerlIO_fileno||5.007003|
@@ -1732,7 +1736,7 @@ STMT_END|||p
 STMT_START|||p
 STR_WITH_LEN|5.009003||p
 ST|||
-SVf|||p
+SVf|5.006000||p
 SVt_IV|||
 SVt_NV|||
 SVt_PVAV|||
@@ -1826,7 +1830,7 @@ SvRV_set|5.009003||p
 SvRV|||
 SvSETMAGIC|||
 SvSHARE||5.007003|
-SvSTASH_set|5.009004||p
+SvSTASH_set|5.009003||p
 SvSTASH|||
 SvSetMagicSV_nosteal||5.004000|
 SvSetMagicSV||5.004000|
@@ -1992,7 +1996,7 @@ boot_core_PerlIO|||
 boot_core_UNIVERSAL|||
 boot_core_xsutils|||
 bytes_from_utf8||5.007001|
-bytes_to_uni|||
+bytes_to_uni|||n
 bytes_to_utf8||5.006001|
 call_argv|5.006000||p
 call_atexit||5.006000|
@@ -2010,7 +2014,7 @@ check_type_and_open|||
 check_uni|||
 checkcomma|||
 checkposixcc|||
-ckWARN|||p
+ckWARN|5.006000||p
 ck_anoncode|||
 ck_bitop|||
 ck_concat|||
@@ -2307,6 +2311,7 @@ gv_init_sv|||
 gv_init|||
 gv_name_set||5.009004|
 gv_stashpvn|5.006000||p
+gv_stashpvs||5.009003|
 gv_stashpv|||
 gv_stashsv|||
 he_dup|||
@@ -2679,6 +2684,7 @@ newSVpvf_nocontext|||vn
 newSVpvf||5.004000|v
 newSVpvn_share||5.007001|
 newSVpvn|5.006000||p
+newSVpvs_share||5.009003|
 newSVpvs|5.009003||p
 newSVpv|||
 newSVrv|||
@@ -2910,6 +2916,7 @@ save_sptr|||
 save_svref|||
 save_vptr||5.006000|
 savepvn|||
+savepvs||5.009003|
 savepv|||
 savesharedpv||5.007003|
 savestack_grow_cnt||5.008001|

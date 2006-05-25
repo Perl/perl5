@@ -38,28 +38,34 @@ $^W = 1;
 
 my @pods = qw( HACKERS PPPort.pm ppport.h );
 
-# Try loading Test::Pod
-eval q{
-  use Test::Pod;
-  $Test::Pod::VERSION >= 0.95
-      or die "Test::Pod version only $Test::Pod::VERSION";
-  import Test::Pod tests => scalar @pods;
-};
+my $reason = '';
 
-my $TP = $@ eq '';
+if ($ENV{'SKIP_SLOW_TESTS'}) {
+  $reason = 'SKIP_SLOW_TESTS';
+}
+else {
+  # Try loading Test::Pod
+  eval q{
+    use Test::Pod;
+    $Test::Pod::VERSION >= 0.95
+        or die "Test::Pod version only $Test::Pod::VERSION";
+    import Test::Pod tests => scalar @pods;
+  };
+  $reason = 'Test::Pod >= 0.95 required' if $@;
+}
 
-unless ($TP) {
+if ($reason) {
   load();
   plan(tests => scalar @pods);
 }
 
 for (@pods) {
   print "# checking $_\n";
-  if ($TP) {
-    pod_file_ok($_);
+  if ($reason) {
+    skip("skip: $reason", 0);
   }
   else {
-    skip("skip: Test::Pod >= 0.95 required", 0);
+    pod_file_ok($_);
   }
 }
 

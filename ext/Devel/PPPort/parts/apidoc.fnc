@@ -1,3 +1,6 @@
+Ama|char*|savepvs|const char* s
+Ama|SV*|newSVpvs|const char* s
+Ama|SV*|newSVpvs_share|const char* s
 Am|bool|isALNUM|char ch
 Am|bool|isALPHA|char ch
 Am|bool|isDIGIT|char ch
@@ -56,6 +59,7 @@ Am|char*|SvPVx|SV* sv|STRLEN len
 Am|char|toLOWER|char ch
 Am|char|toUPPER|char ch
 Am|HV*|CvSTASH|CV* cv
+Am|HV*|gv_stashpvs|const char* name|I32 create
 Am|HV*|SvSTASH|SV* sv
 Am|int|AvFILL|AV* av
 Am|IV|SvIV_nomg|SV* sv
@@ -113,17 +117,21 @@ Am|SV*|HeSVKEY_force|HE* he
 Am|SV*|HeSVKEY|HE* he
 Am|SV*|HeSVKEY_set|HE* he|SV* sv
 Am|SV*|HeVAL|HE* he
+Am|SV**|hv_fetchs|HV* tb|const char* key|I32 lval
+Am|SV**|hv_stores|HV* tb|const char* key|NULLOK SV* val
 Am|SV*|newRV_inc|SV* sv
 Am|SV*|ST|int ix
+Am|void|sv_catpvs|SV* sv|const char* s
 Am|SV*|SvREFCNT_inc_NN|SV* sv
 Am|SV*|SvREFCNT_inc_simple_NN|SV* sv
 Am|SV*|SvREFCNT_inc_simple|SV* sv
-Am|SV*|SvREFCNT_inc_simple_void_NN|SV* sv
-Am|SV*|SvREFCNT_inc_simple_void|SV* sv
+Am|void|SvREFCNT_inc_simple_void_NN|SV* sv
+Am|void|SvREFCNT_inc_simple_void|SV* sv
 Am|SV*|SvREFCNT_inc|SV* sv
-Am|SV*|SvREFCNT_inc_void_NN|SV* sv
-Am|SV*|SvREFCNT_inc_void|SV* sv
+Am|void|SvREFCNT_inc_void_NN|SV* sv
+Am|void|SvREFCNT_inc_void|SV* sv
 Am|SV*|SvRV|SV* sv
+Am|void|sv_setpvs|SV* sv|const char* s
 Am|svtype|SvTYPE|SV* sv
 Ams||XCPT_RETHROW
 Ams||XSRETURN_EMPTY

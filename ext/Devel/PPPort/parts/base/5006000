@@ -476,6 +476,7 @@ PTR2UV                         # added by devel/scanprov
 PTRV                           # added by devel/scanprov
 Perl_warner                    # added by devel/scanprov
 Perl_warner_nocontext          # added by devel/scanprov
+SVf                            # added by devel/scanprov
 UVSIZE                         # added by devel/scanprov
 UVTYPE                         # added by devel/scanprov
 UVof                           # added by devel/scanprov
@@ -528,6 +529,7 @@ WARN_VOID                      # added by devel/scanprov
 XSprePUSH                      # added by devel/scanprov
 aTHX                           # added by devel/scanprov
 aTHX_                          # added by devel/scanprov
+ckWARN                         # added by devel/scanprov
 dNOOP                          # added by devel/scanprov
 dTHX                           # added by devel/scanprov
 dTHXa                          # added by devel/scanprov

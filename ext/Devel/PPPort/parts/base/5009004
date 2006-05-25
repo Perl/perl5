@@ -2,27 +2,28 @@
 MULTICALL                      # E
 POP_MULTICALL                  # E
 PUSH_MULTICALL                 # E
+PerlIO_context_layers          # E
 PoisonFree                     # E
 PoisonNew                      # E
 PoisonWith                     # E
 SvREFCNT_inc_NN                # E
 SvREFCNT_inc_simple            # E
 SvREFCNT_inc_simple_NN         # E
-SvREFCNT_inc_simple_void       # E
-SvREFCNT_inc_simple_void_NN    # E
-SvREFCNT_inc_void              # E
-SvREFCNT_inc_void_NN           # E
-SvSTASH_set                    # E
+SvREFCNT_inc_simple_void       # U
+SvREFCNT_inc_simple_void_NN    # U
+SvREFCNT_inc_void              # U
+SvREFCNT_inc_void_NN           # U
 gv_name_set                    # U
+hv_stores                      # E
 my_snprintf                    # U
 my_vsnprintf                   # U
 newXS_flags                    # E
 pad_sv                         # U
 regclass_swash                 # E (Perl_regclass_swash)
 stashpv_hvname_match           # U
+sv_setpvs                      # U
 sv_usepvn_flags                # U
 PERL_BCDVERSION                # added by devel/scanprov
 PERL_UNUSED_CONTEXT            # added by devel/scanprov
+PERL_USE_GCC_BRACE_GROUPS      # added by devel/scanprov
 SvVSTRING_mg                   # added by devel/scanprov
-hv_stores                      # added by devel/scanprov
-sv_setpvs                      # added by devel/scanprov

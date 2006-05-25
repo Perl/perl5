@@ -6,6 +6,7 @@ csighandler                    # E (Perl_csighandler)
 dMULTICALL                     # E
 doref                          # E
 gv_const_sv                    # E
+gv_stashpvs                    # E
 hv_eiter_p                     # E
 hv_eiter_set                   # U
 hv_name_set                    # U
@@ -18,8 +19,10 @@ is_utf8_string_loclen          # U
 my_sprintf                     # U
 newGIVENOP                     # E
 newSVhek                       # E
+newSVpvs_share                 # E
 newWHENOP                      # E
 newWHILEOP                     # E (Perl_newWHILEOP)
 ref                            # E (Perl_ref)
+savepvs                        # E
 sortsv_flags                   # U
 vverify                        # U

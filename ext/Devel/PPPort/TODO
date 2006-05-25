@@ -1,8 +1,25 @@
 TODO:
 
-* see if we can implement sv_catpvf() for < 5.004
+* figure out why many of the function for which Perl_* exists
+  fail the automated API check
 
-* add hv_stores() to blead
+* use 'nm' to more efficiently find 'undefined' symbols?
+
+* implement snprintf with newSVpvf for >= 5.004, which is safer?
+
+* add support for my_vsnprintf?
+
+* try to perform some core consistency checks:
+
+  - check if 'd' flag in embed.fnc matches with
+    supplied documentation
+
+  - check if all public API is documented
+
+* check (during make regen?) if MAX_PERL in PPPort_pm.PL
+  needs to be updated
+
+* see if we can implement sv_catpvf() for < 5.004
 
 * MULTICALL ?
 

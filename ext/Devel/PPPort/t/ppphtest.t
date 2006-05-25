@@ -37,9 +37,9 @@ use strict;
 $^W = 1;
 
 BEGIN {
-  if ($ENV{'SKIP_PPPHTEST'}) {
+  if ($ENV{'SKIP_SLOW_TESTS'}) {
     for (1 .. 202) {
-      ok(1);
+      skip("skip: SKIP_SLOW_TESTS", 0);
     }
     exit 0;
   }

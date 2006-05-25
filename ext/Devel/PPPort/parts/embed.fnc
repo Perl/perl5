@@ -312,7 +312,7 @@ XEpoM	|SV *	|refcounted_he_fetch|NN const struct refcounted_he *chain \
 				|NULLOK SV *keysv|NULLOK const char *key \
 				|STRLEN klen, int flags, U32 hash
 dpoM	|void	|refcounted_he_free|NULLOK struct refcounted_he *he
-dpoM	|struct refcounted_he *|refcounted_he_new \
+XEdpoM	|struct refcounted_he *|refcounted_he_new \
 				|NULLOK struct refcounted_he *const parent \
 				|NULLOK SV *const key|NULLOK SV *const value
 Apd	|SV**	|hv_store	|NULLOK HV* tb|NULLOK const char* key|I32 klen|NULLOK SV* val \
@@ -1228,7 +1228,7 @@ sR	|const char *|get_num	|NN const char *ppat|NN I32 *lenptr
 ns	|bool	|need_utf8	|NN const char *pat|NN const char *patend
 ns	|char	|first_symbol	|NN const char *pat|NN const char *patend
 sR	|char *	|sv_exp_grow	|NN SV *sv|STRLEN needed
-sR	|char *	|bytes_to_uni	|NN const U8 *start|STRLEN len|NN char *dest
+snR	|char *	|bytes_to_uni	|NN const U8 *start|STRLEN len|NN char *dest
 #endif
 
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_DECL_PROT)
@@ -1692,7 +1692,7 @@ p	|void	|offer_nice_chunk	|NN void *chunk|U32 chunk_size
 Apnod	|int	|my_sprintf	|NN char *buffer|NN const char *pat|...
 #endif
 
-Apnod	|int	|my_snprintf	|NN char *buffer|const Size_t len|NN const char *format|...
+Apnodf	|int	|my_snprintf	|NN char *buffer|const Size_t len|NN const char *format|...
 Apnod	|int	|my_vsnprintf	|NN char *buffer|const Size_t len|NN const char *format|va_list ap
 
 px	|void	|my_clearenv

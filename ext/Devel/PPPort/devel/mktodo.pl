@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 8 $
+#  $Revision: 11 $
 #  $Author: mhx $
-#  $Date: 2006/01/14 22:41:14 +0100 $
+#  $Date: 2006/05/25 17:22:32 +0200 $
 #
 ################################################################################
 #
@@ -25,20 +25,28 @@ use Getopt::Long;
 use Data::Dumper;
 use IO::File;
 use IO::Select;
+use Time::HiRes qw( gettimeofday tv_interval );
 
-my %opt = (
-  debug => 0,
-  base  => 0,
+require 'devel/devtools.pl';
+
+our %opt = (
+  debug   => 0,
+  base    => 0,
+  verbose => 0,
 );
 
-print "\n$0 @ARGV\n\n";
-
 GetOptions(\%opt, qw(
-            perl=s todo=s version=s debug base
+            perl=s todo=s version=s debug base verbose
           )) or die;
+
+identify();
+
+print "\n", ident_str(), "\n\n";
 
 my $fullperl = `which $opt{perl}`;
 chomp $fullperl;
+
+$ENV{SKIP_SLOW_TESTS} = 1;
 
 regen_all();
 
@@ -83,7 +91,6 @@ retry:
   unless (@new) {
     @new = grep !$all{$_->[0]}, @tmp;
     # TODO: @recheck was here, find a better way to get recheck syms
-    #       * we definitely don't have to check (U) symbols
     #       * try to grep out warnings before making symlist ?
   }
   unless (@new) {
@@ -95,7 +102,8 @@ retry:
     print Dumper($r);
     die "no new TODO symbols found...";
   }
-  push @recheck, map { $_->[0] } @new;
+  # don't recheck undefined symbols reported by the dynamic linker
+  push @recheck, map { $_->[0] } grep { $_->[1] !~ /^U/ } @new;
   for (@new) {
     printf "[$opt{version}] new symbol: %-30s # %s\n", @$_;
     $all{$_->[0]} = $_->[1];
@@ -103,13 +111,37 @@ retry:
   write_todo($opt{todo}, $opt{version}, \%all);
 }
 
-for my $sym (@recheck) {
+my $ifmt = '%' . length(scalar @recheck) . 'd';
+my $t0 = [gettimeofday];
+
+RECHECK: for my $i (0 .. $#recheck) {
+  my $sym = $recheck[$i];
   my $cur = delete $all{$sym};
-  printf "[$opt{version}] chk symbol: %-30s # %s\n", $sym, $cur;
+
+  printf "[$opt{version}] chk symbol: %-30s # %s [$ifmt/$ifmt, ETA %s]\n",
+         $sym, $cur, $i + 1, scalar @recheck, eta($t0, $i, scalar @recheck);
+
   write_todo($opt{todo}, $opt{version}, \%all);
+
+  if ($cur eq "E (Perl_$sym)") {
+    # we can try a shortcut here
+    regen_apicheck($sym);
+
+    my $r = run(qw(make test));
+
+    if (!$r->{didnotrun} && $r->{status} == 0) {
+      printf "[$opt{version}] del symbol: %-30s # %s\n", $sym, $cur;
+      next RECHECK;
+    }
+  }
+
+  # run the full test
   regen_all();
+
   my $r = run(qw(make test));
+
   $r->{didnotrun} and die "couldn't run make test: $!\n";
+
   if ($r->{status} == 0) {
     printf "[$opt{version}] del symbol: %-30s # %s\n", $sym, $cur;
   }
@@ -126,7 +158,7 @@ exit 0;
 
 sub regen_all
 {
-  my @mf_arg = qw( --with-apicheck OPTIMIZE=-O0 );
+  my @mf_arg = ('--with-apicheck', 'OPTIMIZE=-O0');
   push @mf_arg, qw( DEFINE=-DDPPP_APICHECK_NO_PPPORT_H ) if $opt{base};
 
   # just to be sure
@@ -138,7 +170,8 @@ sub regen_all
 sub regen_apicheck
 {
   unlink qw(apicheck.c apicheck.o);
-  system "$fullperl apicheck_c.PL >/dev/null";
+  runtool({ out => '/dev/null' }, $fullperl, 'apicheck_c.PL', map { "--api=$_" } @_)
+      or die "cannot regenerate apicheck.c\n";
 }
 
 sub load_todo
@@ -179,32 +212,5 @@ sub write_todo
   for (sort keys %$sym) {
     $f->print(sprintf "%-30s # %s\n", $_, $sym->{$_});
   }
-}
-
-sub run
-{
-  my $prog = shift;
-  my @args = @_;
-
-  # print "[$prog @args]\n";
-
-  system "$prog @args >tmp.out 2>tmp.err";
-
-  my $out = new IO::File "tmp.out" || die "tmp.out: $!\n";
-  my $err = new IO::File "tmp.err" || die "tmp.err: $!\n";
-
-  my %rval = (
-    status    => $? >> 8,
-    stdout    => [<$out>],
-    stderr    => [<$err>],
-    didnotrun => 0,
-  );
-
-  unlink "tmp.out", "tmp.err";
-
-  $? & 128 and $rval{core}   = 1;
-  $? & 127 and $rval{signal} = $? & 127;
-
-  \%rval;
 }
 

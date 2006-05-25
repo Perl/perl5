@@ -4,6 +4,7 @@ Newxc                          # E
 Newxz                          # E
 SvMAGIC_set                    # U
 SvRV_set                       # U
+SvSTASH_set                    # U
 SvUV_set                       # U
 av_arylen_p                    # E
 ckwarn                         # U
@@ -13,8 +14,10 @@ dAXMARK                        # E
 dMULTICALL                     # E
 doref                          # E
 gv_const_sv                    # E
+gv_stashpvs                    # E
 hv_eiter_p                     # E
 hv_eiter_set                   # U
+hv_fetchs                      # E
 hv_name_set                    # U
 hv_placeholders_get            # U
 hv_placeholders_p              # E
@@ -25,16 +28,17 @@ is_utf8_string_loclen          # U
 my_sprintf                     # U
 newGIVENOP                     # E
 newSVhek                       # E
+newSVpvs                       # E
+newSVpvs_share                 # E
 newWHENOP                      # E
 newWHILEOP                     # E (Perl_newWHILEOP)
 ref                            # E (Perl_ref)
+savepvs                        # E
 sortsv_flags                   # U
+sv_catpvs                      # U
 vverify                        # U
 PERL_UNUSED_ARG                # added by devel/scanprov
 STR_WITH_LEN                   # added by devel/scanprov
 SvPVX_const                    # added by devel/scanprov
 SvPVX_mutable                  # added by devel/scanprov
 dVAR                           # added by devel/scanprov
-hv_fetchs                      # added by devel/scanprov
-newSVpvs                       # added by devel/scanprov
-sv_catpvs                      # added by devel/scanprov

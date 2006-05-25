@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 10 $
+#  $Revision: 12 $
 #  $Author: mhx $
-#  $Date: 2006/01/14 23:02:12 +0100 $
+#  $Date: 2006/05/25 17:22:31 +0200 $
 #
 ################################################################################
 #
@@ -23,13 +23,19 @@
 use strict;
 use Getopt::Long;
 
-my %opt = (
-  base  => 0,
+require 'devel/devtools.pl';
+
+our %opt = (
+  base    => 0,
+  verbose => 0,
 );
 
 GetOptions(\%opt, qw(
             base
+            verbose
           )) or die;
+
+identify();
 
 # my $outdir = $opt{base} ? 'parts/base' : 'parts/todo';
 my $outdir = 'parts/todo';
@@ -51,12 +57,12 @@ for (1 .. $#perls) {
 
 shift @perls;
 
-$ENV{SKIP_PPPHTEST} = 1;
-
 for (@perls) {
   my $todo = do { my $v = $_->{todo}; $v =~ s/\D+//g; $v };
   -e "$outdir/$todo" and next;
   my @args = ('--perl', $_->{path}, '--todo', "$outdir/$todo", '--version', "$_->{todo}");
   push @args, '--base' if $opt{base};
-  system 'devel/mktodo.pl', @args and die "system(@args): [$!] [$?]\n";
+  push @args, '--verbose' if $opt{verbose};
+  runperl('devel/mktodo.pl', @args) or die "error running mktodo.pl [$!] [$?]\n";
 }
+

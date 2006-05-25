@@ -1,3 +1,9 @@
+3.08_03 - 2006-05-25
+
+    * update API info
+    * add devel/regenerate script to regenerate API info
+    * improve and speed up the development tools
+
 3.08_02 - 2006-05-22
 
     * fix a POD error

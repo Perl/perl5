@@ -340,9 +340,11 @@ ext/Devel/Peek/t/Peek.t		See if Devel::Peek works
 ext/Devel/PPPort/apicheck_c.PL	Devel::PPPort apicheck generator
 ext/Devel/PPPort/Changes	Devel::PPPort changes
 ext/Devel/PPPort/devel/buildperl.pl	Devel::PPPort perl version builder
+ext/Devel/PPPort/devel/devtools.pl	Devel::PPPort development utilities
 ext/Devel/PPPort/devel/mkapidoc.sh	Devel::PPPort apidoc collector
 ext/Devel/PPPort/devel/mktodo	Devel::PPPort baseline/todo generator
 ext/Devel/PPPort/devel/mktodo.pl	Devel::PPPort baseline/todo generator
+ext/Devel/PPPort/devel/regenerate	Devel::PPPort API re-generator
 ext/Devel/PPPort/devel/scanprov	Devel::PPPort provided API scanner
 ext/Devel/PPPort/HACKERS	Devel::PPPort hackers documentation
 ext/Devel/PPPort/Makefile.PL	Devel::PPPort makefile writer

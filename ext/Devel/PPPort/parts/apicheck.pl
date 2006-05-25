@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 16 $
+#  $Revision: 19 $
 #  $Author: mhx $
-#  $Date: 2006/05/19 16:15:51 +0200 $
+#  $Date: 2006/05/25 17:21:23 +0200 $
 #
 ################################################################################
 #
@@ -24,7 +24,8 @@ use strict;
 require 'parts/ppptools.pl';
 
 if (@ARGV) {
-  open OUT, ">$ARGV[0]" or die "$ARGV[0]: $!\n";
+  my $file = pop @ARGV;
+  open OUT, ">$file" or die "$file: $!\n";
 }
 else {
   *OUT = \*STDOUT;
@@ -177,6 +178,15 @@ static double VARarg3;
 
 HEAD
 
+if (@ARGV) {
+  my %want = map { ($_ => 0) } @ARGV;
+  @f = grep { exists $want{$_->{name}} } @f;
+  for (@f) { $want{$_->{name}}++ }
+  for (keys %want) {
+    die "nothing found for '$_'\n" unless $want{$_};
+  }
+}
+
 my $f;
 for $f (@f) {
   $ignore{$f->{name}} and next;
@@ -211,9 +221,14 @@ for $f (@f) {
       next;
     }
     $n = $tmap{$n} || $n;
-    my $v = 'arg' . $i++;
-    push @arg, $v;
-    $stack .= "  static $n $p$v$d;\n";
+    if ($n eq 'const char' and $p eq '*' and !$f->{flags}{f}) {
+      push @arg, '"foo"';
+    }
+    else {
+      my $v = 'arg' . $i++;
+      push @arg, $v;
+      $stack .= "  static $n $p$v$d;\n";
+    }
   }
 
   unless ($f->{flags}{n} || $f->{flags}{'m'}) {

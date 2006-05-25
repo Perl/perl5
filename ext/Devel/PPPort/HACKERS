@@ -134,6 +134,8 @@ Finally, add the remaining baseline information by running
 
 =back
 
+Alternatively, you can try to use the F<devel/regenerate> script.
+
 =head2 Implementation
 
 Residing in F<parts/inc/> is the "heart" of C<Devel::PPPort>. Each
