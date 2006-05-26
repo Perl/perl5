@@ -1,9 +1,11 @@
+use strict;
 use ExtUtils::MakeMaker;
 eval 'use ExtUtils::MakeMaker::Coverage';
 require 5.006;
 
 WriteMakefile(
     NAME            => 'Sys::Syslog',
+    LICENSE         => 'perl',
     VERSION_FROM    => 'Syslog.pm', 
     ABSTRACT_FROM   => 'Syslog.pm', 
     INSTALLDIRS     => 'perl',
@@ -11,7 +13,7 @@ WriteMakefile(
     XSPROTOARG      => '-noprototypes',
     PREREQ_PM       => {
         'Test::More' => 0,
-        'XSLoader' => 0,
+        'XSLoader'   => 0,
     },
     dist            => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean           => { FILES => 'Sys-Syslog-*' }, 
@@ -20,10 +22,10 @@ WriteMakefile(
 
 my $_PATH_LOG;
 
-if (-S "/dev/log" && -w "/dev/log") {
+if (-S "/dev/log" and -w "/dev/log") {
     # Most unixes have a unix domain socket /dev/log.
     $_PATH_LOG = "/dev/log";
-} elsif (-c "/dev/conslog" && -w "/dev/conslog") {
+} elsif (-c "/dev/conslog" and -w "/dev/conslog") {
     # SunOS 5.8 has a worldwritable /dev/conslog STREAMS log driver.
     # The /dev/log STREAMS log driver on this platform has permissions
     # and ownership `crw-r----- root sys'.  /dev/conslog has more liberal
@@ -55,10 +57,10 @@ if(eval {require ExtUtils::Constant; 1}) {
     close(MACROS);
 
 } else {
-    use File::Copy;
-    use File::Spec;
+    require File::Copy;
+    require File::Spec;
     foreach my $file ('const-c.inc', 'const-xs.inc') {
         my $fallback = File::Spec->catfile('fallback', $file);
-        copy ($fallback, $file) or die "Can't copy $fallback to $ $!";
+        File::Copy::copy($fallback, $file) or die "Can't copy $fallback to $ $!";
     }
 }

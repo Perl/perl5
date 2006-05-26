@@ -1,10 +1,12 @@
 package Sys::Syslog;
 use strict;
 use Carp;
+use POSIX qw(strftime setlocale LC_TIME);
+use Socket ':all';
 require 5.006;
 require Exporter;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 our @ISA = qw(Exporter);
 
 our %EXPORT_TAGS = (
@@ -18,6 +20,7 @@ our %EXPORT_TAGS = (
         LOG_MAIL LOG_NDELAY LOG_NEWS LOG_NFACILITIES LOG_NOTICE
         LOG_NOWAIT LOG_ODELAY LOG_PERROR LOG_PID LOG_PRIMASK LOG_SYSLOG
         LOG_USER LOG_UUCP LOG_WARNING
+        LOG_MASK LOG_UPTO
     )],
 );
 
@@ -44,8 +47,6 @@ my $failed = undef;
 my $fail_time = undef;
 our ($connected, @fallbackMethods, $syslog_send, $host);
 
-use Socket ':all';
-use POSIX qw(strftime setlocale LC_TIME);
 
 =head1 NAME
 
@@ -53,7 +54,7 @@ Sys::Syslog - Perl interface to the UNIX syslog(3) calls
 
 =head1 VERSION
 
-Version 0.13
+Version 0.14
 
 =head1 SYNOPSIS
 
@@ -96,7 +97,8 @@ C<:extended> exports the Perl specific functions for C<syslog(3)>:
 =item *
 
 C<:macros> exports the symbols corresponding to most of your C<syslog(3)> 
-macros. See L<"CONSTANTS"> for the supported constants and their meaning. 
+macros and the C<LOG_UPTO()> and C<LOG_MASK()> functions. 
+See L<"CONSTANTS"> for the supported constants and their meaning. 
 
 =back
 
@@ -199,16 +201,26 @@ might show up if $message contains tainted data.
 Sets the log mask for the current process to C<$mask_priority> and 
 returns the old mask.  If the mask argument is 0, the current log mask 
 is not modified.  See L<"Levels"> for the list of available levels. 
+You can use the C<LOG_UPTO()> function to allow all levels up to a 
+given priority (but it only accept the numeric macros as arguments).
 
 B<Examples>
 
 Only log errors: 
 
-    setlogmask(LOG_ERR);
+    setlogmask( LOG_MASK(LOG_ERR) );
+
+Log everything except informational messages: 
+
+    setlogmask( ~(LOG_MASK(LOG_INFO)) );
 
 Log critical messages, errors and warnings: 
 
-    setlogmask(LOG_CRIT|LOG_ERR|LOG_WARNING);
+    setlogmask( LOG_MASK(LOG_CRIT) | LOG_MASK(LOG_ERR) | LOG_MASK(LOG_WARNING) );
+
+Log all messages up to debug: 
+
+    setlogmask( LOG_UPTO(LOG_DEBUG) );
 
 
 =item B<setlogsock($sock_type)>
@@ -226,8 +238,8 @@ whatever is writable.  A value of 'stream' will connect to the stream
 indicated by the pathname provided as the optional second parameter.
 (For example Solaris and IRIX require C<"stream"> instead of C<"unix">.)
 A value of C<"inet"> will connect to an INET socket (either C<tcp> or C<udp>,
-tried in that order) returned by C<getservbyname()>. C<"tcp"> and C<"udp"> can
-also be given as values. The value C<"console"> will send messages
+tried in that order) returned by C<getservbyname()>. C<"tcp"> and C<"udp"> 
+can also be given as values. The value C<"console"> will send messages
 directly to the console, as for the C<"cons"> option in the logopts in
 C<openlog()>.
 
@@ -262,9 +274,10 @@ Closes the log file and return true on success.
 
     setlogsock('inet');
     $! = 55;
-    syslog('info', 'problem was %m'); # %m == $! in syslog(3)
+    syslog('info', 'problem was %m');   # %m == $! in syslog(3)
 
-    # Log to UDP port on $remotehost instead of logging locally
+Log to UDP port on C<$remotehost> instead of logging locally:
+
     setlogsock('udp');
     $Sys::Syslog::host = $remotehost;
     openlog($program, 'ndelay', 'user');
@@ -404,8 +417,7 @@ B<(F)> You forgot to give C<syslog()> the indicated argument.
 
 =item syslog: invalid level/facility: %s
 
-B<(F)> You specified an invalid level or facility, like C<LOG_KERN> 
-(which is reserved to the kernel). 
+B<(F)> You specified an invalid level or facility.
 
 =item syslog: too many levels given: %s
 
@@ -436,10 +448,37 @@ was unable to find an appropriate an appropriate device.
 
 L<syslog(3)>
 
+SUSv3 issue 6, IEEE Std 1003.1, 2004 edition, 
+L<http://www.opengroup.org/onlinepubs/000095399/basedefs/syslog.h.html>
+
+GNU C Library documentation on syslog, 
+L<http://www.gnu.org/software/libc/manual/html_node/Syslog.html>
+
+Solaris 10 documentation on syslog, 
+L<http://docs.sun.com/app/docs/doc/816-5168/6mbb3hruo?a=view>
+
+AIX 5L 5.3 documentation on syslog, 
+L<http://publib.boulder.ibm.com/infocenter/pseries/v5r3/index.jsp?topic=/com.ibm.aix.doc/libs/basetrf2/syslog.htm>
+
+HP-UX 11i documentation on syslog, 
+L<http://docs.hp.com/en/B9106-90010/syslog.3C.html>
+
+Tru64 5.1 documentation on syslog, 
+L<http://h30097.www3.hp.com/docs/base_doc/DOCUMENTATION/V51_HTML/MAN/MAN3/0193____.HTM>
+
+Stratus VOS 15.1, 
+L<http://stratadoc.stratus.com/vos/15.1.1/r502-01/wwhelp/wwhimpl/js/html/wwhelp.htm?context=r502-01&file=ch5r502-01bi.html>
+
+I<RFC 3164 - The BSD syslog Protocol>, L<http://www.faqs.org/rfcs/rfc3164.html>
+-- Please note that this is an informational RFC, and therefore does not 
+specify a standard of any kind.
+
+I<RFC 3195 - Reliable Delivery for syslog>, L<http://www.faqs.org/rfcs/rfc3195.html>
+
 I<Syslogging with Perl>, L<http://lexington.pm.org/meetings/022001.html>
 
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Tom Christiansen E<lt>F<tchrist@perl.com>E<gt> and Larry Wall
 E<lt>F<larry@wall.org>E<gt>.
@@ -493,7 +532,15 @@ L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Sys-Syslog>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/Sys-Syslog>
+L<http://search.cpan.org/dist/Sys-Syslog/>
+
+=item * Kobes' CPAN Search
+
+L<http://cpan.uwinnipeg.ca/dist/Sys-Syslog>
+
+=item * Perl Documentation
+
+L<http://perldoc.perl.org/Sys/Syslog.html>
 
 =back
 
@@ -511,7 +558,7 @@ sub AUTOLOAD {
     my $constname;
     our $AUTOLOAD;
     ($constname = $AUTOLOAD) =~ s/.*:://;
-    croak "&Sys::Syslog::constant not defined" if $constname eq 'constant';
+    croak "Sys::Syslog::constant() not defined" if $constname eq 'constant';
     my ($error, $val) = constant($constname);
 	croak $error if $error;
     no strict 'refs';
@@ -529,7 +576,7 @@ eval {
     bootstrap Sys::Syslog $VERSION;
 };
 
-our $maskpri = &LOG_UPTO(&LOG_DEBUG);
+our $maskpri = LOG_UPTO(&LOG_DEBUG);
 
 sub openlog {
     our ($ident, $logopt, $facility) = @_;  # package vars
@@ -537,12 +584,12 @@ sub openlog {
     our $lo_ndelay = $logopt =~ /\bndelay\b/;
     our $lo_nowait = $logopt =~ /\bnowait\b/;
     return 1 unless $lo_ndelay;
-    &connect;
+    connect_log();
 } 
 
 sub closelog {
     our $facility = our $ident = '';
-    &disconnect;
+    disconnect_log();
 } 
 
 sub setlogmask {
@@ -554,12 +601,14 @@ sub setlogmask {
 sub setlogsock {
     my $setsock = shift;
     $syslog_path = shift;
-    &disconnect if $connected;
+    disconnect_log() if $connected;
     $transmit_ok = 0;
     @fallbackMethods = ();
     @connectMethods = @defaultMethods;
+
     if (ref $setsock eq 'ARRAY') {
 	@connectMethods = @$setsock;
+
     } elsif (lc($setsock) eq 'stream') {
 	unless (defined $syslog_path) {
 	    my @try = qw(/dev/log /dev/conslog);
@@ -581,6 +630,7 @@ sub setlogsock {
 	} else {
 	    @connectMethods = ( 'stream' );
 	}
+
     } elsif (lc($setsock) eq 'unix') {
         if (length _PATH_LOG() && !defined $syslog_path) {
 	    $syslog_path = _PATH_LOG();
@@ -589,6 +639,7 @@ sub setlogsock {
 	    carp 'unix passed to setlogsock, but path not available';
 	    return undef;
         }
+
     } elsif (lc($setsock) eq 'tcp') {
 	if (getservbyname('syslog', 'tcp') || getservbyname('syslogng', 'tcp')) {
 	    @connectMethods = ( 'tcp' );
@@ -596,6 +647,7 @@ sub setlogsock {
 	    carp "tcp passed to setlogsock, but tcp service unavailable";
 	    return undef;
 	}
+
     } elsif (lc($setsock) eq 'udp') {
 	if (getservbyname('syslog', 'udp')) {
 	    @connectMethods = ( 'udp' );
@@ -603,13 +655,17 @@ sub setlogsock {
 	    carp "udp passed to setlogsock, but udp service unavailable";
 	    return undef;
 	}
+
     } elsif (lc($setsock) eq 'inet') {
 	@connectMethods = ( 'tcp', 'udp' );
+
     } elsif (lc($setsock) eq 'console') {
 	@connectMethods = ( 'console' );
+
     } else {
         croak "Invalid argument passed to setlogsock; must be 'stream', 'unix', 'tcp', 'udp' or 'inet'"
     }
+
     return 1;
 }
 
@@ -627,15 +683,16 @@ sub syslog {
     @words = split(/\W+/, $priority, 2);# Allow "level" or "level|facility".
     undef $numpri;
     undef $numfac;
+
     foreach (@words) {
-	$num = &xlate($_);		# Translate word to number.
-	if ($_ eq 'kern' || $num <= 0) {
+	$num = xlate($_);		# Translate word to number.
+	if ($num < 0) {
 	    croak "syslog: invalid level/facility: $_"
 	}
 	elsif ($num <= &LOG_PRIMASK) {
 	    croak "syslog: too many levels given: $_" if defined($numpri);
 	    $numpri = $num;
-	    return 0 unless &LOG_MASK($numpri) & $maskpri;
+	    return 0 unless LOG_MASK($numpri) & $maskpri;
 	}
 	else {
 	    croak "syslog: too many facilities given: $_" if defined($numfac);
@@ -648,10 +705,10 @@ sub syslog {
 
     if (!defined($numfac)) {	# Facility not specified in this call.
 	$facility = 'user' unless $facility;
-	$numfac = &xlate($facility);
+	$numfac = xlate($facility);
     }
 
-    &connect unless $connected;
+    connect_log() unless $connected;
 
     $whoami = our $ident;
 
@@ -661,9 +718,7 @@ sub syslog {
     } 
 
     unless ($whoami) {
-	($whoami = getlogin) ||
-	    ($whoami = getpwuid($<)) ||
-		($whoami = 'syslog');
+	$whoami = getlogin() || getpwuid($<) || 'syslog';
     }
 
     $whoami .= "[$$]" if our $lo_pid;
@@ -695,26 +750,29 @@ sub syslog {
 	if ($failed && (time - $fail_time) > 60) {
 	    # it's been a while... maybe things have been fixed
 	    @fallbackMethods = ();
-	    disconnect();
+	    disconnect_log();
 	    $transmit_ok = 0; # make it look like a fresh attempt
-	    &connect;
+	    connect_log();
         }
+
 	if ($connected && !connection_ok()) {
 	    # Something was OK, but has now broken. Remember coz we'll
 	    # want to go back to what used to be OK.
 	    $failed = $current_proto unless $failed;
 	    $fail_time = time;
-	    disconnect();
+	    disconnect_log();
 	}
-	&connect unless $connected;
+
+	connect_log() unless $connected;
 	$failed = undef if ($current_proto && $failed && $current_proto eq $failed);
+
 	if ($syslog_send) {
-	    if (&{$syslog_send}($buf)) {
+	    if ($syslog_send->($buf)) {
 		$transmit_ok++;
 		return 1;
 	    }
 	    # typically doesn't happen, since errors are rare from write().
-	    disconnect();
+	    disconnect_log();
 	}
     }
     # could not send, could not fallback onto a working
@@ -766,6 +824,10 @@ sub _syslog_send_socket {
     #return send(SYSLOG, $buf, 0);
 }
 
+# xlate()
+# -----
+# private function to translate names to numeric values
+# 
 sub xlate {
     my($name) = @_;
     return $name+0 if $name =~ /^\s*\d+\s*$/;
@@ -777,7 +839,7 @@ sub xlate {
     defined $value ? $value : -1;
 }
 
-sub connect {
+sub connect_log {
     @fallbackMethods = @connectMethods unless (scalar @fallbackMethods);
     if ($transmit_ok && $current_proto) {
 	# Retry what we were on, because it's worked in the past.
@@ -836,7 +898,7 @@ sub connect_tcp {
     }
     setsockopt(SYSLOG, SOL_SOCKET, SO_KEEPALIVE, 1);
     setsockopt(SYSLOG, IPPROTO_TCP, TCP_NODELAY, 1);
-    if (!CORE::connect(SYSLOG,$that)) {
+    if (!connect(SYSLOG,$that)) {
 	push(@{$errs}, "tcp connect: $!");
 	return 0;
     }
@@ -873,7 +935,7 @@ sub connect_udp {
 	push(@{$errs}, "udp socket: $!");
 	return 0;
     }
-    if (!CORE::connect(SYSLOG,$that)) {
+    if (!connect(SYSLOG,$that)) {
 	push(@{$errs}, "udp connect: $!");
 	return 0;
     }
@@ -926,12 +988,12 @@ sub connect_unix {
 	push(@{$errs}, "unix stream socket: $!");
 	return 0;
     }
-    if (!CORE::connect(SYSLOG,$that)) {
+    if (!connect(SYSLOG,$that)) {
         if (!socket(SYSLOG,AF_UNIX,SOCK_DGRAM,0)) {
 	    push(@{$errs}, "unix dgram socket: $!");
 	    return 0;
 	}
-        if (!CORE::connect(SYSLOG,$that)) {
+        if (!connect(SYSLOG,$that)) {
 	    push(@{$errs}, "unix dgram connect: $!");
 	    return 0;
 	}
@@ -964,7 +1026,7 @@ sub connection_ok {
     return ($ret ? 0 : 1);
 }
 
-sub disconnect {
+sub disconnect_log {
     $connected = 0;
     $syslog_send = undef;
     return close SYSLOG;
