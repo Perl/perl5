@@ -107,7 +107,7 @@ Pugs already does parallel testing - can their approach be re-used?
 
 =head2 Make Schwern poorer
 
-We should have for everything. When all the core's modules are tested,
+We should have tests for everything. When all the core's modules are tested,
 Schwern has promised to donate to $500 to TPF. We may need volunteers to
 hold him upside down and shake vigorously in order to actually extract the
 cash.
