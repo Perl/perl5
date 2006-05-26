@@ -341,7 +341,8 @@ decl	:	format
 	;
 
 format	:	FORMAT startformsub formname block
-			{ newFORM($2, $3, $4); }
+			{ SvREFCNT_inc(PL_compcv);
+			  newFORM($2, $3, $4); }
 	;
 
 formname:	WORD		{ $$ = $1; }
@@ -350,24 +351,29 @@ formname:	WORD		{ $$ = $1; }
 
 /* Unimplemented "my sub foo { }" */
 mysubrout:	MYSUB startsub subname proto subattrlist subbody
-			{ newMYSUB($2, $3, $4, $5, $6); }
+			{ SvREFCNT_inc(PL_compcv);
+			  newMYSUB($2, $3, $4, $5, $6); }
 	;
 
 /* Subroutine definition */
 subrout	:	SUB startsub subname proto subattrlist subbody
-			{ newATTRSUB($2, $3, $4, $5, $6); }
+			{ SvREFCNT_inc(PL_compcv);
+			  newATTRSUB($2, $3, $4, $5, $6); }
 	;
 
 startsub:	/* NULL */	/* start a regular subroutine scope */
-			{ $$ = start_subparse(FALSE, 0); }
+			{ $$ = start_subparse(FALSE, 0);
+			    SAVEFREESV(PL_compcv); }
 	;
 
 startanonsub:	/* NULL */	/* start an anonymous subroutine scope */
-			{ $$ = start_subparse(FALSE, CVf_ANON); }
+			{ $$ = start_subparse(FALSE, CVf_ANON);
+			    SAVEFREESV(PL_compcv); }
 	;
 
 startformsub:	/* NULL */	/* start a format subroutine scope */
-			{ $$ = start_subparse(TRUE, 0); }
+			{ $$ = start_subparse(TRUE, 0);
+			    SAVEFREESV(PL_compcv); }
 	;
 
 /* Name of a subroutine - must be a bareword, could be special */
@@ -412,7 +418,8 @@ package :	PACKAGE WORD ';'
 use	:	USE startsub
 			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
 		    WORD WORD listexpr ';'
-			{ utilize($1, $2, $4, $5, $6); }
+			 { SvREFCNT_inc(PL_compcv);
+			   utilize($1, $2, $4, $5, $6); }
 	;
 
 /* Ordinary expressions; logical combinations */
@@ -464,7 +471,8 @@ listop	:	LSTOP indirob argexpr /* map {...} @args or print $fh @args */
 	|	FUNC '(' listexprcom ')'             /* print (@args) */
 			{ $$ = convert($1, 0, $3); }
 	|	LSTOPSUB startanonsub block /* sub f(&@);   f { foo } ... */
-			{ $3 = newANONATTRSUB($2, 0, Nullop, $3); }
+			{ SvREFCNT_inc(PL_compcv);
+			  $3 = newANONATTRSUB($2, 0, Nullop, $3); }
 		    listexpr		%prec LSTOP  /* ... @bar */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				 append_elem(OP_LIST,
@@ -593,7 +601,8 @@ anonymous:	'[' expr ']'
 	|	HASHBRACK ';' '}'	%prec '(' /* { } (';' by tokener) */
 			{ $$ = newANONHASH(Nullop); }
 	|	ANONSUB startanonsub proto subattrlist block	%prec '('
-			{ $$ = newANONATTRSUB($2, $3, $4, $5); }
+			{ SvREFCNT_inc(PL_compcv);
+			  $$ = newANONATTRSUB($2, $3, $4, $5); }
 
     ;
 

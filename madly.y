@@ -443,7 +443,8 @@ peg	:	PEG
 	;
 
 format	:	FORMAT startformsub formname block
-			{ $$ = newFORM($2, $3, $4);
+			{ SvREFCNT_inc(PL_compcv);
+			  $$ = newFORM($2, $3, $4);
 			  prepend_madprops($1->tk_mad, $$, 'F');
 			  $1->tk_mad = 0;
 			  token_free($1);
@@ -456,14 +457,16 @@ formname:	WORD		{ $$ = $1; }
 
 /* Unimplemented "my sub foo { }" */
 mysubrout:	MYSUB startsub subname proto subattrlist subbody
-			{ $$ = newMYSUB($2, $3, $4, $5, $6);
+			{ SvREFCNT_inc(PL_compcv);
+			  $$ = newMYSUB($2, $3, $4, $5, $6);
 			  token_getmad($1,$$,'d');
 			}
 	;
 
 /* Subroutine definition */
 subrout	:	SUB startsub subname proto subattrlist subbody
-			{ OP* o = newSVOP(OP_ANONCODE, 0,
+			{ SvREFCNT_inc(PL_compcv);
+			  OP* o = newSVOP(OP_ANONCODE, 0,
 			    (SV*)newATTRSUB($2, $3, $4, $5, $6));
 			  $$ = newOP(OP_NULL,0);
 			  op_getmad(o,$$,'&');
@@ -477,15 +480,19 @@ subrout	:	SUB startsub subname proto subattrlist subbody
 	;
 
 startsub:	/* NULL */	/* start a regular subroutine scope */
-			{ $$ = start_subparse(FALSE, 0); }
+			{ $$ = start_subparse(FALSE, 0);
+			    SAVEFREESV(PL_compcv); }
+
 	;
 
 startanonsub:	/* NULL */	/* start an anonymous subroutine scope */
-			{ $$ = start_subparse(FALSE, CVf_ANON); }
+			{ $$ = start_subparse(FALSE, CVf_ANON);
+			    SAVEFREESV(PL_compcv); }
 	;
 
 startformsub:	/* NULL */	/* start a format subroutine scope */
-			{ $$ = start_subparse(TRUE, 0); }
+			{ $$ = start_subparse(TRUE, 0);
+			    SAVEFREESV(PL_compcv); }
 	;
 
 /* Name of a subroutine - must be a bareword, could be special */
@@ -543,7 +550,8 @@ package :	PACKAGE WORD ';'
 use	:	USE startsub
 			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
 		    WORD WORD listexpr ';'
-			{ $$ = utilize(($1)->tk_lval.ival, $2, $4, $5, $6);
+			{ SvREFCNT_inc(PL_compcv);
+			  $$ = utilize(($1)->tk_lval.ival, $2, $4, $5, $6);
 			  token_getmad($1,$$,'o');
 			  token_getmad($7,$$,';');
 			  if (PL_rsfp_filters && AvFILLp(PL_rsfp_filters) >= 0)
@@ -635,7 +643,8 @@ listop	:	LSTOP indirob argexpr          /* print $fh @args */
 			  token_getmad($4,$$,')');
 			}
 	|	LSTOPSUB startanonsub block          /* map { foo } ... */
-			{ $3 = newANONATTRSUB($2, 0, Nullop, $3); }
+			{ SvREFCNT_inc(PL_compcv);
+			  $3 = newANONATTRSUB($2, 0, Nullop, $3); }
 		    listexpr		%prec LSTOP  /* ... @bar */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				 append_elem(OP_LIST,
@@ -882,7 +891,8 @@ anonymous:	'[' expr ']'
 			  token_getmad($3,$$,'}');
 			}
 	|	ANONSUB startanonsub proto subattrlist block	%prec '('
-			{ $$ = newANONATTRSUB($2, $3, $4, $5);
+			{ SvREFCNT_inc(PL_compcv);
+			  $$ = newANONATTRSUB($2, $3, $4, $5);
 			  token_getmad($1,$$,'o');
 			  op_getmad($3,$$,'s');
 			  op_getmad($4,$$,'a');
