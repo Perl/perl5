@@ -72,7 +72,6 @@ WriteMakefile(
         'threads.pm'    => '$(INST_LIBDIR)/threads.pm',
     },
     'PREREQ_PM'         => {
-        'threads::shared' => 0,
         'XSLoader'        => 0,
     },
     'INSTALLDIRS'       => 'perl',
