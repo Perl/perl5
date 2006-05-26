@@ -88,6 +88,15 @@ case "`${cc:-cc} -V 2>&1`" in
     optimize='-xO2'
     cccdlflags='-KPIC'
     lddlflags='-G -Bdynamic'
+    # Sun C doesn't support gcc attributes, but, in many cases, doesn't
+    # complain either.  Not all cases, though.
+    d_attribute_format='undef'
+    d_attribute_malloc='undef'
+    d_attribute_nonnull='undef'
+    d_attribute_noreturn='undef'
+    d_attribute_pure='undef'
+    d_attribute_unused='undef'
+    d_attribute_warn_unused_result='undef'
     ;;
 esac
 
