@@ -140,14 +140,23 @@ yy_stack_print (pTHX_ const short *yyss, const short *yyssp, const YYSTYPE *yyvs
     for (i=0; i < count; i++)
 	PerlIO_printf(Perl_debug_log, " %8d", start+i);
     PerlIO_printf(Perl_debug_log, "\nstate:");
-    for (i=0, yyss += start; i < count; i++, yyss++)
-	PerlIO_printf(Perl_debug_log, " %8d", *yyss);
+    for (i=0; i < count; i++)
+	PerlIO_printf(Perl_debug_log, " %8d", yyss[start+i]);
     PerlIO_printf(Perl_debug_log, "\ntoken:");
-    for (i=0, yyns += start; i < count; i++, yyns++)
-	PerlIO_printf(Perl_debug_log, " %8.8s", *yyns);
+    for (i=0; i < count; i++)
+	PerlIO_printf(Perl_debug_log, " %8.8s", yyns[start+i]);
     PerlIO_printf(Perl_debug_log, "\nvalue:");
-    for (i=0, yyvs += start; i < count; i++, yyvs++)
-	PerlIO_printf(Perl_debug_log, " %8"UVxf, (UV)yyvs->ival);
+    for (i=0; i < count; i++) {
+	if (yy_is_opval[yystos[yyss[start+i]]]) {
+	    PerlIO_printf(Perl_debug_log, " %8.8s",
+		  yyvs[start+i].opval
+		    ? PL_op_name[yyvs[start+i].opval->op_type]
+		    : "NULL"
+	    );
+	}
+	else
+	    PerlIO_printf(Perl_debug_log, " %8"UVxf, (UV)yyvs[start+i].ival);
+    }
     PerlIO_printf(Perl_debug_log, "\n\n");
 }
 
