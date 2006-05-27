@@ -613,6 +613,10 @@ Perl_yyparse (pTHX)
 	    /* Pop the rest of the stack.  */
 	    while (yyss < yyssp) {
 		YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp);
+		if (yy_is_opval[yystos[*yyssp]]) {
+		    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
+		    op_free(yyvsp->opval);
+		}
 		YYPOPSTACK;
 	    }
 	    YYABORT;
@@ -650,6 +654,10 @@ Perl_yyparse (pTHX)
 	    YYABORT;
 
 	YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp);
+	if (yy_is_opval[yystos[*yyssp]]) {
+	    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
+	    op_free(yyvsp->opval);
+	}
 	yyvsp--;
 #ifdef DEBUGGING
 	yynsp--;
