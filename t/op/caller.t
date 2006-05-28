@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 71 );
+    plan( tests => 77 );
 }
 
 my @c;
@@ -266,4 +266,28 @@ EOE
     is(get_hash()->{$k1}, 2, "UTF-8 or not, it's the same");
     is(get_hash()->{$k2}, 2, "UTF-8 or not, it's the same");
     is(get_hash()->{$k3}, 3, "Octect sequences and UTF-8 are distinct");
+}
+
+{
+    my ($k1, $k2, $k3);
+    BEGIN {
+	($k1, $k2, $k3) = ("\0", "\0\0", "\0\0\0");
+	$^H{$k1} = 1;
+	$^H{$k2} = 2;
+	$^H{$k3} = 3;
+    }
+
+    is(get_hash()->{$k1}, 1, "Keys with the same hash value don't clash");
+    is(get_hash()->{$k2}, 2, "Keys with the same hash value don't clash");
+    is(get_hash()->{$k3}, 3, "Keys with the same hash value don't clash");
+
+    BEGIN {
+	$^H{$k1} = "a";
+	$^H{$k2} = "b";
+	$^H{$k3} = "c";
+    }
+
+    is(get_hash()->{$k1}, "a", "Keys with the same hash value don't clash");
+    is(get_hash()->{$k2}, "b", "Keys with the same hash value don't clash");
+    is(get_hash()->{$k3}, "c", "Keys with the same hash value don't clash");
 }

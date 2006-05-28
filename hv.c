@@ -2634,7 +2634,26 @@ Perl_refcounted_he_chain_2hv(pTHX_ const struct refcounted_he *chain)
 
 	for (; entry; entry = HeNEXT(entry)) {
 	    if (HeHASH(entry) == hash) {
-		goto next_please;
+		/* We might have a duplicate key here.  If so, entry is older
+		   than the key we've already put in the hash, so if they are
+		   the same, skip adding entry.  */
+#ifdef USE_ITHREADS
+		const STRLEN klen = HeKLEN(entry);
+		const char *const key = HeKEY(entry);
+		if (klen == chain->refcounted_he_keylen
+		    && (!!HeKUTF8(entry)
+			== !!(chain->refcounted_he_data[0] & HVhek_UTF8))
+		    && memEQ(key, REF_HE_KEY(chain), klen))
+		    goto next_please;
+#else
+		if (HeKEY_hek(entry) == chain->refcounted_he_hek)
+		    goto next_please;
+		if (HeKLEN(entry) == HEK_LEN(chain->refcounted_he_hek)
+		    && HeKUTF8(entry) == HEK_UTF8(chain->refcounted_he_hek)
+		    && memEQ(HeKEY(entry), HEK_KEY(chain->refcounted_he_hek),
+			     HeKLEN(entry)))
+		    goto next_please;
+#endif
 	    }
 	}
 	assert (!entry);
