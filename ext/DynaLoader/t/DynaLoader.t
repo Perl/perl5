@@ -9,7 +9,6 @@ BEGIN {
 
 use strict;
 use Config;
-use Errno qw(ENOENT);
 use Test::More;
 my %modules;
 
@@ -22,7 +21,7 @@ my %modules;
     'Time::HiRes'=> q| ::is( ref Time::HiRes->can('usleep'),'CODE' ) |,  # 5.7.3
 );
 
-plan tests => 28 + keys(%modules) * 2;
+plan tests => 27 + keys(%modules) * 2;
 
 
 # Try to load the module
@@ -65,28 +64,31 @@ like( $@, q{/^Usage: DynaLoader::dl_load_file\(filename, flags=0\)/},
 eval { no warnings 'uninitialized'; DynaLoader::dl_load_file(undef) };
 is( $@, '', "calling DynaLoader::dl_load_file() with undefined argument" );     # is this expected ?
 
-my ($eint,$estr,$eestr,$dlerr);
-eval { DynaLoader::dl_load_file("egg_bacon_sausage_and_spam") };
-$eint = 0+$!; $estr = "\Q$!\E";
-$estr .= "|\Q$^E\E" if $^E ne $!;
-$estr = "/$estr/";
+my ($dlhandle, $dlerr);
+eval { $dlhandle = DynaLoader::dl_load_file("egg_bacon_sausage_and_spam") };
 $dlerr = DynaLoader::dl_error();
-SKIP: {
-    is( $@, '', "calling DynaLoader::dl_load_file() with a package without binary object" )
-        or skip "Errvalue irrelevent after eval failure (this should not happen)", 2;
-    is( $eint, ENOENT, "checking errno value" );
-    like( $dlerr, $estr, "checking error message returned by dl_error()" );
-}
+ok( !$dlhandle, "calling DynaLoader::dl_load_file() without an existing library should fail" );
+ok( defined $dlerr, "dl_error() returning an error message: '$dlerr'" );
 
+# Checking for any particular error messages or numeric codes
+# is very unportable, please do not try to do that.  A failing
+# dl_load_file() is not even guaranteed to set the $! or the $^E.
 
 # ... dl_findfile()
 SKIP: {
     my @files = ();
     eval { @files = DynaLoader::dl_findfile("c") };
     is( $@, '', "calling dl_findfile()" );
-    skip "dl_findfile test not appropriate on Win32", 1
-	if $^O =~ /win32/i;
-    cmp_ok( scalar @files, '>=', 1, " - array should contain one result result or more: libc => (@files)" );
+    # Some platforms are known to not have a "libc"
+    # (not at least by that name) that the dl_findfile()
+    # could find.
+    skip "dl_findfile test not appropriate on $^O", 1
+	if $^O =~ /(win32|vms)/i;
+    # Play safe and only try this test if this system
+    # looks pretty much Unix-like.
+    skip "dl_findfile test not appropriate on $^O", 1
+	unless -d '/usr' && -f '/bin/ls';
+    cmp_ok( scalar @files, '>=', 1, "array should contain one result result or more: libc => (@files)" );
 }
 
 # Now try to load well known XS modules
