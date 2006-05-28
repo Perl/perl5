@@ -958,8 +958,8 @@ x(?#	x	c	-	Sequence (?#... not terminated
 (foo|fool|x.|money|parted)$	fools	n	-	-
 (x.|foo|fool|x.|money|parted|y.)$	fools	n	-	-
 (foo|fool|money|parted)$	fools	n	-	-
-(a|aa|aaa|aaaa|aaaaa|aaaaaa)(b|c)	aaaaaaaaaaaaaaab	y	$1$2	aaaaaab
-(a|aa|aaa|aaaa|aaaaa|aaaaaa)(??{$1&&""})(b|c)	aaaaaaaaaaaaaaab	y	$1$2	aaaaaab
+(a|aa|aaa||aaaa|aaaaa|aaaaaa)(b|c)	aaaaaaaaaaaaaaab	y	$1$2	aaaaaab
+(a|aa|aaa||aaaa|aaaaa|aaaaaa)(??{$1&&""})(b|c)	aaaaaaaaaaaaaaab	y	$1$2	aaaaaab
 (a|aa|aaa|aaaa|aaaaa|aaaaaa)(??{$1&&"foo"})(b|c)	aaaaaaaaaaaaaaab	n	-	-
 ^(a*?)(?!(aa|aaaa)*$)	aaaaaaaaaaaaaaaaaaaa	y	$1	a	# [perl #34195]
 ^(a*?)(?!(aa|aaaa)*$)(?=a\z)	aaaaaaaa	y	$1	aaaaaaa
@@ -969,3 +969,5 @@ x(?#	x	c	-	Sequence (?#... not terminated
 ^(a*?)(?!(a{6}|a{5})*$)	aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa	y	$+[1]	12	# super-linear cache bug may return 18
 ^((?>(?:aa)?b)?)	aab	y	$1	aab
 ^((?:aa)*)(?:X+((?:\d+|-)(?:X+(.+))?))?$	aaaaX5	y	$1	aaaa
+X(A|B||C|D)Y	XXXYYY	y	$&	XY	# Trie w/ NOTHING
+(?i:X([A]|[B]|y[Y]y|[D]|)Y)	XXXYYYB	y	$&	XY	# Trie w/ NOTHING

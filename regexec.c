@@ -99,16 +99,16 @@
 #define CHR_SVLEN(sv) (do_utf8 ? sv_len_utf8(sv) : SvCUR(sv))
 #define CHR_DIST(a,b) (PL_reg_match_utf8 ? utf8_distance(a,b) : a - b)
 
-#define HOPc(pos,off) ((char *)(PL_reg_match_utf8 \
+#define HOPc(pos,off) \
+	(char *)(PL_reg_match_utf8 \
 	    ? reghop3((U8*)pos, off, (U8*)(off >= 0 ? PL_regeol : PL_bostr)) \
-	    : (U8*)(pos + off)))
-#define HOPBACKc(pos, off) ((char*)	\
-    ((PL_reg_match_utf8)		\
+	    : (U8*)(pos + off))
+#define HOPBACKc(pos, off) \
+	(char*)(PL_reg_match_utf8\
 	? reghopmaybe3((U8*)pos, -off, (U8*)PL_bostr) \
     : (pos - off >= PL_bostr)		\
-	? (U8*)(pos - off)		\
-    : (U8*)NULL)			\
-)
+		? pos - off		\
+		: NULL)
 
 #define HOP3(pos,off,lim) (PL_reg_match_utf8 ? reghop3((U8*)pos, off, (U8*)lim) : (U8*)(pos + off))
 #define HOP3c(pos,off,lim) ((char*)HOP3(pos,off,lim))
@@ -120,16 +120,18 @@
 #define LOAD_UTF8_CHARCLASS_SPACE() LOAD_UTF8_CHARCLASS(space," ")
 #define LOAD_UTF8_CHARCLASS_MARK()  LOAD_UTF8_CHARCLASS(mark, "\xcd\x86")
 
+/* TODO: Combine JUMPABLE and HAS_TEXT to cache OP(rn) */
+
 /* for use after a quantifier and before an EXACT-like node -- japhy */
 #define JUMPABLE(rn) ( \
     OP(rn) == OPEN || OP(rn) == CLOSE || OP(rn) == EVAL || \
     OP(rn) == SUSPEND || OP(rn) == IFMATCH || \
     OP(rn) == PLUS || OP(rn) == MINMOD || \
-    (PL_regkind[(U8)OP(rn)] == CURLY && ARG1(rn) > 0) \
+    (PL_regkind[OP(rn)] == CURLY && ARG1(rn) > 0) \
 )
 
 #define HAS_TEXT(rn) ( \
-    PL_regkind[(U8)OP(rn)] == EXACT || PL_regkind[(U8)OP(rn)] == REF \
+    PL_regkind[OP(rn)] == EXACT || PL_regkind[OP(rn)] == REF \
 )
 
 /*
@@ -137,14 +139,16 @@
   follow but for lookbehind (rn->flags != 0) we skip to the next step.
 */
 #define FIND_NEXT_IMPT(rn) STMT_START { \
-    while (JUMPABLE(rn)) \
-	if (OP(rn) == SUSPEND || PL_regkind[(U8)OP(rn)] == CURLY) \
+    while (JUMPABLE(rn)) { \
+	const OPCODE type = OP(rn); \
+	if (type == SUSPEND || PL_regkind[type] == CURLY) \
 	    rn = NEXTOPER(NEXTOPER(rn)); \
-	else if (OP(rn) == PLUS) \
+	else if (type == PLUS) \
 	    rn = NEXTOPER(rn); \
-	else if (OP(rn) == IFMATCH) \
+	else if (type == IFMATCH) \
 	    rn = (rn->flags == 0) ? NEXTOPER(NEXTOPER(rn)) : rn + ARG(rn); \
 	else rn += NEXT_OFF(rn); \
+    } \
 } STMT_END 
 
 static void restore_pos(pTHX_ void *arg);
@@ -811,7 +815,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	/* If regstclass takes bytelength more than 1: If charlength==1, OK.
 	   This leaves EXACTF only, which is dealt with in find_byclass().  */
         const U8* const str = (U8*)STRING(prog->regstclass);
-        const int cl_l = (PL_regkind[(U8)OP(prog->regstclass)] == EXACT
+        const int cl_l = (PL_regkind[OP(prog->regstclass)] == EXACT
 		    ? CHR_DIST(str+STR_LEN(prog->regstclass), str)
 		    : 1);
 	const char * const endpos = (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
@@ -1045,8 +1049,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char
 					   uniflags);
 			if ( c == c1
 			     && (ln == len ||
-				 ibcmp_utf8(s, (char **)0, 0,  do_utf8,
-					    m, (char **)0, ln, (bool)UTF))
+				 ibcmp_utf8(s, NULL, 0,  do_utf8,
+					    m, NULL, ln, (bool)UTF))
 			     && (!reginfo || regtry(reginfo, s)) )
 			    goto got_it;
 			else {
@@ -1057,9 +1061,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char
 				  && (f == c1 || f == c2)
 				  && (ln == foldlen ||
 				      !ibcmp_utf8((char *) foldbuf,
-						  (char **)0, foldlen, do_utf8,
+						  NULL, foldlen, do_utf8,
 						  m,
-						  (char **)0, ln, (bool)UTF))
+						  NULL, ln, (bool)UTF))
 				  && (!reginfo || regtry(reginfo, s)) )
 				  goto got_it;
 			}
@@ -1084,8 +1088,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char
 
 			if ( (c == c1 || c == c2)
 			     && (ln == len ||
-				 ibcmp_utf8(s, (char **)0, 0,  do_utf8,
-					    m, (char **)0, ln, (bool)UTF))
+				 ibcmp_utf8(s, NULL, 0,  do_utf8,
+					    m, NULL, ln, (bool)UTF))
 			     && (!reginfo || regtry(reginfo, s)) )
 			    goto got_it;
 			else {
@@ -1096,9 +1100,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char
 				  && (f == c1 || f == c2)
 				  && (ln == foldlen ||
 				      !ibcmp_utf8((char *) foldbuf,
-						  (char **)0, foldlen, do_utf8,
+						  NULL, foldlen, do_utf8,
 						  m,
-						  (char **)0, ln, (bool)UTF))
+						  NULL, ln, (bool)UTF))
 				  && (!reginfo || regtry(reginfo, s)) )
 				  goto got_it;
 			}
@@ -1589,7 +1593,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     I32 end_shift = 0;			/* Same for the end. */		/* CC */
     I32 scream_pos = -1;		/* Internal iterator of scream. */
     char *scream_olds = NULL;
-    SV* oreplsv = GvSV(PL_replgv);
+    SV* const oreplsv = GvSV(PL_replgv);
     const bool do_utf8 = DO_UTF8(sv);
     I32 multiline;
 #ifdef DEBUGGING
@@ -1889,7 +1893,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
     else if ((c = prog->regstclass)) {
 	if (minlen) {
-	    I32 op = (U8)OP(prog->regstclass);
+	    I32 op = OP(prog->regstclass);
 	    /* don't bother with what can't match */
 	    if (PL_regkind[op] != EXACT && op != CANY)
 	        strend = HOPc(strend, -(minlen - 1));
@@ -2090,7 +2094,7 @@ S_regtry(pTHX_ const regmatch_info *reginfo, char *startpos)
 		if (SvIsCOW(sv))
 		    sv_force_normal_flags(sv, 0);
 #endif
-		mg = sv_magicext(reginfo->sv, (SV*)0, PERL_MAGIC_regex_global,
+		mg = sv_magicext(reginfo->sv, NULL, PERL_MAGIC_regex_global,
 				 &PL_vtbl_mglob, NULL, 0);
 		mg->mg_len = -1;
 	    }
@@ -2458,6 +2462,7 @@ S_push_slab(pTHX)
  * allocated since entry are freed.
  */
  
+#define REG_NODE_NUM(x) ((x) ? (int)((x)-prog) : -1)
 
 STATIC I32			/* 0 failure, 1 success */
 S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
@@ -2671,15 +2676,40 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	/*
 	   traverse the TRIE keeping track of all accepting states
 	   we transition through until we get to a failing node.
-
-
 	*/
 	case TRIE:
-	case TRIEF:
-	case TRIEFL:
+	    {
+	        const enum { trie_plain, trie_utf8, trie_utf8_fold }
+		    trie_type = do_utf8 ?
+			  (scan->flags == EXACT ? trie_utf8 : trie_utf8_fold)
+			: trie_plain;
+
+                /* what trie are we using right now */
+        	reg_trie_data *trie
+        	    = (reg_trie_data*)rex->data->data[ ARG( scan ) ];
+                U32 state = trie->startstate;
+                
+        	if (trie->bitmap && trie_type != trie_utf8_fold &&
+        	    !TRIE_BITMAP_TEST(trie,*locinput)
+        	) {
+        	    if (trie->states[ state ].wordnum) {
+        	         DEBUG_EXECUTE_r(
+                            PerlIO_printf(Perl_debug_log,
+                        	          "%*s  %smatched empty string...%s\n",
+                        	          REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4], PL_colors[5])
+                        );
+        	        break;
+        	    } else {
+        	        DEBUG_EXECUTE_r(
+                            PerlIO_printf(Perl_debug_log,
+                        	          "%*s  %sfailed to match start class...%s\n",
+                        	          REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4], PL_colors[5])
+                        );
+        	        sayNO_SILENT;
+        	   }
+                }
 	    {
 		U8 *uc = ( U8* )locinput;
-		U32 state = 1;
 		U16 charid = 0;
 		U32 base = 0;
 		UV uvc = 0;
@@ -2688,14 +2718,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		U8 *uscan = (U8*)NULL;
 		STRLEN bufflen=0;
 		SV *sv_accept_buff = NULL;
-		const enum { trie_plain, trie_utf8, trie_uft8_fold }
-		    trie_type = do_utf8 ?
-			  (OP(scan) == TRIE ? trie_utf8 : trie_uft8_fold)
-			: trie_plain;
 
-		/* what trie are we using right now */
-		reg_trie_data *trie
-		    = (reg_trie_data*)rex->data->data[ ARG( scan ) ];
 	    	st->u.trie.accepted = 0; /* how many accepting states we have seen */
 		result = 0;
 
@@ -2741,7 +2764,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
 		    if ( base ) {
 			switch (trie_type) {
-			case trie_uft8_fold:
+			case trie_utf8_fold:
 			    if ( foldlen>0 ) {
 				uvc = utf8n_to_uvuni( uscan, UTF8_MAXLEN, &len, uniflags );
 				foldlen -= len;
@@ -2770,8 +2793,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 			else {
 			    charid = 0;
 			    if (trie->widecharmap) {
-				SV** svpp = (SV**)NULL;
-				svpp = hv_fetch(trie->widecharmap,
+				SV** const svpp = hv_fetch(trie->widecharmap,
 					    (char*)&uvc, sizeof(UV), 0);
 				if (svpp)
 				    charid = (U16)SvIV(*svpp);
@@ -2862,10 +2884,10 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 			    reg_trie_data * const trie = (reg_trie_data*)
 					    rex->data->data[ARG(scan)];
 			    SV ** const tmp = av_fetch( trie->words, st->u.trie.accept_buff[ best ].wordnum - 1, 0 );
-    			    PerlIO_printf( Perl_debug_log, "%*s  %strying alternation #%d <%s> at 0x%p%s\n",
+    			    PerlIO_printf( Perl_debug_log, "%*s  %strying alternation #%d <%s> at node #%d %s\n",
     			        REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
     			        st->u.trie.accept_buff[best].wordnum,
-        		        tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr", (void*)scan,
+        		        tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr", REG_NODE_NUM(scan),
         		        PL_colors[5] );
 			});
 			if ( best<st->u.trie.accepted ) {
@@ -2895,7 +2917,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		} else {
 		    sayNO;
 		}
-	    }
+	    }}
 	    /* unreached codepoint */
 	case EXACT: {
 	    char *s = STRING(scan);
@@ -3914,9 +3936,10 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    st->u.curlym.c1 = st->u.curlym.c2 = CHRTEST_VOID;
 	    if (HAS_TEXT(next) || JUMPABLE(next)) {
 		regnode *text_node = next;
-		if (! HAS_TEXT(text_node)) FIND_NEXT_IMPT(text_node);
+		if (! HAS_TEXT(text_node)) 
+		    FIND_NEXT_IMPT(text_node);
 		if (HAS_TEXT(text_node)
-		    && PL_regkind[(U8)OP(text_node)] != REF)
+		    && PL_regkind[OP(text_node)] != REF)
 		{
 		    st->u.curlym.c1 = (U8)*STRING(text_node);
 		    st->u.curlym.c2 =
@@ -4037,12 +4060,13 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		U8 *s;
 		regnode *text_node = next;
 
-		if (! HAS_TEXT(text_node)) FIND_NEXT_IMPT(text_node);
+		if (! HAS_TEXT(text_node)) 
+		    FIND_NEXT_IMPT(text_node);
 
 		if (! HAS_TEXT(text_node))
 		    st->u.plus.c1 = st->u.plus.c2 = CHRTEST_VOID;
 		else {
-		    if (PL_regkind[(U8)OP(text_node)] == REF) {
+		    if (PL_regkind[OP(text_node)] == REF) {
 			st->u.plus.c1 = st->u.plus.c2 = CHRTEST_VOID;
 			goto assume_ok_easy;
 		    }
@@ -4209,9 +4233,8 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    else {
 		n = regrepeat(rex, scan, n);
 		locinput = PL_reginput;
-		if (st->ln < n && PL_regkind[(U8)OP(next)] == EOL &&
-		    (OP(next) != MEOL ||
-			OP(next) == SEOL || OP(next) == EOS))
+		if ((st->ln < n) && (PL_regkind[OP(next)] == EOL) &&
+		    (OP(next) != MEOL || OP(next) == SEOL || OP(next) == EOS))
 		{
 		    st->ln = n;			/* why back off? */
 		    /* ...because $ and \Z can match before *and* after
@@ -4286,7 +4309,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    /* trivial fail */
 		    if (st->logical) {
 			st->logical = 0;
-			st->sw = 1 - st->u.ifmatch.wanted;
+			st->sw = 1 - (bool)st->u.ifmatch.wanted;
 		    }
 		    else if (st->u.ifmatch.wanted)
 			sayNO;
@@ -4421,7 +4444,7 @@ yes_final:
 	case resume_IFMATCH:
 	    if (st->logical) {
 		st->logical = 0;
-		st->sw = st->u.ifmatch.wanted;
+		st->sw = (bool)st->u.ifmatch.wanted;
 	    }
 	    else if (!st->u.ifmatch.wanted)
 		sayNO;
@@ -4932,7 +4955,7 @@ Perl_regclass_swash(pTHX_ const regexp *prog, register const regnode* node, bool
     SV *sw  = NULL;
     SV *si  = NULL;
     SV *alt = NULL;
-    const struct reg_data *data = prog ? prog->data : NULL;
+    const struct reg_data * const data = prog ? prog->data : NULL;
 
     if (data && data->count) {
 	const U32 n = ARG(node);
@@ -5138,7 +5161,7 @@ S_reghopmaybe3(U8* s, I32 off, const U8* lim)
 	    s += UTF8SKIP(s);
 	}
 	if (off >= 0)
-	    return 0;
+	    return NULL;
     }
     else {
 	while (off++) {
@@ -5154,7 +5177,7 @@ S_reghopmaybe3(U8* s, I32 off, const U8* lim)
 		break;
 	}
 	if (off <= 0)
-	    return 0;
+	    return NULL;
     }
     return s;
 }

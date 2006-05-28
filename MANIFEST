@@ -1008,6 +1008,8 @@ ext/re/re.pm			re extension Perl module
 ext/re/re_top.h			re extension symbol hiding header
 ext/re/re.xs			re extension external subroutines
 ext/re/t/re.t			see if re pragma works
+ext/re/t/regop.pl		generate debug output for various patterns
+ext/re/t/regop.t		test RE optimizations by scraping debug output
 ext/Safe/t/safe1.t		See if Safe works
 ext/Safe/t/safe2.t		See if Safe works
 ext/Safe/t/safe3.t		See if Safe works

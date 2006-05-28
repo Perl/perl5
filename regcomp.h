@@ -311,11 +311,11 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 
 #define EXTRA_SIZE(guy) ((sizeof(guy)-1)/sizeof(struct regnode))
 
-#define REG_SEEN_ZERO_LEN	 1
-#define REG_SEEN_LOOKBEHIND	 2
-#define REG_SEEN_GPOS		 4
-#define REG_SEEN_EVAL		 8
-#define REG_SEEN_CANY		16
+#define REG_SEEN_ZERO_LEN	0x00000001
+#define REG_SEEN_LOOKBEHIND	0x00000002
+#define REG_SEEN_GPOS		0x00000004
+#define REG_SEEN_EVAL		0x00000008
+#define REG_SEEN_CANY		0x00000010
 #define REG_SEEN_SANY		REG_SEEN_CANY /* src bckwrd cmpt */
 
 START_EXTERN_C
@@ -362,7 +362,7 @@ typedef struct re_scream_pos_data_s
  *   f - start-class data for regstclass optimization
  *   n - Root of op tree for (?{EVAL}) item
  *   o - Start op for (?{EVAL}) item
- *   p - Pad for (?{EVAL} item
+ *   p - Pad for (?{EVAL}) item
  *   s - swash for unicode-style character class, and the multicharacter
  *       strings resulting from casefolding the single-character entries
  *       in the character class
@@ -445,28 +445,53 @@ typedef struct _reg_trie_trans    reg_trie_trans;
 should be dealt with in pregfree */
 struct _reg_trie_data {
     U16              uniquecharcount;
-    U16              wordcount;
-    STRLEN           charcount;
-    U32              laststate;
     U32              lasttrans;
     U16              *charmap;
     HV               *widecharmap;
     reg_trie_state   *states;
     reg_trie_trans   *trans;
+    char             *bitmap;
     U32              refcount;
+    U32              startstate;
+    STRLEN           minlen;     
+    STRLEN           maxlen;     
 #ifdef DEBUGGING
+    U16              wordcount;   /* Build only */
+    STRLEN           charcount;   /* Build only */
+    U32              laststate;   /* Build only */
     AV               *words;
     AV               *revcharmap;
 #endif
 };
-
 typedef struct _reg_trie_data reg_trie_data;
+
+/* ANY_BIT doesnt use the structure, so we can borrow it here.
+   This is simpler than refactoring all of it as wed end up with
+   three different sets... */
+
+#define TRIE_BITMAP(p)		(((reg_trie_data *)(p))->bitmap)
+#define TRIE_BITMAP_BYTE(p, c)	(TRIE_BITMAP(p)[((c) >> 3) & 31])
+#define TRIE_BITMAP_SET(p, c)	(TRIE_BITMAP_BYTE(p, c) |=  ANYOF_BIT(c))
+#define TRIE_BITMAP_CLEAR(p,c)	(TRIE_BITMAP_BYTE(p, c) &= ~ANYOF_BIT(c))
+#define TRIE_BITMAP_TEST(p, c)	(TRIE_BITMAP_BYTE(p, c) &   ANYOF_BIT(c))
+
 
 /* these defines assume uniquecharcount is the correct variable, and state may be evaluated twice */
 #define TRIE_NODENUM(state) (((state)-1)/(trie->uniquecharcount)+1)
 #define SAFE_TRIE_NODENUM(state) ((state) ? (((state)-1)/(trie->uniquecharcount)+1) : (state))
 #define TRIE_NODEIDX(state) ((state) ? (((state)-1)*(trie->uniquecharcount)+1) : (state))
 
+#ifdef DEBUGGING
+#define TRIE_WORDCOUNT(trie) ((trie)->wordcount)
+#define TRIE_CHARCOUNT(trie) ((trie)->charcount)
+#define TRIE_LASTSTATE(trie) ((trie)->laststate)
+#define TRIE_REVCHARMAP(trie) ((trie)->revcharmap)
+#else
+#define TRIE_WORDCOUNT(trie) (trie_wordcount)
+#define TRIE_CHARCOUNT(trie) (trie_charcount)
+#define TRIE_LASTSTATE(trie) (trie_laststate)
+#define TRIE_REVCHARMAP(trie) (trie_revcharmap)
+#endif
 #define DO_TRIE 1
 #define TRIE_DEBUG 1
 
@@ -475,14 +500,17 @@ typedef struct _reg_trie_data reg_trie_data;
 #define RE_DEBUG_FLAGS "\022E_DEBUG_FLAGS"
 
 /* If you change these be sure to update ext/re/re.pm as well */
-#define RE_DEBUG_COMPILE       1
-#define RE_DEBUG_EXECUTE       2
-#define RE_DEBUG_TRIE_COMPILE  4
-#define RE_DEBUG_TRIE_EXECUTE  8
-#define RE_DEBUG_TRIE_MORE    16
-#define RE_DEBUG_OPTIMISE     32
-#define RE_DEBUG_OFFSETS      64
+#define RE_DEBUG_COMPILE       0x0001
+#define RE_DEBUG_EXECUTE       0x0002
+#define RE_DEBUG_TRIE_COMPILE  0x0004
+#define RE_DEBUG_TRIE_EXECUTE  0x0008
+#define RE_DEBUG_TRIE_MORE     0x0010
+#define RE_DEBUG_OPTIMISE      0x0020
+#define RE_DEBUG_OFFSETS       0x0040
+#define RE_DEBUG_PARSE         0x0080
 
+
+#define DEBUG_PARSE_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_PARSE) x  )
 #define DEBUG_OPTIMISE_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_OPTIMISE) x  )
 #define DEBUG_EXECUTE_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_EXECUTE) x  )
 #define DEBUG_COMPILE_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE) x  )
@@ -507,7 +535,7 @@ typedef struct _reg_trie_data reg_trie_data;
 #define GET_RE_DEBUG_FLAGS DEBUG_r( \
         re_debug_flags=get_sv(RE_DEBUG_FLAGS, 1); \
         if (!SvIOK(re_debug_flags)) { \
-            sv_setiv(re_debug_flags, RE_DEBUG_COMPILE | RE_DEBUG_EXECUTE | RE_DEBUG_OFFSETS); \
+            sv_setiv(re_debug_flags, RE_DEBUG_COMPILE | RE_DEBUG_EXECUTE ); \
         } \
     )
 

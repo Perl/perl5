@@ -83,13 +83,15 @@ statements and saying C<< use re Debug => 'EXECUTE' >> will turn it on. Note
 that these flags can be set directly via ${^RE_DEBUG_FLAGS} by using the
 following flag values:
 
-    RE_DEBUG_COMPILE       1
-    RE_DEBUG_EXECUTE       2
-    RE_DEBUG_TRIE_COMPILE  4
-    RE_DEBUG_TRIE_EXECUTE  8
-    RE_DEBUG_TRIE_MORE    16
-    RE_DEBUG_OPTIMISE     32
-    RE_DEBUG_OFFSETS      64
+
+    RE_DEBUG_COMPILE       0x01
+    RE_DEBUG_EXECUTE       0x02
+    RE_DEBUG_TRIE_COMPILE  0x04
+    RE_DEBUG_TRIE_EXECUTE  0x08
+    RE_DEBUG_TRIE_MORE     0x10
+    RE_DEBUG_OPTIMISE      0x20
+    RE_DEBUG_OFFSETS       0x40
+    RE_DEBUG_PARSE         0x80
 
 The directive C<use re 'debug'> and its equivalents are I<not> lexically
 scoped, as the other directives are.  They have both compile-time and run-time
@@ -129,7 +131,8 @@ my %flags = (
     OPTIMISE     => 32,
     OPTIMIZE     => 32, # alias
     OFFSETS      => 64,
-    ALL          => 127,
+    PARSE        => 128,
+    ALL          => 255,
     All          => 15,
     More         => 31,
 );
@@ -159,6 +162,8 @@ sub bits {
                 if ($flags{$_[$idx]}) {
                     if ($on) {
                         ${^RE_DEBUG_FLAGS} |= $flags{$_[$idx]};
+                        ${^RE_DEBUG_FLAGS} |= 1
+                                if $flags{$_[$idx]}>2;
                     } else {
                         ${^RE_DEBUG_FLAGS} &= ~ $flags{$_[$idx]};
                     }
