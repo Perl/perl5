@@ -5,6 +5,10 @@
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib);
+    if ($ENV{PERL_CORE_MINITEST}) {
+        print "1..0 # Skip: no dynamic loading on miniperl\n";
+        exit 0;
+    }
     unless (find PerlIO::Layer 'perlio') {
 	print "1..0 # Skip: not perlio\n";
 	exit 0;
@@ -68,11 +72,24 @@ do [$fh, sub {s/$_[1]/pass/; return;}, 'fail'] or die;
 
 print "# 2 tests with pipes from subprocesses.\n";
 
-open $fh, 'echo pass|' or die $!;
+my ($echo_command, $pass_arg, $fail_arg);
+
+if ($^O eq 'VMS') {
+    $echo_command = 'write sys$output';
+    $pass_arg = '"pass"';
+    $fail_arg = '"fail"';
+}
+else {
+    $echo_command = 'echo';
+    $pass_arg = 'pass';
+    $fail_arg = 'fail';
+}
+
+open $fh, "$echo_command $pass_arg|" or die $!;
 
 do $fh or die;
 
-open $fh, 'echo fail|' or die $!;
+open $fh, "$echo_command $fail_arg|" or die $!;
 
 do [$fh, sub {s/$_[1]/pass/; return;}, 'fail'] or die;
 
