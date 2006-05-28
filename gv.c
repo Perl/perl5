@@ -1313,7 +1313,7 @@ Perl_newIO(pTHX)
 }
 
 void
-Perl_gv_check(pTHX_ HV *stash)
+Perl_gv_check(pTHX_ const HV *stash)
 {
     dVAR;
     register I32 i;

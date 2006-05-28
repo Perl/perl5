@@ -1662,7 +1662,7 @@ Perl_magic_nextpack(pTHX_ SV *sv, MAGIC *mg, SV *key)
 }
 
 int
-Perl_magic_existspack(pTHX_ SV *sv, MAGIC *mg)
+Perl_magic_existspack(pTHX_ SV *sv, const MAGIC *mg)
 {
     return magic_methpack(sv,mg,"EXISTS");
 }
