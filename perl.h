@@ -2198,6 +2198,7 @@ int isnan(double d);
 #endif
 
 struct RExC_state_t;
+struct _reg_trie_data;
 
 typedef MEM_SIZE STRLEN;
 

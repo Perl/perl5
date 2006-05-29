@@ -1022,12 +1022,12 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     SV *re_trie_maxbuff;
 #ifndef DEBUGGING
     /* these are only used during construction but are useful during
-    debugging so we store them in the struct when debugging.
-    Wordcount is actually superfluous in debugging as we have
-    (AV*)trie->words to use for it, but thats not available when
-    not debugging... We could make the macro use the AV during
-    debugging tho...
-    */
+     * debugging so we store them in the struct when debugging.
+     * Wordcount is actually superfluous in debugging as we have
+     * (AV*)trie->words to use for it, but that's not available when
+     * not debugging... We could make the macro use the AV during
+     * debugging though...
+     */
     U16 trie_wordcount=0;
     STRLEN trie_charcount=0;
     U32 trie_laststate=0;
@@ -1563,61 +1563,63 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         if ( trie->bitmap && !trie->widecharmap  ) {
             U32 state;
             DEBUG_OPTIMISE_r(
-                PerlIO_printf( Perl_debug_log,"%*sLaststate:%d\n", 
-                    (int)depth * 2 + 2,"",
-                    TRIE_LASTSTATE(trie)));
-            for( state= 1 ; state < TRIE_LASTSTATE(trie)-1 ; state++ ) {
+                PerlIO_printf(Perl_debug_log, "%*sLaststate:%"UVuf"\n",
+                    (int)depth * 2 + 2, "",
+                    TRIE_LASTSTATE(trie))
+	    );
+            for ( state = 1 ; state < TRIE_LASTSTATE(trie)-1 ; state++ ) {
                 U32 ofs = 0;
-                I32 idx= -1;
-                U32 count= 0;
-                const U32 base= trie->states[ state ].trans.base;
+                I32 idx = -1;
+                U32 count = 0;
+                const U32 base = trie->states[ state ].trans.base;
 
                 if ( trie->states[state].wordnum )
-                        count =1;
+                        count = 1;
 
-                for ( ofs= 0 ; ofs < trie->uniquecharcount ; ofs++ ) 
-                {
-
+                for ( ofs = 0 ; ofs < trie->uniquecharcount ; ofs++ ) {
                     if ( ( base + ofs >= trie->uniquecharcount ) &&
                          ( base + ofs - trie->uniquecharcount < trie->lasttrans ) &&
                          trie->trans[ base + ofs - trie->uniquecharcount ].check == state )
                     {
                         if ( ++count > 1 ) {
-                            SV **tmp= av_fetch( TRIE_REVCHARMAP(trie), ofs, 0);
-                            const char *ch= SvPV_nolen_const( *tmp );
-                            if (state==1) break;
+                            SV **tmp = av_fetch( TRIE_REVCHARMAP(trie), ofs, 0);
+                            const char *ch = SvPV_nolen_const( *tmp );
+                            if ( state == 1 ) break;
                             if ( count == 2 ) {
                                 Zero(trie->bitmap, ANYOF_BITMAP_SIZE, char);
                                 DEBUG_OPTIMISE_r(
-                                    PerlIO_printf( Perl_debug_log,"%*sNew Start State=%d Class: [", 
-                                        (int)depth * 2 + 2,"",
+                                    PerlIO_printf(Perl_debug_log,
+					"%*sNew Start State=%"UVuf" Class: [",
+                                        (int)depth * 2 + 2, "",
                                         state));
                                 if (idx>-1) {
-                                    SV **tmp= av_fetch( TRIE_REVCHARMAP(trie), idx, 0);
-                                    const char *ch= SvPV_nolen_const( *tmp );    
-                                
+                                    SV **tmp = av_fetch( TRIE_REVCHARMAP(trie), idx, 0);
+                                    const char *ch = SvPV_nolen_const( *tmp );
+
                                     TRIE_BITMAP_SET(trie,*ch);
-                                    if ( folder ) 
-                                        TRIE_BITMAP_SET(trie,folder[ *ch ]); 
+                                    if ( folder )
+                                        TRIE_BITMAP_SET(trie, folder[ *ch ]);
                                     DEBUG_OPTIMISE_r(
-                                        PerlIO_printf( Perl_debug_log,"%s", ch)
+                                        PerlIO_printf(Perl_debug_log, ch)
                                     );
-                    }
-                }
-                            TRIE_BITMAP_SET(trie,*ch);
-                            if ( folder ) TRIE_BITMAP_SET(trie,folder[ *ch ]); 
-                            DEBUG_OPTIMISE_r(PerlIO_printf( Perl_debug_log,"%s", ch));
-            }
-                        idx= ofs;
-        }
+				}
+			    }
+			    TRIE_BITMAP_SET(trie,*ch);
+			    if ( folder )
+				TRIE_BITMAP_SET(trie,folder[ *ch ]);
+			    DEBUG_OPTIMISE_r(PerlIO_printf( Perl_debug_log,"%s", ch));
+			}
+                        idx = ofs;
+		    }
                 }
                 if ( count == 1 ) {
                     SV **tmp = av_fetch( TRIE_REVCHARMAP(trie), idx, 0);
-                    const char *ch= SvPV_nolen_const( *tmp );
+                    const char *ch = SvPV_nolen_const( *tmp );
                     DEBUG_OPTIMISE_r(
-                        PerlIO_printf( Perl_debug_log,"%*sPrefix State: %d Idx:%d Char='%s'\n",
-                            (int)depth * 2 + 2,"",
-                            state,  idx, ch)
+                        PerlIO_printf( Perl_debug_log,
+			    "%*sPrefix State: %"UVuf" Idx:%"UVuf" Char='%s'\n",
+                            (int)depth * 2 + 2, "",
+                            state, idx, ch)
                     );
                     if ( state==1 ) {
                         OP( convert ) = nodetype;
@@ -1627,29 +1629,29 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                     *str++=*ch;
                     STR_LEN(convert)++;
 
-        } else {
-                    if (state>1)
-                        DEBUG_OPTIMISE_r(PerlIO_printf( Perl_debug_log,"]\n"));
-                    break;
-        }
-            }    
+		} else {
+		    if (state>1)
+			DEBUG_OPTIMISE_r(PerlIO_printf( Perl_debug_log,"]\n"));
+		    break;
+		}
+	    }
             if (str) {
-                regnode *n= convert+NODE_SZ_STR(convert);
+                regnode *n = convert+NODE_SZ_STR(convert);
                 NEXT_OFF(convert)= NODE_SZ_STR(convert);
-                trie->startstate= state;
+                trie->startstate = state;
                 trie->minlen-= (state-1);
                 trie->maxlen-= (state-1);
-                if (trie->maxlen) 
-                    convert= n;
-                else {
+                if (trie->maxlen) {
+                    convert = n;
+		} else {
                     NEXT_OFF(convert) = (U16)(tail - convert);
                 }
             }
         }
         if ( trie->maxlen ) {
             OP( convert ) = TRIE;
-        NEXT_OFF( convert ) = (U16)(tail - convert);
-        ARG_SET( convert, data_slot );
+	    NEXT_OFF( convert ) = (U16)(tail - convert);
+	    ARG_SET( convert, data_slot );
 
             /* store the type in the flags */
             convert->flags = nodetype;
@@ -1709,11 +1711,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 
     GET_RE_DEBUG_FLAGS_DECL;
 
-PEEP:
     while (scan && OP(scan) != END && scan < last) {
-        #ifdef DEBUGGING
+#ifdef DEBUGGING
             int merged=0;
-        #endif
+#endif
 	/* Peephole optimizer: */
 	DEBUG_OPTIMISE_r({
 	  SV * const mysv=sv_newmortal();
@@ -3422,7 +3423,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     else                                                        \
        PerlIO_printf(Perl_debug_log,"%4s","");                  \
     PerlIO_printf(Perl_debug_log,"%*s%-4s",                     \
-        10+(depth*2),"",                                        \
+        (int)(10+(depth*2)), "",                                \
         (funcname)                                              \
     );                                                          \
     RExC_lastnum=num;                                           \
@@ -3953,7 +3954,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     register char *next;
     I32 flags;
     const char * const origparse = RExC_parse;
-    char *maxpos;
     I32 min;
     I32 max = REG_INFTY;
     char *parse_start;
@@ -6567,11 +6567,11 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	    l--;	
 	next = regnext((regnode *)node);
 	/* Where, what. */
-	if ( OP(node) == OPTIMIZED) {
+	if (OP(node) == OPTIMIZED) {
 	    if (!optstart && (SvIV(re_debug_flags) & RE_DEBUG_OPTIMISE))
-	        optstart= node;
+	        optstart = node;
 	    else
-	    goto after_print;
+		goto after_print;
 	} else
 	    CLEAR_OPTSTART;
 	regprop(r, sv, node);
@@ -6579,11 +6579,11 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 		      (int)(2*l + 1), "", SvPVX_const(sv));
 
 	if (OP(node) != OPTIMIZED) {
-	if (next == NULL)		/* Next ptr. */
-	    PerlIO_printf(Perl_debug_log, "(0)");
-	else
-	    PerlIO_printf(Perl_debug_log, "(%"IVdf")", (IV)(next - start));
-	(void)PerlIO_putc(Perl_debug_log, '\n');
+	    if (next == NULL)		/* Next ptr. */
+		PerlIO_printf(Perl_debug_log, "(0)");
+	    else
+		PerlIO_printf(Perl_debug_log, "(%"IVdf")", (IV)(next - start));
+	    (void)PerlIO_putc(Perl_debug_log, '\n');
 	}
 
       after_print:
@@ -6604,16 +6604,16 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
             const I32 arry_len = av_len(trie->words)+1;
 	    I32 word_idx;
 	    PerlIO_printf(Perl_debug_log,
-                       "%*s[Start:%d Words:%d Chars:%d Unique:%d States:%"IVdf" Minlen:%d Maxlen:%d",
-		       (int)(2*(l+3)),
-		       "",
-		       trie->startstate,
-                       TRIE_WORDCOUNT(trie),
-                       (int)TRIE_CHARCOUNT(trie),
-		       trie->uniquecharcount,
-                       (IV)TRIE_LASTSTATE(trie)-1,
-                       trie->minlen, trie->maxlen 
-                      );
+		    "%*s[Start:%"UVuf" Words:%d Chars:%d Unique:%d States:%"IVdf" Minlen:%d Maxlen:%d",
+		    (int)(2*(l+3)),
+		    "",
+		    trie->startstate,
+		    TRIE_WORDCOUNT(trie),
+		    (int)TRIE_CHARCOUNT(trie),
+		    trie->uniquecharcount,
+		    (IV)TRIE_LASTSTATE(trie)-1,
+		    trie->minlen, trie->maxlen
+		);
            if (trie->bitmap) {
                 int i;
                 int rangestart= -1;

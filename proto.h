@@ -3507,18 +3507,18 @@ STATIC SV *	S_space_join_names_mortal(pTHX_ char *const *array)
 #endif
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
-STATIC regnode*	S_reg(pTHX_ struct RExC_state_t *state, I32 paren, I32 *flagp)
+STATIC regnode*	S_reg(pTHX_ struct RExC_state_t *state, I32 paren, I32 *flagp, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 
 STATIC regnode*	S_reganode(pTHX_ struct RExC_state_t *state, U8 op, U32 arg)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC regnode*	S_regatom(pTHX_ struct RExC_state_t *state, I32 *flagp)
+STATIC regnode*	S_regatom(pTHX_ struct RExC_state_t *state, I32 *flagp, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC regnode*	S_regbranch(pTHX_ struct RExC_state_t *state, I32 *flagp, I32 first)
+STATIC regnode*	S_regbranch(pTHX_ struct RExC_state_t *state, I32 *flagp, I32 first, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
@@ -3526,7 +3526,7 @@ STATIC STRLEN	S_reguni(pTHX_ const struct RExC_state_t *state, UV uv, char *s)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 
-STATIC regnode*	S_regclass(pTHX_ struct RExC_state_t *state)
+STATIC regnode*	S_regclass(pTHX_ struct RExC_state_t *state, U32 depth)
 			__attribute__nonnull__(pTHX_1);
 
 STATIC I32	S_regcurly(const char *)
@@ -3536,7 +3536,7 @@ STATIC I32	S_regcurly(const char *)
 STATIC regnode*	S_reg_node(pTHX_ struct RExC_state_t *state, U8 op)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC regnode*	S_regpiece(pTHX_ struct RExC_state_t *state, I32 *flagp)
+STATIC regnode*	S_regpiece(pTHX_ struct RExC_state_t *state, I32 *flagp, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
@@ -3544,7 +3544,12 @@ STATIC void	S_reginsert(pTHX_ struct RExC_state_t *state, U8 op, regnode *opnd)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_3);
 
-STATIC void	S_regtail(pTHX_ const struct RExC_state_t *state, regnode *p, const regnode *val)
+STATIC void	S_regtail(pTHX_ struct RExC_state_t *state, regnode *p, const regnode *val, U32 depth)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+
+STATIC U8	S_regtail_study(pTHX_ struct RExC_state_t *state, regnode *p, const regnode *val, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
@@ -3557,17 +3562,6 @@ STATIC char*	S_regwhite(char *p, const char *e)
 STATIC char*	S_nextchar(pTHX_ struct RExC_state_t *state)
 			__attribute__nonnull__(pTHX_1);
 
-#  ifdef DEBUGGING
-STATIC const regnode*	S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node, const regnode *last, SV* sv, I32 l)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_5);
-
-STATIC void	S_put_byte(pTHX_ SV* sv, int c)
-			__attribute__nonnull__(pTHX_1);
-
-#  endif
 STATIC void	S_scan_commit(pTHX_ const struct RExC_state_t* state, struct scan_data_t *data)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -3619,14 +3613,33 @@ STATIC I32	S_regpposixcc(pTHX_ struct RExC_state_t* state, I32 value)
 STATIC void	S_checkposixcc(pTHX_ struct RExC_state_t* state)
 			__attribute__nonnull__(pTHX_1);
 
-
-STATIC I32	S_make_trie(pTHX_ struct RExC_state_t* state, regnode *startbranch, regnode *first, regnode *last, regnode *tail, U32 flags)
+STATIC I32	S_make_trie(pTHX_ struct RExC_state_t* state, regnode *startbranch, regnode *first, regnode *last, regnode *tail, U32 flags, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
 			__attribute__nonnull__(pTHX_4)
 			__attribute__nonnull__(pTHX_5);
 
+#  ifdef DEBUGGING
+STATIC const regnode*	S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node, const regnode *last, SV* sv, I32 l)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_5);
+
+STATIC void	S_put_byte(pTHX_ SV* sv, int c)
+			__attribute__nonnull__(pTHX_1);
+
+STATIC void	S_dump_trie(pTHX_ const struct _reg_trie_data *trie, U32 depth)
+			__attribute__nonnull__(pTHX_1);
+
+STATIC void	S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie, U32 next_alloc, U32 depth)
+			__attribute__nonnull__(pTHX_1);
+
+STATIC void	S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie, U32 next_alloc, U32 depth)
+			__attribute__nonnull__(pTHX_1);
+
+#  endif
 #endif
 
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)

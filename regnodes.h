@@ -66,9 +66,9 @@
 #define	LOGICAL	59	/* 0x3b Next opcode should set the flag only. */
 #define	RENUM	60	/* 0x3c Group with independently numbered parens. */
 #define	OPTIMIZED	61	/* 0x3d Placeholder for dump. */
-#define	TRIE	62	/* 0x3e Match one or more of many EXACT strings */
-#define	TRIEF	63	/* 0x3f Match one or more of many EXACTF strings */
-#define	TRIEFL	64	/* 0x40 Match one or more of many EXACTFL strings */
+#define	TRIE	62	/* 0x3e Match many EXACT(FL?)? at once. flags==type */
+#define	TRIEC	63	/* 0x3f Trie + charclass. (unused at present) */
+#define	PSEUDO	64	/* 0x40 Pseudo opcode for internal use. */
 
 #ifndef DOINIT
 EXTCONST U8 PL_regkind[];
@@ -137,8 +137,8 @@ EXTCONST U8 PL_regkind[] = {
 	BRANCHJ,		/* RENUM */
 	NOTHING,		/* OPTIMIZED */
 	TRIE,		/* TRIE */
-	TRIE,		/* TRIEF */
-	TRIE,		/* TRIEFL */
+	TRIE,		/* TRIEC */
+	PSEUDO,		/* PSEUDO */
 };
 #endif
 
@@ -208,8 +208,8 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_1),		/* RENUM */
 	0,		/* OPTIMIZED */
 	EXTRA_SIZE(struct regnode_1),		/* TRIE */
-	EXTRA_SIZE(struct regnode_1),		/* TRIEF */
-	EXTRA_SIZE(struct regnode_1),		/* TRIEFL */
+	EXTRA_SIZE(struct regnode_1),		/* TRIEC */
+	0,		/* PSEUDO */
 };
 
 static const char reg_off_by_arg[] = {
@@ -276,8 +276,8 @@ static const char reg_off_by_arg[] = {
 	1,		/* RENUM */
 	0,		/* OPTIMIZED */
 	0,		/* TRIE */
-	0,		/* TRIEF */
-	0,		/* TRIEFL */
+	0,		/* TRIEC */
+	0,		/* PSEUDO */
 };
 
 #ifdef DEBUGGING
@@ -345,8 +345,8 @@ static const char * const reg_name[] = {
 	"RENUM",		/* 0x3c */
 	"OPTIMIZED",		/* 0x3d */
 	"TRIE",		/* 0x3e */
-	"TRIEF",		/* 0x3f */
-	"TRIEFL",		/* 0x40 */
+	"TRIEC",		/* 0x3f */
+	"PSEUDO",		/* 0x40 */
 };
 
 static const int reg_num = 65;

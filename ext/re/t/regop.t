@@ -1,40 +1,39 @@
 #!./perl
 
 BEGIN {
-	chdir 't' if -d 't';
-	@INC = '../lib';
-	require Config;
-	if (($Config::Config{'extensions'} !~ /\bre\b/) ){
-        	print "1..0 # Skip -- Perl configured without re module\n";
-		exit 0;
-	}
+    chdir 't' if -d 't';
+    @INC = '../lib';
+    require Config;
+    if (($Config::Config{'extensions'} !~ /\bre\b/) ){
+	print "1..0 # Skip -- Perl configured without re module\n";
+	exit 0;
+    }
 }
 
 use strict;
-use Test::More;
+require "./test.pl";
 
 chomp(my @strs=grep { !/^\s*\#/ } <DATA>);
-chdir "../ext/re/t" or die "Can't chdir '../ext/re/t':$!\n";
-my $out=`$^X regop.pl 2>&1`;
-my @tests=grep { /\S/ } split /(?=Compiling REx)/,$out;
+my $out = runperl(progfile => "../ext/re/t/regop.pl", stderr => 1);
+my @tests = grep { /\S/ && !/EXECUTING/ } split /(?=Compiling REx)/,$out;
 
-plan tests => 2+(@strs-grep { !$_ or /^---/ } @strs)+@tests;
+plan(2 + (@strs - grep { !$_ or /^---/ } @strs) + @tests);
 
 my $numtests=4;
-ok(@tests==$numtests,"Expecting output for $numtests patterns");
+is(scalar @tests, $numtests, "Expecting output for $numtests patterns");
 ok(defined $out,'regop.pl');
 $out||="";
 my $test=1;
 foreach my $testout (@tests) {
     my ($pattern)=$testout=~/Compiling REx "([^"]+)"/;
-    ok($pattern,"Pattern for test ".($test++));
-    while (@strs) {    
+    ok($pattern, "Pattern found for test ".($test++));
+    while (@strs) {
         my $str=shift @strs;
         last if !$str or $str=~/^---/;
         next if $str=~/^\s*#/;
-        ok($testout=~/\Q$str\E/,"$str: /$pattern/");    
-    }    
-}    
+        ok($testout=~/\Q$str\E/,"$str: /$pattern/");
+    }
+}
 
 __END__
 #Compiling REx "X(A|[B]Q||C|D)Y"

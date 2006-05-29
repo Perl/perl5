@@ -442,7 +442,7 @@ typedef struct _reg_trie_trans    reg_trie_trans;
 
 
 /* anything in here that needs to be freed later
-should be dealt with in pregfree */
+   should be dealt with in pregfree */
 struct _reg_trie_data {
     U16              uniquecharcount;
     U32              lasttrans;
@@ -453,8 +453,8 @@ struct _reg_trie_data {
     char             *bitmap;
     U32              refcount;
     U32              startstate;
-    STRLEN           minlen;     
-    STRLEN           maxlen;     
+    STRLEN           minlen;
+    STRLEN           maxlen;
 #ifdef DEBUGGING
     U16              wordcount;   /* Build only */
     STRLEN           charcount;   /* Build only */

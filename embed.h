@@ -1304,16 +1304,9 @@
 #define regpiece		S_regpiece
 #define reginsert		S_reginsert
 #define regtail			S_regtail
+#define regtail_study		S_regtail_study
 #define regwhite		S_regwhite
 #define nextchar		S_nextchar
-#endif
-#  ifdef DEBUGGING
-#if defined(PERL_CORE) || defined(PERL_EXT)
-#define dumpuntil		S_dumpuntil
-#define put_byte		S_put_byte
-#endif
-#  endif
-#if defined(PERL_CORE) || defined(PERL_EXT)
 #define scan_commit		S_scan_commit
 #define cl_anything		S_cl_anything
 #define cl_is_anything		S_cl_is_anything
@@ -1330,10 +1323,17 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define regpposixcc		S_regpposixcc
 #define checkposixcc		S_checkposixcc
-#endif
-#if defined(PERL_CORE) || defined(PERL_EXT)
 #define make_trie		S_make_trie
 #endif
+#  ifdef DEBUGGING
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#define dumpuntil		S_dumpuntil
+#define put_byte		S_put_byte
+#define dump_trie		S_dump_trie
+#define dump_trie_interim_list	S_dump_trie_interim_list
+#define dump_trie_interim_table	S_dump_trie_interim_table
+#endif
+#  endif
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
 #if defined(PERL_CORE) || defined(PERL_EXT)
@@ -3461,27 +3461,20 @@
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_DECL_PROT)
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define reg(a,b,c)		S_reg(aTHX_ a,b,c)
+#define reg(a,b,c,d)		S_reg(aTHX_ a,b,c,d)
 #define reganode(a,b,c)		S_reganode(aTHX_ a,b,c)
-#define regatom(a,b)		S_regatom(aTHX_ a,b)
-#define regbranch(a,b,c)	S_regbranch(aTHX_ a,b,c)
+#define regatom(a,b,c)		S_regatom(aTHX_ a,b,c)
+#define regbranch(a,b,c,d)	S_regbranch(aTHX_ a,b,c,d)
 #define reguni(a,b,c)		S_reguni(aTHX_ a,b,c)
-#define regclass(a)		S_regclass(aTHX_ a)
+#define regclass(a,b)		S_regclass(aTHX_ a,b)
 #define regcurly		S_regcurly
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)
-#define regpiece(a,b)		S_regpiece(aTHX_ a,b)
+#define regpiece(a,b,c)		S_regpiece(aTHX_ a,b,c)
 #define reginsert(a,b,c)	S_reginsert(aTHX_ a,b,c)
-#define regtail(a,b,c)		S_regtail(aTHX_ a,b,c)
+#define regtail(a,b,c,d)	S_regtail(aTHX_ a,b,c,d)
+#define regtail_study(a,b,c,d)	S_regtail_study(aTHX_ a,b,c,d)
 #define regwhite		S_regwhite
 #define nextchar(a)		S_nextchar(aTHX_ a)
-#endif
-#  ifdef DEBUGGING
-#if defined(PERL_CORE) || defined(PERL_EXT)
-#define dumpuntil(a,b,c,d,e,f)	S_dumpuntil(aTHX_ a,b,c,d,e,f)
-#define put_byte(a,b)		S_put_byte(aTHX_ a,b)
-#endif
-#  endif
-#if defined(PERL_CORE) || defined(PERL_EXT)
 #define scan_commit(a,b)	S_scan_commit(aTHX_ a,b)
 #define cl_anything		S_cl_anything
 #define cl_is_anything		S_cl_is_anything
@@ -3497,10 +3490,17 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define regpposixcc(a,b)	S_regpposixcc(aTHX_ a,b)
 #define checkposixcc(a)		S_checkposixcc(aTHX_ a)
+#define make_trie(a,b,c,d,e,f,g)	S_make_trie(aTHX_ a,b,c,d,e,f,g)
 #endif
+#  ifdef DEBUGGING
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define make_trie(a,b,c,d,e,f)	S_make_trie(aTHX_ a,b,c,d,e,f)
+#define dumpuntil(a,b,c,d,e,f)	S_dumpuntil(aTHX_ a,b,c,d,e,f)
+#define put_byte(a,b)		S_put_byte(aTHX_ a,b)
+#define dump_trie(a,b)		S_dump_trie(aTHX_ a,b)
+#define dump_trie_interim_list(a,b,c)	S_dump_trie_interim_list(aTHX_ a,b,c)
+#define dump_trie_interim_table(a,b,c)	S_dump_trie_interim_table(aTHX_ a,b,c)
 #endif
+#  endif
 #endif
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
 #if defined(PERL_CORE) || defined(PERL_EXT)
