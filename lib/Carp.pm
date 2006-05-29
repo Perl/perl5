@@ -28,8 +28,18 @@ sub export_fail { shift; $Verbose = shift if $_[0] eq 'verbose'; @_ }
 sub longmess  { goto &longmess_jmp }
 sub shortmess { goto &shortmess_jmp }
 # these two are replaced when Carp::Heavy is loaded
-sub longmess_jmp  {{ local($@, $!); require Carp::Heavy} goto &longmess_jmp}
-sub shortmess_jmp {{ local($@, $!); require Carp::Heavy} goto &shortmess_jmp}
+sub longmess_jmp  {
+    local($@, $!);
+    eval { require Carp::Heavy };
+    return $@ if $@;
+    goto &longmess_jmp;
+}
+sub shortmess_jmp  {
+    local($@, $!);
+    eval { require Carp::Heavy };
+    return $@ if $@;
+    goto &shortmess_jmp;
+}
 
 sub croak   { die  shortmess @_ }
 sub confess { die  longmess  @_ }
