@@ -2367,8 +2367,6 @@ PerlIO_cleanup(pTHX)
 	PerlIO_list_free(aTHX_ PL_def_layerlist);
 	PL_def_layerlist = NULL;
     }
-
-    Safefree(PL_perlio_fd_refcnt);
 }
 
 
