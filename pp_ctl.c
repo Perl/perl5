@@ -3297,6 +3297,9 @@ PP(pp_require)
 			    tryname += 2;
 			break;
 		    }
+		    else if (errno == EMFILE)
+			/* no point in trying other paths if out of handles */
+			break;
 		  }
 		}
 	    }
