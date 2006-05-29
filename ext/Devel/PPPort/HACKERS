@@ -66,10 +66,15 @@ work with less than a certain version of Perl.
 This information is in turn used by F<parts/apicheck.pl> to mask
 API calls in the generated C file for these versions, so the
 process can be stopped by the time F<apicheck.c> compiles cleanly
-and the dynamic linker is happy. (Actually, this process generates
-false positives, so each API call is checked once more afterwards.)
+and the dynamic linker is happy. (Actually, this process may generate
+false positives, so by default each API call is checked once more
+afterwards.)
 
-Running C<devel/mktodo> takes a couple of hours.
+Running C<devel/mktodo> takes about an hour, depending of course
+on the machine you're running it on. If you run it with
+the C<--nocheck> option, it won't recheck the API calls that failed
+in the compilation stage and it'll take significantly less time.
+Running with C<--nocheck> should usually be safe.
 
 When running C<devel/mktodo> with the C<--base> option, it will
 generate the I<baseline> todo files by disabling all functionality
@@ -85,9 +90,13 @@ to figure out the baseline information for all remaining provided
 macros by scanning the include files in the F<CORE> directory of
 various Perl versions.
 
-It's not very often that one has to regenerate the baseline and
-todo files, and the process hasn't been automated yet, but it's
-basically only the following steps:
+The whole process isn't platform independent. It has currently been
+tested only under Linux, and it definitely requires at least C<gcc> and
+the C<nm> utility.
+
+It's not very often that one has to regenerate the baseline and todo
+files. If you have to, you can either run F<devel/regenerate> or just
+execute the following steps by hand:
 
 =over 4
 
@@ -133,8 +142,6 @@ Finally, add the remaining baseline information by running
     perl devel/scanprov write
 
 =back
-
-Alternatively, you can try to use the F<devel/regenerate> script.
 
 =head2 Implementation
 
@@ -294,7 +301,7 @@ modify it under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-See L<ppport.h>.
+See L<ppport.h> and L<devel/regenerate>.
 
 =cut
 

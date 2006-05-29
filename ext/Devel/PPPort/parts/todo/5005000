@@ -1,18 +1,18 @@
 5.005000
 PL_modglobal                   # E
 cx_dump                        # U
-debop                          # E
+debop                          # U
 debprofdump                    # U
 fbm_compile                    # E (Perl_fbm_compile)
 fbm_instr                      # E (Perl_fbm_instr)
-get_op_descs                   # E
-get_op_names                   # E
+get_op_descs                   # U
+get_op_names                   # U
 init_stacks                    # U
 mg_length                      # U
 mg_size                        # U
-newHVhv                        # E
+newHVhv                        # U
 new_stackinfo                  # E
-regdump                        # E
+regdump                        # U
 regexec_flags                  # U
 regnext                        # E (Perl_regnext)
 runops_debug                   # U

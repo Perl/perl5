@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 2 $
+#  $Revision: 5 $
 #  $Author: mhx $
-#  $Date: 2006/05/25 17:22:32 +0200 $
+#  $Date: 2006/05/28 20:43:04 +0200 $
 #
 ################################################################################
 #
@@ -29,10 +29,11 @@ use Pod::Usage;
 require 'devel/devtools.pl';
 
 our %opt = (
-  verbose => 0
+  check   => 1,
+  verbose => 0,
 );
 
-GetOptions(\%opt, qw( verbose )) or die pod2usage();
+GetOptions(\%opt, qw( check! verbose )) or die pod2usage();
 
 identify();
 
@@ -83,10 +84,12 @@ for my $dir (qw( base todo )) {
 }
 
 my $T0 = time;
+my @args = ddverbose();
+push @args, '--nocheck' unless $opt{check};
 
 print "\nBuilding baseline files...\n\n";
 
-unless (runperl('devel/mktodo', '--base', ddverbose())) {
+unless (runperl('devel/mktodo', '--base', @args)) {
   print "\nSomething went wrong while building the baseline files.\n";
   quit_now();
 }
@@ -101,7 +104,7 @@ for my $src (glob 'parts/todo/5*') {
 
 print "\nBuilding todo files...\n\n";
 
-unless (runperl('devel/mktodo', ddverbose())) {
+unless (runperl('devel/mktodo', @args)) {
   print "\nSomething went wrong while building the baseline files.\n";
   quit_now();
 }
@@ -129,4 +132,30 @@ Finished in $wall wallclock secs ($usr usr + $sys sys = $cpu CPU)
 Don't forget to check in the files in parts/base and parts/todo.
 
 END
+
+__END__
+
+=head1 NAME
+
+regenerate - Automatically regeneate Devel::PPPort's API information
+
+=head1 SYNOPSIS
+
+  regenerate [options]
+
+  --nocheck      don't recheck symbols that caused an error
+  --verbose      show verbose output
+
+=head1 COPYRIGHT
+
+Copyright (c) 2006, Marcus Holland-Moritz.
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=head1 SEE ALSO
+
+See L<Devel::PPPort> and L<HACKERS>.
+
+=cut
 

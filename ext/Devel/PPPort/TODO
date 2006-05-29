@@ -1,10 +1,5 @@
 TODO:
 
-* figure out why many of the function for which Perl_* exists
-  fail the automated API check
-
-* use 'nm' to more efficiently find 'undefined' symbols?
-
 * implement snprintf with newSVpvf for >= 5.004, which is safer?
 
 * add support for my_vsnprintf?

@@ -1,3 +1,11 @@
+3.08_04 - 2006-05-29
+
+    * update API info
+    * fix a bug in the automated API info generator that
+      caused slightly wrong output
+    * improve the speed of the automated API info generator;
+      we're now down from several hours to a few minutes
+
 3.08_03 - 2006-05-25
 
     * update API info

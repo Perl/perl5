@@ -36,7 +36,7 @@ use Devel::PPPort;
 use strict;
 $^W = 1;
 
-my @pods = qw( HACKERS PPPort.pm ppport.h );
+my @pods = qw( HACKERS PPPort.pm ppport.h devel/regenerate devel/buildperl.pl );
 
 my $reason = '';
 

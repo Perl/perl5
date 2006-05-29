@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 8 $
+#  $Revision: 9 $
 #  $Author: mhx $
-#  $Date: 2006/01/14 22:41:11 +0100 $
+#  $Date: 2006/05/28 20:42:53 +0200 $
 #
 ################################################################################
 #
@@ -395,12 +395,12 @@ and don't install them, run:
 
 =head1 COPYRIGHT
 
-Copyright (c) 2004-2005, Marcus Holland-Moritz.
+Copyright (c) 2004-2006, Marcus Holland-Moritz.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-See L<Devel::PPPort>.
+See L<Devel::PPPort> and L<HACKERS>.
 

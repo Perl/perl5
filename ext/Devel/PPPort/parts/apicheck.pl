@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 19 $
+#  $Revision: 20 $
 #  $Author: mhx $
-#  $Date: 2006/05/25 17:21:23 +0200 $
+#  $Date: 2006/05/28 19:35:39 +0200 $
 #
 ################################################################################
 #
@@ -104,20 +104,6 @@ my %stack = (
   XCPT_RETHROW   => ['dXCPT;'],
 );
 
-my %postcode = (
-  dSP        => "some_global_var = !sp;",
-  dMARK      => "some_global_var = !mark;",
-  dORIGMARK  => "some_global_var = !origmark;",
-  dAX        => "some_global_var = !ax;",
-  dITEMS     => "some_global_var = !items;",
-  dXSARGS    => "some_global_var = ax && items;",
-  NEWSV      => "some_global_var = !arg1;",
-  New        => "some_global_var = !arg1;",
-  Newc       => "some_global_var = !arg1;",
-  Newz       => "some_global_var = !arg1;",
-  dUNDERBAR  => "(void) UNDERBAR;",
-);
-
 my %ignore = (
   map { ($_ => 1) } qw(
     svtype
@@ -145,7 +131,15 @@ print OUT <<HEAD;
 #define NO_XSLOCKS
 #include "XSUB.h"
 
-#ifndef DPPP_APICHECK_NO_PPPORT_H
+#ifdef DPPP_APICHECK_NO_PPPORT_H
+
+/* This is just to avoid too many baseline failures with perls < 5.6.0 */
+
+#ifndef dTHX
+#  define dTHX extern int Perl___notused
+#endif
+
+#else
 
 #define NEED_eval_pv
 #define NEED_grok_bin
@@ -165,12 +159,9 @@ print OUT <<HEAD;
 #define NEED_vnewSVpvf
 #define NEED_warner
 
-
 #include "ppport.h"
 
 #endif
-
-static int some_global_var;
 
 static int    VARarg1;
 static char  *VARarg2;
@@ -251,16 +242,10 @@ for $f (@f) {
     $ret = $castvoid{$f->{name}} ? '(void) ' : '';
   }
   else {
-    $ret = $ignorerv{$f->{name}} ? '(void) ' : "return ";
+    $stack .= "  $rvt rval;\n";
+    $ret = $ignorerv{$f->{name}} ? '(void) ' : "rval = ";
   }
   my $aTHX_args = "$aTHX$args";
-
-  my $post = '';
-  if ($postcode{$f->{name}}) {
-    $post = $postcode{$f->{name}};
-    $post =~ s/^/    /g;
-    $post = "\n$post";
-  }
 
   unless ($f->{flags}{'m'} and @arg == 0) {
     $args = "($args)";
@@ -294,24 +279,21 @@ HEAD
   $f->{cond} and print OUT "#if $f->{cond}\n";
 
   print OUT <<END;
-$rvt _DPPP_test_$f->{name} (void)
+void _DPPP_test_$f->{name} (void)
 {
   dXSARGS;
 $stack
-#ifdef $f->{name}
-  if (some_global_var)
   {
-    $ret$f->{name}$args;$post
-  }
+#ifdef $f->{name}
+    $ret$f->{name}$args;
 #endif
-
-  some_global_var = items && ax;
+  }
 
   {
 #ifdef $f->{name}
-    $ret$final;$post
+    $ret$final;
 #else
-    $ret$Perl_$f->{name}$aTHX_args;$post
+    $ret$Perl_$f->{name}$aTHX_args;
 #endif
   }
 }

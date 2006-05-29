@@ -1,8 +1,8 @@
 5.009000
-new_version                    # E
+new_version                    # U
 save_set_svflags               # U
-upg_version                    # E
+upg_version                    # U
 vcmp                           # U
-vnumify                        # E
-vstringify                     # E
+vnumify                        # U
+vstringify                     # U
 WARN_ASSERTIONS                # added by devel/scanprov

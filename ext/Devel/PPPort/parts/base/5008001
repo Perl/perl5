@@ -6,7 +6,7 @@ is_utf8_string_loc             # U
 packlist                       # U
 save_bool                      # U
 savestack_grow_cnt             # U
-scan_vstring                   # E
+scan_vstring                   # U
 seed                           # U
 sv_cat_decode                  # U
 sv_compile_2op                 # E (Perl_sv_compile_2op)

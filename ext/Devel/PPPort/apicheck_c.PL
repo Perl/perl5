@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 7 $
+#  $Revision: 8 $
 #  $Author: mhx $
-#  $Date: 2006/05/25 17:20:38 +0200 $
+#  $Date: 2006/05/28 19:33:09 +0200 $
 #
 ################################################################################
 #
@@ -23,7 +23,7 @@ use strict;
 
 my $out = 'apicheck.c';
 my @api = map { /^--api=(\w+)$/ ? ($1) : () } @ARGV;
-print "creating $out", (@ARGV ? " (@api)" : ''), "\n";
+print "creating $out", (@api ? " (@api)" : ''), "\n";
 system $^X, 'parts/apicheck.pl', @api, $out
     and die "couldn't create $out\n";
 

@@ -6,34 +6,34 @@ SvMAGIC_set                    # U
 SvRV_set                       # U
 SvSTASH_set                    # U
 SvUV_set                       # U
-av_arylen_p                    # E
+av_arylen_p                    # U
 ckwarn                         # U
 ckwarn_d                       # U
 csighandler                    # E (Perl_csighandler)
 dAXMARK                        # E
 dMULTICALL                     # E
-doref                          # E
-gv_const_sv                    # E
-gv_stashpvs                    # E
-hv_eiter_p                     # E
+doref                          # U
+gv_const_sv                    # U
+gv_stashpvs                    # U
+hv_eiter_p                     # U
 hv_eiter_set                   # U
-hv_fetchs                      # E
+hv_fetchs                      # U
 hv_name_set                    # U
 hv_placeholders_get            # U
-hv_placeholders_p              # E
+hv_placeholders_p              # U
 hv_placeholders_set            # U
-hv_riter_p                     # E
+hv_riter_p                     # U
 hv_riter_set                   # U
 is_utf8_string_loclen          # U
 my_sprintf                     # U
-newGIVENOP                     # E
-newSVhek                       # E
-newSVpvs                       # E
-newSVpvs_share                 # E
-newWHENOP                      # E
+newGIVENOP                     # U
+newSVhek                       # U
+newSVpvs                       # U
+newSVpvs_share                 # U
+newWHENOP                      # U
 newWHILEOP                     # E (Perl_newWHILEOP)
-ref                            # E (Perl_ref)
-savepvs                        # E
+ref                            # U (Perl_ref)
+savepvs                        # U
 sortsv_flags                   # U
 sv_catpvs                      # U
 vverify                        # U

@@ -5,9 +5,9 @@
 #
 ################################################################################
 #
-#  $Revision: 12 $
+#  $Revision: 13 $
 #  $Author: mhx $
-#  $Date: 2006/05/25 17:22:31 +0200 $
+#  $Date: 2006/05/28 19:36:03 +0200 $
 #
 ################################################################################
 #
@@ -27,22 +27,15 @@ require 'devel/devtools.pl';
 
 our %opt = (
   base    => 0,
+  check   => 1,
   verbose => 0,
 );
 
-GetOptions(\%opt, qw(
-            base
-            verbose
-          )) or die;
+GetOptions(\%opt, qw( base check! verbose )) or die;
 
 identify();
 
-# my $outdir = $opt{base} ? 'parts/base' : 'parts/todo';
 my $outdir = 'parts/todo';
-
-# for (glob "$outdir/*") {
-#   unlink or die "$_: $!\n";
-# }
 
 my $install = '/tmp/perl/install/default';
 # my $install = '/tmp/perl/install/thread';
@@ -63,6 +56,7 @@ for (@perls) {
   my @args = ('--perl', $_->{path}, '--todo', "$outdir/$todo", '--version', "$_->{todo}");
   push @args, '--base' if $opt{base};
   push @args, '--verbose' if $opt{verbose};
+  push @args, '--nocheck' unless $opt{check};
   runperl('devel/mktodo.pl', @args) or die "error running mktodo.pl [$!] [$?]\n";
 }
 

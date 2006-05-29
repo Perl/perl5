@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 3 $
+##  $Revision: 5 $
 ##  $Author: mhx $
-##  $Date: 2006/05/24 09:25:00 +0200 $
+##  $Date: 2006/05/28 20:43:18 +0200 $
 ##
 ################################################################################
 ##
@@ -17,7 +17,7 @@
 
 =tests plan => 0
 
-my @pods = qw( HACKERS PPPort.pm ppport.h );
+my @pods = qw( HACKERS PPPort.pm ppport.h devel/regenerate devel/buildperl.pl );
 
 my $reason = '';
 

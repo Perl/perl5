@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 19 $
+#  $Revision: 20 $
 #  $Author: mhx $
-#  $Date: 2006/01/19 19:35:25 +0100 $
+#  $Date: 2006/05/28 19:36:23 +0200 $
 #
 ################################################################################
 #
@@ -43,10 +43,13 @@ else {
 
 @clean    = qw{ $(H_FILES) PPPort.c };
 
+%depend   = ( '$(OBJECT)' => '$(H_FILES)' );
+
 if ($opt{'apicheck'}) {
   $PL_FILES{'apicheck_c.PL'} = 'apicheck.c';
   push @C_FILES, qw{ apicheck.c };
-  push @clean,   qw{ apicheck.c };
+  push @clean,   qw{ apicheck.c apicheck.i };
+  $depend{'apicheck.i'} = 'ppport.h';
 }
 
 if (eval $ExtUtils::MakeMaker::VERSION >= 6) {
@@ -71,7 +74,7 @@ WriteMakefile(
   OBJECT        => '$(BASEEXT)$(OBJ_EXT) $(O_FILES)',
   XSPROTOARG    => '-noprototypes',
   clean         => { FILES => "@clean" },
-  depend        => { '$(OBJECT)' => '$(H_FILES)' },
+  depend        => \%depend,
   @moreopts,
 );
 
@@ -91,5 +94,20 @@ regen:
 
 POSTAMBLE
   return $post;
+}
+
+sub MY::c_o {
+  package MY;
+  my $co = shift->SUPER::c_o(@_);
+
+  $co .= <<'CO' if $::opt{'apicheck'} && $co !~ /^\.c\.i:/m;
+
+.SUFFIXES: .i
+
+.c.i:
+	$(CCCMD) -E -I$(PERL_INC) $(DEFINE) $*.c > $*.i
+CO
+
+  return $co;
 }
 

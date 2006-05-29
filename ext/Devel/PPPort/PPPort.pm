@@ -1012,7 +1012,7 @@ require DynaLoader;
 use strict;
 use vars qw($VERSION @ISA $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.08_03 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.08_04 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 @ISA = qw(DynaLoader);
 
@@ -2310,7 +2310,7 @@ gv_handler||5.007001|
 gv_init_sv|||
 gv_init|||
 gv_name_set||5.009004|
-gv_stashpvn|5.006000||p
+gv_stashpvn|5.004000||p
 gv_stashpvs||5.009003|
 gv_stashpv|||
 gv_stashsv|||
@@ -2640,7 +2640,7 @@ newAVREF|||
 newAV|||
 newBINOP|||
 newCONDOP|||
-newCONSTSUB|5.006000||p
+newCONSTSUB|5.004050||p
 newCVREF|||
 newDEFSVOP|||
 newFORM|||
@@ -2670,7 +2670,7 @@ newPROG|||
 newPVOP|||
 newRANGE|||
 newRV_inc|5.004000||p
-newRV_noinc|5.006000||p
+newRV_noinc|5.004000||p
 newRV|||
 newSLICEOP|||
 newSTATEOP|||
@@ -2683,7 +2683,7 @@ newSVnv|||
 newSVpvf_nocontext|||vn
 newSVpvf||5.004000|v
 newSVpvn_share||5.007001|
-newSVpvn|5.006000||p
+newSVpvn|5.004050||p
 newSVpvs_share||5.009003|
 newSVpvs|5.009003||p
 newSVpv|||
@@ -3020,7 +3020,7 @@ sv_add_backref|||
 sv_backoff|||
 sv_bless|||
 sv_cat_decode||5.008001|
-sv_catpv_mg|5.006000||p
+sv_catpv_mg|5.004050||p
 sv_catpvf_mg_nocontext|||pvn
 sv_catpvf_mg|5.006000|5.004000|pv
 sv_catpvf_nocontext|||vn
@@ -3093,7 +3093,7 @@ sv_pvbyte||5.006000|
 sv_pvn_force_flags||5.007002|
 sv_pvn_force|||p
 sv_pvn_nomg|5.007003||p
-sv_pvn|5.006000||p
+sv_pvn|5.005000||p
 sv_pvutf8n_force||5.006000|
 sv_pvutf8n||5.006000|
 sv_pvutf8||5.006000|
@@ -3106,18 +3106,18 @@ sv_replace|||
 sv_report_used|||
 sv_reset|||
 sv_rvweaken||5.006000|
-sv_setiv_mg|5.006000||p
+sv_setiv_mg|5.004050||p
 sv_setiv|||
 sv_setnv_mg|5.006000||p
 sv_setnv|||
-sv_setpv_mg|5.006000||p
+sv_setpv_mg|5.004050||p
 sv_setpvf_mg_nocontext|||pvn
 sv_setpvf_mg|5.006000|5.004000|pv
 sv_setpvf_nocontext|||vn
 sv_setpvf||5.004000|v
 sv_setpviv_mg||5.008001|
 sv_setpviv||5.008001|
-sv_setpvn_mg|5.006000||p
+sv_setpvn_mg|5.004050||p
 sv_setpvn|||
 sv_setpvs|5.009004||p
 sv_setpv|||
@@ -3128,11 +3128,11 @@ sv_setref_pv|||
 sv_setref_uv||5.007001|
 sv_setsv_cow|||
 sv_setsv_flags||5.007002|
-sv_setsv_mg|5.006000||p
+sv_setsv_mg|5.004050||p
 sv_setsv_nomg|5.007002||p
 sv_setsv|||
-sv_setuv_mg|5.006000||p
-sv_setuv|5.006000||p
+sv_setuv_mg|5.004050||p
+sv_setuv|5.004000||p
 sv_tainted||5.004000|
 sv_taint||5.004000|
 sv_true||5.005000|
@@ -3151,7 +3151,7 @@ sv_utf8_downgrade||5.006000|
 sv_utf8_encode||5.006000|
 sv_utf8_upgrade_flags||5.007002|
 sv_utf8_upgrade||5.007001|
-sv_uv|5.006000||p
+sv_uv|5.005000||p
 sv_vcatpvf_mg|5.006000|5.004000|p
 sv_vcatpvfn||5.004000|
 sv_vcatpvf|5.006000|5.004000|p
