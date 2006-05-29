@@ -5,7 +5,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require './test.pl';
-    plan( tests => 77 );
+    plan( tests => 78 );
 }
 
 my @c;
@@ -118,176 +118,20 @@ is( eval 'pb()', 'main::pb', 'actually return the right function name even if $^
 
 print "# caller can now return the compile time state of %^H\n";
 
-sub get_hash {
+sub hint_exists {
+    my $key = shift;
     my $level = shift;
     my @results = caller($level||0);
-    $results[10];
+    exists $results[10]->{$key};
 }
 
-sub get_dooot {
+sub hint_fetch {
+    my $key = shift;
     my $level = shift;
     my @results = caller($level||0);
-    $results[10]->{dooot};
+    $results[10]->{$key};
 }
 
-sub get_thikoosh {
-    my $level = shift;
-    my @results = caller($level||0);
-    $results[10]->{thikoosh};
-}
+$::testing_caller = 1;
 
-sub dooot {
-    is(get_dooot(), undef);
-    is(get_thikoosh(), undef);
-    my $hash = get_hash();
-    ok(!exists $hash->{dooot});
-    ok(!exists $hash->{thikoosh});
-    is(get_dooot(1), 54);
-    BEGIN {
-	$^H{dooot} = 42;
-    }
-    is(get_dooot(), 6 * 7);
-    is(get_dooot(1), 54);
-
-    BEGIN {
-	$^H{dooot} = undef;
-    }
-    is(get_dooot(), undef);
-    $hash = get_hash();
-    ok(exists $hash->{dooot});
-
-    BEGIN {
-	delete $^H{dooot};
-    }
-    is(get_dooot(), undef);
-    $hash = get_hash();
-    ok(!exists $hash->{dooot});
-    is(get_dooot(1), 54);
-}
-{
-    is(get_dooot(), undef);
-    is(get_thikoosh(), undef);
-    BEGIN {
-	$^H{dooot} = 1;
-	$^H{thikoosh} = "SKREECH";
-    }
-    is(get_dooot(), 1);
-    is(get_thikoosh(), "SKREECH");
-
-    BEGIN {
-	$^H{dooot} = 42;
-    }
-    {
-	{
-	    BEGIN {
-		$^H{dooot} = 6 * 9;
-	    }
-	    is(get_dooot(), 54);
-	    is(get_thikoosh(), "SKREECH");
-	    {
-		BEGIN {
-		    delete $^H{dooot};
-		}
-		is(get_dooot(), undef);
-		my $hash = get_hash();
-		ok(!exists $hash->{dooot});
-		is(get_thikoosh(), "SKREECH");
-	    }
-	    dooot();
-	}
-	is(get_dooot(), 6 * 7);
-	is(get_thikoosh(), "SKREECH");
-    }
-    is(get_dooot(), 6 * 7);
-    is(get_thikoosh(), "SKREECH");
-}
-
-print "# which now works inside evals\n";
-
-{
-    BEGIN {
-	$^H{dooot} = 42;
-    }
-    is(get_dooot(), 6 * 7);
-
-    eval "is(get_dooot(), 6 * 7); 1" or die $@;
-
-    eval <<'EOE' or die $@;
-    is(get_dooot(), 6 * 7);
-    eval "is(get_dooot(), 6 * 7); 1" or die $@;
-    BEGIN {
-	$^H{dooot} = 54;
-    }
-    is(get_dooot(), 54);
-    eval "is(get_dooot(), 54); 1" or die $@;
-    eval 'BEGIN { $^H{dooot} = -1; }; 1' or die $@;
-    is(get_dooot(), 54);
-    eval "is(get_dooot(), 54); 1" or die $@;
-EOE
-}
-
-{
-    BEGIN {
-	$^H{dooot} = "FIP\0FOP\0FIDDIT\0FAP";
-    }
-    is(get_dooot(), "FIP\0FOP\0FIDDIT\0FAP", "Can do embedded 0 bytes");
-
-    BEGIN {
-	$^H{dooot} = chr 256;
-    }
-    is(get_dooot(), chr 256, "Can do Unicode");
-
-    BEGIN {
-	$^H{dooot} = -42;
-    }
-    is(get_dooot(), -42, "Can do IVs");
-
-    BEGIN {
-	$^H{dooot} = ~0;
-    }
-    cmp_ok(get_dooot(), '>', 42, "Can do UVs");
-}
-
-{
-    my ($k1, $k2, $k3);
-    BEGIN {
-	$k1 = chr 163;
-	$k2 = $k1;
-	$k3 = $k1;
-	utf8::upgrade $k2;
-	utf8::encode $k3;
-
-	$^H{$k1} = 1;
-	$^H{$k2} = 2;
-	$^H{$k3} = 3;
-    }
-
-	
-    is(get_hash()->{$k1}, 2, "UTF-8 or not, it's the same");
-    is(get_hash()->{$k2}, 2, "UTF-8 or not, it's the same");
-    is(get_hash()->{$k3}, 3, "Octect sequences and UTF-8 are distinct");
-}
-
-{
-    my ($k1, $k2, $k3);
-    BEGIN {
-	($k1, $k2, $k3) = ("\0", "\0\0", "\0\0\0");
-	$^H{$k1} = 1;
-	$^H{$k2} = 2;
-	$^H{$k3} = 3;
-    }
-
-    is(get_hash()->{$k1}, 1, "Keys with the same hash value don't clash");
-    is(get_hash()->{$k2}, 2, "Keys with the same hash value don't clash");
-    is(get_hash()->{$k3}, 3, "Keys with the same hash value don't clash");
-
-    BEGIN {
-	$^H{$k1} = "a";
-	$^H{$k2} = "b";
-	$^H{$k3} = "c";
-    }
-
-    is(get_hash()->{$k1}, "a", "Keys with the same hash value don't clash");
-    is(get_hash()->{$k2}, "b", "Keys with the same hash value don't clash");
-    is(get_hash()->{$k3}, "c", "Keys with the same hash value don't clash");
-}
+do './op/caller.pl';

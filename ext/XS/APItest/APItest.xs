@@ -240,6 +240,36 @@ test_share_unshare_pvn(input)
 	unsharepvn(p, len, hash);
 	OUTPUT:
 	RETVAL
+
+bool
+refcounted_he_exists(key, level=0)
+	SV *key
+	IV level
+	CODE:
+	if (level) {
+	    croak("level must be zero, not %"IVdf, level);
+	}
+	RETVAL = (Perl_refcounted_he_fetch(aTHX_ PL_curcop->cop_hints_hash,
+					   key, NULL, 0, 0, 0)
+		  != &PL_sv_placeholder);
+	OUTPUT:
+	RETVAL
+
+
+SV *
+refcounted_he_fetch(key, level=0)
+	SV *key
+	IV level
+	CODE:
+	if (level) {
+	    croak("level must be zero, not %"IVdf, level);
+	}
+	RETVAL = Perl_refcounted_he_fetch(aTHX_ PL_curcop->cop_hints_hash, key,
+					  NULL, 0, 0, 0);
+	SvREFCNT_inc(RETVAL);
+	OUTPUT:
+	RETVAL
+	
 	
 =pod
 

@@ -2709,12 +2709,16 @@ Perl_refcounted_he_fetch(pTHX_ const struct refcounted_he *chain, SV *keysv,
     /* Just to be awkward, if you're using this interface the UTF-8-or-not-ness
        of your key has to exactly match that which is stored.  */
     SV *value = &PL_sv_placeholder;
+    bool is_utf8;
 
     if (keysv) {
 	if (flags & HVhek_FREEKEY)
 	    Safefree(key);
 	key = SvPV_const(keysv, klen);
 	flags = 0;
+	is_utf8 = (SvUTF8(keysv) != 0);
+    } else {
+	is_utf8 = ((flags & HVhek_UTF8) ? TRUE : FALSE);
     }
 
     if (!hash) {
@@ -2733,12 +2737,16 @@ Perl_refcounted_he_fetch(pTHX_ const struct refcounted_he *chain, SV *keysv,
 	    continue;
 	if (memNE(REF_HE_KEY(chain),key,klen))
 	    continue;
+	if (!!is_utf8 != !!(chain->refcounted_he_data[0] & HVhek_UTF8))
+	    continue;
 #else
 	if (hash != HEK_HASH(chain->refcounted_he_hek))
 	    continue;
 	if (klen != HEK_LEN(chain->refcounted_he_hek))
 	    continue;
 	if (memNE(HEK_KEY(chain->refcounted_he_hek),key,klen))
+	    continue;
+	if (!!is_utf8 != !!HEK_UTF8(chain->refcounted_he_hek))
 	    continue;
 #endif
 
@@ -2775,7 +2783,7 @@ Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent,
     char flags;
     STRLEN key_offset;
     U32 hash;
-    bool is_utf8 = SvUTF8(key);
+    bool is_utf8 = SvUTF8(key) ? TRUE : FALSE;
 
     if (SvPOK(value)) {
 	value_type = HVrhek_PV;

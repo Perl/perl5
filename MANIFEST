@@ -1221,6 +1221,7 @@ ext/XS/APItest/t/call.t		XS::APItest extension
 ext/XS/APItest/t/exception.t	XS::APItest extension
 ext/XS/APItest/t/hash.t		XS::APItest extension
 ext/XS/APItest/t/my_cxt.t	XS::APItest: test MY_CXT interface
+ext/XS/APItest/t/hash.t		XS::APItest: tests for OP related APIs
 ext/XS/APItest/t/printf.t	XS::APItest extension
 ext/XS/APItest/t/push.t		XS::APItest extension
 ext/XS/Typemap/Makefile.PL	XS::Typemap extension
@@ -3364,6 +3365,7 @@ t/op/auto.t			See if autoincrement et all work
 t/op/avhv.t			See if pseudo-hashes work
 t/op/bless.t			See if bless works
 t/op/bop.t			See if bitops work
+t/op/caller.pl			Tests shared between caller.t and XS op.t
 t/op/caller.t			See if caller() works
 t/op/chars.t			See if character escapes work
 t/op/chdir.t			See if chdir works
