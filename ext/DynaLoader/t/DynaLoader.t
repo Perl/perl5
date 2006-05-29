@@ -36,7 +36,10 @@ can_ok( 'DynaLoader' => 'dl_install_xsub'         ); # defined in XS section
 can_ok( 'DynaLoader' => 'dl_load_file'            ); # defined in XS section
 can_ok( 'DynaLoader' => 'dl_load_flags'           ); # defined in Perl section
 can_ok( 'DynaLoader' => 'dl_undef_symbols'        ); # defined in XS section
-can_ok( 'DynaLoader' => 'dl_unload_file'          ); # defined in XS section
+SKIP: {
+    skip "unloading unsupported on VMS", 1 if $^O eq 'VMS';
+    can_ok( 'DynaLoader' => 'dl_unload_file'          ); # defined in XS section
+}
 
 TODO: {
 local $TODO = "Test::More::can_ok() seems to have trouble dealing with AutoLoaded functions";
@@ -67,7 +70,10 @@ is( $@, '', "calling DynaLoader::dl_load_file() with undefined argument" );     
 my ($dlhandle, $dlerr);
 eval { $dlhandle = DynaLoader::dl_load_file("egg_bacon_sausage_and_spam") };
 $dlerr = DynaLoader::dl_error();
-ok( !$dlhandle, "calling DynaLoader::dl_load_file() without an existing library should fail" );
+SKIP: {
+    skip "dl_load_file() does not attempt to load file on VMS (and thus does not fail) when \@dl_require_symbols is empty", 1 if $^O eq 'VMS';
+    ok( !$dlhandle, "calling DynaLoader::dl_load_file() without an existing library should fail" );
+}
 ok( defined $dlerr, "dl_error() returning an error message: '$dlerr'" );
 
 # Checking for any particular error messages or numeric codes
@@ -109,9 +115,12 @@ is( scalar @DynaLoader::dl_modules, scalar keys %modules, "checking number of it
 
 my @loaded_modules = @DynaLoader::dl_modules;
 for my $libref (reverse @DynaLoader::dl_librefs) {
+  SKIP: {
+    skip "unloading unsupported on VMS", 2 if $^O eq 'VMS';
     my $module = pop @loaded_modules;
     my $r = eval { DynaLoader::dl_unload_file($libref) };
     is( $@, '', "calling dl_unload_file() for $module" );
     is( $r,  1, " - unload was successful" );
+  }
 }
 
