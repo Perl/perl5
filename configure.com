@@ -6281,7 +6281,14 @@ $ WC "shmattype='" + " '"
 $ WC "shortsize='" + shortsize + "'"
 $ WC "shrplib='define'"
 $ WC "sig_name='" + sig_name + "'"
-$ WC "sig_name_init='" + sig_name_init + "'"
+$ IF (f$length(sig_name_init) .GE. 1024)
+$ THEN
+$     tmp = "sig_name_init='" + sig_name_init + "'"
+$     WC/symbol tmp
+$     DELETE/SYMBOL tmp
+$ ELSE
+$     WC "sig_name_init='" + sig_name_init + "'"
+$ ENDIF
 $ WC "sig_num='" + sig_num + "'"
 $ WC "sig_num_init='" + sig_num_init + "'"
 $ WC "sig_count='" + sig_count + "'"
