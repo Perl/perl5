@@ -4869,7 +4869,7 @@ STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 {
     dVAR;
-    register UV value;
+    register UV value = 0;
     register UV nextvalue;
     register IV prevvalue = OOB_UNICODE;
     register IV range = 0;
