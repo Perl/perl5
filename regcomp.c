@@ -1671,6 +1671,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             }
         });
     } /* end node insert */
+#ifndef DEBUGGING    
+    SvREFCNT_dec(TRIE_REVCHARMAP(trie));
+#endif    
     return 1;
 }
 
