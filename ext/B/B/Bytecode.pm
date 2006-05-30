@@ -634,7 +634,6 @@ sub B::LOOP::bsave {
 sub B::COP::bsave {
     my ($cop,$ix) = @_;
     my $warnix = $cop->warnings->ix;
-    my $ioix = $cop->io->ix;
     if (ITHREADS) {
 	$cop->B::OP::bsave($ix);
 	asm "cop_stashpv", pvix $cop->stashpv;
@@ -651,7 +650,6 @@ sub B::COP::bsave {
     asm "cop_arybase", $cop->arybase;
     asm "cop_line", $cop->line;
     asm "cop_warnings", $warnix;
-    asm "cop_io", $ioix;
 }
 
 sub B::OP::opwalk {

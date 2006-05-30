@@ -247,6 +247,26 @@ make_sv_object(pTHX_ SV *arg, SV *sv)
 }
 
 static SV *
+make_temp_object(pTHX_ SV *arg, SV *temp)
+{
+    SV *target;
+    const char *const type = svclassnames[SvTYPE(temp)];
+    const IV iv = PTR2IV(temp);
+
+    target = newSVrv(arg, type);
+    sv_setiv(target, iv);
+
+    /* Need to keep our "temp" around as long as the target exists.
+       Simplest way seems to be to hang it from magic, and let that clear
+       it up.  No vtable, so won't actually get in the way of anything.  */
+    sv_magicext(target, temp, PERL_MAGIC_sv, NULL, NULL, 0);
+    /* magic object has had its reference count increased, so we must drop
+       our reference.  */
+    SvREFCNT_dec(temp);
+    return arg;
+}
+
+static SV *
 make_warnings_object(pTHX_ SV *arg, STRLEN *warnings)
 {
     const char *type = 0;
@@ -265,26 +285,32 @@ make_warnings_object(pTHX_ SV *arg, STRLEN *warnings)
     }
     if (type) {
 	sv_setiv(newSVrv(arg, type), iv);
+	return arg;
     } else {
 	/* B assumes that warnings are a regular SV. Seems easier to keep it
 	   happy by making them into a regular SV.  */
-	SV *temp = newSVpvn((char *)(warnings + 1), *warnings);
-	SV *target;
-
-	type = svclassnames[SvTYPE(temp)];
-	target = newSVrv(arg, type);
-	iv = PTR2IV(temp);
-	sv_setiv(target, iv);
-
-	/* Need to keep our "temp" around as long as the target exists.
-	   Simplest way seems to be to hang it from magic, and let that clear
-	   it up.  No vtable, so won't actually get in the way of anything.  */
-	sv_magicext(target, temp, PERL_MAGIC_sv, NULL, NULL, 0);
-	/* magic object has had its reference count increased, so we must drop
-	   our reference.  */
-	SvREFCNT_dec(temp);
+	return make_temp_object(aTHX_ arg,
+				newSVpvn((char *)(warnings + 1), *warnings));
     }
-    return arg;
+}
+
+static SV *
+make_cop_io_object(pTHX_ SV *arg, COP *cop)
+{
+    if (CopHINTS_get(cop) & HINT_LEXICAL_IO) {
+	/* I feel you should be able to simply SvREFCNT_inc the return value
+	   from this, but if you do (and restore the line
+	   my $ioix = $cop->io->ix;
+	   in B::COP::bsave in Bytecode.pm, then you get errors about
+	   "attempt to free temp prematurely ... during global destruction.
+	   The SV's flags are consistent with the error, but quite how the
+	   temp escaped from the save stack is not clear.  */
+	SV *value = Perl_refcounted_he_fetch(aTHX_ cop->cop_hints_hash,
+					     0, "open", 4, 0, 0);
+	return make_temp_object(aTHX_ arg, newSVsv(value));
+    } else {
+	return make_sv_object(aTHX_ arg, NULL);
+    }
 }
 
 static SV *
@@ -1148,12 +1174,7 @@ B::SV
 COP_io(o)
 	B::COP	o
 	PPCODE:
-	ST(0) =
-	    make_sv_object(aTHX_ sv_newmortal(),
-			   (CopHINTS_get(o) & HINT_LEXICAL_IO)
-			   ? Perl_refcounted_he_fetch(aTHX_ o->cop_hints_hash,
-						      0, "open", 4, 0, 0)
-			   : NULL);
+	ST(0) = make_cop_io_object(aTHX_ sv_newmortal(), o);
 	XSRETURN(1);
 
 U32
