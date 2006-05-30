@@ -4637,6 +4637,17 @@ normal Perl method.
 =for hackers
 Found in file universal.c
 
+=item sv_does
+X<sv_does>
+
+Returns a boolean indicating whether the SV performs a specific, named role.
+The SV can be a Perl object or the name of a Perl class.
+
+	bool	sv_does(SV* sv, const char* name)
+
+=for hackers
+Found in file universal.c
+
 =item sv_report_used
 X<sv_report_used>
 

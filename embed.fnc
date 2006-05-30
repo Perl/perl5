@@ -809,6 +809,7 @@ Apd	|int	|getcwd_sv	|NN SV* sv
 Apd	|void	|sv_dec		|NN SV* sv
 Ap	|void	|sv_dump	|NN SV* sv
 ApdR	|bool	|sv_derived_from|NN SV* sv|NN const char* name
+ApdR	|bool	|sv_does	|NN SV* sv|NN const char* name
 Apd	|I32	|sv_eq		|NULLOK SV* sv1|NULLOK SV* sv2
 Apd	|void	|sv_free	|NULLOK SV* sv
 poMX	|void	|sv_free2	|NN SV* sv

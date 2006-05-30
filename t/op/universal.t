@@ -10,7 +10,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 104;
+plan tests => 109;
 
 $a = {};
 bless $a, "Bob";
@@ -123,9 +123,9 @@ my $subs = join ' ', sort grep { defined &{"UNIVERSAL::$_"} } keys %UNIVERSAL::;
 ## The test for import here is *not* because we want to ensure that UNIVERSAL
 ## can always import; it is an historical accident that UNIVERSAL can import.
 if ('a' lt 'A') {
-    is $subs, "can import isa VERSION";
+    is $subs, "can does import isa VERSION";
 } else {
-    is $subs, "VERSION can import isa";
+    is $subs, "VERSION can does import isa";
 }
 
 ok $a->isa("UNIVERSAL");
@@ -146,9 +146,9 @@ ok $a->isa("UNIVERSAL");
 my $sub2 = join ' ', sort grep { defined &{"UNIVERSAL::$_"} } keys %UNIVERSAL::;
 # XXX import being here is really a bug
 if ('a' lt 'A') {
-    is $sub2, "can import isa VERSION";
+    is $sub2, "can does import isa VERSION";
 } else {
-    is $sub2, "VERSION can import isa";
+    is $sub2, "VERSION can does import isa";
 }
 
 eval 'sub UNIVERSAL::sleep {}';
@@ -200,3 +200,19 @@ is $@, '';
 # This segfaulted in a blead.
 fresh_perl_is('package Foo; Foo->VERSION;  print "ok"', 'ok');
 
+package Foo;
+
+sub does { 1 }
+
+package Bar;
+
+@Bar::ISA = 'Foo';
+
+package Baz;
+
+package main;
+ok( Foo->does( 'bar' ), 'does() should call does() on class' );
+ok( Bar->does( 'Bar' ), '... and should fall back to isa()' );
+ok( Bar->does( 'Foo' ), '... even when inherited' );
+ok( Baz->does( 'Baz' ), '... even without inheriting any other does()' );
+ok( ! Baz->does( 'Foo' ), '... returning true or false appropriately' );

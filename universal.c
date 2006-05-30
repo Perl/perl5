@@ -166,10 +166,60 @@ Perl_sv_derived_from(pTHX_ SV *sv, const char *name)
 
 }
 
+/*
+=for apidoc sv_does
+
+Returns a boolean indicating whether the SV performs a specific, named role.
+The SV can be a Perl object or the name of a Perl class.
+
+=cut
+*/
+
 #include "XSUB.h"
+
+bool
+Perl_sv_does(pTHX_ SV *sv, const char *name)
+{
+    const char *classname;
+    bool does_it;
+
+    dSP;
+    ENTER;
+    SAVETMPS;
+
+    SvGETMAGIC(sv);
+
+    if (!SvOK(sv) || !(SvROK(sv) || (SvPOK(sv) && SvCUR(sv))
+		|| (SvGMAGICAL(sv) && SvPOKp(sv) && SvCUR(sv))))
+	return FALSE;
+
+    if (sv_isobject(sv)) {
+	classname = sv_reftype(SvRV(sv),TRUE);
+    } else {
+	classname = SvPV(sv,PL_na);
+    }
+
+    if (strEQ(name,classname))
+	return TRUE;
+
+    PUSHMARK(SP);
+    XPUSHs(sv);
+    XPUSHs(sv_2mortal(newSVpv(name, 0)));
+    PUTBACK;
+
+    call_method("isa", G_SCALAR);
+    SPAGAIN;
+
+    does_it = SvTRUE( TOPs );
+    FREETMPS;
+    LEAVE;
+
+    return does_it;
+}
 
 PERL_XS_EXPORT_C void XS_UNIVERSAL_isa(pTHX_ CV *cv);
 PERL_XS_EXPORT_C void XS_UNIVERSAL_can(pTHX_ CV *cv);
+PERL_XS_EXPORT_C void XS_UNIVERSAL_DOES(pTHX_ CV *cv);
 PERL_XS_EXPORT_C void XS_UNIVERSAL_VERSION(pTHX_ CV *cv);
 XS(XS_version_new);
 XS(XS_version_stringify);
@@ -210,6 +260,7 @@ Perl_boot_core_UNIVERSAL(pTHX)
 
     newXS("UNIVERSAL::isa",             XS_UNIVERSAL_isa,         file);
     newXS("UNIVERSAL::can",             XS_UNIVERSAL_can,         file);
+    newXS("UNIVERSAL::DOES",            XS_UNIVERSAL_DOES,        file);
     newXS("UNIVERSAL::VERSION", 	XS_UNIVERSAL_VERSION, 	  file);
     {
 	/* register the overloading (type 'A') magic */
@@ -319,6 +370,25 @@ XS(XS_UNIVERSAL_can)
 
     ST(0) = rv;
     XSRETURN(1);
+}
+
+XS(XS_UNIVERSAL_DOES)
+{
+    dVAR;
+    dXSARGS;
+
+    if (items != 2)
+	Perl_croak(aTHX_ "Usage: invocant->does(kind)");
+    else {
+	SV * const sv = ST(0);
+	const char *name;
+
+	name = SvPV_nolen_const(ST(1));
+	if (sv_does( sv, name ))
+	    XSRETURN_YES;
+
+	XSRETURN_NO;
+    }
 }
 
 XS(XS_UNIVERSAL_VERSION)

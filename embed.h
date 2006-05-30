@@ -842,6 +842,7 @@
 #define sv_dec			Perl_sv_dec
 #define sv_dump			Perl_sv_dump
 #define sv_derived_from		Perl_sv_derived_from
+#define sv_does			Perl_sv_does
 #define sv_eq			Perl_sv_eq
 #define sv_free			Perl_sv_free
 #ifdef PERL_CORE
@@ -3027,6 +3028,7 @@
 #define sv_dec(a)		Perl_sv_dec(aTHX_ a)
 #define sv_dump(a)		Perl_sv_dump(aTHX_ a)
 #define sv_derived_from(a,b)	Perl_sv_derived_from(aTHX_ a,b)
+#define sv_does(a,b)		Perl_sv_does(aTHX_ a,b)
 #define sv_eq(a,b)		Perl_sv_eq(aTHX_ a,b)
 #define sv_free(a)		Perl_sv_free(aTHX_ a)
 #ifdef PERL_CORE
