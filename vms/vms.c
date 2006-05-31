@@ -9820,7 +9820,7 @@ int Perl_my_utime(pTHX_ const char *file, const struct utimbuf *utimes)
  *
  * A better method might be to use sys$device_scan on the first call, and to
  * search for the device, returning an index into the cached array.
- * The number returned would be more intelligable.
+ * The number returned would be more intelligible.
  * This is probably not worth it, and anyway would take quite a bit longer
  * on the first call.
  */
@@ -9838,7 +9838,7 @@ static mydev_t encode_dev (pTHX_ const char *dev)
 #if LOCKID_MASK
   {
     struct dsc$descriptor_s dev_desc;
-    unsigned long int status, lockid, item = DVI$_LOCKID;
+    unsigned long int status, lockid = 0, item = DVI$_LOCKID;
 
     /* For cluster-mounted disks, the disk lock identifier is unique, so we
        can try that first. */
@@ -9846,7 +9846,16 @@ static mydev_t encode_dev (pTHX_ const char *dev)
     dev_desc.dsc$b_dtype =   DSC$K_DTYPE_T;
     dev_desc.dsc$b_class =   DSC$K_CLASS_S;
     dev_desc.dsc$a_pointer = (char *) dev;  /* Read only parameter */
-    _ckvmssts(lib$getdvi(&item, 0, &dev_desc, &lockid, 0, 0));
+    status = lib$getdvi(&item, 0, &dev_desc, &lockid, 0, 0);
+    if (!(status & 1)) {
+      switch (status) {
+        case SS$_NOSUCHDEV: 
+          SETERRNO(ENODEV, status);
+          return 0;
+        default: 
+          _ckvmssts(status);
+      }
+    }
     if (lockid) return (lockid & ~LOCKID_MASK);
   }
 #endif
