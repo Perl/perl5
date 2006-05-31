@@ -72,11 +72,24 @@ do [$fh, sub {s/$_[1]/pass/; return;}, 'fail'] or die;
 
 print "# 2 tests with pipes from subprocesses.\n";
 
-open $fh, 'echo pass|' or die $!;
+my ($echo_command, $pass_arg, $fail_arg);
+
+if ($^O eq 'VMS') {
+    $echo_command = 'write sys$output';
+    $pass_arg = '"pass"';
+    $fail_arg = '"fail"';
+}
+else {
+    $echo_command = 'echo';
+    $pass_arg = 'pass';
+    $fail_arg = 'fail';
+}
+
+open $fh, "$echo_command $pass_arg|" or die $!;
 
 do $fh or die;
 
-open $fh, 'echo fail|' or die $!;
+open $fh, "$echo_command $fail_arg|" or die $!;
 
 do [$fh, sub {s/$_[1]/pass/; return;}, 'fail'] or die;
 
