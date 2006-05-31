@@ -181,11 +181,8 @@ find(sub {
     if ("$File::Find::dir/$_" =~ m{^ext\b(.*)/([^/]+)\.pm$}) {
 	my($path, $modname) = ($1,$2);
 
-	# strip trailing component first
-	$path =~ s{/[^/]*$}{};
-
-	# strip optional "/lib";
-	$path =~ s{/lib\b}{};
+	# strip to optional "/lib", or remove trailing component
+	$path =~ s{.*/lib\b}{} or $path =~ s{/[^/]*$}{};
 
 	# strip any leading /
 	$path =~ s{^/}{};
@@ -862,7 +859,7 @@ sub installlib {
     }
 
     if (-f $_) {
-	if (/\.(?:al|ix)$/ && !($dir =~ m[^auto/(.*)$] && $archpms{$1})) {
+	if (/\.(?:al|ix)$/ && !($dir =~ m[^auto/(.*)$])) {
 	    $installlib = $installprivlib;
 	    #We're installing *.al and *.ix files into $installprivlib,
 	    #but we have to delete old *.al and *.ix files from the 5.000
