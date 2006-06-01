@@ -4404,6 +4404,10 @@ Builtin types include:
     REF
     GLOB
     LVALUE
+    FORMAT
+    IO
+    VSTRING
+    Regexp
 
 If the referenced object has been blessed into a package, then that package
 name is returned instead.  You can think of C<ref> as a C<typeof> operator.
