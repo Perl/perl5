@@ -3126,8 +3126,6 @@ PP(pp_substr)
 		sv_upgrade(TARG, SVt_PVLV);
 		sv_magic(TARG, NULL, PERL_MAGIC_substr, NULL, 0);
 	    }
-	    else
-		SvOK_off(TARG);
 
 	    LvTYPE(TARG) = 'x';
 	    if (LvTARG(TARG) != sv) {
