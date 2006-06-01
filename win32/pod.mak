@@ -120,6 +120,7 @@ POD = \
 	perltrap.pod	\
 	perlunicode.pod	\
 	perluniintro.pod	\
+	perlunitut.pod	\
 	perlutil.pod	\
 	perlvar.pod	\
 	perlxs.pod	\
