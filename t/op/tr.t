@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 100;
+plan tests => 102;
 
 my $Is_EBCDIC = (ord('i') == 0x89 & ord('J') == 0xd1);
 
@@ -384,3 +384,13 @@ is( ref $x, 'SCALAR', "    doesn't stringify its argument" );
 # rt.perl.org 36622.  Perl didn't like a y/// at end of file.  No trailing
 # newline allowed.
 fresh_perl_is(q[$_ = "foo"; y/A-Z/a-z/], '');
+{ # related to [perl #27940]
+    my $c;
+
+    ($c = "\x20\c@\x30\cA\x40\cZ\x50\c_\x60") =~ tr/\c@-\c_//d;
+    is($c, "\x20\x30\x40\x50\x60", "tr/\\c\@-\\c_//d");
+
+    ($c = "\x20\x00\x30\x01\x40\x1A\x50\x1F\x60") =~ tr/\x00-\x1f//d;
+    is($c, "\x20\x30\x40\x50\x60", "tr/\\x00-\\x1f//d");
+}
+

@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 131 );
+plan( tests => 133 );
 
 $x = 'foo';
 $_ = "x";
@@ -552,4 +552,14 @@ is($name, "cis", q[#22351 bug with 'e' substitution modifier]);
     is(length($x), 2, '[perl #34171]');
 }
 
+
+{ # [perl #27940] perlbug: [\x00-\x1f] works, [\c@-\c_] does not
+    my $c;
+
+    ($c = "\x20\c@\x30\cA\x40\cZ\x50\c_\x60") =~ s/[\c@-\c_]//g;
+    is($c, "\x20\x30\x40\x50\x60", "s/[\\c\@-\\c_]//g");
+
+    ($c = "\x20\x00\x30\x01\x40\x1A\x50\x1F\x60") =~ s/[\x00-\x1f]//g;
+    is($c, "\x20\x30\x40\x50\x60", "s/[\\x00-\\x1f]//g");
+}
 

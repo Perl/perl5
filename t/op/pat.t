@@ -6,7 +6,8 @@
 
 $| = 1;
 
-print "1..1195\n";
+# please update note at bottom of file when you change this
+print "1..1215\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3301,6 +3302,7 @@ ok("abc" =~ /[^\cA-\cB]/, '\cA in negated character class range');
 ok("a\cBb" =~ /[\cA-\cC]/, '\cB in character class range');
 ok("a\cCbc" =~ /[^\cA-\cB]/, '\cC in negated character class range');
 ok("a\cAb" =~ /(??{"\cA"})/, '\cA in ??{} pattern');
+ok("ab" !~ /a\cIb/x, '\cI in pattern');
 
 # perl #28532: optional zero-width match at end of string is ignored
 ok(("abc" =~ /^abc(\z)?/) && defined($1),
@@ -3416,5 +3418,31 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
        "# assigning to original string should not corrupt match vars");
 }
 
-# last test 1195
+{ # related to [perl #27940]
+    ok("\0-A"  =~ /\c@-A/, '@- should not be interpolated in a pattern');
+    ok("\0\0A" =~ /\c@+A/, '@+ should not be interpolated in a pattern');
+    ok("X\@-A"  =~ /X@-A/, '@- should not be interpolated in a pattern');
+    ok("X\@\@A" =~ /X@+A/, '@+ should not be interpolated in a pattern');
+
+    ok("X\0A" =~ /X\c@?A/,  '\c@?');
+    ok("X\0A" =~ /X\c@*A/,  '\c@*');
+    ok("X\0A" =~ /X\c@(A)/, '\c@(');
+    ok("X\0A" =~ /X(\c@)A/, '\c@)');
+    ok("X\0A" =~ /X\c@|ZA/, '\c@|');
+
+    ok("X\@A" =~ /X@?A/,  '@?');
+    ok("X\@A" =~ /X@*A/,  '@*');
+    ok("X\@A" =~ /X@(A)/, '@(');
+    ok("X\@A" =~ /X(@)A/, '@)');
+    ok("X\@A" =~ /X@|ZA/, '@|');
+
+    local $" = ','; # non-whitespace and non-RE-specific
+    ok('abc' =~ /(.)(.)(.)/, 'the last successful match is bogus');
+    ok("A@+B"  =~ /A@{+}B/,  'interpolation of @+ in /@{+}/');
+    ok("A@-B"  =~ /A@{-}B/,  'interpolation of @- in /@{-}/');
+    ok("A@+B"  =~ /A@{+}B/x, 'interpolation of @+ in /@{+}/x');
+    ok("A@-B"  =~ /A@{-}B/x, 'interpolation of @- in /@{-}/x');
+}
+
+# last test 1215
 
