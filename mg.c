@@ -1103,10 +1103,20 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 		Stat_t st;
 		I32 i;
 		s = delimcpy(tmpbuf, tmpbuf + sizeof tmpbuf,
-			     s, strend, ':', &i);
+			     s, strend, 
+#ifdef VMS
+                                       '|',  /* Hmm.  How do we get $Config{path_sep} from C? */
+#else
+                                       ':', 
+#endif
+                                            &i);
 		s++;
 		if (i >= (I32)sizeof tmpbuf   /* too long -- assume the worst */
-		      || *tmpbuf != '/'
+#ifdef VMS
+		      || !strchr(tmpbuf, ':') /* no colon thus no device name -- assume relative path */
+#else
+		      || *tmpbuf != '/'       /* no starting slash -- assume relative path */
+#endif
 		      || (PerlLIO_stat(tmpbuf, &st) == 0 && (st.st_mode & 2)) ) {
 		    MgTAINTEDDIR_on(mg);
 		    return 0;
