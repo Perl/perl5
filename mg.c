@@ -1097,19 +1097,18 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 #endif /* VMS */
 	if (s && klen == 4 && strEQ(ptr,"PATH")) {
 	    const char * const strend = s + len;
+#ifdef VMS  /* Hmm.  How do we get $Config{path_sep} from C? */
+	    const char path_sep = '|';
+#else
+	    const char path_sep = ':';
+#endif
 
 	    while (s < strend) {
 		char tmpbuf[256];
 		Stat_t st;
 		I32 i;
 		s = delimcpy(tmpbuf, tmpbuf + sizeof tmpbuf,
-			     s, strend, 
-#ifdef VMS
-                                       '|',  /* Hmm.  How do we get $Config{path_sep} from C? */
-#else
-                                       ':', 
-#endif
-                                            &i);
+			     s, strend, path_sep, &i);
 		s++;
 		if (i >= (I32)sizeof tmpbuf   /* too long -- assume the worst */
 #ifdef VMS
