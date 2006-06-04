@@ -3768,42 +3768,8 @@ PP(pp_smartmatch)
     return do_smartmatch(NULL, NULL);
 }
 
-/* This version of do_smartmatch() implements the following
-   table of smart matches:
-    
-    $a      $b        Type of Match Implied    Matching Code
-    ======  =====     =====================    =============
-    (overloading trumps everything)
-
-    Code[+] Code[+]   referential equality     match if refaddr($a) == refaddr($b)
-    Any     Code[+]   scalar sub truth         match if $b->($a)
-
-    Hash    Hash      hash keys identical      match if sort(keys(%$a)) ÈeqÇ sort(keys(%$b))
-    Hash    Array     hash value slice truth   match if $a->{any(@$b)}
-    Hash    Regex     hash key grep            match if any(keys(%$a)) =~ /$b/
-    Hash    Any       hash entry existence     match if exists $a->{$b}
-
-    Array   Array     arrays are identical[*]  match if $a È~~Ç $b
-    Array   Regex     array grep               match if any(@$a) =~ /$b/
-    Array   Num       array contains number    match if any($a) == $b
-    Array   Any       array contains string    match if any($a) eq $b
-
-    Any     undef     undefined                match if !defined $a
-    Any     Regex     pattern match            match if $a =~ /$b/
-    Code()  Code()    results are equal        match if $a->() eq $b->()
-    Any     Code()    simple closure truth     match if $b->() (ignoring $a)
-    Num     numish[!] numeric equality         match if $a == $b
-    Any     Str       string equality          match if $a eq $b
-    Any     Num       numeric equality         match if $a == $b
-
-    Any     Any       string equality          match if $a eq $b
-
-
- + - this must be a code reference whose prototype (if present) is not ""
-     (subs with a "" prototype are dealt with by the 'Code()' entry lower down)
- * - if a circular reference is found, we fall back to referential equality
- ! - either a real number, or a string that looks_like_number()
-
+/* This version of do_smartmatch() implements the
+ * table of smart matches that is found in perlsyn.
  */
 STATIC
 OP *

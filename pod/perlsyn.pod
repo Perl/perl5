@@ -698,7 +698,9 @@ order, determines the match behaviour.
 
  + - this must be a code reference whose prototype (if present) is not ""
      (subs with a "" prototype are dealt with by the 'Code()' entry lower down)
- * - if a circular reference is found, we fall back to referential equality
+ * - that is, each element matches the element of same index in the other
+     array. If a circular reference is found, we fall back to referential
+     equality.
  ! - either a real number, or a string that looks like a number
 
 The "matching code" doesn't represent the I<real> matching code,
