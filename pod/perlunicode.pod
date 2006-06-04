@@ -153,7 +153,6 @@ Additionally, if you
 you can use the C<\N{...}> notation and put the official Unicode
 character name within the braces, such as C<\N{WHITE SMILING FACE}>.
 
-
 =item *
 
 If an appropriate L<encoding> is specified, identifiers within the
@@ -182,7 +181,120 @@ with byte semantics.)
 
 Named Unicode properties, scripts, and block ranges may be used like
 character classes via the C<\p{}> "matches property" construct and
-the  C<\P{}> negation, "doesn't match property".
+the C<\P{}> negation, "doesn't match property".
+
+See L</"Unicode  Character Properties"> for more details.
+
+You can define your own character properties and use them
+in the regular expression with the C<\p{}> or C<\P{}> construct.
+
+See L</"User-Defined Character Properties"> for more details.
+
+=item *
+
+The special pattern C<\X> matches any extended Unicode
+sequence--"a combining character sequence" in Standardese--where the
+first character is a base character and subsequent characters are mark
+characters that apply to the base character.  C<\X> is equivalent to
+C<(?:\PM\pM*)>.
+
+=item *
+
+The C<tr///> operator translates characters instead of bytes.  Note
+that the C<tr///CU> functionality has been removed.  For similar
+functionality see pack('U0', ...) and pack('C0', ...).
+
+=item *
+
+Case translation operators use the Unicode case translation tables
+when character input is provided.  Note that C<uc()>, or C<\U> in
+interpolated strings, translates to uppercase, while C<ucfirst>,
+or C<\u> in interpolated strings, translates to titlecase in languages
+that make the distinction.
+
+=item *
+
+Most operators that deal with positions or lengths in a string will
+automatically switch to using character positions, including
+C<chop()>, C<chomp()>, C<substr()>, C<pos()>, C<index()>, C<rindex()>,
+C<sprintf()>, C<write()>, and C<length()>.  An operator that
+specifically does not switch is C<vec()>.  Operators that really don't 
+care include operators that treat strings as a bucket of bits such as 
+C<sort()>, and operators dealing with filenames.
+
+=item *
+
+The C<pack()>/C<unpack()> letter C<C> does I<not> change, since it is often 
+used for byte-oriented formats.  Again, think C<char> in the C language.
+
+There is a new C<U> specifier that converts between Unicode characters
+and code points. There is also a C<W> specifier that is the equivalent of
+C<chr>/C<ord> and properly handles character values even if they are above 255.
+
+=item *
+
+The C<chr()> and C<ord()> functions work on characters, similar to
+C<pack("W")> and C<unpack("W")>, I<not> C<pack("C")> and
+C<unpack("C")>.  C<pack("C")> and C<unpack("C")> are methods for
+emulating byte-oriented C<chr()> and C<ord()> on Unicode strings.
+While these methods reveal the internal encoding of Unicode strings,
+that is not something one normally needs to care about at all.
+
+=item *
+
+The bit string operators, C<& | ^ ~>, can operate on character data.
+However, for backward compatibility, such as when using bit string
+operations when characters are all less than 256 in ordinal value, one
+should not use C<~> (the bit complement) with characters of both
+values less than 256 and values greater than 256.  Most importantly,
+DeMorgan's laws (C<~($x|$y) eq ~$x&~$y> and C<~($x&$y) eq ~$x|~$y>)
+will not hold.  The reason for this mathematical I<faux pas> is that
+the complement cannot return B<both> the 8-bit (byte-wide) bit
+complement B<and> the full character-wide bit complement.
+
+=item *
+
+lc(), uc(), lcfirst(), and ucfirst() work for the following cases:
+
+=over 8
+
+=item *
+
+the case mapping is from a single Unicode character to another
+single Unicode character, or
+
+=item *
+
+the case mapping is from a single Unicode character to more
+than one Unicode character.
+
+=back
+
+Things to do with locales (Lithuanian, Turkish, Azeri) do B<not> work
+since Perl does not understand the concept of Unicode locales.
+
+See the Unicode Technical Report #21, Case Mappings, for more details.
+
+But you can also define your own mappings to be used in the lc(),
+lcfirst(), uc(), and ucfirst() (or their string-inlined versions).
+
+See L</"User-Defined Case Mappings"> for more details.
+
+=back
+
+=over 4
+
+=item *
+
+And finally, C<scalar reverse()> reverses by character rather than by byte.
+
+=back
+
+=head2 Unicode Character Properties
+
+Named Unicode properties, scripts, and block ranges may be used like
+character classes via the C<\p{}> "matches property" construct and
+the C<\P{}> negation, "doesn't match property".
 
 For instance, C<\p{Lu}> matches any character with the Unicode "Lu"
 (Letter, uppercase) property, while C<\p{M}> matches any character
@@ -207,6 +319,10 @@ equal to C<\P{Tamil}>.
 B<NOTE: the properties, scripts, and blocks listed here are as of
 Unicode 3.2.0, March 2002, or Perl 5.8.0, July 2002.  Unicode 4.0.0
 came out in April 2003, and Perl 5.8.1 in September 2003.>
+
+=over 4
+
+=item General Category
 
 Here are the basic Unicode General Category properties, followed by their
 long form.  You can use either; C<\p{Lu}> and C<\p{UppercaseLetter}>,
@@ -271,6 +387,8 @@ representation of Unicode characters, there is no need to implement
 the somewhat messy concept of surrogates. C<Cs> is therefore not
 supported.
 
+=item Bidirectional Character Types
+
 Because scripts differ in their directionality--Hebrew is
 written right to left, for example--Unicode supplies these properties in
 the BidiClass class:
@@ -300,9 +418,7 @@ the BidiClass class:
 For example, C<\p{BidiClass:R}> matches characters that are normally
 written right to left.
 
-=back
-
-=head2 Scripts
+=item Scripts
 
 The script names which can be used by C<\p{...}> and C<\P{...}>,
 such as in C<\p{Latin}> or C<\p{Cyrillic}>, are as follows:
@@ -352,6 +468,8 @@ such as in C<\p{Latin}> or C<\p{Cyrillic}>, are as follows:
     Tibetan
     Yi
 
+=item Extended property classes
+
 Extended property classes can supplement the basic
 properties, defined by the F<PropList> Unicode database:
 
@@ -399,11 +517,13 @@ and there are further derived properties:
     Common          Any character (or unassigned code point)
                     not explicitly assigned to a script
 
+=item Use of "Is" Prefix
+
 For backward compatibility (with Perl 5.6), all properties mentioned
 so far may have C<Is> prepended to their name, so C<\P{IsLu}>, for
 example, is equal to C<\P{Lu}>.
 
-=head2 Blocks
+=item Blocks
 
 In addition to B<scripts>, Unicode also defines B<blocks> of
 characters.  The difference between scripts and blocks is that the
@@ -542,101 +662,6 @@ These block names are supported:
     InYiRadicals
     InYiSyllables
 
-=over 4
-
-=item *
-
-The special pattern C<\X> matches any extended Unicode
-sequence--"a combining character sequence" in Standardese--where the
-first character is a base character and subsequent characters are mark
-characters that apply to the base character.  C<\X> is equivalent to
-C<(?:\PM\pM*)>.
-
-=item *
-
-The C<tr///> operator translates characters instead of bytes.  Note
-that the C<tr///CU> functionality has been removed.  For similar
-functionality see pack('U0', ...) and pack('C0', ...).
-
-=item *
-
-Case translation operators use the Unicode case translation tables
-when character input is provided.  Note that C<uc()>, or C<\U> in
-interpolated strings, translates to uppercase, while C<ucfirst>,
-or C<\u> in interpolated strings, translates to titlecase in languages
-that make the distinction.
-
-=item *
-
-Most operators that deal with positions or lengths in a string will
-automatically switch to using character positions, including
-C<chop()>, C<chomp()>, C<substr()>, C<pos()>, C<index()>, C<rindex()>,
-C<sprintf()>, C<write()>, and C<length()>.  An operator that
-specifically does not switch is C<vec()>.  Operators that really don't 
-care include operators that treat strings as a bucket of bits such as 
-C<sort()>, and operators dealing with filenames.
-
-=item *
-
-The C<pack()>/C<unpack()> letter C<C> does I<not> change, since it is often 
-used for byte-oriented formats.  Again, think C<char> in the C language.
-
-There is a new C<U> specifier that converts between Unicode characters
-and code points. There is also a C<W> specifier that is the equivalent of
-C<chr>/C<ord> and properly handles character values even if they are above 255.
-
-=item *
-
-The C<chr()> and C<ord()> functions work on characters, similar to
-C<pack("W")> and C<unpack("W")>, I<not> C<pack("C")> and
-C<unpack("C")>.  C<pack("C")> and C<unpack("C")> are methods for
-emulating byte-oriented C<chr()> and C<ord()> on Unicode strings.
-While these methods reveal the internal encoding of Unicode strings,
-that is not something one normally needs to care about at all.
-
-=item *
-
-The bit string operators, C<& | ^ ~>, can operate on character data.
-However, for backward compatibility, such as when using bit string
-operations when characters are all less than 256 in ordinal value, one
-should not use C<~> (the bit complement) with characters of both
-values less than 256 and values greater than 256.  Most importantly,
-DeMorgan's laws (C<~($x|$y) eq ~$x&~$y> and C<~($x&$y) eq ~$x|~$y>)
-will not hold.  The reason for this mathematical I<faux pas> is that
-the complement cannot return B<both> the 8-bit (byte-wide) bit
-complement B<and> the full character-wide bit complement.
-
-=item *
-
-lc(), uc(), lcfirst(), and ucfirst() work for the following cases:
-
-=over 8
-
-=item *
-
-the case mapping is from a single Unicode character to another
-single Unicode character, or
-
-=item *
-
-the case mapping is from a single Unicode character to more
-than one Unicode character.
-
-=back
-
-Things to do with locales (Lithuanian, Turkish, Azeri) do B<not> work
-since Perl does not understand the concept of Unicode locales.
-
-See the Unicode Technical Report #21, Case Mappings, for more details.
-
-=back
-
-=over 4
-
-=item *
-
-And finally, C<scalar reverse()> reverses by character rather than by byte.
-
 =back
 
 =head2 User-Defined Character Properties
@@ -755,9 +780,16 @@ two (or more) classes.
 It's important to remember not to use "&" for the first set -- that
 would be intersecting with nothing (resulting in an empty set).
 
+A final note on the user-defined property tests: they will be used
+only if the scalar has been marked as having Unicode characters.
+Old byte-style strings will not be affected.
+
+=head2 User-Defined Case Mappings
+
 You can also define your own mappings to be used in the lc(),
 lcfirst(), uc(), and ucfirst() (or their string-inlined versions).
-The principle is the same: define subroutines in the C<main> package
+The principle is similar to that of user-defined character
+properties: to define subroutines in the C<main> package
 with names like C<ToLower> (for lc() and lcfirst()), C<ToTitle> (for
 the first character in ucfirst()), and C<ToUpper> (for uc(), and the
 rest of the characters in ucfirst()).
@@ -801,9 +833,9 @@ are not directly user-accessible, one can use either the
 C<Unicode::UCD> module, or just match case-insensitively (that's when
 the C<Fold> mapping is used).
 
-A final note on the user-defined property tests and mappings: they
-will be used only if the scalar has been marked as having Unicode
-characters.  Old byte-style strings will not be affected.
+A final note on the user-defined case mappings: they will be used
+only if the scalar has been marked as having Unicode characters.
+Old byte-style strings will not be affected.
 
 =head2 Character Encodings for Input and Output
 
