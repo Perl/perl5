@@ -32,9 +32,18 @@ $SIG{__WARN__} = sub {
 #################################
 pass("CANONICAL B::Concise EXAMPLE");
 
+my @open_todo;
+sub open_todo {
+    if (((caller 0)[10]||{})->{open}) {
+	@open_todo = (skip => "\$^OPEN is set");
+    }
+}
+open_todo;
+
 checkOptree ( name	=> 'canonical example w -basic',
 	      bcopts	=> '-basic',
 	      code	=>  sub{$a=$b+42},
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 7  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->7
@@ -62,6 +71,7 @@ EONT_EONT
 checkOptree ( name	=> 'canonical example w -exec',
 	      bcopts	=> '-exec',
 	      code	=> sub{$a=$b+42},
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate(main 61 optree_concise.t:139) v:{
 # 2  <#> gvsv[*b] s
@@ -86,6 +96,7 @@ pass("B::Concise OPTION TESTS");
 checkOptree ( name	=> '-base3 sticky-exec',
 	      bcopts	=> '-base3',
 	      code	=> sub{$a=$b+42},
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 1  <;> dbstate(main 24 optree_concise.t:132) v:{
 2  <#> gvsv[*b] s
@@ -107,6 +118,7 @@ EONT_EONT
 checkOptree ( name	=> 'sticky-base3, -basic over sticky-exec',
 	      bcopts	=> '-basic',
 	      code	=> sub{$a=$b+42},
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 21 <1> leavesub[1 ref] K/REFC,1 ->(end)
 -     <@> lineseq KP ->21
@@ -134,6 +146,7 @@ EONT_EONT
 checkOptree ( name	=> '-base4',
 	      bcopts	=> [qw/ -basic -base4 /],
 	      code	=> sub{$a=$b+42},
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 13 <1> leavesub[1 ref] K/REFC,1 ->(end)
 -     <@> lineseq KP ->13
@@ -162,6 +175,7 @@ checkOptree ( name	=> "restore -base36 default",
 	      bcopts	=> [qw/ -basic -base36 /],
 	      code	=> sub{$a},
 	      crossfail	=> 1,
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
 -     <@> lineseq KP ->3
@@ -214,6 +228,7 @@ checkOptree ( name => 'cmdline invoke -basic works',
 			'Name "main::a" used only once: possible typo at -e line 1.',
 			],
 	      #bcopts	=> '-basic', # default
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 7  <@> leave[1 ref] vKP/REFC ->(end)
 # 1     <0> enter ->2
@@ -238,6 +253,7 @@ checkOptree ( name => 'cmdline invoke -exec works',
 			'Name "main::a" used only once: possible typo at -e line 1.',
 			],
 	      bcopts => '-exec',
+	      @open_todo,
 	      expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 1  <0> enter 
 2  <;> nextstate(main 1 -e:1) v:{
@@ -284,6 +300,7 @@ checkOptree
       prog	=> 'our @a; sort @a',
       bcopts	=> [qw/ -basic -concise -exec /],
       errs	=> ['Useless use of sort in void context at -e line 1.'],
+      @open_todo,
       expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <0> enter 
 # 2  <;> nextstate(main 1 -e:1) v:{
@@ -363,6 +380,7 @@ pass("set_up_relative_test, new callback installed");
 checkOptree ( name	=> 'callback used, independent of style',
 	      bcopts	=> [qw/ -concise -exec /],
 	      code	=> sub{$a=$b+42},
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 1  <;> nextstate(main 76 optree_concise.t:337) v:{
 2  <#> gvsv[*b] s

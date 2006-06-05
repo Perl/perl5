@@ -36,6 +36,13 @@ SKIP: {
     skip "no perlio in this build", $tests
     unless $Config::Config{useperlio};
 
+my @open_todo;
+sub open_todo {
+    if (((caller 0)[10]||{})->{open}) {
+	@open_todo = (skip => "\$^OPEN is set");
+    }
+}
+open_todo;
 
 pass("REGEX TEST HARNESS SELFTEST");
 
@@ -150,6 +157,7 @@ pass ("REFTEXT FIXUP TESTS");
 checkOptree ( name	=> 'fixup nextstate (in reftext)',
 	      bcopts	=> '-exec',
 	      code	=> sub {my $a},
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate( NOTE THAT THIS CAN BE ANYTHING ) v
 # 2  <0> padsv[$a:54,55] M/LVINTRO
@@ -164,6 +172,7 @@ checkOptree ( name	=> 'fixup opcode args',
 	      bcopts	=> '-exec',
 	      #fail	=> 1, # uncomment to see real padsv args: [$a:491,492] 
 	      code	=> sub {my $a},
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate(main 56 optree_concise.t:96) v
 # 2  <0> padsv[$a:56,57] M/LVINTRO
@@ -182,6 +191,7 @@ checkOptree ( name	=> 'canonical example w -basic',
 	      code	=>  sub{$a=$b+42},
 	      crossfail => 1,
 	      debug	=> 1,
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 7  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->7

@@ -47,11 +47,19 @@ my @warnings_todo;
    . "propagated to 5.8.x")
     if $] < 5.009;
 
+my @open_todo;
+sub open_todo {
+    if (((caller 0)[10]||{})->{open}) {
+	@open_todo = (skip => "\$^OPEN is set");
+    }
+}
+open_todo;
 
 checkOptree ( name	=> 'BEGIN',
 	      bcopts	=> 'BEGIN',
 	      prog	=> $src,
 	      @warnings_todo,
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # BEGIN 1:
 # b  <1> leavesub[1 ref] K/REFC,1 ->(end)
@@ -102,6 +110,7 @@ EONT_EONT
 checkOptree ( name	=> 'END',
 	      bcopts	=> 'END',
 	      prog	=> $src,
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # END 1:
 # 4  <1> leavesub[1 ref] K/REFC,1 ->(end)
@@ -124,6 +133,7 @@ EONT_EONT
 checkOptree ( name	=> 'CHECK',
 	      bcopts	=> 'CHECK',
 	      prog	=> $src,
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # CHECK 1:
 # 4  <1> leavesub[1 ref] K/REFC,1 ->(end)
@@ -147,6 +157,7 @@ checkOptree ( name	=> 'INIT',
 	      bcopts	=> 'INIT',
 	      #todo	=> 'get working',
 	      prog	=> $src,
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # INIT 1:
 # 4  <1> leavesub[1 ref] K/REFC,1 ->(end)
@@ -170,6 +181,7 @@ checkOptree ( name	=> 'all of BEGIN END INIT CHECK -exec',
 	      bcopts	=> [qw/ BEGIN END INIT CHECK -exec /],
 	      prog	=> $src,
 	      @warnings_todo,
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # BEGIN 1:
 # 1  <;> nextstate(B::Concise -234 Concise.pm:328) v:*,&,{,$

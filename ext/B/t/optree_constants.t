@@ -24,6 +24,14 @@ plan tests => $tests;
 SKIP: {
 skip "no perlio in this build", $tests unless $Config::Config{useperlio};
 
+my @open_todo;
+sub open_todo {
+    if (((caller 0)[10]||{})->{open}) {
+	@open_todo = (skip => "\$^OPEN is set");
+    }
+}
+open_todo;
+
 #################################
 
 use constant {		# see also t/op/gv.t line 282
@@ -190,6 +198,7 @@ sub printem {
 
 checkOptree ( name	=> 'call many in a print statement',
 	      code	=> \&printem,
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 9  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->9

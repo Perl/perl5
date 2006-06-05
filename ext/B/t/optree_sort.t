@@ -24,9 +24,18 @@ skip "no perlio in this build", 11 unless $Config::Config{useperlio};
 
 pass("SORT OPTIMIZATION");
 
+my @open_todo;
+sub open_todo {
+    if (((caller 0)[10]||{})->{open}) {
+	@open_todo = (skip => "\$^OPEN is set");
+    }
+}
+open_todo;
+
 checkOptree ( name	=> 'sub {sort @a}',
 	      code	=> sub {sort @a},
 	      bcopts	=> '-exec',
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate(main 424 optree_sort.t:14) v
 # 2  <0> pushmark s
@@ -49,6 +58,7 @@ checkOptree ( name => 'sort @a',
 			'Name "main::a" used only once: possible typo at -e line 1.',
 			],
 	      bcopts => '-exec',
+	      @open_todo,
 	      expect => <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 1  <0> enter 
 2  <;> nextstate(main 1 -e:1) v:{
@@ -70,6 +80,7 @@ EONT_EONT
 checkOptree ( name	=> 'sub {@a = sort @a}',
 	      code	=> sub {@a = sort @a},
 	      bcopts	=> '-exec',
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 1  <;> nextstate(main -438 optree.t:244) v
 2  <0> pushmark s
@@ -99,6 +110,7 @@ EONT_EONT
 checkOptree ( name	=> '@a = sort @a',
 	      prog	=> '@a = sort @a',
 	      bcopts	=> '-exec',
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 1  <0> enter 
 2  <;> nextstate(main 1 -e:1) v:{
@@ -122,6 +134,7 @@ EONT_EONT
 checkOptree ( name	=> 'sub {@a = sort @a; reverse @a}',
 	      code	=> sub {@a = sort @a; reverse @a},
 	      bcopts	=> '-exec',
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 1  <;> nextstate(main -438 optree.t:286) v
 2  <0> pushmark s
@@ -154,6 +167,7 @@ checkOptree ( name	=> '@a = sort @a; reverse @a',
 	      prog	=> '@a = sort @a; reverse @a',
 	      errs      => ['Useless use of reverse in void context at -e line 1.'],
 	      bcopts	=> '-exec',
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 1  <0> enter 
 2  <;> nextstate(main 1 -e:1) v:{
@@ -187,6 +201,7 @@ EONT_EONT
 checkOptree ( name	=> 'sub {my @a; @a = sort @a}',
 	      code	=> sub {my @a; @a = sort @a},
 	      bcopts	=> '-exec',
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 1  <;> nextstate(main -437 optree.t:254) v
 2  <0> padav[@a:-437,-436] vM/LVINTRO
@@ -216,6 +231,7 @@ EONT_EONT
 checkOptree ( name	=> 'my @a; @a = sort @a',
 	      prog	=> 'my @a; @a = sort @a',
 	      bcopts	=> '-exec',
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 1  <0> enter 
 2  <;> nextstate(main 1 -e:1) v:{
@@ -242,6 +258,7 @@ checkOptree ( name	=> 'sub {my @a; @a = sort @a; push @a, 1}',
 	      code	=> sub {my @a; @a = sort @a; push @a, 1},
 	      bcopts	=> '-exec',
 	      debug	=> 0,
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 1  <;> nextstate(main -437 optree.t:325) v
 2  <0> padav[@a:-437,-436] vM/LVINTRO
@@ -276,6 +293,7 @@ checkOptree ( name	=> 'sub {my @a; @a = sort @a; 1}',
 	      code	=> sub {my @a; @a = sort @a; 1},
 	      bcopts	=> '-exec',
 	      debug	=> 0,
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 1  <;> nextstate(main -437 optree.t:325) v
 2  <0> padav[@a:-437,-436] vM/LVINTRO

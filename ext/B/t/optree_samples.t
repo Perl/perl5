@@ -25,11 +25,20 @@ pass("GENERAL OPTREE EXAMPLES");
 
 pass("IF,THEN,ELSE, ?:");
 
+my @open_todo;
+sub open_todo {
+    if (((caller 0)[10]||{})->{open}) {
+	@open_todo = (skip => "\$^OPEN is set");
+    }
+}
+open_todo;
+
 checkOptree ( name	=> '-basic sub {if shift print then,else}',
 	      bcopts	=> '-basic',
 	      code	=> sub { if (shift) { print "then" }
 				 else       { print "else" }
 			     },
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 9  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->9
@@ -78,6 +87,7 @@ checkOptree ( name	=> '-basic (see above, with my $a = shift)',
 				 if ($a) { print "foo" }
 				 else    { print "bar" }
 			     },
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # d  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->d
@@ -133,6 +143,7 @@ checkOptree ( name	=> '-exec sub {if shift print then,else}',
 	      code	=> sub { if (shift) { print "then" }
 				 else       { print "else" }
 			     },
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate(main 426 optree.t:16) v
 # 2  <#> gv[*_] s
@@ -175,6 +186,7 @@ checkOptree ( name	=> '-exec (see above, with my $a = shift)',
 				 if ($a) { print "foo" }
 				 else    { print "bar" }
 			     },
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate(main 423 optree.t:16) v
 # 2  <#> gv[*_] s
@@ -222,6 +234,7 @@ EONT_EONT
 checkOptree ( name	=> '-exec sub { print (shift) ? "foo" : "bar" }',
 	      code	=> sub { print (shift) ? "foo" : "bar" },
 	      bcopts	=> '-exec',
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate(main 428 optree.t:31) v
 # 2  <0> pushmark s
@@ -253,6 +266,7 @@ pass ("FOREACH");
 checkOptree ( name	=> '-exec sub { foreach (1..10) {print "foo $_"} }',
 	      code	=> sub { foreach (1..10) {print "foo $_"} },
 	      bcopts	=> '-exec',
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate(main 443 optree.t:158) v
 # 2  <0> pushmark s
@@ -296,6 +310,7 @@ EONT_EONT
 checkOptree ( name	=> '-basic sub { print "foo $_" foreach (1..10) }',
 	      code	=> sub { print "foo $_" foreach (1..10) }, 
 	      bcopts	=> '-basic',
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # h  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->h
@@ -353,6 +368,7 @@ EONT_EONT
 checkOptree ( name	=> '-exec -e foreach (1..10) {print qq{foo $_}}',
 	      prog	=> 'foreach (1..10) {print qq{foo $_}}',
 	      bcopts	=> '-exec',
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <0> enter 
 # 2  <;> nextstate(main 2 -e:1) v
@@ -398,6 +414,7 @@ EONT_EONT
 checkOptree ( name	=> '-exec sub { print "foo $_" foreach (1..10) }',
 	      code	=> sub { print "foo $_" foreach (1..10) }, 
 	      bcopts	=> '-exec',
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <;> nextstate(main 445 optree.t:167) v
 # 2  <;> nextstate(main 445 optree.t:167) v
@@ -632,6 +649,7 @@ pass("CONSTANTS");
 checkOptree ( name	=> '-e use constant j => qq{junk}; print j',
 	      prog	=> 'use constant j => qq{junk}; print j',
 	      bcopts	=> '-exec',
+	      @open_todo,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 # 1  <0> enter 
 # 2  <;> nextstate(main 71 -e:1) v:{
