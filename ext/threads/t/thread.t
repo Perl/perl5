@@ -160,8 +160,8 @@ package main;
     ok($th->join());
 }
 {
-    # there is a little chance this test case will falsly fail
-    # since it tests rand       
+    # There is a slight chance (<< 1%) this test case will falsely fail
+    # since it tests using rand()
     my %rand : shared;
     rand(10);
     threads->create( sub { $rand{int(rand(10000000000))}++ } ) foreach 1..25;
@@ -169,7 +169,7 @@ package main;
 #    use Data::Dumper qw(Dumper);
 #    print Dumper(\%rand);
     #$val = rand();
-    ok((keys %rand == 25), "Check that rand works after a new thread");
+    ok((keys %rand >= 24), "Check that rand() works after a new thread");
 }
 
 # bugid #24165
