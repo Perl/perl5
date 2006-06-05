@@ -1,5 +1,9 @@
 Revision history for Perl extension threads.
 
+1.32 Mon Jun  5 09:27:53 EDT 2006
+	- Fix for HP-UX 10.20 pthread_attr_getstacksize usage
+	- Check for threads::shared in tests
+
 1.31 Fri May 19 16:06:42 EDT 2006
 	- Explicit thread context
 

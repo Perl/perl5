@@ -16,9 +16,17 @@ BEGIN {
 use ExtUtils::testlib;
 
 use threads;
-use threads::shared;
 
 BEGIN {
+    eval {
+        require threads::shared;
+        import threads::shared;
+    };
+    if ($@ || ! $threads::shared::threads_shared) {
+        print("1..0 # Skip: threads::shared not available\n");
+        exit(0);
+    }
+
     if (($] < 5.008002) && ($threads::shared::VERSION < 0.92)) {
         print("1..0 # Skip: Needs threads::shared 0.92 or later\n");
         exit(0);

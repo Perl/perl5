@@ -16,9 +16,17 @@ BEGIN {
 use ExtUtils::testlib;
 
 use threads;
-use threads::shared;
 
 BEGIN {
+    eval {
+        require threads::shared;
+        import threads::shared;
+    };
+    if ($@ || ! $threads::shared::threads_shared) {
+        print("1..0 # Skip: threads::shared not available\n");
+        exit(0);
+    }
+
     $| = 1;
     print("1..6\n");   ### Number of tests that will be run ###
 };

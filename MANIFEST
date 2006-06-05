@@ -1126,7 +1126,8 @@ ext/Thread/README		Thread README
 ext/Thread/README.threads		Notes about multithreading
 ext/threads/Changes		ithreads
 ext/Thread/Semaphore.pmx	Threadsafe semaphore
-ext/threads/hints/linux.pl	thread shared variables
+ext/threads/hints/hpux.pl	Hint file for HPUX
+ext/threads/hints/linux.pl	Hint file for Linux
 ext/threads/Makefile.PL		ithreads
 ext/Thread/specific.tx		Test thread-specific user data
 ext/threads/README		ithreads

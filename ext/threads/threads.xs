@@ -620,11 +620,14 @@ S_ithread_create(
         /* Try to get thread's actual stack size */
         {
             size_t stacksize;
-            if (! pthread_attr_getstacksize(&attr, &stacksize)) {
-                if (stacksize) {
+#ifdef HPUX1020
+            stacksize = pthread_attr_getstacksize(attr);
+#else
+            if (! pthread_attr_getstacksize(&attr, &stacksize))
+#endif
+                if (stacksize > 0) {
                     thread->stack_size = (IV)stacksize;
                 }
-            }
         }
 #  endif
     }
