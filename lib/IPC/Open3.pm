@@ -262,7 +262,11 @@ sub _open3 {
 	}
 	return 0 if ($cmd[0] eq '-');
 	local($")=(" ");
-	exec @cmd or do { carp "$Me: exec of @cmd failed"; exit 255; };
+	exec @cmd or do {
+	    carp "$Me: exec of @cmd failed";
+	    eval { require POSIX; POSIX::_exit(255); };
+	    exit 255;
+	};
     } elsif ($do_spawn) {
 	# All the bookkeeping of coincidence between handles is
 	# handled in spawn_with_handles.
