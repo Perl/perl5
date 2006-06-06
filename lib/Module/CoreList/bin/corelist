@@ -10,7 +10,7 @@ See L<Module::CoreList> for one.
 
 =head1 SYNOPSIS
 
-    corelist [-a] [ Modulename [ version ]] ...
+    corelist [-a] [ Modulename [ version ]] [ /Modulenameregex/ [ version ] ] ...
     corelist [-v [ version ]]
 
 =head1 OPTIONS
@@ -96,7 +96,29 @@ if(exists $Opts{v} ){
 	    $mod = shift @ARGV;
 	    $ver = (@ARGV && $ARGV[0] =~ /^\d/) ? shift @ARGV : "";
 	}
-	module_version($mod,$ver);
+
+	if ($mod !~ m|^/(.*)/([imosx]*)$|) { # not a regex
+	    module_version($mod,$ver);
+	} else {
+	    my $re;
+	    eval { $re = $2 ? qr/(?$2)($1)/ : qr/$1/; }; # trap exceptions while building regex
+	    if ($@) {
+		# regex errors are usually like 'Quantifier follow nothing in regex; marked by ...'
+		# then we drop text after ';' to shorten message
+		my $errmsg = $@ =~ /(.*);/ ? $1 : $@;
+		warn "\n$mod  is a bad regex: $errmsg\n";
+		next;
+	    }
+	    my @mod = Module::CoreList->find_modules($re);
+	    if (@mod) {
+		module_version($_, $ver) for @mod;
+	    } else {
+		$ver |= '';
+		print "\n$mod $ver has no match in CORE (or so I think)\n";
+	    }
+
+	}
+
     }
 } else {
     pod2usage(0);
@@ -154,6 +176,21 @@ sub module_version {
     $ corelist File::Spec::Aliens
 
     File::Spec::Aliens  was not in CORE (or so I think)
+
+    $ corelist /IPC::Open/
+
+    IPC::Open2  was first released with perl 5
+
+    IPC::Open3  was first released with perl 5
+
+    $ corelist /MANIFEST/i
+
+    ExtUtils::Manifest  was first released with perl 5.001
+
+    $ corelist /Template/
+
+    /Template/  has no match in CORE (or so I think)
+
 
 =head1 COPYRIGHT
 

@@ -1,7 +1,7 @@
 package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %patchlevel %version %families/;
-$VERSION = '2.04';
+$VERSION = '2.05';
 
 =head1 NAME
 
@@ -15,6 +15,11 @@ Module::CoreList - what modules shipped with versions of perl
 
  print Module::CoreList->first_release('File::Spec');       # prints 5.00503
  print Module::CoreList->first_release('File::Spec', 0.82); # prints 5.006001
+
+ print join ', ', Module::CoreList->find_modules(qr/Data/); 
+    # prints 'Data::Dumper'
+ print join ', ', Module::CoreList->find_modules(qr/test::h.*::.*s/i, 5.008008); 
+    # prints 'Test::Harness::Assert, Test::Harness::Straps'
 
  print join ", ", @{ $Module::CoreList::families{5.005} };
     # prints "5.005, 5.00503, 5.00504"
@@ -97,6 +102,21 @@ sub first_release {
 
     return unless @perls;
     return (sort { $released{$a} cmp $released{$b} } @perls)[0];
+}
+
+sub find_modules {
+    my $discard = shift; 
+    my $regex = shift;
+    my @perls = @_;
+    @perls = keys %version unless @perls;
+
+    my %mods;
+    foreach (@perls) {
+        while (my ($k, $v) = each %{$version{$_}}) {
+            $mods{$k}++ if $k =~ $regex;
+        }
+    }
+    return sort keys %mods
 }
 
 
