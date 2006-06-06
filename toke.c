@@ -298,7 +298,7 @@ static struct debug_tokens {
     { WHEN,		TOKENTYPE_IVAL,		"WHEN" },
     { WHILE,		TOKENTYPE_IVAL,		"WHILE" },
     { WORD,		TOKENTYPE_OPVAL,	"WORD" },
-    { 0,		TOKENTYPE_NONE,		0 }
+    { 0,		TOKENTYPE_NONE,		NULL }
 };
 
 /* dump the returned token in rv, plus any optional arg in yylval */
@@ -429,8 +429,8 @@ S_no_op(pTHX_ const char *what, char *s)
 		    "\t(Missing semicolon on previous line?)\n");
 	else if (PL_oldoldbufptr && isIDFIRST_lazy_if(PL_oldoldbufptr,UTF)) {
 	    const char *t;
-	    for (t = PL_oldoldbufptr; *t && (isALNUM_lazy_if(t,UTF) || *t == ':'); t++)
-		/**/;
+	    for (t = PL_oldoldbufptr; (isALNUM_lazy_if(t,UTF) || *t == ':'); t++)
+		NOOP;
 	    if (t < PL_bufptr && isSPACE(*t))
 		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			"\t(Do you need to predeclare %.*s?)\n",
@@ -737,7 +737,9 @@ S_incline(pTHX_ char *s)
 	e = t + 1;
     }
     else {
-	for (t = s; !isSPACE(*t); t++) ;
+	t = s;
+	while (!isSPACE(*t))
+	    t++;
 	e = t;
     }
     while (SPACE_OR_TAB(*e) || *e == '\r' || *e == '\f')
@@ -842,9 +844,10 @@ S_skipspace1(pTHX_ register char *s)
 STATIC char *
 S_skipspace2(pTHX_ register char *s, SV **svp)
 {
-    char *start = s;
-    I32 bufptroff = PL_bufptr - SvPVX(PL_linestr);
-    I32 startoff = start - SvPVX(PL_linestr);
+    char *start;
+    const I32 bufptroff = PL_bufptr - SvPVX(PL_linestr);
+    const I32 startoff = s - SvPVX(PL_linestr);
+
     s = skipspace(s);
     PL_bufptr = SvPVX(PL_linestr) + bufptroff;
     if (!PL_madskills || !svp)
@@ -1075,8 +1078,9 @@ S_check_uni(pTHX)
 	return;
     while (isSPACE(*PL_last_uni))
 	PL_last_uni++;
-    for (s = PL_last_uni; isALNUM_lazy_if(s,UTF) || *s == '-'; s++)
-	/**/;
+    s = PL_last_uni;
+    while (isALNUM_lazy_if(s,UTF) || *s == '-')
+	s++;
     if ((t = strchr(s, '(')) && t < PL_bufptr)
 	return;
 
@@ -1306,7 +1310,7 @@ STATIC void
 S_force_ident(pTHX_ register const char *s, int kind)
 {
     dVAR;
-    if (s && *s) {
+    if (*s) {
 	const STRLEN len = strlen(s);
 	OP* const o = (OP*)newSVOP(OP_CONST, 0, newSVpvn(s, len));
 	start_force(PL_curforce);
@@ -2476,7 +2480,7 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 		}
 	    }
 	} else
-	    gv = 0;
+	    gv = NULL;
     }
     s = scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
     /* start is the beginning of the possible filehandle/object,
@@ -2736,11 +2740,11 @@ S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
     }
 
     /* use constant CLASS => 'MyClass' */
-    if ((gv = gv_fetchpvn_flags(pkgname, len, 0, SVt_PVCV))) {
-        SV *sv;
-        if (GvCV(gv) && (sv = cv_const_sv(GvCV(gv)))) {
+    gv = gv_fetchpvn_flags(pkgname, len, 0, SVt_PVCV);
+    if (gv && GvCV(gv)) {
+	SV * const sv = cv_const_sv(GvCV(gv));
+	if (sv)
             pkgname = SvPV_nolen_const(sv);
-        }
     }
 
     return gv_stashpv(pkgname, FALSE);
@@ -2786,7 +2790,7 @@ Perl_madlex(pTHX)
 	    if (PL_realtokenstart < 0 || !CopLINE(PL_curcop))
 		PL_thistoken = newSVpvn("",0);
 	    else {
-		char *tstart = SvPVX(PL_linestr) + PL_realtokenstart;
+		char * const tstart = SvPVX(PL_linestr) + PL_realtokenstart;
 		PL_thistoken = newSVpvn(tstart, s - tstart);
 	    }
 	}
@@ -3656,8 +3660,10 @@ Perl_yylex(pTHX)
 		}
 #endif
 		if (d) {
-		    while (*d && !isSPACE(*d)) d++;
-		    while (SPACE_OR_TAB(*d)) d++;
+		    while (*d && !isSPACE(*d))
+			d++;
+		    while (SPACE_OR_TAB(*d))
+			d++;
 
 		    if (*d++ == '-') {
 			const bool switches_done = PL_doswitches;
@@ -4461,12 +4467,13 @@ Perl_yylex(pTHX)
 		}
 	}
 	if (PL_lex_brackets < PL_lex_formbrack) {
-	    const char *t;
+	    const char *t = s;
 #ifdef PERL_STRICT_CR
-	    for (t = s; SPACE_OR_TAB(*t); t++) ;
+	    while (SPACE_OR_TAB(*t))
 #else
-	    for (t = s; SPACE_OR_TAB(*t) || *t == '\r'; t++) ;
+	    while (SPACE_OR_TAB(*t) || *t == '\r')
 #endif
+		t++;
 	    if (*t == '\n' || *t == '#') {
 		s--;
 		PL_expect = XBLOCK;
@@ -4594,10 +4601,10 @@ Perl_yylex(pTHX)
 		if (*s == '[') {
 		    PL_tokenbuf[0] = '@';
 		    if (ckWARN(WARN_SYNTAX)) {
-			char *t;
-			for(t = s + 1;
-			    isSPACE(*t) || isALNUM_lazy_if(t,UTF) || *t == '$';
-			    t++) ;
+			char *t = s+1;
+
+			while (isSPACE(*t) || isALNUM_lazy_if(t,UTF) || *t == '$')
+			    t++;
 			if (*t++ == ',') {
 			    PL_bufptr = PEEKSPACE(PL_bufptr); /* XXX can realloc */
 			    while (t < PL_bufend && *t != ']')
@@ -4615,12 +4622,15 @@ Perl_yylex(pTHX)
 			&& (t = strchr(s, '}')) && (t = strchr(t, '=')))
 			{
 			    char tmpbuf[sizeof PL_tokenbuf];
-			    for (t++; isSPACE(*t); t++) ;
+			    do {
+				t++;
+			    } while (isSPACE(*t));
 			    if (isIDFIRST_lazy_if(t,UTF)) {
 				STRLEN dummylen;
 				t = scan_word(t, tmpbuf, sizeof tmpbuf, TRUE,
 					      &dummylen);
-				for (; isSPACE(*t); t++) ;
+				while (isSPACE(*t))
+				    t++;
 				if (*t == ';' && get_cv(tmpbuf, FALSE))
 				    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 						"You need to quote \"%s\"",
@@ -5196,7 +5206,9 @@ Perl_yylex(pTHX)
 		if (*s == '(') {
 		    CLINE;
 		    if (cv) {
-			for (d = s + 1; SPACE_OR_TAB(*d); d++) ;
+			d = s + 1;
+			while (SPACE_OR_TAB(*d))
+			    d++;
 			if (*d == ')' && (sv = gv_const_sv(gv))) {
 			    s = d + 1;
 #ifdef PERL_MAD
@@ -5370,7 +5382,9 @@ Perl_yylex(pTHX)
 		bareword:
 		    if (lastchar != '-') {
 			if (ckWARN(WARN_RESERVED)) {
-			    for (d = PL_tokenbuf; *d && isLOWER(*d); d++) ;
+			    d = PL_tokenbuf;
+			    while (isLOWER(*d))
+				d++;
 			    if (!*d && !gv_stashpv(PL_tokenbuf,FALSE))
 				Perl_warner(aTHX_ packWARN(WARN_RESERVED), PL_warn_reserved,
 				       PL_tokenbuf);
@@ -6011,8 +6025,10 @@ Perl_yylex(pTHX)
 	    s = SKIPSPACE1(s);
 	    if (isIDFIRST_lazy_if(s,UTF)) {
 		const char *t;
-		for (d = s; isALNUM_lazy_if(d,UTF); d++) ;
-		for (t=d; *t && isSPACE(*t); t++) ;
+		for (d = s; isALNUM_lazy_if(d,UTF);)
+		    d++;
+		for (t=d; isSPACE(*t);)
+		    t++;
 		if ( *t && strchr("|&*+-=!?:.", *t) && ckWARN_d(WARN_PRECEDENCE)
 		    /* [perl #16184] */
 		    && !(t[0] == '=' && t[1] == '>')
@@ -6682,7 +6698,7 @@ S_pending_ident(pTHX)
 {
     dVAR;
     register char *d;
-    register PADOFFSET tmp = 0;
+    register I32 tmp = 0;
     /* pit holds the identifier we read and pending_ident is reset */
     char pit = PL_pending_ident;
     PL_pending_ident = 0;
@@ -10364,23 +10380,25 @@ S_scan_word(pTHX_ register char *s, char *dest, STRLEN destlen, int allow_packag
 	    Perl_croak(aTHX_ ident_too_long);
 	if (isALNUM(*s))	/* UTF handled below */
 	    *d++ = *s++;
-	else if (*s == '\'' && allow_package && isIDFIRST_lazy_if(s+1,UTF)) {
+	else if (allow_package && (*s == '\'') && isIDFIRST_lazy_if(s+1,UTF)) {
 	    *d++ = ':';
 	    *d++ = ':';
 	    s++;
 	}
-	else if (*s == ':' && s[1] == ':' && allow_package && s[2] != '$') {
+	else if (allow_package && (s[0] == ':') && (s[1] == ':') && (s[2] != '$')) {
 	    *d++ = *s++;
 	    *d++ = *s++;
 	}
 	else if (UTF && UTF8_IS_START(*s) && isALNUM_utf8((U8*)s)) {
 	    char *t = s + UTF8SKIP(s);
+	    size_t len;
 	    while (UTF8_IS_CONTINUED(*t) && is_utf8_mark((U8*)t))
 		t += UTF8SKIP(t);
-	    if (d + (t - s) > e)
+	    len = t - s;
+	    if (d + len > e)
 		Perl_croak(aTHX_ ident_too_long);
-	    Copy(s, d, t - s, char);
-	    d += t - s;
+	    Copy(s, d, len, char);
+	    d += len;
 	    s = t;
 	}
 	else {
@@ -10493,10 +10511,11 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
 		    Perl_croak(aTHX_ ident_too_long);
 	    }
 	    *d = '\0';
-	    while (s < send && SPACE_OR_TAB(*s)) s++;
+	    while (s < send && SPACE_OR_TAB(*s))
+		s++;
 	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
 		if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, d - dest)) {
-		    const char *brack = *s == '[' ? "[...]" : "{...}";
+		    const char * const brack = (*s == '[') ? "[...]" : "{...}";
 		    Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
 			"Ambiguous use of %c{%s%s} resolved to %c%s%s",
 			funny, dest, brack, funny, dest, brack);
@@ -10525,12 +10544,12 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
 		PL_lex_state = LEX_INTERPEND;
 		PL_expect = XREF;
 	    }
-	    if (funny == '#')
-		funny = '@';
 	    if (PL_lex_state == LEX_NORMAL) {
 		if (ckWARN(WARN_AMBIGUOUS) &&
 		    (keyword(dest, d - dest) || get_cv(dest, FALSE)))
 		{
+		    if (funny == '#')
+			funny = '@';
 		    Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
 			"Ambiguous use of %c{%s} resolved to %c%s",
 			funny, dest, funny, dest);
@@ -10829,7 +10848,9 @@ S_scan_heredoc(pTHX_ register char *s)
     e = PL_tokenbuf + sizeof PL_tokenbuf - 1;
     if (!outer)
 	*d++ = '\n';
-    for (peek = s; SPACE_OR_TAB(*peek); peek++) ;
+    peek = s;
+    while (SPACE_OR_TAB(*peek))
+	peek++;
     if (*peek == '`' || *peek == '\'' || *peek =='"') {
 	s = peek;
 	term = *s++;
@@ -11164,7 +11185,7 @@ S_scan_inputsymbol(pTHX_ char *start)
 	   filehandle
 	*/
 	if (*d == '$') {
-	    PADOFFSET tmp;
+	    I32 tmp;
 
 	    /* try to find it in the pad for this block, otherwise find
 	       add symbol table ops
@@ -11517,7 +11538,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	*/
 #ifdef PERL_MAD
 	if (PL_madskills) {
-	    char *tstart = SvPVX(PL_linestr) + stuffstart;
+	    char * const tstart = SvPVX(PL_linestr) + stuffstart;
 	    if (PL_thisstuff)
 		sv_catpvn(PL_thisstuff, tstart, PL_bufend - tstart);
 	    else
@@ -11557,11 +11578,12 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
     if (!PL_encoding || UTF) {
 #ifdef PERL_MAD
 	if (PL_madskills) {
-	    char *tstart = SvPVX(PL_linestr) + stuffstart;
+	    char * const tstart = SvPVX(PL_linestr) + stuffstart;
+	    const int len = s - start;
 	    if (PL_thisstuff)
-		sv_catpvn(PL_thisstuff, tstart, s - tstart);
+		sv_catpvn(PL_thisstuff, tstart, len);
 	    else
-		PL_thisstuff = newSVpvn(tstart, s - tstart);
+		PL_thisstuff = newSVpvn(tstart, len);
 	    if (!PL_thisclose && !keep_delims)
 		PL_thisclose = newSVpvn(s,termlen);
 	}
@@ -11574,11 +11596,12 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 #ifdef PERL_MAD
     else {
 	if (PL_madskills) {
-	    char *tstart = SvPVX(PL_linestr) + stuffstart;
+	    char * const tstart = SvPVX(PL_linestr) + stuffstart;
+	    const int len = s - tstart - termlen;
 	    if (PL_thisstuff)
-		sv_catpvn(PL_thisstuff, tstart, s - tstart - termlen);
+		sv_catpvn(PL_thisstuff, tstart, len);
 	    else
-		PL_thisstuff = newSVpvn(tstart, s - tstart - termlen);
+		PL_thisstuff = newSVpvn(tstart, len);
 	    if (!PL_thisclose && !keep_delims)
 		PL_thisclose = newSVpvn(s - termlen,termlen);
 	}
@@ -12031,10 +12054,13 @@ S_scan_formline(pTHX_ register char *s)
 
     while (!needargs) {
 	if (*s == '.') {
+	    t = s+1;
 #ifdef PERL_STRICT_CR
-	    for (t = s+1;SPACE_OR_TAB(*t); t++) ;
+	    while (SPACE_OR_TAB(*t))
+		t++;
 #else
-	    for (t = s+1;SPACE_OR_TAB(*t) || *t == '\r'; t++) ;
+	    while (SPACE_OR_TAB(*t) || *t == '\r')
+		t++;
 #endif
 	    if (*t == '\n' || t == PL_bufend) {
 	        eofmt = TRUE;
