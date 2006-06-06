@@ -9,7 +9,7 @@ use strict;
 use warnings;
 use Getopt::Std;
 my @orig_ARGV = @ARGV;
-our $VERSION  = do { my @r = (q$Revision: 2.3 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
+our $VERSION  = do { my @r = (q$Revision: 2.4 $ =~ /\d+/g); sprintf "%d."."%02d" x $#r, @r };
 
 # These may get re-ordered.
 # RAW is a do_now as inserted by &enter
@@ -961,54 +961,60 @@ use vars qw(
         $_LocalVer
         );
 
-sub make_configlocal_pm
-{
+sub make_configlocal_pm {
     eval { require Encode; };
     $@ and die "Unable to require Encode: $@\n";
     eval { require File::Spec; };
+
     # our used for variable expanstion
-    my %in_core = map {$_=>1}('ascii','iso-8859-1','utf8');
+    my %in_core = map { $_ => 1 } (
+        'ascii',      'iso-8859-1', 'utf8',
+        'ascii-ctrl', 'null',       'utf-8-strict'
+    );
     my %LocalMod = ();
-    for my $d (@INC){
-    my $inc = File::Spec->catfile($d, "Encode");
-    -d $inc or next;
-    opendir my $dh, $inc or die "$inc:$!";
-    warn "Checking $inc...\n";
-    for my $f (grep /\.pm$/o, readdir($dh)){
-        -f File::Spec->catfile($inc, "$f") or next;
-        $INC{"Encode/$f"} and next;
-        warn "require Encode/$f;\n";
-        eval { require "Encode/$f"; };
-        $@ and die "Can't require Encode/$f: $@\n";
-        for my $enc (Encode->encodings()){
-        no warnings 'once';
-        $in_core{$enc} and next;
-        $Encode::Config::ExtModule{$enc} and next;
-        my $mod = "Encode/$f"; 
-        $mod =~ s/\.pm$//o; $mod =~ s,/,::,og;
-        $LocalMod{$enc} ||= $mod;
-        }
-    }
-    }
+    # check @enc;
+    use File::Find ();
+    my $wanted = sub{
+	-f $_ or return;
+	$File::Find::name =~ /\A\./        and return;
+	$File::Find::name =~ /\.pm\z/      or  return;
+	$File::Find::name =~ m/\bEncode\b/ or  return;
+	my $mod = $File::Find::name;
+	$mod =~ s/.*\bEncode\b/Encode/o;
+	$mod =~ s/\.pm\z//o;
+	$mod =~ s,/,::,og;
+	warn qq{ require $mod;\n};
+	eval qq{ require $mod; };
+	$@ and die "Can't require $mod: $@\n";
+	for my $enc ( Encode->encodings() ) {
+	    no warnings;
+	    $in_core{$enc}                   and next;
+	    $Encode::Config::ExtModule{$enc} and next;
+	    $LocalMod{$enc} ||= $mod;
+	}
+    };
+    File::Find::find({wanted => $wanted}, @INC);
     $_ModLines = "";
-    for my $enc (sort keys %LocalMod){
-    $_ModLines .= 
-        qq(\$Encode::ExtModule{'$enc'} =\t"$LocalMod{$enc}";\n);
+    for my $enc ( sort keys %LocalMod ) {
+        $_ModLines .=
+          qq(\$Encode::ExtModule{'$enc'} = "$LocalMod{$enc}";\n);
     }
     warn $_ModLines;
     $_LocalVer = _mkversion();
-    $_E2X = find_e2x();
-    $_Inc = $INC{"Encode.pm"}; $_Inc =~ s/\.pm$//o;    
-    _print_expand(File::Spec->catfile($_E2X,"ConfigLocal_PM.e2x"),    
-          File::Spec->catfile($_Inc,"ConfigLocal.pm"),
-          1);
+    $_E2X      = find_e2x();
+    $_Inc      = $INC{"Encode.pm"};
+    $_Inc =~ s/\.pm$//o;
+    _print_expand( File::Spec->catfile( $_E2X, "ConfigLocal_PM.e2x" ),
+        File::Spec->catfile( $_Inc, "ConfigLocal.pm" ), 1 );
     exit;
 }
 
 sub _mkversion{
-    my ($ss,$mm,$hh,$dd,$mo,$yyyy) = localtime();
-    $yyyy += 1900, $mo +=1;
-    return sprintf("v%04d.%04d.%04d", $yyyy, $mo*100+$dd, $hh*100+$mm);
+    # v-string is now depreciated; use time() instead;
+    #my ($ss,$mm,$hh,$dd,$mo,$yyyy) = localtime();
+    #$yyyy += 1900, $mo +=1;
+    #return sprintf("v%04d.%04d.%04d", $yyyy, $mo*100+$dd, $hh*100+$mm);
+    return time();
 }
 
 sub _print_expand{

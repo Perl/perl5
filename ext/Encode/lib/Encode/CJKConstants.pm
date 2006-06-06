@@ -1,13 +1,13 @@
 #
-# $Id: CJKConstants.pm,v 2.1 2006/05/03 18:24:10 dankogai Exp $
+# $Id: CJKConstants.pm,v 2.2 2006/06/03 20:28:48 dankogai Exp dankogai $
 #
 
 package Encode::CJKConstants;
 
 use strict;
-
-our $RCSID = q$Id: CJKConstants.pm,v 2.1 2006/05/03 18:24:10 dankogai Exp $;
-our $VERSION = do { my @r = ( q$Revision: 2.1 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+use warnings;
+our $RCSID = q$Id: CJKConstants.pm,v 2.2 2006/06/03 20:28:48 dankogai Exp dankogai $;
+our $VERSION = do { my @r = ( q$Revision: 2.2 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 use Carp;
 

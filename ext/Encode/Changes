@@ -1,8 +1,20 @@
 # Revision history for Perl extension Encode.
 #
-# $Id: Changes,v 2.16 2006/05/03 18:24:10 dankogai Exp $
+# $Id: Changes,v 2.17 2006/06/03 20:28:48 dankogai Exp dankogai $
 #
-$Revision: 2.16 $ $Date: 2006/05/03 18:24:10 $
+$Revision: 2.17 $ $Date: 2006/06/03 20:28:48 $
+! bin/enc2xs
+  overhauled the -C option
+  - added ascii-ctrl', 'null', 'utf-8-strict' to core
+  - auto-generated Encode::ConfigLocal no longer use v-string for version
+  - now searches modules via File::Find so Encode/JP/Mobile is happy
+! Byte/Byte.pm CN/CN.pm EBCDIC/EBCDIC.pm JP/JP.pm KR/KR.pm Symbol/Symbol.pm
+  use strict added; though all they do is load XS, it's
+  still better a practice
+! *.pm
+  use warnings added to all of them for better practices' sake.
+
+2.17 2006/05/09 17:10:09
 ! encode.pm
   'chin' =~ /^zh_CN|chin(?:a|ese)?$/i is true
   but chin is not china or chinese.

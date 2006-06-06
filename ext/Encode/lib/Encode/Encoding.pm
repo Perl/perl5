@@ -2,7 +2,8 @@ package Encode::Encoding;
 
 # Base class for classes which implement encodings
 use strict;
-our $VERSION = do { my @r = ( q$Revision: 2.3 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
+use warnings;
+our $VERSION = do { my @r = ( q$Revision: 2.4 $ =~ /\d+/g ); sprintf "%d." . "%02d" x $#r, @r };
 
 require Encode;
 
