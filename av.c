@@ -395,8 +395,7 @@ Perl_av_make(pTHX_ register I32 size, register SV **strp)
 	Newx(ary,size,SV*);
 	AvALLOC(av) = ary;
 	SvPV_set(av, (char*)ary);
-	AvFILLp(av) = size - 1;
-	AvMAX(av) = size - 1;
+	AvFILLp(av) = AvMAX(av) = size - 1;
 	for (i = 0; i < size; i++) {
 	    assert (*strp);
 	    ary[i] = newSV(0);
@@ -482,7 +481,7 @@ Perl_av_undef(pTHX_ register AV *av)
 	    SvREFCNT_dec(AvARRAY(av)[--key]);
     }
     Safefree(AvALLOC(av));
-    AvALLOC(av) = 0;
+    AvALLOC(av) = NULL;
     SvPV_set(av, NULL);
     AvMAX(av) = AvFILLp(av) = -1;
 }

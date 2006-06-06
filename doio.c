@@ -188,7 +188,6 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 	STRLEN olen = len;
 	char *tend;
 	int dodup = 0;
-	PerlIO *that_fp = NULL;
 
 	type = savepvn(oname, len);
 	tend = type+len;
@@ -321,6 +320,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 		    fp = supplied_fp;
 		}
 		else {
+		    PerlIO *that_fp = NULL;
 		    if (num_svs > 1) {
 			Perl_croak(aTHX_ "More than one argument to '%c&' open",IoTYPE(io));
 		    }
@@ -339,8 +339,7 @@ Perl_do_openn(pTHX_ GV *gv, register const char *oname, I32 len, int as_raw,
 			    thatio = sv_2io(*svp);
 			}
 			else {
-			    GV *thatgv;
-			    thatgv = gv_fetchpvn_flags(type, tend - type,
+			    GV * const thatgv = gv_fetchpvn_flags(type, tend - type,
 						       0, SVt_PVIO);
 			    thatio = GvIO(thatgv);
 			}
@@ -939,7 +938,7 @@ Perl_nextargv(pTHX_ register GV *gv)
 	if (io && (IoFLAGS(io) & IOf_ARGV)
 	    && PL_argvout_stack && AvFILLp(PL_argvout_stack) >= 0)
 	{
-	    GV *oldout = (GV*)av_pop(PL_argvout_stack);
+	    GV * const oldout = (GV*)av_pop(PL_argvout_stack);
 	    setdefout(oldout);
 	    SvREFCNT_dec(oldout);
 	    return NULL;
@@ -1184,7 +1183,6 @@ my_chsize(int fd, Off_t length)
 	/* code courtesy of William Kucharski */
 #define HAS_CHSIZE
 
-    struct flock fl;
     Stat_t filebuf;
 
     if (PerlLIO_fstat(fd, &filebuf) < 0)
@@ -1204,7 +1202,7 @@ my_chsize(int fd, Off_t length)
     }
     else {
 	/* truncate length */
-
+	struct flock fl;
 	fl.l_whence = 0;
 	fl.l_len = 0;
 	fl.l_start = length;
@@ -1270,7 +1268,7 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	else if (DO_UTF8(sv)) {
 	    STRLEN tmplen = len;
 	    bool utf8 = TRUE;
-	    U8 *result = bytes_from_utf8((const U8*) tmps, &tmplen, &utf8);
+	    U8 * const result = bytes_from_utf8((const U8*) tmps, &tmplen, &utf8);
 	    if (!utf8) {
 		tmpbuf = result;
 		tmps = (char *) tmpbuf;
@@ -1294,8 +1292,7 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
      * io the write failure can be delayed until the flush/close. --jhi */
     if (len && (PerlIO_write(fp,tmps,len) == 0))
 	happy = FALSE;
-    if (tmpbuf)
-	Safefree(tmpbuf);
+    Safefree(tmpbuf);
     return happy ? !PerlIO_error(fp) : FALSE;
 }
 
@@ -1508,7 +1505,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	      if (s[-1] == '\'') {
 		  *--s = '\0';
 		  PERL_FPU_PRE_EXEC
-		  PerlProc_execl(PL_cshname,"csh", flags, ncmd, (char*)0);
+		  PerlProc_execl(PL_cshname, "csh", flags, ncmd, NULL);
 		  PERL_FPU_POST_EXEC
 		  *s = '\'';
 		  Safefree(cmd);
@@ -1556,7 +1553,7 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	    }
 	  doshell:
 	    PERL_FPU_PRE_EXEC
-	    PerlProc_execl(PL_sh_path, "sh", "-c", cmd, (char*)0);
+	    PerlProc_execl(PL_sh_path, "sh", "-c", cmd, NULL);
 	    PERL_FPU_POST_EXEC
 	    Safefree(cmd);
 	    return FALSE;
@@ -2308,12 +2305,10 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
 #endif
     }
     else {
-	I32 n;
 	STRLEN len;
 
 	const char *mbuf = SvPV_const(mstr, len);
-	if ((n = len) > msize)
-	    n = msize;
+	const I32 n = (len > msize) ? msize : len;
 	Copy(mbuf, shm + mpos, n, char);
 	if (n < msize)
 	    memzero(shm + mpos + n, msize - n);

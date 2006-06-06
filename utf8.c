@@ -262,13 +262,10 @@ See also is_utf8_string_loclen() and is_utf8_string_loc().
 bool
 Perl_is_utf8_string(pTHX_ const U8 *s, STRLEN len)
 {
+    const U8* const send = s + (len ? len : strlen((const char *)s));
     const U8* x = s;
-    const U8* send;
 
     PERL_UNUSED_CONTEXT;
-    if (!len)
-	len = strlen((const char *)s);
-    send = s + len;
 
     while (x < send) {
 	STRLEN c;
@@ -329,15 +326,11 @@ See also is_utf8_string_loc() and is_utf8_string().
 bool
 Perl_is_utf8_string_loclen(pTHX_ const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 {
+    const U8* const send = s + (len ? len : strlen((const char *)s));
     const U8* x = s;
-    const U8* send;
     STRLEN c;
     STRLEN outlen = 0;
     PERL_UNUSED_CONTEXT;
-
-    if (!len)
-        len = strlen((const char *)s);
-    send = s + len;
 
     while (x < send) {
 	 /* Inline the easy bits of is_utf8_char() here for speed... */
@@ -820,7 +813,7 @@ Perl_bytes_from_utf8(pTHX_ const U8 *s, STRLEN *len, bool *is_utf8)
 	}
     }
 
-    *is_utf8 = 0;		
+    *is_utf8 = FALSE;
 
     Newx(d, (*len) - count + 1, U8);
     s = start; start = d;
@@ -1389,10 +1382,10 @@ Perl_to_utf8_case(pTHX_ const U8 *p, U8* ustrp, STRLEN *lenp,
     if (special && (uv1 == 0xDF || uv1 > 0xFF)) {
          /* It might be "special" (sometimes, but not always,
 	  * a multicharacter mapping) */
-	 HV *hv;
+	 HV * const hv = get_hv(special, FALSE);
 	 SV **svp;
 
-	 if ((hv  = get_hv(special, FALSE)) &&
+	 if (hv &&
 	     (svp = hv_fetch(hv, (const char*)tmpbuf, UNISKIP(uv1), FALSE)) &&
 	     (*svp)) {
 	     const char *s;
@@ -1648,7 +1641,7 @@ Perl_swash_fetch(pTHX_ SV *swash, const U8 *ptr, bool do_utf8)
     U32 bit;
     SV *swatch;
     U8 tmputf8[2];
-    UV c = NATIVE_TO_ASCII(*ptr);
+    const UV c = NATIVE_TO_ASCII(*ptr);
 
     if (!do_utf8 && !UNI_IS_INVARIANT(c)) {
 	tmputf8[0] = (U8)UTF8_EIGHT_BIT_HI(c);
@@ -1810,7 +1803,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
     l = (U8*)SvPV(*listsvp, lcur);
     lend = l + lcur;
     while (l < lend) {
-	UV min, max, val, key;
+	UV min, max, val;
 	STRLEN numlen;
 	I32 flags = PERL_SCAN_SILENT_ILLDIGIT | PERL_SCAN_DISALLOW_PREFIX;
 
@@ -1883,6 +1876,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 	    continue;
 
 	if (octets) {
+	    UV key;
 	    if (min < start) {
 		if (!none || val < none) {
 		    val += start - min;
@@ -1913,6 +1907,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 	    }
 	}
 	else { /* bits == 1, then val should be ignored */
+	    UV key;
 	    if (min < start)
 		min = start;
 	    for (key = min; key <= max; key++) {
@@ -1938,7 +1933,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 	U8 *s, *o, *nl;
 	STRLEN slen, olen;
 
-	U8 opc = *x++;
+	const U8 opc = *x++;
 	if (opc == '\n')
 	    continue;
 
@@ -2008,7 +2003,7 @@ S_swash_get(pTHX_ SV* swash, UV start, UV span)
 	else {
 	    STRLEN otheroctets = otherbits >> 3;
 	    STRLEN offset = 0;
-	    U8* send = s + slen;
+	    U8* const send = s + slen;
 
 	    while (s < send) {
 		UV otherval = 0;
