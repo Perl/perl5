@@ -648,7 +648,7 @@ Perl_do_trans(pTHX_ SV *sv)
 }
 
 void
-Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **sp)
+Perl_do_join(pTHX_ register SV *sv, SV *delim, register SV **mark, register SV **sp)
 {
     dVAR;
     SV ** const oldmark = mark;
@@ -656,7 +656,7 @@ Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **s
     register STRLEN len;
     STRLEN delimlen;
 
-    (void) SvPV_const(del, delimlen); /* stringify and get the delimlen */
+    (void) SvPV_const(delim, delimlen); /* stringify and get the delimlen */
     /* SvCUR assumes it's SvPOK() and woe betide you if it's not. */
 
     mark++;
@@ -693,7 +693,7 @@ Perl_do_join(pTHX_ register SV *sv, SV *del, register SV **mark, register SV **s
 
     if (delimlen) {
 	for (; items > 0; items--,mark++) {
-	    sv_catsv(sv,del);
+	    sv_catsv(sv,delim);
 	    sv_catsv(sv,*mark);
 	}
     }

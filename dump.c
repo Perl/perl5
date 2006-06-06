@@ -305,7 +305,7 @@ Perl_sv_peek(pTHX_ SV *sv)
 	if (!SvPVX_const(sv))
 	    sv_catpv(t, "(null)");
 	else {
-	    SV *tmp = newSVpvs("");
+	    SV * const tmp = newSVpvs("");
 	    sv_catpv(t, "(");
 	    if (SvOOK(sv))
 		Perl_sv_catpvf(aTHX_ t, "[%s]", pv_display(tmp, SvPVX_const(sv)-SvIVX(sv), SvIVX(sv), 0, 127));
@@ -373,8 +373,7 @@ Perl_do_pmop_dump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
     Perl_dump_indent(aTHX_ level-1, file, "}\n");
 }
 
-static
-SV *
+static SV *
 S_pm_description(pTHX_ const PMOP *pm)
 {
     SV * const desc = newSVpvs("");
@@ -668,16 +667,16 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    }
 	    else {
 		switch (o->op_private & OPpDEREF) {
-	    case OPpDEREF_SV:
-		sv_catpv(tmpsv, ",SV");
-		break;
-	    case OPpDEREF_AV:
-		sv_catpv(tmpsv, ",AV");
-		break;
-	    case OPpDEREF_HV:
-		sv_catpv(tmpsv, ",HV");
-		break;
-	    }
+		case OPpDEREF_SV:
+		    sv_catpv(tmpsv, ",SV");
+		    break;
+		case OPpDEREF_AV:
+		    sv_catpv(tmpsv, ",AV");
+		    break;
+		case OPpDEREF_HV:
+		    sv_catpv(tmpsv, ",HV");
+		    break;
+		}
 		if (o->op_private & OPpMAYBE_LVSUB)
 		    sv_catpv(tmpsv, ",MAYBE_LVSUB");
 	    }
@@ -1000,7 +999,7 @@ static const struct { const char type; const char *name; } magic_names[] = {
 	{ PERL_MAGIC_defelem,        "defelem(y)" },
 	{ PERL_MAGIC_ext,            "ext(~)" },
 	/* this null string terminates the list */
-	{ 0,                         0 },
+	{ 0,                         NULL },
 };
 
 void
@@ -1011,7 +1010,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 			 "  MAGIC = 0x%"UVxf"\n", PTR2UV(mg));
  	if (mg->mg_virtual) {
             const MGVTBL * const v = mg->mg_virtual;
- 	    const char *s = NULL;
+ 	    const char *s;
  	    if      (v == &PL_vtbl_sv)         s = "sv";
             else if (v == &PL_vtbl_env)        s = "env";
             else if (v == &PL_vtbl_envelem)    s = "envelem";
@@ -1041,6 +1040,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 	    else if (v == &PL_vtbl_utf8)       s = "utf8";
             else if (v == &PL_vtbl_arylen_p)   s = "arylen_p";
             else if (v == &PL_vtbl_hintselem)  s = "hintselem";
+	    else			       s = NULL;
 	    if (s)
 	        Perl_dump_indent(aTHX_ level, file, "    MG_VIRTUAL = &PL_vtbl_%s\n", s);
 	    else
@@ -1125,7 +1125,7 @@ Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32
 void
 Perl_magic_dump(pTHX_ const MAGIC *mg)
 {
-    do_magic_dump(0, Perl_debug_log, mg, 0, 0, 0, 0);
+    do_magic_dump(0, Perl_debug_log, mg, 0, 0, FALSE, 0);
 }
 
 void
@@ -1505,18 +1505,18 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	Perl_dump_indent(aTHX_ level, file, "  RITER = %"IVdf"\n", (IV)HvRITER_get(sv));
 	Perl_dump_indent(aTHX_ level, file, "  EITER = 0x%"UVxf"\n", PTR2UV(HvEITER_get(sv)));
 	{
-	    MAGIC *mg = mg_find(sv, PERL_MAGIC_symtab);
+	    MAGIC * const mg = mg_find(sv, PERL_MAGIC_symtab);
 	    if (mg && mg->mg_obj) {
 		Perl_dump_indent(aTHX_ level, file, "  PMROOT = 0x%"UVxf"\n", PTR2UV(mg->mg_obj));
 	    }
 	}
 	{
-	    const char *hvname = HvNAME_get(sv);
+	    const char * const hvname = HvNAME_get(sv);
 	    if (hvname)
 		Perl_dump_indent(aTHX_ level, file, "  NAME = \"%s\"\n", hvname);
 	}
 	if (SvOOK(sv)) {
-	    AV *backrefs = *Perl_hv_backreferences_p(aTHX_ (HV*)sv);
+	    const AV * const backrefs = *Perl_hv_backreferences_p(aTHX_ (HV*)sv);
 	    if (backrefs) {
 		Perl_dump_indent(aTHX_ level, file, "  BACKREFS = 0x%"UVxf"\n",
 				 PTR2UV(backrefs));
@@ -1601,7 +1601,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    do_dump_pad(level+1, file, CvPADLIST(sv), 0);
 	}
 	{
-            const CV *outside = CvOUTSIDE(sv);
+	    const CV * const outside = CvOUTSIDE(sv);
 	    Perl_dump_indent(aTHX_ level, file, "  OUTSIDE = 0x%"UVxf" (%s)\n",
 			PTR2UV(outside),
 			(!outside ? "null"
@@ -1615,15 +1615,15 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	break;
     case SVt_PVGV:
     case SVt_PVLV:
-    if (type == SVt_PVLV) {
-        Perl_dump_indent(aTHX_ level, file, "  TYPE = %c\n", LvTYPE(sv));
-        Perl_dump_indent(aTHX_ level, file, "  TARGOFF = %"IVdf"\n", (IV)LvTARGOFF(sv));
-        Perl_dump_indent(aTHX_ level, file, "  TARGLEN = %"IVdf"\n", (IV)LvTARGLEN(sv));
-        Perl_dump_indent(aTHX_ level, file, "  TARG = 0x%"UVxf"\n", PTR2UV(LvTARG(sv)));
-        if (LvTYPE(sv) != 't' && LvTYPE(sv) != 'T')
-            do_sv_dump(level+1, file, LvTARG(sv), nest+1, maxnest,
-                dumpops, pvlim);
-    }
+	if (type == SVt_PVLV) {
+	    Perl_dump_indent(aTHX_ level, file, "  TYPE = %c\n", LvTYPE(sv));
+	    Perl_dump_indent(aTHX_ level, file, "  TARGOFF = %"IVdf"\n", (IV)LvTARGOFF(sv));
+	    Perl_dump_indent(aTHX_ level, file, "  TARGLEN = %"IVdf"\n", (IV)LvTARGLEN(sv));
+	    Perl_dump_indent(aTHX_ level, file, "  TARG = 0x%"UVxf"\n", PTR2UV(LvTARG(sv)));
+	    if (LvTYPE(sv) != 't' && LvTYPE(sv) != 'T')
+		do_sv_dump(level+1, file, LvTARG(sv), nest+1, maxnest,
+		    dumpops, pvlim);
+	}
 	if (!isGV_with_GP(sv))
 	    break;
 	Perl_dump_indent(aTHX_ level, file, "  NAME = \"%s\"\n", GvNAME(sv));
@@ -1717,7 +1717,7 @@ Perl_runops_debug(pTHX)
     do {
 	PERL_ASYNC_CHECK();
 	if (PL_debug) {
-	    if (PL_watchaddr != 0 && *PL_watchaddr != PL_watchok)
+	    if (PL_watchaddr && (*PL_watchaddr != PL_watchok))
 		PerlIO_printf(Perl_debug_log,
 			      "WARNING: %"UVxf" changed from %"UVxf" to %"UVxf"\n",
 			      PTR2UV(PL_watchaddr), PTR2UV(PL_watchok),
@@ -1757,7 +1757,7 @@ Perl_debop(pTHX_ const OP *o)
     case OP_GVSV:
     case OP_GV:
 	if (cGVOPo_gv) {
-	    SV *sv = newSV(0);
+	    SV * const sv = newSV(0);
 #ifdef PERL_MAD
 	    /* FIXME - it this making unwarranted assumptions about the
 	       UTF-8 cleanliness of the dump file handle?  */
@@ -1775,18 +1775,18 @@ Perl_debop(pTHX_ const OP *o)
     case OP_PADHV:
 	{
 	/* print the lexical's name */
-	CV *cv = deb_curcv(cxstack_ix);
+	CV * const cv = deb_curcv(cxstack_ix);
 	SV *sv;
         if (cv) {
-            AV * const padlist = CvPADLIST(cv);
+	    AV * const padlist = CvPADLIST(cv);
             AV * const comppad = (AV*)(*av_fetch(padlist, 0, FALSE));
             sv = *av_fetch(comppad, o->op_targ, FALSE);
         } else
             sv = NULL;
         if (sv)
-           PerlIO_printf(Perl_debug_log, "(%s)", SvPV_nolen_const(sv));
+	    PerlIO_printf(Perl_debug_log, "(%s)", SvPV_nolen_const(sv));
         else
-           PerlIO_printf(Perl_debug_log, "[%"UVuf"]", (UV)o->op_targ);
+	    PerlIO_printf(Perl_debug_log, "[%"UVuf"]", (UV)o->op_targ);
 	}
         break;
     default:
@@ -1800,7 +1800,7 @@ STATIC CV*
 S_deb_curcv(pTHX_ I32 ix)
 {
     dVAR;
-    const PERL_CONTEXT *cx = &cxstack[ix];
+    const PERL_CONTEXT * const cx = &cxstack[ix];
     if (CxTYPE(cx) == CXt_SUB || CxTYPE(cx) == CXt_FORMAT)
         return cx->blk_sub.cv;
     else if (CxTYPE(cx) == CXt_EVAL && !CxTRYBLOCK(cx))
