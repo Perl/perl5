@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon May 22 19:21:39 CEST 2006 [metaconfig 3.0 PL70]
+# Generated on Tue Jun  6 20:32:43 CEST 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -4308,7 +4308,7 @@ echo "Checking for GNU cc in disguise and/or its version number..." >&4
 $cat >try.c <<EOM
 #include <stdio.h>
 int main() {
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__INTEL_COMPILER)
 #ifdef __VERSION__
 	printf("%s\n", __VERSION__);
 #else
