@@ -1002,6 +1002,9 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		if (strEQ(name2, "RGV")) {
 		    IoFLAGS(GvIOn(gv)) |= IOf_ARGV|IOf_START;
 		}
+		else if (strEQ(name2, "RGVOUT")) {
+		    GvMULTI_on(gv);
+		}
 		break;
 	    case 'E':
 		if (strnEQ(name2, "XPORT", 5))
