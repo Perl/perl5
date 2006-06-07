@@ -118,9 +118,7 @@ close(F);
     is( $x, chr(300).chr(130), sprintf('(%vd)', $x) );
 
     open F, ">", "a" or die $!;
-    if (${^OPEN} =~ /:utf8/) {
-        binmode(F, ":bytes:");
-    }
+    binmode(F, ":bytes:");
 
     # Now let's make it suffer.
     my $w;
