@@ -693,7 +693,7 @@ dynext : $(LIBPREREQ) $(DBG)perlshr$(E) preplibrary
 preplibrary : $(MINIPERL_EXE) $(LIBPREREQ) 
 	@ Write Sys$Output "Autosplitting Perl library . . ."
 	@ Create/Directory [.lib.auto]
-	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]*.pm [.lib.*]*.pm
+	@ $(MINIPERL) -e "use AutoSplit; autosplit_lib_modules(@ARGV)" [.lib]*.pm [.lib.*]*.pm [.lib.*.*]*.pm
 
 [.lib.pods]perl.pod : [.pod]perl.pod
 	@ If F$Search("[.lib]pods.dir").eqs."" Then Create/Directory [.lib.pods]
