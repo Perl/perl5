@@ -188,6 +188,11 @@
 #ifdef PERL_CORE
 #define do_execfree		Perl_do_execfree
 #endif
+#ifdef PERL_IN_DOIO_C
+#ifdef PERL_CORE
+#define exec_failed		S_exec_failed
+#endif
+#endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 #ifdef PERL_CORE
 #define do_ipcctl		Perl_do_ipcctl
@@ -2362,6 +2367,11 @@
 #endif
 #ifdef PERL_CORE
 #define do_execfree()		Perl_do_execfree(aTHX)
+#endif
+#ifdef PERL_IN_DOIO_C
+#ifdef PERL_CORE
+#define exec_failed(a,b,c)	S_exec_failed(aTHX_ a,b,c)
+#endif
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 #ifdef PERL_CORE
