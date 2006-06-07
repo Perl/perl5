@@ -8,6 +8,7 @@ my %feature = (
     "~~"   => "feature_~~",
     say    => "feature_say",
     err    => "feature_err",
+    dor    => "feature_err",
     state  => "feature_state",
 );
 
@@ -81,6 +82,10 @@ operator from here to the end of the enclosing BLOCK.
 
 C<err> is a low-precedence variant of the C<//> operator:
 see C<perlop> for details.
+
+=head2 the 'dor' feature
+
+The 'dor' feature is an alias for the 'err' feature.
 
 =head2 the 'state' feature
 
