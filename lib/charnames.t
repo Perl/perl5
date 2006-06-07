@@ -15,7 +15,7 @@ require File::Spec;
 
 $| = 1;
 
-print "1..76\n";
+print "1..78\n";
 
 use charnames ':full';
 
@@ -349,6 +349,15 @@ if (ord('A') == 65) { # as on ASCII or UTF-8 machines
   print "ok 76\n";
 }
 
+# Verify that charnames propagate to eval("")
+my $evaltry = eval q[ "Eval: \N{LEFT-POINTING DOUBLE ANGLE QUOTATION MARK}" ];
+if ($@) {
+    print "# $@not ok 77\nnot ok 78\n";
+} else {
+    print "ok 77\n";
+    print "not " unless $evaltry eq "Eval: \N{LEFT-POINTING DOUBLE ANGLE QUOTATION MARK}";
+    print "ok 78\n";
+}
 
 __END__
 # unsupported pragma
