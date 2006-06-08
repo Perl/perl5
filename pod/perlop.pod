@@ -648,10 +648,23 @@ to get a hexadecimal digit, or
 
     @z2 = ('01' .. '31');  print $z2[$mday];
 
-to get dates with leading zeros.  If the final value specified is not
-in the sequence that the magical increment would produce, the sequence
-goes until the next value would be longer than the final value
-specified.
+to get dates with leading zeros.
+
+If the final value specified is not in the sequence that the magical
+increment would produce, the sequence goes until the next value would
+be longer than the final value specified.
+
+If the initial value specified isn't part of a magical increment
+sequence (that is, a non-empty string matching "/^[a-zA-Z]*[0-9]*\z/"),
+only the initial value will be returned.  So the following will only
+return an alpha:
+
+    use charnames 'greek';
+    my @greek_small =  ("\N{alpha}" .. "\N{omega}");
+
+To get lower-case greek letters, use this instead:
+
+    my @greek_small =  map { chr } ( ord("\N{alpha}") .. ord("\N{omega}") );
 
 Because each operand is evaluated in integer form, C<2.18 .. 3.14> will
 return two elements in list context.
