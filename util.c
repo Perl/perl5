@@ -4192,6 +4192,11 @@ Perl_scan_version(pTHX_ const char *s, SV *rv, bool qv)
     if ( av_len(av) == -1 ) /* oops, someone forgot to pass a value */
 	av_push(av, newSViv(0));
 
+    /* fix RT#19517 - special case 'undef' as string */
+    if ( *s == 'u' && strEQ(s,"undef") ) {
+	s += 5;
+    }
+
     /* And finally, store the AV in the hash */
     hv_store((HV *)hv, "version", 7, newRV_noinc((SV *)av), 0);
     return s;
@@ -4311,12 +4316,13 @@ Perl_upg_version(pTHX_ SV *ver)
     {
 	version = savepv(SvPV_nolen(ver));
     }
+
     s = scan_version(version, ver, qv);
     if ( *s != '\0' ) 
-        if(ckWARN(WARN_MISC))
+	if(ckWARN(WARN_MISC))
 	    Perl_warner(aTHX_ packWARN(WARN_MISC), 
-                "Version string '%s' contains invalid data; "
-	        "ignoring: '%s'", version, s);
+		"Version string '%s' contains invalid data; "
+		"ignoring: '%s'", version, s);
     Safefree(version);
     return ver;
 }

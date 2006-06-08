@@ -413,14 +413,10 @@ XS(XS_version_new)
 		? HvNAME(SvSTASH(SvRV(ST(0))))
 		: (char *)SvPV_nolen(ST(0));
 
-	if ( items == 1 ) {
-	    /* no parameter provided */
-	    if ( sv_isobject(ST(0)) )
-	    {
-		/* create empty object */
-		vs = sv_newmortal();
-		sv_setpvn(vs,"",0);
-	    }
+	if ( items == 1 || vs == &PL_sv_undef ) { /* no param or explicit undef */
+	    /* create empty object */
+	    vs = sv_newmortal();
+	    sv_setpvn(vs,"",0);
 	}
 	else if ( items == 3 ) {
 	    vs = sv_newmortal();

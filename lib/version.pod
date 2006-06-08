@@ -261,6 +261,19 @@ must be quoted to be converted properly.  For this reason, it is strongly
 recommended that all initializers to qv() be quoted strings instead of
 bare numbers.
 
+To prevent the C<qv()> function from being exported to the caller's namespace,
+either use version with a null parameter:
+
+  use version ();
+
+or just require version, like this:
+
+  require version;
+
+Both methods will prevent the import() method from firing and exporting the
+C<qv()> sub.  This is true of subclasses of version as well, see
+L<SUBCLASSING> for details.
+
 =back
 
 For the subsequent examples, the following three objects will be used:
@@ -570,14 +583,10 @@ derived class:
 See also L<version::AlphaBeta> on CPAN for an alternate representation of
 version strings.
 
-B<NOTE:> the L<qv> operator is not a class method and will not be inherited
-in the same way as the other methods.  L<qv> will always return an object of
-type L<version> and not an object in the derived class.  If you need to
-have L<qv> return an object in your derived class, add something like this:
-
-  *::qv = sub { return bless version::qv(shift), __PACKAGE__ };
-
-as seen in the test file F<t/02derived.t>.
+B<NOTE:> Although the L<qv> operator is not a true class method, but rather a
+function exported into the caller's namespace, a subclass of version will 
+inherit an import() function which will perform the correct magic on behalf
+of the subclass.
 
 =head1 EXPORT
 

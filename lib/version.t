@@ -414,6 +414,23 @@ SKIP: 	{
 	$version = $CLASS->new(" 1.7");
 	ok($version->numify eq "1.700", "leading space ignored");
 
+	# RT 19517 - deal with undef and 'undef' initialization
+	ok($version ne 'undef', "Undef version comparison #1");
+	ok($version ne undef, "Undef version comparison #2");
+	$version = $CLASS->new('undef');
+	unlike($warning, qr/^Version string 'undef' contains invalid data/,
+	    "Version string 'undef'");
+
+	$version = $CLASS->new(undef);
+	like($warning, qr/^Use of uninitialized value/,
+	    "Version string 'undef'");
+	ok($version eq 'undef', "Undef version comparison #3");
+	ok($version eq undef, "Undef version comparison #4");
+	eval "\$version = \$CLASS->new()"; # no parameter at all
+	unlike($@, qr/^Bizarre copy of CODE/, "No initializer at all");
+	ok($version eq 'undef', "Undef version comparison #5");
+	ok($version eq undef, "Undef version comparison #6");
+
 SKIP:	{
 
 	    # dummy up a legal module for testing RT#19017
@@ -443,6 +460,21 @@ EOF
 
 	    unlink 'www.pm';
 	}
+ 
+	open F, ">vvv.pm" or die "Cannot open vvv.pm: $!\n";
+	print F <<"EOF";
+package vvv;
+use base qw(version);
+1;
+EOF
+	close F;
+	# need to eliminate any other qv()'s
+	undef *main::qv;
+	ok(!defined(&{"main\::qv"}), "make sure we cleared qv() properly");
+	eval "use lib '.'; use vvv;";
+	ok(defined(&{"main\::qv"}), "make sure we exported qv() properly");
+	isa_ok( qv(1.2), "vvv");
+	unlink 'vvv.pm';
 }
 
 1;
