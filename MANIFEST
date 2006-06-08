@@ -1007,9 +1007,9 @@ ext/re/re_comp.h		re extension wrapper for regcomp.h
 ext/re/re.pm			re extension Perl module
 ext/re/re_top.h			re extension symbol hiding header
 ext/re/re.xs			re extension external subroutines
-ext/re/t/re.t			see if re pragma works
 ext/re/t/regop.pl		generate debug output for various patterns
 ext/re/t/regop.t		test RE optimizations by scraping debug output
+ext/re/t/re.t			see if re pragma works
 ext/Safe/t/safe1.t		See if Safe works
 ext/Safe/t/safe2.t		See if Safe works
 ext/Safe/t/safe3.t		See if Safe works
@@ -1220,8 +1220,8 @@ ext/XS/APItest/MANIFEST		XS::APItest extension
 ext/XS/APItest/README		XS::APItest extension
 ext/XS/APItest/t/call.t		XS::APItest extension
 ext/XS/APItest/t/exception.t	XS::APItest extension
-ext/XS/APItest/t/my_cxt.t	XS::APItest: test MY_CXT interface
 ext/XS/APItest/t/hash.t		XS::APItest: tests for hash related APIs
+ext/XS/APItest/t/my_cxt.t	XS::APItest: test MY_CXT interface
 ext/XS/APItest/t/op.t		XS::APItest: tests for OP related APIs
 ext/XS/APItest/t/printf.t	XS::APItest extension
 ext/XS/APItest/t/push.t		XS::APItest extension
@@ -2947,6 +2947,7 @@ pod/perlport.pod		Perl portability guide
 pod/perlpragma.pod		Perl modules: writing a user pragma
 pod/perlref.pod			Perl references, the rest of the story
 pod/perlreftut.pod		Perl references short introduction
+pod/perlreguts.pod		Perl regular expression engine internals
 pod/perlre.pod			Perl regular expressions, the rest of the story
 pod/perlrequick.pod		Perl regular expressions quick start
 pod/perlreref.pod		Perl regular expressions quick reference

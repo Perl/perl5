@@ -3774,11 +3774,14 @@ autodetected, C<use encoding> needed to upgrade non-Latin-1 byte strings
 
 =item Effects of Character Semantics
 
-=item Scripts
+=item Unicode Character Properties
 
-=item Blocks
+General Category, Bidirectional Character Types, Scripts, Extended property
+classes, Use of "Is" Prefix, Blocks
 
 =item User-Defined Character Properties
+
+=item User-Defined Case Mappings
 
 =item Character Encodings for Input and Output
 
@@ -5286,6 +5289,53 @@ callback
 =item AUTHOR
 
 =item DATE
+
+=back
+
+=head2 perlreguts - Description of the Perl regular expression engine.
+
+=over 4
+
+=item DESCRIPTION
+
+=item OVERVIEW
+
+=over 4
+
+=item A quick note on terms
+
+=item What is a regular expression engine?
+
+=item Structure of a Regexp Program
+
+regnode_1, regnode_2, regnode_string, regnode_charclass,
+regnode_charclass_class
+
+=back
+
+=item PROCESS OVERVIEW
+
+=over 4
+
+=item Compilation
+
+=item Execution
+
+=back
+
+=item MISCELLANEOUS
+
+=over 4
+
+=item UNICODE and Localization Support
+
+=back
+
+=item AUTHOR
+
+=item LICENSE
+
+=item REFERENCES
 
 =back
 
@@ -11192,6 +11242,8 @@ upgrading for byte-strings
 =item The 'say' feature
 
 =item the 'err' feature
+
+=item the 'dor' feature
 
 =item the 'state' feature
 
@@ -21416,6 +21468,10 @@ handling
 =item SYNOPSIS
 
 =item DESCRIPTION
+
+=item See Also
+
+L<IPC::Open2>, L<IPC::Run>
 
 =item WARNING
 
