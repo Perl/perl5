@@ -10140,55 +10140,49 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		}
 		break;
 	    case SVt_PVHV:
-		{
-		    HEK *hvname = NULL;
+		if (HvARRAY((HV*)sstr)) {
+		    STRLEN i = 0;
+		    const bool sharekeys = !!HvSHAREKEYS(sstr);
+		    XPVHV * const dxhv = (XPVHV*)SvANY(dstr);
+		    XPVHV * const sxhv = (XPVHV*)SvANY(sstr);
+		    char *darray;
+		    Newx(darray, PERL_HV_ARRAY_ALLOC_BYTES(dxhv->xhv_max+1)
+			+ (SvOOK(sstr) ? sizeof(struct xpvhv_aux) : 0),
+			char);
+		    HvARRAY(dstr) = (HE**)darray;
+		    while (i <= sxhv->xhv_max) {
+			const HE * const source = HvARRAY(sstr)[i];
+			HvARRAY(dstr)[i] = source
+			    ? he_dup(source, sharekeys, param) : 0;
+			++i;
+		    }
+		    if (SvOOK(sstr)) {
+			HEK *hvname;
+			const struct xpvhv_aux * const saux = HvAUX(sstr);
+			struct xpvhv_aux * const daux = HvAUX(dstr);
+			/* This flag isn't copied.  */
+			/* SvOOK_on(hv) attacks the IV flags.  */
+			SvFLAGS(dstr) |= SVf_OOK;
 
-		    if (HvARRAY((HV*)sstr)) {
-			STRLEN i = 0;
-			const bool sharekeys = !!HvSHAREKEYS(sstr);
-			XPVHV * const dxhv = (XPVHV*)SvANY(dstr);
-			XPVHV * const sxhv = (XPVHV*)SvANY(sstr);
-			char *darray;
-			Newx(darray, PERL_HV_ARRAY_ALLOC_BYTES(dxhv->xhv_max+1)
-			    + (SvOOK(sstr) ? sizeof(struct xpvhv_aux) : 0),
-			    char);
-			HvARRAY(dstr) = (HE**)darray;
-			while (i <= sxhv->xhv_max) {
-			    const HE *source = HvARRAY(sstr)[i];
-			    HvARRAY(dstr)[i] = source
-				? he_dup(source, sharekeys, param) : 0;
-			    ++i;
-			}
-			if (SvOOK(sstr)) {
-			    struct xpvhv_aux * const saux = HvAUX(sstr);
-			    struct xpvhv_aux * const daux = HvAUX(dstr);
-			    /* This flag isn't copied.  */
-			    /* SvOOK_on(hv) attacks the IV flags.  */
-			    SvFLAGS(dstr) |= SVf_OOK;
+			hvname = saux->xhv_name;
+			daux->xhv_name = hvname ? hek_dup(hvname, param) : hvname;
 
-			    hvname = saux->xhv_name;
-			    daux->xhv_name
-				= hvname ? hek_dup(hvname, param) : hvname;
-
-			    daux->xhv_riter = saux->xhv_riter;
-			    daux->xhv_eiter = saux->xhv_eiter
-				? he_dup(saux->xhv_eiter,
-					 (bool)!!HvSHAREKEYS(sstr), param) : 0;
-			    daux->xhv_backreferences = saux->xhv_backreferences
+			daux->xhv_riter = saux->xhv_riter;
+			daux->xhv_eiter = saux->xhv_eiter
+			    ? he_dup(saux->xhv_eiter,
+					(bool)!!HvSHAREKEYS(sstr), param) : 0;
+			daux->xhv_backreferences =
+			    saux->xhv_backreferences
 				? (AV*) SvREFCNT_inc(
-						     sv_dup((SV*)saux->
-							    xhv_backreferences,
-							    param))
+					sv_dup((SV*)saux->xhv_backreferences, param))
 				: 0;
-			}
+			/* Record stashes for possible cloning in Perl_clone(). */
+			if (hvname)
+			    av_push(param->stashes, dstr);
 		    }
-		    else {
-			SvPV_set(dstr, NULL);
-		    }
-		    /* Record stashes for possible cloning in Perl_clone(). */
-		    if(hvname)
-			av_push(param->stashes, dstr);
 		}
+		else
+		    SvPV_set(dstr, NULL);
 		break;
 	    case SVt_PVCV:
 		if (!(param->flags & CLONEf_COPY_STACKS)) {
