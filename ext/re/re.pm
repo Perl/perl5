@@ -84,14 +84,15 @@ that these flags can be set directly via ${^RE_DEBUG_FLAGS} by using the
 following flag values:
 
 
-    RE_DEBUG_COMPILE       0x01
-    RE_DEBUG_EXECUTE       0x02
-    RE_DEBUG_TRIE_COMPILE  0x04
-    RE_DEBUG_TRIE_EXECUTE  0x08
-    RE_DEBUG_TRIE_MORE     0x10
-    RE_DEBUG_OPTIMISE      0x20
-    RE_DEBUG_OFFSETS       0x40
-    RE_DEBUG_PARSE         0x80
+    RE_DEBUG_COMPILE       0x001
+    RE_DEBUG_EXECUTE       0x002
+    RE_DEBUG_TRIE_COMPILE  0x004
+    RE_DEBUG_TRIE_EXECUTE  0x008
+    RE_DEBUG_TRIE_MORE     0x010
+    RE_DEBUG_OPTIMISE      0x020
+    RE_DEBUG_OFFSETS       0x040
+    RE_DEBUG_PARSE         0x080
+    RE_DEBUG_OFFSETS_DEBUG 0x100
 
 The directive C<use re 'debug'> and its equivalents are I<not> lexically
 scoped, as the other directives are.  They have both compile-time and run-time
@@ -123,18 +124,20 @@ sub setcolor {
 }
 
 my %flags = (
-    COMPILE      => 1,
-    EXECUTE      => 2,
-    TRIE_COMPILE => 4,
-    TRIE_EXECUTE => 8,
-    TRIE_MORE    => 16,
-    OPTIMISE     => 32,
-    OPTIMIZE     => 32, # alias
-    OFFSETS      => 64,
-    PARSE        => 128,
-    ALL          => 255,
-    All          => 15,
-    More         => 31,
+    COMPILE       => 1,
+    EXECUTE       => 2,
+    TRIE_COMPILE  => 4,
+    TRIE_EXECUTE  => 8,
+    TRIE_MORE     => 16,
+    OPTIMISE      => 32,
+    OPTIMIZE      => 32, # alias
+    OFFSETS       => 64,
+    PARSE         => 128,
+    OFFSETS_DEBUG => 256,
+    OFFSETS_OLD   => 576,
+    ALL           => 0xFFFF,
+    All           => 15,
+    More          => 31,
 );
 
 my $installed = 0;

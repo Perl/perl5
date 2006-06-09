@@ -3639,6 +3639,7 @@ reStudy:
     Newxz(r->startp, RExC_npar, I32);
     Newxz(r->endp, RExC_npar, I32);
 
+    DEBUG_r( RX_DEBUG_on(r) );
     DEBUG_COMPILE_r({
         if (SvIV(re_debug_flags)> (RE_DEBUG_COMPILE | RE_DEBUG_EXECUTE)) 
             PerlIO_printf(Perl_debug_log,"Final program:\n");

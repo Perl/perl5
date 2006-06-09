@@ -3020,6 +3020,17 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    */
 
 		if ( st->u.trie.accepted == 1 ) {
+		    DEBUG_EXECUTE_r({
+			SV ** const tmp = RX_DEBUG(reginfo->prog) 
+			                ? av_fetch( trie->words, st->u.trie.accept_buff[ 0 ].wordnum-1, 0 )
+			                : NULL;
+			PerlIO_printf( Perl_debug_log,
+			    "%*s  %sonly one match : #%d <%s>%s\n",
+			    REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
+        		    st->u.trie.accept_buff[ 0 ].wordnum,
+        		    tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr",
+        		    PL_colors[5] );
+		    });
 		    PL_reginput = (char *)st->u.trie.accept_buff[ 0 ].endpos;
 		    /* in this case we free tmps/leave before we call regmatch
 		       as we wont be using accept_buff again. */
@@ -3050,6 +3061,18 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 				    st->u.trie.accept_buff[best].wordnum)
 				best = cur;
 			}
+			DEBUG_EXECUTE_r({
+			    reg_trie_data * const trie = (reg_trie_data*)
+					    rex->data->data[ARG(scan)];
+			    SV ** const tmp = RX_DEBUG(reginfo->prog) 
+			                ? av_fetch( trie->words, st->u.trie.accept_buff[ best ].wordnum - 1, 0 )
+			                : NULL;
+    			    PerlIO_printf( Perl_debug_log, "%*s  %strying alternation #%d <%s> at node #%d %s\n",
+    			        REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
+    			        st->u.trie.accept_buff[best].wordnum,
+        		        tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr", REG_NODE_NUM(scan),
+        		        PL_colors[5] );
+			});
 			if ( best<st->u.trie.accepted ) {
 			    reg_trie_accepted tmp = st->u.trie.accept_buff[ best ];
 			    st->u.trie.accept_buff[ best ] = st->u.trie.accept_buff[ st->u.trie.accepted ];

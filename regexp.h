@@ -55,40 +55,46 @@ typedef struct regexp {
 
 #define ROPT_ANCH		(ROPT_ANCH_BOL|ROPT_ANCH_MBOL|ROPT_ANCH_GPOS|ROPT_ANCH_SBOL)
 #define ROPT_ANCH_SINGLE	(ROPT_ANCH_SBOL|ROPT_ANCH_GPOS)
-#define ROPT_ANCH_BOL	 	0x00001
-#define ROPT_ANCH_MBOL	 	0x00002
-#define ROPT_ANCH_SBOL	 	0x00004
-#define ROPT_ANCH_GPOS	 	0x00008
-#define ROPT_SKIP		0x00010
-#define ROPT_IMPLICIT		0x00020	/* Converted .* to ^.* */
-#define ROPT_NOSCAN		0x00040	/* Check-string always at start. */
-#define ROPT_GPOS_SEEN		0x00080
-#define ROPT_CHECK_ALL		0x00100
-#define ROPT_LOOKBEHIND_SEEN	0x00200
-#define ROPT_EVAL_SEEN		0x00400
-#define ROPT_CANY_SEEN		0x00800
+#define ROPT_ANCH_BOL	 	0x00000001
+#define ROPT_ANCH_MBOL	 	0x00000002
+#define ROPT_ANCH_SBOL	 	0x00000004
+#define ROPT_ANCH_GPOS	 	0x00000008
+#define ROPT_SKIP		0x00000010
+#define ROPT_IMPLICIT		0x00000020	/* Converted .* to ^.* */
+#define ROPT_NOSCAN		0x00000040	/* Check-string always at start. */
+#define ROPT_GPOS_SEEN		0x00000080
+#define ROPT_CHECK_ALL		0x00000100
+#define ROPT_LOOKBEHIND_SEEN	0x00000200
+#define ROPT_EVAL_SEEN		0x00000400
+#define ROPT_CANY_SEEN		0x00000800
 #define ROPT_SANY_SEEN		ROPT_CANY_SEEN /* src bckwrd cmpt */
 
 /* 0xf800 of reganch is used by PMf_COMPILETIME */
 
-#define ROPT_UTF8		0x10000
-#define ROPT_NAUGHTY		0x20000 /* how exponential is this pattern? */
-#define ROPT_COPY_DONE		0x40000	/* subbeg is a copy of the string */
-#define ROPT_TAINTED_SEEN	0x80000
+#define ROPT_UTF8		0x00010000
+#define ROPT_NAUGHTY		0x00020000 /* how exponential is this pattern? */
+#define ROPT_COPY_DONE		0x00040000	/* subbeg is a copy of the string */
+#define ROPT_TAINTED_SEEN	0x00080000
 #define ROPT_MATCH_UTF8		0x10000000 /* subbeg is utf-8 */
 
-#define RE_USE_INTUIT_NOML	0x0100000 /* Best to intuit before matching */
-#define RE_USE_INTUIT_ML	0x0200000
-#define REINT_AUTORITATIVE_NOML	0x0400000 /* Can trust a positive answer */
-#define REINT_AUTORITATIVE_ML	0x0800000 
-#define REINT_ONCE_NOML		0x1000000 /* Intuit can succed once only. */
-#define REINT_ONCE_ML		0x2000000
-#define RE_INTUIT_ONECHAR	0x4000000
-#define RE_INTUIT_TAIL		0x8000000
+#define RE_USE_INTUIT_NOML	0x00100000 /* Best to intuit before matching */
+#define RE_USE_INTUIT_ML	0x00200000
+#define REINT_AUTORITATIVE_NOML	0x00400000 /* Can trust a positive answer */
+#define REINT_AUTORITATIVE_ML	0x00800000 
+#define REINT_ONCE_NOML		0x01000000 /* Intuit can succed once only. */
+#define REINT_ONCE_ML		0x02000000
+#define RE_INTUIT_ONECHAR	0x04000000
+#define RE_INTUIT_TAIL		0x08000000
+
+#define RE_DEBUG_BIT            0x20000000
 
 #define RE_USE_INTUIT		(RE_USE_INTUIT_NOML|RE_USE_INTUIT_ML)
 #define REINT_AUTORITATIVE	(REINT_AUTORITATIVE_NOML|REINT_AUTORITATIVE_ML)
 #define REINT_ONCE		(REINT_ONCE_NOML|REINT_ONCE_ML)
+
+#define RX_DEBUG(prog)	((prog)->reganch & RE_DEBUG_BIT)
+#define RX_DEBUG_on(prog) ((prog)->reganch |= RE_DEBUG_BIT)
+
 
 #define RX_MATCH_TAINTED(prog)	((prog)->reganch & ROPT_TAINTED_SEEN)
 #define RX_MATCH_TAINTED_on(prog) ((prog)->reganch |= ROPT_TAINTED_SEEN)
