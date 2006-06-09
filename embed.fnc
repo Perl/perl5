@@ -207,7 +207,7 @@ p	|bool	|do_exec3	|NN const char* cmd|int fd|int do_report
 #endif
 p	|void	|do_execfree
 #ifdef PERL_IN_DOIO_C
-s	|void	|exec_failed	|const char *cmd|int fd|int do_report
+s	|void	|exec_failed	|NN const char *cmd|int fd|int do_report
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 p	|I32	|do_ipcctl	|I32 optype|NN SV** mark|NN SV** sp

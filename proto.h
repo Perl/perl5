@@ -442,7 +442,9 @@ PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char* cmd, int fd, int do_report)
 #endif
 PERL_CALLCONV void	Perl_do_execfree(pTHX);
 #ifdef PERL_IN_DOIO_C
-STATIC void	S_exec_failed(pTHX_ const char *cmd, int fd, int do_report);
+STATIC void	S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
+			__attribute__nonnull__(pTHX_1);
+
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 PERL_CALLCONV I32	Perl_do_ipcctl(pTHX_ I32 optype, SV** mark, SV** sp)
