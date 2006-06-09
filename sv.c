@@ -9536,6 +9536,7 @@ Perl_re_dup(pTHX_ const REGEXP *r, CLONE_PARAMS *param)
 		d->data[i] = r->data->data[i];
 		break;
 	    case 't':
+	    case 'T':
 		d->data[i] = r->data->data[i];
 		OP_REFCNT_LOCK;
 		((reg_trie_data*)d->data[i])->refcount++;

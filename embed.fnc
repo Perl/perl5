@@ -1295,7 +1295,7 @@ Es	|regnode*|reg_node	|NN struct RExC_state_t *state|U8 op
 Es	|regnode*|regpiece	|NN struct RExC_state_t *state|NN I32 *flagp|U32 depth
 Es	|void	|reginsert	|NN struct RExC_state_t *state|U8 op|NN regnode *opnd
 Es	|void	|regtail	|NN struct RExC_state_t *state|NN regnode *p|NN const regnode *val|U32 depth
-Es	|U8	|regtail_study	|NN struct RExC_state_t *state|NN regnode *p|NN const regnode *val|U32 depth
+Es	|U32	|join_exact	|NN struct RExC_state_t *state|NN regnode *scan|NN I32 *min|U32 flags|NULLOK regnode *val|U32 depth
 EsRn	|char*	|regwhite	|NN char *p|NN const char *e
 Es	|char*	|nextchar	|NN struct RExC_state_t *state
 Es	|void	|scan_commit	|NN const struct RExC_state_t* state|NN struct scan_data_t *data
@@ -1317,6 +1317,8 @@ Es	|void	|checkposixcc	|NN struct RExC_state_t* state
 Es	|I32	|make_trie	|NN struct RExC_state_t* state|NN regnode *startbranch \
 				|NN regnode *first|NN regnode *last|NN regnode *tail \
 				|U32 flags|U32 depth
+Es	|void	|make_trie_failtable	|NN struct RExC_state_t* state \
+                                |NN regnode *source|NN regnode *node|U32 depth
 #  ifdef DEBUGGING
 Es	|const regnode*|dumpuntil|NN const regexp *r|NN const regnode *start \
 				|NN const regnode *node \
@@ -1325,6 +1327,7 @@ Es	|void	|put_byte	|NN SV* sv|int c
 Es	|void	|dump_trie	|NN const struct _reg_trie_data *trie|U32 depth
 Es	|void	|dump_trie_interim_list|NN const struct _reg_trie_data *trie|U32 next_alloc|U32 depth
 Es	|void	|dump_trie_interim_table|NN const struct _reg_trie_data *trie|U32 next_alloc|U32 depth
+Es	|U8	|regtail_study	|NN struct RExC_state_t *state|NN regnode *p|NN const regnode *val|U32 depth
 #  endif
 #endif
 
@@ -1341,6 +1344,9 @@ ERsn	|U8*	|reghopmaybe3	|NN U8 *pos|I32 off|NN const U8 *lim
 ERs	|char*	|find_byclass	|NN regexp * prog|NN const regnode *c|NN char *s|NN const char *strend|NULLOK const regmatch_info *reginfo
 Es	|void	|to_utf8_substr	|NN regexp * prog
 Es	|void	|to_byte_substr	|NN regexp * prog
+#  ifdef DEBUGGING
+Es	|void	|dump_exec_pos	|NN const char *locinput|NN const regnode *scan|const bool do_utf8
+#  endif
 #endif
 
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)

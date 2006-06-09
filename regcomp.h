@@ -10,6 +10,11 @@
 
 typedef OP OP_4tree;			/* Will be redefined later. */
 
+
+#define PERL_ENABLE_TRIE_OPTIMISATION 1
+#define PERL_ENABLE_EXTENDED_TRIE_OPTIMISATION 1
+#define PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS 0
+
 /*
  * The "internal use only" fields in regexp.h are present to pass info from
  * compile to execute that permits the execute phase to run lots faster on
@@ -367,6 +372,7 @@ typedef struct re_scream_pos_data_s
  *       strings resulting from casefolding the single-character entries
  *       in the character class
  *   t - trie struct
+ *   T - aho-trie struct
  * 20010712 mjd@plover.com
  * (Remember to update re_dup() and pregfree() if you add any items.)
  */
@@ -455,15 +461,24 @@ struct _reg_trie_data {
     U32              startstate;
     STRLEN           minlen;
     STRLEN           maxlen;
+    U32              *wordlen;
+    U32              laststate;   /* Build only */
 #ifdef DEBUGGING
     U16              wordcount;   /* Build only */
     STRLEN           charcount;   /* Build only */
-    U32              laststate;   /* Build only */
     AV               *words;
     AV               *revcharmap;
 #endif
 };
 typedef struct _reg_trie_data reg_trie_data;
+
+struct _reg_ac_data {
+    U32              *fail;
+    reg_trie_state   *states;
+    reg_trie_data    *trie;
+    U32              refcount;
+};
+typedef struct _reg_ac_data reg_ac_data;
 
 /* ANY_BIT doesnt use the structure, so we can borrow it here.
    This is simpler than refactoring all of it as wed end up with
@@ -489,11 +504,10 @@ typedef struct _reg_trie_data reg_trie_data;
 #else
 #define TRIE_WORDCOUNT(trie) (trie_wordcount)
 #define TRIE_CHARCOUNT(trie) (trie_charcount)
-#define TRIE_LASTSTATE(trie) (trie_laststate)
+/*#define TRIE_LASTSTATE(trie) (trie_laststate)*/
+#define TRIE_LASTSTATE(trie) ((trie)->laststate)
 #define TRIE_REVCHARMAP(trie) (trie_revcharmap)
 #endif
-#define DO_TRIE 1
-#define TRIE_DEBUG 1
 
 #define RE_TRIE_MAXBUF_INIT 65536
 #define RE_TRIE_MAXBUF_NAME "\022E_TRIE_MAXBUF"
@@ -508,6 +522,8 @@ typedef struct _reg_trie_data reg_trie_data;
 #define RE_DEBUG_OPTIMISE      0x0020
 #define RE_DEBUG_OFFSETS       0x0040
 #define RE_DEBUG_PARSE         0x0080
+#define RE_DEBUG_OFFSETS_DEBUG 0x0100
+#define RE_DEBUG_OLD_OFFSETS   0x0200
 
 
 #define DEBUG_PARSE_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_PARSE) x  )
@@ -515,6 +531,8 @@ typedef struct _reg_trie_data reg_trie_data;
 #define DEBUG_EXECUTE_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_EXECUTE) x  )
 #define DEBUG_COMPILE_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE) x  )
 #define DEBUG_OFFSETS_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_OFFSETS) x  )
+#define DEBUG_OLD_OFFSETS_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_OLD_OFFSETS) x  )
+    
 #define DEBUG_TRIE_r(x) DEBUG_r( \
    if (SvIV(re_debug_flags) & RE_DEBUG_TRIE_COMPILE       \
        || SvIV(re_debug_flags) & RE_DEBUG_TRIE_EXECUTE )  \
@@ -539,6 +557,10 @@ typedef struct _reg_trie_data reg_trie_data;
         } \
     )
 
+#define MJD_OFFSET_DEBUG(x) DEBUG_r( \
+    if (SvIV(re_debug_flags) & RE_DEBUG_OFFSETS_DEBUG) \
+        Perl_warn_nocontext x \
+)
 
 #ifdef DEBUGGING
 #define GET_RE_DEBUG_FLAGS_DECL SV *re_debug_flags = NULL; GET_RE_DEBUG_FLAGS;

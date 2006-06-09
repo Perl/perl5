@@ -3549,7 +3549,7 @@ STATIC void	S_regtail(pTHX_ struct RExC_state_t *state, regnode *p, const regnod
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
-STATIC U8	S_regtail_study(pTHX_ struct RExC_state_t *state, regnode *p, const regnode *val, U32 depth)
+STATIC U32	S_join_exact(pTHX_ struct RExC_state_t *state, regnode *scan, I32 *min, U32 flags, regnode *val, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
@@ -3620,6 +3620,11 @@ STATIC I32	S_make_trie(pTHX_ struct RExC_state_t* state, regnode *startbranch, r
 			__attribute__nonnull__(pTHX_4)
 			__attribute__nonnull__(pTHX_5);
 
+STATIC void	S_make_trie_failtable(pTHX_ struct RExC_state_t* state, regnode *source, regnode *node, U32 depth)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
+
 #  ifdef DEBUGGING
 STATIC const regnode*	S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node, const regnode *last, SV* sv, I32 l)
 			__attribute__nonnull__(pTHX_1)
@@ -3638,6 +3643,11 @@ STATIC void	S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie, U3
 
 STATIC void	S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie, U32 next_alloc, U32 depth)
 			__attribute__nonnull__(pTHX_1);
+
+STATIC U8	S_regtail_study(pTHX_ struct RExC_state_t *state, regnode *p, const regnode *val, U32 depth)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
 
 #  endif
 #endif
@@ -3690,6 +3700,12 @@ STATIC void	S_to_utf8_substr(pTHX_ regexp * prog)
 STATIC void	S_to_byte_substr(pTHX_ regexp * prog)
 			__attribute__nonnull__(pTHX_1);
 
+#  ifdef DEBUGGING
+STATIC void	S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const bool do_utf8)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+#  endif
 #endif
 
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)

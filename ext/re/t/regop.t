@@ -12,28 +12,44 @@ BEGIN {
 
 use strict;
 require "./test.pl";
+our $NUM_SECTS;
+chomp(my @strs= grep { !/^\s*\#/ } <DATA>);
+my $out = runperl(progfile => "../ext/re/t/regop.pl", stderr => 1 );
+my @tests = grep { /\S/ } split /(?=Compiling REx)/, $out;
+# on debug builds we get an EXECUTING... message in there at the top
+shift @tests
+    if $tests[0] =~ /EXECUTING.../;
 
-chomp(my @strs=grep { !/^\s*\#/ } <DATA>);
-my $out = runperl(progfile => "../ext/re/t/regop.pl", stderr => 1);
-my @tests = grep { /\S/ && !/EXECUTING/ } split /(?=Compiling REx)/,$out;
+plan( @tests + 2 + ( @strs - grep { !$_ or /^---/ } @strs ));
 
-plan(2 + (@strs - grep { !$_ or /^---/ } @strs) + @tests);
+is( scalar @tests, $NUM_SECTS,
+    "Expecting output for $NUM_SECTS patterns" );
+ok( defined $out, 'regop.pl returned something defined' );
 
-my $numtests=4;
-is(scalar @tests, $numtests, "Expecting output for $numtests patterns");
-ok(defined $out,'regop.pl');
-$out||="";
-my $test=1;
-foreach my $testout (@tests) {
-    my ($pattern)=$testout=~/Compiling REx "([^"]+)"/;
-    ok($pattern, "Pattern found for test ".($test++));
+$out ||= "";
+my $test= 1;
+foreach my $testout ( @tests ) {
+    my ( $pattern )= $testout=~/Compiling REx "([^"]+)"/;
+    ok( $pattern, "Pattern for test " . ($test++) );
     while (@strs) {
-        my $str=shift @strs;
-        last if !$str or $str=~/^---/;
-        next if $str=~/^\s*#/;
-        ok($testout=~/\Q$str\E/,"$str: /$pattern/");
+        local $_= shift @strs;
+        last if !$_
+             or /^---/;
+        next if /^\s*#/;
+        s/^\s+//;
+        s/\s+$//;
+        ok( $testout=~/\Q$_\E/, "$_: /$pattern/" );
     }
 }
+
+# The format below is simple. Each line is an exact
+# string that must be found in the output.
+# Lines starting the # are comments.
+# Lines starting with --- are seperators indicating
+# that the tests for this result set are finished.
+# If you add a test make sure you update $NUM_SECTS
+# the commented output is just for legacy/debugging purposes
+BEGIN{ $NUM_SECTS= 6 }
 
 __END__
 #Compiling REx "X(A|[B]Q||C|D)Y"
@@ -146,3 +162,68 @@ Start-Class:A-EGP
 only one match : #6 <ABCD>
 Start:4
 minlen 4
+---
+#Compiling REx "(\.COM|\.EXE|\.BAT|\.CMD|\.VBS|\.VBE|\.JS|\.JSE|\.WSF|\.WSH|\.pyo|\.pyc|\.pyw|\.py)$"
+#size 48 nodes first at 3
+#first at 3
+#rarest char
+# at 0
+#   1: OPEN1(3)
+#   3:   EXACTF <.>(5)
+#   5:   TRIE-EXACTF(45)
+#        [Start:2 Words:14 Chars:54 Unique:18 States:29 Minlen:2 Maxlen:3 Start-Class:BCEJPVWbcejpvw]
+#          <.COM>
+#          ...  yada yada ... (dmq)
+#          <.py>
+#  45: CLOSE1(47)
+#  47: EOL(48)
+#  48: END(0)
+#floating ""$ at 3..4 (checking floating) stclass "EXACTF <.>" minlen 3
+#Offsets: [48]
+#        1:1[1] 3:2[1] 5:2[81] 45:83[1] 47:84[1] 48:85[0]
+#Guessing start of match, REx "(\.COM|\.EXE|\.BAT|\.CMD|\.VBS|\.VBE|\.JS|\.JSE|\.WSF|\.WSH|..." against "D:dev/perl/ver/28321_/perl.exe"...
+#Found floating substr ""$ at offset 30...
+#Starting position does not contradict /^/m...
+#Does not contradict STCLASS...
+#Guessed: match at offset 26
+#Matching REx "(\.COM|\.EXE|\.BAT|\.CMD|\.VBS|\.VBE|\.JS|\.JSE|\.WSF|\.WSH|\.pyo|\.pyc|\.pyw|\.py)$..." against ".exe"
+#Matching stclass "EXACTF <.>" against ".exe"
+#  Setting an EVAL scope, savestack=140
+#  26 <21_/perl> <.exe>    |  1:  OPEN1
+#  26 <21_/perl> <.exe>    |  3:  EXACTF <.>
+#  27 <21_/perl.> <exe>    |  5:  TRIE-EXACTF
+#                                 only one match : #2 <.EXE>
+#  30 <21_/perl.exe> <>    | 45:    CLOSE1
+#  30 <21_/perl.exe> <>    | 47:    EOL
+#  30 <21_/perl.exe> <>    | 48:    END
+#Match successful!
+#POP STATE(1)
+#%MATCHED%
+#Freeing REx: "(\\.COM|\\.EXE|\\.BAT|\\.CMD|\\.VBS|\\.VBE|\\.JS|\\.JSE|\\."......
+%MATCHED%
+floating ""$ at 3..4 (checking floating)
+1:1[1] 3:2[1] 5:2[81] 45:83[1] 47:84[1] 48:85[0]
+stclass "EXACTF <.>" minlen 3
+Found floating substr ""$ at offset 30...
+Does not contradict STCLASS...
+Guessed: match at offset 26
+Matching stclass "EXACTF <.>" against ".exe"
+---
+#Compiling REx "[q]"
+#size 12 nodes Got 100 bytes for offset annotations.
+#first at 1
+#Final program:
+#   1: EXACT <q>(3)
+#   3: END(0)
+#anchored "q" at 0 (checking anchored isall) minlen 1
+#Offsets: [12]
+#        1:1[3] 3:4[0]
+#Guessing start of match, REx "[q]" against "q"...
+#Found anchored substr "q" at offset 0...
+#Guessed: match at offset 0
+#%MATCHED%
+#Freeing REx: "[q]"
+Got 100 bytes for offset annotations.
+Offsets: [12]
+1:1[3] 3:4[0]
+%MATCHED%        

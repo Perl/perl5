@@ -1304,7 +1304,7 @@
 #define regpiece		S_regpiece
 #define reginsert		S_reginsert
 #define regtail			S_regtail
-#define regtail_study		S_regtail_study
+#define join_exact		S_join_exact
 #define regwhite		S_regwhite
 #define nextchar		S_nextchar
 #define scan_commit		S_scan_commit
@@ -1324,6 +1324,7 @@
 #define regpposixcc		S_regpposixcc
 #define checkposixcc		S_checkposixcc
 #define make_trie		S_make_trie
+#define make_trie_failtable	S_make_trie_failtable
 #endif
 #  ifdef DEBUGGING
 #if defined(PERL_CORE) || defined(PERL_EXT)
@@ -1332,6 +1333,7 @@
 #define dump_trie		S_dump_trie
 #define dump_trie_interim_list	S_dump_trie_interim_list
 #define dump_trie_interim_table	S_dump_trie_interim_table
+#define regtail_study		S_regtail_study
 #endif
 #  endif
 #endif
@@ -1349,6 +1351,11 @@
 #define to_utf8_substr		S_to_utf8_substr
 #define to_byte_substr		S_to_byte_substr
 #endif
+#  ifdef DEBUGGING
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#define dump_exec_pos		S_dump_exec_pos
+#endif
+#  endif
 #endif
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
@@ -3472,7 +3479,7 @@
 #define regpiece(a,b,c)		S_regpiece(aTHX_ a,b,c)
 #define reginsert(a,b,c)	S_reginsert(aTHX_ a,b,c)
 #define regtail(a,b,c,d)	S_regtail(aTHX_ a,b,c,d)
-#define regtail_study(a,b,c,d)	S_regtail_study(aTHX_ a,b,c,d)
+#define join_exact(a,b,c,d,e,f)	S_join_exact(aTHX_ a,b,c,d,e,f)
 #define regwhite		S_regwhite
 #define nextchar(a)		S_nextchar(aTHX_ a)
 #define scan_commit(a,b)	S_scan_commit(aTHX_ a,b)
@@ -3491,6 +3498,7 @@
 #define regpposixcc(a,b)	S_regpposixcc(aTHX_ a,b)
 #define checkposixcc(a)		S_checkposixcc(aTHX_ a)
 #define make_trie(a,b,c,d,e,f,g)	S_make_trie(aTHX_ a,b,c,d,e,f,g)
+#define make_trie_failtable(a,b,c,d)	S_make_trie_failtable(aTHX_ a,b,c,d)
 #endif
 #  ifdef DEBUGGING
 #if defined(PERL_CORE) || defined(PERL_EXT)
@@ -3499,6 +3507,7 @@
 #define dump_trie(a,b)		S_dump_trie(aTHX_ a,b)
 #define dump_trie_interim_list(a,b,c)	S_dump_trie_interim_list(aTHX_ a,b,c)
 #define dump_trie_interim_table(a,b,c)	S_dump_trie_interim_table(aTHX_ a,b,c)
+#define regtail_study(a,b,c,d)	S_regtail_study(aTHX_ a,b,c,d)
 #endif
 #  endif
 #endif
@@ -3516,6 +3525,11 @@
 #define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)
 #define to_byte_substr(a)	S_to_byte_substr(aTHX_ a)
 #endif
+#  ifdef DEBUGGING
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#define dump_exec_pos(a,b,c)	S_dump_exec_pos(aTHX_ a,b,c)
+#endif
+#  endif
 #endif
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE

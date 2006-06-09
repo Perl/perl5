@@ -12,7 +12,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 13;
+use Test::More tests => 14;
 require_ok( 're' );
 
 # setcolor
@@ -58,6 +58,13 @@ re->unimport('taint');
 ok( !( $^H & 0x00100000 ), 'unimport should clear bits in $^H when requested' );
 re->unimport('eval');
 ok( !( $^H & 0x00200000 ), '... and again' );
+my $reg=qr/(foo|bar|baz|blah)/;
+close STDERR;
+eval"use re Debug=>'ALL'";
+my $ok='foo'=~/$reg/;
+eval"no re Debug=>'ALL'";
+ok( $ok, 'No segv!' );
+
 
 package Term::Cap;
 
