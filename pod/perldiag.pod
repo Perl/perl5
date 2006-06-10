@@ -3773,7 +3773,7 @@ C<can> may break this.
 (P) The substitution was looping infinitely.  (Obviously, a substitution
 shouldn't iterate more times than there are characters of input, which
 is what happened.)  See the discussion of substitution in
-L<perlop/"Quote and Quote-like Operators">.
+L<perlop/"Regexp Quote-Like Operators">.
 
 =item Substitution pattern not terminated
 

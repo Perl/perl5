@@ -1233,9 +1233,9 @@ Here is the output (split into several lines):
  MiXeD line-noise. That's all!
 
 =item q/STRING/
-X<q> X<quote, double> X<'> X<''>
+X<q> X<quote, single> X<'> X<''>
 
-=item C<'STRING'>
+=item 'STRING'
 
 A single-quoted, literal string.  A backslash represents a backslash
 unless followed by the delimiter or another backslash, in which case
