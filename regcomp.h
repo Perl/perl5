@@ -337,7 +337,11 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 
 START_EXTERN_C
 
+#ifdef PLUGGABLE_RE_EXTENSION
+#include "re_nodes.h"
+#else
 #include "regnodes.h"
+#endif
 
 /* The following have no fixed length. U8 so we can do strchr() on it. */
 #ifndef DOINIT
