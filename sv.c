@@ -1099,7 +1099,7 @@ Perl_sv_upgrade(pTHX_ register SV *sv, U32 new_type)
 {
     void*	old_body;
     void*	new_body;
-    U32		old_type = SvTYPE(sv);
+    const U32	old_type = SvTYPE(sv);
     const struct body_details *new_type_details;
     const struct body_details *const old_type_details
 	= bodies_by_type + old_type;
@@ -1472,6 +1472,7 @@ Perl_sv_setiv(pTHX_ register SV *sv, IV i)
     case SVt_PVIO:
 	Perl_croak(aTHX_ "Can't coerce %s to integer in %s", sv_reftype(sv,0),
 		   OP_DESC(PL_op));
+    default: NOOP;
     }
     (void)SvIOK_only(sv);			/* validate number */
     SvIV_set(sv, i);
@@ -1571,6 +1572,7 @@ Perl_sv_setnv(pTHX_ register SV *sv, NV num)
     case SVt_PVIO:
 	Perl_croak(aTHX_ "Can't coerce %s to number in %s", sv_reftype(sv,0),
 		   OP_NAME(PL_op));
+    default: NOOP;
     }
     SvNV_set(sv, num);
     (void)SvNOK_only(sv);			/* validate number */
@@ -3242,7 +3244,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 {
     register U32 sflags;
     register int dtype;
-    register int stype;
+    register svtype stype;
 
     if (sstr == dstr)
 	return;

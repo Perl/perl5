@@ -1242,6 +1242,7 @@
 #define sortcv			S_sortcv
 #define sortcv_xsub		S_sortcv_xsub
 #define sortcv_stacked		S_sortcv_stacked
+#define qsortsvu		S_qsortsvu
 #endif
 #endif
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
@@ -3331,6 +3332,7 @@
 #define sortcv(a,b)		S_sortcv(aTHX_ a,b)
 #define sortcv_xsub(a,b)	S_sortcv_xsub(aTHX_ a,b)
 #define sortcv_stacked(a,b)	S_sortcv_stacked(aTHX_ a,b)
+#define qsortsvu(a,b,c)		S_qsortsvu(aTHX_ a,b,c)
 #endif
 #endif
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)

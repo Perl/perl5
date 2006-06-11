@@ -1798,6 +1798,7 @@ STATIC I32	S_amagic_cmp_locale(pTHX_ SV *a, SV *b);
 STATIC I32	S_sortcv(pTHX_ SV *a, SV *b);
 STATIC I32	S_sortcv_xsub(pTHX_ SV *a, SV *b);
 STATIC I32	S_sortcv_stacked(pTHX_ SV *a, SV *b);
+STATIC void	S_qsortsvu(pTHX_ SV** array, size_t num_elts, SVCOMPARE_t compare);
 #endif
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
