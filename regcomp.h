@@ -325,7 +325,11 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 
 START_EXTERN_C
 
+#ifdef PLUGGABLE_RE_EXTENSION
+#include "re_nodes.h"
+#else
 #include "regnodes.h"
+#endif
 
 /* The following have no fixed length. U8 so we can do strchr() on it. */
 #ifndef DOINIT
@@ -513,60 +517,109 @@ typedef struct _reg_ac_data reg_ac_data;
 #define RE_TRIE_MAXBUF_NAME "\022E_TRIE_MAXBUF"
 #define RE_DEBUG_FLAGS "\022E_DEBUG_FLAGS"
 
-/* If you change these be sure to update ext/re/re.pm as well */
-#define RE_DEBUG_COMPILE       0x0001
-#define RE_DEBUG_EXECUTE       0x0002
-#define RE_DEBUG_TRIE_COMPILE  0x0004
-#define RE_DEBUG_TRIE_EXECUTE  0x0008
-#define RE_DEBUG_TRIE_MORE     0x0010
-#define RE_DEBUG_OPTIMISE      0x0020
-#define RE_DEBUG_OFFSETS       0x0040
-#define RE_DEBUG_PARSE         0x0080
-#define RE_DEBUG_OFFSETS_DEBUG 0x0100
-#define RE_DEBUG_OLD_OFFSETS   0x0200
+/*
 
+RE_DEBUG_FLAGS is used to control what debug output is emitted
+its divided into three groups of options, some of which interact.
+The three groups are: Compile, Execute, Extra. There is room for a
+further group, as currently only the low three bytes are used.
 
-#define DEBUG_PARSE_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_PARSE) x  )
-#define DEBUG_OPTIMISE_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_OPTIMISE) x  )
-#define DEBUG_EXECUTE_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_EXECUTE) x  )
-#define DEBUG_COMPILE_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE) x  )
-#define DEBUG_OFFSETS_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_OFFSETS) x  )
-#define DEBUG_OLD_OFFSETS_r(x) DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_OLD_OFFSETS) x  )
+    Compile Options:
     
-#define DEBUG_TRIE_r(x) DEBUG_r( \
-   if (SvIV(re_debug_flags) & RE_DEBUG_TRIE_COMPILE       \
-       || SvIV(re_debug_flags) & RE_DEBUG_TRIE_EXECUTE )  \
-   x  \
-)
-#define DEBUG_TRIE_EXECUTE_r(x) \
-    DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_TRIE_EXECUTE) x )
+    PARSE
+    PEEP
+    TRIE
+    PROGRAM
+    OFFSETS
 
-#define DEBUG_TRIE_COMPILE_r(x) \
-    DEBUG_r( if (SvIV(re_debug_flags) & RE_DEBUG_TRIE_COMPILE) x )
+    Execute Options:
 
-#define DEBUG_TRIE_EXECUTE_MORE_r(x) \
-    DEBUG_TRIE_EXECUTE_r( if (SvIV(re_debug_flags) & RE_DEBUG_TRIE_MORE) x )
+    INTUIT
+    MATCH
+    TRIE
 
-#define DEBUG_TRIE_COMPILE_MORE_r(x) \
-    DEBUG_TRIE_COMPILE_r( if (SvIV(re_debug_flags) & RE_DEBUG_TRIE_MORE) x )
+    Extra Options
 
-/* get_sv() can return NULL during global destruction.  */
-#define GET_RE_DEBUG_FLAGS DEBUG_r( \
-        re_debug_flags=get_sv(RE_DEBUG_FLAGS, 1); \
-        if (re_debug_flags && !SvIOK(re_debug_flags)) { \
-            sv_setiv(re_debug_flags, RE_DEBUG_COMPILE | RE_DEBUG_EXECUTE ); \
-        } \
-    )
+    TRIE
+    OFFSETS
 
+If you modify any of these make sure you make corresponding changes to
+re.pm, especially to the documentation.
+
+*/
+
+
+/* Compile */
+#define RE_DEBUG_COMPILE_MASK      0x0000FF
+#define RE_DEBUG_COMPILE_PARSE     0x000001
+#define RE_DEBUG_COMPILE_OPTIMISE  0x000002
+#define RE_DEBUG_COMPILE_TRIE      0x000004
+#define RE_DEBUG_COMPILE_DUMP      0x000008
+#define RE_DEBUG_COMPILE_OFFSETS   0x000010
+
+/* Execute */
+#define RE_DEBUG_EXECUTE_MASK      0x00FF00
+#define RE_DEBUG_EXECUTE_INTUIT    0x000100
+#define RE_DEBUG_EXECUTE_MATCH     0x000200
+#define RE_DEBUG_EXECUTE_TRIE      0x000400
+
+/* Extra */
+#define RE_DEBUG_EXTRA_MASK        0xFF0000
+#define RE_DEBUG_EXTRA_TRIE        0x010000
+#define RE_DEBUG_EXTRA_OFFSETS     0x020000
+
+/* Compile */
+#define DEBUG_COMPILE_r(x) DEBUG_r( \
+    if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE_MASK) x  )
+#define DEBUG_PARSE_r(x) DEBUG_r( \
+    if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE_PARSE) x  )
+#define DEBUG_OPTIMISE_r(x) DEBUG_r( \
+    if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE_OPTIMISE) x  )
+#define DEBUG_PARSE_r(x) DEBUG_r( \
+    if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE_PARSE) x  )
+#define DEBUG_DUMP_r(x) DEBUG_r( \
+    if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE_DUMP) x  )
+#define DEBUG_OFFSETS_r(x) DEBUG_r( \
+    if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE_OFFSETS) x  )
+#define DEBUG_TRIE_COMPILE_r(x) DEBUG_r( \
+    if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE_TRIE) x )
+
+/* Execute */
+#define DEBUG_EXECUTE_r(x) DEBUG_r( \
+    if (SvIV(re_debug_flags) & RE_DEBUG_EXECUTE_MASK) x  )
+#define DEBUG_INTUIT_r(x) DEBUG_r( \
+    if (SvIV(re_debug_flags) & RE_DEBUG_EXECUTE_INTUIT) x  )
+#define DEBUG_MATCH_r(x) DEBUG_r( \
+    if (SvIV(re_debug_flags) & RE_DEBUG_EXECUTE_MATCH) x  )
+#define DEBUG_TRIE_EXECUTE_r(x) DEBUG_r( \
+    if (SvIV(re_debug_flags) & RE_DEBUG_EXECUTE_TRIE) x )
+
+/* Extra */
+#define DEBUG_EXTRA_r(x) DEBUG_r( \
+    if (SvIV(re_debug_flags) & RE_DEBUG_EXTRA_MASK) x  )
 #define MJD_OFFSET_DEBUG(x) DEBUG_r( \
-    if (SvIV(re_debug_flags) & RE_DEBUG_OFFSETS_DEBUG) \
-        Perl_warn_nocontext x \
-)
+    if (SvIV(re_debug_flags) & RE_DEBUG_EXTRA_OFFSETS) \
+        Perl_warn_nocontext x )
+#define DEBUG_TRIE_COMPILE_MORE_r(x) DEBUG_TRIE_COMPILE_r( \
+    if (SvIV(re_debug_flags) & RE_DEBUG_EXTRA_TRIE) x )
+#define DEBUG_TRIE_EXECUTE_MORE_r(x) DEBUG_TRIE_EXECUTE_r( \
+    if (SvIV(re_debug_flags) & RE_DEBUG_EXTRA_TRIE) x )
+
+#define DEBUG_TRIE_r(x) DEBUG_r( \
+    if (SvIV(re_debug_flags) & (RE_DEBUG_COMPILE_TRIE \
+        | RE_DEBUG_EXECUTE_TRIE )) x )
+
+/* initialization */
+/* get_sv() can return NULL during global destruction. */
+#define GET_RE_DEBUG_FLAGS DEBUG_r( \
+        re_debug_flags = get_sv(RE_DEBUG_FLAGS, 1); \
+        if (re_debug_flags && !SvIOK(re_debug_flags)) { \
+            sv_setiv(re_debug_flags, RE_DEBUG_COMPILE_DUMP | RE_DEBUG_EXECUTE_MASK ); \
+        } )
 
 #ifdef DEBUGGING
 #define GET_RE_DEBUG_FLAGS_DECL SV *re_debug_flags = NULL; GET_RE_DEBUG_FLAGS;
 #else
 #define GET_RE_DEBUG_FLAGS_DECL
 #endif
-
 

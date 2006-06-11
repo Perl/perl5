@@ -14,7 +14,9 @@
  * Caveat:  this is V8 regexp(3) [actually, a reimplementation thereof],
  * not the System V one.
  */
-
+#ifndef PLUGGABLE_RE_EXTENSION
+/* we don't want to include this stuff if we are inside Nicholas'
+ * pluggable regex engine code */
 
 struct regnode {
     U8	flags;
@@ -80,21 +82,16 @@ typedef struct regexp {
 #define RE_USE_INTUIT_NOML	0x00100000 /* Best to intuit before matching */
 #define RE_USE_INTUIT_ML	0x00200000
 #define REINT_AUTORITATIVE_NOML	0x00400000 /* Can trust a positive answer */
-#define REINT_AUTORITATIVE_ML	0x00800000 
+#define REINT_AUTORITATIVE_ML	0x00800000
 #define REINT_ONCE_NOML		0x01000000 /* Intuit can succed once only. */
 #define REINT_ONCE_ML		0x02000000
 #define RE_INTUIT_ONECHAR	0x04000000
 #define RE_INTUIT_TAIL		0x08000000
 
-#define RE_DEBUG_BIT            0x20000000
 
 #define RE_USE_INTUIT		(RE_USE_INTUIT_NOML|RE_USE_INTUIT_ML)
 #define REINT_AUTORITATIVE	(REINT_AUTORITATIVE_NOML|REINT_AUTORITATIVE_ML)
 #define REINT_ONCE		(REINT_ONCE_NOML|REINT_ONCE_ML)
-
-#define RX_DEBUG(prog)	((prog)->reganch & RE_DEBUG_BIT)
-#define RX_DEBUG_on(prog) ((prog)->reganch |= RE_DEBUG_BIT)
-
 
 #define RX_MATCH_TAINTED(prog)	((prog)->reganch & ROPT_TAINTED_SEEN)
 #define RX_MATCH_TAINTED_on(prog) ((prog)->reganch |= ROPT_TAINTED_SEEN)
@@ -109,6 +106,13 @@ typedef struct regexp {
 #define RX_MATCH_COPIED_set(prog,t)	((t) \
 					 ? RX_MATCH_COPIED_on(prog) \
 					 : RX_MATCH_COPIED_off(prog))
+#endif /* PLUGGABLE_RE_EXTENSION */
+
+/* Stuff that needs to be included in the plugable extension goes below here */
+
+#define RE_DEBUG_BIT            0x20000000
+#define RX_DEBUG(prog)	((prog)->reganch & RE_DEBUG_BIT)
+#define RX_DEBUG_on(prog) ((prog)->reganch |= RE_DEBUG_BIT)
 
 #ifdef PERL_OLD_COPY_ON_WRITE
 #define RX_MATCH_COPY_FREE(rx) \

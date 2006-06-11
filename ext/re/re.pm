@@ -73,26 +73,120 @@ See L<perldebug/"Debugging regular expressions"> for additional info.
 
 Similarly C<use re 'Debug'> produces debugging output, the difference
 being that it allows the fine tuning of what debugging output will be
-emitted. Following the 'Debug' keyword one of several options may be
-provided: COMPILE, EXECUTE, TRIE_COMPILE, TRIE_EXECUTE, TRIE_MORE,
-OPTIMISE, OFFSETS and ALL. Additionally the special keywords 'All' and
-'More' may be provided. 'All' represents everything but OPTIMISE and
-OFFSETS and TRIE_MORE, and 'More' is similar but include TRIE_MORE.
-Saying C<< no re Debug => 'EXECUTE' >> will disable executing debug
-statements and saying C<< use re Debug => 'EXECUTE' >> will turn it on. Note
-that these flags can be set directly via ${^RE_DEBUG_FLAGS} by using the
-following flag values:
+emitted. Options are divided into three groups, those related to
+compilation, those related to execution and those related to special
+purposes. The options are as follows:
 
+=over 4
 
-    RE_DEBUG_COMPILE       0x001
-    RE_DEBUG_EXECUTE       0x002
-    RE_DEBUG_TRIE_COMPILE  0x004
-    RE_DEBUG_TRIE_EXECUTE  0x008
-    RE_DEBUG_TRIE_MORE     0x010
-    RE_DEBUG_OPTIMISE      0x020
-    RE_DEBUG_OFFSETS       0x040
-    RE_DEBUG_PARSE         0x080
-    RE_DEBUG_OFFSETS_DEBUG 0x100
+=item Compile related options
+
+=over 4
+
+=item COMPILE
+
+Turns on all compile related debug options.
+
+=item PARSE
+
+Turns on debug output related to the process of parsing the pattern.
+
+=item OPTIMISE
+
+Enables output related to the optimisation phase of compilation.
+
+=item TRIE_COMPILE
+
+Detailed info about trie compilation.
+
+=item DUMP
+
+Dump the final program out after it is compiled and optimised.
+
+=item OFFSETS
+
+Dump offset information. This can be used to see how regops correlate
+to the pattern. Output format is
+
+   NODENUM:POSITION[LENGTH]
+
+Where 1 is the position of the first char in the string. Note that position
+can be 0, or larger than the actual length of the pattern, likewise length
+can be zero.
+
+=back
+
+=item Execute related options
+
+=over 4
+
+=item EXECUTE
+
+Turns on all execute related debug options.
+
+=item MATCH
+
+Turns on debugging of the main matching loop.
+
+=item TRIE_EXECUTE
+
+Extra debugging of how tries execute.
+
+=item INTUIT
+
+Enable debugging of start point optimisations.
+
+=back
+
+=item Extra debugging options
+
+=over 4
+
+=item EXTRA
+
+Turns on all "extra" debugging options.
+
+=item TRIE_MORE
+
+Enable enhanced TRIE debugging. Enhances both TRIE_EXECUTE
+and TRIE_COMPILE.
+
+=item OFFSETS_DEBUG
+
+Enable debugging of offsets information. This emits copious
+amounts of trace information and doesnt mesh well with other
+debug options.
+
+Almost definately only useful to people hacking
+on the offsets part of the debug engine.
+
+=back
+
+=item Other useful flags
+
+These are useful shortcuts to save on the typing.
+
+=over 4
+
+=item ALL
+
+Enable all compile and execute options at once.
+
+=item All
+
+Enable DUMP and all execute options. Equivelent to:
+
+  use re 'debug';
+
+=item MORE
+
+=item More
+
+Enable TRIE_MORE and all execute compile and execute options.
+
+=back 4
+
+=back 4
 
 The directive C<use re 'debug'> and its equivalents are I<not> lexically
 scoped, as the other directives are.  They have both compile-time and run-time
@@ -124,21 +218,25 @@ sub setcolor {
 }
 
 my %flags = (
-    COMPILE       => 1,
-    EXECUTE       => 2,
-    TRIE_COMPILE  => 4,
-    TRIE_EXECUTE  => 8,
-    TRIE_MORE     => 16,
-    OPTIMISE      => 32,
-    OPTIMIZE      => 32, # alias
-    OFFSETS       => 64,
-    PARSE         => 128,
-    OFFSETS_DEBUG => 256,
-    OFFSETS_OLD   => 576,
-    ALL           => 0xFFFF,
-    All           => 15,
-    More          => 31,
+    COMPILE         => 0x0000FF,
+    PARSE           => 0x000001,
+    OPTIMISE        => 0x000002,
+    TRIE_COMPILE    => 0x000004,
+    DUMP            => 0x000008,
+    OFFSETS         => 0x000010,
+
+    EXECUTE         => 0x00FF00,
+    INTUIT          => 0x000100,
+    MATCH           => 0x000200,
+    TRIE_EXECUTE    => 0x000400,
+
+    EXTRA           => 0xFF0000,
+    TRIE_MORE       => 0x010000,
+    OFFSETS_DEBUG   => 0x020000,
 );
+$flags{ALL} = $flags{COMPILE} | $flags{EXECUTE};
+$flags{All} = $flags{all} = $flags{DUMP} | $flags{EXECUTE};
+$flags{More} = $flags{MORE} = $flags{ALL} | $flags{TRIE_MORE};
 
 my $installed = 0;
 
@@ -165,8 +263,6 @@ sub bits {
                 if ($flags{$_[$idx]}) {
                     if ($on) {
                         ${^RE_DEBUG_FLAGS} |= $flags{$_[$idx]};
-                        ${^RE_DEBUG_FLAGS} |= 1
-                                if $flags{$_[$idx]}>2;
                     } else {
                         ${^RE_DEBUG_FLAGS} &= ~ $flags{$_[$idx]};
                     }

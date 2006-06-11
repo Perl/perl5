@@ -9536,11 +9536,21 @@ Perl_re_dup(pTHX_ const REGEXP *r, CLONE_PARAMS *param)
 		d->data[i] = r->data->data[i];
 		break;
 	    case 't':
-	    case 'T':
 		d->data[i] = r->data->data[i];
 		OP_REFCNT_LOCK;
 		((reg_trie_data*)d->data[i])->refcount++;
 		OP_REFCNT_UNLOCK;
+		break;
+	    case 'T':
+		d->data[i] = r->data->data[i];
+		OP_REFCNT_LOCK;
+		((reg_ac_data*)d->data[i])->refcount++;
+		OP_REFCNT_UNLOCK;
+		/* Trie stclasses are readonly and can thus be shared
+		 * without duplication. We free the stclass in pregfree
+		 * when the corresponding reg_ac_data struct is freed.
+		 */
+		ret->regstclass= r->regstclass;
 		break;
             default:
 		Perl_croak(aTHX_ "panic: re_dup unknown data code '%c'", r->data->what[i]);
