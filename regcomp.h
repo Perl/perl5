@@ -550,9 +550,10 @@ typedef struct _reg_ac_data reg_ac_data;
 #define DEBUG_TRIE_COMPILE_MORE_r(x) \
     DEBUG_TRIE_COMPILE_r( if (SvIV(re_debug_flags) & RE_DEBUG_TRIE_MORE) x )
 
+/* get_sv() can return NULL during global destruction.  */
 #define GET_RE_DEBUG_FLAGS DEBUG_r( \
         re_debug_flags=get_sv(RE_DEBUG_FLAGS, 1); \
-        if (!SvIOK(re_debug_flags)) { \
+        if (re_debug_flags && !SvIOK(re_debug_flags)) { \
             sv_setiv(re_debug_flags, RE_DEBUG_COMPILE | RE_DEBUG_EXECUTE ); \
         } \
     )

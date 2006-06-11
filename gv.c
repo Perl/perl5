@@ -943,10 +943,16 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		  : sv_type == SVt_PVAV ? "@"
 		  : sv_type == SVt_PVHV ? "%"
 		  : ""), name);
+	    GV *gv;
 	    if (USE_UTF8_IN_NAMES)
 		SvUTF8_on(err);
 	    qerror(err);
-	    stash = GvHV(gv_fetchpvn_flags("<none>::", 8, GV_ADDMULTI, SVt_PVHV));
+	    gv = gv_fetchpvn_flags("<none>::", 8, GV_ADDMULTI, SVt_PVHV);
+	    if(!gv) {
+		/* symbol table under destruction */
+		return NULL;
+	    }	
+	    stash = GvHV(gv);
 	}
 	else
 	    return NULL;
