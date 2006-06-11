@@ -1107,6 +1107,7 @@ ext/Sys/Syslog/Makefile.PL	Sys::Syslog extension makefile writer
 ext/Sys/Syslog/README		README for Sys::Syslog
 ext/Sys/Syslog/Syslog.pm	Sys::Syslog extension Perl module
 ext/Sys/Syslog/Syslog.xs	Sys::Syslog extension external subroutines
+ext/Sys/Syslog/ppport.h		portability header for Sys::Syslog
 ext/Sys/Syslog/t/00-load.t	test for Sys::Syslog
 ext/Sys/Syslog/t/constants.t	test for Sys::Syslog
 ext/Sys/Syslog/t/syslog.t	See if Sys::Syslog works

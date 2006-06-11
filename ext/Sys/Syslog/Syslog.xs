@@ -1,10 +1,13 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include "ppport.h"
 
 #ifdef I_SYSLOG
 #include <syslog.h>
 #endif
+
+static SV *ident_svptr;
 
 #include "const-c.inc"
 
@@ -82,3 +85,41 @@ LOG_UPTO(pri)
 #endif
     OUTPUT:
 	RETVAL
+
+
+void
+openlog_xs(ident, option, facility)
+    INPUT:
+        SV*   ident
+        int   option
+        int   facility
+    PREINIT:
+        STRLEN len;
+        char*  ident_pv;
+    CODE:
+        ident_svptr = newSVsv(ident);
+        ident_pv    = SvPV(ident_svptr, len);
+        openlog(ident_pv, option, facility);
+
+void
+syslog_xs(priority, message)
+    INPUT:
+        int   priority
+        const char * message
+    CODE:
+        syslog(priority, "%s", message);
+
+int
+setlogmask_xs(mask)
+    INPUT:
+        int mask
+    CODE:
+        setlogmask(mask);
+
+void
+closelog_xs()
+    CODE:
+        closelog();
+        if (SvREFCNT(ident_svptr))
+            SvREFCNT_dec(ident_svptr);
+

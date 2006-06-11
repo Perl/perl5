@@ -1,5 +1,14 @@
 Revision history for Sys-Syslog
 
+0.15 -- 2006.06.10 -- Sebastien Aperghis-Tramoni (SAPER)
+        [FEATURE] RT#17316: Added a "nofatal" option to openlog().
+        [FEATURE] Sys::Syslog warnings can now be controled by the warnings
+        category of the same name.
+        [FEATURE] Added support for using the native C syslog(3) functions.
+        [CODE] Removed most "our" variables.
+        [CODE] Improved readability by removing cargo-cult brackets and 
+        parentheses.
+
 0.14 -- 2006.05.25 -- Sebastien Aperghis-Tramoni (SAPER)
         [BUGFIX] RT#19259, RT#17518: Now allowing all levels and facilities.
         [CODE] Removed useless "&".
