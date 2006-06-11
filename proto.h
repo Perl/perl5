@@ -2356,7 +2356,7 @@ PERL_CALLCONV void	Perl_sv_unref_flags(pTHX_ SV* sv, U32 flags)
 PERL_CALLCONV void	Perl_sv_untaint(pTHX_ SV* sv)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV void	Perl_sv_upgrade(pTHX_ SV* sv, U32 mt)
+PERL_CALLCONV void	Perl_sv_upgrade(pTHX_ SV* sv, svtype new_type)
 			__attribute__nonnull__(pTHX_1);
 
 /* PERL_CALLCONV void	Perl_sv_usepvn(pTHX_ SV* sv, char* ptr, STRLEN len)

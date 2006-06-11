@@ -1431,8 +1431,9 @@ PerlIO_layer_from_ref(pTHX_ SV *sv)
 	return PerlIO_find_layer(aTHX_ STR_WITH_LEN("Code"), 0);
     case SVt_PVGV:
 	return PerlIO_find_layer(aTHX_ STR_WITH_LEN("Glob"), 0);
+    default:
+	return NULL;
     }
-    return NULL;
 }
 
 PerlIO_list_t *

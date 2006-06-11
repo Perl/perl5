@@ -204,6 +204,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	case SVt_PVIO:
             Perl_croak(aTHX_ "Cannot convert a reference to %s to typeglob",
 		       sv_reftype(has_constant, 0));
+	default: NOOP;
 	}
 	SvRV_set(gv, NULL);
 	SvROK_off(gv);

@@ -5891,7 +5891,7 @@ Upgrade an SV to a more complex form.  Generally adds a new body type to the
 SV, then copies across as much information as possible from the old body.
 You generally want to use the C<SvUPGRADE> macro wrapper. See also C<svtype>.
 
-	void	sv_upgrade(SV* sv, U32 mt)
+	void	sv_upgrade(SV* sv, svtype new_type)
 
 =for hackers
 Found in file sv.c
