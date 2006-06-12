@@ -1062,7 +1062,8 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
         (trie->laststate+1)*sizeof(reg_trie_state));
     Newxz( q, numstates, U32);
     Newxz( aho->fail, numstates, U32 );
-    fail= aho->fail;
+    aho->refcount = 1;
+    fail = aho->fail;
     fail[ 0 ] = fail[ 1 ] = 1;
 
     for ( charid = 0; charid < ucharcount ; charid++ ) {
