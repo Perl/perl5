@@ -3488,6 +3488,10 @@ STATIC I32	S_sortcv_stacked(pTHX_ SV *a, SV *b)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
+STATIC void	S_qsortsvu(pTHX_ SV** array, size_t num_elts, SVCOMPARE_t compare)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_3);
+
 #endif
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)

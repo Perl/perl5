@@ -1365,8 +1365,10 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 	 PL_sort_RealCmp = cmp;	/* Put comparison routine where cmpindir can find it */
 
 	 /* sort, with indirection */
-	 S_qsortsvu(aTHX_ (gptr *)indir, nmemb,
-		    ((flags & SORTf_DESC) != 0 ? cmpindir_desc : cmpindir));
+	 if (flags & SORTf_DESC)
+	    qsortsvu((gptr *)indir, nmemb, cmpindir_desc);
+	else
+	    qsortsvu((gptr *)indir, nmemb, cmpindir);
 
 	 pp = indir;
 	 q = list1;
@@ -1413,11 +1415,11 @@ S_qsortsv(pTHX_ gptr *list1, size_t nmemb, SVCOMPARE_t cmp, U32 flags)
 	 const SVCOMPARE_t savecmp = PL_sort_RealCmp;	/* Save current comparison routine, if any */
 	 PL_sort_RealCmp = cmp;	/* Put comparison routine where cmp_desc can find it */
 	 cmp = cmp_desc;
-	 S_qsortsvu(aTHX_ list1, nmemb, cmp);
+	 qsortsvu(list1, nmemb, cmp);
 	 /* restore prevailing comparison routine */
 	 PL_sort_RealCmp = savecmp;
     } else {
-	 S_qsortsvu(aTHX_ list1, nmemb, cmp);
+	 qsortsvu(list1, nmemb, cmp);
     }
 }
 

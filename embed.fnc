@@ -1275,6 +1275,7 @@ s	|I32	|amagic_cmp_locale|NN SV *a|NN SV *b
 s	|I32	|sortcv		|NN SV *a|NN SV *b
 s	|I32	|sortcv_xsub	|NN SV *a|NN SV *b
 s	|I32	|sortcv_stacked	|NN SV *a|NN SV *b
+s	|void	|qsortsvu	|NN SV** array|size_t num_elts|NN SVCOMPARE_t compare
 #endif
 
 #if defined(PERL_IN_PP_SYS_C) || defined(PERL_DECL_PROT)
