@@ -1,5 +1,11 @@
 Revision history for Perl extension Test::Harness
 
+2.62 Thu Jun  8 14:11:57 CDT 2006
+    [FIXES]
+    * Restored the behavior of dying if any subtests failed.  This is a
+      pretty crucial bug that I should have fixed long ago.  Not having this
+      means that CPANPLUS will install modules even if their tests fail. :-(
+
 2.60 Wed May 24 14:48:44 CDT 2006
     [FIXES]
     * Fixed the headers in the summary failure table.

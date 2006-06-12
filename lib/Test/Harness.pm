@@ -34,11 +34,11 @@ Test::Harness - Run Perl standard test scripts with statistics
 
 =head1 VERSION
 
-Version 2.60
+Version 2.62
 
 =cut
 
-$VERSION = '2.60';
+$VERSION = '2.62';
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -213,6 +213,11 @@ sub runtests {
 
     assert(($ok xor keys %$failedtests), 
            q{ok status jives with $failedtests});
+
+    if (! $ok) {
+        die("Failed $tot->{bad}/$tot->{tests} test programs. " .
+            "@{[$tot->{max} - $tot->{ok}]}/$tot->{max} subtests failed.\n");
+    }
 
     return $ok;
 }
