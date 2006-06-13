@@ -6,7 +6,7 @@ use strict;
 use warnings;
 use integer;
 
-our $VERSION = '5.38_01';
+our $VERSION = '5.41';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -112,7 +112,7 @@ sub _addfile {  # this is "addfile" from Digest::base 1.00
 sub Addfile {
 	my ($self, $file, $mode) = @_;
 
-	if (ref(\$file) eq 'GLOB') { return(_addfile($self, $file)) }
+	return(_addfile($self, $file)) unless ref(\$file) eq 'SCALAR';
 
 	$mode = defined($mode) ? $mode : "";
 	my ($binary, $portable) = map { $_ eq $mode } ("b", "p");
@@ -138,8 +138,8 @@ sub Addfile {
 			last unless $n2;
 			$buf1 .= $buf2;
 		}
-                $buf1 =~ s/\015?\015\012/\012/g; 	# DOS/Windows
-                $buf1 =~ s/\015/\012/g;          	# Apple/MacOS 9
+		$buf1 =~ s/\015?\015\012/\012/g; 	# DOS/Windows
+		$buf1 =~ s/\015/\012/g;          	# Apple/MacOS 9
 		$self->add($buf1);
 	}
 	_bail("Read failed") unless defined $n1;
@@ -465,13 +465,9 @@ By default, I<$filename> is simply opened and read; no special modes
 or I/O disciplines are used.  To change this, set the optional I<$mode>
 argument to one of the following values:
 
-=over 4
+	"b"	read file in binary mode
 
-=item B<"b">	read file in binary mode
-
-=item B<"p">	use portable mode
-
-=back
+	"p"	use portable mode
 
 The "p" mode is handy since it ensures that the digest value of
 I<$filename> will be the same when computed on different operating

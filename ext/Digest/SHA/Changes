@@ -1,5 +1,18 @@
 Revision history for Perl extension Digest::SHA.
 
+5.41  Sat Jun  3 01:50:46 MST 2006
+	- corrected addfile
+		-- process $file argument as a filehandle unless passed
+			as a SCALAR (which indicates a file name)
+
+5.40  Fri Jun  2 04:00:30 MST 2006
+	- modified addfile to accept indirect filehandles
+		-- ref. rt.cpan.org #19627 and #19641
+
+5.39  Sun May 28 03:22:24 MST 2006
+	- modified shasum to warn rather than die for file errors
+		-- to follow conventions of GNU sha1sum/md5sum
+
 5.38  Thu May 25 02:02:02 MST 2006
 	- added new capabilities to the "addfile" method
 		-- now able to accept file names as well as handles

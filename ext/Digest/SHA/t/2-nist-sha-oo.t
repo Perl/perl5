@@ -20,7 +20,7 @@ BEGIN {
 "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
 	);
 
-	plan tests => 5 + scalar(@vec);
+	plan tests => 6 + scalar(@vec);
 }
 
 	# attempt to use an invalid algorithm, and check for failure
@@ -48,6 +48,13 @@ open(FILE, "<$file");
 binmode(FILE);
 ok($ctx->clone->addfile(*FILE)->hexdigest, $rsp);
 close(FILE);
+
+	# use indirect filehandle
+
+open(my $fh, "<$file");
+binmode($fh);
+ok($ctx->clone->addfile($fh)->hexdigest, $rsp);
+close($fh);
 
 	# test addfile using file name instead of handle
 
