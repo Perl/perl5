@@ -1,4 +1,4 @@
-Unicode/Normalize version 0.28
+Unicode/Normalize version 1.00
 ===================================
 
 Unicode::Normalize - Unicode Normalization Forms
@@ -90,7 +90,7 @@ COPYRIGHT AND LICENCE
 
   http://homepage1.nifty.com/nomenclator/perl/
 
-  Copyright(C) 2001-2003, SADAHIRO Tomoyuki. Japan. All rights reserved.
+  Copyright(C) 2001-2006, SADAHIRO Tomoyuki. Japan. All rights reserved.
 
   This module is free software; you can redistribute it
   and/or modify it under the same terms as Perl itself.
