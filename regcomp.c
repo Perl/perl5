@@ -2012,6 +2012,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
     SV *re_trie_maxbuff = NULL;
 
     GET_RE_DEBUG_FLAGS_DECL;
+#ifdef DEBUGGING
+    StructCopy(&zero_scan_data, &data_fake, scan_data_t);    
+#endif
 
     while (scan && OP(scan) != END && scan < last) {
 	/* Peephole optimizer: */

@@ -1603,7 +1603,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 points=(U8**)SvPV_nolen(sv_points );
 
         	if (trie->bitmap && trie_type != trie_utf8_fold) {
-        	    while (!TRIE_BITMAP_TEST(trie,*s) && s <= last_start ) {
+        	    while (s <= last_start && !TRIE_BITMAP_TEST(trie,*s) ) {
         	        s++;
         	    }
                 }
@@ -1716,7 +1716,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             if (leftmost)
                                 break;
                             else if (!charid && trie->bitmap && trie_type != trie_utf8_fold) {
-                                while (!TRIE_BITMAP_TEST(trie,*uc) && uc <= (U8*)last_start ) {
+                                while ( uc <= (U8*)last_start  && !TRIE_BITMAP_TEST(trie,*uc) ) {
                                     uc++;
                                 }
                             }
