@@ -6366,8 +6366,9 @@ Perl_regdump(pTHX_ const regexp *r)
 	    U32 i;
 	    PerlIO_printf(Perl_debug_log, "Offsets: [%"UVuf"]\n\t", (UV)r->offsets[0]);
 	    for (i = 1; i <= len; i++) {
-	        PerlIO_printf(Perl_debug_log, "%"UVuf":%"UVuf"[%"UVuf"] ",
-		    i, (UV)r->offsets[i*2-1], (UV)r->offsets[i*2]);
+	        if (r->offsets[i*2-1] || r->offsets[i*2])
+	            PerlIO_printf(Perl_debug_log, "%"UVuf":%"UVuf"[%"UVuf"] ",
+		        i, (UV)r->offsets[i*2-1], (UV)r->offsets[i*2]);
             }
 	    PerlIO_printf(Perl_debug_log, "\n");
         });
@@ -6903,7 +6904,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	
 	/* Where, what. */
 	if (OP(node) == OPTIMIZED) {
-	    if (!optstart && (SvIV(re_debug_flags) & RE_DEBUG_COMPILE_OPTIMISE))
+	    if (!optstart && RE_DEBUG_FLAG(RE_DEBUG_COMPILE_OPTIMISE))
 	        optstart = node;
 	    else
 		goto after_print;

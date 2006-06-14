@@ -1,4 +1,4 @@
-use re Debug=>qw(COMPILE EXECUTE OFFSETS);
+use re Debug=>qw(DUMP EXECUTE OFFSETS);
 my @tests=(
   XY     =>  'X(A|[B]Q||C|D)Y' ,
   foobar =>  '[f][o][o][b][a][r]',

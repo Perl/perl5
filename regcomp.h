@@ -568,57 +568,62 @@ re.pm, especially to the documentation.
 #define RE_DEBUG_EXTRA_TRIE        0x010000
 #define RE_DEBUG_EXTRA_OFFSETS     0x020000
 
+#define RE_DEBUG_FLAG(x) (re_debug_flags & x)
 /* Compile */
 #define DEBUG_COMPILE_r(x) DEBUG_r( \
-    if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE_MASK) x  )
+    if (re_debug_flags & RE_DEBUG_COMPILE_MASK) x  )
 #define DEBUG_PARSE_r(x) DEBUG_r( \
-    if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE_PARSE) x  )
+    if (re_debug_flags & RE_DEBUG_COMPILE_PARSE) x  )
 #define DEBUG_OPTIMISE_r(x) DEBUG_r( \
-    if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE_OPTIMISE) x  )
+    if (re_debug_flags & RE_DEBUG_COMPILE_OPTIMISE) x  )
 #define DEBUG_PARSE_r(x) DEBUG_r( \
-    if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE_PARSE) x  )
+    if (re_debug_flags & RE_DEBUG_COMPILE_PARSE) x  )
 #define DEBUG_DUMP_r(x) DEBUG_r( \
-    if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE_DUMP) x  )
+    if (re_debug_flags & RE_DEBUG_COMPILE_DUMP) x  )
 #define DEBUG_OFFSETS_r(x) DEBUG_r( \
-    if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE_OFFSETS) x  )
+    if (re_debug_flags & RE_DEBUG_COMPILE_OFFSETS) x  )
 #define DEBUG_TRIE_COMPILE_r(x) DEBUG_r( \
-    if (SvIV(re_debug_flags) & RE_DEBUG_COMPILE_TRIE) x )
+    if (re_debug_flags & RE_DEBUG_COMPILE_TRIE) x )
 
 /* Execute */
 #define DEBUG_EXECUTE_r(x) DEBUG_r( \
-    if (SvIV(re_debug_flags) & RE_DEBUG_EXECUTE_MASK) x  )
+    if (re_debug_flags & RE_DEBUG_EXECUTE_MASK) x  )
 #define DEBUG_INTUIT_r(x) DEBUG_r( \
-    if (SvIV(re_debug_flags) & RE_DEBUG_EXECUTE_INTUIT) x  )
+    if (re_debug_flags & RE_DEBUG_EXECUTE_INTUIT) x  )
 #define DEBUG_MATCH_r(x) DEBUG_r( \
-    if (SvIV(re_debug_flags) & RE_DEBUG_EXECUTE_MATCH) x  )
+    if (re_debug_flags & RE_DEBUG_EXECUTE_MATCH) x  )
 #define DEBUG_TRIE_EXECUTE_r(x) DEBUG_r( \
-    if (SvIV(re_debug_flags) & RE_DEBUG_EXECUTE_TRIE) x )
+    if (re_debug_flags & RE_DEBUG_EXECUTE_TRIE) x )
 
 /* Extra */
 #define DEBUG_EXTRA_r(x) DEBUG_r( \
-    if (SvIV(re_debug_flags) & RE_DEBUG_EXTRA_MASK) x  )
+    if (re_debug_flags & RE_DEBUG_EXTRA_MASK) x  )
 #define MJD_OFFSET_DEBUG(x) DEBUG_r( \
-    if (SvIV(re_debug_flags) & RE_DEBUG_EXTRA_OFFSETS) \
+    if (re_debug_flags & RE_DEBUG_EXTRA_OFFSETS) \
         Perl_warn_nocontext x )
 #define DEBUG_TRIE_COMPILE_MORE_r(x) DEBUG_TRIE_COMPILE_r( \
-    if (SvIV(re_debug_flags) & RE_DEBUG_EXTRA_TRIE) x )
+    if (re_debug_flags & RE_DEBUG_EXTRA_TRIE) x )
 #define DEBUG_TRIE_EXECUTE_MORE_r(x) DEBUG_TRIE_EXECUTE_r( \
-    if (SvIV(re_debug_flags) & RE_DEBUG_EXTRA_TRIE) x )
+    if (re_debug_flags & RE_DEBUG_EXTRA_TRIE) x )
 
 #define DEBUG_TRIE_r(x) DEBUG_r( \
-    if (SvIV(re_debug_flags) & (RE_DEBUG_COMPILE_TRIE \
+    if (re_debug_flags & (RE_DEBUG_COMPILE_TRIE \
         | RE_DEBUG_EXECUTE_TRIE )) x )
 
 /* initialization */
 /* get_sv() can return NULL during global destruction. */
-#define GET_RE_DEBUG_FLAGS DEBUG_r( \
-        re_debug_flags = get_sv(RE_DEBUG_FLAGS, 1); \
-        if (re_debug_flags && !SvIOK(re_debug_flags)) { \
-            sv_setiv(re_debug_flags, RE_DEBUG_COMPILE_DUMP | RE_DEBUG_EXECUTE_MASK ); \
-        } )
+#define GET_RE_DEBUG_FLAGS DEBUG_r({ \
+        SV * re_debug_flags_sv = NULL; \
+        re_debug_flags_sv = get_sv(RE_DEBUG_FLAGS, 1); \
+        if (re_debug_flags_sv) { \
+            if (!SvUOK(re_debug_flags_sv)) \
+                sv_setuv(re_debug_flags_sv, RE_DEBUG_COMPILE_DUMP | RE_DEBUG_EXECUTE_MASK ); \
+            re_debug_flags=SvUV(re_debug_flags_sv); \
+        }\
+})
 
 #ifdef DEBUGGING
-#define GET_RE_DEBUG_FLAGS_DECL SV *re_debug_flags = NULL; GET_RE_DEBUG_FLAGS;
+#define GET_RE_DEBUG_FLAGS_DECL UV re_debug_flags = 0; GET_RE_DEBUG_FLAGS;
 #else
 #define GET_RE_DEBUG_FLAGS_DECL
 #endif

@@ -2750,8 +2750,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 							    subpattern */
     
 #ifdef DEBUGGING
-    SV *re_debug_flags = NULL;
-    GET_RE_DEBUG_FLAGS;
+    GET_RE_DEBUG_FLAGS_DECL;
     PL_regindent++;
 #endif
 
@@ -5128,12 +5127,11 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max)
     PL_reginput = scan;
 
     DEBUG_r({
-	SV *re_debug_flags = NULL;
-	SV * const prop = sv_newmortal();
-	GET_RE_DEBUG_FLAGS;
+	GET_RE_DEBUG_FLAGS_DECL;
 	DEBUG_EXECUTE_r({
-	regprop(prog, prop, p);
-	PerlIO_printf(Perl_debug_log,
+	    SV * const prop = sv_newmortal();
+	    regprop(prog, prop, p);
+	    PerlIO_printf(Perl_debug_log,
 			"%*s  %s can match %"IVdf" times out of %"IVdf"...\n",
 			REPORT_CODE_OFF+1, "", SvPVX_const(prop),(IV)c,(IV)max);
 	});
