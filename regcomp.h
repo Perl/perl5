@@ -616,14 +616,14 @@ re.pm, especially to the documentation.
         SV * re_debug_flags_sv = NULL; \
         re_debug_flags_sv = get_sv(RE_DEBUG_FLAGS, 1); \
         if (re_debug_flags_sv) { \
-            if (!SvUOK(re_debug_flags_sv)) \
+            if (!SvIOK(re_debug_flags_sv)) \
                 sv_setuv(re_debug_flags_sv, RE_DEBUG_COMPILE_DUMP | RE_DEBUG_EXECUTE_MASK ); \
-            re_debug_flags=SvUV(re_debug_flags_sv); \
+            re_debug_flags=SvIV(re_debug_flags_sv); \
         }\
 })
 
 #ifdef DEBUGGING
-#define GET_RE_DEBUG_FLAGS_DECL UV re_debug_flags = 0; GET_RE_DEBUG_FLAGS;
+#define GET_RE_DEBUG_FLAGS_DECL IV re_debug_flags = 0; GET_RE_DEBUG_FLAGS;
 #else
 #define GET_RE_DEBUG_FLAGS_DECL
 #endif

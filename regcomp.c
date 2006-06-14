@@ -3660,6 +3660,18 @@ reStudy:
         PerlIO_printf(Perl_debug_log,"Final program:\n");
         regdump(r);
     });
+    DEBUG_OFFSETS_r(if (r->offsets) {
+        const U32 len = r->offsets[0];
+        U32 i;
+        GET_RE_DEBUG_FLAGS_DECL;
+        PerlIO_printf(Perl_debug_log, "Offsets: [%"UVuf"]\n\t", (UV)r->offsets[0]);
+        for (i = 1; i <= len; i++) {
+            if (r->offsets[i*2-1] || r->offsets[i*2])
+                PerlIO_printf(Perl_debug_log, "%"UVuf":%"UVuf"[%"UVuf"] ",
+                i, (UV)r->offsets[i*2-1], (UV)r->offsets[i*2]);
+            }
+        PerlIO_printf(Perl_debug_log, "\n");
+    });
     return(r);
 }
 
@@ -6359,20 +6371,6 @@ Perl_regdump(pTHX_ const regexp *r)
     if (r->reganch & ROPT_EVAL_SEEN)
 	PerlIO_printf(Perl_debug_log, "with eval ");
     PerlIO_printf(Perl_debug_log, "\n");
-    if (r->offsets) {
-        const U32 len = r->offsets[0];
-        GET_RE_DEBUG_FLAGS_DECL;
-        DEBUG_OFFSETS_r({
-	    U32 i;
-	    PerlIO_printf(Perl_debug_log, "Offsets: [%"UVuf"]\n\t", (UV)r->offsets[0]);
-	    for (i = 1; i <= len; i++) {
-	        if (r->offsets[i*2-1] || r->offsets[i*2])
-	            PerlIO_printf(Perl_debug_log, "%"UVuf":%"UVuf"[%"UVuf"] ",
-		        i, (UV)r->offsets[i*2-1], (UV)r->offsets[i*2]);
-            }
-	    PerlIO_printf(Perl_debug_log, "\n");
-        });
-    }
 #else
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(r);
