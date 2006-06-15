@@ -5996,7 +5996,9 @@ int unixlen;
   mynam.naml$b_rss = 0;
   if (decc_efs_case_preserve)
     mynam.naml$b_nop |= NAM$M_NO_SHORT_UPCASE;
+#ifdef NAML$M_OPEN_SPECIAL
   mynam.naml$l_input_flags |= NAML$M_OPEN_SPECIAL;
+#endif
 
   /* Set up the remaining naml fields */
   sts = sys$parse(&myfab);
