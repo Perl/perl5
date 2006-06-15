@@ -123,16 +123,24 @@ for file do
     *) ;;
     esac
 
-# Add -Wall for the core modules iff gcc and not already -Wall
 warn=''
+
+# Add -Wall for the core modules iff gcc and not already -Wall
 case "$gccversion" in
 '') ;;
-Intel*) ;;
+Intel*) ;; # The Intel C++ plays gcc on TV but is not really it.
 *)  case "$ccflags" in
     *-Wall*) ;;
     *) warn="$warn -Wall" ;;
     esac
-    case "$gccansipedantic" in
+    ;;
+esac
+
+# The gcc -ansi -pedantic require their own dance, too.
+case "$gccversion" in
+'') ;;
+Intel*) ;;
+*)  case "$gccansipedantic" in
     define)
 	case "$gccversion" in
 	[12]*) ;; # gcc versions 1 (gasp!) and 2 are not good for this.
@@ -162,6 +170,24 @@ Intel*) ;;
 	esac
 	;;
     esac
+    ;;
+esac
+
+# Further gcc warning options.
+case "$gccversion" in
+'') ;;
+Intel*) ;;
+*)  for opt in '' extra declaration-after-statement endif-labels
+    do
+       case " $ccflags " in
+       *"-W$opt "*) ;;
+       *) case "`echo | $cc -W$opt -E - 2>&1`" in
+          *"unrecognized"*) ;;
+          *) warn="$warn -W$opt" ;;
+          esac
+          ;;
+       esac
+    done
     ;;
 esac
 
