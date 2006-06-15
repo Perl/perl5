@@ -465,7 +465,7 @@ decompose(src, compat = &PL_sv_no)
     dlen = slen;
     New(0, d, dlen+1, U8);
     dend = pv_utf8_decompose(s, slen, &d, dlen, SvTRUE(compat));
-    sv_setpvn(dst, d, dend - d);
+    sv_setpvn(dst, (char *)d, dend - d);
     SvUTF8_on(dst);
     Safefree(d);
     RETVAL = dst;
