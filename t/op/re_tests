@@ -971,3 +971,4 @@ x(?#	x	c	-	Sequence (?#... not terminated
 ^((?:aa)*)(?:X+((?:\d+|-)(?:X+(.+))?))?$	aaaaX5	y	$1	aaaa
 X(A|B||C|D)Y	XXXYYY	y	$&	XY	# Trie w/ NOTHING
 (?i:X([A]|[B]|y[Y]y|[D]|)Y)	XXXYYYB	y	$&	XY	# Trie w/ NOTHING
+^([a]{1})*$	aa	y	$1	a

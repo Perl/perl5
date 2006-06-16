@@ -180,34 +180,12 @@ typedef struct {
 
 typedef I32 CHECKPOINT;
 
-typedef enum {
-    resume_TRIE1,
-    resume_TRIE2,
-    resume_EVAL,
-    resume_CURLYX,
-    resume_WHILEM1,
-    resume_WHILEM2,
-    resume_WHILEM3,
-    resume_WHILEM4,
-    resume_WHILEM5,
-    resume_WHILEM6,
-    resume_CURLYM1,
-    resume_CURLYM2,
-    resume_CURLYM3,
-    resume_IFMATCH,
-    resume_PLUS1,
-    resume_PLUS2,
-    resume_PLUS3,
-    resume_PLUS4
-} regmatch_resume_states;
-
-
 typedef struct regmatch_state {
 
     /* these vars contain state that needs to be maintained
      * across the main while loop ... */
 
-    regmatch_resume_states resume_state; /* where to jump to on return */
+    int resume_state;		/* where to jump to on return */
     regnode *scan;		/* Current node. */
     regnode *next;		/* Next node. */
     bool minmod;		/* the next "{n,m}" is a "{n,m}?" */
@@ -243,6 +221,7 @@ typedef struct regmatch_state {
 	    int		toggleutf;
 	    CHECKPOINT	cp;	/* remember current savestack indexes */
 	    CHECKPOINT	lastcp;
+	    regnode	*B;	/* the node following us  */
 	} eval;
 
 	struct {
@@ -269,15 +248,21 @@ typedef struct regmatch_state {
 	} whilem;
 
 	struct {
+	    I32 lastparen;
+	    regnode *next_branch; /* next branch node */
+	    CHECKPOINT cp;
+	} branch;
+
+	struct {
 	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
-	    I32 paren;
 	    I32 c1, c2;		/* case fold search */
-	    CHECKPOINT lastcp;
-	    I32 l;
-	    I32 matches;
-	    I32 maxwanted;
+	    CHECKPOINT cp;
+	    I32 alen;		/* length of first-matched A string */
+	    I32 count;
 	    bool minmod;
+	    regnode *A, *B;	/* the nodes corresponding to /A*B/  */
+	    regnode *me;	/* the curlym node */
 	} curlym;
 
 	struct {
@@ -293,6 +278,7 @@ typedef struct regmatch_state {
 	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
 	    I32 wanted;
+	    regnode  *me; /* the IFMATCH/SUSPEND/UNLESSM node  */
 	} ifmatch; /* and SUSPEND/UNLESSM */
     } u;
 } regmatch_state;

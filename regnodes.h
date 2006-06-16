@@ -69,6 +69,7 @@
 #define	TRIE	62	/* 0x3e Match many EXACT(FL?)? at once. flags==type */
 #define	TRIEC	63	/* 0x3f Trie + charclass. (unused at present) */
 #define	PSEUDO	64	/* 0x40 Pseudo opcode for internal use. */
+#define REGNODE_MAX 64
 
 #ifndef DOINIT
 EXTCONST U8 PL_regkind[];

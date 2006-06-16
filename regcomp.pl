@@ -45,6 +45,7 @@ EOP
 }
 
 print OUT <<EOP;
+#define REGNODE_MAX $oind
 
 #ifndef DOINIT
 EXTCONST U8 PL_regkind[];
