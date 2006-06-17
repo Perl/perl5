@@ -1,6 +1,6 @@
 package UNIVERSAL;
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 
 # UNIVERSAL should not contain any extra subs/methods beyond those
 # that it exists to define. The use of Exporter below is a historical
@@ -27,18 +27,21 @@ UNIVERSAL - base class for ALL classes (blessed references)
 
 =head1 SYNOPSIS
 
-    $is_io = $fd->isa("IO::Handle");
-    $is_io = Class->isa("IO::Handle");
+    $is_io    = $fd->isa("IO::Handle");
+    $is_io    = Class->isa("IO::Handle");
 
-    $sub   = $obj->can("print");
-    $sub   = Class->can("print");
+    $does_log = $obj->DOES("Logger");
+    $does_log = Class->DOES("Logger");
 
-    $sub   = eval { $ref->can("fandango") };
-    $ver   = $obj->VERSION;
+    $sub      = $obj->can("print");
+    $sub      = Class->can("print");
+
+    $sub      = eval { $ref->can("fandango") };
+    $ver      = $obj->VERSION;
 
     # but never do this!
-    $is_io = UNIVERSAL::isa($fd, "IO::Handle");
-    $sub   = UNIVERSAL::can($obj, "print");
+    $is_io    = UNIVERSAL::isa($fd, "IO::Handle");
+    $sub      = UNIVERSAL::can($obj, "print");
 
 =head1 DESCRIPTION
 
@@ -98,6 +101,33 @@ check the invocant with C<blessed> from L<Scalar::Util> first:
       ...
   }
 
+=item C<< $obj->DOES( ROLE ) >>
+
+=item C<< CLASS->DOES( ROLE ) >>
+
+C<DOES> checks if the object or class performs the role C<ROLE>.  A role is a
+named group of specific behavior (often methods of particular names and
+signatures), similar to a class, but not necessarily a complete class by
+itself.  For example, logging or serialization may be roles.
+
+C<DOES> and C<isa> are similar, in that if either is true, you know that the
+object or class on which you call the method can perform specific behavior.
+However, C<DOES> is different from C<isa> in that it does not care I<how> the
+invocant performs the operations, merely that it does.  (C<isa> of course
+mandates an inheritance relationship.  Other relationships include aggregation,
+delegation, and mocking.)
+
+By default, classes in Perl only perform the C<UNIVERSAL> role.  To mark that
+your own classes perform other roles, override C<DOES> appropriately.
+
+There is a relationship between roles and classes, as each class implies the
+existence of a role of the same name.  There is also a relationship between
+inheritance and roles, in that a subclass that inherits from an ancestor class
+implicitly performs any roles its parent performs.  Thus you can use C<DOES> in
+place of C<isa> safely, as it will return true in all places where C<isa> will
+return true (provided that any overridden C<DOES> I<and> C<isa> methods behave
+appropriately).
+
 =item C<< $obj->can( METHOD ) >>
 
 =item C<< CLASS->can( METHOD ) >>
@@ -139,9 +169,8 @@ method.
 
 None by default.
 
-You may request the import of all three functions (C<isa>, C<can>, and
-C<VERSION>), however it is usually harmful to do so.  Please don't do this in
-new code.
+You may request the import of three functions (C<isa>, C<can>, and C<VERSION>),
+however it is usually harmful to do so.  Please don't do this in new code.
 
 For example, previous versions of this documentation suggested using C<isa> as
 a function to determine the type of a reference:
