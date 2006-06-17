@@ -82,6 +82,7 @@ static perl_mutex create_destruct_mutex;
 
 static UV tid_counter = 0;
 static IV active_threads = 0;
+static IV joinable_threads = 0;
 #ifdef THREAD_CREATE_NEEDS_STACK
 static IV default_stack_size = THREAD_CREATE_NEEDS_STACK;
 #else
@@ -194,9 +195,9 @@ Perl_ithread_hook(pTHX)
 {
     int veto_cleanup = 0;
     MUTEX_LOCK(&create_destruct_mutex);
-    if ((aTHX == PL_curinterp) && (active_threads != 1)) {
+    if ((aTHX == PL_curinterp) && (joinable_threads != 1)) {
         if (ckWARN_d(WARN_THREADS)) {
-            Perl_warn(aTHX_ "A thread exited while %" IVdf " threads were running", active_threads);
+            Perl_warn(aTHX_ "A thread exited while %" IVdf " threads were running", joinable_threads);
         }
         veto_cleanup = 1;
     }
@@ -394,6 +395,9 @@ S_ithread_run(void * arg)
 
     MUTEX_LOCK(&create_destruct_mutex);
     active_threads--;
+    if (!cleanup) {
+	joinable_threads--;
+    }
     MUTEX_UNLOCK(&create_destruct_mutex);
 
 #ifdef WIN32
@@ -654,6 +658,7 @@ S_ithread_create(
     }
 
     active_threads++;
+    joinable_threads++;
     MUTEX_UNLOCK(&create_destruct_mutex);
 
     sv_2mortal(params);
@@ -970,6 +975,11 @@ ithread_detach(...)
 
         if (cleanup)
             S_ithread_destruct(aTHX_ thread);
+	else {
+	    MUTEX_LOCK(&create_destruct_mutex);
+	    joinable_threads--;
+	    MUTEX_UNLOCK(&create_destruct_mutex);
+	}
 
 
 void
@@ -1176,6 +1186,7 @@ BOOT:
 #  endif
 
     active_threads++;
+    joinable_threads++;
 
     S_ithread_set(aTHX_ thread);
     MUTEX_UNLOCK(&create_destruct_mutex);

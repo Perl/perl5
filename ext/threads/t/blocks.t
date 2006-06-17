@@ -95,4 +95,8 @@ ok($bthr, 'BEGIN thread');
 ok($mthr->join() == 42, 'Main join');
 ok($bthr->join() == 42, 'BEGIN join');
 
-# EOF
+# make sure a still-running detached thread doesn't give a warning on exit
+
+# *** add new tests above this one
+threads->create(sub { 1 while 1 })->detach();
+# *** add new tests above this one
