@@ -1594,6 +1594,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		                is unnecessary overhead as the relationship
 		                is always 1:1, but for unicode, especially
 		                case folded unicode this is not true. */
+		U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
 
                 GET_RE_DEBUG_FLAGS_DECL;
 
@@ -1646,7 +1647,6 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                 uscan += len;
                                 len=0;
                             } else {
-                                U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
                                 uvc = utf8n_to_uvuni( (U8*)uc, UTF8_MAXLEN, &len, uniflags );
                                 uvc = to_uni_fold( uvc, foldbuf, &foldlen );
                                 foldlen -= UNISKIP( uvc );
@@ -2896,6 +2896,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		U8 *uscan = (U8*)NULL;
 		STRLEN bufflen=0;
 		SV *sv_accept_buff = NULL;
+		U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
 
 	    	st->u.trie.accepted = 0; /* how many accepting states we have seen */
 		result = 0;
@@ -2950,7 +2951,6 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 				uscan += len;
 				len=0;
 			    } else {
-				U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
 				uvc = utf8n_to_uvuni( (U8*)uc, UTF8_MAXLEN, &len, uniflags );
 				uvc = to_uni_fold( uvc, foldbuf, &foldlen );
 				foldlen -= UNISKIP( uvc );
