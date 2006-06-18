@@ -181,12 +181,14 @@ Intel*) ;;
     do
        case " $ccflags " in
        *"-W$opt "*) ;;
-       *) case "`echo | $cc -W$opt -E - 2>&1`" in
+       *) case "`echo >_cflags.c | $cc -W$opt -c _cflags.c -o _cflags.o 2>&1`" in
           *"unrecognized"*) ;;
+          *"Invalid"*) ;;
           *) warn="$warn -W$opt" ;;
           esac
           ;;
        esac
+       rm -f _cflags.c cflags.o
     done
     ;;
 esac
