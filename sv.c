@@ -9017,18 +9017,19 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	integer:
 	    {
 		char *ptr = ebuf + sizeof ebuf;
+		bool tempalt = uv ? alt : FALSE; /* Vectors can't change alt */
+		zeros = 0;
+
 		switch (base) {
 		    unsigned dig;
 		case 16:
-		    if (!uv)
-			alt = FALSE;
 		    p = (char*)((c == 'X')
 				? "0123456789ABCDEF" : "0123456789abcdef");
 		    do {
 			dig = uv & 15;
 			*--ptr = p[dig];
 		    } while (uv >>= 4);
-		    if (alt) {
+		    if (tempalt) {
 			esignbuf[esignlen++] = '0';
 			esignbuf[esignlen++] = c;  /* 'x' or 'X' */
 		    }
@@ -9042,13 +9043,11 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 			*--ptr = '0';
 		    break;
 		case 2:
-		    if (!uv)
-			alt = FALSE;
 		    do {
 			dig = uv & 1;
 			*--ptr = '0' + dig;
 		    } while (uv >>= 1);
-		    if (alt) {
+		    if (tempalt) {
 			esignbuf[esignlen++] = '0';
 			esignbuf[esignlen++] = 'b';
 		    }
