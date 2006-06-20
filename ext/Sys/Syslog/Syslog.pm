@@ -8,7 +8,7 @@ require 5.006;
 require Exporter;
 
 {   no strict 'vars';
-    $VERSION = '0.15';
+    $VERSION = '0.16';
     @ISA = qw(Exporter);
 
     %EXPORT_TAGS = (
@@ -73,7 +73,7 @@ my %options = (
 
 # it would be nice to try stream/unix first, since that will be
 # most efficient. However streams are dodgy - see _syslog_send_stream
-my @connectMethods = ( 'tcp', 'udp', 'unix', 'stream', 'console' );
+my @connectMethods = qw(native tcp udp unix stream console);
 if ($^O =~ /^(freebsd|linux)$/) {
     @connectMethods = grep { $_ ne 'udp' } @connectMethods;
 }
@@ -156,8 +156,8 @@ sub setlogsock {
 	}
 
     } elsif (lc $setsock eq 'unix') {
-        if (length _PATH_LOG() && !defined $syslog_path) {
-	    $syslog_path = _PATH_LOG();
+        if (length _PATH_LOG() || (defined $syslog_path && -w $syslog_path)) {
+	    $syslog_path = _PATH_LOG() unless defined $syslog_path;
 	    @connectMethods = ( 'unix' );
         } else {
             warnings::warnif 'unix passed to setlogsock, but path not available';
@@ -203,18 +203,19 @@ sub syslog {
     my (@words, $num, $numpri, $numfac, $sum);
     my $failed = undef;
     my $fail_time = undef;
+    my $error = $!;
 
     my $facility = $facility;	# may need to change temporarily.
 
     croak "syslog: expecting argument \$priority" unless defined $priority;
     croak "syslog: expecting argument \$format"   unless defined $mask;
 
-    @words = split(/\W+/, $priority, 2);# Allow "level" or "level|facility".
+    @words = split(/\W+/, $priority, 2);    # Allow "level" or "level|facility".
     undef $numpri;
     undef $numfac;
 
     foreach (@words) {
-	$num = xlate($_);		# Translate word to number.
+	$num = xlate($_);		    # Translate word to number.
 	if ($num < 0) {
 	    croak "syslog: invalid level/facility: $_"
 	}
@@ -240,11 +241,10 @@ sub syslog {
     connect_log() unless $connected;
 
     if ($mask =~ /%m/) {
-	my $err = $!;
 	# escape percent signs if sprintf will be called
-	$err =~ s/%/%%/g if @_;
+        $error =~ s/%/%%/g if @_;
 	# replace %m with $err, if preceded by an even number of percent signs
-	$mask =~ s/(?<!%)((?:%%)*)%m/$1$err/g;
+        $mask =~ s/(?<!%)((?:%%)*)%m/$1$error/g;
     }
 
     $mask .= "\n" unless $mask =~ /\n$/;
@@ -503,7 +503,7 @@ sub connect_stream {
     my ($errs) = @_;
     # might want syslog_path to be variable based on syslog.h (if only
     # it were in there!)
-    $syslog_path = '/dev/conslog'; 
+    $syslog_path = '/dev/conslog' unless defined $syslog_path; 
     if (!-w $syslog_path) {
 	push @$errs, "stream $syslog_path is not writable";
 	return 0;
@@ -518,7 +518,7 @@ sub connect_stream {
 
 sub connect_unix {
     my ($errs) = @_;
-    if (length _PATH_LOG()) {
+    if (not defined $syslog_path and length _PATH_LOG()) {
 	$syslog_path = _PATH_LOG();
     } else {
         push @$errs, "_PATH_LOG not available in syslog.h";
@@ -619,7 +619,7 @@ Sys::Syslog - Perl interface to the UNIX syslog(3) calls
 
 =head1 VERSION
 
-Version 0.15
+Version 0.16
 
 =head1 SYNOPSIS
 
@@ -810,9 +810,11 @@ C<undef> on failure.
 A value of C<"unix"> will connect to the UNIX domain socket (in some
 systems a character special device) returned by the C<_PATH_LOG> macro
 (if your system defines it), or F</dev/log> or F</dev/conslog>,
-whatever is writable.  A value of 'stream' will connect to the stream
+whatever is writable.  A value of C<"stream"> will connect to the stream
 indicated by the pathname provided as the optional second parameter.
 (For example Solaris and IRIX require C<"stream"> instead of C<"unix">.)
+A value of C<"native"> will use the native C functions from your C<syslog(3)> 
+library.
 A value of C<"inet"> will connect to an INET socket (either C<tcp> or C<udp>,
 tried in that order) returned by C<getservbyname()>. C<"tcp"> and C<"udp"> 
 can also be given as values. The value C<"console"> will send messages
