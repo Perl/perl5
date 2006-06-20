@@ -101,9 +101,9 @@ sub uprops {
   return $r;
 }
 
-ok(uprops(0x0000), 'xsnfbdmckyg');
-ok(uprops(0x0029), 'xsnfbdmckyg');
-ok(uprops(0x0041), 'xsnfbdmckyg');
+ok(uprops(0x0000), 'xsnfbdmckyg'); # NULL
+ok(uprops(0x0029), 'xsnfbdmckyg'); # RIGHT PARENTHESIS
+ok(uprops(0x0041), 'xsnfbdmckyg'); # LATIN CAPITAL LETTER A
 ok(uprops(0x00A0), 'xsnfbdmcKyG'); # NO-BREAK SPACE
 ok(uprops(0x00C0), 'xsnfbDmcKyg'); # LATIN CAPITAL LETTER A WITH GRAVE
 ok(uprops(0x0300), 'xsnfBdMckYg'); # COMBINING GRAVE ACCENT
@@ -113,7 +113,7 @@ ok(uprops(0x0958), 'XsnFbDmCKyG'); # DEVANAGARI LETTER QA
 ok(uprops(0x0F43), 'XsnFbDmCKyG'); # TIBETAN LETTER GHA
 ok(uprops(0x1100), 'xsnfbdmckyg'); # HANGUL CHOSEONG KIYEOK
 ok(uprops(0x1161), 'xsnfBdMckYg'); # HANGUL JUNGSEONG A
-ok(uprops(0x11AF), 'xsnfBdMckYg'); # HANGUL JONGSEONG RIEU
+ok(uprops(0x11AF), 'xsnfBdMckYg'); # HANGUL JONGSEONG RIEUL
 ok(uprops(0x212B), 'xSnFbDmCKyG'); # ANGSTROM SIGN
 ok(uprops(0xAC00), 'xsnfbDmcKyg'); # HANGUL SYLLABLE GA
 ok(uprops(0xF900), 'xSnFbDmCKyG'); # CJK COMPATIBILITY IDEOGRAPH-F900

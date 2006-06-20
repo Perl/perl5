@@ -181,17 +181,17 @@ static U8* pv_cat_decompHangul(U8* d, UV uv)
     return d;
 }
 
-static char * sv_2pvunicode(SV *sv, STRLEN *lp)
+static char* sv_2pvunicode(SV *sv, STRLEN *lp)
 {
     char *s;
     STRLEN len;
-    s = (char*)SvPV(sv,len);
+    s = SvPV(sv,len);
     if (!SvUTF8(sv)) {
-	SV* tmpsv = sv_mortalcopy(sv);
+	SV* tmpsv = sv_2mortal(newSVpvn(s, len));
 	if (!SvPOK(tmpsv))
-	    (void)sv_pvn_force(tmpsv,&len);
+	    s = SvPV_force(tmpsv,len);
 	sv_utf8_upgrade(tmpsv);
-	s = (char*)SvPV(tmpsv,len);
+	s = SvPV(tmpsv,len);
     }
     if (lp)
 	*lp = len;
@@ -292,7 +292,7 @@ U8* pv_utf8_reorder(U8* s, STRLEN slen, U8* d, STRLEN dlen)
 		else {
 		    Renew(seq_ext, seq_max, UNF_cc);
 		}
-		seq_ptr = seq_ext; /* till now use seq_ext */
+		seq_ptr = seq_ext; /* use seq_ext from now */
 	    }
 
 	    seq_ptr[cc_pos].cc  = curCC;
@@ -336,7 +336,7 @@ U8* pv_utf8_compose(U8* s, STRLEN slen, U8* d, STRLEN dlen, bool iscontig)
     U8* e = s + slen;
     U8* dend = d + dlen;
 
-    UV uvS; /* code point of the starter */
+    UV uvS = 0; /* code point of the starter */
     bool valid_uvS = FALSE; /* if FALSE, uvS isn't initialized yet */
     U8 preCC = 0;
 
@@ -464,7 +464,7 @@ decompose(src, compat = &PL_sv_no)
     dst = newSVpvn("", 0);
     dlen = slen;
     New(0, d, dlen+1, U8);
-    dend = pv_utf8_decompose(s, slen, &d, dlen, SvTRUE(compat));
+    dend = pv_utf8_decompose(s, slen, &d, dlen, (bool)SvTRUE(compat));
     sv_setpvn(dst, (char *)d, dend - d);
     SvUTF8_on(dst);
     Safefree(d);
@@ -691,7 +691,7 @@ checkFCD(src)
     for (p = s; p < e; p += retlen) {
 	U8 *sCan;
 	UV uvLead;
-	STRLEN canlen, canret;
+	STRLEN canlen = 0;
 	UV uv = utf8n_to_uvuni(p, e - p, &retlen, AllowAnyUTF);
 	if (!retlen)
 	    croak(ErrRetlenIsZero, "checkFCD or -FCC");
@@ -699,6 +699,7 @@ checkFCD(src)
 	sCan = (U8*) dec_canonical(uv);
 
 	if (sCan) {
+	    STRLEN canret;
 	    canlen = (STRLEN)strlen((char *) sCan);
 	    uvLead = utf8n_to_uvuni(sCan, canlen, &canret, AllowAnyUTF);
 	    if (!canret)
@@ -721,6 +722,7 @@ checkFCD(src)
 	}
 
 	if (sCan) {
+	    STRLEN canret;
 	    UV uvTrail;
 	    U8* eCan = sCan + canlen;
 	    U8* pCan = utf8_hop(eCan, -1);
