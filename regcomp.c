@@ -1052,6 +1052,9 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
     U32 *fail;
     reg_ac_data *aho;
     const U32 data_slot = add_data( pRExC_state, 1, "T" );
+#ifndef DEBUGGING
+    PERL_UNUSED_ARG(depth);
+#endif    
     GET_RE_DEBUG_FLAGS_DECL;
 
     ARG_SET( stclass, data_slot );
@@ -1147,6 +1150,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     STRLEN trie_charcount=0;
     /*U32 trie_laststate=0;*/
     AV *trie_revcharmap;
+    PERL_UNUSED_ARG(depth);
 #endif
     GET_RE_DEBUG_FLAGS_DECL;
 
@@ -1769,8 +1773,10 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                     STR_LEN(convert)++;
 
 		} else {
+#ifdef DEBUGGING	    
 		    if (state>1)
 			DEBUG_OPTIMISE_r(PerlIO_printf( Perl_debug_log,"]\n"));
+#endif
 		    break;
 		}
 	    }
@@ -1867,6 +1873,10 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
     U32 stopnow = 0;
 #ifdef DEBUGGING
     regnode *stop = scan;
+#else
+    PERL_UNUSED_ARG(flags);
+    PERL_UNUSED_ARG(val);
+    PERL_UNUSED_ARG(depth);
 #endif
     GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_PEEP("join",scan,depth);
@@ -5167,6 +5177,9 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 #ifdef EBCDIC
     UV literal_endpoint = 0;
 #endif
+#ifndef DEBUGGING
+    PERL_UNUSED_ARG(depth);
+#endif
     UV stored = 0;  /* number of chars stored in the class */
 
     regnode * const orig_emit = RExC_emit; /* Save the original RExC_emit in
@@ -6141,6 +6154,9 @@ S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,U32 de
 {
     dVAR;
     register regnode *scan;
+#ifndef DEBUGGING
+    PERL_UNUSED_ARG(depth);
+#endif
     GET_RE_DEBUG_FLAGS_DECL;
 
     if (SIZE_ONLY)
@@ -6573,6 +6589,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(sv);
     PERL_UNUSED_ARG(o);
+    PERL_UNUSED_ARG(prog);
 #endif	/* DEBUGGING */
 }
 
