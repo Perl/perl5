@@ -1,6 +1,28 @@
 CHANGES
 -------
 
+  2.000_13 20 June 2006
+
+      * Store compress & uncompressed sizes as 64-bit.
+
+      * For one-shot uncompression, like this
+
+            unzip "some.zip" => \@a, MultiStream => 1;
+
+        Push each uncompressed stream from "some.zip" onto @a.
+
+      * Added IO::Compress::Base::FilterEnvelope
+
+      * Added IO::Uncompress::Base::nextStream
+
+      * The '-' filehandle now maps to either *STDIN or *STDOUT. 
+        This keeps mod_perl happier. Was using these before
+
+            new IO::File("<-")
+            new IO::File(">-")
+  
+  2.000_12 3 May 2006
+
   2.000_11 10 April 2006
 
       * Transparent + InputLength made more robust where input data is not

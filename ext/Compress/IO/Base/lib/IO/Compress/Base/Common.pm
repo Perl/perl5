@@ -11,7 +11,7 @@ use File::GlobMapper;
 require Exporter;
 our ($VERSION, @ISA, @EXPORT, %EXPORT_TAGS);
 @ISA = qw(Exporter);
-$VERSION = '2.000_12';
+$VERSION = '2.000_13';
 
 @EXPORT = qw( isaFilehandle isaFilename whatIsInput whatIsOutput 
               isaFileGlobString cleanFileGlobString oneTarget
@@ -276,6 +276,14 @@ sub Validator::new
     {
         $obj->croakError("$reportClass: output filename is undef or null string")
             if ! defined $_[1] || $_[1] eq ''  ;
+
+        if (-e $_[1])
+        {
+            if (-d _ )
+            {
+                return $obj->saveErrorString("output file '$_[1]' is a directory");
+            }
+        }
     }
     
     return $obj ;
@@ -314,7 +322,12 @@ sub Validator::validateInputFilenames
             return $self->saveErrorString("input file '$filename' does not exist");
         }
 
-        if (! -r $filename )
+        if (-d _ )
+        {
+            return $self->saveErrorString("input file '$filename' is a directory");
+        }
+
+        if (! -r _ )
         {
             return $self->saveErrorString("cannot open file '$filename': $!");
         }
@@ -696,6 +709,128 @@ sub IO::Compress::Base::Parameters::clone
 
     return bless $obj, 'IO::Compress::Base::Parameters' ;
 }
+
+package U64;
+
+use constant MAX32 => 0xFFFFFFFF ;
+use constant LOW   => 0 ;
+use constant HIGH  => 1;
+
+sub new
+{
+    my $class = shift ;
+
+    my $high = 0 ;
+    my $low  = 0 ;
+
+    if (@_ == 2) {
+        $high = shift ;
+        $low  = shift ;
+    }
+    elsif (@_ == 1) {
+        $low  = shift ;
+    }
+
+    bless [$low, $high], $class;
+}
+
+sub newUnpack_V64
+{
+    my $string = shift;
+
+    my ($low, $hi) = unpack "V V", $string ;
+    bless [ $low, $hi ], "U64";
+}
+
+sub newUnpack_V32
+{
+    my $string = shift;
+
+    my $low = unpack "V", $string ;
+    bless [ $low, 0 ], "U64";
+}
+
+sub reset
+{
+    my $self = shift;
+    $self->[HIGH] = $self->[LOW] = 0;
+}
+
+sub clone
+{
+    my $self = shift;
+    bless [ @$self ], ref $self ;
+}
+
+sub getHigh
+{
+    my $self = shift;
+    return $self->[HIGH];
+}
+
+sub getLow
+{
+    my $self = shift;
+    return $self->[LOW];
+}
+
+sub get32bit
+{
+    my $self = shift;
+    return $self->[LOW];
+}
+
+sub add
+{
+    my $self = shift;
+    my $value = shift;
+
+    if (ref $value eq 'U64') {
+        $self->[HIGH] += $value->[HIGH] ;
+        $value = $value->[LOW];
+    }
+     
+    my $available = MAX32 - $self->[LOW] ;
+
+    if ($value > $available) {
+       ++ $self->[HIGH] ;
+       $self->[LOW] = $value - $available - 1;
+    }
+    else {
+       $self->[LOW] += $value ;
+    }
+}
+
+sub equal
+{
+    my $self = shift;
+    my $other = shift;
+
+    return $self->[LOW]  == $other->[LOW] &&
+           $self->[HIGH] == $other->[HIGH] ;
+}
+
+sub getPacked_V64
+{
+    my $self = shift;
+
+    return pack "V V", @$self ;
+}
+
+sub getPacked_V32
+{
+    my $self = shift;
+
+    return pack "V", $self->[LOW] ;
+}
+
+sub pack_V64
+{
+    my $low  = shift;
+
+    return pack "V V", $low, 0;
+}
+
 
 package IO::Compress::Base::Common;
 

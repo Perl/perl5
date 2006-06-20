@@ -8,6 +8,7 @@ use IO::Compress::Base::Common qw(:Status createSelfTiedObject);
 use IO::Compress::RawDeflate;
 use IO::Compress::Adapter::Deflate;
 use IO::Compress::Adapter::Identity;
+use IO::Compress::Zlib::Extra;
 use IO::Compress::Zip::Constants;
 
 
@@ -26,7 +27,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.000_12';
+$VERSION = '2.000_13';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -88,7 +89,8 @@ sub mkComp
        if ! defined $obj;
 
     if (! defined *$self->{ZipData}{StartOffset}) {
-        *$self->{ZipData}{StartOffset} = *$self->{ZipData}{Offset} = 0;
+        *$self->{ZipData}{StartOffset} = 0;
+        *$self->{ZipData}{Offset} = new U64 ;
     }
 
     return $obj;    
@@ -122,7 +124,7 @@ sub mkHeader
     my $self  = shift;
     my $param = shift ;
     
-    *$self->{ZipData}{StartOffset} = *$self->{ZipData}{Offset} ;
+    *$self->{ZipData}{StartOffset} = *$self->{ZipData}{Offset}->get32bit() ;
 
     my $filename = '';
     $filename = $param->value('Name') || '';
@@ -136,6 +138,21 @@ sub mkHeader
 
     my $extra = '';
     my $ctlExtra = '';
+    my $empty = 0;
+
+    if (*$self->{ZipData}{Zip64}) {
+        $empty = 0xFFFF;
+
+        my $x = '';
+        $x .= pack "V V", 0, 0 ; # uncompressedLength   
+        $x .= pack "V V", 0, 0 ; # compressedLength   
+        $x .= *$self->{ZipData}{Offset}->getPacked_V64() ; # offset to local hdr
+        #$x .= pack "V  ", 0    ; # disk no
+
+        $x = IO::Compress::Zlib::Extra::mkSubField(ZIP_EXTRA_ID_ZIP64, $x);
+        $extra .= $x;
+        $ctlExtra .= $x;
+    }
 
     if (! $param->value('Minimal')) {
         if (defined $param->value('exTime'))
@@ -160,6 +177,7 @@ sub mkHeader
             if defined $param->value('ExtraFieldCentral');
     }
 
+
     my $extAttr = 0;
     $extAttr = $param->value('Mode') << 16
         if defined $param->value('Mode') ;
@@ -170,11 +188,14 @@ sub mkHeader
 
     my $method = *$self->{ZipData}{Method} ;
 
-    # deflate is 20
-    # bzip2 is 46
-    my $madeBy = ($param->value('OS_Code') << 8) +
-                    $ZIP_CM_MIN_VERSIONS{$method};
-    my $extract = $ZIP_CM_MIN_VERSIONS{$method};
+    my $version = $ZIP_CM_MIN_VERSIONS{$method};
+    $version = ZIP64_MIN_VERSION
+        if ZIP64_MIN_VERSION > $version && *$self->{ZipData}{Zip64};
+    my $madeBy = ($param->value('OS_Code') << 8) + $version;
+    my $extract = $version;
+
+    *$self->{ZipData}{Version} = $version;
+    *$self->{ZipData}{MadeBy} = $madeBy;
 
     my $ifa = 0;
     $ifa |= ZIP_IFA_TEXT_MASK
@@ -186,8 +207,8 @@ sub mkHeader
     $hdr .= pack 'v', $method    ; # compression method (deflate)
     $hdr .= pack 'V', $time      ; # last mod date/time
     $hdr .= pack 'V', 0          ; # crc32               - 0 when streaming
-    $hdr .= pack 'V', 0          ; # compressed length   - 0 when streaming
-    $hdr .= pack 'V', 0          ; # uncompressed length - 0 when streaming
+    $hdr .= pack 'V', $empty     ; # compressed length   - 0 when streaming
+    $hdr .= pack 'V', $empty     ; # uncompressed length - 0 when streaming
     $hdr .= pack 'v', length $filename ; # filename length
     $hdr .= pack 'v', length $extra ; # extra length
     
@@ -204,21 +225,27 @@ sub mkHeader
     $ctl .= pack 'v', $method    ; # compression method (deflate)
     $ctl .= pack 'V', $time      ; # last mod date/time
     $ctl .= pack 'V', 0          ; # crc32
-    $ctl .= pack 'V', 0          ; # compressed length
-    $ctl .= pack 'V', 0          ; # uncompressed length
+    $ctl .= pack 'V', $empty     ; # compressed length
+    $ctl .= pack 'V', $empty     ; # uncompressed length
     $ctl .= pack 'v', length $filename ; # filename length
     $ctl .= pack 'v', length $ctlExtra ; # extra length
     $ctl .= pack 'v', length $comment ;  # file comment length
     $ctl .= pack 'v', 0          ; # disk number start 
     $ctl .= pack 'v', $ifa       ; # internal file attributes
     $ctl .= pack 'V', $extAttr   ; # external file attributes
-    $ctl .= pack 'V', *$self->{ZipData}{Offset}  ; # offset to local header
+    if (! *$self->{ZipData}{Zip64}) {
+        $ctl .= pack 'V', *$self->{ZipData}{Offset}->get32bit()  ; # offset to local header
+    }
+    else {
+        $ctl .= pack 'V', $empty ; # offset to local header
+    }
     
     $ctl .= $filename ;
+    *$self->{ZipData}{StartOffset64} = 4 + length $ctl;
     $ctl .= $ctlExtra ;
     $ctl .= $comment ;
 
-    *$self->{ZipData}{Offset} += length $hdr ;
+    *$self->{ZipData}{Offset}->add(length $hdr) ;
 
     *$self->{ZipData}{CentralHeader} = $ctl;
 
@@ -231,19 +258,26 @@ sub mkTrailer
 
     my $crc32 ;
     if (*$self->{ZipData}{Method} == ZIP_CM_DEFLATE) {
-        $crc32 = *$self->{Compress}->crc32();
+        $crc32 = pack "V", *$self->{Compress}->crc32();
     }
     else {
-        $crc32 = *$self->{ZipData}{CRC32};
+        $crc32 = pack "V", *$self->{ZipData}{CRC32};
     }
 
-    my $compressedBytes   = *$self->{Compress}->compressedBytes();
-    my $uncompressedBytes = *$self->{Compress}->uncompressedBytes();
+    my $ctl = *$self->{ZipData}{CentralHeader} ;
 
-    my $data ;
-    $data .= pack "V", $crc32 ;                           # CRC32
-    $data .= pack "V", $compressedBytes   ;               # Compressed Size
-    $data .= pack "V", $uncompressedBytes;                # Uncompressed Size
+    my $sizes ;
+    if (! *$self->{ZipData}{Zip64}) {
+        $sizes .= *$self->{CompSize}->getPacked_V32() ;   # Compressed size
+        $sizes .= *$self->{UnCompSize}->getPacked_V32() ; # Uncompressed size
+    }
+    else {
+        $sizes .= *$self->{CompSize}->getPacked_V64() ;   # Compressed size
+        $sizes .= *$self->{UnCompSize}->getPacked_V64() ; # Uncompressed size
+    }
+
+    my $data = $crc32 . $sizes ;
+
 
     my $hdr = '';
 
@@ -256,10 +290,17 @@ sub mkTrailer
             or return undef;
     }
 
-    my $ctl = *$self->{ZipData}{CentralHeader} ;
-    substr($ctl, 16, 12) = $data ;
+    if (! *$self->{ZipData}{Zip64})
+      { substr($ctl, 16, length $data) = $data }
+    else {
+        substr($ctl, 16, length $crc32) = $crc32 ;
+        my $s  = *$self->{UnCompSize}->getPacked_V64() ; # Uncompressed size
+           $s .= *$self->{CompSize}->getPacked_V64() ;   # Compressed size
+        substr($ctl, *$self->{ZipData}{StartOffset64}, length $s) = $s ;
+    }
 
-    *$self->{ZipData}{Offset} += length($hdr) + $compressedBytes;
+    *$self->{ZipData}{Offset}->add(length($hdr));
+    *$self->{ZipData}{Offset}->add( *$self->{CompSize} );
     push @{ *$self->{ZipData}{CentralDir} }, $ctl ;
 
     return $hdr;
@@ -272,21 +313,56 @@ sub mkFinalTrailer
     my $comment = '';
     $comment = *$self->{ZipData}{ZipComment} ;
 
+    my $cd_offset = *$self->{ZipData}{Offset}->get32bit() ; # offset to start central dir
+
     my $entries = @{ *$self->{ZipData}{CentralDir} };
     my $cd = join '', @{ *$self->{ZipData}{CentralDir} };
+    my $cd_len = length $cd ;
+
+    my $z64e = '';
+
+    if ( *$self->{ZipData}{Zip64} ) {
+
+        my $v  = *$self->{ZipData}{Version} ;
+        my $mb = *$self->{ZipData}{MadeBy} ;
+        $z64e .= pack 'v', $v             ; # Version made by
+        $z64e .= pack 'v', $mb            ; # Version to extract
+        $z64e .= pack 'V', 0              ; # number of disk
+        $z64e .= pack 'V', 0              ; # number of disk with central dir
+        $z64e .= U64::pack_V64 $entries   ; # entries in central dir on this disk
+        $z64e .= U64::pack_V64 $entries   ; # entries in central dir
+        $z64e .= U64::pack_V64 $cd_len    ; # size of central dir
+        $z64e .= *$self->{ZipData}{Offset}->getPacked_V64() ; # offset to start central dir
+
+        $z64e  = pack("V", ZIP64_END_CENTRAL_REC_HDR_SIG) # signature
+              .  U64::pack_V64(length $z64e)
+              .  $z64e ;
+
+        *$self->{ZipData}{Offset}->add(length $cd) ; 
+
+        $z64e .= pack "V", ZIP64_END_CENTRAL_LOC_HDR_SIG; # signature
+        $z64e .= pack 'V', 0              ; # number of disk with central dir
+        $z64e .= *$self->{ZipData}{Offset}->getPacked_V64() ; # offset to end zip64 central dir
+        $z64e .= pack 'V', 1              ; # Total number of disks 
+
+        # TODO - fix these when info-zip 3 is fixed.
+        #$cd_len = 
+        #$cd_offset = 
+        $entries = 0xFFFF ;
+    }
 
     my $ecd = '';
     $ecd .= pack "V", ZIP_END_CENTRAL_HDR_SIG ; # signature
     $ecd .= pack 'v', 0          ; # number of disk
-    $ecd .= pack 'v', 0          ; # number if disk with central dir
+    $ecd .= pack 'v', 0          ; # number of disk with central dir
     $ecd .= pack 'v', $entries   ; # entries in central dir on this disk
     $ecd .= pack 'v', $entries   ; # entries in central dir
-    $ecd .= pack 'V', length $cd ; # size of central dir
-    $ecd .= pack 'V', *$self->{ZipData}{Offset} ; # offset to start central dir
+    $ecd .= pack 'V', $cd_len    ; # size of central dir
+    $ecd .= pack 'V', $cd_offset ; # offset to start central dir
     $ecd .= pack 'v', length $comment ; # zipfile comment length
     $ecd .= $comment;
 
-    return $cd . $ecd ;
+    return $cd . $z64e . $ecd ;
 }
 
 sub ckParams
@@ -313,7 +389,11 @@ sub ckParams
         $got->value("CTime", $timeRef->[2]);
     }
 
+    *$self->{ZipData}{Zip64} = $got->value('Zip64');
     *$self->{ZipData}{Stream} = $got->value('Stream');
+
+    return $self->saveErrorString(undef, "Zip64 only supported if Stream enabled")   
+        if  *$self->{ZipData}{Zip64} && ! *$self->{ZipData}{Stream} ;
 
     my $method = $got->value('Method');
     return $self->saveErrorString(undef, "Unknown Method '$method'")   
@@ -375,6 +455,7 @@ sub getExtraParams
             
 #            # Zip header fields
             'Minimal'   => [0, 1, Parse_boolean,   0],
+            'Zip64'     => [0, 1, Parse_boolean,   0],
             'Comment'   => [0, 1, Parse_any,       ''],
             'ZipComment'=> [0, 1, Parse_any,       ''],
             'Name'      => [0, 1, Parse_any,       ''],
@@ -729,7 +810,7 @@ L</"Constructor Options"> section below.
 
 =over 5
 
-=item AutoClose =E<gt> 0|1
+=item C<< AutoClose => 0|1 >>
 
 This option applies to any input or output data streams to 
 C<zip> that are filehandles.
@@ -741,8 +822,7 @@ completed.
 This parameter defaults to 0.
 
 
-
-=item BinModeIn =E<gt> 0|1
+=item C<< BinModeIn => 0|1 >>
 
 When reading from a file or filehandle, set C<binmode> before reading.
 
@@ -752,7 +832,7 @@ Defaults to 0.
 
 
 
-=item -Append =E<gt> 0|1
+=item C<< Append => 0|1 >>
 
 TODO
 
@@ -869,7 +949,7 @@ C<OPTS> is any combination of the following options:
 
 =over 5
 
-=item AutoClose =E<gt> 0|1
+=item C<< AutoClose => 0|1 >>
 
 This option is only valid when the C<$output> parameter is a filehandle. If
 specified, and the value is true, it will result in the C<$output> being
@@ -878,7 +958,7 @@ object is destroyed.
 
 This parameter defaults to 0.
 
-=item Append =E<gt> 0|1
+=item C<< Append => 0|1 >>
 
 Opens C<$output> in append mode. 
 
@@ -910,19 +990,19 @@ This parameter defaults to 0.
 
 
 
-=item -Name =E<gt> $string
+=item C<< Name => $string >>
 
 Stores the contents of C<$string> in the zip filename header field. If
 C<Name> is not specified, no zip filename field will be created.
 
-=item -Time =E<gt> $number
+=item C<< Time => $number >>
 
 Sets the last modified time field in the zip header to $number.
 
 This field defaults to the time the C<IO::Compress::Zip> object was created
 if this option is not specified.
 
-=item -exTime =E<gt> [$atime, $mtime, $ctime]
+=item C<< exTime => [$atime, $mtime, $ctime] >>
 
 This option expects an array reference with exactly three elements:
 C<$atime>, C<mtime> and C<$ctime>. These correspond to the last access
@@ -936,21 +1016,21 @@ If the C<Minimal> option is set to true, this option will be ignored.
 
 By default no extended time field is created.
 
-=item -Comment =E<gt> $comment
+=item C<< Comment => $comment >>
 
 Stores the contents of C<$comment> in the Central File Header of
 the zip file.
 
 By default, no comment field is written to the zip file.
 
-=item -ZipComment =E<gt> $comment
+=item C<< ZipComment => $comment >>
 
 Stores the contents of C<$comment> in the End of Central Directory record
 of the zip file.
 
 By default, no comment field is written to the zip file.
 
-=item Method =E<gt> $method
+=item C<< Method => $method >>
 
 Controls which compression method is used. At present three compression
 methods are supported, namely Store (no compression at all), Deflate and
@@ -971,7 +1051,7 @@ content when C<IO::Compress::Bzip2> is not available.
 
 The default method is ZIP_CM_DEFLATE.
 
-=item Stream =E<gt> 0|1
+=item C<< Stream => 0|1 >>
 
 This option controls whether the zip file/buffer output is created in
 streaming mode.
@@ -981,7 +1061,7 @@ is 0), the output file must be seekable.
 
 The default is 1.
 
-=item -TextFlag =E<gt> 0|1
+=item C<< TextFlag => 0|1 >>
 
 This parameter controls the setting of a bit in the zip central header. It
 is used to signal that the data stored in the zip file/buffer is probably
@@ -989,8 +1069,8 @@ text.
 
 The default is 0. 
 
-=item ExtraFieldLocal =E<gt> $data
-=item ExtraFieldCentral =E<gt> $data
+=item C<< ExtraFieldLocal => $data >>
+=item C<< ExtraFieldCentral => $data >>
 
 These options allows additional metadata to be stored in the local and
 central headers in the zip file/buffer.
@@ -1031,14 +1111,14 @@ If the C<Minimal> option is set to true, this option will be ignored.
 
 The maximum size of an extra field 65535 bytes.
 
-=item Minimal =E<gt> 1|0
+=item C<< Minimal => 1|0 >>
 
 If specified, this option will disable the creation of all extended fields
 in the zip local and central headers.
 
 This parameter defaults to 0.
 
-=item BlockSize100K =E<gt> number
+=item C<< BlockSize100K => number >>
 
 Specify the number of 100K blocks bzip2 uses during compression. 
 
@@ -1049,7 +1129,7 @@ otherwise.
 
 The default is 1.
 
-=item WorkFactor =E<gt> number
+=item C<< WorkFactor => number >>
 
 Specifies how much effort bzip2 should take before resorting to a slower
 fallback compression algorithm.
@@ -1101,7 +1181,7 @@ The default is Z_DEFAULT_STRATEGY.
 
 
 
-=item -Strict =E<gt> 0|1
+=item C<< Strict => 0|1 >>
 
 
 
@@ -1326,18 +1406,10 @@ Usage is
 
 Closes the current compressed data stream and starts a new one.
 
-OPTS consists of the following sub-set of the the options that are
-available when creating the C<$z> object,
+OPTS consists of any of the the options that are available when creating
+the C<$z> object.
 
-=over 5
-
-
-
-=item * Level
-
-
-
-=back
+See the L</"Constructor Options"> section for more details.
 
 
 =head2 deflateParams
@@ -1426,6 +1498,11 @@ For
 =head1 EXAMPLES
 
 TODO
+
+
+
+
+
 
 
 

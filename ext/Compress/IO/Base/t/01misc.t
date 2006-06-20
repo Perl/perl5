@@ -19,7 +19,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 33 + $extra ;
+    plan tests => 69 + $extra ;
 
 
     use_ok('IO::Compress::Base::Common');
@@ -128,4 +128,83 @@ My::testParseParameters();
     is whatIsOutput(sub { 1 }, 1), 'code',     "Match code";
     is whatIsOutput(sub { 1 }),    ''   ,      "Don't match code";
 
+}
+
+# U64
+
+{
+    title "U64" ;
+
+    my $x = new U64();
+    is $x->getHigh, 0, "  getHigh is 0";
+    is $x->getLow, 0, "  getLow is 0";
+
+    $x = new U64(1,2);
+    $x = new U64(1,2);
+    is $x->getHigh, 1, "  getHigh is 1";
+    is $x->getLow, 2, "  getLow is 2";
+
+    $x = new U64(0xFFFFFFFF,2);
+    is $x->getHigh, 0xFFFFFFFF, "  getHigh is 0xFFFFFFFF";
+    is $x->getLow, 2, "  getLow is 2";
+
+    $x = new U64(7, 0xFFFFFFFF);
+    is $x->getHigh, 7, "  getHigh is 7";
+    is $x->getLow, 0xFFFFFFFF, "  getLow is 0xFFFFFFFF";
+
+    $x = new U64(666);
+    is $x->getHigh, 0, "  getHigh is 0";
+    is $x->getLow, 666, "  getLow is 666";
+
+    title "U64 - add" ;
+
+    $x = new U64(0, 1);
+    is $x->getHigh, 0, "  getHigh is 0";
+    is $x->getLow, 1, "  getLow is 1";
+
+    $x->add(1);
+    is $x->getHigh, 0, "  getHigh is 0";
+    is $x->getLow, 2, "  getLow is 2";
+
+    $x = new U64(0, 0xFFFFFFFE);
+    is $x->getHigh, 0, "  getHigh is 0";
+    is $x->getLow, 0xFFFFFFFE, "  getLow is 0xFFFFFFFE";
+
+    $x->add(1);
+    is $x->getHigh, 0, "  getHigh is 0";
+    is $x->getLow, 0xFFFFFFFF, "  getLow is 0xFFFFFFFF";
+
+    $x->add(1);
+    is $x->getHigh, 1, "  getHigh is 1";
+    is $x->getLow, 0, "  getLow is 0";
+
+    $x->add(1);
+    is $x->getHigh, 1, "  getHigh is 1";
+    is $x->getLow, 1, "  getLow is 1";
+
+    $x = new U64(1, 0xFFFFFFFE);
+    my $y = new U64(2, 3);
+
+    $x->add($y);
+    is $x->getHigh, 4, "  getHigh is 4";
+    is $x->getLow, 1, "  getLow is 1";
+
+    title "U64 - equal" ;
+
+    $x = new U64(0, 1);
+    is $x->getHigh, 0, "  getHigh is 0";
+    is $x->getLow, 1, "  getLow is 1";
+
+    $y = new U64(0, 1);
+    is $x->getHigh, 0, "  getHigh is 0";
+    is $x->getLow, 1, "  getLow is 1";
+
+    my $z = new U64(0, 2);
+    is $x->getHigh, 0, "  getHigh is 0";
+    is $x->getLow, 1, "  getLow is 1";
+
+    ok $x->equal($y), "  equal";
+    ok !$x->equal($z), "  ! equal";
+
+    title "U64 - pack_V" ;
 }

@@ -13,7 +13,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.000_12';
+$VERSION = '2.000_13';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -594,7 +594,7 @@ If not successful, the returned deflation object, C<$d>, will be
 I<undef> and C<$status> will hold the a I<zlib> error code.
 
 The function optionally takes a number of named options specified as
-C<-Name =E<gt> value> pairs. This allows individual options to be
+C<< Name => value >> pairs. This allows individual options to be
 tailored without having to specify them all in the parameter list.
 
 For backward compatibility, it is also possible to pass the parameters
@@ -610,26 +610,26 @@ Defines the compression level. Valid values are 0 through 9,
 C<Z_NO_COMPRESSION>, C<Z_BEST_SPEED>, C<Z_BEST_COMPRESSION>, and
 C<Z_DEFAULT_COMPRESSION>.
 
-The default is C<-Level =E<gt> Z_DEFAULT_COMPRESSION>.
+The default is Z_DEFAULT_COMPRESSION.
 
 =item B<-Method>
 
 Defines the compression method. The only valid value at present (and
-the default) is C<-Method =E<gt> Z_DEFLATED>.
+the default) is Z_DEFLATED.
 
 =item B<-WindowBits>
 
 For a definition of the meaning and valid values for C<WindowBits>
 refer to the I<zlib> documentation for I<deflateInit2>.
 
-Defaults to C<-WindowBits =E<gt> MAX_WBITS>.
+Defaults to MAX_WBITS.
 
 =item B<-MemLevel>
 
 For a definition of the meaning and valid values for C<MemLevel>
 refer to the I<zlib> documentation for I<deflateInit2>.
 
-Defaults to C<-MemLevel =E<gt> MAX_MEM_LEVEL>.
+Defaults to MAX_MEM_LEVEL.
 
 =item B<-Strategy>
 
@@ -637,7 +637,7 @@ Defines the strategy used to tune the compression. The valid values are
 C<Z_DEFAULT_STRATEGY>, C<Z_FILTERED>, C<Z_RLE>, C<Z_FIXED> and
 C<Z_HUFFMAN_ONLY>.
 
-The default is C<-Strategy =E<gt>Z_DEFAULT_STRATEGY>.
+The default is Z_DEFAULT_STRATEGY.
 
 =item B<-Dictionary>
 
@@ -881,11 +881,11 @@ If not successful, C<$i> will be I<undef> and C<$status> will hold the
 I<zlib> error code.
 
 The function optionally takes a number of named options specified as
-C<-Name =E<gt> value> pairs. This allows individual options to be
+C<< -Name => value >> pairs. This allows individual options to be
 tailored without having to specify them all in the parameter list.
 
 For backward compatibility, it is also possible to pass the parameters
-as a reference to a hash containing the name=E<gt>value pairs.
+as a reference to a hash containing the C<< name=>value >> pairs.
 
 Here is a list of the valid options:
 
@@ -901,7 +901,7 @@ To uncompress an RFC 1951 data stream, set C<WindowBits> to C<-MAX_WBITS>.
 For a full definition of the meaning and valid values for C<WindowBits>
 refer to the I<zlib> documentation for I<inflateInit2>.
 
-Defaults to C<-WindowBits =E<gt>MAX_WBITS>.
+Defaults to MAX_WBITS.
 
 =item B<-Bufsize>
 

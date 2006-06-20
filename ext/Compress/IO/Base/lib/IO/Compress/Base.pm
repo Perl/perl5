@@ -20,7 +20,7 @@ use bytes;
 our (@ISA, $VERSION, $got_encode);
 #@ISA    = qw(Exporter IO::File);
 
-$VERSION = '2.000_12';
+$VERSION = '2.000_13';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 
@@ -115,6 +115,31 @@ sub writeAt
     return 1;
 }
 
+sub output
+{
+    my $self = shift ;
+    my $data = shift ;
+    my $last = shift ;
+
+    return 1 
+        if length $data == 0 && ! $last ;
+
+    if ( *$self->{FilterEnvelope} ) {
+        *_ = \$data;
+        &{ *$self->{FilterEnvelope} }();
+    }
+
+    if ( defined *$self->{FH} ) {
+        defined *$self->{FH}->write( $data, length $data )
+          or return $self->saveErrorString(0, $!, $!); 
+    }
+    else {
+        ${ *$self->{Buffer} } .= $data ;
+    }
+
+    return 1;
+}
+
 sub getOneShotParams
 {
     return ( 'MultiStream' => [1, 1, Parse_boolean,   1],
@@ -136,6 +161,8 @@ sub checkParams
             'Strict'    => [0, 1, Parse_boolean,   1],
             'Append'    => [1, 1, Parse_boolean,   0],
             'BinModeIn' => [1, 1, Parse_boolean,   0],
+
+            'FilterEnvelope' => [1, 1, Parse_any,   undef],
 
             $self->getExtraParams(),
             *$self->{OneShot} ? $self->getOneShotParams() 
@@ -185,6 +212,8 @@ sub _create
     # Merge implies Append
     my $merge = $got->value('Merge') ;
     my $appendOutput = $got->value('Append') || $merge ;
+    *$obj->{Append} = $appendOutput;
+    *$obj->{FilterEnvelope} = $got->value('FilterEnvelope') ;
 
     if ($merge)
     {
@@ -228,15 +257,12 @@ sub _create
         *$obj->{Compress} = $obj->mkComp($class, $got)
             or return undef;
         
-        *$obj->{BytesWritten} = 0 ;
-        *$obj->{UnCompSize_32bit} = 0 ;
-
-        *$obj->{Header} = $obj->mkHeader($got) ;
+        *$obj->{UnCompSize} = new U64 ;
+        *$obj->{CompSize} = new U64 ;
 
         if ( $outType eq 'buffer') {
             ${ *$obj->{Buffer} }  = ''
                 unless $appendOutput ;
-            ${ *$obj->{Buffer} } .= *$obj->{Header};
         }
         else {
             if ($outType eq 'handle') {
@@ -260,13 +286,11 @@ sub _create
                 *$obj->{StdIO} = ($outValue eq '-'); 
                 setBinModeOutput(*$obj->{FH}) ;
             }
-
-
-            if (length *$obj->{Header}) {
-                defined *$obj->{FH}->write(*$obj->{Header}, length(*$obj->{Header}))
-                    or return $obj->saveErrorString(undef, $!, $!) ;
-            }
         }
+
+        *$obj->{Header} = $obj->mkHeader($got) ;
+        $obj->output( *$obj->{Header} )
+            or return undef;
     }
     else
     {
@@ -478,7 +502,7 @@ sub _wr2
         my $status ;
         my $buff ;
         my $count = 0 ;
-        while (($status = read($fh, $buff, 4096)) > 0) {
+        while (($status = read($fh, $buff, 16 * 1024)) > 0) {
             $count += length $buff;
             defined $self->syswrite($buff, @_) 
                 or return undef ;
@@ -539,6 +563,7 @@ sub DESTROY
     my $self = shift ;
     $self->close() ;
 
+
     # TODO - memory leak with 5.8.0 - this isn't called until 
     #        global destruction
     #
@@ -591,14 +616,7 @@ sub syswrite
     return 0 if ! defined $$buffer || length $$buffer == 0 ;
 
     my $buffer_length = defined $$buffer ? length($$buffer) : 0 ;
-    *$self->{BytesWritten} += $buffer_length ;
-    my $rest = 0xFFFFFFFF - *$self->{UnCompSize_32bit} ;
-    if ($buffer_length > $rest) {
-        *$self->{UnCompSize_32bit} = $buffer_length - $rest - 1;
-    }
-    else {
-        *$self->{UnCompSize_32bit} += $buffer_length ;
-    }
+    *$self->{UnCompSize}->add($buffer_length) ;
 
     $self->filterUncompressed($buffer);
 
@@ -606,20 +624,17 @@ sub syswrite
 #        $$buffer = *$self->{Encoding}->encode($$buffer);
 #    }
 
-    #my $length = length $$buffer;
-    
-    my $status = *$self->{Compress}->compr($buffer, *$self->{Buffer}) ;
+    my $outBuffer='';
+    my $status = *$self->{Compress}->compr($buffer, $outBuffer) ;
 
     return $self->saveErrorString(undef, *$self->{Compress}{Error}, 
                                          *$self->{Compress}{ErrorNo})
         if $status == STATUS_ERROR;
 
+    *$self->{CompSize}->add(length $outBuffer) ;
 
-    if ( defined *$self->{FH} and length ${ *$self->{Buffer} }) {
-        defined *$self->{FH}->write( ${ *$self->{Buffer} }, length ${ *$self->{Buffer} } )
-          or return $self->saveErrorString(undef, $!, $!); 
-        ${ *$self->{Buffer} } = '' ;
-    }
+    $self->output($outBuffer)
+        or return undef;
 
     return $buffer_length;
 }
@@ -660,18 +675,24 @@ sub flush
 {
     my $self = shift ;
 
-    my $status = *$self->{Compress}->flush(*$self->{Buffer}, @_) ;
+    my $outBuffer='';
+    my $status = *$self->{Compress}->flush($outBuffer, @_) ;
     return $self->saveErrorString(0, *$self->{Compress}{Error}, 
                                     *$self->{Compress}{ErrorNo})
         if $status == STATUS_ERROR;
 
     if ( defined *$self->{FH} ) {
         *$self->{FH}->clearerr();
-        defined *$self->{FH}->write(${ *$self->{Buffer} }, length ${ *$self->{Buffer} })
-            or return $self->saveErrorString(0, $!, $!); 
+    }
+
+    *$self->{CompSize}->add(length $outBuffer) ;
+
+    $self->output($outBuffer)
+        or return 0;
+
+    if ( defined *$self->{FH} ) {
         defined *$self->{FH}->flush()
             or return $self->saveErrorString(0, $!, $!); 
-        ${ *$self->{Buffer} } = '' ;
     }
 
     return 1;
@@ -691,24 +712,16 @@ sub newStream
         or $self->croakError("newStream: $self->{Error}");
 
     *$self->{Header} = $self->mkHeader($got) ;
-    ${ *$self->{Buffer} } .= *$self->{Header} ;
-
-    if (defined *$self->{FH})
-    {
-        defined *$self->{FH}->write(${ *$self->{Buffer} }, 
-                                    length ${ *$self->{Buffer} })
-            or return $self->saveErrorString(0, $!, $!); 
-        ${ *$self->{Buffer} } = '' ;
-    }
+    $self->output(*$self->{Header} )
+        or return 0;
     
-    #my $status = *$self->{Compress}->reset() ;
     my $status = $self->reset() ;
     return $self->saveErrorString(0, *$self->{Compress}{Error}, 
                                   *$self->{Compress}{ErrorNo})
         if $status == STATUS_ERROR;
 
-    *$self->{BytesWritten} = 0 ;
-    *$self->{UnCompSize_32bit} = 0 ;
+    *$self->{UnCompSize}->reset();
+    *$self->{CompSize}->reset();
 
     return 1 ;
 }
@@ -723,40 +736,26 @@ sub _writeTrailer
 {
     my $self = shift ;
 
-    my $status = *$self->{Compress}->close(*$self->{Buffer}) ;
+    my $trailer = '';
+
+    my $status = *$self->{Compress}->close($trailer) ;
     return $self->saveErrorString(0, *$self->{Compress}{Error}, *$self->{Compress}{ErrorNo})
         if $status == STATUS_ERROR;
 
-    my $trailer = $self->mkTrailer();
+    *$self->{CompSize}->add(length $trailer) ;
+
+    $trailer .= $self->mkTrailer();
     defined $trailer
       or return 0;
 
-    ${ *$self->{Buffer} } .= $trailer;
-
-    return 1 if ! defined *$self->{FH} ;
-
-    defined *$self->{FH}->write(${ *$self->{Buffer} }, length ${ *$self->{Buffer} })
-      or return $self->saveErrorString(0, $!, $!); 
-
-    ${ *$self->{Buffer} } = '' ;
-
-    return 1;
+    return $self->output($trailer);
 }
 
 sub _writeFinalTrailer
 {
     my $self = shift ;
 
-    ${ *$self->{Buffer} } .= $self->mkFinalTrailer();
-
-    return 1 if ! defined *$self->{FH} ;
-
-    defined *$self->{FH}->write(${ *$self->{Buffer} }, length ${ *$self->{Buffer} })
-      or return $self->saveErrorString(0, $!, $!); 
-
-    ${ *$self->{Buffer} } = '' ;
-
-    return 1;
+    return $self->output($self->mkFinalTrailer());
 }
 
 sub close
@@ -775,7 +774,11 @@ sub close
     $self->_writeFinalTrailer()
         or return 0 ;
 
+    $self->output( "", 1 )
+        or return 0;
+
     if (defined *$self->{FH}) {
+
         #if (! *$self->{Handle} || *$self->{AutoClose}) {
         if ((! *$self->{Handle} || *$self->{AutoClose}) && ! *$self->{StdIO}) {
             $! = 0 ;
@@ -830,7 +833,7 @@ sub tell
 {
     my $self = shift ;
 
-    return *$self->{BytesWritten} ;
+    return *$self->{UnCompSize}->get32bit() ;
 }
 
 sub eof

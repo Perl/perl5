@@ -13,7 +13,7 @@ use IO::Uncompress::RawInflate ;
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $InflateError);
 
-$VERSION = '2.000_12';
+$VERSION = '2.000_13';
 $InflateError = '';
 
 @ISA    = qw( Exporter IO::Uncompress::RawInflate );
@@ -203,7 +203,8 @@ IO::Uncompress::Inflate - Read RFC 1950 files/buffers
 
     $status = $z->inflateSync()
 
-    $z->trailingData()
+    $data = $z->trailingData()
+    $status = $z->nextStream()
     $data = $z->getHeaderInfo()
     $z->tell()
     $z->seek($position, $whence)
@@ -404,7 +405,7 @@ L</"Constructor Options"> section below.
 
 =over 5
 
-=item AutoClose =E<gt> 0|1
+=item C<< AutoClose => 0|1 >>
 
 This option applies to any input or output data streams to 
 C<inflate> that are filehandles.
@@ -416,8 +417,7 @@ completed.
 This parameter defaults to 0.
 
 
-
-=item BinModeOut =E<gt> 0|1
+=item C<< BinModeOut => 0|1 >>
 
 When writing to a file or filehandle, set C<binmode> before writing to the
 file.
@@ -428,15 +428,16 @@ Defaults to 0.
 
 
 
-=item -Append =E<gt> 0|1
+=item C<< Append => 0|1 >>
 
 TODO
 
-=item -MultiStream =E<gt> 0|1
+=item C<< MultiStream => 0|1 >>
 
-Creates a new stream after each file.
+If the input file/buffer contains multiple compressed data streams, this
+option will uncompress the whole lot as a single data stream.
 
-Defaults to 1.
+Defaults to 0.
 
 
 
@@ -558,7 +559,7 @@ OPTS is a combination of the following options:
 
 =over 5
 
-=item -AutoClose =E<gt> 0|1
+=item C<< AutoClose => 0|1 >>
 
 This option is only valid when the C<$input> parameter is a filehandle. If
 specified, and the value is true, it will result in the file being closed once
@@ -567,7 +568,7 @@ destroyed.
 
 This parameter defaults to 0.
 
-=item -MultiStream =E<gt> 0|1
+=item C<< MultiStream => 0|1 >>
 
 
 
@@ -580,8 +581,7 @@ start of another stream.
 This parameter defaults to 0.
 
 
-
-=item -Prime =E<gt> $string
+=item C<< Prime => $string >>
 
 This option will uncompress the contents of C<$string> before processing the
 input file/buffer.
@@ -592,21 +592,21 @@ data begins without having to read the first few bytes. If this is the
 case, the uncompression can be I<primed> with these bytes using this
 option.
 
-=item -Transparent =E<gt> 0|1
+=item C<< Transparent => 0|1 >>
 
 If this option is set and the input file or buffer is not compressed data,
 the module will allow reading of it anyway.
 
 This option defaults to 1.
 
-=item -BlockSize =E<gt> $num
+=item C<< BlockSize => $num >>
 
 When reading the compressed input data, IO::Uncompress::Inflate will read it in
 blocks of C<$num> bytes.
 
 This option defaults to 4096.
 
-=item -InputLength =E<gt> $size
+=item C<< InputLength => $size >>
 
 When present this option will limit the number of compressed bytes read
 from the input file/buffer to C<$size>. This option can be used in the
@@ -622,7 +622,7 @@ compressed data stream.
 
 This option defaults to off.
 
-=item -Append =E<gt> 0|1
+=item C<< Append => 0|1 >>
 
 This option controls what the C<read> method does with uncompressed data.
 
@@ -634,7 +634,7 @@ will be overwritten by the uncompressed data.
 
 Defaults to 0.
 
-=item -Strict =E<gt> 0|1
+=item C<< Strict => 0|1 >>
 
 
 
@@ -899,6 +899,27 @@ underlying file will also be closed.
 
 
 
+
+=head2 nextStream
+
+Usage is
+
+    my $status = $z->nextStream();
+
+Skips to the next compressed data stream in the input file/buffer. If a new
+compressed data stream is found, the eof marker will be cleared, C<$.> will
+be reset to 0.
+
+Returns 1 if a new stream was found, 0 if none was found, and -1 if an
+error was encountered.
+
+=head2 trailingData
+
+Usage is
+
+    my $data = $z->trailingData();
+
+Returns any data that 
 
 =head1 Importing 
 

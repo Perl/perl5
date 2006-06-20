@@ -1,6 +1,10 @@
 CHANGES
 -------
 
+  2.000_13 20 June 2006
+
+      * Preliminary support for reading zip files with zip64 members.
+
   2.000_12 3 May 2006
 
       * Moved the code for creating and parsing the gzip extra field into

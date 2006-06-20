@@ -10,7 +10,7 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter );
 
 
-$VERSION = '2.000_12';
+$VERSION = '2.000_13';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
@@ -84,7 +84,10 @@ sub smartRead
        $$buf = '' unless defined $$buf ;
        #$$out = '' unless defined $$out ;
        substr($$out, $offset) = substr($$buf, *$self->{BufferOffset}, $get_size);
-       *$self->{BufferOffset} += length($$out) - $offset ;
+       if (*$self->{ConsumeInput})
+         { substr($$buf, 0, $get_size) = '' }
+       else  
+         { *$self->{BufferOffset} += length($$out) - $offset }
     }
 
     *$self->{InputLengthRemaining} -= length $$out;
@@ -165,7 +168,7 @@ sub smartEof
     my ($self) = $_[0];
     local $.; 
 
-    return 0 if length *$self->{Prime};
+    return 0 if length *$self->{Prime} || *$self->{PushMode};
 
     if (defined *$self->{FH})
      { *$self->{FH}->eof() }
@@ -290,6 +293,7 @@ sub checkParams
                     'Scan'          => [1, 1, Parse_boolean,  0],
                     'InputLength'   => [1, 1, Parse_unsigned, undef],
                     'BinModeOut'    => [1, 1, Parse_boolean,  0],
+                   #'ConsumeInput'  => [1, 1, Parse_boolean,  0],
 
                     $self->getExtraParams(),
 
@@ -370,10 +374,10 @@ sub _create
     *$obj->{BufferOffset}      = 0 ;
     *$obj->{AutoClose}         = $got->value('AutoClose');
     *$obj->{Strict}            = $got->value('Strict');
-    #*$obj->{Strict}            = ! $got->value('Lax');
     *$obj->{BlockSize}         = $got->value('BlockSize');
     *$obj->{Append}            = $got->value('Append');
     *$obj->{AppendOutput}      = $append_mode || $got->value('Append');
+    *$obj->{ConsumeInput}      = $got->value('ConsumeInput');
     *$obj->{Transparent}       = $got->value('Transparent');
     *$obj->{MultiStream}       = $got->value('MultiStream');
 
@@ -381,19 +385,25 @@ sub _create
     *$obj->{Scan}              = $got->value('Scan');
     *$obj->{ParseExtra}        = $got->value('ParseExtra') 
                                   || $got->value('Strict')  ;
-                                  #|| ! $got->value('Lax')  ;
     *$obj->{Type}              = '';
     *$obj->{Prime}             = $got->value('Prime') || '' ;
     *$obj->{Pending}           = '';
     *$obj->{Plain}             = 0;
     *$obj->{PlainBytesRead}    = 0;
     *$obj->{InflatedBytesRead} = 0;
-    *$obj->{UnCompSize_32bit}  = 0;
+    *$obj->{UnCompSize}        = new U64;
+    *$obj->{CompSize}          = new U64;
     *$obj->{TotalInflatedBytesRead} = 0;
     *$obj->{NewStream}         = 0 ;
     *$obj->{EventEof}          = 0 ;
     *$obj->{ClassName}         = $class ;
     *$obj->{Params}            = $got ;
+
+    if (*$obj->{ConsumeInput}) {
+        *$obj->{InNew} = 0;
+        *$obj->{Closed} = 0;
+        return $obj
+    }
 
     my $status = $obj->mkUncomp($class, $got);
 
@@ -468,21 +478,24 @@ sub _inf
     my $got = $obj->checkParams($name, undef, @_)
         or return undef ;
 
+    *$obj->{MultiStream} = $got->value('MultiStream');
+    $got->value('MultiStream', 0);
+
     $x->{Got} = $got ;
 
-    if ($x->{Hash})
-    {
-        while (my($k, $v) = each %$input)
-        {
-            $v = \$input->{$k} 
-                unless defined $v ;
-
-            $obj->_singleTarget($x, 1, $k, $v, @_)
-                or return undef ;
-        }
-
-        return keys %$input ;
-    }
+#    if ($x->{Hash})
+#    {
+#        while (my($k, $v) = each %$input)
+#        {
+#            $v = \$input->{$k} 
+#                unless defined $v ;
+#
+#            $obj->_singleTarget($x, $k, $v, @_)
+#                or return undef ;
+#        }
+#
+#        return keys %$input ;
+#    }
     
     if ($x->{GlobMap})
     {
@@ -490,42 +503,34 @@ sub _inf
         foreach my $pair (@{ $x->{Pairs} })
         {
             my ($from, $to) = @$pair ;
-            $obj->_singleTarget($x, 1, $from, $to, @_)
+            $obj->_singleTarget($x, $from, $to, @_)
                 or return undef ;
         }
 
         return scalar @{ $x->{Pairs} } ;
     }
 
-    #if ($x->{outType} eq 'array' || $x->{outType} eq 'hash')
     if (! $x->{oneOutput} )
     {
         my $inFile = ($x->{inType} eq 'filenames' 
                         || $x->{inType} eq 'filename');
 
         $x->{inType} = $inFile ? 'filename' : 'buffer';
-        my $ot = $x->{outType} ;
-        $x->{outType} = 'buffer';
         
         foreach my $in ($x->{oneInput} ? $input : @$input)
         {
             my $out ;
             $x->{oneInput} = 1 ;
 
-            $obj->_singleTarget($x, $inFile, $in, \$out, @_)
+            $obj->_singleTarget($x, $in, $output, @_)
                 or return undef ;
-
-            if ($ot eq 'array')
-              { push @$output, \$out }
-            else
-              { $output->{$in} = \$out }
         }
 
         return 1 ;
     }
 
     # finally the 1 to 1 and n to 1
-    return $obj->_singleTarget($x, 1, $input, $output, @_);
+    return $obj->_singleTarget($x, $input, $output, @_);
 
     croak "should not be here" ;
 }
@@ -544,11 +549,11 @@ sub _singleTarget
 {
     my $self      = shift ;
     my $x         = shift ;
-    my $inputIsFilename = shift;
     my $input     = shift;
     my $output    = shift;
     
-    $x->{buff} = '' ;
+    my $buff = '';
+    $x->{buff} = \$buff ;
 
     my $fh ;
     if ($x->{outType} eq 'filename') {
@@ -580,16 +585,14 @@ sub _singleTarget
 
     if ($x->{oneInput})
     {
-        defined $self->_rd2($x, $input, $inputIsFilename)
+        defined $self->_rd2($x, $input, $output)
             or return undef; 
     }
     else
     {
-        my $inputIsFilename = ($x->{inType} ne 'array');
-
         for my $element ( ($x->{inType} eq 'hash') ? keys %$input : @$input)
         {
-            defined $self->_rd2($x, $element, $inputIsFilename) 
+            defined $self->_rd2($x, $element, $output) 
                 or return undef ;
         }
     }
@@ -599,7 +602,6 @@ sub _singleTarget
          ($x->{outType} eq 'handle' && $x->{Got}->value('AutoClose'))) {
         $x->{fh}->close() 
             or return retErr($x, $!); 
-            #or return $gunzip->saveErrorString(undef, $!, $!); 
         delete $x->{fh};
     }
 
@@ -611,7 +613,7 @@ sub _rd2
     my $self      = shift ;
     my $x         = shift ;
     my $input     = shift;
-    my $inputIsFilename = shift;
+    my $output    = shift;
         
     my $z = createSelfTiedObject($x->{Class}, *$self->{Error});
     
@@ -621,12 +623,35 @@ sub _rd2
     my $status ;
     my $fh = $x->{fh};
     
-    while (($status = $z->read($x->{buff})) > 0) {
-        if ($fh) {
-            print $fh $x->{buff} 
-                or return $z->saveErrorString(undef, "Error writing to output file: $!", $!);
-            $x->{buff} = '' ;
+    while (1) {
+
+        while (($status = $z->read($x->{buff})) > 0) {
+            if ($fh) {
+                print $fh ${ $x->{buff} }
+                    or return $z->saveErrorString(undef, "Error writing to output file: $!", $!);
+                ${ $x->{buff} } = '' ;
+            }
         }
+
+        if (! $x->{oneOutput} ) {
+            my $ot = $x->{outType} ;
+
+            if ($ot eq 'array') 
+              { push @$output, $x->{buff} }
+            elsif ($ot eq 'hash') 
+              { $output->{$input} = $x->{buff} }
+
+            my $buff = '';
+            $x->{buff} = \$buff;
+        }
+
+        last 
+            unless *$self->{MultiStream};
+
+        $status = $z->nextStream();
+
+        last 
+            unless $status == 1 ;
     }
 
     return $z->closeError(undef)
@@ -684,7 +709,6 @@ sub readBlock
     }
 
     return STATUS_OK;
-
 }
 
 sub postBlockChk
@@ -728,17 +752,8 @@ sub _raw_read
 
     if (*$self->{NewStream}) {
 
-        *$self->{NewStream} = 0 ;
-        *$self->{EndStream} = 0 ;
-        $self->reset();
-
-        return G_ERR
-            unless  my $magic = $self->ckMagic();
-        *$self->{Info} = $self->readHeader($magic);
-
-        return G_ERR unless defined *$self->{Info} ;
-
-        push @{ *$self->{InfoList} }, *$self->{Info} ;
+        $self->gotoNextStream() > 0
+            or return G_ERR;
 
         # For the headers that actually uncompressed data, put the
         # uncompressed data into the output buffer.
@@ -748,21 +763,20 @@ sub _raw_read
         return $len; 
     }
 
-    my $temp_buf ;
+    my $temp_buf = '';
     my $outSize = 0;
     my $status = $self->readBlock(\$temp_buf, *$self->{BlockSize}, $outSize) ;
     return G_ERR
         if $status == STATUS_ERROR  ;
 
+
     my $buf_len = 0;
     if ($status == STATUS_OK) {
+        my $beforeC_len = length $temp_buf;
         my $before_len = defined $$buffer ? length $$buffer : 0 ;
         $status = *$self->{Uncomp}->uncompr(\$temp_buf, $buffer,
                                     defined *$self->{CompressedInputLengthDone} ||
                                                 $self->smartEof(), $outSize);
-#                                    (defined *$self->{CompressedInputLength} &&
-#                                        *$self->{CompressedInputLengthRemaining} < 0) ||
-#                                                $self->smartEof(), $outSize);
 
         return $self->saveErrorString(G_ERR, *$self->{Uncomp}{Error}, *$self->{Uncomp}{ErrorNo})
             if $self->saveStatus($status) == STATUS_ERROR;
@@ -772,19 +786,14 @@ sub _raw_read
 
         $self->filterUncompressed($buffer);
 
-        #$buf_len = *$self->{Uncomp}->count();
         $buf_len = length($$buffer) - $before_len;
 
     
+        *$self->{CompSize}->add($beforeC_len - length $temp_buf) ;
+
         *$self->{InflatedBytesRead} += $buf_len ;
         *$self->{TotalInflatedBytesRead} += $buf_len ;
-        my $rest = 0xFFFFFFFF - *$self->{UnCompSize_32bit} ;
-        if ($buf_len > $rest) {
-            *$self->{UnCompSize_32bit} = $buf_len - $rest - 1;
-        }
-        else {
-            *$self->{UnCompSize_32bit} += $buf_len ;
-        }
+        *$self->{UnCompSize}->add($buf_len) ;
     }
 
     if ($status == STATUS_ENDSTREAM) {
@@ -812,11 +821,13 @@ sub _raw_read
             $self->pushBack($trailer)  ;
         }
 
-        if (*$self->{MultiStream} &&  ! $self->smartEof()) {
-                    #&& (length $temp_buf || ! $self->smartEof())){
+        if (! $self->smartEof()) {
             *$self->{NewStream} = 1 ;
-            *$self->{EndStream} = 0 ;
-            return $buf_len ;
+
+            if (*$self->{MultiStream}) {
+                *$self->{EndStream} = 0 ;
+                return $buf_len ;
+            }
         }
 
     }
@@ -843,6 +854,56 @@ sub filterUncompressed
 #    return *$self->{NewStream} ||
 #           *$self->{EndStream} ;
 #}
+
+sub nextStream
+{
+    my $self = shift ;
+
+    my $status = $self->gotoNextStream();
+    $status == 1
+        or return $status ;
+
+    *$self->{TotalInflatedBytesRead} = 0 ;
+    *$self->{LineNo} = $. = 0;
+
+    return 1;
+}
+
+sub gotoNextStream
+{
+    my $self = shift ;
+
+    if (! *$self->{NewStream}) {
+        my $status = 1;
+        my $buffer ;
+
+        # TODO - make this more efficient if know the offset for the end of
+        # the stream and seekable
+        $status = $self->read($buffer) 
+            while $status > 0 ;
+
+        return $status
+            if $status < 0;
+    }
+
+    *$self->{NewStream} = 0 ;
+    *$self->{EndStream} = 0 ;
+    $self->reset();
+    *$self->{UnCompSize}->reset();
+    *$self->{CompSize}->reset();
+
+    return 0
+        unless  my $magic = $self->ckMagic();
+    *$self->{Info} = $self->readHeader($magic);
+
+    return -1 
+        unless defined *$self->{Info} ;
+
+
+    push @{ *$self->{InfoList} }, *$self->{Info} ;
+
+    return 1; 
+}
 
 sub streamCount
 {
@@ -1219,80 +1280,6 @@ sub _notAvailable
 #*sysread  = \&read;
 #*syswrite = \&_notAvailable;
 
-#package IO::_infScan ;
-#
-#*_raw_read = \&IO::Uncompress::Base::_raw_read ;
-#*smartRead = \&IO::Uncompress::Base::smartRead ;
-#*smartWrite = \&IO::Uncompress::Base::smartWrite ;
-#*smartSeek = \&IO::Uncompress::Base::smartSeek ;
-
-#sub mkIdentityUncomp
-#{
-#    my $self = shift ;
-#    my $class = shift ;
-#    my $got = shift ;
-#
-#    *$self->{Uncomp} = UncompressPlugin::Identity::mkUncompObject($self, $class, $got)
-#        or return undef;
-#
-#    return 1;
-#
-#}
-#
-#
-#package UncompressPlugin::Identity;
-#
-#use strict ;
-#use warnings;
-#
-#our ($VERSION, @ISA, @EXPORT);
-#
-#$VERSION = '2.000_05';
-#
-#use constant STATUS_OK        => 0;
-#use constant STATUS_ENDSTREAM => 1;
-#use constant STATUS_ERROR     => 2;
-#
-#sub mkUncompObject
-#{
-#    my $class = shift ;
-#
-#    bless { 'CompSize'   => 0,
-#            'UnCompSize' => 0,
-#            'CRC32'      => 0,
-#            'ADLER32'    => 0,
-#          }, __PACKAGE__ ;
-#}
-#
-#sub uncompr
-#{
-#    my $self = shift ;
-#    my $from = shift ;
-#    my $to   = shift ;
-#    my $eof  = shift ;
-#
-#
-#    $self->{CompSize} += length $$from ;
-#    $self->{UnCompSize} = $self->{CompSize} ;
-#
-#    $$to = $$from ;
-#
-#    return STATUS_ENDSTREAM if $eof;
-#    return STATUS_OK ;
-#}
-#
-#sub count
-#{
-#    my $self = shift ;
-#    return $self->{UnCompSize} ;
-#}
-#
-#sub sync
-#{
-#    return STATUS_OK ;
-#}
-#
-#
 
 
 package IO::Uncompress::Base ;

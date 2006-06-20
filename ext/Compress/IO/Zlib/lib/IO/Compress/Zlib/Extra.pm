@@ -8,7 +8,7 @@ use bytes;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS);
 
-$VERSION = '2.000_12';
+$VERSION = '2.000_13';
 
 use IO::Compress::Gzip::Constants;
 
@@ -157,8 +157,6 @@ sub parseExtraField
                 return $bad if $bad ;
 
                 $out .= mkSubField(@$pair);
-                #$out .= $pair->[0] . pack("v", length $pair->[1]) . 
-                #        $pair->[1] ;
             }   
         }   
         else {
@@ -172,8 +170,6 @@ sub parseExtraField
                 return $bad if $bad ;
 
                 $out .= mkSubField($data->[$ix], $data->[$ix+1]);
-                #$out .= $data->[$ix] . pack("v", length $data->[$ix+1]) . 
-                #        $data->[$ix+1] ;
             }   
         }
     }   
@@ -183,7 +179,6 @@ sub parseExtraField
             return $bad if $bad ;
 
             $out .= mkSubField($id, $info);
-            #$out .= $id .  pack("v", length $info) . $info ;
         }   
     }   
     else {

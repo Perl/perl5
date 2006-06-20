@@ -16,7 +16,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %DEFLATE_CONSTANTS, %EXPORT_TAGS, $RawDeflateError);
 
-$VERSION = '2.000_12';
+$VERSION = '2.000_13';
 $RawDeflateError = '';
 
 @ISA = qw(Exporter IO::Compress::Base);
@@ -202,8 +202,10 @@ sub createMerge
     my $def = *$self->{Compress} = $inf->createDeflate();
 
     *$self->{Header} = *$inf->{Info}{Header};
-    *$self->{UnCompSize_32bit} = 
-        *$self->{BytesWritten} = *$inf->{UnCompSize_32bit} ;
+    *$self->{UnCompSize} = *$inf->{UnCompSize}->clone();
+    *$self->{CompSize} = *$inf->{CompSize}->clone();
+    # TODO -- fix this
+    #*$self->{CompSize} = new U64(0, *$self->{UnCompSize_32bit});
 
 
     if ( $outType eq 'buffer') 
@@ -481,7 +483,7 @@ L</"Constructor Options"> section below.
 
 =over 5
 
-=item AutoClose =E<gt> 0|1
+=item C<< AutoClose => 0|1 >>
 
 This option applies to any input or output data streams to 
 C<rawdeflate> that are filehandles.
@@ -493,8 +495,7 @@ completed.
 This parameter defaults to 0.
 
 
-
-=item BinModeIn =E<gt> 0|1
+=item C<< BinModeIn => 0|1 >>
 
 When reading from a file or filehandle, set C<binmode> before reading.
 
@@ -504,7 +505,7 @@ Defaults to 0.
 
 
 
-=item -Append =E<gt> 0|1
+=item C<< Append => 0|1 >>
 
 TODO
 
@@ -621,7 +622,7 @@ C<OPTS> is any combination of the following options:
 
 =over 5
 
-=item AutoClose =E<gt> 0|1
+=item C<< AutoClose => 0|1 >>
 
 This option is only valid when the C<$output> parameter is a filehandle. If
 specified, and the value is true, it will result in the C<$output> being
@@ -630,7 +631,7 @@ object is destroyed.
 
 This parameter defaults to 0.
 
-=item Append =E<gt> 0|1
+=item C<< Append => 0|1 >>
 
 Opens C<$output> in append mode. 
 
@@ -664,7 +665,7 @@ This parameter defaults to 0.
 
 
 
-=item Merge =E<gt> 0|1
+=item C<< Merge => 0|1 >>
 
 This option is used to compress input data and append it to an existing
 compressed data stream in C<$output>. The end result is a single compressed
@@ -735,7 +736,7 @@ The default is Z_DEFAULT_STRATEGY.
 
 
 
-=item -Strict =E<gt> 0|1
+=item C<< Strict => 0|1 >>
 
 
 
@@ -960,18 +961,10 @@ Usage is
 
 Closes the current compressed data stream and starts a new one.
 
-OPTS consists of the following sub-set of the the options that are
-available when creating the C<$z> object,
+OPTS consists of any of the the options that are available when creating
+the C<$z> object.
 
-=over 5
-
-
-
-=item * Level
-
-
-
-=back
+See the L</"Constructor Options"> section for more details.
 
 
 =head2 deflateParams
@@ -1050,6 +1043,11 @@ For
 =head1 EXAMPLES
 
 TODO
+
+
+
+
+
 
 
 

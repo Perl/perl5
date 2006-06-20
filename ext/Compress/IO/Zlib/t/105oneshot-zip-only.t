@@ -23,7 +23,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 119 + $extra ;
+    plan tests => 146 + $extra ;
 
     #use_ok('IO::Compress::Zip', qw(zip $ZipError :zip_method)) ;
     use_ok('IO::Compress::Zip', qw(:all)) ;
@@ -135,82 +135,100 @@ sub zipGetHeader
 
 for my $stream (0, 1)
 {
-    for my $method (ZIP_CM_STORE, ZIP_CM_DEFLATE)
+    for my $zip64 (0, 1)
     {
-        title "Stream $stream, Method $method";
+        next if $zip64 && ! $stream;
 
-        my $lex = new LexFile my $file1;
-
-        my $content = "hello ";
-        #writeFile($file1, $content);
-
-        ok zip(\$content => $file1 , Method => $method, Stream => $stream), " zip ok" 
-            or diag $ZipError ;
-
-        my $got ;
-        if ($stream && $method == ZIP_CM_STORE ) {
-            #eval ' unzip($file1 => \$got) ';
-            ok ! unzip($file1 => \$got), "  unzip fails"; 
-            like $UnzipError, "/Streamed Stored content not supported/",
-                "  Streamed Stored content not supported";
-                next ;
-        }
-
-        ok unzip($file1 => \$got), "  unzip ok"
-            or diag $UnzipError ;
-
-        is $got, $content, "  content ok";
-
-        my $u = new IO::Uncompress::Unzip $file1
-            or diag $ZipError ;
-
-        my $hdr = $u->getHeaderInfo();
-        ok $hdr, "  got header";
-
-        is $hdr->{Stream}, $stream, "  stream is $stream" ;
-        is $hdr->{MethodID}, $method, "  MethodID is $method" ;
-    }
-}
-
-for my $stream (0, 1)
-{
-    for my $method (ZIP_CM_STORE, ZIP_CM_DEFLATE)
-    {
-        title "Stream $stream, Method $method";
-
-        my $file1;
-        my $file2;
-        my $zipfile;
-        my $lex = new LexFile $file1, $file2, $zipfile;
-
-        my $content1 = "hello ";
-        writeFile($file1, $content1);
-
-        my $content2 = "goodbye ";
-        writeFile($file2, $content2);
-
-        my %content = ( $file1 => $content1,
-                        $file2 => $content2,
-                      );
-
-        ok zip([$file1, $file2] => $zipfile , Method => $method, Stream => $stream), " zip ok" 
-            or diag $ZipError ;
-
-        for my $file ($file1, $file2)
+        for my $method (ZIP_CM_STORE, ZIP_CM_DEFLATE)
         {
+
+            title "Stream $stream, Zip64 $zip64, Method $method";
+
+            my $lex = new LexFile my $file1;
+
+            my $content = "hello ";
+            #writeFile($file1, $content);
+
+            my $status = zip(\$content => $file1 , 
+                               Method => $method, 
+                               Stream => $stream,
+                               Zip64  => $zip64);
+
+             ok $status, "  zip ok" 
+                or diag $ZipError ;
+
             my $got ;
-            if ($stream &&  $method == ZIP_CM_STORE ) {
-                #eval ' unzip($zipfile => \$got) ';
-                ok ! unzip($zipfile => \$got, Name => $file), "  unzip fails"; 
+            if ($stream && $method == ZIP_CM_STORE ) {
+                #eval ' unzip($file1 => \$got) ';
+                ok ! unzip($file1 => \$got), "  unzip fails"; 
                 like $UnzipError, "/Streamed Stored content not supported/",
                     "  Streamed Stored content not supported";
                     next ;
             }
 
-            ok unzip($zipfile => \$got, Name => $file), "  unzip $file ok"
+            ok unzip($file1 => \$got), "  unzip ok"
                 or diag $UnzipError ;
 
-            is $got, $content{$file}, "  content ok";
+            is $got, $content, "  content ok";
+
+            my $u = new IO::Uncompress::Unzip $file1
+                or diag $ZipError ;
+
+            my $hdr = $u->getHeaderInfo();
+            ok $hdr, "  got header";
+
+            is $hdr->{Stream}, $stream, "  stream is $stream" ;
+            is $hdr->{MethodID}, $method, "  MethodID is $method" ;
+            is $hdr->{Zip64}, $zip64, "  Zip64 is $zip64" ;
+        }
+    }
+}
+
+for my $stream (0, 1)
+{
+    for my $zip64 (0, 1)
+    {
+        next if $zip64 && ! $stream;
+        for my $method (ZIP_CM_STORE, ZIP_CM_DEFLATE)
+        {
+            title "Stream $stream, Zip64 $zip64, Method $method";
+
+            my $file1;
+            my $file2;
+            my $zipfile;
+            my $lex = new LexFile $file1, $file2, $zipfile;
+
+            my $content1 = "hello ";
+            writeFile($file1, $content1);
+
+            my $content2 = "goodbye ";
+            writeFile($file2, $content2);
+
+            my %content = ( $file1 => $content1,
+                            $file2 => $content2,
+                          );
+
+            ok zip([$file1, $file2] => $zipfile , Method => $method, 
+                                                  Zip64  => $zip64,
+                                                  Stream => $stream), " zip ok" 
+                or diag $ZipError ;
+
+            for my $file ($file1, $file2)
+            {
+                my $got ;
+                if ($stream &&  $method == ZIP_CM_STORE ) {
+                    #eval ' unzip($zipfile => \$got) ';
+                    ok ! unzip($zipfile => \$got, Name => $file), "  unzip fails"; 
+                    like $UnzipError, "/Streamed Stored content not supported/",
+                        "  Streamed Stored content not supported";
+                        next ;
+                }
+
+                ok unzip($zipfile => \$got, Name => $file), "  unzip $file ok"
+                    or diag $UnzipError ;
+
+                is $got, $content{$file}, "  content ok";
+            }
         }
     }
 }

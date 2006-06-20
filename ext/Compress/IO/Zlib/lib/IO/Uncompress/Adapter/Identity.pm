@@ -8,7 +8,7 @@ use IO::Compress::Base::Common qw(:Status);
 
 our ($VERSION);
 
-$VERSION = '2.000_12';
+$VERSION = '2.000_13';
 
 use Compress::Raw::Zlib ();
 
@@ -55,8 +55,8 @@ sub reset
 
     $self->{CompSize}   = 0;
     $self->{UnCompSize} = 0;
-    $self->{CRC32}      = Compress::Zlib::crc32('');
-    $self->{ADLER32}    = Compress::Zlib::adler32('');      
+    $self->{CRC32}      = Compress::Raw::Zlib::crc32('');
+    $self->{ADLER32}    = Compress::Raw::Zlib::adler32('');      
 
     return STATUS_OK ;
 }

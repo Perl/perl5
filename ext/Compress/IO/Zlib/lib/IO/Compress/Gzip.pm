@@ -27,7 +27,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $GzipError);
 
-$VERSION = '2.000_12';
+$VERSION = '2.000_13';
 $GzipError = '' ;
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -163,7 +163,7 @@ sub mkTrailer
 {
     my $self = shift ;
     return pack("V V", *$self->{Compress}->crc32(), 
-                       *$self->{UnCompSize_32bit});
+                       *$self->{UnCompSize}->get32bit());
 }
 
 sub getInverseClass
@@ -516,7 +516,7 @@ L</"Constructor Options"> section below.
 
 =over 5
 
-=item AutoClose =E<gt> 0|1
+=item C<< AutoClose => 0|1 >>
 
 This option applies to any input or output data streams to 
 C<gzip> that are filehandles.
@@ -528,8 +528,7 @@ completed.
 This parameter defaults to 0.
 
 
-
-=item BinModeIn =E<gt> 0|1
+=item C<< BinModeIn => 0|1 >>
 
 When reading from a file or filehandle, set C<binmode> before reading.
 
@@ -539,7 +538,7 @@ Defaults to 0.
 
 
 
-=item -Append =E<gt> 0|1
+=item C<< Append => 0|1 >>
 
 TODO
 
@@ -656,7 +655,7 @@ C<OPTS> is any combination of the following options:
 
 =over 5
 
-=item AutoClose =E<gt> 0|1
+=item C<< AutoClose => 0|1 >>
 
 This option is only valid when the C<$output> parameter is a filehandle. If
 specified, and the value is true, it will result in the C<$output> being
@@ -665,7 +664,7 @@ object is destroyed.
 
 This parameter defaults to 0.
 
-=item Append =E<gt> 0|1
+=item C<< Append => 0|1 >>
 
 Opens C<$output> in append mode. 
 
@@ -699,7 +698,7 @@ This parameter defaults to 0.
 
 
 
-=item Merge =E<gt> 0|1
+=item C<< Merge => 0|1 >>
 
 This option is used to compress input data and append it to an existing
 compressed data stream in C<$output>. The end result is a single compressed
@@ -770,7 +769,7 @@ The default is Z_DEFAULT_STRATEGY.
 
 
 
-=item -Minimal =E<gt> 0|1
+=item C<< Minimal => 0|1 >>
 
 If specified, this option will force the creation of the smallest possible
 compliant gzip header (which is exactly 10 bytes long) as defined in
@@ -784,7 +783,7 @@ be ignored if this parameter is set to 1.
 
 This parameter defaults to 0.
 
-=item -Comment =E<gt> $comment
+=item C<< Comment => $comment >>
 
 Stores the contents of C<$comment> in the COMMENT field in
 the gzip header.
@@ -797,7 +796,7 @@ If the C<-Strict> option is disabled, the comment field can contain any
 character except NULL. If any null characters are present, the field
 will be truncated at the first NULL.
 
-=item -Name =E<gt> $string
+=item C<< Name => $string >>
 
 Stores the contents of C<$string> in the gzip NAME header field. If
 C<Name> is not specified, no gzip NAME field will be created.
@@ -809,14 +808,14 @@ If C<-Strict> is disabled, then C<$string> can contain any character
 except NULL. If any null characters are present, the field will be
 truncated at the first NULL.
 
-=item -Time =E<gt> $number
+=item C<< Time => $number >>
 
 Sets the MTIME field in the gzip header to $number.
 
 This field defaults to the time the C<IO::Compress::Gzip> object was created
 if this option is not specified.
 
-=item -TextFlag =E<gt> 0|1
+=item C<< TextFlag => 0|1 >>
 
 This parameter controls the setting of the FLG.FTEXT bit in the gzip
 header. It is used to signal that the data stored in the gzip file/buffer
@@ -824,7 +823,7 @@ is probably text.
 
 The default is 0. 
 
-=item -HeaderCRC =E<gt> 0|1
+=item C<< HeaderCRC => 0|1 >>
 
 When true this parameter will set the FLG.FHCRC bit to 1 in the gzip header
 and set the CRC16 header field to the CRC of the complete gzip header
@@ -837,7 +836,7 @@ you want to maximize the portability of your gzip files.
 
 This parameter defaults to 0.
 
-=item -OS_Code =E<gt> $value
+=item C<< OS_Code => $value >>
 
 Stores C<$value> in the gzip OS header field. A number between 0 and 255 is
 valid.
@@ -846,7 +845,7 @@ If not specified, this parameter defaults to the OS code of the Operating
 System this module was built on. The value 3 is used as a catch-all for all
 Unix variants and unknown Operating Systems.
 
-=item -ExtraField =E<gt> $data
+=item C<< ExtraField => $data >>
 
 This parameter allows additional metadata to be stored in the ExtraField in
 the gzip header. An RFC 1952 compliant ExtraField consists of zero or more
@@ -886,20 +885,20 @@ consist of any arbitrary byte stream.
 
 The maximum size of the Extra Field 65535 bytes.
 
-=item -ExtraFlags =E<gt> $value
+=item C<< ExtraFlags => $value >>
 
 Sets the XFL byte in the gzip header to C<$value>.
 
 If this option is not present, the value stored in XFL field will be
 determined by the setting of the C<Level> option.
 
-If C<Level =E<gt> Z_BEST_SPEED> has been specified then XFL is set to 2.
-If C<Level =E<gt> Z_BEST_COMPRESSION> has been specified then XFL is set to 4.
+If C<< Level => Z_BEST_SPEED >> has been specified then XFL is set to 2.
+If C<< Level => Z_BEST_COMPRESSION >> has been specified then XFL is set to 4.
 Otherwise XFL is set to 0.
 
 
 
-=item -Strict =E<gt> 0|1
+=item C<< Strict => 0|1 >>
 
 
 
@@ -1191,18 +1190,10 @@ Usage is
 
 Closes the current compressed data stream and starts a new one.
 
-OPTS consists of the following sub-set of the the options that are
-available when creating the C<$z> object,
+OPTS consists of any of the the options that are available when creating
+the C<$z> object.
 
-=over 5
-
-
-
-=item * Level
-
-
-
-=back
+See the L</"Constructor Options"> section for more details.
 
 
 =head2 deflateParams
@@ -1281,6 +1272,11 @@ For
 =head1 EXAMPLES
 
 TODO
+
+
+
+
+
 
 
 

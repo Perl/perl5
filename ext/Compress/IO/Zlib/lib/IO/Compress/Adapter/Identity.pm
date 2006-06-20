@@ -7,7 +7,7 @@ use bytes;
 use IO::Compress::Base::Common qw(:Status);
 our ($VERSION);
 
-$VERSION = '2.000_12';
+$VERSION = '2.000_13';
 
 sub mkCompObject
 {
@@ -30,7 +30,10 @@ sub compr
         $self->{CompSize} += length ${ $_[0] } ;
         $self->{UnCompSize} = $self->{CompSize} ;
 
-        ${ $_[1] } .= ${ $_[0] };
+        if ( ref $_[1] ) 
+          { ${ $_[1] } .= ${ $_[0] } }
+        else
+          { $_[1] .= ${ $_[0] } }
     }
 
     return STATUS_OK ;

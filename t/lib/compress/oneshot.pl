@@ -16,7 +16,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 944 + $extra ;
+    plan tests => 956 + $extra ;
 
     use_ok('IO::Uncompress::AnyUncompress', qw(anyuncompress $AnyUncompressError)) ;
 
@@ -72,6 +72,22 @@ sub run
             eval { $a = $Func->($in, $out) ;} ;
             like $@, mkErr("^$TopType: input and output filename are identical"),
                 '  Input and Output filename are the same';
+        }
+
+        {
+            my $dir = "tmpdir";
+            my $lex = new LexDir $dir ;
+            mkdir $dir, 0777 ;
+
+            $a = $Func->($dir, \$x) ;
+            is $a, undef, "  $TopType returned undef";
+            like $$Error, "/input file '$dir' is a directory/",
+                '  Input filename is a directory';
+
+            $a = $Func->(\$x, $dir) ;
+            is $a, undef, "  $TopType returned undef";
+            like $$Error, "/output file '$dir' is a directory/",
+                '  Output filename is a directory';
         }
 
         eval { $a = $Func->(\$in, \$in) ;} ;

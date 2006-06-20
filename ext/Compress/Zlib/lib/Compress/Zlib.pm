@@ -18,7 +18,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.000_12';
+$VERSION = '2.000_13';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -703,7 +703,7 @@ Added C<gztell>.
 =back
 
 A more complete and flexible interface for reading/writing gzip
-files/buffers is included with the module C<IO-Compress-ZLib>. See
+files/buffers is included with the module C<IO-Compress-Zlib>. See
 L<IO::Compress::Gzip|IO::Compress::Gzip> and
 L<IO::Uncompress::Gunzip|IO::Uncompress::Gunzip> for more details.
 
@@ -1044,7 +1044,7 @@ If not successful, the returned deflation stream (C<$d>) will be
 I<undef> and C<$status> will hold the exact I<zlib> error code.
 
 The function optionally takes a number of named options specified as
-C<-Name=E<gt>value> pairs. This allows individual options to be
+C<< -Name=>value >> pairs. This allows individual options to be
 tailored without having to specify them all in the parameter list.
 
 For backward compatibility, it is also possible to pass the parameters
@@ -1063,12 +1063,12 @@ Defines the compression level. Valid values are 0 through 9,
 C<Z_NO_COMPRESSION>, C<Z_BEST_SPEED>, C<Z_BEST_COMPRESSION>, and
 C<Z_DEFAULT_COMPRESSION>.
 
-The default is C<-Level =E<gt>Z_DEFAULT_COMPRESSION>.
+The default is Z_DEFAULT_COMPRESSION.
 
 =item B<-Method>
 
 Defines the compression method. The only valid value at present (and
-the default) is C<-Method =E<gt>Z_DEFLATED>.
+the default) is Z_DEFLATED.
 
 =item B<-WindowBits>
 
@@ -1079,21 +1079,21 @@ To create an RFC 1951 data stream, set C<WindowBits> to C<-MAX_WBITS>.
 For a full definition of the meaning and valid values for C<WindowBits> refer
 to the I<zlib> documentation for I<deflateInit2>.
 
-Defaults to C<-WindowBits =E<gt>MAX_WBITS>.
+Defaults to MAX_WBITS.
 
 =item B<-MemLevel>
 
 For a definition of the meaning and valid values for C<MemLevel>
 refer to the I<zlib> documentation for I<deflateInit2>.
 
-Defaults to C<-MemLevel =E<gt>MAX_MEM_LEVEL>.
+Defaults to MAX_MEM_LEVEL.
 
 =item B<-Strategy>
 
 Defines the strategy used to tune the compression. The valid values are
 C<Z_DEFAULT_STRATEGY>, C<Z_FILTERED> and C<Z_HUFFMAN_ONLY>. 
 
-The default is C<-Strategy =E<gt>Z_DEFAULT_STRATEGY>.
+The default is Z_DEFAULT_STRATEGY.
 
 =item B<-Dictionary>
 
@@ -1254,7 +1254,7 @@ If not successful, C<$i> will be I<undef> and C<$status> will hold the
 I<zlib> error code.
 
 The function optionally takes a number of named options specified as
-C<-Name=E<gt>value> pairs. This allows individual options to be
+C<< -Name=>value >> pairs. This allows individual options to be
 tailored without having to specify them all in the parameter list.
  
 For backward compatibility, it is also possible to pass the parameters
@@ -1276,7 +1276,7 @@ To uncompress an RFC 1951 data stream, set C<WindowBits> to C<-MAX_WBITS>.
 For a full definition of the meaning and valid values for C<WindowBits> refer
 to the I<zlib> documentation for I<inflateInit2>.
 
-Defaults to C<-WindowBits =E<gt>MAX_WBITS>.
+Defaults to MAX_WBITS.
 
 =item B<-Bufsize>
 
@@ -1398,15 +1398,6 @@ CRC-related functions are available.
     $crc = crc32_combine($adler1, $adler2, $len2)
 
 These functions allow checksums to be merged.
-
-=head1 ACCESSING ZIP FILES
-
-Although it is possible (with some effort on your part) to use this
-module to access .zip files, there is a module on CPAN that will do all
-the hard work for you. Check out the C<Archive::Zip> module on CPAN at
-
-    http://www.cpan.org/modules/by-module/Archive/Archive-Zip-*.tar.gz    
-
 
 =head1 CONSTANTS
 

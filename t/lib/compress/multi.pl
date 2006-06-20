@@ -13,7 +13,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 190 + $extra ;
+    plan tests => 694 + $extra ;
 
     use_ok('IO::Uncompress::AnyUncompress', qw($AnyUncompressError)) ;
 
@@ -40,6 +40,7 @@ EOM
 
     push @buffers, <<EOM ;
 some more stuff
+line 2
 EOM
 
     push @buffers, <<EOM ;
@@ -129,6 +130,70 @@ EOM
                     ok $un eq join('', @buffs), "    expected output" ;
 
                 }
+
+                foreach my $unc ($UncompressClass, 'IO::Uncompress::AnyUncompress') {
+                    title "  Testing $CompressClass with $unc nextStream and $i streams, from $fb";
+                    $cc = $output ;
+                    if ($fb eq 'filehandle')
+                    {
+                        $cc = new IO::File "<$name" ;
+                    }
+                    my $gz = new $unc($cc,
+                                   Strict      => 1,
+                                   AutoClose   => 1,
+                                   Append      => 1,
+                                   MultiStream => 0,
+                                   Transparent => 0)
+                        or diag $$UnError;
+                    isa_ok $gz, $UncompressClass, '    $gz' ;
+
+                    for my $stream (1 .. $i)
+                    {
+                        my $buff = $buffs[$stream-1];
+                        my @lines = split("\n", $buff);
+                        my $lines = @lines;
+
+                        my $un = '';
+                        while (<$gz>) {
+                            $un .= $_;
+                        }
+                        is $., $lines, "    \$. is $lines";
+                        
+                        ok ! $gz->error(), "      ! error()"
+                            or diag "Error is " . $gz->error() ;
+                        ok $gz->eof(), "      eof()";
+                        is $gz->streamCount(), $stream, "    streamCount is $stream"
+                            or diag "Stream count is " . $gz->streamCount();
+                        ok $un eq $buff, "    expected output" ;
+                        #is $gz->tell(), length $buff, "    tell is ok";
+                        is $gz->nextStream(), 1, "    nextStream ok";
+                        is $gz->tell(), 0, "    tell is 0";
+                        is $., 0, '    $. is 0';
+                    }
+
+                    {
+                        my $un = '';
+                        1 while $gz->read($un) > 0 ;
+                        #print "[[$un]]\n" while $gz->read($un) > 0 ;
+                        ok ! $gz->error(), "      ! error()"
+                            or diag "Error is " . $gz->error() ;
+                        ok $gz->eof(), "      eof()";
+                        is $gz->streamCount(), $i+1, "    streamCount is ok"
+                            or diag "Stream count is " . $gz->streamCount();
+                        ok $un eq "", "    expected output" ;
+                        is $gz->tell(), 0, "    tell is 0";
+                        is $., 0, "    \$. is 0";
+                    }
+
+                    is $gz->nextStream(), 0, "    nextStream ok";
+                    ok $gz->eof(), "      eof()";
+                    ok $gz->close(), "    close() ok"
+                        or diag "errno $!\n" ;
+
+                    is $gz->streamCount(), $i +1, "    streamCount ok"
+                        or diag "Stream count is " . $gz->streamCount();
+
+                }
             }
         }
     }
@@ -137,7 +202,6 @@ EOM
 
 # corrupt one of the streams - all previous should be ok
 # trailing stuff
-# need a way to skip to the start of the next stream.
 # check that "tell" works ok
 
 1;
