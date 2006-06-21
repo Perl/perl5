@@ -5177,14 +5177,14 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 #ifdef EBCDIC
     UV literal_endpoint = 0;
 #endif
-#ifndef DEBUGGING
-    PERL_UNUSED_ARG(depth);
-#endif
     UV stored = 0;  /* number of chars stored in the class */
 
     regnode * const orig_emit = RExC_emit; /* Save the original RExC_emit in
         case we need to change the emitted regop to an EXACT. */
     const char * orig_parse = RExC_parse;
+#ifndef DEBUGGING
+    PERL_UNUSED_ARG(depth);
+#endif
     GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_PARSE("clas");
 
