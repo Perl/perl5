@@ -379,7 +379,7 @@ Perl_mg_copy(pTHX_ SV *sv, SV *nsv, const char *key, I32 klen)
 	}
 	else {
 	    const char type = mg->mg_type;
-	    if (isUPPER(type)) {
+	    if (isUPPER(type) && type != PERL_MAGIC_uvar) {
 		sv_magic(nsv,
 		     (type == PERL_MAGIC_tied)
 			? SvTIED_obj(sv, mg)

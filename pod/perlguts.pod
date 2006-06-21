@@ -1111,6 +1111,17 @@ sv_magic, so you can safely allocate it on the stack.
         uf.uf_index = 0;
         sv_magic(sv, 0, PERL_MAGIC_uvar, (char*)&uf, sizeof(uf));
 
+Attaching C<PERL_MAGIC_uvar> to arrays is permissible but has no effect.
+
+For hashes there is a specialized hook that gives control over hash
+keys (but not values).  This hook calls C<PERL_MAGIC_uvar> 'get' magic
+if the "set" function in the C<ufuncs> structure is NULL.  The hook
+is activated whenever the hash is accessed with a key specified as
+an C<SV> through the functions C<hv_store_ent>, C<hv_fetch_ent>,
+C<hv_delete_ent>, and C<hv_exists_ent>.  Accessing the key as a string
+through the functions without the C<..._ent> suffix circumvents the
+hook.  See L<Hash::Util::Fieldhash/Guts> for a detailed description.
+
 Note that because multiple extensions may be using C<PERL_MAGIC_ext>
 or C<PERL_MAGIC_uvar> magic, it is important for extensions to take
 extra care to avoid conflict.  Typically only using the magic on

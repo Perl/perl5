@@ -810,6 +810,18 @@ ext/Hash/Util/lib/Hash/Util.pm	Hash::Util
 ext/Hash/Util/Makefile.PL	Makefile for Hash::Util
 ext/Hash/Util/t/Util.t		See if Hash::Util works
 ext/Hash/Util/Util.xs		XS bits of Hash::Util
+ext/Hash/Util/FieldHash/Changes			Changes for Hash::Util::FieldHash
+ext/Hash/Util/FieldHash/Makefile.PL		Makefile for Hash::Util::FieldHash
+ext/Hash/Util/FieldHash/FieldHash.xs		XS portion
+ext/Hash/Util/FieldHash/lib/Hash/Util/FieldHash.pm	Perl portion and documentation
+ext/Hash/Util/FieldHash/t/01_load.t		Test script
+ext/Hash/Util/FieldHash/t/02_function.t		Test script
+ext/Hash/Util/FieldHash/t/03_class.t		Test script
+ext/Hash/Util/FieldHash/t/04_thread.t		Test script
+ext/Hash/Util/FieldHash/t/05_perlhook.t		Test script
+ext/Hash/Util/FieldHash/t/10_hash.t		Adapted from t/op/hash.t
+ext/Hash/Util/FieldHash/t/11_hashassign.t	Adapted from t/op/hashassign.t
+ext/Hash/Util/FieldHash/t/12_hashwarn.t		Adapted from t/op/hashwarn.t
 ext/I18N/Langinfo/fallback/const-c.inc	I18N::Langinfo
 ext/I18N/Langinfo/fallback/const-xs.inc	I18N::Langinfo
 ext/I18N/Langinfo/Langinfo.pm	I18N::Langinfo

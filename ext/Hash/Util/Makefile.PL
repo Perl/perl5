@@ -8,6 +8,7 @@ WriteMakefile(
     MAN3PODS        => {},  # Pods will be built by installman.
     NAME            => "Hash::Util",
     DEFINE          => "-DPERL_EXT",
+    DIR             => ['FieldHash'],
 );
 
 package MY;

@@ -1,0 +1,6 @@
+Revision history for Perl extension Hash::Util::FieldHash.
+
+0.01  Sat Jun  3 16:24:12 2006
+	- original version; created by h2xs 1.23 with options
+		-A -g --skip-ppport -nHash::Util::FieldHash
+

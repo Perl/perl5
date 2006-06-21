@@ -10,6 +10,8 @@ use Scalar::Util qw(reftype);
 require Exporter;
 our @ISA        = qw(Exporter);
 our @EXPORT_OK  = qw(
+                     fieldhash fieldhashes
+
                      all_keys
                      lock_keys unlock_keys
                      lock_value unlock_value
@@ -26,10 +28,20 @@ our @EXPORT_OK  = qw(
                      hash_seed hv_store
 
                     );
-our $VERSION    = 0.06;
+our $VERSION    = 0.07;
 require DynaLoader;
 local @ISA = qw(DynaLoader);
 bootstrap Hash::Util $VERSION;
+
+sub import {
+    my $class = shift;
+    if ( grep /fieldhash/, @_ ) {
+        require Hash::Util::FieldHash;
+        Hash::Util::FieldHash->import(':all'); # for re-export
+    }
+    unshift @_, $class;
+    goto &Exporter::import;
+}
 
 
 =head1 NAME
@@ -37,6 +49,20 @@ bootstrap Hash::Util $VERSION;
 Hash::Util - A selection of general-utility hash subroutines
 
 =head1 SYNOPSIS
+
+  # Field hashes
+
+  use Hash::Util qw(fieldhash fieldhashes);
+
+  # Create a single field hash
+  fieldhash my %foo;
+
+  # Create three at once...
+  fieldhashes \ my(%foo, %bar, %baz);
+  # ...or any number
+  fieldhashes @hashrefs;
+
+  # Restricted hashes
 
   use Hash::Util qw(
                      hash_seed all_keys
@@ -78,6 +104,19 @@ C<Hash::Util> contains special functions for manipulating hashes that
 don't really warrant a keyword.
 
 By default C<Hash::Util> does not export anything.
+
+=head2 Field hashes
+
+Field hashes are designed to maintain an association of a reference
+with a value. The association is independent of the bless status of
+the key, it is thread safe and garbage-collected.  These properties
+are desirable in the construction of inside-out classes.
+
+When used with keys that are plain scalars (not references), field
+hashes behave like normal hashes.
+
+Field hashes are defined in a separate module for which C<Hash::Util>
+is a front end.  For a detailed description see L<Hash::Util::FieldHash>.
 
 =head2 Restricted hashes
 

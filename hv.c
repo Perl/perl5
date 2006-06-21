@@ -436,6 +436,8 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return NULL;
 
     if (keysv) {
+	if (SvSMAGICAL(hv) && SvGMAGICAL(hv))
+	    keysv = hv_magic_uvar_xkey(hv, keysv, action);
 	if (flags & HVhek_FREEKEY)
 	    Safefree(key);
 	key = SvPV_const(keysv, klen);
@@ -965,6 +967,8 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 	return NULL;
 
     if (keysv) {
+	if (SvSMAGICAL(hv) && SvGMAGICAL(hv))
+	    keysv = hv_magic_uvar_xkey(hv, keysv, -1);
 	if (k_flags & HVhek_FREEKEY)
 	    Safefree(key);
 	key = SvPV_const(keysv, klen);
@@ -2509,6 +2513,24 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	Safefree(str);
 
     return HeKEY_hek(entry);
+}
+
+STATIC SV *
+S_hv_magic_uvar_xkey(pTHX_ HV* hv, SV* keysv, int action)
+{
+    MAGIC* mg;
+    if ((mg = mg_find((SV*)hv, PERL_MAGIC_uvar))) {
+	struct ufuncs * const uf = (struct ufuncs *)mg->mg_ptr;
+	if (uf->uf_set == NULL) {
+	    SV* obj = mg->mg_obj;
+	    mg->mg_obj = keysv;         /* pass key */
+	    uf->uf_index = action;      /* pass action */
+	    magic_getuvar((SV*)hv, mg);
+	    keysv = mg->mg_obj;         /* may have changed */
+	    mg->mg_obj = obj;
+	}
+    }
+    return keysv;
 }
 
 I32 *

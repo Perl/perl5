@@ -4644,7 +4644,8 @@ Perl_sv_unmagic(pTHX_ SV *sv, int type)
 Weaken a reference: set the C<SvWEAKREF> flag on this RV; give the
 referred-to SV C<PERL_MAGIC_backref> magic if it hasn't already; and
 push a back-reference to this RV onto the array of backreferences
-associated with that magic.
+associated with that magic. If the RV is magical, set magic will be
+called after the RV is cleared.
 
 =cut
 */
@@ -4797,6 +4798,7 @@ Perl_sv_kill_backrefs(pTHX_ SV *sv, AV *av)
 		    SvRV_set(referrer, 0);
 		    SvOK_off(referrer);
 		    SvWEAKREF_off(referrer);
+		    SvSETMAGIC(referrer);
 		} else if (SvTYPE(referrer) == SVt_PVGV ||
 			   SvTYPE(referrer) == SVt_PVLV) {
 		    /* You lookin' at me?  */

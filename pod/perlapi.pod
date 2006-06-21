@@ -5542,7 +5542,8 @@ X<sv_rvweaken>
 Weaken a reference: set the C<SvWEAKREF> flag on this RV; give the
 referred-to SV C<PERL_MAGIC_backref> magic if it hasn't already; and
 push a back-reference to this RV onto the array of backreferences
-associated with that magic.
+associated with that magic. If the RV is magical, set magic will be
+called after the RV is cleared.
 
 	SV*	sv_rvweaken(SV *sv)
 

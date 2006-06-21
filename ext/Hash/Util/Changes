@@ -15,4 +15,6 @@ on top of code by Nick Ing-Simmons and Jeffrey Friedl.
 
 
 
-
+0.07 Sun Jun 11 21:24:15 CEST 2006
+        - added front-end support for the new Hash::Util::FieldHash
+        (Anno Siegel)
