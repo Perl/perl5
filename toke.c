@@ -1976,8 +1976,7 @@ S_scan_const(pTHX_ char *start)
 		/* FALL THROUGH */
 	    default:
 	        {
-		    if (isALNUM(*s) &&
-			*s != '_' &&
+		    if ((isALPHA(*s) || isDIGIT(*s)) &&
 			ckWARN(WARN_MISC))
 			Perl_warner(aTHX_ packWARN(WARN_MISC),
 			       "Unrecognized escape \\%c passed through",
