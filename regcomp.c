@@ -1052,10 +1052,11 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
     U32 *fail;
     reg_ac_data *aho;
     const U32 data_slot = add_data( pRExC_state, 1, "T" );
+    GET_RE_DEBUG_FLAGS_DECL;
 #ifndef DEBUGGING
     PERL_UNUSED_ARG(depth);
 #endif    
-    GET_RE_DEBUG_FLAGS_DECL;
+
 
     ARG_SET( stclass, data_slot );
     Newxz( aho, 1, reg_ac_data );
@@ -1150,9 +1151,11 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     STRLEN trie_charcount=0;
     /*U32 trie_laststate=0;*/
     AV *trie_revcharmap;
-    PERL_UNUSED_ARG(depth);
 #endif
     GET_RE_DEBUG_FLAGS_DECL;
+#ifndef DEBUGGING
+    PERL_UNUSED_ARG(depth);
+#endif
 
     Newxz( trie, 1, reg_trie_data );
     trie->refcount = 1;
@@ -1873,12 +1876,12 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
     U32 stopnow = 0;
 #ifdef DEBUGGING
     regnode *stop = scan;
+    GET_RE_DEBUG_FLAGS_DECL;
 #else
     PERL_UNUSED_ARG(flags);
     PERL_UNUSED_ARG(val);
     PERL_UNUSED_ARG(depth);
 #endif
-    GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_PEEP("join",scan,depth);
     
     /* Skip NOTHING, merge EXACT*. */
@@ -5182,10 +5185,11 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     regnode * const orig_emit = RExC_emit; /* Save the original RExC_emit in
         case we need to change the emitted regop to an EXACT. */
     const char * orig_parse = RExC_parse;
+    GET_RE_DEBUG_FLAGS_DECL;
 #ifndef DEBUGGING
     PERL_UNUSED_ARG(depth);
 #endif
-    GET_RE_DEBUG_FLAGS_DECL;
+
     DEBUG_PARSE("clas");
 
     /* Assume we are going to generate an ANYOF node. */
@@ -6154,10 +6158,10 @@ S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,U32 de
 {
     dVAR;
     register regnode *scan;
+    GET_RE_DEBUG_FLAGS_DECL;
 #ifndef DEBUGGING
     PERL_UNUSED_ARG(depth);
 #endif
-    GET_RE_DEBUG_FLAGS_DECL;
 
     if (SIZE_ONLY)
 	return;
