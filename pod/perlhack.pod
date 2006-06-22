@@ -361,7 +361,7 @@ patch directory.
 
 It's then up to you to apply these patches, using something like
 
- # last=`ls -t *.gz | sed q`
+ # last="`cat ../perl-current/.patch`.gz"
  # rsync -avz rsync://public.activestate.com/perl-current-diffs/ .
  # find . -name '*.gz' -newer $last -exec gzcat {} \; >blead.patch
  # cd ../perl-current
