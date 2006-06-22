@@ -102,8 +102,7 @@ sub run
                                 "  Got non-writable filename message" ;
                     }
                     else {
-                        is $$Error, "Output filehandle is not writable",
-                                "  Got non-writable filehandle message" ;
+                        ok $$Error, "  Got error message" ;
                     }
                 }
             }

@@ -227,8 +227,6 @@ sub _create
     if ($outType eq 'filename' && -e $outValue && ! -w _)
       { return $obj->saveErrorString(undef, "Output file '$outValue' is not writable" ) }
 
-    elsif ($outType eq 'handle'  && ! -w $outValue)
-      { return $obj->saveErrorString(undef, "Output filehandle is not writable" ) }
 
 
 #    TODO - encoding
