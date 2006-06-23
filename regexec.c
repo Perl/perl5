@@ -4396,9 +4396,10 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 				sayNO;
 			}
 			/* PL_reginput == locinput now */
+			PL_reginput = locinput; /* Could be reset... */
 			TRYPAREN(st->u.plus.paren, st->ln, locinput, PLUS1);
 			/*** all unsaved local vars undefined at this point */
-			PL_reginput = locinput;	/* Could be reset... */
+
 			REGCP_UNWIND(st->u.plus.lastcp);
 			/* Couldn't or didn't -- move forward. */
 			st->u.plus.old = locinput;
