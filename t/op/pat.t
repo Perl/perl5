@@ -7,7 +7,7 @@
 $| = 1;
 
 # please update note at bottom of file when you change this
-print "1..1244\n";
+print "1..1247\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3514,6 +3514,31 @@ if ($ordA == 193) {
     ok($s eq "\x{ffff}", "U+FFFF, NBOUND");
 } # non-characters end
 
+{
+    # https://rt.perl.org/rt3/Ticket/Display.html?id=39583
+    
+    # The printing characters
+    my @chars = ("A".."Z");
+    my $delim = ",";
+    my $size = 32771 - 4;
+    my $test = '';
+
+    # create some random junk. Inefficient, but it works.
+    for ($i = 0 ; $i < $size ; $i++) {
+        $test .= $chars[int(rand(@chars))];
+    }
+
+    $test .= ($delim x 4);
+    my $res;
+    my $matched;
+    if ($test =~ s/^(.*?)${delim}{4}//s) {
+        $res = $1;
+        $matched=1;
+    } 
+    ok($matched,'pattern matches');
+    ok(length($test)==0,"Empty string");
+    ok(defined($res) && length($res)==$size,"\$1 is correct size");
+}
 
 { # related to [perl #27940]
     ok("\0-A"  =~ /\c@-A/, '@- should not be interpolated in a pattern');
@@ -3631,4 +3656,4 @@ sub iseq($$;$) {
 }
 
 
-# last test 1243
+# last test 1247

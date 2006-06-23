@@ -3473,8 +3473,9 @@ S_regmatch(pTHX_ regnode *prog)
 				sayNO;
 			}
 			/* PL_reginput == locinput now */
+			PL_reginput = locinput; /* Could be reset... */
 			TRYPAREN(paren, ln, locinput);
-			PL_reginput = locinput;	/* Could be reset... */
+
 			REGCP_UNWIND(lastcp);
 			/* Couldn't or didn't -- move forward. */
 			old = locinput;
