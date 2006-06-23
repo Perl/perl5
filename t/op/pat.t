@@ -3533,31 +3533,6 @@ if ($ordA == 193) {
     ok($s eq "\x{ffff}", "U+FFFF, NBOUND");
 } # non-characters end
 
-{
-    # https://rt.perl.org/rt3/Ticket/Display.html?id=39583
-    
-    # The printing characters
-    my @chars = ("A".."Z");
-    my $delim = ",";
-    my $size = 32771 - 4;
-    my $test = '';
-
-    # create some random junk. Inefficient, but it works.
-    for ($i = 0 ; $i < $size ; $i++) {
-        $test .= $chars[int(rand(@chars))];
-    }
-
-    $test .= ($delim x 4);
-    my $res;
-    my $matched;
-    if ($test =~ s/^(.*?)${delim}{4}//s) {
-        $res = $1;
-        $matched=1;
-    } 
-    ok($matched,'pattern matches');
-    ok(length($test)==0,"Empty string");
-    ok(defined($res) && length($res)==$size,"\$1 is correct size");
-}
 
 { # related to [perl #27940]
     ok("\0-A"  =~ /\c@-A/, '@- should not be interpolated in a pattern');
@@ -3885,4 +3860,4 @@ SKIP: {
 
 # Put new tests above the dotted line about a page above this comment
 
-BEGIN{print "1..1276\n"};
+BEGIN{print "1..1273\n"};
