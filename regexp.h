@@ -211,7 +211,9 @@ typedef struct regmatch_state {
 
 	struct {
 	    reg_trie_accepted *accept_buff;
-	    U32 accepted;	/* how many accepting states we have seen */
+	    U32		accepted; /* how many accepting states we have seen */
+	    regnode	*B;	/* node following the trie */
+	    regnode	*me;	/* only needed for debugging */
 	} trie;
 
 	struct {

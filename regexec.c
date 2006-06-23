@@ -2604,8 +2604,8 @@ S_push_slab(pTHX)
  */
  
 /* *** every FOO_fail should = FOO+1 */
-#define resume_TRIE1	    (REGNODE_MAX+1)
-#define resume_TRIE2	    (REGNODE_MAX+2)
+#define TRIE_next	    (REGNODE_MAX+1)
+#define TRIE_next_fail	    (REGNODE_MAX+2)
 #define EVAL_A		    (REGNODE_MAX+3)
 #define EVAL_A_fail	    (REGNODE_MAX+4)
 #define resume_CURLYX	    (REGNODE_MAX+5)
@@ -2849,6 +2849,10 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    else
 		nextchr = UCHARAT(++locinput);
 	    break;
+
+#undef  ST
+#define ST st->u.trie
+
 	case TRIE:
 	    {
                 /* what type of TRIE am I? (utf8 makes this contextual) */
@@ -2861,6 +2865,23 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		reg_trie_data * const trie
         	    = (reg_trie_data*)rex->data->data[ ARG( scan ) ];
                 U32 state = trie->startstate;
+
+		U8 *uc = ( U8* )locinput;
+		U16 charid = 0;
+		U32 base = 0;
+		UV uvc = 0;
+		STRLEN len = 0;
+		STRLEN foldlen = 0;
+		U8 *uscan = (U8*)NULL;
+		STRLEN bufflen=0;
+		SV *sv_accept_buff = NULL;
+		U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
+
+	    	ST.accepted = 0; /* how many accepting states we have seen */
+		ST.B = next;
+#ifdef DEBUGGING
+		ST.me = scan;
+#endif
                 
         	if (trie->bitmap && trie_type != trie_utf8_fold &&
         	    !TRIE_BITMAP_TEST(trie,*locinput)
@@ -2881,30 +2902,16 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
         	        sayNO_SILENT;
         	   }
                 }
-	    {
+
 	        /*
         	   traverse the TRIE keeping track of all accepting states
         	   we transition through until we get to a failing node.
         	*/
 
-		U8 *uc = ( U8* )locinput;
-		U16 charid = 0;
-		U32 base = 0;
-		UV uvc = 0;
-		STRLEN len = 0;
-		STRLEN foldlen = 0;
-		U8 *uscan = (U8*)NULL;
-		STRLEN bufflen=0;
-		SV *sv_accept_buff = NULL;
-		U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
-
-	    	st->u.trie.accepted = 0; /* how many accepting states we have seen */
-		result = 0;
-
 		while ( state && uc <= (U8*)PL_regeol ) {
 
 		    if (trie->states[ state ].wordnum) {
-			if (!st->u.trie.accepted ) {
+			if (!ST.accepted ) {
 			    ENTER;
 			    SAVETMPS;
 			    bufflen = TRIE_INITAL_ACCEPT_BUFFLEN;
@@ -2914,22 +2921,23 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 						sizeof(reg_trie_accepted));
 			    SvPOK_on(sv_accept_buff);
 			    sv_2mortal(sv_accept_buff);
-			    st->u.trie.accept_buff =
+			    SAVETMPS;
+			    ST.accept_buff =
 				(reg_trie_accepted*)SvPV_nolen(sv_accept_buff );
 			}
 			else {
-			    if (st->u.trie.accepted >= bufflen) {
+			    if (ST.accepted >= bufflen) {
 				bufflen *= 2;
-				st->u.trie.accept_buff =(reg_trie_accepted*)
+				ST.accept_buff =(reg_trie_accepted*)
 				    SvGROW(sv_accept_buff,
 				       	bufflen * sizeof(reg_trie_accepted));
 			    }
 			    SvCUR_set(sv_accept_buff,SvCUR(sv_accept_buff)
 				+ sizeof(reg_trie_accepted));
 			}
-			st->u.trie.accept_buff[st->u.trie.accepted].wordnum = trie->states[state].wordnum;
-			st->u.trie.accept_buff[st->u.trie.accepted].endpos = uc;
-			++st->u.trie.accepted;
+			ST.accept_buff[ST.accepted].wordnum = trie->states[state].wordnum;
+			ST.accept_buff[ST.accepted].endpos = uc;
+			++ST.accepted;
 		    }
 
 		    base = trie->states[ state ].trans.base;
@@ -2939,7 +2947,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 			        PerlIO_printf( Perl_debug_log,
 			            "%*s  %sState: %4"UVxf", Base: %4"UVxf", Accepted: %4"UVxf" ",
 			            2+PL_regindent * 2, "", PL_colors[4],
-			            (UV)state, (UV)base, (UV)st->u.trie.accepted );
+			            (UV)state, (UV)base, (UV)ST.accepted );
 		    });
 
 		    if ( base ) {
@@ -3004,105 +3012,108 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		            charid, uvc, (UV)state, PL_colors[5] );
 		    );
 		}
-		if (!st->u.trie.accepted )
+		if (!ST.accepted )
 		   sayNO;
 
+		DEBUG_EXECUTE_r(
+		    PerlIO_printf( Perl_debug_log,
+			"%*s  %sgot %"IVdf" possible matches%s\n",
+			REPORT_CODE_OFF + PL_regindent * 2, "",
+			PL_colors[4], (IV)ST.accepted, PL_colors[5] );
+		);
+	    }
+
+	    /* FALL THROUGH */
+
+	case TRIE_next_fail: /* we failed - try next alterative */
+
+	    if ( ST.accepted == 1 ) {
+		/* only one choice left - just continue */
+		DEBUG_EXECUTE_r({
+		    reg_trie_data * const trie
+			= (reg_trie_data*)rex->data->data[ ARG(ST.me) ];
+		    SV ** const tmp = RX_DEBUG(reginfo->prog)
+				    ? av_fetch( trie->words, ST.accept_buff[ 0 ].wordnum-1, 0 )
+				    : NULL;
+		    PerlIO_printf( Perl_debug_log,
+			"%*s  %sonly one match left: #%d <%s>%s\n",
+			REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
+			ST.accept_buff[ 0 ].wordnum,
+			tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr",
+			PL_colors[5] );
+		});
+		PL_reginput = (char *)ST.accept_buff[ 0 ].endpos;
+		/* in this case we free tmps/leave before we call regmatch
+		   as we wont be using accept_buff again. */
+		FREETMPS;
+		LEAVE;
+		locinput = PL_reginput;
+		nextchr = UCHARAT(locinput);
+		scan = ST.B;
+		continue; /* execute rest of RE */
+	    }
+
+	    if (!ST.accepted-- ) {
+		FREETMPS;
+		LEAVE;
+		sayNO;
+	    }
+
 	    /*
-	       There was at least one accepting state that we
-	       transitioned through. Presumably the number of accepting
-	       states is going to be low, typically one or two. So we
-	       simply scan through to find the one with lowest wordnum.
-	       Once we find it, we swap the last state into its place
-	       and decrement the size. We then try to match the rest of
-	       the pattern at the point where the word ends, if we
-	       succeed then we end the loop, otherwise the loop
-	       eventually terminates once all of the accepting states
-	       have been tried.
-	    */
+	       There are at least two accepting states left.  Presumably
+	       the number of accepting states is going to be low,
+	       typically two. So we simply scan through to find the one
+	       with lowest wordnum.  Once we find it, we swap the last
+	       state into its place and decrement the size. We then try to
+	       match the rest of the pattern at the point where the word
+	       ends. If we succeed, control just continues along the
+	       regex; if we fail we return here to try the next accepting
+	       state
+	     */
 
-		if ( st->u.trie.accepted == 1 ) {
-		    DEBUG_EXECUTE_r({
-			SV ** const tmp = RX_DEBUG(reginfo->prog)
-			                ? av_fetch( trie->words, st->u.trie.accept_buff[ 0 ].wordnum-1, 0 )
-			                : NULL;
+	    {
+		U32 best = 0;
+		U32 cur;
+		for( cur = 1 ; cur <= ST.accepted ; cur++ ) {
+		    DEBUG_TRIE_EXECUTE_r(
 			PerlIO_printf( Perl_debug_log,
-			    "%*s  %sonly one match : #%d <%s>%s\n",
-			    REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
-        		    st->u.trie.accept_buff[ 0 ].wordnum,
-        		    tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr",
-        		    PL_colors[5] );
-		    });
-		    PL_reginput = (char *)st->u.trie.accept_buff[ 0 ].endpos;
-		    /* in this case we free tmps/leave before we call regmatch
-		       as we wont be using accept_buff again. */
-		    FREETMPS;
-		    LEAVE;
-		    /* do we need this? why dont we just do a break? */
-		    REGMATCH(scan + NEXT_OFF(scan), TRIE1);
-		    /*** all unsaved local vars undefined at this point */
-		} else {
-                    DEBUG_EXECUTE_r(
-                        PerlIO_printf( Perl_debug_log,"%*s  %sgot %"IVdf" possible matches%s\n",
-                            REPORT_CODE_OFF + PL_regindent * 2, "", PL_colors[4], (IV)st->u.trie.accepted,
-                            PL_colors[5] );
-                    );
-		    while ( !result && st->u.trie.accepted-- ) {
-			U32 best = 0;
-			U32 cur;
-			for( cur = 1 ; cur <= st->u.trie.accepted ; cur++ ) {
-			    DEBUG_TRIE_EXECUTE_r(
-			        PerlIO_printf( Perl_debug_log,
-			            "%*s  %sgot %"IVdf" (%d) as best, looking at %"IVdf" (%d)%s\n",
-			            REPORT_CODE_OFF + PL_regindent * 2, "", PL_colors[4],
-			            (IV)best, st->u.trie.accept_buff[ best ].wordnum, (IV)cur,
-			            st->u.trie.accept_buff[ cur ].wordnum, PL_colors[5] );
-			    );
+			    "%*s  %sgot %"IVdf" (%d) as best, looking at %"IVdf" (%d)%s\n",
+			    REPORT_CODE_OFF + PL_regindent * 2, "", PL_colors[4],
+			    (IV)best, ST.accept_buff[ best ].wordnum, (IV)cur,
+			    ST.accept_buff[ cur ].wordnum, PL_colors[5] );
+		    );
 
-			    if (st->u.trie.accept_buff[cur].wordnum <
-				    st->u.trie.accept_buff[best].wordnum)
-				best = cur;
-			}
-			DEBUG_EXECUTE_r({
-			    reg_trie_data * const trie = (reg_trie_data*)
-					    rex->data->data[ARG(scan)];
-			    SV ** const tmp = RX_DEBUG(reginfo->prog)
-			                ? av_fetch( trie->words, st->u.trie.accept_buff[ best ].wordnum - 1, 0 )
-			                : NULL;
-    			    PerlIO_printf( Perl_debug_log, "%*s  %strying alternation #%d <%s> at node #%d %s\n",
-    			        REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
-    			        st->u.trie.accept_buff[best].wordnum,
-        		        tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr", REG_NODE_NUM(scan),
-        		        PL_colors[5] );
-			});
-			if ( best<st->u.trie.accepted ) {
-			    reg_trie_accepted tmp = st->u.trie.accept_buff[ best ];
-			    st->u.trie.accept_buff[ best ] = st->u.trie.accept_buff[ st->u.trie.accepted ];
-			    st->u.trie.accept_buff[ st->u.trie.accepted ] = tmp;
-			    best = st->u.trie.accepted;
-			}
-			PL_reginput = (char *)st->u.trie.accept_buff[ best ].endpos;
+		    if (ST.accept_buff[cur].wordnum <
+			    ST.accept_buff[best].wordnum)
+			best = cur;
+		}
 
-                        /* 
-                           as far as I can tell we only need the SAVETMPS/FREETMPS 
-                           for re's with EVAL in them but I'm leaving them in for 
-                           all until I can be sure.
-                         */
-			SAVETMPS;
-			REGMATCH(scan + NEXT_OFF(scan), TRIE2);
-			/*** all unsaved local vars undefined at this point */
-			FREETMPS;
-		    }
-		    FREETMPS;
-		    LEAVE;
+		DEBUG_EXECUTE_r({
+		    reg_trie_data * const trie
+			= (reg_trie_data*)rex->data->data[ ARG(ST.me) ];
+		    SV ** const tmp = RX_DEBUG(reginfo->prog)
+				? av_fetch( trie->words, ST.accept_buff[ best ].wordnum - 1, 0 )
+				: NULL;
+		    PerlIO_printf( Perl_debug_log, "%*s  %strying alternation #%d <%s> at node #%d %s\n",
+			REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
+			ST.accept_buff[best].wordnum,
+			tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr", REG_NODE_NUM(scan),
+			PL_colors[5] );
+		});
+
+		if ( best<ST.accepted ) {
+		    reg_trie_accepted tmp = ST.accept_buff[ best ];
+		    ST.accept_buff[ best ] = ST.accept_buff[ ST.accepted ];
+		    ST.accept_buff[ ST.accepted ] = tmp;
+		    best = ST.accepted;
 		}
-		
-		if (result) {
-		    sayYES;
-		} else {
-		    sayNO;
-		}
-	    }}
-	    /* unreached codepoint */
+		PL_reginput = (char *)ST.accept_buff[ best ].endpos;
+	    }
+	    PUSH_STATE_GOTO(TRIE_next, ST.B);
+	    /* NOTREACHED */
+
+#undef  ST
+
 	case EXACT: {
 	    char *s = STRING(scan);
 	    st->ln = STR_LEN(scan);
@@ -4685,12 +4696,13 @@ yes_final:
 	switch (st->resume_state) {
 	case IFMATCH_A:
 	case CURLYM_A:
-	case BRANCH_next:
 	case EVAL_A:
 	    state_num = st->resume_state;
 	    goto reenter_switch;
 
 	case CURLYM_B:
+	case BRANCH_next:
+	case TRIE_next:
 	default:
 	    Perl_croak(aTHX_ "unexpected yes resume state");
 	}
@@ -4723,10 +4735,6 @@ yes:
 	nextchr = UCHARAT(locinput);
 
 	switch (st->resume_state) {
-	case resume_TRIE1:
-	    goto resume_point_TRIE1;
-	case resume_TRIE2:
-	    goto resume_point_TRIE2;
 	case resume_CURLYX:
 	    goto resume_point_CURLYX;
 	case resume_WHILEM1:
@@ -4750,6 +4758,7 @@ yes:
 	case resume_PLUS4:
 	    goto resume_point_PLUS4;
 
+	case TRIE_next:
 	case CURLYM_A:
 	case CURLYM_B:
 	case EVAL_A:
@@ -4794,11 +4803,6 @@ do_no:
 	nextchr = UCHARAT(locinput);
 
 	switch (st->resume_state) {
-	case resume_TRIE1:
-	    goto resume_point_TRIE1;
-	case resume_TRIE2:
-	    goto resume_point_TRIE2;
-
 	case resume_CURLYX:
 	    goto resume_point_CURLYX;
 	case resume_WHILEM1:
@@ -4814,6 +4818,7 @@ do_no:
 	case resume_WHILEM6:
 	    goto resume_point_WHILEM6;
 
+	case TRIE_next:
 	case EVAL_A:
 	case BRANCH_next:
 	case CURLYM_A:
