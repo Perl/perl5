@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 20 $
+#  $Revision: 21 $
 #  $Author: mhx $
-#  $Date: 2006/05/28 19:36:23 +0200 $
+#  $Date: 2006/06/23 15:55:22 +0200 $
 #
 ################################################################################
 #
@@ -26,18 +26,13 @@ unless ($ENV{'PERL_CORE'}) {
   $ENV{'PERL_CORE'} = 1 if grep { $_ eq 'PERL_CORE=1' } @ARGV;
 }
 
-if ($ENV{'PERL_CORE'}) {
-  # Pods will be built by installman.
-  @moreopts = ( MAN3PODS => {} );
-}
-else {
-  # Devel::PPPort is in the core since 5.7.3
-  @moreopts = ( INSTALLDIRS => ($] >= 5.007003 ? 'perl' : 'site') );
-}
-
 @ARGV = map { /^--with-(.*)/ && ++$opt{$1} ? () : $_ } @ARGV;
 
-%PL_FILES = ( 'ppport_h.PL'  => 'ppport.h' ),
+%PL_FILES = (
+  'ppport_h.PL'  => 'ppport.h',
+  'PPPort_pm.PL' => 'PPPort.pm',
+  'PPPort_xs.PL' => 'PPPort.xs',
+);
 
 @C_FILES  = qw{ module2.c module3.c };
 
@@ -50,6 +45,16 @@ if ($opt{'apicheck'}) {
   push @C_FILES, qw{ apicheck.c };
   push @clean,   qw{ apicheck.c apicheck.i };
   $depend{'apicheck.i'} = 'ppport.h';
+}
+
+if ($ENV{'PERL_CORE'}) {
+  # Pods will be built by installman.
+  push @moreopts, MAN3PODS => {};
+  push @clean, qw( PPPort.pm PPPort.xs );
+}
+else {
+  # Devel::PPPort is in the core since 5.7.3
+  push @moreopts, INSTALLDIRS => ($] >= 5.007003 ? 'perl' : 'site');
 }
 
 if (eval $ExtUtils::MakeMaker::VERSION >= 6) {

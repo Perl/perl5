@@ -1,3 +1,9 @@
+3.08_05 - 2006-06-23
+
+    * when in the core, generate PPPort.pm and PPPort.xs
+      automatically
+    * PPPort.pm can now be loaded by miniperl
+
 3.08_04 - 2006-05-29
 
     * update API info
