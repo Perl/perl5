@@ -305,6 +305,15 @@ C<Configure> to enable it. This would allow Unix users to test that the
 export list is correct, and to build a perl that does not pollute the global
 namespace with private symbols.
 
+=head2 Cross-compile support
+
+Currently C<Configure> understands C<-Dusecrosscompile> option. This option
+arranges for building C<miniperl> for TARGET machine, so this C<miniperl> is
+assumed then to be copied to TARGET machine and used as a replacement of full
+C<perl> executable.
+
+This should be done litle differently. Namely C<miniperl> should be built for
+HOST and then full C<perl> with extensions should be compiled for TARGET.
 
 
 
@@ -409,13 +418,10 @@ custom allocates so it would both use less memory and less CPU to allocate
 the various OP structures from arenas. The SV arena code can probably be
 re-used for this.
 
-=head2 Merge the win32 and wince codebases
+=head2 Improve win32/wince.c
 
-Currently, code used to build Perl on Win32 and WinCE are maintained
-separately, but use much of the same code.  We currently have a very high
-probability of the code diverging when it shouldn't.  Ideally, the code
-for the two systems should be merged so that common code between the two
-could be shared.
+Currently, numerous functions look virtually, if not completely,
+identical in both C<win32/wince.c> and C<win32/win32.c> files, which can't be good.
 
 
 =head1 Tasks that need a knowledge of XS
