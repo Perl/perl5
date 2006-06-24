@@ -3388,7 +3388,7 @@ reStudy:
 		if (OP(first) == IFMATCH) {
 		    first = NEXTOPER(first);
 		    first += EXTRA_STEP_2ARGS;
-		} else  /*xxx possible optimisation for /(?=)/*/
+		} else  /* XXX possible optimisation for /(?=)/  */
 		    first = NEXTOPER(first);
 	}
 
