@@ -5,7 +5,7 @@ perlreguts - Description of the Perl regular expression engine.
 =head1 DESCRIPTION
 
 This document is an attempt to shine some light on the guts of the regex
-engine and how it works. The regex engine represents a signifigant chunk
+engine and how it works. The regex engine represents a significant chunk
 of the perl codebase, but is relatively poorly understood. This document
 is a meagre attempt at addressing this situation. It is derived from the
 author's experience, comments in the source code, other papers on the
@@ -43,7 +43,7 @@ specified in a mini-language, and then applies those constraints to a
 target string, and determines whether or not the string satisfies the
 constraints. See L<perlre> for a full definition of the language.
 
-So  in less grandiose terms the first part of the job is to turn a pattern into
+So in less grandiose terms the first part of the job is to turn a pattern into
 something the computer can efficiently use to find the matching point in
 the string, and the second part is performing the search itself.
 
@@ -65,7 +65,7 @@ parsing technology).>
 
 The term "railroad normal form" is a bit esoteric, with "syntax
 diagram/charts", or "railroad diagram/charts" being more common terms.
-Nevertheless it provides a useful mental image of a regex program: Each
+Nevertheless it provides a useful mental image of a regex program: each
 node can be thought of as a unit of track, with a single entry and in
 most cases a single exit point (there are pieces of track that fork, but
 statistically not many), and the whole forms a layout with a
@@ -93,9 +93,9 @@ following chart:
                        [end]
 
 The truth of the matter is that perl's regular expressions these days are
-much more complex than this kind of structure, but visualizing it this way
-can help when trying to get your bearings, and it pretty closely with the
-current implementation.
+much more complex than this kind of structure, but visualising it this way
+can help when trying to get your bearings, and it matches the
+current implementation pretty closely.
 
 To be more precise, we will say that a regex program is an encoding
 of a graph. Each node in the graph corresponds to part of
@@ -106,7 +106,7 @@ perl source, we will call the nodes in a regex program "regops".
 
 The program is represented by an array of C<regnode> structures, one or
 more of which represent a single regop of the program. Struct
-C<regnode> is the smallest struct needed and has a field structure which is
+C<regnode> is the smallest struct needed, and has a field structure which is
 shared with all the other larger structures.
 
 The "next" pointers of all regops except C<BRANCH> implement concatenation;
@@ -119,7 +119,7 @@ The operand of some types of regop is a literal string; for others,
 it is a regop leading into a sub-program.  In particular, the operand
 of a C<BRANCH> node is the first regop of the branch.
 
-B<NOTE>: As the railroad metaphor suggests this is B<not> a tree
+B<NOTE>: As the railroad metaphor suggests, this is B<not> a tree
 structure:  the tail of the branch connects to the thing following the
 set of C<BRANCH>es.  It is a like a single line of railway track that
 splits as it goes into a station or railway yard and rejoins as it comes
@@ -137,9 +137,9 @@ The base structure of a regop is defined in F<regexp.h> as follows:
 
 Other larger C<regnode>-like structures are defined in F<regcomp.h>. They
 are almost like subclasses in that they have the same fields as
-regnode, with possibly additional fields following in
+C<regnode>, with possibly additional fields following in
 the structure, and in some cases the specific meaning (and name)
-of some of base fields are overriden. The following is a more
+of some of base fields are overridden. The following is a more
 complete description.
 
 =over 4
@@ -197,10 +197,10 @@ of distinct regops is restricted to 256, with about a quarter already
 used.
 
 A set of macros makes accessing the fields
-easier and more consistent. These include C<OP()> which is used to determine
-the type of a C<regnode>-like structure, C<NEXT_OFF()> which is the offset to
-the next node (more on this later), C<ARG()>, C<ARG1()>, C<ARG2()>, C<ARG_SET()>,
-and equivelents for reading and setting the arguments, C<STR_LEN()>,
+easier and more consistent. These include C<OP()>, which is used to determine
+the type of a C<regnode>-like structure; C<NEXT_OFF()>, which is the offset to
+the next node (more on this later); C<ARG()>, C<ARG1()>, C<ARG2()>, C<ARG_SET()>,
+and equivalents for reading and setting the arguments; and C<STR_LEN()>,
 C<STRING()> and C<OPERAND()> for manipulating strings and regop bearing
 types.
 
@@ -275,7 +275,7 @@ Where these steps occur in the actual execution of a perl program is
 determined by whether the pattern involves interpolating any string
 variables. If interpolation occurs, then compilation happens at run time. If it
 does not, then compilation is performed at compile time. (The C</o> modifier changes this,
-as does C<qr//> to a certain extent). The engine doesn't really care that
+as does C<qr//> to a certain extent.) The engine doesn't really care that
 much.
 
 =head2 Compilation
@@ -283,18 +283,18 @@ much.
 This code resides primarily in F<regcomp.c>, along with the header files
 F<regcomp.h>, F<regexp.h> and F<regnodes.h>.
 
-Compilation starts with C<pregcomp()>, which is mostly an initialization
-wrapper which farms out two other routines for the heavy lifting. The
-first being C<reg()> which is the start point for parsing, and
-C<study_chunk()> which is responsible for optimisation.
+Compilation starts with C<pregcomp()>, which is mostly an initialisation
+wrapper which farms work out to two other routines for the heavy lifting: the
+first is C<reg()>, which is the start point for parsing; the second,
+C<study_chunk()>, is responsible for optimisation.
 
-Initialization in C<pregcomp()> mostly involves the creation and data
-filling of a special structure C<RExC_state_t>, (defined in F<regcomp.c>).
-Almost all internally used routines in F<regcomp.h> take a pointer to one
+Initialisation in C<pregcomp()> mostly involves the creation and data-filling
+of a special structure, C<RExC_state_t> (defined in F<regcomp.c>).
+Almost all internally-used routines in F<regcomp.h> take a pointer to one
 of these structures as their first argument, with the name C<pRExC_state>.
 This structure is used to store the compilation state and contains many
 fields. Likewise there are many macros which operate on this
-variable. Anything that looks like C<RExC_xxxx> is a macro that operates on
+variable: anything that looks like C<RExC_xxxx> is a macro that operates on
 this pointer/structure.
 
 =head3 Parsing for size
@@ -305,11 +305,11 @@ used to determine whether long jumps will be required in the program.
 
 This stage is controlled by the macro C<SIZE_ONLY> being set.
 
-The parse procedes pretty much exactly as it does during the
+The parse proceeds pretty much exactly as it does during the
 construction phase, except that most routines are short-circuited to
 change the size field C<RExC_size> and not do anything else.
 
-=head3 Parsing for construcution
+=head3 Parsing for construction
 
 Once the size of the program has been determined, the pattern is parsed
 again, but this time for real. Now C<SIZE_ONLY> will be false, and the
@@ -318,7 +318,7 @@ actual construction can occur.
 C<reg()> is the start of the parse process. It is responsible for
 parsing an arbitrary chunk of pattern up to either the end of the
 string, or the first closing parenthesis it encounters in the pattern.
-This means it can be used to parse the toplevel regex, or any section
+This means it can be used to parse the top-level regex, or any section
 inside of a grouping parenthesis. It also handles the "special parens"
 that perl's regexes have. For instance when parsing C</x(?:foo)y/> C<reg()>
 will at one point be called to parse from the "?" symbol up to and
@@ -346,7 +346,7 @@ offsets as appropriate. C<regtail> is used to make this easier.
 
 A subtlety of the parsing process means that a regex like C</foo/> is
 originally parsed into an alternation with a single branch. It is only
-afterwards that the optimizer converts single branch alternations into the
+afterwards that the optimiser converts single branch alternations into the
 simpler form.
 
 =head3 Parse Call Graph and a Grammar
@@ -358,13 +358,13 @@ The call graph looks like this:
             regpiece()           # parse a pattern followed by a quantifier
                 regatom()        # parse a simple pattern
                     regclass()   #   used to handle a class
-                    reg()        #   used to handle a parenthesized subpattern
+                    reg()        #   used to handle a parenthesised subpattern
                     ....
             ...
             regtail()            # finish off the branch
         ...
         regtail()                # finish off the branch sequence. Tie each
-                                 # branches tail to the tail of the sequence
+                                 # branch's tail to the tail of the sequence
                                  # (NEW) In Debug mode this is
                                  # regtail_study().
 
@@ -384,22 +384,22 @@ A grammar form might be something like this:
 
 =head3 Debug Output
 
-In bleadperl you can C<< use re Debug => 'PARSE'; >> to see some trace
+In the 5.9.x development version of perl you can C<< use re Debug => 'PARSE'; >> to see some trace
 information about the parse process. We will start with some simple
 patterns and build up to more complex patterns.
 
 So when we parse C</foo/> we see something like the following table. The
-left shows whats being parsed, the number indicates where the next regop
+left shows what is being parsed, and the number indicates where the next regop
 would go. The stuff on the right is the trace output of the graph. The
 names are chosen to be short to make it less dense on the screen. 'tsdy'
 is a special form of C<regtail()> which does some extra analysis.
 
- >foo<             1            reg
-                                  brnc
-                                    piec
-                                      atom
- ><                4              tsdy~ EXACT <foo> (EXACT) (1)
-                                      ~ attach to END (3) offset to 2
+ >foo<             1    reg
+                          brnc
+                            piec
+                              atom
+ ><                4      tsdy~ EXACT <foo> (EXACT) (1)
+                              ~ attach to END (3) offset to 2
 
 The resulting program then looks like:
 
@@ -414,18 +414,18 @@ we have successfully matched. The number on the left indicates the position of
 the regop in the regnode array.
 
 Now let's try a harder pattern. We will add a quantifier, so now we have the pattern
-C</foo+/>. We will see that C<regbranch()> calls C<regpiece()> regpiece twice.
+C</foo+/>. We will see that C<regbranch()> calls C<regpiece()> twice.
 
- >foo+<            1            reg
-                                  brnc
-                                    piec
-                                      atom
- >o+<              3                piec
-                                      atom
- ><                6                tail~ EXACT <fo> (1)
-                   7              tsdy~ EXACT <fo> (EXACT) (1)
-                                      ~ PLUS (END) (3)
-                                      ~ attach to END (6) offset to 3
+ >foo+<            1    reg
+                          brnc
+                            piec
+                              atom
+ >o+<              3        piec
+                              atom
+ ><                6        tail~ EXACT <fo> (1)
+                   7      tsdy~ EXACT <fo> (EXACT) (1)
+                              ~ PLUS (END) (3)
+                              ~ attach to END (6) offset to 3
 
 And we end up with the program:
 
@@ -435,83 +435,83 @@ And we end up with the program:
    6: END(0)
 
 Now we have a special case. The C<EXACT> regop has a C<regnext> of 0. This is
-because if it matches it should try to match itself again. The PLUS regop
+because if it matches it should try to match itself again. The C<PLUS> regop
 handles the actual failure of the C<EXACT> regop and acts appropriately (going
-to regnode 6 if the C<EXACT> matched at least once, or failing if it didn't.)
+to regnode 6 if the C<EXACT> matched at least once, or failing if it didn't).
 
 Now for something much more complex: C</x(?:foo*|b[a][rR])(foo|bar)$/>
 
- >x(?:foo*|b...    1            reg
-                                  brnc
+ >x(?:foo*|b...    1    reg
+                          brnc
+                            piec
+                              atom
+ >(?:foo*|b[...    3        piec
+                              atom
+ >?:foo*|b[a...                 reg
+ >foo*|b[a][...                   brnc
                                     piec
                                       atom
- >(?:foo*|b[...    3                piec
+ >o*|b[a][rR...    5                piec
                                       atom
- >?:foo*|b[a...                         reg
- >foo*|b[a][...                           brnc
-                                            piec
-                                              atom
- >o*|b[a][rR...    5                        piec
-                                              atom
- >|b[a][rR])...    8                        tail~ EXACT <fo> (3)
- >b[a][rR])(...    9                      brnc
-                  10                        piec
-                                              atom
- >[a][rR])(f...   12                        piec
-                                              atom
- >a][rR])(fo...                                 clas
- >[rR])(foo|...   14                        tail~ EXACT <b> (10)
-                                            piec
-                                              atom
- >rR])(foo|b...                                 clas
- >)(foo|bar)...   25                        tail~ EXACT <a> (12)
-                                          tail~ BRANCH (3)
-                  26                      tsdy~ BRANCH (END) (9)
-                                              ~ attach to TAIL (25) offset to 16
-                                          tsdy~ EXACT <fo> (EXACT) (4)
-                                              ~ STAR (END) (6)
-                                              ~ attach to TAIL (25) offset to 19
-                                          tsdy~ EXACT <b> (EXACT) (10)
-                                              ~ EXACT <a> (EXACT) (12)
-                                              ~ ANYOF[Rr] (END) (14)
-                                              ~ attach to TAIL (25) offset to 11
- >(foo|bar)$<                       tail~ EXACT <x> (1)
+ >|b[a][rR])...    8                tail~ EXACT <fo> (3)
+ >b[a][rR])(...    9              brnc
+                  10                piec
+                                      atom
+ >[a][rR])(f...   12                piec
+                                      atom
+ >a][rR])(fo...                         clas
+ >[rR])(foo|...   14                tail~ EXACT <b> (10)
                                     piec
                                       atom
- >foo|bar)$<                            reg
-                  28                      brnc
-                                            piec
-                                              atom
- >|bar)$<         31                      tail~ OPEN1 (26)
- >bar)$<                                  brnc
-                  32                        piec
-                                              atom
- >)$<             34                      tail~ BRANCH (28)
-                  36                      tsdy~ BRANCH (END) (31)
-                                              ~ attach to CLOSE1 (34) offset to 3
-                                          tsdy~ EXACT <foo> (EXACT) (29)
-                                              ~ attach to CLOSE1 (34) offset to 5
-                                          tsdy~ EXACT <bar> (EXACT) (32)
-                                              ~ attach to CLOSE1 (34) offset to 2
- >$<                                tail~ BRANCH (3)
-                                        ~ BRANCH (9)
-                                        ~ TAIL (25)
+ >rR])(foo|b...                         clas
+ >)(foo|bar)...   25                tail~ EXACT <a> (12)
+                                  tail~ BRANCH (3)
+                  26              tsdy~ BRANCH (END) (9)
+                                      ~ attach to TAIL (25) offset to 16
+                                  tsdy~ EXACT <fo> (EXACT) (4)
+                                      ~ STAR (END) (6)
+                                      ~ attach to TAIL (25) offset to 19
+                                  tsdy~ EXACT <b> (EXACT) (10)
+                                      ~ EXACT <a> (EXACT) (12)
+                                      ~ ANYOF[Rr] (END) (14)
+                                      ~ attach to TAIL (25) offset to 11
+ >(foo|bar)$<               tail~ EXACT <x> (1)
+                            piec
+                              atom
+ >foo|bar)$<                    reg
+                  28              brnc
                                     piec
                                       atom
- ><               37                tail~ OPEN1 (26)
-                                        ~ BRANCH (28)
-                                        ~ BRANCH (31)
-                                        ~ CLOSE1 (34)
-                  38              tsdy~ EXACT <x> (EXACT) (1)
-                                      ~ BRANCH (END) (3)
-                                      ~ BRANCH (END) (9)
-                                      ~ TAIL (END) (25)
-                                      ~ OPEN1 (END) (26)
-                                      ~ BRANCH (END) (28)
-                                      ~ BRANCH (END) (31)
-                                      ~ CLOSE1 (END) (34)
-                                      ~ EOL (END) (36)
-                                      ~ attach to END (37) offset to 1<div></div>
+ >|bar)$<         31              tail~ OPEN1 (26)
+ >bar)$<                          brnc
+                  32                piec
+                                      atom
+ >)$<             34              tail~ BRANCH (28)
+                  36              tsdy~ BRANCH (END) (31)
+                                      ~ attach to CLOSE1 (34) offset to 3
+                                  tsdy~ EXACT <foo> (EXACT) (29)
+                                      ~ attach to CLOSE1 (34) offset to 5
+                                  tsdy~ EXACT <bar> (EXACT) (32)
+                                      ~ attach to CLOSE1 (34) offset to 2
+ >$<                        tail~ BRANCH (3)
+                                ~ BRANCH (9)
+                                ~ TAIL (25)
+                            piec
+                              atom
+ ><               37        tail~ OPEN1 (26)
+                                ~ BRANCH (28)
+                                ~ BRANCH (31)
+                                ~ CLOSE1 (34)
+                  38      tsdy~ EXACT <x> (EXACT) (1)
+                              ~ BRANCH (END) (3)
+                              ~ BRANCH (END) (9)
+                              ~ TAIL (END) (25)
+                              ~ OPEN1 (END) (26)
+                              ~ BRANCH (END) (28)
+                              ~ BRANCH (END) (31)
+                              ~ CLOSE1 (END) (34)
+                              ~ EOL (END) (36)
+                              ~ attach to END (37) offset to 1
 
 Resulting in the program
 
@@ -559,13 +559,13 @@ Consider a situation like the following pattern.
 
 The C<(a|b)*> part can match at every char in the string, and then fail
 every time because there is no C<z> in the string. So obviously we can
-avoid using the regex engine unless there is a 'z' in the string.
+avoid using the regex engine unless there is a C<z> in the string.
 Likewise in a pattern like:
 
    /foo(\w+)bar/
 
 In this case we know that the string must contain a C<foo> which must be
-followed by C<bar>. We can use Fast Boyer-More matching as implemented
+followed by C<bar>. We can use Fast Boyer-Moore matching as implemented
 in C<fbm_instr()> to find the location of these strings. If they don't exist
 then we don't need to resort to the much more expensive regex engine.
 Even better, if they do exist then we can use their positions to
@@ -575,24 +575,32 @@ if the entire pattern matches.
 There are various aspects of the pattern that can be used to facilitate
 optimisations along these lines:
 
-    * anchored fixed strings
-    * floating fixed strings
-    * minimum and maximum length requirements
-    * start class
-    * Beginning/End of line positions
+=over 5
+
+=item * anchored fixed strings
+
+=item * floating fixed strings
+
+=item * minimum and maximum length requirements
+
+=item * start class
+
+=item * Beginning/End of line positions
+
+=back
 
 Another form of optimisation that can occur is post-parse "peep-hole"
 optimisations, where inefficient constructs are replaced by
 more efficient constructs. An example of this are C<TAIL> regops which are used
 during parsing to mark the end of branches and the end of groups. These
-regops are used as place holders during construction and "always match"
+regops are used as place-holders during construction and "always match"
 so they can be "optimised away" by making the things that point to the
-TAIL point to thing that the C<TAIL> points to, thus "skipping" the node.
+C<TAIL> point to thing that the C<TAIL> points to, thus "skipping" the node.
 
 Another optimisation that can occur is that of "C<EXACT> merging" which is
 where two consecutive C<EXACT> nodes are merged into a single
-regop. An even more agressive form of this is that a branch
-sequence of the form CEXACT BRANCH ... EXACT> can be converted into a
+regop. An even more aggressive form of this is that a branch
+sequence of the form C<EXACT BRANCH ... EXACT> can be converted into a
 C<TRIE-EXACT> regop.
 
 All of this occurs in the routine C<study_chunk()> which uses a special
@@ -615,50 +623,50 @@ interpreter.
 The two entry points are C<re_intuit_start()> and C<pregexec()>. These routines
 have a somewhat incestuous relationship with overlap between their functions,
 and C<pregexec()> may even call C<re_intuit_start()> on its own. Nevertheless
-the perl source code may call into either, or both.
+other parts of the the perl source code may call into either, or both.
 
 Execution of the interpreter itself used to be recursive. Due to the
-efforts of Dave Mitchell in blead perl, it is now iterative. Now an
+efforts of Dave Mitchell in the 5.9.x development track, it is now iterative. Now an
 internal stack is maintained on the heap and the routine is fully
 iterative. This can make it tricky as the code is quite conservative
-about what state it stores which means that two consecutive lines in the
+about what state it stores, with the result that that two consecutive lines in the
 code can actually be running in totally different contexts due to the
 simulated recursion.
 
 =head3 Start position and no-match optimisations
 
-C<re_intuit_start()> is responsible for handling start points and no match
+C<re_intuit_start()> is responsible for handling start points and no-match
 optimisations as determined by the results of the analysis done by
 C<study_chunk()> (and described in L<Peep-hole Optimisation and Analysis>).
 
-The basic structure of this routine is to try to find the start and/or
-end points of where the pattern could match, and to ensure that the string
-is long enough to match the pattern. It tries to use more efficent
-methods over less efficient methods and may involve considerable cross
-checking of constraints to find the place in the string that matches.
+The basic structure of this routine is to try to find the start- and/or
+end-points of where the pattern could match, and to ensure that the string
+is long enough to match the pattern. It tries to use more efficient
+methods over less efficient methods and may involve considerable
+cross-checking of constraints to find the place in the string that matches.
 For instance it may try to determine that a given fixed string must be
 not only present but a certain number of chars before the end of the
 string, or whatever.
 
 It calls several other routines, such as C<fbm_instr()> which does
-"Fast Boyer More" matching and C<find_byclass()> which is responsible for
+Fast Boyer Moore matching and C<find_byclass()> which is responsible for
 finding the start using the first mandatory regop in the program.
 
-When the optimisation criteria have been satisfied C<reg_try()> is called
+When the optimisation criteria have been satisfied, C<reg_try()> is called
 to perform the match.
 
 =head3 Program execution
 
 C<pregexec()> is the main entry point for running a regex. It contains
-support for initializing the regex interpreters state, running
-C<re_intuit_start()> if needed, and running the intepreter on the string
-from various start positions as needed. When its necessary to use
+support for initialising the regex interpreter's state, running
+C<re_intuit_start()> if needed, and running the interpreter on the string
+from various start positions as needed. When it is necessary to use
 the regex interpreter C<pregexec()> calls C<regtry()>.
 
 C<regtry()> is the entry point into the regex interpreter. It expects
 as arguments a pointer to a C<regmatch_info> structure and a pointer to
 a string.  It returns an integer 1 for success and a 0 for failure.
-It is basically a setup wrapper around C<regmatch()>.
+It is basically a set-up wrapper around C<regmatch()>.
 
 C<regmatch> is the main "recursive loop" of the interpreter. It is
 basically a giant switch statement that executes the regops based on
@@ -667,18 +675,26 @@ the bulk are inline code.
 
 =head1 MISCELLANEOUS
 
-=head2 UNICODE and Localization Support
+=head2 Unicode and Localisation Support
+
+When dealing with strings containing characters that cannot be represented
+using an eight-bit character set, perl uses an internal representation 
+that is a permissive version of Unicode's UTF-8 encoding[2]. This uses single
+bytes to represent characters from the ASCII character set, and sequences 
+of two or more bytes for all other characters. (See L<perlunitut>
+for more information about the relationship between UTF-8 and perl's
+encoding, utf8 -- the difference isn't important for this discussion.)
 
 No matter how you look at it, Unicode support is going to be a pain in a
 regex engine. Tricks that might be fine when you have 256 possible
 characters often won't scale to handle the size of the UTF-8 character
 set.  Things you can take for granted with ASCII may not be true with
-unicode. For instance, in ASCII, it is safe to assume that
+Unicode. For instance, in ASCII, it is safe to assume that
 C<sizeof(char1) == sizeof(char2)>, but in UTF-8 it isn't. Unicode case folding is
 vastly more complex than the simple rules of ASCII, and even when not
-using Unicode but only localized single byte encodings, things can get
-tricky (for example, GERMAN-SHARP-ESS should match 'ss' in localized case
-insensitive matching).
+using Unicode but only localised single byte encodings, things can get
+tricky (for example, GERMAN-SHARP-ESS should match 'SS' in localised
+case-insensitive matching).
 
 Making things worse is that UTF-8 support was a later addition to the
 regex engine (as it was to perl) and this necessarily  made things a lot
@@ -686,7 +702,7 @@ more complicated. Obviously it is easier to design a regex engine with
 Unicode support in mind from the beginning than it is to retrofit it to
 one that wasn't.
 
-Nearly all regops that involves looking at the input string have
+Nearly all regops that involve looking at the input string have
 two cases, one for UTF-8, and one not. In fact, it's often more complex
 than that, as the pattern may be UTF-8 as well.
 
@@ -723,9 +739,9 @@ tricky this can be:
     A sequence of valid UTF-8 bytes cannot be a subsequence of
     another valid sequence of UTF-8 bytes.
 
-=head3 Base Struct
+=head2 Base Struct
 
-regexp.h contains the base structure definition:
+F<regexp.h> contains the base structure definition:
 
     typedef struct regexp {
             I32 *startp;
@@ -742,7 +758,7 @@ regexp.h contains the base structure definition:
             U32 *offsets;           /* offset annotations 20001228 MJD */
             I32 sublen;             /* Length of string pointed by subbeg */
             I32 refcnt;
-            I32 minlen;             /* mininum possible length of $& */
+            I32 minlen;             /* minimum possible length of $& */
             I32 prelen;             /* length of precomp */
             U32 nparens;            /* number of parentheses */
             U32 lastparen;          /* last paren matched */
@@ -753,32 +769,49 @@ regexp.h contains the base structure definition:
     } regexp;
 
 C<program>, and C<data> are the primary fields of concern in terms of
-program structure. program is the actual array of nodes, and data is
+program structure. C<program> is the actual array of nodes, and C<data> is
 an array of "whatever", with each whatever being typed by letter, and
 freed or cloned as needed based on this type.  regops use the data
 array to store reference data that isn't convenient to store in the regop
-itself. It also means memory management code doesnt need to traverse the
-program to find pointers. So for instance if a regop needs a pointer, the
-normal procedure is use a regnode_arg1 store the data index in the ARG
+itself. It also means memory management code doesn't need to traverse the
+program to find pointers. So for instance, if a regop needs a pointer, the
+normal procedure is use a C<regnode_arg1> store the data index in the C<ARG>
 field and look it up from the data array.
 
-startp,endp,nparens,lasparen,lastcloseparen are used to manage capture
+=over 5
+
+=item -
+
+C<startp>, C<endp>, C<nparens>, C<lasparen>, and C<lastcloseparen> are used to manage capture
 buffers.
 
-subbeg and optional saved_copy are used during exectuion phase for managing
+=item -
+
+C<subbeg> and optional C<saved_copy> are used during the execution phase for managing
 replacements.
 
-offsets and precomp are used for debugging purposes.
+=item -
 
-And the rest are used for start point optimisations.
+C<offsets> and C<precomp> are used for debugging purposes.
 
+=item -
 
-=head2 Deallocation and Cloning
+The rest are used for start point optimisations.
+
+=back
+
+=head2 De-allocation and Cloning
 
 Any patch that adds data items to the regexp will need to include
-changes to sv.c (Perl_re_dup) and regcomp.c (pregfree). This
+changes to F<sv.c> (C<Perl_re_dup()>) and F<regcomp.c> (C<pregfree()>). This
 involves freeing or cloning items in the regexes data array based
-on the data items type.
+on the data item's type.
+
+=head1 SEE ALSO
+
+L<perlre>
+
+L<perlunitut>
 
 =head1 AUTHOR
 
@@ -788,12 +821,14 @@ With excerpts from Perl, and contributions and suggestions from
 Ronald J. Kimball, Dave Mitchell, Dominic Dunlop, Mark Jason Dominus,
 Stephen McCamant, and David Landgren.
 
-=head1 LICENSE
+=head1 LICENCE
 
 Same terms as Perl.
 
 =head1 REFERENCES
 
-[1] http://perl.plover.com/Rx/paper/
+[1] L<http://perl.plover.com/Rx/paper/>
+
+[2] L<http://www.unicode.org>
 
 =cut
