@@ -36,6 +36,14 @@ use Devel::PPPort;
 use strict;
 $^W = 1;
 
+package Devel::PPPort;
+use vars '@ISA';
+require DynaLoader;
+@ISA = qw(DynaLoader);
+bootstrap Devel::PPPort;
+
+package main;
+
 my $foo = 5;
 ok(&Devel::PPPort::TestSvUV_set($foo, 12345), 42);
 ok(&Devel::PPPort::TestSvPVX_const("mhx"), 43);

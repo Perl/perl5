@@ -36,6 +36,14 @@ use Devel::PPPort;
 use strict;
 $^W = 1;
 
+package Devel::PPPort;
+use vars '@ISA';
+require DynaLoader;
+@ISA = qw(DynaLoader);
+bootstrap Devel::PPPort;
+
+package main;
+
 BEGIN {
   if ($ENV{'SKIP_SLOW_TESTS'}) {
     for (1 .. 202) {

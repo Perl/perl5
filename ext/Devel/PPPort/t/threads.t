@@ -36,6 +36,14 @@ use Devel::PPPort;
 use strict;
 $^W = 1;
 
+package Devel::PPPort;
+use vars '@ISA';
+require DynaLoader;
+@ISA = qw(DynaLoader);
+bootstrap Devel::PPPort;
+
+package main;
+
 ok(&Devel::PPPort::no_THX_arg("42"), 43);
 eval { &Devel::PPPort::with_THX_arg("yes\n"); };
 ok($@ =~ /^yes/);

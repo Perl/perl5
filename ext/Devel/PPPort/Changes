@@ -1,3 +1,11 @@
+3.08_06 - 2006-06-25
+
+    * fix breakage on MSWin32, where generating XS files on
+      the fly doesn't seem to work the same way as under Linux
+      (thanks to Sadahiro Tomoyuki for providing a patch)
+    * load the shared files only when testing the module
+    * remove PPPort.xs from CPAN distribution
+
 3.08_05 - 2006-06-23
 
     * when in the core, generate PPPort.pm and PPPort.xs

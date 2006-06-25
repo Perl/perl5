@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 45 $
+#  $Revision: 46 $
 #  $Author: mhx $
-#  $Date: 2006/06/23 15:43:09 +0200 $
+#  $Date: 2006/06/25 03:41:11 +0200 $
 #
 ################################################################################
 #
@@ -335,9 +335,9 @@ __DATA__
 #
 ################################################################################
 #
-#  $Revision: 45 $
+#  $Revision: 46 $
 #  $Author: mhx $
-#  $Date: 2006/06/23 15:43:09 +0200 $
+#  $Date: 2006/06/25 03:41:11 +0200 $
 #
 ################################################################################
 #
@@ -496,17 +496,9 @@ See L<h2xs>, L<ppport.h>.
 package Devel::PPPort;
 
 use strict;
-use vars qw($VERSION @ISA $data);
+use vars qw($VERSION $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.08_05 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
-
-# we don't care if the XS cannot be loaded, it's only needed for tests
-
-eval {
-  require DynaLoader;
-  @ISA = qw(DynaLoader);
-  bootstrap Devel::PPPort;
-};
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.08_06 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 sub _init_data
 {

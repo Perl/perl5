@@ -36,6 +36,14 @@ use Devel::PPPort;
 use strict;
 $^W = 1;
 
+package Devel::PPPort;
+use vars '@ISA';
+require DynaLoader;
+@ISA = qw(DynaLoader);
+bootstrap Devel::PPPort;
+
+package main;
+
 ok(&Devel::PPPort::grok_number("42"), 42);
 ok(!defined(&Devel::PPPort::grok_number("A")));
 ok(&Devel::PPPort::grok_bin("10000001"), 129);

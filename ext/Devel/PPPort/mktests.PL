@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 22 $
+#  $Revision: 25 $
 #  $Author: mhx $
-#  $Date: 2006/05/21 23:15:21 +0200 $
+#  $Date: 2006/06/25 06:30:35 +0200 $
 #
 ################################################################################
 #
@@ -25,33 +25,42 @@ require "parts/ppptools.pl";
 
 my $template = do { local $/; <DATA> };
 
-my $file;
-for $file (glob 'parts/inc/*') {
-  my($testfile) = $file =~ /(\w+)$/;
-  $testfile = "t/$testfile.t";
+generate_tests();
 
-  my $spec = parse_partspec($file);
-  my $plan = 0;
+sub generate_tests
+{
+  my @tests;
+  my $file;
 
-  if (exists $spec->{tests}) {
-    exists $spec->{OPTIONS}{tests} &&
-    exists $spec->{OPTIONS}{tests}{plan}
-        or die "No plan for tests in $file\n";
-
-    print "generating $testfile\n";
-
-    my $tmpl = $template;
-    $tmpl =~ s/__SOURCE__/$file/mg;
-    $tmpl =~ s/__PLAN__/$spec->{OPTIONS}{tests}{plan}/mg;
-    $tmpl =~ s/^__TESTS__$/$spec->{tests}/mg;
-
-    open FH, ">$testfile" or die "$testfile: $!\n";
-    print FH $tmpl;
-    close FH;
+  for $file (glob 'parts/inc/*') {
+    my($testfile) = $file =~ /(\w+)\.?$/;  # VMS has a trailing dot
+    $testfile = "t/$testfile.t";
+  
+    my $spec = parse_partspec($file);
+    my $plan = 0;
+  
+    if (exists $spec->{tests}) {
+      exists $spec->{OPTIONS}{tests} &&
+      exists $spec->{OPTIONS}{tests}{plan}
+          or die "No plan for tests in $file\n";
+  
+      print "generating $testfile\n";
+  
+      my $tmpl = $template;
+      $tmpl =~ s/__SOURCE__/$file/mg;
+      $tmpl =~ s/__PLAN__/$spec->{OPTIONS}{tests}{plan}/mg;
+      $tmpl =~ s/^__TESTS__$/$spec->{tests}/mg;
+  
+      open FH, ">$testfile" or die "$testfile: $!\n";
+      print FH $tmpl;
+      close FH;
+  
+      push @tests, $testfile;
+    }
   }
+  
+  return @tests;
 }
-
-exit 0;
 
 __DATA__
 ################################################################################
@@ -91,5 +100,13 @@ BEGIN {
 use Devel::PPPort;
 use strict;
 $^W = 1;
+
+package Devel::PPPort;
+use vars '@ISA';
+require DynaLoader;
+@ISA = qw(DynaLoader);
+bootstrap Devel::PPPort;
+
+package main;
 
 __TESTS__

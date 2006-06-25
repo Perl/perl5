@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 21 $
+#  $Revision: 24 $
 #  $Author: mhx $
-#  $Date: 2006/06/23 15:55:22 +0200 $
+#  $Date: 2006/06/25 06:30:56 +0200 $
 #
 ################################################################################
 #
@@ -20,70 +20,80 @@
 ################################################################################
 
 use ExtUtils::MakeMaker;
+use strict;
 require 5.003;
 
 unless ($ENV{'PERL_CORE'}) {
   $ENV{'PERL_CORE'} = 1 if grep { $_ eq 'PERL_CORE=1' } @ARGV;
 }
 
+my %opt;
+
 @ARGV = map { /^--with-(.*)/ && ++$opt{$1} ? () : $_ } @ARGV;
-
-%PL_FILES = (
-  'ppport_h.PL'  => 'ppport.h',
-  'PPPort_pm.PL' => 'PPPort.pm',
-  'PPPort_xs.PL' => 'PPPort.xs',
-);
-
-@C_FILES  = qw{ module2.c module3.c };
-
-@clean    = qw{ $(H_FILES) PPPort.c };
-
-%depend   = ( '$(OBJECT)' => '$(H_FILES)' );
-
-if ($opt{'apicheck'}) {
-  $PL_FILES{'apicheck_c.PL'} = 'apicheck.c';
-  push @C_FILES, qw{ apicheck.c };
-  push @clean,   qw{ apicheck.c apicheck.i };
-  $depend{'apicheck.i'} = 'ppport.h';
-}
-
-if ($ENV{'PERL_CORE'}) {
-  # Pods will be built by installman.
-  push @moreopts, MAN3PODS => {};
-  push @clean, qw( PPPort.pm PPPort.xs );
-}
-else {
-  # Devel::PPPort is in the core since 5.7.3
-  push @moreopts, INSTALLDIRS => ($] >= 5.007003 ? 'perl' : 'site');
-}
-
-if (eval $ExtUtils::MakeMaker::VERSION >= 6) {
-  push @moreopts, AUTHOR => 'Marcus Holland-Moritz <mhx@cpan.org>';
-  if (-f 'PPPort.pm') {
-    push @moreopts, ABSTRACT_FROM => 'PPPort.pm';
-  }
-}
-
-if (eval $ExtUtils::MakeMaker::VERSION >= 6.30_01) {
-  print "Setting license tag...\n";
-  push @moreopts, LICENSE => 'perl';
-}
 
 WriteMakefile(
   NAME          => 'Devel::PPPort',
   VERSION_FROM  => 'PPPort_pm.PL',
-  PL_FILES      => \%PL_FILES,
   PM            => { 'PPPort.pm' => '$(INST_LIBDIR)/PPPort.pm' },
-  C             => \@C_FILES,
   H             => [ qw(ppport.h) ],
   OBJECT        => '$(BASEEXT)$(OBJ_EXT) $(O_FILES)',
   XSPROTOARG    => '-noprototypes',
-  clean         => { FILES => "@clean" },
-  depend        => \%depend,
-  @moreopts,
+  CONFIGURE     => \&configure,
 );
 
-sub MY::postamble {
+sub configure
+{
+  my @clean    = qw{ $(H_FILES) PPPort.xs PPPort.c };
+  my %depend   = ('$(OBJECT)' => '$(H_FILES)');
+  my @C_FILES  = qw{ module2.c module3.c },
+  my %PL_FILES = (
+    'ppport_h.PL'  => 'ppport.h',
+    'PPPort_pm.PL' => 'PPPort.pm',
+    'PPPort_xs.PL' => 'PPPort.xs',
+  );
+  my @moreopts;
+
+  if (eval $ExtUtils::MakeMaker::VERSION >= 6) {
+    push @moreopts, AUTHOR => 'Marcus Holland-Moritz <mhx@cpan.org>';
+    if (-f 'PPPort.pm') {
+      push @moreopts, ABSTRACT_FROM => 'PPPort.pm';
+    }
+  }
+
+  if (eval $ExtUtils::MakeMaker::VERSION >= 6.30_01) {
+    print "Setting license tag...\n";
+    push @moreopts, LICENSE => 'perl';
+  }
+
+  if ($ENV{'PERL_CORE'}) {
+    # Pods will be built by installman.
+    push @moreopts, MAN3PODS => {};
+    push @clean, 'PPPort.pm';
+  }
+  else {
+    # Devel::PPPort is in the core since 5.7.3
+    push @moreopts, INSTALLDIRS => ($] >= 5.007003 ? 'perl' : 'site');
+  }
+
+  if ($opt{'apicheck'}) {
+    $PL_FILES{'apicheck_c.PL'} = 'apicheck.c';
+    push @C_FILES, qw{ apicheck.c };
+    push @clean,   qw{ apicheck.c apicheck.i };
+    $depend{'apicheck.i'} = 'ppport.h';
+  }
+
+  return {
+    C        => \@C_FILES,
+    XS       => { 'PPPort.xs' => 'PPPort.c' },
+    PL_FILES => \%PL_FILES,
+    depend   => \%depend,
+    clean    => { FILES => "@clean" },
+    @moreopts,
+  };
+}
+
+sub MY::postamble
+{
   package MY;
   my $post = shift->SUPER::postamble(@_);
   $post .= <<'POSTAMBLE';
@@ -101,7 +111,8 @@ POSTAMBLE
   return $post;
 }
 
-sub MY::c_o {
+sub MY::c_o
+{
   package MY;
   my $co = shift->SUPER::c_o(@_);
 

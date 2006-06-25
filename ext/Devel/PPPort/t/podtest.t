@@ -36,6 +36,14 @@ use Devel::PPPort;
 use strict;
 $^W = 1;
 
+package Devel::PPPort;
+use vars '@ISA';
+require DynaLoader;
+@ISA = qw(DynaLoader);
+bootstrap Devel::PPPort;
+
+package main;
+
 my @pods = qw( HACKERS PPPort.pm ppport.h devel/regenerate devel/buildperl.pl );
 
 my $reason = '';
