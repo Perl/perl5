@@ -157,7 +157,7 @@ void HUF_mark_field(SV* trigger, SV* field) {
 
 /* The key exchange function.  It communicates with S_hv_magic_uvar_xkey
  * in hv.c */
-IV HUF_watch_key(pTHX_ IV action, SV* field) {
+I32 HUF_watch_key(pTHX_ IV action, SV* field) {
     MAGIC* mg = mg_find(field, PERL_MAGIC_uvar);
     SV* keysv = mg->mg_obj;
     if (keysv && SvROK(keysv)) {
@@ -234,7 +234,7 @@ void HUF_fix_objects() {
 /* test support (not needed for functionality) */
 
 static SV* counter;
-IV HUF_inc_var(pTHX_ IV index, SV* which) {
+I32 HUF_inc_var(pTHX_ IV index, SV* which) {
     sv_setiv(counter, 1 + SvIV(counter));
     return 0;
 }
