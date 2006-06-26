@@ -34,7 +34,7 @@ code form and their internal form. In this document we will use the term
 "pattern" when we speak of their textual, source code form, the term
 "program" when we speak of their internal representation. These
 correspond to the terms I<S-regex> and I<B-regex> that Mark Jason
-Dominus employs in his paper on "Rx" ([1] in L</references>).
+Dominus employs in his paper on "Rx" ([1] in L</REFERENCES>).
 
 =head2 What is a regular expression engine?
 
@@ -669,9 +669,10 @@ a string.  It returns an integer 1 for success and a 0 for failure.
 It is basically a set-up wrapper around C<regmatch()>.
 
 C<regmatch> is the main "recursive loop" of the interpreter. It is
-basically a giant switch statement that executes the regops based on
-their type. A few of the regops are implemented as subroutines but
-the bulk are inline code.
+basically a giant switch statement that implements a state machine, where
+the possible states are the regops themselves, plus a number of additional
+intermediate and failure states. A few of the states are implemented as
+subroutines but the bulk are inline code.
 
 =head1 MISCELLANEOUS
 
