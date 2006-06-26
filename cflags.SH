@@ -16,6 +16,77 @@ esac
 case "$0" in
 */*) cd `expr X$0 : 'X\(.*\)/'` ;;
 esac
+
+warn=''
+
+# Add -Wall for the core modules iff gcc and not already -Wall
+case "$gccversion" in
+'') ;;
+Intel*) ;; # The Intel C++ plays gcc on TV but is not really it.
+*)  case "$ccflags" in
+    *-Wall*) ;;
+    *) warn="$warn -Wall" ;;
+    esac
+    ;;
+esac
+
+# The gcc -ansi -pedantic require their own dance, too.
+case "$gccversion" in
+'') ;;
+Intel*) ;;
+*)  case "$gccansipedantic" in
+    define)
+	case "$gccversion" in
+	[12]*) ;; # gcc versions 1 (gasp!) and 2 are not good for this.
+	*)  case "$osname" in
+	    # Add -ansi -pedantic only for known platforms.
+	    aix|dec_osf|freebsd|hpux|irix|linux)
+		ansipedantic="-ansi -pedantic" ;;
+	    solaris)
+# Can't add -ansi for Solaris.
+# Off_t/off_t is a struct in Solaris with largefiles, and with -ansi
+# that struct cannot be compared with a flat integer, such as a STRLEN.
+# The -ansi will also cause a lot of noise in Solaris because of:
+# /usr/include/sys/resource.h:148: warning: `struct rlimit64' declared inside parameter list
+		ansipedantic="-pedantic" ;;
+	    esac
+	    for i in $ansipedantic
+	    do
+		case "$ccflags" in
+		*$i*) ;;
+		*) warn="$warn $i" ;;
+		esac
+	    done
+	    case "$warn$ccflags" in
+	    *-pedantic*) warn="$warn -DPERL_GCC_PEDANTIC" ;;
+	    esac
+	    ;;
+	esac
+	;;
+    esac
+    ;;
+esac
+
+# Further gcc warning options.
+case "$gccversion" in
+'') ;;
+Intel*) ;;
+*)  for opt in '' extra declaration-after-statement endif-labels
+    do
+       case " $ccflags " in
+       *"-W$opt "*) ;;
+       *) case "`echo >_cflags.c | $cc -W$opt -c _cflags.c -o _cflags.o 2>&1`" in
+          *"unrecognized"*) ;;
+          *"Invalid"*) ;;
+          *) warn="$warn -W$opt" ;;
+          esac
+          ;;
+       esac
+       rm -f _cflags.c cflags.o
+    done
+    ;;
+esac
+
 echo "Extracting cflags (with variable substitutions)"
 : This section of the file will have variable substitutions done on it.
 : Move anything that needs config subs from !NO!SUBS! section to !GROK!THIS!.
@@ -24,6 +95,10 @@ echo "Extracting cflags (with variable substitutions)"
 rm -f cflags
 $spitshell >cflags <<!GROK!THIS!
 $startsh
+
+# Used for gcc.
+warn="$warn"
+
 !GROK!THIS!
 
 : In the following dollars and backticks do not need the extra backslash.
@@ -122,76 +197,6 @@ for file do
     util) ;;
     *) ;;
     esac
-
-warn=''
-
-# Add -Wall for the core modules iff gcc and not already -Wall
-case "$gccversion" in
-'') ;;
-Intel*) ;; # The Intel C++ plays gcc on TV but is not really it.
-*)  case "$ccflags" in
-    *-Wall*) ;;
-    *) warn="$warn -Wall" ;;
-    esac
-    ;;
-esac
-
-# The gcc -ansi -pedantic require their own dance, too.
-case "$gccversion" in
-'') ;;
-Intel*) ;;
-*)  case "$gccansipedantic" in
-    define)
-	case "$gccversion" in
-	[12]*) ;; # gcc versions 1 (gasp!) and 2 are not good for this.
-	*)  case "$osname" in
-	    # Add -ansi -pedantic only for known platforms.
-	    aix|dec_osf|freebsd|hpux|irix|linux)
-		ansipedantic="-ansi -pedantic" ;;
-	    solaris)
-# Can't add -ansi for Solaris.
-# Off_t/off_t is a struct in Solaris with largefiles, and with -ansi
-# that struct cannot be compared with a flat integer, such as a STRLEN.
-# The -ansi will also cause a lot of noise in Solaris because of:
-# /usr/include/sys/resource.h:148: warning: `struct rlimit64' declared inside parameter list
-		ansipedantic="-pedantic" ;;
-	    esac
-	    for i in $ansipedantic
-	    do
-		case "$ccflags" in
-		*$i*) ;;
-		*) warn="$warn $i" ;;
-		esac
-	    done
-	    case "$warn$ccflags" in
-	    *-pedantic*) warn="$warn -DPERL_GCC_PEDANTIC" ;;
-	    esac
-	    ;;
-	esac
-	;;
-    esac
-    ;;
-esac
-
-# Further gcc warning options.
-case "$gccversion" in
-'') ;;
-Intel*) ;;
-*)  for opt in '' extra declaration-after-statement endif-labels
-    do
-       case " $ccflags " in
-       *"-W$opt "*) ;;
-       *) case "`echo >_cflags.c | $cc -W$opt -c _cflags.c -o _cflags.o 2>&1`" in
-          *"unrecognized"*) ;;
-          *"Invalid"*) ;;
-          *) warn="$warn -W$opt" ;;
-          esac
-          ;;
-       esac
-       rm -f _cflags.c cflags.o
-    done
-    ;;
-esac
 
 if test -f .patch; then
   ccflags="-DPERL_PATCHNUM=`cat .patch` $ccflags"
