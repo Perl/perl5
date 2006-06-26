@@ -1,7 +1,7 @@
 #!/usr/bin/perl -Tw
 
 BEGIN {
-    unless (-d 'blib') {
+    if ($ENV{PERL_CORE}) {
 	chdir 't' if -d 't';
 	@INC = '../lib';
 	require Config; import Config;
