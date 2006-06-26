@@ -5148,6 +5148,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
           }
         }
       }
+      esa[rms_nam_esll(dirnam)] = '\0';
       if (!rms_is_nam_fnb(dirnam, (NAM$M_EXP_DEV | NAM$M_EXP_DIR))) {
         cp1 = strchr(esa,']');
         if (!cp1) cp1 = strchr(esa,'>');
@@ -5170,7 +5171,7 @@ static char *mp_do_fileify_dirspec(pTHX_ const char *dir,char *buf,int ts, int *
           return NULL;
         }
       }
-      esa[rms_nam_esll(dirnam)] = '\0';
+
       if (rms_is_nam_fnb(dirnam, NAM$M_EXP_NAME)) {
         /* They provided at least the name; we added the type, if necessary, */
         if (buf) retspec = buf;                            /* in sys$parse() */
