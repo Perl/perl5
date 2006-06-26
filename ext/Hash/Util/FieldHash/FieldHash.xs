@@ -69,7 +69,6 @@ void HUF_add_uvar_magic(
     I32 index,                 /* get/set will see this */
     SV* thing                  /* any associated info */
 ) {
-    MAGIC* mg;
     struct ufuncs uf;
         uf.uf_val = val;
         uf.uf_set = set;
@@ -155,6 +154,13 @@ void HUF_mark_field(SV* trigger, SV* field) {
     hv_store_ent(field_tab, field_id, field_ref, 0);
 }
 
+#define HV_FETCH_ISSTORE   0x01
+#define HV_FETCH_ISEXISTS  0x02
+#define HV_FETCH_LVALUE    0x04
+#define HV_FETCH_JUST_SV   0x08
+
+#define HUF_WOULD_CREATE_KEY(x) ((x) != -1 && ((x) & (HV_FETCH_ISSTORE | HV_FETCH_LVALUE)))
+
 /* The key exchange function.  It communicates with S_hv_magic_uvar_xkey
  * in hv.c */
 I32 HUF_watch_key(pTHX_ IV action, SV* field) {
@@ -162,9 +168,11 @@ I32 HUF_watch_key(pTHX_ IV action, SV* field) {
     SV* keysv = mg->mg_obj;
     if (keysv && SvROK(keysv)) {
         SV* ob_id = HUF_obj_id(keysv);
-        SV* trigger = HUF_get_trigger(keysv, ob_id);
-        HUF_mark_field(trigger, field);
         mg->mg_obj = ob_id; /* key replacement */
+        if (HUF_WOULD_CREATE_KEY(action)) {
+            SV* trigger = HUF_get_trigger(keysv, ob_id);
+            HUF_mark_field(trigger, field);
+        }
     }
     return 0;
 }
