@@ -1891,13 +1891,13 @@ interpreters, with one interpreter represented either as a C structure,
 or inside a thread-specific structure.  These structures contain all
 the context, the state of that interpreter.
 
-Two macros control the major Perl build flavors: MULTIPLICITY and
-USE_5005THREADS.  The MULTIPLICITY build has a C structure
-that packages all the interpreter state, and there is a similar thread-specific
-data structure under USE_5005THREADS.  In both cases,
-PERL_IMPLICIT_CONTEXT is also normally defined, and enables the
-support for passing in a "hidden" first argument that represents all three
-data structures.
+One macro controls the major Perl build flavor: MULTIPLICITY. The
+MULTIPLICITY build has a C structure that packages all the interpreter
+state. With multiplicity-enabled perls, PERL_IMPLICIT_CONTEXT is also
+normally defined, and enables the support for passing in a "hidden" first
+argument that represents all three data structures. MULTIPLICITY makes
+mutli-threaded perls possible (with the ithreads threading model, related
+to the macro USE_ITHREADS.)
 
 Two other "encapsulation" macros are the PERL_GLOBAL_STRUCT and
 PERL_GLOBAL_STRUCT_PRIVATE (the latter turns on the former, and the
@@ -2153,8 +2153,8 @@ Just as PERL_IMPLICIT_CONTEXT provides a way to bundle up everything
 that the interpreter knows about itself and pass it around, so too are
 there plans to allow the interpreter to bundle up everything it knows
 about the environment it's running on.  This is enabled with the
-PERL_IMPLICIT_SYS macro.  Currently it only works with USE_ITHREADS
-and USE_5005THREADS on Windows (see inside iperlsys.h).
+PERL_IMPLICIT_SYS macro.  Currently it only works with USE_ITHREADS on
+Windows.
 
 This allows the ability to provide an extra pointer (called the "host"
 environment) for all the system calls.  This makes it possible for
