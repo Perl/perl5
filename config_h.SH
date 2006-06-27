@@ -917,6 +917,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_syssecrt   I_SYS_SECURITY	/**/
 
+/* USE_CROSS_COMPILE:
+ *	This symbol, if defined, indicates that Perl is being cross-compiled.
+ */
+/* PERL_TARGETARCH:
+ *	This symbol, if defined, indicates the target architecture
+ *	Perl has been cross-compiled to.  Undefined if not a cross-compile.
+ */
+#ifndef USE_CROSS_COMPILE
+#$usecrosscompile	USE_CROSS_COMPILE	/**/
+#define	PERL_TARGETARCH	"$targetarch"	/**/
+#endif
+
 /* OSNAME:
  *	This symbol contains the name of the operating system, as determined
  *	by Configure.  You shouldn't rely on it too much; the specific
@@ -929,18 +941,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #define OSNAME "$osname"		/**/
 #define OSVERS "$osvers"		/**/
-
-/* USE_CROSS_COMPILE:
- *	This symbol, if defined, indicates that Perl is being cross-compiled.
- */
-/* PERL_TARGETARCH:
- *	This symbol, if defined, indicates the target architecture
- *	Perl has been cross-compiled to.  Undefined if not a cross-compile.
- */
-#ifndef USE_CROSS_COMPILE
-#$usecrosscompile	USE_CROSS_COMPILE	/**/
-#define	PERL_TARGETARCH	"$targetarch"	/**/
-#endif
 
 /* MULTIARCH:
  *	This symbol, if defined, signifies that the build
@@ -1140,6 +1140,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_access HAS_ACCESS		/**/
 
+/* HAS_AINTL:
+ *	This symbol, if defined, indicates that the aintl routine is
+ *	available.  If copysignl is also present we can emulate modfl.
+ */
+#$d_aintl HAS_AINTL		/**/
+
 /* HAS_ASCTIME_R:
  *	This symbol, if defined, indicates that the asctime_r routine
  *	is available to asctime re-entrantly.
@@ -1152,6 +1158,45 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_asctime_r HAS_ASCTIME_R	   /**/
 #define ASCTIME_R_PROTO $asctime_r_proto	   /**/
+
+/* HASATTRIBUTE_FORMAT:
+ *	Can we handle GCC attribute for checking printf-style formats
+ */
+/* HASATTRIBUTE_MALLOC:
+ *	Can we handle GCC attribute for malloc-style functions.
+ */
+/* HASATTRIBUTE_NONNULL:
+ *	Can we handle GCC attribute for nonnull function parms.
+ */
+/* HASATTRIBUTE_NORETURN:
+ *	Can we handle GCC attribute for functions that do not return
+ */
+/* HASATTRIBUTE_PURE:
+ *	Can we handle GCC attribute for pure functions
+ */
+/* HASATTRIBUTE_UNUSED:
+ *	Can we handle GCC attribute for unused variables and arguments
+ */
+/* HASATTRIBUTE_WARN_UNUSED_RESULT:
+ *	Can we handle GCC attribute for warning on unused results
+ */
+#$d_attribute_format HASATTRIBUTE_FORMAT	/**/
+#$d_attribute_noreturn HASATTRIBUTE_NORETURN	/**/
+#$d_attribute_malloc HASATTRIBUTE_MALLOC	/**/
+#$d_attribute_nonnull HASATTRIBUTE_NONNULL	/**/
+#$d_attribute_pure HASATTRIBUTE_PURE	/**/
+#$d_attribute_unused HASATTRIBUTE_UNUSED	/**/
+#$d_attribute_warn_unused_result HASATTRIBUTE_WARN_UNUSED_RESULT	/**/
+
+/* HAS_BUILTIN_CHOOSE_EXPR:
+ *	Can we handle GCC builtin for compile-time ternary-like expressions
+ */
+/* HAS_BUILTIN_EXPECT:
+ *	Can we handle GCC builtin for telling that certain values are more
+ *	likely
+ */
+#$d_builtin_expect HAS_BUILTIN_EXPECT	/**/
+#$d_builtin_choose_expr HAS_BUILTIN_CHOOSE_EXPR	/**/
 
 /* CASTI32:
  *	This symbol is defined if the C compiler can cast negative
@@ -1192,6 +1237,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_class HAS_CLASS		/**/
 
+/* HAS_CLEARENV:
+ *	This symbol, if defined, indicates that the clearenv () routine is
+ *	available for use.
+ */
+#$d_clearenv HAS_CLEARENV		/**/
+
 /* VOID_CLOSEDIR:
  *	This symbol, if defined, indicates that the closedir() routine
  *	does not return a value.
@@ -1203,6 +1254,18 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	is supported.
  */
 #$d_cmsghdr_s HAS_STRUCT_CMSGHDR	/**/
+
+/* HAS_COPYSIGNL:
+ *	This symbol, if defined, indicates that the copysignl routine is
+ *	available.  If aintl is also present we can emulate modfl.
+ */
+#$d_copysignl HAS_COPYSIGNL		/**/
+
+/* HAS_CRYPT:
+ *	This symbol, if defined, indicates that the crypt routine is available
+ *	to encrypt passwords and the like.
+ */
+#$d_crypt HAS_CRYPT		/**/
 
 /* HAS_CRYPT_R:
  *	This symbol, if defined, indicates that the crypt_r routine
@@ -1228,6 +1291,19 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define CSH "$full_csh"	/**/
 #endif
 
+/* HAS_CTERMID_R:
+ *	This symbol, if defined, indicates that the ctermid_r routine
+ *	is available to ctermid re-entrantly.
+ */
+/* CTERMID_R_PROTO:
+ *	This symbol encodes the prototype of ctermid_r.
+ *	It is zero if d_ctermid_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ctermid_r
+ *	is defined.
+ */
+#$d_ctermid_r HAS_CTERMID_R	   /**/
+#define CTERMID_R_PROTO $ctermid_r_proto	   /**/
+
 /* HAS_CTIME_R:
  *	This symbol, if defined, indicates that the ctime_r routine
  *	is available to ctime re-entrantly.
@@ -1241,6 +1317,20 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_ctime_r HAS_CTIME_R	   /**/
 #define CTIME_R_PROTO $ctime_r_proto	   /**/
 
+/* HAS_DBMINIT_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the dbminit() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern int dbminit(char *);
+ */
+#$d_dbminitproto	HAS_DBMINIT_PROTO	/**/
+
+/* HAS_DIRFD:
+ *	This manifest constant lets the C program know that dirfd
+ *	is available.
+ */
+#$d_dirfd HAS_DIRFD		/**/
+
 /* DLSYM_NEEDS_UNDERSCORE:
  *	This symbol, if defined, indicates that we need to prepend an
  *	underscore to the symbol name before calling dlsym().  This only
@@ -1248,6 +1338,26 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	case if you're using dl_dlopen.xs.
  */
 #$d_dlsymun 	DLSYM_NEEDS_UNDERSCORE 	/**/
+
+/* SETUID_SCRIPTS_ARE_SECURE_NOW:
+ *	This symbol, if defined, indicates that the bug that prevents
+ *	setuid scripts from being secure is not present in this kernel.
+ */
+/* DOSUID:
+ *	This symbol, if defined, indicates that the C program should
+ *	check the script that it is executing for setuid/setgid bits, and
+ *	attempt to emulate setuid/setgid on systems that have disabled
+ *	setuid #! scripts because the kernel can't do it securely.
+ *	It is up to the package designer to make sure that this emulation
+ *	is done securely.  Among other things, it should do an fstat on
+ *	the script it just opened to make sure it really is a setuid/setgid
+ *	script, it should make sure the arguments passed correspond exactly
+ *	to the argument on the #! line, and it should not trust any
+ *	subprocesses to which it must pass the filename rather than the
+ *	file descriptor of the script to be executed.
+ */
+#$d_suidsafe SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
+#$d_dosuid DOSUID		/**/
 
 /* HAS_DRAND48_R:
  *	This symbol, if defined, indicates that the drand48_r routine
@@ -1295,17 +1405,56 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_endhent HAS_ENDHOSTENT		/**/
 
+/* HAS_ENDHOSTENT_R:
+ *	This symbol, if defined, indicates that the endhostent_r routine
+ *	is available to endhostent re-entrantly.
+ */
+/* ENDHOSTENT_R_PROTO:
+ *	This symbol encodes the prototype of endhostent_r.
+ *	It is zero if d_endhostent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endhostent_r
+ *	is defined.
+ */
+#$d_endhostent_r HAS_ENDHOSTENT_R	   /**/
+#define ENDHOSTENT_R_PROTO $endhostent_r_proto	   /**/
+
 /* HAS_ENDNETENT:
  *	This symbol, if defined, indicates that the endnetent() routine is
  *	available to close whatever was being used for network queries.
  */
 #$d_endnent HAS_ENDNETENT		/**/
 
+/* HAS_ENDNETENT_R:
+ *	This symbol, if defined, indicates that the endnetent_r routine
+ *	is available to endnetent re-entrantly.
+ */
+/* ENDNETENT_R_PROTO:
+ *	This symbol encodes the prototype of endnetent_r.
+ *	It is zero if d_endnetent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endnetent_r
+ *	is defined.
+ */
+#$d_endnetent_r HAS_ENDNETENT_R	   /**/
+#define ENDNETENT_R_PROTO $endnetent_r_proto	   /**/
+
 /* HAS_ENDPROTOENT:
  *	This symbol, if defined, indicates that the endprotoent() routine is
  *	available to close whatever was being used for protocol queries.
  */
 #$d_endpent HAS_ENDPROTOENT		/**/
+
+/* HAS_ENDPROTOENT_R:
+ *	This symbol, if defined, indicates that the endprotoent_r routine
+ *	is available to endprotoent re-entrantly.
+ */
+/* ENDPROTOENT_R_PROTO:
+ *	This symbol encodes the prototype of endprotoent_r.
+ *	It is zero if d_endprotoent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endprotoent_r
+ *	is defined.
+ */
+#$d_endprotoent_r HAS_ENDPROTOENT_R	   /**/
+#define ENDPROTOENT_R_PROTO $endprotoent_r_proto	   /**/
 
 /* HAS_ENDPWENT:
  *	This symbol, if defined, indicates that the getgrent routine is
@@ -1331,6 +1480,25 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to close whatever was being used for service queries.
  */
 #$d_endsent HAS_ENDSERVENT		/**/
+
+/* HAS_ENDSERVENT_R:
+ *	This symbol, if defined, indicates that the endservent_r routine
+ *	is available to endservent re-entrantly.
+ */
+/* ENDSERVENT_R_PROTO:
+ *	This symbol encodes the prototype of endservent_r.
+ *	It is zero if d_endservent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endservent_r
+ *	is defined.
+ */
+#$d_endservent_r HAS_ENDSERVENT_R	   /**/
+#define ENDSERVENT_R_PROTO $endservent_r_proto	   /**/
+
+/* HAS_FAST_STDIO:
+ *	This symbol, if defined, indicates that the "fast stdio"
+ *	is available to manipulate the stdio buffers directly.
+ */
+#$d_faststdio HAS_FAST_STDIO		/**/
 
 /* HAS_FCHDIR:
  *	This symbol, if defined, indicates that the fchdir routine is
@@ -1369,6 +1537,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	longer than 14 characters.
  */
 #$d_flexfnam	FLEXFILENAMES		/**/
+
+/* HAS_FLOCK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the flock() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern int flock(int, int);
+ */
+#$d_flockproto	HAS_FLOCK_PROTO	/**/
 
 /* HAS_FP_CLASS:
  *	This symbol, if defined, indicates that the fp_class routine is
@@ -1419,6 +1595,24 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *
  */
 #$d_fpclassify HAS_FPCLASSIFY		/**/
+
+/* HAS_FPCLASSL:
+ *	This symbol, if defined, indicates that the fpclassl routine is
+ *	available to classify long doubles.  Available for example in IRIX.
+ *	The returned values are defined in <ieeefp.h> and are:
+ *
+ *	FP_SNAN		signaling NaN
+ *	FP_QNAN		quiet NaN
+ *	FP_NINF		negative infinity
+ *	FP_PINF		positive infinity
+ *	FP_NDENORM	negative denormalized non-zero
+ *	FP_PDENORM	positive denormalized non-zero
+ *	FP_NZERO	negative zero
+ *	FP_PZERO	positive zero
+ *	FP_NNORM	negative normalized non-zero
+ *	FP_PNORM	positive normalized non-zero
+ */
+#$d_fpclassl HAS_FPCLASSL		/**/
 
 /* HAS_FPOS64_T:
  *	This symbol will be defined if the C compiler supports fpos64_t.
@@ -1596,6 +1790,45 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define PHOSTNAME "$aphostname"	/* How to get the host name */
 #endif
 
+/* HAS_GETHOSTBYADDR_R:
+ *	This symbol, if defined, indicates that the gethostbyaddr_r routine
+ *	is available to gethostbyaddr re-entrantly.
+ */
+/* GETHOSTBYADDR_R_PROTO:
+ *	This symbol encodes the prototype of gethostbyaddr_r.
+ *	It is zero if d_gethostbyaddr_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostbyaddr_r
+ *	is defined.
+ */
+#$d_gethostbyaddr_r HAS_GETHOSTBYADDR_R	   /**/
+#define GETHOSTBYADDR_R_PROTO $gethostbyaddr_r_proto	   /**/
+
+/* HAS_GETHOSTBYNAME_R:
+ *	This symbol, if defined, indicates that the gethostbyname_r routine
+ *	is available to gethostbyname re-entrantly.
+ */
+/* GETHOSTBYNAME_R_PROTO:
+ *	This symbol encodes the prototype of gethostbyname_r.
+ *	It is zero if d_gethostbyname_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostbyname_r
+ *	is defined.
+ */
+#$d_gethostbyname_r HAS_GETHOSTBYNAME_R	   /**/
+#define GETHOSTBYNAME_R_PROTO $gethostbyname_r_proto	   /**/
+
+/* HAS_GETHOSTENT_R:
+ *	This symbol, if defined, indicates that the gethostent_r routine
+ *	is available to gethostent re-entrantly.
+ */
+/* GETHOSTENT_R_PROTO:
+ *	This symbol encodes the prototype of gethostent_r.
+ *	It is zero if d_gethostent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostent_r
+ *	is defined.
+ */
+#$d_gethostent_r HAS_GETHOSTENT_R	   /**/
+#define GETHOSTENT_R_PROTO $gethostent_r_proto	   /**/
+
 /* HAS_GETHOST_PROTOS:
  *	This symbol, if defined, indicates that <netdb.h> includes
  *	prototypes for gethostent(), gethostbyname(), and
@@ -1653,6 +1886,45 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_getnent HAS_GETNETENT		/**/
 
+/* HAS_GETNETBYADDR_R:
+ *	This symbol, if defined, indicates that the getnetbyaddr_r routine
+ *	is available to getnetbyaddr re-entrantly.
+ */
+/* GETNETBYADDR_R_PROTO:
+ *	This symbol encodes the prototype of getnetbyaddr_r.
+ *	It is zero if d_getnetbyaddr_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetbyaddr_r
+ *	is defined.
+ */
+#$d_getnetbyaddr_r HAS_GETNETBYADDR_R	   /**/
+#define GETNETBYADDR_R_PROTO $getnetbyaddr_r_proto	   /**/
+
+/* HAS_GETNETBYNAME_R:
+ *	This symbol, if defined, indicates that the getnetbyname_r routine
+ *	is available to getnetbyname re-entrantly.
+ */
+/* GETNETBYNAME_R_PROTO:
+ *	This symbol encodes the prototype of getnetbyname_r.
+ *	It is zero if d_getnetbyname_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetbyname_r
+ *	is defined.
+ */
+#$d_getnetbyname_r HAS_GETNETBYNAME_R	   /**/
+#define GETNETBYNAME_R_PROTO $getnetbyname_r_proto	   /**/
+
+/* HAS_GETNETENT_R:
+ *	This symbol, if defined, indicates that the getnetent_r routine
+ *	is available to getnetent re-entrantly.
+ */
+/* GETNETENT_R_PROTO:
+ *	This symbol encodes the prototype of getnetent_r.
+ *	It is zero if d_getnetent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetent_r
+ *	is defined.
+ */
+#$d_getnetent_r HAS_GETNETENT_R	   /**/
+#define GETNETENT_R_PROTO $getnetent_r_proto	   /**/
+
 /* HAS_GETNET_PROTOS:
  *	This symbol, if defined, indicates that <netdb.h> includes
  *	prototypes for getnetent(), getnetbyname(), and
@@ -1695,6 +1967,45 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_getpbyname HAS_GETPROTOBYNAME		/**/
 #$d_getpbynumber HAS_GETPROTOBYNUMBER		/**/
+
+/* HAS_GETPROTOBYNAME_R:
+ *	This symbol, if defined, indicates that the getprotobyname_r routine
+ *	is available to getprotobyname re-entrantly.
+ */
+/* GETPROTOBYNAME_R_PROTO:
+ *	This symbol encodes the prototype of getprotobyname_r.
+ *	It is zero if d_getprotobyname_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotobyname_r
+ *	is defined.
+ */
+#$d_getprotobyname_r HAS_GETPROTOBYNAME_R	   /**/
+#define GETPROTOBYNAME_R_PROTO $getprotobyname_r_proto	   /**/
+
+/* HAS_GETPROTOBYNUMBER_R:
+ *	This symbol, if defined, indicates that the getprotobynumber_r routine
+ *	is available to getprotobynumber re-entrantly.
+ */
+/* GETPROTOBYNUMBER_R_PROTO:
+ *	This symbol encodes the prototype of getprotobynumber_r.
+ *	It is zero if d_getprotobynumber_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotobynumber_r
+ *	is defined.
+ */
+#$d_getprotobynumber_r HAS_GETPROTOBYNUMBER_R	   /**/
+#define GETPROTOBYNUMBER_R_PROTO $getprotobynumber_r_proto	   /**/
+
+/* HAS_GETPROTOENT_R:
+ *	This symbol, if defined, indicates that the getprotoent_r routine
+ *	is available to getprotoent re-entrantly.
+ */
+/* GETPROTOENT_R_PROTO:
+ *	This symbol encodes the prototype of getprotoent_r.
+ *	It is zero if d_getprotoent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotoent_r
+ *	is defined.
+ */
+#$d_getprotoent_r HAS_GETPROTOENT_R	   /**/
+#define GETPROTOENT_R_PROTO $getprotoent_r_proto	   /**/
 
 /* HAS_GETPROTO_PROTOS:
  *	This symbol, if defined, indicates that <netdb.h> includes
@@ -1761,6 +2072,45 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to look up network services in some data base or another.
  */
 #$d_getsent HAS_GETSERVENT		/**/
+
+/* HAS_GETSERVBYNAME_R:
+ *	This symbol, if defined, indicates that the getservbyname_r routine
+ *	is available to getservbyname re-entrantly.
+ */
+/* GETSERVBYNAME_R_PROTO:
+ *	This symbol encodes the prototype of getservbyname_r.
+ *	It is zero if d_getservbyname_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservbyname_r
+ *	is defined.
+ */
+#$d_getservbyname_r HAS_GETSERVBYNAME_R	   /**/
+#define GETSERVBYNAME_R_PROTO $getservbyname_r_proto	   /**/
+
+/* HAS_GETSERVBYPORT_R:
+ *	This symbol, if defined, indicates that the getservbyport_r routine
+ *	is available to getservbyport re-entrantly.
+ */
+/* GETSERVBYPORT_R_PROTO:
+ *	This symbol encodes the prototype of getservbyport_r.
+ *	It is zero if d_getservbyport_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservbyport_r
+ *	is defined.
+ */
+#$d_getservbyport_r HAS_GETSERVBYPORT_R	   /**/
+#define GETSERVBYPORT_R_PROTO $getservbyport_r_proto	   /**/
+
+/* HAS_GETSERVENT_R:
+ *	This symbol, if defined, indicates that the getservent_r routine
+ *	is available to getservent re-entrantly.
+ */
+/* GETSERVENT_R_PROTO:
+ *	This symbol encodes the prototype of getservent_r.
+ *	It is zero if d_getservent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservent_r
+ *	is defined.
+ */
+#$d_getservent_r HAS_GETSERVENT_R	   /**/
+#define GETSERVENT_R_PROTO $getservent_r_proto	   /**/
 
 /* HAS_GETSERV_PROTOS:
  *	This symbol, if defined, indicates that <netdb.h> includes
@@ -1853,6 +2203,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_htonl HAS_NTOHL		/**/
 #$d_htonl HAS_NTOHS		/**/
 
+/* HAS_ILOGBL:
+ *	This symbol, if defined, indicates that the ilogbl routine is
+ *	available.  If scalbnl is also present we can emulate frexpl.
+ */
+#$d_ilogbl HAS_ILOGBL		/**/
+
 /* HAS_INT64_T:
  *     This symbol will defined if the C compiler supports int64_t.
  *     Usually the <inttypes.h> needs to be included, but sometimes
@@ -1904,6 +2260,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	for DBL_DIG, there's no good guess for LDBL_DIG if it is undefined.
  */
 #$d_ldbl_dig HAS_LDBL_DIG 	/* */
+
+/* LIBM_LIB_VERSION:
+ *	This symbol, if defined, indicates that libm exports _LIB_VERSION
+ *	and that math.h defines the enum to manipulate it.
+ */
+#$d_libm_lib_version LIBM_LIB_VERSION		/**/
 
 /* HAS_LOCALTIME_R:
  *	This symbol, if defined, indicates that the localtime_r routine
@@ -2048,6 +2410,13 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_msghdr_s HAS_STRUCT_MSGHDR	/**/
 
+/* HAS_NL_LANGINFO:
+ *	This symbol, if defined, indicates that the nl_langinfo routine is
+ *	available to return local data.  You will also need <langinfo.h>
+ *	and therefore I_LANGINFO.
+ */
+#$d_nl_langinfo HAS_NL_LANGINFO		/**/
+
 /* HAS_OFF64_T:
  *	This symbol will be defined if the C compiler supports off64_t.
  */
@@ -2059,6 +2428,20 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_open3 HAS_OPEN3		/**/
 
+/* HAS_PROCSELFEXE:
+ *	This symbol is defined if PROCSELFEXE_PATH is a symlink
+ *	to the absolute pathname of the executing program.
+ */
+/* PROCSELFEXE_PATH:
+ *	If HAS_PROCSELFEXE is defined this symbol is the filename
+ *	of the symbolic link pointing to the absolute pathname of
+ *	the executing program.
+ */
+#$d_procselfexe HAS_PROCSELFEXE	/**/
+#if defined(HAS_PROCSELFEXE) && !defined(PROCSELFEXE_PATH)
+#define PROCSELFEXE_PATH	$procselfexe	/**/
+#endif
+
 /* OLD_PTHREAD_CREATE_JOINABLE:
  *	This symbol, if defined, indicates how to create pthread
  *	in joinable (aka undetached) state.  NOTE: not defined
@@ -2068,6 +2451,19 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	and __UNDETACHED.
  */
 #$d_old_pthread_create_joinable OLD_PTHREAD_CREATE_JOINABLE $old_pthread_create_joinable /**/
+
+/* HAS_PTHREAD_ATFORK:
+ *	This symbol, if defined, indicates that the pthread_atfork routine
+ *	is available to setup fork handlers.
+ */
+#$d_pthread_atfork HAS_PTHREAD_ATFORK		/**/
+
+/* HAS_PTHREAD_ATTR_SETSCOPE:
+ *	This symbol, if defined, indicates that the pthread_attr_setscope
+ *	system call is available to set the contention scope attribute of
+ *	a thread attribute object.
+ */
+#$d_pthread_attr_setscope HAS_PTHREAD_ATTR_SETSCOPE		/**/
 
 /* HAS_PTHREAD_YIELD:
  *	This symbol, if defined, indicates that the pthread_yield 
@@ -2100,6 +2496,19 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_random_r HAS_RANDOM_R	   /**/
 #define RANDOM_R_PROTO $random_r_proto	   /**/
+
+/* HAS_READDIR64_R:
+ *	This symbol, if defined, indicates that the readdir64_r routine
+ *	is available to readdir64 re-entrantly.
+ */
+/* READDIR64_R_PROTO:
+ *	This symbol encodes the prototype of readdir64_r.
+ *	It is zero if d_readdir64_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_readdir64_r
+ *	is defined.
+ */
+#$d_readdir64_r HAS_READDIR64_R	   /**/
+#define READDIR64_R_PROTO $readdir64_r_proto	   /**/
 
 /* HAS_READDIR_R:
  *	This symbol, if defined, indicates that the readdir_r routine
@@ -2159,6 +2568,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_sbrkproto	HAS_SBRK_PROTO	/**/
 
+/* HAS_SCALBNL:
+ *	This symbol, if defined, indicates that the scalbnl routine is
+ *	available.  If ilogbl is also present we can emulate frexpl.
+ */
+#$d_scalbnl HAS_SCALBNL		/**/
+
 /* HAS_SEM:
  *	This symbol, if defined, indicates that the entire sem*(2) library is
  *	supported.
@@ -2203,17 +2618,56 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_sethent HAS_SETHOSTENT		/**/
 
+/* HAS_SETHOSTENT_R:
+ *	This symbol, if defined, indicates that the sethostent_r routine
+ *	is available to sethostent re-entrantly.
+ */
+/* SETHOSTENT_R_PROTO:
+ *	This symbol encodes the prototype of sethostent_r.
+ *	It is zero if d_sethostent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_sethostent_r
+ *	is defined.
+ */
+#$d_sethostent_r HAS_SETHOSTENT_R	   /**/
+#define SETHOSTENT_R_PROTO $sethostent_r_proto	   /**/
+
 /* HAS_SETITIMER:
  *	This symbol, if defined, indicates that the setitimer routine is
  *	available to set interval timers.
  */
 #$d_setitimer HAS_SETITIMER		/**/
 
+/* HAS_SETLOCALE_R:
+ *	This symbol, if defined, indicates that the setlocale_r routine
+ *	is available to setlocale re-entrantly.
+ */
+/* SETLOCALE_R_PROTO:
+ *	This symbol encodes the prototype of setlocale_r.
+ *	It is zero if d_setlocale_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setlocale_r
+ *	is defined.
+ */
+#$d_setlocale_r HAS_SETLOCALE_R	   /**/
+#define SETLOCALE_R_PROTO $setlocale_r_proto	   /**/
+
 /* HAS_SETNETENT:
  *	This symbol, if defined, indicates that the setnetent() routine is
  *	available.
  */
 #$d_setnent HAS_SETNETENT		/**/
+
+/* HAS_SETNETENT_R:
+ *	This symbol, if defined, indicates that the setnetent_r routine
+ *	is available to setnetent re-entrantly.
+ */
+/* SETNETENT_R_PROTO:
+ *	This symbol encodes the prototype of setnetent_r.
+ *	It is zero if d_setnetent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setnetent_r
+ *	is defined.
+ */
+#$d_setnetent_r HAS_SETNETENT_R	   /**/
+#define SETNETENT_R_PROTO $setnetent_r_proto	   /**/
 
 /* HAS_SETPROTOENT:
  *	This symbol, if defined, indicates that the setprotoent() routine is
@@ -2238,6 +2692,19 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to set process title.
  */
 #$d_setproctitle HAS_SETPROCTITLE		/**/
+
+/* HAS_SETPROTOENT_R:
+ *	This symbol, if defined, indicates that the setprotoent_r routine
+ *	is available to setprotoent re-entrantly.
+ */
+/* SETPROTOENT_R_PROTO:
+ *	This symbol encodes the prototype of setprotoent_r.
+ *	It is zero if d_setprotoent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setprotoent_r
+ *	is defined.
+ */
+#$d_setprotoent_r HAS_SETPROTOENT_R	   /**/
+#define SETPROTOENT_R_PROTO $setprotoent_r_proto	   /**/
 
 /* HAS_SETPWENT:
  *	This symbol, if defined, indicates that the setpwent routine is
@@ -2264,6 +2731,19 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_setsent HAS_SETSERVENT		/**/
 
+/* HAS_SETSERVENT_R:
+ *	This symbol, if defined, indicates that the setservent_r routine
+ *	is available to setservent re-entrantly.
+ */
+/* SETSERVENT_R_PROTO:
+ *	This symbol encodes the prototype of setservent_r.
+ *	It is zero if d_setservent_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setservent_r
+ *	is defined.
+ */
+#$d_setservent_r HAS_SETSERVENT_R	   /**/
+#define SETSERVENT_R_PROTO $setservent_r_proto	   /**/
+
 /* HAS_SETVBUF:
  *	This symbol, if defined, indicates that the setvbuf routine is
  *	available to change buffering on an open stdio stream.
@@ -2283,11 +2763,32 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_shm HAS_SHM		/**/
 
+/* Shmat_t:
+ *	This symbol holds the return type of the shmat() system call.
+ *	Usually set to 'void *' or 'char *'.
+ */
+/* HAS_SHMAT_PROTOTYPE:
+ *	This symbol, if defined, indicates that the sys/shm.h includes
+ *	a prototype for shmat().  Otherwise, it is up to the program to
+ *	guess one.  Shmat_t shmat(int, Shmat_t, int) is a good guess,
+ *	but not always right so it should be emitted by the program only
+ *	when HAS_SHMAT_PROTOTYPE is not defined to avoid conflicting defs.
+ */
+#define Shmat_t $shmattype	/**/
+#$d_shmatprototype HAS_SHMAT_PROTOTYPE	/**/
+
 /* HAS_SIGACTION:
  *	This symbol, if defined, indicates that Vr4's sigaction() routine
  *	is available.
  */
 #$d_sigaction HAS_SIGACTION	/**/
+
+/* HAS_SIGPROCMASK:
+ *	This symbol, if defined, indicates that the sigprocmask
+ *	system call is available to examine or change the signal mask
+ *	of the calling process.
+ */
+#$d_sigprocmask HAS_SIGPROCMASK		/**/
 
 /* HAS_SIGSETJMP:
  *	This variable indicates to the C program that the sigsetjmp()
@@ -2338,6 +2839,20 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_snprintf HAS_SNPRINTF	/**/
 #$d_vsnprintf HAS_VSNPRINTF	/**/
+
+/* HAS_SOCKATMARK:
+ *	This symbol, if defined, indicates that the sockatmark routine is
+ *	available to test whether a socket is at the out-of-band mark.
+ */
+#$d_sockatmark HAS_SOCKATMARK		/**/
+
+/* HAS_SOCKATMARK_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the sockatmark() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern int sockatmark(int);
+ */
+#$d_sockatmarkproto	HAS_SOCKATMARK_PROTO	/**/
 
 /* HAS_SOCKET:
  *	This symbol, if defined, indicates that the BSD socket interface is
@@ -2392,6 +2907,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_socks5_init HAS_SOCKS5_INIT		/**/
 
+/* SPRINTF_RETURNS_STRLEN:
+ *	This variable defines whether sprintf returns the length of the string
+ *	(as per the ANSI spec). Some C libraries retain compatibility with
+ *	pre-ANSI C and return a pointer to the passed in buffer; for these
+ *	this variable will be undef.
+ */
+#$d_sprintf_returns_strlen SPRINTF_RETURNS_STRLEN	/**/
+
 /* HAS_SQRTL:
  *	This symbol, if defined, indicates that the sqrtl routine is
  *	available to do long double square roots.
@@ -2423,6 +2946,22 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_srandom_r HAS_SRANDOM_R	   /**/
 #define SRANDOM_R_PROTO $srandom_r_proto	   /**/
+
+/* HAS_SETRESGID_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the setresgid() function.  Otherwise, it is up
+ *	to the program to supply one.  Good guesses are
+ *		extern int setresgid(uid_t ruid, uid_t euid, uid_t suid);
+ */
+#$d_sresgproto	HAS_SETRESGID_PROTO	/**/
+
+/* HAS_SETRESUID_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the setresuid() function.  Otherwise, it is up
+ *	to the program to supply one.  Good guesses are
+ *		extern int setresuid(uid_t ruid, uid_t euid, uid_t suid);
+ */
+#$d_sresuproto	HAS_SETRESUID_PROTO	/**/
 
 /* USE_STAT_BLOCKS:
  *	This symbol is defined if this system has a stat structure declaring
@@ -2557,6 +3096,24 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_strerror_r HAS_STRERROR_R	   /**/
 #define STRERROR_R_PROTO $strerror_r_proto	   /**/
 
+/* HAS_STRFTIME:
+ *	This symbol, if defined, indicates that the strftime routine is
+ *	available to do time formatting.
+ */
+#$d_strftime HAS_STRFTIME		/**/
+
+/* HAS_STRLCAT:
+ *	This symbol, if defined, indicates that the strlcat () routine is
+ *	available to do string concatenation.
+ */
+#$d_strlcat HAS_STRLCAT		/**/
+
+/* HAS_STRLCPY:
+ *	This symbol, if defined, indicates that the strlcpy () routine is
+ *	available to do string copying.
+ */
+#$d_strlcpy HAS_STRLCPY		/**/
+
 /* HAS_STRTOLD:
  *	This symbol, if defined, indicates that the strtold routine is
  *	available to convert strings to long doubles.
@@ -2592,6 +3149,15 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to convert strings to unsigned long longs (quads).
  */
 #$d_strtouq HAS_STRTOUQ		/**/
+
+/* HAS_SYSCALL_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the syscall() function.  Otherwise, it is up
+ *	to the program to supply one.  Good guesses are
+ *		extern int syscall(int,  ...);
+ *		extern int syscall(long, ...);
+ */
+#$d_syscallproto	HAS_SYSCALL_PROTO	/**/
 
 /* HAS_TELLDIR_PROTO:
  *	This symbol, if defined, indicates that the system provides
@@ -2631,6 +3197,27 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_tmpnam_r HAS_TMPNAM_R	   /**/
 #define TMPNAM_R_PROTO $tmpnam_r_proto	   /**/
+
+/* HAS_TTYNAME_R:
+ *	This symbol, if defined, indicates that the ttyname_r routine
+ *	is available to ttyname re-entrantly.
+ */
+/* TTYNAME_R_PROTO:
+ *	This symbol encodes the prototype of ttyname_r.
+ *	It is zero if d_ttyname_r is undef, and one of the
+ *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ttyname_r
+ *	is defined.
+ */
+#$d_ttyname_r HAS_TTYNAME_R	   /**/
+#define TTYNAME_R_PROTO $ttyname_r_proto	   /**/
+
+/* U32_ALIGNMENT_REQUIRED:
+ *	This symbol, if defined, indicates that you must access
+ *	character data through U32-aligned pointers.
+ */
+#ifndef U32_ALIGNMENT_REQUIRED
+#$d_u32align U32_ALIGNMENT_REQUIRED	/**/
+#endif
 
 /* HAS_UALARM:
  *	This symbol, if defined, indicates that the ualarm routine is
@@ -2672,6 +3259,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available for use.
  */
 #$d_unsetenv HAS_UNSETENV		/**/
+
+/* HAS_USLEEP_PROTO:
+ *	This symbol, if defined, indicates that the system provides
+ *	a prototype for the usleep() function.  Otherwise, it is up
+ *	to the program to supply one.  A good guess is
+ *		extern int usleep(useconds_t);
+ */
+#$d_usleepproto	HAS_USLEEP_PROTO	/**/
 
 /* HAS_USTAT:
  *	This symbol, if defined, indicates that the ustat system call is
@@ -2789,6 +3384,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define Groups_t $groupstype	/* Type for 2nd arg to [sg]etgroups() */
 #endif
 
+/* I_CRYPT:
+ *	This symbol, if defined, indicates that <crypt.h> exists and
+ *	should be included.
+ */
+#$i_crypt	I_CRYPT		/**/
+
 /* DB_Prefix_t:
  *	This symbol contains the type of the prefix structure element
  *	in the <db.h> header file.  In older versions of DB, it was
@@ -2819,6 +3420,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define DB_VERSION_MINOR_CFG	$db_version_minor  	/**/
 #define DB_VERSION_PATCH_CFG	$db_version_patch  	/**/
 
+/* I_FP:
+ *	This symbol, if defined, indicates that <fp.h> exists and
+ *	should be included.
+ */
+#$i_fp	I_FP		/**/
+
 /* I_FP_CLASS:
  *	This symbol, if defined, indicates that <fp_class.h> exists and
  *	should be included.
@@ -2848,6 +3455,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_inttypes   I_INTTYPES                /**/
 
+/* I_LANGINFO:
+ *	This symbol, if defined, indicates that <langinfo.h> exists and
+ *	should be included.
+ */
+#$i_langinfo	I_LANGINFO		/**/
+
 /* I_LIBUTIL:
  *	This symbol, if defined, indicates that <libutil.h> exists and
  *	should be included.
@@ -2865,6 +3478,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	should be included.
  */
 #$i_mntent	I_MNTENT		/**/
+
+/* I_NDBM:
+ *	This symbol, if defined, indicates that <ndbm.h> exists and should
+ *	be included.
+ */
+#$i_ndbm I_NDBM	/**/
 
 /* I_NETDB:
  *	This symbol, if defined, indicates that <netdb.h> exists and
@@ -3039,6 +3658,17 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_ustat	I_USTAT		/**/
 
+/* I_STDARG:
+ *	This symbol, if defined, indicates that <stdarg.h> exists and should
+ *	be included.
+ */
+/* I_VARARGS:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <varargs.h>.
+ */
+#$i_stdarg I_STDARG		/**/
+#$i_varargs I_VARARGS	/**/
+
 /* PERL_INC_VERSION_LIST:
  *	This variable specifies the list of subdirectories in over
  *	which perl.c:incpush() and lib/lib.pm will automatically
@@ -3089,6 +3719,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define Off_t $lseektype		/* <offset> type */
 #define LSEEKSIZE $lseeksize		/* <offset> size */
 #define Off_t_size $lseeksize	/* <offset> size */
+
+/* PERL_MAD:
+ *	This symbol, if defined, indicates that the Misc Attribution
+ *	Declaration code should be conditionally compiled.
+ */
+#$mad	PERL_MAD		/**/
 
 /* Free_t:
  *	This variable contains the return type of free().  It is usually
@@ -3385,6 +4021,24 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define PRIVLIB "$privlib"		/**/
 #define PRIVLIB_EXP "$privlibexp"		/**/
 
+/* CAN_PROTOTYPE:
+ *	If defined, this macro indicates that the C compiler can handle
+ *	function prototypes.
+ */
+/* _:
+ *	This macro is used to declare function parameters for folks who want
+ *	to make declarations with prototypes using a different style than
+ *	the above macros.  Use double parentheses.  For example:
+ *
+ *		int main _((int argc, char *argv[]));
+ */
+#$prototype	CAN_PROTOTYPE	/**/
+#ifdef CAN_PROTOTYPE
+#define	_(args) args
+#else
+#define	_(args) ()
+#endif
+
 /* PTRSIZE:
  *	This symbol contains the size of a pointer, so that the C preprocessor
  *	can make decisions based on it.  It will be sizeof(void *) if
@@ -3434,6 +4088,15 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	have select(), of course.
  */
 #define Select_fd_set_t 	$selecttype	/**/
+
+/* SH_PATH:
+ *	This symbol contains the full pathname to the shell used on this
+ *	on this system to execute Bourne shell scripts.  Usually, this will be
+ *	/bin/sh, though it's possible that some systems will have /bin/ksh,
+ *	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
+ *	D:/bin/sh.exe.
+ */
+#define SH_PATH "$sh"  /**/
 
 /* SIG_NAME:
  *	This symbol contains a list of signal names in order of
@@ -3619,6 +4282,15 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$use64bitall	USE_64_BIT_ALL		/**/
 #endif
 
+/* USE_FAST_STDIO:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use 'fast stdio'.
+ *	Defaults to define in Perls 5.8 and earlier, to undef later.
+ */
+#ifndef USE_FAST_STDIO
+#$usefaststdio	USE_FAST_STDIO		/**/
+#endif
+
 /* USE_LARGE_FILES:
  *	This symbol, if defined, indicates that large file support
  *	should be used when available.
@@ -3747,678 +4419,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define void int		/* is void to be avoided? */
 #define M_VOID			/* Xenix strikes again */
 #endif
-
-/* HASATTRIBUTE_FORMAT:
- *	Can we handle GCC attribute for checking printf-style formats
- */
-/* HASATTRIBUTE_MALLOC:
- *	Can we handle GCC attribute for malloc-style functions.
- */
-/* HASATTRIBUTE_NONNULL:
- *	Can we handle GCC attribute for nonnull function parms.
- */
-/* HASATTRIBUTE_NORETURN:
- *	Can we handle GCC attribute for functions that do not return
- */
-/* HASATTRIBUTE_PURE:
- *	Can we handle GCC attribute for pure functions
- */
-/* HASATTRIBUTE_UNUSED:
- *	Can we handle GCC attribute for unused variables and arguments
- */
-/* HASATTRIBUTE_WARN_UNUSED_RESULT:
- *	Can we handle GCC attribute for warning on unused results
- */
-#$d_attribute_format HASATTRIBUTE_FORMAT	/**/
-#$d_attribute_noreturn HASATTRIBUTE_NORETURN	/**/
-#$d_attribute_malloc HASATTRIBUTE_MALLOC	/**/
-#$d_attribute_nonnull HASATTRIBUTE_NONNULL	/**/
-#$d_attribute_pure HASATTRIBUTE_PURE	/**/
-#$d_attribute_unused HASATTRIBUTE_UNUSED	/**/
-#$d_attribute_warn_unused_result HASATTRIBUTE_WARN_UNUSED_RESULT	/**/
-
-/* HAS_CRYPT:
- *	This symbol, if defined, indicates that the crypt routine is available
- *	to encrypt passwords and the like.
- */
-#$d_crypt HAS_CRYPT		/**/
-
-/* SETUID_SCRIPTS_ARE_SECURE_NOW:
- *	This symbol, if defined, indicates that the bug that prevents
- *	setuid scripts from being secure is not present in this kernel.
- */
-/* DOSUID:
- *	This symbol, if defined, indicates that the C program should
- *	check the script that it is executing for setuid/setgid bits, and
- *	attempt to emulate setuid/setgid on systems that have disabled
- *	setuid #! scripts because the kernel can't do it securely.
- *	It is up to the package designer to make sure that this emulation
- *	is done securely.  Among other things, it should do an fstat on
- *	the script it just opened to make sure it really is a setuid/setgid
- *	script, it should make sure the arguments passed correspond exactly
- *	to the argument on the #! line, and it should not trust any
- *	subprocesses to which it must pass the filename rather than the
- *	file descriptor of the script to be executed.
- */
-#$d_suidsafe SETUID_SCRIPTS_ARE_SECURE_NOW	/**/
-#$d_dosuid DOSUID		/**/
-
-/* Shmat_t:
- *	This symbol holds the return type of the shmat() system call.
- *	Usually set to 'void *' or 'char *'.
- */
-/* HAS_SHMAT_PROTOTYPE:
- *	This symbol, if defined, indicates that the sys/shm.h includes
- *	a prototype for shmat().  Otherwise, it is up to the program to
- *	guess one.  Shmat_t shmat(int, Shmat_t, int) is a good guess,
- *	but not always right so it should be emitted by the program only
- *	when HAS_SHMAT_PROTOTYPE is not defined to avoid conflicting defs.
- */
-#define Shmat_t $shmattype	/**/
-#$d_shmatprototype HAS_SHMAT_PROTOTYPE	/**/
-
-/* I_NDBM:
- *	This symbol, if defined, indicates that <ndbm.h> exists and should
- *	be included.
- */
-#$i_ndbm I_NDBM	/**/
-
-/* I_STDARG:
- *	This symbol, if defined, indicates that <stdarg.h> exists and should
- *	be included.
- */
-/* I_VARARGS:
- *	This symbol, if defined, indicates to the C program that it should
- *	include <varargs.h>.
- */
-#$i_stdarg I_STDARG		/**/
-#$i_varargs I_VARARGS	/**/
-
-/* CAN_PROTOTYPE:
- *	If defined, this macro indicates that the C compiler can handle
- *	function prototypes.
- */
-/* _:
- *	This macro is used to declare function parameters for folks who want
- *	to make declarations with prototypes using a different style than
- *	the above macros.  Use double parentheses.  For example:
- *
- *		int main _((int argc, char *argv[]));
- */
-#$prototype	CAN_PROTOTYPE	/**/
-#ifdef CAN_PROTOTYPE
-#define	_(args) args
-#else
-#define	_(args) ()
-#endif
-
-/* SH_PATH:
- *	This symbol contains the full pathname to the shell used on this
- *	on this system to execute Bourne shell scripts.  Usually, this will be
- *	/bin/sh, though it's possible that some systems will have /bin/ksh,
- *	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
- *	D:/bin/sh.exe.
- */
-#define SH_PATH "$sh"  /**/
-
-/* HAS_AINTL:
- *	This symbol, if defined, indicates that the aintl routine is
- *	available.  If copysignl is also present we can emulate modfl.
- */
-#$d_aintl HAS_AINTL		/**/
-
-/* HAS_BUILTIN_CHOOSE_EXPR:
- *	Can we handle GCC builtin for compile-time ternary-like expressions
- */
-/* HAS_BUILTIN_EXPECT:
- *	Can we handle GCC builtin for telling that certain values are more
- *	likely
- */
-#$d_builtin_expect HAS_BUILTIN_EXPECT	/**/
-#$d_builtin_choose_expr HAS_BUILTIN_CHOOSE_EXPR	/**/
-
-/* HAS_CLEARENV:
- *	This symbol, if defined, indicates that the clearenv () routine is
- *	available for use.
- */
-#$d_clearenv HAS_CLEARENV		/**/
-
-/* HAS_COPYSIGNL:
- *	This symbol, if defined, indicates that the copysignl routine is
- *	available.  If aintl is also present we can emulate modfl.
- */
-#$d_copysignl HAS_COPYSIGNL		/**/
-
-/* HAS_DBMINIT_PROTO:
- *	This symbol, if defined, indicates that the system provides
- *	a prototype for the dbminit() function.  Otherwise, it is up
- *	to the program to supply one.  A good guess is
- *		extern int dbminit(char *);
- */
-#$d_dbminitproto	HAS_DBMINIT_PROTO	/**/
-
-/* HAS_DIRFD:
- *	This manifest constant lets the C program know that dirfd
- *	is available.
- */
-#$d_dirfd HAS_DIRFD		/**/
-
-/* HAS_FAST_STDIO:
- *	This symbol, if defined, indicates that the "fast stdio"
- *	is available to manipulate the stdio buffers directly.
- */
-#$d_faststdio HAS_FAST_STDIO		/**/
-
-/* HAS_FLOCK_PROTO:
- *	This symbol, if defined, indicates that the system provides
- *	a prototype for the flock() function.  Otherwise, it is up
- *	to the program to supply one.  A good guess is
- *		extern int flock(int, int);
- */
-#$d_flockproto	HAS_FLOCK_PROTO	/**/
-
-/* HAS_FPCLASSL:
- *	This symbol, if defined, indicates that the fpclassl routine is
- *	available to classify long doubles.  Available for example in IRIX.
- *	The returned values are defined in <ieeefp.h> and are:
- *
- *	FP_SNAN		signaling NaN
- *	FP_QNAN		quiet NaN
- *	FP_NINF		negative infinity
- *	FP_PINF		positive infinity
- *	FP_NDENORM	negative denormalized non-zero
- *	FP_PDENORM	positive denormalized non-zero
- *	FP_NZERO	negative zero
- *	FP_PZERO	positive zero
- *	FP_NNORM	negative normalized non-zero
- *	FP_PNORM	positive normalized non-zero
- */
-#$d_fpclassl HAS_FPCLASSL		/**/
-
-/* HAS_ILOGBL:
- *	This symbol, if defined, indicates that the ilogbl routine is
- *	available.  If scalbnl is also present we can emulate frexpl.
- */
-#$d_ilogbl HAS_ILOGBL		/**/
-
-/* LIBM_LIB_VERSION:
- *	This symbol, if defined, indicates that libm exports _LIB_VERSION
- *	and that math.h defines the enum to manipulate it.
- */
-#$d_libm_lib_version LIBM_LIB_VERSION		/**/
-
-/* HAS_NL_LANGINFO:
- *	This symbol, if defined, indicates that the nl_langinfo routine is
- *	available to return local data.  You will also need <langinfo.h>
- *	and therefore I_LANGINFO.
- */
-#$d_nl_langinfo HAS_NL_LANGINFO		/**/
-
-/* HAS_PROCSELFEXE:
- *	This symbol is defined if PROCSELFEXE_PATH is a symlink
- *	to the absolute pathname of the executing program.
- */
-/* PROCSELFEXE_PATH:
- *	If HAS_PROCSELFEXE is defined this symbol is the filename
- *	of the symbolic link pointing to the absolute pathname of
- *	the executing program.
- */
-#$d_procselfexe HAS_PROCSELFEXE	/**/
-#if defined(HAS_PROCSELFEXE) && !defined(PROCSELFEXE_PATH)
-#define PROCSELFEXE_PATH	$procselfexe	/**/
-#endif
-
-/* HAS_PTHREAD_ATTR_SETSCOPE:
- *	This symbol, if defined, indicates that the pthread_attr_setscope
- *	system call is available to set the contention scope attribute of
- *	a thread attribute object.
- */
-#$d_pthread_attr_setscope HAS_PTHREAD_ATTR_SETSCOPE		/**/
-
-/* HAS_SCALBNL:
- *	This symbol, if defined, indicates that the scalbnl routine is
- *	available.  If ilogbl is also present we can emulate frexpl.
- */
-#$d_scalbnl HAS_SCALBNL		/**/
-
-/* HAS_SIGPROCMASK:
- *	This symbol, if defined, indicates that the sigprocmask
- *	system call is available to examine or change the signal mask
- *	of the calling process.
- */
-#$d_sigprocmask HAS_SIGPROCMASK		/**/
-
-/* HAS_SOCKATMARK:
- *	This symbol, if defined, indicates that the sockatmark routine is
- *	available to test whether a socket is at the out-of-band mark.
- */
-#$d_sockatmark HAS_SOCKATMARK		/**/
-
-/* HAS_SOCKATMARK_PROTO:
- *	This symbol, if defined, indicates that the system provides
- *	a prototype for the sockatmark() function.  Otherwise, it is up
- *	to the program to supply one.  A good guess is
- *		extern int sockatmark(int);
- */
-#$d_sockatmarkproto	HAS_SOCKATMARK_PROTO	/**/
-
-/* SPRINTF_RETURNS_STRLEN:
- *	This variable defines whether sprintf returns the length of the string
- *	(as per the ANSI spec). Some C libraries retain compatibility with
- *	pre-ANSI C and return a pointer to the passed in buffer; for these
- *	this variable will be undef.
- */
-#$d_sprintf_returns_strlen SPRINTF_RETURNS_STRLEN	/**/
-
-/* HAS_SETRESGID_PROTO:
- *	This symbol, if defined, indicates that the system provides
- *	a prototype for the setresgid() function.  Otherwise, it is up
- *	to the program to supply one.  Good guesses are
- *		extern int setresgid(uid_t ruid, uid_t euid, uid_t suid);
- */
-#$d_sresgproto	HAS_SETRESGID_PROTO	/**/
-
-/* HAS_SETRESUID_PROTO:
- *	This symbol, if defined, indicates that the system provides
- *	a prototype for the setresuid() function.  Otherwise, it is up
- *	to the program to supply one.  Good guesses are
- *		extern int setresuid(uid_t ruid, uid_t euid, uid_t suid);
- */
-#$d_sresuproto	HAS_SETRESUID_PROTO	/**/
-
-/* HAS_STRFTIME:
- *	This symbol, if defined, indicates that the strftime routine is
- *	available to do time formatting.
- */
-#$d_strftime HAS_STRFTIME		/**/
-
-/* HAS_STRLCAT:
- *	This symbol, if defined, indicates that the strlcat () routine is
- *	available to do string concatenation.
- */
-#$d_strlcat HAS_STRLCAT		/**/
-
-/* HAS_STRLCPY:
- *	This symbol, if defined, indicates that the strlcpy () routine is
- *	available to do string copying.
- */
-#$d_strlcpy HAS_STRLCPY		/**/
-
-/* HAS_SYSCALL_PROTO:
- *	This symbol, if defined, indicates that the system provides
- *	a prototype for the syscall() function.  Otherwise, it is up
- *	to the program to supply one.  Good guesses are
- *		extern int syscall(int,  ...);
- *		extern int syscall(long, ...);
- */
-#$d_syscallproto	HAS_SYSCALL_PROTO	/**/
-
-/* U32_ALIGNMENT_REQUIRED:
- *	This symbol, if defined, indicates that you must access
- *	character data through U32-aligned pointers.
- */
-#ifndef U32_ALIGNMENT_REQUIRED
-#$d_u32align U32_ALIGNMENT_REQUIRED	/**/
-#endif
-
-/* HAS_USLEEP_PROTO:
- *	This symbol, if defined, indicates that the system provides
- *	a prototype for the usleep() function.  Otherwise, it is up
- *	to the program to supply one.  A good guess is
- *		extern int usleep(useconds_t);
- */
-#$d_usleepproto	HAS_USLEEP_PROTO	/**/
-
-/* I_CRYPT:
- *	This symbol, if defined, indicates that <crypt.h> exists and
- *	should be included.
- */
-#$i_crypt	I_CRYPT		/**/
-
-/* I_FP:
- *	This symbol, if defined, indicates that <fp.h> exists and
- *	should be included.
- */
-#$i_fp	I_FP		/**/
-
-/* I_LANGINFO:
- *	This symbol, if defined, indicates that <langinfo.h> exists and
- *	should be included.
- */
-#$i_langinfo	I_LANGINFO		/**/
-
-/* PERL_MAD:
- *	This symbol, if defined, indicates that the Misc Attribution
- *	Declaration code should be conditionally compiled.
- */
-#$mad	PERL_MAD		/**/
-
-/* USE_FAST_STDIO:
- *	This symbol, if defined, indicates that Perl should
- *	be built to use 'fast stdio'.
- *	Defaults to define in Perls 5.8 and earlier, to undef later.
- */
-#ifndef USE_FAST_STDIO
-#$usefaststdio	USE_FAST_STDIO		/**/
-#endif
-
-/* HAS_CTERMID_R:
- *	This symbol, if defined, indicates that the ctermid_r routine
- *	is available to ctermid re-entrantly.
- */
-/* CTERMID_R_PROTO:
- *	This symbol encodes the prototype of ctermid_r.
- *	It is zero if d_ctermid_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ctermid_r
- *	is defined.
- */
-#$d_ctermid_r HAS_CTERMID_R	   /**/
-#define CTERMID_R_PROTO $ctermid_r_proto	   /**/
-
-/* HAS_ENDHOSTENT_R:
- *	This symbol, if defined, indicates that the endhostent_r routine
- *	is available to endhostent re-entrantly.
- */
-/* ENDHOSTENT_R_PROTO:
- *	This symbol encodes the prototype of endhostent_r.
- *	It is zero if d_endhostent_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endhostent_r
- *	is defined.
- */
-#$d_endhostent_r HAS_ENDHOSTENT_R	   /**/
-#define ENDHOSTENT_R_PROTO $endhostent_r_proto	   /**/
-
-/* HAS_ENDNETENT_R:
- *	This symbol, if defined, indicates that the endnetent_r routine
- *	is available to endnetent re-entrantly.
- */
-/* ENDNETENT_R_PROTO:
- *	This symbol encodes the prototype of endnetent_r.
- *	It is zero if d_endnetent_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endnetent_r
- *	is defined.
- */
-#$d_endnetent_r HAS_ENDNETENT_R	   /**/
-#define ENDNETENT_R_PROTO $endnetent_r_proto	   /**/
-
-/* HAS_ENDPROTOENT_R:
- *	This symbol, if defined, indicates that the endprotoent_r routine
- *	is available to endprotoent re-entrantly.
- */
-/* ENDPROTOENT_R_PROTO:
- *	This symbol encodes the prototype of endprotoent_r.
- *	It is zero if d_endprotoent_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endprotoent_r
- *	is defined.
- */
-#$d_endprotoent_r HAS_ENDPROTOENT_R	   /**/
-#define ENDPROTOENT_R_PROTO $endprotoent_r_proto	   /**/
-
-/* HAS_ENDSERVENT_R:
- *	This symbol, if defined, indicates that the endservent_r routine
- *	is available to endservent re-entrantly.
- */
-/* ENDSERVENT_R_PROTO:
- *	This symbol encodes the prototype of endservent_r.
- *	It is zero if d_endservent_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_endservent_r
- *	is defined.
- */
-#$d_endservent_r HAS_ENDSERVENT_R	   /**/
-#define ENDSERVENT_R_PROTO $endservent_r_proto	   /**/
-
-/* HAS_GETHOSTBYADDR_R:
- *	This symbol, if defined, indicates that the gethostbyaddr_r routine
- *	is available to gethostbyaddr re-entrantly.
- */
-/* GETHOSTBYADDR_R_PROTO:
- *	This symbol encodes the prototype of gethostbyaddr_r.
- *	It is zero if d_gethostbyaddr_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostbyaddr_r
- *	is defined.
- */
-#$d_gethostbyaddr_r HAS_GETHOSTBYADDR_R	   /**/
-#define GETHOSTBYADDR_R_PROTO $gethostbyaddr_r_proto	   /**/
-
-/* HAS_GETHOSTBYNAME_R:
- *	This symbol, if defined, indicates that the gethostbyname_r routine
- *	is available to gethostbyname re-entrantly.
- */
-/* GETHOSTBYNAME_R_PROTO:
- *	This symbol encodes the prototype of gethostbyname_r.
- *	It is zero if d_gethostbyname_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostbyname_r
- *	is defined.
- */
-#$d_gethostbyname_r HAS_GETHOSTBYNAME_R	   /**/
-#define GETHOSTBYNAME_R_PROTO $gethostbyname_r_proto	   /**/
-
-/* HAS_GETHOSTENT_R:
- *	This symbol, if defined, indicates that the gethostent_r routine
- *	is available to gethostent re-entrantly.
- */
-/* GETHOSTENT_R_PROTO:
- *	This symbol encodes the prototype of gethostent_r.
- *	It is zero if d_gethostent_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_gethostent_r
- *	is defined.
- */
-#$d_gethostent_r HAS_GETHOSTENT_R	   /**/
-#define GETHOSTENT_R_PROTO $gethostent_r_proto	   /**/
-
-/* HAS_GETNETBYADDR_R:
- *	This symbol, if defined, indicates that the getnetbyaddr_r routine
- *	is available to getnetbyaddr re-entrantly.
- */
-/* GETNETBYADDR_R_PROTO:
- *	This symbol encodes the prototype of getnetbyaddr_r.
- *	It is zero if d_getnetbyaddr_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetbyaddr_r
- *	is defined.
- */
-#$d_getnetbyaddr_r HAS_GETNETBYADDR_R	   /**/
-#define GETNETBYADDR_R_PROTO $getnetbyaddr_r_proto	   /**/
-
-/* HAS_GETNETBYNAME_R:
- *	This symbol, if defined, indicates that the getnetbyname_r routine
- *	is available to getnetbyname re-entrantly.
- */
-/* GETNETBYNAME_R_PROTO:
- *	This symbol encodes the prototype of getnetbyname_r.
- *	It is zero if d_getnetbyname_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetbyname_r
- *	is defined.
- */
-#$d_getnetbyname_r HAS_GETNETBYNAME_R	   /**/
-#define GETNETBYNAME_R_PROTO $getnetbyname_r_proto	   /**/
-
-/* HAS_GETNETENT_R:
- *	This symbol, if defined, indicates that the getnetent_r routine
- *	is available to getnetent re-entrantly.
- */
-/* GETNETENT_R_PROTO:
- *	This symbol encodes the prototype of getnetent_r.
- *	It is zero if d_getnetent_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getnetent_r
- *	is defined.
- */
-#$d_getnetent_r HAS_GETNETENT_R	   /**/
-#define GETNETENT_R_PROTO $getnetent_r_proto	   /**/
-
-/* HAS_GETPROTOBYNAME_R:
- *	This symbol, if defined, indicates that the getprotobyname_r routine
- *	is available to getprotobyname re-entrantly.
- */
-/* GETPROTOBYNAME_R_PROTO:
- *	This symbol encodes the prototype of getprotobyname_r.
- *	It is zero if d_getprotobyname_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotobyname_r
- *	is defined.
- */
-#$d_getprotobyname_r HAS_GETPROTOBYNAME_R	   /**/
-#define GETPROTOBYNAME_R_PROTO $getprotobyname_r_proto	   /**/
-
-/* HAS_GETPROTOBYNUMBER_R:
- *	This symbol, if defined, indicates that the getprotobynumber_r routine
- *	is available to getprotobynumber re-entrantly.
- */
-/* GETPROTOBYNUMBER_R_PROTO:
- *	This symbol encodes the prototype of getprotobynumber_r.
- *	It is zero if d_getprotobynumber_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotobynumber_r
- *	is defined.
- */
-#$d_getprotobynumber_r HAS_GETPROTOBYNUMBER_R	   /**/
-#define GETPROTOBYNUMBER_R_PROTO $getprotobynumber_r_proto	   /**/
-
-/* HAS_GETPROTOENT_R:
- *	This symbol, if defined, indicates that the getprotoent_r routine
- *	is available to getprotoent re-entrantly.
- */
-/* GETPROTOENT_R_PROTO:
- *	This symbol encodes the prototype of getprotoent_r.
- *	It is zero if d_getprotoent_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getprotoent_r
- *	is defined.
- */
-#$d_getprotoent_r HAS_GETPROTOENT_R	   /**/
-#define GETPROTOENT_R_PROTO $getprotoent_r_proto	   /**/
-
-/* HAS_GETSERVBYNAME_R:
- *	This symbol, if defined, indicates that the getservbyname_r routine
- *	is available to getservbyname re-entrantly.
- */
-/* GETSERVBYNAME_R_PROTO:
- *	This symbol encodes the prototype of getservbyname_r.
- *	It is zero if d_getservbyname_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservbyname_r
- *	is defined.
- */
-#$d_getservbyname_r HAS_GETSERVBYNAME_R	   /**/
-#define GETSERVBYNAME_R_PROTO $getservbyname_r_proto	   /**/
-
-/* HAS_GETSERVBYPORT_R:
- *	This symbol, if defined, indicates that the getservbyport_r routine
- *	is available to getservbyport re-entrantly.
- */
-/* GETSERVBYPORT_R_PROTO:
- *	This symbol encodes the prototype of getservbyport_r.
- *	It is zero if d_getservbyport_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservbyport_r
- *	is defined.
- */
-#$d_getservbyport_r HAS_GETSERVBYPORT_R	   /**/
-#define GETSERVBYPORT_R_PROTO $getservbyport_r_proto	   /**/
-
-/* HAS_GETSERVENT_R:
- *	This symbol, if defined, indicates that the getservent_r routine
- *	is available to getservent re-entrantly.
- */
-/* GETSERVENT_R_PROTO:
- *	This symbol encodes the prototype of getservent_r.
- *	It is zero if d_getservent_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_getservent_r
- *	is defined.
- */
-#$d_getservent_r HAS_GETSERVENT_R	   /**/
-#define GETSERVENT_R_PROTO $getservent_r_proto	   /**/
-
-/* HAS_PTHREAD_ATFORK:
- *	This symbol, if defined, indicates that the pthread_atfork routine
- *	is available to setup fork handlers.
- */
-#$d_pthread_atfork HAS_PTHREAD_ATFORK		/**/
-
-/* HAS_READDIR64_R:
- *	This symbol, if defined, indicates that the readdir64_r routine
- *	is available to readdir64 re-entrantly.
- */
-/* READDIR64_R_PROTO:
- *	This symbol encodes the prototype of readdir64_r.
- *	It is zero if d_readdir64_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_readdir64_r
- *	is defined.
- */
-#$d_readdir64_r HAS_READDIR64_R	   /**/
-#define READDIR64_R_PROTO $readdir64_r_proto	   /**/
-
-/* HAS_SETHOSTENT_R:
- *	This symbol, if defined, indicates that the sethostent_r routine
- *	is available to sethostent re-entrantly.
- */
-/* SETHOSTENT_R_PROTO:
- *	This symbol encodes the prototype of sethostent_r.
- *	It is zero if d_sethostent_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_sethostent_r
- *	is defined.
- */
-#$d_sethostent_r HAS_SETHOSTENT_R	   /**/
-#define SETHOSTENT_R_PROTO $sethostent_r_proto	   /**/
-
-/* HAS_SETLOCALE_R:
- *	This symbol, if defined, indicates that the setlocale_r routine
- *	is available to setlocale re-entrantly.
- */
-/* SETLOCALE_R_PROTO:
- *	This symbol encodes the prototype of setlocale_r.
- *	It is zero if d_setlocale_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setlocale_r
- *	is defined.
- */
-#$d_setlocale_r HAS_SETLOCALE_R	   /**/
-#define SETLOCALE_R_PROTO $setlocale_r_proto	   /**/
-
-/* HAS_SETNETENT_R:
- *	This symbol, if defined, indicates that the setnetent_r routine
- *	is available to setnetent re-entrantly.
- */
-/* SETNETENT_R_PROTO:
- *	This symbol encodes the prototype of setnetent_r.
- *	It is zero if d_setnetent_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setnetent_r
- *	is defined.
- */
-#$d_setnetent_r HAS_SETNETENT_R	   /**/
-#define SETNETENT_R_PROTO $setnetent_r_proto	   /**/
-
-/* HAS_SETPROTOENT_R:
- *	This symbol, if defined, indicates that the setprotoent_r routine
- *	is available to setprotoent re-entrantly.
- */
-/* SETPROTOENT_R_PROTO:
- *	This symbol encodes the prototype of setprotoent_r.
- *	It is zero if d_setprotoent_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setprotoent_r
- *	is defined.
- */
-#$d_setprotoent_r HAS_SETPROTOENT_R	   /**/
-#define SETPROTOENT_R_PROTO $setprotoent_r_proto	   /**/
-
-/* HAS_SETSERVENT_R:
- *	This symbol, if defined, indicates that the setservent_r routine
- *	is available to setservent re-entrantly.
- */
-/* SETSERVENT_R_PROTO:
- *	This symbol encodes the prototype of setservent_r.
- *	It is zero if d_setservent_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_setservent_r
- *	is defined.
- */
-#$d_setservent_r HAS_SETSERVENT_R	   /**/
-#define SETSERVENT_R_PROTO $setservent_r_proto	   /**/
-
-/* HAS_TTYNAME_R:
- *	This symbol, if defined, indicates that the ttyname_r routine
- *	is available to ttyname re-entrantly.
- */
-/* TTYNAME_R_PROTO:
- *	This symbol encodes the prototype of ttyname_r.
- *	It is zero if d_ttyname_r is undef, and one of the
- *	REENTRANT_PROTO_T_ABC macros of reentr.h if d_ttyname_r
- *	is defined.
- */
-#$d_ttyname_r HAS_TTYNAME_R	   /**/
-#define TTYNAME_R_PROTO $ttyname_r_proto	   /**/
 
 #endif
 !GROK!THIS!
