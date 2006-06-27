@@ -34,7 +34,7 @@ functions much like C<use integer;> You'd like this code
     
     no myint;
     print "E: ", $l + $r, "\n";
-   
+
 to give the output
 
     A: 4.6
@@ -71,13 +71,13 @@ this:
     
     1;
 
-Note how we load the user pragma C<myint> with C<()> to prevent its C<import>
-being called.
+Note how we load the user pragma C<myint> with an empty list C<()> to
+prevent its C<import> being called.
 
-The interaction with the Perl compile happens inside package C<myint>:
+The interaction with the Perl compilation happens inside package C<myint>:
 
-package myint;
-
+    package myint;
+    
     use strict;
     use warnings;
     
@@ -117,7 +117,7 @@ for the user's code.
 
 User pragmata store their state by writing to the magical hash C<%^H>,
 hence these two routines manipulate it. The state information in C<%^H> is
-stored in the optree, and can be retrieved at runtime with C<caller>, at
+stored in the optree, and can be retrieved at runtime with C<caller()>, at
 index 10 of the list of returned results. In the example pragma, retrieval
 is encapsulated into the routine C<in_effect()>, which takes as parameter
 the number of call frames to go up to find the value of the pragma in the
