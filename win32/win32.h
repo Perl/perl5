@@ -209,6 +209,8 @@ typedef unsigned short	mode_t;
 #define PERL_MEMBER_PTR_SIZE	16
 
 #define isnan		_isnan
+#define snprintf	_snprintf
+#define vsnprintf	_vsnprintf
 
 #endif /* _MSC_VER */
 
