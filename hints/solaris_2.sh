@@ -560,7 +560,7 @@ EOM
 		    # This adds in -Wa,-xarch=v9.  I suspect that's superfluous,
 		    # since the -m64 above should do that already.  Someone
 		    # with gcc-3.x.x, please test with gcc -v.   A.D. 20-Nov-2003
-		    ccflags="$ccflags -Wa,`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
+		    # ccflags="$ccflags -Wa,`getconf XBS5_LP64_OFF64_CFLAGS 2>/dev/null`"
 		fi
 		ldflags="$ldflags -m64"
 		lddlflags="$lddlflags -G -m64"
