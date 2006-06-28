@@ -85,7 +85,8 @@ AV* HUF_get_trigger_content(SV* trigger) {
 }
 
 /* Delete an object from all field hashes it may occur in.  Also delete
- * the object's entry from the object registry.
+ * the object's entry from the object registry.  This function goes in
+ * the uf_set field of the uvar magic of a trigger.
  */
 I32 HUF_destroy_obj(pTHX_ IV index, SV* trigger) {
     /* Do nothing if the weakref wasn't undef'd.  Also don't bother
@@ -181,7 +182,6 @@ I32 HUF_watch_key(pTHX_ IV action, SV* field) {
 int HUF_get_status(HV* hash) {
     int ans = 0;
     if (hash && (SvTYPE(hash) == SVt_PVHV)) {
-        dMY_CXT;
         MAGIC* mg;
         struct ufuncs* uf;
         ans = (mg = mg_find((SV*)hash, PERL_MAGIC_uvar)) &&
@@ -294,7 +294,7 @@ CODE:
 OUTPUT:
     RETVAL
 
-SV*
+void
 _active_fields(SV* obj)
 PPCODE:
     if (SvROK(obj)) {

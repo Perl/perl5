@@ -14,10 +14,6 @@ use Test::More tests => 8;
 # see that Hash::Util::FieldHash and Hash::Util load and export what
 # they should
 
-# note to self: this test only works in the perl build environment,
-# not in my homely test environment (haven't got the right Hash::Util.pm
-# there).  mask it.
-
 BEGIN {
     use_ok( 'Hash::Util');
     ok( defined( &Hash::Util::lock_keys), "Hash::Util::lock_keys found");
