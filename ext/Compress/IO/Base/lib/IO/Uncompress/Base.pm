@@ -39,17 +39,20 @@ sub smartRead
     my $offset = 0 ;
 
 
-    if (defined *$self->{InputLength} && 
-                *$self->{InputLengthRemaining} <= 0) {
-        return 0 ;
+    if (defined *$self->{InputLength}) {
+        return 0
+            if *$self->{InputLengthRemaining} <= 0 ;
+        $size = min($size, *$self->{InputLengthRemaining});
     }
 
     if ( length *$self->{Prime} ) {
         #$$out = substr(*$self->{Prime}, 0, $size, '') ;
         $$out = substr(*$self->{Prime}, 0, $size) ;
         substr(*$self->{Prime}, 0, $size) =  '' ;
-        if (length $$out == $size || defined *$self->{InputLength}) {
-            *$self->{InputLengthRemaining} -= length $$out;
+        if (length $$out == $size) {
+            *$self->{InputLengthRemaining} -= length $$out
+                if defined *$self->{InputLength};
+
             return length $$out ;
         }
         $offset = length $$out ;
@@ -57,9 +60,9 @@ sub smartRead
 
     my $get_size = $size - $offset ;
 
-    if ( defined *$self->{InputLength} ) {
-        $get_size = min($get_size, *$self->{InputLengthRemaining});
-    }
+    #if ( defined *$self->{InputLength} ) {
+    #    $get_size = min($get_size, *$self->{InputLengthRemaining});
+    #}
 
     if (defined *$self->{FH})
       { *$self->{FH}->read($$out, $get_size, $offset) }
@@ -90,7 +93,8 @@ sub smartRead
          { *$self->{BufferOffset} += length($$out) - $offset }
     }
 
-    *$self->{InputLengthRemaining} -= length $$out;
+    *$self->{InputLengthRemaining} -= length($$out) #- $offset 
+        if defined *$self->{InputLength};
         
     $self->saveStatus(length $$out < 0 ? STATUS_ERROR : STATUS_OK) ;
 
@@ -892,13 +896,19 @@ sub gotoNextStream
     *$self->{UnCompSize}->reset();
     *$self->{CompSize}->reset();
 
-    return 0
-        unless  my $magic = $self->ckMagic();
+    my $magic = $self->ckMagic();
+
+    if ( ! $magic) {
+        *$self->{EndStream} = 1 ;
+        return 0;
+    }
+
     *$self->{Info} = $self->readHeader($magic);
 
-    return -1 
-        unless defined *$self->{Info} ;
-
+    if ( ! defined *$self->{Info} ) {
+        *$self->{EndStream} = 1 ;
+        return -1;
+    }
 
     push @{ *$self->{InfoList} }, *$self->{Info} ;
 

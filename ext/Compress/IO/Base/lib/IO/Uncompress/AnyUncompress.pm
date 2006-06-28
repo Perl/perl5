@@ -53,7 +53,8 @@ sub anyuncompress
 
 sub getExtraParams
 {
-    return ();
+    use IO::Compress::Base::Common qw(:Parse);
+    return ( 'RawInflate' => [1, 1, Parse_boolean,  0] ) ;
 }
 
 sub ckParams
@@ -86,17 +87,20 @@ sub mkUncomp
 
         *$self->{Uncomp} = $obj;
         
-         $magic = $self->ckMagic( qw( RawInflate Inflate Gunzip Unzip ) ); 
+        my @possible = qw( Inflate Gunzip Unzip );
+        unshift @possible, 'RawInflate' 
+            if $got->value('RawInflate');
 
-         if ($magic) {
+        $magic = $self->ckMagic( @possible );
+        
+        if ($magic) {
             *$self->{Info} = $self->readHeader($magic)
                 or return undef ;
 
             return 1;
-         }
+        }
      }
 
-     #foreach my $type ( qw( Bunzip2 UnLzop ) ) {
      if (defined $IO::Uncompress::Bunzip2::VERSION and
          $magic = $self->ckMagic('Bunzip2')) {
         *$self->{Info} = $self->readHeader($magic)
@@ -111,7 +115,8 @@ sub mkUncomp
 
          return 1;
      }
-     elsif (defined $IO::Uncompress::UnLzop::VERSION and
+
+     if (defined $IO::Uncompress::UnLzop::VERSION and
             $magic = $self->ckMagic('UnLzop')) {
 
         *$self->{Info} = $self->readHeader($magic)

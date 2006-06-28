@@ -422,7 +422,11 @@ sub anyUncompress
     }
 
     my $out = '';
-    my $o = new IO::Uncompress::AnyUncompress \$data, -Append => 1, Transparent => 0, @opts
+    my $o = new IO::Uncompress::AnyUncompress \$data, 
+                    Append => 1, 
+                    Transparent => 0, 
+                    RawInflate => 1,
+                    @opts
         or croak "Cannot open buffer/file: $AnyUncompressError" ;
 
     1 while $o->read($out) > 0 ;
@@ -478,7 +482,12 @@ sub getHeaders
     }
 
     my $out = '';
-    my $o = new IO::Uncompress::AnyUncompress \$data, MultiStream => 1, -Append => 1, Transparent => 0, @opts
+    my $o = new IO::Uncompress::AnyUncompress \$data, 
+                MultiStream => 1, 
+                Append => 1, 
+                Transparent => 0, 
+                RawInflate => 1,
+                @opts
         or croak "Cannot open buffer/file: $AnyUncompressError" ;
 
     1 while $o->read($out) > 0 ;

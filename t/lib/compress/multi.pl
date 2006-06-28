@@ -107,7 +107,11 @@ EOM
                     {
                         $cc = new IO::File "<$name" ;
                     }
+                    my @opts = $unc ne $UncompressClass 
+                                    ? (RawInflate => 1)
+                                    : ();
                     my $gz = new $unc($cc,
+                                   @opts,
                                    Strict      => 1,
                                    AutoClose   => 1,
                                    Append      => 1,
@@ -138,7 +142,11 @@ EOM
                     {
                         $cc = new IO::File "<$name" ;
                     }
+                    my @opts = $unc ne $UncompressClass 
+                                    ? (RawInflate => 1)
+                                    : ();
                     my $gz = new $unc($cc,
+                                   @opts,
                                    Strict      => 1,
                                    AutoClose   => 1,
                                    Append      => 1,

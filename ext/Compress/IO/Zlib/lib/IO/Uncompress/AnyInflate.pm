@@ -48,7 +48,8 @@ sub anyinflate
 
 sub getExtraParams
 {
-    return ();
+    use IO::Compress::Base::Common qw(:Parse);
+    return ( 'RawInflate' => [1, 1, Parse_boolean,  0] ) ;
 }
 
 sub ckParams
@@ -76,7 +77,11 @@ sub mkUncomp
 
     *$self->{Uncomp} = $obj;
     
-     my $magic = $self->ckMagic( qw( RawInflate Inflate Gunzip Unzip ) ); 
+     my @possible = qw( Inflate Gunzip Unzip );
+     unshift @possible, 'RawInflate' 
+        if 1 || $got->value('RawInflate');
+
+     my $magic = $self->ckMagic( @possible );
 
      if ($magic) {
         *$self->{Info} = $self->readHeader($magic)

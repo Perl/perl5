@@ -34,7 +34,7 @@ sub run
         for my $file ( 0, 1 )
         {
             title "$AnyClass(Transparent => $trans, File=>$file) with $CompressClass" ;
-            my $string = "some text";
+            my $string = "some text" x 100 ;
 
             my $buffer ;
             my $x = new $CompressClass(\$buffer) ;
@@ -53,19 +53,39 @@ sub run
                 $input = \$buffer;
             }
 
-            my $unc = new $AnyConstruct $input, Transparent => $trans  ;
+            {
+                my $unc = new $AnyConstruct $input, Transparent => $trans
+                                                    Append => 1  ;
 
-            ok $unc, "  Created $AnyClass object" 
-                or print "# $$AnyError\n";
-            my $uncomp ;
-            ok $unc->read($uncomp) > 0 
-                or print "# $$AnyError\n";
-            my $y;
-            is $unc->read($y, 1), 0, "  at eof" ;
-            ok $unc->eof(), "  at eof" ;
-            #ok $unc->type eq $Type;
+                ok $unc, "  Created $AnyClass object" 
+                    or print "# $$AnyError\n";
+                my $uncomp ;
+                1 while $unc->read($uncomp) > 0 ;
+                #ok $unc->read($uncomp) > 0 
+                #    or print "# $$AnyError\n";
+                my $y;
+                is $unc->read($y, 1), 0, "  at eof" ;
+                ok $unc->eof(), "  at eof" ;
+                #ok $unc->type eq $Type;
 
-            is $uncomp, $string, "  expected output" ;
+                is $uncomp, $string, "  expected output" ;
+            }
+
+            {
+                my $unc = new $AnyConstruct $input, Transparent => $trans,
+                                                     Append =>1  ;
+
+                ok $unc, "  Created $AnyClass object" 
+                    or print "# $$AnyError\n";
+                my $uncomp ;
+                1 while $unc->read($uncomp, 10) > 0 ;
+                my $y;
+                is $unc->read($y, 1), 0, "  at eof" ;
+                ok $unc->eof(), "  at eof" ;
+                #ok $unc->type eq $Type;
+
+                is $uncomp, $string, "  expected output" ;
+            }
         }
     }
 }
