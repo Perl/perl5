@@ -5110,37 +5110,41 @@ $   d_truncate="define"
 $   d_wait4="define"
 $   d_index="define"
 $   pidtype="pid_t"
-$   sig_name1="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM "
-$   sig_name2="TERM ABRT USR1 USR2 SPARE18 SPARE19 CHLD CONT STOP TSTP TTIN TTOU "
-$   sig_name3="DEBUG SPARE27 SPARE28 SPARE29 SPARE30 SPARE31 SPARE32 "
-$   sig_name4="WINCH "
-$   sig_namert="RTMIN RTMAX"
-$   psnwc1="""ZERO"",""HUP"",""INT"",""QUIT"",""ILL"",""TRAP"",""IOT"",""EMT"",""FPE"",""KILL"",""BUS"",""SEGV"",""SYS"","
-$   psnwc2="""PIPE"",""ALRM"",""TERM"",""ABRT"",""USR1"",""USR2"",""SPARE18"",""SPARE19"",""CHLD"",""CONT"",""STOP"",""TSTP"","
-$   psnwc3="""TTIN"",""TTOU"",""DEBUG"",""SPARE27"",""SPARE28"",""SPARE29"",""SPARE30"",""SPARE31"",""SPARE32"","
-$   psnwc4_v7_3="""WINCH"","
-$   psnwcrt="""RTMIN"",""RTMAX"",0"
-$   sig_num1="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 "
-$   sig_num_v7_3="28 "
-$   sig_numrt="33 64"
-$   sig_num_init1="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,"
-$   sig_num_init_v7_3="28,"
-$   sig_num_initrt="33,64,0"
-$   if (vms_ver .GES. "7.3")
-$   then
-$	sig_name = sig_name1 + sig_name2 + sig_name3 + sig_name4 + sig_namert
-$       sig_name_init = psnwc1 + psnwc2 + psnwc3 + psnwc4_v7_3 + psnwcrt
-$	sig_num = sig_num1 + sig_num_v7_3 + sig_numrt
-$	sig_num_init = sig_num_init1 + sig_num_v7_3 + sig_num_initrt
-$	sig_size="37"
-$   else
-$	sig_name = sig_name1 + sig_name2 + sig_name3 + sig_namert
-$       sig_name_init = psnwc1 + psnwc2 + psnwc3 + psnwcrt
-$	sig_num = sig_num1 + sig_numrt
-$	sig_num_init = sig_num_init1 + sig_num_initrt
-$	sig_size="36"
-$   endif
-$   sig_count="64"
+$   sig_name1="ZERO HUP INT QUIT ILL TRAP ABRT EMT FPE KILL BUS SEGV SYS PIPE"
+$   sig_name2=" ALRM TERM USR1 USR2 NUM18 NUM19 CHLD CONT STOP TSTP TTIN TTOU DEBUG"
+$   IF (vms_ver .GES. "7.3")
+$   THEN
+$     sig_name2 = sig_name2 + " NUM27 WINCH"
+$   ENDIF
+$!* signal.h defines SIGRTMIN as 33 and SIGRTMAX as 64, but there is no 
+$!* sigqueue function or other apparent means to do realtime signalling,
+$!* so let's not try to include the realtime range for now.
+$!* sig_name3=" NUM29 NUM30 NUM31 NUM32 RTMIN NUM34 NUM35 NUM36 NUM37 NUM38 NUM39 NUM40 NUM41 NUM42 NUM43"
+$!* sig_name4=" NUM44 NUM45 NUM46 NUM47 NUM48 NUM49 NUM50 NUM51 NUM52 NUM53 NUM54 NUM55 NUM56 NUM57 NUM58"
+$!* sig_name5=" NUM59 NUM60 NUM61 NUMT62 NUM63 RTMAX"
+$   sig_name = sig_name1 + sig_name2
+$   sig_num = ""
+$   sig_num_init = ""
+$   sig_name_init = ""
+$   sig_index = 0
+$!
+$ PARSE_SIG_NAME_LOOP:
+$!
+$   tmp = F$ELEMENT(sig_index, " ", sig_name)
+$   IF F$LENGTH(F$EDIT(tmp,"TRIM")) .eq. 0 THEN GOTO END_SIG_NAME_LOOP
+$   sig_name_init = sig_name_init + """''tmp'"","
+$   sig_num = sig_num + "''sig_index' "
+$   sig_num_init = sig_num_init + "''sig_index',"
+$   sig_index = sig_index + 1
+$   GOTO PARSE_SIG_NAME_LOOP
+$!
+$ END_SIG_NAME_LOOP:
+$!
+$   sig_name_init = sig_name_init + "0"
+$   sig_num_init = sig_num_init + "0"
+$   sig_size = "''sig_index'"
+$   sig_index = sig_index - 1
+$   sig_count = "''sig_index'"
 $   uidtype="uid_t"
 $   d_pathconf="define"
 $   d_fpathconf="define"
@@ -5515,20 +5519,12 @@ $   THEN
 $       echo4 "Yep, we can."
 $       kill_by_sigprc = "define"
 $!
-$!      since SIGBUS and SIGSEGV indistinguishable, make them the same here.
-$!      sigusr1 and sigusr2 show up in VMS6.2 and later
+$!	Use the same list of signals the CRTL does for recent systems, but cook our own for very old systems.
+$!	Note that the list controls what signals can be caught by name as well as what can be raised via kill().
 $!
-$       if  vms_ver .GES. "6.2"
-$       then
-$           sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT USR1 USR2"
-$           psnwc1="""ZERO"",""HUP"",""INT"",""QUIT"",""ILL"",""TRAP"",""IOT"",""EMT"",""FPE"",""KILL"",""BUS"",""SEGV"",""SYS"","
-$           psnwc2="""PIPE"",""ALRM"",""TERM"",""ABRT"",""USR1"",""USR2"",0"
-$           sig_name_init = psnwc1 + psnwc2
-$           sig_num="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 6 16 17"
-$           sig_num_init="0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,6,16,17,0"
-$           sig_size="19"
-$	    sig_count="17"
-$       else
+$       if  vms_ver .LT. "6.2"
+$	then
+$!          since SIGBUS and SIGSEGV indistinguishable, make them the same here.
 $           sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT"
 $           psnwc1="""ZERO"",""HUP"",""INT"",""QUIT"",""ILL"",""TRAP"",""IOT"",""EMT"",""FPE"",""KILL"",""BUS"",""SEGV"",""SYS"","
 $           psnwc2="""PIPE"",""ALRM"",""TERM"",""ABRT"",0"
@@ -6280,8 +6276,15 @@ $ WC "sh='MCR'"
 $ WC "shmattype='" + " '"
 $ WC "shortsize='" + shortsize + "'"
 $ WC "shrplib='define'"
-$ WC "sig_name='" + sig_name + "'"
-$ IF (f$length(sig_name_init) .GE. 1024)
+$ IF (f$length(sig_name) .GE. 244)
+$ THEN
+$     tmp = "sig_name='" + sig_name + "'"
+$     WC/symbol tmp
+$     DELETE/SYMBOL tmp
+$ ELSE
+$     WC "sig_name='" + sig_name + "'"
+$ ENDIF
+$ IF (f$length(sig_name_init) .GE. 244)
 $ THEN
 $     tmp = "sig_name_init='" + sig_name_init + "'"
 $     WC/symbol tmp

@@ -2163,7 +2163,7 @@ Perl_my_sigaction (pTHX_ int sig, const struct sigaction* act,
    than signalling with an unrecognized (and unhandled by CRTL) code.
 */
 
-#define _MY_SIG_MAX 17
+#define _MY_SIG_MAX 28
 
 static unsigned int
 Perl_sig_to_vmscondition_int(int sig)
@@ -2191,7 +2191,18 @@ Perl_sig_to_vmscondition_int(int sig)
         SS$_ASTFLT,         /* 14 SIGALRM  */
         4,                  /* 15 SIGTERM  */
         0,                  /* 16 SIGUSR1  */
-        0                   /* 17 SIGUSR2  */
+        0,                  /* 17 SIGUSR2  */
+        0,                  /* 18 */
+        0,                  /* 19 */
+        0,                  /* 20 SIGCHLD  */
+        0,                  /* 21 SIGCONT  */
+        0,                  /* 22 SIGSTOP  */
+        0,                  /* 23 SIGTSTP  */
+        0,                  /* 24 SIGTTIN  */
+        0,                  /* 25 SIGTTOU  */
+        0,                  /* 26 */
+        0,                  /* 27 */
+        0                   /* 28 SIGWINCH  */
     };
 
 #if __VMS_VER >= 60200000
@@ -2200,6 +2211,12 @@ Perl_sig_to_vmscondition_int(int sig)
         initted = 1;
         sig_code[16] = C$_SIGUSR1;
         sig_code[17] = C$_SIGUSR2;
+#if __CRTL_VER >= 70000000
+        sig_code[20] = C$_SIGCHLD;
+#endif
+#if __CRTL_VER >= 70300000
+        sig_code[28] = C$_SIGWINCH;
+#endif
     }
 #endif
 
