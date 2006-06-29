@@ -2567,6 +2567,9 @@ typedef struct clone_params CLONE_PARAMS;
  * http://www.ohse.de/uwe/articles/gcc-attributes.html,
  * but contrary to this information warn_unused_result seems
  * not to be in gcc 3.3.5, at least. --jhi
+ * Also, when building extensions with an installed perl, this allows
+ * the user to upgrade gcc and get the right attributes, rather than
+ * relying on the list generated at Configure time.  --AD
  * Set these up now otherwise we get confused when some of the <*thread.h>
  * includes below indirectly pull in <perlio.h> (which needs to know if we
  * have HASATTRIBUTE_FORMAT).
@@ -2588,7 +2591,8 @@ typedef struct clone_params CLONE_PARAMS;
 #  if __GNUC__ >= 3 /* gcc 3.0 -> */
 #    define HASATTRIBUTE_PURE
 #  endif
-#  if __GNUC__ >= 3 /* gcc 3.0 -> */ /* XXX Verify this version */
+#  if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
+     /* This actually works for gcc-3.3, but not for g++-3.3. */
 #    define HASATTRIBUTE_UNUSED
 #  endif
 #  if __GNUC__ == 3 && __GNUC_MINOR__ >= 4 || __GNUC__ > 3 /* 3.4 -> */
