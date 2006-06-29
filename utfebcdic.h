@@ -337,7 +337,7 @@ EXTCONST unsigned char PL_a2e[];
 
 END_EXTERN_C
 
-#define UTF8SKIP(s) PL_utf8skip[*(const U8*)s]
+#define UTF8SKIP(s) PL_utf8skip[*(const U8*)(s)]
 
 /* EBCDIC-happy ways of converting native code to UTF-8 */
 
