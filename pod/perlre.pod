@@ -71,12 +71,13 @@ character is also treated as a metacharacter introducing a comment,
 just as in ordinary Perl code.  This also means that if you want real
 whitespace or C<#> characters in the pattern (outside a character
 class, where they are unaffected by C</x>), that you'll either have to 
-escape them or encode them using octal or hex escapes.  Taken together,
-these features go a long way towards making Perl's regular expressions
-more readable.  Note that you have to be careful not to include the
-pattern delimiter in the comment--perl has no way of knowing you did
-not intend to close the pattern early.  See the C-comment deletion code
-in L<perlop>.
+escape them (using blackslashes or C<\Q \E>) or encode them using octal
+or hex escapes.  Taken together, these features go a long way towards 
+making Perl's regular expressions more readable.  Note that you have to 
+be careful not to include the pattern delimiter in the comment--perl has 
+no way of knowing you did not intend to close the pattern early.  See 
+the C-comment deletion code in L<perlop>.  Also note that anything inside 
+a C<\Q...\E> stays unaffected by C</x>.
 X</x>
 
 =head2 Regular Expressions
