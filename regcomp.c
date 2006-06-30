@@ -1878,9 +1878,11 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
     regnode *stop = scan;
     GET_RE_DEBUG_FLAGS_DECL;
 #else
+    PERL_UNUSED_ARG(depth);
+#endif
+#ifndef EXPERIMENTAL_INPLACESCAN
     PERL_UNUSED_ARG(flags);
     PERL_UNUSED_ARG(val);
-    PERL_UNUSED_ARG(depth);
 #endif
     DEBUG_PEEP("join",scan,depth);
     
@@ -1894,7 +1896,6 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
         if (OP(n) == TAIL || n > next)
             stringok = 0;
         if (PL_regkind[OP(n)] == NOTHING) {
-        
             DEBUG_PEEP("skip:",n,depth);
             NEXT_OFF(scan) += NEXT_OFF(n);
             next = n + NODE_STEP_REGNODE;
@@ -1925,17 +1926,17 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
             if (stopnow) break;
         }
 
-#ifdef  EXPERIMENTAL_INPLACESCAN
-        if (flags && !NEXT_OFF(n)) {
-            DEBUG_PEEP("atch",val,depth);            
-            if (reg_off_by_arg[OP(n)]) {
-	        ARG_SET(n, val - n);
-            }
-            else {
-	        NEXT_OFF(n) = val - n;
-            }
-            stopnow=1;
-        }            
+#ifdef EXPERIMENTAL_INPLACESCAN
+	if (flags && !NEXT_OFF(n)) {
+	    DEBUG_PEEP("atch", val, depth);
+	    if (reg_off_by_arg[OP(n)]) {
+		ARG_SET(n, val - n);
+	    }
+	    else {
+		NEXT_OFF(n) = val - n;
+	    }
+	    stopnow = 1;
+	}
 #endif
     }
     
