@@ -245,7 +245,7 @@ void
 perl_construct(pTHXx)
 {
     dVAR;
-    PERL_UNUSED_CONTEXT;
+    PERL_UNUSED_ARG(my_perl);
 #ifdef MULTIPLICITY
     init_interp();
     PL_perl_destruct_level = 1;
@@ -545,7 +545,7 @@ perl_destruct(pTHXx)
     pid_t child;
 #endif
 
-    PERL_UNUSED_CONTEXT;
+    PERL_UNUSED_ARG(my_perl);
 
     /* wait for all pseudo-forked children to finish */
     PERL_WAIT_FOR_CHILDREN;
@@ -1454,7 +1454,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
     int ret;
     dJMPENV;
 
-    PERL_UNUSED_VAR(my_perl);
+    PERL_UNUSED_ARG(my_perl);
 
 #ifdef SETUID_SCRIPTS_ARE_SECURE_NOW
 #ifdef IAMSUID
@@ -2294,7 +2294,7 @@ perl_run(pTHXx)
     int ret = 0;
     dJMPENV;
 
-    PERL_UNUSED_CONTEXT;
+    PERL_UNUSED_ARG(my_perl);
 
     oldscope = PL_scopestack_ix;
 #ifdef VMS
