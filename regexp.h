@@ -269,12 +269,14 @@ typedef struct regmatch_state {
 
 	struct {
 	    I32 paren;
-	    CHECKPOINT lastcp;
+	    CHECKPOINT cp;
 	    I32 c1, c2;		/* case fold search */
-	    char *e;
-	    char *old;
+	    char *maxpos;	/* highest possible point in string to match */
+	    char *oldloc;	/* the previous locinput */
 	    int count;
-	} plus; /* and CURLYN/CURLY/STAR */
+	    int min, max;	/* {m,n} */
+	    regnode *A, *B;	/* the nodes corresponding to /A*B/  */
+	} curly; /* and CURLYN/PLUS/STAR */
 
 	struct {
 	    /* this first element must match u.yes */
