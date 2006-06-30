@@ -43,6 +43,7 @@ while (@{$optref} && $optref->[0] =~ /^([\w_]+)=(.*)$/) {
 }
 
 FindExt::scan_ext("../ext");
+FindExt::scan_ext("ext");
 FindExt::set_static_extensions(split ' ', $opt{'static_ext'});
 
 my @dynamic_ext = grep(!/Thread/,FindExt::dynamic_ext());

@@ -892,7 +892,8 @@ DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Sys/Hostname Storable Filter/Util/Call Encode \
 		Digest/MD5 Digest/SHA PerlIO/scalar MIME/Base64 Time/HiRes \
-		Unicode/Normalize Math/BigInt/FastCalc Compress/Zlib Win32
+		Unicode/Normalize Math/BigInt/FastCalc Compress/Zlib Win32 \
+		Win32API/File
 STATIC_EXT	= 
 NONXS_EXT	= Errno
 
@@ -1332,6 +1333,8 @@ distclean: realclean
 	-del /f $(LIBDIR)\Unicode\Normalize.pm
 	-del /f $(LIBDIR)\Math\BigInt\FastCalc.pm
 	-del /f $(LIBDIR)\Win32.pm
+	-del /f $(LIBDIR)\Win32API\File.pm
+	-del /f $(LIBDIR)\Win32API\File\cFile.pc
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B
 	-if exist $(LIBDIR)\Compress rmdir /s /q $(LIBDIR)\Compress
 	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data
@@ -1347,6 +1350,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\Sys rmdir /s /q $(LIBDIR)\Sys
 	-if exist $(LIBDIR)\threads rmdir /s /q $(LIBDIR)\threads
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
+	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-cd $(PODDIR) && del /f *.html *.bat checkpods \
 	    perlaix.pod perlamiga.pod perlapollo.pod perlbeos.pod \
 	    perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \

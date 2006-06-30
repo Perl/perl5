@@ -3702,6 +3702,20 @@ win32/dl_win32.xs		Win32 port
 win32/ext/Win32/Makefile.PL	Win32 extension makefile writer
 win32/ext/Win32/Win32.pm	Win32 extension Perl module
 win32/ext/Win32/Win32.xs	Win32 extension external subroutines
+win32/ext/Win32API/File/buffers.h			Win32API::File extension
+win32/ext/Win32API/File/cFile.h				Win32API::File extension
+win32/ext/Win32API/File/cFile.pc			Win32API::File extension
+win32/ext/Win32API/File/Changes				Win32API::File extension changes
+win32/ext/Win32API/File/const2perl.h			Win32API::File extension
+win32/ext/Win32API/File/ExtUtils/Myconst2perl.pm	Win32API::File extension
+win32/ext/Win32API/File/File.pm				Win32API::File extension
+win32/ext/Win32API/File/File.xs				Win32API::File extension
+win32/ext/Win32API/File/Makefile.PL			Win32API::File extension makefile write
+win32/ext/Win32API/File/ppport.h			Win32API::File extension
+win32/ext/Win32API/File/README				Win32API::File extension Readme
+win32/ext/Win32API/File/t/file.t			See if Win32API::File extension works
+win32/ext/Win32API/File/t/tie.t				See if Win32API::File extension works
+win32/ext/Win32API/File/typemap				Win32API::File extension interface types
 win32/fcrypt.c			crypt() implementation
 win32/FindExt.pm		Scan for extensions
 win32/genmk95.pl		Perl code to generate command.com-usable makefile.95

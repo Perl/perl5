@@ -773,6 +773,7 @@ UNICODENORMALIZE	= $(EXTDIR)\Unicode\Normalize\Normalize
 MATHBIGINTFASTCALC	= $(EXTDIR)\Math\BigInt\FastCalc\FastCalc
 COMPRESSZLIB		= $(EXTDIR)\Compress\Zlib\Zlib
 WIN32_DIR		= ext\Win32
+WIN32APIFILE		= ext\Win32API\File\File
 
 SOCKET_DLL		= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL		= $(AUTODIR)\Fcntl\Fcntl.dll
@@ -808,6 +809,7 @@ UNICODENORMALIZE_DLL	= $(AUTODIR)\Unicode\Normalize\Normalize.dll
 MATHBIGINTFASTCALC_DLL	= $(AUTODIR)\Math\BigInt\FastCalc\FastCalc.dll
 COMPRESSZLIB_DLL	= $(AUTODIR)\Compress\Zlib\Zlib.dll
 WIN32_DLL		= $(AUTODIR)\Win32\Win32.dll
+WIN32APIFILE_DLL	= $(AUTODIR)\Win32API\File\File.dll
 
 EXTENSION_C	= 		\
 		$(SOCKET).c	\
@@ -843,7 +845,8 @@ EXTENSION_C	= 		\
 		$(UNICODENORMALIZE).c	\
 		$(MATHBIGINTFASTCALC).c	\
 		$(COMPRESSZLIB).c	\
-		$(WIN32_DIR).c
+		$(WIN32_DIR).c	\
+		$(WIN32APIFILE).c
 
 EXTENSION_DLL	= 		\
 		$(SOCKET_DLL)	\
@@ -879,7 +882,8 @@ EXTENSION_DLL	= 		\
 		$(UNICODENORMALIZE_DLL)	\
 		$(MATHBIGINTFASTCALC_DLL)	\
 		$(COMPRESSZLIB_DLL)	\
-		$(WIN32_DLL)
+		$(WIN32_DLL)	\
+		$(WIN32APIFILE_DLL)
 
 CFG_VARS	=					\
 		"INST_DRV=$(INST_DRV)"			\
@@ -1194,6 +1198,8 @@ distclean: realclean
 	-del /f $(LIBDIR)\Unicode\Normalize.pm
 	-del /f $(LIBDIR)\Math\BigInt\FastCalc.pm
 	-del /f $(LIBDIR)\Win32.pm
+	-del /f $(LIBDIR)\Win32API\File.pm
+	-del /f $(LIBDIR)\Win32API\File\cFile.pc
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B
 	-if exist $(LIBDIR)\Compress rmdir /s /q $(LIBDIR)\Compress
 	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data
@@ -1209,6 +1215,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\Sys rmdir /s /q $(LIBDIR)\Sys
 	-if exist $(LIBDIR)\threads rmdir /s /q $(LIBDIR)\threads
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
+	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-cd $(PODDIR) && del /f *.html *.bat checkpods \
 	    perlaix.pod perlamiga.pod perlapollo.pod perlbeos.pod \
 	    perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \

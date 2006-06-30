@@ -142,8 +142,9 @@ unless (@ARGV) {
     }
     my $mani = File::Spec->catfile($updir, "MANIFEST");
     if (open(MANI, $mani)) {
+	my $ext_pat = $^O eq 'MSWin32' ? '(?:win32/)?ext' : 'ext';
 	while (<MANI>) { # similar code in t/harness
-	    if (m!^(ext/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\s!) {
+	    if (m!^($ext_pat/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\s!) {
 		my $t = $1;
 		my $extension = $2;
 		if (!$::core || $t =~ m!^lib/[a-z]!)
