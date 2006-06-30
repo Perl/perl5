@@ -30,6 +30,9 @@ TODO are completed.
 =over
 
 =item *
+Implement L</state variables> (mostly done currently)
+
+=item *
 
 Review assertions. Review syntax to combine assertions. Assertions could take
 advantage of the lexical pragmas work. L</What hooks would assertions need?>
@@ -47,9 +50,6 @@ C<encoding> should, too (probably).
 
 =item *
 Implement L</_ prototype character>
-
-=item *
-Implement L</state variables>
 
 =back
 
