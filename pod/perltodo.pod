@@ -30,6 +30,7 @@ TODO are completed.
 =over
 
 =item *
+
 Implement L</state variables> (mostly done currently)
 
 =item *
@@ -49,7 +50,12 @@ C<encoding> should, too (probably).
 =over
 
 =item *
+
 Implement L</_ prototype character>
+
+=item *
+
+Review smart match semantics in light of Perl 6 developments.
 
 =back
 
