@@ -3,10 +3,14 @@
 require 5.003;	# keep this compatible, an old perl is all we may have before
                 # we build the new one
 
+use strict;
+
 BEGIN {
     # Get function prototypes
     require 'regen_lib.pl';
 }
+
+my $SPLINT = 0; # Turn true for experimental splint support http://www.splint.org
 
 #
 # See database of global and static function prototypes in embed.fnc
@@ -155,13 +159,25 @@ sub write_protos {
 	my ($flags,$retval,$func,@args) = @_;
 	my @nonnull;
 	my $has_context = ( $flags !~ /n/ );
-	$ret .= '/* ' if $flags =~ /m/;
+	my $never_returns = ( $flags =~ /r/ );
+	my $commented_out = ( $flags =~ /m/ );
+	my $is_malloc = ( $flags =~ /a/ );
+	my $can_ignore = ( $flags !~ /R/ ) && !$is_malloc;
+
+	my $splint_flags = "";
+	if ( $SPLINT && !$commented_out ) {
+	    $splint_flags .= '/*@noreturn@*/ ' if $never_returns;
+	    if ($can_ignore && ($retval ne 'void') && ($retval !~ /\*/)) {
+		$retval .= " /*\@alt void\@*/";
+	    }
+	}
+
 	if ($flags =~ /s/) {
-	    $retval = "STATIC $retval";
+	    $retval = "STATIC $splint_flags$retval";
 	    $func = "S_$func";
 	}
 	else {
-	    $retval = "PERL_CALLCONV $retval";
+	    $retval = "PERL_CALLCONV $splint_flags$retval";
 	    if ($flags =~ /p/) {
 		$func = "Perl_$func";
 	    }
@@ -182,10 +198,11 @@ sub write_protos {
 		# Given the bugs fixed by changes 25822 and 26253, for now
 		# strip NN with no effect, until I'm confident that there are
 		# no similar bugs lurking.
-		# push( @nonnull, $n ) if ( $arg =~ s/\s*\bNN\b\s+// );
-		$arg =~ s/\s*\bNN\b\s+//;
 
-		$arg =~ s/\s*\bNULLOK\b\s+//; # strip NULLOK with no effect
+		my $nn = ( $arg =~ s/\s*\bNN\b\s+// );
+		# push( @nonnull, $n ) if $nn;
+
+		my $nullok = ( $arg =~ s/\s*\bNULLOK\b\s+// ); # strip NULLOK with no effect
 
 		# Make sure each arg has at least a type and a var name.
 		# An arg of "int" is valid C, but want it to be "int foo".
@@ -194,6 +211,9 @@ sub write_protos {
 		$temp_arg =~ s/\s*\bstruct\b\s*/ /g;
 		if ( ($temp_arg ne "...") && ($temp_arg !~ /\w+\s+\w+/) ) {
 		    warn "$func: $arg doesn't have a name\n";
+		}
+		if ( $SPLINT && $nullok && !$commented_out ) {
+		    $arg = '/*@null@*/ ' . $arg;
 		}
 	    }
 	    $ret .= join ", ", @args;
@@ -206,11 +226,10 @@ sub write_protos {
 	if ( $flags =~ /r/ ) {
 	    push @attrs, "__attribute__noreturn__";
 	}
-	if ( $flags =~ /a/ ) {
+	if ( $is_malloc ) {
 	    push @attrs, "__attribute__malloc__";
-	    $flags .= "R"; # All allocing must check return value
 	}
-	if ( $flags =~ /R/ ) {
+	if ( !$can_ignore ) {
 	    push @attrs, "__attribute__warn_unused_result__";
 	}
 	if ( $flags =~ /P/ ) {
@@ -235,7 +254,7 @@ sub write_protos {
 	    $ret .= join( "\n", map { "\t\t\t$_" } @attrs );
 	}
 	$ret .= ";";
-	$ret .= ' */' if $flags =~ /m/;
+	$ret = "/* $ret */" if $commented_out;
 	$ret .= @attrs ? "\n\n" : "\n";
     }
     $ret;
@@ -328,6 +347,7 @@ sub readvars(\%$$@) {
 
 my %intrp;
 my %thread;
+my %globvar;
 
 readvars %intrp,  'intrpvar.h','I';
 readvars %thread, 'thrdvar.h','T';
