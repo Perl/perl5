@@ -906,7 +906,7 @@ DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
 		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
 		Sys/Hostname Storable Filter/Util/Call Encode \
 		Digest/MD5 PerlIO/scalar MIME/Base64 Time/HiRes \
-		Unicode/Normalize Win32
+		Unicode/Normalize Compress/Zlib Win32API/File
 STATIC_EXT	= 
 NONXS_EXT	= Errno
 
@@ -1344,6 +1344,8 @@ distclean: realclean
 	-del /f $(LIBDIR)\Time\HiRes.pm
 	-del /f $(LIBDIR)\Unicode\Normalize.pm
 	-del /f $(LIBDIR)\Win32.pm
+	-del /f $(LIBDIR)\Win32API\File.pm
+	-del /f $(LIBDIR)\Win32API\File\cFile.pc
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B
 	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data
 	-if exist $(LIBDIR)\Encode rmdir /s /q $(LIBDIR)\Encode
@@ -1357,6 +1359,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\Sys rmdir /s /q $(LIBDIR)\Sys
 	-if exist $(LIBDIR)\threads rmdir /s /q $(LIBDIR)\threads
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
+	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-cd $(PODDIR) && del /f *.html *.bat checkpods \
 	    perlaix.pod perlamiga.pod perlapollo.pod perlbeos.pod \
 	    perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \

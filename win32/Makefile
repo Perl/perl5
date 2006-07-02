@@ -788,6 +788,7 @@ XSAPITEST		= $(EXTDIR)\XS\APItest\APItest
 XSTYPEMAP		= $(EXTDIR)\XS\Typemap\Typemap
 UNICODENORMALIZE	= $(EXTDIR)\Unicode\Normalize\Normalize
 WIN32_DIR		= ext\Win32
+WIN32APIFILE		= ext\Win32API\File\File
 
 SOCKET_DLL		= $(AUTODIR)\Socket\Socket.dll
 FCNTL_DLL		= $(AUTODIR)\Fcntl\Fcntl.dll
@@ -820,6 +821,7 @@ XSAPITEST_DLL		= $(AUTODIR)\XS\APItest\APItest.dll
 XSTYPEMAP_DLL		= $(AUTODIR)\XS\Typemap\Typemap.dll
 UNICODENORMALIZE_DLL	= $(AUTODIR)\Unicode\Normalize\Normalize.dll
 WIN32_DLL		= $(AUTODIR)\Win32\Win32.dll
+WIN32APIFILE_DLL	= $(AUTODIR)\Win32API\File\File.dll
 
 EXTENSION_C	= 		\
 		$(SOCKET).c	\
@@ -852,7 +854,8 @@ EXTENSION_C	= 		\
 		$(XSAPITEST).c	\
 		$(XSTYPEMAP).c	\
 		$(UNICODENORMALIZE).c	\
-		$(WIN32_DIR).c
+		$(WIN32_DIR).c	\
+		$(WIN32APIFILE).c
 
 EXTENSION_DLL	= 		\
 		$(SOCKET_DLL)	\
@@ -885,7 +888,8 @@ EXTENSION_DLL	= 		\
 		$(XSAPITEST_DLL)	\
 		$(XSTYPEMAP_DLL)	\
 		$(UNICODENORMALIZE_DLL)	\
-		$(WIN32_DLL)
+		$(WIN32_DLL)	\
+		$(WIN32APIFILE_DLL)
 
 CFG_VARS	=					\
 		"INST_DRV=$(INST_DRV)"			\
@@ -1190,6 +1194,8 @@ distclean: realclean
 	-del /f $(LIBDIR)\Time\HiRes.pm
 	-del /f $(LIBDIR)\Unicode\Normalize.pm
 	-del /f $(LIBDIR)\Win32.pm
+	-del /f $(LIBDIR)\Win32API\File.pm
+	-del /f $(LIBDIR)\Win32API\File\cFile.pc
 	-if exist $(LIBDIR)\B rmdir /s /q $(LIBDIR)\B
 	-if exist $(LIBDIR)\Data rmdir /s /q $(LIBDIR)\Data
 	-if exist $(LIBDIR)\Encode rmdir /s /q $(LIBDIR)\Encode
@@ -1206,6 +1212,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\Sys rmdir /s /q $(LIBDIR)\Sys
 	-if exist $(LIBDIR)\threads rmdir /s /q $(LIBDIR)\threads
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
+	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-cd $(PODDIR) && del /f *.html *.bat checkpods \
 	    perlaix.pod perlamiga.pod perlapollo.pod perlbeos.pod \
 	    perlbs2000.pod perlce.pod perlcn.pod perlcygwin.pod \

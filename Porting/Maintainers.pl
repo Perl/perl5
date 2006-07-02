@@ -58,7 +58,9 @@ package Maintainers;
 	'smccam'	=> 'Stephen McCamant <smccam@cpan.org>',
 	'tels'		=> 'perl_dummy a-t bloodgate.com',
 	'tomhughes'	=> 'Tom Hughes <tomhughes@cpan.org>',
-	'tjenness'	=> 'Tim Jenness <tjenness@cpan.org>'
+	'tjenness'	=> 'Tim Jenness <tjenness@cpan.org>',
+	'tyemq'		=> 'Tye McQueen <tyemq@cpan.org>',
+	'yves'		=> 'Yves Orton <yves@cpan.org>',
 	);
 
 # The FILES is either filenames, or glob patterns, or directory
@@ -652,6 +654,13 @@ package Maintainers;
 		'MAINTAINER'	=> 'jand',
 		'FILES'		=> q[win32 README.win32 t/win32],
 		'CPAN'		=> 0,
+		},
+
+	'Win32API::File' =>
+		{
+		'MAINTAINER'	=> 'tyemq',
+		'FILES'		=> q[win32/ext/Win32API/File],
+		'CPAN'		=> 1,
 		},
 
 	'XSLoader' =>
