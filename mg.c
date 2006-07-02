@@ -272,7 +272,7 @@ Perl_mg_length(pTHX_ SV *sv)
 
     if (DO_UTF8(sv)) {
         const U8 *s = (U8*)SvPV_const(sv, len);
-        len = Perl_utf8_length(aTHX_ s, s + len);
+	len = utf8_length(s, s + len);
     }
     else
         (void)SvPV_const(sv, len);
@@ -531,7 +531,7 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 		    if (i > 0 && RX_MATCH_UTF8(rx)) {
 			const char * const b = rx->subbeg;
 			if (b)
-			    i = Perl_utf8_length(aTHX_ (U8*)b, (U8*)(b+i));
+			    i = utf8_length((U8*)b, (U8*)(b+i));
 		    }
 
 		    sv_setiv(sv, i);
@@ -819,10 +819,11 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             else if (PL_compiling.cop_warnings == pWARN_ALL) {
 		/* Get the bit mask for $warnings::Bits{all}, because
 		 * it could have been extended by warnings::register */
-		SV **bits_all;
 		HV * const bits=get_hv("warnings::Bits", FALSE);
-		if (bits && (bits_all=hv_fetchs(bits, "all", FALSE))) {
-		    sv_setsv(sv, *bits_all);
+		if (bits) {
+		    SV ** const bits_all = hv_fetchs(bits, "all", FALSE);
+		    if (bits_all)
+			sv_setsv(sv, *bits_all);
 		}
 	        else {
 		    sv_setpvn(sv, WARN_ALLstring, WARNsize) ;
@@ -1097,16 +1098,16 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 #endif /* VMS */
 	if (s && klen == 4 && strEQ(ptr,"PATH")) {
 	    const char * const strend = s + len;
-#ifdef VMS  /* Hmm.  How do we get $Config{path_sep} from C? */
-	    const char path_sep = '|';
-#else
-	    const char path_sep = ':';
-#endif
 
 	    while (s < strend) {
 		char tmpbuf[256];
 		Stat_t st;
 		I32 i;
+#ifdef VMS  /* Hmm.  How do we get $Config{path_sep} from C? */
+		const char path_sep = '|';
+#else
+		const char path_sep = ':';
+#endif
 		s = delimcpy(tmpbuf, tmpbuf + sizeof tmpbuf,
 			     s, strend, path_sep, &i);
 		s++;
@@ -1178,7 +1179,7 @@ static void
 restore_sigmask(pTHX_ SV *save_sv)
 {
     const sigset_t * const ossetp = (const sigset_t *) SvPV_nolen_const( save_sv );
-    (void)sigprocmask(SIG_SETMASK, ossetp, (sigset_t *)0);
+    (void)sigprocmask(SIG_SETMASK, ossetp, NULL);
 }
 #endif
 int
@@ -2523,8 +2524,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
             }
             if (i)
                 (void)setgroups(i, gary);
-            if (gary)
-                Safefree(gary);
+	    Safefree(gary);
 	}
 #else  /* HAS_SETGROUPS */
 	PL_egid = SvIV(sv);
@@ -2820,9 +2820,9 @@ S_restore_magic(pTHX_ const void *p)
 	    /* downgrade public flags to private,
 	       and discard any other private flags */
 
-	    U32 public = SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
+	    const U32 public = SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
 	    if (public) {
-		SvFLAGS(sv) &= ~( public | SVp_IOK|SVp_NOK|SVp_POK );
+		SvFLAGS(sv) &= ~( public | (SVp_IOK|SVp_NOK|SVp_POK) );
 		SvFLAGS(sv) |= ( public << PRIVSHIFT );
 	    }
 	}
@@ -2907,6 +2907,8 @@ int
 Perl_magic_clearhint(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
+    PERL_UNUSED_ARG(sv);
+
     assert(mg->mg_len == HEf_SVKEY);
 
     PERL_UNUSED_ARG(sv);
