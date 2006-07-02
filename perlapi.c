@@ -77,17 +77,17 @@ START_EXTERN_C
 #undef PL_check
 #undef PL_fold_locale
 Perl_ppaddr_t** Perl_Gppaddr_ptr(pTHX) {
-    static const Perl_ppaddr_t* const ppaddr_ptr = PL_ppaddr;
+    static Perl_ppaddr_t* const ppaddr_ptr = PL_ppaddr;
     PERL_UNUSED_CONTEXT;
     return (Perl_ppaddr_t**)&ppaddr_ptr;
 }
 Perl_check_t**  Perl_Gcheck_ptr(pTHX) {
-    static const Perl_check_t* const check_ptr  = PL_check;
+    static Perl_check_t* const check_ptr  = PL_check;
     PERL_UNUSED_CONTEXT;
     return (Perl_check_t**)&check_ptr;
 }
 unsigned char** Perl_Gfold_locale_ptr(pTHX) {
-    static const unsigned char* const fold_locale_ptr = PL_fold_locale;
+    static unsigned char* const fold_locale_ptr = PL_fold_locale;
     PERL_UNUSED_CONTEXT;
     return (unsigned char**)&fold_locale_ptr;
 }
