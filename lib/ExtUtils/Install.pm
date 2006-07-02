@@ -3,7 +3,7 @@ use 5.00503;
 use strict;
 
 use vars qw(@ISA @EXPORT $VERSION $MUST_REBOOT %Config);
-$VERSION = '1.40';
+$VERSION = '1.41';
 $VERSION = eval $VERSION;
 
 use AutoSplit;
