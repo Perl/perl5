@@ -6,7 +6,8 @@
 
 $| = 1;
 
-print "1..1208\n";
+# please update note at bottom of file when you change this
+print "1..1211\n"; 
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3514,10 +3515,35 @@ if ($ordA == 193) {
     ok($s eq "\x{ffff}", "U+FFFF, NBOUND");
 } # non-characters end
 
+{
+    # https://rt.perl.org/rt3/Ticket/Display.html?id=39583
+    
+    # The printing characters
+    my @chars = ("A".."Z");
+    my $delim = ",";
+    my $size = 32771 - 4;
+    my $test = '';
+
+    # create some random junk. Inefficient, but it works.
+    for ($i = 0 ; $i < $size ; $i++) {
+        $test .= $chars[int(rand(@chars))];
+    }
+
+    $test .= ($delim x 4);
+    my $res;
+    my $matched;
+    if ($test =~ s/^(.*?)${delim}{4}//s) {
+        $res = $1;
+        $matched=1;
+    } 
+    ok($matched,'pattern matches');
+    ok(length($test)==0,"Empty string");
+    ok(defined($res) && length($res)==$size,"\$1 is correct size");
+}
 
 # Keep the following test last -- it may crash perl
 
 ok(("a" x (2**15 - 10)) =~ /^()(a|bb)*$/, "Recursive stack cracker: #24274")
     or print "# Unexpected outcome: should pass or crash perl\n";
 
-# last test 1200
+# last test 1211
