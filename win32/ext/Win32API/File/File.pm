@@ -10,7 +10,7 @@ use Fcntl qw( O_RDONLY O_RDWR O_WRONLY O_APPEND O_BINARY O_TEXT );
 use vars qw( $VERSION @ISA );
 use vars qw( @EXPORT @EXPORT_OK @EXPORT_FAIL %EXPORT_TAGS );
 
-$VERSION= '0.10';
+$VERSION= '0.1001';
 
 use base qw( Exporter DynaLoader Tie::Handle IO::File );
 
@@ -1363,10 +1363,10 @@ Examples:
     $hFlop= CreateFile( "//./A:", GENERIC_READ(),
       FILE_SHARE_READ(), [], OPEN_EXISTING(), 0, [] )
       or  die "Can't prevent others from writing to floppy: $^E\n";
-    $hDisk= createFile( $sFilePath, FILE_READ_ATTRIBUTES(),
+    $hDisk= CreateFile( $sFilePath, FILE_READ_ATTRIBUTES(),
       FILE_SHARE_READ()|FILE_SHARE_WRITE(), [], OPEN_EXISTING(), 0, [] )
       or  die "Can't read attributes of $sFilePath: $^E\n";
-    $hTemp= createFile( "$ENV{Temp}/temp.$$", GENERIC_WRITE(), 0,
+    $hTemp= CreateFile( "$ENV{Temp}/temp.$$", GENERIC_WRITE(), 0,
       CREATE_NEW(), FILE_FLAG_DELETE_ON_CLOSE()|attrLetsToBits("hst"), [] )
       or  die "Can't create temporary file, temp.$$: $^E\n";
 

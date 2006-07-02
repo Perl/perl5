@@ -126,7 +126,8 @@ Plus the following constants:
 	VALID_NTFT			PARTITION_NTFT
 
 Comments, additions, and bug reports are welcomed.  Please address
-technical questions that are not full bug reports to one of the Usenet
-newsgroups comp.lang.perl.modules or comp.lang.perl.moderated.
+technical questions that are not full bug reports to 
+
+http://perlmonks.org/index.pl?node=Seekers%20of%20Perl%20Wisdom
 
 Tye McQueen, tye@metronet.com, http://www.metronet.com/~tye/.

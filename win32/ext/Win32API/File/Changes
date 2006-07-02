@@ -1,5 +1,9 @@
 Revision history for Perl extension Win32API::File.
 
+0.1001 2006-07-02 14:04
+	- Minor doc tweak, release as standalone for sychronization with
+	  with version in bleadperl (future 5.10)
+
 0.10 2005-09-09
 	- Added GetFileAttributes() function and corresponding constants.
 	  (Patches from Kenneth Olwing from 2004-11-12).
