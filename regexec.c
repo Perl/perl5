@@ -4489,7 +4489,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		if (ST.c1 != CHRTEST_VOID)
 		    c = do_utf8 ? utf8n_to_uvchr((U8*)PL_reginput,
 					   UTF8_MAXBYTES, 0, uniflags)
-				: UCHARAT(PL_reginput);
+				: (UV) UCHARAT(PL_reginput);
 		/* If it could work, try it. */
 		if (ST.c1 == CHRTEST_VOID || c == (UV)ST.c1 || c == (UV)ST.c2) {
 		    CURLY_SETPAREN(ST.paren, ST.count);
