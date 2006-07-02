@@ -389,12 +389,13 @@ lintflags = \
     -erroff=E_BAD_SIGN_EXTEND \
     -erroff=E_BLOCK_DECL_UNUSED \
     -erroff=E_CASE_FALLTHRU \
+    -erroff=E_CONST_EXPR \
     -erroff=E_CONSTANT_CONDITION \
+    -erroff=E_END_OF_LOOP_CODE_NOT_REACHED \
     -erroff=E_EQUALITY_NOT_ASSIGNMENT \
     -erroff=E_EXPR_NULL_EFFECT \
     -erroff=E_FALSE_LOGICAL_EXPR \
     -erroff=E_INCL_NUSD \
-    -erroff=E_INDISTING_FROM_TRUNC \
     -erroff=E_LOOP_EMPTY \
     -erroff=E_MAIN_PARAM \
     -erroff=E_POINTER_TO_OBJECT \
@@ -402,6 +403,32 @@ lintflags = \
     -erroff=E_SHIFT_CNT_NEG_TOO_BIG_L \
     -erroff=E_STATIC_UNUSED \
     -erroff=E_TRUE_LOGICAL_EXPR
+
+splintflags = \
+    -I/usr/lib/gcc/i486-linux-gnu/4.0.2/include/ \
+    -D__builtin_va_list=va_list \
+    -Dsigjmp_buf=jmp_buf \
+    -warnposix \
+    \
+    +boolint \
+    +charintliteral \
+    -fixedformalarray \
+    -mustfreefresh \
+    -nestedextern \
+    -predboolint \
+    -predboolothers \
+    -preproc \
+    -boolops \
+    -shadow \
+    -nullstate \
+    +longintegral \
+    +matchanyintegral \
+    -type \
+    \
+    +line-len 999 \
+    +weak
+
+splintfiles = $(c1)
 
 .c$(OBJ_EXT):
 	$(CCCMD) $(PLDLFLAGS) $*.c
@@ -1104,6 +1131,10 @@ lint: $(c)
 	rm -f *.ln
 	lint $(lintflags) -DPERL_CORE -D_REENTRANT -DDEBUGGING -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(c)
 
+.PHONY: splint
+splint: $(c)
+	splint $(splintflags) -DPERL_CORE -D_REENTRANT -DDEBUGGING -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(splintfiles)
+
 # Need to unset during recursion to go out of loop.
 # The README below ensures that the dependency list is never empty and
 # that when MAKEDEPEND is empty $(FIRSTMAKEFILE) doesn't need rebuilding.
@@ -1344,7 +1375,7 @@ tags:	TAGS
 	perl emacs/e2ctags.pl TAGS > tags
 
 ctags:
-	ctags -f Tags -N --totals --languages=c --langmap=c:+.h *.c *.h
+	ctags -f Tags -N --totals --languages=c --langmap=c:+.h --exclude=opmini.c *.c *.h
 
 # AUTOMATICALLY GENERATED MAKE DEPENDENCIES--PUT NOTHING BELOW THIS LINE
 # If this runs make out of memory, delete /usr/include lines.
