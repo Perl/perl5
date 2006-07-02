@@ -967,7 +967,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '/':
 	break;
     case '[':
-	WITH_THR(sv_setiv(sv, (IV)CopARYBASE_get(PL_curcop)));
+	sv_setiv(sv, (IV)CopARYBASE_get(PL_curcop));
 	break;
     case '|':
 	if (GvIOp(PL_defoutgv))
