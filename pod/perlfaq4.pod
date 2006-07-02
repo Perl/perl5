@@ -593,7 +593,7 @@ does not show up next to itself
 This is documented in L<perlref>, and although it's not the easiest
 thing to read, it does work. In each of these examples, we call the
 function inside the braces used to dereference a reference. If we
-have a more than one return value, we can construct and dereference an
+have more than one return value, we can construct and dereference an
 anonymous array. In this case, we call the function in list context.
 
 	print "The time values are @{ [localtime] }.\n";
