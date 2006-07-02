@@ -67,6 +67,7 @@ dprof_dbg_sub_notify(pTHX_ SV *Sub) {
 #  include <starlet.h>  /* prototype for sys$gettim() */
 #  include <lib$routines.h>
 #  define Times(ptr) (dprof_times(aTHX_ ptr))
+#  define NEEDS_DPROF_TIMES
 #else
 #  ifndef HZ
 #    ifdef CLK_TCK
@@ -77,6 +78,7 @@ dprof_dbg_sub_notify(pTHX_ SV *Sub) {
 #  endif
 #  ifdef OS2				/* times() has significant overhead */
 #    define Times(ptr) (dprof_times(aTHX_ ptr))
+#    define NEEDS_DPROF_TIMES
 #    define INCL_DOSPROFILE
 #    define INCL_DOSERRORS
 #    include <os2.h>
@@ -98,7 +100,7 @@ union prof_any {
         clock_t tms_utime;  /* cpu time spent in user space */
         clock_t tms_stime;  /* cpu time spent in system */
         clock_t realtime;   /* elapsed real time, in ticks */
-        char *name;
+        const char *name;
         U32 id;
         opcode ptype;
 };
@@ -107,7 +109,7 @@ typedef union prof_any PROFANY;
 
 typedef struct {
     U32		dprof_ticks;
-    char*	out_file_name;	/* output file (defaults to tmon.out) */
+    const char*	out_file_name;	/* output file (defaults to tmon.out) */
     PerlIO*	fp;		/* pointer to tmon.out file */
     Off_t	TIMES_LOCATION;	/* Where in the file to store the time totals */
     int		SAVE_STACK;	/* How much data to buffer until end of run */
@@ -175,6 +177,7 @@ prof_state_t g_prof_state;
 #  define g_start_cnt		g_prof_state.start_cnt
 #endif
 
+#ifdef NEEDS_DPROF_TIMES
 static clock_t
 dprof_times(pTHX_ struct tms *t)
 {
@@ -225,6 +228,7 @@ dprof_times(pTHX_ struct tms *t)
 #  endif
 #endif
 }
+#endif
 
 static void
 prof_dumpa(pTHX_ opcode ptype, U32 id)
@@ -366,7 +370,7 @@ prof_mark(pTHX_ opcode ptype)
 
 	CV * const cv = db_get_cv(aTHX_ Sub);
 	GV * const gv = CvGV(cv);
-	pname = GvSTASH(gv) ? HvNAME_get(GvSTASH(gv)) : 0;
+	pname = GvSTASH(gv) ? HvNAME_get(GvSTASH(gv)) : NULL;
 	pname = pname ? pname : (char *) "(null)";
 	gname = GvNAME(gv);
 
