@@ -32,7 +32,7 @@
  */
 
 STATIC bool
-S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
+S_isa_lookup(pTHX_ HV *stash, const char *name, const HV* const name_stash,
              int len, int level)
 {
     dVAR;
@@ -45,7 +45,7 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
 
     /* A stash/class can go by many names (ie. User == main::User), so 
        we compare the stash itself just in case */
-    if (name_stash && (stash == name_stash))
+    if (name_stash && ((const HV *)stash == name_stash))
         return TRUE;
 
     hvname = HvNAME_get(stash);
@@ -66,11 +66,12 @@ S_isa_lookup(pTHX_ HV *stash, const char *name, HV* name_stash,
 	&& (hv = GvHV(gv)))
     {
 	if (SvIV(subgen) == (IV)PL_sub_generation) {
-	    SV* sv;
 	    SV** const svp = (SV**)hv_fetch(hv, name, len, FALSE);
-	    if (svp && (sv = *svp) != (SV*)&PL_sv_undef) {
-	        DEBUG_o( Perl_deb(aTHX_ "Using cached ISA %s for package %s\n",
-				  name, hvname) );
+	    if (svp) {
+		SV * const sv = *svp;
+		if (sv != &PL_sv_undef)
+		    DEBUG_o( Perl_deb(aTHX_ "Using cached ISA %s for package %s\n",
+				    name, hvname) );
 		return (sv == &PL_sv_yes);
 	    }
 	}
