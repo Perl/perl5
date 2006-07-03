@@ -160,22 +160,22 @@ package main;
     ok($th->join());
 }
 {
-    # There is a slight chance (<< 1%) this test case will falsely fail
+    # There is a miniscule chance this test case may falsely fail
     # since it tests using rand()
     my %rand : shared;
     rand(10);
     threads->create( sub { $rand{int(rand(10000000000))}++ } ) foreach 1..25;
     $_->join foreach threads->list;
-#    use Data::Dumper qw(Dumper);
-#    print Dumper(\%rand);
-    #$val = rand();
-    ok((keys %rand >= 24), "Check that rand() works after a new thread");
+    ok((keys %rand >= 23), "Check that rand() is randomized in new threads");
 }
 
 # bugid #24165
 
-run_perl(prog =>
-    'use threads; sub a{threads->create(shift)} $t = a sub{}; $t->tid; $t->join; $t->tid');
+run_perl(prog => 'use threads 1.33;
+                  sub a{threads->create(shift)} $t = a sub{};
+                  $t->tid; $t->join; $t->tid',
+                  nolib => ($ENV{PERL_CORE}) ? 0 : 1,
+                  switches => ($ENV{PERL_CORE}) ? [] : [ '-Mblib' ]);
 is($?, 0, 'coredump in global destruction');
 
 # test CLONE_SKIP() functionality

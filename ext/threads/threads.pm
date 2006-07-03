@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.32';
+our $VERSION = '1.33';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -74,6 +74,12 @@ sub import
 
 ### Methods, etc. ###
 
+# Our own exit function/method
+sub exit
+{
+    CORE::exit(0);
+}
+
 # 'new' is an alias for 'create'
 *new = \&create;
 
@@ -102,7 +108,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.32
+This document describes threads version 1.33
 
 =head1 SYNOPSIS
 
@@ -156,6 +162,8 @@ This document describes threads version 1.32
     my @results = $thr->join();
 
     $thr->kill('SIGUSR1');
+
+    threads->exit();
 
 =head1 DESCRIPTION
 
@@ -237,10 +245,8 @@ is determined at the time of thread creation.
 
 See L</"THREAD CONTEXT"> for more details.
 
-If the program exits without all other threads having been either joined or
-detached, then a warning will be issued. (A program exits either because one
-of its threads explicitly calls L<exit()|perlfunc/"exit EXPR">, or in the case
-of the main thread, reaches the end of the main program file.)
+If the program exits without all threads having either been joined or
+detached, then a warning will be issued.
 
 Calling C<-E<gt>join()> or C<-E<gt>detach()> on an already joined thread will
 cause an error to be thrown.
@@ -248,7 +254,11 @@ cause an error to be thrown.
 =item $thr->detach()
 
 Makes the thread unjoinable, and causes any eventual return value to be
-discarded.
+discarded.  When the program exits, any detached threads that are still
+running are silently terminated.
+
+If the program exits without all threads having either been joined or
+detached, then a warning will be issued.
 
 Calling C<-E<gt>join()> or C<-E<gt>detach()> on an already detached thread
 will cause an error to be thrown.
@@ -256,6 +266,27 @@ will cause an error to be thrown.
 =item threads->detach()
 
 Class method that allows a thread to detach itself.
+
+=item threads->exit()
+
+The usual method for terminating a thread is to
+L<return()|perlfunc/"return EXPR"> from the entry point function with the
+appropriate return value(s).
+
+If needed, a thread can be exited at any time by calling
+C<threads-E<gt>exit()>.  This will cause the thread to return C<undef> in a
+scalar context, or the empty list in a list context.
+
+Calling C<die()> in a thread indicates an abnormal exit for the thread.  Any
+C<$SIG{__DIE__}> handler in the thread will be called first, and then the
+thread will exit with a warning message that will contain any arguments passed
+in the C<die()> call.
+
+Calling C<exit()> in a thread is discouraged, but is equivalent to calling
+C<threads-E<gt>exit()>.
+
+If the desired affect is to truly terminate the application from a thread,
+then use L<POSIX::_exit()|POSIX/"_exit">, if available.
 
 =item threads->self()
 
@@ -566,12 +597,13 @@ such that the signal is acted up immediately.
 
 =over 4
 
-=item A thread exited while # other threads were still running
+=item Perl exited with active threads:
 
-A thread (not necessarily the main thread) exited while there were still other
-threads running.  Usually, it's a good idea to first collect the return values
-of the created threads by joining them, and only then exit from the main
-thread.
+If the program exits without all threads having either been joined or
+detached, then this warning will be issued.
+
+NOTE:  This warning cannot be suppressed using C<no warnings 'threads';> as
+suggested below.
 
 =item Thread creation failed: pthread_create returned #
 
@@ -581,7 +613,7 @@ cause for the failure.
 =item Thread # terminated abnormally: ...
 
 A thread terminated in some manner other than just returning from its entry
-point function.  For example, the thread may have exited via C<die>.
+point function.  For example, the thread may have terminated using C<die>.
 
 =item Using minimum thread stack size of #
 
@@ -623,7 +655,7 @@ following results in the above error:
 
     $thr->set_stack_size($size);
 
-=item Cannot signal other threads without safe signals
+=item Cannot signal threads without safe signals
 
 Safe signals must be in effect to use the C<-E<gt>kill()> signalling method.
 See L</"Unsafe signals"> for more details.
@@ -705,7 +737,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.32/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.33/threads.pm>
 
 L<threads::shared>, L<perlthrtut>
 

@@ -1,5 +1,14 @@
 Revision history for Perl extension threads.
 
+1.33 Mon Jul  3 10:11:20 EDT 2006
+	- 'exit' inside a thread silently terminates thread only
+	- Added 'threads->exit()' (just calls CORE::exit(0))
+	- Handle 'die/exit' in thread warn handlers if thread terminates
+	    with a warning
+	- Give exact accounting of unjoined threads on program termination
+	- Fix spurious 'failures' from t/blocks.t
+	- Set correct path to threads module in tests that use test.pl
+
 1.32 Mon Jun  5 09:27:53 EDT 2006
 	- Fix for HP-UX 10.20 pthread_attr_getstacksize usage
 	- Check for threads::shared in tests

@@ -31,8 +31,15 @@ BEGIN {
     print("1..5\n");   ### Number of tests that will be run ###
 };
 
-my $TEST = 1;
-share($TEST);
+my ($TEST, $COUNT, $TOTAL);
+
+BEGIN {
+    share($TEST);
+    $TEST = 1;
+    share($COUNT);
+    $COUNT = 0;
+    $TOTAL = 0;
+}
 
 ok(1, 'Loaded');
 
@@ -48,6 +55,7 @@ sub ok {
     } else {
         print("not ok $id - $name\n");
         printf("# Failed test at line %d\n", (caller)[2]);
+        print(STDERR "# FAIL: $name\n") if (! exists($ENV{'PERL_CORE'}));
     }
 
     return ($ok);
@@ -58,33 +66,45 @@ sub ok {
 
 $SIG{'__WARN__'} = sub { ok(0, "Warning: $_[0]"); };
 
-sub foo { }
+sub foo { lock($COUNT); $COUNT++; }
 sub baz { 42 }
 
 my $bthr;
 BEGIN {
     $SIG{'__WARN__'} = sub { ok(0, "BEGIN: $_[0]"); };
 
+    $TOTAL++;
     threads->create('foo')->join();
+    $TOTAL++;
     threads->create(\&foo)->join();
-    threads->create(sub {})->join();
+    $TOTAL++;
+    threads->create(sub { lock($COUNT); $COUNT++; })->join();
 
+    $TOTAL++;
     threads->create('foo')->detach();
+    $TOTAL++;
     threads->create(\&foo)->detach();
-    threads->create(sub {})->detach();
+    $TOTAL++;
+    threads->create(sub { lock($COUNT); $COUNT++; })->detach();
 
     $bthr = threads->create('baz');
 }
 
 my $mthr;
 MAIN: {
+    $TOTAL++;
     threads->create('foo')->join();
+    $TOTAL++;
     threads->create(\&foo)->join();
-    threads->create(sub {})->join();
+    $TOTAL++;
+    threads->create(sub { lock($COUNT); $COUNT++; })->join();
 
+    $TOTAL++;
     threads->create('foo')->detach();
+    $TOTAL++;
     threads->create(\&foo)->detach();
-    threads->create(sub {})->detach();
+    $TOTAL++;
+    threads->create(sub { lock($COUNT); $COUNT++; })->detach();
 
     $mthr = threads->create('baz');
 }
@@ -95,8 +115,12 @@ ok($bthr, 'BEGIN thread');
 ok($mthr->join() == 42, 'Main join');
 ok($bthr->join() == 42, 'BEGIN join');
 
-# make sure a still-running detached thread doesn't give a warning on exit
+# Wait for detached threads to finish
+{
+    threads->yield();
+    sleep(1);
+    lock($COUNT);
+    redo if ($COUNT < $TOTAL);
+}
 
-# *** add new tests above this one
-threads->create(sub { 1 while 1 })->detach();
-# *** add new tests above this one
+# EOF

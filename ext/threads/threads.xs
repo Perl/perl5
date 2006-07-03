@@ -2,6 +2,11 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+/* Workaround for XSUB.h bug under WIN32 */
+#ifdef WIN32
+#  undef setjmp
+#  define setjmp(x) _setjmp(x)
+#endif
 #ifdef HAS_PPPORT_H
 #  define NEED_PL_signals
 #  define NEED_newRV_noinc
@@ -81,8 +86,9 @@ static ithread *threads;
 static perl_mutex create_destruct_mutex;
 
 static UV tid_counter = 0;
-static IV active_threads = 0;
 static IV joinable_threads = 0;
+static IV running_threads = 0;
+static IV detached_threads = 0;
 #ifdef THREAD_CREATE_NEEDS_STACK
 static IV default_stack_size = THREAD_CREATE_NEEDS_STACK;
 #else
@@ -155,11 +161,11 @@ S_ithread_destruct(pTHX_ ithread *thread)
         return;
     }
 
-    MUTEX_LOCK(&create_destruct_mutex);
     /* Main thread (0) is immortal and should never get here */
     assert(thread->tid != 0);
 
     /* Remove from circular list of threads */
+    MUTEX_LOCK(&create_destruct_mutex);
     thread->next->prev = thread->prev;
     thread->prev->next = thread->next;
     thread->next = NULL;
@@ -195,9 +201,17 @@ Perl_ithread_hook(pTHX)
 {
     int veto_cleanup = 0;
     MUTEX_LOCK(&create_destruct_mutex);
-    if ((aTHX == PL_curinterp) && (joinable_threads != 1)) {
+    if ((aTHX == PL_curinterp) &&
+        (running_threads || joinable_threads))
+    {
         if (ckWARN_d(WARN_THREADS)) {
-            Perl_warn(aTHX_ "A thread exited while %" IVdf " threads were running", joinable_threads);
+            Perl_warn(aTHX_ "Perl exited with active threads:\n\t%"
+                            IVdf " running and unjoined\n\t%"
+                            IVdf " finished and unjoined\n\t%"
+                            IVdf " running and detached\n",
+                            running_threads,
+                            joinable_threads,
+                            detached_threads);
         }
         veto_cleanup = 1;
     }
@@ -266,7 +280,7 @@ good_stack_size(pTHX_ IV stack_size)
 #ifdef PTHREAD_STACK_MIN
     /* Can't use less than minimum */
     if (stack_size < PTHREAD_STACK_MIN) {
-        if (ckWARN_d(WARN_THREADS)) {
+        if (ckWARN(WARN_THREADS)) {
             Perl_warn(aTHX_ "Using minimum thread stack size of %" IVdf, (IV)PTHREAD_STACK_MIN);
         }
         return (PTHREAD_STACK_MIN);
@@ -346,6 +360,10 @@ S_ithread_run(void * arg)
         AV *params = (AV *)SvRV(thread->params);
         int len = (int)av_len(params)+1;
         int ii;
+        int jmp_rc = 0;
+        I32 oldscope;
+
+        dJMPENV;
 
         dSP;
         ENTER;
@@ -358,23 +376,43 @@ S_ithread_run(void * arg)
         }
         PUTBACK;
 
-        /* Run the specified function */
-        len = (int)call_sv(thread->init_function, thread->gimme|G_EVAL);
+        oldscope = PL_scopestack_ix;
+        JMPENV_PUSH(jmp_rc);
+        if (jmp_rc == 0) {
+            /* Run the specified function */
+            len = (int)call_sv(thread->init_function, thread->gimme|G_EVAL);
+        } else if (jmp_rc == 2) {
+            while (PL_scopestack_ix > oldscope) {
+                LEAVE;
+            }
+        }
+        JMPENV_POP;
 
         /* Remove args from stack and put back in params array */
         SPAGAIN;
         for (ii=len-1; ii >= 0; ii--) {
             SV *sv = POPs;
-            av_store(params, ii, SvREFCNT_inc(sv));
-        }
-
-        /* Check for failure */
-        if (SvTRUE(ERRSV) && ckWARN_d(WARN_THREADS)) {
-            Perl_warn(aTHX_ "Thread %" UVuf " terminated abnormally: %" SVf, thread->tid, ERRSV);
+            if (jmp_rc == 0) {
+                av_store(params, ii, SvREFCNT_inc(sv));
+            }
         }
 
         FREETMPS;
         LEAVE;
+
+        /* Check for failure */
+        if (SvTRUE(ERRSV) && ckWARN_d(WARN_THREADS)) {
+            oldscope = PL_scopestack_ix;
+            JMPENV_PUSH(jmp_rc);
+            if (jmp_rc == 0) {
+                Perl_warn(aTHX_ "Thread %" UVuf " terminated abnormally: %" SVf, thread->tid, ERRSV);
+            } else if (jmp_rc == 2) {
+                while (PL_scopestack_ix > oldscope) {
+                    LEAVE;
+                }
+            }
+            JMPENV_POP;
+        }
 
         /* Release function ref */
         SvREFCNT_dec(thread->init_function);
@@ -390,15 +428,17 @@ S_ithread_run(void * arg)
     cleanup = (thread->state & PERL_ITHR_DETACHED);
     MUTEX_UNLOCK(&thread->mutex);
 
-    if (cleanup)
+    if (cleanup) {
+        MUTEX_LOCK(&create_destruct_mutex);
+        detached_threads--;
+        MUTEX_UNLOCK(&create_destruct_mutex);
         S_ithread_destruct(aTHX_ thread);
-
-    MUTEX_LOCK(&create_destruct_mutex);
-    active_threads--;
-    if (!cleanup) {
-	joinable_threads--;
+    } else {
+        MUTEX_LOCK(&create_destruct_mutex);
+        running_threads--;
+        joinable_threads++;
+        MUTEX_UNLOCK(&create_destruct_mutex);
     }
-    MUTEX_UNLOCK(&create_destruct_mutex);
 
 #ifdef WIN32
     return ((DWORD)0);
@@ -657,8 +697,7 @@ S_ithread_create(
         return (&PL_sv_undef);
     }
 
-    active_threads++;
-    joinable_threads++;
+    running_threads++;
     MUTEX_UNLOCK(&create_destruct_mutex);
 
     sv_2mortal(params);
@@ -685,7 +724,6 @@ ithread_create(...)
         IV stack_size;
         int context;
         char *str;
-        char ch;
         int idx;
         int ii;
     CODE:
@@ -920,6 +958,10 @@ ithread_join(...)
         S_ithread_clear(aTHX_ thread);
         MUTEX_UNLOCK(&thread->mutex);
 
+        MUTEX_LOCK(&create_destruct_mutex);
+        joinable_threads--;
+        MUTEX_UNLOCK(&create_destruct_mutex);
+
         /* If no return values, then just return */
         if (! params) {
             XSRETURN_UNDEF;
@@ -973,13 +1015,18 @@ ithread_detach(...)
         cleanup = (thread->state & PERL_ITHR_FINISHED);
         MUTEX_UNLOCK(&thread->mutex);
 
-        if (cleanup)
+        MUTEX_LOCK(&create_destruct_mutex);
+        if (cleanup) {
+            joinable_threads--;
+        } else {
+            running_threads--;
+            detached_threads++;
+        }
+        MUTEX_UNLOCK(&create_destruct_mutex);
+
+        if (cleanup) {
             S_ithread_destruct(aTHX_ thread);
-	else {
-	    MUTEX_LOCK(&create_destruct_mutex);
-	    joinable_threads--;
-	    MUTEX_UNLOCK(&create_destruct_mutex);
-	}
+        }
 
 
 void
@@ -991,14 +1038,11 @@ ithread_kill(...)
     CODE:
         /* Must have safe signals */
         if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
-            Perl_croak(aTHX_ "Cannot signal other threads without safe signals");
+            Perl_croak(aTHX_ "Cannot signal threads without safe signals");
 
         /* Object method only */
         if (! sv_isobject(ST(0)))
             Perl_croak(aTHX_ "Usage: $thr->kill('SIG...')");
-
-        /* Get thread */
-        thread = SV_to_ithread(aTHX_ ST(0));
 
         /* Get signal */
         sig_name = SvPV_nolen(ST(1));
@@ -1011,11 +1055,14 @@ ithread_kill(...)
             signal = SvIV(ST(1));
 
         /* Set the signal for the thread */
+        thread = SV_to_ithread(aTHX_ ST(0));
+        MUTEX_LOCK(&thread->mutex);
         {
             dTHXa(thread->interp);
             PL_psig_pend[signal]++;
             PL_sig_pending = 1;
         }
+        MUTEX_UNLOCK(&thread->mutex);
 
         /* Return the thread to allow for method chaining */
         ST(0) = ST(0);
@@ -1164,7 +1211,6 @@ BOOT:
     }
     Zero(thread, 1, ithread);
 
-    PL_perl_destruct_level = 2;
     MUTEX_INIT(&thread->mutex);
 
     thread->tid = tid_counter++;        /* Thread 0 */
@@ -1184,9 +1230,6 @@ BOOT:
 #  else
     thread->thr = pthread_self();
 #  endif
-
-    active_threads++;
-    joinable_threads++;
 
     S_ithread_set(aTHX_ thread);
     MUTEX_UNLOCK(&create_destruct_mutex);

@@ -31,8 +31,11 @@ BEGIN {
     print("1..13\n");   ### Number of tests that will be run ###
 };
 
-my $TEST = 1;
-share($TEST);
+my $TEST;
+BEGIN {
+    share($TEST);
+    $TEST = 1;
+}
 
 ok(1, 'Loaded');
 
