@@ -9,7 +9,7 @@ BEGIN {
 use Config;
 use File::Spec;
 
-plan tests => 86;
+plan tests => 88;
 
 my $Perl = which_perl();
 
@@ -477,6 +477,13 @@ ok(unlink($f), 'unlink tmp file');
     my $s2 = -s _;
     is($s1, $s2, q(-T _ doesn't break the statbuffer));
     unlink $tmpfile;
+}
+
+SKIP: {
+    skip "No dirfd()", 2 unless $Config{d_dirfd};
+    opendir my $dir, "." or die 'Unable to opendir ".":  $!';
+    ok(stat($dir), "stat() on dirhandle works"); 
+    ok(-d -r _ , "chained -x's on dirhandle"); 
 }
 
 END {

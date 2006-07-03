@@ -281,11 +281,13 @@ X<-S>X<-b>X<-c>X<-t>X<-u>X<-g>X<-k>X<-T>X<-B>X<-M>X<-A>X<-C>
 
 =item -X EXPR
 
+=item -X DIRHANDLE
+
 =item -X
 
 A file test, where X is one of the letters listed below.  This unary
-operator takes one argument, either a filename or a filehandle, and
-tests the associated file to see if something is true about it.  If the
+operator takes one argument, either a filename, a filehandle, or a dirhandle, 
+and tests the associated file to see if something is true about it.  If the
 argument is omitted, tests C<$_>, except for C<-t>, which tests STDIN.
 Unless otherwise documented, it returns C<1> for true and C<''> for false, or
 the undefined value if the file doesn't exist.  Despite the funny
@@ -5827,12 +5829,14 @@ X<stat> X<file, status>
 
 =item stat EXPR
 
+=item stat DIRHANDLE
+
 =item stat
 
 Returns a 13-element list giving the status info for a file, either
-the file opened via FILEHANDLE, or named by EXPR.  If EXPR is omitted,
-it stats C<$_>.  Returns a null list if the stat fails.  Typically used
-as follows:
+the file opened via FILEHANDLE or DIRHANDLE, or named by EXPR.  If EXPR is 
+omitted, it stats C<$_>.  Returns a null list if the stat fails.  Typically
+used as follows:
 
     ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
        $atime,$mtime,$ctime,$blksize,$blocks)

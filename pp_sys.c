@@ -2790,9 +2790,26 @@ PP(pp_stat)
 	    PL_laststype = OP_STAT;
 	    PL_statgv = gv;
 	    sv_setpvn(PL_statname, "", 0);
-	    PL_laststatval = (GvIO(gv) && IoIFP(GvIOp(gv))
-		? PerlLIO_fstat(PerlIO_fileno(IoIFP(GvIOn(gv))), &PL_statcache) : -1);
-	}
+            if(gv) {
+                IO* const io = GvIO(gv);
+                if (io) {
+                    if (IoIFP(io)) {
+                        PL_laststatval = 
+                            PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache);   
+                    } else if (IoDIRP(io)) {
+#ifdef HAS_DIRFD
+                        PL_laststatval =
+                            PerlLIO_fstat(dirfd(IoDIRP(io)), &PL_statcache);
+#else
+                        DIE(aTHX_ PL_no_func, "dirfd");
+#endif
+                    } else {
+                        PL_laststatval = -1;
+                    }
+	        }
+            }
+        }
+
 	if (PL_laststatval < 0) {
 	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 		report_evil_fh(gv, GvIO(gv), PL_op->op_type);

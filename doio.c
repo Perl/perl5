@@ -1308,22 +1308,31 @@ Perl_my_stat(pTHX)
 	EXTEND(SP,1);
 	gv = cGVOP_gv;
       do_fstat:
+        if (gv == PL_defgv)
+            return PL_laststatval;
 	io = GvIO(gv);
-	if (io && IoIFP(io)) {
-	    PL_statgv = gv;
-	    sv_setpvn(PL_statname,"", 0);
-	    PL_laststype = OP_STAT;
-	    return (PL_laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache));
-	}
-	else {
-	    if (gv == PL_defgv)
-		return PL_laststatval;
-	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
-		report_evil_fh(gv, io, PL_op->op_type);
-	    PL_statgv = NULL;
-	    sv_setpvn(PL_statname,"", 0);
-	    return (PL_laststatval = -1);
-	}
+        PL_laststype = OP_STAT;
+        PL_statgv = gv;
+        sv_setpvn(PL_statname, "", 0);
+        if(io) {
+	    if (IoIFP(io)) {
+	        return (PL_laststatval = PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache));
+            } else if (IoDIRP(io)) {
+#ifdef HAS_DIRFD
+                return (PL_laststatval = PerlLIO_fstat(dirfd(IoDIRP(io)), &PL_statcache));
+#else
+                DIE(aTHX_ PL_no_func, "dirfd");
+#endif
+            } else {
+                if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+                    report_evil_fh(gv, io, PL_op->op_type);
+                return (PL_laststatval = -1);
+            }
+	} else {
+            if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
+                report_evil_fh(gv, io, PL_op->op_type);
+            return (PL_laststatval = -1);
+        }
     }
     else if (PL_op->op_private & OPpFT_STACKED) {
 	return PL_laststatval;
