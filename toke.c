@@ -6697,7 +6697,7 @@ S_pending_ident(pTHX)
 {
     dVAR;
     register char *d;
-    register PADOFFSET tmp = 0;
+    PADOFFSET tmp = 0;
     /* pit holds the identifier we read and pending_ident is reset */
     char pit = PL_pending_ident;
     PL_pending_ident = 0;
@@ -11186,12 +11186,11 @@ S_scan_inputsymbol(pTHX_ char *start)
 	   filehandle
 	*/
 	if (*d == '$') {
-	    PADOFFSET tmp;
-
 	    /* try to find it in the pad for this block, otherwise find
 	       add symbol table ops
 	    */
-	    if ((tmp = pad_findmy(d)) != NOT_IN_PAD) {
+	    const PADOFFSET tmp = pad_findmy(d);
+	    if (tmp != NOT_IN_PAD) {
 		if (PAD_COMPNAME_FLAGS_isOUR(tmp)) {
 		    HV * const stash = PAD_COMPNAME_OURSTASH(tmp);
 		    HEK * const stashname = HvNAME_HEK(stash);
