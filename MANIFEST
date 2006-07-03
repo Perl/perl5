@@ -448,9 +448,10 @@ ext/Devel/PPPort/parts/todo/5009001	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009002	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009003	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009004	Devel::PPPort todo file
+ext/Devel/PPPort/PPPort.xs	Devel::PPPort dummy PPPort.xs
 ext/Devel/PPPort/ppport_h.PL	Devel::PPPort ppport.h writer
 ext/Devel/PPPort/PPPort_pm.PL	Devel::PPPort PPPort.pm writer
-ext/Devel/PPPort/PPPort_xs.PL	Devel::PPPort PPPort.xs writer
+ext/Devel/PPPort/PPPort_xs.PL	Devel::PPPort RealPPPort.xs writer
 ext/Devel/PPPort/README		Devel::PPPort Readme
 ext/Devel/PPPort/soak		Devel::PPPort Test Harness to run under various Perls
 ext/Devel/PPPort/t/call.t	Devel::PPPort test file

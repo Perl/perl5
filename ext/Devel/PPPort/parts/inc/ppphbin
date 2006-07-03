@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 32 $
+##  $Revision: 34 $
 ##  $Author: mhx $
-##  $Date: 2006/05/21 23:14:16 +0200 $
+##  $Date: 2006/07/03 10:21:54 +0200 $
 ##
 ################################################################################
 ##
@@ -21,6 +21,8 @@
 
 use strict;
 
+my $VERSION = __VERSION__;
+
 my %opt = (
   quiet     => 0,
   diag      => 1,
@@ -29,6 +31,7 @@ my %opt = (
   cplusplus => 0,
   filter    => 1,
   strip     => 0,
+  version   => 0,
 );
 
 my($ppport) = $0 =~ /([\w.]+)$/;
@@ -38,7 +41,7 @@ my $HS = "[ \t]";             # horizontal whitespace
 eval {
   require Getopt::Long;
   Getopt::Long::GetOptions(\%opt, qw(
-    help quiet diag! filter! hints! changes! cplusplus strip
+    help quiet diag! filter! hints! changes! cplusplus strip version
     patch=s copy=s diff=s compat-version=s
     list-provided list-unsupported api-info=s
   )) or usage();
@@ -47,6 +50,11 @@ eval {
 if ($@ and grep /^-/, @ARGV) {
   usage() if "@ARGV" =~ /^--?h(?:elp)?$/;
   die "Getopt::Long not found. Please don't use any options.\n";
+}
+
+if ($opt{version}) {
+  print "This is $0 $VERSION.\n";
+  exit 0;
 }
 
 usage() if $opt{help};
@@ -714,11 +722,18 @@ ENDUSAGE
 sub strip
 {
   my $self = do { local(@ARGV,$/)=($0); <> };
-  $self =~ s/^$HS+Do NOT edit.*?(?=^-)//ms;
+  my($copy) = $self =~ /^=head\d\s+COPYRIGHT\s*^(.*?)^=\w+/ms;
+  $copy =~ s/^(?=\S+)/    /gms;
+  $self =~ s/^$HS+Do NOT edit.*?(?=^-)/$copy/ms;
   $self =~ s/^SKIP.*(?=^__DATA__)/SKIP
 if (\@ARGV && \$ARGV[0] eq '--unstrip') {
   eval { require Devel::PPPort };
   \$@ and die "Cannot require Devel::PPPort, please install.\\n";
+  if (\$Devel::PPPort::VERSION < $VERSION) {
+    die "$0 was originally generated with Devel::PPPort $VERSION.\\n"
+      . "Your Devel::PPPort is only version \$Devel::PPPort::VERSION.\\n"
+      . "Please install a newer version, or --unstrip will not work.\\n";
+  }
   Devel::PPPort::WriteFile(\$0);
   exit 0;
 }

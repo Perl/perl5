@@ -1,3 +1,11 @@
+3.08_07 - 2006-07-03
+
+    * fix cpan #20179: Licensing information for PPPort is
+      unclear
+    * only --unstrip a stripped ppport.h if an appropriate
+      version of Devel::PPPort is installed
+    * add a --version option to ppport.h
+
 3.08_06 - 2006-06-25
 
     * fix breakage on MSWin32, where generating XS files on

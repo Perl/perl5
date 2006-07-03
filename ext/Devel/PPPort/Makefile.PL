@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 24 $
+#  $Revision: 25 $
 #  $Author: mhx $
-#  $Date: 2006/06/25 06:30:56 +0200 $
+#  $Date: 2006/07/03 21:48:31 +0200 $
 #
 ################################################################################
 #
@@ -36,20 +36,20 @@ WriteMakefile(
   VERSION_FROM  => 'PPPort_pm.PL',
   PM            => { 'PPPort.pm' => '$(INST_LIBDIR)/PPPort.pm' },
   H             => [ qw(ppport.h) ],
-  OBJECT        => '$(BASEEXT)$(OBJ_EXT) $(O_FILES)',
+  OBJECT        => 'RealPPPort$(OBJ_EXT) $(O_FILES)',
   XSPROTOARG    => '-noprototypes',
   CONFIGURE     => \&configure,
 );
 
 sub configure
 {
-  my @clean    = qw{ $(H_FILES) PPPort.xs PPPort.c };
+  my @clean    = qw{ $(H_FILES) RealPPPort.xs RealPPPort.c };
   my %depend   = ('$(OBJECT)' => '$(H_FILES)');
   my @C_FILES  = qw{ module2.c module3.c },
   my %PL_FILES = (
     'ppport_h.PL'  => 'ppport.h',
     'PPPort_pm.PL' => 'PPPort.pm',
-    'PPPort_xs.PL' => 'PPPort.xs',
+    'PPPort_xs.PL' => 'RealPPPort.xs',
   );
   my @moreopts;
 
@@ -84,7 +84,7 @@ sub configure
 
   return {
     C        => \@C_FILES,
-    XS       => { 'PPPort.xs' => 'PPPort.c' },
+    XS       => { 'RealPPPort.xs' => 'RealPPPort.c' },
     PL_FILES => \%PL_FILES,
     depend   => \%depend,
     clean    => { FILES => "@clean" },
@@ -99,13 +99,21 @@ sub MY::postamble
   $post .= <<'POSTAMBLE';
 
 purge_all: realclean
-	@$(RM_F) PPPort.pm PPPort.xs t/*.t
+	@$(RM_F) PPPort.pm t/*.t
 
-regen:
+regen_pm:
 	$(PERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) PPPort_pm.PL
+
+regen_xs:
 	$(PERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) PPPort_xs.PL
+
+regen_tests:
 	$(PERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) mktests.PL
+
+regen_h:
 	$(PERL) -I$(INST_ARCHLIB) -I$(INST_LIB) -I$(PERL_ARCHLIB) -I$(PERL_LIB) ppport_h.PL
+
+regen: regen_pm regen_xs regen_tests regen_h
 
 POSTAMBLE
   return $post;

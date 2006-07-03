@@ -26,9 +26,9 @@ BEGIN {
     require 'testutil.pl' if $@;
   }
 
-  if (202) {
+  if (203) {
     load();
-    plan(tests => 202);
+    plan(tests => 203);
   }
 }
 
@@ -46,7 +46,7 @@ package main;
 
 BEGIN {
   if ($ENV{'SKIP_SLOW_TESTS'}) {
-    for (1 .. 202) {
+    for (1 .. 203) {
       skip("skip: SKIP_SLOW_TESTS", 0);
     }
     exit 0;
@@ -221,6 +221,9 @@ __DATA__
 my $o = ppport(qw(--help));
 ok($o =~ /^Usage:.*ppport\.h/m);
 ok($o =~ /--help/m);
+
+$o = ppport(qw(--version));
+ok($o =~ /^This is.*ppport.*\d+\.\d+(?:_?\d+)?\.$/);
 
 $o = ppport(qw(--nochanges));
 ok($o =~ /^Scanning.*test\.xs/mi);

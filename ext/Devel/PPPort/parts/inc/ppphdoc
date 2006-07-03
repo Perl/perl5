@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 26 $
+##  $Revision: 27 $
 ##  $Author: mhx $
-##  $Date: 2006/05/21 23:14:18 +0200 $
+##  $Date: 2006/07/03 10:21:55 +0200 $
 ##
 ################################################################################
 ##
@@ -41,6 +41,8 @@ ppport.h - Perl/Pollution/Portability version __VERSION__
 
   --help                      show short help
 
+  --version                   show version
+
   --patch=file                write one patch file with changes
   --copy=suffix               write changed copies with suffix
   --diff=program              use diff program and options
@@ -55,7 +57,7 @@ ppport.h - Perl/Pollution/Portability version __VERSION__
   --nofilter                  don't filter input files
 
   --strip                     strip all script and doc functionality from
-                              ppport.h (this, obviously, cannot be undone)
+                              ppport.h
 
   --list-provided             list provided API
   --list-unsupported          list unsupported API
@@ -71,6 +73,10 @@ installations back to __MIN_PERL__, and has been tested up to __MAX_PERL__.
 =head2 --help
 
 Display a brief usage summary.
+
+=head2 --version
+
+Display the version of F<ppport.h>.
 
 =head2 --patch=I<file>
 
@@ -139,6 +145,10 @@ Strip all script and documentation functionality from F<ppport.h>.
 This reduces the size of F<ppport.h> dramatically and may be useful
 if you want to include F<ppport.h> in smaller modules without
 increasing their distribution size too much.
+
+The stripped F<ppport.h> will have a C<--unstrip> option that allows
+you to undo the stripping, but only if an appropriate C<Devel::PPPort>
+module is installed.
 
 =head2 --list-provided
 
