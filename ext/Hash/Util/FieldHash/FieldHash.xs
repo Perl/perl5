@@ -46,7 +46,7 @@ SV* HUF_id(SV* ref, NV cookie) {
         SvNV_set(id, cookie);
         SvNOK_on(id);
     }
-    SvIV_set(id, (IV)SvRV(ref));
+    SvIV_set(id, PTR2UV(SvRV(ref)));
     SvIOK_on(id);
     return id;
 }
@@ -221,7 +221,7 @@ void HUF_fix_trigger(SV* trigger, SV* new_id) {
 /* Go over object registry and fix all objects.  Also fix the object
  * registry.
  */
-void HUF_fix_objects() {
+void HUF_fix_objects(void) {
     dMY_CXT;
     I32 i, len;
     HE* ent;

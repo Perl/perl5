@@ -151,7 +151,7 @@ BEGIN { $n_tests += 8 }
     
     {
         my @refs = map [], 1 .. $size;
-        $f{ $_} = 1 for @refs;
+        @f{ @refs } = ( 1) x @refs;
         is( keys %f, $size, "many keys at once");
         is(
             keys %Hash::Util::FieldHash::ob_reg,

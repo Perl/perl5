@@ -118,6 +118,9 @@ use Scalar::Util qw( weaken);
     () = each %h;
     is( $counter, 9, "list each doesn't trigger");
 
+    bless \ %h, 'xyz';
+    is( $counter, 9, "bless doesn't trigger");
+
     # see that normal set magic doesn't trigger (identity condition)
     my %i;
     Hash::Util::FieldHash::_test_uvar_set( \ %i, \ $counter);
@@ -143,7 +146,7 @@ use Scalar::Util qw( weaken);
     bless \ %i, 'abc';
     is( $counter, 1, "...except with bless");
 
-    # see that magic with both set and get doesn't trigger (identity condition)
+    # see that magic with both set and get doesn't trigger
     $counter = 123;
     my %j;
     Hash::Util::FieldHash::_test_uvar_same( \ %j, \ $counter);
@@ -163,13 +166,13 @@ use Scalar::Util qw( weaken);
     () = values %j;
     $x = each %j;
     () = each %j;
-    
-    is( $counter, 0, "normal get magic never triggers");
+
+    is( $counter, 0, "get/set magic never triggers");
 
     bless \ %j, 'abc';
     is( $counter, 1, "...except for bless");
 
-    BEGIN { $n_tests += 22 }
+    BEGIN { $n_tests += 23 }
 }
 
 BEGIN { plan tests => $n_tests }
