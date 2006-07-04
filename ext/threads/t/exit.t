@@ -239,9 +239,15 @@ foreach my $die (@exit_types) {
 # Check termination warning concerning running threads
 $SIG{'__WARN__'} = sub {
     my $msg = shift;
-    ok($msg =~ /1 running and unjoined/,  '1 running and unjoined');
-    ok($msg =~ /2 finished and unjoined/, '2 finished and unjoined');
-    ok($msg =~ /3 running and detached/,  '3 finished and detached');
+    if ($^O eq 'VMS') {
+        ok($msg =~ /0 running and unjoined/,  '0 running and unjoined (VMS)');
+        ok($msg =~ /3 finished and unjoined/, '3 finished and unjoined (VMS)');
+        ok($msg =~ /0 running and detached/,  '0 finished and detached (VMS)');
+    } else {
+        ok($msg =~ /1 running and unjoined/,  '1 running and unjoined');
+        ok($msg =~ /2 finished and unjoined/, '2 finished and unjoined');
+        ok($msg =~ /3 running and detached/,  '3 finished and detached');
+    }
 };
 
 threads->create(sub { sleep(100); });
