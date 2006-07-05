@@ -967,8 +967,17 @@ Apd	|void	|sv_setpvn_mg	|NN SV *sv|NN const char *ptr|STRLEN len
 Apd	|void	|sv_setsv_mg	|NN SV *dstr|NULLOK SV *sstr
 Apdbm	|void	|sv_usepvn_mg	|NN SV *sv|NULLOK char *ptr|STRLEN len
 ApR	|MGVTBL*|get_vtbl	|int vtbl_id
-Ap	|char*	|pv_display	|NN SV *dsv|NN char *pv|STRLEN cur|STRLEN len \
+Apd	|char*	|pv_display	|NN SV *dsv|NN char *pv|STRLEN cur|STRLEN len \
 				|STRLEN pvlim
+Apd	|char*	|pv_escape	|NN SV *dsv|NN U8 const * const str\
+                                |const STRLEN count|const STRLEN max\
+                                |NULLOK STRLEN * const escaped\
+                                |const U32 flags				
+Apd     |char*  |pv_pretty      |NN SV *dsv|NN U8 const * const str\
+                                |const STRLEN count|const STRLEN max\
+                                |NULLOK U8 const * const start_color\
+                                |NULLOK U8 const * const end_color\
+                                |const U32 flags				
 Afp	|void	|dump_indent	|I32 level|NN PerlIO *file|NN const char* pat|...
 Ap	|void	|dump_vindent	|I32 level|NN PerlIO *file|NN const char* pat \
 				|NULLOK va_list *args

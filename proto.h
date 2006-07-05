@@ -1410,6 +1410,8 @@ PERL_CALLCONV MGVTBL*	Perl_get_vtbl(pTHX_ int vtbl_id)
 			__attribute__warn_unused_result__;
 
 PERL_CALLCONV char*	Perl_pv_display(pTHX_ SV *dsv, char *pv, STRLEN cur, STRLEN len, STRLEN pvlim);
+PERL_CALLCONV char*	Perl_pv_escape(pTHX_ SV *dsv, U8 const * const str, const STRLEN count, const STRLEN max, STRLEN * const escaped, const U32 flags);
+PERL_CALLCONV char*	Perl_pv_pretty(pTHX_ SV *dsv, U8 const * const str, const STRLEN count, const STRLEN max, U8 const * const start_color, U8 const * const end_color, const U32 flags);
 PERL_CALLCONV void	Perl_dump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 			__attribute__format__(__printf__,pTHX_3,pTHX_4);
 
