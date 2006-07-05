@@ -3783,7 +3783,6 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	 * to store these values, evil chicanery is done with SvCUR().
 	 */
 
-	if (!(left->op_private & OPpLVAL_INTRO)) {
 	    OP *lastop = o;
 	    PL_generation++;
 	    for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
@@ -3837,7 +3836,6 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    }
 	    if (curop != o)
 		o->op_private |= OPpASSIGN_COMMON;
-	}
 	if (right && right->op_type == OP_SPLIT) {
 	    OP* tmpop = ((LISTOP*)right)->op_first;
 	    if (tmpop && (tmpop->op_type == OP_PUSHRE)) {

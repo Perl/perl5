@@ -7,7 +7,7 @@ BEGIN {
 
 require 'test.pl';
 
-plan (117);
+plan (125);
 
 #
 # @foo, @bar, and @ary are also used from tie-stdarray after tie-ing them
@@ -176,7 +176,6 @@ is("@bar", "foo bar");						# 43
 
 # try the same with my
 {
-
     my @bee = @bee;
     is("@bee", "foo bar burbl blah");				# 54
     {
@@ -200,6 +199,29 @@ is("@bar", "foo bar");						# 43
 	is("@bee", "bar burbl blah");				# 62
     }
     is("@bee", "foo bar burbl blah");				# 63
+}
+
+# try the same with our (except that previous values aren't restored)
+{
+    our @bee = @bee;
+    is("@bee", "foo bar burbl blah");
+    {
+	our (undef,@bee) = @bee;
+	is("@bee", "bar burbl blah");
+	{
+	    our @bee = ('XXX',@bee,'YYY');
+	    is("@bee", "XXX bar burbl blah YYY");
+	    {
+		our @bee = our @bee = qw(foo bar burbl blah);
+		is("@bee", "foo bar burbl blah");
+		{
+		    our (@bim) = our(@bee) = qw(foo bar);
+		    is("@bee", "foo bar");
+		    is("@bim", "foo bar");
+		}
+	    }
+	}
+    }
 }
 
 # make sure reification behaves
@@ -383,5 +405,19 @@ sub test_arylen {
     push @{@array}, 23;
     is ($4[8], 23);
 }
+
+# more tests for AASSIGN_COMMON
+
+{
+    our($x,$y,$z) = (1..3);
+    our($y,$z) = ($x,$y);
+    is("$x $y $z", "1 1 2");
+}
+{
+    our($x,$y,$z) = (1..3);
+    (our $y, our $z) = ($x,$y);
+    is("$x $y $z", "1 1 2");
+}
+
 
 "We're included by lib/Tie/Array/std.t so we need to return something true";
