@@ -1107,7 +1107,7 @@ _cleaner2:
 	rm -rf .config
 	rm -f preload
 	rm -f testcompile compilelog
-	rm -rf lib/Encode lib/Compress
+	rm -rf lib/Encode lib/Compress lib/Hash
 	rm -rf lib/IO/Compress lib/IO/Uncompress
 	rm -f lib/ExtUtils/ParseXS/t/XSTest.c
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(OBJ_EXT)
@@ -1115,7 +1115,7 @@ _cleaner2:
 	-rmdir lib/B lib/Data
 	-rmdir lib/Filter/Util lib/IO/Socket
 	-rmdir lib/List lib/MIME lib/Scalar lib/Sys
-	-rmdir lib/threads lib/XS lib/Hash
+	-rmdir lib/threads lib/XS
 
 _realcleaner:
 	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=realclean
