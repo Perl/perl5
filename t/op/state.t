@@ -10,7 +10,7 @@ BEGIN {
 use strict;
 use feature "state";
 
-plan tests => 30;
+plan tests => 32;
 
 ok( ! defined state $uninit, q(state vars are undef by default) );
 
@@ -137,3 +137,21 @@ is( $xhval, 0, 'uninitialized state hash' );
 
 $xhval = stateful_hash();
 is( $xhval, 1, 'uninitialized state hash after one iteration' );
+
+# state declaration with a list
+
+sub statelist {
+    # note that this should be a state assignment, while (state $lager, state $stout) shouldn't
+    state($lager, $stout) = (11, 22);
+    $lager++;
+    $stout++;
+    "$lager/$stout";
+}
+
+my $ls = statelist();
+is($ls, "12/23", 'list assignment to state scalars');
+$ls = statelist();
+{
+    local our $TODO = 'make aassign handle state vars';
+    is($ls, "13/24", 'list assignment to state scalars');
+}
