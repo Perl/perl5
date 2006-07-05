@@ -562,7 +562,7 @@ $priv{$_}{128} = "LVINTRO"
        "padav", "padhv", "enteriter");
 $priv{$_}{64} = "REFC" for ("leave", "leavesub", "leavesublv", "leavewrite");
 $priv{"aassign"}{64} = "COMMON";
-$priv{"aassign"}{32} = "PHASH" if $] < 5.009;
+$priv{"aassign"}{32} = $] < 5.009 ? "PHASH" : "STATE";
 $priv{"sassign"}{32} = "STATE";
 $priv{"sassign"}{64} = "BKWARD";
 $priv{$_}{64} = "RTIME" for ("match", "subst", "substcont", "qr");

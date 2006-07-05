@@ -1080,6 +1080,12 @@ PP(pp_aassign)
 	    }
 	}
     }
+    if (PL_op->op_private & OPpASSIGN_STATE) {
+	if (SvPADSTALE(*firstlelem))
+	    SvPADSTALE_off(*firstlelem);
+	else
+	    RETURN; /* ignore assignment */
+    }
 
     relem = firstrelem;
     lelem = firstlelem;

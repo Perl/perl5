@@ -105,7 +105,7 @@ is( gen_cashier()->{bal}->(), 42, '$42 in my drawer' );
 # stateless assignment to a state variable
 
 sub stateless {
-    (state $reinitme) = 42;
+    (state $reinitme, my $foo) = (42, 'bar');
     ++$reinitme;
 }
 is( stateless(), 43, 'stateless function, first time' );
@@ -151,7 +151,4 @@ sub statelist {
 my $ls = statelist();
 is($ls, "12/23", 'list assignment to state scalars');
 $ls = statelist();
-{
-    local our $TODO = 'make aassign handle state vars';
-    is($ls, "13/24", 'list assignment to state scalars');
-}
+is($ls, "13/24", 'list assignment to state scalars');

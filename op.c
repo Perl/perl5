@@ -3783,6 +3783,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	 * to store these values, evil chicanery is done with SvCUR().
 	 */
 
+	{
 	    OP *lastop = o;
 	    PL_generation++;
 	    for (curop = LINKLIST(o); curop != o; curop = LINKLIST(curop)) {
@@ -3799,6 +3800,11 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			     curop->op_type == OP_PADHV ||
 			     curop->op_type == OP_PADANY)
 		    {
+			if ((left->op_private & OPpLVAL_INTRO) && (curop->op_private & OPpPAD_STATE)) {
+			    o->op_private |= OPpASSIGN_STATE;
+			    /* hijacking PADSTALE for uninitialized state variables */
+			    SvPADSTALE_on(PAD_SVl(curop->op_targ));
+			}
 			if (PAD_COMPNAME_GEN(curop->op_targ)
 						    == (STRLEN)PL_generation)
 			    break;
@@ -3836,6 +3842,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    }
 	    if (curop != o)
 		o->op_private |= OPpASSIGN_COMMON;
+	}
 	if (right && right->op_type == OP_SPLIT) {
 	    OP* tmpop = ((LISTOP*)right)->op_first;
 	    if (tmpop && (tmpop->op_type == OP_PUSHRE)) {
