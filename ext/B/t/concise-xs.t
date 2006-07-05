@@ -118,7 +118,7 @@ use Carp;
 use Test::More tests => ( # per-pkg tests (function ct + require_ok)
 			  40 + 16	# Data::Dumper, Digest::MD5
 			  + 512 + 235	# B::Deparse, B
-			  + 588 + 190	# POSIX, IO::Socket
+			  + 595 + 190	# POSIX, IO::Socket
 			  + 3 * ($] > 5.009)
 			  + 16 * ($] >= 5.009003)
 			  - 22);	# fudge
