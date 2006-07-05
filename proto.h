@@ -2674,6 +2674,10 @@ PERL_CALLCONV char*	Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, S
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
+PERL_CALLCONV char*	Perl_pv_escape(pTHX_ SV *dsv, const char *pv, const STRLEN count, const STRLEN max, const U32 flags)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
 PERL_CALLCONV void	Perl_dump_indent(pTHX_ I32 level, PerlIO *file, const char* pat, ...)
 			__attribute__format__(__printf__,pTHX_3,pTHX_4)
 			__attribute__nonnull__(pTHX_2)

@@ -1000,6 +1000,7 @@
 #define sv_setsv_mg		Perl_sv_setsv_mg
 #define get_vtbl		Perl_get_vtbl
 #define pv_display		Perl_pv_display
+#define pv_escape		Perl_pv_escape
 #define dump_indent		Perl_dump_indent
 #define dump_vindent		Perl_dump_vindent
 #define do_gv_dump		Perl_do_gv_dump
@@ -3182,6 +3183,7 @@
 #define sv_setsv_mg(a,b)	Perl_sv_setsv_mg(aTHX_ a,b)
 #define get_vtbl(a)		Perl_get_vtbl(aTHX_ a)
 #define pv_display(a,b,c,d,e)	Perl_pv_display(aTHX_ a,b,c,d,e)
+#define pv_escape(a,b,c,d,e)	Perl_pv_escape(aTHX_ a,b,c,d,e)
 #define dump_vindent(a,b,c,d)	Perl_dump_vindent(aTHX_ a,b,c,d)
 #define do_gv_dump(a,b,c,d)	Perl_do_gv_dump(aTHX_ a,b,c,d)
 #define do_gvgv_dump(a,b,c,d)	Perl_do_gvgv_dump(aTHX_ a,b,c,d)

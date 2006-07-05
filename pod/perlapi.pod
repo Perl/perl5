@@ -753,6 +753,62 @@ Found in file perl.c
 
 =back
 
+=head1 Functions in file dump.c
+
+
+=over 8
+
+=item pv_display
+X<pv_display>
+
+  char *pv_display(SV *dsv, const char *pv, STRLEN cur, STRLEN len,
+                   STRLEN pvlim, U32 flags)
+
+Similar to
+
+  pv_escape(dsv,pv,cur,pvlim,PERL_PV_ESCAPE_QUOTE);
+
+except that an additional "\0" will be appended to the string when
+len > cur and pv[cur] is "\0".
+
+Note that the final string may be up to 7 chars longer than pvlim.
+
+	char*	pv_display(SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
+
+=for hackers
+Found in file dump.c
+
+=item pv_escape
+X<pv_escape>
+
+Escapes at most the first "count" chars of pv and puts the results into
+buf such that the size of the escaped string will not exceed "max" chars
+and will not contain any incomplete escape sequences.
+
+If flags contains PERL_PV_ESCAPE_QUOTE then the string will have quotes
+placed around it; moreover, if the number of chars converted was less than
+"count" then a trailing elipses (...) will be added after the closing
+quote.
+
+If PERL_PV_ESCAPE_QUOTE is not set, but PERL_PV_ESCAPE_PADR is, then the
+returned string will be right padded with spaces such that it is max chars
+long.
+
+Normally the SV will be cleared before the escaped string is prepared,
+but when PERL_PV_ESCAPE_CAT is set this will not occur.
+
+Returns a pointer to the string contained by SV.
+
+NOTE: the perl_ form of this function is deprecated.
+
+	char*	pv_escape(SV *dsv, const char *pv, const STRLEN count, const STRLEN max, const U32 flags)
+
+=for hackers
+Found in file dump.c
+
+
+=back
+
 =head1 Functions in file mathoms.c
 
 

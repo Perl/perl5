@@ -5628,5 +5628,12 @@ extern void moncontrol(int);
 
    so that Configure picks them up. */
 
+/* these are used by Perl_pv_escape() and are here so that they
+ * are available throughout the core */
+
+#define PERL_PV_ESCAPE_QUOTE  1
+#define PERL_PV_ESCAPE_PADR   2
+#define PERL_PV_ESCAPE_CAT    4
+
 #endif /* Include guard */
 

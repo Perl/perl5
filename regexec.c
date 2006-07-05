@@ -2616,8 +2616,9 @@ S_push_slab(pTHX)
 
 #define REG_NODE_NUM(x) ((x) ? (int)((x)-prog) : -1)
 
-#ifdef DEBUGGING 
-STATIC void 
+#ifdef DEBUGGING
+
+STATIC void
 S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const bool do_utf8)
 {
     const int docolor = *PL_colors[0];
@@ -2646,24 +2647,30 @@ S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const bool do_u
     if (pref0_len > pref_len)
 	pref0_len = pref_len;
     {
-      const char * const s0 =
-	do_utf8 && OP(scan) != CANY ?
-	pv_uni_display(PERL_DEBUG_PAD(0), (U8*)(locinput - pref_len),
-		       pref0_len, 60, UNI_DISPLAY_REGEX) :
-	locinput - pref_len;
-      const int len0 = do_utf8 ? (int)strlen(s0) : pref0_len;
-      const char * const s1 = do_utf8 && OP(scan) != CANY ?
-	pv_uni_display(PERL_DEBUG_PAD(1),
-		       (U8*)(locinput - pref_len + pref0_len),
-		       pref_len - pref0_len, 60, UNI_DISPLAY_REGEX) :
-	locinput - pref_len + pref0_len;
-      const int len1 = do_utf8 ? (int)strlen(s1) : pref_len - pref0_len;
-      const char * const s2 = do_utf8 && OP(scan) != CANY ?
-	pv_uni_display(PERL_DEBUG_PAD(2), (U8*)locinput,
-		       PL_regeol - locinput, 60, UNI_DISPLAY_REGEX) :
-	locinput;
-      const int len2 = do_utf8 ? (int)strlen(s2) : l;
-      PerlIO_printf(Perl_debug_log,
+	const int is_uni = (do_utf8 && OP(scan) != CANY) ? 1 : 0;
+	const char * const s0 = is_uni ?
+	    pv_uni_display(PERL_DEBUG_PAD(0), (U8*)(locinput - pref_len),
+		    pref0_len, 60, UNI_DISPLAY_REGEX) :
+	    pv_escape(PERL_DEBUG_PAD(0), (locinput - pref_len),
+		    pref0_len, 60, 0);
+
+	const int len0 = strlen(s0);
+	const char * const s1 = is_uni ?
+	    pv_uni_display(PERL_DEBUG_PAD(1),
+		    (U8*)(locinput - pref_len + pref0_len),
+		    pref_len - pref0_len, 60, UNI_DISPLAY_REGEX) :
+	    pv_escape(PERL_DEBUG_PAD(1),
+		    (locinput - pref_len + pref0_len),
+		    pref_len - pref0_len, 60, 0);
+
+	const int len1 = (int)strlen(s1);
+	const char * const s2 = is_uni ?
+	    pv_uni_display(PERL_DEBUG_PAD(2), (U8*)locinput,
+		    PL_regeol - locinput, 60, UNI_DISPLAY_REGEX) :
+	    pv_escape(PERL_DEBUG_PAD(2), locinput,
+		    PL_regeol - locinput, 60, 0);
+	const int len2 = (int)strlen(s2);
+	PerlIO_printf(Perl_debug_log,
 		    "%4"IVdf" <%s%.*s%s%s%.*s%s%s%s%.*s%s>%*s|",
 		    (IV)(locinput - PL_bostr),
 		    PL_colors[4],
@@ -2680,6 +2687,7 @@ S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const bool do_u
 		    "");
     }
 }
+
 #endif
 
 STATIC I32			/* 0 failure, 1 success */

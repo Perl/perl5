@@ -119,40 +119,121 @@ Perl_dump_eval(pTHX)
     op_dump(PL_eval_root);
 }
 
+
+/*
+=for apidoc Apd|char*|pv_escape|NN SV *dsv|NN const char *pv|const STRLEN count|const STRLEN max|const U32 flags
+
+Escapes at most the first "count" chars of pv and puts the results into
+buf such that the size of the escaped string will not exceed "max" chars
+and will not contain any incomplete escape sequences.
+
+If flags contains PERL_PV_ESCAPE_QUOTE then the string will have quotes
+placed around it; moreover, if the number of chars converted was less than
+"count" then a trailing elipses (...) will be added after the closing
+quote.
+
+If PERL_PV_ESCAPE_QUOTE is not set, but PERL_PV_ESCAPE_PADR is, then the
+returned string will be right padded with spaces such that it is max chars
+long.
+
+Normally the SV will be cleared before the escaped string is prepared,
+but when PERL_PV_ESCAPE_CAT is set this will not occur.
+
+Returns a pointer to the string contained by SV.
+
+=cut
+*/
+
+char *
+Perl_pv_escape( pTHX_ SV *dsv, const char *pv, const STRLEN count, const STRLEN max, const U32 flags ) {
+    char dq = (flags & PERL_PV_ESCAPE_QUOTE) ? '"' : '\\';
+    char octbuf[8] = "\\0123456";
+    STRLEN wrote = 0;
+    STRLEN chsize = 0;
+    const char *end = pv + count;
+
+    if (flags & PERL_PV_ESCAPE_CAT) {
+	if ( dq == '"' )
+	    sv_catpvn(dsv, "\"", 1);
+    } else {
+	if ( dq == '"' )
+	    sv_setpvn(dsv, "\"", 1);
+	else
+	    sv_setpvn(dsv, "", 0);
+    }
+    for ( ; (pv < end && (!max || (wrote < max))) ; pv++ ) {
+	if ( (*pv == dq) || (*pv == '\\') || isCNTRL(*pv) ) {
+	    chsize = 2;
+	    switch (*pv) {
+		case '\\' : octbuf[1] = '\\'; break;
+		case '\v' : octbuf[1] = 'v';  break;
+		case '\t' : octbuf[1] = 't';  break;
+		case '\r' : octbuf[1] = 'r';  break;
+		case '\n' : octbuf[1] = 'n';  break;
+		case '\f' : octbuf[1] = 'f';  break;
+		case '"'  : if ( dq == *pv ) {
+				octbuf[1] = '"';
+				break;
+			    }
+		default:
+			    /* note the (U8*) casts here are important.
+			     * if they are omitted we can produce the octal
+			     * for a negative number which could produce a
+			     * buffer overrun in octbuf, with it on we are
+			     * guaranteed that the longest the string could be
+			     * is 5, (we reserve 8 just because its the first
+			     * power of 2 larger than 5.)*/
+			    if ( (pv < end) && isDIGIT(*(pv+1)) )
+				chsize = sprintf( octbuf, "\\%03o", (U8)*pv);
+			    else
+				chsize = sprintf( octbuf, "\\%o", (U8)*pv);
+	    }
+	    if ( max && (wrote + chsize > max) ) {
+		break;
+	    } else {
+		sv_catpvn(dsv, octbuf, chsize);
+		wrote += chsize;
+	    }
+	} else {
+	    sv_catpvn(dsv, pv, 1);
+	    wrote++;
+	}
+    }
+    if ( dq == '"' ) {
+	sv_catpvn( dsv, "\"", 1 );
+	if ( pv < end )
+	    sv_catpvn( dsv, "...", 3 );
+    } else if ( max && (flags & PERL_PV_ESCAPE_PADR) ) {
+	for ( ; wrote < max ; wrote++ )
+	    sv_catpvn( dsv, " ", 1 );
+    }
+    return SvPVX(dsv);
+}
+
+/*
+=for apidoc pv_display
+
+  char *pv_display(SV *dsv, const char *pv, STRLEN cur, STRLEN len,
+                   STRLEN pvlim, U32 flags)
+
+Similar to
+
+  pv_escape(dsv,pv,cur,pvlim,PERL_PV_ESCAPE_QUOTE);
+
+except that an additional "\0" will be appended to the string when
+len > cur and pv[cur] is "\0".
+
+Note that the final string may be up to 7 chars longer than pvlim.
+
+=cut
+*/
+
 char *
 Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
 {
-    const bool nul_terminated = len > cur && pv[cur] == '\0';
-    bool truncated = 0;
-
-    sv_setpvn(dsv, "\"", 1);
-    for (; cur--; pv++) {
-	if (pvlim && SvCUR(dsv) >= pvlim) {
-            truncated = 1;
-	    break;
-        }
-	switch (*pv) {
-	case '\t': sv_catpvs(dsv, "\\t");  break;
-	case '\n': sv_catpvs(dsv, "\\n");  break;
-	case '\r': sv_catpvs(dsv, "\\r");  break;
-	case '\f': sv_catpvs(dsv, "\\f");  break;
-	case '"':  sv_catpvs(dsv, "\\\""); break;
-	case '\\': sv_catpvs(dsv, "\\\\"); break;
-	default:
-	    if (isPRINT(*pv))
-		sv_catpvn(dsv, pv, 1);
-	    else if (cur && isDIGIT(*(pv+1)))
-		Perl_sv_catpvf(aTHX_ dsv, "\\%03o", (U8)*pv);
-	    else
-		Perl_sv_catpvf(aTHX_ dsv, "\\%o", (U8)*pv);
-        }
-    }
-    sv_catpvs(dsv, "\"");
-    if (truncated)
-	sv_catpvs(dsv, "...");
-    if (nul_terminated)
-	sv_catpvs(dsv, "\\0");
-
+    pv_escape( dsv, pv, cur, pvlim, PERL_PV_ESCAPE_QUOTE);
+    if (len > cur && pv[cur] == '\0')
+            sv_catpvn( dsv, "\\0", 2 );
     return SvPVX(dsv);
 }
 

@@ -44,7 +44,7 @@ Perl_reentrant_size(pTHX) {
 #ifdef HAS_GETGRNAM_R
 #   if defined(HAS_SYSCONF) && defined(_SC_GETGR_R_SIZE_MAX) && !defined(__GLIBC__)
 	PL_reentrant_buffer->_grent_size = sysconf(_SC_GETGR_R_SIZE_MAX);
-	if (PL_reentrant_buffer->_grent_size == -1U)
+	if (PL_reentrant_buffer->_grent_size == -1)
 		PL_reentrant_buffer->_grent_size = REENTRANTUSUALSIZE;
 #   else
 #       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
