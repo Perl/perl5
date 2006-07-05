@@ -70,6 +70,7 @@ esac
 # Further gcc warning options.
 case "$gccversion" in
 '') ;;
+[12]*) ;;
 Intel*) ;;
 *)  for opt in '' extra declaration-after-statement endif-labels
     do
