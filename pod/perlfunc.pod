@@ -174,7 +174,7 @@ L<feature>.)
 =item Miscellaneous functions
 
 C<defined>, C<dump>, C<eval>, C<formline>, C<local>, C<my>, C<our>,
-C<state>, C<reset>, C<scalar>, C<undef>, C<wantarray>
+C<reset>, C<scalar>, C<state>, C<undef>, C<wantarray>
 
 =item Functions for processes and process groups
 X<process> X<pid> X<process id>
@@ -231,12 +231,11 @@ C<gmtime>, C<localtime>, C<time>, C<times>
 =item Functions new in perl5
 X<perl5>
 
-C<abs>, C<bless>, C<chomp>, C<chr>, C<exists>, C<formline>, C<glob>,
-C<import>, C<lc>, C<lcfirst>, C<lock>, C<map>, C<my>, C<no>, C<our>,
-C<state>,
-C<prototype>, C<qr>, C<qw>, C<qx>, C<readline>, C<readpipe>, C<ref>,
-C<sub>*, C<sysopen>, C<tie>, C<tied>, C<uc>, C<ucfirst>, C<untie>, C<use>,
-C<break>, C<continue>, C<given>, C<when>, C<default>
+C<abs>, C<bless>, C<break>, C<chomp>, C<chr>, C<continue>, C<default>, 
+C<exists>, C<formline>, C<given>, C<glob>, C<import>, C<lc>, C<lcfirst>,
+C<lock>, C<map>, C<my>, C<no>, C<our>, C<prototype>, C<qr>, C<qw>, C<qx>,
+C<readline>, C<readpipe>, C<ref>, C<sub>*, C<sysopen>, C<tie>, C<tied>, C<uc>,
+C<ucfirst>, C<untie>, C<use>, C<when>
 
 * - C<sub> was a keyword in perl4, but in perl5 it is an
 operator, which can be used in expressions.
