@@ -40,7 +40,25 @@ and then File::Spec::Unix canonpath() is called on the result.
 sub canonpath {
     my($self,$path) = @_;
     $path =~ s|\\|/|g;
-    return $self->SUPER::canonpath($path);
+
+    # Handle network path names beginning with double slash
+    my $node = '';
+    if ( $path =~ s@^(//[^/]+)(?:/|\z)@/@s ) {
+        $node = $1;
+    }
+    return $node . $self->SUPER::canonpath($path);
+}
+
+sub catdir {
+    my $self = shift;
+
+    # Don't create something that looks like a //network/path
+    if ($_[0] eq '/' or $_[0] eq '\\') {
+        shift;
+        return $self->SUPER::catdir('', @_);
+    }
+
+    $self->SUPER::catdir(@_);
 }
 
 =pod

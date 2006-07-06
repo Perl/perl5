@@ -18,7 +18,7 @@ use lib File::Spec->catdir('t', 'lib');
 use Test::More;
 require VMS::Filespec if $^O eq 'VMS';
 
-my $tests = 29;
+my $tests = 30;
 # _perl_abs_path() currently only works when the directory separator
 # is '/', so don't test it when it won't work.
 my $EXTRA_ABSPATH_TESTS = ($Config{prefix} =~ m/\//) && $^O ne 'cygwin';
@@ -123,6 +123,13 @@ foreach my $func (qw(cwd getcwd fastcwd fastgetcwd)) {
   my $result = eval "$func()";
   is $@, '';
   dir_ends_with( $result, $Test_Dir, "$func()" );
+}
+
+{
+  # Some versions of File::Path (e.g. that shipped with perl 5.8.5)
+  # call getcwd() with an argument (perhaps by calling it as a
+  # method?), so make sure that doesn't die.
+  is getcwd(), getcwd('foo'), "Call getcwd() with an argument";
 }
 
 # Cwd::chdir should also update $ENV{PWD}
