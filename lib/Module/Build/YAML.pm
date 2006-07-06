@@ -102,25 +102,30 @@ sub _yaml_chunk {
 }
 
 sub _yaml_value {
-  # XXX doesn't handle embedded newlines
   my ($value) = @_;
-  # undefs and empty strings will become empty strings
-  if (! defined $value || $value eq "") {
+  # undefs become ~
+  if (! defined $value) {
+    return("~");
+  }
+  # empty strings will become empty strings
+  elsif (! defined $value || $value eq "") {
     return('""');
   }
+  # quote and escape strings with special values
+  elsif ($value =~ /["'`~\n!\@\#^\&\*\(\)\{\}\[\]\|<>\?]/) {
+    if ($value !~ /['`~\n!\#^\&\*\(\)\{\}\[\]\|\?]/) {  # nothing but " or @ or < or > (email addresses)
+      return("'" . $value . "'");
+    }
+    else {
+      $value =~ s/\n/\\n/g;    # handle embedded newlines
+      $value =~ s/"/\\"/g;     # handle embedded quotes
+      return('"' . $value . '"');
+    }
+  }
   # allow simple scalars (without embedded quote chars) to be unquoted
-  elsif ($value !~ /["'\\]/) {
-    return($value);
-  }
-  # strings without double-quotes get double-quoted
-  elsif ($value !~ /\"/) {
-    $value =~ s{\\}{\\\\}g;
-    return qq{"$value"};
-  }
-  # other strings get single-quoted
+  # (includes $%_+=-\;:,./)
   else {
-    $value =~ s{([\\'])}{\\$1}g;
-    return qq{'$value'};
+    return($value);
   }
 }
 

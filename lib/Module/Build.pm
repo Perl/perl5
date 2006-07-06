@@ -15,7 +15,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.28';
+$VERSION = '0.2801';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -867,113 +867,29 @@ This will effectively install to "/tmp/foo/$sitelib",
 C<File::Spec> to make the pathnames work correctly on whatever
 platform you're installing on.
 
-=back
+=item prefix
 
+Provided for compatibility with ExtUtils::MakeMaker's PREFIX argument.
+C<prefix> should be used when you wish Module::Build to install your
+modules, documentation and scripts in the same place
+ExtUtils::MakeMaker does.
 
-=head2 About PREFIX Support
+The following are equivalent.
 
-[version 0.28]
+    perl Build.PL --prefix /tmp/foo
+    perl Makefile.PL PREFIX=/tmp/foo
 
-First, it is necessary to understand the original idea behind
-C<PREFIX>.  If, for example, the default installation locations for
-your machine are F</usr/local/lib/perl5/5.8.5> for modules,
-F</usr/local/bin> for executables, F</usr/local/man/man1> and
-F</usr/local/man/man3> for manual pages, etc., then they all share the
-same "prefix" F</usr/local>.  MakeMaker's C<PREFIX> mechanism was
-intended as a way to change an existing prefix that happened to occur
-in all those paths - essentially a C<< s{/usr/local}{/foo/bar} >> for
-each path.
+Because of the very complex nature of the prefixification logic, the
+behavior of PREFIX in MakeMaker has changed subtly over time.
+Module::Build's --prefix logic is equivalent to the PREFIX logic found
+in ExtUtils::MakeMaker 6.30.
 
-However, the real world is more complicated than that.  The C<PREFIX>
-idea is fundamentally broken when your machine doesn't jibe with
-C<PREFIX>'s worldview.
+If you do not need to retain compatibility with ExtUtils::MakeMaker or
+are starting a fresh Perl installation we recommand you use
+C<install_base> instead (and C<INSTALL_BASE> in ExtUtils::MakeMaker).
+See L<Module::Build::Cookbook/Instaling in the same location as
+ExtUtils::MakeMaker> for further information.
 
-
-=over 4
-
-=item Why PREFIX is not recommended
-
-=over 4
-
-=item *
-
-Many systems have Perl configs that make little sense with PREFIX.
-For example, OS X, where core modules go in
-F</System/Library/Perl/...>, user-installed modules go in
-F</Library/Perl/...>, and man pages go in F</usr/share/man/...>.  The
-PREFIX is thus set to F</>.  Install L<Foo::Bar> on OS X with
-C<PREFIX=/home/spurkis> and you get things like
-F</home/spurkis/Library/Perl/5.8.1/Foo/Bar.pm> and
-F</home/spurkis/usr/share/man/man3/Foo::Bar.3pm>.  Not too pretty.
-
-The problem is not limited to Unix-like platforms, either - on Windows
-builds (e.g. ActiveState perl 5.8.0), we have user-installed modules
-going in F<C:\Perl\site\lib>, user-installed executables going in
-F<C:\Perl\bin>, and PREFIX=F<C:\Perl\site>.  The prefix just doesn't
-apply neatly to the executables.
-
-=item *
-
-The PREFIX logic is too complicated and hard to predict for the user.
-It's hard to document what exactly is going to happen.  You can't give
-a user simple instructions like "run perl Makefile.PL PREFIX=~ and
-then set PERL5LIB=~/lib/perl5".
-
-=item *
-
-The results from PREFIX will change if your configuration of Perl
-changes (for example, if you upgrade Perl).  This means your modules
-will end up in different places.
-
-=item *
-
-The results from PREFIX can change with different releases of
-MakeMaker.  The logic of PREFIX is subtle and it has been altered in
-the past (mostly to limit damage in the many "edge cases" when its
-behavior was undesirable).
-
-=item *
-
-PREFIX imposes decisions made by the person who configured Perl onto
-the person installing a module.  The person who configured Perl could
-have been you or it could have been some guy at Redhat.
-
-=back
-
-
-=item Alternatives to PREFIX
-
-Module::Build offers L</install_base> as a simple, predictable, and
-user-configurable alternative to ExtUtils::MakeMaker's C<PREFIX>.
-What's more, MakeMaker will soon accept C<INSTALL_BASE> -- we strongly
-urge you to make the switch.
-
-Here's a quick comparison of the two when installing modules to your
-home directory on a unix box:
-
-MakeMaker [*]:
-
-  % perl Makefile.PL PREFIX=/home/spurkis
-  PERL5LIB=/home/spurkis/lib/perl5/5.8.5:/home/spurkis/lib/perl5/site_perl/5.8.5
-  PATH=/home/spurkis/bin
-  MANPATH=/home/spurkis/man
-
-Module::Build:
-
-  % perl Build.PL install_base=/home/spurkis
-  PERL5LIB=/home/spurkis/lib/perl5
-  PATH=/home/spurkis/bin
-  MANPATH=/home/spurkis/man
-
-[*] Note that MakeMaker's behaviour cannot be guaranteed in even this
-common scenario, and differs among different versions of MakeMaker.
-
-In short, using C<install_base> is similar to the following MakeMaker usage:
-
-  perl Makefile.PL PREFIX=/home/spurkis LIB=/home/spurkis/lib/perl5
-
-See L</"INSTALL PATHS"> for details on other
-installation options available and how to configure them.
 
 =back
 

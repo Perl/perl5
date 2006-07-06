@@ -13,6 +13,17 @@ sub make_tarball {
   $self->SUPER::make_tarball(@_);
 }
 
+sub is_executable {
+  # We consider the owner bit to be authoritative on a file, because
+  # -x will always return true if the user is root and *any*
+  # executable bit is set.  The -x test seems to try to answer the
+  # question "can I execute this file", but I think we want "is this
+  # file executable".
+
+  my ($self, $file) = @_;
+  return +(stat $file)[2] & 0100;
+}
+
 sub _startperl { "#! " . shift()->perl }
 
 sub _construct {

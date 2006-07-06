@@ -1272,6 +1272,13 @@ sub make_executable {
   }
 }
 
+sub is_executable {
+  # We assume this does the right thing on generic platforms, though
+  # we do some other more specific stuff on Unixish platforms.
+  my ($self, $file) = @_;
+  return -x $file;
+}
+
 sub _startperl { shift()->config('startperl') }
 
 # Return any directories in @INC which are not in the default @INC for
@@ -2496,7 +2503,7 @@ sub htmlify_pods {
 
   my $pods = $self->_find_pods( $self->{properties}{"${type}doc_dirs"},
                                 exclude => [ qr/\.(?:bat|com|html)$/ ] );
-  next unless %$pods;  # nothing to do
+  return unless %$pods;  # nothing to do
 
   unless ( -d $htmldir ) {
     File::Path::mkpath($htmldir, 0, 0755)
@@ -3955,7 +3962,7 @@ sub copy_if_modified {
   $self->log_info("$file -> $to_path\n") if $args{verbose};
   File::Copy::copy($file, $to_path) or die "Can't copy('$file', '$to_path'): $!";
   # mode is read-only + (executable if source is executable)
-  my $mode = 0444 | ( -x $file ? 0111 : 0 );
+  my $mode = 0444 | ( $self->is_executable($file) ? 0111 : 0 );
   chmod( $mode, $to_path );
 
   return $to_path;

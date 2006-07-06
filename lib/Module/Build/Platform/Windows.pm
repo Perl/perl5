@@ -54,17 +54,26 @@ sub make_executable {
   $self->SUPER::make_executable(@_);
 
   foreach my $script (@_) {
-    my %opts = ();
-    if ( $script eq $self->build_script ) {
-      $opts{ntargs}    = q(-x -S %0 --build_bat %*);
-      $opts{otherargs} = q(-x -S "%0" --build_bat %1 %2 %3 %4 %5 %6 %7 %8 %9);
-    }
 
-    my $out = eval {$self->pl2bat(in => $script, update => 1, %opts)};
-    if ( $@ ) {
-      $self->log_warn("WARNING: Unable to convert file '$script' to an executable script:\n$@");
+    # Native batch script
+    if ( $script =~ /\.(bat|cmd)$/ ) {
+      $self->SUPER::make_executable($script);
+      next;
+
+    # Perl script that needs to be wrapped in a batch script
     } else {
-      $self->SUPER::make_executable($out);
+      my %opts = ();
+      if ( $script eq $self->build_script ) {
+        $opts{ntargs}    = q(-x -S %0 --build_bat %*);
+        $opts{otherargs} = q(-x -S "%0" --build_bat %1 %2 %3 %4 %5 %6 %7 %8 %9);
+      }
+
+      my $out = eval {$self->pl2bat(in => $script, update => 1, %opts)};
+      if ( $@ ) {
+        $self->log_warn("WARNING: Unable to convert file '$script' to an executable script:\n$@");
+      } else {
+        $self->SUPER::make_executable($out);
+      }
     }
   }
 }

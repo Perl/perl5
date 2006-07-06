@@ -44,7 +44,7 @@ $VERSION = 0.01;
 
 # We have a few extra exports, but Test::More has a special import()
 # that won't take extra additions.
-my @extra_exports = qw(stdout_of stderr_of slurp find_in_path check_compiler);
+my @extra_exports = qw(stdout_of stderr_of slurp find_in_path check_compiler have_module);
 push @EXPORT, @extra_exports;
 __PACKAGE__->export(scalar caller, @extra_exports);
 
@@ -103,6 +103,11 @@ sub check_compiler {
   stderr_of( sub {$have_c_compiler = $mb->have_c_compiler} );
 
   return ($have_c_compiler, $mb->feature('C_support'));
+}
+
+sub have_module {
+  my $module = shift;
+  return eval "use $module; 1";
 }
 
 1;

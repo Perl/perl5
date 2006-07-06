@@ -131,20 +131,67 @@ F</tmp/my-package-1.003> directory.
 
 To install to a non-standard directory (for example, if you don't have
 permission to install in the system-wide directories), you can use the
-C<install_base> or C<prefix> parameters:
+C<install_base>:
 
   ./Build install --install_base /foo/bar
-   or
-  ./Build install --prefix /foo/bar
-
-Note that these have somewhat different effects - C<prefix> is an
-emulation of C<ExtUtils::MakeMaker>'s old C<PREFIX> setting, and
-inherits all its nasty gotchas.  C<install_base> is more predictable,
-and newer versions of C<ExtUtils::MakeMaker> also support it, so it's
-often your best choice.
 
 See L<Module::Build/"INSTALL PATHS"> for a much more complete
 discussion of how installation paths are determined.
+
+
+=head2 Installing in the same location as ExtUtils::MakeMaker
+
+With the introduction of C<--prefix> in Module::Build 0.28 and
+C<INSTALL_BASE> in ExtUtils::MakeMaker 6.31 its easy to get them both
+to install to the same locations.
+
+First, ensure you have at least version 0.28 of Module::Build
+installed and 6.31 of ExtUtils::MakeMaker.  Prior versions have
+differing installation behaviors.
+
+The following installation flags are equivalent between
+ExtUtils::MakeMaker and Module::Build.
+
+    MakeMaker             Module::Build
+    PREFIX=...            --prefix ...
+    INSTALL_BASE=...      --install_base ...
+    DESTDIR=...           --destdir ...
+    LIB=...               --install_path lib=...
+    INSTALLDIRS=...       --installdirs ...
+    INSTALLDIRS=perl      --installdirs core
+    UNINST=...            --uninst ...
+    INC=...               --extra_compiler_flags ...
+    POLLUTE=1             --extra_compiler_flags -DPERL_POLLUTE
+
+For example, if you are currently installing MakeMaker modules with
+this command:
+
+    perl Makefile.PL PREFIX=~
+    make test
+    make install UNINST=1
+
+You can install into the same location with Module::Build using this:
+
+    perl Build.PL --prefix ~
+    ./Build test
+    ./Build install --uninst 1
+
+=head3 C<prefix> vs C<install_base>
+
+The behavior of C<prefix> is complicated and depends closely on
+how your Perl is configured.  The resulting installation locations
+will vary from machine to machine and even different installations of
+Perl on the same machine.  Because of this, its difficult to document
+where C<prefix> will place your modules.
+
+In contrast, C<install_base> has predictable, easy to explain
+installation locations.  Now that Module::Build and MakeMaker both
+have C<install_base> there is little reason to use C<prefix> other
+than to preserve your existing installation locations.  If you are
+starting a fresh Perl installation we encourage you to use
+C<install_base>.  If you have an existing installation installed via
+C<prefix>, consider moving it to an installation structure matching
+C<install_base> and using that instead.
 
 
 =head2 Running a single test file

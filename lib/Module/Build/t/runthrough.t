@@ -2,7 +2,7 @@
 
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
-use MBTest tests => 28;
+use MBTest tests => 32;
 use Module::Build;
 use Module::Build::ConfigData;
 
@@ -197,6 +197,47 @@ ok ! -e $mb->build_script;
 ok ! -e $mb->config_dir;
 ok ! -e $mb->dist_dir;
 
+chdir( $cwd ) or die "Can''t chdir to '$cwd': $!";
+$dist->remove;
+
+SKIP: {
+  skip( 'Windows only test', 4 ) unless $^O =~ /^MSWin/;
+
+  my $script_data = <<'---';
+@echo off
+echo Hello, World!
+---
+
+  $dist = DistGen->new( dir => $tmp );
+  $dist->change_file( 'Build.PL', <<'---' );
+use Module::Build;
+my $build = new Module::Build(
+  module_name => 'Simple',
+  scripts     => [ 'bin/script.bat' ],
+  license     => 'perl',
+);
+$build->create_build_script;
+---
+  $dist->add_file( 'bin/script.bat', $script_data );
+
+  $dist->regen;
+  chdir( $dist->dirname ) or die "Can't chdir to '@{[$dist->dirname]}': $!";
+
+  $mb = Module::Build->new_from_context;
+  ok $mb;
+
+  eval{ $mb->dispatch('build') };
+  is $@, '';
+
+  my $script_file = File::Spec->catfile( qw(blib script), 'script.bat' );
+  ok -f $script_file, "Native batch file copied to 'scripts'";
+
+  my $out = slurp( $script_file );
+  is $out, $script_data, '  unmodified by pl2bat';
+
+  chdir( $cwd ) or die "Can''t chdir to '$cwd': $!";
+  $dist->remove;
+}
 
 # cleanup
 chdir( $cwd ) or die "Can''t chdir to '$cwd': $!";

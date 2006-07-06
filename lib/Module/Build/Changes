@@ -1,5 +1,39 @@
 Revision history for Perl extension Module::Build.
 
+0.2801  Sun May 21 00:07:40 CDT 2006
+
+ - Module::Build::Compat's emulation of INC is incorrectly prepending
+   a -I to the value of INC. This is incorrect because there should
+   already be a -I on the value. I.E. it's "perl Makefile.PL INC=-Ifoo"
+   not "perl Makefile.PL INC=foo" so Compat should not prefix a -I.
+   [Michael Schwern]
+
+ - Native batch scripts under Windows should not be converted by
+   pl2bat. [Spotted by Ron Savage]
+
+ - Tweaked the way we determine whether a file is executable on Unix.
+   We use this determination to decide whether to make it executable
+   during installation. [Julian Mehnle]
+
+ - Replaced a vestigial 'next' with 'return' now that the code is in a
+   subroutine (htmlify_pods()), not a loop. [Ron Savage]
+
+ - Fixed a guaranteed failure in t/signature.t when TEST_SIGNATURE was
+   set. [Eric R. Meyers]
+
+ - Fixed a test failure that occurred when testing or installing in
+   unattended mode - the code to test whether unattended mode and
+   attended mode are working properly was assuming that we started out
+   in attended mode. [Steve Peters]
+
+ - Improved our stand-in YAML generator that we use to generate
+   META.yaml when authors don't have a copy of YAML.pm installed on
+   their machine.  It was unable to handle things like embedded
+   newlines in the data, now it has a much more extensive escaping
+   mechanism. [Stephen Adkins]
+
+ - Revised the docs for --prefix and PREFIX. [Michael Schwern]
+
 0.28  Thu Apr 27 22:25:00 CDT 2006
 
  - When y_n() or prompt() are called without a default value and the
