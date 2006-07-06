@@ -380,6 +380,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+        'Math::Complex' =>
+                {
+                'MAINTAINER'    => 'jhi',
+                'FILES'         => q[lib/Math/Complex.pm lib/Math/Trig.pm],
+                'CPAN'          => 1,
+                },
+
 	'Memoize' =>
 		{
 		'MAINTAINER'	=> 'mjd',
