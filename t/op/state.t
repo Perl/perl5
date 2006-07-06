@@ -10,7 +10,7 @@ BEGIN {
 use strict;
 use feature "state";
 
-plan tests => 32;
+plan tests => 34;
 
 ok( ! defined state $uninit, q(state vars are undef by default) );
 
@@ -105,6 +105,7 @@ is( gen_cashier()->{bal}->(), 42, '$42 in my drawer' );
 # stateless assignment to a state variable
 
 sub stateless {
+    no warnings 'misc';
     (state $reinitme, my $foo) = (42, 'bar');
     ++$reinitme;
 }
@@ -152,3 +153,17 @@ my $ls = statelist();
 is($ls, "12/23", 'list assignment to state scalars');
 $ls = statelist();
 is($ls, "13/24", 'list assignment to state scalars');
+
+sub statelist2 {
+    state($sherry, $bourbon) = (1 .. 2);
+    $sherry++;
+    $bourbon++;
+    "$sherry/$bourbon";
+}
+
+$ls = statelist2();
+is($ls, "2/3", 'list assignment to state scalars');
+$ls = statelist2();
+{ local our $TODO = 'detection of state vars is misplaced in newASSIGNOP';
+is($ls, "3/4", 'list assignment to state scalars');
+}
