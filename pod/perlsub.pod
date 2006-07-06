@@ -431,7 +431,50 @@ L<perlref/"Function Templates"> for something of a work-around to
 this.
 
 =head2 Persistent Private Variables
-X<static> X<variable, persistent> X<variable, static> X<closure>
+X<state> X<state variable> X<static> X<variable, persistent> X<variable, static> X<closure>
+
+There are two ways to build persistent private variables in Perl 5.10.
+First, you can simply use the C<state> feature. Or, you can use closures,
+if you want to stay compatible with releases older than 5.10.
+
+=head3 Persistent variables via state()
+
+Beginning with perl 5.9.4, you can declare variables with the C<state>
+keyword in place of C<my>. For that to work, though, you must have
+enabled that feature beforehand, either by using the C<feature> pragma, or
+by using C<-E> on one-liners. (see L<feature>)
+
+For example, the following code maintains a private counter, incremented
+each time the gimme_another() function is called:
+
+    use feature 'state';
+    sub gimme_another { state $x; return ++$x }
+
+Also, since C<$x> is lexical, it can't be reached or modified by any Perl
+code outside.
+
+You can initialize state variables, and the assigment will be executed
+only once:
+
+    sub starts_from_42 { state $x = 42; return ++$x }
+
+You can also, as a syntactic shortcut, initialize more than one if they're
+all declared within the same state() clause:
+
+    state ($a, $b, $c) = ( 'one', 'two', 'three' );
+
+However, be warned that state variables declared as part of a list will
+get assigned each time the statement will be executed, since it will be
+considered as a regular list assigment, not one to be executed only once:
+
+    (state $x, my $y) = (1, 2); # $x gets reinitialized every time !
+
+B<Caveat>: the code at the right side of the assignment to a state
+variable will be executed every time; only the assignment is disabled. So,
+avoid code that has side-effects, or that is slow to execute. This might
+be optimized out in a future version of Perl.
+
+=head3 Persistent variables with closures
 
 Just because a lexical variable is lexically (also called statically)
 scoped to its enclosing block, C<eval>, or C<do> FILE, this doesn't mean that
