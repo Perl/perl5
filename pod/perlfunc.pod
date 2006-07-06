@@ -158,19 +158,23 @@ C<goto>, C<last>, C<next>, C<redo>, C<return>, C<sub>, C<wantarray>
 
 =item Keywords related to switch
 
-C<break>, C<continue>
+C<break>, C<continue>, C<given>, C<when>, C<default>
 
 (These are only available if you enable the "switch" feature.
 See L<feature> and L<perlsyn/"Switch statements">.)
 
 =item Keywords related to scoping
 
-C<caller>, C<import>, C<local>, C<my>, C<our>, C<package>, C<use>
+C<caller>, C<import>, C<local>, C<my>, C<our>, C<state>, C<package>,
+C<use>
+
+(C<state> is only available if the "state" feature is enabled. See
+L<feature>.)
 
 =item Miscellaneous functions
 
-C<defined>, C<dump>, C<eval>, C<formline>, C<local>, C<my>, C<our>, C<reset>,
-C<scalar>, C<undef>, C<wantarray>
+C<defined>, C<dump>, C<eval>, C<formline>, C<local>, C<my>, C<our>,
+C<state>, C<reset>, C<scalar>, C<undef>, C<wantarray>
 
 =item Functions for processes and process groups
 X<process> X<pid> X<process id>
@@ -229,8 +233,10 @@ X<perl5>
 
 C<abs>, C<bless>, C<chomp>, C<chr>, C<exists>, C<formline>, C<glob>,
 C<import>, C<lc>, C<lcfirst>, C<lock>, C<map>, C<my>, C<no>, C<our>,
+C<state>,
 C<prototype>, C<qr>, C<qw>, C<qx>, C<readline>, C<readpipe>, C<ref>,
-C<sub>*, C<sysopen>, C<tie>, C<tied>, C<uc>, C<ucfirst>, C<untie>, C<use>
+C<sub>*, C<sysopen>, C<tie>, C<tied>, C<uc>, C<ucfirst>, C<untie>, C<use>,
+C<break>, C<continue>, C<given>, C<when>, C<default>
 
 * - C<sub> was a keyword in perl4, but in perl5 it is an
 operator, which can be used in expressions.
@@ -3429,7 +3435,7 @@ See L<perlunicode> and L<encoding> for more about Unicode.
 =item our EXPR
 X<our> X<global>
 
-=item our EXPR TYPE
+=item our TYPE EXPR
 
 =item our EXPR : ATTRS
 
@@ -5956,6 +5962,23 @@ and the C<S_IF*> functions are
 See your native chmod(2) and stat(2) documentation for more details
 about the C<S_*> constants.  To get status info for a symbolic link
 instead of the target file behind the link, use the C<lstat> function.
+
+=item state EXPR
+X<state>
+
+=item state TYPE EXPR
+
+=item state EXPR : ATTRS
+
+=item state TYPE EXPR : ATTRS
+
+C<state> declares a lexically scoped variable, just like C<my> does.
+However, those variables will be initialized only once, contrary to
+lexical variables that are reinitialized each time their enclosing block
+is entered.
+
+C<state> variables are only enabled when the C<feature 'state'> pragma is
+in effect.  See L<feature>.
 
 =item study SCALAR
 X<study>

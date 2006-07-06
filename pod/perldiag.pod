@@ -1422,12 +1422,17 @@ conditional. Some people have exploited this bug to achieve a kind of
 static variable. Since we intend to fix this bug, we don't want people
 relying on this behavior. You can achieve a similar static effect by
 declaring the variable in a separate block outside the function, eg
-    
+
     sub f { my $x if 0; return $x++ }
 
 becomes
 
     { my $x; sub f { return $x++ } }
+
+Beginning with perl 5.9.4, you can also use C<state> variables to
+have lexicals that are initialized only once (see L<feature>):
+
+    sub f { state $x; return $x++ }
 
 =item DESTROY created new reference to dead object '%s'
 

@@ -394,7 +394,6 @@ never fully qualified with the package name.  In particular, you're not
 allowed to try to make a package variable (or other global) lexical:
 
     my $pack::var;	# ERROR!  Illegal syntax
-    my $_;		# also illegal (currently)
 
 In fact, a dynamic variable (also known as package or global variables)
 are still accessible using the fully qualified C<::> notation even while a
