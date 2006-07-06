@@ -1,5 +1,9 @@
 Revision history for Perl extension threads.
 
+1.34 Thu Jul  6 10:29:37 EDT 2006
+	- Added ->is_running, ->is_detached, ->is_joinable, ->wantarray
+	- Enhanced ->list to return running or joinable threads
+
 1.33 Mon Jul  3 10:11:20 EDT 2006
 	- 'exit' inside a thread silently terminates thread only
 	- Added 'threads->exit()' (just calls CORE::exit(0))

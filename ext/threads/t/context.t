@@ -28,7 +28,7 @@ BEGIN {
     }
 
     $| = 1;
-    print("1..13\n");   ### Number of tests that will be run ###
+    print("1..31\n");   ### Number of tests that will be run ###
 };
 
 my $TEST;
@@ -98,6 +98,61 @@ $res = $thr->join();
 ok($res eq 'scalar', 'Explicit scalar context');
 
 $thr = threads->create({'void' => 1}, 'foo', 'void');
+$res = $thr->join();
+ok(! defined($res), 'Explicit void context');
+
+
+sub bar
+{
+    my $context = shift;
+    my $wantarray = threads->wantarray();
+
+    if ($wantarray) {
+        ok($context eq 'array', 'Array context');
+        return ('array');
+    } elsif (defined($wantarray)) {
+        ok($context eq 'scalar', 'Scalar context');
+        return 'scalar';
+    } else {
+        ok($context eq 'void', 'Void context');
+        return;
+    }
+}
+
+($thr) = threads->create('bar', 'array');
+my $ctx = $thr->wantarray();
+ok($ctx, 'Implicit array context');
+($res) = $thr->join();
+ok($res eq 'array', 'Implicit array context');
+
+$thr = threads->create('bar', 'scalar');
+$ctx = $thr->wantarray();
+ok(defined($ctx) && !$ctx, 'Implicit scalar context');
+$res = $thr->join();
+ok($res eq 'scalar', 'Implicit scalar context');
+
+threads->create('bar', 'void');
+($thr) = threads->list();
+$ctx = $thr->wantarray();
+ok(! defined($ctx), 'Implicit void context');
+$res = $thr->join();
+ok(! defined($res), 'Implicit void context');
+
+$thr = threads->create({'context' => 'array'}, 'bar', 'array');
+$ctx = $thr->wantarray();
+ok($ctx, 'Explicit array context');
+($res) = $thr->join();
+ok($res eq 'array', 'Explicit array context');
+
+($thr) = threads->create({'scalar' => 'scalar'}, 'bar', 'scalar');
+$ctx = $thr->wantarray();
+ok(defined($ctx) && !$ctx, 'Explicit scalar context');
+$res = $thr->join();
+ok($res eq 'scalar', 'Explicit scalar context');
+
+$thr = threads->create({'void' => 1}, 'bar', 'void');
+$ctx = $thr->wantarray();
+ok(! defined($ctx), 'Explicit void context');
 $res = $thr->join();
 ok(! defined($res), 'Explicit void context');
 

@@ -1178,6 +1178,7 @@ ext/threads/t/list.t		Test threads->list()
 ext/threads/t/problems.t	Test various memory problems
 ext/threads/t/stack_env.t	Tests for stack limits
 ext/threads/t/stack.t		Tests for stack limits
+ext/threads/t/state.t		Tests state methods
 ext/threads/t/stress_cv.t	Test with multiple threads, coderef cv argument.
 ext/threads/t/stress_re.t	Test with multiple threads, string cv argument and regexes.
 ext/threads/t/stress_string.t	Test with multiple threads, string cv argument.

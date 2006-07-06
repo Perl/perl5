@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.33';
+our $VERSION = '1.34';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -80,6 +80,11 @@ sub exit
     CORE::exit(0);
 }
 
+# 'Constant' args for threads->list()
+sub threads::all      { }
+sub threads::running  { 1 }
+sub threads::joinable { 0 }
+
 # 'new' is an alias for 'create'
 *new = \&create;
 
@@ -108,7 +113,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.33
+This document describes threads version 1.34
 
 =head1 SYNOPSIS
 
@@ -148,6 +153,9 @@ This document describes threads version 1.33
     my @threads = threads->list();
     my $thread_count = threads->list();
 
+    my @running = threads->list(threads::running);
+    my @joinable = threads->list(threads::joinable);
+
     if ($thr1 == $thr2) {
         ...
     }
@@ -159,7 +167,17 @@ This document describes threads version 1.33
     my $thr = threads->create({ 'context'    => 'list',
                                 'stack_size' => 32*4096 },
                               \&foo);
-    my @results = $thr->join();
+
+    # Get thread's context
+    my $wantarray = $thr->wantarray();
+
+    # Check thread's state
+    if ($thr->is_running()) {
+        sleep(1);
+    }
+    if ($thr->is_joinable()) {
+        $thr->join();
+    }
 
     $thr->kill('SIGUSR1');
 
@@ -319,8 +337,22 @@ code.
 
 =item threads->list()
 
-In a list context, returns a list of all non-joined, non-detached I<threads>
-objects.  In a scalar context, returns a count of the same.
+=item threads->list(threads::all)
+
+=item threads->list(threads::running)
+
+=item threads->list(threads::joinable)
+
+With no arguments (or using C<threads::all>) and in a list context, returns a
+list of all non-joined, non-detached I<threads> objects.  In a scalar context,
+returns a count of the same.
+
+With a I<true> argument (using C<threads::running>), returns a list of all
+non-detached I<threads> objects that are still running.
+
+With a I<false> argument (using C<threads::joinable>), returns a list of all
+non-joined, non-detached I<threads> objects that have finished running (i.e.,
+for which C<-E<gt>join()> will not I<block>).
 
 =item $thr1->equal($thr2)
 
@@ -360,6 +392,34 @@ thread.
 =item threads->_handle()
 
 Class method that allows a thread to obtain its own I<handle>.
+
+=back
+
+=head1 THREAD STATE
+
+The following boolean methods are useful in determining the I<state> of a
+thread.
+
+=over
+
+=item $thr->is_running()
+
+Returns true if a thread is still running (i.e., if its entry point function
+has not yet finished/exited).
+
+=item $thr->is_joinable()
+
+Returns true if the thread has finished running, is not detached and has not
+yet been joined.  In other works, the thread is ready to be joined and will
+not I<block>.
+
+=item $thr->is_detached()
+
+Returns true if the thread has been detached.
+
+=item threads->is_detached()
+
+Class method that allows a thread to determine whether or not it is detached.
 
 =back
 
@@ -414,6 +474,16 @@ of the C<-E<gt>create()> call:
 
     # Create thread in void context
     threads->create(...);
+
+=head2 $thr->wantarray()
+
+This returns the thread's context in the same manner as
+L<wantarray()|perlfunc/"wantarray">.
+
+=head2 threads->wantarray()
+
+Class method to return the current thread's context.  This is the same as
+running L<wantarray()|perlfunc/"wantarray"> in the current thread.
 
 =head1 THREAD STACK SIZE
 
@@ -737,7 +807,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.33/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.34/threads.pm>
 
 L<threads::shared>, L<perlthrtut>
 

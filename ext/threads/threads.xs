@@ -122,8 +122,8 @@ S_ithread_clear(pTHX_ ithread *thread)
 {
     PerlInterpreter *interp;
 
-    assert(thread->state & PERL_ITHR_FINISHED &&
-           thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED));
+    assert((thread->state & PERL_ITHR_FINISHED) &&
+           (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)));
 
     interp = thread->interp;
     if (interp) {
@@ -827,14 +827,20 @@ ithread_list(...)
         ithread *thread;
         int list_context;
         IV count = 0;
+        int want_running;
     PPCODE:
         /* Class method only */
         if (SvROK(ST(0)))
-            Perl_croak(aTHX_ "Usage: threads->list()");
+            Perl_croak(aTHX_ "Usage: threads->list(...)");
         classname = (char *)SvPV_nolen(ST(0));
 
         /* Calling context */
         list_context = (GIMME_V == G_ARRAY);
+
+        /* Running or joinable parameter */
+        if (items > 1) {
+            want_running = SvTRUE(ST(1));
+        }
 
         /* Walk through threads list */
         MUTEX_LOCK(&create_destruct_mutex);
@@ -846,6 +852,20 @@ ithread_list(...)
             if (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)) {
                 continue;
             }
+
+            /* Filter per parameter */
+            if (items > 1) {
+                if (want_running) {
+                    if (thread->state & PERL_ITHR_FINISHED) {
+                        continue;   /* Not running */
+                    }
+                } else {
+                    if (! (thread->state & PERL_ITHR_FINISHED)) {
+                        continue;   /* Still running - not joinable yet */
+                    }
+                }
+            }
+
             /* Push object on stack if list context */
             if (list_context) {
                 XPUSHs(sv_2mortal(ithread_to_SV(aTHX_ Nullsv, thread, classname, TRUE)));
@@ -1183,6 +1203,66 @@ ithread_set_stack_size(...)
         old_size = default_stack_size;
         default_stack_size = good_stack_size(aTHX_ SvIV(ST(1)));
         XST_mIV(0, old_size);
+        /* XSRETURN(1); - implied */
+
+
+void
+ithread_is_running(...)
+    PREINIT:
+        ithread *thread;
+    CODE:
+        /* Object method only */
+        if (! sv_isobject(ST(0)))
+            Perl_croak(aTHX_ "Usage: $thr->is_running()");
+
+        thread = INT2PTR(ithread *, SvIV(SvRV(ST(0))));
+        MUTEX_LOCK(&thread->mutex);
+        ST(0) = (thread->state & PERL_ITHR_FINISHED) ? &PL_sv_no : &PL_sv_yes;
+        MUTEX_UNLOCK(&thread->mutex);
+        /* XSRETURN(1); - implied */
+
+
+void
+ithread_is_detached(...)
+    PREINIT:
+        ithread *thread;
+    CODE:
+        thread = SV_to_ithread(aTHX_ ST(0));
+        MUTEX_LOCK(&thread->mutex);
+        ST(0) = (thread->state & PERL_ITHR_DETACHED) ? &PL_sv_yes : &PL_sv_no;
+        MUTEX_UNLOCK(&thread->mutex);
+        /* XSRETURN(1); - implied */
+
+
+void
+ithread_is_joinable(...)
+    PREINIT:
+        ithread *thread;
+    CODE:
+        /* Object method only */
+        if (! sv_isobject(ST(0)))
+            Perl_croak(aTHX_ "Usage: $thr->is_joinable()");
+
+        thread = INT2PTR(ithread *, SvIV(SvRV(ST(0))));
+        MUTEX_LOCK(&thread->mutex);
+        ST(0) = ((thread->state & PERL_ITHR_FINISHED) &&
+                 ! (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)))
+            ? &PL_sv_yes : &PL_sv_no;
+        MUTEX_UNLOCK(&thread->mutex);
+        /* XSRETURN(1); - implied */
+
+
+void
+ithread_wantarray(...)
+    PREINIT:
+        ithread *thread;
+    CODE:
+        thread = SV_to_ithread(aTHX_ ST(0));
+        MUTEX_LOCK(&thread->mutex);
+        ST(0) = (thread->gimme & G_ARRAY) ? &PL_sv_yes :
+                (thread->gimme & G_VOID)  ? &PL_sv_undef
+                           /* G_SCALAR */ : &PL_sv_no;
+        MUTEX_UNLOCK(&thread->mutex);
         /* XSRETURN(1); - implied */
 
 #endif /* USE_ITHREADS */
