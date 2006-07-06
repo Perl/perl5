@@ -3750,7 +3750,7 @@ happened.) See L<perlfunc/split>.
 (W misc) You're declaring a C<state> variable inside a list. The list
 assignment will be treated by perl as a regular assignment, which means
 that the C<state> variable will be reinitialized each time the statement
-is run. The solution to have it initialized twice is to write the
+is run. The solution to have it initialized only once is to write the
 assignment on its own line, as in:
 
     state $var = 42;
