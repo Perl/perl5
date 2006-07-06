@@ -3800,10 +3800,16 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			     curop->op_type == OP_PADHV ||
 			     curop->op_type == OP_PADANY)
 		    {
-			if ((left->op_private & OPpLVAL_INTRO) && (curop->op_private & OPpPAD_STATE)) {
-			    o->op_private |= OPpASSIGN_STATE;
-			    /* hijacking PADSTALE for uninitialized state variables */
-			    SvPADSTALE_on(PAD_SVl(curop->op_targ));
+			if (curop->op_private & OPpPAD_STATE) {
+			    if (left->op_private & OPpLVAL_INTRO) {
+				o->op_private |= OPpASSIGN_STATE;
+				/* hijacking PADSTALE for uninitialized state variables */
+				SvPADSTALE_on(PAD_SVl(curop->op_targ));
+			    }
+			    else if (ckWARN(WARN_MISC)) {
+				Perl_warner(aTHX_ packWARN(WARN_MISC), "State variable %s will be reinitialized",
+					PAD_COMPNAME_PV(curop->op_targ));
+			    }
 			}
 			if (PAD_COMPNAME_GEN(curop->op_targ)
 						    == (STRLEN)PL_generation)
