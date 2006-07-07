@@ -6423,13 +6423,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	 * be the best for now since we have no flag "this EXACTish
 	 * node was UTF-8" --jhi */
 	const bool do_utf8 = is_utf8_string((U8*)STRING(o), STR_LEN(o));
-	const char * const s = do_utf8 ?
-	  pv_uni_display(dsv, (U8*)STRING(o), STR_LEN(o), 60,
-			 UNI_DISPLAY_REGEX) :
-	  STRING(o);
-	const int len = do_utf8 ?
-	  strlen(s) :
-	  STR_LEN(o);
+	RE_PV_DISPLAY_DECL(s, len, do_utf8, dsv, STRING(o), STR_LEN(o), 60);
+
 	Perl_sv_catpvf(aTHX_ sv, " <%s%.*s%s>",
 		       PL_colors[0],
 		       len, s,
@@ -6628,26 +6623,25 @@ void
 Perl_pregfree(pTHX_ struct regexp *r)
 {
     dVAR;
-#ifdef DEBUGGING
-    SV * const dsv = PERL_DEBUG_PAD_ZERO(0);
-#endif
+
+
+
     GET_RE_DEBUG_FLAGS_DECL;
 
     if (!r || (--r->refcnt > 0))
 	return;
     DEBUG_COMPILE_r(if (RX_DEBUG(r)){
-        const char * const s = (r->reganch & ROPT_UTF8)
-            ? pv_uni_display(dsv, (U8*)r->precomp, r->prelen, 60, UNI_DISPLAY_REGEX)
-            : pv_display(dsv, r->precomp, r->prelen, 0, 60);
-        const int len = SvCUR(dsv);
-	 if (!PL_colorset)
-	      reginitcolors();
-	 PerlIO_printf(Perl_debug_log,
-		       "%sFreeing REx:%s %s%*.*s%s%s\n",
-		       PL_colors[4],PL_colors[5],PL_colors[0],
-		       len, len, s,
-		       PL_colors[1],
-		       len > 60 ? "..." : "");
+	RE_PV_DISPLAY_DECL(s, len, (r->reganch & ROPT_UTF8),
+	    PERL_DEBUG_PAD_ZERO(0), r->precomp, r->prelen, 60);
+
+	if (!PL_colorset)
+	    reginitcolors();
+	PerlIO_printf(Perl_debug_log,
+	    "%sFreeing REx:%s %s%*.*s%s%s\n",
+	    PL_colors[4],PL_colors[5],PL_colors[0],
+	    len, len, s,
+	    PL_colors[1],
+	    len > 60 ? "..." : "");
     });
 
     /* gcov results gave these as non-null 100% of the time, so there's no

@@ -358,7 +358,6 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     const I32 multiline = prog->reganch & PMf_MULTILINE;
 #ifdef DEBUGGING
     const char * const i_strpos = strpos;
-    SV * const dsv = PERL_DEBUG_PAD_ZERO(0);
 #endif
 
     GET_RE_DEBUG_FLAGS_DECL;
@@ -372,11 +371,9 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     }
 
     DEBUG_EXECUTE_r({
-	 const char *s   = PL_reg_match_utf8 ?
-	                 sv_uni_display(dsv, sv, 60, UNI_DISPLAY_REGEX) :
-	                 strpos;
-	 const int   len = PL_reg_match_utf8 ?
-	                 (int)strlen(s) : strend - strpos;
+         RE_PV_DISPLAY_DECL(s, len, PL_reg_match_utf8,
+            PERL_DEBUG_PAD_ZERO(0), strpos, strend - strpos, 60);
+
 	 if (!PL_colorset)
 	      reginitcolors();
 	 if (PL_reg_match_utf8)
@@ -1772,10 +1769,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     SV* const oreplsv = GvSV(PL_replgv);
     const bool do_utf8 = DO_UTF8(sv);
     I32 multiline;
-#ifdef DEBUGGING
-    SV* dsv0;
-    SV* dsv1;
-#endif
+
     regmatch_info reginfo;  /* create some info to pass to regtry etc */
 
     GET_RE_DEBUG_FLAGS_DECL;
@@ -1790,11 +1784,6 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 
     multiline = prog->reganch & PMf_MULTILINE;
     reginfo.prog = prog;
-
-#ifdef DEBUGGING
-    dsv0 = PERL_DEBUG_PAD_ZERO(0);
-    dsv1 = PERL_DEBUG_PAD_ZERO(1);
-#endif
 
     RX_MATCH_UTF8_set(prog, do_utf8);
 
@@ -1864,14 +1853,11 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
 
     DEBUG_EXECUTE_r({
-	const char * const s0   = UTF
-	    ? pv_uni_display(dsv0, (U8*)prog->precomp, prog->prelen, 60,
-			  UNI_DISPLAY_REGEX)
-	    : prog->precomp;
-	const int len0 = UTF ? (int)SvCUR(dsv0) : prog->prelen;
-	const char * const s1 = do_utf8 ? sv_uni_display(dsv1, sv, 60,
-					       UNI_DISPLAY_REGEX) : startpos;
-	const int len1 = do_utf8 ? (int)SvCUR(dsv1) : strend - startpos;
+        RE_PV_DISPLAY_DECL(s0, len0, UTF,
+            PERL_DEBUG_PAD_ZERO(0), prog->precomp, prog->prelen, 60);
+        RE_PV_DISPLAY_DECL(s1, len1, do_utf8,
+            PERL_DEBUG_PAD_ZERO(1), startpos, strend - startpos, 60);
+
 	 if (!PL_colorset)
 	     reginitcolors();
 	 PerlIO_printf(Perl_debug_log,
@@ -2076,24 +2062,17 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	}
 	DEBUG_EXECUTE_r({
 	    SV * const prop = sv_newmortal();
-	    const char *s0;
-	    const char *s1;
-	    int len0;
-	    int len1;
-
 	    regprop(prog, prop, c);
-	    s0 = UTF ?
-	      pv_uni_display(dsv0, (U8*)SvPVX_const(prop), SvCUR(prop), 60,
-			     UNI_DISPLAY_REGEX) :
-	      SvPVX_const(prop);
-	    len0 = UTF ? SvCUR(dsv0) : SvCUR(prop);
-	    s1 = UTF ?
-	      sv_uni_display(dsv1, sv, 60, UNI_DISPLAY_REGEX) : s;
-	    len1 = UTF ? (int)SvCUR(dsv1) : strend - s;
-	    PerlIO_printf(Perl_debug_log,
-			  "Matching stclass \"%*.*s\" against \"%*.*s\" (%d chars)\n",
-			  len0, len0, s0,
-			  len1, len1, s1, (int)(strend - s));
+	    {
+		RE_PV_DISPLAY_DECL(s0,len0,UTF,
+		    PERL_DEBUG_PAD_ZERO(0),SvPVX_const(prop),SvCUR(prop),60);
+		RE_PV_DISPLAY_DECL(s1,len1,UTF,
+		    PERL_DEBUG_PAD_ZERO(1),s,strend-s,60);
+		PerlIO_printf(Perl_debug_log,
+		    "Matching stclass \"%*.*s\" against \"%*.*s\" (%d chars)\n",
+		    len0, len0, s0,
+		    len1, len1, s1, (int)(strend - s));
+	    }
 	});
         if (find_byclass(prog, c, s, strend, &reginfo))
 	    goto got_it;
@@ -2648,28 +2627,17 @@ S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const bool do_u
 	pref0_len = pref_len;
     {
 	const int is_uni = (do_utf8 && OP(scan) != CANY) ? 1 : 0;
-	const char * const s0 = is_uni ?
-	    pv_uni_display(PERL_DEBUG_PAD(0), (U8*)(locinput - pref_len),
-		    pref0_len, 60, UNI_DISPLAY_REGEX) :
-	    pv_escape(PERL_DEBUG_PAD(0), (locinput - pref_len),
-		    pref0_len, 60, 0);
 
-	const int len0 = strlen(s0);
-	const char * const s1 = is_uni ?
-	    pv_uni_display(PERL_DEBUG_PAD(1),
-		    (U8*)(locinput - pref_len + pref0_len),
-		    pref_len - pref0_len, 60, UNI_DISPLAY_REGEX) :
-	    pv_escape(PERL_DEBUG_PAD(1),
+	RE_PV_DISPLAY_DECL(s0,len0,is_uni,PERL_DEBUG_PAD(0),
+	    (locinput - pref_len),pref0_len, 60);
+	
+	RE_PV_DISPLAY_DECL(s1,len1,is_uni,PERL_DEBUG_PAD(1),
 		    (locinput - pref_len + pref0_len),
-		    pref_len - pref0_len, 60, 0);
+		    pref_len - pref0_len, 60);
+	
+	RE_PV_DISPLAY_DECL(s2,len2,is_uni,PERL_DEBUG_PAD(2),
+		    locinput, PL_regeol - locinput, 60);
 
-	const int len1 = (int)strlen(s1);
-	const char * const s2 = is_uni ?
-	    pv_uni_display(PERL_DEBUG_PAD(2), (U8*)locinput,
-		    PL_regeol - locinput, 60, UNI_DISPLAY_REGEX) :
-	    pv_escape(PERL_DEBUG_PAD(2), locinput,
-		    PL_regeol - locinput, 60, 0);
-	const int len2 = (int)strlen(s2);
 	PerlIO_printf(Perl_debug_log,
 		    "%4"IVdf" <%s%.*s%s%s%.*s%s%s%s%.*s%s>%*s|",
 		    (IV)(locinput - PL_bostr),

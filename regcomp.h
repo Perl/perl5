@@ -624,7 +624,13 @@ re.pm, especially to the documentation.
 
 #ifdef DEBUGGING
 #define GET_RE_DEBUG_FLAGS_DECL IV re_debug_flags = 0; GET_RE_DEBUG_FLAGS;
+#define RE_PV_DISPLAY_DECL(rpv,rlen,isuni,dsv,pv,l,m) \
+    const char * const rpv = (isuni) ?  \
+	    pv_uni_display(dsv, (U8*)(pv), l, m, UNI_DISPLAY_REGEX) : \
+	    pv_escape(dsv, pv, l, m, 0); \
+    const int rlen = SvCUR(dsv)
 #else
 #define GET_RE_DEBUG_FLAGS_DECL
+#define RE_PV_DISPLAY_DECL
 #endif
 
