@@ -3800,17 +3800,6 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 			     curop->op_type == OP_PADHV ||
 			     curop->op_type == OP_PADANY)
 		    {
-			if (curop->op_private & OPpPAD_STATE) {
-			    if (left->op_private & OPpLVAL_INTRO) {
-				o->op_private |= OPpASSIGN_STATE;
-				/* hijacking PADSTALE for uninitialized state variables */
-				SvPADSTALE_on(PAD_SVl(curop->op_targ));
-			    }
-			    else if (ckWARN(WARN_MISC)) {
-				Perl_warner(aTHX_ packWARN(WARN_MISC), "State variable %s will be reinitialized",
-					PAD_COMPNAME_PV(curop->op_targ));
-			    }
-			}
 			if (PAD_COMPNAME_GEN(curop->op_targ)
 						    == (STRLEN)PL_generation)
 			    break;
@@ -3849,6 +3838,34 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	    if (curop != o)
 		o->op_private |= OPpASSIGN_COMMON;
 	}
+
+	if ( ((left->op_private & OPpLVAL_INTRO) || ckWARN(WARN_MISC))
+		&& (left->op_type == OP_LIST
+		    || (left->op_type == OP_NULL && left->op_targ == OP_LIST)))
+	{
+	    OP* lop = ((LISTOP*)left)->op_first;
+	    while (lop) {
+		if (lop->op_type == OP_PADSV ||
+		    lop->op_type == OP_PADAV ||
+		    lop->op_type == OP_PADHV ||
+		    lop->op_type == OP_PADANY)
+		{
+		    if (lop->op_private & OPpPAD_STATE) {
+			if (left->op_private & OPpLVAL_INTRO) {
+			    o->op_private |= OPpASSIGN_STATE;
+			    /* hijacking PADSTALE for uninitialized state variables */
+			    SvPADSTALE_on(PAD_SVl(lop->op_targ));
+			}
+			else { /* we already checked for WARN_MISC before */
+			    Perl_warner(aTHX_ packWARN(WARN_MISC), "State variable %s will be reinitialized",
+				    PAD_COMPNAME_PV(lop->op_targ));
+			}
+		    }
+		}
+		lop = lop->op_sibling;
+	    }
+	}
+
 	if (right && right->op_type == OP_SPLIT) {
 	    OP* tmpop = ((LISTOP*)right)->op_first;
 	    if (tmpop && (tmpop->op_type == OP_PUSHRE)) {

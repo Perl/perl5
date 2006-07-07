@@ -164,6 +164,4 @@ sub statelist2 {
 $ls = statelist2();
 is($ls, "2/3", 'list assignment to state scalars');
 $ls = statelist2();
-{ local our $TODO = 'detection of state vars is misplaced in newASSIGNOP';
 is($ls, "3/4", 'list assignment to state scalars');
-}
