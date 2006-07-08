@@ -13,7 +13,6 @@
  * it's built with -DPERL_EXT_RE_BUILD -DPERL_EXT_RE_DEBUG -DPERL_EXT.
  * This causes the main functions to be compiled under new names and with
  * debugging support added, which makes "use re 'debug'" work.
- 
  */
 
 /* NOTE: this is derived from Henry Spencer's regexp code, and should not
@@ -944,7 +943,106 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     return NULL;
 }
 
-/* We know what class REx starts with.  Try to find this position... */
+#define REXEC_FBC_EXACTISH_CHECK(CoNd)                 \
+    if ( (CoNd)                                        \
+	 && (ln == len ||                              \
+	     ibcmp_utf8(s, NULL, 0,  do_utf8,          \
+			m, NULL, ln, (bool)UTF))       \
+	 && (norun || regtry(prog, s)) )               \
+	goto got_it;                                   \
+    else {                                             \
+	 U8 foldbuf[UTF8_MAXBYTES_CASE+1];             \
+	 uvchr_to_utf8(tmpbuf, c);                     \
+	 f = to_utf8_fold(tmpbuf, foldbuf, &foldlen);  \
+	 if ( f != c                                   \
+	      && (f == c1 || f == c2)                  \
+	      && (ln == foldlen ||                     \
+		  !ibcmp_utf8((char *) foldbuf,        \
+			      NULL, foldlen, do_utf8,  \
+			      m,                       \
+			      NULL, ln, (bool)UTF))    \
+	      && (norun || regtry(prog, s)) )          \
+	      goto got_it;                             \
+    }                                                  \
+    s += len
+
+#define REXEC_FBC_EXACTISH_SCAN(CoNd)                     \
+STMT_START {                                              \
+    while (s <= e) {                                      \
+	if ( (CoNd)                                       \
+	     && (ln == 1 || !(OP(c) == EXACTF             \
+			      ? ibcmp(s, m, ln)           \
+			      : ibcmp_locale(s, m, ln)))  \
+	     && (norun || regtry(prog, s)) )              \
+	    goto got_it;                                  \
+	s++;                                              \
+    }                                                     \
+} STMT_END
+
+#define REXEC_FBC_UTF8_SCAN(CoDe)                     \
+STMT_START {                                          \
+    while (s + (uskip = UTF8SKIP(s)) <= strend) {     \
+	CoDe                                          \
+	s += uskip;                                   \
+    }                                                 \
+} STMT_END
+
+#define REXEC_FBC_SCAN(CoDe)                          \
+STMT_START {                                          \
+    while (s < strend) {                              \
+	CoDe                                          \
+	s++;                                          \
+    }                                                 \
+} STMT_END
+
+#define REXEC_FBC_UTF8_CLASS_SCAN(CoNd)               \
+REXEC_FBC_UTF8_SCAN(                                  \
+    if (CoNd) {                                       \
+	if (tmp && (norun || regtry(prog, s)))        \
+	    goto got_it;                              \
+	else                                          \
+	    tmp = doevery;                            \
+    }                                                 \
+    else                                              \
+	tmp = 1;                                      \
+)
+
+#define REXEC_FBC_CLASS_SCAN(CoNd)                    \
+REXEC_FBC_SCAN(                                       \
+    if (CoNd) {                                       \
+	if (tmp && (norun || regtry(prog, s)))        \
+	    goto got_it;                              \
+	else                                          \
+	    tmp = doevery;                            \
+    }                                                 \
+    else                                              \
+	tmp = 1;                                      \
+)
+
+#define REXEC_FBC_TRYIT               \
+if ((norun || regtry(prog, s)))       \
+    goto got_it
+
+#define REXEC_FBC_CSCAN_PRELOAD(UtFpReLoAd,CoNdUtF8,CoNd)      \
+    if (do_utf8) {                                             \
+	UtFpReLoAd;                                            \
+	REXEC_FBC_UTF8_CLASS_SCAN(CoNdUtF8);                   \
+    }                                                          \
+    else {                                                     \
+	REXEC_FBC_CLASS_SCAN(CoNd);                            \
+    }                                                          \
+    break
+
+#define REXEC_FBC_CSCAN_TAINT(CoNdUtF8,CoNd)                   \
+    PL_reg_flags |= RF_tainted;                                \
+    if (do_utf8) {                                             \
+	REXEC_FBC_UTF8_CLASS_SCAN(CoNdUtF8);                   \
+    }                                                          \
+    else {                                                     \
+	REXEC_FBC_CLASS_SCAN(CoNd);                            \
+    }                                                          \
+    break
+
 STATIC char *
 S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *strend, I32 norun)
 {
@@ -963,20 +1061,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	switch (OP(c)) {
 	case ANYOF:
 	    if (do_utf8) {
-		 while (s + (uskip = UTF8SKIP(s)) <= strend) {
-		      if ((ANYOF_FLAGS(c) & ANYOF_UNICODE) ||
+		 REXEC_FBC_UTF8_CLASS_SCAN((ANYOF_FLAGS(c) & ANYOF_UNICODE) ||
 			  !UTF8_IS_INVARIANT((U8)s[0]) ?
 			  reginclass(c, (U8*)s, 0, do_utf8) :
-			  REGINCLASS(c, (U8*)s)) {
-			   if (tmp && (norun || regtry(prog, s)))
-				goto got_it;
-			   else
-				tmp = doevery;
-		      }
-		      else 
-			   tmp = 1;
-		      s += uskip;
-		 }
+			  REGINCLASS(c, (U8*)s));
 	    }
 	    else {
 		 while (s < strend) {
@@ -999,13 +1087,12 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 	    }
 	    break;
 	case CANY:
-	    while (s < strend) {
+	    REXEC_FBC_SCAN(
 	        if (tmp && (norun || regtry(prog, s)))
 		    goto got_it;
 		else
 		    tmp = doevery;
-		s++;
-	    }
+	    );
 	    break;
 	case EXACTF:
 	    m   = STRING(c);
@@ -1070,27 +1157,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		    while (s <= e) {
 		        c = utf8n_to_uvchr((U8*)s, UTF8_MAXBYTES, &len,
 					   uniflags);
-			if ( c == c1
-			     && (ln == len ||
-				 ibcmp_utf8(s, (char **)0, 0,  do_utf8,
-					    m, (char **)0, ln, (bool)UTF))
-			     && (norun || regtry(prog, s)) )
-			    goto got_it;
-			else {
-			     U8 foldbuf[UTF8_MAXBYTES_CASE+1];
-			     uvchr_to_utf8(tmpbuf, c);
-			     f = to_utf8_fold(tmpbuf, foldbuf, &foldlen);
-			     if ( f != c
-				  && (f == c1 || f == c2)
-				  && (ln == foldlen ||
-				      !ibcmp_utf8((char *) foldbuf,
-						  (char **)0, foldlen, do_utf8,
-						  m,
-						  (char **)0, ln, (bool)UTF))
-				  && (norun || regtry(prog, s)) )
-				  goto got_it;
-			}
-			s += len;
+			REXEC_FBC_EXACTISH_CHECK(c == c1);
 		    }
 		}
 		else {
@@ -1109,51 +1176,15 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 			    c == (UV)UNICODE_GREEK_SMALL_LETTER_FINAL_SIGMA)
 			    c = (UV)UNICODE_GREEK_SMALL_LETTER_SIGMA;
 
-			if ( (c == c1 || c == c2)
-			     && (ln == len ||
-				 ibcmp_utf8(s, (char **)0, 0,  do_utf8,
-					    m, (char **)0, ln, (bool)UTF))
-			     && (norun || regtry(prog, s)) )
-			    goto got_it;
-			else {
-			     U8 foldbuf[UTF8_MAXBYTES_CASE+1];
-			     uvchr_to_utf8(tmpbuf, c);
-			     f = to_utf8_fold(tmpbuf, foldbuf, &foldlen);
-			     if ( f != c
-				  && (f == c1 || f == c2)
-				  && (ln == foldlen ||
-				      !ibcmp_utf8((char *) foldbuf,
-						  (char **)0, foldlen, do_utf8,
-						  m,
-						  (char **)0, ln, (bool)UTF))
-				  && (norun || regtry(prog, s)) )
-				  goto got_it;
-			}
-			s += len;
+			REXEC_FBC_EXACTISH_CHECK(c == c1 || c == c2);
 		    }
 		}
 	    }
 	    else {
 		if (c1 == c2)
-		    while (s <= e) {
-			if ( *(U8*)s == c1
-			     && (ln == 1 || !(OP(c) == EXACTF
-					      ? ibcmp(s, m, ln)
-					      : ibcmp_locale(s, m, ln)))
-			     && (norun || regtry(prog, s)) )
-			    goto got_it;
-			s++;
-		    }
+		    REXEC_FBC_EXACTISH_SCAN(*(U8*)s == c1);
 		else
-		    while (s <= e) {
-			if ( (*(U8*)s == c1 || *(U8*)s == c2)
-			     && (ln == 1 || !(OP(c) == EXACTF
-					      ? ibcmp(s, m, ln)
-					      : ibcmp_locale(s, m, ln)))
-			     && (norun || regtry(prog, s)) )
-			    goto got_it;
-			s++;
-		    }
+		    REXEC_FBC_EXACTISH_SCAN(*(U8*)s == c1 || *(U8*)s == c2);
 	    }
 	    break;
 	case BOUNDL:
@@ -1170,30 +1201,26 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		tmp = ((OP(c) == BOUND ?
 			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp))) != 0);
 		LOAD_UTF8_CHARCLASS_ALNUM();
-		while (s + (uskip = UTF8SKIP(s)) <= strend) {
+		REXEC_FBC_UTF8_SCAN(
 		    if (tmp == !(OP(c) == BOUND ?
 				 (bool)swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8) :
 				 isALNUM_LC_utf8((U8*)s)))
 		    {
 			tmp = !tmp;
-			if ((norun || regtry(prog, s)))
-			    goto got_it;
-		    }
-		    s += uskip;
+			REXEC_FBC_TRYIT;
 		}
+		);
 	    }
 	    else {
 		tmp = (s != PL_bostr) ? UCHARAT(s - 1) : '\n';
 		tmp = ((OP(c) == BOUND ? isALNUM(tmp) : isALNUM_LC(tmp)) != 0);
-		while (s < strend) {
+		REXEC_FBC_SCAN(
 		    if (tmp ==
 			!(OP(c) == BOUND ? isALNUM(*s) : isALNUM_LC(*s))) {
 			tmp = !tmp;
-			if ((norun || regtry(prog, s)))
-			    goto got_it;
-		    }
-		    s++;
+			REXEC_FBC_TRYIT;
 		}
+		);
 	    }
 	    if ((!prog->minlen && tmp) && (norun || regtry(prog, s)))
 		goto got_it;
@@ -1212,380 +1239,94 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *stren
 		tmp = ((OP(c) == NBOUND ?
 			isALNUM_uni(tmp) : isALNUM_LC_uvchr(UNI_TO_NATIVE(tmp))) != 0);
 		LOAD_UTF8_CHARCLASS_ALNUM();
-		while (s + (uskip = UTF8SKIP(s)) <= strend) {
+		REXEC_FBC_UTF8_SCAN(
 		    if (tmp == !(OP(c) == NBOUND ?
 				 (bool)swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8) :
 				 isALNUM_LC_utf8((U8*)s)))
 			tmp = !tmp;
-		    else if ((norun || regtry(prog, s)))
-			goto got_it;
-		    s += uskip;
-		}
+		    else REXEC_FBC_TRYIT;
+		);
 	    }
 	    else {
 		tmp = (s != PL_bostr) ? UCHARAT(s - 1) : '\n';
 		tmp = ((OP(c) == NBOUND ?
 			isALNUM(tmp) : isALNUM_LC(tmp)) != 0);
-		while (s < strend) {
+		REXEC_FBC_SCAN(
 		    if (tmp ==
 			!(OP(c) == NBOUND ? isALNUM(*s) : isALNUM_LC(*s)))
 			tmp = !tmp;
-		    else if ((norun || regtry(prog, s)))
-			goto got_it;
-		    s++;
-		}
+		    else REXEC_FBC_TRYIT;
+		);
 	    }
 	    if ((!prog->minlen && !tmp) && (norun || regtry(prog, s)))
 		goto got_it;
 	    break;
 	case ALNUM:
-	    if (do_utf8) {
-		LOAD_UTF8_CHARCLASS_ALNUM();
-		while (s + (uskip = UTF8SKIP(s)) <= strend) {
-		    if (swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s += uskip;
-		}
-	    }
-	    else {
-		while (s < strend) {
-		    if (isALNUM(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s++;
-		}
-	    }
-	    break;
+	    REXEC_FBC_CSCAN_PRELOAD(
+		LOAD_UTF8_CHARCLASS_ALNUM(),
+		swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8),
+		isALNUM(*s)
+	    );
 	case ALNUML:
-	    PL_reg_flags |= RF_tainted;
-	    if (do_utf8) {
-		while (s + (uskip = UTF8SKIP(s)) <= strend) {
-		    if (isALNUM_LC_utf8((U8*)s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s += uskip;
-		}
-	    }
-	    else {
-		while (s < strend) {
-		    if (isALNUM_LC(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s++;
-		}
-	    }
-	    break;
+	    REXEC_FBC_CSCAN_TAINT(
+		isALNUM_LC_utf8((U8*)s),
+		isALNUM_LC(*s)
+	    );
 	case NALNUM:
-	    if (do_utf8) {
-		LOAD_UTF8_CHARCLASS_ALNUM();
-		while (s + (uskip = UTF8SKIP(s)) <= strend) {
-		    if (!swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s += uskip;
-		}
-	    }
-	    else {
-		while (s < strend) {
-		    if (!isALNUM(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s++;
-		}
-	    }
-	    break;
+	    REXEC_FBC_CSCAN_PRELOAD(
+		LOAD_UTF8_CHARCLASS_ALNUM(),
+		!swash_fetch(PL_utf8_alnum, (U8*)s, do_utf8),
+		!isALNUM(*s)
+	    );
 	case NALNUML:
-	    PL_reg_flags |= RF_tainted;
-	    if (do_utf8) {
-		while (s + (uskip = UTF8SKIP(s)) <= strend) {
-		    if (!isALNUM_LC_utf8((U8*)s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s += uskip;
-		}
-	    }
-	    else {
-		while (s < strend) {
-		    if (!isALNUM_LC(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s++;
-		}
-	    }
-	    break;
+	    REXEC_FBC_CSCAN_TAINT(
+		!isALNUM_LC_utf8((U8*)s),
+		!isALNUM_LC(*s)
+	    );
 	case SPACE:
-	    if (do_utf8) {
-		LOAD_UTF8_CHARCLASS_SPACE();
-		while (s + (uskip = UTF8SKIP(s)) <= strend) {
-		    if (*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s, do_utf8)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s += uskip;
-		}
-	    }
-	    else {
-		while (s < strend) {
-		    if (isSPACE(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s++;
-		}
-	    }
-	    break;
+	    REXEC_FBC_CSCAN_PRELOAD(
+		LOAD_UTF8_CHARCLASS_SPACE(),
+		*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s, do_utf8),
+		isSPACE(*s)
+	    );
 	case SPACEL:
-	    PL_reg_flags |= RF_tainted;
-	    if (do_utf8) {
-		while (s + (uskip = UTF8SKIP(s)) <= strend) {
-		    if (*s == ' ' || isSPACE_LC_utf8((U8*)s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s += uskip;
-		}
-	    }
-	    else {
-		while (s < strend) {
-		    if (isSPACE_LC(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s++;
-		}
-	    }
-	    break;
+	    REXEC_FBC_CSCAN_TAINT(
+		*s == ' ' || isSPACE_LC_utf8((U8*)s),
+		isSPACE_LC(*s)
+	    );
 	case NSPACE:
-	    if (do_utf8) {
-		LOAD_UTF8_CHARCLASS_SPACE();
-		while (s + (uskip = UTF8SKIP(s)) <= strend) {
-		    if (!(*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s, do_utf8))) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s += uskip;
-		}
-	    }
-	    else {
-		while (s < strend) {
-		    if (!isSPACE(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s++;
-		}
-	    }
-	    break;
+	    REXEC_FBC_CSCAN_PRELOAD(
+		LOAD_UTF8_CHARCLASS_SPACE(),
+		!(*s == ' ' || swash_fetch(PL_utf8_space,(U8*)s, do_utf8)),
+		!isSPACE(*s)
+	    );
 	case NSPACEL:
-	    PL_reg_flags |= RF_tainted;
-	    if (do_utf8) {
-		while (s + (uskip = UTF8SKIP(s)) <= strend) {
-		    if (!(*s == ' ' || isSPACE_LC_utf8((U8*)s))) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s += uskip;
-		}
-	    }
-	    else {
-		while (s < strend) {
-		    if (!isSPACE_LC(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s++;
-		}
-	    }
-	    break;
+	    REXEC_FBC_CSCAN_TAINT(
+		!(*s == ' ' || isSPACE_LC_utf8((U8*)s)),
+		!isSPACE_LC(*s)
+	    );
 	case DIGIT:
-	    if (do_utf8) {
-		LOAD_UTF8_CHARCLASS_DIGIT();
-		while (s + (uskip = UTF8SKIP(s)) <= strend) {
-		    if (swash_fetch(PL_utf8_digit,(U8*)s, do_utf8)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s += uskip;
-		}
-	    }
-	    else {
-		while (s < strend) {
-		    if (isDIGIT(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s++;
-		}
-	    }
-	    break;
+	    REXEC_FBC_CSCAN_PRELOAD(
+		LOAD_UTF8_CHARCLASS_DIGIT(),
+		swash_fetch(PL_utf8_digit,(U8*)s, do_utf8),
+		isDIGIT(*s)
+	    );
 	case DIGITL:
-	    PL_reg_flags |= RF_tainted;
-	    if (do_utf8) {
-		while (s + (uskip = UTF8SKIP(s)) <= strend) {
-		    if (isDIGIT_LC_utf8((U8*)s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s += uskip;
-		}
-	    }
-	    else {
-		while (s < strend) {
-		    if (isDIGIT_LC(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s++;
-		}
-	    }
-	    break;
+	    REXEC_FBC_CSCAN_TAINT(
+		isDIGIT_LC_utf8((U8*)s),
+		isDIGIT_LC(*s)
+	    );
 	case NDIGIT:
-	    if (do_utf8) {
-		LOAD_UTF8_CHARCLASS_DIGIT();
-		while (s + (uskip = UTF8SKIP(s)) <= strend) {
-		    if (!swash_fetch(PL_utf8_digit,(U8*)s, do_utf8)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s += uskip;
-		}
-	    }
-	    else {
-		while (s < strend) {
-		    if (!isDIGIT(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s++;
-		}
-	    }
-	    break;
+	    REXEC_FBC_CSCAN_PRELOAD(
+		LOAD_UTF8_CHARCLASS_DIGIT(),
+		!swash_fetch(PL_utf8_digit,(U8*)s, do_utf8),
+		!isDIGIT(*s)
+	    );
 	case NDIGITL:
-	    PL_reg_flags |= RF_tainted;
-	    if (do_utf8) {
-		while (s + (uskip = UTF8SKIP(s)) <= strend) {
-		    if (!isDIGIT_LC_utf8((U8*)s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s += uskip;
-		}
-	    }
-	    else {
-		while (s < strend) {
-		    if (!isDIGIT_LC(*s)) {
-			if (tmp && (norun || regtry(prog, s)))
-			    goto got_it;
-			else
-			    tmp = doevery;
-		    }
-		    else
-			tmp = 1;
-		    s++;
-		}
-	    }
-	    break;
+	    REXEC_FBC_CSCAN_TAINT(
+		!isDIGIT_LC_utf8((U8*)s),
+		!isDIGIT_LC(*s)
+	    );
 	default:
 	    Perl_croak(aTHX_ "panic: unknown regstclass %d", (int)OP(c));
 	    break;
@@ -1800,7 +1541,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	ch = SvPVX_const(do_utf8 ? prog->anchored_utf8 : prog->anchored_substr)[0];
 
 	if (do_utf8) {
-	    while (s < strend) {
+	    REXEC_FBC_SCAN(
 		if (*s == ch) {
 		    DEBUG_r( did_match = 1 );
 		    if (regtry(prog, s)) goto got_it;
@@ -1808,11 +1549,10 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		    while (s < strend && *s == ch)
 			s += UTF8SKIP(s);
 		}
-		s += UTF8SKIP(s);
-	    }
+	    );
 	}
 	else {
-	    while (s < strend) {
+	    REXEC_FBC_SCAN(
 		if (*s == ch) {
 		    DEBUG_r( did_match = 1 );
 		    if (regtry(prog, s)) goto got_it;
@@ -1820,8 +1560,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		    while (s < strend && *s == ch)
 			s++;
 		}
-		s++;
-	    }
+	    );
 	}
 	DEBUG_r(if (!did_match)
 		PerlIO_printf(Perl_debug_log,
