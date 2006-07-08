@@ -121,17 +121,11 @@ Am|SV**|hv_fetchs|HV* tb|const char* key|I32 lval
 Am|SV**|hv_stores|HV* tb|const char* key|NULLOK SV* val
 Am|SV*|newRV_inc|SV* sv
 Am|SV*|ST|int ix
-Am|void|sv_catpvs|SV* sv|const char* s
 Am|SV*|SvREFCNT_inc_NN|SV* sv
 Am|SV*|SvREFCNT_inc_simple_NN|SV* sv
 Am|SV*|SvREFCNT_inc_simple|SV* sv
-Am|void|SvREFCNT_inc_simple_void_NN|SV* sv
-Am|void|SvREFCNT_inc_simple_void|SV* sv
 Am|SV*|SvREFCNT_inc|SV* sv
-Am|void|SvREFCNT_inc_void_NN|SV* sv
-Am|void|SvREFCNT_inc_void|SV* sv
 Am|SV*|SvRV|SV* sv
-Am|void|sv_setpvs|SV* sv|const char* s
 Am|svtype|SvTYPE|SV* sv
 Ams||XCPT_RETHROW
 Ams||XSRETURN_EMPTY
@@ -208,6 +202,7 @@ Am|void|Renew|void* ptr|int nitems|type
 Am|void|Safefree|void* ptr
 Am|void|StructCopy|type src|type dest|type
 Am|void|sv_catpvn_nomg|SV* sv|const char* ptr|STRLEN len
+Am|void|sv_catpvs|SV* sv|const char* s
 Am|void|sv_catsv_nomg|SV* dsv|SV* ssv
 Am|void|SvCUR_set|SV* sv|STRLEN len
 Am|void|SvGETMAGIC|SV* sv
@@ -230,12 +225,17 @@ Am|void|SvPOK_only_UTF8|SV* sv
 Am|void|SvPOK_on|SV* sv
 Am|void|SvPV_set|SV* sv|char* val
 Am|void|SvREFCNT_dec|SV* sv
+Am|void|SvREFCNT_inc_simple_void_NN|SV* sv
+Am|void|SvREFCNT_inc_simple_void|SV* sv
+Am|void|SvREFCNT_inc_void_NN|SV* sv
+Am|void|SvREFCNT_inc_void|SV* sv
 Am|void|SvROK_off|SV* sv
 Am|void|SvROK_on|SV* sv
 Am|void|SvRV_set|SV* sv|SV* val
 Am|void|SvSetMagicSV_nosteal|SV* dsv|SV* ssv
 Am|void|SvSETMAGIC|SV* sv
 Am|void|SvSetMagicSV|SV* dsb|SV* ssv
+Am|void|sv_setpvs|SV* sv|const char* s
 Am|void|sv_setsv_nomg|SV* dsv|SV* ssv
 Am|void|SvSetSV_nosteal|SV* dsv|SV* ssv
 Am|void|SvSetSV|SV* dsb|SV* ssv

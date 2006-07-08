@@ -44,7 +44,7 @@ bootstrap Devel::PPPort;
 
 package main;
 
-my @pods = qw( HACKERS PPPort.pm ppport.h devel/regenerate devel/buildperl.pl );
+my @pods = qw( HACKERS PPPort.pm ppport.h soak devel/regenerate devel/buildperl.pl );
 
 my $reason = '';
 

@@ -1,3 +1,13 @@
+3.09 - 2006-07-08
+
+    * fix Makefile.PL's c_o override
+    * update API info
+    * improve soak script
+      - now counts warnings emitted during testing
+      - output is colored (can be turned off)
+    * add a section on integrating this module into
+      the core to the HACKERS file
+
 3.08_07 - 2006-07-03
 
     * fix cpan #20179: Licensing information for PPPort is

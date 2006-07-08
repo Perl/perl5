@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 46 $
+#  $Revision: 47 $
 #  $Author: mhx $
-#  $Date: 2006/06/25 03:41:11 +0200 $
+#  $Date: 2006/07/08 11:44:19 +0200 $
 #
 ################################################################################
 #
@@ -68,7 +68,7 @@ for (keys %raw_todo) {
 
 # check consistency
 for (@api) {
-  if (exists $raw_todo{$_}) {
+  if (exists $raw_todo{$_} and exists $raw_base{$_}) {
     if ($raw_base{$_} eq $raw_todo{$_}) {
       warn "$INCLUDE/$provides{$_} provides $_, which is still marked "
            . "todo for " . format_version($raw_todo{$_}) . "\n";
@@ -335,9 +335,9 @@ __DATA__
 #
 ################################################################################
 #
-#  $Revision: 46 $
+#  $Revision: 47 $
 #  $Author: mhx $
-#  $Date: 2006/06/25 03:41:11 +0200 $
+#  $Date: 2006/07/08 11:44:19 +0200 $
 #
 ################################################################################
 #
@@ -498,7 +498,7 @@ package Devel::PPPort;
 use strict;
 use vars qw($VERSION $data);
 
-$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.08_07 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+$VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.09 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 sub _init_data
 {

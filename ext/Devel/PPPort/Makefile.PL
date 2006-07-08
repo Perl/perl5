@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 25 $
+#  $Revision: 26 $
 #  $Author: mhx $
-#  $Date: 2006/07/03 21:48:31 +0200 $
+#  $Date: 2006/07/08 11:44:45 +0200 $
 #
 ################################################################################
 #
@@ -19,17 +19,18 @@
 #
 ################################################################################
 
-use ExtUtils::MakeMaker;
-use strict;
 require 5.003;
+
+use strict;
+use ExtUtils::MakeMaker;
+
+use vars '%opt';  # needs to be global, and we can't use 'our'
 
 unless ($ENV{'PERL_CORE'}) {
   $ENV{'PERL_CORE'} = 1 if grep { $_ eq 'PERL_CORE=1' } @ARGV;
 }
 
-my %opt;
-
-@ARGV = map { /^--with-(.*)/ && ++$opt{$1} ? () : $_ } @ARGV;
+@ARGV = map { /^--with-(apicheck)$/ && ++$opt{$1} ? () : $_ } @ARGV;
 
 WriteMakefile(
   NAME          => 'Devel::PPPort',
@@ -124,13 +125,17 @@ sub MY::c_o
   package MY;
   my $co = shift->SUPER::c_o(@_);
 
-  $co .= <<'CO' if $::opt{'apicheck'} && $co !~ /^\.c\.i:/m;
+  if ($::opt{'apicheck'} && $co !~ /^\.c\.i:/m) {
+    print "Adding custom rule for preprocessed apicheck file...\n";
+
+    $co .= <<'CO'
 
 .SUFFIXES: .i
 
 .c.i:
 	$(CCCMD) -E -I$(PERL_INC) $(DEFINE) $*.c > $*.i
 CO
+  }
 
   return $co;
 }
