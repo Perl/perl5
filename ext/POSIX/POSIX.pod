@@ -848,7 +848,8 @@ FIFO special files.
 	if (mkfifo($path, $mode)) { ....
 
 Returns C<undef> on failure.  The C<$mode> is similar to the
-mode of C<mkdir()>, see L<perlfunc/mkdir>.
+mode of C<mkdir()>, see L<perlfunc/mkdir>, though for C<mkfifo>
+you B<must> specify the C<$mode>.
 
 =item mktime
 
@@ -1840,6 +1841,7 @@ Get terminal control attributes.
 
 Obtain the attributes for stdin.
 
+	$termios->getattr( 0 ) # Recommended for clarity.
 	$termios->getattr()
 
 Obtain the attributes for stdout.
