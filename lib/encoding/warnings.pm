@@ -1,10 +1,8 @@
-# $File: //member/autrijus/.vimrc $ $Author: autrijus $
-# $Revision: #14 $ $Change: 4137 $ $DateTime: 2003/02/08 11:41:59 $
-
 package encoding::warnings;
-$encoding::warnings::VERSION = '0.05';
+$encoding::warnings::VERSION = '0.10';
 
 use strict;
+use 5.007;
 
 =head1 NAME
 
@@ -12,8 +10,8 @@ encoding::warnings - Warn on implicit encoding conversions
 
 =head1 VERSION
 
-This document describes version 0.05 of encoding::warnings, released
-July 15, 2004.
+This document describes version 0.10 of encoding::warnings, released
+July 7, 2006.
 
 =head1 SYNOPSIS
 
@@ -136,9 +134,10 @@ silencing warnings from this module.  See L<encoding> for more details.
 
 =head1 CAVEATS
 
-This module currently affects the whole script, instead of inside its
-lexical block.  This is expected to be addressed during Perl 5.9 development,
-where the B<encoding> module will also be made lexical.
+For Perl 5.9.4 or later, this module's effect is lexical.
+
+For Perl versions prior to 5.9.4, this module affects the whole script,
+instead of inside its lexical block.
 
 =cut
 
@@ -163,13 +162,21 @@ sub import {
     undef ${^ENCODING};
 
     # Install a warning handler for decode()
-    ${^ENCODING} = bless(
+    my $decoder = bless(
 	[
 	    $ascii,
 	    $latin1,
 	    (($fatal eq 'FATAL') ? 'Carp::croak' : 'Carp::carp'),
 	], $class,
     );
+
+    ${^ENCODING} = $decoder;
+    $^H{$class} = 1;
+}
+
+sub unimport {
+    my $class = shift;
+    $^H{$class} = undef;
 }
 
 # Don't worry about source code literals.
@@ -182,15 +189,24 @@ sub cat_decode {
 sub decode {
     my $self = shift;
 
-    local $@;
-    my $rv = eval { $self->[ASCII]->decode($_[0], Encode::FB_CROAK()) };
-    return $rv unless $@;
+    DO_WARN: {
+        if ($] >= 5.009004) {
+            my $hints = (caller(0))[10];
+            $hints->{ref($self)} or last DO_WARN;
+        }
 
-    require Carp;
-    no strict 'refs';
-    $self->[FATAL]->(
-	"Bytes implicitly upgraded into wide characters as iso-8859-1"
-    );
+        local $@;
+        my $rv = eval { $self->[ASCII]->decode($_[0], Encode::FB_CROAK()) };
+        return $rv unless $@;
+
+        require Carp;
+        no strict 'refs';
+        $self->[FATAL]->(
+            "Bytes implicitly upgraded into wide characters as iso-8859-1"
+        );
+
+    }
+
     return $self->[LATIN1]->decode(@_);
 }
 
@@ -208,11 +224,11 @@ L<open>, L<utf8>, L<encoding>, L<Encode>
 
 =head1 AUTHORS
 
-Autrijus Tang E<lt>autrijus@autrijus.orgE<gt>
+Audrey Tang
 
 =head1 COPYRIGHT
 
-Copyright 2004 by Autrijus Tang E<lt>autrijus@autrijus.orgE<gt>.
+Copyright 2004, 2005, 2006 by Audrey Tang E<lt>cpan@audreyt.orgE<gt>.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
