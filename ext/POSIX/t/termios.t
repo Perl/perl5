@@ -8,11 +8,17 @@ BEGIN {
 
     use Config;
     use Test::More;
-    plan skip_all => "POSIX is unavailable" if $Config{'extensions'} !~ m!\bPOSIX\b!;
+    plan skip_all => "POSIX is unavailable" 
+        if $Config{'extensions'} !~ m!\bPOSIX\b!;
 }
-
 use strict;
 use POSIX;
+BEGIN {
+    plan skip_all => "POSIX::Termios not implemented" 
+        if  !eval "POSIX::Termios->new;1"
+        and $@=~/not implemented/;
+}
+
 
 my @getters = qw(getcflag getiflag getispeed getlflag getoflag getospeed);
 

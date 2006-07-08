@@ -16,29 +16,36 @@ use File::Spec;
 use POSIX;
 use Scalar::Util qw(looks_like_number);
 
-my @path_consts = qw(
+sub check(@) {
+    grep { eval "&$_;1" or $@!~/vendor has not defined POSIX macro/ } @_
+}       
+
+my @path_consts = check qw(
     _PC_CHOWN_RESTRICTED _PC_LINK_MAX _PC_NAME_MAX
     _PC_NO_TRUNC _PC_PATH_MAX
 );
 
-my @path_consts_terminal = qw(
+my @path_consts_terminal = check qw(
     _PC_MAX_CANON _PC_MAX_INPUT _PC_VDISABLE
 );
 
-my @path_consts_fifo = qw(
+my @path_consts_fifo = check qw(
     _PC_PIPE_BUF
 );
 
-my @sys_consts = qw(
+my @sys_consts = check qw(
     _SC_ARG_MAX _SC_CHILD_MAX _SC_CLK_TCK _SC_JOB_CONTROL
     _SC_NGROUPS_MAX _SC_OPEN_MAX _SC_PAGESIZE _SC_SAVED_IDS
     _SC_STREAM_MAX _SC_TZNAME_MAX _SC_VERSION
 );
-
-plan tests => 2 * 3 * @path_consts +
+my $tests=2 * 3 * @path_consts +
                   3 * @path_consts_terminal +
               2 * 3 * @path_consts_fifo +
                   3 * @sys_consts;
+plan $tests 
+     ? (tests => $tests) 
+     : (skip_all => "No tests to run on this OS")
+;
 
 my $curdir = File::Spec->curdir;
 
@@ -83,7 +90,7 @@ SKIP: {
 my $fifo = "fifo$$";
 
 SKIP: {
-    mkfifo($fifo, 0666)
+    eval { mkfifo($fifo, 0666) }
 	or skip("could not create fifo $fifo ($!)", 2 * 3 * @path_consts_fifo);
 
   SKIP: {
