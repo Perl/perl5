@@ -6354,9 +6354,13 @@ sub readline {
         $OUT->write( join( '', @_ ) );
 
         # Receive anything there is to receive.
-        my $stuff;
-        $IN->recv( $stuff, 2048 );    # XXX "what's wrong with sysread?"
-                                      # XXX Don't know. You tell me.
+        $stuff;
+        my $stuff = '';
+        my $buf;
+        do {
+            $IN->recv( $buf = '', 2048 );   # XXX "what's wrong with sysread?"
+                                            # XXX Don't know. You tell me.
+        } while length $buf and ($stuff .= $buf) !~ /\n/;
 
         # What we got.
         $stuff;
