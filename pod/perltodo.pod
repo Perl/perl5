@@ -40,8 +40,7 @@ advantage of the lexical pragmas work. L</What hooks would assertions need?>
 
 =item *
 
-C<encoding::warnings> should be turned into a lexical pragma.
-C<encoding> should, too (probably).
+C<encoding> should be turned into a lexical pragma (probably).
 
 =back
 
