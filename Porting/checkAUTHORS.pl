@@ -124,7 +124,7 @@ my %map = reverse (
 
 $map{"autrijus\100egb.elixus.org"} = $map{"autrijus\100geb.elixus.org"}
   = $map{"autrijus\100gmail.com"} = $map{"autrijus\100ossf.iis.sinica.edu.tw"}
-  = "autrijus\100autrijus.org";
+  = $map{"autrijus\100autrijus.org"} = "cpan\100audreyt.org";
 $map{"ilya\100math.ohio-state.edu"} = $map{"ilya\100math.berkeley.edu"}
   = $map{"ilya\100math.berkeley.edu"} = "nospam-abuse\100ilyaz.org";
 $map{"philip.newton\100gmx.net"} = $map{"philip.newton\100datenrevision.de"}

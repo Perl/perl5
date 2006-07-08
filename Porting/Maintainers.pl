@@ -14,7 +14,7 @@ package Maintainers;
 	'ams'		=> 'Abhijit Menon-Sen <ams@cpan.org>',
 	'andk'		=> 'Andreas J. Koenig <andk@cpan.org>',
 	'arandal'       => 'Allison Randal <allison@perl.org>',
-	'autrijus'	=> 'Audrey Tang <autrijus@cpan.org>',
+	'audreyt'	=> 'Audrey Tang <cpan@audreyt.org>',
 	'bbb'		=> 'Rob Brown <bbb@cpan.org>',
 	'craig'		=> 'Craig Berry <craigberry@mac.com>',
 	'dankogai'	=> 'Dan Kogai <dankogai@cpan.org>',
@@ -208,7 +208,7 @@ package Maintainers;
 
 	'encoding::warnings' =>
 		{
-		'MAINTAINER'	=> 'autrijus',
+		'MAINTAINER'	=> 'audreyt',
 		'FILES'		=> q[lib/encoding/warnings.pm lib/encoding/warnings],
 		'CPAN'		=> 1,
 		},
