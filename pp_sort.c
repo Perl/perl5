@@ -1847,6 +1847,8 @@ S_sv_i_ncmp(pTHX_ SV *a, SV *b)
 	? amagic_call(left, right, CAT2(meth,_amg), 0) \
 	: NULL;
 
+#define SORT_NORMAL_RETURN_VALUE(val)  (((val) > 0) ? 1 : ((val) ? -1 : 0))
+
 static I32
 S_amagic_ncmp(pTHX_ register SV *a, register SV *b)
 {
@@ -1855,15 +1857,11 @@ S_amagic_ncmp(pTHX_ register SV *a, register SV *b)
     if (tmpsv) {
         if (SvIOK(tmpsv)) {
             const I32 i = SvIVX(tmpsv);
-            if (i > 0)
-               return 1;
-            return i? -1 : 0;
+            return SORT_NORMAL_RETURN_VALUE(i);
         }
 	else {
 	    const NV d = SvNV(tmpsv);
-	    if (d > 0)
-	       return 1;
-	    return d ? -1 : 0;
+	    return SORT_NORMAL_RETURN_VALUE(d);
 	}
      }
      return S_sv_ncmp(aTHX_ a, b);
@@ -1877,15 +1875,11 @@ S_amagic_i_ncmp(pTHX_ register SV *a, register SV *b)
     if (tmpsv) {
         if (SvIOK(tmpsv)) {
             const I32 i = SvIVX(tmpsv);
-            if (i > 0)
-               return 1;
-            return i? -1 : 0;
+            return SORT_NORMAL_RETURN_VALUE(i);
         }
 	else {
 	    const NV d = SvNV(tmpsv);
-	    if (d > 0)
-	       return 1;
-	    return d ? -1 : 0;
+	    return SORT_NORMAL_RETURN_VALUE(d);
 	}
     }
     return S_sv_i_ncmp(aTHX_ a, b);
@@ -1899,15 +1893,11 @@ S_amagic_cmp(pTHX_ register SV *str1, register SV *str2)
     if (tmpsv) {
         if (SvIOK(tmpsv)) {
             const I32 i = SvIVX(tmpsv);
-            if (i > 0)
-               return 1;
-            return i? -1 : 0;
+            return SORT_NORMAL_RETURN_VALUE(i);
         }
 	else {
 	    const NV d = SvNV(tmpsv);
-	    if (d > 0)
-	       return 1;
-	    return d? -1 : 0;
+	    return SORT_NORMAL_RETURN_VALUE(d);
 	}
     }
     return sv_cmp(str1, str2);
@@ -1921,15 +1911,11 @@ S_amagic_cmp_locale(pTHX_ register SV *str1, register SV *str2)
     if (tmpsv) {
         if (SvIOK(tmpsv)) {
             const I32 i = SvIVX(tmpsv);
-            if (i > 0)
-               return 1;
-            return i? -1 : 0;
+            return SORT_NORMAL_RETURN_VALUE(i);
         }
 	else {
 	    const NV d = SvNV(tmpsv);
-	    if (d > 0)
-	       return 1;
-	    return d? -1 : 0;
+	    return SORT_NORMAL_RETURN_VALUE(d);
 	}
     }
     return sv_cmp_locale(str1, str2);
