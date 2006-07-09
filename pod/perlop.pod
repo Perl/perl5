@@ -1685,9 +1685,15 @@ try to do this:
     ABC
        + 20;
 
-If you want your here-docs to be indented with the 
-rest of the code, you'll need to remove leading whitespace
-from each line manually:
+If you want to remove the line terminator from your here-docs,
+use C<chomp()>.
+
+    chomp($string = <<'END');
+    This is a string.
+    END
+
+If you want your here-docs to be indented with the rest of the code,
+you'll need to remove leading whitespace from each line manually:
 
     ($quote = <<'FINIS') =~ s/^\s+//gm;
        The Road goes ever on and on, 
@@ -1761,7 +1767,7 @@ one to five, but these passes are always performed in the same order.
 =item Finding the end
 
 The first pass is finding the end of the quoted construct, whether
-it be a multicharacter delimiter C<"\nEOF\n"> in the C<<<EOF>
+it be a multicharacter delimiter C<"EOF\n"> in the C<<<EOF>
 construct, a C</> that terminates a C<qq//> construct, a C<]> which
 terminates C<qq[]> construct, or a C<< > >> which terminates a
 fileglob started with C<< < >>.
@@ -1771,7 +1777,8 @@ as C</>, combinations of C<\\> and C<\/> are skipped.  However,
 when searching for single-character pairing delimiter like C<[>,
 combinations of C<\\>, C<\]>, and C<\[> are all skipped, and nested
 C<[>, C<]> are skipped as well.  When searching for multicharacter
-delimiters, nothing is skipped.
+delimiters like C<"EOF\n">, nothing is skipped, though the delimiter
+must start from the first column of the terminating line.
 
 For constructs with three-part delimiters (C<s///>, C<y///>, and
 C<tr///>), the search is repeated once more.
