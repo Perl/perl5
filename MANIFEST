@@ -248,7 +248,6 @@ ext/Compress/Raw/Zlib/fallback/constants.h	Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/fallback/constants.xs	Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/lib/Compress/Raw/Zlib.pm	Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/Makefile.PL	Compress::Raw::Zlib
-ext/Compress/Raw/Zlib/ppport.h		Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/private/MakeUtil.pm	Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/README		Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/t/01version.t	Compress::Raw::Zlib
@@ -299,7 +298,6 @@ ext/Compress/Zlib/t/99pod.t		Compress::Zlib
 ext/Cwd/Changes			Cwd extension Changelog
 ext/Cwd/Cwd.xs			Cwd extension external subroutines
 ext/Cwd/Makefile.PL		Cwd extension makefile maker
-ext/Cwd/ppport.h		portability header for Cwd
 ext/Cwd/t/cwd.t			See if Cwd works
 ext/Cwd/t/taint.t		See if Cwd works with taint
 ext/Cwd/t/win32.t		See if Cwd works on Win32
@@ -500,7 +498,6 @@ ext/Digest/MD5/typemap		Digest::MD5 extension
 ext/Digest/SHA/bin/shasum	shasum script
 ext/Digest/SHA/Changes		Digest::SHA changes
 ext/Digest/SHA/Makefile.PL	Digest::SHA Makefile.PL
-ext/Digest/SHA/ppport.h		Digest::SHA extension
 ext/Digest/SHA/README		Digest::SHA README
 ext/Digest/SHA/SHA.pm		Digest::SHA extension
 ext/Digest/SHA/SHA.xs		Digest::SHA extension
@@ -1120,7 +1117,6 @@ ext/Sys/Syslog/Makefile.PL	Sys::Syslog extension makefile writer
 ext/Sys/Syslog/README		README for Sys::Syslog
 ext/Sys/Syslog/Syslog.pm	Sys::Syslog extension Perl module
 ext/Sys/Syslog/Syslog.xs	Sys::Syslog extension external subroutines
-ext/Sys/Syslog/ppport.h		portability header for Sys::Syslog
 ext/Sys/Syslog/t/00-load.t	test for Sys::Syslog
 ext/Sys/Syslog/t/constants.t	test for Sys::Syslog
 ext/Sys/Syslog/t/syslog.t	See if Sys::Syslog works
@@ -1208,7 +1204,6 @@ ext/Time/HiRes/hints/svr4.pl	Hints for Time::HiRes for named architecture
 ext/Time/HiRes/HiRes.pm		Time::HiRes extension
 ext/Time/HiRes/HiRes.xs		Time::HiRes extension
 ext/Time/HiRes/Makefile.PL	Time::HiRes extension
-ext/Time/HiRes/ppport.h		portability header for Time::HiRes
 ext/Time/HiRes/t/HiRes.t	Test for Time::HiRes
 ext/Time/HiRes/typemap		Time::HiRes extension
 ext/Unicode/Normalize/Changes	Unicode::Normalize
@@ -2715,6 +2710,8 @@ mint/README			MiNT port
 mint/stdio.h			MiNT port
 mint/sys/time.h			MiNT port
 mint/time.h			MiNT port
+mkppport			A script that distributes ppport.h
+mkppport.lst			List of extensions that need a ppport.h
 mpeix/mpeix.c			MPE/iX port
 mpeix/mpeixish.h		MPE/iX port
 mpeix/mpeix_setjmp.c		MPE/iX port
@@ -3717,7 +3714,6 @@ win32/ext/Win32API/File/ExtUtils/Myconst2perl.pm	Win32API::File extension
 win32/ext/Win32API/File/File.pm				Win32API::File extension
 win32/ext/Win32API/File/File.xs				Win32API::File extension
 win32/ext/Win32API/File/Makefile.PL			Win32API::File extension makefile write
-win32/ext/Win32API/File/ppport.h			Win32API::File extension
 win32/ext/Win32API/File/README				Win32API::File extension Readme
 win32/ext/Win32API/File/t/file.t			See if Win32API::File extension works
 win32/ext/Win32API/File/t/tie.t				See if Win32API::File extension works

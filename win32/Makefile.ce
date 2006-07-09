@@ -706,7 +706,7 @@ CFG_VARS = \
 # Top targets
 #
 
-all: hostminiperl $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE) Extensions
+all: hostminiperl $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE) MakePPPort Extensions
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c xconfig.h $(EXTDIR)\DynaLoader\dlutils.c
 
@@ -745,6 +745,12 @@ $(DYNALOADER).c: $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	$(COPY) dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
+
+MakePPPort: $(MINIPERL) $(CONFIGPM)
+	$(MINIPERL) -I..\lib ..\mkppport
+
+MakePPPort_clean:
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\mkppport --clean
 
 #----------------------------------------------------------------------------------
 NOT_COMPILE_EXT =

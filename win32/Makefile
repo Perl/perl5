@@ -918,7 +918,7 @@ CFG_VARS	=					\
 #
 
 all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE) \
-	$(X2P) Extensions
+	$(X2P) MakePPPort Extensions
 	@echo	Everything is up to date. '$(MAKE_BARE) test' to run test suite.
 
 reonly : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE) \
@@ -1076,6 +1076,12 @@ $(DYNALOADER).c: $(MINIPERL) $(EXTDIR)\DynaLoader\dl_win32.xs $(CONFIGPM)
 
 $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	copy dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
+
+MakePPPort: $(MINIPERL) $(CONFIGPM)
+	$(MINIPERL) -I..\lib ..\mkppport
+
+MakePPPort_clean:
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\mkppport --clean
 
 #-------------------------------------------------------------------------------
 Extensions: buildext.pl $(PERLDEP) $(CONFIGPM)
@@ -1330,7 +1336,7 @@ _clean :
 
 clean : Extensions_clean _clean
 
-realclean : Extensions_realclean _clean
+realclean : Extensions_realclean MakePPPort_clean _clean
 
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.
