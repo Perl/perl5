@@ -122,9 +122,13 @@ unlink($fifo);
 
 # testing sysconf()
 for my $constant (@sys_consts) {
-    $r = eval { sysconf( eval "$constant()" ) };
-    is( $@, '', "calling sysconf($constant)" );
-    ok( defined $r, "\tchecking that the returned value is defined: $r" );
-    ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
+ SKIP: {
+	skip "Saved IDs broken on Mac OS X (Perl #24122)", 3
+	    if $^O eq 'darwin' && $constant eq '_SC_SAVED_IDS';
+	$r = eval { sysconf( eval "$constant()" ) };
+	is( $@, '', "calling sysconf($constant)" );
+	ok( defined $r, "\tchecking that the returned value is defined: $r" );
+	ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
+    }
 }
 
