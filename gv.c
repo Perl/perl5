@@ -654,7 +654,6 @@ Perl_gv_autoload4(pTHX_ HV *stash, const char *name, STRLEN len, I32 method)
     sv_setpvn(varsv, packname, packname_len);
     sv_catpvs(varsv, "::");
     sv_catpvn(varsv, name, len);
-    SvTAINTED_off(varsv);
     return gv;
 }
 

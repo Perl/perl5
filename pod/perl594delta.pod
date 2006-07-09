@@ -27,6 +27,11 @@ file. (This trick is used by Pugs.)
 The special arrays C<@-> and C<@+> are no longer interpolated in regular
 expressions.
 
+=head2 $AUTOLOAD can now be tainted
+
+If you call a subroutine by a tainted name, and if it defers to an
+AUTOLOAD function, then $AUTOLOAD will be (correctly) tainted.
+
 =head1 Core Enhancements
 
 =head2 state() variables
