@@ -2558,7 +2558,7 @@ Or we will publicly ridicule you.  Seriously.
 
 Do not use strcpy() or strcat()
 
-Where there still linger some uses of these in the Perl source code,
+While some uses of these still linger in the Perl source code,
 we have inspected them for safety and are very, very ashamed of them,
 and plan to get rid of them.  In places where there are strlcpy()
 and strlcat() we prefer to use them, and there is a plan to integrate
