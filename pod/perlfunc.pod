@@ -6071,6 +6071,13 @@ that far from the end of the string.  If LENGTH is omitted, returns
 everything to the end of the string.  If LENGTH is negative, leaves that
 many characters off the end of the string.
 
+    my $s = "The black cat climbed the green tree";
+    my $color  = substr $s, 4, 5;	# black
+    my $middle = substr $s, 4, -11;	# black cat climbed the
+    my $end    = substr $s, 14;		# climbed the green tree
+    my $tail   = substr $s, -4;		# tree
+    my $z      = substr $s, -4, 2;	# tr
+
 You can use the substr() function as an lvalue, in which case EXPR
 must itself be an lvalue.  If you assign something shorter than LENGTH,
 the string will shrink, and if you assign something longer than LENGTH,
@@ -6095,6 +6102,10 @@ replacement string as the 4th argument.  This allows you to replace
 parts of the EXPR and return what was there before in one operation,
 just as you can with splice().
 
+    my $s = "The black cat climbed the green tree";
+    my $z = substr $s, 14, 7, "jumped from";	# climbed
+    # $s is now "The black cat jumped from the green tree"
+
 Note that the lvalue returned by the 3-arg version of substr() acts as
 a 'magic bullet'; each time it is assigned to, it remembers which part
 of the original string is being modified; for example:
@@ -6106,7 +6117,6 @@ of the original string is being modified; for example:
         $x = '56789';
         $_ = 'pq';  print $x,"\n";	# prints 5pq9
     }
-
 
 Prior to Perl version 5.9.1, the result of using an lvalue multiple times was
 unspecified.
