@@ -5,7 +5,7 @@ perlop - Perl operators and precedence
 
 =head1 DESCRIPTION
 
-=head2 Operator Precedence and Associativity 
+=head2 Operator Precedence and Associativity
 X<operator, precedence> X<precedence> X<associativity>
 
 Operator precedence and associativity work in Perl more or less like
@@ -150,7 +150,7 @@ value.
     print ++$j;  # prints 1
 
 Note that just as in C, Perl doesn't define B<when> the variable is
-incremented or decremented. You just know it will be done sometime 
+incremented or decremented. You just know it will be done sometime
 before or after the value is returned. This also means that modifying
 a variable twice in the same statement will lead to undefined behaviour.
 Avoid statements like:
@@ -236,12 +236,17 @@ pattern, substitution, or transliteration.  The left argument is what is
 supposed to be searched, substituted, or transliterated instead of the default
 $_.  When used in scalar context, the return value generally indicates the
 success of the operation.  Behavior in list context depends on the particular
-operator.  See L</"Regexp Quote-Like Operators"> for details and 
+operator.  See L</"Regexp Quote-Like Operators"> for details and
 L<perlretut> for examples using these operators.
 
 If the right argument is an expression rather than a search pattern,
 substitution, or transliteration, it is interpreted as a search pattern at run
-time.
+time. Note that this means that its contents will be interpolated twice, so
+
+  '\\' =~ q'\\';
+
+is not ok, as the regex engine will end up trying to compile the
+pattern C<\>, which it will consider a syntax error.
 
 Binary "!~" is just like "=~" except the return value is negated in
 the logical sense.
@@ -261,7 +266,7 @@ C<$a> minus the largest multiple of C<$b> that is not greater than
 C<$a>.  If C<$b> is negative, then C<$a % $b> is C<$a> minus the
 smallest multiple of C<$b> that is not less than C<$a> (i.e. the
 result will be less than or equal to zero).  If the operands
-C<$a> and C<$b> are floting point values, only the integer portion 
+C<$a> and C<$b> are floting point values, only the integer portion
 of C<$a> and C<$b> will be used in the operation.
 Note that when C<use integer> is in scope, "%" gives you direct access
 to the modulus operator as implemented by your C compiler.  This
@@ -487,12 +492,12 @@ is evaluated.
 X<//> X<operator, logical, defined-or>
 
 Although it has no direct equivalent in C, Perl's C<//> operator is related
-to its C-style or.  In fact, it's exactly the same as C<||>, except that it 
+to its C-style or.  In fact, it's exactly the same as C<||>, except that it
 tests the left hand side's definedness instead of its truth.  Thus, C<$a // $b>
-is similar to C<defined($a) || $b> (except that it returns the value of C<$a> 
-rather than the value of C<defined($a)>) and is exactly equivalent to 
+is similar to C<defined($a) || $b> (except that it returns the value of C<$a>
+rather than the value of C<defined($a)>) and is exactly equivalent to
 C<defined($a) ? $a : $b>.  This is very useful for providing default values
-for variables.  If you actually want to test if at least one of C<$a> and 
+for variables.  If you actually want to test if at least one of C<$a> and
 C<$b> is defined, use C<defined($a // $b)>.
 
 The C<||>, C<//> and C<&&> operators return the last value evaluated
@@ -511,7 +516,7 @@ for selecting between two aggregates for assignment:
 
 As more readable alternatives to C<&&>, C<//> and C<||> when used for
 control flow, Perl provides C<and>, C<err> and C<or> operators (see below).
-The short-circuit behavior is identical.  The precedence of "and", "err" 
+The short-circuit behavior is identical.  The precedence of "and", "err"
 and "or" is much lower, however, so that you can safely use them after a
 list operator without the need for parentheses:
 
@@ -886,7 +891,7 @@ Type-casting operator.
 =back
 
 =head2 Quote and Quote-like Operators
-X<operator, quote> X<operator, quote-like> X<q> X<qq> X<qx> X<qw> X<m> 
+X<operator, quote> X<operator, quote-like> X<q> X<qq> X<qx> X<qw> X<m>
 X<qr> X<s> X<tr> X<'> X<''> X<"> X<""> X<//> X<`> X<``> X<<< << >>>
 X<escape sequence> X<escape>
 
@@ -1002,10 +1007,10 @@ separated by the value of C<$">, so is equivalent to interpolating
 C<join $", @array>.    "Punctuation" arrays such as C<@+> are only
 interpolated if the name is enclosed in braces C<@{+}>.
 
-You cannot include a literal C<$> or C<@> within a C<\Q> sequence. 
-An unescaped C<$> or C<@> interpolates the corresponding variable, 
+You cannot include a literal C<$> or C<@> within a C<\Q> sequence.
+An unescaped C<$> or C<@> interpolates the corresponding variable,
 while escaping will cause the literal string C<\$> to be inserted.
-You'll need to write something like C<m/\Quser\E\@\Qhost/>. 
+You'll need to write something like C<m/\Quser\E\@\Qhost/>.
 
 Patterns are subject to an additional level of interpretation as a
 regular expression.  This is done as a second pass, after variables are
@@ -1049,8 +1054,8 @@ be removed in some distant future version of Perl, perhaps somewhere
 around the year 2168.
 
 =item m/PATTERN/cgimosx
-X<m> X<operator, match> 
-X<regexp, options> X<regexp> X<regex, options> X<regex> 
+X<m> X<operator, match>
+X<regexp, options> X<regexp> X<regex, options> X<regex>
 X</c> X</i> X</m> X</o> X</s> X</x>
 
 =item /PATTERN/cgimosx
@@ -1075,7 +1080,7 @@ Options are:
     x	Use extended regular expressions.
 
 If "/" is the delimiter then the initial C<m> is optional.  With the C<m>
-you can use any pair of non-alphanumeric, non-whitespace characters 
+you can use any pair of non-alphanumeric, non-whitespace characters
 as delimiters.  This is particularly useful for matching path names
 that contain "/", to avoid LTS (leaning toothpick syndrome).  If "?" is
 the delimiter, then the match-only-once rule of C<?PATTERN?> applies.
@@ -1099,13 +1104,13 @@ the other flags are taken from the original pattern. If no match has
 previously succeeded, this will (silently) act instead as a genuine
 empty pattern (which will always match).
 
-Note that it's possible to confuse Perl into thinking C<//> (the empty 
-regex) is really C<//> (the defined-or operator).  Perl is usually pretty 
-good about this, but some pathological cases might trigger this, such as 
-C<$a///> (is that C<($a) / (//)> or C<$a // />?) and C<print $fh //> 
-(C<print $fh(//> or C<print($fh //>?).  In all of these examples, Perl 
-will assume you meant defined-or.  If you meant the empty regex, just 
-use parentheses or spaces to disambiguate, or even prefix the empty 
+Note that it's possible to confuse Perl into thinking C<//> (the empty
+regex) is really C<//> (the defined-or operator).  Perl is usually pretty
+good about this, but some pathological cases might trigger this, such as
+C<$a///> (is that C<($a) / (//)> or C<$a // />?) and C<print $fh //>
+(C<print $fh(//> or C<print($fh //>?).  In all of these examples, Perl
+will assume you meant defined-or.  If you meant the empty regex, just
+use parentheses or spaces to disambiguate, or even prefix the empty
 regex with an C<m> (so C<//> becomes C<m//>).
 
 If the C</g> option is not used, C<m//> in list context returns a
@@ -1432,7 +1437,7 @@ Some frequently seen examples:
 
 A common mistake is to try to separate the words with comma or to
 put comments into a multi-line C<qw>-string.  For this reason, the
-C<use warnings> pragma and the B<-w> switch (that is, the C<$^W> variable) 
+C<use warnings> pragma and the B<-w> switch (that is, the C<$^W> variable)
 produces warnings if the STRING contains the "," or the "#" character.
 
 =item s/PATTERN/REPLACEMENT/egimosx
@@ -1539,7 +1544,7 @@ Occasionally, you can't use just a C</g> to get all the changes
 to occur that you might want.  Here are two common cases:
 
     # put commas in the right places in an integer
-    1 while s/(\d)(\d\d\d)(?!\d)/$1,$2/g;  
+    1 while s/(\d)(\d\d\d)(?!\d)/$1,$2/g;
 
     # expand tabs to 8-column spacing
     1 while s/\t+/' ' x (length($&)*8 - length($`)%8)/e;
@@ -1556,7 +1561,7 @@ specified via the =~ or !~ operator, the $_ string is transliterated.  (The
 string specified with =~ must be a scalar variable, an array element, a
 hash element, or an assignment to one of those, i.e., an lvalue.)
 
-A character range may be specified with a hyphen, so C<tr/A-J/0-9/> 
+A character range may be specified with a hyphen, so C<tr/A-J/0-9/>
 does the same replacement as C<tr/ACEGIBDFHJ/0246813579/>.
 For B<sed> devotees, C<y> is provided as a synonym for C<tr>.  If the
 SEARCHLIST is delimited by bracketing quotes, the REPLACEMENTLIST has
@@ -1640,15 +1645,25 @@ X<here-doc> X<heredoc> X<here-document> X<<< << >>>
 A line-oriented form of quoting is based on the shell "here-document"
 syntax.  Following a C<< << >> you specify a string to terminate
 the quoted material, and all lines following the current line down to
-the terminating string are the value of the item.  The terminating
-string may be either an identifier (a word), or some quoted text.  If
-quoted, the type of quotes you use determines the treatment of the
-text, just as in regular quoting.  An unquoted identifier works like
-double quotes.  There must be no space between the C<< << >> and
-the identifier, unless the identifier is quoted.  (If you put a space it
-will be treated as a null identifier, which is valid, and matches the first
-empty line.)  The terminating string must appear by itself (unquoted and
-with no surrounding whitespace) on the terminating line.
+the terminating string are the value of the item.
+
+The terminating string may be either an identifier (a word), or some
+quoted text.  An unquoted identifier works like double quotes.
+There may not be a space between the C<< << >> and the identifier,
+unless the identifier is explicitly quoted.  (If you put a space it
+will be treated as a null identifier, which is valid, and matches the
+first empty line.)  The terminating string must appear by itself
+(unquoted and with no surrounding whitespace) on the terminating line.
+
+If the terminating string is quoted, the type of quotes used determine
+the treatment of the text.
+
+=over 4
+
+=item Double Quotes
+
+Double quotes indicate that the text will be interpolated using exactly
+the same rules as normal double quoted strings.
 
        print <<EOF;
     The price is $Price.
@@ -1658,10 +1673,33 @@ with no surrounding whitespace) on the terminating line.
     The price is $Price.
     EOF
 
-       print << `EOC`; # execute commands
+
+=item Single Quotes
+
+Single quotes indicate the text is to be treated literally with no
+interpolation of its content. This is similar to single quoted
+strings except that backslashes have no special meaning, with C<\\>
+being treated as two backslashes and not one as they would in every
+other quoting construct.
+
+This is the only form of quoting in perl where there is no need
+to worry about escaping content, something that code generators
+can and do make good use of.
+
+=item Backticks
+
+The content of the here doc is treated just as it would be if the
+string were embedded in backticks. Thus the content is interpolated
+as though it were double quoted and then executed via the shell, with
+the results of the execution returned.
+
+       print << `EOC`; # execute command and get results
     echo hi there
-    echo lo there
     EOC
+
+=back
+
+It is possible to stack multiple here-docs in a row:
 
        print <<"foo", <<"bar"; # you can stack them
     I said foo.
@@ -1696,7 +1734,7 @@ If you want your here-docs to be indented with the rest of the code,
 you'll need to remove leading whitespace from each line manually:
 
     ($quote = <<'FINIS') =~ s/^\s+//gm;
-       The Road goes ever on and on, 
+       The Road goes ever on and on,
        down from the door where it began.
     FINIS
 
@@ -1711,19 +1749,19 @@ So instead of
 
 you have to write
 
-    s/this/<<E . 'that' 
-     . 'more '/eg; 
-    the other 
-    E 
+    s/this/<<E . 'that'
+     . 'more '/eg;
+    the other
+    E
 
 If the terminating identifier is on the last line of the program, you
 must be sure there is a newline after it; otherwise, Perl will give the
 warning B<Can't find string terminator "END" anywhere before EOF...>.
 
-Additionally, the quoting rules for the identifier are not related to
-Perl's quoting rules -- C<q()>, C<qq()>, and the like are not supported
-in place of C<''> and C<"">, and the only interpolation is for backslashing
-the quoting character:
+Additionally, the quoting rules for the end of string identifier are not
+related to Perl's quoting rules -- C<q()>, C<qq()>, and the like are not
+supported in place of C<''> and C<"">, and the only interpolation is for
+backslashing the quoting character:
 
     print << "abc\"def";
     testing...
@@ -1790,7 +1828,7 @@ Thus:
 
 or:
 
-    m/ 
+    m/
       bar	# NOT a comment, this slash / terminated m//!
      /x
 
@@ -1800,9 +1838,9 @@ Because the slash that terminated C<m//> was followed by a C<SPACE>,
 the example above is not C<m//x>, but rather C<m//> with no C</x>
 modifier.  So the embedded C<#> is interpreted as a literal C<#>.
 
-Also no attention is paid to C<\c\> during this search.
-Thus the second C<\> in C<qq/\c\/> is interpreted as a part of C<\/>,
-and the following C</> is not recognized as a delimiter.
+Also no attention is paid to C<\c\> (multichar control char syntax) during
+this search. Thus the second C<\> in C<qq/\c\/> is interpreted as a part
+of C<\/>, and the following C</> is not recognized as a delimiter.
 Instead, use C<\034> or C<\x1c> at the end of quoted constructs.
 
 =item Removal of backslashes before delimiters
@@ -1810,9 +1848,9 @@ Instead, use C<\034> or C<\x1c> at the end of quoted constructs.
 During the second pass, text between the starting and ending
 delimiters is copied to a safe location, and the C<\> is removed
 from combinations consisting of C<\> and delimiter--or delimiters,
-meaning both starting and ending delimiters will should these differ.
-This removal does not happen for multi-character delimiters.
-Note that the combination C<\\> is left intact, just as it was.
+meaning both starting and ending delimiters will be handled,
+should these differ. This removal does not happen for multi-character
+delimiters. Note that the combination C<\\> is left intact.
 
 Starting from this step no information about the delimiters is
 used in parsing.
@@ -1821,19 +1859,32 @@ used in parsing.
 X<interpolation>
 
 The next step is interpolation in the text obtained, which is now
-delimiter-independent.  There are four different cases.
+delimiter-independent.  There are multiple cases.
 
 =over 4
 
-=item C<<<'EOF'>, C<m''>, C<s'''>, C<tr///>, C<y///>
+=item C<<<'EOF'>
 
 No interpolation is performed.
 
+=item  C<m''>, C<s'''>
+
+No interpolation is performed at this stage, see
+L</"Interpolation of regular expressions"> for comments on later
+processing of their contents.
+
 =item C<''>, C<q//>
 
-The only interpolation is removal of C<\> from pairs C<\\>.
+The only interpolation is removal of C<\> from pairs of C<\\>.
 
-=item C<"">, C<``>, C<qq//>, C<qx//>, C<< <file*glob> >>
+=item C<tr///>, C<y///>
+
+No variable interpolation occurs. Escape sequences such as \200
+and the common escapes such as \t for tab are converted to literals.
+The character C<-> is treated specially and therefore C<\-> is treated
+as a literal C<->.
+
+=item C<"">, C<``>, C<qq//>, C<qx//>, C<< <file*glob> >>, C<<<"EOF">
 
 C<\Q>, C<\U>, C<\u>, C<\L>, C<\l> (possibly paired with C<\E>) are
 converted to corresponding Perl constructs.  Thus, C<"$foo\Qbaz$bar">
@@ -1867,7 +1918,7 @@ C<"\\\$">; if not, it is interpreted as the start of an interpolated
 scalar.
 
 Note also that the interpolation code needs to make a decision on
-where the interpolated scalar ends.  For instance, whether 
+where the interpolated scalar ends.  For instance, whether
 C<< "a $b -> {c}" >> really means:
 
   "a " . $b . " -> {c}";
@@ -1882,7 +1933,7 @@ brackets.  because the outcome may be determined by voting based
 on heuristic estimators, the result is not strictly predictable.
 Fortunately, it's usually correct for ambiguous cases.
 
-=item C<?RE?>, C</RE/>, C<m/RE/>, C<s/RE/foo/>, 
+=item C<?RE?>, C</RE/>, C<m/RE/>, C<s/RE/foo/>,
 
 Processing of C<\Q>, C<\U>, C<\u>, C<\L>, C<\l>, and interpolation
 happens (almost) as with C<qq//> constructs, but the substitution
@@ -1922,7 +1973,7 @@ alphanumeric char, as in:
 
 In the RE above, which is intentionally obfuscated for illustration, the
 delimiter is C<m>, the modifier is C<mx>, and after backslash-removal the
-RE is the same as for C<m/ ^ a \s* b /mx>.  There's more than one 
+RE is the same as for C<m/ ^ a \s* b /mx>.  There's more than one
 reason you're encouraged to restrict your delimiters to non-alphanumeric,
 non-whitespace choices.
 
@@ -2036,7 +2087,7 @@ The following lines are equivalent:
 
 This also behaves similarly, but avoids $_ :
 
-    while (my $line = <STDIN>) { print $line }    
+    while (my $line = <STDIN>) { print $line }
 
 In these loop constructs, the assigned value (whether assignment
 is automatic or explicit) is then tested to see whether it is
@@ -2049,7 +2100,7 @@ to terminate the loop, they should be tested for explicitly:
     while (<STDIN>) { last unless $_; ... }
 
 In other boolean contexts, C<< <I<filehandle>> >> without an
-explicit C<defined> test or comparison elicit a warning if the 
+explicit C<defined> test or comparison elicit a warning if the
 C<use warnings> pragma or the B<-w>
 command-line switch (the C<$^W> variable) is in effect.
 
@@ -2103,7 +2154,7 @@ containing the list of filenames you really want.  Line numbers (C<$.>)
 continue as though the input were one big happy file.  See the example
 in L<perlfunc/eof> for how to reset line numbers on each file.
 
-If you want to set @ARGV to your own list of files, go right ahead.  
+If you want to set @ARGV to your own list of files, go right ahead.
 This sets @ARGV to all plain text files if no @ARGV was given:
 
     @ARGV = grep { -f && -T } glob('*') unless @ARGV;
@@ -2128,8 +2179,8 @@ Getopts modules or put a loop on the front like this:
 	# ...		# code for each line
     }
 
-The <> symbol will return C<undef> for end-of-file only once.  
-If you call it again after this, it will assume you are processing another 
+The <> symbol will return C<undef> for end-of-file only once.
+If you call it again after this, it will assume you are processing another
 @ARGV list, and if you haven't set @ARGV, will read input from STDIN.
 
 If what the angle brackets contain is a simple scalar variable (e.g.,
@@ -2249,7 +2300,7 @@ the longer operand were truncated to the length of the shorter.
 The granularity for such extension or truncation is one or more
 bytes.
 
-    # ASCII-based examples 
+    # ASCII-based examples
     print "j p \n" ^ " a h";        	# prints "JAPH\n"
     print "JA" | "  ph\n";          	# prints "japh\n"
     print "japh\nJunk" & '_____';   	# prints "JAPH\n";
@@ -2292,7 +2343,7 @@ integer>, if you take the C<sqrt(2)>, you'll still get C<1.4142135623731>
 or so.
 
 Used on numbers, the bitwise operators ("&", "|", "^", "~", "<<",
-and ">>") always produce integral results.  (But see also 
+and ">>") always produce integral results.  (But see also
 L<Bitwise String Operators>.)  However, C<use integer> still has meaning for
 them.  By default, their results are interpreted as unsigned integers, but
 if C<use integer> is in effect, their results are interpreted
