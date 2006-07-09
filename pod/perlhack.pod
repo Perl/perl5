@@ -1455,6 +1455,141 @@ You can expand the macros in a F<foo.c> file by saying
 
 which will expand the macros using cpp.  Don't be scared by the results.
 
+=head1 SOURCE CODE STATIC ANALYSIS
+
+Various tools exist for analysing C source code B<statically>, as
+opposed to B<dynamically>, that is, without executing the code.
+It is possible to detect resource leaks, undefined behaviour, type
+mismatches, portability problems, code paths that would cause illegal
+memory accesses, and other similar problems by just parsing the C code
+and looking at the resulting graph, what does it tell about the
+execution and data flows.  As a matter of fact, this is exactly
+how C compilers know to give warnings about dubious code.
+
+=head2 lint, splint
+
+The good old C code quality inspector, C<lint>, is available in
+several platforms, but please be aware that there are several
+different implementations of it by different vendors, which means that
+the flags are not identical across different platforms.
+
+There is a lint variant called C<splint> (Secure Programming Lint)
+available from http://www.splint.org/ that should compile on any
+Unix-like platform.
+
+There are C<lint> and <splint> targets in Makefile, but you may have
+to diddle with the flags (see above).
+
+=head2 Coverity
+
+Coverity (http://www.coverity.com/) is a product similar to lint and
+as a testbed for their product they periodically check several open
+source projects, and they give out accounts to open source developers
+to the defect databases.
+
+=head2 cpd (cut-and-paste detector)
+
+The cpd tool detects cut-and-paste coding.  If one instance of the
+cut-and-pasted code changes, all the other spots should probably be
+changed, too.  Therefore such code should probably be turned into a
+subroutine or a macro.
+
+cpd (http://pmd.sourceforge.net/cpd.html) is part of the pmd project
+(http://pmd.sourceforge.net/).  pmd was originally written for static
+analysis of Java code, but later the cpd part of it was extended to
+parse also C and C++.
+
+Download the pmd-X.y.jar from the SourceForge site, and then run
+it on source code thusly:
+
+  java -cp pmd-X.Y.jar net.sourceforge.pmd.cpd.CPD --minimum-tokens 100 --files /some/where/src --language c > cpd.txt
+
+You may run into memory limits, in which case you should use the -Xmx option:
+
+  java -Xmx512M ...
+
+=head2 gcc warnings
+
+Though much can be written about the inconsistency and coverage
+problems of gcc warnings (like C<-Wall> not meaning "all the
+warnings", or some common portability problems not being covered by
+C<-Wall>, or C<-ansi> and C<-pedantic> both being a poorly defined
+collection of warnings, and so forth), gcc is still a useful tool in
+keeping our coding nose clean.
+
+The C<-Wall> is by default on.
+
+The C<-ansi> (and its sidekick, C<-pedantic>) would be nice to be
+on always, but unfortunately they are not safe on all platforms,
+they can for example cause fatal conflicts with the system headers
+(Solaris being a prime example).  The C<cflags> frontend selects
+C<-ansi -pedantic> for the platforms where they are known to be safe.
+
+Starting from Perl 5.9.4 the following extra flags are added:
+
+=over 4
+
+=item *
+
+C<-Wendif-labels>
+
+=item *
+
+C<-Wextra>
+
+=item *
+
+C<-Wdeclaration-after-statement>
+
+=back
+
+The following flags would be nice to have but they would first need
+their own Stygian stablemaster:
+
+=over 4
+
+=item *
+
+C<-Wpointer-arith>
+
+=item *
+
+C<-Wshadow>
+
+=item *
+
+C<-Wstrict-prototypes>
+
+=item *
+
+=back
+
+The C<-Wtraditional> is another example of the annoying tendency of
+gcc to bundle a lot of warnings under one switch -- it would be
+impossible to deploy in practice because it would complain a lot -- but
+it does contain some warnings that would be beneficial to have available
+on their own, such as the warning about string constants inside macros
+containing the macro arguments: this behaved differently pre-ANSI
+than it does in ANSI, and some C compilers are still in transition,
+AIX being an example.
+
+=head2 Warnings of other C compilers
+
+Other C compilers (yes, there B<are> other C compilers than gcc) often
+have their "strict ANSI" or "strict ANSI with some portability extensions"
+modes on, like for example the Sun Workshop has its C<-Xa> mode on
+(though implicitly), or the DEC (these days, HP...) has its C<-std1>
+mode on.
+
+=head2 DEBUGGING
+
+You can compile a special debugging version of Perl, which allows you
+to use the C<-D> option of Perl to tell more about what Perl is doing.
+But sometimes there is no alternative than to dive in with a debugger,
+either to see the stack trace of a core dump (very useful in a bug
+report), or trying to figure out what went wrong before the core dump
+happened, or how did we end up having wrong or unexpected results.
+
 =head2 Poking at Perl
 
 To really poke around with Perl, you'll probably want to build Perl for
@@ -1464,7 +1599,11 @@ debugging, like this:
     make
 
 C<-g> is a flag to the C compiler to have it produce debugging
-information which will allow us to step through a running program.
+information which will allow us to step through a running program,
+and to see in which C function we are at (without the debugging
+information we might see only the numerical addresses of the functions,
+which is not very helpful).
+
 F<Configure> will also turn on the C<DEBUGGING> compilation symbol which
 enables all the internal debugging code in Perl. There are a whole bunch
 of things you can debug with this: L<perlrun> lists them all, and the
@@ -1491,14 +1630,19 @@ through perl's execution with a source-level debugger.
 
 =item *
 
-We'll use C<gdb> for our examples here; the principles will apply to any
-debugger, but check the manual of the one you're using.
+We'll use C<gdb> for our examples here; the principles will apply to
+any debugger (many vendors call their debugger C<dbx>), but check the
+manual of the one you're using.
 
 =back
 
 To fire up the debugger, type
 
     gdb ./perl
+
+Or if you have a core dump:
+
+    gdb ./perl core
 
 You'll want to do that in your Perl source tree so the debugger can read
 the source code. You should see the copyright message, followed by the
@@ -2710,14 +2854,16 @@ see L<perlclib>.
 
 =back
 
-=head2 CONCLUSION
+=head1 CONCLUSION
 
-We've had a brief look around the Perl source, an overview of the stages
-F<perl> goes through when it's running your code, and how to use a
-debugger to poke at the Perl guts. We took a very simple problem and
-demonstrated how to solve it fully - with documentation, regression
-tests, and finally a patch for submission to p5p.  Finally, we talked
-about how to use external tools to debug and test Perl.
+We've had a brief look around the Perl source, how to maintain quality
+of the source code, an overview of the stages F<perl> goes through
+when it's running your code, how to use debuggers to poke at the Perl
+guts, and finally how to analyse the execution of Perl. We took a very
+simple problem and demonstrated how to solve it fully - with
+documentation, regression tests, and finally a patch for submission to
+p5p.  Finally, we talked about how to use external tools to debug and
+test Perl.
 
 I'd now suggest you read over those references again, and then, as soon
 as possible, get your hands dirty. The best way to learn is by doing,
