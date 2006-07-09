@@ -2,7 +2,7 @@ package Test::Builder::Tester;
 
 use strict;
 use vars qw(@EXPORT $VERSION @ISA);
-$VERSION = "1.02";
+$VERSION = "1.03";
 
 use Test::Builder;
 use Symbol;
@@ -18,10 +18,20 @@ Test::Builder
     use Test::Builder::Tester tests => 1;
     use Test::More;
 
-    test_out("not ok 1 - foo");
-    test_fail(+1);
+    test_fail(+1, "foo");
     fail("foo");
     test_test("fail works");
+
+    test_pass("baz");
+    ok(1, "baz");
+    test_test("pass works");
+
+    test_fail(+3, "is foo bar?");
+    test_err("#          got: 'foo'",
+             "#     expected: 'bar'");
+    is("foo", "bar", "is foo bar?");
+    test_test("diagnostic checking works");
+
 
 =head1 DESCRIPTION
 
@@ -30,8 +40,8 @@ B<Test::Builder>.
 
 The testing system is designed to be used by performing a three step
 process for each test you wish to test.  This process starts with using
-C<test_out> and C<test_err> in advance to declare what the testsuite you
-are testing will output with B<Test::Builder> to stdout and stderr.
+Test::Builder::Tester functions to declare what the testsuite you
+are testing will output with B<Test::Builder>.
 
 You then can run the test(s) from your test suite that call
 B<Test::Builder>.  At this point the output of B<Test::Builder> is
@@ -58,7 +68,7 @@ my $t = Test::Builder->new;
 use Exporter;
 @ISA = qw(Exporter);
 
-@EXPORT = qw(test_out test_err test_fail test_diag test_test line_num);
+@EXPORT = qw(test_out test_err test_fail test_diag test_test line_num test_pass);
 
 # _export_to_level and import stolen directly from Test::More.  I am
 # the king of cargo cult programming ;-)
@@ -154,37 +164,114 @@ sub _start_testing
     $t->no_ending(1);
 }
 
-=head2 Methods
+=head2 Functions
 
-These are the six methods that are exported as default.
+These are the functions exported by default.
 
 =over 4
 
+=item test_pass
+
+    test_pass();
+    test_pass($description);
+
+Because the standard success message that B<Test::Builder> produces
+whenever a test passes will be common in your test error
+output, rather than forcing you to call C<test_out> with the string
+all the time like so
+
+    test_out("ok 1 - some test name here");
+
+C<test_pass> exists as a convenience function that you can call instead.  It
+takes one optional argument, the test description from the test you expect to
+pass.  The following is equivalent to the above C<test_out> call.
+
+    test_pass("some test name here");
+
+=cut
+
+sub test_pass(;$)
+{
+    _start_testing() unless $testing++;
+    my $mess = "ok $testing";
+    $mess .= ' - ' . shift if @_;
+    $out->expect( $mess, @_ );
+}
+
+
+=item test_fail
+
+    test_fail($line_num_offset);
+    test_fail($line_num_offset, $description);
+
+Because the standard failure message that B<Test::Builder> produces
+whenever a test fails will be a common occurrence in your test error
+output, and because has changed between Test::Builder versions, rather
+than forcing you to call C<test_err> with the string all the time like
+so
+
+    test_err("# Failed test ($0 at line ".line_num(+1).")");
+
+C<test_fail> exists as a convenience function that can be called
+instead.  It takes one argument, the offset from the current line that
+the line that causes the fail is on.
+
+    test_fail(+1);
+    ok(0);
+
+It optionally takes the $description of the test.
+
+    test_fail(+1, "kaboom");
+    fail("kaboom");
+
+=cut
+
+sub test_fail
+{
+    # do we need to do any setup?
+    _start_testing() unless $testing++;
+
+    # work out what line we should be on
+    my ($package, $filename, $line) = caller;
+    $line = $line + (shift() || 0); # prevent warnings
+
+    my $mess = "not ok $testing";
+    $mess .= ' - ' . shift if @_;
+    $out->expect( $mess );
+
+    # expect that on stderr
+    $err->expect("#     Failed test ($0 at line $line)");
+}
+
+
 =item test_out
 
+    test_out(@output);
+
 =item test_err
+
+    test_err(@diagnostic_output);
 
 Procedures for predeclaring the output that your test suite is
 expected to produce until C<test_test> is called.  These procedures
 automatically assume that each line terminates with "\n".  So
 
-   test_out("ok 1","ok 2");
+   test_out("foo","bar");
 
 is the same as
 
-   test_out("ok 1\nok 2");
+   test_out("foo\nbar");
 
 which is even the same as
 
-   test_out("ok 1");
-   test_out("ok 2");
+   test_out("foo");
+   test_out("bar");
 
-Once C<test_out> or C<test_err> (or C<test_fail> or C<test_diag>) have
-been called once all further output from B<Test::Builder> will be
-captured by B<Test::Builder::Tester>.  This means that your will not
-be able perform further tests to the normal output in the normal way
-until you call C<test_test> (well, unless you manually meddle with the
-output filehandles)
+Once C<test_out> or C<test_err> (or C<test_fail>, C<test_pass>, or
+C<test_diag>) have been called once all further output from B<Test::Builder>
+will be captured by B<Test::Builder::Tester>.  This means that your will not be
+able perform further tests to the normal output in the normal way until you
+call C<test_test>.
 
 =cut
 
@@ -204,44 +291,6 @@ sub test_err(@)
     $err->expect(@_)
 }
 
-=item test_fail
-
-Because the standard failure message that B<Test::Builder> produces
-whenever a test fails will be a common occurrence in your test error
-output, and because has changed between Test::Builder versions, rather
-than forcing you to call C<test_err> with the string all the time like
-so
-
-    test_err("# Failed test ($0 at line ".line_num(+1).")");
-
-C<test_fail> exists as a convenience method that can be called
-instead.  It takes one argument, the offset from the current line that
-the line that causes the fail is on.
-
-    test_fail(+1);
-
-This means that the example in the synopsis could be rewritten
-more simply as:
-
-   test_out("not ok 1 - foo");
-   test_fail(+1);
-   fail("foo");
-   test_test("fail works");
-
-=cut
-
-sub test_fail
-{
-    # do we need to do any setup?
-    _start_testing() unless $testing;
-
-    # work out what line we should be on
-    my ($package, $filename, $line) = caller;
-    $line = $line + (shift() || 0); # prevent warnings
-
-    # expect that on stderr
-    $err->expect("#     Failed test ($0 at line $line)");
-}
 
 =item test_diag
 
@@ -358,7 +407,6 @@ sub test_test
                     && ($args{skip_err} || $err->check),
                    $mess))
     {
-      # print out the diagnostic information about why this
       # test failed
 
       local $_;
@@ -376,7 +424,7 @@ sub test_test
 A utility function that returns the line number that the function was
 called on.  You can pass it an offset which will be added to the
 result.  This is very useful for working out the correct text of
-diagnostic methods that contain line numbers.
+diagnostic functions that contain line numbers.
 
 Essentially this is the same as the C<__LINE__> macro, but the
 C<line_num(+3)> idiom is arguably nicer.
@@ -442,10 +490,10 @@ sub color
 
 =head1 BUGS
 
-Calls B<Test::Builder>'s C<no_ending> method turning off the ending
-tests.  This is needed as otherwise it will trip out because we've run
-more tests than we strictly should have and it'll register any
-failures we had that we were testing for as real failures.
+Calls C<<Test::Builder->no_ending>> turning off the ending tests.
+This is needed as otherwise it will trip out because we've run more
+tests than we strictly should have and it'll register any failures we
+had that we were testing for as real failures.
 
 The color function doesn't work unless B<Term::ANSIColor> is installed
 and is compatible with your terminal.
@@ -543,7 +591,7 @@ sub complaint
     my $self = shift;
     my $type   = $self->type;
     my $got    = $self->got;
-    my $wanted = join "\n", @{$self->wanted};
+    my $wanted = join '', @{$self->wanted};
 
     # are we running in colour mode?
     if (Test::Builder::Tester::color)

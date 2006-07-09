@@ -45,7 +45,7 @@ sub main::err_ok ($) {
 package main;
 
 require Test::More;
-my $Total = 28;
+my $Total = 29;
 Test::More->import(tests => $Total);
 
 my $tb = Test::More->builder;
@@ -141,6 +141,7 @@ ERR
 #line 52
 can_ok('Mooble::Hooble::Yooble', qw(this that));
 can_ok('Mooble::Hooble::Yooble', ());
+can_ok(undef, undef);
 err_ok( <<ERR );
 #   Failed test 'Mooble::Hooble::Yooble->can(...)'
 #   in $0 at line 52.
@@ -149,6 +150,9 @@ err_ok( <<ERR );
 #   Failed test 'Mooble::Hooble::Yooble->can(...)'
 #   in $0 at line 53.
 #     can_ok() called with no methods
+#   Failed test '->can(...)'
+#   in $0 at line 54.
+#     can_ok() called with empty class or reference
 ERR
 
 #line 55
@@ -288,6 +292,7 @@ not ok - regex with % in it
 not ok - fail()
 not ok - Mooble::Hooble::Yooble->can(...)
 not ok - Mooble::Hooble::Yooble->can(...)
+not ok - ->can(...)
 not ok - The object isa Wibble
 not ok - My Wibble isa Wibble
 not ok - Another Wibble isa Wibble

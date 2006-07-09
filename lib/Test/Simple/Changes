@@ -1,5 +1,21 @@
+0.63  Sun Jul  9 02:36:36 PDT 2006
+    * Fixed can_ok() to gracefully handle no class name.
+      Submitted by "Pete Krawczyk" <perl@bsod.net>
+      Implemented by "Richard Foley" <richard.foley@rfi.net>
+      [rt.cpan.org 15654]
+    * Added test_pass() to Test::Builder::Tester rather than having to
+      call test_out("ok 1 - foo"). <chromatic@wgz.org> [rt.cpan.org 11317]
+    * test_fail() now accepts a test diagnostic rather than having to
+      call test_out() separately. <chromatic@wgz.org> [rt.cpan.org 11319]
+    - Changed Test::Builder::Tester docs to show best practice using
+      test_fail() and test_pass().
+    - isnt_num() doc example wrongly showed is_num(). <chromatic@wgz.org>
+    - Fixed a minor typo in the BAIL_OUT() docs. <Jeff Deifik>
+    - Removed the LICENSE field from the Makefile.PL as the release of
+      MakeMaker with that feature has been delayed.
+
 0.62  Sat Oct  8 01:25:03 PDT 2005
-    * Aborbed Test::Builder::Tester.  The last release broke it because its
+    * Absorbed Test::Builder::Tester.  The last release broke it because its
       screen scraping Test::More and the failure output changed.  By
       distributing them together we ensure TBT won't break again.
     * Test::Builder->BAILOUT() was missing.

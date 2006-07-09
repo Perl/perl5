@@ -7,7 +7,7 @@ BEGIN {
     }
 }
 
-use Test::Builder::Tester tests => 9;
+use Test::Builder::Tester tests => 12;
 use Test::More;
 
 ok(1,"This is a basic test");

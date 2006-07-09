@@ -16,7 +16,7 @@ sub _carp {
 
 
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.62';
+$VERSION = '0.63';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 use Test::Builder::Module;
@@ -464,6 +464,12 @@ sub can_ok ($@) {
     my($proto, @methods) = @_;
     my $class = ref $proto || $proto;
     my $tb = Test::More->builder;
+
+    unless( $class ) {
+        my $ok = $tb->ok( 0, "->can(...)" );
+        $tb->diag('    can_ok() called with empty class or reference');
+        return $ok;
+    }
 
     unless( @methods ) {
         my $ok = $tb->ok( 0, "$class->can(...)" );
@@ -1107,7 +1113,7 @@ but want to put tests in your testing script (always a good idea).
 
     BAIL_OUT($reason);
 
-Incidates to the harness that things are going so badly all testing
+Indicates to the harness that things are going so badly all testing
 should terminate.  This includes the running any additional test scripts.
 
 This is typically used when testing cannot continue such as a critical
