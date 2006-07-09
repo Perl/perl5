@@ -620,9 +620,9 @@ set. The pad API only takes a C<char *> pointer, so that's all bytes too. The
 tokeniser ignores the UTF-8-ness of C<PL_rsfp>, or any SVs returned from
 source filters.  All this could be fixed.
 
+=head2 Integrate Russ Allbery's strlcat/strlcpy implementation
 
-
-
+And remove the last remaining uses of strcat() and strcpy().
 
 =head1 Big projects
 
