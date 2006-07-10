@@ -201,9 +201,11 @@ threads->yield();
 sleep(1);
 
 # Terminate the thread
-ok($thr->kill('TERM'), 'Signalled thread to terminate');
+ok($thr->kill('TERM') == $thr, 'Signalled thread to terminate');
 
 $rc = $thr->join();
 ok($rc eq 'OKAY', 'Thread return value');
+
+ok($thr->kill('TERM'), 'Ignore signal to terminated thread');
 
 # EOF

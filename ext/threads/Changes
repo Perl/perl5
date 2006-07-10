@@ -1,6 +1,9 @@
 Revision history for Perl extension threads.
 
-1.35 - Mon Jul 10 09:44:47 EDT 2006
+1.36 Mon Jul 10 15:58:13 EDT 2006
+	- Ignore signals sent to terminated threads
+
+1.35 Mon Jul 10 09:44:47 EDT 2006
 	- Upgraded ppport.h to Devel::PPPort 3.09
 	- Fix for Borland compiler
 

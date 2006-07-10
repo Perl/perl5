@@ -1079,7 +1079,7 @@ ithread_kill(...)
         /* Set the signal for the thread */
         thread = SV_to_ithread(aTHX_ ST(0));
         MUTEX_LOCK(&thread->mutex);
-        {
+        if (thread->interp) {
             dTHXa(thread->interp);
             PL_psig_pend[signal]++;
             PL_sig_pending = 1;

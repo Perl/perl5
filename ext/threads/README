@@ -1,8 +1,7 @@
-threads version 1.35
+threads version 1.36
 ====================
 
-This module needs perl 5.8.0 or later compiled with 'useithreads'.
-It exposes interpreter threads to the Perl level.
+This module exposes interpreter threads to the Perl level.
 
 INSTALLATION
 
@@ -15,9 +14,7 @@ To install this module type the following:
 
 DEPENDENCIES
 
-This module requires these other modules and libraries:
-
-    threads::shared
+This module needs perl 5.8.0 or later compiled with 'useithreads'.
 
 COPYRIGHT AND LICENCE
 
