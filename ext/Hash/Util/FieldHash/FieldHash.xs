@@ -4,12 +4,11 @@
 
 /* support for Hash::Util::FieldHash, prefix HUF_ */
 
-/* The object registry, a package variable */
-#define HUF_OB_REG "Hash::Util::FieldHash::ob_reg"
+/* A Perl sub that returns a hashref to the object registry */
+#define HUF_OB_REG "Hash::Util::FieldHash::_ob_reg"
 /* Magic cookies to recognize object id's.  Hi, Eva, David */
 #define HUF_COOKIE 2805.1980
 #define HUF_REFADDR_COOKIE 1811.1976
-
 
 /* For global cache of object registry */
 #define MY_CXT_KEY "Hash::Util::FieldHash::_guts" XS_VERSION
@@ -17,6 +16,20 @@ typedef struct {
     HV* ob_reg; /* Cache object registry */
 } my_cxt_t;
 START_MY_CXT
+
+/* Inquire the object registry (a lexical hash) from perl */
+HV* HUF_get_ob_reg(void) {
+    dSP;
+    I32 items = call_pv(HUF_OB_REG, G_SCALAR|G_NOARGS);
+    SPAGAIN;
+    if (items == 1) {
+        SV* ref = POPs;
+        PUTBACK;
+        if (ref && SvROK(ref) && SvTYPE(SvRV(ref)) == SVt_PVHV)
+            return (HV*)SvRV(ref);
+    }
+    Perl_die(aTHX_ "Can't get object registry hash");
+}
 
 /* Deal with global context */
 #define HUF_INIT 1
@@ -26,13 +39,13 @@ START_MY_CXT
 void HUF_global(I32 how) {
     if (how == HUF_INIT) {
         MY_CXT_INIT;
-        MY_CXT.ob_reg = get_hv(HUF_OB_REG, 1);
+        MY_CXT.ob_reg = HUF_get_ob_reg();
     } else if (how == HUF_CLONE) {
         MY_CXT_CLONE;
-        MY_CXT.ob_reg = get_hv(HUF_OB_REG, 0);
+        MY_CXT.ob_reg = HUF_get_ob_reg();
     } else if (how == HUF_RESET) {
         dMY_CXT;
-        MY_CXT.ob_reg = get_hv(HUF_OB_REG, 0);
+        MY_CXT.ob_reg = HUF_get_ob_reg();
     }
 }
 
@@ -56,14 +69,14 @@ SV* HUF_field_id(SV* obj) {
     return HUF_id(obj, 0.0);
 }
 
-/* object id (may be different in future) */
+/* object id (same as plain, may be different in future) */
 SV* HUF_obj_id(SV* obj) {
     return HUF_id(obj, 0.0);
 }
 
 /* set up uvar magic for any sv */
 void HUF_add_uvar_magic(
-    SV* sv,                    /* the sv to enchant, visible to * get/set */
+    SV* sv,                    /* the sv to enchant, visible to get/set */
     I32(* val)(pTHX_ IV, SV*), /* "get" function */
     I32(* set)(pTHX_ IV, SV*), /* "set" function */
     I32 index,                 /* get/set will see this */
@@ -155,6 +168,8 @@ void HUF_mark_field(SV* trigger, SV* field) {
     hv_store_ent(field_tab, field_id, field_ref, 0);
 }
 
+/* These constants are not in the API.  If they ever change in hv.c this code
+ * must be updated */
 #define HV_FETCH_ISSTORE   0x01
 #define HV_FETCH_ISEXISTS  0x02
 #define HV_FETCH_LVALUE    0x04
@@ -166,7 +181,10 @@ void HUF_mark_field(SV* trigger, SV* field) {
  * in hv.c */
 I32 HUF_watch_key(pTHX_ IV action, SV* field) {
     MAGIC* mg = mg_find(field, PERL_MAGIC_uvar);
-    SV* keysv = mg->mg_obj;
+    SV* keysv;
+    if (!mg)
+        Perl_die(aTHX_ "Rogue call of 'HUF_watch_key'");
+    keysv = mg->mg_obj;
     if (keysv && SvROK(keysv)) {
         SV* ob_id = HUF_obj_id(keysv);
         mg->mg_obj = ob_id; /* key replacement */
@@ -284,15 +302,6 @@ CODE:
         HUF_global(HUF_CLONE);
         HUF_fix_objects();
     }
-
-SV*
-_get_obj_id(SV* obj)
-CODE:
-    RETVAL = NULL;
-    if (SvROK(obj))
-        RETVAL = HUF_obj_id(obj);
-OUTPUT:
-    RETVAL
 
 void
 _active_fields(SV* obj)

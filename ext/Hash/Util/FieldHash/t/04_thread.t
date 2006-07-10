@@ -12,6 +12,7 @@ use Test::More;
 my $n_tests;
 
 use Hash::Util::FieldHash qw( :all);
+my $ob_reg = Hash::Util::FieldHash::_ob_reg;
 
 {
     my $n_basic;
@@ -19,7 +20,6 @@ use Hash::Util::FieldHash qw( :all);
         $n_basic = 6; # 6 tests per call of basic_func()
         $n_tests += 5*$n_basic;
     }
-    my $ob_reg = \ %Hash::Util::FieldHash::ob_reg;
     my %h;
     fieldhash %h;
 

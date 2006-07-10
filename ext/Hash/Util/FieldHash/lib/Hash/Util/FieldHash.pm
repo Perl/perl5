@@ -3,7 +3,6 @@ package Hash::Util::FieldHash;
 use 5.009004;
 use strict;
 use warnings;
-use Carp qw( croak);
 use Scalar::Util qw( reftype);
 
 require Exporter;
@@ -15,14 +14,13 @@ our %EXPORT_TAGS = (
     )],
 );
 our @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
-our @EXPORT = qw(
-);
 
 our $VERSION = '0.01';
 
 {
     require XSLoader;
-    our %ob_reg; # silence possible 'once' warning in XSLoader
+    my %ob_reg; # private object registry
+    sub _ob_reg { \ %ob_reg }
     XSLoader::load('Hash::Util::FieldHash', $VERSION);
 }
 
@@ -47,10 +45,10 @@ Hash::Util::FieldHash - Associate references with data
 =head1 SYNOPSIS
 
   use Hash::Util qw(fieldhash fieldhashes);
-  
+
   # Create a single field hash
   fieldhash my %foo;
-  
+
   # Create three at once...
   fieldhashes \ my(%foo, %bar, %baz);
   # ...or any number
@@ -199,11 +197,14 @@ as
 instead of importing it from C<Scalar::Util>.  It should now be possible
 to disable DESTROY and CLONE.  Note that while it isn't disabled,
 DESTROY will be called before the garbage collection of field hashes,
-so it will be invoked with a functional object.
+so it will be invoked with a functional object and will continue to
+function.
 
-It is not necessary to import the functions C<fieldhash> and/or
-C<fieldhashes> into every class that is going to use them.  When
-the class is up and running, these functions have no business there.
+It is not desirable to import the functions C<fieldhash> and/or
+C<fieldhashes> into every class that is going to use them.  They
+are only used once to set up the class.  When the class is up and running,
+these functions serve no more purpose.
+
 If there are only a few field hashes to declare, it is simplest to
 
     use Hash::Util::FieldHash;
@@ -267,8 +268,8 @@ C<refaddr> or something similar in the accessors.
 The outstanding property of inside-out classes is their "inheritability".
 Like all inside-out classes, C<TimeStamp> is a I<universal base class>.
 We can put it on the C<@ISA> list of arbitrary classes and its methods
-will just work, no matter how the host class is constructed.  This is
-demonstrated by the following program:
+will just work, no matter how the host class is constructed.  No traditional
+Perl class allows that.  The following program demonstrates the feat:
 
     # Make a sample of objects to add time stamps to.
 
@@ -280,10 +281,11 @@ demonstrated by the following program:
         IO::Handle->new(),
         qr/abc/,                         # in class Regexp
         bless( [], 'Boing'),             # made up on the spot
+        # add more
     );
 
     # Prepare for use with TimeStamp
-    
+
     for ( @objects ) {
         no strict 'refs';
         push @{ ref() . '::ISA' }, 'TimeStamp';
@@ -381,10 +383,9 @@ the referenced object.
 
 The three features of key hashes, I<key replacement>, I<thread support>,
 and I<garbage collection> are supported by a data structure called
-the I<object registry>.  This is currently the hash
-C<Hash::Utils::FieldHash::ob_reg> though there may be a more private
-place for it in the future.  An "object" is any reference (blessed
-or unblessed) that has been used as a field hash key.
+the I<object registry>.  This is a private hash where every object
+is stored.  An "object" in this sense is any reference (blessed or
+unblessed) that has been used as a field hash key.
 
 The object registry keeps track of references that have been used as
 field hash keys.  The keys are generated from the reference address
@@ -433,7 +434,7 @@ Anno Siegel, E<lt>anno4000@zrz.tu-berlin.deE<gt>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (C) 2006 by (icke)
+Copyright (C) 2006 by (Anno Siegel)
 
 This library is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself, either Perl version 5.8.7 or,

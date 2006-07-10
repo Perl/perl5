@@ -12,6 +12,7 @@ use Test::More;
 my $n_tests = 0;
 
 use Hash::Util::FieldHash qw( :all);
+my $ob_reg = Hash::Util::FieldHash::_ob_reg;
 
 #########################
 
@@ -26,7 +27,6 @@ BEGIN {
 
 BEGIN { $n_tests += 3 }
 {
-    my $ob_reg = \ %Hash::Util::FieldHash::ob_reg;
     {
         my $obj = {};
         {
@@ -98,7 +98,7 @@ for my $preload ( [], [ map {}, 1 .. 3] ) {
             my ( $val) = grep $_ eq $type, values %f;
             is( $val, $type, "$type visible$pre");
             is( 
-                keys %Hash::Util::FieldHash::ob_reg,
+                keys %$ob_reg,
                 1 + @$preload,
                 "$type obj registered$pre"
             );
@@ -107,7 +107,7 @@ for my $preload ( [], [ map {}, 1 .. 3] ) {
     }
     
     # Garbage collection collectively
-    is( keys %Hash::Util::FieldHash::ob_reg, @$preload, "no objs remaining$pre");
+    is( keys %$ob_reg, @$preload, "no objs remaining$pre");
     {
         my @refs = map gen_ref( $_), @test_types;
         @f{ @refs} = @test_types;
@@ -116,16 +116,16 @@ for my $preload ( [], [ map {}, 1 .. 3] ) {
             "all types present$pre",
         );
         is(
-            keys %Hash::Util::FieldHash::ob_reg,
+            keys %$ob_reg,
             @test_types + @$preload,
             "all types registered$pre",
         );
     }
     die "preload gone" unless defined $preload;
     ok( eq_set( [ values %f], \ @preval), "all types gone$pre");
-    is( keys %Hash::Util::FieldHash::ob_reg, @$preload, "all types unregistered$pre");
+    is( keys %$ob_reg, @$preload, "all types unregistered$pre");
 }
-is( keys %Hash::Util::FieldHash::ob_reg, 0, "preload gone after loop");
+is( keys %$ob_reg, 0, "preload gone after loop");
 
 # big key sets
 BEGIN { $n_tests += 8 }
@@ -137,14 +137,14 @@ BEGIN { $n_tests += 8 }
         $f{ $_} = 1 for @refs;
         is( keys %f, $size, "many keys singly");
         is(
-            keys %Hash::Util::FieldHash::ob_reg,
+            keys %$ob_reg,
             $size,
             "many objects singly",
         );
     }
     is( keys %f, 0, "many keys singly gone");
     is(
-        keys %Hash::Util::FieldHash::ob_reg,
+        keys %$ob_reg,
         0,
         "many objects singly unregistered",
     );
@@ -154,14 +154,14 @@ BEGIN { $n_tests += 8 }
         @f{ @refs } = ( 1) x @refs;
         is( keys %f, $size, "many keys at once");
         is(
-            keys %Hash::Util::FieldHash::ob_reg,
+            keys %$ob_reg,
             $size,
             "many objects at once",
         );
     }
     is( keys %f, 0, "many keys at once gone");
     is(
-        keys %Hash::Util::FieldHash::ob_reg,
+        keys %$ob_reg,
         0,
         "many objects at once unregistered",
     );
@@ -179,15 +179,15 @@ BEGIN { $n_tests += 6 }
     }
     my $err = grep keys %$_ != @obs, @fields;
     is( $err, 0, "$n_obs entries in $n_fields fields");
-    is( keys %Hash::Util::FieldHash::ob_reg, @obs, "$n_obs obs registered");
+    is( keys %$ob_reg, @obs, "$n_obs obs registered");
     pop @obs;
     $err = grep keys %$_ != @obs, @fields;
     is( $err, 0, "one entry gone from $n_fields fields");
-    is( keys %Hash::Util::FieldHash::ob_reg, @obs, "one ob unregistered");
+    is( keys %$ob_reg, @obs, "one ob unregistered");
     @obs = ();
     $err = grep keys %$_ != @obs, @fields;
     is( $err, 0, "all entries gone from $n_fields fields");
-    is( keys %Hash::Util::FieldHash::ob_reg, @obs, "all obs unregistered");
+    is( keys %$ob_reg, @obs, "all obs unregistered");
 }
 
 {
