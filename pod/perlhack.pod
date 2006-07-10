@@ -2744,7 +2744,7 @@ they either use the native implementation, or Perl's own implementation
 Do not use sprintf() or vsprintf()
 
 If you really want just plain byte strings, use my_snprintf()
-and my_vnsprintf() instead, which will try to use snprintf() and
+and my_vsnprintf() instead, which will try to use snprintf() and
 vsnprintf() if those safer APIs are available.  If you want something
 fancier than a plain byte string, use SVs and Perl_sv_catpvf().
 
@@ -3303,11 +3303,10 @@ activity as well, and probably sooner than you'd think.
 
 =back
 
-If you can do these things, you've started on the long road to Perl porting. 
+If you can do these things, you've started on the long road to Perl porting.
 Thanks for wanting to help make Perl better - and happy hacking!
 
 =head1 AUTHOR
 
 This document was written by Nathan Torkington, and is maintained by
 the perl5-porters mailing list.
-
