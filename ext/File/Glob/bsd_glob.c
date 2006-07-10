@@ -1131,9 +1131,9 @@ g_opendir(register Char *str, glob_t *pglob)
 
 	if (!*str) {
 #ifdef MACOS_TRADITIONAL
-		strcpy(buf, ":");
+		my_strlcpy(buf, ":", sizeof(buf));
 #else
-		strcpy(buf, ".");
+		my_strlcpy(buf, ".", sizeof(buf));
 #endif
 	} else {
 		if (g_Ctoc(str, buf, sizeof(buf)))

@@ -3118,13 +3118,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 	    if (len == 2 && tmpbuf[0] == '.')
 		seen_dot = 1;
 #endif
-#ifdef HAS_STRLCAT
-	    (void)strlcpy(tmpbuf + len, scriptname, sizeof(tmpbuf) - len);
-#else
-	    /* FIXME? Convert to memcpy by storing previous strlen(scriptname)
-	     */
-	    (void)strcpy(tmpbuf + len, scriptname);
-#endif /* #ifdef HAS_STRLCAT */
+	    (void)my_strlcpy(tmpbuf + len, scriptname, sizeof(tmpbuf) - len);
 #endif  /* !VMS */
 
 #ifdef SEARCH_EXTS

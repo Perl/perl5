@@ -622,7 +622,9 @@ source filters.  All this could be fixed.
 
 =head2 Integrate Russ Allbery's strlcat/strlcpy implementation
 
-And remove the last remaining uses of strcat() and strcpy().
+And remove the last remaining uses of strcat() and strcpy().  Also, add
+my_strlcat() and my_strlcpy() to Devel::PPPort so previous versions of Perl can
+use these APIs. 
 
 =head1 Big projects
 

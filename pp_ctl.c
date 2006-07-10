@@ -3423,9 +3423,7 @@ PP(pp_entereval)
     U32 seq;
     HV *saved_hh = NULL;
     const char * const fakestr = "_<(eval )";
-#ifdef HAS_STRLCPY
     const int fakelen = 9 + 1;
-#endif
     
     if (PL_op->op_private & OPpEVAL_HAS_HH) {
 	saved_hh = (HV*) SvREFCNT_inc(POPs);
@@ -3498,11 +3496,7 @@ PP(pp_entereval)
     if (PERLDB_INTER && was != (I32)PL_sub_generation /* Some subs defined here. */
 	&& ret != PL_op->op_next) {	/* Successive compilation. */
 	/* Copy in anything fake and short. */
-#ifdef HAS_STRLCPY
-	strlcpy(safestr, fakestr, fakelen);
-#else
-	strcpy(safestr, fakestr);
-#endif /* #ifdef HAS_STRLCPY */
+	my_strlcpy(safestr, fakestr, fakelen);
     }
     return DOCATCH(ret);
 }
