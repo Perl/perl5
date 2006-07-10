@@ -3935,8 +3935,10 @@ Perl_sv_usepvn_flags(pTHX_ SV *sv, char *ptr, STRLEN len, U32 flags)
     if (SvPVX_const(sv))
 	SvPV_free(sv);
 
+#ifdef DEBUGGING
     if (flags & SV_HAS_TRAILING_NUL)
 	assert(ptr[len] == '\0');
+#endif
 
     allocate = (flags & SV_HAS_TRAILING_NUL)
 	? len + 1: PERL_STRLEN_ROUNDUP(len + 1);
