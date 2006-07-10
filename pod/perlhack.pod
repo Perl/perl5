@@ -2375,9 +2375,10 @@ and "Perl_-ly" APIs, for example:
   Perl_sv_setiv(aTHX_ ...);
   sv_setiv(...);
 
-The first one explicitly passes in the context, which is needed for
-e.g. threaded builds.  The second one does that implicitly; do not get
-them mixed.
+The first one explicitly passes in the context, which is needed for e.g.
+threaded builds.  The second one does that implicitly; do not get them
+mixed.  If you are not passing in a aTHX_, you will need to do a dTHX as
+the first thing in the function.
 
 See L<perlguts/"How multiple interpreters and concurrency are supported">
 for further discussion about context.
@@ -2388,6 +2389,30 @@ Not compiling with -DDEBUGGING
 
 The DEBUGGING define exposes more code to the compiler,
 therefore more ways for things to go wrong.  You should try it.
+
+=item *
+
+Introducing (non-read-only) globals
+
+Do not introduce any modifiable globals, truly global or file static.
+They are bad form and break multithreading.  The right way is to
+introduce them as new interpreter variables, see F<intrpvar.h> (at the
+very end for binary compatibility).
+
+Introducing read-only (const) globals is okay, as long as you verify
+with e.g. C<nm libperl.a|egrep -v ' [TURtr] '> (if your C<nm> has
+BSD-style output) that the data you added really is read-only.
+(If it is, it shouldn't show up in the output of that command.)
+
+If you want to have static strings, make them constant:
+
+  static const char etc[] = "...";
+
+If you want to have arrays of static strings, note carefully
+the right combination of C<const>s:
+
+    static const char * const yippee[] =
+	{"hi", "ho", "silver"};
 
 =item *
 
@@ -2431,6 +2456,9 @@ oneself from public embarrassment.
 Also study L<perlport> carefully to avoid any bad assumptions
 about the operating system, filesystem, and so forth.
 
+You may once in a while try a "make miniperl" to see whether
+we can compile Perl with just the bare minimum of interfaces.
+
 Do not assume an operating system indicates a certain compiler.
 
 =over 4
@@ -2449,7 +2477,7 @@ or
     {
       IV i = (IV)p;
 
-Either are bad, and broken, and unportable.  Use the PTR2IV()
+Both are bad, and broken, and unportable.  Use the PTR2IV()
 macro that does it right.  (Likewise, there are PTR2UV(), PTR2NV(),
 INT2PTR(), and NUM2PTR().)
 
@@ -2507,8 +2535,31 @@ Mixing #define and #ifdef
   ... do it the new way ... \
   #endif
 
-You cannot portably "stack" cpp directives.  For example in the
-above you need two separate #defines, one in each #ifdef branch.
+You cannot portably "stack" cpp directives.  For example in the above
+you need two separate BURGLE() #defines, one for each #ifdef branch.
+
+=item *
+
+Adding stuff after #endif or #else
+
+  #ifdef SNOSH
+  ...
+  #else !SNOSH
+  ...
+  #endif SNOSH
+
+The #endif and #else cannot portably have anything after them.  If you
+want to document what is going (which is a good idea especially if the
+branches are long), use (C) comments:
+
+  #ifdef SNOSH
+  ...
+  #else /* !SNOSH */
+  ...
+  #endif /* SNOSH */
+
+The gcc option C<-Wendif-labels> warns about the bad variant
+(by default on starting from Perl 5.9.4).
 
 =item *
 
@@ -2576,6 +2627,40 @@ rest of the AIX compiler is very happily C89.
 
 =item *
 
+Using printf formats for non-basic C types
+
+   IV i = ...;
+   printf("i = %d\n", i);
+
+While this might by accident work in some platform (where IV happens
+to be an C<int>), in general it cannot.  IV might be something larger.
+Even worse the situation is with more specific types (defined by Perl's
+configuration step in F<config.h>):
+
+   Uid_t who = ...;
+   printf("who = %d\n", who);
+
+The problem here is that Uid_t might be not only not C<int>-wide
+but it might also be unsigned, in which case large uids would be
+printed as negative values.
+
+There is no simple solution to this because of printf()'s limited
+intelligence, but for many types the right format is available as
+with either 'f' or '_f' suffix, for example:
+
+   IVdf /* IV in decimal */
+   UVxf /* UV is hexadecimal */
+
+   printf("i = %"IVdf"\n", i); /* The IVdf is a string constant. */
+
+   Uid_t_f /* Uid_t in decimal */
+
+   printf("who = %"Uid_t_f"\n", who);
+
+The gcc option C<-Wformat> scans for such problems.
+
+=item *
+
 Blindly using variadic macros
 
 gcc has had them for a while with its own syntax, and C99
@@ -2589,6 +2674,46 @@ Blindly passing va_list
 Not all platforms support passing va_list to further varargs (stdarg)
 functions.  The right thing to do is to copy the va_list using the
 Perl_va_copy() if the NEED_VA_COPY is defined.
+
+=item *
+
+Testing for operating systems or versions when should be testing for features
+
+  #ifdef __FOONIX__
+  foo = quux();
+  #endif
+
+Unless you know with 100% certainty that quux() is only ever available
+for the "Foonix" operating system B<and> that is available B<and>
+correctly working for B<all> past, present, B<and> future versions of
+"Foonix", the above is very wrong.  This is more correct (though still
+not perfect, because the below is a compile-time check):
+
+  #ifdef HAS_QUUX
+  foo = quux();
+  #endif
+
+How does the HAS_QUUX become defined where it needs to be? Well, if
+Foonix happens to be UNIXy enought to be able to run the Configure
+script, and Configure has been taught about detecting and testing
+quux(), the HAS_QUUX will be correctly defined.  In other platforms,
+the corresponding configuration step will hopefully do the same.
+
+In a pinch, if you cannot wait for Configure to be educated,
+or if you have a good hunch of where quux() might be available,
+you can temporarily try the following:
+
+  #if (defined(__FOONIX__) || defined(__BARNIX__))
+  # define HAS_QUUX
+  #endif
+
+  ...
+
+  #ifdef HAS_QUUX
+  foo = quux();
+  #endif
+
+But in any case, try to keep the features and operating systems separate.
 
 =back
 
@@ -2610,9 +2735,9 @@ Do not use strcpy() or strcat()
 
 While some uses of these still linger in the Perl source code,
 we have inspected them for safety and are very, very ashamed of them,
-and plan to get rid of them.  In places where there are strlcpy()
-and strlcat() we prefer to use them, and there is a plan to integrate
-the strlcpy/strlcat implementation of INN.
+and plan to get rid of them.  Use my_strlcpy() and my_strlcat() instead:
+they either use the native implementation, or Perl's own implementation
+(borrowed from the public domain implementation of INN).
 
 =item *
 
