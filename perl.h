@@ -1488,6 +1488,18 @@ int sockatmark(int);
 #  define PERL_MY_VSNPRINTF_GUARDED
 #endif
 
+#ifdef HAS_STRLCAT
+#  define my_strlcat    strlcat
+#else
+#  define my_strlcat    Perl_my_strlcat
+#endif
+
+#ifdef HAS_STRLCPY
+#  define my_strlcpy	strlcpy
+#else
+#  define my_strlcpy	Perl_my_strlcpy
+#endif
+
 /* Configure gets this right but the UTS compiler gets it wrong.
    -- Hal Morris <hom00@utsglobal.com> */
 #ifdef UTS

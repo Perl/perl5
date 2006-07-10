@@ -1773,6 +1773,10 @@
 #endif
 #ifdef PERL_IMPLICIT_CONTEXT
 #endif
+#ifndef HAS_STRLCAT
+#endif
+#ifndef HAS_STRLCPY
+#endif
 #ifdef PERL_MAD
 #ifdef PERL_CORE
 #define pad_peg			Perl_pad_peg
@@ -3965,6 +3969,10 @@
 #define my_clearenv()		Perl_my_clearenv(aTHX)
 #endif
 #ifdef PERL_IMPLICIT_CONTEXT
+#endif
+#ifndef HAS_STRLCAT
+#endif
+#ifndef HAS_STRLCPY
 #endif
 #ifdef PERL_MAD
 #ifdef PERL_CORE

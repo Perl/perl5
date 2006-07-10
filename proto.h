@@ -4407,6 +4407,14 @@ PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *index, size_t size)
 
 #endif
 
+#ifndef HAS_STRLCAT
+PERL_CALLCONV Size_t	Perl_my_strlcat(char *dst, const char *src, Size_t size);
+#endif
+
+#ifndef HAS_STRLCPY
+PERL_CALLCONV Size_t	Perl_my_strlcpy(char *dst, const char *src, Size_t size);
+#endif
+
 #ifdef PERL_MAD
 PERL_CALLCONV void	Perl_pad_peg(const char* s)
 			__attribute__nonnull__(1);

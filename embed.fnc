@@ -1718,6 +1718,14 @@ px	|void	|my_clearenv
 Apo	|void*	|my_cxt_init	|NN int *index|size_t size
 #endif
 
+#ifndef HAS_STRLCAT
+Apno	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
+#endif
+
+#ifndef HAS_STRLCPY
+Apno     |Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t size
+#endif
+
 #ifdef PERL_MAD
 Mnp	|void	|pad_peg	|NN const char* s
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
