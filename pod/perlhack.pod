@@ -1560,8 +1560,6 @@ C<-Wshadow>
 
 C<-Wstrict-prototypes>
 
-=item *
-
 =back
 
 The C<-Wtraditional> is another example of the annoying tendency of
@@ -2445,7 +2443,7 @@ in L<perlguts>.
 
 =back
 
-=head Portability problems
+=head2 Portability problems
 
 The following are common causes of compilation and/or execution
 failures, not common to Perl as such.  The C FAQ is good bedtime
