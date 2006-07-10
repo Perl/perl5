@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.34';
+our $VERSION = '1.35';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -113,7 +113,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.34
+This document describes threads version 1.35
 
 =head1 SYNOPSIS
 
@@ -593,13 +593,10 @@ expected to act upon.  Here's an example for I<cancelling> a thread:
 
     use threads;
 
-    # Suppress warning message when thread is 'killed'
-    no warnings 'threads';
-
     sub thr_func
     {
         # Thread 'cancellation' signal handler
-        $SIG{'KILL'} = sub { die("Thread killed\n"); };
+        $SIG{'KILL'} = sub { threads->exit(); };
 
         ...
     }
@@ -807,7 +804,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.34/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.35/threads.pm>
 
 L<threads::shared>, L<perlthrtut>
 

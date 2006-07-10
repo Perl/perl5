@@ -5,7 +5,9 @@
 /* Workaround for XSUB.h bug under WIN32 */
 #ifdef WIN32
 #  undef setjmp
-#  define setjmp(x) _setjmp(x)
+#  if !defined(__BORLANDC__)
+#    define setjmp(x) _setjmp(x)
+#  endif
 #endif
 #ifdef HAS_PPPORT_H
 #  define NEED_PL_signals
