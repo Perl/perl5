@@ -1443,10 +1443,9 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
     char *cmd;
 
     /* Make a copy so we can change it */
-    const int cmdlen = strlen(incmd);
-    Newx(cmd, cmdlen+1, char);
-    strncpy(cmd, incmd, cmdlen);
-    cmd[cmdlen] = 0;
+    const Size_t cmdlen = strlen(incmd) + 1;
+    Newx(cmd, cmdlen, char);
+    my_strlcpy(cmd, incmd, cmdlen);
 
     while (*cmd && isSPACE(*cmd))
 	cmd++;

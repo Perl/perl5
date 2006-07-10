@@ -3580,10 +3580,11 @@ S_dooneliner(pTHX_ const char *cmd, const char *filename)
     char *s;
     PerlIO *myfp;
     int anum = 1;
+    Size_t size = strlen(cmd) + (strlen(filename) * 2) + 10;
 
-    Newx(cmdline, strlen(cmd) + (strlen(filename) * 2) + 10, char);
-    strcpy(cmdline, cmd);
-    strcat(cmdline, " ");
+    Newx(cmdline, size, char);
+    my_strlcpy(cmdline, cmd, size);
+    my_strlcat(cmdline, " ", size);
     for (s = cmdline + strlen(cmdline); *filename; ) {
 	*s++ = '\\';
 	*s++ = *filename++;

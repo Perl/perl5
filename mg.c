@@ -1073,8 +1073,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 	    Stat_t sbuf;
 	    int i = 0, j = 0;
 
-	    strncpy(eltbuf, s, 255);
-	    eltbuf[255] = 0;
+	    my_strlcpy(eltbuf, s, sizeof(eltbuf));
 	    elt = eltbuf;
 	    do {          /* DCL$PATH may be a search list */
 		while (1) {   /* as may dev portion of any element */

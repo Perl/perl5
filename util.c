@@ -3022,7 +3022,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 	    if ((strlen(tmpbuf) + strlen(scriptname)
 		 + MAX_EXT_LEN) >= sizeof tmpbuf)
 		continue;	/* don't search dir with too-long name */
-	    strcat(tmpbuf, scriptname);
+	    my_strlcat(tmpbuf, scriptname, sizeof(tmpbuf));
 #else  /* !VMS */
 
 #ifdef DOSISH
@@ -3054,11 +3054,10 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 		len = strlen(scriptname);
 		if (len+MAX_EXT_LEN+1 >= sizeof(tmpbuf))
 		    break;
-		/* FIXME? Convert to memcpy  */
-		cur = strcpy(tmpbuf, scriptname);
+		cur = my_strlcpy(tmpbuf, scriptname, sizeof(tmpbuf));
 	    }
 	} while (extidx >= 0 && ext[extidx]	/* try an extension? */
-		 && strcpy(tmpbuf+len, ext[extidx++]));
+		 && my_strlcpy(tmpbuf+len, ext[extidx++], sizeof(tmpbuf) - len));
 #endif
     }
 #endif
@@ -3135,7 +3134,7 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 #ifdef SEARCH_EXTS
 	    } while (  retval < 0		/* not there */
 		    && extidx>=0 && ext[extidx]	/* try an extension? */
-		    && strcpy(tmpbuf+len, ext[extidx++])
+		    && my_strlcpy(tmpbuf+len, ext[extidx++], sizeof(tmpbuf) - len)
 		);
 #endif
 	    if (retval < 0)

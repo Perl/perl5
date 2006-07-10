@@ -499,7 +499,7 @@ S_feature_is_enabled(pTHX_ const char *name, STRLEN namelen)
     dVAR;
     HV * const hinthv = GvHV(PL_hintgv);
     char he_name[32] = "feature_";
-    (void) strncpy(&he_name[8], name, 24);
+    (void) my_strlcpy(&he_name[8], name, 24);
 
     return (hinthv && hv_exists(hinthv, he_name, 8 + namelen));
 }
