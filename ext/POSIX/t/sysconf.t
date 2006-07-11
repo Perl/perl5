@@ -38,10 +38,11 @@ my @sys_consts = check qw(
     _SC_NGROUPS_MAX _SC_OPEN_MAX _SC_PAGESIZE _SC_SAVED_IDS
     _SC_STREAM_MAX _SC_TZNAME_MAX _SC_VERSION
 );
-my $tests=2 * 3 * @path_consts +
-                  3 * @path_consts_terminal +
-              2 * 3 * @path_consts_fifo +
-                  3 * @sys_consts;
+
+my $tests = 2 * 3 * @path_consts +
+            2 * 3 * @path_consts_terminal +
+            2 * 3 * @path_consts_fifo +
+                3 * @sys_consts;
 plan $tests 
      ? (tests => $tests) 
      : (skip_all => "No tests to run on this OS")
@@ -75,13 +76,32 @@ for my $constant (@path_consts) {
 }
 
 SKIP: {
-    -c "/dev/tty"
-	or skip("/dev/tty not a character file", 3 * @path_consts_terminal);
+    my $TTY = "/dev/tty";
 
+    my $n = 2 * 3 * @path_consts_terminal;
+
+    -c $TTY
+	or skip("$TTY not a character file", $n);
+    open(TTY, $TTY)
+	or skip("failed to open $TTY: $!", $n);
+    -t TTY
+	or skip("TTY ($TTY) not a terminal file", $n);
+
+    my $fd = fileno(TTY);
+
+    # testing fpathconf() on a terminal file
+    for my $constant (@path_consts_terminal) {
+	$r = eval { fpathconf( $fd, eval "$constant()" ) };
+	is( $@, '', qq[calling fpathconf($fd, $constant) ($TTY)] );
+	ok( defined $r, "\tchecking that the returned value is defined: $r" );
+	ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
+    }
+    
+    close($fd);
     # testing pathconf() on a terminal file
     for my $constant (@path_consts_terminal) {
-	$r = eval { pathconf( "/dev/tty", eval "$constant()" ) };
-	is( $@, '', qq[calling pathconf("/dev/tty", $constant)] );
+	$r = eval { pathconf( $TTY, eval "$constant()" ) };
+	is( $@, '', qq[calling pathconf($TTY, $constant)] );
 	ok( defined $r, "\tchecking that the returned value is defined: $r" );
 	ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
     }
@@ -99,7 +119,7 @@ SKIP: {
 
       for my $constant (@path_consts_fifo) {
 	  $r = eval { fpathconf( $fd, eval "$constant()" ) };
-	  is( $@, '', "calling fpathconf($fd, $constant) " );
+	  is( $@, '', "calling fpathconf($fd, $constant) ($fifo)" );
 	  ok( defined $r, "\tchecking that the returned value is defined: $r" );
 	  ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
       }
@@ -118,7 +138,9 @@ SKIP: {
   }
 }
 
-unlink($fifo);
+END {
+    1 while unlink($fifo);
+}
 
 # testing sysconf()
 for my $constant (@sys_consts) {
