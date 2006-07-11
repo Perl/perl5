@@ -3054,7 +3054,8 @@ Perl_find_script(pTHX_ const char *scriptname, bool dosearch,
 		len = strlen(scriptname);
 		if (len+MAX_EXT_LEN+1 >= sizeof(tmpbuf))
 		    break;
-		cur = my_strlcpy(tmpbuf, scriptname, sizeof(tmpbuf));
+		my_strlcpy(tmpbuf, scriptname, sizeof(tmpbuf));
+		cur = tmpbuf;
 	    }
 	} while (extidx >= 0 && ext[extidx]	/* try an extension? */
 		 && my_strlcpy(tmpbuf+len, ext[extidx++], sizeof(tmpbuf) - len));
