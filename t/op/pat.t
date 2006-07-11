@@ -7,7 +7,7 @@
 $| = 1;
 
 # please update note at bottom of file when you change this
-print "1..1211\n"; 
+print "1..1212\n"; 
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3312,6 +3312,7 @@ ok("abc" =~ /[^\cA-\cB]/, '\cA in negated character class range');
 ok("a\cBb" =~ /[\cA-\cC]/, '\cB in character class range');
 ok("a\cCbc" =~ /[^\cA-\cB]/, '\cC in negated character class range');
 ok("a\cAb" =~ /(??{"\cA"})/, '\cA in ??{} pattern');
+ok("ab" !~ /a\cIb/x, '\cI in pattern');
 
 # perl #28532: optional zero-width match at end of string is ignored
 ok(("abc" =~ /^abc(\z)?/) && defined($1),
