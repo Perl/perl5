@@ -17,21 +17,59 @@ Earlier releases interpreted the bareword as a directory name.
 
 =head1 Core Enhancements
 
+=head2 state() variables
+
 =head1 Modules and Pragmata
+
+C<encoding::warnings> is now a lexical pragma.
+
+=head2 New Core Modules
+
+=over 4
+
+=item *
+
+C<Module::Build> has been added.
+
+=item *
+
+C<Hash::Util::FieldHash> has been added.
+
+=item *
+
+C<Win32API::File> has been added.
+
+=back
 
 =head1 Utility Changes
 
 =head1 Documentation
 
+=head2 New manpage, perlpragma
+
+=head2 New manpage, perlreguts
+
+=head2 New manpage, perlunitut
+
 =head1 Performance Enhancements
 
+Constants (Nicholas)
+
+Regular expressions (Yves)
+
 =head1 Installation and Configuration Improvements
+
+Perl has been reported to work on DragonFlyBSD.
 
 =head1 Selected Bug Fixes
 
 =head1 New or Changed Diagnostics
 
 =head1 Changed Internals
+
+Arenas
+
+Mathoms and factorizations (many PP functions are now shared for several ops)
 
 =head1 Known Problems
 
