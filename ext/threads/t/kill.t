@@ -65,7 +65,7 @@ BEGIN {
 
 BEGIN {
     $| = 1;
-    print("1..18\n");   ### Number of tests that will be run ###
+    print("1..19\n");   ### Number of tests that will be run ###
 };
 
 my $TEST = 1;
