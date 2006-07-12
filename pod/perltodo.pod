@@ -25,25 +25,6 @@ programming languages offer you 1 line of immortality?
 The roadmap to 5.10 envisages feature based releases, as various items in this
 TODO are completed.
 
-=head2 Needed for a 5.9.4 release
-
-=over
-
-=item *
-
-Implement L</state variables> (mostly done currently)
-
-=item *
-
-Review assertions. Review syntax to combine assertions. Assertions could take
-advantage of the lexical pragmas work. L</What hooks would assertions need?>
-
-=item *
-
-C<encoding> should be turned into a lexical pragma (probably).
-
-=back
-
 =head2 Needed for a 5.9.5 release
 
 =over
@@ -55,6 +36,15 @@ Implement L</_ prototype character>
 =item *
 
 Review smart match semantics in light of Perl 6 developments.
+
+=item *
+
+Review assertions. Review syntax to combine assertions. Assertions could take
+advantage of the lexical pragmas work. L</What hooks would assertions need?>
+
+=item *
+
+C<encoding> should be turned into a lexical pragma (probably).
 
 =back
 
@@ -83,6 +73,9 @@ The addition of C<Pod::Simple> and its related modules may make this task
 easier to complete.
 
 =head2 Parallel testing
+
+(This probably impacts much more than the core, but the Test::Harness
+and TAP::* modules on CPAN.)
 
 The core regression test suite is getting ever more comprehensive, which has
 the side effect that it takes longer to run. This isn't so good. Investigate
@@ -117,12 +110,10 @@ Schwern has promised to donate to $500 to TPF. We may need volunteers to
 hold him upside down and shake vigorously in order to actually extract the
 cash.
 
-See F<t/lib/1_compile.t> for the 3 remaining modules that need tests.
-
 =head2 Improve the coverage of the core tests
 
-Use Devel::Cover to ascertain the core's test coverage, then add tests that
-are currently missing.
+Use Devel::Cover to ascertain the core modules's test coverage, then add
+tests that are currently missing.
 
 =head2 test B
 
@@ -284,7 +275,7 @@ wanted to perform perl level coverage, and another to specify C level
 coverage, and have C<Configure> and the F<Makefile> do all the right things
 automatically.
 
-=head2 Make Config.pm cope with differences between build and installed perl
+=head2 Make Config.pm cope with differences between built and installed perl
 
 Quite often vendors ship a perl binary compiled with their (pay-for)
 compilers.  People install a free compiler, such as gcc. To work out how to
@@ -426,8 +417,8 @@ re-used for this.
 =head2 Improve win32/wince.c
 
 Currently, numerous functions look virtually, if not completely,
-identical in both C<win32/wince.c> and C<win32/win32.c> files, which can't be good.
-
+identical in both C<win32/wince.c> and C<win32/win32.c> files, which can't
+be good.
 
 =head1 Tasks that need a knowledge of XS
 
@@ -443,17 +434,6 @@ probably aren't worth it, as typical programs don't use more than 8, and
 (at least) C<Filter::Util::Call> uses C<SvPVX>/C<SvCUR>/C<SvLEN> on a C<PVIO>,
 so it would mean code changes to modules on CPAN. C<PVBM>s might have some
 savings to win.
-
-=head2 Implicit Latin 1 => Unicode translation
-
-Conversions from byte strings to UTF-8 currently map high bit characters
-to Unicode without translation (or, depending on how you look at it, by
-implicitly assuming that the byte strings are in Latin-1). As perl assumes
-the C locale by default, upgrading a string to UTF-8 may change the
-meaning of its contents regarding character classes, case mapping, etc.
-This should probably emit a warning (at least).
-
-This task is incremental - even a little bit of work on it will help.
 
 =head2 autovivification
 
@@ -522,11 +502,6 @@ extended.
 These tasks would need C knowledge, and knowledge of how the interpreter works,
 or a willingness to learn.
 
-=head2 lexical pragmas
-
-Document the new support for lexical pragmas in 5.9.3 and how %^H works.
-Maybe C<re>, C<encoding>, maybe other pragmas could be made lexical.
-
 =head2 Attach/detach debugger from running program
 
 The old perltodo notes "With C<gdb>, you can attach the debugger to a running
@@ -549,12 +524,6 @@ would be good to fix.
 Study the possibility of adding a new prototype character, C<_>, meaning
 "this argument defaults to $_".
 
-=head2 state variables
-
-C<my $foo if 0;> is deprecated, and should be replaced with
-C<state $x = "initial value\n";> the syntax from Perl 6.
-Rafael has sent a first cut patch to perl5-porters.
-
 =head2 regexp optimiser optional
 
 The regexp optimiser is not optional. It should configurable to be, to allow
@@ -566,6 +535,15 @@ Introduce a new special block, UNITCHECK, which is run at the end of a
 compilation unit (module, file, eval(STRING) block). This will correspond to
 the Perl 6 CHECK. Perl 5's CHECK cannot be changed or removed because the
 O.pm/B.pm backend framework depends on it.
+
+=head2 delete &function
+
+Allow to delete functions. One can already undef them, but they're still
+in the stash.
+
+=head2 Make readpipe overridable
+
+so we can override qx// as well.
 
 =head2 optional optimizer
 
