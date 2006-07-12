@@ -171,7 +171,7 @@ use strict;
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 
-$VERSION = '3.18';
+$VERSION = '3.19';
 
 @ISA = qw/ Exporter /;
 @EXPORT = qw(cwd getcwd fastcwd fastgetcwd);
@@ -370,10 +370,8 @@ if ($^O eq 'cygwin') {
 # isn't redefined later (20001212 rspier)
 *fastgetcwd = \&cwd;
 
-# By Brandon S. Allbery
-#
-# Usage: $cwd = getcwd();
-
+# A non-XS version of getcwd() - also used to bootstrap the perl build
+# process, when miniperl is running and no XS loading happens.
 sub _perl_getcwd
 {
     abs_path('.');

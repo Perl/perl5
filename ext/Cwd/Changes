@@ -1,5 +1,23 @@
 Revision history for Perl distribution PathTools.
 
+3.19  Tue Jul 11 22:40:26 CDT 2006
+
+ - When abs2rel() is called with two relative paths
+   (e.g. abs2rel('foo/bar/baz', 'foo/bar')) the resolution algorithm
+   needlessly called cwd() (twice!) to turn both arguments into
+   absolute paths.  Now it avoids the cwd() calls with a workaround,
+   making a big efficiency win when abs2rel() is called
+   repeatedly. [Brendan O'Dea]
+
+ - Added a build-time dependency on ExtUtils::Install version 1.39
+   when on Windows.  This is necessary because version 1.39 knows how
+   to replace an in-use Cwd shared library, but previous versions
+   don't. [Suggested by Adam Kennedy]
+
+ - Fixed File::Spec::Win32->canonpath('foo/../bar'), which was
+   returning \bar, and now properly returns just bar. [Spotted by
+   Heinrich Tegethoff]
+
 3.18  Thu Apr 27 22:01:38 CDT 2006
 
  - Fixed some problems on VMS in which a directory called "0" would be

@@ -116,6 +116,8 @@ if ($^O eq 'MacOS') {
 #[ "Unix->abs2rel('../t4','/t1/t2/t3')",              '../t4'              ],
 [  "Unix->abs2rel('/t1/t2/t3', '/')",                 't1/t2/t3'           ],
 [  "Unix->abs2rel('/t1/t2/t3', '/t1')",               't2/t3'              ],
+[  "Unix->abs2rel('t1/t2/t3', 't1')",                 't2/t3'              ],
+[  "Unix->abs2rel('t1/t2/t3', 't4')",                 '../t1/t2/t3'        ],
 
 [ "Unix->rel2abs('t4','/t1/t2/t3')",             '/t1/t2/t3/t4'    ],
 [ "Unix->rel2abs('t4/t5','/t1/t2/t3')",          '/t1/t2/t3/t4/t5' ],
@@ -205,6 +207,7 @@ if ($^O eq 'MacOS') {
 [ "Win32->catdir('A:/')",                   'A:\\'               ],
 [ "Win32->catdir('\\', 'foo')",             '\\foo'              ],
 
+
 [ "Win32->catfile('a','b','c')",        'a\\b\\c' ],
 [ "Win32->catfile('a','b','.\\c')",      'a\\b\\c'  ],
 [ "Win32->catfile('.\\a','b','c')",      'a\\b\\c'  ],
@@ -235,6 +238,8 @@ if ($^O eq 'MacOS') {
 [ "Win32->canonpath('\\..\\')",         '\\'                  ],
 [ "Win32->canonpath('/../')",           '\\'                  ],
 [ "Win32->canonpath('/..\\')",          '\\'                  ],
+[ "Win32->canonpath('d1/../foo')",      'foo'                 ],
+
 [ "Win32->can('_cwd')",                 '/CODE/'              ],
 
 # FakeWin32 subclass (see below) just sets CWD to C:\one\two and getdcwd('D') to D:\alpha\beta
