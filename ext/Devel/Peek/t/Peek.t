@@ -4,19 +4,20 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require Config; import Config;
-    if ($Config{'extensions'} !~ /\bPeek\b/) {
+    if ($Config{'extensions'} !~ /\bDevel\/Peek\b/) {
         print "1..0 # Skip: Devel::Peek was not built\n";
         exit 0;
     }
 }
 
+require "./test.pl";
+
 use Devel::Peek;
 
-print "1..23\n";
+plan(23);
 
 our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
-
 
 sub do_test {
     my $pattern = pop;
@@ -42,14 +43,10 @@ sub do_test {
 		($] < 5.009) ? "    IV = 0\n    NV = 0\n" : '';
 	    /mge;
 
-
-
 	    print $pattern, "\n" if $DEBUG;
 	    my $dump = <IN>;
 	    print $dump, "\n"    if $DEBUG;
-	    print "got:\n[\n$dump\n]\nexpected:\n[\n$pattern\n]\nnot "
-		unless $dump =~ /\A$pattern\Z/ms;
-	    print "ok $_[0]\n";
+	    like( $dump, qr/\A$pattern\Z/ms );
 	    close(IN);
             return $1;
 	} else {
@@ -65,6 +62,9 @@ our   $b;
 my    $c;
 local $d = 0;
 
+END {
+    1 while unlink("peek$$");
+}
 
 do_test( 1,
 	$a = "foo",
@@ -445,10 +445,6 @@ do_test(21,
   MAGIC = $ADDR
     MG_VIRTUAL = &PL_vtbl_taint
     MG_TYPE = PERL_MAGIC_taint\\(t\\)');
-
-END {
-  1 while unlink("peek$$");
-}
 
 # blessed refs
 do_test(22,
