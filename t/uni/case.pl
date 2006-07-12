@@ -78,6 +78,9 @@ sub casetest {
 
     for my $i (sort keys %$spec) {
 	my $w = unidump($spec->{$i});
+	if (ord('A') == 193 && $i eq "\x8A\x73") {
+	    $w = '0178'; # It's a latin small Y with diaresis and not a latin small letter sharp 's'.
+	}
 	my $u = unpack "C0U", $i;
 	my $h = sprintf "%04X", $u;
 	my $c = chr($u); $c .= chr(0x100); chop $c;
@@ -118,7 +121,7 @@ sub casetest {
 		#
 		# 0130 -> 0069 0307 (00D1 0307)
 		#
-		if ($i =~ /^(0130|0149|01F0|1E96|1E97|1E98|1E99|1E9A)$/) {
+		if ($h =~ /^(0130|0149|01F0|1E96|1E97|1E98|1E99|1E9A)$/) {
 		    $e =~ s/004E/002B/; # N
 		    $e =~ s/004A/00A2/; # J
 		    $e =~ s/0048/00E7/; # H

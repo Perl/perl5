@@ -2639,7 +2639,11 @@ print "# some Unicode properties\n";
     print "# more whitespace: U+0085, U+2028, U+2029\n";
 
     # U+0085 needs to be forced to be Unicode, the \x{100} does that.
-    print "<\x{100}\x{0085}>" =~ /<\x{100}\s>/ ? "ok 845\n" : "not ok 845\n";
+    if ($ordA == 193) {
+	print "<\x{100}\x{0085}>" =~ /<\x{100}e>/ ? "ok 845\n" : "not ok 845\n";
+    } else {
+	print "<\x{100}\x{0085}>" =~ /<\x{100}\s>/ ? "ok 845\n" : "not ok 845\n";
+    }
     print "<\x{2028}>" =~ /<\s>/ ? "ok 846\n" : "not ok 846\n";
     print "<\x{2029}>" =~ /<\s>/ ? "ok 847\n" : "not ok 847\n";
 }

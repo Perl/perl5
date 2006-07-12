@@ -77,15 +77,15 @@ sub testwarn {
     testwarn("\0" x 12);
 
     use warnings;
-    BEGIN { is( ${^WARNING_BITS}, "UUUUUUUUUUU\025", 'default bits on via "use warnings"' ); }
-    BEGIN { testwarn("UUUUUUUUUUU\025", "#1"); }
+    BEGIN { is( ${^WARNING_BITS}, "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\025", 'default bits on via "use warnings"' ); }
+    BEGIN { testwarn("\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\025", "#1"); }
     # run-time :
     # the warning mask has been extended by warnings::register
-    testwarn("UUUUUUUUUUUU");
+    testwarn("\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55");
 
     use warnings::register;
-    BEGIN { is( ${^WARNING_BITS}, "UUUUUUUUUUUU", 'warning bits on via "use warnings::register"' ) }
-    testwarn("UUUUUUUUUUUU","#3");
+    BEGIN { is( ${^WARNING_BITS}, "\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55", 'warning bits on via "use warnings::register"' ) }
+    testwarn("\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55\x55","#3");
 }
 
 

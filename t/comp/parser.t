@@ -135,7 +135,7 @@ EOF
 {
     local $SIG{__WARN__} = sub { }; # silence mandatory warning
     eval q{ my $x = -F 1; };
-    like( $@, qr/(?:syntax|parse) error .* near "F 1"/, "unknown filetest operators" );
+    like( $@, qr/(?i:syntax|parse) error .* near "F 1"/, "unknown filetest operators" );
     is(
         eval q{ sub F { 42 } -F 1 },
 	'-42',
