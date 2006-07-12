@@ -96,7 +96,7 @@ unless( ok($rc == 255 << 8 or $rc == -1 or $rc == 256 or $rc == 512) ) {
 
 unless ( ok( $! == 2  or  $! =~ /\bno\b.*\bfile/i or  
              $! == 13 or  $! =~ /permission denied/i or
-             $! == 22 or  $! =~ /invalid argument/  ) ) {
+             $! == 22 or  $! =~ /invalid argument/i  ) ) {
     printf "# \$! eq %d, '%s'\n", $!, $!;
 }
 

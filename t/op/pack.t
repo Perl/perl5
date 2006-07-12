@@ -1495,7 +1495,7 @@ like ($@, qr/Not enough arguments for unpack/,
       "one-arg unpack (change #18751) is not in maint");
 
 {
-    my $a = "X\t01234567\n" x 100;
+    my $a = "X\x0901234567\n" x 100; # \t would not be EBCDIC TAB
     my @a = unpack("(a1 c/a)*", $a);
     is(scalar @a, 200,       "[perl #15288]");
     is($a[-1], "01234567\n", "[perl #15288]");
@@ -1523,7 +1523,11 @@ like ($@, qr/Not enough arguments for unpack/,
     is($x[1], $y[1], "checksum advance ok");
 
     # verify that the checksum is not overflowed with C0
-    is(unpack("C0%128U", "abcd"), unpack("U0%128U", "abcd"), "checksum not overflowed");
+    if (ord('A') == 193) {
+	is(unpack("C0%128U", "/bcd"), unpack("U0%128U", "abcd"), "checksum not overflowed");
+    } else {
+	is(unpack("C0%128U", "abcd"), unpack("U0%128U", "abcd"), "checksum not overflowed");
+    }
 }
 
 {
@@ -1548,15 +1552,28 @@ like ($@, qr/Not enough arguments for unpack/,
     # counted length prefixes shouldn't change C0/U0 mode
     # (note the length is actually 0 in this test)
     if ($] > 5.009) {
-	is(join(',', unpack("aC/UU",   "b\0\341\277\274")), 'b,8188');
-	is(join(',', unpack("aC/CU",   "b\0\341\277\274")), 'b,8188');
-	is(join(',', unpack("aU0C/UU", "b\0\341\277\274")), 'b,225');
-	is(join(',', unpack("aU0C/CU", "b\0\341\277\274")), 'b,225');
+	if (ord('A') == 193) {
+	    is(join(',', unpack("aU0C/UU", "b\0\341\277\274")), 'b,0');
+	    is(join(',', unpack("aU0C/CU", "b\0\341\277\274")), 'b,0');
+	} else {
+	    is(join(',', unpack("aC/UU",   "b\0\341\277\274")), 'b,8188');
+	    is(join(',', unpack("aC/CU",   "b\0\341\277\274")), 'b,8188');
+	    is(join(',', unpack("aU0C/UU", "b\0\341\277\274")), 'b,225');
+	    is(join(',', unpack("aU0C/CU", "b\0\341\277\274")), 'b,225');
+	}
     } else {
-	is(join(',', unpack("aU0C/UU", "b\0\341\277\274")), 'b,8188');
-	is(join(',', unpack("aU0C/CU", "b\0\341\277\274")), 'b,8188');
-	is(join(',', unpack("aC0C/UU", "b\0\341\277\274")), 'b,225');
-	is(join(',', unpack("aC0C/CU", "b\0\341\277\274")), 'b,225');
+	if (ord('A') == 193) {
+	    # IBM's EBCDIC counting mistake copied as is - maybe they should
+	    # pay someone to actually test this?
+	    # Someone competant, otherwise it's a false economy.
+	    is(join(',', unpack("aC0C/UU", "b\0\341\277\274")), 'b,0');
+	    is(join(',', unpack("aC0C/CU", "b\0\341\277\274")), 'b,0');
+	} else {
+	    is(join(',', unpack("aU0C/UU", "b\0\341\277\274")), 'b,8188');
+	    is(join(',', unpack("aU0C/CU", "b\0\341\277\274")), 'b,8188');
+	    is(join(',', unpack("aC0C/UU", "b\0\341\277\274")), 'b,225');
+	    is(join(',', unpack("aC0C/CU", "b\0\341\277\274")), 'b,225');
+	}
     }
 }
 
