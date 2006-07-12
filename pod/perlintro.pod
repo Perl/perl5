@@ -359,6 +359,8 @@ the more friendly list scanning C<foreach> loop.
         print "This element is $_\n";
     }
 
+    print $list[$_] foreach 1 .. $max;
+
     # you don't have to use the default $_ either...
     foreach my $key (keys %hash) {
         print "The value of $key is $hash{$key}\n";
@@ -444,17 +446,17 @@ You can open a file for input or output using the C<open()> function.
 It's documented in extravagant detail in L<perlfunc> and L<perlopentut>, 
 but in short:
 
-    open(INFILE,  "input.txt")   or die "Can't open input.txt: $!";
-    open(OUTFILE, ">output.txt") or die "Can't open output.txt: $!";
-    open(LOGFILE, ">>my.log")    or die "Can't open logfile: $!";
+    open(my $in,  "<",  "input.txt")  or die "Can't open input.txt: $!";
+    open(my $out, ">",  "output.txt") or die "Can't open output.txt: $!";
+    open(my $log, ">>", "my.log")     or die "Can't open my.log: $!";
 
 You can read from an open filehandle using the C<< <> >> operator.  In
 scalar context it reads a single line from the filehandle, and in list
 context it reads the whole file in, assigning each line to an element of
 the list:
 
-    my $line  = <INFILE>;
-    my @lines = <INFILE>;
+    my $line  = <$in>;
+    my @lines = <$in>;
 
 Reading in the whole file at one time is called slurping. It can
 be useful but it may be a memory hog. Most text file processing
@@ -462,7 +464,7 @@ can be done a line at a time with Perl's looping constructs.
 
 The C<< <> >> operator is most often seen in a C<while> loop:
 
-    while (<INFILE>) {     # assigns each line in turn to $_ 
+    while (<$in>) {     # assigns each line in turn to $_ 
         print "Just read in this line: $_";
     }
 
@@ -471,13 +473,13 @@ However, C<print()> can also take an optional first argument specifying
 which filehandle to print to:
 
     print STDERR "This is your final warning.\n";
-    print OUTFILE $record;
-    print LOGFILE $logmessage;
+    print $out $record;
+    print $log $logmessage;
 
 When you're done with your filehandles, you should C<close()> them
 (though to be honest, Perl will clean up after you if you forget):
 
-    close INFILE;
+    close $in or die "$in: $!";
 
 =head2 Regular expressions
 
@@ -577,10 +579,15 @@ L<perlretut>, and L<perlre>.
 
 Writing subroutines is easy:
 
-    sub log {
+    sub logger {
         my $logmessage = shift;
-        print LOGFILE $logmessage;
+        open my $logfile, ">>", "my.log" or die "Could not open my.log: $!";
+        print $logfile $logmessage;
     }
+
+Now we can use the subroutine just as any other built-in function:
+
+    logger("We have a logger subroutine!");
 
 What's that C<shift>?  Well, the arguments to a subroutine are available
 to us as a special array called C<@_> (see L<perlvar> for more on that).
@@ -600,6 +607,10 @@ Subroutines can also return values:
         my $result = $num * $num;
         return $result;
     }
+
+Then use it like:
+
+    $sq = square(8);
 
 For more information on writing subroutines, see L<perlsub>.
 
