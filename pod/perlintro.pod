@@ -376,7 +376,7 @@ the more friendly list scanning C<foreach> loop.
         print "This element is $_\n";
     }
 
-    print $list[$_] foreach 1 .. $max;
+    print $list[$_] foreach 0 .. $max;
 
     # you don't have to use the default $_ either...
     foreach my $key (keys %hash) {
