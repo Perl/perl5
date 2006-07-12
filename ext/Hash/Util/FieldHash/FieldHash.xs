@@ -21,11 +21,12 @@ START_MY_CXT
 HV* HUF_get_ob_reg(void) {
     dSP;
     HV* ob_reg = NULL;
+    I32 items;
     ENTER;
     SAVETMPS;
 
     PUSHMARK(SP);
-    I32 items = call_pv(HUF_OB_REG, G_SCALAR|G_NOARGS);
+    items = call_pv(HUF_OB_REG, G_SCALAR|G_NOARGS);
     SPAGAIN;
 
     if (items == 1 && TOPs && SvROK(TOPs) && SvTYPE(SvRV(TOPs)) == SVt_PVHV) {
