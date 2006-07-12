@@ -20,14 +20,23 @@ START_MY_CXT
 /* Inquire the object registry (a lexical hash) from perl */
 HV* HUF_get_ob_reg(void) {
     dSP;
+    HV* ob_reg = NULL;
+    ENTER;
+    SAVETMPS;
+
+    PUSHMARK(SP);
     I32 items = call_pv(HUF_OB_REG, G_SCALAR|G_NOARGS);
     SPAGAIN;
-    if (items == 1) {
-        SV* ref = POPs;
-        PUTBACK;
-        if (ref && SvROK(ref) && SvTYPE(SvRV(ref)) == SVt_PVHV)
-            return (HV*)SvRV(ref);
+
+    if (items == 1 && TOPs && SvROK(TOPs) && SvTYPE(SvRV(TOPs)) == SVt_PVHV) {
+        ob_reg = (HV*)SvRV(POPs);
     }
+    PUTBACK;
+    FREETMPS;
+    LEAVE;
+
+    if (ob_reg)
+        return ob_reg;
     Perl_die(aTHX_ "Can't get object registry hash");
 }
 
