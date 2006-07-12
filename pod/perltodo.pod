@@ -74,7 +74,7 @@ easier to complete.
 
 =head2 Parallel testing
 
-(This probably impacts much more than the core, but the Test::Harness
+(This probably impacts much more than the core: also the Test::Harness
 and TAP::* modules on CPAN.)
 
 The core regression test suite is getting ever more comprehensive, which has
@@ -597,12 +597,6 @@ variable names are stored in stashes as raw bytes, without the utf-8 flag
 set. The pad API only takes a C<char *> pointer, so that's all bytes too. The
 tokeniser ignores the UTF-8-ness of C<PL_rsfp>, or any SVs returned from
 source filters.  All this could be fixed.
-
-=head2 Integrate Russ Allbery's strlcat/strlcpy implementation
-
-And remove the last remaining uses of strcat() and strcpy().  Also, add
-my_strlcat() and my_strlcpy() to Devel::PPPort so previous versions of Perl can
-use these APIs. 
 
 =head1 Big projects
 
