@@ -59,17 +59,20 @@ Windows and Mac OS, read L<perlrun>.
 
 =head2 Safety net
 
-Perl by default is very forgiving. In order to make it more roboust
+Perl by default is very forgiving. In order to make it more robust
 it is recommened to start every program with the following lines:
 
     #!/usr/bin/perl
     use strict;
     use warnings;
 
-The C<use strict;> line imposes some restrictions that will mainly stop
-you from introducing bugs in your code.  The C<use warnings;> is more or
-less equivalent to the command line switch B<-w> (see L<perlrun>). This will
-catch various problems in your code and give warnings.
+The two additional lines request from perl to catch various common
+problems in your code. They check different things so you need both. A
+potential problem caught by C<use strict;> will cause your code to stop
+immediately when it is encountered, while C<use warnings;> will merely
+give a warning (like the command-line switch B<-w>) and let your code run.
+To read more about them check their respective manual pages at L<strict>
+and L<warnings>.
 
 =head2 Basic syntax overview
 
