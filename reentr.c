@@ -533,6 +533,8 @@ Perl_reentrant_retry(const char *f, ...)
     }
 
     va_end(ap);
+#else
+    PERL_UNUSED_ARG(f);
 #endif
     return retptr;
 }

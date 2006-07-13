@@ -5071,7 +5071,7 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 	    if (addoldvers) {
 		for (incver = incverlist; *incver; incver++) {
 		    /* .../xxx if -d .../xxx */
-		    Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT, libdir, *incver);
+		    Perl_sv_setpvf(aTHX_ subdir, "%"SVf PERL_ARCH_FMT, (void *)libdir, *incver);
 		    subdir = S_incpush_if_exists(aTHX_ subdir);
 		}
 	    }

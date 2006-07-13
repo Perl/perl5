@@ -1346,7 +1346,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         	reg_trie_data *trie=aho->trie;
 
 		const char *last_start = strend - trie->minlen;
+#ifdef DEBUGGING
 		const char *real_start = s;
+#endif
 		STRLEN maxlen = trie->maxlen;
 		SV *sv_points;
 		U8 **points; /* map of where we were in the input string
@@ -1409,7 +1411,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         uc += len;
 
                         do {
+#ifdef DEBUGGING
                             U32 word = aho->states[ state ].wordnum;
+#endif
                             base = aho->states[ state ].trans.base;
 
                             DEBUG_TRIE_EXECUTE_r(
