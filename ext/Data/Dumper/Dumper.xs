@@ -138,7 +138,11 @@ esc_q_utf8(pTHX_ SV* sv, register const char *src, register STRLEN slen)
     for (s = src; s < send; s += UTF8SKIP(s)) {
         const UV k = utf8_to_uvchr((U8*)s, NULL);
 
-        if (k > 127) {
+#ifdef EBCDIC
+	if (!isprint(k) || k > 256) {
+#else
+	if (k > 127) {
+#endif
             /* 4: \x{} then count the number of hex digits.  */
             grow += 4 + (k <= 0xFF ? 2 : k <= 0xFFF ? 3 : k <= 0xFFFF ? 4 :
 #if UVSIZE == 4
@@ -172,7 +176,12 @@ esc_q_utf8(pTHX_ SV* sv, register const char *src, register STRLEN slen)
                 *r++ = '\\';
                 *r++ = (char)k;
             }
-            else if (k < 0x80)
+            else
+#ifdef EBCDIC
+	      if (isprint(k) && k < 256)
+#else
+	      if (k < 0x80)
+#endif
                 *r++ = (char)k;
             else {
 	      /* The return value of sprintf() is unportable.

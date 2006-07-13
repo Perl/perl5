@@ -481,7 +481,8 @@ CODE:
     	/* Native bytes - can always encode */
     U8 *d = (U8 *) SvGROW(dst, 2*slen+1); /* +1 or assertion will botch */
     	while (s < e) {
-    	    UV uv = NATIVE_TO_UNI((UV) *s++);
+    	    UV uv = NATIVE_TO_UNI((UV) *s);
+	    s++; /* Above expansion of NATIVE_TO_UNI() is safer this way. */
             if (UNI_IS_INVARIANT(uv))
             	*d++ = (U8)UTF_TO_NATIVE(uv);
             else {

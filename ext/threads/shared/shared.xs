@@ -587,6 +587,11 @@ Perl_sharedsv_cond_timedwait(perl_cond *cond, perl_mutex *mut, double abs)
     switch (pthread_cond_timedwait(cond, mut, &ts)) {
         case 0:         got_it = 1; break;
         case ETIMEDOUT:             break;
+#ifdef OEMVS
+        case -1:
+	  if (errno == ETIMEDOUT || errno == EAGAIN)
+	    break;
+#endif
         default:
             Perl_croak_nocontext("panic: cond_timedwait");
             break;

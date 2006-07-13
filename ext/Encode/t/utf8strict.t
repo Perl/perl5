@@ -40,14 +40,25 @@ BEGIN {
          0x0000FFFF => 1, # 5.3.1
         );
      $NTESTS +=  scalar keys %ORD;
-     %SEQ = (
-         qq/ed 9f bf/    => 0, # 2.3.1
-         qq/ee 80 80/    => 0, # 2.3.2
-         qq/f4 8f bf bf/ => 0, # 2.3.3
-         qq/f4 90 80 80/ => 1, # 2.3.4 -- out of range so NG
-         # "3 Malformed sequences" are checked by perl.
-         # "4 Overlong sequences"  are checked by perl.
-        );
+     if (ord('A') == 193) {
+	 %SEQ = (
+		 qq/dd 64 73 73/    => 0, # 2.3.1
+		 qq/dd 67 41 41/    => 0, # 2.3.2
+		 qq/ee 42 73 73 73/ => 0, # 2.3.3
+		 qq/f4 90 80 80/ => 1, # 2.3.4 -- out of range so NG
+		 # "3 Malformed sequences" are checked by perl.
+		 # "4 Overlong sequences"  are checked by perl.
+		 );
+     } else {
+	 %SEQ = (
+		 qq/ed 9f bf/    => 0, # 2.3.1
+		 qq/ee 80 80/    => 0, # 2.3.2
+		 qq/f4 8f bf bf/ => 0, # 2.3.3
+		 qq/f4 90 80 80/ => 1, # 2.3.4 -- out of range so NG
+		 # "3 Malformed sequences" are checked by perl.
+		 # "4 Overlong sequences"  are checked by perl.
+		 );
+     }
      $NTESTS +=  scalar keys %SEQ;
 }
 use strict;

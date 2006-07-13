@@ -48,7 +48,15 @@ sub TEST {
 	: "not ok $TNUM$name\n--Expected--\n$WANT\n--Got--\n$@$t\n");
 
   ++$TNUM;
-  eval "$t";
+  if ($Is_ebcdic) { # EBCDIC.
+      if ($TNUM == 311 || $TNUM == 314) {
+	  eval $string;
+      } else {
+	  eval $t;
+      }
+  } else {
+      eval "$t";
+  }
   print $@ ? "not ok $TNUM\n# \$@ says: $@\n" : "ok $TNUM\n";
 
   $t = eval $string;
@@ -1285,20 +1293,37 @@ EOT
 
 #XXX}
 {
-  $b = "Bad. XS didn't escape dollar sign";
+    if ($Is_ebcdic) {
+	$b = "Bad. XS didn't escape dollar sign";
 ############# 322
-  $WANT = <<"EOT"; # Careful. This is '' string written inside '' here doc
+	$WANT = <<"EOT"; # Careful. This is '' string written inside '' here doc
+#\$VAR1 = '\$b\"\@\\\\\xB1';
+EOT
+        $a = "\$b\"\@\\\xB1\x{100}";
+	chop $a;
+	TEST q(Data::Dumper->Dump([$a])), "utf8 flag with \" and \$";
+	if ($XS) {
+	    $WANT = <<'EOT'; # While this is "" string written inside "" here doc
+#$VAR1 = "\$b\"\@\\\x{b1}";
+EOT
+            TEST q(Data::Dumper->Dumpxs([$a])), "XS utf8 flag with \" and \$";
+	}
+    } else {
+	$b = "Bad. XS didn't escape dollar sign";
+############# 322
+	$WANT = <<"EOT"; # Careful. This is '' string written inside '' here doc
 #\$VAR1 = '\$b\"\@\\\\\xA3';
 EOT
 
-  $a = "\$b\"\@\\\xA3\x{100}";
-  chop $a;
-  TEST q(Data::Dumper->Dump([$a])), "utf8 flag with \" and \$";
-  if ($XS) {
-    $WANT = <<'EOT'; # While this is "" string written inside "" here doc
+        $a = "\$b\"\@\\\xA3\x{100}";
+	chop $a;
+	TEST q(Data::Dumper->Dump([$a])), "utf8 flag with \" and \$";
+	if ($XS) {
+	    $WANT = <<'EOT'; # While this is "" string written inside "" here doc
 #$VAR1 = "\$b\"\@\\\x{a3}";
 EOT
-    TEST q(Data::Dumper->Dumpxs([$a])), "XS utf8 flag with \" and \$";
+            TEST q(Data::Dumper->Dumpxs([$a])), "XS utf8 flag with \" and \$";
+	}
   }
   # XS used to produce "$b\"' which is 4 chars, not 3. [ie wrongly qq(\$b\\\")]
 ############# 328
