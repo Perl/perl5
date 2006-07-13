@@ -598,13 +598,23 @@ ftp://ftp.gnu.org/pub/gnu/ , or use Johan Vromans' I<makepatch>
 but context diffs are accepted.  Do not send RCS-style diffs or diffs
 without context lines.  More information is given in the
 I<Porting/patching.pod> file in the Perl source distribution.  Please
-patch against the latest B<development> version (e.g., if you're
-fixing a bug in the 5.005 track, patch against the latest 5.005_5x
-version).  Only patches that survive the heat of the development
+patch against the latest B<development> version. (e.g., even if you're
+fixing a bug in the 5.8 track, patch against the latest B<development>
+version rsynced from rsync://public.activestate.com/perl-current/ )
+
+If changes are accepted, they are applied to the development branch. Then
+the 5.8 pumpking decides which of those patches is to be backported to the
+maint branch.  Only patches that survive the heat of the development
 branch get applied to maintenance versions.
 
-Your patch should update the documentation and test suite.  See
+Your patch should also update the documentation and test suite.  See
 L<Writing a test>.
+
+Patching documentation also follows the same order: if accepted, a patch
+is first applied to B<development>, and if relevant then it's backported
+to B<maintenance>. (With an exception for some patches that document
+behaviour that only appears in the maintenance branch, but which has
+changed in the development version.)
 
 To report a bug in Perl, use the program I<perlbug> which comes with
 Perl (if you can't get Perl to work, send mail to the address
