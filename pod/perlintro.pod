@@ -54,6 +54,9 @@ Alternatively, put this as the first line of your script:
 ... and run the script as C</path/to/script.pl>.  Of course, it'll need
 to be executable first, so C<chmod 755 script.pl> (under Unix).
 
+(This start line assumes you have the B<env> program. You can also put
+directly the path to your perl executable, like in C<#!/usr/bin/perl>).
+
 For more information, including instructions for other platforms such as
 Windows and Mac OS, read L<perlrun>.
 
