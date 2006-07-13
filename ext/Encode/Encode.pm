@@ -4,7 +4,7 @@
 package Encode;
 use strict;
 use warnings;
-our $VERSION = sprintf "%d.%02d", q$Revision: 2.18 $ =~ /(\d+)/g;
+our $VERSION = "2.18_01";
 sub DEBUG () { 0 }
 use XSLoader ();
 XSLoader::load( __PACKAGE__, $VERSION );

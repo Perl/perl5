@@ -7,7 +7,7 @@ BEGIN {
     require Exporter;
     our @ISA = qw(Exporter);
     our @EXPORT = qw(share cond_wait cond_timedwait cond_broadcast cond_signal);
-    our $VERSION = '0.94';
+    our $VERSION = '0.94_01';
 
     if ($threads::threads) {
 	*cond_wait = \&cond_wait_enabled;
