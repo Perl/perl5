@@ -121,7 +121,7 @@ is( $foo->bazmarkhianish($1), 'foo', '(again)' );
 eval {
   $foo->blechanawilla;
 };
-like( $@, qr/syntax error/, 'require error propagates' );
+like( $@, qr/syntax error/i, 'require error propagates' );
 
 # test recursive autoloads
 open(F, '>', File::Spec->catfile( $fulldir, 'a.al'))

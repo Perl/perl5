@@ -3588,7 +3588,7 @@ sub const {
 	return $self->maybe_parens("\\" . $self->const($ref, 20), $cx, 20);
     } elsif ($sv->FLAGS & SVf_POK) {
 	my $str = $sv->PV;
-	if ($str =~ /[^ -~]/) { # ASCII for non-printing
+	if ($str =~ /[[:^print:]]/) {
 	    return single_delim("qq", '"', uninterp escape_str unback $str);
 	} else {
 	    return single_delim("q", "'", unback $str);
