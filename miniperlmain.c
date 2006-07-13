@@ -44,8 +44,14 @@ static PerlInterpreter *my_perl;
 long _stksize = 64 * 1024;
 #endif
 
+#ifdef NO_ENV_ARRAY_IN_MAIN
+extern char **environ;
+int
+main(int argc, char **argv)
+#else
 int
 main(int argc, char **argv, char **env)
+#endif
 {
     int exitstatus;
     (void)env;
@@ -69,7 +75,11 @@ main(int argc, char **argv, char **env)
     /* noop unless Configure is given -Accflags=-DPERL_GPROF_CONTROL */
     PERL_GPROF_MONCONTROL(0);
 
+#ifdef NO_ENV_ARRAY_IN_MAIN
+    PERL_SYS_INIT3(&argc,&argv,&environ);
+#else
     PERL_SYS_INIT3(&argc,&argv,&env);
+#endif
 
 #if defined(USE_5005THREADS) || defined(USE_ITHREADS)
     /* XXX Ideally, this should really be happening in perl_alloc() or
@@ -102,7 +112,7 @@ main(int argc, char **argv, char **env)
 
     perl_free(my_perl);
 
-#if defined(USE_ENVIRON_ARRAY) && defined(PERL_TRACK_MEMPOOL)
+#if defined(USE_ENVIRON_ARRAY) && defined(PERL_TRACK_MEMPOOL) && !defined(NO_ENV_ARRAY_IN_MAIN)
     /*
      * The old environment may have been freed by perl_free()
      * when PERL_TRACK_MEMPOOL is defined, but without having

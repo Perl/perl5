@@ -69,13 +69,23 @@ my $db2 = tie(%h2, 'SDBM_File','Op_dbmx', O_RDWR|O_CREAT, 0640) ;
 
 ok $db2, "tied to SDBM_File";
 
-VerifyData(\%h2,
-	{
-		'alpha'	=> "\xCE\xB1",
-		'beta'	=> "\xCE\xB2",
-		"\xCE\xB3"=> "gamma",
-		""		=> "",
-	});
+if (ord('A') == 193) { # EBCDIC.
+    VerifyData(\%h2,
+	   {
+	    'alpha'	=> "\xB4\x58",
+	    'beta'	=> "\xB4\x59",
+	    "\xB4\x62"=> "gamma",
+	    ""		=> "",
+	   });
+} else {
+    VerifyData(\%h2,
+	   {
+	    'alpha'	=> "\xCE\xB1",
+	    'beta'	=> "\xCE\xB2",
+	    "\xCE\xB3"=> "gamma",
+	    ""		=> "",
+	   });
+}
 
 undef $db2;
 {

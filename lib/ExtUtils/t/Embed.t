@@ -79,7 +79,9 @@ if ($^O eq 'VMS') {
 	push(@cmd,"-L$lib",File::Spec->catfile($lib,$Config{'libperl'}),$Config{'libc'});
     }
    }
-   else { # Not MSWin32.
+   elsif ($^O eq 'os390' && $Config{usedl}) {
+    # Nothing for OS/390 (z/OS) dynamic.
+   } else { # Not MSWin32 or OS/390 (z/OS) dynamic.
     push(@cmd,"-L$lib",'-lperl');
     local $SIG{__WARN__} = sub {
 	warn $_[0] unless $_[0] =~ /No library found for .*perl/
@@ -164,7 +166,12 @@ static struct perl_vars *my_plvarsp;
 struct perl_vars* Perl_GetVarsPrivate(void) { return my_plvarsp; }
 #endif
 
+#ifdef NO_ENV_ARRAY_IN_MAIN
+extern char **environ;
+int main(int argc, char **argv)
+#else
 int main(int argc, char **argv, char **env)
+#endif
 {
     PerlInterpreter *my_perl;
 #ifdef PERL_GLOBAL_STRUCT
@@ -177,7 +184,11 @@ int main(int argc, char **argv, char **env)
 
     (void)argc; /* PERL_SYS_INIT3 may #define away their use */
     (void)argv;
+#ifdef NO_ENV_ARRAY_IN_MAIN
+    PERL_SYS_INIT3(&argc,&argv,&environ);
+#else
     PERL_SYS_INIT3(&argc,&argv,&env);
+#endif
 
     my_perl = perl_alloc();
 
@@ -187,7 +198,11 @@ int main(int argc, char **argv, char **env)
 
     my_puts("ok 3");
 
+#ifdef NO_ENV_ARRAY_IN_MAIN
+    perl_parse(my_perl, NULL, (sizeof(cmds)/sizeof(char *))-1, cmds, environ);
+#else
     perl_parse(my_perl, NULL, (sizeof(cmds)/sizeof(char *))-1, cmds, env);
+#endif
 
     my_puts("ok 4");
 
