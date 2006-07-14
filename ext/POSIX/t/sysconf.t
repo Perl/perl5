@@ -58,10 +58,14 @@ SKIP: {
         or skip "could not open current directory ($!)", 3 * @path_consts;
 
     for my $constant (@path_consts) {
-        $r = eval { fpathconf( $fd, eval "$constant()" ) };
-        is( $@, '', "calling fpathconf($fd, $constant) " );
-        ok( defined $r, "\tchecking that the returned value is defined: $r" );
-        ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
+        SKIP: {
+            skip "_PC_CHOWN_RESTRICTED is unreliable on HP-UX", 3
+                if $^O eq "hpux" && $constant eq "_PC_CHOWN_RESTRICTED";
+            $r = eval { fpathconf( $fd, eval "$constant()" ) };
+            is( $@, '', "calling fpathconf($fd, $constant) " );
+            ok( defined $r, "\tchecking that the returned value is defined: $r" );
+            ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
+        }
     }
     
     POSIX::close($fd);
@@ -69,10 +73,14 @@ SKIP: {
 
 # testing pathconf() on a non-terminal file
 for my $constant (@path_consts) {
-    $r = eval { pathconf( $curdir, eval "$constant()" ) };
-    is( $@, '', qq[calling pathconf("$curdir", $constant)] );
-    ok( defined $r, "\tchecking that the returned value is defined: $r" );
-    ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
+    SKIP: {
+        skip "_PC_CHOWN_RESTRICTED is unreliable on HP-UX", 3
+            if $^O eq "hpux" && $constant eq "_PC_CHOWN_RESTRICTED";
+        $r = eval { pathconf( $curdir, eval "$constant()" ) };
+        is( $@, '', qq[calling pathconf("$curdir", $constant)] );
+        ok( defined $r, "\tchecking that the returned value is defined: $r" );
+        ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
+    }
 }
 
 SKIP: {
