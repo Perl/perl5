@@ -29,16 +29,15 @@ HV* HUF_get_ob_reg(void) {
     items = call_pv(HUF_OB_REG, G_SCALAR|G_NOARGS);
     SPAGAIN;
 
-    if (items == 1 && TOPs && SvROK(TOPs) && SvTYPE(SvRV(TOPs)) == SVt_PVHV) {
+    if (items == 1 && TOPs && SvROK(TOPs) && SvTYPE(SvRV(TOPs)) == SVt_PVHV)
         ob_reg = (HV*)SvRV(POPs);
-    }
     PUTBACK;
     FREETMPS;
     LEAVE;
 
-    if (ob_reg)
-        return ob_reg;
-    Perl_die(aTHX_ "Can't get object registry hash");
+    if (!ob_reg)
+        Perl_die(aTHX_ "Can't get object registry hash");
+    return ob_reg;
 }
 
 /* Deal with global context */
@@ -192,16 +191,18 @@ void HUF_mark_field(SV* trigger, SV* field) {
 I32 HUF_watch_key(pTHX_ IV action, SV* field) {
     MAGIC* mg = mg_find(field, PERL_MAGIC_uvar);
     SV* keysv;
-    if (!mg)
-        Perl_die(aTHX_ "Rogue call of 'HUF_watch_key'");
-    keysv = mg->mg_obj;
-    if (keysv && SvROK(keysv)) {
-        SV* ob_id = HUF_obj_id(keysv);
-        mg->mg_obj = ob_id; /* key replacement */
-        if (HUF_WOULD_CREATE_KEY(action)) {
-            SV* trigger = HUF_get_trigger(keysv, ob_id);
-            HUF_mark_field(trigger, field);
+    if (mg) {
+        keysv = mg->mg_obj;
+        if (keysv && SvROK(keysv)) {
+            SV* ob_id = HUF_obj_id(keysv);
+            mg->mg_obj = ob_id; /* key replacement */
+            if (HUF_WOULD_CREATE_KEY(action)) {
+                SV* trigger = HUF_get_trigger(keysv, ob_id);
+                HUF_mark_field(trigger, field);
+            }
         }
+    } else {
+        Perl_die(aTHX_ "Rogue call of 'HUF_watch_key'");
     }
     return 0;
 }
