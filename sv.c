@@ -1032,7 +1032,7 @@ static const struct body_details bodies_by_type[] = {
 #define new_NOARENAZ(details) \
 	my_safecalloc((details)->body_size + (details)->offset)
 
-#ifdef DEBUGGING
+#if defined(DEBUGGING) && !defined(PERL_GLOBAL_STRUCT_PRIVATE)
 static bool done_sanity_check;
 #endif
 
@@ -1048,7 +1048,9 @@ S_more_bodies (pTHX_ svtype sv_type)
 
     assert(bdp->arena_size);
 
-#ifdef DEBUGGING
+#if defined(DEBUGGING) && !defined(PERL_GLOBAL_STRUCT_PRIVATE)
+    /* PERL_GLOBAL_STRUCT_PRIVATE cannot coexist with global
+     * variables like done_sanity_check. */
     if (!done_sanity_check) {
 	unsigned int i = SVt_LAST;
 

@@ -2577,6 +2577,7 @@ Perl_hv_placeholders_set(pTHX_ HV *hv, I32 ph)
 SV *
 S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
 {
+    dVAR;
     SV *value;
     switch(he->refcounted_he_data[0] & HVrhek_typemask) {
     case HVrhek_undef:
@@ -2728,6 +2729,7 @@ SV *
 Perl_refcounted_he_fetch(pTHX_ const struct refcounted_he *chain, SV *keysv,
 			 const char *key, STRLEN klen, int flags, U32 hash)
 {
+    dVAR;
     /* Just to be awkward, if you're using this interface the UTF-8-or-not-ness
        of your key has to exactly match that which is stored.  */
     SV *value = &PL_sv_placeholder;
