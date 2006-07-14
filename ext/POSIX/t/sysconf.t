@@ -153,11 +153,12 @@ END {
 # testing sysconf()
 for my $constant (@sys_consts) {
  SKIP: {
-	skip "Saved IDs broken on Mac OS X (Perl #24122)", 3
-	    if $^O eq 'darwin' && $constant eq '_SC_SAVED_IDS';
+	$! = 0;
 	$r = eval { sysconf( eval "$constant()" ) };
+	my $s = defined($r) || $! == 0;
 	is( $@, '', "calling sysconf($constant)" );
-	ok( defined $r, "\tchecking that the returned value is defined: $r" );
+	ok( $s, "\tchecking that the returned value is defined or that errno is clear: $r $!" );
+	skip "$constant not implemented on $^O", 1 if $s && !defined($r);
 	ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
     }
 }
