@@ -972,3 +972,7 @@ x(?#	x	c	-	Sequence (?#... not terminated
 X(A|B||C|D)Y	XXXYYY	y	$&	XY	# Trie w/ NOTHING
 (?i:X([A]|[B]|y[Y]y|[D]|)Y)	XXXYYYB	y	$&	XY	# Trie w/ NOTHING
 ^([a]{1})*$	aa	y	$1	a
+a(?!b(?!c))(..)	abababc	y	$1	bc	# test nested negatives
+a(?!b(?=a))(..)	abababc	y	$1	bc	# test nested lookaheads
+a(?!b(?!c(?!d(?!e))))...(.)	abxabcdxabcde	y	$1	e
+X(?!b+(?!(c+)*(?!(c+)*d))).*X	aXbbbbbbbcccccccccccccaaaX	y	-	-

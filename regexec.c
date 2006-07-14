@@ -2099,53 +2099,13 @@ S_regtry(pTHX_ const regmatch_info *reginfo, char *startpos)
 #define sayNO_SILENT goto do_no
 #define saySAME(x) if (x) goto yes; else goto no
 
-#define POSCACHE_SUCCESS 0	/* caching success rather than failure */
-#define POSCACHE_SEEN 1		/* we know what we're caching */
-#define POSCACHE_START 2	/* the real cache: this bit maps to pos 0 */
-
-#define CACHEsayYES STMT_START { \
-    if (st->u.whilem.cache_offset | st->u.whilem.cache_bit) { \
-	if (!(PL_reg_poscache[0] & (1<<POSCACHE_SEEN))) { \
-	    PL_reg_poscache[0] |= (1<<POSCACHE_SUCCESS) | (1<<POSCACHE_SEEN); \
-	    PL_reg_poscache[st->u.whilem.cache_offset] |= (1<<st->u.whilem.cache_bit); \
-	} \
-        else if (PL_reg_poscache[0] & (1<<POSCACHE_SUCCESS)) { \
-	    PL_reg_poscache[st->u.whilem.cache_offset] |= (1<<st->u.whilem.cache_bit); \
-	} \
-	else { \
-	    /* cache records failure, but this is success */ \
-	    DEBUG_r( \
-		PerlIO_printf(Perl_debug_log, \
-		    "%*s  (remove success from failure cache)\n", \
-		    REPORT_CODE_OFF+PL_regindent*2, "") \
-	    ); \
-	    PL_reg_poscache[st->u.whilem.cache_offset] &= ~(1<<st->u.whilem.cache_bit); \
-	} \
-    } \
-    sayYES; \
-} STMT_END
-
 #define CACHEsayNO STMT_START { \
-    if (st->u.whilem.cache_offset | st->u.whilem.cache_bit) { \
-	if (!(PL_reg_poscache[0] & (1<<POSCACHE_SEEN))) { \
-	    PL_reg_poscache[0] |= (1<<POSCACHE_SEEN); \
-	    PL_reg_poscache[st->u.whilem.cache_offset] |= (1<<st->u.whilem.cache_bit); \
-	} \
-        else if (!(PL_reg_poscache[0] & (1<<POSCACHE_SUCCESS))) { \
-	    PL_reg_poscache[st->u.whilem.cache_offset] |= (1<<st->u.whilem.cache_bit); \
-	} \
-	else { \
-	    /* cache records success, but this is failure */ \
-	    DEBUG_r( \
-		PerlIO_printf(Perl_debug_log, \
-		    "%*s  (remove failure from success cache)\n", \
-		    REPORT_CODE_OFF+PL_regindent*2, "") \
-	    ); \
-	    PL_reg_poscache[st->u.whilem.cache_offset] &= ~(1<<st->u.whilem.cache_bit); \
-	} \
-    } \
+    if (st->u.whilem.cache_offset | st->u.whilem.cache_bit) \
+       PL_reg_poscache[st->u.whilem.cache_offset] |= \
+	    (1<<st->u.whilem.cache_bit); \
     sayNO; \
 } STMT_END
+
 
 /* this is used to determine how far from the left messages like
    'failed...' are printed. Currently 29 makes these messages line
@@ -3587,7 +3547,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    PL_reg_leftiter = PL_reg_maxiter;
 		}
 		if (PL_reg_leftiter-- == 0) {
-		    const I32 size = (PL_reg_maxiter + 7 + POSCACHE_START)/8;
+		    const I32 size = (PL_reg_maxiter + 7)/8;
 		    if (PL_reg_poscache) {
 			if ((I32)PL_reg_poscache_size < size) {
 			    Renew(PL_reg_poscache, size, char);
@@ -3608,7 +3568,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		if (PL_reg_leftiter < 0) {
 		    st->u.whilem.cache_offset = locinput - PL_bostr;
 
-		    st->u.whilem.cache_offset = (scan->flags & 0xf) - 1 + POSCACHE_START
+		    st->u.whilem.cache_offset = (scan->flags & 0xf) - 1
 			    + st->u.whilem.cache_offset * (scan->flags>>4);
 		    st->u.whilem.cache_bit = st->u.whilem.cache_offset % 8;
 		    st->u.whilem.cache_offset /= 8;
@@ -3618,12 +3578,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 				      "%*s  already tried at this position...\n",
 				      REPORT_CODE_OFF+PL_regindent*2, "")
 			);
-			if (PL_reg_poscache[0] & (1<<POSCACHE_SUCCESS))
-			    /* cache records success */
-			    sayYES;
-			else
-			    /* cache records failure */
-			    sayNO_SILENT;
+			sayNO; /* cache records failure */
 		    }
 		}
 		}
@@ -3642,7 +3597,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    st->cc = st->u.whilem.savecc;
 		    if (result) {
 			regcpblow(st->u.whilem.cp);
-			CACHEsayYES;	/* All done. */
+			sayYES;	/* All done. */
 		    }
 		    REGCP_UNWIND(st->u.whilem.lastcp);
 		    regcppop(rex);
@@ -3675,7 +3630,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    /*** all unsaved local vars undefined at this point */
 		    if (result) {
 			regcpblow(st->u.whilem.cp);
-			CACHEsayYES;
+			sayYES;
 		    }
 		    REGCP_UNWIND(st->u.whilem.lastcp);
 		    regcppop(rex);
@@ -3695,7 +3650,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    /*** all unsaved local vars undefined at this point */
 		    if (result) {
 			regcpblow(st->u.whilem.cp);
-			CACHEsayYES;
+			sayYES;
 		    }
 		    REGCP_UNWIND(st->u.whilem.lastcp);
 		    regcppop(rex);	/* Restore some previous $<digit>s? */
@@ -3723,7 +3678,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		/*** all unsaved local vars undefined at this point */
 		st->cc = st->u.whilem.savecc;
 		if (result)
-		    CACHEsayYES;
+		    sayYES;
 		if (st->cc->u.curlyx.outercc)
 		    st->cc->u.curlyx.outercc->u.curlyx.cur = st->ln;
 		st->cc->u.curlyx.cur = n - 1;
