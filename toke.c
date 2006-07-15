@@ -1699,12 +1699,12 @@ S_sublex_done(pTHX)
   Extracts a pattern, double-quoted string, or transliteration.  This
   is terrifying code.
 
-  It looks at lex_inwhat and PL_lex_inpat to find out whether it's
+  It looks at PL_lex_inwhat and PL_lex_inpat to find out whether it's
   processing a pattern (PL_lex_inpat is true), a transliteration
-  (lex_inwhat & OP_TRANS is true), or a double-quoted string.
+  (PL_lex_inwhat == OP_TRANS is true), or a double-quoted string.
 
-  Returns a pointer to the character scanned up to. Iff this is
-  advanced from the start pointer supplied (ie if anything was
+  Returns a pointer to the character scanned up to. If this is
+  advanced from the start pointer supplied (i.e. if anything was
   successfully parsed), will leave an OP for the substring scanned
   in yylval. Caller must intuit reason for not parsing further
   by looking at the next characters herself.
@@ -1713,21 +1713,23 @@ S_sublex_done(pTHX)
     backslashes:
       double-quoted style: \r and \n
       regexp special ones: \D \s
-      constants: \x3
-      backrefs: \1 (deprecated in substitution replacements)
+      constants: \x31
+      backrefs: \1
       case and quoting: \U \Q \E
     stops on @ and $, but not for $ as tail anchor
 
   In transliterations:
     characters are VERY literal, except for - not at the start or end
-    of the string, which indicates a range.  scan_const expands the
-    range to the full set of intermediate characters.
+    of the string, which indicates a range. If the range is in bytes,
+    scan_const expands the range to the full set of intermediate
+    characters. If the range is in utf8, the hyphen is replaced with
+    a certain range mark which will be handled by pmtrans() in op.c.
 
   In double-quoted strings:
     backslashes:
       double-quoted style: \r and \n
-      constants: \x3
-      backrefs: \1 (deprecated)
+      constants: \x31
+      deprecated backrefs: \1 (in substitution replacements)
       case and quoting: \U \Q \E
     stops on @ and $
 
@@ -1735,31 +1737,35 @@ S_sublex_done(pTHX)
   It stops processing as soon as it finds an embedded $ or @ variable
   and leaves it to the caller to work out what's going on.
 
-  @ in pattern could be: @foo, @{foo}, @$foo, @'foo, @::foo.
+  embedded arrays (whether in pattern or not) could be:
+      @foo, @::foo, @'foo, @{foo}, @$foo, @+, @-.
+
+  $ in double-quoted strings must be the symbol of an embedded scalar.
 
   $ in pattern could be $foo or could be tail anchor.  Assumption:
   it's a tail anchor if $ is the last thing in the string, or if it's
-  followed by one of ")| \n\t"
+  followed by one of "()| \r\n\t"
 
   \1 (backreferences) are turned into $1
 
   The structure of the code is
       while (there's a character to process) {
-          handle transliteration ranges
-	  skip regexp comments
-	  skip # initiated comments in //x patterns
-	  check for embedded @foo
+	  handle transliteration ranges
+	  skip regexp comments /(?#comment)/ and codes /(?{code})/
+	  skip #-initiated comments in //x patterns
+	  check for embedded arrays
 	  check for embedded scalars
 	  if (backslash) {
-	      leave intact backslashes from leave (below)
-	      deprecate \1 in strings and sub replacements
+	      leave intact backslashes from leaveit (below)
+	      deprecate \1 in substitution replacements
 	      handle string-changing backslashes \l \U \Q \E, etc.
 	      switch (what was escaped) {
-	          handle - in a transliteration (becomes a literal -)
-		  handle \132 octal characters
-		  handle 0x15 hex characters
-		  handle \cV (control V)
-		  handle printf backslashes (\f, \r, \n, etc)
+		  handle \- in a transliteration (becomes a literal -)
+		  handle \132 (octal characters)
+		  handle \x15 and \x{1234} (hex characters)
+		  handle \N{name} (named characters)
+		  handle \cV (control characters)
+		  handle printf-style backslashes (\f, \r, \n, etc)
 	      } (end switch)
 	  } (end if backslash)
     } (end while character to read)
