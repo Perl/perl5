@@ -2039,6 +2039,7 @@ lib/Module/Build/t/signature.t	Module::Build
 lib/Module/Build/t/tilde.t	Module::Build
 lib/Module/Build/t/versions.t	Module::Build
 lib/Module/Build/t/xs.t		Module::Build
+lib/Module/Build/Version.pm	Module::Build
 lib/Module/Build/YAML.pm	Module::Build
 lib/Module/CoreList/bin/corelist	Module::CoreList
 lib/Module/CoreList.pm			Module::CoreList
