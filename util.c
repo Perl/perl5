@@ -5465,11 +5465,10 @@ Perl_my_clearenv(pTHX)
       int l = e ? e - *environ : strlen(*environ);
       if (bsiz < l + 1) {
         (void)safesysfree(buf);
-        bsiz = l + 1;
+        bsiz = l + 1; /* + 1 for the \0. */
         buf = (char*)safesysmalloc(bufsiz);
       } 
-      my_strlcpy(buf, bufsiz, *environ, l);
-      *(buf + l) = '\0';
+      my_strlcpy(buf, *environ, l + 1);
       (void)unsetenv(buf);
     }
     (void)safesysfree(buf);
