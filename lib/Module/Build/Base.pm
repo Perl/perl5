@@ -499,9 +499,8 @@ EOF
 
   my $ans = $self->_readline();
 
-  if ( !defined($ans) ) {     # Ctrl-D
-    print "\n";
-  } elsif ( !length($ans) ) { # Default
+  if ( !defined($ans)        # Ctrl-D or unattended
+       or !length($ans) ) {  # User hit return
     print "$def\n";
     $ans = $def;
   }
@@ -1233,10 +1232,8 @@ sub check_installed_status {
 sub compare_versions {
   my $self = shift;
   my ($v1, $op, $v2) = @_;
-
-  # for alpha versions - this doesn't cover all cases, but should work for most:
-  $v1 =~ s/_(\d+)\z/$1/;
-  $v2 =~ s/_(\d+)\z/$1/;
+  $v1 = Module::Build::Version->new($v1) 
+    unless UNIVERSAL::isa($v1,'Module::Build::Version');
 
   my $eval_str = "\$v1 $op \$v2";
   my $result   = eval $eval_str;
@@ -2444,6 +2441,7 @@ sub _find_pods {
   foreach my $spec (@$dirs) {
     my $dir = $self->localize_dir_path($spec);
     next unless -e $dir;
+
     FILE: foreach my $file ( @{ $self->rscan_dir( $dir ) } ) {
       foreach my $regexp ( @{ $args{exclude} } ) {
 	next FILE if $file =~ $regexp;

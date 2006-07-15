@@ -201,7 +201,7 @@ chdir( $cwd ) or die "Can''t chdir to '$cwd': $!";
 $dist->remove;
 
 SKIP: {
-  skip( 'Windows only test', 4 ) unless $^O =~ /^MSWin/;
+  skip( 'Windows-only test', 4 ) unless $^O =~ /^MSWin/;
 
   my $script_data = <<'---';
 @echo off

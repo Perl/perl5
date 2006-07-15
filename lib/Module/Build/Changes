@@ -1,5 +1,17 @@
 Revision history for Perl extension Module::Build.
 
+0.2802  Fri Jul 14 22:40:34 CDT 2006
+
+ - Added reliance on version.pm, which means we should deal much
+   better with the wide range of version specifications one finds on
+   CPAN.  This is made possible by recent releases of version.pm that
+   give the user a pure-perl option, so installing version.pm
+   shouldn't be too onerous for most users.  [John Peacock]
+
+ - We should be accepting the default when we're in unattended mode,
+   not acting dumb and ignoring both the default and the [empty]
+   answer from the user.  Fixed.  [Spotted by Nik Clayton]
+
 0.2801  Sun May 21 00:07:40 CDT 2006
 
  - Module::Build::Compat's emulation of INC is incorrectly prepending

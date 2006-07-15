@@ -2,7 +2,7 @@
 
 use strict;
 use lib $ENV{PERL_CORE} ? '../lib/Module/Build/t/lib' : 't/lib';
-use MBTest tests => 66;
+use MBTest tests => 72;
 
 use Cwd ();
 my $cwd = Cwd::cwd;
@@ -163,6 +163,15 @@ __PACKAGE__->mk_accessors(qw(
 
 our $VERSION = "1.23";
 ---
+  <<'---', # $VERSION using version.pm
+  package Simple;
+  use version; our $VERSION = version->new('1.23');
+---
+  <<'---', # $VERSION using version.pm and qv()
+  package Simple;
+  use version; our $VERSION = qv('1.230');
+---
+
 );
 
 my( $i, $n ) = ( 1, scalar( @modules ) );
@@ -178,7 +187,7 @@ foreach my $module ( @modules ) {
     local $SIG{__WARN__} = sub { $warnings .= $_ for @_ };
     my $pm_info = Module::Build::ModuleInfo->new_from_file( $file );
 
-    is( $pm_info->version, '1.23',
+    cmp_ok( $pm_info->version, '==', '1.23',
 	"correct module version ($i of $n)" );
     is( $warnings, '', 'no warnings from parsing' );
     $i++;
@@ -223,6 +232,26 @@ $pm_info = Module::Build::ModuleInfo->new_from_file( $file );
 is( $pm_info->name, undef, 'no default package' );
 is( $pm_info->version, undef, 'no version w/o default package' );
 
+# Module 'Simple.pm' contains an alpha version
+# constructor should report first $VERSION found
+$dist->change_file( 'lib/Simple.pm', <<'---' );
+package Simple;
+$VERSION = '1.23_01';
+$VERSION = eval $VERSION;
+---
+
+$dist->regen;
+$pm_info = Module::Build::ModuleInfo->new_from_file( $file );
+
+is( $pm_info->version, '1.23_01', 'alpha version reported');
+
+# NOTE the following test has be done this way because Test::Builder is
+# too smart for our own good and tries to see if the version object is a 
+# dual-var, which breaks with alpha versions:
+#    Argument "1.23_0100" isn't numeric in addition (+) at
+#    /usr/lib/perl5/5.8.7/Test/Builder.pm line 505. 
+
+ok( $pm_info->version > 1.23, 'alpha version greater than non');
 
 # revert to pristine state
 chdir( $cwd ) or die "Can''t chdir to '$cwd': $!";

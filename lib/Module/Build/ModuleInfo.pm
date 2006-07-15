@@ -8,6 +8,7 @@ use strict;
 
 use File::Spec;
 use IO::File;
+use Module::Build::Version;
 
 
 my $PKG_REGEXP  = qr/   # match a package declaration
@@ -283,23 +284,14 @@ sub _evaluate_version_line {
 		   $line
 		 }; \$$var
 		};
+
   local $^W;
-
-  # version.pm will change the ->VERSION method, so we mitigate the
-  # potential effects here.  Unfortunately local(*UNIVERSAL::VERSION)
-  # will crash perl < 5.8.1.  We also use * Foo::VERSION instead of
-  # *Foo::VERSION so that old versions of CPAN.pm, etc. with a
-  # too-permissive regex don't think we're actually declaring a
-  # version.
-
-  my $old_version = \&UNIVERSAL::VERSION;
-  eval {require version};
+  # Try and get the $VERSION
   my $result = eval $eval;
-  * UNIVERSAL::VERSION = $old_version;
   warn "Error evaling version line '$eval' in $self->{filename}: $@\n" if $@;
 
-  # Unbless it if it's a version.pm object
-  $result = $result->numify if UNIVERSAL::isa($result, 'version');
+  # Bless it into our own version class
+  $result = Module::Build::Version->new($result);
 
   return $result;
 }
