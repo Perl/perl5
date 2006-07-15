@@ -186,15 +186,19 @@ for file do
     doio) ;;
     doop) ;;
     dump) ;;
+    globals) ;;
     gv) ;;
     hv) ;;
     locale) ;;
+    madly) ;;
     main) ;;
     malloc) ;;
     mg) ;;
     miniperlmain) ;;
     numeric) ;;
     op) ;;
+    opmini) ;;
+    pad) ;;
     perl) ;;
     perlapi) ;;
     perlmain) ;;
@@ -203,6 +207,7 @@ for file do
     pp_ctl) ;;
     pp_hot) ;;
     pp_pack) ;;
+    pp_sort) ;;
     pp_sys) ;;
     regcomp) ;;
     regexec) ;;
@@ -211,8 +216,11 @@ for file do
     sv) ;;
     taint) ;;
     toke) ;;
+    universal) ;;
     usersub) ;;
+    utf8) ;;
     util) ;;
+    xsutils) ;;
     *) ;;
     esac
 
