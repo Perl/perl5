@@ -33,7 +33,7 @@ esac
 # The gcc -ansi -pedantic require their own dance, too.
 case "$gccversion" in
 '') ;;
-Intel*) ;;
+Intel*) ;; # Is that you, Intel C++?
 *)  case "$gccansipedantic" in
     define)
 	case "$gccversion" in
@@ -71,7 +71,7 @@ esac
 case "$gccversion" in
 '') ;;
 [12]*) ;;
-Intel*) ;;
+Intel*) ;; # Haven't we been through this already?
 *)  for opt in '' extra declaration-after-statement endif-labels
     do
        case " $ccflags " in
@@ -88,6 +88,21 @@ Intel*) ;;
     ;;
 esac
 
+
+stdflags=''
+
+# Be strict C89 for gcc (but not for g++).
+case "$gccversion" in
+'') ;;
+Intel*) ;; # Nice try, Intel C++.
+12]*) ;; # Go easy on the older versions of gcc.
+*) case "$cc" in
+   *g++*) ;;
+   *) stdflags="$stdflags -std=c89" ;;
+   esac
+   ;;
+esac
+
 echo "Extracting cflags (with variable substitutions)"
 : This section of the file will have variable substitutions done on it.
 : Move anything that needs config subs from !NO!SUBS! section to !GROK!THIS!.
@@ -97,8 +112,10 @@ rm -f cflags
 $spitshell >cflags <<!GROK!THIS!
 $startsh
 
-# Used for gcc.
+# Extra warnings, used e.g. for gcc.
 warn="$warn"
+# Extra standardness.
+stdflags="$stdflags"
 
 !GROK!THIS!
 
@@ -204,8 +221,8 @@ if test -f .patch; then
 fi
 
     : Can we perhaps use $ansi2knr here
-    echo "$cc -c -DPERL_CORE $ccflags $optimize $warn"
-    eval "$also "'"$cc -DPERL_CORE -c $ccflags $optimize $warn"'
+    echo "$cc -c -DPERL_CORE $ccflags $stdflags $optimize $warn"
+    eval "$also "'"$cc -DPERL_CORE -c $ccflags $stdflags $optimize $warn"'
 
     . $TOP/config.sh
 
