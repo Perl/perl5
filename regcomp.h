@@ -567,6 +567,7 @@ re.pm, especially to the documentation.
 #define RE_DEBUG_EXTRA_MASK        0xFF0000
 #define RE_DEBUG_EXTRA_TRIE        0x010000
 #define RE_DEBUG_EXTRA_OFFSETS     0x020000
+#define RE_DEBUG_EXTRA_STATE       0x040000
 
 #define RE_DEBUG_FLAG(x) (re_debug_flags & x)
 /* Compile */
@@ -598,6 +599,8 @@ re.pm, especially to the documentation.
 /* Extra */
 #define DEBUG_EXTRA_r(x) DEBUG_r( \
     if (re_debug_flags & RE_DEBUG_EXTRA_MASK) x  )
+#define DEBUG_STATE_r(x) DEBUG_r( \
+    if (re_debug_flags & RE_DEBUG_EXTRA_STATE) x )
 #define MJD_OFFSET_DEBUG(x) DEBUG_r( \
     if (re_debug_flags & RE_DEBUG_EXTRA_OFFSETS) \
         Perl_warn_nocontext x )
@@ -623,14 +626,41 @@ re.pm, especially to the documentation.
 })
 
 #ifdef DEBUGGING
+
 #define GET_RE_DEBUG_FLAGS_DECL IV re_debug_flags = 0; GET_RE_DEBUG_FLAGS;
-#define RE_PV_DISPLAY_DECL(rpv,rlen,isuni,dsv,pv,l,m) \
-    const char * const rpv = (isuni) ?  \
-	    pv_uni_display(dsv, (U8*)(pv), l, m, UNI_DISPLAY_REGEX) : \
-	    pv_escape(dsv, pv, l, m, 0); \
+
+#define RE_PV_COLOR_DECL(rpv,rlen,isuni,dsv,pv,l,m,c1,c2) \
+    const char * const rpv =                          \
+        pv_pretty((dsv), (U8*)(pv), (l), (m), \
+            PL_colors[(c1)],PL_colors[(c2)], \
+            ((isuni) ? PERL_PV_ESCAPE_UNI : 0) );         \
     const int rlen = SvCUR(dsv)
-#else
+
+#define RE_SV_ESCAPE(rpv,isuni,dsv,sv,m) \
+    const char * const rpv =                          \
+        pv_pretty((dsv), (U8*)(SvPV_nolen_const(sv)), (SvCUR(sv)), (m), \
+            PL_colors[(c1)],PL_colors[(c2)], \
+            ((isuni) ? PERL_PV_ESCAPE_UNI : 0) )
+
+#define RE_PV_QUOTED_DECL(rpv,isuni,dsv,pv,l,m)                    \
+    const char * const rpv =                                       \
+        pv_pretty((dsv), (U8*)(pv), (l), (m), \
+            PL_colors[0], PL_colors[1], \
+            ( PERL_PV_PRETTY_QUOTE | PERL_PV_PRETTY_ELIPSES |      \
+              ((isuni) ? PERL_PV_ESCAPE_UNI : 0))                  \
+        )                                                  
+
+#define RE_SV_DUMPLEN(ItEm) (SvCUR(ItEm) - (SvTAIL(ItEm)!=0))
+#define RE_SV_TAIL(ItEm) (SvTAIL(ItEm) ? "$" : "")
+    
+#else /* if not DEBUGGING */
+
 #define GET_RE_DEBUG_FLAGS_DECL
-#define RE_PV_DISPLAY_DECL
-#endif
+#define RE_PV_COLOR_DECL(rpv,rlen,isuni,dsv,pv,l,m,c1,c2)
+#define RE_SV_ESCAPE(rpv,isuni,dsv,sv,m)
+#define RE_PV_QUOTED_DECL(rpv,isuni,dsv,pv,l,m)
+#define RE_SV_DUMPLEN(ItEm)
+#define RE_SV_TAIL(ItEm)
+
+#endif /* DEBUG RELATED DEFINES */
 

@@ -121,92 +121,179 @@ Perl_dump_eval(pTHX)
 
 
 /*
-=for apidoc Apd|char*|pv_escape|NN SV *dsv|NN const char *pv|const STRLEN count|const STRLEN max|const U32 flags
+=for apidoc Apd|char*|pv_escape|NN SV *dsv|NN const U8 const *str\
+               |const STRLEN count|const STRLEN max
+               |STRLEN const *escaped, const U32 flags
 
 Escapes at most the first "count" chars of pv and puts the results into
-buf such that the size of the escaped string will not exceed "max" chars
+dsv such that the size of the escaped string will not exceed "max" chars
 and will not contain any incomplete escape sequences.
 
-If flags contains PERL_PV_ESCAPE_QUOTE then the string will have quotes
-placed around it; moreover, if the number of chars converted was less than
-"count" then a trailing elipses (...) will be added after the closing
-quote.
-
-If PERL_PV_ESCAPE_QUOTE is not set, but PERL_PV_ESCAPE_PADR is, then the
-returned string will be right padded with spaces such that it is max chars
-long.
+If flags contains PERL_PV_ESCAPE_QUOTE then any double quotes in the string
+will also be escaped.
 
 Normally the SV will be cleared before the escaped string is prepared,
-but when PERL_PV_ESCAPE_CAT is set this will not occur.
+but when PERL_PV_ESCAPE_NOCLEAR is set this will not occur.
 
-Returns a pointer to the string contained by SV.
+If PERL_PV_ESCAPE_UNI is set then the input string is treated as unicode,
+if PERL_PV_ESCAPE_UNI_DETECT is set then the input string is scanned
+using C<is_utf8_string()> to determine if it is unicode.
+
+If PERL_PV_ESCAPE_ALL is set then all input chars will be output
+using C<\x01F1> style escapes, otherwise only chars above 255 will be
+escaped using this style, other non printable chars will use octal or
+common escaped patterns like C<\n>. If PERL_PV_ESCAPE_NOBACKSLASH
+then all chars below 255 will be treated as printable and 
+will be output as literals.
+
+If PERL_PV_ESCAPE_FIRSTCHAR is set then only the first char of the
+string will be escaped, regardles of max. If the string is utf8 and 
+the chars value is >255 then it will be returned as a plain hex 
+sequence. Thus the output will either be a single char, 
+an octal escape sequence, a special escape like C<\n> or a 3 or 
+more digit hex value. 
+
+Returns a pointer to the escaped text as held by dsv.
 
 =cut
 */
-
+#define PV_ESCAPE_OCTBUFSIZE 32
 char *
-Perl_pv_escape( pTHX_ SV *dsv, const char *pv, const STRLEN count, const STRLEN max, const U32 flags ) {
-    char dq = (flags & PERL_PV_ESCAPE_QUOTE) ? '"' : '\\';
-    char octbuf[8] = "\\0123456";
-    STRLEN wrote = 0;
-    STRLEN chsize = 0;
-    const char *end = pv + count;
+Perl_pv_escape( pTHX_ SV *dsv, U8 const * const str, 
+                const STRLEN count, const STRLEN max, 
+                STRLEN * const escaped, const U32 flags ) 
+{
+    U8 dq = (flags & PERL_PV_ESCAPE_QUOTE) ? '"' : '\\';
+    U8 octbuf[PV_ESCAPE_OCTBUFSIZE] = "\\123456789ABCDF";
+    STRLEN wrote = 0;    /* chars written so far */
+    STRLEN chsize = 0;   /* size of data to be written */
+    STRLEN readsize = 1; /* size of data just read */
+    bool isuni= flags & PERL_PV_ESCAPE_UNI ? 1 : 0; /* is this unicode */
+    const U8 *pv  = str;
+    const U8 *end = pv + count; /* end of string */
 
-    if (flags & PERL_PV_ESCAPE_CAT) {
-	if ( dq == '"' )
-	    sv_catpvn(dsv, "\"", 1);
-    } else {
-	if ( dq == '"' )
-	    sv_setpvn(dsv, "\"", 1);
-	else
+    if (!flags & PERL_PV_ESCAPE_NOCLEAR) 
 	    sv_setpvn(dsv, "", 0);
-    }
-    for ( ; (pv < end && (!max || (wrote < max))) ; pv++ ) {
-	if ( (*pv == dq) || (*pv == '\\') || isCNTRL(*pv) ) {
+    
+    if ((flags & PERL_PV_ESCAPE_UNI_DETECT) && is_utf8_string(pv, count))
+        isuni = 1;
+    
+    for ( ; (pv < end && (!max || (wrote < max))) ; pv += readsize ) {
+        const UV u= (isuni) ? utf8_to_uvchr(pv, &readsize) : *pv;            
+        const U8 c = (U8)u & 0xFF;
+        
+        if ( ( u > 255 ) || (flags & PERL_PV_ESCAPE_ALL)) {
+            if (flags & PERL_PV_ESCAPE_FIRSTCHAR) 
+                chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE, 
+                                      "%"UVxf, u);
+            else
+                chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE, 
+                                      "\\x{%"UVxf"}", u);
+        } else if (flags & PERL_PV_ESCAPE_NOBACKSLASH) {
+            chsize = 1;            
+        } else {         
+            if ( (c == dq) || (c == '\\') || !isPRINT(c) ) {
 	    chsize = 2;
-	    switch (*pv) {
+                switch (c) {
 		case '\\' : octbuf[1] = '\\'; break;
 		case '\v' : octbuf[1] = 'v';  break;
 		case '\t' : octbuf[1] = 't';  break;
 		case '\r' : octbuf[1] = 'r';  break;
 		case '\n' : octbuf[1] = 'n';  break;
 		case '\f' : octbuf[1] = 'f';  break;
-		case '"'  : if ( dq == *pv ) {
+                    case '"'  : 
+                        if ( dq == '"' ) 
 				octbuf[1] = '"';
+                        else 
+                            chsize = 1;
 				break;
-			    }
 		default:
-			    /* note the (U8*) casts here are important.
-			     * if they are omitted we can produce the octal
-			     * for a negative number which could produce a
-			     * buffer overrun in octbuf, with it on we are
-			     * guaranteed that the longest the string could be
-			     * is 5, (we reserve 8 just because its the first
-			     * power of 2 larger than 5.)*/
-			    if ( (pv < end) && isDIGIT(*(pv+1)) )
-				chsize = sprintf( octbuf, "\\%03o", (U8)*pv);
+                        if ( (pv < end) && isDIGIT(*(pv+readsize)) )
+                            chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE, 
+                                                  "\\%03o", c);
 			    else
-				chsize = sprintf( octbuf, "\\%o", (U8)*pv);
+                            chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE, 
+                                                  "\\%o", c);
+                }
+            } else {
+                chsize=1;
+            }
 	    }
 	    if ( max && (wrote + chsize > max) ) {
 		break;
-	    } else {
+        } else if (chsize > 1) {
 		sv_catpvn(dsv, octbuf, chsize);
 		wrote += chsize;
-	    }
 	} else {
-	    sv_catpvn(dsv, pv, 1);
+            Perl_sv_catpvf( aTHX_ dsv, "%c", c);
 	    wrote++;
 	}
+        if ( flags & PERL_PV_ESCAPE_FIRSTCHAR ) 
+            break;
     }
-    if ( dq == '"' ) {
+    if (escaped != NULL)
+        *escaped= pv - str;
+    return SvPVX(dsv);
+}
+/*
+=for apidoc Apd|char *|pv_pretty|NN SV *dsv|NN const U8 const *str\
+           |const STRLEN count|const STRLEN max\
+           |const U8 const *start_color| const U8 const *end_color\
+           |const U32 flags
+
+Converts a string into something presentable, handling escaping via
+pv_escape() and supporting quoting and elipses. 
+
+If the PERL_PV_PRETTY_QUOTE flag is set then the result will be 
+double quoted with any double quotes in the string escaped. Otherwise
+if the PERL_PV_PRETTY_LTGT flag is set then the result be wrapped in
+angle brackets. 
+           
+If the PERL_PV_PRETTY_ELIPSES flag is set and not all characters in
+string were output then an elipses C<...> will be appended to the 
+string. Note that this happens AFTER it has been quoted.
+           
+If start_color is non-null then it will be inserted after the opening
+quote (if there is one) but before the escaped text. If end_color
+is non-null then it will be inserted after the escaped text but before
+any quotes or elipses.
+
+Returns a pointer to the prettified text as held by dsv.
+           
+=cut           
+*/
+
+char *
+Perl_pv_pretty( pTHX_ SV *dsv, U8 const * const str, const STRLEN count, 
+  const STRLEN max, U8 const * const start_color, U8 const * const end_color, 
+  const U32 flags ) 
+{
+    U8 dq = (flags & PERL_PV_PRETTY_QUOTE) ? '"' : '\\';
+    STRLEN escaped;
+    
+    if ( dq == '"' )
+        sv_setpvn(dsv, "\"", 1);
+    else if ( flags & PERL_PV_PRETTY_LTGT )
+        sv_setpvn(dsv, "<", 1);
+    else 
+        sv_setpvn(dsv, "", 0);
+        
+    if ( start_color != NULL ) 
+        Perl_sv_catpvf( aTHX_ dsv, "%s", start_color);
+    
+    pv_escape( dsv, str, count, max, &escaped, flags | PERL_PV_ESCAPE_NOCLEAR );    
+    
+    if ( end_color != NULL ) 
+        Perl_sv_catpvf( aTHX_ dsv, "%s", end_color);
+
+    if ( dq == '"' ) 
 	sv_catpvn( dsv, "\"", 1 );
-	if ( pv < end )
+    else if ( flags & PERL_PV_PRETTY_LTGT )
+        sv_catpvn( dsv, ">", 1);         
+    
+    if ( (flags & PERL_PV_PRETTY_ELIPSES) && ( escaped < count ) )
 	    sv_catpvn( dsv, "...", 3 );
-    } else if ( max && (flags & PERL_PV_ESCAPE_PADR) ) {
-	for ( ; wrote < max ; wrote++ )
-	    sv_catpvn( dsv, " ", 1 );
-    }
+ 
     return SvPVX(dsv);
 }
 
@@ -231,7 +318,7 @@ Note that the final string may be up to 7 chars longer than pvlim.
 char *
 Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
 {
-    pv_escape( dsv, pv, cur, pvlim, PERL_PV_ESCAPE_QUOTE);
+    pv_pretty( dsv, pv, cur, pvlim, 0, 0, PERL_PV_PRETTY_DUMP);
     if (len > cur && pv[cur] == '\0')
             sv_catpvn( dsv, "\\0", 2 );
     return SvPVX(dsv);

@@ -754,6 +754,7 @@ is the recommended Unicode-aware way of saying
 #define TRIE_STORE_REVCHAR                                                    \
     STMT_START {                                                           \
 	SV *tmp = Perl_newSVpvf_nocontext( "%c", (int)uvc );               \
+	if (UTF) SvUTF8_on(tmp);                                           \
 	av_push( TRIE_REVCHARMAP(trie), tmp );                             \
     } STMT_END
 
@@ -852,7 +853,10 @@ STATIC void
 S_dump_trie(pTHX_ const struct _reg_trie_data *trie,U32 depth)
 {
     U32 state;
+    SV *sv=sv_newmortal();
+    int colwidth= trie->widecharmap ? 6 : 4;
     GET_RE_DEBUG_FLAGS_DECL;
+
 
     PerlIO_printf( Perl_debug_log, "%*sChar : %-6s%-6s%-4s ",
         (int)depth * 2 + 2,"",
@@ -861,14 +865,21 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie,U32 depth)
     for( state = 0 ; state < trie->uniquecharcount ; state++ ) {
 	SV ** const tmp = av_fetch( trie->revcharmap, state, 0);
         if ( tmp ) {
-          PerlIO_printf( Perl_debug_log, "%4.4s ", SvPV_nolen_const( *tmp ) );
+            PerlIO_printf( Perl_debug_log, "%*s", 
+                colwidth,
+                pv_pretty(sv, (U8*)SvPV_nolen_const(*tmp), SvCUR(*tmp), colwidth, 
+	                    PL_colors[0], PL_colors[1],
+	                    (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0) |
+	                    PERL_PV_ESCAPE_FIRSTCHAR 
+                ) 
+            );
         }
     }
     PerlIO_printf( Perl_debug_log, "\n%*sState|-----------------------",
         (int)depth * 2 + 2,"");
 
     for( state = 0 ; state < trie->uniquecharcount ; state++ )
-        PerlIO_printf( Perl_debug_log, "-----");
+        PerlIO_printf( Perl_debug_log, "%.*s", colwidth, "--------");
     PerlIO_printf( Perl_debug_log, "\n");
 
     for( state = 1 ; state < TRIE_LASTSTATE(trie) ; state++ ) {
@@ -899,10 +910,11 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie,U32 depth)
                      ( base + ofs - trie->uniquecharcount < trie->lasttrans ) &&
                      trie->trans[ base + ofs - trie->uniquecharcount ].check == state )
                 {
-                   PerlIO_printf( Perl_debug_log, "%4"UVXf" ",
+                   PerlIO_printf( Perl_debug_log, "%*"UVXf,
+                    colwidth,
                     (UV)trie->trans[ base + ofs - trie->uniquecharcount ].next );
                 } else {
-                    PerlIO_printf( Perl_debug_log, "%4s ","   ." );
+                    PerlIO_printf( Perl_debug_log, "%*s",colwidth,"   ." );
                 }
             }
 
@@ -923,16 +935,18 @@ STATIC void
 S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie, U32 next_alloc,U32 depth)
 {
     U32 state;
+    SV *sv=sv_newmortal();
+    int colwidth= trie->widecharmap ? 6 : 4;
     GET_RE_DEBUG_FLAGS_DECL;
     /* print out the table precompression.  */
-    PerlIO_printf( Perl_debug_log, "%*sState :Word | Transition Data\n%*s",
-        (int)depth * 2 + 2,"", (int)depth * 2 + 2,"");
-    PerlIO_printf( Perl_debug_log,   "------:-----+-----------------" );
+    PerlIO_printf( Perl_debug_log, "%*sState :Word | Transition Data\n%*s%s",
+        (int)depth * 2 + 2,"", (int)depth * 2 + 2,"",
+        "------:-----+-----------------\n" );
     
     for( state=1 ; state < next_alloc ; state ++ ) {
         U16 charid;
     
-        PerlIO_printf( Perl_debug_log, "\n%*s %4"UVXf" :",
+        PerlIO_printf( Perl_debug_log, "%*s %4"UVXf" :",
             (int)depth * 2 + 2,"", (UV)state  );
         if ( ! trie->states[ state ].wordnum ) {
             PerlIO_printf( Perl_debug_log, "%5s| ","");
@@ -943,13 +957,20 @@ S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie, U32 next_alloc
         }
         for( charid = 1 ; charid <= TRIE_LIST_USED( state ) ; charid++ ) {
 	    SV ** const tmp = av_fetch( trie->revcharmap, TRIE_LIST_ITEM(state,charid).forid, 0);
-            PerlIO_printf( Perl_debug_log, "%s:%3X=%4"UVXf" | ",
-                SvPV_nolen_const( *tmp ),
+	    if ( tmp ) {
+                PerlIO_printf( Perl_debug_log, "%*s:%3X=%4"UVXf" | ",
+                    colwidth,
+                    pv_pretty(sv, (U8*)SvPV_nolen_const(*tmp), SvCUR(*tmp), colwidth, 
+	                    PL_colors[0], PL_colors[1],
+	                    (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0) |
+	                    PERL_PV_ESCAPE_FIRSTCHAR 
+                    ) ,
                 TRIE_LIST_ITEM(state,charid).forid,
                 (UV)TRIE_LIST_ITEM(state,charid).newstate
             );
         }
-    
+        }
+        PerlIO_printf( Perl_debug_log, "\n");
     }
 }    
 
@@ -965,6 +986,8 @@ S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie, U32 next_allo
 {
     U32 state;
     U16 charid;
+    SV *sv=sv_newmortal();
+    int colwidth= trie->widecharmap ? 6 : 4;
     GET_RE_DEBUG_FLAGS_DECL;
     
     /*
@@ -977,14 +1000,21 @@ S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie, U32 next_allo
     for( charid = 0 ; charid < trie->uniquecharcount ; charid++ ) {
 	SV ** const tmp = av_fetch( trie->revcharmap, charid, 0);
         if ( tmp ) {
-          PerlIO_printf( Perl_debug_log, "%4.4s ", SvPV_nolen_const( *tmp ) );
+            PerlIO_printf( Perl_debug_log, "%*s", 
+                colwidth,
+                pv_pretty(sv, (U8*)SvPV_nolen_const(*tmp), SvCUR(*tmp), colwidth, 
+	                    PL_colors[0], PL_colors[1],
+	                    (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0) |
+	                    PERL_PV_ESCAPE_FIRSTCHAR 
+                ) 
+            );
         }
     }
 
     PerlIO_printf( Perl_debug_log, "\n%*sState+-",(int)depth * 2 + 2,"" );
 
     for( charid=0 ; charid < trie->uniquecharcount ; charid++ ) {
-        PerlIO_printf( Perl_debug_log, "%4s-", "----" );
+        PerlIO_printf( Perl_debug_log, "%.*s", colwidth,"--------");
     }
 
     PerlIO_printf( Perl_debug_log, "\n" );
@@ -996,8 +1026,11 @@ S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie, U32 next_allo
             (UV)TRIE_NODENUM( state ) );
 
         for( charid = 0 ; charid < trie->uniquecharcount ; charid++ ) {
-            PerlIO_printf( Perl_debug_log, "%4"UVXf" ",
-                (UV)SAFE_TRIE_NODENUM( trie->trans[ state + charid ].next ) );
+            UV v=(UV)SAFE_TRIE_NODENUM( trie->trans[ state + charid ].next );
+            if (v)
+                PerlIO_printf( Perl_debug_log, "%*"UVXf, colwidth, v );
+            else
+                PerlIO_printf( Perl_debug_log, "%*s", colwidth, "." );
         }
         if ( ! trie->states[ TRIE_NODENUM( state ) ].wordnum ) {
             PerlIO_printf( Perl_debug_log, " (%4"UVXf")\n", (UV)trie->trans[ state ].check );
@@ -3231,9 +3264,11 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     RExC_precomp = exp;
     DEBUG_r(if (!PL_colorset) reginitcolors());
     DEBUG_COMPILE_r({
-	 PerlIO_printf(Perl_debug_log, "%sCompiling REx%s \"%s%*s%s\"\n",
-		       PL_colors[4],PL_colors[5],PL_colors[0],
-		       (int)(xend - exp), RExC_precomp, PL_colors[1]);
+        SV *dsv= sv_newmortal();
+        RE_PV_QUOTED_DECL(s, RExC_utf8,
+            dsv, RExC_precomp, (xend - exp), 60);
+        PerlIO_printf(Perl_debug_log, "%sCompiling REx%s %s\n",
+		       PL_colors[4],PL_colors[5],s);
     });
     RExC_flags = pm->op_pmflags;
     RExC_sawback = 0;
@@ -6314,46 +6349,41 @@ Perl_regdump(pTHX_ const regexp *r)
 #ifdef DEBUGGING
     dVAR;
     SV * const sv = sv_newmortal();
+    SV *dsv= sv_newmortal();
 
     (void)dumpuntil(r, r->program, r->program + 1, NULL, sv, 0);
 
     /* Header fields of interest. */
-    if (r->anchored_substr)
+    if (r->anchored_substr) {
+	RE_PV_QUOTED_DECL(s, 0, dsv, SvPVX_const(r->anchored_substr), 
+	    RE_SV_DUMPLEN(r->anchored_substr), 30);
 	PerlIO_printf(Perl_debug_log,
-		      "anchored \"%s%.*s%s\"%s at %"IVdf" ",
-		      PL_colors[0],
-		      (int)(SvCUR(r->anchored_substr) - (SvTAIL(r->anchored_substr)!=0)),
-		      SvPVX_const(r->anchored_substr),
-		      PL_colors[1],
-		      SvTAIL(r->anchored_substr) ? "$" : "",
+		      "anchored %s%s at %"IVdf" ",
+		      s, RE_SV_TAIL(r->anchored_substr),
 		      (IV)r->anchored_offset);
-    else if (r->anchored_utf8)
+    } else if (r->anchored_utf8) {
+	RE_PV_QUOTED_DECL(s, 1, dsv, SvPVX_const(r->anchored_utf8), 
+	    RE_SV_DUMPLEN(r->anchored_utf8), 30);
 	PerlIO_printf(Perl_debug_log,
-		      "anchored utf8 \"%s%.*s%s\"%s at %"IVdf" ",
-		      PL_colors[0],
-		      (int)(SvCUR(r->anchored_utf8) - (SvTAIL(r->anchored_utf8)!=0)),
-		      SvPVX_const(r->anchored_utf8),
-		      PL_colors[1],
-		      SvTAIL(r->anchored_utf8) ? "$" : "",
+		      "anchored utf8 %s%s at %"IVdf" ",
+		      s, RE_SV_TAIL(r->anchored_utf8),
 		      (IV)r->anchored_offset);
-    if (r->float_substr)
+    }		      
+    if (r->float_substr) {
+	RE_PV_QUOTED_DECL(s, 0, dsv, SvPVX_const(r->float_substr), 
+	    RE_SV_DUMPLEN(r->float_substr), 30);
 	PerlIO_printf(Perl_debug_log,
-		      "floating \"%s%.*s%s\"%s at %"IVdf"..%"UVuf" ",
-		      PL_colors[0],
-		      (int)(SvCUR(r->float_substr) - (SvTAIL(r->float_substr)!=0)),
-		      SvPVX_const(r->float_substr),
-		      PL_colors[1],
-		      SvTAIL(r->float_substr) ? "$" : "",
+		      "floating %s%s at %"IVdf"..%"UVuf" ",
+		      s, RE_SV_TAIL(r->float_substr),
 		      (IV)r->float_min_offset, (UV)r->float_max_offset);
-    else if (r->float_utf8)
+    } else if (r->float_utf8) {
+	RE_PV_QUOTED_DECL(s, 1, dsv, SvPVX_const(r->float_utf8), 
+	    RE_SV_DUMPLEN(r->float_utf8), 30);
 	PerlIO_printf(Perl_debug_log,
-		      "floating utf8 \"%s%.*s%s\"%s at %"IVdf"..%"UVuf" ",
-		      PL_colors[0],
-		      (int)(SvCUR(r->float_utf8) - (SvTAIL(r->float_utf8)!=0)),
-		      SvPVX_const(r->float_utf8),
-		      PL_colors[1],
-		      SvTAIL(r->float_utf8) ? "$" : "",
+		      "floating utf8 %s%s at %"IVdf"..%"UVuf" ",
+		      s, RE_SV_TAIL(r->float_utf8),
 		      (IV)r->float_min_offset, (UV)r->float_max_offset);
+    }
     if (r->check_substr || r->check_utf8)
 	PerlIO_printf(Perl_debug_log,
 		      r->check_substr == r->float_substr
@@ -6419,16 +6449,18 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 
     if (k == EXACT) {
 	SV * const dsv = sv_2mortal(newSVpvs(""));
-	/* Using is_utf8_string() is a crude hack but it may
-	 * be the best for now since we have no flag "this EXACTish
-	 * node was UTF-8" --jhi */
-	const bool do_utf8 = is_utf8_string((U8*)STRING(o), STR_LEN(o));
-	RE_PV_DISPLAY_DECL(s, len, do_utf8, dsv, STRING(o), STR_LEN(o), 60);
-
-	Perl_sv_catpvf(aTHX_ sv, " <%s%.*s%s>",
-		       PL_colors[0],
-		       len, s,
-		       PL_colors[1]);
+	/* Using is_utf8_string() (via PERL_PV_UNI_DETECT) 
+	 * is a crude hack but it may be the best for now since 
+	 * we have no flag "this EXACTish node was UTF-8" 
+	 * --jhi */
+	const char * const s = 
+	    pv_pretty(dsv, (U8*)STRING(o), STR_LEN(o), 60, 
+	        PL_colors[0], PL_colors[1],
+	        PERL_PV_ESCAPE_UNI_DETECT |
+	        PERL_PV_PRETTY_ELIPSES    |
+	        PERL_PV_PRETTY_LTGT    
+            ); 
+	Perl_sv_catpvf(aTHX_ sv, " %s", s );
     } else if (k == TRIE) {
         Perl_sv_catpvf(aTHX_ sv, "-%s",reg_name[o->flags]);
 	/* print the details of the trie in dumpuntil instead, as
@@ -6630,18 +6662,16 @@ Perl_pregfree(pTHX_ struct regexp *r)
 
     if (!r || (--r->refcnt > 0))
 	return;
-    DEBUG_COMPILE_r(if (RX_DEBUG(r)){
-	RE_PV_DISPLAY_DECL(s, len, (r->reganch & ROPT_UTF8),
-	    PERL_DEBUG_PAD_ZERO(0), r->precomp, r->prelen, 60);
-
+    DEBUG_COMPILE_r({
 	if (!PL_colorset)
 	    reginitcolors();
-	PerlIO_printf(Perl_debug_log,
-	    "%sFreeing REx:%s %s%*.*s%s%s\n",
-	    PL_colors[4],PL_colors[5],PL_colors[0],
-	    len, len, s,
-	    PL_colors[1],
-	    len > 60 ? "..." : "");
+	if (RX_DEBUG(r)){
+            SV *dsv= sv_newmortal();
+            RE_PV_QUOTED_DECL(s, (r->reganch & ROPT_UTF8),
+                dsv, r->precomp, r->prelen, 60);
+            PerlIO_printf(Perl_debug_log,"%sFreeing REx:%s %s\n", 
+                PL_colors[4],PL_colors[5],s);
+        }
     });
 
     /* gcov results gave these as non-null 100% of the time, so there's no
@@ -6996,15 +7026,17 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 
 	    for (word_idx=0; word_idx < arry_len; word_idx++) {
 		SV ** const elem_ptr = av_fetch(trie->words,word_idx,0);
-		if (elem_ptr) {
-		    PerlIO_printf(Perl_debug_log, "%*s<%s%s%s>\n",
+		if (elem_ptr) 
+		    PerlIO_printf(Perl_debug_log, "%*s%s\n",
 		       (int)(2*(l+4)), "",
-		       PL_colors[0],
-		       SvPV_nolen_const(*elem_ptr),
-		       PL_colors[1]
+		        pv_pretty(sv, (U8*)SvPV_nolen_const(*elem_ptr), SvCUR(*elem_ptr), 60, 
+	                    PL_colors[0], PL_colors[1],
+	                    (SvUTF8(*elem_ptr) ? PERL_PV_ESCAPE_UNI : 0) |
+	                    PERL_PV_PRETTY_ELIPSES    |
+	                    PERL_PV_PRETTY_LTGT    
+                        )
 		    );
 		}
-	    }
 
 	    node = NEXTOPER(node);
 	    node += regarglen[(U8)op];

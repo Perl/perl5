@@ -78,7 +78,7 @@
 #define RF_tainted	1		/* tainted information used? */
 #define RF_warned	2		/* warned about big count? */
 #define RF_evaled	4		/* Did an EVAL with setting? */
-#define RF_utf8		8		/* String contains multibyte chars? */
+#define RF_utf8		8		/* Pattern contains multibyte chars? */
 
 #define UTF ((PL_reg_flags & RF_utf8) != 0)
 
@@ -195,14 +195,21 @@ S_regcppush(pTHX_ I32 parenfloor)
 }
 
 /* These are needed since we do not localize EVAL nodes: */
-#  define REGCP_SET(cp)  DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,		\
+#define REGCP_SET(cp)                                           \
+    DEBUG_STATE_r(                                              \
+        if (cp != PL_savestack_ix) 		                \
+            PerlIO_printf(Perl_debug_log,		        \
 			     "  Setting an EVAL scope, savestack=%"IVdf"\n",	\
-			     (IV)PL_savestack_ix)); cp = PL_savestack_ix
+	        (IV)PL_savestack_ix));                          \
+    cp = PL_savestack_ix
 
-#  define REGCP_UNWIND(cp)  DEBUG_EXECUTE_r(cp != PL_savestack_ix ?		\
+#define REGCP_UNWIND(cp)                                        \
+    DEBUG_EXECUTE_r(                                            \
+        if (cp != PL_savestack_ix) 		                \
 				PerlIO_printf(Perl_debug_log,		\
 				"  Clearing an EVAL scope, savestack=%"IVdf"..%"IVdf"\n", \
-				(IV)(cp), (IV)PL_savestack_ix) : 0); regcpblow(cp)
+	        (IV)(cp), (IV)PL_savestack_ix));                \
+    regcpblow(cp)
 
 STATIC char *
 S_regcppop(pTHX_ const regexp *rex)
@@ -364,32 +371,12 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     RX_MATCH_UTF8_set(prog,do_utf8);
 
     if (prog->reganch & ROPT_UTF8) {
-	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-			      "UTF-8 regex...\n"));
 	PL_reg_flags |= RF_utf8;
     }
-
-    DEBUG_EXECUTE_r({
-         RE_PV_DISPLAY_DECL(s, len, PL_reg_match_utf8,
-            PERL_DEBUG_PAD_ZERO(0), strpos, strend - strpos, 60);
-
-	 if (!PL_colorset)
-	      reginitcolors();
-	 if (PL_reg_match_utf8)
-	     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-				   "UTF-8 target...\n"));
-	 PerlIO_printf(Perl_debug_log,
-		       "%sGuessing start of match, REx%s \"%s%.60s%s%s\" against \"%s%.*s%s%s\"...\n",
-		       PL_colors[4], PL_colors[5], PL_colors[0],
-		       prog->precomp,
-		       PL_colors[1],
-		       (strlen(prog->precomp) > 60 ? "..." : ""),
-		       PL_colors[0],
-		       (int)(len > 60 ? 60 : len),
-		       s, PL_colors[1],
-		       (len > 60 ? "..." : "")
+    DEBUG_EXECUTE_r( 
+        debug_start_match(prog, do_utf8, strpos, strend, 
+            "Guessing start of match for");
 	      );
-    });
 
     /* CHR_DIST() would be more correct here but it makes things slow. */
     if (prog->minlen > strend - strpos) {
@@ -520,14 +507,17 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     /* Update the count-of-usability, remove useless subpatterns,
 	unshift s.  */
 
-    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%s %s substr \"%s%.*s%s\"%s%s",
+    DEBUG_EXECUTE_r({
+        RE_PV_QUOTED_DECL(quoted, do_utf8, PERL_DEBUG_PAD_ZERO(0), 
+            SvPVX_const(check), RE_SV_DUMPLEN(check), 30);
+        PerlIO_printf(Perl_debug_log, "%s %s substr %s%s%s",
 			  (s ? "Found" : "Did not find"),
-			  (check == (do_utf8 ? prog->anchored_utf8 : prog->anchored_substr) ? "anchored" : "floating"),
-			  PL_colors[0],
-			  (int)(SvCUR(check) - (SvTAIL(check)!=0)),
-			  SvPVX_const(check),
-			  PL_colors[1], (SvTAIL(check) ? "$" : ""),
-			  (s ? " at offset " : "...\n") ) );
+	    (check == (do_utf8 ? prog->anchored_utf8 : prog->anchored_substr) 
+	        ? "anchored" : "floating"),
+	    quoted,
+	    RE_SV_TAIL(check),
+	    (s ? " at offset " : "...\n") ); 
+    });
 
     if (!s)
 	goto fail_finish;
@@ -587,14 +577,15 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			must,
 			multiline ? FBMrf_MULTILINE : 0
 		    );
-		DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-			"%s anchored substr \"%s%.*s%s\"%s",
+                DEBUG_EXECUTE_r({
+                    RE_PV_QUOTED_DECL(quoted, do_utf8, PERL_DEBUG_PAD_ZERO(0), 
+                        SvPVX_const(must), RE_SV_DUMPLEN(must), 30);
+                    PerlIO_printf(Perl_debug_log, "%s anchored substr %s%s",
 			(s ? "Found" : "Contradicts"),
-			PL_colors[0],
-			  (int)(SvCUR(must)
-			  - (SvTAIL(must)!=0)),
-			  SvPVX_const(must),
-			  PL_colors[1], (SvTAIL(must) ? "$" : "")));
+                        quoted, RE_SV_TAIL(must));
+                });		    
+		
+			    
 		if (!s) {
 		    if (last1 >= last2) {
 			DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
@@ -647,12 +638,13 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			      (unsigned char*)last + SvCUR(must)
 				  - (SvTAIL(must)!=0),
 			      must, multiline ? FBMrf_MULTILINE : 0);
-	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%s floating substr \"%s%.*s%s\"%s",
+	    DEBUG_EXECUTE_r({
+	        RE_PV_QUOTED_DECL(quoted, do_utf8, PERL_DEBUG_PAD_ZERO(0), 
+	            SvPVX_const(must), RE_SV_DUMPLEN(must), 30);
+	        PerlIO_printf(Perl_debug_log, "%s floating substr %s%s",
 		    (s ? "Found" : "Contradicts"),
-		    PL_colors[0],
-		      (int)(SvCUR(must) - (SvTAIL(must)!=0)),
-		      SvPVX_const(must),
-		      PL_colors[1], (SvTAIL(must) ? "$" : "")));
+		    quoted, RE_SV_TAIL(must));
+            });
 	    if (!s) {
 		if (last1 == last) {
 		    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
@@ -1603,26 +1595,10 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	}
     }
 
-    DEBUG_EXECUTE_r({
-        RE_PV_DISPLAY_DECL(s0, len0, UTF,
-            PERL_DEBUG_PAD_ZERO(0), prog->precomp, prog->prelen, 60);
-        RE_PV_DISPLAY_DECL(s1, len1, do_utf8,
-            PERL_DEBUG_PAD_ZERO(1), startpos, strend - startpos, 60);
-
-	 if (!PL_colorset)
-	     reginitcolors();
-	 PerlIO_printf(Perl_debug_log,
-		       "%sMatching REx%s \"%s%*.*s%s%s\" against \"%s%.*s%s%s\"\n",
-		       PL_colors[4], PL_colors[5], PL_colors[0],
-		       len0, len0, s0,
-		       PL_colors[1],
-		       len0 > 60 ? "..." : "",
-		       PL_colors[0],
-		       (int)(len1 > 60 ? 60 : len1),
-		       s1, PL_colors[1],
-		       (len1 > 60 ? "..." : "")
+    DEBUG_EXECUTE_r( 
+        debug_start_match(prog, do_utf8, startpos, strend, 
+            "Matching");
 	      );
-    });
 
     /* Simplest case:  anchored match need be tried only once. */
     /*  [unless only anchor is BOL and multiline is set] */
@@ -1790,16 +1766,14 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		}
 	    }
 	}
-	DEBUG_EXECUTE_r(if (!did_match)
-                    PerlIO_printf(Perl_debug_log, 
-                                  "Did not find %s substr \"%s%.*s%s\"%s...\n",
+	DEBUG_EXECUTE_r(if (!did_match) {
+            RE_PV_QUOTED_DECL(quoted, do_utf8, PERL_DEBUG_PAD_ZERO(0), 
+                SvPVX_const(must), RE_SV_DUMPLEN(must), 30);
+            PerlIO_printf(Perl_debug_log, "Did not find %s substr %s%s...\n",
 			      ((must == prog->anchored_substr || must == prog->anchored_utf8)
 			       ? "anchored" : "floating"),
-			      PL_colors[0],
-			      (int)(SvCUR(must) - (SvTAIL(must)!=0)),
-			      SvPVX_const(must),
-                                  PL_colors[1], (SvTAIL(must) ? "$" : ""))
-               );
+                quoted, RE_SV_TAIL(must));
+        });		    
 	goto phooey;
     }
     else if ((c = prog->regstclass)) {
@@ -1813,14 +1787,12 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    SV * const prop = sv_newmortal();
 	    regprop(prog, prop, c);
 	    {
-		RE_PV_DISPLAY_DECL(s0,len0,UTF,
-		    PERL_DEBUG_PAD_ZERO(0),SvPVX_const(prop),SvCUR(prop),60);
-		RE_PV_DISPLAY_DECL(s1,len1,UTF,
-		    PERL_DEBUG_PAD_ZERO(1),s,strend-s,60);
+		RE_PV_QUOTED_DECL(quoted,UTF,PERL_DEBUG_PAD_ZERO(1),
+		    s,strend-s,60);
 		PerlIO_printf(Perl_debug_log,
-		    "Matching stclass \"%*.*s\" against \"%*.*s\" (%d chars)\n",
-		    len0, len0, s0,
-		    len1, len1, s1, (int)(strend - s));
+		    "Matching stclass %.*s against %s (%d chars)\n",
+		    SvCUR(prop), SvPVX_const(prop),
+		     quoted, (int)(strend - s));
 	    }
 	});
         if (find_byclass(prog, c, s, strend, &reginfo))
@@ -2305,6 +2277,31 @@ S_push_slab(pTHX)
 #define REG_NODE_NUM(x) ((x) ? (int)((x)-prog) : -1)
 
 #ifdef DEBUGGING
+STATIC void
+S_debug_start_match(pTHX_ const regexp *prog, const bool do_utf8, 
+    const char *start, const char *end, const char *blurb)
+{
+    const bool utf8_pat= prog->reganch & ROPT_UTF8 ? 1 : 0;
+    if (!PL_colorset)   
+            reginitcolors();    
+    {
+        RE_PV_QUOTED_DECL(s0, utf8_pat, PERL_DEBUG_PAD_ZERO(0), 
+            prog->precomp, prog->prelen, 60);   
+        
+        RE_PV_QUOTED_DECL(s1, do_utf8, PERL_DEBUG_PAD_ZERO(1), 
+            start, end - start, 60); 
+        
+        PerlIO_printf(Perl_debug_log, 
+            "%s%s REx%s %s against %s\n", 
+		       PL_colors[4], blurb, PL_colors[5], s0, s1); 
+        
+        if (do_utf8||utf8_pat) 
+            PerlIO_printf(Perl_debug_log, "UTF-8 %s...\n",
+                !do_utf8 ? "pattern" : !utf8_pat ? "string" : 
+                    "pattern and string"
+            ); 
+    }
+}
 
 STATIC void
 S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const bool do_utf8)
@@ -2337,29 +2334,23 @@ S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const bool do_u
     {
 	const int is_uni = (do_utf8 && OP(scan) != CANY) ? 1 : 0;
 
-	RE_PV_DISPLAY_DECL(s0,len0,is_uni,PERL_DEBUG_PAD(0),
-	    (locinput - pref_len),pref0_len, 60);
+	RE_PV_COLOR_DECL(s0,len0,is_uni,PERL_DEBUG_PAD(0),
+	    (locinput - pref_len),pref0_len, 60, 4, 5);
 	
-	RE_PV_DISPLAY_DECL(s1,len1,is_uni,PERL_DEBUG_PAD(1),
+	RE_PV_COLOR_DECL(s1,len1,is_uni,PERL_DEBUG_PAD(1),
 		    (locinput - pref_len + pref0_len),
-		    pref_len - pref0_len, 60);
+		    pref_len - pref0_len, 60, 2, 3);
 	
-	RE_PV_DISPLAY_DECL(s2,len2,is_uni,PERL_DEBUG_PAD(2),
-		    locinput, PL_regeol - locinput, 60);
+	RE_PV_COLOR_DECL(s2,len2,is_uni,PERL_DEBUG_PAD(2),
+		    locinput, PL_regeol - locinput, 60, 0, 1);
 
 	PerlIO_printf(Perl_debug_log,
-		    "%4"IVdf" <%s%.*s%s%s%.*s%s%s%s%.*s%s>%*s|",
+		    "%4"IVdf" <%.*s%.*s%s%.*s>%*s|",
 		    (IV)(locinput - PL_bostr),
-		    PL_colors[4],
 		    len0, s0,
-		    PL_colors[5],
-		    PL_colors[2],
 		    len1, s1,
-		    PL_colors[3],
 		    (docolor ? "" : "> <"),
-		    PL_colors[0],
 		    len2, s2,
-		    PL_colors[1],
 		    15 - l - pref_len + 1,
 		    "");
     }
@@ -3237,14 +3228,9 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		}
 
 		/* run the pattern returned from (??{...}) */
-
 		DEBUG_EXECUTE_r(
-		    PerlIO_printf(Perl_debug_log,
-				  "Entering embedded \"%s%.60s%s%s\"\n",
-				  PL_colors[0],
-				  re->precomp,
-				  PL_colors[1],
-				  (strlen(re->precomp) > 60 ? "..." : ""))
+                    debug_start_match(re, do_utf8, locinput, PL_regeol, 
+                        "Matching embedded");
 		    );
 
 		ST.cp = regcppush(0);	/* Save *all* the positions. */
@@ -3790,7 +3776,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    DEBUG_EXECUTE_r(
 		PerlIO_printf(Perl_debug_log,
 			  "%*s  CURLYM now matched %"IVdf" times, len=%"IVdf"...\n",
-			  (int)(REPORT_CODE_OFF+PL_regindent*2), "",
+			  (int)(REPORT_CODE_OFF+(PL_regindent*2)), "",
 			  (IV) ST.count, (IV)ST.alen)
 	    );
 
@@ -3831,7 +3817,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    DEBUG_EXECUTE_r(
 		PerlIO_printf(Perl_debug_log,
 		    "%*s  CURLYM trying tail with matches=%"IVdf"...\n",
-		    (int)(REPORT_CODE_OFF+PL_regindent*2),
+		    (int)(REPORT_CODE_OFF+(PL_regindent*2)),
 		    "", (IV)ST.count)
 		);
 	    if (ST.c1 != CHRTEST_VOID
@@ -4273,7 +4259,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    regmatch_state *newst;
 
 	    depth++;
-	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+	    DEBUG_STATE_r(PerlIO_printf(Perl_debug_log,
 			"PUSH STATE(%d)\n", depth));
 	    st->locinput = locinput;
 	    newst = st+1; 
@@ -4354,7 +4340,7 @@ yes_final:
 	    st = SLAB_LAST(PL_regmatch_slab);
 	}
 	depth -= (st - yes_state);
-	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "POP STATES (%d..%d)\n",
+	DEBUG_STATE_r(PerlIO_printf(Perl_debug_log, "POP STATES (%d..%d)\n",
 	    depth+1, depth+(st - yes_state)));
 	st = yes_state;
 	yes_state = st->u.yes.prev_yes_state;
@@ -4388,7 +4374,7 @@ yes:
      * will disappear when REGFMATCH goes */
     if (depth) {
 	/* restore previous state and re-enter */
-	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "POP STATE(%d)\n", depth));
+	DEBUG_STATE_r(PerlIO_printf(Perl_debug_log, "POP STATE(%d)\n", depth));
 	depth--;
 	st--;
 	if (st < SLAB_FIRST(PL_regmatch_slab)) {
@@ -4451,7 +4437,7 @@ do_no:
 
     if (depth) {
 	/* there's a previous state to backtrack to */
-	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "POP STATE(%d)\n", depth));
+	DEBUG_STATE_r(PerlIO_printf(Perl_debug_log, "POP STATE(%d)\n", depth));
 	depth--;
 	st--;
 	if (st < SLAB_FIRST(PL_regmatch_slab)) {

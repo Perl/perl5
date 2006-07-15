@@ -233,6 +233,7 @@ my %flags = (
     EXTRA           => 0xFF0000,
     TRIE_MORE       => 0x010000,
     OFFSETS_DEBUG   => 0x020000,
+    STATE           => 0x040000,
 );
 $flags{ALL} = $flags{COMPILE} | $flags{EXECUTE};
 $flags{All} = $flags{all} = $flags{DUMP} | $flags{EXECUTE};

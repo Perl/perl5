@@ -5646,12 +5646,32 @@ extern void moncontrol(int);
 
    so that Configure picks them up. */
 
-/* these are used by Perl_pv_escape() and are here so that they
- * are available throughout the core */
+/* These are used by Perl_pv_escape() and Perl_pv_pretty() 
+ * are here so that they are available throughout the core 
+ * NOTE that even though some are for _escape and some for _pretty
+ * there must not be any clashes as the flags from _pretty are
+ * passed straight through to _escape.
+ */
 
-#define PERL_PV_ESCAPE_QUOTE  1
-#define PERL_PV_ESCAPE_PADR   2
-#define PERL_PV_ESCAPE_CAT    4
+#define PERL_PV_ESCAPE_QUOTE        0x0001
+#define PERL_PV_PRETTY_QUOTE        PERL_PV_ESCAPE_QUOTE
+
+
+#define PERL_PV_PRETTY_ELIPSES      0x0002
+#define PERL_PV_PRETTY_LTGT         0x0004
+
+#define PERL_PV_ESCAPE_FIRSTCHAR    0x0008
+
+#define PERL_PV_ESCAPE_UNI          0x0100     
+#define PERL_PV_ESCAPE_UNI_DETECT   0x0200
+
+#define PERL_PV_ESCAPE_ALL	    0x1000
+#define PERL_PV_ESCAPE_NOBACKSLASH  0x2000
+#define PERL_PV_ESCAPE_NOCLEAR      0x4000
+
+/* used by pv_display in dump.c*/
+#define PERL_PV_PRETTY_DUMP  PERL_PV_PRETTY_ELIPSES|PERL_PV_PRETTY_QUOTE
+#define PERL_PV_PRETTY_REGPROP PERL_PV_PRETTY_ELIPSES|PERL_PV_PRETTY_LTGT
 
 #endif /* Include guard */
 
