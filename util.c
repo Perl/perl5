@@ -5225,7 +5225,7 @@ Perl_mem_log_alloc(const UV n, const UV typesize, const char *typename, Malloc_t
 	{
 	    const STRLEN len =
 		my_snprintf(buf,
-			    PERL_MEM_LOG_SPRINTF_BUF_SIZE,
+			    sizeof(buf),
 #  ifdef PERL_MEM_LOG_TIMESTAMP
 			    "%10d.%06d: "
 # endif
@@ -5270,7 +5270,7 @@ Perl_mem_log_realloc(const UV n, const UV typesize, const char *typename, Malloc
 	{
 	    const STRLEN len =
 		my_snprintf(buf,
-			    PERL_MEM_LOG_SPRINTF_BUF_SIZE,
+			    sizeof(buf),
 #  ifdef PERL_MEM_LOG_TIMESTAMP
 			    "%10d.%06d: "
 # endif
@@ -5316,7 +5316,7 @@ Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int linenumber,
 	{
 	    const STRLEN len =
 		my_snprintf(buf,
-			    PERL_MEM_LOG_SPRINTF_BUF_SIZE,
+			    sizeof(buf),
 #  ifdef PERL_MEM_LOG_TIMESTAMP
 			    "%10d.%06d: "
 # endif
@@ -5458,16 +5458,17 @@ Perl_my_clearenv(pTHX)
     (void)clearenv();
 #        elif defined(HAS_UNSETENV)
     int bsiz = 80; /* Most envvar names will be shorter than this. */
-    char *buf = (char*)safesysmalloc(bsiz * sizeof(char));
+    int bufsiz = bsiz * sizeof(char); /* sizeof(char) paranoid? */
+    char *buf = (char*)safesysmalloc(bufsiz);
     while (*environ != NULL) {
       char *e = strchr(*environ, '=');
       int l = e ? e - *environ : strlen(*environ);
       if (bsiz < l + 1) {
         (void)safesysfree(buf);
         bsiz = l + 1;
-        buf = (char*)safesysmalloc(bsiz * sizeof(char));
+        buf = (char*)safesysmalloc(bufsiz);
       } 
-      strncpy(buf, *environ, l);
+      my_strlcpy(buf, bufsiz, *environ, l);
       *(buf + l) = '\0';
       (void)unsetenv(buf);
     }

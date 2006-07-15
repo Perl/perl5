@@ -3589,7 +3589,8 @@ S_dooneliner(pTHX_ const char *cmd, const char *filename)
 	*s++ = '\\';
 	*s++ = *filename++;
     }
-    strcpy(s, " 2>&1");
+    if (s - cmdline < size)
+	my_strlcpy(s, " 2>&1", size - (s - cmdline));
     myfp = PerlProc_popen(cmdline, "r");
     Safefree(cmdline);
 

@@ -2461,6 +2461,10 @@ reading.  Please test your changes with as many C compilers and
 platforms as possible -- we will, anyway, and it's nice to save
 oneself from public embarrassment.
 
+If using gcc, starting from Perl 5.9.4 Perl core C files will be
+compiled with the C<-std=c89> option which will hopefully catch
+most of these unportabilities.
+
 Also study L<perlport> carefully to avoid any bad assumptions
 about the operating system, filesystem, and so forth.
 
@@ -2771,13 +2775,11 @@ Or we will publicly ridicule you.  Seriously.
 
 =item *
 
-Do not use strcpy() or strcat()
+Do not use strcpy() or strcat() or strncpy() or strncat()
 
-While some uses of these still linger in the Perl source code,
-we have inspected them for safety and are very, very ashamed of them,
-and plan to get rid of them.  Use my_strlcpy() and my_strlcat() instead:
-they either use the native implementation, or Perl's own implementation
-(borrowed from the public domain implementation of INN).
+Use my_strlcpy() and my_strlcat() instead: they either use the native
+implementation, or Perl's own implementation (borrowed from the public
+domain implementation of INN).
 
 =item *
 
