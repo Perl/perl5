@@ -2674,7 +2674,11 @@ PERL_CALLCONV char*	Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, S
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV char*	Perl_pv_escape(pTHX_ SV *dsv, const char *pv, const STRLEN count, const STRLEN max, const U32 flags)
+PERL_CALLCONV char*	Perl_pv_escape(pTHX_ SV *dsv, U8 const * const str, const STRLEN count, const STRLEN max, STRLEN * const escaped, const U32 flags)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
+PERL_CALLCONV char*	Perl_pv_pretty(pTHX_ SV *dsv, U8 const * const str, const STRLEN count, const STRLEN max, U8 const * const start_color, U8 const * const end_color, const U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
@@ -3727,6 +3731,12 @@ STATIC void	S_to_byte_substr(pTHX_ regexp * prog)
 STATIC void	S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const bool do_utf8)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
+
+STATIC void	S_debug_start_match(pTHX_ const regexp *prog, const bool do_utf8, const char *start, const char *end, const char *blurb)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_4)
+			__attribute__nonnull__(pTHX_5);
 
 #  endif
 #endif

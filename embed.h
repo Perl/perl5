@@ -1001,6 +1001,7 @@
 #define get_vtbl		Perl_get_vtbl
 #define pv_display		Perl_pv_display
 #define pv_escape		Perl_pv_escape
+#define pv_pretty		Perl_pv_pretty
 #define dump_indent		Perl_dump_indent
 #define dump_vindent		Perl_dump_vindent
 #define do_gv_dump		Perl_do_gv_dump
@@ -1363,6 +1364,7 @@
 #  ifdef DEBUGGING
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define dump_exec_pos		S_dump_exec_pos
+#define debug_start_match	S_debug_start_match
 #endif
 #  endif
 #endif
@@ -3187,7 +3189,8 @@
 #define sv_setsv_mg(a,b)	Perl_sv_setsv_mg(aTHX_ a,b)
 #define get_vtbl(a)		Perl_get_vtbl(aTHX_ a)
 #define pv_display(a,b,c,d,e)	Perl_pv_display(aTHX_ a,b,c,d,e)
-#define pv_escape(a,b,c,d,e)	Perl_pv_escape(aTHX_ a,b,c,d,e)
+#define pv_escape(a,b,c,d,e,f)	Perl_pv_escape(aTHX_ a,b,c,d,e,f)
+#define pv_pretty(a,b,c,d,e,f,g)	Perl_pv_pretty(aTHX_ a,b,c,d,e,f,g)
 #define dump_vindent(a,b,c,d)	Perl_dump_vindent(aTHX_ a,b,c,d)
 #define do_gv_dump(a,b,c,d)	Perl_do_gv_dump(aTHX_ a,b,c,d)
 #define do_gvgv_dump(a,b,c,d)	Perl_do_gvgv_dump(aTHX_ a,b,c,d)
@@ -3550,6 +3553,7 @@
 #  ifdef DEBUGGING
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define dump_exec_pos(a,b,c)	S_dump_exec_pos(aTHX_ a,b,c)
+#define debug_start_match(a,b,c,d,e)	S_debug_start_match(aTHX_ a,b,c,d,e)
 #endif
 #  endif
 #endif
