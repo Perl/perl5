@@ -1,3 +1,9 @@
+0.64  Sun Jul 16 02:47:29 PDT 2006
+    * 0.63's change to test_fail() broke backwards compatibility.  They
+      have been removed for the time being.  test_pass() went with it.
+      This is [rt.cpan.org 11317] and [rt.cpan.org 11319].
+    - skip() will now warn if you get the args backwards.
+
 0.63  Sun Jul  9 02:36:36 PDT 2006
     * Fixed can_ok() to gracefully handle no class name.
       Submitted by "Pete Krawczyk" <perl@bsod.net>

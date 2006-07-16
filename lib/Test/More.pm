@@ -16,7 +16,7 @@ sub _carp {
 
 
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.63';
+$VERSION = '0.64';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 use Test::Builder::Module;
@@ -487,7 +487,7 @@ sub can_ok ($@) {
     my $name;
     $name = @methods == 1 ? "$class->can('$methods[0]')" 
                           : "$class->can(...)";
-    
+
     my $ok = $tb->ok( !@nok, $name );
 
     $tb->diag(map "    $class->can('$_') failed\n", @nok);
@@ -998,6 +998,11 @@ sub skip {
         # $how_many can only be avoided when no_plan is in use.
         _carp "skip() needs to know \$how_many tests are in the block"
           unless $tb->has_plan eq 'no_plan';
+        $how_many = 1;
+    }
+
+    if( defined $how_many and $how_many =~ /\D/ ) {
+        _carp "skip() was passed a non-numeric number of tests.  Did you get the arguments backwards?";
         $how_many = 1;
     }
 
