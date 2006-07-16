@@ -1529,11 +1529,12 @@ keeping our coding nose clean.
 
 The C<-Wall> is by default on.
 
-The C<-ansi> (and its sidekick, C<-pedantic>) would be nice to be
-on always, but unfortunately they are not safe on all platforms,
-they can for example cause fatal conflicts with the system headers
-(Solaris being a prime example).  The C<cflags> frontend selects
-C<-ansi -pedantic> for the platforms where they are known to be safe.
+The C<-ansi> (and its sidekick, C<-pedantic>) would be nice to be on
+always, but unfortunately they are not safe on all platforms, they can
+for example cause fatal conflicts with the system headers (Solaris
+being a prime example).  If Configure C<-Dgccansipedantic> is used,
+the C<cflags> frontend selects C<-ansi -pedantic> for the platforms
+where they are known to be safe.
 
 Starting from Perl 5.9.4 the following extra flags are added:
 
@@ -2464,6 +2465,9 @@ oneself from public embarrassment.
 If using gcc, starting from Perl 5.9.4 Perl core C files will be
 compiled with the C<-std=c89> option which will hopefully catch
 most of these unportabilities.
+
+Use the Configure C<-Dgccansipedantic> flag to enable the gcc
+C<-ansi -pedantic> flags which enforce stricter ANSI rules.
 
 Also study L<perlport> carefully to avoid any bad assumptions
 about the operating system, filesystem, and so forth.
