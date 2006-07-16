@@ -1004,8 +1004,9 @@ But method calls such as C<< $obj->meth >> are not.
 
 Interpolating an array or slice interpolates the elements in order,
 separated by the value of C<$">, so is equivalent to interpolating
-C<join $", @array>.    "Punctuation" arrays such as C<@+> are only
-interpolated if the name is enclosed in braces C<@{+}>.
+C<join $", @array>.    "Punctuation" arrays such as C<@*> are only
+interpolated if the name is enclosed in braces C<@{*}>, but special
+arrays C<@_>, C<@+>, and C<@-> are interpolated, even without braces.
 
 You cannot include a literal C<$> or C<@> within a C<\Q> sequence.
 An unescaped C<$> or C<@> interpolates the corresponding variable,
@@ -1798,28 +1799,56 @@ expectations much less frequently than this first one.
 Some passes discussed below are performed concurrently, but because
 their results are the same, we consider them individually.  For different
 quoting constructs, Perl performs different numbers of passes, from
-one to five, but these passes are always performed in the same order.
+one to four, but these passes are always performed in the same order.
 
 =over 4
 
 =item Finding the end
 
-The first pass is finding the end of the quoted construct, whether
-it be a multicharacter delimiter C<"EOF\n"> in the C<<<EOF>
-construct, a C</> that terminates a C<qq//> construct, a C<]> which
-terminates C<qq[]> construct, or a C<< > >> which terminates a
-fileglob started with C<< < >>.
+The first pass is finding the end of the quoted construct, where
+the information about the delimiters is used in parsing.
+During this search, text between the starting and ending delimiters
+is copied to a safe location. The text copied gets delimiter-independent.
 
-When searching for single-character non-pairing delimiters, such
-as C</>, combinations of C<\\> and C<\/> are skipped.  However,
-when searching for single-character pairing delimiter like C<[>,
-combinations of C<\\>, C<\]>, and C<\[> are all skipped, and nested
-C<[>, C<]> are skipped as well.  When searching for multicharacter
-delimiters like C<"EOF\n">, nothing is skipped, though the delimiter
-must start from the first column of the terminating line.
+If the construct is a here-doc, the ending delimiter is a line
+that has a terminating string as the content. Therefore C<<<EOF> is
+terminated by C<EOF> immediately followed by C<"\n"> and starting
+from the first column of the terminating line.
+When searching for the terminating line of a here-doc, nothing
+is skipped. In other words, lines after the here-doc syntax
+are compared with the terminating string line by line.
+
+For the constructs except here-docs, single characters are used as starting
+and ending delimiters. If the starting delimiter is an opening punctuation
+(that is C<(>, C<[>, C<{>, or C<< < >>), the ending delimiter is the
+corresponding closing punctuation (that is C<)>, C<]>, C<}>, or C<< > >>).
+If the starting delimiter is an unpaired character like C</> or a closing
+punctuation, the ending delimiter is same as the starting delimiter.
+Therefore a C</> terminates a C<qq//> construct, while a C<]> terminates
+C<qq[]> and C<qq]]> constructs.
+
+When searching for single-character delimiters, escaped delimiters
+and C<\\> are skipped. For example, while searching for terminating C</>,
+combinations of C<\\> and C<\/> are skipped.  If the delimiters are
+bracketing, nested pairs are also skipped.  For example, while searching
+for closing C<]> paired with the opening C<[>, combinations of C<\\>, C<\]>,
+and C<\[> are all skipped, and nested C<[> and C<]> are skipped as well.
+However, when backslashes are used as the delimiters (like C<qq\\> and
+C<tr\\\>), nothing is skipped.
+During the search for the end, backslashes that escape delimiters
+are removed (exactly speaking, they are not copied to the safe location).
 
 For constructs with three-part delimiters (C<s///>, C<y///>, and
 C<tr///>), the search is repeated once more.
+If the first delimiter is not an opening punctuation, three delimiters must
+be same such as C<s!!!> and C<tr)))>, in which case the second delimiter
+terminates the left part and starts the right part at once.
+If the left part is delimited by bracketing punctuations (that is C<()>,
+C<[]>, C<{}>, or C<< <> >>), the right part needs another pair of
+delimiters such as C<s(){}> and C<tr[]//>.  In these cases, whitespaces
+and comments are allowed between both parts, though the comment must follow
+at least one whitespace; otherwise a character expected as the start of
+the comment may be regarded as the starting delimiter of the right part.
 
 During this search no attention is paid to the semantics of the construct.
 Thus:
@@ -1843,18 +1872,6 @@ this search. Thus the second C<\> in C<qq/\c\/> is interpreted as a part
 of C<\/>, and the following C</> is not recognized as a delimiter.
 Instead, use C<\034> or C<\x1c> at the end of quoted constructs.
 
-=item Removal of backslashes before delimiters
-
-During the second pass, text between the starting and ending
-delimiters is copied to a safe location, and the C<\> is removed
-from combinations consisting of C<\> and delimiter--or delimiters,
-meaning both starting and ending delimiters will be handled,
-should these differ. This removal does not happen for multi-character
-delimiters. Note that the combination C<\\> is left intact.
-
-Starting from this step no information about the delimiters is
-used in parsing.
-
 =item Interpolation
 X<interpolation>
 
@@ -1866,21 +1883,28 @@ delimiter-independent.  There are multiple cases.
 =item C<<<'EOF'>
 
 No interpolation is performed.
+Note that the combination C<\\> is left intact, since escaped delimiters
+are not available for here-docs.
 
-=item  C<m''>, C<s'''>
+=item  C<m''>, the pattern of C<s'''>
 
-No interpolation is performed at this stage, see
-L</"Interpolation of regular expressions"> for comments on later
-processing of their contents.
+No interpolation is performed at this stage.
+Any backslashed sequences including C<\\> are treated at the stage
+to L</"parsing regular expressions">.
 
-=item C<''>, C<q//>
+=item C<''>, C<q//>, C<tr'''>, C<y'''>, the replacement of C<s'''>
 
 The only interpolation is removal of C<\> from pairs of C<\\>.
+Therefore C<-> in C<tr'''> and C<y'''> is treated literally
+as a hyphen and no character range is available.
+C<\1> in the replacement of C<s'''> does not work as C<$1>.
 
 =item C<tr///>, C<y///>
 
-No variable interpolation occurs. Escape sequences such as \200
-and the common escapes such as \t for tab are converted to literals.
+No variable interpolation occurs.  String modifying combinations for
+case and quoting such as C<\Q>, C<\U>, and C<\E> are not recognized.
+The other escape sequences such as C<\200> and C<\t> and backslashed
+characters such as C<\\> and C<\-> are converted to appropriate literals.
 The character C<-> is treated specially and therefore C<\-> is treated
 as a literal C<->.
 
@@ -1889,7 +1913,9 @@ as a literal C<->.
 C<\Q>, C<\U>, C<\u>, C<\L>, C<\l> (possibly paired with C<\E>) are
 converted to corresponding Perl constructs.  Thus, C<"$foo\Qbaz$bar">
 is converted to C<$foo . (quotemeta("baz" . $bar))> internally.
-The other combinations are replaced with appropriate expansions.
+The other escape sequences such as C<\200> and C<\t> and backslashed
+characters such as C<\\> and C<\-> are replaced with appropriate
+expansions.
 
 Let it be stressed that I<whatever falls between C<\Q> and C<\E>>
 is interpolated in the usual way.  Something like C<"\Q\\E"> has
@@ -1933,12 +1959,35 @@ brackets.  because the outcome may be determined by voting based
 on heuristic estimators, the result is not strictly predictable.
 Fortunately, it's usually correct for ambiguous cases.
 
-=item C<?RE?>, C</RE/>, C<m/RE/>, C<s/RE/foo/>,
+=item the replacement of C<s///>
 
 Processing of C<\Q>, C<\U>, C<\u>, C<\L>, C<\l>, and interpolation
-happens (almost) as with C<qq//> constructs, but the substitution
-of C<\> followed by RE-special chars (including C<\>) is not
-performed.  Moreover, inside C<(?{BLOCK})>, C<(?# comment )>, and
+happens as with C<qq//> constructs.
+
+It is at this step that C<\1> is begrudgingly converted to C<$1> in
+the replacement text of C<s///>, in order to correct the incorrigible
+I<sed> hackers who haven't picked up the saner idiom yet.  A warning
+is emitted if the C<use warnings> pragma or the B<-w> command-line flag
+(that is, the C<$^W> variable) was set.
+
+=item C<RE> in C<?RE?>, C</RE/>, C<m/RE/>, C<s/RE/foo/>,
+
+Processing of C<\Q>, C<\U>, C<\u>, C<\L>, C<\l>, and interpolation
+happens (almost) as with C<qq//> constructs.
+
+However combinations of C<\> followed by RE-special chars are not
+substituted but only skipped. The full list of RE-special chars is
+C<\>, C<.>, C<^>, C<$>, C<@>, C<A>, C<G>, C<Z>, C<d>, C<D>, C<w>, C<W>,
+C<s>, C<S>, C<b>, C<B>, C<p>, C<P>, C<X>, C<C>, C<+>, C<*>, C<?>, C<|>,
+C<(>, C<)>, C<->, C<n>, C<r>, C<t>, C<f>, C<e>, C<a>, C<x>, C<c>, C<z>,
+digits (C<0> to C<9>), C<[>, C<{>, C<]>, C<}>, whitespaces (SPACE, TAB,
+LF, CR, FF, and VT in addition), and C<#>.
+As C<\c> is skipped at this step, C<@> of C<\c@> in RE is possibly
+treated as an array symbol (for example one of C<@foo> or C<@->),
+even though the same text in C<qq//> gives interpolation of C<\c@>.
+Note that C<\N{name}> is interpolated at this step.
+
+Moreover, inside C<(?{BLOCK})>, C<(?# comment )>, and
 a C<#>-comment in a C<//x>-regular expression, no processing is
 performed whatsoever.  This is the first step at which the presence
 of the C<//x> modifier is relevant.
@@ -1953,12 +2002,6 @@ C<$arr> followed by a digit, which would be the interpretation of
 C</$arr[0-9]/>.  Since voting among different estimators may occur,
 the result is not predictable.
 
-It is at this step that C<\1> is begrudgingly converted to C<$1> in
-the replacement text of C<s///> to correct the incorrigible
-I<sed> hackers who haven't picked up the saner idiom yet.  A warning
-is emitted if the C<use warnings> pragma or the B<-w> command-line flag
-(that is, the C<$^W> variable) was set.
-
 The lack of processing of C<\\> creates specific restrictions on
 the post-processed text.  If the delimiter is C</>, one cannot get
 the combination C<\/> into the result of this step.  C</> will
@@ -1972,7 +2015,7 @@ alphanumeric char, as in:
   m m ^ a \s* b mmx;
 
 In the RE above, which is intentionally obfuscated for illustration, the
-delimiter is C<m>, the modifier is C<mx>, and after backslash-removal the
+delimiter is C<m>, the modifier is C<mx>, and after delimiter-removal the
 RE is the same as for C<m/ ^ a \s* b /mx>.  There's more than one
 reason you're encouraged to restrict your delimiters to non-alphanumeric,
 non-whitespace choices.
@@ -1982,13 +2025,13 @@ non-whitespace choices.
 This step is the last one for all constructs except regular expressions,
 which are processed further.
 
-=item Interpolation of regular expressions
-X<regexp, interpolation>
+=item parsing regular expressions
+X<regexp, parse>
 
 Previous steps were performed during the compilation of Perl code,
 but this one happens at run time--although it may be optimized to
 be calculated at compile time if appropriate.  After preprocessing
-described above, and possibly after evaluation if catenation,
+described above, and possibly after evaluation if concatenation,
 joining, casing translation, or metaquoting are involved, the
 resulting I<string> is passed to the RE engine for compilation.
 
