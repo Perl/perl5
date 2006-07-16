@@ -1,5 +1,10 @@
 Revision history for Perl extension Module::Build.
 
+0.2803  Sat Jul 15 08:26:34 CDT 2006
+
+ - The META.yml file in the last release was all screwed up, so the
+   distribution wasn't indexed properly.  Fixed in this release.
+
 0.2802  Fri Jul 14 22:40:34 CDT 2006
 
  - Added reliance on version.pm, which means we should deal much

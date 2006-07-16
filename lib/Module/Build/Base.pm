@@ -3211,6 +3211,8 @@ sub prepare_metadata {
     die "ERROR: Missing required field '$_' for META.yml\n"
       unless defined($node->{$name}) && length($node->{$name});
   }
+  # Really don't understand why I need the "... if exists" here
+  $node->{version} = $node->{version}->stringify if exists $node->{version};
 
   if (defined( $self->license ) &&
       defined( my $url = $self->valid_licenses->{ $self->license } )) {
@@ -3228,7 +3230,7 @@ sub prepare_metadata {
   }
   my $pkgs = eval { $self->find_dist_packages };
   if ($@) {
-    $self->log_warn("WARNING: Possible missing or corrupt 'MANIFEST' file.\n" .
+    $self->log_warn("$@\nWARNING: Possible missing or corrupt 'MANIFEST' file.\n" .
 		    "Nothing to enter for 'provides' field in META.yml\n");
   } else {
     $node->{provides} = $pkgs if %$pkgs;
@@ -3377,6 +3379,11 @@ sub find_dist_packages {
       $prime{$package}{version} = $result->{version}
 	  if defined( $result->{version} );
     }
+  }
+
+  # Stringify versions
+  for (grep exists $_->{version}, values %prime) {
+    $_->{version} = $_->{version}->stringify;
   }
 
   return \%prime;
