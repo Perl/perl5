@@ -867,7 +867,7 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie,U32 depth)
         if ( tmp ) {
             PerlIO_printf( Perl_debug_log, "%*s", 
                 colwidth,
-                pv_pretty(sv, (U8*)SvPV_nolen_const(*tmp), SvCUR(*tmp), colwidth, 
+                pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), colwidth, 
 	                    PL_colors[0], PL_colors[1],
 	                    (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0) |
 	                    PERL_PV_ESCAPE_FIRSTCHAR 
@@ -960,7 +960,7 @@ S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie, U32 next_alloc
 	    if ( tmp ) {
                 PerlIO_printf( Perl_debug_log, "%*s:%3X=%4"UVXf" | ",
                     colwidth,
-                    pv_pretty(sv, (U8*)SvPV_nolen_const(*tmp), SvCUR(*tmp), colwidth, 
+                    pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), colwidth, 
 	                    PL_colors[0], PL_colors[1],
 	                    (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0) |
 	                    PERL_PV_ESCAPE_FIRSTCHAR 
@@ -1002,7 +1002,7 @@ S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie, U32 next_allo
         if ( tmp ) {
             PerlIO_printf( Perl_debug_log, "%*s", 
                 colwidth,
-                pv_pretty(sv, (U8*)SvPV_nolen_const(*tmp), SvCUR(*tmp), colwidth, 
+                pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), colwidth, 
 	                    PL_colors[0], PL_colors[1],
 	                    (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0) |
 	                    PERL_PV_ESCAPE_FIRSTCHAR 
@@ -6454,7 +6454,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	 * we have no flag "this EXACTish node was UTF-8" 
 	 * --jhi */
 	const char * const s = 
-	    pv_pretty(dsv, (U8*)STRING(o), STR_LEN(o), 60, 
+	    pv_pretty(dsv, STRING(o), STR_LEN(o), 60, 
 	        PL_colors[0], PL_colors[1],
 	        PERL_PV_ESCAPE_UNI_DETECT |
 	        PERL_PV_PRETTY_ELIPSES    |
@@ -7029,7 +7029,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 		if (elem_ptr) 
 		    PerlIO_printf(Perl_debug_log, "%*s%s\n",
 		       (int)(2*(l+4)), "",
-		        pv_pretty(sv, (U8*)SvPV_nolen_const(*elem_ptr), SvCUR(*elem_ptr), 60, 
+		        pv_pretty(sv, SvPV_nolen_const(*elem_ptr), SvCUR(*elem_ptr), 60, 
 	                    PL_colors[0], PL_colors[1],
 	                    (SvUTF8(*elem_ptr) ? PERL_PV_ESCAPE_UNI : 0) |
 	                    PERL_PV_PRETTY_ELIPSES    |

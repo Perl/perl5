@@ -121,7 +121,7 @@ Perl_dump_eval(pTHX)
 
 
 /*
-=for apidoc Apd|char*|pv_escape|NN SV *dsv|NN const U8 const *str\
+=for apidoc Apd|char*|pv_escape|NN SV *dsv|NN const char const *str\
                |const STRLEN count|const STRLEN max
                |STRLEN const *escaped, const U32 flags
 
@@ -158,28 +158,29 @@ Returns a pointer to the escaped text as held by dsv.
 =cut
 */
 #define PV_ESCAPE_OCTBUFSIZE 32
+
 char *
-Perl_pv_escape( pTHX_ SV *dsv, U8 const * const str, 
+Perl_pv_escape( pTHX_ SV *dsv, char const * const str, 
                 const STRLEN count, const STRLEN max, 
                 STRLEN * const escaped, const U32 flags ) 
 {
-    U8 dq = (flags & PERL_PV_ESCAPE_QUOTE) ? '"' : '\\';
-    U8 octbuf[PV_ESCAPE_OCTBUFSIZE] = "\\123456789ABCDF";
+    char dq = (flags & PERL_PV_ESCAPE_QUOTE) ? '"' : '\\';
+    char octbuf[PV_ESCAPE_OCTBUFSIZE] = "\\123456789ABCDF";
     STRLEN wrote = 0;    /* chars written so far */
     STRLEN chsize = 0;   /* size of data to be written */
     STRLEN readsize = 1; /* size of data just read */
     bool isuni= flags & PERL_PV_ESCAPE_UNI ? 1 : 0; /* is this unicode */
-    const U8 *pv  = str;
-    const U8 *end = pv + count; /* end of string */
+    const char *pv  = str;
+    const char *end = pv + count; /* end of string */
 
     if (!flags & PERL_PV_ESCAPE_NOCLEAR) 
 	    sv_setpvn(dsv, "", 0);
     
-    if ((flags & PERL_PV_ESCAPE_UNI_DETECT) && is_utf8_string(pv, count))
+    if ((flags & PERL_PV_ESCAPE_UNI_DETECT) && is_utf8_string((U8*)pv, count))
         isuni = 1;
     
     for ( ; (pv < end && (!max || (wrote < max))) ; pv += readsize ) {
-        const UV u= (isuni) ? utf8_to_uvchr(pv, &readsize) : *pv;            
+        const UV u= (isuni) ? utf8_to_uvchr((U8*)pv, &readsize) : (U8)*pv;            
         const U8 c = (U8)u & 0xFF;
         
         if ( ( u > 255 ) || (flags & PERL_PV_ESCAPE_ALL)) {
@@ -208,7 +209,7 @@ Perl_pv_escape( pTHX_ SV *dsv, U8 const * const str,
                             chsize = 1;
 				break;
 		default:
-                        if ( (pv < end) && isDIGIT(*(pv+readsize)) )
+                        if ( (pv < end) && isDIGIT((U8)*(pv+readsize)) )
                             chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE, 
                                                   "\\%03o", c);
 			    else
@@ -236,9 +237,9 @@ Perl_pv_escape( pTHX_ SV *dsv, U8 const * const str,
     return SvPVX(dsv);
 }
 /*
-=for apidoc Apd|char *|pv_pretty|NN SV *dsv|NN const U8 const *str\
+=for apidoc Apd|char *|pv_pretty|NN SV *dsv|NN const char const *str\
            |const STRLEN count|const STRLEN max\
-           |const U8 const *start_color| const U8 const *end_color\
+           |const char const *start_color| const char const *end_color\
            |const U32 flags
 
 Converts a string into something presentable, handling escaping via
@@ -264,8 +265,8 @@ Returns a pointer to the prettified text as held by dsv.
 */
 
 char *
-Perl_pv_pretty( pTHX_ SV *dsv, U8 const * const str, const STRLEN count, 
-  const STRLEN max, U8 const * const start_color, U8 const * const end_color, 
+Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count, 
+  const STRLEN max, char const * const start_color, char const * const end_color, 
   const U32 flags ) 
 {
     U8 dq = (flags & PERL_PV_PRETTY_QUOTE) ? '"' : '\\';
@@ -318,7 +319,7 @@ Note that the final string may be up to 7 chars longer than pvlim.
 char *
 Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pvlim)
 {
-    pv_pretty( dsv, pv, cur, pvlim, 0, 0, PERL_PV_PRETTY_DUMP);
+    pv_pretty( dsv, pv, cur, pvlim, NULL, NULL, PERL_PV_PRETTY_DUMP);
     if (len > cur && pv[cur] == '\0')
             sv_catpvn( dsv, "\\0", 2 );
     return SvPVX(dsv);

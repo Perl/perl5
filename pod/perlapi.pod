@@ -781,27 +781,75 @@ Found in file dump.c
 =item pv_escape
 X<pv_escape>
 
+               |const STRLEN count|const STRLEN max
+               |STRLEN const *escaped, const U32 flags
+
 Escapes at most the first "count" chars of pv and puts the results into
-buf such that the size of the escaped string will not exceed "max" chars
+dsv such that the size of the escaped string will not exceed "max" chars
 and will not contain any incomplete escape sequences.
 
-If flags contains PERL_PV_ESCAPE_QUOTE then the string will have quotes
-placed around it; moreover, if the number of chars converted was less than
-"count" then a trailing elipses (...) will be added after the closing
-quote.
-
-If PERL_PV_ESCAPE_QUOTE is not set, but PERL_PV_ESCAPE_PADR is, then the
-returned string will be right padded with spaces such that it is max chars
-long.
+If flags contains PERL_PV_ESCAPE_QUOTE then any double quotes in the string
+will also be escaped.
 
 Normally the SV will be cleared before the escaped string is prepared,
-but when PERL_PV_ESCAPE_CAT is set this will not occur.
+but when PERL_PV_ESCAPE_NOCLEAR is set this will not occur.
 
-Returns a pointer to the string contained by SV.
+If PERL_PV_ESCAPE_UNI is set then the input string is treated as unicode,
+if PERL_PV_ESCAPE_UNI_DETECT is set then the input string is scanned
+using C<is_utf8_string()> to determine if it is unicode.
+
+If PERL_PV_ESCAPE_ALL is set then all input chars will be output
+using C<\x01F1> style escapes, otherwise only chars above 255 will be
+escaped using this style, other non printable chars will use octal or
+common escaped patterns like C<\n>. If PERL_PV_ESCAPE_NOBACKSLASH
+then all chars below 255 will be treated as printable and 
+will be output as literals.
+
+If PERL_PV_ESCAPE_FIRSTCHAR is set then only the first char of the
+string will be escaped, regardles of max. If the string is utf8 and 
+the chars value is >255 then it will be returned as a plain hex 
+sequence. Thus the output will either be a single char, 
+an octal escape sequence, a special escape like C<\n> or a 3 or 
+more digit hex value. 
+
+Returns a pointer to the escaped text as held by dsv.
 
 NOTE: the perl_ form of this function is deprecated.
 
-	char*	pv_escape(SV *dsv, const char *pv, const STRLEN count, const STRLEN max, const U32 flags)
+	char*	pv_escape(SV *dsv, char const * const str, const STRLEN count, const STRLEN max, STRLEN * const escaped, const U32 flags)
+
+=for hackers
+Found in file dump.c
+
+=item pv_pretty
+X<pv_pretty>
+
+           |const STRLEN count|const STRLEN max\
+           |const char const *start_color| const char const *end_color\
+           |const U32 flags
+
+Converts a string into something presentable, handling escaping via
+pv_escape() and supporting quoting and elipses. 
+
+If the PERL_PV_PRETTY_QUOTE flag is set then the result will be 
+double quoted with any double quotes in the string escaped. Otherwise
+if the PERL_PV_PRETTY_LTGT flag is set then the result be wrapped in
+angle brackets. 
+           
+If the PERL_PV_PRETTY_ELIPSES flag is set and not all characters in
+string were output then an elipses C<...> will be appended to the 
+string. Note that this happens AFTER it has been quoted.
+           
+If start_color is non-null then it will be inserted after the opening
+quote (if there is one) but before the escaped text. If end_color
+is non-null then it will be inserted after the escaped text but before
+any quotes or elipses.
+
+Returns a pointer to the prettified text as held by dsv.
+           
+NOTE: the perl_ form of this function is deprecated.
+
+	char*	pv_pretty(SV *dsv, char const * const str, const STRLEN count, const STRLEN max, char const * const start_color, char const * const end_color, const U32 flags)
 
 =for hackers
 Found in file dump.c

@@ -2674,11 +2674,11 @@ PERL_CALLCONV char*	Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, S
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV char*	Perl_pv_escape(pTHX_ SV *dsv, U8 const * const str, const STRLEN count, const STRLEN max, STRLEN * const escaped, const U32 flags)
+PERL_CALLCONV char*	Perl_pv_escape(pTHX_ SV *dsv, char const * const str, const STRLEN count, const STRLEN max, STRLEN * const escaped, const U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV char*	Perl_pv_pretty(pTHX_ SV *dsv, U8 const * const str, const STRLEN count, const STRLEN max, U8 const * const start_color, U8 const * const end_color, const U32 flags)
+PERL_CALLCONV char*	Perl_pv_pretty(pTHX_ SV *dsv, char const * const str, const STRLEN count, const STRLEN max, char const * const start_color, char const * const end_color, const U32 flags)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 

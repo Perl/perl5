@@ -235,9 +235,10 @@ my %flags = (
     OFFSETS_DEBUG   => 0x020000,
     STATE           => 0x040000,
 );
-$flags{ALL} = $flags{COMPILE} | $flags{EXECUTE};
+$flags{ALL} = $flags{COMPILE} | $flags{EXECUTE} | $flags{STATE};
 $flags{All} = $flags{all} = $flags{DUMP} | $flags{EXECUTE};
 $flags{More} = $flags{MORE} = $flags{ALL} | $flags{TRIE_MORE};
+$flags{State} = $flags{DUMP} | $flags{EXECUTE} | $flags{STATE};
 
 my $installed = 0;
 
