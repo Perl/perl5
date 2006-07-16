@@ -82,6 +82,9 @@ Perl_taint_env(pTHX)
 	"CDPATH",	/* ksh dain bramage #1 */
 	"ENV",		/* ksh dain bramage #2 */
 	"BASH_ENV",	/* bash dain bramage -- I guess it's contagious */
+#ifdef WIN32
+	"PERL5SHELL",	/* used for system() on Windows */
+#endif
 	NULL
     };
 
