@@ -105,7 +105,8 @@ chmod 0444, $tab_file;
 unlink $tmpc_file;
 
 # Wrap PERL_CORE round the symbol definitions. Also,  the
-# C<#line 123 "perlytmp.h"> gets picked up by make depend, so change it.
+# C<#line 30 "perly.y"> confuses the Win32 resource compiler and the
+# C<#line 188 "perlytmp.h"> gets picked up by make depend, so remove them.
 
 open TMPH_FILE, $tmph_file or die "Can't open $tmph_file: $!\n";
 chmod 0644, $h_file;
@@ -117,7 +118,7 @@ while (<TMPH_FILE>) {
 	print H_FILE "#endif /* PERL_CORE */\n";
 	$endcore_done = 1;
     }
-    s/"$tmph_file"/"$h_file"/;
+    next if /^#line \d+ ".*"/;
     print H_FILE $_;
 }
 close TMPH_FILE;

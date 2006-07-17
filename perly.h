@@ -175,7 +175,6 @@
 
 #endif /* PERL_CORE */
 #if ! defined (YYSTYPE) && ! defined (YYSTYPE_IS_DECLARED)
-#line 30 "perly.y"
 typedef union YYSTYPE {
     I32	ival;
     char *pval;
@@ -186,7 +185,6 @@ typedef union YYSTYPE {
     GV *gvval;
 } YYSTYPE;
 /* Line 1447 of yacc.c.  */
-#line 188 "perly.h"
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
