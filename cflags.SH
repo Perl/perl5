@@ -98,7 +98,10 @@ Intel*) ;; # Nice try, Intel C++.
 12]*) ;; # Go easy on the older versions of gcc.
 *) case "$cc" in
    *g++*) ;;
-   *) stdflags="$stdflags -std=c89" ;;
+   *) case "$osname" in
+      cygwin) ;; # Fails at least up to and including 1.5.20
+      *) stdflags="$stdflags -std=c89" ;;
+      esac
    esac
    ;;
 esac
