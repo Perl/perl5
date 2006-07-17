@@ -62,14 +62,17 @@ sub ok {
 # Tests freeing the Perl interperter for each thread
 # See http://www.nntp.perl.org/group/perl.perl5.porters/110772 for details
 
-my $COUNT;
-share($COUNT);
+my ($COUNT, $STARTED) :shared;
 
 sub threading_1 {
     my $tid = threads->tid();
     ok($tid, "Thread $tid started");
 
-    if ($tid < 5) {
+    {
+        lock($STARTED);
+        $STARTED++;
+    }
+    if ($STARTED < 5) {
         sleep(1);
         threads->create('threading_1')->detach();
     }
@@ -95,12 +98,16 @@ sub threading_1 {
 }
 
 {
+    $STARTED = 0;
     $COUNT = 0;
     threads->create('threading_1')->detach();
     {
         lock($COUNT);
         while ($COUNT < 3) {
             cond_wait($COUNT);
+            threads->create(sub {
+                threads->create(sub { })->join();
+            })->join();
         }
     }
 }
@@ -109,6 +116,9 @@ sub threading_1 {
         lock($COUNT);
         while ($COUNT < 5) {
             cond_wait($COUNT);
+            threads->create(sub {
+                threads->create(sub { })->join();
+            })->join();
         }
     }
     threads->yield();
@@ -121,7 +131,11 @@ sub threading_2 {
     my $tid = threads->tid();
     ok($tid, "Thread $tid started");
 
-    if ($tid < 10) {
+    {
+        lock($STARTED);
+        $STARTED++;
+    }
+    if ($STARTED < 5) {
         threads->create('threading_2')->detach();
     }
 
@@ -135,11 +149,15 @@ sub threading_2 {
 }
 
 {
+    $STARTED = 0;
     $COUNT = 0;
     threads->create('threading_2')->detach();
+    threads->create(sub {
+        threads->create(sub { })->join();
+    })->join();
     {
         lock($COUNT);
-        while ($COUNT < 3) {
+        while ($COUNT < 5) {
             cond_wait($COUNT);
         }
     }

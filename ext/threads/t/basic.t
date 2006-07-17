@@ -68,11 +68,11 @@ sub test4 {
 {
     my $thread1 = threads->create('test4');
     $thread1->detach();
+    while ($thread1->is_running()) {
+        threads->yield();
+        sleep 1;
+    }
 }
-
-threads->yield; # help out non-preemptive thread implementations
-sleep 2;
-
 ok(7, 1, "Detach test");
 
 
