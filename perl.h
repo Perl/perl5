@@ -4460,14 +4460,23 @@ END_EXTERN_C
 
 START_EXTERN_C
 
+/* PERL_GLOBAL_STRUCT_PRIVATE wants to keep global data like the
+ * magic vtables const, but this is incompatible with SWIG which
+ * does want to modify the vtables. */
+#ifdef PERL_GLOBAL_STRUCT_PRIVATE
+#  define EXT_MGVTBL EXTCONST MGVTBL
+#else
+#  define EXT_MGVTBL EXT MGVTBL
+#endif
+
 #ifdef DOINIT
-#  define MGVTBL_SET(var,a,b,c,d,e,f,g,h) EXT MGVTBL var = {a,b,c,d,e,f,g,h}
+#  define MGVTBL_SET(var,a,b,c,d,e,f,g,h) EXT_MGVTBL var = {a,b,c,d,e,f,g,h}
 /* Like MGVTBL_SET but with the get magic having a const MG* */
-#  define MGVTBL_SET_CONST_MAGIC_GET(var,a,b,c,d,e,f,g,h) EXT MGVTBL var \
+#  define MGVTBL_SET_CONST_MAGIC_GET(var,a,b,c,d,e,f,g,h) EXT_MGVTBL var \
     = {(int (*)(pTHX_ SV *, MAGIC *))a,b,c,d,e,f,g,h}
 #else
-#  define MGVTBL_SET(var,a,b,c,d,e,f,g,h) EXT MGVTBL var
-#  define MGVTBL_SET_CONST_MAGIC_GET(var,a,b,c,d,e,f,g,h) EXT MGVTBL var
+#  define MGVTBL_SET(var,a,b,c,d,e,f,g,h) EXT_MGVTBL var
+#  define MGVTBL_SET_CONST_MAGIC_GET(var,a,b,c,d,e,f,g,h) EXT_MGVTBL var
 #endif
 
 MGVTBL_SET(

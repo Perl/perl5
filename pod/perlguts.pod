@@ -1914,6 +1914,12 @@ please see F<miniperlmain.c> for usage details.  You may also need
 to use C<dVAR> in your coding to "declare the global variables"
 when you are using them.  dTHX does this for you automatically.
 
+To see whether you have non-const data you can use a BSD-compatible C<nm>:
+
+  nm libperl.a | grep -v ' [TURtr] '
+
+If this displays any C<D> or C<d> symbols, you have non-const data.
+
 For backward compatibility reasons defining just PERL_GLOBAL_STRUCT
 doesn't actually hide all symbols inside a big global struct: some
 PerlIO_xxx vtables are left visible.  The PERL_GLOBAL_STRUCT_PRIVATE

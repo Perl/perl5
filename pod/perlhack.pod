@@ -2404,9 +2404,9 @@ therefore more ways for things to go wrong.  You should try it.
 Introducing (non-read-only) globals
 
 Do not introduce any modifiable globals, truly global or file static.
-They are bad form and break multithreading.  The right way is to
-introduce them as new interpreter variables, see F<intrpvar.h> (at the
-very end for binary compatibility).
+They are bad form and complicate multithreading and other forms of
+concurrency.  The right way is to introduce them as new interpreter
+variables, see F<intrpvar.h> (at the very end for binary compatibility).
 
 Introducing read-only (const) globals is okay, as long as you verify
 with e.g. C<nm libperl.a|egrep -v ' [TURtr] '> (if your C<nm> has
@@ -2417,11 +2417,16 @@ If you want to have static strings, make them constant:
 
   static const char etc[] = "...";
 
-If you want to have arrays of static strings, note carefully
+If you want to have arrays of constant strings, note carefully
 the right combination of C<const>s:
 
     static const char * const yippee[] =
 	{"hi", "ho", "silver"};
+
+There is a way to completely hide any modifiable globals (they are all
+moved to heap), the compilation setting C<-DPERL_GLOBAL_STRUCT_PRIVATE>.
+It is not normally used, but can be used for testing, read more
+about it in L<perlhack>.
 
 =item *
 
