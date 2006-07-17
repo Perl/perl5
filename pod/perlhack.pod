@@ -2462,9 +2462,9 @@ reading.  Please test your changes with as many C compilers and
 platforms as possible -- we will, anyway, and it's nice to save
 oneself from public embarrassment.
 
-If using gcc, starting from Perl 5.9.4 Perl core C files will be
-compiled with the C<-std=c89> option which will hopefully catch
-most of these unportabilities.
+If using gcc, you can add the C<-std=c89> option which will hopefully
+catch most of these unportabilities. (However it might also catch
+incompatibilities in your system's header files.)
 
 Use the Configure C<-Dgccansipedantic> flag to enable the gcc
 C<-ansi -pedantic> flags which enforce stricter ANSI rules.

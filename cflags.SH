@@ -91,21 +91,6 @@ esac
 
 stdflags=''
 
-# Be strict C89 for gcc (but not for g++).
-case "$gccversion" in
-'') ;;
-Intel*) ;; # Nice try, Intel C++.
-12]*) ;; # Go easy on the older versions of gcc.
-*) case "$cc" in
-   *g++*) ;;
-   *) case "$osname" in
-      cygwin) ;; # Fails at least up to and including 1.5.20
-      *) stdflags="$stdflags -std=c89" ;;
-      esac
-   esac
-   ;;
-esac
-
 echo "Extracting cflags (with variable substitutions)"
 : This section of the file will have variable substitutions done on it.
 : Move anything that needs config subs from !NO!SUBS! section to !GROK!THIS!.
