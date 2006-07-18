@@ -233,7 +233,9 @@ above.  If you see a prompt that looks like:
 
 Then you either don't have a F<~/.ssh/identity> or F<~/.ssh/id_rsa>
 file corresponding to your public key, or that file is not readable.
-Fix the problem and try again.
+Fix the problem and try again.  Alternatively, some ssh implementations
+will fail to verify your RSA key if the key if readable by others.
+Just lower the permissions to make the key readable to yourself.
 
 If you only had the public key file for one protocol installed at the
 server end then make sure your client is using the corresponding
