@@ -197,17 +197,16 @@ S_regcppush(pTHX_ I32 parenfloor)
 /* These are needed since we do not localize EVAL nodes: */
 #define REGCP_SET(cp)                                           \
     DEBUG_STATE_r(                                              \
-        if (cp != PL_savestack_ix) 		                \
             PerlIO_printf(Perl_debug_log,		        \
-			     "  Setting an EVAL scope, savestack=%"IVdf"\n",	\
+	        "  Setting an EVAL scope, savestack=%"IVdf"\n",	\
 	        (IV)PL_savestack_ix));                          \
     cp = PL_savestack_ix
 
 #define REGCP_UNWIND(cp)                                        \
-    DEBUG_EXECUTE_r(                                            \
+    DEBUG_STATE_r(                                              \
         if (cp != PL_savestack_ix) 		                \
-				PerlIO_printf(Perl_debug_log,		\
-				"  Clearing an EVAL scope, savestack=%"IVdf"..%"IVdf"\n", \
+    	    PerlIO_printf(Perl_debug_log,		        \
+		"  Clearing an EVAL scope, savestack=%"IVdf"..%"IVdf"\n", \
 	        (IV)(cp), (IV)PL_savestack_ix));                \
     regcpblow(cp)
 
@@ -1412,7 +1411,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                 PerlIO_printf( Perl_debug_log,
                                     "%sState: %4"UVxf", Base: 0x%-4"UVxf" uvc=%"UVxf" word=%"UVxf"\n",
                                     failed ? "Fail transition to " : "",
-                                    state, base, uvc, word)
+                                    (UV)state, (UV)base, (UV)uvc, (UV)word)
                             );
                             if ( base ) {
                                 U32 tmp;
@@ -1461,7 +1460,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         PerlIO_printf( Perl_debug_log,
                             "%sState: %4"UVxf", Base: 0x%-4"UVxf" uvc=%"UVxf"\n",
                             "All done: ",
-                            state, base, uvc)
+                            (UV)state, (UV)base, (UV)uvc)
                     );
                     if (leftmost) {
                         s = (char*)leftmost;
@@ -1791,7 +1790,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		    s,strend-s,60);
 		PerlIO_printf(Perl_debug_log,
 		    "Matching stclass %.*s against %s (%d chars)\n",
-		    SvCUR(prop), SvPVX_const(prop),
+		    (int)SvCUR(prop), SvPVX_const(prop),
 		     quoted, (int)(strend - s));
 	    }
 	});
@@ -4348,8 +4347,8 @@ yes_final:
 	    st = SLAB_LAST(PL_regmatch_slab);
 	}
 	depth -= (st - yes_state);
-	DEBUG_STATE_r(PerlIO_printf(Perl_debug_log, "POP STATES (%d..%d)\n",
-	    depth+1, depth+(st - yes_state)));
+	DEBUG_STATE_r(PerlIO_printf(Perl_debug_log, "POP STATES (%"UVuf"..%"UVuf")\n",
+	    (UV)(depth+1), (UV)(depth+(st - yes_state))));
 	st = yes_state;
 	yes_state = st->u.yes.prev_yes_state;
 	PL_regmatch_state = st;
