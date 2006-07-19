@@ -1,10 +1,10 @@
 #!./perl
 
 if ( $does_gmtime = gmtime(time) ) { 
-    print "1..7\n" 
+    print "1..8\n" 
 }
 else { 
-    print "1..4\n" 
+    print "1..5\n" 
 }
 
 
@@ -51,6 +51,13 @@ ok(localtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
                   /x,
    'localtime(), scalar context'
   );
+
+# check that localtime respects changes to $ENV{TZ}
+$ENV{TZ} = "GMT-5";
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($beg);
+$ENV{TZ} = "GMT+5";
+($sec,$min,$hour2,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($beg);
+ok($hour != $hour2,                             'changes to $ENV{TZ} respected');
 
 exit 0 unless $does_gmtime;
 

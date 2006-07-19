@@ -1346,10 +1346,10 @@ typedef struct {
 #  if defined(PERL_REENTR_API) && (PERL_REENTR_API+0 == 1)
 #   undef localtime
 #   if !defined(localtime) && LOCALTIME_R_PROTO == REENTRANT_PROTO_S_TS
-#       define localtime(a) (localtime_r(a, &PL_reentrant_buffer->_localtime_struct) ? &PL_reentrant_buffer->_localtime_struct : 0)
+#       define localtime(a) (L_R_TZSET localtime_r(a, &PL_reentrant_buffer->_localtime_struct) ? &PL_reentrant_buffer->_localtime_struct : 0)
 #  endif /* if defined(PERL_REENTR_API) && (PERL_REENTR_API+0 == 1) */
 #   if !defined(localtime) && LOCALTIME_R_PROTO == REENTRANT_PROTO_I_TS
-#       define localtime(a) (localtime_r(a, &PL_reentrant_buffer->_localtime_struct) == 0 ? &PL_reentrant_buffer->_localtime_struct : 0)
+#       define localtime(a) (L_R_TZSET localtime_r(a, &PL_reentrant_buffer->_localtime_struct) == 0 ? &PL_reentrant_buffer->_localtime_struct : 0)
 #  endif /* if defined(PERL_REENTR_API) && (PERL_REENTR_API+0 == 1) */
 #   endif /* HAS_LOCALTIME */
 #endif /* HAS_LOCALTIME_R */

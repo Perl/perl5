@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Oct 23 17:35:45 CEST 2006 [metaconfig 3.0 PL70]
+# Generated on Mon Nov  6 10:30:43 CET 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -549,6 +549,7 @@ d_ldbl_dig=''
 d_libm_lib_version=''
 d_link=''
 d_localtime_r=''
+d_localtime_r_needs_tzset=''
 localtime_r_proto=''
 d_locconv=''
 d_lockf=''
@@ -14514,6 +14515,59 @@ case "$d_localtime_r" in
 	;;
 esac
 
+: see if localtime_r calls tzset
+case "$localtime_r_proto" in
+REENTRANT_PROTO*)
+	$cat >try.c <<EOCP
+/*  Does our libc's localtime_r call tzset ?
+ *  return 0 if so, 1 otherwise.
+ */
+#include <sys/types.h>
+#include <unistd.h>
+#include <time.h>
+#include <string.h>
+#include <malloc.h>
+int main()
+{
+    time_t t = time(0L);
+    char w_tz[]="TZ" "=GMT+5",
+	 e_tz[]="TZ" "=GMT-5",
+	*tz_e = (char*)malloc(16),
+	*tz_w = (char*)malloc(16);
+    struct tm tm_e, tm_w;
+    memset(&tm_e,'\0',sizeof(struct tm));
+    memset(&tm_w,'\0',sizeof(struct tm));
+    strcpy(tz_e,e_tz);
+    strcpy(tz_w,w_tz);
+
+    putenv(tz_e);
+    localtime_r(&t, &tm_e);
+
+    putenv(tz_w);
+    localtime_r(&t, &tm_w);
+
+    if( memcmp(&tm_e, &tm_w, sizeof(struct tm)) == 0 )
+	return 1;
+    return 0;
+}
+EOCP
+	set try
+	if eval $compile; then
+	    if ./try; then
+		d_localtime_r_needs_tzset=undef;
+	    else
+		d_localtime_r_needs_tzset=define;
+	    fi;
+	else
+	    d_localtime_r_needs_tzset=undef;
+	fi;
+     ;;
+  *)
+     d_localtime_r_needs_tzset=undef;
+     ;;
+esac
+$rm -f try try.* core
+
 : see if localeconv exists
 set localeconv d_locconv
 eval $inlibc
@@ -21505,6 +21559,7 @@ d_ldbl_dig='$d_ldbl_dig'
 d_libm_lib_version='$d_libm_lib_version'
 d_link='$d_link'
 d_localtime_r='$d_localtime_r'
+d_localtime_r_needs_tzset='$d_localtime_r_needs_tzset'
 d_locconv='$d_locconv'
 d_lockf='$d_lockf'
 d_longdbl='$d_longdbl'
