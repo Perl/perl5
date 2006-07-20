@@ -2825,12 +2825,14 @@ try_autoload:
 	 * Owing the speed considerations, we choose instead to search for
 	 * the cv using find_runcv() when calling doeval().
 	 */
-	if (CvDEPTH(cv) >= 2) {
-	    PERL_STACK_OVERFLOW_CHECK();
-	    pad_push(padlist, CvDEPTH(cv));
+	if (padlist) {
+	    if (CvDEPTH(cv) >= 2) {
+		PERL_STACK_OVERFLOW_CHECK();
+		pad_push(padlist, CvDEPTH(cv));
+	    }
+	    SAVECOMPPAD();
+	    PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 	}
-	SAVECOMPPAD();
-	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
 	if (hasargs)
 	{
 	    AV* const av = (AV*)PAD_SVl(0);
