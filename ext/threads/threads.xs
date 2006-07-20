@@ -45,10 +45,11 @@ typedef perl_os_thread pthread_t;
 #endif
 
 /* Values for 'state' member */
-#define PERL_ITHR_JOINABLE      0
-#define PERL_ITHR_DETACHED      1
-#define PERL_ITHR_JOINED        2
-#define PERL_ITHR_FINISHED      4
+#define PERL_ITHR_JOINABLE              0
+#define PERL_ITHR_DETACHED              1
+#define PERL_ITHR_JOINED                2
+#define PERL_ITHR_FINISHED              4
+#define PERL_ITHR_THREAD_EXIT_ONLY      8
 
 typedef struct _ithread {
     struct _ithread *next;      /* Next thread in the list */
@@ -197,15 +198,14 @@ S_ithread_destruct(pTHX_ ithread *thread)
 }
 
 
-/* Called on exit */
+/* Warn if exiting with any unjoined threads */
 int
-Perl_ithread_hook(pTHX)
+S_exit_warning(pTHX)
 {
     int veto_cleanup = 0;
+
     MUTEX_LOCK(&create_destruct_mutex);
-    if ((aTHX == PL_curinterp) &&
-        (running_threads || joinable_threads))
-    {
+    if (running_threads || joinable_threads) {
         if (ckWARN_d(WARN_THREADS)) {
             Perl_warn(aTHX_ "Perl exited with active threads:\n\t%"
                             IVdf " running and unjoined\n\t%"
@@ -218,7 +218,15 @@ Perl_ithread_hook(pTHX)
         veto_cleanup = 1;
     }
     MUTEX_UNLOCK(&create_destruct_mutex);
+
     return (veto_cleanup);
+}
+
+/* Called on exit from main thread */
+int
+Perl_ithread_hook(pTHX)
+{
+    return ((aTHX == PL_curinterp) ? S_exit_warning(aTHX) : 0);
 }
 
 
@@ -339,7 +347,13 @@ S_ithread_run(void * arg)
 #endif
 {
     ithread *thread = (ithread *)arg;
+    int jmp_rc = 0;
+    I32 oldscope;
+    int exit_app = 0;
+    int exit_code = 0;
     int cleanup;
+
+    dJMPENV;
 
     dTHXa(thread->interp);
     PERL_SET_CONTEXT(thread->interp);
@@ -362,10 +376,6 @@ S_ithread_run(void * arg)
         AV *params = (AV *)SvRV(thread->params);
         int len = (int)av_len(params)+1;
         int ii;
-        int jmp_rc = 0;
-        I32 oldscope;
-
-        dJMPENV;
 
         dSP;
         ENTER;
@@ -384,6 +394,9 @@ S_ithread_run(void * arg)
             /* Run the specified function */
             len = (int)call_sv(thread->init_function, thread->gimme|G_EVAL);
         } else if (jmp_rc == 2) {
+            /* Thread exited */
+            exit_app = 1;
+            exit_code = STATUS_CURRENT;
             while (PL_scopestack_ix > oldscope) {
                 LEAVE;
             }
@@ -407,8 +420,12 @@ S_ithread_run(void * arg)
             oldscope = PL_scopestack_ix;
             JMPENV_PUSH(jmp_rc);
             if (jmp_rc == 0) {
+                /* Warn that thread died */
                 Perl_warn(aTHX_ "Thread %" UVuf " terminated abnormally: %" SVf, thread->tid, ERRSV);
             } else if (jmp_rc == 2) {
+                /* Warn handler exited */
+                exit_app = 1;
+                exit_code = STATUS_CURRENT;
                 while (PL_scopestack_ix > oldscope) {
                     LEAVE;
                 }
@@ -426,21 +443,45 @@ S_ithread_run(void * arg)
     MUTEX_LOCK(&thread->mutex);
     /* Mark as finished */
     thread->state |= PERL_ITHR_FINISHED;
+    /* Clear exit flag if required */
+    if (thread->state & PERL_ITHR_THREAD_EXIT_ONLY)
+        exit_app = 0;
     /* Cleanup if detached */
     cleanup = (thread->state & PERL_ITHR_DETACHED);
     MUTEX_UNLOCK(&thread->mutex);
 
+    /* Adjust thread status counts */
+    MUTEX_LOCK(&create_destruct_mutex);
     if (cleanup) {
-        MUTEX_LOCK(&create_destruct_mutex);
         detached_threads--;
-        MUTEX_UNLOCK(&create_destruct_mutex);
-        S_ithread_destruct(aTHX_ thread);
     } else {
-        MUTEX_LOCK(&create_destruct_mutex);
         running_threads--;
         joinable_threads++;
-        MUTEX_UNLOCK(&create_destruct_mutex);
     }
+    MUTEX_UNLOCK(&create_destruct_mutex);
+
+    /* Exit application if required */
+    if (exit_app) {
+        oldscope = PL_scopestack_ix;
+        JMPENV_PUSH(jmp_rc);
+        if (jmp_rc == 0) {
+            /* Warn if there are unjoined threads */
+            S_exit_warning(aTHX);
+        } else if (jmp_rc == 2) {
+            /* Warn handler exited */
+            exit_code = STATUS_CURRENT;
+            while (PL_scopestack_ix > oldscope) {
+                LEAVE;
+            }
+        }
+        JMPENV_POP;
+
+        my_exit(exit_code);
+    }
+
+    /* Clean up detached thread */
+    if (cleanup)
+        S_ithread_destruct(aTHX_ thread);
 
 #ifdef WIN32
     return ((DWORD)0);
@@ -498,6 +539,7 @@ S_ithread_create(
         SV       *init_function,
         IV        stack_size,
         int       gimme,
+        int       exit_opt,
         SV       *params)
 {
     ithread     *thread;
@@ -537,6 +579,7 @@ S_ithread_create(
     thread->tid = tid_counter++;
     thread->stack_size = good_stack_size(aTHX_ stack_size);
     thread->gimme = gimme;
+    thread->state = exit_opt;
 
     /* "Clone" our interpreter into the thread's interpreter.
      * This gives thread access to "static data" and code.
@@ -725,6 +768,8 @@ ithread_create(...)
         HV *specs;
         IV stack_size;
         int context;
+        int exit_opt;
+        SV *thread_exit_only;
         char *str;
         int idx;
         int ii;
@@ -746,10 +791,14 @@ ithread_create(...)
             classname = HvNAME(SvSTASH(SvRV(ST(0))));
             thread = INT2PTR(ithread *, SvIV(SvRV(ST(0))));
             stack_size = thread->stack_size;
+            exit_opt = thread->state & PERL_ITHR_THREAD_EXIT_ONLY;
         } else {
             /* threads->create() */
             classname = (char *)SvPV_nolen(ST(0));
             stack_size = default_stack_size;
+            thread_exit_only = get_sv("threads::thread_exit_only", TRUE);
+            exit_opt = (SvTRUE(thread_exit_only))
+                                    ? PERL_ITHR_THREAD_EXIT_ONLY : 0;
         }
 
         function_to_call = ST(idx+1);
@@ -797,6 +846,13 @@ ithread_create(...)
                     context = G_VOID;
                 }
             }
+
+            /* exit => thread_only */
+            if (hv_exists(specs, "exit", 4)) {
+                str = (char *)SvPV_nolen(*hv_fetch(specs, "exit", 4, 0));
+                exit_opt = (*str == 't' || *str == 'T')
+                                    ? PERL_ITHR_THREAD_EXIT_ONLY : 0;
+            }
         }
         if (context == -1) {
             context = GIMME_V;  /* Implicit context */
@@ -818,6 +874,7 @@ ithread_create(...)
                                             function_to_call,
                                             stack_size,
                                             context,
+                                            exit_opt,
                                             newRV_noinc((SV*)params)));
         /* XSRETURN(1); - implied */
 
@@ -1266,6 +1323,23 @@ ithread_wantarray(...)
                            /* G_SCALAR */ : &PL_sv_no;
         MUTEX_UNLOCK(&thread->mutex);
         /* XSRETURN(1); - implied */
+
+
+void
+ithread_set_thread_exit_only(...)
+    PREINIT:
+        ithread *thread;
+    CODE:
+        if (items != 2)
+            Perl_croak(aTHX_ "Usage: ->set_thread_exit_only(boolean)");
+        thread = SV_to_ithread(aTHX_ ST(0));
+        MUTEX_LOCK(&thread->mutex);
+        if (SvTRUE(ST(1))) {
+            thread->state |= PERL_ITHR_THREAD_EXIT_ONLY;
+        } else {
+            thread->state &= ~PERL_ITHR_THREAD_EXIT_ONLY;
+        }
+        MUTEX_UNLOCK(&thread->mutex);
 
 #endif /* USE_ITHREADS */
 

@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.36';
+our $VERSION = '1.37';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -47,8 +47,12 @@ sub import
 
     # Handle args
     while (my $sym = shift) {
-        if ($sym =~ /^stack/) {
+        if ($sym =~ /^stack/i) {
             threads->set_stack_size(shift);
+
+        } elsif ($sym =~ /^exit/i) {
+            my $flag = shift;
+            $threads::thread_exit_only = $flag =~ /^thread/i;
 
         } elsif ($sym =~ /all/) {
             push(@EXPORT, qw(yield));
@@ -74,10 +78,22 @@ sub import
 
 ### Methods, etc. ###
 
-# Our own exit function/method
+# Exit from a thread (only)
 sub exit
 {
-    CORE::exit(0);
+    my ($class, $status) = @_;
+    if (! defined($status)) {
+        $status = 0;
+    }
+
+    # Class method only
+    if (ref($class)) {
+        require Carp;
+        Carp::croak("Usage: threads->exit(status)");
+    }
+
+    $class->set_thread_exit_only(1);
+    CORE::exit($status);
 }
 
 # 'Constant' args for threads->list()
@@ -113,11 +129,11 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.36
+This document describes threads version 1.37
 
 =head1 SYNOPSIS
 
-    use threads ('yield', 'stack_size' => 64*4096);
+    use threads ('yield', 'stack_size' => 64*4096, 'exit' => 'threads_only');
 
     sub start_thread {
         my @args = @_;
@@ -140,32 +156,39 @@ This document describes threads version 1.36
 
     $thread->detach();
 
+    # Get a thread's object
     $thread = threads->self();
     $thread = threads->object($tid);
 
+    # Get a thread's ID
     $tid = threads->tid();
     $tid = threads->self->tid();
     $tid = $thread->tid();
 
+    # Give other threads a chance to run
     threads->yield();
     yield();
 
+    # Lists of non-detached threads
     my @threads = threads->list();
     my $thread_count = threads->list();
 
     my @running = threads->list(threads::running);
     my @joinable = threads->list(threads::joinable);
 
+    # Test thread objects
     if ($thr1 == $thr2) {
         ...
     }
 
+    # Manage thread stack size
     $stack_size = threads->get_stack_size();
     $old_size = threads->set_stack_size(32*4096);
 
     # Create a thread with a specific context and stack size
     my $thr = threads->create({ 'context'    => 'list',
-                                'stack_size' => 32*4096 },
+                                'stack_size' => 32*4096,
+                                'exit'       => 'thread_only' },
                               \&foo);
 
     # Get thread's context
@@ -179,8 +202,10 @@ This document describes threads version 1.36
         $thr->join();
     }
 
+    # Send a signal to a thread
     $thr->kill('SIGUSR1');
 
+    # Exit a thread
     threads->exit();
 
 =head1 DESCRIPTION
@@ -285,27 +310,6 @@ will cause an error to be thrown.
 
 Class method that allows a thread to detach itself.
 
-=item threads->exit()
-
-The usual method for terminating a thread is to
-L<return()|perlfunc/"return EXPR"> from the entry point function with the
-appropriate return value(s).
-
-If needed, a thread can be exited at any time by calling
-C<threads-E<gt>exit()>.  This will cause the thread to return C<undef> in a
-scalar context, or the empty list in a list context.
-
-Calling C<die()> in a thread indicates an abnormal exit for the thread.  Any
-C<$SIG{__DIE__}> handler in the thread will be called first, and then the
-thread will exit with a warning message that will contain any arguments passed
-in the C<die()> call.
-
-Calling C<exit()> in a thread is discouraged, but is equivalent to calling
-C<threads-E<gt>exit()>.
-
-If the desired affect is to truly terminate the application from a thread,
-then use L<POSIX::_exit()|POSIX/"_exit">, if available.
-
 =item threads->self()
 
 Class method that allows a thread to obtain its own I<threads> object.
@@ -392,6 +396,83 @@ thread.
 =item threads->_handle()
 
 Class method that allows a thread to obtain its own I<handle>.
+
+=back
+
+=head1 EXITING A THREAD
+
+The usual method for terminating a thread is to
+L<return()|perlfunc/"return EXPR"> from the entry point function with the
+appropriate return value(s).
+
+=over
+
+=item threads->exit()
+
+If needed, a thread can be exited at any time by calling
+C<threads-E<gt>exit()>.  This will cause the thread to return C<undef> in a
+scalar context, or the empty list in a list context.
+
+When called from the I<main> thread, this behaves the same as C<exit(0)>.
+
+=item threads->exit(status)
+
+When called from a thread, this behaves like C<threads-E<gt>exit()> (i.e., the
+exit status code is ignored).
+
+When called from the I<main> thread, this behaves the same as C<exit(status)>.
+
+=item die()
+
+Calling C<die()> in a thread indicates an abnormal exit for the thread.  Any
+C<$SIG{__DIE__}> handler in the thread will be called first, and then the
+thread will exit with a warning message that will contain any arguments passed
+in the C<die()> call.
+
+=item exit(status)
+
+Calling L<exit()|perlfunc/"exit EXPR"> inside a thread causes the whole
+application to terminate.  Because of this, the use of C<exit()> inside
+threaded code, or in modules that might be used in threaded applications, is
+strongly discouraged.
+
+If C<exit()> really is needed, then consider using the following:
+
+    threads->exit() if $threads::threads;   # Thread friendly
+    exit(status);
+
+=item use threads 'exit' => 'thread_only'
+
+This globally overrides the default behavior of calling C<exit()> inside a
+thread, and effectively causes such calls to behave the same as
+C<threads-E<gt>exit()>.  In other words, with this setting, calling C<exit()>
+causes only the thread to terminate.
+
+Because of its global effect, this setting should not be used inside modules
+or the like.
+
+The I<main> thread is unaffected by this setting.
+
+=item threads->create({'exit' => 'thread_only'}, ...)
+
+This overrides the default behavior of C<exit()> inside the newly created
+thread only.
+
+=item $thr->set_thread_exit_only(boolean)
+
+This can be used to change the I<exit thread only> behavior for a thread after
+it has been created.  With a I<true> argument, C<exit()> will cause the only
+the thread to exit.  With a I<false> argument, C<exit()> will terminate the
+application.
+
+The I<main> thread is unaffected by this call.
+
+=item threads->set_thread_exit_only(boolean)
+
+Class method for use inside a thread to changes its own behavior for
+C<exit()>.
+
+The I<main> thread is unaffected by this call.
 
 =back
 
@@ -660,6 +741,8 @@ current operation has completed.  For instance, if the thread is I<stuck> on
 an I/O call, sending it a signal will not cause the I/O call to be interrupted
 such that the signal is acted up immediately.
 
+Sending a signal to a terminated thread is ignored.
+
 =head1 WARNINGS
 
 =over 4
@@ -669,8 +752,8 @@ such that the signal is acted up immediately.
 If the program exits without all threads having either been joined or
 detached, then this warning will be issued.
 
-NOTE:  This warning cannot be suppressed using C<no warnings 'threads';> as
-suggested below.
+NOTE:  If the I<main> thread exits, then this warning cannot be suppressed
+using C<no warnings 'threads';> as suggested below.
 
 =item Thread creation failed: pthread_create returned #
 
@@ -804,7 +887,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.36/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.37/threads.pm>
 
 L<threads::shared>, L<perlthrtut>
 

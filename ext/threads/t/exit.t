@@ -11,6 +11,8 @@ BEGIN {
         print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
         exit(0);
     }
+
+    require($ENV{PERL_CORE} ? "./test.pl" : "./t/test.pl");
 }
 
 use ExtUtils::testlib;
@@ -28,41 +30,10 @@ BEGIN {
     }
 
     $| = 1;
-    print("1..226\n");   ### Number of tests that will be run ###
+    print("1..18\n");   ### Number of tests that will be run ###
 };
 
-my $TEST;
-BEGIN {
-    share($TEST);
-    $TEST = 1;
-}
-
 ok(1, 'Loaded');
-
-sub ok {
-    my ($ok, $name) = @_;
-    if (! defined($name)) {
-        # Bug in test
-        $name = $ok;
-        $ok = 0;
-    }
-    chomp($name);
-
-    lock($TEST);
-    my $id = $TEST++;
-
-    # You have to do it this way or VMS will get confused.
-    if ($ok) {
-        print("ok $id - $name\n");
-    } else {
-        print("not ok $id - $name\n");
-        printf("# Failed test at line %d\n", (caller)[2]);
-        print(STDERR "# FAIL: $name\n") if (! exists($ENV{'PERL_CORE'}));
-    }
-
-    return ($ok);
-}
-
 
 ### Start of Testing ###
 
@@ -76,187 +47,118 @@ $SIG{'__DIE__'} = sub {
 };
 
 
-sub nasty
-{
-    my ($term, $warn, $die) = @_;
-    my $tid = threads->tid();
+my $thr = threads->create(sub {
+    threads->exit();
+    return (99);  # Not seen
+});
+ok($thr, 'Created: threads->exit()');
+my $rc = $thr->join();
+ok(! defined($rc), 'Exited: threads->exit()');
 
-    $SIG{'__WARN__'} = sub {
-        my $msg = $_[0];
-        ok($msg =~ /Thread \d+ terminated abnormally/, "WARN: $msg");
-        if ($warn eq 'return') {
-            return ('# __WARN__ returned');
-        } elsif ($warn eq 'die') {
-            die('# __WARN__ dying');
-        } elsif ($warn eq 'exit') {
-            CORE::exit(20);
-        } else {
-            threads->exit(21);
-        }
-    };
 
-    $SIG{'__DIE__'} = sub {
-        my $msg = $_[0];
-        ok(1, "DIE: $msg");
-        if ($die eq 'return') {
-            return ('# __DIE__ returned');
-        } elsif ($die eq 'die') {
-            die('# __DIE__ dying');
-        } elsif ($die eq 'exit') {
-            CORE::exit(30);
-        } else {
-            threads->exit(31);
-        }
-    };
+run_perl(prog => 'use threads 1.37;
+                  threads->exit(86);
+                  exit(99);',
+         nolib => ($ENV{PERL_CORE}) ? 0 : 1,
+         switches => ($ENV{PERL_CORE}) ? [] : [ '-Mblib' ]);
+is($?>>8, 86, 'thread->exit(status) in main');
 
-    ok(1, "Thread $tid");
-    if ($term eq 'return') {
-        return ('# Thread returned');
-    } elsif ($term eq 'die') {
-        die('# Thread dying');
-    } elsif ($term eq 'exit') {
-        CORE::exit(10);
-    } else {
-        threads->exit(11);
+
+$thr = threads->create({'exit' => 'thread_only'}, sub {
+                                                    exit(1);
+                                                    return (99);  # Not seen
+                                                  });
+ok($thr, 'Created: thread_only');
+$rc = $thr->join();
+ok(! defined($rc), 'Exited: thread_only');
+
+
+$thr = threads->create(sub {
+    threads->set_thread_exit_only(1);
+    exit(1);
+    return (99);  # Not seen
+});
+ok($thr, 'Created: threads->set_thread_exit_only');
+$rc = $thr->join();
+ok(! defined($rc), 'Exited: threads->set_thread_exit_only');
+
+
+my $WAIT :shared = 1;
+$thr = threads->create(sub {
+    lock($WAIT);
+    while ($WAIT) {
+        cond_wait($WAIT);
     }
-}
-
-
-my @exit_types = qw(return die exit threads->exit);
-
-# Test (non-trivial) combinations of termination methods
-#   WRT the thread and its handlers
-foreach my $die (@exit_types) {
-    foreach my $wrn (@exit_types) {
-        foreach my $thr (@exit_types) {
-            # Things are well behaved if the thread just returns
-            next if ($thr eq 'return');
-
-            # Skip combos with the die handler
-            #   if neither the thread nor the warn handler dies
-            next if ($thr ne 'die' && $wrn ne 'die' && $die ne 'return');
-
-            # Must send STDERR to file to filter out 'un-capturable' output
-            my $rc;
-            eval {
-                local *STDERR;
-                if (! open(STDERR, '>tmp.stderr')) {
-                    die('Failed to create "tmp.stderr"');
-                }
-
-                $rc = threads->create('nasty', $thr, $wrn, $die)->join();
-
-                close(STDERR);
-            };
-
-            # Filter out 'un-capturable' output
-            if (open(IN, 'tmp.stderr')) {
-                while (my $line = <IN>) {
-                    if ($line !~ /^#/) {
-                        print(STDERR $line);
-                    }
-                }
-                close(IN);
-            } else {
-                ok(0, "Failed to open 'tmp.stderr': $!");
-            }
-            unlink('tmp.stderr');
-
-            ok(! $@, ($@) ? "Thread problem: $@" : "Thread ran okay");
-            ok(! defined($rc), "Thread returned 'undef'");
-        }
-    }
-}
-
-
-# Again with:
-no warnings 'threads';
-
-sub less_nasty
-{
-    my ($term, $warn, $die) = @_;
-    my $tid = threads->tid();
-
-    $SIG{'__WARN__'} = sub {
-        my $msg = $_[0];
-        ok(0, "WARN: $msg");
-        if ($warn eq 'return') {
-            return ('# __WARN__ returned');
-        } elsif ($warn eq 'die') {
-            die('# __WARN__ dying');
-        } elsif ($warn eq 'exit') {
-            CORE::exit(20);
-        } else {
-            threads->exit(21);
-        }
-    };
-
-    $SIG{'__DIE__'} = sub {
-        my $msg = $_[0];
-        ok(1, "DIE: $msg");
-        if ($die eq 'return') {
-            return ('# __DIE__ returned');
-        } elsif ($die eq 'die') {
-            die('# __DIE__ dying');
-        } elsif ($die eq 'exit') {
-            CORE::exit(30);
-        } else {
-            threads->exit(31);
-        }
-    };
-
-    ok(1, "Thread $tid");
-    if ($term eq 'return') {
-        return ('# Thread returned');
-    } elsif ($term eq 'die') {
-        die('# Thread dying');
-    } elsif ($term eq 'exit') {
-        CORE::exit(10);
-    } else {
-        threads->exit(11);
-    }
-}
-
-foreach my $die (@exit_types) {
-    foreach my $wrn (@exit_types) {
-        foreach my $thr (@exit_types) {
-            # Things are well behaved if the thread just returns
-            next if ($thr eq 'return');
-
-            # Skip combos with the die handler
-            #   if neither the thread nor the warn handler dies
-            next if ($thr ne 'die' && $wrn ne 'die' && $die ne 'return');
-
-            my $rc;
-            eval { $rc = threads->create('less_nasty', $thr, $wrn, $die)->join() };
-            ok(! $@, ($@) ? "Thread problem: $@" : "Thread ran okay");
-            ok(! defined($rc), "Thread returned 'undef'");
-        }
-    }
-}
-
-
-# Check termination warning concerning running threads
-$SIG{'__WARN__'} = sub {
-    my $msg = shift;
-    if ($^O eq 'VMS') {
-        ok($msg =~ /0 running and unjoined/,  '0 running and unjoined (VMS)');
-        ok($msg =~ /3 finished and unjoined/, '3 finished and unjoined (VMS)');
-        ok($msg =~ /0 running and detached/,  '0 finished and detached (VMS)');
-    } else {
-        ok($msg =~ /1 running and unjoined/,  '1 running and unjoined');
-        ok($msg =~ /2 finished and unjoined/, '2 finished and unjoined');
-        ok($msg =~ /3 running and detached/,  '3 finished and detached');
-    }
-};
-
-threads->create(sub { sleep(100); });
-threads->create(sub {});
-threads->create(sub {});
-threads->create(sub { sleep(100); })->detach();
-threads->create(sub { sleep(100); })->detach();
-threads->create(sub { sleep(100); })->detach();
+    exit(1);
+    return (99);  # Not seen
+});
 threads->yield();
-sleep(1);
+ok($thr, 'Created: $thr->set_thread_exit_only');
+$thr->set_thread_exit_only(1);
+{
+    lock($WAIT);
+    $WAIT = 0;
+    cond_broadcast($WAIT);
+}
+$rc = $thr->join();
+ok(! defined($rc), 'Exited: $thr->set_thread_exit_only');
+
+
+run_perl(prog => 'use threads 1.37 qw(exit thread_only);
+                  threads->create(sub { exit(99); })->join();
+                  exit(86);',
+         nolib => ($ENV{PERL_CORE}) ? 0 : 1,
+         switches => ($ENV{PERL_CORE}) ? [] : [ '-Mblib' ]);
+is($?>>8, 86, "'use threads 'exit' => 'thread_only'");
+
+
+SKIP: {
+    skip('run_perl+STDERR broken under MSWin32', 4) if ($^O eq 'MSWin32');
+
+    my $out = run_perl(prog => 'use threads 1.37;
+                                threads->create(sub {
+                                    exit(99);
+                                })->join();
+                                exit(86);',
+                       nolib => ($ENV{PERL_CORE}) ? 0 : 1,
+                       switches => ($ENV{PERL_CORE}) ? [] : [ '-Mblib' ],
+                       stderr => 1);
+    is($?>>8, 99, "exit(status) in thread");
+    like($out, '1 finished and unjoined', "exit(status) in thread");
+
+
+    $out = run_perl(prog => 'use threads 1.37 qw(exit thread_only);
+                             threads->create(sub {
+                                threads->set_thread_exit_only(0);
+                                exit(99);
+                             })->join();
+                             exit(86);',
+                    nolib => ($ENV{PERL_CORE}) ? 0 : 1,
+                    switches => ($ENV{PERL_CORE}) ? [] : [ '-Mblib' ],
+                    stderr => 1);
+    is($?>>8, 99, "set_thread_exit_only(0)");
+    like($out, '1 finished and unjoined', "set_thread_exit_only(0)");
+}
+
+
+run_perl(prog => 'use threads 1.37;
+                  threads->create(sub {
+                     $SIG{__WARN__} = sub { exit(99); };
+                     die();
+                  })->join();
+                  exit(86);',
+         nolib => ($ENV{PERL_CORE}) ? 0 : 1,
+         switches => ($ENV{PERL_CORE}) ? [] : [ '-Mblib' ]);
+is($?>>8, 99, "exit(status) in thread warn handler");
+
+
+$thr = threads->create(sub {
+    $SIG{__WARN__} = sub { threads->exit(); };
+    local $SIG{__DIE__} = 'DEFAULT';
+    die('Died');
+});
+ok($thr, 'Created: threads->exit() in thread warn handler');
+$rc = $thr->join();
+ok(! defined($rc), 'Exited: threads->exit() in thread warn handler');
 
 # EOF
