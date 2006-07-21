@@ -199,13 +199,16 @@ S_ithread_destruct(pTHX_ ithread *thread)
 
 
 /* Warn if exiting with any unjoined threads */
-int
+static int
 S_exit_warning(pTHX)
 {
-    int veto_cleanup = 0;
+    int veto_cleanup;
 
     MUTEX_LOCK(&create_destruct_mutex);
-    if (running_threads || joinable_threads) {
+    veto_cleanup = (running_threads || joinable_threads);
+    MUTEX_UNLOCK(&create_destruct_mutex);
+
+    if (veto_cleanup) {
         if (ckWARN_d(WARN_THREADS)) {
             Perl_warn(aTHX_ "Perl exited with active threads:\n\t%"
                             IVdf " running and unjoined\n\t%"
@@ -215,9 +218,7 @@ S_exit_warning(pTHX)
                             joinable_threads,
                             detached_threads);
         }
-        veto_cleanup = 1;
     }
-    MUTEX_UNLOCK(&create_destruct_mutex);
 
     return (veto_cleanup);
 }

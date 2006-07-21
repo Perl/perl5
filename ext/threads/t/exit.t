@@ -56,9 +56,9 @@ my $rc = $thr->join();
 ok(! defined($rc), 'Exited: threads->exit()');
 
 
-run_perl(prog => 'use threads 1.37;
-                  threads->exit(86);
-                  exit(99);',
+run_perl(prog => 'use threads 1.37;' .
+                 'threads->exit(86);' .
+                 'exit(99);',
          nolib => ($ENV{PERL_CORE}) ? 0 : 1,
          switches => ($ENV{PERL_CORE}) ? [] : [ '-Mblib' ]);
 is($?>>8, 86, 'thread->exit(status) in main');
@@ -104,49 +104,45 @@ $rc = $thr->join();
 ok(! defined($rc), 'Exited: $thr->set_thread_exit_only');
 
 
-run_perl(prog => 'use threads 1.37 qw(exit thread_only);
-                  threads->create(sub { exit(99); })->join();
-                  exit(86);',
+run_perl(prog => 'use threads 1.37 qw(exit thread_only);' .
+                 'threads->create(sub { exit(99); })->join();' .
+                 'exit(86);',
          nolib => ($ENV{PERL_CORE}) ? 0 : 1,
          switches => ($ENV{PERL_CORE}) ? [] : [ '-Mblib' ]);
 is($?>>8, 86, "'use threads 'exit' => 'thread_only'");
 
 
-SKIP: {
-    skip('run_perl+STDERR broken under MSWin32', 4) if ($^O eq 'MSWin32');
-
-    my $out = run_perl(prog => 'use threads 1.37;
-                                threads->create(sub {
-                                    exit(99);
-                                })->join();
-                                exit(86);',
-                       nolib => ($ENV{PERL_CORE}) ? 0 : 1,
-                       switches => ($ENV{PERL_CORE}) ? [] : [ '-Mblib' ],
-                       stderr => 1);
-    is($?>>8, 99, "exit(status) in thread");
-    like($out, '1 finished and unjoined', "exit(status) in thread");
+my $out = run_perl(prog => 'use threads 1.37;' .
+                           'threads->create(sub {' .
+                           '    exit(99);' .
+                           '})->join();' .
+                           'exit(86);',
+                   nolib => ($ENV{PERL_CORE}) ? 0 : 1,
+                   switches => ($ENV{PERL_CORE}) ? [] : [ '-Mblib' ],
+                   stderr => 1);
+is($?>>8, 99, "exit(status) in thread");
+like($out, '1 finished and unjoined', "exit(status) in thread");
 
 
-    $out = run_perl(prog => 'use threads 1.37 qw(exit thread_only);
-                             threads->create(sub {
-                                threads->set_thread_exit_only(0);
-                                exit(99);
-                             })->join();
-                             exit(86);',
-                    nolib => ($ENV{PERL_CORE}) ? 0 : 1,
-                    switches => ($ENV{PERL_CORE}) ? [] : [ '-Mblib' ],
-                    stderr => 1);
-    is($?>>8, 99, "set_thread_exit_only(0)");
-    like($out, '1 finished and unjoined', "set_thread_exit_only(0)");
-}
+$out = run_perl(prog => 'use threads 1.37 qw(exit thread_only);' .
+                        'threads->create(sub {' .
+                        '   threads->set_thread_exit_only(0);' .
+                        '   exit(99);' .
+                        '})->join();' .
+                        'exit(86);',
+                nolib => ($ENV{PERL_CORE}) ? 0 : 1,
+                switches => ($ENV{PERL_CORE}) ? [] : [ '-Mblib' ],
+                stderr => 1);
+is($?>>8, 99, "set_thread_exit_only(0)");
+like($out, '1 finished and unjoined', "set_thread_exit_only(0)");
 
 
-run_perl(prog => 'use threads 1.37;
-                  threads->create(sub {
-                     $SIG{__WARN__} = sub { exit(99); };
-                     die();
-                  })->join();
-                  exit(86);',
+run_perl(prog => 'use threads 1.37;' .
+                 'threads->create(sub {' .
+                 '   $SIG{__WARN__} = sub { exit(99); };' .
+                 '   die();' .
+                 '})->join();' .
+                 'exit(86);',
          nolib => ($ENV{PERL_CORE}) ? 0 : 1,
          switches => ($ENV{PERL_CORE}) ? [] : [ '-Mblib' ]);
 is($?>>8, 99, "exit(status) in thread warn handler");

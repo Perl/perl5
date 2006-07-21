@@ -438,7 +438,7 @@ strongly discouraged.
 
 If C<exit()> really is needed, then consider using the following:
 
-    threads->exit() if $threads::threads;   # Thread friendly
+    threads->exit() if threads->can('exit');   # Thread friendly
     exit(status);
 
 =item use threads 'exit' => 'thread_only'
