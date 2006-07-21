@@ -159,15 +159,14 @@ functions in F<parts/ppptools.pl>.
 
 The scripts F<PPPort_pm.PL>, F<PPPort_xs.PL> and F<mktests.PL> all
 use the information in F<parts/inc/> to generate the main module
-F<PPPort.pm>, the XS code in F<PPPort.xs> and various test files
+F<PPPort.pm>, the XS code in F<RealPPPort.xs> and various test files
 in F<t/>.
 
 All of these files could be generated on the fly while building
-C<Devel::PPPort>, but not having the tests in C<t/> and not having
-F<PPPort.xs> will confuse Configure and TEST/harness in the core.
-Not having F<PPPort.pm> will be bad for viewing the docs on
-C<search.cpan.org>. So unfortunately, it's unavoidable to put
-some redundancy into the package.
+C<Devel::PPPort>, but not having the tests in C<t/> will confuse
+TEST/harness in the core. Not having F<PPPort.pm> will be bad for
+viewing the docs on C<search.cpan.org>. So unfortunately, it's
+unavoidable to put some redundancy into the package.
 
 =head2 Adding stuff to Devel::PPPort
 

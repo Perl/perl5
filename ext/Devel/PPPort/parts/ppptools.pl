@@ -4,9 +4,9 @@
 #
 ################################################################################
 #
-#  $Revision: 16 $
+#  $Revision: 17 $
 #  $Author: mhx $
-#  $Date: 2006/01/14 18:07:58 +0100 $
+#  $Date: 2006/07/21 19:21:40 +0200 $
 #
 ################################################################################
 #
@@ -19,6 +19,24 @@
 #
 ################################################################################
 
+sub cat_file
+{
+  eval { require File::Spec };
+  return $@ ? join('/', @_) : File::Spec->catfile(@_);
+}
+
+sub all_files_in_dir
+{
+  my $dir = shift;
+  local *DIR;
+
+  opendir DIR, $dir or die "cannot open directory $dir: $!\n";
+  my @files = grep { !-d && !/^\./ } readdir DIR;  # no dirs or hidden files
+  closedir DIR;
+
+  return map { cat_file($dir, $_) } @files;
+}
+
 sub parse_todo
 {
   my $dir = shift || 'parts/todo';
@@ -26,7 +44,7 @@ sub parse_todo
   my %todo;
   my $todo;
 
-  for $todo (glob "$dir/*") {
+  for $todo (all_files_in_dir($dir)) {
     open TODO, $todo or die "cannot open $todo: $!\n";
     my $perl = <TODO>;
     chomp $perl;

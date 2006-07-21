@@ -1,3 +1,7 @@
+3.09_01 - 2006-07-21
+
+    * avoid using 'glob' when running under miniperl
+
 3.09 - 2006-07-08
 
     * fix Makefile.PL's c_o override
