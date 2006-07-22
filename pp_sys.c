@@ -2557,6 +2557,17 @@ PP(pp_accept)
 
     nstio = GvIOn(ngv);
     fd = PerlSock_accept(PerlIO_fileno(IoIFP(gstio)), (struct sockaddr *) namebuf, &len);
+#if defined(OEMVS)
+    if (len == 0) {
+	/* Some platforms indicate zero length when an AF_UNIX client is
+	 * not bound. Simulate a non-zero-length sockaddr structure in
+	 * this case. */
+	namebuf[0] = 0;        /* sun_len */
+	namebuf[1] = AF_UNIX;  /* sun_family */
+	len = 2;
+    }
+#endif
+
     if (fd < 0)
 	goto badexit;
     if (IoIFP(nstio))

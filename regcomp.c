@@ -2005,14 +2005,23 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
          char * const s0 = STRING(scan), *s, *t;
          char * const s1 = s0 + STR_LEN(scan) - 1;
          char * const s2 = s1 - 4;
+#ifdef EBCDIC /* RD tunifold greek 0390 and 03B0 */
+	 const char t0[] = "\xaf\x49\xaf\x42";
+#else
          const char t0[] = "\xcc\x88\xcc\x81";
+#endif
          const char * const t1 = t0 + 3;
     
          for (s = s0 + 2;
               s < s2 && (t = ninstr(s, s1, t0, t1));
               s = t + 4) {
+#ifdef EBCDIC
+	      if (((U8)t[-1] == 0x68 && (U8)t[-2] == 0xB4) ||
+		  ((U8)t[-1] == 0x46 && (U8)t[-2] == 0xB5))
+#else
               if (((U8)t[-1] == 0xB9 && (U8)t[-2] == 0xCE) ||
                   ((U8)t[-1] == 0x85 && (U8)t[-2] == 0xCF))
+#endif
                    *min -= 4;
          }
     }
@@ -5881,11 +5890,27 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 			 STRLEN foldlen;
 			 const UV f = to_uni_fold(natvalue, foldbuf, &foldlen);
 
+#ifdef EBCDIC /* RD t/uni/fold ff and 6b */
+			 if (RExC_precomp[0] == ':' &&
+			     RExC_precomp[1] == '[' &&
+			     (f == 0xDF || f == 0x92)) {
+			     f = NATIVE_TO_UNI(f);
+                        }
+#endif
 			 /* If folding and foldable and a single
 			  * character, insert also the folded version
 			  * to the charclass. */
 			 if (f != value) {
+#ifdef EBCDIC /* RD tunifold ligatures s,t fb05, fb06 */
+			     if ((RExC_precomp[0] == ':' &&
+				  RExC_precomp[1] == '[' &&
+				  (f == 0xA2 &&
+				   (value == 0xFB05 || value == 0xFB06))) ?
+				 foldlen == ((STRLEN)UNISKIP(f) - 1) :
+				 foldlen == (STRLEN)UNISKIP(f) )
+#else
 			      if (foldlen == (STRLEN)UNISKIP(f))
+#endif
 				  Perl_sv_catpvf(aTHX_ listsv,
 						 "%04"UVxf"\n", f);
 			      else {

@@ -896,7 +896,11 @@ Perl_utf16_to_utf8(pTHX_ U8* p, U8* d, I32 bytelen, I32 *newlen)
 	UV uv = (p[0] << 8) + p[1]; /* UTF-16BE */
 	p += 2;
 	if (uv < 0x80) {
+#ifdef EBCDIC
+	    *d++ = UNI_TO_NATIVE(uv);
+#else
 	    *d++ = (U8)uv;
+#endif
 	    continue;
 	}
 	if (uv < 0x800) {
