@@ -8,22 +8,39 @@ require 5.006;
 require Exporter;
 
 {   no strict 'vars';
-    $VERSION = '0.16';
+    $VERSION = '0.17';
     @ISA = qw(Exporter);
 
     %EXPORT_TAGS = (
-    standard => [qw(openlog syslog closelog setlogmask)],
-    extended => [qw(setlogsock)],
-    macros => [qw(
-        LOG_ALERT LOG_AUTH LOG_AUTHPRIV LOG_CONS LOG_CRIT LOG_CRON
-        LOG_DAEMON LOG_DEBUG LOG_EMERG LOG_ERR LOG_FACMASK LOG_FTP
-        LOG_INFO LOG_KERN LOG_LFMT LOG_LOCAL0 LOG_LOCAL1 LOG_LOCAL2
-        LOG_LOCAL3 LOG_LOCAL4 LOG_LOCAL5 LOG_LOCAL6 LOG_LOCAL7 LOG_LPR
-        LOG_MAIL LOG_NDELAY LOG_NEWS LOG_NFACILITIES LOG_NOTICE
-        LOG_NOWAIT LOG_ODELAY LOG_PERROR LOG_PID LOG_PRIMASK LOG_SYSLOG
-        LOG_USER LOG_UUCP LOG_WARNING
-        LOG_MASK LOG_UPTO
-    )],
+        standard => [qw(openlog syslog closelog setlogmask)],
+        extended => [qw(setlogsock)],
+        macros => [
+            # levels
+            qw(
+                LOG_ALERT LOG_CRIT LOG_DEBUG LOG_EMERG LOG_ERR 
+                LOG_INFO LOG_NOTICE LOG_WARNING
+            ), 
+
+            # facilities
+            qw(
+                LOG_AUTH LOG_AUTHPRIV LOG_CRON LOG_DAEMON LOG_FTP
+                LOG_INSTALL LOG_KERN LOG_LAUNCHD LOG_LFMT LOG_LOCAL0 
+                LOG_LOCAL1 LOG_LOCAL2 LOG_LOCAL3 LOG_LOCAL4 LOG_LOCAL5 
+                LOG_LOCAL6 LOG_LOCAL7 LOG_LPR LOG_MAIL LOG_NETINFO 
+                LOG_NEWS LOG_RAS LOG_REMOTEAUTH LOG_SYSLOG LOG_USER LOG_UUCP 
+            ), 
+
+            # options
+            qw(
+                LOG_CONS LOG_PID LOG_NDELAY LOG_NOWAIT LOG_ODELAY LOG_PERROR 
+            ), 
+
+            # others macros
+            qw(
+                LOG_FACMASK LOG_NFACILITIES LOG_PRIMASK 
+                LOG_MASK LOG_UPTO
+            ), 
+        ],
     );
 
     @EXPORT = (
@@ -416,30 +433,31 @@ sub connect_log {
 
 sub connect_tcp {
     my ($errs) = @_;
+
     my $tcp = getprotobyname('tcp');
     if (!defined $tcp) {
 	push @$errs, "getprotobyname failed for tcp";
 	return 0;
     }
-    my $syslog = getservbyname('syslog','tcp');
-    $syslog = getservbyname('syslogng','tcp') unless defined $syslog;
+
+    my $syslog = getservbyname('syslog', 'tcp');
+    $syslog = getservbyname('syslogng', 'tcp') unless defined $syslog;
     if (!defined $syslog) {
 	push @$errs, "getservbyname failed for syslog/tcp and syslogng/tcp";
 	return 0;
     }
 
-    my $this = sockaddr_in($syslog, INADDR_ANY);
-    my $that;
+    my $addr;
     if (defined $host) {
-	$that = inet_aton($host);
-	if (!$that) {
+        $addr = inet_aton($host);
+        if (!$addr) {
 	    push @$errs, "can't lookup $host";
 	    return 0;
 	}
     } else {
-	$that = INADDR_LOOPBACK;
+        $addr = INADDR_LOOPBACK;
     }
-    $that = sockaddr_in($syslog, $that);
+    $addr = sockaddr_in($syslog, $addr);
 
     if (!socket(SYSLOG, AF_INET, SOCK_STREAM, $tcp)) {
 	push @$errs, "tcp socket: $!";
@@ -447,47 +465,52 @@ sub connect_tcp {
     }
     setsockopt(SYSLOG, SOL_SOCKET, SO_KEEPALIVE, 1);
     setsockopt(SYSLOG, &IPPROTO_TCP, &TCP_NODELAY, 1);
-    if (!connect(SYSLOG, $that)) {
+    if (!connect(SYSLOG, $addr)) {
 	push @$errs, "tcp connect: $!";
 	return 0;
     }
+
     $syslog_send = \&_syslog_send_socket;
+
     return 1;
 }
 
 sub connect_udp {
     my ($errs) = @_;
+
     my $udp = getprotobyname('udp');
     if (!defined $udp) {
 	push @$errs, "getprotobyname failed for udp";
 	return 0;
     }
-    my $syslog = getservbyname('syslog','udp');
+
+    my $syslog = getservbyname('syslog', 'udp');
     if (!defined $syslog) {
 	push @$errs, "getservbyname failed for syslog/udp";
 	return 0;
     }
-    my $this = sockaddr_in($syslog, INADDR_ANY);
-    my $that;
+
+    my $addr;
     if (defined $host) {
-	$that = inet_aton($host);
-	if (!$that) {
+        $addr = inet_aton($host);
+        if (!$addr) {
 	    push @$errs, "can't lookup $host";
 	    return 0;
 	}
     } else {
-	$that = INADDR_LOOPBACK;
+        $addr = INADDR_LOOPBACK;
     }
-    $that = sockaddr_in($syslog, $that);
+    $addr = sockaddr_in($syslog, $addr);
 
     if (!socket(SYSLOG, AF_INET, SOCK_DGRAM, $udp)) {
 	push @$errs, "udp socket: $!";
 	return 0;
     }
-    if (!connect(SYSLOG, $that)) {
+    if (!connect(SYSLOG, $addr)) {
 	push @$errs, "udp connect: $!";
 	return 0;
     }
+
     # We want to check that the UDP connect worked. However the only
     # way to do that is to send a message and see if an ICMP is returned
     _syslog_send_socket("");
@@ -495,7 +518,9 @@ sub connect_udp {
 	push @$errs, "udp connect: nobody listening";
 	return 0;
     }
+
     $syslog_send = \&_syslog_send_socket;
+
     return 1;
 }
 
@@ -518,36 +543,41 @@ sub connect_stream {
 
 sub connect_unix {
     my ($errs) = @_;
-    if (not defined $syslog_path and length _PATH_LOG()) {
-	$syslog_path = _PATH_LOG();
-    } else {
-        push @$errs, "_PATH_LOG not available in syslog.h";
+
+    $syslog_path ||= _PATH_LOG() if length _PATH_LOG();
+
+    if (not defined $syslog_path) {
+        push @$errs, "_PATH_LOG not available in syslog.h and no user-supplied socket path";
 	return 0;
     }
+
     if (! -S $syslog_path) {
         push @$errs, "$syslog_path is not a socket";
 	return 0;
     }
-    my $that = sockaddr_un($syslog_path);
-    if (!$that) {
+
+    my $addr = sockaddr_un($syslog_path);
+    if (!$addr) {
 	push @$errs, "can't locate $syslog_path";
 	return 0;
     }
-    if (!socket(SYSLOG,AF_UNIX,SOCK_STREAM,0)) {
+    if (!socket(SYSLOG, AF_UNIX, SOCK_STREAM, 0)) {
         push @$errs, "unix stream socket: $!";
 	return 0;
     }
-    if (!connect(SYSLOG,$that)) {
-        if (!socket(SYSLOG,AF_UNIX,SOCK_DGRAM,0)) {
+    if (!connect(SYSLOG, $addr)) {
+        if (!socket(SYSLOG, AF_UNIX, SOCK_DGRAM, 0)) {
 	    push @$errs, "unix dgram socket: $!";
 	    return 0;
 	}
-        if (!connect(SYSLOG,$that)) {
+        if (!connect(SYSLOG, $addr)) {
 	    push @$errs, "unix dgram connect: $!";
 	    return 0;
 	}
     }
+
     $syslog_send = \&_syslog_send_socket;
+
     return 1;
 }
 
@@ -619,7 +649,7 @@ Sys::Syslog - Perl interface to the UNIX syslog(3) calls
 
 =head1 VERSION
 
-Version 0.16
+Version 0.17
 
 =head1 SYNOPSIS
 
@@ -805,34 +835,70 @@ Log all messages up to debug:
 
 Sets the socket type to be used for the next call to
 C<openlog()> or C<syslog()> and returns true on success,
-C<undef> on failure.
+C<undef> on failure. The available mechanisms are: 
 
-A value of C<"unix"> will connect to the UNIX domain socket (in some
-systems a character special device) returned by the C<_PATH_LOG> macro
-(if your system defines it), or F</dev/log> or F</dev/conslog>,
-whatever is writable.  A value of C<"stream"> will connect to the stream
-indicated by the pathname provided as the optional second parameter.
-(For example Solaris and IRIX require C<"stream"> instead of C<"unix">.)
-A value of C<"native"> will use the native C functions from your C<syslog(3)> 
-library.
-A value of C<"inet"> will connect to an INET socket (either C<tcp> or C<udp>,
-tried in that order) returned by C<getservbyname()>. C<"tcp"> and C<"udp"> 
-can also be given as values. The value C<"console"> will send messages
-directly to the console, as for the C<"cons"> option in the logopts in
-C<openlog()>.
+=over
+
+=item *
+
+C<"native"> - use the native C functions from your C<syslog(3)> library.
+
+=item *
+
+C<"tcp"> - connect to a TCP socket, on the C<syslog/tcp> or C<syslogng/tcp> 
+service. 
+
+=item *
+
+C<"udp"> - connect to a UDP socket, on the C<syslog/udp> service.
+
+=item *
+
+C<"inet"> - connect to an INET socket, either TCP or UDP, tried in that order. 
+
+=item *
+
+C<"unix"> - connect to a UNIX domain socket (in some systems a character 
+special device).  The name of that socket is the second parameter or, if 
+you omit the second parameter, the value returned by the C<_PATH_LOG> macro 
+(if your system defines it), or F</dev/log> or F</dev/conslog>, whatever is 
+writable.  
+
+=item *
+
+C<"stream"> - connect to the stream indicated by the pathname provided as 
+the optional second parameter, or, if omitted, to F</dev/conslog>. 
+For example Solaris and IRIX system may prefer C<"stream"> instead of C<"unix">. 
+
+=item *
+
+C<"console"> - send messages directly to the console, as for the C<"cons"> 
+option of C<openlog()>.
+
+=back
 
 A reference to an array can also be passed as the first parameter.
 When this calling method is used, the array should contain a list of
-sock_types which are attempted in order.
+mechanisms which are attempted in order.
 
-The default is to try C<tcp>, C<udp>, C<unix>, C<stream>, C<console>.
+The default is to try C<native>, C<tcp>, C<udp>, C<unix>, C<stream>, C<console>.
 
 Giving an invalid value for C<$sock_type> will croak.
+
+B<Examples>
+
+Select the UDP socket mechanism: 
+
+    setlogsock("udp");
+
+Select the native, UDP socket then UNIX domain socket mechanisms: 
+
+    setlogsock(["native", "udp", "unix"]);
 
 
 =item B<closelog()>
 
-Closes the log file and return true on success.
+Closes the log file and returns true on success.
 
 =back
 
@@ -878,7 +944,7 @@ C<LOG_AUTHPRIV> - security/authorization messages (private)
 
 =item *
 
-C<LOG_CRON> - clock daemon (B<cron> and B<at>)
+C<LOG_CRON> - clock daemons (B<cron> and B<at>)
 
 =item *
 
@@ -886,11 +952,19 @@ C<LOG_DAEMON> - system daemons without separate facility value
 
 =item *
 
-C<LOG_FTP> - ftp daemon
+C<LOG_FTP> - FTP daemon
 
 =item *
 
 C<LOG_KERN> - kernel messages
+
+=item *
+
+C<LOG_INSTALL> - installer subsystem
+
+=item *
+
+C<LOG_LAUNCHD> - launchd - general bootstrap daemon (Mac OS X)
 
 =item *
 
@@ -906,7 +980,19 @@ C<LOG_MAIL> - mail subsystem
 
 =item *
 
+C<LOG_NETINFO> - NetInfo subsystem (Mac OS X)
+
+=item *
+
 C<LOG_NEWS> - USENET news subsystem
+
+=item *
+
+C<LOG_RAS> - Remote Access Service (VPN / PPP) (Mac OS X)
+
+=item *
+
+C<LOG_REMOTEAUTH> - remote authentication/authorization (Mac OS X)
 
 =item *
 
