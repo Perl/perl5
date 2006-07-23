@@ -2825,16 +2825,13 @@ try_autoload:
 	 * Owing the speed considerations, we choose instead to search for
 	 * the cv using find_runcv() when calling doeval().
 	 */
-	if (padlist) {
-	    if (CvDEPTH(cv) >= 2) {
-		PERL_STACK_OVERFLOW_CHECK();
-		pad_push(padlist, CvDEPTH(cv));
-	    }
-	    SAVECOMPPAD();
-	    PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
+	if (CvDEPTH(cv) >= 2) {
+	    PERL_STACK_OVERFLOW_CHECK();
+	    pad_push(padlist, CvDEPTH(cv));
 	}
-	if (hasargs)
-	{
+	SAVECOMPPAD();
+	PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
+	if (hasargs) {
 	    AV* const av = (AV*)PAD_SVl(0);
 	    if (AvREAL(av)) {
 		/* @_ is normally not REAL--this should only ever
@@ -2885,43 +2882,43 @@ try_autoload:
 	RETURNOP(CvSTART(cv));
     }
     else {
-	    I32 markix = TOPMARK;
+	I32 markix = TOPMARK;
 
-	    PUTBACK;
+	PUTBACK;
 
-	    if (!hasargs) {
-		/* Need to copy @_ to stack. Alternative may be to
-		 * switch stack to @_, and copy return values
-		 * back. This would allow popping @_ in XSUB, e.g.. XXXX */
-		AV * const av = GvAV(PL_defgv);
-		const I32 items = AvFILLp(av) + 1;   /* @_ is not tieable */
+	if (!hasargs) {
+	    /* Need to copy @_ to stack. Alternative may be to
+	     * switch stack to @_, and copy return values
+	     * back. This would allow popping @_ in XSUB, e.g.. XXXX */
+	    AV * const av = GvAV(PL_defgv);
+	    const I32 items = AvFILLp(av) + 1;   /* @_ is not tieable */
 
-		if (items) {
-		    /* Mark is at the end of the stack. */
-		    EXTEND(SP, items);
-		    Copy(AvARRAY(av), SP + 1, items, SV*);
-		    SP += items;
-		    PUTBACK ;		
-		}
+	    if (items) {
+		/* Mark is at the end of the stack. */
+		EXTEND(SP, items);
+		Copy(AvARRAY(av), SP + 1, items, SV*);
+		SP += items;
+		PUTBACK ;		
 	    }
-	    /* We assume first XSUB in &DB::sub is the called one. */
-	    if (PL_curcopdb) {
-		SAVEVPTR(PL_curcop);
-		PL_curcop = PL_curcopdb;
-		PL_curcopdb = NULL;
-	    }
-	    /* Do we need to open block here? XXXX */
-	    if (CvXSUB(cv)) /* XXX this is supposed to be true */
-		(void)(*CvXSUB(cv))(aTHX_ cv);
+	}
+	/* We assume first XSUB in &DB::sub is the called one. */
+	if (PL_curcopdb) {
+	    SAVEVPTR(PL_curcop);
+	    PL_curcop = PL_curcopdb;
+	    PL_curcopdb = NULL;
+	}
+	/* Do we need to open block here? XXXX */
+	if (CvXSUB(cv)) /* XXX this is supposed to be true */
+	    (void)(*CvXSUB(cv))(aTHX_ cv);
 
-	    /* Enforce some sanity in scalar context. */
-	    if (gimme == G_SCALAR && ++markix != PL_stack_sp - PL_stack_base ) {
-		if (markix > PL_stack_sp - PL_stack_base)
-		    *(PL_stack_base + markix) = &PL_sv_undef;
-		else
-		    *(PL_stack_base + markix) = *PL_stack_sp;
-		PL_stack_sp = PL_stack_base + markix;
-	    }
+	/* Enforce some sanity in scalar context. */
+	if (gimme == G_SCALAR && ++markix != PL_stack_sp - PL_stack_base ) {
+	    if (markix > PL_stack_sp - PL_stack_base)
+		*(PL_stack_base + markix) = &PL_sv_undef;
+	    else
+		*(PL_stack_base + markix) = *PL_stack_sp;
+	    PL_stack_sp = PL_stack_base + markix;
+	}
 	LEAVE;
 	return NORMAL;
     }
