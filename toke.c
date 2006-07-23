@@ -12422,7 +12422,7 @@ S_swallow_bom(pTHX_ U8 *s)
 		filter_add(utf16rev_textfilter, NULL);
 		Newx(news, (PL_bufend - (char*)s) * 3 / 2 + 1, U8);
 		utf16_to_utf8_reversed(s, news,
-				       PL_bufend - (char*)s,
+				       PL_bufend - (char*)s - 1,
 				       &newlen);
 		sv_setpvn(PL_linestr, (const char*)news, newlen);
 #ifdef PERL_MAD
