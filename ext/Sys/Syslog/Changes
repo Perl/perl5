@@ -1,5 +1,13 @@
 Revision history for Sys-Syslog
 
+0.17 -- 2006.07.23 -- Sebastien Aperghis-Tramoni (SAPER)
+        [BUGFIX] CPAN-RT#20622, #20164: Fixed path handling in connect_unix().
+        [CODE] Renamed some variables ($that is not a valid name), and removed 
+        some dead code. 
+        [CODE] Actually added the macros from Mac OS X that was announced in 
+        the 0.14 version.
+        [DOC] CPAN-RT#20545: Rewrote the documentation about setlogksock().
+
 0.16 -- 2006.06.20 -- Sebastien Aperghis-Tramoni (SAPER)
         [BUGFIX] Perl-RT#20557: Save errno before trying to connect.
         [FEATURE] Perl-RT#35406: Applied the patch proposed by Keisuke Hirata 
@@ -40,8 +48,8 @@ Revision history for Sys-Syslog
         use INADDR_LOOPBACK.
         [CODE] Merged blead@26772: $host needs to stay in case the user sets it.
         [CODE] Merged blead@26773: check that $syslog_path is a socket.
-        [TESTS] CPAN-RT#16980 (Alan Burlison): Sys::Syslog blows up rather 
-        spectacularly on Solaris. Corrected by previous patches. 
+        [TESTS] CPAN-RT#16980: Sys::Syslog blows up rather spectacularly on 
+        Solaris. Corrected by previous patches. 
         [TESTS] CPAN-RT#16974: Failed test in t/podspell. This test is now skipped.
 
 0.12 -- 2006.01.07 -- Sebastien Aperghis-Tramoni (SAPER)

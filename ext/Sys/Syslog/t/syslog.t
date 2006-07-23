@@ -44,7 +44,7 @@ BEGIN { $tests += 1 }
 # check the diagnostics
 # setlogsock()
 eval { setlogsock() };
-like( $@, qr/^Invalid argument passed to setlogsock; must be 'stream', 'unix', 'native', 'tcp', 'udp' or 'inet'/, 
+like( $@, qr/^Invalid argument passed to setlogsock/, 
     "calling setlogsock() with no argument" );
 
 BEGIN { $tests += 3 }
@@ -61,11 +61,6 @@ eval { syslog('') };
 like( $@, qr/^syslog: expecting argument \$format/, 
     "calling syslog() with one empty argument" );
 
-BEGIN { $tests += 1 }
-# setlogsock()
-eval { setlogsock() };
-like( $@, qr/^Invalid argument passed to setlogsock; must be 'stream', 'unix', 'native', 'tcp', 'udp' or 'inet'/, 
-    "calling setlogsock() with no argument" );
 
 my $test_string = "uid $< is testing Perl $] syslog(3) capabilities";
 my $r = 0;

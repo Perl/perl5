@@ -36,13 +36,32 @@ if (-S "/dev/log" and -w "/dev/log") {
 }
 
 if(eval {require ExtUtils::Constant; 1}) {
-    my @names = (qw( LOG_ALERT LOG_AUTH LOG_AUTHPRIV LOG_CONS LOG_CRIT LOG_CRON
-                     LOG_DAEMON LOG_DEBUG LOG_EMERG LOG_ERR LOG_FACMASK LOG_FTP
-                     LOG_INFO LOG_KERN LOG_LFMT LOG_LOCAL0 LOG_LOCAL1 LOG_LOCAL2
-                     LOG_LOCAL3 LOG_LOCAL4 LOG_LOCAL5 LOG_LOCAL6 LOG_LOCAL7 LOG_LPR
-                     LOG_MAIL LOG_NDELAY LOG_NEWS LOG_NFACILITIES LOG_NOTICE
-                     LOG_NOWAIT LOG_ODELAY LOG_PERROR LOG_PID LOG_PRIMASK LOG_SYSLOG
-                     LOG_USER LOG_UUCP LOG_WARNING),
+    my @names = (
+            # levels
+            qw(
+                LOG_ALERT LOG_CRIT LOG_DEBUG LOG_EMERG LOG_ERR 
+                LOG_INFO LOG_NOTICE LOG_WARNING
+            ), 
+
+            # facilities
+            qw(
+                LOG_AUTH LOG_AUTHPRIV LOG_CRON LOG_DAEMON LOG_FTP
+                LOG_INSTALL LOG_KERN LOG_LAUNCHD LOG_LFMT LOG_LOCAL0 
+                LOG_LOCAL1 LOG_LOCAL2 LOG_LOCAL3 LOG_LOCAL4 LOG_LOCAL5 
+                LOG_LOCAL6 LOG_LOCAL7 LOG_LPR LOG_MAIL LOG_NETINFO 
+                LOG_NEWS LOG_RAS LOG_REMOTEAUTH LOG_SYSLOG LOG_USER LOG_UUCP 
+            ), 
+
+            # options
+            qw(
+                LOG_CONS LOG_PID LOG_NDELAY LOG_NOWAIT LOG_ODELAY LOG_PERROR 
+            ), 
+
+            # others macros
+            qw(
+                LOG_FACMASK LOG_NFACILITIES LOG_PRIMASK 
+            ), 
+
            { name => "_PATH_LOG", type => "PV", default => [ "PV", qq("$_PATH_LOG") ] },
     );
 
