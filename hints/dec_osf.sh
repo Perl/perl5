@@ -179,6 +179,16 @@ case "$optimize" in
 	;;
 esac
 
+case "$isgcc" in
+gcc)	;;
+*)	case "$optimize" in
+	*-O*)	# With both -O and -g, the -g must be -g3.
+		optimize="`echo $optimize | sed 's/-g[1-4]*/-g3/'`"
+		;;
+	esac
+	;;
+esac
+
 ## Optimization limits
 case "$isgcc" in
 gcc) #  gcc 3.2.1 wants a lot of memory for -O3'ing toke.c
