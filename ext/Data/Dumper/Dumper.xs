@@ -2,6 +2,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include "ppport.h"
 
 static I32 num_q (const char *s, STRLEN slen);
 static I32 esc_q (char *dest, const char *src, STRLEN slen);
@@ -192,7 +193,7 @@ esc_q_utf8(pTHX_ SV* sv, register const char *src, register STRLEN slen)
 	       * then strlen(buffer) for the length.  The more proper way
 	       * would of course be to figure out the prototype of sprintf.
 	       * --jhi */
-	        sprintf(r, "\\x{%"UVxf"}", k);
+                sprintf(r, "\\x{%"UVxf"}", k);
                 r += strlen(r);
             }
         }
@@ -296,7 +297,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	
 	ival = SvRV(val);
 	realtype = SvTYPE(ival);
-        (void) sprintf(id, "0x%"UVxf, PTR2UV(ival));
+        (void) my_snprintf(id, sizeof(id), "0x%"UVxf, PTR2UV(ival));
 	idlen = strlen(id);
 	if (SvOBJECT(ival))
 	    realpack = HvNAME_get(SvSTASH(ival));
@@ -775,7 +776,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	STRLEN i;
 	
 	if (namelen) {
-	    (void) sprintf(id, "0x%"UVxf, PTR2UV(val));
+	    (void) my_snprintf(id, sizeof(id), "0x%"UVxf, PTR2UV(val));
 	    if ((svp = hv_fetch(seenhv, id, (idlen = strlen(id)), FALSE)) &&
 		(sv = *svp) && SvROK(sv) &&
 		(seenentry = (AV*)SvRV(sv)))
@@ -804,9 +805,9 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
         if (DD_is_integer(val)) {
             STRLEN len;
 	    if (SvIsUV(val))
-	      (void) sprintf(tmpbuf, "%"UVuf, SvUV(val));
+	      (void) my_snprintf(tmpbuf, sizeof(tmpbuf), "%"UVuf, SvUV(val));
 	    else
-	      (void) sprintf(tmpbuf, "%"IVdf, SvIV(val));
+	      (void) my_snprintf(tmpbuf, sizeof(tmpbuf), "%"IVdf, SvIV(val));
             len = strlen(tmpbuf);
             if (SvPOK(val)) {
               /* Need to check to see if this is a string such as " 0".
@@ -1092,7 +1093,7 @@ Data_Dumper_Dumpxs(href, ...)
 			STRLEN nchars;
 			sv_setpvn(name, "$", 1);
 			sv_catsv(name, varname);
-			(void) sprintf(tmpbuf, "%"IVdf, (IV)(i+1));
+			(void) my_snprintf(tmpbuf, sizeof(tmpbuf), "%"IVdf, (IV)(i+1));
 			nchars = strlen(tmpbuf);
 			sv_catpvn(name, tmpbuf, nchars);
 		    }
