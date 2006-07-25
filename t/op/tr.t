@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 116;
+plan tests => 118;
 
 my $Is_EBCDIC = (ord('i') == 0x89 & ord('J') == 0xd1);
 
@@ -454,4 +454,14 @@ $s =~ tr/\x{fffe}\x{ffff}/x/d;
 is($s, "AxBC", "utf8, DELETE");
 
 } # non-characters end
+
+{ # related to [perl #27940]
+    my $c;
+
+    ($c = "\x20\c@\x30\cA\x40\cZ\x50\c_\x60") =~ tr/\c@-\c_//d;
+    is($c, "\x20\x30\x40\x50\x60", "tr/\\c\@-\\c_//d");
+
+    ($c = "\x20\x00\x30\x01\x40\x1A\x50\x1F\x60") =~ tr/\x00-\x1f//d;
+    is($c, "\x20\x30\x40\x50\x60", "tr/\\x00-\\x1f//d");
+}
 

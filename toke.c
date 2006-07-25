@@ -1994,9 +1994,14 @@ S_scan_const(pTHX_ char *start)
 	/* check for embedded arrays
 	   (@foo, @::foo, @'foo, @{foo}, @$foo, @+, @-)
 	   */
-	else if (*s == '@' && s[1]
-		 && (isALNUM_lazy_if(s+1,UTF) || strchr(":'{$+-", s[1])))
-	    break;
+	else if (*s == '@' && s[1]) {
+	    if (isALNUM_lazy_if(s+1,UTF))
+		break;
+	    if (strchr(":'{$", s[1]))
+		break;
+	    if (!PL_lex_inpat && (s[1] == '+' || s[1] == '-'))
+		break; /* in regexp, neither @+ nor @- are interpolated */
+	}
 
 	/* check for embedded scalars.  only stop if we're sure it's a
 	   variable.

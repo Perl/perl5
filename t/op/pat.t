@@ -7,7 +7,7 @@
 $| = 1;
 
 # please update note at bottom of file when you change this
-print "1..1212\n"; 
+print "1..1231\n"; 
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3546,9 +3546,35 @@ if ($ordA == 193) {
     ok(defined($res) && length($res)==$size,"\$1 is correct size");
 }
 
+{ # related to [perl #27940]
+    ok("\0-A"  =~ /\c@-A/, '@- should not be interpolated in a pattern');
+    ok("\0\0A" =~ /\c@+A/, '@+ should not be interpolated in a pattern');
+    ok("X\@-A"  =~ /X@-A/, '@- should not be interpolated in a pattern');
+    ok("X\@\@A" =~ /X@+A/, '@+ should not be interpolated in a pattern');
+
+    ok("X\0A" =~ /X\c@?A/,  '\c@?');
+    ok("X\0A" =~ /X\c@*A/,  '\c@*');
+    ok("X\0A" =~ /X\c@(A)/, '\c@(');
+    ok("X\0A" =~ /X(\c@)A/, '\c@)');
+    ok("X\0A" =~ /X\c@|ZA/, '\c@|');
+
+    ok("X\@A" =~ /X@?A/,  '@?');
+    ok("X\@A" =~ /X@*A/,  '@*');
+    ok("X\@A" =~ /X@(A)/, '@(');
+    ok("X\@A" =~ /X(@)A/, '@)');
+    ok("X\@A" =~ /X@|ZA/, '@|');
+
+    local $" = ','; # non-whitespace and non-RE-specific
+    ok('abc' =~ /(.)(.)(.)/, 'the last successful match is bogus');
+    ok("A@+B"  =~ /A@{+}B/,  'interpolation of @+ in /@{+}/');
+    ok("A@-B"  =~ /A@{-}B/,  'interpolation of @- in /@{-}/');
+    ok("A@+B"  =~ /A@{+}B/x, 'interpolation of @+ in /@{+}/x');
+    ok("A@-B"  =~ /A@{-}B/x, 'interpolation of @- in /@{-}/x');
+}
+
 # Keep the following test last -- it may crash perl
 
 ok(("a" x (2**15 - 10)) =~ /^()(a|bb)*$/, "Recursive stack cracker: #24274")
     or print "# Unexpected outcome: should pass or crash perl\n";
 
-# last test 1211
+# last test 1231

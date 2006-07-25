@@ -1983,7 +1983,7 @@ C<(>, C<)>, C<->, C<n>, C<r>, C<t>, C<f>, C<e>, C<a>, C<x>, C<c>, C<z>,
 digits (C<0> to C<9>), C<[>, C<{>, C<]>, C<}>, whitespaces (SPACE, TAB,
 LF, CR, FF, and VT in addition), and C<#>.
 As C<\c> is skipped at this step, C<@> of C<\c@> in RE is possibly
-treated as an array symbol (for example one of C<@foo> or C<@->),
+treated as an array symbol (for example C<@foo>),
 even though the same text in C<qq//> gives interpolation of C<\c@>.
 Note that C<\N{name}> is interpolated at this step.
 
@@ -1992,10 +1992,10 @@ a C<#>-comment in a C<//x>-regular expression, no processing is
 performed whatsoever.  This is the first step at which the presence
 of the C<//x> modifier is relevant.
 
-Interpolation has several quirks: C<$|>, C<$(>, and C<$)> are not
-interpolated, and constructs C<$var[SOMETHING]> are voted (by several
-different estimators) to be either an array element or C<$var>
-followed by an RE alternative.  This is where the notation
+Interpolation in patterns has several quirks: C<$|>, C<$(>, C<$)>, C<@+>
+and C<@-> are not interpolated, and constructs C<$var[SOMETHING]> are
+voted (by several different estimators) to be either an array element
+or C<$var> followed by an RE alternative.  This is where the notation
 C<${arr[$bar]}> comes handy: C</${arr[0-9]}/> is interpreted as
 array element C<-9>, not as a regular expression from the variable
 C<$arr> followed by a digit, which would be the interpretation of
