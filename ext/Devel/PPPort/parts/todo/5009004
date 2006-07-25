@@ -8,6 +8,7 @@ my_vsnprintf                   # U
 newXS_flags                    # U
 pad_sv                         # U
 pv_escape                      # U
+pv_pretty                      # U
 regclass_swash                 # E (Perl_regclass_swash)
 stashpv_hvname_match           # U
 sv_does                        # U

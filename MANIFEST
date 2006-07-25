@@ -404,6 +404,7 @@ ext/Devel/PPPort/parts/inc/ppphdoc	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/ppphtest	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/pvs	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/snprintf	Devel::PPPort include
+ext/Devel/PPPort/parts/inc/strlfuncs	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/SvPV	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/SvREFCNT	Devel::PPPort include
 ext/Devel/PPPort/parts/inc/Sv_set	Devel::PPPort include
@@ -469,6 +470,7 @@ ext/Devel/PPPort/t/podtest.t	Devel::PPPort test file
 ext/Devel/PPPort/t/ppphtest.t	Devel::PPPort test file
 ext/Devel/PPPort/t/pvs.t	Devel::PPPort test file
 ext/Devel/PPPort/t/snprintf.t	Devel::PPPort test file
+ext/Devel/PPPort/t/strlfuncs.t	Devel::PPPort test file
 ext/Devel/PPPort/t/SvPV.t	Devel::PPPort test file
 ext/Devel/PPPort/t/SvREFCNT.t	Devel::PPPort test file
 ext/Devel/PPPort/t/Sv_set.t	Devel::PPPort test file

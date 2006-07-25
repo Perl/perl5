@@ -1,5 +1,7 @@
 TODO:
 
+* try to make parts/apicheck.pl automatically find NEED_ #defines
+
 * implement snprintf with newSVpvf for >= 5.004, which is safer?
 
 * add support for my_vsnprintf?

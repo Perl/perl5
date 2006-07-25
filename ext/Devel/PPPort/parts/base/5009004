@@ -16,10 +16,13 @@ SvREFCNT_inc_void_NN           # U
 gv_name_set                    # U
 hv_stores                      # U
 my_snprintf                    # U
+my_strlcat                     # U
+my_strlcpy                     # U
 my_vsnprintf                   # U
 newXS_flags                    # U
 pad_sv                         # U
 pv_escape                      # U
+pv_pretty                      # U
 regclass_swash                 # E (Perl_regclass_swash)
 stashpv_hvname_match           # U
 sv_does                        # U

@@ -982,8 +982,15 @@ Apdbm	|void	|sv_usepvn_mg	|NN SV *sv|NULLOK char *ptr|STRLEN len
 ApR	|MGVTBL*|get_vtbl	|int vtbl_id
 Apd	|char*	|pv_display	|NN SV *dsv|NN const char *pv|STRLEN cur|STRLEN len \
 				|STRLEN pvlim
-Apd	|char*	|pv_escape	|NN SV *dsv|NN const char *pv|const STRLEN count \
-				|const STRLEN max|const U32 flags
+Apd	|char*	|pv_escape	|NN SV *dsv|NN char const * const str\
+                                |const STRLEN count|const STRLEN max\
+                                |NULLOK STRLEN * const escaped\
+                                |const U32 flags				
+Apd     |char*  |pv_pretty      |NN SV *dsv|NN char const * const str\
+                                |const STRLEN count|const STRLEN max\
+                                |NULLOK char const * const start_color\
+                                |NULLOK char const * const end_color\
+                                |const U32 flags				
 Afp	|void	|dump_indent	|I32 level|NN PerlIO *file|NN const char* pat|...
 Ap	|void	|dump_vindent	|I32 level|NN PerlIO *file|NN const char* pat \
 				|NULLOK va_list *args
@@ -1354,6 +1361,7 @@ Es	|void	|to_utf8_substr	|NN regexp * prog
 Es	|void	|to_byte_substr	|NN regexp * prog
 #  ifdef DEBUGGING
 Es	|void	|dump_exec_pos	|NN const char *locinput|NN const regnode *scan|const bool do_utf8
+Es	|void	|debug_start_match|NN const regexp *prog|const bool do_utf8|NN const char *start|NN const char *end|NN const char *blurb
 #  endif
 #endif
 
@@ -1716,6 +1724,14 @@ px	|void	|my_clearenv
 
 #ifdef PERL_IMPLICIT_CONTEXT
 Apo	|void*	|my_cxt_init	|NN int *index|size_t size
+#endif
+
+#ifndef HAS_STRLCAT
+Apno	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
+#endif
+
+#ifndef HAS_STRLCPY
+Apno     |Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t size
 #endif
 
 #ifdef PERL_MAD
