@@ -2912,6 +2912,9 @@ number of trailing slashes.  Some operating and filesystems do not get
 this right, so Perl automatically removes all trailing slashes to keep
 everyone happy.
 
+In order to recursively create a directory structure look at
+the C<mkpath> function of the L<File::Path> module.
+
 =item msgctl ID,CMD,ARG
 X<msgctl>
 
@@ -4441,6 +4444,9 @@ for this.  Other restrictions include whether it works on directories,
 open files, or pre-existing files.  Check L<perlport> and either the
 rename(2) manpage or equivalent system documentation for details.
 
+For a platform independent C<move> function look at the L<File::Copy>
+module.
+
 =item require VERSION
 X<require>
 
@@ -4715,6 +4721,9 @@ X<rmdir> X<rd> X<directory, remove>
 Deletes the directory specified by FILENAME if that directory is
 empty.  If it succeeds it returns true, otherwise it returns false and
 sets C<$!> (errno).  If FILENAME is omitted, uses C<$_>.
+
+To remove a directory tree recursively (C<rm -rf> on unix) look at
+the C<rmtree> function of the L<File::Path> module.
 
 =item s///
 
@@ -5892,7 +5901,7 @@ In scalar context, C<stat> returns a boolean value indicating success
 or failure, and, if successful, sets the information associated with
 the special filehandle C<_>.
 
-The File::stat module provides a convenient, by-name access mechanism:
+The L<File::stat> module provides a convenient, by-name access mechanism:
 
     use File::stat;
     $sb = stat($filename);
@@ -6661,7 +6670,7 @@ parameter.  Examples:
 Note that this is a unary operator, not a list operator.
 
 =item unlink LIST
-X<unlink> X<delete> X<remove> X<rm>
+X<unlink> X<delete> X<remove> X<rm> X<del>
 
 =item unlink
 
