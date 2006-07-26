@@ -1536,6 +1536,9 @@ lib/CGI/t/no_tabindex.t	See if CGI.pm works
 lib/CGI/t/pretty.t		See if CGI.pm works
 lib/CGI/t/push.t		See if CGI::Push works
 lib/CGI/t/request.t		See if CGI.pm works
+lib/CGI/t/start_end_asterisk.t	See if CGI.pm works
+lib/CGI/t/start_end_end.t	See if CGI.pm works
+lib/CGI/t/start_end_start.t	See if CGI.pm works
 lib/CGI/t/switch.t		See if CGI::Switch still loads
 lib/CGI/t/util-58.t		See if 5.8-dependent features work
 lib/CGI/t/util.t		See if CGI.pm works
