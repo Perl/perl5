@@ -225,7 +225,6 @@ test_hv_delayfree_ent()
 SV *
 test_share_unshare_pvn(input)
 	PREINIT:
-	SV *output;
 	STRLEN len;
 	U32 hash;
 	char *pvx;

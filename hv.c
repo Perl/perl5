@@ -2766,7 +2766,7 @@ Perl_refcounted_he_fetch(pTHX_ const struct refcounted_he *chain, SV *keysv,
 #else
 	if (hash != HEK_HASH(chain->refcounted_he_hek))
 	    continue;
-	if (klen != HEK_LEN(chain->refcounted_he_hek))
+	if (klen != (STRLEN)HEK_LEN(chain->refcounted_he_hek))
 	    continue;
 	if (memNE(HEK_KEY(chain->refcounted_he_hek),key,klen))
 	    continue;

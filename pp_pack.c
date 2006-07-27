@@ -2962,7 +2962,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 	    break;
 	case 'W': {
 	    char *end;
-	    U8 in_bytes = IN_BYTES;
+	    U8 in_bytes = (U8)IN_BYTES;
 
 	    end = start+SvLEN(cat)-1;
 	    if (utf8) end -= UTF8_MAXLEN-1;

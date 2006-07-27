@@ -2233,7 +2233,7 @@ Perl_fold_constants(pTHX_ register OP *o)
     if (type == OP_RV2GV)
 	newop = newGVOP(OP_GV, 0, (GV*)sv);
     else
-	newop = newSVOP(OP_CONST, 0, sv);
+	newop = newSVOP(OP_CONST, 0, (SV*)sv);
     op_getmad(o,newop,'f');
     return newop;
 

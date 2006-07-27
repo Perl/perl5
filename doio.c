@@ -1287,6 +1287,7 @@ Perl_my_stat(pTHX)
                 return (PL_laststatval = PerlLIO_fstat(dirfd(IoDIRP(io)), &PL_statcache));
 #else
                 Perl_die(aTHX_ PL_no_func, "dirfd");
+                NORETURN_FUNCTION_END;
 #endif
             } else {
                 if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))

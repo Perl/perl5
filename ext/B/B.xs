@@ -1170,7 +1170,7 @@ COP_warnings(o)
 	ST(0) = make_warnings_object(aTHX_ sv_newmortal(), o->cop_warnings);
 	XSRETURN(1);
 
-B::SV
+void
 COP_io(o)
 	B::COP	o
 	PPCODE:
