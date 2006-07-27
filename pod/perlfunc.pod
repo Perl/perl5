@@ -664,6 +664,7 @@ previous time C<caller> was called.
 =item chdir EXPR
 X<chdir>
 X<cd>
+X<directory, change>
 
 =item chdir FILEHANDLE
 
@@ -970,7 +971,7 @@ function, or use this relation:
 
 =item crypt PLAINTEXT,SALT
 X<crypt> X<digest> X<hash> X<salt> X<plaintext> X<password>
-X<decrypt> X<cryptography> X<passwd>
+X<decrypt> X<cryptography> X<passwd> X<encrypt>
 
 Creates a digest string exactly like the crypt(3) function in the C
 library (assuming that you actually have a version there that has not
@@ -1508,6 +1509,7 @@ there was an error.
 
 =item eval EXPR
 X<eval> X<try> X<catch> X<evaluate> X<parse> X<execute>
+X<error, handling> X<exception, handling>
 
 =item eval BLOCK
 
@@ -2001,7 +2003,7 @@ character may be taken to mean the beginning of an array name.
 C<formline> always returns true.  See L<perlform> for other examples.
 
 =item getc FILEHANDLE
-X<getc> X<getchar>
+X<getc> X<getchar> X<character> X<file, read>
 
 =item getc
 
@@ -2479,7 +2481,7 @@ you've set the C<$[> variable to--but don't do that).  If the substring
 is not found, C<index> returns one less than the base, ordinarily C<-1>.
 
 =item int EXPR
-X<int> X<integer> X<truncate> X<trunc>
+X<int> X<integer> X<truncate> X<trunc> X<floor>
 
 =item int
 
@@ -4234,7 +4236,7 @@ large or too small, then your version of Perl was probably compiled
 with the wrong number of RANDBITS.)
 
 =item read FILEHANDLE,SCALAR,LENGTH,OFFSET
-X<read>
+X<read> X<file, read>
 
 =item read FILEHANDLE,SCALAR,LENGTH
 
