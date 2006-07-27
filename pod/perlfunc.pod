@@ -2317,49 +2317,12 @@ X<gmtime> X<UTC> X<Greenwich>
 
 =item gmtime
 
-Converts a time as returned by the time function to an 9-element list
-with the time localized for the standard Greenwich time zone.
-Typically used as follows:
+Works just like L<localtime> but the returned values are
+localized for the standard Greenwich time zone.
 
-    #  0    1    2     3     4    5     6     7     8
-    ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
-					    gmtime(time);
-
-All list elements are numeric, and come straight out of the C `struct
-tm'.  $sec, $min, and $hour are the seconds, minutes, and hours of the
-specified time.  $mday is the day of the month, and $mon is the month
-itself, in the range C<0..11> with 0 indicating January and 11
-indicating December.  $year is the number of years since 1900.  That
-is, $year is C<123> in year 2023.  $wday is the day of the week, with
-0 indicating Sunday and 3 indicating Wednesday.  $yday is the day of
-the year, in the range C<0..364> (or C<0..365> in leap years).  $isdst
-is always C<0>.
-
-Note that the $year element is I<not> simply the last two digits of
-the year.  If you assume it is then you create non-Y2K-compliant
-programs--and you wouldn't want to do that, would you?
-
-The proper way to get a complete 4-digit year is simply:
-
-	$year += 1900;
-
-And to get the last two digits of the year (e.g., '01' in 2001) do:
-
-	$year = sprintf("%02d", $year % 100);
-
-If EXPR is omitted, C<gmtime()> uses the current time (C<gmtime(time)>).
-
-In scalar context, C<gmtime()> returns the ctime(3) value:
-
-    $now_string = gmtime;  # e.g., "Thu Oct 13 04:54:34 1994"
-
-If you need local time instead of GMT use the L</localtime> builtin. 
-See also the C<timegm> function provided by the C<Time::Local> module,
-and the strftime(3) and mktime(3) functions available via the L<POSIX> module.
-
-This scalar value is B<not> locale dependent (see L<perllocale>), but is
-instead a Perl builtin.  To get somewhat similar but locale dependent date
-strings, see the example in L</localtime>.
+Note: when called in list context, $isdst, the last value
+returned by gmtime is always C<0>.  There is no
+Daylight Saving Time in GMT.
 
 See L<perlport/gmtime> for portability concerns.
 
@@ -2717,7 +2680,7 @@ be placed in parentheses.  See L<perlsub/"Temporary Values via local()">
 for details, including issues with tied arrays and hashes.
 
 =item localtime EXPR
-X<localtime>
+X<localtime> X<ctime>
 
 =item localtime
 
@@ -2746,6 +2709,9 @@ of the year.  That is, C<$year> is C<123> in year 2023.  The proper way
 to get a complete 4-digit year is simply:
 
     $year += 1900;
+
+Otherwise you create non-Y2K-compliant programs--and you wouldn't want
+to do that, would you?
 
 To get the last two digits of the year (e.g., '01' in 2001) do:
 
@@ -2783,6 +2749,13 @@ Note that the C<%a> and C<%b>, the short forms of the day of the week
 and the month of the year, may not necessarily be three characters wide.
 
 See L<perlport/localtime> for portability concerns.
+
+The L<Time::gmtime> and L<Time::localtime> modules provides a convenient,
+by-name access mechanism to the gmtime() and localtime() functions,
+respectively.
+
+For a comprehensive date and time representation look at the
+L<DateTime> module on CPAN.
 
 =item lock THING
 X<lock>
@@ -5841,7 +5814,7 @@ for a seed can fall prey to the mathematical property that
 one-third of the time.  So don't do that.
 
 =item stat FILEHANDLE
-X<stat> X<file, status>
+X<stat> X<file, status> X<ctime>
 
 =item stat EXPR
 
@@ -6542,10 +6515,14 @@ a prominent exception being Mac OS Classic which uses 00:00:00, January 1,
 1904 in the current local time zone for its epoch.
 
 For measuring time in better granularity than one second,
-you may use either the Time::HiRes module (from CPAN, and starting from
+you may use either the L<Time::HiRes> module (from CPAN, and starting from
 Perl 5.8 part of the standard distribution), or if you have
 gettimeofday(2), you may be able to use the C<syscall> interface of Perl.
 See L<perlfaq8> for details.
+
+For date and time processing look at the many related modules on CPAN.
+For a comprehensive date and time representation look at the
+L<DateTime> module.
 
 =item times
 X<times>
