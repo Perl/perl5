@@ -4,8 +4,8 @@
 	#
 	# Copyright (C) 2003-2006 Mark Shelor, All Rights Reserved
 	#
-	# Version: 5.41
-	# Sat Jun  3 01:50:46 MST 2006
+	# Version: 5.42
+	# Mon Jul 24 04:04:40 MST 2006
 
 =head1 NAME
 
@@ -22,7 +22,7 @@ shasum - Print or Check SHA Checksums
   -b, --binary       read files in binary mode (default on DOS/Windows)
   -c, --check        check SHA sums against given list
   -p, --portable     read files in portable mode
-                         produces same digest on Windows/Unix/MacOS 9
+                         produces same digest on Windows/Unix/Mac
   -t, --text         read files in text mode (default)
 
  The following two options are useful only when verifying checksums:
@@ -52,7 +52,7 @@ L<Digest::SHA::PurePerl>.
 use strict;
 use Getopt::Long;
 
-my $VERSION = "5.41";
+my $VERSION = "5.42";
 
 
 	# Try to use Digest::SHA, since it's faster.  If not installed,
@@ -62,10 +62,10 @@ my $MOD_PREFER = "Digest::SHA";
 my $MOD_SECOND = "Digest::SHA::PurePerl";
 
 my $module = $MOD_PREFER;
-eval "require $module";
+eval "require $module";			## no critic
 if ($@) {
 	$module = $MOD_SECOND;
-	eval "require $module";
+	eval "require $module";		## no critic
 	die "Unable to find $MOD_PREFER or $MOD_SECOND\n" if $@;
 }
 
@@ -92,7 +92,7 @@ With no FILE, or when FILE is -, read standard input.
   -b, --binary       read files in binary mode (default on DOS/Windows)
   -c, --check        check SHA sums against given list
   -p, --portable     read files in portable mode
-                         produces same digest on Windows/Unix/MacOS 9
+                         produces same digest on Windows/Unix/Mac
   -t, --text         read files in text mode (default)
 
 The following two options are useful only when verifying checksums:
@@ -201,7 +201,7 @@ if ($check) {
 	my ($fh, $sum, $fname, $rsp);
 
 	die "shasum: $checkfile: $!\n"
-		unless open($fh, "<$checkfile");
+		unless open($fh, q{<}, $checkfile);
 	while (<$fh>) {
 		s/\s+$//;
 		($sum, $modesym, $fname) = /^(\S+) (.)(.*)$/;

@@ -18,9 +18,8 @@ BEGIN {
 
 BEGIN { plan tests => 1 }
 
-my $filename = File::Spec->catfile(dirname($0), "ireland.tmp");
-my $file = File::Spec->canonpath($filename);
-open(F, ">$file"); while (<DATA>) { print F $_ }  close(F);
+my $file = File::Spec->catfile(dirname($0), "ireland.tmp");
+open(my $fh, q{>}, $file); while (<DATA>) { print $fh $_ }  close($fh);
 
 my $data = "a" x 1000000;
 my $vec = "b9045a713caed5dff3d3b783e98d1ce5778d8bc331ee4119d707072312af06a7";

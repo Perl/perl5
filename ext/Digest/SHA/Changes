@@ -1,5 +1,14 @@
 Revision history for Perl extension Digest::SHA.
 
+5.42  Mon Jul 24 04:04:40 MST 2006
+	- minor code changes suggested by Perl::Critic
+		-- e.g. no bareword filehandles, no 2-argument open's
+	- updated public key (ref. B538C51C)
+		-- previous one (0AF563FE) expired July 2, 2006
+	- added documentation to warn that Base64 digests are NOT padded
+		-- padding must be done by user if interoperability
+			with other software is required
+
 5.41  Sat Jun  3 01:50:46 MST 2006
 	- corrected addfile
 		-- process $file argument as a filehandle unless passed

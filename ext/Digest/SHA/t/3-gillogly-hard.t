@@ -54,11 +54,8 @@ BEGIN {
 	plan tests => scalar(@vec110) / 2 + scalar(@vec011) / 2;
 }
 
-my $fileSTATE110 = File::Spec->catfile(dirname($0), "gillogly", "state.110");
-my $fileSTATE011 = File::Spec->catfile(dirname($0), "gillogly", "state.011");
-
-my $STATE110 = File::Spec->canonpath($fileSTATE110);
-my $STATE011 = File::Spec->canonpath($fileSTATE011);
+my $STATE110 = File::Spec->catfile(dirname($0), "gillogly", "state.110");
+my $STATE011 = File::Spec->catfile(dirname($0), "gillogly", "state.011");
 
 my $reps = 1 << 14;
 my $loops = int(1431655764 / $reps);

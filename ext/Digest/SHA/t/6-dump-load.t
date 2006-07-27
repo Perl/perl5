@@ -27,8 +27,7 @@ BEGIN {
 my @ext = (1, 256, 384, 512);
 my $data = "a" x 990000;
 my $skip;
-my $tmpname = File::Spec->catfile(dirname($0), "dumpload.tmp");
-my $tmpfile = File::Spec->canonpath($tmpname);
+my $tmpfile = File::Spec->catfile(dirname($0), "dumpload.tmp");
 
 for (my $i = 0; $i < @sharsp; $i++) {
 	$skip = 0;
@@ -41,11 +40,8 @@ for (my $i = 0; $i < @sharsp; $i++) {
 	my $digest;
 	unless ($skip) {
 		my $state;
-		my $file;
-		my $filename;
-		$filename = File::Spec->catfile(dirname($0),
+		my $file = File::Spec->catfile(dirname($0),
 			"state", "state.$ext[$i]");
-		$file = File::Spec->canonpath($filename);
 		unless ($state = Digest::SHA->load($file)) {
 			$state = Digest::SHA->new($ext[$i]);
 			$state->add($data);

@@ -1,4 +1,5 @@
 use Test;
+use strict;
 
 BEGIN {
 	if ($ENV{PERL_CORE}) {
