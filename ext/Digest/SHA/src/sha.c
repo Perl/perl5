@@ -527,7 +527,7 @@ SHA *s;
 		return(0);
 	SHA_fprintf(f, "alg:%d\nH", s->alg);
 	for (i = 0; i < 8; i++)
-		for (j = 0; j < (UINT) (s->alg <= 256 ? 4 : 8); j++)
+		for (j = 0; j < (s->alg <= 256 ? 4 : 8); j++)
 			SHA_fprintf(f, "%s%02x", j==0 ? ":" : "", *p++);
 	SHA_fprintf(f, "\nblock");
 	for (i = 0; i < (int) (s->blocksize >> 3); i++)
