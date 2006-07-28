@@ -1276,6 +1276,7 @@ Perl_my_stat(pTHX)
         if (gv == PL_defgv)
             return PL_laststatval;
 	io = GvIO(gv);
+        do_fstat_have_io:
         PL_laststype = OP_STAT;
         PL_statgv = gv;
         sv_setpvn(PL_statname, "", 0);
@@ -1316,6 +1317,10 @@ Perl_my_stat(pTHX)
 	    gv = (GV*)SvRV(sv);
 	    goto do_fstat;
 	}
+        else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) {
+            io = (IO*)SvRV(sv);
+            goto do_fstat_have_io;
+        }
 
 	s = SvPV_const(sv, len);
 	PL_statgv = NULL;

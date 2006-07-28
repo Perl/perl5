@@ -2781,6 +2781,7 @@ PP(pp_stat)
     dVAR;
     dSP;
     GV *gv;
+    IO *io;
     I32 gimme;
     I32 max = 13;
 
@@ -2802,7 +2803,8 @@ PP(pp_stat)
 	    PL_statgv = gv;
 	    sv_setpvn(PL_statname, "", 0);
             if(gv) {
-                IO* const io = GvIO(gv);
+                io = GvIO(gv);
+                do_fstat_have_io:
                 if (io) {
                     if (IoIFP(io)) {
                         PL_laststatval = 
@@ -2832,13 +2834,18 @@ PP(pp_stat)
 	if (SvTYPE(sv) == SVt_PVGV) {
 	    gv = (GV*)sv;
 	    goto do_fstat;
-	}
-	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
-	    gv = (GV*)SvRV(sv);
-	    if (PL_op->op_type == OP_LSTAT)
-		goto do_fstat_warning_check;
-	    goto do_fstat;
-	}
+	} else if(SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
+            gv = (GV*)SvRV(sv);
+            if (PL_op->op_type == OP_LSTAT)
+                goto do_fstat_warning_check;
+            goto do_fstat;
+        } else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) { 
+            io = (IO*)SvRV(sv);
+            if (PL_op->op_type == OP_LSTAT)
+                goto do_fstat_warning_check;
+            goto do_fstat_have_io; 
+        }
+        
 	sv_setpv(PL_statname, SvPV_nolen_const(sv));
 	PL_statgv = NULL;
 	PL_laststype = PL_op->op_type;
