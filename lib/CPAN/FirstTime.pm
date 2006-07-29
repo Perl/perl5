@@ -2,7 +2,7 @@
 package CPAN::Mirrored::By;
 use strict;
 use vars qw($VERSION);
-$VERSION = sprintf "%.6f", substr(q$Rev: 657 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 742 $,4)/1000000 + 5.4;
 
 sub new { 
     my($self,@arg) = @_;
@@ -21,7 +21,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec;
 use vars qw($VERSION);
-$VERSION = sprintf "%.6f", substr(q$Rev: 657 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 742 $,4)/1000000 + 5.4;
 
 =head1 NAME
 
@@ -240,6 +240,17 @@ Shall we use it as the general CPAN build and cache directory?
 
 
     #
+    # Module::Signature
+    #
+    $CPAN::Frontend->myprint($prompts{check_sigs_intro});
+
+    defined($default = $CPAN::Config->{check_sigs}) or
+        $default = 0;
+    $ans = prompt($prompts{check_sigs},
+                  ($default ? 'yes' : 'no'));
+    $CPAN::Config->{check_sigs} = ($ans =~ /^y/i ? 1 : 0);
+
+    #
     # External programs
     #
 
@@ -264,7 +275,7 @@ Shall we use it as the general CPAN build and cache directory?
       my $progcall = $progname;
       # we don't need ncftp if we have ncftpget
       next if $progname eq "ncftp" && $CPAN::Config->{ncftpget} gt " ";
-      my $path = $CPAN::Config->{$progname} 
+      my $path = $CPAN::Config->{$progname}
 	  || $Config::Config{$progname}
 	      || "";
       if (File::Spec->file_name_is_absolute($path)) {
@@ -273,6 +284,8 @@ Shall we use it as the general CPAN build and cache directory?
 
 	# warn "Warning: configured $path does not exist\n" unless -e $path;
 	# $path = "";
+      } elsif ($path =~ /^\s+$/) {
+          # preserve disabled programs
       } else {
 	$path = '';
       }
@@ -409,6 +422,7 @@ Shall we use it as the general CPAN build and cache directory?
     $CPAN::Config->{inhibit_startup_message} = 0;
     $CPAN::Config->{getcwd}                  = 'cwd';
     $CPAN::Config->{ftp_passive}             = 1;
+    $CPAN::Config->{term_ornaments}          = 1;
 
     $CPAN::Frontend->myprint("\n\n");
     CPAN::HandleConfig->commit($configpm);
@@ -693,13 +707,13 @@ my @prompts = (
 manual_config => qq[
 
 CPAN is the world-wide archive of perl resources. It consists of about
-100 sites that all replicate the same contents all around the globe.
+300 sites that all replicate the same contents around the globe.
 Many countries have at least one CPAN site already. The resources
 found on CPAN are easily accessible with the CPAN.pm module. If you
 want to use CPAN.pm, you have to configure it properly.
 
-If you do not want to enter a dialog now, you can answer 'no' to this
-question and I\'ll try to autoconfigure. (Note: you can revisit this
+If you do NOT want to enter a dialog now, you can answer 'no' to this
+question and I'll try to autoconfigure. (Note: you can revisit this
 dialog anytime later by typing 'o conf init' at the cpan prompt.)
 
 ],
@@ -812,6 +826,31 @@ policy to one of the three values.
 
 prerequisites_policy =>
 "Policy on building prerequisites (follow, ask or ignore)?",
+
+check_sigs_intro  => qq{
+
+CPAN packages can be digitally signed by authors and thus verified
+with the security provided by strong cryptography. The exact mechanism
+is defined in the Module::Signature module. While this is generally
+considered a good thing, it is not always convenient to the end user
+to install modules that are signed incorrectly or where the key of the
+author is not available or where some prerequisite for
+Module::Signature has a bug and so on.
+
+With the check_sigs parameter you can turn signature checking on and
+off. The default is off for now because the whole tool chain for the
+functionality is not yet considered mature by some. The author of
+CPAN.pm would recommend setting it to true most of the time and
+turning it off only if it turns out to be annoying.
+
+Note that if you do not have Module::Signature installed, no signature
+checks will be performed at all.
+
+},
+
+check_sigs =>
+qq{Always try to check and verify signatures if a SIGNATURE file is in the package
+and Module::Signature is installed (yes/no)?},
 
 external_progs => qq{
 
