@@ -4,11 +4,11 @@ use strict;
 use vars qw($VERSION @ISA $BUGHUNTING);
 use CPAN::Debug;
 use File::Basename ();
-$VERSION = sprintf "%.6f", substr(q$Rev: 659 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 1525 $,4)/1000000 + 5.4;
 # module is internal to CPAN.pm
 
 @ISA = qw(CPAN::Debug);
-$BUGHUNTING = 0; # released code must have turned off
+$BUGHUNTING ||= 0; # released code must have turned off
 
 # it's ok if file doesn't exist, it just matters if it is .gz or .bz2
 sub new {
@@ -28,7 +28,7 @@ sub new {
         $bzip2 = File::Which::which("bzip2");
       }
       if ($bzip2) {
-        $me->{UNGZIPPRG} = $bzip2;
+        $me->{UNGZIPPRG} = $bzip2 || "bzip2";
       } else {
         $CPAN::Frontend->mydie(qq{
 CPAN.pm needs the external program bzip2 in order to handle '$file'.
@@ -39,7 +39,7 @@ program.
     }
   } else {
     # yes, we let gzip figure it out in *any* other case
-    $me->{UNGZIPPRG} = $CPAN::Config->{gzip};
+    $me->{UNGZIPPRG} = $CPAN::Config->{gzip} || "gzip";
   }
   bless $me, $class;
 }
@@ -60,7 +60,8 @@ sub gzip {
     $fhw->close;
     return 1;
   } else {
-    system(qq{$self->{UNGZIPPRG} -c "$read" > "$write"})==0;
+    my $command = CPAN::HandleConfig->safe_quote($self->{UNGZIPPRG});
+    system(qq{$command -c "$read" > "$write"})==0;
   }
 }
 
@@ -82,7 +83,8 @@ sub gunzip {
     $fhw->close;
     return 1;
   } else {
-    system(qq{$self->{UNGZIPPRG} -dc "$read" > "$write"})==0;
+    my $command = CPAN::HandleConfig->safe_quote($self->{UNGZIPPRG});
+    system(qq{$command -dc "$read" > "$write"})==0;
   }
 }
 
@@ -90,7 +92,8 @@ sub gunzip {
 sub gtest {
   my($self) = @_;
   return $self->{GTEST} if exists $self->{GTEST};
-  my $read = $self->{FILE} or die;
+  defined $self->{FILE} or $CPAN::Frontend->mydie("gtest called but no FILE specified");
+  my $read = $self->{FILE};
   my $success;
   # After I had reread the documentation in zlib.h, I discovered that
   # uncompressed files do not lead to an gzerror (anymore?).
@@ -114,7 +117,8 @@ sub gtest {
     $gz->gzclose();
     CPAN->debug("err[$err]success[$success]") if $CPAN::DEBUG;
   } else {
-    $success = 0==system(qq{$self->{UNGZIPPRG} -qdt "$read"});
+    my $command = CPAN::HandleConfig->safe_quote($self->{UNGZIPPRG});
+    $success = 0==system(qq{$command -qdt "$read"});
   }
   return $self->{GTEST} = $success;
 }
@@ -127,18 +131,23 @@ sub TIEHANDLE {
   my $self = $class->new($file);
   if (0) {
   } elsif (!$self->gtest) {
-    my $fh = FileHandle->new($file) or die "Could not open file[$file]: $!";
+    my $fh = FileHandle->new($file)
+        or $CPAN::Frontend->mydie("Could not open file[$file]: $!");
     binmode $fh;
     $self->{FH} = $fh;
+    $class->debug("via uncompressed FH");
   } elsif ($CPAN::META->has_inst("Compress::Zlib")) {
     my $gz = Compress::Zlib::gzopen($file,"rb") or
-	die "Could not gzopen $file";
+	$CPAN::Frontend->mydie("Could not gzopen $file");
     $self->{GZ} = $gz;
+    $class->debug("via Compress::Zlib");
   } else {
-    my $pipe = "$CPAN::Config->{gzip} -dc $file |";
-    my $fh = FileHandle->new($pipe) or die "Could not pipe[$pipe]: $!";
+    my $gzip = CPAN::HandleConfig->safe_quote($self->{UNGZIPPRG});
+    my $pipe = "$gzip -dc $file |";
+    my $fh = FileHandle->new($pipe) or $CPAN::Frontend->mydie("Could not pipe[$pipe]: $!");
     binmode $fh;
     $self->{FH} = $fh;
+    $class->debug("via external gzip");
   }
   $self;
 }
@@ -161,7 +170,7 @@ sub READLINE {
 
 sub READ {
   my($self,$ref,$length,$offset) = @_;
-  die "read with offset not implemented" if defined $offset;
+  $CPAN::Frontend->mydie("read with offset not implemented") if defined $offset;
   if (exists $self->{GZ}) {
     my $gz = $self->{GZ};
     my $byteread = $gz->gzread($$ref,$length);# 30eaf79e8b446ef52464b5422da328a8
@@ -197,18 +206,13 @@ sub untar {
     $prefer=2;
   } elsif (MM->maybe_command($self->{UNGZIPPRG})
            &&
-           MM->maybe_command($CPAN::Config->{'tar'})) {
+           MM->maybe_command($CPAN::Config->{tar})) {
     # should be default until Archive::Tar handles bzip2
     $prefer = 1;
   } elsif (
-           $CPAN::META->has_inst("Archive::Tar")
+           $CPAN::META->has_usable("Archive::Tar")
            &&
            $CPAN::META->has_inst("Compress::Zlib") ) {
-    if ($file =~ /\.bz2$/) {
-      $CPAN::Frontend->mydie(qq{
-Archive::Tar lacks support for bz2. Can't continue.
-});
-    }
     $prefer = 2;
   } else {
     $CPAN::Frontend->mydie(qq{
@@ -219,11 +223,13 @@ installed. Can't continue.
   if ($prefer==1) { # 1 => external gzip+tar
     my($system);
     my $is_compressed = $self->gtest();
+    my $tarcommand = CPAN::HandleConfig->safe_quote($CPAN::Config->{tar}) || "tar";
     if ($is_compressed) {
-      $system = qq{$self->{UNGZIPPRG} -dc }.
-          qq{< "$file" | $CPAN::Config->{tar} xvf -};
+      my $command = CPAN::HandleConfig->safe_quote($self->{UNGZIPPRG});
+      $system = qq{$command -dc }.
+          qq{< "$file" | $tarcommand xvf -};
     } else {
-      $system = qq{$CPAN::Config->{tar} xvf "$file"};
+      $system = qq{$tarcommand xvf "$file"};
     }
     if (system($system) != 0) {
       # people find the most curious tar binaries that cannot handle
@@ -239,7 +245,7 @@ installed. Can't continue.
         }
         $file = $ungzf;
       }
-      $system = qq{$CPAN::Config->{tar} xvf "$file"};
+      $system = qq{$tarcommand xvf "$file"};
       $CPAN::Frontend->myprint(qq{Using Tar:$system:\n});
       if (system($system)==0) {
         $CPAN::Frontend->myprint(qq{Untarred $file successfully\n});
@@ -251,6 +257,9 @@ installed. Can't continue.
       return 1;
     }
   } elsif ($prefer==2) { # 2 => modules
+    unless ($CPAN::META->has_usable("Archive::Tar")) {
+      $CPAN::Frontend->mydie("Archive::Tar not installed, please install it to continue");
+    }
     my $tar = Archive::Tar->new($file,1);
     my $af; # archive file
     my @af;
@@ -299,7 +308,8 @@ sub unzip {
     my $zip = Archive::Zip->new();
     my $status;
     $status = $zip->read($file);
-    die "Read of file[$file] failed\n" if $status != Archive::Zip::AZ_OK();
+    $CPAN::Frontend->mydie("Read of file[$file] failed\n")
+        if $status != Archive::Zip::AZ_OK();
     $CPAN::META->debug("Successfully read file[$file]") if $CPAN::DEBUG;
     my @members = $zip->members();
     for my $member ( @members ) {
@@ -310,7 +320,7 @@ sub unzip {
       }
       $status = $member->extractToFileNamed( $af );
       $CPAN::META->debug("af[$af]status[$status]") if $CPAN::DEBUG;
-      die "Extracting of file[$af] from zipfile[$file] failed\n" if
+      $CPAN::Frontend->mydie("Extracting of file[$af] from zipfile[$file] failed\n") if
           $status != Archive::Zip::AZ_OK();
       return if $CPAN::Signal;
     }
@@ -325,3 +335,11 @@ sub unzip {
 
 1;
 
+__END__
+
+=head1 LICENSE
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut
