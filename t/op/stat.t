@@ -9,7 +9,7 @@ BEGIN {
 use Config;
 use File::Spec;
 
-plan tests => 88;
+plan tests => 95;
 
 my $Perl = which_perl();
 
@@ -481,9 +481,29 @@ ok(unlink($f), 'unlink tmp file');
 
 SKIP: {
     skip "No dirfd()", 2 unless $Config{d_dirfd};
-    opendir my $dir, "." or die 'Unable to opendir ".":  $!';
-    ok(stat($dir), "stat() on dirhandle works"); 
+    ok(opendir(DIR, "."), 'Can open "." dir') || diag "Can't open '.':  $!";
+    ok(stat(DIR), "stat() on dirhandle works"); 
     ok(-d -r _ , "chained -x's on dirhandle"); 
+    closedir DIR;
+}
+
+{
+    # RT #8244: *FILE{IO} does not behave like *FILE for stat() and -X() operators
+    ok(open(F, ">", $tmpfile), 'can create temp file');
+    my @thwap = stat *F{IO};
+    ok(@thwap, "stat(*F{IO}) works");    
+    ok( -f *F{IO} , "single file tests work with *F{IO}");
+    unlink $tmpfile;
+
+    #PVIO's hold dirhandle information, so let's test them too.
+
+    SKIP: {
+        skip "No dirfd()", 2 unless $Config{d_dirfd};
+        ok(opendir(DIR, "."), 'Can open "." dir') || diag "Can't open '.':  $!";
+        ok(stat(*DIR{IO}), "stat() on *DIR{IO} works");
+        ok(-d -r *DIR{IO} , "chained -x's on *DIR{IO}");
+        closedir DIR;
+    }
 }
 
 END {
