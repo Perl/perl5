@@ -161,6 +161,11 @@ esac
 # Be nauseatingly ANSI
 ccflags="$ccflags $_ccflags_strict_ansi"
 
+# g++ needs -D_XOPEN_SOURCE -D_OSF_SOURCE to get much use of <unistd.h>.
+case "$cc" in
+*g++*) ccflags="$ccflags -D_XOPEN_SOURCE -D_OSF_SOURCE" ;;
+esac
+
 # for gcc the Configure knows about the -fpic:
 # position-independent code for dynamic loading
 
@@ -193,6 +198,7 @@ esac
 case "$isgcc" in
 gcc) #  gcc 3.2.1 wants a lot of memory for -O3'ing toke.c
 cat >try.c <<EOF
+#include <stdio.h>
 #include <sys/resource.h>
 
 int main ()
