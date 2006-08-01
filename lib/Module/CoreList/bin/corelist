@@ -10,8 +10,9 @@ See L<Module::CoreList> for one.
 
 =head1 SYNOPSIS
 
-    corelist [-a] [ Modulename [ version ]] [ /Modulenameregex/ [ version ] ] ...
-    corelist [-v [ version ]]
+    corelist -v [<PerlVersion>]
+    corelist [-a] <ModuleName> | /<ModuleRegex>/ [<ModuleVersion>] ...
+    corelist [-v <PerlVersion>] [ <ModuleName> | /<ModuleNameRegex>/ ] ...
 
 =head1 OPTIONS
 
@@ -55,6 +56,8 @@ lists all of the perl release versions we got the CoreList for.
 If you pass a version argument (value of C<$]>, like 5.00503),
 you get a list of all the modules and their respective versions.
 
+In module filtering context, it can be used as Perl version filter.
+
 =back
 
 =cut
@@ -64,6 +67,7 @@ use Getopt::Long;
 use Pod::Usage;
 use strict;
 use warnings;
+use version ();
 
 my %Opts;
 
@@ -73,22 +77,33 @@ pod2usage(1) if $Opts{help};
 pod2usage(-verbose=>2) if $Opts{man};
 
 if(exists $Opts{v} ){
-    if( $Opts{v} ) {
-        if( exists $Module::CoreList::version{$Opts{v}} ) {
-            print "\nThe following modules were in perl v$Opts{v} CORE\n";
-            print "$_ ", $Module::CoreList::version{$Opts{v}}{$_} || " ","\n"
-                for sort keys %{$Module::CoreList::version{$Opts{v}}};
-            print "\n";
-        } else {
-            print "\nModule::CoreList has no info on perl v$Opts{v}\n\n";
-        }
-    } else {
+    if( !$Opts{v} ) {
         print "\nModule::CoreList has info on the following perl versions:\n";
         print "$_\n" for sort keys %Module::CoreList::version;
         print "\n";
+        exit 0;
     }
-} elsif (@ARGV) {
-    while (@ARGV) {
+
+    $Opts{v} = numify_version( $Opts{v} );
+    if( !exists $Module::CoreList::version{$Opts{v}} ) {
+        print "\nModule::CoreList has no info on perl v$Opts{v}\n\n";
+        exit 1;
+    }
+
+    if ( !@ARGV ) {
+	print "\nThe following modules were in perl v$Opts{v} CORE\n";
+	print "$_ ", $Module::CoreList::version{$Opts{v}}{$_} || " ","\n"
+	for sort keys %{$Module::CoreList::version{$Opts{v}}};
+	print "\n";
+	exit 0;
+    }
+}
+
+if ( !@ARGV ) {
+    pod2usage(0);
+}
+
+while (@ARGV) {
 	my ($mod, $ver);
 	if ($ARGV[0] =~ /=/) {
 	    ($mod, $ver) = split /=/, shift @ARGV;
@@ -118,16 +133,18 @@ if(exists $Opts{v} ){
 	    }
 
 	}
-
-    }
-} else {
-    pod2usage(0);
 }
 
 exit();
 
 sub module_version {
     my($mod,$ver) = @_;
+
+    if ( $Opts{v} ) {
+        return printf "  %-24s %-10s\n",
+            $mod,
+            $Module::CoreList::version{$Opts{v}}{$mod} || 'undef';
+    }
 
     $ver = "" unless defined $ver;
 
@@ -158,6 +175,13 @@ sub module_version {
     }
 }
 
+sub numify_version {
+    my $ver = shift;
+    if ( index( $ver, q{.}, index( $ver, q{.} ) ) >= 0 ) {
+        $ver = version->new($ver)->numify;
+    }
+    return $ver;
+}
 
 =head1 EXAMPLES
 
@@ -191,12 +215,35 @@ sub module_version {
 
     /Template/  has no match in CORE (or so I think)
 
+    $ corelist -v 5.8.8 B
+
+    B                        1.09_01
+
+    $ corelist -v 5.8.8 /^B::/
+
+    B::Asmdata               1.01
+    B::Assembler             0.07
+    B::Bblock                1.02_01
+    B::Bytecode              1.01_01
+    B::C                     1.04_01
+    B::CC                    1.00_01
+    B::Concise               0.66
+    B::Debug                 1.02_01
+    B::Deparse               0.71
+    B::Disassembler          1.05
+    B::Lint                  1.03
+    B::O                     1.00
+    B::Showlex               1.02
+    B::Stackobj              1.00
+    B::Stash                 1.00
+    B::Terse                 1.03_01
+    B::Xref                  1.01
 
 =head1 COPYRIGHT
 
 Copyright (c) 2002-2006 by D.H. aka PodMaster
 
-Current maintainer : Rafael Garcia-Suarez E<lt>rgarciasuarez at mandriva dot
+Current maintainer : Rafael Garcia-Suarez E<lt>rgarciasuarez at gmail dot
 comE<gt>
 
 This program is distributed under the same terms as perl itself.
