@@ -252,7 +252,11 @@
 #endif
 
 #define NOOP /*EMPTY*/(void)0
+#if !defined(HASATTRIBUTE_UNUSED) && defined(__cplusplus)
+#define dNOOP /*EMPTY*/(void)0 /* Older g++ has no __attribute((unused))__ */
+#else
 #define dNOOP extern int /*@unused@*/ Perl___notused PERL_UNUSED_DECL
+#endif
 
 #ifndef pTHX
 /* Don't bother defining tTHX and sTHX; using them outside
