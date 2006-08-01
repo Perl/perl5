@@ -480,7 +480,7 @@ ok(unlink($f), 'unlink tmp file');
 }
 
 SKIP: {
-    skip "No dirfd()", 2 unless $Config{d_dirfd};
+    skip "No dirfd()", 3 unless $Config{d_dirfd};
     ok(opendir(DIR, "."), 'Can open "." dir') || diag "Can't open '.':  $!";
     ok(stat(DIR), "stat() on dirhandle works"); 
     ok(-d -r _ , "chained -x's on dirhandle"); 
@@ -498,7 +498,7 @@ SKIP: {
     #PVIO's hold dirhandle information, so let's test them too.
 
     SKIP: {
-        skip "No dirfd()", 2 unless $Config{d_dirfd};
+        skip "No dirfd()", 3 unless $Config{d_dirfd};
         ok(opendir(DIR, "."), 'Can open "." dir') || diag "Can't open '.':  $!";
         ok(stat(*DIR{IO}), "stat() on *DIR{IO} works");
         ok(-d -r *DIR{IO} , "chained -x's on *DIR{IO}");
