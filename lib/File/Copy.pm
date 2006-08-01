@@ -314,7 +314,8 @@ one place to another.
 
 =over 4
 
-=item *
+=item copy
+X<copy> X<cp>
 
 The C<copy> function takes two
 parameters: a file to copy from and a file to copy to. Either
@@ -342,7 +343,8 @@ upon the file, but will generally be the whole file (up to 2Mb), or
 You may use the syntax C<use File::Copy "cp"> to get at the
 "cp" alias for this function. The syntax is I<exactly> the same.
 
-=item *
+=item move
+X<move> X<mv> X<rename>
 
 The C<move> function also takes two parameters: the current name
 and the intended name of the file to be moved.  If the destination
@@ -358,7 +360,8 @@ copy of the file under the destination name.
 You may use the "mv" alias for this function in the same way that
 you may use the "cp" alias for C<copy>.
 
-=back
+=item syscopy
+X<syscopy>
 
 File::Copy also provides the C<syscopy> routine, which copies the
 file specified in the first parameter to the file specified in the
@@ -372,7 +375,7 @@ this calls C<Win32::CopyFile>.
 On Mac OS (Classic), C<syscopy> calls C<Mac::MoreFiles::FSpFileCopy>,
 if available.
 
-=head2 Special behaviour if C<syscopy> is defined (OS/2, VMS and Win32)
+B<Special behaviour if C<syscopy> is defined (OS/2, VMS and Win32)>
 
 If both arguments to C<copy> are not file handles,
 then C<copy> will perform a "system copy" of
@@ -387,9 +390,8 @@ The system copy routine may also be called directly under VMS and OS/2
 as C<File::Copy::syscopy> (or under VMS as C<File::Copy::rmscopy>, which
 is the routine that does the actual work for syscopy).
 
-=over 4
-
 =item rmscopy($from,$to[,$date_flag])
+X<rmscopy>
 
 The first and second arguments may be strings, typeglobs, typeglob
 references, or objects inheriting from IO::Handle;
@@ -448,13 +450,13 @@ E.g.
   copy("file1", "tmp");        # creates the file 'tmp' in the current directory
   copy("file1", ":tmp:");      # creates :tmp:file1
   copy("file1", ":tmp");       # same as above
-  copy("file1", "tmp");        # same as above, if 'tmp' is a directory (but don't do   
+  copy("file1", "tmp");        # same as above, if 'tmp' is a directory (but don't do
                                # that, since it may cause confusion, see example #1)
   copy("file1", "tmp:file1");  # error, since 'tmp:' is not a volume
   copy("file1", ":tmp:file1"); # ok, partial path
   copy("file1", "DataHD:");    # creates DataHD:file1
-  
-  move("MacintoshHD:fileA", "DataHD:fileB"); # moves (don't copies) files from one 
+
+  move("MacintoshHD:fileA", "DataHD:fileB"); # moves (don't copies) files from one
                                              # volume to another
 
 =back
