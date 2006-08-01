@@ -9,7 +9,7 @@ BEGIN {
 use Config;
 use File::Spec;
 
-plan tests => 86;
+plan tests => 107;
 
 my $Perl = which_perl();
 
@@ -477,6 +477,57 @@ ok(unlink($f), 'unlink tmp file');
     my $s2 = -s _;
     is($s1, $s2, q(-T _ doesn't break the statbuffer));
     unlink $tmpfile;
+}
+
+SKIP: {
+    skip "No dirfd()", 9 unless $Config{d_dirfd};
+    ok(opendir(DIR, "."), 'Can open "." dir') || diag "Can't open '.':  $!";
+    ok(stat(DIR), "stat() on dirhandle works"); 
+    ok(-d _ , "-d on dirhandle"); 
+    ok(-d DIR, "-d on a dirhandle works");
+
+    # And now for the ambigious bareword case
+    ok(open(DIR, "TEST"), 'Can open "TEST" dir')
+	|| diag "Can't open 'TEST':  $!";
+    my $size = (stat(DIR))[7];
+    ok(defined $size, "stat() on bareword works");
+    is($size, -s "TEST", "size returned by stat of bareword is for the file");
+    ok(-f _, "ambiguous bareword uses file handle, not dir handle");
+    ok(-f DIR);
+    closedir DIR or die $!;
+    close DIR or die $!;
+}
+
+{
+    # RT #8244: *FILE{IO} does not behave like *FILE for stat() and -X() operators
+    ok(open(F, ">", $tmpfile), 'can create temp file');
+    my @thwap = stat *F{IO};
+    ok(@thwap, "stat(*F{IO}) works");    
+    ok( -f *F{IO} , "single file tests work with *F{IO}");
+    close F;
+    unlink $tmpfile;
+
+    #PVIO's hold dirhandle information, so let's test them too.
+
+    SKIP: {
+        skip "No dirfd()", 9 unless $Config{d_dirfd};
+        ok(opendir(DIR, "."), 'Can open "." dir') || diag "Can't open '.':  $!";
+        ok(stat(*DIR{IO}), "stat() on *DIR{IO} works");
+	ok(-d _ , "The special file handle _ is set correctly"); 
+        ok(-d *DIR{IO} , "-d on *DIR{IO}");
+
+	# And now for the ambigious bareword case
+	ok(open(DIR, "TEST"), 'Can open "TEST" dir')
+	    || diag "Can't open 'TEST':  $!";
+	my $size = (stat(*DIR{IO}))[7];
+	ok(defined $size, "stat() on *THINGY{IO} works");
+	is($size, -s "TEST",
+	   "size returned by stat of *THINGY{IO} is for the file");
+	ok(-f _, "ambiguous *THINGY{IO} uses file handle, not dir handle");
+	ok(-f *DIR{IO});
+	closedir DIR or die $!;
+	close DIR or die $!;
+    }
 }
 
 END {

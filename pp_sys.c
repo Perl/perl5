@@ -2780,6 +2780,7 @@ PP(pp_stat)
 {
     dSP;
     GV *gv = NULL;
+    IO *io;
     I32 gimme;
     I32 max = 13;
 
@@ -2800,9 +2801,27 @@ PP(pp_stat)
 	    PL_laststype = OP_STAT;
 	    PL_statgv = gv;
 	    sv_setpvn(PL_statname, "", 0);
-	    PL_laststatval = (GvIO(gv) && IoIFP(GvIOp(gv))
-		? PerlLIO_fstat(PerlIO_fileno(IoIFP(GvIOn(gv))), &PL_statcache) : -1);
-	}
+            if(gv) {
+                io = GvIO(gv);
+                do_fstat_have_io:
+                if (io) {
+                    if (IoIFP(io)) {
+                        PL_laststatval = 
+                            PerlLIO_fstat(PerlIO_fileno(IoIFP(io)), &PL_statcache);   
+                    } else if (IoDIRP(io)) {
+#ifdef HAS_DIRFD
+                        PL_laststatval =
+                            PerlLIO_fstat(dirfd(IoDIRP(io)), &PL_statcache);
+#else
+                        DIE(aTHX_ PL_no_func, "dirfd");
+#endif
+                    } else {
+                        PL_laststatval = -1;
+                    }
+	        }
+            }
+        }
+
 	if (PL_laststatval < 0) {
 	    if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 		report_evil_fh(gv, GvIO(gv), PL_op->op_type);
@@ -2814,13 +2833,18 @@ PP(pp_stat)
 	if (SvTYPE(sv) == SVt_PVGV) {
 	    gv = (GV*)sv;
 	    goto do_fstat;
-	}
-	else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
-	    gv = (GV*)SvRV(sv);
-	    if (PL_op->op_type == OP_LSTAT)
-		goto do_fstat_warning_check;
-	    goto do_fstat;
-	}
+	} else if(SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVGV) {
+            gv = (GV*)SvRV(sv);
+            if (PL_op->op_type == OP_LSTAT)
+                goto do_fstat_warning_check;
+            goto do_fstat;
+        } else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO) { 
+            io = (IO*)SvRV(sv);
+            if (PL_op->op_type == OP_LSTAT)
+                goto do_fstat_warning_check;
+            goto do_fstat_have_io; 
+        }
+        
 	sv_setpv(PL_statname, SvPV_nolen_const(sv));
 	PL_statgv = NULL;
 	PL_laststype = PL_op->op_type;
