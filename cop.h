@@ -576,7 +576,7 @@ struct subst {
 	cx->sb_rx		= rx,					\
 	cx->cx_type		= CXt_SUBST;				\
 	rxres_save(&cx->sb_rxres, rx);					\
-	ReREFCNT_inc(rx)
+	(void)ReREFCNT_inc(rx)
 
 #define POPSUBST(cx) cx = &cxstack[cxstack_ix--];			\
 	rxres_free(&cx->sb_rxres);					\

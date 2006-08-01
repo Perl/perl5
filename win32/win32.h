@@ -325,7 +325,7 @@ typedef struct {
 } child_IO_table;
 
 DllExport void		win32_get_child_IO(child_IO_table* ptr);
-DllExport HWND		win32_create_message_window();
+DllExport HWND		win32_create_message_window(void);
 
 #ifndef USE_SOCKETS_AS_HANDLES
 extern FILE *		my_fdopen(int, char *);

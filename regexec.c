@@ -2383,7 +2383,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
     /* these variables are NOT saved during a recusive RFEGMATCH: */
     register I32 nextchr;   /* is always set to UCHARAT(locinput) */
-    bool result;	    /* return value of S_regmatch */
+    bool result = 0;	    /* return value of S_regmatch */
     int depth = 0;	    /* depth of recursion */
     regmatch_state *yes_state = NULL; /* state to pop to on success of
 							    subpattern */
