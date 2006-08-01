@@ -33,7 +33,7 @@ BEGIN {
     }
 
     $| = 1;
-    print("1..74\n");   ### Number of tests that will be run ###
+    print("1..78\n");   ### Number of tests that will be run ###
 };
 
 my $TEST;
@@ -77,15 +77,29 @@ sub th_start {
     my $tid = threads->tid();
     ok($tid, "Thread $tid started");
 
-    # Create next thread
-    if ($tid < 17) {
-        my $next = 'th' . ($tid+1);
-        my $th = threads->create($next);
-    } else {
-        # Last thread signals first
-        th_signal(1);
+    threads->yield();
+
+    my $other;
+    {
+        lock(%READY);
+
+        # Create next thread
+        if ($tid < 17) {
+            my $next = 'th' . ($tid+1);
+            my $th = threads->create($next);
+        } else {
+            # Last thread signals first
+            th_signal(1);
+        }
+
+        # Wait until signalled by another thread
+        while (! exists($READY{$tid})) {
+            cond_wait(%READY);
+        }
+        $other = delete($READY{$tid});
     }
-    th_wait();
+    ok($tid, "Thread $tid received signal from $other");
+    threads->yield();
 }
 
 # Thread terminating
@@ -97,19 +111,6 @@ sub th_done {
     cond_signal($COUNT);
 
     ok($tid, "Thread $tid done");
-}
-
-# Wait until signalled by another thread
-sub th_wait
-{
-    my $tid = threads->tid();
-
-    lock(%READY);
-    while (! exists($READY{$tid})) {
-        cond_wait(%READY);
-    }
-    my $other = delete($READY{$tid});
-    ok($tid, "Thread $tid received signal from $other");
 }
 
 # Signal another thread to go
@@ -197,15 +198,16 @@ sub th16 {
 }
 
 sub th3 {
+    my $tid = threads->tid();
     my $other = 5;
 
     th_start();
     threads->detach();
     th_signal($other);
-    threads->yield();
     sleep(1);
+    ok(1, "Thread $tid getting return from thread $other");
     my $ret = threads->object($other)->join();
-    ok($ret == $other, "Thread $other returned $ret");
+    ok($ret == $other, "Thread $tid saw that thread $other returned $ret");
     th_done();
 }
 
@@ -217,19 +219,20 @@ sub th5 {
 
 
 sub th7 {
+    my $tid = threads->tid();
     my $other = 9;
 
     th_start();
     threads->detach();
     th_signal($other);
+    ok(1, "Thread $tid getting return from thread $other");
     my $ret = threads->object($other)->join();
-    ok($ret == $other, "Thread $other returned $ret");
+    ok($ret == $other, "Thread $tid saw that thread $other returned $ret");
     th_done();
 }
 
 sub th9 {
     th_start();
-    threads->yield();
     sleep(1);
     th_done();
     return (threads->tid());
@@ -237,15 +240,16 @@ sub th9 {
 
 
 sub th13 {
+    my $tid = threads->tid();
     my $other = 11;
 
     th_start();
     threads->detach();
     th_signal($other);
-    threads->yield();
     sleep(1);
+    ok(1, "Thread $tid getting return from thread $other");
     my $ret = threads->object($other)->join();
-    ok($ret == $other, "Thread $other returned $ret");
+    ok($ret == $other, "Thread $tid saw that thread $other returned $ret");
     th_done();
 }
 
@@ -257,27 +261,24 @@ sub th11 {
 
 
 sub th17 {
+    my $tid = threads->tid();
     my $other = 15;
 
     th_start();
     threads->detach();
     th_signal($other);
+    ok(1, "Thread $tid getting return from thread $other");
     my $ret = threads->object($other)->join();
-    ok($ret == $other, "Thread $other returned $ret");
+    ok($ret == $other, "Thread $tid saw that thread $other returned $ret");
     th_done();
 }
 
 sub th15 {
     th_start();
-    threads->yield();
     sleep(1);
     th_done();
     return (threads->tid());
 }
-
-
-
-
 
 
 TEST_STARTS_HERE:
@@ -290,7 +291,6 @@ TEST_STARTS_HERE:
             cond_wait($COUNT);
         }
     }
-    threads->yield();
     sleep(1);
 }
 ok($COUNT == 17, "Done - $COUNT threads");

@@ -68,24 +68,24 @@ sub threading_1 {
     my $tid = threads->tid();
     ok($tid, "Thread $tid started");
 
+    my $id;
     {
         lock($STARTED);
         $STARTED++;
+        $id = $STARTED;
     }
     if ($STARTED < 5) {
         sleep(1);
         threads->create('threading_1')->detach();
     }
 
-    threads->yield();
-
-    if ($tid == 1) {
+    if ($id == 1) {
         sleep(2);
-    } elsif ($tid == 2) {
+    } elsif ($id == 2) {
         sleep(6);
-    } elsif ($tid == 3) {
+    } elsif ($id == 3) {
         sleep(3);
-    } elsif ($tid == 4) {
+    } elsif ($id == 4) {
         sleep(1);
     } else {
         sleep(2);
@@ -102,26 +102,18 @@ sub threading_1 {
     $COUNT = 0;
     threads->create('threading_1')->detach();
     {
-        lock($COUNT);
-        while ($COUNT < 3) {
-            cond_wait($COUNT);
+        my $cnt = 0;
+        while ($cnt < 5) {
+            {
+                lock($COUNT);
+                cond_wait($COUNT) if ($COUNT < 5);
+                $cnt = $COUNT;
+            }
             threads->create(sub {
                 threads->create(sub { })->join();
             })->join();
         }
     }
-}
-{
-    {
-        lock($COUNT);
-        while ($COUNT < 5) {
-            cond_wait($COUNT);
-            threads->create(sub {
-                threads->create(sub { })->join();
-            })->join();
-        }
-    }
-    threads->yield();
     sleep(1);
 }
 ok($COUNT == 5, "Done - $COUNT threads");
@@ -138,7 +130,6 @@ sub threading_2 {
     if ($STARTED < 5) {
         threads->create('threading_2')->detach();
     }
-
     threads->yield();
 
     lock($COUNT);
@@ -161,7 +152,6 @@ sub threading_2 {
             cond_wait($COUNT);
         }
     }
-    threads->yield();
     sleep(1);
 }
 ok($COUNT == 5, "Done - $COUNT threads");
@@ -182,7 +172,6 @@ sub threading_3 {
             my $tid = threads->tid();
             ok($tid, "Thread $tid started");
 
-            threads->yield();
             sleep(1);
 
             lock($COUNT);
@@ -190,7 +179,7 @@ sub threading_3 {
             cond_signal($COUNT);
 
             ok($tid, "Thread $tid done");
-        })->join();
+        })->detach();
     }
 
     lock($COUNT);
@@ -211,7 +200,6 @@ sub threading_3 {
             }
         }
     })->join();
-    threads->yield();
     sleep(1);
 }
 ok($COUNT == 2, "Done - $COUNT threads");

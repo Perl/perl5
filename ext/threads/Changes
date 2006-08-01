@@ -1,5 +1,8 @@
 Revision history for Perl extension threads.
 
+1.38 Tue Aug  1 11:48:56 EDT 2006
+	- Fixes to tests
+
 1.37 Fri Jul 21 10:51:36 EDT 2006
 	- Revert 'exit' behavior with override
 

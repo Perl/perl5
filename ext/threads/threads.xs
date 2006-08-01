@@ -620,12 +620,12 @@ S_ithread_create(
             clone_param.flags = 0;
             thread->init_function = sv_dup(init_function, &clone_param);
             if (SvREFCNT(thread->init_function) == 0) {
-                SvREFCNT_inc(thread->init_function);
+                SvREFCNT_inc_void(thread->init_function);
             }
         }
 
         thread->params = sv_dup(params, &clone_param);
-        SvREFCNT_inc(thread->params);
+        SvREFCNT_inc_void(thread->params);
 
         /* The code below checks that anything living on the tmps stack and
          * has been cloned (so it lives in the ptr_table) has a refcount
@@ -645,7 +645,7 @@ S_ithread_create(
             SV* sv = (SV*)ptr_table_fetch(PL_ptr_table, tmps_tmp[tmps_ix]);
             tmps_ix--;
             if (sv && SvREFCNT(sv) == 0) {
-                SvREFCNT_inc(sv);
+                SvREFCNT_inc_void(sv);
                 SvREFCNT_dec(sv);
             }
         }
@@ -1029,7 +1029,7 @@ ithread_join(...)
             params = (AV *)sv_dup((SV*)params_copy, &clone_params);
             S_ithread_set(aTHX_ current_thread);
             SvREFCNT_dec(clone_params.stashes);
-            SvREFCNT_inc(params);
+            SvREFCNT_inc_void(params);
             ptr_table_free(PL_ptr_table);
             PL_ptr_table = NULL;
         }
