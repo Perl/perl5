@@ -131,6 +131,7 @@ cat >try.c <<'EOM'
 /* Test for whether ELF binaries are produced */
 #include <fcntl.h>
 #include <stdlib.h>
+#include <unistd.h>
 main() {
 	char buffer[4];
 	int i=open("a.out",O_RDONLY);
@@ -352,3 +353,14 @@ $define|true|[yY]*)
     libswanted="$*"
     ;;
 esac
+
+# If we are using g++ we must use nm and force ourselves to use
+# the /usr/lib/libc.a (resetting the libc below to an empty string
+# makes Configure to look for the right one) because the symbol
+# scanning tricks of Configure will crash and burn horribly.
+case "$cc" in
+*g++*) usenm=true
+       libc=''
+       ;;
+esac
+

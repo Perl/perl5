@@ -88,6 +88,20 @@ Intel*) ;; # Haven't we been through this already?
     ;;
 esac
 
+# If we have g++, we cannot have the -Wdeclaration-after-statement.
+# Some g++s accept it but then whine about it with every file.
+case "$cc" in
+*g++*) warn="`echo $warn|sed 's/-Wdeclaration-after-statement/ /'`" ;;
+esac
+
+extra=''
+
+# C and C++ have different rules for const strings;
+# without the -fno-const-strings g++ cannot handle our habit
+# of mixing char literals and char pointers.
+case "$cc" in
+*g++*) extra="$extra -fno-const-strings" ;;
+esac
 
 stdflags=''
 
@@ -104,6 +118,8 @@ $startsh
 warn="$warn"
 # Extra standardness.
 stdflags="$stdflags"
+# Extra extra.
+extra="$extra"
 
 !GROK!THIS!
 
@@ -217,8 +233,8 @@ if test -f .patch; then
 fi
 
     : Can we perhaps use $ansi2knr here
-    echo "$cc -c -DPERL_CORE $ccflags $stdflags $optimize $warn"
-    eval "$also "'"$cc -DPERL_CORE -c $ccflags $stdflags $optimize $warn"'
+    echo "$cc -c -DPERL_CORE $ccflags $stdflags $optimize $warn $extra"
+    eval "$also "'"$cc -DPERL_CORE -c $ccflags $stdflags $optimize $warn $extra"'
 
     . $TOP/config.sh
 

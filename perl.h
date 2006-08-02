@@ -351,7 +351,10 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #  endif
 #endif
 
-#if defined(PERL_GCC_PEDANTIC)
+/* gcc (-ansi) -pedantic doesn't allow gcc brace groups,
+ * g++ allows them but seems to have problems with them
+ * (insane errors ensue). */
+#if defined(PERL_GCC_PEDANTIC) || (defined(__GNUC__) && defined(__cplusplus))
 #  ifndef PERL_GCC_BRACE_GROUPS_FORBIDDEN
 #    define PERL_GCC_BRACE_GROUPS_FORBIDDEN
 #  endif
