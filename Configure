@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Tue Aug  1 10:44:27 CEST 2006 [metaconfig 3.0 PL70]
+# Generated on Wed Aug  2 13:20:07 CEST 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -7107,7 +7107,7 @@ int main(void)
 {
 #ifdef __GLIBC__
 #   ifdef __GLIBC_MINOR__
-#       if __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 1
+#       if __GLIBC__ >= 2 && __GLIBC_MINOR__ >= 1 && !defined(__cplusplus)
 #           include <gnu/libc-version.h>
 	    printf("%s\n",  gnu_get_libc_version());
 #       else
@@ -7590,6 +7590,10 @@ set dlopen d_dlopen
 eval $inlibc
 runnm="$xxx_runnm"
 
+: see if this is a unistd.h system
+set unistd.h i_unistd
+eval $inhdr
+
 : determine which dynamic loading, if any, to compile in
 echo " "
 dldir="ext/DynaLoader"
@@ -7692,6 +7696,10 @@ EOM
 #$i_stdlib I_STDLIB
 #ifdef I_STDLIB
 #include <stdlib.h>
+#endif
+#$i_unistd I_UNISTD
+#ifdef I_UNISTD
+#include <unistd.h>
 #endif
 int main() {
 	char b[4];
@@ -10102,10 +10110,6 @@ eval $inlibc
 set bcopy d_bcopy
 eval $inlibc
 
-: see if this is a unistd.h system
-set unistd.h i_unistd
-eval $inhdr
-
 : see if getpgrp exists
 set getpgrp d_getpgrp
 eval $inlibc
@@ -10351,6 +10355,7 @@ va_dcl
 	p = va_arg(ap, char *);
 #endif
 	va_end(ap);
+	return 0;
 }
 EOP
 $cat > varargs <<EOP
