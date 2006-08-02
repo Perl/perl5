@@ -2814,7 +2814,7 @@ Perl_sighandler(int sig)
 #endif
 		   EXTEND(SP, 2);
 		   PUSHs((SV*)rv);
-		   PUSHs(newSVpv((void*)sip, sizeof(*sip)));
+		   PUSHs(newSVpv((char *)sip, sizeof(*sip)));
 	      }
 
               va_end(args);
@@ -2883,10 +2883,10 @@ S_restore_magic(pTHX_ const void *p)
 	    /* downgrade public flags to private,
 	       and discard any other private flags */
 
-	    const U32 public = SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
-	    if (public) {
-		SvFLAGS(sv) &= ~( public | (SVp_IOK|SVp_NOK|SVp_POK) );
-		SvFLAGS(sv) |= ( public << PRIVSHIFT );
+	    const U32 pubflags = SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
+	    if (pubflags) {
+		SvFLAGS(sv) &= ~( pubflags | (SVp_IOK|SVp_NOK|SVp_POK) );
+		SvFLAGS(sv) |= ( pubflags << PRIVSHIFT );
 	    }
 	}
     }

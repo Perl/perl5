@@ -1257,6 +1257,7 @@ PP(pp_enterwrite)
     register IO *io;
     GV *fgv;
     CV *cv;
+    SV * tmpsv = NULL;
 
     if (MAXARG == 0)
 	gv = PL_defoutgv;
@@ -1280,8 +1281,8 @@ PP(pp_enterwrite)
 
     cv = GvFORM(fgv);
     if (!cv) {
-	SV * const tmpsv = sv_newmortal();
 	const char *name;
+	tmpsv = sv_newmortal();
 	gv_efullname4(tmpsv, fgv, NULL, FALSE);
 	name = SvPV_nolen_const(tmpsv);
 	if (name && *name)
@@ -1608,7 +1609,7 @@ PP(pp_sysread)
 	buffer = SvGROW(bufsv, (STRLEN)(length+1));
 	/* 'offset' means 'flags' here */
 	count = PerlSock_recvfrom(PerlIO_fileno(IoIFP(io)), buffer, length, offset,
-			  (struct sockaddr *)namebuf, &bufsize);
+				  (struct sockaddr *)namebuf, &bufsize);
 	if (count < 0)
 	    RETPUSHUNDEF;
 #ifdef EPOC
@@ -2769,7 +2770,7 @@ nuts2:
 PP(pp_stat)
 {
     dSP;
-    GV *gv;
+    GV *gv = NULL;
     I32 gimme;
     I32 max = 13;
 
@@ -4571,7 +4572,7 @@ PP(pp_ghostent)
 	STRLEN addrlen;
 	Netdb_host_t addr = (Netdb_host_t) SvPVbyte(addrsv, addrlen);
 
-	hent = PerlSock_gethostbyaddr(addr, (Netdb_hlen_t) addrlen, addrtype);
+	hent = PerlSock_gethostbyaddr((const void*)addr, (Netdb_hlen_t) addrlen, addrtype);
 #else
 	DIE(aTHX_ PL_no_sock_func, "gethostbyaddr");
 #endif

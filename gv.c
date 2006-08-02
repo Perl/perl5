@@ -79,7 +79,8 @@ Perl_gv_IOadd(pTHX_ register GV *gv)
          * if it walks like a dirhandle, then let's assume that
          * this is a dirhandle.
          */
-        const char *fh = PL_op->op_type == OP_READDIR ||
+	const char * const fh =
+			 PL_op->op_type ==  OP_READDIR ||
                          PL_op->op_type ==  OP_TELLDIR ||
                          PL_op->op_type ==  OP_SEEKDIR ||
                          PL_op->op_type ==  OP_REWINDDIR ||
@@ -303,6 +304,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     GV** gvp;
     CV* cv;
     const char *hvname;
+    HV* lastchance = NULL;
 
     /* UNIVERSAL methods should be callable without a stash */
     if (!stash) {
@@ -390,7 +392,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     /* if at top level, try UNIVERSAL */
 
     if (level == 0 || level == -1) {
-	HV* const lastchance = gv_stashpvs("UNIVERSAL", FALSE);
+	lastchance = gv_stashpvs("UNIVERSAL", FALSE);
 
 	if (lastchance) {
 	    if ((gv = gv_fetchmeth(lastchance, name, len,

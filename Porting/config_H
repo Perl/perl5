@@ -3393,7 +3393,234 @@
 /*#define	USE_SOCKS		/ **/
 #endif
 
-/* HAS_DRAND48_PROTO:
+/* USE_ITHREADS:
+ *	This symbol, if defined, indicates that Perl should be built to
+ *	use the interpreter-based threading implementation.
+ */
+/* USE_5005THREADS:
+ *	This symbol, if defined, indicates that Perl should be built to
+ *	use the 5.005-based threading implementation.
+ */
+/* OLD_PTHREADS_API:
+ *	This symbol, if defined, indicates that Perl should
+ *	be built to use the old draft POSIX threads API.
+ */
+/* USE_REENTRANT_API:
+ *	This symbol, if defined, indicates that Perl should
+ *	try to use the various _r versions of library functions.
+ *	This is extremely experimental.
+ */
+/*#define	USE_5005THREADS		/ **/
+/*#define	USE_ITHREADS		/ **/
+#if defined(USE_5005THREADS) && !defined(USE_ITHREADS)
+#define		USE_THREADS		/* until src is revised*/
+#endif
+/*#define	OLD_PTHREADS_API		/ **/
+/*#define	USE_REENTRANT_API	/ **/
+
+/* PERL_VENDORARCH:
+ *	If defined, this symbol contains the name of a private library.
+ *	The library is private in the sense that it needn't be in anyone's
+ *	execution path, but it should be accessible by the world.
+ *	It may have a ~ on the front.
+ *	The standard distribution will put nothing in this directory.
+ *	Vendors who distribute perl may wish to place their own
+ *	architecture-dependent modules and extensions in this directory with
+ *		MakeMaker Makefile.PL INSTALLDIRS=vendor
+ *	or equivalent.  See INSTALL for details.
+ */
+/* PERL_VENDORARCH_EXP:
+ *	This symbol contains the ~name expanded version of PERL_VENDORARCH, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+/*#define PERL_VENDORARCH ""		/ **/
+/*#define PERL_VENDORARCH_EXP ""		/ **/
+
+/* PERL_VENDORLIB_EXP:
+ *	This symbol contains the ~name expanded version of VENDORLIB, to be used
+ *	in programs that are not prepared to deal with ~ expansion at run-time.
+ */
+/* PERL_VENDORLIB_STEM:
+ *	This define is PERL_VENDORLIB_EXP with any trailing version-specific component
+ *	removed.  The elements in inc_version_list (inc_version_list.U) can
+ *	be tacked onto this variable to generate a list of directories to search.
+ */
+/*#define PERL_VENDORLIB_EXP ""		/ **/
+/*#define PERL_VENDORLIB_STEM ""		/ **/
+
+/* VOIDFLAGS:
+ *	This symbol indicates how much support of the void type is given by this
+ *	compiler.  What various bits mean:
+ *
+ *	    1 = supports declaration of void
+ *	    2 = supports arrays of pointers to functions returning void
+ *	    4 = supports comparisons between pointers to void functions and
+ *		    addresses of void functions
+ *	    8 = suports declaration of generic void pointers
+ *
+ *	The package designer should define VOIDUSED to indicate the requirements
+ *	of the package.  This can be done either by #defining VOIDUSED before
+ *	including config.h, or by defining defvoidused in Myinit.U.  If the
+ *	latter approach is taken, only those flags will be tested.  If the
+ *	level of void support necessary is not present, defines void to int.
+ */
+#ifndef VOIDUSED
+#define VOIDUSED 15
+#endif
+#define VOIDFLAGS 15
+#if (VOIDFLAGS & VOIDUSED) != VOIDUSED
+#define void int		/* is void to be avoided? */
+#define M_VOID			/* Xenix strikes again */
+#endif
+
+/* HASATTRIBUTE_FORMAT:
+ *	Can we handle GCC attribute for checking printf-style formats
+ */
+/* HASATTRIBUTE_MALLOC:
+ *	Can we handle GCC attribute for malloc-style functions.
+ */
+/* HASATTRIBUTE_NONNULL:
+ *	Can we handle GCC attribute for nonnull function parms.
+ */
+/* HASATTRIBUTE_NORETURN:
+ *	Can we handle GCC attribute for functions that do not return
+ */
+/* HASATTRIBUTE_PURE:
+ *	Can we handle GCC attribute for pure functions
+ */
+/* HASATTRIBUTE_UNUSED:
+ *	Can we handle GCC attribute for unused variables and arguments
+ */
+/* HASATTRIBUTE_WARN_UNUSED_RESULT:
+ *	Can we handle GCC attribute for warning on unused results
+ */
+#define HASATTRIBUTE_FORMAT	/**/
+#define HASATTRIBUTE_NORETURN	/**/
+#define HASATTRIBUTE_MALLOC	/**/
+#define HASATTRIBUTE_NONNULL	/**/
+#define HASATTRIBUTE_PURE	/**/
+#define HASATTRIBUTE_UNUSED	/**/
+#define HASATTRIBUTE_WARN_UNUSED_RESULT	/**/
+
+/* HAS_CRYPT:
+ *	This symbol, if defined, indicates that the crypt routine is available
+ *	to encrypt passwords and the like.
+ */
+#define HAS_CRYPT		/**/
+
+/* SETUID_SCRIPTS_ARE_SECURE_NOW:
+ *	This symbol, if defined, indicates that the bug that prevents
+ *	setuid scripts from being secure is not present in this kernel.
+ */
+/* DOSUID:
+ *	This symbol, if defined, indicates that the C program should
+ *	check the script that it is executing for setuid/setgid bits, and
+ *	attempt to emulate setuid/setgid on systems that have disabled
+ *	setuid #! scripts because the kernel can't do it securely.
+ *	It is up to the package designer to make sure that this emulation
+ *	is done securely.  Among other things, it should do an fstat on
+ *	the script it just opened to make sure it really is a setuid/setgid
+ *	script, it should make sure the arguments passed correspond exactly
+ *	to the argument on the #! line, and it should not trust any
+ *	subprocesses to which it must pass the filename rather than the
+ *	file descriptor of the script to be executed.
+ */
+/*#define SETUID_SCRIPTS_ARE_SECURE_NOW	/ **/
+/*#define DOSUID		/ **/
+
+/* Shmat_t:
+ *	This symbol holds the return type of the shmat() system call.
+ *	Usually set to 'void *' or 'char *'.
+ */
+/* HAS_SHMAT_PROTOTYPE:
+ *	This symbol, if defined, indicates that the sys/shm.h includes
+ *	a prototype for shmat().  Otherwise, it is up to the program to
+ *	guess one.  Shmat_t shmat(int, Shmat_t, int) is a good guess,
+ *	but not always right so it should be emitted by the program only
+ *	when HAS_SHMAT_PROTOTYPE is not defined to avoid conflicting defs.
+ */
+#define Shmat_t void *	/**/
+#define HAS_SHMAT_PROTOTYPE	/**/
+
+/* I_NDBM:
+ *	This symbol, if defined, indicates that <ndbm.h> exists and should
+ *	be included.
+ */
+/*#define I_NDBM	/ **/
+
+/* I_STDARG:
+ *	This symbol, if defined, indicates that <stdarg.h> exists and should
+ *	be included.
+ */
+/* I_VARARGS:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <varargs.h>.
+ */
+#define I_STDARG		/**/
+/*#define I_VARARGS	/ **/
+
+/* CAN_PROTOTYPE:
+ *	If defined, this macro indicates that the C compiler can handle
+ *	function prototypes.
+ */
+/* _:
+ *	This macro is used to declare function parameters for folks who want
+ *	to make declarations with prototypes using a different style than
+ *	the above macros.  Use double parentheses.  For example:
+ *
+ *		int main _((int argc, char *argv[]));
+ */
+#define	CAN_PROTOTYPE	/**/
+#ifdef CAN_PROTOTYPE
+#define	_(args) args
+#else
+#define	_(args) ()
+#endif
+
+/* SH_PATH:
+ *	This symbol contains the full pathname to the shell used on this
+ *	on this system to execute Bourne shell scripts.  Usually, this will be
+ *	/bin/sh, though it's possible that some systems will have /bin/ksh,
+ *	/bin/pdksh, /bin/ash, /bin/bash, or even something such as
+ *	D:/bin/sh.exe.
+ */
+#define SH_PATH "/bin/sh"  /**/
+
+/* HAS_AINTL:
+ *	This symbol, if defined, indicates that the aintl routine is
+ *	available.  If copysignl is also present we can emulate modfl.
+ */
+/*#define HAS_AINTL		/ **/
+
+/* HAS_BUILTIN_CHOOSE_EXPR:
+ *	Can we handle GCC builtin for compile-time ternary-like expressions
+ */
+/* HAS_BUILTIN_EXPECT:
+ *	Can we handle GCC builtin for telling that certain values are more
+ *	likely
+ */
+/*#define HAS_BUILTIN_EXPECT	/ **/
+#define HAS_BUILTIN_CHOOSE_EXPR	/**/
+
+/* HAS_CLEARENV:
+ *	This symbol, if defined, indicates that the clearenv () routine is
+ *	available for use.
+ */
+#define HAS_CLEARENV		/**/
+
+/* HAS_COPYSIGNL:
+ *	This symbol, if defined, indicates that the copysignl routine is
+ *	available.  If aintl is also present we can emulate modfl.
+ */
+#define HAS_COPYSIGNL		/**/
+
+/* USE_CPLUSPLUS:
+ *	This symbol, if defined, indicates that a C++ compiler was
+ *	used to compiled Perl and will be used to compile extensions.
+ */
+/*#define USE_CPLUSPLUS		/**/
+
+/* HAS_DBMINIT_PROTO:
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the drand48() function.  Otherwise, it is up
  *	to the program to supply one.  A good guess is

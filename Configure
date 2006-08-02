@@ -373,6 +373,7 @@ d_void_closedir=''
 d_cmsghdr_s=''
 d_const=''
 d_copysignl=''
+d_cplusplus=''
 cryptlib=''
 d_crypt=''
 crypt_r_proto=''
@@ -7136,6 +7137,32 @@ $rm -f try try.* glibc.ver
 set d_gnulibc
 eval $setvar
 
+echo " "
+echo "Checking for C++..." >&4
+cat >try.c <<'EOCP'
+#include <stdio.h>
+int main(void)
+{
+#ifdef __cplusplus
+    printf("define\n");
+#else
+    printf("undef\n");
+#endif
+    return 0;
+}
+EOCP
+set try
+if eval $compile_ok && $run ./try > cplusplus; then
+	val=`$cat cplusplus`
+	echo "You are using a C++ compiler."
+else
+	val="$undef"
+	echo "You are not using a C++ compiler."
+fi
+$rm -f try try.* cplusplus
+set d_cplusplus
+eval $setvar
+
 : see if nm is to be used to determine whether a symbol is defined or not
 case "$usenm" in
 '')
@@ -7585,10 +7612,20 @@ esac'
 
 : see if dlopen exists
 xxx_runnm="$runnm"
+xxx_ccflags="$ccflags"
 runnm=false
+: with g++ one needs -shared to get is-in-libc to work for dlopen
+case "$gccversion" in
+'')	;;
+*)	case "$d_cplusplus" in
+	"$define") ccflags="$ccflags -shared" ;;
+	esac
+	;;
+esac
 set dlopen d_dlopen
 eval $inlibc
 runnm="$xxx_runnm"
+ccflags="$xxx_ccflags"
 
 : see if this is a unistd.h system
 set unistd.h i_unistd
@@ -10845,7 +10882,7 @@ typedef struct spug { int drokk; } spug;
 int main()
 {
 	const char *foo;
-	const spug y;
+	const spug y = { 0 };
 }
 EOCP
 if $cc -c $ccflags const.c >/dev/null 2>&1 ; then
@@ -21328,6 +21365,7 @@ d_closedir='$d_closedir'
 d_cmsghdr_s='$d_cmsghdr_s'
 d_const='$d_const'
 d_copysignl='$d_copysignl'
+d_cplusplus='$d_cplusplus'
 d_crypt='$d_crypt'
 d_crypt_r='$d_crypt_r'
 d_csh='$d_csh'

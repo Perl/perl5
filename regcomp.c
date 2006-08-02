@@ -508,7 +508,7 @@ S_cl_is_anything(const struct regnode_charclass_class *cl)
 	    return 1;
     if (!(cl->flags & ANYOF_UNICODE_ALL))
 	return 0;
-    if (!ANYOF_BITMAP_TESTALLSET(cl))
+    if (!ANYOF_BITMAP_TESTALLSET((const void*)cl))
 	return 0;
     return 1;
 }
@@ -2611,10 +2611,10 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp)
     register char *next;
     I32 flags;
     const char * const origparse = RExC_parse;
-    char *maxpos;
     I32 min;
     I32 max = REG_INFTY;
     char *parse_start;
+    const char *maxpos = NULL;
 
     ret = regatom(pRExC_state, &flags);
     if (ret == NULL) {
@@ -4613,9 +4613,10 @@ Perl_regdump(pTHX_ const regexp *r)
 		      (IV)r->float_min_offset, (UV)r->float_max_offset);
     if (r->check_substr || r->check_utf8)
 	PerlIO_printf(Perl_debug_log,
-		      r->check_substr == r->float_substr
-		      && r->check_utf8 == r->float_utf8
-		      ? "(checking floating" : "(checking anchored");
+		      (const char *)
+		      (r->check_substr == r->float_substr
+		       && r->check_utf8 == r->float_utf8
+		       ? "(checking floating" : "(checking anchored"));
     if (r->reganch & ROPT_NOSCAN)
 	PerlIO_printf(Perl_debug_log, " noscan");
     if (r->reganch & ROPT_CHECK_ALL)

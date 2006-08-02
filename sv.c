@@ -1419,7 +1419,7 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 		return s;
 	    } else
 #endif
-	    s = saferealloc(s, newlen);
+	    s = (char*)saferealloc(s, newlen);
 	}
 	else {
 	    /* sv_force_normal_flags() must not try to unshare the new
@@ -1428,7 +1428,7 @@ Perl_sv_grow(pTHX_ register SV *sv, register STRLEN newlen)
 		SvFAKE_off(sv);
 		SvREADONLY_off(sv);
 	    }
-	    s = safemalloc(newlen);
+	    s = (char*)safemalloc(newlen);
 	    if (SvPVX_const(sv) && SvCUR(sv)) {
 	        Move(SvPVX_const(sv), s, (newlen < SvCUR(sv)) ? newlen : SvCUR(sv), char);
 	    }
@@ -2604,7 +2604,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		s = SvGROW_mutable(sv, len + 1);
 		SvCUR_set(sv, len);
 		SvPOKp_on(sv);
-		return memcpy(s, tbuf, len + 1);
+		return (char*)memcpy(s, tbuf, len + 1);
 	    }
 	}
         if (SvROK(sv)) {
@@ -3208,9 +3208,10 @@ S_glob_assign_ref(pTHX_ SV *dstr, SV *sstr) {
 					 || sv_cmp(cv_const_sv(cv),
 						   cv_const_sv((CV*)sref))))) {
 			    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-					CvCONST(cv)
-					? "Constant subroutine %s::%s redefined"
-					: "Subroutine %s::%s redefined",
+					(const char *)
+					(CvCONST(cv)
+					 ? "Constant subroutine %s::%s redefined"
+					 : "Subroutine %s::%s redefined"),
 					HvNAME_get(GvSTASH((GV*)dstr)),
 					GvENAME((GV*)dstr));
 			}
@@ -3659,7 +3660,7 @@ Perl_sv_usepvn_flags(pTHX_ SV *sv, char *ptr, STRLEN len, U32 flags)
 	/* It's long enough - do nothing.
 	   Specfically Perl_newCONSTSUB is relying on this.  */
     } else {
-	ptr = saferealloc (ptr, allocate);
+	ptr = (char*) saferealloc (ptr, allocate);
     }
     SvPV_set(sv, ptr);
     SvCUR_set(sv, len);

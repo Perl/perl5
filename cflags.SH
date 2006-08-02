@@ -88,8 +88,18 @@ Intel*) ;; # Haven't we been through this already?
     ;;
 esac
 
+# If we have g++, we cannot have the -Wdeclaration-after-statement.
+# Some g++s accept it but then whine about it with every file.
+case "$cc" in
+*g++*) warn="`echo $warn|sed 's/-Wdeclaration-after-statement/ /'`" ;;
+esac
 
+# stdflags currently unused.
 stdflags=''
+
+extra=''
+
+# Code to set any extra flags here.
 
 echo "Extracting cflags (with variable substitutions)"
 : This section of the file will have variable substitutions done on it.
@@ -104,6 +114,8 @@ $startsh
 warn="$warn"
 # Extra standardness.
 stdflags="$stdflags"
+# Extra extra.
+extra="$extra"
 
 !GROK!THIS!
 
@@ -212,9 +224,13 @@ for file do
     *) ;;
     esac
 
+case "$cc" in
+*g++*) ccflags="`echo $ccflags|sed 's/-Wdeclaration-after-statement/ /'`" ;;
+esac
+
     : Can we perhaps use $ansi2knr here
-    echo "$cc -c -DPERL_CORE $ccflags $stdflags $optimize $warn"
-    eval "$also "'"$cc -DPERL_CORE -c $ccflags $stdflags $optimize $warn"'
+    echo "$cc -c -DPERL_CORE $ccflags $stdflags $optimize $warn $extra"
+    eval "$also "'"$cc -DPERL_CORE -c $ccflags $stdflags $optimize $warn $extra"'
 
     . $TOP/config.sh
 

@@ -1823,7 +1823,7 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
     {
       const char * const desc
 	  = PL_op_desc[(rtype == OP_SUBST || rtype == OP_TRANS)
-	     ? rtype : OP_MATCH];
+		       ? (int)rtype : OP_MATCH];
       const char * const sample = ((ltype == OP_RV2AV || ltype == OP_PADAV)
 	     ? "@array" : "%hash");
       Perl_warner(aTHX_ packWARN(WARN_MISC),

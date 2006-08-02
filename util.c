@@ -876,8 +876,8 @@ Perl_savepv(pTHX_ const char *pv)
     else {
 	char *newaddr;
 	const STRLEN pvlen = strlen(pv)+1;
-	Newx(newaddr,pvlen,char);
-	return memcpy(newaddr,pv,pvlen);
+	Newx(newaddr, pvlen, char);
+	return (char*)memcpy(newaddr, pv, pvlen);
     }
 }
 
@@ -933,7 +933,7 @@ Perl_savesharedpv(pTHX_ const char *pv)
     if (!newaddr) {
 	return write_no_mem();
     }
-    return memcpy(newaddr,pv,pvlen);
+    return (char*)memcpy(newaddr, pv, pvlen);
 }
 
 /*
@@ -3685,7 +3685,8 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
 
     if (op == OP_phoney_OUTPUT_ONLY || op == OP_phoney_INPUT_ONLY) {
 	if (ckWARN(WARN_IO)) {
-	    const char * const direction = (op == OP_phoney_INPUT_ONLY) ? "in" : "out";
+	    const char * const direction =
+		(const char *)((op == OP_phoney_INPUT_ONLY) ? "in" : "out");
 	    if (name && *name)
 		Perl_warner(aTHX_ packWARN(WARN_IO),
 			    "Filehandle %s opened only for %sput",
@@ -3709,15 +3710,19 @@ Perl_report_evil_fh(pTHX_ GV *gv, IO *io, I32 op)
 	}
 
 	if (ckWARN(warn_type)) {
-	    const char * const pars = OP_IS_FILETEST(op) ? "" : "()";
+	    const char * const pars =
+		(const char *)(OP_IS_FILETEST(op) ? "" : "()");
 	    const char * const func =
-		op == OP_READLINE   ? "readline"  :	/* "<HANDLE>" not nice */
-		op == OP_LEAVEWRITE ? "write" :		/* "write exit" not nice */
-		op < 0              ? "" :              /* handle phoney cases */
-		PL_op_desc[op];
-	    const char * const type = OP_IS_SOCKET(op)
-		    || (gv && io && IoTYPE(io) == IoTYPE_SOCKET)
-			?  "socket" : "filehandle";
+		(const char *)
+		(op == OP_READLINE   ? "readline"  :	/* "<HANDLE>" not nice */
+		 op == OP_LEAVEWRITE ? "write" :		/* "write exit" not nice */
+		 op < 0              ? "" :              /* handle phoney cases */
+		 PL_op_desc[op]);
+	    const char * const type =
+		(const char *)
+		(OP_IS_SOCKET(op) ||
+		 (gv && io && IoTYPE(io) == IoTYPE_SOCKET) ?
+		 "socket" : "filehandle");
 	    if (name && *name) {
 		Perl_warner(aTHX_ packWARN(warn_type),
 			    "%s%s on %s %s %s", func, pars, vile, type, name);

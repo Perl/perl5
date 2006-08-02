@@ -3852,6 +3852,12 @@
  */
 /*#define HAS_CLEARENV		/**/
 
+/* USE_CPLUSPLUS:
+ *	This symbol, if defined, indicates that a C++ compiler was
+ *	used to compiled Perl and will be used to compile extensions.
+ */
+/*#define USE_CPLUSPLUS		/**/
+
 /* HAS_COPYSIGNL:
  *	This symbol, if defined, indicates that the copysignl routine is
  *	available.  If aintl is also present we can emulate modfl.

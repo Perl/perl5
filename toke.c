@@ -1441,9 +1441,10 @@ S_scan_const(pTHX_ char *start)
 #endif
 
     const char * const leaveit = /* set of acceptably-backslashed characters */
-	PL_lex_inpat
-	    ? "\\.^$@AGZdDwWsSbBpPXC+*?|()-nrtfeaxcz0123456789[{]} \t\n\r\f\v#"
-	    : "";
+	(const char *)
+	(PL_lex_inpat
+	 ? "\\.^$@AGZdDwWsSbBpPXC+*?|()-nrtfeaxcz0123456789[{]} \t\n\r\f\v#"
+	 : "");
 
     if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {
 	/* If we are doing a trans and we know we want UTF8 set expectation */
@@ -2002,13 +2003,15 @@ S_scan_const(pTHX_ char *start)
     /* return the substring (via yylval) only if we parsed anything */
     if (s > PL_bufptr) {
 	if ( PL_hints & ( PL_lex_inpat ? HINT_NEW_RE : HINT_NEW_STRING ) )
-	    sv = new_constant(start, s - start, (PL_lex_inpat ? "qr" : "q"),
+	    sv = new_constant(start, s - start,
+			      (const char *)(PL_lex_inpat ? "qr" : "q"),
 			      sv, NULL,
-			      ( PL_lex_inwhat == OP_TRANS
-				? "tr"
-				: ( (PL_lex_inwhat == OP_SUBST && !PL_lex_inpat)
-				    ? "s"
-				    : "qq")));
+			      (const char *)
+			      (( PL_lex_inwhat == OP_TRANS
+				 ? "tr"
+				 : ( (PL_lex_inwhat == OP_SUBST && !PL_lex_inpat)
+				     ? "s"
+				     : "qq"))));
 	yylval.opval = (OP*)newSVOP(OP_CONST, 0, sv);
     } else
 	SvREFCNT_dec(sv);
@@ -2122,7 +2125,7 @@ S_intuit_more(pTHX_ register char *s)
 		if (s[1]) {
 		    if (strchr("wds]",s[1]))
 			weight += 100;
-		    else if (seen['\''] || seen['"'])
+		    else if (seen[(U8)'\''] || seen[(U8)'"'])
 			weight += 1;
 		    else if (strchr("rnftbxcav",s[1]))
 			weight += 40;
@@ -2548,6 +2551,13 @@ Perl_yylex(pTHX)
     STRLEN len;
     bool bof = FALSE;
 
+    /* orig_keyword, gvp, and gv are initialized here because
+     * jump to the label just_a_word_zero can bypass their
+     * initialization later. */
+    I32 orig_keyword = 0;
+    GV *gv = NULL;
+    GV **gvp = NULL;
+
     DEBUG_T( {
 	SV* tmp = newSVpvs("");
 	PerlIO_printf(Perl_debug_log, "### %"IVdf":LEX_%s/X%s %s\n",
@@ -2776,9 +2786,9 @@ Perl_yylex(pTHX)
 	    PL_last_uni = 0;
 	    PL_last_lop = 0;
 	    if (PL_lex_brackets) {
-		yyerror(PL_lex_formbrack
-		    ? "Format not terminated"
-		    : "Missing right curly or square bracket");
+		yyerror((PL_lex_formbrack
+			 ? "Format not terminated"
+			 : "Missing right curly or square bracket"));
 	    }
             DEBUG_T( { PerlIO_printf(Perl_debug_log,
                         "### Tokener got EOF\n");
@@ -2865,8 +2875,10 @@ Perl_yylex(pTHX)
 		    PL_doextract = FALSE;
 		}
 		if (!PL_in_eval && (PL_minus_n || PL_minus_p)) {
-		    sv_setpv(PL_linestr,PL_minus_p
-			     ? ";}continue{print;}" : ";}");
+		    sv_setpv(PL_linestr,
+			     (const char *)
+			     (PL_minus_p
+			      ? ";}continue{print;}" : ";}"));
 		    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 		    PL_last_lop = PL_last_uni = NULL;
@@ -3453,10 +3465,10 @@ Perl_yylex(pTHX)
 		       context messages from yyerror().
 		    */
 		    PL_bufptr = s;
-		    yyerror( *s
-			     ? Perl_form(aTHX_ "Invalid separator character "
-					 "%c%c%c in attribute list", q, *s, q)
-			     : "Unterminated attribute list" );
+		    yyerror( (*s
+			      ? Perl_form(aTHX_ "Invalid separator character "
+					  "%c%c%c in attribute list", q, *s, q)
+			      : "Unterminated attribute list" ) );
 		    if (attrs)
 			op_free(attrs);
 		    OPERATOR(':');
@@ -4190,9 +4202,10 @@ Perl_yylex(pTHX)
 
       keylookup: {
 	I32 tmp;
-	I32 orig_keyword = 0;
-	GV *gv = NULL;
-	GV **gvp = NULL;
+
+	orig_keyword = 0;
+	gv = NULL;
+	gvp = NULL;
 
 	PL_bufptr = s;
 	s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
@@ -4516,8 +4529,10 @@ Perl_yylex(pTHX)
 			while (*proto == ';')
 			    proto++;
 			if (*proto == '&' && *s == '{') {
-			    sv_setpv(PL_subname, PL_curstash ?
-					"__ANON__" : "__ANON__::__ANON__");
+			    sv_setpv(PL_subname,
+				     (const char *)
+				     (PL_curstash ?
+				      "__ANON__" : "__ANON__::__ANON__"));
 			    PREBLOCK(LSTOPSUB);
 			}
 		    }
@@ -5555,7 +5570,8 @@ Perl_yylex(pTHX)
 		}
 		if (!have_name) {
 		    sv_setpv(PL_subname,
-			PL_curstash ? "__ANON__" : "__ANON__::__ANON__");
+			     (const char *)
+			     (PL_curstash ? "__ANON__" : "__ANON__::__ANON__"));
 		    TOKEN(ANONSUB);
 		}
 		(void) force_word(PL_oldbufptr + tboffset, WORD,
@@ -9200,9 +9216,10 @@ S_new_constant(pTHX_ const char *s, STRLEN len, const char *key, SV *sv, SV *pv,
     if (!table || !(PL_hints & HINT_LOCALIZE_HH)) {
 	SV *msg;
 	
-	why2 = strEQ(key,"charnames")
-	       ? "(possibly a missing \"use charnames ...\")"
-	       : "";
+	why2 = (const char *)
+	    (strEQ(key,"charnames")
+	     ? "(possibly a missing \"use charnames ...\")"
+	     : "");
 	msg = Perl_newSVpvf(aTHX_ "Constant(%s) unknown: %s",
 			    (type ? type: "undef"), why2);
 
@@ -9428,7 +9445,9 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
 		s++;
 	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
 		if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, d - dest)) {
-		    const char * const brack = (*s == '[') ? "[...]" : "{...}";
+		    const char * const brack =
+			(const char *)
+			((*s == '[') ? "[...]" : "{...}");
 		    Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
 			"Ambiguous use of %c{%s%s} resolved to %c%s%s",
 			funny, dest, brack, funny, dest, brack);
@@ -9504,13 +9523,16 @@ S_scan_pat(pTHX_ char *start, I32 type)
 {
     PMOP *pm;
     char *s = scan_str(start,FALSE,FALSE);
-    const char * const valid_flags = (type == OP_QR) ? "iomsx" : "iogcmsx";
+    const char * const valid_flags =
+	(const char *)((type == OP_QR) ? "iomsx" : "iogcmsx");
 
     if (!s) {
 	const char * const delimiter = skipspace(start);
-	Perl_croak(aTHX_ *delimiter == '?'
-		   ? "Search pattern not terminated or ternary operator parsed as search pattern"
-		   : "Search pattern not terminated" );
+	Perl_croak(aTHX_
+		   (const char *)
+		   (*delimiter == '?'
+		    ? "Search pattern not terminated or ternary operator parsed as search pattern"
+		    : "Search pattern not terminated" ));
     }
 
     pm = (PMOP*)newPMOP(type, 0);
@@ -9585,7 +9607,7 @@ S_scan_subst(pTHX_ char *start)
 	PL_multi_end = 0;
 	pm->op_pmflags |= PMf_EVAL;
 	while (es-- > 0)
-	    sv_catpv(repl, es ? "eval " : "do ");
+	    sv_catpv(repl, (const char *)(es ? "eval " : "do "));
 	sv_catpvs(repl, "{");
 	sv_catsv(repl, PL_lex_repl);
 	if (strchr(SvPVX(PL_lex_repl), '#'))
@@ -9730,7 +9752,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	s = olds;
     }
 #endif
-    if ( outer || !(found_newline = memchr(s, '\n', PL_bufend - s)) ) {
+    if ( outer || !(found_newline = (char*)memchr((void*)s, '\n', PL_bufend - s)) ) {
         herewas = newSVpvn(s,PL_bufend-s);
     }
     else {
@@ -10723,7 +10745,9 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
 
 	if ( floatit ? (PL_hints & HINT_NEW_FLOAT) :
 	               (PL_hints & HINT_NEW_INTEGER) )
-	    sv = new_constant(PL_tokenbuf, d - PL_tokenbuf,
+	    sv = new_constant(PL_tokenbuf,
+			      d - PL_tokenbuf,
+			      (const char *)
 			      (floatit ? "float" : "integer"),
 			      sv, NULL, NULL);
 	break;

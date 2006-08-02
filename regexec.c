@@ -2057,6 +2057,8 @@ S_regmatch(pTHX_ regnode *prog)
 #endif
     U32 uniflags = ckWARN(WARN_UTF8) ? 0 : UTF8_ALLOW_ANY;
 
+    I32 parenfloor = 0;
+
 #ifdef DEBUGGING
     PL_regindent++;
 #endif
@@ -2869,8 +2871,8 @@ S_regmatch(pTHX_ regnode *prog)
 		CURCUR cc;
 		CHECKPOINT cp = PL_savestack_ix;
 		/* No need to save/restore up to this paren */
-		I32 parenfloor = scan->flags;
-
+		parenfloor = scan->flags;
+		
 		/* Dave says:
 		   
 		   CURLYX and WHILEM are always paired: they're the moral

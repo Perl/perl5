@@ -738,17 +738,23 @@ PP(pp_formline)
 	case FF_0DECIMAL:
 	    arg = *fpc++;
 #if defined(USE_LONG_DOUBLE)
-	    fmt = (arg & 256) ? "%#0*.*" PERL_PRIfldbl : "%0*.*" PERL_PRIfldbl;
+	    fmt = (const char *)
+		((arg & 256) ?
+		 "%#0*.*" PERL_PRIfldbl : "%0*.*" PERL_PRIfldbl);
 #else
-	    fmt = (arg & 256) ? "%#0*.*f"              : "%0*.*f";
+	    fmt = (const char *)
+		((arg & 256) ?
+		 "%#0*.*f"              : "%0*.*f");
 #endif
 	    goto ff_dec;
 	case FF_DECIMAL:
 	    arg = *fpc++;
 #if defined(USE_LONG_DOUBLE)
- 	    fmt = (arg & 256) ? "%#*.*" PERL_PRIfldbl : "%*.*" PERL_PRIfldbl;
+ 	    fmt = (const char *)
+		((arg & 256) ? "%#*.*" PERL_PRIfldbl : "%*.*" PERL_PRIfldbl);
 #else
-            fmt = (arg & 256) ? "%#*.*f"              : "%*.*f";
+            fmt = (const char *)
+		((arg & 256) ? "%#*.*f"              : "%*.*f");
 #endif
 	ff_dec:
 	    /* If the field is marked with ^ and the value is undefined,
@@ -1375,7 +1381,7 @@ Perl_die_where(pTHX_ char *message, STRLEN msglen)
 	    if (CxTYPE(cx) != CXt_EVAL) {
 		if (!message)
 		    message = (char *)SvPVx_const(ERRSV, msglen);
-		PerlIO_write(Perl_error_log, "panic: die ", 11);
+		PerlIO_write(Perl_error_log, (const char *)"panic: die ", 11);
 		PerlIO_write(Perl_error_log, message, msglen);
 		my_exit(1);
 	    }
@@ -1585,7 +1591,7 @@ PP(pp_caller)
 PP(pp_reset)
 {
     dSP;
-    const char * const tmps = (MAXARG < 1) ? "" : POPpconstx;
+    const char * const tmps = (MAXARG < 1) ? (const char *)"" : POPpconstx;
     sv_reset((char *)tmps, CopSTASH(PL_curcop));
     PUSHs(&PL_sv_yes);
     RETURN;
@@ -3947,7 +3953,8 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 		    take = umaxlen;
 		}
 	    } else {
-		const char *const first_nl = memchr(cache_p, '\n', cache_len);
+		const char *const first_nl =
+		    (const char *)memchr(cache_p, '\n', cache_len);
 		if (first_nl) {
 		    take = first_nl + 1 - cache_p;
 		}
@@ -4019,7 +4026,8 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 		prune_from = got_p + umaxlen;
 	    }
 	} else {
-	    const char *const first_nl = memchr(got_p, '\n', got_len);
+	    const char *const first_nl =
+		(const char *)memchr(got_p, '\n', got_len);
 	    if (first_nl && first_nl + 1 < got_p + got_len) {
 		/* There's a second line here... */
 		prune_from = first_nl + 1;

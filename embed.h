@@ -1317,7 +1317,6 @@
 #define to_utf8_substr		S_to_utf8_substr
 #define to_byte_substr		S_to_byte_substr
 #endif
-#define debug_start_match	S_debug_start_match
 #endif
 #if defined(PERL_IN_DUMP_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
