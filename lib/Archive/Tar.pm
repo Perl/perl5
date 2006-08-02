@@ -1,5 +1,5 @@
 ### the gnu tar specification:
-### http://www.gnu.org/software/tar/manual/html_mono/tar.html
+### http://www.gnu.org/software/tar/manual/tar.html
 ###
 ### and the pax format spec, which tar derives from:
 ### http://www.opengroup.org/onlinepubs/007904975/utilities/pax.html
@@ -14,7 +14,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG              = 0;
 $WARN               = 1;
 $FOLLOW_SYMLINK     = 0;
-$VERSION            = "1.29_02";
+$VERSION            = "1.30_01";
 $CHOWN              = 1;
 $CHMOD              = 1;
 $DO_NOT_USE_PREFIX  = 0;
@@ -435,6 +435,9 @@ sub extract {
     my @args    = @_;
     my @files;
 
+    # use the speed optimization for all extracted files
+    local($self->{cwd}) = cwd() unless $self->{cwd};
+
     ### you requested the extraction of only certian files
     if( @args ) {
         for my $file ( @args ) {
@@ -538,7 +541,7 @@ sub _extract_file {
 
     ### it's a relative path ###
     } else {
-        my $cwd     = cwd();
+        my $cwd     = (defined $self->{cwd} ? $self->{cwd} : cwd());
         my @dirs    = File::Spec::Unix->splitdir( $dirs );
         my @cwd     = File::Spec->splitdir( $cwd );
         $dir        = File::Spec->catdir( @cwd, @dirs );
@@ -1236,6 +1239,45 @@ method call instead.
     }
 }
 
+=head2 $tar->setcwd( $cwd );
+
+C<Archive::Tar> needs to know the current directory, and it will run
+C<Cwd::cwd()> I<every> time it extracts a I<relative> entry from the 
+tarfile and saves it in the file system. (As of version 1.30, however,
+C<Archive::Tar> will use the speed optimization described below 
+automatically, so it's only relevant if you're using C<extract_file()>).
+
+Since C<Archive::Tar> doesn't change the current directory internally
+while it is extracting the items in a tarball, all calls to C<Cwd::cwd()>
+can be avoided if we can guarantee that the current directory doesn't
+get changed externally.
+
+To use this performance boost, set the current directory via
+
+    use Cwd;
+    $tar->setcwd( cwd() );
+
+once before calling a function like C<extract_file> and
+C<Archive::Tar> will use the current directory setting from then on
+and won't call C<Cwd::cwd()> internally. 
+
+To switch back to the default behaviour, use
+
+    $tar->setcwd( undef );
+
+and C<Archive::Tar> will call C<Cwd::cwd()> internally again.
+
+If you're using C<Archive::Tar>'s C<exract()> method, C<setcwd()> will
+be called for you.
+
+=cut 
+
+sub setcwd {
+    my $self     = shift;
+    my $cwd      = shift;
+
+    $self->{cwd} = $cwd;
+}
 
 =head2 $bool = $tar->has_io_string
 
@@ -1429,13 +1471,18 @@ The default is C<1>.
 
 =head2 $Archive::Tar::DO_NOT_USE_PREFIX
 
-By default, C<Archive::Tar> will try to put paths that are over
-100 characters in the C<prefix> field of your tar header. However,
-some older tar programs do not implement this spec. To retain
-compatibility with these older versions, you can set the
-C<$DO_NOT_USE_PREFIX> variable to a true value, and C<Archive::Tar>
-will use an alternate way of dealing with paths over 100 characters
-by using the C<GNU Extended Header> feature.
+By default, C<Archive::Tar> will try to put paths that are over 
+100 characters in the C<prefix> field of your tar header, as
+defined per POSIX-standard. However, some (older) tar programs 
+do not implement this spec. To retain compatibility with these older 
+or non-POSIX compliant versions, you can set the C<$DO_NOT_USE_PREFIX> 
+variable to a true value, and C<Archive::Tar> will use an alternate 
+way of dealing with paths over 100 characters by using the 
+C<GNU Extended Header> feature.
+
+Note that clients who do not support the C<GNU Extended Header>
+feature will not be able to read these archives. Such clients include
+tars on C<Solaris>, C<Irix> and C<AIX>.
 
 The default is C<0>.
 
@@ -1537,6 +1584,17 @@ have incompatible filetypes and still expect things to work).
 For other filetypes, like C<chardevs> and C<blockdevs> we'll warn that
 the extraction of this particular item didn't work.
 
+=item I'm using WinZip, or some other non-POSIX client, and files are not being extracted properly!
+
+By default, C<Archive::Tar> is in a completely POSIX-compatible
+mode, which uses the POSIX-specification of C<tar> to store files.
+For paths greather than 100 characters, this is done using the
+C<POSIX header prefix>. Non-POSIX-compatible clients may not support
+this part of the specification, and may only support the C<GNU Extended
+Header> functionality. To facilitate those clients, you can set the
+C<$Archive::Tar::DO_NOT_USE_PREFIX> variable to C<true>. See the 
+C<GLOBAL VARIABLES> section for details on this variable.
+
 =item How do I extract only files that have property X from an archive?
 
 Sometimes, you might not wish to extract a complete archive, just
@@ -1616,6 +1674,31 @@ stringified archives.
 Currently, we only support this if the filehandle is an IO::Zlib object.
 Environments, like apache, will present you with an opened filehandle
 to an uploaded file, which might be a compressed archive.
+
+=back
+
+=head1 SEE ALSO
+
+=over 4
+
+=item The GNU tar specification
+
+C<http://www.gnu.org/software/tar/manual/tar.html>
+
+=item The PAX format specication
+
+The specifcation which tar derives from; C< http://www.opengroup.org/onlinepubs/007904975/utilities/pax.html>
+
+=item A comparison of GNU and POSIX tar standards; C<http://www.delorie.com/gnu/docs/tar/tar_114.html>
+
+=item GNU tar intends to switch to POSIX compatibility
+
+GNU Tar authors have expressed their intention to become completely
+POSIX-compatible; C<http://www.gnu.org/software/tar/manual/html_node/Formats.html>
+
+=item A Comparison between various tar implementations
+
+Lists known issues and incompatibilities; C<http://gd.tuwien.ac.at/utils/archivers/star/README.otherbugs>
 
 =back
 
