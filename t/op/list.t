@@ -6,7 +6,7 @@ BEGIN {
 }
 
 require "test.pl";
-plan( tests => 52 );
+plan( tests => 57 );
 
 @foo = (1, 2, 3, 4);
 cmp_ok($foo[0], '==', 1, 'first elem');
@@ -147,3 +147,17 @@ cmp_ok(join('',(1,2),3,(4,5)),'eq','12345','list (..).(..)');
     my $size = scalar(()[1..1]);
     cmp_ok($size,'==','0','size nil');
 }
+
+{
+    # perl #39882
+    sub test_zero_args {
+        my $test_name = shift;
+        is(scalar(@_), 0, $test_name);
+    }
+    test_zero_args("simple list slice",      (10,11)[2,3]);
+    test_zero_args("grepped list slice",     grep(1, (10,11)[2,3]));
+    test_zero_args("sorted list slice",      sort((10,11)[2,3]));
+    test_zero_args("assigned list slice",    my @tmp = (10,11)[2,3]);
+    test_zero_args("do-returned list slice", do { (10,11)[2,3]; });
+}
+

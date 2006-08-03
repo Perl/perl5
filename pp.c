@@ -4074,7 +4074,7 @@ PP(pp_lslice)
     SV ** const firstlelem = PL_stack_base + POPMARK + 1;
     register SV ** const firstrelem = lastlelem + 1;
     const I32 arybase = CopARYBASE_get(PL_curcop);
-    I32 is_something_there = PL_op->op_flags & OPf_MOD;
+    I32 is_something_there = FALSE;
 
     register const I32 max = lastrelem - lastlelem;
     register SV **lelem;
