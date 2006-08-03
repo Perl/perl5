@@ -197,7 +197,7 @@ void setservent(int);
 void endservent(void);
 #endif
 
-#if defined(__osf__) && !defined(_XOPEN_SOURCE_EXTENDED)
+#if defined(__osf__) && defined(__cplusplus) && !defined(_XOPEN_SOURCE_EXTENDED)
 extern int readlink(const char *, char *, size_t);
 extern int fchdir(int);
 #endif
