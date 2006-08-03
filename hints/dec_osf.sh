@@ -161,9 +161,9 @@ esac
 # Be nauseatingly ANSI
 ccflags="$ccflags $_ccflags_strict_ansi"
 
-# g++ needs -D_XOPEN_SOURCE -D_OSF_SOURCE to get much use of <unistd.h>.
+# g++ needs -D_XOPEN_SOURCE -D_OSF_SOURCE -D_AES_SOURCE -D_BSD to get much use of <unistd.h>.
 case "$cc" in
-*g++*) ccflags="$ccflags -D_XOPEN_SOURCE -D_OSF_SOURCE" ;;
+*g++*) ccflags="$ccflags -D_XOPEN_SOURCE -D_OSF_SOURCE -D_AES_SOURCE -D_BSD" ;;
 esac
 
 # for gcc the Configure knows about the -fpic:
@@ -375,7 +375,7 @@ $define|true|[yY]*)
 extern int foo;	
 EOF
 	$cc -c pthread.c 2> pthread.err
-	if grep -q "unrecognized compiler" pthread.err; then
+	if egrep -q "unrecognized compiler|syntax error" pthread.err; then
 	    cat >&4 <<EOF
 ***
 *** I'm sorry but your C compiler ($cc) cannot be used to
