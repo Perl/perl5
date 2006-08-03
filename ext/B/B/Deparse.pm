@@ -2674,6 +2674,10 @@ sub pp_null {
 	return $self->pp_list($op, $cx);
     } elsif ($op->first->name eq "enter") {
 	return $self->pp_leave($op, $cx);
+    } elsif ($op->first->name eq "leave") {
+	return $self->pp_leave($op->first, $cx);
+    } elsif ($op->first->name eq "scope") {
+	return $self->pp_scope($op->first, $cx);
     } elsif ($op->targ == OP_STRINGIFY) {
 	return $self->dquote($op, $cx);
     } elsif (!null($op->first->sibling) and
