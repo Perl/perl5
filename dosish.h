@@ -190,3 +190,6 @@
 #define WUNTRACED             0
 
 #endif
+
+/* Don't go reading from /dev/urandom */
+#define PERL_NO_DEV_RANDOM
