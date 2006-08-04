@@ -447,9 +447,9 @@ ext/Devel/PPPort/parts/todo/5009001	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009002	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009003	Devel::PPPort todo file
 ext/Devel/PPPort/parts/todo/5009004	Devel::PPPort todo file
-ext/Devel/PPPort/PPPort.xs	Devel::PPPort dummy PPPort.xs
 ext/Devel/PPPort/ppport_h.PL	Devel::PPPort ppport.h writer
 ext/Devel/PPPort/PPPort_pm.PL	Devel::PPPort PPPort.pm writer
+ext/Devel/PPPort/PPPort.xs	Devel::PPPort dummy PPPort.xs
 ext/Devel/PPPort/PPPort_xs.PL	Devel::PPPort RealPPPort.xs writer
 ext/Devel/PPPort/README		Devel::PPPort Readme
 ext/Devel/PPPort/soak		Devel::PPPort Test Harness to run under various Perls
@@ -804,14 +804,10 @@ ext/GDBM_File/Makefile.PL	GDBM extension makefile writer
 ext/GDBM_File/t/gdbm.t		See if GDBM_File works
 ext/GDBM_File/typemap		GDBM extension interface types
 ext/Hash/Util/Changes		Change history of Hash::Util
-ext/Hash/Util/lib/Hash/Util.pm	Hash::Util
-ext/Hash/Util/Makefile.PL	Makefile for Hash::Util
-ext/Hash/Util/t/Util.t		See if Hash::Util works
-ext/Hash/Util/Util.xs		XS bits of Hash::Util
 ext/Hash/Util/FieldHash/Changes			Changes for Hash::Util::FieldHash
-ext/Hash/Util/FieldHash/Makefile.PL		Makefile for Hash::Util::FieldHash
 ext/Hash/Util/FieldHash/FieldHash.xs		XS portion
 ext/Hash/Util/FieldHash/lib/Hash/Util/FieldHash.pm	Perl portion and documentation
+ext/Hash/Util/FieldHash/Makefile.PL		Makefile for Hash::Util::FieldHash
 ext/Hash/Util/FieldHash/t/01_load.t		Test script
 ext/Hash/Util/FieldHash/t/02_function.t		Test script
 ext/Hash/Util/FieldHash/t/03_class.t		Test script
@@ -820,6 +816,10 @@ ext/Hash/Util/FieldHash/t/05_perlhook.t		Test script
 ext/Hash/Util/FieldHash/t/10_hash.t		Adapted from t/op/hash.t
 ext/Hash/Util/FieldHash/t/11_hashassign.t	Adapted from t/op/hashassign.t
 ext/Hash/Util/FieldHash/t/12_hashwarn.t		Adapted from t/op/hashwarn.t
+ext/Hash/Util/lib/Hash/Util.pm	Hash::Util
+ext/Hash/Util/Makefile.PL	Makefile for Hash::Util
+ext/Hash/Util/t/Util.t		See if Hash::Util works
+ext/Hash/Util/Util.xs		XS bits of Hash::Util
 ext/I18N/Langinfo/fallback/const-c.inc	I18N::Langinfo
 ext/I18N/Langinfo/fallback/const-xs.inc	I18N::Langinfo
 ext/I18N/Langinfo/Langinfo.pm	I18N::Langinfo
@@ -2541,11 +2541,11 @@ lib/Text/Tabs.pm		Do expand and unexpand
 lib/Text/TabsWrap/CHANGELOG	ChangeLog for Tabs+Wrap
 lib/Text/TabsWrap/t/37000.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/39548.t	See if Text::Tabs is working
-lib/Text/TabsWrap/t/Jochen.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/belg4mit.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/fill.t	See if Text::Wrap::fill works
-lib/Text/TabsWrap/t/sep.t	See if Text::Tabs is working
+lib/Text/TabsWrap/t/Jochen.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/sep2.t	See if Text::Tabs is working
+lib/Text/TabsWrap/t/sep.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/tabs.t	See if Text::Tabs works
 lib/Text/TabsWrap/t/wrap.t	See if Text::Wrap::wrap works
 lib/Text/Wrap.pm		Paragraph formatter
@@ -3715,9 +3715,6 @@ win32/config.vc			Win32 base line config.sh (Visual C++ build)
 win32/config.vc64		Win64 base line config.sh (Visual C++ build)
 win32/distclean.bat		Remove _ALL_ files not listed here in MANIFEST
 win32/dl_win32.xs		Win32 port
-win32/ext/Win32/Makefile.PL	Win32 extension makefile writer
-win32/ext/Win32/Win32.pm	Win32 extension Perl module
-win32/ext/Win32/Win32.xs	Win32 extension external subroutines
 win32/ext/Win32API/File/buffers.h			Win32API::File extension
 win32/ext/Win32API/File/cFile.h				Win32API::File extension
 win32/ext/Win32API/File/cFile.pc			Win32API::File extension
@@ -3731,6 +3728,9 @@ win32/ext/Win32API/File/README				Win32API::File extension Readme
 win32/ext/Win32API/File/t/file.t			See if Win32API::File extension works
 win32/ext/Win32API/File/t/tie.t				See if Win32API::File extension works
 win32/ext/Win32API/File/typemap				Win32API::File extension interface types
+win32/ext/Win32/Makefile.PL	Win32 extension makefile writer
+win32/ext/Win32/Win32.pm	Win32 extension Perl module
+win32/ext/Win32/Win32.xs	Win32 extension external subroutines
 win32/fcrypt.c			crypt() implementation
 win32/FindExt.pm		Scan for extensions
 win32/genmk95.pl		Perl code to generate command.com-usable makefile.95
