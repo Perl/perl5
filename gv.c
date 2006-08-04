@@ -81,12 +81,13 @@ Perl_gv_IOadd(pTHX_ register GV *gv)
          * this is a dirhandle.
          */
 	const char * const fh =
-			 PL_op->op_type ==  OP_READDIR ||
-                         PL_op->op_type ==  OP_TELLDIR ||
-                         PL_op->op_type ==  OP_SEEKDIR ||
-                         PL_op->op_type ==  OP_REWINDDIR ||
-                         PL_op->op_type ==  OP_CLOSEDIR ?
-                         "dirhandle" : "filehandle";
+	    (const char *)
+	    (PL_op->op_type ==  OP_READDIR ||
+	     PL_op->op_type ==  OP_TELLDIR ||
+	     PL_op->op_type ==  OP_SEEKDIR ||
+	     PL_op->op_type ==  OP_REWINDDIR ||
+	     PL_op->op_type ==  OP_CLOSEDIR ?
+	     "dirhandle" : "filehandle");
         Perl_croak(aTHX_ "Bad symbol for %s", fh);
     }
 
@@ -161,7 +162,8 @@ GP *
 Perl_newGP(pTHX_ GV *const gv)
 {
     GP *gp;
-    const char *const file = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : "";
+    const char *const file =
+	CopFILE(PL_curcop) ? CopFILE(PL_curcop) : (const char *)"";
     STRLEN len = strlen(file);
     U32 hash;
 
@@ -313,6 +315,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     GV** gvp;
     CV* cv;
     const char *hvname;
+    HV* lastchance = NULL;
 
     /* UNIVERSAL methods should be callable without a stash */
     if (!stash) {
@@ -400,7 +403,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
     /* if at top level, try UNIVERSAL */
 
     if (level == 0 || level == -1) {
-	HV* const lastchance = gv_stashpvs("UNIVERSAL", FALSE);
+	lastchance = gv_stashpvs("UNIVERSAL", FALSE);
 
 	if (lastchance) {
 	    if ((gv = gv_fetchmeth(lastchance, name, len,
@@ -1274,7 +1277,7 @@ Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
 	SvOK_off(sv);
 	return;
     }
-    sv_setpv(sv, prefix ? prefix : "");
+    sv_setpv(sv, prefix ? prefix : (const char *)"");
 
     name = HvNAME_get(hv);
     if (name) {
@@ -1559,7 +1562,9 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 						       FALSE)))
 		{
 		    /* Can be an import stub (created by "can"). */
-		    const char * const name = (gvsv && SvPOK(gvsv)) ?  SvPVX_const(gvsv) : "???";
+		    const char * const name =
+			(const char *)
+			((gvsv && SvPOK(gvsv)) ?  SvPVX_const(gvsv) : "???");
 		    Perl_croak(aTHX_ "%s method \"%.256s\" overloading \"%s\" "\
 				"in package \"%.256s\"",
 			       (GvCVGEN(gv) ? "Stub found while resolving"

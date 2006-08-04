@@ -1427,9 +1427,6 @@ s	|void	|glob_assign_ref|NN SV *dstr|NN SV *sstr
 #  if defined(USE_ITHREADS)
 sRn	|PTR_TBL_ENT_t *|ptr_table_find|NN PTR_TBL_t *tbl|NN const void *sv
 #  endif
-s	|SV *	|find_hash_subscript|NULLOK HV *hv|NN SV *val
-s	|I32	|find_array_subscript|NULLOK AV *av|NN SV *val
-s	|SV *	|find_uninit_var|NULLOK OP *obase|NULLOK SV *uninit_sv|bool match
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
@@ -1613,7 +1610,10 @@ ApoR	|I32	|hv_placeholders_get	|NN HV* hv
 Apo	|void	|hv_placeholders_set	|NN HV* hv|I32 ph
 
 p	|SV*	|magic_scalarpack|NN HV* hv|NN MAGIC* mg
-#ifdef PERL_IN_SV_C
+
+#if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+s	|SV *	|find_hash_subscript|NULLOK HV *hv|NN SV *val
+s	|I32	|find_array_subscript|NULLOK AV *av|NN SV *val
 sMd	|SV*	|find_uninit_var|NULLOK OP* obase|NULLOK SV* uninit_sv|bool top
 #endif
 

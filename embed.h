@@ -1436,11 +1436,6 @@
 #define ptr_table_find		S_ptr_table_find
 #endif
 #  endif
-#ifdef PERL_CORE
-#define find_hash_subscript	S_find_hash_subscript
-#define find_array_subscript	S_find_array_subscript
-#define find_uninit_var		S_find_uninit_var
-#endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
@@ -1623,8 +1618,10 @@
 #ifdef PERL_CORE
 #define magic_scalarpack	Perl_magic_scalarpack
 #endif
-#ifdef PERL_IN_SV_C
+#if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
+#define find_hash_subscript	S_find_hash_subscript
+#define find_array_subscript	S_find_array_subscript
 #define find_uninit_var		S_find_uninit_var
 #endif
 #endif
@@ -3629,11 +3626,6 @@
 #define ptr_table_find		S_ptr_table_find
 #endif
 #  endif
-#ifdef PERL_CORE
-#define find_hash_subscript(a,b)	S_find_hash_subscript(aTHX_ a,b)
-#define find_array_subscript(a,b)	S_find_array_subscript(aTHX_ a,b)
-#define find_uninit_var(a,b,c)	S_find_uninit_var(aTHX_ a,b,c)
-#endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
@@ -3820,8 +3812,10 @@
 #ifdef PERL_CORE
 #define magic_scalarpack(a,b)	Perl_magic_scalarpack(aTHX_ a,b)
 #endif
-#ifdef PERL_IN_SV_C
+#if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
+#define find_hash_subscript(a,b)	S_find_hash_subscript(aTHX_ a,b)
+#define find_array_subscript(a,b)	S_find_array_subscript(aTHX_ a,b)
 #define find_uninit_var(a,b,c)	S_find_uninit_var(aTHX_ a,b,c)
 #endif
 #endif

@@ -71,7 +71,7 @@ S_new_he(pTHX)
     LOCK_SV_MUTEX;
     if (!*root)
 	S_more_he(aTHX);
-    he = *root;
+    he = (HE*) *root;
     assert(he);
     *root = HeNEXT(he);
     UNLOCK_SV_MUTEX;
@@ -2831,12 +2831,14 @@ Perl_refcounted_he_new(pTHX_ struct refcounted_he *const parent,
     flags = value_type;
 
 #ifdef USE_ITHREADS
-    he = PerlMemShared_malloc(sizeof(struct refcounted_he) - 1
-			      + key_len
-			      + key_offset);
+    he = (struct refcounted_he*)
+	PerlMemShared_malloc(sizeof(struct refcounted_he) - 1
+			     + key_len
+			     + key_offset);
 #else
-    he = PerlMemShared_malloc(sizeof(struct refcounted_he) - 1
-			      + key_offset);
+    he = (struct refcounted_he*)
+	PerlMemShared_malloc(sizeof(struct refcounted_he) - 1
+			     + key_offset);
 #endif
 
 

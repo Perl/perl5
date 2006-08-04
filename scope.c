@@ -980,7 +980,7 @@ Perl_leave_scope(pTHX_ I32 base)
 	    if (!specialWARN(PL_compiling.cop_warnings))
 		PerlMemShared_free(PL_compiling.cop_warnings);
 
-	    PL_compiling.cop_warnings = ptr;
+	    PL_compiling.cop_warnings = (STRLEN*)ptr;
 	    break;
 	case SAVEt_RE_STATE:
 	    {

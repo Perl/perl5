@@ -1937,7 +1937,9 @@ PP(pp_iter)
 	    /* string increment */
 	    register SV* cur = cx->blk_loop.iterlval;
 	    STRLEN maxlen = 0;
-	    const char *max = SvOK((SV*)av) ? SvPV_const((SV*)av, maxlen) : "";
+	    const char *max =
+	      SvOK((SV*)av) ?
+	      SvPV_const((SV*)av, maxlen) : (const char *)"";
 	    if (!SvNIOK(cur) && SvCUR(cur) <= maxlen) {
 		if (SvREFCNT(*itersvp) == 1 && !SvMAGICAL(*itersvp)) {
 		    /* safe to reuse old SV */

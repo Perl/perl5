@@ -2266,8 +2266,8 @@ S_more_refcounted_fds(pTHX_ const int new_fd) {
 
     assert (new_max > new_fd);
 
-    new_array
-	= PerlMemShared_realloc(PL_perlio_fd_refcnt, new_max * sizeof(int));
+    new_array =
+	(int*) PerlMemShared_realloc(PL_perlio_fd_refcnt, new_max * sizeof(int));
 
     if (!new_array) {
 #ifdef USE_THREADS

@@ -796,17 +796,23 @@ PP(pp_formline)
 	case FF_0DECIMAL:
 	    arg = *fpc++;
 #if defined(USE_LONG_DOUBLE)
-	    fmt = (arg & 256) ? "%#0*.*" PERL_PRIfldbl : "%0*.*" PERL_PRIfldbl;
+	    fmt = (const char *)
+		((arg & 256) ?
+		 "%#0*.*" PERL_PRIfldbl : "%0*.*" PERL_PRIfldbl);
 #else
-	    fmt = (arg & 256) ? "%#0*.*f"              : "%0*.*f";
+	    fmt = (const char *)
+		((arg & 256) ?
+		 "%#0*.*f"              : "%0*.*f");
 #endif
 	    goto ff_dec;
 	case FF_DECIMAL:
 	    arg = *fpc++;
 #if defined(USE_LONG_DOUBLE)
- 	    fmt = (arg & 256) ? "%#*.*" PERL_PRIfldbl : "%*.*" PERL_PRIfldbl;
+ 	    fmt = (const char *)
+		((arg & 256) ? "%#*.*" PERL_PRIfldbl : "%*.*" PERL_PRIfldbl);
 #else
-            fmt = (arg & 256) ? "%#*.*f"              : "%*.*f";
+            fmt = (const char *)
+		((arg & 256) ? "%#*.*f"              : "%*.*f");
 #endif
 	ff_dec:
 	    /* If the field is marked with ^ and the value is undefined,
@@ -1509,7 +1515,7 @@ Perl_die_where(pTHX_ const char *message, STRLEN msglen)
 	    if (CxTYPE(cx) != CXt_EVAL) {
 		if (!message)
 		    message = SvPVx_const(ERRSV, msglen);
-		PerlIO_write(Perl_error_log, "panic: die ", 11);
+		PerlIO_write(Perl_error_log, (const char *)"panic: die ", 11);
 		PerlIO_write(Perl_error_log, message, msglen);
 		my_exit(1);
 	    }
@@ -1731,7 +1737,7 @@ PP(pp_reset)
 {
     dVAR;
     dSP;
-    const char * const tmps = (MAXARG < 1) ? "" : POPpconstx;
+    const char * const tmps = (MAXARG < 1) ? (const char *)"" : POPpconstx;
     sv_reset(tmps, CopSTASH(PL_curcop));
     PUSHs(&PL_sv_yes);
     RETURN;
@@ -3774,39 +3780,39 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     
     SV *e = TOPs;	/* e is for 'expression' */
     SV *d = TOPm1s;	/* d is for 'default', as in PL_defgv */
-    SV *this, *other;
+    SV *This, *Other;	/* 'This' (and Other to match) to play with C++ */
     MAGIC *mg;
     regexp *this_regex, *other_regex;
 
 #   define NOT_EMPTY_PROTO(cv) (!SvPOK(cv) || SvCUR(cv) == 0)
 
 #   define SM_REF(type) ( \
-	   (SvROK(d) && (SvTYPE(this = SvRV(d)) == SVt_##type) && (other = e)) \
-	|| (SvROK(e) && (SvTYPE(this = SvRV(e)) == SVt_##type) && (other = d)))
+	   (SvROK(d) && (SvTYPE(This = SvRV(d)) == SVt_##type) && (Other = e)) \
+	|| (SvROK(e) && (SvTYPE(This = SvRV(e)) == SVt_##type) && (Other = d)))
 
 #   define SM_CV_NEP   /* Find a code ref without an empty prototype */ \
-	((SvROK(d) && (SvTYPE(this = SvRV(d)) == SVt_PVCV)		\
-	    && NOT_EMPTY_PROTO(this) && (other = e))			\
-	|| (SvROK(e) && (SvTYPE(this = SvRV(e)) == SVt_PVCV)		\
-	    && NOT_EMPTY_PROTO(this) && (other = d)))
+	((SvROK(d) && (SvTYPE(This = SvRV(d)) == SVt_PVCV)		\
+	    && NOT_EMPTY_PROTO(This) && (Other = e))			\
+	|| (SvROK(e) && (SvTYPE(This = SvRV(e)) == SVt_PVCV)		\
+	    && NOT_EMPTY_PROTO(This) && (Other = d)))
 
 #   define SM_REGEX ( \
-	   (SvROK(d) && SvMAGICAL(this = SvRV(d))			\
-	&& (mg = mg_find(this, PERL_MAGIC_qr))				\
+	   (SvROK(d) && SvMAGICAL(This = SvRV(d))			\
+	&& (mg = mg_find(This, PERL_MAGIC_qr))				\
 	&& (this_regex = (regexp *)mg->mg_obj)				\
-	&& (other = e))							\
+	&& (Other = e))							\
     ||									\
-	   (SvROK(e) && SvMAGICAL(this = SvRV(e))			\
-	&& (mg = mg_find(this, PERL_MAGIC_qr))				\
+	   (SvROK(e) && SvMAGICAL(This = SvRV(e))			\
+	&& (mg = mg_find(This, PERL_MAGIC_qr))				\
 	&& (this_regex = (regexp *)mg->mg_obj)				\
-	&& (other = d))	)
+	&& (Other = d))	)
 	
 
 #   define SM_OTHER_REF(type) \
-	(SvROK(other) && SvTYPE(SvRV(other)) == SVt_##type)
+	(SvROK(Other) && SvTYPE(SvRV(Other)) == SVt_##type)
 
-#   define SM_OTHER_REGEX (SvROK(other) && SvMAGICAL(SvRV(other))	\
-	&& (mg = mg_find(SvRV(other), PERL_MAGIC_qr))			\
+#   define SM_OTHER_REGEX (SvROK(Other) && SvMAGICAL(SvRV(Other))	\
+	&& (mg = mg_find(SvRV(Other), PERL_MAGIC_qr))			\
 	&& (other_regex = (regexp *)mg->mg_obj))
 	
 
@@ -3836,9 +3842,9 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     if (SM_CV_NEP) {
 	I32 c;
 	
-	if ( SM_OTHER_REF(PVCV) && NOT_EMPTY_PROTO(SvRV(other)) )
+	if ( SM_OTHER_REF(PVCV) && NOT_EMPTY_PROTO(SvRV(Other)) )
 	{
-	    if (this == SvRV(other))
+	    if (This == SvRV(Other))
 		RETPUSHYES;
 	    else
 		RETPUSHNO;
@@ -3847,9 +3853,9 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	ENTER;
 	SAVETMPS;
 	PUSHMARK(SP);
-	PUSHs(other);
+	PUSHs(Other);
 	PUTBACK;
-	c = call_sv(this, G_SCALAR);
+	c = call_sv(This, G_SCALAR);
 	SPAGAIN;
 	if (c == 0)
 	    PUSHs(&PL_sv_no);
@@ -3863,39 +3869,39 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	if (SM_OTHER_REF(PVHV)) {
 	    /* Check that the key-sets are identical */
 	    HE *he;
-	    HV *other_hv = (HV *) SvRV(other);
+	    HV *other_hv = (HV *) SvRV(Other);
 	    bool tied = FALSE;
 	    bool other_tied = FALSE;
 	    U32 this_key_count  = 0,
 	        other_key_count = 0;
 	    
 	    /* Tied hashes don't know how many keys they have. */
-	    if (SvTIED_mg(this, PERL_MAGIC_tied)) {
+	    if (SvTIED_mg(This, PERL_MAGIC_tied)) {
 		tied = TRUE;
 	    }
 	    else if (SvTIED_mg((SV *) other_hv, PERL_MAGIC_tied)) {
 		HV * const temp = other_hv;
-		other_hv = (HV *) this;
-		this  = (SV *) temp;
+		other_hv = (HV *) This;
+		This  = (SV *) temp;
 		tied = TRUE;
 	    }
 	    if (SvTIED_mg((SV *) other_hv, PERL_MAGIC_tied))
 		other_tied = TRUE;
 	    
-	    if (!tied && HvUSEDKEYS((HV *) this) != HvUSEDKEYS(other_hv))
+	    if (!tied && HvUSEDKEYS((HV *) This) != HvUSEDKEYS(other_hv))
 	    	RETPUSHNO;
 
 	    /* The hashes have the same number of keys, so it suffices
 	       to check that one is a subset of the other. */
-	    (void) hv_iterinit((HV *) this);
-	    while ( (he = hv_iternext((HV *) this)) ) {
+	    (void) hv_iterinit((HV *) This);
+	    while ( (he = hv_iternext((HV *) This)) ) {
 	    	I32 key_len;
 		char * const key = hv_iterkey(he, &key_len);
 	    	
 	    	++ this_key_count;
 	    	
 	    	if(!hv_exists(other_hv, key, key_len)) {
-	    	    (void) hv_iterinit((HV *) this);	/* reset iterator */
+	    	    (void) hv_iterinit((HV *) This);	/* reset iterator */
 		    RETPUSHNO;
 	    	}
 	    }
@@ -3914,11 +3920,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		RETPUSHYES;
 	}
 	else if (SM_OTHER_REF(PVAV)) {
-	    AV * const other_av = (AV *) SvRV(other);
+	    AV * const other_av = (AV *) SvRV(Other);
 	    const I32 other_len = av_len(other_av) + 1;
 	    I32 i;
 	    
-	    if (HvUSEDKEYS((HV *) this) != other_len)
+	    if (HvUSEDKEYS((HV *) This) != other_len)
 		RETPUSHNO;
 	    
 	    for(i = 0; i < other_len; ++i) {
@@ -3930,7 +3936,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		    RETPUSHNO;
 
 		key = SvPV(*svp, key_len);
-	    	if(!hv_exists((HV *) this, key, key_len))
+	    	if(!hv_exists((HV *) This, key, key_len))
 		    RETPUSHNO;
 	    }
 	    RETPUSHYES;
@@ -3939,10 +3945,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    PMOP * const matcher = make_matcher(other_regex);
 	    HE *he;
 
-	    (void) hv_iterinit((HV *) this);
-	    while ( (he = hv_iternext((HV *) this)) ) {
+	    (void) hv_iterinit((HV *) This);
+	    while ( (he = hv_iternext((HV *) This)) ) {
 		if (matcher_matches_sv(matcher, hv_iterkeysv(he))) {
-		    (void) hv_iterinit((HV *) this);
+		    (void) hv_iterinit((HV *) This);
 		    destroy_matcher(matcher);
 		    RETPUSHYES;
 		}
@@ -3951,7 +3957,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    RETPUSHNO;
 	}
 	else {
-	    if (hv_exists_ent((HV *) this, other, 0))
+	    if (hv_exists_ent((HV *) This, Other, 0))
 		RETPUSHYES;
 	    else
 		RETPUSHNO;
@@ -3959,8 +3965,8 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
     }
     else if (SM_REF(PVAV)) {
 	if (SM_OTHER_REF(PVAV)) {
-	    AV *other_av = (AV *) SvRV(other);
-	    if (av_len((AV *) this) != av_len(other_av))
+	    AV *other_av = (AV *) SvRV(Other);
+	    if (av_len((AV *) This) != av_len(other_av))
 		RETPUSHNO;
 	    else {
 	    	I32 i;
@@ -3975,7 +3981,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 		    (void) sv_2mortal((SV *) seen_other);
 		}
 		for(i = 0; i <= other_len; ++i) {
-		    SV * const * const this_elem = av_fetch((AV *)this, i, FALSE);
+		    SV * const * const this_elem = av_fetch((AV *)This, i, FALSE);
 		    SV * const * const other_elem = av_fetch(other_av, i, FALSE);
 
 		    if (!this_elem || !other_elem) {
@@ -4011,11 +4017,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	}
 	else if (SM_OTHER_REGEX) {
 	    PMOP * const matcher = make_matcher(other_regex);
-	    const I32 this_len = av_len((AV *) this);
+	    const I32 this_len = av_len((AV *) This);
 	    I32 i;
 
 	    for(i = 0; i <= this_len; ++i) {
-		SV * const * const svp = av_fetch((AV *)this, i, FALSE);
+		SV * const * const svp = av_fetch((AV *)This, i, FALSE);
 		if (svp && matcher_matches_sv(matcher, *svp)) {
 		    destroy_matcher(matcher);
 		    RETPUSHYES;
@@ -4024,15 +4030,15 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    destroy_matcher(matcher);
 	    RETPUSHNO;
 	}
-	else if (SvIOK(other) || SvNOK(other)) {
+	else if (SvIOK(Other) || SvNOK(Other)) {
 	    I32 i;
 
-	    for(i = 0; i <= AvFILL((AV *) this); ++i) {
-		SV * const * const svp = av_fetch((AV *)this, i, FALSE);
+	    for(i = 0; i <= AvFILL((AV *) This); ++i) {
+		SV * const * const svp = av_fetch((AV *)This, i, FALSE);
 		if (!svp)
 		    continue;
 		
-		PUSHs(other);
+		PUSHs(Other);
 		PUSHs(*svp);
 		PUTBACK;
 		if (CopHINTS_get(PL_curcop) & HINT_INTEGER)
@@ -4045,16 +4051,16 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    }
 	    RETPUSHNO;
 	}
-	else if (SvPOK(other)) {
-	    const I32 this_len = av_len((AV *) this);
+	else if (SvPOK(Other)) {
+	    const I32 this_len = av_len((AV *) This);
 	    I32 i;
 
 	    for(i = 0; i <= this_len; ++i) {
-		SV * const * const svp = av_fetch((AV *)this, i, FALSE);
+		SV * const * const svp = av_fetch((AV *)This, i, FALSE);
 		if (!svp)
 		    continue;
 		
-		PUSHs(other);
+		PUSHs(Other);
 		PUSHs(*svp);
 		PUTBACK;
 		(void) pp_seq();
@@ -4075,7 +4081,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	PMOP * const matcher = make_matcher(this_regex);
 
 	PUTBACK;
-	PUSHs(matcher_matches_sv(matcher, other)
+	PUSHs(matcher_matches_sv(matcher, Other)
 	    ? &PL_sv_yes
 	    : &PL_sv_no);
 	destroy_matcher(matcher);
@@ -4090,7 +4096,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	SAVETMPS;
 	PUSHMARK(SP);
 	PUTBACK;
-	c = call_sv(this, G_SCALAR);
+	c = call_sv(This, G_SCALAR);
 	SPAGAIN;
 	if (c == 0)
 	    PUSHs(&PL_sv_undef);
@@ -4101,7 +4107,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	    /* This one has to be null-proto'd too.
 	       Call both of 'em, and compare the results */
 	    PUSHMARK(SP);
-	    c = call_sv(SvRV(other), G_SCALAR);
+	    c = call_sv(SvRV(Other), G_SCALAR);
 	    SPAGAIN;
 	    if (c == 0)
 		PUSHs(&PL_sv_undef);
@@ -4117,10 +4123,10 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other)
 	LEAVE;
 	RETURN;
     }
-    else if ( ((SvIOK(d) || SvNOK(d)) && (this = d) && (other = e))
-         ||   ((SvIOK(e) || SvNOK(e)) && (this = e) && (other = d)) )
+    else if ( ((SvIOK(d) || SvNOK(d)) && (This = d) && (Other = e))
+         ||   ((SvIOK(e) || SvNOK(e)) && (This = e) && (Other = d)) )
     {
-	if (SvPOK(other) && !looks_like_number(other)) {
+	if (SvPOK(Other) && !looks_like_number(Other)) {
 	    /* String comparison */
 	    PUSHs(d); PUSHs(e);
 	    PUTBACK;
@@ -4529,7 +4535,8 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 		    take = umaxlen;
 		}
 	    } else {
-		const char *const first_nl = memchr(cache_p, '\n', cache_len);
+		const char *const first_nl =
+		    (const char *)memchr(cache_p, '\n', cache_len);
 		if (first_nl) {
 		    take = first_nl + 1 - cache_p;
 		}
@@ -4601,7 +4608,8 @@ S_run_user_filter(pTHX_ int idx, SV *buf_sv, int maxlen)
 		prune_from = got_p + umaxlen;
 	    }
 	} else {
-	    const char *const first_nl = memchr(got_p, '\n', got_len);
+	    const char *const first_nl =
+		(const char *)memchr(got_p, '\n', got_len);
 	    if (first_nl && first_nl + 1 < got_p + got_len) {
 		/* There's a second line here... */
 		prune_from = first_nl + 1;

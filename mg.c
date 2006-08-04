@@ -730,7 +730,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	     {
 		 const int saveerrno = errno;
 		 sv_setnv(sv, (NV)errno);
-		 sv_setpv(sv, errno ? Strerror(errno) : "");
+		 sv_setpv(sv, (const char *)(errno ? Strerror(errno) : ""));
 		 errno = saveerrno;
 	     }
 #endif
@@ -810,11 +810,11 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	        sv_setpvn(sv, WARN_NONEstring, WARNsize) ;
 	    }
 	    else if (PL_compiling.cop_warnings == pWARN_STD) {
-		sv_setpvn(
-		    sv, 
-		    (PL_dowarn & G_WARN_ON) ? WARN_ALLstring : WARN_NONEstring,
-		    WARNsize
-		);
+		sv_setpvn(sv,
+			  (const char *)
+			  ((PL_dowarn & G_WARN_ON) ?
+			   WARN_ALLstring : WARN_NONEstring),
+			  WARNsize);
 	    }
             else if (PL_compiling.cop_warnings == pWARN_ALL) {
 		/* Get the bit mask for $warnings::Bits{all}, because
@@ -993,7 +993,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    sv_setpv(sv, os2error(Perl_rc));
 	else
 #endif
-	sv_setpv(sv, errno ? Strerror(errno) : "");
+	sv_setpv(sv, (const char *)(errno ? Strerror(errno) : ""));
 	errno = saveerrno;
 	}
 #endif
@@ -1048,7 +1048,7 @@ Perl_magic_setenv(pTHX_ SV *sv, MAGIC *mg)
 {
     dVAR;
     STRLEN len = 0, klen;
-    const char *s = SvOK(sv) ? SvPV_const(sv,len) : "";
+    const char *s = SvOK(sv) ? SvPV_const(sv,len) : (const char *)"";
     const char * const ptr = MgPV_const(mg,klen);
     my_setenv(ptr, s);
 
@@ -1649,7 +1649,7 @@ int
 Perl_magic_nextpack(pTHX_ SV *sv, MAGIC *mg, SV *key)
 {
     dVAR; dSP;
-    const char * const meth = SvOK(key) ? "NEXTKEY" : "FIRSTKEY";
+    const char * const meth = (const char *)(SvOK(key) ? "NEXTKEY" : "FIRSTKEY");
 
     ENTER;
     SAVETMPS;
@@ -2744,7 +2744,7 @@ Perl_sighandler(int sig)
 #endif
 		   EXTEND(SP, 2);
 		   PUSHs((SV*)rv);
-		   PUSHs(newSVpv((void*)sip, sizeof(*sip)));
+		   PUSHs(newSVpv((char *)sip, sizeof(*sip)));
 	      }
 
               va_end(args);
@@ -2819,10 +2819,10 @@ S_restore_magic(pTHX_ const void *p)
 	    /* downgrade public flags to private,
 	       and discard any other private flags */
 
-	    const U32 public = SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
-	    if (public) {
-		SvFLAGS(sv) &= ~( public | (SVp_IOK|SVp_NOK|SVp_POK) );
-		SvFLAGS(sv) |= ( public << PRIVSHIFT );
+	    const U32 pubflags = SvFLAGS(sv) & (SVf_IOK|SVf_NOK|SVf_POK);
+	    if (pubflags) {
+		SvFLAGS(sv) &= ~( pubflags | (SVp_IOK|SVp_NOK|SVp_POK) );
+		SvFLAGS(sv) |= ( pubflags << PRIVSHIFT );
 	    }
 	}
     }

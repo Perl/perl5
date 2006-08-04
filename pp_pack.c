@@ -62,7 +62,7 @@ typedef struct tempsym {
 	(symptr)->grpend   = NULL;	\
 	(symptr)->code     = 0;		\
 	(symptr)->length   = 0;		\
-	(symptr)->howlen   = 0;		\
+	(symptr)->howlen   = e_no_len;	\
 	(symptr)->level    = 0;		\
 	(symptr)->flags    = (f);	\
 	(symptr)->strbeg   = 0;		\
@@ -776,7 +776,7 @@ STMT_START {							\
 
 static const char *_action( const tempsym_t* symptr )
 {
-    return ( symptr->flags & FLAG_PACK ) ? "pack" : "unpack";
+    return (const char *)(( symptr->flags & FLAG_PACK ) ? "pack" : "unpack");
 }
 
 /* Returns the sizeof() struct described by pat */
@@ -2088,7 +2088,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
              * algorithm, the code will be character-set independent
              * (and just as fast as doing character arithmetic)
              */
-            if (PL_uudmap['M'] == 0) {
+            if (PL_uudmap[(U8)'M'] == 0) {
 		size_t i;
 
 		for (i = 0; i < sizeof(PL_uuemap); ++i)
@@ -2097,7 +2097,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
                  * Because ' ' and '`' map to the same value,
                  * we need to decode them both the same.
                  */
-                PL_uudmap[' '] = 0;
+                PL_uudmap[(U8)' '] = 0;
             }
 	    {
                 const STRLEN l = (STRLEN) (strend - s) * 3 / 4;

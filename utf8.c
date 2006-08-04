@@ -524,7 +524,7 @@ malformed:
 
     if (flags & UTF8_CHECK_ONLY) {
 	if (retlen)
-	    *retlen = -1;
+	    *retlen = ((STRLEN) -1);
 	return 0;
     }
 
@@ -653,6 +653,7 @@ Perl_utf8_length(pTHX_ const U8 *s, const U8 *e)
 {
     dVAR;
     STRLEN len = 0;
+    U8 t = 0;
 
     /* Note: cannot use UTF8_IS_...() too eagerly here since e.g.
      * the bitops (especially ~) can create illegal UTF-8.
@@ -661,7 +662,7 @@ Perl_utf8_length(pTHX_ const U8 *s, const U8 *e)
     if (e < s)
 	goto warn_and_return;
     while (s < e) {
-	const U8 t = UTF8SKIP(s);
+	t = UTF8SKIP(s);
 	if (e - s < t) {
 	    warn_and_return:
 	    if (ckWARN_d(WARN_UTF8)) {
@@ -760,7 +761,7 @@ Perl_utf8_to_bytes(pTHX_ U8 *s, STRLEN *len)
         if (!UTF8_IS_INVARIANT(c) &&
             (!UTF8_IS_DOWNGRADEABLE_START(c) || (s >= send)
 	     || !(c = *s++) || !UTF8_IS_CONTINUATION(c))) {
-            *len = -1;
+            *len = ((STRLEN) -1);
             return 0;
         }
     }

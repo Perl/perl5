@@ -94,16 +94,12 @@ case "$cc" in
 *g++*) warn="`echo $warn|sed 's/-Wdeclaration-after-statement/ /'`" ;;
 esac
 
+# stdflags currently unused.
+stdflags=''
+
 extra=''
 
-# C and C++ have different rules for const strings;
-# without the -fno-const-strings g++ cannot handle our habit
-# of mixing char literals and char pointers.
-case "$cc" in
-*g++*) extra="$extra -fno-const-strings" ;;
-esac
-
-stdflags=''
+# Code to set any extra flags here.
 
 echo "Extracting cflags (with variable substitutions)"
 : This section of the file will have variable substitutions done on it.

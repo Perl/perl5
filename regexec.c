@@ -2389,6 +2389,8 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 							    subpattern */
     U32 state_num;
     
+    I32 parenfloor = 0;
+
 #ifdef DEBUGGING
     GET_RE_DEBUG_FLAGS_DECL;
     PL_regindent++;
@@ -3406,8 +3408,8 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
 	case CURLYX: {
 		/* No need to save/restore up to this paren */
-		I32 parenfloor = scan->flags;
-
+		parenfloor = scan->flags;
+		
 		/* Dave says:
 		   
 		   CURLYX and WHILEM are always paired: they're the moral

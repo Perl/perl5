@@ -512,7 +512,7 @@ S_cl_is_anything(const struct regnode_charclass_class *cl)
 	    return 1;
     if (!(cl->flags & ANYOF_UNICODE_ALL))
 	return 0;
-    if (!ANYOF_BITMAP_TESTALLSET(cl))
+    if (!ANYOF_BITMAP_TESTALLSET((const void*)cl))
 	return 0;
     return 1;
 }
@@ -2502,7 +2502,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 	}
 #ifdef TRIE_STUDY_OPT	
 	else if (OP(scan) == TRIE) {
-	    reg_trie_data *trie=RExC_rx->data->data[ ARG(scan) ];
+	    reg_trie_data *trie = (reg_trie_data*)RExC_rx->data->data[ ARG(scan) ];
 	    min += trie->minlen;
 	    delta += (trie->maxlen - trie->minlen);
 	    flags &= ~SCF_DO_STCLASS; /* xxx */
@@ -4297,6 +4297,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     I32 min;
     I32 max = REG_INFTY;
     char *parse_start;
+    const char *maxpos = NULL;
     GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_PARSE("piec");
 
@@ -4310,7 +4311,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     op = *RExC_parse;
 
     if (op == '{' && regcurly(RExC_parse)) {
-	const char *maxpos = NULL;
+	maxpos = NULL;
         parse_start = RExC_parse; /* MJD */
 	next = RExC_parse + 1;
 	while (isDIGIT(*next) || *next == ',') {
@@ -6411,9 +6412,10 @@ Perl_regdump(pTHX_ const regexp *r)
     }
     if (r->check_substr || r->check_utf8)
 	PerlIO_printf(Perl_debug_log,
-		      r->check_substr == r->float_substr
-		      && r->check_utf8 == r->float_utf8
-		      ? "(checking floating" : "(checking anchored");
+		      (const char *)
+		      (r->check_substr == r->float_substr
+		       && r->check_utf8 == r->float_utf8
+		       ? "(checking floating" : "(checking anchored"));
     if (r->reganch & ROPT_NOSCAN)
 	PerlIO_printf(Perl_debug_log, " noscan");
     if (r->reganch & ROPT_CHECK_ALL)

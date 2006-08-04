@@ -3873,13 +3873,6 @@ STATIC PTR_TBL_ENT_t *	S_ptr_table_find(PTR_TBL_t *tbl, const void *sv)
 			__attribute__nonnull__(2);
 
 #  endif
-STATIC SV *	S_find_hash_subscript(pTHX_ HV *hv, SV *val)
-			__attribute__nonnull__(pTHX_2);
-
-STATIC I32	S_find_array_subscript(pTHX_ AV *av, SV *val)
-			__attribute__nonnull__(pTHX_2);
-
-STATIC SV *	S_find_uninit_var(pTHX_ OP *obase, SV *uninit_sv, bool match);
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
@@ -4270,7 +4263,14 @@ PERL_CALLCONV SV*	Perl_magic_scalarpack(pTHX_ HV* hv, MAGIC* mg)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-#ifdef PERL_IN_SV_C
+
+#if defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)
+STATIC SV *	S_find_hash_subscript(pTHX_ HV *hv, SV *val)
+			__attribute__nonnull__(pTHX_2);
+
+STATIC I32	S_find_array_subscript(pTHX_ AV *av, SV *val)
+			__attribute__nonnull__(pTHX_2);
+
 STATIC SV*	S_find_uninit_var(pTHX_ OP* obase, SV* uninit_sv, bool top);
 #endif
 
