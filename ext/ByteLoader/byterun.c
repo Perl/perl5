@@ -143,8 +143,8 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    }
 	  case INSN_NEWSVX:		/* 9 */
 	    {
-		U32 arg;
-		BGET_U32(arg);
+		svtype arg;
+		BGET_svtype(arg);
 		BSET_newsvx(bstate->bs_sv, arg);
 		break;
 	    }
