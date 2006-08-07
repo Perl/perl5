@@ -1384,7 +1384,8 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	    Perl_croak(aTHX_ "No such hook: %s", s);
 	i = 0;
 	if (*svp) {
-	    to_dec = *svp;
+	    if (*svp != PERL_WARNHOOK_FATAL)
+		to_dec = *svp;
 	    *svp = NULL;
 	}
     }
