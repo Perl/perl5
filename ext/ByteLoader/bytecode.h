@@ -28,6 +28,7 @@ typedef char *pvindex;
 #define BGET_IV(arg)		BGET_OR_CROAK(arg, IV)
 #define BGET_PADOFFSET(arg)	BGET_OR_CROAK(arg, PADOFFSET)
 #define BGET_long(arg)		BGET_OR_CROAK(arg, long)
+#define BGET_svtype(arg)	BGET_OR_CROAK(arg, svtype)
 
 #define BGET_OR_CROAK(arg, type) STMT_START {				\
 	if (BGET_FREAD(&arg, sizeof(type), 1) < 1) {			\
