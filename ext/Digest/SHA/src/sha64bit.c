@@ -66,8 +66,7 @@ C64(0x1f83d9abfb41bd6b), C64(0x5be0cd19137e2179)
 };
 
 /* strto64: converts hex string to a 64-bit word */
-static W64 strto64(s)
-char *s;
+static W64 strto64(char *s)
 {
 	char str[2] = {0, 0};
 	W64 u = C64(0);
@@ -77,9 +76,7 @@ char *s;
 	return(u);
 }
 
-static void sha512(s, block)	/* SHA-384/512 transform */
-SHA *s;
-unsigned char *block;
+static void sha512(SHA *s, unsigned char *block) /* SHA-384/512 transform */
 {
 	W64 a, b, c, d, e, f, g, h, T1, T2;
 	SHA_STO_CLASS W64 W[80];

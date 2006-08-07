@@ -4,8 +4,8 @@
 	#
 	# Copyright (C) 2003-2006 Mark Shelor, All Rights Reserved
 	#
-	# Version: 5.42
-	# Mon Jul 24 04:04:40 MST 2006
+	# Version: 5.43
+	# Sat Aug  5 02:36:18 MST 2006
 
 =head1 NAME
 
@@ -52,7 +52,7 @@ L<Digest::SHA::PurePerl>.
 use strict;
 use Getopt::Long;
 
-my $VERSION = "5.42";
+my $VERSION = "5.43";
 
 
 	# Try to use Digest::SHA, since it's faster.  If not installed,
@@ -201,7 +201,7 @@ if ($check) {
 	my ($fh, $sum, $fname, $rsp);
 
 	die "shasum: $checkfile: $!\n"
-		unless open($fh, q{<}, $checkfile);
+		unless open($fh, "<$checkfile");	## no critic
 	while (<$fh>) {
 		s/\s+$//;
 		($sum, $modesym, $fname) = /^(\S+) (.)(.*)$/;

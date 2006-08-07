@@ -5,8 +5,8 @@
  *
  * Copyright (C) 2003-2006 Mark Shelor, All Rights Reserved
  *
- * Version: 5.42
- * Mon Jul 24 04:04:40 MST 2006
+ * Version: 5.43
+ * Sat Aug  5 02:36:18 MST 2006
  *
  */
 
@@ -174,9 +174,9 @@
 	#define SHA_H_SIZE	sizeof(SHA32) * 8
 #endif
 
-typedef struct {
+typedef struct SHA {
 	int alg;
-	void (*sha)();
+	void (*sha)(struct SHA *, unsigned char *);
 	unsigned char H[SHA_H_SIZE];
 	unsigned char block[SHA_MAX_BLOCK_BITS/8];
 	unsigned int blockcnt;
@@ -192,44 +192,42 @@ typedef struct {
 #define SHA_FMT_HEX 2
 #define SHA_FMT_BASE64 3
 
-#if defined(__STDC__) && __STDC__ != 0
-	#define _SHA_P(protos)	protos
-#else
-	#define _SHA_P(protos)	()
-#endif
-
 #define _SHA_STATE	SHA *s
 #define _SHA_ALG	int alg
 #define _SHA_DATA	unsigned char *bitstr, unsigned long bitcnt
 #define _SHA_FNAME	char *filename
 
-SHA		*shaopen	_SHA_P((_SHA_ALG));
-unsigned long	 shawrite	_SHA_P((_SHA_DATA, _SHA_STATE));
-void		 shafinish	_SHA_P((_SHA_STATE));
-void		 sharewind	_SHA_P((_SHA_STATE));
-unsigned char	*shadigest	_SHA_P((_SHA_STATE));
-char		*shahex		_SHA_P((_SHA_STATE));
-char		*shabase64	_SHA_P((_SHA_STATE));
-int		 shadsize	_SHA_P((_SHA_STATE));
-SHA		*shadup		_SHA_P((_SHA_STATE));
-int		 shadump	_SHA_P((_SHA_FNAME, _SHA_STATE));
-SHA		*shaload	_SHA_P((_SHA_FNAME));
-int		 shaclose	_SHA_P((_SHA_STATE));
+SHA		*shaopen	(_SHA_ALG);
+unsigned long	 shawrite	(_SHA_DATA, _SHA_STATE);
+void		 shafinish	(_SHA_STATE);
+void		 sharewind	(_SHA_STATE);
+unsigned char	*shadigest	(_SHA_STATE);
+char		*shahex		(_SHA_STATE);
+char		*shabase64	(_SHA_STATE);
+int		 shadsize	(_SHA_STATE);
+SHA		*shadup		(_SHA_STATE);
+int		 shadump	(_SHA_FNAME, _SHA_STATE);
+SHA		*shaload	(_SHA_FNAME);
+int		 shaclose	(_SHA_STATE);
 
-unsigned char	*sha1digest	_SHA_P((_SHA_DATA));
-char		*sha1hex	_SHA_P((_SHA_DATA));
-char		*sha1base64	_SHA_P((_SHA_DATA));
-unsigned char	*sha224digest	_SHA_P((_SHA_DATA));
-char		*sha224hex	_SHA_P((_SHA_DATA));
-char		*sha224base64	_SHA_P((_SHA_DATA));
-unsigned char	*sha256digest	_SHA_P((_SHA_DATA));
-char		*sha256hex	_SHA_P((_SHA_DATA));
-char		*sha256base64	_SHA_P((_SHA_DATA));
-unsigned char	*sha384digest	_SHA_P((_SHA_DATA));
-char		*sha384hex	_SHA_P((_SHA_DATA));
-char		*sha384base64	_SHA_P((_SHA_DATA));
-unsigned char	*sha512digest	_SHA_P((_SHA_DATA));
-char		*sha512hex	_SHA_P((_SHA_DATA));
-char		*sha512base64	_SHA_P((_SHA_DATA));
+#ifndef SHA_PERL_MODULE
+
+unsigned char	*sha1digest	(_SHA_DATA);
+char		*sha1hex	(_SHA_DATA);
+char		*sha1base64	(_SHA_DATA);
+unsigned char	*sha224digest	(_SHA_DATA);
+char		*sha224hex	(_SHA_DATA);
+char		*sha224base64	(_SHA_DATA);
+unsigned char	*sha256digest	(_SHA_DATA);
+char		*sha256hex	(_SHA_DATA);
+char		*sha256base64	(_SHA_DATA);
+unsigned char	*sha384digest	(_SHA_DATA);
+char		*sha384hex	(_SHA_DATA);
+char		*sha384base64	(_SHA_DATA);
+unsigned char	*sha512digest	(_SHA_DATA);
+char		*sha512hex	(_SHA_DATA);
+char		*sha512base64	(_SHA_DATA);
+
+#endif
 
 #endif	/* _INCLUDE_SHA_H_ */

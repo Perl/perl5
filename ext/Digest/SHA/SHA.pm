@@ -6,7 +6,7 @@ use strict;
 use warnings;
 use integer;
 
-our $VERSION = '5.42_01';
+our $VERSION = '5.43';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -118,7 +118,8 @@ sub Addfile {
 	my ($binary, $portable) = map { $_ eq $mode } ("b", "p");
 	my $text = -T $file;
 
-	open(my $fh, q{<}, $file) or _bail("Open failed");
+	open(my $fh, "<$file")			## no critic
+		or _bail("Open failed");
 	binmode($fh) if $binary || $portable;
 
 	unless ($portable && $text) {
