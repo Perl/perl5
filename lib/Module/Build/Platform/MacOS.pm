@@ -2,7 +2,8 @@ package Module::Build::Platform::MacOS;
 
 use strict;
 use Module::Build::Base;
-use base qw(Module::Build::Base);
+use vars qw(@ISA);
+@ISA = qw(Module::Build::Base);
 
 use ExtUtils::Install;
 

@@ -1,5 +1,45 @@
 Revision history for Perl extension Module::Build.
 
+0.2805  Sat Jul 29 22:01:24 CDT 2006
+
+ - We now embed a copy of version.pm right in the
+   Module::Build::Version source code, with John Peacock's blessing,
+   in case the user has a rough time installing version.pm.  This
+   helps alleviate troubles people were still having with working out
+   a seemingly circular dependency (even though version.pm now ships
+   with a standard Makefile.PL too).  A version.pm >= 0.661 installed
+   on the system will take precedence over our bundled one. [John
+   Peacock]
+
+ - Fix some test warnings (or failures?) related to version.pm
+   numification. [John Peacock]
+
+ - The top-level 'version' entry in META.yml files we'd generated was
+   in the wrong format (it was being treated as a version.pm object
+   rather than a serialized copy) due to a weird YAML::Node issue.
+   Fixed.
+
+ - Don't 'use base qw(version)' anymore in our M::B::Version wrapper,
+   just set @ISA directly, because some people have reported that the
+   'use base' line is croaking.
+
+ - Added an 'allow_mb_mismatch' parameter to suppress the startup
+   check that ensures the version of M::B currently running is the
+   same as the one initially used to run the Build.PL.  Use with
+   caution.
+
+ - Module::Build::ModuleInfo will no longer detect things that look
+   like $VERSION assignments after an __END__ or __DATA__ token.
+
+ - Updated documentation to mention the new mailing list on perl.org
+   rather than the old one on sourceforge.
+
+0.2804  Sun Jul 16 16:41:25 CDT 2006
+
+ - Added 'use version;' in Module::Build::Version, because some
+   versions of base.pm won't automatically load version.pm when we do
+   'use base qw/version/;'. [Spotted by Erik Tank]
+
 0.2803  Sat Jul 15 08:26:34 CDT 2006
 
  - The META.yml file in the last release was all screwed up, so the

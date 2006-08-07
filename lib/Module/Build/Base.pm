@@ -68,12 +68,15 @@ sub resume {
 		    "   but we are now using '$perl'.\n");
   }
   
-  my $mb_version = $Module::Build::VERSION;
-  die(" * ERROR: Configuration was initially created with Module::Build version '$self->{properties}{mb_version}',\n".
-      "   but we are now using version '$mb_version'.  Please re-run the Build.PL or Makefile.PL script.\n")
-    unless $mb_version eq $self->{properties}{mb_version};
-  
   $self->cull_args(@ARGV);
+
+  unless ($self->allow_mb_mismatch) {
+    my $mb_version = $Module::Build::VERSION;
+    die(" * ERROR: Configuration was initially created with Module::Build version '$self->{properties}{mb_version}',\n".
+	"   but we are now using version '$mb_version'.  Please re-run the Build.PL or Makefile.PL script.\n")
+    if $mb_version ne $self->{properties}{mb_version};
+  }
+  
   $self->{invoked_action} = $self->{action} ||= 'build';
   
   return $self;
@@ -755,6 +758,7 @@ __PACKAGE__->add_property(metafile => 'META.yml');
 __PACKAGE__->add_property(recurse_into => []);
 __PACKAGE__->add_property(use_rcfile => 1);
 __PACKAGE__->add_property(create_packlist => 1);
+__PACKAGE__->add_property(allow_mb_mismatch => 0);
 
 {
   my $Is_ActivePerl = eval {require ActivePerl::DocTools};
@@ -1089,7 +1093,7 @@ sub prereq_failures {
 
       } elsif ($type =~ /^(?:\w+_)?recommends$/) {
 	next if $status->{ok};
-	$status->{message} = ($status->{have} eq '<none>'
+	$status->{message} = (!ref($status->{have}) && $status->{have} eq '<none>'
 			      ? "Optional prerequisite $modname is not installed"
 			      : "$modname ($status->{have}) is installed, but we prefer to have $spec");
       } else {
@@ -3211,8 +3215,7 @@ sub prepare_metadata {
     die "ERROR: Missing required field '$_' for META.yml\n"
       unless defined($node->{$name}) && length($node->{$name});
   }
-  # Really don't understand why I need the "... if exists" here
-  $node->{version} = $node->{version}->stringify if exists $node->{version};
+  $node->{version} = '' . $node->{version}; # Stringify version objects
 
   if (defined( $self->license ) &&
       defined( my $url = $self->valid_licenses->{ $self->license } )) {
@@ -3929,7 +3932,13 @@ sub process_xs {
 sub do_system {
   my ($self, @cmd) = @_;
   $self->log_info("@cmd\n");
-  return !system(@cmd);
+  my $status = system(@cmd);
+  if ($status and $! =~ /Argument list too long/i) {
+    my $env_entries = '';
+    foreach (sort keys %ENV) { $env_entries .= "$_=>".length($ENV{$_})."; " }
+    warn "'Argument list' was 'too long', env lengths are $env_entries";
+  }
+  return !$status;
 }
 
 sub copy_if_modified {

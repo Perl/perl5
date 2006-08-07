@@ -259,7 +259,7 @@ compatibility layers.
 Ken Williams <kwilliams@cpan.org>
 
 Development questions, bug reports, and patches should be sent to the
-Module-Build mailing list at <module-build-general@lists.sourceforge.net>.
+Module-Build mailing list at <module-build@perl.org>.
 
 Bug reports are also welcome at
 <http://rt.cpan.org/NoAuth/Bugs.html?Dist=Module-Build>.

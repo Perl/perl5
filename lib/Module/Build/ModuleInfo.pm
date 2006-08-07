@@ -176,6 +176,9 @@ sub _parse_file {
 
     $in_pod = ($line =~ /^=(?!cut)/) ? 1 : ($line =~ /^=cut/) ? 0 : $in_pod;
 
+    # Would be nice if we could also check $in_string or something too
+    last if !$in_pod && $line =~ /^__(?:DATA|END)__$/;
+
     if ( $in_pod || $line =~ /^=cut/ ) {
 
       if ( $line =~ /^=head\d\s+(.+)\s*$/ ) {

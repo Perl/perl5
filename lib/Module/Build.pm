@@ -15,7 +15,7 @@ use Module::Build::Base;
 
 use vars qw($VERSION @ISA);
 @ISA = qw(Module::Build::Base);
-$VERSION = '0.2803';
+$VERSION = '0.2805';
 $VERSION = eval $VERSION;
 
 # Okay, this is the brute-force method of finding out what kind of
@@ -660,6 +660,13 @@ false to prevent the custom resource file from being loaded.
 
 Display extra information about the Build on output.
 
+=item allow_mb_mismatch
+
+Suppresses the check upon startup that the version of Module::Build
+we're now running under is the same version that was initially invoked
+when building the distribution (i.e. when the C<Build.PL> script was
+first run).  Use with caution.
+
 =back
 
 
@@ -980,7 +987,7 @@ signature or the like, if available.  See C<cons> for an example.
 Ken Williams <kwilliams@cpan.org>
 
 Development questions, bug reports, and patches should be sent to the
-Module-Build mailing list at <module-build-general@lists.sourceforge.net>.
+Module-Build mailing list at <module-build@perl.org>.
 
 Bug reports are also welcome at
 <http://rt.cpan.org/NoAuth/Bugs.html?Dist=Module-Build>.
