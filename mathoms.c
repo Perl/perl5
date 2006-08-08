@@ -484,14 +484,14 @@ Perl_huge(void)
 void
 Perl_gv_fullname(pTHX_ SV *sv, const GV *gv)
 {
-    gv_fullname3(sv, gv, (const char *)(sv == (const SV*)gv ? "*" : ""));
+    gv_fullname3(sv, gv, sv == (const SV*)gv ? "*" : "");
 }
 
 /* compatibility with versions <= 5.003. */
 void
 Perl_gv_efullname(pTHX_ SV *sv, const GV *gv)
 {
-    gv_efullname3(sv, gv, (const char *)(sv == (const SV*)gv ? "*" : ""));
+    gv_efullname3(sv, gv, sv == (const SV*)gv ? "*" : "");
 }
 
 void

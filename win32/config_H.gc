@@ -3888,6 +3888,12 @@
  */
 /*#define HAS_COPYSIGNL		/**/
 
+/* USE_CPLUSPLUS:
+ *	This symbol, if defined, indicates that a C++ compiler was
+ *	used to compiled Perl and will be used to compile extensions.
+ */
+/*#define USE_CPLUSPLUS		/**/
+
 /* HAS_DBMINIT_PROTO:
  *	This symbol, if defined, indicates that the system provides
  *	a prototype for the dbminit() function.  Otherwise, it is up

@@ -1875,12 +1875,10 @@ Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
 	  || ltype == OP_PADHV) && ckWARN(WARN_MISC))
     {
       const char * const desc
-	  = PL_op_desc[(rtype == OP_SUBST || rtype == OP_TRANS) ?
-		       (int)rtype : OP_MATCH];
-      const char * const sample =
-	  (const char *)
-	  (((ltype == OP_RV2AV || ltype == OP_PADAV)
-	    ? "@array" : "%hash"));
+	  = PL_op_desc[(rtype == OP_SUBST || rtype == OP_TRANS)
+		       ? (int)rtype : OP_MATCH];
+      const char * const sample = ((ltype == OP_RV2AV || ltype == OP_PADAV)
+	     ? "@array" : "%hash");
       Perl_warner(aTHX_ packWARN(WARN_MISC),
              "Applying %s to %s will act on scalar(%s)",
              desc, sample, sample);
@@ -4576,10 +4574,9 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 	if (label->op_type == OP_STUB && (label->op_flags & OPf_PARENS))
 	    o = newOP(type, OPf_SPECIAL);
 	else {
-	    o = newPVOP(type, 0,
-			savepv(label->op_type == OP_CONST
-			       ? SvPVx_nolen_const(((SVOP*)label)->op_sv)
-			       : (const char *)""));
+	    o = newPVOP(type, 0, savepv(label->op_type == OP_CONST
+					? SvPVx_nolen_const(((SVOP*)label)->op_sv)
+					: ""));
 	}
 #ifdef PERL_MAD
 	op_getmad(label,o,'L');
@@ -5037,9 +5034,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	aname = NULL;
 
     gv = name ? gv_fetchsv(cSVOPo->op_sv, gv_fetch_flags, SVt_PVCV)
-	: gv_fetchpv((const char *)
-		     (aname ? aname
-		      : (PL_curstash ? "__ANON__" : "__ANON__::__ANON__")),
+	: gv_fetchpv(aname ? aname
+		     : (PL_curstash ? "__ANON__" : "__ANON__::__ANON__"),
 		     gv_fetch_flags, SVt_PVCV);
 
     if (!PL_madskills) {
@@ -5132,10 +5128,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 		    if (PL_copline != NOLINE)
 			CopLINE_set(PL_curcop, PL_copline);
 		    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-				(const char *)
-				(CvCONST(cv)
-				 ? "Constant subroutine %s redefined"
-				 : "Subroutine %s redefined"), name);
+			CvCONST(cv) ? "Constant subroutine %s redefined"
+				    : "Subroutine %s redefined", name);
 		    CopLINE_set(PL_curcop, oldline);
 		}
 #ifdef PERL_MAD
@@ -5516,11 +5510,9 @@ CV *
 Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
 {
     dVAR;
-    GV * const gv =
-	gv_fetchpv((const char *)
-		   (name ? name :
-		    (PL_curstash ? "__ANON__" : "__ANON__::__ANON__")),
-		    GV_ADDMULTI, SVt_PVCV);
+    GV * const gv = gv_fetchpv(name ? name :
+			(PL_curstash ? "__ANON__" : "__ANON__::__ANON__"),
+			GV_ADDMULTI, SVt_PVCV);
     register CV *cv;
 
     if (!subaddr)
@@ -5546,11 +5538,9 @@ Perl_newXS(pTHX_ const char *name, XSUBADDR_t subaddr, const char *filename)
 			    if (PL_copline != NOLINE)
 				CopLINE_set(PL_curcop, PL_copline);
 			    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-					(const char *)
-					(CvCONST(cv)
-					 ? "Constant subroutine %s redefined"
-					 : "Subroutine %s redefined"),
-					name);
+					CvCONST(cv) ? "Constant subroutine %s redefined"
+						    : "Subroutine %s redefined"
+					,name);
 			    CopLINE_set(PL_curcop, oldline);
 			}
 		    }
@@ -5646,7 +5636,7 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 
 #ifdef GV_UNIQUE_CHECK
     if (GvUNIQUE(gv)) {
-        Perl_croak(aTHX_ (const char*)"Bad symbol for form (GV is unique)");
+        Perl_croak(aTHX_ "Bad symbol for form (GV is unique)");
     }
 #endif
     GvMULTI_on(gv);
@@ -5656,10 +5646,8 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 	    if (PL_copline != NOLINE)
 		CopLINE_set(PL_curcop, PL_copline);
 	    Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
-			(const char *)
-			(o
-			 ? "Format %"SVf" redefined"
-			 : "Format STDOUT redefined"), (void*)cSVOPo->op_sv);
+			o ? "Format %"SVf" redefined"
+			: "Format STDOUT redefined", (void*)cSVOPo->op_sv);
 	    CopLINE_set(PL_curcop, oldline);
 	}
 	SvREFCNT_dec(cv);
@@ -6434,9 +6422,8 @@ Perl_ck_fun(pTHX_ OP *o)
 				 if (op) {
 				      SV *tmpstr = NULL;
 				      const char * const a =
-					  (const char *)
-					  (kid->op_type == OP_AELEM ?
-					   "[]" : "{}");
+					   kid->op_type == OP_AELEM ?
+					   "[]" : "{}";
 				      if (((op->op_type == OP_RV2AV) ||
 					   (op->op_type == OP_RV2HV)) &&
 					  (firstop = ((UNOP*)op)->op_first) &&
@@ -7292,7 +7279,7 @@ Perl_ck_join(pTHX_ OP *o)
     if (kid && kid->op_type == OP_MATCH) {
 	if (ckWARN(WARN_SYNTAX)) {
             const REGEXP *re = PM_GETRE(kPMOP);
-	    const char *pmstr = (const char *)(re ? re->precomp : "STRING");
+	    const char *pmstr = re ? re->precomp : "STRING";
 	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			"/%s/ should probably be written as \"%s\"",
 			pmstr, pmstr);
@@ -7396,9 +7383,8 @@ Perl_ck_subr(pTHX_ OP *o)
 		arg++;
 		if (o3->op_type != OP_REFGEN && o3->op_type != OP_UNDEF)
 		    bad_type(arg,
-			     (const char*)
-			     (arg == 1 ? "block or sub {}" : "sub {}"),
-			     gv_ename(namegv), o3);
+			arg == 1 ? "block or sub {}" : "sub {}",
+			gv_ename(namegv), o3);
 		break;
 	    case '*':
 		/* '*' allows any scalar type, including bareword */

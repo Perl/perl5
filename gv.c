@@ -81,13 +81,12 @@ Perl_gv_IOadd(pTHX_ register GV *gv)
          * this is a dirhandle.
          */
 	const char * const fh =
-	    (const char *)
-	    (PL_op->op_type ==  OP_READDIR ||
-	     PL_op->op_type ==  OP_TELLDIR ||
-	     PL_op->op_type ==  OP_SEEKDIR ||
-	     PL_op->op_type ==  OP_REWINDDIR ||
-	     PL_op->op_type ==  OP_CLOSEDIR ?
-	     "dirhandle" : "filehandle");
+			 PL_op->op_type ==  OP_READDIR ||
+                         PL_op->op_type ==  OP_TELLDIR ||
+                         PL_op->op_type ==  OP_SEEKDIR ||
+                         PL_op->op_type ==  OP_REWINDDIR ||
+                         PL_op->op_type ==  OP_CLOSEDIR ?
+                         "dirhandle" : "filehandle";
         Perl_croak(aTHX_ "Bad symbol for %s", fh);
     }
 
@@ -162,8 +161,7 @@ GP *
 Perl_newGP(pTHX_ GV *const gv)
 {
     GP *gp;
-    const char *const file =
-	CopFILE(PL_curcop) ? CopFILE(PL_curcop) : (const char *)"";
+    const char *const file = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : "";
     STRLEN len = strlen(file);
     U32 hash;
 
@@ -1277,7 +1275,7 @@ Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
 	SvOK_off(sv);
 	return;
     }
-    sv_setpv(sv, prefix ? prefix : (const char *)"");
+    sv_setpv(sv, prefix ? prefix : "");
 
     name = HvNAME_get(hv);
     if (name) {
@@ -1562,9 +1560,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash)
 						       FALSE)))
 		{
 		    /* Can be an import stub (created by "can"). */
-		    const char * const name =
-			(const char *)
-			((gvsv && SvPOK(gvsv)) ?  SvPVX_const(gvsv) : "???");
+		    const char * const name = (gvsv && SvPOK(gvsv)) ?  SvPVX_const(gvsv) : "???";
 		    Perl_croak(aTHX_ "%s method \"%.256s\" overloading \"%s\" "\
 				"in package \"%.256s\"",
 			       (GvCVGEN(gv) ? "Stub found while resolving"

@@ -718,8 +718,8 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		  "%*sTYPE = %s  ===> ",
 		  (int)(PL_dumpindent*level-4), "", OP_NAME(o));
     if (o->op_next)
-	PerlIO_printf(file, (const char *)(seq ? "%"UVf"\n" : "(%"UVf")\n"),
-		      sequence_num(o->op_next));
+	PerlIO_printf(file, seq ? "%"UVf"\n" : "(%"UVf")\n",
+				sequence_num(o->op_next));
     else
 	PerlIO_printf(file, "DONE\n");
     if (o->op_targ) {

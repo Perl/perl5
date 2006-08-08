@@ -1259,6 +1259,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_copysignl HAS_COPYSIGNL		/**/
 
+/* USE_CPLUSPLUS:
+ *	This symbol, if defined, indicates that a C++ compiler was
+ *	used to compiled Perl and will be used to compile extensions.
+ */
+#$d_cplusplus USE_CPLUSPLUS		/**/
+
 /* HAS_CRYPT:
  *	This symbol, if defined, indicates that the crypt routine is available
  *	to encrypt passwords and the like.

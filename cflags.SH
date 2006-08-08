@@ -224,6 +224,10 @@ for file do
     *) ;;
     esac
 
+case "$cc" in
+*g++*) ccflags="`echo $ccflags|sed 's/-Wdeclaration-after-statement/ /'`" ;;
+esac
+
 if test -f .patch; then
   ccflags="-DPERL_PATCHNUM=`cat .patch` $ccflags"
 fi

@@ -349,13 +349,6 @@
  */
 /*#define HAS_PIPE		/ **/
 
-/* HAS_POLL:
- *	This symbol, if defined, indicates that the poll routine is
- *	available to poll active file descriptors. You may safely
- *	include <poll.h> when this symbol is defined.
- */
-/*#define HAS_POLL		/ **/
-
 /* HAS_READDIR:
  *	This symbol, if defined, indicates that the readdir routine is
  *	available to read directory entries. You may have to include
@@ -1174,6 +1167,11 @@
 /*#define HAS_BUILTIN_EXPECT	/ **/
 /*#define HAS_BUILTIN_CHOOSE_EXPR	/ **/
 
+/* HAS_C99_VARIADIC_MACROS:
+ *	If defined, the compiler supports C99 variadic macros.
+ */
+/*#define	HAS_C99_VARIADIC_MACROS	/ **/
+
 /* CASTI32:
  *	This symbol is defined if the C compiler can cast negative
  *	or large floating point numbers to 32-bit ints.
@@ -1236,6 +1234,12 @@
  *	available.  If aintl is also present we can emulate modfl.
  */
 /*#define HAS_COPYSIGNL		/ **/
+
+/* USE_CPLUSPLUS:
+ *	This symbol, if defined, indicates that a C++ compiler was
+ *	used to compiled Perl and will be used to compile extensions.
+ */
+/*#define USE_CPLUSPLUS		/ **/
 
 /* HAS_CRYPT:
  *	This symbol, if defined, indicates that the crypt routine is available
@@ -3475,7 +3479,7 @@
 
 /* I_POLL:
  *	This symbol, if defined, indicates that <poll.h> exists and
- *	should be included.
+ *	should be included. (see also HAS_POLL)
  */
 /*#define	I_POLL		/ **/
 
@@ -4395,5 +4399,12 @@
 #define void int		/* is void to be avoided? */
 #define M_VOID			/* Xenix strikes again */
 #endif
+
+/* HAS_POLL:
+ *	This symbol, if defined, indicates that the poll routine is
+ *	available to poll active file descriptors. You may safely
+ *	include <poll.h> when both this symbol *and* I_POLL are defined.
+ */
+/*#define HAS_POLL		/ **/
 
 #endif
