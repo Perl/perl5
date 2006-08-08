@@ -1420,7 +1420,7 @@ you subsequently fork() off.
 =item $SIG{expr}
 X<%SIG>
 
-The hash %SIG contains signal handlers for signals.  For example:
+The hash C<%SIG> contains signal handlers for signals.  For example:
 
     sub handler {	# 1st argument is signal name
 	my($sig) = @_;
@@ -1459,24 +1459,29 @@ immediate (also known as "unsafe") to deferred, also known as
 Certain internal hooks can be also set using the %SIG hash.  The
 routine indicated by C<$SIG{__WARN__}> is called when a warning message is
 about to be printed.  The warning message is passed as the first
-argument.  The presence of a __WARN__ hook causes the ordinary printing
-of warnings to STDERR to be suppressed.  You can use this to save warnings
+argument.  The presence of a C<__WARN__> hook causes the ordinary printing
+of warnings to C<STDERR> to be suppressed.  You can use this to save warnings
 in a variable, or turn warnings into fatal errors, like this:
 
     local $SIG{__WARN__} = sub { die $_[0] };
     eval $proggie;
 
+As the C<'IGNORE'> hook is not supported by C<__WARN__>, you can
+disable warnings using the empty subroutine:
+
+    local $SIG{__WARN__} = sub {};
+
 The routine indicated by C<$SIG{__DIE__}> is called when a fatal exception
 is about to be thrown.  The error message is passed as the first
-argument.  When a __DIE__ hook routine returns, the exception
+argument.  When a C<__DIE__> hook routine returns, the exception
 processing continues as it would have in the absence of the hook,
-unless the hook routine itself exits via a C<goto>, a loop exit, or a die().
+unless the hook routine itself exits via a C<goto>, a loop exit, or a C<die()>.
 The C<__DIE__> handler is explicitly disabled during the call, so that you
 can die from a C<__DIE__> handler.  Similarly for C<__WARN__>.
 
 Due to an implementation glitch, the C<$SIG{__DIE__}> hook is called
 even inside an eval().  Do not use this to rewrite a pending exception
-in C<$@>, or as a bizarre substitute for overriding CORE::GLOBAL::die().
+in C<$@>, or as a bizarre substitute for overriding C<CORE::GLOBAL::die()>.
 This strange action at a distance may be fixed in a future release
 so that C<$SIG{__DIE__}> is only called if your program is about
 to exit, as was the original intent.  Any other use is deprecated.
