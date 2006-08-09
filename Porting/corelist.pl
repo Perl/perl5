@@ -21,12 +21,15 @@ find(sub {
 	and $1 eq 'ext'
 	and ( $module =~ s{^(.*)/lib/\1\b}{$1},
 	      $module =~ s{(\w+)/\1\b}{$1},
+	      $module =~ s{^B/O}{O},
 	      $module =~ s{^Compress/IO/Base/lib/}{},
+	      $module =~ s{^Compress/IO/Zlib/}{},
 	      $module =~ s{^Devel/PPPort}{Devel},
 	      $module =~ s{^Encode/encoding}{encoding},
-	      $module =~ s{^MIME/Base64/QuotedPrint}{MIME/QuotedPrint},
+	      $module =~ s{^IPC/SysV/}{IPC/},
 	      $module =~ s{^List/Util/lib/Scalar}{Scalar},
-	      $module =~ s{^(?:DynaLoader|Errno)/}{},
+	      $module =~ s{^MIME/Base64/QuotedPrint}{MIME/QuotedPrint},
+	      $module =~ s{^(?:DynaLoader|Errno|Opcode)/}{},
 	    );
     $module =~ s{/}{::}g;
     $module =~ s/(\.pm|_pm\.PL)$//;
