@@ -2370,7 +2370,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* Mmap_t:
  *	This symbol holds the return type of the mmap() system call
  *	(and simultaneously the type of the first argument).
- *	Usually set to 'void *' or 'cadd_t'.
+ *	Usually set to 'void *' or 'caddr_t'.
  */
 #$d_mmap HAS_MMAP		/**/
 #define Mmap_t $mmaptype	/**/
