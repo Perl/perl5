@@ -2,7 +2,6 @@
 # Generates info for Module::CoreList from this perl tree
 # run this from the root of a clean perl tree
 
-use 5.9.0;
 use strict;
 use warnings;
 use File::Find;
@@ -11,16 +10,19 @@ use ExtUtils::MM_Unix;
 my @lines;
 find(sub {
     /(\.pm|_pm\.PL)$/ or return;
-    /PPPort_pm\.PL/ and return;
+    /PPPort\.pm$/ and return;
     my $module = $File::Find::name;
-    $module =~ /\b(demo|t)\b/ and return; # demo or test modules
-    my $version = MM->parse_version($_) // 'undef';
+    $module =~ /\b(demo|t|private)\b/ and return; # demo or test modules
+    my $version = MM->parse_version($_);
+    defined $version or $version = 'undef';
     $version =~ /\d/ and $version = "'$version'";
     # some heuristics to figure out the module name from the file name
     $module =~ s{^(lib|ext)/}{}
 	and $1 eq 'ext'
 	and ( $module =~ s{^(.*)/lib/\1\b}{$1},
 	      $module =~ s{(\w+)/\1\b}{$1},
+	      $module =~ s{^Compress/IO/Base/lib/}{},
+	      $module =~ s{^Devel/PPPort}{Devel},
 	      $module =~ s{^Encode/encoding}{encoding},
 	      $module =~ s{^MIME/Base64/QuotedPrint}{MIME/QuotedPrint},
 	      $module =~ s{^List/Util/lib/Scalar}{Scalar},
