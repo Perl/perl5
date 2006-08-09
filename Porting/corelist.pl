@@ -17,8 +17,8 @@ find(sub {
     defined $version or $version = 'undef';
     $version =~ /\d/ and $version = "'$version'";
     # some heuristics to figure out the module name from the file name
-    $module =~ s{^(lib|ext)/}{}
-	and $1 eq 'ext'
+    $module =~ s{^(lib|(win32/|vms/|symbian/)?ext)/}{}
+	and $1 ne 'lib'
 	and ( $module =~ s{^(.*)/lib/\1\b}{$1},
 	      $module =~ s{(\w+)/\1\b}{$1},
 	      $module =~ s{^B/O}{O},
@@ -34,7 +34,7 @@ find(sub {
     $module =~ s{/}{::}g;
     $module =~ s/(\.pm|_pm\.PL)$//;
     push @lines, sprintf "\t%-24s=> $version,\n", "'$module'";
-}, 'lib', 'ext');
+}, 'lib', 'ext', 'win32/ext', 'vms/ext', 'symbian/ext');
 print "    $] => {\n";
 print sort @lines;
 print "    },\n";
