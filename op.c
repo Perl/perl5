@@ -7303,7 +7303,7 @@ Perl_ck_subr(pTHX_ OP *o)
     int optional = 0;
     I32 arg = 0;
     I32 contextclass = 0;
-    char *e = NULL;
+    const char *e = NULL;
     bool delete_op = 0;
 
     o->op_private |= OPpENTERSUB_HASTARG;

@@ -11414,7 +11414,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 {
     dVAR;
     SV *sv;				/* scalar value: string */
-    char *tmps;				/* temp string, used for delimiter matching */
+    const char *tmps;			/* temp string, used for delimiter matching */
     register char *s = start;		/* current position in the buffer */
     register char term;			/* terminating character */
     register char *to;			/* current position in the sv's data */
