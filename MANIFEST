@@ -2050,6 +2050,14 @@ lib/Module/CoreList/bin/corelist	Module::CoreList
 lib/Module/CoreList.pm			Module::CoreList
 lib/Module/CoreList/t/corelist.t	Module::CoreList
 lib/Module/CoreList/t/find_modules.t	Module::CoreList
+lib/Module/Load.pm	Module::Load
+lib/Module/Load/t/01_Module-Load.t	Module::Load tests
+lib/Module/Load/t/to_load/config_file	Module::Load tests
+lib/Module/Load/t/to_load/LoadIt.pm	Module::Load tests
+lib/Module/Load/t/to_load/LoadMe.pl	Module::Load tests
+lib/Module/Load/t/to_load/Must/Be/Loaded.pm	Module::Load tests
+lib/Module/Load/t/to_load/TestModule.pm	Module::Load tests
+lib/Module/Load/t/to_load/ToBeLoaded	Module::Load tests
 lib/Net/Changes.libnet		libnet
 lib/Net/Cmd.pm			libnet
 lib/Net/Config.eg		libnet
