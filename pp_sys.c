@@ -4651,7 +4651,7 @@ PP(pp_ghostent)
 	STRLEN addrlen;
 	Netdb_host_t addr = (Netdb_host_t) SvPVbyte(addrsv, addrlen);
 
-	hent = PerlSock_gethostbyaddr((const void*)addr, (Netdb_hlen_t) addrlen, addrtype);
+	hent = PerlSock_gethostbyaddr((const char*)addr, (Netdb_hlen_t) addrlen, addrtype);
 #else
 	DIE(aTHX_ PL_no_sock_func, "gethostbyaddr");
 #endif

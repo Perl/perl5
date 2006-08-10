@@ -161,9 +161,10 @@ esac
 # Be nauseatingly ANSI
 ccflags="$ccflags $_ccflags_strict_ansi"
 
-# g++ needs -D_XOPEN_SOURCE -D_OSF_SOURCE -D_AES_SOURCE -D_BSD to get much use of <unistd.h>.
+# g++ needs a lot of definitions to see the same set of
+# prototypes from <unistd.h> et alia as cxx/cc see.
 case "$cc" in
-*g++*) ccflags="$ccflags -D_XOPEN_SOURCE -D_OSF_SOURCE -D_AES_SOURCE -D_BSD" ;;
+*g++*) ccflags="$ccflags -D_XOPEN_SOURCE -D_OSF_SOURCE -D_AES_SOURCE -D_BSD -D_POSIX_C_SOURCE=199309L -D_POSIX_PII_SOCKET" ;;
 esac
 
 # for gcc the Configure knows about the -fpic:
