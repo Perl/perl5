@@ -61,7 +61,7 @@ is( ${^OPEN}, ":raw :crlf\0:raw :crlf",
 is( $^H{'open_IO'}, 'crlf', 'should record last layer set in %^H' );
 
 SKIP: {
-    skip("no perlio, no :utf8", 4) unless (find PerlIO::Layer 'perlio');
+    skip("no perlio, no :utf8", 12) unless (find PerlIO::Layer 'perlio');
 
     eval <<EOE;
     use open ':utf8';
