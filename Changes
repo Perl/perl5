@@ -29,6 +29,1100 @@ Version v5.9.X		Development release working toward v5.10
 --------------
 
 ____________________________________________________________________________
+[ 28691] By: rgs                                   on 2006/08/10  13:17:51
+        Log: Some updates to the cross-compilation config script
+     Branch: perl
+	   ! Cross/config.sh-arm-linux
+____________________________________________________________________________
+[ 28690] By: rgs                                   on 2006/08/10  09:46:34
+        Log: lstat on *GLOB{IO} with warnings on would segfault
+             (noticed by Andrew Dougherty)
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 28689] By: rgs                                   on 2006/08/10  08:23:31
+        Log: Subject: [PATCH] g++: gethostbyaddr, and more Tru64 defines
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Thu, 10 Aug 2006 09:00:44 +0300
+             Message-ID: <44DACB8C.1080708@iki.fi>
+     Branch: perl
+	   ! hints/dec_osf.sh pp_sys.c
+____________________________________________________________________________
+[ 28688] By: rgs                                   on 2006/08/10  08:22:01
+        Log: Subject: [PATCH] doio.c: vararg NULLs must be cast right
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Thu, 10 Aug 2006 08:35:53 +0300 (EEST)
+             Message-Id: <200608100535.k7A5Zr2Z156515@kosh.hut.fi>
+     Branch: perl
+	   ! doio.c
+____________________________________________________________________________
+[ 28687] By: rgs                                   on 2006/08/10  08:14:46
+        Log: Upgrade to version.pm 0.67
+     Branch: perl
+	   ! lib/version.pm lib/version.pod lib/version.t
+____________________________________________________________________________
+[ 28686] By: stevep                                on 2006/08/09  21:54:08
+        Log: A couple const's and a cast to get Sun CC to compile these files.
+             Perl, however, still will not build with the Sun CC.  
+     Branch: perl
+	   ! op.c pp_sort.c toke.c
+____________________________________________________________________________
+[ 28685] By: stevep                                on 2006/08/09  19:45:06
+        Log: Fix comment nit in config.h
+     Branch: perl
+	   ! config_h.SH
+____________________________________________________________________________
+[ 28684] By: rgs                                   on 2006/08/09  15:46:55
+        Log: Subject: Re: [perl #37731] junk and uninit'ed values in tied scalars
+             From: Yitzchak Scott-Thoennes <sthoenna@efn.org>
+             Date: Mon, 28 Nov 2005 01:26:31 -0800
+             Message-ID: <20051128092605.GA2328@efn.org>
+             
+             plus a regression test
+     Branch: perl
+	   ! sv.c t/op/tie.t
+____________________________________________________________________________
+[ 28683] By: rgs                                   on 2006/08/09  12:43:19
+        Log: Subject: PATCH: Sync Time::Local in blead to 1.13 on CPAN
+             From: Dave Rolsky <autarch@urth.org>
+             Date: Wed, 9 Aug 2006 04:38:28 -0500 (CDT)
+             Message-ID: <Pine.LNX.4.64.0608090422450.8735@urth.org>
+     Branch: perl
+	   ! lib/Time/Local.pm lib/Time/Local.t
+____________________________________________________________________________
+[ 28682] By: rgs                                   on 2006/08/09  09:58:52
+        Log: Add OS-specific core modules in Module::CoreList for 5.8.[78] and 5.9.[23]
+     Branch: perl
+	   ! lib/Module/CoreList.pm
+____________________________________________________________________________
+[ 28681] By: rgs                                   on 2006/08/09  09:52:38
+        Log: Add OS-specific modules in Module::Corelist generation script
+             (hinted by Steve Hay)
+     Branch: perl
+	   ! Porting/corelist.pl
+____________________________________________________________________________
+[ 28680] By: rgs                                   on 2006/08/09  09:42:34
+        Log: Fix data for 5.9.2, 5.9.3, 5.8.7 and 5.8.8
+     Branch: perl
+	   ! lib/Module/CoreList.pm
+____________________________________________________________________________
+[ 28679] By: rgs                                   on 2006/08/09  09:23:02
+        Log: More fixes in the Module::Corelist data generation process
+     Branch: perl
+	   ! Porting/corelist.pl
+____________________________________________________________________________
+[ 28678] By: rgs                                   on 2006/08/09  09:01:25
+        Log: Really submit previous change
+     Branch: perl
+	   ! Porting/corelist.pl
+____________________________________________________________________________
+[ 28677] By: rgs                                   on 2006/08/09  08:34:42
+        Log: Several fixes in Porting/corelist.pl
+             - make it run with 5.8.x perls
+             - make it handle new modules layout in bleadperl
+     Branch: perl
+	   ! Porting/corelist.pl
+____________________________________________________________________________
+[ 28676] By: rgs                                   on 2006/08/08  09:39:35
+        Log: Subject: [PATCH] Small precision about $SIG{__WARN__}
+             From: Sébastien Aperghis-Tramoni <maddingue@free.fr>
+             Date: Tue, 08 Aug 2006 11:17:58 +0200
+             Message-ID: <1155028678.44d856c64fa0d@imp6-g19.free.fr>
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 28675] By: rgs                                   on 2006/08/08  09:22:27
+        Log: Simplification in Perl_magic_clearsig, plus a fix similar and
+             symmetrical to the one implemented in change #28669.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 28674] By: stevep                                on 2006/08/08  03:55:13
+        Log: Subject: [PATCH] g++ stage 1 reached
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Tue, 08 Aug 2006 00:02:35 +0300
+             Message-ID: <44D7AA6B.4040802@iki.fi>
+     Branch: perl
+	   ! Configure NetWare/config.wc Porting/Glossary Porting/config.sh
+	   ! Porting/config_H cflags.SH config_h.SH configure.com deb.c
+	   ! dump.c epoc/config.sh gv.c mathoms.c mg.c op.c opcode.h
+	   ! plan9/config.plan9 plan9/config_h.sample symbian/config.sh
+	   ! uconfig.h uconfig.sh win32/config.bc win32/config.ce
+	   ! win32/config.gc win32/config.vc win32/config.vc64
+	   ! win32/config_H.bc win32/config_H.ce win32/config_H.gc
+	   ! win32/config_H.vc win32/config_H.vc64
+____________________________________________________________________________
+[ 28673] By: stevep                                on 2006/08/07  19:54:51
+        Log: Upgrade to Module-Build-0.2805
+     Branch: perl
+	   ! lib/Module/Build.pm lib/Module/Build/API.pod
+	   ! lib/Module/Build/Authoring.pod lib/Module/Build/Base.pm
+	   ! lib/Module/Build/Changes lib/Module/Build/ModuleInfo.pm
+	   ! lib/Module/Build/Platform/MacOS.pm lib/Module/Build/Version.pm
+	   ! lib/Module/Build/t/moduleinfo.t
+____________________________________________________________________________
+[ 28672] By: stevep                                on 2006/08/07  19:37:28
+        Log: Upgrade to Digest-SHA-5.43
+     Branch: perl
+	   ! ext/Digest/SHA/Changes ext/Digest/SHA/README
+	   ! ext/Digest/SHA/SHA.pm ext/Digest/SHA/bin/shasum
+	   ! ext/Digest/SHA/src/hmac.c ext/Digest/SHA/src/hmac.h
+	   ! ext/Digest/SHA/src/sha.c ext/Digest/SHA/src/sha.h
+	   ! ext/Digest/SHA/src/sha64bit.c
+____________________________________________________________________________
+[ 28671] By: steveh                                on 2006/08/07  16:58:16
+        Log: Subject: Define PERL_NO_DEV_RANDOM on Windows
+             From: "Davies, Alex" <adavies@ptc.com>
+             Date: Thu, 3 Aug 2006 13:31:14 -0400
+             Message-ID: <A69AA663CE9BBC44AE1DA72483DE15DE04622D66@HQ-MAIL3.ptcnet.ptc.com>
+             
+             This stops perl from trying to read C:\dev\urandom on Windows
+     Branch: perl
+	   ! dosish.h
+____________________________________________________________________________
+[ 28670] By: steveh                                on 2006/08/07  16:21:40
+        Log: Fixups for test failures caused by #28667 and #28668
+     Branch: perl
+	   ! ext/B/B/Assembler.pm ext/B/t/assembler.t
+____________________________________________________________________________
+[ 28669] By: rgs                                   on 2006/08/07  14:10:15
+        Log: We shouldn't try to decrement the refcount of PL_warnhook
+             if it has been set to PERL_WARNHOOK_FATAL.
+     Branch: perl
+	   ! mg.c
+____________________________________________________________________________
+[ 28668] By: steveh                                on 2006/08/07  10:24:39
+        Log: Provide a BGET_svtype, required by #28667
+     Branch: perl
+	   ! ext/ByteLoader/bytecode.h
+____________________________________________________________________________
+[ 28667] By: rgs                                   on 2006/08/07  09:43:20
+        Log: Try to reinstate the fix of change #28638 by patching bytecode.pl and
+             not the file it generates
+     Branch: perl
+	   ! bytecode.pl ext/B/B/Asmdata.pm ext/ByteLoader/byterun.c
+____________________________________________________________________________
+[ 28666] By: rgs                                   on 2006/08/07  09:23:35
+        Log: Restore modification in warnings.h from change 28662 by backporting it
+             to warnings.pl
+     Branch: perl
+	   ! warnings.h warnings.pl
+____________________________________________________________________________
+[ 28665] By: rgs                                   on 2006/08/07  09:13:42
+        Log: Subject: [PATCH] File::Basename add X<> tags, replace regex delimiters
+             From: "Gabor Szabo" <szabgab@gmail.com>
+             Date: Sat, 5 Aug 2006 23:00:14 +0300
+             Message-ID: <d8a74af10608051300m4a1ebd93j491889b9b4e8523d@mail.gmail.com>
+     Branch: perl
+	   ! lib/File/Basename.pm
+____________________________________________________________________________
+[ 28664] By: rgs                                   on 2006/08/07  08:28:50
+        Log: Subject: [PATCH] adding X<> to perlvar
+             From: "Gabor Szabo" <szabgab@gmail.com>
+             Date: Sun, 6 Aug 2006 13:59:28 +0300
+             Message-ID: <d8a74af10608060359g7d4726dalf947f051a51c10e@mail.gmail.com>
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 28663] By: rgs                                   on 2006/08/07  08:23:13
+        Log: Regenerate files after previous change
+     Branch: perl
+	   ! ext/ByteLoader/byterun.c warnings.h
+____________________________________________________________________________
+[ 28662] By: rgs                                   on 2006/08/07  08:15:39
+        Log: Subject: [PATCH] g++ large patch
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 04 Aug 2006 08:58:27 +0300
+             Message-ID: <44D2E203.5050201@iki.fi>
+     Branch: perl
+	   ! cflags.SH deb.c dump.c embed.fnc embed.h gv.c hv.c mathoms.c
+	   ! mg.c op.c perl.h perlio.c pp_ctl.c pp_hot.c pp_pack.c pp_sys.c
+	   ! proto.h regcomp.c regexec.c scope.c sv.c toke.c utf8.c util.c
+	   ! warnings.h
+____________________________________________________________________________
+[ 28661] By: rgs                                   on 2006/08/05  15:46:34
+        Log: Subject: [PATCH] perlfunc.pod - unite gmtime and localtime
+             From: "Gabor Szabo" <szabgab@gmail.com>
+             Date: Thu, 27 Jul 2006 09:25:02 +0300
+             Message-ID: <d8a74af10607262325n472b424cr78c9591c31ffe190@mail.gmail.com>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 28660] By: rgs                                   on 2006/08/05  15:28:39
+        Log: Subject: [PATCH] add more X<> tags to perlfunc
+             From: "Gabor Szabo" <szabgab@gmail.com>
+             Date: Thu, 27 Jul 2006 00:27:06 +0300
+             Message-ID: <d8a74af10607261427g142f0c6bge6f77c2f5e59da40@mail.gmail.com>
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 28659] By: rgs                                   on 2006/08/05  15:22:18
+        Log: Subject: [PATCH] File::Copy pod updated adding X<>
+             From: "Gabor Szabo" <szabgab@gmail.com>
+             Date: Tue, 1 Aug 2006 08:55:37 +0200
+             Message-ID: <d8a74af10607312355t7f3fed91g1459cb74b9b50fcd@mail.gmail.com>
+     Branch: perl
+	   ! lib/File/Copy.pm
+____________________________________________________________________________
+[ 28658] By: stevep                                on 2006/08/04  16:42:54
+        Log: Sorting the MANIFEST
+     Branch: perl
+	   ! MANIFEST
+____________________________________________________________________________
+[ 28657] By: rgs                                   on 2006/08/04  09:45:37
+        Log: Subject: [PATCH blead] Re: [perl #39882] inconsistent list slice behaviour
+             From: Rick Delaney <rick@bort.ca>
+             Date: Thu, 3 Aug 2006 21:48:07 -0400
+             Message-ID: <20060804014807.GW21381@localhost.localdomain>
+     Branch: perl
+	   ! pp.c t/op/list.t
+____________________________________________________________________________
+[ 28656] By: rgs                                   on 2006/08/04  09:20:31
+        Log: Subject: [PATCH blead] Re: [perl #40055] B::Deparse double do
+             From: Rick Delaney <rick@bort.ca>
+             Date: Thu, 3 Aug 2006 17:30:06 -0400
+             Message-ID: <20060803213006.GU21381@localhost.localdomain>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm ext/B/t/deparse.t
+____________________________________________________________________________
+[ 28655] By: stevep                                on 2006/08/03  20:18:28
+        Log: Subject: [PATCH] Tru64 oops
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Thu, 3 Aug 2006 22:59:37 +0300 (EEST)
+             Message-Id: <200608031959.k73JxbsC395856@kosh.hut.fi>
+     Branch: perl
+	   ! pp_sys.c
+____________________________________________________________________________
+[ 28654] By: rgs                                   on 2006/08/03  08:15:51
+        Log: Subject: [PATCH] more g++ in Tru64
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Thu, 03 Aug 2006 09:04:45 +0300
+             Message-ID: <44D191FD.9030902@iki.fi>
+     Branch: perl
+	   ! hints/dec_osf.sh perlio.c pp_sys.c
+____________________________________________________________________________
+[ 28653] By: stevep                                on 2006/08/02  17:47:34
+        Log: Upgrade to Archive-Tar-1.30.  Since change #27571 is not included,
+             the bleadperl version is bumped to 1.30_01.
+     Branch: perl
+	   ! lib/Archive/Tar.pm
+____________________________________________________________________________
+[ 28652] By: rgs                                   on 2006/08/02  13:11:25
+        Log: Cross-compilation makefile fails to copy Config_heavy.pl
+             (noticed by Alexandre Jousset <mid@gtmp.org>)
+     Branch: perl
+	   ! Cross/Makefile
+____________________________________________________________________________
+[ 28651] By: merijn                                on 2006/08/02  11:21:30
+        Log: Subject: [PATCH] g++ heavy shoveling
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Wed, 02 Aug 2006 00:04:42 +0300
+             Message-ID: <44CFC1EA.2050702@iki.fi>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 28649] By: rgs                                   on 2006/08/02  09:49:10
+        Log: Subject: [PATCH blead] Re: [perl #39733] $AUTOLOAD is never tainted
+             From: Rick Delaney <rick@bort.ca>
+             Date: Sun, 9 Jul 2006 15:01:50 -0400
+             Message-ID: <20060709190150.GA1922@localhost.localdomain>
+             
+             Plus a note in perldelta
+     Branch: perl
+	   ! gv.c pod/perl594delta.pod t/op/taint.t
+____________________________________________________________________________
+[ 28645] By: stevep                                on 2006/08/02  03:11:51
+        Log: Subject: [PATCH] g++ heavy shoveling
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Wed, 02 Aug 2006 00:04:42 +0300
+             Message-ID: <44CFC1EA.2050702@iki.fi>
+     Branch: perl
+	   ! cflags.SH hints/linux.sh perl.h
+____________________________________________________________________________
+[ 28644] By: rgs                                   on 2006/08/01  16:47:01
+        Log: Subject: Re: New perltrap?
+             From: Rick Delaney <rick@bort.ca>
+             Date: Tue, 1 Aug 2006 08:43:36 -0400
+             Message-ID: <20060801124336.GM21381@localhost.localdomain>
+     Branch: perl
+	   ! pod/perlsec.pod
+____________________________________________________________________________
+[ 28643] By: steveh                                on 2006/08/01  16:17:47
+        Log: Silence a couple of Borland compiler warnings
+     Branch: perl
+	   ! cop.h regexec.c win32/win32.h
+____________________________________________________________________________
+[ 28642] By: rgs                                   on 2006/08/01  16:11:24
+        Log: Subject: [PATCH] threads 1.38
+             From: "Jerry D. Hedden" <jerry@hedden.us>
+             Date: Tue, 01 Aug 2006 08:58:52 -0700
+             Message-ID: <20060801085852.fb30e530d17747c2b054d625b8945d88.ad7fb0a136.wbe@email.secureserver.net>
+     Branch: perl
+	   ! ext/threads/Changes ext/threads/README ext/threads/t/free.t
+	   ! ext/threads/t/free2.t ext/threads/t/thread.t
+	   ! ext/threads/threads.pm ext/threads/threads.xs
+____________________________________________________________________________
+[ 28641] By: rgs                                   on 2006/08/01  15:11:15
+        Log: Bump version of Module::CoreList
+     Branch: perl
+	   ! lib/Module/CoreList.pm
+____________________________________________________________________________
+[ 28640] By: rgs                                   on 2006/08/01  14:59:36
+        Log: Patch by Marius Feraru <altblue@n0i.net> to handle dotted perl versions
+             in the corelist utility, and to add an easy way to determine what was
+             some module's version bundled with a specified Perl release.
+     Branch: perl
+	   ! lib/Module/CoreList/bin/corelist
+____________________________________________________________________________
+[ 28639] By: merijn                                on 2006/08/01  12:13:53
+        Log: Subject: [PATCH] g++ dNOOP (luckily one can mix code and decls in C++)
+             Somewhat modifies as per Steve Hay's comment
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Tue, 1 Aug 2006 08:46:15 +0300 (EEST)
+             Message-Id: <200608010546.k715kEdP017064@kosh.hut.fi>
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 28638] By: steveh                                on 2006/08/01  11:20:47
+        Log: Silence the VC7 compiler warning in the following smoke:
+             http://www.nntp.perl.org/group/perl.daily-build.reports/39824
+     Branch: perl
+	   ! ext/ByteLoader/byterun.c
+____________________________________________________________________________
+[ 28637] By: merijn                                on 2006/08/01  08:44:58
+        Log: ANSI-C headers in test snippets to please g++ (and the rest)
+             Subject: [PATCH]  (back) towards g++ compilation (in Tru64, and elsewhere)
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Mon, 31 Jul 2006 23:44:55 +0300
+             Message-ID: <44CE6BC7.8060805@iki.fi>
+     Branch: perl
+	   ! Configure
+____________________________________________________________________________
+[ 28635] By: steveh                                on 2006/08/01  08:10:07
+        Log: Subject: [PATCH] op/stat.t: SKIP count fix in case of no dirfd()
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Tue, 1 Aug 2006 08:04:26 +0300 (EEST)
+             Message-Id: <200608010504.k7154QT3178692@kosh.hut.fi>
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 28634] By: stevep                                on 2006/08/01  00:17:19
+        Log: Subject: [PATCH] solution(?) to the "warning: comparison is always false dueto limited range of data type" with New*()
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Fri, 28 Jul 2006 09:00:28 +0300
+             Message-ID: <44C9A7FC.1060801@iki.fi>
+     Branch: perl
+	   ! handy.h
+____________________________________________________________________________
+[ 28633] By: stevep                                on 2006/08/01  00:10:06
+        Log: Subject: [PATCH] (back) towards g++ compilation (in Tru64, and elsewhere)
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Mon, 31 Jul 2006 23:44:55 +0300
+             Message-ID: <44CE6BC7.8060805@iki.fi>
+             
+             Just the hints/dec_osf.sh changes from this set of patches.
+     Branch: perl
+	   ! hints/dec_osf.sh
+____________________________________________________________________________
+[ 28632] By: stevep                                on 2006/07/30  17:03:10
+        Log: Tests to go with change #28628.
+     Branch: perl
+	   ! t/op/stat.t
+____________________________________________________________________________
+[ 28631] By: stevep                                on 2006/07/30  16:20:58
+        Log: Subject: [PAUSE] CPAN Upload: A/AN/ANDK/CPAN-1.87_55.tar.gz
+             From: andreas.koenig.gmwojprw@franz.ak.mind.de (Andreas J. Koenig)
+             Date: Sat, 29 Jul 2006 22:06:31 +0200
+             Message-ID: <877j1w2n20.fsf@k75.linux.bogus>
+     Branch: perl
+	   ! lib/CPAN.pm lib/CPAN/FirstTime.pm lib/CPAN/HandleConfig.pm
+	   ! lib/CPAN/SIGNATURE lib/CPAN/Tarzip.pm
+____________________________________________________________________________
+[ 28630] By: steveh                                on 2006/07/28  16:37:48
+        Log: Remove a (UINT) cast to silence a VC6 compiler warning
+             (this was added by #27352, but Digest-SHA-5.37 changed the
+             loop variable to be signed so the cast now needs to go).
+             Also bump the VERSION since #27482 has not yet been applied
+             to the CPAN version.
+     Branch: perl
+	   ! ext/Digest/SHA/SHA.pm ext/Digest/SHA/src/sha.c
+____________________________________________________________________________
+[ 28629] By: merijn                                on 2006/07/28  08:04:01
+        Log: Subject: [PATCH] z/OS: an easy test nit
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Thu, 27 Jul 2006 20:00:02 +0300 (EEST)
+             Message-Id: <200607271700.k6RH02V1355005@kosh.hut.fi>
+     Branch: perl
+	   ! ext/PerlIO/t/encoding.t
+____________________________________________________________________________
+[ 28628] By: stevep                                on 2006/07/28  00:42:04
+        Log: Change stat() and -X filetests so that they treat *FILE{IO} 
+             filehandles like *FILE filehandles.  This resolves RT #8244.
+     Branch: perl
+	   ! doio.c pp_sys.c
+____________________________________________________________________________
+[ 28627] By: stevep                                on 2006/07/27  21:17:10
+        Log: Upgrade to Digest-SHA-5.42
+     Branch: perl
+	   ! ext/Digest/SHA/Changes ext/Digest/SHA/README
+	   ! ext/Digest/SHA/SHA.pm ext/Digest/SHA/bin/shasum
+	   ! ext/Digest/SHA/src/hmac.c ext/Digest/SHA/src/hmac.h
+	   ! ext/Digest/SHA/src/sha.c ext/Digest/SHA/src/sha.h
+	   ! ext/Digest/SHA/t/1-exist.t ext/Digest/SHA/t/2-nist-sha-oo.t
+	   ! ext/Digest/SHA/t/2-nist-vectors-bit.t
+	   ! ext/Digest/SHA/t/2-nist-vectors-byte.t
+	   ! ext/Digest/SHA/t/3-gillogly-hard.t
+	   ! ext/Digest/SHA/t/6-dump-load.t ext/Digest/SHA/t/7-ireland.t
+____________________________________________________________________________
+[ 28626] By: steveh                                on 2006/07/27  16:25:41
+        Log: Clear up most of the VC6 compiler warnings in the following smoke:
+             http://www.nntp.perl.org/group/perl.daily-build.reports/39733
+     Branch: perl
+	   ! doio.c ext/B/B.xs ext/XS/APItest/APItest.xs hv.c op.c pp.c
+	   ! pp_pack.c utf8.c
+____________________________________________________________________________
+[ 28625] By: merijn                                on 2006/07/27  15:33:07
+        Log: #7217: config.h comments for HAS_POLL incorrect
+             http://rt.perl.org/rt3/Ticket/Display.html?id=7217
+             Date: Mon, 2 Jul 2001 14:58:27 -0700
+             From: David Dyck <dcd@tc.fluke.com>
+             Subject: config.h comments for HAS_POLL incorrect
+     Branch: perl
+	   ! config_h.SH
+____________________________________________________________________________
+[ 28623] By: craigb                                on 2006/07/27  13:54:55
+        Log: Subject: Re: Silence/fix more warnings from the regex engine
+             From: demerphq <demerphq@gmail.com>
+             Date: Tue, 18 Jul 2006 21:57:15 +0200
+             Message-ID: <9b18b3110607181257l28cc424aj1de28ebfc4c196d7@mail.gmail.com>
+             
+             REGCP_SET should only set a value, not check the previous value of its arg
+     Branch: perl
+	   ! regexec.c
+____________________________________________________________________________
+[ 28622] By: stevep                                on 2006/07/27  11:00:18
+        Log: Subject: [perl #39835] Patch for perlipc.pod to update TCP server example wrt safe signals and accept()
+             From: Andy Wardley (via RT) <perlbug-followup@perl.org>
+             Date: Fri, 14 Jul 2006 10:11:44 -0700	
+             Message-ID: <rt-3.6.HEAD-20371-1152897103-1865.39835-75-0@perl.org>
+     Branch: perl
+	   ! pod/perlipc.pod
+____________________________________________________________________________
+[ 28621] By: rgs                                   on 2006/07/26  20:36:19
+        Log: Some notes in perl594delta.
+     Branch: perl
+	   ! pod/perl594delta.pod
+____________________________________________________________________________
+[ 28620] By: rgs                                   on 2006/07/26  20:32:08
+        Log: Subject: interpolation of @- (and @+) in patterns ([perl #27940] comes back)
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Tue, 25 Jul 2006 00:15:50 +0900
+             Message-Id: <20060725001517.3C5D.BQW10602@nifty.com>
+     Branch: perl
+	   ! pod/perlop.pod t/op/pat.t t/op/subst.t t/op/tr.t toke.c
+____________________________________________________________________________
+[ 28619] By: stevep                                on 2006/07/26  13:54:28
+        Log: Added tests from CGI.pm that had not been integrated into core.
+     Branch: perl
+	   + lib/CGI/t/start_end_asterisk.t lib/CGI/t/start_end_end.t
+	   + lib/CGI/t/start_end_start.t
+	   ! MANIFEST
+____________________________________________________________________________
+[ 28618] By: rgs                                   on 2006/07/26  06:41:56
+        Log: Add a few links to standard modules in perlfunc, by Gabor Szabo.
+     Branch: perl
+	   ! pod/perlfunc.pod
+____________________________________________________________________________
+[ 28617] By: stevep                                on 2006/07/26  01:59:06
+        Log: Subject: [PATCH] Re: [ID 20000816.012] *foo = *_ is broken
+             From: Mike Guy <mjtg@cam.ac.uk>
+             Date: Thu, 17 Aug 2000 16:26:56 +0100
+             Message-Id: <E13PRZI-0007Ge-00@libra.cus.cam.ac.uk>
+             
+             Only part regarding @ARG missing from the documentation was applied.
+     Branch: perl
+	   ! pod/perlvar.pod
+____________________________________________________________________________
+[ 28616] By: mhx                                   on 2006/07/25  18:54:08
+        Log: Upgrade to Devel::PPPort 3.09_02
+     Branch: perl
+	   + ext/Devel/PPPort/parts/inc/strlfuncs
+	   + ext/Devel/PPPort/t/strlfuncs.t
+	   ! MANIFEST ext/Devel/PPPort/Changes
+	   ! ext/Devel/PPPort/PPPort_pm.PL ext/Devel/PPPort/TODO
+	   ! ext/Devel/PPPort/parts/apicheck.pl
+	   ! ext/Devel/PPPort/parts/base/5009004
+	   ! ext/Devel/PPPort/parts/embed.fnc
+	   ! ext/Devel/PPPort/parts/todo/5009004 ext/Devel/PPPort/soak
+____________________________________________________________________________
+[ 28615] By: mhx                                   on 2006/07/25  18:42:26
+        Log: Very recent development versions of gcc (4.2.0 20060715) seem
+             to have switched from '<command line>' to '<command-line>'.
+     Branch: perl
+	   ! makedepend.SH
+____________________________________________________________________________
+[ 28614] By: stevep                                on 2006/07/24  17:30:38
+        Log: Replace some sprintf()'s in Data::Dumper with my_snprintf()'s
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.xs mkppport.lst
+____________________________________________________________________________
+[ 28613] By: rgs                                   on 2006/07/23  20:32:33
+        Log: Revert change 28603: this was a wrong fix, that didn't prevent
+             a later crash. Reindent a bit of the same function.
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[ 28612] By: rgs                                   on 2006/07/23  19:59:55
+        Log: Subject: [PATCH document] perlop: parsing quoted constructs 
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sun, 16 Jul 2006 20:06:33 +0900
+             Message-Id: <20060716200218.2CE6.BQW10602@nifty.com>
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[ 28611] By: stevep                                on 2006/07/23  13:46:05
+        Log: The rest of the changes for Sys-Syslog-0.17 which my new patch no
+             longer automatically "p4 edits" for me.
+     Branch: perl
+	   ! ext/Sys/Syslog/Changes ext/Sys/Syslog/Makefile.PL
+	   ! ext/Sys/Syslog/README ext/Sys/Syslog/t/syslog.t
+____________________________________________________________________________
+[ 28610] By: stevep                                on 2006/07/23  13:42:55
+        Log: Upgrade to Sys-Syslog-0.17
+     Branch: perl
+	   ! ext/Sys/Syslog/Syslog.pm
+____________________________________________________________________________
+[ 28609] By: stevep                                on 2006/07/23  13:20:07
+        Log: Subject: [PATCH] Tru64: if cc given both -O and -g, -g must be -g3
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Sun, 23 Jul 2006 10:18:11 +0300 (EEST)
+             Message-Id: <200607230718.k6N7IB4u009170@kosh.hut.fi>
+     Branch: perl
+	   ! hints/dec_osf.sh
+____________________________________________________________________________
+[ 28608] By: rgs                                   on 2006/07/23  13:17:48
+        Log: Revert part of last change, that was causing utf8 test failures
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 28607] By: rgs                                   on 2006/07/23  13:04:10
+        Log: Subject: [PATCH] z/OS: pp_sys.c, reg*.c, toke.c, utf8.c
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Sat, 22 Jul 2006 18:51:48 +0300
+             Message-ID: <44C24994.6020008@iki.fi>
+     Branch: perl
+	   ! pp_sys.c regcomp.c regexec.c toke.c utf8.c
+____________________________________________________________________________
+[ 28606] By: rgs                                   on 2006/07/23  12:51:02
+        Log: Add another volatile modifier to protect against longjmp clobbering
+     Branch: perl
+	   ! op.c
+____________________________________________________________________________
+[ 28605] By: mhx                                   on 2006/07/21  17:56:39
+        Log: Upgrade to Devel::PPPort 3.09_01
+     Branch: perl
+	   ! ext/Devel/PPPort/Changes ext/Devel/PPPort/HACKERS
+	   ! ext/Devel/PPPort/PPPort_pm.PL ext/Devel/PPPort/PPPort_xs.PL
+	   ! ext/Devel/PPPort/mktests.PL ext/Devel/PPPort/parts/ppptools.pl
+	   ! ext/Devel/PPPort/soak
+____________________________________________________________________________
+[ 28604] By: rgs                                   on 2006/07/21  15:27:20
+        Log: More tweaks to threads 1.37, by Jerry D. Hedden
+     Branch: perl
+	   ! ext/threads/Changes ext/threads/t/exit.t
+	   ! ext/threads/t/thread.t ext/threads/threads.pm
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 28603] By: rgs                                   on 2006/07/20  22:03:59
+        Log: In pp_entersub, accept to handle a CV with a NULL padlist.
+             This fixes a crash with mod_perl 1.29.
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[ 28602] By: rgs                                   on 2006/07/20  21:36:25
+        Log: Upgrade to threads 1.37, by Jerry D. Hedden
+     Branch: perl
+	   ! ext/threads/Changes ext/threads/README ext/threads/t/exit.t
+	   ! ext/threads/t/thread.t ext/threads/threads.pm
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 28601] By: rgs                                   on 2006/07/19  21:34:05
+        Log: Band-aid for segfault in ext/threads/t/blocks.t on SMP machines
+     Branch: perl
+	   ! pp_hot.c
+____________________________________________________________________________
+[ 28600] By: stevep                                on 2006/07/19  14:59:24
+        Log: Subject: [perl #39876] Time::gmtime 1.02 examples patch
+             From: Alexandr Ciornii (via RT) <perlbug-followup@perl.org>
+             Date: Wed, 19 Jul 2006 05:46:36 -0700
+             Message-ID: <rt-3.6.HEAD-25412-1153313196-897.39876-75-0@perl.org>
+             
+             Pod fixes for Time::gmtime.pm
+     Branch: perl
+	   ! lib/Time/gmtime.pm
+____________________________________________________________________________
+[ 28599] By: rgs                                   on 2006/07/18  21:43:52
+        Log: Subject: [PATCH] make magic vtables const if PERL_GLOBAL_STRUCT_PRIVATE
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Mon, 17 Jul 2006 09:09:24 +0300
+             Message-ID: <44BB2994.5090609@iki.fi>
+     Branch: perl
+	   ! perl.h pod/perlguts.pod pod/perlhack.pod
+____________________________________________________________________________
+[ 28598] By: rgs                                   on 2006/07/18  21:02:39
+        Log: Subject: [PATCH] [Fwd: Smoke [5.9.4] 28575 FAIL(XF) OSF1 V5.1 (EV6/4 cpu)]
+             From: "Jerry D. Hedden" <jerry@hedden.us>
+             Date: Mon, 17 Jul 2006 05:00:01 -0700
+             Message-ID: <20060717050001.fb30e530d17747c2b054d625b8945d88.b729fe881f.wbe@email.secureserver.net>
+     Branch: perl
+	   ! ext/threads/t/basic.t ext/threads/t/free.t
+____________________________________________________________________________
+[ 28597] By: steveh                                on 2006/07/18  12:11:36
+        Log: Fix Borland problem with quoted pre-processor macros in response files
+             
+             This should clear up the errors from Module/Build/t/ppm.t and
+             Module/Build/t/xs.t in the Borland smokes.
+             
+             Subject: Re: Smoke [5.9.4] 27656 FAIL(F) MSWin32 WinXP/.Net SP2 (x86/2 cpu)
+             From: "Randy W. Sims" <ml-perl@thepierianspring.org>
+             Date: Thu, 06 Apr 2006 22:33:04 -0400
+             Message-ID: <4435CF60.1000707@thepierianspring.org>
+             
+             See the thread here for details:
+             http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2006-04/msg00027.html
+     Branch: perl
+	   ! lib/ExtUtils/CBuilder/Platform/Windows.pm
+____________________________________________________________________________
+[ 28596] By: stevep                                on 2006/07/18  03:10:51
+        Log: Additional reason for ssh passphrase failures.
+     Branch: perl
+	   ! Porting/repository.pod
+____________________________________________________________________________
+[ 28595] By: rgs                                   on 2006/07/17  21:11:52
+        Log: Remove the C89 checking with gcc
+             (but leave a note in perlhack)
+     Branch: perl
+	   ! cflags.SH pod/perlhack.pod
+____________________________________________________________________________
+[ 28594] By: steveh                                on 2006/07/17  14:32:19
+        Log: Subject: Silence system warning during tests (only on win32 for now)
+             From: demerphq <demerphq@gmail.com>
+             Date: Sat, 15 Jul 2006 18:21:15 +0200
+             Message-ID: <9b18b3110607150921p33be8e87wd51b2fd317a81587@mail.gmail.com>
+     Branch: perl
+	   ! t/comp/opsubs.t
+____________________________________________________________________________
+[ 28593] By: steveh                                on 2006/07/17  14:23:59
+        Log: Avoid an error that VC++'s resource compiler seems to have
+             with a reference to "perly.y" in "perly.h"
+             
+             See the thread here for details:
+             http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2006-07/msg00460.html
+     Branch: perl
+	   ! perly.h regen_perly.pl
+____________________________________________________________________________
+[ 28592] By: merijn                                on 2006/07/17  06:51:54
+        Log: Cygwin doesn't cope (yet) with gcc flags -std=c89
+     Branch: perl
+	   ! cflags.SH
+____________________________________________________________________________
+[ 28591] By: rgs                                   on 2006/07/16  21:42:59
+        Log: Check for taintedness of PERL5SHELL on Windows
+             (bug #39832)
+     Branch: perl
+	   ! taint.c
+____________________________________________________________________________
+[ 28590] By: stevep                                on 2006/07/16  19:18:27
+        Log: Subject: [PATCH] MIME::Base64 quoted-print.t: z/OS (EBCDIC)
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Sun, 16 Jul 2006 13:11:15 +0300
+             Message-ID: <44BA10C3.8040007@iki.fi>
+     Branch: perl
+	   ! ext/MIME/Base64/t/quoted-print.t
+____________________________________________________________________________
+[ 28589] By: stevep                                on 2006/07/16  19:12:28
+        Log: Subject: Re: Fix loads of warnings from the last escaping patch...
+             From: demerphq <demerphq@gmail.com>
+             Date: Sun, 16 Jul 2006 19:59:02 +0200
+             Message-ID: <9b18b3110607161059j276ac869p450aa178150044ae@mail.gmail.com>
+     Branch: perl
+	   ! dump.c embed.fnc ext/re/re.pm pod/perlapi.pod proto.h
+	   ! regcomp.c regcomp.h
+____________________________________________________________________________
+[ 28588] By: stevep                                on 2006/07/16  19:06:01
+        Log: Subject: [PATCH] perlhack: advertise Configure -Dgccansipedantic
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Sun, 16 Jul 2006 20:27:20 +0300 (EEST)
+             Message-Id: <200607161727.k6GHRKFk069579@kosh.hut.fi>
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 28587] By: stevep                                on 2006/07/16  15:40:29
+        Log: Upgrade to Module-Build-0.2803
+     Branch: perl
+	   ! lib/Module/Build.pm lib/Module/Build/Base.pm
+	   ! lib/Module/Build/Changes
+____________________________________________________________________________
+[ 28586] By: stevep                                on 2006/07/16  14:54:58
+        Log: Upgrade to Test-Simple-0.64
+     Branch: perl
+	   ! lib/Test/Builder/Tester.pm lib/Test/More.pm lib/Test/Simple.pm
+	   ! lib/Test/Simple/Changes lib/Test/Simple/t/skip.t
+	   ! lib/Test/Simple/t/tbt_01basic.t
+	   ! lib/Test/Simple/t/tbt_05faildiag.t
+	   ! lib/Test/Simple/t/tbt_06errormess.t
+	   ! lib/Test/Simple/t/tbt_07args.t
+____________________________________________________________________________
+[ 28585] By: stevep                                on 2006/07/16  13:46:35
+        Log: various safety/portability tweaks
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Sat, 15 Jul 2006 22:15:29 +0300
+             Message-ID: <44B93ED1.7080000@iki.fi>
+             
+             Fix for change #28578.
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 28584] By: davem                                 on 2006/07/16  00:20:25
+        Log: run regen_headerds
+     Branch: perl
+	   ! embed.h global.sym proto.h
+____________________________________________________________________________
+[ 28583] By: davem                                 on 2006/07/15  22:14:46
+        Log: Subject:  [PATCH] comment update for scan_const
+             From:  SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date:  Sat, 15 Jul 2006 20:16:01 +0900
+             Message-Id:  <20060715201552.9FA5.BQW10602@nifty.com>
+     Branch: perl
+	   ! toke.c
+____________________________________________________________________________
+[ 28582] By: davem                                 on 2006/07/15  21:59:43
+        Log: Subject:  Updated escaping code. utf8 regex debug output improvements
+             From:  demerphq <demerphq@gmail.com>
+             Date:  Sat, 15 Jul 2006 18:56:03 +0200
+             Message-Id:  <9b18b3110607150956o6273a16clb1518911d1945d4@mail.gmail.com>
+     Branch: perl
+	   ! dump.c embed.fnc ext/re/re.pm perl.h regcomp.c regcomp.h
+	   ! regexec.c
+____________________________________________________________________________
+[ 28581] By: stevep                                on 2006/07/15  18:57:39
+        Log: Adding Module::Build::Version missed in upgrade.
+     Branch: perl
+	   + lib/Module/Build/Version.pm
+	   ! MANIFEST
+____________________________________________________________________________
+[ 28580] By: stevep                                on 2006/07/15  15:22:35
+        Log: Upgrade to ANSIColor-1.11
+     Branch: perl
+	   + lib/Term/ANSIColor/t/basic.t lib/Term/ANSIColor/t/pod.t
+	   - lib/Term/ANSIColor/test.pl
+	   ! MANIFEST lib/Term/ANSIColor.pm lib/Term/ANSIColor/ChangeLog
+	   ! lib/Term/ANSIColor/README
+____________________________________________________________________________
+[ 28579] By: stevep                                on 2006/07/15  14:46:53
+        Log: Upgrade to Module-Build-0.2802
+     Branch: perl
+	   ! lib/Module/Build.pm lib/Module/Build/Base.pm
+	   ! lib/Module/Build/Changes lib/Module/Build/ModuleInfo.pm
+	   ! lib/Module/Build/t/moduleinfo.t
+	   ! lib/Module/Build/t/runthrough.t
+____________________________________________________________________________
+[ 28578] By: merijn                                on 2006/07/15  11:53:36
+        Log: Subject: [PATCH] various safety/portability tweaks
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Sat, 15 Jul 2006 13:14:32 +0300
+             Message-ID: <44B8C008.4030300@iki.fi>
+     Branch: perl
+	   ! pod/perlhack.pod pod/perltodo.pod pp_sys.c sv.c util.c
+____________________________________________________________________________
+[ 28577] By: merijn                                on 2006/07/15  11:45:15
+        Log: Subject: [PATCH] cflags.SH: add missing C files
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Sat, 15 Jul 2006 12:30:25 +0300
+             Message-ID: <44B8B5B1.2050902@iki.fi>
+     Branch: perl
+	   ! cflags.SH
+____________________________________________________________________________
+[ 28576] By: merijn                                on 2006/07/15  11:41:59
+        Log: Subject: [PATCH] Re: [PATCH] cflags.SH: add -std=c89
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Sat, 15 Jul 2006 12:19:45 +0300
+             Message-ID: <44B8B331.8090009@iki.fi>
+     Branch: perl
+	   ! cflags.SH
+____________________________________________________________________________
+[ 28575] By: craigb                                on 2006/07/14  18:18:18
+        Log: overload.t has same locale problem with VMS that it has with dec_osf
+     Branch: perl
+	   ! t/uni/overload.t
+____________________________________________________________________________
+[ 28574] By: craigb                                on 2006/07/14  18:09:40
+        Log: Make sysconf tests handle unimplemented success indications
+             for the benefit of Mac OS X and VMS.
+     Branch: perl
+	   ! ext/POSIX/t/sysconf.t
+____________________________________________________________________________
+[ 28573] By: steveh                                on 2006/07/14  14:42:57
+        Log: Silence a compiler warning on Win32/VC++
+             
+             Subject: Re: Smoke [5.9.4] 28569 FAIL(F) MSWin32 WinXP/.Net SP2 (x86/2 cpu)
+             From: Anno Siegel <anno4000@mailbox.tu-berlin.de>
+             Date: Fri, 14 Jul 2006 16:33:01 +0200
+             Message-Id: <8CC2FF7E-42EE-4B28-A9D2-4FCD8C745004@mailbox.tu-berlin.de>
+     Branch: perl
+	   ! ext/Hash/Util/FieldHash/FieldHash.xs
+____________________________________________________________________________
+[ 28572] By: stevep                                on 2006/07/14  14:38:28
+        Log: Skip tests for pathconf() and fpathconf() on HP-UX for 
+             _PC_CHOWN_RESTRICTED.  The HP-UX manpage suggests not trying
+             to do it, and that the errno will not be set on failure.
+     Branch: perl
+	   ! ext/POSIX/t/sysconf.t
+____________________________________________________________________________
+[ 28571] By: davem                                 on 2006/07/14  11:50:37
+        Log: remove regex postive super-linear cache code
+             (it wasn't actually achieving anything)
+     Branch: perl
+	   ! regexec.c t/op/re_tests
+____________________________________________________________________________
+[ 28570] By: merijn                                on 2006/07/14  07:03:08
+        Log: Subject: [PATCH] -DPERL_GLOBAL_STRUCT_PRIVATE tweaks (done_sanity_check global? yech!)
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Fri, 14 Jul 2006 09:34:09 +0300 (EEST)
+             Message-Id: <200607140634.k6E6Y9Ia471707@kosh.hut.fi>
+     Branch: perl
+	   ! hv.c sv.c
+____________________________________________________________________________
+[ 28569] By: stevep                                on 2006/07/13  20:31:59
+        Log: Version bumps for z/OS fixes.
+     Branch: perl
+	   ! ext/Encode/Encode.pm ext/MIME/Base64/Base64.pm
+	   ! ext/threads/shared/shared.pm
+____________________________________________________________________________
+[ 28568] By: stevep                                on 2006/07/13  20:18:59
+        Log: Subject: [PATCH] z/OS: CPAN-ized ext/ and lib/
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Thu, 13 Jul 2006 23:10:27 +0300
+             Message-ID: <44B6A8B3.5070605@iki.fi>
+     Branch: perl
+	   ! ext/Data/Dumper/Dumper.xs ext/Data/Dumper/t/dumper.t
+	   ! ext/Encode/Encode.xs ext/Encode/t/utf8strict.t
+	   ! ext/MIME/Base64/Base64.xs ext/Storable/t/downgrade.t
+	   ! ext/Storable/t/overload.t ext/threads/shared/shared.xs
+	   ! lib/CGI/t/util-58.t lib/Digest/t/base.t lib/Digest/t/file.t
+	   ! lib/Pod/t/pod2html-lib.pl lib/Tie/File/t/09_gen_rs.t
+____________________________________________________________________________
+[ 28567] By: merijn                                on 2006/07/13  17:12:00
+        Log: Subject: [PATCH] z/OS: non-CPAN ext and lib + main() without the third arg + Stephen McCamant's comment
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Thu, 13 Jul 2006 19:47:29 +0300
+             Message-ID: <44B67921.6090901@iki.fi>
+     Branch: perl
+	   ! ext/B/B/Deparse.pm lib/AutoLoader.t lib/DBM_Filter/t/encode.t
+	   ! lib/DBM_Filter/t/utf8.t lib/ExtUtils/Constant/Utils.pm
+	   ! lib/ExtUtils/Embed.pm lib/ExtUtils/t/Embed.t
+	   ! lib/PerlIO/via/t/QuotedPrint.t lib/bytes.t lib/dumpvar.pl
+	   ! lib/utf8.t miniperlmain.c perl.h
+____________________________________________________________________________
+[ 28566] By: stevep                                on 2006/07/13  15:46:11
+        Log: Keep Intel C++ from claiming that it is gcc.
+     Branch: perl
+	   ! hints/linux.sh
+____________________________________________________________________________
+[ 28565] By: stevep                                on 2006/07/13  14:04:18
+        Log: Clear up a few more warnings from blead.
+     Branch: perl
+	   ! op.c perl.c reentr.c reentr.pl regexec.c
+____________________________________________________________________________
+[ 28564] By: rgs                                   on 2006/07/13  08:46:30
+        Log: Not everybody has env
+     Branch: perl
+	   ! pod/perlintro.pod
+____________________________________________________________________________
+[ 28563] By: rgs                                   on 2006/07/13  08:40:12
+        Log: Subject: Re: Misunderstanding escapes in heredocs?
+             From: demerphq <demerphq@gmail.com>
+             Date: Sun, 9 Jul 2006 16:42:45 +0200
+             Message-ID: <9b18b3110607090742gc55b4ffl402d5fadc5bd231e@mail.gmail.com>
+             
+             with formatting nits
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[ 28562] By: rgs                                   on 2006/07/13  08:17:04
+        Log: Additions to perlhack based on a patch by Gabor Szabo
+     Branch: perl
+	   ! pod/perlhack.pod
+____________________________________________________________________________
+[ 28561] By: rgs                                   on 2006/07/13  08:04:44
+        Log: Nits to the perlintro safety net (by Gabor Szabo and Merijn)
+     Branch: perl
+	   ! pod/perlintro.pod
+____________________________________________________________________________
+[ 28560] By: merijn                                on 2006/07/13  06:50:55
+        Log: Relink to use temp file forced on current dir in mpeix
+             Subject: [PATCH] mpeix/relink: tweak from Donna Garverick
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Thu, 13 Jul 2006 08:25:59 +0300 (EEST)
+             Message-Id: <200607130525.k6D5PxFp251263@kosh.hut.fi>
+     Branch: perl
+	   ! mpeix/relink
+____________________________________________________________________________
+[ 28559] By: rgs                                   on 2006/07/12  13:19:04
+        Log: Cleanup and conversion to t/test.pl
+     Branch: perl
+	   ! ext/Devel/Peek/t/Peek.t
+____________________________________________________________________________
+[ 28558] By: rgs                                   on 2006/07/12  12:29:58
+        Log: I prefer array indexes that start from 0 in beginner docs
+     Branch: perl
+	   ! pod/perlintro.pod
+____________________________________________________________________________
+[ 28557] By: rgs                                   on 2006/07/12  12:28:34
+        Log: Integration of strlcat is to-done (noticed by Yves)
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 28556] By: steveh                                on 2006/07/12  10:28:39
+        Log: Fix change #28552: VC++ doesn't like code before declarations
+     Branch: perl
+	   ! ext/Hash/Util/FieldHash/FieldHash.xs
+____________________________________________________________________________
+[ 28555] By: rgs                                   on 2006/07/12  09:56:04
+        Log: Additions and removals in perltodo
+     Branch: perl
+	   ! pod/perltodo.pod
+____________________________________________________________________________
+[ 28554] By: merijn                                on 2006/07/12  09:40:14
+        Log: Subject: [PATCH] more strictness in perlintro
+             From: "Gabor Szabo" <szabgab@gmail.com>
+             Date: Wed, 12 Jul 2006 10:30:06 +0300
+             Message-ID: <d8a74af10607120030p1964b935y9493e29994a5b371@mail.gmail.com>
+     Branch: perl
+	   ! pod/perlintro.pod
+____________________________________________________________________________
+[ 28553] By: merijn                                on 2006/07/12  09:27:59
+        Log: Subject: [PATCH] perlinro (use $fh filehandler + not to use built in function name in sub example)
+             From: "Gabor Szabo" <szabgab@gmail.com>
+             Date: Wed, 12 Jul 2006 10:51:03 +0300
+             Message-ID: <d8a74af10607120051t10382a7fw95ce094f0f395490@mail.gmail.com>
+     Branch: perl
+	   ! pod/perlintro.pod
+____________________________________________________________________________
+[ 28552] By: rgs                                   on 2006/07/12  09:00:01
+        Log: Subject: Re: [PATCH] FieldHash coverity-compliant
+             From: Anno Siegel <anno4000@mailbox.tu-berlin.de>
+             Date: Wed, 12 Jul 2006 00:45:44 +0200
+             Message-Id: <7AEBF247-0AF7-46A8-9D61-D38B45FD21EA@mailbox.tu-berlin.de>
+     Branch: perl
+	   ! ext/Hash/Util/FieldHash/FieldHash.xs
+____________________________________________________________________________
+[ 28551] By: rgs                                   on 2006/07/12  08:49:17
+        Log: Upgrade to PathTools 3.19
+     Branch: perl
+	   ! ext/Cwd/Changes lib/Cwd.pm lib/File/Spec.pm
+	   ! lib/File/Spec/Unix.pm lib/File/Spec/t/Spec.t
+____________________________________________________________________________
+[ 28550] By: merijn                                on 2006/07/12  06:53:22
+        Log: Subject: [PATCH] z/OS: t/ - mostly EBCDIC fixes
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Wed, 12 Jul 2006 00:01:29 +0300 (EEST)
+             Message-Id: <200607112101.k6BL1TGr321715@kosh.hut.fi>
+     Branch: perl
+	   ! t/comp/parser.t t/op/caller.t t/op/chop.t t/op/exec.t
+	   ! t/op/index.t t/op/pack.t t/op/pat.t t/op/sprintf.t
+	   ! t/op/utfhash.t t/run/fresh_perl.t t/uni/case.pl t/uni/class.t
+____________________________________________________________________________
+[ 28549] By: rgs                                   on 2006/07/11  17:00:26
+        Log: A few rough notes for the next perldelta
+     Branch: perl
+	   ! pod/perl594delta.pod
+____________________________________________________________________________
+[ 28548] By: rgs                                   on 2006/07/11  14:55:17
+        Log: Revert bogus fix for bug #27940, which wasn't really a bug,
+             and a new test item, as found and suggested by Sadahiro Tomoyuki.
+     Branch: perl
+	   ! t/op/pat.t toke.c
+____________________________________________________________________________
+[ 28547] By: rgs                                   on 2006/07/11  14:06:08
+        Log: Subject: Re: Misunderstanding escapes in heredocs?
+             From: SADAHIRO Tomoyuki <bqw10602@nifty.com>
+             Date: Sun, 09 Jul 2006 11:57:42 +0900
+             Message-Id: <20060709115613.78FF.BQW10602@nifty.com>
+     Branch: perl
+	   ! pod/perlop.pod
+____________________________________________________________________________
+[ 28546] By: stevep                                on 2006/07/11  12:31:10
+        Log: Upgrade to Text-Tabs+Wrap-2006.0711.  Keep the local changes from
+             change #27541.  Also, leave out the test files Jacobson.t and 
+             Jacobson2.t which both generated several warnings.
+     Branch: perl
+	   + lib/Text/TabsWrap/t/37000.t lib/Text/TabsWrap/t/39548.t
+	   + lib/Text/TabsWrap/t/Jochen.t lib/Text/TabsWrap/t/belg4mit.t
+	   + lib/Text/TabsWrap/t/sep.t lib/Text/TabsWrap/t/sep2.t
+	   ! MANIFEST lib/Text/Tabs.pm lib/Text/TabsWrap/CHANGELOG
+	   ! lib/Text/TabsWrap/t/fill.t lib/Text/Wrap.pm
+____________________________________________________________________________
+[ 28545] By: steveh                                on 2006/07/11  11:26:17
+        Log: Fix change #28533: my_strlcpy does not return the dest str!
+     Branch: perl
+	   ! util.c
+____________________________________________________________________________
+[ 28544] By: rgs                                   on 2006/07/11  09:29:23
+        Log: Adjust test count in threads test
+     Branch: perl
+	   ! ext/threads/t/kill.t
+____________________________________________________________________________
+[ 28543] By: rgs                                   on 2006/07/11  09:27:25
+        Log: Subject: [PATCH] threads 1.36 - Signalling terminated threads core dumps
+             From: "Jerry D. Hedden" <jerry@hedden.us>
+             Date: Mon, 10 Jul 2006 13:28:25 -0700
+             Message-ID: <20060710132825.fb30e530d17747c2b054d625b8945d88.5bdc82d2c0.wbe@email.secureserver.net>
+     Branch: perl
+	   ! ext/threads/Changes ext/threads/README ext/threads/t/kill.t
+	   ! ext/threads/t/thread.t ext/threads/threads.pm
+	   ! ext/threads/threads.xs
+____________________________________________________________________________
+[ 28542] By: rgs                                   on 2006/07/11  08:06:26
+        Log: Subject: [PATCH] FieldHash coverity-compliant
+             From: Anno Siegel <anno4000@mailbox.tu-berlin.de>
+             Date: Mon, 10 Jul 2006 21:30:15 +0200
+             Message-Id: <9C6C104C-8040-489A-BB35-40D22BC48AFC@mailbox.tu-berlin.de>
+     Branch: perl
+	   ! ext/Hash/Util/FieldHash/FieldHash.xs
+	   ! ext/Hash/Util/FieldHash/lib/Hash/Util/FieldHash.pm
+	   ! ext/Hash/Util/FieldHash/t/02_function.t
+	   ! ext/Hash/Util/FieldHash/t/04_thread.t
+____________________________________________________________________________
+[ 28541] By: rgs                                   on 2006/07/11  07:55:21
+        Log: Subject: [PATCH] Re: [perl #39634] gcc 3.3 has problems with __attribute__((unused))
+             From: Andy Dougherty <doughera@lafayette.edu>
+             Date: Mon, 10 Jul 2006 13:16:27 -0400 (EDT)
+             Message-ID: <Pine.LNX.4.62.0607101312540.24708@fractal.phys.lafayette.edu>
+     Branch: perl
+	   ! perl.h
+____________________________________________________________________________
+[ 28540] By: rgs                                   on 2006/07/11  07:48:24
+        Log: Subject: [PATCH] sysconf.t: still failing in tru64, try harder to skip
+             From: Jarkko Hietaniemi <jhi@cc.hut.fi>
+             Date: Tue, 11 Jul 2006 09:23:08 +0300 (EEST)
+             Message-Id: <200607110623.k6B6N8Ni488812@kosh.hut.fi>
+     Branch: perl
+	   ! ext/POSIX/t/sysconf.t
+____________________________________________________________________________
+[ 28539] By: rgs                                   on 2006/07/10  20:14:34
+        Log: Subject: [PATCH] z/OS: hints/os390.sh and Makefile.SH
+             From: Jarkko Hietaniemi <jhi@iki.fi>
+             Date: Mon, 10 Jul 2006 22:55:33 +0300
+             Message-ID: <44B2B0B5.3000008@iki.fi>
+     Branch: perl
+	   ! Makefile.SH hints/os390.sh
+____________________________________________________________________________
+[ 28538] By: rgs                                   on 2006/07/10  19:42:18
+        Log: Update Changes
+     Branch: perl
+	   ! Changes
+____________________________________________________________________________
 [ 28537] By: stevep                                on 2006/07/10  19:28:54
         Log: Subject: [PATCH] perlhack: argh...
              From: Jarkko Hietaniemi <jhi@iki.fi>
