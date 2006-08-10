@@ -6,13 +6,13 @@ use strict;
 
 use vars qw(@ISA $VERSION $CLASS *qv);
 
-$VERSION = 0.64;
+$VERSION = 0.67;
 
 $CLASS = 'version';
 
 # Preloaded methods go here.
 sub import {
-    my ($class, @args) = @_;
+    my ($class) = @_;
     my $callpkg = caller();
     no strict 'refs';
     

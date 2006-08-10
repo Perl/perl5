@@ -21,7 +21,7 @@ version - Perl extension for Version Objects
 
 =head1 DESCRIPTION
 
-Overloaded version objects for all versions of Perl.  This module
+Overloaded version objects for all modern versions of Perl.  This module
 implements all of the features of version objects which will be part
 of Perl 5.10.0.
 
@@ -73,6 +73,54 @@ to the release of version.pm in your Build.PL:
 and it should Just Work(TM).  Module::Build will [hopefully soon] 
 include full support for version objects; there are no current plans 
 to patch ExtUtils::MakeMaker to support version objects.
+
+=back
+
+=head2 Using modules that use version.pm
+
+As much as possible, the version.pm module remains compatible with all
+current code.  However, if your module is using a module that has defined
+C<$VERSION> using the version class, there are a couple of things to be
+aware of.  For purposes of discussion, we will assume that we have the
+following module installed:
+
+  package Example;
+  use version;  $VERSION = qv('1.2.2');
+  ...module code here...
+  1;
+
+=over 4
+
+=item Numeric versions always work
+
+Code of the form:
+
+  use Example 1.002003;
+
+will always work correctly.  The C<use> will perform an automatic
+C<$VERSION> comparison using the floating point number given as the first
+term after the module name (e.g. above 1.002.003).  In this case, the
+installed module is too old for the requested line, so you would see an
+error like:
+
+  Example version 1.002003 (v1.2.3) required--this is only version 1.002002 (v1.2.2)...
+
+=item Extended version work sometimes
+
+With Perl >= 5.6.2, you can also use a line like this:
+
+  use Example 1.2.3;
+
+and it will again work (i.e. give the error message as above), even with
+releases of Perl which do not normally support v-strings (see L<What about
+v-strings> below).  This has to do with that fact that C<use> only checks
+to see if the second term I<looks like a number> and passes that to the
+replacement L<UNIVERSAL::VERSION>.  This is not true in Perl 5.005_04,
+however, so you are B<strongly encouraged> to always use a numeric version
+in your code, even for those versions of Perl which support the extended
+version.
+
+=back
 
 =head2 What IS a version
 
