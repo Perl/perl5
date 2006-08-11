@@ -189,6 +189,10 @@ C<Archive::Tar> is a module to manipulate C<tar> archives.
 C<Digest::SHA> is a module used to calculate many types of SHA digests,
 has been included for SHA support in the CPAN module.
 
+=item *
+
+C<ExtUtils::CBuilder> and C<ExtUtils::ParseXS> have been added.
+
 =back
 
 =head1 Utility Changes

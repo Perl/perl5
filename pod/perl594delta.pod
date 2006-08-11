@@ -12,15 +12,19 @@ and L<perl593delta> for the differences between 5.8.0 and 5.9.3.
 
 =head2 chdir FOO
 
-A bareword argument to chdir is now recognized as a file handle.
+A bareword argument to chdir() is now recognized as a file handle.
 Earlier releases interpreted the bareword as a directory name.
 
 =head2 Handling of pmc files
 
-TODO XXX explain what are pmc files
+And old feature of perl is that before C<require> or C<use> look for a
+file with a F<.pm> extension, they will first look for a similar filename
+with a F<.pmc> extension. If this file is found, it will be loaded in
+place of any potentially existing file ending in a F<.pm> extension.
 
-.pmc files are always loaded, even if they are older than a matching .pm
-file. (This trick is used by Pugs.)
+Previously, F<.pmc> files were loaded only if more recent than the
+matching F<.pm> file. Starting with 5.9.4, they'll be always loaded if
+they exist. (This trick is used by Pugs.)
 
 =head2 @- and @+ in patterns
 
@@ -40,7 +44,9 @@ AUTOLOAD function, then $AUTOLOAD will be (correctly) tainted.
 
 =head1 Modules and Pragmata
 
-C<encoding::warnings> is now a lexical pragma.
+C<encoding::warnings> is now a lexical pragma. (Although on older perls,
+which don't have support for lexical pragmas, it keeps its global
+behaviour.)
 
 C<threads>
 
@@ -50,7 +56,13 @@ C<threads>
 
 =item *
 
-C<Module::Build> has been added.
+C<Module::Build> has been added. It's an alternative to
+C<ExtUtils::MakeMaker> to build and install perl modules.
+
+=item *
+
+C<Module::Load> has been added. It's used to load indistinctively modules
+and files.
 
 =item *
 
@@ -71,9 +83,18 @@ provides low-level access to Win32 system API calls for files/dirs.
 
 =head2 New manpage, perlpragma
 
+The L<perlpragma> manpage documents how to write one's own lexical
+pragmas in pure Perl.
+
 =head2 New manpage, perlreguts
 
+The L<perlreguts> manpage, due to Yves Orton, describes internals of the
+Perl regular expression engine.
+
 =head2 New manpage, perlunitut
+
+The L<perlunitut> manpage is an tutorial for programming with Unicode and
+string encodings in Perl, due to Juerd Waalboer.
 
 =head1 Performance Enhancements
 
@@ -86,6 +107,9 @@ Regular expressions (Yves)
 =head2 Ports
 
 Perl has been reported to work on DragonFlyBSD.
+
+Many improvements have been made towards making Perl work correctly on
+z/OS.
 
 =head2 Compilation improvements
 
@@ -100,6 +124,15 @@ Russ Allbery's public domain implementation).  Various places in the perl
 interpreter now uses them.
 
 =head1 Selected Bug Fixes
+
+=head2 PERL5SHELL and tainting
+
+On Windows, PERL5SHELL is now checked for taintedness.
+
+=head2 Using *FILE{IO}
+
+C<stat()> and C<-X> filetests now treat *FILE{IO} filehandles like *FILE
+filehandles.
 
 =head1 New or Changed Diagnostics
 
