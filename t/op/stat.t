@@ -493,6 +493,7 @@ SKIP: {
     my @thwap = stat *F{IO};
     ok(@thwap, "stat(*F{IO}) works");    
     ok( -f *F{IO} , "single file tests work with *F{IO}");
+    close F;
     unlink $tmpfile;
 
     #PVIO's hold dirhandle information, so let's test them too.
