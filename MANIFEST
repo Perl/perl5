@@ -2133,6 +2133,8 @@ lib/open.pm			Pragma to specify default I/O layers
 lib/open.t			See if the open pragma works
 lib/overload.pm			Module for overloading perl operators
 lib/overload.t			See if operator overloading works
+lib/Package/Constants.pm	Package::Constants
+lib/Package/Constants/t/01_list.t	Package::Constants tests
 lib/perl5db.pl			Perl debugging routines
 lib/PerlIO.pm			PerlIO support module
 lib/PerlIO/via/QuotedPrint.pm	PerlIO::via::QuotedPrint
