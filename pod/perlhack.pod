@@ -2474,6 +2474,9 @@ incompatibilities in your system's header files.)
 Use the Configure C<-Dgccansipedantic> flag to enable the gcc
 C<-ansi -pedantic> flags which enforce stricter ANSI rules.
 
+If using the C<gcc -Wall> note that not all the possible
+warnings are given unless you also compile with C<-O>.
+
 Also study L<perlport> carefully to avoid any bad assumptions
 about the operating system, filesystem, and so forth.
 
@@ -2544,7 +2547,43 @@ Lvalue casts
   (int)*p = ...;
 
 Simply not portable.  Get your lvalue to be of the right type,
-or maybe use temporary variables.
+or maybe use temporary variables, or dirty tricks with unions.
+
+=item *
+
+Assume B<anything> about structs
+
+=over 8
+
+=item *
+
+That a certain field exists in a struct
+
+=item *
+
+That no other fields exist besides the ones you know of know of
+
+=item *
+
+That a field is a certain signedness, sizeof, or type
+
+=item *
+
+That the fields are in a certain order
+
+=item *
+
+That the sizeof(struct) is the same everywhere
+
+=item *
+
+That there is no padding between the fields
+
+=item *
+
+That there are no alignment requirements for the fields
+
+=back
 
 =item *
 
@@ -2582,6 +2621,21 @@ branches are long), use (C) comments:
 
 The gcc option C<-Wendif-labels> warns about the bad variant
 (by default on starting from Perl 5.9.4).
+
+=item *
+
+Having a comma after the last element of an enum list
+
+  enum color {
+    CERULEAN,
+    CHARTREUSE,
+    CINNABAR, /* Right here. */
+  };
+
+is not portable.  Leave out the last comma.
+
+Also note that whether enums are implicitly morphable to ints
+varies between compilers, you might need to (int).
 
 =item *
 
