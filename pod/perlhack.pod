@@ -450,7 +450,7 @@ When you keep in sync with bleadperl, the pumpking would love to
 I<see> that the community efforts really work. So after each of his
 sync points, you are to 'make test' to check if everything is still
 in working order. If it is, you do 'make ok', which will send an OK
-report to perlbug@perl.org. (If you do not have access to a mailer
+report to I<perlbug@perl.org>. (If you do not have access to a mailer
 from the system you just finished successfully 'make test', you can
 do 'make okfile', which creates the file C<perl.ok>, which you can
 than take to your favourite mailer and mail yourself).
@@ -570,21 +570,16 @@ other diff variants.
 
 =head2 Perlbug administration
 
-There is a single remote administrative interface for modifying bug status, 
-category, open issues etc. using the B<RT> I<bugtracker> system, maintained
-by I<Robert Spier>.  Become an administrator, and close any bugs you can get 
+There is a single remote administrative interface for modifying bug status,
+category, open issues etc. using the B<RT> bugtracker system, maintained
+by Robert Spier.  Become an administrator, and close any bugs you can get
 your sticky mitts on:
 
-	http://rt.perl.org
-
-The bugtracker mechanism for B<perl5> bugs in particular is at:
-
-	http://bugs6.perl.org/perlbug
+	http://rt.perl.org/rt3/
 
 To email the bug system administrators:
 
 	"perlbug-admin" <perlbug-admin@perl.org>
-
 
 =head2 Submitting patches
 
@@ -620,7 +615,7 @@ To report a bug in Perl, use the program I<perlbug> which comes with
 Perl (if you can't get Perl to work, send mail to the address
 I<perlbug@perl.org> or I<perlbug@perl.com>).  Reporting bugs through
 I<perlbug> feeds into the automated bug-tracking system, access to
-which is provided through the web at http://bugs.perl.org/ .  It
+which is provided through the web at http://rt.perl.org/rt3/ .  It
 often pays to check the archives of the perl5-porters mailing list to
 see whether the bug you're reporting has been reported before, and if
 so whether it was considered a bug.  See above for the location of
@@ -628,8 +623,8 @@ the searchable archives.
 
 The CPAN testers ( http://testers.cpan.org/ ) are a group of
 volunteers who test CPAN modules on a variety of platforms.  Perl
-Smokers ( http://archives.develooper.com/daily-build@perl.org/ )
-automatically tests Perl source releases on platforms with various
+Smokers ( http://www.nntp.perl.org/group/perl.daily-build )
+automatically test Perl source releases on platforms with various
 configurations.  Both efforts welcome volunteers.
 
 It's a good idea to read and lurk for a while before chipping in.
@@ -679,11 +674,9 @@ wanting to go about Perl development.
 
 =item The perl5-porters FAQ
 
-This should be available from http://simon-cozens.org/writings/p5p-faq ;
-alternatively, you can get the FAQ emailed to you by sending mail to
-C<perl5-porters-faq@perl.org>. It contains hints on reading perl5-porters,
-information on how perl5-porters works and how Perl development in general
-works.
+This should be available from http://dev.perl.org/perl5/docs/p5p-faq.html .
+It contains hints on reading perl5-porters, information on how
+perl5-porters works and how Perl development in general works.
 
 =back
 
@@ -2561,7 +2554,7 @@ That a certain field exists in a struct
 
 =item *
 
-That no other fields exist besides the ones you know of know of
+That no other fields exist besides the ones you know of
 
 =item *
 
