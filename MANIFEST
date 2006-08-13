@@ -2050,6 +2050,8 @@ lib/Module/CoreList/bin/corelist	Module::CoreList
 lib/Module/CoreList.pm			Module::CoreList
 lib/Module/CoreList/t/corelist.t	Module::CoreList
 lib/Module/CoreList/t/find_modules.t	Module::CoreList
+lib/Module/Loaded.pm	Module::Loaded
+lib/Module/Loaded/t/01_Module-Loaded.t	Module::Loaded tests
 lib/Module/Load.pm	Module::Load
 lib/Module/Load/t/01_Module-Load.t	Module::Load tests
 lib/Module/Load/t/to_load/config_file	Module::Load tests
