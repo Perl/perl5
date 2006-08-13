@@ -114,7 +114,8 @@ their parent modules.)
 =head2 New manpage, perlpragma
 
 The L<perlpragma> manpage documents how to write one's own lexical
-pragmas in pure Perl.
+pragmas in pure Perl (something that is possible only starting with
+5.9.4).
 
 =head2 New manpage, perlreguts
 
@@ -185,7 +186,7 @@ compiler is considered to be removed before the 5.10.0 release.
 
 If you find what you think is a bug, you might check the articles
 recently posted to the comp.lang.perl.misc newsgroup and the perl
-bug database at http://bugs.perl.org/ .  There may also be
+bug database at http://rt.perl.org/rt3/ .  There may also be
 information at http://www.perl.org/ , the Perl Home Page.
 
 If you believe you have an unreported bug, please run the B<perlbug>
