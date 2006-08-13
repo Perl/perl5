@@ -1523,8 +1523,8 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 28481] By: craigb                                on 2006/07/05  02:31:06
         Log: Subject: [PATCH] RE: [PATCH] threads 1.33
-	From: "Jerry D. Hedden" <jdhedden@cpan.org>
-	Message-id: <20060704171845.fb30e530d17747c2b054d625b8945d88.f0db2cab53.wbe@email.secureserver.net>
+             From: "Jerry D. Hedden" <jdhedden@cpan.org>
+             Message-id: <20060704171845.fb30e530d17747c2b054d625b8945d88.f0db2cab53.wbe@email.secureserver.net>
              Date: Tue, 04 Jul 2006 17:18:45 -0700
              
              exiting from threads works differently on VMS
@@ -2393,8 +2393,8 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 28367] By: craigb                                on 2006/06/07  12:14:39
         Log: Subject: [patch@28349] vmsify - full EFS charset support
-	From: "John E. Malmberg" <wb8tyw@qsl.net>
-	Date: Mon, 05 Jun 2006 23:39:32 -0400
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
+             Date: Mon, 05 Jun 2006 23:39:32 -0400
              Message-id: <4484F8F4.7040902@qsl.net>
 
      Branch: perl
@@ -2637,9 +2637,9 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 28334] By: craigb                                on 2006/05/29  22:34:23
         Log: Subject: [PATCH] redo part of change 27374
-	From: Abe Timmerman <abe@ztreet.demon.nl>
-	Date: Mon, 29 May 2006 23:24:51 +0200
-	Message-id: <200605292324.51714.abe@ztreet.demon.nl>
+             From: Abe Timmerman <abe@ztreet.demon.nl>
+             Date: Mon, 29 May 2006 23:24:51 +0200
+             Message-id: <200605292324.51714.abe@ztreet.demon.nl>
 
      Branch: perl
 	   ! configure.com
@@ -6466,9 +6466,9 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 27733] By: craigb                                on 2006/04/07  02:53:52
         Log: Subject: [patch@27694] VMS RMSEXPAND/PERL_CANDO fixes
-	From: "John E. Malmberg" <wb8tyw@qsl.net>
-	Date: Mon, 03 Apr 2006 07:39:10 -0400
-	Message-id: <4431095E.8030003@qsl.net>
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
+             Date: Mon, 03 Apr 2006 07:39:10 -0400
+             Message-id: <4431095E.8030003@qsl.net>
      Branch: perl
 	   ! vms/vms.c vms/vmsish.h
 ____________________________________________________________________________
@@ -6934,9 +6934,9 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 27648] By: craigb                                on 2006/03/31  16:31:28
         Log: Subject: [patch@27638] Enable standard stat for VMS >=8.2
-	From: "John E. Malmberg" <wb8tyw@qsl.net>
-	Date: Fri, 31 Mar 2006 00:39:23 -0500
-	Message-id: <442CC08A.30409@qsl.net>
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
+             Date: Fri, 31 Mar 2006 00:39:23 -0500
+             Message-id: <442CC08A.30409@qsl.net>
      Branch: perl
 	   ! configure.com vms/vms.c vms/vmsish.h
 ____________________________________________________________________________
@@ -7151,9 +7151,9 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 27618] By: craigb                                on 2006/03/28  04:01:21
         Log: Subject: [patch@27613] VMS long file path support active.
-	From: "John E. Malmberg" <wb8tyw@qsl.net>
-	Date: Mon, 27 Mar 2006 08:05:33 -0500
-	Message-id: <4427E31D.2030801@qsl.net>
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
+             Date: Mon, 27 Mar 2006 08:05:33 -0500
+             Message-id: <4427E31D.2030801@qsl.net>
 
      Branch: perl
 	   ! vms/vms.c vms/vmsish.h
@@ -7194,9 +7194,9 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 27611] By: craigb                                on 2006/03/26  21:58:49
         Log: Subject: [patch@27609] vms pool corruption fix for _NLA0:
-	From: "John E. Malmberg" <wb8tyw@qsl.net>
-	Date: Sun, 26 Mar 2006 14:32:30 -0500
-	Message-id: <4426EC4E.8030801@qsl.net>
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
+             Date: Sun, 26 Mar 2006 14:32:30 -0500
+             Message-id: <4426EC4E.8030801@qsl.net>
      Branch: perl
 	   ! vms/vms.c
 ____________________________________________________________________________
@@ -7501,9 +7501,9 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 27563] By: craigb                                on 2006/03/21  13:01:47
         Log: Subject: [patch@27529] thread.h - VMS needs more stack
-	From: "John E. Malmberg" <wb8tyw@qsl.net>
-	Date: Fri, 17 Mar 2006 11:05:33 -0500
-	Message-id: <441ADE4D.2090207@qsl.net>
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
+             Date: Fri, 17 Mar 2006 11:05:33 -0500
+             Message-id: <441ADE4D.2090207@qsl.net>
 
      Branch: perl
 	   ! thread.h
@@ -8138,8 +8138,8 @@ ____________________________________________________________________________
 [ 27474] By: craigb                                on 2006/03/11  17:26:00
         Log: Subject: [PATCH] perl@27437 fix File::Path::mkpath so that perl installs on VMS
              From: Peter Prymmer <PPrymmer@factset.com>
-	Date: Fri, 10 Mar 2006 15:24:23 -0500
-	Message-id: <OFBE8F84F1.A708DA4A-ON8525712D.006E4BF7-8525712D.007018C6@factset.com>
+             Date: Fri, 10 Mar 2006 15:24:23 -0500
+             Message-id: <OFBE8F84F1.A708DA4A-ON8525712D.006E4BF7-8525712D.007018C6@factset.com>
      Branch: perl
 	   ! lib/File/Path.pm
 ____________________________________________________________________________
@@ -8349,9 +8349,9 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 27438] By: craigb                                on 2006/03/09  14:49:45
         Log: Subject: patch@27385 - VMS thread fixes (was: threads and VMS)
-	From: "John E. Malmberg" <wb8tyw@qsl.net>
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
              Date: Wed, 08 Mar 2006 23:34:05 -0500
-	Message-id: <440FB03D.8010409@qsl.net>
+             Message-id: <440FB03D.8010409@qsl.net>
 
      Branch: perl
 	   ! vms/vms.c
@@ -8687,17 +8687,17 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 27386] By: craigb                                on 2006/03/06  03:42:19
         Log: Subject: PATCH: 2 vms specific build files in perl @ 27383
-	From: Peter Prymmer <PPrymmer@factset.com>
-	Date: Sun, 05 Mar 2006 20:30:09 -0500
-	Message-id: <OFF0B19477.39D9ABEB-ON85257129.00070590-85257129.000840D3@factset.com>
+             From: Peter Prymmer <PPrymmer@factset.com>
+             Date: Sun, 05 Mar 2006 20:30:09 -0500
+             Message-id: <OFF0B19477.39D9ABEB-ON85257129.00070590-85257129.000840D3@factset.com>
      Branch: perl
 	   ! configure.com vms/gen_shrfls.pl
 ____________________________________________________________________________
 [ 27385] By: craigb                                on 2006/03/06  03:26:39
         Log: Subject: Re: threads and VMS
-	From: "John E. Malmberg" <wb8tyw@qsl.net>
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
              Date: Sun, 05 Mar 2006 00:32:27 -0500
-	Message-id: <440A77EB.2030205@qsl.net>
+             Message-id: <440A77EB.2030205@qsl.net>
      Branch: perl
 	   ! vms/vms.c
 ____________________________________________________________________________
@@ -8772,8 +8772,8 @@ ____________________________________________________________________________
 [ 27376] By: craigb                                on 2006/03/05  00:03:31
         Log: Subject: Re: threads and VMS
              From: "John E. Malmberg" <wb8tyw@qsl.net>
-	Date: Sat, 04 Mar 2006 18:29:22 -0500
-	Message-id: <440A22D2.30009@qsl.net>
+             Date: Sat, 04 Mar 2006 18:29:22 -0500
+             Message-id: <440A22D2.30009@qsl.net>
      Branch: perl
 	   ! doio.c
 ____________________________________________________________________________
@@ -9873,9 +9873,9 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 27187] By: craigb                                on 2006/02/15  04:32:14
         Log: Subject: patch@27162 long path name support in readdir / cando_by_name
-	From: "John E. Malmberg" <wb8tyw@qsl.net>
-	Date: Sun, 12 Feb 2006 15:24:58 -0500
-	Message-id: <43EF999A.1020500@qsl.net>
+             From: "John E. Malmberg" <wb8tyw@qsl.net>
+             Date: Sun, 12 Feb 2006 15:24:58 -0500
+             Message-id: <43EF999A.1020500@qsl.net>
      Branch: perl
 	   ! vms/vms.c vms/vmsish.h
 ____________________________________________________________________________
@@ -10231,9 +10231,9 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 27115] By: craigb                                on 2006/02/07  04:46:47
         Log: Subject: Re: Configure.com issue, more quoting needed.
-	From: Peter Prymmer <PPrymmer@factset.com>
-	Date: Mon, 06 Feb 2006 13:27:14 -0500
-	Message-id:  <OF3536E719.A8B8D167-ON8525710D.0065011E-8525710D.00655ED0@factset.com>
+             From: Peter Prymmer <PPrymmer@factset.com>
+             Date: Mon, 06 Feb 2006 13:27:14 -0500
+             Message-id:  <OF3536E719.A8B8D167-ON8525710D.0065011E-8525710D.00655ED0@factset.com>
      Branch: perl
 	   ! configure.com
 ____________________________________________________________________________
@@ -10241,7 +10241,7 @@ ____________________________________________________________________________
         Log: Subject: patch@27082 Allow fatal exceptions to bring up VMS debugger
              From: "John E. Malmberg" <wb8tyw@qsl.net>
              Date: Sat, 04 Feb 2006 16:04:32 -0500
-	Message-id: <43E516E0.1000508@qsl.net>
+             Message-id: <43E516E0.1000508@qsl.net>
 
      Branch: perl
 	   ! vms/perlvms.pod vms/vms.c
@@ -10805,8 +10805,8 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 27015] By: craigb                                on 2006/01/31  04:37:27
         Log: Subject: patch@26996 - patch around stat("_NLA0:") bug
-	From: "John E. Malmberg" <wb8tyw@qsl.net>Date: Mon, 30 Jan 2006 23:21:34 -0500
-	Message-id: <43DEE5CE.7060108@qsl.net>
+             From: "John E. Malmberg" <wb8tyw@qsl.net>Date: Mon, 30 Jan 2006 23:21:34 -0500
+             Message-id: <43DEE5CE.7060108@qsl.net>
 
      Branch: perl
 	   ! vms/vms.c vms/vmsish.h
