@@ -4546,12 +4546,13 @@ A filehandle, from which the file will be read.
 
 =item 3
 
-A reference to a subroutine. If there is no file handle, then this subroutine
-is expected to generate one line of source code per call, writing the line
-into C<$_> and returning 1, then returning 0 at "end of FILE" If there is a
-file handle then the subroutine will be called to act a simple source filter,
-with the line as read in C<$_>. Again, return 1 for each valid line, and 0
-after all lines have been returned.
+A reference to a subroutine. If there is no filehandle (previous item),
+then this subroutine is expected to generate one line of source code per
+call, writing the line into C<$_> and returning 1, then returning 0 at
+"end of file". If there is a filehandle, then the subroutine will be
+called to act a simple source filter, with the line as read in C<$_>.
+Again, return 1 for each valid line, and 0 after all lines have been
+returned.
 
 =item 4
 
