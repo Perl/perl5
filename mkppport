@@ -4,6 +4,7 @@ use warnings;
 use Getopt::Long;
 use Pod::Usage;
 use File::Spec;
+use File::Compare qw( compare );
 use File::Copy qw( copy );
 use File::Basename qw( dirname );
 
@@ -82,9 +83,14 @@ unless (-e 'ppport.h') {
 # Now install the created ppport.h into extension directories
 iterdirs {
   my($dir, $fulldir) = @_;
-  print "installing ppport.h for $dir\n";
   my $dest = File::Spec->catfile($fulldir, 'ppport.h');
-  copy('ppport.h', $dest) or die "copying ppport.h to $dest failed: $!\n";
+  if (compare('ppport.h', $dest)) {
+    print "installing ppport.h for $dir\n";
+    copy('ppport.h', $dest) or die "copying ppport.h to $dest failed: $!\n";
+  }
+  else {
+    print "ppport.h in $dir is up-to-date\n";
+  }
 };
 
 exit 0;
