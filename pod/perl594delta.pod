@@ -149,13 +149,56 @@ string encodings in Perl, due to Juerd Waalboer.
 
 =head1 Performance Enhancements
 
+=head2 Memory optimisations
+
 Several internal data structures (typeglobs, GVs, CVs, formats) have been
 restructured to use less memory. (Nicholas Clark)
+
+=head2 UTF-8 cache optimisation
 
 The UTF-8 caching code is now more efficient, and used more often.
 (Nicholas Clark)
 
-Regular expressions (Yves Orton) TODO
+=head2 Regular expressions
+
+=over 4
+
+=item Engine de-recursiveized
+
+The regular expression engine is no longer recursive, meaning that
+patterns that used to overflow the stack will either die with useful
+explanations, or run to completion, which, since they were able to blow
+the stack before, will likely take a very long time to happen. If you were
+experiencing the occasional stack overflow (or segfault) and upgrade to
+discover that now perl apparently hangs instead, look for a degenerate
+regex.
+
+=item Single char char-classes treated as literals
+
+Classes of a single character are now treated the same as if the
+character had been used as a literal, meaning that code that uses
+char-classes as an escaping mechanism will see a speedup.
+
+=item Trie optimisation of literal string alternations
+
+Alternations, where possible, are optimised into more efficient matching
+structures. String literal alternations are merged into a trie and are
+matched simultaneously.  This means that instead of O(N) time for matching
+N alternations at a given point the new code performs in O(1) time.
+
+B<Note:> Much code exists that works around perl's historic poor
+performance on alternations. Often the tricks used to do so will disable
+the new optimisations. Hopefully the utility modules used for this purpose
+will be educated about these new optimisations by the time 5.10 is
+released.
+
+=item Aho-Corasick start-point optimisation
+
+When a pattern starts with a trie-able alternation and there aren't
+better optimisations available the regex engine will use Aho-Corasick
+matching to find the start point.
+
+=back
 
 =head1 Installation and Configuration Improvements
 
