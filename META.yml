@@ -1,5 +1,5 @@
 name: perl
-version: 5.009003
+version: 5.009004
 abstract: Practical Extraction and Reporting Language
 author: perl5-porters@perl.org
 license: perl
@@ -21,6 +21,9 @@ private:
     - ext/MIME/Base64
     - ext/Safe
     - ext/Storable
+    - ext/threads/hints
+    - ext/threads/shared
+    - ext/threads/t
     - ext/Time/HiRes
     - ext/Unicode/Normalize
     - lib/Archive/Tar
@@ -47,11 +50,15 @@ private:
     - lib/Math/BigInt
     - lib/Math/BigRat
     - lib/Memoize
+    - lib/Module/Build
     - lib/Module/CoreList
+    - lib/Module/Load
+    - lib/Module/Loaded
     - lib/Net/FTP
     - lib/Net/Ping
     - lib/Net/t
     - lib/NEXT
+    - lib/Package/Constants
     - lib/Pod/Escapes
     - lib/Pod/Perldoc
     - lib/Pod/Simple
@@ -63,17 +70,22 @@ private:
     - lib/Text/Balanced
     - lib/Text/TabsWrap
     - lib/Tie/File
+    - lib/Tie/RefHash
     - lib/Unicode/Collate
     - t/lib/Filter/Simple
     - t/lib/MakeMaker
     - t/lib/Math
     - t/lib/sample-tests
     - t/lib/Test/Simple
+    - win32/ext/Win32API/File
 
   file:
     - ext/DynaLoader/t/XSLoader.t
     - ext/DynaLoader/XSLoader_pm.PL
     - ext/Filter/t/call.t
+    - ext/threads/threads.pm
+    - ext/threads/threads.xs
+    - ext/threads/typemap
     - lib/Archive/Tar.pm
     - lib/assertions.pm
     - lib/Attribute/Handlers.pm
@@ -144,8 +156,13 @@ private:
     - lib/Math/BigFloat.pm
     - lib/Math/BigInt.pm
     - lib/Math/BigRat.pm
+    - lib/Math/Complex.pm
+    - lib/Math/Trig.pm
     - lib/Memoize.pm
+    - lib/Module/Build.pm
     - lib/Module/CoreList.pm
+    - lib/Module/Load.pm
+    - lib/Module/Loaded.pm
     - lib/Net/ChangeLog.libnet
     - lib/Net/Cmd.pm
     - lib/Net/Config.eg
@@ -162,6 +179,7 @@ private:
     - lib/Net/SMTP.pm
     - lib/Net/Time.pm
     - lib/NEXT.pm
+    - lib/Package/Constants.pm
     - lib/PerlIO/via/QuotedPrint.pm
     - lib/PerlIO/via/t/QuotedPrint.t
     - lib/Pod/Checker.pm
@@ -208,6 +226,7 @@ private:
     - lib/Text/Tabs.pm
     - lib/Text/Wrap.pm
     - lib/Tie/File.pm
+    - lib/Tie/RefHash.pm
     - lib/Time/Local.pm
     - lib/Time/Local.t
     - lib/Unicode/Collate.pm
