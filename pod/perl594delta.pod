@@ -78,6 +78,12 @@ C<threads>
 
 =item *
 
+C<Hash::Util::FieldHash> has been added. This module provides support for
+I<field hashes>: hashes that maintain an association of a reference with a
+value, in a thread-safe garbage-collected way.
+
+=item *
+
 C<Module::Build> has been added. It's an alternative to
 C<ExtUtils::MakeMaker> to build and install perl modules.
 
@@ -88,19 +94,18 @@ and files.
 
 =item *
 
-C<Hash::Util::FieldHash> has been added. This module provides support for
-I<field hashes>: hashes that maintain an association of a reference with a
-value, in a thread-safe garbage-collected way.
-
-=item *
-
-C<Win32API::File> has been added (for Windows builds). This module
-provides low-level access to Win32 system API calls for files/dirs.
+C<Module::Loaded> has been added. It's used to mark modules as loaded or
+unloaded.
 
 =item *
 
 C<Package::Constants> has been added. It's a simple helper to list all
 constants declared in a given package.
+
+=item *
+
+C<Win32API::File> has been added (for Windows builds). This module
+provides low-level access to Win32 system API calls for files/dirs.
 
 =back
 
