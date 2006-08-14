@@ -23,6 +23,7 @@ Adam Krolnik			<adamk@gypsy.cyrix.com>
 Adam Milner			<carmiac@nmt.edu>
 Adam Spiers
 Adrian M. Enache		<enache@rdslink.ro>
+Adriano Ferreira		<a.r.ferreira@gmail.com>
 Akim Demaille			<akim@epita.fr>
 Alan Burlison			<Alan.Burlison@uk.sun.com>
 Alan Champion			<achampio@lehman.com>
@@ -33,12 +34,15 @@ Albert Chin-A-Young		<china@thewrittenword.com>
 Albert Dvornik			<bert@genscan.com>
 Alessandro Forghieri		<alf@orion.it>
 Alexei Alexandrov		<alexei.alexandrov@gmail.com>
+Alex Davies			<adavies@ptc.com>
 Alex Gough			<alex@rcon.rog>
 Alex Vandiver			<alexmv@mit.edu>
+Alex Waugh			<alex@alexwaugh.com>
 Alexander Gough			<alex-p5p@earth.li>
 Alexander Klimov		<ask@wisdom.weizmann.ac.il>
 Alexander Smishlajev		<als@turnhere.com>
 Alexey Mahotkin			<alexm@netli.com>
+Alexey Toptygin			<alexeyt@freeshell.org>
 Alexey Tourbin			<at@altlinux.ru>
 Alexey V. Barantsev		<barancev@kazbek.ispras.ru>
 Allen Smith			<allens@cpan.org>
@@ -73,10 +77,12 @@ Art Green			<Art_Green@mercmarine.com>
 Art Haas			<ahaas@airmail.net>
 Artiom Morozov			<artiom@phreaker.net>
 Artur Bergman			<artur@contiller.se>
+Ash Berlin			<ash@cpan.org>
 Audrey Tang			<cpan@audreyt.org>
 Axel Boldt
 Barrie Slaymaker		<barries@slaysys.com>
 Barry Friedman
+Bas van Sisseren		<bas@quarantainenet.nl>
 Beau Cox
 Ben Tilly			<ben_tilly@operamail.com>
 Benjamin Goldberg		<goldbb2@earthlink.net>
@@ -175,6 +181,7 @@ Dan Schmidt			<dfan@harmonixmusic.com>
 Dan Sugalski			<dan@sidhe.org>
 Daniel Berger			<djberg86@attbi.com>
 Daniel Chetlin			<daniel@chetlin.com>
+Daniel Frederick Crisman	<daniel@crisman.org>
 Daniel Grisinger		<dgris@dimensional.com>
 Daniel Lieberman		<daniel@bitpusher.com>
 Daniel Muiño			<dmuino@afip.gov.ar>
@@ -209,6 +216,8 @@ David H. Adler			<dha@panix.com>
 David Hammen			<hammen@gothamcity.jsc.nasa.gov>
 David J. Fiander		<davidf@mks.com>
 David Kerry			<davidk@tor.securecomputing.com>
+David Landgren			<david@landgren.net>
+David Manura			<dm.list@math2.org>
 David Mitchell			<davem@iabyn.nospamdeletethisbit.com>
 David Muir Sharnoff		<muir@idiom.com>
 david nicol			<whatever@davidnicol.com>
@@ -232,6 +241,7 @@ Douglas E. Wegscheid		<dwegscheid@qtm.net>
 Douglas Lankshear		<doug@lankshear.net>
 Douglas Wilson			<dougw@cpan.org>
 Dov Grobgeld			<dov@Orbotech.Co.IL>
+Dr.Ruud				<rvtol+news@isolution.nl>
 Drago Goricanec			<drago@raptor.otsd.ts.fujitsu.co.jp>
 Duncan Findlay			<duncf@debian.org>
 Ed Mooring			<mooring@Lynx.COM>
@@ -265,6 +275,7 @@ François Désarménien		<desar@club-internet.fr>
 Fréderic Chauveau		<fmc@pasteur.fr>
 G. Del Merritt			<del@intranetics.com>
 Gabe Schaffer
+Gabor Szabo			<szabgab@gmail.com>
 Garry T. Williams		<garry@zvolve.com>
 Gary Clark			<GaryC@mail.jeld-wen.com>
 Gary L. Armstrong
@@ -381,6 +392,7 @@ Jeremy H. Brown			<jhbrown@ai.mit.edu>
 Jeremy Madea			<jmadea@inktomi.com>
 Jerome Abela			<abela@hsc.fr>
 Jerrad Pierce			<belg4mit@MIT.EDU>
+Jerry Hedden			<jerry@hedden.us>
 Jesús Quiroga			<jquiroga@pobox.com>
 Jim Anderson			<jander@ml.com>
 Jim Avera			<avera@hal.com>
@@ -701,6 +713,7 @@ Rob Napier			<rnapier@employees.org>
 Robert Millan			<rmh@debian.org>
 Robert Partington		<rjp@riffraff.plig.net>
 Robert Sanders			<Robert.Sanders@linux.org>
+Robert Sebastian Gerus		<arachnist@gmail.com>
 Robert Spier			<rspier@pobox.com>
 Robin Barker			<RMBarker@cpan.org>
 Robin Houston			<robin@cpan.org>
@@ -735,6 +748,7 @@ Sean Sheedy			<seans@ncube.com>
 Sebastian Wittmeier		<Sebastian.Wittmeier@ginko.de>
 Sébastien Aperghis-Tramoni	<sebastien@aperghis.net>
 Sebastien Barre			<Sebastien.Barre@utc.fr>
+Sherm Pendley			<sherm@dot-app.org>
 Shigeya Suzuki			<shigeya@foretune.co.jp>
 Shimpei Yamashita		<shimpei@socrates.patnet.caltech.edu>
 Shinya Hayakawa			<hayakawa@livedoor.jp>
@@ -766,6 +780,7 @@ Steve McDougall			<swmcd@world.std.com>
 Steve Nielsen			<spn@enteract.com>
 Steve Pearlmutter
 Steve Peters			<steve@fisharerojo.org>
+Steve Purkis			<Steve.Purkis@multimap.com>
 Steve Vinoski
 Steven Hirsch			<hirschs@btv.ibm.com>
 Steven Knight			<knight@theopera.baldmt.citilink.com>
@@ -827,7 +842,7 @@ Tsutomu IKEGAMI			<t-ikegami@aist.go.jp>
 Tye McQueen			<tye@metronet.com>
 Ulrich Kunitz			<kunitz@mai-koeln.com>
 Ulrich Pfeifer			<pfeifer@wait.de>
-Vadim Konovalov			<vkonovalov@spb.lucent.com>
+Vadim Konovalov			<vkonovalov@lucent.com>
 Valeriy E. Ushakov		<uwe@ptc.spbu.ru>
 Ville Skyttä			<scop@cs132170.pp.htv.fi>
 Vishal Bhatia			<vishal@deja.com>
