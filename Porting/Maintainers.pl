@@ -415,6 +415,20 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Module::Load' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/Module/Load lib/Module/Load.pm],
+		'CPAN'		=> 1,
+		},
+
+	'Module::Loaded' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/Module/Loaded lib/Module/Loaded.pm],
+		'CPAN'		=> 1,
+		},
+
 	'Net::Ping' =>
 		{
 		'MAINTAINER'	=> 'bbb',
@@ -426,6 +440,13 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'dconway',
 		'FILES'		=> q[lib/NEXT.pm lib/NEXT],
+		'CPAN'		=> 1,
+		},
+
+	'Package::Constants' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/Package/Constants lib/Package/Constants.pm],
 		'CPAN'		=> 1,
 		},
 
