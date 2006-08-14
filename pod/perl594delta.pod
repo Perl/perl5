@@ -18,7 +18,7 @@ Earlier releases interpreted the bareword as a directory name.
 
 =head2 Handling of pmc files
 
-And old feature of perl is that before C<require> or C<use> look for a
+An old feature of perl was that before C<require> or C<use> look for a
 file with a F<.pm> extension, they will first look for a similar filename
 with a F<.pmc> extension. If this file is found, it will be loaded in
 place of any potentially existing file ending in a F<.pm> extension.
@@ -71,15 +71,47 @@ See L<< UNIVERSAL/"$obj->DOES( ROLE )" >>.
 The constant folding routine is now wrapped in an exception handler, and
 if folding throws an exception (such as attempting to evaluate 0/0), perl
 now retains the current optree, rather than aborting the whole program.
-(Nicholas Clark)
+(Nicholas Clark, Dave Mitchell)
+
+=head2 Source filters in @INC
+
+It's possible to enhance the mechanism of subroutine hooks in @INC by
+adding a source filter on top of the filehandle opened and returned by the
+hook. This feature was planned a long time ago, but wasn't quite working
+until now. See L<perlfunc/require> for details. (Nicholas Clark)
+
+=head2 MAD
+
+MAD, which stands for I<Misc Attribute Decoration>, is a
+still-in-development work leading to a Perl 5 to Perl 6 convertor. To
+enable it, it's necessary to pass the argument C<-Dmad> to Configure. The
+obtained perl isn't binary compatible with a regular perl 5.9.4, and has
+space and speed penalties; moreover not all regression tests still pass
+with it. (Larry Wall, Nicholas Clark)
 
 =head1 Modules and Pragmata
+
+=over 4
+
+=item *
 
 C<encoding::warnings> is now a lexical pragma. (Although on older perls,
 which don't have support for lexical pragmas, it keeps its global
 behaviour.) (Audrey Tang)
 
-C<threads>
+=item *
+
+C<threads> is now a dual-life module, also available on CPAN. It has been
+expanded in many ways. A kill() method is available for thread signalling.
+One can get thread status, or the list of running or joinable threads.
+
+A new C<< threads->exit() >> method is used to exit from the application
+(this is the default for the main thread) or from the current thread only
+(this is the default for all other threads). On the other hand, the exit()
+built-in now always causes the whole application to terminate. (Jerry
+D. Hedden)
+
+=back
 
 =head2 New Core Modules
 
@@ -98,8 +130,8 @@ C<ExtUtils::MakeMaker> to build and install perl modules.
 
 =item *
 
-C<Module::Load>, by Jos Boumans, has been added. It's used to load
-indistinctively modules and files.
+C<Module::Load>, by Jos Boumans, has been added. It provides a single
+interface to load Perl modules and F<.pl> files.
 
 =item *
 
@@ -171,20 +203,21 @@ explanations, or run to completion, which, since they were able to blow
 the stack before, will likely take a very long time to happen. If you were
 experiencing the occasional stack overflow (or segfault) and upgrade to
 discover that now perl apparently hangs instead, look for a degenerate
-regex.
+regex. (Dave Mitchell)
 
 =item Single char char-classes treated as literals
 
-Classes of a single character are now treated the same as if the
-character had been used as a literal, meaning that code that uses
-char-classes as an escaping mechanism will see a speedup.
+Classes of a single character are now treated the same as if the character
+had been used as a literal, meaning that code that uses char-classes as an
+escaping mechanism will see a speedup. (Yves Orton)
 
 =item Trie optimisation of literal string alternations
 
 Alternations, where possible, are optimised into more efficient matching
 structures. String literal alternations are merged into a trie and are
 matched simultaneously.  This means that instead of O(N) time for matching
-N alternations at a given point the new code performs in O(1) time.
+N alternations at a given point the new code performs in O(1) time. (Yves
+Orton)
 
 B<Note:> Much code exists that works around perl's historic poor
 performance on alternations. Often the tricks used to do so will disable
@@ -196,7 +229,7 @@ released.
 
 When a pattern starts with a trie-able alternation and there aren't
 better optimisations available the regex engine will use Aho-Corasick
-matching to find the start point.
+matching to find the start point. (Yves Orton)
 
 =back
 
@@ -204,7 +237,16 @@ matching to find the start point.
 
 =head2 Relocatable installations
 
-TODO
+There is now Configure support for creating a relocatable perl tree. If
+you Configure with C<-Duserelocatableinc>, then the paths in @INC (and
+everything else in %Config) can be optionally located via the path of the
+perl executable.
+
+That means that, if the string C<".../"> is found at the start of any
+path, it's substituted with the directory of $^X. So, the relocation can
+be configured on a per-directory basis, although the default with
+C<-Duserelocatableinc> is that everything is relocated. The initial
+install is done to the original configured prefix.
 
 =head2 Ports
 
@@ -267,13 +309,16 @@ the perl core, but that remain around because modules out there might
 still use them. They come from a factorization effort: for example, many
 PP functions are now shared for several ops.
 
+The implementation of the special variables $^H and %^H has changed, to
+allow implementing lexical pragmas in pure perl.
+
 =head1 Known Problems
 
 One warning test (number 263 in F<lib/warnings.t>) fails under UTF-8
 locales.
 
-Bytecode tests fails under several platforms. Support for byteloader and
-compiler is considered to be removed before the 5.10.0 release.
+Bytecode tests fails under several platforms. We are considering removing
+support for byteloader and compiler before the 5.10.0 release.
 
 =head2 Platform-specific Problems
 
