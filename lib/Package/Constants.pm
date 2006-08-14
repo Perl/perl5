@@ -8,7 +8,7 @@ $DEBUG      = 0;
 
 =head1 NAME 
 
-Package::Constants -- List all constants declared in a package
+Package::Constants - List all constants declared in a package
 
 =head1 SYNOPSIS
 
