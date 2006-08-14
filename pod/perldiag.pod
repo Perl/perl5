@@ -2928,7 +2928,7 @@ data.
 
 =item panic: fold_constants JMPENV_PUSH returned %d
 
-(P) While attemtping folding constants an exception other than an C<eval>
+(P) While attempting folding constants an exception other than an C<eval>
 failure was caught.
 
 =item panic: frexp
