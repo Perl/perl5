@@ -54,7 +54,7 @@ or by using the C<-E> command-line switch in one-liners.
 
 See L<perlsub/"Persistent variables via state()">.
 
-=head2 UNIVERSAL:DOES()
+=head2 UNIVERSAL::DOES()
 
 The C<UNIVERSAL> class has a new method, C<DOES()>. It has been added to
 solve semantic problems with the C<isa()> method. C<isa()> checks for
@@ -97,6 +97,11 @@ value, in a thread-safe garbage-collected way.
 C<Win32API::File> has been added (for Windows builds). This module
 provides low-level access to Win32 system API calls for files/dirs.
 
+=item *
+
+C<Package::Constants> has been added. It's a simple helper to list all
+constants declared in a given package.
+
 =back
 
 =head1 Utility Changes
@@ -128,8 +133,6 @@ The L<perlunitut> manpage is an tutorial for programming with Unicode and
 string encodings in Perl, due to Juerd Waalboer.
 
 =head1 Performance Enhancements
-
-Constants (Nicholas)
 
 Regular expressions (Yves)
 
@@ -181,6 +184,11 @@ locales.
 
 Bytecode tests fails under several platforms. Support for byteloader and
 compiler is considered to be removed before the 5.10.0 release.
+
+=head2 Platform-specific Problems
+
+The test F<ext/Socket/t/socketpair.t> crashes after completing all tests
+successfully when built with USE_ITHREADS and PERL_IMPLICIT_SYS on Win32.
 
 =head1 Reporting Bugs
 
