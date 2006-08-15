@@ -283,7 +283,7 @@ Support for building XS extension modules with the free MinGW compiler has
 been improved in the case where perl itself was built with the Microsoft
 VC++ compiler. (ActiveState)
 
-=item 64-bit compiler
+=item Support for 64-bit compiler
 
 Support for building perl with Microsoft's 64-bit compiler has been
 improved. (ActiveState)
