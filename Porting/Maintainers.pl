@@ -410,7 +410,7 @@ package Maintainers;
 
 	'Module::CoreList' =>
 		{
-		'MAINTAINER'	=> 'rclamp',
+		'MAINTAINER'	=> 'rgarcia',
 		'FILES'		=> q[lib/Module/CoreList lib/Module/CoreList.pm],
 		'CPAN'		=> 1,
 		},
