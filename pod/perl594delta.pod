@@ -83,13 +83,13 @@ until now. See L<perlfunc/require> for details. (Nicholas Clark)
 =head2 MAD
 
 MAD, which stands for I<Misc Attribute Decoration>, is a
-still-in-development work leading to a Perl 5 to Perl 6 convertor. To
+still-in-development work leading to a Perl 5 to Perl 6 converter. To
 enable it, it's necessary to pass the argument C<-Dmad> to Configure. The
 obtained perl isn't binary compatible with a regular perl 5.9.4, and has
 space and speed penalties; moreover not all regression tests still pass
 with it. (Larry Wall, Nicholas Clark)
 
-=head1 Modules and Pragmata
+=head1 Modules and Pragmas
 
 =over 4
 
@@ -158,7 +158,7 @@ files/dirs.
 C<config_data> is a new utility that comes with C<Module::Build>. It
 provides a command-line interface to the configuration of Perl modules
 that use Module::Build's framework of configurability (that is,
-C<*::ConfigData> modules, that contain local configuration information for
+C<*::ConfigData> modules that contain local configuration information for
 their parent modules.)
 
 =head1 Documentation
@@ -194,7 +194,7 @@ The UTF-8 caching code is now more efficient, and used more often.
 
 =over 4
 
-=item Engine de-recursiveised
+=item Engine de-recursivised
 
 The regular expression engine is no longer recursive, meaning that
 patterns that used to overflow the stack will either die with useful
@@ -270,8 +270,8 @@ interpreter now use them. (Steve Peters)
 
 =head2 PERL5SHELL and tainting
 
-On Windows, PERL5SHELL is now checked for taintedness. (Rafael
-Garcia-Suarez)
+On Windows, the PERL5SHELL environment variable is now checked for
+taintedness. (Rafael Garcia-Suarez)
 
 =head2 Using *FILE{IO}
 
@@ -290,6 +290,11 @@ always have been. (Nicholas Clark)
 A few bugs related to UTF-8 handling with objects that have
 stringification overloaded have been fixed. (Nicholas Clark)
 
+=head2 eval memory leaks fixed
+
+Traditionally, C<eval 'syntax error'> has leaked badly. Many (but not all)
+of these leaks have now been eliminated or reduced. (Dave Mitchell)
+
 =head1 New or Changed Diagnostics
 
 =over 4
@@ -304,7 +309,7 @@ declared as a sub-part of a list assignment. See L<perldiag>.
 =head1 Changed Internals
 
 A new file, F<mathoms.c>, contains functions that aren't used anymore in
-the perl core, but that remain around because modules out there might
+the perl core, but remain around because modules out there might
 still use them. They come from a factorization effort: for example, many
 PP functions are now shared for several ops.
 
@@ -318,6 +323,10 @@ locales.
 
 Bytecode tests fail under several platforms. We are considering removing
 support for byteloader and compiler before the 5.10.0 release.
+
+On threaded perls, the construct C<eval("syntax error")> might lead, under
+some circumstances, to a segmentation fault. This is due to the flaw in
+the bug fix implmented by change #28319.
 
 =head2 Platform-specific Problems
 
