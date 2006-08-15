@@ -232,6 +232,13 @@ matching to find the start point. (Yves Orton)
 
 =back
 
+=head2 Sloppy stat on Windows
+
+On Windows, perl's stat() function normally opens the file to determine
+the link count and update attributes that may have been changed through
+hard links. Setting ${^WIN32_SLOPPY_STAT} to a true value speeds up
+stat() by not performing this operation. (Jan Dubois)
+
 =head1 Installation and Configuration Improvements
 
 =head2 Relocatable installations
@@ -266,6 +273,23 @@ available.  When they are not available, perl's own version is used (from
 Russ Allbery's public domain implementation).  Various places in the perl
 interpreter now use them. (Steve Peters)
 
+=head2 Windows build improvements
+
+=over 4
+
+=item Building XS extensions
+
+Support for building XS extension modules with the free MinGW compiler has
+been improved in the case where perl itself was built with the Microsoft
+VC++ compiler. (ActiveState)
+
+=item 64-bit compiler
+
+Support for building perl with Microsoft's 64-bit compiler has been
+improved. (ActiveState)
+
+=back
+
 =head1 Selected Bug Fixes
 
 =head2 PERL5SHELL and tainting
@@ -295,6 +319,13 @@ stringification overloaded have been fixed. (Nicholas Clark)
 Traditionally, C<eval 'syntax error'> has leaked badly. Many (but not all)
 of these leaks have now been eliminated or reduced. (Dave Mitchell)
 
+=head2 Random device on Windows
+
+In previous versions, perl would read the file F</dev/urandom> if it
+existed when seeding its random number generator.  That file is unlikely
+to exist on Windows, and if it did would probably not contain appropriate
+data, so perl no longer tries to read it on Windows. (Alex Davies)
+
 =head1 New or Changed Diagnostics
 
 =over 4
@@ -323,15 +354,6 @@ locales.
 
 Bytecode tests fail under several platforms. We are considering removing
 support for byteloader and compiler before the 5.10.0 release.
-
-On threaded perls, the construct C<eval("syntax error")> might lead, under
-some circumstances, to a segmentation fault. This is due to the flaw in
-the bug fix implmented by change #28319.
-
-=head2 Platform-specific Problems
-
-The test F<ext/Socket/t/socketpair.t> crashes after completing all tests
-successfully when built with USE_ITHREADS and PERL_IMPLICIT_SYS on Win32.
 
 =head1 Reporting Bugs
 
