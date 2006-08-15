@@ -71,6 +71,8 @@ through to locate the proper section you're looking for.
 
 =item Running Perl programs
 
+=item Safety net
+
 =item Basic syntax overview
 
 =item Perl variable types
@@ -1891,7 +1893,7 @@ X<typeglob> X<filehandle> X<*>
 
 =over 4
 
-=item Operator Precedence and Associativity 
+=item Operator Precedence and Associativity
 X<operator, precedence> X<precedence> X<associativity>
 
 =item Terms and List Operators (Leftward)
@@ -1984,34 +1986,35 @@ X<typecasting> X<(TYPE)>
 unary &, unary *, (TYPE)
 
 =item Quote and Quote-like Operators
-X<operator, quote> X<operator, quote-like> X<q> X<qq> X<qx> X<qw> X<m> 
+X<operator, quote> X<operator, quote-like> X<q> X<qq> X<qx> X<qw> X<m>
 X<qr> X<s> X<tr> X<'> X<''> X<"> X<""> X<//> X<`> X<``> X<<< << >>>
 X<escape sequence> X<escape>
 
 =item Regexp Quote-Like Operators
 X<operator, regexp>
 
-?PATTERN? X<?>, m/PATTERN/cgimosx X<m> X<operator, match>  X<regexp,
-options> X<regexp> X<regex, options> X<regex>  X</c> X</i> X</m> X</o>
-X</s> X</x>, /PATTERN/cgimosx, q/STRING/ X<q> X<quote, double> X<'> X<''>,
-C<'STRING'>, qq/STRING/ X<qq> X<quote, double> X<"> X<"">, "STRING",
+?PATTERN? X<?>, m/PATTERN/cgimosx X<m> X<operator, match> X<regexp,
+options> X<regexp> X<regex, options> X<regex> X</c> X</i> X</m> X</o> X</s>
+X</x>, /PATTERN/cgimosx, q/STRING/ X<q> X<quote, single> X<'> X<''>,
+'STRING', qq/STRING/ X<qq> X<quote, double> X<"> X<"">, "STRING",
 qr/STRING/imosx X<qr> X</i> X</m> X</o> X</s> X</x>, qx/STRING/ X<qx> X<`>
 X<``> X<backtick>, `STRING`, qw/STRING/ X<qw> X<quote, list> X<quote,
 words>, s/PATTERN/REPLACEMENT/egimosx X<substitute> X<substitution>
 X<replace> X<regexp, replace> X<regexp, substitute> X</e> X</g> X</i> X</m>
 X</o> X</s> X</x>, tr/SEARCHLIST/REPLACEMENTLIST/cds X<tr> X<y>
 X<transliterate> X</c> X</d> X</s>, y/SEARCHLIST/REPLACEMENTLIST/cds, <<EOF
-X<here-doc> X<heredoc> X<here-document> X<<< << >>>
+X<here-doc> X<heredoc> X<here-document> X<<< << >>>, Double Quotes, Single
+Quotes, Backticks
 
 =item Gory details of parsing quoted constructs
 X<quote, gory details>
 
-Finding the end, Removal of backslashes before delimiters, Interpolation
-X<interpolation>, C<<<'EOF'>, C<m''>, C<s'''>, C<tr///>, C<y///>, C<''>,
-C<q//>, C<"">, C<``>, C<qq//>, C<qx//>, C<< <file*glob> >>, C<?RE?>,
-C</RE/>, C<m/RE/>, C<s/RE/foo/>,, Interpolation of regular expressions
-X<regexp, interpolation>, Optimization of regular expressions X<regexp,
-optimization>
+Finding the end, Interpolation X<interpolation>, C<<<'EOF'>,  C<m''>, the
+pattern of C<s'''>, C<''>, C<q//>, C<tr'''>, C<y'''>, the replacement of
+C<s'''>, C<tr///>, C<y///>, C<"">, C<``>, C<qq//>, C<qx//>, C<< <file*glob>
+>>, C<<<"EOF">, the replacement of C<s///>, C<RE> in C<?RE?>, C</RE/>,
+C<m/RE/>, C<s/RE/foo/>,, parsing regular expressions X<regexp, parse>,
+Optimization of regular expressions X<regexp, optimization>
 
 =item I/O Operators
 X<operator, i/o> X<operator, io> X<io> X<while> X<filehandle>
@@ -2054,7 +2057,8 @@ X<my> X<variable, lexical> X<lexical> X<lexical variable> X<scope, lexical>
 X<lexical scope> X<attributes, my>
 
 =item Persistent Private Variables
-X<static> X<variable, persistent> X<variable, static> X<closure>
+X<state> X<state variable> X<static> X<variable, persistent> X<variable,
+static> X<closure>
 
 =item Temporary Values via local()
 X<local> X<scope, dynamic> X<dynamic scope> X<variable, local>
@@ -2135,85 +2139,88 @@ X<portability> X<Unix> X<portable>
 -I<X> FILEHANDLE
 X<-r>X<-w>X<-x>X<-o>X<-R>X<-W>X<-X>X<-O>X<-e>X<-z>X<-s>X<-f>X<-d>X<-l>X<-p>
 X<-S>X<-b>X<-c>X<-t>X<-u>X<-g>X<-k>X<-T>X<-B>X<-M>X<-A>X<-C>, -I<X> EXPR,
--I<X>, abs VALUE X<abs> X<absolute>, abs, accept NEWSOCKET,GENERICSOCKET
-X<accept>, alarm SECONDS X<alarm> X<SIGALRM> X<timer>, alarm, atan2 Y,X
-X<atan2> X<arctangent> X<tan> X<tangent>, bind SOCKET,NAME X<bind>, binmode
-FILEHANDLE, LAYER X<binmode> X<binary> X<text> X<DOS> X<Windows>, binmode
-FILEHANDLE, bless REF,CLASSNAME X<bless>, bless REF, break, caller EXPR
-X<caller> X<call stack> X<stack> X<stack trace>, caller, chdir EXPR
-X<chdir> X<cd>, chdir FILEHANDLE, chdir DIRHANDLE, chdir, chmod LIST
-X<chmod> X<permission> X<mode>, chomp VARIABLE X<chomp>
-X<INPUT_RECORD_SEPARATOR> X<$/> X<newline> X<eol>, chomp( LIST ), chomp,
-chop VARIABLE X<chop>, chop( LIST ), chop, chown LIST X<chown> X<owner>
-X<user> X<group>, chr NUMBER X<chr> X<character> X<ASCII> X<Unicode>, chr,
-chroot FILENAME X<chroot> X<root>, chroot, close FILEHANDLE X<close>,
-close, closedir DIRHANDLE X<closedir>, connect SOCKET,NAME X<connect>,
-continue BLOCK X<continue>, continue, cos EXPR X<cos> X<cosine> X<acos>
-X<arccosine>, cos, crypt PLAINTEXT,SALT X<crypt> X<digest> X<hash> X<salt>
-X<plaintext> X<password> X<decrypt> X<cryptography> X<passwd>, dbmclose
-HASH X<dbmclose>, dbmopen HASH,DBNAME,MASK X<dbmopen> X<dbm> X<ndbm>
-X<sdbm> X<gdbm>, defined EXPR X<defined> X<undef> X<undefined>, defined,
-delete EXPR X<delete>, die LIST X<die> X<throw> X<exception> X<raise> X<$@>
-X<abort>, do BLOCK X<do> X<block>, do SUBROUTINE(LIST) X<do>, do EXPR
-X<do>, dump LABEL X<dump> X<core> X<undump>, dump, each HASH X<each>
-X<hash, iterator>, eof FILEHANDLE X<eof> X<end of file> X<end-of-file>, eof
-(), eof, eval EXPR X<eval> X<try> X<catch> X<evaluate> X<parse> X<execute>,
-eval BLOCK, eval, exec LIST X<exec> X<execute>, exec PROGRAM LIST, exists
-EXPR X<exists> X<autovivification>, exit EXPR X<exit> X<terminate>
-X<abort>, exit, exp EXPR X<exp> X<exponential> X<antilog> X<antilogarithm>
-X<e>, exp, fcntl FILEHANDLE,FUNCTION,SCALAR X<fcntl>, fileno FILEHANDLE
-X<fileno>, flock FILEHANDLE,OPERATION X<flock> X<lock> X<locking>, fork
-X<fork> X<child> X<parent>, format X<format>, formline PICTURE,LIST
-X<formline>, getc FILEHANDLE X<getc> X<getchar>, getc, getlogin X<getlogin>
-X<login>, getpeername SOCKET X<getpeername> X<peer>, getpgrp PID X<getpgrp>
-X<group>, getppid X<getppid> X<parent> X<pid>, getpriority WHICH,WHO
-X<getpriority> X<priority> X<nice>, getpwnam NAME X<getpwnam> X<getgrnam>
-X<gethostbyname> X<getnetbyname> X<getprotobyname> X<getpwuid> X<getgrgid>
-X<getservbyname> X<gethostbyaddr> X<getnetbyaddr> X<getprotobynumber>
-X<getservbyport> X<getpwent> X<getgrent> X<gethostent> X<getnetent>
-X<getprotoent> X<getservent> X<setpwent> X<setgrent> X<sethostent>
-X<setnetent> X<setprotoent> X<setservent> X<endpwent> X<endgrent>
-X<endhostent> X<endnetent> X<endprotoent> X<endservent>, getgrnam NAME,
-gethostbyname NAME, getnetbyname NAME, getprotobyname NAME, getpwuid UID,
-getgrgid GID, getservbyname NAME,PROTO, gethostbyaddr ADDR,ADDRTYPE,
-getnetbyaddr ADDR,ADDRTYPE, getprotobynumber NUMBER, getservbyport
-PORT,PROTO, getpwent, getgrent, gethostent, getnetent, getprotoent,
-getservent, setpwent, setgrent, sethostent STAYOPEN, setnetent STAYOPEN,
-setprotoent STAYOPEN, setservent STAYOPEN, endpwent, endgrent, endhostent,
-endnetent, endprotoent, endservent, getsockname SOCKET X<getsockname>,
-getsockopt SOCKET,LEVEL,OPTNAME X<getsockopt>, glob EXPR X<glob>
-X<wildcard> X<filename, expansion> X<expand>, glob, gmtime EXPR X<gmtime>
-X<UTC> X<Greenwich>, gmtime, goto LABEL X<goto> X<jump> X<jmp>, goto EXPR,
-goto &NAME, grep BLOCK LIST X<grep>, grep EXPR,LIST, hex EXPR X<hex>
+-I<X> DIRHANDLE, -I<X>, abs VALUE X<abs> X<absolute>, abs, accept
+NEWSOCKET,GENERICSOCKET X<accept>, alarm SECONDS X<alarm> X<SIGALRM>
+X<timer>, alarm, atan2 Y,X X<atan2> X<arctangent> X<tan> X<tangent>, bind
+SOCKET,NAME X<bind>, binmode FILEHANDLE, LAYER X<binmode> X<binary> X<text>
+X<DOS> X<Windows>, binmode FILEHANDLE, bless REF,CLASSNAME X<bless>, bless
+REF, break, caller EXPR X<caller> X<call stack> X<stack> X<stack trace>,
+caller, chdir EXPR X<chdir> X<cd> X<directory, change>, chdir FILEHANDLE,
+chdir DIRHANDLE, chdir, chmod LIST X<chmod> X<permission> X<mode>, chomp
+VARIABLE X<chomp> X<INPUT_RECORD_SEPARATOR> X<$/> X<newline> X<eol>, chomp(
+LIST ), chomp, chop VARIABLE X<chop>, chop( LIST ), chop, chown LIST
+X<chown> X<owner> X<user> X<group>, chr NUMBER X<chr> X<character> X<ASCII>
+X<Unicode>, chr, chroot FILENAME X<chroot> X<root>, chroot, close
+FILEHANDLE X<close>, close, closedir DIRHANDLE X<closedir>, connect
+SOCKET,NAME X<connect>, continue BLOCK X<continue>, continue, cos EXPR
+X<cos> X<cosine> X<acos> X<arccosine>, cos, crypt PLAINTEXT,SALT X<crypt>
+X<digest> X<hash> X<salt> X<plaintext> X<password> X<decrypt>
+X<cryptography> X<passwd> X<encrypt>, dbmclose HASH X<dbmclose>, dbmopen
+HASH,DBNAME,MASK X<dbmopen> X<dbm> X<ndbm> X<sdbm> X<gdbm>, defined EXPR
+X<defined> X<undef> X<undefined>, defined, delete EXPR X<delete>, die LIST
+X<die> X<throw> X<exception> X<raise> X<$@> X<abort>, do BLOCK X<do>
+X<block>, do SUBROUTINE(LIST) X<do>, do EXPR X<do>, dump LABEL X<dump>
+X<core> X<undump>, dump, each HASH X<each> X<hash, iterator>, eof
+FILEHANDLE X<eof> X<end of file> X<end-of-file>, eof (), eof, eval EXPR
+X<eval> X<try> X<catch> X<evaluate> X<parse> X<execute> X<error, handling>
+X<exception, handling>, eval BLOCK, eval, exec LIST X<exec> X<execute>,
+exec PROGRAM LIST, exists EXPR X<exists> X<autovivification>, exit EXPR
+X<exit> X<terminate> X<abort>, exit, exp EXPR X<exp> X<exponential>
+X<antilog> X<antilogarithm> X<e>, exp, fcntl FILEHANDLE,FUNCTION,SCALAR
+X<fcntl>, fileno FILEHANDLE X<fileno>, flock FILEHANDLE,OPERATION X<flock>
+X<lock> X<locking>, fork X<fork> X<child> X<parent>, format X<format>,
+formline PICTURE,LIST X<formline>, getc FILEHANDLE X<getc> X<getchar>
+X<character> X<file, read>, getc, getlogin X<getlogin> X<login>,
+getpeername SOCKET X<getpeername> X<peer>, getpgrp PID X<getpgrp> X<group>,
+getppid X<getppid> X<parent> X<pid>, getpriority WHICH,WHO X<getpriority>
+X<priority> X<nice>, getpwnam NAME X<getpwnam> X<getgrnam> X<gethostbyname>
+X<getnetbyname> X<getprotobyname> X<getpwuid> X<getgrgid> X<getservbyname>
+X<gethostbyaddr> X<getnetbyaddr> X<getprotobynumber> X<getservbyport>
+X<getpwent> X<getgrent> X<gethostent> X<getnetent> X<getprotoent>
+X<getservent> X<setpwent> X<setgrent> X<sethostent> X<setnetent>
+X<setprotoent> X<setservent> X<endpwent> X<endgrent> X<endhostent>
+X<endnetent> X<endprotoent> X<endservent>, getgrnam NAME, gethostbyname
+NAME, getnetbyname NAME, getprotobyname NAME, getpwuid UID, getgrgid GID,
+getservbyname NAME,PROTO, gethostbyaddr ADDR,ADDRTYPE, getnetbyaddr
+ADDR,ADDRTYPE, getprotobynumber NUMBER, getservbyport PORT,PROTO, getpwent,
+getgrent, gethostent, getnetent, getprotoent, getservent, setpwent,
+setgrent, sethostent STAYOPEN, setnetent STAYOPEN, setprotoent STAYOPEN,
+setservent STAYOPEN, endpwent, endgrent, endhostent, endnetent,
+endprotoent, endservent, getsockname SOCKET X<getsockname>, getsockopt
+SOCKET,LEVEL,OPTNAME X<getsockopt>, glob EXPR X<glob> X<wildcard>
+X<filename, expansion> X<expand>, glob, gmtime EXPR X<gmtime> X<UTC>
+X<Greenwich>, gmtime, goto LABEL X<goto> X<jump> X<jmp>, goto EXPR, goto
+&NAME, grep BLOCK LIST X<grep>, grep EXPR,LIST, hex EXPR X<hex>
 X<hexadecimal>, hex, import LIST X<import>, index STR,SUBSTR,POSITION
 X<index> X<indexOf> X<InStr>, index STR,SUBSTR, int EXPR X<int> X<integer>
-X<truncate> X<trunc>, int, ioctl FILEHANDLE,FUNCTION,SCALAR X<ioctl>, join
-EXPR,LIST X<join>, keys HASH X<keys> X<key>, kill SIGNAL, LIST X<kill>
-X<signal>, last LABEL X<last> X<break>, last, lc EXPR X<lc> X<lowercase>,
-lc, lcfirst EXPR X<lcfirst> X<lowercase>, lcfirst, length EXPR X<length>
-X<size>, length, link OLDFILE,NEWFILE X<link>, listen SOCKET,QUEUESIZE
-X<listen>, local EXPR X<local>, localtime EXPR X<localtime>, localtime,
-lock THING X<lock>, log EXPR X<log> X<logarithm> X<e> X<ln> X<base>, log,
-lstat EXPR X<lstat>, lstat, m//, map BLOCK LIST X<map>, map EXPR,LIST,
-mkdir FILENAME,MASK X<mkdir> X<md> X<directory, create>, mkdir FILENAME,
-mkdir, msgctl ID,CMD,ARG X<msgctl>, msgget KEY,FLAGS X<msgget>, msgrcv
-ID,VAR,SIZE,TYPE,FLAGS X<msgrcv>, msgsnd ID,MSG,FLAGS X<msgsnd>, my EXPR
-X<my>, my TYPE EXPR, my EXPR : ATTRS, my TYPE EXPR : ATTRS, next LABEL
-X<next> X<continue>, next, no Module VERSION LIST X<no>, no Module VERSION,
-no Module LIST, no Module, oct EXPR X<oct> X<octal> X<hex> X<hexadecimal>
-X<binary> X<bin>, oct, open FILEHANDLE,EXPR X<open> X<pipe> X<file, open>
-X<fopen>, open FILEHANDLE,MODE,EXPR, open FILEHANDLE,MODE,EXPR,LIST, open
-FILEHANDLE,MODE,REFERENCE, open FILEHANDLE, opendir DIRHANDLE,EXPR
-X<opendir>, ord EXPR X<ord> X<encoding>, ord, our EXPR X<our> X<global>,
-our EXPR TYPE, our EXPR : ATTRS, our TYPE EXPR : ATTRS, pack TEMPLATE,LIST
-X<pack>, package NAMESPACE X<package> X<module> X<namespace>, package, pipe
-READHANDLE,WRITEHANDLE X<pipe>, pop ARRAY X<pop> X<stack>, pop, pos SCALAR
-X<pos> X<match, position>, pos, print FILEHANDLE LIST X<print>, print LIST,
-print, printf FILEHANDLE FORMAT, LIST X<printf>, printf FORMAT, LIST,
-prototype FUNCTION X<prototype>, push ARRAY,LIST X<push>, X<stack>,
-q/STRING/, qq/STRING/, qr/STRING/, qx/STRING/, qw/STRING/, quotemeta EXPR
-X<quotemeta> X<metacharacter>, quotemeta, rand EXPR X<rand> X<random>,
-rand, read FILEHANDLE,SCALAR,LENGTH,OFFSET X<read>, read
+X<truncate> X<trunc> X<floor>, int, ioctl FILEHANDLE,FUNCTION,SCALAR
+X<ioctl>, join EXPR,LIST X<join>, keys HASH X<keys> X<key>, kill SIGNAL,
+LIST X<kill> X<signal>, last LABEL X<last> X<break>, last, lc EXPR X<lc>
+X<lowercase>, lc, lcfirst EXPR X<lcfirst> X<lowercase>, lcfirst, length
+EXPR X<length> X<size>, length, link OLDFILE,NEWFILE X<link>, listen
+SOCKET,QUEUESIZE X<listen>, local EXPR X<local>, localtime EXPR
+X<localtime> X<ctime>, localtime, lock THING X<lock>, log EXPR X<log>
+X<logarithm> X<e> X<ln> X<base>, log, lstat EXPR X<lstat>, lstat, m//, map
+BLOCK LIST X<map>, map EXPR,LIST, mkdir FILENAME,MASK X<mkdir> X<md>
+X<directory, create>, mkdir FILENAME, mkdir, msgctl ID,CMD,ARG X<msgctl>,
+msgget KEY,FLAGS X<msgget>, msgrcv ID,VAR,SIZE,TYPE,FLAGS X<msgrcv>, msgsnd
+ID,MSG,FLAGS X<msgsnd>, my EXPR X<my>, my TYPE EXPR, my EXPR : ATTRS, my
+TYPE EXPR : ATTRS, next LABEL X<next> X<continue>, next, no Module VERSION
+LIST X<no>, no Module VERSION, no Module LIST, no Module, oct EXPR X<oct>
+X<octal> X<hex> X<hexadecimal> X<binary> X<bin>, oct, open FILEHANDLE,EXPR
+X<open> X<pipe> X<file, open> X<fopen>, open FILEHANDLE,MODE,EXPR, open
+FILEHANDLE,MODE,EXPR,LIST, open FILEHANDLE,MODE,REFERENCE, open FILEHANDLE,
+opendir DIRHANDLE,EXPR X<opendir>, ord EXPR X<ord> X<encoding>, ord, our
+EXPR X<our> X<global>, our TYPE EXPR, our EXPR : ATTRS, our TYPE EXPR :
+ATTRS, pack TEMPLATE,LIST X<pack>, package NAMESPACE X<package> X<module>
+X<namespace>, package, pipe READHANDLE,WRITEHANDLE X<pipe>, pop ARRAY
+X<pop> X<stack>, pop, pos SCALAR X<pos> X<match, position>, pos, print
+FILEHANDLE LIST X<print>, print LIST, print, printf FILEHANDLE FORMAT, LIST
+X<printf>, printf FORMAT, LIST, prototype FUNCTION X<prototype>, push
+ARRAY,LIST X<push>, X<stack>, q/STRING/, qq/STRING/, qr/STRING/,
+qx/STRING/, qw/STRING/, quotemeta EXPR X<quotemeta> X<metacharacter>,
+quotemeta, rand EXPR X<rand> X<random>, rand, read
+FILEHANDLE,SCALAR,LENGTH,OFFSET X<read> X<file, read>, read
 FILEHANDLE,SCALAR,LENGTH, readdir DIRHANDLE X<readdir>, readline EXPR
 X<readline> X<gets> X<fgets>, readlink EXPR X<readlink>, readlink, readpipe
 EXPR X<readpipe>, recv SOCKET,SCALAR,LENGTH,FLAGS X<recv>, redo LABEL
@@ -2245,13 +2252,14 @@ split /PATTERN/,EXPR, split /PATTERN/, split, sprintf FORMAT, LIST
 X<sprintf>, format parameter index, flags, vector flag, (minimum) width,
 precision, or maximum width X<precision>, size, order of arguments, sqrt
 EXPR X<sqrt> X<root> X<square root>, sqrt, srand EXPR X<srand> X<seed>
-X<randseed>, srand, stat FILEHANDLE X<stat> X<file, status>, stat EXPR,
-stat, study SCALAR X<study>, study, sub NAME BLOCK X<sub>, sub NAME (PROTO)
-BLOCK, sub NAME : ATTRS BLOCK, sub NAME (PROTO) : ATTRS BLOCK, substr
-EXPR,OFFSET,LENGTH,REPLACEMENT X<substr> X<substring> X<mid> X<left>
-X<right>, substr EXPR,OFFSET,LENGTH, substr EXPR,OFFSET, symlink
-OLDFILE,NEWFILE X<symlink> X<link> X<symbolic link> X<link, symbolic>,
-syscall NUMBER, LIST X<syscall> X<system call>, sysopen
+X<randseed>, srand, stat FILEHANDLE X<stat> X<file, status> X<ctime>, stat
+EXPR, stat DIRHANDLE, stat, state EXPR X<state>, state TYPE EXPR, state
+EXPR : ATTRS, state TYPE EXPR : ATTRS, study SCALAR X<study>, study, sub
+NAME BLOCK X<sub>, sub NAME (PROTO) BLOCK, sub NAME : ATTRS BLOCK, sub NAME
+(PROTO) : ATTRS BLOCK, substr EXPR,OFFSET,LENGTH,REPLACEMENT X<substr>
+X<substring> X<mid> X<left> X<right>, substr EXPR,OFFSET,LENGTH, substr
+EXPR,OFFSET, symlink OLDFILE,NEWFILE X<symlink> X<link> X<symbolic link>
+X<link, symbolic>, syscall NUMBER, LIST X<syscall> X<system call>, sysopen
 FILEHANDLE,FILENAME,MODE X<sysopen>, sysopen
 FILEHANDLE,FILENAME,MODE,PERMS, sysread FILEHANDLE,SCALAR,LENGTH,OFFSET
 X<sysread>, sysread FILEHANDLE,SCALAR,LENGTH, sysseek
@@ -2264,9 +2272,9 @@ X<epoch>, times X<times>, tr///, truncate FILEHANDLE,LENGTH X<truncate>,
 truncate EXPR,LENGTH, uc EXPR X<uc> X<uppercase> X<toupper>, uc, ucfirst
 EXPR X<ucfirst> X<uppercase>, ucfirst, umask EXPR X<umask>, umask, undef
 EXPR X<undef> X<undefine>, undef, unlink LIST X<unlink> X<delete> X<remove>
-X<rm>, unlink, unpack TEMPLATE,EXPR X<unpack>, unpack TEMPLATE, untie
-VARIABLE X<untie>, unshift ARRAY,LIST X<unshift>, use Module VERSION LIST
-X<use> X<module> X<import>, use Module VERSION, use Module LIST, use
+X<rm> X<del>, unlink, unpack TEMPLATE,EXPR X<unpack>, unpack TEMPLATE,
+untie VARIABLE X<untie>, unshift ARRAY,LIST X<unshift>, use Module VERSION
+LIST X<use> X<module> X<import>, use Module VERSION, use Module LIST, use
 Module, use VERSION, utime LIST X<utime>, values HASH X<values>, vec
 EXPR,OFFSET,BITS X<vec> X<bit> X<bit vector>, wait X<wait>, waitpid
 PID,FLAGS X<waitpid>, wantarray X<wantarray> X<context>, warn LIST X<warn>
@@ -2746,41 +2754,62 @@ X<memory usage>
 
 =item Predefined Names
 
-$ARG, $_, $a, $b, $<I<digits>>, $MATCH, $&, $PREMATCH, $`, $POSTMATCH, $',
-$LAST_PAREN_MATCH, $+, $^N, @LAST_MATCH_END, @+,
-HANDLE->input_line_number(EXPR), $INPUT_LINE_NUMBER, $NR, $,
-IO::Handle->input_record_separator(EXPR), $INPUT_RECORD_SEPARATOR, $RS, $/,
-HANDLE->autoflush(EXPR), $OUTPUT_AUTOFLUSH, $|,
-IO::Handle->output_field_separator EXPR, $OUTPUT_FIELD_SEPARATOR, $OFS, $,,
+$ARG, $_ X<$_> X<$ARG>, $a, $b X<$a> X<$b>, $<I<digits>> X<$1> X<$2> X<$3>,
+$MATCH, $& X<$&> X<$MATCH>, $PREMATCH, $` X<$`> X<$PREMATCH>, $POSTMATCH,
+$' X<$'> X<$POSTMATCH>, $LAST_PAREN_MATCH, $+ X<$+> X<$LAST_PAREN_MATCH>,
+$^N X<$^N>, @LAST_MATCH_END, @+ X<@+> X<@LAST_MATCH_END>,
+HANDLE->input_line_number(EXPR), $INPUT_LINE_NUMBER, $NR, $. X<$.> X<$NR>
+X<$INPUT_LINE_NUMBER> X<line number>,
+IO::Handle->input_record_separator(EXPR), $INPUT_RECORD_SEPARATOR, $RS, $/
+X<$/> X<$RS> X<$INPUT_RECORD_SEPARATOR>, HANDLE->autoflush(EXPR),
+$OUTPUT_AUTOFLUSH, $| X<$|> X<autoflush> X<flush> X<$OUTPUT_AUTOFLUSH>,
+IO::Handle->output_field_separator EXPR, $OUTPUT_FIELD_SEPARATOR, $OFS, $,
+X<$,> X<$OFS> X<$OUTPUT_FIELD_SEPARATOR>,
 IO::Handle->output_record_separator EXPR, $OUTPUT_RECORD_SEPARATOR, $ORS,
-$\, $LIST_SEPARATOR, $", $SUBSCRIPT_SEPARATOR, $SUBSEP, $;,
-HANDLE->format_page_number(EXPR), $FORMAT_PAGE_NUMBER, $%,
-HANDLE->format_lines_per_page(EXPR), $FORMAT_LINES_PER_PAGE, $=,
-HANDLE->format_lines_left(EXPR), $FORMAT_LINES_LEFT, $-, @LAST_MATCH_START,
-@-, C<$`> is the same as C<substr($var, 0, $-[0])>, C<$&> is the same as
-C<substr($var, $-[0], $+[0] - $-[0])>, C<$'> is the same as C<substr($var,
-$+[0])>, C<$1> is the same as C<substr($var, $-[1], $+[1] - $-[1])>, C<$2>
-is the same as C<substr($var, $-[2], $+[2] - $-[2])>, C<$3> is the same as
-C<substr($var, $-[3], $+[3] - $-[3])>, HANDLE->format_name(EXPR),
-$FORMAT_NAME, $~, HANDLE->format_top_name(EXPR), $FORMAT_TOP_NAME, $^,
-IO::Handle->format_line_break_characters EXPR,
-$FORMAT_LINE_BREAK_CHARACTERS, $:, IO::Handle->format_formfeed EXPR,
-$FORMAT_FORMFEED, $^L, $ACCUMULATOR, $^A, $CHILD_ERROR, $?,
-${^CHILD_ERROR_NATIVE}, ${^ENCODING}, $OS_ERROR, $ERRNO, $!, %!,
-$EXTENDED_OS_ERROR, $^E, $EVAL_ERROR, $@, $PROCESS_ID, $PID, $$,
-$REAL_USER_ID, $UID, $<, $EFFECTIVE_USER_ID, $EUID, $>, $REAL_GROUP_ID,
-$GID, $(, $EFFECTIVE_GROUP_ID, $EGID, $), $PROGRAM_NAME, $0, $[, $],
-$COMPILING, $^C, $DEBUGGING, $^D, ${^RE_DEBUG_FLAGS}, ${^RE_TRIE_MAXBUF},
-$SYSTEM_FD_MAX, $^F, $^H, %^H, $INPLACE_EDIT, $^I, $^M, $OSNAME, $^O,
-${^OPEN}, $PERLDB, $^P, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80,
-0x100, 0x200, 0x400, $LAST_REGEXP_CODE_RESULT, $^R,
-$EXCEPTIONS_BEING_CAUGHT, $^S, $BASETIME, $^T, ${^TAINT}, ${^UNICODE},
-${^UTF8CACHE}, ${^UTF8LOCALE}, $PERL_VERSION, $^V, $WARNING, $^W,
-${^WARNING_BITS}, ${^WIN32_SLOPPY_STAT}, $EXECUTABLE_NAME, $^X, ARGV,
-$ARGV, @ARGV, ARGVOUT, @F, @INC, @_, %INC, %ENV, $ENV{expr}, %SIG,
-$SIG{expr}
+$\ X<$\> X<$ORS> X<$OUTPUT_RECORD_SEPARATOR>, $LIST_SEPARATOR, $" X<$">
+X<$LIST_SEPARATOR>, $SUBSCRIPT_SEPARATOR, $SUBSEP, $; X<$;> X<$SUBSEP>
+X<SUBSCRIPT_SEPARATOR>, HANDLE->format_page_number(EXPR),
+$FORMAT_PAGE_NUMBER, $% X<$%> X<$FORMAT_PAGE_NUMBER>,
+HANDLE->format_lines_per_page(EXPR), $FORMAT_LINES_PER_PAGE, $= X<$=>
+X<$FORMAT_LINES_PER_PAGE>, HANDLE->format_lines_left(EXPR),
+$FORMAT_LINES_LEFT, $- X<$-> X<$FORMAT_LINES_LEFT>, @LAST_MATCH_START, @-
+X<@-> X<@LAST_MATCH_START>, C<$`> is the same as C<substr($var, 0, $-[0])>,
+C<$&> is the same as C<substr($var, $-[0], $+[0] - $-[0])>, C<$'> is the
+same as C<substr($var, $+[0])>, C<$1> is the same as C<substr($var, $-[1],
+$+[1] - $-[1])>, C<$2> is the same as C<substr($var, $-[2], $+[2] -
+$-[2])>, C<$3> is the same as C<substr($var, $-[3], $+[3] - $-[3])>,
+HANDLE->format_name(EXPR), $FORMAT_NAME, $~ X<$~> X<$FORMAT_NAME>,
+HANDLE->format_top_name(EXPR), $FORMAT_TOP_NAME, $^ X<$^>
+X<$FORMAT_TOP_NAME>, IO::Handle->format_line_break_characters EXPR,
+$FORMAT_LINE_BREAK_CHARACTERS, $: X<$:> X<FORMAT_LINE_BREAK_CHARACTERS>,
+IO::Handle->format_formfeed EXPR, $FORMAT_FORMFEED, $^L X<$^L>
+X<$FORMAT_FORMFEED>, $ACCUMULATOR, $^A X<$^A> X<$ACCUMULATOR>,
+$CHILD_ERROR, $? X<$?> X<$CHILD_ERROR>, ${^CHILD_ERROR_NATIVE}
+X<$^CHILD_ERROR_NATIVE>, ${^ENCODING} X<$^ENCODING>, $OS_ERROR, $ERRNO, $!
+X<$!> X<$ERRNO> X<$OS_ERROR>, %! X<%!>, $EXTENDED_OS_ERROR, $^E X<$^E>
+X<$EXTENDED_OS_ERROR>, $EVAL_ERROR, $@ X<$@> X<$EVAL_ERROR>, $PROCESS_ID,
+$PID, $$ X<$$> X<$PID> X<$PROCESS_ID>, $REAL_USER_ID, $UID, $< X<< $< >>
+X<$UID> X<$REAL_USER_ID>, $EFFECTIVE_USER_ID, $EUID, $> X<< $> >> X<$EUID>
+X<$EFFECTIVE_USER_ID>, $REAL_GROUP_ID, $GID, $( X<$(> X<$GID>
+X<$REAL_GROUP_ID>, $EFFECTIVE_GROUP_ID, $EGID, $) X<$)> X<$EGID>
+X<$EFFECTIVE_GROUP_ID>, $PROGRAM_NAME, $0 X<$0> X<$PROGRAM_NAME>, $[ X<$[>,
+$] X<$]>, $COMPILING, $^C X<$^C> X<$COMPILING>, $DEBUGGING, $^D X<$^D>
+X<$DEBUGGING>, ${^RE_DEBUG_FLAGS}, ${^RE_TRIE_MAXBUF}, $SYSTEM_FD_MAX, $^F
+X<$^F> X<$SYSTEM_FD_MAX>, $^H, %^H, $INPLACE_EDIT, $^I X<$^I>
+X<$INPLACE_EDIT>, $^M X<$^M>, $OSNAME, $^O X<$^O> X<$OSNAME>, ${^OPEN},
+$PERLDB, $^P X<$^P> X<$PERLDB>, 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40,
+0x80, 0x100, 0x200, 0x400, $LAST_REGEXP_CODE_RESULT, $^R X<$^R>
+X<$LAST_REGEXP_CODE_RESULT>, $EXCEPTIONS_BEING_CAUGHT, $^S X<$^S>
+X<$EXCEPTIONS_BEING_CAUGHT>, $BASETIME, $^T X<$^T> X<$BASETIME>, ${^TAINT},
+${^UNICODE}, ${^UTF8CACHE}, ${^UTF8LOCALE}, $PERL_VERSION, $^V X<$^V>
+X<$PERL_VERSION>, $WARNING, $^W X<$^W> X<$WARNING>, ${^WARNING_BITS},
+${^WIN32_SLOPPY_STAT}, $EXECUTABLE_NAME, $^X X<$^X> X<$EXECUTABLE_NAME>,
+ARGV X<ARGV>, $ARGV X<$ARGV>, @ARGV X<@ARGV>, ARGVOUT X<ARGVOUT>, @F X<@F>,
+@INC X<@INC>, @ARG, @_ X<@_> X<@ARG>, %INC X<%INC>, %ENV, $ENV{expr}
+X<%ENV>, %SIG, $SIG{expr} X<%SIG>
 
 =item Error Indicators
+X<error> X<exception>
 
 =item Technical Note on the Syntax of Variable Names
 
@@ -4067,17 +4096,18 @@ B::Showlex, B::Stackobj, B::Stash, B::Terse, B::Xref, Benchmark,
 ByteLoader, CGI, CGI::Apache, CGI::Carp, CGI::Cookie, CGI::Fast,
 CGI::Pretty, CGI::Push, CGI::Switch, CGI::Util, CPAN, CPAN::FirstTime,
 CPAN::Nox, CPAN::Version, Carp, Carp::Heavy, Class::ISA, Class::Struct,
-Compress::Zlib, Compress::Zlib::pod::FAQ, Config, Cwd, DB, DBM_Filter,
-DB_File, Data::Dumper, Devel::DProf, Devel::PPPort, Devel::Peek,
-Devel::SelfStubber, Digest, Digest::MD5, Digest::SHA, Digest::base,
-Digest::file, DirHandle, Dumpvalue, DynaLoader, Encode, Encode::Alias,
-Encode::Byte, Encode::CJKConstants, Encode::CN, Encode::CN::HZ,
-Encode::Config, Encode::EBCDIC, Encode::Encoder, Encode::Encoding,
-Encode::Guess, Encode::JP, Encode::JP::H2Z, Encode::JP::JIS7, Encode::KR,
-Encode::KR::2022_KR, Encode::MIME::Header, Encode::PerlIO,
-Encode::Supported, Encode::Symbol, Encode::TW, Encode::Unicode,
-Encode::Unicode::UTF7, English, Env, Errno, Exporter, Exporter::Heavy,
-ExtUtils::CBuilder, ExtUtils::CBuilder::Platform::Windows,
+Compress::Raw::Zlib, Compress::Zlib, Config, Cwd, DB, DBM_Filter,
+DBM_Filter::compress, DBM_Filter::encode, DBM_Filter::int32,
+DBM_Filter::null, DBM_Filter::utf8, DB_File, Data::Dumper, Devel::DProf,
+Devel::Peek, Devel::SelfStubber, Digest, Digest::MD5, Digest::SHA,
+Digest::base, Digest::file, DirHandle, Dumpvalue, DynaLoader, Encode,
+Encode::Alias, Encode::Byte, Encode::CJKConstants, Encode::CN,
+Encode::CN::HZ, Encode::Config, Encode::EBCDIC, Encode::Encoder,
+Encode::Encoding, Encode::Guess, Encode::JP, Encode::JP::H2Z,
+Encode::JP::JIS7, Encode::KR, Encode::KR::2022_KR, Encode::MIME::Header,
+Encode::PerlIO, Encode::Supported, Encode::Symbol, Encode::TW,
+Encode::Unicode, Encode::Unicode::UTF7, English, Env, Errno, Exporter,
+Exporter::Heavy, ExtUtils::CBuilder, ExtUtils::CBuilder::Platform::Windows,
 ExtUtils::Command, ExtUtils::Command::MM, ExtUtils::Constant,
 ExtUtils::Constant::Base, ExtUtils::Constant::Utils,
 ExtUtils::Constant::XS, ExtUtils::Embed, ExtUtils::Install,
@@ -4096,13 +4126,16 @@ File::GlobMapper, File::Path, File::Spec, File::Spec::Cygwin,
 File::Spec::Epoc, File::Spec::Functions, File::Spec::Mac, File::Spec::OS2,
 File::Spec::Unix, File::Spec::VMS, File::Spec::Win32, File::Temp,
 File::stat, FileCache, FileHandle, Filter::Simple, Filter::Util::Call,
-FindBin, GDBM_File, Getopt::Long, Getopt::Std, Hash::Util, I18N::Collate,
-I18N::LangTags, I18N::LangTags::Detect, I18N::LangTags::List,
-I18N::Langinfo, IO, IO::Compress::Deflate, IO::Compress::Gzip,
-IO::Compress::RawDeflate, IO::Dir, IO::File, IO::Handle, IO::Pipe,
-IO::Poll, IO::Seekable, IO::Select, IO::Socket, IO::Socket::INET,
-IO::Socket::UNIX, IO::Uncompress::AnyInflate, IO::Uncompress::Gunzip,
-IO::Uncompress::Inflate, IO::Uncompress::RawInflate, IO::Zlib, IPC::Open2,
+FindBin, GDBM_File, Getopt::Long, Getopt::Std, Hash::Util,
+Hash::Util::FieldHash, I18N::Collate, I18N::LangTags,
+I18N::LangTags::Detect, I18N::LangTags::List, I18N::Langinfo, IO,
+IO::Compress::Base, IO::Compress::Deflate, IO::Compress::Gzip,
+IO::Compress::RawDeflate, IO::Compress::Zip, IO::Dir, IO::File, IO::Handle,
+IO::Pipe, IO::Poll, IO::Seekable, IO::Select, IO::Socket, IO::Socket::INET,
+IO::Socket::UNIX, IO::Uncompress::AnyInflate,
+IO::Uncompress::AnyUncompress, IO::Uncompress::Base,
+IO::Uncompress::Gunzip, IO::Uncompress::Inflate,
+IO::Uncompress::RawInflate, IO::Uncompress::Unzip, IO::Zlib, IPC::Open2,
 IPC::Open3, IPC::SysV, IPC::SysV::Msg, IPC::SysV::Semaphore, List::Util,
 Locale::Constants, Locale::Country, Locale::Currency, Locale::Language,
 Locale::Maketext, Locale::Maketext::TPJ13, Locale::Script, MIME::Base64,
@@ -4110,11 +4143,22 @@ MIME::Base64::QuotedPrint, Math::BigFloat, Math::BigInt,
 Math::BigInt::Calc, Math::BigInt::CalcEmu, Math::BigInt::FastCalc,
 Math::BigRat, Math::Complex, Math::Trig, Memoize, Memoize::AnyDBM_File,
 Memoize::Expire, Memoize::ExpireFile, Memoize::ExpireTest,
-Memoize::NDBM_File, Memoize::SDBM_File, Memoize::Storable,
-Module::CoreList, NDBM_File, NEXT, Net::Cmd, Net::Config, Net::Domain,
-Net::FTP, Net::NNTP, Net::Netrc, Net::POP3, Net::Ping, Net::SMTP,
-Net::Time, Net::hostent, Net::libnetFAQ, Net::netent, Net::protoent,
-Net::servent, O, ODBM_File, Opcode, POSIX, PerlIO, PerlIO::encoding,
+Memoize::NDBM_File, Memoize::SDBM_File, Memoize::Storable, Module::Build,
+Module::Build::API, Module::Build::Authoring, Module::Build::Base,
+Module::Build::Compat, Module::Build::ConfigData, Module::Build::Cookbook,
+Module::Build::ModuleInfo, Module::Build::Notes, Module::Build::PPMMaker,
+Module::Build::Platform::Amiga, Module::Build::Platform::Default,
+Module::Build::Platform::EBCDIC, Module::Build::Platform::MPEiX,
+Module::Build::Platform::MacOS, Module::Build::Platform::RiscOS,
+Module::Build::Platform::Unix, Module::Build::Platform::VMS,
+Module::Build::Platform::VOS, Module::Build::Platform::Windows,
+Module::Build::Platform::aix, Module::Build::Platform::cygwin,
+Module::Build::Platform::darwin, Module::Build::Platform::os2,
+Module::Build::YAML, Module::CoreList, Module::Load, Module::Loaded,
+NDBM_File, NEXT, Net::Cmd, Net::Config, Net::Domain, Net::FTP, Net::NNTP,
+Net::Netrc, Net::POP3, Net::Ping, Net::SMTP, Net::Time, Net::hostent,
+Net::libnetFAQ, Net::netent, Net::protoent, Net::servent, O, ODBM_File,
+Opcode, POSIX, Package::Constants, PerlIO, PerlIO::encoding,
 PerlIO::scalar, PerlIO::via, PerlIO::via::QuotedPrint, Pod::Checker,
 Pod::Escapes, Pod::Find, Pod::Functions, Pod::Html, Pod::InputObjects,
 Pod::LaTeX, Pod::Man, Pod::ParseLink, Pod::ParseUtils, Pod::Parser,
@@ -4136,13 +4180,14 @@ Term::ANSIColor, Term::Cap, Term::Complete, Term::ReadLine, Test,
 Test::Builder, Test::Builder::Module, Test::Builder::Tester,
 Test::Builder::Tester::Color, Test::Harness, Test::Harness::Assert,
 Test::Harness::Iterator, Test::Harness::Point, Test::Harness::Straps,
-Test::Harness::TAP, Test::More, Test::Simple, Test::Tutorial, Text::Abbrev,
-Text::Balanced, Text::ParseWords, Text::Soundex, Text::Tabs, Text::Wrap,
-Thread, Thread::Queue, Thread::Semaphore, Thread::Signal, Thread::Specific,
-Tie::Array, Tie::File, Tie::Handle, Tie::Hash, Tie::Memoize, Tie::RefHash,
-Tie::Scalar, Tie::SubstrHash, Time::HiRes, Time::Local, Time::gmtime,
-Time::localtime, Time::tm, UNIVERSAL, Unicode::Collate, Unicode::Normalize,
-Unicode::UCD, User::grent, User::pwent, XS::APItest, XS::Typemap, XSLoader
+Test::Harness::TAP, Test::Harness::Util, Test::More, Test::Simple,
+Test::Tutorial, Text::Abbrev, Text::Balanced, Text::ParseWords,
+Text::Soundex, Text::Tabs, Text::Wrap, Thread, Thread::Queue,
+Thread::Semaphore, Thread::Signal, Thread::Specific, Tie::Array, Tie::File,
+Tie::Handle, Tie::Hash, Tie::Memoize, Tie::RefHash, Tie::Scalar,
+Tie::SubstrHash, Time::HiRes, Time::Local, Time::gmtime, Time::localtime,
+Time::tm, UNIVERSAL, Unicode::Collate, Unicode::Normalize, Unicode::UCD,
+User::grent, User::pwent, XS::APItest, XS::Typemap, XSLoader
 
 =item Extension Modules
 
@@ -5308,16 +5353,23 @@ callback
 
 =item Structure of a Regexp Program
 
-regnode_1, regnode_2, regnode_string, regnode_charclass,
-regnode_charclass_class
+C<regnode_1>, C<regnode_2>, C<regnode_string>, C<regnode_charclass>,
+C<regnode_charclass_class>
 
 =back
 
-=item PROCESS OVERVIEW
+=item Process Overview
+
+A. Compilation, 1. Parsing for size, 2. Parsing for construction, 3.
+Peep-hole optimisation and analysis, B. Execution, 4. Start position and
+no-match optimisations, 5. Program execution
 
 =over 4
 
 =item Compilation
+
+anchored fixed strings, floating fixed strings, minimum and maximum length
+requirements, start class, Beginning/End of line positions
 
 =item Execution
 
@@ -5327,13 +5379,21 @@ regnode_charclass_class
 
 =over 4
 
-=item UNICODE and Localization Support
+=item Unicode and Localisation Support
+
+=item Base Struct
+
+-, -, -, -
+
+=item De-allocation and Cloning
 
 =back
 
+=item SEE ALSO
+
 =item AUTHOR
 
-=item LICENSE
+=item LICENCE
 
 =item REFERENCES
 
@@ -5387,6 +5447,10 @@ cv_undef X<cv_undef>, load_module X<load_module>, nothreadhook
 X<nothreadhook>, perl_alloc X<perl_alloc>, perl_construct
 X<perl_construct>, perl_destruct X<perl_destruct>, perl_free X<perl_free>,
 perl_parse X<perl_parse>, perl_run X<perl_run>, require_pv X<require_pv>
+
+=item Functions in file dump.c
+
+pv_display X<pv_display>, pv_escape X<pv_escape>, pv_pretty X<pv_pretty>
 
 =item Functions in file mathoms.c
 
@@ -5553,8 +5617,9 @@ X<SvTRUE>, SvTYPE X<SvTYPE>, SvUOK X<SvUOK>, SvUPGRADE X<SvUPGRADE>, SvUTF8
 X<SvUTF8>, SvUTF8_off X<SvUTF8_off>, SvUTF8_on X<SvUTF8_on>, SvUV X<SvUV>,
 SvUVX X<SvUVX>, SvUVx X<SvUVx>, SvUV_nomg X<SvUV_nomg>, SvUV_set
 X<SvUV_set>, SvVOK X<SvVOK>, sv_catpvn_nomg X<sv_catpvn_nomg>,
-sv_catsv_nomg X<sv_catsv_nomg>, sv_derived_from X<sv_derived_from>,
-sv_report_used X<sv_report_used>, sv_setsv_nomg X<sv_setsv_nomg>
+sv_catsv_nomg X<sv_catsv_nomg>, sv_derived_from X<sv_derived_from>, sv_does
+X<sv_does>, sv_report_used X<sv_report_used>, sv_setsv_nomg
+X<sv_setsv_nomg>
 
 =item SV-Body Allocation
 
@@ -5880,6 +5945,24 @@ Argument stack, Mark stack, Save stack
 
 =item The .i Targets
 
+=back
+
+=item SOURCE CODE STATIC ANALYSIS
+
+=over 4
+
+=item lint, splint
+
+=item Coverity
+
+=item cpd (cut-and-paste detector)
+
+=item gcc warnings
+
+=item Warnings of other C compilers
+
+=item DEBUGGING
+
 =item Poking at Perl
 
 =item Using a source-level debugger
@@ -5914,6 +5997,14 @@ check.utf8, minitest.utf16 test.utf16, test_harness, test-notty test_notty
 
 -v, -torture, -re=PATTERN, -re LIST OF PATTERNS, PERL_CORE=1,
 PERL_DESTRUCT_LEVEL=2, PERL, PERL_SKIP_TTY_TEST
+
+=item Common problems when patching Perl source code
+
+=item Perl environment problems
+
+=item Portability problems
+
+=item Security problems
 
 =back
 
@@ -5954,11 +6045,11 @@ DEFINES, USE_MULTI = define, #PERL_MALLOC = define, CFG = Debug
 
 =item Miscellaneous tricks
 
+=back
+
 =item CONCLUSION
 
 I<The Road goes ever on and on, down from the door where it began.>
-
-=back
 
 =item AUTHOR
 
@@ -5982,11 +6073,7 @@ I<The Road goes ever on and on, down from the door where it began.>
 
 =over 4
 
-=item Needed for a 5.9.4 release
-
 =item Needed for a 5.9.5 release
-
-Implement L</_ prototype character>, Implement L</state variables>
 
 =item Needed for a 5.9.6 release
 
@@ -6032,9 +6119,11 @@ Implement L</_ prototype character>, Implement L</state variables>
 
 =item Add a code coverage target to the Makefile
 
-=item Make Config.pm cope with differences between build and installed perl
+=item Make Config.pm cope with differences between built and installed perl
 
 =item linker specification files
+
+=item Cross-compile support
 
 =back
 
@@ -6052,7 +6141,7 @@ Implement L</_ prototype character>, Implement L</state variables>
 
 =item Allocate OPs from arenas
 
-=item Merge the win32 and wince codebases
+=item Improve win32/wince.c
 
 =back
 
@@ -6061,8 +6150,6 @@ Implement L</_ prototype character>, Implement L</state variables>
 =over 4
 
 =item shrink C<PVBM>s
-
-=item Implicit Latin 1 => Unicode translation
 
 =item autovivification
 
@@ -6078,13 +6165,13 @@ Implement L</_ prototype character>, Implement L</state variables>
 
 =item readpipe(LIST)
 
+=item strcat(), strcpy(), strncat(), strncpy(), sprintf(), vsprintf()
+
 =back
 
 =item Tasks that need a knowledge of the interpreter
 
 =over 4
-
-=item lexical pragmas
 
 =item Attach/detach debugger from running program
 
@@ -6094,11 +6181,13 @@ Implement L</_ prototype character>, Implement L</state variables>
 
 =item _ prototype character
 
-=item state variables
-
 =item regexp optimiser optional
 
 =item UNITCHECK
+
+=item delete &function
+
+=item Make readpipe overridable
 
 =item optional optimizer
 
@@ -6201,33 +6290,119 @@ B<-V>
 
 =item chdir FOO
 
+=item Handling of pmc files
+
+=item @- and @+ in patterns
+
+=item $AUTOLOAD can now be tainted
+
 =back
 
 =item Core Enhancements
 
-=item Modules and Pragmata
+=over 4
+
+=item state() variables
+
+=item UNIVERSAL::DOES()
+
+=item Exceptions in constant folding
+
+=item Source filters in @INC
+
+=item MAD
+
+=back
+
+=item Modules and Pragmas
+
+=over 4
+
+=item New Core Modules
+
+=back
 
 =item Utility Changes
 
+=over 4
+
+=item config_data
+
+=back
+
 =item Documentation
+
+=over 4
+
+=item New manpage, perlpragma
+
+=item New manpage, perlreguts
+
+=item New manpage, perlunitut
+
+=back
 
 =item Performance Enhancements
 
+=over 4
+
+=item Memory optimisations
+
+=item UTF-8 cache optimisation
+
+=item Regular expressions
+
+Engine de-recursivised, Single char char-classes treated as literals, Trie
+optimisation of literal string alternations, Aho-Corasick start-point
+optimisation
+
+=item Sloppy stat on Windows
+
+=back
+
 =item Installation and Configuration Improvements
+
+=over 4
+
+=item Relocatable installations
+
+=item Ports
+
+=item Compilation improvements
+
+=item New probes
+
+=item Windows build improvements
+
+Building XS extensions, Support for 64-bit compiler
+
+=back
 
 =item Selected Bug Fixes
 
+=over 4
+
+=item PERL5SHELL and tainting
+
+=item Using *FILE{IO}
+
+=item Overloading and reblessing
+
+=item Overloading and UTF-8
+
+=item eval memory leaks fixed
+
+=item Random device on Windows
+
+=back
+
 =item New or Changed Diagnostics
+
+State variable %s will be reinitialized
 
 =item Changed Internals
 
 =item Known Problems
-
-=over 4
-
-=item Platform Specific Problems
-
-=back
 
 =item Reporting Bugs
 
@@ -6247,33 +6422,119 @@ B<-V>
 
 =item chdir FOO
 
+=item Handling of pmc files
+
+=item @- and @+ in patterns
+
+=item $AUTOLOAD can now be tainted
+
 =back
 
 =item Core Enhancements
 
-=item Modules and Pragmata
+=over 4
+
+=item state() variables
+
+=item UNIVERSAL::DOES()
+
+=item Exceptions in constant folding
+
+=item Source filters in @INC
+
+=item MAD
+
+=back
+
+=item Modules and Pragmas
+
+=over 4
+
+=item New Core Modules
+
+=back
 
 =item Utility Changes
 
+=over 4
+
+=item config_data
+
+=back
+
 =item Documentation
+
+=over 4
+
+=item New manpage, perlpragma
+
+=item New manpage, perlreguts
+
+=item New manpage, perlunitut
+
+=back
 
 =item Performance Enhancements
 
+=over 4
+
+=item Memory optimisations
+
+=item UTF-8 cache optimisation
+
+=item Regular expressions
+
+Engine de-recursivised, Single char char-classes treated as literals, Trie
+optimisation of literal string alternations, Aho-Corasick start-point
+optimisation
+
+=item Sloppy stat on Windows
+
+=back
+
 =item Installation and Configuration Improvements
+
+=over 4
+
+=item Relocatable installations
+
+=item Ports
+
+=item Compilation improvements
+
+=item New probes
+
+=item Windows build improvements
+
+Building XS extensions, Support for 64-bit compiler
+
+=back
 
 =item Selected Bug Fixes
 
+=over 4
+
+=item PERL5SHELL and tainting
+
+=item Using *FILE{IO}
+
+=item Overloading and reblessing
+
+=item Overloading and UTF-8
+
+=item eval memory leaks fixed
+
+=item Random device on Windows
+
+=back
+
 =item New or Changed Diagnostics
+
+State variable %s will be reinitialized
 
 =item Changed Internals
 
 =item Known Problems
-
-=over 4
-
-=item Platform Specific Problems
-
-=back
 
 =item Reporting Bugs
 
@@ -10634,6 +10895,11 @@ method, locked
 
 =item DESCRIPTION
 
+Compile related options, COMPILE, PARSE, OPTIMISE, TRIE_COMPILE, DUMP,
+OFFSETS, Execute related options, EXECUTE, MATCH, TRIE_EXECUTE, INTUIT,
+Extra debugging options, EXTRA, TRIE_MORE, OFFSETS_DEBUG, Other useful
+flags, ALL, All, MORE, More
+
 =back
 
 =head2 threadshared::shared, threads::shared - Perl extension for sharing
@@ -10676,7 +10942,20 @@ ABS_TIMEOUT, LOCKVAR, cond_signal VARIABLE, cond_broadcast VARIABLE
 $thr = threads->create(FUNCTION, ARGS), $thr->join(), $thr->detach(),
 threads->detach(), threads->self(), $thr->tid(), threads->tid(),
 threads->object($tid), threads->yield(), threads->list(),
-$thr1->equal($thr2), async BLOCK;, $thr->_handle(), threads->_handle()
+threads->list(threads::all), threads->list(threads::running),
+threads->list(threads::joinable), $thr1->equal($thr2), async BLOCK;,
+$thr->_handle(), threads->_handle()
+
+=item EXITING A THREAD
+
+threads->exit(), threads->exit(status), die(), exit(status), use threads
+'exit' => 'thread_only', threads->create({'exit' => 'thread_only'}, ...),
+$thr->set_thread_exit_only(boolean), threads->set_thread_exit_only(boolean)
+
+=item THREAD STATE
+
+$thr->is_running(), $thr->is_joinable(), $thr->is_detached(),
+threads->is_detached()
 
 =item THREAD CONTEXT
 
@@ -10685,6 +10964,10 @@ $thr1->equal($thr2), async BLOCK;, $thr->_handle(), threads->_handle()
 =item Explicit context
 
 =item Implicit context
+
+=item $thr->wantarray()
+
+=item threads->wantarray()
 
 =back
 
@@ -10701,16 +10984,16 @@ $thr->kill('SIG...');
 
 =item WARNINGS
 
-A thread exited while # other threads were still running, Thread creation
-failed: pthread_create returned #, Thread # terminated abnormally: ..,
-Using minimum thread stack size of #, Thread creation failed:
-pthread_attr_setstacksize(I<SIZE>) returned 22
+Perl exited with active threads:, Thread creation failed: pthread_create
+returned #, Thread # terminated abnormally: .., Using minimum thread stack
+size of #, Thread creation failed: pthread_attr_setstacksize(I<SIZE>)
+returned 22
 
 =item ERRORS
 
 This Perl not built to support threads, Cannot change stack size of an
-existing thread, Cannot signal other threads without safe signals,
-Unrecognized signal name: ..
+existing thread, Cannot signal threads without safe signals, Unrecognized
+signal name: ..
 
 =item BUGS
 
@@ -11630,6 +11913,10 @@ utf8::is_utf8(STRING), $flag = utf8::valid(STRING)
 
 Be consistent, Be careful
 
+=item Using modules that use version.pm
+
+Numeric versions always work, Extended version work sometimes
+
 =item What IS a version
 
 Numeric Versions, Extended Versions
@@ -11841,6 +12128,12 @@ FILE, HARDLINK, SYMLINK, CHARDEV, BLOCKDEV, DIR, FIFO, SOCKET
 
 =over 4
 
+=item $tar->setcwd( $cwd );
+
+=back
+
+=over 4
+
 =item $bool = $tar->has_io_string
 
 =back
@@ -11912,15 +12205,24 @@ FILE, HARDLINK, SYMLINK, CHARDEV, BLOCKDEV, DIR, FIFO, SOCKET
 What's the minimum perl version required to run Archive::Tar?, Isn't
 Archive::Tar slow?, Isn't Archive::Tar heavier on memory than /bin/tar?,
 Can't you lazy-load data instead?, How much memory will an X kb tar file
-need?, What do you do with unsupported filetypes in an archive?, How do I
-extract only files that have property X from an archive?, How do I access
-.tar.Z files?
+need?, What do you do with unsupported filetypes in an archive?, I'm using
+WinZip, or some other non-POSIX client, and files are not being extracted
+properly!, How do I extract only files that have property X from an
+archive?, How do I access .tar.Z files?
 
 =item TODO
 
 Check if passed in handles are open for read/write, Allow archives to be
 passed in as string, Facilitate processing an opened filehandle of a
 compressed archive
+
+=item SEE ALSO
+
+The GNU tar specification, The PAX format specication, A comparison of GNU
+and POSIX tar standards;
+C<http://www.delorie.com/gnu/docs/tar/tar_114.html>, GNU tar intends to
+switch to POSIX compatibility, A Comparison between various tar
+implementations
 
 =item AUTHOR
 
@@ -13252,6 +13554,8 @@ Signals
 
 =item recompile
 
+=item upgrade
+
 =item mkmyconfig
 
 =item The four C<CPAN::*> Classes: Author, Bundle, Module, Distribution
@@ -13354,6 +13658,8 @@ http firewall, ftp firewall, One way visibility, SOCKS, IP Masquerade
 1), 2), 3), 4), 5), 6), 7), 8), 9), 10), 11), 12), 13), 14)
 
 =item BUGS
+
+=item SECURITY ADVICE
 
 =item AUTHOR
 
@@ -13581,8 +13887,8 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
--MultiStream =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>
 
 =item Examples
 
@@ -13598,9 +13904,9 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -MultiStream =E<gt> 0|1, -Prime =E<gt> $string,
--Transparent =E<gt> 0|1, -BlockSize =E<gt> $num, -InputLength =E<gt> $size,
--Append =E<gt> 0|1, -Strict =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
 
 =item Examples
 
@@ -13639,6 +13945,10 @@ A filename, A filehandle, A scalar reference
 =item fileno
 
 =item close
+
+=item nextStream
+
+=item trailingData
 
 =back
 
@@ -13704,7 +14014,7 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeIn =E<gt> 0|1, -Append =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeIn => 0|1 >>, C<< Append => 0|1 >>
 
 =item Examples
 
@@ -13720,8 +14030,8 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
-AutoClose =E<gt> 0|1, Append =E<gt> 0|1, A Buffer, A Filename, A
-Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
+Filehandle, C<< Merge => 0|1 >>, -Level, -Strategy, C<< Strict => 0|1 >>
 
 =item Examples
 
@@ -13760,8 +14070,6 @@ Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
 =item close
 
 =item newStream([OPTS])
-
-Level
 
 =item deflateParams
 
@@ -13810,7 +14118,7 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeIn =E<gt> 0|1, -Append =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeIn => 0|1 >>, C<< Append => 0|1 >>
 
 =item Examples
 
@@ -13826,11 +14134,12 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
-AutoClose =E<gt> 0|1, Append =E<gt> 0|1, A Buffer, A Filename, A
-Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Minimal =E<gt> 0|1,
--Comment =E<gt> $comment, -Name =E<gt> $string, -Time =E<gt> $number,
--TextFlag =E<gt> 0|1, -HeaderCRC =E<gt> 0|1, -OS_Code =E<gt> $value,
--ExtraField =E<gt> $data, -ExtraFlags =E<gt> $value, -Strict =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
+Filehandle, C<< Merge => 0|1 >>, -Level, -Strategy, C<< Minimal => 0|1 >>,
+C<< Comment => $comment >>, C<< Name => $string >>, C<< Time => $number >>,
+C<< TextFlag => 0|1 >>, C<< HeaderCRC => 0|1 >>, C<< OS_Code => $value >>,
+C<< ExtraField => $data >>, C<< ExtraFlags => $value >>, C<< Strict => 0|1
+>>
 
 =item Examples
 
@@ -13869,8 +14178,6 @@ Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Minimal =E<gt> 0|1,
 =item close
 
 =item newStream([OPTS])
-
-Level
 
 =item deflateParams
 
@@ -13919,7 +14226,7 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeIn =E<gt> 0|1, -Append =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeIn => 0|1 >>, C<< Append => 0|1 >>
 
 =item Examples
 
@@ -13935,8 +14242,8 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
-AutoClose =E<gt> 0|1, Append =E<gt> 0|1, A Buffer, A Filename, A
-Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
+Filehandle, C<< Merge => 0|1 >>, -Level, -Strategy, C<< Strict => 0|1 >>
 
 =item Examples
 
@@ -13975,8 +14282,6 @@ Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
 =item close
 
 =item newStream([OPTS])
-
-Level
 
 =item deflateParams
 
@@ -14025,7 +14330,7 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeIn =E<gt> 0|1, -Append =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeIn => 0|1 >>, C<< Append => 0|1 >>
 
 =item Examples
 
@@ -14041,13 +14346,13 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
-AutoClose =E<gt> 0|1, Append =E<gt> 0|1, A Buffer, A Filename, A
-Filehandle, -Name =E<gt> $string, -Time =E<gt> $number, -exTime =E<gt>
-[$atime, $mtime, $ctime], -Comment =E<gt> $comment, -ZipComment =E<gt>
-$comment, Method =E<gt> $method, Stream =E<gt> 0|1, -TextFlag =E<gt> 0|1,
-ExtraFieldLocal =E<gt> $data =item ExtraFieldCentral =E<gt> $data, Minimal
-=E<gt> 1|0, BlockSize100K =E<gt> number, WorkFactor =E<gt> number, -Level,
--Strategy, -Strict =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
+Filehandle, C<< Name => $string >>, C<< Time => $number >>, C<< exTime =>
+[$atime, $mtime, $ctime] >>, C<< Comment => $comment >>, C<< ZipComment =>
+$comment >>, C<< Method => $method >>, C<< Stream => 0|1 >>, C<< TextFlag
+=> 0|1 >>, C<< ExtraFieldLocal => $data >> =item C<< ExtraFieldCentral =>
+$data >>, C<< Minimal => 1|0 >>, C<< BlockSize100K => number >>, C<<
+WorkFactor => number >>, -Level, -Strategy, C<< Strict => 0|1 >>
 
 =item Examples
 
@@ -14086,8 +14391,6 @@ ExtraFieldLocal =E<gt> $data =item ExtraFieldCentral =E<gt> $data, Minimal
 =item close
 
 =item newStream([OPTS])
-
-Level
 
 =item deflateParams
 
@@ -14136,8 +14439,8 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
--MultiStream =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>
 
 =item Examples
 
@@ -14153,9 +14456,10 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -MultiStream =E<gt> 0|1, -Prime =E<gt> $string,
--Transparent =E<gt> 0|1, -BlockSize =E<gt> $num, -InputLength =E<gt> $size,
--Append =E<gt> 0|1, -Strict =E<gt> 0|1, -ParseExtra =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>, C<< ParseExtra => 0|1
+>>
 
 =item Examples
 
@@ -14196,6 +14500,10 @@ A filename, A filehandle, A scalar reference
 =item fileno
 
 =item close
+
+=item nextStream
+
+=item trailingData
 
 =back
 
@@ -14242,8 +14550,8 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
--MultiStream =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>
 
 =item Examples
 
@@ -14259,9 +14567,10 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -MultiStream =E<gt> 0|1, -Prime =E<gt> $string,
--Transparent =E<gt> 0|1, -BlockSize =E<gt> $num, -InputLength =E<gt> $size,
--Append =E<gt> 0|1, -Strict =E<gt> 0|1, -ParseExtra =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>, C<< ParseExtra => 0|1
+>>
 
 =item Examples
 
@@ -14304,6 +14613,10 @@ Name, Comment
 =item fileno
 
 =item close
+
+=item nextStream
+
+=item trailingData
 
 =back
 
@@ -14350,8 +14663,8 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
--MultiStream =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>
 
 =item Examples
 
@@ -14367,9 +14680,9 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -MultiStream =E<gt> 0|1, -Prime =E<gt> $string,
--Transparent =E<gt> 0|1, -BlockSize =E<gt> $num, -InputLength =E<gt> $size,
--Append =E<gt> 0|1, -Strict =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
 
 =item Examples
 
@@ -14410,6 +14723,10 @@ A filename, A filehandle, A scalar reference
 =item fileno
 
 =item close
+
+=item nextStream
+
+=item trailingData
 
 =back
 
@@ -14456,8 +14773,8 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
--MultiStream =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>
 
 =item Examples
 
@@ -14473,9 +14790,9 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -MultiStream =E<gt> 0|1, -Prime =E<gt> $string,
--Transparent =E<gt> 0|1, -BlockSize =E<gt> $num, -InputLength =E<gt> $size,
--Append =E<gt> 0|1, -Strict =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
 
 =item Examples
 
@@ -14516,6 +14833,10 @@ A filename, A filehandle, A scalar reference
 =item fileno
 
 =item close
+
+=item nextStream
+
+=item trailingData
 
 =back
 
@@ -14562,8 +14883,8 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
--MultiStream =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>
 
 =item Examples
 
@@ -14579,9 +14900,9 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -MultiStream =E<gt> 0|1, -Prime =E<gt> $string,
--Transparent =E<gt> 0|1, -BlockSize =E<gt> $num, -InputLength =E<gt> $size,
--Append =E<gt> 0|1, -Strict =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
 
 =item Examples
 
@@ -14622,6 +14943,10 @@ A filename, A filehandle, A scalar reference
 =item fileno
 
 =item close
+
+=item nextStream
+
+=item trailingData
 
 =back
 
@@ -14931,8 +15256,6 @@ B<-WindowBits>, B<-Bufsize>, B<-Dictionary>
 
 =item CHECKSUM FUNCTIONS
 
-=item ACCESSING ZIP FILES
-
 =item CONSTANTS
 
 =item SEE ALSO
@@ -15040,8 +15363,6 @@ B<-WindowBits>, B<-Bufsize>, B<-Dictionary>
 
 =item CHECKSUM FUNCTIONS
 
-=item ACCESSING ZIP FILES
-
 =item CONSTANTS
 
 =item SEE ALSO
@@ -15108,36 +15429,37 @@ C<d_bsdgetpgrp>, C<d_bsdsetpgrp>, C<d_builtin_choose_expr>,
 C<d_builtin_expect>, C<d_bzero>, C<d_c99_variadic_macros>, C<d_casti32>,
 C<d_castneg>, C<d_charvspr>, C<d_chown>, C<d_chroot>, C<d_chsize>,
 C<d_class>, C<d_clearenv>, C<d_closedir>, C<d_cmsghdr_s>, C<d_const>,
-C<d_copysignl>, C<d_crypt>, C<d_crypt_r>, C<d_csh>, C<d_ctermid_r>,
-C<d_ctime_r>, C<d_cuserid>, C<d_dbl_dig>, C<d_dbminitproto>, C<d_difftime>,
-C<d_dirfd>, C<d_dirnamlen>, C<d_dlerror>, C<d_dlopen>, C<d_dlsymun>,
-C<d_dosuid>, C<d_drand48_r>, C<d_drand48proto>, C<d_dup2>, C<d_eaccess>,
-C<d_endgrent>, C<d_endgrent_r>, C<d_endhent>, C<d_endhostent_r>,
-C<d_endnent>, C<d_endnetent_r>, C<d_endpent>, C<d_endprotoent_r>,
-C<d_endpwent>, C<d_endpwent_r>, C<d_endsent>, C<d_endservent_r>,
-C<d_eofnblk>, C<d_eunice>, C<d_faststdio>, C<d_fchdir>, C<d_fchmod>,
-C<d_fchown>, C<d_fcntl>, C<d_fcntl_can_lock>, C<d_fd_macros>, C<d_fd_set>,
-C<d_fds_bits>, C<d_fgetpos>, C<d_finite>, C<d_finitel>, C<d_flexfnam>,
-C<d_flock>, C<d_flockproto>, C<d_fork>, C<d_fp_class>, C<d_fpathconf>,
-C<d_fpclass>, C<d_fpclassify>, C<d_fpclassl>, C<d_fpos64_t>, C<d_frexpl>,
-C<d_fs_data_s>, C<d_fseeko>, C<d_fsetpos>, C<d_fstatfs>, C<d_fstatvfs>,
-C<d_fsync>, C<d_ftello>, C<d_ftime>, C<d_futimes>, C<d_Gconvert>,
-C<d_getcwd>, C<d_getespwnam>, C<d_getfsstat>, C<d_getgrent>,
-C<d_getgrent_r>, C<d_getgrgid_r>, C<d_getgrnam_r>, C<d_getgrps>,
-C<d_gethbyaddr>, C<d_gethbyname>, C<d_gethent>, C<d_gethname>,
-C<d_gethostbyaddr_r>, C<d_gethostbyname_r>, C<d_gethostent_r>,
-C<d_gethostprotos>, C<d_getitimer>, C<d_getlogin>, C<d_getlogin_r>,
-C<d_getmnt>, C<d_getmntent>, C<d_getnbyaddr>, C<d_getnbyname>,
-C<d_getnent>, C<d_getnetbyaddr_r>, C<d_getnetbyname_r>, C<d_getnetent_r>,
-C<d_getnetprotos>, C<d_getpagsz>, C<d_getpbyname>, C<d_getpbynumber>,
-C<d_getpent>, C<d_getpgid>, C<d_getpgrp>, C<d_getpgrp2>, C<d_getppid>,
-C<d_getprior>, C<d_getprotobyname_r>, C<d_getprotobynumber_r>,
-C<d_getprotoent_r>, C<d_getprotoprotos>, C<d_getprpwnam>, C<d_getpwent>,
-C<d_getpwent_r>, C<d_getpwnam_r>, C<d_getpwuid_r>, C<d_getsbyname>,
-C<d_getsbyport>, C<d_getsent>, C<d_getservbyname_r>, C<d_getservbyport_r>,
-C<d_getservent_r>, C<d_getservprotos>, C<d_getspnam>, C<d_getspnam_r>,
-C<d_gettimeod>, C<d_gmtime_r>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>,
-C<d_htonl>, C<d_ilogbl>, C<d_inc_version_list>, C<d_index>, C<d_inetaton>,
+C<d_cplusplus>, C<d_copysignl>, C<d_crypt>, C<d_crypt_r>, C<d_csh>,
+C<d_ctermid_r>, C<d_ctime_r>, C<d_cuserid>, C<d_dbl_dig>,
+C<d_dbminitproto>, C<d_difftime>, C<d_dirfd>, C<d_dirnamlen>, C<d_dlerror>,
+C<d_dlopen>, C<d_dlsymun>, C<d_dosuid>, C<d_drand48_r>, C<d_drand48proto>,
+C<d_dup2>, C<d_eaccess>, C<d_endgrent>, C<d_endgrent_r>, C<d_endhent>,
+C<d_endhostent_r>, C<d_endnent>, C<d_endnetent_r>, C<d_endpent>,
+C<d_endprotoent_r>, C<d_endpwent>, C<d_endpwent_r>, C<d_endsent>,
+C<d_endservent_r>, C<d_eofnblk>, C<d_eunice>, C<d_faststdio>, C<d_fchdir>,
+C<d_fchmod>, C<d_fchown>, C<d_fcntl>, C<d_fcntl_can_lock>, C<d_fd_macros>,
+C<d_fd_set>, C<d_fds_bits>, C<d_fgetpos>, C<d_finite>, C<d_finitel>,
+C<d_flexfnam>, C<d_flock>, C<d_flockproto>, C<d_fork>, C<d_fp_class>,
+C<d_fpathconf>, C<d_fpclass>, C<d_fpclassify>, C<d_fpclassl>,
+C<d_fpos64_t>, C<d_frexpl>, C<d_fs_data_s>, C<d_fseeko>, C<d_fsetpos>,
+C<d_fstatfs>, C<d_fstatvfs>, C<d_fsync>, C<d_ftello>, C<d_ftime>,
+C<d_futimes>, C<d_Gconvert>, C<d_getcwd>, C<d_getespwnam>, C<d_getfsstat>,
+C<d_getgrent>, C<d_getgrent_r>, C<d_getgrgid_r>, C<d_getgrnam_r>,
+C<d_getgrps>, C<d_gethbyaddr>, C<d_gethbyname>, C<d_gethent>,
+C<d_gethname>, C<d_gethostbyaddr_r>, C<d_gethostbyname_r>,
+C<d_gethostent_r>, C<d_gethostprotos>, C<d_getitimer>, C<d_getlogin>,
+C<d_getlogin_r>, C<d_getmnt>, C<d_getmntent>, C<d_getnbyaddr>,
+C<d_getnbyname>, C<d_getnent>, C<d_getnetbyaddr_r>, C<d_getnetbyname_r>,
+C<d_getnetent_r>, C<d_getnetprotos>, C<d_getpagsz>, C<d_getpbyname>,
+C<d_getpbynumber>, C<d_getpent>, C<d_getpgid>, C<d_getpgrp>, C<d_getpgrp2>,
+C<d_getppid>, C<d_getprior>, C<d_getprotobyname_r>,
+C<d_getprotobynumber_r>, C<d_getprotoent_r>, C<d_getprotoprotos>,
+C<d_getprpwnam>, C<d_getpwent>, C<d_getpwent_r>, C<d_getpwnam_r>,
+C<d_getpwuid_r>, C<d_getsbyname>, C<d_getsbyport>, C<d_getsent>,
+C<d_getservbyname_r>, C<d_getservbyport_r>, C<d_getservent_r>,
+C<d_getservprotos>, C<d_getspnam>, C<d_getspnam_r>, C<d_gettimeod>,
+C<d_gmtime_r>, C<d_gnulibc>, C<d_grpasswd>, C<d_hasmntopt>, C<d_htonl>,
+C<d_ilogbl>, C<d_inc_version_list>, C<d_index>, C<d_inetaton>,
 C<d_int64_t>, C<d_isascii>, C<d_isfinite>, C<d_isinf>, C<d_isnan>,
 C<d_isnanl>, C<d_killpg>, C<d_lchown>, C<d_ldbl_dig>,
 C<d_libm_lib_version>, C<d_link>, C<d_localtime_r>, C<d_locconv>,
@@ -15997,6 +16319,8 @@ $md5->add_bits($bitstring), $md5->digest, $md5->hexdigest, $md5->b64digest
 
 =item NIST STATEMENT ON SHA-1
 
+=item BASE64 DIGESTS
+
 =item EXPORT
 
 =item EXPORTABLE FUNCTIONS
@@ -16009,8 +16333,7 @@ B<sha224_base64($data, ...)>, B<sha256_base64($data, ...)>,
 B<sha384_base64($data, ...)>, B<sha512_base64($data, ...)>, B<new($alg)>,
 B<reset($alg)>, B<hashsize>, B<algorithm>, B<clone>, B<add($data, ...)>,
 B<add_bits($data, $nbits)>, B<add_bits($bits)>, B<addfile(*FILE)>,
-B<addfile($filename [, $mode])>, B<"b">     read file in binary mode,
-B<"p">	      use portable mode, B<dump($filename)>, B<load($filename)>,
+B<addfile($filename [, $mode])>, B<dump($filename)>, B<load($filename)>,
 B<digest>, B<hexdigest>, B<b64digest>, B<hmac_sha1($data, $key)>,
 B<hmac_sha224($data, $key)>, B<hmac_sha256($data, $key)>,
 B<hmac_sha384($data, $key)>, B<hmac_sha512($data, $key)>,
@@ -18501,13 +18824,13 @@ suffix.
 
 =back
 
-C<fileparse>
+C<fileparse> X<fileparse>
 
-C<basename>
+C<basename> X<basename> X<filename>
 
-C<dirname>
+C<dirname> X<dirname>
 
-C<fileparse_set_fstype>
+C<fileparse_set_fstype> X<filesystem>
 
 =over 4
 
@@ -18551,13 +18874,8 @@ C<fileparse_set_fstype>
 
 =item DESCRIPTION
 
-=over 4
-
-=item Special behaviour if C<syscopy> is defined (OS/2, VMS and Win32)
-
-rmscopy($from,$to[,$date_flag])
-
-=back
+copy X<copy> X<cp>, move X<move> X<mv> X<rename>, syscopy X<syscopy>,
+rmscopy($from,$to[,$date_flag]) X<rmscopy>
 
 =item RETURN
 
@@ -19435,6 +19753,8 @@ with switch clustering
 
 =over 4
 
+=item Field hashes
+
 =item Restricted hashes
 
 B<lock_keys>, B<unlock_keys>
@@ -19479,6 +19799,107 @@ unlock_hashref_recurse, hash_ref_unlocked, legal_ref_keys, hidden_ref_keys
 
 =back
 
+=head2 Hash::Util::FieldHash - Associate references with data
+
+=over 4
+
+=item SYNOPSIS
+
+=item Functions
+
+fieldhash, fieldhashes
+
+=item Description
+
+=over 4
+
+=item Features
+
+Key exchange, Thread support, Garbage collection
+
+=item Rationale
+
+Stringification, Thread Dependency, Garbage Collection
+
+=item How to use
+
+=item Examples
+
+=item Garbage-Collected Hashes
+
+=back
+
+=item Guts
+
+=over 4
+
+=item The C<PERL_MAGIC_uvar> interface for hashes
+
+=item Weakrefs call uvar magic
+
+=item How field hashes work
+
+=item Internal function Hash::Util::FieldHash::_fieldhash
+
+=back
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
+=head2 Hash::Util::FieldHash::lib::Hash::Util::FieldHash,
+Hash::Util::FieldHash - Associate references with data
+
+=over 4
+
+=item SYNOPSIS
+
+=item Functions
+
+fieldhash, fieldhashes
+
+=item Description
+
+=over 4
+
+=item Features
+
+Key exchange, Thread support, Garbage collection
+
+=item Rationale
+
+Stringification, Thread Dependency, Garbage Collection
+
+=item How to use
+
+=item Examples
+
+=item Garbage-Collected Hashes
+
+=back
+
+=item Guts
+
+=over 4
+
+=item The C<PERL_MAGIC_uvar> interface for hashes
+
+=item Weakrefs call uvar magic
+
+=item How field hashes work
+
+=item Internal function Hash::Util::FieldHash::_fieldhash
+
+=back
+
+=item AUTHOR
+
+=item COPYRIGHT AND LICENSE
+
+=back
+
 =head2 Hash::Utilib::Hash::Util, Hash::Util - A selection of
 general-utility hash subroutines
 
@@ -19489,6 +19910,8 @@ general-utility hash subroutines
 =item DESCRIPTION
 
 =over 4
+
+=item Field hashes
 
 =item Restricted hashes
 
@@ -19839,7 +20262,7 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeIn =E<gt> 0|1, -Append =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeIn => 0|1 >>, C<< Append => 0|1 >>
 
 =item Examples
 
@@ -19855,8 +20278,8 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
-AutoClose =E<gt> 0|1, Append =E<gt> 0|1, A Buffer, A Filename, A
-Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
+Filehandle, C<< Merge => 0|1 >>, -Level, -Strategy, C<< Strict => 0|1 >>
 
 =item Examples
 
@@ -19895,8 +20318,6 @@ Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
 =item close
 
 =item newStream([OPTS])
-
-Level
 
 =item deflateParams
 
@@ -19944,7 +20365,7 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeIn =E<gt> 0|1, -Append =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeIn => 0|1 >>, C<< Append => 0|1 >>
 
 =item Examples
 
@@ -19960,11 +20381,12 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
-AutoClose =E<gt> 0|1, Append =E<gt> 0|1, A Buffer, A Filename, A
-Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Minimal =E<gt> 0|1,
--Comment =E<gt> $comment, -Name =E<gt> $string, -Time =E<gt> $number,
--TextFlag =E<gt> 0|1, -HeaderCRC =E<gt> 0|1, -OS_Code =E<gt> $value,
--ExtraField =E<gt> $data, -ExtraFlags =E<gt> $value, -Strict =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
+Filehandle, C<< Merge => 0|1 >>, -Level, -Strategy, C<< Minimal => 0|1 >>,
+C<< Comment => $comment >>, C<< Name => $string >>, C<< Time => $number >>,
+C<< TextFlag => 0|1 >>, C<< HeaderCRC => 0|1 >>, C<< OS_Code => $value >>,
+C<< ExtraField => $data >>, C<< ExtraFlags => $value >>, C<< Strict => 0|1
+>>
 
 =item Examples
 
@@ -20003,8 +20425,6 @@ Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Minimal =E<gt> 0|1,
 =item close
 
 =item newStream([OPTS])
-
-Level
 
 =item deflateParams
 
@@ -20052,7 +20472,7 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeIn =E<gt> 0|1, -Append =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeIn => 0|1 >>, C<< Append => 0|1 >>
 
 =item Examples
 
@@ -20068,8 +20488,8 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
-AutoClose =E<gt> 0|1, Append =E<gt> 0|1, A Buffer, A Filename, A
-Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
+Filehandle, C<< Merge => 0|1 >>, -Level, -Strategy, C<< Strict => 0|1 >>
 
 =item Examples
 
@@ -20108,8 +20528,6 @@ Filehandle, Merge =E<gt> 0|1, -Level, -Strategy, -Strict =E<gt> 0|1
 =item close
 
 =item newStream([OPTS])
-
-Level
 
 =item deflateParams
 
@@ -20157,7 +20575,7 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeIn =E<gt> 0|1, -Append =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeIn => 0|1 >>, C<< Append => 0|1 >>
 
 =item Examples
 
@@ -20173,13 +20591,13 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
-AutoClose =E<gt> 0|1, Append =E<gt> 0|1, A Buffer, A Filename, A
-Filehandle, -Name =E<gt> $string, -Time =E<gt> $number, -exTime =E<gt>
-[$atime, $mtime, $ctime], -Comment =E<gt> $comment, -ZipComment =E<gt>
-$comment, Method =E<gt> $method, Stream =E<gt> 0|1, -TextFlag =E<gt> 0|1,
-ExtraFieldLocal =E<gt> $data =item ExtraFieldCentral =E<gt> $data, Minimal
-=E<gt> 1|0, BlockSize100K =E<gt> number, WorkFactor =E<gt> number, -Level,
--Strategy, -Strict =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< Append => 0|1 >>, A Buffer, A Filename, A
+Filehandle, C<< Name => $string >>, C<< Time => $number >>, C<< exTime =>
+[$atime, $mtime, $ctime] >>, C<< Comment => $comment >>, C<< ZipComment =>
+$comment >>, C<< Method => $method >>, C<< Stream => 0|1 >>, C<< TextFlag
+=> 0|1 >>, C<< ExtraFieldLocal => $data >> =item C<< ExtraFieldCentral =>
+$data >>, C<< Minimal => 1|0 >>, C<< BlockSize100K => number >>, C<<
+WorkFactor => number >>, -Level, -Strategy, C<< Strict => 0|1 >>
 
 =item Examples
 
@@ -20218,8 +20636,6 @@ ExtraFieldLocal =E<gt> $data =item ExtraFieldCentral =E<gt> $data, Minimal
 =item close
 
 =item newStream([OPTS])
-
-Level
 
 =item deflateParams
 
@@ -20508,8 +20924,8 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
--MultiStream =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>
 
 =item Examples
 
@@ -20525,9 +20941,10 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -MultiStream =E<gt> 0|1, -Prime =E<gt> $string,
--Transparent =E<gt> 0|1, -BlockSize =E<gt> $num, -InputLength =E<gt> $size,
--Append =E<gt> 0|1, -Strict =E<gt> 0|1, -ParseExtra =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>, C<< ParseExtra => 0|1
+>>
 
 =item Examples
 
@@ -20568,6 +20985,10 @@ A filename, A filehandle, A scalar reference
 =item fileno
 
 =item close
+
+=item nextStream
+
+=item trailingData
 
 =back
 
@@ -20614,8 +21035,8 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
--MultiStream =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>
 
 =item Examples
 
@@ -20631,9 +21052,9 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -MultiStream =E<gt> 0|1, -Prime =E<gt> $string,
--Transparent =E<gt> 0|1, -BlockSize =E<gt> $num, -InputLength =E<gt> $size,
--Append =E<gt> 0|1, -Strict =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
 
 =item Examples
 
@@ -20672,6 +21093,10 @@ A filename, A filehandle, A scalar reference
 =item fileno
 
 =item close
+
+=item nextStream
+
+=item trailingData
 
 =back
 
@@ -20735,8 +21160,8 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
--MultiStream =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>
 
 =item Examples
 
@@ -20752,9 +21177,10 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -MultiStream =E<gt> 0|1, -Prime =E<gt> $string,
--Transparent =E<gt> 0|1, -BlockSize =E<gt> $num, -InputLength =E<gt> $size,
--Append =E<gt> 0|1, -Strict =E<gt> 0|1, -ParseExtra =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>, C<< ParseExtra => 0|1
+>>
 
 =item Examples
 
@@ -20797,6 +21223,10 @@ Name, Comment
 =item fileno
 
 =item close
+
+=item nextStream
+
+=item trailingData
 
 =back
 
@@ -20842,8 +21272,8 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
--MultiStream =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>
 
 =item Examples
 
@@ -20859,9 +21289,9 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -MultiStream =E<gt> 0|1, -Prime =E<gt> $string,
--Transparent =E<gt> 0|1, -BlockSize =E<gt> $num, -InputLength =E<gt> $size,
--Append =E<gt> 0|1, -Strict =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
 
 =item Examples
 
@@ -20902,6 +21332,10 @@ A filename, A filehandle, A scalar reference
 =item fileno
 
 =item close
+
+=item nextStream
+
+=item trailingData
 
 =back
 
@@ -20947,8 +21381,8 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
--MultiStream =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>
 
 =item Examples
 
@@ -20964,9 +21398,9 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -MultiStream =E<gt> 0|1, -Prime =E<gt> $string,
--Transparent =E<gt> 0|1, -BlockSize =E<gt> $num, -InputLength =E<gt> $size,
--Append =E<gt> 0|1, -Strict =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
 
 =item Examples
 
@@ -21007,6 +21441,10 @@ A filename, A filehandle, A scalar reference
 =item fileno
 
 =item close
+
+=item nextStream
+
+=item trailingData
 
 =back
 
@@ -21052,8 +21490,8 @@ Reference, An Output FileGlob
 
 =item Optional Parameters
 
-AutoClose =E<gt> 0|1, BinModeOut =E<gt> 0|1, -Append =E<gt> 0|1,
--MultiStream =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< BinModeOut => 0|1 >>, C<< Append => 0|1 >>,
+C<< MultiStream => 0|1 >>
 
 =item Examples
 
@@ -21069,9 +21507,9 @@ A filename, A filehandle, A scalar reference
 
 =item Constructor Options
 
--AutoClose =E<gt> 0|1, -MultiStream =E<gt> 0|1, -Prime =E<gt> $string,
--Transparent =E<gt> 0|1, -BlockSize =E<gt> $num, -InputLength =E<gt> $size,
--Append =E<gt> 0|1, -Strict =E<gt> 0|1
+C<< AutoClose => 0|1 >>, C<< MultiStream => 0|1 >>, C<< Prime => $string
+>>, C<< Transparent => 0|1 >>, C<< BlockSize => $num >>, C<< InputLength =>
+$size >>, C<< Append => 0|1 >>, C<< Strict => 0|1 >>
 
 =item Examples
 
@@ -21112,6 +21550,10 @@ A filename, A filehandle, A scalar reference
 =item fileno
 
 =item close
+
+=item nextStream
+
+=item trailingData
 
 =back
 
@@ -22402,6 +22844,12 @@ functions
 
 =item USAGE
 
+=over 4
+
+=item PI
+
+=back
+
 =item ERRORS DUE TO DIVISION BY ZERO OR LOGARITHM OF ZERO
 
 =item ERRORS DUE TO INDIGESTIBLE ARGUMENTS
@@ -22434,6 +22882,9 @@ B<tan>
 
 =item PLANE ANGLE CONVERSIONS
 
+deg2rad, grad2rad, rad2deg, grad2deg, deg2grad, rad2grad, rad2rad, deg2deg,
+grad2grad
+
 =item RADIAL COORDINATE CONVERSIONS
 
 =over 4
@@ -22448,6 +22899,22 @@ cylindrical_to_spherical, spherical_to_cartesian, spherical_to_cylindrical
 =back
 
 =item GREAT CIRCLE DISTANCES AND DIRECTIONS
+
+=over 4
+
+=item great_circle_distance
+
+=item great_circle_direction
+
+=item great_circle_bearing
+
+=item great_circle_destination
+
+=item great_circle_midpoint
+
+=item great_circle_waypoint
+
+=back
 
 =item EXAMPLES
 
@@ -22617,7 +23084,7 @@ versioninstall
 
 =item Command Line Options
 
-quiet, use_rcfile, verbose
+quiet, use_rcfile, verbose, allow_mb_mismatch
 
 =item Default Options File (F<.modulebuildrc>)
 
@@ -22626,15 +23093,7 @@ quiet, use_rcfile, verbose
 =item INSTALL PATHS
 
 lib, arch, script, bin, bindoc, libdoc, binhtml, libhtml, installdirs,
-install_path, install_base, destdir
-
-=over 4
-
-=item About PREFIX Support
-
-Why PREFIX is not recommended, Alternatives to PREFIX
-
-=back
+install_path, install_base, destdir, prefix
 
 =item MOTIVATIONS
 
@@ -22697,15 +23156,15 @@ $default)
 
 =item Autogenerated Accessors
 
-PL_files(), autosplit(), base_dir(), bindoc_dirs(), blib(), build_bat(),
-build_class(), build_elements(), build_requires(), build_script(),
-c_source(), config(), config_dir(), conflicts(), create_makefile_pl(),
-create_packlist(), create_readme(), debugger(), destdir(), get_options(),
-html_css(), include_dirs(), install_base(), install_sets(), installdirs(),
-libdoc_dirs(), license(), magic_number(), mb_version(), meta_add(),
-meta_merge(), metafile(), module_name(), orig_dir(), original_prefix(),
-perl(), pm_files(), pod_files(), pollute(), prefix(),
-prereq_action_types(), quiet(), recommends(), recurse_into(),
+PL_files(), allow_mb_mismatch(), autosplit(), base_dir(), bindoc_dirs(),
+blib(), build_bat(), build_class(), build_elements(), build_requires(),
+build_script(), c_source(), config(), config_dir(), conflicts(),
+create_makefile_pl(), create_packlist(), create_readme(), debugger(),
+destdir(), get_options(), html_css(), include_dirs(), install_base(),
+install_sets(), installdirs(), libdoc_dirs(), license(), magic_number(),
+mb_version(), meta_add(), meta_merge(), metafile(), module_name(),
+orig_dir(), original_prefix(), perl(), pm_files(), pod_files(), pollute(),
+prefix(), prereq_action_types(), quiet(), recommends(), recurse_into(),
 recursive_test_files(), requires(), scripts(), use_rcfile(), verbose(),
 xs_files()
 
@@ -22827,6 +23286,8 @@ auto_feature_names(), write()
 =item Installing to a temporary directory
 
 =item Installing to a non-standard directory
+
+=item Installing in the same location as ExtUtils::MakeMaker
 
 =item Running a single test file
 
@@ -23153,6 +23614,62 @@ Module::Build works even if YAML.pm is not installed
 =item COPYRIGHT
 
 =item SEE ALSO
+
+=back
+
+=head2 Module::Load - runtime require of both modules and files
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item Rules
+
+=item Caveats
+
+=item AUTHOR
+
+=item COPYRIGHT
+
+=back
+
+=head2 Module::Loaded - mark modules as loaded or unloaded
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item FUNCTIONS
+
+=over 4
+
+=item $bool = mark_as_loaded( PACKAGE );
+
+=back
+
+=back
+
+=over 4
+
+=item $bool = mark_as_unloaded( PACKAGE );
+
+=back
+
+=over 4
+
+=item $loc = is_loaded( PACKAGE );
+
+=back
+
+=over 4
+
+=item AUTHOR
+
+=item COPYRIGHT
 
 =back
 
@@ -23955,6 +24472,44 @@ Constants
 
 Constants, WNOHANG, WUNTRACED, Macros, WIFEXITED, WEXITSTATUS, WIFSIGNALED,
 WTERMSIG, WIFSTOPPED, WSTOPSIG
+
+=back
+
+=head2 Package::Constants - List all constants declared in a package
+
+=over 4
+
+=item SYNOPSIS
+
+=item DESCRIPTION
+
+=item CLASS METHODS
+
+=over 4
+
+=item @const = Package::Constants->list( PACKAGE_NAME );
+
+=back
+
+=back
+
+=over 4
+
+=item GLOBAL VARIABLES
+
+=over 4
+
+=item $Package::Constants::DEBUG
+
+=back
+
+=back
+
+=over 4
+
+=item AUTHOR
+
+=item COPYRIGHT
 
 =back
 
@@ -26029,6 +26584,8 @@ set_prototype CODEREF, PROTOTYPE, tainted EXPR, weaken REF
 
 =back
 
+B<_make_cmd>
+
 =head2 Shell - run shell commands transparently within perl
 
 =over 4
@@ -26642,7 +27199,7 @@ Test::Builder
 
 =over 4
 
-=item Methods
+=item Functions
 
 test_out, test_err
 
@@ -27356,6 +27913,8 @@ unexpand(1)
 
 =item DESCRIPTION
 
+=item EXAMPLE
+
 =item BUGS
 
 =item LICENSE
@@ -27372,7 +27931,7 @@ unexpand(1)
 
 =item OVERRIDES
 
-=item EXAMPLE
+=item EXAMPLES
 
 =item LICENSE
 
@@ -27707,7 +28266,13 @@ $flags = 0), clock()
 
 =item DESCRIPTION
 
+=item FUNCTIONS
+
 =over 4
+
+=item Year Value Interpretation
+
+=item Limits of time_t
 
 =item Ambiguous Local Times (DST)
 
@@ -27778,9 +28343,9 @@ function
 =item DESCRIPTION
 
 C<< $obj->isa( TYPE ) >>, C<< CLASS->isa( TYPE ) >>, C<< eval { VAL->isa(
-TYPE ) } >>, C<TYPE>, C<$obj>, C<CLASS>, C<VAL>, C<< $obj->can( METHOD )
->>, C<< CLASS->can( METHOD ) >>, C<< eval { VAL->can( METHOD ) } >>,
-C<VERSION ( [ REQUIRE ] )>
+TYPE ) } >>, C<TYPE>, C<$obj>, C<CLASS>, C<VAL>, C<< $obj->DOES( ROLE ) >>,
+C<< CLASS->DOES( ROLE ) >>, C<< $obj->can( METHOD ) >>, C<< CLASS->can(
+METHOD ) >>, C<< eval { VAL->can( METHOD ) } >>, C<VERSION ( [ REQUIRE ] )>
 
 =item EXPORTS
 
@@ -27867,9 +28432,9 @@ C<$normalized_string = normalize($form_name, $string)>
 
 =item Decomposition and Composition
 
-C<$decomposed_string = decompose($string)>, C<$decomposed_string =
-decompose($string, $useCompatMapping)>, C<$reordered_string  =
-reorder($string)>, C<$composed_string	= compose($string)>
+C<$decomposed_string = decompose($string [, $useCompatMapping])>,
+C<$reordered_string = reorder($string)>, C<$composed_string =
+compose($string)>
 
 =item Quick Check
 
@@ -27880,13 +28445,19 @@ check($form_name, $string)>
 
 =item Character Data
 
-C<$canonical_decomposed = getCanon($codepoint)>,
-C<$compatibility_decomposed = getCompat($codepoint)>,
-C<$codepoint_composite = getComposite($codepoint_here, $codepoint_next)>,
-C<$combining_class = getCombinClass($codepoint)>, C<$is_exclusion =
-isExclusion($codepoint)>, C<$is_singleton = isSingleton($codepoint)>,
-C<$is_non_starter_decomposition = isNonStDecomp($codepoint)>,
-C<$may_be_composed_with_prev_char = isComp2nd($codepoint)>
+C<$canonical_decomposition = getCanon($code_point)>,
+C<$compatibility_decomposition = getCompat($code_point)>,
+C<$code_point_composite = getComposite($code_point_here,
+$code_point_next)>, C<$combining_class = getCombinClass($code_point)>,
+C<$may_be_composed_with_prev_char = isComp2nd($code_point)>,
+C<$is_exclusion = isExclusion($code_point)>, C<$is_singleton =
+isSingleton($code_point)>, C<$is_non_starter_decomposition =
+isNonStDecomp($code_point)>, C<$is_Full_Composition_Exclusion =
+isComp_Ex($code_point)>, C<$NFD_is_NO = isNFD_NO($code_point)>,
+C<$NFC_is_NO = isNFC_NO($code_point)>, C<$NFC_is_MAYBE =
+isNFC_MAYBE($code_point)>, C<$NFKD_is_NO = isNFKD_NO($code_point)>,
+C<$NFKC_is_NO = isNFKC_NO($code_point)>, C<$NFKC_is_MAYBE =
+isNFKC_MAYBE($code_point)>
 
 =back
 
@@ -27902,6 +28473,7 @@ Revised definition of canonical composition
 =item SEE ALSO
 
 http://www.unicode.org/reports/tr15/,
+http://www.unicode.org/Public/UNIDATA/CompositionExclusions.txt,
 http://www.unicode.org/Public/UNIDATA/DerivedNormalizationProps.txt,
 http://www.unicode.org/Public/UNIDATA/NormalizationCorrections.txt,
 http://www.unicode.org/review/pr-29.html, http://www.unicode.org/notes/tn5/

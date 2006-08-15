@@ -181,7 +181,7 @@ Predeclare sub names
 
 =item threads
 
-Perl extension allowing use of interpreter based threads from perl
+Perl interpreter-based threads
 
 =item threads::shared
 
@@ -393,13 +393,13 @@ Report the search path for a class's ISA tree
 
 Declare struct-like datatypes as Perl classes
 
+=item Compress::Raw::Zlib
+
+Low-Level Interface to zlib compression library
+
 =item Compress::Zlib
 
 Interface to zlib compression library
-
-=item Compress::Zlib::pod::FAQ
-
-Frequently Asked Questions about Compress::Zlib 
 
 =item Config
 
@@ -417,6 +417,26 @@ Programmatic interface to the Perl debugging API (draft, subject to
 
 Filter DBM keys/values 
 
+=item DBM_Filter::compress
+
+Filter for DBM_Filter
+
+=item DBM_Filter::encode
+
+Filter for DBM_Filter
+
+=item DBM_Filter::int32
+
+Filter for DBM_Filter
+
+=item DBM_Filter::null
+
+Filter for DBM_Filter
+
+=item DBM_Filter::utf8
+
+Filter for DBM_Filter
+
 =item DB_File
 
 Perl5 access to Berkeley DB version 1.x
@@ -428,10 +448,6 @@ Stringified perl data structures, suitable for both printing and C<eval>
 =item Devel::DProf
 
 A Perl code profiler
-
-=item Devel::PPPort
-
-Perl/Pollution/Portability
 
 =item Devel::Peek
 
@@ -873,6 +889,10 @@ Process single-character switches with switch clustering
 
 A selection of general-utility hash subroutines
 
+=item Hash::Util::FieldHash
+
+Associate references with data
+
 =item I18N::Collate
 
 Compare 8-bit scalar data according to the current locale
@@ -897,17 +917,25 @@ Query locale information
 
 Load various IO modules
 
+=item IO::Compress::Base
+
+Base Class for IO::Compress modules 
+
 =item IO::Compress::Deflate
 
-Perl interface to write RFC 1950 files/buffers
+Write RFC 1950 files/buffers
 
 =item IO::Compress::Gzip
 
-Perl interface to write RFC 1952 files/buffers
+Write RFC 1952 files/buffers
 
 =item IO::Compress::RawDeflate
 
-Perl interface to write RFC 1951 files/buffers
+Write RFC 1951 files/buffers
+
+=item IO::Compress::Zip
+
+Write zip files/buffers
 
 =item IO::Dir
 
@@ -951,19 +979,31 @@ Object interface for AF_UNIX domain sockets
 
 =item IO::Uncompress::AnyInflate
 
-Perl interface to read RFC 1950, 1951 & 1952 files/buffers
+Uncompress zlib-based (zip, gzip) file/buffer
+
+=item IO::Uncompress::AnyUncompress
+
+Uncompress gzip, zip, bzip2 or lzop file/buffer
+
+=item IO::Uncompress::Base
+
+Base Class for IO::Uncompress modules 
 
 =item IO::Uncompress::Gunzip
 
-Perl interface to read RFC 1952 files/buffers
+Read RFC 1952 files/buffers
 
 =item IO::Uncompress::Inflate
 
-Perl interface to read RFC 1950 files/buffers
+Read RFC 1950 files/buffers
 
 =item IO::Uncompress::RawInflate
 
-Perl interface to read RFC 1951 files/buffers
+Read RFC 1951 files/buffers
+
+=item IO::Uncompress::Unzip
+
+Read zip files/buffers
 
 =item IO::Zlib
 
@@ -1093,9 +1133,117 @@ Glue to provide EXISTS for SDBM_File for Storable use
 
 Store Memoized data in Storable database
 
+=item Module::Build
+
+Build and install Perl modules
+
+=item Module::Build::API
+
+API Reference for Module Authors
+
+=item Module::Build::Authoring
+
+Authoring Module::Build modules
+
+=item Module::Build::Base
+
+Default methods for Module::Build
+
+=item Module::Build::Compat
+
+Compatibility with ExtUtils::MakeMaker
+
+=item Module::Build::ConfigData
+
+Configuration for Module::Build
+
+=item Module::Build::Cookbook
+
+Examples of Module::Build Usage
+
+=item Module::Build::ModuleInfo
+
+Gather package and POD information from a perl module files
+
+=item Module::Build::Notes
+
+Configuration for $module_name
+
+=item Module::Build::PPMMaker
+
+Perl Package Manager file creation
+
+=item Module::Build::Platform::Amiga
+
+Builder class for Amiga platforms
+
+=item Module::Build::Platform::Default
+
+Stub class for unknown platforms
+
+=item Module::Build::Platform::EBCDIC
+
+Builder class for EBCDIC platforms
+
+=item Module::Build::Platform::MPEiX
+
+Builder class for MPEiX platforms
+
+=item Module::Build::Platform::MacOS
+
+Builder class for MacOS platforms
+
+=item Module::Build::Platform::RiscOS
+
+Builder class for RiscOS platforms
+
+=item Module::Build::Platform::Unix
+
+Builder class for Unix platforms
+
+=item Module::Build::Platform::VMS
+
+Builder class for VMS platforms
+
+=item Module::Build::Platform::VOS
+
+Builder class for VOS platforms
+
+=item Module::Build::Platform::Windows
+
+Builder class for Windows platforms
+
+=item Module::Build::Platform::aix
+
+Builder class for AIX platform
+
+=item Module::Build::Platform::cygwin
+
+Builder class for Cygwin platform
+
+=item Module::Build::Platform::darwin
+
+Builder class for Mac OS X platform
+
+=item Module::Build::Platform::os2
+
+Builder class for OS/2 platform
+
+=item Module::Build::YAML
+
+Provides just enough YAML support so that Module::Build works even if YAML.pm is not installed
+
 =item Module::CoreList
 
 What modules shipped with versions of perl
+
+=item Module::Load
+
+Runtime require of both modules and files
+
+=item Module::Loaded
+
+Mark modules as loaded or unloaded
 
 =item NDBM_File
 
@@ -1180,6 +1328,10 @@ Disable named opcodes when compiling perl code
 =item POSIX
 
 Perl interface to IEEE Std 1003.1
+
+=item Package::Constants
+
+List all constants declared in a package
 
 =item PerlIO
 
@@ -1504,6 +1656,10 @@ Detailed analysis of test results
 =item Test::Harness::TAP
 
 Documentation for the TAP format
+
+=item Test::Harness::Util
+
+Utility functions for Test::Harness::*
 
 =item Test::More
 
