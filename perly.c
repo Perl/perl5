@@ -245,38 +245,6 @@ yystpcpy (pTHX_ char *yydest, const char *yysrc)
 
 #endif /* !YYERROR_VERBOSE */
 
-
-/* a snapshot of the current stack position variables for use by
- * S_clear_yystack */
-
-typedef struct {
-    short *yyss;
-    short *yyssp;
-    YYSTYPE *yyvsp;
-    int yylen;
-} yystack_positions;
-
-/* called during cleanup (via SAVEDESTRUCTOR_X) to free any items on the
- * parse stack, thus avoiding leaks if we die  */
-
-static void
-S_clear_yystack(pTHX_ const void *p)
-{
-    yystack_positions *y = (yystack_positions*) p;
-
-    if (!y->yyss)
-	return;
-    YYDPRINTF ((Perl_debug_log, "clearing the parse stack\n"));
-    y->yyvsp -= y->yylen; /* ignore the tokens that have just been reduced */
-    y->yyssp -= y->yylen;
-    while (y->yyssp > y->yyss) {
-	if (yy_is_opval[yystos[*y->yyssp]])
-	    op_free(y->yyvsp->opval);
-	y->yyvsp--;
-	y->yyssp--;
-    }
-}
-
 /*----------.
 | yyparse.  |
 `----------*/
@@ -315,8 +283,6 @@ Perl_yyparse (pTHX)
     /* for ease of re-allocation and automatic freeing, have two SVs whose
       * SvPVX points to the stacks */
     SV *yyss_sv, *yyvs_sv;
-    SV *ss_save_sv;
-    yystack_positions *ss_save;
 
 #ifdef DEBUGGING
     /* maintain also a stack of token/rule names for debugging with -Dpv */
@@ -354,18 +320,10 @@ Perl_yyparse (pTHX)
 
     yyss_sv = newSV(YYINITDEPTH * sizeof(short));
     yyvs_sv = newSV(YYINITDEPTH * sizeof(YYSTYPE));
-    ss_save_sv = newSV(sizeof(yystack_positions));
     SAVEFREESV(yyss_sv);
     SAVEFREESV(yyvs_sv);
-    SAVEFREESV(ss_save_sv);
     yyss = (short *) SvPVX(yyss_sv);
     yyvs = (YYSTYPE *) SvPVX(yyvs_sv);
-    ss_save = (yystack_positions *) SvPVX(ss_save_sv);
-
-    ss_save->yyss = NULL; /* disarm stack cleanup */
-    /* cleanup the parse stack on premature exit */
-    SAVEDESTRUCTOR_X(S_clear_yystack, (void*) ss_save);
-
     /* note that elements zero of yyvs and yyns are not used */
     yyssp = yyss;
     yyvsp = yyvs;
@@ -547,15 +505,6 @@ Perl_yyparse (pTHX)
 
 
     YY_REDUCE_PRINT (yyn);
-
-    /* running external code may trigger a die (eg 'use nosuchmodule'):
-     * record the current stack state so that an unwind will
-     * free all the pesky OPs lounging around on the parse stack */
-    ss_save->yyss = yyss;
-    ss_save->yyssp = yyssp;
-    ss_save->yyvsp = yyvsp;
-    ss_save->yylen = yylen;
-
     switch (yyn) {
 
 /* contains all the rule actions; auto-generated from perly.y */
@@ -765,8 +714,7 @@ Perl_yyparse (pTHX)
 
   yyreturn:
 
-    ss_save->yyss = NULL;	/* disarm parse stack cleanup */
-    LEAVE;		/* force stack free before we return */
+    LEAVE;			/* force stack free before we return */
 
     return yyresult;
 }
