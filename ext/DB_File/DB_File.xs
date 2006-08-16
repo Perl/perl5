@@ -410,12 +410,12 @@ typedef struct {
 typedef DB_File_type * DB_File ;
 typedef DBT DBTKEY ;
 
-#define my_sv_setpvn(sv, d, s) sv_setpvn(sv, (s ? d : (void*)""), s)
+#define my_sv_setpvn(sv, d, s) sv_setpvn(sv, (s ? d : (const char *)""), s)
 
 #define OutputValue(arg, name)  					\
 	{ if (RETVAL == 0) {						\
 	      SvGETMAGIC(arg) ;          				\
-	      my_sv_setpvn(arg, name.data, name.size) ;			\
+	      my_sv_setpvn(arg, (const char *)name.data, name.size) ;			\
 	      TAINT;                                       		\
 	      SvTAINTED_on(arg);                                       	\
 	      SvUTF8_off(arg);                                       	\
@@ -428,7 +428,7 @@ typedef DBT DBTKEY ;
 	  { 								\
 		SvGETMAGIC(arg) ;          				\
 		if (db->type != DB_RECNO) {				\
-		    my_sv_setpvn(arg, name.data, name.size); 		\
+		    my_sv_setpvn(arg, (const char *)name.data, name.size); 		\
 		}							\
 		else 							\
 		    sv_setiv(arg, (I32)*(I32*)name.data - 1); 		\
@@ -597,8 +597,8 @@ const DBT * key2 ;
 
     PUSHMARK(SP) ;
     EXTEND(SP,2) ;
-    PUSHs(sv_2mortal(newSVpvn(data1,key1->size)));
-    PUSHs(sv_2mortal(newSVpvn(data2,key2->size)));
+    PUSHs(sv_2mortal(newSVpvn((const char*)data1,key1->size)));
+    PUSHs(sv_2mortal(newSVpvn((const char*)data2,key2->size)));
     PUTBACK ;
 
     count = perl_call_sv(CurrentDB->compare, G_SCALAR); 

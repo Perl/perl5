@@ -210,7 +210,7 @@ typedef char *pvindex;
 		SvUPGRADE(sv, (arg));			\
 	    }
 #define BSET_newsvx(sv, arg) STMT_START {		\
-	    BSET_newsv(sv, arg &  SVTYPEMASK);		\
+	    BSET_newsv(sv, (svtype)(arg &  SVTYPEMASK));		\
 	    SvFLAGS(sv) = arg;				\
 	    BSET_OBJ_STOREX(sv);			\
 	} STMT_END

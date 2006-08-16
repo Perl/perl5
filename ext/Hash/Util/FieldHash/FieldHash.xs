@@ -307,9 +307,9 @@ OUTPUT:
     RETVAL
 
 void
-CLONE(char* class)
+CLONE(char* classname)
 CODE:
-    if (0 == strcmp(class, "Hash::Util::FieldHash")) {
+    if (0 == strcmp(classname, "Hash::Util::FieldHash")) {
         HUF_global(HUF_CLONE);
         HUF_fix_objects();
     }

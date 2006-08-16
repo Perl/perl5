@@ -1363,7 +1363,7 @@ sigaction(sig, optaction, oldaction = 0)
 		svp = hv_fetchs(action, "SAFE", FALSE);
 		act.sa_handler =
 			DPTR2FPTR(
-			    void (*)(),
+			    void (*)(int),
 			    (*svp && SvTRUE(*svp))
 				? PL_csighandlerp : PL_sighandlerp
 			);

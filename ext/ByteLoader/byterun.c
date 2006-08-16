@@ -136,8 +136,8 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    }
 	  case INSN_NEWSV:		/* 8 */
 	    {
-		U8 arg;
-		BGET_U8(arg);
+		svtype arg;
+		BGET_svtype(arg);
 		BSET_newsv(bstate->bs_sv, arg);
 		break;
 	    }
@@ -189,8 +189,8 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    }
 	  case INSN_SV_UPGRADE:		/* 17 */
 	    {
-		U8 arg;
-		BGET_U8(arg);
+		svtype arg;
+		BGET_svtype(arg);
 		BSET_sv_upgrade(bstate->bs_sv, arg);
 		break;
 	    }

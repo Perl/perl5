@@ -373,7 +373,7 @@ stop		PL_op					U32		s
 stpv		bstate->bs_pv.pvx			U32		x
 ldspecsv	bstate->bs_sv				U8		x
 ldspecsvx	bstate->bs_sv				U8		x
-newsv		bstate->bs_sv				U8		x
+newsv		bstate->bs_sv				svtype		x
 newsvx		bstate->bs_sv				svtype		x
 newop		PL_op					U8		x
 newopx		PL_op					U16		x
@@ -381,7 +381,7 @@ newopn		PL_op					U8		x
 newpv		none					PV
 pv_cur		bstate->bs_pv.xpv.xpv_cur		STRLEN
 pv_free		bstate->bs_pv.pvx			none		x
-sv_upgrade	bstate->bs_sv				U8		x
+sv_upgrade	bstate->bs_sv				svtype		x
 sv_refcnt	SvREFCNT(bstate->bs_sv)			U32
 sv_refcnt_add	SvREFCNT(bstate->bs_sv)			I32		x
 sv_flags	SvFLAGS(bstate->bs_sv)			U32
