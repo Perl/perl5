@@ -157,7 +157,7 @@ case `$cc -v 2>&1`"" in
 		done
 	    [ -z "$cc_found" ] && cc_found=`which cc`
 	    what $cc_found >&4
-	    ccversion=`what $cc_found | awk '/Compiler/{print $2}/Itanium/{print $6,$7}'`
+	    ccversion=`what $cc_found | awk '/Compiler/{print $2}/Itanium/{print $6,$7}/for Integrity/{print $7}'`
 	    case "$ccflags" in
                "-Ae "*) ;;
 		*)  ccflags="-Ae $cc_cppflags"
