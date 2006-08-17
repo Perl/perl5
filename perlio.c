@@ -120,6 +120,9 @@ extern off_t ftello(FILE *);
 #endif
 
 #ifndef USE_SFIO
+
+EXTERN_C int perlsio_binmode(FILE *fp, int iotype, int mode);
+
 int
 perlsio_binmode(FILE *fp, int iotype, int mode)
 {

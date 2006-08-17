@@ -25,6 +25,13 @@
 #define PERL_IN_UTF8_C
 #include "perl.h"
 
+#ifndef EBCDIC
+/* Separate prototypes needed because in ASCII systems these
+ * usually macros but they still are compiled as code, too. */
+PERL_CALLCONV UV	Perl_utf8n_to_uvchr(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags);
+PERL_CALLCONV U8*	Perl_uvchr_to_utf8(pTHX_ U8 *d, UV uv);
+#endif
+
 static const char unees[] =
     "Malformed UTF-8 character (unexpected end of string)";
 

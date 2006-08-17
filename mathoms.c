@@ -29,41 +29,42 @@
 #define PERL_IN_MATHOMS_C
 #include "perl.h"
 
-OP * Perl_ref(pTHX_ OP *o, I32 type);
-void Perl_sv_unref(pTHX_ SV *sv);
-void Perl_sv_taint(pTHX_ SV *sv);
-IV Perl_sv_2iv(pTHX_ register SV *sv);
-UV Perl_sv_2uv(pTHX_ register SV *sv);
-char * Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp);
-char * Perl_sv_2pv_nolen(pTHX_ register SV *sv);
-char * Perl_sv_2pvbyte_nolen(pTHX_ register SV *sv);
-char * Perl_sv_2pvutf8_nolen(pTHX_ register SV *sv);
-void Perl_sv_force_normal(pTHX_ register SV *sv);
-void Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr);
-void Perl_sv_catpvn(pTHX_ SV *dsv, const char* sstr, STRLEN slen);
-void Perl_sv_catpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRLEN len);
-void Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr);
-void Perl_sv_catsv_mg(pTHX_ SV *dsv, register SV *ssv);
-char * Perl_sv_pv(pTHX_ SV *sv);
-char * Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp);
-char * Perl_sv_pvbyte(pTHX_ SV *sv);
-char * Perl_sv_pvutf8(pTHX_ SV *sv);
-STRLEN Perl_sv_utf8_upgrade(pTHX_ register SV *sv);
-NV Perl_huge(void);
-void Perl_gv_fullname3(pTHX_ SV *sv, const GV *gv, const char *prefix);
-void Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix);
-GV * Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name);
-HE * Perl_hv_iternext(pTHX_ HV *hv);
-void Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how);
-bool Perl_do_open(pTHX_ GV *gv, register const char *name, I32 len, int as_raw,
-		int rawmode, int rawperm, PerlIO *supplied_fp);
-bool Perl_do_aexec(pTHX_ SV *really, register SV **mark, register SV **sp);
-bool Perl_do_exec(pTHX_ const char *cmd);
-U8 * Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv);
-bool Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **ep);
-void Perl_sv_nolocking(pTHX_ SV *sv);
-void Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len);
-void Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len);
+PERL_CALLCONV OP * Perl_ref(pTHX_ OP *o, I32 type);
+PERL_CALLCONV void Perl_sv_unref(pTHX_ SV *sv);
+PERL_CALLCONV void Perl_sv_taint(pTHX_ SV *sv);
+PERL_CALLCONV IV Perl_sv_2iv(pTHX_ register SV *sv);
+PERL_CALLCONV UV Perl_sv_2uv(pTHX_ register SV *sv);
+PERL_CALLCONV char * Perl_sv_2pv(pTHX_ register SV *sv, STRLEN *lp);
+PERL_CALLCONV char * Perl_sv_2pv_nolen(pTHX_ register SV *sv);
+PERL_CALLCONV char * Perl_sv_2pvbyte_nolen(pTHX_ register SV *sv);
+PERL_CALLCONV char * Perl_sv_2pvutf8_nolen(pTHX_ register SV *sv);
+PERL_CALLCONV void Perl_sv_force_normal(pTHX_ register SV *sv);
+PERL_CALLCONV void Perl_sv_setsv(pTHX_ SV *dstr, register SV *sstr);
+PERL_CALLCONV void Perl_sv_catpvn(pTHX_ SV *dsv, const char* sstr, STRLEN slen);
+PERL_CALLCONV void Perl_sv_catpvn_mg(pTHX_ register SV *sv, register const char *ptr, register STRLEN len);
+PERL_CALLCONV void Perl_sv_catsv(pTHX_ SV *dstr, register SV *sstr);
+PERL_CALLCONV void Perl_sv_catsv_mg(pTHX_ SV *dsv, register SV *ssv);
+PERL_CALLCONV char * Perl_sv_pv(pTHX_ SV *sv);
+PERL_CALLCONV char * Perl_sv_pvn_force(pTHX_ SV *sv, STRLEN *lp);
+PERL_CALLCONV char * Perl_sv_pvbyte(pTHX_ SV *sv);
+PERL_CALLCONV char * Perl_sv_pvutf8(pTHX_ SV *sv);
+PERL_CALLCONV STRLEN Perl_sv_utf8_upgrade(pTHX_ register SV *sv);
+PERL_CALLCONV NV Perl_huge(void);
+PERL_CALLCONV void Perl_gv_fullname3(pTHX_ SV *sv, const GV *gv, const char *prefix);
+PERL_CALLCONV void Perl_gv_efullname3(pTHX_ SV *sv, const GV *gv, const char *prefix);
+PERL_CALLCONV GV * Perl_gv_fetchmethod(pTHX_ HV *stash, const char *name);
+PERL_CALLCONV HE * Perl_hv_iternext(pTHX_ HV *hv);
+PERL_CALLCONV void Perl_hv_magic(pTHX_ HV *hv, GV *gv, int how);
+PERL_CALLCONV bool Perl_do_open(pTHX_ GV *gv, register const char *name, I32 len, int as_raw, int rawmode, int rawperm, PerlIO *supplied_fp);
+PERL_CALLCONV bool Perl_do_aexec(pTHX_ SV *really, register SV **mark, register SV **sp);
+PERL_CALLCONV bool Perl_do_exec(pTHX_ const char *cmd);
+PERL_CALLCONV U8 * Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv);
+PERL_CALLCONV bool Perl_is_utf8_string_loc(pTHX_ const U8 *s, STRLEN len, const U8 **ep);
+PERL_CALLCONV void Perl_sv_nolocking(pTHX_ SV *sv);
+PERL_CALLCONV void Perl_sv_usepvn_mg(pTHX_ SV *sv, char *ptr, STRLEN len);
+PERL_CALLCONV void Perl_sv_usepvn(pTHX_ SV *sv, char *ptr, STRLEN len);
+PERL_CALLCONV int Perl_fprintf_nocontext(PerlIO *stream, const char *format, ...);
+PERL_CALLCONV int Perl_printf_nocontext(const char *format, ...);
 
 
 /* ref() is now a macro using Perl_doref;
