@@ -405,9 +405,7 @@ PERL_CALLCONV void	Perl_do_chop(pTHX_ SV* asv, SV* sv)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-PERL_CALLCONV bool	Perl_do_close(pTHX_ GV* gv, bool not_implicit)
-			__attribute__nonnull__(pTHX_1);
-
+PERL_CALLCONV bool	Perl_do_close(pTHX_ GV* gv, bool not_implicit);
 PERL_CALLCONV bool	Perl_do_eof(pTHX_ GV* gv)
 			__attribute__nonnull__(pTHX_1);
 
