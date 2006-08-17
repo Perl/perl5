@@ -587,11 +587,11 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #endif
 
 #if defined(HAS_SYSCALL) && !defined(HAS_SYSCALL_PROTO) && !defined(PERL_MICRO)
-int syscall(int, ...);
+EXTERN_C int syscall(int, ...);
 #endif
 
 #if defined(HAS_USLEEP) && !defined(HAS_USLEEP_PROTO) && !defined(PERL_MICRO)
-int usleep(unsigned int);
+EXTERN_C int usleep(unsigned int);
 #endif
 
 #ifdef PERL_MICRO /* Last chance to export Perl_my_swap */
