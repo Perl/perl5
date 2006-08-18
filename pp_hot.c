@@ -417,7 +417,7 @@ PP(pp_defined)
     register SV* sv;
     bool defined;
     const int op_type = PL_op->op_type;
-    const int is_dor = (op_type == OP_DOR || op_type == OP_DORASSIGN);
+    const bool is_dor = (op_type == OP_DOR || op_type == OP_DORASSIGN);
 
     if (is_dor) {
         sv = TOPs;
