@@ -197,11 +197,6 @@ void setservent(int);
 void endservent(void);
 #endif
 
-#if defined(__osf__) && defined(__cplusplus) && !defined(_XOPEN_SOURCE_EXTENDED)
-extern int readlink(const char *, char *, size_t);
-extern int fchdir(int);
-#endif
-
 #undef PERL_EFF_ACCESS	/* EFFective uid/gid ACCESS */
 
 /* AIX 5.2 and below use mktime for localtime, and defines the edge case

@@ -163,6 +163,11 @@ ccflags="$ccflags $_ccflags_strict_ansi"
 
 # g++ needs a lot of definitions to see the same set of
 # prototypes from <unistd.h> et alia as cxx/cc see.
+# Note that we cannot define _XOPEN_SOURCE_EXTENDED or
+# its moral equivalent, _XOPEN_SOURCE=500 (which would
+# define a lot of the required prototypes for us), because
+# the gcc-processed version of <sys/wait.h> contains fatally
+# conflicting prototypes for wait3().
 case "$cc" in
 *g++*) ccflags="$ccflags -D_XOPEN_SOURCE -D_OSF_SOURCE -D_AES_SOURCE -D_BSD -D_POSIX_C_SOURCE=199309L -D_POSIX_PII_SOCKET" ;;
 esac
