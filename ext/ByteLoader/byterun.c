@@ -50,7 +50,7 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 {
     register int insn;
     U32 ix;
-    SV *specialsv_list[6];
+    SV *specialsv_list[7];
 
     BYTECODE_HEADER_CHECK;	/* croak if incorrect platform */
     Newx(bstate->bs_obj_list, 32, void*); /* set op objlist */
@@ -141,9 +141,9 @@ byterun(pTHX_ register struct byteloader_state *bstate)
 	    }
 	  case INSN_NEWSVX:		/* 9 */
 	    {
-		U32 arg;
-		BGET_U32(arg);
-		BSET_newsvx(bstate->bs_sv, arg);
+		svtype arg;
+		BGET_svtype(arg);
+		BSET_newsvx(bstate->bs_sv, (svtype)arg);
 		break;
 	    }
 	  case INSN_NEWOP:		/* 11 */
