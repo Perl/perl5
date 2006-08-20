@@ -151,7 +151,7 @@ sub B::Asmdata::PUT_long {
 }
 
 sub B::Asmdata::PUT_svtype { # svtype is an enum, so an int.
-    $Config{intsize} == 4 ? &B::Asmdata::PUT_I32 : &B::Asmdata::PUT_IV64;
+    $Config{intsize} == 4 ? &B::Asmdata::PUT_U32 : &B::Asmdata::PUT_IV64;
 }
 
 my %unesc = (n => "\n", r => "\r", t => "\t", a => "\a",
