@@ -2473,8 +2473,9 @@ warnings are given unless you also compile with C<-O>.
 Also study L<perlport> carefully to avoid any bad assumptions
 about the operating system, filesystem, and so forth.
 
-You may once in a while try a "make miniperl" to see whether we
+You may once in a while try a "make microperl" to see whether we
 can still compile Perl with just the bare minimum of interfaces.
+(See README.micro.)
 
 Do not assume an operating system indicates a certain compiler.
 
@@ -2544,7 +2545,8 @@ or maybe use temporary variables, or dirty tricks with unions.
 
 =item *
 
-Assume B<anything> about structs
+Assume B<anything> about structs (especially the ones you
+don't control, like the ones coming from the system headers)
 
 =over 8
 
@@ -2558,23 +2560,39 @@ That no other fields exist besides the ones you know of
 
 =item *
 
-That a field is a certain signedness, sizeof, or type
+That a field is of certain signedness, sizeof, or type
 
 =item *
 
 That the fields are in a certain order
 
-=item *
-
-That the sizeof(struct) is the same everywhere
+=over 8
 
 =item *
 
-That there is no padding between the fields
+While C guarantees the ordering specified in the struct definition,
+between different platforms the definitions might differ
+
+=back
 
 =item *
 
-That there are no alignment requirements for the fields
+That the sizeof(struct) or the alignments are the same everywhere
+
+=over 8
+
+=item *
+
+There might be padding bytes between the fields to align the fields -
+the bytes can be anything
+
+=item *
+
+Structs are required to be aligned to the maximum alignment required
+by the fields - which for native types is for usually equivalent to
+sizeof() of the field
+
+=back
 
 =back
 
