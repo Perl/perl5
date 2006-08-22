@@ -1,5 +1,10 @@
 Revision history for Perl extension Time::HiRes.
 
+1.88	[2006-08-21]
+	- clean up the g++ warnings in HiRes.xs, all of them
+	  about mixing integer and floating point, introduce
+	  constants IV_1[679] and NV_1[679]
+
 1.87	[2006-02-13]
 	- [rt.cpan.org #17442] 'make test' frequently fails under
 	  Cygwin Perl v5.8.8, reported and patched by J. R. Hedden

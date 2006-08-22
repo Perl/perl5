@@ -37,6 +37,13 @@ extern "C" {
 }
 #endif
 
+#define IV_1E6 1000000L
+#define IV_1E7 10000000L
+#define IV_1E9 1000000000L
+#define NV_1E6 1000000.0
+#define NV_1E7 10000000.0
+#define NV_1E9 1000000000.0
+
 #ifndef PerlProc_pause
 #   define PerlProc_pause() Pause()
 #endif
@@ -154,8 +161,8 @@ _gettimeofday(pTHX_ struct timeval *tp, void *not_used)
         QueryPerformanceCounter((LARGE_INTEGER*)&ticks);
         ticks -= MY_CXT.base_ticks;
         ft.ft_i64 = MY_CXT.base_systime_as_filetime.ft_i64
-                    + Const64(10000000) * (ticks / MY_CXT.tick_frequency)
-                    +(Const64(10000000) * (ticks % MY_CXT.tick_frequency)) / MY_CXT.tick_frequency;
+                    + Const64(IV_1E7) * (ticks / MY_CXT.tick_frequency)
+                    +(Const64(IV_1E7) * (ticks % MY_CXT.tick_frequency)) / MY_CXT.tick_frequency;
 	diff = ft.ft_i64 - MY_CXT.base_systime_as_filetime.ft_i64;
 	if (diff < -MAX_PERF_COUNTER_SKEW || diff > MAX_PERF_COUNTER_SKEW) {
 	    MY_CXT.base_ticks += ticks;
@@ -165,10 +172,10 @@ _gettimeofday(pTHX_ struct timeval *tp, void *not_used)
     }
 
     /* seconds since epoch */
-    tp->tv_sec = (long)((ft.ft_i64 - EPOCH_BIAS) / Const64(10000000));
+    tp->tv_sec = (long)((ft.ft_i64 - EPOCH_BIAS) / Const64(IV_1E7));
 
     /* microseconds remaining */
-    tp->tv_usec = (long)((ft.ft_i64 / Const64(10)) % Const64(1000000));
+    tp->tv_usec = (long)((ft.ft_i64 / Const64(10)) % Const64(IV_1E6));
 
     return 0;
 }
@@ -383,8 +390,8 @@ void
 hrt_nanosleep(unsigned long usec) /* This is used to emulate usleep. */
 {
     struct timespec res;
-    res.tv_sec = usec/1000/1000;
-    res.tv_nsec = ( usec - res.tv_sec*1000*1000 ) * 1000;
+    res.tv_sec = usec / IV_1E6;
+    res.tv_nsec = ( usec - res.tv_sec * IV_1E6 ) * 1000;
     nanosleep(&res, NULL);
 }
 
@@ -456,10 +463,10 @@ int
 hrt_ualarm(int usec, int interval)
 {
    struct itimerval itv;
-   itv.it_value.tv_sec = usec / 1000000;
-   itv.it_value.tv_usec = usec % 1000000;
-   itv.it_interval.tv_sec = interval / 1000000;
-   itv.it_interval.tv_usec = interval % 1000000;
+   itv.it_value.tv_sec = usec / IV_1E6;
+   itv.it_value.tv_usec = usec % IV_1E6;
+   itv.it_interval.tv_sec = interval / IV_1E6;
+   itv.it_interval.tv_usec = interval % IV_1E6;
    return setitimer(ITIMER_REAL, &itv, 0);
 }
 #endif /* #if !defined(HAS_UALARM) && defined(HAS_SETITIMER) */
@@ -683,7 +690,7 @@ myNVtime()
   struct timeval Tp;
   int status;
   status = gettimeofday (&Tp, NULL);
-  return status == 0 ? Tp.tv_sec + (Tp.tv_usec / 1000000.) : -1.0;
+  return status == 0 ? Tp.tv_sec + (Tp.tv_usec / NV_1E6) : -1.0;
 }
 
 #endif /* #ifdef HAS_GETTIMEOFDAY */
@@ -774,7 +781,7 @@ nanosleep(nsec)
 	    } else if (nsec < 0.0)
 	        croak("Time::HiRes::nanosleep(%"NVgf"): negative time not invented yet", nsec);
 	    ts1.tv_sec  = (IV) (nsec / 1E9);
-	    ts1.tv_nsec = (IV) nsec - ts1.tv_sec * 1E9;
+	    ts1.tv_nsec = (IV) nsec - (IV) (ts1.tv_sec * NV_1E9);
 	    status = nanosleep(&ts1, NULL);
 	} else {
 	    PerlProc_pause();
@@ -866,8 +873,8 @@ alarm(seconds,interval=0)
 	CODE:
 	if (seconds < 0.0 || interval < 0.0)
 	    croak("Time::HiRes::alarm(%"NVgf", %"NVgf"): negative time not invented yet", seconds, interval);
-	RETVAL = (NV)ualarm(seconds  * 1000000,
-			    interval * 1000000) / 1E6;
+	RETVAL = (NV)ualarm((IV)(seconds  * IV_1E6),
+			    (IV)(interval * IV_1E6)) / NV_1E6;
 
 	OUTPUT:
 	RETVAL
@@ -912,7 +919,7 @@ gettimeofday()
                  PUSHs(sv_2mortal(newSViv(Tp.tv_usec)));
              } else {
                  EXTEND(sp, 1);
-                 PUSHs(sv_2mortal(newSVnv(Tp.tv_sec + (Tp.tv_usec / 1000000.0))));
+                 PUSHs(sv_2mortal(newSVnv(Tp.tv_sec + (Tp.tv_usec / NV_1E6))));
 	     }
         }
 
@@ -926,7 +933,7 @@ time()
         status = gettimeofday (&Tp, &Tz);
 	if (status == 0) {
             Tp.tv_sec += Tz.tz_minuteswest * 60;	/* adjust for TZ */
-	    RETVAL = Tp.tv_sec + (Tp.tv_usec / 1000000.0);
+	    RETVAL = Tp.tv_sec + (Tp.tv_usec / NV_1E6);
         } else {
 	    RETVAL = -1.0;
 	}
@@ -948,7 +955,7 @@ gettimeofday()
                  PUSHs(sv_2mortal(newSViv(Tp.tv_usec)));
              } else {
                  EXTEND(sp, 1);
-                 PUSHs(sv_2mortal(newSVnv(Tp.tv_sec + (Tp.tv_usec / 1000000.0))));
+                 PUSHs(sv_2mortal(newSVnv(Tp.tv_sec + (Tp.tv_usec / NV_1E6))));
              }
         }
 
@@ -960,7 +967,7 @@ time()
 	int status;
         status = gettimeofday (&Tp, NULL);
 	if (status == 0) {
-            RETVAL = Tp.tv_sec + (Tp.tv_usec / 1000000.);
+            RETVAL = Tp.tv_sec + (Tp.tv_usec / NV_1E6);
 	} else {
 	    RETVAL = -1.0;
 	}
@@ -985,12 +992,12 @@ setitimer(which, seconds, interval = 0)
     PPCODE:
 	if (seconds < 0.0 || interval < 0.0)
 	    croak("Time::HiRes::setitimer(%"IVdf", %"NVgf", %"NVgf"): negative time not invented yet", (IV)which, seconds, interval);
-	newit.it_value.tv_sec  = seconds;
+	newit.it_value.tv_sec  = (IV)seconds;
 	newit.it_value.tv_usec =
-	  (seconds  - (NV)newit.it_value.tv_sec)    * 1000000.0;
-	newit.it_interval.tv_sec  = interval;
+	  (IV)((seconds  - (NV)newit.it_value.tv_sec)    * NV_1E6);
+	newit.it_interval.tv_sec  = (IV)interval;
 	newit.it_interval.tv_usec =
-	  (interval - (NV)newit.it_interval.tv_sec) * 1000000.0;
+	  (IV)((interval - (NV)newit.it_interval.tv_sec) * NV_1E6);
 	if (setitimer(which, &newit, &oldit) == 0) {
 	  EXTEND(sp, 1);
 	  PUSHs(sv_2mortal(newSVnv(TV2NV(oldit.it_value))));
