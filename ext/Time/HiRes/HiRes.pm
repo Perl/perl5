@@ -21,7 +21,7 @@ require DynaLoader;
 		 d_nanosleep d_clock_gettime d_clock_getres
 		 d_clock d_clock_nanosleep);
 	
-$VERSION = '1.88';
+$VERSION = '1.89';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 

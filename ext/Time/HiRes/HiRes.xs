@@ -37,9 +37,22 @@ extern "C" {
 }
 #endif
 
-#define IV_1E6 1000000L
-#define IV_1E7 10000000L
-#define IV_1E9 1000000000L
+#define IV_1E6 1000000
+#define IV_1E7 10000000
+#define IV_1E9 1000000000
+
+#ifdef Const64
+# ifdef __GNUC__
+#  define IV_1E6LL  1000000LL /* Needed because of Const64() ##-appends LL (or i64). */
+#  define IV_1E7LL  10000000LL
+#  define IV_1E9LL  1000000000LL
+# else
+#  define IV_1E6i64 1000000i64
+#  define IV_1E7i64 10000000i64
+#  define IV_1E9i64 1000000000i64
+# endif
+#endif
+
 #define NV_1E6 1000000.0
 #define NV_1E7 10000000.0
 #define NV_1E9 1000000000.0

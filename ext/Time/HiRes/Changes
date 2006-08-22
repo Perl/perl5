@@ -1,9 +1,14 @@
 Revision history for Perl extension Time::HiRes.
 
+1.89	[2006-08-22]
+	- Const64() already appends an 'LL' (or i64), so provide LL and i64
+	  forms for the IV_1E[679] (effects Win32 and Cygwin).
+	- the Changes entry for 1.88 talked about [IN]V_1[679], missing the 'E'.
+
 1.88	[2006-08-21]
 	- clean up the g++ warnings in HiRes.xs, all of them
 	  about mixing integer and floating point, introduce
-	  constants IV_1[679] and NV_1[679]
+	  constants IV_1E[679] and NV_1E[679]
 
 1.87	[2006-02-13]
 	- [rt.cpan.org #17442] 'make test' frequently fails under
