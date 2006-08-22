@@ -78,7 +78,7 @@ test_freeent(freeent_function *f) {
        test expect to be able to call del_HE on the HE  */
     if (!PL_body_roots[HE_SVSLOT])
 	croak("PL_he_root is 0");
-    victim = PL_body_roots[HE_SVSLOT];
+    victim = (HE*) PL_body_roots[HE_SVSLOT];
     PL_body_roots[HE_SVSLOT] = HeNEXT(victim);
 #endif
 
