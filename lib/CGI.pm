@@ -19,7 +19,7 @@ use Carp 'croak';
 #   http://stein.cshl.org/WWW/software/CGI/
 
 $CGI::revision = '$Id: CGI.pm,v 1.208 2006/04/23 14:25:14 lstein Exp $';
-$CGI::VERSION='3.20_01';
+$CGI::VERSION='3.21';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -434,7 +434,7 @@ sub param {
 	    }
 	}
 	# If values is provided, then we set it.
-	if (defined $value) {
+	if (@values or defined $value) {
 	    $self->add_parameter($name);
 	    $self->{$name}=[@values];
 	}
@@ -443,7 +443,16 @@ sub param {
     }
 
     return unless defined($name) && $self->{$name};
-    return wantarray ? @{$self->{$name}} : $self->{$name}->[0];
+
+    my $charset = $self->charset || '';
+    my $utf8    = $charset eq 'utf-8';
+    if ($utf8) {
+      eval "require Encode; 1;" if $utf8 && !Encode->can('decode'); # bring in these functions
+      return wantarray ? map {Encode::decode(utf8=>$_) } @{$self->{$name}} 
+                       : Encode::decode(utf8=>$self->{$name}->[0]);
+    } else {
+      return wantarray ? @{$self->{$name}} : $self->{$name}->[0];
+    }
 }
 
 sub self_or_default {
@@ -515,17 +524,10 @@ sub init {
 
       # avoid unreasonably large postings
       if (($POST_MAX > 0) && ($content_length > $POST_MAX)) {
-	# quietly read and discard the post
-	  my $buffer;
-          my $tmplength = $content_length;
-          while($tmplength > 0) {
-                 my $maxbuffer = ($tmplength < 10000)?$tmplength:10000;
-                 my $bytesread = $MOD_PERL ? $self->r->read($buffer,$maxbuffer) : read(STDIN,$buffer,$maxbuffer);
-                 $tmplength -= $bytesread;
-          }
-          $self->cgi_error("413 Request entity too large");
-          last METHOD;
-       }
+	#discard the post, unread
+	$self->cgi_error("413 Request entity too large");
+	last METHOD;
+      }
 
       # Process multipart postings, but only if the initializer is
       # not defined.
@@ -2690,8 +2692,8 @@ END_OF_FUNC
 'cookie' => <<'END_OF_FUNC',
 sub cookie {
     my($self,@p) = self_or_default(@_);
-    my($name,$value,$path,$domain,$secure,$expires) =
-	rearrange([NAME,[VALUE,VALUES],PATH,DOMAIN,SECURE,EXPIRES],@p);
+    my($name,$value,$path,$domain,$secure,$expires,$httponly) =
+	rearrange([NAME,[VALUE,VALUES],PATH,DOMAIN,SECURE,EXPIRES,HTTPONLY],@p);
 
     require CGI::Cookie;
 
@@ -2719,6 +2721,7 @@ sub cookie {
     push(@param,'-path'=>$path) if $path;
     push(@param,'-expires'=>$expires) if $expires;
     push(@param,'-secure'=>$secure) if $secure;
+    push(@param,'-httponly'=>$httponly) if $httponly;
 
     return new CGI::Cookie(@param);
 }

@@ -1,3 +1,9 @@
+  Version 3.21
+  1. Don't try to read data at all when POST > $POST_MAX.
+  2. Fixed bug that caused $cgi->param('name',undef,'value') to unset param('name') entirely.
+  3. Fixed bug in which upload() sometimes returns empty. (CPAN bug #12694).
+  4. Incorporated patch from BURAK@cpan.org to support HTTPcookies (CPAN bug 21019).
+
   Version 3.20
   1. Patch from David Wheeler for CGI::Cookie->bake(). Uses mod_perl headers_out->add()
 	rather than headers_out->set().

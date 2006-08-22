@@ -116,8 +116,8 @@ sub new {
   # Ignore mod_perl request object--compatability with Apache::Cookie.
   shift if ref $_[0]
         && eval { $_[0]->isa('Apache::Request::Req') || $_[0]->isa('Apache') };
-  my($name,$value,$path,$domain,$secure,$expires) =
-    rearrange([NAME,[VALUE,VALUES],PATH,DOMAIN,SECURE,EXPIRES],@_);
+  my($name,$value,$path,$domain,$secure,$expires,$httponly) =
+    rearrange([NAME,[VALUE,VALUES],PATH,DOMAIN,SECURE,EXPIRES,HTTPONLY],@_);
   
   # Pull out our parameters.
   my @values;
@@ -146,6 +146,7 @@ sub new {
   $self->domain($domain) if defined $domain;
   $self->secure($secure) if defined $secure;
   $self->expires($expires) if defined $expires;
+  $self->httponly($httponly) if defined $httponly;
 #  $self->max_age($expires) if defined $expires;
   return $self;
 }
@@ -154,13 +155,14 @@ sub as_string {
     my $self = shift;
     return "" unless $self->name;
 
-    my(@constant_values,$domain,$path,$expires,$max_age,$secure);
+    my(@constant_values,$domain,$path,$expires,$max_age,$secure,$httponly);
 
     push(@constant_values,"domain=$domain")   if $domain = $self->domain;
     push(@constant_values,"path=$path")       if $path = $self->path;
     push(@constant_values,"expires=$expires") if $expires = $self->expires;
     push(@constant_values,"max-age=$max_age") if $max_age = $self->max_age;
     push(@constant_values,"secure") if $secure = $self->secure;
+    push(@constant_values,"HttpOnly") if $httponly = $self->httponly;
 
     my($key) = escape($self->name);
     my($cookie) = join("=",(defined $key ? $key : ''),join("&",map escape(defined $_ ? $_ : ''),$self->value));
@@ -251,6 +253,14 @@ sub path {
     return $self->{'path'};
 }
 
+
+sub httponly { # HttpOnly
+    my $self     = shift;
+    my $httponly = shift;
+    $self->{'httponly'} = $httponly if defined $httponly;
+    return $self->{'httponly'};
+}
+
 1;
 
 =head1 NAME
@@ -337,6 +347,19 @@ that all scripts at your site will receive the cookie.
 If the "secure" attribute is set, the cookie will only be sent to your
 script if the CGI request is occurring on a secure channel, such as SSL.
 
+=item B<4. httponly flag>
+
+If the "httponly" attribute is set, the cookie will only be accessible
+through HTTP Requests. This cookie will be inaccessible via JavaScript
+(to prevent XSS attacks).
+
+But, currently this feature only used and recognised by 
+MS Internet Explorer 6 Service Pack 1 and later.
+
+See this URL for more information:
+
+L<http://msdn.microsoft.com/workshop/author/dhtml/httponly_cookies.asp>
+
 =back
 
 =head2 Creating New Cookies
@@ -370,6 +393,9 @@ pages at your site.
 
 B<-secure> if set to a true value instructs the browser to return the
 cookie only when a cryptographic protocol is in use.
+
+B<-httponly> if set to a true value, the cookie will not be accessible
+via JavaScript.
 
 For compatibility with Apache::Cookie, you may optionally pass in
 a mod_perl request object as the first argument to C<new()>. It will
