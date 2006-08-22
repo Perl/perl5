@@ -1,8 +1,14 @@
 Revision history for Perl extension Time::HiRes.
 
+1.90	[2006-08-22]
+	- tweak still needed for Const64(), from Jerry Hedden
+	- get a freshly generated ppport.h
+	- update Copyright years
+
 1.89	[2006-08-22]
 	- Const64() already appends an 'LL' (or i64), so provide LL and i64
-	  forms for the IV_1E[679] (effects Win32 and Cygwin).
+	  forms for the IV_1E[679] (effects Win32 and Cygwin), reported by
+	  Jerry Hedden.
 	- the Changes entry for 1.88 talked about [IN]V_1[679], missing the 'E'.
 
 1.88	[2006-08-21]

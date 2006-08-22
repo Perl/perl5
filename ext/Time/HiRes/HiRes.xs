@@ -2,7 +2,7 @@
  * 
  * Copyright (c) 1996-2002 Douglas E. Wegscheid.  All rights reserved.
  * 
- * Copyright (c) 2002,2003,2004,2005 Jarkko Hietaniemi.  All rights reserved.
+ * Copyright (c) 2002,2003,2004,2005,2006 Jarkko Hietaniemi.  All rights reserved.
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the same terms as Perl itself.
@@ -40,18 +40,6 @@ extern "C" {
 #define IV_1E6 1000000
 #define IV_1E7 10000000
 #define IV_1E9 1000000000
-
-#ifdef Const64
-# ifdef __GNUC__
-#  define IV_1E6LL  1000000LL /* Needed because of Const64() ##-appends LL (or i64). */
-#  define IV_1E7LL  10000000LL
-#  define IV_1E9LL  1000000000LL
-# else
-#  define IV_1E6i64 1000000i64
-#  define IV_1E7i64 10000000i64
-#  define IV_1E9i64 1000000000i64
-# endif
-#endif
 
 #define NV_1E6 1000000.0
 #define NV_1E7 10000000.0
@@ -134,6 +122,18 @@ START_MY_CXT
 # define Const64(x) x##i64
 #endif
 #define EPOCH_BIAS  Const64(116444736000000000)
+
+#ifdef Const64
+# ifdef __GNUC__
+#  define IV_1E6LL  1000000LL /* Needed because of Const64() ##-appends LL (or i64). */
+#  define IV_1E7LL  10000000LL
+#  define IV_1E9LL  1000000000LL
+# else
+#  define IV_1E6i64 1000000i64
+#  define IV_1E7i64 10000000i64
+#  define IV_1E9i64 1000000000i64
+# endif
+#endif
 
 /* NOTE: This does not compute the timezone info (doing so can be expensive,
  * and appears to be unsupported even by glibc) */
