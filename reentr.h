@@ -1425,9 +1425,4 @@ typedef struct {
  
 #endif
 
-PERL_CALLCONV void Perl_reentrant_size(pTHX);
-PERL_CALLCONV void Perl_reentrant_init(pTHX);
-PERL_CALLCONV void Perl_reentrant_free(pTHX);
-PERL_CALLCONV void* Perl_reentrant_retry(const char *f, ...);
-
 /* ex: set ro: */
