@@ -1,6 +1,6 @@
 package attributes;
 
-our $VERSION = 0.06;
+our $VERSION = 0.07;
 
 @EXPORT_OK = qw(get reftype);
 @EXPORT = ();
@@ -43,7 +43,7 @@ sub import {
     my @badattrs;
     if ($pkgmeth) {
 	my @pkgattrs = _modify_attrs($svref, @attrs);
-	@badattrs = $pkgmeth->($home_stash, $svref, @attrs);
+	@badattrs = $pkgmeth->($home_stash, $svref, @pkgattrs);
 	if (!@badattrs && @pkgattrs) {
 	    return unless _warn_reserved;
 	    @pkgattrs = grep { m/\A[[:lower:]]+(?:\z|\()/ } @pkgattrs;

@@ -85,8 +85,8 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 #endif
 	    case 6:
 		switch (name[3]) {
-		case 'l':
 #ifdef CVf_LVALUE
+		case 'l':
 		    if (memEQ(name, "lvalue", 6)) {
 			if (negated)
 			    CvFLAGS((CV*)sv) &= ~CVf_LVALUE;
@@ -95,8 +95,8 @@ modify_SV_attributes(pTHX_ SV *sv, SV **retlist, SV **attrlist, int numattrs)
 			continue;
 		    }
 		    break;
+#endif
 		case 'k':
-#endif /* defined CVf_LVALUE */
 		    if (memEQ(name, "locked", 6)) {
 			if (negated)
 			    CvFLAGS((CV*)sv) &= ~CVf_LOCKED;
