@@ -1,3 +1,6 @@
+  Version 3.22
+  1. Typo in upload() function broke uploads. Now fixed (CPAN bug 21126).
+
   Version 3.21
   1. Don't try to read data at all when POST > $POST_MAX.
   2. Fixed bug that caused $cgi->param('name',undef,'value') to unset param('name') entirely.

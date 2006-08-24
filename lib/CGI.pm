@@ -19,7 +19,7 @@ use Carp 'croak';
 #   http://stein.cshl.org/WWW/software/CGI/
 
 $CGI::revision = '$Id: CGI.pm,v 1.208 2006/04/23 14:25:14 lstein Exp $';
-$CGI::VERSION='3.21';
+$CGI::VERSION='3.22';
 
 # HARD-CODED LOCATION FOR FILE UPLOAD TEMPORARY FILES.
 # UNCOMMENT THIS ONLY IF YOU KNOW WHAT YOU'RE DOING.
@@ -3419,7 +3419,7 @@ END_OF_FUNC
 'upload' =><<'END_OF_FUNC',
 sub upload {
     my($self,$param_name) = self_or_default(@_);
-    my @param = grep(ref && defined(fileno($_)), $self->param($param_name));
+    my @param = grep {ref && defined(fileno($_))}, $self->param($param_name));
     return unless @param;
     return wantarray ? @param : $param[0];
 }
