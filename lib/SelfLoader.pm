@@ -16,8 +16,10 @@ $nested = qr{ \( (?: (?> [^()]+ ) | (??{ $nested }) )* \) }x;
 our $one_attr = qr{ (?> (?! \d) \w+ (?:$nested)? ) (?:\s*\:\s*|\s+(?!\:)) }x;
 our $attr_list = qr{ \s* : \s* (?: $one_attr )* }x;
 
-sub croak { require Carp; goto &Carp::croak }
-sub carp { require Carp; goto &Carp::carp }
+# in croak and carp, protect $@ from "require Carp;" RT #40216
+
+sub croak { { local $@; require Carp; } goto &Carp::croak }
+sub carp { { local $@; require Carp; } goto &Carp::carp }
 
 AUTOLOAD {
     print STDERR "SelfLoader::AUTOLOAD for $AUTOLOAD\n" if $DEBUG;
