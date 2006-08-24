@@ -23,7 +23,6 @@
  */
 
 /* package attributes; */
-PERL_XS_EXPORT_C void XS_attributes__warn_reserved(pTHX_ CV *cv);
 PERL_XS_EXPORT_C void XS_attributes_reftype(pTHX_ CV *cv);
 PERL_XS_EXPORT_C void XS_attributes__modify_attrs(pTHX_ CV *cv);
 PERL_XS_EXPORT_C void XS_attributes__guess_stash(pTHX_ CV *cv);
@@ -166,7 +165,6 @@ XS(XS_attributes_bootstrap)
     if( items > 1 )
         Perl_croak(aTHX_ "Usage: attributes::bootstrap $module");
 
-    newXSproto("attributes::_warn_reserved", XS_attributes__warn_reserved, file, "");
     newXS("attributes::_modify_attrs",	XS_attributes__modify_attrs,	file);
     newXSproto("attributes::_guess_stash", XS_attributes__guess_stash, file, "$");
     newXSproto("attributes::_fetch_attrs", XS_attributes__fetch_attrs, file, "$");
@@ -313,22 +311,6 @@ usage:
     sv = SvRV(rv);
     sv_setpv(TARG, sv_reftype(sv, 0));
     SvSETMAGIC(TARG);
-
-    XSRETURN(1);
-}
-
-XS(XS_attributes__warn_reserved)
-{
-    dVAR;
-    dXSARGS;
-
-    if (items != 0) {
-	Perl_croak(aTHX_
-		   "Usage: attributes::_warn_reserved ()");
-    }
-
-    EXTEND(SP,1);
-    ST(0) = boolSV(ckWARN(WARN_RESERVED));
 
     XSRETURN(1);
 }
