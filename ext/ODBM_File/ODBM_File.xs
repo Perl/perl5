@@ -15,7 +15,11 @@ int	dbminit(char* filename);
 int	dbmclose(void);
 datum	fetch(datum key);
 int	store(datum key, datum dat);
-int	odelete(datum key); /* Cannot be delete() because of C++. */
+#  ifdef __cplusplus
+int	odelete(datum key);	/* Cannot be delete() for C++. */
+#  else
+int	delete(datum key); 
+#  endif
 datum	firstkey(void);
 datum	nextkey(datum key);
 #endif
@@ -53,7 +57,11 @@ typedef datum datum_value ;
 
 #define odbm_FETCH(db,key)			fetch(key)
 #define odbm_STORE(db,key,value,flags)		store(key,value)
-#define odbm_DELETE(db,key)			odelete(key)
+#ifdef __cplusplus
+#  define odbm_DELETE(db,key)			odelete(key)
+#else
+#  define odbm_DELETE(db,key)			delete(key)
+#endif
 #define odbm_FIRSTKEY(db)			firstkey()
 #define odbm_NEXTKEY(db,key)			nextkey(key)
 
