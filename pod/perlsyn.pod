@@ -237,7 +237,7 @@ C<if> an C<else> goes with.  If you use C<unless> in place of C<if>,
 the sense of the test is reversed.
 
 The C<while> statement executes the block as long as the expression is
-true (does not evaluate to the null string C<""> or C<0> or C<"0">).
+L<true|/"Truth and Falsehood">.
 The C<until> statement executes the block as long as the expression is
 false.
 The LABEL is optional, and if present, consists of an identifier followed
