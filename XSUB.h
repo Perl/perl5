@@ -365,7 +365,6 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
             if (name[7] == 's'){                                \
                 arg = sv_2mortal(arg);                          \
             }                                                   \
-            SvOKp(arg);                                         \
 	} } STMT_END                                                     
 
 #if 1		/* for compatibility */
