@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Nov  6 10:30:43 CET 2006 [metaconfig 3.0 PL70]
+# Generated on Mon Nov  6 16:18:02 CET 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -59,6 +59,18 @@ if test -f /dev/cputype -a -f /dev/drivers -a -f /dev/osversion; then
 *** I'm sorry but this system looks like Plan 9 and Plan 9 doesn't do
 *** Configure that well.  (Plan 9 is close to UNIX but not close enough.)
 *** Please read the README.plan9 for further instructions.
+*** Cannot continue, aborting.
+***
+EOF
+	exit 1
+fi
+
+if test ! -c /dev/null ; then
+	cat >&4 <<EOF
+***
+*** I'm sorry, but /dev/null appears to be a file rather than a device.
+*** Please consult your operating sytem's notes for making a device
+*** in /dev.
 *** Cannot continue, aborting.
 ***
 EOF
