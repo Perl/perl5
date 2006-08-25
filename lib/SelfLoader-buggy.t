@@ -8,6 +8,7 @@ BEGIN {
 }
 
 use SelfLoader;
+print "1..1\n";
 
 # this script checks that errors on self-loaded
 # subroutines that affect $@ are reported
