@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.121_08';
+$VERSION = '2.121_09';
 
 #$| = 1;
 
@@ -119,6 +119,7 @@ sub format_refaddr {
 sub Seen {
   my($s, $g) = @_;
   if (defined($g) && (ref($g) eq 'HASH'))  {
+    init_refaddr_format();
     my($k, $v, $id);
     while (($k, $v) = each %$g) {
       if (defined $v and ref $v) {
