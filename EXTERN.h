@@ -55,6 +55,14 @@
 #  endif
 #endif
 
+#ifndef EXTERN_C
+#  ifdef __cplusplus
+#    define EXTERN_C extern "C"
+#  else
+#    define EXTERN_C extern
+#  endif
+#endif
+
 #undef INIT
 #define INIT(x)
 
