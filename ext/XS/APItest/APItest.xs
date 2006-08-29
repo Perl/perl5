@@ -30,7 +30,7 @@ my_cxt_setint_p(pMY_CXT_ int i)
 }
 
 SV*
-my_cxt_getsv_interp()
+my_cxt_getsv_interp(void)
 {
 #ifdef PERL_IMPLICIT_CONTEXT
     dTHX;
