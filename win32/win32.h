@@ -182,14 +182,15 @@ struct utsname {
 #define DllMain DllEntryPoint
 #endif
 
-#pragma warn -ccc	/* "condition is always true/false" */
-#pragma warn -rch	/* "unreachable code" */
-#pragma warn -sig	/* "conversion may lose significant digits" */
-#pragma warn -pia	/* "possibly incorrect assignment" */
-#pragma warn -par	/* "parameter 'foo' is never used" */
-#pragma warn -aus	/* "'foo' is assigned a value that is never used" */
-#pragma warn -use	/* "'foo' is declared but never used" */
-#pragma warn -csu	/* "comparing signed and unsigned values" */
+#pragma warn -8004	/* "'foo' is assigned a value that is never used" */
+#pragma warn -8008	/* "condition is always true/false" */
+#pragma warn -8012	/* "comparing signed and unsigned values" */
+#pragma warn -8027	/* "functions containing %s are not expanded inline" */
+#pragma warn -8057	/* "parameter 'foo' is never used" */
+#pragma warn -8060	/* "possibly incorrect assignment" */
+#pragma warn -8066	/* "unreachable code" */
+#pragma warn -8071	/* "conversion may lose significant digits" */
+#pragma warn -8080	/* "'foo' is declared but never used" */
 
 /* Borland C thinks that a pointer to a member variable is 12 bytes in size. */
 #define PERL_MEMBER_PTR_SIZE	12
