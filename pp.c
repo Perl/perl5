@@ -4123,16 +4123,17 @@ PP(pp_anonlist)
 {
     dVAR; dSP; dMARK; dORIGMARK;
     const I32 items = SP - MARK;
-    SV * const av = sv_2mortal((SV*)av_make(items, MARK+1));
+    SV * const av = (SV *) av_make(items, MARK+1);
     SP = ORIGMARK;		/* av_make() might realloc stack_sp */
-    XPUSHs(av);
+    XPUSHs(sv_2mortal((PL_op->op_flags & OPf_SPECIAL)
+		      ? newRV_noinc(av) : av));
     RETURN;
 }
 
 PP(pp_anonhash)
 {
     dVAR; dSP; dMARK; dORIGMARK;
-    HV* const hv = (HV*)sv_2mortal((SV*)newHV());
+    HV* const hv = newHV();
 
     while (MARK < SP) {
 	SV * const key = *++MARK;
@@ -4144,7 +4145,8 @@ PP(pp_anonhash)
 	(void)hv_store_ent(hv,key,val,0);
     }
     SP = ORIGMARK;
-    XPUSHs((SV*)hv);
+    XPUSHs(sv_2mortal((PL_op->op_flags & OPf_SPECIAL)
+		      ? newRV_noinc((SV*) hv) : (SV*)hv));
     RETURN;
 }
 

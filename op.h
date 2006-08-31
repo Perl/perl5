@@ -121,6 +121,8 @@ Deprecated.  Use C<GIMME_V> instead.
 				/*  On OP_ENTERWHEN, there's no condition */
 				/*  On OP_BREAK, an implicit break */
 				/*  On OP_SMARTMATCH, an implicit smartmatch */
+				/*  On OP_ANONHASH and OP_ANONLIST, create a
+				    reference to the new anon hash or array */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST

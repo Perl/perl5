@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.76;
+$VERSION = 0.77;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1751,6 +1751,32 @@ sub padval {
     return $self->{'curcv'}->PADLIST->ARRAYelt(1)->ARRAYelt($targ);
 }
 
+sub anon_hash_or_list {
+    my $self = shift;
+    my $op = shift;
+
+    my($pre, $post) = @{{"anonlist" => ["[","]"],
+			 "anonhash" => ["{","}"]}->{$op->name}};
+    my($expr, @exprs);
+    $op = $op->first->sibling; # skip pushmark
+    for (; !null($op); $op = $op->sibling) {
+	$expr = $self->deparse($op, 6);
+	push @exprs, $expr;
+    }
+    return $pre . join(", ", @exprs) . $post;
+}
+
+sub pp_anonlist {
+    my ($self, $op) = @_;
+    if ($op->flags & OPf_SPECIAL) {
+	return $self->anon_hash_or_list($op);
+    }
+    warn "Unexpected op pp_" . $op->name() . " without OPf_SPECIAL";
+    return 'XXX';
+}
+
+*pp_anonhash = \&pp_anonlist;
+
 sub pp_refgen {
     my $self = shift;	
     my($op, $cx) = @_;
@@ -1758,15 +1784,7 @@ sub pp_refgen {
     if ($kid->name eq "null") {
 	$kid = $kid->first;
 	if ($kid->name eq "anonlist" || $kid->name eq "anonhash") {
-	    my($pre, $post) = @{{"anonlist" => ["[","]"],
-				 "anonhash" => ["{","}"]}->{$kid->name}};
-	    my($expr, @exprs);
-	    $kid = $kid->first->sibling; # skip pushmark
-	    for (; !null($kid); $kid = $kid->sibling) {
-		$expr = $self->deparse($kid, 6);
-		push @exprs, $expr;
-	    }
-	    return $pre . join(", ", @exprs) . $post;
+	    return $self->anon_hash_or_list($op);
 	} elsif (!null($kid->sibling) and
 		 $kid->sibling->name eq "anoncode") {
 	    return "sub " .

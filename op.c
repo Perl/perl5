@@ -2258,6 +2258,8 @@ Perl_gen_constant_list(pTHX_ register OP *o)
     pp_pushmark();
     CALLRUNOPS(aTHX);
     PL_op = curop;
+    assert (!(curop->op_flags & OPf_SPECIAL));
+    assert(curop->op_type == OP_RANGE);
     pp_anonlist();
     PL_tmps_floor = oldtmps_floor;
 
@@ -5681,15 +5683,13 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 OP *
 Perl_newANONLIST(pTHX_ OP *o)
 {
-    return newUNOP(OP_REFGEN, 0,
-	mod(list(convert(OP_ANONLIST, 0, o)), OP_REFGEN));
+    return convert(OP_ANONLIST, OPf_SPECIAL, o);
 }
 
 OP *
 Perl_newANONHASH(pTHX_ OP *o)
 {
-    return newUNOP(OP_REFGEN, 0,
-	mod(list(convert(OP_ANONHASH, 0, o)), OP_REFGEN));
+    return convert(OP_ANONHASH, OPf_SPECIAL, o);
 }
 
 OP *
