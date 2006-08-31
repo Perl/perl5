@@ -470,12 +470,13 @@ struct block_givwhen {
 
 /* context common to subroutines, evals and loops */
 struct block {
+    U16		blku_type;	/* what kind of context this is */
+    U8		blku_gimme;	/* is this block running in list context? */
     I32		blku_oldsp;	/* stack pointer to copy stuff down to */
     COP *	blku_oldcop;	/* old curcop pointer */
     I32		blku_oldmarksp;	/* mark stack index */
     I32		blku_oldscopesp;	/* scope stack index */
     PMOP *	blku_oldpm;	/* values of pattern match vars */
-    U8		blku_gimme;	/* is this block running in list context? */
 
     union {
 	struct block_sub	blku_sub;
@@ -529,12 +530,13 @@ struct block {
 
 /* substitution context */
 struct subst {
+    U16		sbu_type;	/* what kind of context this is */
+    bool	sbu_once;
+    bool	sbu_rxtainted;
     I32		sbu_iters;
     I32		sbu_maxiters;
     I32		sbu_rflags;
     I32		sbu_oldsave;
-    bool	sbu_once;
-    bool	sbu_rxtainted;
     char *	sbu_orig;
     SV *	sbu_dstr;
     SV *	sbu_targ;
@@ -583,12 +585,12 @@ struct subst {
 	ReREFCNT_dec(cx->sb_rx)
 
 struct context {
-    U32		cx_type;	/* what kind of context this is */
     union {
 	struct block	cx_blk;
 	struct subst	cx_subst;
     } cx_u;
 };
+#define cx_type cx_u.cx_subst.sbu_type
 
 #define CXTYPEMASK	0xff
 #define CXt_NULL	0
