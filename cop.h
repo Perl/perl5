@@ -278,10 +278,13 @@ struct block_sub {
  * Note that the refcnt of the cv is incremented twice;  The CX one is
  * decremented by LEAVESUB, the other by LEAVE. */
 
+#define CX_SUB_HASARGS_SET(cx, v)	((cx)->blk_sub.hasargs = (v))
+#define CX_SUB_HASARGS_GET(cx)		((cx)->blk_sub.hasargs + 0)
+
 #define PUSHSUB_BASE(cx)						\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
-	cx->blk_sub.hasargs = hasargs;					\
+	CX_SUB_HASARGS_SET(cx, hasargs);				\
 	cx->blk_sub.retop = NULL;					\
 	if (!CvDEPTH(cv)) {						\
 	    SvREFCNT_inc_simple_void_NN(cv);				\
@@ -305,7 +308,7 @@ struct block_sub {
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.gv = gv;						\
 	cx->blk_sub.retop = NULL;					\
-	cx->blk_sub.hasargs = 0;					\
+	CX_SUB_HASARGS_SET(cx, 0);					\
 	cx->blk_sub.dfoutgv = PL_defoutgv;				\
 	SvREFCNT_inc_void(cx->blk_sub.dfoutgv)
 
@@ -326,7 +329,7 @@ struct block_sub {
 
 #define POPSUB(cx,sv)							\
     STMT_START {							\
-	if (cx->blk_sub.hasargs) {					\
+	if (CX_SUB_HASARGS_GET(cx)) {					\
 	    POP_SAVEARRAY();						\
 	    /* abandon @_ if it got reified */				\
 	    if (AvREAL(cx->blk_sub.argarray)) {				\

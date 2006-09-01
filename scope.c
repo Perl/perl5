@@ -1033,7 +1033,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.DFOUTGV = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_sub.dfoutgv));
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.HASARGS = %d\n",
-		(int)cx->blk_sub.hasargs);
+		(int)CX_SUB_HASARGS_GET(cx));
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.RETOP = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_sub.retop));
 	break;
@@ -1043,7 +1043,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.OLDDEPTH = %ld\n",
 		(long)cx->blk_sub.olddepth);
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.HASARGS = %d\n",
-		(int)cx->blk_sub.hasargs);
+		(int)CX_SUB_HASARGS_GET(cx));
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.LVAL = %d\n",
 		(int)cx->blk_sub.lval);
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.RETOP = 0x%"UVxf"\n",
