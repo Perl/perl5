@@ -1289,8 +1289,8 @@ Perl_is_lvalue_sub(pTHX)
     const I32 cxix = dopoptosub(cxstack_ix);
     assert(cxix >= 0);  /* We should only be called from inside subs */
 
-    if (cxstack[cxix].blk_sub.lval && CvLVALUE(cxstack[cxix].blk_sub.cv))
-	return cxstack[cxix].blk_sub.lval;
+    if (CX_SUB_LVAL(cxstack + cxix) && CvLVALUE(cxstack[cxix].blk_sub.cv))
+	return CX_SUB_LVAL(cxstack + cxix);
     else
 	return 0;
 }

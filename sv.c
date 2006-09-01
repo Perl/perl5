@@ -10292,7 +10292,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_sub.savearray	= av_dup_inc(cx->blk_sub.savearray, param);
 		ncx->blk_sub.olddepth	= cx->blk_sub.olddepth;
 		CX_SUB_HASARGS_SET(ncx, CX_SUB_HASARGS_GET(cx));
-		ncx->blk_sub.lval	= cx->blk_sub.lval;
+		CX_SUB_LVAL_SET(ncx, CX_SUB_LVAL(cx));
 		ncx->blk_sub.retop	= cx->blk_sub.retop;
 		ncx->blk_sub.oldcomppad = (PAD*)ptr_table_fetch(PL_ptr_table,
 					   cx->blk_sub.oldcomppad);

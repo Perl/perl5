@@ -1045,7 +1045,7 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.HASARGS = %d\n",
 		(int)CX_SUB_HASARGS_GET(cx));
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.LVAL = %d\n",
-		(int)cx->blk_sub.lval);
+		(int)CX_SUB_LVAL(cx));
 	PerlIO_printf(Perl_debug_log, "BLK_SUB.RETOP = 0x%"UVxf"\n",
 		PTR2UV(cx->blk_sub.retop));
 	break;

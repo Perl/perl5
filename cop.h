@@ -274,12 +274,18 @@ struct block_sub {
     OP *	retop;	/* op to execute on exit from sub */
 };
 
+#define CX_SUB_HASARGS_SET(cx, v)	((cx)->blk_sub.hasargs = (v))
+#define CX_SUB_HASARGS_GET(cx)		((cx)->blk_sub.hasargs + 0)
+
+#define CX_SUB_LVAL_SET(cx, v)		((cx)->blk_sub.lval = (v) &	\
+					 (OPpLVAL_INTRO|OPpENTERSUB_INARGS))
+#define CX_SUB_LVAL(cx)			((cx)->blk_sub.lval + 0)
+#define CX_SUB_LVAL_INARGS(cx)		((cx)->blk_sub.lval & 		\
+					 OPpENTERSUB_INARGS)
+
 /* base for the next two macros. Don't use directly.
  * Note that the refcnt of the cv is incremented twice;  The CX one is
  * decremented by LEAVESUB, the other by LEAVE. */
-
-#define CX_SUB_HASARGS_SET(cx, v)	((cx)->blk_sub.hasargs = (v))
-#define CX_SUB_HASARGS_GET(cx)		((cx)->blk_sub.hasargs + 0)
 
 #define PUSHSUB_BASE(cx)						\
 	cx->blk_sub.cv = cv;						\
@@ -295,13 +301,12 @@ struct block_sub {
 
 #define PUSHSUB(cx)							\
 	PUSHSUB_BASE(cx)						\
-	cx->blk_sub.lval = PL_op->op_private &                          \
-	                      (OPpLVAL_INTRO|OPpENTERSUB_INARGS);
+	CX_SUB_LVAL_SET(cx, PL_op->op_private)
 
 /* variant for use by OP_DBSTATE, where op_private holds hint bits */
 #define PUSHSUB_DB(cx)							\
 	PUSHSUB_BASE(cx)						\
-	cx->blk_sub.lval = 0;
+	CX_SUB_LVAL_SET(cx, 0)
 
 
 #define PUSHFORMAT(cx)							\
