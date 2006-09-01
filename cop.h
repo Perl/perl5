@@ -268,19 +268,20 @@ struct block_sub {
     AV *	savearray;
     AV *	argarray;
     I32		olddepth;
-    U8		hasargs;
-    U8		lval;		/* XXX merge lval and hasargs? */
+    /* These are merged to to get struct context down to 64 bytes on ILP32.  */
+    U8		hasargs_lval;
     PAD		*oldcomppad;
     OP *	retop;	/* op to execute on exit from sub */
 };
 
-#define CX_SUB_HASARGS_SET(cx, v)	((cx)->blk_sub.hasargs = (v))
-#define CX_SUB_HASARGS_GET(cx)		((cx)->blk_sub.hasargs + 0)
+#define CX_SUB_HASARGS_SET(cx, v)	((cx)->blk_sub.hasargs_lval = \
+ ((cx)->blk_sub.hasargs_lval & 0xFE) | ((v) ? 1 : 0))
+#define CX_SUB_HASARGS_GET(cx)		((cx)->blk_sub.hasargs_lval & 0x01)
 
-#define CX_SUB_LVAL_SET(cx, v)		((cx)->blk_sub.lval = (v) &	\
-					 (OPpLVAL_INTRO|OPpENTERSUB_INARGS))
-#define CX_SUB_LVAL(cx)			((cx)->blk_sub.lval + 0)
-#define CX_SUB_LVAL_INARGS(cx)		((cx)->blk_sub.lval & 		\
+#define CX_SUB_LVAL_SET(cx, v)		((cx)->blk_sub.hasargs_lval = \
+ (((cx)->blk_sub.hasargs_lval & 0x01) | ((v) & (OPpLVAL_INTRO|OPpENTERSUB_INARGS))))
+#define CX_SUB_LVAL(cx)			((cx)->blk_sub.hasargs_lval & 0xFE)
+#define CX_SUB_LVAL_INARGS(cx)		((cx)->blk_sub.hasargs_lval & \
 					 OPpENTERSUB_INARGS)
 
 /* base for the next two macros. Don't use directly.
