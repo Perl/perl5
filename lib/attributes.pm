@@ -255,10 +255,10 @@ The class methods invoked for modifying and fetching are these:
 
 =item FETCH_I<type>_ATTRIBUTES
 
-This method receives a single argument, which is a reference to the
-variable or subroutine for which package-defined attributes are desired.
-The expected return value is a list of associated attributes.
-This list may be empty.
+This method is called with two arguments:  the relevant package name,
+and a reference to a variable or subroutine for which package-defined
+attributes are desired.  The expected return value is a list of
+associated attributes.  This list may be empty.
 
 =item MODIFY_I<type>_ATTRIBUTES
 
