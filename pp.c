@@ -4035,7 +4035,7 @@ PP(pp_hslice)
 			STRLEN keylen;
 			const char * const key = SvPV_const(keysv, keylen);
 			SAVEDELETE(hv, savepvn(key,keylen),
-				   SvUTF8(keysv) ? -(I32)keylen : keylen);
+				   SvUTF8(keysv) ? -(I32)keylen : (I32)keylen);
 		    }
 		}
             }

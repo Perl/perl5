@@ -1971,7 +1971,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
 		    if (++bytes >= sizeof(UV)) {	/* promote to string */
 			const char *t;
 
-			sv = Perl_newSVpvf(aTHX_ "%.*"UVf, (int)TYPE_DIGITS(UV), auv);
+			sv = Perl_newSVpvf(aTHX_ "%.*"UVuf, (int)TYPE_DIGITS(UV), auv);
 			while (s < strend) {
 			    ch = SHIFT_BYTE(utf8, s, strend, datumtype);
 			    sv = mul128(sv, (U8)(ch & 0x7f));

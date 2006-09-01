@@ -711,14 +711,14 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     level++;
     seq = sequence_num(o);
     if (seq)
-	PerlIO_printf(file, "%-4"UVf, seq);
+	PerlIO_printf(file, "%-4"UVuf, seq);
     else
 	PerlIO_printf(file, "    ");
     PerlIO_printf(file,
 		  "%*sTYPE = %s  ===> ",
 		  (int)(PL_dumpindent*level-4), "", OP_NAME(o));
     if (o->op_next)
-	PerlIO_printf(file, seq ? "%"UVf"\n" : "(%"UVf")\n",
+	PerlIO_printf(file, seq ? "%"UVuf"\n" : "(%"UVuf")\n",
 				sequence_num(o->op_next));
     else
 	PerlIO_printf(file, "DONE\n");
@@ -727,7 +727,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    Perl_dump_indent(aTHX_ level, file, "  (was %s)\n", PL_op_name[o->op_targ]);
 	    if (o->op_targ == OP_NEXTSTATE) {
 		if (CopLINE(cCOPo))
-		    Perl_dump_indent(aTHX_ level, file, "LINE = %"UVf"\n",
+		    Perl_dump_indent(aTHX_ level, file, "LINE = %"UVuf"\n",
 				     (UV)CopLINE(cCOPo));
 		if (CopSTASHPV(cCOPo))
 		    Perl_dump_indent(aTHX_ level, file, "PACKAGE = \"%s\"\n",
@@ -1027,7 +1027,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     case OP_NEXTSTATE:
     case OP_DBSTATE:
 	if (CopLINE(cCOPo))
-	    Perl_dump_indent(aTHX_ level, file, "LINE = %"UVf"\n",
+	    Perl_dump_indent(aTHX_ level, file, "LINE = %"UVuf"\n",
 			     (UV)CopLINE(cCOPo));
 	if (CopSTASHPV(cCOPo))
 	    Perl_dump_indent(aTHX_ level, file, "PACKAGE = \"%s\"\n",
@@ -1039,17 +1039,17 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     case OP_ENTERLOOP:
 	Perl_dump_indent(aTHX_ level, file, "REDO ===> ");
 	if (cLOOPo->op_redoop)
-	    PerlIO_printf(file, "%"UVf"\n", sequence_num(cLOOPo->op_redoop));
+	    PerlIO_printf(file, "%"UVuf"\n", sequence_num(cLOOPo->op_redoop));
 	else
 	    PerlIO_printf(file, "DONE\n");
 	Perl_dump_indent(aTHX_ level, file, "NEXT ===> ");
 	if (cLOOPo->op_nextop)
-	    PerlIO_printf(file, "%"UVf"\n", sequence_num(cLOOPo->op_nextop));
+	    PerlIO_printf(file, "%"UVuf"\n", sequence_num(cLOOPo->op_nextop));
 	else
 	    PerlIO_printf(file, "DONE\n");
 	Perl_dump_indent(aTHX_ level, file, "LAST ===> ");
 	if (cLOOPo->op_lastop)
-	    PerlIO_printf(file, "%"UVf"\n", sequence_num(cLOOPo->op_lastop));
+	    PerlIO_printf(file, "%"UVuf"\n", sequence_num(cLOOPo->op_lastop));
 	else
 	    PerlIO_printf(file, "DONE\n");
 	break;
@@ -1061,7 +1061,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
     case OP_AND:
 	Perl_dump_indent(aTHX_ level, file, "OTHER ===> ");
 	if (cLOGOPo->op_other)
-	    PerlIO_printf(file, "%"UVf"\n", sequence_num(cLOGOPo->op_other));
+	    PerlIO_printf(file, "%"UVuf"\n", sequence_num(cLOGOPo->op_other));
 	else
 	    PerlIO_printf(file, "DONE\n");
 	break;
@@ -2492,7 +2492,7 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    if (o->op_targ == OP_NEXTSTATE)
 	    {
 		if (CopLINE(cCOPo))
-		    PerlIO_printf(file, " line=\"%"UVf"\"",
+		    PerlIO_printf(file, " line=\"%"UVuf"\"",
 				     (UV)CopLINE(cCOPo));
 		if (CopSTASHPV(cCOPo))
 		    PerlIO_printf(file, " package=\"%s\"",
@@ -2759,7 +2759,7 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
     case OP_NEXTSTATE:
     case OP_DBSTATE:
 	if (CopLINE(cCOPo))
-	    S_xmldump_attr(aTHX_ level, file, "line=\"%"UVf"\"",
+	    S_xmldump_attr(aTHX_ level, file, "line=\"%"UVuf"\"",
 			     (UV)CopLINE(cCOPo));
 	if (CopSTASHPV(cCOPo))
 	    S_xmldump_attr(aTHX_ level, file, "package=\"%s\"",

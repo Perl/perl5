@@ -3015,6 +3015,7 @@ typedef pthread_key_t	perl_key;
 #  endif
 #endif
  
+/* not used; but needed for backward compatibilty with XS code? - RMB */ 
 #ifndef UVf
 #  define UVf UVuf
 #endif
