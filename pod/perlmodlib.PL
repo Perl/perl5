@@ -1070,8 +1070,8 @@ the module after __END__ either using AutoSplit or by saying:
 Does your module pass the 'empty subclass' test? If you say
 C<@SUBCLASS::ISA = qw(YOURCLASS);> your applications should be able
 to use SUBCLASS in exactly the same way as YOURCLASS.  For example,
-does your application still work if you change:  C<$obj = new YOURCLASS;>
-into: C<$obj = new SUBCLASS;> ?
+does your application still work if you change:  C<< $obj = YOURCLASS->new(); >>
+into: C<< $obj = SUBCLASS->new(); >> ?
 
 Avoid keeping any state information in your packages. It makes it
 difficult for multiple other packages to use yours. Keep state

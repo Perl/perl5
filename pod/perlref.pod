@@ -210,17 +210,18 @@ that most Perl programmers need trouble themselves about to begin with.
 =item 5.
 X<constructor> X<new>
 
-References are often returned by special subroutines called constructors.
-Perl objects are just references to a special type of object that happens to know
-which package it's associated with.  Constructors are just special
-subroutines that know how to create that association.  They do so by
-starting with an ordinary reference, and it remains an ordinary reference
-even while it's also being an object.  Constructors are often
-named new() and called indirectly:
+References are often returned by special subroutines called constructors.  Perl
+objects are just references to a special type of object that happens to know
+which package it's associated with.  Constructors are just special subroutines
+that know how to create that association.  They do so by starting with an
+ordinary reference, and it remains an ordinary reference even while it's also
+being an object.  Constructors are often named C<new()>.  You I<can> call them
+indirectly:
 
-    $objref = new Doggie (Tail => 'short', Ears => 'long');
+    $objref = new Doggie( Tail => 'short', Ears => 'long' );
 
-But don't have to be:
+But that can produce ambiguous syntax in certain cases, so it's often
+better to use the direct method invocation approach:
 
     $objref   = Doggie->new(Tail => 'short', Ears => 'long');
 

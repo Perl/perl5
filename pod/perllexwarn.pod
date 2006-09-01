@@ -503,9 +503,9 @@ C<Derived>.
     use Original;
     use Derived;
     use warnings 'Derived';
-    my $a = new Original;
+    my $a = Original->new();
     $a->doit(1);
-    my $b = new Derived;
+    my $b = Derived->new();
     $a->doit(1);
 
 When this code is run only the C<Derived> object, C<$b>, will generate
