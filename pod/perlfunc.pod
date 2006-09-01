@@ -623,15 +623,19 @@ returns the caller's package name if there is a caller, that is, if
 we're in a subroutine or C<eval> or C<require>, and the undefined value
 otherwise.  In list context, returns
 
+    # 0         1          2
     ($package, $filename, $line) = caller;
 
 With EXPR, it returns some extra information that the debugger uses to
 print a stack trace.  The value of EXPR indicates how many call frames
 to go back before the current one.
 
+    #  0         1          2      3            4
     ($package, $filename, $line, $subroutine, $hasargs,
+
+    #  5          6          7            8       9         10
     $wantarray, $evaltext, $is_require, $hints, $bitmask, $hinthash)
-	 = caller($i);
+     = caller($i);
 
 Here $subroutine may be C<(eval)> if the frame is not a subroutine
 call, but an C<eval>.  In such a case additional elements $evaltext and
