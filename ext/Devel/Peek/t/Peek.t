@@ -165,7 +165,7 @@ do_test(11,
   FLAGS = \\(ROK\\)
   RV = $ADDR
   SV = PVAV\\($ADDR\\) at $ADDR
-    REFCNT = 2
+    REFCNT = 1
     FLAGS = \\(\\)
     IV = 0
     NV = 0
@@ -188,7 +188,7 @@ do_test(12,
   FLAGS = \\(ROK\\)
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
-    REFCNT = 2
+    REFCNT = 1
     FLAGS = \\(SHAREKEYS\\)
     IV = 1
     NV = $FLOAT
@@ -284,7 +284,7 @@ do_test(16,
   FLAGS = \\(ROK\\)
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
-    REFCNT = 2
+    REFCNT = 1
     FLAGS = \\(OBJECT,SHAREKEYS\\)
     IV = 0
     NV = 0
@@ -353,7 +353,7 @@ do_test(19,
   FLAGS = \\(ROK\\)
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
-    REFCNT = 2
+    REFCNT = 1
     FLAGS = \\(SHAREKEYS,HASKFLAGS\\)
     UV = 1
     NV = $FLOAT
@@ -379,7 +379,7 @@ do_test(19,
   FLAGS = \\(ROK\\)
   RV = $ADDR
   SV = PVHV\\($ADDR\\) at $ADDR
-    REFCNT = 2
+    REFCNT = 1
     FLAGS = \\(SHAREKEYS,HASKFLAGS\\)
     UV = 1
     NV = 0

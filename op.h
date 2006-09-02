@@ -103,6 +103,8 @@ Deprecated.  Use C<GIMME_V> instead.
 				 *    (runtime property) */
 				/*  On OP_AELEMFAST, indiciates pad var */
 				/*  On OP_REQUIRE, was seen as CORE::require */
+				/*  On OP_ANONHASH and OP_ANONLIST, create a
+				    reference to the new anon hash or array */
 
 /* old names; don't use in new code, but don't break them, either */
 #define OPf_LIST	OPf_WANT_LIST

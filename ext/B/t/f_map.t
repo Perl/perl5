@@ -512,14 +512,13 @@ checkOptree(note   => q{},
 # 9      <#> gvsv[*_] s
 # a      <1> lc[t4] sK/1
 # b      <$> const[IV 1] s
-# c      <@> anonhash sKRM/1
-# d      <1> srefgen sK/1
+# c      <@> anonhash sK*/1
 #            goto 7
-# e  <0> pushmark s
-# f  <#> gv[*hashes] s
-# g  <1> rv2av[t2] lKRM*/1
-# h  <2> aassign[t8] KS/COMMON
-# i  <1> leavesub[1 ref] K/REFC,1
+# d  <0> pushmark s
+# e  <#> gv[*hashes] s
+# f  <1> rv2av[t2] lKRM*/1
+# g  <2> aassign[t8] KS/COMMON
+# h  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # 1  <;> nextstate(main 601 (eval 32):1) v
 # 2  <0> pushmark s
@@ -532,12 +531,11 @@ EOT_EOT
 # 9      <$> gvsv(*_) s
 # a      <1> lc[t2] sK/1
 # b      <$> const(IV 1) s
-# c      <@> anonhash sKRM/1
-# d      <1> srefgen sK/1
+# c      <@> anonhash sK*/1
 #            goto 7
-# e  <0> pushmark s
-# f  <$> gv(*hashes) s
-# g  <1> rv2av[t1] lKRM*/1
-# h  <2> aassign[t5] KS/COMMON
-# i  <1> leavesub[1 ref] K/REFC,1
+# d  <0> pushmark s
+# e  <$> gv(*hashes) s
+# f  <1> rv2av[t1] lKRM*/1
+# g  <2> aassign[t5] KS/COMMON
+# h  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
