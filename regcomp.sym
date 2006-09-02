@@ -122,11 +122,13 @@ OPTIMIZED	NOTHING,off	Placeholder for dump.
 
 # Trie Related (behave the same as A|LIST|OF|WORDS would)
 TRIE		TRIE,   trie 1	Match many EXACT(FL?)? at once. flags==type
-TRIEC		TRIE,   trie 1	Trie + charclass. (unused at present)
+TRIEC		TRIE,   trie charclass	Same as TRIE, but with embedded charclass data
 
+# NEW STUFF HERE
 # Special opcode with the property that no opcode in a compiled program
 # will ever be of this type. Thus it can be used as a flag value that
 # no other opcode has been seen. END is used similarly, in that an END
 # node cant be optimized. So END implies "unoptimizable" and PSEUDO mean
 # "not seen anything to optimize yet".
 PSEUDO		PSEUDO,off	Pseudo opcode for internal use.
+# NOTHING BELOW HERE

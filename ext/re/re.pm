@@ -235,10 +235,11 @@ my %flags = (
     OFFSETS_DEBUG   => 0x020000,
     STATE           => 0x040000,
 );
-$flags{ALL} = $flags{COMPILE} | $flags{EXECUTE} | $flags{STATE};
+$flags{ALL} = -1;
 $flags{All} = $flags{all} = $flags{DUMP} | $flags{EXECUTE};
-$flags{More} = $flags{MORE} = $flags{ALL} | $flags{TRIE_MORE};
+$flags{More} = $flags{MORE} = $flags{All} | $flags{TRIE_MORE} | $flags{STATE};
 $flags{State} = $flags{DUMP} | $flags{EXECUTE} | $flags{STATE};
+$flags{TRIE} = $flags{DUMP} | $flags{EXECUTE} | $flags{TRIE_COMPILE};
 
 my $installed = 0;
 
@@ -259,7 +260,12 @@ sub bits {
     foreach my $idx (0..$#_){
         my $s=$_[$idx];
         if ($s eq 'Debug' or $s eq 'Debugcolor') {
-            setcolor() if $s eq 'Debugcolor';
+            if ($s eq 'Debugcolor') {
+                setcolor();     
+            } else {
+               # $ENV{PERL_RE_COLORS}||=qq'\t\t> <\t> <\t\t'
+            }
+            
             ${^RE_DEBUG_FLAGS} = 0 unless defined ${^RE_DEBUG_FLAGS};
             for my $idx ($idx+1..$#_) {
                 if ($flags{$_[$idx]}) {

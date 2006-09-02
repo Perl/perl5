@@ -1331,13 +1331,15 @@ Es	|I32	|regpposixcc	|NN struct RExC_state_t* state|I32 value
 Es	|void	|checkposixcc	|NN struct RExC_state_t* state
 Es	|I32	|make_trie	|NN struct RExC_state_t* state|NN regnode *startbranch \
 				|NN regnode *first|NN regnode *last|NN regnode *tail \
-				|U32 flags|U32 depth
+				|U32 word_count|U32 flags|U32 depth
 Es	|void	|make_trie_failtable	|NN struct RExC_state_t* state \
                                 |NN regnode *source|NN regnode *node|U32 depth
 #  ifdef DEBUGGING
 Es	|const regnode*|dumpuntil|NN const regexp *r|NN const regnode *start \
 				|NN const regnode *node \
-				|NULLOK const regnode *last|NN SV* sv|I32 l
+				|NULLOK const regnode *last \
+				|NULLOK const regnode *plast \
+				|NN SV* sv|I32 indent|U32 depth
 Es	|void	|put_byte	|NN SV* sv|int c
 Es	|void	|dump_trie	|NN const struct _reg_trie_data *trie|U32 depth
 Es	|void	|dump_trie_interim_list|NN const struct _reg_trie_data *trie|U32 next_alloc|U32 depth
@@ -1360,7 +1362,8 @@ ERs	|char*	|find_byclass	|NN regexp * prog|NN const regnode *c|NN char *s|NN con
 Es	|void	|to_utf8_substr	|NN regexp * prog
 Es	|void	|to_byte_substr	|NN regexp * prog
 #  ifdef DEBUGGING
-Es	|void	|dump_exec_pos	|NN const char *locinput|NN const regnode *scan|const bool do_utf8
+Es	|void	|dump_exec_pos	|NN const char *locinput|NN const regnode *scan|NN const char *loc_regeol\
+				|NN const char *loc_bostr|NN const char *loc_reg_starttry|const bool do_utf8
 Es	|void	|debug_start_match|NN const regexp *prog|const bool do_utf8|NN const char *start|NN const char *end|NN const char *blurb
 #  endif
 #endif

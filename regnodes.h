@@ -67,7 +67,7 @@
 #define	RENUM	60	/* 0x3c Group with independently numbered parens. */
 #define	OPTIMIZED	61	/* 0x3d Placeholder for dump. */
 #define	TRIE	62	/* 0x3e Match many EXACT(FL?)? at once. flags==type */
-#define	TRIEC	63	/* 0x3f Trie + charclass. (unused at present) */
+#define	TRIEC	63	/* 0x3f Same as TRIE, but with embedded charclass data */
 #define	PSEUDO	64	/* 0x40 Pseudo opcode for internal use. */
 #define REGNODE_MAX 64
 
@@ -209,7 +209,7 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_1),		/* RENUM */
 	0,		/* OPTIMIZED */
 	EXTRA_SIZE(struct regnode_1),		/* TRIE */
-	EXTRA_SIZE(struct regnode_1),		/* TRIEC */
+	EXTRA_SIZE(struct regnode_charclass),		/* TRIEC */
 	0,		/* PSEUDO */
 };
 

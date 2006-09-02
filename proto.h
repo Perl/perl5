@@ -3638,7 +3638,7 @@ STATIC I32	S_regpposixcc(pTHX_ struct RExC_state_t* state, I32 value)
 STATIC void	S_checkposixcc(pTHX_ struct RExC_state_t* state)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC I32	S_make_trie(pTHX_ struct RExC_state_t* state, regnode *startbranch, regnode *first, regnode *last, regnode *tail, U32 flags, U32 depth)
+STATIC I32	S_make_trie(pTHX_ struct RExC_state_t* state, regnode *startbranch, regnode *first, regnode *last, regnode *tail, U32 word_count, U32 flags, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
@@ -3651,11 +3651,11 @@ STATIC void	S_make_trie_failtable(pTHX_ struct RExC_state_t* state, regnode *sou
 			__attribute__nonnull__(pTHX_3);
 
 #  ifdef DEBUGGING
-STATIC const regnode*	S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node, const regnode *last, SV* sv, I32 l)
+STATIC const regnode*	S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node, const regnode *last, const regnode *plast, SV* sv, I32 indent, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_5);
+			__attribute__nonnull__(pTHX_6);
 
 STATIC void	S_put_byte(pTHX_ SV* sv, int c)
 			__attribute__nonnull__(pTHX_1);
@@ -3726,9 +3726,12 @@ STATIC void	S_to_byte_substr(pTHX_ regexp * prog)
 			__attribute__nonnull__(pTHX_1);
 
 #  ifdef DEBUGGING
-STATIC void	S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const bool do_utf8)
+STATIC void	S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const char *loc_regeol, const char *loc_bostr, const char *loc_reg_starttry, const bool do_utf8)
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_4)
+			__attribute__nonnull__(pTHX_5);
 
 STATIC void	S_debug_start_match(pTHX_ const regexp *prog, const bool do_utf8, const char *start, const char *end, const char *blurb)
 			__attribute__nonnull__(pTHX_1)

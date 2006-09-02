@@ -103,6 +103,7 @@ struct regnode_2 {
 #define ANYOF_BITMAP_SIZE	32	/* 256 b/(8 b/B) */
 #define ANYOF_CLASSBITMAP_SIZE	 4	/* up to 32 (8*4) named classes */
 
+/* also used by trie */
 struct regnode_charclass {
     U8	flags;
     U8  type;
@@ -152,6 +153,7 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 #define ARG(p) ARG_VALUE(ARG_LOC(p))
 #define ARG1(p) ARG_VALUE(ARG1_LOC(p))
 #define ARG2(p) ARG_VALUE(ARG2_LOC(p))
+
 #define ARG_SET(p, val) ARG__SET(ARG_LOC(p), (val))
 #define ARG1_SET(p, val) ARG__SET(ARG1_LOC(p), (val))
 #define ARG2_SET(p, val) ARG__SET(ARG2_LOC(p), (val))
@@ -187,6 +189,8 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 #define	ARG_LOC(p)	(((struct regnode_1 *)p)->arg1)
 #define	ARG1_LOC(p)	(((struct regnode_2 *)p)->arg1)
 #define	ARG2_LOC(p)	(((struct regnode_2 *)p)->arg2)
+
+
 #define NODE_STEP_REGNODE	1	/* sizeof(regnode)/sizeof(regnode) */
 #define EXTRA_STEP_2ARGS	EXTRA_SIZE(struct regnode_2)
 
@@ -288,7 +292,7 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 #define ANYOF_BITMAP_ZERO(ret)	Zero(((struct regnode_charclass*)(ret))->bitmap, ANYOF_BITMAP_SIZE, char)
 
 #define ANYOF_BITMAP(p)		(((struct regnode_charclass*)(p))->bitmap)
-#define ANYOF_BITMAP_BYTE(p, c)	(ANYOF_BITMAP(p)[((c) >> 3) & 31])
+#define ANYOF_BITMAP_BYTE(p, c)	(ANYOF_BITMAP(p)[(((U8)(c)) >> 3) & 31])
 #define ANYOF_BITMAP_SET(p, c)	(ANYOF_BITMAP_BYTE(p, c) |=  ANYOF_BIT(c))
 #define ANYOF_BITMAP_CLEAR(p,c)	(ANYOF_BITMAP_BYTE(p, c) &= ~ANYOF_BIT(c))
 #define ANYOF_BITMAP_TEST(p, c)	(ANYOF_BITMAP_BYTE(p, c) &   ANYOF_BIT(c))
@@ -304,6 +308,7 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 #define ANYOF_SKIP		((ANYOF_SIZE - 1)/sizeof(regnode))
 #define ANYOF_CLASS_SKIP	((ANYOF_CLASS_SIZE - 1)/sizeof(regnode))
 #define ANYOF_CLASS_ADD_SKIP	(ANYOF_CLASS_SKIP - ANYOF_SKIP)
+
 
 /*
  * Utility definitions.
@@ -454,24 +459,28 @@ typedef struct _reg_trie_trans    reg_trie_trans;
 /* anything in here that needs to be freed later
    should be dealt with in pregfree */
 struct _reg_trie_data {
-    U16              uniquecharcount;
-    U32              lasttrans;
-    U16              *charmap;
-    HV               *widecharmap;
-    reg_trie_state   *states;
-    reg_trie_trans   *trans;
-    char             *bitmap;
-    U32              refcount;
-    U32              startstate;
-    STRLEN           minlen;
-    STRLEN           maxlen;
-    U32              *wordlen;
-    U32              laststate;   /* Build only */
+    U16             uniquecharcount; /* unique chars in trie (width of trans table) */
+    U32             lasttrans;       /* last valid transition element */
+    U16             *charmap;        /* byte to charid lookup array */
+    HV              *widecharmap;    /* code points > 255 to charid */
+    reg_trie_state  *states;         /* state data */
+    reg_trie_trans  *trans;          /* array of transition elements */
+    char            *bitmap;         /* stclass bitmap */
+    U32             refcount;        /* number of times this trie is referenced */
+    U32             startstate;      /* initial state - used for common prefix optimisation */
+    STRLEN          minlen;          /* minimum length of words in trie - build/opt only? */
+    STRLEN          maxlen;          /* maximum length of words in trie - build/opt only? */
+    U32             *wordlen;        /* array of lengths of words */
+    U16 	    *jump;           /* optional 1 indexed array of offsets before tail 
+                                        for the node following a given word. */
+    U16	            *nextword;       /* optional 1 indexed array to support linked list
+                                        of duplicate wordnums */
+    U32             laststate;       /* Build only */
+    U32             wordcount;       /* Build only */
 #ifdef DEBUGGING
-    U16              wordcount;   /* Build only */
-    STRLEN           charcount;   /* Build only */
-    AV               *words;
-    AV               *revcharmap;
+    STRLEN          charcount;       /* Build only */
+    AV              *words;          /* Array of words contained in trie, for dumping */
+    AV              *revcharmap;     /* Map of each charid back to its character representation */
 #endif
 };
 typedef struct _reg_trie_data reg_trie_data;
@@ -489,11 +498,13 @@ typedef struct _reg_ac_data reg_ac_data;
    three different sets... */
 
 #define TRIE_BITMAP(p)		(((reg_trie_data *)(p))->bitmap)
-#define TRIE_BITMAP_BYTE(p, c)	(TRIE_BITMAP(p)[(((U8)c) >> 3) & 31])
+#define TRIE_BITMAP_BYTE(p, c)	(TRIE_BITMAP(p)[(((U8)(c)) >> 3) & 31])
 #define TRIE_BITMAP_SET(p, c)	(TRIE_BITMAP_BYTE(p, c) |=  ANYOF_BIT((U8)c))
 #define TRIE_BITMAP_CLEAR(p,c)	(TRIE_BITMAP_BYTE(p, c) &= ~ANYOF_BIT((U8)c))
 #define TRIE_BITMAP_TEST(p, c)	(TRIE_BITMAP_BYTE(p, c) &   ANYOF_BIT((U8)c))
 
+#define BITMAP_BYTE(p, c)	(((U8*)p)[(((U8)(c)) >> 3) & 31])
+#define BITMAP_TEST(p, c)	(BITMAP_BYTE(p, c) &   ANYOF_BIT((U8)c))
 
 /* these defines assume uniquecharcount is the correct variable, and state may be evaluated twice */
 #define TRIE_NODENUM(state) (((state)-1)/(trie->uniquecharcount)+1)
@@ -501,15 +512,10 @@ typedef struct _reg_ac_data reg_ac_data;
 #define TRIE_NODEIDX(state) ((state) ? (((state)-1)*(trie->uniquecharcount)+1) : (state))
 
 #ifdef DEBUGGING
-#define TRIE_WORDCOUNT(trie) ((trie)->wordcount)
 #define TRIE_CHARCOUNT(trie) ((trie)->charcount)
-#define TRIE_LASTSTATE(trie) ((trie)->laststate)
 #define TRIE_REVCHARMAP(trie) ((trie)->revcharmap)
 #else
-#define TRIE_WORDCOUNT(trie) (trie_wordcount)
 #define TRIE_CHARCOUNT(trie) (trie_charcount)
-/*#define TRIE_LASTSTATE(trie) (trie_laststate)*/
-#define TRIE_LASTSTATE(trie) ((trie)->laststate)
 #define TRIE_REVCHARMAP(trie) (trie_revcharmap)
 #endif
 

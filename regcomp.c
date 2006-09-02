@@ -171,6 +171,7 @@ typedef struct RExC_state_t {
 /* whether trie related optimizations are enabled */
 #if PERL_ENABLE_EXTENDED_TRIE_OPTIMISATION
 #define TRIE_STUDY_OPT
+#define FULL_TRIE_STUDY
 #define TRIE_STCLASS
 #endif
 /* Length of a variant. */
@@ -232,7 +233,8 @@ static const scan_data_t zero_scan_data =
 #define SCF_DO_STCLASS		(SCF_DO_STCLASS_AND|SCF_DO_STCLASS_OR)
 #define SCF_WHILEM_VISITED_POS	0x2000
 
-#define SCF_EXACT_TRIE          0x4000 /* should re study once we are done? */
+#define SCF_TRIE_RESTUDY        0x4000 /* Do restudy? */
+
 
 #define UTF (RExC_utf8 != 0)
 #define LOC ((RExC_flags & PMf_LOCALE) != 0)
@@ -444,7 +446,7 @@ static const scan_data_t zero_scan_data =
 static void clear_re(pTHX_ void *r);
 
 /* Mark that we cannot extend a found fixed substring at this point.
-   Updata the longest found anchored substring and the longest found
+   Update the longest found anchored substring and the longest found
    floating substrings if needed. */
 
 STATIC void
@@ -633,199 +635,11 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
     }
 }
 
-/*
-
- make_trie(startbranch,first,last,tail,flags,depth)
-  startbranch: the first branch in the whole branch sequence
-  first      : start branch of sequence of branch-exact nodes.
-	       May be the same as startbranch
-  last       : Thing following the last branch.
-	       May be the same as tail.
-  tail       : item following the branch sequence
-  flags      : currently the OP() type we will be building one of /EXACT(|F|Fl)/
-  depth      : indent depth
-
-Inplace optimizes a sequence of 2 or more Branch-Exact nodes into a TRIE node.
-
-A trie is an N'ary tree where the branches are determined by digital
-decomposition of the key. IE, at the root node you look up the 1st character and
-follow that branch repeat until you find the end of the branches. Nodes can be
-marked as "accepting" meaning they represent a complete word. Eg:
-
-  /he|she|his|hers/
-
-would convert into the following structure. Numbers represent states, letters
-following numbers represent valid transitions on the letter from that state, if
-the number is in square brackets it represents an accepting state, otherwise it
-will be in parenthesis.
-
-      +-h->+-e->[3]-+-r->(8)-+-s->[9]
-      |    |
-      |   (2)
-      |    |
-     (1)   +-i->(6)-+-s->[7]
-      |
-      +-s->(3)-+-h->(4)-+-e->[5]
-
-      Accept Word Mapping: 3=>1 (he),5=>2 (she), 7=>3 (his), 9=>4 (hers)
-
-This shows that when matching against the string 'hers' we will begin at state 1
-read 'h' and move to state 2, read 'e' and move to state 3 which is accepting,
-then read 'r' and go to state 8 followed by 's' which takes us to state 9 which
-is also accepting. Thus we know that we can match both 'he' and 'hers' with a
-single traverse. We store a mapping from accepting to state to which word was
-matched, and then when we have multiple possibilities we try to complete the
-rest of the regex in the order in which they occured in the alternation.
-
-The only prior NFA like behaviour that would be changed by the TRIE support is
-the silent ignoring of duplicate alternations which are of the form:
-
- / (DUPE|DUPE) X? (?{ ... }) Y /x
-
-Thus EVAL blocks follwing a trie may be called a different number of times with
-and without the optimisation. With the optimisations dupes will be silently
-ignored. This inconsistant behaviour of EVAL type nodes is well established as
-the following demonstrates:
-
- 'words'=~/(word|word|word)(?{ print $1 })[xyz]/
-
-which prints out 'word' three times, but
-
- 'words'=~/(word|word|word)(?{ print $1 })S/
-
-which doesnt print it out at all. This is due to other optimisations kicking in.
-
-Example of what happens on a structural level:
-
-The regexp /(ac|ad|ab)+/ will produce the folowing debug output:
-
-   1: CURLYM[1] {1,32767}(18)
-   5:   BRANCH(8)
-   6:     EXACT <ac>(16)
-   8:   BRANCH(11)
-   9:     EXACT <ad>(16)
-  11:   BRANCH(14)
-  12:     EXACT <ab>(16)
-  16:   SUCCEED(0)
-  17:   NOTHING(18)
-  18: END(0)
-
-This would be optimizable with startbranch=5, first=5, last=16, tail=16
-and should turn into:
-
-   1: CURLYM[1] {1,32767}(18)
-   5:   TRIE(16)
-	[Words:3 Chars Stored:6 Unique Chars:4 States:5 NCP:1]
-	  <ac>
-	  <ad>
-	  <ab>
-  16:   SUCCEED(0)
-  17:   NOTHING(18)
-  18: END(0)
-
-Cases where tail != last would be like /(?foo|bar)baz/:
-
-   1: BRANCH(4)
-   2:   EXACT <foo>(8)
-   4: BRANCH(7)
-   5:   EXACT <bar>(8)
-   7: TAIL(8)
-   8: EXACT <baz>(10)
-  10: END(0)
-
-which would be optimizable with startbranch=1, first=1, last=7, tail=8
-and would end up looking like:
-
-    1: TRIE(8)
-      [Words:2 Chars Stored:6 Unique Chars:5 States:7 NCP:1]
-	<foo>
-	<bar>
-   7: TAIL(8)
-   8: EXACT <baz>(10)
-  10: END(0)
-
-    d = uvuni_to_utf8_flags(d, uv, 0);
-
-is the recommended Unicode-aware way of saying
-
-    *(d++) = uv;
-*/
-
-#define TRIE_STORE_REVCHAR                                                    \
-    STMT_START {                                                           \
-	SV *tmp = Perl_newSVpvf_nocontext( "%c", (int)uvc );               \
-	if (UTF) SvUTF8_on(tmp);                                           \
-	av_push( TRIE_REVCHARMAP(trie), tmp );                             \
-    } STMT_END
-
-#define TRIE_READ_CHAR STMT_START {                                           \
-    wordlen++;                                                                \
-    if ( UTF ) {                                                              \
-	if ( folder ) {                                                       \
-	    if ( foldlen > 0 ) {                                              \
-	       uvc = utf8n_to_uvuni( scan, UTF8_MAXLEN, &len, uniflags );     \
-	       foldlen -= len;                                                \
-	       scan += len;                                                   \
-	       len = 0;                                                       \
-	    } else {                                                          \
-		uvc = utf8n_to_uvuni( (const U8*)uc, UTF8_MAXLEN, &len, uniflags);\
-		uvc = to_uni_fold( uvc, foldbuf, &foldlen );                  \
-		foldlen -= UNISKIP( uvc );                                    \
-		scan = foldbuf + UNISKIP( uvc );                              \
-	    }                                                                 \
-	} else {                                                              \
-	    uvc = utf8n_to_uvuni( (const U8*)uc, UTF8_MAXLEN, &len, uniflags);\
-	}                                                                     \
-    } else {                                                                  \
-	uvc = (U32)*uc;                                                       \
-	len = 1;                                                              \
-    }                                                                         \
-} STMT_END
-
-
 #define TRIE_LIST_ITEM(state,idx) (trie->states[state].trans.list)[ idx ]
 #define TRIE_LIST_CUR(state)  ( TRIE_LIST_ITEM( state, 0 ).forid )
 #define TRIE_LIST_LEN(state) ( TRIE_LIST_ITEM( state, 0 ).newstate )
 #define TRIE_LIST_USED(idx)  ( trie->states[state].trans.list ? (TRIE_LIST_CUR( idx ) - 1) : 0 )
 
-#define TRIE_LIST_PUSH(state,fid,ns) STMT_START {               \
-    if ( TRIE_LIST_CUR( state ) >=TRIE_LIST_LEN( state ) ) {    \
-	TRIE_LIST_LEN( state ) *= 2;                            \
-	Renew( trie->states[ state ].trans.list,                \
-	       TRIE_LIST_LEN( state ), reg_trie_trans_le );     \
-    }                                                           \
-    TRIE_LIST_ITEM( state, TRIE_LIST_CUR( state ) ).forid = fid;     \
-    TRIE_LIST_ITEM( state, TRIE_LIST_CUR( state ) ).newstate = ns;   \
-    TRIE_LIST_CUR( state )++;                                   \
-} STMT_END
-
-#define TRIE_LIST_NEW(state) STMT_START {                       \
-    Newxz( trie->states[ state ].trans.list,               \
-	4, reg_trie_trans_le );                                 \
-     TRIE_LIST_CUR( state ) = 1;                                \
-     TRIE_LIST_LEN( state ) = 4;                                \
-} STMT_END
-
-#define TRIE_HANDLE_WORD(state) STMT_START {				\
-	    if ( !trie->states[ state ].wordnum ) {			\
-		/* we haven't inserted this word into the structure yet. */ \
-		if (trie->wordlen)					\
-		    trie->wordlen[ curword ] = wordlen;			\
-		trie->states[ state ].wordnum = ++curword;              \
-		DEBUG_r({                                               \
-		    /* store the word for dumping */                    \
-		    SV* tmp;                                            \
-		    if (OP(noper) != NOTHING)				\
-		        tmp = newSVpvn(STRING(noper), STR_LEN(noper));	\
-		    else                                                \
-		        tmp = newSVpvn( "", 0 );			\
-		    if ( UTF ) SvUTF8_on( tmp );                        \
-		    av_push( trie->words, tmp );                        \
-		});                                                     \
-	    } else {                                                    \
-		NOOP;   /* It's a dupe. So ignore it. */                \
-	    }                                                           \
-} STMT_END
 
 #ifdef DEBUGGING
 /*
@@ -882,7 +696,7 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie,U32 depth)
         PerlIO_printf( Perl_debug_log, "%.*s", colwidth, "--------");
     PerlIO_printf( Perl_debug_log, "\n");
 
-    for( state = 1 ; state < TRIE_LASTSTATE(trie) ; state++ ) {
+    for( state = 1 ; state < trie->laststate ; state++ ) {
 	const U32 base = trie->states[ state ].trans.base;
 
         PerlIO_printf( Perl_debug_log, "%*s#%4"UVXf"|", (int)depth * 2 + 2,"", (UV)state);
@@ -1043,6 +857,220 @@ S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie, U32 next_allo
 
 #endif
 
+/* make_trie(startbranch,first,last,tail,word_count,flags,depth)
+  startbranch: the first branch in the whole branch sequence
+  first      : start branch of sequence of branch-exact nodes.
+	       May be the same as startbranch
+  last       : Thing following the last branch.
+	       May be the same as tail.
+  tail       : item following the branch sequence
+  count      : words in the sequence
+  flags      : currently the OP() type we will be building one of /EXACT(|F|Fl)/
+  depth      : indent depth
+
+Inplace optimizes a sequence of 2 or more Branch-Exact nodes into a TRIE node.
+
+A trie is an N'ary tree where the branches are determined by digital
+decomposition of the key. IE, at the root node you look up the 1st character and
+follow that branch repeat until you find the end of the branches. Nodes can be
+marked as "accepting" meaning they represent a complete word. Eg:
+
+  /he|she|his|hers/
+
+would convert into the following structure. Numbers represent states, letters
+following numbers represent valid transitions on the letter from that state, if
+the number is in square brackets it represents an accepting state, otherwise it
+will be in parenthesis.
+
+      +-h->+-e->[3]-+-r->(8)-+-s->[9]
+      |    |
+      |   (2)
+      |    |
+     (1)   +-i->(6)-+-s->[7]
+      |
+      +-s->(3)-+-h->(4)-+-e->[5]
+
+      Accept Word Mapping: 3=>1 (he),5=>2 (she), 7=>3 (his), 9=>4 (hers)
+
+This shows that when matching against the string 'hers' we will begin at state 1
+read 'h' and move to state 2, read 'e' and move to state 3 which is accepting,
+then read 'r' and go to state 8 followed by 's' which takes us to state 9 which
+is also accepting. Thus we know that we can match both 'he' and 'hers' with a
+single traverse. We store a mapping from accepting to state to which word was
+matched, and then when we have multiple possibilities we try to complete the
+rest of the regex in the order in which they occured in the alternation.
+
+The only prior NFA like behaviour that would be changed by the TRIE support is
+the silent ignoring of duplicate alternations which are of the form:
+
+ / (DUPE|DUPE) X? (?{ ... }) Y /x
+
+Thus EVAL blocks follwing a trie may be called a different number of times with
+and without the optimisation. With the optimisations dupes will be silently
+ignored. This inconsistant behaviour of EVAL type nodes is well established as
+the following demonstrates:
+
+ 'words'=~/(word|word|word)(?{ print $1 })[xyz]/
+
+which prints out 'word' three times, but
+
+ 'words'=~/(word|word|word)(?{ print $1 })S/
+
+which doesnt print it out at all. This is due to other optimisations kicking in.
+
+Example of what happens on a structural level:
+
+The regexp /(ac|ad|ab)+/ will produce the folowing debug output:
+
+   1: CURLYM[1] {1,32767}(18)
+   5:   BRANCH(8)
+   6:     EXACT <ac>(16)
+   8:   BRANCH(11)
+   9:     EXACT <ad>(16)
+  11:   BRANCH(14)
+  12:     EXACT <ab>(16)
+  16:   SUCCEED(0)
+  17:   NOTHING(18)
+  18: END(0)
+
+This would be optimizable with startbranch=5, first=5, last=16, tail=16
+and should turn into:
+
+   1: CURLYM[1] {1,32767}(18)
+   5:   TRIE(16)
+	[Words:3 Chars Stored:6 Unique Chars:4 States:5 NCP:1]
+	  <ac>
+	  <ad>
+	  <ab>
+  16:   SUCCEED(0)
+  17:   NOTHING(18)
+  18: END(0)
+
+Cases where tail != last would be like /(?foo|bar)baz/:
+
+   1: BRANCH(4)
+   2:   EXACT <foo>(8)
+   4: BRANCH(7)
+   5:   EXACT <bar>(8)
+   7: TAIL(8)
+   8: EXACT <baz>(10)
+  10: END(0)
+
+which would be optimizable with startbranch=1, first=1, last=7, tail=8
+and would end up looking like:
+
+    1: TRIE(8)
+      [Words:2 Chars Stored:6 Unique Chars:5 States:7 NCP:1]
+	<foo>
+	<bar>
+   7: TAIL(8)
+   8: EXACT <baz>(10)
+  10: END(0)
+
+    d = uvuni_to_utf8_flags(d, uv, 0);
+
+is the recommended Unicode-aware way of saying
+
+    *(d++) = uv;
+*/
+
+#define TRIE_STORE_REVCHAR                                                    \
+    STMT_START {                                                           \
+	SV *tmp = Perl_newSVpvf_nocontext( "%c", (int)uvc );               \
+	if (UTF) SvUTF8_on(tmp);                                           \
+	av_push( TRIE_REVCHARMAP(trie), tmp );                             \
+    } STMT_END
+
+#define TRIE_READ_CHAR STMT_START {                                           \
+    wordlen++;                                                                \
+    if ( UTF ) {                                                              \
+	if ( folder ) {                                                       \
+	    if ( foldlen > 0 ) {                                              \
+	       uvc = utf8n_to_uvuni( scan, UTF8_MAXLEN, &len, uniflags );     \
+	       foldlen -= len;                                                \
+	       scan += len;                                                   \
+	       len = 0;                                                       \
+	    } else {                                                          \
+		uvc = utf8n_to_uvuni( (const U8*)uc, UTF8_MAXLEN, &len, uniflags);\
+		uvc = to_uni_fold( uvc, foldbuf, &foldlen );                  \
+		foldlen -= UNISKIP( uvc );                                    \
+		scan = foldbuf + UNISKIP( uvc );                              \
+	    }                                                                 \
+	} else {                                                              \
+	    uvc = utf8n_to_uvuni( (const U8*)uc, UTF8_MAXLEN, &len, uniflags);\
+	}                                                                     \
+    } else {                                                                  \
+	uvc = (U32)*uc;                                                       \
+	len = 1;                                                              \
+    }                                                                         \
+} STMT_END
+
+
+
+#define TRIE_LIST_PUSH(state,fid,ns) STMT_START {               \
+    if ( TRIE_LIST_CUR( state ) >=TRIE_LIST_LEN( state ) ) {    \
+	TRIE_LIST_LEN( state ) *= 2;                            \
+	Renew( trie->states[ state ].trans.list,                \
+	       TRIE_LIST_LEN( state ), reg_trie_trans_le );     \
+    }                                                           \
+    TRIE_LIST_ITEM( state, TRIE_LIST_CUR( state ) ).forid = fid;     \
+    TRIE_LIST_ITEM( state, TRIE_LIST_CUR( state ) ).newstate = ns;   \
+    TRIE_LIST_CUR( state )++;                                   \
+} STMT_END
+
+#define TRIE_LIST_NEW(state) STMT_START {                       \
+    Newxz( trie->states[ state ].trans.list,               \
+	4, reg_trie_trans_le );                                 \
+     TRIE_LIST_CUR( state ) = 1;                                \
+     TRIE_LIST_LEN( state ) = 4;                                \
+} STMT_END
+
+#define TRIE_HANDLE_WORD(state) STMT_START {                    \
+    U16 dupe= trie->states[ state ].wordnum;                    \
+    regnode * const noper_next = regnext( noper );              \
+                                                                \
+    if (trie->wordlen)                                          \
+        trie->wordlen[ curword ] = wordlen;                     \
+    DEBUG_r({                                                   \
+        /* store the word for dumping */                        \
+        SV* tmp;                                                \
+        if (OP(noper) != NOTHING)                               \
+            tmp = newSVpvn(STRING(noper), STR_LEN(noper));      \
+        else                                                    \
+            tmp = newSVpvn( "", 0 );                            \
+        if ( UTF ) SvUTF8_on( tmp );                            \
+        av_push( trie->words, tmp );                            \
+    });                                                         \
+                                                                \
+    curword++;                                                  \
+                                                                \
+    if ( noper_next < tail ) {                                  \
+        if (!trie->jump)                                        \
+            Newxz( trie->jump, word_count + 1, U16);            \
+        trie->jump[curword] = (U16)(tail - noper_next);         \
+        if (!jumper)                                            \
+            jumper = noper_next;                                \
+        if (!nextbranch)                                        \
+            nextbranch= regnext(cur);                           \
+    }                                                           \
+                                                                \
+    if ( dupe ) {                                               \
+        /* So it's a dupe. This means we need to maintain a   */\
+        /* linked-list from the first to the next.            */\
+        /* we only allocate the nextword buffer when there    */\
+        /* a dupe, so first time we have to do the allocation */\
+        if (!trie->nextword)                                    \
+            Newxz( trie->nextword, word_count + 1, U16);        \
+        while ( trie->nextword[dupe] )                          \
+            dupe= trie->nextword[dupe];                         \
+        trie->nextword[dupe]= curword;                          \
+    } else {                                                    \
+        /* we haven't inserted this word yet.                */ \
+        trie->states[ state ].wordnum = curword;                \
+    }                                                           \
+} STMT_END
+
+
 #define TRIE_TRANS_STATE(state,base,ucharcount,charid,special)		\
      ( ( base + charid >=  ucharcount					\
          && base + charid < ubound					\
@@ -1052,105 +1080,12 @@ S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie, U32 next_allo
            : ( state==1 ? special : 0 )					\
       )
 
-STATIC void
-S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode *stclass, U32 depth)
-{
-/* The Trie is constructed and compressed now so we can build a fail array now if its needed
-
-   This is apparently the Aho-Corasick algorithm. Its from exercise 3.31 and 3.32 in the
-   "Red Dragon" -- Compilers, principles, techniques, and tools. Aho, Sethi, Ullman 1985/88
-   ISBN 0-201-10088-6
-
-   We find the fail state for each state in the trie, this state is the longest proper
-   suffix of the current states 'word' that is also a proper prefix of another word in our
-   trie. State 1 represents the word '' and is the thus the default fail state. This allows
-   the DFA not to have to restart after its tried and failed a word at a given point, it
-   simply continues as though it had been matching the other word in the first place.
-   Consider
-      'abcdgu'=~/abcdefg|cdgu/
-   When we get to 'd' we are still matching the first word, we would encounter 'g' which would
-   fail, which would bring use to the state representing 'd' in the second word where we would
-   try 'g' and succeed, prodceding to match 'cdgu'.
- */
- /* add a fail transition */
-    reg_trie_data *trie=(reg_trie_data *)RExC_rx->data->data[ARG(source)];
-    U32 *q;
-    const U32 ucharcount = trie->uniquecharcount;
-    const U32 numstates = trie->laststate;
-    const U32 ubound = trie->lasttrans + ucharcount;
-    U32 q_read = 0;
-    U32 q_write = 0;
-    U32 charid;
-    U32 base = trie->states[ 1 ].trans.base;
-    U32 *fail;
-    reg_ac_data *aho;
-    const U32 data_slot = add_data( pRExC_state, 1, "T" );
-    GET_RE_DEBUG_FLAGS_DECL;
-#ifndef DEBUGGING
-    PERL_UNUSED_ARG(depth);
-#endif    
-
-
-    ARG_SET( stclass, data_slot );
-    Newxz( aho, 1, reg_ac_data );
-    RExC_rx->data->data[ data_slot ] = (void*)aho;
-    aho->trie=trie;
-    aho->states=(reg_trie_state *)savepvn((const char*)trie->states, 
-        (trie->laststate+1)*sizeof(reg_trie_state));
-    Newxz( q, numstates, U32);
-    Newxz( aho->fail, numstates, U32 );
-    aho->refcount = 1;
-    fail = aho->fail;
-    fail[ 0 ] = fail[ 1 ] = 1;
-
-    for ( charid = 0; charid < ucharcount ; charid++ ) {
-	const U32 newstate = TRIE_TRANS_STATE( 1, base, ucharcount, charid, 0 );
-	if ( newstate ) {
-            q[ q_write ] = newstate;
-            /* set to point at the root */
-            fail[ q[ q_write++ ] ]=1;
-        }
-    }
-    while ( q_read < q_write) {
-	const U32 cur = q[ q_read++ % numstates ];
-        base = trie->states[ cur ].trans.base;
-
-        for ( charid = 0 ; charid < ucharcount ; charid++ ) {
-	    const U32 ch_state = TRIE_TRANS_STATE( cur, base, ucharcount, charid, 1 );
-	    if (ch_state) {
-                U32 fail_state = cur;
-                U32 fail_base;
-                do {
-                    fail_state = fail[ fail_state ];
-                    fail_base = aho->states[ fail_state ].trans.base;
-                } while ( !TRIE_TRANS_STATE( fail_state, fail_base, ucharcount, charid, 1 ) );
-
-                fail_state = TRIE_TRANS_STATE( fail_state, fail_base, ucharcount, charid, 1 );
-                fail[ ch_state ] = fail_state;
-                if ( !aho->states[ ch_state ].wordnum && aho->states[ fail_state ].wordnum )
-                {
-                        aho->states[ ch_state ].wordnum =  aho->states[ fail_state ].wordnum;
-                }
-                q[ q_write++ % numstates] = ch_state;
-            }
-        }
-    }
-
-    DEBUG_TRIE_COMPILE_MORE_r({
-        PerlIO_printf(Perl_debug_log, "%*sFail: 1", (int)(depth * 2), "");
-        for( q_read=2; q_read<numstates; q_read++ ) {
-            PerlIO_printf(Perl_debug_log, ", %"UVuf, fail[q_read]);
-        }
-        PerlIO_printf(Perl_debug_log, "\n");
-    });
-    Safefree(q);
-    /*RExC_seen |= REG_SEEN_TRIEDFA;*/
-}
-
-
+#define MADE_TRIE       1
+#define MADE_JUMP_TRIE  2
+#define MADE_EXACT_TRIE 4
 
 STATIC I32
-S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *first, regnode *last, regnode *tail, U32 flags, U32 depth)
+S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *first, regnode *last, regnode *tail, U32 word_count, U32 flags, U32 depth)
 {
     dVAR;
     /* first pass, loop through and scan words */
@@ -1161,6 +1096,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     UV uvc = 0;
     U16 curword = 0;
     U32 next_alloc = 0;
+    regnode *jumper = NULL;
+    regnode *nextbranch = NULL;
     /* we just use folder as a flag in utf8 */
     const U8 * const folder = ( flags == EXACTF
                        ? PL_fold
@@ -1175,14 +1112,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 #ifndef DEBUGGING
     /* these are only used during construction but are useful during
      * debugging so we store them in the struct when debugging.
-     * Wordcount is actually superfluous in debugging as we have
-     * (AV*)trie->words to use for it, but that's not available when
-     * not debugging... We could make the macro use the AV during
-     * debugging though...
      */
-    U16 trie_wordcount=0;
     STRLEN trie_charcount=0;
-    /*U32 trie_laststate=0;*/
     AV *trie_revcharmap;
 #endif
     GET_RE_DEBUG_FLAGS_DECL;
@@ -1193,6 +1124,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     Newxz( trie, 1, reg_trie_data );
     trie->refcount = 1;
     trie->startstate = 1;
+    trie->wordcount = word_count;
     RExC_rx->data->data[ data_slot ] = (void*)trie;
     Newxz( trie->charmap, 256, U16 );
     if (!(UTF && folder))
@@ -1208,10 +1140,11 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     }
     DEBUG_OPTIMISE_r({
                 PerlIO_printf( Perl_debug_log,
-                  "%*smake_trie start==%d, first==%d, last==%d, tail==%d\n", 
+                  "%*smake_trie start==%d, first==%d, last==%d, tail==%d depth=%d\n",
                   (int)depth * 2 + 2, "", 
                   REG_NODE_NUM(startbranch),REG_NODE_NUM(first), 
-                  REG_NODE_NUM(last), REG_NODE_NUM(tail));
+                  REG_NODE_NUM(last), REG_NODE_NUM(tail),
+                  depth);
     });
     /*  -- First loop and Setup --
 
@@ -1246,7 +1179,6 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         U32 wordlen      = 0;         /* required init */
         STRLEN chars=0;
 
-        TRIE_WORDCOUNT(trie)++;
         if (OP(noper) == NOTHING) {
             trie->minlen= 0;
             continue;
@@ -1295,11 +1227,11 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     DEBUG_TRIE_COMPILE_r(
         PerlIO_printf( Perl_debug_log, "%*sTRIE(%s): W:%d C:%d Uq:%d Min:%d Max:%d\n",
                 (int)depth * 2 + 2,"",
-                ( trie->widecharmap ? "UTF8" : "NATIVE" ), TRIE_WORDCOUNT(trie),
+                ( trie->widecharmap ? "UTF8" : "NATIVE" ), word_count,
 		(int)TRIE_CHARCOUNT(trie), trie->uniquecharcount,
 		(int)trie->minlen, (int)trie->maxlen )
     );
-    Newxz( trie->wordlen, TRIE_WORDCOUNT(trie), U32 );
+    Newxz( trie->wordlen, word_count, U32 );
 
     /*
         We now know what we are dealing with in terms of unique chars and
@@ -1355,52 +1287,52 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 	    U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
 
             if (OP(noper) != NOTHING) {
-	    for ( ; uc < e ; uc += len ) {
+                for ( ; uc < e ; uc += len ) {
 
-		TRIE_READ_CHAR;
+                    TRIE_READ_CHAR;
 
-		if ( uvc < 256 ) {
-		    charid = trie->charmap[ uvc ];
-		} else {
-		    SV** const svpp = hv_fetch( trie->widecharmap, (char*)&uvc, sizeof( UV ), 0);
-		    if ( !svpp ) {
-			charid = 0;
+                    if ( uvc < 256 ) {
+                        charid = trie->charmap[ uvc ];
 		    } else {
-			charid=(U16)SvIV( *svpp );
+                        SV** const svpp = hv_fetch( trie->widecharmap, (char*)&uvc, sizeof( UV ), 0);
+                        if ( !svpp ) {
+                            charid = 0;
+                        } else {
+                            charid=(U16)SvIV( *svpp );
+                        }
 		    }
-		}
-		if ( charid ) {
+                    /* charid is now 0 if we dont know the char read, or nonzero if we do */
+                    if ( charid ) {
 
-		    U16 check;
-		    U32 newstate = 0;
+                        U16 check;
+                        U32 newstate = 0;
 
-		    charid--;
-		    if ( !trie->states[ state ].trans.list ) {
-			TRIE_LIST_NEW( state );
-		    }
-		    for ( check = 1; check <= TRIE_LIST_USED( state ); check++ ) {
-			if ( TRIE_LIST_ITEM( state, check ).forid == charid ) {
-			    newstate = TRIE_LIST_ITEM( state, check ).newstate;
-			    break;
+                        charid--;
+                        if ( !trie->states[ state ].trans.list ) {
+                            TRIE_LIST_NEW( state );
 			}
+                        for ( check = 1; check <= TRIE_LIST_USED( state ); check++ ) {
+                            if ( TRIE_LIST_ITEM( state, check ).forid == charid ) {
+                                newstate = TRIE_LIST_ITEM( state, check ).newstate;
+                                break;
+                            }
+                        }
+                        if ( ! newstate ) {
+                            newstate = next_alloc++;
+                            TRIE_LIST_PUSH( state, charid, newstate );
+                            transcount++;
+                        }
+                        state = newstate;
+                    } else {
+                        Perl_croak( aTHX_ "panic! In trie construction, no char mapping for %"IVdf, uvc );
 		    }
-		    if ( ! newstate ) {
-			newstate = next_alloc++;
-			TRIE_LIST_PUSH( state, charid, newstate );
-			transcount++;
-		    }
-		    state = newstate;
-		} else {
-		    Perl_croak( aTHX_ "panic! In trie construction, no char mapping for %"IVdf, uvc );
 		}
-		/* charid is now 0 if we dont know the char read, or nonzero if we do */
-	    }
 	    }
             TRIE_HANDLE_WORD(state);
 
         } /* end second pass */
 
-        TRIE_LASTSTATE(trie) = next_alloc;
+        trie->laststate = next_alloc;
         Renew( trie->states, next_alloc, reg_trie_state );
 
         /* and now dump it out before we compress it */
@@ -1540,29 +1472,29 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
 
             if ( OP(noper) != NOTHING ) {
-            for ( ; uc < e ; uc += len ) {
+                for ( ; uc < e ; uc += len ) {
 
-                TRIE_READ_CHAR;
+                    TRIE_READ_CHAR;
 
-                if ( uvc < 256 ) {
-                    charid = trie->charmap[ uvc ];
-                } else {
-		    SV* const * const svpp = hv_fetch( trie->widecharmap, (char*)&uvc, sizeof( UV ), 0);
-		    charid = svpp ? (U16)SvIV(*svpp) : 0;
-                }
-                if ( charid ) {
-                    charid--;
-                    if ( !trie->trans[ state + charid ].next ) {
-                        trie->trans[ state + charid ].next = next_alloc;
-                        trie->trans[ state ].check++;
-                        next_alloc += trie->uniquecharcount;
+                    if ( uvc < 256 ) {
+                        charid = trie->charmap[ uvc ];
+                    } else {
+                        SV* const * const svpp = hv_fetch( trie->widecharmap, (char*)&uvc, sizeof( UV ), 0);
+                        charid = svpp ? (U16)SvIV(*svpp) : 0;
                     }
-                    state = trie->trans[ state + charid ].next;
-                } else {
-                    Perl_croak( aTHX_ "panic! In trie construction, no char mapping for %"IVdf, uvc );
+                    if ( charid ) {
+                        charid--;
+                        if ( !trie->trans[ state + charid ].next ) {
+                            trie->trans[ state + charid ].next = next_alloc;
+                            trie->trans[ state ].check++;
+                            next_alloc += trie->uniquecharcount;
+                        }
+                        state = trie->trans[ state + charid ].next;
+                    } else {
+                        Perl_croak( aTHX_ "panic! In trie construction, no char mapping for %"IVdf, uvc );
+                    }
+                    /* charid is now 0 if we dont know the char read, or nonzero if we do */
                 }
-                /* charid is now 0 if we dont know the char read, or nonzero if we do */
-            }
             }
             accept_state = TRIE_NODENUM( state );
             TRIE_HANDLE_WORD(accept_state);
@@ -1600,6 +1532,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
            even earlier), but the .check field determines if the transition is
            valid.
 
+           XXX - wrong maybe?
            The following process inplace converts the table to the compressed
            table: We first do not compress the root node 1,and mark its all its
            .check pointers as 1 and set its .base pointer as 1 as well. This
@@ -1625,7 +1558,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
            This pointer is independent of the main pointer and scans forward
            looking for null transitions that are allocated to a state. When it
            finds one it writes the single transition into the "hole".  If the
-           pointer doesnt find one the single transition is appeneded as normal.
+           pointer doesnt find one the single transition is appended as normal.
 
            - Once compressed we can Renew/realloc the structures to release the
            excess space.
@@ -1638,7 +1571,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         const U32 laststate = TRIE_NODENUM( next_alloc );
 	U32 state, charid;
         U32 pos = 0, zp=0;
-        TRIE_LASTSTATE(trie) = laststate;
+        trie->laststate = laststate;
 
         for ( state = 1 ; state < laststate ; state++ ) {
             U8 flag = 0;
@@ -1700,7 +1633,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         regnode *convert;
         U8 nodetype =(U8)(flags & 0xFF);
         char *str=NULL;
+        
 #ifdef DEBUGGING
+        
         U32 mjd_offset;
         U32 mjd_nodelen;
 #endif
@@ -1733,20 +1668,20 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         DEBUG_OPTIMISE_r(
             PerlIO_printf(Perl_debug_log, "%*sMJD offset:%"UVuf" MJD length:%"UVuf"\n",
                 (int)depth * 2 + 2, "",
-                mjd_offset,mjd_nodelen)
+                (UV)mjd_offset, (UV)mjd_nodelen)
         );
 
         /* But first we check to see if there is a common prefix we can 
            split out as an EXACT and put in front of the TRIE node.  */
         trie->startstate= 1;
-        if ( trie->bitmap && !trie->widecharmap  ) {
+        if ( trie->bitmap && !trie->widecharmap && !trie->jump  ) {
             U32 state;
             DEBUG_OPTIMISE_r(
                 PerlIO_printf(Perl_debug_log, "%*sLaststate:%"UVuf"\n",
                     (int)depth * 2 + 2, "",
-                    TRIE_LASTSTATE(trie))
+                    (UV)trie->laststate)
 	    );
-            for ( state = 1 ; state < TRIE_LASTSTATE(trie)-1 ; state++ ) {
+            for ( state = 1 ; state < trie->laststate-1 ; state++ ) {
                 U32 ofs = 0;
                 I32 idx = -1;
                 U32 count = 0;
@@ -1770,7 +1705,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                                     PerlIO_printf(Perl_debug_log,
 					"%*sNew Start State=%"UVuf" Class: [",
                                         (int)depth * 2 + 2, "",
-                                        state));
+                                        (UV)state));
 				if (idx >= 0) {
 				    SV ** const tmp = av_fetch( TRIE_REVCHARMAP(trie), idx, 0);
 				    const U8 * const ch = (U8*)SvPV_nolen_const( *tmp );
@@ -1798,7 +1733,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                         PerlIO_printf( Perl_debug_log,
 			    "%*sPrefix State: %"UVuf" Idx:%"UVuf" Char='%s'\n",
                             (int)depth * 2 + 2, "",
-                            state, idx, ch)
+                            (UV)state, (UV)idx, ch)
                     );
                     if ( state==1 ) {
                         OP( convert ) = nodetype;
@@ -1838,9 +1773,25 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             }
         }
         if ( trie->maxlen ) {
-            OP( convert ) = TRIE;
 	    NEXT_OFF( convert ) = (U16)(tail - convert);
 	    ARG_SET( convert, data_slot );
+	    /* Store the offset to the first unabsorbed branch in 
+	       jump[0], which is otherwise unused by the jump logic. 
+	       We use this when dumping a trie and during optimisation. */
+	    if (trie->jump) 
+	        trie->jump[0] = (U16)(tail - nextbranch);
+            if (!jumper) 
+                jumper= last; 
+            /* XXXX */
+            if ( !trie->states[trie->startstate].wordnum && trie->bitmap && 
+                 ( (char *)jumper - (char *)convert) >= sizeof(struct regnode_charclass) ) 
+            {
+                OP( convert ) = TRIEC;
+                Copy(trie->bitmap, ((struct regnode_charclass *)convert)->bitmap, ANYOF_BITMAP_SIZE, char);
+                Safefree(trie->bitmap);
+                trie->bitmap= NULL;
+            } else 
+                OP( convert ) = TRIE;
 
             /* store the type in the flags */
             convert->flags = nodetype;
@@ -1848,18 +1799,18 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         }
         /* needed for dumping*/
         DEBUG_r({
-            regnode *optimize = convert + NODE_STEP_REGNODE + regarglen[ TRIE ];
+            regnode *optimize = convert 
+                              + NODE_STEP_REGNODE 
+                              + regarglen[ OP( convert ) ];
             regnode *opt = convert;
             while (++opt<optimize) {
                 Set_Node_Offset_Length(opt,0,0);
             }
-            /* We now need to mark all of the space originally used by the
-               branches as optimized away. This keeps the dumpuntil from
-               throwing a wobbly as it doesnt use regnext() to traverse the
-               opcodes.
-               We also "fix" the offsets 
+            /* 
+                Try to clean up some of the debris left after the 
+                optimisation.
              */
-            while( optimize < last ) {
+            while( optimize < jumper ) {
                 mjd_nodelen += Node_Length((optimize));
                 OP( optimize ) = OPTIMIZED;
                 Set_Node_Offset_Length(optimize,0,0);
@@ -1871,8 +1822,116 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 #ifndef DEBUGGING
     SvREFCNT_dec(TRIE_REVCHARMAP(trie));
 #endif
-    return 1;
+    return trie->jump 
+           ? MADE_JUMP_TRIE 
+           : trie->startstate>1 
+             ? MADE_EXACT_TRIE 
+             : MADE_TRIE;
 }
+
+STATIC void
+S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode *stclass, U32 depth)
+{
+/* The Trie is constructed and compressed now so we can build a fail array now if its needed
+
+   This is basically the Aho-Corasick algorithm. Its from exercise 3.31 and 3.32 in the
+   "Red Dragon" -- Compilers, principles, techniques, and tools. Aho, Sethi, Ullman 1985/88
+   ISBN 0-201-10088-6
+
+   We find the fail state for each state in the trie, this state is the longest proper
+   suffix of the current states 'word' that is also a proper prefix of another word in our
+   trie. State 1 represents the word '' and is the thus the default fail state. This allows
+   the DFA not to have to restart after its tried and failed a word at a given point, it
+   simply continues as though it had been matching the other word in the first place.
+   Consider
+      'abcdgu'=~/abcdefg|cdgu/
+   When we get to 'd' we are still matching the first word, we would encounter 'g' which would
+   fail, which would bring use to the state representing 'd' in the second word where we would
+   try 'g' and succeed, prodceding to match 'cdgu'.
+ */
+ /* add a fail transition */
+    reg_trie_data *trie=(reg_trie_data *)RExC_rx->data->data[ARG(source)];
+    U32 *q;
+    const U32 ucharcount = trie->uniquecharcount;
+    const U32 numstates = trie->laststate;
+    const U32 ubound = trie->lasttrans + ucharcount;
+    U32 q_read = 0;
+    U32 q_write = 0;
+    U32 charid;
+    U32 base = trie->states[ 1 ].trans.base;
+    U32 *fail;
+    reg_ac_data *aho;
+    const U32 data_slot = add_data( pRExC_state, 1, "T" );
+    GET_RE_DEBUG_FLAGS_DECL;
+#ifndef DEBUGGING
+    PERL_UNUSED_ARG(depth);
+#endif
+
+
+    ARG_SET( stclass, data_slot );
+    Newxz( aho, 1, reg_ac_data );
+    RExC_rx->data->data[ data_slot ] = (void*)aho;
+    aho->trie=trie;
+    aho->states=(reg_trie_state *)savepvn((const char*)trie->states,
+        (trie->laststate+1)*sizeof(reg_trie_state));
+    Newxz( q, numstates, U32);
+    Newxz( aho->fail, numstates, U32 );
+    aho->refcount = 1;
+    fail = aho->fail;
+    /* initialize fail[0..1] to be 1 so that we always have
+       a valid final fail state */
+    fail[ 0 ] = fail[ 1 ] = 1;
+
+    for ( charid = 0; charid < ucharcount ; charid++ ) {
+	const U32 newstate = TRIE_TRANS_STATE( 1, base, ucharcount, charid, 0 );
+	if ( newstate ) {
+            q[ q_write ] = newstate;
+            /* set to point at the root */
+            fail[ q[ q_write++ ] ]=1;
+        }
+    }
+    while ( q_read < q_write) {
+	const U32 cur = q[ q_read++ % numstates ];
+        base = trie->states[ cur ].trans.base;
+
+        for ( charid = 0 ; charid < ucharcount ; charid++ ) {
+	    const U32 ch_state = TRIE_TRANS_STATE( cur, base, ucharcount, charid, 1 );
+	    if (ch_state) {
+                U32 fail_state = cur;
+                U32 fail_base;
+                do {
+                    fail_state = fail[ fail_state ];
+                    fail_base = aho->states[ fail_state ].trans.base;
+                } while ( !TRIE_TRANS_STATE( fail_state, fail_base, ucharcount, charid, 1 ) );
+
+                fail_state = TRIE_TRANS_STATE( fail_state, fail_base, ucharcount, charid, 1 );
+                fail[ ch_state ] = fail_state;
+                if ( !aho->states[ ch_state ].wordnum && aho->states[ fail_state ].wordnum )
+                {
+                        aho->states[ ch_state ].wordnum =  aho->states[ fail_state ].wordnum;
+                }
+                q[ q_write++ % numstates] = ch_state;
+            }
+        }
+    }
+    /* restore fail[0..1] to 0 so that we "fall out" of the AC loop
+       when we fail in state 1, this allows us to use the
+       charclass scan to find a valid start char. This is based on the principle
+       that theres a good chance the string being searched contains lots of stuff
+       that cant be a start char.
+     */
+    fail[ 0 ] = fail[ 1 ] = 0;
+    DEBUG_TRIE_COMPILE_r({
+        PerlIO_printf(Perl_debug_log, "%*sStclass Failtable: 0", (int)(depth * 2), "");
+        for( q_read=1; q_read<numstates; q_read++ ) {
+            PerlIO_printf(Perl_debug_log, ", %"UVuf, (UV)fail[q_read]);
+        }
+        PerlIO_printf(Perl_debug_log, "\n");
+    });
+    Safefree(q);
+    /*RExC_seen |= REG_SEEN_TRIEDFA;*/
+}
+
 
 /*
  * There are strange code-generation bugs caused on sparc64 by gcc-2.95.2.
@@ -1939,7 +1998,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, I32 *min, U32 flags
             n = regnext(n);
         }
         else if (stringok) {
-            const int oldl = STR_LEN(scan);
+            const unsigned int oldl = STR_LEN(scan);
             regnode * const nnext = regnext(n);
             
             DEBUG_PEEP("merg",n,depth);
@@ -2066,11 +2125,18 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
     scan_data_t data_fake;
     struct regnode_charclass_class and_with; /* Valid if flags & SCF_DO_STCLASS_OR */
     SV *re_trie_maxbuff = NULL;
+    regnode *first_non_open = scan;
+
 
     GET_RE_DEBUG_FLAGS_DECL;
 #ifdef DEBUGGING
     StructCopy(&zero_scan_data, &data_fake, scan_data_t);    
 #endif
+    if ( depth == 0 ) {
+        while (first_non_open && OP(first_non_open) == OPEN) 
+            first_non_open=regnext(first_non_open);
+    }
+
 
     while (scan && OP(scan) != END && scan < last) {
 	/* Peephole optimizer: */
@@ -2112,6 +2178,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 	    /* demq: the op(next)==code check is to see if we have "branch-branch" AFAICT */
 	
 	    if (OP(next) == code || code == IFTHEN || code == SUSPEND) {
+	        /* NOTE - There is similar code to this block below for handling
+	           TRIE nodes on a re-study.  If you change stuff here check there
+	           too. */
 		I32 max1 = 0, min1 = I32_MAX, num = 0;
 		struct regnode_charclass_class accum;
 		regnode * const startbranch=scan;
@@ -2202,6 +2271,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 		    }
 		}
 
+                if (PERL_ENABLE_TRIE_OPTIMISATION && OP( startbranch ) == BRANCH ) {
 		/* demq.
 
 		   Assuming this was/is a branch we are dealing with: 'scan' now
@@ -2209,8 +2279,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 		   it is. We now start at the beginning of the sequence and look
 		   for subsequences of
 
-		   BRANCH->EXACT=>X
-		   BRANCH->EXACT=>X
+		   BRANCH->EXACT=>x1
+		   BRANCH->EXACT=>x2
+		   tail
 
 		   which would be constructed from a pattern like /A|LIST|OF|WORDS/
 
@@ -2220,10 +2291,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 
 		   We have two cases
 
-		     1. patterns where the whole set of branch can be converted to a trie,
+		     1. patterns where the whole set of branch can be converted. 
 
-		     2. patterns where only a subset of the alternations can be
-		     converted to a trie.
+		     2. patterns where only a subset can be converted.
 
 		   In case 1 we can replace the whole set with a single regop
 		   for the trie. In case 2 we need to keep the start and end
@@ -2232,19 +2302,24 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 		     'BRANCH EXACT; BRANCH EXACT; BRANCH X'
 		     becomes BRANCH TRIE; BRANCH X;
 
-		   Hypthetically when we know the regex isnt anchored we can
-		   turn a case 1 into a DFA and let it rip... Every time it finds a match
-		   it would just call its tail, no WHILEM/CURLY needed.
+		  There is an additional case, that being where there is a 
+		  common prefix, which gets split out into an EXACT like node
+		  preceding the TRIE node.
+
+		  If x(1..n)==tail then we can do a simple trie, if not we make
+		  a "jump" trie, such that when we match the appropriate word
+		  we "jump" to the appopriate tail node. Essentailly we turn
+		  a nested if into a case structure of sorts.
 
 		*/
-		if (PERL_ENABLE_TRIE_OPTIMISATION) {
+		
 		    int made=0;
 		    if (!re_trie_maxbuff) {
 			re_trie_maxbuff = get_sv(RE_TRIE_MAXBUF_NAME, 1);
 			if (!SvIOK(re_trie_maxbuff))
 			    sv_setiv(re_trie_maxbuff, RE_TRIE_MAXBUF_INIT);
 		    }
-                    if ( SvIV(re_trie_maxbuff)>=0 && OP( startbranch )==BRANCH ) {
+                    if ( SvIV(re_trie_maxbuff)>=0  ) {
                         regnode *cur;
                         regnode *first = (regnode *)NULL;
                         regnode *last = (regnode *)NULL;
@@ -2328,7 +2403,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
                             if ( (((first && optype!=NOTHING) ? OP( noper ) == optype
                                          : PL_regkind[ OP( noper ) ] == EXACT )
                                   || OP(noper) == NOTHING )
-                                  && noper_next == tail && count<U16_MAX)
+#ifdef NOJUMPTRIE
+                                  && noper_next == tail
+#endif
+                                  && count < U16_MAX)
                             {
                                 count++;
                                 if ( !first || optype == NOTHING ) {
@@ -2339,11 +2417,15 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
                                 }
                             } else {
                                 if ( last ) {
-                                    made+=make_trie( pRExC_state, startbranch, first, cur, tail, optype, depth+1 );
+                                    make_trie( pRExC_state, 
+                                            startbranch, first, cur, tail, count, 
+                                            optype, depth+1 );
                                 }
                                 if ( PL_regkind[ OP( noper ) ] == EXACT
-                                     && noper_next == tail )
-                                {
+#ifdef NOJUMPTRIE
+                                     && noper_next == tail
+#endif
+                                ){
                                     count = 1;
                                     first = cur;
                                     optype = OP( noper );
@@ -2363,24 +2445,19 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 
                         });
                         if ( last ) {
-                            made+= make_trie( pRExC_state, startbranch, first, scan, tail, optype, depth+1 );
+                            made= make_trie( pRExC_state, startbranch, first, scan, tail, count, optype, depth+1 );
 #ifdef TRIE_STUDY_OPT	
-                            if ( made && startbranch == first ) {
-                                if ( OP(first)!=TRIE )
-                                    flags |= SCF_EXACT_TRIE;
-                                else {
-                                    regnode *chk=*scanp;
-                                    while ( OP( chk ) == OPEN ) 
-                                        chk = regnext( chk );
-                                    if (chk==first) 
-                                        flags |= SCF_EXACT_TRIE;
-                                }
-                            }                   
+                            if ( ((made == MADE_EXACT_TRIE && 
+                                 startbranch == first) 
+                                 || ( first_non_open == first )) && 
+                                 depth==0 ) 
+                                flags |= SCF_TRIE_RESTUDY;
 #endif
                         }
                     }
                     
                 } /* do trie */
+                
 	    }
 	    else if ( code == BRANCHJ ) {  /* single branch is optimized. */
 		scan = NEXTOPER(NEXTOPER(scan));
@@ -2500,21 +2577,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 	    }
 	    flags &= ~SCF_DO_STCLASS;
 	}
-#ifdef TRIE_STUDY_OPT	
-	else if (OP(scan) == TRIE) {
-	    reg_trie_data *trie = (reg_trie_data*)RExC_rx->data->data[ ARG(scan) ];
-	    min += trie->minlen;
-	    delta += (trie->maxlen - trie->minlen);
-	    flags &= ~SCF_DO_STCLASS; /* xxx */
-            if (flags & SCF_DO_SUBSTR) {
-    	        scan_commit(pRExC_state,data);	/* Cannot expect anything... */
-    	        data->pos_min += trie->minlen;
-    	        data->pos_delta += (trie->maxlen - trie->minlen);
-		if (trie->maxlen != trie->minlen)
-		    data->longest = &(data->longest_float);
-    	    }
-	}
-#endif	
 	else if (strchr((const char*)PL_varies,OP(scan))) {
 	    I32 mincount, maxcount, minnext, deltanext, fl = 0;
 	    I32 f = flags, pos_before = 0;
@@ -2563,7 +2625,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 		next = regnext(scan);
 		if (OP(scan) == CURLYX) {
 		    I32 lp = (data ? *(data->last_closep) : 0);
-		    scan->flags = ((lp <= U8_MAX) ? (U8)lp : U8_MAX);
+		    scan->flags = ((lp <= (I32)U8_MAX) ? (U8)lp : U8_MAX);
 		}
 		scan = NEXTOPER(scan) + EXTRA_STEP_2ARGS;
 		next_is_eval = (OP(scan) == EVAL);
@@ -3107,7 +3169,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 		if (deltanext) {
 		    vFAIL("Variable length lookbehind not implemented");
 		}
-		else if (minnext > U8_MAX) {
+		else if (minnext > (I32)U8_MAX) {
 		    vFAIL2("Lookbehind longer than %"UVuf" not implemented", (UV)U8_MAX);
 		}
 		scan->flags = (U8)minnext;
@@ -3154,6 +3216,138 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
 		    cl_anything(pRExC_state, data->start_class);
 		flags &= ~SCF_DO_STCLASS;
 	}
+#ifdef TRIE_STUDY_OPT
+#ifdef FULL_TRIE_STUDY        
+        else if (PL_regkind[OP(scan)] == TRIE) {
+            /* NOTE - There is similar code to this block above for handling
+               BRANCH nodes on the initial study.  If you change stuff here 
+               check there too. */
+            regnode *tail= regnext(scan);
+            reg_trie_data *trie = (reg_trie_data*)RExC_rx->data->data[ ARG(scan) ];
+            I32 max1 = 0, min1 = I32_MAX;
+            struct regnode_charclass_class accum;
+
+            if (flags & SCF_DO_SUBSTR) /* XXXX Add !SUSPEND? */
+                scan_commit(pRExC_state, data); /* Cannot merge strings after this. */
+            if (flags & SCF_DO_STCLASS)
+                cl_init_zero(pRExC_state, &accum);
+                
+            if (!trie->jump) {
+                min1= trie->minlen;
+                max1= trie->maxlen;
+            } else {
+                const regnode *nextbranch= NULL;
+                U32 word;
+                
+                for ( word=1 ; word <= trie->wordcount ; word++) 
+                {
+                    I32 deltanext=0, minnext=0, f = 0, fake;
+                    struct regnode_charclass_class this_class;
+                    
+                    data_fake.flags = 0;
+                    if (data) {
+                        data_fake.whilem_c = data->whilem_c;
+                        data_fake.last_closep = data->last_closep;
+                    }
+                    else
+                        data_fake.last_closep = &fake;
+                        
+                    if (flags & SCF_DO_STCLASS) {
+                        cl_init(pRExC_state, &this_class);
+                        data_fake.start_class = &this_class;
+                        f = SCF_DO_STCLASS_AND;
+                    }
+                    if (flags & SCF_WHILEM_VISITED_POS)
+                        f |= SCF_WHILEM_VISITED_POS;
+    
+                    if (trie->jump[word]) {
+                        if (!nextbranch)
+                            nextbranch = tail - trie->jump[0];
+                        scan= tail - trie->jump[word];
+                        /* We go from the jump point to the branch that follows
+                           it. Note this means we need the vestigal unused branches
+                           even though they arent otherwise used.
+                         */
+                        minnext = study_chunk(pRExC_state, &scan, &deltanext,
+                                              (regnode *)nextbranch, &data_fake, f,depth+1);
+                    }
+                    if (nextbranch && PL_regkind[OP(nextbranch)]==BRANCH)
+                        nextbranch= regnext((regnode*)nextbranch);
+                    
+                    if (min1 > (I32)(minnext + trie->minlen))
+                        min1 = minnext + trie->minlen;
+                    if (max1 < (I32)(minnext + deltanext + trie->maxlen))
+                        max1 = minnext + deltanext + trie->maxlen;
+                    if (deltanext == I32_MAX)
+                        is_inf = is_inf_internal = 1;
+                    
+                    if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
+                        pars++;
+                    
+                    if (data) {
+                        if (data_fake.flags & SF_HAS_EVAL)
+                            data->flags |= SF_HAS_EVAL;
+                        data->whilem_c = data_fake.whilem_c;
+                    }
+                    if (flags & SCF_DO_STCLASS)
+                        cl_or(pRExC_state, &accum, &this_class);
+                }
+            }
+            if (flags & SCF_DO_SUBSTR) {
+                data->pos_min += min1;
+                data->pos_delta += max1 - min1;
+                if (max1 != min1 || is_inf)
+                    data->longest = &(data->longest_float);
+            }
+            min += min1;
+            delta += max1 - min1;
+            if (flags & SCF_DO_STCLASS_OR) {
+                cl_or(pRExC_state, data->start_class, &accum);
+                if (min1) {
+                    cl_and(data->start_class, &and_with);
+                    flags &= ~SCF_DO_STCLASS;
+                }
+            }
+            else if (flags & SCF_DO_STCLASS_AND) {
+                if (min1) {
+                    cl_and(data->start_class, &accum);
+                    flags &= ~SCF_DO_STCLASS;
+                }
+                else {
+                    /* Switch to OR mode: cache the old value of
+                     * data->start_class */
+                    StructCopy(data->start_class, &and_with,
+                               struct regnode_charclass_class);
+                    flags &= ~SCF_DO_STCLASS_AND;
+                    StructCopy(&accum, data->start_class,
+                               struct regnode_charclass_class);
+                    flags |= SCF_DO_STCLASS_OR;
+                    data->start_class->flags |= ANYOF_EOS;
+                }
+            }
+            scan= tail;
+            continue;
+        }
+#else
+	else if (PL_regkind[OP(scan)] == TRIE) {
+	    reg_trie_data *trie = (reg_trie_data*)RExC_rx->data->data[ ARG(scan) ];
+	    U8*bang=NULL;
+	    
+	    min += trie->minlen;
+	    delta += (trie->maxlen - trie->minlen);
+	    flags &= ~SCF_DO_STCLASS; /* xxx */
+            if (flags & SCF_DO_SUBSTR) {
+    	        scan_commit(pRExC_state,data);	/* Cannot expect anything... */
+    	        data->pos_min += trie->minlen;
+    	        data->pos_delta += (trie->maxlen - trie->minlen);
+		if (trie->maxlen != trie->minlen)
+		    data->longest = &(data->longest_float);
+    	    }
+    	    if (trie->jump) /* no more substrings -- for now /grr*/
+    	        flags &= ~SCF_DO_SUBSTR; 
+	}
+#endif /* old or new */
+#endif /* TRIE_STUDY_OPT */	
 	/* Else: zero-length, ignore. */
 	scan = regnext(scan);
     }
@@ -3163,7 +3357,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
     *deltap = is_inf_internal ? I32_MAX : delta;
     if (flags & SCF_DO_SUBSTR && is_inf)
 	data->pos_delta = I32_MAX - data->pos_min;
-    if (is_par > U8_MAX)
+    if (is_par > (I32)U8_MAX)
 	is_par = 0;
     if (is_par && pars==1 && data) {
 	data->flags |= SF_IN_PAR;
@@ -3175,8 +3369,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp, I32 *deltap,
     }
     if (flags & SCF_DO_STCLASS_OR)
 	cl_and(data->start_class, &and_with);
-    if (flags & SCF_EXACT_TRIE) 
-        data->flags |= 	SCF_EXACT_TRIE;
+    if (flags & SCF_TRIE_RESTUDY)
+        data->flags |= 	SCF_TRIE_RESTUDY;
     return min;
 }
 
@@ -3229,6 +3423,15 @@ Perl_reginitcolors(pTHX)
 #endif
 
 
+#ifdef TRIE_STUDY_OPT
+#define CHECK_RESTUDY_GOTO                                  \
+        if (                                                \
+              (data.flags & SCF_TRIE_RESTUDY)               \
+              && ! restudied++                              \
+        )     goto reStudy
+#else
+#define CHECK_RESTUDY_GOTO
+#endif        
 /*
  - pregcomp - compile a regular expression into internal code
  *
@@ -3368,7 +3571,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     RExC_emit_start = r->program;
     RExC_emit = r->program;
     /* Store the count of eval-groups for security checks: */
-    RExC_emit->next_off = (U16)((RExC_seen_evals > U16_MAX) ? U16_MAX : RExC_seen_evals);
+    RExC_emit->next_off = (RExC_seen_evals > (I32)U16_MAX) ? U16_MAX : (U16)RExC_seen_evals;
     REGC((U8)REG_MAGIC, (char*) RExC_emit++);
     r->data = 0;
     if (reg(pRExC_state, 0, &flags,1) == NULL)
@@ -3378,6 +3581,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     Newx(r->substrs, 1, struct reg_substr_data);
 
 reStudy:
+    minlen=sawplus=sawopen=0;
     Zero(r->substrs, 1, struct reg_substr_data);
     StructCopy(&zero_scan_data, &data, scan_data_t);
 
@@ -3425,7 +3629,7 @@ reStudy:
 	       /* An {n,m} with n>0 */
 	    (PL_regkind[OP(first)] == CURLY && ARG1(first) > 0) ) 
 	{
-	        DEBUG_PEEP("first:",first,0);
+	        
 		if (OP(first) == PLUS)
 		    sawplus = 1;
 		else
@@ -3439,6 +3643,7 @@ reStudy:
 
 	/* Starting-point info. */
       again:
+        DEBUG_PEEP("first:",first,0);
         /* Ignore EXACT as we deal with it later. */
 	if (PL_regkind[OP(first)] == EXACT) {
 	    if (OP(first) == EXACT)
@@ -3447,15 +3652,24 @@ reStudy:
 		r->regstclass = first;
 	}
 #ifdef TRIE_STCLASS	
-	else if (OP(first) == TRIE &&
+	else if (PL_regkind[OP(first)] == TRIE &&
 	        ((reg_trie_data *)r->data->data[ ARG(first) ])->minlen>0) 
 	{
+	    regnode *trie_op;
 	    /* this can happen only on restudy */
-            struct regnode_1 *trie_op;
-            Newxz(trie_op,1,struct regnode_1);
-            StructCopy(first,trie_op,struct regnode_1);
-            make_trie_failtable(pRExC_state, (regnode *)first, (regnode *)trie_op, 0);
-	    r->regstclass = (regnode *)trie_op;
+	    if ( OP(first) == TRIE ) {
+                struct regnode_1 *trieop;
+                Newxz(trieop,1,struct regnode_1);
+                StructCopy(first,trieop,struct regnode_1);
+                trie_op=(regnode *)trieop;
+            } else {
+                struct regnode_charclass *trieop;
+                Newxz(trieop,1,struct regnode_charclass);
+                StructCopy(first,trieop,struct regnode_charclass);
+                trie_op=(regnode *)trieop;
+            }
+            make_trie_failtable(pRExC_state, (regnode *)first, trie_op, 0);
+	    r->regstclass = trie_op;
 	}
 #endif	
 	else if (strchr((const char*)PL_simple,OP(first)))
@@ -3539,12 +3753,10 @@ reStudy:
 	minlen = study_chunk(pRExC_state, &first, &fake, scan + RExC_size, /* Up to end */
 			     &data, SCF_DO_SUBSTR | SCF_WHILEM_VISITED_POS | stclass_flag,0);
 
-#ifdef TRIE_STUDY_OPT	        
-        if ( (data.flags & SCF_EXACT_TRIE) && ! restudied++ ) {
-            goto reStudy;
-        }
-#endif	
 	
+        CHECK_RESTUDY_GOTO;
+
+
 	if ( RExC_npar == 1 && data.longest == &(data.longest_fixed)
 	     && data.last_start_min == 0 && data.last_end > 0
 	     && !RExC_seen_zerolen
@@ -3673,11 +3885,7 @@ reStudy:
 	minlen = study_chunk(pRExC_state, &scan, &fake, scan + RExC_size,
 	    &data, SCF_DO_STCLASS_AND|SCF_WHILEM_VISITED_POS,0);
 
-#ifdef TRIE_STUDY_OPT
-	if ( (data.flags & SCF_EXACT_TRIE) && ! restudied++ ) {
-	    goto reStudy;
-	}
-#endif
+        CHECK_RESTUDY_GOTO;
 
 	r->check_substr = r->check_utf8 = r->anchored_substr = r->anchored_utf8
 		= r->float_substr = r->float_utf8 = NULL;
@@ -3726,7 +3934,7 @@ reStudy:
         for (i = 1; i <= len; i++) {
             if (r->offsets[i*2-1] || r->offsets[i*2])
                 PerlIO_printf(Perl_debug_log, "%"UVuf":%"UVuf"[%"UVuf"] ",
-                i, (UV)r->offsets[i*2-1], (UV)r->offsets[i*2]);
+                (UV)i, (UV)r->offsets[i*2-1], (UV)r->offsets[i*2]);
             }
         PerlIO_printf(Perl_debug_log, "\n");
     });
@@ -6201,7 +6409,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd)
               ? "Overwriting end of array!\n" : "OK",
               (UV)(place - RExC_emit_start),
               (UV)(RExC_parse - RExC_start),
-              RExC_offsets[0])); 
+              (UV)RExC_offsets[0]));
 	Set_Node_Offset(place, RExC_parse);
 	Set_Node_Length(place, 1);
     }
@@ -6377,7 +6585,7 @@ Perl_regdump(pTHX_ const regexp *r)
     SV * const sv = sv_newmortal();
     SV *dsv= sv_newmortal();
 
-    (void)dumpuntil(r, r->program, r->program + 1, NULL, sv, 0);
+    (void)dumpuntil(r, r->program, r->program + 1, NULL, NULL, sv, 0, 0);
 
     /* Header fields of interest. */
     if (r->anchored_substr) {
@@ -6683,8 +6891,6 @@ Perl_pregfree(pTHX_ struct regexp *r)
 {
     dVAR;
 
-
-
     GET_RE_DEBUG_FLAGS_DECL;
 
     if (!r || (--r->refcnt > 0))
@@ -6794,6 +7000,10 @@ Perl_pregfree(pTHX_ struct regexp *r)
                             Safefree(trie->bitmap);
                         if (trie->wordlen)
                             Safefree(trie->wordlen);
+                        if (trie->jump)
+                            Safefree(trie->jump);
+                        if (trie->nextword)
+                            Safefree(trie->nextword);
 #ifdef DEBUGGING
                         if (RX_DEBUG(r)) {
                             if (trie->words)
@@ -6946,31 +7156,41 @@ S_put_byte(pTHX_ SV *sv, int c)
 	Perl_sv_catpvf(aTHX_ sv, "%c", c);
 }
 
+
 #define CLEAR_OPTSTART \
     if (optstart) STMT_START { \
 	    DEBUG_OPTIMISE_r(PerlIO_printf(Perl_debug_log, " (%d nodes)\n", node - optstart)); \
 	    optstart=NULL; \
     } STMT_END
 
-#define DUMPUNTIL(a,b,c,d,e,f) CLEAR_OPTSTART; node=dumpuntil(a,b,c,d,e,f);
+#define DUMPUNTIL(b,e) CLEAR_OPTSTART; node=dumpuntil(r,start,(b),(e),last,sv,indent+1,depth+1);
 
 STATIC const regnode *
 S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
-	    const regnode *last, SV* sv, I32 l)
+	    const regnode *last, const regnode *plast, 
+	    SV* sv, I32 indent, U32 depth)
 {
     dVAR;
-    register U8 op = EXACT;	/* Arbitrary non-END op. */
+    register U8 op = PSEUDO;	/* Arbitrary non-END op. */
     register const regnode *next;
     const regnode *optstart= NULL;
     GET_RE_DEBUG_FLAGS_DECL;
 
-    while (op != END && (!last || node < last)) {
+#ifdef DEBUG_DUMPUNTIL
+    PerlIO_printf(Perl_debug_log, "--- %d : %d - %d - %d\n",indent,node-start,
+        last ? last-start : 0,plast ? plast-start : 0);
+#endif
+            
+    if (plast && plast < last) 
+        last= plast;
+
+    while (PL_regkind[op] != END && (!last || node < last)) {
 	/* While that wasn't END last time... */
 
 	NODE_ALIGN(node);
 	op = OP(node);
 	if (op == CLOSE)
-	    l--;	
+	    indent--;
 	next = regnext((regnode *)node);
 	
 	/* Where, what. */
@@ -6984,14 +7204,18 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	    
 	regprop(r, sv, node);
 	PerlIO_printf(Perl_debug_log, "%4"IVdf":%*s%s", (IV)(node - start),
-		      (int)(2*l + 1), "", SvPVX_const(sv));
+		      (int)(2*indent + 1), "", SvPVX_const(sv));
 
 	if (OP(node) != OPTIMIZED) {
 	    if (next == NULL)		/* Next ptr. */
 		PerlIO_printf(Perl_debug_log, "(0)");
+	    else if (PL_regkind[(U8)op] == BRANCH && PL_regkind[OP(next)] != BRANCH )
+	        PerlIO_printf(Perl_debug_log, "(FAIL)");
 	    else
 		PerlIO_printf(Perl_debug_log, "(%"IVdf")", (IV)(next - start));
-	    (void)PerlIO_putc(Perl_debug_log, '\n');
+		
+	    if (PL_regkind[(U8)op]  != TRIE)
+	        (void)PerlIO_putc(Perl_debug_log, '\n');
 	}
 
       after_print:
@@ -7003,36 +7227,39 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 					     : next);
                 if (last && nnode > last)
                     nnode = last;
-                DUMPUNTIL(r, start, NEXTOPER(NEXTOPER(node)), nnode, sv, l + 1);
+                DUMPUNTIL(NEXTOPER(NEXTOPER(node)), nnode);
 	    }
 	}
 	else if (PL_regkind[(U8)op] == BRANCH) {
 	    assert(next);
-	    DUMPUNTIL(r, start, NEXTOPER(node), next, sv, l + 1);
+	    DUMPUNTIL(NEXTOPER(node), next);
 	}
 	else if ( PL_regkind[(U8)op]  == TRIE ) {
             const I32 n = ARG(node);
 	    const reg_trie_data * const trie = (reg_trie_data*)r->data->data[n];
-            const I32 arry_len = av_len(trie->words)+1;
+	    const regnode *nextbranch= NULL;
 	    I32 word_idx;
-	    PerlIO_printf(Perl_debug_log,
-		    "%*s[StS:%"UVuf" Wds:%d Cs:%d Uq:%d #Sts:%"IVdf" Mn:%d Mx:%d",
-		    (int)(2*(l+3)),
-		    "",
-		    trie->startstate,
-		    TRIE_WORDCOUNT(trie),
-		    (int)TRIE_CHARCOUNT(trie),
-		    trie->uniquecharcount,
-		    (IV)TRIE_LASTSTATE(trie)-1,
-		    (int)trie->minlen,
-		    (int)trie->maxlen
-		);
-           if (trie->bitmap) {
+	    
+	    DEBUG_TRIE_COMPILE_r(
+        	    PerlIO_printf(Perl_debug_log,
+        		    " S:%"UVuf"/%"IVdf" W:%d L:%d/%d C:%d/%d ",
+        		    (UV)trie->startstate,
+        		    (IV)trie->laststate-1,
+        		    trie->wordcount,
+        		    (int)trie->minlen,
+        		    (int)trie->maxlen,
+        		    (int)TRIE_CHARCOUNT(trie),
+        		    trie->uniquecharcount
+        		);
+            );
+            if ( op==TRIEC || trie->bitmap ) {
                 int i;
                 int rangestart= -1;
+                U8* bitmap= op==TRIEC ? ANYOF_BITMAP(node) : TRIE_BITMAP(trie);
+                    
                 sv_setpvn(sv, "", 0);
         	for (i = 0; i <= 256; i++) {
-        	    if (i < 256 && TRIE_BITMAP_TEST(trie,i)) {
+        	    if (i < 256 && BITMAP_TEST(bitmap,i)) {
         		if (rangestart == -1)
         		    rangestart = i;
         	    } else if (rangestart != -1) {
@@ -7047,39 +7274,54 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         		rangestart = -1;
         	    }
         	}
-        	PerlIO_printf(Perl_debug_log, " Stcls:%s]\n", SvPVX_const(sv));
+        	PerlIO_printf(Perl_debug_log, "[%s]\n", SvPVX_const(sv));
             } else
-                PerlIO_printf(Perl_debug_log, " No-Stcls]\n");
+                PerlIO_printf(Perl_debug_log, "\n");
 
-	    for (word_idx=0; word_idx < arry_len; word_idx++) {
+                        
+                
+	    for (word_idx= 0; word_idx < (I32)trie->wordcount; word_idx++) {
 		SV ** const elem_ptr = av_fetch(trie->words,word_idx,0);
-		if (elem_ptr) 
-		    PerlIO_printf(Perl_debug_log, "%*s%s\n",
-		       (int)(2*(l+4)), "",
-		        pv_pretty(sv, SvPV_nolen_const(*elem_ptr), SvCUR(*elem_ptr), 60, 
+		
+                PerlIO_printf(Perl_debug_log, "%*s%s ",
+                   (int)(2*(indent+3)), "",
+                    elem_ptr ? pv_pretty(sv, SvPV_nolen_const(*elem_ptr), SvCUR(*elem_ptr), 60,
 	                    PL_colors[0], PL_colors[1],
 	                    (SvUTF8(*elem_ptr) ? PERL_PV_ESCAPE_UNI : 0) |
 	                    PERL_PV_PRETTY_ELIPSES    |
 	                    PERL_PV_PRETTY_LTGT    
-                        )
-		    );
+                            )
+                            : "???"
+                );
+                if (trie->jump) {
+                    U16 dist= trie->jump[word_idx+1];
+                    PerlIO_printf(Perl_debug_log, "(%u)\n",(next - dist) - start);
+                    if (dist) {
+                        if (!nextbranch)
+                            nextbranch= next - trie->jump[0];
+                        DUMPUNTIL(next - dist, nextbranch);
+                    } 
+                    if (nextbranch && PL_regkind[OP(nextbranch)]==BRANCH)
+                        nextbranch= regnext((regnode *)nextbranch);
+                } else {
+                    PerlIO_printf(Perl_debug_log, "\n");
 		}
-
-	    node = NEXTOPER(node);
-	    node += regarglen[(U8)op];
-
+	    }
+	    if (last && next > last)
+	        node= last;
+	    else
+	        node= next;
 	}
-	else if ( op == CURLY) {   /* "next" might be very big: optimizer */
-	    DUMPUNTIL(r, start, NEXTOPER(node) + EXTRA_STEP_2ARGS,
-			     NEXTOPER(node) + EXTRA_STEP_2ARGS + 1, sv, l + 1);
+	else if ( op == CURLY ) {   /* "next" might be very big: optimizer */
+	    DUMPUNTIL(NEXTOPER(node) + EXTRA_STEP_2ARGS,
+                    NEXTOPER(node) + EXTRA_STEP_2ARGS + 1);
 	}
 	else if (PL_regkind[(U8)op] == CURLY && op != CURLYX) {
 	    assert(next);
-	    DUMPUNTIL(r, start, NEXTOPER(node) + EXTRA_STEP_2ARGS,
-			     next, sv, l + 1);
+	    DUMPUNTIL(NEXTOPER(node) + EXTRA_STEP_2ARGS, next);
 	}
 	else if ( op == PLUS || op == STAR) {
-	    DUMPUNTIL(r, start, NEXTOPER(node), NEXTOPER(node) + 1, sv, l + 1);
+	    DUMPUNTIL(NEXTOPER(node), NEXTOPER(node) + 1);
 	}
 	else if (op == ANYOF) {
 	    /* arglen 1 + class block */
@@ -7097,12 +7339,15 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	    node += regarglen[(U8)op];
 	}
 	if (op == CURLYX || op == OPEN)
-	    l++;
+	    indent++;
 	else if (op == WHILEM)
-	    l--;
+	    indent--;
     }
     CLEAR_OPTSTART;
-    return node;
+#ifdef DEBUG_DUMPUNTIL    
+    PerlIO_printf(Perl_debug_log, "--- %d\n",indent);
+#endif
+    return last ? last : node;
 }
 
 #endif	/* DEBUGGING */

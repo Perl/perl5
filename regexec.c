@@ -782,7 +782,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 
     /* Last resort... */
     /* XXXX BmUSEFUL already changed, maybe multiple change is meaningful... */
-    if (prog->regstclass && OP(prog->regstclass)!=TRIE) {
+    if (prog->regstclass && PL_regkind[OP(prog->regstclass)]!=TRIE) {
 	/* minlen == 0 is possible if regstclass is \b or \B,
 	   and the fixed substr is ''$.
 	   Since minlen is already taken into account, s+1 is before strend;
@@ -895,10 +895,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     return NULL;
 }
 
-/* We know what class REx starts with.  Try to find this position... */
-/* if reginfo is NULL, its a dryrun */
-/* annoyingly all the vars in this routine have different names from their counterparts
-   in regmatch. /grrr */
+
 
 #define REXEC_TRIE_READ_CHAR(trie_type, trie, uc, uscan, len, uvc, charid,  \
 foldlen, foldbuf, uniflags) STMT_START {                                    \
@@ -1037,6 +1034,14 @@ if ((!reginfo || regtry(reginfo, s))) \
 	REXEC_FBC_CLASS_SCAN(CoNd);                            \
     }                                                          \
     break
+
+#define DUMP_EXEC_POS(li,s,doutf8) \
+    dump_exec_pos(li,s,(PL_regeol),(PL_bostr),(PL_reg_starttry),doutf8)
+
+/* We know what class REx starts with.  Try to find this position... */
+/* if reginfo is NULL, its a dryrun */
+/* annoyingly all the vars in this routine have different names from their counterparts
+   in regmatch. /grrr */
 
 STATIC char *
 S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, 
@@ -1324,8 +1329,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		!isDIGIT_LC_utf8((U8*)s),
 		!isDIGIT_LC(*s)
 	    );
+	case TRIEC:
 	case TRIE: 
-	    /*Perl_croak(aTHX_ "panic: unknown regstclass TRIE");*/
 	    {
 	        const enum { trie_plain, trie_utf8, trie_utf8_fold }
 		    trie_type = do_utf8 ?
@@ -1343,11 +1348,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		STRLEN maxlen = trie->maxlen;
 		SV *sv_points;
 		U8 **points; /* map of where we were in the input string
-		                when reading a given string. For ASCII this
+		                when reading a given char. For ASCII this
 		                is unnecessary overhead as the relationship
 		                is always 1:1, but for unicode, especially
 		                case folded unicode this is not true. */
 		U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
+		U8 *bitmap=NULL;
+
 
                 GET_RE_DEBUG_FLAGS_DECL;
 
@@ -1362,13 +1369,29 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 SvPOK_on(sv_points);
                 sv_2mortal(sv_points);
                 points=(U8**)SvPV_nolen(sv_points );
-
-        	if (trie->bitmap && trie_type != trie_utf8_fold) {
-        	    while (s <= last_start && !TRIE_BITMAP_TEST(trie,*s) ) {
-        	        s++;
-        	    }
+                if ( trie_type != trie_utf8_fold && (trie->bitmap || OP(c)==TRIEC) ) {
+                    if (trie->bitmap) 
+                        bitmap=(U8*)trie->bitmap;
+                    else
+                        bitmap=(U8*)ANYOF_BITMAP(c);
                 }
+                /* this is the Aho-Corasick algorithm modified a touch
+                   to include special handling for long "unknown char" 
+                   sequences. The basic idea being that we use AC as long
+                   as we are dealing with a possible matching char, when
+                   we encounter an unknown char (and we have not encountered
+                   an accepting state) we scan forward until we find a legal 
+                   starting char. 
+                   AC matching is basically that of trie matching, except
+                   that when we encounter a failing transition, we fall back
+                   to the current states "fail state", and try the current char 
+                   again, a process we repeat until we reach the root state, 
+                   state 1, or a legal transition. If we fail on the root state 
+                   then we can either terminate if we have reached an accepting 
+                   state previously, or restart the entire process from the beginning 
+                   if we have not.
 
+                 */
                 while (s <= last_start) {
                     const U32 uniflags = UTF8_ALLOW_DEFAULT;
                     U8 *uc = (U8*)s;
@@ -1380,39 +1403,66 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                     STRLEN foldlen = 0;
                     U8 *uscan = (U8*)NULL;
                     U8 *leftmost = NULL;
-
+#ifdef DEBUGGING                    
+                    U32 accepted_word= 0;
+#endif
                     U32 pointpos = 0;
 
                     while ( state && uc <= (U8*)strend ) {
                         int failed=0;
-                        if (aho->states[ state ].wordnum) {
-                            U8 *lpos= points[ (pointpos - trie->wordlen[aho->states[ state ].wordnum-1] ) % maxlen ];
-                            if (!leftmost || lpos < leftmost)
+                        U32 word = aho->states[ state ].wordnum;
+
+                        if( state==1 && bitmap ) {
+                            DEBUG_TRIE_EXECUTE_r(
+                                if ( uc <= (U8*)last_start && !BITMAP_TEST(bitmap,*uc) ) {
+                                    dump_exec_pos( (char *)uc, c, strend, real_start, 
+                                        uc, do_utf8 );
+                                    PerlIO_printf( Perl_debug_log,
+                                        " Scanning for legal start char...\n");
+                                }
+                            );            
+                            while ( uc <= (U8*)last_start  && !BITMAP_TEST(bitmap,*uc) ) {
+                                uc++;
+                            }
+                            s= (char *)uc;    
+                            if (uc >(U8*)last_start) break;
+                        }
+                                            
+                        if ( word ) {
+                            U8 *lpos= points[ (pointpos - trie->wordlen[word-1] ) % maxlen ];
+                            if (!leftmost || lpos < leftmost) {
+                                DEBUG_r(accepted_word=word);
                                 leftmost= lpos;
+                            }
                             if (base==0) break;
+                            
                         }
                         points[pointpos++ % maxlen]= uc;
 			REXEC_TRIE_READ_CHAR(trie_type, trie, uc, uscan, len,
 			    uvc, charid, foldlen, foldbuf, uniflags);
-                        DEBUG_TRIE_EXECUTE_r(
+                        DEBUG_TRIE_EXECUTE_r({
+                            dump_exec_pos( (char *)uc, c, strend, real_start, 
+                                s,   do_utf8 );
                             PerlIO_printf(Perl_debug_log,
-                                "Pos: %d Charid:%3x CV:%4"UVxf" ",
-                                (int)((const char*)uc - real_start), charid, uvc)
-                        );
-                        uc += len;
+                                " Charid:%3u CP:%4"UVxf" ",
+                                 charid, uvc);
+                        });
 
                         do {
 #ifdef DEBUGGING
-                            U32 word = aho->states[ state ].wordnum;
+                            word = aho->states[ state ].wordnum;
 #endif
                             base = aho->states[ state ].trans.base;
 
-                            DEBUG_TRIE_EXECUTE_r(
+                            DEBUG_TRIE_EXECUTE_r({
+                                if (failed) 
+                                    dump_exec_pos( (char *)uc, c, strend, real_start, 
+                                        s,   do_utf8 );
                                 PerlIO_printf( Perl_debug_log,
-                                    "%sState: %4"UVxf", Base: 0x%-4"UVxf" uvc=%"UVxf" word=%"UVxf"\n",
-                                    failed ? "Fail transition to " : "",
-                                    (UV)state, (UV)base, (UV)uvc, (UV)word)
-                            );
+                                    "%sState: %4"UVxf", word=%"UVxf,
+                                    failed ? " Fail transition to " : "",
+                                    (UV)state, (UV)word);
+                            });
                             if ( base ) {
                                 U32 tmp;
                                 if (charid &&
@@ -1424,53 +1474,60 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                      && (tmp=trie->trans[base + charid - 1 -
                                         trie->uniquecharcount ].next))
                                 {
+                                    DEBUG_TRIE_EXECUTE_r(
+                                        PerlIO_printf( Perl_debug_log," - legal\n"));
                                     state = tmp;
                                     break;
                                 }
                                 else {
-                                    failed++;
-                                    if ( state == 1 )
-                                        break;
-                                    else
-                                        state = aho->fail[state];
+                                    DEBUG_TRIE_EXECUTE_r(
+                                        PerlIO_printf( Perl_debug_log," - fail\n"));
+                                    failed = 1;
+                                    state = aho->fail[state];
                                 }
                             }
                             else {
                                 /* we must be accepting here */
-                                failed++;
+                                DEBUG_TRIE_EXECUTE_r(
+                                        PerlIO_printf( Perl_debug_log," - accepting\n"));
+                                failed = 1;
                                 break;
                             }
                         } while(state);
+                        uc += len;
                         if (failed) {
                             if (leftmost)
                                 break;
-                            else if (!charid && trie->bitmap && trie_type != trie_utf8_fold) {
-                                while ( uc <= (U8*)last_start  && !TRIE_BITMAP_TEST(trie,*uc) ) {
-                                    uc++;
-                                }
-                            }
+                            if (!state) state = 1;
                         }
                     }
                     if ( aho->states[ state ].wordnum ) {
                         U8 *lpos = points[ (pointpos - trie->wordlen[aho->states[ state ].wordnum-1]) % maxlen ];
-                        if (!leftmost || lpos < leftmost)
+                        if (!leftmost || lpos < leftmost) {
+                            DEBUG_r(accepted_word=aho->states[ state ].wordnum);
                             leftmost = lpos;
+                        }
                     }
-                    DEBUG_TRIE_EXECUTE_r(
-                        PerlIO_printf( Perl_debug_log,
-                            "%sState: %4"UVxf", Base: 0x%-4"UVxf" uvc=%"UVxf"\n",
-                            "All done: ",
-                            (UV)state, (UV)base, (UV)uvc)
-                    );
                     if (leftmost) {
                         s = (char*)leftmost;
+                        DEBUG_TRIE_EXECUTE_r({
+                            PerlIO_printf( 
+                                Perl_debug_log,"Matches word #%"UVxf" at position %d. Trying full pattern...\n",
+                                (UV)accepted_word, s - real_start
+                            );
+                        });
                         if (!reginfo || regtry(reginfo, s)) {
                             FREETMPS;
 		            LEAVE;
                             goto got_it;
                         }
                         s = HOPc(s,1);
+                        DEBUG_TRIE_EXECUTE_r({
+                            PerlIO_printf( Perl_debug_log,"Pattern failed. Looking for new start point...\n");
+                        });
                     } else {
+                        DEBUG_TRIE_EXECUTE_r(
+                            PerlIO_printf( Perl_debug_log,"No match.\n"));
                         break;
                     }
                 }
@@ -1775,11 +1832,11 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
         });		    
 	goto phooey;
     }
-    else if ((c = prog->regstclass)) {
+    else if ( (c = prog->regstclass) ) {
 	if (minlen) {
 	    const OPCODE op = OP(prog->regstclass);
 	    /* don't bother with what can't match */
-	    if (PL_regkind[op] != EXACT && op != CANY && op != TRIE)
+	    if (PL_regkind[op] != EXACT && op != CANY && PL_regkind[op] != TRIE)
 	        strend = HOPc(strend, -(minlen - 1));
 	}
 	DEBUG_EXECUTE_r({
@@ -2303,27 +2360,32 @@ S_debug_start_match(pTHX_ const regexp *prog, const bool do_utf8,
 }
 
 STATIC void
-S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const bool do_utf8)
+S_dump_exec_pos(pTHX_ const char *locinput, 
+                      const regnode *scan, 
+                      const char *loc_regeol, 
+                      const char *loc_bostr, 
+                      const char *loc_reg_starttry,
+                      const bool do_utf8)
 {
-    const int docolor = *PL_colors[0];
+    const int docolor = *PL_colors[0] || *PL_colors[2] || *PL_colors[4];
     const int taill = (docolor ? 10 : 7); /* 3 chars for "> <" */
-    int l = (PL_regeol - locinput) > taill ? taill : (PL_regeol - locinput);
+    int l = (loc_regeol - locinput) > taill ? taill : (loc_regeol - locinput);
     /* The part of the string before starttry has one color
        (pref0_len chars), between starttry and current
        position another one (pref_len - pref0_len chars),
        after the current position the third one.
        We assume that pref0_len <= pref_len, otherwise we
        decrease pref0_len.  */
-    int pref_len = (locinput - PL_bostr) > (5 + taill) - l
-	? (5 + taill) - l : locinput - PL_bostr;
+    int pref_len = (locinput - loc_bostr) > (5 + taill) - l
+	? (5 + taill) - l : locinput - loc_bostr;
     int pref0_len;
 
     while (do_utf8 && UTF8_IS_CONTINUATION(*(U8*)(locinput - pref_len)))
 	pref_len++;
-    pref0_len = pref_len  - (locinput - PL_reg_starttry);
-    if (l + pref_len < (5 + taill) && l < PL_regeol - locinput)
-	l = ( PL_regeol - locinput > (5 + taill) - pref_len
-	      ? (5 + taill) - pref_len : PL_regeol - locinput);
+    pref0_len = pref_len  - (locinput - loc_reg_starttry);
+    if (l + pref_len < (5 + taill) && l < loc_regeol - locinput)
+	l = ( loc_regeol - locinput > (5 + taill) - pref_len
+	      ? (5 + taill) - pref_len : loc_regeol - locinput);
     while (do_utf8 && UTF8_IS_CONTINUATION(*(U8*)(locinput + l)))
 	l--;
     if (pref0_len < 0)
@@ -2334,18 +2396,18 @@ S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const bool do_u
 	const int is_uni = (do_utf8 && OP(scan) != CANY) ? 1 : 0;
 
 	RE_PV_COLOR_DECL(s0,len0,is_uni,PERL_DEBUG_PAD(0),
-	    (locinput - pref_len),pref0_len, 60, 4, 5);
+	    (locinput - pref_len),pref0_len, pref0_len, 4, 5);
 	
 	RE_PV_COLOR_DECL(s1,len1,is_uni,PERL_DEBUG_PAD(1),
 		    (locinput - pref_len + pref0_len),
-		    pref_len - pref0_len, 60, 2, 3);
+		    pref_len - pref0_len, pref_len - pref0_len, 2, 3);
 	
 	RE_PV_COLOR_DECL(s2,len2,is_uni,PERL_DEBUG_PAD(2),
-		    locinput, PL_regeol - locinput, 60, 0, 1);
+		    locinput, loc_regeol - locinput, l, 0, 1);
 
 	PerlIO_printf(Perl_debug_log,
 		    "%4"IVdf" <%.*s%.*s%s%.*s>%*s|",
-		    (IV)(locinput - PL_bostr),
+		    (IV)(locinput - loc_bostr),
 		    len0, s0,
 		    len1, s1,
 		    (docolor ? "" : "> <"),
@@ -2418,6 +2480,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
     st->sw = 0;
     st->logical = 0;
     st->cc = NULL;
+
     /* Note that nextchr is a byte even in UTF */
     nextchr = UCHARAT(locinput);
     scan = prog;
@@ -2425,7 +2488,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
         DEBUG_EXECUTE_r( {
 	    SV * const prop = sv_newmortal();
-	    dump_exec_pos( locinput, scan, do_utf8 );
+	    DUMP_EXEC_POS( locinput, scan, do_utf8 );
 	    regprop(rex, prop, scan);
             
 	    PerlIO_printf(Perl_debug_log,
@@ -2513,7 +2576,22 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
 #undef  ST
 #define ST st->u.trie
-
+        case TRIEC:
+            /* In this case the charclass data is available inline so
+               we can fail fast without a lot of extra overhead. 
+             */
+            if (scan->flags == EXACT || !do_utf8) {
+                if(!ANYOF_BITMAP_TEST(scan, *locinput)) {
+                    DEBUG_EXECUTE_r(
+                        PerlIO_printf(Perl_debug_log,
+                    	          "%*s  %sfailed to match trie start class...%s\n",
+                    	          REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4], PL_colors[5])
+                    );
+                    sayNO_SILENT;
+                    /* NOTREACHED */
+                }        	        
+            }
+            /* FALL THROUGH */
 	case TRIE:
 	    {
                 /* what type of TRIE am I? (utf8 makes this contextual) */
@@ -2527,23 +2605,6 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
         	    = (reg_trie_data*)rex->data->data[ ARG( scan ) ];
                 U32 state = trie->startstate;
 
-		U8 *uc = ( U8* )locinput;
-		U16 charid = 0;
-		U32 base = 0;
-		UV uvc = 0;
-		STRLEN len = 0;
-		STRLEN foldlen = 0;
-		U8 *uscan = (U8*)NULL;
-		STRLEN bufflen=0;
-		SV *sv_accept_buff = NULL;
-		U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
-
-	    	ST.accepted = 0; /* how many accepting states we have seen */
-		ST.B = next;
-#ifdef DEBUGGING
-		ST.me = scan;
-#endif
-                
         	if (trie->bitmap && trie_type != trie_utf8_fold &&
         	    !TRIE_BITMAP_TEST(trie,*locinput)
         	) {
@@ -2557,12 +2618,32 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
         	    } else {
         	        DEBUG_EXECUTE_r(
                             PerlIO_printf(Perl_debug_log,
-                        	          "%*s  %sfailed to match start class...%s\n",
+                        	          "%*s  %sfailed to match trie start class...%s\n",
                         	          REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4], PL_colors[5])
                         );
         	        sayNO_SILENT;
         	   }
                 }
+
+            { 
+		U8 *uc = ( U8* )locinput;
+
+		STRLEN len = 0;
+		STRLEN foldlen = 0;
+		U8 *uscan = (U8*)NULL;
+		STRLEN bufflen=0;
+		SV *sv_accept_buff = NULL;
+		U8 foldbuf[ UTF8_MAXBYTES_CASE + 1 ];
+
+	    	ST.accepted = 0; /* how many accepting states we have seen */
+		ST.B = next;
+		ST.jump = trie->jump;
+		
+#ifdef DEBUGGING
+		ST.me = scan;
+#endif
+                
+        	
 
 	        /*
         	   traverse the TRIE keeping track of all accepting states
@@ -2570,23 +2651,32 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
         	*/
 
 		while ( state && uc <= (U8*)PL_regeol ) {
+                    U32 base = trie->states[ state ].trans.base;
+                    UV uvc;
+                    U16 charid;
+                    /* We use charid to hold the wordnum as we don't use it
+                       for charid until after we have done the wordnum logic. 
+                       We define an alias just so that the wordnum logic reads
+                       more naturally. */
 
-		    if (trie->states[ state ].wordnum) {
-			if (!ST.accepted ) {
+#define got_wordnum charid
+                    got_wordnum = trie->states[ state ].wordnum;
+
+		    if ( got_wordnum ) {
+			if ( ! ST.accepted ) {
 			    ENTER;
 			    SAVETMPS;
 			    bufflen = TRIE_INITAL_ACCEPT_BUFFLEN;
 			    sv_accept_buff=newSV(bufflen *
 					    sizeof(reg_trie_accepted) - 1);
-			    SvCUR_set(sv_accept_buff,
-						sizeof(reg_trie_accepted));
+			    SvCUR_set(sv_accept_buff, 0);
 			    SvPOK_on(sv_accept_buff);
 			    sv_2mortal(sv_accept_buff);
 			    SAVETMPS;
 			    ST.accept_buff =
 				(reg_trie_accepted*)SvPV_nolen(sv_accept_buff );
 			}
-			else {
+			do {
 			    if (ST.accepted >= bufflen) {
 				bufflen *= 2;
 				ST.accept_buff =(reg_trie_accepted*)
@@ -2595,20 +2685,21 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 			    }
 			    SvCUR_set(sv_accept_buff,SvCUR(sv_accept_buff)
 				+ sizeof(reg_trie_accepted));
-			}
-			ST.accept_buff[ST.accepted].wordnum = trie->states[state].wordnum;
-			ST.accept_buff[ST.accepted].endpos = uc;
-			++ST.accepted;
-		    }
 
-		    base = trie->states[ state ].trans.base;
+
+			    ST.accept_buff[ST.accepted].wordnum = got_wordnum;
+			    ST.accept_buff[ST.accepted].endpos = uc;
+			    ++ST.accepted;
+		        } while (trie->nextword && (got_wordnum= trie->nextword[got_wordnum]));
+		    }
+#undef got_wordnum 
 
 		    DEBUG_TRIE_EXECUTE_r({
-		                dump_exec_pos( (char *)uc, scan, do_utf8 );
+		                DUMP_EXEC_POS( (char *)uc, scan, do_utf8 );
 			        PerlIO_printf( Perl_debug_log,
-			            "%*s  %sState: %4"UVxf", Base: %4"UVxf", Accepted: %4"UVxf" ",
+			            "%*s  %sState: %4"UVxf" Accepted: %4"UVxf" ",
 			            2+PL_regindent * 2, "", PL_colors[4],
-			            (UV)state, (UV)base, (UV)ST.accepted );
+			            (UV)state, (UV)ST.accepted );
 		    });
 
 		    if ( base ) {
@@ -2636,7 +2727,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    }
 		    DEBUG_TRIE_EXECUTE_r(
 		        PerlIO_printf( Perl_debug_log,
-		            "Charid:%3x CV:%4"UVxf" After State: %4"UVxf"%s\n",
+		            "Charid:%3x CP:%4"UVxf" After State: %4"UVxf"%s\n",
 		            charid, uvc, (UV)state, PL_colors[5] );
 		    );
 		}
@@ -2649,7 +2740,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 			REPORT_CODE_OFF + PL_regindent * 2, "",
 			PL_colors[4], (IV)ST.accepted, PL_colors[5] );
 		);
-	    }
+	    }}
 
 	    /* FALL THROUGH */
 
@@ -2677,7 +2768,12 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		LEAVE;
 		locinput = PL_reginput;
 		nextchr = UCHARAT(locinput);
-		scan = ST.B;
+		
+		if ( !ST.jump ) 
+		    scan = ST.B;
+		else
+		    scan = ST.B - ST.jump[ST.accept_buff[0].wordnum];
+		
 		continue; /* execute rest of RE */
 	    }
 
@@ -2736,8 +2832,15 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    best = ST.accepted;
 		}
 		PL_reginput = (char *)ST.accept_buff[ best ].endpos;
+		if ( !ST.jump ) {
+		    PUSH_STATE_GOTO(TRIE_next, ST.B);
+		    /* NOTREACHED */
+		} else {
+		    PUSH_STATE_GOTO(TRIE_next, ST.B - ST.jump[ST.accept_buff[best].wordnum]);
+		    /* NOTREACHED */
+                }
+                /* NOTREACHED */
 	    }
-	    PUSH_STATE_GOTO(TRIE_next, ST.B);
 	    /* NOTREACHED */
 
 #undef  ST
@@ -4281,6 +4384,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    newst->sw = 0;
 	    newst->logical = 0;
 
+
 	    locinput = PL_reginput;
 	    nextchr = UCHARAT(locinput);
 	    st = newst;
@@ -4317,6 +4421,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    st->minmod = 0;
 	    st->sw = 0;
 	    st->logical = 0;
+	    
 #ifdef DEBUGGING
 	    PL_regindent++;
 #endif
@@ -4433,8 +4538,9 @@ yes:
 no:
     DEBUG_EXECUTE_r(
 	PerlIO_printf(Perl_debug_log,
-		      "%*s  %sfailed...%s\n",
-		      REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4], PL_colors[5])
+            "%*s  %sfailed...%s\n",
+            REPORT_CODE_OFF+PL_regindent*2, "", 
+            PL_colors[4], PL_colors[5])
 	);
 no_final:
 do_no:

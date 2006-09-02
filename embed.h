@@ -3519,12 +3519,12 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define regpposixcc(a,b)	S_regpposixcc(aTHX_ a,b)
 #define checkposixcc(a)		S_checkposixcc(aTHX_ a)
-#define make_trie(a,b,c,d,e,f,g)	S_make_trie(aTHX_ a,b,c,d,e,f,g)
+#define make_trie(a,b,c,d,e,f,g,h)	S_make_trie(aTHX_ a,b,c,d,e,f,g,h)
 #define make_trie_failtable(a,b,c,d)	S_make_trie_failtable(aTHX_ a,b,c,d)
 #endif
 #  ifdef DEBUGGING
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define dumpuntil(a,b,c,d,e,f)	S_dumpuntil(aTHX_ a,b,c,d,e,f)
+#define dumpuntil(a,b,c,d,e,f,g,h)	S_dumpuntil(aTHX_ a,b,c,d,e,f,g,h)
 #define put_byte(a,b)		S_put_byte(aTHX_ a,b)
 #define dump_trie(a,b)		S_dump_trie(aTHX_ a,b)
 #define dump_trie_interim_list(a,b,c)	S_dump_trie_interim_list(aTHX_ a,b,c)
@@ -3549,7 +3549,7 @@
 #endif
 #  ifdef DEBUGGING
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define dump_exec_pos(a,b,c)	S_dump_exec_pos(aTHX_ a,b,c)
+#define dump_exec_pos(a,b,c,d,e,f)	S_dump_exec_pos(aTHX_ a,b,c,d,e,f)
 #define debug_start_match(a,b,c,d,e)	S_debug_start_match(aTHX_ a,b,c,d,e)
 #endif
 #  endif

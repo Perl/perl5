@@ -7,7 +7,7 @@
 $| = 1;
 
 # please update note at bottom of file when you change this
-print "1..1231\n"; 
+print "1..1232\n"; 
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3394,6 +3394,12 @@ ok(("foba  ba$s" =~ qr/(foo|Bass|bar)/i)
 ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
     &&  $1 eq "ba$s",
    "TRIEF + LATIN SMALL LETTER SHARP S =~ SS");
+
+ok(("foba  ba${s}pxySS$s$s" =~ qr/(b(?:a${s}t|a${s}f|a${s}p)[xy]+$s*)/i)
+    &&  $1 eq "ba${s}pxySS$s$s",
+   "COMMON PREFIX TRIEF + LATIN SMALL LETTER SHARP S");
+
+   
 }
 
 
