@@ -1,6 +1,6 @@
 package sort;
 
-our $VERSION = '2.00';
+our $VERSION = '2.01';
 
 # The hints for pp_sort are now stored in $^H{sort}; older versions
 # of perl used the global variable $sort::hints. -- rjh 2005-12-19
@@ -19,7 +19,6 @@ sub import {
 	Carp::croak("sort pragma requires arguments");
     }
     local $_;
-    no warnings 'uninitialized';	# bitops would warn
     $^H{sort} //= 0;
     while ($_ = shift(@_)) {
 	if (/^_q(?:uick)?sort$/) {
@@ -37,7 +36,6 @@ sub import {
 	    Carp::croak("sort: unknown subpragma '$_'");
 	}
     }
-    $^H |= $sort::hint_bits;
 }
 
 sub unimport {
