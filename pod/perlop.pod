@@ -1507,7 +1507,7 @@ Examples:
 
     s/%(.)/$percent{$1}/g;	# change percent escapes; no /e
     s/%(.)/$percent{$1} || $&/ge;	# expr now, so /e
-    s/^=(\w+)/&pod($1)/ge;	# use function call
+    s/^=(\w+)/pod($1)/ge;	# use function call
 
     # expand variables in $_, but dynamics only, using
     # symbolic dereferencing
