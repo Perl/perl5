@@ -2,13 +2,14 @@ package Sys::Syslog;
 use strict;
 use warnings::register;
 use Carp;
+use File::Basename;
 use POSIX qw(strftime setlocale LC_TIME);
 use Socket ':all';
 require 5.006;
 require Exporter;
 
 {   no strict 'vars';
-    $VERSION = '0.17';
+    $VERSION = '0.18';
     @ISA = qw(Exporter);
 
     %EXPORT_TAGS = (
@@ -44,12 +45,12 @@ require Exporter;
     );
 
     @EXPORT = (
-    @{$EXPORT_TAGS{standard}}, 
+        @{$EXPORT_TAGS{standard}}, 
     );
 
     @EXPORT_OK = (
-    @{$EXPORT_TAGS{extended}}, 
-    @{$EXPORT_TAGS{macros}}, 
+        @{$EXPORT_TAGS{extended}}, 
+        @{$EXPORT_TAGS{macros}}, 
     );
 
     eval {
@@ -138,7 +139,7 @@ sub setlogmask {
     $maskpri = shift unless $_[0] == 0;
     $oldmask;
 }
-
+ 
 sub setlogsock {
     my $setsock = shift;
     $syslog_path = shift;
@@ -166,7 +167,7 @@ sub setlogsock {
 		unless defined $syslog_path
         }
 	unless (-w $syslog_path) {
-        warnings::warnif "stream passed to setlogsock, but $syslog_path is not writable";
+            warnings::warnif "stream passed to setlogsock, but $syslog_path is not writable";
 	    return undef;
 	} else {
 	    @connectMethods = ( 'stream' );
@@ -255,10 +256,13 @@ sub syslog {
 	$numfac = xlate($facility);
     }
 
+    # if no identifiant, set up a default one
+    $ident ||= basename($0) || getlogin() || getpwuid($<) || 'syslog';
+
     connect_log() unless $connected;
 
     if ($mask =~ /%m/) {
-	# escape percent signs if sprintf will be called
+        # escape percent signs for sprintf()
         $error =~ s/%/%%/g if @_;
 	# replace %m with $err, if preceded by an even number of percent signs
         $mask =~ s/(?<!%)((?:%%)*)%m/$1$error/g;
@@ -272,16 +276,6 @@ sub syslog {
 
     } else {
         my $whoami = $ident;
-
-        if (!$whoami && $mask =~ /^(\S.*?):\s?(.*)/) {
-            $whoami = $1;
-            $mask = $2;
-        }
-
-        unless ($whoami) {
-            $whoami = getlogin() || getpwuid($<) || 'syslog';
-        }
-
         $whoami .= "[$$]" if $options{pid};
 
         $sum = $numpri + $numfac;
@@ -406,13 +400,16 @@ sub xlate {
 # 
 sub connect_log {
     @fallbackMethods = @connectMethods unless scalar @fallbackMethods;
+
     if ($transmit_ok && $current_proto) {
         # Retry what we were on, because it has worked in the past.
 	unshift(@fallbackMethods, $current_proto);
     }
+
     $connected = 0;
     my @errs = ();
     my $proto = undef;
+
     while ($proto = shift @fallbackMethods) {
 	no strict 'refs';
 	my $fn = "connect_$proto";
@@ -649,7 +646,7 @@ Sys::Syslog - Perl interface to the UNIX syslog(3) calls
 
 =head1 VERSION
 
-Version 0.17
+Version 0.18
 
 =head1 SYNOPSIS
 
@@ -831,7 +828,7 @@ Log all messages up to debug:
 
 =item B<setlogsock($sock_type)>
 
-=item B<setlogsock($sock_type, $stream_location)> (added in 5.004_02)
+=item B<setlogsock($sock_type, $stream_location)> (added in Perl 5.004_02)
 
 Sets the socket type to be used for the next call to
 C<openlog()> or C<syslog()> and returns true on success,
@@ -841,7 +838,8 @@ C<undef> on failure. The available mechanisms are:
 
 =item *
 
-C<"native"> - use the native C functions from your C<syslog(3)> library.
+C<"native"> - use the native C functions from your C<syslog(3)> library
+(added in C<Sys::Syslog> 0.15).
 
 =item *
 
@@ -883,7 +881,7 @@ mechanisms which are attempted in order.
 
 The default is to try C<native>, C<tcp>, C<udp>, C<unix>, C<stream>, C<console>.
 
-Giving an invalid value for C<$sock_type> will croak.
+Giving an invalid value for C<$sock_type> will C<croak>.
 
 B<Examples>
 
@@ -895,6 +893,19 @@ Select the native, UDP socket then UNIX domain socket mechanisms:
 
     setlogsock(["native", "udp", "unix"]);
 
+=over
+
+=item B<Note>
+
+Now that the "native" mechanism is supported by C<Sys::Syslog> and selected 
+by default, the use of the C<setlogsock()> function is discouraged because 
+other mechanisms are less portable across operating systems.  Authors of 
+modules and programs that use this function, especially its cargo-cult form 
+C<setlogsock("unix")>, are advised to remove any occurence of it unless they 
+specifically want to use a given mechanism (like TCP or UDP to connect to 
+a remote host).
+
+=back
 
 =item B<closelog()>
 

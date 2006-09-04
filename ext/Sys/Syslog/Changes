@@ -1,10 +1,16 @@
 Revision history for Sys-Syslog
 
+0.18 -- 2006.08.28 -- Sebastien Aperghis-Tramoni (SAPER)
+        [BUGFIX] Rewrote the way the default identifiant is constructed.
+        [TESTS] CPAN-RT#20946: Removed the console mechanism from the main 
+        test loop because writing to the console hangs on several systems.
+        [DOC] Added a note discouraging the use of setlogsock().
+
 0.17 -- 2006.07.23 -- Sebastien Aperghis-Tramoni (SAPER)
         [BUGFIX] CPAN-RT#20622, #20164: Fixed path handling in connect_unix().
         [CODE] Renamed some variables ($that is not a valid name), and removed 
         some dead code. 
-        [CODE] Actually added the macros from Mac OS X that was announced in 
+        [CODE] Actually added the macros from Mac OS X that were announced in 
         the 0.14 version.
         [DOC] CPAN-RT#20545: Rewrote the documentation about setlogksock().
 

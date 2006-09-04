@@ -19,25 +19,18 @@ INSTALLATION
         $ make test
         $ make install
 
-    A ANSI-compliant compiler is required to compile the extension.
-
-    Sys::Syslog has been tested by the author on the following systems,
-    but is likely to run on many more:
-
-      - Linux 2.6, gcc 3.4.1
-      - FreeBSD 6.0, gcc 3.4.4
-      - Mac OS X 10.4, gcc 4.0.1
+    An ANSI-compliant compiler is required to compile the extension.
 
     Sys::Syslog should on any Perl since 5.6.0. This module has been 
-    tested by the author to check that it works with the following
-    versions ot Perl:
+    tested by the author on the following Perl and system versions
+    but is likely to run on many more:
 
-      - Perl 5.6.2 i686-linux (custom build)
-      - Perl 5.8.5 i386-linux-thread-multi (vendor build)
-      - Perl 5.8.7 i386-linux (custom build)
-      - Perl 5.8.8 i386-freebsd-64int (custom build)
-      - Perl 5.8.8 i386-linux (custom build)
-      - Perl 5.8.6 darwin-thread-multi-2level (PowerPC) (vendor build)
+      - Perl 5.6.2 i686-linux gcc-3.4.1 (custom build)
+      - Perl 5.8.5 i386-linux-thread-multi gcc-3.4.1 (vendor build)
+      - Perl 5.8.7 i386-linux gcc-3.4.1 (custom build)
+      - Perl 5.8.8 i386-freebsd-64int gcc-3.4.4 (custom build)
+      - Perl 5.8.8 i386-linux gcc-3.4.1 (custom build)
+      - Perl 5.8.6 darwin-thread-multi-2level gcc-4.0.1 (PowerPC) (vendor build)
 
     See also the corresponding CPAN Testers page:
         http://testers.cpan.org/show/Sys-Syslog.html
