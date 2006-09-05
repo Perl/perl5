@@ -2672,6 +2672,7 @@ lib/unicore/LineBreak.txt	Unicode character database
 lib/unicore/Makefile		Unicode character database
 lib/unicore/mktables		Unicode character database generator
 lib/unicore/mktables.lst	File list for mktables
+lib/unicore/NamedSqProv.txt	Unicode character database
 lib/unicore/NamedSequences.txt	Unicode character database
 lib/unicore/NamesList.txt	Unicode character database
 lib/unicore/NormalizationCorrections.txt	Unicode character database

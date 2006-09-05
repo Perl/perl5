@@ -4,7 +4,7 @@ BEGIN {
     require "test.pl";
 }
 
-plan tests => 4670;
+plan tests => 4784;
 
 sub MyUniClass {
   <<END;
@@ -159,7 +159,10 @@ for my $p ('gc', 'sc') {
       for my $y ($abbr, $utf8::PropValueAlias{$p}{$abbr}, $utf8::PVA_abbr_map{gc_sc}{$abbr}) {
         is($str =~ /(\p{$x: $y}+)/ && $1, substr($str, 0, -1));
         is($str =~ /(\P{$x= $y}+)/ && $1, substr($str, -1));
-	test_regexp ($str, $y);
+        SKIP: {
+	  skip("surrogate", 1) if $abbr eq 'cs';
+ 	  test_regexp ($str, $y);
+        }
       }
     }
   }
@@ -221,8 +224,11 @@ for (grep $utf8::Canonical{$_} =~ /^In/, keys %utf8::Canonical) {
 
   my $blk = $_;
 
-  test_regexp ($str, $blk);
-  $blk =~ s/^In/Block:/;
-  test_regexp ($str, $blk);
+  SKIP: {
+    skip($blk, 2) if $blk =~ /surrogates/i;
+    test_regexp ($str, $blk);
+    $blk =~ s/^In/Block:/;
+    test_regexp ($str, $blk);
+  }
 }
 
