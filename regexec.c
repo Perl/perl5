@@ -1416,7 +1416,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             DEBUG_TRIE_EXECUTE_r(
                                 if ( uc <= (U8*)last_start && !BITMAP_TEST(bitmap,*uc) ) {
                                     dump_exec_pos( (char *)uc, c, strend, real_start, 
-                                        uc, do_utf8 );
+                                        (char*)uc, do_utf8 );
                                     PerlIO_printf( Perl_debug_log,
                                         " Scanning for legal start char...\n");
                                 }

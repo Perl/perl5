@@ -1144,7 +1144,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                   (int)depth * 2 + 2, "", 
                   REG_NODE_NUM(startbranch),REG_NODE_NUM(first), 
                   REG_NODE_NUM(last), REG_NODE_NUM(tail),
-                  depth);
+                  (int)depth);
     });
     /*  -- First loop and Setup --
 
@@ -1227,7 +1227,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     DEBUG_TRIE_COMPILE_r(
         PerlIO_printf( Perl_debug_log, "%*sTRIE(%s): W:%d C:%d Uq:%d Min:%d Max:%d\n",
                 (int)depth * 2 + 2,"",
-                ( trie->widecharmap ? "UTF8" : "NATIVE" ), word_count,
+                ( trie->widecharmap ? "UTF8" : "NATIVE" ), (int)word_count,
 		(int)TRIE_CHARCOUNT(trie), trie->uniquecharcount,
 		(int)trie->minlen, (int)trie->maxlen )
     );
@@ -1781,10 +1781,10 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 	    if (trie->jump) 
 	        trie->jump[0] = (U16)(tail - nextbranch);
             if (!jumper) 
-                jumper= last; 
+                jumper = last; 
             /* XXXX */
             if ( !trie->states[trie->startstate].wordnum && trie->bitmap && 
-                 ( (char *)jumper - (char *)convert) >= sizeof(struct regnode_charclass) ) 
+                 ((char *)jumper - (char *)convert) >= (int)sizeof(struct regnode_charclass) ) 
             {
                 OP( convert ) = TRIEC;
                 Copy(trie->bitmap, ((struct regnode_charclass *)convert)->bitmap, ANYOF_BITMAP_SIZE, char);
@@ -7245,7 +7245,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         		    " S:%"UVuf"/%"IVdf" W:%d L:%d/%d C:%d/%d ",
         		    (UV)trie->startstate,
         		    (IV)trie->laststate-1,
-        		    trie->wordcount,
+        		    (int)trie->wordcount,
         		    (int)trie->minlen,
         		    (int)trie->maxlen,
         		    (int)TRIE_CHARCOUNT(trie),
@@ -7254,9 +7254,9 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
             );
             if ( op==TRIEC || trie->bitmap ) {
                 int i;
-                int rangestart= -1;
-                U8* bitmap= op==TRIEC ? ANYOF_BITMAP(node) : TRIE_BITMAP(trie);
-                    
+                int rangestart = -1;
+                U8* bitmap = op==TRIEC ? (U8*)ANYOF_BITMAP(node) : (U8*)TRIE_BITMAP(trie);
+
                 sv_setpvn(sv, "", 0);
         	for (i = 0; i <= 256; i++) {
         	    if (i < 256 && BITMAP_TEST(bitmap,i)) {
