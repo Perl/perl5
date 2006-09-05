@@ -4135,7 +4135,7 @@ S_reginclass(pTHX_ register const regnode *n, register const U8* p, STRLEN* lenp
 	c = utf8n_to_uvchr((U8 *)p, UTF8_MAXBYTES, &len,
 			    ckWARN(WARN_UTF8) ? UTF8_CHECK_ONLY :
 					UTF8_ALLOW_ANYUV|UTF8_CHECK_ONLY);
-	if (len == (STRLEN)-1)
+	if (len == (STRLEN)-1) 
 	    Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
     }
 
