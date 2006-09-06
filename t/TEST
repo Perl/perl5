@@ -29,8 +29,6 @@ our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 	$::torture = 1 if $1 eq 'torture';
 	$::with_utf8 = 1 if $1 eq 'utf8';
 	$::with_utf16 = 1 if $1 eq 'utf16';
-	$::bytecompile = 1 if $1 eq 'bytecompile';
-	$::compile = 1 if $1 eq 'compile';
 	$::taintwarn = 1 if $1 eq 'taintwarn';
 	$ENV{PERL_CORE_MINITEST} = 1 if $1 eq 'minitest';
 	if ($1 =~ /^deparse(,.+)?$/) {
@@ -171,18 +169,8 @@ unless (@ARGV) {
     }
 }
 
-# Tests known to cause infinite loops for the perlcc tests.
-# %::infinite = ( 'comp/require.t', 1, 'op/bop.t', 1, 'lib/hostname.t', 1 );
-%::infinite = ();
-
 if ($::deparse) {
     _testprogs('deparse', '',   @ARGV);
-}
-elsif( $::compile ) {
-    _testprogs('compile', '',   @ARGV);
-}
-elsif( $::bytecompile ) {
-    _testprogs('bytecompile', '', @ARGV);
 }
 elsif ($::with_utf16) {
     for my $e (0, 1) {
@@ -211,33 +199,17 @@ elsif ($::with_utf16) {
     }
 }
 else {
-    _testprogs('compile', '',   @ARGV) if -e "../testcompile";
     _testprogs('perl',    '',   @ARGV);
 }
 
 sub _testprogs {
     my ($type, $args, @tests) = @_;
 
-    print <<'EOT' if ($type eq 'compile');
-------------------------------------------------------------------------------
-TESTING COMPILER
-------------------------------------------------------------------------------
-EOT
-
     print <<'EOT' if ($type eq 'deparse');
 ------------------------------------------------------------------------------
 TESTING DEPARSER
 ------------------------------------------------------------------------------
 EOT
-
-    print <<EOT if ($type eq 'bytecompile');
-------------------------------------------------------------------------------
-TESTING BYTECODE COMPILER
-------------------------------------------------------------------------------
-EOT
-
-    $ENV{PERLCC_TIMEOUT} = 120
-	  if ($type eq 'compile' && !$ENV{PERLCC_TIMEOUT});
 
     $::bad_files = 0;
 
@@ -267,10 +239,6 @@ EOT
     while (my $test = shift @tests) {
         my $test_start_time = $show_elapsed_time ? Time::HiRes::time() : 0;
 
-	if ( $::infinite{$test} && $type eq 'compile' ) {
-	    print STDERR "$test creates infinite loop! Skipping.\n";
-	    next;
-	}
 	if ($test =~ /^$/) {
 	    next;
 	}
@@ -315,7 +283,6 @@ EOT
 	    }
 	}
 
-	my $test_executable; # for 'compile' tests
 	my $file_opts = "";
 	if ($type eq 'deparse') {
 	    # Look for #line directives which change the filename
@@ -337,31 +304,6 @@ EOT
 	    open(RESULTS, $deparse_cmd)
 		or print "can't deparse '$deparse_cmd': $!.\n";
 	}
-	elsif ($type eq 'bytecompile') {
-	    my ($pwd, $null);
-	    if( $^O eq 'MSWin32') {
-		$pwd = `cd`;
-		$null = 'nul';
-	    } else {
-		$pwd = `pwd`;
-		$null = '/dev/null';
-	    }
-	    chomp $pwd;
-	    my $perl = $ENV{PERL} || "$pwd/perl";
-	    my $bswitch = "-MO=Bytecode,-H,-TI,-s$pwd/$test,";
-	    $bswitch .= "-TF$test.plc,"
-		if $test =~ m(chdir|pod/|CGI/t/carp|lib/DB);
-	    $bswitch .= "-k,"
-		if $test =~ m(deparse|terse|ext/Storable/t/code);
-	    $bswitch .= "-b,"
-		if $test =~ m(op/getpid);
-	    my $bytecompile_cmd =
-		"$perl $testswitch $switch -I../lib $bswitch".
-		"-o$test.plc $test 2>$null &&".
-		"$perl $testswitch $switch -I../lib $utf8 $test.plc |";
-	    open(RESULTS,$bytecompile_cmd)
-		or print "can't byte-compile '$bytecompile_cmd': $!.\n";
-	}
 	elsif ($type eq 'perl') {
 	    my $perl = $ENV{PERL} || './perl';
 	    my $redir = $^O eq 'VMS' ? '2>&1' : '';
@@ -375,38 +317,6 @@ EOT
 	    my $run = "$perl" . _quote_args("$testswitch $switch $utf8")
 			      . " $test $redir|";
 	    open(RESULTS,$run) or print "can't run '$run': $!.\n";
-	}
-	else {
-	    my $compile_cmd;
-	    my $pl2c = "$testswitch -I../lib ../utils/perlcc --testsuite " .
-	      # -O9 for good measure, -fcog is broken ATM
-		       "$switch -Wb=-O9,-fno-cog -L .. " .
-		       "-I \".. ../lib/CORE\" $args $utf8 $test -o ";
-
-	    if( $^O eq 'MSWin32' ) {
-		$test_executable = "$test.exe";
-		# hopefully unused name...
-		open HACK, "> xweghyz.pl";
-		print HACK <<EOT;
-#!./perl
-
-open HACK, '.\\perl $pl2c $test_executable |';
-# cl.exe prints the name of the .c file on stdout (\%^\$^#)
-while(<HACK>) {m/^\\w+\\.[cC]\$/ && next;print}
-open HACK, '$test_executable |';
-while(<HACK>) {print}
-EOT
-		close HACK;
-		$compile_cmd = 'xweghyz.pl |';
-	    }
-	    else {
-		$test_executable = "$test.plc";
-		$compile_cmd
-		    = "./perl $pl2c $test_executable && $test_executable |";
-	    }
-	    unlink $test_executable if -f $test_executable;
-	    open(RESULTS, $compile_cmd)
-		or print "can't compile '$compile_cmd': $!.\n";
 	}
 	# Our environment may force us to use UTF-8, but we can't be sure that
 	# anything we're reading from will be generating (well formed) UTF-8
@@ -554,10 +464,6 @@ EOT
 	    $tpp =~ s:\.t$:.3log:;
 	    rename("perl.3log", $tpp) ||
 		die "rename: perl3.log to $tpp: $!\n";
-	}
-	# test if the compiler compiled something
-	if( $type eq 'compile' && !-e "$test_executable" ) {
-	    $failure = "Test did not compile";
 	}
 	if (not defined $failure and $next != $max) {
 	    $failure="FAILED--expected $max tests, saw $next";

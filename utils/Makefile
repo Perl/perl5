@@ -5,24 +5,11 @@ REALPERL = ../perl
 # Files to be built with variable substitution after miniperl is
 # available.  Dependencies handled manually below (for now).
 
-pl = c2ph.PL config_data.PL corelist.PL cpan.PL h2ph.PL h2xs.PL instmodsh.PL perlbug.PL perldoc.PL perlivp.PL pl2pm.PL prove.PL ptar.PL ptardiff.PL shasum.PL splain.PL perlcc.PL dprofpp.PL libnetcfg.PL piconv.PL enc2xs.PL xsubpp.PL
-plextract = c2ph config_data corelist cpan h2ph h2xs instmodsh perlbug perldoc perlivp pl2pm prove ptar ptardiff shasum splain perlcc dprofpp libnetcfg piconv enc2xs xsubpp
-plextractexe = ./c2ph ./config_data ./corelist ./cpan ./h2ph ./h2xs ./instmodsh ./perlbug ./perldoc ./perlivp ./pl2pm ./prove ./ptar ./ptardiff ./shasum ./splain ./perlcc ./dprofpp ./libnetcfg ./piconv ./enc2xs ./xsubpp
+pl = c2ph.PL config_data.PL corelist.PL cpan.PL h2ph.PL h2xs.PL instmodsh.PL perlbug.PL perldoc.PL perlivp.PL pl2pm.PL prove.PL ptar.PL ptardiff.PL shasum.PL splain.PL dprofpp.PL libnetcfg.PL piconv.PL enc2xs.PL xsubpp.PL
+plextract = c2ph config_data corelist cpan h2ph h2xs instmodsh perlbug perldoc perlivp pl2pm prove ptar ptardiff shasum splain dprofpp libnetcfg piconv enc2xs xsubpp
+plextractexe = ./c2ph ./config_data ./corelist ./cpan ./h2ph ./h2xs ./instmodsh ./perlbug ./perldoc ./perlivp ./pl2pm ./prove ./ptar ./ptardiff ./shasum ./splain ./dprofpp ./libnetcfg ./piconv ./enc2xs ./xsubpp
 
 all: $(plextract) 
-
-compile: all $(plextract)
-	$(REALPERL) -I../lib perlcc -I .. -L .. c2ph -o c2ph.exe -v 10 -log ../compilelog;
-	$(REALPERL) -I../lib perlcc -I .. -L .. h2ph -o h2ph.exe -v 10 -log ../compilelog;
-	$(REALPERL) -I../lib perlcc -I .. -L .. h2xs -o h2xs.exe -v 10 -log ../compilelog;
-	$(REALPERL) -I../lib perlcc -I .. -L .. perlbug -o perlbug.exe -v 10 -log ../compilelog;
-	$(REALPERL) -I../lib perlcc -I .. -L .. perldoc -o perldoc.exe -v 10 -log ../compilelog;
-	$(REALPERL) -I../lib perlcc -I .. -L .. perlivp -o perlivp.exe -v 10 -log ../compilelog;
-	$(REALPERL) -I../lib perlcc -I .. -L .. pl2pm -o pl2pm.exe -v 10 -log ../compilelog;
-	$(REALPERL) -I../lib perlcc -I .. -L .. splain -o splain.exe -v 10 -log ../compilelog;
-	$(REALPERL) -I../lib perlcc -I .. -L .. perlcc -I .. -L .. -o perlcc.exe -v 10 -log ../compilelog;
-	$(REALPERL) -I../lib perlcc -I .. -L .. dprofpp -o dprofpp.exe -v 10 -log ../compilelog;
-	$(REALPERL) -I../lib perlcc -I .. -L .. libnetcfg -o libnetcfg.exe -v 10 -log ../compilelog;
 
 $(plextract):
 	$(PERL) -I../lib $@.PL
@@ -58,8 +45,6 @@ pl2pm:		pl2pm.PL ../config.sh
 shasum:		shasum.PL ../config.sh
 
 splain:		splain.PL ../config.sh ../lib/diagnostics.pm
-
-perlcc:		perlcc.PL ../config.sh
 
 dprofpp:	dprofpp.PL ../config.sh
 

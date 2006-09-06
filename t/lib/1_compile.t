@@ -24,9 +24,6 @@ if (eval { require Socket }) {
       push @Core_Modules, qw(Net::Cmd Net::POP3);
   }
 }
-if(eval { require B }) {
-  push @Core_Modules, qw(B::C B::CC B::Stackobj);
-}
 
 @Core_Modules = sort @Core_Modules;
 

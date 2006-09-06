@@ -103,9 +103,6 @@ lintflags = -phbvxac
 all: $(public) $(private) $(util)
 	@echo " "
 
-compile: all
-	$(REALPERL) -I../lib ../utils/perlcc -I .. -L .. $(plextract) -v -log ../compilelog;  
-
 a2p$(EXE_EXT): $(obj) a2p$(OBJ_EXT)
 	$(CC) -o a2p $(LDFLAGS) $(obj) a2p$(OBJ_EXT) $(libs)
 

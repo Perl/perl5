@@ -7,7 +7,7 @@ av.h			Array value header
 beos/beos.c		BeOS port
 beos/beosish.h		BeOS port
 beos/nm.c		BeOS port
-bytecode.pl		Produces ext/ByteLoader/byterun.h, ext/ByteLoader/byterun.c and ext/B/Asmdata.pm
+bytecode.pl		Produces ext/B/Asmdata.pm
 cc_runtime.h		Macros need by runtime of compiler-generated code
 cflags.SH		A script that emits C compilation flags per file
 Changes			Differences from previous version
@@ -70,58 +70,30 @@ ext/attrs/attrs.xs		attrs extension external subroutines
 ext/attrs/Makefile.PL		attrs extension makefile writer
 ext/attrs/t/attrs.t		See if attrs works with C<sub : attrs>
 ext/B/B/Asmdata.pm	Compiler backend data for assembler
-ext/B/B/assemble	Assemble compiler bytecode
-ext/B/B/Assembler.pm	Compiler backend assembler support functions
-ext/B/B/Bblock.pm	Compiler basic block analysis support
-ext/B/B/Bytecode.pm	Compiler Bytecode backend
-ext/B/B/cc_harness	Simplistic wrapper for using -MO=CC compiler
-ext/B/B/CC.pm		Compiler CC backend
 ext/B/B/Concise.pm	Compiler Concise backend
-ext/B/B/C.pm		Compiler C backend
 ext/B/B/Debug.pm	Compiler Debug backend
 ext/B/B/Deparse.pm	Compiler Deparse backend
-ext/B/B/disassemble	Disassemble compiler bytecode output
-ext/B/B/Disassembler.pm	Compiler Disassembler backend
 ext/B/B/Lint.pm		Compiler Lint backend
-ext/B/B/makeliblinks	Make a simplistic XSUB .so symlink tree for compiler
 ext/B/B.pm		Compiler backend support functions and methods
 ext/B/B/Showlex.pm	Compiler Showlex backend
-ext/B/B/Stackobj.pm	Compiler stack objects support functions
-ext/B/B/Stash.pm	Compiler module to identify stashes
 ext/B/B/Terse.pm	Compiler Terse backend
 ext/B/B/Xref.pm		Compiler Xref backend
 ext/B/B.xs		Compiler backend external subroutines
-ext/B/C/C.xs		Compiler C backend external subroutines
-ext/B/C/Makefile.PL	Compiler C backend makefile writer
 ext/B/defsubs_h.PL	Generator for constant subroutines
 ext/B/hints/darwin.pl	Hints for named architecture
 ext/B/hints/openbsd.pl	Hints for named architecture
 ext/B/Makefile.PL	Compiler backend makefile writer
-ext/B/NOTES		Compiler backend notes
 ext/B/O.pm		Compiler front-end module (-MO=...)
-ext/B/ramblings/cc.notes	Compiler ramblings: notes on CC backend
-ext/B/ramblings/curcop.runtime	Compiler ramblings: notes on curcop use
-ext/B/ramblings/flip-flop	Compiler ramblings: notes on flip-flop
-ext/B/ramblings/magic		Compiler ramblings: notes on magic
-ext/B/ramblings/reg.alloc	Compiler ramblings: register allocation
-ext/B/ramblings/runtime.porting	Compiler ramblings: porting PP engine
-ext/B/README		Compiler backend README
-ext/B/t/asmdata.t	See if B::Asmdata works
-ext/B/t/assembler.t	See if B::Assembler, B::Disassembler comply
-ext/B/t/bblock.t	See if B::Bblock works
 ext/B/t/b.t		See if B works
-ext/B/t/bytecode.t	See whether B::Bytecode works
 ext/B/t/concise.t	See whether B::Concise works
 ext/B/t/concise-xs.t	See whether B::Concise recognizes XS functions
 ext/B/t/debug.t		See if B::Debug works
 ext/B/t/deparse.t	See if B::Deparse works
-ext/B/TESTS		Compiler backend test data
 ext/B/t/f_map			code from perldoc -f map
 ext/B/t/f_map.t			converted to optreeCheck()s
 ext/B/t/f_sort			optree test raw material
 ext/B/t/f_sort.t		optree test raw material
 ext/B/t/lint.t		See if B::Lint works
-ext/B/Todo		Compiler backend Todo list
 ext/B/t/OptreeCheck.pm		optree comparison tool
 ext/B/t/optree_check.t		test OptreeCheck apparatus
 ext/B/t/optree_concise.t	more B::Concise tests
@@ -133,17 +105,9 @@ ext/B/t/optree_specials.t	BEGIN, END, etc code
 ext/B/t/optree_varinit.t	my,our,local var init optimization
 ext/B/t/o.t		See if O works
 ext/B/t/showlex.t	See if B::ShowLex works
-ext/B/t/stash.t		See if B::Stash works
 ext/B/t/terse.t		See if B::Terse works
 ext/B/t/xref.t		See if B::Xref works
 ext/B/typemap			Compiler backend interface types
-ext/ByteLoader/bytecode.h	Bytecode header for bytecode loader
-ext/ByteLoader/ByteLoader.pm	Bytecode loader Perl module
-ext/ByteLoader/ByteLoader.xs	Bytecode loader external subroutines
-ext/ByteLoader/byterun.c	Runtime support for bytecode loader
-ext/ByteLoader/byterun.h	Header for byterun.c
-ext/ByteLoader/hints/sunos.pl	Hints for named architecture
-ext/ByteLoader/Makefile.PL	Bytecode loader makefile writer
 ext/Compress/IO/Base/Changes	IO::Compress::Base
 ext/Compress/IO/Base/lib/File/GlobMapper.pm	IO::Compress::Base
 ext/Compress/IO/Base/lib/IO/Compress/Base/Common.pm	IO::Compress::Base
@@ -3612,7 +3576,6 @@ utils/libnetcfg.PL		libnet
 utils.lst			Lists utilities bundled with Perl
 utils/Makefile			Extract the utility scripts
 utils/perlbug.PL		A simple tool to submit a bug report
-utils/perlcc.PL			Front-end for compiler
 utils/perldoc.PL		A simple tool to find & display perl's documentation
 utils/perlivp.PL		installation verification procedure
 utils/piconv.PL			iconv(1), reinvented in perl
