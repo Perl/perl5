@@ -1808,7 +1808,7 @@ PP(pp_enteriter)
     register PERL_CONTEXT *cx;
     const I32 gimme = GIMME_V;
     SV **svp;
-    U32 cxtype = CXt_LOOP | CXp_FOREACH;
+    U16 cxtype = CXt_LOOP | CXp_FOREACH;
 #ifdef USE_ITHREADS
     void *iterdata;
 #endif
