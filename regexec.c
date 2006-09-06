@@ -4944,15 +4944,8 @@ S_reginclass(pTHX_ const regexp *prog, register const regnode *n, register const
 	c = utf8n_to_uvchr(p, UTF8_MAXBYTES, &len,
 		(UTF8_ALLOW_DEFAULT & UTF8_ALLOW_ANYUV) | UTF8_CHECK_ONLY);
 		/* see [perl #37836] for UTF8_ALLOW_ANYUV */
-	if (len == (STRLEN)-1) {
-	    int i;
-	    PerlIO_printf(Perl_debug_log, "utf8: ");
-	    for (i = 0; i < 4; i++)
-		PerlIO_printf(Perl_debug_log, "\\x%02x", p[i]);
-	    PerlIO_printf(Perl_debug_log, "\n");
-	    Perl_warner(aTHX_ packWARN(WARN_REGEXP), "Malformed UTF-8 character");
-	    /* Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)"); */
-	}
+	if (len == (STRLEN)-1) 
+	    Perl_croak(aTHX_ "Malformed UTF-8 character (fatal)");
     }
 
     plen = lenp ? *lenp : UNISKIP(NATIVE_TO_UNI(c));
