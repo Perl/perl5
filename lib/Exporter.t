@@ -1,8 +1,10 @@
-#!./perl -w
+#!perl -w
 
 BEGIN {
-    chdir 't' if -d 't';
-    @INC = '../lib';
+   if( $ENV{PERL_CORE} ) {
+        chdir 't' if -d 't';
+        @INC = '../lib';
+    }
 }
 
 # Can't use Test::Simple/More, they depend on Exporter.
