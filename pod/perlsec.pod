@@ -480,9 +480,9 @@ Algorithm::FastPermute), or for any cryptographic applications.
 
 =item *
 
-Regular expressions - Perl's regular expression engine is so called
-NFA (Non-Finite Automaton), which among other things means that it can
-rather easily consume large amounts of both time and space if the
+Regular expressions - Perl's regular expression engine is so called NFA
+(Non-deterministic Finite Automaton), which among other things means that
+it can rather easily consume large amounts of both time and space if the
 regular expression may match in several ways.  Careful crafting of the
 regular expressions can help but quite often there really isn't much
 one can do (the book "Mastering Regular Expressions" is required
