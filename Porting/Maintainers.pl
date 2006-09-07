@@ -22,6 +22,7 @@ package Maintainers;
 	'dmanura'	=> 'David Manura <dmanura@cpan.org>',
 	'drolsky'	=> 'Dave Rolsky <drolsky@cpan.org>',
 	'elizabeth'	=> 'Elizabeth Mattijsen <liz@dijkmat.nl>',
+	'ferreira'	=> 'Adriano Ferreira <ferreira@cpan.org>',
 	'gbarr'		=> 'Graham Barr <gbarr@cpan.org>',
 	'gaas'		=> 'Gisle Aas <gaas@cpan.org>',
 	'gsar'		=> 'Gurusamy Sarathy <gsar@activestate.com>',
@@ -218,6 +219,13 @@ package Maintainers;
 		'MAINTAINER'	=> 'p5p', # Not gbarr.
 		'FILES'		=> q[ext/Errno],
 		'CPAN'		=> 0,
+		},
+
+	'Exporter' =>
+		{
+		'MAINTAINER'	=> 'ferreira',
+		'FILES'		=> q[lib/Exporter.pm lib/Exporter.t lib/Exporter/Heavy.pm],
+		'CPAN'		=> 1,
 		},
 
 	'ExtUtils::CBuilder' =>
