@@ -22,7 +22,7 @@ case $PERL_CONFIG_SH in
 	;;
 esac
 
-addtopath=`pwd`
+addtopath=`pwd | sed -e 's/ /\\\ /g'`
 $spitshell >>Makefile <<!GROK!THIS!
 
 cygwin.c: cygwin/cygwin.c
