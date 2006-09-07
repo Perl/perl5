@@ -24,6 +24,12 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
      */
     if (arg) {
 	if (SvROK(arg)) {
+	    if (SvREADONLY(SvRV(arg)) && mode && *mode != 'r') {
+		if (ckWARN(WARN_LAYER))
+		    Perl_warner(aTHX_ packWARN(WARN_LAYER), PL_no_modify);
+		errno = EINVAL;
+		return -1;
+	    }
 	    s->var = SvREFCNT_inc(SvRV(arg));
 	    if (!SvPOK(s->var) && SvTYPE(SvRV(arg)) > SVt_NULL)
 		(void)SvPV_nolen(s->var);

@@ -15,7 +15,7 @@ BEGIN {
 }
 
 $| = 1;
-print "1..27\n";
+print "1..30\n";
 
 my $fh;
 my $var = "ok 2\n";
@@ -162,4 +162,31 @@ EOF
     my $ln = <F>;
     close F;
     print $ln eq $s ? "ok 27\n" : "not ok 27\n";
+}
+
+# [perl #40267] PerlIO::scalar doesn't respect readonly-ness
+{
+    if (open(F, '>', \undef)) {
+	print "not ok 28\n";
+    }
+    else {
+	print "ok 28 - \$! is $!\n";
+    }
+    close F;
+    my $ro = \43;
+    if (open(F, '>', $ro)) {
+	print "not ok 29\n";
+    }
+    else {
+	print "ok 29 - \$! is $!\n";
+    }
+    close F;
+    # but we can read from it
+    if (open(F, '<', $ro)) {
+	print "ok 30\n";
+    }
+    else {
+	print "not ok 30 - \$! is $!\n";
+    }
+    close F;
 }
