@@ -4,10 +4,9 @@ use 5.006_001;
 
 use strict;
 
-our($VERSION, $XS_VERSION, @ISA, @EXPORT_OK);
+our($VERSION, @ISA, @EXPORT_OK);
 
-$VERSION = "1.08";
-$XS_VERSION = "1.03";
+$VERSION = "1.09";
 
 use Carp;
 use Exporter ();
@@ -29,7 +28,7 @@ sub opset_to_hex ($);
 sub opdump (;$);
 use subs @EXPORT_OK;
 
-XSLoader::load 'Opcode', $XS_VERSION;
+XSLoader::load 'Opcode', $VERSION;
 
 _init_optags();
 

@@ -314,6 +314,10 @@ PPCODE:
     dummy_hv = save_hash(PL_incgv);
     GvHV(PL_incgv) = (HV*)SvREFCNT_inc(GvHV(gv_HVadd(gv_fetchpv("INC",TRUE,SVt_PVHV))));
 
+    /* Invalidate ISA and method caches */
+    ++PL_sub_generation;
+    hv_clear(PL_stashcache);
+
     PUSHMARK(SP);
     perl_call_sv(codesv, GIMME|G_EVAL|G_KEEPERR); /* use callers context */
     sv_free( (SV *) dummy_hv);  /* get rid of what save_hash gave us*/
