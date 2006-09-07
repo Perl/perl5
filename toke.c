@@ -2587,7 +2587,7 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 	len = start - SvPVX(PL_linestr);
 #endif
 	s = PEEKSPACE(s);
-#ifdef PERLMAD
+#ifdef PERL_MAD
 	start = SvPVX(PL_linestr) + len;
 #endif
 	PL_bufptr = start;
