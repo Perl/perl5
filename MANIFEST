@@ -2065,6 +2065,8 @@ lib/overload.pm			Module for overloading perl operators
 lib/overload.t			See if operator overloading works
 lib/Package/Constants.pm	Package::Constants
 lib/Package/Constants/t/01_list.t	Package::Constants tests
+lib/Params/Check.pm	Params::Check
+lib/Params/Check/t/01_Params-Check.t	Params::Check tests
 lib/perl5db.pl			Perl debugging routines
 lib/PerlIO.pm			PerlIO support module
 lib/PerlIO/via/QuotedPrint.pm	PerlIO::via::QuotedPrint
@@ -2309,9 +2311,9 @@ lib/Search/Dict.pm		Perform binary search on dictionaries
 lib/Search/Dict.t		See if Search::Dict works
 lib/SelectSaver.pm		Enforce proper select scoping
 lib/SelectSaver.t		See if SelectSaver works
+lib/SelfLoader-buggy.t		See if SelfLoader works
 lib/SelfLoader.pm		Load functions only on demand
 lib/SelfLoader.t		See if SelfLoader works
-lib/SelfLoader-buggy.t		See if SelfLoader works
 lib/Shell.pm			Make AUTOLOADed system() calls
 lib/Shell.t			Tests for above
 lib/shellwords.pl		Perl library to split into words with shell quoting
@@ -2598,8 +2600,8 @@ lib/unicore/LineBreak.txt	Unicode character database
 lib/unicore/Makefile		Unicode character database
 lib/unicore/mktables		Unicode character database generator
 lib/unicore/mktables.lst	File list for mktables
-lib/unicore/NamedSqProv.txt	Unicode character database
 lib/unicore/NamedSequences.txt	Unicode character database
+lib/unicore/NamedSqProv.txt	Unicode character database
 lib/unicore/NamesList.txt	Unicode character database
 lib/unicore/NormalizationCorrections.txt	Unicode character database
 lib/unicore/PropertyAliases.txt	Unicode character database
