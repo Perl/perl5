@@ -1,12 +1,12 @@
 package assertions;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 # use strict;
 # use warnings;
 
-my $hint=0x01000000;
-my $seen_hint=0x02000000;
+my $hint = 1;
+my $seen_hint = 2;
 
 sub _syntax_error ($$) {
     my ($expr, $why)=@_;
@@ -67,10 +67,10 @@ sub _calc_expr {
 		    shift @op;
 		}
 		elsif ($t eq '_') {
-		    unless ($^H & $seen_hint) {
+		    unless ($^H{assertions} & $seen_hint) {
 			_carp "assertion status '_' referenced but not previously defined";
 		    }
-		    $t=($^H & $hint) ? 1 : 0;
+		    $t=($^H{assertions} & $hint) ? 1 : 0;
 		}
 		elsif ($t ne '0' and $t ne '1') {
 		    $t = ( grep { ref $_ eq 'Regexp'
@@ -109,44 +109,44 @@ sub import {
     foreach my $expr (@_) {
 	unless (_calc_expr $expr) {
 	    # print STDERR "assertions deactived";
-	    $^H &= ~$hint;
-	    $^H |= $seen_hint;
+	    $^H{assertions} &= ~$hint;
+	    $^H{assertions} |= $seen_hint;
 	    return;
 	}
     }
     # print STDERR "assertions actived";
-    $^H |= $hint|$seen_hint;
+    $^H{assertions} |= $hint|$seen_hint;
 }
 
 sub unimport {
     @_ > 1
 	and _carp($_[0]."->unimport arguments are being ignored");
-    $^H &= ~$hint;
+    $^H{assertions} &= ~$hint;
 }
 
 sub enabled {
     if (@_) {
 	if ($_[0]) {
-	    $^H |= $hint;
+	    $^H{assertions} |= $hint;
 	}
 	else {
-	    $^H &= ~$hint;
+	    $^H{assertions} &= ~$hint;
 	}
-	$^H |= $seen_hint;
+	$^H{assertions} |= $seen_hint;
     }
-    return $^H & $hint ? 1 : 0;
+    return $^H{assertions} & $hint ? 1 : 0;
 }
 
 sub seen {
     if (@_) {
 	if ($_[0]) {
-	    $^H |= $seen_hint;
+	    $^H{assertions} |= $seen_hint;
 	}
 	else {
-	    $^H &= ~$seen_hint;
+	    $^H{assertions} &= ~$seen_hint;
 	}
     }
-    return $^H & $seen_hint ? 1 : 0;
+    return $^H{assertions} & $seen_hint ? 1 : 0;
 }
 
 1;

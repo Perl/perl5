@@ -7326,13 +7326,20 @@ Perl_ck_subr(pTHX_ OP *o)
 		    proto_end = proto + len;
 		}
 		if (CvASSERTION(cv)) {
-		    if (PL_hints & HINT_ASSERTING) {
+		    U32 asserthints = 0;
+		    HV *const hinthv = GvHV(PL_hintgv);
+		    if (hinthv) {
+			SV **svp = hv_fetchs(hinthv, "assertions", FALSE);
+			if (svp && *svp)
+			    asserthints = SvUV(*svp);
+		    }
+		    if (asserthints & HINT_ASSERTING) {
 			if (PERLDB_ASSERTION && PL_curstash != PL_debstash)
 			    o->op_private |= OPpENTERSUB_DB;
 		    }
 		    else {
 			delete_op = 1;
-			if (!(PL_hints & HINT_ASSERTIONSSEEN) && ckWARN(WARN_ASSERTIONS)) {
+			if (!(asserthints & HINT_ASSERTIONSSEEN) && ckWARN(WARN_ASSERTIONS)) {
 			    Perl_warner(aTHX_ packWARN(WARN_ASSERTIONS),
 					"Impossible to activate assertion call");
 			}
