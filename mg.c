@@ -1309,7 +1309,17 @@ Perl_csighandler(int sig)
             exit(1);
 #endif
 #endif
-   if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
+   if (
+#ifdef SIGILL
+	   sig == SIGILL ||
+#endif
+#ifdef SIGBUS
+	   sig == SIGBUS ||
+#endif
+#ifdef SIGSEGV
+	   sig == SIGSEGV ||
+#endif
+	   (PL_signals & PERL_SIGNALS_UNSAFE_FLAG))
 	/* Call the perl level handler now--
 	 * with risk we may be in malloc() etc. */
 	(*PL_sighandlerp)(sig);
