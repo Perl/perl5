@@ -465,6 +465,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Params::Check' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/Params/Check lib/Params/Check.pm],
+		'CPAN'		=> 1,
+		},
+
 	'perlebcdic' =>
 		{
 		'MAINTAINER'	=> 'pvhp',
