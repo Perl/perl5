@@ -1357,8 +1357,9 @@ prime_env_iter(void)
          */
         char lnm[LNM$C_NAMLENGTH+1];
         char eqv[MAX_DCL_SYMBOL+1];
+        int trnlen;
         strncpy(lnm, key, keylen);
-        int trnlen = vmstrnenv(lnm, eqv, 0, fildev, 0);
+        trnlen = vmstrnenv(lnm, eqv, 0, fildev, 0);
         sv = newSVpvn(eqv, strlen(eqv));
       }
       else {
