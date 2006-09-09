@@ -1535,9 +1535,9 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 #ifndef PERL_GLOBAL_STRUCT_INIT
 
 #ifndef DOINIT
-EXT const U32 PL_opargs[];
+EXTCONST U32 PL_opargs[];
 #else
-EXT const U32 PL_opargs[] = {
+EXTCONST U32 PL_opargs[] = {
 	0x00000000,	/* null */
 	0x00000000,	/* stub */
 	0x00003604,	/* scalar */

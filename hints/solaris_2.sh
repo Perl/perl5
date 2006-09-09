@@ -638,13 +638,26 @@ EOOVER
 
 rm -f try.c try.o try a.out
 
-# If using g++, the Configure scan for dlopen() will fail in Solaris
+# If using C++, the Configure scan for dlopen() will fail in Solaris
 # because one of the two (1) an extern "C" linkage definition is needed
 # (2) #include <dlfcn.h> is needed, *and* a cast to (void*(*)())
 # is needed for the &dlopen.  Adding any of these would require changing
 # a delicate spot in Configure, so easier just to force our guess here
 # for Solaris.
 case "$cc" in
-*g++*) d_dlopen='define' ;;
+*g++*|/opt/SUNWspro/bin/CC) d_dlopen='define' ;;
+esac
+
+# The Sun C++ doesn't define the global environ array.
+case "$cc" in
+/opt/SUNWspro/bin/CC)
+  for o in NO_ENVIRON_ARRAY PERL_USE_SAFE_PUTENV
+  do
+    case "$ccflags" in
+    *$o*) ;;
+    *) ccflags="$ccflags $o" ;;
+    esac
+  done
+  ;;
 esac
 

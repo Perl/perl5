@@ -1157,6 +1157,10 @@ EXTERN_C int fseeko(FILE *, off_t, int);
 EXTERN_C off_t ftello(FILE *);
 #endif
 
+#if defined(__SUNPRO_CC)
+EXTERN_C char *crypt(const char *, const char *);
+#endif
+
 #ifdef SETERRNO
 # undef SETERRNO  /* SOCKS might have defined this */
 #endif

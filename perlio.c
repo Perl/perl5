@@ -4593,7 +4593,14 @@ PerlIOMmap_unmap(pTHX_ PerlIO *f)
     if (m->len) {
 	PerlIOBuf * const b = &m->base;
 	if (b->buf) {
-	    code = munmap(m->mptr, m->len);
+	    /* The munmap address argument is tricky: depending on the
+	     * standard it is either "void *" or "caddr_t" (which is
+	     * usually "char *" (signed or unsigned).  If we cast it
+	     * to "void *", those that have it caddr_t and an uptight
+	     * C++ compiler, will freak out.  But casting it as char*
+	     * should work.  Maybe.  (Using Mmap_t figured out by
+	     * Configure doesn't always work, apparently.) */
+	    code = munmap((char*)m->mptr, m->len);
 	    b->buf = NULL;
 	    m->len = 0;
 	    m->mptr = NULL;

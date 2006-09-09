@@ -287,9 +287,9 @@ print <<END;
 #ifndef PERL_GLOBAL_STRUCT_INIT
 
 #ifndef DOINIT
-EXT const U32 PL_opargs[];
+EXTCONST U32 PL_opargs[];
 #else
-EXT const U32 PL_opargs[] = {
+EXTCONST U32 PL_opargs[] = {
 END
 
 %argnum = (
