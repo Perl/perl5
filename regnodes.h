@@ -65,11 +65,13 @@
 #define	MINMOD	58	/* 0x3a Next operator is not greedy. */
 #define	LOGICAL	59	/* 0x3b Next opcode should set the flag only. */
 #define	RENUM	60	/* 0x3c Group with independently numbered parens. */
-#define	OPTIMIZED	61	/* 0x3d Placeholder for dump. */
-#define	TRIE	62	/* 0x3e Match many EXACT(FL?)? at once. flags==type */
-#define	TRIEC	63	/* 0x3f Same as TRIE, but with embedded charclass data */
-#define	PSEUDO	64	/* 0x40 Pseudo opcode for internal use. */
-#define REGNODE_MAX 64
+#define	TRIE	61	/* 0x3d Match many EXACT(FL?)? at once. flags==type */
+#define	TRIEC	62	/* 0x3e Same as TRIE, but with embedded charclass data */
+#define	AHOCORASICK	63	/* 0x3f Aho Corasick stclass. flags==type */
+#define	AHOCORASICKC	64	/* 0x40 Same as AHOCORASICK, but with embedded charclass data */
+#define	OPTIMIZED	65	/* 0x41 Placeholder for dump. */
+#define	PSEUDO	66	/* 0x42 Pseudo opcode for internal use. */
+#define REGNODE_MAX 66
 
 #ifndef DOINIT
 EXTCONST U8 PL_regkind[];
@@ -136,9 +138,11 @@ EXTCONST U8 PL_regkind[] = {
 	MINMOD,		/* MINMOD */
 	LOGICAL,		/* LOGICAL */
 	BRANCHJ,		/* RENUM */
-	NOTHING,		/* OPTIMIZED */
 	TRIE,		/* TRIE */
 	TRIE,		/* TRIEC */
+	TRIE,		/* AHOCORASICK */
+	TRIE,		/* AHOCORASICKC */
+	NOTHING,		/* OPTIMIZED */
 	PSEUDO,		/* PSEUDO */
 };
 #endif
@@ -207,9 +211,11 @@ static const U8 regarglen[] = {
 	0,		/* MINMOD */
 	0,		/* LOGICAL */
 	EXTRA_SIZE(struct regnode_1),		/* RENUM */
-	0,		/* OPTIMIZED */
 	EXTRA_SIZE(struct regnode_1),		/* TRIE */
 	EXTRA_SIZE(struct regnode_charclass),		/* TRIEC */
+	EXTRA_SIZE(struct regnode_1),		/* AHOCORASICK */
+	EXTRA_SIZE(struct regnode_charclass),		/* AHOCORASICKC */
+	0,		/* OPTIMIZED */
 	0,		/* PSEUDO */
 };
 
@@ -275,9 +281,11 @@ static const char reg_off_by_arg[] = {
 	0,		/* MINMOD */
 	0,		/* LOGICAL */
 	1,		/* RENUM */
-	0,		/* OPTIMIZED */
 	0,		/* TRIE */
 	0,		/* TRIEC */
+	0,		/* AHOCORASICK */
+	0,		/* AHOCORASICKC */
+	0,		/* OPTIMIZED */
 	0,		/* PSEUDO */
 };
 
@@ -344,13 +352,15 @@ static const char * const reg_name[] = {
 	"MINMOD",		/* 0x3a */
 	"LOGICAL",		/* 0x3b */
 	"RENUM",		/* 0x3c */
-	"OPTIMIZED",		/* 0x3d */
-	"TRIE",		/* 0x3e */
-	"TRIEC",		/* 0x3f */
-	"PSEUDO",		/* 0x40 */
+	"TRIE",		/* 0x3d */
+	"TRIEC",		/* 0x3e */
+	"AHOCORASICK",		/* 0x3f */
+	"AHOCORASICKC",		/* 0x40 */
+	"OPTIMIZED",		/* 0x41 */
+	"PSEUDO",		/* 0x42 */
 };
 
-static const int reg_num = 65;
+static const int reg_num = 67;
 
 #endif /* DEBUGGING */
 #endif /* REG_COMP_C */

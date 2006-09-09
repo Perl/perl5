@@ -9508,6 +9508,7 @@ Perl_re_dup(pTHX_ const REGEXP *r, CLONE_PARAMS *param)
     for (s = ret->substrs->data, i = 0; i < 3; i++, s++) {
 	s->min_offset = r->substrs->data[i].min_offset;
 	s->max_offset = r->substrs->data[i].max_offset;
+	s->end_shift  = r->substrs->data[i].end_shift;
 	s->substr     = sv_dup_inc(r->substrs->data[i].substr, param);
 	s->utf8_substr = sv_dup_inc(r->substrs->data[i].utf8_substr, param);
     }

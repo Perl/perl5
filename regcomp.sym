@@ -8,11 +8,13 @@
 # Add new regops to the end, and do not re-order the existing ops.
 #
 
-# Exit points
+#* Exit points (0,1)
+
 END		END,    no	End of program.
 SUCCEED		END,    no	Return from a subroutine, basically.
 
-# Anchors:
+#* Anchors: (2..13)
+
 BOL		BOL,    no	Match "" at beginning of line.
 MBOL		BOL,    no	Same, assuming multiline.
 SBOL		BOL,    no	Same, assuming singleline.
@@ -26,7 +28,8 @@ NBOUND		NBOUND, no	Match "" at any word non-boundary
 NBOUNDL		NBOUND, no	Match "" at any word non-boundary
 GPOS		GPOS,   no	Matches where last m//g left off.
 
-# [Special] alternatives
+#* [Special] alternatives: (14..30)
+
 REG_ANY		REG_ANY,    no	Match any one character (except newline).
 SANY		REG_ANY,    no	Match any one character.
 CANY		REG_ANY,    no	Match any one byte.
@@ -45,7 +48,9 @@ NDIGIT		NDIGIT, no	Match any non-numeric character
 NDIGITL		NDIGIT, no	Match any non-numeric character in locale
 CLUMP		CLUMP,  no	Match any combining character sequence
 
-# BRANCH	The set of branches constituting a single choice are hooked
+#* Alternation (31)
+
+# BRANCH  	The set of branches constituting a single choice are hooked
 #		together with their "next" pointers, since precedence prevents
 #		anything being concatenated to any individual branch.  The
 #		"next" pointer of the last BRANCH in a choice points to the
@@ -55,20 +60,26 @@ CLUMP		CLUMP,  no	Match any combining character sequence
 #
 BRANCH		BRANCH, node	Match this alternative, or the next...
 
+#*Back pointer (32)
+
 # BACK		Normal "next" pointers all implicitly point forward; BACK
 #		exists to make loop structures possible.
 # not used
 BACK		BACK,   no	Match "", "next" ptr points backward.
 
-# Literals
+#*Literals (33..35)
+
 EXACT		EXACT,  sv	Match this string (preceded by length).
 EXACTF		EXACT,  sv	Match this string, folded (prec. by length).
 EXACTFL		EXACT,  sv	Match this string, folded in locale (w/len).
 
-# Do nothing
+#*Do nothing types (36..37)
+
 NOTHING		NOTHING,no	Match empty string.
 # A variant of above which delimits a group, thus stops optimizations
 TAIL		NOTHING,no	Match empty string. Can jump here from outside.
+
+#*Loops (38..44)
 
 # STAR,PLUS	'?', and complex '*' and '+', are implemented as circular
 #		BRANCH structures using BACK.  Simple cases (one character
@@ -87,6 +98,8 @@ CURLYX		CURLY,  sv 2	Match this complex thing {n,m} times.
 # This terminator creates a loop structure for CURLYX
 WHILEM		WHILEM, no	Do curly processing and see if rest matches.
 
+#*Buffer related (45..49)
+
 # OPEN,CLOSE,GROUPP	...are numbered at compile time.
 OPEN		OPEN,   num 1	Mark this point in input as start of #n.
 CLOSE		CLOSE,  num 1	Analogous to OPEN.
@@ -95,40 +108,57 @@ REF		REF,    num 1	Match some already matched string
 REFF		REF,    num 1	Match already matched string, folded
 REFFL		REF,    num 1	Match already matched string, folded in loc.
 
-# grouping assertions
+#*Grouping assertions (50..54)
+
 IFMATCH		BRANCHJ,off 1 2	Succeeds if the following matches.
 UNLESSM		BRANCHJ,off 1 2	Fails if the following matches.
 SUSPEND		BRANCHJ,off 1 1	"Independent" sub-RE.
 IFTHEN		BRANCHJ,off 1 1	Switch, should be preceeded by switcher .
 GROUPP		GROUPP, num 1	Whether the group matched.
 
-# Support for long RE
+#*Support for long RE (55..56)
+
 LONGJMP		LONGJMP,off 1 1	Jump far away.
 BRANCHJ		BRANCHJ,off 1 1	BRANCH with long offset.
 
-# The heavy worker
+#*The heavy worker (57..58)
+
 EVAL		EVAL,   evl 1	Execute some Perl code.
 
-# Modifiers
+#*Modifiers (59..60)
+
 MINMOD		MINMOD, no	Next operator is not greedy.
 LOGICAL		LOGICAL,no	Next opcode should set the flag only.
 
-# This is not used yet
+# This is not used yet (61)
 RENUM		BRANCHJ,off 1 1	Group with independently numbered parens.
+
+#*Trie Related (62..64)
+
+# Behave the same as A|LIST|OF|WORDS would. The '..C' variants have  
+# inline charclass data (ascii only), the 'C' store it in the structure.
+# NOTE: the relative order of the TRIE-like regops  is signifigant
+
+TRIE		TRIE,   trie 1	Match many EXACT(FL?)? at once. flags==type
+TRIEC		TRIE,   trie charclass	Same as TRIE, but with embedded charclass data
+
+# For start classes, contains an added fail table.
+AHOCORASICK	TRIE,   trie 1	Aho Corasick stclass. flags==type
+AHOCORASICKC	TRIE,   trie charclass	Same as AHOCORASICK, but with embedded charclass data
+
+# NEW STUFF ABOVE THIS LINE -- Please update counts below. 
+
+#*Special Nodes (65, 66)
 
 # This is not really a node, but an optimized away piece of a "long" node.
 # To simplify debugging output, we mark it as if it were a node
 OPTIMIZED	NOTHING,off	Placeholder for dump.
 
-# Trie Related (behave the same as A|LIST|OF|WORDS would)
-TRIE		TRIE,   trie 1	Match many EXACT(FL?)? at once. flags==type
-TRIEC		TRIE,   trie charclass	Same as TRIE, but with embedded charclass data
-
-# NEW STUFF HERE
 # Special opcode with the property that no opcode in a compiled program
 # will ever be of this type. Thus it can be used as a flag value that
 # no other opcode has been seen. END is used similarly, in that an END
 # node cant be optimized. So END implies "unoptimizable" and PSEUDO mean
 # "not seen anything to optimize yet".
 PSEUDO		PSEUDO,off	Pseudo opcode for internal use.
+
 # NOTHING BELOW HERE

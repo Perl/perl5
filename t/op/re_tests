@@ -990,3 +990,17 @@ X(?!b+(?!(c+)*(?!(c+)*d))).*X	aXbbbbbbbcccccccccccccaaaX	y	-	-
 ^([TUV]+|XXX|YYY|Z.Q*X|Z[TE]Q*P|[MKJ]):	ZEQQQX:	y	$1	ZEQQQX
 X(?:ABCF[cC]x*|ABCD|ABCF):(?:DIT|DID|DIM)	XABCFCxxxxxxxxxx:DIM	y	$&	XABCFCxxxxxxxxxx:DIM
 (((ABCD|ABCE|ABCF)))(A|B|C[xy]*):	ABCFCxxxxxxxxxx:DIM	y	$&	ABCFCxxxxxxxxxx:
+(?=foo)	foo	y	pos	0
+(?=foo)	XfooY	y	pos	1
+.*(?=foo)	XfooY	y	pos	1
+(?<=foo)	foo	y	pos	3
+(?<=foo)	XfooY	y	pos	4
+.*(?<=foo)	foo	y	pos	3
+.*(?<=foo)	XfooY	y	pos	4
+(?<=foo)Y	XfooY	y	pos	5
+o(?<=foo)Y	..XfooY..	y	pos	7
+X(?=foo)f	..XfooY..	y	pos	4
+X(?=foo)	..XfooY..	y	pos	3
+X(?<=foo.)[YZ]	..XfooXY..	y	pos	8
+(?=XY*foo)	Xfoo	y	pos	0
+^(?=XY*foo)	Xfoo	y	pos	0

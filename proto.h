@@ -3587,9 +3587,10 @@ STATIC char*	S_regwhite(char *p, const char *e)
 STATIC char*	S_nextchar(pTHX_ struct RExC_state_t *state)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_scan_commit(pTHX_ const struct RExC_state_t* state, struct scan_data_t *data)
+STATIC void	S_scan_commit(pTHX_ const struct RExC_state_t* state, struct scan_data_t *data, I32 *minlenp)
 			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3);
 
 STATIC void	S_cl_anything(const struct RExC_state_t* state, struct regnode_charclass_class *cl)
 			__attribute__nonnull__(1)
@@ -3616,11 +3617,12 @@ STATIC void	S_cl_or(const struct RExC_state_t* state, struct regnode_charclass_c
 			__attribute__nonnull__(2)
 			__attribute__nonnull__(3);
 
-STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t* state, regnode **scanp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags, U32 depth)
+STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t* state, regnode **scanp, I32 *minlenp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)
-			__attribute__nonnull__(pTHX_4);
+			__attribute__nonnull__(pTHX_4)
+			__attribute__nonnull__(pTHX_5);
 
 STATIC I32	S_add_data(struct RExC_state_t* state, I32 n, const char *s)
 			__attribute__warn_unused_result__
@@ -3706,6 +3708,12 @@ STATIC U8*	S_reghop3(U8 *pos, I32 off, const U8 *lim)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(3);
+
+STATIC U8*	S_reghop4(U8 *pos, I32 off, const U8 *llim, const U8 *rlim)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(1)
+			__attribute__nonnull__(3)
+			__attribute__nonnull__(4);
 
 STATIC U8*	S_reghopmaybe3(U8 *pos, I32 off, const U8 *lim)
 			__attribute__warn_unused_result__

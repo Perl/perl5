@@ -13,6 +13,7 @@ typedef OP OP_4tree;			/* Will be redefined later. */
 
 #define PERL_ENABLE_TRIE_OPTIMISATION 1
 #define PERL_ENABLE_EXTENDED_TRIE_OPTIMISATION 1
+#define PERL_ENABLE_POSITIVE_ASSERTION_STUDY 1
 #define PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS 0
 
 /*
@@ -396,6 +397,7 @@ struct reg_substr_datum {
     I32 max_offset;
     SV *substr;		/* non-utf8 variant */
     SV *utf8_substr;	/* utf8 variant */
+    I32 end_shift;
 };
 
 struct reg_substr_data {
@@ -405,14 +407,19 @@ struct reg_substr_data {
 #define anchored_substr substrs->data[0].substr
 #define anchored_utf8 substrs->data[0].utf8_substr
 #define anchored_offset substrs->data[0].min_offset
+#define anchored_end_shift substrs->data[0].end_shift
+
 #define float_substr substrs->data[1].substr
 #define float_utf8 substrs->data[1].utf8_substr
 #define float_min_offset substrs->data[1].min_offset
 #define float_max_offset substrs->data[1].max_offset
+#define float_end_shift substrs->data[1].end_shift
+
 #define check_substr substrs->data[2].substr
 #define check_utf8 substrs->data[2].utf8_substr
 #define check_offset_min substrs->data[2].min_offset
 #define check_offset_max substrs->data[2].max_offset
+#define check_end_shift substrs->data[2].end_shift
 
 
 
@@ -502,6 +509,10 @@ typedef struct _reg_ac_data reg_ac_data;
 #define TRIE_BITMAP_SET(p, c)	(TRIE_BITMAP_BYTE(p, c) |=  ANYOF_BIT((U8)c))
 #define TRIE_BITMAP_CLEAR(p,c)	(TRIE_BITMAP_BYTE(p, c) &= ~ANYOF_BIT((U8)c))
 #define TRIE_BITMAP_TEST(p, c)	(TRIE_BITMAP_BYTE(p, c) &   ANYOF_BIT((U8)c))
+
+#define IS_ANYOF_TRIE(op) ((op)==TRIEC || (op)==AHOCORASICKC)
+#define IS_TRIE_AC(op) ((op)>=AHOCORASICK)
+
 
 #define BITMAP_BYTE(p, c)	(((U8*)p)[(((U8)(c)) >> 3) & 31])
 #define BITMAP_TEST(p, c)	(BITMAP_BYTE(p, c) &   ANYOF_BIT((U8)c))

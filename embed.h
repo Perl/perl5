@@ -1356,6 +1356,7 @@
 #define regcppush		S_regcppush
 #define regcppop		S_regcppop
 #define reghop3			S_reghop3
+#define reghop4			S_reghop4
 #define reghopmaybe3		S_reghopmaybe3
 #define find_byclass		S_find_byclass
 #define to_utf8_substr		S_to_utf8_substr
@@ -3504,14 +3505,14 @@
 #define join_exact(a,b,c,d,e,f)	S_join_exact(aTHX_ a,b,c,d,e,f)
 #define regwhite		S_regwhite
 #define nextchar(a)		S_nextchar(aTHX_ a)
-#define scan_commit(a,b)	S_scan_commit(aTHX_ a,b)
+#define scan_commit(a,b,c)	S_scan_commit(aTHX_ a,b,c)
 #define cl_anything		S_cl_anything
 #define cl_is_anything		S_cl_is_anything
 #define cl_init			S_cl_init
 #define cl_init_zero		S_cl_init_zero
 #define cl_and			S_cl_and
 #define cl_or			S_cl_or
-#define study_chunk(a,b,c,d,e,f,g)	S_study_chunk(aTHX_ a,b,c,d,e,f,g)
+#define study_chunk(a,b,c,d,e,f,g,h)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h)
 #define add_data		S_add_data
 #endif
 #ifdef PERL_CORE
@@ -3542,6 +3543,7 @@
 #define regcppush(a)		S_regcppush(aTHX_ a)
 #define regcppop(a)		S_regcppop(aTHX_ a)
 #define reghop3			S_reghop3
+#define reghop4			S_reghop4
 #define reghopmaybe3		S_reghopmaybe3
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
 #define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)

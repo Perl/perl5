@@ -72,23 +72,33 @@ while (<TESTS>) {
     $skip = ($skip_amp ? ($result =~ s/B//i) : ($result =~ s/B//));
     $reason = 'skipping $&' if $reason eq  '' && $skip_amp;
     $result =~ s/B//i unless $skip;
-    for $study ('', 'study \$subject') {
+
+    for $study ('', 'study $subject') {
  	$c = $iters;
-    if ($qr_embed) {
- 	    eval qq"
-            my \$RE = qr$pat;
-            $study;
-            \$match = (\$subject =~ /(?:)\$RE(?:)/) while \$c--;
-            \$got = \"$repl\";
-        ";
-    } 
-    else {
- 	    eval qq"
-            $study;
-            \$match = (\$subject =~ $OP$pat) while \$c--;
-            \$got = \"$repl\";
-        ";
-    }
+        if ($repl eq 'pos') {
+            $code= <<EOFCODE;
+                $study;
+                pos(\$subject)=0;
+                \$match = ( \$subject =~ m${pat}g );
+                \$got = pos(\$subject);
+EOFCODE
+        }
+        elsif ($qr_embed) {
+            $code= <<EOFCODE;
+                my \$RE = qr$pat;
+                $study;
+                \$match = (\$subject =~ /(?:)\$RE(?:)/) while \$c--;
+                \$got = "$repl";
+EOFCODE
+        }
+        else {
+            $code= <<EOFCODE;
+                $study;
+                \$match = (\$subject =~ $OP$pat$addg) while \$c--;
+                \$got = "$repl";
+EOFCODE
+        }
+        eval $code;
 	chomp( $err = $@ );
 	if ($result eq 'c') {
 	    if ($err !~ m!^\Q$expect!) { print "not ok $. (compile) $input => `$err'\n"; next TEST }
@@ -99,14 +109,14 @@ while (<TESTS>) {
 	    next TEST;
 	}
 	elsif ($@) {
-	    print "not ok $. $input => error `$err'\n"; next TEST;
+	    print "not ok $. $input => error `$err'\n$code\n$@\n"; next TEST;
 	}
 	elsif ($result eq 'n') {
 	    if ($match) { print "not ok $. ($study) $input => false positive\n"; next TEST }
 	}
 	else {
 	    if (!$match || $got ne $expect) {
- 		print "not ok $. ($study) $input => `$got', match=$match\n";
+ 		print "not ok $. ($study) $input => `$got', match=$match\n$code\n";
 		next TEST;
 	    }
 	}

@@ -1313,7 +1313,7 @@ Es	|void	|regtail	|NN struct RExC_state_t *state|NN regnode *p|NN const regnode 
 Es	|U32	|join_exact	|NN struct RExC_state_t *state|NN regnode *scan|NN I32 *min|U32 flags|NULLOK regnode *val|U32 depth
 EsRn	|char*	|regwhite	|NN char *p|NN const char *e
 Es	|char*	|nextchar	|NN struct RExC_state_t *state
-Es	|void	|scan_commit	|NN const struct RExC_state_t* state|NN struct scan_data_t *data
+Es	|void	|scan_commit	|NN const struct RExC_state_t* state|NN struct scan_data_t *data|NN I32 *minlenp
 Esn	|void	|cl_anything	|NN const struct RExC_state_t* state|NN struct regnode_charclass_class *cl
 EsRn	|int	|cl_is_anything	|NN const struct regnode_charclass_class *cl
 Esn	|void	|cl_init	|NN const struct RExC_state_t* state|NN struct regnode_charclass_class *cl
@@ -1323,7 +1323,8 @@ Esn	|void	|cl_and		|NN struct regnode_charclass_class *cl \
 Esn	|void	|cl_or		|NN const struct RExC_state_t* state|NN struct regnode_charclass_class *cl \
 				|NN const struct regnode_charclass_class *or_with
 Es	|I32	|study_chunk	|NN struct RExC_state_t* state|NN regnode **scanp \
-				|NN I32 *deltap|NN regnode *last|NULLOK struct scan_data_t *data \
+				|NN I32 *minlenp|NN I32 *deltap \
+				|NN regnode *last|NULLOK struct scan_data_t *data \
 				|U32 flags|U32 depth
 EsRn	|I32	|add_data	|NN struct RExC_state_t* state|I32 n|NN const char *s
 rs	|void	|re_croak2	|NN const char* pat1|NN const char* pat2|...
@@ -1357,6 +1358,7 @@ ERs	|bool	|reginclass	|NULLOK const regexp *prog|NN const regnode *n|NN const U8
 Es	|CHECKPOINT|regcppush	|I32 parenfloor
 Es	|char*	|regcppop	|NN const regexp *rex
 ERsn	|U8*	|reghop3	|NN U8 *pos|I32 off|NN const U8 *lim
+ERsn	|U8*	|reghop4	|NN U8 *pos|I32 off|NN const U8 *llim|NN const U8 *rlim
 ERsn	|U8*	|reghopmaybe3	|NN U8 *pos|I32 off|NN const U8 *lim
 ERs	|char*	|find_byclass	|NN regexp * prog|NN const regnode *c|NN char *s|NN const char *strend|NULLOK const regmatch_info *reginfo
 Es	|void	|to_utf8_substr	|NN regexp * prog

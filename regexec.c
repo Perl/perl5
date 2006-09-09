@@ -356,7 +356,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     register SV *check;
     char *strbeg;
     char *t;
-    const int do_utf8 = sv ? SvUTF8(sv) : 0;	/* if no sv we have to assume bytes */
+    const bool do_utf8 = (sv && SvUTF8(sv)) ? 1 : 0; /* if no sv we have to assume bytes */
     I32 ml_anch;
     register char *other_last = NULL;	/* other substr checked before this */
     char *check_at = NULL;		/* check substr found at this pos */
@@ -374,7 +374,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     }
     DEBUG_EXECUTE_r( 
         debug_start_match(prog, do_utf8, strpos, strend, 
-            "Guessing start of match for");
+            sv ? "Guessing start of match in sv for"
+               : "Guessing start of match in string for");
 	      );
 
     /* CHR_DIST() would be more correct here but it makes things slow. */
@@ -383,6 +384,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			      "String too short... [re_intuit_start]\n"));
 	goto fail;
     }
+                
     strbeg = (sv && SvPOK(sv)) ? strend - SvCUR(sv) : strpos;
     PL_regeol = strend;
     if (do_utf8) {
@@ -394,9 +396,9 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    to_byte_substr(prog);
 	check = prog->check_substr;
     }
-   if (check == &PL_sv_undef) {
+    if (check == &PL_sv_undef) {
 	DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-		"Non-utf string cannot match utf check string\n"));
+		"Non-utf8 string cannot match utf8 check string\n"));
 	goto fail;
     }
     if (prog->reganch & ROPT_ANCH) {	/* Match at beg-of-str or after \n */
@@ -419,6 +421,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    I32 slen;
 
 	    s = HOP3c(strpos, prog->check_offset_min, strend);
+	    
 	    if (SvTAIL(check)) {
 		slen = SvCUR(check);	/* >= 1 */
 
@@ -448,8 +451,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	/* Match is anchored, but substr is not anchored wrt beg-of-str. */
 	s = strpos;
 	start_shift = prog->check_offset_min; /* okay to underestimate on CC */
-	end_shift = prog->minlen - start_shift -
-	    CHR_SVLEN(check) + (SvTAIL(check) != 0);
+	end_shift = prog->check_end_shift;
+	
 	if (!ml_anch) {
 	    const I32 end = prog->check_offset_max + CHR_SVLEN(check)
 					 - (SvTAIL(check) != 0);
@@ -462,20 +465,37 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     else {				/* Can match at random position */
 	ml_anch = 0;
 	s = strpos;
-	start_shift = prog->check_offset_min; /* okay to underestimate on CC */
-	/* Should be nonnegative! */
-	end_shift = prog->minlen - start_shift -
-	    CHR_SVLEN(check) + (SvTAIL(check) != 0);
+	start_shift = prog->check_offset_min;  /* okay to underestimate on CC */
+	end_shift = prog->check_end_shift;
+	
+	/* end shift should be non negative here */
     }
 
 #ifdef DEBUGGING	/* 7/99: reports of failure (with the older version) */
     if (end_shift < 0)
-	Perl_croak(aTHX_ "panic: end_shift");
+	Perl_croak(aTHX_ "panic: end_shift: %"IVdf" pattern:\n%s\n ",
+	    end_shift,prog->precomp);
 #endif
 
   restart:
     /* Find a possible match in the region s..strend by looking for
        the "check" substring in the region corrected by start/end_shift. */
+    
+    {
+        I32 srch_start_shift = start_shift;
+        I32 srch_end_shift = end_shift;
+        if (srch_start_shift < 0 && strbeg - s > srch_start_shift) {
+	    srch_end_shift -= ((strbeg - s) - srch_start_shift); 
+	    srch_start_shift = strbeg - s;
+	}
+    DEBUG_OPTIMISE_r({
+        PerlIO_printf(Perl_debug_log, "Check offset min: %"IVdf" Start shift: %"IVdf" End shift %"IVdf" Real End Shift: %"IVdf"\n",
+            (IV)prog->check_offset_min,
+            (IV)srch_start_shift,
+            (IV)srch_end_shift, 
+            (IV)prog->check_end_shift);
+    });       
+        
     if (flags & REXEC_SCREAM) {
 	I32 p = -1;			/* Internal iterator of scream. */
 	I32 * const pp = data ? data->scream_pos : &p;
@@ -485,7 +505,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		 && (BmPREVIOUS(check) == SvCUR(check) - 1)
 		 && SvTAIL(check) ))
 	    s = screaminstr(sv, check,
-			    start_shift + (s - strbeg), end_shift, pp, 0);
+			    srch_start_shift + (s - strbeg), srch_end_shift, pp, 0);
 	else
 	    goto fail_finish;
 	/* we may be pointing at the wrong string */
@@ -494,15 +514,27 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	if (data)
 	    *data->scream_olds = s;
     }
-    else if (prog->reganch & ROPT_CANY_SEEN)
-	s = fbm_instr((U8*)(s + start_shift),
-		      (U8*)(strend - end_shift),
-		      check, multiline ? FBMrf_MULTILINE : 0);
-    else
-	s = fbm_instr(HOP3(s, start_shift, strend),
-		      HOP3(strend, -end_shift, strbeg),
-		      check, multiline ? FBMrf_MULTILINE : 0);
+    else {
+        U8* start_point;
+        U8* end_point;
+        if (prog->reganch & ROPT_CANY_SEEN) {
+            start_point= (U8*)(s + srch_start_shift);
+            end_point= (U8*)(strend - srch_end_shift);
+        } else {
+	    start_point= HOP3(s, srch_start_shift, srch_start_shift < 0 ? strbeg : strend);
+            end_point= HOP3(strend, -srch_end_shift, strbeg);
+	}
+	DEBUG_OPTIMISE_r({
+            PerlIO_printf(Perl_debug_log, "fbm_instr len=%"IVdf" str=<%.*s>\n", 
+                (int)(end_point - start_point),
+                (int)(end_point - start_point), 
+                start_point);
+        });
 
+	s = fbm_instr( start_point, end_point,
+		      check, multiline ? FBMrf_MULTILINE : 0);
+    }
+    }
     /* Update the count-of-usability, remove useless subpatterns,
 	unshift s.  */
 
@@ -520,11 +552,19 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 
     if (!s)
 	goto fail_finish;
-
-    check_at = s;
-
     /* Finish the diagnostic message */
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%ld...\n", (long)(s - i_strpos)) );
+
+    /* XXX dmq: first branch is for positive lookbehind...
+       Our check string is offset from the beginning of the pattern.
+       So we need to do any stclass tests offset forward from that 
+       point. I think. :-(
+     */
+    
+        
+    
+    check_at=s;
+     
 
     /* Got a candidate.  Check MBOL anchoring, and the *other* substr.
        Start with the other substr.
@@ -534,7 +574,9 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
        Probably it is right to do no SCREAM here...
      */
 
-    if (do_utf8 ? (prog->float_utf8 && prog->anchored_utf8) : (prog->float_substr && prog->anchored_substr)) {
+    if (do_utf8 ? (prog->float_utf8 && prog->anchored_utf8) 
+                : (prog->float_substr && prog->anchored_substr)) 
+    {
 	/* Take into account the "other" substring. */
 	/* XXXX May be hopelessly wrong for UTF... */
 	if (!other_last)
@@ -561,12 +603,17 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		last2 = last1 = HOP3c(strend, -prog->minlen, strbeg);
 		if (last < last1)
 		    last1 = last;
- /* XXXX It is not documented what units *_offsets are in.  Assume bytes.  */
+                /* XXXX It is not documented what units *_offsets are in.  
+                   We assume bytes, but this is clearly wrong. 
+                   Meaning this code needs to be carefully reviewed for errors.
+                   dmq.
+                  */
+ 
 		/* On end-of-str: see comment below. */
 		must = do_utf8 ? prog->anchored_utf8 : prog->anchored_substr;
 		if (must == &PL_sv_undef) {
 		    s = (char*)NULL;
-		    DEBUG_EXECUTE_r(must = prog->anchored_utf8);	/* for debug */
+		    DEBUG_r(must = prog->anchored_utf8);	/* for debug */
 		}
 		else
 		    s = fbm_instr(
@@ -630,7 +677,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	       and end-of-str is not later than strend we are OK. */
 	    if (must == &PL_sv_undef) {
 		s = (char*)NULL;
-		DEBUG_EXECUTE_r(must = prog->float_utf8);	/* for debug message */
+		DEBUG_r(must = prog->float_utf8);	/* for debug message */
 	    }
 	    else
 		s = fbm_instr((unsigned char*)s,
@@ -669,11 +716,26 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	}
     }
 
-    t = s - prog->check_offset_max;
+    
+    t= HOP3( s, -prog->check_offset_max, (prog->check_offset_max<0) ? strend : strpos);  
+        
+    DEBUG_OPTIMISE_r(
+        PerlIO_printf(Perl_debug_log, 
+            "Check offset min:%"IVdf" max:%"IVdf" S:%"IVdf" t:%"IVdf" D:%"IVdf" end:%"IVdf"\n",
+            (IV)prog->check_offset_min,
+            (IV)prog->check_offset_max,
+            (IV)(s-strpos),
+            (IV)(t-strpos),
+            (IV)(t-s),
+            (IV)(strend-strpos)
+        )
+    );
+
     if (s - strpos > prog->check_offset_max  /* signed-corrected t > strpos */
         && (!do_utf8
-	    || ((t = (char*)reghopmaybe3((U8*)s, -prog->check_offset_max, (U8*)strpos))
-		 && t > strpos))) {
+	    || ((t = (char*)reghopmaybe3((U8*)s, -prog->check_offset_max, (prog->check_offset_max<0) ? strend : strpos))
+		 && t > strpos))) 
+    {
 	/* Fixed substring is found far enough so that the match
 	   cannot start at strpos. */
       try_at_offset:
@@ -782,6 +844,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 
     /* Last resort... */
     /* XXXX BmUSEFUL already changed, maybe multiple change is meaningful... */
+    /* trie stclasses are too expensive to use here, we are better off to
+       leave it to regmatch itself */
     if (prog->regstclass && PL_regkind[OP(prog->regstclass)]!=TRIE) {
 	/* minlen == 0 is possible if regstclass is \b or \B,
 	   and the fixed substr is ''$.
@@ -795,14 +859,17 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
         const int cl_l = (PL_regkind[OP(prog->regstclass)] == EXACT
 		    ? CHR_DIST(str+STR_LEN(prog->regstclass), str)
 		    : 1);
-	const char * endpos = (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
-		? HOP3c(s, (prog->minlen ? cl_l : 0), strend)
-		: (prog->float_substr || prog->float_utf8
-		   ? HOP3c(HOP3c(check_at, -start_shift, strbeg),
-			   cl_l, strend)
-		   : strend);
-        /*if (OP(prog->regstclass) == TRIE)
-            endpos++;*/
+	char * endpos;
+	if (prog->anchored_substr || prog->anchored_utf8 || ml_anch)
+            endpos= HOP3c(s, (prog->minlen ? cl_l : 0), strend);
+        else if (prog->float_substr || prog->float_utf8)
+	    endpos= HOP3c(HOP3c(check_at, -start_shift, strbeg), cl_l, strend);
+        else 
+            endpos= strend;
+		    
+        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "start_shift: %"IVdf" check_at: %"IVdf" s: %"IVdf" endpos: %"IVdf"\n",
+                      start_shift,check_at-strbeg,s-strbeg,endpos-strbeg));
+	
 	t = s;
         s = find_byclass(prog, prog->regstclass, s, endpos, NULL);
 	if (!s) {
@@ -1329,8 +1396,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 		!isDIGIT_LC_utf8((U8*)s),
 		!isDIGIT_LC(*s)
 	    );
-	case TRIEC:
-	case TRIE: 
+	case AHOCORASICKC:
+	case AHOCORASICK: 
 	    {
 	        const enum { trie_plain, trie_utf8, trie_utf8_fold }
 		    trie_type = do_utf8 ?
@@ -1369,7 +1436,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 SvPOK_on(sv_points);
                 sv_2mortal(sv_points);
                 points=(U8**)SvPV_nolen(sv_points );
-                if ( trie_type != trie_utf8_fold && (trie->bitmap || OP(c)==TRIEC) ) {
+                if ( trie_type != trie_utf8_fold 
+                     && (trie->bitmap || OP(c)==AHOCORASICKC) ) 
+                {
                     if (trie->bitmap) 
                         bitmap=(U8*)trie->bitmap;
                     else
@@ -1412,19 +1481,21 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         int failed=0;
                         U32 word = aho->states[ state ].wordnum;
 
-                        if( state==1 && bitmap ) {
-                            DEBUG_TRIE_EXECUTE_r(
-                                if ( uc <= (U8*)last_start && !BITMAP_TEST(bitmap,*uc) ) {
-                                    dump_exec_pos( (char *)uc, c, strend, real_start, 
-                                        (char*)uc, do_utf8 );
-                                    PerlIO_printf( Perl_debug_log,
-                                        " Scanning for legal start char...\n");
+                        if( state==1 ) {
+                            if ( bitmap ) {
+                                DEBUG_TRIE_EXECUTE_r(
+                                    if ( uc <= (U8*)last_start && !BITMAP_TEST(bitmap,*uc) ) {
+                                        dump_exec_pos( (char *)uc, c, strend, real_start, 
+                                            (char *)uc, do_utf8 );
+                                        PerlIO_printf( Perl_debug_log,
+                                            " Scanning for legal start char...\n");
+                                    }
+                                );            
+                                while ( uc <= (U8*)last_start  && !BITMAP_TEST(bitmap,*uc) ) {
+                                    uc++;
                                 }
-                            );            
-                            while ( uc <= (U8*)last_start  && !BITMAP_TEST(bitmap,*uc) ) {
-                                uc++;
+                                s= (char *)uc;
                             }
-                            s= (char *)uc;    
                             if (uc >(U8*)last_start) break;
                         }
                                             
@@ -1585,14 +1656,20 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     reginfo.prog = prog;
 
     RX_MATCH_UTF8_set(prog, do_utf8);
+    DEBUG_EXECUTE_r( 
+        debug_start_match(prog, do_utf8, startpos, strend, 
+        "Matching");
+    );
 
     minlen = prog->minlen;
-    if (strend - startpos < minlen) {
+    
+    if (strend - startpos < (minlen+(prog->check_offset_min<0?prog->check_offset_min:0))) {
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 			      "String too short [regexec_flags]...\n"));
 	goto phooey;
     }
 
+    
     /* Check validity of program. */
     if (UCHARAT(prog->program) != REG_MAGIC) {
 	Perl_croak(aTHX_ "corrupted regexp program");
@@ -1651,10 +1728,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	}
     }
 
-    DEBUG_EXECUTE_r( 
-        debug_start_match(prog, do_utf8, startpos, strend, 
-            "Matching");
-	      );
+
 
     /* Simplest case:  anchored match need be tried only once. */
     /*  [unless only anchor is BOL and multiline is set] */
@@ -1768,14 +1842,19 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    back_max = prog->float_max_offset;
 	    back_min = prog->float_min_offset;
 	}
+	
+	    
 	if (must == &PL_sv_undef)
 	    /* could not downgrade utf8 check substring, so must fail */
 	    goto phooey;
 
-	last = HOP3c(strend,	/* Cannot start after this */
-			  -(I32)(CHR_SVLEN(must)
-				 - (SvTAIL(must) != 0) + back_min), strbeg);
-
+        if (back_min<0) {
+	    last = strend;
+	} else {
+            last = HOP3c(strend,	/* Cannot start after this */
+        	  -(I32)(CHR_SVLEN(must)
+        		 - (SvTAIL(must) != 0) + back_min), strbeg);
+        }
 	if (s > PL_bostr)
 	    last1 = HOPc(s, -1);
 	else
@@ -1788,9 +1867,9 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	strend = HOPc(strend, -dontbother);
 	while ( (s <= last) &&
 		((flags & REXEC_SCREAM)
-		 ? (s = screaminstr(sv, must, HOP3c(s, back_min, strend) - strbeg,
+		 ? (s = screaminstr(sv, must, HOP3c(s, back_min, (back_min<0 ? strbeg : strend)) - strbeg,
 				    end_shift, &scream_pos, 0))
-		 : (s = fbm_instr((unsigned char*)HOP3(s, back_min, strend),
+		 : (s = fbm_instr((unsigned char*)HOP3(s, back_min, (back_min<0 ? strbeg : strend)),
 				  (unsigned char*)strend, must,
 				  multiline ? FBMrf_MULTILINE : 0))) ) {
 	    /* we may be pointing at the wrong string */
@@ -2352,9 +2431,10 @@ S_debug_start_match(pTHX_ const regexp *prog, const bool do_utf8,
 		       PL_colors[4], blurb, PL_colors[5], s0, s1); 
         
         if (do_utf8||utf8_pat) 
-            PerlIO_printf(Perl_debug_log, "UTF-8 %s...\n",
-                !do_utf8 ? "pattern" : !utf8_pat ? "string" : 
-                    "pattern and string"
+            PerlIO_printf(Perl_debug_log, "UTF-8 %s%s%s...\n",
+                utf8_pat ? "pattern" : "",
+                utf8_pat && do_utf8 ? " and " : "",
+                do_utf8 ? "string" : ""
             ); 
     }
 }
@@ -2396,15 +2476,16 @@ S_dump_exec_pos(pTHX_ const char *locinput,
 	const int is_uni = (do_utf8 && OP(scan) != CANY) ? 1 : 0;
 
 	RE_PV_COLOR_DECL(s0,len0,is_uni,PERL_DEBUG_PAD(0),
-	    (locinput - pref_len),pref0_len, pref0_len, 4, 5);
+	    (locinput - pref_len),pref0_len, 60, 4, 5);
 	
 	RE_PV_COLOR_DECL(s1,len1,is_uni,PERL_DEBUG_PAD(1),
 		    (locinput - pref_len + pref0_len),
-		    pref_len - pref0_len, pref_len - pref0_len, 2, 3);
+		    pref_len - pref0_len, 60, 2, 3);
 	
 	RE_PV_COLOR_DECL(s2,len2,is_uni,PERL_DEBUG_PAD(2),
-		    locinput, loc_regeol - locinput, l, 0, 1);
+		    locinput, loc_regeol - locinput, 10, 0, 1);
 
+	const STRLEN tlen=len0+len1+len2;
 	PerlIO_printf(Perl_debug_log,
 		    "%4"IVdf" <%.*s%.*s%s%.*s>%*s|",
 		    (IV)(locinput - loc_bostr),
@@ -2412,7 +2493,7 @@ S_dump_exec_pos(pTHX_ const char *locinput,
 		    len1, s1,
 		    (docolor ? "" : "> <"),
 		    len2, s2,
-		    15 - l - pref_len + 1,
+		    tlen > 19 ? 0 :  19 - tlen,
 		    "");
     }
 }
@@ -2488,6 +2569,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
         DEBUG_EXECUTE_r( {
 	    SV * const prop = sv_newmortal();
+	    regnode *rnext=regnext(scan);
 	    DUMP_EXEC_POS( locinput, scan, do_utf8 );
 	    regprop(rex, prop, scan);
             
@@ -2495,7 +2577,8 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    "%3"IVdf":%*s%s(%"IVdf")\n",
 		    (IV)(scan - rex->program), PL_regindent*2, "",
 		    SvPVX_const(prop),
-		    PL_regkind[OP(scan)] == END ? 0 : (IV)(regnext(scan) - rex->program));
+		    (PL_regkind[OP(scan)] == END || !rnext) ? 
+		        0 : (IV)(rnext - rex->program));
 	});
 
 	next = scan + NEXT_OFF(scan);
@@ -3332,11 +3415,6 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		}
 
 		/* run the pattern returned from (??{...}) */
-		DEBUG_EXECUTE_r(
-                    debug_start_match(re, do_utf8, locinput, PL_regeol, 
-                        "Matching embedded");
-		    );
-
 		ST.cp = regcppush(0);	/* Save *all* the positions. */
 		REGCP_SET(ST.lastcp);
 		*PL_reglastparen = 0;
@@ -3354,6 +3432,10 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		rex = re;
 
 		ST.B = next;
+		DEBUG_EXECUTE_r(
+                    debug_start_match(re, do_utf8, locinput, PL_regeol, 
+                        "Matching embedded");
+		    );
 		/* now continue  from first node in postoned RE */
 		PUSH_YES_STATE_GOTO(EVAL_A, re->program + 1);
 		/* NOTREACHED */
@@ -3383,7 +3465,6 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	     /* continue at the node following the (??{...}) */
 	    scan = ST.B;
 	    continue;
-
 	case EVAL_A_fail: /* unsuccessfully ran inner rex (??{rex}) */
 	    /* Restore state to the outer re then re-throw the failure */
 	    if (ST.toggleutf)
@@ -4443,7 +4524,6 @@ yes_final:
     if (yes_state) {
 	/* we have successfully completed a subexpression, but we must now
 	 * pop to the state marked by yes_state and continue from there */
-
 	assert(st != yes_state);
 	while (yes_state < SLAB_FIRST(PL_regmatch_slab)
 	    || yes_state > SLAB_LAST(PL_regmatch_slab))
@@ -4461,9 +4541,9 @@ yes_final:
 	PL_regmatch_state = st;
 
 	switch (st->resume_state) {
+	case EVAL_A: 
 	case IFMATCH_A:
 	case CURLYM_A:
-	case EVAL_A:
 	    state_num = st->resume_state;
 	    goto reenter_switch;
 
@@ -5064,19 +5144,41 @@ S_reghop3(U8 *s, I32 off, const U8* lim)
 	}
     }
     else {
-	while (off++) {
-	    if (s > lim) {
-		s--;
-		if (UTF8_IS_CONTINUED(*s)) {
-		    while (s > (U8*)lim && UTF8_IS_CONTINUATION(*s))
-			s--;
-		}
-		/* XXX could check well-formedness here */
+        while (off++ && s > lim) {
+            s--;
+            if (UTF8_IS_CONTINUED(*s)) {
+                while (s > lim && UTF8_IS_CONTINUATION(*s))
+                    s--;
 	    }
+            /* XXX could check well-formedness here */
 	}
     }
     return s;
 }
+
+STATIC U8 *
+S_reghop4(U8 *s, I32 off, const U8* llim, const U8* rlim)
+{
+    dVAR;
+    if (off >= 0) {
+        while (off-- && s < rlim) {
+            /* XXX could check well-formedness here */
+            s += UTF8SKIP(s);
+        }
+    }
+    else {
+        while (off++ && s > llim) {
+            s--;
+            if (UTF8_IS_CONTINUED(*s)) {
+                while (s > llim && UTF8_IS_CONTINUATION(*s))
+                    s--;
+            }
+            /* XXX could check well-formedness here */
+        }
+    }
+    return s;
+}
+
 
 STATIC U8 *
 S_reghopmaybe3(U8* s, I32 off, const U8* lim)
@@ -5091,17 +5193,13 @@ S_reghopmaybe3(U8* s, I32 off, const U8* lim)
 	    return NULL;
     }
     else {
-	while (off++) {
-	    if (s > lim) {
-		s--;
-		if (UTF8_IS_CONTINUED(*s)) {
-		    while (s > (U8*)lim && UTF8_IS_CONTINUATION(*s))
-			s--;
-		}
-		/* XXX could check well-formedness here */
+        while (off++ && s > lim) {
+            s--;
+            if (UTF8_IS_CONTINUED(*s)) {
+                while (s > lim && UTF8_IS_CONTINUATION(*s))
+                    s--;
 	    }
-	    else
-		break;
+            /* XXX could check well-formedness here */
 	}
 	if (off <= 0)
 	    return NULL;
