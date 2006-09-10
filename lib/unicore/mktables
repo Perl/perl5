@@ -45,6 +45,13 @@ while (@ARGV)
     } elsif ($arg eq '-w') {
         $AlwaysWrite = 1;	# update the files even if they havent changed
         $FileList = "";
+    } elsif ($arg eq '-check') {
+        my $this = shift @ARGV;
+        my $ok = shift @ARGV;
+        if ($this ne $ok) {
+            print "Skipping as check params are not the same.\n";
+            exit(0);
+        }
     } elsif ($arg eq '-maketest') {
         $MakeTestScript = 1;
     } elsif ($arg eq '-makelist') {
@@ -61,7 +68,8 @@ while (@ARGV)
             "  -maketest   : Make test script\n",
             "  -makelist   : Rewrite the file list based on current setup\n",
             "  -L filelist : Use this file list, (defaults to $0)\n",
-            "  -C dir      : Change to this directory before proceding\n";   
+            "  -C dir      : Change to this directory before proceeding\n",
+            "  -check A B  : Executes only if A and B are the same\n";   
     }
 }
 
