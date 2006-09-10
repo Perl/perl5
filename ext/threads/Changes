@@ -1,5 +1,12 @@
 Revision history for Perl extension threads.
 
+1.41 Fri Sep  8 19:28:41 EST 2006
+	- Race condition fixes
+
+1.39 Tue Aug 30 12:00:00 EDT 2006
+	- Signals are safe in 5.8.0
+	- Upgraded ppport.h to Devel::PPPort 3.10
+
 1.38 Tue Aug  1 11:48:56 EDT 2006
 	- Fixes to tests
 

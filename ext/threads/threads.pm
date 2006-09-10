@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.38';
+our $VERSION = '1.41';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -129,7 +129,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.38
+This document describes threads version 1.41
 
 =head1 SYNOPSIS
 
@@ -139,13 +139,13 @@ This document describes threads version 1.38
         my @args = @_;
         print('Thread started: ', join(' ', @args), "\n");
     }
-    my $thread = threads->create('start_thread', 'argument');
-    $thread->join();
+    my $thr = threads->create('start_thread', 'argument');
+    $thr->join();
 
     threads->create(sub { print("I am a thread\n"); })->join();
 
-    my $thread3 = async { foreach (@files) { ... } };
-    $thread3->join();
+    my $thr2 = async { foreach (@files) { ... } };
+    $thr2->join();
 
     # Invoke thread in list context (implicit) so it can return a list
     my ($thr) = threads->create(sub { return (qw/a b c/); });
@@ -154,16 +154,15 @@ This document describes threads version 1.38
                               sub { return (qw/a b c/); });
     my @results = $thr->join();
 
-    $thread->detach();
+    $thr->detach();
 
     # Get a thread's object
-    $thread = threads->self();
-    $thread = threads->object($tid);
+    $thr = threads->self();
+    $thr = threads->object($tid);
 
     # Get a thread's ID
     $tid = threads->tid();
-    $tid = threads->self->tid();
-    $tid = $thread->tid();
+    $tid = $thr->tid();
 
     # Give other threads a chance to run
     threads->yield();
@@ -887,7 +886,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.38/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.41/threads.pm>
 
 L<threads::shared>, L<perlthrtut>
 

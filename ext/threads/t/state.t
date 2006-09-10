@@ -180,7 +180,7 @@ ok($thr->is_detached(),   'thread detached');
 ok(! $thr->is_joinable(), 'thread not joinable');
 ok(threads->list(threads::joinable) == 0, 'thread joinable list');
 
-$thr = threads->create(sub {
+threads->create(sub {
     ok(! threads->is_detached(), 'thread not detached');
     ok(threads->list(threads::running) == 1, 'thread running list');
     ok(threads->list(threads::joinable) == 0, 'thread joinable list');

@@ -154,7 +154,7 @@ S_ithread_destruct(pTHX_ ithread *thread)
 #ifdef WIN32
     HANDLE handle;
 #endif
-    /* Thread is still in use */
+    /* Return if thread is still being used */
     if (thread->count != 0) {
         return;
     }
@@ -182,8 +182,9 @@ S_ithread_destruct(pTHX_ ithread *thread)
     MUTEX_DESTROY(&thread->mutex);
 
 #ifdef WIN32
-    if (handle)
+    if (handle) {
         CloseHandle(handle);
+    }
 #endif
 
     /* Call PerlMemShared_free() in the context of the "first" interpreter
@@ -250,8 +251,9 @@ ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
                (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)));
     MUTEX_UNLOCK(&thread->mutex);
 
-    if (cleanup)
+    if (cleanup) {
         S_ithread_destruct(aTHX_ thread);
+    }
     return (0);
 }
 
@@ -281,8 +283,9 @@ static IV
 good_stack_size(pTHX_ IV stack_size)
 {
     /* Use default stack size if no stack size specified */
-    if (! stack_size)
+    if (! stack_size) {
         return (default_stack_size);
+    }
 
 #ifdef PTHREAD_STACK_MIN
     /* Can't use less than minimum */
@@ -322,8 +325,9 @@ good_stack_size(pTHX_ IV stack_size)
         page_size = 8192;   /* A conservative default */
 #    endif
 #  endif
-        if (page_size <= 0)
+        if (page_size <= 0) {
             Perl_croak(aTHX_ "PANIC: bad pagesize %" IVdf, (IV)page_size);
+        }
 #endif
     }
     stack_size = ((stack_size + (page_size - 1)) / page_size) * page_size;
@@ -436,8 +440,9 @@ S_ithread_run(void * arg)
     /* Mark as finished */
     thread->state |= PERL_ITHR_FINISHED;
     /* Clear exit flag if required */
-    if (thread->state & PERL_ITHR_THREAD_EXIT_ONLY)
+    if (thread->state & PERL_ITHR_THREAD_EXIT_ONLY) {
         exit_app = 0;
+    }
     /* Cleanup if detached */
     cleanup = (thread->state & PERL_ITHR_DETACHED);
     MUTEX_UNLOCK(&thread->mutex);
@@ -471,8 +476,9 @@ S_ithread_run(void * arg)
     }
 
     /* Clean up detached thread */
-    if (cleanup)
+    if (cleanup) {
         S_ithread_destruct(aTHX_ thread);
+    }
 
 #ifdef WIN32
     return ((DWORD)0);
@@ -483,6 +489,7 @@ S_ithread_run(void * arg)
 
 
 /* Type conversion helper functions */
+
 static SV *
 ithread_to_SV(pTHX_ SV *obj, ithread *thread, char *classname, bool inc)
 {
@@ -726,10 +733,11 @@ S_ithread_create(
         S_ithread_destruct(aTHX_ thread);
 #ifndef WIN32
         if (ckWARN_d(WARN_THREADS)) {
-            if (rc_stack_size)
+            if (rc_stack_size) {
                 Perl_warn(aTHX_ "Thread creation failed: pthread_attr_setstacksize(%" IVdf ") returned %d", thread->stack_size, rc_stack_size);
-            else
+            } else {
                 Perl_warn(aTHX_ "Thread creation failed: pthread_create returned %d", rc_thread_create);
+            }
         }
 #endif
         return (NULL);
@@ -765,13 +773,15 @@ ithread_create(...)
         int ii;
     CODE:
         if ((items >= 2) && SvROK(ST(1)) && SvTYPE(SvRV(ST(1)))==SVt_PVHV) {
-            if (--items < 2)
+            if (--items < 2) {
                 Perl_croak(aTHX_ "Usage: threads->create(\\%specs, function, ...)");
+            }
             specs = (HV*)SvRV(ST(1));
             idx = 1;
         } else {
-            if (items < 2)
+            if (items < 2) {
                 Perl_croak(aTHX_ "Usage: threads->create(function, ...)");
+            }
             specs = NULL;
             idx = 0;
         }
@@ -887,8 +897,9 @@ ithread_list(...)
         int want_running;
     PPCODE:
         /* Class method only */
-        if (SvROK(ST(0)))
+        if (SvROK(ST(0))) {
             Perl_croak(aTHX_ "Usage: threads->list(...)");
+        }
         classname = (char *)SvPV_nolen(ST(0));
 
         /* Calling context */
@@ -943,8 +954,9 @@ ithread_self(...)
         ithread *thread;
     CODE:
         /* Class method only */
-        if (SvROK(ST(0)))
+        if (SvROK(ST(0))) {
             Perl_croak(aTHX_ "Usage: threads->self()");
+        }
         classname = (char *)SvPV_nolen(ST(0));
 
         thread = S_ithread_get(aTHX);
@@ -978,8 +990,9 @@ ithread_join(...)
 #endif
     PPCODE:
         /* Object method only */
-        if (! sv_isobject(ST(0)))
+        if (! sv_isobject(ST(0))) {
             Perl_croak(aTHX_ "Usage: $thr->join()");
+        }
 
         /* Check if the thread is joinable */
         thread = SV_to_ithread(aTHX_ ST(0));
@@ -1112,22 +1125,27 @@ ithread_kill(...)
         IV signal;
     CODE:
         /* Must have safe signals */
-        if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG)
+        if (PL_signals & PERL_SIGNALS_UNSAFE_FLAG) {
             Perl_croak(aTHX_ "Cannot signal threads without safe signals");
+        }
 
         /* Object method only */
-        if (! sv_isobject(ST(0)))
+        if (! sv_isobject(ST(0))) {
             Perl_croak(aTHX_ "Usage: $thr->kill('SIG...')");
+        }
 
         /* Get signal */
         sig_name = SvPV_nolen(ST(1));
         if (isALPHA(*sig_name)) {
-            if (*sig_name == 'S' && sig_name[1] == 'I' && sig_name[2] == 'G')
+            if (*sig_name == 'S' && sig_name[1] == 'I' && sig_name[2] == 'G') {
                 sig_name += 3;
-            if ((signal = whichsig(sig_name)) < 0)
+            }
+            if ((signal = whichsig(sig_name)) < 0) {
                 Perl_croak(aTHX_ "Unrecognized signal name: %s", sig_name);
-        } else
+            }
+        } else {
             signal = SvIV(ST(1));
+        }
 
         /* Set the signal for the thread */
         thread = SV_to_ithread(aTHX_ ST(0));
@@ -1179,8 +1197,9 @@ ithread_object(...)
         int have_obj = 0;
     CODE:
         /* Class method only */
-        if (SvROK(ST(0)))
+        if (SvROK(ST(0))) {
             Perl_croak(aTHX_ "Usage: threads->object($tid)");
+        }
         classname = (char *)SvPV_nolen(ST(0));
 
         if ((items < 2) || ! SvOK(ST(1))) {
@@ -1251,10 +1270,12 @@ ithread_set_stack_size(...)
     PREINIT:
         IV old_size;
     CODE:
-        if (items != 2)
+        if (items != 2) {
             Perl_croak(aTHX_ "Usage: threads->set_stack_size($size)");
-        if (sv_isobject(ST(0)))
+        }
+        if (sv_isobject(ST(0))) {
             Perl_croak(aTHX_ "Cannot change stack size of an existing thread");
+        }
 
         old_size = default_stack_size;
         default_stack_size = good_stack_size(aTHX_ SvIV(ST(1)));
@@ -1268,8 +1289,9 @@ ithread_is_running(...)
         ithread *thread;
     CODE:
         /* Object method only */
-        if (! sv_isobject(ST(0)))
+        if (! sv_isobject(ST(0))) {
             Perl_croak(aTHX_ "Usage: $thr->is_running()");
+        }
 
         thread = INT2PTR(ithread *, SvIV(SvRV(ST(0))));
         ST(0) = (thread->state & PERL_ITHR_FINISHED) ? &PL_sv_no : &PL_sv_yes;
@@ -1292,8 +1314,9 @@ ithread_is_joinable(...)
         ithread *thread;
     CODE:
         /* Object method only */
-        if (! sv_isobject(ST(0)))
+        if (! sv_isobject(ST(0))) {
             Perl_croak(aTHX_ "Usage: $thr->is_joinable()");
+        }
 
         thread = INT2PTR(ithread *, SvIV(SvRV(ST(0))));
         MUTEX_LOCK(&thread->mutex);
@@ -1321,8 +1344,9 @@ ithread_set_thread_exit_only(...)
     PREINIT:
         ithread *thread;
     CODE:
-        if (items != 2)
+        if (items != 2) {
             Perl_croak(aTHX_ "Usage: ->set_thread_exit_only(boolean)");
+        }
         thread = SV_to_ithread(aTHX_ ST(0));
         MUTEX_LOCK(&thread->mutex);
         if (SvTRUE(ST(1))) {
