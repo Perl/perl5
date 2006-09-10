@@ -81,14 +81,14 @@ typedef struct {
 
 START_MY_CXT
 
-
-/* Linked list of all threads */
-static ithread *threads;
+/* Structure for 'main' thread
+ * Also forms the 'base' for the doubly-linked list of threads */
+static ithread main_thread;
 
 /* Protects the creation and destruction of threads*/
 static perl_mutex create_destruct_mutex;
 
-static UV tid_counter = 0;
+static UV tid_counter = 1;
 static IV joinable_threads = 0;
 static IV running_threads = 0;
 static IV detached_threads = 0;
@@ -554,9 +554,9 @@ S_ithread_create(
     Zero(thread, 1, ithread);
 
     /* Add to threads list */
-    thread->next = threads;
-    thread->prev = threads->prev;
-    threads->prev = thread;
+    thread->next = &main_thread;
+    thread->prev = main_thread.prev;
+    main_thread.prev = thread;
     thread->prev->next = thread;
 
     /* Set count to 1 immediately in case thread exits before
@@ -901,8 +901,8 @@ ithread_list(...)
 
         /* Walk through threads list */
         MUTEX_LOCK(&create_destruct_mutex);
-        for (thread = threads->next;
-             thread != threads;
+        for (thread = main_thread.next;
+             thread != &main_thread;
              thread = thread->next)
         {
             /* Ignore detached or joined threads */
@@ -1192,8 +1192,8 @@ ithread_object(...)
 
         /* Walk through threads list */
         MUTEX_LOCK(&create_destruct_mutex);
-        for (thread = threads->next;
-             thread != threads;
+        for (thread = main_thread.next;
+             thread != &main_thread;
              thread = thread->next)
         {
             /* Look for TID */
@@ -1338,11 +1338,6 @@ ithread_set_thread_exit_only(...)
 BOOT:
 {
 #ifdef USE_ITHREADS
-    /* The 'main' thread is thread 0.
-     * It is detached (unjoinable) and immortal.
-     */
-
-    ithread *thread;
     MY_CXT_INIT;
 
     PL_perl_destruct_level = 2;
@@ -1351,34 +1346,29 @@ BOOT:
 
     PL_threadhook = &Perl_ithread_hook;
 
-    thread = (ithread *)PerlMemShared_malloc(sizeof(ithread));
-    if (! thread) {
-        PerlLIO_write(PerlIO_fileno(Perl_error_log), PL_no_mem, strlen(PL_no_mem));
-        my_exit(1);
-    }
-    Zero(thread, 1, ithread);
+    /* The 'main' thread is thread 0.
+     * It is detached (unjoinable) and immortal.
+     */
+    Zero(&main_thread, 1, ithread);         /* Thread 0 */
 
-    MUTEX_INIT(&thread->mutex);
-
-    thread->tid = tid_counter++;        /* Thread 0 */
+    MUTEX_INIT(&main_thread.mutex);
 
     /* Head of the threads list */
-    threads = thread;
-    thread->next = thread;
-    thread->prev = thread;
+    main_thread.next = &main_thread;
+    main_thread.prev = &main_thread;
 
-    thread->count = 1;                  /* Immortal */
+    main_thread.count = 1;                  /* Immortal */
 
-    thread->interp = aTHX;
-    thread->state = PERL_ITHR_DETACHED; /* Detached */
-    thread->stack_size = default_stack_size;
+    main_thread.interp = aTHX;
+    main_thread.state = PERL_ITHR_DETACHED; /* Detached */
+    main_thread.stack_size = default_stack_size;
 #  ifdef WIN32
-    thread->thr = GetCurrentThreadId();
+    main_thread.thr = GetCurrentThreadId();
 #  else
-    thread->thr = pthread_self();
+    main_thread.thr = pthread_self();
 #  endif
 
-    S_ithread_set(aTHX_ thread);
+    S_ithread_set(aTHX_ &main_thread);
     MUTEX_UNLOCK(&create_destruct_mutex);
 #endif /* USE_ITHREADS */
 }
