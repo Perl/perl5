@@ -6933,7 +6933,7 @@ Perl_newSVpv(pTHX_ const char *s, STRLEN len)
     register SV *sv;
 
     new_SV(sv);
-    sv_setpvn(sv,s,len ? len : strlen(s));
+    sv_setpvn(sv, s, len || s == NULL ? len : strlen(s));
     return sv;
 }
 
