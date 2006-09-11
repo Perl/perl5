@@ -54,8 +54,6 @@ each extension in turn.
 All invokes of C<Makefile.PL> are provided with C<-MCross> so to enable cross-
 compile.
 
-=item *
-
 =back
 
 =head2 BUILD
@@ -151,7 +149,7 @@ or just
 to refer a cross-compilation that was created last time.
 
 All questions related to building for WinCE devices could be asked in
-L<perlce-user@lists.sourceforge.net> mailing list.
+F<perlce-user@lists.sourceforge.net> mailing list.
 
 =head1 Using Perl on WinCE
 
@@ -289,8 +287,7 @@ Extension building support was added.
 Two directories C<./win32> and C<./wince> were merged, so perlce build
 process comes in C<./win32> directory.
 
-=over
-
+=back
 
 =head1 AUTHORS
 
@@ -307,4 +304,3 @@ Many thanks and obligations to Rainer!
 made further support of WinCE port.
 
 =back
-
