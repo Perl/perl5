@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 3606 $)
+perlfaq5 - Files and Formats ($Revision: 6019 $)
 
 =head1 DESCRIPTION
 
@@ -39,12 +39,6 @@ per-filehandle variables.
 	$old_fh = select(OUTPUT_HANDLE);
 	$| = 1;
 	select($old_fh);
-
-Some idioms can handle this in a single statement:
-
-	select((select(OUTPUT_HANDLE), $| = 1)[0]);
-
-	$| = 1, select $_ for select OUTPUT_HANDLE;
 
 Some modules offer object-oriented access to handles and their
 variables, although they may be overkill if this is the only
@@ -176,7 +170,7 @@ temporary files in one process, use a counter:
 
 	if (defined(fileno(FH))
 		return (*FH, $base_name);
-	    } 
+	    }
 	else {
 		return ();
 	    }
@@ -215,7 +209,7 @@ Storing the keys in an array means it's easy to operate on them as a
 group or loop over them with for. It also avoids polluting the program
 with global variables and using symbolic references.
 
-=head2 How can I make a filehandle local to a subroutine?  How do I pass filehandles between subroutines?  How do I make an array of filehandles? 
+=head2 How can I make a filehandle local to a subroutine?  How do I pass filehandles between subroutines?  How do I make an array of filehandles?
 X<filehandle, local> X<filehandle, passing> X<filehandle, reference>
 
 As of perl5.6, open() autovivifies file and directory handles
@@ -233,12 +227,12 @@ and use them in the place of named handles.
 
 If you like, you can store these filehandles in an array or a hash.
 If you access them directly, they aren't simple scalars and you
-need to give C<print> a little help by placing the filehandle 
+need to give C<print> a little help by placing the filehandle
 reference in braces. Perl can only figure it out on its own when
 the filehandle reference is a simple scalar.
 
 	my @fhs = ( $fh1, $fh2, $fh3 );
-	
+
 	for( $i = 0; $i <= $#fhs; $i++ ) {
 		print {$fhs[$i]} "just another Perl answer, \n";
 		}
@@ -876,7 +870,7 @@ turns off echo processing as well.
 		$term->setcc(VTIME, 1);
 		$term->setattr($fd_stdin, TCSANOW);
 		}
-	
+
 	sub cooked {
 		$term->setlflag($oterm);
 		$term->setcc(VTIME, 0);
@@ -967,7 +961,7 @@ FIONREAD requires a filehandle connected to a stream, meaning that sockets,
 pipes, and tty devices work, but I<not> files.
 
 =head2 How do I do a C<tail -f> in perl?
-X<tail>
+X<tail> X<IO::Handle> X<File::Tail> X<clearerr>
 
 First try
 
@@ -975,7 +969,7 @@ First try
 
 The statement C<seek(GWFILE, 0, 1)> doesn't change the current position,
 but it does clear the end-of-file condition on the handle, so that the
-next <GWFILE> makes Perl try again to read something.
+next C<< <GWFILE> >> makes Perl try again to read something.
 
 If that doesn't work (it relies on features of your stdio implementation),
 then you need something more like this:
@@ -988,12 +982,11 @@ then you need something more like this:
 	  seek(GWFILE, $curpos, 0);  # seek to where we had been
 	}
 
-If this still doesn't work, look into the POSIX module.  POSIX defines
-the clearerr() method, which can remove the end of file condition on a
-filehandle.  The method: read until end of file, clearerr(), read some
-more.  Lather, rinse, repeat.
+If this still doesn't work, look into the C<clearerr> method
+from C<IO::Handle>, which resets the error and end-of-file states
+on the handle.
 
-There's also a File::Tail module from CPAN.
+There's also a C<File::Tail> module from CPAN.
 
 =head2 How do I dup() a filehandle in Perl?
 X<dup>
@@ -1122,9 +1115,9 @@ If your array contains lines, just print them:
 
 =head1 REVISION
 
-Revision: $Revision: 3606 $
+Revision: $Revision: 6019 $
 
-Date: $Date: 2006-03-06 12:05:47 +0100 (lun, 06 mar 2006) $
+Date: $Date: 2006-05-04 19:04:31 +0200 (jeu, 04 mai 2006) $
 
 See L<perlfaq> for source control details and availability.
 

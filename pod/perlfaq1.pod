@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq1 - General Questions About Perl ($Revision: 3606 $)
+perlfaq1 - General Questions About Perl ($Revision: 7822 $)
 
 =head1 DESCRIPTION
 
@@ -40,7 +40,7 @@ http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/
 and http://archive.develooper.com/perl5-porters@perl.org/
 or the news gateway nntp://nntp.perl.org/perl.perl5.porters or
 its web interface at http://nntp.perl.org/group/perl.perl5.porters ,
-or read the faq at http://simon-cozens.org/writings/p5p-faq ,
+or read the faq at http://dev.perl.org/perl5/docs/p5p-faq.html ,
 or you can subscribe to the mailing list by sending
 perl5-porters-request@perl.org a subscription request
 (an empty message with no subject is fine).
@@ -60,7 +60,7 @@ users the informal support will more than suffice.  See the answer to
 
 There is often a matter of opinion and taste, and there isn't any one
 answer that fits anyone.  In general, you want to use either the current
-stable release, or the stable release immediately prior to that one. 
+stable release, or the stable release immediately prior to that one.
 Currently, those are perl5.8.x and perl5.6.x, respectively.
 
 Beyond that, you have to consider several things and decide which is best
@@ -275,9 +275,7 @@ device drivers or context-switching code, complex multi-threaded
 shared-memory applications, or extremely large applications.  You'll
 notice that perl is not itself written in Perl.
 
-The new, native-code compiler for Perl may eventually reduce the
-limitations given in the previous statement to some degree, but understand
-that Perl remains fundamentally a dynamically typed language, not
+Perl remains fundamentally a dynamically typed language, not
 a statically typed one.  You certainly won't be chastised if you don't
 trust nuclear-plant or brain-surgery monitoring code to it.  And Larry
 will sleep easier, too--Wall Street programs not withstanding. :-)
@@ -311,14 +309,6 @@ ask this question of someone who isn't a computer scientist, they might
 tell you that a I<program> has been compiled to physical machine code
 once and can then be run multiple times, whereas a I<script> must be
 translated by a program each time it's used.
-
-Perl programs are (usually) neither strictly compiled nor strictly
-interpreted.  They can be compiled to a byte-code form (something of a
-Perl virtual machine) or to completely different languages, like C or
-assembly language.  You can't tell just by looking at it whether the
-source is destined for a pure interpreter, a parse-tree interpreter,
-a byte-code interpreter, or a native-code compiler, so it's hard to give
-a definitive answer here.
 
 Now that "script" and "scripting" are terms that have been seized by
 unscrupulous or unknowing marketeers for their own nefarious purposes,
@@ -373,7 +363,7 @@ In general, the benefit of a language is closely related to the skill of
 the people using that language. If you or your team can be more faster,
 better, and stronger through Perl, you'll deliver more value. Remember,
 people often respond better to what they get out of it. If you run
-into resistance, figure out what those people get out of the other 
+into resistance, figure out what those people get out of the other
 choice and how Perl might satisfy that requirement.
 
 You don't have to worry about finding or paying for Perl; it's freely
@@ -400,9 +390,9 @@ You might find these links useful:
 
 =head1 REVISION
 
-Revision: $Revision: 3606 $
+Revision: $Revision: 7822 $
 
-Date: $Date: 2006-03-06 12:05:47 +0100 (lun, 06 mar 2006) $
+Date: $Date: 2006-09-11 14:22:59 +0200 (lun, 11 sep 2006) $
 
 See L<perlfaq> for source control details and availability.
 

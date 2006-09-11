@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq - frequently asked questions about Perl ($Revision: 3606 $)
+perlfaq - frequently asked questions about Perl
 
 =head1 DESCRIPTION
 
@@ -24,15 +24,15 @@ at http://faq.perl.org/ . The perlfaq-workers periodically post extracts
 of the latest perlfaq to comp.lang.perl.misc.
 
 You can view the source tree at
-https://svn.perl.org/modules/perlfaq/trunk/ (which is outside of the
-main Perl source tree).  The SVN repository notes all changes to the FAQ
+http://cvs.perl.org/viewcvs/cvs-public/perlfaq/ (which is outside of the
+main Perl source tree).  The CVS repository notes all changes to the FAQ
 and holds the latest version of the working documents and may vary
 significantly from the version distributed with the latest version of
 Perl. Check the repository before sending your corrections.
 
 =head2 How to contribute to the perlfaq
 
-You can mail corrections, additions, and suggestions to 
+You can mail corrections, additions, and suggestions to
 C<< <perlfaq-workers AT perl DOT org> >>. The perlfaq volunteers use this
 address to coordinate their efforts and track the perlfaq development.
 They appreciate your contributions to the FAQ but do not have time to
@@ -171,7 +171,7 @@ Where can I get a list of Larry Wall witticisms?
 
 =item *
 
-How can I convince my sysadmin/supervisor/employees to use version 5/5.6.1/Perl instead of some other language?
+How can I convince others to use Perl?
 
 =back
 
@@ -342,10 +342,6 @@ How can I hide the source for my Perl program?
 =item *
 
 How can I compile my Perl program into byte code or C?
-
-=item *
-
-How can I compile Perl into Java?
 
 =item *
 
@@ -956,7 +952,7 @@ How can I match strings with multibyte characters?
 
 =item *
 
-How do I match a pattern that is supplied by the user?
+How do I match a regular expression that's in a variable?
 
 =back
 

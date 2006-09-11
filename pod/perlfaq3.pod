@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 3606 $)
+perlfaq3 - Programming Tools ($Revision: 7822 $)
 
 =head1 DESCRIPTION
 
@@ -114,14 +114,14 @@ perl finds it.
 
 Before you do anything else, you can help yourself by ensuring that
 you let Perl tell you about problem areas in your code. By turning
-on warnings and strictures, you can head off many problems before 
+on warnings and strictures, you can head off many problems before
 they get too big. You can find out more about these in L<strict>
 and L<warnings>.
 
 	#!/usr/bin/perl
 	use strict;
 	use warnings;
-	
+
 Beyond that, the simplest debugger is the C<print> function. Use it
 to look at values as you run your program:
 
@@ -129,9 +129,9 @@ to look at values as you run your program:
 
 The C<Data::Dumper> module can pretty-print Perl data structures:
 
-	use Data::Dumper( Dump );
-	print STDERR "The hash is " . Dump( \%hash ) . "\n";
-	
+	use Data::Dumper qw( Dumper );
+	print STDERR "The hash is " . Dumper( \%hash ) . "\n";
+
 Perl comes with an interactive debugger, which you can start with the
 C<-d> switch. It's fully explained in L<perldebug>.
 
@@ -210,8 +210,8 @@ the following settings in vi and its clones:
 
 Put that in your F<.exrc> file (replacing the caret characters
 with control characters) and away you go.  In insert mode, ^T is
-for indenting, ^D is for undenting, and ^O is for blockdenting--
-as it were.  A more complete example, with comments, can be found at
+for indenting, ^D is for undenting, and ^O is for blockdenting--as
+it were.  A more complete example, with comments, can be found at
 http://www.cpan.org/authors/id/TOMC/scripts/toms.exrc.gz
 
 The a2ps http://www-inf.enst.fr/%7Edemaille/a2ps/black+white.ps.gz does
@@ -221,6 +221,10 @@ documents, as does enscript at http://people.ssh.fi/mtr/genscript/ .
 =head2 Is there a ctags for Perl?
 
 (contributed by brian d foy)
+
+Ctags uses an index to quickly find things in source code, and many
+popular editors support ctags for several different languages,
+including Perl.
 
 Exuberent ctags supports Perl: http://ctags.sourceforge.net/
 
@@ -423,7 +427,7 @@ http://www.primate.wisc.edu/software/csh-tcsh-book/
 
 =item Zsh
 
-ftp://ftp.blarg.net/users/amol/zsh/ , see also http://www.zsh.org/
+http://www.zsh.org/
 
 =back
 
@@ -499,10 +503,11 @@ B<rep ps axu> similar to B<top>.
 
 =head2 How can I use X or Tk with Perl?
 
-Tk is a completely Perl-based, object-oriented interface to the Tk toolkit
-that doesn't force you to use Tcl just to get at Tk.  Sx is an interface
-to the Athena Widget set.  Both are available from CPAN.  See the
-directory http://www.cpan.org/modules/by-category/08_User_Interfaces/
+The Tk.pm module is a completely Perl-based, object-oriented interface
+to the Tk toolkit that doesn't force you to use Tcl just to get at Tk.
+Sx is an interface to the Athena Widget set.  Both are available from
+CPAN.  See the directory
+http://www.cpan.org/modules/by-category/08_User_Interfaces/
 
 Invaluable for Perl/Tk programming are the Perl/Tk FAQ at
 http://phaseit.net/claird/comp.lang.perl.tk/ptkFAQ.html , the Perl/Tk Reference
@@ -758,11 +763,12 @@ You can try using encryption via source filters (Starting from Perl
 5.8 the Filter::Simple and Filter::Util::Call modules are included in
 the standard distribution), but any decent programmer will be able to
 decrypt it.  You can try using the byte code compiler and interpreter
-described below, but the curious might still be able to de-compile it.
-You can try using the native-code compiler described below, but
-crackers might be able to disassemble it.  These pose varying degrees
-of difficulty to people wanting to get at your code, but none can
-definitively conceal it (true of every language, not just Perl).
+described later in L<perlfaq3>, but the curious might still be able to
+de-compile it. You can try using the native-code compiler described
+later, but crackers might be able to disassemble it.  These pose
+varying degrees of difficulty to people wanting to get at your code,
+but none can definitively conceal it (true of every language, not just
+Perl).
 
 It is very easy to recover the source of Perl programs.  You simply
 feed the program to the perl interpreter and use the modules in
@@ -790,15 +796,9 @@ You probably won't see much of a speed increase either, since most
 solutions simply bundle a Perl interpreter in the final product
 (but see L<How can I make my Perl program run faster?>).
 
-The Perl Archive Toolkit ( http://par.perl.org/index.cgi ) is Perl's
+The Perl Archive Toolkit ( http://par.perl.org/ ) is Perl's
 analog to Java's JAR.  It's freely available and on CPAN (
 http://search.cpan.org/dist/PAR/ ).
-
-The B::* namespace, often called "the Perl compiler", but is really a way
-for Perl programs to peek at its innards rather than create pre-compiled
-versions of your program.  However. the B::Bytecode module can turn your
-script  into a bytecode format that could be loaded later by the
-ByteLoader module and executed as a regular Perl script.
 
 There are also some commercial products that may work for you, although
 you have to buy a license for them.
@@ -810,16 +810,6 @@ executables for HP-UX, Linux, Solaris and Windows."
 Perl2Exe ( http://www.indigostar.com/perl2exe.htm ) is a command line
 program for converting perl scripts to executable files.  It targets both
 Windows and unix platforms.
-
-=head2 How can I compile Perl into Java?
-
-You can also integrate Java and Perl with the
-Perl Resource Kit from O'Reilly Media.  See
-http://www.oreilly.com/catalog/prkunix/ .
-
-Perl 5.6 comes with Java Perl Lingo, or JPL.  JPL, still in
-development, allows Perl code to be called from Java.  See jpl/README
-in the Perl source tree.
 
 =head2 How can I get C<#!perl> to work on [MS-DOS,NT,...]?
 
@@ -939,9 +929,8 @@ A good place to start is L<perltoot>, and you can use L<perlobj>,
 L<perlboot>, L<perltoot>, L<perltooc>, and L<perlbot> for reference.
 
 A good book on OO on Perl is the "Object-Oriented Perl"
-by Damian Conway from Manning Publications, or "Learning Perl
-References, Objects, & Modules" by Randal Schwartz and Tom
-Phoenix from O'Reilly Media.
+by Damian Conway from Manning Publications, or "Intermediate Perl" 
+by Randal Schwartz, brian d foy, and Tom Phoenix from O'Reilly Media.
 
 =head2 Where can I learn about linking C with Perl?
 
@@ -984,15 +973,18 @@ or
 
 =head2 What's MakeMaker?
 
-This module (part of the standard Perl distribution) is designed to
-write a Makefile for an extension module from a Makefile.PL.  For more
-information, see L<ExtUtils::MakeMaker>.
+(contributed by brian d foy)
+
+The C<ExtUtils::MakeMaker> module, better known simply as "MakeMaker",
+turns a Perl script, typically called C<Makefile.PL>, into a Makefile.
+The unix tool C<make> uses this file to manage dependencies and actions
+to process and install a Perl distribution.
 
 =head1 REVISION
 
-Revision: $Revision: 3606 $
+Revision: $Revision: 7822 $
 
-Date: $Date: 2006-03-06 12:05:47 +0100 (lun, 06 mar 2006) $
+Date: $Date: 2006-09-11 14:22:59 +0200 (lun, 11 sep 2006) $
 
 See L<perlfaq> for source control details and availability.
 

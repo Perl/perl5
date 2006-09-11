@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq9 - Networking ($Revision: 3606 $)
+perlfaq9 - Networking ($Revision: 6309 $)
 
 =head1 DESCRIPTION
 
@@ -311,7 +311,7 @@ an absolute URLpath.
 
 To enable authentication for your web server, you need to configure
 your web server.  The configuration is different for different sorts
-of web servers---apache does it differently from iPlanet which does
+of web servers--apache does it differently from iPlanet which does
 it differently from IIS.  Check your web server documentation for
 the details for your particular server.
 
@@ -404,7 +404,7 @@ if it is a deliverable address (i.e. that mail to the address
 will not bounce).  Modules like Mail::CheckUser and Mail::EXPN
 try to interact with the domain name system or particular
 mail servers to learn even more, but their methods do not
-work everywhere---especially for security conscious administrators.
+work everywhere--especially for security conscious administrators.
 
 Many are tempted to try to eliminate many frequently-invalid
 mail addresses with a simple regex, such as
@@ -649,9 +649,9 @@ http://search.cpan.org/search?query=RPC&mode=all ).
 
 =head1 REVISION
 
-Revision: $Revision: 3606 $
+Revision: $Revision: 6309 $
 
-Date: $Date: 2006-03-06 12:05:47 +0100 (lun, 06 mar 2006) $
+Date: $Date: 2006-05-18 07:44:45 +0200 (jeu, 18 mai 2006) $
 
 See L<perlfaq> for source control details and availability.
 

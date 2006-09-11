@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 3606 $)
+perlfaq7 - General Perl Language Issues ($Revision: 6833 $)
 
 =head1 DESCRIPTION
 
@@ -282,7 +282,7 @@ variable's value this way, but now it's much harder.  Take this code:
 
     my $f = 'foo';
     sub T {
-      while ($i++ < 3) { my $f = $f; $f .= $i; print $f, "\n" }
+      while ($i++ < 3) { my $f = $f; $f .= "bar"; print $f, "\n" }
     }
     T;
     print "Finally $f\n";
@@ -312,8 +312,8 @@ With the exception of regexes, you need to pass references to these
 objects.  See L<perlsub/"Pass by Reference"> for this particular
 question, and L<perlref> for information on references.
 
-See "Passing Regexes", below, for information on passing regular
-expressions.
+See "Passing Regexes", later in L<perlfaq7>, for information on
+passing regular expressions.
 
 =over 4
 
@@ -634,9 +634,9 @@ where they don't belong.
 This is explained in more depth in the L<perlsyn>.  Briefly, there's
 no official case statement, because of the variety of tests possible
 in Perl (numeric comparison, string comparison, glob comparison,
-regex matching, overloaded comparisons, ...).
-Larry couldn't decide how best to do this, so he left it out, even
-though it's been on the wish list since perl1.
+regex matching, overloaded comparisons, ...).  Larry couldn't decide 
+how best to do this, so he left it out, even though it's been on the 
+wish list since perl1.
 
 Starting from Perl 5.8 to get switch and case one can use the
 Switch extension and say:
@@ -942,7 +942,7 @@ If you see "bad interpreter - no such file or directory", the first
 line in your perl script (the "shebang" line) does not contain the
 right path to perl (or any other program capable of running scripts).
 Sometimes this happens when you move the script from one machine to
-another and each machine has a different path to perl---/usr/bin/perl
+another and each machine has a different path to perl--/usr/bin/perl
 versus /usr/local/bin/perl for instance. It may also indicate
 that the source machine has CRLF line terminators and the
 destination machine has LF only: the shell tries to find
@@ -962,9 +962,9 @@ where you expect it so you need to adjust your shebang line.
 
 =head1 REVISION
 
-Revision: $Revision: 3606 $
+Revision: $Revision: 6833 $
 
-Date: $Date: 2006-03-06 12:05:47 +0100 (lun, 06 mar 2006) $
+Date: $Date: 2006-09-02 21:16:20 +0200 (sam, 02 sep 2006) $
 
 See L<perlfaq> for source control details and availability.
 
