@@ -525,7 +525,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
             end_point= HOP3(strend, -srch_end_shift, strbeg);
 	}
 	DEBUG_OPTIMISE_r({
-            PerlIO_printf(Perl_debug_log, "fbm_instr len=%"IVdf" str=<%.*s>\n", 
+            PerlIO_printf(Perl_debug_log, "fbm_instr len=%d str=<%.*s>\n", 
                 (int)(end_point - start_point),
                 (int)(end_point - start_point), 
                 start_point);
@@ -867,7 +867,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
         else 
             endpos= strend;
 		    
-        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "start_shift: %"IVdf" check_at: %"IVdf" s: %"IVdf" endpos: %"IVdf"\n",
+        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "start_shift: %"IVdf" check_at: %d s: %d endpos: %d\n",
                       start_shift,check_at-strbeg,s-strbeg,endpos-strbeg));
 	
 	t = s;
