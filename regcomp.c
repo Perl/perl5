@@ -4009,7 +4009,7 @@ reStudy:
 		&& (!(data.flags & SF_FL_BEFORE_MEOL)
 		    || (RExC_flags & PMf_MULTILINE)))) 
         {
-            int t,ml;
+            I32 t,ml;
 
 	    if (SvCUR(data.longest_fixed)  /* ok to leave SvCUR */
 		&& data.offset_fixed == data.offset_float_min
@@ -4030,13 +4030,13 @@ reStudy:
 	       lookbehind offset is added in we lose the ability to correctly
 	       calculate it.*/
 	    ml = data.minlen_float ? *(data.minlen_float) 
-	                           : longest_float_length;
+	                           : (I32)longest_float_length;
 	    r->float_end_shift = ml - data.offset_float_min
 	        - longest_float_length + (SvTAIL(data.longest_float) != 0)
 	        + data.lookbehind_float;
 	    r->float_min_offset = data.offset_float_min - data.lookbehind_float;
 	    r->float_max_offset = data.offset_float_max;
-	    if (data.offset_float_max < (U32)I32_MAX) /* Don't offset infinity */
+	    if (data.offset_float_max < I32_MAX) /* Don't offset infinity */
 	        r->float_max_offset -= data.lookbehind_float;
 	    
 	    t = (data.flags & SF_FL_BEFORE_EOL /* Can't have SEOL and MULTI */
@@ -4061,7 +4061,7 @@ reStudy:
 		&& (!(data.flags & SF_FIX_BEFORE_MEOL)
 		    || (RExC_flags & PMf_MULTILINE)))) 
         {
-            int t,ml;
+            I32 t,ml;
 
             /* copy the information about the longest fixed 
                from the reg_scan_data over to the program. */
@@ -4077,7 +4077,7 @@ reStudy:
 	       lookbehind offset is added in we lose the ability to correctly
 	       calculate it.*/
             ml = data.minlen_fixed ? *(data.minlen_fixed) 
-                                   : longest_fixed_length;
+                                   : (I32)longest_fixed_length;
             r->anchored_end_shift = ml - data.offset_fixed
 	        - longest_fixed_length + (SvTAIL(data.longest_fixed) != 0)
 	        + data.lookbehind_fixed;
