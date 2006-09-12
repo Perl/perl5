@@ -4705,6 +4705,13 @@ which is not, consequently, deparsed correctly.
 
 =item *
 
+Lexical (my) variables declared in scopes external to a subroutine
+appear in code2ref output text as package variables. This is a tricky
+problem, as perl has no native facility for refering to a lexical variable
+defined within a different scope, although L<PadWalker> is a good start.
+
+=item *
+
 There are probably many more bugs on non-ASCII platforms (EBCDIC).
 
 =back
