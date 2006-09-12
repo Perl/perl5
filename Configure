@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Aug  2 13:20:07 CEST 2006 [metaconfig 3.0 PL70]
+# Generated on Wed Sep 13 08:48:56 CEST 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -4954,20 +4954,6 @@ default|recommended)
 		else
 			echo "Nope, it doesn't, but that's ok." 2>&1
 		fi
-
-		echo "Checking if your compiler accepts -Wdeclaration-after-statement" 2>&1
-		echo 'int main(void) { return 0; }' > gcctest.c
-		if $cc -Wdeclaration-after-statement -o gcctest gcctest.c; then
-			echo "Yes, it does." 2>&1
-			case "$ccflags" in
-			*-Wdeclaration-after-statement*)
-				echo "Leaving current flags $ccflags alone." 2>&1
-				;;
-			*) dflt="$dflt -Wdeclaration-after-statement" ;;
-			esac
-		else
-			echo "Nope, it doesn't, but that's ok." 2>&1
-		fi
 		;;
 	esac
 	;;
@@ -7137,32 +7123,6 @@ $rm -f try try.* glibc.ver
 set d_gnulibc
 eval $setvar
 
-echo " "
-echo "Checking for C++..." >&4
-cat >try.c <<'EOCP'
-#include <stdio.h>
-int main(void)
-{
-#ifdef __cplusplus
-    printf("define\n");
-#else
-    printf("undef\n");
-#endif
-    return 0;
-}
-EOCP
-set try
-if eval $compile_ok && $run ./try > cplusplus; then
-	val=`$cat cplusplus`
-	echo "You are using a C++ compiler."
-else
-	val="$undef"
-	echo "You are not using a C++ compiler."
-fi
-$rm -f try try.* cplusplus
-set d_cplusplus
-eval $setvar
-
 : see if nm is to be used to determine whether a symbol is defined or not
 case "$usenm" in
 '')
@@ -7609,6 +7569,33 @@ yes)
 	*) echo "$sym() NOT found." >&4;;
 	esac;;
 esac'
+
+
+echo " "
+echo "Checking for C++..." >&4
+cat >try.c <<'EOCP'
+#include <stdio.h>
+int main(void)
+{
+#ifdef __cplusplus
+    printf("define\n");
+#else
+    printf("undef\n");
+#endif
+    return 0;
+}
+EOCP
+set try
+if eval $compile_ok && $run ./try >cplusplus$$; then
+	val=`$cat cplusplus$$`
+	echo "You are using a C++ compiler."
+else
+	val="$undef"
+	echo "You are not using a C++ compiler."
+fi
+$rm -f try try.* cplusplus$$
+set d_cplusplus
+eval $setvar
 
 : see if dlopen exists
 xxx_runnm="$runnm"

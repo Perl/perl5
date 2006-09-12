@@ -534,15 +534,15 @@ d_const (d_const.U):
 	indicates to the C program that this C compiler knows about the
 	const type.
 
-d_cplusplus (d_cplusplus.U):
-	This variable conditionally defines the USE_CPLUSPLUS symbol, which
-	indicates that a C++ compiler was used to compiled Perl and will be
-	used to compile extensions.
-
 d_copysignl (d_copysignl.U):
 	This variable conditionally defines the HAS_COPYSIGNL symbol, which
 	indicates to the C program that the copysignl() routine is available.
 	If aintl is also present we can emulate modfl.
+
+d_cplusplus (d_cplusplus.U):
+	This variable conditionally defines the USE_CPLUSPLUS symbol, which
+	indicates that a C++ compiler was used to compiled Perl and will be
+	used to compile extensions.
 
 d_crypt (d_crypt.U):
 	This variable conditionally defines the CRYPT symbol, which
