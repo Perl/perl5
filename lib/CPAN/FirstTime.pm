@@ -2,7 +2,7 @@
 package CPAN::Mirrored::By;
 use strict;
 use vars qw($VERSION);
-$VERSION = sprintf "%.6f", substr(q$Rev: 742 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 819 $,4)/1000000 + 5.4;
 
 sub new { 
     my($self,@arg) = @_;
@@ -20,8 +20,8 @@ use FileHandle ();
 use File::Basename ();
 use File::Path ();
 use File::Spec;
-use vars qw($VERSION);
-$VERSION = sprintf "%.6f", substr(q$Rev: 742 $,4)/1000000 + 5.4;
+use vars qw($VERSION $urllist);
+$VERSION = sprintf "%.6f", substr(q$Rev: 819 $,4)/1000000 + 5.4;
 
 =head1 NAME
 
@@ -46,6 +46,16 @@ sub init {
     use Config;
     # extra arg in 'o conf init make' selects only $item =~ /make/
     my $matcher = $args{args} && @{$args{args}} ? $args{args}[0] : '';
+    if ($matcher =~ /^\w+$/) {
+        if (
+            exists $CPAN::HandleConfig::keys{$matcher}
+           ) {
+            $matcher = "\\b$matcher\\b";
+        } else {
+            $CPAN::Frontend->myprint("'$matcher' is not a valid configuration variable");
+            return;
+        }
+    }
     CPAN->debug("matcher[$matcher]") if $CPAN::DEBUG;
 
     unless ($CPAN::VERSION) {
@@ -61,19 +71,26 @@ sub init {
     my($ans,$default);
 
     #
-    # Files, directories
+    #= Files, directories
     #
 
-    print $prompts{manual_config};
+    unless ($matcher) {
+        $CPAN::Frontend->myprint($prompts{manual_config});
+    }
 
     my $manual_conf;
 
-    local *_real_prompt = \&ExtUtils::MakeMaker::prompt;
+    local *_real_prompt = \&CPAN::Shell::colorable_makemaker_prompt;
     if ( $args{autoconfig} ) {
         $manual_conf = "no";
+    } elsif ($matcher) {
+        $manual_conf = "yes";
     } else {
-        $manual_conf = prompt("Are you ready for manual configuration?", "yes");
+        my $_conf = prompt("Would you like me to configure as much as possible ".
+                           "automatically?", "yes");
+        $manual_conf = ($_conf and $_conf =~ /^y/i) ? "no" : "yes";
     }
+    CPAN->debug("manual_conf[$manual_conf]") if $CPAN::DEBUG;
     my $fastread;
     {
       if ($manual_conf =~ /^y/i) {
@@ -84,259 +101,258 @@ sub init {
 
         local $^W = 0;
 	# prototype should match that of &MakeMaker::prompt
+        my $current_second = time;
+        my $current_second_count = 0;
+        my $i_am_mad = 0;
 	*_real_prompt = sub ($;$) {
 	  my($q,$a) = @_;
 	  my($ret) = defined $a ? $a : "";
 	  $CPAN::Frontend->myprint(sprintf qq{%s [%s]\n\n}, $q, $ret);
           eval { require Time::HiRes };
           unless ($@) {
-              Time::HiRes::sleep(0.1);
+              if (time == $current_second) {
+                  $current_second_count++;
+                  if ($current_second_count > 20) {
+                      # I don't like more than 20 prompts per second
+                      $i_am_mad++;
+                  }
+              } else {
+                  $current_second = time;
+                  $current_second_count = 0;
+                  $i_am_mad-- if $i_am_mad>0;
+              }
+              if ($i_am_mad>0){
+                  #require Carp;
+                  #Carp::cluck("SLEEEEEEEEPIIIIIIIIIIINGGGGGGGGGGG");
+                  Time::HiRes::sleep(0.1);
+              }
           }
 	  $ret;
 	};
       }
     }
 
-    $CPAN::Frontend->myprint($prompts{config_intro})
-      if !$matcher or 'config_intro' =~ /$matcher/;
+    if (!$matcher or 'cpan_home keep_source_where build_dir' =~ /$matcher/){
+        $CPAN::Frontend->myprint($prompts{config_intro});
 
-    my $cpan_home = $CPAN::Config->{cpan_home}
-	|| File::Spec->catdir($ENV{HOME}, ".cpan");
+        if (!$matcher or 'cpan_home' =~ /$matcher/) {
+            my $cpan_home = $CPAN::Config->{cpan_home}
+                || File::Spec->catdir($ENV{HOME}, ".cpan");
 
-    if (-d $cpan_home) {
-	if (!$matcher or 'config_intro' =~ /$matcher/) {
-	    $CPAN::Frontend->myprint(qq{
+            if (-d $cpan_home) {
+                $CPAN::Frontend->myprint(qq{
 
 I see you already have a  directory
     $cpan_home
 Shall we use it as the general CPAN build and cache directory?
 
 });
-	}
-    } else {
-	# no cpan-home, must prompt and get one
-	$CPAN::Frontend->myprint($prompts{cpan_home_where});
-    }
+            } else {
+                # no cpan-home, must prompt and get one
+                $CPAN::Frontend->myprint($prompts{cpan_home_where});
+            }
 
-    $default = $cpan_home;
-    while ($ans = prompt("CPAN build and cache directory?",$default)) {
-      unless (File::Spec->file_name_is_absolute($ans)) {
-        require Cwd;
-        my $cwd = Cwd::cwd();
-        my $absans = File::Spec->catdir($cwd,$ans);
-        warn "The path '$ans' is not an absolute path. Please specify an absolute path\n";
-        $default = $absans;
-        next;
-      }
-      eval { File::Path::mkpath($ans); }; # dies if it can't
-      if ($@) {
-	warn "Couldn't create directory $ans.\nPlease retry.\n";
-	next;
-      }
-      if (-d $ans && -w _) {
-	last;
-      } else {
-	warn "Couldn't find directory $ans\n"
-		. "or directory is not writable. Please retry.\n";
-      }
-    }
-    $CPAN::Config->{cpan_home} = $ans;
+            $default = $cpan_home;
+            while ($ans = prompt("CPAN build and cache directory?",$default)) {
+                unless (File::Spec->file_name_is_absolute($ans)) {
+                    require Cwd;
+                    my $cwd = Cwd::cwd();
+                    my $absans = File::Spec->catdir($cwd,$ans);
+                    $CPAN::Frontend->mywarn("The path '$ans' is not an ".
+                                            "absolute path. Please specify ".
+                                            "an absolute path\n");
+                    $default = $absans;
+                    next;
+                }
+                eval { File::Path::mkpath($ans); }; # dies if it can't
+                if ($@) {
+                    $CPAN::Frontend->mywarn("Couldn't create directory $ans.\n".
+                                            "Please retry.\n");
+                    next;
+                }
+                if (-d $ans && -w _) {
+                    last;
+                } else {
+                    $CPAN::Frontend->mywarn("Couldn't find directory $ans\n".
+                                            "or directory is not writable. Please retry.\n");
+                }
+            }
+            $CPAN::Config->{cpan_home} = $ans;
+        }
 
-    $CPAN::Frontend->myprint($prompts{keep_source_where});
+        if (!$matcher or 'keep_source_where' =~ /$matcher/) {
+            my_dflt_prompt("keep_source_where",
+                           File::Spec->catdir($CPAN::Config->{cpan_home},"sources"),
+                           $matcher,
+                          );
+        }
 
-    $CPAN::Config->{keep_source_where}
-	= File::Spec->catdir($CPAN::Config->{cpan_home},"sources");
-
-    $CPAN::Config->{build_dir}
-	= File::Spec->catdir($CPAN::Config->{cpan_home},"build");
-
-    #
-    # Cache size, Index expire
-    #
-
-    $CPAN::Frontend->myprint($prompts{build_cache_intro})
-      if !$matcher or 'build_cache_intro' =~ /$matcher/;
-
-    # large enough to build large dists like Tk
-    my_dflt_prompt(build_cache => 100, $matcher);
-
-    # XXX This the time when we refetch the index files (in days)
-    $CPAN::Config->{'index_expire'} = 1;
-
-    $CPAN::Frontend->myprint($prompts{scan_cache_intro})
-      if !$matcher or 'build_cache_intro' =~ /$matcher/;
-
-    my_prompt_loop(scan_cache => 'atstart', $matcher, 'atstart|never');
-
-    #
-    # cache_metadata
-    #
-
-    if (!$matcher or 'build_cache_intro' =~ /$matcher/) {
-
-	$CPAN::Frontend->myprint($prompts{cache_metadata});
-
-	defined($default = $CPAN::Config->{cache_metadata}) or $default = 1;
-	do {
-	    $ans = prompt("Cache metadata (yes/no)?", ($default ? 'yes' : 'no'));
-	} while ($ans !~ /^[yn]/i);
-	$CPAN::Config->{cache_metadata} = ($ans =~ /^y/i ? 1 : 0);
-    }
-    #
-    # term_is_latin
-    #
-
-    $CPAN::Frontend->myprint($prompts{term_is_latin})
-      if !$matcher or 'term_is_latin' =~ /$matcher/;
-
-    defined($default = $CPAN::Config->{term_is_latin}) or $default = 1;
-    do {
-        $ans = prompt("Your terminal expects ISO-8859-1 (yes/no)?",
-                      ($default ? 'yes' : 'no'));
-    } while ($ans !~ /^[yn]/i);
-    $CPAN::Config->{term_is_latin} = ($ans =~ /^y/i ? 1 : 0);
-
-    #
-    # save history in file 'histfile'
-    #
-
-    $CPAN::Frontend->myprint($prompts{histfile_intro});
-
-    defined($default = $CPAN::Config->{histfile}) or
-        $default = File::Spec->catfile($CPAN::Config->{cpan_home},"histfile");
-    $ans = prompt("File to save your history?", $default);
-    $CPAN::Config->{histfile} = $ans;
-
-    if ($CPAN::Config->{histfile}) {
-      defined($default = $CPAN::Config->{histsize}) or $default = 100;
-      $ans = prompt("Number of lines to save?", $default);
-      $CPAN::Config->{histsize} = $ans;
+        if (!$matcher or 'build_dir' =~ /$matcher/) {
+            my_dflt_prompt("build_dir",
+                           File::Spec->catdir($CPAN::Config->{cpan_home},"build"),
+                           $matcher
+                          );
+        }
     }
 
     #
-    # do an ls on the m or the d command
-    #
-    $CPAN::Frontend->myprint($prompts{show_upload_date_intro});
-
-    defined($default = $CPAN::Config->{show_upload_date}) or
-        $default = 'n';
-    $ans = prompt("Always try to show upload date with 'd' and 'm' command (yes/no)?",
-                  ($default ? 'yes' : 'no'));
-    $CPAN::Config->{show_upload_date} = ($ans =~ /^[y1]/i ? 1 : 0);
-
-    #my_prompt_loop(show_upload_date => 'n', $matcher,
-		   #'follow|ask|ignore');
-
-    #
-    # prerequisites_policy
-    # Do we follow PREREQ_PM?
+    #= Cache size, Index expire
     #
 
-    $CPAN::Frontend->myprint($prompts{prerequisites_policy_intro})
-      if !$matcher or 'prerequisites_policy_intro' =~ /$matcher/;
+    if (!$matcher or 'build_cache' =~ /$matcher/){
+        $CPAN::Frontend->myprint($prompts{build_cache_intro});
 
-    my_prompt_loop(prerequisites_policy => 'ask', $matcher,
-		   'follow|ask|ignore');
+        # large enough to build large dists like Tk
+        my_dflt_prompt(build_cache => 100, $matcher);
+    }
 
+    if (!$matcher or 'index_expire' =~ /$matcher/) {
+        $CPAN::Frontend->myprint($prompts{index_expire_intro});
+
+        my_dflt_prompt(index_expire => 1, $matcher);
+    }
+
+    if (!$matcher or 'scan_cache' =~ /$matcher/){
+        $CPAN::Frontend->myprint($prompts{scan_cache_intro});
+
+        my_prompt_loop(scan_cache => 'atstart', $matcher, 'atstart|never');
+    }
 
     #
-    # Module::Signature
-    #
-    $CPAN::Frontend->myprint($prompts{check_sigs_intro});
-
-    defined($default = $CPAN::Config->{check_sigs}) or
-        $default = 0;
-    $ans = prompt($prompts{check_sigs},
-                  ($default ? 'yes' : 'no'));
-    $CPAN::Config->{check_sigs} = ($ans =~ /^y/i ? 1 : 0);
-
-    #
-    # External programs
+    #= cache_metadata
     #
 
-    $CPAN::Frontend->myprint($prompts{external_progs})
-      if !$matcher or 'external_progs' =~ /$matcher/;
+    my_yn_prompt(cache_metadata => 1, $matcher);
 
-    my $old_warn = $^W;
-    local $^W if $^O eq 'MacOS';
-    my(@path) = split /$Config{'path_sep'}/, $ENV{'PATH'};
-    local $^W = $old_warn;
-    my $progname;
-    for $progname (qw/bzip2 gzip tar unzip make
+    #
+    #= Do we follow PREREQ_PM?
+    #
+
+    if (!$matcher or 'prerequisites_policy' =~ /$matcher/){
+        $CPAN::Frontend->myprint($prompts{prerequisites_policy_intro});
+
+        my_prompt_loop(prerequisites_policy => 'ask', $matcher,
+                       'follow|ask|ignore');
+    }
+
+    #
+    #= Module::Signature
+    #
+    if (!$matcher or 'check_sigs' =~ /$matcher/) {
+        my_yn_prompt(check_sigs => 0, $matcher);
+    }
+
+    #
+    #= CPAN::Reporter
+    #
+    if (!$matcher or 'test_report' =~ /$matcher/) {
+        my_yn_prompt(test_report => 0, $matcher);
+        if (
+            $CPAN::Config->{test_report} && 
+            $CPAN::META->has_inst("CPAN::Reporter") &&
+            CPAN::Reporter->can('configure')
+           ) {
+            $CPAN::Frontend->myprint("\nProceeding to configure CPAN::Reporter.\n");
+            CPAN::Reporter::configure();
+            $CPAN::Frontend->myprint("\nReturning to CPAN configuration.\n");
+        }
+    }
+
+    #
+    #= External programs
+    #
+
+    my @external_progs = qw/bzip2 gzip tar unzip make
                       curl lynx wget ncftpget ncftp ftp
-                      gpg/)
-    {
-      if ($^O eq 'MacOS') {
-          $CPAN::Config->{$progname} = 'not_here';
-          next;
-      }
-      next if $matcher && $progname !~ /$matcher/;
+                      gpg/;
+    my(@path) = split /$Config{'path_sep'}/, $ENV{'PATH'};
+    if (!$matcher or "@external_progs" =~ /$matcher/) {
+        $CPAN::Frontend->myprint($prompts{external_progs});
 
-      my $progcall = $progname;
-      # we don't need ncftp if we have ncftpget
-      next if $progname eq "ncftp" && $CPAN::Config->{ncftpget} gt " ";
-      my $path = $CPAN::Config->{$progname}
-	  || $Config::Config{$progname}
-	      || "";
-      if (File::Spec->file_name_is_absolute($path)) {
-	# testing existence is not good enough, some have these exe
-	# extensions
+        my $old_warn = $^W;
+        local $^W if $^O eq 'MacOS';
+        local $^W = $old_warn;
+        my $progname;
+        for $progname (@external_progs) {
+            if ($^O eq 'MacOS') {
+                $CPAN::Config->{$progname} = 'not_here';
+                next;
+            }
+            next if $matcher && $progname !~ /$matcher/;
 
-	# warn "Warning: configured $path does not exist\n" unless -e $path;
-	# $path = "";
-      } elsif ($path =~ /^\s+$/) {
-          # preserve disabled programs
-      } else {
-	$path = '';
-      }
-      unless ($path) {
-	# e.g. make -> nmake
-	$progcall = $Config::Config{$progname} if $Config::Config{$progname};
-      }
+            my $progcall = $progname;
+            # we don't need ncftp if we have ncftpget
+            next if $progname eq "ncftp" && $CPAN::Config->{ncftpget} gt " ";
+            my $path = $CPAN::Config->{$progname}
+                || $Config::Config{$progname}
+                    || "";
+            if (File::Spec->file_name_is_absolute($path)) {
+                # testing existence is not good enough, some have these exe
+                # extensions
 
-      $path ||= find_exe($progcall,[@path]);
-      $CPAN::Frontend->mywarn("Warning: $progcall not found in PATH\n") unless
-	  $path; # not -e $path, because find_exe already checked that
-      $ans = prompt("Where is your $progname program?",$path) || $path;
-      $CPAN::Config->{$progname} = $ans;
+                # warn "Warning: configured $path does not exist\n" unless -e $path;
+                # $path = "";
+            } elsif ($path =~ /^\s+$/) {
+                # preserve disabled programs
+            } else {
+                $path = '';
+            }
+            unless ($path) {
+                # e.g. make -> nmake
+                $progcall = $Config::Config{$progname} if $Config::Config{$progname};
+            }
+
+            $path ||= find_exe($progcall,[@path]);
+            $CPAN::Frontend->mywarn("Warning: $progcall not found in PATH\n") unless
+                $path; # not -e $path, because find_exe already checked that
+            $ans = prompt("Where is your $progname program?",$path) || $path;
+            $CPAN::Config->{$progname} = $ans;
+        }
     }
-    my $path = $CPAN::Config->{'pager'} || 
-	$ENV{PAGER} || find_exe("less",[@path]) || 
-	    find_exe("more",[@path]) || ($^O eq 'MacOS' ? $ENV{EDITOR} : 0 )
-	    || "more";
-    $ans = prompt("What is your favorite pager program?",$path);
-    $CPAN::Config->{'pager'} = $ans;
-    $path = $CPAN::Config->{'shell'};
-    if (File::Spec->file_name_is_absolute($path)) {
-	warn "Warning: configured $path does not exist\n" unless -e $path;
-	$path = "";
+
+    if (!$matcher or 'pager' =~ /$matcher/) {
+        my $path = $CPAN::Config->{'pager'} || 
+            $ENV{PAGER} || find_exe("less",[@path]) || 
+                find_exe("more",[@path]) || ($^O eq 'MacOS' ? $ENV{EDITOR} : 0 )
+                    || "more";
+        $ans = prompt("What is your favorite pager program?",$path);
+        $CPAN::Config->{'pager'} = $ans;
     }
-    $path ||= $ENV{SHELL};
-    $path ||= $ENV{COMSPEC} if $^O eq "MSWin32";
-    if ($^O eq 'MacOS') {
-        $CPAN::Config->{'shell'} = 'not_here';
-    } else {
-        $path =~ s,\\,/,g if $^O eq 'os2';	# Cosmetic only
-        $ans = prompt("What is your favorite shell?",$path);
-        $CPAN::Config->{'shell'} = $ans;
+
+    if (!$matcher or 'shell' =~ /$matcher/) {
+        my $path = $CPAN::Config->{'shell'};
+        if (File::Spec->file_name_is_absolute($path)) {
+            $CPAN::Frontend->mywarn("Warning: configured $path does not exist\n")
+                unless -e $path;
+            $path = "";
+        }
+        $path ||= $ENV{SHELL};
+        $path ||= $ENV{COMSPEC} if $^O eq "MSWin32";
+        if ($^O eq 'MacOS') {
+            $CPAN::Config->{'shell'} = 'not_here';
+        } else {
+            $path =~ s,\\,/,g if $^O eq 'os2';	# Cosmetic only
+            $ans = prompt("What is your favorite shell?",$path);
+            $CPAN::Config->{'shell'} = $ans;
+        }
     }
 
     #
-    # Arguments to make etc.
+    #= Installer, arguments to make etc.
     #
 
-    $CPAN::Frontend->myprint($prompts{prefer_installer_intro})
-      if !$matcher or 'prerequisites_policy_intro' =~ /$matcher/;
+    if (!$matcher or 'prefer_installer' =~ /$matcher/){
+        $CPAN::Frontend->myprint($prompts{prefer_installer_intro});
 
-    my_prompt_loop(prefer_installer => 'EUMM', $matcher, 'MB|EUMM');
+        my_prompt_loop(prefer_installer => 'EUMM', $matcher, 'MB|EUMM');
+    }
 
+    if (!$matcher or 'makepl_arg make_arg' =~ /$matcher/){
+        $CPAN::Frontend->myprint($prompts{makepl_arg_intro});
 
-    $CPAN::Frontend->myprint($prompts{makepl_arg_intro})
-      if !$matcher or 'makepl_arg_intro' =~ /$matcher/;
-
-    my_dflt_prompt(makepl_arg => "", $matcher);
-
-    my_dflt_prompt(make_arg => "", $matcher);
+        my_dflt_prompt(makepl_arg => "", $matcher);
+        my_dflt_prompt(make_arg => "", $matcher);
+    }
 
     require CPAN::HandleConfig;
     if (exists $CPAN::HandleConfig::keys{make_install_make_command}) {
@@ -349,12 +365,13 @@ Shall we use it as the general CPAN build and cache directory?
     my_dflt_prompt(make_install_arg => $CPAN::Config->{make_arg} || "", 
 		   $matcher);
 
-    $CPAN::Frontend->myprint($prompts{mbuildpl_arg_intro})
-      if !$matcher or 'mbuildpl_arg_intro' =~ /$matcher/;
+    if (!$matcher or 'mbuildpl_arg mbuild_arg' =~ /$matcher/){
+        $CPAN::Frontend->myprint($prompts{mbuildpl_arg_intro});
 
-    my_dflt_prompt(mbuildpl_arg => "", $matcher);
+        my_dflt_prompt(mbuildpl_arg => "", $matcher);
 
-    my_dflt_prompt(mbuild_arg => "", $matcher);
+        my_dflt_prompt(mbuild_arg => "", $matcher);
+    }
 
     if (exists $CPAN::HandleConfig::keys{mbuild_install_build_command}) {
         # as long as Windows needs $self->_build_command, we cannot
@@ -365,67 +382,168 @@ Shall we use it as the general CPAN build and cache directory?
     my_dflt_prompt(mbuild_install_arg => "", $matcher);
 
     #
-    # Alarm period
+    #= Alarm period
     #
 
-    $CPAN::Frontend->myprint($prompts{inactivity_timeout_intro})
-      if !$matcher or 'inactivity_timeout_intro' =~ /$matcher/;
-
-    # my_dflt_prompt(inactivity_timeout => 0);
-
-    $default = $CPAN::Config->{inactivity_timeout} || 0;
-    $CPAN::Config->{inactivity_timeout} =
-      prompt("Timeout for inactivity during {Makefile,Build}.PL?",$default);
-
-    # Proxies
-
-    $CPAN::Frontend->myprint($prompts{proxy_intro})
-      if !$matcher or 'proxy_intro' =~ /$matcher/;
-
-    for (qw/ftp_proxy http_proxy no_proxy/) {
-	next if $matcher and $_ =~ /$matcher/;
-
-	$default = $CPAN::Config->{$_} || $ENV{$_};
-	$CPAN::Config->{$_} = prompt("Your $_?",$default);
+    if (!$matcher or 'inactivity_timeout' =~ /$matcher/) {
+        $CPAN::Frontend->myprint($prompts{inactivity_timeout_intro});
+        $default = $CPAN::Config->{inactivity_timeout} || 0;
+        $CPAN::Config->{inactivity_timeout} =
+            prompt("Timeout for inactivity during {Makefile,Build}.PL?",$default);
     }
 
-    if ($CPAN::Config->{ftp_proxy} ||
-        $CPAN::Config->{http_proxy}) {
+    #
+    #= Proxies
+    #
 
-        $default = $CPAN::Config->{proxy_user} || $CPAN::LWP::UserAgent::USER;
+    my @proxy_vars = qw/ftp_proxy http_proxy no_proxy/;
+    my @proxy_user_vars = qw/proxy_user proxy_pass/;
+    if (!$matcher or "@proxy_vars @proxy_user_vars" =~ /$matcher/){
+        $CPAN::Frontend->myprint($prompts{proxy_intro});
 
-		$CPAN::Frontend->myprint($prompts{proxy_user});
-
-        if ($CPAN::Config->{proxy_user} = prompt("Your proxy user id?",$default)) {
-	    $CPAN::Frontend->myprint($prompts{proxy_pass});
-
-            if ($CPAN::META->has_inst("Term::ReadKey")) {
-                Term::ReadKey::ReadMode("noecho");
-            } else {
-		$CPAN::Frontend->myprint($prompts{password_warn});
+        for (@proxy_vars) {
+            if (!$matcher or /$matcher/){
+                $default = $CPAN::Config->{$_} || $ENV{$_} || "";
+                $CPAN::Config->{$_} = prompt("Your $_?",$default);
             }
-            $CPAN::Config->{proxy_pass} = prompt_no_strip("Your proxy password?");
-            if ($CPAN::META->has_inst("Term::ReadKey")) {
-                Term::ReadKey::ReadMode("restore");
+        }
+
+        if ($CPAN::Config->{ftp_proxy} ||
+            $CPAN::Config->{http_proxy}) {
+
+            $default = $CPAN::Config->{proxy_user} || $CPAN::LWP::UserAgent::USER || "";
+
+            $CPAN::Frontend->myprint($prompts{proxy_user});
+
+            if ($CPAN::Config->{proxy_user} = prompt("Your proxy user id?",$default)) {
+                $CPAN::Frontend->myprint($prompts{proxy_pass});
+
+                if ($CPAN::META->has_inst("Term::ReadKey")) {
+                    Term::ReadKey::ReadMode("noecho");
+                } else {
+                    $CPAN::Frontend->myprint($prompts{password_warn});
+                }
+                $CPAN::Config->{proxy_pass} = prompt_no_strip("Your proxy password?");
+                if ($CPAN::META->has_inst("Term::ReadKey")) {
+                    Term::ReadKey::ReadMode("restore");
+                }
+                $CPAN::Frontend->myprint("\n\n");
             }
-            $CPAN::Frontend->myprint("\n\n");
         }
     }
 
     #
-    # MIRRORED.BY
+    #= how FTP works
     #
 
-    conf_sites() unless $fastread;
+    my_yn_prompt(ftp_passive => 1, $matcher);
 
-    # We don't ask these now, the defaults are very likely OK.
+    #
+    #= how cwd works
+    #
+
+    if (!$matcher or 'getcwd' =~ /$matcher/){
+        $CPAN::Frontend->myprint($prompts{getcwd_intro});
+
+        my_prompt_loop(getcwd => 'cwd', $matcher,
+                       'cwd|getcwd|fastcwd|backtickcwd');
+    }
+
+    #
+    #= the CPAN shell itself
+    #
+
+    my_yn_prompt(commandnumber_in_prompt => 1, $matcher);
+    my_yn_prompt(term_ornaments => 1, $matcher);
+    if ("colorize_output colorize_print colorize_warn" =~ $matcher) {
+        my_yn_prompt(colorize_output => 0, $matcher);
+        if ($CPAN::Config->{colorize_output}) {
+            for my $tuple (
+                           ["colorize_print", "bold blue"],
+                           ["colorize_warn", "bold red"],
+                          ) {
+                my_dflt_prompt($tuple->[0] => $tuple->[1], $matcher);
+                if ($CPAN::META->has_inst("Term::ANSIColor")) {
+                    eval { Term::ANSIColor::color($CPAN::Config->{$tuple->[0]})};
+                    if ($@) {
+                        $CPAN::Config->{$tuple->[0]} = $tuple->[1];
+                        $CPAN::Frontend->mywarn($@."setting to default '$tuple->[1]'\n");
+                    }
+                }
+            }
+        }
+    }
+
+    #
+    #== term_is_latin
+    #
+
+    if (!$matcher or 'term_is_latin' =~ /$matcher/){
+        $CPAN::Frontend->myprint($prompts{term_is_latin});
+        my_yn_prompt(term_is_latin => 1, $matcher);
+    }
+
+    #
+    #== save history in file 'histfile'
+    #
+
+    if (!$matcher or 'histfile histsize' =~ /$matcher/) {
+        $CPAN::Frontend->myprint($prompts{histfile_intro});
+        defined($default = $CPAN::Config->{histfile}) or
+            $default = File::Spec->catfile($CPAN::Config->{cpan_home},"histfile");
+        $ans = prompt("File to save your history?", $default);
+        $CPAN::Config->{histfile} = $ans;
+
+        if ($CPAN::Config->{histfile}) {
+            defined($default = $CPAN::Config->{histsize}) or $default = 100;
+            $ans = prompt("Number of lines to save?", $default);
+            $CPAN::Config->{histsize} = $ans;
+        }
+    }
+
+    #
+    #== do an ls on the m or the d command
+    #
+    if (!$matcher or 'show_upload_date' =~ /$matcher/) {
+        $CPAN::Frontend->myprint($prompts{show_upload_date_intro});
+
+        defined($default = $CPAN::Config->{show_upload_date}) or
+            $default = 'n';
+        $ans = prompt("Always try to show upload date with 'd' and 'm' command (yes/no)?",
+                      ($default ? 'yes' : 'no'));
+        $CPAN::Config->{show_upload_date} = ($ans =~ /^[y1]/i ? 1 : 0);
+    }
+
+    #
+    #= MIRRORED.BY and conf_sites()
+    #
+
+    if ($matcher){
+        if ("urllist" =~ $matcher) {
+            # conf_sites would go into endless loop with the smash prompt
+            local *_real_prompt;
+            *_real_prompt = \&CPAN::Shell::colorable_makemaker_prompt;
+            conf_sites();
+        }
+    } elsif ($fastread) {
+        $CPAN::Frontend->myprint("Autoconfigured everything but 'urllist'.\n".
+                                 "Please call 'o conf init urllist' to configure ".
+                                 "your CPAN server(s) now!");
+    } else {
+        conf_sites();
+    }
+
+    # We don't ask this one now, it's plain silly and maybe is not
+    # even used correctly everywhere.
     $CPAN::Config->{inhibit_startup_message} = 0;
-    $CPAN::Config->{getcwd}                  = 'cwd';
-    $CPAN::Config->{ftp_passive}             = 1;
-    $CPAN::Config->{term_ornaments}          = 1;
 
     $CPAN::Frontend->myprint("\n\n");
-    CPAN::HandleConfig->commit($configpm);
+    if ($matcher) {
+        $CPAN::Frontend->myprint("Please remember to call 'o conf commit' to ".
+                                 "make the config permanent!\n\n");
+    } else {
+        CPAN::HandleConfig->commit($configpm);
+    }
 }
 
 sub my_dflt_prompt {
@@ -435,6 +553,23 @@ sub my_dflt_prompt {
     $DB::single = 1;
     if (!$m || $item =~ /$m/) {
 	$CPAN::Config->{$item} = prompt($prompts{$item}, $default);
+    } else {
+	$CPAN::Config->{$item} = $default;
+    }
+}
+
+sub my_yn_prompt {
+    my ($item, $dflt, $m) = @_;
+    my $default;
+    defined($default = $CPAN::Config->{$item}) or $default = $dflt;
+
+    $DB::single = 1;
+    if (!$m || $item =~ /$m/) {
+        if (my $intro = $prompts{$item . "_intro"}) {
+            $CPAN::Frontend->myprint($intro);
+        }
+	my $ans = prompt($prompts{$item}, $default ? 'yes' : 'no');
+        $CPAN::Config->{$item} = ($ans =~ /^[y1]/i ? 1 : 0);
     } else {
 	$CPAN::Config->{$item} = $default;
     }
@@ -481,25 +616,28 @@ Shall I use the local database in $mby?};
   }
   while ($mby) {
     if ($overwrite_local) {
-      print qq{Trying to overwrite $mby\n};
+      $CPAN::Frontend->myprint(qq{Trying to overwrite $mby\n});
       $mby = CPAN::FTP->localize($m,$mby,3);
       $overwrite_local = 0;
     } elsif ( ! -f $mby ){
-      print qq{You have no $mby\n  I\'m trying to fetch one\n};
+      $CPAN::Frontend->myprint(qq{You have no $mby\n  I\'m trying to fetch one\n});
       $mby = CPAN::FTP->localize($m,$mby,3);
     } elsif (-M $mby > 60 && $loopcount == 0) {
-      print qq{Your $mby is older than 60 days,\n  I\'m trying to fetch one\n};
-      $mby = CPAN::FTP->localize($m,$mby,3);
-      $loopcount++;
+        $CPAN::Frontend->myprint(qq{Your $mby is older than 60 days,\n  I\'m trying }.
+                                 qq{to fetch one\n});
+        $mby = CPAN::FTP->localize($m,$mby,3);
+        $loopcount++;
     } elsif (-s $mby == 0) {
-      print qq{You have an empty $mby,\n  I\'m trying to fetch one\n};
+      $CPAN::Frontend->myprint(qq{You have an empty $mby,\n  I\'m trying to fetch one\n});
       $mby = CPAN::FTP->localize($m,$mby,3);
     } else {
       last;
     }
   }
+  local $urllist = [];
   read_mirrored_by($mby);
   bring_your_own();
+  $CPAN::Config->{urllist} = $urllist;
 }
 
 sub find_exe {
@@ -516,34 +654,45 @@ sub find_exe {
 
 sub picklist {
     my($items,$prompt,$default,$require_nonempty,$empty_warning)=@_;
+    CPAN->debug("picklist('$items','$prompt','$default','$require_nonempty',".
+                "'$empty_warning')") if $CPAN::DEBUG;
     $default ||= '';
 
     my $pos = 0;
 
     my @nums;
-    while (1) {
+  SELECTION: while (1) {
 
         # display, at most, 15 items at a time
         my $limit = $#{ $items } - $pos;
         $limit = 15 if $limit > 15;
 
         # show the next $limit items, get the new position
-        $pos = display_some($items, $limit, $pos);
+        $pos = display_some($items, $limit, $pos, $default);
         $pos = 0 if $pos >= @$items;
 
         my $num = prompt($prompt,$default);
 
         @nums = split (' ', $num);
-        my $i = scalar @$items;
-        (warn "invalid items entered, try again\n"), next
-            if grep (/\D/ || $_ < 1 || $_ > $i, @nums);
-        if ($require_nonempty) {
-            (warn "$empty_warning\n");
+        {
+            my %seen;
+            @nums = grep { !$seen{$_}++ } @nums;
         }
-        print "\n";
+        my $i = scalar @$items;
+        if (grep (/\D/ || $_ < 1 || $_ > $i, @nums)){
+            $CPAN::Frontend->mywarn("invalid items entered, try again\n");
+            if ("@nums" =~ /\D/) {
+                $CPAN::Frontend->mywarn("(we are expecting at least one number between 1 and $i)\n");
+            }
+            next SELECTION;
+        }
+        if ($require_nonempty && !@nums) {
+            $CPAN::Frontend->mywarn("$empty_warning\n");
+        }
+        $CPAN::Frontend->myprint("\n");
 
         # a blank line continues...
-        next unless @nums;
+        next SELECTION unless @nums;
         last;
     }
     for (@nums) { $_-- }
@@ -551,18 +700,20 @@ sub picklist {
 }
 
 sub display_some {
-	my ($items, $limit, $pos) = @_;
-	$pos ||= 0;
+    my ($items, $limit, $pos, $default) = @_;
+    $pos ||= 0;
 
-	my @displayable = @$items[$pos .. ($pos + $limit)];
+    my @displayable = @$items[$pos .. ($pos + $limit)];
     for my $item (@displayable) {
-		printf "(%d) %s\n", ++$pos, $item;
+        $CPAN::Frontend->myprint(sprintf "(%d) %s\n", ++$pos, $item);
     }
-	printf("%d more items, hit SPACE RETURN to show them\n",
-               (@$items - $pos)
-              )
-            if $pos < @$items;
-	return $pos;
+    my $hit_what = $default ? "SPACE RETURN" : "RETURN";
+    $CPAN::Frontend->myprint(sprintf("%d more items, hit %s to show them\n",
+                                     (@$items - $pos),
+                                     $hit_what,
+                                    ))
+        if $pos < @$items;
+    return $pos;
 }
 
 sub read_mirrored_by {
@@ -588,20 +739,22 @@ sub read_mirrored_by {
     }
     $fh->close;
     $CPAN::Config->{urllist} ||= [];
-    my(@previous_urls);
-    if (@previous_urls = @{$CPAN::Config->{urllist}}) {
-	$CPAN::Config->{urllist} = [];
-    }
+    my @previous_urls = @{$CPAN::Config->{urllist}};
 
-    print $prompts{urls_intro};
+    $CPAN::Frontend->myprint($prompts{urls_intro});
 
     my (@cont, $cont, %cont, @countries, @urls, %seen);
-    my $no_previous_warn = 
-       "Sorry! since you don't have any existing picks, you must make a\n" .
-       "geographic selection.";
-    @cont = picklist([sort keys %all],
+    my $no_previous_warn =
+        "Sorry! since you don't have any existing picks, you must make a\n" .
+            "geographic selection.";
+    my $offer_cont = [sort keys %all];
+    if (@previous_urls) {
+        push @$offer_cont, "(edit previous picks)";
+        $default = @$offer_cont;
+    }
+    @cont = picklist($offer_cont,
                      "Select your continent (or several nearby continents)",
-                     '',
+                     $default,
                      ! @previous_urls,
                      $no_previous_warn);
 
@@ -612,21 +765,26 @@ sub read_mirrored_by {
         @c = map ("$_ ($cont)", @c) if @cont > 1;
         push (@countries, @c);
     }
+    if (@previous_urls && @countries) {
+        push @countries, "(edit previous picks)";
+        $default = @countries;
+    }
 
     if (@countries) {
         @countries = picklist (\@countries,
                                "Select your country (or several nearby countries)",
-                               '',
+                               $default,
                                ! @previous_urls,
                                $no_previous_warn);
         %seen = map (($_ => 1), @previous_urls);
         # hmmm, should take list of defaults from CPAN::Config->{'urllist'}...
         foreach $country (@countries) {
+            next if $country =~ /edit previous picks/;
             (my $bare_country = $country) =~ s/ \(.*\)//;
             my @u = sort keys %{$all{$cont{$bare_country}}{$bare_country}};
             @u = grep (! $seen{$_}, @u);
             @u = map ("$_ ($bare_country)", @u)
-               if @countries > 1;
+                if @countries > 1;
             push (@urls, @u);
         }
     }
@@ -634,18 +792,18 @@ sub read_mirrored_by {
     my $prompt = "Select as many URLs as you like (by number),
 put them on one line, separated by blanks, e.g. '1 4 5'";
     if (@previous_urls) {
-       $default = join (' ', ((scalar @urls) - (scalar @previous_urls) + 1) ..
-                             (scalar @urls));
-       $prompt .= "\n(or just hit RETURN to keep your previous picks)";
+        $default = join (' ', ((scalar @urls) - (scalar @previous_urls) + 1) ..
+                         (scalar @urls));
+        $prompt .= "\n(or just hit RETURN to keep your previous picks)";
     }
 
     @urls = picklist (\@urls, $prompt, $default);
     foreach (@urls) { s/ \(.*\)//; }
-    push @{$CPAN::Config->{urllist}}, @urls;
+    push @$urllist, @urls;
 }
 
 sub bring_your_own {
-    my %seen = map (($_ => 1), @{$CPAN::Config->{urllist}});
+    my %seen = map (($_ => 1), @$urllist);
     my($ans,@urls);
     do {
 	my $prompt = "Enter another URL or RETURN to quit:";
@@ -662,21 +820,24 @@ Please enter your CPAN site:};
             if ($ans =~ /^\w+:\/./) {
                 push @urls, $ans unless $seen{$ans}++;
             } else {
-                printf(qq{"%s" doesn\'t look like an URL at first sight.
+                $CPAN::Frontend->
+                    myprint(sprintf(qq{"%s" doesn\'t look like an URL at first sight.
 I\'ll ignore it for now.
 You can add it to your %s
 later if you\'re sure it\'s right.\n},
-                       $ans,
-                       $INC{'CPAN/MyConfig.pm'} || $INC{'CPAN/Config.pm'} || "configuration file",
-                      );
+                                   $ans,
+                                   $INC{'CPAN/MyConfig.pm'}
+                                   || $INC{'CPAN/Config.pm'}
+                                   || "configuration file",
+                                  ));
             }
         }
     } while $ans || !%seen;
 
-    push @{$CPAN::Config->{urllist}}, @urls;
+    push @$urllist, @urls;
     # xxx delete or comment these out when you're happy that it works
-    print "New set of picks:\n";
-    map { print "  $_\n" } @{$CPAN::Config->{urllist}};
+    $CPAN::Frontend->myprint("New set of picks:\n");
+    map { $CPAN::Frontend->myprint("  $_\n") } @$urllist;
 }
 
 
@@ -684,7 +845,6 @@ sub _strip_spaces {
     $_[0] =~ s/^\s+//;  # no leading spaces
     $_[0] =~ s/\s+\z//; # no trailing spaces
 }
-
 
 sub prompt ($;$) {
     my $ans = _real_prompt(@_);
@@ -707,14 +867,17 @@ my @prompts = (
 manual_config => qq[
 
 CPAN is the world-wide archive of perl resources. It consists of about
-300 sites that all replicate the same contents around the globe.
-Many countries have at least one CPAN site already. The resources
-found on CPAN are easily accessible with the CPAN.pm module. If you
-want to use CPAN.pm, you have to configure it properly.
+300 sites that all replicate the same contents around the globe. Many
+countries have at least one CPAN site already. The resources found on
+CPAN are easily accessible with the CPAN.pm module. If you want to use
+CPAN.pm, lots of things have to be configured. Fortunately, most of
+them can be determined automatically. If you prefer the automatic
+configuration, answer 'yes' below.
 
-If you do NOT want to enter a dialog now, you can answer 'no' to this
-question and I'll try to autoconfigure. (Note: you can revisit this
-dialog anytime later by typing 'o conf init' at the cpan prompt.)
+If you prefer to enter a dialog instead, you can answer 'no' to this
+question and I'll let you configure in small steps one thing after the
+other. (Note: you can revisit this dialog anytime later by typing 'o
+conf init' at the cpan prompt.)
 
 ],
 
@@ -737,13 +900,9 @@ First of all, I\'d like to create this directory. Where?
 
 keep_source_where => qq{
 
-If you like, I can cache the source files after I build them.  Doing
-so means that, if you ever rebuild that module in the future, the
-files will be taken from the cache. The tradeoff is that it takes up
-space.  How much space would you like to allocate to this cache?  (If
-you don\'t want me to keep a cache, answer 0.)
-
-},
+Unless you are accessing the CPAN via the filesystem directly CPAN.pm
+needs to keep the source files it downloads somewhere. Please supply a
+directory where the downloaded files are to be kept.},
 
 build_cache_intro => qq{
 
@@ -755,6 +914,9 @@ with all the intermediate files\?
 build_cache =>
 "Cache size for build directory (in MB)?",
 
+build_dir =>
+
+"Directory where the build process takes place?",
 
 scan_cache_intro => qq{
 
@@ -766,7 +928,7 @@ performed to keep the cache size in sync. To prevent this, answer
 
 scan_cache => "Perform cache scanning (atstart or never)?",
 
-cache_metadata => qq{
+cache_metadata_intro => qq{
 
 To considerably speed up the initial CPAN shell startup, it is
 possible to use Storable to create a cache of metadata. If Storable
@@ -774,7 +936,9 @@ is not available, the normal index mechanism will be used.
 
 },
 
-term_is_latin => qq{
+cache_metadata => qq{Cache metadata (yes/no)?},
+
+term_is_latin_intro => qq{
 
 The next option deals with the charset (aka character set) your
 terminal supports. In general, CPAN is English speaking territory, so
@@ -787,6 +951,8 @@ because you will not be able to read the names of some authors
 anyway. If you answer no, names will be output in UTF-8.
 
 },
+
+term_is_latin => qq{Your terminal expects ISO-8859-1 (yes/no)?},
 
 histfile_intro => qq{
 
@@ -852,13 +1018,35 @@ check_sigs =>
 qq{Always try to check and verify signatures if a SIGNATURE file is in the package
 and Module::Signature is installed (yes/no)?},
 
+test_report_intro =>
+qq{
+
+The goal of the CPAN Testers project (http://testers.cpan.org/) is to
+test as many CPAN packages as possible on as many platforms as
+possible.  This provides valuable feedback to module authors and
+potential users to identify bugs or platform compatibility issues and
+improves the overall quality and value of CPAN.
+
+One way you can contribute is to send test results for each module
+that you install.  If you install the CPAN::Reporter module, you have
+the option to automatically generate and email test reports to CPAN
+Testers whenever you run tests on a CPAN package.
+
+See the CPAN::Reporter documentation for additional details and
+configuration settings.  If your firewall blocks outgoing email,
+you will need to configure CPAN::Reporter before sending reports.
+
+},
+
+test_report =>
+qq{Email test reports if CPAN::Reporter is installed (yes/no)?},
+
 external_progs => qq{
 
 The CPAN module will need a few external programs to work properly.
 Please correct me, if I guess the wrong path for a program. Don\'t
 panic if you do not have some of them, just press ENTER for those. To
-disable the use of a download program, you can type a space followed
-by ENTER.
+disable the use of a program, you can type a space followed by ENTER.
 
 },
 
@@ -867,7 +1055,7 @@ prefer_installer_intro => qq{
 When you have Module::Build installed and a module comes with both a
 Makefile.PL and a Build.PL, which shall have precedence? The two
 installer modules we have are the old and well established
-ExtUtils::MakeMaker (for short: EUMM) understands the Makefile.PL and
+ExtUtils::MakeMaker (for short: EUMM) which uses the Makefile.PL and
 the next generation installer Module::Build (MB) works with the
 Build.PL.
 
@@ -971,9 +1159,10 @@ Your choice: },
 inactivity_timeout_intro => qq{
 
 Sometimes you may wish to leave the processes run by CPAN alone
-without caring about them. Because the Makefile.PL sometimes contains
-question you\'re expected to answer, you can set a timer that will
-kill a 'perl Makefile.PL' process after the specified time in seconds.
+without caring about them. Because the Makefile.PL or the Build.PL
+sometimes contains question you\'re expected to answer, you can set a
+timer that will kill a 'perl Makefile.PL' process after the specified
+time in seconds.
 
 If you set this value to 0, these processes will wait forever. This is
 the default and recommended setting.
@@ -1016,13 +1205,13 @@ a few sites onto the array (just in case the first on the array won\'t
 work). If you are mirroring CPAN to your local workstation, specify a
 file: URL.
 
-First, pick a nearby continent and country (you can pick several of
-each, separated by spaces, or none if you just want to keep your
-existing selections). Then, you will be presented with a list of URLs
-of CPAN mirrors in the countries you selected, along with previously
-selected URLs. Select some of those URLs, or just keep the old list.
-Finally, you will be prompted for any extra URLs -- file:, ftp:, or
-http: -- that host a CPAN mirror.
+First, pick a nearby continent and country by typing in the number(s)
+in front of the item(s) you want to select. You can pick several of
+each, separated by spaces. Then, you will be presented with a list of
+URLs of CPAN mirrors in the countries you selected, along with
+previously selected URLs. Select some of those URLs, or just keep the
+old list. Finally, you will be prompted for any extra URLs -- file:,
+ftp:, or http: -- that host a CPAN mirror.
 
 },
 
@@ -1033,6 +1222,65 @@ be echoed to the terminal!
 
 },
 
+commandnumber_in_prompt => qq{
+
+The prompt of the cpan shell can contain the current command number
+for easier tracking of the session or be a plain string. Do you want
+the command number in the prompt (yes/no)?},
+
+ftp_passive => qq{
+
+Shall we always set FTP_PASSIVE envariable when dealing with ftp
+download (yes/no)?},
+
+# taken from the manpage:
+getcwd_intro => qq{
+
+CPAN.pm changes the current working directory often and needs to
+determine its own current working directory. Per default it uses
+Cwd::cwd but if this doesn't work on your system for some reason,
+alternatives can be configured according to the following table:
+
+    cwd         Cwd::cwd
+    getcwd      Cwd::getcwd
+    fastcwd     Cwd::fastcwd
+    backtickcwd external command cwd
+
+},
+
+getcwd => qq{Preferred method for determining the current working directory?},
+
+index_expire_intro => qq{
+
+The CPAN indexes are usually rebuilt once or twice per hour, but the
+typical CPAN mirror mirrors only once or twice per day. Depending on
+the quality of your mirror and your desire to be on the bleeding edge,
+you may want to set the following value to more or less than one day
+(which is the default). It determines after how many days CPAN.pm
+downloads new indexes.
+
+},
+
+index_expire => qq{Let the index expire after how many days?},
+
+term_ornaments => qq{
+
+When using Term::ReadLine, you can turn ornaments on so that your
+input stands out against the output from CPAN.pm. Do you want to turn
+ornaments on?},
+
+colorize_output => qq{
+
+When you have Term::ANSIColor installed, you can turn on colorized
+output to have some visual differences between normal CPAN.pm output,
+warnings, and the output of the modules being installed. Set your
+favorite colors after some experimenting with the Term::ANSIColor
+module. Do you want to turn on colored output?},
+
+colorize_print => qq{Color for normal output?},
+
+colorize_warn => qq{Color for warnings?},
+
 );
 
 die "Coding error in \@prompts declaration.  Odd number of elements, above"
@@ -1041,17 +1289,13 @@ die "Coding error in \@prompts declaration.  Odd number of elements, above"
 %prompts = @prompts;
 
 if (scalar(keys %prompts) != scalar(@prompts)/2) {
-
     my %already;
-
     for my $item (0..$#prompts) {
 	next if $item % 2;
-	die "$prompts[$item] is duplicated\n"
-	  if $already{$prompts[$item]}++;
+	die "$prompts[$item] is duplicated\n" if $already{$prompts[$item]}++;
     }
-
 }
 
-}
+} # EOBEGIN
 
 1;

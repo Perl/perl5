@@ -1,8 +1,8 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
-package CPAN;
-$VERSION = '1.87_55';
-$VERSION = eval $VERSION;
 use strict;
+package CPAN;
+$CPAN::VERSION = '1.87_62';
+$CPAN::VERSION = eval $CPAN::VERSION;
 
 use CPAN::HandleConfig;
 use CPAN::Version;
@@ -26,8 +26,17 @@ use Safe ();
 use Sys::Hostname qw(hostname);
 use Text::ParseWords ();
 use Text::Wrap ();
-no lib "."; # we need to run chdir all over and we would get at wrong
-            # libraries there
+
+# we need to run chdir all over and we would get at wrong libraries
+# there
+BEGIN {
+    if (File::Spec->can("rel2abs")) {
+        for my $inc (@INC) {
+            $inc = File::Spec->rel2abs($inc);
+        }
+    }
+}
+no lib ".";
 
 require Mac::BuildTools if $^O eq 'MacOS';
 
@@ -133,10 +142,11 @@ sub shell {
             }
             close $fh;
         }}
-	# $term->OUT is autoflushed anyway
-        for ($CPAN::Config->{term_ornaments}) {
+        for ($CPAN::Config->{term_ornaments}) { # alias
+            local $Term::ReadLine::termcap_nowarn = 1;
             $term->ornaments($_) if defined;
         }
+	# $term->OUT is autoflushed anyway
 	my $odef = select STDERR;
 	$| = 1;
 	select STDOUT;
@@ -157,17 +167,19 @@ sub shell {
 	($term->ReadLine ne "Term::ReadLine::Stub") ? "enabled" :
 	    "available (try 'install Bundle::CPAN')";
 
-    $CPAN::Frontend->myprint(
-			     sprintf qq{
+    unless ($CPAN::Config->{'inhibit_startup_message'}){
+        $CPAN::Frontend->myprint(
+                                 sprintf qq{
 cpan shell -- CPAN exploration and modules installation (v%s)
 ReadLine support %s
 
 },
-                             $CPAN::VERSION,
-                             $rl_avail
-                            )
-        unless $CPAN::Config->{'inhibit_startup_message'} ;
+                                 $CPAN::VERSION,
+                                 $rl_avail
+                                )
+    }
     my($continuation) = "";
+    my $last_term_ornaments;
   SHELLCOMMAND: while () {
 	if ($Suppress_readline) {
 	    print $prompt;
@@ -242,6 +254,19 @@ ReadLine support %s
             @_ = ($oprompt,"");
 	    goto &shell;
 	}
+      }
+      for ($CPAN::Config->{term_ornaments}) { # alias
+          if (defined $_) {
+              if (not defined $last_term_ornaments
+                  or $_ != $last_term_ornaments
+                 ) {
+                  local $Term::ReadLine::termcap_nowarn = 1;
+                  $term->ornaments($_);
+                  $last_term_ornaments = $_;
+              }
+          } else {
+              undef $last_term_ornaments;
+          }
       }
     }
     soft_chdir_with_alternatives(\@cwd);
@@ -396,10 +421,9 @@ sub as_string {
 
 package CPAN::Shell;
 use strict;
-use vars qw($AUTOLOAD @ISA $COLOR_REGISTERED $ADVANCED_QUERY $PRINT_ORNAMENTING);
+use vars qw($AUTOLOAD @ISA $COLOR_REGISTERED $ADVANCED_QUERY);
 @CPAN::Shell::ISA = qw(CPAN::Debug);
 $COLOR_REGISTERED ||= 0;
-$PRINT_ORNAMENTING ||= 0;
 
 #-> sub CPAN::Shell::AUTOLOAD ;
 sub AUTOLOAD {
@@ -568,7 +592,7 @@ sub suggest_myconfig () {
   SUGGEST_MYCONFIG: if(!$INC{'CPAN/MyConfig.pm'}) {
         $CPAN::Frontend->myprint("You don't seem to have a user ".
                                  "configuration (MyConfig.pm) yet.\n");
-        my $new = ExtUtils::MakeMaker::prompt("Do you want to create a ".
+        my $new = CPAN::Shell::colorable_makemaker_prompt("Do you want to create a ".
                                               "user configuration now? (Y/n)",
                                               "yes");
         if($new =~ m{^y}i) {
@@ -634,7 +658,7 @@ You may want to kill it and delete the lockfile, maybe. On UNIX try:
 });
 	    } elsif (-w $lockfile) {
 		my($ans) =
-		    ExtUtils::MakeMaker::prompt
+		    CPAN::Shell::colorable_makemaker_prompt
 			(qq{Other job not responding. Shall I overwrite }.
 			 qq{the lockfile '$lockfile'? (Y/n)},"y");
 		$CPAN::Frontend->myexit("Ok, bye\n")
@@ -911,18 +935,18 @@ sub has_inst {
       install Bundle::libnet
 
 }) unless $Have_warned->{"Net::FTP"}++;
-	sleep 3;
+	$CPAN::Frontend->mysleep(3);
     } elsif ($mod eq "Digest::SHA"){
         if ($Have_warned->{"Digest::SHA"}++) {
             $CPAN::Frontend->myprint(qq{CPAN: checksum security checks disabled}.
                                      qq{because Digest::SHA not installed.\n});
         } else {
-            $CPAN::Frontend->myprint(qq{
+            $CPAN::Frontend->mywarn(qq{
   CPAN: checksum security checks disabled because Digest::SHA not installed.
   Please consider installing the Digest::SHA module.
 
 });
-            sleep 2;
+            $CPAN::Frontend->mysleep(2);
         }
     } elsif ($mod eq "Module::Signature"){
         if (not $CPAN::Config->{check_sigs}) {
@@ -937,14 +961,14 @@ sub has_inst {
                  $CPAN::Config->{'gpg'} =~ /\S/
                 )
                ) {
-		$CPAN::Frontend->myprint(qq{
+		$CPAN::Frontend->mywarn(qq{
   CPAN: Module::Signature security checks disabled because Module::Signature
   not installed.  Please consider installing the Module::Signature module.
   You may also need to be able to connect over the Internet to the public
   keyservers like pgp.mit.edu (port 11371).
 
 });
-		sleep 2;
+		$CPAN::Frontend->mysleep(2);
 	    }
 	}
     } else {
@@ -987,7 +1011,7 @@ sub cleanup {
   unlink $META->{LOCK};
   # require Carp;
   # Carp::cluck("DEBUGGING");
-  $CPAN::Frontend->mywarn("Lockfile removed.\n");
+  $CPAN::Frontend->myprint("Lockfile removed.\n");
 }
 
 #-> sub CPAN::savehist
@@ -1141,7 +1165,7 @@ sub disk_usage {
                                            "the permission to change the permission; ".
                                            "can only partially estimate disk usage ".
                                            "of '$_'\n");
-                   sleep 5;
+                   $CPAN::Frontend->mysleep(5);
                    return;
                  }
                }
@@ -1410,8 +1434,10 @@ sub i {
 
 #-> sub CPAN::Shell::o ;
 
-# CPAN::Shell::o and CPAN::Config::edit are closely related. 'o conf'
-# should have been called set and 'o debug' maybe 'set debug'
+# CPAN::Shell::o and CPAN::HandleConfig::edit are closely related. 'o
+# conf' calls through to CPAN::HandleConfig::edit. 'o conf' should
+# have been called 'set' and 'o debug' maybe 'set debug' or 'debug'
+# 'o conf XXX' calls ->edit in CPAN/HandleConfig.pm
 sub o {
     my($self,$o_type,@o_what) = @_;
     $DB::single = 1;
@@ -1527,8 +1553,18 @@ sub reload {
         my $redef = 0;
         chdir $CPAN::iCwd if $CPAN::iCwd; # may fail
         my $failed;
-      MFILE: for my $f (qw(CPAN.pm CPAN/HandleConfig.pm CPAN/FirstTime.pm CPAN/Tarzip.pm
-                      CPAN/Debug.pm CPAN/Version.pm)) {
+        my @relo = (
+                    "CPAN.pm",
+                    "CPAN/HandleConfig.pm",
+                    "CPAN/FirstTime.pm",
+                    "CPAN/Tarzip.pm",
+                    "CPAN/Debug.pm",
+                    "CPAN/Version.pm",
+                   );
+        if ($CPAN::Config->{test_report}) {
+            push @relo, "CPAN/Reporter.pm";
+        }
+      MFILE: for my $f (@relo) {
             local($SIG{__WARN__}) = paintdots_onreload(\$redef);
             $self->reload_this($f) or $failed++;
         }
@@ -1646,9 +1682,11 @@ sub scripts {
     my($self, $arg) = @_;
     $CPAN::Frontend->mywarn(">>>> experimental command, currently unsupported <<<<\n\n");
 
-    require HTML::LinkExtor;
-    require Sort::Versions;
-    require List::Util;
+    for my $req (qw( HTML::LinkExtor Sort::Versions List::Util )) {
+        unless ($CPAN::META->has_inst($req)) {
+            $CPAN::Frontend->mywarn("  $req not available\n");
+        }
+    }
     my $p = HTML::LinkExtor->new();
     my $indexfile = "/home/ftp/pub/PAUSE/scripts/new/index.html";
     unless (-f $indexfile) {
@@ -1658,7 +1696,7 @@ sub scripts {
     my @hrefs;
     my $qrarg;
     if ($arg =~ s|^/(.+)/$|$1|) {
-        $qrarg = qr/$arg/;
+        $qrarg = eval 'qr/$arg/'; # hide construct from 5.004
     }
     for my $l ($p->links) {
         my $tag = shift @$l;
@@ -2151,10 +2189,29 @@ sub format_result {
 # debugging utility that reveals which output is going through which
 # channel. No, I don't like the colors ;-)
 
-#-> sub CPAN::Shell::print_ornameted ;
+# to turn colordebugging on, write
+# cpan> o conf colorize_output 1
+
+#-> sub CPAN::Shell::print_ornamented ;
+{
+    my $print_ornamented_have_warned = 0;
+    sub colorize_output {
+        my $colorize_output = $CPAN::Config->{colorize_output};
+        if ($colorize_output && !$CPAN::META->has_inst("Term::ANSIColor")) {
+            unless ($print_ornamented_have_warned++) {
+                # no myprint/mywarn within myprint/mywarn!
+                warn "Colorize_output is set to true but Term::ANSIColor is not
+installed. To activate colorized output, please install Term::ANSIColor.\n\n";
+            }
+            $colorize_output = 0;
+        }
+        return $colorize_output;
+    }
+}
+
+
 sub print_ornamented {
     my($self,$what,$ornament) = @_;
-    my $longest = 0;
     return unless defined $what;
 
     local $| = 1; # Flush immediately
@@ -2162,44 +2219,84 @@ sub print_ornamented {
         print {report_fh()} $what;
         return;
     }
-
+    my $swhat = "$what"; # stringify if it is an object
     if ($CPAN::Config->{term_is_latin}){
         # courtesy jhi:
-        $what
+        $swhat
             =~ s{([\xC0-\xDF])([\x80-\xBF])}{chr(ord($1)<<6&0xC0|ord($2)&0x3F)}eg; #};
     }
-    if ($PRINT_ORNAMENTING) {
-	unless (defined &color) {
-	    if ($CPAN::META->has_inst("Term::ANSIColor")) {
-		import Term::ANSIColor "color";
-	    } else {
-		*color = sub { return "" };
-	    }
-	}
-	my $line;
-	for $line (split /\n/, $what) {
-	    $longest = length($line) if length($line) > $longest;
-	}
-	my $sprintf = "%-" . $longest . "s";
-	while ($what){
-	    $what =~ s/(.*\n?)//m;
-	    my $line = $1;
-	    last unless $line;
-	    my($nl) = chomp $line ? "\n" : "";
-	    #	print "line[$line]ornament[$ornament]sprintf[$sprintf]\n";
-	    print color($ornament), sprintf($sprintf,$line), color("reset"), $nl;
-	}
+    my $line;
+    my $longest = 0; # Does list::util work on 5.004?
+    for $line (split /\n/, $swhat) {
+        $longest = length($line) if length($line) > $longest;
+    }
+    $longest = 78 if $longest > 78; # yes, arbitrary, who wants it set-able?
+    if ($self->colorize_output) {
+        my $color_on = eval { Term::ANSIColor::color($ornament) } || "";
+        if ($@) {
+            print "Term::ANSIColor rejects color[$ornament]: $@\n
+Please choose a different color (Hint: try 'o conf init color.*')\n";
+        }
+        my $demobug = 0; # (=0) works, (=1) has some obscure bugs and
+                         # breaks 30shell.t, (=2) has some obvious
+                         # bugs but passes 30shell.t
+        if ($demobug == 1) {
+            my $nl = chomp $swhat ? "\n" : "";
+            while (length $swhat) {
+                $line = "";
+                if (0) {
+                    $swhat =~ s/(.*\n?)//m;
+                    $line = $1;
+                    last unless $line;
+                } else {
+                    while (length $swhat) {
+                        my $c = substr($swhat,0,1);
+                        $swhat = substr($swhat,1);
+                        $line .= $c;
+                        if ($c eq "\n") {
+                            last;
+                        }
+                    }
+                }
+
+                # my($nl) = chomp $line ? "\n" : "";
+                # ->debug verboten within print_ornamented ==> recursion!
+                # warn("line[$line]ornament[$ornament]sprintf[$sprintf]\n") if $CPAN::DEBUG;
+                print $color_on,
+                    sprintf("%-*s",$longest,$line),
+                        Term::ANSIColor::color("reset"),
+                              $line =~ /\n/ ? "" : $nl;
+            }
+        } elsif ($demobug == 2) {
+            my $block = join "\n",
+                map {
+                    sprintf("%s%-*s%s",
+                            $color_on,
+                            $longest,
+                            $_,
+                            Term::ANSIColor::color("reset"),
+                           )
+                }
+                    split /[\r ]*\n/, $swhat;
+            print $block;
+        } else {
+            print $color_on,
+                $swhat,
+                    Term::ANSIColor::color("reset");
+        }
     } else {
-        # chomp $what;
-        # $what .= "\n"; # newlines unless $PRINT_ORNAMENTING
-	print $what;
+        print $swhat;
     }
 }
 
+# where is myprint/mywarn/Frontend/etc. documented? We need guidelines
+# where to use what! I think, we send everything to STDOUT and use
+# print for normal/good news and warn for news that need more
+# attention. Yes, this is our working contract for now.
 sub myprint {
     my($self,$what) = @_;
 
-    $self->print_ornamented($what, 'bold blue on_yellow');
+    $self->print_ornamented($what, $CPAN::Config->{colorize_print}||'bold blue');
 }
 
 sub myexit {
@@ -2210,19 +2307,13 @@ sub myexit {
 
 sub mywarn {
     my($self,$what) = @_;
-    $self->print_ornamented($what, 'bold red on_yellow');
+    $self->print_ornamented($what, $CPAN::Config->{colorize_warn}||'bold red');
 }
-
-#sub myconfess {
-#    my($self,$what) = @_;
-#    $self->print_ornamented($what, 'bold red on_white');
-#    Carp::confess "died";
-#}
 
 # only to be used for shell commands
 sub mydie {
     my($self,$what) = @_;
-    $self->print_ornamented($what, 'bold red on_white');
+    $self->print_ornamented($what, $CPAN::Config->{colorize_warn}||'bold red');
 
     # If it is the shell, we want that the following die to be silent,
     # but if it is not the shell, we would need a 'die $what'. We need
@@ -2230,6 +2321,21 @@ sub mydie {
     # possible?
 
     die "\n";
+}
+
+# sub CPAN::Shell::colorable_makemaker_prompt
+sub colorable_makemaker_prompt {
+    my($foo,$bar) = @_;
+    if (CPAN::Shell->colorize_output) {
+        my $ornament = $CPAN::Config->{colorize_print}||'bold blue';
+        my $color_on = eval { Term::ANSIColor::color($ornament); } || "";
+        print $color_on;
+    }
+    my $ans = ExtUtils::MakeMaker::prompt($foo,$bar);
+    if (CPAN::Shell->colorize_output) {
+        print Term::ANSIColor::color('reset');
+    }
+    return $ans;
 }
 
 # use this only for unrecoverable errors!
@@ -2309,7 +2415,7 @@ sub rematein {
 	} elsif ($s =~ m|^/|) { # looks like a regexp
             $CPAN::Frontend->mywarn("Sorry, $meth with a regular expression is ".
                                     "not supported\n");
-            sleep 2;
+            $CPAN::Frontend->mysleep(2);
             next;
 	} elsif ($meth eq "ls") {
             $self->globls($s,\@pragma);
@@ -2327,17 +2433,17 @@ sub rematein {
             if ($meth =~ /^(dump|ls)$/) {
                 $obj->$meth();
             } else {
-                $CPAN::Frontend->myprint(
-                                         join "",
-                                         "Don't be silly, you can't $meth ",
-                                         $obj->fullname,
-                                         " ;-)\n"
-                                        );
-                sleep 2;
+                $CPAN::Frontend->mywarn(
+                                        join "",
+                                        "Don't be silly, you can't $meth ",
+                                        $obj->fullname,
+                                        " ;-)\n"
+                                       );
+                $CPAN::Frontend->mysleep(2);
             }
 	} else {
 	    $CPAN::Frontend
-		->myprint(qq{Warning: Cannot $meth $s, }.
+		->mywarn(qq{Warning: Cannot $meth $s, }.
 			  qq{don\'t know what it is.
 Try the command
 
@@ -2345,7 +2451,7 @@ Try the command
 
 to find objects with matching identifiers.
 });
-            sleep 2;
+            $CPAN::Frontend->mysleep(2);
 	}
     }
 
@@ -2431,7 +2537,7 @@ sub config {
         @ISA = qw(Exporter LWP::UserAgent);
         $SETUPDONE++;
     } else {
-        $CPAN::Frontend->mywarn("LWP::UserAgent not available\n");
+        $CPAN::Frontend->mywarn("  LWP::UserAgent not available\n");
     }
 }
 
@@ -2481,7 +2587,7 @@ sub get_non_proxy_credentials {
        o conf username your_username
        o conf password your_password
      )\nUsername:";
-        
+
     ($user, $password) =
         _get_username_and_password_from_user($username_prompt);
     return ($user,$password);
@@ -2778,14 +2884,20 @@ sub localize {
     }
     unless ($CPAN::Signal) {
         my(@mess);
-        push @mess,
-            qq{Please check, if the URLs I found in your configuration file \(}.
-                join(", ", @{$CPAN::Config->{urllist}}).
-                    qq{\) are valid. The urllist can be edited.},
-                        qq{E.g. with 'o conf urllist push ftp://myurl/'};
-        $CPAN::Frontend->myprint(Text::Wrap::wrap("","",@mess). "\n\n");
-        sleep 2;
-        $CPAN::Frontend->myprint("Could not fetch $file\n");
+        local $" = " ";
+        if (@{$CPAN::Config->{urllist}}) {
+            push @mess,
+                qq{Please check, if the URLs I found in your configuration file \(}.
+                    join(", ", @{$CPAN::Config->{urllist}}).
+                        qq{\) are valid.};
+        } else {
+            push @mess, qq{Your urllist is empty!};
+        }
+        push @mess, qq{The urllist can be edited.},
+            qq{E.g. with 'o conf urllist push ftp://myurl/'};
+        $CPAN::Frontend->mywarn(Text::Wrap::wrap("","","@mess"). "\n\n");
+        $CPAN::Frontend->mywarn("Could not fetch $file\n");
+        $CPAN::Frontend->mysleep(2);
     }
     if ($restore) {
 	rename "$aslocal.bak", $aslocal;
@@ -2884,7 +2996,7 @@ sub hosteasy {
 	    # skip Net::FTP anymore when LWP is available.
 	  }
 	} else {
-            $CPAN::Frontend->myprint("LWP not available\n");
+            $CPAN::Frontend->mywarn("  LWP not available\n");
 	}
         return if $CPAN::Signal;
 	if ($url =~ m|^ftp://(.*?)/(.*)/(.*)|) {
@@ -2997,7 +3109,7 @@ Trying with "$funkyftp$src_switch" to get
               if (-s $asl_ungz) {
                   my $content = do { local *FH; open FH, $asl_ungz or die; local $/; <FH> };
                   if ($content =~ /^<.*<title>[45]/si) {
-                      $CPAN::Frontend->myprint(qq{
+                      $CPAN::Frontend->mywarn(qq{
 No success, the file that lynx has has downloaded looks like an error message:
 $content
 });
@@ -3082,12 +3194,11 @@ sub hosthardest {
         $CPAN::Frontend->myprint("No external ftp command available\n\n");
         return;
     }
-    $CPAN::Frontend->myprint(qq{
+    $CPAN::Frontend->mywarn(qq{
 As a last ressort we now switch to the external ftp command '$ftpbin'
 to get '$aslocal'.
 
-Doing so often leads to problems that are hard to diagnose, even endless
-loops may be encountered.
+Doing so often leads to problems that are hard to diagnose.
 
 If you're victim of such problems, please consider unsetting the ftp
 config variable with
@@ -3096,7 +3207,7 @@ config variable with
     o conf commit
 
 });
-    $CPAN::Frontend->mysleep(4);
+    $CPAN::Frontend->mysleep(2);
   HOSTHARDEST: for $ro_url (@$host_seq) {
 	my $url = "$ro_url$file";
 	$self->debug("localizing ftpwise[$url]") if $CPAN::DEBUG;
@@ -3197,8 +3308,8 @@ $dialog
 	    $CPAN::Frontend->myprint("Bad luck... Still failed!\n");
 	}
         return if $CPAN::Signal;
-	$CPAN::Frontend->myprint("Can't access URL $url.\n\n");
-	sleep 2;
+	$CPAN::Frontend->mywarn("Can't access URL $url.\n\n");
+	$CPAN::Frontend->mysleep(2);
     } # host
 }
 
@@ -3630,13 +3741,13 @@ sub rd_modpacks {
     }
     if (not defined $line_count) {
 
-	warn qq{Warning: Your $index_target does not contain a Line-Count header.
+	$CPAN::Frontend->mywarn(qq{Warning: Your $index_target does not contain a Line-Count header.
 Please check the validity of the index file by comparing it to more
 than one CPAN mirror. I'll continue but problems seem likely to
 happen.\a
-};
+});
 
-	sleep 5;
+	$CPAN::Frontend->mysleep(5);
     } elsif ($line_count != scalar @lines) {
 
 	warn sprintf qq{Warning: Your %s
@@ -3648,13 +3759,13 @@ $index_target, $line_count, scalar(@lines);
     }
     if (not defined $last_updated) {
 
-	warn qq{Warning: Your $index_target does not contain a Last-Updated header.
+	$CPAN::Frontend->mywarn(qq{Warning: Your $index_target does not contain a Last-Updated header.
 Please check the validity of the index file by comparing it to more
 than one CPAN mirror. I'll continue but problems seem likely to
 happen.\a
-};
+});
 
-	sleep 5;
+	$CPAN::Frontend->mysleep(5);
     } else {
 
 	$CPAN::Frontend
@@ -3667,7 +3778,7 @@ happen.\a
             require HTTP::Date;
             $age -= HTTP::Date::str2time($last_updated);
         } else {
-            $CPAN::Frontend->myprint("  HTTP::Date not available\n");
+            $CPAN::Frontend->mywarn("  HTTP::Date not available\n");
             require Time::Local;
             my(@d) = $last_updated =~ / (\d+) (\w+) (\d+) (\d+):(\d+):(\d+) /;
             $d[1] = index("Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec", $d[1])/4;
@@ -3721,7 +3832,7 @@ happen.\a
 	   ) {
             local($^W)= 0;
             if ($version > $CPAN::VERSION){
-                $CPAN::Frontend->myprint(qq{
+                $CPAN::Frontend->mywarn(qq{
   New CPAN.pm version (v$version) available.
   [Currently running version is v$CPAN::VERSION]
   You might want to try
@@ -3731,7 +3842,7 @@ happen.\a
   the current session.
 
 }); #});
-                sleep 2;
+                $CPAN::Frontend->mysleep(2);
 		$CPAN::Frontend->myprint(qq{\n});
 	    }
 	    last if $CPAN::Signal;
@@ -4089,7 +4200,7 @@ sub dump {
   }
   local $Data::Dumper::Sortkeys;
   $Data::Dumper::Sortkeys = 1;
-  print Data::Dumper::Dumper($self);
+  $CPAN::Frontend->myprint(Data::Dumper::Dumper($self));
 }
 
 package CPAN::Author;
@@ -4435,7 +4546,11 @@ sub uptodate {
     my $c;
     foreach $c ($self->containsmods) {
         my $obj = CPAN::Shell->expandany($c);
-        return 0 unless $obj->uptodate;
+        unless ($obj->uptodate){
+            my $id = $self->pretty_id;
+            $self->debug("$id not uptodate due to $c") if $CPAN::DEBUG;
+            return 0;
+        }
     }
     return 1;
 }
@@ -4642,7 +4757,7 @@ and there run
                     $self->debug("Module::Signature has verified") if $CPAN::DEBUG;
                 }
             } else {
-                $CPAN::Frontend->myprint(qq{Package came without SIGNATURE\n\n});
+                $CPAN::Frontend->mywarn(qq{Package came without SIGNATURE\n\n});
             }
         } else {
             $self->debug("Module::Signature is NOT installed") if $CPAN::DEBUG;
@@ -4658,7 +4773,7 @@ and there run
         # NFS has been reported to have racing problems after the
         # renaming of a directory in some environments.
         # This trick helps.
-        sleep 1;
+        $CPAN::Frontend->mysleep(1);
         my $mpldh = DirHandle->new($packagedir)
             or Carp::croak("Couldn't opendir $packagedir: $!");
         $mpl_exists = grep /^Makefile\.PL$/, $mpldh->read;
@@ -4686,12 +4801,12 @@ and there run
             # do we have anything to do?
             $self->{'configure'} = $configure;
         } elsif (-f File::Spec->catfile($packagedir,"Makefile")) {
-            $CPAN::Frontend->myprint(qq{
+            $CPAN::Frontend->mywarn(qq{
 Package comes with a Makefile and without a Makefile.PL.
 We\'ll try to build it with that Makefile then.
 });
             $self->{writemakefile} = CPAN::Distrostatus->new("YES");
-            sleep 2;
+            $CPAN::Frontend->mysleep(2);
         } else {
             my $cf = $self->called_for || "unknown";
             if ($cf =~ m|/|) {
@@ -4700,11 +4815,11 @@ We\'ll try to build it with that Makefile then.
             }
             $cf =~ s|[/\\:]||g; # risk of filesystem damage
             $cf = "unknown" unless length($cf);
-            $CPAN::Frontend->myprint(qq{Package seems to come without Makefile.PL.
+            $CPAN::Frontend->mywarn(qq{Package seems to come without Makefile.PL.
   (The test -f "$mpl" returned false.)
   Writing one on our own (setting NAME to $cf)\a\n});
             $self->{had_no_makefile_pl}++;
-            sleep 3;
+            $CPAN::Frontend->mysleep(3);
 
             # Writing our own Makefile.PL
 
@@ -4970,7 +5085,6 @@ Displaying file
   $local_file
 with pager "$pager"
 });
-    sleep 2;
     $fh_pager->print(<$fh_readme>);
     $fh_pager->close;
 }
@@ -5089,7 +5203,7 @@ Warning: checksum file '$chk_file' broken.
 When trying to read that file I expected to get a hash reference
 for further processing, but got garbage instead.
 });
-        my $answer = ExtUtils::MakeMaker::prompt("Proceed nonetheless?", "no");
+        my $answer = CPAN::Shell::colorable_makemaker_prompt("Proceed nonetheless?", "no");
         $answer =~ /^\s*y/i or $CPAN::Frontend->mydie("Aborted.\n");
         $self->{CHECKSUM_STATUS} = "NIL -- CHECKSUMS file broken";
         return;
@@ -5152,7 +5266,7 @@ The cause for this may be that the file is very new and the checksum
 has not yet been calculated, but it may also be that something is
 going awry right now.
 });
-            my $answer = ExtUtils::MakeMaker::prompt("Proceed?", "yes");
+            my $answer = CPAN::Shell::colorable_makemaker_prompt("Proceed?", "yes");
             $answer =~ /^\s*y/i or $CPAN::Frontend->mydie("Aborted.\n");
 	}
         $self->{CHECKSUM_STATUS} = "NIL -- distro not in CHECKSUMS file";
@@ -5287,7 +5401,7 @@ or
 			       $self->called_for,
 			       $self->id);
         $self->{make} = CPAN::Distrostatus->new("NO isa perl");
-        sleep 2;
+        $CPAN::Frontend->mysleep(1);
         return;
       }
     }
@@ -5409,8 +5523,9 @@ or
 	    if ($@){
 		kill 9, $pid;
 		waitpid $pid, 0;
-		$CPAN::Frontend->myprint($@);
-		$self->{writemakefile} = CPAN::Distrostatus->new("NO $@");
+                my $err = "$@";
+		$CPAN::Frontend->myprint($err);
+		$self->{writemakefile} = CPAN::Distrostatus->new("NO $err");
 		$@ = "";
 		return;
 	    }
@@ -5419,6 +5534,7 @@ or
 	  if ($ret != 0) {
 	    $self->{writemakefile} = CPAN::Distrostatus
                 ->new("NO '$system' returned status $ret");
+            $CPAN::Frontend->mywarn("Warning: No success on command[$system]\n");
 	    return;
 	  }
 	}
@@ -5437,8 +5553,13 @@ or
     if (my @prereq = $self->unsat_prereq){
       return 1 if $self->follow_prereqs(@prereq); # signal success to the queuerunner
     }
-    # XXX modulebuild / make
     if ($self->{modulebuild}) {
+        unless (-f "Build") {
+            my $cwd = Cwd::cwd;
+            $CPAN::Frontend->mywarn("Alert: no Build file available for 'make $self->{id}'".
+                                    " in cwd[$cwd]. Danger, Will Robinson!");
+            $CPAN::Frontend->mysleep(5);
+        }
         $system = sprintf "%s %s", $self->_build_command(), $CPAN::Config->{mbuild_arg};
     } else {
         $system = join " ", $self->_make_command(), $CPAN::Config->{make_arg};
@@ -5449,7 +5570,7 @@ or
     } else {
 	 $self->{writemakefile} ||= CPAN::Distrostatus->new("YES");
 	 $self->{make} = CPAN::Distrostatus->new("NO");
-	 $CPAN::Frontend->myprint("  $system -- NOT OK\n");
+	 $CPAN::Frontend->mywarn("  $system -- NOT OK\n");
     }
 }
 
@@ -5485,7 +5606,7 @@ sub follow_prereqs {
     if ($CPAN::Config->{prerequisites_policy} eq "follow") {
 	$follow = 1;
     } elsif ($CPAN::Config->{prerequisites_policy} eq "ask") {
-	my $answer = ExtUtils::MakeMaker::prompt(
+	my $answer = CPAN::Shell::colorable_makemaker_prompt(
 "Shall I follow them and prepend them to the queue
 of modules we are processing right now?", "yes");
 	$follow = $answer =~ /^\s*y/i;
@@ -5635,7 +5756,7 @@ sub prereq_pm {
                     $CPAN::Frontend->mywarn("Suspicious key-value pair in META.yml's ".
                                             "requires hash: $k => $v; I'll take both ".
                                             "key and value as a module name\n");
-                    sleep 1;
+                    $CPAN::Frontend->mysleep(1);
                     $areq->{$k} = 0;
                     $areq->{$v} = 0;
                     $do_replace++;
@@ -5773,14 +5894,21 @@ sub test {
     } else {
         $system = join " ", $self->_make_command(), "test";
     }
-    if (system($system) == 0) {
+    my $tests_ok;
+    if ( $CPAN::Config->{test_report} && 
+         $CPAN::META->has_inst("CPAN::Reporter") ) {
+            $tests_ok = CPAN::Reporter::test($self, $system);
+    } else {
+            $tests_ok = system($system) == 0;
+    }
+    if ( $tests_ok ) {
 	 $CPAN::Frontend->myprint("  $system -- OK\n");
 	 $CPAN::META->is_tested($self->{'build_dir'});
 	 $self->{make_test} = CPAN::Distrostatus->new("YES");
     } else {
 	 $self->{make_test} = CPAN::Distrostatus->new("NO");
          $self->{badtestcnt}++;
-	 $CPAN::Frontend->myprint("  $system -- NOT OK\n");
+	 $CPAN::Frontend->mywarn("  $system -- NOT OK\n");
     }
 }
 
@@ -5815,6 +5943,12 @@ sub clean {
 
     my $system;
     if ($self->{modulebuild}) {
+        unless (-f "Build") {
+            my $cwd = Cwd::cwd;
+            $CPAN::Frontend->mywarn("Alert: no Build file available for 'clean $self->{id}".
+                                    " in cwd[$cwd]. Danger, Will Robinson!");
+            $CPAN::Frontend->mysleep(5);
+        }
         $system = sprintf "%s clean", $self->_build_command();
     } else {
         $system  = join " ", $self->_make_command(), "clean";
@@ -5844,7 +5978,7 @@ sub clean {
       # Hmmm, what to do if make clean failed?
 
       $self->{make_clean} = CPAN::Distrostatus->new("NO");
-      $CPAN::Frontend->myprint(qq{  $system -- NOT OK\n});
+      $CPAN::Frontend->mywarn(qq{  $system -- NOT OK\n});
 
       # 2006-02-27: seems silly to me to force a make now
       # $self->force("make"); # so that this directory won't be used again
@@ -5944,7 +6078,9 @@ sub install {
     my($pipe) = FileHandle->new("$system $stderr |");
     my($makeout) = "";
     while (<$pipe>){
-	$CPAN::Frontend->myprint($_);
+	print $_; # intentionally NOT use Frontend->myprint because it
+                  # looks irritating when we markup in color what we
+                  # just pass through from an external program
 	$makeout .= $_;
     }
     $pipe->close;
@@ -5954,7 +6090,7 @@ sub install {
         return $self->{install} = CPAN::Distrostatus->new("YES");
     } else {
         $self->{install} = CPAN::Distrostatus->new("NO");
-        $CPAN::Frontend->myprint("  $system -- NOT OK\n");
+        $CPAN::Frontend->mywarn("  $system -- NOT OK\n");
         if (
             $makeout =~ /permission/s
             && $> > 0
@@ -6039,7 +6175,7 @@ Displaying URL
   $url
 with browser $browser
 });
-	sleep 2;
+	$CPAN::Frontend->mysleep(1);
         system("$browser $url");
 	if ($saved_file) { 1 while unlink($saved_file) }
     } else {
@@ -6099,7 +6235,7 @@ Displaying URL
   $url
 with pager "$pager"
 });
-            sleep 2;
+            $CPAN::Frontend->mysleep(1);
             $fh_pager->print(<FH>);
             $fh_pager->close;
         } else {
@@ -6168,7 +6304,7 @@ sub _getsave_url {
             return;
         }
     } else {
-        $CPAN::Frontend->myprint("LWP not available\n");
+        $CPAN::Frontend->mywarn("  LWP not available\n");
         return;
     }
 }
@@ -6393,7 +6529,7 @@ sub rematein {
 The Bundle }.$self->id.qq{ contains
 explicitly a file $s.
 });
-	    sleep 3;
+	    $CPAN::Frontend->mysleep(3);
 	}
 	# possibly noisy action:
         $self->debug("type[$type] s[$s]") if $CPAN::DEBUG;
@@ -6907,6 +7043,7 @@ sub test   {
 #-> sub CPAN::Module::uptodate ;
 sub uptodate {
     my($self) = @_;
+    local($_); # protect against a bug in MakeMaker 6.17
     my($latest) = $self->cpan_version;
     $latest ||= 0;
     my($inst_file) = $self->inst_file;
@@ -6946,7 +7083,7 @@ sub install {
 \n\n\n     ***WARNING***
      The module $self->{ID} has no active maintainer.\n\n\n
 });
-        sleep 5;
+        $CPAN::Frontend->mysleep(5);
     }
     $self->rematein('install') if $doit;
 }
@@ -6959,6 +7096,9 @@ sub inst_file {
     my($dir,@packpath);
     @packpath = split /::/, $self->{ID};
     $packpath[-1] .= ".pm";
+    if (@packpath == 1 && $packpath[0] eq "readline.pm") {
+        unshift @packpath, "Term", "ReadLine"; # historical reasons
+    }
     foreach $dir (@INC) {
 	my $pmfile = File::Spec->catfile($dir,@packpath);
 	if (-f $pmfile){
@@ -7059,7 +7199,7 @@ Batch mode:
   install $distro;                                # same thing
   CPAN::Shell->install($distro);                  # same thing
   CPAN::Shell->expandany($distro)->install;       # same thing
-  CPAN::Shell->expand("Module",$distro)->install; # same thing
+  CPAN::Shell->expand("Distribution",$distro)->install; # same thing
 
 =head1 STATUS
 
@@ -7597,6 +7737,8 @@ any case and if this fails, the install will be canceled. The
 cancellation can be avoided by letting C<force> run the C<install> for
 you.
 
+Note that install() gives no meaningful return value. See uptodate().
+
 =item CPAN::Distribution::isa_perl()
 
 Returns 1 if this distribution file seems to be a perl distribution.
@@ -7960,7 +8102,9 @@ added to the search path of the CPAN module before the use() or
 require() statements.
 
 The configuration dialog can be started any time later again by
-issuing the command C< o conf init > in the CPAN shell.
+issuing the command C< o conf init > in the CPAN shell. A subset of
+the configuration dialog can be run by issuing C<o conf init WORD>
+where WORD is any valid config variable or a regular expression.
 
 Currently the following keys in the hash reference $CPAN::Config are
 defined:
@@ -8015,6 +8159,7 @@ defined:
   tar                location of external program tar
   term_is_latin      if true internal UTF-8 is translated to ISO-8859-1
                      (and nonsense for characters outside latin range)
+  test_report        email test reports (if CPAN::Reporter is installed)
   unzip              location of external program unzip
   urllist	     arrayref to nearby CPAN sites (or equivalent locations)
   wait_list          arrayref to a wait server to try (See CPAN::WAIT)
@@ -8051,7 +8196,7 @@ works like the corresponding perl commands.
 
 =back
 
-=head2 Not on config variable getcwd
+=head2 Note on config variable getcwd
 
 CPAN.pm changes the current working directory often and needs to
 determine its own current working directory. Per default it uses
@@ -8365,7 +8510,7 @@ not using the private area.
 
 How to get a package, unwrap it, and make a change before building it?
 
-  look Sybase::Sybperl
+Have a look at the C<look> (!) command.
 
 =item 7)
 
@@ -8461,11 +8606,14 @@ decent command.
 
 How do I install a "DEVELOPER RELEASE" of a module?
 
-By default, CPAN will install the latest non-developer release of a module.
-If you want to install a dev release, you have to specify a partial path to
-the tarball you wish to install, like so:
+By default, CPAN will install the latest non-developer release of a
+module. If you want to install a dev release, you have to specify the
+partial path starting with the author id to the tarball you wish to
+install, like so:
 
     cpan> install KWILLIAMS/Module-Build-0.27_07.tar.gz
+
+Note that you can use the C<ls> command to get this path listed.
 
 =item 13)
 
