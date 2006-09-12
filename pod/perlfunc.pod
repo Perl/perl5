@@ -5903,7 +5903,7 @@ You can import symbolic mode constants (C<S_IF*>) and functions
     printf "Permissions are %04o\n", S_IMODE($mode), "\n";
 
     $is_setuid     =  $mode & S_ISUID;
-    $is_setgid     =  S_ISDIR($mode);
+    $is_directory  =  S_ISDIR($mode);
 
 You could write the last two using the C<-u> and C<-d> operators.
 The commonly available C<S_IF*> constants are
