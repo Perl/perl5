@@ -1,4 +1,4 @@
-# $Id: /local/svn.schwern.org/CPAN/ExtUtils-MakeMaker/trunk/lib/ExtUtils/MakeMaker.pm 2539 2005-08-17T06:53:55.009300Z schwern  $
+# $Id: /local/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm 18035 2006-09-11T20:18:19.209066Z schwern  $
 package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
@@ -21,8 +21,8 @@ use vars qw(
 use vars qw($Revision);
 use strict;
 
-$VERSION = '6.30_02';
-$Revision = (q$Revision: 2539 $) =~ /Revision:\s+(\S+)/;
+$VERSION = '6.30_04';
+($Revision) = q$Revision: 18035 $ =~ /Revision:\s+(\S+)/;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&WriteMakefile &writeMakefile $Verbose &prompt);
@@ -1030,7 +1030,7 @@ The generated Makefile enables the user of the extension to invoke
 The Makefile to be produced may be altered by adding arguments of the
 form C<KEY=VALUE>. E.g.
 
-  perl Makefile.PL PREFIX=~
+  perl Makefile.PL INSTALL_BASE=~
 
 Other interesting targets in the generated Makefile are
 
@@ -1118,17 +1118,48 @@ C<UNINST> variable.
     make install UNINST=1
 
 
+=head2 INSTALL_BASE
+
+INSTALL_BASE can be passed into Makefile.PL to change where your
+module will be installed.  INSTALL_BASE is more like what everyone
+else calls "prefix" than PREFIX is.
+
+To have everything installed in your home directory, do the following.
+
+    perl Makefile.PL INSTALL_BASE=~
+
+Like PREFIX, it sets several INSTALL* attributes at once.  Unlike
+PREFIX it is easy to predict where the module will end up.  The
+installation pattern looks like this:
+
+    INSTALLARCHLIB     INSTALL_BASE/lib/perl5/$Config{archname}
+    INSTALLPRIVLIB     INSTALL_BASE/lib/perl5
+    INSTALLBIN         INSTALL_BASE/bin
+    INSTALLSCRIPT      INSTALL_BASE/bin
+    INSTALLMAN1DIR     INSTALL_BASE/man/man1
+    INSTALLMAN3DIR     INSTALL_BASE/man/man3
+
+INSTALL_BASE in MakeMaker and C<--install_base> in Module::Build (as
+of 0.28) install to the same location.  If you want MakeMaker and
+Module::Build to install to the same location simply set INSTALL_BASE
+and C<--install_base> to the same location.
+
+INSTALL_BASE was added in 6.31.
+
+
 =head2 PREFIX and LIB attribute
 
 PREFIX and LIB can be used to set several INSTALL* attributes in one
-go. The quickest way to install a module in a non-standard place might
-be
+go.  Here's an example for installing into your home directory.
 
     perl Makefile.PL PREFIX=~
 
 This will install all files in the module under your home directory,
 with man pages and libraries going into an appropriate place (usually
-~/man and ~/lib).
+~/man and ~/lib).  How the exact location is determined is complicated
+and depends on how your Perl was configured.  INSTALL_BASE works more
+like what other build systems call "prefix" than PREFIX and we
+recommend you use that instead.
 
 Another way to specify many INSTALL directories with a single
 parameter is LIB.
@@ -1459,10 +1490,6 @@ If your executables start with something like #!perl or
 #!/usr/bin/perl MakeMaker will change this to the path of the perl
 'Makefile.PL' was invoked with so the programs will be sure to run
 properly even if perl is not in /usr/bin/perl.
-
-=item EXTRA_META
-
-Extra text to be appended to the generated META.yml.
 
 =item FIRST_MAKEFILE
 
@@ -2135,7 +2162,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    $VERSION = (q$Revision: 2539 $) =~ /(\d+)/g;
+    $VERSION = (q$Revision: 18035 $) =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 

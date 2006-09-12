@@ -18,8 +18,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-# $VERSION needs to stay numeric to avoid test warnings
-$VERSION = '1.5003';
+$VERSION = '1.50_04';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -1305,12 +1304,14 @@ sub init_MANPODS {
 
     # Set up names of manual pages to generate from pods
     foreach my $man (qw(MAN1 MAN3)) {
-	unless ($self->{"${man}PODS"}) {
-	    $self->{"${man}PODS"} = {};
-	    unless ($self->{"INSTALL${man}DIR"} =~ /^(none|\s*)$/) {
-		my $init = "init_${man}PODS";
-		$self->$init();
-	    }
+	if ( $self->{"${man}PODS"}
+             or $self->{"INSTALL${man}DIR"} =~ /^(none|\s*)$/
+        ) {
+            $self->{"${man}PODS"} ||= {};
+        }
+        else {
+            my $init_method = "init_${man}PODS";
+            $self->$init_method();
 	}
     }
 }
@@ -1415,8 +1416,6 @@ Initializes PMLIBDIRS and PM from PMLIBDIRS.
 sub init_PM {
     my $self = shift;
 
-    my $pm = $self->{PM};
-
     # Some larger extensions often wish to install a number of *.pm/pl
     # files into the library in various locations.
 
@@ -1468,6 +1467,8 @@ sub init_PM {
 	@{$self->{PMLIBPARENTDIRS}} = ('lib');
     }
 
+    return if $self->{PM} and $self->{ARGS}{PM};
+
     if (@{$self->{PMLIBDIRS}}){
 	print "Searching PMLIBDIRS: @{$self->{PMLIBDIRS}}\n"
 	    if ($Verbose >= 2);
@@ -1497,7 +1498,7 @@ sub init_PM {
 	    $inst = $self->libscan($inst);
 	    print "libscan($path) => '$inst'\n" if ($Verbose >= 2);
 	    return unless $inst;
-	    $pm->{$path} = $inst;
+	    $self->{PM}{$path} = $inst;
 	}, @{$self->{PMLIBDIRS}});
     }
 }

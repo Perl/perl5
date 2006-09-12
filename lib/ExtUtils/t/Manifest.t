@@ -46,7 +46,7 @@ sub read_manifest {
 }
 
 sub catch_warning {
-    my $warn;
+    my $warn = '';
     local $SIG{__WARN__} = sub { $warn .= $_[0] };
     return join('', $_[0]->() ), $warn;
 }
@@ -72,7 +72,7 @@ ok( chdir( 'mantest' ), 'chdir() to mantest' );
 ok( add_file('foo'), 'add a temporary file' );
 
 # there shouldn't be a MANIFEST there
-my ($res, $warn) = catch_warning( \&mkmanifest ); 
+my ($res, $warn) = catch_warning( \&mkmanifest );
 # Canonize the order.
 $warn = join("", map { "$_|" } 
                  sort { lc($a) cmp lc($b) } split /\r?\n/, $warn);
@@ -97,10 +97,10 @@ like( $warn, qr/^Not in MANIFEST: bar/, 'warning that bar has been added' );
 is( $res, 'bar', 'bar reported as new' );
 
 # now quiet the warning that bar was added and test again
-($res, $warn) = do { local $ExtUtils::Manifest::Quiet = 1; 
-                     catch_warning( \&skipcheck ) 
+($res, $warn) = do { local $ExtUtils::Manifest::Quiet = 1;
+                     catch_warning( \&skipcheck )
                 };
-ok( ! defined $warn, 'disabled warnings' );
+is( $warn, '', 'disabled warnings' );
 
 # add a skip file with a rule to skip itself (and the nonexistent glob '*baz*')
 add_file( 'MANIFEST.SKIP', "baz\n.SKIP" );
@@ -111,7 +111,7 @@ like( $warn, qr/^Skipping MANIFEST\.SKIP/i, 'got skipping warning' );
 
 my @skipped;
 catch_warning( sub {
-	@skipped = skipcheck()
+	@skipped = skipcheck();
 });
 
 is( join( ' ', @skipped ), 'MANIFEST.SKIP', 'listed skipped files' );
@@ -150,16 +150,8 @@ is_deeply( [sort map { lc } @copies], [sort map { lc } keys %$files] );
 foreach my $orig (@copies) {
     my $copy = "copy/$orig";
     ok( -r $copy,               "$copy: must be readable" );
-
-  SKIP: {
-    skip "       original was not writable", 1 unless -w $orig;
-    ok(-w $copy, "       writable if original was" );
-  }
-
-  SKIP: {
-    skip "       original was not executable", 1 unless -x $orig;
-    ok(-x $copy, "       executable if original was" );
-  }
+    is( -w $copy, -w $orig,     "       has orig write state" );
+    is( -x $copy, -x $orig,     "       has orig executable state" );
 }
 rmtree('copy');
 
@@ -207,8 +199,8 @@ add_file( 'MANIFEST.SKIP' => 'foo' );
 add_file( 'MANIFEST'      => "foobar\n"   );
 add_file( 'foobar'        => '123' );
 ($res, $warn) = catch_warning( \&manicheck );
-is( $res,  '',      'MANIFEST overrides MANIFEST.SKIP' );
-is( $warn, undef,   'MANIFEST overrides MANIFEST.SKIP, no warnings' );
+is( $res,  '',   'MANIFEST overrides MANIFEST.SKIP' );
+is( $warn, '',   'MANIFEST overrides MANIFEST.SKIP, no warnings' );
 
 $files = maniread;
 ok( !$files->{wibble},     'MANIFEST in good state' );

@@ -753,7 +753,7 @@ MAKE_FRAG
     $meta .= <<YAML;
 requires:     $prereq_pm
 meta-spec:
-    url: <http://module-build.sourceforge.net/META-spec-new.html>;
+    url: http://module-build.sourceforge.net/META-spec-new.html
     version: 1.1
 YAML
 

@@ -29,8 +29,8 @@ BEGIN {
 
 BEGIN {
     # bad neighbor, but test_f() uses exit()
-        *CORE::GLOBAL::exit = '';   # quiet 'only once' warning.
-    *CORE::GLOBAL::exit = sub { return @_ };
+    *CORE::GLOBAL::exit = '';   # quiet 'only once' warning.
+    *CORE::GLOBAL::exit = sub { return $_[0] };
     use_ok( 'ExtUtils::Command' );
 }
 
@@ -53,19 +53,16 @@ BEGIN {
     is( scalar( $$out =~ s/use_ok\( 'ExtUtils::Command'//g), 2, 
         'concatenation worked' );
 
-    # the truth value here is reversed -- Perl true is C false
+    # the truth value here is reversed -- Perl true is shell false
     @ARGV = ( $Testfile );
     ok( test_f(), 'testing non-existent file' );
-
-    @ARGV = ( $Testfile );
-    cmp_ok( ! test_f(), '==', defined (-f $Testfile), 'testing non-existent file' );
 
     # these are destructive, have to keep setting @ARGV
     @ARGV = ( $Testfile );
     touch();
 
     @ARGV = ( $Testfile );
-    ok( test_f(), 'now creating that file' );
+    ok( !test_f(), 'now creating that file' );
     is_deeply( \@ARGV, [$Testfile], 'test_f preserves @ARGV' );
 
     @ARGV = ( $Testfile );
@@ -108,7 +105,7 @@ BEGIN {
             $^O eq 'NetWare' || $^O eq 'dos' || $^O eq 'cygwin'  ||
             $^O eq 'MacOS'
            ) {
-            skip( "different file permission semantics on $^O", 3);
+            skip( "different file permission semantics on $^O", 4);
         }
 
         # change a file to execute-only
@@ -162,13 +159,6 @@ BEGIN {
         is( ((stat('testdir'))[2] & 07777) & 0700,
             0100, 'change a dir to execute-only' );
 
-        # change a dir to read-only
-        @ARGV = ( '0400', 'testdir' );
-        ExtUtils::Command::chmod();
-
-        is( ((stat('testdir'))[2] & 07777) & 0700,
-            ($^O eq 'vos' ? 0500 : 0400), 'change a dir to read-only' );
-
         # change a dir to write-only
         @ARGV = ( '0200', 'testdir' );
         ExtUtils::Command::chmod();
@@ -176,8 +166,16 @@ BEGIN {
         is( ((stat('testdir'))[2] & 07777) & 0700,
             ($^O eq 'vos' ? 0700 : 0200), 'change a dir to write-only' );
 
+        # change a dir to read-only
+        @ARGV = ( '0400', 'testdir' );
+        ExtUtils::Command::chmod();
+
+        is( ((stat('testdir'))[2] & 07777) & 0700,
+            ($^O eq 'vos' ? 0500 : 0400), 'change a dir to read-only' );
+
         @ARGV = ('testdir');
         rm_rf;
+        ok( ! -e 'testdir', 'rm_rf can delete a read-only dir' );
     }
 
 

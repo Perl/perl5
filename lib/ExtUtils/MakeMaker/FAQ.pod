@@ -1,7 +1,7 @@
 package ExtUtils::MakeMaker::FAQ;
 
 use vars qw($VERSION);
-$VERSION = '1.11_01';
+$VERSION = '1.11_04';
 
 1;
 __END__
@@ -18,6 +18,49 @@ FAQs, tricks and tips for C<ExtUtils::MakeMaker>.
 =head2 Module Installation
 
 =over 4
+
+=item How do I install a module into my home directory?
+
+If you're not the Perl administrator you probably don't have
+permission to install a module to its default location.  Then you
+should install it for your own use into your home directory like so:
+
+    perl Makefile.PL INSTALL_BASE=~
+
+This will put modules into F<~/lib/perl5>, man pages into F<~/man> and
+programs into F<~/bin>.
+
+To ensure your Perl programs can see these newly installed modules,
+set your C<PERL5LIB> environment variable to F<~/lib/perl5> or tell
+each of your programs to look in that directory with the following:
+
+    use lib "$ENV{HOME}/lib/perl5";
+
+
+=item How do I get MakeMaker and Module::Build to install to the same place?
+
+Module::Build, as of 0.28, supports two ways to install to the same
+location as MakeMaker.
+
+1) Use INSTALL_BASE / C<--install_base>
+
+MakeMaker (as of 6.31) and Module::Build (as of 0.28) both can install
+to the same locations using the "install_base" concept.  See
+L<ExtUtils::MakeMaker/INSTALL_BASE> for details.  To get MM and MB to
+install to the same location simply set INSTALL_BASE in MM and
+C<--install_base> in MB to the same location.
+
+    perl Makefile.PL INSTALL_BASE=/whatever
+    perl Build.PL    --install_base /whatever
+
+2) Use PREFIX / C<--prefix>
+
+Module::Build 0.28 added support for C<--prefix> which works like
+MakeMaker's PREFIX.
+
+    perl Makefile.PL PREFIX=/whatever
+    perl Build.PL    --prefix /whatever
+
 
 =item How do I keep from installing man pages?
 
@@ -39,17 +82,21 @@ Two ways.  One is to build the module normally...
 
         perl Makefile.PL
         make
+        make test
 
 ...and then set the PERL5LIB environment variable to point at the
 blib/lib and blib/arch directories.
 
 The other is to install the module in a temporary location.
 
-        perl Makefile.PL PREFIX=~/tmp LIB=~/tmp/lib/perl
+        perl Makefile.PL INSTALL_BASE=~/tmp
+        make
+        make test
+        make install
 
-And then set PERL5LIB to F<~/tmp/lib/perl>.  This works well when you have
-multiple modules to work with.  It also ensures that the module goes
-through its full installation process which may modify it.
+And then set PERL5LIB to F<~/tmp/lib/perl5>.  This works well when you
+have multiple modules to work with.  It also ensures that the module
+goes through its full installation process which may modify it.
 
 =back
 
@@ -152,6 +199,54 @@ automatically generated as part of the 'distdir' target (and thus
 'dist').  See L<ExtUtils::MakeMaker/"Module Meta-Data">.
 
 To shut off its generation, pass the C<NO_META> flag to C<WriteMakefile()>.
+
+
+=item How do I delete everything not in my F<MANIFEST>?
+
+Some folks are surpried that C<make distclean> does not delete
+everything not listed in their MANIFEST (thus making a clean
+distribution) but only tells them what they need to delete.  This is
+done because it is considered too dangerous.  While developing your
+module you might write a new file, not add it to the MANIFEST, then
+run a C<distclean> and be sad because your new work was deleted.
+
+If you really want to do this, you can use
+C<ExtUtils::Manifest::manifind()> to read the MANIFEST and File::Find
+to delete the files.  But you have to be careful.  Here's a script to
+do that.  Use at your own risk.  Have fun blowing holes in your foot.
+
+    #!/usr/bin/perl -w
+    
+    use strict;
+    
+    use File::Spec;
+    use File::Find;
+    use ExtUtils::Manifest qw(maniread);
+    
+    my %manifest = map  {( $_ => 1 )}
+                   grep { File::Spec->canonpath($_) }
+                        keys %{ maniread() };
+
+    if( !keys %manifest ) {
+        print "No files found in MANIFEST.  Stopping.\n";
+        exit;
+    }
+    
+    find({
+          wanted   => sub {
+              my $path = File::Spec->canonpath($_);
+    
+              return unless -f $path;
+              return if exists $manifest{ $path };
+    
+              print "unlink $path\n";
+              unlink $path;
+          },
+          no_chdir => 1
+         },
+         "."
+    );
+
 
 =back
 
@@ -282,7 +377,7 @@ The following four files sum up all the details discussed so far.
 
 And of course a very basic test:
 
-  test.pl:
+  t/cool.t:
   --------
   use Test;
   BEGIN { plan tests => 1 };

@@ -17,5 +17,7 @@ BEGIN {
     use_ok 'ExtUtils::MM_VMS';
 }
 
-like $ExtUtils::MakeMaker::Revision, qr/^(\d)+$/;
-like $ExtUtils::MM_VMS::Revision, qr/^(\d)+$/;
+# Why 1?  Because a common mistake is for the regex to run in scalar context
+# thus getting the count of captured elements (1) rather than the value of $1
+cmp_ok $ExtUtils::MakeMaker::Revision, '>', 1;
+cmp_ok $ExtUtils::MM_VMS::Revision,    '>', 1;

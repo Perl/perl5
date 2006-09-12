@@ -1,3 +1,35 @@
+6.30_04  Mon Sep 11 16:14:06 EDT 2006
+    - EXTRA_META has been undocumented as I don't like the way the
+      interface works but I don't want to hold up 6.31.  It will be
+      replaced with something better next version.
+    - Added explaination of distclean behavior and instructions on how to
+      blow away anything not in the MANIFEST to the FAQ.
+    * 6.30_01 broke overrides of PM.  MakeMaker would add to a user
+      suplied PM rather than simply accepting it.
+    * Document INSTALL_BASE.
+    * Added "How do I install a module into my home directory?" to the FAQ
+    * Added "How do I get MakeMaker and Module::Build to install to the
+      same place?"
+    - Moving ExtUtils::Mksymlists and ExtUtils::Mkbootstrap back into
+      lib/ because no independent distribution has taken them over.
+
+6.30_03  Fri Sep  1 17:03:11 EDT 2006
+    - Minor fix to Command.t for Win32.
+
+6.30_02  Fri Sep  1 15:03:55 EDT 2006
+    - Updated to ExtUtils::Install 1.41
+    * Won't scan for and build man pages when MAN3PODS is deliberately set
+      empty.
+    - Minor VMS fixes. [bleadperl@26813]
+    - VMS->one_liner must quote "--" argument. [bleadperl@27613]
+    * Split INSTALLSCRIPT into INSTALLSCRIPT, INSTALLSITESCRIPT and
+      INSTALLVENDORSCRIPT so it now honors INSTALLDIRS. [bleadperl@26536]
+    - Minor fix to work with Pod::man 2.04. [bleadperl@26457]
+    - $Revision was broken.
+    - Updated our internal version of Test::More to catch a few warnings.
+    - ExtUtils::Command::test_f() test was broken.
+    - Clarified that test_f() exits.
+
 6.30_01  Tue Aug 16 23:53:27 PDT 2005
     * Fixed compiling modules using an uninstalled Perl on Win32 by using
       the proper perl header location for Windows (which is different from

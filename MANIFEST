@@ -1613,6 +1613,7 @@ lib/ExtUtils/README		MakeMaker README
 lib/ExtUtils/t/00compile.t	See if MakeMaker modules compile
 lib/ExtUtils/t/backwards.t	Check MakeMaker's backwards compatibility
 lib/ExtUtils/t/basic.t		See if MakeMaker can build a module
+lib/ExtUtils/t/build_man.t	Set if MakeMaker builds manpages
 lib/ExtUtils/t/bytes.t		Test ExtUtils::MakeMaker::bytes
 lib/ExtUtils/t/Command.t	See if ExtUtils::Command works (Win32 only)
 lib/ExtUtils/t/config.t		Test ExtUtils::MakeMaker::Config
@@ -1645,6 +1646,7 @@ lib/ExtUtils/t/Packlist.t	See if Packlist works
 lib/ExtUtils/t/parse_version.t	See if parse_version works
 lib/ExtUtils/t/PL_FILES.t	Test PL_FILES in MakeMaker
 lib/ExtUtils/t/postamble.t	See if postamble works
+lib/ExtUtils/t/pm.t		See if Makemaker can handle PM
 lib/ExtUtils/t/prefixify.t	See if MakeMaker can apply a PREFIX
 lib/ExtUtils/t/prereq_print.t	See if PREREQ_PRINT works
 lib/ExtUtils/t/problems.t	How MakeMaker reacts to build problems
