@@ -717,7 +717,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     }
 
     
-    t= HOP3( s, -prog->check_offset_max, (prog->check_offset_max<0) ? strend : strpos);  
+    t= (char*)HOP3( s, -prog->check_offset_max, (prog->check_offset_max<0) ? strend : strpos);
         
     DEBUG_OPTIMISE_r(
         PerlIO_printf(Perl_debug_log, 
@@ -733,7 +733,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 
     if (s - strpos > prog->check_offset_max  /* signed-corrected t > strpos */
         && (!do_utf8
-	    || ((t = (char*)reghopmaybe3((U8*)s, -prog->check_offset_max, (prog->check_offset_max<0) ? strend : strpos))
+	    || ((t = (char*)reghopmaybe3((U8*)s, -prog->check_offset_max, (U8*) ((prog->check_offset_max<0) ? strend : strpos)))
 		 && t > strpos))) 
     {
 	/* Fixed substring is found far enough so that the match
