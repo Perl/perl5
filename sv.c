@@ -1092,8 +1092,8 @@ S_more_bodies (pTHX_ svtype sv_type)
     STMT_START { \
 	void ** const r3wt = &PL_body_roots[sv_type]; \
 	LOCK_SV_MUTEX; \
-	xpv = *((void **)(r3wt)) \
-	  ? *((void **)(r3wt)) : more_bodies(sv_type); \
+	xpv = (PTR_TBL_ENT_t*) (*((void **)(r3wt))      \
+	  ? *((void **)(r3wt)) : more_bodies(sv_type)); \
 	*(r3wt) = *(void**)(xpv); \
 	UNLOCK_SV_MUTEX; \
     } STMT_END
@@ -10469,7 +10469,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    break;
         case SAVEt_HV:				/* hash reference */
         case SAVEt_AV:				/* array reference */
-	    sv = POPPTR(ss,ix);
+	    sv = (SV*) POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = sv_dup_inc(sv, param);
 	    gv = (GV*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = gv_dup(gv, param);
@@ -10690,13 +10690,14 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		new_state->re_state_regeol
 		    = pv_dup(old_state->re_state_regeol);
 		new_state->re_state_regstartp
-		    = any_dup(old_state->re_state_regstartp, proto_perl);
+		    = (I32*) any_dup(old_state->re_state_regstartp, proto_perl);
 		new_state->re_state_regendp
-		    = any_dup(old_state->re_state_regendp, proto_perl);
+		    = (I32*) any_dup(old_state->re_state_regendp, proto_perl);
 		new_state->re_state_reglastparen
-		    = any_dup(old_state->re_state_reglastparen, proto_perl);
+		    = (U32*) any_dup(old_state->re_state_reglastparen, 
+			      proto_perl);
 		new_state->re_state_reglastcloseparen
-		    = any_dup(old_state->re_state_reglastcloseparen,
+		    = (U32*)any_dup(old_state->re_state_reglastcloseparen,
 			      proto_perl);
 		/* XXX This just has to be broken. The old save_re_context
 		   code did SAVEGENERICPV(PL_reg_start_tmp);
@@ -10716,11 +10717,14 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		    = sv_dup(old_state->re_state_nrs, param);
 #endif
 		new_state->re_state_reg_magic
-		    = any_dup(old_state->re_state_reg_magic, proto_perl);
+		    = (MAGIC*) any_dup(old_state->re_state_reg_magic, 
+			       proto_perl);
 		new_state->re_state_reg_oldcurpm
-		    = any_dup(old_state->re_state_reg_oldcurpm, proto_perl);
+		    = (PMOP*) any_dup(old_state->re_state_reg_oldcurpm, 
+			      proto_perl);
 		new_state->re_state_reg_curpm
-		    = any_dup(old_state->re_state_reg_curpm, proto_perl);
+		    = (PMOP*)  any_dup(old_state->re_state_reg_curpm, 
+			       proto_perl);
 		new_state->re_state_reg_oldsaved
 		    = pv_dup(old_state->re_state_reg_oldsaved);
 		new_state->re_state_reg_poscache
@@ -11401,7 +11405,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_glob_index	= proto_perl->Iglob_index;
     PL_srand_called	= proto_perl->Isrand_called;
-    PL_uudmap['M']	= 0;		/* reinits on demand */
+    PL_uudmap[(U32) 'M']	= 0;	/* reinits on demand */
     PL_bitcount		= NULL;	/* reinits on demand */
 
     if (proto_perl->Ipsig_pend) {
