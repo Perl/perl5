@@ -644,7 +644,7 @@ PP(pp_study)
     }
     s = (unsigned char*)(SvPV(sv, len));
     pos = len;
-    if (pos <= 0 || !SvPOK(sv)) {
+    if (pos <= 0 || !SvPOK(sv) || SvUTF8(sv)) {
 	/* No point in studying a zero length string, and not safe to study
 	   anything that doesn't appear to be a simple scalar (and hence might
 	   change between now and when the regexp engine runs without our set
