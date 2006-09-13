@@ -37,7 +37,7 @@ can_ok( 'DynaLoader' => 'dl_load_file'            ); # defined in XS section
 can_ok( 'DynaLoader' => 'dl_load_flags'           ); # defined in Perl section
 can_ok( 'DynaLoader' => 'dl_undef_symbols'        ); # defined in XS section
 SKIP: {
-    skip "unloading unsupported on VMS", 1 if $^O eq 'VMS';
+    skip "unloading unsupported on $^O", 1 if ($^O eq 'VMS' || $^O eq 'darwin');
     can_ok( 'DynaLoader' => 'dl_unload_file'          ); # defined in XS section
 }
 
@@ -116,7 +116,7 @@ is( scalar @DynaLoader::dl_modules, scalar keys %modules, "checking number of it
 my @loaded_modules = @DynaLoader::dl_modules;
 for my $libref (reverse @DynaLoader::dl_librefs) {
   SKIP: {
-    skip "unloading unsupported on VMS", 2 if $^O eq 'VMS';
+    skip "unloading unsupported on $^O", 2 if ($^O eq 'VMS' || $^O eq 'darwin');
     my $module = pop @loaded_modules;
     my $r = eval { DynaLoader::dl_unload_file($libref) };
     is( $@, '', "calling dl_unload_file() for $module" );
