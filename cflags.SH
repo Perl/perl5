@@ -225,7 +225,26 @@ for file do
     esac
 
 case "$cc" in
-*g++*) ccflags="`echo $ccflags|sed 's/-Wdeclaration-after-statement/ /'`" ;;
+*g++*)
+  # We need to remove this also in here (removed early earlier).
+  ccflags="`echo $ccflags|sed 's/-Wdeclaration-after-statement/ /'`"
+  ;;
+esac
+
+case "$cc" in
+*g++*)
+  # Without -Wno-unused-variable g++ 4.x compiles are rather unwatchable
+  # because of all the warnings about Perl___notused, and g++ doesn't
+  # do __attribute__((unused)) (and even if at some stage it will), people
+  # do have older gcc installations.  Yes, we lose some valid warnings.
+  for o in -Wno-unused-variable
+  do
+    case "$warn" in
+    *$o*) ;;
+    *) warn="$warn $o" ;;
+    esac
+  done
+  ;;
 esac
 
 if test -f .patch; then

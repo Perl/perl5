@@ -1150,15 +1150,16 @@ int sockatmark(int);
 # endif
 #endif
 
-#if defined(__osf__) && defined(__cplusplus) && !defined(_XOPEN_SOURCE_EXTENDED)
+#if defined(__osf__) && defined(__cplusplus) && !defined(_XOPEN_SOURCE_EXTENDED) /* Tru64 "cxx" (C++), see hints/dec_osf.sh for why the _XOPEN_SOURCE_EXTENDED cannot be defined. */
 EXTERN_C int fchdir(int);
 EXTERN_C int flock(int, int);
 EXTERN_C int fseeko(FILE *, off_t, int);
 EXTERN_C off_t ftello(FILE *);
 #endif
 
-#if defined(__SUNPRO_CC)
+#if defined(__SUNPRO_CC) /* SUNWspro CC (C++) */
 EXTERN_C char *crypt(const char *, const char *);
+EXTERN_C char **environ;
 #endif
 
 #ifdef SETERRNO
