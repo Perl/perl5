@@ -1,7 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.87_62';
+$CPAN::VERSION = '1.87_63';
 $CPAN::VERSION = eval $CPAN::VERSION;
 
 use CPAN::HandleConfig;
@@ -44,8 +44,13 @@ END { $CPAN::End++; &cleanup; }
 
 $CPAN::Signal ||= 0;
 $CPAN::Frontend ||= "CPAN::Shell";
-@CPAN::Defaultsites = ("http://www.perl.org/CPAN/","ftp://ftp.perl.org/pub/CPAN/")
-    unless @CPAN::Defaultsites;
+unless (@CPAN::Defaultsites){
+    @CPAN::Defaultsites = map {
+        CPAN::URL->new(TEXT => $_, FROM => "DEF")
+    }
+        "http://www.perl.org/CPAN/",
+            "ftp://ftp.perl.org/pub/CPAN/";
+}
 # $CPAN::iCwd (i for initial) is going to be initialized during find_perl
 $CPAN::Perl ||= CPAN::find_perl();
 $CPAN::Defaultdocs ||= "http://search.cpan.org/perldoc?";
@@ -392,6 +397,27 @@ sub as_string {
     } else {
         "cpan> ";
     }
+}
+
+package CPAN::URL; use overload '""' => "as_string", fallback => 1;
+# accessors: TEXT(the url string), FROM(DEF=>defaultlist,USER=>urllist),
+# planned are things like age or quality
+sub new {
+    my($class,%args) = @_;
+    bless {
+           %args
+          }, $class;
+}
+sub as_string {
+    my($self) = @_;
+    $self->text;
+}
+sub text {
+    my($self,$set) = @_;
+    if (defined $set) {
+        $self->{TEXT} = $set;
+    }
+    $self->{TEXT};
 }
 
 package CPAN::Distrostatus;
@@ -2846,6 +2872,8 @@ sub localize {
 	    } 0..$last;
     }
     my(@levels);
+    $Themethod ||= "";
+    $self->debug("Themethod[$Themethod]") if $CPAN::DEBUG;
     if ($Themethod) {
 	@levels = ($Themethod, grep {$_ ne $Themethod} qw/easy hard hardest/);
     } else {
@@ -2863,7 +2891,12 @@ sub localize {
 	    @reordered : 0..$last;  # reordered has CDROM up front
         my @urllist = map { $CPAN::Config->{urllist}[$_] } @host_seq;
         for my $u (@urllist) {
-            $u .= "/" unless substr($u,-1) eq "/";
+            if ($u->can("text")) {
+                $u->{TEXT} .= "/" unless substr($u->{TEXT},-1) eq "/";
+            } else {
+                $u .= "/" unless substr($u,-1) eq "/";
+                $u = CPAN::URL->new(TEXT => $u, FROM => "USER");
+            }
         }
         for my $u (@CPAN::Defaultsites) {
             push @urllist, $u unless grep { $_ eq $u } @urllist;
@@ -2956,46 +2989,54 @@ sub hosteasy {
 	    }
 	}
         if ($CPAN::META->has_usable('LWP')) {
-	  $CPAN::Frontend->myprint("Fetching with LWP:
+            $CPAN::Frontend->myprint("Fetching with LWP:
   $url
 ");
-	  unless ($Ua) {
-              CPAN::LWP::UserAgent->config;
-              eval { $Ua = CPAN::LWP::UserAgent->new; };
-              if ($@) {
-                  $CPAN::Frontend->mywarn("CPAN::LWP::UserAgent->new dies with $@\n");
-              }
-	  }
-	  my $res = $Ua->mirror($url, $aslocal);
-	  if ($res->is_success) {
-	    $ThesiteURL = $ro_url;
-	    my $now = time;
-	    utime $now, $now, $aslocal; # download time is more
-                                        # important than upload time
-	    return $aslocal;
-	  } elsif ($url !~ /\.gz(?!\n)\Z/) {
-	    my $gzurl = "$url.gz";
-	    $CPAN::Frontend->myprint("Fetching with LWP:
+            unless ($Ua) {
+                CPAN::LWP::UserAgent->config;
+                eval { $Ua = CPAN::LWP::UserAgent->new; };
+                if ($@) {
+                    $CPAN::Frontend->mywarn("CPAN::LWP::UserAgent->new dies with $@\n");
+                }
+            }
+            my $res = $Ua->mirror($url, $aslocal);
+            if ($res->is_success) {
+                $ThesiteURL = $ro_url;
+                my $now = time;
+                utime $now, $now, $aslocal; # download time is more
+                                            # important than upload
+                                            # time
+                return $aslocal;
+            } elsif ($url !~ /\.gz(?!\n)\Z/) {
+                my $gzurl = "$url.gz";
+                $CPAN::Frontend->myprint("Fetching with LWP:
   $gzurl
 ");
-	    $res = $Ua->mirror($gzurl, "$aslocal.gz");
-	    if ($res->is_success &&
-		CPAN::Tarzip->new("$aslocal.gz")->gunzip($aslocal)
-	       ) {
-	      $ThesiteURL = $ro_url;
-	      return $aslocal;
-	    }
-	  } else {
-              $CPAN::Frontend->myprint(sprintf(
-                                               "LWP failed with code[%s] message[%s]\n",
-                                               $res->code,
-                                               $res->message,
-                                              ));
-	    # Alan Burlison informed me that in firewall environments
-	    # Net::FTP can still succeed where LWP fails. So we do not
-	    # skip Net::FTP anymore when LWP is available.
-	  }
-	} else {
+                $res = $Ua->mirror($gzurl, "$aslocal.gz");
+                if ($res->is_success &&
+                    CPAN::Tarzip->new("$aslocal.gz")->gunzip($aslocal)
+                   ) {
+                    $ThesiteURL = $ro_url;
+                    return $aslocal;
+                }
+            } else {
+                $CPAN::Frontend->myprint(sprintf(
+                                                 "LWP failed with code[%s] message[%s]\n",
+                                                 $res->code,
+                                                 $res->message,
+                                                ));
+                # Alan Burlison informed me that in firewall environments
+                # Net::FTP can still succeed where LWP fails. So we do not
+                # skip Net::FTP anymore when LWP is available.
+            }
+	} elsif (
+                 $ro_url->can("text")
+                 and
+                 $ro_url->{FROM} eq "USER"
+                ){
+            my $ret = $self->hosthard([$ro_url],$file,$aslocal);
+            return $ret if $ret;
+        } else {
             $CPAN::Frontend->mywarn("  LWP not available\n");
 	}
         return if $CPAN::Signal;
@@ -3750,11 +3791,11 @@ happen.\a
 	$CPAN::Frontend->mysleep(5);
     } elsif ($line_count != scalar @lines) {
 
-	warn sprintf qq{Warning: Your %s
+	$CPAN::Frontend->mywarn(sprintf qq{Warning: Your %s
 contains a Line-Count header of %d but I see %d lines there. Please
 check the validity of the index file by comparing it to more than one
 CPAN mirror. I'll continue but problems seem likely to happen.\a\n},
-$index_target, $line_count, scalar(@lines);
+$index_target, $line_count, scalar(@lines));
 
     }
     if (not defined $last_updated) {

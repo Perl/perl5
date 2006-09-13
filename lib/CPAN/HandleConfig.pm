@@ -2,7 +2,7 @@ package CPAN::HandleConfig;
 use strict;
 use vars qw(%can %keys $VERSION);
 
-$VERSION = sprintf "%.6f", substr(q$Rev: 809 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 826 $,4)/1000000 + 5.4;
 
 %can = (
         commit   => "Commit changes to disk",
@@ -279,6 +279,7 @@ sub defaults {
     my $done;
     for my $config (qw(CPAN/MyConfig.pm CPAN/Config.pm)) {
       CPAN::Shell->reload_this($config) and $done++;
+      $CPAN::Frontend->myprint("'$config' reread\n");
       last if $done;
     }
     1;
@@ -461,9 +462,12 @@ the following indispensable but missing parameters:
 END
         $args{args} = ["\\b".join("|",@miss)."\\b"];
     }
-    $CPAN::Frontend->myprint(qq{
+    if (0) {
+        # where do we need this?
+        $CPAN::Frontend->myprint(qq{
 $configpm initialized.
 });
+    }
     CPAN::FirstTime::init($configpm, %args);
 }
 
@@ -572,7 +576,7 @@ package
 
 use strict;
 use vars qw($AUTOLOAD $VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 809 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 826 $,4)/100;
 
 # formerly CPAN::HandleConfig was known as CPAN::Config
 sub AUTOLOAD {
