@@ -319,12 +319,15 @@ SKIP: {
     like($@, qr/Test::More version $version/,
 	    'Replacement eval works with incremented version');
     
-    $version =~ s/\.0$//; #convert to string and remove trailing '.0'
-    chop($version);	# shorten by 1 digit, should still succeed
-    eval "use Test::More $version";
-    unlike($@, qr/Test::More version $version/,
+    TODO: {
+        local $TODO = "Test fails with Test::More versions ending in _0X";
+        $version =~ s/\.0$//; #convert to string and remove trailing '.0'
+        chop($version);	# shorten by 1 digit, should still succeed
+        eval "use Test::More $version";
+        unlike($@, qr/Test::More version $version/,
 	    'Replacement eval works with single digit');
-    
+    }
+
     $version += 0.1; # this would fail with old UNIVERSAL::VERSION
     eval "use Test::More $version";
     like($@, qr/Test::More version $version/,
