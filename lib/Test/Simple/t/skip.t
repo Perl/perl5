@@ -94,5 +94,5 @@ SKIP: {
         pass "This does not run";
     }
 
-    like $warning, qr/^skip\(\) was passed a non-numeric number of tests/;
+    like $warning, '/^skip\(\) was passed a non-numeric number of tests/';
 }

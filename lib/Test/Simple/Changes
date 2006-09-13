@@ -1,3 +1,21 @@
+0.64_02  Sat Sep  9 12:16:56 EDT 2006
+    - Last release broke Perls earlier than 5.8.
+
+0.64_01  Mon Sep  4 04:40:42 EDT 2006
+    - Small improvement to the docs to avoid user confusion over
+      "use Test::More tests => $num_tests" (Thanks Eric Wilhelm)
+    - Minor fix for a test failure in is_deeply_fail for some Windows
+      users.  Not a real bug.  [rt.cpan.org 21310]
+    - _print_diag() accidentally leaked into the public documentation.
+      It is a private method.
+    * Made most of the error messages report in the caller's context.
+      [rt.cpan.org #20639]
+    * Made the failure diagnostic message file and line reporting portion
+      match Perl's for easier integration with Perl aware editors.
+      (so its "at $file line $line_num." now)
+      [rt.cpan.org #20639]
+    * 5.8.0 threads are no longer supported.  There's too many bugs.
+
 0.64  Sun Jul 16 02:47:29 PDT 2006
     * 0.63's change to test_fail() broke backwards compatibility.  They
       have been removed for the time being.  test_pass() went with it.

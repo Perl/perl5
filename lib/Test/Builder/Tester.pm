@@ -2,7 +2,7 @@ package Test::Builder::Tester;
 
 use strict;
 use vars qw(@EXPORT $VERSION @ISA);
-$VERSION = "1.04";
+$VERSION = "1.04_02";
 
 use Test::Builder;
 use Symbol;
@@ -497,17 +497,17 @@ sub expect
     my @checks = @_;
     foreach my $check (@checks) {
         $check = $self->_translate_Failed_check($check);
-        push @{$self->[2]}, ref $check ? $check : "$check\n";
+        push @{$self->{wanted}}, ref $check ? $check : "$check\n";
     }
 }
 
 
-sub _translate_Failed_check 
+sub _translate_Failed_check
 {
     my($self, $check) = @_;
 
     if( $check =~ /\A(.*)#     (Failed .*test) \((.*?) at line (\d+)\)\z/ ) {
-        $check = qr/\Q$1\E#\s+\Q$2\E.*?\n?.*?\Q$3\E at line \Q$4\E.*\n?/;
+        $check = qr/\Q$1\E#\s+\Q$2\E.*?\n?.*?\Qat $3\E line \Q$4\E.*\n?/;
     }
 
     return $check;
@@ -524,8 +524,8 @@ sub check
     # turn off warnings as these might be undef
     local $^W = 0;
 
-    my @checks = @{$self->[2]};
-    my $got = $self->[1];
+    my @checks = @{$self->{wanted}};
+    my $got = $self->{got};
     foreach my $check (@checks) {
         $check = qr/^\Q$check\E/ unless ref $check;
         return 0 unless $got =~ s/^$check//;
@@ -592,26 +592,30 @@ sub complaint
 sub reset
 {
     my $self = shift;
-    @$self = ($self->[0], '', []);
+    %$self = (
+              type   => $self->{type},
+              got    => '',
+              wanted => [],
+             );
 }
 
 
 sub got
 {
     my $self = shift;
-    return $self->[1];
+    return $self->{got};
 }
 
 sub wanted
 {
     my $self = shift;
-    return $self->[2];
+    return $self->{wanted};
 }
 
 sub type
 {
     my $self = shift;
-    return $self->[0];
+    return $self->{type};
 }
 
 ###
@@ -620,13 +624,16 @@ sub type
 
 sub PRINT  {
     my $self = shift;
-    $self->[1] .= join '', @_;
+    $self->{got} .= join '', @_;
 }
 
 sub TIEHANDLE {
     my($class, $type) = @_;
 
-    my $self = bless [$type], $class;
+    my $self = bless {
+                   type => $type
+               }, $class;
+
     $self->reset;
 
     return $self;

@@ -16,7 +16,7 @@ sub _carp {
 
 
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.64';
+$VERSION = '0.64_02';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 use Test::Builder::Module;
@@ -41,7 +41,7 @@ Test::More - yet another framework for writing test scripts
 
 =head1 SYNOPSIS
 
-  use Test::More tests => $Num_Tests;
+  use Test::More tests => 23;
   # or
   use Test::More qw(no_plan);
   # or
@@ -113,7 +113,7 @@ failure.
 
 The preferred way to do this is to declare a plan when you C<use Test::More>.
 
-  use Test::More tests => $Num_Tests;
+  use Test::More tests => 23;
 
 There are rare cases when you will not know beforehand how many tests
 your script is going to run.  In this case, you can declare that you
@@ -1464,6 +1464,8 @@ This may cause problems:
 
     use Test::More
     use threads;
+
+5.8.1 and above are supported.  Anything below that has too many bugs.
 
 
 =item Test::Harness upgrade

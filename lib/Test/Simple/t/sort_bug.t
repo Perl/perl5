@@ -17,10 +17,10 @@ use strict;
 use Config;
 
 BEGIN {
-    unless ( $] >= 5.008 && $Config{'useithreads'} && 
+    unless ( $] >= 5.008001 && $Config{'useithreads'} && 
              eval { require threads; 'threads'->import; 1; }) 
     {
-        print "1..0 # Skip: no threads\n";
+        print "1..0 # Skip: no working threads\n";
         exit 0;
     }
 }

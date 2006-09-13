@@ -8,14 +8,15 @@ $^C ||= 0;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.33';
+$VERSION = '0.33_02';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 # Make Test::Builder thread-safe for ithreads.
 BEGIN {
     use Config;
-    # Load threads::shared when threads are turned on
-    if( $] >= 5.008 && $Config{useithreads} && $INC{'threads.pm'}) {
+    # Load threads::shared when threads are turned on.
+    # 5.8.0's threads are so busted we no longer support them.
+    if( $] >= 5.008001 && $Config{useithreads} && $INC{'threads.pm'}) {
         require threads::shared;
 
         # Hack around YET ANOTHER threads::shared bug.  It would 
@@ -35,7 +36,7 @@ BEGIN {
                 $$data = ${$_[0]};
             }
             else {
-                die "Unknown type: ".$type;
+                die("Unknown type: ".$type);
             }
 
             $_[0] = &threads::shared::share($_[0]);
@@ -50,14 +51,14 @@ BEGIN {
                 ${$_[0]} = $$data;
             }
             else {
-                die "Unknown type: ".$type;
+                die("Unknown type: ".$type);
             }
 
             return $_[0];
         };
     }
-    # 5.8.0's threads::shared is busted when threads are off.
-    # We emulate it here.
+    # 5.8.0's threads::shared is busted when threads are off
+    # and earlier Perls just don't have that module at all.
     else {
         *share = sub { return $_[0] };
         *lock  = sub { 0 };
@@ -247,8 +248,7 @@ sub plan {
     return unless $cmd;
 
     if( $self->{Have_Plan} ) {
-        die sprintf "You tried to plan twice!  Second plan at %s line %d\n",
-          ($self->caller)[1,2];
+        $self->croak("You tried to plan twice");
     }
 
     if( $cmd eq 'no_plan' ) {
@@ -259,20 +259,19 @@ sub plan {
     }
     elsif( $cmd eq 'tests' ) {
         if( $arg ) {
+            local $Level = $Level + 1;
             return $self->expected_tests($arg);
         }
         elsif( !defined $arg ) {
-            die "Got an undefined number of tests.  Looks like you tried to ".
-                "say how many tests you plan to run but made a mistake.\n";
+            $self->croak("Got an undefined number of tests");
         }
         elsif( !$arg ) {
-            die "You said to run 0 tests!  You've got to run something.\n";
+            $self->croak("You said to run 0 tests");
         }
     }
     else {
-        require Carp;
         my @args = grep { defined } ($cmd, $arg);
-        Carp::croak("plan() doesn't understand @args");
+        $self->croak("plan() doesn't understand @args");
     }
 
     return 1;
@@ -293,7 +292,7 @@ sub expected_tests {
     my($max) = @_;
 
     if( @_ ) {
-        die "Number of tests must be a postive integer.  You gave it '$max'.\n"
+        $self->croak("Number of tests must be a positive integer.  You gave it '$max'")
           unless $max =~ /^\+?\d+$/ and $max > 0;
 
         $self->{Expected_Tests} = $max;
@@ -386,10 +385,7 @@ sub ok {
     # store, so we turn it into a boolean.
     $test = $test ? 1 : 0;
 
-    unless( $self->{Have_Plan} ) {
-        require Carp;
-        Carp::croak("You tried to run a test without a plan!  Gotta have a plan.");
-    }
+    $self->_plan_check;
 
     lock $self->{Curr_Test};
     $self->{Curr_Test}++;
@@ -451,10 +447,10 @@ ERR
 
 	if( defined $name ) {
 	    $self->diag(qq[  $msg test '$name'\n]);
-	    $self->diag(qq[  in $file at line $line.\n]);
+	    $self->diag(qq[  at $file line $line.\n]);
 	}
 	else {
-	    $self->diag(qq[  $msg test in $file at line $line.\n]);
+	    $self->diag(qq[  $msg test at $file line $line.\n]);
 	}
     } 
 
@@ -889,10 +885,7 @@ sub skip {
     $why ||= '';
     $self->_unoverload_str(\$why);
 
-    unless( $self->{Have_Plan} ) {
-        require Carp;
-        Carp::croak("You tried to run tests without a plan!  Gotta have a plan.");
-    }
+    $self->_plan_check;
 
     lock($self->{Curr_Test});
     $self->{Curr_Test}++;
@@ -933,10 +926,7 @@ sub todo_skip {
     my($self, $why) = @_;
     $why ||= '';
 
-    unless( $self->{Have_Plan} ) {
-        require Carp;
-        Carp::croak("You tried to run tests without a plan!  Gotta have a plan.");
-    }
+    $self->_plan_check;
 
     lock($self->{Curr_Test});
     $self->{Curr_Test}++;
@@ -1182,12 +1172,15 @@ sub _print {
     print $fh $msg;
 }
 
+=begin private
 
 =item B<_print_diag>
 
     $Test->_print_diag(@msg);
 
 Like _print, but prints to the current diagnostic filehandle.
+
+=end private
 
 =cut
 
@@ -1232,7 +1225,7 @@ sub output {
     my($self, $fh) = @_;
 
     if( defined $fh ) {
-        $self->{Out_FH} = _new_fh($fh);
+        $self->{Out_FH} = $self->_new_fh($fh);
     }
     return $self->{Out_FH};
 }
@@ -1241,7 +1234,7 @@ sub failure_output {
     my($self, $fh) = @_;
 
     if( defined $fh ) {
-        $self->{Fail_FH} = _new_fh($fh);
+        $self->{Fail_FH} = $self->_new_fh($fh);
     }
     return $self->{Fail_FH};
 }
@@ -1250,23 +1243,24 @@ sub todo_output {
     my($self, $fh) = @_;
 
     if( defined $fh ) {
-        $self->{Todo_FH} = _new_fh($fh);
+        $self->{Todo_FH} = $self->_new_fh($fh);
     }
     return $self->{Todo_FH};
 }
 
 
 sub _new_fh {
+    my $self = shift;
     my($file_or_fh) = shift;
 
     my $fh;
-    if( _is_fh($file_or_fh) ) {
+    if( $self->_is_fh($file_or_fh) ) {
         $fh = $file_or_fh;
     }
     else {
         $fh = do { local *FH };
-        open $fh, ">$file_or_fh" or 
-            die "Can't open test output log $file_or_fh: $!";
+        open $fh, ">$file_or_fh" or
+            $self->croak("Can't open test output log $file_or_fh: $!");
 	_autoflush($fh);
     }
 
@@ -1275,6 +1269,7 @@ sub _new_fh {
 
 
 sub _is_fh {
+    my $self = shift;
     my $maybe_fh = shift;
     return 0 unless defined $maybe_fh;
 
@@ -1325,6 +1320,49 @@ sub _open_testhandles {
 }
 
 
+=item carp
+
+  $tb->carp(@message);
+
+Warns with C<@message> but the message will appear to come from the
+point where the original test function was called (C<$tb->caller>).
+
+=item croak
+
+  $tb->croak(@message);
+
+Dies with C<@message> but the message will appear to come from the
+point where the original test function was called (C<$tb->caller>).
+
+=cut
+
+sub _message_at_caller {
+    my $self = shift;
+
+    local $Level = $Level + 2;
+    my($pack, $file, $line) = $self->caller;
+    return join("", @_) . " at $file line $line.\n";
+}
+
+sub carp {
+    my $self = shift;
+    warn $self->_message_at_caller(@_);
+}
+
+sub croak {
+    my $self = shift;
+    die $self->_message_at_caller(@_);
+}
+
+sub _plan_check {
+    my $self = shift;
+
+    unless( $self->{Have_Plan} ) {
+        local $Level = $Level + 1;
+        $self->croak("You tried to run a test without a plan");
+    }
+}
+
 =back
 
 
@@ -1352,8 +1390,7 @@ sub current_test {
     lock($self->{Curr_Test});
     if( defined $num ) {
         unless( $self->{Have_Plan} ) {
-            require Carp;
-            Carp::croak("Can't change the current test number without a plan!");
+            $self->croak("Can't change the current test number without a plan!");
         }
 
         $self->{Curr_Test} = $num;
@@ -1523,16 +1560,16 @@ error message.
 sub _sanity_check {
     my $self = shift;
 
-    _whoa($self->{Curr_Test} < 0,  'Says here you ran a negative number of tests!');
-    _whoa(!$self->{Have_Plan} and $self->{Curr_Test}, 
+    $self->_whoa($self->{Curr_Test} < 0,  'Says here you ran a negative number of tests!');
+    $self->_whoa(!$self->{Have_Plan} and $self->{Curr_Test}, 
           'Somehow your tests ran without a plan!');
-    _whoa($self->{Curr_Test} != @{ $self->{Test_Results} },
+    $self->_whoa($self->{Curr_Test} != @{ $self->{Test_Results} },
           'Somehow you got a different number of results than tests ran!');
 }
 
 =item B<_whoa>
 
-  _whoa($check, $description);
+  $self->_whoa($check, $description);
 
 A sanity check, similar to assert().  If the $check is true, something
 has gone horribly wrong.  It will die with the given $description and
@@ -1541,9 +1578,10 @@ a note to contact the author.
 =cut
 
 sub _whoa {
-    my($check, $desc) = @_;
+    my($self, $check, $desc) = @_;
     if( $check ) {
-        die <<WHOA;
+        local $Level = $Level + 1;
+        $self->croak(<<"WHOA");
 WHOA!  $desc
 This should never happen!  Please contact the author immediately!
 WHOA
@@ -1713,9 +1751,12 @@ If you fail more than 254 tests, it will be reported as 254.
 
 =head1 THREADS
 
-In perl 5.8.0 and later, Test::Builder is thread-safe.  The test
+In perl 5.8.1 and later, Test::Builder is thread-safe.  The test
 number is shared amongst all threads.  This means if one thread sets
 the test number using current_test() they will all be effected.
+
+While versions earlier than 5.8.1 had threads they contain too many
+bugs to support.
 
 Test::Builder is only thread-aware if threads.pm is loaded I<before>
 Test::Builder.
