@@ -52,6 +52,7 @@ package Maintainers;
 	'pvhp'		=> 'Peter Prymmer <pvhp@best.com>',
 	'rclamp'	=> 'Richard Clamp <rclamp@cpan.org>',
 	'rgarcia'	=> 'Rafael Garcia-Suarez <rgarcia@cpan.org>',
+	'rkobes'	=> 'Randy Kobes <rkobes@cpan.org>',
 	'rmbarker'	=> 'Robin Barker <rmbarker@cpan.org>',
 	'rra'		=> 'Russ Allbery <rra@cpan.org>',
 	'sadahiro'	=> 'SADAHIRO Tomoyuki <SADAHIRO@cpan.org>',
@@ -235,6 +236,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'ExtUtils::Command' =>
+		{
+		'MAINTAINER'	=> 'rkobes',
+		'FILES'		=> q[lib/ExtUtils/Command.pm],
+		'CPAN'		=> 1,
+		},
+
         'ExtUtils::Install' =>
 
 		{
@@ -246,8 +254,15 @@ package Maintainers;
 	'ExtUtils::MakeMaker' =>
 		{
 		'MAINTAINER'	=> 'mschwern',
-		'FILES'	=> q[lib/ExtUtils/{Command,Liblist,MakeMaker,Manifest,Mkbootstrap,Mksymlists,MM*,MY,testlib}.pm lib/ExtUtils/{Command,Liblist,MakeMaker,MANIFEST.SKIP}
+		'FILES'	=> q[lib/ExtUtils/{Command,Liblist,MakeMaker,Mkbootstrap,Mksymlists,MM*,MY,testlib}.pm lib/ExtUtils/{Command,Liblist,MakeMaker}
 				     lib/ExtUtils/t t/lib/MakeMaker t/lib/TieIn.pm t/lib/TieOut.pm],
+		'CPAN'		=> 1,
+		},
+
+	'ExtUtils::Manifest' =>
+		{
+		'MAINTAINER'	=> 'rkobes',
+		'FILES'		=> q[lib/ExtUtils/{Manifest.pm,MANIFEST.SKIP} lib/ExtUtils/t/Manifest.t],
 		'CPAN'		=> 1,
 		},
 
