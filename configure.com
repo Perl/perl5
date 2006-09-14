@@ -2027,7 +2027,10 @@ $   DELETE/NOLOG/NOCONFIRM cxxvers.*;
 $   echo "You are using CXX ''line'"
 $   cxxversion = line
 $   ccversion = line
+$   d_cplusplus = "define"
 $   CALL Cxx_demangler_cleanup
+$ ELSE
+$   d_cplusplus = "undef"
 $ ENDIF
 $!
 $Cxx_demangler_cleanup: SUBROUTINE
@@ -5696,7 +5699,7 @@ $ WC "d_class='undef'"
 $ WC "d_cmsghdr_s='undef'"
 $ WC "d_const='define'"
 $ WC "d_copysignl='define'"
-$ WC "d_cplusplus='undef'"
+$ WC "d_cplusplus='" + d_cplusplus + "'"
 $ WC "d_crypt='define'"
 $ WC "d_csh='undef'"
 $ WC "d_cuserid='define'"
