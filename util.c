@@ -1556,7 +1556,7 @@ Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const char *const bits,
    Copy(val, s+(nlen+1), vlen, char); \
    *(s+(nlen+1+vlen)) = '\0'
 
-#ifdef USE_ENVIRON_ARRAY
+#if defined(USE_ENVIRON_ARRAY) && !defined(WIN32) && !defined(NETWARE)
 /* VMS' my_setenv() is in vms.c */
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
@@ -1617,7 +1617,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
 	    my_setenv_format(environ[i], nam, nlen, val, vlen);
 	}
     } else {
-# endif
+#endif
 #   if defined(__CYGWIN__) || defined(EPOC) || defined(__SYMBIAN32__) || defined(__riscos__)
 #       if defined(HAS_UNSETENV)
         if (val == NULL) {
@@ -1660,7 +1660,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
   }
 }
 
-#else /* USE_ENVIRON_ARRAY */
+#else /* defined(USE_ENVIRON_ARRAY) && !defined(WIN32) && !defined(NETWARE)*/
 
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
@@ -1688,7 +1688,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
     }
 }
 
-#endif /* USE_ENVIRON_ARRAY */
+#endif /* defined(USE_ENVIRON_ARRAY) && !defined(WIN32) && !defined(NETWARE) */
 
 #if !defined(VMS)
 
