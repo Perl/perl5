@@ -689,7 +689,7 @@ sub addstrings
   }
  if ($a->{'Forward'})
   {
-   my $cpp = $Config{d_cplusplus} eq 'define';
+   my $cpp = ($Config{d_cplusplus} || '') eq 'define';
    my $var = $^O eq 'MacOS' || $cpp ? 'extern' : 'static';
    my $const = $cpp ? '' : 'const';
    print $fh "$var $const encpage_t $name\[",scalar(@{$a->{'Entries'}}),"];\n";
@@ -755,7 +755,7 @@ sub outbigstring
   }
 
   $strings = length $string_acc;
-  my $cpp = $Config{d_cplusplus} eq 'define';
+  my $cpp = ($Config{d_cplusplus} || '') eq 'define';
   my $var = $cpp ? '' : 'static';
   my $definition = "\n$var const U8 $name\[$strings] = { " .
     join(',',unpack "C*",$string_acc);
@@ -782,7 +782,7 @@ sub outtable
    my ($s,$e,$out,$t,$end,$l) = @$b;
    outtable($fh,$t,$bigname) unless $t->{'Done'};
   }
- my $cpp = $Config{d_cplusplus} eq 'define';
+ my $cpp = ($Config{d_cplusplus} || '') eq 'define';
  my $var = $cpp ? '' : 'static';
  my $const = $cpp ? '' : 'const';
  print $fh "\n$var $const encpage_t $name\[",
