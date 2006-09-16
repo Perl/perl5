@@ -358,8 +358,8 @@ struct block_sub {
 
 /* eval context */
 struct block_eval {
-    I32		old_in_eval;
-    I32		old_op_type;
+    U8		old_in_eval;
+    U16		old_op_type;
     SV *	old_namesv;
     OP *	old_eval_root;
     SV *	cur_text;
