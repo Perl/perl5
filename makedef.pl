@@ -591,6 +591,12 @@ unless ($define{'DEBUGGING'}) {
 		    )];
 }
 
+if ($define{'PERL_IMPLICIT_CONTEXT'}) {
+    skip_symbols [qw(
+		    PL_sig_sv
+		    )];
+}
+
 if ($define{'PERL_IMPLICIT_SYS'}) {
     skip_symbols [qw(
 		    Perl_getenv_len
