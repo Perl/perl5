@@ -18,7 +18,7 @@ my(@XSStack);	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
 use vars qw($VERSION);
-$VERSION = '2.15_02';
+$VERSION = '2.16_01';
 
 use vars qw(%input_expr %output_expr $ProtoUsed @InitFileCode $FH $proto_re $Overload $errors $Fallback
 	    $cplusplus $hiertype $WantPrototypes $WantVersionChk $except $WantLineNumbers
@@ -1221,7 +1221,9 @@ sub INTERFACE_handler() {
   TrimWhitespace($in);
 
   foreach (split /[\s,]+/, $in) {
-    $Interfaces{$_} = $_;
+    my $name = $_;
+    $name =~ s/^$Prefix//;
+    $Interfaces{$name} = $_;
   }
   print Q(<<"EOF");
 #	XSFUNCTION = $interface_macro($ret_type,cv,XSANY.any_dptr);
