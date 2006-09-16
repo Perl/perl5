@@ -49,8 +49,25 @@ plan $tests
 ;
 
 my $curdir = File::Spec->curdir;
+$curdir = VMS::Filespec::fileify($curdir) if $^O eq 'VMS';
 
 my $r;
+
+sub _check_and_report {
+    my ($eval_status, $return_val, $description) = @_;
+    my $success = defined($return_val) || $! == 0;
+    is( $eval_status, '', $description );
+    ok( $success, "\tchecking that the returned value is defined (" 
+                    . (defined($return_val) ? "yes, it's $return_val)" : "it isn't)"
+                    . " or that errno is clear ("
+                    . (!($!+0) ? "it is)" : "it isn't, it's $!)"))
+                    );
+    SKIP: {
+        skip "constant not implemented on $^O or no limit in effect", 1 
+            if $success && !defined($return_val);
+        ok( looks_like_number($return_val), "\tchecking that the returned value looks like a number" );
+    }
+}
 
 # testing fpathconf() on a non-terminal file
 SKIP: {
@@ -58,14 +75,9 @@ SKIP: {
         or skip "could not open current directory ($!)", 3 * @path_consts;
 
     for my $constant (@path_consts) {
-        SKIP: {
-            skip "_PC_CHOWN_RESTRICTED is unreliable on HP-UX", 3
-                if $^O eq "hpux" && $constant eq "_PC_CHOWN_RESTRICTED";
+	    $! = 0;
             $r = eval { fpathconf( $fd, eval "$constant()" ) };
-            is( $@, '', "calling fpathconf($fd, $constant) " );
-            ok( defined $r, "\tchecking that the returned value is defined: $r" );
-            ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
-        }
+            _check_and_report( $@, $r, "calling fpathconf($fd, $constant) " );
     }
     
     POSIX::close($fd);
@@ -73,14 +85,9 @@ SKIP: {
 
 # testing pathconf() on a non-terminal file
 for my $constant (@path_consts) {
-    SKIP: {
-        skip "_PC_CHOWN_RESTRICTED is unreliable on HP-UX", 3
-            if $^O eq "hpux" && $constant eq "_PC_CHOWN_RESTRICTED";
+	$! = 0;
         $r = eval { pathconf( $curdir, eval "$constant()" ) };
-        is( $@, '', qq[calling pathconf("$curdir", $constant)] );
-        ok( defined $r, "\tchecking that the returned value is defined: $r" );
-        ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
-    }
+        _check_and_report( $@, $r, qq[calling pathconf("$curdir", $constant)] );
 }
 
 SKIP: {
@@ -99,19 +106,17 @@ SKIP: {
 
     # testing fpathconf() on a terminal file
     for my $constant (@path_consts_terminal) {
+	$! = 0;
 	$r = eval { fpathconf( $fd, eval "$constant()" ) };
-	is( $@, '', qq[calling fpathconf($fd, $constant) ($TTY)] );
-	ok( defined $r, "\tchecking that the returned value is defined: $r" );
-	ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
+	_check_and_report( $@, $r, qq[calling fpathconf($fd, $constant) ($TTY)] );
     }
     
     close($fd);
     # testing pathconf() on a terminal file
     for my $constant (@path_consts_terminal) {
+	$! = 0;
 	$r = eval { pathconf( $TTY, eval "$constant()" ) };
-	is( $@, '', qq[calling pathconf($TTY, $constant)] );
-	ok( defined $r, "\tchecking that the returned value is defined: $r" );
-	ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
+	_check_and_report( $@, $r, qq[calling pathconf($TTY, $constant)] );
     }
 }
 
@@ -126,23 +131,19 @@ SKIP: {
 	  or skip("could not open $fifo ($!)", 3 * @path_consts_fifo);
 
       for my $constant (@path_consts_fifo) {
+	  $! = 0;
 	  $r = eval { fpathconf( $fd, eval "$constant()" ) };
-	  is( $@, '', "calling fpathconf($fd, $constant) ($fifo)" );
-	  ok( defined $r, "\tchecking that the returned value is defined: $r" );
-	  ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
+	  _check_and_report( $@, $r, "calling fpathconf($fd, $constant) ($fifo)" );
       }
     
       POSIX::close($fd);
   }
 
-  SKIP: {
-      # testing pathconf() on a fifo file
-      for my $constant (@path_consts_fifo) {
-	  $r = eval { pathconf( $fifo, eval "$constant()" ) };
-	  is( $@, '', qq[calling pathconf($fifo, $constant)] );
-	  ok( defined $r, "\tchecking that the returned value is defined: $r" );
-	  ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
-      }
+  # testing pathconf() on a fifo file
+  for my $constant (@path_consts_fifo) {
+      $! = 0;
+      $r = eval { pathconf( $fifo, eval "$constant()" ) };
+      _check_and_report( $@, $r, qq[calling pathconf($fifo, $constant)] );
   }
 }
 
@@ -152,14 +153,8 @@ END {
 
 # testing sysconf()
 for my $constant (@sys_consts) {
- SKIP: {
 	$! = 0;
 	$r = eval { sysconf( eval "$constant()" ) };
-	my $s = defined($r) || $! == 0;
-	is( $@, '', "calling sysconf($constant)" );
-	ok( $s, "\tchecking that the returned value is defined or that errno is clear: $r $!" );
-	skip "$constant not implemented on $^O", 1 if $s && !defined($r);
-	ok( looks_like_number($r), "\tchecking that the returned value looks like a number" );
-    }
+	_check_and_report( $@, $r, "calling sysconf($constant)" );
 }
 
