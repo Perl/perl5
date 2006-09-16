@@ -2,7 +2,7 @@
 package CPAN::Mirrored::By;
 use strict;
 use vars qw($VERSION);
-$VERSION = sprintf "%.6f", substr(q$Rev: 825 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 848 $,4)/1000000 + 5.4;
 
 sub new { 
     my($self,@arg) = @_;
@@ -21,7 +21,7 @@ use File::Basename ();
 use File::Path ();
 use File::Spec;
 use vars qw($VERSION $urllist);
-$VERSION = sprintf "%.6f", substr(q$Rev: 825 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 848 $,4)/1000000 + 5.4;
 
 =head1 NAME
 
@@ -36,6 +36,10 @@ CPAN::FirstTime::init()
 The init routine asks a few questions and writes a CPAN/Config.pm or
 CPAN/MyConfig.pm file (depending on what it is currently using).
 
+=head1 LICENSE
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
 
 =cut
 
@@ -44,17 +48,27 @@ use vars qw( %prompts );
 sub init {
     my($configpm, %args) = @_;
     use Config;
-    # extra arg in 'o conf init make' selects only $item =~ /make/
+    # extra args after 'o conf init'
     my $matcher = $args{args} && @{$args{args}} ? $args{args}[0] : '';
-    if ($matcher =~ /^\w+$/) {
-        if (
-            exists $CPAN::HandleConfig::keys{$matcher}
-           ) {
-            $matcher = "\\b$matcher\\b";
-        } else {
-            $CPAN::Frontend->myprint("'$matcher' is not a valid configuration variable");
-            return;
+    if ($matcher =~ /^\/(.*)\/$/) {
+        # case /regex/ => take the first, ignore the rest
+        $matcher = $1;
+        shift @{$args{args}};
+        if (@{$args{args}}) {
+            local $" = " ";
+            $CPAN::Frontend->mywarn("Ignoring excessive arguments '@{$args{args}}'");
+            $CPAN::Frontend->mysleep(2);
         }
+    } elsif (0 == length $matcher) {
+    } else {
+        # case WORD... => all arguments must be valid
+        for my $arg (@{$args{args}}) {
+            unless (exists $CPAN::HandleConfig::keys{$arg}) {
+                $CPAN::Frontend->mywarn("'$arg' is not a valid configuration variable");
+                return;
+            }
+        }
+        $matcher = "\\b(".join("|",@{$args{args}}).")\\b";
     }
     CPAN->debug("matcher[$matcher]") if $CPAN::DEBUG;
 
@@ -679,10 +693,11 @@ sub picklist {
             @nums = grep { !$seen{$_}++ } @nums;
         }
         my $i = scalar @$items;
+        unrangify(\@nums);
         if (grep (/\D/ || $_ < 1 || $_ > $i, @nums)){
             $CPAN::Frontend->mywarn("invalid items entered, try again\n");
             if ("@nums" =~ /\D/) {
-                $CPAN::Frontend->mywarn("(we are expecting at least one number between 1 and $i)\n");
+                $CPAN::Frontend->mywarn("(we are expecting only numbers between 1 and $i)\n");
             }
             next SELECTION;
         }
@@ -697,6 +712,22 @@ sub picklist {
     }
     for (@nums) { $_-- }
     @{$items}[@nums];
+}
+
+sub unrangify ($) {
+    my($nums) = $_[0];
+    my @nums2 = ();
+    while (@{$nums||[]}) {
+        my $n = shift @$nums;
+        if ($n =~ /^(\d+)-(\d+)$/) {
+            my @range = $1 .. $2;
+            # warn "range[@range]";
+            push @nums2, @range;
+        } else {
+            push @nums2, $n;
+        }
+    }
+    push @$nums, @nums2;
 }
 
 sub display_some {
@@ -790,7 +821,8 @@ sub read_mirrored_by {
     }
     push (@urls, map ("$_ (previous pick)", @previous_urls));
     my $prompt = "Select as many URLs as you like (by number),
-put them on one line, separated by blanks, e.g. '1 4 5'";
+put them on one line, separated by blanks, hyphenated ranges allowed
+ e.g. '1 4 5' or '7 1-4 8'";
     if (@previous_urls) {
         $default = join (' ', ((scalar @urls) - (scalar @previous_urls) + 1) ..
                          (scalar @urls));

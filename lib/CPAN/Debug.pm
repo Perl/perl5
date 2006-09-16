@@ -2,7 +2,7 @@ package CPAN::Debug;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = sprintf "%.6f", substr(q$Rev: 561 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 844 $,4)/1000000 + 5.4;
 # module is internal to CPAN.pm
 
 %CPAN::DEBUG = qw[
@@ -53,3 +53,11 @@ sub debug {
 }
 
 1;
+
+__END__
+=head1 LICENSE
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut

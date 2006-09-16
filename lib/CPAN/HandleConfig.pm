@@ -2,7 +2,7 @@ package CPAN::HandleConfig;
 use strict;
 use vars qw(%can %keys $VERSION);
 
-$VERSION = sprintf "%.6f", substr(q$Rev: 826 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 847 $,4)/1000000 + 5.4;
 
 %can = (
         commit   => "Commit changes to disk",
@@ -22,6 +22,7 @@ $VERSION = sprintf "%.6f", substr(q$Rev: 826 $,4)/1000000 + 5.4;
                              "colorize_print",
                              "colorize_warn",
                              "commandnumber_in_prompt",
+                             "commands_quote",
                              "cpan_home",
                              "curl",
                              "dontload_hash", # deprecated after 1.83_68 (rev. 581)
@@ -278,9 +279,11 @@ sub defaults {
     my($self) = @_;
     my $done;
     for my $config (qw(CPAN/MyConfig.pm CPAN/Config.pm)) {
-      CPAN::Shell->reload_this($config) and $done++;
-      $CPAN::Frontend->myprint("'$config' reread\n");
-      last if $done;
+        if ($INC{$config}) {
+            CPAN::Shell->reload_this($config);
+            $CPAN::Frontend->myprint("'$INC{$config}' reread\n");
+            last;
+        }
     }
     1;
 }
@@ -460,7 +463,7 @@ the following indispensable but missing parameters:
 
 @miss
 END
-        $args{args} = ["\\b".join("|",@miss)."\\b"];
+        $args{args} = \@miss;
     }
     if (0) {
         # where do we need this?
@@ -512,7 +515,7 @@ Known options:
   commit    commit session changes to disk
   defaults  reload default config values from disk
   help      this help
-  init      go through a dialog to set all parameters
+  init      enter a dialog to set all or a set of parameters
 
 Edit key values as in the following (the "o" is a literal letter o):
   o conf build_cache 15
@@ -549,7 +552,7 @@ sub cpl {
             (
              @words == 3
              ||
-             @words == 4 && length($word)
+             @words >= 4 && length($word)
             )) {
 	return sort grep /^\Q$word\E/, keys %keys;
     } elsif (@words >= 4) {
@@ -576,7 +579,7 @@ package
 
 use strict;
 use vars qw($AUTOLOAD $VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 826 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 847 $,4)/100;
 
 # formerly CPAN::HandleConfig was known as CPAN::Config
 sub AUTOLOAD {
@@ -589,6 +592,14 @@ sub AUTOLOAD {
 1;
 
 __END__
+
+=head1 LICENSE
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut
+
 # Local Variables:
 # mode: cperl
 # cperl-indent-level: 4

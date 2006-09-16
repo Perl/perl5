@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION @ISA $BUGHUNTING);
 use CPAN::Debug;
 use File::Basename ();
-$VERSION = sprintf "%.6f", substr(q$Rev: 714 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 844 $,4)/1000000 + 5.4;
 # module is internal to CPAN.pm
 
 @ISA = qw(CPAN::Debug);
@@ -331,3 +331,11 @@ sub unzip {
 
 1;
 
+__END__
+
+=head1 LICENSE
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut

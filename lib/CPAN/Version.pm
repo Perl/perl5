@@ -1,42 +1,8 @@
-=head1 NAME
-
-CPAN::Version - utility functions to compare CPAN versions
-
-=head1 SYNOPSIS
-
-  use CPAN::Version;
-
-  CPAN::Version->vgt("1.1","1.1.1");    # 1 bc. 1.1 > 1.001001
-
-  CPAN::Version->vlt("1.1","1.1");      # 0 bc. 1.1 not < 1.1
-
-  CPAN::Version->vcmp("1.1","1.1.1");   # 1 bc. first is larger
-
-  CPAN::Version->vcmp("1.1.1","1.1");   # -1 bc. first is smaller
-
-  CPAN::Version->readable(v1.2.3);      # "v1.2.3"
-
-  CPAN::Version->vstring("v1.2.3");     # v1.2.3
-
-  CPAN::Version->float2vv(1.002003);    # "v1.2.3"
-
-=head1 DESCRIPTION
-
-This module mediates between some version that perl sees in a package
-and the version that is published by the CPAN indexer.
-
-It's only written as a helper module for both CPAN.pm and CPANPLUS.pm.
-
-As it stands it predates version.pm but has the same goal: make
-version strings visible and comparable.
-
-=cut
-
 package CPAN::Version;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = sprintf "%.6f", substr(q$Rev: 561 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 844 $,4)/1000000 + 5.4;
 
 # CPAN::Version::vcmp courtesy Jost Krieger
 sub vcmp {
@@ -137,6 +103,45 @@ sub readable {
 1;
 
 __END__
+
+=head1 NAME
+
+CPAN::Version - utility functions to compare CPAN versions
+
+=head1 SYNOPSIS
+
+  use CPAN::Version;
+
+  CPAN::Version->vgt("1.1","1.1.1");    # 1 bc. 1.1 > 1.001001
+
+  CPAN::Version->vlt("1.1","1.1");      # 0 bc. 1.1 not < 1.1
+
+  CPAN::Version->vcmp("1.1","1.1.1");   # 1 bc. first is larger
+
+  CPAN::Version->vcmp("1.1.1","1.1");   # -1 bc. first is smaller
+
+  CPAN::Version->readable(v1.2.3);      # "v1.2.3"
+
+  CPAN::Version->vstring("v1.2.3");     # v1.2.3
+
+  CPAN::Version->float2vv(1.002003);    # "v1.2.3"
+
+=head1 DESCRIPTION
+
+This module mediates between some version that perl sees in a package
+and the version that is published by the CPAN indexer.
+
+It's only written as a helper module for both CPAN.pm and CPANPLUS.pm.
+
+As it stands it predates version.pm but has the same goal: make
+version strings visible and comparable.
+
+=head1 LICENSE
+
+This program is free software; you can redistribute it and/or
+modify it under the same terms as Perl itself.
+
+=cut
 
 # Local Variables:
 # mode: cperl
