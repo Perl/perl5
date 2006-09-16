@@ -4318,8 +4318,9 @@ Perl_upg_version(pTHX_ SV *ver)
     if ( SvNOK(ver) ) /* may get too much accuracy */ 
     {
 	char tbuf[64];
+	STRLEN len;
 	SET_NUMERIC_STANDARD();
-	STRLEN len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVff, SvNVX(ver));
+	len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVff, SvNVX(ver));
 	SET_NUMERIC_LOCAL();
 	while (tbuf[len-1] == '0' && len > 0) len--;
 	version = savepvn(tbuf, len);
