@@ -2518,7 +2518,7 @@ PP(pp_leavesublv)
 
     TAINT_NOT;
 
-    if (CX_SUB_LVAL_INARGS(cx)) {
+    if (cx->blk_sub.lval & OPpENTERSUB_INARGS) {
 	/* We are an argument to a function or grep().
 	 * This kind of lvalueness was legal before lvalue
 	 * subroutines too, so be backward compatible:
@@ -2545,7 +2545,7 @@ PP(pp_leavesublv)
 	    }
 	}
     }
-    else if (CX_SUB_LVAL(cx)) {     /* Leave it as it is if we can. */
+    else if (cx->blk_sub.lval) {     /* Leave it as it is if we can. */
 	/* Here we go for robustness, not for speed, so we change all
 	 * the refcounts so the caller gets a live guy. Cannot set
 	 * TEMP, so sv_2mortal is out of question. */

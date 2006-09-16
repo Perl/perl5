@@ -268,21 +268,11 @@ struct block_sub {
     AV *	savearray;
     AV *	argarray;
     I32		olddepth;
-    /* These are merged to to get struct context down to 64 bytes on ILP32.  */
-    U8		hasargs_lval;
+    U8		hasargs;
+    U8		lval;		/* XXX merge lval and hasargs? */
     PAD		*oldcomppad;
     OP *	retop;	/* op to execute on exit from sub */
 };
-
-#define CX_SUB_HASARGS_SET(cx, v)	((cx)->blk_sub.hasargs_lval = \
- ((cx)->blk_sub.hasargs_lval & 0xFE) | ((v) ? 1 : 0))
-#define CX_SUB_HASARGS_GET(cx)		((cx)->blk_sub.hasargs_lval & 0x01)
-
-#define CX_SUB_LVAL_SET(cx, v)		((cx)->blk_sub.hasargs_lval = \
- (((cx)->blk_sub.hasargs_lval & 0x01) | ((v) & (OPpLVAL_INTRO|OPpENTERSUB_INARGS))))
-#define CX_SUB_LVAL(cx)			((cx)->blk_sub.hasargs_lval & 0xFE)
-#define CX_SUB_LVAL_INARGS(cx)		((cx)->blk_sub.hasargs_lval & \
-					 OPpENTERSUB_INARGS)
 
 /* base for the next two macros. Don't use directly.
  * Note that the refcnt of the cv is incremented twice;  The CX one is
@@ -291,7 +281,7 @@ struct block_sub {
 #define PUSHSUB_BASE(cx)						\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.olddepth = CvDEPTH(cv);				\
-	CX_SUB_HASARGS_SET(cx, hasargs);				\
+	cx->blk_sub.hasargs = hasargs;					\
 	cx->blk_sub.retop = NULL;					\
 	if (!CvDEPTH(cv)) {						\
 	    SvREFCNT_inc_simple_void_NN(cv);				\
@@ -302,19 +292,20 @@ struct block_sub {
 
 #define PUSHSUB(cx)							\
 	PUSHSUB_BASE(cx)						\
-	CX_SUB_LVAL_SET(cx, PL_op->op_private)
+	cx->blk_sub.lval = PL_op->op_private &                          \
+	                      (OPpLVAL_INTRO|OPpENTERSUB_INARGS);
 
 /* variant for use by OP_DBSTATE, where op_private holds hint bits */
 #define PUSHSUB_DB(cx)							\
 	PUSHSUB_BASE(cx)						\
-	CX_SUB_LVAL_SET(cx, 0)
+	cx->blk_sub.lval = 0;
 
 
 #define PUSHFORMAT(cx)							\
 	cx->blk_sub.cv = cv;						\
 	cx->blk_sub.gv = gv;						\
 	cx->blk_sub.retop = NULL;					\
-	CX_SUB_HASARGS_SET(cx, 0);					\
+	cx->blk_sub.hasargs = 0;					\
 	cx->blk_sub.dfoutgv = PL_defoutgv;				\
 	SvREFCNT_inc_void(cx->blk_sub.dfoutgv)
 
@@ -335,7 +326,7 @@ struct block_sub {
 
 #define POPSUB(cx,sv)							\
     STMT_START {							\
-	if (CX_SUB_HASARGS_GET(cx)) {					\
+	if (cx->blk_sub.hasargs) {					\
 	    POP_SAVEARRAY();						\
 	    /* abandon @_ if it got reified */				\
 	    if (AvREAL(cx->blk_sub.argarray)) {				\

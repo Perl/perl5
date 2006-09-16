@@ -10287,13 +10287,13 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_sub.cv		= (cx->blk_sub.olddepth == 0
 					   ? cv_dup_inc(cx->blk_sub.cv, param)
 					   : cv_dup(cx->blk_sub.cv,param));
-		ncx->blk_sub.argarray	= (CX_SUB_HASARGS_GET(cx)
+		ncx->blk_sub.argarray	= (cx->blk_sub.hasargs
 					   ? av_dup_inc(cx->blk_sub.argarray, param)
 					   : NULL);
 		ncx->blk_sub.savearray	= av_dup_inc(cx->blk_sub.savearray, param);
 		ncx->blk_sub.olddepth	= cx->blk_sub.olddepth;
-		CX_SUB_HASARGS_SET(ncx, CX_SUB_HASARGS_GET(cx));
-		CX_SUB_LVAL_SET(ncx, CX_SUB_LVAL(cx));
+		ncx->blk_sub.hasargs	= cx->blk_sub.hasargs;
+		ncx->blk_sub.lval	= cx->blk_sub.lval;
 		ncx->blk_sub.retop	= cx->blk_sub.retop;
 		ncx->blk_sub.oldcomppad = (PAD*)ptr_table_fetch(PL_ptr_table,
 					   cx->blk_sub.oldcomppad);
@@ -10328,7 +10328,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 		ncx->blk_sub.cv		= cv_dup(cx->blk_sub.cv, param);
 		ncx->blk_sub.gv		= gv_dup(cx->blk_sub.gv, param);
 		ncx->blk_sub.dfoutgv	= gv_dup_inc(cx->blk_sub.dfoutgv, param);
-		CX_SUB_HASARGS_SET(ncx, CX_SUB_HASARGS_GET(cx));
+		ncx->blk_sub.hasargs	= cx->blk_sub.hasargs;
 		ncx->blk_sub.retop	= cx->blk_sub.retop;
 		break;
 	    case CXt_BLOCK:

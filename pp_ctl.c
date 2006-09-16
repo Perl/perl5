@@ -1289,8 +1289,8 @@ Perl_is_lvalue_sub(pTHX)
     const I32 cxix = dopoptosub(cxstack_ix);
     assert(cxix >= 0);  /* We should only be called from inside subs */
 
-    if (CX_SUB_LVAL(cxstack + cxix) && CvLVALUE(cxstack[cxix].blk_sub.cv))
-	return CX_SUB_LVAL(cxstack + cxix);
+    if (cxstack[cxix].blk_sub.lval && CvLVALUE(cxstack[cxix].blk_sub.cv))
+	return cxstack[cxix].blk_sub.lval;
     else
 	return 0;
 }
@@ -1641,11 +1641,11 @@ PP(pp_caller)
 	    SV * const sv = newSV(0);
 	    gv_efullname3(sv, cvgv, NULL);
 	    PUSHs(sv_2mortal(sv));
-	    PUSHs(sv_2mortal(newSViv((I32)CX_SUB_HASARGS_GET(cx))));
+	    PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
 	}
 	else {
 	    PUSHs(sv_2mortal(newSVpvs("(unknown)")));
-	    PUSHs(sv_2mortal(newSViv((I32)CX_SUB_HASARGS_GET(cx))));
+	    PUSHs(sv_2mortal(newSViv((I32)cx->blk_sub.hasargs)));
 	}
     }
     else {
@@ -1678,7 +1678,7 @@ PP(pp_caller)
 	PUSHs(&PL_sv_undef);
 	PUSHs(&PL_sv_undef);
     }
-    if (CxTYPE(cx) == CXt_SUB && CX_SUB_HASARGS_GET(cx)
+    if (CxTYPE(cx) == CXt_SUB && cx->blk_sub.hasargs
 	&& CopSTASH_eq(PL_curcop, PL_debstash))
     {
 	AV * const ary = cx->blk_sub.argarray;
@@ -2348,7 +2348,7 @@ PP(pp_goto)
 	    }
 	    else if (CxMULTICALL(cx))
 		DIE(aTHX_ "Can't goto subroutine from a sort sub (or similar callback)");
-	    if (CxTYPE(cx) == CXt_SUB && CX_SUB_HASARGS_GET(cx)) {
+	    if (CxTYPE(cx) == CXt_SUB && cx->blk_sub.hasargs) {
 		/* put @_ back onto stack */
 		AV* av = cx->blk_sub.argarray;
 
@@ -2410,7 +2410,7 @@ PP(pp_goto)
 		    PL_in_eval = cx->blk_eval.old_in_eval;
 		    PL_eval_root = cx->blk_eval.old_eval_root;
 		    cx->cx_type = CXt_SUB;
-		    CX_SUB_HASARGS_SET(cx, 0);
+		    cx->blk_sub.hasargs = 0;
 		}
 		cx->blk_sub.cv = cv;
 		cx->blk_sub.olddepth = CvDEPTH(cv);
@@ -2425,7 +2425,7 @@ PP(pp_goto)
 		}
 		SAVECOMPPAD();
 		PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
-		if (CX_SUB_HASARGS_GET(cx))
+		if (cx->blk_sub.hasargs)
 		{
 		    AV* const av = (AV*)PAD_SVl(0);
 
