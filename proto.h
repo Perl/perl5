@@ -1577,7 +1577,7 @@ STATIC HEK*	S_save_hek_flags(pTHX_ const char *str, I32 len, U32 hash, int flags
 			__attribute__warn_unused_result__;
 
 STATIC void	S_hv_magic_check(pTHX_ HV *hv, bool *needs_copy, bool *needs_store);
-STATIC void	S_unshare_hek_or_pvn(pTHX_ HEK* hek, const char* str, I32 len, U32 hash);
+STATIC void	S_unshare_hek_or_pvn(pTHX_ const HEK* hek, const char* str, I32 len, U32 hash);
 STATIC HEK*	S_share_hek_flags(pTHX_ const char* str, I32 len, U32 hash, int flags)
 			__attribute__warn_unused_result__;
 
@@ -2173,10 +2173,6 @@ PERL_CALLCONV long	Perl_my_betohl(long n);
 
 PERL_CALLCONV void	Perl_my_swabn(void* ptr, int n);
 
-PERL_CALLCONV GV*	Perl_gv_fetchpvn_flags(pTHX_ const char* name, STRLEN len, I32 flags, I32 sv_type);
-PERL_CALLCONV GV*	Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, I32 sv_type);
-PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags);
-
 #if defined(PERL_IN_OP_C) || defined(PERL_DECL_PROT)
 PERL_CALLCONV OP*	Perl_ck_anoncode(pTHX_ OP *o)
 			__attribute__warn_unused_result__;
@@ -2323,11 +2319,12 @@ PERL_CALLCONV bool	Perl_ckwarn_d(pTHX_ U32 w);
 
 PERL_CALLCONV void	Perl_my_clearenv(pTHX);
 
-#ifndef SPRINTF_RETURNS_STRLEN
-PERL_CALLCONV int	Perl_my_sprintf(char *buffer, const char *pat, ...)
-			__attribute__nonnull__(1)
-			__attribute__nonnull__(2);
+PERL_CALLCONV GV*	Perl_gv_fetchpvn_flags(pTHX_ const char* name, STRLEN len, I32 flags, I32 sv_type);
+PERL_CALLCONV GV*	Perl_gv_fetchsv(pTHX_ SV *name, I32 flags, I32 sv_type);
+PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags);
 
+#ifndef SPRINTF_RETURNS_STRLEN
+PERL_CALLCONV int	Perl_my_sprintf(char *buffer, const char *pat, ...);
 #endif
 
 END_EXTERN_C
