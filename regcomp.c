@@ -2504,7 +2504,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         /* dont use tail as the end marker for this traverse */
                         for ( cur = startbranch ; cur != scan ; cur = regnext( cur ) ) {
                             regnode * const noper = NEXTOPER( cur );
+#if defined(DEBUGGING) || defined(NOJUMPTRIE)
                             regnode * const noper_next = regnext( noper );
+#endif
 
                             DEBUG_OPTIMISE_r({
                                 regprop(RExC_rx, mysv, cur);
