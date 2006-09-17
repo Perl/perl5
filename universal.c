@@ -691,10 +691,11 @@ XS(XS_version_qv)
 #ifdef USE_LOCALE_NUMERIC
 		char *loc = setlocale(LC_NUMERIC, "C");
 #endif
-		const STRLEN len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVgf, SvNVX(ver));
+		STRLEN len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVgf, SvNVX(ver));
 #ifdef USE_LOCALE_NUMERIC
 		setlocale(LC_NUMERIC, loc);
 #endif
+		while (tbuf[len-1] == '0' && len > 0) len--;
 		version = savepvn(tbuf, len);
 	    }
 	    else

@@ -4303,11 +4303,10 @@ Perl_upg_version(pTHX_ SV *ver)
     if ( SvNOK(ver) ) /* may get too much accuracy */ 
     {
 	char tbuf[64];
-	STRLEN len;
 #ifdef USE_LOCALE_NUMERIC
 	char *loc = setlocale(LC_NUMERIC, "C");
 #endif
-	len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVff, SvNVX(ver));
+	STRLEN len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVff, SvNVX(ver));
 #ifdef USE_LOCALE_NUMERIC
 	setlocale(LC_NUMERIC, loc);
 #endif
