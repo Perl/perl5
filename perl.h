@@ -200,6 +200,7 @@
 #define CALLREG_INTUIT_START CALL_FPTR(PL_regint_start)
 #define CALLREG_INTUIT_STRING CALL_FPTR(PL_regint_string)
 #define CALLREGFREE CALL_FPTR(PL_regfree)
+#define CALLREGDUPE CALL_FPTR(PL_regdupe)
 
 /*
  * Because of backward compatibility reasons the PERL_UNUSED_DECL
@@ -4327,6 +4328,7 @@ typedef char* (CPERLscope(*re_intuit_start_t)) (pTHX_ regexp *prog, SV *sv,
 						struct re_scream_pos_data_s *d);
 typedef SV*	(CPERLscope(*re_intuit_string_t)) (pTHX_ regexp *prog);
 typedef void	(CPERLscope(*regfree_t)) (pTHX_ struct regexp* r);
+typedef regexp*(CPERLscope(*regdupe_t)) (pTHX_ const regexp* r, CLONE_PARAMS *param);
 
 typedef void (*DESTRUCTORFUNC_NOCONTEXT_t) (void*);
 typedef void (*DESTRUCTORFUNC_t) (pTHX_ void*);

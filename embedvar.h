@@ -84,6 +84,7 @@
 #define PL_reg_state		(vTHX->Treg_state)
 #define PL_regcompp		(vTHX->Tregcompp)
 #define PL_regdummy		(vTHX->Tregdummy)
+#define PL_regdupe		(vTHX->Tregdupe)
 #define PL_regexecp		(vTHX->Tregexecp)
 #define PL_regfree		(vTHX->Tregfree)
 #define PL_regint_start		(vTHX->Tregint_start)
@@ -757,6 +758,7 @@
 #define PL_Treg_state		PL_reg_state
 #define PL_Tregcompp		PL_regcompp
 #define PL_Tregdummy		PL_regdummy
+#define PL_Tregdupe		PL_regdupe
 #define PL_Tregexecp		PL_regexecp
 #define PL_Tregfree		PL_regfree
 #define PL_Tregint_start	PL_regint_start

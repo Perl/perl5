@@ -19,6 +19,9 @@ extern char*	my_re_intuit_start (pTHX_ regexp *prog, SV *sv, char *strpos,
 				    struct re_scream_pos_data_s *data);
 extern SV*	my_re_intuit_string (pTHX_ regexp *prog);
 
+extern regexp*	my_regdupe (pTHX_ regexp *r, CLONE_PARAMS *param);
+
+
 END_EXTERN_C
 
 /* engine details need to be paired - non debugging, debuggin  */
@@ -33,13 +36,14 @@ struct regexp_engine {
 				    struct re_scream_pos_data_s *data);
     SV*		(*re_intuit_string) (pTHX_ regexp *prog);
     void	(*regfree) (pTHX_ struct regexp* r);
+    regexp*	(*regdupe) (pTHX_ regexp *r, CLONE_PARAMS *param);
 };
 
 struct regexp_engine engines[] = {
     { Perl_pregcomp, Perl_regexec_flags, Perl_re_intuit_start,
-      Perl_re_intuit_string, Perl_pregfree },
+      Perl_re_intuit_string, Perl_pregfree, Perl_regdupe },
     { my_regcomp, my_regexec, my_re_intuit_start, my_re_intuit_string,
-      my_regfree }
+      my_regfree, my_regdupe }
 };
 
 #define MY_CXT_KEY "re::_guts" XS_VERSION
@@ -72,6 +76,7 @@ install(pTHX_ unsigned int new_state)
     PL_regint_start = engines[new_state].re_intuit_start;
     PL_regint_string = engines[new_state].re_intuit_string;
     PL_regfree = engines[new_state].regfree;
+    PL_regdupe = engines[new_state].regdupe;
 
     if (new_state & NEEDS_DEBUGGING) {
 	PL_colorset = 0;	/* Allow reinspection of ENV. */

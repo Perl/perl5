@@ -176,6 +176,10 @@ PERLVARI(Tregint_string,re_intuit_string_t, MEMBER_TO_FPTR(Perl_re_intuit_string
 PERLVARI(Tregfree,	regfree_t, MEMBER_TO_FPTR(Perl_pregfree))
 					/* Pointer to REx free()er */
 
+PERLVARI(Tregdupe,	regdupe_t, MEMBER_TO_FPTR(Perl_regdupe))
+					/* Pointer to REx dupe()er */
+
+
 PERLVARI(Treginterp_cnt,int,	    0)	/* Whether "Regexp" was interpolated. */
 PERLVARI(Twatchaddr,	char **,    0)
 PERLVAR(Twatchok,	char *)

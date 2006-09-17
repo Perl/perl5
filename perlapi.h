@@ -788,6 +788,8 @@ END_EXTERN_C
 #define PL_regcompp		(*Perl_Tregcompp_ptr(aTHX))
 #undef  PL_regdummy
 #define PL_regdummy		(*Perl_Tregdummy_ptr(aTHX))
+#undef  PL_regdupe
+#define PL_regdupe		(*Perl_Tregdupe_ptr(aTHX))
 #undef  PL_regexecp
 #define PL_regexecp		(*Perl_Tregexecp_ptr(aTHX))
 #undef  PL_regfree

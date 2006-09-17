@@ -7515,6 +7515,12 @@ Perl_re_intuit_string(pTHX_ regexp *prog)
     return prog->check_substr ? prog->check_substr : prog->check_utf8;
 }
 
+/* 
+   pregfree - free a regexp
+   
+   See regdupe below if you change anything here. 
+*/
+
 void
 Perl_pregfree(pTHX_ struct regexp *r)
 {
@@ -7655,6 +7661,150 @@ Perl_pregfree(pTHX_ struct regexp *r)
     Safefree(r->startp);
     Safefree(r->endp);
     Safefree(r);
+}
+
+#define sv_dup_inc(s,t)	SvREFCNT_inc(sv_dup(s,t))
+#define av_dup_inc(s,t)	(AV*)SvREFCNT_inc(sv_dup((SV*)s,t))
+#define SAVEPVN(p,n)	((p) ? savepvn(p,n) : NULL)
+
+/* 
+   regdupe - duplicate a regexp. 
+   
+   This routine is called by sv.c's re_dup and is expected to clone a 
+   given regexp structure. It is a no-op when not under USE_ITHREADS. 
+   (Originally this *was* re_dup() for change history see sv.c)
+   
+   See pregfree() above if you change anything here. 
+*/
+       
+regexp *
+Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
+{
+#if defined(USE_ITHREADS)
+    dVAR;
+    REGEXP *ret;
+    int i, len, npar;
+    struct reg_substr_datum *s;
+
+    if (!r)
+	return (REGEXP *)NULL;
+
+    if ((ret = (REGEXP *)ptr_table_fetch(PL_ptr_table, r)))
+	return ret;
+
+    len = r->offsets[0];
+    npar = r->nparens+1;
+
+    Newxc(ret, sizeof(regexp) + (len+1)*sizeof(regnode), char, regexp);
+    Copy(r->program, ret->program, len+1, regnode);
+
+    Newx(ret->startp, npar, I32);
+    Copy(r->startp, ret->startp, npar, I32);
+    Newx(ret->endp, npar, I32);
+    Copy(r->startp, ret->startp, npar, I32);
+
+    Newx(ret->substrs, 1, struct reg_substr_data);
+    for (s = ret->substrs->data, i = 0; i < 3; i++, s++) {
+	s->min_offset = r->substrs->data[i].min_offset;
+	s->max_offset = r->substrs->data[i].max_offset;
+	s->end_shift  = r->substrs->data[i].end_shift;
+	s->substr     = sv_dup_inc(r->substrs->data[i].substr, param);
+	s->utf8_substr = sv_dup_inc(r->substrs->data[i].utf8_substr, param);
+    }
+
+    ret->regstclass = NULL;
+    if (r->data) {
+	struct reg_data *d;
+        const int count = r->data->count;
+	int i;
+
+	Newxc(d, sizeof(struct reg_data) + count*sizeof(void *),
+		char, struct reg_data);
+	Newx(d->what, count, U8);
+
+	d->count = count;
+	for (i = 0; i < count; i++) {
+	    d->what[i] = r->data->what[i];
+	    switch (d->what[i]) {
+	        /* legal options are one of: sfpont
+	           see also regcomp.h and pregfree() */
+	    case 's':
+		d->data[i] = sv_dup_inc((SV *)r->data->data[i], param);
+		break;
+	    case 'p':
+		d->data[i] = av_dup_inc((AV *)r->data->data[i], param);
+		break;
+	    case 'f':
+		/* This is cheating. */
+		Newx(d->data[i], 1, struct regnode_charclass_class);
+		StructCopy(r->data->data[i], d->data[i],
+			    struct regnode_charclass_class);
+		ret->regstclass = (regnode*)d->data[i];
+		break;
+	    case 'o':
+		/* Compiled op trees are readonly, and can thus be
+		   shared without duplication. */
+		OP_REFCNT_LOCK;
+		d->data[i] = (void*)OpREFCNT_inc((OP*)r->data->data[i]);
+		OP_REFCNT_UNLOCK;
+		break;
+	    case 'n':
+		d->data[i] = r->data->data[i];
+		break;
+	    case 't':
+		d->data[i] = r->data->data[i];
+		OP_REFCNT_LOCK;
+		((reg_trie_data*)d->data[i])->refcount++;
+		OP_REFCNT_UNLOCK;
+		break;
+	    case 'T':
+		d->data[i] = r->data->data[i];
+		OP_REFCNT_LOCK;
+		((reg_ac_data*)d->data[i])->refcount++;
+		OP_REFCNT_UNLOCK;
+		/* Trie stclasses are readonly and can thus be shared
+		 * without duplication. We free the stclass in pregfree
+		 * when the corresponding reg_ac_data struct is freed.
+		 */
+		ret->regstclass= r->regstclass;
+		break;
+            default:
+		Perl_croak(aTHX_ "panic: re_dup unknown data code '%c'", r->data->what[i]);
+	    }
+	}
+
+	ret->data = d;
+    }
+    else
+	ret->data = NULL;
+
+    Newx(ret->offsets, 2*len+1, U32);
+    Copy(r->offsets, ret->offsets, 2*len+1, U32);
+
+    ret->precomp        = SAVEPVN(r->precomp, r->prelen);
+    ret->refcnt         = r->refcnt;
+    ret->minlen         = r->minlen;
+    ret->prelen         = r->prelen;
+    ret->nparens        = r->nparens;
+    ret->lastparen      = r->lastparen;
+    ret->lastcloseparen = r->lastcloseparen;
+    ret->reganch        = r->reganch;
+
+    ret->sublen         = r->sublen;
+
+    if (RX_MATCH_COPIED(ret))
+	ret->subbeg  = SAVEPVN(r->subbeg, r->sublen);
+    else
+	ret->subbeg = NULL;
+#ifdef PERL_OLD_COPY_ON_WRITE
+    ret->saved_copy = NULL;
+#endif
+
+    ptr_table_store(PL_ptr_table, r, ret);
+    return ret;
+#else
+    return NULL;    
+#endif    
 }
 
 #ifndef PERL_IN_XSUB_RE
