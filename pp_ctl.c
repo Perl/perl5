@@ -2113,7 +2113,7 @@ PP(pp_last)
     case CXt_LOOP:
 	pop2 = CXt_LOOP;
 	newsp = PL_stack_base + cx->blk_loop.resetsp;
-	nextop = cx->blk_loop.last_op->op_next;
+	nextop = cx->blk_loop.my_op->op_lastop->op_next;
 	break;
     case CXt_SUB:
 	pop2 = CXt_SUB;
@@ -2196,7 +2196,7 @@ PP(pp_next)
     if (PL_scopestack_ix < inner)
 	leave_scope(PL_scopestack[PL_scopestack_ix]);
     PL_curcop = cx->blk_oldcop;
-    return cx->blk_loop.next_op;
+    return CX_LOOP_NEXTOP_GET(cx);
 }
 
 PP(pp_redo)
@@ -2220,7 +2220,7 @@ PP(pp_redo)
     if (cxix < cxstack_ix)
 	dounwind(cxix);
 
-    redo_op = cxstack[cxix].blk_loop.redo_op;
+    redo_op = cxstack[cxix].blk_loop.my_op->op_redoop;
     if (redo_op->op_type == OP_ENTER) {
 	/* pop one less context to avoid $x being freed in while (my $x..) */
 	cxstack_ix++;
@@ -4245,7 +4245,7 @@ PP(pp_break)
     PL_curcop = cx->blk_oldcop;
 
     if (CxFOREACH(cx))
-	return cx->blk_loop.next_op;
+	return CX_LOOP_NEXTOP_GET(cx);
     else
 	return cx->blk_givwhen.leave_op;
 }

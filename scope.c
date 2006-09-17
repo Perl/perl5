@@ -1069,12 +1069,10 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 		cx->blk_loop.label);
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.RESETSP = %ld\n",
 		(long)cx->blk_loop.resetsp);
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.REDO_OP = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_loop.redo_op));
+	PerlIO_printf(Perl_debug_log, "BLK_LOOP.MY_OP = 0x%"UVxf"\n",
+		PTR2UV(cx->blk_loop.my_op));
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.NEXT_OP = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_loop.next_op));
-	PerlIO_printf(Perl_debug_log, "BLK_LOOP.LAST_OP = 0x%"UVxf"\n",
-		PTR2UV(cx->blk_loop.last_op));
+		PTR2UV(CX_LOOP_NEXTOP_GET(cx)));
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERIX = %ld\n",
 		(long)cx->blk_loop.iterix);
 	PerlIO_printf(Perl_debug_log, "BLK_LOOP.ITERARY = 0x%"UVxf"\n",

@@ -10309,9 +10309,7 @@ Perl_cx_dup(pTHX_ PERL_CONTEXT *cxs, I32 ix, I32 max, CLONE_PARAMS* param)
 	    case CXt_LOOP:
 		ncx->blk_loop.label	= cx->blk_loop.label;
 		ncx->blk_loop.resetsp	= cx->blk_loop.resetsp;
-		ncx->blk_loop.redo_op	= cx->blk_loop.redo_op;
-		ncx->blk_loop.next_op	= cx->blk_loop.next_op;
-		ncx->blk_loop.last_op	= cx->blk_loop.last_op;
+		ncx->blk_loop.my_op	= cx->blk_loop.my_op;
 		ncx->blk_loop.iterdata	= (CxPADLOOP(cx)
 					   ? cx->blk_loop.iterdata
 					   : gv_dup((GV*)cx->blk_loop.iterdata, param));

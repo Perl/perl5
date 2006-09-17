@@ -393,13 +393,14 @@ struct block_eval {
 struct block_loop {
     char *	label;
     I32		resetsp;
-    OP *	redo_op;
-    OP *	next_op;
-    OP *	last_op;
+    LOOP *	my_op;	/* My op, that contains redo, next and last ops.  */
+    /* (except for non_ithreads we need to modify next_op in pp_ctl.c, hence
+	why next_op is conditionally defined below.)  */
 #ifdef USE_ITHREADS
     void *	iterdata;
     PAD		*oldcomppad;
 #else
+    OP *	next_op;
     SV **	itervar;
 #endif
     SV *	itersave;
@@ -432,12 +433,19 @@ struct block_loop {
 	    cx->blk_loop.itersave = NULL;
 #endif
 
+#ifdef USE_ITHREADS
+#  define PUSHLOOP_OP_NEXT		/* No need to do anything.  */
+#  define CX_LOOP_NEXTOP_GET(cx)	((cx)->blk_loop.my_op->op_nextop + 0)
+#else
+#  define PUSHLOOP_OP_NEXT		cx->blk_loop.next_op = cLOOP->op_nextop
+#  define CX_LOOP_NEXTOP_GET(cx)	((cx)->blk_loop.next_op + 0)
+#endif
+
 #define PUSHLOOP(cx, dat, s)						\
 	cx->blk_loop.label = PL_curcop->cop_label;			\
 	cx->blk_loop.resetsp = s - PL_stack_base;			\
-	cx->blk_loop.redo_op = cLOOP->op_redoop;			\
-	cx->blk_loop.next_op = cLOOP->op_nextop;			\
-	cx->blk_loop.last_op = cLOOP->op_lastop;			\
+	cx->blk_loop.my_op = cLOOP;					\
+	PUSHLOOP_OP_NEXT;						\
 	cx->blk_loop.iterlval = NULL;					\
 	cx->blk_loop.iterary = NULL;					\
 	cx->blk_loop.iterix = -1;					\
