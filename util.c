@@ -4304,9 +4304,13 @@ Perl_upg_version(pTHX_ SV *ver)
     {
 	char tbuf[64];
 	STRLEN len;
-	SET_NUMERIC_STANDARD();
+#ifdef USE_LOCALE_NUMERIC
+	char *loc = setlocale(LC_NUMERIC, "C");
+#endif
 	len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVff, SvNVX(ver));
-	SET_NUMERIC_LOCAL();
+#ifdef USE_LOCALE_NUMERIC
+	setlocale(LC_NUMERIC, loc);
+#endif
 	while (tbuf[len-1] == '0' && len > 0) len--;
 	version = savepvn(tbuf, len);
     }

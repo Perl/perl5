@@ -688,7 +688,13 @@ XS(XS_version_qv)
 	    if ( SvNOK(ver) ) /* may get too much accuracy */
 	    {
 		char tbuf[64];
+#ifdef USE_LOCALE_NUMERIC
+		char *loc = setlocale(LC_NUMERIC, "C");
+#endif
 		const STRLEN len = my_snprintf(tbuf, sizeof(tbuf), "%.9"NVgf, SvNVX(ver));
+#ifdef USE_LOCALE_NUMERIC
+		setlocale(LC_NUMERIC, loc);
+#endif
 		version = savepvn(tbuf, len);
 	    }
 	    else
