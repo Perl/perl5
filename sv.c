@@ -8966,101 +8966,7 @@ ptr_table_* functions.
 REGEXP *
 Perl_re_dup(pTHX_ REGEXP *r, CLONE_PARAMS *param)
 {
-    REGEXP *ret;
-    int i, len, npar;
-    struct reg_substr_datum *s;
-
-    if (!r)
-	return (REGEXP *)NULL;
-
-    if ((ret = (REGEXP *)ptr_table_fetch(PL_ptr_table, r)))
-	return ret;
-
-    len = r->offsets[0];
-    npar = r->nparens+1;
-
-    Newxc(ret, sizeof(regexp) + (len+1)*sizeof(regnode), char, regexp);
-    Copy(r->program, ret->program, len+1, regnode);
-
-    Newx(ret->startp, npar, I32);
-    Copy(r->startp, ret->startp, npar, I32);
-    Newx(ret->endp, npar, I32);
-    Copy(r->startp, ret->startp, npar, I32);
-
-    Newx(ret->substrs, 1, struct reg_substr_data);
-    for (s = ret->substrs->data, i = 0; i < 3; i++, s++) {
-	s->min_offset = r->substrs->data[i].min_offset;
-	s->max_offset = r->substrs->data[i].max_offset;
-	s->substr     = sv_dup_inc(r->substrs->data[i].substr, param);
-	s->utf8_substr = sv_dup_inc(r->substrs->data[i].utf8_substr, param);
-    }
-
-    ret->regstclass = NULL;
-    if (r->data) {
-	struct reg_data *d;
-        const int count = r->data->count;
-	int i;
-
-	Newxc(d, sizeof(struct reg_data) + count*sizeof(void *),
-		char, struct reg_data);
-	Newx(d->what, count, U8);
-
-	d->count = count;
-	for (i = 0; i < count; i++) {
-	    d->what[i] = r->data->what[i];
-	    switch (d->what[i]) {
-	    case 's':
-		d->data[i] = sv_dup_inc((SV *)r->data->data[i], param);
-		break;
-	    case 'p':
-		d->data[i] = av_dup_inc((AV *)r->data->data[i], param);
-		break;
-	    case 'f':
-		/* This is cheating. */
-		Newx(d->data[i], 1, struct regnode_charclass_class);
-		StructCopy(r->data->data[i], d->data[i],
-			    struct regnode_charclass_class);
-		ret->regstclass = (regnode*)d->data[i];
-		break;
-	    case 'o':
-		/* Compiled op trees are readonly, and can thus be
-		   shared without duplication. */
-		OP_REFCNT_LOCK;
-		d->data[i] = (void*)OpREFCNT_inc((OP*)r->data->data[i]);
-		OP_REFCNT_UNLOCK;
-		break;
-	    case 'n':
-		d->data[i] = r->data->data[i];
-		break;
-	    }
-	}
-
-	ret->data = d;
-    }
-    else
-	ret->data = NULL;
-
-    Newx(ret->offsets, 2*len+1, U32);
-    Copy(r->offsets, ret->offsets, 2*len+1, U32);
-
-    ret->precomp        = SAVEPVN(r->precomp, r->prelen);
-    ret->refcnt         = r->refcnt;
-    ret->minlen         = r->minlen;
-    ret->prelen         = r->prelen;
-    ret->nparens        = r->nparens;
-    ret->lastparen      = r->lastparen;
-    ret->lastcloseparen = r->lastcloseparen;
-    ret->reganch        = r->reganch;
-
-    ret->sublen         = r->sublen;
-
-    if (RX_MATCH_COPIED(ret))
-	ret->subbeg  = SAVEPVN(r->subbeg, r->sublen);
-    else
-	ret->subbeg = NULL;
-
-    ptr_table_store(PL_ptr_table, r, ret);
-    return ret;
+    return CALLREGDUPE(aTHX_ r,param);
 }
 
 /* duplicate a file handle */
@@ -10520,6 +10426,19 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     sv_setpvn(PERL_DEBUG_PAD(1), "", 0);	/* ext/re needs these */
     sv_setpvn(PERL_DEBUG_PAD(2), "", 0);	/* even without DEBUGGING. */
 
+   
+    /* RE engine - function pointers -- must initilize these before 
+       re_dup() is called. dmq. */
+    PL_regcompp		= proto_perl->Tregcompp;
+    PL_regexecp		= proto_perl->Tregexecp;
+    PL_regint_start	= proto_perl->Tregint_start;
+    PL_regint_string	= proto_perl->Tregint_string;
+    PL_regfree		= proto_perl->Tregfree;
+    PL_regdupe		= proto_perl->Iregdupe;
+
+    PL_reginterp_cnt	= 0;
+    PL_reg_starttry	= 0;
+    
     /* Clone the regex array */
     PL_regex_padav = newAV();
     {
@@ -11044,16 +10963,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_reg_leftiter	= 0;
     PL_reg_poscache	= NULL;
     PL_reg_poscache_size= 0;
-
-    /* RE engine - function pointers */
-    PL_regcompp		= proto_perl->Tregcompp;
-    PL_regexecp		= proto_perl->Tregexecp;
-    PL_regint_start	= proto_perl->Tregint_start;
-    PL_regint_string	= proto_perl->Tregint_string;
-    PL_regfree		= proto_perl->Tregfree;
-
-    PL_reginterp_cnt	= 0;
-    PL_reg_starttry	= 0;
 
     /* Pluggable optimizer */
     PL_peepp		= proto_perl->Tpeepp;

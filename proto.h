@@ -1059,6 +1059,9 @@ PERL_CALLCONV void	Perl_regdump(pTHX_ const regexp* r);
 PERL_CALLCONV SV*	Perl_regclass_swash(pTHX_ struct regnode *n, bool doinit, SV **listsvp, SV **altsvp);
 PERL_CALLCONV I32	Perl_pregexec(pTHX_ regexp* prog, char* stringarg, char* strend, char* strbeg, I32 minend, SV* screamer, U32 nosave);
 PERL_CALLCONV void	Perl_pregfree(pTHX_ struct regexp* r);
+#if defined(USE_ITHREADS)
+PERL_CALLCONV regexp*	Perl_regdupe(pTHX_ const regexp* r, CLONE_PARAMS* param);
+#endif
 PERL_CALLCONV regexp*	Perl_pregcomp(pTHX_ char* exp, char* xend, PMOP* pm);
 PERL_CALLCONV char*	Perl_re_intuit_start(pTHX_ regexp* prog, SV* sv, char* strpos, char* strend, U32 flags, struct re_scream_pos_data_s *data);
 PERL_CALLCONV SV*	Perl_re_intuit_string(pTHX_ regexp* prog);
@@ -2402,16 +2405,16 @@ PERL_CALLCONV bool	Perl_is_gv_magical_sv(pTHX_ SV *name, U32 flags);
 #ifndef SPRINTF_RETURNS_STRLEN
 PERL_CALLCONV int	Perl_my_sprintf(char *buffer, const char *pat, ...);
 #endif
-#if !defined(HAS_SIGNBIT)
-PERL_CALLCONV int	Perl_signbit(NV f)
-			__attribute__pure__;
-
-#endif
 
 PERL_CALLCONV int	Perl_my_snprintf(char *buffer, const Size_t len, const char *format, ...)
 			__attribute__format__null_ok__(__printf__,3,4);
 
 PERL_CALLCONV int	Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap);
+#if !defined(HAS_SIGNBIT)
+PERL_CALLCONV int	Perl_signbit(NV f)
+			__attribute__pure__;
+
+#endif
 
 END_EXTERN_C
 /*

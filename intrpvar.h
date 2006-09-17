@@ -619,3 +619,8 @@ PERLVAR(Ibody_arenas, void*) /* pointer to list of body-arenas */
 #if !defined(USE_THREADS)
 PERLVAR(Iptr_table,	PTR_TBL_t*)
 #endif
+
+#if defined(USE_ITHREADS)
+PERLVARI(Iregdupe,	regdupe_t, MEMBER_TO_FPTR(Perl_regdupe))
+					/* Pointer to REx dupe()er */
+#endif

@@ -397,6 +397,7 @@
 #define PL_ptr_table		(PERL_GET_INTERP->Iptr_table)
 #define PL_reentrant_buffer	(PERL_GET_INTERP->Ireentrant_buffer)
 #define PL_reentrant_retint	(PERL_GET_INTERP->Ireentrant_retint)
+#define PL_regdupe		(PERL_GET_INTERP->Iregdupe)
 #define PL_regex_pad		(PERL_GET_INTERP->Iregex_pad)
 #define PL_regex_padav		(PERL_GET_INTERP->Iregex_padav)
 #define PL_rehash_seed		(PERL_GET_INTERP->Irehash_seed)
@@ -727,6 +728,7 @@
 #define PL_ptr_table		(vTHX->Iptr_table)
 #define PL_reentrant_buffer	(vTHX->Ireentrant_buffer)
 #define PL_reentrant_retint	(vTHX->Ireentrant_retint)
+#define PL_regdupe		(vTHX->Iregdupe)
 #define PL_regex_pad		(vTHX->Iregex_pad)
 #define PL_regex_padav		(vTHX->Iregex_padav)
 #define PL_rehash_seed		(vTHX->Irehash_seed)
@@ -1060,6 +1062,7 @@
 #define PL_Iptr_table		PL_ptr_table
 #define PL_Ireentrant_buffer	PL_reentrant_buffer
 #define PL_Ireentrant_retint	PL_reentrant_retint
+#define PL_Iregdupe		PL_regdupe
 #define PL_Iregex_pad		PL_regex_pad
 #define PL_Iregex_padav		PL_regex_padav
 #define PL_Irehash_seed		PL_rehash_seed

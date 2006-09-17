@@ -719,6 +719,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_sharedsv_space_mutex
 		    PL_dollarzero_mutex
 		    PL_perlio_mutex
+		    PL_regdupe
 		    Perl_dirp_dup
 		    Perl_cx_dup
 		    Perl_si_dup
@@ -742,6 +743,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_sharedsv_thrcnt_inc
 		    Perl_sharedsv_unlock
 		    Perl_stashpv_hvname_match
+		    Perl_regdupe
 		    )];
 }
 
