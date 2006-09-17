@@ -1556,7 +1556,9 @@ Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const char *const bits,
    Copy(val, s+(nlen+1), vlen, char); \
    *(s+(nlen+1+vlen)) = '\0'
 
-#if defined(USE_ENVIRON_ARRAY) && !defined(WIN32) && !defined(NETWARE)
+#ifdef USE_ENVIRON_ARRAY
+       /* VMS' my_setenv() is in vms.c */
+#if !defined(WIN32) && !defined(NETWARE)
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
@@ -1568,55 +1570,49 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
   {
 #ifndef PERL_USE_SAFE_PUTENV
     if (!PL_use_safe_putenv) {
-	/* The excuse for this code was that many putenv()s used to
-	 * leak, so we manipulate environ directly -- but the claim is
-	 * somewhat doubtful, since manipulating environment CANNOT be
-	 * made in a safe way, the env API and the whole concept are
-	 * fundamentally broken. */
-	register I32 i = setenv_getix(nam);		/* where does it go? */
-	int nlen, vlen;
+    /* most putenv()s leak, so we manipulate environ directly */
+    register I32 i=setenv_getix(nam);          /* where does it go? */
+    int nlen, vlen;
 
-	if (i >= 0) {
-	    if (environ == PL_origenviron) {	/* need we copy environment? */
-		I32 j;
-		I32 max;
-		char **tmpenv;
-	    
-		max = i;
-		while (environ[max])
-		    max++;
-		tmpenv = (char**)safesysmalloc((max+2) * sizeof(char*));
-		for (j=0; j<max; j++) {		/* copy environment */
-		    const int len = strlen(environ[j]);
-		    tmpenv[j] = (char*)safesysmalloc((len+1)*sizeof(char));
-		    Copy(environ[j], tmpenv[j], len+1, char);
-		}
-		tmpenv[max] = NULL;
-		environ = tmpenv;		/* tell exec where it is now */
-	    }
-	    if (!val) {
-		safesysfree(environ[i]);
-		while (environ[i]) {
-		    environ[i] = environ[i+1];
-		    i++;
-		}
-		return;
-	    }
-	    if (!environ[i]) {			/* does not exist yet */
-		environ = (char**)safesysrealloc(environ, (i+2) * sizeof(char*));
-		environ[i+1] = NULL;	/* make sure it's null terminated */
-	    }
-	    else
-		safesysfree(environ[i]);
-	    nlen = strlen(nam);
-	    vlen = strlen(val);
-	    
-	    environ[i] = (char*)safesysmalloc((nlen+vlen+2) * sizeof(char));
-	    /* all that work just for this */
-	    my_setenv_format(environ[i], nam, nlen, val, vlen);
+    if (environ == PL_origenviron) {   /* need we copy environment? */
+       I32 j;
+       I32 max;
+       char **tmpenv;
+
+       max = i;
+       while (environ[max])
+           max++;
+       tmpenv = (char**)safesysmalloc((max+2) * sizeof(char*));
+       for (j=0; j<max; j++) {         /* copy environment */
+           const int len = strlen(environ[j]);
+           tmpenv[j] = (char*)safesysmalloc((len+1)*sizeof(char));
+           Copy(environ[j], tmpenv[j], len+1, char);
+       }
+       tmpenv[max] = NULL;
+       environ = tmpenv;               /* tell exec where it is now */
+    }
+    if (!val) {
+       safesysfree(environ[i]);
+       while (environ[i]) {
+           environ[i] = environ[i+1];
+           i++;
 	}
+       return;
+    }
+    if (!environ[i]) {                 /* does not exist yet */
+       environ = (char**)safesysrealloc(environ, (i+2) * sizeof(char*));
+       environ[i+1] = NULL;    /* make sure it's null terminated */
+    }
+    else
+       safesysfree(environ[i]);
+       nlen = strlen(nam);
+       vlen = strlen(val);
+
+       environ[i] = (char*)safesysmalloc((nlen+vlen+2) * sizeof(char));
+       /* all that work just for this */
+       my_setenv_format(environ[i], nam, nlen, val, vlen);
     } else {
-#endif
+# endif
 #   if defined(__CYGWIN__) || defined(EPOC) || defined(__SYMBIAN32__) || defined(__riscos__)
 #       if defined(HAS_UNSETENV)
         if (val == NULL) {
@@ -1659,46 +1655,36 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
   }
 }
 
-#elif !defined(VMS) /* VMS has my_setenv in vms.c */
+#else /* WIN32 || NETWARE */
 
 void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
     dVAR;
-#if !(defined(WIN32) || defined(NETWARE))
-# ifdef USE_ITHREADS
-    /* only parent thread can modify process environment */
-    if (PL_curinterp == aTHX)
-# endif
-#endif
-    {
-	register char *envstr;
-	const int nlen = strlen(nam);
-	int vlen;
+    register char *envstr;
+    const int nlen = strlen(nam);
+    int vlen;
 
-	if (!val) {
-	    val = "";
-	}
-	vlen = strlen(val);
-	Newx(envstr, nlen+vlen+2, char);
-	my_setenv_format(envstr, nam, nlen, val, vlen);
-	(void)PerlEnv_putenv(envstr);
-	Safefree(envstr);
+    if (!val) {
+       val = "";
     }
+    vlen = strlen(val);
+    Newx(envstr, nlen+vlen+2, char);
+    my_setenv_format(envstr, nam, nlen, val, vlen);
+    (void)PerlEnv_putenv(envstr);
+    Safefree(envstr);
 }
 
-#endif /* defined(USE_ENVIRON_ARRAY) && !defined(WIN32) && !defined(NETWARE) */
+#endif /* WIN32 || NETWARE */
 
-#if !defined(VMS)
-
+#ifndef PERL_MICRO
 I32
 Perl_setenv_getix(pTHX_ const char *nam)
 {
-    register I32 i = -1;
+    register I32 i;
     register const I32 len = strlen(nam);
     PERL_UNUSED_CONTEXT;
 
-#ifdef USE_ENVIRON_ARRAY
     for (i = 0; environ[i]; i++) {
 	if (
 #ifdef WIN32
@@ -1709,12 +1695,11 @@ Perl_setenv_getix(pTHX_ const char *nam)
 	    && environ[i][len] == '=')
 	    break;			/* strnEQ must come first to avoid */
     }					/* potential SEGV's */
-#endif /* USE_ENVIRON_ARRAY */
-
     return i;
 }
+#endif /* !PERL_MICRO */
 
-#endif /* !PERL_VMS */
+#endif /* !VMS && !EPOC*/
 
 #ifdef UNLINK_ALL_VERSIONS
 I32
