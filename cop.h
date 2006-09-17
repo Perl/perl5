@@ -404,11 +404,28 @@ struct block_loop {
     SV **	itervar;
 #endif
     SV *	itersave;
+    /* (from inspection of source code) for a .. range of strings this is the
+       current string.  */
     SV *	iterlval;
+    /* (from inspection of source code) for a foreach loop this is the array
+       being iterated over. For a .. range of numbers it's the current value.
+       A check is often made on the SvTYPE of iterary to determine whether
+       we are iterating over an array or a range. (numbers or strings)  */
     AV *	iterary;
     IV		iterix;
+    /* (from inspection of source code) for a .. range of numbers this is the
+       maximum value.  */
     IV		itermax;
 };
+/* It might be possible to squeeze this structure further. As best I can tell
+   itermax and iterlval are never used at the same time, so it might be possible
+   to make them into a union. However, I'm not confident that there are enough
+   flag bits/NULLable pointers in this structure alone to encode which is
+   active. There is, however, U8 of space free in struct block, which could be
+   used. Right now it may not be worth squeezing this structure further, as it's
+   the largest part of struct block, and currently struct block is 64 bytes on
+   an ILP32 system, which will give good cache alignment.
+*/
 
 #ifdef USE_ITHREADS
 #  define CxITERVAR(c)							\
