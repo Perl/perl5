@@ -3477,7 +3477,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     case SVt_PVBM:
 	if (SvGMAGICAL(sstr) && (flags & SV_GMAGIC)) {
 	    mg_get(sstr);
-	    if ((int)SvTYPE(sstr) != stype) {
+	    if (SvTYPE(sstr) != stype) {
 		stype = SvTYPE(sstr);
 		if (stype == SVt_PVGV && dtype <= SVt_PVGV) {
 		    glob_assign_glob(dstr, sstr, dtype);
