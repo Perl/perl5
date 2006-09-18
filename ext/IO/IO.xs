@@ -132,10 +132,10 @@ fgetpos(handle)
 	InputStream	handle
     CODE:
 	if (handle) {
+	    Fpos_t pos;
 #ifdef PerlIO
 	    ST(0) = sv_newmortal();
 #if PERL_VERSION < 8
-	    Fpos_t pos;
 	    if (PerlIO_getpos(handle, &pos) != 0) {
 		ST(0) = &PL_sv_undef;
 	    }
