@@ -5021,9 +5021,9 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep)
             | PERL_SCAN_DISALLOW_PREFIX
             | (SIZE_ONLY ? PERL_SCAN_SILENT_ILLDIGIT : 0);
         UV cp;
-        len = endbrace - name - 2;
+        len = (STRLEN)(endbrace - name - 2);
         cp = grok_hex(name + 2, &len, &fl, NULL);
-        if ( len != endbrace - name - 2 ) {
+        if ( len != (STRLEN)(endbrace - name - 2) ) {
             cp = 0xFFFD;
         }    
         if (cp > 0xff)
@@ -5102,7 +5102,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep)
         if (len) {
             STRLEN numlen = 1;
             if ( SvUTF8(sv_str) ) {
-                *valuep = utf8_to_uvchr(p, &numlen);
+                *valuep = utf8_to_uvchr((U8*)p, &numlen);
                 if (*valuep > 0x7F)
                     RExC_utf8 = 1; 
                 /* XXXX
@@ -5162,7 +5162,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep)
         /* len is the length written, charlen is the size the char read */
         for ( len = 0; p < pend; p += charlen ) {
             if (UTF) {
-                UV uvc = utf8_to_uvchr(p, &charlen);
+                UV uvc = utf8_to_uvchr((U8*)p, &charlen);
                 if (FOLD) {
                     STRLEN foldlen,numlen;
                     U8 tmpbuf[UTF8_MAXBYTES_CASE+1], *foldbuf;
