@@ -2726,15 +2726,15 @@ win32_popen(const char *command, const char *mode)
     if (win32_pipe(p, 512, ourmode) == -1)
         return NULL;
 
-    /* save current stdfd */
-    if ((oldfd = win32_dup(stdfd)) == -1)
-        goto cleanup;
-
     /* save the old std handle (this needs to happen before the
      * dup2(), since that might call SetStdHandle() too) */
     OP_REFCNT_LOCK;
     lock_held = 1;
     old_h = GetStdHandle(nhandle);
+
+    /* save current stdfd */
+    if ((oldfd = win32_dup(stdfd)) == -1)
+        goto cleanup;
 
     /* make stdfd go to child end of pipe (implicitly closes stdfd) */
     /* stdfd will be inherited by the child */
@@ -2757,6 +2757,9 @@ win32_popen(const char *command, const char *mode)
 	if (win32_dup2(oldfd, stdfd) == -1)
 	    goto cleanup;
 
+	/* close saved handle */
+	win32_close(oldfd);
+
 	/* restore the old std handle (this needs to happen after the
 	 * dup2(), since that might call SetStdHandle() too */
 	if (lock_held) {
@@ -2764,9 +2767,6 @@ win32_popen(const char *command, const char *mode)
 	    OP_REFCNT_UNLOCK;
 	    lock_held = 0;
 	}
-
-	/* close saved handle */
-	win32_close(oldfd);
 
 	LOCK_FDPID_MUTEX;
 	sv_setiv(*av_fetch(w32_fdpid, p[parent], TRUE), childpid);
@@ -2783,14 +2783,14 @@ cleanup:
     /* we don't need to check for errors here */
     win32_close(p[0]);
     win32_close(p[1]);
+    if (oldfd != -1) {
+        win32_dup2(oldfd, stdfd);
+        win32_close(oldfd);
+    }
     if (lock_held) {
 	SetStdHandle(nhandle, old_h);
 	OP_REFCNT_UNLOCK;
 	lock_held = 0;
-    }
-    if (oldfd != -1) {
-        win32_dup2(oldfd, stdfd);
-        win32_close(oldfd);
     }
     return (NULL);
 
