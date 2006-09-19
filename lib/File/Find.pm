@@ -1119,7 +1119,7 @@ sub _find_dir_symlnk($$$) {
 
 	    # ignore if invalid symlink
 	    unless (defined $new_loc) {
-	        if ($dangling_symlinks) {
+	        if (!defined -l _ && $dangling_symlinks) {
 	            if (ref $dangling_symlinks eq 'CODE') {
 	                $dangling_symlinks->($FN, $dir_pref);
 	            } else {
