@@ -1312,6 +1312,7 @@
 #define regcurly		S_regcurly
 #define reg_node		S_reg_node
 #define regpiece		S_regpiece
+#define reg_namedseq		S_reg_namedseq
 #define reginsert		S_reginsert
 #define regtail			S_regtail
 #define join_exact		S_join_exact
@@ -3500,6 +3501,7 @@
 #define regcurly		S_regcurly
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)
 #define regpiece(a,b,c)		S_regpiece(aTHX_ a,b,c)
+#define reg_namedseq(a,b)	S_reg_namedseq(aTHX_ a,b)
 #define reginsert(a,b,c)	S_reginsert(aTHX_ a,b,c)
 #define regtail(a,b,c,d)	S_regtail(aTHX_ a,b,c,d)
 #define join_exact(a,b,c,d,e,f)	S_join_exact(aTHX_ a,b,c,d,e,f)

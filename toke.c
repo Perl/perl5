@@ -1793,7 +1793,7 @@ S_scan_const(pTHX_ char *start)
     const char * const leaveit = /* set of acceptably-backslashed characters */
 	(const char *)
 	(PL_lex_inpat
-	 ? "\\.^$@AGZdDwWsSbBpPXC+*?|()-nrtfeaxcz0123456789[{]} \t\n\r\f\v#"
+	 ? "\\.^$@AGZdDwWsSbBpPXC+*?|()-Nnrtfeaxcz0123456789[{]} \t\n\r\f\v#"
 	 : "");
 
     if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {
@@ -2179,6 +2179,7 @@ S_scan_const(pTHX_ char *start)
  		    SV *res;
  		    STRLEN len;
  		    const char *str;
+ 		    SV *type;
 
  		    if (!e) {
 			yyerror("Missing right brace on \\N{}");
@@ -2192,12 +2193,17 @@ S_scan_const(pTHX_ char *start)
 		        s += 3;
 			len = e - s;
 			uv = grok_hex(s, &len, &flags, NULL);
+			if ( len != e - s ) {
+			    uv=0xFFFD;
+			}
 			s = e + 1;
 			goto NUM_ESCAPE_INSERT;
 		    }
 		    res = newSVpvn(s + 1, e - s - 1);
+		    type = newSVpvn(s - 2,e - s + 3);
 		    res = new_constant( NULL, 0, "charnames",
-					res, NULL, "\\N{...}" );
+					res, NULL, SvPVX(type) );
+		    SvREFCNT_dec(type);		
 		    if (has_utf8)
 			sv_utf8_upgrade(res);
 		    str = SvPV_const(res,len);

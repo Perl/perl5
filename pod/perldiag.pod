@@ -1334,6 +1334,14 @@ specified in the C<\N{...}> escape.  Perhaps you forgot to load the
 corresponding C<overload> or C<charnames> pragma?  See L<charnames> and
 L<overload>.
 
+=item Constant(%s)%s: %s in regex; marked by <-- HERE in m/%s/
+
+(F) The parser found inconsistencies while attempting to find 
+the character name specified in the C<\N{...}> escape.  Perhaps you 
+forgot to load the corresponding C<charnames> pragma?  
+See L<charnames>.
+
+
 =item Constant is not %s reference
 
 (F) A constant value (perhaps declared using the C<use constant> pragma)
@@ -1840,6 +1848,13 @@ L<perlport> for more on portability concerns.
 about 250 characters for simple names, and somewhat more for compound
 names (like C<$A::B>).  You've exceeded Perl's limits.  Future versions
 of Perl are likely to eliminate these arbitrary limitations.
+
+=item Ignoring %s in character class in regex; marked by <-- HERE in m/%s/
+
+(W) Named unicode character escapes (\N{...}) may return multi-char
+or zero length sequences. When such an escape is used in a character class
+its behaviour is not well defined. Check that the correct escape has 
+been used, and the correct charname handler is in scope.
 
 =item Illegal binary digit %s
 

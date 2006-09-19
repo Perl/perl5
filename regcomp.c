@@ -118,6 +118,7 @@ typedef struct RExC_state_t {
     I32		seen_zerolen;
     I32		seen_evals;
     I32		utf8;
+    HV  	*charnames; /* cache of named sequences */
 #if ADD_TO_REGEXEC
     char 	*starttry;		/* -Dr: where regtry was called. */
 #define RExC_starttry	(pRExC_state->starttry)
@@ -149,6 +150,7 @@ typedef struct RExC_state_t {
 #define RExC_seen_zerolen	(pRExC_state->seen_zerolen)
 #define RExC_seen_evals	(pRExC_state->seen_evals)
 #define RExC_utf8	(pRExC_state->utf8)
+#define RExC_charnames  (pRExC_state->charnames)
 
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
 #define	ISMULT2(s)	((*s) == '*' || (*s) == '+' || (*s) == '?' || \
@@ -3734,6 +3736,8 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     RExC_size = 0L;
     RExC_emit = &PL_regdummy;
     RExC_whilem_seen = 0;
+    RExC_charnames = NULL;
+    
 #if 0 /* REGC() is (currently) a NOP at the first pass.
        * Clever compilers notice this and complain. --jhi */
     REGC((U8)REG_MAGIC, (char*)RExC_emit);
@@ -3833,6 +3837,7 @@ reStudy:
         copyRExC_state=RExC_state;
     }
 #endif    
+
     /* Dig out information for optimizations. */
     r->reganch = pm->op_pmflags & PMf_COMPILETIME; /* Again? */
     pm->op_pmflags = RExC_flags;
@@ -4204,6 +4209,8 @@ reStudy:
 	r->reganch |= ROPT_CANY_SEEN;
     Newxz(r->startp, RExC_npar, I32);
     Newxz(r->endp, RExC_npar, I32);
+    if (RExC_charnames) 
+        SvREFCNT_dec((SV*)(RExC_charnames));
 
     DEBUG_r( RX_DEBUG_on(r) );
     DEBUG_DUMP_r({
@@ -4948,6 +4955,274 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     return(ret);
 }
 
+
+/* reg_namedseq(pRExC_state,UVp)
+   
+   This is expected to be called by a parser routine that has 
+   recognized'\N' and needs to handle the rest. RExC_parse is 
+   expected to point at the first char following the N at the time
+   of the call.
+   
+   If valuep is non-null then it is assumed that we are parsing inside 
+   of a charclass definition and the first codepoint in the resolved
+   string is returned via *valuep and the routine will return NULL. 
+   In this mode if a multichar string is returned from the charnames 
+   handler a warning will be issued, and only the first char in the 
+   sequence will be examined. If the string returned is zero length
+   then the value of *valuep is undefined and NON-NULL will 
+   be returned to indicate failure. (This will NOT be a valid pointer 
+   to a regnode.)
+   
+   If value is null then it is assumed that we are parsing normal text
+   and inserts a new EXACT node into the program containing the resolved
+   string and returns a pointer to the new node. If the string is 
+   zerolength a NOTHING node is emitted.
+   
+   On success RExC_parse is set to the char following the endbrace.
+   Parsing failures will generate a fatal errorvia vFAIL(...)
+   
+   NOTE: We cache all results from the charnames handler locally in 
+   the RExC_charnames hash (created on first use) to prevent a charnames 
+   handler from playing silly-buggers and returning a short string and 
+   then a long string for a given pattern. Since the regexp program 
+   size is calculated during an initial parse this would result
+   in a buffer overrun so we cache to prevent the charname result from
+   changing during the course of the parse.
+   
+ */
+STATIC regnode *
+S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep) 
+{
+    char * name;        /* start of the content of the name */
+    char * endbrace;    /* endbrace following the name */
+    SV *sv_str = NULL;  
+    SV *sv_name = NULL;
+    STRLEN len; /* this has various purposes throughout the code */
+    bool cached = 0; /* if this is true then we shouldn't refcount dev sv_str */
+    regnode *ret = NULL;
+    
+    if (*RExC_parse != '{') {
+        vFAIL("Missing braces on \\N{}");
+    }
+    name = RExC_parse+1;
+    endbrace = strchr(RExC_parse, '}');
+    if ( ! endbrace ) {
+        RExC_parse++;
+        vFAIL("Missing right brace on \\N{}");
+    } 
+    RExC_parse = endbrace + 1;  
+    
+    
+    /* RExC_parse points at the beginning brace, 
+       endbrace points at the last */
+    if ( name[0]=='U' && name[1]=='+' ) {
+        /* its a "unicode hex" notation {U+89AB} */
+        I32 fl = PERL_SCAN_ALLOW_UNDERSCORES
+            | PERL_SCAN_DISALLOW_PREFIX
+            | (SIZE_ONLY ? PERL_SCAN_SILENT_ILLDIGIT : 0);
+        UV cp;
+        len = endbrace - name - 2;
+        cp = grok_hex(name + 2, &len, &fl, NULL);
+        if ( len != endbrace - name - 2 ) {
+            cp = 0xFFFD;
+        }    
+        if (cp > 0xff)
+            RExC_utf8 = 1;
+        if ( valuep ) {
+            *valuep = cp;
+            return NULL;
+        }
+        sv_str= Perl_newSVpvf_nocontext("%c",(int)cp);
+    } else {
+        /* fetch the charnames handler for this scope */
+        HV * const table = GvHV(PL_hintgv);
+        SV **cvp= table ? 
+            hv_fetchs(table, "charnames", FALSE) :
+            NULL;
+        SV *cv= cvp ? *cvp : NULL;
+        HE *he_str;
+        int count;
+        /* create an SV with the name as argument */
+        sv_name = newSVpvn(name, endbrace - name);
+        
+        if (!table || !(PL_hints & HINT_LOCALIZE_HH)) {
+            vFAIL2("Constant(\\N{%s}) unknown: "
+                  "(possibly a missing \"use charnames ...\")",
+                  SvPVX(sv_name));
+        }
+        if (!cvp || !SvOK(*cvp)) { /* when $^H{charnames} = undef; */
+            vFAIL2("Constant(\\N{%s}): "
+                  "$^H{charnames} is not defined",SvPVX(sv_name));
+        }
+        
+        
+        
+        if (!RExC_charnames) {
+            /* make sure our cache is allocated */
+            RExC_charnames = newHV();
+        } 
+            /* see if we have looked this one up before */
+        he_str = hv_fetch_ent( RExC_charnames, sv_name, 0, 0 );
+        if ( he_str ) {
+            sv_str = HeVAL(he_str);
+            cached = 1;
+        } else {
+            dSP ;
+
+            ENTER ;
+            SAVETMPS ;
+            PUSHMARK(SP) ;
+            
+            XPUSHs(sv_name);
+            
+            PUTBACK ;
+            
+            count= call_sv(cv, G_SCALAR);
+            
+            if (count == 1) { /* XXXX is this right? dmq */
+                sv_str = POPs;
+                SvREFCNT_inc_simple_void(sv_str);
+            } 
+            
+            SPAGAIN ;
+            PUTBACK ;
+            FREETMPS ;
+            LEAVE ;
+            
+            if ( !sv_str || !SvOK(sv_str) ) {
+                vFAIL2("Constant(\\N{%s}): Call to &{$^H{charnames}} "
+                      "did not return a defined value",SvPVX(sv_name));
+            }
+            if (hv_store_ent( RExC_charnames, sv_name, sv_str, 0))
+                cached = 1;
+        }
+    }
+    if (valuep) {
+        char *p = SvPV(sv_str, len);
+        if (len) {
+            STRLEN numlen = 1;
+            if ( SvUTF8(sv_str) ) {
+                *valuep = utf8_to_uvchr(p, &numlen);
+                if (*valuep > 0x7F)
+                    RExC_utf8 = 1; 
+                /* XXXX
+                  We have to turn on utf8 for high bit chars otherwise
+                  we get failures with
+                  
+                   "ss" =~ /[\N{LATIN SMALL LETTER SHARP S}]/i
+                   "SS" =~ /[\N{LATIN SMALL LETTER SHARP S}]/i
+                
+                  This is different from what \x{} would do with the same
+                  codepoint, where the condition is > 0xFF.
+                  - dmq
+                */
+                
+                
+            } else {
+                *valuep = (UV)*p;
+                /* warn if we havent used the whole string? */
+            }
+            if (numlen<len && SIZE_ONLY && ckWARN(WARN_REGEXP)) {
+                vWARN2(RExC_parse,
+                    "Ignoring excess chars from \\N{%s} in character class",
+                    SvPVX(sv_name)
+                );
+            }        
+        } else if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
+            vWARN2(RExC_parse,
+                    "Ignoring zero length \\N{%s} in character class",
+                    SvPVX(sv_name)
+                );
+        }
+        if (sv_name)    
+            SvREFCNT_dec(sv_name);    
+        if (!cached)
+            SvREFCNT_dec(sv_str);    
+        return len ? NULL : (regnode *)&len;
+    } else if(SvCUR(sv_str)) {     
+        
+        char *s; 
+        char *p, *pend;        
+        STRLEN charlen = 1;
+        char * parse_start = name-3; /* needed for the offsets */
+        GET_RE_DEBUG_FLAGS_DECL;     /* needed for the offsets */
+        
+        ret = reg_node(pRExC_state,
+            (U8)(FOLD ? (LOC ? EXACTFL : EXACTF) : EXACT));
+        s= STRING(ret);
+        
+        if ( RExC_utf8 && !SvUTF8(sv_str) ) {
+            sv_utf8_upgrade(sv_str);
+        } else if ( !RExC_utf8 && SvUTF8(sv_str) ) {
+            RExC_utf8= 1;
+        }
+        
+        p = SvPV(sv_str, len);
+        pend = p + len;
+        /* len is the length written, charlen is the size the char read */
+        for ( len = 0; p < pend; p += charlen ) {
+            if (UTF) {
+                UV uvc = utf8_to_uvchr(p, &charlen);
+                if (FOLD) {
+                    STRLEN foldlen,numlen;
+                    U8 tmpbuf[UTF8_MAXBYTES_CASE+1], *foldbuf;
+                    uvc = toFOLD_uni(uvc, tmpbuf, &foldlen);
+                    /* Emit all the Unicode characters. */
+                    
+                    for (foldbuf = tmpbuf;
+                        foldlen;
+                        foldlen -= numlen) 
+                    {
+                        uvc = utf8_to_uvchr(foldbuf, &numlen);
+                        if (numlen > 0) {
+                            const STRLEN unilen = reguni(pRExC_state, uvc, s);
+                            s       += unilen;
+                            len     += unilen;
+                            /* In EBCDIC the numlen
+                            * and unilen can differ. */
+                            foldbuf += numlen;
+                            if (numlen >= foldlen)
+                                break;
+                        }
+                        else
+                            break; /* "Can't happen." */
+                    }                          
+                } else {
+                    const STRLEN unilen = reguni(pRExC_state, uvc, s);
+        	    if (unilen > 0) {
+        	       s   += unilen;
+        	       len += unilen;
+        	    }
+        	}
+	    } else {
+                len++;
+                REGC(*p, s++);
+            }
+        }
+        if (SIZE_ONLY) {
+            RExC_size += STR_SZ(len);
+        } else {
+            STR_LEN(ret) = len;
+            RExC_emit += STR_SZ(len);
+        }
+        Set_Node_Cur_Length(ret); /* MJD */
+        RExC_parse--; 
+        nextchar(pRExC_state);
+    } else {
+        ret = reg_node(pRExC_state,NOTHING);
+    }
+    if (!cached) {
+        SvREFCNT_dec(sv_str);
+    }
+    if (sv_name) {
+        SvREFCNT_dec(sv_name); 
+    }
+    return ret;
+
+}
+
+
+
 /*
  - regatom - the lowest level
  *
@@ -5184,6 +5459,14 @@ tryagain:
 		*flagp |= HASWIDTH|SIMPLE;
 	    }
 	    break;
+        case 'N': 
+            /* Handle \N{NAME} here and not below because it can be 
+            multicharacter. join_exact() will join them up later on. 
+            Also this makes sure that things like /\N{BLAH}+/ and 
+            \N{BLAH} being multi char Just Happen. dmq*/
+            ++RExC_parse;
+            ret= reg_namedseq(pRExC_state, NULL); 
+            break;
 	case 'n':
 	case 'r':
 	case 't':
@@ -5295,6 +5578,7 @@ tryagain:
 		    case 'D':
 		    case 'p':
 		    case 'P':
+                    case 'N':
 			--p;
 			goto loopdone;
 		    case 'n':
@@ -5493,7 +5777,7 @@ tryagain:
 
     /* If the encoding pragma is in effect recode the text of
      * any EXACT-kind nodes. */
-    if (PL_encoding && PL_regkind[OP(ret)] == EXACT) {
+    if (ret && PL_encoding && PL_regkind[OP(ret)] == EXACT) {
  	const STRLEN oldlen = STR_LEN(ret);
  	SV * const sv = sv_2mortal(newSVpvn(STRING(ret), oldlen));
 
@@ -5766,6 +6050,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
     if (UCHARAT(RExC_parse) == ']')
 	goto charclassloop;
 
+parseit:
     while (RExC_parse < RExC_end && UCHARAT(RExC_parse) != ']') {
 
     charclassloop:
@@ -5807,6 +6092,20 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, U32 depth)
 	    case 'S':	namedclass = ANYOF_NSPACE;	break;
 	    case 'd':	namedclass = ANYOF_DIGIT;	break;
 	    case 'D':	namedclass = ANYOF_NDIGIT;	break;
+            case 'N':  /* Handle \N{NAME} in class */
+                {
+                    /* We only pay attention to the first char of 
+                    multichar strings being returned. I kinda wonder
+                    if this makes sense as it does change the behaviour
+                    from earlier versions, OTOH that behaviour was broken
+                    as well. */
+                    UV v; /* value is register so we cant & it /grrr */
+                    if (reg_namedseq(pRExC_state, &v)) {
+                        goto parseit;
+                    }
+                    value= v; 
+                }
+                break;
 	    case 'p':
 	    case 'P':
 		{

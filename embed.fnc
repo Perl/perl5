@@ -1308,6 +1308,7 @@ Es	|regnode*|regclass	|NN struct RExC_state_t *state|U32 depth
 ERsn	|I32	|regcurly	|NN const char *
 Es	|regnode*|reg_node	|NN struct RExC_state_t *state|U8 op
 Es	|regnode*|regpiece	|NN struct RExC_state_t *state|NN I32 *flagp|U32 depth
+Es	|regnode*|reg_namedseq	|NN struct RExC_state_t *state|NULLOK UV *valuep
 Es	|void	|reginsert	|NN struct RExC_state_t *state|U8 op|NN regnode *opnd
 Es	|void	|regtail	|NN struct RExC_state_t *state|NN regnode *p|NN const regnode *val|U32 depth
 Es	|U32	|join_exact	|NN struct RExC_state_t *state|NN regnode *scan|NN I32 *min|U32 flags|NULLOK regnode *val|U32 depth

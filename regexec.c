@@ -527,7 +527,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	DEBUG_OPTIMISE_r({
             PerlIO_printf(Perl_debug_log, "fbm_instr len=%d str=<%.*s>\n", 
                 (int)(end_point - start_point),
-                (int)(end_point - start_point), 
+                (int)(end_point - start_point) > 20 ? 20 : (int)(end_point - start_point), 
                 start_point);
         });
 
