@@ -312,7 +312,7 @@ As of db-4.2.x it is no longer needed to do this by hand. Sleepycat
 has changed the configuration process to add +z on HP-UX automatically.
 
   # cd .../db-4.2.25/build_unix
-  # env CFLAGS=+DA2.0w LDFLAGS=+DA2.0w ../dist/configure
+  # env CFLAGS=+DD64 LDFLAGS=+DD64 ../dist/configure
 
 should work to generate 64bit shared libraries for HP-UX 11.00 and 11i.
 
@@ -330,6 +330,14 @@ When using this compiler to build Perl, you should make sure that the
 flag -Aa is added to the cpprun and cppstdin variables in the config.sh
 file (though see the section on 64-bit perl below). If you are using a
 recent version of the Perl distribution, these flags are set automatically.
+
+Even though HP-UX 10.20 and 11.00 are not actively maintained by HP
+anymore, updates for the HP ANSI C compiler are still available from
+time to time, and it might be advisable to see if updates are applicable.
+At the moment of writing, the latests available patches for 11.00 that
+should be applied are PHSS_35098, PHSS_35175, PHSS_35100, PHSS_33036,
+and PHSS_33902). If you have a SUM account, you can use it to search
+for updates/patches. Enter "ANSI" as keyword.
 
 =head2 The GNU C Compiler
 
@@ -586,6 +594,6 @@ With much assistance regarding shared libraries from Marc Sabatella.
 
 =head1 DATE
 
-Version 0.7.6: 2005-12-20
+Version 0.7.7: 2006-09-19
 
 =cut
