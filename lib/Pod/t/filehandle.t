@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: filehandle.t,v 1.1 2006-02-19 23:02:37 eagle Exp $
+# $Id: filehandle.t,v 1.2 2006-09-16 20:25:25 eagle Exp $
 #
 # filehandle.t -- Test the parse_from_filehandle interface.
 #
@@ -47,7 +47,7 @@ while (<DATA>) {
     close IN;
     close OUT;
     open (OUT, 'out.tmp') or die "Cannot open out.tmp: $!\n";
-    while (<OUT>) { last if /^\.TH/ }
+    while (<OUT>) { last if /^\.nh/ }
     my $output;
     {
         local $/;

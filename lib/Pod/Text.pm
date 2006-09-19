@@ -1,5 +1,5 @@
 # Pod::Text -- Convert POD data to formatted ASCII text.
-# $Id: Text.pm,v 3.7 2006-02-19 23:02:35 eagle Exp $
+# $Id: Text.pm,v 3.8 2006-09-16 20:55:41 eagle Exp $
 #
 # Copyright 1999, 2000, 2001, 2002, 2004, 2006
 #     by Russ Allbery <rra@stanford.edu>
@@ -41,7 +41,7 @@ use Pod::Simple ();
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 3.07;
+$VERSION = 3.08;
 
 ##############################################################################
 # Initialization
@@ -589,7 +589,23 @@ sub pod2text {
 sub parse_from_file {
     my $self = shift;
     $self->reinit;
+
+    # Fake the old cutting option to Pod::Parser.  This fiddings with internal
+    # Pod::Simple state and is quite ugly; we need a better approach.
+    if (ref ($_[0]) eq 'HASH') {
+        my $opts = shift @_;
+        if (defined ($$opts{-cutting}) && !$$opts{-cutting}) {
+            $$self{in_pod} = 1;
+            $$self{last_was_blank} = 1;
+        }
+    }
+
+    # Do the work.
     my $retval = $self->Pod::Simple::parse_from_file (@_);
+
+    # Flush output, since Pod::Simple doesn't do this.  Ideally we should also
+    # close the file descriptor if we had to open one, but we can't easily
+    # figure this out.
     my $fh = $self->output_fh ();
     my $oldfh = select $fh;
     my $oldflush = $|;

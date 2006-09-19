@@ -177,7 +177,7 @@ This paragraph should be doubly indented.
 .Sp
 This paragraph should only be singly indented.
 .IP "\(bu" 4
-This is an item in the middle of a block\-quote, which should be allowed.
+This is an item in the middle of a block-quote, which should be allowed.
 .IP "\(bu" 4
 We're also testing tagless item commands.
 .RE
@@ -254,7 +254,7 @@ A forward slash.
 Try to get this bit of text over towards the edge so |that\ all\ of\ this\ text\ inside\ S<>\ won't| be wrapped.  Also test the
 |same\ thing\ with\ non-breaking\ spaces.|
 .PP
-There is a soft hy\%phen in hyphen at hy\-phen.
+There is a soft hy\%phen in hyphen at hy-phen.
 .PP
 This is a test of an index entry.
 .IX Xref "index entry"

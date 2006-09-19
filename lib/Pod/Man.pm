@@ -1,5 +1,5 @@
 # Pod::Man -- Convert POD data to formatted *roff input.
-# $Id: Man.pm,v 2.9 2006-02-19 23:02:35 eagle Exp $
+# $Id: Man.pm,v 2.12 2006-09-16 20:55:41 eagle Exp $
 #
 # Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
 #     Russ Allbery <rra@stanford.edu>
@@ -40,7 +40,7 @@ use POSIX qw(strftime);
 # Don't use the CVS revision as the version, since this module is also in Perl
 # core and too many things could munge CVS magic revision strings.  This
 # number should ideally be the same as the CVS revision in podlators, however.
-$VERSION = 2.09;
+$VERSION = '2.12';
 
 # Set the debugging level.  If someone has inserted a debug function into this
 # class already, use that.  Otherwise, use any Pod::Simple debug function
@@ -422,17 +422,17 @@ sub guesswork {
     DEBUG > 5 and print "   Guesswork called on [$_]\n";
 
     # By the time we reach this point, all hypens will be escaped by adding a
-    # backslash.  We want to do that escaping if they're part of regular words
-    # and there's only a single dash, since that's a real hyphen that *roff
-    # gets to consider a possible break point.  Make sure that a dash after
-    # the first character of a word stays non-breaking, however.
+    # backslash.  We want to undo that escaping if they're part of regular
+    # words and there's only a single dash, since that's a real hyphen that
+    # *roff gets to consider a possible break point.  Make sure that a dash
+    # after the first character of a word stays non-breaking, however.
     #
     # Note that this is not user-controllable; we pretty much have to do this
     # transformation or *roff will mangle the output in unacceptable ways.
     s{
-        ( (?:\G|^|\s) [a-zA-Z] ) ( \\- )?
-        ( (?: [a-zA-Z]+ \\-)+ )
-        ( [a-zA-Z]+ ) (?=\s|\Z|\\\ )
+        ( (?:\G|^|\s) [\(\"]* [a-zA-Z] ) ( \\- )?
+        ( (?: [a-zA-Z\']+ \\-)+ )
+        ( [a-zA-Z\']+ ) (?= [\)\".?!,;:]* (?:\s|\Z|\\\ ) )
         \b
     } {
         my ($prefix, $hyphen, $main, $suffix) = ($1, $2, $3, $4);
@@ -882,6 +882,10 @@ $preamble
 .\\"
 .IX Title "$index"
 .TH $name $section "$date" "$$self{release}" "$$self{center}"
+.\\" For nroff, turn off justification.  Always turn off hyphenation; it makes
+.\\" way too many mistakes in technical documents.
+.if n .ad l
+.nh
 ----END OF HEADER----
     $self->output (".\\\" [End of preamble]\n") if DEBUG;
 }
@@ -1216,7 +1220,23 @@ sub cmd_item_block  { my $self = shift; $self->item_common ('block',  @_) }
 sub parse_from_file {
     my $self = shift;
     $self->reinit;
+
+    # Fake the old cutting option to Pod::Parser.  This fiddings with internal
+    # Pod::Simple state and is quite ugly; we need a better approach.
+    if (ref ($_[0]) eq 'HASH') {
+        my $opts = shift @_;
+        if (defined ($$opts{-cutting}) && !$$opts{-cutting}) {
+            $$self{in_pod} = 1;
+            $$self{last_was_blank} = 1;
+        }
+    }
+
+    # Do the work.
     my $retval = $self->SUPER::parse_from_file (@_);
+
+    # Flush output, since Pod::Simple doesn't do this.  Ideally we should also
+    # close the file descriptor if we had to open one, but we can't easily
+    # figure this out.
     my $fh = $self->output_fh ();
     my $oldfh = select $fh;
     my $oldflush = $|;
@@ -1303,11 +1323,11 @@ sub preamble_template {
 ..
 .\" Set up some character translations and predefined strings.  \*(-- will
 .\" give an unbreakable dash, \*(PI will give pi, \*(L" will give a left
-.\" double quote, and \*(R" will give a right double quote.  | will give a
-.\" real vertical bar.  \*(C+ will give a nicer C++.  Capital omega is used to
-.\" do unbreakable dashes and therefore won't be available.  \*(C` and \*(C'
-.\" expand to `' in nroff, nothing in troff, for use with C<>.
-.tr \(*W-|\(bv\*(Tr
+.\" double quote, and \*(R" will give a right double quote.  \*(C+ will
+.\" give a nicer C++.  Capital omega is used to do unbreakable dashes and
+.\" therefore won't be available.  \*(C` and \*(C' expand to `' in nroff,
+.\" nothing in troff, for use with C<>.
+.tr \(*W-
 .ds C+ C\v'-.1v'\h'-1p'\s-2+\h'-1p'+\s0\v'.1v'\h'-1p'
 .ie n \{\
 .    ds -- \(*W-
@@ -1337,11 +1357,6 @@ sub preamble_template {
 .    nr % 0
 .    rr F
 .\}
-.\"
-.\" For nroff, turn off justification.  Always turn off hyphenation; it makes
-.\" way too many mistakes in technical documents.
-.hy 0
-.if n .na
 .\"
 .\" Accent mark definitions (@(#)ms.acc 1.5 88/02/08 SMI; from UCB 4.2).
 .\" Fear.  Run.  Save yourself.  No user-serviceable parts.

@@ -2298,6 +2298,7 @@ lib/Pod/t/htmlview.t		pod2html render test
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
 lib/Pod/t/man.t			podlators test
 lib/Pod/t/parselink.t		podlators test
+lib/Pod/t/pod-parser.t		podlators test
 lib/Pod/t/pod2html-lib.pl	pod2html testing library
 lib/Pod/t/pod2latex.t		See if Pod::LaTeX works
 lib/Pod/t/Select.t		See if Pod::Select works

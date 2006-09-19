@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: basic.t,v 1.10 2006-01-28 22:31:50 eagle Exp $
+# $Id: basic.t,v 1.11 2006-09-16 20:25:25 eagle Exp $
 #
 # basic.t -- Basic tests for podlators.
 #
@@ -90,7 +90,7 @@ for (sort keys %translators) {
         open (OUTPUT, "> out.$translators{$_}")
             or die "Cannot create out.$translators{$_}: $!\n";
         local $_;
-        while (<TMP>) { last if /^\.TH/ }
+        while (<TMP>) { last if /^\.nh/ }
         print OUTPUT while <TMP>;
         close OUTPUT;
         close TMP;

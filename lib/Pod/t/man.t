@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# $Id: man.t,v 1.9 2006-01-28 22:31:50 eagle Exp $
+# $Id: man.t,v 1.10 2006-09-16 20:25:25 eagle Exp $
 #
 # man.t -- Additional specialized tests for Pod::Man.
 #
@@ -49,7 +49,7 @@ while (<DATA>) {
     $parser->parse_from_file ('tmp.pod', \*OUT);
     close OUT;
     open (OUT, 'out.tmp') or die "Cannot open out.tmp: $!\n";
-    while (<OUT>) { last if /^\.TH/ }
+    while (<OUT>) { last if /^\.nh/ }
     my $output;
     {
         local $/;
@@ -413,9 +413,11 @@ Blorpy \fBprok\fR  wugga chachacha.
 ###
 =head1 Hyphen in SE<lt>E<gt>
 
-Don't S<transform even-this hyphen>.
+Don't S<transform even-this hyphen>.  This "one's-fine!", as well.  However,
+$-0.13 should have a real hyphen.
 ###
 .SH "Hyphen in S<>"
 .IX Header "Hyphen in S<>"
-Don't transform\ even-this\ hyphen.
+Don't transform\ even-this\ hyphen.  This \*(L"one's-fine!\*(R", as well.  However,
+$\-0.13 should have a real hyphen.
 ###
