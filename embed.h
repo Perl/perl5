@@ -2573,7 +2573,7 @@
 #define is_utf8_mark(a)		Perl_is_utf8_mark(aTHX_ a)
 #ifdef PERL_CORE
 #define jmaybe(a)		Perl_jmaybe(aTHX_ a)
-#define keyword(a,b)		Perl_keyword(aTHX_ a,b)
+#define keyword(a,b,c)		Perl_keyword(aTHX_ a,b,c)
 #endif
 #define leave_scope(a)		Perl_leave_scope(aTHX_ a)
 #ifdef PERL_CORE

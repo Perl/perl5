@@ -7,7 +7,7 @@ BEGIN {
 }
 
 BEGIN { require './test.pl'; }
-plan tests => 234;
+plan tests => 238;
 
 while (<DATA>) {
     chomp;
@@ -68,7 +68,7 @@ endpwent ()
 endservent ()
 eof (;*)
 eq ($$)
-err unknown
+err ()
 eval undef
 exec undef
 exists undef
@@ -109,6 +109,7 @@ getservbyport ($$)
 getservent ()
 getsockname (*)
 getsockopt (*$$)
+given undef
 glob undef
 gmtime (;$)
 goto undef
@@ -186,6 +187,7 @@ rewinddir (*)
 rindex ($$;$)
 rmdir (;$)
 s undef
+say (;*@)
 scalar undef
 seek (*$$)
 seekdir (*$)
@@ -220,6 +222,7 @@ sprintf ($@)
 sqrt (;$)
 srand (;$)
 stat (*)
+state undef
 study undef
 sub undef
 substr ($$;$$)
@@ -256,6 +259,7 @@ wait ()
 waitpid ($$)
 wantarray ()
 warn (@)
+when undef
 while undef
 write (;*)
 x unknown

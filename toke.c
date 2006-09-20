@@ -1275,7 +1275,7 @@ S_force_word(pTHX_ register char *start, int token, int check_keyword, int allow
 	(allow_initial_tick && *s == '\'') )
     {
 	s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, allow_pack, &len);
-	if (check_keyword && keyword(PL_tokenbuf, len))
+	if (check_keyword && keyword(PL_tokenbuf, len, 0))
 	    return start;
 	start_force(PL_curforce);
 	if (PL_madskills)
@@ -2514,7 +2514,7 @@ S_intuit_more(pTHX_ register char *s)
 		    while (isALPHA(*s))
 			*d++ = *s++;
 		    *d = '\0';
-		    if (keyword(tmpbuf, d - tmpbuf))
+		    if (keyword(tmpbuf, d - tmpbuf, 0))
 			weight -= 150;
 		}
 		if (un_char == last_un_char + 1)
@@ -2600,7 +2600,7 @@ S_intuit_method(pTHX_ char *start, GV *gv, CV *cv)
 	PL_expect = XREF;
 	return *s == '(' ? FUNCMETH : METHOD;
     }
-    if (!keyword(tmpbuf, len)) {
+    if (!keyword(tmpbuf, len, 0)) {
 	if (len > 2 && tmpbuf[len - 2] == ':' && tmpbuf[len - 1] == ':') {
 	    len -= 2;
 	    tmpbuf[len] = '\0';
@@ -4116,7 +4116,7 @@ Perl_yylex(pTHX)
 		I32 tmp;
 		SV *sv;
 		d = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
-		if (isLOWER(*s) && (tmp = keyword(PL_tokenbuf, len))) {
+		if (isLOWER(*s) && (tmp = keyword(PL_tokenbuf, len, 0))) {
 		    if (tmp < 0) tmp = -tmp;
 		    switch (tmp) {
 		    case KEY_or:
@@ -4762,7 +4762,7 @@ Perl_yylex(pTHX)
 		    char tmpbuf[sizeof PL_tokenbuf];
 		    int t2;
 		    scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
-		    if ((t2 = keyword(tmpbuf, len))) {
+		    if ((t2 = keyword(tmpbuf, len, 0))) {
 			/* binary operators exclude handle interpretations */
 			switch (t2) {
 			case -KEY_x:
@@ -5067,7 +5067,7 @@ Perl_yylex(pTHX)
 	}
 
 	/* Check for keywords */
-	tmp = keyword(PL_tokenbuf, len);
+	tmp = keyword(PL_tokenbuf, len, 0);
 
 	/* Is this a word before a => operator? */
 	if (*d == '=' && d[1] == '>') {
@@ -5451,7 +5451,7 @@ Perl_yylex(pTHX)
 			STRLEN tmplen;
 			d = s;
 			d = scan_word(d, tmpbuf, sizeof tmpbuf, TRUE, &tmplen);
-			if (!keyword(tmpbuf,tmplen))
+			if (!keyword(tmpbuf, tmplen, 0))
 			    probable_sub = 1;
 			else {
 			    while (d < PL_bufend && isSPACE(*d))
@@ -5651,7 +5651,7 @@ Perl_yylex(pTHX)
 		s += 2;
 		d = s;
 		s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
-		if (!(tmp = keyword(PL_tokenbuf, len)))
+		if (!(tmp = keyword(PL_tokenbuf, len, 0)))
 		    Perl_croak(aTHX_ "CORE::%s is not a keyword", PL_tokenbuf);
 		if (tmp < 0)
 		    tmp = -tmp;
@@ -6953,7 +6953,7 @@ S_pending_ident(pTHX)
  */
 
 I32
-Perl_keyword (pTHX_ const char *name, I32 len)
+Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
 {
     dVAR;
   switch (len)
@@ -7225,7 +7225,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
             case 'r':
               if (name[2] == 'r')
               {                                   /* err        */
-                return (FEATURE_IS_ENABLED("err") ? -KEY_err : 0);
+                return (all_keywords || FEATURE_IS_ENABLED("err") ? -KEY_err : 0);
               }
 
               goto unknown;
@@ -7364,7 +7364,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
             case 'a':
               if (name[2] == 'y')
               {                                   /* say        */
-                return (FEATURE_IS_ENABLED("say") ? -KEY_say : 0);
+                return (all_keywords || FEATURE_IS_ENABLED("say") ? -KEY_say : 0);
               }
 
               goto unknown;
@@ -7888,7 +7888,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
               if (name[2] == 'e' &&
                   name[3] == 'n')
               {                                   /* when       */
-                return (FEATURE_IS_ENABLED("switch") ? KEY_when : 0);
+                return (all_keywords || FEATURE_IS_ENABLED("switch") ? KEY_when : 0);
               }
 
               goto unknown;
@@ -7971,7 +7971,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
                   name[3] == 'a' &&
                   name[4] == 'k')
               {                                   /* break      */
-                return (FEATURE_IS_ENABLED("switch") ? -KEY_break : 0);
+                return (all_keywords || FEATURE_IS_ENABLED("switch") ? -KEY_break : 0);
               }
 
               goto unknown;
@@ -8099,7 +8099,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
               name[3] == 'e' &&
               name[4] == 'n')
           {                                       /* given      */
-            return (FEATURE_IS_ENABLED("switch") ? KEY_given : 0);
+            return (all_keywords || FEATURE_IS_ENABLED("switch") ? KEY_given : 0);
           }
 
           goto unknown;
@@ -8267,7 +8267,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
                   if (name[3] == 't' &&
                       name[4] == 'e')
                   {                               /* state      */
-                    return (FEATURE_IS_ENABLED("state") ? KEY_state : 0);
+                    return (all_keywords || FEATURE_IS_ENABLED("state") ? KEY_state : 0);
                   }
 
                   goto unknown;
@@ -8935,7 +8935,7 @@ Perl_keyword (pTHX_ const char *name, I32 len)
                         name[5] == 'l' &&
                         name[6] == 't')
                     {                             /* default    */
-                      return (FEATURE_IS_ENABLED("switch") ? KEY_default : 0);
+                      return (all_keywords || FEATURE_IS_ENABLED("switch") ? KEY_default : 0);
                     }
 
                     goto unknown;
@@ -10368,7 +10368,7 @@ S_checkcomma(pTHX_ const char *s, const char *name, const char *what)
 	    s++;
 	if (*s == ',') {
 	    GV* gv;
-	    if (keyword(w, s - w))
+	    if (keyword(w, s - w, 0))
 		return;
 
 	    gv = gv_fetchpvn_flags(w, s - w, 0, SVt_PVCV);
@@ -10628,7 +10628,7 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
 	    while (s < send && SPACE_OR_TAB(*s))
 		s++;
 	    if ((*s == '[' || (*s == '{' && strNE(dest, "sub")))) {
-		if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, d - dest)) {
+		if (ckWARN(WARN_AMBIGUOUS) && keyword(dest, d - dest, 0)) {
 		    const char * const brack =
 			(const char *)
 			((*s == '[') ? "[...]" : "{...}");
@@ -10662,7 +10662,7 @@ S_scan_ident(pTHX_ register char *s, register const char *send, char *dest, STRL
 	    }
 	    if (PL_lex_state == LEX_NORMAL) {
 		if (ckWARN(WARN_AMBIGUOUS) &&
-		    (keyword(dest, d - dest) || get_cv(dest, FALSE)))
+		    (keyword(dest, d - dest, 0) || get_cv(dest, FALSE)))
 		{
 		    if (funny == '#')
 			funny = '@';

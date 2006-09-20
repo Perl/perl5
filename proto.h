@@ -1007,7 +1007,7 @@ PERL_CALLCONV bool	Perl_is_utf8_mark(pTHX_ const U8 *p)
 PERL_CALLCONV OP*	Perl_jmaybe(pTHX_ OP* arg)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV I32	Perl_keyword(pTHX_ const char* d, I32 len)
+PERL_CALLCONV I32	Perl_keyword(pTHX_ const char* d, I32 len, bool all_keywords)
 			__attribute__pure__
 			__attribute__nonnull__(pTHX_1);
 
