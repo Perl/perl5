@@ -474,7 +474,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 #ifdef DEBUGGING	/* 7/99: reports of failure (with the older version) */
     if (end_shift < 0)
 	Perl_croak(aTHX_ "panic: end_shift: %"IVdf" pattern:\n%s\n ",
-	    end_shift,prog->precomp);
+		   (IV)end_shift, prog->precomp);
 #endif
 
   restart:
@@ -868,7 +868,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
             endpos= strend;
 		    
         DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "start_shift: %"IVdf" check_at: %d s: %d endpos: %d\n",
-                      start_shift,check_at-strbeg,s-strbeg,endpos-strbeg));
+				      (IV)start_shift, check_at - strbeg, s - strbeg, endpos - strbeg));
 	
 	t = s;
         s = find_byclass(prog, prog->regstclass, s, endpos, NULL);

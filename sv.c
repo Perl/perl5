@@ -1851,6 +1851,7 @@ STATIC int
 S_sv_2iuv_non_preserve(pTHX_ register SV *sv, I32 numtype)
 {
     dVAR;
+    PERL_UNUSED_ARG(numtype); /* Used only under DEBUGGING? */
     DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2iuv_non '%s', IV=0x%"UVxf" NV=%"NVgf" inttype=%"UVXf"\n", SvPVX_const(sv), SvIVX(sv), SvNVX(sv), (UV)numtype));
     if (SvNVX(sv) < (NV)IV_MIN) {
 	(void)SvIOKp_on(sv);

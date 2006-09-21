@@ -1333,6 +1333,8 @@ Perl_my_stat(pTHX)
 	    Perl_warner(aTHX_ packWARN(WARN_NEWLINE), PL_warn_nl, "stat");
 	return PL_laststatval;
     }
+    /* Should we warn/croak here? Or do something smart/useful? */
+    return (PL_laststatval = -1);
 }
 
 

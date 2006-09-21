@@ -2193,8 +2193,8 @@ S_scan_const(pTHX_ char *start)
 		        s += 3;
 			len = e - s;
 			uv = grok_hex(s, &len, &flags, NULL);
-			if ( len != e - s ) {
-			    uv=0xFFFD;
+			if ( e > s && len != (STRLEN)(e - s) ) {
+			    uv = 0xFFFD;
 			}
 			s = e + 1;
 			goto NUM_ESCAPE_INSERT;

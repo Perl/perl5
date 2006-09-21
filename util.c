@@ -5475,7 +5475,7 @@ Perl_my_clearenv(pTHX)
     char *buf = (char*)safesysmalloc(bufsiz);
     while (*environ != NULL) {
       char *e = strchr(*environ, '=');
-      int l = e ? e - *environ : strlen(*environ);
+      int l = e ? e - *environ : (int)strlen(*environ);
       if (bsiz < l + 1) {
         (void)safesysfree(buf);
         bsiz = l + 1; /* + 1 for the \0. */

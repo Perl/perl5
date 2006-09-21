@@ -1756,8 +1756,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         
 #ifdef DEBUGGING
         
-        U32 mjd_offset;
-        U32 mjd_nodelen;
+        U32 mjd_offset = 0;
+        U32 mjd_nodelen = 0;
 #endif
         /*
            This means we convert either the first branch or the first Exact,
