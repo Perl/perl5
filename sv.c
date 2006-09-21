@@ -1782,6 +1782,7 @@ Perl_looks_like_number(pTHX_ SV *sv)
 STATIC int
 S_sv_2iuv_non_preserve(pTHX_ register SV *sv, I32 numtype)
 {
+    PERL_UNUSED_ARG(numtype); /* Used only under DEBUGGING? */
     DEBUG_c(PerlIO_printf(Perl_debug_log,"sv_2iuv_non '%s', IV=0x%"UVxf" NV=%"NVgf" inttype=%"UVXf"\n", SvPVX_const(sv), SvIVX(sv), SvNVX(sv), (UV)numtype));
     if (SvNVX(sv) < (NV)IV_MIN) {
 	(void)SvIOKp_on(sv);
@@ -2644,12 +2645,15 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		}
 	    }
 	    {
-		SV *tsv;
+		STRLEN len;
+		char *retval;
+		char *buffer;
 		MAGIC *mg;
 		const SV *const referent = (SV*)SvRV(sv);
 
 		if (!referent) {
-		    tsv = sv_2mortal(newSVpvs("NULLREF"));
+		    len = 7;
+		    retval = buffer = savepvn("NULLREF", len);
 		} else if (SvTYPE(referent) == SVt_PVMG
 			   && ((SvFLAGS(referent) &
 				(SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
@@ -2658,21 +2662,66 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 		    return stringify_regexp(sv, mg, lp);
 		} else {
 		    const char *const typestr = sv_reftype((SV *) referent, 0);
+		    const STRLEN typelen = strlen(typestr);
+		    UV addr = PTR2UV(referent);
+		    const char *stashname = NULL;
+		    STRLEN stashnamelen = 0; /* hush, gcc */
+		    const char *buffer_end;
 
-		    tsv = sv_newmortal();
 		    if (SvOBJECT(referent)) {
-			const char *const name = HvNAME_get(SvSTASH(referent));
-			Perl_sv_setpvf(aTHX_ tsv, "%s=%s(0x%"UVxf")",
-				       name ? name : "__ANON__" , typestr,
-				       PTR2UV(referent));
+			const HEK *const name = HvNAME_HEK(SvSTASH(referent));
+
+			if (name) {
+			    stashname = HEK_KEY(name);
+			    stashnamelen = HEK_LEN(name);
+
+			    if (HEK_UTF8(name)) {
+				SvUTF8_on(sv);
+			    } else {
+				SvUTF8_off(sv);
+			    }
+			} else {
+			    stashname = "__ANON__";
+			    stashnamelen = 8;
+			}
+			len = stashnamelen + 1 /* = */ + typelen + 3 /* (0x */
+			    + 2 * sizeof(UV) + 2 /* )\0 */;
+		    } else {
+			len = typelen + 3 /* (0x */
+			    + 2 * sizeof(UV) + 2 /* )\0 */;
 		    }
-		    else
-			Perl_sv_setpvf(aTHX_ tsv, "%s(0x%"UVxf")", typestr,
-				       PTR2UV(referent));
+
+		    Newx(buffer, len, char);
+		    buffer_end = retval = buffer + len;
+
+		    /* Working backwards  */
+		    *--retval = '\0';
+		    *--retval = ')';
+		    do {
+			*--retval = PL_hexdigit[addr & 15];
+		    } while (addr >>= 4);
+		    *--retval = 'x';
+		    *--retval = '0';
+		    *--retval = '(';
+
+		    retval -= typelen;
+		    memcpy(retval, typestr, typelen);
+
+		    if (stashname) {
+			*--retval = '=';
+			retval -= stashnamelen;
+			memcpy(retval, stashname, stashnamelen);
+		    }
+		    /* retval may not neccesarily have reached the start of the
+		       buffer here.  */
+		    assert (retval >= buffer);
+
+		    len = buffer_end - retval - 1; /* -1 for that \0  */
 		}
 		if (lp)
-		    *lp = SvCUR(tsv);
-		return SvPVX(tsv);
+		    *lp = len;
+		SAVEFREEPV(buffer);
+		return retval;
 	    }
 	}
 	if (SvREADONLY(sv) && !SvOK(sv)) {
@@ -8439,8 +8488,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		switch (base) {
 		    unsigned dig;
 		case 16:
-		    p = (char*)((c == 'X')
-				? "0123456789ABCDEF" : "0123456789abcdef");
+		    p = (char *)((c == 'X') ? PL_hexdigit + 16 : PL_hexdigit);
 		    do {
 			dig = uv & 15;
 			*--ptr = p[dig];
