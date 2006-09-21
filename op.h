@@ -593,3 +593,78 @@ struct token {
     MADPROP* tk_mad;
 };
 #endif
+
+/*
+ * Values that can be hold by mad_key :
+ * ^       unfilled head spot
+ * ,       literal ,
+ * ;       literal ; (blank if implicit ; at end of block)
+ * :       literal : from ?: or attr list
+ * +       unary +
+ * ?       literal ? from ?:
+ * (       literal (
+ * )       literal )
+ * [       literal [
+ * ]       literal ]
+ * {       literal {
+ * }       literal }
+ * @       literal @ sigil
+ * $       literal $ sigil
+ * *       literal * sigil
+ * !       use is source filtered
+ * &       & or sub
+ * #       whitespace/comment following ; or }
+ * #       $# sigil
+ * 1       1st ; from for(;;)
+ * 1       retired protasis
+ * 2       2nd ; from for(;;)
+ * 2       retired apodosis
+ * 3       C-style for list
+ * a       sub or var attributes
+ * a       non-method arrow operator
+ * A       method arrow operator
+ * A       use import args
+ * b       format block
+ * B       retired stub block
+ * C       constant conditional op
+ * d       declarator
+ * D       do block
+ * e       unreached "else" (see C)
+ * e       expression producing E
+ * E       tr/E/R/, /E/
+ * f       folded constant op
+ * F       peg op for format
+ * i       if/unless modifier
+ * I       if/elsif/unless statement
+ * K       retired kid op
+ * l       last index of array ($#foo)
+ * L       label
+ * m       modifier on regex
+ * M       my assignment slurped into some other operator's target
+ * n       sub or format name
+ * o       current operator/declarator name
+ * o       else/continue
+ * O       generic optimized op
+ * p       peg to hold extra whitespace at statement level
+ * P       peg op for package declaration
+ * q       opening quote
+ * =       quoted material
+ * Q       closing quote
+ * Q       optimized qw//
+ * r       expression producing R
+ * R       tr/E/R/ s/E/R/
+ * R       assign slurped by split
+ * s       sub signature
+ * S       use import stub (no import)
+ * S       retired sort block
+ * t       unreached "then" (see C)
+ * U       use import op
+ * v       private sv of for loop
+ * V       use version
+ * w       while/until modifier
+ * W       while/for statement
+ * x       optimized qw
+ * X       random thing
+ * _       whitespace/comments preceding anything else
+ * ~       =~ operator
+ */
