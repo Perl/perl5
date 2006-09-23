@@ -4,11 +4,11 @@ use strict;
 use vars qw($VERSION @ISA $BUGHUNTING);
 use CPAN::Debug;
 use File::Basename ();
-$VERSION = sprintf "%.6f", substr(q$Rev: 844 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 858 $,4)/1000000 + 5.4;
 # module is internal to CPAN.pm
 
 @ISA = qw(CPAN::Debug);
-$BUGHUNTING = 0; # released code must have turned off
+$BUGHUNTING ||= 0; # released code must have turned off
 
 # it's ok if file doesn't exist, it just matters if it is .gz or .bz2
 sub new {
@@ -208,11 +208,6 @@ sub untar {
            $CPAN::META->has_inst("Archive::Tar")
            &&
            $CPAN::META->has_inst("Compress::Zlib") ) {
-    if ($file =~ /\.bz2$/) {
-      $CPAN::Frontend->mydie(qq{
-Archive::Tar lacks support for bz2. Can't continue.
-});
-    }
     $prefer = 2;
   } else {
     $CPAN::Frontend->mydie(qq{
@@ -257,6 +252,9 @@ installed. Can't continue.
       return 1;
     }
   } elsif ($prefer==2) { # 2 => modules
+    unless ($CPAN::META->has_inst("Archive::Tar")) {
+      $CPAN::Frontend->mydie("Archive::Tar not installed, please install it to continue");
+    }
     my $tar = Archive::Tar->new($file,1);
     my $af; # archive file
     my @af;
