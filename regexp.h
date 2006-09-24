@@ -219,8 +219,12 @@ typedef struct regmatch_state {
 	struct {
 	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
+	    struct regmatch_state *prev_eval;
+	    struct regmatch_state *prev_curlyx;
 	    regexp	*prev_rex;
-	    int		toggleutf;
+	    U32		toggle_reg_flags; /* what bits in PL_reg_flags to
+					    flip when transitioning between
+					    inner and outer rexen */
 	    CHECKPOINT	cp;	/* remember current savestack indexes */
 	    CHECKPOINT	lastcp;
 	    regnode	*B;	/* the node following us  */

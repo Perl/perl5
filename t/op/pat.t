@@ -3627,11 +3627,16 @@ EOFTEST
        /[\N{SPACE}\N{U+0041}][\N{SPACE}\N{U+0042}]/,
         'Intermixed named and unicode escapes');     
 }
+$brackets = qr{
+	         {  (?> [^{}]+ | (??{ $brackets }) )* }
+	      }x;
+ok("{b{c}d" !~ m/^((??{ $brackets }))/, "bracket mismatch");
+
 # Keep the following test last -- it may crash perl
 
 ok(("a" x (2**15 - 10)) =~ /^()(a|bb)*$/, "Recursive stack cracker: #24274")
     or print "# Unexpected outcome: should pass or crash perl\n";
 
 # Don't forget to update this!
-BEGIN{print "1..1251\n"};
+BEGIN{print "1..1252\n"};
 

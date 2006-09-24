@@ -77,7 +77,7 @@
 
 #define RF_tainted	1		/* tainted information used? */
 #define RF_warned	2		/* warned about big count? */
-#define RF_evaled	4		/* Did an EVAL with setting? */
+
 #define RF_utf8		8		/* Pattern contains multibyte chars? */
 
 #define UTF ((PL_reg_flags & RF_utf8) != 0)
@@ -2384,8 +2384,8 @@ S_push_slab(pTHX)
 /* *** every FOO_fail should = FOO+1 */
 #define TRIE_next              (REGNODE_MAX+1)
 #define TRIE_next_fail         (REGNODE_MAX+2)
-#define EVAL_A                 (REGNODE_MAX+3)
-#define EVAL_A_fail            (REGNODE_MAX+4)
+#define EVAL_AB                (REGNODE_MAX+3)
+#define EVAL_AB_fail           (REGNODE_MAX+4)
 #define resume_CURLYX          (REGNODE_MAX+5)
 #define resume_WHILEM1         (REGNODE_MAX+6)
 #define resume_WHILEM2         (REGNODE_MAX+7)
@@ -2530,6 +2530,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
     int depth = 0;	    /* depth of recursion */
     regmatch_state *yes_state = NULL; /* state to pop to on success of
 							    subpattern */
+    regmatch_state *cur_eval = NULL; /* most recent EVAL_AB state */
     struct regmatch_state  *cur_curlyx = NULL; /* most recent curlyx */
     U32 state_num;
     
@@ -3426,19 +3427,27 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		PL_reg_maxiter = 0;
 
 		st->logical = 0;
-		ST.toggleutf = ((PL_reg_flags & RF_utf8) != 0) ^
-			    ((re->reganch & ROPT_UTF8) != 0);
-		if (ST.toggleutf) PL_reg_flags ^= RF_utf8;
-		ST.prev_rex = rex;
-		rex = re;
+		ST.toggle_reg_flags = PL_reg_flags;
+		if (re->reganch & ROPT_UTF8)
+		    PL_reg_flags |= RF_utf8;
+		else
+		    PL_reg_flags &= ~RF_utf8;
+		ST.toggle_reg_flags ^= PL_reg_flags; /* diff of old and new */
 
+		ST.prev_rex = rex;
+		ST.prev_curlyx = cur_curlyx;
+		rex = re;
+		cur_curlyx = NULL;
 		ST.B = next;
+		ST.prev_eval = cur_eval;
+		cur_eval = st;
+
 		DEBUG_EXECUTE_r(
                     debug_start_match(re, do_utf8, locinput, PL_regeol, 
                         "Matching embedded");
 		    );
-		/* now continue  from first node in postoned RE */
-		PUSH_YES_STATE_GOTO(EVAL_A, re->program + 1);
+		/* now continue from first node in postoned RE */
+		PUSH_YES_STATE_GOTO(EVAL_AB, re->program + 1);
 		/* NOTREACHED */
 	    }
 	    /* /(?(?{...})X|Y)/ */
@@ -3447,38 +3456,31 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    break;
 	}
 
-	case EVAL_A: /* successfully ran inner rex (??{rex}) */
-	    if (ST.toggleutf)
-		PL_reg_flags ^= RF_utf8;
+	case EVAL_AB: /* cleanup after a successful (??{A})B */
+	    /* note: this is called twice; first after popping B, then A */
+	    PL_reg_flags ^= ST.toggle_reg_flags; 
 	    ReREFCNT_dec(rex);
 	    rex = ST.prev_rex;
+	    regcpblow(ST.cp);
+	    cur_eval = ST.prev_eval;
+	    cur_curlyx = ST.prev_curlyx;
 	    /* XXXX This is too dramatic a measure... */
 	    PL_reg_maxiter = 0;
-	    /* Restore parens of the caller without popping the
-	     * savestack */
-	    {
-		const I32 tmp = PL_savestack_ix;
-		PL_savestack_ix = ST.lastcp;
-		regcppop(rex);
-		PL_savestack_ix = tmp;
-	    }
-	    PL_reginput = locinput;
-	     /* continue at the node following the (??{...}) */
-	    scan = ST.B;
-	    continue;
-	case EVAL_A_fail: /* unsuccessfully ran inner rex (??{rex}) */
-	    /* Restore state to the outer re then re-throw the failure */
-	    if (ST.toggleutf)
-		PL_reg_flags ^= RF_utf8;
+	    sayYES_FINAL;
+
+
+	case EVAL_AB_fail: /* unsuccessfully ran A or B in (??{A})B */
+	    /* note: this is called twice; first after popping B, then A */
+	    PL_reg_flags ^= ST.toggle_reg_flags; 
 	    ReREFCNT_dec(rex);
 	    rex = ST.prev_rex;
-
-	    /* XXXX This is too dramatic a measure... */
-	    PL_reg_maxiter = 0;
-
 	    PL_reginput = locinput;
 	    REGCP_UNWIND(ST.lastcp);
 	    regcppop(rex);
+	    cur_eval = ST.prev_eval;
+	    cur_curlyx = ST.prev_curlyx;
+	    /* XXXX This is too dramatic a measure... */
+	    PL_reg_maxiter = 0;
 	    sayNO_SILENT;
 
 #undef ST
@@ -4344,6 +4346,39 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
 
 	case END:
+	    if (cur_eval) {
+		/* we've just finished A in /(??{A})B/; now continue with B */
+		I32 tmpix;
+
+
+		st->u.eval.toggle_reg_flags
+			    = cur_eval->u.eval.toggle_reg_flags;
+		PL_reg_flags ^= st->u.eval.toggle_reg_flags; 
+
+		st->u.eval.prev_rex = rex;		/* inner */
+		rex    = cur_eval->u.eval.prev_rex;	/* outer */
+		cur_curlyx = cur_eval->u.eval.prev_curlyx;
+		ReREFCNT_inc(rex);
+		st->u.eval.cp = regcppush(0);	/* Save *all* the positions. */
+		REGCP_SET(st->u.eval.lastcp);
+		PL_reginput = locinput;
+
+		/* Restore parens of the outer rex without popping the
+		 * savestack */
+		tmpix = PL_savestack_ix;
+		PL_savestack_ix = cur_eval->u.eval.lastcp;
+		regcppop(rex);
+		PL_savestack_ix = tmpix;
+
+		st->u.eval.prev_eval = cur_eval;
+		cur_eval = cur_eval->u.eval.prev_eval;
+		DEBUG_EXECUTE_r(
+		    PerlIO_printf(Perl_debug_log, "%*s  EVAL trying tail ...\n",
+				      REPORT_CODE_OFF+PL_regindent*2, ""););
+		PUSH_YES_STATE_GOTO(EVAL_AB,
+			st->u.eval.prev_eval->u.eval.B); /* match B */
+	    }
+
 	    if (locinput < reginfo->till) {
 		DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
 				      "%sMatch possible, but length=%ld is smaller than requested=%ld, failing!%s\n",
@@ -4543,7 +4578,7 @@ yes_final:
 	PL_regmatch_state = st;
 
 	switch (st->resume_state) {
-	case EVAL_A: 
+	case EVAL_AB: 
 	case IFMATCH_A:
 	case CURLYM_A:
 	    state_num = st->resume_state;
@@ -4603,7 +4638,7 @@ yes:
 	case TRIE_next:
 	case CURLYM_A:
 	case CURLYM_B:
-	case EVAL_A:
+	case EVAL_AB:
 	case IFMATCH_A:
 	case BRANCH_next:
 	case CURLY_B_max:
@@ -4665,7 +4700,7 @@ do_no:
 	    goto resume_point_WHILEM6;
 
 	case TRIE_next:
-	case EVAL_A:
+	case EVAL_AB:
 	case BRANCH_next:
 	case CURLYM_A:
 	case CURLYM_B:
