@@ -192,7 +192,6 @@ typedef struct regmatch_state {
     bool sw;			/* the condition value in (?(cond)a|b) */
     int logical;
     I32 unwind;			/* savestack index of current unwind block */
-    struct regmatch_state  *cc;	/* current innermost curly state */
     char *locinput;
 
     /* ... while the rest of these are local to an individual branch */
