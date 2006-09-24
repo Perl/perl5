@@ -30,6 +30,9 @@
 #
 # If you want to add a regular expression test that can't be expressed
 # in this format, don't add it here: put it in op/pat.t instead.
+#
+# Note that columns 2,3 and 5 are all enclosed in double quotes and then
+# evalled; so something like a\"\x{100}$1 has length 3+length($1).
 
 BEGIN {
     chdir 't' if -d 't';
@@ -64,10 +67,8 @@ while (<TESTS>) {
     $pat = "'$pat'" unless $pat =~ /^[:']/;
     $pat =~ s/(\$\{\w+\})/$1/eeg;
     $pat =~ s/\\n/\n/g;
-    $subject =~ s/(\$\{\w+\})/$1/eeg;
-    $subject =~ s/\\n/\n/g;
-    $expect =~ s/(\$\{\w+\})/$1/eeg;
-    $expect =~ s/\\n/\n/g;
+    $subject = eval qq("$subject");
+    $expect  = eval qq("$expect");
     $expect = $repl = '-' if $skip_amp and $input =~ /\$[&\`\']/;
     $skip = ($skip_amp ? ($result =~ s/B//i) : ($result =~ s/B//));
     $reason = 'skipping $&' if $reason eq  '' && $skip_amp;
