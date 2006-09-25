@@ -2212,12 +2212,10 @@ S_regtry(pTHX_ const regmatch_info *reginfo, char *startpos)
 
 
 /* this is used to determine how far from the left messages like
-   'failed...' are printed. Currently 29 makes these messages line
-   up with the opcode they refer to. Earlier perls used 25 which
-   left these messages outdented making reviewing a debug output
-   quite difficult.
+   'failed...' are printed. It should be set such that messages 
+   are inline with the regop output that created them.
 */
-#define REPORT_CODE_OFF 29
+#define REPORT_CODE_OFF 32
 
 
 /* Make sure there is a test for this +1 options in re_tests */
@@ -2406,13 +2404,13 @@ S_push_slab(pTHX)
 #define CURLY_B_max_fail       (REGNODE_MAX+25)
 
 #define DEBUG_STATE_pp(pp)				    \
-    DEBUG_STATE_r(					    \
+    DEBUG_STATE_r({					    \
 	DUMP_EXEC_POS(locinput, scan, do_utf8);		    \
 	PerlIO_printf(Perl_debug_log,			    \
 	    "    %*s"pp" %s\n",				    \
 	    depth*2, "",				    \
-	    state_names[st->resume_state-REGNODE_MAX-1] )   \
-    );
+	    state_names[st->resume_state-REGNODE_MAX-1] );   \
+    });
 
 
 #define REG_NODE_NUM(x) ((x) ? (int)((x)-prog) : -1)
@@ -2936,10 +2934,15 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    SV ** const tmp = RX_DEBUG(reginfo->prog)
 				? av_fetch( trie->words, ST.accept_buff[ best ].wordnum - 1, 0 )
 				: NULL;
-		    PerlIO_printf( Perl_debug_log, "%*s  %strying alternation #%d <%s> at node #%d %s\n",
+		    regnode *nextop=!ST.jump ? 
+		                    ST.B : 
+		                    ST.B - ST.jump[ST.accept_buff[best].wordnum];    
+		    PerlIO_printf( Perl_debug_log, 
+		        "%*s  %strying alternation #%d <%s> at node #%d %s\n",
 			REPORT_CODE_OFF+depth*2, "", PL_colors[4],
 			ST.accept_buff[best].wordnum,
-			tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr", REG_NODE_NUM(scan),
+			tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr", 
+			    REG_NODE_NUM(nextop),
 			PL_colors[5] );
 		});
 
