@@ -1,12 +1,19 @@
-# Format:
-# NAME \t TYPE, arg-description [num-args] [longjump-len] \t DESCRIPTION
-
-# Empty rows and #-comment rows are ignored.
-
+# regcomp.sym
+#
+# File has two sections, divided by a line of dashes '-'. 
+#
+# Empty rows after #-comment are removed from input are ignored
+#
+# First section is for regops, second sectionis for regmatch-states
+#
 # Note that the order in this file is important.
 #
-# Add new regops to the end, and do not re-order the existing ops.
+# Format for first section: 
+# NAME \t TYPE, arg-description [num-args] [longjump-len] \t DESCRIPTION
 #
+#
+
+
 
 #* Exit points (0,1)
 
@@ -146,9 +153,13 @@ TRIEC		TRIE,   trie charclass	Same as TRIE, but with embedded charclass data
 AHOCORASICK	TRIE,   trie 1	Aho Corasick stclass. flags==type
 AHOCORASICKC	TRIE,   trie charclass	Same as AHOCORASICK, but with embedded charclass data
 
+
+
 # NEW STUFF ABOVE THIS LINE -- Please update counts below. 
 
-#*Special Nodes (65, 66)
+################################################################################
+
+#*SPECIAL  REGOPS (65, 66)
 
 # This is not really a node, but an optimized away piece of a "long" node.
 # To simplify debugging output, we mark it as if it were a node
@@ -161,4 +172,22 @@ OPTIMIZED	NOTHING,off	Placeholder for dump.
 # "not seen anything to optimize yet".
 PSEUDO		PSEUDO,off	Pseudo opcode for internal use.
 
-# NOTHING BELOW HERE
+-------------------------------------------------------------------------------
+# Format for second section:
+# REGOP \t typelist [ \t typelist] [# Comment]
+# typelist= namelist
+#         = namelist:FAIL
+#         = name:count
+
+# Anything below is a state
+#
+#
+TRIE    	next:FAIL	
+EVAL    	AB:FAIL	
+CURLYX  	resume	
+WHILEM  	resume:6	
+BRANCH  	next:FAIL	
+CURLYM  	A,B:FAIL	
+IFMATCH 	A:FAIL	
+CURLY   	B_min_known,B_min,B_max:FAIL	
+	

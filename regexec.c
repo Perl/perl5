@@ -2376,32 +2376,6 @@ S_push_slab(pTHX)
  * allocated since entry are freed.
  */
  
-/* *** every FOO_fail should = FOO+1 */
-#define TRIE_next              (REGNODE_MAX+1)
-#define TRIE_next_fail         (REGNODE_MAX+2)
-#define EVAL_AB                (REGNODE_MAX+3)
-#define EVAL_AB_fail           (REGNODE_MAX+4)
-#define resume_CURLYX          (REGNODE_MAX+5)
-#define resume_WHILEM1         (REGNODE_MAX+6)
-#define resume_WHILEM2         (REGNODE_MAX+7)
-#define resume_WHILEM3         (REGNODE_MAX+8)
-#define resume_WHILEM4         (REGNODE_MAX+9)
-#define resume_WHILEM5         (REGNODE_MAX+10)
-#define resume_WHILEM6         (REGNODE_MAX+11)
-#define BRANCH_next            (REGNODE_MAX+12)
-#define BRANCH_next_fail       (REGNODE_MAX+13)
-#define CURLYM_A               (REGNODE_MAX+14)
-#define CURLYM_A_fail          (REGNODE_MAX+15)
-#define CURLYM_B               (REGNODE_MAX+16)
-#define CURLYM_B_fail          (REGNODE_MAX+17)
-#define IFMATCH_A              (REGNODE_MAX+18)
-#define IFMATCH_A_fail         (REGNODE_MAX+19)
-#define CURLY_B_min_known      (REGNODE_MAX+20)
-#define CURLY_B_min_known_fail (REGNODE_MAX+21)
-#define CURLY_B_min            (REGNODE_MAX+22)
-#define CURLY_B_min_fail       (REGNODE_MAX+23)
-#define CURLY_B_max            (REGNODE_MAX+24)
-#define CURLY_B_max_fail       (REGNODE_MAX+25)
 
 #define DEBUG_STATE_pp(pp)				    \
     DEBUG_STATE_r({					    \
@@ -2409,40 +2383,13 @@ S_push_slab(pTHX)
 	PerlIO_printf(Perl_debug_log,			    \
 	    "    %*s"pp" %s\n",				    \
 	    depth*2, "",				    \
-	    state_names[st->resume_state-REGNODE_MAX-1] );   \
+	    reg_name[st->resume_state] );   \
     });
 
 
 #define REG_NODE_NUM(x) ((x) ? (int)((x)-prog) : -1)
 
 #ifdef DEBUGGING
-static const char * const state_names[] = {
-   "TRIE_next",
-   "TRIE_next_fail",
-   "EVAL_AB",
-   "EVAL_AB_fail",
-   "resume_CURLYX",
-   "resume_WHILEM1",
-   "resume_WHILEM2",
-   "resume_WHILEM3",
-   "resume_WHILEM4",
-   "resume_WHILEM5",
-   "resume_WHILEM6",
-   "BRANCH_next",
-   "BRANCH_next_fail",
-   "CURLYM_A",
-   "CURLYM_A_fail",
-   "CURLYM_B",
-   "CURLYM_B_fail",
-   "IFMATCH_A",
-   "IFMATCH_A_fail",
-   "CURLY_B_min_known",
-   "CURLY_B_min_known_fail",
-   "CURLY_B_min",
-   "CURLY_B_min_fail",
-   "CURLY_B_max",
-   "CURLY_B_max_fail"
-};
 
 STATIC void
 S_debug_start_match(pTHX_ const regexp *prog, const bool do_utf8, 

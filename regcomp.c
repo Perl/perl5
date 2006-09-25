@@ -7258,7 +7258,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     GET_RE_DEBUG_FLAGS_DECL;
 
     sv_setpvn(sv, "", 0);
-    if (OP(o) >= reg_num)		/* regnode.type is unsigned */
+    if (OP(o) > REGNODE_MAX)		/* regnode.type is unsigned */
 	/* It would be nice to FAIL() here, but this may be called from
 	   regexec.c, and it would be hard to supply pRExC_state. */
 	Perl_croak(aTHX_ "Corrupted regexp opcode");
