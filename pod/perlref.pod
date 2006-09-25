@@ -455,6 +455,12 @@ chicanery is also useful for arbitrary expressions:
 
     print "That yields @{[$n + 5]} widgets\n";
 
+Similarly, an expression that returns a reference to a scalar can be
+dereferenced via C<${...}>. Thus, the above expression may be written
+as:
+
+    print "That yields ${\($n + 5)} widgets\n";
+
 =head2 Symbolic references
 X<reference, symbolic> X<reference, soft>
 X<symbolic reference> X<soft reference>
