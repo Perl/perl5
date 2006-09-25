@@ -2072,9 +2072,6 @@ S_regtry(pTHX_ const regmatch_info *reginfo, char *startpos)
     regexp *prog = reginfo->prog;
     GET_RE_DEBUG_FLAGS_DECL;
 
-#ifdef DEBUGGING
-    PL_regindent = 0;	/* XXXX Not good when matches are reenterable... */
-#endif
     if ((prog->reganch & ROPT_EVAL_SEEN) && !PL_reg_eval_set) {
 	MAGIC *mg;
 
@@ -2408,10 +2405,47 @@ S_push_slab(pTHX)
 #define CURLY_B_max            (REGNODE_MAX+24)
 #define CURLY_B_max_fail       (REGNODE_MAX+25)
 
+#define DEBUG_STATE_pp(pp)				    \
+    DEBUG_STATE_r(					    \
+	DUMP_EXEC_POS(locinput, scan, do_utf8);		    \
+	PerlIO_printf(Perl_debug_log,			    \
+	    "    %*s"pp" %s\n",				    \
+	    depth*2, "",				    \
+	    state_names[st->resume_state-REGNODE_MAX-1] )   \
+    );
+
 
 #define REG_NODE_NUM(x) ((x) ? (int)((x)-prog) : -1)
 
 #ifdef DEBUGGING
+static const char * const state_names[] = {
+   "TRIE_next",
+   "TRIE_next_fail",
+   "EVAL_AB",
+   "EVAL_AB_fail",
+   "resume_CURLYX",
+   "resume_WHILEM1",
+   "resume_WHILEM2",
+   "resume_WHILEM3",
+   "resume_WHILEM4",
+   "resume_WHILEM5",
+   "resume_WHILEM6",
+   "BRANCH_next",
+   "BRANCH_next_fail",
+   "CURLYM_A",
+   "CURLYM_A_fail",
+   "CURLYM_B",
+   "CURLYM_B_fail",
+   "IFMATCH_A",
+   "IFMATCH_A_fail",
+   "CURLY_B_min_known",
+   "CURLY_B_min_known_fail",
+   "CURLY_B_min",
+   "CURLY_B_min_fail",
+   "CURLY_B_max",
+   "CURLY_B_max_fail"
+};
+
 STATIC void
 S_debug_start_match(pTHX_ const regexp *prog, const bool do_utf8, 
     const char *start, const char *end, const char *blurb)
@@ -2538,7 +2572,6 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
 #ifdef DEBUGGING
     GET_RE_DEBUG_FLAGS_DECL;
-    PL_regindent++;
 #endif
 
     /* on first ever call to regmatch, allocate first slab */
@@ -2577,7 +2610,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
             
 	    PerlIO_printf(Perl_debug_log,
 		    "%3"IVdf":%*s%s(%"IVdf")\n",
-		    (IV)(scan - rex->program), PL_regindent*2, "",
+		    (IV)(scan - rex->program), depth*2, "",
 		    SvPVX_const(prop),
 		    (PL_regkind[OP(scan)] == END || !rnext) ? 
 		        0 : (IV)(rnext - rex->program));
@@ -2670,7 +2703,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
                     DEBUG_EXECUTE_r(
                         PerlIO_printf(Perl_debug_log,
                     	          "%*s  %sfailed to match trie start class...%s\n",
-                    	          REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4], PL_colors[5])
+                    	          REPORT_CODE_OFF+depth*2, "", PL_colors[4], PL_colors[5])
                     );
                     sayNO_SILENT;
                     /* NOTREACHED */
@@ -2697,14 +2730,14 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
         	         DEBUG_EXECUTE_r(
                             PerlIO_printf(Perl_debug_log,
                         	          "%*s  %smatched empty string...%s\n",
-                        	          REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4], PL_colors[5])
+                        	          REPORT_CODE_OFF+depth*2, "", PL_colors[4], PL_colors[5])
                         );
         	        break;
         	    } else {
         	        DEBUG_EXECUTE_r(
                             PerlIO_printf(Perl_debug_log,
                         	          "%*s  %sfailed to match trie start class...%s\n",
-                        	          REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4], PL_colors[5])
+                        	          REPORT_CODE_OFF+depth*2, "", PL_colors[4], PL_colors[5])
                         );
         	        sayNO_SILENT;
         	   }
@@ -2783,7 +2816,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		                DUMP_EXEC_POS( (char *)uc, scan, do_utf8 );
 			        PerlIO_printf( Perl_debug_log,
 			            "%*s  %sState: %4"UVxf" Accepted: %4"UVxf" ",
-			            2+PL_regindent * 2, "", PL_colors[4],
+			            2+depth * 2, "", PL_colors[4],
 			            (UV)state, (UV)ST.accepted );
 		    });
 
@@ -2822,7 +2855,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		DEBUG_EXECUTE_r(
 		    PerlIO_printf( Perl_debug_log,
 			"%*s  %sgot %"IVdf" possible matches%s\n",
-			REPORT_CODE_OFF + PL_regindent * 2, "",
+			REPORT_CODE_OFF + depth * 2, "",
 			PL_colors[4], (IV)ST.accepted, PL_colors[5] );
 		);
 	    }}
@@ -2841,7 +2874,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 				    : NULL;
 		    PerlIO_printf( Perl_debug_log,
 			"%*s  %sonly one match left: #%d <%s>%s\n",
-			REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
+			REPORT_CODE_OFF+depth*2, "", PL_colors[4],
 			ST.accept_buff[ 0 ].wordnum,
 			tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr",
 			PL_colors[5] );
@@ -2887,7 +2920,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    DEBUG_TRIE_EXECUTE_r(
 			PerlIO_printf( Perl_debug_log,
 			    "%*s  %sgot %"IVdf" (%d) as best, looking at %"IVdf" (%d)%s\n",
-			    REPORT_CODE_OFF + PL_regindent * 2, "", PL_colors[4],
+			    REPORT_CODE_OFF + depth * 2, "", PL_colors[4],
 			    (IV)best, ST.accept_buff[ best ].wordnum, (IV)cur,
 			    ST.accept_buff[ cur ].wordnum, PL_colors[5] );
 		    );
@@ -2904,7 +2937,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 				? av_fetch( trie->words, ST.accept_buff[ best ].wordnum - 1, 0 )
 				: NULL;
 		    PerlIO_printf( Perl_debug_log, "%*s  %strying alternation #%d <%s> at node #%d %s\n",
-			REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4],
+			REPORT_CODE_OFF+depth*2, "", PL_colors[4],
 			ST.accept_buff[best].wordnum,
 			tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr", REG_NODE_NUM(scan),
 			PL_colors[5] );
@@ -3668,7 +3701,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		DEBUG_EXECUTE_r(
 		    PerlIO_printf(Perl_debug_log,
 				  "%*s  %ld out of %ld..%ld  cc=%"UVxf"\n",
-				  REPORT_CODE_OFF+PL_regindent*2, "",
+				  REPORT_CODE_OFF+depth*2, "",
 				  (long)n, (long)cur_curlyx->u.curlyx.min,
 				  (long)cur_curlyx->u.curlyx.max,
 				  PTR2UV(cur_curlyx))
@@ -3686,7 +3719,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    DEBUG_EXECUTE_r(
 			PerlIO_printf(Perl_debug_log,
 			   "%*s  empty match detected, try continuation...\n",
-			   REPORT_CODE_OFF+PL_regindent*2, "")
+			   REPORT_CODE_OFF+depth*2, "")
 			);
 		    REGMATCH(st->u.whilem.savecc->next, WHILEM1);
 		    /*** all unsaved local vars undefined at this point */
@@ -3753,7 +3786,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    DEBUG_EXECUTE_r(
 			PerlIO_printf(Perl_debug_log,
 				      "%*s  already tried at this position...\n",
-				      REPORT_CODE_OFF+PL_regindent*2, "")
+				      REPORT_CODE_OFF+depth*2, "")
 			);
 			sayNO; /* cache records failure */
 		    }
@@ -3795,7 +3828,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    DEBUG_EXECUTE_r(
 			PerlIO_printf(Perl_debug_log,
 				      "%*s  trying longer...\n",
-				      REPORT_CODE_OFF+PL_regindent*2, "")
+				      REPORT_CODE_OFF+depth*2, "")
 			);
 		    /* Try scanning more and see if it helps. */
 		    PL_reginput = locinput;
@@ -3835,7 +3868,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    DEBUG_EXECUTE_r(
 			PerlIO_printf(Perl_debug_log,
 				      "%*s  failed, try continuation...\n",
-				      REPORT_CODE_OFF+PL_regindent*2, "")
+				      REPORT_CODE_OFF+depth*2, "")
 			);
 		}
 		if (ckWARN(WARN_REGEXP) && n >= REG_INFTY
@@ -3967,7 +4000,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    DEBUG_EXECUTE_r(
 		PerlIO_printf(Perl_debug_log,
 			  "%*s  CURLYM now matched %"IVdf" times, len=%"IVdf"...\n",
-			  (int)(REPORT_CODE_OFF+(PL_regindent*2)), "",
+			  (int)(REPORT_CODE_OFF+(depth*2)), "",
 			  (IV) ST.count, (IV)ST.alen)
 	    );
 
@@ -4008,7 +4041,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    DEBUG_EXECUTE_r(
 		PerlIO_printf(Perl_debug_log,
 		    "%*s  CURLYM trying tail with matches=%"IVdf"...\n",
-		    (int)(REPORT_CODE_OFF+(PL_regindent*2)),
+		    (int)(REPORT_CODE_OFF+(depth*2)),
 		    "", (IV)ST.count)
 		);
 	    if (ST.c1 != CHRTEST_VOID
@@ -4374,7 +4407,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		cur_eval = cur_eval->u.eval.prev_eval;
 		DEBUG_EXECUTE_r(
 		    PerlIO_printf(Perl_debug_log, "%*s  EVAL trying tail ...\n",
-				      REPORT_CODE_OFF+PL_regindent*2, ""););
+				      REPORT_CODE_OFF+depth*2, ""););
 		PUSH_YES_STATE_GOTO(EVAL_AB,
 			st->u.eval.prev_eval->u.eval.B); /* match B */
 	    }
@@ -4395,7 +4428,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    DEBUG_EXECUTE_r(
 	    PerlIO_printf(Perl_debug_log,
 		"%*s  %ssubpattern success...%s\n",
-		REPORT_CODE_OFF+PL_regindent*2, "", PL_colors[4], PL_colors[5]));
+		REPORT_CODE_OFF+depth*2, "", PL_colors[4], PL_colors[5]));
 	    PL_reginput = locinput;	/* put where regtry can find it */
 	    sayYES_FINAL;		/* Success! */
 
@@ -4490,9 +4523,8 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	{
 	    regmatch_state *newst;
 
+	    DEBUG_STATE_pp("push");
 	    depth++;
-	    DEBUG_STATE_r(PerlIO_printf(Perl_debug_log,
-			"PUSH STATE(%d)\n", depth));
 	    st->locinput = locinput;
 	    newst = st+1; 
 	    if (newst >  SLAB_LAST(PL_regmatch_slab))
@@ -4521,8 +4553,8 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    /* push new state */
 	    regmatch_state *oldst = st;
 
+	    DEBUG_STATE_pp("push");
 	    depth++;
-	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "PUSH RECURSE STATE(%d)\n", depth));
 
 	    /* grab the next free state slot */
 	    st++;
@@ -4540,9 +4572,6 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    st->sw = 0;
 	    st->logical = 0;
 	    
-#ifdef DEBUGGING
-	    PL_regindent++;
-#endif
 	}
     }
 
@@ -4562,6 +4591,17 @@ yes_final:
 	/* we have successfully completed a subexpression, but we must now
 	 * pop to the state marked by yes_state and continue from there */
 	assert(st != yes_state);
+#ifdef DEBUGGING
+	while (st != yes_state) {
+	    st--;
+	    if (st < SLAB_FIRST(PL_regmatch_slab)) {
+		PL_regmatch_slab = PL_regmatch_slab->prev;
+		st = SLAB_LAST(PL_regmatch_slab);
+	    }
+	    DEBUG_STATE_pp("pop (yes)");
+	    depth--;
+	}
+#else
 	while (yes_state < SLAB_FIRST(PL_regmatch_slab)
 	    || yes_state > SLAB_LAST(PL_regmatch_slab))
 	{
@@ -4571,8 +4611,7 @@ yes_final:
 	    st = SLAB_LAST(PL_regmatch_slab);
 	}
 	depth -= (st - yes_state);
-	DEBUG_STATE_r(PerlIO_printf(Perl_debug_log, "POP STATES (%"UVuf"..%"UVuf")\n",
-	    (UV)(depth+1), (UV)(depth+(st - yes_state))));
+#endif
 	st = yes_state;
 	yes_state = st->u.yes.prev_yes_state;
 	PL_regmatch_state = st;
@@ -4596,17 +4635,12 @@ yes_final:
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%sMatch successful!%s\n",
 			  PL_colors[4], PL_colors[5]));
 yes:
-#ifdef DEBUGGING
-    PL_regindent--;
-#endif
 
     result = 1;
     /* XXX this is duplicate(ish) code to that in the do_no section.
      * will disappear when REGFMATCH goes */
     if (depth) {
 	/* restore previous state and re-enter */
-	DEBUG_STATE_r(PerlIO_printf(Perl_debug_log, "POP STATE(%d)\n", depth));
-	depth--;
 	st--;
 	if (st < SLAB_FIRST(PL_regmatch_slab)) {
 	    PL_regmatch_slab = PL_regmatch_slab->prev;
@@ -4618,6 +4652,9 @@ yes:
 	n	= st->n;
 	locinput= st->locinput;
 	nextchr = UCHARAT(locinput);
+
+	DEBUG_STATE_pp("pop");
+	depth--;
 
 	switch (st->resume_state) {
 	case resume_CURLYX:
@@ -4656,21 +4693,16 @@ no:
     DEBUG_EXECUTE_r(
 	PerlIO_printf(Perl_debug_log,
             "%*s  %sfailed...%s\n",
-            REPORT_CODE_OFF+PL_regindent*2, "", 
+            REPORT_CODE_OFF+depth*2, "", 
             PL_colors[4], PL_colors[5])
 	);
 no_final:
 do_no:
 
-#ifdef DEBUGGING
-    PL_regindent--;
-#endif
     result = 0;
 
     if (depth) {
 	/* there's a previous state to backtrack to */
-	DEBUG_STATE_r(PerlIO_printf(Perl_debug_log, "POP STATE(%d)\n", depth));
-	depth--;
 	st--;
 	if (st < SLAB_FIRST(PL_regmatch_slab)) {
 	    PL_regmatch_slab = PL_regmatch_slab->prev;
@@ -4682,6 +4714,9 @@ do_no:
 	n	= st->n;
 	locinput= st->locinput;
 	nextchr = UCHARAT(locinput);
+
+	DEBUG_STATE_pp("pop");
+	depth--;
 
 	switch (st->resume_state) {
 	case resume_CURLYX:
