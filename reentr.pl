@@ -547,7 +547,7 @@ EOF
 	    push @size, <<EOF;
 #   if defined(HAS_SYSCONF) && defined($sc) && !defined(__GLIBC__)
 	PL_reentrant_buffer->$sz = sysconf($sc);
-	if ((IV)PL_reentrant_buffer->$sz == (IV)-1)
+	if (PL_reentrant_buffer->$sz == -1)
 		PL_reentrant_buffer->$sz = REENTRANTUSUALSIZE;
 #   else
 #       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
