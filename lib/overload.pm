@@ -1103,7 +1103,7 @@ The value of $side is
 
 Note that while we obtained this value using a nice little script,
 there is no simple way to I<use> this value.  In fact this value may
-be inspected in debugger (see L<perldebug>), but ony if
+be inspected in debugger (see L<perldebug>), but only if
 C<bareStringify> B<O>ption is set, and not via C<p> command.
 
 If one attempts to print this value, then the overloaded operator
