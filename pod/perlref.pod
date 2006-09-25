@@ -330,7 +330,6 @@ However, a "simple scalar" includes an identifier that itself uses method
     print $$$$refrefref;
 
 =item 2.
-X<${}> X<@{}> X<%{}>
 
 Anywhere you'd put an identifier (or chain of identifiers) as part of a
 variable or subroutine name, you can replace the identifier with a
@@ -367,7 +366,6 @@ called %hashref, not dereferencing through $hashref to the hash
 it's presumably referencing.  That would be case 3.
 
 =item 3.
-X<autovivification> X<< -> >> X<arrow>
 
 Subroutine calls and lookups of individual array elements arise often
 enough that it gets cumbersome to use method 2.  As a form of
@@ -405,7 +403,6 @@ Well, okay, not entirely like C's arrays, actually.  C doesn't know how
 to grow its arrays on demand.  Perl does.
 
 =item 4.
-X<encapsulation>
 
 If a reference happens to be a reference to an object, then there are
 probably methods to access the things referred to, and you should probably
