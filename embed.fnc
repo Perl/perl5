@@ -668,7 +668,9 @@ Ap	|I32	|pregexec	|NN regexp* prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \
 				|NN SV* screamer|U32 nosave
 Ap	|void	|pregfree	|NULLOK struct regexp* r
+#if defined(USE_ITHREADS)
 Ap	|regexp*|regdupe	|NN const regexp* r|NN CLONE_PARAMS* param
+#endif
 Ap	|regexp*|pregcomp	|NN char* exp|NN char* xend|NN PMOP* pm
 Ap	|char*	|re_intuit_start|NN regexp* prog|NULLOK SV* sv|NN char* strpos \
 				|NN char* strend|U32 flags \

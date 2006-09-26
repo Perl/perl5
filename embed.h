@@ -680,7 +680,9 @@
 #define regclass_swash		Perl_regclass_swash
 #define pregexec		Perl_pregexec
 #define pregfree		Perl_pregfree
+#if defined(USE_ITHREADS)
 #define regdupe			Perl_regdupe
+#endif
 #define pregcomp		Perl_pregcomp
 #define re_intuit_start		Perl_re_intuit_start
 #define re_intuit_string	Perl_re_intuit_string
@@ -2877,7 +2879,9 @@
 #define regclass_swash(a,b,c,d,e)	Perl_regclass_swash(aTHX_ a,b,c,d,e)
 #define pregexec(a,b,c,d,e,f,g)	Perl_pregexec(aTHX_ a,b,c,d,e,f,g)
 #define pregfree(a)		Perl_pregfree(aTHX_ a)
+#if defined(USE_ITHREADS)
 #define regdupe(a,b)		Perl_regdupe(aTHX_ a,b)
+#endif
 #define pregcomp(a,b,c)		Perl_pregcomp(aTHX_ a,b,c)
 #define re_intuit_start(a,b,c,d,e,f)	Perl_re_intuit_start(aTHX_ a,b,c,d,e,f)
 #define re_intuit_string(a)	Perl_re_intuit_string(aTHX_ a)

@@ -7677,10 +7677,10 @@ Perl_pregfree(pTHX_ struct regexp *r)
    See pregfree() above if you change anything here. 
 */
        
+#if defined(USE_ITHREADS)
 regexp *
 Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 {
-#if defined(USE_ITHREADS)
     dVAR;
     REGEXP *ret;
     int i, len, npar;
@@ -7802,10 +7802,9 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 
     ptr_table_store(PL_ptr_table, r, ret);
     return ret;
-#else
     return NULL;    
-#endif    
 }
+#endif    
 
 #ifndef PERL_IN_XSUB_RE
 /*
