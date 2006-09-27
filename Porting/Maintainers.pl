@@ -43,7 +43,6 @@ package Maintainers;
 	'mshelor'	=> 'Mark Shelor <mshelor@cpan.org>',
 	'muir'		=> 'David Muir Sharnoff <muir@cpan.org>',
 	'neilb'		=> 'Neil Bowers <neilb@cpan.org>',
-	'ni-s'		=> 'Nick Ing-Simmons <nick@ing-simmons.net>',
 	'nuffin'	=> 'Yuval Kogman <nothingmuch@woobling.org>',
 	'p5p'		=> 'perl5-porters <perl5-porters@perl.org>',
 	'perlfaq'	=> 'perlfaq-workers <perlfaq-workers@perl.org>',
@@ -498,15 +497,6 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'p5p',
 		'FILES'		=> q[ext/PerlIO],
-		'CPAN'		=> 0,
-		},
-
-	'perlio-doc' =>
-		{
-		'MAINTAINER'	=> 'ni-s',
-		'FILES'		=> q[pod/perlapio.pod
-				     pod/perliol.pod
-				     lib/PerlIO.pm],
 		'CPAN'		=> 0,
 		},
 
