@@ -1492,7 +1492,7 @@ EXTERN_C char **environ;
  * that should be true only if the snprintf()/vsnprintf() are true
  * to the standard. */
 
-#if defined(HAS_SNPRINTF) && defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS))
+#if defined(HAS_SNPRINTF) && defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS)) && !defined(PERL_GCC_PEDANTIC)
 #  ifdef PERL_USE_GCC_BRACE_GROUPS
 #      define my_snprintf(buffer, len, ...) ({ int __len__ = snprintf(buffer, len, __VA_ARGS__); if ((len) > 0 && (Size_t)__len__ >= (len)) Perl_croak(aTHX_ "panic: snprintf buffer overflow"); __len__; })
 #      define PERL_MY_SNPRINTF_GUARDED
@@ -1504,7 +1504,7 @@ EXTERN_C char **environ;
 #  define PERL_MY_SNPRINTF_GUARDED
 #endif
 
-#if defined(HAS_VSNPRINTF) && defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS))
+#if defined(HAS_VSNPRINTF) && defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS)) && !defined(PERL_GCC_PEDANTIC)
 #  ifdef PERL_USE_GCC_BRACE_GROUPS
 #      define my_vsnprintf(buffer, len, ...) ({ int __len__ = vsnprintf(buffer, len, __VA_ARGS__); if ((len) > 0 && (Size_t)__len__ >= (len)) Perl_croak(aTHX_ "panic: vsnprintf buffer overflow"); __len__; })
 #      define PERL_MY_VSNPRINTF_GUARDED
