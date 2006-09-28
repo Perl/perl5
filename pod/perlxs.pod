@@ -2025,6 +2025,23 @@ Note that these macros will only work together within the I<same> source
 file; that is, a dMY_CTX in one source file will access a different structure
 than a dMY_CTX in another source file.
 
+=head2 Thread-aware system interfaces
+
+Starting from Perl 5.8, in C/C++ level Perl knows how to wrap
+system/library interfaces that have thread-aware versions
+(e.g. getpwent_r()) into frontend macros (e.g. getpwent()) that
+correctly handle the multithreaded interaction with the Perl
+interpreter.  This will happen transparently, the only thing
+you need to do is to instantiate a Perl interpreter.
+
+This wrapping happens always when compiling Perl core source
+(PERL_CORE is defined) or the Perl core extensions (PERL_EXT is
+defined).  When compiling XS code outside of Perl core the wrapping
+does not take place.  Note, however, that intermixing the _r-forms
+(as Perl compiled for multithreaded operation will do) and the _r-less
+forms is neither well-defined (inconsistent results, data corruption,
+or even crashes become more likely), nor is it very portable.
+
 =head1 EXAMPLES
 
 File C<RPC.xs>: Interface to some ONC+ RPC bind library functions.
