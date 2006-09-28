@@ -650,7 +650,7 @@ EOF
 	push @wrap, $ifdef;
 
 	push @wrap, <<EOF;
-#  if defined(PERL_REENTR_API) && (PERL_REENTR_API == 1)
+#  if defined(PERL_REENTR_API) && (PERL_REENTR_API+0 == 1)
 #   undef $func
 EOF
 
@@ -750,7 +750,7 @@ EOF
 		}
 	    }
 	    push @wrap, <<EOF;
-#  endif /* if defined(PERL_REENTR_API) && (PERL_REENTR_API == 1) */
+#  endif /* if defined(PERL_REENTR_API) && (PERL_REENTR_API+0 == 1) */
 EOF
 	}
 
