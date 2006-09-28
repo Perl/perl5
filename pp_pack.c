@@ -2630,6 +2630,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
 		if (savsym.howlen == e_star && beglist == endlist)
 		    break;		/* No way to continue */
 	    }
+	    items = endlist - beglist;
 	    lookahead.flags  = symptr->flags & ~group_modifiers;
 	    goto no_change;
 	}
