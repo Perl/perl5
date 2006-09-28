@@ -14,6 +14,21 @@
 #ifndef REENTR_H
 #define REENTR_H
 
+/* If compiling for a threaded perl, we will macro-wrap the system/library
+ * interfaces (e.g. getpwent()) which have threaded versions
+ * (e.g. getpwent_r()), which will handle things correctly for
+ * the Perl interpreter, but otherwise (for XS) the wrapping does
+ * not take place.  See L<perlxs/Thread-aware system interfaces>.
+ */
+
+#ifndef PERL_REENTR_API
+# if defined(PERL_CORE) || defined(PERL_EXT)
+#  define PERL_REENTR_API 1
+# else
+#  define PERL_REENTR_API 0
+# endif
+#endif
+
 #ifdef USE_REENTRANT_API
 
 #ifdef PERL_CORE
@@ -24,7 +39,8 @@
  * but they are declared obsolete and are not to be used.  Often this
  * means that the platform has threadsafed the interfaces (hopefully).
  * All this is OS version dependent, so we are of course fooling ourselves.
- * If you know of more deprecations on some platforms, please add your own. */
+ * If you know of more deprecations on some platforms, please add your own
+ * (by editing reentr.pl, mind!) */
 
 #ifdef __hpux
 #   undef HAS_CRYPT_R

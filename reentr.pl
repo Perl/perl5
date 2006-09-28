@@ -61,6 +61,21 @@ print <<EOF;
 #ifndef REENTR_H
 #define REENTR_H
 
+/* If compiling for a threaded perl, we will macro-wrap the system/library
+ * interfaces (e.g. getpwent()) which have threaded versions
+ * (e.g. getpwent_r()), which will handle things correctly for
+ * the Perl interpreter, but otherwise (for XS) the wrapping does
+ * not take place.  See L<perlxs/Thread-aware system interfaces>.
+ */
+
+#ifndef PERL_REENTR_API
+# if defined(PERL_CORE) || defined(PERL_EXT)
+#  define PERL_REENTR_API 1
+# else
+#  define PERL_REENTR_API 0
+# endif
+#endif
+
 #ifdef USE_REENTRANT_API
 
 #ifdef PERL_CORE
@@ -71,7 +86,8 @@ print <<EOF;
  * but they are declared obsolete and are not to be used.  Often this
  * means that the platform has threadsafed the interfaces (hopefully).
  * All this is OS version dependent, so we are of course fooling ourselves.
- * If you know of more deprecations on some platforms, please add your own. */
+ * If you know of more deprecations on some platforms, please add your own
+ * (by editing reentr.pl, mind!) */
 
 #ifdef __hpux
 #   undef HAS_CRYPT_R
@@ -541,7 +557,7 @@ EOF
 	    push @size, <<EOF;
 #   if defined(HAS_SYSCONF) && defined($sc) && !defined(__GLIBC__)
 	PL_reentrant_buffer->$sz = sysconf($sc);
-	if ((IV)PL_reentrant_buffer->$sz == (IV)-1)
+	if (PL_reentrant_buffer->$sz == (size_t) -1)
 		PL_reentrant_buffer->$sz = REENTRANTUSUALSIZE;
 #   else
 #       if defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
@@ -628,6 +644,7 @@ EOF
 	push @wrap, $ifdef;
 
 	push @wrap, <<EOF;
+#  if defined(PERL_REENTR_API) && (PERL_REENTR_API == 1)
 #   undef $func
 EOF
 
@@ -692,6 +709,7 @@ EOF
 			 } split '', $b;
 		$w = ", $w" if length $v;
 	    }
+
 	    my $call = "${func}_r($v$w)";
 
             # Must make OpenBSD happy
@@ -744,9 +762,13 @@ EOF
 		}
 	    }
 	    push @wrap, <<EOF;
-#   endif
+#  endif /* if defined(PERL_REENTR_API) && (PERL_REENTR_API == 1) */
 EOF
 	}
+
+	    push @wrap, <<EOF;
+#   endif /* HAS_\U$func */
+EOF
 
 	push @wrap, $endif, "\n";
     }

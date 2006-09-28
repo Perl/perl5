@@ -109,7 +109,7 @@ to be generated in evals, such as
 #define PARENT_PAD_INDEX_set(sv,val)		SvNV_set(sv, (NV)val)
 #define PARENT_FAKELEX_FLAGS_set(sv,val)	SvUV_set(sv, val)
 
-#define PAD_MAX IV_MAX
+#define PAD_MAX I32_MAX
 
 
 
