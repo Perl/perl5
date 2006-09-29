@@ -9483,7 +9483,7 @@ ptr_table_* functions.
 REGEXP *
 Perl_re_dup(pTHX_ const REGEXP *r, CLONE_PARAMS *param)
 {
-    return CALLREGDUPE(aTHX_ r,param);
+    return CALLREGDUPE(r,param);
 }
 
 /* duplicate a file handle */
@@ -10941,15 +10941,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     sv_setpvn(PERL_DEBUG_PAD(2), "", 0);	/* even without DEBUGGING. */
 
    
-    /* RE engine - function pointers -- must initilize these before 
-       re_dup() is called. dmq. */
-    PL_regcompp		= proto_perl->Tregcompp;
-    PL_regexecp		= proto_perl->Tregexecp;
-    PL_regint_start	= proto_perl->Tregint_start;
-    PL_regint_string	= proto_perl->Tregint_string;
-    PL_regfree		= proto_perl->Tregfree;
-    PL_regdupe          = proto_perl->Tregdupe;
-    
+    /* RE engine related */
     Zero(&PL_reg_state, 1, struct re_save_state);
     PL_reginterp_cnt	= 0;
     PL_regmatch_slab	= NULL;

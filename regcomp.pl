@@ -86,12 +86,14 @@ printf OUT <<EOP,
 #define %*s\t%d
 
 EOP
--$width,REGNODE_MAX=>$lastregop-1,-$width,REGMATCH_STATE_MAX=>$tot-1;
+    -$width, REGNODE_MAX        => $lastregop - 1,
+    -$width, REGMATCH_STATE_MAX => $tot - 1
+;
 
 $ind = 0;
 while (++$ind <= $tot) {
   my $oind = $ind - 1;
-  printf OUT "#define\t%*s\t%d\t/*%#04x %s*/\n",
+  printf OUT "#define\t%*s\t%d\t/* %#04x %s */\n",
     -$width, $name[$ind], $ind-1, $ind-1, $rest[$ind];
   print OUT "\n\t/* ------------ States ------------- */\n\n"
     if $ind == $lastregop and $lastregop != $tot;
@@ -150,7 +152,7 @@ print OUT <<EOP;
 };
 
 #ifdef DEBUGGING
-extern const char * const reg_name[] = {
+const char * const reg_name[] = {
 EOP
 
 $ind = 0;

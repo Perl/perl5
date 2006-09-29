@@ -985,6 +985,8 @@ ext/re/re_top.h			re extension symbol hiding header
 ext/re/re.xs			re extension external subroutines
 ext/re/t/regop.pl		generate debug output for various patterns
 ext/re/t/regop.t		test RE optimizations by scraping debug output
+ext/re/t/lexical_debug.pl	generate debug output for lexical re 'debug'
+ext/re/t/lexical_debug.t	test that lexical re 'debug' works
 ext/re/t/re.t			see if re pragma works
 ext/Safe/t/safe1.t		See if Safe works
 ext/Safe/t/safe2.t		See if Safe works

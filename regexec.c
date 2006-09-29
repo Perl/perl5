@@ -1637,7 +1637,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     I32 scream_pos = -1;		/* Internal iterator of scream. */
     char *scream_olds = NULL;
     SV* const oreplsv = GvSV(PL_replgv);
-    const bool do_utf8 = DO_UTF8(sv);
+    const bool do_utf8 = (bool)DO_UTF8(sv);
     I32 multiline;
 
     regmatch_info reginfo;  /* create some info to pass to regtry etc */
@@ -1773,7 +1773,11 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    }
 	}
 	goto phooey;
-    } else if (prog->reganch & ROPT_ANCH_GPOS) {
+    } else if (ROPT_GPOS_CHECK == (prog->reganch & ROPT_GPOS_CHECK)) 
+    {
+        /* the warning about reginfo.ganch being used without intialization
+           is bogus -- we set it above, when prog->reganch & ROPT_GPOS_SEEN 
+           and we only enter this block when the same bit is set. */
 	if (regtry(&reginfo, reginfo.ganch))
 	    goto got_it;
 	goto phooey;
@@ -2203,13 +2207,13 @@ S_regtry(pTHX_ const regmatch_info *reginfo, char *startpos)
 #define sayNO_SILENT goto do_no
 #define saySAME(x) if (x) goto yes; else goto no
 
-#define CACHEsayNO STMT_START { \
+/* we dont use STMT_START/END here because it leads to 
+   "unreachable code" warnings, which are bogus, but distracting. */
+#define CACHEsayNO \
     if (st->u.whilem.cache_offset | st->u.whilem.cache_bit) \
        PL_reg_poscache[st->u.whilem.cache_offset] |= \
 	    (1<<st->u.whilem.cache_bit); \
-    sayNO; \
-} STMT_END
-
+    sayNO
 
 /* this is used to determine how far from the left messages like
    'failed...' are printed. It should be set such that messages 
@@ -2472,7 +2476,7 @@ S_dump_exec_pos(pTHX_ const char *locinput,
 		    len1, s1,
 		    (docolor ? "" : "> <"),
 		    len2, s2,
-		    tlen > 19 ? 0 :  19 - tlen,
+		    (int)(tlen > 19 ? 0 :  19 - tlen),
 		    "");
     }
 }
@@ -2715,7 +2719,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
 		while ( state && uc <= (U8*)PL_regeol ) {
                     U32 base = trie->states[ state ].trans.base;
-                    UV uvc;
+                    UV uvc = 0;
                     U16 charid;
                     /* We use charid to hold the wordnum as we don't use it
                        for charid until after we have done the wordnum logic. 
@@ -3389,7 +3393,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
 			Zero(&pm, 1, PMOP);
 			if (DO_UTF8(ret)) pm.op_pmdynflags |= PMdf_DYN_UTF8;
-			re = CALLREGCOMP(aTHX_ (char*)t, (char*)t + len, &pm);
+			re = CALLREGCOMP((char*)t, (char*)t + len, &pm);
 			if (!(SvFLAGS(ret)
 			      & (SVs_TEMP | SVs_PADTMP | SVf_READONLY
 				| SVs_GMG)))
@@ -3434,7 +3438,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		/* NOTREACHED */
 	    }
 	    /* /(?(?{...})X|Y)/ */
-	    st->sw = SvTRUE(ret);
+	    st->sw = (bool)SvTRUE(ret);
 	    st->logical = 0;
 	    break;
 	}
@@ -3484,7 +3488,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    break;
 	case GROUPP:
 	    n = ARG(scan);  /* which paren pair */
-	    st->sw = ((I32)*PL_reglastparen >= n && PL_regendp[n] != -1);
+	    st->sw = (bool)((I32)*PL_reglastparen >= n && PL_regendp[n] != -1);
 	    break;
 	case IFTHEN:
 	    PL_reg_leftiter = PL_reg_maxiter;		/* Void cache */
@@ -5178,6 +5182,11 @@ S_reghop3(U8 *s, I32 off, const U8* lim)
     return s;
 }
 
+#ifdef XXX_dmq
+/* there are a bunch of places where we use two reghop3's that should
+   be replaced with this routine. but since thats not done yet 
+   we ifdef it out - dmq
+*/
 STATIC U8 *
 S_reghop4(U8 *s, I32 off, const U8* llim, const U8* rlim)
 {
@@ -5200,7 +5209,7 @@ S_reghop4(U8 *s, I32 off, const U8* llim, const U8* rlim)
     }
     return s;
 }
-
+#endif
 
 STATIC U8 *
 S_reghopmaybe3(U8* s, I32 off, const U8* lim)

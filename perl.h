@@ -195,12 +195,24 @@
 #define CALL_FPTR(fptr) (*fptr)
 
 #define CALLRUNOPS  CALL_FPTR(PL_runops)
-#define CALLREGCOMP CALL_FPTR(PL_regcompp)
-#define CALLREGEXEC CALL_FPTR(PL_regexecp)
-#define CALLREG_INTUIT_START CALL_FPTR(PL_regint_start)
-#define CALLREG_INTUIT_STRING CALL_FPTR(PL_regint_string)
-#define CALLREGFREE CALL_FPTR(PL_regfree)
-#define CALLREGDUPE CALL_FPTR(PL_regdupe)
+
+#define CALLREGCOMP(exp, xend, pm) Perl_pregcomp(aTHX_ exp,xend,pm)
+
+#define CALLREGEXEC(prog,stringarg,strend,strbeg,minend,screamer,data,flags) \
+    CALL_FPTR((prog)->engine->regexec)(aTHX_ (prog),(stringarg),(strend), \
+        (strbeg),(minend),(screamer),(data),(flags))
+#define CALLREG_INTUIT_START(prog,sv,strpos,strend,flags,data) \
+    CALL_FPTR((prog)->engine->re_intuit_start)(aTHX_ (prog), (sv), (strpos), \
+        (strend),(flags),(data))
+#define CALLREG_INTUIT_STRING(prog) \
+    CALL_FPTR((prog)->engine->re_intuit_string)(aTHX_ (prog))
+#define CALLREGFREE(prog) \
+    if(prog) CALL_FPTR((prog)->engine->regfree)(aTHX_ (prog))
+#if defined(USE_ITHREADS)         
+#define CALLREGDUPE(prog,param) \
+    (prog ? CALL_FPTR((prog)->engine->regdupe)(aTHX_ (prog),(param)) \
+          : (REGEXP *)NULL) 
+#endif
 
 /*
  * Because of backward compatibility reasons the PERL_UNUSED_DECL
@@ -3499,7 +3511,11 @@ Gid_t getegid (void);
 	} STMT_END
 
 #  define DEBUG_f(a) DEBUG__(DEBUG_f_TEST, a)
+#ifndef PERL_EXT_RE_BUILD
 #  define DEBUG_r(a) DEBUG__(DEBUG_r_TEST, a)
+#else
+#  define DEBUG_r(a) STMT_START {a;} STMT_END
+#endif /* PERL_EXT_RE_BUILD */
 #  define DEBUG_x(a) DEBUG__(DEBUG_x_TEST, a)
 #  define DEBUG_u(a) DEBUG__(DEBUG_u_TEST, a)
 #  define DEBUG_H(a) DEBUG__(DEBUG_H_TEST, a)

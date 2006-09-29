@@ -12,7 +12,7 @@ BEGIN {
 
 use strict;
 
-use Test::More tests => 14;
+use Test::More tests => 13;
 require_ok( 're' );
 
 # setcolor
@@ -31,8 +31,8 @@ my $warn;
 local $SIG{__WARN__} = sub {
 	$warn = shift;
 };
-eval { re::bits(1) };
-like( $warn, qr/Useless use/, 'bits() should warn with no args' );
+#eval { re::bits(1) };
+#like( $warn, qr/Useless use/, 'bits() should warn with no args' );
 
 delete $ENV{PERL_RE_COLORS};
 re::bits(0, 'debug');
@@ -64,7 +64,6 @@ eval"use re Debug=>'ALL'";
 my $ok='foo'=~/$reg/;
 eval"no re Debug=>'ALL'";
 ok( $ok, 'No segv!' );
-
 
 package Term::Cap;
 

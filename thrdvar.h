@@ -165,22 +165,6 @@ PERLVARA(Tcolors,6,	char *)		/* from regcomp.c */
 
 PERLVARI(Tpeepp,	peep_t, MEMBER_TO_FPTR(Perl_peep))
 					/* Pointer to peephole optimizer */
-PERLVARI(Tregcompp,	regcomp_t, MEMBER_TO_FPTR(Perl_pregcomp))
-					/* Pointer to REx compiler */
-PERLVARI(Tregexecp,	regexec_t, MEMBER_TO_FPTR(Perl_regexec_flags))
-					/* Pointer to REx executer */
-PERLVARI(Tregint_start,	re_intuit_start_t, MEMBER_TO_FPTR(Perl_re_intuit_start))
-					/* Pointer to optimized REx executer */
-PERLVARI(Tregint_string,re_intuit_string_t, MEMBER_TO_FPTR(Perl_re_intuit_string))
-					/* Pointer to optimized REx string */
-PERLVARI(Tregfree,	regfree_t, MEMBER_TO_FPTR(Perl_pregfree))
-					/* Pointer to REx free()er */
-
-#if defined(USE_ITHREADS)
-PERLVARI(Tregdupe,	regdupe_t, MEMBER_TO_FPTR(Perl_regdupe))
-					/* Pointer to REx dupe()er */
-#endif
-
 
 PERLVARI(Treginterp_cnt,int,	    0)	/* Whether "Regexp" was interpolated. */
 PERLVARI(Twatchaddr,	char **,    0)

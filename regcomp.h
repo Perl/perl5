@@ -364,13 +364,26 @@ EXTCONST U8 PL_simple[] = {
 };
 #endif
 
+#ifndef PLUGGABLE_RE_EXTENSION
+#ifndef DOINIT
+EXTCONST regexp_engine PL_core_reg_engine;
+#else /* DOINIT */
+EXTCONST regexp_engine PL_core_reg_engine = { 
+        Perl_pregcomp, 
+        Perl_regexec_flags, 
+        Perl_re_intuit_start,
+        Perl_re_intuit_string, 
+        Perl_pregfree, 
+#if defined(USE_ITHREADS)        
+        Perl_regdupe 
+#endif        
+};
+#endif /* DOINIT */
+#endif /* PLUGGABLE_RE_EXTENSION */
+
+
 END_EXTERN_C
 
-typedef struct re_scream_pos_data_s
-{
-    char **scream_olds;		/* match pos */
-    I32 *scream_pos;		/* Internal iterator of scream. */
-} re_scream_pos_data;
 
 /* .what is a character array with one character for each member of .data
  * The character describes the function of the corresponding .data item:

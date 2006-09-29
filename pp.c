@@ -4638,7 +4638,7 @@ PP(pp_split)
 	     && (rx->reganch & ROPT_CHECK_ALL)
 	     && !(rx->reganch & ROPT_ANCH)) {
 	const int tail = (rx->reganch & RE_INTUIT_TAIL);
-	SV * const csv = CALLREG_INTUIT_STRING(aTHX_ rx);
+	SV * const csv = CALLREG_INTUIT_STRING(rx);
 
 	len = rx->minlen;
 	if (len == 1 && !(rx->reganch & ROPT_UTF8) && !tail) {
@@ -4688,7 +4688,7 @@ PP(pp_split)
 	{
 	    I32 rex_return;
 	    PUTBACK;
-	    rex_return = CALLREGEXEC(aTHX_ rx, (char*)s, (char*)strend, (char*)orig, 1 ,
+	    rex_return = CALLREGEXEC(rx, (char*)s, (char*)strend, (char*)orig, 1 ,
 			    sv, NULL, 0);
 	    SPAGAIN;
 	    if (rex_return == 0)

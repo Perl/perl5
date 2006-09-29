@@ -3718,12 +3718,14 @@ STATIC U8*	S_reghop3(U8 *pos, I32 off, const U8 *lim)
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(3);
 
+#ifdef XXX_dmq
 STATIC U8*	S_reghop4(U8 *pos, I32 off, const U8 *llim, const U8 *rlim)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(3)
 			__attribute__nonnull__(4);
 
+#endif
 STATIC U8*	S_reghopmaybe3(U8 *pos, I32 off, const U8 *lim)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)

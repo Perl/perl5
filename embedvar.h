@@ -82,13 +82,7 @@
 #define PL_opsave		(vTHX->Topsave)
 #define PL_peepp		(vTHX->Tpeepp)
 #define PL_reg_state		(vTHX->Treg_state)
-#define PL_regcompp		(vTHX->Tregcompp)
 #define PL_regdummy		(vTHX->Tregdummy)
-#define PL_regdupe		(vTHX->Tregdupe)
-#define PL_regexecp		(vTHX->Tregexecp)
-#define PL_regfree		(vTHX->Tregfree)
-#define PL_regint_start		(vTHX->Tregint_start)
-#define PL_regint_string	(vTHX->Tregint_string)
 #define PL_reginterp_cnt	(vTHX->Treginterp_cnt)
 #define PL_regmatch_slab	(vTHX->Tregmatch_slab)
 #define PL_regmatch_state	(vTHX->Tregmatch_state)
@@ -756,13 +750,7 @@
 #define PL_Topsave		PL_opsave
 #define PL_Tpeepp		PL_peepp
 #define PL_Treg_state		PL_reg_state
-#define PL_Tregcompp		PL_regcompp
 #define PL_Tregdummy		PL_regdummy
-#define PL_Tregdupe		PL_regdupe
-#define PL_Tregexecp		PL_regexecp
-#define PL_Tregfree		PL_regfree
-#define PL_Tregint_start	PL_regint_start
-#define PL_Tregint_string	PL_regint_string
 #define PL_Treginterp_cnt	PL_reginterp_cnt
 #define PL_Tregmatch_slab	PL_regmatch_slab
 #define PL_Tregmatch_state	PL_regmatch_state

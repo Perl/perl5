@@ -1371,7 +1371,7 @@ play_it_again:
 	DO_UTF8(TARG) == ((rx->reganch & ROPT_UTF8) != 0)) {
 	/* FIXME - can PL_bostr be made const char *?  */
 	PL_bostr = (char *)truebase;
-	s = CALLREG_INTUIT_START(aTHX_ rx, TARG, (char *)s, (char *)strend, r_flags, NULL);
+	s = CALLREG_INTUIT_START(rx, TARG, (char *)s, (char *)strend, r_flags, NULL);
 
 	if (!s)
 	    goto nope;
@@ -1383,7 +1383,7 @@ play_it_again:
 	     && !SvROK(TARG))	/* Cannot trust since INTUIT cannot guess ^ */
 	    goto yup;
     }
-    if (CALLREGEXEC(aTHX_ rx, (char*)s, (char *)strend, (char*)truebase, minmatch, TARG, NULL, r_flags))
+    if (CALLREGEXEC(rx, (char*)s, (char *)strend, (char*)truebase, minmatch, TARG, NULL, r_flags))
     {
 	PL_curpm = pm;
 	if (dynpm->op_pmflags & PMf_ONCE)
@@ -2139,7 +2139,7 @@ PP(pp_subst)
     orig = m = s;
     if (rx->reganch & RE_USE_INTUIT) {
 	PL_bostr = orig;
-	s = CALLREG_INTUIT_START(aTHX_ rx, TARG, s, strend, r_flags, NULL);
+	s = CALLREG_INTUIT_START(rx, TARG, s, strend, r_flags, NULL);
 
 	if (!s)
 	    goto nope;
@@ -2187,7 +2187,7 @@ PP(pp_subst)
 	&& (I32)clen <= rx->minlen && (once || !(r_flags & REXEC_COPY_STR))
 	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)
 	&& (!doutf8 || SvUTF8(TARG))) {
-	if (!CALLREGEXEC(aTHX_ rx, s, strend, orig, 0, TARG, NULL,
+	if (!CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL,
 			 r_flags | REXEC_CHECKED))
 	{
 	    SPAGAIN;
@@ -2265,7 +2265,7 @@ PP(pp_subst)
 		    d += clen;
 		}
 		s = rx->endp[0] + orig;
-	    } while (CALLREGEXEC(aTHX_ rx, s, strend, orig, s == m,
+	    } while (CALLREGEXEC(rx, s, strend, orig, s == m,
 				 TARG, NULL,
 				 /* don't match same null twice */
 				 REXEC_NOT_FIRST|REXEC_IGNOREPOS));
@@ -2292,7 +2292,7 @@ PP(pp_subst)
 	RETURN;
     }
 
-    if (CALLREGEXEC(aTHX_ rx, s, strend, orig, 0, TARG, NULL,
+    if (CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL,
 		    r_flags | REXEC_CHECKED))
     {
 	if (force_on_match) {
@@ -2337,7 +2337,7 @@ PP(pp_subst)
 		sv_catpvn(dstr, c, clen);
 	    if (once)
 		break;
-	} while (CALLREGEXEC(aTHX_ rx, s, strend, orig, s == m,
+	} while (CALLREGEXEC(rx, s, strend, orig, s == m,
 			     TARG, NULL, r_flags));
 	if (doutf8 && !DO_UTF8(TARG))
 	    sv_catpvn_utf8_upgrade(dstr, s, strend - s, nsv);

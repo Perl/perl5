@@ -3225,7 +3225,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
         if (DO_UTF8(pat))
 	    pm->op_pmdynflags |= PMdf_UTF8;
 	/* FIXME - can we make this function take const char * args?  */
-	PM_SETRE(pm, CALLREGCOMP(aTHX_ (char*)p, (char*)p + plen, pm));
+	PM_SETRE(pm, CALLREGCOMP((char*)p, (char*)p + plen, pm));
 	if (strEQ("\\s+", PM_GETRE(pm)->precomp))
 	    pm->op_pmflags |= PMf_WHITE;
 #ifdef PERL_MAD

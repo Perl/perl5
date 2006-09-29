@@ -30,6 +30,8 @@ struct reg_substr_data;
 
 struct reg_data;
 
+struct regexp_engine;
+
 typedef struct regexp {
 	I32 *startp;
 	I32 *endp;
@@ -52,8 +54,31 @@ typedef struct regexp {
 	U32 lastcloseparen;	/* last paren matched */
 	U32 reganch;		/* Internal use only +
 				   Tainted information used by regexec? */
+        const struct regexp_engine* engine;
 	regnode program[1];	/* Unwarranted chumminess with compiler. */
 } regexp;
+
+
+typedef struct re_scream_pos_data_s
+{
+    char **scream_olds;		/* match pos */
+    I32 *scream_pos;		/* Internal iterator of scream. */
+} re_scream_pos_data;
+
+typedef struct regexp_engine {
+    regexp*	(*regcomp) (pTHX_ char* exp, char* xend, PMOP* pm);
+    I32		(*regexec) (pTHX_ regexp* prog, char* stringarg, char* strend,
+			    char* strbeg, I32 minend, SV* screamer,
+			    void* data, U32 flags);
+    char*	(*re_intuit_start) (pTHX_ regexp *prog, SV *sv, char *strpos,
+				    char *strend, U32 flags,
+				    struct re_scream_pos_data_s *data);
+    SV*		(*re_intuit_string) (pTHX_ regexp *prog);
+    void	(*regfree) (pTHX_ struct regexp* r);
+#if defined(USE_ITHREADS)
+    regexp*	(*regdupe) (pTHX_ const regexp *r, CLONE_PARAMS *param);
+#endif    
+} regexp_engine;
 
 #define ROPT_ANCH		(ROPT_ANCH_BOL|ROPT_ANCH_MBOL|ROPT_ANCH_GPOS|ROPT_ANCH_SBOL)
 #define ROPT_ANCH_SINGLE	(ROPT_ANCH_SBOL|ROPT_ANCH_GPOS)
@@ -70,6 +95,7 @@ typedef struct regexp {
 #define ROPT_EVAL_SEEN		0x00000400
 #define ROPT_CANY_SEEN		0x00000800
 #define ROPT_SANY_SEEN		ROPT_CANY_SEEN /* src bckwrd cmpt */
+#define ROPT_GPOS_CHECK         (ROPT_GPOS_SEEN|ROPT_ANCH_GPOS)
 
 /* 0xf800 of reganch is used by PMf_COMPILETIME */
 
@@ -106,6 +132,7 @@ typedef struct regexp {
 #define RX_MATCH_COPIED_set(prog,t)	((t) \
 					 ? RX_MATCH_COPIED_on(prog) \
 					 : RX_MATCH_COPIED_off(prog))
+
 #endif /* PLUGGABLE_RE_EXTENSION */
 
 /* Stuff that needs to be included in the plugable extension goes below here */
@@ -145,7 +172,7 @@ typedef struct regexp {
 #define REXEC_NOT_FIRST	0x10		/* This is another iteration of //g. */
 
 #define ReREFCNT_inc(re) ((void)(re && re->refcnt++), re)
-#define ReREFCNT_dec(re) CALLREGFREE(aTHX_ re)
+#define ReREFCNT_dec(re) CALLREGFREE(re)
 
 #define FBMcf_TAIL_DOLLAR	1
 #define FBMcf_TAIL_DOLLARM	2

@@ -146,7 +146,7 @@ PP(pp_regcomp)
 		if (pm->op_pmdynflags & PMdf_UTF8)
 		    t = (char*)bytes_to_utf8((U8*)t, &len);
 	    }
-	    PM_SETRE(pm, CALLREGCOMP(aTHX_ (char *)t, (char *)t + len, pm));
+	    PM_SETRE(pm, CALLREGCOMP((char *)t, (char *)t + len, pm));
 	    if (!DO_UTF8(tmpstr) && (pm->op_pmdynflags & PMdf_UTF8))
 		Safefree(t);
 	    PL_reginterp_cnt = 0;	/* XXXX Be extra paranoid - needed
@@ -214,7 +214,7 @@ PP(pp_substcont)
 	FREETMPS; /* Prevent excess tmp stack */
 
 	/* Are we done */
-	if (cx->sb_once || !CALLREGEXEC(aTHX_ rx, s, cx->sb_strend, orig,
+	if (cx->sb_once || !CALLREGEXEC(rx, s, cx->sb_strend, orig,
 				     s == m, cx->sb_targ, NULL,
 				     ((cx->sb_rflags & REXEC_COPY_STR)
 				      ? (REXEC_IGNOREPOS|REXEC_NOT_FIRST)

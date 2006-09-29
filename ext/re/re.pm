@@ -215,6 +215,10 @@ sub setcolor {
   $colors =~ s/\0//g;
   $ENV{PERL_RE_COLORS} = $colors;
  };
+ if ($@) {
+    $ENV{PERL_RE_COLORS}||=qq'\t\t> <\t> <\t\t'
+ }
+                
 }
 
 my %flags = (
@@ -241,31 +245,34 @@ $flags{More} = $flags{MORE} = $flags{All} | $flags{TRIE_MORE} | $flags{STATE};
 $flags{State} = $flags{DUMP} | $flags{EXECUTE} | $flags{STATE};
 $flags{TRIE} = $flags{DUMP} | $flags{EXECUTE} | $flags{TRIE_COMPILE};
 
-my $installed = 0;
-
-sub _load_unload {
-    my $on = shift;
+my $installed =eval {
     require XSLoader;
     XSLoader::load('re');
-    install($on);
+    install();
+};
+
+sub _load_unload {
+    my ($on)= @_;
+    if ($on) {
+        die "'re' not installed!?" unless $installed;
+        #warn "installed: $installed\n";
+        install();  # allow for changes in colors
+        $^H{regcomp}= $installed;
+    } else {
+        delete $^H{regcomp};
+    }
 }
 
 sub bits {
     my $on = shift;
     my $bits = 0;
     unless (@_) {
-	require Carp;
-	Carp::carp("Useless use of \"re\" pragma");
+	return;
     }
     foreach my $idx (0..$#_){
         my $s=$_[$idx];
         if ($s eq 'Debug' or $s eq 'Debugcolor') {
-            if ($s eq 'Debugcolor') {
-                setcolor();     
-            } else {
-               # $ENV{PERL_RE_COLORS}||=qq'\t\t> <\t> <\t\t'
-            }
-            
+            setcolor() if $s =~/color/i;
             ${^RE_DEBUG_FLAGS} = 0 unless defined ${^RE_DEBUG_FLAGS};
             for my $idx ($idx+1..$#_) {
                 if ($flags{$_[$idx]}) {
@@ -283,7 +290,7 @@ sub bits {
             _load_unload($on ? 1 : ${^RE_DEBUG_FLAGS});
             last;
         } elsif ($s eq 'debug' or $s eq 'debugcolor') {
-	    setcolor() if $s eq 'debugcolor';
+	    setcolor() if $s =~/color/i;
 	    _load_unload($on);
         } elsif (exists $bitmask{$s}) {
 	    $bits |= $bitmask{$s};

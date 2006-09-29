@@ -3669,6 +3669,7 @@ Perl_reginitcolors(pTHX)
 #else
 #define CHECK_RESTUDY_GOTO
 #endif        
+
 /*
  - pregcomp - compile a regular expression into internal code
  *
@@ -3684,10 +3685,37 @@ Perl_reginitcolors(pTHX)
  * Beware that the optimization-preparation code in here knows about some
  * of the structure of the compiled regexp.  [I'll say.]
  */
+#ifndef PERL_IN_XSUB_RE
+#define CORE_ONLY_BLOCK(c) {c}{
+#define RE_ENGINE_PTR &PL_core_reg_engine
+#else
+#define CORE_ONLY_BLOCK(c) {
+extern const struct regexp_engine my_reg_engine;
+#define RE_ENGINE_PTR &my_reg_engine
+#endif
+#define END_BLOCK }
+ 
 regexp *
 Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 {
     dVAR;
+    GET_RE_DEBUG_FLAGS_DECL;
+    DEBUG_r(if (!PL_colorset) reginitcolors());
+    CORE_ONLY_BLOCK(
+    /* Dispatch a request to compile a regexp to correct 
+       regexp engine. */
+    HV * const table = GvHV(PL_hintgv);
+    if (table) {
+        SV **ptr= hv_fetchs(table, "regcomp", FALSE);
+        if (ptr && SvIOK(*ptr)) {
+            const regexp_engine *eng=INT2PTR(regexp_engine*,SvIV(*ptr));
+            DEBUG_COMPILE_r({
+                PerlIO_printf(Perl_debug_log, "Using engine %"IVxf"\n",
+                    SvIV(*ptr));
+            });            
+            return CALL_FPTR((eng->regcomp))(aTHX_ exp, xend, pm);
+        } 
+    })
     register regexp *r;
     regnode *scan;
     regnode *first;
@@ -3702,16 +3730,12 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     int restudied= 0;
     RExC_state_t copyRExC_state;
 #endif    
-
-    GET_RE_DEBUG_FLAGS_DECL;
-
     if (exp == NULL)
 	FAIL("NULL regexp argument");
 
     RExC_utf8 = pm->op_pmdynflags & PMdf_CMP_UTF8;
 
     RExC_precomp = exp;
-    DEBUG_r(if (!PL_colorset) reginitcolors());
     DEBUG_COMPILE_r({
         SV *dsv= sv_newmortal();
         RE_PV_QUOTED_DECL(s, RExC_utf8,
@@ -3765,16 +3789,19 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     if (RExC_whilem_seen > 15)
 	RExC_whilem_seen = 15;
 
-    /* Allocate space and initialize. */
+    /* Allocate space and zero-initialize. Note, the two step process 
+       of zeroing when in debug mode, thus anything assigned has to 
+       happen after that */
     Newxc(r, sizeof(regexp) + (unsigned)RExC_size * sizeof(regnode),
 	 char, regexp);
     if (r == NULL)
 	FAIL("Regexp out of space");
-
 #ifdef DEBUGGING
     /* avoid reading uninitialized memory in DEBUGGING code in study_chunk() */
     Zero(r, sizeof(regexp) + (unsigned)RExC_size * sizeof(regnode), char);
 #endif
+    /* initialization begins here */
+    r->engine= RE_ENGINE_PTR;
     r->refcnt = 1;
     r->prelen = xend - exp;
     r->precomp = savepvn(RExC_precomp, r->prelen);
@@ -4209,6 +4236,8 @@ reStudy:
 	r->reganch |= ROPT_CANY_SEEN;
     Newxz(r->startp, RExC_npar, I32);
     Newxz(r->endp, RExC_npar, I32);
+    
+    
     if (RExC_charnames) 
         SvREFCNT_dec((SV*)(RExC_charnames));
 
@@ -4230,8 +4259,12 @@ reStudy:
         PerlIO_printf(Perl_debug_log, "\n");
     });
     return(r);
+    END_BLOCK    
 }
 
+#undef CORE_ONLY_BLOCK
+#undef END_BLOCK
+#undef RE_ENGINE_PTR
 
 #define DEBUG_PARSE_MSG(funcname)     DEBUG_PARSE_r({           \
     int rem=(int)(RExC_end - RExC_parse);                       \
@@ -7676,7 +7709,6 @@ Perl_pregfree(pTHX_ struct regexp *r)
    
    See pregfree() above if you change anything here. 
 */
-       
 #if defined(USE_ITHREADS)
 regexp *
 Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
@@ -7792,6 +7824,8 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 
     ret->sublen         = r->sublen;
 
+    ret->engine         = r->engine;
+
     if (RX_MATCH_COPIED(ret))
 	ret->subbeg  = SAVEPVN(r->subbeg, r->sublen);
     else
@@ -7802,7 +7836,6 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 
     ptr_table_store(PL_ptr_table, r, ret);
     return ret;
-    return NULL;    
 }
 #endif    
 

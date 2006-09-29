@@ -1360,7 +1360,13 @@
 #define regcppush		S_regcppush
 #define regcppop		S_regcppop
 #define reghop3			S_reghop3
+#endif
+#ifdef XXX_dmq
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reghop4			S_reghop4
+#endif
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reghopmaybe3		S_reghopmaybe3
 #define find_byclass		S_find_byclass
 #define to_utf8_substr		S_to_utf8_substr
@@ -3551,7 +3557,13 @@
 #define regcppush(a)		S_regcppush(aTHX_ a)
 #define regcppop(a)		S_regcppop(aTHX_ a)
 #define reghop3			S_reghop3
+#endif
+#ifdef XXX_dmq
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reghop4			S_reghop4
+#endif
+#endif
+#if defined(PERL_CORE) || defined(PERL_EXT)
 #define reghopmaybe3		S_reghopmaybe3
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
 #define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)

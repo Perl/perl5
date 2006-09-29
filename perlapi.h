@@ -784,20 +784,8 @@ END_EXTERN_C
 #define PL_peepp		(*Perl_Tpeepp_ptr(aTHX))
 #undef  PL_reg_state
 #define PL_reg_state		(*Perl_Treg_state_ptr(aTHX))
-#undef  PL_regcompp
-#define PL_regcompp		(*Perl_Tregcompp_ptr(aTHX))
 #undef  PL_regdummy
 #define PL_regdummy		(*Perl_Tregdummy_ptr(aTHX))
-#undef  PL_regdupe
-#define PL_regdupe		(*Perl_Tregdupe_ptr(aTHX))
-#undef  PL_regexecp
-#define PL_regexecp		(*Perl_Tregexecp_ptr(aTHX))
-#undef  PL_regfree
-#define PL_regfree		(*Perl_Tregfree_ptr(aTHX))
-#undef  PL_regint_start
-#define PL_regint_start		(*Perl_Tregint_start_ptr(aTHX))
-#undef  PL_regint_string
-#define PL_regint_string	(*Perl_Tregint_string_ptr(aTHX))
 #undef  PL_reginterp_cnt
 #define PL_reginterp_cnt	(*Perl_Treginterp_cnt_ptr(aTHX))
 #undef  PL_regmatch_slab
