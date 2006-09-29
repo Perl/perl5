@@ -3713,7 +3713,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
                 PerlIO_printf(Perl_debug_log, "Using engine %"UVxf"\n",
                     SvIV(*ptr));
             });            
-            return CALL_FPTR((eng->regcomp))(aTHX_ exp, xend, pm);
+            return CALLREGCOMP_ENG(eng, exp, xend, pm);
         } 
     })
     register regexp *r;

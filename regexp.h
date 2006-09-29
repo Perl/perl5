@@ -66,17 +66,17 @@ typedef struct re_scream_pos_data_s
 } re_scream_pos_data;
 
 typedef struct regexp_engine {
-    regexp*	(*regcomp) (pTHX_ char* exp, char* xend, PMOP* pm);
-    I32		(*regexec) (pTHX_ regexp* prog, char* stringarg, char* strend,
+    regexp* (*comp) (pTHX_ char* exp, char* xend, PMOP* pm);
+    I32	    (*exec) (pTHX_ regexp* prog, char* stringarg, char* strend,
 			    char* strbeg, I32 minend, SV* screamer,
 			    void* data, U32 flags);
-    char*	(*re_intuit_start) (pTHX_ regexp *prog, SV *sv, char *strpos,
-				    char *strend, U32 flags,
-				    struct re_scream_pos_data_s *data);
-    SV*		(*re_intuit_string) (pTHX_ regexp *prog);
-    void	(*regfree) (pTHX_ struct regexp* r);
-#if defined(USE_ITHREADS)
-    regexp*	(*regdupe) (pTHX_ const regexp *r, CLONE_PARAMS *param);
+    char*   (*intuit) (pTHX_ regexp *prog, SV *sv, char *strpos,
+			    char *strend, U32 flags,
+			    struct re_scream_pos_data_s *data);
+    SV*	    (*checkstr) (pTHX_ regexp *prog);
+    void    (*free) (pTHX_ struct regexp* r);
+#ifdef USE_ITHREADS
+    regexp* (*dupe) (pTHX_ const regexp *r, CLONE_PARAMS *param);
 #endif    
 } regexp_engine;
 

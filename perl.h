@@ -198,19 +198,21 @@
 
 #define CALLREGCOMP(exp, xend, pm) Perl_pregcomp(aTHX_ exp,xend,pm)
 
+#define CALLREGCOMP_ENG(prog, exp, xend, pm) \
+    CALL_FPTR(((prog)->comp))(aTHX_ exp, xend, pm)
 #define CALLREGEXEC(prog,stringarg,strend,strbeg,minend,screamer,data,flags) \
-    CALL_FPTR((prog)->engine->regexec)(aTHX_ (prog),(stringarg),(strend), \
+    CALL_FPTR((prog)->engine->exec)(aTHX_ (prog),(stringarg),(strend), \
         (strbeg),(minend),(screamer),(data),(flags))
 #define CALLREG_INTUIT_START(prog,sv,strpos,strend,flags,data) \
-    CALL_FPTR((prog)->engine->re_intuit_start)(aTHX_ (prog), (sv), (strpos), \
+    CALL_FPTR((prog)->engine->intuit)(aTHX_ (prog), (sv), (strpos), \
         (strend),(flags),(data))
 #define CALLREG_INTUIT_STRING(prog) \
-    CALL_FPTR((prog)->engine->re_intuit_string)(aTHX_ (prog))
+    CALL_FPTR((prog)->engine->checkstr)(aTHX_ (prog))
 #define CALLREGFREE(prog) \
-    if(prog) CALL_FPTR((prog)->engine->regfree)(aTHX_ (prog))
+    if(prog) CALL_FPTR((prog)->engine->free)(aTHX_ (prog))
 #if defined(USE_ITHREADS)         
 #define CALLREGDUPE(prog,param) \
-    (prog ? CALL_FPTR((prog)->engine->regdupe)(aTHX_ (prog),(param)) \
+    (prog ? CALL_FPTR((prog)->engine->dupe)(aTHX_ (prog),(param)) \
           : (REGEXP *)NULL) 
 #endif
 
