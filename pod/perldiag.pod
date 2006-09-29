@@ -2764,10 +2764,10 @@ which is odd, because hashes come in key/value pairs.
 
 =item Offset outside string
 
-(F) You tried to do a read/write/send/recv operation with an offset
-pointing outside the buffer.  This is difficult to imagine.  The sole
-exception to this is that C<sysread()>ing past the buffer will extend
-the buffer and zero pad the new area.
+(F, W layer) You tried to do a read/write/send/recv/seek operation
+with an offset pointing outside the buffer.  This is difficult to
+imagine.  The sole exception to this is that C<sysread()>ing past the
+buffer will extend the buffer and zero pad the new area.
 
 =item %s() on unopened %s
 

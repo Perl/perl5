@@ -27,7 +27,7 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 	    if (SvREADONLY(SvRV(arg)) && mode && *mode != 'r') {
 		if (ckWARN(WARN_LAYER))
 		    Perl_warner(aTHX_ packWARN(WARN_LAYER), PL_no_modify);
-		errno = EINVAL;
+		SETERRNO(EINVAL, SS_IVCHAN);
 		return -1;
 	    }
 	    s->var = SvREFCNT_inc(SvRV(arg));
@@ -83,20 +83,32 @@ IV
 PerlIOScalar_seek(pTHX_ PerlIO * f, Off_t offset, int whence)
 {
     PerlIOScalar *s = PerlIOSelf(f, PerlIOScalar);
+    STRLEN oldcur = SvCUR(s->var);
+    STRLEN newlen;
     switch (whence) {
-    case 0:
+    case SEEK_SET:
 	s->posn = offset;
 	break;
-    case 1:
+    case SEEK_CUR:
 	s->posn = offset + s->posn;
 	break;
-    case 2:
+    case SEEK_END:
 	s->posn = offset + SvCUR(s->var);
 	break;
     }
-    if ((STRLEN) s->posn > SvCUR(s->var)) {
-	(void) SvGROW(s->var, (STRLEN) s->posn);
+    if (s->posn < 0) {
+        if (ckWARN(WARN_LAYER))
+	    Perl_warner(aTHX_ packWARN(WARN_LAYER), "Offset outside string");
+	SETERRNO(EINVAL, SS_IVCHAN);
+	return -1;
     }
+    newlen = (STRLEN) s->posn;
+    if (newlen > oldcur) {
+	(void) SvGROW(s->var, newlen);
+	Zero(SvPVX(s->var) + oldcur, newlen - oldcur, char);
+	/* No SvCUR_set(), though.  This is just a seek, not a write. */
+    }
+    SvPOK_on(s->var);
     return 0;
 }
 
