@@ -3710,7 +3710,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
         if (ptr && SvIOK(*ptr)) {
             const regexp_engine *eng=INT2PTR(regexp_engine*,SvIV(*ptr));
             DEBUG_COMPILE_r({
-                PerlIO_printf(Perl_debug_log, "Using engine %"IVxf"\n",
+                PerlIO_printf(Perl_debug_log, "Using engine %"UVxf"\n",
                     SvIV(*ptr));
             });            
             return CALL_FPTR((eng->regcomp))(aTHX_ exp, xend, pm);
