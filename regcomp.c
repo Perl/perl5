@@ -525,7 +525,7 @@ static const scan_data_t zero_scan_data =
 #endif
 
 #define DEBUG_STUDYDATA(data,depth)                                  \
-DEBUG_OPTIMISE_r(if(data){                                           \
+DEBUG_OPTIMISE_MORE_r(if(data){                                           \
     PerlIO_printf(Perl_debug_log,                                    \
         "%*s"/* Len:%"IVdf"/%"IVdf" */" Pos:%"IVdf"/%"IVdf           \
         " Flags: %"IVdf" Whilem_c: %"IVdf" Lcp: %"IVdf" ",           \
@@ -1755,7 +1755,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         char *str=NULL;
         
 #ifdef DEBUGGING
-        
+        regnode *optimize;
         U32 mjd_offset = 0;
         U32 mjd_nodelen = 0;
 #endif
@@ -1889,9 +1889,12 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                     convert = n;
 		} else {
                     NEXT_OFF(convert) = (U16)(tail - convert);
+                    DEBUG_r(optimize= n);
                 }
             }
         }
+        if (!jumper) 
+            jumper = last; 
         if ( trie->maxlen ) {
 	    NEXT_OFF( convert ) = (U16)(tail - convert);
 	    ARG_SET( convert, data_slot );
@@ -1900,8 +1903,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 	       We use this when dumping a trie and during optimisation. */
 	    if (trie->jump) 
 	        trie->jump[0] = (U16)(tail - nextbranch);
-            if (!jumper) 
-                jumper = last; 
+            
             /* XXXX */
             if ( !trie->states[trie->startstate].wordnum && trie->bitmap && 
                  ( (char *)jumper - (char *)convert) >= (int)sizeof(struct regnode_charclass) )
@@ -1915,13 +1917,16 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
             /* store the type in the flags */
             convert->flags = nodetype;
-            /* XXX We really should free up the resource in trie now, as we wont use them */
+            DEBUG_r({
+            optimize = convert 
+                      + NODE_STEP_REGNODE 
+                      + regarglen[ OP( convert ) ];
+            });
+            /* XXX We really should free up the resource in trie now, 
+                   as we won't use them - (which resources?) dmq */
         }
         /* needed for dumping*/
         DEBUG_r({
-            regnode *optimize = convert 
-                              + NODE_STEP_REGNODE 
-                              + regarglen[ OP( convert ) ];
             regnode *opt = convert;
             while (++opt<optimize) {
                 Set_Node_Offset_Length(opt,0,0);
@@ -7294,7 +7299,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     if (OP(o) > REGNODE_MAX)		/* regnode.type is unsigned */
 	/* It would be nice to FAIL() here, but this may be called from
 	   regexec.c, and it would be hard to supply pRExC_state. */
-	Perl_croak(aTHX_ "Corrupted regexp opcode");
+	Perl_croak(aTHX_ "Corrupted regexp opcode %d > %d", (int)OP(o), (int)REGNODE_MAX);
     sv_catpv(sv, reg_name[OP(o)]); /* Take off const! */
 
     k = PL_regkind[OP(o)];

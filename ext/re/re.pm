@@ -1,6 +1,6 @@
 package re;
 
-our $VERSION = 0.06_01;
+our $VERSION = 0.06_02;
 
 =head1 NAME
 
@@ -225,25 +225,26 @@ my %flags = (
     COMPILE         => 0x0000FF,
     PARSE           => 0x000001,
     OPTIMISE        => 0x000002,
-    TRIE_COMPILE    => 0x000004,
+    TRIEC           => 0x000004,
     DUMP            => 0x000008,
-    OFFSETS         => 0x000010,
 
     EXECUTE         => 0x00FF00,
     INTUIT          => 0x000100,
     MATCH           => 0x000200,
-    TRIE_EXECUTE    => 0x000400,
+    TRIEE           => 0x000400,
 
     EXTRA           => 0xFF0000,
-    TRIE_MORE       => 0x010000,
-    OFFSETS_DEBUG   => 0x020000,
-    STATE           => 0x040000,
+    TRIEM           => 0x010000,
+    OFFSETS         => 0x020000,
+    OFFSETSDBG      => 0x040000,
+    STATE           => 0x080000,
+    OPTIMISEM       => 0x100000,
 );
 $flags{ALL} = -1;
 $flags{All} = $flags{all} = $flags{DUMP} | $flags{EXECUTE};
-$flags{More} = $flags{MORE} = $flags{All} | $flags{TRIE_MORE} | $flags{STATE};
+$flags{More} = $flags{MORE} = $flags{All} | $flags{TRIEC} | $flags{TRIEM} | $flags{STATE};
 $flags{State} = $flags{DUMP} | $flags{EXECUTE} | $flags{STATE};
-$flags{TRIE} = $flags{DUMP} | $flags{EXECUTE} | $flags{TRIE_COMPILE};
+$flags{TRIE} = $flags{DUMP} | $flags{EXECUTE} | $flags{TRIEC};
 
 my $installed =eval {
     require XSLoader;
