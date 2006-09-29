@@ -2933,7 +2933,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
     int i = 0;
     if (isALPHA(**s)) {
 	/* if adding extra options, remember to update DEBUG_MASK */
-	static const char debopts[] = "psltocPmfrxu HXDSTRJvCAq";
+	static const char debopts[] = "psltocPmfrxuUHXDSTRJvCAq";
 
 	for (; isALNUM(**s); (*s)++) {
 	    const char * const d = strchr(debopts,**s);

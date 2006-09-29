@@ -3420,7 +3420,8 @@ Gid_t getegid (void);
 #define DEBUG_r_FLAG		0x00000200 /*    512 */
 #define DEBUG_x_FLAG		0x00000400 /*   1024 */
 #define DEBUG_u_FLAG		0x00000800 /*   2048 */
-					   /*  spare */
+/* U is reserved for Unofficial, exploratory hacking */
+#define DEBUG_U_FLAG		0x00001000 /*   4096 */
 #define DEBUG_H_FLAG		0x00002000 /*   8192 */
 #define DEBUG_X_FLAG		0x00004000 /*  16384 */
 #define DEBUG_D_FLAG		0x00008000 /*  32768 */
@@ -3450,6 +3451,7 @@ Gid_t getegid (void);
 #  define DEBUG_r_TEST_ (PL_debug & DEBUG_r_FLAG)
 #  define DEBUG_x_TEST_ (PL_debug & DEBUG_x_FLAG)
 #  define DEBUG_u_TEST_ (PL_debug & DEBUG_u_FLAG)
+#  define DEBUG_U_TEST_ (PL_debug & DEBUG_U_FLAG)
 #  define DEBUG_H_TEST_ (PL_debug & DEBUG_H_FLAG)
 #  define DEBUG_X_TEST_ (PL_debug & DEBUG_X_FLAG)
 #  define DEBUG_D_TEST_ (PL_debug & DEBUG_D_FLAG)
@@ -3477,6 +3479,7 @@ Gid_t getegid (void);
 #  define DEBUG_r_TEST DEBUG_r_TEST_
 #  define DEBUG_x_TEST DEBUG_x_TEST_
 #  define DEBUG_u_TEST DEBUG_u_TEST_
+#  define DEBUG_U_TEST DEBUG_U_TEST_
 #  define DEBUG_H_TEST DEBUG_H_TEST_
 #  define DEBUG_X_TEST DEBUG_X_TEST_
 #  define DEBUG_Xv_TEST DEBUG_Xv_TEST_
@@ -3520,6 +3523,7 @@ Gid_t getegid (void);
 #endif /* PERL_EXT_RE_BUILD */
 #  define DEBUG_x(a) DEBUG__(DEBUG_x_TEST, a)
 #  define DEBUG_u(a) DEBUG__(DEBUG_u_TEST, a)
+#  define DEBUG_U(a) DEBUG__(DEBUG_U_TEST, a)
 #  define DEBUG_H(a) DEBUG__(DEBUG_H_TEST, a)
 #  define DEBUG_X(a) DEBUG__(DEBUG_X_TEST, a)
 #  define DEBUG_Xv(a) DEBUG__(DEBUG_Xv_TEST, a)
@@ -3548,6 +3552,7 @@ Gid_t getegid (void);
 #  define DEBUG_r_TEST (0)
 #  define DEBUG_x_TEST (0)
 #  define DEBUG_u_TEST (0)
+#  define DEBUG_U_TEST (0)
 #  define DEBUG_H_TEST (0)
 #  define DEBUG_X_TEST (0)
 #  define DEBUG_Xv_TEST (0)
@@ -3575,6 +3580,7 @@ Gid_t getegid (void);
 #  define DEBUG_r(a)
 #  define DEBUG_x(a)
 #  define DEBUG_u(a)
+#  define DEBUG_U(a)
 #  define DEBUG_H(a)
 #  define DEBUG_X(a)
 #  define DEBUG_Xv(a)
