@@ -2201,10 +2201,7 @@ S_regtry(pTHX_ const regmatch_info *reginfo, char *startpos)
 
 #define sayYES goto yes
 #define sayNO goto no
-#define sayNO_ANYOF goto no_anyof
-#define sayYES_FINAL goto yes_final
-#define sayNO_FINAL  goto no_final
-#define sayNO_SILENT goto do_no
+#define sayNO_SILENT goto no_silent
 #define saySAME(x) if (x) goto yes; else goto no
 
 /* we dont use STMT_START/END here because it leads to 
@@ -3023,7 +3020,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	        STRLEN inclasslen = PL_regeol - locinput;
 
 	        if (!reginclass(rex, scan, (U8*)locinput, &inclasslen, do_utf8))
-		    sayNO_ANYOF;
+		    goto anyof_fail;
 		if (locinput >= PL_regeol)
 		    sayNO;
 		locinput += inclasslen ? inclasslen : UTF8SKIP(locinput);
@@ -3034,13 +3031,13 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		if (nextchr < 0)
 		    nextchr = UCHARAT(locinput);
 		if (!REGINCLASS(rex, scan, (U8*)locinput))
-		    sayNO_ANYOF;
+		    goto anyof_fail;
 		if (!nextchr && locinput >= PL_regeol)
 		    sayNO;
 		nextchr = UCHARAT(++locinput);
 		break;
 	    }
-	no_anyof:
+	anyof_fail:
 	    /* If we might have the case of the German sharp s
 	     * in a casefolding Unicode character class. */
 
@@ -3453,7 +3450,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    cur_curlyx = ST.prev_curlyx;
 	    /* XXXX This is too dramatic a measure... */
 	    PL_reg_maxiter = 0;
-	    sayYES_FINAL;
+	    sayYES;
 
 
 	case EVAL_AB_fail: /* unsuccessfully ran A or B in (??{A})B */
@@ -4373,10 +4370,10 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 				      (long)(locinput - PL_reg_starttry),
 				      (long)(reginfo->till - PL_reg_starttry),
 				      PL_colors[5]));
-		sayNO_FINAL;		/* Cannot match: too short. */
+		sayNO_SILENT;		/* Cannot match: too short. */
 	    }
 	    PL_reginput = locinput;	/* put where regtry can find it */
-	    sayYES_FINAL;		/* Success! */
+	    sayYES;			/* Success! */
 
 	case SUCCEED: /* successful SUSPEND/UNLESSM/IFMATCH/CURLYM */
 	    DEBUG_EXECUTE_r(
@@ -4384,7 +4381,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		"%*s  %ssubpattern success...%s\n",
 		REPORT_CODE_OFF+depth*2, "", PL_colors[4], PL_colors[5]));
 	    PL_reginput = locinput;	/* put where regtry can find it */
-	    sayYES_FINAL;		/* Success! */
+	    sayYES;			/* Success! */
 
 #undef  ST
 #define ST st->u.ifmatch
@@ -4509,6 +4506,8 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
 	    DEBUG_STATE_pp("push");
 	    depth++;
+	    st->u.yes.prev_yes_state = yes_state;
+	    yes_state = st;
 
 	    /* grab the next free state slot */
 	    st++;
@@ -4529,8 +4528,6 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	}
     }
 
-
-
     /*
     * We get here only if there's trouble -- normally "case END" is
     * the terminating point.
@@ -4539,8 +4536,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
     /*NOTREACHED*/
     sayNO;
 
-yes_final:
-
+yes:
     if (yes_state) {
 	/* we have successfully completed a subexpression, but we must now
 	 * pop to the state marked by yes_state and continue from there */
@@ -4571,6 +4567,38 @@ yes_final:
 	PL_regmatch_state = st;
 
 	switch (st->resume_state) {
+	case resume_CURLYX:
+	case resume_WHILEM1:
+	case resume_WHILEM2:
+	case resume_WHILEM3:
+	case resume_WHILEM4:
+	case resume_WHILEM5:
+	case resume_WHILEM6:
+	    result = 1;
+	    /* restore previous state and re-enter */
+	    scan	= st->scan;
+	    next	= st->next;
+	    n	= st->n;
+	    locinput= st->locinput;
+	    nextchr = UCHARAT(locinput);
+	    switch (st->resume_state) {
+	    case resume_CURLYX:
+		goto resume_point_CURLYX;
+	    case resume_WHILEM1:
+		goto resume_point_WHILEM1;
+	    case resume_WHILEM2:
+		goto resume_point_WHILEM2;
+	    case resume_WHILEM3:
+		goto resume_point_WHILEM3;
+	    case resume_WHILEM4:
+		goto resume_point_WHILEM4;
+	    case resume_WHILEM5:
+		goto resume_point_WHILEM5;
+	    case resume_WHILEM6:
+		goto resume_point_WHILEM6;
+	    }
+	    Perl_croak(aTHX_ "unexpected whilem resume state");
+
 	case EVAL_AB: 
 	case IFMATCH_A:
 	case CURLYM_A:
@@ -4588,59 +4616,8 @@ yes_final:
 
     DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "%sMatch successful!%s\n",
 			  PL_colors[4], PL_colors[5]));
-yes:
 
     result = 1;
-    /* XXX this is duplicate(ish) code to that in the do_no section.
-     * will disappear when REGFMATCH goes */
-    if (depth) {
-	/* restore previous state and re-enter */
-	st--;
-	if (st < SLAB_FIRST(PL_regmatch_slab)) {
-	    PL_regmatch_slab = PL_regmatch_slab->prev;
-	    st = SLAB_LAST(PL_regmatch_slab);
-	}
-	PL_regmatch_state = st;
-	scan	= st->scan;
-	next	= st->next;
-	n	= st->n;
-	locinput= st->locinput;
-	nextchr = UCHARAT(locinput);
-
-	DEBUG_STATE_pp("pop");
-	depth--;
-
-	switch (st->resume_state) {
-	case resume_CURLYX:
-	    goto resume_point_CURLYX;
-	case resume_WHILEM1:
-	    goto resume_point_WHILEM1;
-	case resume_WHILEM2:
-	    goto resume_point_WHILEM2;
-	case resume_WHILEM3:
-	    goto resume_point_WHILEM3;
-	case resume_WHILEM4:
-	    goto resume_point_WHILEM4;
-	case resume_WHILEM5:
-	    goto resume_point_WHILEM5;
-	case resume_WHILEM6:
-	    goto resume_point_WHILEM6;
-
-	case TRIE_next:
-	case CURLYM_A:
-	case CURLYM_B:
-	case EVAL_AB:
-	case IFMATCH_A:
-	case BRANCH_next:
-	case CURLY_B_max:
-	case CURLY_B_min:
-	case CURLY_B_min_known:
-	    break;
-
-	default:
-	    Perl_croak(aTHX_ "regexp resume memory corruption");
-	}
-    }
     goto final_exit;
 
 no:
@@ -4650,9 +4627,8 @@ no:
             REPORT_CODE_OFF+depth*2, "", 
             PL_colors[4], PL_colors[5])
 	);
-no_final:
-do_no:
 
+no_silent:
     result = 0;
 
     if (depth) {
@@ -4671,6 +4647,8 @@ do_no:
 
 	DEBUG_STATE_pp("pop");
 	depth--;
+	if (yes_state == st)
+	    yes_state = st->u.yes.prev_yes_state;
 
 	switch (st->resume_state) {
 	case resume_CURLYX:
@@ -4697,8 +4675,6 @@ do_no:
 	case CURLY_B_max:
 	case CURLY_B_min:
 	case CURLY_B_min_known:
-	    if (yes_state == st)
-		yes_state = st->u.yes.prev_yes_state;
 	    state_num = st->resume_state + 1; /* failure = success + 1 */
 	    goto reenter_switch;
 
@@ -4707,7 +4683,7 @@ do_no:
 	}
     }
 
-final_exit:
+  final_exit:
 
     /* restore original high-water mark */
     PL_regmatch_slab  = orig_slab;
@@ -4725,7 +4701,6 @@ final_exit:
     }
 
     return result;
-
 }
 
 /*

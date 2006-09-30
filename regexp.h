@@ -258,6 +258,7 @@ typedef struct regmatch_state {
 	} eval;
 
 	struct {
+	    struct regmatch_state *prev_yes_state;
 	    CHECKPOINT cp;	/* remember current savestack indexes */
 	    struct regmatch_state *outercc; /* outer CURLYX state if any */
 
@@ -272,6 +273,7 @@ typedef struct regmatch_state {
 	} curlyx;
 
 	struct {
+	    struct regmatch_state *prev_yes_state;
 	    CHECKPOINT cp;	/* remember current savestack indexes */
 	    CHECKPOINT lastcp;
 	    struct regmatch_state *savecc;
