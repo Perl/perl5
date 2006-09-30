@@ -3665,8 +3665,6 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		{
 		    st->u.whilem.savecc = cur_curlyx;
 		    cur_curlyx = cur_curlyx->u.curlyx.outercc;
-		    if (cur_curlyx)
-			st->ln = cur_curlyx->u.curlyx.cur;
 		    DEBUG_EXECUTE_r(
 			PerlIO_printf(Perl_debug_log,
 			   "%*s  empty match detected, try continuation...\n",
@@ -3677,8 +3675,6 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    cur_curlyx = st->u.whilem.savecc;
 		    if (result)
 			sayYES;
-		    if (cur_curlyx->u.curlyx.outercc)
-			assert(cur_curlyx->u.curlyx.outercc->u.curlyx.cur == st->ln);
 		    sayNO;
 		}
 
@@ -3749,8 +3745,6 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		if (cur_curlyx->minmod) {
 		    st->u.whilem.savecc = cur_curlyx;
 		    cur_curlyx = cur_curlyx->u.curlyx.outercc;
-		    if (cur_curlyx)
-			st->ln = cur_curlyx->u.curlyx.cur;
 		    st->u.whilem.cp = regcppush(st->u.whilem.savecc->u.curlyx.parenfloor);
 		    REGCP_SET(st->u.whilem.lastcp);
 		    REGMATCH(st->u.whilem.savecc->next, WHILEM3);
@@ -3762,8 +3756,6 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    }
 		    REGCP_UNWIND(st->u.whilem.lastcp);
 		    regcppop(rex);
-		    if (cur_curlyx->u.curlyx.outercc)
-			assert(cur_curlyx->u.curlyx.outercc->u.curlyx.cur == st->ln);
 
 		    if (n >= cur_curlyx->u.curlyx.max) { /* Maximum greed exceeded? */
 			if (ckWARN(WARN_REGEXP) && n >= REG_INFTY
@@ -3833,15 +3825,11 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		/* Failed deeper matches of scan, so see if this one works. */
 		st->u.whilem.savecc = cur_curlyx;
 		cur_curlyx = cur_curlyx->u.curlyx.outercc;
-		if (cur_curlyx)
-		    st->ln = cur_curlyx->u.curlyx.cur;
 		REGMATCH(st->u.whilem.savecc->next, WHILEM6);
 		/*** all unsaved local vars undefined at this point */
 		cur_curlyx = st->u.whilem.savecc;
 		if (result)
 		    sayYES;
-		if (cur_curlyx->u.curlyx.outercc)
-		    assert(cur_curlyx->u.curlyx.outercc->u.curlyx.cur == st->ln);
 		cur_curlyx->u.curlyx.cur = n - 1;
 		cur_curlyx->u.curlyx.lastloc = st->u.whilem.lastloc;
 		CACHEsayNO;
