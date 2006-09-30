@@ -3678,7 +3678,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    if (result)
 			sayYES;
 		    if (cur_curlyx->u.curlyx.outercc)
-			cur_curlyx->u.curlyx.outercc->u.curlyx.cur = st->ln;
+			assert(cur_curlyx->u.curlyx.outercc->u.curlyx.cur == st->ln);
 		    sayNO;
 		}
 
@@ -3763,7 +3763,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    REGCP_UNWIND(st->u.whilem.lastcp);
 		    regcppop(rex);
 		    if (cur_curlyx->u.curlyx.outercc)
-			cur_curlyx->u.curlyx.outercc->u.curlyx.cur = st->ln;
+			assert(cur_curlyx->u.curlyx.outercc->u.curlyx.cur == st->ln);
 
 		    if (n >= cur_curlyx->u.curlyx.max) { /* Maximum greed exceeded? */
 			if (ckWARN(WARN_REGEXP) && n >= REG_INFTY
@@ -3841,7 +3841,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		if (result)
 		    sayYES;
 		if (cur_curlyx->u.curlyx.outercc)
-		    cur_curlyx->u.curlyx.outercc->u.curlyx.cur = st->ln;
+		    assert(cur_curlyx->u.curlyx.outercc->u.curlyx.cur == st->ln);
 		cur_curlyx->u.curlyx.cur = n - 1;
 		cur_curlyx->u.curlyx.lastloc = st->u.whilem.lastloc;
 		CACHEsayNO;
