@@ -1,8 +1,6 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 package CPAN::Mirrored::By;
 use strict;
-use vars qw($VERSION);
-$VERSION = sprintf "%.6f", substr(q$Rev: 879 $,4)/1000000 + 5.4;
 
 sub new { 
     my($self,@arg) = @_;
@@ -13,15 +11,15 @@ sub country { shift->[1] }
 sub url { shift->[2] }
 
 package CPAN::FirstTime;
-
 use strict;
+
 use ExtUtils::MakeMaker ();
 use FileHandle ();
 use File::Basename ();
 use File::Path ();
 use File::Spec;
 use vars qw($VERSION $urllist);
-$VERSION = sprintf "%.6f", substr(q$Rev: 879 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 924 $,4)/1000000 + 5.4;
 
 =head1 NAME
 
@@ -247,6 +245,13 @@ Shall we use it as the general CPAN build and cache directory?
 
         my_prompt_loop(prerequisites_policy => 'ask', $matcher,
                        'follow|ask|ignore');
+    }
+
+    if (!$matcher or 'build_requires_install_policy' =~ /$matcher/){
+        $CPAN::Frontend->myprint($prompts{build_requires_install_policy_intro});
+
+        my_prompt_loop(build_requires_install_policy => 'ask/yes', $matcher,
+                       'yes|no|ask/yes|ask/no');
     }
 
     #
@@ -1318,6 +1323,26 @@ module. Do you want to turn on colored output?},
 colorize_print => qq{Color for normal output?},
 
 colorize_warn => qq{Color for warnings?},
+
+build_requires_install_policy_intro => qq{
+
+When a module declares another one as a 'build_requires' prerequisite
+this means that the other module is only needed for building or
+testing the module but need not be installed permanently. In this case
+you may wish to install that other module nonetheless or just keep it
+in the 'build_dir' directory to have it available only temporarily.
+Installing saves time on future installations but makes the perl
+installation bigger.
+
+You can choose if you want to always install (yes), never install (no)
+or be always asked. In the latter case you can set the default answer
+for the question to yes (ask/yes) or no (ask/no).
+
+},
+
+build_requires_install_policy =>
+qq{Policy on installing 'build_requires' modules (yes, no, ask/yes,
+ask/no)?},
 
 );
 
