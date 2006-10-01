@@ -766,22 +766,23 @@ PP(pp_binmode)
     }
 
     PUTBACK;
-    if (PerlIO_binmode(aTHX_ fp,IoTYPE(io),mode_from_discipline(discp),
-                       (discp) ? SvPV_nolen_const(discp) : NULL)) {
-	if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {
-	     if (!PerlIO_binmode(aTHX_ IoOFP(io),IoTYPE(io),
-			mode_from_discipline(discp),
-                       (discp) ? SvPV_nolen_const(discp) : NULL)) {
-		SPAGAIN;
-		RETPUSHUNDEF;
-	     }
+    {
+	const int mode = mode_from_discipline(discp);
+	const char *const d = (discp ? SvPV_nolen_const(discp) : NULL);
+	if (PerlIO_binmode(aTHX_ fp, IoTYPE(io), mode, d)) {
+	    if (IoOFP(io) && IoOFP(io) != IoIFP(io)) {
+		if (!PerlIO_binmode(aTHX_ IoOFP(io), IoTYPE(io), mode, d)) {
+		    SPAGAIN;
+		    RETPUSHUNDEF;
+		}
+	    }
+	    SPAGAIN;
+	    RETPUSHYES;
 	}
-	SPAGAIN;
-	RETPUSHYES;
-    }
-    else {
-	SPAGAIN;
-	RETPUSHUNDEF;
+	else {
+	    SPAGAIN;
+	    RETPUSHUNDEF;
+	}
     }
 }
 
