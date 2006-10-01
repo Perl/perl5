@@ -473,12 +473,19 @@ PerlIO_debug(const char *fmt, ...)
     va_list ap;
     dSYS;
     va_start(ap, fmt);
-    if (!PL_perlio_debug_fd && !PL_tainting && PL_uid == PL_euid && PL_gid == PL_egid) {
-	const char * const s = PerlEnv_getenv("PERLIO_DEBUG");
-	if (s && *s)
-	    PL_perlio_debug_fd = PerlLIO_open3(s, O_WRONLY | O_CREAT | O_APPEND, 0666);
-	else
+    if (!PL_perlio_debug_fd) {
+	if (!PL_tainting && PL_uid == PL_euid && PL_gid == PL_egid) {
+	    const char * const s = PerlEnv_getenv("PERLIO_DEBUG");
+	    if (s && *s)
+		PL_perlio_debug_fd
+		    = PerlLIO_open3(s, O_WRONLY | O_CREAT | O_APPEND, 0666);
+	    else
+		PL_perlio_debug_fd = -1;
+	} else {
+	    /* tainting or set*id, so ignore the environment, and ensure we
+	       skip these tests next time through.  */
 	    PL_perlio_debug_fd = -1;
+	}
     }
     if (PL_perlio_debug_fd > 0) {
 	dTHX;
