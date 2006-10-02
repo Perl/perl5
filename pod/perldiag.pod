@@ -2766,8 +2766,11 @@ which is odd, because hashes come in key/value pairs.
 
 (F, W layer) You tried to do a read/write/send/recv/seek operation
 with an offset pointing outside the buffer.  This is difficult to
-imagine.  The sole exception to this is that C<sysread()>ing past the
-buffer will extend the buffer and zero pad the new area.
+imagine.  The sole exceptions to this are that zero padding will
+take place when going past the end of the string when either
+C<sysread()>ing a file, or when seeking past the end of a scalar opened
+of I/O (in anticipation of future reads and to imitate the behaviour with
+real files).
 
 =item %s() on unopened %s
 
