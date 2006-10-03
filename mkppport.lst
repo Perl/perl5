@@ -10,6 +10,7 @@ ext/Cwd
 ext/Data/Dumper
 ext/Digest/SHA
 ext/Sys/Syslog
+ext/threads/shared
 ext/Time/HiRes
 
 win32/ext/Win32API/File

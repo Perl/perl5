@@ -1,39 +1,55 @@
-# cond_wait and cond_timedwait extended tests
-# adapted from cond.t
-
+use strict;
 use warnings;
 
 BEGIN {
-    chdir 't' if -d 't';
-    push @INC ,'../lib';
-    require Config; import Config;
-    unless ($Config{'useithreads'}) {
-        print "1..0 # Skip: no threads\n";
-        exit 0;
+    if ($ENV{'PERL_CORE'}){
+        chdir 't';
+        unshift @INC, '../lib';
+    }
+    use Config;
+    if (! $Config{'useithreads'}) {
+        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
+        exit(0);
     }
 }
-$|++;
-print "1..102\n";
-use strict;
 
-use threads;
-use threads::shared;
 use ExtUtils::testlib;
 
 my $Base = 0;
-
 sub ok {
-    my ($offset, $bool, $text) = @_;
-    my $not = '';
-    $not = "not " unless $bool;
-    print "${not}ok " . ($Base + $offset) . " - $text\n";
+    my ($id, $ok, $name) = @_;
+    $id += $Base;
+
+    # You have to do it this way or VMS will get confused.
+    if ($ok) {
+        print("ok $id - $name\n");
+    } else {
+        print("not ok $id - $name\n");
+        printf("# Failed test at line %d\n", (caller)[2]);
+    }
+
+    return ($ok);
 }
+
+BEGIN {
+    $| = 1;
+    print("1..103\n");   ### Number of tests that will be run ###
+};
+
+use threads;
+use threads::shared;
+ok(1, 1, 'Loaded');
+$Base++;
+
+### Start of Testing ###
+
+# cond_wait and cond_timedwait extended tests adapted from cond.t
 
 # The two skips later on in these tests refer to this quote from the
 # pod/perl583delta.pod:
 #
 # =head1 Platform Specific Problems
-# 
+#
 # The regression test ext/threads/shared/t/wait.t fails on early RedHat 9
 # and HP-UX 10.20 due to bugs in their threading implementations.
 # RedHat users should see https://rhn.redhat.com/errata/RHBA-2003-136.html
@@ -103,7 +119,6 @@ SYNC_SHARED: {
   my $cond : shared;
   my $lock : shared;
 
-  print "# testing my \$var : shared\n";
   ok(1, 1, "Shared synchronization tests preparation");
   $Base += 1;
 
@@ -204,21 +219,19 @@ SYNC_SHARED: {
   # cond_timedwait timeout (relative timeout)
   sub ctw_fail {
     my $to = shift;
-
     if ($^O eq "hpux" && $Config{osvers} <= 10.20) {
       # The lock obtaining would pass, but the wait will not.
       ok(1,1, "$test: obtained initial lock");
       ok(2,0, "# SKIP see perl583delta");
-    }
-    else {
+    } else {
       $test =~ /twain/ ? lock($lock) : lock($cond);
       ok(1,1, "$test: obtained initial lock");
       my $ok;
       for ($test) {
-	$ok=cond_timedwait($cond, time() + $to), last        if    /simple/;
-	$ok=cond_timedwait($cond, time() + $to, $cond), last if    /repeat/;
-	$ok=cond_timedwait($cond, time() + $to, $lock), last if    /twain/;
-	die "$test: unknown test\n"; 
+        $ok=cond_timedwait($cond, time() + $to), last        if    /simple/;
+        $ok=cond_timedwait($cond, time() + $to, $cond), last if    /repeat/;
+        $ok=cond_timedwait($cond, time() + $to, $lock), last if    /twain/;
+        die "$test: unknown test\n"; 
       }
       ok(2,!defined($ok), "$test: timeout");
     }
@@ -238,7 +251,6 @@ SYNCH_REFS: {
   my $cond = \$true_cond;
   my $lock = \$true_lock;
 
-  print "# testing reference to shared(\$var)\n";
   ok(1, 1, "Synchronization reference tests preparation");
   $Base += 1;
 
@@ -343,16 +355,15 @@ SYNCH_REFS: {
       # The lock obtaining would pass, but the wait will not.
       ok(1,1, "$test: obtained initial lock");
       ok(2,0, "# SKIP see perl583delta");
-      }
-    else {
+    } else {
       $test =~ /twain/ ? lock($lock) : lock($cond);
       ok(1,1, "$test: obtained initial lock");
       my $ok;
       for ($test) {
-	$ok=cond_timedwait($cond, time() + $to), last        if    /simple/;
-	$ok=cond_timedwait($cond, time() + $to, $cond), last if    /repeat/;
-	$ok=cond_timedwait($cond, time() + $to, $lock), last if    /twain/;
-	die "$test: unknown test\n"; 
+        $ok=cond_timedwait($cond, time() + $to), last        if    /simple/;
+        $ok=cond_timedwait($cond, time() + $to, $cond), last if    /repeat/;
+        $ok=cond_timedwait($cond, time() + $to, $lock), last if    /twain/;
+        die "$test: unknown test\n"; 
       }
       ok(2,!$ok, "$test: timeout");
     }
@@ -360,3 +371,4 @@ SYNCH_REFS: {
 
 } # -- SYNCH_REFS block
 
+# EOF
