@@ -3639,7 +3639,8 @@ vms/writemain.pl		Generate perlmain.c from miniperlmain.c+extensions
 vos/Changes			Changes made to port Perl to the VOS operating system
 vos/compile_full_perl.cm	VOS command macro to build "full" Perl
 vos/configure_full_perl.sh	VOS shell script to configure "full" perl before building
-vos/make_full_perl.sh	VOS shell script to build and test "full" perl
+vos/make_full_perl.sh		VOS shell script to build and test "full" perl
+vos/syslog.h			syslog header for VOS
 vos/vos.c			VOS emulations for missing POSIX functions
 vos/vosish.h			VOS-specific header file
 warnings.h			The warning numbers
