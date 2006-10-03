@@ -1115,6 +1115,7 @@ ext/threads/hints/linux.pl	Hint file for Linux
 ext/threads/Makefile.PL		ithreads
 ext/Thread/specific.tx		Test thread-specific user data
 ext/threads/README		ithreads
+ext/threads/shared/Changes	Changes for threads::shared
 ext/threads/shared/hints/linux.pl	thread shared variables
 ext/threads/shared/Makefile.PL	thread shared variables
 ext/threads/shared/README	thread shared variables

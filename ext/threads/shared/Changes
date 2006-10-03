@@ -1,0 +1,37 @@
+Revision history for Perl extension threads::shared.
+
+1.03 Fri Sep 15 15:09:26 EDT 2006
+	- Fix memory leak caused blessed shared objects
+	- Upgraded ppport.h to Devel::PPPort 3.10
+
+1.02 Fri Jul 14 08:56:03 EDT 2006
+	- Skip failing thread/wait tests on HP-UX 10.20 (patch 27920)
+	- Check for 'C' compiler when building module
+	- Remove BEGIN block in .pm file
+	- Upgraded ppport.h to Devel::PPPort 3.09
+
+1.01 Sat Mar 25 18:46:44 EST 2006
+	- Restoration of 'core' build parameters
+
+0.99 Sun Mar 19 17:38:52 EST 2006
+	- Use $ENV{PERL_CORE} in tests
+	- More XS code cleanups
+	- Eliminated use of Exporter
+
+0.98 Fri Mar 17 13:25:34 EST 2006
+	- XS code cleanup
+
+0.97 Mon Mar 13 14:30:50 EST 2006
+	- Cleaned up shared.h as part of the ppport.h upgrade
+	- Cleaned up tests
+	- Compatible with 5.9.3
+
+0.96 Mon Feb 27 16:50:07 EST 2006
+	- Added 'is_shared' as alias to '_id'
+	- Upgraded ppport.h to v3.08
+	- Updated POD with discussion of bless()
+
+0.95 Fri Feb 03 16:46:00 2006
+	- Initial (re-)release to CPAN
+	- 'bless' is now supported on shared refs
+
