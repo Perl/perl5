@@ -58,7 +58,7 @@ BEGIN {
     ok( test_f(), 'testing non-existent file' );
 
     @ARGV = ( $Testfile );
-    cmp_ok( ! test_f(), '==', (-f $Testfile), 'testing non-existent file' );
+    is( ! test_f(), '', 'testing non-existent file' );
 
     # these are destructive, have to keep setting @ARGV
     @ARGV = ( $Testfile );
@@ -188,7 +188,7 @@ BEGIN {
     ok( test_d(), 'testing non-existent directory' );
 
     @ARGV = ( $test_dir );
-    cmp_ok( ! test_d(), '==', (-d $test_dir), 'testing non-existent dir' );
+    is( ! test_d(), '', 'testing non-existent dir' );
 
     @ARGV = ( $test_dir );
     mkpath();
