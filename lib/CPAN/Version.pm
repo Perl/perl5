@@ -2,7 +2,7 @@ package CPAN::Version;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = sprintf "%.6f", substr(q$Rev: 844 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 950 $,4)/1000000 + 5.4;
 
 # CPAN::Version::vcmp courtesy Jost Krieger
 sub vcmp {
@@ -13,16 +13,22 @@ sub vcmp {
   return 0 if $l eq $r; # short circuit for quicker success
 
   for ($l,$r) {
+      s/_//g;
+  }
+  CPAN->debug("l[$l] r[$r]") if $CPAN::DEBUG;
+  for ($l,$r) {
       next unless tr/.// > 1;
       s/^v?/v/;
       1 while s/\.0+(\d)/.$1/;
   }
+  CPAN->debug("l[$l] r[$r]") if $CPAN::DEBUG;
   if ($l=~/^v/ <=> $r=~/^v/) {
       for ($l,$r) {
           next if /^v/;
           $_ = $self->float2vv($_);
       }
   }
+  CPAN->debug("l[$l] r[$r]") if $CPAN::DEBUG;
 
   return (
           ($l ne "undef") <=> ($r ne "undef") ||

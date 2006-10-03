@@ -1,7 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.88_51';
+$CPAN::VERSION = '1.88_52';
 $CPAN::VERSION = eval $CPAN::VERSION;
 
 use CPAN::HandleConfig;
@@ -1464,7 +1464,7 @@ sub o {
 	  $CPAN::Frontend->myprint("\n\n");
 	}
 	if ($CPAN::DEBUG) {
-	    $CPAN::Frontend->myprint("Options set for debugging:\n");
+	    $CPAN::Frontend->myprint("Options set for debugging ($CPAN::DEBUG):\n");
 	    my($k,$v);
 	    for $k (sort {$CPAN::DEBUG{$a} <=> $CPAN::DEBUG{$b}} keys %CPAN::DEBUG) {
 		$v = $CPAN::DEBUG{$k};
@@ -1547,31 +1547,39 @@ index    re-reads the index files\n});
 #-> sub CPAN::Shell::reload_this ;
 sub reload_this {
     my($self,$f) = @_;
+    CPAN->debug("f[$f]") if $CPAN::DEBUG;
     return 1 unless $INC{$f}; # we never loaded this, so we do not
                               # reload but say OK
     my $pwd = CPAN::anycwd();
-    CPAN->debug("reloading the whole '$f' from '$INC{$f}' while pwd='$pwd'")
-        if $CPAN::DEBUG;
-    my $read;
+    CPAN->debug("pwd[$pwd]") if $CPAN::DEBUG;
+    my($file);
     for my $inc (@INC) {
-        $read = File::Spec->catfile($inc,split /\//, $f);
-        last if -f $read;
+        $file = File::Spec->catfile($inc,split /\//, $f);
+        last if -f $file;
+        $file = "";
     }
-    unless (-f $read) {
-        $read = $INC{$f};
+    CPAN->debug("file[$file]") if $CPAN::DEBUG;
+    my @inc = @INC;
+    unless ($file && -f $file) {
+        # this thingie is not in the INC path, maybe CPAN/MyConfig.pm?
+        $file = $INC{$f};
+        @inc = substr($file,0,-length($f)); # bring in back to me!
     }
-    unless (-f $read) {
+    CPAN->debug("file[$file]inc[@inc]") if $CPAN::DEBUG;
+    unless (-f $file) {
         $CPAN::Frontend->mywarn("Found no file to reload for '$f'\n");
         return;
     }
-    my $fh = FileHandle->new($read) or
-        $CPAN::Frontend->mydie("Could not open $read: $!");
+    my $fh = FileHandle->new($file) or
+        $CPAN::Frontend->mydie("Could not open $file: $!");
     local($/);
     local $^W = 1;
-    my $eval = <$fh>;
-    CPAN->debug(sprintf("evaling [%s...]\n",substr($eval,0,64)))
+    my $content = <$fh>;
+    CPAN->debug(sprintf("reload file[%s] content[%s...]",$file,substr($content,0,128)))
         if $CPAN::DEBUG;
-    eval $eval;
+    delete $INC{$f};
+    local @INC = @inc;
+    eval "require '$f'";
     if ($@){
         warn $@;
         return;
@@ -1931,7 +1939,7 @@ sub status {
         next unless substr($k,0,4) eq "read";
         warn sprintf " %-26s %6d\n", $k, Devel::Size::total_size($CPAN::META->{$k})/1024;
         for my $k2 (sort keys %{$CPAN::META->{$k}}) {
-            warn sprintf "  %-25s %6d %6d\n",
+            warn sprintf "  %-25s %6d (keys: %6d)\n",
                 $k2,
                     Devel::Size::total_size($CPAN::META->{$k}{$k2})/1024,
                           scalar keys %{$CPAN::META->{$k}{$k2}};
@@ -2336,9 +2344,10 @@ sub rematein {
 	if (ref $s) {
             CPAN->debug("s is an object[$s]") if $CPAN::DEBUG;
 	    $obj = $s;
+	} elsif ($s =~ m|[\$\@\%]|) { # looks like a perl variable
 	} elsif ($s =~ m|^/|) { # looks like a regexp
             $CPAN::Frontend->mywarn("Sorry, $meth with a regular expression is ".
-                                    "not supported\n");
+                                    "not supported. Rejecting argument '$s'\n");
             $CPAN::Frontend->mysleep(2);
             next;
 	} elsif ($meth eq "ls") {
@@ -2348,7 +2357,8 @@ sub rematein {
             CPAN->debug("calling expandany [$s]") if $CPAN::DEBUG;
 	    $obj = CPAN::Shell->expandany($s);
 	}
-	if (ref $obj) {
+	if (0) {
+        } elsif (ref $obj) {
             $obj->color_cmd_tmps(0,1);
             CPAN::Queue->new(qmod => $obj->id, reqtype => "c");
             push @qcopy, $obj;
@@ -2365,7 +2375,7 @@ sub rematein {
                                        );
                 $CPAN::Frontend->mysleep(2);
             }
-	} elsif ($meth eq "dump") {
+	} elsif ($s =~ m|[\$\@\%]| && $meth eq "dump") {
             CPAN::InfoObj->dump($s);
         } else {
 	    $CPAN::Frontend
@@ -3659,6 +3669,8 @@ sub rd_authindex {
     local($/) = "\n";
     local($_);
     push @lines, split /\012/ while <FH>;
+    my $i = 0;
+    my $modulus = int(@lines/75) || 1;
     foreach (@lines) {
 	my($userid,$fullname,$email) =
 	    m/alias\s+(\S+)\s+\"([^\"\<]+)\s+\<([^\>]+)\>\"/;
@@ -3667,8 +3679,10 @@ sub rd_authindex {
 	# instantiate an author object
  	my $userobj = $CPAN::META->instance('CPAN::Author',$userid);
 	$userobj->set('FULLNAME' => $fullname, 'EMAIL' => $email);
+        $CPAN::Frontend->myprint(".") unless $i++ % $modulus;
 	return if $CPAN::Signal;
     }
+    $CPAN::Frontend->myprint("DONE\n");
 }
 
 sub userid {
@@ -3681,18 +3695,19 @@ sub userid {
 #-> sub CPAN::Index::rd_modpacks ;
 sub rd_modpacks {
     my($self, $index_target) = @_;
-    my @lines;
     return unless defined $index_target;
     $CPAN::Frontend->myprint("Going to read $index_target\n");
     my $fh = CPAN::Tarzip->TIEHANDLE($index_target);
-    local($/) = "\n";
     local $_;
-    while ($_ = $fh->READLINE) {
-	s/\012/\n/g;
-	my @ls = map {"$_\n"} split /\n/, $_;
-	unshift @ls, "\n" x length($1) if /^(\n+)/;
-	push @lines, @ls;
+    CPAN->debug(sprintf "start[%d]", time) if $CPAN::DEBUG;
+    my $slurp = "";
+    my $chunk;
+    while (my $bytes = $fh->READ(\$chunk,8192)) {
+        $slurp.=$chunk;
     }
+    my @lines = split /\012/, $slurp;
+    CPAN->debug(sprintf "end[%d]", time) if $CPAN::DEBUG;
+    undef $fh;
     # read header
     my($line_count,$last_updated);
     while (@lines) {
@@ -3701,6 +3716,7 @@ sub rd_modpacks {
 	$shift =~ /^Line-Count:\s+(\d+)/ and $line_count = $1;
         $shift =~ /^Last-Updated:\s+(.+)/ and $last_updated = $1;
     }
+    CPAN->debug("line_count[$line_count]last_updated[$last_updated]") if $CPAN::DEBUG;
     if (not defined $line_count) {
 
 	$CPAN::Frontend->mywarn(qq{Warning: Your $index_target does not contain a Line-Count header.
@@ -3778,8 +3794,9 @@ happen.\a
     my $secondtime = $CPAN::META->exists("CPAN::Module","CPAN");
     CPAN->debug("secondtime[$secondtime]") if $CPAN::DEBUG;
     my(%exists);
+    my $i = 0;
+    my $modulus = int(@lines/75) || 1;
     foreach (@lines) {
-	chomp;
         # before 1.56 we split into 3 and discarded the rest. From
         # 1.57 we assign remaining text to $comment thus allowing to
         # influence isa_perl
@@ -3863,20 +3880,21 @@ happen.\a
 	}
         if ($secondtime) {
             for my $name ($mod,$dist) {
-                CPAN->debug("exists name[$name]") if $CPAN::DEBUG;
+                # $self->debug("exists name[$name]") if $CPAN::DEBUG;
                 $exists{$name} = undef;
             }
         }
+        $CPAN::Frontend->myprint(".") unless $i++ % $modulus;
 	return if $CPAN::Signal;
     }
-    undef $fh;
+    $CPAN::Frontend->myprint("DONE\n");
     if ($secondtime) {
         for my $class (qw(CPAN::Module CPAN::Bundle CPAN::Distribution)) {
             for my $o ($CPAN::META->all_objects($class)) {
                 next if exists $exists{$o->{ID}};
                 $CPAN::META->delete($class,$o->{ID});
-                CPAN->debug("deleting ID[$o->{ID}] in class[$class]")
-                    if $CPAN::DEBUG;
+                # CPAN->debug("deleting ID[$o->{ID}] in class[$class]")
+                #     if $CPAN::DEBUG;
             }
         }
     }
@@ -3888,37 +3906,45 @@ sub rd_modlist {
     return unless defined $index_target;
     $CPAN::Frontend->myprint("Going to read $index_target\n");
     my $fh = CPAN::Tarzip->TIEHANDLE($index_target);
-    my @eval;
-    local($/) = "\n";
     local $_;
-    while ($_ = $fh->READLINE) {
-	s/\012/\n/g;
-	my @ls = map {"$_\n"} split /\n/, $_;
-	unshift @ls, "\n" x length($1) if /^(\n+)/;
-	push @eval, @ls;
+    my $slurp = "";
+    my $chunk;
+    while (my $bytes = $fh->READ(\$chunk,8192)) {
+        $slurp.=$chunk;
     }
-    while (@eval) {
-	my $shift = shift(@eval);
+    my @eval2 = split /\012/, $slurp;
+
+    while (@eval2) {
+	my $shift = shift(@eval2);
 	if ($shift =~ /^Date:\s+(.*)/){
-	    return if $DATE_OF_03 eq $1;
+	    if ($DATE_OF_03 eq $1){
+                $CPAN::Frontend->myprint("Unchanged.\n");
+                return;
+            }
 	    ($DATE_OF_03) = $1;
 	}
 	last if $shift =~ /^\s*$/;
     }
-    undef $fh;
-    push @eval, q{CPAN::Modulelist->data;};
+    push @eval2, q{CPAN::Modulelist->data;};
     local($^W) = 0;
     my($comp) = Safe->new("CPAN::Safe1");
-    my($eval) = join("", @eval);
-    my $ret = $comp->reval($eval);
+    my($eval2) = join("\n", @eval2);
+    CPAN->debug(sprintf "length of eval2[%d]", length $eval2) if $CPAN::DEBUG;
+    my $ret = $comp->reval($eval2);
     Carp::confess($@) if $@;
     return if $CPAN::Signal;
+    my $i = 0;
+    my $until = keys %$ret;
+    my $modulus = int($until/75) || 1;
+    CPAN->debug(sprintf "until[%d]", $until) if $CPAN::DEBUG;
     for (keys %$ret) {
 	my $obj = $CPAN::META->instance("CPAN::Module",$_);
         delete $ret->{$_}{modid}; # not needed here, maybe elsewhere
 	$obj->set(%{$ret->{$_}});
+        $CPAN::Frontend->myprint(".") unless $i++ % $modulus;
 	return if $CPAN::Signal;
     }
+    $CPAN::Frontend->myprint("DONE\n");
 }
 
 #-> sub CPAN::Index::write_metadata_cache ;
@@ -3951,7 +3977,7 @@ sub read_metadata_cache {
     my $cache;
     eval { $cache = Storable::retrieve($metadata_file) };
     $CPAN::Frontend->mywarn($@) if $@; # ?? missing "\n" after $@ in mywarn ??
-    if (!$cache || ref $cache ne 'HASH'){
+    if (!$cache || !UNIVERSAL::isa($cache, 'HASH')){
         $LAST_TIME = 0;
         return;
     }
@@ -4460,6 +4486,7 @@ sub color_cmd_tmps {
     if (defined $prereq_pm) {
       PREREQ: for my $pre (keys %{$prereq_pm->{requires}||{}},
                            keys %{$prereq_pm->{build_requires}||{}}) {
+            next PREREQ if $pre eq "perl";
             my $premo;
             unless ($premo = CPAN::Shell->expand("Module",$pre)) {
                 $CPAN::Frontend->mywarn("prerequisite module[$pre] not known\n");
@@ -5547,7 +5574,15 @@ or
       return;
     }
     if (my @prereq = $self->unsat_prereq){
-      return 1 if $self->follow_prereqs(@prereq); # signal success to the queuerunner
+        if ($prereq[0][0] eq "perl") {
+            my $need = "requires perl '$prereq[0][1]'";
+            my $id = $self->pretty_id;
+            $CPAN::Frontend->mywarn("$id $need; you have only $]; giving up\n");
+            $self->{make} = CPAN::Distrostatus->new("NO $need");
+            return;
+        } else {
+            return 1 if $self->follow_prereqs(@prereq); # signal success to the queuerunner
+        }
     }
     if ($self->{modulebuild}) {
         unless (-f "Build") {
@@ -5631,27 +5666,37 @@ of modules we are processing right now?", "yes");
 }
 
 #-> sub CPAN::Distribution::unsat_prereq ;
+# return ([Foo=>1],[Bar=>1.2]) for normal modules
+# return ([perl=>5.008]) if we need a newer perl than we are running under
 sub unsat_prereq {
     my($self) = @_;
     my $prereq_pm = $self->prereq_pm or return;
     my(@need);
     my %merged = (%{$prereq_pm->{requires}||{}},%{$prereq_pm->{build_requires}||{}});
   NEED: while (my($need_module, $need_version) = each %merged) {
-        my $nmo = $CPAN::META->instance("CPAN::Module",$need_module);
-        # we were too demanding:
-        next if $nmo->uptodate;
+        my($have_version,$inst_file);
+        if ($need_module eq "perl") {
+            $have_version = $];
+            $inst_file = $^X;
+        } else {
+            my $nmo = $CPAN::META->instance("CPAN::Module",$need_module);
+            next if $nmo->uptodate;
+            $inst_file = $nmo->inst_file;
 
-        # if they have not specified a version, we accept any installed one
-        if (not defined $need_version or
-           $need_version eq "0" or
-           $need_version eq "undef") {
-            next if defined $nmo->inst_file;
+            # if they have not specified a version, we accept any installed one
+            if (not defined $need_version or
+                $need_version eq "0" or
+                $need_version eq "undef") {
+                next if defined $inst_file;
+            }
+
+            $have_version = $nmo->inst_version;
         }
 
         # We only want to install prereqs if either they're not installed
         # or if the installed version is too old. We cannot omit this
         # check, because if 'force' is in effect, nobody else will check.
-        if (defined $nmo->inst_file) {
+        if (defined $inst_file) {
             my(@all_requirements) = split /\s*,\s*/, $need_version;
             local($^W) = 0;
             my $ok = 0;
@@ -5659,13 +5704,13 @@ sub unsat_prereq {
                 if ($rq =~ s|>=\s*||) {
                 } elsif ($rq =~ s|>\s*||) {
                     # 2005-12: one user
-                    if (CPAN::Version->vgt($nmo->inst_version,$rq)){
+                    if (CPAN::Version->vgt($have_version,$rq)){
                         $ok++;
                     }
                     next RQ;
                 } elsif ($rq =~ s|!=\s*||) {
                     # 2005-12: no user
-                    if (CPAN::Version->vcmp($nmo->inst_version,$rq)){
+                    if (CPAN::Version->vcmp($have_version,$rq)){
                         $ok++;
                         next RQ;
                     } else {
@@ -5677,20 +5722,24 @@ sub unsat_prereq {
                     $ok++;
                     next RQ;
                 }
-                if (! CPAN::Version->vgt($rq, $nmo->inst_version)){
+                if (! CPAN::Version->vgt($rq, $have_version)){
                     $ok++;
                 }
-                CPAN->debug(sprintf "id[%s]inst_file[%s]inst_version[%s]rq[%s]ok[%d]",
-                            $nmo->id,
-                            $nmo->inst_file,
-                            $nmo->inst_version,
-                            CPAN::Version->readable($rq),
-                            $ok,
-                           ) if $CPAN::DEBUG;
+                CPAN->debug(sprintf("need_module[%s]inst_file[%s]".
+                                    "inst_version[%s]rq[%s]ok[%d]",
+                                    $need_module,
+                                    $inst_file,
+                                    $have_version,
+                                    CPAN::Version->readable($rq),
+                                    $ok,
+                                   )) if $CPAN::DEBUG;
             }
             next NEED if $ok == @all_requirements;
         }
 
+        if ($need_module eq "perl") {
+            return ["perl", $need_version];
+        }
         if ($self->{sponsored_mods}{$need_module}++){
             # We have already sponsored it and for some reason it's still
             # not available. So we do nothing. Or what should we do?
@@ -5771,12 +5820,6 @@ sub prereq_pm {
             }
             $req = $areq if $do_replace;
         }
-        if ($req) {
-            # XXX maybe needs to be reconsidered: what do we if perl
-            # is too old? I think, we will set $self->{make} to
-            # Distrostatus NO and wind up the stack.
-            delete $req->{perl};
-        }
     }
     unless ($req || $breq) {
         my $build_dir = $self->{build_dir} or die "Panic: no build_dir?";
@@ -5813,7 +5856,10 @@ sub prereq_pm {
             }
         }
     }
-    if (-f "Build.PL" && ! -f "Makefile.PL" && ! exists $req->{"Module::Build"}) {
+    if (-f "Build.PL"
+        && ! -f "Makefile.PL"
+        && ! exists $req->{"Module::Build"}
+        && ! $CPAN::META->has_inst("Module::Build")) {
         $CPAN::Frontend->mywarn("  Warning: CPAN.pm discovered Module::Build as ".
                                 "undeclared prerequisite.\n".
                                 "  Adding it now as such.\n"
@@ -5843,7 +5889,9 @@ sub test {
     my $make = $self->{modulebuild} ? "Build" : "make";
     $CPAN::Frontend->myprint("Running $make test\n");
     if (my @prereq = $self->unsat_prereq){
-      return 1 if $self->follow_prereqs(@prereq); # signal success to the queuerunner
+        unless ($prereq[0][0] eq "perl") {
+            return 1 if $self->follow_prereqs(@prereq); # signal success to the queuerunner
+        }
     }
   EXCUSE: {
 	my @e;
@@ -5866,14 +5914,6 @@ sub test {
 
         exists $self->{later} and length($self->{later}) and
             push @e, $self->{later};
-
-        if ($self->{modulebuild}) {
-            my $v = CPAN::Shell->expand("Module","Test::Harness")->inst_version;
-            if (CPAN::Version->vlt($v,2.62)) {
-                push @e, qq{The version of your Test::Harness is only
-  '$v', you need at least '2.62'. Please upgrade your Test::Harness.};
-            }
-        }
 
         if ($CPAN::META->{is_tested}{$self->{build_dir}}
             &&
@@ -5898,6 +5938,16 @@ sub test {
     if ($^O eq 'MacOS') {
         Mac::BuildTools::make_test($self);
         return;
+    }
+
+    if ($self->{modulebuild}) {
+        my $v = CPAN::Shell->expand("Module","Test::Harness")->inst_version;
+        if (CPAN::Version->vlt($v,2.62)) {
+            $CPAN::Frontend->mywarn(qq{The version of your Test::Harness is only
+  '$v', you need at least '2.62'. Please upgrade your Test::Harness.\n});
+            $self->{make_test} = CPAN::Distrostatus->new("NO Test::Harness too old");
+            return;
+        }
     }
 
     local $ENV{PERL5LIB} = defined($ENV{PERL5LIB})
@@ -8139,13 +8189,45 @@ interferences of the software producing the indices on CPAN, of the
 mirroring process on CPAN, of packaging, of configuration, of
 synchronicity, and of bugs within CPAN.pm.
 
-For code debugging in interactive mode you can try "o debug" which
-will list options for debugging the various parts of the code. You
-should know that "o debug" has built-in completion support.
+For debugging the code of CPAN.pm itself in interactive mode some more
+or less useful debugging aid can be turned on for most packages within
+CPAN.pm with one of
 
-For data debugging there is the C<dump> command which takes the same
-arguments as make/test/install and outputs the object's Data::Dumper
-dump.
+=over 2
+
+=item o debug package...
+
+sets debug mode for packages.
+
+=item o debug -package...
+
+unsets debug mode for packages.
+
+=item o debug all
+
+turns debugging on for all packages.
+
+=item o debug number
+
+=back
+
+which sets the debugging packages directly. Note that C<o debug 0>
+turns debugging off.
+
+What seems quite a successful strategy is the combination of C<reload
+cpan> and the debugging switches. Add a new debug statement while
+running in the shell and then issue a C<reload cpan> and see the new
+debugging messages immediately without losing the current context.
+
+C<o debug> without an argument lists the valid package names and the
+current set of packages in debugging mode. C<o debug> has built-in
+completion support.
+
+For debugging of CPAN data there is the C<dump> command which takes
+the same arguments as make/test/install and outputs each object's
+Data::Dumper dump. If an argument looks like a perl variable and
+contains one of C<$>, C<@> or C<%>, it is eval()ed and fed to
+Data::Dumper directly.
 
 =head2 Floppy, Zip, Offline Mode
 

@@ -33,8 +33,10 @@ while (@$D) {
   if ($has_versionpm) {
     local $^W;
     my $vpack = "version"; # hide the name from 5.004
-    my $vres = $vpack->new($l) cmp $vpack->new($r);
-    if ($vres != $res) {
+    my $vres = eval { $vpack->new($l) cmp $vpack->new($r); };
+    if ($@) {
+      push @other, "v.pm: $@";
+    } elsif ($vres != $res) {
       push @other, sprintf "v.pm: %d", $vres;
     }
   }
@@ -61,6 +63,8 @@ VERSION VERSION 0
 1.57_00 1.57 1
 1.5700 1.57 1
 1.57_01 1.57 1
+1.88_51 1.8801 1
+1.8_8_5_1 1.8801 1
 0.2.10 0.2 -1
 20000000.00 19990108 1
 1.00 0.96 1

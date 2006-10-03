@@ -2,7 +2,7 @@ package CPAN::HandleConfig;
 use strict;
 use vars qw(%can %keys $VERSION);
 
-$VERSION = sprintf "%.6f", substr(q$Rev: 916 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 958 $,4)/1000000 + 5.4;
 
 %can = (
         commit   => "Commit changes to disk",
@@ -148,7 +148,8 @@ sub edit {
             $CPAN::Config->{$o} = { @args };
         } else {
 	    $CPAN::Config->{$o} = $args[0] if defined $args[0];
-	    $self->prettyprint($o);
+	    $self->prettyprint($o)
+                if exists $keys{$o} or defined $CPAN::Config->{$o};
             return 1;
 	}
     }
@@ -580,7 +581,7 @@ package
 
 use strict;
 use vars qw($AUTOLOAD $VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 916 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 958 $,4)/100;
 
 # formerly CPAN::HandleConfig was known as CPAN::Config
 sub AUTOLOAD {
