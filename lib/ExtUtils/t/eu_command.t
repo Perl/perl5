@@ -23,14 +23,14 @@ BEGIN {
 }
 
 BEGIN {
-    use Test::More tests => 38;
+    use Test::More tests => 41;
     use File::Spec;
 }
 
 BEGIN {
     # bad neighbor, but test_f() uses exit()
-    *CORE::GLOBAL::exit = '';   # quiet 'only once' warning.
-    *CORE::GLOBAL::exit = sub { return $_[0] };
+        *CORE::GLOBAL::exit = '';   # quiet 'only once' warning.
+    *CORE::GLOBAL::exit = sub { return @_ };
     use_ok( 'ExtUtils::Command' );
 }
 
@@ -53,16 +53,19 @@ BEGIN {
     is( scalar( $$out =~ s/use_ok\( 'ExtUtils::Command'//g), 2, 
         'concatenation worked' );
 
-    # the truth value here is reversed -- Perl true is shell false
+    # the truth value here is reversed -- Perl true is C false
     @ARGV = ( $Testfile );
     ok( test_f(), 'testing non-existent file' );
+
+    @ARGV = ( $Testfile );
+    cmp_ok( ! test_f(), '==', (-f $Testfile), 'testing non-existent file' );
 
     # these are destructive, have to keep setting @ARGV
     @ARGV = ( $Testfile );
     touch();
 
     @ARGV = ( $Testfile );
-    ok( !test_f(), 'now creating that file' );
+    ok( test_f(), 'now creating that file' );
     is_deeply( \@ARGV, [$Testfile], 'test_f preserves @ARGV' );
 
     @ARGV = ( $Testfile );
@@ -105,7 +108,7 @@ BEGIN {
             $^O eq 'NetWare' || $^O eq 'dos' || $^O eq 'cygwin'  ||
             $^O eq 'MacOS'
            ) {
-            skip( "different file permission semantics on $^O", 4);
+            skip( "different file permission semantics on $^O", 3);
         }
 
         # change a file to execute-only
@@ -159,13 +162,6 @@ BEGIN {
         is( ((stat('testdir'))[2] & 07777) & 0700,
             0100, 'change a dir to execute-only' );
 
-        # change a dir to write-only
-        @ARGV = ( '0200', 'testdir' );
-        ExtUtils::Command::chmod();
-
-        is( ((stat('testdir'))[2] & 07777) & 0700,
-            ($^O eq 'vos' ? 0700 : 0200), 'change a dir to write-only' );
-
         # change a dir to read-only
         @ARGV = ( '0400', 'testdir' );
         ExtUtils::Command::chmod();
@@ -173,19 +169,33 @@ BEGIN {
         is( ((stat('testdir'))[2] & 07777) & 0700,
             ($^O eq 'vos' ? 0500 : 0400), 'change a dir to read-only' );
 
+        # change a dir to write-only
+        @ARGV = ( '0200', 'testdir' );
+        ExtUtils::Command::chmod();
+
+        is( ((stat('testdir'))[2] & 07777) & 0700,
+            ($^O eq 'vos' ? 0700 : 0200), 'change a dir to write-only' );
+
         @ARGV = ('testdir');
         rm_rf;
-        ok( ! -e 'testdir', 'rm_rf can delete a read-only dir' );
     }
 
 
     # mkpath
-    @ARGV = ( File::Spec->join( 'ecmddir', 'temp2' ) );
+    my $test_dir = File::Spec->join( 'ecmddir', 'temp2' );
+    @ARGV = ( $test_dir );
     ok( ! -e $ARGV[0], 'temp directory not there yet' );
+    ok( test_d(), 'testing non-existent directory' );
 
+    @ARGV = ( $test_dir );
+    cmp_ok( ! test_d(), '==', (-d $test_dir), 'testing non-existent dir' );
+
+    @ARGV = ( $test_dir );
     mkpath();
     ok( -e $ARGV[0], 'temp directory created' );
+    cmp_ok( test_d(), '==', (-d $test_dir), 'testing existing dir' );
 
+    @ARGV = ( $test_dir );
     # copy a file to a nested subdirectory
     unshift @ARGV, $Testfile;
     @orig_argv = @ARGV;
