@@ -13,7 +13,7 @@ use vars qw($VERSION @ISA @EXPORT_OK
           $Is_MacOS $Is_VMS 
           $Debug $Verbose $Quiet $MANIFEST $DEFAULT_MSKIP);
 
-$VERSION = '1.46_01';
+$VERSION = '1.48';
 @ISA=('Exporter');
 @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
@@ -701,7 +701,9 @@ L<ExtUtils::MakeMaker> which has handy targets for most of the functionality.
 
 Andreas Koenig C<andreas.koenig@anima.de>
 
-Currently maintained by Michael G Schwern C<schwern@pobox.com>
+Maintained by Michael G Schwern C<schwern@pobox.com> within the
+ExtUtils-MakeMaker package and, as a separate CPAN package, by
+Randy Kobes C<r.kobes@uwinnipeg.ca>.
 
 =cut
 
