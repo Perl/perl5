@@ -1,5 +1,9 @@
 Revision history for Perl extension threads.
 
+1.42 Mon Sep 18 11:17:13 EDT 2006
+	- Fixes to tests
+	- Move $threads::threads outside of BEGIN block
+
 1.41 Fri Sep  8 19:28:41 EST 2006
 	- Race condition fixes
 

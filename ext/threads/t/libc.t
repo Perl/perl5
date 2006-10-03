@@ -60,12 +60,6 @@ for (0..$i) {
 my $mutex = 2;
 share($mutex);
 
-sub localtime_r {
-    lock($mutex);
-    my $retval = localtime(shift());
-    return $retval;
-}
-
 my @threads;
 for (0..$i) {
     my $thread = threads->create(sub {
@@ -74,13 +68,17 @@ for (0..$i) {
                     my $error = 0;
                     for (0..$y) {
                         my $lt = localtime($arg);
-                        if($localtime ne $lt) {
+                        if ($localtime ne $lt) {
                             $error++;
                         }
                     }
                     lock($mutex);
+                    while ($mutex != ($_ + 2)) {
+                        cond_wait($mutex);
+                    }
                     ok($mutex, ! $error, 'localtime safe');
                     $mutex++;
+                    cond_broadcast($mutex);
                   });
     push @threads, $thread;
 }

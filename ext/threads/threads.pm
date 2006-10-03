@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.41';
+our $VERSION = '1.42';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -17,9 +17,6 @@ BEGIN {
         die("This Perl not built to support threads\n");
     }
 
-    # Declare that we have been loaded
-    $threads::threads = 1;
-
     # Complain if 'threads' is loaded after 'threads::shared'
     if ($threads::shared::threads_shared) {
         warn <<'_MSG_';
@@ -30,6 +27,9 @@ _MSG_
    }
 }
 
+
+# Declare that we have been loaded
+$threads::threads = 1;
 
 # Load the XS code
 require XSLoader;
@@ -129,7 +129,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.41
+This document describes threads version 1.42
 
 =head1 SYNOPSIS
 
@@ -886,7 +886,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.41/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.42/threads.pm>
 
 L<threads::shared>, L<perlthrtut>
 
