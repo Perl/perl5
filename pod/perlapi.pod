@@ -5609,7 +5609,7 @@ X<sv_reftype>
 
 Returns a string describing what the SV is a reference to.
 
-	char*	sv_reftype(const SV* sv, int ob)
+	const char*	sv_reftype(const SV* sv, int ob)
 
 =for hackers
 Found in file sv.c

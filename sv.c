@@ -7631,7 +7631,7 @@ Returns a string describing what the SV is a reference to.
 =cut
 */
 
-char *
+const char *
 Perl_sv_reftype(pTHX_ const SV *sv, int ob)
 {
     /* The fact that I don't need to downcast to char * everywhere, only in ?:
