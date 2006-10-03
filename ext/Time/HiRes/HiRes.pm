@@ -21,7 +21,7 @@ require DynaLoader;
 		 d_nanosleep d_clock_gettime d_clock_getres
 		 d_clock d_clock_nanosleep);
 	
-$VERSION = '1.90';
+$VERSION = '1.91';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -448,6 +448,12 @@ Here is an example of using C<NVtime> from C:
   printf("The current time is: %f\n", (*myNVtime)());
 
 =head1 DIAGNOSTICS
+
+=head2 useconds or interval more than ...
+
+In ualarm() you tried to use number of microseconds or interval (also
+in microseconds) more than 1_000_000 and setitimer() is not available
+in your system to emulate that case.
 
 =head2 negative time not invented yet
 

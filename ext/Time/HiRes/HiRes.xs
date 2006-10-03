@@ -468,12 +468,9 @@ hrt_usleep(unsigned long usec)
 
 #endif /* #if !defined(HAS_USLEEP) && defined(HAS_POLL) */
 
-#if !defined(HAS_UALARM) && defined(HAS_SETITIMER)
-#define HAS_UALARM
-#define ualarm hrt_ualarm  /* could conflict with ncurses for static build */
-
+#if defined(HAS_SETITIMER) && defined(ITIMER_REAL)
 int
-hrt_ualarm(int usec, int interval)
+hrt_ualarm_itimer(int usec, int interval)
 {
    struct itimerval itv;
    itv.it_value.tv_sec = usec / IV_1E6;
@@ -483,6 +480,11 @@ hrt_ualarm(int usec, int interval)
    return setitimer(ITIMER_REAL, &itv, 0);
 }
 #endif /* #if !defined(HAS_UALARM) && defined(HAS_SETITIMER) */
+
+#if !defined(HAS_UALARM) && defined(HAS_SETITIMER)
+#define HAS_UALARM
+#define ualarm hrt_ualarm_itimer  /* could conflict with ncurses for static build */
+#endif
 
 #if !defined(HAS_UALARM) && defined(VMS)
 #define HAS_UALARM
@@ -874,7 +876,14 @@ ualarm(useconds,interval=0)
 	CODE:
 	if (useconds < 0 || interval < 0)
 	    croak("Time::HiRes::ualarm(%d, %d): negative time not invented yet", useconds, interval);
-	RETVAL = ualarm(useconds, interval);
+	if (useconds >= IV_1E6 || interval >= IV_1E6)
+#if defined(HAS_SETITIMER) && defined(ITIMER_REAL)
+		RETVAL = hrt_ualarm_itimer(useconds, interval);
+#else
+		croak("Time::HiRes::ualarm(%d, %d): useconds or interval equal or more than %"IVdf, useconds, interval, IV_1E6);
+#endif
+	else
+		RETVAL = ualarm(useconds, interval);
 
 	OUTPUT:
 	RETVAL

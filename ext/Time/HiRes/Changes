@@ -1,5 +1,12 @@
 Revision history for Perl extension Time::HiRes.
 
+1.91	[2006-09-28]
+	- ualarm() in SuSE 10.1 was overflowing after ~4.2 seconds,
+	  probably due to a glibc bug/feature, workaround by using the
+	  setitimer() variant if either useconds or interval >= IV_1E6
+	  (this case seems to vary between systems: are useconds
+	   more than 999_999 for ualarm() defined or not)
+
 1.90	[2006-08-22]
 	- tweak still needed for Const64(), from Jerry Hedden
 	- get a freshly generated ppport.h
