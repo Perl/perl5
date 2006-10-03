@@ -1088,6 +1088,12 @@ ext/Sys/Syslog/Syslog.xs	Sys::Syslog extension external subroutines
 ext/Sys/Syslog/t/00-load.t	test for Sys::Syslog
 ext/Sys/Syslog/t/constants.t	test for Sys::Syslog
 ext/Sys/Syslog/t/syslog.t	See if Sys::Syslog works
+ext/Text/Soundex/Changes	Changelog for Text::Soundex
+ext/Text/Soundex/Makefile.PL	Text::Soundex extension makefile writer
+ext/Text/Soundex/README		README for Text::Soundex
+ext/Text/Soundex/Soundex.pm	Text::Soundex extension Perl module
+ext/Text/Soundex/Soundex.xs	Text::Soundex extension external subroutines
+ext/Text/Soundex/t/Soundex.t	test for Text::Soundex
 ext/Thread/create.tx		Test thread creation
 ext/Thread/die2.tx		Test thread die() differently
 ext/Thread/die.tx		Test thread die()
@@ -2484,8 +2490,6 @@ lib/Text/Balanced/t/pod.t	See if Text::Balanced works
 lib/Text/ParseWords.pm		Perl module to split words on arbitrary delimiter
 lib/Text/ParseWords.t		See if Text::ParseWords works
 lib/Text/ParseWords/taint.t	See if Text::ParseWords works with tainting
-lib/Text/Soundex.pm		Perl module to implement Soundex
-lib/Text/Soundex.t		See if Soundex works
 lib/Text/Tabs.pm		Do expand and unexpand
 lib/Text/TabsWrap/CHANGELOG	ChangeLog for Tabs+Wrap
 lib/Text/TabsWrap/t/37000.t	See if Text::Tabs is working
