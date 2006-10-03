@@ -58,12 +58,11 @@ my $want = {	# expected types, how value renders in-line, todos (maybe)
     myhref	=> [ 'RV', '\\\\HASH'],
     myundef	=> [ 'NULL', ],
     pi		=> [ 'NV', pi ],
-    # these have todos, since they render as a bare backslash
-    myaref	=> [ 'RV', '\\\\', ' - should render as \\ARRAY' ],
-    myglob	=> [ 'RV', '\\\\', ' - should render as \\GV' ],
-    myrex	=> [ 'RV', '\\\\', ' - should render as ??' ],
-    mysub	=> [ 'RV', '\\\\', ' - should render as \\CV' ],
-    myunsub	=> [ 'RV', '\\\\', ' - should render as \\CV' ],
+    myaref	=> [ 'RV', '\\\\' ],
+    myglob	=> [ 'RV', '\\\\' ],
+    myrex	=> [ 'RV', '\\\\' ],
+    mysub	=> [ 'RV', '\\\\' ],
+    myunsub	=> [ 'RV', '\\\\' ],
     # these are not inlined, at least not per BC::Concise
     #myyes	=> [ 'RV', ],
     #myno	=> [ 'RV', ],
