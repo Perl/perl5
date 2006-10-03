@@ -1,3 +1,17 @@
+  Version 3.25
+  1. Fixed the link to the Netscape frames page.
+  2. Added ability to specify an alternate stylesheet.
+
+  Version 3.24
+  1. In startform(), if request_uri() returns undef, then falls back
+  to self_url(). This should rarely happen except when run outside of
+  the CGI environment.
+  2. image button alignment options were mistakenly being capitalized, causing xhtml validation to fail.
+
+  Version 3.23
+  1. Typo in upload() persisted, now fixed for real. Thanks to
+  Emanuele Zeppieri for correct patch and regression test.
+
   Version 3.22
   1. Typo in upload() function broke uploads. Now fixed (CPAN bug 21126).
 

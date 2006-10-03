@@ -261,7 +261,7 @@ sub expire_calc {
         $offset = 0;
     } elsif ($time=~/^\d+/) {
         return $time;
-    } elsif ($time=~/^([+-]?(?:\d+|\d*\.\d*))([mhdMy]?)/) {
+    } elsif ($time=~/^([+-]?(?:\d+|\d*\.\d*))([mhdMy])/) {
         $offset = ($mult{$2} || 1)*$1;
     } else {
         return $time;
