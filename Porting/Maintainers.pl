@@ -38,6 +38,7 @@ package Maintainers;
 	'laun'		=> 'Wolfgang Laun <Wolfgang.Laun@alcatel.at>',
 	'lstein'	=> 'Lincoln D. Stein <lds@cpan.org>',
 	'marekr'	=> 'Marek Rouchal <marekr@cpan.org>',
+	'markm'		=> 'Mark Mielke <markm@cpan.org>',
 	'mhx'		=> 'Marcus Holland-Moritz <mhx@cpan.org>',
 	'mjd'		=> 'Mark-Jason Dominus <mjd@plover.com>',
 	'mshelor'	=> 'Mark Shelor <mshelor@cpan.org>',
@@ -617,6 +618,13 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'dmanura',
 		'FILES'		=> q[lib/Text/Balanced.pm lib/Text/Balanced],
+		'CPAN'		=> 1,
+		},
+
+	'Text::Soundex' =>
+		{
+		'MAINTAINER'	=> 'markm',
+		'FILES'		=> q[ext/Text/Soundex],
 		'CPAN'		=> 1,
 		},
 
