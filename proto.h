@@ -2288,7 +2288,7 @@ PERL_CALLCONV bool	Perl_sv_cat_decode(pTHX_ SV* dsv, SV *encoding, SV *ssv, int 
 			__attribute__nonnull__(pTHX_4)
 			__attribute__nonnull__(pTHX_5);
 
-PERL_CALLCONV char*	Perl_sv_reftype(pTHX_ const SV* sv, int ob)
+PERL_CALLCONV const char*	Perl_sv_reftype(pTHX_ const SV* sv, int ob)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
