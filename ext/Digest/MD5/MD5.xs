@@ -587,7 +587,7 @@ clone(self)
 	SV* self
     PREINIT:
 	MD5_CTX* cont = get_md5_ctx(aTHX_ self);
-	char *myname = sv_reftype(SvRV(self),TRUE);
+	const char *myname = sv_reftype(SvRV(self),TRUE);
 	MD5_CTX* context;
     PPCODE:
 	New(55, context, 1, MD5_CTX);
