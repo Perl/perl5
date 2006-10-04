@@ -3895,7 +3895,7 @@ reStudy:
 
     /* testing for BRANCH here tells us whether there is "must appear"
        data in the pattern. If there is then we can use it for optimisations */
-    if (OP(scan) != BRANCH) {	/* Only one top-level choice. */
+    if (!(RExC_seen & REG_TOP_LEVEL_BRANCHES)) { /*  Only one top-level choice. */
 	I32 fake;
 	STRLEN longest_float_length, longest_fixed_length;
 	struct regnode_charclass_class ch_class; /* pointed to by data */
@@ -4747,9 +4747,12 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    ender = reg_node(pRExC_state, END);
 	    break;
 	}
-        REGTAIL_STUDY(pRExC_state, lastbr, ender);
+        REGTAIL(pRExC_state, lastbr, ender);
 
 	if (have_branch && !SIZE_ONLY) {
+	    if (depth==1)
+	        RExC_seen |= REG_TOP_LEVEL_BRANCHES;
+
 	    /* Hook the tails of the branches to the closing node. */
 	    for (br = ret; br; br = regnext(br)) {
 		const U8 op = PL_regkind[OP(br)];
@@ -7147,8 +7150,11 @@ S_regtail(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,U32 de
             SV * const mysv=sv_newmortal();
             DEBUG_PARSE_MSG((scan==p ? "tail" : ""));
             regprop(RExC_rx, mysv, scan);
-            PerlIO_printf(Perl_debug_log, "~ %s (%d)\n",
-                SvPV_nolen_const(mysv), REG_NODE_NUM(scan));
+            PerlIO_printf(Perl_debug_log, "~ %s (%d) %s %s\n",
+                SvPV_nolen_const(mysv), REG_NODE_NUM(scan),
+                    (temp == NULL ? "->" : ""),
+                    (temp == NULL ? reg_name[OP(val)] : "")
+            );
         });
         if (temp == NULL)
             break;
@@ -7225,10 +7231,10 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,
             SV * const mysv=sv_newmortal();
             DEBUG_PARSE_MSG((scan==p ? "tsdy" : ""));
             regprop(RExC_rx, mysv, scan);
-            PerlIO_printf(Perl_debug_log, "~ %s (%s) (%d)\n",
+            PerlIO_printf(Perl_debug_log, "~ %s (%d) -> %s\n",
                 SvPV_nolen_const(mysv),
-                reg_name[exact],
-                REG_NODE_NUM(scan));
+                REG_NODE_NUM(scan),
+                reg_name[exact]);
         });
 	if (temp == NULL)
 	    break;
