@@ -117,8 +117,9 @@ typedef struct RExC_state_t {
     I32		extralen;
     I32		seen_zerolen;
     I32		seen_evals;
+    regnode	**parens;		/* offsets of each paren */
     I32		utf8;
-    HV  	*charnames; /* cache of named sequences */
+    HV		*charnames;		/* cache of named sequences */
 #if ADD_TO_REGEXEC
     char 	*starttry;		/* -Dr: where regtry was called. */
 #define RExC_starttry	(pRExC_state->starttry)
@@ -151,6 +152,7 @@ typedef struct RExC_state_t {
 #define RExC_seen_evals	(pRExC_state->seen_evals)
 #define RExC_utf8	(pRExC_state->utf8)
 #define RExC_charnames  (pRExC_state->charnames)
+#define RExC_parens	(pRExC_state->parens)
 
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
 #define	ISMULT2(s)	((*s) == '*' || (*s) == '+' || (*s) == '?' || \
@@ -2709,6 +2711,9 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    }
 	    flags &= ~SCF_DO_STCLASS;
 	}
+	else if (OP(scan)==RECURSE) {
+            ARG2L_SET( scan, RExC_parens[ARG(scan)-1] - scan ); 
+	} 
 	else if (strchr((const char*)PL_varies,OP(scan))) {
 	    I32 mincount, maxcount, minnext, deltanext, fl = 0;
 	    I32 f = flags, pos_before = 0;
@@ -3766,6 +3771,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     RExC_emit = &PL_regdummy;
     RExC_whilem_seen = 0;
     RExC_charnames = NULL;
+    RExC_parens= NULL;
     
 #if 0 /* REGC() is (currently) a NOP at the first pass.
        * Clever compilers notice this and complain. --jhi */
@@ -3820,8 +3826,14 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 
     r->substrs = 0;			/* Useful during FAIL. */
     r->startp = 0;			/* Useful during FAIL. */
-    r->endp = 0;			/* Useful during FAIL. */
 
+    r->endp = 0;			
+    if (RExC_seen & REG_SEEN_RECURSE) {
+        Newx(RExC_parens, RExC_npar,regnode *);
+        SAVEFREEPV(RExC_parens);
+    }
+
+    /* Useful during FAIL. */
     Newxz(r->offsets, 2*RExC_size+1, U32); /* MJD 20001228 */
     if (r->offsets) {
 	r->offsets[0] = RExC_size;
@@ -3847,6 +3859,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     r->data = 0;
     if (reg(pRExC_state, 0, &flags,1) == NULL)
 	return(NULL);
+
     /* XXXX To minimize changes to RE engine we always allocate
        3-units-long substrs field. */
     Newx(r->substrs, 1, struct reg_substr_data);
@@ -4242,10 +4255,6 @@ reStudy:
     Newxz(r->startp, RExC_npar, I32);
     Newxz(r->endp, RExC_npar, I32);
     
-    
-    if (RExC_charnames) 
-        SvREFCNT_dec((SV*)(RExC_charnames));
-
     DEBUG_r( RX_DEBUG_on(r) );
     DEBUG_DUMP_r({
         PerlIO_printf(Perl_debug_log,"Final program:\n");
@@ -4311,6 +4320,10 @@ reStudy:
 #define DEBUG_PARSE(funcname)     DEBUG_PARSE_r({           \
     DEBUG_PARSE_MSG((funcname));                            \
     PerlIO_printf(Perl_debug_log,"%4s","\n");               \
+})
+#define DEBUG_PARSE_FMT(funcname,fmt,args)     DEBUG_PARSE_r({           \
+    DEBUG_PARSE_MSG((funcname));                            \
+    PerlIO_printf(Perl_debug_log,fmt "\n",args);               \
 })
 /*
  - reg - regular expression, i.e. main body or parenthesized thing
@@ -4399,6 +4412,41 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		nextchar(pRExC_state);
 		*flagp = TRYAGAIN;
 		return NULL;
+            case 'R' :
+                if (*RExC_parse != ')')
+		    FAIL("Sequence (?R) not terminated");
+		reg_node(pRExC_state, SRECURSE);
+		break;
+            case '1': case '2': case '3': case '4': /* (?1) */
+	    case '5': case '6': case '7': case '8': case '9':
+	        RExC_parse--;
+	    {
+		const I32 num = atoi(RExC_parse);
+  	        char * const parse_start = RExC_parse - 1; /* MJD */
+		while (isDIGIT(*RExC_parse))
+			RExC_parse++;
+	        if (*RExC_parse!=')') 
+	            vFAIL("Expecting close bracket");
+                ret = reganode(pRExC_state, RECURSE, num);
+                if (!SIZE_ONLY) {
+		    if (num > (I32)RExC_rx->nparens) {
+			RExC_parse++;
+			vFAIL("Reference to nonexistent group");
+	            }
+	            ARG2L_SET( ret, 0);
+                    RExC_emit++;
+                    DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log, 
+                      "Recurse #%d to %d\n", ARG(ret), ARG2L(ret)));
+		} else{
+		    RExC_size++;
+	            RExC_seen|=REG_SEEN_RECURSE;
+    		}
+                Set_Node_Length(ret, 1 + regarglen[OP(ret)]); /* MJD */
+                Set_Node_Offset(ret, RExC_parse); /* MJD */
+                
+                nextchar(pRExC_state);
+                return ret;
+            }
 	    case 'p':           /* (?p...) */
 		if (SIZE_ONLY && ckWARN2(WARN_DEPRECATED, WARN_REGEXP))
 		    vWARNdep(RExC_parse, "(?p{}) is deprecated - use (??{})");
@@ -4612,6 +4660,12 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    parno = RExC_npar;
 	    RExC_npar++;
 	    ret = reganode(pRExC_state, OPEN, parno);
+	    if (!SIZE_ONLY && RExC_seen & REG_SEEN_RECURSE) {
+    		DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log, "Setting paren #%d to %d\n",
+		      parno,REG_NODE_NUM(ret)));
+	        RExC_parens[parno-1]= ret;
+	        
+	    }
             Set_Node_Length(ret, 1); /* MJD */
             Set_Node_Offset(ret, RExC_parse); /* MJD */
 	    is_open = 1;
@@ -4629,10 +4683,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	return(NULL);
     if (*RExC_parse == '|') {
 	if (!SIZE_ONLY && RExC_extralen) {
-	    reginsert(pRExC_state, BRANCHJ, br);
+	    reginsert(pRExC_state, BRANCHJ, br, depth+1);
 	}
 	else {                  /* MJD */
-	    reginsert(pRExC_state, BRANCH, br);
+	    reginsert(pRExC_state, BRANCH, br, depth+1);
             Set_Node_Length(br, paren != 0);
             Set_Node_Offset_To_R(br-RExC_emit_start, parse_start-RExC_start);
         }
@@ -4719,7 +4773,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
 	    if (paren == '>')
 		node = SUSPEND, flag = 0;
-	    reginsert(pRExC_state, node,ret);
+	    reginsert(pRExC_state, node,ret, depth+1);
 	    Set_Node_Cur_Length(ret);
 	    Set_Node_Offset(ret, parse_start + 1);
 	    ret->flags = flag;
@@ -4880,7 +4934,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	do_curly:
 	    if ((flags&SIMPLE)) {
 		RExC_naughty += 2 + RExC_naughty / 2;
-		reginsert(pRExC_state, CURLY, ret);
+		reginsert(pRExC_state, CURLY, ret, depth+1);
                 Set_Node_Offset(ret, parse_start+1); /* MJD */
                 Set_Node_Cur_Length(ret);
 	    }
@@ -4890,11 +4944,11 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 		w->flags = 0;
                 REGTAIL(pRExC_state, ret, w);
 		if (!SIZE_ONLY && RExC_extralen) {
-		    reginsert(pRExC_state, LONGJMP,ret);
-		    reginsert(pRExC_state, NOTHING,ret);
+		    reginsert(pRExC_state, LONGJMP,ret, depth+1);
+		    reginsert(pRExC_state, NOTHING,ret, depth+1);
 		    NEXT_OFF(ret) = 3;	/* Go over LONGJMP. */
 		}
-		reginsert(pRExC_state, CURLYX,ret);
+		reginsert(pRExC_state, CURLYX,ret, depth+1);
                                 /* MJD hk */
                 Set_Node_Offset(ret, parse_start+1);
                 Set_Node_Length(ret,
@@ -4928,6 +4982,10 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	*flagp = flags;
 	return(ret);
     }
+    /* else if (OP(ret)==RECURSE) {
+        RExC_parse++;
+        vFAIL("Illegal quantifier on recursion group");
+    } */
 
 #if 0				/* Now runtime fix should be reliable. */
 
@@ -4951,7 +5009,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     *flagp = (op != '+') ? (WORST|SPSTART|HASWIDTH) : (WORST|HASWIDTH);
 
     if (op == '*' && (flags&SIMPLE)) {
-	reginsert(pRExC_state, STAR, ret);
+	reginsert(pRExC_state, STAR, ret, depth+1);
 	ret->flags = 0;
 	RExC_naughty += 4;
     }
@@ -4960,7 +5018,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	goto do_curly;
     }
     else if (op == '+' && (flags&SIMPLE)) {
-	reginsert(pRExC_state, PLUS, ret);
+	reginsert(pRExC_state, PLUS, ret, depth+1);
 	ret->flags = 0;
 	RExC_naughty += 3;
     }
@@ -4982,7 +5040,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     if (*RExC_parse == '?') {
 	nextchar(pRExC_state);
-	reginsert(pRExC_state, MINMOD, ret);
+	reginsert(pRExC_state, MINMOD, ret, depth+1);
         REGTAIL(pRExC_state, ret, ret + NODE_STEP_REGNODE);
     }
     if (ISMULT2(RExC_parse)) {
@@ -5098,6 +5156,7 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep)
         if (!RExC_charnames) {
             /* make sure our cache is allocated */
             RExC_charnames = newHV();
+            sv_2mortal((SV*)RExC_charnames);
         } 
             /* see if we have looked this one up before */
         he_str = hv_fetch_ent( RExC_charnames, sv_name, 0, 0 );
@@ -6944,6 +7003,20 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
     if (SIZE_ONLY) {
 	SIZE_ALIGN(RExC_size);
 	RExC_size += 2;
+	/* 
+	   We can't do this:
+	   
+	   assert(2==regarglen[op]+1); 
+	
+	   Anything larger than this has to allocate the extra amount.
+	   If we changed this to be:
+	   
+	   RExC_size += (1 + regarglen[op]);
+	   
+	   then it wouldn't matter. Its not clear what side effect
+	   might come from that so its not done so far.
+	   -- dmq
+	*/
 	return(ret);
     }
 
@@ -6984,24 +7057,33 @@ S_reguni(pTHX_ const RExC_state_t *pRExC_state, UV uv, char* s)
 * Means relocating the operand.
 */
 STATIC void
-S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd)
+S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
 {
     dVAR;
     register regnode *src;
     register regnode *dst;
     register regnode *place;
     const int offset = regarglen[(U8)op];
+    const int size = NODE_STEP_REGNODE + offset;
     GET_RE_DEBUG_FLAGS_DECL;
 /* (PL_regkind[(U8)op] == CURLY ? EXTRA_STEP_2ARGS : 0); */
-
+    DEBUG_PARSE_FMT("inst"," - %s",reg_name[op]);
     if (SIZE_ONLY) {
-	RExC_size += NODE_STEP_REGNODE + offset;
+	RExC_size += size;
 	return;
     }
 
     src = RExC_emit;
-    RExC_emit += NODE_STEP_REGNODE + offset;
+    RExC_emit += size;
     dst = RExC_emit;
+    if (RExC_parens) {
+        int paren;
+        for ( paren=0 ; paren < RExC_npar ; paren++ ) {
+            if ( RExC_parens[paren] >= src ) 
+                RExC_parens[paren] += size;
+        }            
+    }
+    
     while (src > opnd) {
 	StructCopy(--src, --dst, regnode);
         if (RExC_offsets) {     /* MJD 20010112 */
@@ -7374,8 +7456,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     }
     else if (k == WHILEM && o->flags)			/* Ordinal/of */
 	Perl_sv_catpvf(aTHX_ sv, "[%d/%d]", o->flags & 0xf, o->flags>>4);
-    else if (k == REF || k == OPEN || k == CLOSE || k == GROUPP )
+    else if (k == REF || k == OPEN || k == CLOSE || k == GROUPP) 
 	Perl_sv_catpvf(aTHX_ sv, "%d", (int)ARG(o));	/* Parenth number */
+    else if (k == RECURSE)
+	Perl_sv_catpvf(aTHX_ sv, "%d[%+d]", (int)ARG(o),(int)ARG2L(o));	/* Paren and offset */
     else if (k == LOGICAL)
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */
     else if (k == ANYOF) {

@@ -3632,7 +3632,31 @@ $brackets = qr{
 	      }x;
 ok("{b{c}d" !~ m/^((??{ $brackets }))/, "bracket mismatch");
 
+SKIP:{
+    our @stack=();
+    my @expect=qw(
+        stuff1
+        stuff2
+        <stuff1>and<stuff2>
+        right
+        <right>
+        <<right>>
+        <<<right>>>
+        <<stuff1>and<stuff2>><<<<right>>>>
+    );
 
+    local $_='<<<stuff1>and<stuff2>><<<<right>>>>>';
+    ok(/^(<((?:(?>[^<>]+)|(?1))*)>(?{push @stack, $2 }))$/,
+        "Recursion should match");
+    ok(@stack==@expect)
+        or skip("Won't test individual results as count isn't equal",
+                0+@expect);
+    foreach my $idx (@expect) {
+        ok($expect[$idx] eq $stack[$idx], 
+            "Expecting '$expect' at stack pos #$idx");
+    }
+        
+}
 # stress test CURLYX/WHILEM.
 #
 # This test includes varying levels of nesting, and according to
@@ -3734,11 +3758,15 @@ ok("{b{c}d" !~ m/^((??{ $brackets }))/, "bracket mismatch");
 }
 
 
-# Keep the following test last -- it may crash perl
+# Keep the following tests last -- they may crash perl
 
 ok(("a" x (2**15 - 10)) =~ /^()(a|bb)*$/, "Recursive stack cracker: #24274")
     or print "# Unexpected outcome: should pass or crash perl\n";
 
+ok((q(a)x 100) =~ /^(??{'(.)'x 100})/, 
+        "Regexp /^(??{'(.)'x 100})/ crashes older perls")
+    or print "# Unexpected outcome: should pass or crash perl\n";
+
 # Don't forget to update this!
-BEGIN{print "1..1253\n"};
+BEGIN{print "1..1264\n"};
 

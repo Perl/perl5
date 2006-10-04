@@ -674,6 +674,13 @@ The assignment to C<$^R> above is properly localized, so the old
 value of C<$^R> is restored if the assertion is backtracked; compare
 L<"Backtracking">.
 
+Due to an unfortunate implementation issue the perl code contained in these
+blocks is treated as a compile time closure, which can have seemingly bizarre
+consequences when used with lexically scoped variables inside of subroutines
+or loops. There are various workarounds for this, including simply using
+global variables instead. If you are using this construct and strange results
+occur then check for the use of lexically scoped variables.
+
 For reasons of security, this construct is forbidden if the regular
 expression involves run-time interpolation of variables, unless the
 perilous C<use re 'eval'> pragma has been used (see L<re>), or the
@@ -702,7 +709,6 @@ or indirectly with functions such as C<split>.
 =item C<(??{ code })>
 X<(??{})>
 X<regex, postponed> X<regexp, postponed> X<regular expression, postponed>
-X<regex, recursive> X<regexp, recursive> X<regular expression, recursive>
 
 B<WARNING>: This extended regular expression feature is considered
 highly experimental, and may be changed or deleted without notice.
@@ -712,7 +718,15 @@ used idioms.
 This is a "postponed" regular subexpression.  The C<code> is evaluated
 at run time, at the moment this subexpression may match.  The result
 of evaluation is considered as a regular expression and matched as
-if it were inserted instead of this construct.
+if it were inserted instead of this construct. Note that this means
+that the contents of capture buffers defined inside an eval'ed pattern
+are not available outside of the pattern, and vice versa, there is no
+way for the inner pattern to refer to a capture buffer defined outside.
+Thus,
+
+    ('a' x 100)=~/(??{'(.)' x 100})/
+
+B<will> match, it will B<not> set $1. 
 
 The C<code> is not interpolated.  As before, the rules to determine
 where the C<code> ends are currently somewhat convoluted.
@@ -729,12 +743,80 @@ The following pattern matches a parenthesized group:
 	     \)
 	  }x;
 
+See also C<(?PARNO)> for a different, more efficient way to accomplish
+the same task.
+
 Because perl's regex engine is not currently re-entrant, delayed 
 code may not invoke the regex engine either directly with C<m//> or C<s///>),
 or indirectly with functions such as C<split>.
 
+Recursing deeper than 50 times without consuming any input string will 
+result in a fatal error. The maximum depth is compiled into perl, so 
+changing it requires a custom build.
+
+=item C<(?PARNO)> C<(?R)>
+
+X<(?PARNO)> X<(?1)>
+X<regex, recursive> X<regexp, recursive> X<regular expression, recursive>
+
+B<WARNING>: This extended regular expression feature is considered
+highly experimental, and may be changed or deleted without notice.
+
+Similar to C<(??{ code })> except it does not involve compiling any code, 
+instead it treats the contents of a capture buffer as an independent 
+pattern that must match at the current position. Capture buffers
+contained by the pattern will have the value as determined by the 
+outermost recursion.
+
+PARNO is a sequence of digits not starting with 0 whose value
+reflects the paren-number of the capture buffer to recurse to. 
+C<(?R)> curses to the beginning of the pattern.
+
+The following pattern matches a function foo() which may contain 
+balanced parenthesis as the argument. 
+
+  $re = qr{ (                    # paren group 1 (full function)
+              foo              
+              (                  # paren group 2 (parens)
+                \(
+                  (              # paren group 3 (contents of parens)
+                  (?:
+                   (?> [^()]+ )  # Non-parens without backtracking
+                  |
+                   (?2)          # Recurse to start of paren group 2
+                  )*
+                  )
+                \)
+              )
+            )
+          }x;
+
+If the pattern was used as follows
+
+    'foo(bar(baz)+baz(bop))'=~/$re/
+        and print "\$1 = $1\n",
+                  "\$2 = $2\n",
+                  "\$3 = $3\n";
+
+the output produced should be the following:
+
+    $1 = foo(bar(baz)+baz(bop))
+    $2 = (bar(baz)+baz(bop))
+    $3 = bar(baz)+baz(bop)      
+
+If there is no corresponding capture buffer defined, then it is a 
+fatal error. Recursing deeper than 50 times without consuming any input
+string will also result in a fatal error. The maximum depth is compiled 
+into perl, so changing it requires a custom build.
+
+B<Note> that this pattern does not behave the same way as the equivalent 
+PCRE or Python construct of the same form. In perl you can backtrack into
+a recursed group, in PCRE and Python the recursed into group is treated
+as atomic. Also, constructs like (?i:(?1)) or (?:(?i)(?1)) do not affect 
+the pattern being recursed into. 
+
 =item C<< (?>pattern) >>
-X<backtrack> X<backtracking>
+X<backtrack> X<backtracking> X<atomic> X<possessive>
 
 B<WARNING>: This extended regular expression feature is considered
 highly experimental, and may be changed or deleted without notice.
@@ -826,6 +908,9 @@ one of these:
 
 Which one you pick depends on which of these expressions better reflects
 the above specification of comments.
+
+In some literature this construct is called "atomic matching" or
+"possessive matching".
 
 =item C<(?(condition)yes-pattern|no-pattern)>
 X<(?()>
@@ -1320,10 +1405,10 @@ else in the whole regular expression.)
 For this grouping operator there is no need to describe the ordering, since
 only whether or not C<S> can match is important.
 
-=item C<(??{ EXPR })>
+=item C<(??{ EXPR })>, C<(?PARNO)>
 
 The ordering is the same as for the regular expression which is
-the result of EXPR.
+the result of EXPR, or the pattern contained by capture buffer PARNO.
 
 =item C<(?(condition)yes-pattern|no-pattern)>
 

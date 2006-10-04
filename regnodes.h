@@ -4,8 +4,10 @@
    Any changes made here will be lost!
 */
 
-#define REGNODE_MAX           	66
-#define REGMATCH_STATE_MAX    	91
+/* Regops and State definitions */
+
+#define REGNODE_MAX           	68
+#define REGMATCH_STATE_MAX    	93
 
 #define	END                   	0	/* 0000 End of program. */
 #define	SUCCEED               	1	/* 0x01 Return from a subroutine, basically. */
@@ -72,37 +74,40 @@
 #define	TRIEC                 	62	/* 0x3e Same as TRIE, but with embedded charclass data */
 #define	AHOCORASICK           	63	/* 0x3f Aho Corasick stclass. flags==type */
 #define	AHOCORASICKC          	64	/* 0x40 Same as AHOCORASICK, but with embedded charclass data */
-#define	OPTIMIZED             	65	/* 0x41 Placeholder for dump. */
-#define	PSEUDO                	66	/* 0x42 Pseudo opcode for internal use. */
+#define	RECURSE               	65	/* 0x41 recurse to paren arg1 at (signed) ofs arg2 */
+#define	SRECURSE              	66	/* 0x42 recurse to start of pattern */
+#define	OPTIMIZED             	67	/* 0x43 Placeholder for dump. */
+#define	PSEUDO                	68	/* 0x44 Pseudo opcode for internal use. */
 
 	/* ------------ States ------------- */
 
-#define	TRIE_next             	67	/* 0x43 Regmatch state for TRIE */
-#define	TRIE_next_fail        	68	/* 0x44 Regmatch state for TRIE */
-#define	EVAL_AB               	69	/* 0x45 Regmatch state for EVAL */
-#define	EVAL_AB_fail          	70	/* 0x46 Regmatch state for EVAL */
-#define	resume_CURLYX         	71	/* 0x47 Regmatch state for CURLYX */
-#define	resume_WHILEM1        	72	/* 0x48 Regmatch state for WHILEM */
-#define	resume_WHILEM2        	73	/* 0x49 Regmatch state for WHILEM */
-#define	resume_WHILEM3        	74	/* 0x4a Regmatch state for WHILEM */
-#define	resume_WHILEM4        	75	/* 0x4b Regmatch state for WHILEM */
-#define	resume_WHILEM5        	76	/* 0x4c Regmatch state for WHILEM */
-#define	resume_WHILEM6        	77	/* 0x4d Regmatch state for WHILEM */
-#define	BRANCH_next           	78	/* 0x4e Regmatch state for BRANCH */
-#define	BRANCH_next_fail      	79	/* 0x4f Regmatch state for BRANCH */
-#define	CURLYM_A              	80	/* 0x50 Regmatch state for CURLYM */
-#define	CURLYM_A_fail         	81	/* 0x51 Regmatch state for CURLYM */
-#define	CURLYM_B              	82	/* 0x52 Regmatch state for CURLYM */
-#define	CURLYM_B_fail         	83	/* 0x53 Regmatch state for CURLYM */
-#define	IFMATCH_A             	84	/* 0x54 Regmatch state for IFMATCH */
-#define	IFMATCH_A_fail        	85	/* 0x55 Regmatch state for IFMATCH */
-#define	CURLY_B_min_known     	86	/* 0x56 Regmatch state for CURLY */
-#define	CURLY_B_min_known_fail	87	/* 0x57 Regmatch state for CURLY */
-#define	CURLY_B_min           	88	/* 0x58 Regmatch state for CURLY */
-#define	CURLY_B_min_fail      	89	/* 0x59 Regmatch state for CURLY */
-#define	CURLY_B_max           	90	/* 0x5a Regmatch state for CURLY */
-#define	CURLY_B_max_fail      	91	/* 0x5b Regmatch state for CURLY */
+#define	TRIE_next             	69	/* 0x45 Regmatch state for TRIE */
+#define	TRIE_next_fail        	70	/* 0x46 Regmatch state for TRIE */
+#define	EVAL_AB               	71	/* 0x47 Regmatch state for EVAL */
+#define	EVAL_AB_fail          	72	/* 0x48 Regmatch state for EVAL */
+#define	resume_CURLYX         	73	/* 0x49 Regmatch state for CURLYX */
+#define	resume_WHILEM1        	74	/* 0x4a Regmatch state for WHILEM */
+#define	resume_WHILEM2        	75	/* 0x4b Regmatch state for WHILEM */
+#define	resume_WHILEM3        	76	/* 0x4c Regmatch state for WHILEM */
+#define	resume_WHILEM4        	77	/* 0x4d Regmatch state for WHILEM */
+#define	resume_WHILEM5        	78	/* 0x4e Regmatch state for WHILEM */
+#define	resume_WHILEM6        	79	/* 0x4f Regmatch state for WHILEM */
+#define	BRANCH_next           	80	/* 0x50 Regmatch state for BRANCH */
+#define	BRANCH_next_fail      	81	/* 0x51 Regmatch state for BRANCH */
+#define	CURLYM_A              	82	/* 0x52 Regmatch state for CURLYM */
+#define	CURLYM_A_fail         	83	/* 0x53 Regmatch state for CURLYM */
+#define	CURLYM_B              	84	/* 0x54 Regmatch state for CURLYM */
+#define	CURLYM_B_fail         	85	/* 0x55 Regmatch state for CURLYM */
+#define	IFMATCH_A             	86	/* 0x56 Regmatch state for IFMATCH */
+#define	IFMATCH_A_fail        	87	/* 0x57 Regmatch state for IFMATCH */
+#define	CURLY_B_min_known     	88	/* 0x58 Regmatch state for CURLY */
+#define	CURLY_B_min_known_fail	89	/* 0x59 Regmatch state for CURLY */
+#define	CURLY_B_min           	90	/* 0x5a Regmatch state for CURLY */
+#define	CURLY_B_min_fail      	91	/* 0x5b Regmatch state for CURLY */
+#define	CURLY_B_max           	92	/* 0x5c Regmatch state for CURLY */
+#define	CURLY_B_max_fail      	93	/* 0x5d Regmatch state for CURLY */
 
+/* PL_regkind[] What type of regop or state is this. */
 
 #ifndef DOINIT
 EXTCONST U8 PL_regkind[];
@@ -173,6 +178,8 @@ EXTCONST U8 PL_regkind[] = {
 	TRIE,   	/* TRIEC                  */
 	TRIE,   	/* AHOCORASICK            */
 	TRIE,   	/* AHOCORASICKC           */
+	RECURSE,	/* RECURSE                */
+	RECURSE,	/* SRECURSE               */
 	NOTHING,	/* OPTIMIZED              */
 	PSEUDO, 	/* PSEUDO                 */
 	/* ------------ States ------------- */
@@ -204,6 +211,7 @@ EXTCONST U8 PL_regkind[] = {
 };
 #endif
 
+/* regarglen[] - How large is the argument part of the node (in regnodes) */
 
 #ifdef REG_COMP_C
 static const U8 regarglen[] = {
@@ -272,9 +280,13 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_charclass),	/* TRIEC        */
 	EXTRA_SIZE(struct regnode_1),        	/* AHOCORASICK  */
 	EXTRA_SIZE(struct regnode_charclass),	/* AHOCORASICKC */
+	EXTRA_SIZE(struct regnode_2L),       	/* RECURSE      */
+	0,                                   	/* SRECURSE     */
 	0,                                   	/* OPTIMIZED    */
 	0,                                   	/* PSEUDO       */
 };
+
+/* reg_off_by_arg[] - Which argument holds the offset to the next node */
 
 static const char reg_off_by_arg[] = {
 	0,	/* END          */
@@ -342,9 +354,13 @@ static const char reg_off_by_arg[] = {
 	0,	/* TRIEC        */
 	0,	/* AHOCORASICK  */
 	0,	/* AHOCORASICKC */
+	0,	/* RECURSE      */
+	0,	/* SRECURSE     */
 	0,	/* OPTIMIZED    */
 	0,	/* PSEUDO       */
 };
+
+/* reg_name[] - Opcode/state names in string form, for debugging */
 
 #ifdef DEBUGGING
 const char * reg_name[] = {
@@ -413,34 +429,36 @@ const char * reg_name[] = {
 	"TRIEC",                 	/* 0x3e */
 	"AHOCORASICK",           	/* 0x3f */
 	"AHOCORASICKC",          	/* 0x40 */
-	"OPTIMIZED",             	/* 0x41 */
-	"PSEUDO",                	/* 0x42 */
+	"RECURSE",               	/* 0x41 */
+	"SRECURSE",              	/* 0x42 */
+	"OPTIMIZED",             	/* 0x43 */
+	"PSEUDO",                	/* 0x44 */
 	/* ------------ States ------------- */
-	"TRIE_next",             	/* 0x43 */
-	"TRIE_next_fail",        	/* 0x44 */
-	"EVAL_AB",               	/* 0x45 */
-	"EVAL_AB_fail",          	/* 0x46 */
-	"resume_CURLYX",         	/* 0x47 */
-	"resume_WHILEM1",        	/* 0x48 */
-	"resume_WHILEM2",        	/* 0x49 */
-	"resume_WHILEM3",        	/* 0x4a */
-	"resume_WHILEM4",        	/* 0x4b */
-	"resume_WHILEM5",        	/* 0x4c */
-	"resume_WHILEM6",        	/* 0x4d */
-	"BRANCH_next",           	/* 0x4e */
-	"BRANCH_next_fail",      	/* 0x4f */
-	"CURLYM_A",              	/* 0x50 */
-	"CURLYM_A_fail",         	/* 0x51 */
-	"CURLYM_B",              	/* 0x52 */
-	"CURLYM_B_fail",         	/* 0x53 */
-	"IFMATCH_A",             	/* 0x54 */
-	"IFMATCH_A_fail",        	/* 0x55 */
-	"CURLY_B_min_known",     	/* 0x56 */
-	"CURLY_B_min_known_fail",	/* 0x57 */
-	"CURLY_B_min",           	/* 0x58 */
-	"CURLY_B_min_fail",      	/* 0x59 */
-	"CURLY_B_max",           	/* 0x5a */
-	"CURLY_B_max_fail",      	/* 0x5b */
+	"TRIE_next",             	/* 0x45 */
+	"TRIE_next_fail",        	/* 0x46 */
+	"EVAL_AB",               	/* 0x47 */
+	"EVAL_AB_fail",          	/* 0x48 */
+	"resume_CURLYX",         	/* 0x49 */
+	"resume_WHILEM1",        	/* 0x4a */
+	"resume_WHILEM2",        	/* 0x4b */
+	"resume_WHILEM3",        	/* 0x4c */
+	"resume_WHILEM4",        	/* 0x4d */
+	"resume_WHILEM5",        	/* 0x4e */
+	"resume_WHILEM6",        	/* 0x4f */
+	"BRANCH_next",           	/* 0x50 */
+	"BRANCH_next_fail",      	/* 0x51 */
+	"CURLYM_A",              	/* 0x52 */
+	"CURLYM_A_fail",         	/* 0x53 */
+	"CURLYM_B",              	/* 0x54 */
+	"CURLYM_B_fail",         	/* 0x55 */
+	"IFMATCH_A",             	/* 0x56 */
+	"IFMATCH_A_fail",        	/* 0x57 */
+	"CURLY_B_min_known",     	/* 0x58 */
+	"CURLY_B_min_known_fail",	/* 0x59 */
+	"CURLY_B_min",           	/* 0x5a */
+	"CURLY_B_min_fail",      	/* 0x5b */
+	"CURLY_B_max",           	/* 0x5c */
+	"CURLY_B_max_fail",      	/* 0x5d */
 };
 #endif /* DEBUGGING */
 #else

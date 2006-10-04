@@ -153,7 +153,9 @@ TRIEC		TRIE,   trie charclass	Same as TRIE, but with embedded charclass data
 AHOCORASICK	TRIE,   trie 1	Aho Corasick stclass. flags==type
 AHOCORASICKC	TRIE,   trie charclass	Same as AHOCORASICK, but with embedded charclass data
 
-
+#*Recursion (65) 
+RECURSE		RECURSE,   num/ofs 2L	recurse to paren arg1 at (signed) ofs arg2
+SRECURSE	RECURSE,   no   	recurse to start of pattern
 
 # NEW STUFF ABOVE THIS LINE -- Please update counts below. 
 

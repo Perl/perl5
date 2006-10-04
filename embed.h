@@ -3514,7 +3514,7 @@
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)
 #define regpiece(a,b,c)		S_regpiece(aTHX_ a,b,c)
 #define reg_namedseq(a,b)	S_reg_namedseq(aTHX_ a,b)
-#define reginsert(a,b,c)	S_reginsert(aTHX_ a,b,c)
+#define reginsert(a,b,c,d)	S_reginsert(aTHX_ a,b,c,d)
 #define regtail(a,b,c,d)	S_regtail(aTHX_ a,b,c,d)
 #define join_exact(a,b,c,d,e,f)	S_join_exact(aTHX_ a,b,c,d,e,f)
 #define regwhite		S_regwhite

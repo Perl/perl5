@@ -165,7 +165,7 @@ S_regcppush(pTHX_ I32 parenfloor)
     if (paren_elems_to_push < 0)
 	Perl_croak(aTHX_ "panic: paren_elems_to_push < 0");
 
-#define REGCP_OTHER_ELEMS 6
+#define REGCP_OTHER_ELEMS 8
     SSGROW(paren_elems_to_push + REGCP_OTHER_ELEMS);
     for (p = PL_regsize; p > parenfloor; p--) {
 /* REGCP_PARENS_ELEMS are pushed per pairs of parentheses. */
@@ -181,6 +181,8 @@ S_regcppush(pTHX_ I32 parenfloor)
 	));
     }
 /* REGCP_OTHER_ELEMS are pushed in any case, parentheses or no. */
+    SSPUSHPTR(PL_regstartp);
+    SSPUSHPTR(PL_regendp);
     SSPUSHINT(PL_regsize);
     SSPUSHINT(*PL_reglastparen);
     SSPUSHINT(*PL_reglastcloseparen);
@@ -227,7 +229,10 @@ S_regcppop(pTHX_ const regexp *rex)
     *PL_reglastcloseparen = SSPOPINT;
     *PL_reglastparen = SSPOPINT;
     PL_regsize = SSPOPINT;
+    PL_regendp=(I32 *) SSPOPPTR;
+    PL_regstartp=(I32 *) SSPOPPTR;
 
+    
     /* Now restore the parentheses context. */
     for (i -= (REGCP_OTHER_ELEMS - REGCP_FRAME_ELEMS);
 	 i > 0; i -= REGCP_PAREN_ELEMS) {
@@ -488,7 +493,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    srch_end_shift -= ((strbeg - s) - srch_start_shift); 
 	    srch_start_shift = strbeg - s;
 	}
-    DEBUG_OPTIMISE_r({
+    DEBUG_OPTIMISE_MORE_r({
         PerlIO_printf(Perl_debug_log, "Check offset min: %"IVdf" Start shift: %"IVdf" End shift %"IVdf" Real End Shift: %"IVdf"\n",
             (IV)prog->check_offset_min,
             (IV)srch_start_shift,
@@ -524,7 +529,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    start_point= HOP3(s, srch_start_shift, srch_start_shift < 0 ? strbeg : strend);
             end_point= HOP3(strend, -srch_end_shift, strbeg);
 	}
-	DEBUG_OPTIMISE_r({
+	DEBUG_OPTIMISE_MORE_r({
             PerlIO_printf(Perl_debug_log, "fbm_instr len=%d str=<%.*s>\n", 
                 (int)(end_point - start_point),
                 (int)(end_point - start_point) > 20 ? 20 : (int)(end_point - start_point), 
@@ -719,7 +724,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     
     t= (char*)HOP3( s, -prog->check_offset_max, (prog->check_offset_max<0) ? strend : strpos);
         
-    DEBUG_OPTIMISE_r(
+    DEBUG_OPTIMISE_MORE_r(
         PerlIO_printf(Perl_debug_log, 
             "Check offset min:%"IVdf" max:%"IVdf" S:%"IVdf" t:%"IVdf" D:%"IVdf" end:%"IVdf"\n",
             (IV)prog->check_offset_min,
@@ -1979,9 +1984,10 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		}
 	    }
 	    if (last == NULL) {
-		DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
-				      "%sCan't trim the tail, match fails (should not happen)%s\n",
-				      PL_colors[4], PL_colors[5]));
+		DEBUG_EXECUTE_r(
+		    PerlIO_printf(Perl_debug_log,
+			"%sCan't trim the tail, match fails (should not happen)%s\n",
+	                PL_colors[4], PL_colors[5]));
 		goto phooey; /* Should not happen! */
 	    }
 	    dontbother = strend - last + prog->float_min_offset;
@@ -2062,6 +2068,7 @@ phooey:
 	restore_pos(aTHX_ prog);
     return 0;
 }
+
 
 /*
  - regtry - try match at specific point
@@ -2146,16 +2153,16 @@ S_regtry(pTHX_ const regmatch_info *reginfo, char *startpos)
 	prog->subbeg = PL_bostr;
 	prog->sublen = PL_regeol - PL_bostr; /* strend may have been modified */
     }
+    DEBUG_EXECUTE_r(PL_reg_starttry = startpos);
     prog->startp[0] = startpos - PL_bostr;
     PL_reginput = startpos;
-    PL_regstartp = prog->startp;
-    PL_regendp = prog->endp;
     PL_reglastparen = &prog->lastparen;
     PL_reglastcloseparen = &prog->lastcloseparen;
     prog->lastparen = 0;
     prog->lastcloseparen = 0;
     PL_regsize = 0;
-    DEBUG_EXECUTE_r(PL_reg_starttry = startpos);
+    PL_regstartp = prog->startp;
+    PL_regendp = prog->endp;
     if (PL_reg_start_tmpl <= prog->nparens) {
 	PL_reg_start_tmpl = prog->nparens*3/2 + 3;
         if(PL_reg_start_tmp)
@@ -2508,6 +2515,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
     register I32 nextchr;   /* is always set to UCHARAT(locinput) */
     bool result = 0;	    /* return value of S_regmatch */
     int depth = 0;	    /* depth of recursion */
+    int nochange_depth = 0; /* depth of RECURSE recursion with nochange*/
     regmatch_state *yes_state = NULL; /* state to pop to on success of
 							    subpattern */
     regmatch_state *cur_eval = NULL; /* most recent EVAL_AB state */
@@ -3325,10 +3333,39 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
 #undef  ST
 #define ST st->u.eval
-
-	case EVAL:  /*   /(?{A})B/   /(??{A})B/  and /(?(?{A})X|Y)B/   */
 	{
 	    SV *ret;
+            regexp *re;
+            regnode *startpoint;	    
+            
+        case SRECURSE:
+	case RECURSE: /*    /(...(?1))/      */
+            if (cur_eval && cur_eval->locinput==locinput) {
+                if (cur_eval->u.eval.close_paren == ARG(scan)) 
+                    Perl_croak(aTHX_ "Infinite recursion in RECURSE in regexp");
+                if ( ++nochange_depth > MAX_RECURSE_EVAL_NOCHANGE_DEPTH ) 
+                    Perl_croak(aTHX_ "RECURSE without pos change exceeded limit in regexp");
+            } else {
+                nochange_depth = 0;
+            }    
+            re = rex;
+            (void)ReREFCNT_inc(rex);
+            if (OP(scan)==RECURSE) {
+                startpoint = scan + ARG2L(scan);
+                ST.close_paren = ARG(scan);
+            } else {
+                startpoint = re->program+1;
+                ST.close_paren = 0;
+            }
+            goto eval_recurse_doit;
+            /* NOTREACHED */
+        case EVAL:  /*   /(?{A})B/   /(??{A})B/  and /(?(?{A})X|Y)B/   */        
+            if (cur_eval && cur_eval->locinput==locinput) {
+                if ( ++nochange_depth > MAX_RECURSE_EVAL_NOCHANGE_DEPTH ) 
+                    Perl_croak(aTHX_ "EVAL without pos change exceeded limit in regexp");
+            } else {
+                nochange_depth = 0;
+            }    
 	    {
 		/* execute the code in the {...} */
 		dSP;
@@ -3362,7 +3399,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		}
 	    }
 	    if (st->logical == 2) { /* Postponed subexpression: /(??{...})/ */
-		regexp *re;
+
 		{
 		    /* extract RE object from returned value; compiling if
 		     * necessary */
@@ -3399,10 +3436,29 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 			PL_regsize = osize;
 		    }
 		}
+                DEBUG_EXECUTE_r(
+                    debug_start_match(re, do_utf8, locinput, PL_regeol, 
+                        "Matching embedded");
+		);		
+		startpoint = re->program + 1;
+               	ST.close_paren = 0; /* only used for RECURSE */
+               	/* borrowed from regtry */
+                if (PL_reg_start_tmpl <= re->nparens) {
+                    PL_reg_start_tmpl = re->nparens*3/2 + 3;
+                    if(PL_reg_start_tmp)
+                        Renew(PL_reg_start_tmp, PL_reg_start_tmpl, char*);
+                    else
+                        Newx(PL_reg_start_tmp, PL_reg_start_tmpl, char*);
+                }               	
 
+        eval_recurse_doit: /* Share code with RECURSE below this line */                		
 		/* run the pattern returned from (??{...}) */
 		ST.cp = regcppush(0);	/* Save *all* the positions. */
 		REGCP_SET(ST.lastcp);
+		
+		PL_regstartp = re->startp; /* essentially NOOP on RECURSE */
+		PL_regendp = re->endp;     /* essentially NOOP on RECURSE */
+		
 		*PL_reglastparen = 0;
 		*PL_reglastcloseparen = 0;
 		PL_reginput = locinput;
@@ -3425,13 +3481,8 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		ST.B = next;
 		ST.prev_eval = cur_eval;
 		cur_eval = st;
-
-		DEBUG_EXECUTE_r(
-                    debug_start_match(re, do_utf8, locinput, PL_regeol, 
-                        "Matching embedded");
-		    );
 		/* now continue from first node in postoned RE */
-		PUSH_YES_STATE_GOTO(EVAL_AB, re->program + 1);
+		PUSH_YES_STATE_GOTO(EVAL_AB, startpoint);
 		/* NOTREACHED */
 	    }
 	    /* /(?(?{...})X|Y)/ */
@@ -3466,7 +3517,6 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    /* XXXX This is too dramatic a measure... */
 	    PL_reg_maxiter = 0;
 	    sayNO_SILENT;
-
 #undef ST
 
 	case OPEN:
@@ -3482,6 +3532,9 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    if (n > (I32)*PL_reglastparen)
 		*PL_reglastparen = n;
 	    *PL_reglastcloseparen = n;
+            if (cur_eval && cur_eval->u.eval.close_paren == (U32)n) {
+	        goto fake_end;
+	    }    
 	    break;
 	case GROUPP:
 	    n = ARG(scan);  /* which paren pair */
@@ -4318,6 +4371,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
 
 	case END:
+	    fake_end:
 	    if (cur_eval) {
 		/* we've just finished A in /(??{A})B/; now continue with B */
 		I32 tmpix;
@@ -4345,8 +4399,8 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		st->u.eval.prev_eval = cur_eval;
 		cur_eval = cur_eval->u.eval.prev_eval;
 		DEBUG_EXECUTE_r(
-		    PerlIO_printf(Perl_debug_log, "%*s  EVAL trying tail ...\n",
-				      REPORT_CODE_OFF+depth*2, ""););
+		    PerlIO_printf(Perl_debug_log, "%*s  EVAL trying tail ... %x\n",
+				      REPORT_CODE_OFF+depth*2, "",(int)cur_eval););
 		PUSH_YES_STATE_GOTO(EVAL_AB,
 			st->u.eval.prev_eval->u.eval.B); /* match B */
 	    }

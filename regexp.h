@@ -96,6 +96,7 @@ typedef struct regexp_engine {
 #define ROPT_CANY_SEEN		0x00000800
 #define ROPT_SANY_SEEN		ROPT_CANY_SEEN /* src bckwrd cmpt */
 #define ROPT_GPOS_CHECK         (ROPT_GPOS_SEEN|ROPT_ANCH_GPOS)
+#define ROPT_RECURSE_SEEN       0x00001000
 
 /* 0xf800 of reganch is used by PMf_COMPILETIME */
 
@@ -205,6 +206,8 @@ typedef struct {
 
 /* structures for holding and saving the state maintained by regmatch() */
 
+#define MAX_RECURSE_EVAL_NOCHANGE_DEPTH 50
+
 typedef I32 CHECKPOINT;
 
 typedef struct regmatch_state {
@@ -255,6 +258,7 @@ typedef struct regmatch_state {
 	    CHECKPOINT	cp;	/* remember current savestack indexes */
 	    CHECKPOINT	lastcp;
 	    regnode	*B;	/* the node following us  */
+	    U32        close_paren; /* which close bracket is our end */
 	} eval;
 
 	struct {

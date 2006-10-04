@@ -86,6 +86,8 @@ struct regnode_string {
     char string[1];
 };
 
+/* Argument bearing node - workhorse, 
+   arg1 is often for the data field */
 struct regnode_1 {
     U8	flags;
     U8  type;
@@ -93,6 +95,16 @@ struct regnode_1 {
     U32 arg1;
 };
 
+/* Similar to a regnode_1 but with an extra signed argument */
+struct regnode_2L {
+    U8	flags;
+    U8  type;
+    U16 next_off;
+    U32 arg1;
+    I32 arg2;
+};
+
+/* 'Two field' -- Two 16 bit unsigned args */
 struct regnode_2 {
     U8	flags;
     U8  type;
@@ -100,6 +112,7 @@ struct regnode_2 {
     U16 arg1;
     U16 arg2;
 };
+
 
 #define ANYOF_BITMAP_SIZE	32	/* 256 b/(8 b/B) */
 #define ANYOF_CLASSBITMAP_SIZE	 4	/* up to 32 (8*4) named classes */
@@ -154,10 +167,12 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 #define ARG(p) ARG_VALUE(ARG_LOC(p))
 #define ARG1(p) ARG_VALUE(ARG1_LOC(p))
 #define ARG2(p) ARG_VALUE(ARG2_LOC(p))
+#define ARG2L(p) ARG_VALUE(ARG2L_LOC(p))
 
 #define ARG_SET(p, val) ARG__SET(ARG_LOC(p), (val))
 #define ARG1_SET(p, val) ARG__SET(ARG1_LOC(p), (val))
 #define ARG2_SET(p, val) ARG__SET(ARG2_LOC(p), (val))
+#define ARG2L_SET(p, val) ARG__SET(ARG2L_LOC(p), (val))
 
 #undef NEXT_OFF
 #undef NODE_ALIGN
@@ -190,7 +205,7 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 #define	ARG_LOC(p)	(((struct regnode_1 *)p)->arg1)
 #define	ARG1_LOC(p)	(((struct regnode_2 *)p)->arg1)
 #define	ARG2_LOC(p)	(((struct regnode_2 *)p)->arg2)
-
+#define ARG2L_LOC(p)	(((struct regnode_2L *)p)->arg2)
 
 #define NODE_STEP_REGNODE	1	/* sizeof(regnode)/sizeof(regnode) */
 #define EXTRA_STEP_2ARGS	EXTRA_SIZE(struct regnode_2)
@@ -328,6 +343,7 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 #define REG_SEEN_EVAL		0x00000008
 #define REG_SEEN_CANY		0x00000010
 #define REG_SEEN_SANY		REG_SEEN_CANY /* src bckwrd cmpt */
+#define REG_SEEN_RECURSE        0x00000020
 
 START_EXTERN_C
 
