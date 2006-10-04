@@ -347,7 +347,7 @@ static const char reg_off_by_arg[] = {
 };
 
 #ifdef DEBUGGING
-const char * const reg_name[] = {
+const char * reg_name[] = {
 	"END",                   	/* 0000 */
 	"SUCCEED",               	/* 0x01 */
 	"BOL",                   	/* 0x02 */
@@ -445,7 +445,7 @@ const char * const reg_name[] = {
 #endif /* DEBUGGING */
 #else
 #ifdef DEBUGGING
-extern const char * const reg_name[];
+extern const char * reg_name[];
 #endif
 #endif /* REG_COMP_C */
 

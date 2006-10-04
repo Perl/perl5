@@ -152,7 +152,7 @@ print OUT <<EOP;
 };
 
 #ifdef DEBUGGING
-const char * const reg_name[] = {
+const char * reg_name[] = {
 EOP
 
 $ind = 0;
@@ -170,7 +170,7 @@ print OUT <<EOP;
 #endif /* DEBUGGING */
 #else
 #ifdef DEBUGGING
-extern const char * const reg_name[];
+extern const char * reg_name[];
 #endif
 #endif /* REG_COMP_C */
 
