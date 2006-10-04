@@ -4,6 +4,8 @@
    Any changes made here will be lost!
 */
 
+/* Regops and State definitions */
+
 #define	END	0	/*    0 End of program. */
 #define	SUCCEED	1	/*  0x1 Return from a subroutine, basically. */
 #define	BOL	2	/*  0x2 Match "" at beginning of line. */
@@ -67,6 +69,7 @@
 #define	RENUM	60	/* 0x3c Group with independently numbered parens. */
 #define	OPTIMIZED	61	/* 0x3d Placeholder for dump. */
 
+/* PL_regkind[] What type of regop or state is this. */
 #ifndef DOINIT
 EXTCONST U8 PL_regkind[];
 #else
@@ -136,6 +139,7 @@ EXTCONST U8 PL_regkind[] = {
 };
 #endif
 
+/* regarglen[] - How large is the argument part of the node (in regnodes) */
 
 #ifdef REG_COMP_C
 static const U8 regarglen[] = {
@@ -203,6 +207,8 @@ static const U8 regarglen[] = {
 	0,		/* OPTIMIZED */
 };
 
+/* reg_off_by_arg[] - Which argument holds the offset to the next node */
+
 static const char reg_off_by_arg[] = {
 	0,		/* END */
 	0,		/* SUCCEED */
@@ -267,6 +273,8 @@ static const char reg_off_by_arg[] = {
 	1,		/* RENUM */
 	0,		/* OPTIMIZED */
 };
+
+/* reg_name[] - Opcode/state names in string form, for debugging */
 
 #ifdef DEBUGGING
 static const char * const reg_name[] = {

@@ -31,6 +31,8 @@ print OUT <<EOP;
    Any changes made here will be lost!
 */
 
+/* Regops and State definitions */
+
 EOP
 
 $ind = 0;
@@ -44,6 +46,7 @@ EOP
 
 print OUT <<EOP;
 
+/* PL_regkind[] What type of regop or state is this. */
 #ifndef DOINIT
 EXTCONST U8 PL_regkind[];
 #else
@@ -61,6 +64,7 @@ print OUT <<EOP;
 };
 #endif
 
+/* regarglen[] - How large is the argument part of the node (in regnodes) */
 
 #ifdef REG_COMP_C
 static const U8 regarglen[] = {
@@ -79,6 +83,8 @@ EOP
 print OUT <<EOP;
 };
 
+/* reg_off_by_arg[] - Which argument holds the offset to the next node */
+
 static const char reg_off_by_arg[] = {
 EOP
 
@@ -93,6 +99,8 @@ EOP
 
 print OUT <<EOP;
 };
+
+/* reg_name[] - Opcode/state names in string form, for debugging */
 
 #ifdef DEBUGGING
 static const char * const reg_name[] = {
