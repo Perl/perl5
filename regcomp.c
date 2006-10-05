@@ -4442,8 +4442,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	            RExC_seen|=REG_SEEN_RECURSE;
     		}
                 Set_Node_Length(ret, 1 + regarglen[OP(ret)]); /* MJD */
-                Set_Node_Offset(ret, RExC_parse); /* MJD */
-                
+		Set_Node_Offset(ret, parse_start); /* MJD */
+
                 nextchar(pRExC_state);
                 return ret;
             }
