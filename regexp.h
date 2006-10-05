@@ -211,23 +211,8 @@ typedef struct {
 typedef I32 CHECKPOINT;
 
 typedef struct regmatch_state {
-
-    /* these vars contain state that needs to be maintained
-     * across the main while loop ... */
-
     int resume_state;		/* where to jump to on return */
-    regnode *scan;		/* Current node. */
-    regnode *next;		/* Next node. */
-    bool minmod;		/* the next "{n,m}" is a "{n,m}?" */
-    bool sw;			/* the condition value in (?(cond)a|b) */
-    int logical;
-    I32 unwind;			/* savestack index of current unwind block */
-    char *locinput;
-
-    /* ... while the rest of these are local to an individual branch */
-
-    I32 n;			/* no or next */
-    I32 ln;			/* len or last */
+    char *locinput;		/* where to backtrack in string on failure */
 
     union {
 
@@ -321,6 +306,7 @@ typedef struct regmatch_state {
 	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
 	    I32 wanted;
+	    I32 logical;	/* saved copy of 'logical' var */
 	    regnode  *me; /* the IFMATCH/SUSPEND/UNLESSM node  */
 	} ifmatch; /* and SUSPEND/UNLESSM */
     } u;
