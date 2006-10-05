@@ -674,11 +674,11 @@ The assignment to C<$^R> above is properly localized, so the old
 value of C<$^R> is restored if the assertion is backtracked; compare
 L<"Backtracking">.
 
-Due to an unfortunate implementation issue the perl code contained in these
-blocks is treated as a compile time closure, which can have seemingly bizarre
+Due to an unfortunate implementation issue, the Perl code contained in these
+blocks is treated as a compile time closure that can have seemingly bizarre
 consequences when used with lexically scoped variables inside of subroutines
-or loops. There are various workarounds for this, including simply using
-global variables instead. If you are using this construct and strange results
+or loops.  There are various workarounds for this, including simply using
+global variables instead.  If you are using this construct and strange results
 occur then check for the use of lexically scoped variables.
 
 For reasons of security, this construct is forbidden if the regular
@@ -718,7 +718,7 @@ used idioms.
 This is a "postponed" regular subexpression.  The C<code> is evaluated
 at run time, at the moment this subexpression may match.  The result
 of evaluation is considered as a regular expression and matched as
-if it were inserted instead of this construct. Note that this means
+if it were inserted instead of this construct.  Note that this means
 that the contents of capture buffers defined inside an eval'ed pattern
 are not available outside of the pattern, and vice versa, there is no
 way for the inner pattern to refer to a capture buffer defined outside.
@@ -751,7 +751,7 @@ code may not invoke the regex engine either directly with C<m//> or C<s///>),
 or indirectly with functions such as C<split>.
 
 Recursing deeper than 50 times without consuming any input string will 
-result in a fatal error. The maximum depth is compiled into perl, so 
+result in a fatal error.  The maximum depth is compiled into perl, so 
 changing it requires a custom build.
 
 =item C<(?PARNO)> C<(?R)>
@@ -759,12 +759,12 @@ changing it requires a custom build.
 X<(?PARNO)> X<(?1)>
 X<regex, recursive> X<regexp, recursive> X<regular expression, recursive>
 
-B<WARNING>: This extended regular expression feature is considered
+B<WARNING>:  This extended regular expression feature is considered
 highly experimental, and may be changed or deleted without notice.
 
 Similar to C<(??{ code })> except it does not involve compiling any code, 
 instead it treats the contents of a capture buffer as an independent 
-pattern that must match at the current position. Capture buffers
+pattern that must match at the current position.  Capture buffers
 contained by the pattern will have the value as determined by the 
 outermost recursion.
 
@@ -805,8 +805,8 @@ the output produced should be the following:
     $3 = bar(baz)+baz(bop)      
 
 If there is no corresponding capture buffer defined, then it is a 
-fatal error. Recursing deeper than 50 times without consuming any input
-string will also result in a fatal error. The maximum depth is compiled 
+fatal error.  Recursing deeper than 50 times without consuming any input
+string will also result in a fatal error.  The maximum depth is compiled 
 into perl, so changing it requires a custom build.
 
 B<Note> that this pattern does not behave the same way as the equivalent 
