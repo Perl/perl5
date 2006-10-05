@@ -10,15 +10,18 @@ See L<Module::CoreList> for one.
 
 =head1 SYNOPSIS
 
-    corelist -v [<PerlVersion>]
+    corelist -v
     corelist [-a] <ModuleName> | /<ModuleRegex>/ [<ModuleVersion>] ...
-    corelist [-v <PerlVersion>] [ <ModuleName> | /<ModuleNameRegex>/ ] ...
+    corelist [-v <PerlVersion>] [ <ModuleName> | /<ModuleRegex>/ ] ...
 
 =head1 OPTIONS
 
 =over
 
 =item -a modulename
+
+lists all versions of the given module (or the matching modules, in case you
+used a module regexp) in the perls Module::CoreList knows about.
 
     corelist -a utf8
 
@@ -53,8 +56,10 @@ all of the help
 
 lists all of the perl release versions we got the CoreList for.
 
-If you pass a version argument (value of C<$]>, like 5.00503),
+If you pass a version argument (value of C<$]>, like C<5.00503> or C<5.008008>),
 you get a list of all the modules and their respective versions.
+(If you have the C<version> module, you can also use new-style version numbers,
+like C<5.8.8>.)
 
 In module filtering context, it can be used as Perl version filter.
 
@@ -67,7 +72,6 @@ use Getopt::Long;
 use Pod::Usage;
 use strict;
 use warnings;
-use version ();
 
 my %Opts;
 
@@ -178,6 +182,10 @@ sub module_version {
 sub numify_version {
     my $ver = shift;
     if ( index( $ver, q{.}, index( $ver, q{.} ) ) >= 0 ) {
+	eval { require version };
+	if ($@) {
+	    die "You need to install version.pm to use dotted version numbers\n";
+	}
         $ver = version->new($ver)->numify;
     }
     return $ver;
