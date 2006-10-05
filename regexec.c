@@ -150,6 +150,7 @@
     } \
 } STMT_END 
 
+
 static void restore_pos(pTHX_ void *arg);
 
 STATIC CHECKPOINT
@@ -2209,14 +2210,12 @@ S_regtry(pTHX_ const regmatch_info *reginfo, char *startpos)
 #define sayYES goto yes
 #define sayNO goto no
 #define sayNO_SILENT goto no_silent
-#define saySAME(x) if (x) goto yes; else goto no
 
 /* we dont use STMT_START/END here because it leads to 
    "unreachable code" warnings, which are bogus, but distracting. */
 #define CACHEsayNO \
-    if (st->u.whilem.cache_offset | st->u.whilem.cache_bit) \
-       PL_reg_poscache[st->u.whilem.cache_offset] |= \
-	    (1<<st->u.whilem.cache_bit); \
+    if (ST.cache_mask) \
+       PL_reg_poscache[ST.cache_offset] |= ST.cache_mask; \
     sayNO
 
 /* this is used to determine how far from the left messages like
@@ -2254,14 +2253,6 @@ S_push_slab(pTHX)
     return SLAB_FIRST(s);
 }
 
-/* simulate a recursive call to regmatch */
-
-#define REGMATCH(ns, where) \
-    st->scan = scan; \
-    scan = (ns); \
-    st->resume_state = resume_##where; \
-    goto start_recurse; \
-    resume_point_##where:
 
 /* push a new state then goto it */
 
@@ -2521,8 +2512,6 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
     regmatch_state *cur_eval = NULL; /* most recent EVAL_AB state */
     struct regmatch_state  *cur_curlyx = NULL; /* most recent curlyx */
     U32 state_num;
-    
-    I32 parenfloor = 0;
 
 #ifdef DEBUGGING
     GET_RE_DEBUG_FLAGS_DECL;
@@ -3553,210 +3542,196 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	case LOGICAL:
 	    st->logical = scan->flags;
 	    break;
+
 /*******************************************************************
- cur_curlyx points to the regmatch_state associated with the most recent CURLYX.
- This struct contains info about the innermost (...)* loop (an
- "infoblock"), and a pointer to the next outer cur_curlyx.
 
- Here is how Y(A)*Z is processed (if it is compiled into CURLYX/WHILEM):
+The CURLYX/WHILEM pair of ops handle the most generic case of the /A*B/
+pattern, where A and B are subpatterns. (For simple A, CURLYM or
+STAR/PLUS/CURLY/CURLYN are used instead.)
 
-   1) After matching Y, regnode for CURLYX is processed;
+A*B is compiled as <CURLYX><A><WHILEM><B>
 
-   2) This regnode populates cur_curlyx, and calls regmatch() recursively
-      with the starting point at WHILEM node;
+On entry to the subpattern, CURLYX is called. This pushes a CURLYX
+state, which contains the current count, initialised to -1. It also sets
+cur_curlyx to point to this state, with any previous value saved in the
+state block.
 
-   3) Each hit of WHILEM node tries to match A and Z (in the order
-      depending on the current iteration, min/max of {min,max} and
-      greediness).  The information about where are nodes for "A"
-      and "Z" is read from cur_curlyx, as is info on how many times "A"
-      was already matched, and greediness.
+CURLYX then jumps straight to the WHILEM op, rather than executing A,
+since the pattern may possibly match zero times (i.e. it's a while {} loop
+rather than a do {} while loop).
 
-   4) After A matches, the same WHILEM node is hit again.
+Each entry to WHILEM represents a successful match of A. The count in the
+CURLYX block is incremented, another WHILEM state is pushed, and execution
+passes to A or B depending on greediness and the current count.
 
-   5) Each time WHILEM is hit, cur_curlyx is the infoblock created by CURLYX
-      of the same pair.  Thus when WHILEM tries to match Z, it temporarily
-      resets cur_curlyx, since this Y(A)*Z can be a part of some other loop:
-      as in (Y(A)*Z)*.  If Z matches, the automaton will hit the WHILEM node
-      of the external loop.
+For example, if matching against the string a1a2a3b (where the aN are
+substrings that match /A/), then the match progresses as follows: (the
+pushed states are interspersed with the bits of strings matched so far):
 
- Currently present infoblocks form a tree with a stem formed by cur_curlyx
- and whatever it mentions via ->next, and additional attached trees
- corresponding to temporarily unset infoblocks as in "5" above.
+    <CURLYX cnt=-1>
+    <CURLYX cnt=0><WHILEM>
+    <CURLYX cnt=1><WHILEM> a1 <WHILEM>
+    <CURLYX cnt=2><WHILEM> a1 <WHILEM> a2 <WHILEM>
+    <CURLYX cnt=3><WHILEM> a1 <WHILEM> a2 <WHILEM> a3 <WHILEM>
+    <CURLYX cnt=3><WHILEM> a1 <WHILEM> a2 <WHILEM> a3 <WHILEM> b
 
- In the following picture, infoblocks for outer loop of
- (Y(A)*?Z)*?T are denoted O, for inner I.  NULL starting block
- is denoted by x.  The matched string is YAAZYAZT.  Temporarily postponed
- infoblocks are drawn below the "reset" infoblock.
+(Contrast this with something like CURLYM, which maintains only a single
+backtrack state:
 
- In fact in the picture below we do not show failed matches for Z and T
- by WHILEM blocks.  [We illustrate minimal matches, since for them it is
- more obvious *why* one needs to *temporary* unset infoblocks.]
+    <CURLYM cnt=0> a1
+    a1 <CURLYM cnt=1> a2
+    a1 a2 <CURLYM cnt=2> a3
+    a1 a2 a3 <CURLYM cnt=3> b
+)
 
-  Matched	REx position	InfoBlocks	Comment
-  		(Y(A)*?Z)*?T	x
-  		Y(A)*?Z)*?T	x <- O
-  Y		(A)*?Z)*?T	x <- O
-  Y		A)*?Z)*?T	x <- O <- I
-  YA		)*?Z)*?T	x <- O <- I
-  YA		A)*?Z)*?T	x <- O <- I
-  YAA		)*?Z)*?T	x <- O <- I
-  YAA		Z)*?T		x <- O		# Temporary unset I
-				     I
+Each WHILEM state block marks a point to backtrack to upon partial failure
+of A or B, and also contains some minor state data related to that
+iteration.  The CURLYX block, pointed to by cur_curlyx, contains the
+overall state, such as the count, and pointers to the A and B ops.
 
-  YAAZ		Y(A)*?Z)*?T	x <- O
-				     I
+This is complicated slightly by nested CURLYX/WHILEM's. Since cur_curlyx
+must always point to the *current* CURLYX block, the rules are:
 
-  YAAZY		(A)*?Z)*?T	x <- O
-				     I
+When executing CURLYX, save the old cur_curlyx in the CURLYX state block,
+and set cur_curlyx to point the new block.
 
-  YAAZY		A)*?Z)*?T	x <- O <- I
-				     I
+When popping the CURLYX block after a successful or unsuccessful match,
+restore the previous cur_curlyx.
 
-  YAAZYA	)*?Z)*?T	x <- O <- I	
-				     I
+When WHILEM is about to execute B, save the current cur_curlyx, and set it
+to the outer one saved in the CURLYX block.
 
-  YAAZYA	Z)*?T		x <- O		# Temporary unset I
-				     I,I
+When popping the WHILEM block after a successful or unsuccessful B match,
+restore the previous cur_curlyx.
 
-  YAAZYAZ	)*?T		x <- O
-				     I,I
+Here's an example for the pattern (AI* BI)*BO
+I and O refer to inner and outer, C and W refer to CURLYX and WHILEM:
 
-  YAAZYAZ	T		x		# Temporary unset O
-				O
-				I,I
+cur_
+curlyx backtrack stack
+------ ---------------
+NULL   
+CO     <CO prev=NULL> <WO>
+CI     <CO prev=NULL> <WO> <CI prev=CO> <WI> ai 
+CO     <CO prev=NULL> <WO> <CI prev=CO> <WI> ai <WI prev=CI> bi 
+NULL   <CO prev=NULL> <WO> <CI prev=CO> <WI> ai <WI prev=CI> bi <WO prev=CO> bo
 
-  YAAZYAZT			x
-				O
-				I,I
- *******************************************************************/
+At this point the pattern succeeds, and we work back down the stack to
+clean up, restoring as we go:
 
-	case CURLYX: {
-		/* No need to save/restore up to this paren */
-		parenfloor = scan->flags;
-		
-		/* Dave says:
-		   
-		   CURLYX and WHILEM are always paired: they're the moral
-		   equivalent of pp_enteriter anbd pp_iter.
+CO     <CO prev=NULL> <WO> <CI prev=CO> <WI> ai <WI prev=CI> bi 
+CI     <CO prev=NULL> <WO> <CI prev=CO> <WI> ai 
+CO     <CO prev=NULL> <WO>
+NULL   
 
-		   The only time next could be null is if the node tree is
-		   corrupt. This was mentioned on p5p a few days ago.
+*******************************************************************/
 
-		   See http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2006-04/msg00556.html
-		   So we'll assert that this is true:
-		*/
-		assert(next);
-		if (OP(PREVOPER(next)) == NOTHING) /* LONGJMP */
-		    next += ARG(next);
-		/* XXXX Probably it is better to teach regpush to support
-		   parenfloor > PL_regsize... */
-		if (parenfloor > (I32)*PL_reglastparen)
-		    parenfloor = *PL_reglastparen; /* Pessimization... */
+#define ST st->u.curlyx
 
-		st->u.curlyx.cp = PL_savestack_ix;
-		st->u.curlyx.outercc = cur_curlyx;
-		cur_curlyx = st;
-		/* these fields contain the state of the current curly.
-		 * they are accessed by subsequent WHILEMs;
-		 * cur and lastloc are also updated by WHILEM */
-		st->u.curlyx.parenfloor = parenfloor;
-		st->u.curlyx.cur = -1; /* this will be updated by WHILEM */
-		st->u.curlyx.min = ARG1(scan);
-		st->u.curlyx.max  = ARG2(scan);
-		st->u.curlyx.scan = NEXTOPER(scan) + EXTRA_STEP_2ARGS;
-		st->u.curlyx.lastloc = 0;
-		/* st->next and st->minmod are also read by WHILEM */
+	case CURLYX:    /* start of /A*B/  (for complex A) */
+	{
+	    /* No need to save/restore up to this paren */
+	    I32 parenfloor = scan->flags;
+	    
+	    assert(next); /* keep Coverity happy */
+	    if (OP(PREVOPER(next)) == NOTHING) /* LONGJMP */
+		next += ARG(next);
 
-		PL_reginput = locinput;
-		REGMATCH(PREVOPER(next), CURLYX); /* start on the WHILEM */
-		/*** all unsaved local vars undefined at this point */
-		regcpblow(st->u.curlyx.cp);
-		cur_curlyx = st->u.curlyx.outercc;
-		saySAME(result);
-	    }
+	    /* XXXX Probably it is better to teach regpush to support
+	       parenfloor > PL_regsize... */
+	    if (parenfloor > (I32)*PL_reglastparen)
+		parenfloor = *PL_reglastparen; /* Pessimization... */
+
+	    ST.prev_curlyx= cur_curlyx;
+	    cur_curlyx = st;
+	    ST.cp = PL_savestack_ix;
+
+	    /* these fields contain the state of the current curly.
+	     * they are accessed by subsequent WHILEMs */
+	    ST.parenfloor = parenfloor;
+	    ST.min = ARG1(scan);
+	    ST.max = ARG2(scan);
+	    ST.A = NEXTOPER(scan) + EXTRA_STEP_2ARGS;
+	    ST.B = next;
+	    ST.minmod = st->minmod;
+	    ST.count = -1;	/* this will be updated by WHILEM */
+	    ST.lastloc = NULL;  /* this will be updated by WHILEM */
+
+	    PL_reginput = locinput;
+	    PUSH_YES_STATE_GOTO(CURLYX_end, PREVOPER(next));
 	    /* NOTREACHED */
-	case WHILEM: {
-		/*
-		 * This is really hard to understand, because after we match
-		 * what we're trying to match, we must make sure the rest of
-		 * the REx is going to match for sure, and to do that we have
-		 * to go back UP the parse tree by recursing ever deeper.  And
-		 * if it fails, we have to reset our parent's current state
-		 * that we can try again after backing off.
-		 */
+	}
 
-		/* Dave says:
+	case CURLYX_end: /* just finished matching all of A*B */
+	    regcpblow(ST.cp);
+	    cur_curlyx = ST.prev_curlyx;
+	    sayYES;
+	    /* NOTREACHED */
 
-		   cur_curlyx gets initialised by CURLYX ready for use by WHILEM.
-		   So again, unless somethings been corrupted, cur_curlyx cannot
-		   be null at that point in WHILEM.
-		   
-		   See http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2006-04/msg00556.html
-		   So we'll assert that this is true:
-		*/
-		assert(cur_curlyx);
-		st->u.whilem.lastloc = cur_curlyx->u.curlyx.lastloc; /* Detection of 0-len. */
-		st->u.whilem.cache_offset = 0;
-		st->u.whilem.cache_bit = 0;
-		
-		n = cur_curlyx->u.curlyx.cur + 1; /* how many we know we matched */
-		PL_reginput = locinput;
+	case CURLYX_end_fail: /* just failed to match all of A*B */
+	    regcpblow(ST.cp);
+	    cur_curlyx = ST.prev_curlyx;
+	    sayNO;
+	    /* NOTREACHED */
 
-		DEBUG_EXECUTE_r(
-		    PerlIO_printf(Perl_debug_log,
-				  "%*s  %ld out of %ld..%ld  cc=%"UVxf"\n",
-				  REPORT_CODE_OFF+depth*2, "",
-				  (long)n, (long)cur_curlyx->u.curlyx.min,
-				  (long)cur_curlyx->u.curlyx.max,
-				  PTR2UV(cur_curlyx))
-		    );
 
-		/* If degenerate scan matches "", assume scan done. */
+#undef ST
+#define ST st->u.whilem
 
-		if (locinput == cur_curlyx->u.curlyx.lastloc && n >=
-		    cur_curlyx->u.curlyx.min)
-		{
-		    st->u.whilem.savecc = cur_curlyx;
-		    cur_curlyx = cur_curlyx->u.curlyx.outercc;
-		    DEBUG_EXECUTE_r(
-			PerlIO_printf(Perl_debug_log,
-			   "%*s  empty match detected, try continuation...\n",
-			   REPORT_CODE_OFF+depth*2, "")
-			);
-		    REGMATCH(st->u.whilem.savecc->next, WHILEM1);
-		    /*** all unsaved local vars undefined at this point */
-		    cur_curlyx = st->u.whilem.savecc;
-		    if (result)
-			sayYES;
-		    sayNO;
-		}
+	case WHILEM:     /* just matched an A in /A*B/  (for complex A) */
+	{
+	    /* see the discussion above about CURLYX/WHILEM */
 
-		/* First just match a string of min scans. */
+	    I32 n;
+	    assert(cur_curlyx); /* keep Coverity happy */
+	    n = ++cur_curlyx->u.curlyx.count; /* how many A's matched */
+	    ST.save_lastloc = cur_curlyx->u.curlyx.lastloc;
+	    ST.cache_offset = 0;
+	    ST.cache_mask = 0;
+	    
+	    PL_reginput = locinput;
 
-		if (n < cur_curlyx->u.curlyx.min) {
-		    cur_curlyx->u.curlyx.cur = n;
-		    cur_curlyx->u.curlyx.lastloc = locinput;
-		    REGMATCH(cur_curlyx->u.curlyx.scan, WHILEM2);
-		    /*** all unsaved local vars undefined at this point */
-		    if (result)
-			sayYES;
-		    cur_curlyx->u.curlyx.cur = n - 1;
-		    cur_curlyx->u.curlyx.lastloc = st->u.whilem.lastloc;
-		    sayNO;
-		}
+	    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+		  "%*s  whilem: matched %ld out of %ld..%ld\n",
+		  REPORT_CODE_OFF+depth*2, "", (long)n,
+		  (long)cur_curlyx->u.curlyx.min,
+		  (long)cur_curlyx->u.curlyx.max)
+	    );
 
-		if (scan->flags) {
-		    /* Check whether we already were at this position.
-			Postpone detection until we know the match is not
-			*that* much linear. */
+	    /* First just match a string of min A's. */
+
+	    if (n < cur_curlyx->u.curlyx.min) {
+		cur_curlyx->u.curlyx.lastloc = locinput;
+		PUSH_STATE_GOTO(WHILEM_A_pre, cur_curlyx->u.curlyx.A);
+		/* NOTREACHED */
+	    }
+
+	    /* If degenerate A matches "", assume A done. */
+
+	    if (locinput == cur_curlyx->u.curlyx.lastloc) {
+		DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+		   "%*s  whilem: empty match detected, trying continuation...\n",
+		   REPORT_CODE_OFF+depth*2, "")
+		);
+		goto do_whilem_B_max;
+	    }
+
+	    /* super-linear cache processing */
+
+	    if (scan->flags) {
+
 		if (!PL_reg_maxiter) {
+		    /* start the countdown: Postpone detection until we
+		     * know the match is not *that* much linear. */
 		    PL_reg_maxiter = (PL_regeol - PL_bostr + 1) * (scan->flags>>4);
 		    /* possible overflow for long strings and many CURLYX's */
 		    if (PL_reg_maxiter < 0)
 			PL_reg_maxiter = I32_MAX;
 		    PL_reg_leftiter = PL_reg_maxiter;
 		}
+
 		if (PL_reg_leftiter-- == 0) {
+		    /* initialise cache */
 		    const I32 size = (PL_reg_maxiter + 7)/8;
 		    if (PL_reg_poscache) {
 			if ((I32)PL_reg_poscache_size < size) {
@@ -3769,124 +3744,133 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 			PL_reg_poscache_size = size;
 			Newxz(PL_reg_poscache, size, char);
 		    }
-		    DEBUG_EXECUTE_r(
-			PerlIO_printf(Perl_debug_log,
-	      "%sDetected a super-linear match, switching on caching%s...\n",
-				      PL_colors[4], PL_colors[5])
-			);
+		    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+      "%swhilem: Detected a super-linear match, switching on caching%s...\n",
+			      PL_colors[4], PL_colors[5])
+		    );
 		}
-		if (PL_reg_leftiter < 0) {
-		    st->u.whilem.cache_offset = locinput - PL_bostr;
 
-		    st->u.whilem.cache_offset = (scan->flags & 0xf) - 1
-			    + st->u.whilem.cache_offset * (scan->flags>>4);
-		    st->u.whilem.cache_bit = st->u.whilem.cache_offset % 8;
-		    st->u.whilem.cache_offset /= 8;
-		    if (PL_reg_poscache[st->u.whilem.cache_offset] & (1<<st->u.whilem.cache_bit)) {
-		    DEBUG_EXECUTE_r(
-			PerlIO_printf(Perl_debug_log,
-				      "%*s  already tried at this position...\n",
-				      REPORT_CODE_OFF+depth*2, "")
+		if (PL_reg_leftiter < 0) {
+		    /* have we already failed at this position? */
+		    I32 offset, mask;
+		    offset  = (scan->flags & 0xf) - 1
+		  		+ (locinput - PL_bostr)  * (scan->flags>>4);
+		    mask    = 1 << (offset % 8);
+		    offset /= 8;
+		    if (PL_reg_poscache[offset] & mask) {
+			DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
+			    "%*s  whilem: (cache) already tried at this position...\n",
+			    REPORT_CODE_OFF+depth*2, "")
 			);
 			sayNO; /* cache records failure */
 		    }
+		    ST.cache_offset = offset;
+		    ST.cache_mask   = mask;
 		}
-		}
+	    }
 
-		/* Prefer next over scan for minimal matching. */
+	    /* Prefer B over A for minimal matching. */
 
-		if (cur_curlyx->minmod) {
-		    st->u.whilem.savecc = cur_curlyx;
-		    cur_curlyx = cur_curlyx->u.curlyx.outercc;
-		    st->u.whilem.cp = regcppush(st->u.whilem.savecc->u.curlyx.parenfloor);
-		    REGCP_SET(st->u.whilem.lastcp);
-		    REGMATCH(st->u.whilem.savecc->next, WHILEM3);
-		    /*** all unsaved local vars undefined at this point */
-		    cur_curlyx = st->u.whilem.savecc;
-		    if (result) {
-			regcpblow(st->u.whilem.cp);
-			sayYES;	/* All done. */
-		    }
-		    REGCP_UNWIND(st->u.whilem.lastcp);
-		    regcppop(rex);
+	    if (cur_curlyx->u.curlyx.minmod) {
+		ST.save_curlyx = cur_curlyx;
+		cur_curlyx = cur_curlyx->u.curlyx.prev_curlyx;
+		ST.cp = regcppush(ST.save_curlyx->u.curlyx.parenfloor);
+		REGCP_SET(ST.lastcp);
+		PUSH_YES_STATE_GOTO(WHILEM_B_min, ST.save_curlyx->u.curlyx.B);
+		/* NOTREACHED */
+	    }
 
-		    if (n >= cur_curlyx->u.curlyx.max) { /* Maximum greed exceeded? */
-			if (ckWARN(WARN_REGEXP) && n >= REG_INFTY
-			    && !(PL_reg_flags & RF_warned)) {
-			    PL_reg_flags |= RF_warned;
-			    Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s limit (%d) exceeded",
-				 "Complex regular subexpression recursion",
-				 REG_INFTY - 1);
-			}
-			CACHEsayNO;
-		    }
+	    /* Prefer A over B for maximal matching. */
 
-		    DEBUG_EXECUTE_r(
-			PerlIO_printf(Perl_debug_log,
-				      "%*s  trying longer...\n",
-				      REPORT_CODE_OFF+depth*2, "")
-			);
-		    /* Try scanning more and see if it helps. */
-		    PL_reginput = locinput;
-		    cur_curlyx->u.curlyx.cur = n;
-		    cur_curlyx->u.curlyx.lastloc = locinput;
-		    st->u.whilem.cp = regcppush(cur_curlyx->u.curlyx.parenfloor);
-		    REGCP_SET(st->u.whilem.lastcp);
-		    REGMATCH(cur_curlyx->u.curlyx.scan, WHILEM4);
-		    /*** all unsaved local vars undefined at this point */
-		    if (result) {
-			regcpblow(st->u.whilem.cp);
-			sayYES;
-		    }
-		    REGCP_UNWIND(st->u.whilem.lastcp);
-		    regcppop(rex);
-		    cur_curlyx->u.curlyx.cur = n - 1;
-		    cur_curlyx->u.curlyx.lastloc = st->u.whilem.lastloc;
-		    CACHEsayNO;
-		}
+	    if (n < cur_curlyx->u.curlyx.max) { /* More greed allowed? */
+		ST.cp = regcppush(cur_curlyx->u.curlyx.parenfloor);
+		cur_curlyx->u.curlyx.lastloc = locinput;
+		REGCP_SET(ST.lastcp);
+		PUSH_STATE_GOTO(WHILEM_A_max, cur_curlyx->u.curlyx.A);
+		/* NOTREACHED */
+	    }
+	    goto do_whilem_B_max;
+	}
+	/* NOTREACHED */
 
-		/* Prefer scan over next for maximal matching. */
+	case WHILEM_B_min: /* just matched B in a minimal match */
+	case WHILEM_B_max: /* just matched B in a maximal match */
+	    cur_curlyx = ST.save_curlyx;
+	    sayYES;
+	    /* NOTREACHED */
 
-		if (n < cur_curlyx->u.curlyx.max) {	/* More greed allowed? */
-		    st->u.whilem.cp = regcppush(cur_curlyx->u.curlyx.parenfloor);
-		    cur_curlyx->u.curlyx.cur = n;
-		    cur_curlyx->u.curlyx.lastloc = locinput;
-		    REGCP_SET(st->u.whilem.lastcp);
-		    REGMATCH(cur_curlyx->u.curlyx.scan, WHILEM5);
-		    /*** all unsaved local vars undefined at this point */
-		    if (result) {
-			regcpblow(st->u.whilem.cp);
-			sayYES;
-		    }
-		    REGCP_UNWIND(st->u.whilem.lastcp);
-		    regcppop(rex);	/* Restore some previous $<digit>s? */
-		    PL_reginput = locinput;
-		    DEBUG_EXECUTE_r(
-			PerlIO_printf(Perl_debug_log,
-				      "%*s  failed, try continuation...\n",
-				      REPORT_CODE_OFF+depth*2, "")
-			);
-		}
-		if (ckWARN(WARN_REGEXP) && n >= REG_INFTY
-			&& !(PL_reg_flags & RF_warned)) {
+	case WHILEM_B_max_fail: /* just failed to match B in a maximal match */
+	    cur_curlyx = ST.save_curlyx;
+	    cur_curlyx->u.curlyx.lastloc = ST.save_lastloc;
+	    cur_curlyx->u.curlyx.count--;
+	    CACHEsayNO;
+	    /* NOTREACHED */
+
+	case WHILEM_A_min_fail: /* just failed to match A in a minimal match */
+	    REGCP_UNWIND(ST.lastcp);
+	    regcppop(rex);
+	    /* FALL THROUGH */
+	case WHILEM_A_pre_fail: /* just failed to match even minimal A */
+	    cur_curlyx->u.curlyx.lastloc = ST.save_lastloc;
+	    cur_curlyx->u.curlyx.count--;
+	    CACHEsayNO;
+	    /* NOTREACHED */
+
+	case WHILEM_A_max_fail: /* just failed to match A in a maximal match */
+	    REGCP_UNWIND(ST.lastcp);
+	    regcppop(rex);	/* Restore some previous $<digit>s? */
+	    PL_reginput = locinput;
+	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+		"%*s  whilem: failed, trying continuation...\n",
+		REPORT_CODE_OFF+depth*2, "")
+	    );
+	  do_whilem_B_max:
+	    if (cur_curlyx->u.curlyx.count >= REG_INFTY
+		&& ckWARN(WARN_REGEXP)
+		&& !(PL_reg_flags & RF_warned))
+	    {
+		PL_reg_flags |= RF_warned;
+		Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s limit (%d) exceeded",
+		     "Complex regular subexpression recursion",
+		     REG_INFTY - 1);
+	    }
+
+	    /* now try B */
+	    ST.save_curlyx = cur_curlyx;
+	    cur_curlyx = cur_curlyx->u.curlyx.prev_curlyx;
+	    PUSH_YES_STATE_GOTO(WHILEM_B_max, ST.save_curlyx->u.curlyx.B);
+	    /* NOTREACHED */
+
+	case WHILEM_B_min_fail: /* just failed to match B in a minimal match */
+	    cur_curlyx = ST.save_curlyx;
+	    REGCP_UNWIND(ST.lastcp);
+	    regcppop(rex);
+
+	    if (cur_curlyx->u.curlyx.count >= cur_curlyx->u.curlyx.max) {
+		/* Maximum greed exceeded */
+		if (cur_curlyx->u.curlyx.count >= REG_INFTY
+		    && ckWARN(WARN_REGEXP)
+		    && !(PL_reg_flags & RF_warned))
+		{
 		    PL_reg_flags |= RF_warned;
-		    Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s limit (%d) exceeded",
-			 "Complex regular subexpression recursion",
-			 REG_INFTY - 1);
+		    Perl_warner(aTHX_ packWARN(WARN_REGEXP),
+			"%s limit (%d) exceeded",
+			"Complex regular subexpression recursion",
+			REG_INFTY - 1);
 		}
-
-		/* Failed deeper matches of scan, so see if this one works. */
-		st->u.whilem.savecc = cur_curlyx;
-		cur_curlyx = cur_curlyx->u.curlyx.outercc;
-		REGMATCH(st->u.whilem.savecc->next, WHILEM6);
-		/*** all unsaved local vars undefined at this point */
-		cur_curlyx = st->u.whilem.savecc;
-		if (result)
-		    sayYES;
-		cur_curlyx->u.curlyx.cur = n - 1;
-		cur_curlyx->u.curlyx.lastloc = st->u.whilem.lastloc;
+		cur_curlyx->u.curlyx.count--;
 		CACHEsayNO;
 	    }
+
+	    DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log,
+		"%*s  trying longer...\n", REPORT_CODE_OFF+depth*2, "")
+	    );
+	    /* Try grabbing another A and see if it helps. */
+	    PL_reginput = locinput;
+	    cur_curlyx->u.curlyx.lastloc = locinput;
+	    ST.cp = regcppush(cur_curlyx->u.curlyx.parenfloor);
+	    REGCP_SET(ST.lastcp);
+	    PUSH_STATE_GOTO(WHILEM_A_min, ST.save_curlyx->u.curlyx.A);
 	    /* NOTREACHED */
 
 #undef  ST
@@ -4535,39 +4519,6 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    continue;
 	    /* NOTREACHED */
 	}
-
-	/* simulate recursively calling regmatch(), but without actually
-	 * recursing - ie save the current state on the heap rather than on
-	 * the stack, then re-enter the loop. This avoids complex regexes
-	 * blowing the processor stack */
-
-      start_recurse:
-	{
-	    /* push new state */
-	    regmatch_state *oldst = st;
-
-	    DEBUG_STATE_pp("push");
-	    depth++;
-	    st->u.yes.prev_yes_state = yes_state;
-	    yes_state = st;
-
-	    /* grab the next free state slot */
-	    st++;
-	    if (st >  SLAB_LAST(PL_regmatch_slab))
-		st = S_push_slab(aTHX);
-	    PL_regmatch_state = st;
-
-	    oldst->next = next;
-	    oldst->n = n;
-	    oldst->locinput = locinput;
-
-	    locinput = PL_reginput;
-    	    nextchr = UCHARAT(locinput);
-	    st->minmod = 0;
-	    st->sw = 0;
-	    st->logical = 0;
-	    
-	}
     }
 
     /*
@@ -4609,41 +4560,13 @@ yes:
 	PL_regmatch_state = st;
 
 	switch (st->resume_state) {
-	case resume_CURLYX:
-	case resume_WHILEM1:
-	case resume_WHILEM2:
-	case resume_WHILEM3:
-	case resume_WHILEM4:
-	case resume_WHILEM5:
-	case resume_WHILEM6:
-	    result = 1;
-	    /* restore previous state and re-enter */
-	    scan	= st->scan;
-	    next	= st->next;
-	    n	= st->n;
-	    locinput= st->locinput;
-	    nextchr = UCHARAT(locinput);
-	    switch (st->resume_state) {
-	    case resume_CURLYX:
-		goto resume_point_CURLYX;
-	    case resume_WHILEM1:
-		goto resume_point_WHILEM1;
-	    case resume_WHILEM2:
-		goto resume_point_WHILEM2;
-	    case resume_WHILEM3:
-		goto resume_point_WHILEM3;
-	    case resume_WHILEM4:
-		goto resume_point_WHILEM4;
-	    case resume_WHILEM5:
-		goto resume_point_WHILEM5;
-	    case resume_WHILEM6:
-		goto resume_point_WHILEM6;
-	    }
-	    Perl_croak(aTHX_ "unexpected whilem resume state");
 
 	case EVAL_AB: 
 	case IFMATCH_A:
 	case CURLYM_A:
+	case CURLYX_end:
+	case WHILEM_B_min:
+	case WHILEM_B_max:
 	    state_num = st->resume_state;
 	    goto reenter_switch;
 
@@ -4651,6 +4574,9 @@ yes:
 	case BRANCH_next:
 	case TRIE_next:
 	case CURLY_B_max:
+	case WHILEM_A_pre:
+	case WHILEM_A_min:
+	case WHILEM_A_max:
 	default:
 	    Perl_croak(aTHX_ "unexpected yes resume state");
 	}
@@ -4693,21 +4619,6 @@ no_silent:
 	    yes_state = st->u.yes.prev_yes_state;
 
 	switch (st->resume_state) {
-	case resume_CURLYX:
-	    goto resume_point_CURLYX;
-	case resume_WHILEM1:
-	    goto resume_point_WHILEM1;
-	case resume_WHILEM2:
-	    goto resume_point_WHILEM2;
-	case resume_WHILEM3:
-	    goto resume_point_WHILEM3;
-	case resume_WHILEM4:
-	    goto resume_point_WHILEM4;
-	case resume_WHILEM5:
-	    goto resume_point_WHILEM5;
-	case resume_WHILEM6:
-	    goto resume_point_WHILEM6;
-
 	case TRIE_next:
 	case EVAL_AB:
 	case BRANCH_next:
@@ -4717,6 +4628,12 @@ no_silent:
 	case CURLY_B_max:
 	case CURLY_B_min:
 	case CURLY_B_min_known:
+	case CURLYX_end:
+	case WHILEM_A_pre:
+	case WHILEM_A_min:
+	case WHILEM_A_max:
+	case WHILEM_B_min:
+	case WHILEM_B_max:
 	    state_num = st->resume_state + 1; /* failure = success + 1 */
 	    goto reenter_switch;
 

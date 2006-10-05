@@ -7,7 +7,7 @@
 /* Regops and State definitions */
 
 #define REGNODE_MAX           	68
-#define REGMATCH_STATE_MAX    	93
+#define REGMATCH_STATE_MAX    	98
 
 #define	END                   	0	/* 0000 End of program. */
 #define	SUCCEED               	1	/* 0x01 Return from a subroutine, basically. */
@@ -85,27 +85,32 @@
 #define	TRIE_next_fail        	70	/* 0x46 Regmatch state for TRIE */
 #define	EVAL_AB               	71	/* 0x47 Regmatch state for EVAL */
 #define	EVAL_AB_fail          	72	/* 0x48 Regmatch state for EVAL */
-#define	resume_CURLYX         	73	/* 0x49 Regmatch state for CURLYX */
-#define	resume_WHILEM1        	74	/* 0x4a Regmatch state for WHILEM */
-#define	resume_WHILEM2        	75	/* 0x4b Regmatch state for WHILEM */
-#define	resume_WHILEM3        	76	/* 0x4c Regmatch state for WHILEM */
-#define	resume_WHILEM4        	77	/* 0x4d Regmatch state for WHILEM */
-#define	resume_WHILEM5        	78	/* 0x4e Regmatch state for WHILEM */
-#define	resume_WHILEM6        	79	/* 0x4f Regmatch state for WHILEM */
-#define	BRANCH_next           	80	/* 0x50 Regmatch state for BRANCH */
-#define	BRANCH_next_fail      	81	/* 0x51 Regmatch state for BRANCH */
-#define	CURLYM_A              	82	/* 0x52 Regmatch state for CURLYM */
-#define	CURLYM_A_fail         	83	/* 0x53 Regmatch state for CURLYM */
-#define	CURLYM_B              	84	/* 0x54 Regmatch state for CURLYM */
-#define	CURLYM_B_fail         	85	/* 0x55 Regmatch state for CURLYM */
-#define	IFMATCH_A             	86	/* 0x56 Regmatch state for IFMATCH */
-#define	IFMATCH_A_fail        	87	/* 0x57 Regmatch state for IFMATCH */
-#define	CURLY_B_min_known     	88	/* 0x58 Regmatch state for CURLY */
-#define	CURLY_B_min_known_fail	89	/* 0x59 Regmatch state for CURLY */
-#define	CURLY_B_min           	90	/* 0x5a Regmatch state for CURLY */
-#define	CURLY_B_min_fail      	91	/* 0x5b Regmatch state for CURLY */
-#define	CURLY_B_max           	92	/* 0x5c Regmatch state for CURLY */
-#define	CURLY_B_max_fail      	93	/* 0x5d Regmatch state for CURLY */
+#define	CURLYX_end            	73	/* 0x49 Regmatch state for CURLYX */
+#define	CURLYX_end_fail       	74	/* 0x4a Regmatch state for CURLYX */
+#define	WHILEM_A_pre          	75	/* 0x4b Regmatch state for WHILEM */
+#define	WHILEM_A_pre_fail     	76	/* 0x4c Regmatch state for WHILEM */
+#define	WHILEM_A_min          	77	/* 0x4d Regmatch state for WHILEM */
+#define	WHILEM_A_min_fail     	78	/* 0x4e Regmatch state for WHILEM */
+#define	WHILEM_A_max          	79	/* 0x4f Regmatch state for WHILEM */
+#define	WHILEM_A_max_fail     	80	/* 0x50 Regmatch state for WHILEM */
+#define	WHILEM_B_min          	81	/* 0x51 Regmatch state for WHILEM */
+#define	WHILEM_B_min_fail     	82	/* 0x52 Regmatch state for WHILEM */
+#define	WHILEM_B_max          	83	/* 0x53 Regmatch state for WHILEM */
+#define	WHILEM_B_max_fail     	84	/* 0x54 Regmatch state for WHILEM */
+#define	BRANCH_next           	85	/* 0x55 Regmatch state for BRANCH */
+#define	BRANCH_next_fail      	86	/* 0x56 Regmatch state for BRANCH */
+#define	CURLYM_A              	87	/* 0x57 Regmatch state for CURLYM */
+#define	CURLYM_A_fail         	88	/* 0x58 Regmatch state for CURLYM */
+#define	CURLYM_B              	89	/* 0x59 Regmatch state for CURLYM */
+#define	CURLYM_B_fail         	90	/* 0x5a Regmatch state for CURLYM */
+#define	IFMATCH_A             	91	/* 0x5b Regmatch state for IFMATCH */
+#define	IFMATCH_A_fail        	92	/* 0x5c Regmatch state for IFMATCH */
+#define	CURLY_B_min_known     	93	/* 0x5d Regmatch state for CURLY */
+#define	CURLY_B_min_known_fail	94	/* 0x5e Regmatch state for CURLY */
+#define	CURLY_B_min           	95	/* 0x5f Regmatch state for CURLY */
+#define	CURLY_B_min_fail      	96	/* 0x60 Regmatch state for CURLY */
+#define	CURLY_B_max           	97	/* 0x61 Regmatch state for CURLY */
+#define	CURLY_B_max_fail      	98	/* 0x62 Regmatch state for CURLY */
 
 /* PL_regkind[] What type of regop or state is this. */
 
@@ -187,13 +192,18 @@ EXTCONST U8 PL_regkind[] = {
 	TRIE,   	/* TRIE_next_fail         */
 	EVAL,   	/* EVAL_AB                */
 	EVAL,   	/* EVAL_AB_fail           */
-	CURLYX, 	/* resume_CURLYX          */
-	WHILEM, 	/* resume_WHILEM1         */
-	WHILEM, 	/* resume_WHILEM2         */
-	WHILEM, 	/* resume_WHILEM3         */
-	WHILEM, 	/* resume_WHILEM4         */
-	WHILEM, 	/* resume_WHILEM5         */
-	WHILEM, 	/* resume_WHILEM6         */
+	CURLYX, 	/* CURLYX_end             */
+	CURLYX, 	/* CURLYX_end_fail        */
+	WHILEM, 	/* WHILEM_A_pre           */
+	WHILEM, 	/* WHILEM_A_pre_fail      */
+	WHILEM, 	/* WHILEM_A_min           */
+	WHILEM, 	/* WHILEM_A_min_fail      */
+	WHILEM, 	/* WHILEM_A_max           */
+	WHILEM, 	/* WHILEM_A_max_fail      */
+	WHILEM, 	/* WHILEM_B_min           */
+	WHILEM, 	/* WHILEM_B_min_fail      */
+	WHILEM, 	/* WHILEM_B_max           */
+	WHILEM, 	/* WHILEM_B_max_fail      */
 	BRANCH, 	/* BRANCH_next            */
 	BRANCH, 	/* BRANCH_next_fail       */
 	CURLYM, 	/* CURLYM_A               */
@@ -438,27 +448,32 @@ const char * reg_name[] = {
 	"TRIE_next_fail",        	/* 0x46 */
 	"EVAL_AB",               	/* 0x47 */
 	"EVAL_AB_fail",          	/* 0x48 */
-	"resume_CURLYX",         	/* 0x49 */
-	"resume_WHILEM1",        	/* 0x4a */
-	"resume_WHILEM2",        	/* 0x4b */
-	"resume_WHILEM3",        	/* 0x4c */
-	"resume_WHILEM4",        	/* 0x4d */
-	"resume_WHILEM5",        	/* 0x4e */
-	"resume_WHILEM6",        	/* 0x4f */
-	"BRANCH_next",           	/* 0x50 */
-	"BRANCH_next_fail",      	/* 0x51 */
-	"CURLYM_A",              	/* 0x52 */
-	"CURLYM_A_fail",         	/* 0x53 */
-	"CURLYM_B",              	/* 0x54 */
-	"CURLYM_B_fail",         	/* 0x55 */
-	"IFMATCH_A",             	/* 0x56 */
-	"IFMATCH_A_fail",        	/* 0x57 */
-	"CURLY_B_min_known",     	/* 0x58 */
-	"CURLY_B_min_known_fail",	/* 0x59 */
-	"CURLY_B_min",           	/* 0x5a */
-	"CURLY_B_min_fail",      	/* 0x5b */
-	"CURLY_B_max",           	/* 0x5c */
-	"CURLY_B_max_fail",      	/* 0x5d */
+	"CURLYX_end",            	/* 0x49 */
+	"CURLYX_end_fail",       	/* 0x4a */
+	"WHILEM_A_pre",          	/* 0x4b */
+	"WHILEM_A_pre_fail",     	/* 0x4c */
+	"WHILEM_A_min",          	/* 0x4d */
+	"WHILEM_A_min_fail",     	/* 0x4e */
+	"WHILEM_A_max",          	/* 0x4f */
+	"WHILEM_A_max_fail",     	/* 0x50 */
+	"WHILEM_B_min",          	/* 0x51 */
+	"WHILEM_B_min_fail",     	/* 0x52 */
+	"WHILEM_B_max",          	/* 0x53 */
+	"WHILEM_B_max_fail",     	/* 0x54 */
+	"BRANCH_next",           	/* 0x55 */
+	"BRANCH_next_fail",      	/* 0x56 */
+	"CURLYM_A",              	/* 0x57 */
+	"CURLYM_A_fail",         	/* 0x58 */
+	"CURLYM_B",              	/* 0x59 */
+	"CURLYM_B_fail",         	/* 0x5a */
+	"IFMATCH_A",             	/* 0x5b */
+	"IFMATCH_A_fail",        	/* 0x5c */
+	"CURLY_B_min_known",     	/* 0x5d */
+	"CURLY_B_min_known_fail",	/* 0x5e */
+	"CURLY_B_min",           	/* 0x5f */
+	"CURLY_B_min_fail",      	/* 0x60 */
+	"CURLY_B_max",           	/* 0x61 */
+	"CURLY_B_max_fail",      	/* 0x62 */
 };
 #endif /* DEBUGGING */
 #else

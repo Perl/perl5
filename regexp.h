@@ -262,28 +262,30 @@ typedef struct regmatch_state {
 	} eval;
 
 	struct {
+	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
-	    CHECKPOINT cp;	/* remember current savestack indexes */
-	    struct regmatch_state *outercc; /* outer CURLYX state if any */
-
-	    /* these contain the current curly state, and are accessed
-	     * by subsequent WHILEMs */
+	    struct regmatch_state *prev_curlyx; /* previous cur_curlyx */
+	    CHECKPOINT	cp;	/* remember current savestack index */
+	    bool	minmod;
 	    int		parenfloor;/* how far back to strip paren data */
-	    int		cur;	/* how many instances of scan we've matched */
-	    int		min;	/* the minimal number of scans to match */
-	    int		max;	/* the maximal number of scans to match */
-	    regnode *	scan;	/* the thing to match */
-	    char *	lastloc;/* where we started matching this scan */
+	    int		min;	/* the minimal number of A's to match */
+	    int		max;	/* the maximal number of A's to match */
+	    regnode	*A, *B;	/* the nodes corresponding to /A*B/  */
+
+	    /* these two are modified by WHILEM */
+	    int		count;	/* how many instances of A we've matched */
+	    char	*lastloc;/* where previous A matched (0-len detect) */
 	} curlyx;
 
 	struct {
+	    /* this first element must match u.yes */
 	    struct regmatch_state *prev_yes_state;
-	    CHECKPOINT cp;	/* remember current savestack indexes */
-	    CHECKPOINT lastcp;
-	    struct regmatch_state *savecc;
-	    char *lastloc;	/* Detection of 0-len. */
-	    I32 cache_offset;
-	    I32 cache_bit;
+	    struct regmatch_state *save_curlyx;
+	    CHECKPOINT	cp;	/* remember current savestack indexes */
+	    CHECKPOINT	lastcp;
+	    char	*save_lastloc;	/* previous curlyx.lastloc */
+	    I32		cache_offset;
+	    I32		cache_mask;
 	} whilem;
 
 	struct {

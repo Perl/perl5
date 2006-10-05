@@ -12,6 +12,7 @@
 # NAME \t TYPE, arg-description [num-args] [longjump-len] \t DESCRIPTION
 #
 #
+# run perl regen.pl after editing this file
 
 
 
@@ -186,8 +187,8 @@ PSEUDO		PSEUDO,off	Pseudo opcode for internal use.
 #
 TRIE    	next:FAIL	
 EVAL    	AB:FAIL	
-CURLYX  	resume	
-WHILEM  	resume:6	
+CURLYX  	end:FAIL	
+WHILEM  	A_pre,A_min,A_max,B_min,B_max:FAIL
 BRANCH  	next:FAIL	
 CURLYM  	A,B:FAIL	
 IFMATCH 	A:FAIL	
