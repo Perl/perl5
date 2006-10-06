@@ -2,7 +2,7 @@
 
 #
 # Generate overload.h
-# This allows the order of overloading consants to be changed.
+# This allows the order of overloading constants to be changed.
 # 
 
 BEGIN {
@@ -73,6 +73,8 @@ print <<"EOT";
 EXTCONST char * PL_AMG_names[NofAMmeth];
 #endif /* def INITAMAGIC */
 EOT
+
+close H or die $!;
 
 __DATA__
 # Fallback should be the first
