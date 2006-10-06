@@ -1,5 +1,22 @@
 Revision history for Perl distribution PathTools.
 
+3.21  Wed Oct  4 21:13:21 CDT 2006
+
+ - Added a bunch of X<> tags to the File::Spec docs to help
+   podindex. [Gabor Szabo]
+
+ - On Win32, abs2rel('C:\one\two\t\foo', 't\bar') should return
+   '..\foo' when the cwd is 'C:\one\two', but it wasn't noticing that
+   the two relevant volumes were the same so it would return the full
+   path 'C:\one\two\t\foo'.  This is fixed. [Spotted by Alexandr
+   Ciornii]
+
+ - On Win32, rel2abs() now always adds a volume (drive letter) if the
+   given path doesn't have a volume (drive letter or UNC volume).
+   Previously it could return a value that didn't have a volume if the
+   input was a semi-absolute path like /foo/bar instead of a
+   fully-absolute path like C:/foo/bar .
+
 3.19  Tue Jul 11 22:40:26 CDT 2006
 
  - When abs2rel() is called with two relative paths

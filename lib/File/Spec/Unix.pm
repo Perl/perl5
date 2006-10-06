@@ -358,12 +358,6 @@ sub abs2rel {
 
     for ($path, $base) { $_ = $self->canonpath($_) }
 
-    my ($path_volume) = $self->splitpath($path, 1);
-    my ($base_volume) = $self->splitpath($base, 1);
-
-    # Can't relativize across volumes
-    return $path unless $path_volume eq $base_volume;
-
     if (grep $self->file_name_is_absolute($_), $path, $base) {
 	for ($path, $base) { $_ = $self->rel2abs($_) }
     }
@@ -371,6 +365,12 @@ sub abs2rel {
 	# save a couple of cwd()s if both paths are relative
 	for ($path, $base) { $_ = $self->catdir('/', $_) }
     }
+
+    my ($path_volume) = $self->splitpath($path, 1);
+    my ($base_volume) = $self->splitpath($base, 1);
+
+    # Can't relativize across volumes
+    return $path unless $path_volume eq $base_volume;
 
     my $path_directories = ($self->splitpath($path, 1))[1];
     my $base_directories = ($self->splitpath($base, 1))[1];

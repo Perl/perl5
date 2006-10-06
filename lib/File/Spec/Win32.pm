@@ -9,6 +9,12 @@ $VERSION = '1.6';
 
 @ISA = qw(File::Spec::Unix);
 
+# Some regexes we use for path splitting
+my $DRIVE_RX = '[a-zA-Z]:';
+my $UNC_RX = '(?:\\\\\\\\|//)[^\\\\/]+[\\\\/][^\\\\/]+';
+my $VOL_RX = "(?:$DRIVE_RX|$UNC_RX)";
+
+
 =head1 NAME
 
 File::Spec::Win32 - methods for Win32 file specs
@@ -77,7 +83,9 @@ sub case_tolerant {
 
 sub file_name_is_absolute {
     my ($self,$file) = @_;
-    return scalar($file =~ m{^([a-z]:)?[\\/]}is);
+    return $file =~ m{^$VOL_RX}os ? 2 :
+           $file =~   m{^[\\/]}is ? 1 :
+           0;
 }
 
 =item catfile
@@ -172,21 +180,16 @@ sub splitpath {
     my ($volume,$directory,$file) = ('','','');
     if ( $nofile ) {
         $path =~ 
-            m{^( (?:[a-zA-Z]:|(?:\\\\|//)[^\\/]+[\\/][^\\/]+)? ) 
-                 (.*)
-             }xs;
+            m{^ ( $VOL_RX ? ) (.*) }sox;
         $volume    = $1;
         $directory = $2;
     }
     else {
         $path =~ 
-            m{^ ( (?: [a-zA-Z]: |
-                      (?:\\\\|//)[^\\/]+[\\/][^\\/]+
-                  )?
-                )
+            m{^ ( $VOL_RX ? )
                 ( (?:.*[\\/](?:\.\.?\Z(?!\n))?)? )
                 (.*)
-             }xs;
+             }sox;
         $volume    = $1;
         $directory = $2;
         $file      = $3;
@@ -284,32 +287,40 @@ sub _same {
 sub rel2abs {
     my ($self,$path,$base ) = @_;
 
-    if ( ! $self->file_name_is_absolute( $path ) ) {
+    my $is_abs = $self->file_name_is_absolute($path);
 
-        if ( !defined( $base ) || $base eq '' ) {
-	    require Cwd ;
-	    $base = Cwd::getdcwd( ($self->splitpath( $path ))[0] ) if defined &Cwd::getdcwd ;
-	    $base = $self->_cwd() unless defined $base ;
-        }
-        elsif ( ! $self->file_name_is_absolute( $base ) ) {
-            $base = $self->rel2abs( $base ) ;
-        }
-        else {
-            $base = $self->canonpath( $base ) ;
-        }
+    # Check for volume (should probably document the '2' thing...)
+    return $self->canonpath( $path ) if $is_abs == 2;
 
-        my ( $path_directories, $path_file ) =
-            ($self->splitpath( $path, 1 ))[1,2] ;
-
-        my ( $base_volume, $base_directories ) =
-            $self->splitpath( $base, 1 ) ;
-
-        $path = $self->catpath( 
-            $base_volume, 
-            $self->catdir( $base_directories, $path_directories ), 
-            $path_file
-        ) ;
+    if ($is_abs) {
+      # It's missing a volume, add one
+      my $vol = ($self->splitpath( $self->_cwd() ))[0];
+      return $self->canonpath( $vol . $path );
     }
+
+    if ( !defined( $base ) || $base eq '' ) {
+      require Cwd ;
+      $base = Cwd::getdcwd( ($self->splitpath( $path ))[0] ) if defined &Cwd::getdcwd ;
+      $base = $self->_cwd() unless defined $base ;
+    }
+    elsif ( ! $self->file_name_is_absolute( $base ) ) {
+      $base = $self->rel2abs( $base ) ;
+    }
+    else {
+      $base = $self->canonpath( $base ) ;
+    }
+
+    my ( $path_directories, $path_file ) =
+      ($self->splitpath( $path, 1 ))[1,2] ;
+
+    my ( $base_volume, $base_directories ) =
+      $self->splitpath( $base, 1 ) ;
+
+    $path = $self->catpath( 
+			   $base_volume, 
+			   $self->catdir( $base_directories, $path_directories ), 
+			   $path_file
+			  ) ;
 
     return $self->canonpath( $path ) ;
 }
