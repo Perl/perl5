@@ -3657,6 +3657,31 @@ SKIP:{
     }
         
 }
+{
+    my $s='123453456';
+    $s=~s/(?<digits>\d+)\k<digits>/$+{digits}/;
+    ok($s eq '123456','Named capture (angle brackets) s///');
+    $s='123453456';
+    $s=~s/(?'digits'\d+)\k'digits'/$+{digits}/;
+    ok($s eq '123456','Named capture (single quotes) s///');    
+}
+{
+    my $s='foo bar baz';
+    my (@k,@v,$count);
+    if ($s=~/(?<A>foo)\s+(?<B>bar)?\s+(?<C>baz)/) {
+        while (my ($k,$v)=each(%+)) {
+            $count++;
+        }
+        @k=sort keys(%+);
+        @v=sort values(%+);
+    }
+    ok($count==3,"Got 3 keys in %+ via each ($count)");
+    ok(@k == 3, 'Got 3 keys in %+ via keys');
+    ok("@k" eq "A B C", "Got expected keys");
+    ok("@v" eq "bar baz foo", "Got expected values");
+}
+        
+       
 # stress test CURLYX/WHILEM.
 #
 # This test includes varying levels of nesting, and according to
@@ -3771,5 +3796,5 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
     or print "# Unexpected outcome: should pass or crash perl\n";
 
 # Don't forget to update this!
-BEGIN{print "1..1264\n"};
+BEGIN{print "1..1270\n"};
 

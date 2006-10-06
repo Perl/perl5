@@ -3615,6 +3615,8 @@ Gid_t getegid (void);
 #define PERL_MAGIC_overload_elem  'a' /* %OVERLOAD hash element */
 #define PERL_MAGIC_overload_table 'c' /* Holds overload table (AMT) on stash */
 #define PERL_MAGIC_bm		  'B' /* Boyer-Moore (fast string search) */
+#define PERL_MAGIC_regdata_names  '+' /* Regex named capture buffer hash 
+					(%+ support) */
 #define PERL_MAGIC_regdata	  'D' /* Regex match position data
 					(@+ and @- vars) */
 #define PERL_MAGIC_regdatum	  'd' /* Regex match position data element */
@@ -4824,6 +4826,18 @@ MGVTBL_SET(
     NULL,
     NULL,
     MEMBER_TO_FPTR(Perl_magic_freeregexp),
+    NULL,
+    NULL,
+    NULL
+);
+
+MGVTBL_SET(
+    PL_vtbl_regdata_names,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
     NULL,
     NULL,
     NULL

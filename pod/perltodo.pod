@@ -629,16 +629,6 @@ Fix (or rewrite) the implementation of the C</(?{...})/> closures.
 This will allow the use of a regex from inside (?{ }), (??{ }) and
 (?(?{ })|) constructs.
 
-=head2 Add named capture to regexp engine
-
-Named capture is supported by .NET, PCRE and Python. Its embarrassing
-Perl doesn't support it yet. 
-
-Jeffrey Friedl notes that "the most glaring omission [in perl's regexp
-engine] offered by other implementations is named capture".
-
-demerphq is working on this.
-
 =head2 Add possessive quantifiers to regexp engine
 
 Possessive quantifiers are a syntactic sugar that affords a more

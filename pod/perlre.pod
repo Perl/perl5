@@ -191,20 +191,26 @@ X<metacharacter>
 X<\w> X<\W> X<\s> X<\S> X<\d> X<\D> X<\X> X<\p> X<\P> X<\C>
 X<word> X<whitespace>
 
-    \w	Match a "word" character (alphanumeric plus "_")
-    \W	Match a non-"word" character
-    \s	Match a whitespace character
-    \S	Match a non-whitespace character
-    \d	Match a digit character
-    \D	Match a non-digit character
-    \pP	Match P, named property.  Use \p{Prop} for longer names.
-    \PP	Match non-P
-    \X	Match eXtended Unicode "combining character sequence",
-        equivalent to (?:\PM\pM*)
-    \C	Match a single C char (octet) even under Unicode.
-	NOTE: breaks up characters into their UTF-8 bytes,
-	so you may end up with malformed pieces of UTF-8.
-	Unsupported in lookbehind.
+    \w	     Match a "word" character (alphanumeric plus "_")
+    \W	     Match a non-"word" character
+    \s	     Match a whitespace character
+    \S	     Match a non-whitespace character
+    \d	     Match a digit character
+    \D	     Match a non-digit character
+    \pP	     Match P, named property.  Use \p{Prop} for longer names.
+    \PP	     Match non-P
+    \X	     Match eXtended Unicode "combining character sequence",
+             equivalent to (?:\PM\pM*)
+    \C	     Match a single C char (octet) even under Unicode.
+	     NOTE: breaks up characters into their UTF-8 bytes,
+	     so you may end up with malformed pieces of UTF-8.
+	     Unsupported in lookbehind.
+    \1       Backreference to a a specific group. 
+             '1' may actually be any positive integer
+    \k<name> Named backreference
+    \N{name} Named unicode character, or unicode escape.
+    \x12     Hexadecimal escape sequence
+    \x{1234} Long hexadecimal escape sequence
 
 A C<\w> matches a single alphanumeric character (an alphabetic
 character, or a decimal digit) or C<_>, not a whole word.  Use C<\w+>
@@ -403,7 +409,7 @@ X<\G>
 The bracketing construct C<( ... )> creates capture buffers.  To
 refer to the digit'th buffer use \<digit> within the
 match.  Outside the match use "$" instead of "\".  (The
-\<digit> notation works in certain circumstances outside 
+\<digit> notation works in certain circumstances outside
 the match.  See the warning below about \1 vs $1 for details.)
 Referring back to another part of the match is called a
 I<backreference>.
@@ -414,20 +420,38 @@ There is no limit to the number of captured substrings that you may
 use.  However Perl also uses \10, \11, etc. as aliases for \010,
 \011, etc.  (Recall that 0 means octal, so \011 is the character at
 number 9 in your coded character set; which would be the 10th character,
-a horizontal tab under ASCII.)  Perl resolves this 
-ambiguity by interpreting \10 as a backreference only if at least 10 
-left parentheses have opened before it.  Likewise \11 is a 
-backreference only if at least 11 left parentheses have opened 
-before it.  And so on.  \1 through \9 are always interpreted as 
+a horizontal tab under ASCII.)  Perl resolves this
+ambiguity by interpreting \10 as a backreference only if at least 10
+left parentheses have opened before it.  Likewise \11 is a
+backreference only if at least 11 left parentheses have opened
+before it.  And so on.  \1 through \9 are always interpreted as
 backreferences.
+
+Additionally, as of Perl 5.10 you may use named capture buffers and named
+backreferences. The notation is C<< (?<name>...) >> and C<< \k<name> >>
+(you may also use single quotes instead of angle brackets to quote the
+name). The only difference with named capture buffers and unnamed ones is
+that multiple buffers may have the same name and that the contents of
+named capture buffers is available via the C<%+> hash. When multiple
+groups share the same name C<$+{name}> and C<< \k<name> >> refer to the
+leftmost defined group, thus it's possible to do things with named capture
+buffers that would otherwise require C<(??{})> code to accomplish. Named
+capture buffers are numbered just as normal capture buffers are and may be
+referenced via the magic numeric variables or via numeric backreferences
+as well as by name.
 
 Examples:
 
     s/^([^ ]*) *([^ ]*)/$2 $1/;     # swap first two words
 
-     if (/(.)\1/) {                 # find first doubled char
-         print "'$1' is the first doubled character\n";
-     }
+    /(.)\1/                         # find first doubled char
+         and print "'$1' is the first doubled character\n";
+
+    /(?<char>.)\k<char>/            # ... a different way
+         and print "'$+{char}' is the first doubled character\n";
+
+    /(?<char>.)\1/                  # ... mix and match
+         and print "'$1' is the first doubled character\n";
 
     if (/Time: (..):(..):(..)/) {   # parse out values
 	$hours = $1;
@@ -443,7 +467,7 @@ everything before the matched string.  C<$'> returns everything
 after the matched string. And C<$^N> contains whatever was matched by
 the most-recently closed group (submatch). C<$^N> can be used in
 extended patterns (see below), for example to assign a submatch to a
-variable. 
+variable.
 X<$+> X<$^N> X<$&> X<$`> X<$'>
 
 The numbered match variables ($1, $2, $3, etc.) and the related punctuation
@@ -620,6 +644,48 @@ A zero-width negative look-behind assertion.  For example C</(?<!bar)foo/>
 matches any occurrence of "foo" that does not follow "bar".  Works
 only for fixed-width look-behind.
 
+=item C<(?'NAME'pattern)>
+
+=item C<< (?<NAME>pattern) >>
+X<< (?<NAME>) >> X<(?'NAME')> X<named capture> X<capture>
+
+A named capture buffer. Identical in every respect to normal capturing
+parens C<()> but for the additional fact that C<%+> may be used after
+a succesful match to refer to a named buffer. See C<perlvar> for more
+details on the C<%+> hash.
+
+If multiple distinct capture buffers have the same name then the
+$+{NAME} will refer to the leftmost defined buffer in the match.
+
+The forms C<(?'NAME'pattern)> and C<(?<NAME>pattern)> are equivalent.
+
+B<NOTE:> While the notation of this construct is the same as the similar
+function in .NET regexes, the behavior is not, in Perl the buffers are
+numbered sequentially regardless of being named or not. Thus in the
+pattern
+
+  /(x)(?<foo>y)(z)/
+
+$+{foo} will be the same as $2, and $3 will contain 'z' instead of
+the opposite which is what a .NET regex hacker might expect.
+
+Currently NAME is restricted to word chars only. In other words, it
+must match C</^\w+$/>.
+
+=item C<< \k<name> >>
+
+=item C<< \k'name' >>
+
+Named backreference. Similar to numeric backreferences, except that
+the group is designated by name and not number. If multiple groups
+have the same name then it refers to the leftmost defined group in
+the current match.
+
+It is an error to refer to a name not defined by a C<(?<NAME>)>
+earlier in the pattern.
+
+Both forms are equivalent.
+
 =item C<(?{ code })>
 X<(?{})> X<regex, code in> X<regexp, code in> X<regular expression, code in>
 
@@ -726,7 +792,7 @@ Thus,
 
     ('a' x 100)=~/(??{'(.)' x 100})/
 
-B<will> match, it will B<not> set $1. 
+B<will> match, it will B<not> set $1.
 
 The C<code> is not interpolated.  As before, the rules to determine
 where the C<code> ends are currently somewhat convoluted.
@@ -762,21 +828,21 @@ X<regex, recursive> X<regexp, recursive> X<regular expression, recursive>
 B<WARNING>:  This extended regular expression feature is considered
 highly experimental, and may be changed or deleted without notice.
 
-Similar to C<(??{ code })> except it does not involve compiling any code, 
-instead it treats the contents of a capture buffer as an independent 
+Similar to C<(??{ code })> except it does not involve compiling any code,
+instead it treats the contents of a capture buffer as an independent
 pattern that must match at the current position.  Capture buffers
-contained by the pattern will have the value as determined by the 
+contained by the pattern will have the value as determined by the
 outermost recursion.
 
 PARNO is a sequence of digits not starting with 0 whose value
-reflects the paren-number of the capture buffer to recurse to. 
+reflects the paren-number of the capture buffer to recurse to.
 C<(?R)> curses to the beginning of the pattern.
 
-The following pattern matches a function foo() which may contain 
-balanced parenthesis as the argument. 
+The following pattern matches a function foo() which may contain
+balanced parenthesis as the argument.
 
   $re = qr{ (                    # paren group 1 (full function)
-              foo              
+              foo
               (                  # paren group 2 (parens)
                 \(
                   (              # paren group 3 (contents of parens)
@@ -802,18 +868,18 @@ the output produced should be the following:
 
     $1 = foo(bar(baz)+baz(bop))
     $2 = (bar(baz)+baz(bop))
-    $3 = bar(baz)+baz(bop)      
+    $3 = bar(baz)+baz(bop)
 
-If there is no corresponding capture buffer defined, then it is a 
+If there is no corresponding capture buffer defined, then it is a
 fatal error.  Recursing deeper than 50 times without consuming any input
-string will also result in a fatal error.  The maximum depth is compiled 
+string will also result in a fatal error.  The maximum depth is compiled
 into perl, so changing it requires a custom build.
 
-B<Note> that this pattern does not behave the same way as the equivalent 
+B<Note> that this pattern does not behave the same way as the equivalent
 PCRE or Python construct of the same form. In perl you can backtrack into
 a recursed group, in PCRE and Python the recursed into group is treated
-as atomic. Also, constructs like (?i:(?1)) or (?:(?i)(?1)) do not affect 
-the pattern being recursed into. 
+as atomic. Also, constructs like (?i:(?1)) or (?:(?i)(?1)) do not affect
+the pattern being recursed into.
 
 =item C<< (?>pattern) >>
 X<backtrack> X<backtracking> X<atomic> X<possessive>

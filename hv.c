@@ -450,12 +450,12 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     xhv = (XPVHV*)SvANY(hv);
     if (SvMAGICAL(hv)) {
 	if (SvRMAGICAL(hv) && !(action & (HV_FETCH_ISSTORE|HV_FETCH_ISEXISTS))) {
-	    if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)) {
-		sv = sv_newmortal();
+	    MAGIC *regdata = NULL;
+	    if (mg_find((SV*)hv, PERL_MAGIC_tied) || SvGMAGICAL((SV*)hv)
+	        || (regdata = mg_find((SV*)hv, PERL_MAGIC_regdata_names))) {
 
 		/* XXX should be able to skimp on the HE/HEK here when
 		   HV_FETCH_JUST_SV is true.  */
-
 		if (!keysv) {
 		    keysv = newSVpvn(key, klen);
 		    if (is_utf8) {
@@ -464,7 +464,16 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		} else {
 		    keysv = newSVsv(keysv);
 		}
-		mg_copy((SV*)hv, sv, (char *)keysv, HEf_SVKEY);
+		if (regdata) {
+		    sv = Perl_reg_named_buff_sv(aTHX_ keysv);
+		    if (!sv) {
+		        SvREFCNT_dec(keysv);
+		        return 0;
+		    }
+		} else {
+		    sv = sv_newmortal();
+		    mg_copy((SV*)hv, sv, (char *)keysv, HEf_SVKEY);
+		}
 
 		/* grab a fake HE/HEK pair from the pool or make a new one */
 		entry = PL_hv_fetch_ent_mh;
@@ -1923,7 +1932,17 @@ Perl_hv_iterinit(pTHX_ HV *hv)
     } else {
 	hv_auxinit(hv);
     }
-
+    if (SvMAGICAL(hv) && SvRMAGICAL(hv)) {
+        MAGIC *mg = mg_find((SV*)hv, PERL_MAGIC_regdata_names);
+        if ( mg ) {
+             if (PL_curpm) {
+                const REGEXP * const rx = PM_GETRE(PL_curpm);
+                if (rx && rx->paren_names) {
+                    (void)hv_iterinit(rx->paren_names);
+                } 
+            } 
+        }
+    }
     /* used to be xhv->xhv_fill before 5.004_65 */
     return HvTOTALKEYS(hv);
 }
@@ -2078,6 +2097,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
 
     if (!hv)
 	Perl_croak(aTHX_ "Bad hash");
+
     xhv = (XPVHV*)SvANY(hv);
 
     if (!SvOOK(hv)) {
@@ -2089,8 +2109,85 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
     iter = HvAUX(hv);
 
     oldentry = entry = iter->xhv_eiter; /* HvEITER(hv) */
+    if (SvMAGICAL(hv) && SvRMAGICAL(hv) &&
+	    (mg = mg_find((SV*)hv, PERL_MAGIC_regdata_names)))
+    {
+	SV * key;
+	SV *val = NULL;
+	REGEXP * rx;
+	if (!PL_curpm)
+	    return NULL;
+	rx = PM_GETRE(PL_curpm);
+	if (rx && rx->paren_names) {
+	    hv = rx->paren_names;
+	} else {
+	    return NULL;
+	}
 
-    if ((mg = SvTIED_mg((SV*)hv, PERL_MAGIC_tied))) {
+        key =  sv_newmortal();
+        if (entry) {
+            sv_setsv(key, HeSVKEY_force(entry));
+            SvREFCNT_dec(HeSVKEY(entry));       /* get rid of previous key */
+        }
+        else {
+            char *k;
+            HEK *hek;
+
+            /* one HE per MAGICAL hash */
+            iter->xhv_eiter = entry = new_HE(); /* HvEITER(hv) = new_HE() */
+            Zero(entry, 1, HE);
+            Newxz(k, HEK_BASESIZE + sizeof(SV*), char);
+            hek = (HEK*)k;
+            HeKEY_hek(entry) = hek;
+            HeKLEN(entry) = HEf_SVKEY;
+        }
+        {
+            while (!val) {
+                HE *temphe = hv_iternext_flags(hv,flags);
+                if (temphe) {
+                    IV i;
+                    IV parno = 0;
+                    SV* sv_dat = HeVAL(temphe);
+                    I32 *nums = (I32*)SvPVX(sv_dat);
+                    for ( i = 0; i < SvIVX(sv_dat); i++ ) {
+                        if ((I32)(rx->lastcloseparen) >= nums[i] &&
+                            rx->startp[nums[i]] != -1 &&
+                            rx->endp[nums[i]] != -1) 
+                        {
+                            parno = nums[i];
+                            break;
+                        }
+                    }
+                    if (parno) {
+                        GV *gv_paren;
+                        STRLEN len;
+                        SV *sv = sv_newmortal();
+                        const char* pvkey = HePV(temphe, len);
+                        
+                        Perl_sv_setpvf(aTHX_ sv, "%"IVdf,(IV)parno);
+                        gv_paren = Perl_gv_fetchsv(aTHX_ sv, GV_ADD, SVt_PVGV);
+                        Perl_sv_setpvn(aTHX_ key, pvkey, len);
+                        val = GvSVn(gv_paren);
+                    } 
+                } else {
+                    break;
+                }
+            }
+        }
+        if (val && SvOK(key)) {
+            /* force key to stay around until next time */
+            HeSVKEY_set(entry, SvREFCNT_inc_simple_NN(key));
+            HeVAL(entry) = SvREFCNT_inc_simple_NN(val); 
+            return entry;               /* beware, hent_val is not set */
+        }
+        if (HeVAL(entry))
+            SvREFCNT_dec(HeVAL(entry));
+        Safefree(HeKEY_hek(entry));
+        del_HE(entry);
+        iter->xhv_eiter = NULL; /* HvEITER(hv) = NULL */
+        return NULL;
+    
+    } else if ((mg = SvTIED_mg((SV*)hv, PERL_MAGIC_tied))) {
 	SV * const key = sv_newmortal();
 	if (entry) {
 	    sv_setsv(key, HeSVKEY_force(entry));

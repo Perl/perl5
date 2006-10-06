@@ -54,7 +54,8 @@ typedef struct regexp {
 	U32 lastcloseparen;	/* last paren matched */
 	U32 reganch;		/* Internal use only +
 				   Tainted information used by regexec? */
-        const struct regexp_engine* engine;
+	HV *paren_names;	/* Paren names */
+	const struct regexp_engine* engine;
 	regnode program[1];	/* Unwarranted chumminess with compiler. */
 } regexp;
 

@@ -77,9 +77,9 @@ BACK		BACK,   no	Match "", "next" ptr points backward.
 
 #*Literals (33..35)
 
-EXACT		EXACT,  sv	Match this string (preceded by length).
-EXACTF		EXACT,  sv	Match this string, folded (prec. by length).
-EXACTFL		EXACT,  sv	Match this string, folded in locale (w/len).
+EXACT		EXACT,  str	Match this string (preceded by length).
+EXACTF		EXACT,  str	Match this string, folded (prec. by length).
+EXACTFL		EXACT,  str	Match this string, folded in locale (w/len).
 
 #*Do nothing types (36..37)
 
@@ -154,15 +154,21 @@ TRIEC		TRIE,   trie charclass	Same as TRIE, but with embedded charclass data
 AHOCORASICK	TRIE,   trie 1	Aho Corasick stclass. flags==type
 AHOCORASICKC	TRIE,   trie charclass	Same as AHOCORASICK, but with embedded charclass data
 
-#*Recursion (65) 
+#*Recursion (65..66) 
 RECURSE		RECURSE,   num/ofs 2L	recurse to paren arg1 at (signed) ofs arg2
 SRECURSE	RECURSE,   no   	recurse to start of pattern
+
+#*Named references (67..69)
+NREF		NREF,    no-sv 1	Match some already matched string
+NREFF		NREF,    no-sv 1	Match already matched string, folded
+NREFFL		NREF,    no-sv 1	Match already matched string, folded in loc.
+
 
 # NEW STUFF ABOVE THIS LINE -- Please update counts below. 
 
 ################################################################################
 
-#*SPECIAL  REGOPS (65, 66)
+#*SPECIAL  REGOPS (70, 71)
 
 # This is not really a node, but an optimized away piece of a "long" node.
 # To simplify debugging output, we mark it as if it were a node

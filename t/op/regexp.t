@@ -64,7 +64,7 @@ while (<TESTS>) {
     $input = join(':',$pat,$subject,$result,$repl,$expect);
     infty_subst(\$pat);
     infty_subst(\$expect);
-    $pat = "'$pat'" unless $pat =~ /^[:']/;
+    $pat = "'$pat'" unless $pat =~ /^[:'\/]/;
     $pat =~ s/(\$\{\w+\})/$1/eeg;
     $pat =~ s/\\n/\n/g;
     $subject = eval qq("$subject");

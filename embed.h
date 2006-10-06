@@ -689,6 +689,7 @@
 #define regexec_flags		Perl_regexec_flags
 #define regnext			Perl_regnext
 #if defined(PERL_CORE) || defined(PERL_EXT)
+#define reg_named_buff_sv	Perl_reg_named_buff_sv
 #define regprop			Perl_regprop
 #endif
 #define repeatcpy		Perl_repeatcpy
@@ -2894,6 +2895,7 @@
 #define regexec_flags(a,b,c,d,e,f,g,h)	Perl_regexec_flags(aTHX_ a,b,c,d,e,f,g,h)
 #define regnext(a)		Perl_regnext(aTHX_ a)
 #if defined(PERL_CORE) || defined(PERL_EXT)
+#define reg_named_buff_sv(a)	Perl_reg_named_buff_sv(aTHX_ a)
 #define regprop(a,b,c)		Perl_regprop(aTHX_ a,b,c)
 #endif
 #define repeatcpy(a,b,c,d)	Perl_repeatcpy(aTHX_ a,b,c,d)

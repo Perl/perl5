@@ -2028,6 +2028,8 @@ got_it:
 						  the same. */
 	restore_pos(aTHX_ prog);
     }
+    if (prog->paren_names) 
+        (void)hv_iterinit(prog->paren_names);
 
     /* make sure $`, $&, $', and $digit will work later */
     if ( !(flags & REXEC_NOT_FIRST) ) {
@@ -3288,13 +3290,39 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	       locinput++;
 	    nextchr = UCHARAT(locinput);
 	    break;
+            
+	case NREFFL:
+	{
+	    char *s;
+	    char type =	OP(scan);
+	    PL_reg_flags |= RF_tainted;
+	    /* FALL THROUGH */
+	case NREF:
+	case NREFF:
+	    {
+	        SV *sv_dat=(SV*)rex->data->data[ ARG( scan ) ];    
+	        I32 *nums=(I32*)SvPVX(sv_dat);
+                for ( n=0; n<SvIVX(sv_dat); n++ ) {
+                    if ((I32)*PL_reglastparen >= nums[n] &&
+                        PL_regstartp[nums[n]] != -1 &&
+                        PL_regendp[nums[n]] != -1) 
+                    {
+                        n = nums[n];
+                        type = REF + ( type - NREF );
+                        goto do_ref;    
+                    }
+                }
+                sayNO;
+                /* unreached */
+            } 
 	case REFFL:
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
         case REF:
-	case REFF: {
-	    char *s;
+	case REFF: 
 	    n = ARG(scan);  /* which paren pair */
+	    type = OP(scan);
+	  do_ref:  
 	    ln = PL_regstartp[n];
 	    PL_reg_leftiter = PL_reg_maxiter;		/* Void cache */
 	    if ((I32)*PL_reglastparen < n || ln == -1)
@@ -3303,7 +3331,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		break;
 
 	    s = PL_bostr + ln;
-	    if (do_utf8 && OP(scan) != REF) {	/* REF can do byte comparison */
+	    if (do_utf8 && type != REF) {	/* REF can do byte comparison */
 		char *l = locinput;
 		const char *e = PL_bostr + PL_regendp[n];
 		/*
@@ -3311,7 +3339,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		 * in the 8-bit case (no pun intended) because in Unicode we
 		 * have to map both upper and title case to lower case.
 		 */
-		if (OP(scan) == REFF) {
+		if (type == REFF) {
 		    while (s < e) {
 			STRLEN ulen1, ulen2;
 			U8 tmpbuf1[UTF8_MAXBYTES_CASE+1];
@@ -3334,24 +3362,23 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
 	    /* Inline the first character, for speed. */
 	    if (UCHARAT(s) != nextchr &&
-		(OP(scan) == REF ||
-		 (UCHARAT(s) != ((OP(scan) == REFF
-				  ? PL_fold : PL_fold_locale)[nextchr]))))
+		(type == REF ||
+		 (UCHARAT(s) != (type == REFF
+				  ? PL_fold : PL_fold_locale)[nextchr])))
 		sayNO;
 	    ln = PL_regendp[n] - ln;
 	    if (locinput + ln > PL_regeol)
 		sayNO;
-	    if (ln > 1 && (OP(scan) == REF
+	    if (ln > 1 && (type == REF
 			   ? memNE(s, locinput, ln)
-			   : (OP(scan) == REFF
+			   : (type == REFF
 			      ? ibcmp(s, locinput, ln)
 			      : ibcmp_locale(s, locinput, ln))))
 		sayNO;
 	    locinput += ln;
 	    nextchr = UCHARAT(locinput);
 	    break;
-	    }
-
+	}
 	case NOTHING:
 	case TAIL:
 	    break;

@@ -1863,6 +1863,9 @@ PERL_CALLCONV regnode*	Perl_regnext(pTHX_ regnode* p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
+PERL_CALLCONV SV*	Perl_reg_named_buff_sv(pTHX_ SV* namesv)
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV void	Perl_regprop(pTHX_ const regexp *prog, SV* sv, const regnode* o)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);

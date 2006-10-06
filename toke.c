@@ -1793,7 +1793,7 @@ S_scan_const(pTHX_ char *start)
     const char * const leaveit = /* set of acceptably-backslashed characters */
 	(const char *)
 	(PL_lex_inpat
-	 ? "\\.^$@AGZdDwWsSbBpPXC+*?|()-Nnrtfeaxcz0123456789[{]} \t\n\r\f\v#"
+	 ? "\\.^$@AGZdDwWsSbBpPXC+*?|()-Nnrktfeaxcz0123456789[{]} \t\n\r\f\v#"
 	 : "");
 
     if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {

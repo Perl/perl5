@@ -3862,7 +3862,7 @@ PP(pp_each)
 {
     dVAR;
     dSP;
-    HV * const hash = (HV*)POPs;
+    HV * hash = (HV*)POPs;
     HE *entry;
     const I32 gimme = GIMME_V;
 

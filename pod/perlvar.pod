@@ -313,6 +313,17 @@ past where $2 ends, and so on.  You can use C<$#+> to determine
 how many subgroups were in the last successful match.  See the
 examples given for the C<@-> variable.
 
+=item %+
+X<%+>
+
+Similar to C<@+>, the C<%+> hash allows access to the named capture
+buffers, should they exist, in the last successful match in the
+currently active dynamic scope.
+
+C<$+{foo}> is equivalent to C<$1> after the following match:
+
+  'foo'=~/(?<foo>foo)/;
+
 =item HANDLE->input_line_number(EXPR)
 
 =item $INPUT_LINE_NUMBER
@@ -322,7 +333,7 @@ examples given for the C<@-> variable.
 =item $.
 X<$.> X<$NR> X<$INPUT_LINE_NUMBER> X<line number>
 
-Current line number for the last filehandle accessed. 
+Current line number for the last filehandle accessed.
 
 Each filehandle in Perl counts the number of lines that have been read
 from it.  (Depending on the value of C<$/>, Perl's idea of what

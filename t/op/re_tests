@@ -1020,3 +1020,20 @@ X(?<=foo.)[YZ]	..XfooXY..	y	pos	8
 ^(<(?:[^<>]+|(?1))*>)$	<<><<<><>>>>	y	$1	<<><<<><>>>>
 ((?2)*)([fF]o+)	fooFoFoo	y	$1-$2	fooFo-Foo
 (<(?:[^<>]+|(?R))*>)	<<><<<><>>>>	y	$1	<<><<<><>>>>
+(?<n>foo|bar|baz)	snofooewa	y	$1	foo
+(?<n>foo|bar|baz)	snofooewa	y	$+{n}	foo
+(?<n>foo|bar|baz)(?<m>[ew]+)	snofooewa	y	$+{n}	foo
+(?<n>foo|bar|baz)(?<m>[ew]+)	snofooewa	y	$+{m}	ew
+(?<n>foo)|(?<n>bar)|(?<n>baz)	snofooewa	y	$+{n}	foo
+(?<n>foo)(??{ $+{n} })	snofooefoofoowaa	y	$+{n}	foo
+/(?'n'foo|bar|baz)/	snofooewa	y	$1	foo
+/(?'n'foo|bar|baz)/	snofooewa	y	$+{n}	foo
+/(?'n'foo|bar|baz)(?'m'[ew]+)/	snofooewa	y	$+{n}	foo
+/(?'n'foo|bar|baz)(?'m'[ew]+)/	snofooewa	y	$+{m}	ew
+/(?'n'foo)|(?'n'bar)|(?<n>baz)/	snobazewa	y	$+{n}	baz
+/(?'n'foo)(??{ $+{n} })/	snofooefoofoowaa	y	$+{n}	foo
+/(?'n'foo)\k<n>/	..foofoo..	y	$1	foo
+/(?'n'foo)\k<n>/	..foofoo..	y	$+{n}	foo
+/(?<n>foo)\k'n'/	..foofoo..	y	$1	foo
+/(?<n>foo)\k'n'/	..foofoo..	y	$+{n}	foo
+/(?:(?<n>foo)|(?<n>bar))\k<n>/	..barbar..	y	$+{n}	bar

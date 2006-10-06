@@ -1188,10 +1188,14 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 	    goto magicalize;
 
 	case '+':
+	GvMULTI_on(gv);
 	{
 	    AV* const av = GvAVn(gv);
+	    HV* const hv = GvHVn(gv);
             sv_magic((SV*)av, (SV*)av, PERL_MAGIC_regdata, NULL, 0);
 	    SvREADONLY_on(av);
+	    hv_magic(hv, NULL, PERL_MAGIC_regdata_names);
+	    SvREADONLY_on(hv);
 	    /* FALL THROUGH */
 	}
 	case '\023':	/* $^S */

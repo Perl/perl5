@@ -413,6 +413,7 @@ END_EXTERN_C
  *       in the character class
  *   t - trie struct
  *   T - aho-trie struct
+ *   S - sv for named capture lookup
  * 20010712 mjd@plover.com
  * (Remember to update re_dup() and pregfree() if you add any items.)
  */
