@@ -390,7 +390,7 @@ CODE:
     if(!sv_isobject(sv)) {
 	XSRETURN_UNDEF;
     }
-    RETVAL = sv_reftype(SvRV(sv),TRUE);
+    RETVAL = (char*)sv_reftype(SvRV(sv),TRUE);
 }
 OUTPUT:
     RETVAL
@@ -406,7 +406,7 @@ CODE:
     if(!SvROK(sv)) {
 	XSRETURN_UNDEF;
     }
-    RETVAL = sv_reftype(SvRV(sv),FALSE);
+    RETVAL = (char*)sv_reftype(SvRV(sv),FALSE);
 }
 OUTPUT:
     RETVAL
