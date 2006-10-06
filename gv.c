@@ -1829,6 +1829,9 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	notfound = 1; lr = -1;
       } else if (cvp && (cv=cvp[nomethod_amg])) {
 	notfound = 1; lr = 1;
+      } else if ((amtp && amtp->fallback >= AMGfallYES) && !DEBUG_o_TEST) {
+	/* Skip generating the "no method found" message.  */
+	return NULL;
       } else {
 	SV *msg;
 	if (off==-1) off=method;
