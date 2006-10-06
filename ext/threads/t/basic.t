@@ -31,7 +31,7 @@ sub ok {
 
 BEGIN {
     $| = 1;
-    print("1..32\n");   ### Number of tests that will be run ###
+    print("1..33\n");   ### Number of tests that will be run ###
 };
 
 use threads;
@@ -159,5 +159,10 @@ $thrx = threads->object(undef);
 ok(31, ! defined($thrx), 'No object');
 $thrx = threads->object(0);
 ok(32, ! defined($thrx), 'No object');
+
+import threads 'stringify';
+$thr1 = threads->create(sub {});
+ok(33, "$thr1" eq $thr1->tid(), 'Stringify');
+$thr1->join();
 
 # EOF

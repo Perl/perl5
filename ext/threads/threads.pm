@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.42';
+our $VERSION = '1.43';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -53,6 +53,9 @@ sub import
         } elsif ($sym =~ /^exit/i) {
             my $flag = shift;
             $threads::thread_exit_only = $flag =~ /^thread/i;
+
+        } elsif ($sym =~ /^str/i) {
+            import overload ('""' => \&tid);
 
         } elsif ($sym =~ /all/) {
             push(@EXPORT, qw(yield));
@@ -129,11 +132,14 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.42
+This document describes threads version 1.43
 
 =head1 SYNOPSIS
 
-    use threads ('yield', 'stack_size' => 64*4096, 'exit' => 'threads_only');
+    use threads ('yield',
+                 'stack_size' => 64*4096,
+                 'exit' => 'threads_only',
+                 'stringify');
 
     sub start_thread {
         my @args = @_;
@@ -163,6 +169,7 @@ This document describes threads version 1.42
     # Get a thread's ID
     $tid = threads->tid();
     $tid = $thr->tid();
+    $tid = "$thr";
 
     # Give other threads a chance to run
     threads->yield();
@@ -321,6 +328,17 @@ thread in a program being 0, and incrementing by 1 for every thread created.
 =item threads->tid()
 
 Class method that allows a thread to obtain its own ID.
+
+=item "$thr"
+
+If you add the C<stringify> import option to your C<use threads> declaration,
+then using a threads object in a string or a string context (e.g., as a hash
+key) will cause its ID to be used as the value:
+
+ use threads qw(stringify);
+
+ my $thr = threads->create(...);
+ print("Thread $thr started...\n");  # Prints out: Thread 1 started...
 
 =item threads->object($tid)
 
@@ -886,7 +904,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.42/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.43/threads.pm>
 
 L<threads::shared>, L<perlthrtut>
 

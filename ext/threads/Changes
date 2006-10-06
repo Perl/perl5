@@ -1,5 +1,9 @@
 Revision history for Perl extension threads.
 
+1.43 Fri Oct  6 15:12:07 EDT 2006
+	- Stringify threads objects
+	- Removed 'typemap' file
+
 1.42 Mon Sep 18 11:17:13 EDT 2006
 	- Fixes to tests
 	- Move $threads::threads outside of BEGIN block
