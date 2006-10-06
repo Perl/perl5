@@ -9039,8 +9039,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		switch (base) {
 		    unsigned dig;
 		case 16:
-		    p = (char*)((c == 'X')
-				? "0123456789ABCDEF" : "0123456789abcdef");
+		    p = (char *)((c == 'X') ? PL_hexdigit + 16 : PL_hexdigit);
 		    do {
 			dig = uv & 15;
 			*--ptr = p[dig];
