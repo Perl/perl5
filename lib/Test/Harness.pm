@@ -24,7 +24,7 @@ use vars qw(
 );
 
 BEGIN {
-    eval "use Time::HiRes 'time'";
+    eval q{use Time::HiRes 'time'};
     $has_time_hires = !$@;
 }
 
@@ -34,11 +34,11 @@ Test::Harness - Run Perl standard test scripts with statistics
 
 =head1 VERSION
 
-Version 2.62
+Version 2.64
 
 =cut
 
-$VERSION = '2.62';
+$VERSION = '2.64';
 
 # Backwards compatibility for exportable variable names.
 *verbose  = *Verbose;
@@ -56,7 +56,37 @@ END {
 
 my $Files_In_Dir = $ENV{HARNESS_FILELEAK_IN_DIR};
 
-$Strap = Test::Harness::Straps->new;
+# Stolen from Params::Util
+sub _CLASS {
+    (defined $_[0] and ! ref $_[0] and $_[0] =~ m/^[^\W\d]\w*(?:::\w+)*$/s) ? $_[0] : undef;
+}
+
+# Strap Overloading
+if ( $ENV{HARNESS_STRAPS_CLASS} ) {
+    die 'Set HARNESS_STRAP_CLASS, singular, not HARNESS_STRAPS_CLASS';
+}
+my $HARNESS_STRAP_CLASS  = $ENV{HARNESS_STRAP_CLASS} || 'Test::Harness::Straps';
+if ( $HARNESS_STRAP_CLASS =~ /\.pm$/ ) {
+    # "Class" is actually a filename, that should return the
+    # class name as its true return value.
+    $HARNESS_STRAP_CLASS = require $HARNESS_STRAP_CLASS;
+    if ( !_CLASS($HARNESS_STRAP_CLASS) ) {
+        die "HARNESS_STRAP_CLASS '$HARNESS_STRAP_CLASS' is not a valid class name";
+    }
+}
+else {
+    # It is a class name within the current @INC
+    if ( !_CLASS($HARNESS_STRAP_CLASS) ) {
+        die "HARNESS_STRAP_CLASS '$HARNESS_STRAP_CLASS' is not a valid class name";
+    }
+    eval "require $HARNESS_STRAP_CLASS";
+    die $@ if $@;
+}
+if ( !$HARNESS_STRAP_CLASS->isa('Test::Harness::Straps') ) {
+    die "HARNESS_STRAP_CLASS '$HARNESS_STRAP_CLASS' must be a Test::Harness::Straps subclass";
+}
+
+$Strap = $HARNESS_STRAP_CLASS->new;
 
 sub strap { return $Strap };
 
@@ -66,7 +96,7 @@ sub strap { return $Strap };
 
 $Verbose  = $ENV{HARNESS_VERBOSE} || 0;
 $Debug    = $ENV{HARNESS_DEBUG} || 0;
-$Switches = "-w";
+$Switches = '-w';
 $Columns  = $ENV{HARNESS_COLUMNS} || $ENV{COLUMNS} || 80;
 $Columns--;             # Some shells have trouble with a full line of text.
 $Timer    = $ENV{HARNESS_TIMER} || 0;
@@ -333,7 +363,7 @@ sub execute_tests {
             print $out "# Running: ", $Strap->_command_line($tfile), "\n";
         }
         my $test_start_time = $Timer ? time : 0;
-        my %results = $Strap->analyze_file($tfile) or
+        my $results = $Strap->analyze_file($tfile) or
           do { warn $Strap->{error}, "\n";  next };
         my $elapsed;
         if ( $Timer ) {
@@ -350,35 +380,36 @@ sub execute_tests {
         }
 
         # state of the current test.
-        my @failed = grep { !$results{details}[$_-1]{ok} }
-                     1..@{$results{details}};
-        my @todo_pass = grep { $results{details}[$_-1]{actual_ok} &&
-                               $results{details}[$_-1]{type} eq 'todo' }
-                        1..@{$results{details}};
+        my @failed = grep { !$results->details->[$_-1]{ok} }
+                     1..@{$results->details};
+        my @todo_pass = grep { $results->details->[$_-1]{actual_ok} &&
+                               $results->details->[$_-1]{type} eq 'todo' }
+                        1..@{$results->details};
 
         my %test = (
-                    ok          => $results{ok},
-                    'next'      => $Strap->{'next'},
-                    max         => $results{max},
-                    failed      => \@failed,
-                    todo_pass   => \@todo_pass,
-                    todo        => $results{todo},
-                    bonus       => $results{bonus},
-                    skipped     => $results{skip},
-                    skip_reason => $results{skip_reason},
-                    skip_all    => $Strap->{skip_all},
-                    ml          => $ml,
-                   );
+            ok          => $results->ok,
+            'next'      => $Strap->{'next'},
+            max         => $results->max,
+            failed      => \@failed,
+            todo_pass   => \@todo_pass,
+            todo        => $results->todo,
+            bonus       => $results->bonus,
+            skipped     => $results->skip,
+            skip_reason => $results->skip_reason,
+            skip_all    => $Strap->{skip_all},
+            ml          => $ml,
+        );
 
-        $tot{bonus}       += $results{bonus};
-        $tot{max}         += $results{max};
-        $tot{ok}          += $results{ok};
-        $tot{todo}        += $results{todo};
-        $tot{sub_skipped} += $results{skip};
+        $tot{bonus}       += $results->bonus;
+        $tot{max}         += $results->max;
+        $tot{ok}          += $results->ok;
+        $tot{todo}        += $results->todo;
+        $tot{sub_skipped} += $results->skip;
 
-        my($estatus, $wstatus) = @results{qw(exit wait)};
+        my $estatus = $results->exit;
+        my $wstatus = $results->wait;
 
-        if ($results{passing}) {
+        if ( $results->passing ) {
             # XXX Combine these first two
             if ($test{max} and $test{skipped} + $test{bonus}) {
                 my @msg;
@@ -420,7 +451,7 @@ sub execute_tests {
             }
             # List overruns as failures.
             else {
-                my $details = $results{details};
+                my $details = $results->details;
                 foreach my $overrun ($test{max}+1..@$details) {
                     next unless ref $details->[$overrun-1];
                     push @{$test{failed}}, $overrun
@@ -432,7 +463,7 @@ sub execute_tests {
                                                        $estatus, $wstatus);
                 $failedtests{$tfile}{name} = $tfile;
             }
-            elsif($results{seen}) {
+            elsif ( $results->seen ) {
                 if (@{$test{failed}} and $test{max}) {
                     my ($txt, $canon) = _canondetail($test{max},$test{skipped},'Failed',
                                                     @{$test{failed}});
@@ -617,12 +648,12 @@ sub swrite {
 
 
 my %Handlers = (
-    header => \&header_handler,
-    test => \&test_handler,
+    header  => \&header_handler,
+    test    => \&test_handler,
     bailout => \&bailout_handler,
 );
 
-$Strap->{callback} = \&strap_callback;
+$Strap->set_callback(\&strap_callback);
 sub strap_callback {
     my($self, $line, $type, $totals) = @_;
     print $line if $Verbose;
@@ -640,30 +671,29 @@ sub header_handler {
     $self->{_seen_header}++;
 
     warn "1..M can only appear at the beginning or end of tests\n"
-      if $totals->{seen} && 
-         $totals->{max}  < $totals->{seen};
+      if $totals->seen && ($totals->max < $totals->seen);
 };
 
 sub test_handler {
     my($self, $line, $type, $totals) = @_;
 
-    my $curr = $totals->{seen};
+    my $curr = $totals->seen;
     my $next = $self->{'next'};
-    my $max  = $totals->{max};
-    my $detail = $totals->{details}[-1];
+    my $max  = $totals->max;
+    my $detail = $totals->details->[-1];
 
     if( $detail->{ok} ) {
         _print_ml_less("ok $curr/$max");
 
         if( $detail->{type} eq 'skip' ) {
-            $totals->{skip_reason} = $detail->{reason}
-              unless defined $totals->{skip_reason};
-            $totals->{skip_reason} = 'various reasons'
-              if $totals->{skip_reason} ne $detail->{reason};
+            $totals->set_skip_reason( $detail->{reason} )
+              unless defined $totals->skip_reason;
+            $totals->set_skip_reason( 'various reasons' )
+              if $totals->skip_reason ne $detail->{reason};
         }
     }
     else {
-        _print_ml("NOK $curr");
+        _print_ml("NOK $curr/$max");
     }
 
     if( $curr > $next ) {
@@ -989,6 +1019,21 @@ If true, Test::Harness will output the verbose results of running
 its tests.  Setting C<$Test::Harness::verbose> will override this,
 or you can use the C<-v> switch in the F<prove> utility.
 
+If true, Test::Harness will output the verbose results of running
+its tests.  Setting C<$Test::Harness::verbose> will override this,
+or you can use the C<-v> switch in the F<prove> utility.
+
+=item C<HARNESS_STRAP_CLASS>
+
+Defines the Test::Harness::Straps subclass to use.  The value may either
+be a filename or a class name.
+
+If HARNESS_STRAP_CLASS is a class name, the class must be in C<@INC>
+like any other class.
+
+If HARNESS_STRAP_CLASS is a filename, the .pm file must return the name
+of the class, instead of the canonical "1".
+
 =back
 
 =head1 EXAMPLE
@@ -1038,8 +1083,6 @@ Implement Straps total_results()
 Remember exit code
 
 Completely redo the print summary code.
-
-Implement Straps callbacks.  (experimentally implemented)
 
 Straps->analyze_file() not taint clean, don't know if it can be
 

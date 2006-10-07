@@ -1,5 +1,26 @@
 Revision history for Perl extension Test::Harness
 
+NEXT
+    [FIXES]
+    * prove's --perl=/path/to/file wasn't taking a value.
+    * prove's version number was not getting incremented.  From now on,
+      prove's $VERSION will match Test::Harness's $VERSION, and I added
+      a test to make sure this is the case.
+
+    [ENHANCEMENTS]
+    * Added test straps overload via HARNESS_STRAP_OVERLOAD environment
+      variable.  prove now takes a --strap=class parameter.  Thanks,
+      Adam Kennedy.
+
+2.63_01 Fri Jun 30 16:59:50 CDT 2006
+    [ENHANCEMENTS]
+    * Failed tests used to say "NOK x", and now say "NOK x/y".
+      Thanks to Will Coleda.
+
+    * Added the Test::Harness::Results object, so we have a well-defined
+      object, and not just a hash that we pass around.  Thanks to YAPC::NA
+      2006 Hackathon!
+
 2.62 Thu Jun  8 14:11:57 CDT 2006
     [FIXES]
     * Restored the behavior of dying if any subtests failed.  This is a

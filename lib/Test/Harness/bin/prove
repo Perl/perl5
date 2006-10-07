@@ -10,7 +10,7 @@ use Pod::Usage 1.12;
 use File::Spec;
 
 use vars qw( $VERSION );
-$VERSION = "1.04";
+$VERSION = '2.64';
 
 my $shuffle = 0;
 my $dry = 0;
@@ -25,10 +25,10 @@ my @switches = ();
 
 # Stick any default switches at the beginning, so they can be overridden
 # by the command line switches.
-unshift @ARGV, split( " ", $ENV{PROVE_SWITCHES} ) if defined $ENV{PROVE_SWITCHES};
+unshift @ARGV, split( ' ', $ENV{PROVE_SWITCHES} ) if defined $ENV{PROVE_SWITCHES};
 
-Getopt::Long::Configure( "no_ignore_case" );
-Getopt::Long::Configure( "bundling" );
+Getopt::Long::Configure( 'no_ignore_case' );
+Getopt::Long::Configure( 'bundling' );
 GetOptions(
     'b|blib'        => \$blib,
     'd|debug'       => \$Test::Harness::debug,
@@ -37,13 +37,14 @@ GetOptions(
     'H|man'         => sub {pod2usage({-verbose => 2}); exit},
     'I=s@'          => \@includes,
     'l|lib'         => \$lib,
-    'perl'          => \$ENV{HARNESS_PERL},
+    'perl=s'        => \$ENV{HARNESS_PERL},
     'r|recurse'     => \$recurse,
     's|shuffle'     => \$shuffle,
-    't'             => sub { unshift @switches, "-t" }, # Always want -t up front
-    'T'             => sub { unshift @switches, "-T" }, # Always want -T up front
+    't'             => sub { unshift @switches, '-t' }, # Always want -t up front
+    'T'             => sub { unshift @switches, '-T' }, # Always want -T up front
     'w'             => sub { push @switches, '-w' },
     'W'             => sub { push @switches, '-W' },
+    'strap=s'       => \$ENV{HARNESS_STRAP_CLASS},
     'timer'         => \$Test::Harness::Timer,
     'v|verbose'     => \$Test::Harness::verbose,
     'V|version'     => sub { print_version(); exit; },
@@ -64,12 +65,12 @@ if ( $blib ) {
 
 # Handle lib includes
 if ( $lib ) {
-    unshift @includes, "lib";
+    unshift @includes, 'lib';
 }
 
 # Build up TH switches
 push( @switches, map { /\s/ && !/^".*"$/ ? qq["-I$_"] : "-I$_" } @includes );
-$Test::Harness::Switches = join( " ", @switches );
+$Test::Harness::Switches = join( ' ', @switches );
 print "# \$Test::Harness::Switches: $Test::Harness::Switches\n" if $Test::Harness::debug;
 
 @ARGV = File::Spec->curdir unless @ARGV;
@@ -90,7 +91,7 @@ for ( @argv_globbed ) {
 if ( @tests ) {
     shuffle(@tests) if $shuffle;
     if ( $dry ) {
-        print join( "\n", @tests, "" );
+        print join( "\n", @tests, '' );
     }
     else {
         print "# ", scalar @tests, " tests to run\n" if $Test::Harness::debug;
@@ -125,6 +126,7 @@ prove [options] [files/directories]
         --perl      Sets the name of the Perl executable to use
     -r, --recurse   Recursively descend into directories
     -s, --shuffle   Run the tests in a random order
+        --strap     Define strap class to use
     -T              Enable tainting checks
     -t              Enable tainting warnings
         --timer     Print elapsed time after each test file
@@ -232,6 +234,11 @@ order are likely to be revealed.  The author hopes the run the
 algorithm on the preceding sentence to see if he can produce something
 slightly less awkward.
 
+=head2 --strap
+
+Sets the HARNESS_STRAP_CLASS variable to set which Test::Harness::Straps
+variable to use in running the tests.
+
 =head2 -t
 
 Runs test programs under perl's -t taint warning mode.
@@ -275,7 +282,7 @@ Andy Lester C<< <andy at petdance.com> >>
 
 =head1 COPYRIGHT
 
-Copyright 2005 by Andy Lester C<< <andy at petdance.com> >>.
+Copyright 2004-2006 by Andy Lester C<< <andy at petdance.com> >>.
 
 This program is free software; you can redistribute it and/or 
 modify it under the same terms as Perl itself.
