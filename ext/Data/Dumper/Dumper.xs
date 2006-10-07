@@ -360,7 +360,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		av_push(seenentry, namesv);
 		(void)SvREFCNT_inc(val);
 		av_push(seenentry, val);
-		(void)hv_store(seenhv, id, strlen(id),
+		(void)hv_store(seenhv, id, idlen,
 			       newRV_inc((SV*)seenentry), 0);
 		SvREFCNT_dec(seenentry);
 	    }
@@ -786,7 +786,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		seenentry = newAV();
 		av_push(seenentry, namesv);
 		av_push(seenentry, newRV_inc(val));
-		(void)hv_store(seenhv, id, strlen(id), newRV_inc((SV*)seenentry), 0);
+		(void)hv_store(seenhv, id, idlen, newRV_inc((SV*)seenentry), 0);
 		SvREFCNT_dec(seenentry);
 	    }
 	}
