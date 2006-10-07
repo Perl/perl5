@@ -4,6 +4,10 @@
 #include "XSUB.h"
 #include "ppport.h"
 
+#if PERL_VERSION < 6
+#  define DD_USE_OLD_ID_FORMAT
+#endif
+
 static I32 num_q (const char *s, STRLEN slen);
 static I32 esc_q (char *dest, const char *src, STRLEN slen);
 static I32 esc_q_utf8 (pTHX_ SV *sv, const char *src, STRLEN slen);
@@ -252,7 +256,13 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 {
     char tmpbuf[128];
     U32 i;
-    char *c, *r, *realpack, id[128];
+    char *c, *r, *realpack;
+#ifdef DD_USE_OLD_ID_FORMAT
+    char id[128];
+#else
+    UV id_buffer;
+    char *const id = (char *)&id_buffer;
+#endif
     SV **svp;
     SV *sv, *ipad, *ival;
     SV *blesspad = Nullsv;
@@ -288,7 +298,12 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	
 	ival = SvRV(val);
 	realtype = SvTYPE(ival);
+#ifdef DD_USE_OLD_ID_FORMAT
         idlen = my_snprintf(id, sizeof(id), "0x%"UVxf, PTR2UV(ival));
+#else
+	id_buffer = PTR2UV(ival);
+	idlen = sizeof(id_buffer);
+#endif
 	if (SvOBJECT(ival))
 	    realpack = HvNAME_get(SvSTASH(ival));
 	else
@@ -339,7 +354,11 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 		    return 1;
 		}
 		else {
+#ifdef DD_USE_OLD_ID_FORMAT
 		    warn("ref name not found for %s", id);
+#else
+		    warn("ref name not found for 0x%"UVxf, PTR2UV(ival));
+#endif
 		    return 0;
 		}
 	    }
@@ -765,7 +784,12 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
 	STRLEN i;
 	
 	if (namelen) {
+#ifdef DD_USE_OLD_ID_FORMAT
 	    idlen = my_snprintf(id, sizeof(id), "0x%"UVxf, PTR2UV(val));
+#else
+	    id_buffer = PTR2UV(val);
+	    idlen = sizeof(id_buffer);
+#endif
 	    if ((svp = hv_fetch(seenhv, id, idlen, FALSE)) &&
 		(sv = *svp) && SvROK(sv) &&
 		(seenentry = (AV*)SvRV(sv)))

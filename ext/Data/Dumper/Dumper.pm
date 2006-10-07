@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.121_09';
+$VERSION = '2.121_10';
 
 #$| = 1;
 
@@ -101,16 +101,26 @@ sub new {
   return bless($s, $c);
 }
 
-sub init_refaddr_format {
-  require Config;
-  my $f = $Config::Config{uvxformat};
-  $f =~ tr/"//d;
-  our $refaddr_format = "0x%" . $f;
-}
+if ($] >= 5.006) {
+  # Packed numeric addresses take less memory. Plus pack is faster than sprintf
+  *init_refaddr_format = sub {};
 
-sub format_refaddr {
-  require Scalar::Util;
-  sprintf our $refaddr_format, Scalar::Util::refaddr(shift);
+  *format_refaddr  = sub {
+    require Scalar::Util;
+    pack "J", Scalar::Util::refaddr(shift);
+  };
+} else {
+  *init_refaddr_format = sub {
+    require Config;
+    my $f = $Config::Config{uvxformat};
+    $f =~ tr/"//d;
+    our $refaddr_format = "0x%" . $f;
+  };
+
+  *format_refaddr = sub {
+    require Scalar::Util;
+    sprintf our $refaddr_format, Scalar::Util::refaddr(shift);
+  }
 }
 
 #
