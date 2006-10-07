@@ -122,6 +122,7 @@ Intel*) ;; # # Is that you, Intel C++?
           case "`$cc $cflags $opt _cflags.c -o _cflags$_exe 2>&1`" in
           *"unrecognized"*) ;;
           *"Invalid"*) ;;
+          *"is valid for C"*) ;;
           *) if test -x _cflags$_exe
              then
                case "$opt" in
@@ -138,26 +139,25 @@ Intel*) ;; # # Is that you, Intel C++?
 esac
 rm -f _cflags.c _cflags$_exe
 
-# If we have g++, we cannot have the -Wdeclaration-after-statement.
-# Some g++s accept it but then whine about it with every file.
-# This removal is also done "later", in cflags run time.
-case "$cc" in
-*g++*) warn="`echo $warn|sed 's/-Wdeclaration-after-statement/ /'`" ;;
-esac
-
-# If we have -Duse64bitint (or equivalent) in effect and the quadtype
-# has become 'long long', gcc -pedantic becomes unbearable (moreso
-# when combined with -Wall) because long long and LL and %lld|%Ld
-# become warn-worthy.  So let's drop the -pedantic in that case.
-case "$quadtype:$sPRId64" in
-"long long"*|*lld*|*Ld*)
-  ccflags="`echo $ccflags|sed 's/-pedantic/ /'`"
-  warn="`echo $warn|sed 's/-pedantic/ /'`"
+case "$gccversion" in
+'') ;;
+*)
+  # If we have -Duse64bitint (or equivalent) in effect and the quadtype
+  # has become 'long long', gcc -pedantic becomes unbearable (moreso
+  # when combined with -Wall) because long long and LL and %lld|%Ld
+  # become warn-worthy.  So let's drop the -pedantic in that case.
+  case "$quadtype:$sPRId64" in
+  "long long"*|*lld*|*Ld*)
+    ccflags="`echo $ccflags|sed 's/-pedantic/ /'`"
+    warn="`echo $warn|sed 's/-pedantic/ /'`"
+    ;;
+  esac
+  # Using certain features (like the gcc brace groups)
+  # require knowing whether -pedantic has been specified.
+  case "$warn$ccflags" in
+  *-pedantic*) warn="$warn -DPERL_GCC_PEDANTIC" ;;
+  esac
   ;;
-esac
-
-case "$warn$ccflags" in
-*-pedantic*) warn="$warn -DPERL_GCC_PEDANTIC" ;;
 esac
 
 # Code to set any extra flags here.
@@ -288,8 +288,13 @@ for file do
 
 case "$cc" in
 *g++*)
-  # We need to remove this also in here (removed also earlier in cflags.SH).
-  ccflags="`echo $ccflags|sed 's/-Wdeclaration-after-statement/ /'`"
+  # Extra paranoia in case people have bad canned ccflags:
+  # bad in the sense that the flags are accepted by g++,
+  # but then whined about.
+  for f in -Wdeclaration-after-statement -std=c89
+  do
+    ccflags="`echo $ccflags|sed 's/$f/ /'`"
+  done
   ;;
 esac
 
