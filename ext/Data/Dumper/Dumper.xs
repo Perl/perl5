@@ -274,6 +274,9 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
     if (!val)
 	return 0;
 
+    if (SvTYPE(retval) >= SVt_PV && (SvLEN(retval) - SvCUR(retval)) < 40) {
+	sv_grow(retval, SvCUR(retval) * 1.5);
+    }
     realtype = SvTYPE(val);
 
     if (SvGMAGICAL(val))
