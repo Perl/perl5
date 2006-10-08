@@ -4532,6 +4532,9 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     case PERL_MAGIC_regdata:
 	vtable = &PL_vtbl_regdata;
 	break;
+    case PERL_MAGIC_regdata_names:
+	vtable = &PL_vtbl_regdata_names;
+	break;
     case PERL_MAGIC_regdatum:
 	vtable = &PL_vtbl_regdatum;
 	break;
@@ -4594,7 +4597,6 @@ Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 nam
     case PERL_MAGIC_vec:
 	vtable = &PL_vtbl_vec;
 	break;
-    case PERL_MAGIC_regdata_names:
     case PERL_MAGIC_arylen_p:
     case PERL_MAGIC_rhash:
     case PERL_MAGIC_symtab:
