@@ -4127,9 +4127,10 @@ X<printf>
 Equivalent to C<print FILEHANDLE sprintf(FORMAT, LIST)>, except that C<$\>
 (the output record separator) is not appended.  The first argument
 of the list will be interpreted as the C<printf> format. See C<sprintf>
-for an explanation of the format argument. If C<use locale> is in effect,
-the character used for the decimal point in formatted real numbers is
-affected by the LC_NUMERIC locale.  See L<perllocale>.
+for an explanation of the format argument.  If C<use locale> is in effect,
+and POSIX::setlocale() has been called, the character used for the decimal
+separator in formatted floating point numbers is affected by the LC_NUMERIC
+locale.  See L<perllocale> and L<POSIX>.
 
 Don't fall into the trap of using a C<printf> when a simple
 C<print> would do.  The C<print> is more efficient and less
@@ -5740,9 +5741,10 @@ index, the C<$> may need to be escaped:
 
 =back
 
-If C<use locale> is in effect, the character used for the decimal
-point in formatted real numbers is affected by the LC_NUMERIC locale.
-See L<perllocale>.
+If C<use locale> is in effect, and POSIX::setlocale() has been called,
+the character used for the decimal separator in formatted floating
+point numbers is affected by the LC_NUMERIC locale.  See L<perllocale>
+and L<POSIX>.
 
 =item sqrt EXPR
 X<sqrt> X<root> X<square root>
