@@ -3665,20 +3665,55 @@ SKIP:{
     $s=~s/(?'digits'\d+)\k'digits'/$+{digits}/;
     ok($s eq '123456','Named capture (single quotes) s///');    
 }
+sub iseq($$;$) { 
+    my ( $got, $expect, $name)=@_;
+    
+    $_=defined($_) ? "'$_'" : "undef"
+        for $got, $expect;
+        
+    my $ok=  $got eq $expect;
+        
+    printf "%sok %d - %s\n", ($ok ? "" : "not "), $test, $name||'unnamed';
+
+    printf "# Failed test at line %d\n".
+           "# expected: %s\n". 
+           "#   result: %s\n", 
+           (caller)[2], $expect, $got
+        unless $ok;
+
+    $test++;
+    return $ok;
+}   
 {
     my $s='foo bar baz';
-    my (@k,@v,$count);
+    my (@k,@v,@fetch,$res);
+    my $count= 0;
+    my @names=qw($+{A} $+{B} $+{C});
     if ($s=~/(?<A>foo)\s+(?<B>bar)?\s+(?<C>baz)/) {
         while (my ($k,$v)=each(%+)) {
             $count++;
         }
         @k=sort keys(%+);
         @v=sort values(%+);
+        $res=1;
+        push @fetch,
+            [ "$+{A}", "$1" ],
+            [ "$+{B}", "$2" ],
+            [ "$+{C}", "$3" ],
+        ;
+    } 
+    foreach (0..2) {
+        if ($fetch[$_]) {
+            iseq($fetch[$_][0],$fetch[$_][1],$names[$_]);
+        } else {
+            ok(0, $names[$_]);
+        }
     }
-    ok($count==3,"Got 3 keys in %+ via each ($count)");
-    ok(@k == 3, 'Got 3 keys in %+ via keys');
-    ok("@k" eq "A B C", "Got expected keys");
-    ok("@v" eq "bar baz foo", "Got expected values");
+    iseq($res,1,"$s~=/(?<A>foo)\s+(?<B>bar)?\s+(?<C>baz)/");
+    iseq($count,3,"Got 3 keys in %+ via each");
+    iseq(0+@k, 3, 'Got 3 keys in %+ via keys');
+    iseq("@k","A B C", "Got expected keys");
+    iseq("@v","bar baz foo", "Got expected values");
 }
         
        
@@ -3796,5 +3831,5 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
     or print "# Unexpected outcome: should pass or crash perl\n";
 
 # Don't forget to update this!
-BEGIN{print "1..1270\n"};
+BEGIN{print "1..1274\n"};
 

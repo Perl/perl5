@@ -1759,7 +1759,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         char *str=NULL;
         
 #ifdef DEBUGGING
-        regnode *optimize;
+        regnode *optimize = NULL;
         U32 mjd_offset = 0;
         U32 mjd_nodelen = 0;
 #endif
@@ -1930,9 +1930,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                    as we won't use them - (which resources?) dmq */
         }
         /* needed for dumping*/
-        DEBUG_r({
+        DEBUG_r(if (optimize) {
             regnode *opt = convert;
-            while (++opt<optimize) {
+            while ( ++opt < optimize) {
                 Set_Node_Offset_Length(opt,0,0);
             }
             /* 
@@ -4456,22 +4456,23 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		        vFAIL2("Sequence (?%c... not terminated",
 		            paren=='>' ? '<' : paren);
 		    if (SIZE_ONLY) {
-                        SV *svname= Perl_newSVpvf(aTHX_ "%.*s", 
-                            (int)(RExC_parse - name_start), name_start);
-                        HE *he_str;
-                        SV *sv_dat;
-                        
+			SV *svname= Perl_newSVpvf(aTHX_ "%.*s",
+				(int)(RExC_parse - name_start), name_start);
+			HE *he_str;
+			SV *sv_dat = NULL;
+
                         if (!RExC_paren_names) {
                             RExC_paren_names= newHV();
                             sv_2mortal((SV*)RExC_paren_names);
                         }
                         he_str = hv_fetch_ent( RExC_paren_names, svname, 1, 0 );
-                        if ( he_str ) {
+                        if ( he_str )
                             sv_dat = HeVAL(he_str);
-                        } else {
+                        if ( ! sv_dat ) {
                             /* croak baby croak */
-                        }
-                        if (SvPOK(sv_dat)) {
+                            Perl_croak(aTHX_
+                                "panic: paren_name hash element allocation failed");
+                        } else if ( SvPOK(sv_dat) ) {
                             IV count=SvIV(sv_dat);
                             I32 *pv=(I32*)SvGROW(sv_dat,SvCUR(sv_dat)+sizeof(I32)+1);
                             SvCUR_set(sv_dat,SvCUR(sv_dat)+sizeof(I32));
@@ -4482,7 +4483,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                             sv_setpvn(sv_dat, (char *)&(RExC_npar), sizeof(I32));
                             SvIOK_on(sv_dat);
                             SvIVX(sv_dat)= 1;
-                        }        
+                        }
+
                         /*sv_dump(sv_dat);*/
                     }
                     nextchar(pRExC_state);
