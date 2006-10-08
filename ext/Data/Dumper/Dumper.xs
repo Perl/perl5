@@ -274,9 +274,14 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
     if (!val)
 	return 0;
 
-    if (SvTYPE(retval) >= SVt_PV && (SvLEN(retval) - SvCUR(retval)) < 40) {
+    /* If the ouput buffer has less than some arbitary amount of space
+       remaining, then enlarge it. For the test case (25M of output),
+       *1.1 was slower, *2.0 was the same, so the first guess of 1.5 is
+	deemed to be good enough.  */
+    if (SvTYPE(retval) >= SVt_PV && (SvLEN(retval) - SvCUR(retval)) < 42) {
 	sv_grow(retval, SvCUR(retval) * 1.5);
     }
+
     realtype = SvTYPE(val);
 
     if (SvGMAGICAL(val))
