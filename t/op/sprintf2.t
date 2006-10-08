@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }   
 
-plan tests => 280;
+plan tests => 284;
 
 is(
     sprintf("%.40g ",0.01),
@@ -26,6 +26,15 @@ for my $i (1, 5, 10, 20, 50, 100) {
     my $expect = $string."  "x$i;  # followed by 2*$i spaces
     is(sprintf($utf8_format, 3*$i, $string), $expect,
        "width calculation under utf8 upgrade, length=$i");
+}
+
+# check simultaneous width & precision with wide characters
+for my $i (1, 3, 5, 10) {
+    my $string = "\x{0410}"x($i+10);   # cyrillic capital A
+    my $expect = "\x{0410}"x$i;        # cut down to exactly $i characters
+    my $format = "%$i.${i}s";
+    is(sprintf($format, $string), $expect,
+       "width & precision interplay with utf8 strings, length=$i");
 }
 
 # Used to mangle PL_sv_undef

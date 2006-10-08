@@ -8919,13 +8919,17 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    else {
 		eptr = SvPVx_const(argsv, elen);
 		if (DO_UTF8(argsv)) {
+		    I32 old_precis = precis;
 		    if (has_precis && precis < elen) {
 			I32 p = precis;
 			sv_pos_u2b(argsv, &p, 0); /* sticks at end */
 			precis = p;
 		    }
 		    if (width) { /* fudge width (can't fudge elen) */
-			width += elen - sv_len_utf8(argsv);
+			if (has_precis && precis < elen)
+			    width += precis - old_precis;
+			else
+			    width += elen - sv_len_utf8(argsv);
 		    }
 		    is_utf8 = TRUE;
 		}
