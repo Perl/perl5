@@ -333,7 +333,7 @@ process_utf8(pTHX_ SV* dst, U8* s, U8* e, int check,
                                );
 #if 1 /* perl-5.8.6 and older do not check UTF8_ALLOW_LONG */
         if (strict && uv > PERL_UNICODE_MAX)
-        ulen = -1;
+        ulen = (STRLEN) -1;
 #endif
             if (ulen == -1) {
                 if (strict) {
