@@ -3294,11 +3294,12 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	case NREFFL:
 	{
 	    char *s;
-	    char type =	OP(scan);
+	    char type;
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
 	case NREF:
 	case NREFF:
+	    type = OP(scan);
 	    {
 	        SV *sv_dat=(SV*)rex->data->data[ ARG( scan ) ];    
 	        I32 *nums=(I32*)SvPVX(sv_dat);
