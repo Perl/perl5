@@ -13,6 +13,73 @@ between 5.8.0 and 5.9.4.
 
 =head1 Core Enhancements
 
+=head2 Regular expressions
+
+=over 4
+
+=item Recursive Patterns
+
+It is now possible to write recursive patterns without using the C<(??{})>
+construct. This new way is more efficient, and in many cases easier to
+read.
+
+Each capturing parenthesis can now be treated as an independent pattern
+that can be entered by using the C<(?PARNO)> syntax (C<PARNO> standing for
+"parenthesis number"). For example, the following pattern will match
+nested balanced angle brackets:
+
+    /
+     ^                      # start of line
+     (                      # start capture buffer 1
+	<                   #   match an opening angle bracket
+	(?:                 #   match one of:
+	    (?>             #     don't backtrack over the inside of this group
+		[^<>]+      #       one or more non angle brackets
+	    )               #     end non backtracking group
+	|                   #     ... or ...
+	    (?1)            #     recurse to bracket 1 and try it again
+	)*                  #   0 or more times.
+	>                   #   match a closing angle bracket
+     )                      # end capture buffer one
+     $                      # end of line
+    /x
+
+Note, users experienced with PCRE will find that the Perl implementation
+of this feature differs from the PCRE one in that it is possible to
+backtrack into a recursed pattern, whereas in PCRE the recursion is
+atomic or "possessive" in nature.
+
+=item Named Capture Buffers
+
+It is now possible to name capturing parenthesis in a pattern and refer to
+the captured contents by name. The naming syntax is C<< (?<NAME>....) >>.
+It's possible to backreference to a named buffer with the C<< \k<NAME> >>
+syntax. In code, the new magical hash C<%+> can be used to access the
+contents of the buffers.
+
+Thus, to replace all doubled chars, one could write
+
+    s/(?<letter>.)\k<letter>/$+{letter}/g
+
+Only buffers with defined contents will be "visible" in the hash, so
+it's possible to do something like
+
+    foreach my $name (keys %+) {
+        print "content of buffer '$name' is $+{$name}\n";
+    }
+
+Users exposed to the .NET regex engine will find that the perl
+implementation differs in that the numerical ordering of the buffers
+is sequential, and not "unnamed first, then named". Thus in the pattern
+
+   /(A)(?<B>B)(C)(?<D>D)/
+
+$1 will be 'A', $2 will be 'B', $3 will be 'C' and $4 will be 'D' and not
+$1 is 'A', $2 is 'C' and $3 is 'B' and $4 is 'D' that a .NET programmer
+would expect. This is considered a feature. :-)
+
+=back
+
 =head1 Modules and Pragmas
 
 =head2 New Core Modules
