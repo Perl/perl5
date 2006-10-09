@@ -17,10 +17,7 @@
 #include "sha.h"
 
 /* hmacopen: creates a new HMAC-SHA digest object */
-HMAC *hmacopen(alg, key, keylen)
-int alg;
-unsigned char *key;
-unsigned int keylen;
+HMAC *hmacopen(int alg, unsigned char *key, unsigned int keylen)
 {
 	unsigned int i;
 	HMAC *h;
@@ -62,17 +59,13 @@ unsigned int keylen;
 }
 
 /* hmacwrite: triggers a state update using data in bitstr/bitcnt */
-unsigned long hmacwrite(bitstr, bitcnt, h)
-unsigned char *bitstr;
-unsigned long bitcnt;
-HMAC *h;
+unsigned long hmacwrite(unsigned char *bitstr, unsigned long bitcnt, HMAC *h)
 {
 	return(shawrite(bitstr, bitcnt, h->isha));
 }
 
 /* hmacfinish: computes final digest state */
-void hmacfinish(h)
-HMAC *h;
+void hmacfinish(HMAC *h)
 {
 	shafinish(h->isha);
 	shawrite(shadigest(h->isha), h->isha->digestlen * 8, h->osha);
@@ -81,29 +74,25 @@ HMAC *h;
 }
 
 /* hmacdigest: returns pointer to digest (binary) */
-unsigned char *hmacdigest(h)
-HMAC *h;
+unsigned char *hmacdigest(HMAC *h)
 {
 	return(shadigest(h->osha));
 }
 
 /* hmachex: returns pointer to digest (hexadecimal) */
-char *hmachex(h)
-HMAC *h;
+char *hmachex(HMAC *h)
 {
 	return(shahex(h->osha));
 }
 
 /* hmacbase64: returns pointer to digest (Base 64) */
-char *hmacbase64(h)
-HMAC *h;
+char *hmacbase64(HMAC *h)
 {
 	return(shabase64(h->osha));
 }
 
 /* hmacclose: de-allocates digest object */
-int hmacclose(h)
-HMAC *h;
+int hmacclose(HMAC *h)
 {
 	shaclose(h->osha);
 	memset(h, 0, sizeof(HMAC));
