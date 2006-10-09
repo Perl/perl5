@@ -218,7 +218,7 @@ sub setcolor {
  if ($@) {
     $ENV{PERL_RE_COLORS}||=qq'\t\t> <\t> <\t\t'
  }
-                
+
 }
 
 my %flags = (
@@ -242,23 +242,33 @@ my %flags = (
 );
 $flags{ALL} = -1;
 $flags{All} = $flags{all} = $flags{DUMP} | $flags{EXECUTE};
+$flags{Extra} = $flags{EXECUTE} | $flags{COMPILE};
 $flags{More} = $flags{MORE} = $flags{All} | $flags{TRIEC} | $flags{TRIEM} | $flags{STATE};
 $flags{State} = $flags{DUMP} | $flags{EXECUTE} | $flags{STATE};
 $flags{TRIE} = $flags{DUMP} | $flags{EXECUTE} | $flags{TRIEC};
 
-my $installed =eval {
-    require XSLoader;
-    XSLoader::load('re');
-    install();
-};
+my $installed;
 
 sub _load_unload {
     my ($on)= @_;
     if ($on) {
-        die "'re' not installed!?" unless $installed;
-        #warn "installed: $installed\n";
-        install();  # allow for changes in colors
-        $^H{regcomp}= $installed;
+        if ( ! defined($installed) ) {
+            require XSLoader;
+            XSLoader::load('re');
+            $installed = install() || 0;
+        }
+        if ( ! $installed ) {
+            die "'re' not installed!?";
+        }  else {
+            # We could just say = $installed; but then we wouldn't
+            # "see" any changes to the color environment var.
+
+            # install() returns an integer, which if casted properly
+            # in C resolves to a structure containing the regex
+            # hooks. Setting it to a random integer will guarantee
+            # segfaults.
+            $^H{regcomp} = install();
+        }
     } else {
         delete $^H{regcomp};
     }

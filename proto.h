@@ -3586,6 +3586,9 @@ STATIC void	S_regtail(pTHX_ struct RExC_state_t *state, regnode *p, const regnod
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
+STATIC SV *	S_reg_scan_name(pTHX_ struct RExC_state_t *state, U32 flags)
+			__attribute__nonnull__(pTHX_1);
+
 STATIC U32	S_join_exact(pTHX_ struct RExC_state_t *state, regnode *scan, I32 *min, U32 flags, regnode *val, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)

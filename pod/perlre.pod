@@ -820,9 +820,8 @@ Recursing deeper than 50 times without consuming any input string will
 result in a fatal error.  The maximum depth is compiled into perl, so 
 changing it requires a custom build.
 
-=item C<(?PARNO)> C<(?R)>
-
-X<(?PARNO)> X<(?1)>
+=item C<(?PARNO)> C<(?R)> C<(?0)>
+X<(?PARNO)> X<(?1)> X<(?R)> X<(?0)>
 X<regex, recursive> X<regexp, recursive> X<regular expression, recursive>
 
 B<WARNING>:  This extended regular expression feature is considered
@@ -834,9 +833,10 @@ pattern that must match at the current position.  Capture buffers
 contained by the pattern will have the value as determined by the
 outermost recursion.
 
-PARNO is a sequence of digits not starting with 0 whose value
-reflects the paren-number of the capture buffer to recurse to.
-C<(?R)> curses to the beginning of the pattern.
+PARNO is a sequence of digits (not starting with 0) whose value reflects
+the paren-number of the capture buffer to recurse to. C<(?R)> recurses to
+the beginning of the whole pattern. C<(?0)> is an alternate syntax for
+C<(?R)>.
 
 The following pattern matches a function foo() which may contain
 balanced parenthesis as the argument.
@@ -880,6 +880,16 @@ PCRE or Python construct of the same form. In perl you can backtrack into
 a recursed group, in PCRE and Python the recursed into group is treated
 as atomic. Also, constructs like (?i:(?1)) or (?:(?i)(?1)) do not affect
 the pattern being recursed into.
+
+=item C<(?&NAME)>
+X<(?&NAME)>
+
+Recurse to a named subpattern. Identical to (?PARNO) except that the
+parenthesis to recurse to is determined by name. If multiple parens have
+the same name, then it recurses to the leftmost.
+
+It is an error to refer to a name that is not declared somewhere in the
+pattern.
 
 =item C<< (?>pattern) >>
 X<backtrack> X<backtracking> X<atomic> X<possessive>

@@ -1319,6 +1319,7 @@
 #define reg_namedseq		S_reg_namedseq
 #define reginsert		S_reginsert
 #define regtail			S_regtail
+#define reg_scan_name		S_reg_scan_name
 #define join_exact		S_join_exact
 #define regwhite		S_regwhite
 #define nextchar		S_nextchar
@@ -3518,6 +3519,7 @@
 #define reg_namedseq(a,b)	S_reg_namedseq(aTHX_ a,b)
 #define reginsert(a,b,c,d)	S_reginsert(aTHX_ a,b,c,d)
 #define regtail(a,b,c,d)	S_regtail(aTHX_ a,b,c,d)
+#define reg_scan_name(a,b)	S_reg_scan_name(aTHX_ a,b)
 #define join_exact(a,b,c,d,e,f)	S_join_exact(aTHX_ a,b,c,d,e,f)
 #define regwhite		S_regwhite
 #define nextchar(a)		S_nextchar(aTHX_ a)

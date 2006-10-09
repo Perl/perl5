@@ -4323,6 +4323,35 @@ Perl_reg_named_buff_sv(pTHX_ SV* namesv)
     }
 }
 
+/* Scans the name of a named buffer from the pattern.
+ * If flags is true then returns an SV containing the name.
+ */
+STATIC SV*
+S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags) {
+    char *name_start = RExC_parse;
+    if (UTF) {
+	STRLEN numlen;
+	while (isIDFIRST_uni(utf8n_to_uvchr((U8*)RExC_parse,
+			RExC_end - RExC_parse,
+			&numlen, UTF8_ALLOW_DEFAULT)))
+	    RExC_parse += numlen;
+    }
+    else {
+	while (isIDFIRST(*RExC_parse))
+	    RExC_parse++;
+    }
+    if (flags) {
+	SV* svname = sv_2mortal(Perl_newSVpvn(aTHX_ name_start,
+		    (int)(RExC_parse - name_start)));
+	if (UTF)
+	    SvUTF8_on(svname);
+	return svname;
+    }
+    else {
+	return NULL;
+    }
+}
+
 #define DEBUG_PARSE_MSG(funcname)     DEBUG_PARSE_r({           \
     int rem=(int)(RExC_end - RExC_parse);                       \
     int cut;                                                    \
@@ -4430,37 +4459,28 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    paren = *RExC_parse++;
 	    ret = NULL;			/* For look-ahead/behind. */
 	    switch (paren) {
-	        
+
 	    case '<':           /* (?<...) */
 		if (*RExC_parse == '!')
 		    paren = ',';
-		else if (*RExC_parse != '=') 
-		{               /* (?<...>) */
+		else if (*RExC_parse != '=') { /* (?<...>) */
 		    char *name_start;
+		    SV *svname;
 		    paren= '>';
             case '\'':          /* (?'...') */
     		    name_start= RExC_parse;
-		    if (UTF) {
-		        STRLEN numlen;
-		        while(isIDFIRST_uni(utf8n_to_uvchr((U8*)RExC_parse, 
-		            RExC_end - RExC_parse, 
-		            &numlen, UTF8_ALLOW_DEFAULT)))
-		                RExC_parse += numlen;
-		    } else {
-		        while(isIDFIRST(*RExC_parse))
-		            RExC_parse++;
-		    }
+    		    svname = reg_scan_name(pRExC_state,SIZE_ONLY);
 		    if (RExC_parse == name_start)
 		        goto unknown;
 		    if (*RExC_parse != paren)
 		        vFAIL2("Sequence (?%c... not terminated",
 		            paren=='>' ? '<' : paren);
 		    if (SIZE_ONLY) {
-			SV *svname= Perl_newSVpvf(aTHX_ "%.*s",
-				(int)(RExC_parse - name_start), name_start);
 			HE *he_str;
 			SV *sv_dat = NULL;
-
+                        if (!svname) /* shouldnt happen */
+                            Perl_croak(aTHX_
+                                "panic: reg_scan_name returned NULL");
                         if (!RExC_paren_names) {
                             RExC_paren_names= newHV();
                             sv_2mortal((SV*)RExC_paren_names);
@@ -4511,22 +4531,53 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		nextchar(pRExC_state);
 		*flagp = TRYAGAIN;
 		return NULL;
-	    case '0' :
-            case 'R' :
-                if (*RExC_parse != ')')
+	    case '0' :           /* (?0) */
+	    case 'R' :           /* (?R) */
+		if (*RExC_parse != ')')
 		    FAIL("Sequence (?R) not terminated");
 		reg_node(pRExC_state, SRECURSE);
-		break;
+		break;           /* (?PARNO) */
+            { /* named and numeric backreferences */
+                I32 num;
+                char * parse_start;
+            case '&':            /* (?&NAME) */
+                parse_start = RExC_parse - 1;
+                {
+		    char *name_start = RExC_parse;
+		    SV *svname = reg_scan_name(pRExC_state, !SIZE_ONLY);
+		    if (RExC_parse == name_start)
+			goto unknown;
+		    if (*RExC_parse != ')')
+			vFAIL("Expecting close bracket");
+		    if (!SIZE_ONLY) {
+			HE *he_str = NULL;
+                        SV *sv_dat;
+                        if (!svname) /* shouldn't happen*/
+                            Perl_croak(aTHX_ "panic: reg_scan_name returned NULL");
+                        if (RExC_paren_names)
+                            he_str = hv_fetch_ent( RExC_paren_names, svname, 0, 0 );
+                        if (he_str)
+                            sv_dat = HeVAL(he_str);
+                        else
+                            vFAIL("Reference to nonexistent group");
+                        num = *((I32 *)SvPVX(sv_dat));
+                    } else {
+                        num = 0;
+                    }
+                }
+                goto gen_recurse_regop;
+                /* NOT REACHED */
             case '1': case '2': case '3': case '4': /* (?1) */
 	    case '5': case '6': case '7': case '8': case '9':
 	        RExC_parse--;
-	    {
-		const I32 num = atoi(RExC_parse);
-  	        char * const parse_start = RExC_parse - 1; /* MJD */
+		num = atoi(RExC_parse);
+  	        parse_start = RExC_parse - 1; /* MJD */
 		while (isDIGIT(*RExC_parse))
 			RExC_parse++;
 	        if (*RExC_parse!=')') 
 	            vFAIL("Expecting close bracket");
+			
+              gen_recurse_regop:
                 ret = reganode(pRExC_state, RECURSE, num);
                 if (!SIZE_ONLY) {
 		    if (num > (I32)RExC_rx->nparens) {
@@ -4537,7 +4588,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     RExC_emit++;
 		    DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
 			"Recurse #%"UVuf" to %"IVdf"\n", ARG(ret), ARG2L(ret)));
-		} else{
+		} else {
 		    RExC_size++;
 	            RExC_seen|=REG_SEEN_RECURSE;
     		}
@@ -4546,7 +4597,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
                 nextchar(pRExC_state);
                 return ret;
-            }
+            } /* named and numeric backreferences */
+            /* NOT REACHED */
+
 	    case 'p':           /* (?p...) */
 		if (SIZE_ONLY && ckWARN2(WARN_DEPRECATED, WARN_REGEXP))
 		    vWARNdep(RExC_parse, "(?p{}) is deprecated - use (??{})");
@@ -5680,18 +5733,9 @@ tryagain:
 	    } else {
 		char* name_start = (RExC_parse += 2);
 		I32 num = 0;
-		ch= (ch == '<') ? '>' : '\'';
-
-                if (UTF) {
-                    STRLEN numlen;
-                    while(isIDFIRST_uni(utf8n_to_uvchr((U8*)RExC_parse, 
-                        RExC_end - RExC_parse, 
-                        &numlen, UTF8_ALLOW_DEFAULT)))
-                            RExC_parse += numlen;
-		} else {
-		    while(isIDFIRST(*RExC_parse))
-		        RExC_parse++;
-		}
+                SV *svname = reg_scan_name(pRExC_state,!SIZE_ONLY);
+                ch= (ch == '<') ? '>' : '\'';
+                    
                 if (RExC_parse == name_start || *RExC_parse != ch)
                     vFAIL2("Sequence \\k%c... not terminated",
                         (ch == '>' ? '<' : ch));
@@ -5704,14 +5748,13 @@ tryagain:
                 
     		
                 if (!SIZE_ONLY) {
-                    SV *svname = Perl_newSVpvf(aTHX_ "%.*s", 
-                            (int)(RExC_parse - name_start), name_start);
-                    HE *he_str;
+                    HE *he_str = NULL;
                     SV *sv_dat;
-                    if (UTF) 
-                        SvUTF8_on(svname);
-                    he_str = hv_fetch_ent( RExC_paren_names, svname, 0, 0 );
-                    SvREFCNT_dec(svname);
+                    if (!svname)
+                        Perl_croak(aTHX_
+                                "panic: reg_scan_name returned NULL");
+                    if (RExC_paren_names)                                
+                        he_str = hv_fetch_ent( RExC_paren_names, svname, 0, 0 );
                     if ( he_str ) {
                         sv_dat = HeVAL(he_str);
                     } else {

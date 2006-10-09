@@ -1037,3 +1037,6 @@ X(?<=foo.)[YZ]	..XfooXY..	y	pos	8
 /(?<n>foo)\k'n'/	..foofoo..	y	$1	foo
 /(?<n>foo)\k'n'/	..foofoo..	y	$+{n}	foo
 /(?:(?<n>foo)|(?<n>bar))\k<n>/	..barbar..	y	$+{n}	bar
+/^(?'main'<(?:[^<>]+|(?&crap)|(?&main))*>)(?'empty')(?'crap'!>!>!>)$/	<<!>!>!>><>>!>!>!>	y	$+{main}	<<!>!>!>><>>
+/^(?'main'<(?:[^<>]+|(?&main))*>)$/	<<><<<><>>>>	y	$1	<<><<<><>>>>
+/(?'first'(?&second)*)(?'second'[fF]o+)/	fooFoFoo	y	$+{first}-$+{second}	fooFo-Foo
