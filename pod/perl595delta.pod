@@ -1,0 +1,61 @@
+=head1 NAME
+
+perldelta - what is new for perl v5.9.5
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.9.4 and the 5.9.5
+development releases. See L<perl590delta>, L<perl591delta>,
+L<perl592delta>, L<perl593delta> and L<perl594delta> for the differences
+between 5.8.0 and 5.9.4.
+
+=head1 Incompatible Changes
+
+=head1 Core Enhancements
+
+=head1 Modules and Pragmas
+
+=head2 New Core Modules
+
+=head1 Utility Changes
+
+=head1 Documentation
+
+=head1 Performance Enhancements
+
+=head1 Installation and Configuration Improvements
+
+=head1 Selected Bug Fixes
+
+=head1 New or Changed Diagnostics
+
+=head1 Changed Internals
+
+=head1 Known Problems
+
+=head2 Platform Specific Problems
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the articles
+recently posted to the comp.lang.perl.misc newsgroup and the perl
+bug database at http://rt.perl.org/rt3/ .  There may also be
+information at http://www.perl.org/ , the Perl Home Page.
+
+If you believe you have an unreported bug, please run the B<perlbug>
+program included with your release.  Be sure to trim your bug down
+to a tiny but sufficient test case.  Your bug report, along with the
+output of C<perl -V>, will be sent off to perlbug@perl.org to be
+analysed by the Perl porting team.
+
+=head1 SEE ALSO
+
+The F<Changes> file for exhaustive details on what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
