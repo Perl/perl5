@@ -2,7 +2,7 @@ package CPAN::HandleConfig;
 use strict;
 use vars qw(%can %keys $VERSION);
 
-$VERSION = sprintf "%.6f", substr(q$Rev: 958 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 984 $,4)/1000000 + 5.4;
 
 %can = (
         commit   => "Commit changes to disk",
@@ -282,7 +282,7 @@ sub defaults {
     my $done;
     for my $config (qw(CPAN/MyConfig.pm CPAN/Config.pm)) {
         if ($INC{$config}) {
-            CPAN::Shell->reload_this($config);
+            CPAN::Shell->reload_this($config,{force => 1});
             $CPAN::Frontend->myprint("'$INC{$config}' reread\n");
             last;
         }
@@ -581,12 +581,12 @@ package
 
 use strict;
 use vars qw($AUTOLOAD $VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 958 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 984 $,4)/100;
 
 # formerly CPAN::HandleConfig was known as CPAN::Config
 sub AUTOLOAD {
   my($l) = $AUTOLOAD;
-  $CPAN::Frontend->mywarn("Dispatching deprecated method '$l' to CPAN::HandleConfig");
+  $CPAN::Frontend->mywarn("Dispatching deprecated method '$l' to CPAN::HandleConfig\n");
   $l =~ s/.*:://;
   CPAN::HandleConfig->$l(@_);
 }

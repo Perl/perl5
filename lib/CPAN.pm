@@ -1,7 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.88_52';
+$CPAN::VERSION = '1.88_53';
 $CPAN::VERSION = eval $CPAN::VERSION;
 
 use CPAN::HandleConfig;
@@ -58,7 +58,9 @@ $CPAN::Defaultdocs ||= "http://search.cpan.org/perldoc?";
 $CPAN::Defaultrecent ||= "http://search.cpan.org/recent";
 
 
-use vars qw($VERSION @EXPORT $AUTOLOAD $DEBUG $META $HAS_USABLE $term
+use vars qw($VERSION @EXPORT $AUTOLOAD
+            $DEBUG $META $HAS_USABLE $term
+            $GOTOSHELL
             $Signal $Suppress_readline $Frontend
             @Defaultsites $Have_warned $Defaultdocs $Defaultrecent
             $Be_Silent
@@ -237,14 +239,10 @@ ReadLine support %s
 	    $prompt = $oprompt;
 	} elsif (/./) {
 	    my(@line);
-	    if ($] < 5.00322) { # parsewords had a bug until recently
-		@line = split;
-	    } else {
-		eval { @line = Text::ParseWords::shellwords($_) };
-		warn($@), next SHELLCOMMAND if $@;
-                warn("Text::Parsewords could not parse the line [$_]"),
-                    next SHELLCOMMAND unless @line;
-	    }
+            eval { @line = Text::ParseWords::shellwords($_) };
+            warn($@), next SHELLCOMMAND if $@;
+            warn("Text::Parsewords could not parse the line [$_]"),
+                next SHELLCOMMAND unless @line;
 	    $CPAN::META->debug("line[".join("|",@line)."]") if $CPAN::DEBUG;
 	    my $command = shift @line;
 	    eval { CPAN::Shell->$command(@line) };
@@ -275,8 +273,7 @@ ReadLine support %s
 	    require Term::ReadLine;
 	    $CPAN::Frontend->myprint("\n$redef subroutines in ".
 				     "Term::ReadLine redefined\n");
-            @_ = ($oprompt,"");
-	    goto &shell;
+            $GOTOSHELL = 1;
 	}
       }
       if ($term and $term->can("ornaments")) {
@@ -293,6 +290,23 @@ ReadLine support %s
                   undef $last_term_ornaments;
               }
           }
+      }
+      if ($CPAN::DEBUG && $CPAN::DEBUG & $CPAN::DEBUG{CPAN}) {
+          # debugging 'incommandcolor': should always be off at the end of a command
+          # (incommandcolor is used to detect recursive dependencies)
+          for my $class (qw(Module Distribution)) {
+              for my $dm (keys %{$CPAN::META->{readwrite}{"CPAN::$class"}}) {
+                  next unless $CPAN::META->{readwrite}{"CPAN::$class"}{$dm}{incommandcolor};
+                  CPAN->debug("BUG: $class '$dm' was in command state, resetting");
+                  delete $CPAN::META->{readwrite}{"CPAN::$class"}{$dm}{incommandcolor};
+              }
+          }
+      }
+      if ($GOTOSHELL) {
+          $GOTOSHELL = 0; # not too often
+          $META->savehist if $CPAN::term && $CPAN::term->can("GetHistory");
+          @_ = ($oprompt,"");
+          goto &shell;
       }
     }
     soft_chdir_with_alternatives(\@cwd);
@@ -479,8 +493,13 @@ sub as_string {
 
 package CPAN::Shell;
 use strict;
-use vars qw($AUTOLOAD @ISA $COLOR_REGISTERED $ADVANCED_QUERY
+use vars qw(
+            $ADVANCED_QUERY
+            $AUTOLOAD
+            $COLOR_REGISTERED
             $autoload_recursion
+            $reload
+            @ISA
            );
 @CPAN::Shell::ISA = qw(CPAN::Debug);
 $COLOR_REGISTERED ||= 0;
@@ -873,7 +892,9 @@ sub has_inst {
 	# it tries again. The second require is only a NOOP returning
 	# 1 if we had success, otherwise it's retrying
 
-	$CPAN::Frontend->myprint("CPAN: $mod loaded ok\n");
+        my $v = eval "\$$mod\::VERSION";
+        $v = $v ? " (v$v)" : "";
+	$CPAN::Frontend->myprint("CPAN: $mod loaded ok$v\n");
 	if ($mod eq "CPAN::WAIT") {
 	    push @CPAN::Shell::ISA, 'CPAN::WAIT';
 	}
@@ -1483,6 +1504,7 @@ Known options:
     }
 }
 
+# CPAN::Shell::paintdots_onreload
 sub paintdots_onreload {
     my($ref) = shift;
     sub {
@@ -1492,6 +1514,15 @@ sub paintdots_onreload {
 	    local($|) = 1;
 	    # $CPAN::Frontend->myprint(".($subr)");
 	    $CPAN::Frontend->myprint(".");
+            if ($subr =~ /\bshell\b/i) {
+                # warn "debug[$_[0]]";
+
+                # It would be nice if we could detect that a
+                # subroutine has actually changed, but for now we
+                # practically always set the GOTOSHELL global
+
+                $CPAN::GOTOSHELL=1;
+            }
 	    return;
 	}
 	warn @_;
@@ -1529,7 +1560,6 @@ sub reload {
             $CPAN::Frontend->myprint("v$v)");
         }
         $CPAN::Frontend->myprint("\n$redef subroutines redefined\n");
-        $failed++ unless $redef;
         if ($failed) {
             my $errors = $failed == 1 ? "error" : "errors";
             $CPAN::Frontend->mywarn("\n$failed $errors during reload. You better quit ".
@@ -1546,7 +1576,7 @@ index    re-reads the index files\n});
 # reload means only load again what we have loaded before
 #-> sub CPAN::Shell::reload_this ;
 sub reload_this {
-    my($self,$f) = @_;
+    my($self,$f,$args) = @_;
     CPAN->debug("f[$f]") if $CPAN::DEBUG;
     return 1 unless $INC{$f}; # we never loaded this, so we do not
                               # reload but say OK
@@ -1570,19 +1600,29 @@ sub reload_this {
         $CPAN::Frontend->mywarn("Found no file to reload for '$f'\n");
         return;
     }
-    my $fh = FileHandle->new($file) or
-        $CPAN::Frontend->mydie("Could not open $file: $!");
-    local($/);
-    local $^W = 1;
-    my $content = <$fh>;
-    CPAN->debug(sprintf("reload file[%s] content[%s...]",$file,substr($content,0,128)))
-        if $CPAN::DEBUG;
-    delete $INC{$f};
-    local @INC = @inc;
-    eval "require '$f'";
-    if ($@){
-        warn $@;
-        return;
+    my $mtime = (stat $file)[9];
+    $reload->{$f} ||= $^T;
+    my $must_reload = $mtime > $reload->{$f};
+    $args ||= {};
+    $must_reload ||= $args->{force};
+    if ($must_reload) {
+        my $fh = FileHandle->new($file) or
+            $CPAN::Frontend->mydie("Could not open $file: $!");
+        local($/);
+        local $^W = 1;
+        my $content = <$fh>;
+        CPAN->debug(sprintf("reload file[%s] content[%s...]",$file,substr($content,0,128)))
+            if $CPAN::DEBUG;
+        delete $INC{$f};
+        local @INC = @inc;
+        eval "require '$f'";
+        if ($@){
+            warn $@;
+            return;
+        }
+        $reload->{$f} = time;
+    } else {
+        $CPAN::Frontend->myprint("__unchanged__");
     }
     return 1;
 }
@@ -2347,7 +2387,7 @@ sub rematein {
 	} elsif ($s =~ m|[\$\@\%]|) { # looks like a perl variable
 	} elsif ($s =~ m|^/|) { # looks like a regexp
             $CPAN::Frontend->mywarn("Sorry, $meth with a regular expression is ".
-                                    "not supported. Rejecting argument '$s'\n");
+                                    "not supported.\nRejecting argument '$s'\n");
             $CPAN::Frontend->mysleep(2);
             next;
 	} elsif ($meth eq "ls") {
@@ -2439,6 +2479,7 @@ to find objects with matching identifiers.
         CPAN->debug(qq{pragma[@pragma]meth[$meth]}.
                     qq{ID[$obj->{ID}]}) if $CPAN::DEBUG;
 
+        push @qcopy, $obj;
         if ($obj->$meth()){
             CPAN::Queue->delete($s);
         } else {
@@ -5379,7 +5420,6 @@ sub perl {
 sub make {
     my($self) = @_;
     my $make = $self->{modulebuild} ? "Build" : "make";
-    $CPAN::Frontend->myprint(sprintf "Running %s for %s\n", $make, $self->id);
     # Emergency brake if they said install Pippi and get newest perl
     if ($self->isa_perl) {
       if (
@@ -5387,27 +5427,28 @@ sub make {
           ! $self->{force_update}
 	 ) {
         # if we die here, we break bundles
-	$CPAN::Frontend->mywarn(sprintf qq{
-The most recent version "%s" of the module "%s"
-comes with the current version of perl (%s).
-I\'ll build that only if you ask for something like
-    force install %s
-or
-    install %s
+	$CPAN::Frontend
+            ->mywarn(sprintf(
+                             qq{The most recent version "%s" of the module "%s"
+is part of the perl-%s distribution. To install that, you need to run
+  force install %s   --or--
+  install %s
 },
-			       $CPAN::META->instance(
-						     'CPAN::Module',
-						     $self->called_for
-						    )->cpan_version,
-			       $self->called_for,
-			       $self->isa_perl,
-			       $self->called_for,
-			       $self->id);
+                             $CPAN::META->instance(
+                                                   'CPAN::Module',
+                                                   $self->called_for
+                                                  )->cpan_version,
+                             $self->called_for,
+                             $self->isa_perl,
+                             $self->called_for,
+                             $self->id,
+                            ));
         $self->{make} = CPAN::Distrostatus->new("NO isa perl");
         $CPAN::Frontend->mysleep(1);
         return;
       }
     }
+    $CPAN::Frontend->myprint(sprintf "Running %s for %s\n", $make, $self->id);
     $self->get;
     if ($CPAN::Signal){
       delete $self->{force_update};
@@ -5634,8 +5675,8 @@ sub follow_prereqs {
                c => "commandline",
               );
     $CPAN::Frontend->
-        myprint("---- Unsatisfied dependencies detected ".
-                "during [$id] -----\n".
+        myprint("---- Unsatisfied dependencies detected during\n".
+                "---- $id\n".
                 join("", map {"    $_->[0] \[$map{$_->[1]}]\n"} @prereq_tuples),
                );
     my $follow = 0;
@@ -5851,8 +5892,24 @@ sub prereq_pm {
             }
         } elsif (-f "Build") {
             if ($CPAN::META->has_inst("Module::Build")) {
-                $req  = Module::Build->current->requires();
-                $breq = Module::Build->current->build_requires();
+                eval {
+                    $req  = Module::Build->current->requires();
+                    $breq = Module::Build->current->build_requires();
+                };
+                if ($@) {
+                    # HTML::Mason prompted for this with bleadperl@28900 or so
+                    $CPAN::Frontend
+                        ->mywarn(
+                                 sprintf("Warning: while trying to determine ".
+                                         "prerequisites for %s with the help of ".
+                                         "Module::Build the following error ".
+                                         "occurred: '%s'\n\nCannot care for prerequisites\n",
+                                         $self->id,
+                                         $@
+                                        ));
+                    $self->{prereq_pm_detected}++;
+                    return $self->{prereq_pm} = {requires=>{},build_requires=>{}};
+                }
             }
         }
     }
@@ -5907,7 +5964,6 @@ sub test {
              $self->{make} =~ /^NO/
             ) and push @e, "Can't test without successful make";
 
-	exists $self->{build_dir} or push @e, "Has no own directory";
         $self->{badtestcnt} ||= 0;
         $self->{badtestcnt} > 0 and
             push @e, "Won't repeat unsuccessful test during this command";
@@ -5915,17 +5971,21 @@ sub test {
         exists $self->{later} and length($self->{later}) and
             push @e, $self->{later};
 
-        if ($CPAN::META->{is_tested}{$self->{build_dir}}
-            &&
-            exists $self->{make_test}
-            &&
-            !(
-              $self->{make_test}->can("failed") ?
-              $self->{make_test}->failed :
-              $self->{make_test} =~ /^NO/
-             )
-           ) {
-            push @e, "Already tested successfully";
+        if (exists $self->{build_dir}) {
+            if ($CPAN::META->{is_tested}{$self->{build_dir}}
+                &&
+                exists $self->{make_test}
+                &&
+                !(
+                  $self->{make_test}->can("failed") ?
+                  $self->{make_test}->failed :
+                  $self->{make_test} =~ /^NO/
+                 )
+               ) {
+                push @e, "Already tested successfully";
+            }
+        } elsif (!@e) {
+            push @e, "Has no own directory";
         }
 
 	$CPAN::Frontend->myprint(join "", map {"  $_\n"} @e) and return if @e;
@@ -5966,18 +6026,40 @@ sub test {
     my $tests_ok;
     if ( $CPAN::Config->{test_report} && 
          $CPAN::META->has_inst("CPAN::Reporter") ) {
-            $tests_ok = CPAN::Reporter::test($self, $system);
+        $tests_ok = CPAN::Reporter::test($self, $system);
     } else {
-            $tests_ok = system($system) == 0;
+        $tests_ok = system($system) == 0;
     }
     if ( $tests_ok ) {
-	 $CPAN::Frontend->myprint("  $system -- OK\n");
-	 $CPAN::META->is_tested($self->{'build_dir'});
-	 $self->{make_test} = CPAN::Distrostatus->new("YES");
+        {
+            my @prereq;
+            for my $m (keys %{$self->{sponsored_mods}}) {
+                my $m_obj = CPAN::Shell->expand("Module",$m);
+                if (!$m_obj->distribution->{make_test}
+                    ||
+                    $m_obj->distribution->{make_test}->failed){
+                    #$m_obj->dump;
+                    push @prereq, $m;
+                }
+            }
+            if (@prereq){
+                my $cnt = @prereq;
+                my $which = join ",", @prereq;
+                my $verb = $cnt == 1 ? "one dependency not OK ($which)" :
+                    "$cnt dependencies missing ($which)";
+                $CPAN::Frontend->mywarn("Tests succeeded but $verb\n");
+                $self->{make_test} = CPAN::Distrostatus->new("NO -- $verb");
+                return;
+            }
+        }
+
+        $CPAN::Frontend->myprint("  $system -- OK\n");
+        $CPAN::META->is_tested($self->{'build_dir'});
+        $self->{make_test} = CPAN::Distrostatus->new("YES");
     } else {
-	 $self->{make_test} = CPAN::Distrostatus->new("NO");
-         $self->{badtestcnt}++;
-	 $CPAN::Frontend->mywarn("  $system -- NOT OK\n");
+        $self->{make_test} = CPAN::Distrostatus->new("NO");
+        $self->{badtestcnt}++;
+        $CPAN::Frontend->mywarn("  $system -- NOT OK\n");
     }
 }
 
@@ -6067,8 +6149,6 @@ sub install {
     $CPAN::Frontend->myprint("Running $make install\n");
   EXCUSE: {
 	my @e;
-	exists $self->{build_dir} or push @e, "Has no own directory";
-
 	unless (exists $self->{make} or exists $self->{later}) {
             push @e,
                 "Make had some problems, won't install";
@@ -6080,7 +6160,12 @@ sub install {
              $self->{make}->failed :
              $self->{make} =~ /^NO/
             ) and
-		push @e, "make had returned bad status, install seems impossible";
+		push @e, "Make had returned bad status, install seems impossible";
+
+        if (exists $self->{build_dir}) {
+        } elsif (!@e) {
+            push @e, "Has no own directory";
+        }
 
         if (exists $self->{make_test} and
 	    (
@@ -6146,12 +6231,7 @@ sub install {
     my($stderr) = $^O eq "MSWin32" ? "" : " 2>&1 ";
     $CPAN::Config->{build_requires_install_policy}||="ask/yes";
     my $id = $self->id;
-    my $reqtype = $self->{reqtype};
-    unless ($reqtype) {
-        $CPAN::Frontend->mywarn("Unknown require type for '$id', setting to 'r'. ".
-                                "This should not happen and is construed a bug.\n");
-        $reqtype = "r";
-    }
+    my $reqtype = $self->{reqtype} ||= "c"; # in doubt it was a command
     my $want_install = "yes";
     if ($reqtype eq "b") {
         if ($CPAN::Config->{build_requires_install_policy} eq "no") {
@@ -7086,7 +7166,7 @@ sub notest {
 #-> sub CPAN::Module::rematein ;
 sub rematein {
     my($self,$meth) = @_;
-    $CPAN::Frontend->myprint(sprintf("Running %s for module %s\n",
+    $CPAN::Frontend->myprint(sprintf("Running %s for module '%s'\n",
                                      $meth,
                                      $self->id));
     my $cpan_file = $self->cpan_file;

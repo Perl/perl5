@@ -48,7 +48,7 @@ use strict;
 # Hope that makes sense, my head is a bit off:-) -- AK
 
 use vars qw{ @All $VERSION };
-$VERSION = sprintf "%.6f", substr(q$Rev: 922 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 979 $,4)/1000000 + 5.4;
 
 # CPAN::Queue::new ;
 sub new {
@@ -98,6 +98,11 @@ sub jumpqueue {
                         join("",map {sprintf " %s\[%s]\n",$_->{qmod},$_->{reqtype}} @All),
                         join("",map {sprintf " %s\[%s]",$_->[0],$_->[1]} @what)
                        )) if $CPAN::DEBUG;
+    unless (defined $what[0][1]) {
+        # apparently it was not the Shell that sent us this enquiry,
+        # treat it as commandline
+        $what[0][1] = "c";
+     }
     my $inherit_reqtype = $what[0][1] =~ /^(c|r)$/ ? "r" : "b";
   WHAT: for my $what_tuple (@what) {
         my($what,$reqtype) = @$what_tuple;
