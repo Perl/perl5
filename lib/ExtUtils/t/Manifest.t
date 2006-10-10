@@ -46,7 +46,7 @@ sub read_manifest {
 }
 
 sub catch_warning {
-    my $warn;
+    my $warn = '';
     local $SIG{__WARN__} = sub { $warn .= $_[0] };
     return join('', $_[0]->() ), $warn;
 }
@@ -72,7 +72,7 @@ ok( chdir( 'mantest' ), 'chdir() to mantest' );
 ok( add_file('foo'), 'add a temporary file' );
 
 # there shouldn't be a MANIFEST there
-my ($res, $warn) = catch_warning( \&mkmanifest ); 
+my ($res, $warn) = catch_warning( \&mkmanifest );
 # Canonize the order.
 $warn = join("", map { "$_|" } 
                  sort { lc($a) cmp lc($b) } split /\r?\n/, $warn);
@@ -97,10 +97,10 @@ like( $warn, qr/^Not in MANIFEST: bar/, 'warning that bar has been added' );
 is( $res, 'bar', 'bar reported as new' );
 
 # now quiet the warning that bar was added and test again
-($res, $warn) = do { local $ExtUtils::Manifest::Quiet = 1; 
-                     catch_warning( \&skipcheck ) 
+($res, $warn) = do { local $ExtUtils::Manifest::Quiet = 1;
+                     catch_warning( \&skipcheck )
                 };
-cmp_ok( $warn, 'eq', '', 'disabled warnings' );
+is( $warn, '', 'disabled warnings' );
 
 # add a skip file with a rule to skip itself (and the nonexistent glob '*baz*')
 add_file( 'MANIFEST.SKIP', "baz\n.SKIP" );
@@ -164,7 +164,7 @@ is( ExtUtils::Manifest::maniread()->{none}, '#none',
 ok( mkdir( 'copy', 0777 ), 'made copy directory' );
 $files = maniread();
 eval { (undef, $warn) = catch_warning( sub {
- 		manicopy( $files, 'copy', 'cp' ) }) 
+ 		manicopy( $files, 'copy', 'cp' ) })
 };
 like( $@, qr/^Can't read none: /, 'croaked about none' );
 
@@ -179,7 +179,7 @@ like($warn, qr/^Skipping MANIFEST.SKIP/i, 'warned about MANIFEST.SKIP' );
 	local $ExtUtils::Manifest::MANIFEST = 'albatross'; 
 	($res, $warn) = catch_warning( \&mkmanifest );
 	like( $warn, qr/Added to albatross: /, 'using a new manifest file' );
-	
+
 	# add the new file to the list of files to be deleted
 	$Files{'albatross'}++;
 }
@@ -200,7 +200,7 @@ add_file( 'MANIFEST'      => "foobar\n"   );
 add_file( 'foobar'        => '123' );
 ($res, $warn) = catch_warning( \&manicheck );
 is( $res,  '',      'MANIFEST overrides MANIFEST.SKIP' );
-is( $warn, undef,   'MANIFEST overrides MANIFEST.SKIP, no warnings' );
+is( $warn, '',   'MANIFEST overrides MANIFEST.SKIP, no warnings' );
 
 $files = maniread;
 ok( !$files->{wibble},     'MANIFEST in good state' );
