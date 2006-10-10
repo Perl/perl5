@@ -364,3 +364,11 @@ case "$cc" in
        ;;
 esac
 
+# If using g++, the Configure scan for dlopen() and (especially)
+# dlerror() might fail, easier just to forcibly hint them in.
+case "$cc" in
+*g++*)
+  d_dlopen='define'
+  d_dlerror='define'
+  ;;
+esac
