@@ -18,7 +18,7 @@ use vars qw($VERSION @ISA
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue);
 
-$VERSION = '1.50_04';
+$VERSION = '1.51';
 
 require ExtUtils::MM_Any;
 @ISA = qw(ExtUtils::MM_Any);
@@ -2977,7 +2977,14 @@ PPD_OUT
 
     }
 
-    $ppd_xml .= sprintf <<'PPD_OUT', $Config{archname};
+    my $archname = $Config{archname};
+    if ($] >= 5.008) {
+        # archname did not change from 5.6 to 5.8, but those versions may
+        # not be not binary compatible so now we append the part of the
+        # version that changes when binary compatibility may change
+        $archname .= "-". substr($Config{version},0,3);
+    }
+    $ppd_xml .= sprintf <<'PPD_OUT', $archname;
         <OS NAME="$(OSNAME)" />
         <ARCHITECTURE NAME="%s" />
 PPD_OUT

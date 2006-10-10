@@ -105,7 +105,9 @@ like( $ppd_html, qr{^\s*<DEPENDENCY NAME="strict" VERSION="0,0,0,0" />}m,
                                                            '  <DEPENDENCY>' );
 like( $ppd_html, qr{^\s*<OS NAME="$Config{osname}" />}m,
                                                            '  <OS>'      );
-like( $ppd_html, qr{^\s*<ARCHITECTURE NAME="$Config{archname}" />}m,  
+my $archname = $Config{archname};
+$archname .= "-". substr($Config{version},0,3) if $] >= 5.008;
+like( $ppd_html, qr{^\s*<ARCHITECTURE NAME="$archname" />}m,
                                                            '  <ARCHITECTURE>');
 like( $ppd_html, qr{^\s*<CODEBASE HREF="" />}m,            '  <CODEBASE>');
 like( $ppd_html, qr{^\s*</IMPLEMENTATION>}m,           '  </IMPLEMENTATION>');

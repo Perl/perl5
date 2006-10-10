@@ -1,6 +1,6 @@
 package ExtUtils::Mkbootstrap;
 
-$VERSION = '1.15_01';
+$VERSION = '1.16';
 
 use Config;
 use Exporter;

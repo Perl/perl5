@@ -2,7 +2,7 @@ package ExtUtils::MM_Any;
 
 use strict;
 use vars qw($VERSION @ISA);
-$VERSION = '0.13_02';
+$VERSION = '0.14';
 
 use Carp;
 use File::Spec;
@@ -707,10 +707,7 @@ Generate the metafile target.
 
 Writes the file META.yml YAML encoded meta-data about the module in
 the distdir.  The format follows Module::Build's as closely as
-possible.  Additionally, we include:
-
-    version_from
-    installdirs
+possible.
 
 =cut
 
@@ -733,10 +730,9 @@ MAKE_FRAG
         name         => $self->{DISTNAME},
         version      => $self->{VERSION},
         abstract     => $self->{ABSTRACT},
-        license      => $self->{LICENSE} || 'unknown',
+        license      => $self->{LICENSE},
         generated_by => 
                 "ExtUtils::MakeMaker version $ExtUtils::MakeMaker::VERSION",
-        author       => $self->{AUTHOR},
         distribution_type => $self->{PM} ? 'module' : 'script',
     );
 
@@ -750,11 +746,16 @@ MAKE_FRAG
         $meta .= sprintf "%-20s %s\n", "$key:", $val;
     };
 
-    $meta .= <<YAML;
+    $meta .= <<"YAML";
 requires:     $prereq_pm
 meta-spec:
-    url: http://module-build.sourceforge.net/META-spec-new.html
-    version: 1.1
+    url:     http://module-build.sourceforge.net/META-spec-v1.2.html
+    version: 1.2
+YAML
+
+    $meta .= <<"YAML" if defined $self->{AUTHOR};
+author:
+    - $self->{AUTHOR}
 YAML
 
     $meta .= $self->{EXTRA_META} if $self->{EXTRA_META};

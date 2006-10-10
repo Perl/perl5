@@ -1,3 +1,11 @@
+6.31  Mon Oct  9 16:54:47 PDT 2006
+    - Update our META.yml to version 1.2 of the spec.
+    * Update the SEE ALSO to mention Module::Build, Module::Install,
+      ExtUtils::ModuleMaker and Module::Starter.
+    - Fix ARCHITECTURE tag in PPD generation for 5.8 (patch taken from
+      ActiveState 819). [rt.cpan.org 20566]
+    * Bring ExtUtils::Manifest up to 1.48
+
 6.30_04  Mon Sep 11 16:14:06 EDT 2006
     - EXTRA_META has been undocumented as I don't like the way the
       interface works but I don't want to hold up 6.31.  It will be

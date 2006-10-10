@@ -11,7 +11,7 @@ use Config;
 use vars qw(@ISA @EXPORT $VERSION);
 @ISA = 'Exporter';
 @EXPORT = '&Mksymlists';
-$VERSION = '1.19_01';
+$VERSION = '1.2';
 
 sub Mksymlists {
     my(%spec) = @_;

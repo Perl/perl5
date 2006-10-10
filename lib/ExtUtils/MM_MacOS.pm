@@ -1,6 +1,6 @@
 package ExtUtils::MM_MacOS;
 
-$VERSION = 1.08;
+$VERSION = 1.09;
 
 sub new {
     die <<'UNSUPPORTED';

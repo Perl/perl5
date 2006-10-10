@@ -1,4 +1,4 @@
-# $Id: /local/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm 18035 2006-09-11T20:18:19.209066Z schwern  $
+# $Id: /local/ExtUtils-MakeMaker/lib/ExtUtils/MakeMaker.pm 19606 2006-10-10T01:01:21.319714Z schwern  $
 package ExtUtils::MakeMaker;
 
 BEGIN {require 5.005_03;}
@@ -21,8 +21,8 @@ use vars qw(
 use vars qw($Revision);
 use strict;
 
-$VERSION = '6.30_04';
-($Revision) = q$Revision: 18035 $ =~ /Revision:\s+(\S+)/;
+$VERSION = '6.31';
+($Revision) = q$Revision: 19606 $ =~ /Revision:\s+(\S+)/;
 
 @ISA = qw(Exporter);
 @EXPORT = qw(&WriteMakefile &writeMakefile $Verbose &prompt);
@@ -2162,7 +2162,7 @@ MakeMaker object. The following lines will be parsed o.k.:
 
     $VERSION = '1.00';
     *VERSION = \'1.01';
-    $VERSION = (q$Revision: 18035 $) =~ /(\d+)/g;
+    $VERSION = (q$Revision: 19606 $) =~ /(\d+)/g;
     $FOO::VERSION = '1.10';
     *FOO::VERSION = \'1.11';
     our $VERSION = 1.2.3;       # new for perl5.6.0 
@@ -2561,8 +2561,15 @@ Same as the PERL_CORE parameter.  The parameter overrides this.
 
 =head1 SEE ALSO
 
-ExtUtils::MM_Unix, ExtUtils::Manifest ExtUtils::Install,
-ExtUtils::Embed
+L<Module::Build> is a pure-Perl alternative to MakeMaker which does
+not rely on make or any other external utility.  It is easier to
+extend to suit your needs.
+
+L<Module::Install> is a wrapper around MakeMaker which adds features
+not normally available.
+
+L<ExtUtils::ModuleMaker> and L<Module::Starter> are both modules to
+help you setup your distribution.
 
 =head1 AUTHORS
 
