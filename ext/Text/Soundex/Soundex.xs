@@ -25,8 +25,7 @@ static char *soundex_table =
   /*ABCDEFGHIJKLMNOPQRSTUVWXYZ*/
    "01230120022455012623010202";
 
-static SV *sv_soundex (source)
-     SV *source;
+static SV *sv_soundex (SV *source)
 {
   char *source_p;
   char *source_end;
@@ -77,8 +76,7 @@ static SV *sv_soundex (source)
   return SvREFCNT_inc(perl_get_sv("Text::Soundex::nocode", FALSE));
 }
 
-static SV *sv_soundex_utf8 (source)
-     SV *source;
+static SV *sv_soundex_utf8 (SV* source)
 {
   U8 *source_p;
   U8 *source_end;

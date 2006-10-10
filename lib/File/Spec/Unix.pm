@@ -356,14 +356,14 @@ sub abs2rel {
     my($self,$path,$base) = @_;
     $base = $self->_cwd() unless defined $base and length $base;
 
-    for ($path, $base) { $_ = $self->canonpath($_) }
+    ($path, $base) = map $self->canonpath($_), $path, $base;
 
     if (grep $self->file_name_is_absolute($_), $path, $base) {
-	for ($path, $base) { $_ = $self->rel2abs($_) }
+	($path, $base) = map $self->rel2abs($_), $path, $base;
     }
     else {
 	# save a couple of cwd()s if both paths are relative
-	for ($path, $base) { $_ = $self->catdir('/', $_) }
+	($path, $base) = map $self->catdir('/', $_), $path, $base;
     }
 
     my ($path_volume) = $self->splitpath($path, 1);
