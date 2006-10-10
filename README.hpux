@@ -206,8 +206,8 @@ HP also ships servers with the 128-bit Itanium processor(s). As of the
 date of this document's last update, the following systems contain
 Itanium or Itanium 2 chips (this is very likely to be out of date):
 
-  BL60p, rx1600, rx1620, rx2600, rx2600hptc, rx2620, rx4610, rx4640,
-  rx5670, rx7620, rx8620, rx9610
+  BL60p, cx2600, rx1600, rx1620, rx2600, rx2600hptc, rx2620, rx3600,
+  rx4610, rx4640, rx5670, rx6600, rx7620, rx8620, rx8640, rx9610
 
 To see all about your machine, type
 
@@ -594,6 +594,6 @@ With much assistance regarding shared libraries from Marc Sabatella.
 
 =head1 DATE
 
-Version 0.7.7: 2006-09-19
+Version 0.7.8: 2006-10-10
 
 =cut
