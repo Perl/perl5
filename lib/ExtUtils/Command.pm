@@ -10,9 +10,9 @@ use File::Path qw(rmtree);
 require Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK $VERSION);
 @ISA       = qw(Exporter);
-@EXPORT    = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f test_d chmod 
+@EXPORT    = qw(cp rm_f rm_rf mv cat eqtime mkpath touch test_f test_d chmod
                 dos2unix);
-$VERSION = '1.11';
+$VERSION = '1.12';
 
 my $Is_VMS = $^O eq 'VMS';
 
@@ -22,32 +22,37 @@ ExtUtils::Command - utilities to replace common UNIX commands in Makefiles etc.
 
 =head1 SYNOPSIS
 
-  perl -MExtUtils::Command       -e cat files... > destination
-  perl -MExtUtils::Command       -e mv source... destination
-  perl -MExtUtils::Command       -e cp source... destination
-  perl -MExtUtils::Command       -e touch files...
-  perl -MExtUtils::Command       -e rm_f files...
-  perl -MExtUtils::Command       -e rm_rf directories...
-  perl -MExtUtils::Command       -e mkpath directories...
-  perl -MExtUtils::Command       -e eqtime source destination
-  perl -MExtUtils::Command       -e test_f file
-  perl -MExtUtils::Command       -e test_d directory
-  perl -MExtUtils::Command       -e chmod mode files...
+  perl -MExtUtils::Command -e cat files... > destination
+  perl -MExtUtils::Command -e mv source... destination
+  perl -MExtUtils::Command -e cp source... destination
+  perl -MExtUtils::Command -e touch files...
+  perl -MExtUtils::Command -e rm_f files...
+  perl -MExtUtils::Command -e rm_rf directories...
+  perl -MExtUtils::Command -e mkpath directories...
+  perl -MExtUtils::Command -e eqtime source destination
+  perl -MExtUtils::Command -e test_f file
+  perl -MExtUtils::Command -e test_d directory
+  perl -MExtUtils::Command -e chmod mode files...
   ...
 
 =head1 DESCRIPTION
 
 The module is used to replace common UNIX commands.  In all cases the
 functions work from @ARGV rather than taking arguments.  This makes
-them easier to deal with in Makefiles.
+them easier to deal with in Makefiles.  Call them like this:
 
   perl -MExtUtils::Command -e some_command some files to work on
 
-I<NOT>
+and I<NOT> like this:
 
   perl -MExtUtils::Command -e 'some_command qw(some files to work on)'
 
+For that use L<Shell::Command>.
+
 Filenames with * and ? will be glob expanded.
+
+
+=head2 FUNCTIONS
 
 =over 4
 
@@ -61,7 +66,9 @@ sub expand_wildcards
 }
 
 
-=item cat 
+=item cat
+
+    cat file ...
 
 Concatenates all files mentioned on command line to STDOUT.
 
@@ -73,9 +80,11 @@ sub cat ()
  print while (<>);
 }
 
-=item eqtime src dst
+=item eqtime
 
-Sets modified time of dst to that of src
+    eqtime source destination
+
+Sets modified time of destination to that of source.
 
 =cut 
 
@@ -86,9 +95,11 @@ sub eqtime
  utime((stat($src))[8,9],$dst);
 }
 
-=item rm_rf files....
+=item rm_rf
 
-Removes directories - recursively (even if readonly)
+    rm_rf files or directories ...
+
+Removes files and directories - recursively (even if readonly)
 
 =cut 
 
@@ -98,7 +109,9 @@ sub rm_rf
  rmtree([grep -e $_,@ARGV],0,0);
 }
 
-=item rm_f files....
+=item rm_f
+
+    rm_f file ...
 
 Removes files (even if readonly)
 
@@ -115,7 +128,7 @@ sub rm_f {
         chmod(0777, $file);
 
         next if _unlink($file);
-            
+
         carp "Cannot delete $file: $!";
     }
 }
@@ -131,7 +144,9 @@ sub _unlink {
 }
 
 
-=item touch files ...
+=item touch
+
+    touch file ...
 
 Makes files exist, with current timestamp 
 
@@ -147,7 +162,10 @@ sub touch {
     }
 }
 
-=item mv source... destination
+=item mv
+
+    mv source_file destination_file
+    mv source_file source_file destination_dir
 
 Moves source to destination.  Multiple sources are allowed if
 destination is an existing directory.
@@ -170,9 +188,12 @@ sub mv {
     return !$nok;
 }
 
-=item cp source... destination
+=item cp
 
-Copies source to destination.  Multiple sources are allowed if
+    cp source_file destination_file
+    cp source_file source_file destination_dir
+
+Copies sources to the destination.  Multiple sources are allowed if
 destination is an existing directory.
 
 Returns true if all copies succeeded, false otherwise.
@@ -193,7 +214,9 @@ sub cp {
     return $nok;
 }
 
-=item chmod mode files...
+=item chmod
+
+    chmod mode files ...
 
 Sets UNIX like permissions 'mode' on all the files.  e.g. 0666
 
@@ -222,9 +245,11 @@ sub chmod {
     chmod(oct $mode,@ARGV) || die "Cannot chmod ".join(' ',$mode,@ARGV).":$!";
 }
 
-=item mkpath directory...
+=item mkpath
 
-Creates directory, including any parent directories.
+    mkpath directory ...
+
+Creates directories, including any parent directories.
 
 =cut 
 
@@ -234,29 +259,37 @@ sub mkpath
  File::Path::mkpath([@ARGV],0,0777);
 }
 
-=item test_f file
+=item test_f
 
-Tests if a file exists
+    test_f file
+
+Tests if a file exists.  I<Exits> with 0 if it does, 1 if it does not (ie.
+shell's idea of true and false).
 
 =cut 
 
 sub test_f
 {
- exit !-f $ARGV[0];
+ exit(-f $ARGV[0] ? 0 : 1);
 }
 
-=item test_d directory
+=item test_d
 
-Tests if a directory exists
+    test_d directory
 
-=cut 
+Tests if a directory exists.  I<Exits> with 0 if it does, 1 if it does
+not (ie. shell's idea of true and false).
+
+=cut
 
 sub test_d
 {
- exit !-d $ARGV[0];
+ exit(-d $ARGV[0] ? 0 : 1);
 }
 
 =item dos2unix
+
+    dos2unix files or dirs ...
 
 Converts DOS and OS/2 linefeeds to Unix style recursively.
 
@@ -290,13 +323,10 @@ sub dos2unix {
 
 =back
 
-=head1 BUGS
+=head1 SEE ALSO
 
-Should probably be Auto/Self loaded.
+Shell::Command which is these same functions but take arguments normally.
 
-=head1 SEE ALSO 
-
-ExtUtils::MakeMaker, ExtUtils::MM_Unix, ExtUtils::MM_Win32
 
 =head1 AUTHOR
 

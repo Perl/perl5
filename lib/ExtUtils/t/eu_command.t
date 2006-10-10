@@ -23,14 +23,14 @@ BEGIN {
 }
 
 BEGIN {
-    use Test::More tests => 41;
+    use Test::More tests => 40;
     use File::Spec;
 }
 
 BEGIN {
     # bad neighbor, but test_f() uses exit()
-        *CORE::GLOBAL::exit = '';   # quiet 'only once' warning.
-    *CORE::GLOBAL::exit = sub { return @_ };
+    *CORE::GLOBAL::exit = '';   # quiet 'only once' warning.
+    *CORE::GLOBAL::exit = sub (;$) { return $_[0] };
     use_ok( 'ExtUtils::Command' );
 }
 
@@ -53,9 +53,9 @@ BEGIN {
     is( scalar( $$out =~ s/use_ok\( 'ExtUtils::Command'//g), 2, 
         'concatenation worked' );
 
-    # the truth value here is reversed -- Perl true is C false
+    # the truth value here is reversed -- Perl true is shell false
     @ARGV = ( $Testfile );
-    ok( test_f(), 'testing non-existent file' );
+    is( test_f(), 1, 'testing non-existent file' );
 
     @ARGV = ( $Testfile );
     is( ! test_f(), '', 'testing non-existent file' );
@@ -65,7 +65,7 @@ BEGIN {
     touch();
 
     @ARGV = ( $Testfile );
-    ok( test_f(), 'now creating that file' );
+    is( test_f(), 0, 'testing touch() and test_f()' );
     is_deeply( \@ARGV, [$Testfile], 'test_f preserves @ARGV' );
 
     @ARGV = ( $Testfile );
@@ -148,7 +148,7 @@ BEGIN {
             $^O eq 'NetWare' || $^O eq 'dos' || $^O eq 'cygwin'  ||
             $^O eq 'MacOS'
            ) {
-            skip( "different file permission semantics on $^O", 4);
+            skip( "different file permission semantics on $^O", 5);
         }
 
         @ARGV = ('testdir');
@@ -178,6 +178,7 @@ BEGIN {
 
         @ARGV = ('testdir');
         rm_rf;
+        ok( ! -e 'testdir', 'rm_rf can delete a read-only dir' );
     }
 
 
@@ -185,15 +186,12 @@ BEGIN {
     my $test_dir = File::Spec->join( 'ecmddir', 'temp2' );
     @ARGV = ( $test_dir );
     ok( ! -e $ARGV[0], 'temp directory not there yet' );
-    ok( test_d(), 'testing non-existent directory' );
-
-    @ARGV = ( $test_dir );
-    is( ! test_d(), '', 'testing non-existent dir' );
+    is( test_d(), 1, 'testing non-existent directory' );
 
     @ARGV = ( $test_dir );
     mkpath();
     ok( -e $ARGV[0], 'temp directory created' );
-    cmp_ok( test_d(), '==', (-d $test_dir), 'testing existing dir' );
+    is( test_d(), 0, 'testing existing dir' );
 
     @ARGV = ( $test_dir );
     # copy a file to a nested subdirectory
