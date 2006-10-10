@@ -42,7 +42,7 @@ system).  Currently, this port is capable of using one of the
 following compilers on the Intel x86 architecture:
 
       Borland C++           version 5.02 or later
-      Microsoft Visual C++  version 2.0 or later
+      Microsoft Visual C++  version 2.0 through 7.0 (and possibly later)
       MinGW with gcc        gcc version 2.95.2 or later
 
 The last of these is a high quality freeware compiler.  Use version
@@ -52,10 +52,11 @@ The Borland C++ and Microsoft Visual C++ compilers are also now being given
 away free.  The Borland compiler is available as "Borland C++ Compiler Free
 Command Line Tools" and is the same compiler that ships with the full
 "Borland C++ Builder" product.  The Microsoft compiler is available as
-"Visual C++ Toolkit 2003", and also as part of the ".NET Framework SDK", and
-is the same compiler that ships with "Visual Studio .NET 2003 Professional".
-Currently, Perl cannot be compiled with Visual C++ 8.0, which is part of the
-.NET 2.0 Framework SDK and Visual Studio 2005.  
+"Visual C++ Toolkit 2003" or "Visual C++ 2005 Express Edition" (and also as
+part of the ".NET Framework SDK") and is the same compiler that ships with
+"Visual C++ .NET 2003 Professional" or "Visual C++ 2005 Professional"
+respectively.  Currently, Perl cannot be compiled with Visual C++ 2005 (aka
+Visual C++ 8.x).
 
 This port can also be built on the Intel IA64 using:
 
@@ -135,10 +136,54 @@ and edit win32/config.vc to change "make=nmake" into "make=dmake".  The
 latter step is only essential if you want to use dmake as your default
 make for building extensions using MakeMaker.
 
+=item Microsoft Visual C++ 2005 Express Edition
+
+B<NOTE: While these instructions are in theory correct, Perl currently cannot
+be compiled with Visual C++ 2005.>
+
+This free version of Visual C++ 2005 Professional contains the same compiler
+and linker that ship with the full version, but doesn't contain everything
+necessary to build Perl.
+
+You will also need to download the "Platform SDK" (the "Core SDK" and "MDAC
+SDK" components are required) for more header files and libraries.
+
+These packages can both be downloaded by searching in the Download Center at
+http://www.microsoft.com/downloads/search.aspx?displaylang=en.  (Providing exact
+links to these packages has proven a pointless task because the links keep on
+changing so often.)
+
+Try to obtain the latest version of the Platform SDK.  Sometimes these packages
+contain a particular Windows OS version in their name, but actually work on
+other OS versions too.  For example, the "Windows Server 2003 R2 Platform SDK"
+also runs on Windows XP SP2 and Windows 2000.
+
+According to the download pages these packages are only supported on Windows
+2000/XP/2003, so trying to use these tools on Windows 95/98/ME and even Windows
+NT probably won't work.
+
+Install Visual C++ 2005 first, then the Platform SDK.  Setup your environment
+as follows (assuming default installation locations were chosen):
+
+	SET PATH=%SystemRoot%\system32;%SystemRoot%;C:\Program Files\Microsoft Visual Studio 8\Common7\IDE;C:\Program Files\Microsoft Visual Studio 8\VC\BIN;C:\Program Files\Microsoft Visual Studio 8\Common7\Tools;C:\Program Files\Microsoft Visual Studio 8\SDK\v2.0\bin;C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727;C:\Program Files\Microsoft Visual Studio 8\VC\VCPackages;C:\Program Files\Microsoft Platform SDK\Bin
+
+	SET INCLUDE=C:\Program Files\Microsoft Visual Studio 8\VC\INCLUDE;C:\Program Files\Microsoft Platform SDK\include
+
+	SET LIB=C:\Program Files\Microsoft Visual Studio 8\VC\LIB;C:\Program Files\Microsoft Visual Studio 8\SDK\v2.0\lib;C:\Program Files\Microsoft Platform SDK\lib
+
+	SET LIBPATH=C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727
+
+Perl should now build using the win32/Makefile.  You will need to edit that
+file to set
+
+	CCTYPE = MSVC80FREE
+
+and to set CCHOME, CCINCDIR and CCLIBDIR as per the environment setup above.
+
 =item Microsoft Visual C++ Toolkit 2003
 
 This free toolkit contains the same compiler and linker that ship with
-Visual Studio .NET 2003 Professional, but doesn't contain everything
+Visual C++ .NET 2003 Professional, but doesn't contain everything
 necessary to build Perl.
 
 You will also need to download the "Platform SDK" (the "Core SDK" and "MDAC
@@ -155,19 +200,21 @@ changing so often.)
 
 Try to obtain the latest version of the Platform SDK.  Sometimes these packages
 contain a particular Windows OS version in their name, but actually work on
-other OS versions too.  For example, the "Windows Server 2003 SP1 Platform SDK"
+other OS versions too.  For example, the "Windows Server 2003 R2 Platform SDK"
 also runs on Windows XP SP2 and Windows 2000.
 
-According to the download pages the Toolkit and the .NET Framework SDK are only
-supported on Windows 2000/XP/2003, so trying to use these tools on Windows
-95/98/ME and even Windows NT probably won't work.
+According to the download pages these packages are only supported on Windows
+2000/XP/2003, so trying to use these tools on Windows 95/98/ME and even Windows
+NT probably won't work.
 
 Install the Toolkit first, then the Platform SDK, then the .NET Framework SDK.
 Setup your environment as follows (assuming default installation locations
 were chosen):
 
 	SET PATH=%SystemRoot%\system32;%SystemRoot%;C:\Program Files\Microsoft Visual C++ Toolkit 2003\bin;C:\Program Files\Microsoft SDK\Bin;C:\Program Files\Microsoft.NET\SDK\v1.1\Bin
+
 	SET INCLUDE=C:\Program Files\Microsoft Visual C++ Toolkit 2003\include;C:\Program Files\Microsoft SDK\include;C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\include
+
 	SET LIB=C:\Program Files\Microsoft Visual C++ Toolkit 2003\lib;C:\Program Files\Microsoft SDK\lib;C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\lib
 
 Several required files will still be missing:

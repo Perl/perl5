@@ -3,7 +3,7 @@
 # Supported compilers:
 #	Visual C++ 2.0 through 7.0 (and possibly newer versions)
 #	Borland C++ 5.02 or better
-#	Mingw32 with gcc-2.95.2 or better
+#	MinGW with gcc-2.95.2 or better
 #	MS Platform SDK 64-bit compiler and tools **experimental**
 #
 # This is set up to build a perl.exe that runs off a shared library
@@ -96,12 +96,16 @@ USE_LARGE_FILES	*= define
 #CCTYPE		*= MSVC20
 # Visual C++ > 2.x and < 6.x
 #CCTYPE		*= MSVC
-# Visual C++ 6.x (aka Visual Studio 98)
+# Visual C++ 6.x (aka Visual C++ 98)
 #CCTYPE		*= MSVC60
-# Visual C++ Toolkit 2003 (free version of Visual C++ 7.x command-line tools)
+# Visual C++ Toolkit 2003 (aka Visual C++ 7.x) (free command-line tools)
 #CCTYPE		*= MSVC70FREE
-# Visual C++ 7.x (aka Visual Studio .NET 2003) (full version)
+# Visual C++ .NET 2003 (aka Visual C++ 7.x) (full version)
 #CCTYPE		*= MSVC70
+# Visual C++ 2005 Express Edition (aka Visual C++ 8.x) (free version)
+#CCTYPE		*= MSVC80FREE
+# Visual C++ 2005 (aka Visual C++ 8.x) (full version)
+#CCTYPE		*= MSVC80
 # Borland 5.02 or later
 #CCTYPE		*= BORLAND
 # MinGW with gcc-2.95.2 or later
@@ -344,10 +348,12 @@ ARCHNAME	= MSWin32-$(ARCHITECTURE)
 ARCHNAME	!:= $(ARCHNAME)-thread
 .ENDIF
 
-# Visual Studio 98 and .NET 2003 specific
-# VC++ 6.x and 7.x can load DLL's on demand.  Makes the test suite run in
-# about 10% less time.  (The free version of 7.x can't do this, however.)
-.IF "$(CCTYPE)" == "MSVC60" || "$(CCTYPE)" == "MSVC70"
+# Visual C++ 98, .NET 2003 and 2005 specific.
+# VC++ 6.x, 7.x and 8.x can load DLL's on demand.  Makes the test suite run in
+# about 10% less time.  (The free version of 7.x can't do this, but the free
+# version of 8.x can.)
+.IF "$(CCTYPE)" == "MSVC60" || "$(CCTYPE)" == "MSVC70" \
+    "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE"
 DELAYLOAD	*= -DELAYLOAD:ws2_32.dll -DELAYLOAD:shell32.dll delayimp.lib
 .ENDIF
 
