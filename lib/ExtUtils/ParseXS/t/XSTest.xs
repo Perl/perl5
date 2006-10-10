@@ -28,7 +28,7 @@ is_even(input)
 	RETVAL
 
 void
-xstest_something (class, some_thing)
+xstest_something (myclass, some_thing)
 	char * some_thing
     C_ARGS:
 	some_thing
@@ -38,28 +38,28 @@ xstest_something2 (some_thing)
 	char * some_thing
 
 void
-xstest_something3 (class, some_thing)
-	SV   * class
+xstest_something3 (myclass, some_thing)
+	SV   * myclass
 	char * some_thing
     PREINIT:
     	int i = 0;
     PPCODE:
     	/* it's up to us clear these warnings */
-	class = class;
+	myclass = myclass;
 	some_thing = some_thing;
 	i = i;
 	XSRETURN_UNDEF;
 	
 int
-consts (class)
-	SV * class
+consts (myclass)
+	SV * myclass
     ALIAS:
 	const_one = 1
 	const_two = 2
 	const_three = 3
     CODE:
     	/* it's up to us clear these warnings */
-    	class = class;
+    	myclass = myclass;
 	ix = ix;
     	RETVAL = 1;
     OUTPUT:
