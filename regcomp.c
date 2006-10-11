@@ -4601,7 +4601,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	            ARG2L_SET( ret, 0);
                     RExC_emit++;
 		    DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
-			"Recurse #%"UVuf" to %"IVdf"\n", ARG(ret), ARG2L(ret)));
+			"Recurse #%"UVuf" to %"IVdf"\n", (UV)ARG(ret), (IV)ARG2L(ret)));
 		} else {
 		    RExC_size++;
     		}
@@ -4883,7 +4883,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    ret = reganode(pRExC_state, OPEN, parno);
 	    if (!SIZE_ONLY && RExC_seen & REG_SEEN_RECURSE) {
 		DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
-			"Setting paren #%"IVdf" to %d\n", parno, REG_NODE_NUM(ret)));
+			"Setting paren #%"IVdf" to %d\n", (IV)parno, REG_NODE_NUM(ret)));
 	        RExC_parens[parno-1]= ret;
 
 	    }
