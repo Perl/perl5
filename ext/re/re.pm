@@ -184,9 +184,9 @@ Enable DUMP and all execute options. Equivelent to:
 
 Enable TRIE_MORE and all execute compile and execute options.
 
-=back 4
+=back
 
-=back 4
+=back
 
 The directive C<use re 'debug'> and its equivalents are I<not> lexically
 scoped, as the other directives are.  They have both compile-time and run-time
@@ -260,15 +260,16 @@ sub _load_unload {
         }
         if ( ! $installed ) {
             die "'re' not installed!? ($installed_error)";
-        }  else {
-            # We could just say = $installed; but then we wouldn't
-            # "see" any changes to the color environment var.
+	} else {
+	    # We call install() every time, as if we didn't, we wouldn't
+	    # "see" any changes to the color environment var since
+	    # the last time it was called.
 
-            # install() returns an integer, which if casted properly
-            # in C resolves to a structure containing the regex
-            # hooks. Setting it to a random integer will guarantee
-            # segfaults.
-            $^H{regcomp} = install();
+	    # install() returns an integer, which if casted properly
+	    # in C resolves to a structure containing the regex
+	    # hooks. Setting it to a random integer will guarantee
+	    # segfaults.
+	    $^H{regcomp} = install();
         }
     } else {
         delete $^H{regcomp};
