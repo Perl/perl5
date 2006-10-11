@@ -467,10 +467,8 @@ S_hv_fetch_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 		}
 		if (regdata) {
 		    sv = Perl_reg_named_buff_sv(aTHX_ keysv);
-		    if (!sv) {
-		        SvREFCNT_dec(keysv);
-		        return 0;
-		    }
+		    if (!sv)
+			sv = sv_newmortal();
 		} else {
 		    sv = sv_newmortal();
 		    mg_copy((SV*)hv, sv, (char *)keysv, HEf_SVKEY);
