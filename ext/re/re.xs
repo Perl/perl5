@@ -24,7 +24,7 @@ extern SV*	my_re_intuit_string (pTHX_ regexp *prog);
 extern regexp*	my_regdupe (pTHX_ const regexp *r, CLONE_PARAMS *param);
 #endif
 
-const struct regexp_engine my_reg_engine = { 
+EXTERN_C const struct regexp_engine my_reg_engine = { 
         my_regcomp, 
         my_regexec, 
         my_re_intuit_start, 

@@ -248,17 +248,18 @@ $flags{State} = $flags{DUMP} | $flags{EXECUTE} | $flags{STATE};
 $flags{TRIE} = $flags{DUMP} | $flags{EXECUTE} | $flags{TRIEC};
 
 my $installed;
+my $installed_error;
 
 sub _load_unload {
     my ($on)= @_;
     if ($on) {
         if ( ! defined($installed) ) {
             require XSLoader;
-            XSLoader::load('re');
-            $installed = install() || 0;
+            $installed = eval { XSLoader::load('re') } || 0;
+            $installed_error = $@;
         }
         if ( ! $installed ) {
-            die "'re' not installed!?";
+            die "'re' not installed!? ($installed_error)";
         }  else {
             # We could just say = $installed; but then we wouldn't
             # "see" any changes to the color environment var.
