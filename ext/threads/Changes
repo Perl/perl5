@@ -1,5 +1,9 @@
 Revision history for Perl extension threads.
 
+1.44 Wed Oct 11 08:55:50 EDT 2006
+	- Complain about bad import options
+	- Added example threads script
+
 1.43 Fri Oct  6 15:12:07 EDT 2006
 	- Stringify threads objects
 	- Removed 'typemap' file

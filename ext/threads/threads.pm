@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.43';
+our $VERSION = '1.44';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -57,11 +57,12 @@ sub import
         } elsif ($sym =~ /^str/i) {
             import overload ('""' => \&tid);
 
-        } elsif ($sym =~ /all/) {
+        } elsif ($sym =~ /(?:all|yield)/) {
             push(@EXPORT, qw(yield));
 
         } else {
-            push(@EXPORT, $sym);
+            require Carp;
+            Carp::croak("threads: Unknown import option: $sym");
         }
     }
 
@@ -132,7 +133,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.43
+This document describes threads version 1.44
 
 =head1 SYNOPSIS
 
@@ -904,7 +905,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.43/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.44/threads.pm>
 
 L<threads::shared>, L<perlthrtut>
 
