@@ -17,7 +17,7 @@ typedef datum datum_key ;
 typedef datum datum_value ;
 
 
-#if defined(_cplusplus) && defined(HAS_GDBM)
+#if defined(__cplusplus) && defined(HAS_GDBM)
 /* gdbm's header file used for compatibility with gdbm */
 /* isn't compatible to C++ syntax, so we need these */
 /* declarations to make everyone happy. */
