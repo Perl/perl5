@@ -1004,7 +1004,51 @@ with the given name matched), the special symbol (R) (true when
 evaluated inside of recursion or eval). Additionally the R may be
 followed by a number, (which will be true when evaluated when recursing
 inside of the appropriate group), or by C<&NAME> in which case it will
-be true only when evaluated during recursion into the named group.
+be true only when evaluated during recursion in the named group.
+
+Here's a summary of the possible predicates:
+
+=over 4
+
+=item (1) (2) ...
+
+Checks if the numbered capturing buffer has matched something.
+
+=item (<NAME>) ('NAME')
+
+Checks if a buffer with the given name has matched something.
+
+=item (?{ CODE })
+
+Treats the code block as the condition
+
+=item (R)
+
+Checks if the expression has been evaluated inside of recursion.
+
+=item (R1) (R2) ...
+
+Checks if the expression has been evaluated while executing directly
+inside of the n-th capture group. This check is the regex equivalent of
+
+  if ((caller(0))[3] eq 'subname') { .. }
+
+In other words, it does not check the full recursion stack.
+
+=item (R&NAME)
+
+Similar to C<(R1)>, this predicate checks to see if we're executing
+directly inside of the leftmost group with a given name (this is the same
+logic used by C<(?&NAME)> to disambiguate). It does not check the full
+stack, but only the name of the innermost active recursion.
+
+=item (DEFINE)
+
+In this case, the yes-pattern is never directly executed, and no
+no-pattern is allowed. Similar in spirit to C<(?{0})> but more efficient.
+See below for details.
+
+=back
 
 For example:
 
@@ -1016,9 +1060,31 @@ For example:
 matches a chunk of non-parentheses, possibly included in parentheses
 themselves.
 
-An additional special form of this pattern is the DEFINE pattern, which
-never executes its yes-pattern except by recursion, and does not allow
-a no-pattern.
+A special form is the C<(DEFINE)> predicate, which never executes directly
+its yes-pattern, and does not allow a no-pattern. This allows to define
+subpatterns which will be executed only by using the recursion mechanism.
+This way, you can define a set of regular expression rules that can be
+bundled into any pattern you choose.
+
+It is recommended that for this usage you put the DEFINE block at the
+end of the pattern, and that you name any subpatterns defined within it.
+
+Also, it's worth noting that patterns defined this way probably will
+not be as efficient, as the optimiser is not very clever about
+handling them. YMMV.
+
+An example of how this might be used is as follows:
+
+  /(?<NAME>(&NAME_PAT))(?<ADDR>(&ADDRESS_PAT))
+   (?(DEFINE)
+     (<NAME_PAT>....)
+     (<ADRESS_PAT>....)
+   )/x
+
+Note that capture buffers matched inside of recursion are not accessible
+after the recursion returns, so the extra layer of capturing buffers are
+necessary. Thus C<$+{NAME_PAT}> would not be defined even though
+C<$+{NAME}> would be.
 
 =back
 

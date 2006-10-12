@@ -4290,6 +4290,7 @@ reStudy:
 #undef END_BLOCK
 #undef RE_ENGINE_PTR
 
+#ifndef PERL_IN_XSUB_RE
 SV*
 Perl_reg_named_buff_sv(pTHX_ SV* namesv)
 {
@@ -4323,7 +4324,7 @@ Perl_reg_named_buff_sv(pTHX_ SV* namesv)
         return GvSVn(gv_paren);
     }
 }
-
+#endif
 
 /* Scans the name of a named buffer from the pattern.
  * If flags is REG_RSN_RETURN_NULL returns null.
