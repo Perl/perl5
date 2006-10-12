@@ -15,6 +15,12 @@ typedef OP OP_4tree;			/* Will be redefined later. */
 #define PERL_ENABLE_EXTENDED_TRIE_OPTIMISATION 1
 #define PERL_ENABLE_POSITIVE_ASSERTION_STUDY 1
 #define PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS 0
+/* Unless the next line is uncommented it is illegal to combine lazy 
+   matching with possessive matching. Frankly it doesn't make much sense 
+   to allow it as X*?+ matches nothing, X+?+ matches a single char only, 
+   and X{min,max}?+ matches min times only.
+ */
+/* #define REG_ALLOW_MINMOD_SUSPEND */
 
 /*
  * The "internal use only" fields in regexp.h are present to pass info from

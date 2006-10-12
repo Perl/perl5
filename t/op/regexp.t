@@ -28,6 +28,9 @@
 #
 # \n in the tests are interpolated, as are variables of the form ${\w+}.
 #
+# Blanks lines are treated as PASSING tests to keep the line numbers
+# linked to the test number.
+#
 # If you want to add a regular expression test that can't be expressed
 # in this format, don't add it here: put it in op/pat.t instead.
 #
@@ -58,6 +61,11 @@ $| = 1;
 print "1..$numtests\n# $iters iterations\n";
 TEST:
 while (<TESTS>) {
+    if (!/\S/ || /^\s*#/) {
+        print "ok $. # (Blank line or comment)\n";
+        if (/\S/) { print $_ };
+        next;
+    }
     chomp;
     s/\\n/\n/g;
     ($pat, $subject, $result, $repl, $expect, $reason) = split(/\t/,$_,6);

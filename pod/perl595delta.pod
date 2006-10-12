@@ -78,6 +78,15 @@ $1 will be 'A', $2 will be 'B', $3 will be 'C' and $4 will be 'D' and not
 $1 is 'A', $2 is 'C' and $3 is 'B' and $4 is 'D' that a .NET programmer
 would expect. This is considered a feature. :-)
 
+=item Possessive Quantifiers
+
+Perl now supports the "possessive quantifier" syntax of the "atomic match" 
+pattern. Basically a possessive quantifier matches as much as it can and never
+gives any back. Thus it can be used to control backtracking. The syntax is 
+similar to non-greedy matching, except instead of using a '?' as the modifier
+the '+' is used. Thus C<?+>, C<*+>, C<++>, C<{min,max}+> are now legal
+quantifiers.
+
 =back
 
 =head1 Modules and Pragmas

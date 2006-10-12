@@ -3699,14 +3699,17 @@ Perl_reginitcolors(pTHX)
  * Beware that the optimization-preparation code in here knows about some
  * of the structure of the compiled regexp.  [I'll say.]
  */
+
+
+
 #ifndef PERL_IN_XSUB_RE
-#define CORE_ONLY_BLOCK(c) {c}{
 #define RE_ENGINE_PTR &PL_core_reg_engine
 #else
-#define CORE_ONLY_BLOCK(c) {
 extern const struct regexp_engine my_reg_engine;
 #define RE_ENGINE_PTR &my_reg_engine
 #endif
+/* these make a few things look better, to avoid indentation */
+#define BEGIN_BLOCK {
 #define END_BLOCK }
  
 regexp *
@@ -3715,7 +3718,8 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     dVAR;
     GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_r(if (!PL_colorset) reginitcolors());
-    CORE_ONLY_BLOCK(
+#ifndef PERL_IN_XSUB_RE
+    BEGIN_BLOCK
     /* Dispatch a request to compile a regexp to correct 
        regexp engine. */
     HV * const table = GvHV(PL_hintgv);
@@ -3729,7 +3733,10 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
             });            
             return CALLREGCOMP_ENG(eng, exp, xend, pm);
         } 
-    })
+    }
+    END_BLOCK
+#endif
+    BEGIN_BLOCK    
     register regexp *r;
     regnode *scan;
     regnode *first;
@@ -5206,10 +5213,6 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	*flagp = flags;
 	return(ret);
     }
-    /* else if (OP(ret)==RECURSE) {
-        RExC_parse++;
-        vFAIL("Illegal quantifier on recursion group");
-    } */
 
 #if 0				/* Now runtime fix should be reliable. */
 
@@ -5262,12 +5265,27 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 	       origparse);
     }
 
-    if (*RExC_parse == '?') {
+    if (RExC_parse < RExC_end && *RExC_parse == '?') {
 	nextchar(pRExC_state);
 	reginsert(pRExC_state, MINMOD, ret, depth+1);
         REGTAIL(pRExC_state, ret, ret + NODE_STEP_REGNODE);
     }
-    if (ISMULT2(RExC_parse)) {
+#ifndef REG_ALLOW_MINMOD_SUSPEND
+    else
+#endif
+    if (RExC_parse < RExC_end && *RExC_parse == '+') {
+        regnode *ender;
+        nextchar(pRExC_state);
+        ender = reg_node(pRExC_state, SUCCEED);
+        REGTAIL(pRExC_state, ret, ender);
+        reginsert(pRExC_state, SUSPEND, ret, depth+1);
+        ret->flags = 0;
+        ender = reg_node(pRExC_state, TAIL);
+        REGTAIL(pRExC_state, ret, ender);
+        /*ret= ender;*/
+    }
+
+    if (RExC_parse < RExC_end && ISMULT2(RExC_parse)) {
 	RExC_parse++;
 	vFAIL("Nested quantifiers");
     }

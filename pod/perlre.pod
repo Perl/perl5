@@ -154,6 +154,37 @@ X<?> X<*?> X<+?> X<??> X<{n}?> X<{n,}?> X<{n,m}?>
     {n,}?  Match at least n times
     {n,m}? Match at least n but not more than m times
 
+By default, when a quantified subpattern does not allow the rest of the
+overall pattern to match, Perl will backtrack. However, this behaviour is
+sometimes undesirable. Thus Perl provides the "possesive" quantifier form
+as well.
+
+    *+	   Match 0 or more times and give nothing back
+    +?	   Match 1 or more times and give nothing back
+    ?+	   Match 0 or 1 time and give nothing back
+    {n}+   Match exactly n times and give nothing back (redundant)
+    {n,}?  Match at least n times and give nothing back
+    {n,m}? Match at least n but not more than m times and give nothing back
+
+For instance,
+
+   'aaaa' =~ /a++a/
+
+will never match, as the C<a++> will gobble up all the C<a>'s in the
+string and won't leave any for the remaining part of the pattern. This
+feature can be extremely useful to give perl hints about where it
+shouldn't backtrack. For instance, the typical "match a double-quoted
+string" problem can be most efficiently performed when written as:
+
+   /"(?:[^"\\]++|\\.)*+"/
+
+as we know that if the final quote does not match, bactracking will not
+help. See the independent subexpression C<< (?>...) >> for more details;
+possessive quantifiers are just syntactic sugar for that construct. For
+instance the above example could also be written as follows:
+
+   /"(?>(?:(?>[^"\\]+)|\\.)*)"/
+
 Because patterns are processed as double quoted strings, the following
 also work:
 X<\t> X<\n> X<\r> X<\f> X<\a> X<\l> X<\u> X<\L> X<\U> X<\E> X<\Q>
@@ -690,7 +721,9 @@ Both forms are equivalent.
 X<(?{})> X<regex, code in> X<regexp, code in> X<regular expression, code in>
 
 B<WARNING>: This extended regular expression feature is considered
-highly experimental, and may be changed or deleted without notice.
+experimental, and may be changed without notice. Code executed that
+has side effects may not perform identically from version to version
+due to the effect of future optimisations in the regex engine.
 
 This zero-width assertion evaluates any embedded Perl code.  It
 always succeeds, and its C<code> is not interpolated.  Currently,
@@ -777,9 +810,9 @@ X<(??{})>
 X<regex, postponed> X<regexp, postponed> X<regular expression, postponed>
 
 B<WARNING>: This extended regular expression feature is considered
-highly experimental, and may be changed or deleted without notice.
-A simplified version of the syntax may be introduced for commonly
-used idioms.
+experimental, and may be changed without notice. Code executed that
+has side effects may not perform identically from version to version
+due to the effect of future optimisations in the regex engine.
 
 This is a "postponed" regular subexpression.  The C<code> is evaluated
 at run time, at the moment this subexpression may match.  The result
@@ -823,9 +856,6 @@ changing it requires a custom build.
 =item C<(?PARNO)> C<(?R)> C<(?0)>
 X<(?PARNO)> X<(?1)> X<(?R)> X<(?0)>
 X<regex, recursive> X<regexp, recursive> X<regular expression, recursive>
-
-B<WARNING>:  This extended regular expression feature is considered
-highly experimental, and may be changed or deleted without notice.
 
 Similar to C<(??{ code })> except it does not involve compiling any code,
 instead it treats the contents of a capture buffer as an independent
@@ -893,9 +923,6 @@ pattern.
 
 =item C<< (?>pattern) >>
 X<backtrack> X<backtracking> X<atomic> X<possessive>
-
-B<WARNING>: This extended regular expression feature is considered
-highly experimental, and may be changed or deleted without notice.
 
 An "independent" subexpression, one which matches the substring
 that a I<standalone> C<pattern> would match if anchored at the given
@@ -988,13 +1015,20 @@ the above specification of comments.
 In some literature this construct is called "atomic matching" or
 "possessive matching".
 
+Possessive quantifiers are equivalent to putting the item they are applied
+to inside of one of these constructs. The following equivalences apply:
+
+    Quantifier Form     Bracketing Form
+    ---------------     ---------------
+    PAT*+               (?>PAT*)
+    PAT++               (?>PAT+)
+    PAT?+               (?>PAT?)
+    PAT{min,max}+       (?>PAT{min,max})
+
 =item C<(?(condition)yes-pattern|no-pattern)>
 X<(?()>
 
 =item C<(?(condition)yes-pattern)>
-
-B<WARNING>: This extended regular expression feature is considered
-highly experimental, and may be changed or deleted without notice.
 
 Conditional expression.  C<(condition)> should be either an integer in
 parentheses (which is valid if the corresponding pair of parentheses
