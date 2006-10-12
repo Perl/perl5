@@ -2713,9 +2713,6 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    }
 	    flags &= ~SCF_DO_STCLASS;
 	}
-	else if (OP(scan)==RECURSE) {
-            ARG2L_SET( scan, RExC_parens[ARG(scan)-1] - scan ); 
-	} 
 	else if (strchr((const char*)PL_varies,OP(scan))) {
 	    I32 mincount, maxcount, minnext, deltanext, fl = 0;
 	    I32 f = flags, pos_before = 0;
@@ -3452,7 +3449,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (data)
 		    data->flags |= SF_HAS_EVAL;
 	}
-	else if (OP(scan) == LOGICAL && scan->flags == 2) { /* Embedded follows */
+	else if ( (OP(scan) == LOGICAL && scan->flags == 2) /* Embedded follows */
+	          || OP(scan)==RECURSE)  /* recursion */
+	{ 
+	        if (OP(scan)==RECURSE) {
+	            ARG2L_SET( scan, RExC_parens[ARG(scan)-1] - scan );     
+	        }    
 		if (flags & SCF_DO_SUBSTR) {
 		    scan_commit(pRExC_state,data,minlenp);
 		    data->longest = &(data->longest_float);
@@ -4301,8 +4303,7 @@ Perl_reg_named_buff_sv(pTHX_ SV* namesv)
                 SV* sv_dat=HeVAL(he_str);
                 I32 *nums=(I32*)SvPVX(sv_dat);
                 for ( i=0; i<SvIVX(sv_dat); i++ ) {
-                    if ((I32)(rx->lastcloseparen) >= nums[i] &&
-                        rx->startp[nums[i]] != -1 &&
+                    if ((I32)(rx->lastparen) >= nums[i] &&
                         rx->endp[nums[i]] != -1) 
                     {
                         parno = nums[i];
@@ -4323,33 +4324,59 @@ Perl_reg_named_buff_sv(pTHX_ SV* namesv)
     }
 }
 
+
 /* Scans the name of a named buffer from the pattern.
- * If flags is true then returns an SV containing the name.
+ * If flags is REG_RSN_RETURN_NULL returns null.
+ * If flags is REG_RSN_RETURN_NAME returns an SV* containing the name
+ * If flags is REG_RSN_RETURN_DATA returns the data SV* corresponding
+ * to the parsed name as looked up in the RExC_paren_names hash.
+ * If there is an error throws a vFAIL().. type exception.
  */
+
+#define REG_RSN_RETURN_NULL    0
+#define REG_RSN_RETURN_NAME    1
+#define REG_RSN_RETURN_DATA    2
+
 STATIC SV*
 S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags) {
     char *name_start = RExC_parse;
-    if (UTF) {
+    if ( UTF ) {
 	STRLEN numlen;
-	while (isIDFIRST_uni(utf8n_to_uvchr((U8*)RExC_parse,
-			RExC_end - RExC_parse,
-			&numlen, UTF8_ALLOW_DEFAULT)))
-	    RExC_parse += numlen;
-    }
-    else {
-	while (isIDFIRST(*RExC_parse))
+        while( isIDFIRST_uni(utf8n_to_uvchr((U8*)RExC_parse,
+            RExC_end - RExC_parse, &numlen, UTF8_ALLOW_DEFAULT)))
+        {
+                RExC_parse += numlen;
+        }
+    } else {
+        while( isIDFIRST(*RExC_parse) )
 	    RExC_parse++;
     }
-    if (flags) {
-	SV* svname = sv_2mortal(Perl_newSVpvn(aTHX_ name_start,
-		    (int)(RExC_parse - name_start)));
+    if ( flags ) {
+        SV* sv_name = sv_2mortal(Perl_newSVpvn(aTHX_ name_start,
+            (int)(RExC_parse - name_start)));
 	if (UTF)
-	    SvUTF8_on(svname);
-	return svname;
+            SvUTF8_on(sv_name);
+        if ( flags == REG_RSN_RETURN_NAME)
+            return sv_name;
+        else if (flags==REG_RSN_RETURN_DATA) {
+            HE *he_str = NULL;
+            SV *sv_dat = NULL;
+            if ( ! sv_name )      /* should not happen*/
+                Perl_croak(aTHX_ "panic: no svname in reg_scan_name");
+            if (RExC_paren_names)
+                he_str = hv_fetch_ent( RExC_paren_names, sv_name, 0, 0 );
+            if ( he_str )
+                sv_dat = HeVAL(he_str);
+            if ( ! sv_dat )
+                vFAIL("Reference to nonexistent named group");
+            return sv_dat;
+        }
+        else {
+            Perl_croak(aTHX_ "panic: bad flag in reg_scan_name");
+        }
+        /* NOT REACHED */
     }
-    else {
-	return NULL;
-    }
+    return NULL;
 }
 
 #define DEBUG_PARSE_MSG(funcname)     DEBUG_PARSE_r({           \
@@ -4376,9 +4403,9 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags) {
     else                                                        \
        num=REG_NODE_NUM(RExC_emit);                             \
     if (RExC_lastnum!=num)                                      \
-       PerlIO_printf(Perl_debug_log,"|%4d",num);                 \
+       PerlIO_printf(Perl_debug_log,"|%4d",num);                \
     else                                                        \
-       PerlIO_printf(Perl_debug_log,"|%4s","");                  \
+       PerlIO_printf(Perl_debug_log,"|%4s","");                 \
     PerlIO_printf(Perl_debug_log,"|%*s%-4s",                    \
         (int)((depth*2)), "",                                   \
         (funcname)                                              \
@@ -4463,13 +4490,17 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    case '<':           /* (?<...) */
 		if (*RExC_parse == '!')
 		    paren = ',';
-		else if (*RExC_parse != '=') { /* (?<...>) */
+		else if (*RExC_parse != '=') 
+		{               /* (?<...>) */
 		    char *name_start;
 		    SV *svname;
 		    paren= '>';
             case '\'':          /* (?'...') */
     		    name_start= RExC_parse;
-    		    svname = reg_scan_name(pRExC_state,SIZE_ONLY);
+    		    svname = reg_scan_name(pRExC_state,
+    		        SIZE_ONLY ?  /* reverse test from the others */
+    		        REG_RSN_RETURN_NAME : 
+    		        REG_RSN_RETURN_NULL);
 		    if (RExC_parse == name_start)
 		        goto unknown;
 		    if (*RExC_parse != paren)
@@ -4543,27 +4574,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             case '&':            /* (?&NAME) */
                 parse_start = RExC_parse - 1;
                 {
-		    char *name_start = RExC_parse;
-		    SV *svname = reg_scan_name(pRExC_state, !SIZE_ONLY);
-		    if (RExC_parse == name_start)
-			goto unknown;
-		    if (*RExC_parse != ')')
-			vFAIL("Expecting close bracket");
-		    if (!SIZE_ONLY) {
-			HE *he_str = NULL;
-                        SV *sv_dat;
-                        if (!svname) /* shouldn't happen*/
-                            Perl_croak(aTHX_ "panic: reg_scan_name returned NULL");
-                        if (RExC_paren_names)
-                            he_str = hv_fetch_ent( RExC_paren_names, svname, 0, 0 );
-                        if (he_str)
-                            sv_dat = HeVAL(he_str);
-                        else
-                            vFAIL("Reference to nonexistent group");
-                        num = *((I32 *)SvPVX(sv_dat));
-                    } else {
-                        num = 0;
-                    }
+    		    SV *sv_dat = reg_scan_name(pRExC_state,
+    		        SIZE_ONLY ? REG_RSN_RETURN_NULL : REG_RSN_RETURN_DATA);
+    		     num = sv_dat ? *((I32 *)SvPVX(sv_dat)) : 0;
                 }
                 goto gen_recurse_regop;
                 /* NOT REACHED */
@@ -4590,8 +4603,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			"Recurse #%"UVuf" to %"IVdf"\n", ARG(ret), ARG2L(ret)));
 		} else {
 		    RExC_size++;
-	            RExC_seen|=REG_SEEN_RECURSE;
     		}
+    		RExC_seen |= REG_SEEN_RECURSE;
                 Set_Node_Length(ret, 1 + regarglen[OP(ret)]); /* MJD */
 		Set_Node_Offset(ret, parse_start); /* MJD */
 
@@ -4682,6 +4695,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    }
 	    case '(':           /* (?(?{...})...) and (?(?=...)...) */
 	    {
+	        int is_define= 0;
 		if (RExC_parse[0] == '?') {        /* (?(?...)) */
 		    if (RExC_parse[1] == '=' || RExC_parse[1] == '!'
 			|| RExC_parse[1] == '<'
@@ -4695,6 +4709,55 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			goto insert_if;
 		    }
 		}
+		else if ( RExC_parse[0] == '<'     /* (?(<NAME>)...) */
+		         || RExC_parse[0] == '\'' ) /* (?('NAME')...) */
+	        {
+	            char ch = RExC_parse[0] == '<' ? '>' : '\'';
+	            char *name_start= RExC_parse++;
+	            I32 num = 0;
+	            SV *sv_dat=reg_scan_name(pRExC_state,
+	                SIZE_ONLY ? REG_RSN_RETURN_NULL : REG_RSN_RETURN_DATA);
+	            if (RExC_parse == name_start || *RExC_parse != ch)
+                        vFAIL2("Sequence (?(%c... not terminated",
+                            (ch == '>' ? '<' : ch));
+                    RExC_parse++;
+	            if (!SIZE_ONLY) {
+                        num = add_data( pRExC_state, 1, "S" );
+                        RExC_rx->data->data[num]=(void*)sv_dat;
+                        SvREFCNT_inc(sv_dat);
+                    }
+                    ret = reganode(pRExC_state,NGROUPP,num);
+                    goto insert_if_check_paren;
+		}
+		else if (RExC_parse[0] == 'D' &&
+		         RExC_parse[1] == 'E' &&
+		         RExC_parse[2] == 'F' &&
+		         RExC_parse[3] == 'I' &&
+		         RExC_parse[4] == 'N' &&
+		         RExC_parse[5] == 'E')
+		{
+		    ret = reganode(pRExC_state,DEFINEP,0);
+		    RExC_parse +=6 ;
+		    is_define = 1;
+		    goto insert_if_check_paren;
+		}
+		else if (RExC_parse[0] == 'R') {
+		    RExC_parse++;
+		    parno = 0;
+		    if (RExC_parse[0] >= '1' && RExC_parse[0] <= '9' ) {
+		        parno = atoi(RExC_parse++);
+		        while (isDIGIT(*RExC_parse))
+			    RExC_parse++;
+		    } else if (RExC_parse[0] == '&') {
+		        SV *sv_dat;
+		        RExC_parse++;
+		        sv_dat = reg_scan_name(pRExC_state,
+    		            SIZE_ONLY ? REG_RSN_RETURN_NULL : REG_RSN_RETURN_DATA);
+    		        parno = sv_dat ? *((I32 *)SvPVX(sv_dat)) : 0;
+		    }
+		    ret = reganode(pRExC_state,RECURSEP,parno); 
+		    goto insert_if_check_paren;
+		}
 		else if (RExC_parse[0] >= '1' && RExC_parse[0] <= '9' ) {
                     /* (?(1)...) */
 		    char c;
@@ -4704,6 +4767,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			RExC_parse++;
                     ret = reganode(pRExC_state, GROUPP, parno);
 
+                 insert_if_check_paren:
 		    if ((c = *nextchar(pRExC_state)) != ')')
 			vFAIL("Switch condition not recognized");
 		  insert_if:
@@ -4717,6 +4781,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    if (flags&HASWIDTH)
 			*flagp |= HASWIDTH;
 		    if (c == '|') {
+		        if (is_define) 
+		            vFAIL("(?(DEFINE)....) does not allow branches");
 			lastbr = reganode(pRExC_state, IFTHEN, 0); /* Fake one for optimizer. */
                         regbranch(pRExC_state, &flags, 1,depth+1);
                         REGTAIL(pRExC_state, ret, lastbr);
@@ -5721,7 +5787,7 @@ tryagain:
             ++RExC_parse;
             ret= reg_namedseq(pRExC_state, NULL); 
             break;
-	case 'k':
+	case 'k':    /* Handle \k<NAME> and \k'NAME' */
         {   
             char ch= RExC_parse[1];	    
 	    if (ch != '<' && ch != '\'') {
@@ -5733,7 +5799,8 @@ tryagain:
 	    } else {
 		char* name_start = (RExC_parse += 2);
 		I32 num = 0;
-                SV *svname = reg_scan_name(pRExC_state,!SIZE_ONLY);
+                SV *sv_dat = reg_scan_name(pRExC_state,
+                    SIZE_ONLY ? REG_RSN_RETURN_NULL : REG_RSN_RETURN_DATA);
                 ch= (ch == '<') ? '>' : '\'';
                     
                 if (RExC_parse == name_start || *RExC_parse != ch)
@@ -5748,18 +5815,6 @@ tryagain:
                 
     		
                 if (!SIZE_ONLY) {
-                    HE *he_str = NULL;
-                    SV *sv_dat;
-                    if (!svname)
-                        Perl_croak(aTHX_
-                                "panic: reg_scan_name returned NULL");
-                    if (RExC_paren_names)                                
-                        he_str = hv_fetch_ent( RExC_paren_names, svname, 0, 0 );
-                    if ( he_str ) {
-                        sv_dat = HeVAL(he_str);
-                    } else {
-                        vFAIL("Reference to nonexistent group");
-                    }               
                     num = add_data( pRExC_state, 1, "S" );
                     ARG_SET(ret,num);
                     RExC_rx->data->data[num]=(void*)sv_dat;

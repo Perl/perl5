@@ -1373,6 +1373,7 @@
 #define find_byclass		S_find_byclass
 #define to_utf8_substr		S_to_utf8_substr
 #define to_byte_substr		S_to_byte_substr
+#define reg_check_named_buff_matched	S_reg_check_named_buff_matched
 #endif
 #  ifdef DEBUGGING
 #if defined(PERL_CORE) || defined(PERL_EXT)
@@ -3572,6 +3573,7 @@
 #define find_byclass(a,b,c,d,e)	S_find_byclass(aTHX_ a,b,c,d,e)
 #define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)
 #define to_byte_substr(a)	S_to_byte_substr(aTHX_ a)
+#define reg_check_named_buff_matched(a,b)	S_reg_check_named_buff_matched(aTHX_ a,b)
 #endif
 #  ifdef DEBUGGING
 #if defined(PERL_CORE) || defined(PERL_EXT)

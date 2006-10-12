@@ -3750,6 +3750,11 @@ STATIC void	S_to_utf8_substr(pTHX_ regexp * prog)
 STATIC void	S_to_byte_substr(pTHX_ regexp * prog)
 			__attribute__nonnull__(pTHX_1);
 
+STATIC I32	S_reg_check_named_buff_matched(pTHX_ const regexp *rex, const regnode *prog)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2);
+
 #  ifdef DEBUGGING
 STATIC void	S_dump_exec_pos(pTHX_ const char *locinput, const regnode *scan, const char *loc_regeol, const char *loc_bostr, const char *loc_reg_starttry, const bool do_utf8)
 			__attribute__nonnull__(pTHX_1)

@@ -164,6 +164,11 @@ NREFF		NREF,    no-sv 1	Match already matched string, folded
 NREFFL		NREF,    no-sv 1	Match already matched string, folded in loc.
 
 
+#*Special conditionals 
+NGROUPP		NGROUPP,   no-sv 1	Whether the group matched.            
+RECURSEP	RECURSEP,  num 1 	Whether we are in a specific recurse.  
+DEFINEP		DEFINEP,   none 1 	Never execute directly.               
+
 # NEW STUFF ABOVE THIS LINE -- Please update counts below. 
 
 ################################################################################

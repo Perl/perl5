@@ -2508,6 +2508,30 @@ S_dump_exec_pos(pTHX_ const char *locinput,
 
 #endif
 
+/* reg_check_named_buff_matched()
+ * Checks to see if a named buffer has matched. The data array of 
+ * buffer numbers corresponding to the buffer is expected to reside
+ * in the regexp->data->data array in the slot stored in the ARG() of
+ * node involved. Note that this routine doesn't actually care about the
+ * name, that information is not preserved from compilation to execution.
+ * Returns the index of the leftmost defined buffer with the given name
+ * or 0 if non of the buffers matched.
+ */
+STATIC I32
+S_reg_check_named_buff_matched(pTHX_ const regexp *rex, const regnode *scan) {
+    I32 n;
+    SV *sv_dat=(SV*)rex->data->data[ ARG( scan ) ];
+    I32 *nums=(I32*)SvPVX(sv_dat);
+    for ( n=0; n<SvIVX(sv_dat); n++ ) {
+        if ((I32)*PL_reglastparen >= nums[n] &&
+            PL_regendp[nums[n]] != -1)
+        {
+            return nums[n];
+        }
+    }
+    return 0;
+}
+
 STATIC I32			/* 0 failure, 1 success */
 S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 {
@@ -3300,22 +3324,15 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	case NREF:
 	case NREFF:
 	    type = OP(scan);
-	    {
-	        SV *sv_dat=(SV*)rex->data->data[ ARG( scan ) ];    
-	        I32 *nums=(I32*)SvPVX(sv_dat);
-                for ( n=0; n<SvIVX(sv_dat); n++ ) {
-                    if ((I32)*PL_reglastparen >= nums[n] &&
-                        PL_regstartp[nums[n]] != -1 &&
-                        PL_regendp[nums[n]] != -1) 
-                    {
-                        n = nums[n];
-                        type = REF + ( type - NREF );
-                        goto do_ref;    
-                    }
-                }
+	    n = reg_check_named_buff_matched(rex,scan);
+
+            if ( n ) {
+                type = REF + ( type - NREF );
+                goto do_ref;
+            } else {
                 sayNO;
-                /* unreached */
-            } 
+            }
+            /* unreached */
 	case REFFL:
 	    PL_reg_flags |= RF_tainted;
 	    /* FALL THROUGH */
@@ -3594,6 +3611,17 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    n = ARG(scan);  /* which paren pair */
 	    sw = (bool)((I32)*PL_reglastparen >= n && PL_regendp[n] != -1);
 	    break;
+	case NGROUPP:
+	    /* reg_check_named_buff_matched returns 0 for no match */
+	    sw = (bool)(0 < reg_check_named_buff_matched(rex,scan));
+	    break;
+        case RECURSEP:
+            n = ARG(scan);
+            sw = (cur_eval && (!n || cur_eval->u.eval.close_paren == n));
+            break;
+        case DEFINEP:
+            sw = 0;
+            break;
 	case IFTHEN:
 	    PL_reg_leftiter = PL_reg_maxiter;		/* Void cache */
 	    if (sw)
@@ -3747,7 +3775,6 @@ NULL
 	case WHILEM:     /* just matched an A in /A*B/  (for complex A) */
 	{
 	    /* see the discussion above about CURLYX/WHILEM */
-
 	    I32 n;
 	    assert(cur_curlyx); /* keep Coverity happy */
 	    n = ++cur_curlyx->u.curlyx.count; /* how many A's matched */
@@ -3968,6 +3995,7 @@ NULL
 	    for (n = *PL_reglastparen; n > ST.lastparen; n--)
 		PL_regendp[n] = -1;
 	    *PL_reglastparen = n;
+	    /*dmq: *PL_reglastcloseparen = n; */
 	    scan = ST.next_branch;
 	    /* no more branches? */
 	    if (!scan || (OP(scan) != BRANCH && OP(scan) != BRANCHJ))
@@ -4047,13 +4075,21 @@ NULL
 	    );
 
 	    locinput = PL_reginput;
-	    if (ST.count < (ST.minmod ? ARG1(ST.me) : ARG2(ST.me)))
+	                
+	    if (cur_eval && cur_eval->u.eval.close_paren && 
+	        cur_eval->u.eval.close_paren == ST.me->flags) 
+	        goto fake_end;
+	        
+	    if ( ST.count < (ST.minmod ? ARG1(ST.me) : ARG2(ST.me)) )
 		goto curlym_do_A; /* try to match another A */
 	    goto curlym_do_B; /* try to match B */
 
 	case CURLYM_A_fail: /* just failed to match an A */
 	    REGCP_UNWIND(ST.cp);
-	    if (ST.minmod || ST.count < ARG1(ST.me) /* min*/ )
+
+	    if (ST.minmod || ST.count < ARG1(ST.me) /* min*/ 
+	        || (cur_eval && cur_eval->u.eval.close_paren &&
+	            cur_eval->u.eval.close_paren == ST.me->flags))
 		sayNO;
 
 	  curlym_do_B: /* execute the B in /A{m,n}B/  */
@@ -4102,10 +4138,20 @@ NULL
 		    PL_regstartp[paren]
 			= HOPc(PL_reginput, -ST.alen) - PL_bostr;
 		    PL_regendp[paren] = PL_reginput - PL_bostr;
+		    /*dmq: *PL_reglastcloseparen = paren; */
 		}
 		else
 		    PL_regendp[paren] = -1;
+		if (cur_eval && cur_eval->u.eval.close_paren &&
+		    cur_eval->u.eval.close_paren == ST.me->flags) 
+		{
+		    if (ST.count) 
+	                goto fake_end;
+	            else
+	                sayNO;
+	        }
 	    }
+	    
 	    PUSH_STATE_GOTO(CURLYM_B, ST.B); /* match B */
 	    /* NOTREACHED */
 
@@ -4131,6 +4177,7 @@ NULL
 	if (success) { \
 	    PL_regstartp[paren] = HOPc(locinput, -1) - PL_bostr; \
 	    PL_regendp[paren] = locinput - PL_bostr; \
+	    *PL_reglastcloseparen = paren; \
 	} \
 	else \
 	    PL_regendp[paren] = -1; \
@@ -4156,6 +4203,11 @@ NULL
 		*PL_reglastparen = ST.paren;
 	    ST.min = ARG1(scan);  /* min to match */
 	    ST.max = ARG2(scan);  /* max to match */
+	    if (cur_eval && cur_eval->u.eval.close_paren &&
+	        cur_eval->u.eval.close_paren == ST.paren) {
+	        ST.min=1;
+	        ST.max=1;
+	    }
             scan = regnext(NEXTOPER(scan) + NODE_STEP_REGNODE);
 	    goto repeat;
 	case CURLY:		/*  /A{m,n}B/ where A is width 1 */
@@ -4361,6 +4413,10 @@ NULL
 		}
 		PL_reginput = locinput;
 		CURLY_SETPAREN(ST.paren, ST.count);
+		if (cur_eval && cur_eval->u.eval.close_paren && 
+		    cur_eval->u.eval.close_paren == ST.paren) {
+		    goto fake_end;
+	        }
 		PUSH_STATE_GOTO(CURLY_B_min_known, ST.B);
 	    }
 	    /* NOTREACHED */
@@ -4382,6 +4438,10 @@ NULL
 		{
 		  curly_try_B_min:
 		    CURLY_SETPAREN(ST.paren, ST.count);
+		    if (cur_eval && cur_eval->u.eval.close_paren &&
+		        cur_eval->u.eval.close_paren == ST.paren) {
+                        goto fake_end;
+                    }
 		    PUSH_STATE_GOTO(CURLY_B_min, ST.B);
 		}
 	    }
@@ -4400,6 +4460,10 @@ NULL
 		/* If it could work, try it. */
 		if (ST.c1 == CHRTEST_VOID || c == (UV)ST.c1 || c == (UV)ST.c2) {
 		    CURLY_SETPAREN(ST.paren, ST.count);
+		    if (cur_eval && cur_eval->u.eval.close_paren &&
+		        cur_eval->u.eval.close_paren == ST.paren) {
+                        goto fake_end;
+                    }
 		    PUSH_STATE_GOTO(CURLY_B_max, ST.B);
 		    /* NOTREACHED */
 		}

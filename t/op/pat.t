@@ -3714,9 +3714,13 @@ sub iseq($$;$) {
     iseq(0+@k, 3, 'Got 3 keys in %+ via keys');
     iseq("@k","A B C", "Got expected keys");
     iseq("@v","bar baz foo", "Got expected values");
+    eval'
+        print for $+{this_key_doesnt_exist};
+    ';
+    ok(!$@,'lvalue $+{...} should not throw an exception');
 }
-        
-       
+
+
 # stress test CURLYX/WHILEM.
 #
 # This test includes varying levels of nesting, and according to
@@ -3831,5 +3835,5 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
     or print "# Unexpected outcome: should pass or crash perl\n";
 
 # Don't forget to update this!
-BEGIN{print "1..1274\n"};
+BEGIN{print "1..1275\n"};
 

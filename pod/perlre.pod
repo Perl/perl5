@@ -998,17 +998,27 @@ highly experimental, and may be changed or deleted without notice.
 
 Conditional expression.  C<(condition)> should be either an integer in
 parentheses (which is valid if the corresponding pair of parentheses
-matched), or look-ahead/look-behind/evaluate zero-width assertion.
+matched), a look-ahead/look-behind/evaluate zero-width assertion, a
+name in angle brackets or single quotes (which is valid if a buffer
+with the given name matched), the special symbol (R) (true when
+evaluated inside of recursion or eval). Additionally the R may be
+followed by a number, (which will be true when evaluated when recursing
+inside of the appropriate group), or by C<&NAME> in which case it will
+be true only when evaluated during recursion into the named group.
 
 For example:
 
-    m{ ( \( )? 
-       [^()]+ 
-       (?(1) \) ) 
+    m{ ( \( )?
+       [^()]+
+       (?(1) \) )
      }x
 
 matches a chunk of non-parentheses, possibly included in parentheses
 themselves.
+
+An additional special form of this pattern is the DEFINE pattern, which
+never executes its yes-pattern except by recursion, and does not allow
+a no-pattern.
 
 =back
 

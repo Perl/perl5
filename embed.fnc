@@ -1371,6 +1371,7 @@ ERsn	|U8*	|reghopmaybe3	|NN U8 *pos|I32 off|NN const U8 *lim
 ERs	|char*	|find_byclass	|NN regexp * prog|NN const regnode *c|NN char *s|NN const char *strend|NULLOK const regmatch_info *reginfo
 Es	|void	|to_utf8_substr	|NN regexp * prog
 Es	|void	|to_byte_substr	|NN regexp * prog
+ERs	|I32	|reg_check_named_buff_matched	|NN const regexp *rex|NN const regnode *prog
 #  ifdef DEBUGGING
 Es	|void	|dump_exec_pos	|NN const char *locinput|NN const regnode *scan|NN const char *loc_regeol\
 				|NN const char *loc_bostr|NN const char *loc_reg_starttry|const bool do_utf8
