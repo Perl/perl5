@@ -278,6 +278,7 @@ if ($^O eq 'MacOS') {
 [ "FakeWin32->rel2abs('../temp','//prague_main/work/')",    '\\\\prague_main\\work\\temp'     ],
 [ "FakeWin32->rel2abs('temp','//prague_main/work')",        '\\\\prague_main\\work\\temp'     ],
 [ "FakeWin32->rel2abs('../','//prague_main/work')",         '\\\\prague_main\\work'           ],
+[ "FakeWin32->rel2abs('D:foo.txt')",                        'D:\\alpha\\beta\\foo.txt'        ],
 
 [ "VMS->case_tolerant()",         '1'  ],
 
@@ -622,9 +623,6 @@ if ($^O eq 'MacOS') {
 
 ) ;
 
-if ($^O eq 'MSWin32') {
-  push @tests, [ "FakeWin32->rel2abs('D:foo.txt')", 'D:\\alpha\\beta\\foo.txt' ];
-}
 
 
 plan tests => scalar @tests;

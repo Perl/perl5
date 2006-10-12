@@ -82,10 +82,18 @@ sub case_tolerant {
 }
 
 sub file_name_is_absolute {
+    # As of right now, this returns 2 if the path is absolute with a
+    # volume, 1 if it's absolute with no volume, 0 otherwise.
+
     my ($self,$file) = @_;
-    return $file =~ m{^$VOL_RX}os ? 2 :
-           $file =~   m{^[\\/]}is ? 1 :
-           0;
+
+    if ($file =~ m{^($VOL_RX)}o) {
+      my $vol = $1;
+      return ($vol =~ m{^$UNC_RX}o ? 2
+	      : $file =~ m{^$DRIVE_RX[\\/]}o ? 2
+	      : 0);
+    }
+    return $file =~  m{^[\\/]} ? 1 : 0;
 }
 
 =item catfile

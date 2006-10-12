@@ -1,5 +1,12 @@
 Revision history for Perl distribution PathTools.
 
+ - Yet more Win32 fixes (sigh... seems like I'm fighting a neverending
+   waterbed...).  This time, fixed file_name_is_absolute() to know
+   what it's doing when the path includes a volume but a relative
+   path, like C:foo.txt .  This bug had impact in rel2abs() on Win32
+   too.
+
+3.22 - Mon Oct  9 21:50:52 2006
 
  - Fixed the t/crossplatform.t test on Win32 (and possibly other
    volume-aware platforms) now that rel2abs() always adds a drive
