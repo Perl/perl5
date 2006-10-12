@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -73,7 +73,7 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 VERSION
 
-This document describes threads::shared version 1.03
+This document describes threads::shared version 1.04
 
 =head1 SYNOPSIS
 
@@ -345,7 +345,8 @@ It is often not wise to share an object unless the class itself has been
 written to support sharing. For example, an object's destructor may get called
 multiple times, one for each thread's scope exit.  Another example, is that
 the contents of hash-based objects will be lost due to the above mentioned
-limitation.
+limitation.  See F<examples/class.pl> (in the CPAN distribution of this
+module) for how to create a class that supports object sharing.
 
 Does not support C<splice> on arrays!
 
@@ -367,7 +368,7 @@ L<threads::shared> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads-shared>
 
 Annotated POD for L<threads::shared>:
-L<http://annocpan.org/~JDHEDDEN/threads-shared-1.03/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-shared-1.04/shared.pm>
 
 L<threads>, L<perlthrtut>
 
