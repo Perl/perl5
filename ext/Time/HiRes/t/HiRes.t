@@ -12,7 +12,7 @@ BEGIN {
     }
 }
 
-BEGIN { $| = 1; print "1..33\n"; }
+BEGIN { $| = 1; print "1..38\n"; }
 
 END { print "not ok 1\n" unless $loaded }
 
@@ -32,6 +32,7 @@ my $have_clock_gettime	 = &Time::HiRes::d_clock_gettime;
 my $have_clock_getres	 = &Time::HiRes::d_clock_getres;
 my $have_clock_nanosleep = &Time::HiRes::d_clock_nanosleep;
 my $have_clock           = &Time::HiRes::d_clock;
+my $have_hires_stat      = &Time::HiRes::d_hires_stat;
 
 sub has_symbol {
     my $symbol = shift;
@@ -49,6 +50,7 @@ printf "# have_clock_gettime   = %d\n", $have_clock_gettime;
 printf "# have_clock_getres    = %d\n", $have_clock_getres;
 printf "# have_clock_nanosleep = %d\n", $have_clock_nanosleep;
 printf "# have_clock           = %d\n", $have_clock;
+printf "# have_hires_stat      = %d\n", $have_hires_stat;
 
 import Time::HiRes 'gettimeofday'	if $have_gettimeofday;
 import Time::HiRes 'usleep'		if $have_usleep;
@@ -65,7 +67,7 @@ use Time::HiRes qw(gettimeofday);
 
 my $have_alarm = $Config{d_alarm};
 my $have_fork  = $Config{d_fork};
-my $waitfor = 60; # 10-20 seconds is normal (load affects this).
+my $waitfor = 90; # 30-45 seconds is normal (load affects this).
 my $timer_pid;
 my $TheEnd;
 
@@ -584,8 +586,78 @@ if ($have_clock) {
 	print "not ok 33\n";
     }
 } else {
-    print "# No clock\n";
     skip 33;
+}
+
+if ($have_ualarm) {
+    # 1_100_000 sligthly over 1_000_000,
+    # 2_200_000 slightly over 2**31/1000,
+    # 4_300_000 slightly over 2**32/1000.
+    for my $t ([34, 100_000],
+	       [35, 1_100_000],
+	       [36, 2_200_000],
+	       [37, 4_300_000]) {
+	my ($i, $n) = @$t;
+	my $alarmed = 0;
+	local $SIG{ ALRM } = sub { $alarmed++ };
+	my $t0 = Time::HiRes::time();
+	print "# t0 = $t0\n";
+	print "# ualarm($n)\n";
+	ualarm($n); 1 while $alarmed == 0;
+	my $t1 = Time::HiRes::time();
+	print "# t1 = $t1\n";
+	my $dt = $t1 - $t0;
+	print "# dt = $dt\n";
+	ok $i, $dt >= $n/1e6 &&
+	    ($n < 1_000_000 # Too much noise.
+	     || $dt <= 1.5*$n/1e6), "ualarm($n) close enough";
+    }
+} else {
+    print "# No ualarm\n";
+    skip 34..37;
+}
+
+if (&Time::HiRes::d_hires_stat) {
+    my @stat;
+    my @time;
+    for (1..5) {
+	Time::HiRes::sleep(rand(0.1) + 0.1);
+	open(X, ">$$");
+	print X $$;
+	close(X);
+	@stat = Time::HiRes::stat($$);
+	push @time, $stat[9];
+	Time::HiRes::sleep(rand(0.1) + 0.1);
+	open(X, "<$$");
+	<X>;
+	close(X);
+	@stat = Time::HiRes::stat($$);
+	push @time, $stat[8];
+    }
+    1 while unlink $$;
+    print "# @time\n";
+    my $mi = 1;
+    my $ss = 0;
+    for (my $i = 1; $i < @time; $i++) {
+	if ($time[$i] > $time[$i-1]) {
+	    $mi++;
+	}
+	if ($time[$i] > int($time[$i])) {
+	    $ss++;
+	}
+    }
+    # Need at least 80% of monotonical increase and subsecond results.
+    if ($ss == 0) {
+	print "# No subsecond timestamps detected\n";
+	skip 38;
+    } elsif ($mi/@time > 0.8 && $ss/@time > 0.8) {
+	print "ok 38\n";
+    } else {
+	print "not ok 38\n";
+    }
+} else {
+    print "# No effectual d_hires_stat\n";
+    skip 38;
 }
 
 END {

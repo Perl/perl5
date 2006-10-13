@@ -479,6 +479,13 @@ hrt_ualarm_itimer(int usec, int interval)
    itv.it_interval.tv_usec = interval % IV_1E6;
    return setitimer(ITIMER_REAL, &itv, 0);
 }
+#ifdef HAS_UALARM
+int
+hrt_ualarm(int usec, int interval) /* for binary compat before 1.91 */
+{
+   return hrt_ualarm_itimer(usec, interval);
+}
+#endif /* #ifdef HAS_UALARM */
 #endif /* #if !defined(HAS_UALARM) && defined(HAS_SETITIMER) */
 
 #if !defined(HAS_UALARM) && defined(HAS_SETITIMER)
@@ -709,6 +716,42 @@ myNVtime()
 }
 
 #endif /* #ifdef HAS_GETTIMEOFDAY */
+
+static void
+hrstatns(UV atime, UV mtime, UV ctime, UV *atime_nsec, UV *mtime_nsec, UV *ctime_nsec)
+{
+  dTHX;
+  *atime_nsec = 0;
+  *mtime_nsec = 0;
+  *ctime_nsec = 0;
+#ifdef TIME_HIRES_STAT
+#if TIME_HIRES_STAT == 1
+  *atime_nsec = PL_statcache.st_atimespec.tv_nsec;
+  *mtime_nsec = PL_statcache.st_mtimespec.tv_nsec;
+  *ctime_nsec = PL_statcache.st_ctimespec.tv_nsec;
+#endif
+#if TIME_HIRES_STAT == 2
+  *atime_nsec = PL_statcache.st_atimensec;
+  *mtime_nsec = PL_statcache.st_mtimensec;
+  *ctime_nsec = PL_statcache.st_ctimensec;
+#endif
+#if TIME_HIRES_STAT == 3
+  *atime_nsec = PL_statcache.st_atime_n;
+  *mtime_nsec = PL_statcache.st_mtime_n;
+  *ctime_nsec = PL_statcache.st_ctime_n;
+#endif
+#if TIME_HIRES_STAT == 4
+  *atime_nsec = PL_statcache.st_atim.tv_nsec;
+  *mtime_nsec = PL_statcache.st_mtim.tv_nsec;
+  *ctime_nsec = PL_statcache.st_ctim.tv_nsec;
+#endif
+#if TIME_HIRES_STAT == 5
+  *atime_nsec = PL_statcache.st_uatime * 1000;
+  *mtime_nsec = PL_statcache.st_umtime * 1000;
+  *ctime_nsec = PL_statcache.st_uctime * 1000;
+#endif
+#endif
+}
 
 #include "const-c.inc"
 
@@ -1166,3 +1209,34 @@ clock()
 
 #endif /*  #if defined(TIME_HIRES_CLOCK) && defined(CLOCKS_PER_SEC) */
 
+IV
+stat(...)
+PROTOTYPE: ;$
+    PPCODE:
+	PUSHMARK(SP);
+	XPUSHs(sv_2mortal(newSVsv(items == 1 ? ST(0) : DEFSV)));
+	PUTBACK;
+	ENTER;
+	PL_laststatval = -1;
+	(void)*(PL_ppaddr[OP_STAT])(aTHX);
+	SPAGAIN;
+	LEAVE;
+	if (PL_laststatval == 0) {
+	  /* We assume that pp_stat() left us with 13 valid stack items. */
+	  UV atime = SvUV(ST( 8));
+	  UV mtime = SvUV(ST( 9));
+	  UV ctime = SvUV(ST(10));
+	  UV atime_nsec;
+	  UV mtime_nsec;
+	  UV ctime_nsec;
+	  hrstatns(atime, mtime, ctime,
+		   &atime_nsec, &mtime_nsec, &ctime_nsec);
+	  if (atime_nsec)
+	    ST( 8) = sv_2mortal(newSVnv(atime + 1e-9 * (NV) atime_nsec));
+	  if (mtime_nsec)
+	    ST( 9) = sv_2mortal(newSVnv(mtime + 1e-9 * (NV) mtime_nsec));
+	  if (ctime_nsec)
+	    ST(10) = sv_2mortal(newSVnv(ctime + 1e-9 * (NV) ctime_nsec));
+	  XSRETURN(13);
+	}
+	XSRETURN(0);

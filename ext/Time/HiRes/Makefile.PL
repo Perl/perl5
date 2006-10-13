@@ -169,24 +169,26 @@ EOF
     return $ok;
 }
 
-sub has_gettimeofday {
-    # confusing but true (if condition true ==> -DHAS_GETTIMEOFDAY already)
-    return 0 if $Config{d_gettimeod};
-    return 1 if try_compile_and_link(<<EOM);
+my $TIME_HEADERS = <<EOH;
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
 #ifdef I_SYS_TYPES
 #   include <sys/types.h>
 #endif
-
 #ifdef I_SYS_TIME
 #   include <sys/time.h>
 #endif
-
 #ifdef I_SYS_SELECT
 #   include <sys/select.h>	/* struct timeval might be hidden in here */
 #endif
+EOH
+
+sub has_gettimeofday {
+    # confusing but true (if condition true ==> -DHAS_GETTIMEOFDAY already)
+    return 0 if $Config{d_gettimeod};
+    return 1 if try_compile_and_link(<<EOM);
+$TIME_HEADERS
 static int foo()
 {
     struct timeval tv;
@@ -589,6 +591,113 @@ EOD
 	print "NOT found.\n";
     }
 
+    print "Trying struct stat st_atimespec.tv_nsec...";
+    my $has_stat_st_xtimespec;
+    if (try_compile_and_link(<<EOM)) {
+$TIME_HEADERS
+#include <sys/stat.h>
+int main() {
+    struct stat st;
+    st.st_atimespec.tv_nsec = 0;
+}
+EOM
+      $has_stat_st_xtimespec++;
+      $DEFINE .= ' -DTIME_HIRES_STAT=1';
+    }
+
+    if ($has_stat_st_xtimespec) {
+        print "found.\n";
+    } else {
+	print "NOT found.\n";
+    }
+
+    print "Trying struct stat st_atimensec...";
+    my $has_stat_st_xtimensec;
+    if (try_compile_and_link(<<EOM)) {
+$TIME_HEADERS
+#include <sys/stat.h>
+int main() {
+    struct stat st;
+    st.st_atimensec = 0;
+}
+EOM
+      $has_stat_st_xtimensec++;
+      $DEFINE .= ' -DTIME_HIRES_STAT=2';
+    }
+
+    if ($has_stat_st_xtimensec) {
+        print "found.\n";
+    } else {
+	print "NOT found.\n";
+    }
+
+    print "Trying struct stat st_atime_n...";
+    my $has_stat_st_xtime_n;
+    if (try_compile_and_link(<<EOM)) {
+$TIME_HEADERS
+#include <sys/stat.h>
+int main() {
+    struct stat st;
+    st.st_atime_n = 0;
+}
+EOM
+      $has_stat_st_xtime_n++;
+      $DEFINE .= ' -DTIME_HIRES_STAT=3';
+    }
+
+    if ($has_stat_st_xtime_n) {
+        print "found.\n";
+    } else {
+	print "NOT found.\n";
+    }
+
+    print "Trying struct stat st_atim.tv_nsec...";
+    my $has_stat_st_xtim;
+    if (try_compile_and_link(<<EOM)) {
+$TIME_HEADERS
+#include <sys/stat.h>
+int main() {
+    struct stat st;
+    st.st_atim.tv_nsec = 0;
+}
+EOM
+      $has_stat_st_xtim++;
+      $DEFINE .= ' -DTIME_HIRES_STAT=4';
+    }
+
+    if ($has_stat_st_xtim) {
+        print "found.\n";
+    } else {
+	print "NOT found.\n";
+    }
+
+    print "Trying struct stat st_uatime...";
+    my $has_stat_st_uxtime;
+    if (try_compile_and_link(<<EOM)) {
+$TIME_HEADERS
+#include <sys/stat.h>
+int main() {
+    struct stat st;
+    st.st_uatime = 0;
+}
+EOM
+      $has_stat_st_uxtime++;
+      $DEFINE .= ' -DTIME_HIRES_STAT=5';
+    }
+
+    if ($has_stat_st_uxtime) {
+        print "found.\n";
+    } else {
+	print "NOT found.\n";
+    }
+
+   if ($DEFINE =~ /-DTIME_HIRES_STAT=\d+/) {
+    print "You seem to have stat subsecond timestamps.\n";
+    print "(Your struct stat has them, but the filesystems must help.)\n";
+   } else {
+    print "You do not seem to have stat subsecond timestamps.\n";
+   }
+
     my $has_w32api_windows_h;
 
     if ($^O eq 'cygwin') {
@@ -652,22 +761,28 @@ sub doMakefile {
 
 sub doConstants {
     if (eval {require ExtUtils::Constant; 1}) {
-	my @names = (qw(CLOCK_HIGHRES CLOCK_MONOTONIC
-			CLOCK_PROCESS_CPUTIME_ID
-			CLOCK_REALTIME
-			CLOCK_SOFTTIME
-			CLOCK_THREAD_CPUTIME_ID
-			CLOCK_TIMEOFDAY
-			CLOCKS_PER_SEC
-			ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF
-			ITIMER_REALPROF
-			TIMER_ABSTIME));
+	my @names = qw(CLOCK_HIGHRES CLOCK_MONOTONIC
+		       CLOCK_PROCESS_CPUTIME_ID
+		       CLOCK_REALTIME
+		       CLOCK_SOFTTIME
+		       CLOCK_THREAD_CPUTIME_ID
+		       CLOCK_TIMEOFDAY
+		       CLOCKS_PER_SEC
+		       ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF
+		       ITIMER_REALPROF
+		       TIMER_ABSTIME);
 	foreach (qw (d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		     d_nanosleep d_clock_gettime d_clock_getres
-		     d_clock d_clock_nanosleep)) {
+		     d_clock d_clock_nanosleep d_hires_stat)) {
 	    my $macro = $_;
 	    if ($macro =~ /^(d_nanosleep|d_clock_gettime|d_clock_getres|d_clock|d_clock_nanosleep)$/) {
 		$macro =~ s/^d_(.+)/TIME_HIRES_\U$1/;
+	    } elsif ($macro =~ /^(d_hires_stat)$/) {
+		my $d_hires_stat = 0;
+		$d_hires_stat = $1 if ($DEFINE =~ /-DTIME_HIRES_STAT=(\d+)/);
+		push @names, {name => $_, macro => "TIME_HIRES_STAT", value => $d_hires_stat,
+			      default => ["IV", "0"]};
+		next;
 	    } else {
 		$macro =~ s/^d_(.+)/HAS_\U$1/;
 	    }

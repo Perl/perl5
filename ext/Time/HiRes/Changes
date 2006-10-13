@@ -1,11 +1,51 @@
-Revision history for Perl extension Time::HiRes.
+Revision history for the Perl extension Time::HiRes.
 
-1.91	[2006-09-28]
+1.92	[2006-10-13]
+	- scan for subsecond resolution timestamps in struct stat,
+	  some known possibilities:
+
+	  (1)  struct  timespec st_atimespec;
+                                st_atimespec.tv_nsec;
+	  (2)  time_t  st_atime;
+	       long    st_atimensec;
+          (3)  time_t  st_atime;
+               int     st_atime_n;
+	  (4)  timestruc_t st_atim;
+                           st_atim.tv_nsec
+	  (5)  time_t  st_atime;
+               int     st_uatime;
+
+          If something like this is found, one can do
+
+	    use Time::HiRes;
+	    my @stat = Time::HiRes::stat();
+
+	  or even override the standard stat():
+      
+	    use Time::HiRes qw(stat);
+
+          to get the stat() timestamps
+
+	    my ($atime, $mtime, $ctime) = @stat[8, 9, 10];
+
+	  with subsecond resolution (assuming both the operating
+	  system and the filesystem support that kind of thing).
+
+	  Contributions for more systems (especially non-UNIX,
+	  e.g. but not limited to, Win32, VMS) gladly accepted.
+
+	  Thanks to H.Merijn Brand, John Peacock, and Craig
+	  Berry for brave beta testing.
+
+1.91	[2006-09-29]
 	- ualarm() in SuSE 10.1 was overflowing after ~4.2 seconds,
-	  probably due to a glibc bug/feature, workaround by using the
-	  setitimer() variant if either useconds or interval >= IV_1E6
-	  (this case seems to vary between systems: are useconds
-	   more than 999_999 for ualarm() defined or not)
+	  possibly due to a glibc bug/feature, workaround by using the
+	  setitimer() implementation of ualarm() if either useconds or
+	  interval > 999_999 (this case seems to vary between systems:
+	  are useconds more than 999_999 for ualarm() defined or not)
+	  Added more ualarm() tests to catch various overflow points,
+	  hopefully no problems in various platforms.
+	  (The problem report by Mark Seger and Jon Paul Sullivan of HP.)
 
 1.90	[2006-08-22]
 	- tweak still needed for Const64(), from Jerry Hedden
@@ -16,7 +56,8 @@ Revision history for Perl extension Time::HiRes.
 	- Const64() already appends an 'LL' (or i64), so provide LL and i64
 	  forms for the IV_1E[679] (effects Win32 and Cygwin), reported by
 	  Jerry Hedden.
-	- the Changes entry for 1.88 talked about [IN]V_1[679], missing the 'E'.
+	- the Changes entry for 1.88 talked about [IN]V_1[679],
+	  missing the 'E'.
 
 1.88	[2006-08-21]
 	- clean up the g++ warnings in HiRes.xs, all of them

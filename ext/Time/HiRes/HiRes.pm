@@ -19,9 +19,11 @@ require DynaLoader;
 		 TIMER_ABSTIME
 		 d_usleep d_ualarm d_gettimeofday d_getitimer d_setitimer
 		 d_nanosleep d_clock_gettime d_clock_getres
-		 d_clock d_clock_nanosleep);
+		 d_clock d_clock_nanosleep
+		 stat
+		);
 	
-$VERSION = '1.91';
+$VERSION = '1.92';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -83,7 +85,8 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
 =head1 SYNOPSIS
 
   use Time::HiRes qw( usleep ualarm gettimeofday tv_interval nanosleep
-		      clock_gettime clock_getres clock_nanosleep clock );
+		      clock_gettime clock_getres clock_nanosleep clock
+                      stat );
 
   usleep ($microseconds);
   nanosleep ($nanoseconds);
@@ -118,6 +121,8 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
   clock_nanosleep(CLOCK_REALTIME, time() + 10, TIMER_ABSTIME);
 
   my $ticktock = clock();
+
+  my @stat = stat(FH);
 
 =head1 DESCRIPTION
 
@@ -356,6 +361,31 @@ somewhat like the second value returned by the times() of core Perl,
 but not necessarily identical.  Note that due to backward
 compatibility limitations the returned value may wrap around at about
 2147 seconds or at about 36 minutes.
+
+=item stat
+
+=item stat FH
+
+=item stat EXPR
+
+As L<perlfunc/stat> but with the access/modify/change file timestamps
+in subsecond resolution, if the operating system and the filesystem
+both support such timestamps.  To override the standard stat():
+
+    use Time::HiRes qw(stat);
+
+Test for the value of &Time::HiRes::d_hires_stat to find out whether
+the operating system supports subsecond file timestamps: a value
+larger than zero means yes. There are unfortunately no easy
+ways to find out whether the filesystem supports such timestamps.
+
+A zero return value of &Time::HiRes::d_hires_stat means that
+Time::HiRes::stat is a no-op passthrough for CORE::stat(),
+and therefore the timestamps will stay integers.  The same
+will happen if the filesystem does not do subsecond timestamps.
+
+In any case do not expect nanosecond resolution, or even a microsecond
+resolution.
 
 =back
 
