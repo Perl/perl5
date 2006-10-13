@@ -1288,7 +1288,12 @@ Perl_my_stat(pTHX)
                 return (PL_laststatval = PerlLIO_fstat(dirfd(IoDIRP(io)), &PL_statcache));
 #else
                 Perl_die(aTHX_ PL_no_func, "dirfd");
-                NORETURN_FUNCTION_END;
+		/* NOT REACHED */
+		return 0;
+		/* Can't use NORETURN_FUNCTION_END because Perl_die is not
+		 *     __attribute__noreturn__
+		 * Can't use DIE because that does not return an integer
+		 */
 #endif
             } else {
                 if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
