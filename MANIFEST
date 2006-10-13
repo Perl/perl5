@@ -983,10 +983,10 @@ ext/re/re_comp.h		re extension wrapper for regcomp.h
 ext/re/re.pm			re extension Perl module
 ext/re/re_top.h			re extension symbol hiding header
 ext/re/re.xs			re extension external subroutines
-ext/re/t/regop.pl		generate debug output for various patterns
-ext/re/t/regop.t		test RE optimizations by scraping debug output
 ext/re/t/lexical_debug.pl	generate debug output for lexical re 'debug'
 ext/re/t/lexical_debug.t	test that lexical re 'debug' works
+ext/re/t/regop.pl		generate debug output for various patterns
+ext/re/t/regop.t		test RE optimizations by scraping debug output
 ext/re/t/re.t			see if re pragma works
 ext/Safe/t/safe1.t		See if Safe works
 ext/Safe/t/safe2.t		See if Safe works
@@ -1497,8 +1497,8 @@ lib/CPAN/HandleConfig.pm	helper package for CPAN.pm
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
 lib/CPAN/PAUSE2003.pub		CPAN public key
 lib/CPAN/PAUSE2005.pub		CPAN public key
-lib/CPAN/Queue.pm		queueing system for CPAN.pm
 lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
+lib/CPAN/Queue.pm		queueing system for CPAN.pm
 lib/CPAN/SIGNATURE		CPAN public key
 lib/CPAN/t/01loadme.t		See if CPAN the module works
 lib/CPAN/t/02nox.t		See if CPAN::Nox works
@@ -1629,8 +1629,8 @@ lib/ExtUtils/t/config.t		Test ExtUtils::MakeMaker::Config
 lib/ExtUtils/t/Constant.t	See if ExtUtils::Constant works
 lib/ExtUtils/t/dir_target.t	Verify if dir_target() is supported
 lib/ExtUtils/t/Embed.t		See if ExtUtils::Embed and embedding works
-lib/ExtUtils/t/eu_command.t	See if ExtUtils::Command works
 lib/ExtUtils/testlib.pm		Fixes up @INC to use just-built extension
+lib/ExtUtils/t/eu_command.t	See if ExtUtils::Command works
 lib/ExtUtils/t/FIRST_MAKEFILE.t		See if FIRST_MAKEFILE works
 lib/ExtUtils/t/hints.t		See if hint files are honored.
 lib/ExtUtils/t/INSTALL_BASE.t	Test INSTALL_BASE in MakeMaker
@@ -1655,8 +1655,8 @@ lib/ExtUtils/t/oneliner.t	See if MM can generate perl one-liners
 lib/ExtUtils/t/Packlist.t	See if Packlist works
 lib/ExtUtils/t/parse_version.t	See if parse_version works
 lib/ExtUtils/t/PL_FILES.t	Test PL_FILES in MakeMaker
-lib/ExtUtils/t/postamble.t	See if postamble works
 lib/ExtUtils/t/pm.t		See if Makemaker can handle PM
+lib/ExtUtils/t/postamble.t	See if postamble works
 lib/ExtUtils/t/prefixify.t	See if MakeMaker can apply a PREFIX
 lib/ExtUtils/t/prereq_print.t	See if PREREQ_PRINT works
 lib/ExtUtils/t/problems.t	How MakeMaker reacts to build problems
@@ -1834,6 +1834,18 @@ lib/locale.pm			For "use locale"
 lib/Locale/Script.pm		Locale::Codes
 lib/Locale/Script.pod		Locale::Codes documentation
 lib/locale.t			See if locale support works
+lib/Log/Message/Config.pm	Log::Message
+lib/Log/Message/Handlers.pm	Log::Message
+lib/Log/Message/Item.pm	Log::Message
+lib/Log/Message.pm	Log::Message
+lib/Log/Message/Simple.pm	Log::Simple
+lib/Log/Message/Simple/t/01_use.t	Log::Simple tests
+lib/Log/Message/Simple/t/02_imports.t	Log::Simple tests
+lib/Log/Message/Simple/t/03_functions.t	Log::Simple tests
+lib/Log/Message/t/01_Log-Message-Config.t	Log::Message tests
+lib/Log/Message/t/02_Log-Message.t	Log::Message tests
+lib/Log/Message/t/conf/config_file	Log::Message tests
+lib/Log/Message/t/conf/LoadMe.pl	Log::Message tests
 lib/look.pl			A "look" equivalent
 lib/Math/BigFloat.pm		An arbitrary precision floating-point arithmetic package
 lib/Math/BigFloat/Trace.pm	bignum tracing
@@ -2308,9 +2320,9 @@ lib/Pod/t/htmlview.t		pod2html render test
 lib/Pod/t/InputObjects.t	See if Pod::InputObjects works
 lib/Pod/t/man.t			podlators test
 lib/Pod/t/parselink.t		podlators test
-lib/Pod/t/pod-parser.t		podlators test
 lib/Pod/t/pod2html-lib.pl	pod2html testing library
 lib/Pod/t/pod2latex.t		See if Pod::LaTeX works
+lib/Pod/t/pod-parser.t		podlators test
 lib/Pod/t/Select.t		See if Pod::Select works
 lib/Pod/t/termcap.t		podlators test
 lib/Pod/t/text-options.t		podlators test

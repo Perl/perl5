@@ -381,6 +381,20 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Log::Message' =>
+		{
+		'MAINTAINER'    => 'kane',
+                'FILES'         => q[lib/Log/Message.pm lib/Log/Message/{Config,Handlers,Item}.pm lib/Log/Message/t],
+                'CPAN'          => 1,
+		},
+
+	'Log::Message::Simple' =>
+                {
+                'MAINTAINER'    => 'tels',
+                'FILES'         => q[lib/Log/Message/Simple.pm lib/Log/Message/Simple],
+                'CPAN'          => 1,
+                },
+
 	'Math::BigFloat' =>
 		{
 		'MAINTAINER'	=> 'tels',
