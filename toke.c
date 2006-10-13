@@ -805,7 +805,7 @@ S_skipspace0(pTHX_ register char *s)
 	return s;
     if (PL_skipwhite) {
 	if (!PL_thiswhite)
-	    PL_thiswhite = newSVpvn("",0);
+	    PL_thiswhite = newSVpvs("");
 	sv_catsv(PL_thiswhite, PL_skipwhite);
 	sv_free(PL_skipwhite);
 	PL_skipwhite = 0;
@@ -833,7 +833,7 @@ S_skipspace1(pTHX_ register char *s)
     PL_realtokenstart = -1;
     if (PL_skipwhite) {
 	if (!PL_nextwhite)
-	    PL_nextwhite = newSVpvn("",0);
+	    PL_nextwhite = newSVpvs("");
 	sv_catsv(PL_nextwhite, PL_skipwhite);
 	sv_free(PL_skipwhite);
 	PL_skipwhite = 0;
@@ -860,7 +860,7 @@ S_skipspace2(pTHX_ register char *s, SV **svp)
     }
     if (PL_skipwhite) {
 	if (!*svp)
-	    *svp = newSVpvn("",0);
+	    *svp = newSVpvs("");
 	sv_setsv(*svp, PL_skipwhite);
 	sv_free(PL_skipwhite);
 	PL_skipwhite = 0;
@@ -944,7 +944,7 @@ S_skipspace(pTHX_ register char *s)
 #ifdef PERL_MAD
 	    if (PL_madskills && curoff != startoff) {
 		if (!PL_skipwhite)
-		    PL_skipwhite = newSVpvn("",0);
+		    PL_skipwhite = newSVpvs("");
 		sv_catpvn(PL_skipwhite, SvPVX(PL_linestr) + startoff,
 					curoff - startoff);
 	    }
@@ -1048,7 +1048,7 @@ S_skipspace(pTHX_ register char *s)
   done:
     if (PL_madskills) {
 	if (!PL_skipwhite)
-	    PL_skipwhite = newSVpvn("",0);
+	    PL_skipwhite = newSVpvs("");
 	curoff = s - SvPVX(PL_linestr);
 	if (curoff - startoff)
 	    sv_catpvn(PL_skipwhite, SvPVX(PL_linestr) + startoff,
@@ -1159,7 +1159,7 @@ S_start_force(pTHX_ int where)
     PL_curforce = where;
     if (PL_nextwhite) {
 	if (PL_madskills)
-	    curmad('^', newSVpvn("",0));
+	    curmad('^', newSVpvs(""));
 	CURMAD('_', PL_nextwhite);
     }
 }
@@ -1674,7 +1674,7 @@ S_sublex_done(pTHX)
 	if (PL_madskills) {
 	    if (PL_thiswhite) {
 		if (!PL_endwhite)
-		    PL_endwhite = newSVpvn("",0);
+		    PL_endwhite = newSVpvs("");
 		sv_catsv(PL_endwhite, PL_thiswhite);
 		PL_thiswhite = 0;
 	    }
@@ -2886,7 +2886,7 @@ Perl_madlex(pTHX)
     if (!PL_thismad || PL_thismad->mad_key == '^') {	/* not forced already? */
 	if (!PL_thistoken) {
 	    if (PL_realtokenstart < 0 || !CopLINE(PL_curcop))
-		PL_thistoken = newSVpvn("",0);
+		PL_thistoken = newSVpvs("");
 	    else {
 		char * const tstart = SvPVX(PL_linestr) + PL_realtokenstart;
 		PL_thistoken = newSVpvn(tstart, s - tstart);
@@ -3192,7 +3192,7 @@ Perl_yylex(pTHX)
 		    PL_lex_state = LEX_INTERPCONCAT;
 #ifdef PERL_MAD
 		    if (PL_madskills)
-			PL_thistoken = newSVpvn("\\E",2);
+			PL_thistoken = newSVpvs("\\E");
 #endif
 		}
 		return REPORT(')');
@@ -3201,7 +3201,7 @@ Perl_yylex(pTHX)
 	    while (PL_bufptr != PL_bufend &&
 	      PL_bufptr[0] == '\\' && PL_bufptr[1] == 'E') {
 		if (!PL_thiswhite)
-		    PL_thiswhite = newSVpvn("",0);
+		    PL_thiswhite = newSVpvs("");
 		sv_catpvn(PL_thiswhite, PL_bufptr, 2);
 		PL_bufptr += 2;
 	    }
@@ -3219,7 +3219,7 @@ Perl_yylex(pTHX)
 	    if (s[1] == '\\' && s[2] == 'E') {
 #ifdef PERL_MAD
 		if (!PL_thiswhite)
-		    PL_thiswhite = newSVpvn("",0);
+		    PL_thiswhite = newSVpvs("");
 		sv_catpvn(PL_thiswhite, PL_bufptr, 4);
 #endif
 	        PL_bufptr = s + 3;
@@ -3258,7 +3258,7 @@ Perl_yylex(pTHX)
 		else
 		    Perl_croak(aTHX_ "panic: yylex");
 		if (PL_madskills) {
-		    SV* const tmpsv = newSVpvn("",0);
+		    SV* const tmpsv = newSVpvs("");
 		    Perl_sv_catpvf(aTHX_ tmpsv, "\\%c", *s);
 		    curmad('_', tmpsv);
 		}
@@ -3272,7 +3272,7 @@ Perl_yylex(pTHX)
 		if (PL_madskills) {
 		    if (PL_thistoken)
 			sv_free(PL_thistoken);
-		    PL_thistoken = newSVpvn("",0);
+		    PL_thistoken = newSVpvs("");
 		}
 #endif
 		/* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
@@ -3318,7 +3318,7 @@ Perl_yylex(pTHX)
 	    if (PL_madskills) {
 		if (PL_thistoken)
 		    sv_free(PL_thistoken);
-		PL_thistoken = newSVpvn("",0);
+		PL_thistoken = newSVpvs("");
 	    }
 #endif
 	    /* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
@@ -3344,7 +3344,7 @@ Perl_yylex(pTHX)
 	    if (PL_madskills) {
 		if (PL_thistoken)
 		    sv_free(PL_thistoken);
-		PL_thistoken = newSVpvn("",0);
+		PL_thistoken = newSVpvs("");
 	    }
 #endif
 	    return REPORT(')');
@@ -3395,7 +3395,7 @@ Perl_yylex(pTHX)
 		if (PL_madskills) {
 		    if (PL_thistoken)
 			sv_free(PL_thistoken);
-		    PL_thistoken = newSVpvn("",0);
+		    PL_thistoken = newSVpvs("");
 		}
 #endif
 		/* commas only at base level: /$a\Ub$c/ => ($a,uc(b.$c)) */
@@ -3898,7 +3898,7 @@ Perl_yylex(pTHX)
 		      Perl_croak(aTHX_ "panic: input overflow");
 		    if (PL_madskills && CopLINE(PL_curcop) >= 1) {
 			if (!PL_thiswhite)
-			    PL_thiswhite = newSVpvn("",0);
+			    PL_thiswhite = newSVpvs("");
 			if (CopLINE(PL_curcop) == 1) {
 			    sv_setpvn(PL_thiswhite, "", 0);
 			    PL_faketokens = 0;
@@ -4466,7 +4466,7 @@ Perl_yylex(pTHX)
 #if 0
 		    if (PL_madskills) {
 			if (!PL_thiswhite)
-			    PL_thiswhite = newSVpvn("",0);
+			    PL_thiswhite = newSVpvs("");
 			sv_catpvn(PL_thiswhite,"}",1);
 		    }
 #endif
@@ -4491,7 +4491,7 @@ Perl_yylex(pTHX)
 	force_next('}');
 #ifdef PERL_MAD
 	if (!PL_thistoken)
-	    PL_thistoken = newSVpvn("",0);
+	    PL_thistoken = newSVpvs("");
 #endif
 	TOKEN(';');
     case '&':
@@ -4565,7 +4565,7 @@ Perl_yylex(pTHX)
 #ifdef PERL_MAD
 		    if (PL_madskills) {
 			if (!PL_thiswhite)
-			    PL_thiswhite = newSVpvn("",0);
+			    PL_thiswhite = newSVpvs("");
 			sv_catpvn(PL_thiswhite, PL_linestart,
 				  PL_bufend - PL_linestart);
 		    }
@@ -5347,7 +5347,7 @@ Perl_yylex(pTHX)
 		    if (PL_madskills) {
 			PL_nextwhite = nextPL_nextwhite;
 			curmad('X', PL_thistoken);
-			PL_thistoken = newSVpvn("",0);
+			PL_thistoken = newSVpvs("");
 		    }
 #endif
 		    force_next(WORD);
@@ -5434,7 +5434,7 @@ Perl_yylex(pTHX)
 			if (PL_madskills) {
 			    PL_nextwhite = nextPL_nextwhite;
 			    curmad('X', PL_thistoken);
-			    PL_thistoken = newSVpvn("",0);
+			    PL_thistoken = newSVpvs("");
 			}
 			force_next(WORD);
 			TOKEN(NOAMP);
@@ -5474,7 +5474,7 @@ Perl_yylex(pTHX)
 			PL_expect = XTERM;
 			PL_nextwhite = nextPL_nextwhite;
 			curmad('X', PL_thistoken);
-			PL_thistoken = newSVpvn("",0);
+			PL_thistoken = newSVpvs("");
 			force_next(WORD);
 			TOKEN(NOAMP);
 		    }
@@ -5619,7 +5619,7 @@ Perl_yylex(pTHX)
 		    if (PL_realtokenstart >= 0) {
 			char *tstart = SvPVX(PL_linestr) + PL_realtokenstart;
 			if (!PL_endwhite)
-			    PL_endwhite = newSVpvn("",0);
+			    PL_endwhite = newSVpvs("");
 			sv_catsv(PL_endwhite, PL_thiswhite);
 			PL_thiswhite = 0;
 			sv_catpvn(PL_endwhite, tstart, PL_bufend - tstart);
@@ -6633,7 +6633,7 @@ Perl_yylex(pTHX)
 		start_force(0);
 		if (tmpwhite) {
 		    if (PL_madskills)
-			curmad('^', newSVpvn("",0));
+			curmad('^', newSVpvs(""));
 		    CURMAD('_', tmpwhite);
 		}
 		force_next(0);
