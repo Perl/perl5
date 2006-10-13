@@ -82,6 +82,8 @@ X</x>
 
 =head2 Regular Expressions
 
+=head3 Metacharacters
+
 The patterns used in Perl pattern matching derive from supplied in
 the Version 8 regex routines.  (The routines are derived
 (distantly) from Henry Spencer's freely redistributable reimplementation
@@ -118,6 +120,8 @@ To simplify multi-line substitutions, the "." character never matches a
 newline unless you use the C</s> modifier, which in effect tells Perl to pretend
 the string is a single line--even if it isn't.
 X<.> X</s>
+
+=head3 Quantifiers
 
 The following standard quantifiers are recognized:
 X<metacharacter> X<quantifier> X<*> X<+> X<?> X<{n}> X<{n,}> X<{n,m}>
@@ -160,11 +164,11 @@ sometimes undesirable. Thus Perl provides the "possesive" quantifier form
 as well.
 
     *+	   Match 0 or more times and give nothing back
-    +?	   Match 1 or more times and give nothing back
+    ++	   Match 1 or more times and give nothing back
     ?+	   Match 0 or 1 time and give nothing back
     {n}+   Match exactly n times and give nothing back (redundant)
-    {n,}?  Match at least n times and give nothing back
-    {n,m}? Match at least n but not more than m times and give nothing back
+    {n,}+  Match at least n times and give nothing back
+    {n,m}+ Match at least n but not more than m times and give nothing back
 
 For instance,
 
@@ -184,6 +188,8 @@ possessive quantifiers are just syntactic sugar for that construct. For
 instance the above example could also be written as follows:
 
    /"(?>(?:(?>[^"\\]+)|\\.)*)"/
+
+=head3 Escape sequences
 
 Because patterns are processed as double quoted strings, the following
 also work:
@@ -216,6 +222,8 @@ You cannot include a literal C<$> or C<@> within a C<\Q> sequence.
 An unescaped C<$> or C<@> interpolates the corresponding variable,
 while escaping will cause the literal string C<\$> to be matched.
 You'll need to write something like C<m/\Quser\E\@\Qhost/>.
+
+=head3 Character classes
 
 In addition, Perl defines the following:
 X<metacharacter>
@@ -397,6 +405,8 @@ only supported within a character class.  The POSIX character classes
 [.cc.] and [=cc=] are recognized but B<not> supported and trying to
 use them will cause an error.
 
+=head3 Assertions
+
 Perl defines the following zero-width assertions:
 X<zero-width assertion> X<assertion> X<regex, zero-width assertion>
 X<regexp, zero-width assertion>
@@ -436,6 +446,8 @@ is permitted to use it elsewhere, as in C</(?<=\G..)./g>, some
 such uses (C</.\G/g>, for example) currently cause problems, and
 it is recommended that you avoid such usage for now.
 X<\G>
+
+=head3 Capture buffers
 
 The bracketing construct C<( ... )> creates capture buffers.  To
 refer to the digit'th buffer use \<digit> within the
