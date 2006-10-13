@@ -881,7 +881,7 @@ the beginning of the whole pattern. C<(?0)> is an alternate syntax for
 C<(?R)>.
 
 The following pattern matches a function foo() which may contain
-balanced parenthesis as the argument.
+balanced parentheses as the argument.
 
   $re = qr{ (                    # paren group 1 (full function)
               foo
