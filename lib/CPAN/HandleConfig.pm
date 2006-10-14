@@ -2,7 +2,7 @@ package CPAN::HandleConfig;
 use strict;
 use vars qw(%can %keys $VERSION);
 
-$VERSION = sprintf "%.6f", substr(q$Rev: 984 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 987 $,4)/1000000 + 5.4;
 
 %can = (
         commit   => "Commit changes to disk",
@@ -11,6 +11,9 @@ $VERSION = sprintf "%.6f", substr(q$Rev: 984 $,4)/1000000 + 5.4;
         init     => "Interactive setting of all options",
 );
 
+# Q: where is the "How do I add a new config option" HOWTO?
+# A1: svn diff -r 757:758 # where dagolden added test_report
+# A2: svn diff -r 985:986 # where andk added yaml_module
 %keys = map { $_ => undef } (
                              #  allow_unauthenticated ?? some day...
                              "build_cache",
@@ -58,6 +61,7 @@ $VERSION = sprintf "%.6f", substr(q$Rev: 984 $,4)/1000000 + 5.4;
                              "password",
                              "prefer_installer",
                              "prerequisites_policy",
+                             "prefs_dir",
                              "proxy_pass",
                              "proxy_user",
                              "scan_cache",
@@ -72,6 +76,7 @@ $VERSION = sprintf "%.6f", substr(q$Rev: 984 $,4)/1000000 + 5.4;
                              "username",
                              "wait_list",
                              "wget",
+                             "yaml_module",
                             );
 if ($^O eq "MSWin32") {
     for my $k (qw(
@@ -581,7 +586,7 @@ package
 
 use strict;
 use vars qw($AUTOLOAD $VERSION);
-$VERSION = sprintf "%.2f", substr(q$Rev: 984 $,4)/100;
+$VERSION = sprintf "%.2f", substr(q$Rev: 987 $,4)/100;
 
 # formerly CPAN::HandleConfig was known as CPAN::Config
 sub AUTOLOAD {

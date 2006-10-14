@@ -1,7 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.88_53';
+$CPAN::VERSION = '1.88_54';
 $CPAN::VERSION = eval $CPAN::VERSION;
 
 use CPAN::HandleConfig;
@@ -335,6 +335,28 @@ Trying to chdir to "$cwd->[1]" instead.
             }
         }
     }
+}
+
+# CPAN::_yaml_loadfile
+sub _yaml_loadfile {
+    my($self,$local_file) = @_;
+    my $yaml_module = $CPAN::Config->{yaml_module} || "YAML";
+    if ($CPAN::META->has_inst($yaml_module)) {
+        my $code = UNIVERSAL::can($yaml_module, "LoadFile");
+        my $yaml;
+        eval { $yaml = $code->($local_file); };
+        if ($@) {
+            $CPAN::Frontend->mydie("Alert: While trying to parse YAML file\n".
+                                   "  $local_file\n".
+                                   "with $yaml_module the following error was encountered:\n".
+                                   "  $@\n"
+                                  );
+        }
+        return $yaml;
+    } else {
+        $CPAN::Frontend->mywarn("'$yaml_module' not installed, cannot parse '$local_file'\n");
+    }
+    return +{};
 }
 
 package CPAN::CacheMgr;
@@ -2491,7 +2513,6 @@ to find objects with matching identifiers.
     }
     for my $obj (@qcopy) {
         $obj->color_cmd_tmps(0,0);
-        delete $obj->{incommandcolor};
     }
 }
 
@@ -3711,7 +3732,8 @@ sub rd_authindex {
     local($_);
     push @lines, split /\012/ while <FH>;
     my $i = 0;
-    my $modulus = int(@lines/75) || 1;
+    my $modulus = int($#lines/75) || 1;
+    CPAN->debug(sprintf "modulus[%d]lines[%s]", $modulus, scalar @lines) if $CPAN::DEBUG;
     foreach (@lines) {
 	my($userid,$fullname,$email) =
 	    m/alias\s+(\S+)\s+\"([^\"\<]+)\s+\<([^\>]+)\>\"/;
@@ -3836,7 +3858,7 @@ happen.\a
     CPAN->debug("secondtime[$secondtime]") if $CPAN::DEBUG;
     my(%exists);
     my $i = 0;
-    my $modulus = int(@lines/75) || 1;
+    my $modulus = int($#lines/75) || 1;
     foreach (@lines) {
         # before 1.56 we split into 3 and discarded the rest. From
         # 1.57 we assign remaining text to $comment thus allowing to
@@ -3975,7 +3997,7 @@ sub rd_modlist {
     Carp::confess($@) if $@;
     return if $CPAN::Signal;
     my $i = 0;
-    my $until = keys %$ret;
+    my $until = keys(%$ret) - 1;
     my $modulus = int($until/75) || 1;
     CPAN->debug(sprintf "until[%d]", $until) if $CPAN::DEBUG;
     for (keys %$ret) {
@@ -4492,12 +4514,7 @@ sub fast_yaml {
                                 $local_wanted)) {
         $CPAN::Frontend->mydie("Giving up on downloading yaml file '$local_wanted'\n");
     }
-    if ($CPAN::META->has_inst("YAML")) {
-        my $yaml = YAML::LoadFile($local_file);
-        return $yaml;
-    } else {
-        $CPAN::Frontend->mydie("Yaml not installed, cannot parse '$local_file'\n");
-    }
+    my $yaml = CPAN->_yaml_loadfile($local_file);
 }
 
 #-> sub CPAN::Distribution::pretty_id
@@ -5534,13 +5551,21 @@ is part of the perl-%s distribution. To install that, you need to run
 #	$switch = "-MExtUtils::MakeMaker ".
 #	    "-Mops=:default,:filesys_read,:filesys_open,require,chdir"
 #	    if $] > 5.00310;
+        my $makepl_arg = $self->make_x_arg("pl");
 	$system = sprintf("%s%s Makefile.PL%s",
                           $perl,
                           $switch ? " $switch" : "",
-                          $CPAN::Config->{makepl_arg} ? " $CPAN::Config->{makepl_arg}" : "",
+                          $makepl_arg ? " $makepl_arg" : "",
                          );
     }
-    unless (exists $self->{writemakefile}) {
+    local %ENV = %ENV;
+    if (my $env = $self->prefs->{pl}{env}) {
+        for my $e (keys %$env) {
+            $ENV{$e} = $env->{$e};
+        }
+    }
+    if (exists $self->{writemakefile}) {
+    } else {
 	local($SIG{ALRM}) = sub { die "inactivity_timeout reached\n" };
 	my($ret,$pid);
 	$@ = "";
@@ -5594,13 +5619,17 @@ is part of the perl-%s distribution. To install that, you need to run
                 return;
             }
 	} else {
-	  $ret = system($system);
-	  if ($ret != 0) {
-	    $self->{writemakefile} = CPAN::Distrostatus
-                ->new("NO '$system' returned status $ret");
-            $CPAN::Frontend->mywarn("Warning: No success on command[$system]\n");
-	    return;
-	  }
+            if (my $expect = $self->prefs->{pl}{expect}) {
+                $ret = $self->run_via_expect($system,$expect);
+            } else {
+                $ret = system($system);
+            }
+            if ($ret != 0) {
+                $self->{writemakefile} = CPAN::Distrostatus
+                    ->new("NO '$system' returned status $ret");
+                $CPAN::Frontend->mywarn("Warning: No success on command[$system]\n");
+                return;
+            }
 	}
 	if (-f "Makefile" || -f "Build") {
 	  $self->{writemakefile} = CPAN::Distrostatus->new("YES");
@@ -5625,6 +5654,10 @@ is part of the perl-%s distribution. To install that, you need to run
             return 1 if $self->follow_prereqs(@prereq); # signal success to the queuerunner
         }
     }
+    if ($CPAN::Signal){
+      delete $self->{force_update};
+      return;
+    }
     if ($self->{modulebuild}) {
         unless (-f "Build") {
             my $cwd = Cwd::cwd;
@@ -5636,6 +5669,19 @@ is part of the perl-%s distribution. To install that, you need to run
     } else {
         $system = join " ", $self->_make_command(), $CPAN::Config->{make_arg};
     }
+    my $make_arg = $self->make_x_arg("make");
+    $system = sprintf("%s%s",
+                      $system,
+                      $make_arg ? " $make_arg" : "",
+                     );
+    if (my $env = $self->prefs->{make}{env}) { # overriding the local
+                                               # ENV of PL, not the
+                                               # outer ENV, but
+                                               # unlikely to be a risk
+        for my $e (keys %$env) {
+            $ENV{$e} = $env->{$e};
+        }
+    }
     if (system($system) == 0) {
 	 $CPAN::Frontend->myprint("  $system -- OK\n");
 	 $self->{make} = CPAN::Distrostatus->new("YES");
@@ -5646,19 +5692,170 @@ is part of the perl-%s distribution. To install that, you need to run
     }
 }
 
+# CPAN::Distribution::run_via_expect
+sub run_via_expect {
+    my($self,$system,$expect) = @_;
+    CPAN->debug("system[$system]expect[$expect]") if $CPAN::DEBUG;
+    if ($CPAN::META->has_inst("Expect")) {
+        my $expo = Expect->new;
+        $expo->spawn($system);
+      EXPECT: for (my $i = 0; $i < $#$expect; $i+=2) {
+            my $regex = eval "qr{$expect->[$i]}";
+            my $send = $expect->[$i+1];
+            $expo->expect(10,
+                          [ eof => sub {
+                                my $but = $expo->clear_accum;
+                                $CPAN::Frontend->mywarn("EOF (maybe harmless) system[$system]
+expected[$regex]\nbut[$but]\n\n");
+                                last EXPECT;
+                            } ],
+                          [ timeout => sub {
+                                my $but = $expo->clear_accum;
+                                $CPAN::Frontend->mydie("TIMEOUT system[$system]
+expected[$regex]\nbut[$but]\n\n");
+                            } ],
+                          -re => $regex);
+            $expo->send($send);
+        }
+        $expo->soft_close;
+        return $expo->exitstatus();
+    } else {
+        $CPAN::Frontend->mywarn("Expect not installed, falling back to system()\n");
+        return system($system);
+    }
+}
+
+# CPAN::Distribution::_find_prefs
+sub _find_prefs {
+    my($self,$distro) = @_;
+    my $distroid = $distro->pretty_id;
+    CPAN->debug("distroid[$distroid]") if $CPAN::DEBUG;
+    my $prefs_dir = $CPAN::Config->{prefs_dir};
+    eval { File::Path::mkpath($prefs_dir); };
+    if ($@) {
+        $CPAN::Frontend->mydie("Cannot create directory $prefs_dir");
+    }
+    my $yaml_module = $CPAN::Config->{yaml_module} || "YAML";
+    if ($CPAN::META->has_inst($yaml_module)) {
+        my $dh = DirHandle->new($prefs_dir)
+            or die Carp::croak("Couldn't open '$prefs_dir': $!");
+      DIRENT: for (sort $dh->read) {
+            next if $_ eq "." || $_ eq "..";
+            next unless /\.yml$/;
+            my $abs = File::Spec->catfile($prefs_dir, $_);
+            CPAN->debug("abs[$abs]") if $CPAN::DEBUG;
+            if (-f $abs) {
+                my $yaml = CPAN->_yaml_loadfile($abs);
+                my $ok = 1;
+                my $match = $yaml->{match} or
+                    $CPAN::Frontend->mydie("Nonconforming YAML file '$abs': ".
+                                           "missing attribut 'match'. Please ".
+                                           "remove, cannot continue.");
+                for my $sub_attribute (keys %$match) {
+                    my $qr = eval "qr{$yaml->{match}{$sub_attribute}}";
+                    if ($sub_attribute eq "module") {
+                        my $okm = 0;
+                        my @modules = $distro->containsmods;
+                        for my $module (@modules) {
+                            $okm ||= $module =~ /$qr/;
+                            last if $okm;
+                        }
+                        $ok &&= $okm;
+                    } elsif ($sub_attribute eq "distribution") {
+                        my $okd = $distroid =~ /$qr/;
+                        $ok &&= $okd;
+                    } else {
+                        $CPAN::Frontend->mydie("Nonconforming YAML file '$abs': ".
+                                               "unknown sub_attribut '$sub_attribute'. ".
+                                               "Please ".
+                                               "remove, cannot continue.");
+                    }
+                }
+                if ($ok) {
+                    return {
+                            prefs => $yaml,
+                            prefs_file => $abs,
+                           };
+                }
+            }
+        }
+    } else {
+        $CPAN::Frontend->mywarn("'$yaml_module' not installed, cannot read prefs '$prefs_dir'\n");
+    }
+    return;
+}
+
+# CPAN::Distribution::prefs
+sub prefs {
+    my($self) = @_;
+    if (exists $self->{prefs}) {
+        return $self->{prefs}; # XXX comment out during debugging
+    }
+    if ($CPAN::Config->{prefs_dir}) {
+        CPAN->debug("prefs_dir[$CPAN::Config->{prefs_dir}]") if $CPAN::DEBUG;
+        my $prefs = $self->_find_prefs($self);
+        if ($prefs) {
+            for my $x (qw(prefs prefs_file)) {
+                $self->{$x} = $prefs->{$x};
+            }
+            my $basename = File::Basename::basename($self->{prefs_file});
+            my $filler1 = "_" x 22;
+            my $filler2 = int(66 - length($basename))/2;
+            $filler2 = 0 if $filler2 < 0;
+            $filler2 = " " x $filler2;
+            $CPAN::Frontend->myprint("
+$filler1 D i s t r o P r e f s $filler1
+$filler2 $basename $filler2
+");
+            $CPAN::Frontend->mysleep(1);
+            return $self->{prefs};
+        }
+    }
+    return +{};
+}
+
+# CPAN::Distribution::make_x_arg
+sub make_x_arg {
+    my($self, $whixh) = @_;
+    my $make_x_arg;
+    my $prefs = $self->prefs;
+    if (
+        $prefs
+        && exists $prefs->{$whixh}
+        && exists $prefs->{$whixh}{args}
+        && $prefs->{$whixh}{args}
+       ) {
+        $make_x_arg = join(" ",
+                           map {CPAN::HandleConfig
+                                 ->safe_quote($_)} @{$prefs->{$whixh}{args}},
+                          );
+    }
+    my $what = sprintf "make%s_arg", $whixh eq "make" ? "" : $whixh;
+    $make_x_arg ||= $CPAN::Config->{$what};
+    return $make_x_arg;
+}
+
+# CPAN::Distribution::_make_command
 sub _make_command {
     my ($self) = @_;
     if ($self) {
         return
-          CPAN::HandleConfig
+            CPAN::HandleConfig
                 ->safe_quote(
-                             $CPAN::Config->{make} || $Config::Config{make} || 'make'
+                             $self->prefs->{cpanconfig}{make}
+                             || $CPAN::Config->{make}
+                             || $Config::Config{make}
+                             || 'make'
                             );
     } else {
         # Old style call, without object. Deprecated
         Carp::confess("CPAN::_make_command() used as function. Don't Do That.");
         return
-          safe_quote(undef, $CPAN::Config->{make} || $Config::Config{make} || 'make');
+          safe_quote(undef,
+                     $self->prefs->{cpanconfig}{make}
+                     || $CPAN::Config->{make}
+                     || $Config::Config{make}
+                     || 'make');
     }
 }
 
@@ -5801,17 +5998,14 @@ sub read_yaml {
     my $yaml = File::Spec->catfile($build_dir,"META.yml");
     $self->debug("yaml[$yaml]") if $CPAN::DEBUG;
     return unless -f $yaml;
-    if ($CPAN::META->has_inst("YAML")) {
-        eval { $self->{yaml_content} = YAML::LoadFile($yaml); };
-        if ($@) {
-            $CPAN::Frontend->mywarn("Error while parsing META.yml: $@");
-            return;
-        }
-        if (not exists $self->{yaml_content}{dynamic_config}
-            or $self->{yaml_content}{dynamic_config}
-           ) {
-            $self->{yaml_content} = undef;
-        }
+    eval { $self->{yaml_content} = CPAN->_yaml_loadfile($yaml); };
+    if ($@) {
+        return; # if we die, then we cannot read our own META.yml
+    }
+    if (not exists $self->{yaml_content}{dynamic_config}
+        or $self->{yaml_content}{dynamic_config}
+       ) {
+        $self->{yaml_content} = undef;
     }
     $self->debug(sprintf "yaml_content[%s]", $self->{yaml_content} || "UNDEF")
         if $CPAN::DEBUG;
@@ -6023,9 +6217,18 @@ sub test {
     } else {
         $system = join " ", $self->_make_command(), "test";
     }
-    my $tests_ok;
-    if ( $CPAN::Config->{test_report} && 
-         $CPAN::META->has_inst("CPAN::Reporter") ) {
+    my($tests_ok);
+    local %ENV = %ENV;
+    if (my $env = $self->prefs->{test}{env}) {
+        for my $e (keys %$env) {
+            $ENV{$e} = $env->{$e};
+        }
+    }
+    my $expect = $self->prefs->{test}{expect};
+    if ($expect && @$expect) {
+        $tests_ok = $self->run_via_expect($system,$expect) == 0;
+    } elsif ( $CPAN::Config->{test_report} && 
+              $CPAN::META->has_inst("CPAN::Reporter") ) {
         $tests_ok = CPAN::Reporter::test($self, $system);
     } else {
         $tests_ok = system($system) == 0;
@@ -6035,11 +6238,14 @@ sub test {
             my @prereq;
             for my $m (keys %{$self->{sponsored_mods}}) {
                 my $m_obj = CPAN::Shell->expand("Module",$m);
-                if (!$m_obj->distribution->{make_test}
-                    ||
-                    $m_obj->distribution->{make_test}->failed){
-                    #$m_obj->dump;
-                    push @prereq, $m;
+                my $d_obj = $m_obj->distribution;
+                if ($d_obj) {
+                    if (!$d_obj->{make_test}
+                        ||
+                        $d_obj->{make_test}->failed){
+                        #$m_obj->dump;
+                        push @prereq, $m;
+                    }
                 }
             }
             if (@prereq){
@@ -6220,8 +6426,10 @@ sub install {
                           $CPAN::Config->{mbuild_install_arg},
                          );
     } else {
-        my($make_install_make_command) = $CPAN::Config->{make_install_make_command} ||
-            $self->_make_command();
+        my($make_install_make_command) =
+            $self->prefs->{cpanconfig}{make_install_make_command}
+                || $CPAN::Config->{make_install_make_command}
+                    || $self->_make_command();
         $system = sprintf("%s install %s",
                           $make_install_make_command,
                           $CPAN::Config->{make_install_arg},
@@ -6229,14 +6437,16 @@ sub install {
     }
 
     my($stderr) = $^O eq "MSWin32" ? "" : " 2>&1 ";
-    $CPAN::Config->{build_requires_install_policy}||="ask/yes";
+    my $brip = $self->prefs->{cpanconfig}{build_requires_install_policy};
+    $brip ||= $CPAN::Config->{build_requires_install_policy};
+    $brip ||="ask/yes";
     my $id = $self->id;
     my $reqtype = $self->{reqtype} ||= "c"; # in doubt it was a command
     my $want_install = "yes";
     if ($reqtype eq "b") {
-        if ($CPAN::Config->{build_requires_install_policy} eq "no") {
+        if ($brip eq "no") {
             $want_install = "no";
-        } elsif ($CPAN::Config->{build_requires_install_policy} =~ m|^ask/(.+)|) {
+        } elsif ($brip =~ m|^ask/(.+)|) {
             my $default = $1;
             $default = "yes" unless $default =~ /^(y|n)/i;
             $want_install =
@@ -6269,12 +6479,16 @@ sub install {
     } else {
         $self->{install} = CPAN::Distrostatus->new("NO");
         $CPAN::Frontend->mywarn("  $system -- NOT OK\n");
+        my $mimc =
+            $self->prefs->{cpanconfig}{make_install_make_command} ||
+                $CPAN::Config->{make_install_make_command};
         if (
             $makeout =~ /permission/s
             && $> > 0
             && (
-                ! $CPAN::Config->{make_install_make_command}
-                || $CPAN::Config->{make_install_make_command} eq $CPAN::Config->{make}
+                ! $mimc
+                || $mimc eq ($self->prefs->{cpanconfig}{make}
+                             || $CPAN::Config->{make})
                )
            ) {
             $CPAN::Frontend->myprint(
@@ -7386,23 +7600,30 @@ Batch mode:
 
   use CPAN;
 
-  # modules:
+  # Modules:
 
-  $mod = "Acme::Meta";
-  install $mod;
-  CPAN::Shell->install($mod);                    # same thing
-  CPAN::Shell->expandany($mod)->install;         # same thing
-  CPAN::Shell->expand("Module",$mod)->install;   # same thing
-  CPAN::Shell->expand("Module",$mod)
-    ->distribution->install;                     # same thing
+  cpan> install Acme::Meta                       # in the shell
 
-  # distributions:
+  CPAN::Shell->install("Acme::Meta");            # in perl
 
-  $distro = "NWCLARK/Acme-Meta-0.01.tar.gz";
-  install $distro;                                # same thing
-  CPAN::Shell->install($distro);                  # same thing
-  CPAN::Shell->expandany($distro)->install;       # same thing
-  CPAN::Shell->expand("Distribution",$distro)->install; # same thing
+  # Distributions:
+
+  cpan> install NWCLARK/Acme-Meta-0.02.tar.gz    # in the shell
+
+  CPAN::Shell->
+    install("NWCLARK/Acme-Meta-0.02.tar.gz");    # in perl
+
+  # module objects:
+
+  $mo = CPAN::Shell->expandany($mod);
+  $mo = CPAN::Shell->expand("Module",$mod);      # same thing
+
+  # distribution objects:
+
+  $do = CPAN::Shell->expand("Module",$mod)->distribution;
+  $do = CPAN::Shell->expandany($distro);         # same thing
+  $do = CPAN::Shell->expand("Distribution",
+                            $distro);            # same thing
 
 =head1 STATUS
 
@@ -7732,8 +7953,7 @@ functionalities that are available in the shell.
 
     # install my favorite programs if necessary:
     for $mod (qw(Net::FTP Digest::SHA Data::Dumper)){
-        my $obj = CPAN::Shell->expand('Module',$mod);
-        $obj->install;
+        CPAN::Shell->install($mod);
     }
 
     # list all modules on my disk that have no VERSION number
@@ -7935,6 +8155,10 @@ any case and if this fails, the install will be canceled. The
 cancellation can be avoided by letting C<force> run the C<install> for
 you.
 
+This install method has only the power to install the distribution if
+there are no dependencies in the way. To install an object and all of
+its dependencies, use CPAN::Shell->install.
+
 Note that install() gives no meaningful return value. See uptodate().
 
 =item CPAN::Distribution::isa_perl()
@@ -7964,6 +8188,19 @@ command lynx specified in C<$CPAN::Config->{lynx}>. If lynx
 isn't available, it converts it to plain text with external
 command html2text and runs it through the pager specified
 in C<$CPAN::Config->{pager}>
+
+=item CPAN::Distribution::prefs()
+
+Returns the hash reference from the first matching YAML file that the
+user has deposited in the C<prefs_dir/> directory. The first
+succeeding match wins. The files in the C<prefs_dir/> are processed
+alphabetically and the canonical distroname (e.g.
+AUTHOR/Foo-Bar-3.14.tar.gz) is matched against the regular expressions
+stored in the $root->{match}{distribution} attribute value.
+Additionally all module names contained in a distribution are matched
+agains the regular expressions in the $root->{match}{module} attribute
+value. The two match values are ANDed together. Each of the two
+attributes are optional.
 
 =item CPAN::Distribution::prereq_pm()
 
@@ -8428,6 +8665,7 @@ defined:
   prerequisites_policy
                      what to do if you are missing module prerequisites
                      ('follow' automatically, 'ask' me, or 'ignore')
+  prefs_dir          local directory to store per-distro build options
   proxy_user         username for accessing an authenticating proxy
   proxy_pass         password for accessing an authenticating proxy
   scan_cache	     controls scanning of cache ('atstart' or 'never')
@@ -8443,6 +8681,7 @@ defined:
   username           your username if you CPAN server wants one
   wait_list          arrayref to a wait server to try (See CPAN::WAIT)
   wget               path to external prg
+  yaml_module        which module to use to read/write YAML files
 
 You can set and query each of these options interactively in the cpan
 shell with the command set defined within the C<o conf> command:
@@ -8533,6 +8772,36 @@ add a new site at runtime it may happen that the previously preferred
 site will be tried another time. This means that if you want to disallow
 a site for the next transfer, it must be explicitly removed from
 urllist.
+
+=head2 prefs_dir for avoiding interactive questions (ALPHA)
+
+(B<Note:> This feature has been introduced in CPAN.pm 1.8854 and is
+still considered experimental and may still be changed)
+
+The files in the directory specified in C<prefs_dir> are YAML files
+that specify how CPAN.pm shall treat distributions that deviate from
+the normal non-interactive model of building and installing CPAN
+modules.
+
+Some modules try to get some data from the user interactively thus
+disturbing the installation of large bundles like Phalanx100 or
+modules like Plagger.
+
+CPAN.pm can use YAML files to either pass additional arguments to one
+of the four commands, set environment variables or instantiate an
+Expect object that reads from the console, waits for some regular
+expression and enters some answer. Needless to say that for the latter
+option Expect.pm needs to be installed.
+
+CPAN.pm comes with a couple of such YAML files. The structure is
+currently not documented. Please see the distroprefs directory of the
+CPAN distribution for examples and follow the README in there.
+
+Please note that setting the environment variable PERL_MM_USE_DEFAULT
+to a true value can also get you a long way if you want to always pick
+the default answers. But this only works if the author of apackage
+used the prompt function provided by ExtUtils::MakeMaker and if the
+defaults are OK for you.
 
 =head1 SECURITY
 
