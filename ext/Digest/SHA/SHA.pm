@@ -6,7 +6,7 @@ use strict;
 use warnings;
 use integer;
 
-our $VERSION = '5.43_01';
+our $VERSION = '5.44';
 
 require Exporter;
 our @ISA = qw(Exporter);
@@ -323,17 +323,16 @@ the larger and stronger hash functions.>
 
 ref. L<http://www.csrc.nist.gov/pki/HashWorkshop/NIST%20Statement/Burr_Mar2005.html>
 
-=head1 BASE64 DIGESTS
+=head1 PADDING OF BASE64 DIGESTS
 
-By convention, CPAN Digest modules do not pad their Base64 output.
-This means that Base64 digests contain no trailing "=" characters.
-Unfortunately, problems can occur when feeding such digests to other
-software that expects properly padded Base64 encodings.
+By convention, CPAN Digest modules do B<not> pad their Base64 output.
+Problems can occur when feeding such digests to other software that
+expects properly padded Base64 encodings.
 
 For the time being, any necessary padding must be done by the user.
-Fortunately, the rule for accomplishing it is straightforward: if the
-length of a Base64-encoded digest isn't a multiple of 4, simply append
-1 or more "=" characters to the end of the digest until it is:
+Fortunately, this is a simple operation: if the length of a Base64-encoded
+digest isn't a multiple of 4, simply append "=" characters to the end
+of the digest until it is:
 
 	while (length($b64_digest) % 4) {
 		$b64_digest .= '=';

@@ -1,5 +1,13 @@
 Revision history for Perl extension Digest::SHA.
 
+5.44  Sat Oct 14 00:42:44 MST 2006
+	- removed SIGNATURE file from distribution
+		-- spurious errors from CPANPLUS can break build
+	- eliminated ppport.h header file
+		-- significantly reduces size of distribution
+	- modified C functions in src/hmac.c to use ANSI prototypes
+		-- thanks to Jarkko Hietaniemi for patch
+
 5.43  Sat Aug  5 02:36:18 MST 2006
 	- undid Perl Best Practice of favoring 3-argument "open"
 		-- 3-arg version uses different semantics for "-"
