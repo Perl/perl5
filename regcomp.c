@@ -3629,10 +3629,11 @@ STATIC I32
 S_add_data(RExC_state_t *pRExC_state, I32 n, const char *s)
 {
     if (RExC_rx->data) {
+	const U32 count = RExC_rx->data->count;
 	Renewc(RExC_rx->data,
-	       sizeof(*RExC_rx->data) + sizeof(void*) * (RExC_rx->data->count + n - 1),
+	       sizeof(*RExC_rx->data) + sizeof(void*) * (count + n - 1),
 	       char, struct reg_data);
-	Renew(RExC_rx->data->what, RExC_rx->data->count + n, U8);
+	Renew(RExC_rx->data->what, count + n, U8);
 	RExC_rx->data->count += n;
     }
     else {
