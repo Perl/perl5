@@ -26650,7 +26650,7 @@ ____________________________________________________________________________
              at the same PL_curstackinfo level. This fails in the case of
              SPLICE(), which pushes a new SETJMP and runops level, but not a
              new stackinfo level. There may be other code which does similar.
-             The solution is to store the current calue of PL_top_env in each
+             The solution is to store the current value of PL_top_env in each
              pushed CxEVAL, and see if it's still the same as PL_top_env when
              the exception is handled.
      Branch: perl
