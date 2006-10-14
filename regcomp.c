@@ -1133,9 +1133,8 @@ is the recommended Unicode-aware way of saying
 
 #define TRIE_LIST_PUSH(state,fid,ns) STMT_START {               \
     if ( TRIE_LIST_CUR( state ) >=TRIE_LIST_LEN( state ) ) {    \
-	TRIE_LIST_LEN( state ) *= 2;                            \
-	Renew( trie->states[ state ].trans.list,                \
-	       TRIE_LIST_LEN( state ), reg_trie_trans_le );     \
+	U32 ging = TRIE_LIST_LEN( state ) *= 2;                 \
+	Renew( trie->states[ state ].trans.list, ging, reg_trie_trans_le ); \
     }                                                           \
     TRIE_LIST_ITEM( state, TRIE_LIST_CUR( state ) ).forid = fid;     \
     TRIE_LIST_ITEM( state, TRIE_LIST_CUR( state ) ).newstate = ns;   \
