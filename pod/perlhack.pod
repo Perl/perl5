@@ -2468,6 +2468,19 @@ the addresses of all those leaked SVs to be dumped; it also converts
 C<new_SV()> from a macro into a real function, so you can use your
 favourite debugger to discover where those pesky SVs were allocated.
 
+=head2 PERL_MEM_LOG
+
+If compiled with C<-DPERL_MEM_LOG>, all Newx() and Renew() allocations
+and Safefree() in the Perl core go through logging functions, which is
+handy for breakpoint setting.  If also compiled with C<-DPERL_MEM_LOG_STDERR>,
+the allocations and frees are logged to STDERR (or more precisely, to the
+file descriptor 2) in these logging functions, with the calling source code
+file and line number (and C function name, if supported by the C compiler).
+
+This logging is somewhat similar to C<-Dm> but independent of C<-DDEBUGGING>,
+and at a higher level (the C<-Dm> is directly at the point of C<malloc()>,
+while the C<PERL_MEMLOG> is at the level of C<New()>>.
+
 =head2 Profiling
 
 Depending on your platform there are various of profiling Perl.

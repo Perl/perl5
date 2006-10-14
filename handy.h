@@ -95,7 +95,7 @@ Null SV pointer.
 #  define FUNCTION__ __func__
 #else
 #  if (defined(_MSC_VER) && _MSC_VER < 1300) || /* Pre-MSVC 7.0 has neither __func__ nor __FUNCTION and no good workarounds, either. */ \
-      (defined(__DECC_VER)) /* Tru64 or VMS, and strict C89 being used, but not modern enough cc (in Tur64, -c99 not known, only -std1). */
+      (defined(__DECC_VER)) /* Tru64 or VMS, and strict C89 being used. */
 #    define FUNCTION__ ""
 #  else
 #    define FUNCTION__ __FUNCTION__ /* Common extension. */
@@ -552,18 +552,19 @@ C<id> is an integer id between 0 and 1299 (used to identify leaks).
 =for apidoc Am|void|Newx|void* ptr|int nitems|type
 The XSUB-writer's interface to the C C<malloc> function.
 
+In 5.9.3, Newx() and friends replace the older New() API, and drops
+the first parameter, I<x>, a debug aid which allowed callers to identify
+themselves.  This aid has been superceded by a new build option,
+PERL_MEM_LOG (see L<perlhack/PERL_MEM_LOG>).  The older API is still
+there for use in XS modules supporting older perls.
+
 =for apidoc Am|void|Newxc|void* ptr|int nitems|type|cast
 The XSUB-writer's interface to the C C<malloc> function, with
-cast.
+cast.  See also C<Newx>.
 
 =for apidoc Am|void|Newxz|void* ptr|int nitems|type
 The XSUB-writer's interface to the C C<malloc> function.  The allocated
-memory is zeroed with C<memzero>.
-
-In 5.9.3, we removed the 1st parameter, a debug aid, from the api.  It
-was used to uniquely identify each usage of these allocation
-functions, but was deemed unnecessary with the availability of better
-memory tracking tools, valgrind for example.
+memory is zeroed with C<memzero>.  See also C<Newx>.
 
 =for apidoc Am|void|Renew|void* ptr|int nitems|type
 The XSUB-writer's interface to the C C<realloc> function.
@@ -635,9 +636,64 @@ hopefully catches attempts to access uninitialized memory.
 
 #endif
 
-#define Newx(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) (t*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))
-#define Newxc(v,n,t,c)	(v = (MEM_WRAP_CHECK_(n,t) (c*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))
-#define Newxz(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) (t*)safemalloc((MEM_SIZE)((n)*sizeof(t))))), \
+#ifdef PERL_MEM_LOG
+/*
+ * If PERL_MEM_LOG is defined, all Newx()s, Renew()s, and Safefree()s
+ * go through functions, which are handy for debugging breakpoints, but
+ * which more importantly get the immediate calling environment (file and
+ * line number, and C function name if available) passed in.  This info can
+ * then be used for logging the calls, for which one gets a sample
+ * implementation if PERL_MEM_LOG_STDERR is defined.
+ * 
+ * Known problems:
+ * - all memory allocs do not get logged, only those
+ *   that go through Newx() and derivatives (while all
+ *  Safefrees do get logged)
+ * - __FILE__ and __LINE__ do not work everywhere
+ * - __func__ or __FUNCTION__ even less so
+ * - I think more goes on after the perlio frees but
+ *   the thing is that STDERR gets closed (as do all
+ *   the file descriptors)
+ * - no deeper calling stack than the caller of the Newx()
+ *   or the kind, but do I look like a C reflection/introspection
+ *   utility to you?
+ * - the function prototypes for the logging functions
+ *   probably should maybe be somewhere else than handy.h
+ * - one could consider inlining (macrofying) the logging
+ *   for speed, but I am too lazy
+ * - one could imagine recording the allocations in a hash,
+ *   (keyed by the allocation address?), and maintain that
+ *   through reallocs and frees, but how to do that without
+ *   any News() happening...?
+ */
+
+Malloc_t Perl_mem_log_alloc(const UV n, const UV typesize, const char *typename, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname);
+
+Malloc_t Perl_mem_log_realloc(const UV n, const UV typesize, const char *typename, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname);
+
+Malloc_t Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int linenumber, const char *funcname);
+
+#endif
+
+#ifdef PERL_MEM_LOG
+#define MEM_LOG_ALLOC(n,t,a)     Perl_mem_log_alloc(n,sizeof(t),STRINGIFY(t),a,__FILE__,__LINE__,FUNCTION__)
+#define MEM_LOG_REALLOC(n,t,v,a) Perl_mem_log_realloc(n,sizeof(t),STRINGIFY(t),v,a,__FILE__,__LINE__,FUNCTION__)
+#define MEM_LOG_FREE(a)          Perl_mem_log_free(a,__FILE__,__LINE__,FUNCTION__)
+#endif
+
+#ifndef MEM_LOG_ALLOC
+#define MEM_LOG_ALLOC(n,t,a)     (a)
+#endif
+#ifndef MEM_LOG_REALLOC
+#define MEM_LOG_REALLOC(n,t,v,a) (a)
+#endif
+#ifndef MEM_LOG_FREE
+#define MEM_LOG_FREE(a)          (a)
+#endif
+
+#define Newx(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_ALLOC(n,t,(t*)safemalloc((MEM_SIZE)((n)*sizeof(t))))))
+#define Newxc(v,n,t,c)	(v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_ALLOC(n,t,(c*)safemalloc((MEM_SIZE)((n)*sizeof(t))))))
+#define Newxz(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_ALLOC(n,t,(t*)safemalloc((MEM_SIZE)((n)*sizeof(t)))))), \
 			memzero((char*)(v), (n)*sizeof(t))
 /* pre 5.9.x compatibility */
 #define New(x,v,n,t)	Newx(v,n,t)
@@ -645,15 +701,15 @@ hopefully catches attempts to access uninitialized memory.
 #define Newz(x,v,n,t)	Newxz(v,n,t)
 
 #define Renew(v,n,t) \
-	  (v = (MEM_WRAP_CHECK_(n,t) (t*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t)))))
+	  (v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_REALLOC(n,t,v,(t*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))))
 #define Renewc(v,n,t,c) \
-	  (v = (MEM_WRAP_CHECK_(n,t) (c*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t)))))
+	  (v = (MEM_WRAP_CHECK_(n,t) MEM_LOG_REALLOC(n,t,v,(c*)saferealloc((Malloc_t)(v),(MEM_SIZE)((n)*sizeof(t))))))
 
 #ifdef PERL_POISON
 #define Safefree(d) \
-  (d ? (void)(safefree((Malloc_t)(d)), Poison(&(d), 1, Malloc_t)) : (void) 0)
+  ((d) ? (void)(safefree(MEM_LOG_FREE((Malloc_t)(d)))), Poison(&(d), 1, Malloc_t)) : (void) 0)
 #else
-#define Safefree(d)	safefree((Malloc_t)(d))
+#define Safefree(d)	safefree(MEM_LOG_FREE((Malloc_t)(d)))
 #endif
 
 #define Move(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) (void)memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))

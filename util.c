@@ -4707,6 +4707,55 @@ Perl_my_sprintf(char *buffer, const char* pat, ...)
 }
 #endif
 
+#ifdef PERL_MEM_LOG
+
+#define PERL_MEM_LOG_SPRINTF_BUF_SIZE 128
+
+Malloc_t
+Perl_mem_log_alloc(const UV n, const UV typesize, const char *typename, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
+{
+#ifdef PERL_MEM_LOG_STDERR
+    /* We can't use PerlIO for obvious reasons. */
+    char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
+    sprintf(buf,
+	    "alloc: %s:%d:%s: %"IVdf" %"UVuf" %s = %"IVdf": %"UVxf"\n",
+	    filename, linenumber, funcname,
+	    n, typesize, typename, n * typesize, PTR2UV(newalloc));
+    PerlLIO_write(2,  buf, strlen(buf));
+#endif
+    return newalloc;
+}
+
+Malloc_t
+Perl_mem_log_realloc(const UV n, const UV typesize, const char *typename, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname)
+{
+#ifdef PERL_MEM_LOG_STDERR
+    /* We can't use PerlIO for obvious reasons. */
+    char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
+    sprintf(buf,
+	    "realloc: %s:%d:%s: %"IVdf" %"UVuf" %s = %"IVdf": %"UVxf" -> %"UVxf"\n",
+	    filename, linenumber, funcname,
+	    n, typesize, typename, n * typesize, PTR2UV(oldalloc), PTR2UV(newalloc));
+    PerlLIO_write(2,  buf, strlen(buf));
+#endif
+    return newalloc;
+}
+
+Malloc_t
+Perl_mem_log_free(Malloc_t oldalloc, const char *filename, const int linenumber, const char *funcname)
+{
+#ifdef PERL_MEM_LOG_STDERR
+    /* We can't use PerlIO for obvious reasons. */
+    char buf[PERL_MEM_LOG_SPRINTF_BUF_SIZE];
+    sprintf(buf, "free: %s:%d:%s: %"UVxf"\n",
+	    filename, linenumber, funcname, PTR2UV(oldalloc));
+    PerlLIO_write(2,  buf, strlen(buf));
+#endif
+    return oldalloc;
+}
+
+#endif /* PERL_MEM_LOG */
+
 /*
  * Local variables:
  * c-indentation-style: bsd
