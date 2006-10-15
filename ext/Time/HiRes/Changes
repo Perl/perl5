@@ -1,5 +1,17 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.93	[2006-10-15]
+	- the ualarm() tests (34-37) assumed that ualarm(N)
+	  could never alarm in less than N seconds, widened
+	  the acceptable relative range to 0.9..1.5.  Addresses
+	  [rt.cpan.org #22090] and [rt.cpan.org #22091].
+
+	- skip the stat() tests in cygwin and win32, because
+	  if run on FAT the timestamp granularity is only 2 seconds.
+	  Any good way to detect (cygwin or win32) whether we are
+	  being run on NTFS or anyplace with better timestamps?
+	  Addresses [rt.cpan.org #22089] and [rt.cpan.org #22098].
+
 1.92	[2006-10-13]
 	- scan for subsecond resolution timestamps in struct stat,
 	  some known possibilities:

@@ -23,7 +23,7 @@ require DynaLoader;
 		 stat
 		);
 	
-$VERSION = '1.92';
+$VERSION = '1.93';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -122,6 +122,7 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
 
   my $ticktock = clock();
 
+  my @stat = stat("file");
   my @stat = stat(FH);
 
 =head1 DESCRIPTION
@@ -378,11 +379,14 @@ Test for the value of &Time::HiRes::d_hires_stat to find out whether
 the operating system supports subsecond file timestamps: a value
 larger than zero means yes. There are unfortunately no easy
 ways to find out whether the filesystem supports such timestamps.
+UNIX filesystems often do; NTFS does; FAT doesn't (FAT timestamp
+granularity is B<two> seconds).
 
 A zero return value of &Time::HiRes::d_hires_stat means that
 Time::HiRes::stat is a no-op passthrough for CORE::stat(),
 and therefore the timestamps will stay integers.  The same
-will happen if the filesystem does not do subsecond timestamps.
+will happen if the filesystem does not do subsecond timestamps,
+even if the &Time::HiRes::d_hires_stat is non-zero.
 
 In any case do not expect nanosecond resolution, or even a microsecond
 resolution.
@@ -450,6 +454,9 @@ resolution.
   ... # Do something.
   my $clock1 = clock();
   my $clockd = $clock1 - $clock0;
+
+  use Time::HiRes qw( stat );
+  my ($atime, $mtime, $ctime) = (stat("istics"))[8, 9, 10];
 
 =head1 C API
 

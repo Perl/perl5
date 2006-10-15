@@ -16,6 +16,7 @@ BEGIN { $| = 1; print "1..38\n"; }
 
 END { print "not ok 1\n" unless $loaded }
 
+use Time::HiRes 1.93; # Remember to bump this once in a while.
 use Time::HiRes qw(tv_interval);
 
 $loaded = 1;
@@ -608,16 +609,20 @@ if ($have_ualarm) {
 	print "# t1 = $t1\n";
 	my $dt = $t1 - $t0;
 	print "# dt = $dt\n";
-	ok $i, $dt >= $n/1e6 &&
-	    ($n < 1_000_000 # Too much noise.
-	     || $dt <= 1.5*$n/1e6), "ualarm($n) close enough";
+	my $r = $dt / ($n/1e6);
+	ok $i,
+	($n < 1_000_000 || # Too much noise.
+	 $r >= 0.9 && $r <= 1.5), "ualarm($n) close enough";
     }
 } else {
     print "# No ualarm\n";
     skip 34..37;
 }
 
-if (&Time::HiRes::d_hires_stat) {
+if ($^O =~ /^(cygwin|MSWin)/) {
+    print "# $^O: timestamps may not be good enough\n";
+    skip 38;
+} elsif (&Time::HiRes::d_hires_stat) {
     my @stat;
     my @time;
     for (1..5) {
@@ -646,11 +651,12 @@ if (&Time::HiRes::d_hires_stat) {
 	    $ss++;
 	}
     }
-    # Need at least 80% of monotonical increase and subsecond results.
+    # Need at least 80% of monotonical increase and 20% subsecond results.
+    # Yes, this is shameless guessing of numbers.
     if ($ss == 0) {
 	print "# No subsecond timestamps detected\n";
 	skip 38;
-    } elsif ($mi/@time > 0.8 && $ss/@time > 0.8) {
+    } elsif ($mi/@time > 0.8 && $ss/@time > 0.2) {
 	print "ok 38\n";
     } else {
 	print "not ok 38\n";
