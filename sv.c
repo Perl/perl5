@@ -8659,7 +8659,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    switch (*q) {
 	    case ' ':
 	    case '+':
-		plus = *q++;
+		if (plus == '+' && *q == ' ') /* '+' over ' ' */
+		    q++;
+		else
+		    plus = *q++;
 		continue;
 
 	    case '-':
@@ -8796,14 +8799,15 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		else
 		    i = (ewix ? ewix <= svmax : svix < svmax)
 			? SvIVx(svargs[ewix ? ewix-1 : svix++]) : 0;
-		precis = (i < 0) ? 0 : i;
+		precis = i;
+		has_precis = !(i < 0);
 	    }
 	    else {
 		precis = 0;
 		while (isDIGIT(*q))
 		    precis = precis * 10 + (*q++ - '0');
+		has_precis = TRUE;
 	    }
-	    has_precis = TRUE;
 	}
 
 	/* SIZE */
@@ -9136,6 +9140,10 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 			zeros = precis - elen;
 		    else if (precis == 0 && elen == 1 && *eptr == '0')
 			elen = 0;
+
+		/* a precision nullifies the 0 flag. */
+		    if (fill == '0')
+			fill = ' ';
 		}
 	    }
 	    break;

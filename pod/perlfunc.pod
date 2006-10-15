@@ -5569,6 +5569,12 @@ For example:
   printf '<%06s>', 12;  # prints "<000012>"
   printf '<%#x>', 12;   # prints "<0xc>"
 
+When a space and a plus sign are given as the flags at once,
+a plus sign is used to prefix a positive number.
+
+  printf '<%+ d>', 12;   # prints "<+12>"
+  printf '<% +d>', 12;   # prints "<+12>"
+
 =item vector flag
 
 This flag tells perl to interpret the supplied string as a vector of
@@ -5635,11 +5641,22 @@ including prior to the decimal point as well as after it, e.g.:
   printf '<%.4g>', 100.01; # prints "<100>"
 
 For integer conversions, specifying a precision implies that the
-output of the number itself should be zero-padded to this width:
+output of the number itself should be zero-padded to this width,
+where the 0 flag is ignored:
+
+  printf '<%.6d>', 1;      # prints "<000001>"
+  printf '<%+.6d>', 1;     # prints "<+000001>"
+  printf '<%-10.6d>', 1;   # prints "<000001    >"
+  printf '<%10.6d>', 1;    # prints "<    000001>"
+  printf '<%010.6d>', 1;   # prints "<    000001>"
+  printf '<%+10.6d>', 1;   # prints "<   +000001>"
 
   printf '<%.6x>', 1;      # prints "<000001>"
   printf '<%#.6x>', 1;     # prints "<0x000001>"
   printf '<%-10.6x>', 1;   # prints "<000001    >"
+  printf '<%10.6x>', 1;    # prints "<    000001>"
+  printf '<%010.6x>', 1;   # prints "<    000001>"
+  printf '<%#10.6x>', 1;   # prints "<  0x000001>"
 
 For string conversions, specifying a precision truncates the string
 to fit in the specified width:
@@ -5651,6 +5668,18 @@ You can also get the precision from the next argument using C<.*>:
 
   printf '<%.6x>', 1;       # prints "<000001>"
   printf '<%.*x>', 6, 1;    # prints "<000001>"
+
+If a precision obtained through C<*> is negative, it has the same
+effect as no precision.
+
+  printf '<%.*s>',  7, "string";   # prints "<string>"
+  printf '<%.*s>',  3, "string";   # prints "<str>"
+  printf '<%.*s>',  0, "string";   # prints "<>"
+  printf '<%.*s>', -1, "string";   # prints "<string>"
+
+  printf '<%.*d>',  1, 0;   # prints "<0>"
+  printf '<%.*d>',  0, 0;   # prints "<>"
+  printf '<%.*d>', -1, 0;   # prints "<0>"
 
 You cannot currently get the precision from a specified number,
 but it is intended that this will be possible in the future using
