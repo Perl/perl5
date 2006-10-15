@@ -1790,12 +1790,6 @@ S_scan_const(pTHX_ char *start)
     bool native_range = TRUE; /* turned to FALSE if the first endpoint is Unicode. */
 #endif
 
-    const char * const leaveit = /* set of acceptably-backslashed characters */
-	(const char *)
-	(PL_lex_inpat
-	 ? "\\.^$@AGZdDwWsSbBpPXC+*?|()-Nnrktfeaxcz0123456789[{]} \t\n\r\f\v#"
-	 : "");
-
     if (PL_lex_inwhat == OP_TRANS && PL_sublex_info.sub_op) {
 	/* If we are doing a trans and we know we want UTF8 set expectation */
 	has_utf8   = PL_sublex_info.sub_op->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF);
@@ -2020,13 +2014,6 @@ S_scan_const(pTHX_ char *start)
 	if (*s == '\\' && s+1 < send) {
 	    s++;
 
-	    /* some backslashes we leave behind */
-	    if (*leaveit && *s && strchr(leaveit, *s)) {
-		*d++ = NATIVE_TO_NEED(has_utf8,'\\');
-		*d++ = NATIVE_TO_NEED(has_utf8,*s++);
-		continue;
-	    }
-
 	    /* deprecate \1 in strings and substitution replacements */
 	    if (PL_lex_inwhat == OP_SUBST && !PL_lex_inpat &&
 		isDIGIT(*s) && *s != '0' && !isDIGIT(s[1]))
@@ -2041,6 +2028,11 @@ S_scan_const(pTHX_ char *start)
 	    if (PL_lex_inwhat != OP_TRANS && *s && strchr("lLuUEQ", *s)) {
 		--s;
 		break;
+	    }
+	    /* skip any other backslash escapes in a pattern */
+	    else if (PL_lex_inpat) {
+		*d++ = NATIVE_TO_NEED(has_utf8,'\\');
+		goto default_action;
 	    }
 
 	    /* if we get here, it's either a quoted -, or a digit */

@@ -476,27 +476,27 @@ print "not " unless $^R eq '79' and $x eq '12';
 print "ok $test\n";
 $test++;
 
-print "not " unless qr/\b\v$/i eq '(?i-xsm:\bv$)';
+print "not " unless qr/\b\v$/i eq '(?i-xsm:\b\v$)';
 print "ok $test\n";
 $test++;
 
-print "not " unless qr/\b\v$/s eq '(?s-xim:\bv$)';
+print "not " unless qr/\b\v$/s eq '(?s-xim:\b\v$)';
 print "ok $test\n";
 $test++;
 
-print "not " unless qr/\b\v$/m eq '(?m-xis:\bv$)';
+print "not " unless qr/\b\v$/m eq '(?m-xis:\b\v$)';
 print "ok $test\n";
 $test++;
 
-print "not " unless qr/\b\v$/x eq '(?x-ism:\bv$)';
+print "not " unless qr/\b\v$/x eq '(?x-ism:\b\v$)';
 print "ok $test\n";
 $test++;
 
-print "not " unless qr/\b\v$/xism eq '(?msix:\bv$)';
+print "not " unless qr/\b\v$/xism eq '(?msix:\b\v$)';
 print "ok $test\n";
 $test++;
 
-print "not " unless qr/\b\v$/ eq '(?-xism:\bv$)';
+print "not " unless qr/\b\v$/ eq '(?-xism:\b\v$)';
 print "ok $test\n";
 $test++;
 
@@ -3824,6 +3824,20 @@ sub iseq($$;$) {
   ok($ok, $msg);
 }
 
+# \, breaks {3,4}
+ok("xaaay"    !~ /xa{3\,4}y/, "\, in a pattern");
+ok("xa{3,4}y" =~ /xa{3\,4}y/, "\, in a pattern");
+
+# \c\ followed by _
+ok("x\c_y"    !~ /x\c\_y/,    "\_ in a pattern");
+ok("x\c\_y"   =~ /x\c\_y/,    "\_ in a pattern");
+
+# \c\ followed by other characters
+for my $c ("z", "\0", "!", chr(254), chr(256)) {
+    my $targ = "a\034$c";
+    my $reg  = "a\\c\\$c";
+    ok(eval("qq/$targ/ =~ /$reg/"), "\\c\\ in pattern");
+}
 
 # Keep the following tests last -- they may crash perl
 
@@ -3835,5 +3849,5 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
     or print "# Unexpected outcome: should pass or crash perl\n";
 
 # Don't forget to update this!
-BEGIN{print "1..1275\n"};
+BEGIN{print "1..1284\n"};
 

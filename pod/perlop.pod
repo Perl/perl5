@@ -1972,16 +1972,12 @@ is emitted if the C<use warnings> pragma or the B<-w> command-line flag
 
 =item C<RE> in C<?RE?>, C</RE/>, C<m/RE/>, C<s/RE/foo/>,
 
-Processing of C<\Q>, C<\U>, C<\u>, C<\L>, C<\l>, and interpolation
-happens (almost) as with C<qq//> constructs.
+Processing of C<\Q>, C<\U>, C<\u>, C<\L>, C<\l>, C<\E>,
+and interpolation happens (almost) as with C<qq//> constructs.
 
-However combinations of C<\> followed by RE-special chars are not
-substituted but only skipped. The full list of RE-special chars is
-C<\>, C<.>, C<^>, C<$>, C<@>, C<A>, C<G>, C<Z>, C<d>, C<D>, C<w>, C<W>,
-C<s>, C<S>, C<b>, C<B>, C<p>, C<P>, C<X>, C<C>, C<+>, C<*>, C<?>, C<|>,
-C<(>, C<)>, C<->, C<N>, C<n>, C<r>, C<t>, C<f>, C<e>, C<a>, C<x>, C<c>,
-C<z>, digits (C<0> to C<9>), C<[>, C<{>, C<]>, C<}>, whitespaces
-(SPACE, TAB, LF, CR, FF, and VT in addition), and C<#>.
+However any other combinations of C<\> followed by a character
+are not substituted but only skipped, in order to parse them
+as regular expressions at the following step.
 As C<\c> is skipped at this step, C<@> of C<\c@> in RE is possibly
 treated as an array symbol (for example C<@foo>),
 even though the same text in C<qq//> gives interpolation of C<\c@>.
