@@ -497,6 +497,7 @@ struct block_givwhen {
 struct block {
     U16		blku_type;	/* what kind of context this is */
     U8		blku_gimme;	/* is this block running in list context? */
+    U8		blku_spare;	/* Padding to match with struct subst */
     I32		blku_oldsp;	/* stack pointer to copy stuff down to */
     COP *	blku_oldcop;	/* old curcop pointer */
     I32		blku_oldmarksp;	/* mark stack index */
@@ -556,8 +557,8 @@ struct block {
 /* substitution context */
 struct subst {
     U16		sbu_type;	/* what kind of context this is */
-    bool	sbu_once;
-    bool	sbu_rxtainted;
+    U8		sbu_once;	/* Actually both booleans, but U8 to matches */
+    U8		sbu_rxtainted;	/* struct block */
     I32		sbu_iters;
     I32		sbu_maxiters;
     I32		sbu_rflags;
