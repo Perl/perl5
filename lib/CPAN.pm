@@ -1,7 +1,7 @@
 # -*- Mode: cperl; coding: utf-8; cperl-indent-level: 4 -*-
 use strict;
 package CPAN;
-$CPAN::VERSION = '1.88_54';
+$CPAN::VERSION = '1.88_55';
 $CPAN::VERSION = eval $CPAN::VERSION;
 
 use CPAN::HandleConfig;
@@ -87,6 +87,7 @@ use vars qw($VERSION @EXPORT $AUTOLOAD
              readme
              recent
              recompile
+             report
              shell
              test
              upgrade
@@ -247,7 +248,7 @@ ReadLine support %s
 	    my $command = shift @line;
 	    eval { CPAN::Shell->$command(@line) };
 	    warn $@ if $@;
-            if ($command =~ /^(make|test|install|force|notest|clean|upgrade)$/) {
+            if ($command =~ /^(make|test|install|force|notest|clean|report|upgrade)$/) {
                 CPAN::Shell->failed($CPAN::CurrentCommandId,1);
             }
             soft_chdir_with_alternatives(\@cwd);
@@ -395,6 +396,7 @@ use strict;
                                     recent
                                     recompile
                                     reload
+                                    report
                                     scripts
                                     test
                                     upgrade
@@ -1774,6 +1776,16 @@ sub scripts {
     }
 }
 
+#-> sub CPAN::Shell::report ;
+sub report {
+    my($self,@args) = @_;
+    unless ($CPAN::META->has_inst("CPAN::Reporter")) {
+        $CPAN::Frontend->mydie("CPAN::Reporter not installed; cannot continue");
+    }
+    local $CPAN::Config->{test_report} = 1;
+    $self->force("test",@args);
+}
+
 #-> sub CPAN::Shell::upgrade ;
 sub upgrade {
     my($self,@args) = @_;
@@ -2060,7 +2072,7 @@ sub autobundle {
 sub expandany {
     my($self,$s) = @_;
     CPAN->debug("s[$s]") if $CPAN::DEBUG;
-    if ($s =~ m|/|) { # looks like a file
+    if ($s =~ m|/| or substr($s,-1,1) eq ".") { # looks like a file or a directory
         $s = CPAN::Distribution->normalize($s);
         return $CPAN::META->instance('CPAN::Distribution',$s);
         # Distributions spring into existence, not expand
@@ -2408,10 +2420,14 @@ sub rematein {
 	    $obj = $s;
 	} elsif ($s =~ m|[\$\@\%]|) { # looks like a perl variable
 	} elsif ($s =~ m|^/|) { # looks like a regexp
-            $CPAN::Frontend->mywarn("Sorry, $meth with a regular expression is ".
-                                    "not supported.\nRejecting argument '$s'\n");
-            $CPAN::Frontend->mysleep(2);
-            next;
+            if (substr($s,-1,1) eq ".") {
+                $obj = CPAN::Shell->expandany($s);
+            } else {
+                $CPAN::Frontend->mywarn("Sorry, $meth with a regular expression is ".
+                                        "not supported.\nRejecting argument '$s'\n");
+                $CPAN::Frontend->mysleep(2);
+                next;
+            }
 	} elsif ($meth eq "ls") {
             $self->globls($s,\@pragma);
             next STHING;
@@ -3224,7 +3240,7 @@ sub hosthardest {
     my($aslocal_dir) = File::Basename::dirname($aslocal);
     File::Path::mkpath($aslocal_dir);
     my $ftpbin = $CPAN::Config->{ftp};
-    unless (length $ftpbin && MM->maybe_command($ftpbin)) {
+    unless ($ftpbin && length $ftpbin && MM->maybe_command($ftpbin)) {
         $CPAN::Frontend->myprint("No external ftp command available\n\n");
         return;
     }
@@ -3736,12 +3752,14 @@ sub rd_authindex {
     CPAN->debug(sprintf "modulus[%d]lines[%s]", $modulus, scalar @lines) if $CPAN::DEBUG;
     foreach (@lines) {
 	my($userid,$fullname,$email) =
-	    m/alias\s+(\S+)\s+\"([^\"\<]+)\s+\<([^\>]+)\>\"/;
-	next unless $userid && $fullname && $email;
-
-	# instantiate an author object
- 	my $userobj = $CPAN::META->instance('CPAN::Author',$userid);
-	$userobj->set('FULLNAME' => $fullname, 'EMAIL' => $email);
+	    m/alias\s+(\S+)\s+\"([^\"\<]*)\s+\<(.*)\>\"/;
+        $fullname ||= $email;
+	if ($userid && $fullname && $email){
+            my $userobj = $CPAN::META->instance('CPAN::Author',$userid);
+            $userobj->set('FULLNAME' => $fullname, 'EMAIL' => $email);
+        } else {
+            CPAN->debug(sprintf "line[%s]", $_) if $CPAN::DEBUG;
+        }
         $CPAN::Frontend->myprint(".") unless $i++ % $modulus;
 	return if $CPAN::Signal;
     }
@@ -4197,7 +4215,11 @@ sub as_string {
     push @m, $class, " id = $self->{ID}\n";
     my $ro;
     unless ($ro = $self->ro) {
-        $CPAN::Frontend->mydie("Unknown object $self->{ID}");
+        if (substr($self->{ID},-1,1) eq ".") { # directory
+            $ro = +{};
+        } else {
+            $CPAN::Frontend->mydie("Unknown object $self->{ID}");
+        }
     }
     for (sort keys %$ro) {
 	# next if m/^(ID|RO)$/;
@@ -4221,15 +4243,36 @@ sub as_string {
         next unless defined $ro->{$_};
         push @m, sprintf "    %-12s %s%s\n", $_, $ro->{$_}, $extra;
     }
-    for (sort keys %$self) {
+  KEY: for (sort keys %$self) {
 	next if m/^(ID|RO)$/;
+        unless (defined $self->{$_}) {
+            delete $self->{$_};
+            next KEY;
+        }
 	if (ref($self->{$_}) eq "ARRAY") {
 	  push @m, sprintf "    %-12s %s\n", $_, "@{$self->{$_}}";
 	} elsif (ref($self->{$_}) eq "HASH") {
+            my $value;
+            if (/^CONTAINSMODS$/) {
+                $value = join(" ",sort keys %{$self->{$_}});
+            } elsif (/^prereq_pm$/) {
+                my @value;
+                my $v = $self->{$_};
+                for my $x (sort keys %$v) {
+                    my @svalue;
+                    for my $y (sort keys %{$v->{$x}}) {
+                        push @svalue, "$y=>$v->{$x}{$y}";
+                    }
+                    push @value, "$x\:" . join ",", @svalue;
+                }
+                $value = join ";", @value;
+            } else {
+                $value = $self->{$_};
+            }
 	  push @m, sprintf(
 			   "    %-12s %s\n",
 			   $_,
-			   join(" ",sort keys %{$self->{$_}}),
+			   $value,
                           );
 	} else {
 	  push @m, sprintf "    %-12s %s\n", $_, $self->{$_};
@@ -4471,7 +4514,24 @@ sub undelay {
 sub normalize {
     my($self,$s) = @_;
     $s = $self->id unless defined $s;
-    if (
+    if (substr($s,-1,1) eq ".") {
+        if ($s eq ".") {
+            $s = "$CPAN::iCwd/.";
+        } elsif (File::Spec->file_name_is_absolute($s)) {
+        } elsif (File::Spec->can("rel2abs")) {
+            $s = File::Spec->rel2abs($s);
+        } else {
+            $CPAN::Frontend->mydie("Your File::Spec is too old, please upgrade File::Spec");
+        }
+        CPAN->debug("s[$s]") if $CPAN::DEBUG;
+        unless ($CPAN::META->exists("CPAN::Distribution", $s)) {
+            for ($CPAN::META->instance("CPAN::Distribution", $s)) {
+                $_->{build_dir} = $s;
+                $_->{archived} = "local_directory";
+                $_->{unwrapped} = "local_directory";
+            }
+        }
+    } elsif (
         $s =~ tr|/|| == 1
         or
         $s !~ m|[A-Z]/[A-Z-]{2}/[A-Z-]{2,}/|
@@ -5369,10 +5429,23 @@ sub eq_CHECKSUM {
 sub force {
   my($self, $method) = @_;
   for my $att (qw(
-  CHECKSUM_STATUS archived build_dir localfile make install unwrapped
-  writemakefile modulebuild make_test signature_verify
+                  CHECKSUM_STATUS
+                  archived
+                  build_dir
+                  install
+                  localfile
+                  make
+                  make_test
+                  modulebuild
+                  prereq_pm
+                  prereq_pm_detected
+                  signature_verify
+                  unwrapped
+                  writemakefile
+                  yaml_content
  )) {
     delete $self->{$att};
+    CPAN->debug(sprintf "att[%s]", $att) if $CPAN::DEBUG;
   }
   if ($method && $method =~ /make|test|install/) {
     $self->{"force_update"}++; # name should probably have been force_install
@@ -5743,7 +5816,7 @@ sub _find_prefs {
             next if $_ eq "." || $_ eq "..";
             next unless /\.yml$/;
             my $abs = File::Spec->catfile($prefs_dir, $_);
-            CPAN->debug("abs[$abs]") if $CPAN::DEBUG;
+            # CPAN->debug("abs[$abs]") if $CPAN::DEBUG;
             if (-f $abs) {
                 my $yaml = CPAN->_yaml_loadfile($abs);
                 my $ok = 1;
@@ -5780,7 +5853,9 @@ sub _find_prefs {
             }
         }
     } else {
-        $CPAN::Frontend->mywarn("'$yaml_module' not installed, cannot read prefs '$prefs_dir'\n");
+        unless ($self->{have_complained_about_missing_yaml}++) {
+            $CPAN::Frontend->mywarn("'$yaml_module' not installed, cannot read prefs '$prefs_dir'\n");
+        }
     }
     return;
 }
@@ -6218,6 +6293,7 @@ sub test {
         $system = join " ", $self->_make_command(), "test";
     }
     my($tests_ok);
+    # XXX fix unini warnings
     local %ENV = %ENV;
     if (my $env = $self->prefs->{test}{env}) {
         for my $e (keys %$env) {
@@ -7861,6 +7937,11 @@ Another popular use for C<recompile> is to act as a rescue in case your
 perl breaks binary compatibility. If one of the modules that CPAN uses
 is in turn depending on binary compatibility (so you cannot run CPAN
 commands), then you should try the CPAN::Nox module for recovery.
+
+=head2 report Bundle|Distribution|Module
+
+The C<report> command temporarily turns on the C<test_report> config
+variable, then runs the C<force test> command with the given arguments.
 
 =head2 upgrade [Module|/Regex/]...
 
