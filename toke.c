@@ -6580,7 +6580,7 @@ Perl_yylex(pTHX)
 		    for (p = d; *p; ++p) {
 			if (!isSPACE(*p)) {
 			    d[tmp++] = *p;
-			    if (warnsyntax && !strchr("$@%*;[]&\\", *p))
+			    if (warnsyntax && !strchr("$@%*;[]&\\_", *p))
 				bad_proto = TRUE;
 			}
 		    }

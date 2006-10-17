@@ -7375,6 +7375,7 @@ Perl_ck_subr(pTHX_ OP *o)
 		optional = 1;
 		proto++;
 		continue;
+	    case '_':
 	    case '$':
 		proto++;
 		arg++;
@@ -7533,6 +7534,12 @@ Perl_ck_subr(pTHX_ OP *o)
 	mod(o2, OP_ENTERSUB);
 	prev = o2;
 	o2 = o2->op_sibling;
+	if (o2 && o2->op_type == OP_NULL && proto && *proto == '_') {
+	    /* generate an access to $_ */
+	    o2 = newDEFSVOP();
+	    o2->op_sibling = prev->op_sibling;
+	    prev->op_sibling = o2; /* instead of cvop */
+	}
     } /* while */
     if (proto && !optional && proto_end > proto &&
 	(*proto != '@' && *proto != '%' && *proto != ';'))
