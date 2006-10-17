@@ -4273,23 +4273,24 @@ subroutine.
 in your Perl script (or eval).  Perhaps you tried to run a compressed
 script, a binary program, or a directory as a Perl program.
 
-=item /%s/: Unrecognized escape \\%c in character class passed through
+=item Unrecognized escape \\%c in character class passed through in regex; marked by <-- HERE in m/%s/
 
 (W regexp) You used a backslash-character combination which is not
 recognized by Perl inside character classes.  The character was
 understood literally.
+The <-- HERE shows in the regular expression about where the
+escape was discovered.
 
 =item Unrecognized escape \\%c passed through
 
-(W misc, W regexp) You used a backslash-character combination which is not
-recognized by Perl.
+(W misc) You used a backslash-character combination which is not
+recognized by Perl.  The character was understood literally.
 
 =item Unrecognized escape \\%c passed through in regex; marked by <-- HERE in m/%s/
 
 (W regexp) You used a backslash-character combination which is not
-recognized by Perl. This combination appears in an interpolated variable or
-a C<'>-delimited regular expression. The character was understood
-literally. The <-- HERE shows in the regular expression about where the
+recognized by Perl.  The character was understood literally.
+The <-- HERE shows in the regular expression about where the
 escape was discovered.
 
 =item Unrecognized signal name "%s"
