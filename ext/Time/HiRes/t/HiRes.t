@@ -440,38 +440,40 @@ if ($have_nanosleep) {
     skip 28;
 }
 
+# Find the loop size N (a for() loop 0..N-1)
+# that will take more than T seconds.
+
 if ($have_ualarm && $] >= 5.008001) {
     # http://groups.google.com/group/perl.perl5.porters/browse_thread/thread/adaffaaf939b042e/20dafc298df737f0%2320dafc298df737f0?sa=X&oi=groupsr&start=0&num=3
     # Perl changes [18765] and [18770], perl bug [perl #20920]
 
-    # First we will find the loop size N (a for() loop 0..N-1)
-    # that will take more than T seconds.
+    print "# Finding delay loop...\n";
 
     my $T = 0.01;
     use Time::HiRes qw(time);
-    my $N = 1024;
+    my $DelayN = 1024;
     my $i;
-    N: {
-	do {
-	    my $t0 = time();
-	    for ($i = 0; $i < $N; $i++) { }
-	    my $t1 = time();
-	    my $dt = $t1 - $t0;
-	    print "# N = $N, t1 = $t1, t0 = $t0, dt = $dt\n";
-	    last N if $dt > $T;
-	    $N *= 2;
-	} while (1);
-    }
+ N: {
+     do {
+	 my $t0 = time();
+	 for ($i = 0; $i < $DelayN; $i++) { }
+	 my $t1 = time();
+	 my $dt = $t1 - $t0;
+	 print "# N = $DelayN, t1 = $t1, t0 = $t0, dt = $dt\n";
+	 last N if $dt > $T;
+	 $DelayN *= 2;
+     } while (1);
+ }
 
-    # The time-burner which takes at least T seconds.
-    my $F = sub {
+    # The time-burner which takes at least T (default 1) seconds.
+    my $Delay = sub {
 	my $c = @_ ? shift : 1;
-	my $n = $c * $N;
+	my $n = $c * $DelayN;
 	my $i;
 	for ($i = 0; $i < $n; $i++) { }
     };
 
-    # Then we will setup a periodic timer (the two-argument alarm() of
+    # Next setup a periodic timer (the two-argument alarm() of
     # Time::HiRes, behind the curtains the libc ualarm()) which has
     # a signal handler that takes so much time (on the first initial
     # invocation) that the first periodic invocation (second invocation)
@@ -490,13 +492,13 @@ if ($have_ualarm && $] >= 5.008001) {
 	$a++;
 	print "# Alarm $a - ", time(), "\n";
 	alarm(0) if $a >= $A; # Disarm the alarm.
-	$F->(2); # Try burning CPU at least for 2T seconds.
+	$Delay->(2); # Try burning CPU at least for 2T seconds.
     }; 
 
     use Time::HiRes qw(alarm); 
     alarm($T, $T);  # Arm the alarm.
 
-    $F->(10); # Try burning CPU at least for 10T seconds.
+    $Delay->(10); # Try burning CPU at least for 10T seconds.
 
     print "ok 29\n"; # Not core dumping by now is considered to be the success.
 } else {
@@ -624,39 +626,52 @@ if ($^O =~ /^(cygwin|MSWin)/) {
     skip 38;
 } elsif (&Time::HiRes::d_hires_stat) {
     my @stat;
-    my @time;
+    my @atime;
+    my @mtime;
     for (1..5) {
 	Time::HiRes::sleep(rand(0.1) + 0.1);
 	open(X, ">$$");
 	print X $$;
 	close(X);
 	@stat = Time::HiRes::stat($$);
-	push @time, $stat[9];
+	push @mtime, $stat[9];
 	Time::HiRes::sleep(rand(0.1) + 0.1);
 	open(X, "<$$");
 	<X>;
 	close(X);
 	@stat = Time::HiRes::stat($$);
-	push @time, $stat[8];
+	push @atime, $stat[8];
     }
     1 while unlink $$;
-    print "# @time\n";
-    my $mi = 1;
+    print "# mtime = @mtime\n";
+    print "# atime = @atime\n";
+    my $ai = 0;
+    my $mi = 0;
     my $ss = 0;
-    for (my $i = 1; $i < @time; $i++) {
-	if ($time[$i] > $time[$i-1]) {
-	    $mi++;
+    for (my $i = 1; $i < @atime; $i++) {
+	if ($atime[$i] >= $atime[$i-1]) {
+	    $ai++;
 	}
-	if ($time[$i] > int($time[$i])) {
+	if ($atime[$i] > int($atime[$i])) {
 	    $ss++;
 	}
     }
-    # Need at least 80% of monotonical increase and 20% subsecond results.
-    # Yes, this is shameless guessing of numbers.
+    for (my $i = 1; $i < @mtime; $i++) {
+	if ($mtime[$i] >= $mtime[$i-1]) {
+	    $mi++;
+	}
+	if ($mtime[$i] > int($mtime[$i])) {
+	    $ss++;
+	}
+    }
+    print "# ai = $ai, mi = $mi, ss = $ss\n";
+    # Need at least 75% of monotonical increase and
+    # 20% of subsecond results. Yes, this is guessing.
     if ($ss == 0) {
 	print "# No subsecond timestamps detected\n";
 	skip 38;
-    } elsif ($mi/@time > 0.8 && $ss/@time > 0.2) {
+    } elsif ($mi/(@mtime-1) >= 0.75 && $ai/(@atime-1) >= 0.75 &&
+	     $ss/(@mtime+@atime) >= 0.2) {
 	print "ok 38\n";
     } else {
 	print "not ok 38\n";

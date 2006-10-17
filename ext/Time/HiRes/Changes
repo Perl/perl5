@@ -1,5 +1,11 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.94	[2006-10-16]
+	- file timestamps oddities seen: the atime and mtime
+	  can be out of sync (modify first and read second can leave
+	  atime < mtime) and mtime can be subsecond while atime is not.
+	  So make the test more forgiving.
+
 1.93	[2006-10-15]
 	- the ualarm() tests (34-37) assumed that ualarm(N)
 	  could never alarm in less than N seconds, widened
