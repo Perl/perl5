@@ -831,6 +831,10 @@ Perl_leave_scope(pTHX_ I32 base)
 	    i = SSPOPINT;
 	    PL_stack_sp = PL_stack_base + i;
 	    break;
+	case SAVEt_STACK_CXPOS:         /* blk_oldsp on context stack */
+	    i = SSPOPINT;
+	    cxstack[i].blk_oldsp = SSPOPINT;
+	    break;
 	case SAVEt_AELEM:		/* array element */
 	    value = (SV*)SSPOPPTR;
 	    i = SSPOPINT;

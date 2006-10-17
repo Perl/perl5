@@ -2094,7 +2094,7 @@ S_regtry(pTHX_ const regmatch_info *reginfo, char *startpos)
 	    PerlIO_printf(Perl_debug_log, "  setting stack tmpbase at %"IVdf"\n",
 			  (IV)(PL_stack_sp - PL_stack_base));
 	    ));
-	SAVEI32(cxstack[cxstack_ix].blk_oldsp);
+	SAVESTACK_CXPOS();
 	cxstack[cxstack_ix].blk_oldsp = PL_stack_sp - PL_stack_base;
 	/* Otherwise OP_NEXTSTATE will free whatever on stack now.  */
 	SAVETMPS;

@@ -52,6 +52,7 @@
 #define SAVEt_COP_ARYBASE	41
 #define SAVEt_RE_STATE		42
 #define SAVEt_COMPILE_WARNINGS	43
+#define SAVEt_STACK_CXPOS	44
 
 #ifndef SCOPE_SAVES_SIGNAL_MASK
 #define SCOPE_SAVES_SIGNAL_MASK 0
@@ -203,6 +204,14 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 	SSCHECK(2);					\
 	SSPUSHPTR(PL_compiling.cop_warnings);		\
 	SSPUSHINT(SAVEt_COMPILE_WARNINGS);		\
+    } STMT_END
+
+#define SAVESTACK_CXPOS() \
+    STMT_START {                                  \
+        SSCHECK(3);                               \
+        SSPUSHINT(cxstack[cxstack_ix].blk_oldsp); \
+        SSPUSHINT(cxstack_ix);                    \
+        SSPUSHINT(SAVEt_STACK_CXPOS);             \
     } STMT_END
 
 #ifdef USE_ITHREADS
