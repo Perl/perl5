@@ -11,7 +11,7 @@ plan tests => 238;
 
 while (<DATA>) {
     chomp;
-    my ($keyword, $proto) = split;
+    (my $keyword, my $proto, local $TODO) = split " ", $_, 3;
     if ($proto eq 'undef') {
 	ok( !defined prototype "CORE::".$keyword, $keyword );
     }
@@ -27,9 +27,9 @@ while (<DATA>) {
 # the keyword list :
 
 __DATA__
-abs (;$)
+abs (_)
 accept (**)
-alarm (;$)
+alarm (_)
 and ()
 atan2 ($$)
 bind (*$)
@@ -41,14 +41,14 @@ chmod (@)
 chomp undef
 chop undef
 chown (@)
-chr (;$)
-chroot (;$)
+chr (_)
+chroot (_)
 close (;*)
 closedir (*)
 cmp unknown
 connect (*$)
 continue ()
-cos (;$)
+cos (_)
 crypt ($$)
 dbmclose (\%)
 dbmopen (\%$$)
@@ -73,7 +73,7 @@ eval undef
 exec undef
 exists undef
 exit (;$)
-exp (;$)
+exp (_)
 fcntl (*$$)
 fileno (*)
 flock (*$)
@@ -115,30 +115,30 @@ gmtime (;$)
 goto undef
 grep undef
 gt ($$)
-hex (;$)
+hex (_)
 if undef
 index ($$;$)
-int (;$)
+int (_)
 ioctl (*$$)
 join ($@)
 keys (\%)
 kill (@)
 last undef
-lc (;$)
-lcfirst (;$)
+lc (_)
+lcfirst (_)
 le ($$)
-length (;$)
+length (_)
 link ($$)
 listen (*$)
 local undef
 localtime (;$)
 lock (\$)
-log (;$)
+log (_)
 lstat (*)
 lt ($$)
 m undef
 map undef
-mkdir (;$$)
+mkdir (_;$) this prototype is not supported
 msgctl ($$$)
 msgget ($$)
 msgrcv ($$$$$)
@@ -148,11 +148,11 @@ ne ($$)
 next undef
 no undef
 not ($)
-oct (;$)
+oct (_)
 open (*;$@)
 opendir (*$)
 or ()
-ord (;$)
+ord (_)
 our undef
 pack ($@)
 package undef
@@ -166,18 +166,18 @@ push (\@@)
 q undef
 qq undef
 qr undef
-quotemeta (;$)
+quotemeta (_)
 qw undef
 qx undef
 rand (;$)
 read (*\$$;$)
 readdir (*)
 readline (;*)
-readlink (;$)
+readlink (_)
 readpipe unknown
 recv (*\$$$)
 redo undef
-ref (;$)
+ref (_)
 rename ($$)
 require undef
 reset (;$)
@@ -185,7 +185,7 @@ return undef
 reverse (@)
 rewinddir (*)
 rindex ($$;$)
-rmdir (;$)
+rmdir (_)
 s undef
 say (;*@)
 scalar undef
@@ -211,7 +211,7 @@ shmget ($$$)
 shmread ($$$$)
 shmwrite ($$$$)
 shutdown (*$)
-sin (;$)
+sin (_)
 sleep (;$)
 socket (*$$$)
 socketpair (**$$$)
@@ -219,7 +219,7 @@ sort undef
 splice (\@;$$@)
 split undef
 sprintf ($@)
-sqrt (;$)
+sqrt (_)
 srand (;$)
 stat (*)
 state undef
@@ -241,8 +241,8 @@ time ()
 times ()
 tr undef
 truncate ($$)
-uc (;$)
-ucfirst (;$)
+uc (_)
+ucfirst (_)
 umask (;$)
 undef undef
 unless undef

@@ -392,7 +392,7 @@ PP(pp_prototype)
 	    const int code = keyword(s + 6, SvCUR(TOPs) - 6, 1);
 	    if (code < 0) {	/* Overridable. */
 #define MAX_ARGS_OP ((sizeof(I32) - 1) * 2)
-		int i = 0, n = 0, seen_question = 0;
+		int i = 0, n = 0, seen_question = 0, defgv = 0;
 		I32 oa;
 		char str[ MAX_ARGS_OP * 2 + 2 ]; /* One ';', one '\0' */
 
@@ -409,9 +409,10 @@ PP(pp_prototype)
 		}
 		goto nonesuch;		/* Should not happen... */
 	      found:
+		defgv = PL_opargs[i] & OA_DEFGV;
 		oa = PL_opargs[i] >> OASHIFT;
 		while (oa) {
-		    if (oa & OA_OPTIONAL && !seen_question) {
+		    if (oa & OA_OPTIONAL && !seen_question && !defgv) {
 			seen_question = 1;
 			str[n++] = ';';
 		    }
@@ -425,6 +426,8 @@ PP(pp_prototype)
 		    str[n++] = ("?$@@%&*$")[oa & (OA_OPTIONAL - 1)];
 		    oa = oa >> 4;
 		}
+		if (defgv && str[n - 1] == '$')
+		    str[n - 1] = '_';
 		str[n++] = '\0';
 		ret = sv_2mortal(newSVpvn(str, n - 1));
 	    }
