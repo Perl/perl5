@@ -6,7 +6,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan(tests => 32);
+plan(tests => 33);
 
 sub f($$_) { my $x = shift; is("@_", $x) }
 
@@ -66,3 +66,6 @@ like( $@, qr/Malformed prototype for main::wrong2/, 'wrong2' );
 
 sub opt ($;_) { is($_[0], "seen"); ok(!defined $_[1], "; has precedence over _") }
 opt("seen");
+
+sub unop (_) { is($_[0],11) }
+unop 11, 22; # takes only the first parameter into account
