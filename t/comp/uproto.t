@@ -6,7 +6,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan(tests => 28);
+plan(tests => 30);
 
 sub f($$_) { my $x = shift; is("@_", $x) }
 
@@ -57,3 +57,9 @@ $_ = $expected;
 g();
 undef $expected; &g; # $_ not passed
 { $expected = my $_ = "bar"; g() }
+
+eval q{ sub wrong1 (_$); wrong1(1,2) };
+like( $@, qr/Malformed prototype for main::wrong1/, 'wrong1' );
+
+eval q{ sub wrong2 ($__); wrong2(1,2) };
+like( $@, qr/Malformed prototype for main::wrong2/, 'wrong2' );

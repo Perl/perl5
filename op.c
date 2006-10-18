@@ -7376,6 +7376,9 @@ Perl_ck_subr(pTHX_ OP *o)
 		proto++;
 		continue;
 	    case '_':
+		/* _ must be at the end */
+		if (proto[1])
+		    goto oops;
 	    case '$':
 		proto++;
 		arg++;
