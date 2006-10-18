@@ -3406,9 +3406,18 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 
     if (sstr == dstr)
 	return;
+
+    if (SvIS_FREED(dstr)) {
+	Perl_croak(aTHX_ "panic: attempt to copy value %" SVf
+		   " to a freed scalar %p", sstr, dstr);
+    }
     SV_CHECK_THINKFIRST_COW_DROP(dstr);
     if (!sstr)
 	sstr = &PL_sv_undef;
+    if (SvIS_FREED(sstr)) {
+	Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p to %p", sstr,
+		   dstr);
+    }
     stype = SvTYPE(sstr);
     dtype = SvTYPE(dstr);
 
