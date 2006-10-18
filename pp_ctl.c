@@ -131,10 +131,19 @@ PP(pp_regcomp)
 	if (!re || !re->precomp || re->prelen != (I32)len ||
 	    memNE(re->precomp, t, len))
 	{
+	    regexp_engine * eng = NULL;
+	    
 	    if (re) {
+	        eng = re->engine;
 	        ReREFCNT_dec(re);
 		PM_SETRE(pm, NULL);	/* crucial if regcomp aborts */
+	    } else if (PL_curcop->cop_hints_hash) {
+	        SV *ptr = Perl_refcounted_he_fetch(aTHX_ PL_curcop->cop_hints_hash, 0,
+				       "regcomp", 7, 0, 0);
+                if (ptr && SvIOK(ptr) && SvIV(ptr))
+                    eng = INT2PTR(regexp_engine*,SvIV(ptr));
 	    }
+	        
 	    if (PL_op->op_flags & OPf_SPECIAL)
 		PL_reginterp_cnt = I32_MAX; /* Mark as safe.  */
 
@@ -146,7 +155,11 @@ PP(pp_regcomp)
 		if (pm->op_pmdynflags & PMdf_UTF8)
 		    t = (char*)bytes_to_utf8((U8*)t, &len);
 	    }
-	    PM_SETRE(pm, CALLREGCOMP((char *)t, (char *)t + len, pm));
+	    if (eng) 
+	        PM_SETRE(pm, CALLREGCOMP_ENG(eng,(char *)t, (char *)t + len, pm));
+            else
+                PM_SETRE(pm, CALLREGCOMP((char *)t, (char *)t + len, pm));
+                
 	    if (!DO_UTF8(tmpstr) && (pm->op_pmdynflags & PMdf_UTF8))
 		Safefree(t);
 	    PL_reginterp_cnt = 0;	/* XXXX Be extra paranoid - needed

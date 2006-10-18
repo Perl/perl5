@@ -23,16 +23,16 @@ re - Perl pragma to alter regular expression behaviour
 	/foo${pat}bar/;		   # disallowed (with or without -T switch)
     }
 
-    use re 'debug';		   # NOT lexically scoped (as others are)
-    /^(.*)$/s;			   # output debugging info during
-    				   #     compile and run time
+    use re 'debug';		   # output debugging info during
+    /^(.*)$/s;			   #     compile and run time
+
 
     use re 'debugcolor';	   # same as 'debug', but with colored output
     ...
 
     use re qw(Debug All);          # Finer tuned debugging options.
-    use re qw(Debug More);         # Similarly not lexically scoped.
-    no re qw(Debug ALL);           # Turn of all re dugging and unload the module.
+    use re qw(Debug More);         
+    no re qw(Debug ALL);           # Turn of all re dugging in this scope
 
 (We use $^X in these examples because it's tainted by default.)
 
@@ -188,9 +188,9 @@ Enable TRIE_MORE and all execute compile and execute options.
 
 =back
 
-The directive C<use re 'debug'> and its equivalents are I<not> lexically
-scoped, as the other directives are.  They have both compile-time and run-time
-effects.
+As of 5.9.5 the directive C<use re 'debug'> and its equivalents are
+lexically scoped, as the other directives are.  However they have both 
+compile-time and run-time effects.
 
 See L<perlmodlib/Pragmatic Modules>.
 
@@ -297,7 +297,7 @@ sub bits {
                 } else {
                     require Carp;
                     Carp::carp("Unknown \"re\" Debug flag '$_[$idx]', possible flags: ",
-                               join(", ",sort { $flags{$a} <=> $flags{$b} } keys %flags ) );
+                               join(", ",sort keys %flags ) );
                 }
             }
             _load_unload($on ? 1 : ${^RE_DEBUG_FLAGS});

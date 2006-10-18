@@ -20,6 +20,10 @@ no re 'debug';
 
 /fop/ and $count++;
 
+use re 'debug';
+my $var='zoo|zil|zap';
+/($var)/ or $count++;
+
 print "Count=$count\n";
 
 

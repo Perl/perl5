@@ -519,7 +519,8 @@ struct _reg_trie_data {
                                         for the node following a given word. */
     U16	            *nextword;       /* optional 1 indexed array to support linked list
                                         of duplicate wordnums */
-    U32             laststate;       /* Build only */
+    U32             statecount;      /* Build only - number of states in the states array 
+                                        (including the unused zero state) */
     U32             wordcount;       /* Build only */
 #ifdef DEBUGGING
     STRLEN          charcount;       /* Build only */

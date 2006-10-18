@@ -820,7 +820,7 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie,U32 depth)
         PerlIO_printf( Perl_debug_log, "%.*s", colwidth, "--------");
     PerlIO_printf( Perl_debug_log, "\n");
 
-    for( state = 1 ; state < trie->laststate ; state++ ) {
+    for( state = 1 ; state < trie->statecount ; state++ ) {
 	const U32 base = trie->states[ state ].trans.base;
 
         PerlIO_printf( Perl_debug_log, "%*s#%4"UVXf"|", (int)depth * 2 + 2,"", (UV)state);
@@ -903,10 +903,13 @@ S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie, U32 next_alloc
 	                    (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0) |
 	                    PERL_PV_ESCAPE_FIRSTCHAR 
                     ) ,
-                TRIE_LIST_ITEM(state,charid).forid,
-                (UV)TRIE_LIST_ITEM(state,charid).newstate
-            );
-        }
+                    TRIE_LIST_ITEM(state,charid).forid,
+                    (UV)TRIE_LIST_ITEM(state,charid).newstate
+                );
+                if (!(charid % 10)) 
+                    PerlIO_printf( Perl_debug_log, "\n%*s| ",
+                        (depth * 2) + 14,"");
+            }
         }
         PerlIO_printf( Perl_debug_log, "\n");
     }
@@ -1098,10 +1101,11 @@ is the recommended Unicode-aware way of saying
     *(d++) = uv;
 */
 
-#define TRIE_STORE_REVCHAR                                                    \
+#define TRIE_STORE_REVCHAR                                                 \
     STMT_START {                                                           \
-	SV *tmp = Perl_newSVpvf_nocontext( "%c", (int)uvc );               \
+	SV *tmp = newSVpvs("");                                            \
 	if (UTF) SvUTF8_on(tmp);                                           \
+	Perl_sv_catpvf( aTHX_ tmp, "%c", (int)uvc );                       \
 	av_push( TRIE_REVCHARMAP(trie), tmp );                             \
     } STMT_END
 
@@ -1393,6 +1397,10 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
         STRLEN transcount = 1;
 
+        DEBUG_TRIE_COMPILE_MORE_r( PerlIO_printf( Perl_debug_log, 
+            "%*sCompiling trie using list compiler\n",
+            (int)depth * 2 + 2, ""));
+
         Newxz( trie->states, TRIE_CHARCOUNT(trie) + 2, reg_trie_state );
         TRIE_LIST_NEW(1);
         next_alloc = 2;
@@ -1455,13 +1463,14 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
         } /* end second pass */
 
-        trie->laststate = next_alloc;
+        /* next alloc is the NEXT state to be allocated */
+        trie->statecount = next_alloc; 
         Renew( trie->states, next_alloc, reg_trie_state );
 
         /* and now dump it out before we compress it */
         DEBUG_TRIE_COMPILE_MORE_r(
             dump_trie_interim_list(trie,next_alloc,depth+1)
-                    );
+        );
 
         Newxz( trie->trans, transcount ,reg_trie_trans );
         {
@@ -1570,7 +1579,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
            use TRIE_NODENUM() to convert.
 
         */
-
+        DEBUG_TRIE_COMPILE_MORE_r( PerlIO_printf( Perl_debug_log, 
+            "%*sCompiling trie using table compiler\n",
+            (int)depth * 2 + 2, ""));
 
         Newxz( trie->trans, ( TRIE_CHARCOUNT(trie) + 1 ) * trie->uniquecharcount + 1,
               reg_trie_trans );
@@ -1694,7 +1705,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         const U32 laststate = TRIE_NODENUM( next_alloc );
 	U32 state, charid;
         U32 pos = 0, zp=0;
-        trie->laststate = laststate;
+        trie->statecount = laststate;
 
         for ( state = 1 ; state < laststate ; state++ ) {
             U8 flag = 0;
@@ -1731,7 +1742,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             }
         }
         trie->lasttrans = pos + 1;
-        Renew( trie->states, laststate + 1, reg_trie_state);
+        Renew( trie->states, laststate, reg_trie_state);
         DEBUG_TRIE_COMPILE_MORE_r(
                 PerlIO_printf( Perl_debug_log,
 		    "%*sAlloc: %d Orig: %"IVdf" elements, Final:%"IVdf". Savings of %%%5.2f\n",
@@ -1744,6 +1755,12 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
         } /* end table compress */
     }
+    DEBUG_TRIE_COMPILE_MORE_r(
+            PerlIO_printf(Perl_debug_log, "%*sStatecount:%"UVxf" Lasttrans:%"UVxf"\n",
+                (int)depth * 2 + 2, "",
+                (UV)trie->statecount,
+                (UV)trie->lasttrans)
+    );
     /* resize the trans array to remove unused space */
     Renew( trie->trans, trie->lasttrans, reg_trie_trans);
 
@@ -1799,12 +1816,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         trie->startstate= 1;
         if ( trie->bitmap && !trie->widecharmap && !trie->jump  ) {
             U32 state;
-            DEBUG_OPTIMISE_r(
-                PerlIO_printf(Perl_debug_log, "%*sLaststate:%"UVuf"\n",
-                    (int)depth * 2 + 2, "",
-                    (UV)trie->laststate)
-	    );
-            for ( state = 1 ; state < trie->laststate-1 ; state++ ) {
+            for ( state = 1 ; state < trie->statecount-1 ; state++ ) {
                 U32 ofs = 0;
                 I32 idx = -1;
                 U32 count = 0;
@@ -1981,7 +1993,7 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
     reg_trie_data *trie=(reg_trie_data *)RExC_rx->data->data[ARG(source)];
     U32 *q;
     const U32 ucharcount = trie->uniquecharcount;
-    const U32 numstates = trie->laststate;
+    const U32 numstates = trie->statecount;
     const U32 ubound = trie->lasttrans + ucharcount;
     U32 q_read = 0;
     U32 q_write = 0;
@@ -2001,7 +2013,7 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
     RExC_rx->data->data[ data_slot ] = (void*)aho;
     aho->trie=trie;
     aho->states=(reg_trie_state *)savepvn((const char*)trie->states,
-        (trie->laststate+1)*sizeof(reg_trie_state));
+        numstates * sizeof(reg_trie_state));
     Newxz( q, numstates, U32);
     Newxz( aho->fail, numstates, U32 );
     aho->refcount = 1;
@@ -2050,7 +2062,9 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
      */
     fail[ 0 ] = fail[ 1 ] = 0;
     DEBUG_TRIE_COMPILE_r({
-        PerlIO_printf(Perl_debug_log, "%*sStclass Failtable: 0", (int)(depth * 2), "");
+        PerlIO_printf(Perl_debug_log, "%*sStclass Failtable (%"UVuf" states): 0", 
+            (int)(depth * 2), "", numstates
+        );
         for( q_read=1; q_read<numstates; q_read++ ) {
             PerlIO_printf(Perl_debug_log, ", %"UVuf, (UV)fail[q_read]);
         }
@@ -3725,7 +3739,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     HV * const table = GvHV(PL_hintgv);
     if (table) {
         SV **ptr= hv_fetchs(table, "regcomp", FALSE);
-        if (ptr && SvIOK(*ptr)) {
+        if (ptr && SvIOK(*ptr) && SvIV(*ptr)) {
             const regexp_engine *eng=INT2PTR(regexp_engine*,SvIV(*ptr));
             DEBUG_COMPILE_r({
                 PerlIO_printf(Perl_debug_log, "Using engine %"UVxf"\n",
@@ -7703,7 +7717,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
             Perl_sv_catpvf(aTHX_ sv,
                 "<S:%"UVuf"/%"IVdf" W:%"UVuf" L:%"UVuf"/%"UVuf" C:%"UVuf"/%"UVuf">",
                 (UV)trie->startstate,
-                (IV)trie->laststate-1,
+                (IV)trie->statecount-1, /* -1 because of the unused 0 element */
                 (UV)trie->wordcount,
                 (UV)trie->minlen,
                 (UV)trie->maxlen,
