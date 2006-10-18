@@ -9,7 +9,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-require "./test.pl";
+BEGIN { require "./test.pl"; }
 
 plan(tests => 31);
 

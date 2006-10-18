@@ -8,7 +8,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-require "./test.pl";
+BEGIN { require "./test.pl"; }
 plan( tests => 60 );
 
 eval '%@x=0;';
