@@ -1054,7 +1054,7 @@ corresponding built-in.
     sub myopen (*;$)	     myopen HANDLE, $name
     sub mypipe (**)	     mypipe READHANDLE, WRITEHANDLE
     sub mygrep (&@)	     mygrep { /foo/ } $a, $b, $c
-    sub myrand ($)	     myrand 42
+    sub myrand (;$)	     myrand 42
     sub mytime ()	     mytime
 
 Any backslashed prototype character represents an actual argument
