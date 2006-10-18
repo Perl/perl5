@@ -1098,8 +1098,11 @@ follows:
 	...
     }
 
-A semicolon separates mandatory arguments from optional arguments.
+A semicolon (C<;>) separates mandatory arguments from optional arguments.
 It is redundant before C<@> or C<%>, which gobble up everything else.
+
+As the last character of a prototype, you can use C<_> in place of C<$>:
+if this argument is not provided, C<$_> will be used instead.
 
 Note how the last three examples in the table above are treated
 specially by the parser.  C<mygrep()> is parsed as a true list
