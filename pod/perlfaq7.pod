@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 6833 $)
+perlfaq7 - General Perl Language Issues ($Revision: 7875 $)
 
 =head1 DESCRIPTION
 
@@ -634,8 +634,8 @@ where they don't belong.
 This is explained in more depth in the L<perlsyn>.  Briefly, there's
 no official case statement, because of the variety of tests possible
 in Perl (numeric comparison, string comparison, glob comparison,
-regex matching, overloaded comparisons, ...).  Larry couldn't decide 
-how best to do this, so he left it out, even though it's been on the 
+regex matching, overloaded comparisons, ...).  Larry couldn't decide
+how best to do this, so he left it out, even though it's been on the
 wish list since perl1.
 
 Starting from Perl 5.8 to get switch and case one can use the
@@ -962,9 +962,9 @@ where you expect it so you need to adjust your shebang line.
 
 =head1 REVISION
 
-Revision: $Revision: 6833 $
+Revision: $Revision: 7875 $
 
-Date: $Date: 2006-09-02 21:16:20 +0200 (sam, 02 sep 2006) $
+Date: $Date: 2006-10-04 22:39:26 +0200 (mer, 04 oct 2006) $
 
 See L<perlfaq> for source control details and availability.
 

@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 6750 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 7861 $)
 
 =head1 DESCRIPTION
 
@@ -90,46 +90,46 @@ architecture.
 
 =head2 What modules and extensions are available for Perl?  What is CPAN?  What does CPAN/src/... mean?
 
-CPAN stands for Comprehensive Perl Archive Network, a ~1.2Gb archive
-replicated on nearly 200 machines all over the world.  CPAN contains
-source code, non-native ports, documentation, scripts, and many
-third-party modules and extensions, designed for everything from
+CPAN stands for Comprehensive Perl Archive Network, a multi-gigabyte
+archive replicated on hundreds of machines all over the world. CPAN
+contains source code, non-native ports, documentation, scripts, and
+many third-party modules and extensions, designed for everything from
 commercial database interfaces to keyboard/screen control to web
-walking and CGI scripts.  The master web site for CPAN is
+walking and CGI scripts. The master web site for CPAN is
 http://www.cpan.org/ and there is the CPAN Multiplexer at
-http://www.cpan.org/CPAN.html which will choose a mirror near you
-via DNS.  See http://www.perl.com/CPAN (without a slash at the
-end) for how this process works. Also, http://mirror.cpan.org/
-has a nice interface to the http://www.cpan.org/MIRRORED.BY
-mirror directory.
+http://www.cpan.org/CPAN.html which will choose a mirror near you via
+DNS.  See http://www.perl.com/CPAN (without a slash at the end) for
+how this process works. Also, http://mirror.cpan.org/ has a nice
+interface to the http://www.cpan.org/MIRRORED.BY mirror directory.
 
-See the CPAN FAQ at http://www.cpan.org/misc/cpan-faq.html for
-answers to the most frequently asked questions about CPAN
-including how to become a mirror.
+See the CPAN FAQ at http://www.cpan.org/misc/cpan-faq.html for answers
+to the most frequently asked questions about CPAN including how to
+become a mirror.
 
 CPAN/path/... is a naming convention for files available on CPAN
 sites.  CPAN indicates the base directory of a CPAN mirror, and the
-rest of the path is the path from that directory to the file.  For
+rest of the path is the path from that directory to the file. For
 instance, if you're using ftp://ftp.funet.fi/pub/languages/perl/CPAN
 as your CPAN site, the file CPAN/misc/japh is downloadable as
 ftp://ftp.funet.fi/pub/languages/perl/CPAN/misc/japh .
 
-Considering that there are close to two thousand existing modules in
-the archive, one probably exists to do nearly anything you can think of.
-Current categories under CPAN/modules/by-category/ include Perl core
-modules; development support; operating system interfaces; networking,
-devices, and interprocess communication; data type utilities; database
-interfaces; user interfaces; interfaces to other languages; filenames,
-file systems, and file locking; internationalization and locale; world
-wide web support; server and daemon utilities; archiving and
-compression; image manipulation; mail and news; control flow
-utilities; filehandle and I/O; Microsoft Windows modules; and
-miscellaneous modules.
+Considering that, as of 2006, there are over ten thousand existing
+modules in the archive, one probably exists to do nearly anything you
+can think of. Current categories under CPAN/modules/by-category/
+include Perl core modules; development support; operating system
+interfaces; networking, devices, and interprocess communication; data
+type utilities; database interfaces; user interfaces; interfaces to
+other languages; filenames, file systems, and file locking;
+internationalization and locale; world wide web support; server and
+daemon utilities; archiving and compression; image manipulation; mail
+and news; control flow utilities; filehandle and I/O; Microsoft
+Windows modules; and miscellaneous modules.
 
 See http://www.cpan.org/modules/00modlist.long.html or
-http://search.cpan.org/ for a more complete list of modules by category.
+http://search.cpan.org/ for a more complete list of modules by
+category.
 
-CPAN is not affiliated with O'Reilly Media.
+CPAN is a free service and is not affiliated with O'Reilly Media.
 
 =head2 Is there an ISO or ANSI certified version of Perl?
 
@@ -501,9 +501,9 @@ the I<What is CPAN?> question earlier in this document.
 
 =head1 REVISION
 
-Revision: $Revision: 6750 $
+Revision: $Revision: 7861 $
 
-Date: $Date: 2006-08-06 02:30:54 +0200 (dim, 06 aoû 2006) $
+Date: $Date: 2006-09-29 22:19:18 +0200 (ven, 29 sep 2006) $
 
 See L<perlfaq> for source control details and availability.
 

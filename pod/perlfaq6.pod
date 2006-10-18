@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq6 - Regular Expressions ($Revision: 6479 $)
+perlfaq6 - Regular Expressions ($Revision: 7910 $)
 
 =head1 DESCRIPTION
 
@@ -143,10 +143,10 @@ Here's another example of using C<..>:
 
 	while (<>) {
 		$in_header =   1  .. /^$/;
-		$in_body   = /^$/ .. eof();
+		$in_body   = /^$/ .. eof;
 	# now choose between them
 	} continue {
-		reset if eof();		# fix $.
+		$. = 0 if eof;	# fix $.
 	}
 
 =head2 I put a regular expression into $/ but it didn't work. What's wrong?
@@ -422,7 +422,8 @@ whitespace and comments.  Here it is expanded, courtesy of Fred Curtis.
        )
      }{defined $2 ? $2 : ""}gxse;
 
-A slight modification also removes C++ comments:
+A slight modification also removes C++ comments, as long as they are not
+spread over multiple lines using a continuation character):
 
 	s#/\*[^*]*\*+([^/*][^*]*\*+)*/|//[^\n]*|("(\\.|[^"\\])*"|'(\\.|[^'\\])*'|.[^/"'\\]*)#defined $2 ? $2 : ""#gse;
 
@@ -952,9 +953,9 @@ Or...
 
 =head1 REVISION
 
-Revision: $Revision: 6479 $
+Revision: $Revision: 7910 $
 
-Date: $Date: 2006-06-07 09:48:12 +0200 (mer, 07 jun 2006) $
+Date: $Date: 2006-10-07 22:38:54 +0200 (sam, 07 oct 2006) $
 
 See L<perlfaq> for source control details and availability.
 

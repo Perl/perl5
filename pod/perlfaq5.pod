@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 6019 $)
+perlfaq5 - Files and Formats ($Revision: 7875 $)
 
 =head1 DESCRIPTION
 
@@ -55,11 +55,162 @@ or IO::Socket:
 
 	$sock->autoflush();
 
-=head2 How do I change one line in a file/delete a line in a file/insert a line in the middle of a file/append to the beginning of a file?
+=head2 How do I change, delete, or insert a line in a file, or append to the beginning of a file?
 X<file, editing>
 
-Use the Tie::File module, which is included in the standard
-distribution since Perl 5.8.0.
+(contributed by brian d foy)
+
+The basic idea of inserting, changing, or deleting a line from a text
+file involves reading and printing the file to the point you want to
+make the change, making the change, then reading and printing the rest
+of the file. Perl doesn't provide random access to lines (especially
+since the record input separator, C<$/>, is mutable), although modules
+such as C<Tie::File> can fake it.
+
+A Perl program to do these tasks takes the basic form of opening a
+file, printing its lines, then closing the file:
+
+	open my $in,  '<',  $file      or die "Can't read old file: $!";
+	open my $out, '>', "$file.new" or die "Can't write new file: $!";
+
+	while( <$in> )
+		{
+		print $out $_;
+		}
+
+   close $out;
+
+Within that basic form, add the parts that you need to insert, change,
+or delete lines.
+
+To prepend lines to the beginning, print those lines before you enter
+the loop that prints the existing lines.
+
+	open my $in,  '<',  $file      or die "Can't read old file: $!";
+	open my $out, '>', "$file.new" or die "Can't write new file: $!";
+
+	print "# Add this line to the top\n"; # <--- HERE'S THE MAGIC
+
+	while( <$in> )
+		{
+		print $out $_;
+		}
+
+   close $out;
+
+To change existing lines, insert the code to modify the lines inside
+the C<while> loop. In this case, the code finds all lowercased
+versions of "perl" and uppercases them. The happens for every line, so
+be sure that you're supposed to do that on every line!
+
+	open my $in,  '<',  $file      or die "Can't read old file: $!";
+	open my $out, '>', "$file.new" or die "Can't write new file: $!";
+
+	print "# Add this line to the top\n";
+
+	while( <$in> )
+		{
+		s/\b(perl)\b/Perl/g;
+		print $out $_;
+		}
+
+   close $out;
+
+To change only a particular line, the input line number, C<$.>, is
+useful. Use C<next> to skip all lines up to line 5, make a change and
+print the result, then stop further processing with C<last>.
+
+	while( <$in> )
+		{
+		next unless $. == 5;
+		s/\b(perl)\b/Perl/g;
+		print $out $_;
+		last;
+		}
+
+To skip lines, use the looping controls. The C<next> in this example
+skips comment lines, and the C<last> stops all processing once it
+encounters either C<__END__> or C<__DATA__>.
+
+	while( <$in> )
+		{
+		next if /^\s+#/;             # skip comment lines
+		last if /^__(END|DATA)__$/;  # stop at end of code marker
+		print $out $_;
+		}
+
+Do the same sort of thing to delete a particular line by using C<next>
+to skip the lines you don't want to show up in the output. This
+example skips every fifth line:
+
+	while( <$in> )
+		{
+		next unless $. % 5;
+		print $out $_;
+		}
+
+If, for some odd reason, you really want to see the whole file at once
+rather than processing line by line, you can slurp it in (as long as
+you can fit the whole thing in memory!):
+
+	open my $in,  '<',  $file      or die "Can't read old file: $!"
+	open my $out, '>', "$file.new" or die "Can't write new file: $!";
+
+	my @lines = do { local $/; <$in> }; # slurp!
+
+		# do your magic here
+
+	print $out @lines;
+
+Modules such as C<File::Slurp> and C<Tie::File> can help with that
+too. If you can, however, avoid reading the entire file at once. Perl
+won't give that memory back to the operating system until the process
+finishes.
+
+You can also use Perl one-liners to modify a file in-place. The
+following changes all 'Fred' to 'Barney' in F<inFile.txt>, overwriting
+the file with the new contents. With the C<-p> switch, Perl wraps a
+C<while> loop around the code you specify with C<-e>, and C<-i> turns
+on in-place editing. The current line is in C<$_>. With C<-p>, Perl
+automatically prints the value of C<$_> at the end of the loop. See
+L<perlrun> for more details.
+
+	perl -pi -e 's/Fred/Barney/' inFile.txt
+
+To make a backup of C<inFile.txt>, give C<-i> a file extension to add:
+
+	perl -pi.bak -e 's/Fred/Barney/' inFile.txt
+
+To change only the fifth line, you can add a test checking C<$.>, the
+input line number, then only perform the operation when the test
+passes:
+
+	perl -pi -e 's/Fred/Barney/ if $. == 5' inFile.txt
+
+To add lines before a certain line, you can add a line (or lines!)
+before Perl prints C<$_>:
+
+	perl -pi -e 'print "Put before third line\n" if $. == 3' inFile.txt
+
+You can even add a line to the beginning of a file, since the current
+line prints at the end of the loop:
+
+	perl -pi -e 'print "Put before first line\n" if $. == 1' inFile.txt
+
+To insert a line after one already in the file, use the C<-n> switch.
+It's just like C<-p> except that it doesn't print C<$_> at the end of
+the loop, so you have to do that yourself. In this case, print C<$_>
+first, then print the line that you want to add.
+
+	perl -ni -e 'print; print "Put after fifth line\n" if $. == 5' inFile.txt
+
+To delete lines, only print the ones that you want.
+
+	perl -ni -e 'print unless /d/' inFile.txt
+
+		... or ...
+
+	perl -pi -e 'next unless /d/' inFile.txt
 
 =head2 How do I count the number of lines in a file?
 X<file, counting lines> X<lines> X<line>
@@ -236,7 +387,6 @@ the filehandle reference is a simple scalar.
 	for( $i = 0; $i <= $#fhs; $i++ ) {
 		print {$fhs[$i]} "just another Perl answer, \n";
 		}
-
 
 Before perl5.6, you had to deal with various typeglob idioms
 which you may see in older code.
@@ -1115,9 +1265,9 @@ If your array contains lines, just print them:
 
 =head1 REVISION
 
-Revision: $Revision: 6019 $
+Revision: $Revision: 7875 $
 
-Date: $Date: 2006-05-04 19:04:31 +0200 (jeu, 04 mai 2006) $
+Date: $Date: 2006-10-04 22:39:26 +0200 (mer, 04 oct 2006) $
 
 See L<perlfaq> for source control details and availability.
 

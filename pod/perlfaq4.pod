@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 6816 $)
+perlfaq4 - Data Manipulation ($Revision: 7954 $)
 
 =head1 DESCRIPTION
 
@@ -600,7 +600,9 @@ anonymous array. In this case, we call the function in list context.
 If we want to call the function in scalar context, we have to do a bit
 more work. We can really have any code we like inside the braces, so
 we simply have to end with the scalar reference, although how you do
-that is up to you, and you can use code inside the braces.
+that is up to you, and you can use code inside the braces. Note that
+the use of parens creates a list context, so we need C<scalar> to
+force the scalar context on the function:
 
 	print "The time is ${\(scalar localtime)}.\n"
 
@@ -958,25 +960,39 @@ Left and right padding with any character, modifying C<$text> directly:
 
 =head2 How do I extract selected columns from a string?
 
-Use C<substr()> or C<unpack()>, both documented in L<perlfunc>.
-If you prefer thinking in terms of columns instead of widths,
-you can use this kind of thing:
+(contributed by brian d foy)
 
-	# determine the unpack format needed to split Linux ps output
-	# arguments are cut columns
-	my $fmt = cut2fmt(8, 14, 20, 26, 30, 34, 41, 47, 59, 63, 67, 72);
+If you know where the columns that contain the data, you can
+use C<substr> to extract a single column.
 
-	sub cut2fmt {
-		my(@positions) = @_;
-		my $template  = '';
-		my $lastpos   = 1;
-		for my $place (@positions) {
-			$template .= "A" . ($place - $lastpos) . " ";
-			$lastpos   = $place;
-			}
-		$template .= "A*";
-		return $template;
-		}
+	my $column = substr( $line, $start_column, $length );
+
+You can use C<split> if the columns are separated by whitespace or
+some other delimiter, as long as whitespace or the delimiter cannot
+appear as part of the data.
+
+	my $line    = ' fred barney   betty   ';
+	my @columns = split /\s+/, $line;
+		# ( '', 'fred', 'barney', 'betty' );
+
+	my $line    = 'fred||barney||betty';
+	my @columns = split /\|/, $line;
+		# ( 'fred', '', 'barney', '', 'betty' );
+
+If you want to work with comma-separated values, don't do this since
+that format is a bit more complicated. Use one of the modules that
+handle that fornat, such as C<Text::CSV>, C<Text::CSV_XS>, or
+C<Text::CSV_PP>.
+
+If you want to break apart an entire line of fixed columns, you can use
+C<unpack> with the A (ASCII) format. by using a number after the format
+specifier, you can denote the column width. See the C<pack> and C<unpack>
+entries in L<perlfunc> for more details.
+
+	my @fields = unpack( $line, "A8 A8 A8 A16 A4" );
+
+Note that spaces in the format argument to C<unpack> do not denote literal
+spaces. If you have space separated data, you may want C<split> instead.
 
 =head2 How do I find the soundex value of a string?
 
@@ -988,37 +1004,52 @@ C<Text::Metaphone>, and C<Text::DoubleMetaphone> modules.
 
 =head2 How can I expand variables in text strings?
 
-Let's assume that you have a string that contains placeholder
-variables.
+(contributed by brian d foy)
 
-	$text = 'this has a $foo in it and a $bar';
+For example, I'll use a string that has two Perl scalar variables
+in it. In this example, I want to expand C<$foo> and C<$bar> to
+their variable's values.
 
-You can use a substitution with a double evaluation.  The
-first /e turns C<$1> into C<$foo>, and the second /e turns
-C<$foo> into its value.  You may want to wrap this in an
-C<eval>: if you try to get the value of an undeclared variable
-while running under C<use strict>, you get a fatal error.
+	my $foo = 'Fred';
+	my $bar = 'Barney';
+	$string = 'Say hello to $foo and $bar';
 
-	eval { $text =~ s/(\$\w+)/$1/eeg };
-	die if $@;
+One way I can do this involves the substitution operator and a double
+C</e> flag.  The first C</e> evaluates C<$1> on the replacement side and
+turns it into C<$foo>. The second /e starts with C<$foo> and replaces
+it with its value. C<$foo>, then, turns into 'Fred', and that's finally
+what's left in the string.
 
-It's probably better in the general case to treat those
-variables as entries in some special hash.  For example:
+	$string =~ s/(\$\w+)/$1/eeg; # 'Say hello to Fred and Barney'
+	
+The C</e> will also silently ignore violations of strict, replacing
+undefined variable names with the empty string.
 
-	%user_defs = (
-		foo  => 23,
-		bar  => 19,
+I could also pull the values from a hash instead of evaluating 
+variable names. Using a single C</e>, I can check the hash to ensure
+the value exists, and if it doesn't, I can replace the missing value
+with a marker, in this case C<???> to signal that I missed something:
+
+	my $string = 'This has $foo and $bar';
+	
+	my %Replacements = (
+		foo  => 'Fred',
 		);
-	$text =~ s/\$(\w+)/$user_defs{$1}/g;
-
+		
+	# $string =~ s/\$(\w+)/$Replacements{$1}/g;
+	$string =~ s/\$(\w+)/
+		exists $Replacements{$1} ? $Replacements{$1} : '???'
+		/eg;
+		
+	print $string;
+	
 =head2 What's wrong with always quoting "$vars"?
 
 The problem is that those double-quotes force
-stringification--coercing numbers and references into
-strings--even when you don't want them to be strings.  Think
-of it this way: double-quote expansion is used to produce
-new strings.  If you already have a string, why do you need
-more?
+stringification--coercing numbers and references into strings--even
+when you don't want them to be strings.  Think of it this way:
+double-quote expansion is used to produce new strings.  If you already
+have a string, why do you need more?
 
 If you get used to writing odd things like these:
 
@@ -2074,7 +2105,7 @@ what you want. It handles that extra work.
 =head2 How do I handle binary data correctly?
 
 Perl is binary clean, so it can handle binary data just fine.
-On Windows or DOS, however, you have to use C<binmode> for binary 
+On Windows or DOS, however, you have to use C<binmode> for binary
 files to avoid conversions for line endings. In general, you should
 use C<binmode> any time you want to work with binary data.
 
@@ -2184,9 +2215,9 @@ the C<PDL> module from CPAN instead--it makes number-crunching easy.
 
 =head1 REVISION
 
-Revision: $Revision: 6816 $
+Revision: $Revision: 7954 $
 
-Date: $Date: 2006-08-20 21:20:03 +0200 (dim, 20 aoû 2006) $
+Date: $Date: 2006-10-16 22:07:58 +0200 (lun, 16 oct 2006) $
 
 See L<perlfaq> for source control details and availability.
 

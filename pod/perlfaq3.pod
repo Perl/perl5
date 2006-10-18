@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq3 - Programming Tools ($Revision: 7822 $)
+perlfaq3 - Programming Tools ($Revision: 7875 $)
 
 =head1 DESCRIPTION
 
@@ -877,13 +877,13 @@ or Plan9 systems.  You might also have to change a single % to a %%.
 
 For example:
 
-    # Unix
+    # Unix (including Mac OS X)
     perl -e 'print "Hello world\n"'
 
     # DOS, etc.
     perl -e "print \"Hello world\n\""
 
-    # Mac
+    # Mac Classic
     print "Hello world\n"
      (then Run "Myscript" or Shift-Command-R)
 
@@ -929,7 +929,7 @@ A good place to start is L<perltoot>, and you can use L<perlobj>,
 L<perlboot>, L<perltoot>, L<perltooc>, and L<perlbot> for reference.
 
 A good book on OO on Perl is the "Object-Oriented Perl"
-by Damian Conway from Manning Publications, or "Intermediate Perl" 
+by Damian Conway from Manning Publications, or "Intermediate Perl"
 by Randal Schwartz, brian d foy, and Tom Phoenix from O'Reilly Media.
 
 =head2 Where can I learn about linking C with Perl?
@@ -982,9 +982,9 @@ to process and install a Perl distribution.
 
 =head1 REVISION
 
-Revision: $Revision: 7822 $
+Revision: $Revision: 7875 $
 
-Date: $Date: 2006-09-11 14:22:59 +0200 (lun, 11 sep 2006) $
+Date: $Date: 2006-10-04 22:39:26 +0200 (mer, 04 oct 2006) $
 
 See L<perlfaq> for source control details and availability.
 
