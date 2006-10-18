@@ -7534,15 +7534,15 @@ Perl_ck_subr(pTHX_ OP *o)
 	mod(o2, OP_ENTERSUB);
 	prev = o2;
 	o2 = o2->op_sibling;
-	if (o2 && o2->op_type == OP_NULL && proto && *proto == '_') {
-	    /* generate an access to $_ */
-	    o2 = newDEFSVOP();
-	    o2->op_sibling = prev->op_sibling;
-	    prev->op_sibling = o2; /* instead of cvop */
-	}
     } /* while */
+    if (o2 == cvop && proto && *proto == '_') {
+	/* generate an access to $_ */
+	o2 = newDEFSVOP();
+	o2->op_sibling = prev->op_sibling;
+	prev->op_sibling = o2; /* instead of cvop */
+    }
     if (proto && !optional && proto_end > proto &&
-	(*proto != '@' && *proto != '%' && *proto != ';'))
+	(*proto != '@' && *proto != '%' && *proto != ';' && *proto != '_'))
 	return too_few_arguments(o, gv_ename(namegv));
     if(delete_op) {
 #ifdef PERL_MAD
