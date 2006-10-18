@@ -2367,6 +2367,20 @@ PerlIO_cleanup(pTHX)
 #else
     PerlIO_debug("Cleanup layers\n");
 #endif
+
+#ifdef DEBUGGING
+    {
+	/* By now all filehandles should have been closed, so any
+	 * stray (non-STD-)filehandles indicate *possible* (PerlIO)
+	 * errors. */
+	for (i = 3; i < PL_perlio_fd_refcnt_size; i++) {
+	    if (PL_perlio_fd_refcnt[i])
+		PerlIO_debug("PerlIO_cleanup: fd %d refcnt=%d\n",
+			     i, PL_perlio_fd_refcnt[i]);
+	}
+    }
+#endif
+
     /* Raise STDIN..STDERR refcount so we don't close them */
     for (i=0; i < 3; i++)
 	PerlIOUnix_refcnt_inc(i);
@@ -2382,6 +2396,15 @@ PerlIO_cleanup(pTHX)
     if (PL_def_layerlist) {
 	PerlIO_list_free(aTHX_ PL_def_layerlist);
 	PL_def_layerlist = NULL;
+    }
+
+#ifdef USE_ITHREADS
+    /* only main thread can free refcnt table */
+    if (PL_curinterp == aTHX)
+#endif
+    {
+	Safefree(PL_perlio_fd_refcnt);
+	PL_perlio_fd_refcnt = NULL;
     }
 }
 
