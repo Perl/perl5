@@ -280,12 +280,12 @@ Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count,
         sv_setpvn(dsv, "", 0);
         
     if ( start_color != NULL ) 
-        Perl_sv_catpvf( aTHX_ dsv, "%s", start_color);
+        Perl_sv_catpv( aTHX_ dsv, start_color);
     
     pv_escape( dsv, str, count, max, &escaped, flags | PERL_PV_ESCAPE_NOCLEAR );    
     
     if ( end_color != NULL ) 
-        Perl_sv_catpvf( aTHX_ dsv, "%s", end_color);
+        Perl_sv_catpv( aTHX_ dsv, end_color);
 
     if ( dq == '"' ) 
 	sv_catpvn( dsv, "\"", 1 );

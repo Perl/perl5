@@ -295,7 +295,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 				    vn = "VERSION"), FALSE);		\
 	}								\
 	if (_sv) {							\
-	    SV *xssv = Perl_newSVpvf(aTHX_ "%s",XS_VERSION);		\
+	    SV *xssv = Perl_newSVpv(aTHX_ XS_VERSION, 0);		\
 	    xssv = new_version(xssv);					\
 	    if ( !sv_derived_from(_sv, "version") )			\
 		_sv = new_version(_sv);				\
