@@ -5403,7 +5403,7 @@ Perl_yylex(pTHX)
 			const char *proto = SvPV_const((SV*)cv, protolen);
 			if (!protolen)
 			    TERM(FUNC0SUB);
-			if (*proto == '$' && proto[1] == '\0')
+			if ((*proto == '$' || *proto == '_') && proto[1] == '\0')
 			    OPERATOR(UNIOPSUB);
 			while (*proto == ';')
 			    proto++;
