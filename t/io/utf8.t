@@ -11,7 +11,7 @@ BEGIN {
 
 no utf8; # needed for use utf8 not griping about the raw octets
 
-require "./test.pl";
+BEGIN { require "./test.pl"; }
 
 plan(tests => 55);
 
@@ -231,7 +231,7 @@ is($failed, undef);
     print F chr(0x100);
     close(F);
 
-    isnt( defined $@ );
+    isnt( defined $@, !0 );
 
     undef $@;
     open F, ">a";
@@ -239,7 +239,7 @@ is($failed, undef);
     print F chr(0x100);
     close(F);
 
-    isnt( defined $@ );
+    isnt( defined $@, !0 );
 
     no warnings 'utf8';
 
@@ -248,7 +248,7 @@ is($failed, undef);
     print F chr(0x100);
     close(F);
 
-    isnt( defined $@ );
+    isnt( defined $@, !0 );
 
     use warnings 'utf8';
 

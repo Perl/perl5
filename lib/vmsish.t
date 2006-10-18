@@ -10,7 +10,7 @@ $perl = VMS::Filespec::vmsify($perl) if $^O eq 'VMS';
 
 my $Invoke_Perl = qq(MCR $perl "-I[-.lib]");
 
-require "./test.pl";
+BEGIN { require "./test.pl"; }
 plan(tests => 25);
 
 SKIP: {

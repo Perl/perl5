@@ -5,7 +5,7 @@ BEGIN {
     @INC = qw(../lib lib);
 }
 
-require "./test.pl";
+BEGIN { require "./test.pl"; }
 
 # This test depends on t/lib/Devel/switchd.pm.
 

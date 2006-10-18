@@ -6,9 +6,6 @@
 
 $| = 1;
 
-# please update note at bottom of file when you change this
-print "1..1248\n";
-
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
@@ -3763,5 +3760,16 @@ sub iseq($$;$) {
   ok($ok, $msg);
 }
 
+{
+    my $str='abc'; 
+    my $count=0;
+    my $mval=0;
+    my $pval=0;
+    while ($str=~/b/g) { $mval=$#-; $pval=$#+; $count++ }
+    iseq($mval,0,"\@- should be empty [RT#36046]");
+    iseq($pval,0,"\@+ should be empty [RT#36046]");
+    iseq($count,1,"should have matched once only [RT#36046]");
+}
 
-# last test 1248
+# Don't forget to update this!
+BEGIN{print "1..1251\n"};

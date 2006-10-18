@@ -10,7 +10,7 @@ BEGIN {
     }
 }
 
-require "./test.pl";
+BEGIN { require "./test.pl"; }
 
 use Devel::Peek;
 
