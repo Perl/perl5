@@ -399,6 +399,10 @@ PP(pp_prototype)
 		if (code == -KEY_chop || code == -KEY_chomp
 			|| code == -KEY_exec || code == -KEY_system || code == -KEY_err)
 		    goto set;
+		if (code == -KEY_mkdir) {
+		    ret = sv_2mortal(newSVpvs("_;$"));
+		    goto set;
+		}
 		while (i < MAXO) {	/* The slow way. */
 		    if (strEQ(s + 6, PL_op_name[i])
 			|| strEQ(s + 6, PL_op_desc[i]))

@@ -138,7 +138,7 @@ lstat (*)
 lt ($$)
 m undef
 map undef
-mkdir (_;$) this prototype is not supported
+mkdir (_;$)
 msgctl ($$$)
 msgget ($$)
 msgrcv ($$$$$)
