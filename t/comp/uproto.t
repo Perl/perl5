@@ -6,7 +6,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan(tests => 33);
+plan(tests => 36);
 
 sub f($$_) { my $x = shift; is("@_", $x) }
 
@@ -67,5 +67,10 @@ like( $@, qr/Malformed prototype for main::wrong2/, 'wrong2' );
 sub opt ($;_) { is($_[0], "seen"); ok(!defined $_[1], "; has precedence over _") }
 opt("seen");
 
-sub unop (_) { is($_[0],11) }
+sub unop (_) { is($_[0], 11, "unary op") }
 unop 11, 22; # takes only the first parameter into account
+
+sub mymkdir (_;$) { is("@_", $expected, "mymkdir") }
+$expected = $_ = "mydir"; mymkdir();
+mymkdir($expected = "foo");
+$expected = "foo 493"; mymkdir foo => 0755;
