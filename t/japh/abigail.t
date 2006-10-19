@@ -656,6 +656,7 @@ eval {die ["Just another Perl Hacker\n"]}; print ${${@}}[$#{@{${@}}}]
 ####### die 5
 eval {die [[qq [Just another Perl Hacker]]]};; print
 ${${${@}}[$#{@{${@}}}]}[$#{${@{${@}}}[$#{@{${@}}}]}]
+SKIP: Abuses a fixed bug; what is in $#{...} must be an arrayref, not an array
 
 ####### Closure returning itself.
 $_ = "\nrekcaH lreP rehtona tsuJ"; my $chop; $chop = sub {print chop; $chop};
