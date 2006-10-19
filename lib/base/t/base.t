@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 10;
+use Test::More tests => 11;
 
 use_ok('base');
 
@@ -55,6 +55,13 @@ like( $@, qr/^Base class package "reallyReAlLyNotexists" is empty./,
 eval q{use base 'reallyReAlLyNotexists'};
 like( $@, qr/^Base class package "reallyReAlLyNotexists" is empty./,
                                           '  still empty on 2nd load');
+{
+    my $warning;
+    local $SIG{__WARN__} = sub { $warning = shift };
+    eval q{package HomoGenous; use base 'HomoGenous';};
+    like($warning, qr/^Class 'HomoGenous' tried to inherit from itself/,
+                                          '  self-inheriting');
+}
 
 BEGIN { $Has::Version_0::VERSION = 0 }
 

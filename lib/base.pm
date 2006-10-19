@@ -2,7 +2,7 @@ package base;
 
 use strict 'vars';
 use vars qw($VERSION);
-$VERSION = '2.07';
+$VERSION = '2.08';
 
 # constant.pm is slow
 sub SUCCESS () { 1 }
@@ -71,6 +71,10 @@ sub import {
     my $inheritor = caller(0);
 
     foreach my $base (@_) {
+        if ( $inheritor eq $base ) {
+            warn "Class '$inheritor' tried to inherit from itself\n";
+        }
+
         next if $inheritor->isa($base);
 
         if (has_version($base)) {
@@ -212,6 +216,12 @@ found in your path.
 
 This module was introduced with Perl 5.004_04.
 
+Attempting to inherit from yourself generates a warning:
+
+ use Foo;
+ use base 'Foo';
+
+ # Class 'Foo' tried to inherit from itself
 
 =head1 CAVEATS
 
