@@ -2397,6 +2397,27 @@ PerlIO_cleanup(pTHX)
 	PerlIO_list_free(aTHX_ PL_def_layerlist);
 	PL_def_layerlist = NULL;
     }
+#ifdef USE_THREADS
+    MUTEX_UNLOCK(&PerlIO_mutex);
+#endif
+    if (PL_perlio_fd_refcnt_size /* Assuming initial size of zero. */
+        && PL_perlio_fd_refcnt) {
+#ifdef PERL_TRACK_MEMPOOL
+        Malloc_t ptr = (Malloc_t)((char*)PL_perlio_fd_refcnt-sTHX);
+        struct perl_memory_debug_header *const header
+            = (struct perl_memory_debug_header *)ptr;
+        /* Only the thread that allocated us can free us. */
+        if (header->interpreter == aTHX)
+#endif
+	    {
+		Safefree(PL_perlio_fd_refcnt);
+		PL_perlio_fd_refcnt = NULL;
+		PL_perlio_fd_refcnt_size = 0;
+	    }
+    }
+#ifdef USE_THREADS
+    MUTEX_UNLOCK(&PerlIO_mutex);
+#endif
 }
 
 
