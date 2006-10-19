@@ -1570,7 +1570,7 @@ its own pair of quotes, which may or may not be bracketing quotes,
 e.g., C<tr[A-Z][a-z]> or C<tr(+\-*/)/ABCD/>.
 
 Note that C<tr> does B<not> do regular expression character classes
-such as C<\d> or C<[:lower:]>.  The <tr> operator is not equivalent to
+such as C<\d> or C<[:lower:]>.  The C<tr> operator is not equivalent to
 the tr(1) utility.  If you want to map strings between lower/upper
 cases, see L<perlfunc/lc> and L<perlfunc/uc>, and in general consider
 using the C<s> operator if you need regular expressions.
