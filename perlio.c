@@ -2397,15 +2397,6 @@ PerlIO_cleanup(pTHX)
 	PerlIO_list_free(aTHX_ PL_def_layerlist);
 	PL_def_layerlist = NULL;
     }
-
-#ifdef USE_ITHREADS
-    /* only main thread can free refcnt table */
-    if (PL_curinterp == aTHX)
-#endif
-    {
-	Safefree(PL_perlio_fd_refcnt);
-	PL_perlio_fd_refcnt = NULL;
-    }
 }
 
 
