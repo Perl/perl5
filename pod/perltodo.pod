@@ -31,10 +31,6 @@ TODO are completed.
 
 =item *
 
-Implement L</_ prototype character>
-
-=item *
-
 Review smart match semantics in light of Perl 6 developments.
 
 =item *
@@ -521,22 +517,10 @@ slices. This would be good to fix.
 The old perltodo notes that lvalue functions don't work in the debugger. This
 would be good to fix.
 
-=head2 _ prototype character
-
-Study the possibility of adding a new prototype character, C<_>, meaning
-"this argument defaults to $_".
-
 =head2 regexp optimiser optional
 
 The regexp optimiser is not optional. It should configurable to be, to allow
 its performance to be measured, and its bugs to be easily demonstrated.
-
-=head2 UNITCHECK
-
-Introduce a new special block, UNITCHECK, which is run at the end of a
-compilation unit (module, file, eval(STRING) block). This will correspond to
-the Perl 6 CHECK. Perl 5's CHECK cannot be changed or removed because the
-O.pm/B.pm backend framework depends on it.
 
 =head2 delete &function
 
