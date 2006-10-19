@@ -640,6 +640,10 @@ END_EXTERN_C
 #define PL_uid			(*Perl_Iuid_ptr(aTHX))
 #undef  PL_unicode
 #define PL_unicode		(*Perl_Iunicode_ptr(aTHX))
+#undef  PL_unitcheckav
+#define PL_unitcheckav		(*Perl_Iunitcheckav_ptr(aTHX))
+#undef  PL_unitcheckav_save
+#define PL_unitcheckav_save	(*Perl_Iunitcheckav_save_ptr(aTHX))
 #undef  PL_unlockhook
 #define PL_unlockhook		(*Perl_Iunlockhook_ptr(aTHX))
 #undef  PL_unsafe

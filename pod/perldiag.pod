@@ -1641,9 +1641,9 @@ Check the #! line, or manually feed your script into Perl yourself.
 
 =item %s failed--call queue aborted
 
-(F) An untrapped exception was raised while executing a CHECK, INIT, or
-END subroutine.  Processing of the remainder of the queue of such
-routines has been prematurely ended.
+(F) An untrapped exception was raised while executing a UNITCHECK,
+CHECK, INIT, or END subroutine.  Processing of the remainder of the
+queue of such routines has been prematurely ended.
 
 =item False [] range "%s" in regex; marked by <-- HERE in m/%s/
 

@@ -133,6 +133,7 @@ PERLVAR(Iglobalstash,	HV *)		/* global keyword overrides imported here */
 PERLVAR(Icurstname,	SV *)		/* name of current package */
 PERLVAR(Ibeginav,	AV *)		/* names of BEGIN subroutines */
 PERLVAR(Iendav,		AV *)		/* names of END subroutines */
+PERLVAR(Iunitcheckav,	AV *)		/* names of UNITCHECK subroutines */
 PERLVAR(Icheckav,	AV *)		/* names of CHECK subroutines */
 PERLVAR(Iinitav,	AV *)		/* names of INIT subroutines */
 PERLVAR(Istrtab,	HV *)		/* shared string table */
@@ -490,6 +491,7 @@ PERLVAR(Iutf8_idcont,	SV *)
 PERLVAR(Isort_RealCmp,  SVCOMPARE_t)
 
 PERLVARI(Icheckav_save, AV*, NULL)	/* save CHECK{}s when compiling */
+PERLVARI(Iunitcheckav_save, AV*, NULL)	/* save UNITCHECK{}s when compiling */
 
 PERLVARI(Iclocktick, long, 0)	/* this many times() ticks in a second */
 

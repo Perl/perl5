@@ -5630,6 +5630,7 @@ Perl_yylex(pTHX)
 	case KEY_AUTOLOAD:
 	case KEY_DESTROY:
 	case KEY_BEGIN:
+	case KEY_UNITCHECK:
 	case KEY_CHECK:
 	case KEY_INIT:
 	case KEY_END:
@@ -9683,9 +9684,24 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
           goto unknown;
       }
 
-    case 9: /* 8 tokens of length 9 */
+    case 9: /* 9 tokens of length 9 */
       switch (name[0])
       {
+        case 'U':
+          if (name[1] == 'N' &&
+              name[2] == 'I' &&
+              name[3] == 'T' &&
+              name[4] == 'C' &&
+              name[5] == 'H' &&
+              name[6] == 'E' &&
+              name[7] == 'C' &&
+              name[8] == 'K')
+          {                                       /* UNITCHECK  */
+            return KEY_UNITCHECK;
+          }
+
+          goto unknown;
+
         case 'e':
           if (name[1] == 'n' &&
               name[2] == 'd' &&

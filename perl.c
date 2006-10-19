@@ -944,12 +944,16 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_endav);
     SvREFCNT_dec(PL_checkav);
     SvREFCNT_dec(PL_checkav_save);
+    SvREFCNT_dec(PL_unitcheckav);
+    SvREFCNT_dec(PL_unitcheckav_save);
     SvREFCNT_dec(PL_initav);
     PL_beginav = NULL;
     PL_beginav_save = NULL;
     PL_endav = NULL;
     PL_checkav = NULL;
     PL_checkav_save = NULL;
+    PL_unitcheckav = NULL;
+    PL_unitcheckav_save = NULL;
     PL_initav = NULL;
 
     /* shortcuts just get cleared */
@@ -1605,6 +1609,8 @@ setuid perl scripts securely.\n");
     switch (ret) {
     case 0:
 	parse_body(env,xsinit);
+	if (PL_unitcheckav)
+	    call_list(oldscope, PL_unitcheckav);
 	if (PL_checkav)
 	    call_list(oldscope, PL_checkav);
 	ret = 0;
@@ -1618,6 +1624,8 @@ setuid perl scripts securely.\n");
 	    LEAVE;
 	FREETMPS;
 	PL_curstash = PL_defstash;
+	if (PL_unitcheckav)
+	    call_list(oldscope, PL_unitcheckav);
 	if (PL_checkav)
 	    call_list(oldscope, PL_checkav);
 	ret = STATUS_EXIT;
@@ -5113,6 +5121,12 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 		    PL_checkav_save = newAV();
 		av_push(PL_checkav_save, (SV*)cv);
 	    }
+	    else if (paramList == PL_unitcheckav) {
+		/* save PL_unitcheckav for compiler */
+		if (! PL_unitcheckav_save)
+		    PL_unitcheckav_save = newAV();
+		av_push(PL_unitcheckav_save, (SV*)cv);
+	    }
 	} else {
 	    if (!PL_madskills)
 		SAVEFREESV(cv);
@@ -5143,6 +5157,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 				   "%s failed--call queue aborted",
 				   paramList == PL_checkav ? "CHECK"
 				   : paramList == PL_initav ? "INIT"
+				   : paramList == PL_unitcheckav ? "UNITCHECK"
 				   : "END");
 		while (PL_scopestack_ix > oldscope)
 		    LEAVE;
@@ -5171,6 +5186,7 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList)
 		    Perl_croak(aTHX_ "%s failed--call queue aborted",
 			       paramList == PL_checkav ? "CHECK"
 			       : paramList == PL_initav ? "INIT"
+			       : paramList == PL_unitcheckav ? "UNITCHECK"
 			       : "END");
 	    }
 	    my_exit_jump();

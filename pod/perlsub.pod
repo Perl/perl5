@@ -227,10 +227,10 @@ indirectly by the run-time system itself, usually due to a triggered event.
 Subroutines that do special, pre-defined things include C<AUTOLOAD>, C<CLONE>,
 C<DESTROY> plus all functions mentioned in L<perltie> and L<PerlIO::via>.
 
-The C<BEGIN>, C<CHECK>, C<INIT> and C<END> subroutines are not so much
-subroutines as named special code blocks, of which you can have more
-than one in a package, and which you can B<not> call explicitly.  See
-L<perlmod/"BEGIN, CHECK, INIT and END">
+The C<BEGIN>, C<UNITCHECK>, C<CHECK>, C<INIT> and C<END> subroutines
+are not so much subroutines as named special code blocks, of which you
+can have more than one in a package, and which you can B<not> call
+explicitly.  See L<perlmod/"BEGIN, UNITCHECK, CHECK, INIT and END">
 
 =head2 Private Variables via my()
 X<my> X<variable, lexical> X<lexical> X<lexical variable> X<scope, lexical>
@@ -521,8 +521,9 @@ starts to run:
 	}
     }
 
-See L<perlmod/"BEGIN, CHECK, INIT and END"> about the
-special triggered code blocks, C<BEGIN>, C<CHECK>, C<INIT> and C<END>.
+See L<perlmod/"BEGIN, UNITCHECK, CHECK, INIT and END"> about the
+special triggered code blocks, C<BEGIN>, C<UNITCHECK>, C<CHECK>,
+C<INIT> and C<END>.
 
 If declared at the outermost scope (the file scope), then lexicals
 work somewhat like C's file statics.  They are available to all

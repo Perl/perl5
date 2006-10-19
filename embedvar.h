@@ -381,6 +381,8 @@
 #define PL_tokenbuf		(vTHX->Itokenbuf)
 #define PL_uid			(vTHX->Iuid)
 #define PL_unicode		(vTHX->Iunicode)
+#define PL_unitcheckav		(vTHX->Iunitcheckav)
+#define PL_unitcheckav_save	(vTHX->Iunitcheckav_save)
 #define PL_unlockhook		(vTHX->Iunlockhook)
 #define PL_unsafe		(vTHX->Iunsafe)
 #define PL_utf8_alnum		(vTHX->Iutf8_alnum)
@@ -677,6 +679,8 @@
 #define PL_Itokenbuf		PL_tokenbuf
 #define PL_Iuid			PL_uid
 #define PL_Iunicode		PL_unicode
+#define PL_Iunitcheckav		PL_unitcheckav
+#define PL_Iunitcheckav_save	PL_unitcheckav_save
 #define PL_Iunlockhook		PL_unlockhook
 #define PL_Iunsafe		PL_unsafe
 #define PL_Iutf8_alnum		PL_utf8_alnum

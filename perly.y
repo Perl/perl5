@@ -379,7 +379,8 @@ startformsub:	/* NULL */	/* start a format subroutine scope */
 /* Name of a subroutine - must be a bareword, could be special */
 subname	:	WORD	{ const char *const name = SvPV_nolen_const(((SVOP*)$1)->op_sv);
 			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
-			      || strEQ(name, "INIT") || strEQ(name, "CHECK"))
+			      || strEQ(name, "INIT") || strEQ(name, "CHECK")
+			      || strEQ(name, "UNITCHECK"))
 			      CvSPECIAL_on(PL_compcv);
 			  $$ = $1; }
 	;

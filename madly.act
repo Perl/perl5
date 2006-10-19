@@ -495,63 +495,64 @@ case 2:
 #line 499 "madly.y"
     { const char *const name = SvPV_nolen_const(((SVOP*)(yyvsp[0].opval))->op_sv);
 			  if (strEQ(name, "BEGIN") || strEQ(name, "END")
-			      || strEQ(name, "INIT") || strEQ(name, "CHECK"))
+			      || strEQ(name, "INIT") || strEQ(name, "CHECK")
+			      || strEQ(name, "UNITCHECK"))
 			      CvSPECIAL_on(PL_compcv);
 			  (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 70:
-#line 508 "madly.y"
+#line 509 "madly.y"
     { (yyval.opval) = Nullop; ;}
     break;
 
   case 72:
-#line 514 "madly.y"
+#line 515 "madly.y"
     { (yyval.opval) = Nullop; ;}
     break;
 
   case 73:
-#line 516 "madly.y"
+#line 517 "madly.y"
     { (yyval.opval) = (yyvsp[0].opval);
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),':');
 			;}
     break;
 
   case 74:
-#line 520 "madly.y"
+#line 521 "madly.y"
     { (yyval.opval) = newOP(OP_NULL, 0);
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),':');
 			;}
     break;
 
   case 75:
-#line 527 "madly.y"
+#line 528 "madly.y"
     { (yyval.opval) = (yyvsp[0].opval);
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),':');
 			;}
     break;
 
   case 76:
-#line 531 "madly.y"
+#line 532 "madly.y"
     { (yyval.opval) = newOP(OP_NULL, 0);
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),':');
 			;}
     break;
 
   case 77:
-#line 537 "madly.y"
+#line 538 "madly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 78:
-#line 538 "madly.y"
+#line 539 "madly.y"
     { (yyval.opval) = newOP(OP_NULL,0); PL_expect = XSTATE;
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),';');
 			;}
     break;
 
   case 79:
-#line 544 "madly.y"
+#line 545 "madly.y"
     { (yyval.opval) = package((yyvsp[-1].opval));
 			  token_getmad((yyvsp[-2].tkval),(yyval.opval),'o');
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),';');
@@ -559,12 +560,12 @@ case 2:
     break;
 
   case 80:
-#line 551 "madly.y"
+#line 552 "madly.y"
     { CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ ;}
     break;
 
   case 81:
-#line 553 "madly.y"
+#line 554 "madly.y"
     { SvREFCNT_inc(PL_compcv);
 			  (yyval.opval) = utilize(((yyvsp[-6].tkval))->tk_lval.ival, (yyvsp[-5].ival), (yyvsp[-3].opval), (yyvsp[-2].opval), (yyvsp[-1].opval));
 			  token_getmad((yyvsp[-6].tkval),(yyval.opval),'o');
@@ -575,28 +576,28 @@ case 2:
     break;
 
   case 82:
-#line 564 "madly.y"
+#line 565 "madly.y"
     { (yyval.opval) = newLOGOP(OP_AND, 0, (yyvsp[-2].opval), (yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 83:
-#line 568 "madly.y"
+#line 569 "madly.y"
     { (yyval.opval) = newLOGOP(((yyvsp[-1].tkval))->tk_lval.ival, 0, (yyvsp[-2].opval), (yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 84:
-#line 572 "madly.y"
+#line 573 "madly.y"
     { (yyval.opval) = newLOGOP(OP_DOR, 0, (yyvsp[-2].opval), (yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 86:
-#line 580 "madly.y"
+#line 581 "madly.y"
     { OP* op = newNULLLIST();
 			  token_getmad((yyvsp[0].tkval),op,',');
 			  (yyval.opval) = append_elem(OP_LIST, (yyvsp[-1].opval), op);
@@ -604,7 +605,7 @@ case 2:
     break;
 
   case 87:
-#line 585 "madly.y"
+#line 586 "madly.y"
     { 
 			  (yyvsp[0].opval) = newUNOP(OP_NULL, 0, (yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyvsp[0].opval),',');
@@ -613,7 +614,7 @@ case 2:
     break;
 
   case 89:
-#line 595 "madly.y"
+#line 596 "madly.y"
     { (yyval.opval) = convert(((yyvsp[-2].tkval))->tk_lval.ival, OPf_STACKED,
 				prepend_elem(OP_LIST, newGVREF(((yyvsp[-2].tkval))->tk_lval.ival,(yyvsp[-1].opval)), (yyvsp[0].opval)) );
 			  token_getmad((yyvsp[-2].tkval),(yyval.opval),'o');
@@ -621,7 +622,7 @@ case 2:
     break;
 
   case 90:
-#line 600 "madly.y"
+#line 601 "madly.y"
     { (yyval.opval) = convert(((yyvsp[-4].tkval))->tk_lval.ival, OPf_STACKED,
 				prepend_elem(OP_LIST, newGVREF(((yyvsp[-4].tkval))->tk_lval.ival,(yyvsp[-2].opval)), (yyvsp[-1].opval)) );
 			  token_getmad((yyvsp[-4].tkval),(yyval.opval),'o');
@@ -631,7 +632,7 @@ case 2:
     break;
 
   case 91:
-#line 607 "madly.y"
+#line 608 "madly.y"
     { (yyval.opval) = convert(OP_ENTERSUB, OPf_STACKED,
 				append_elem(OP_LIST,
 				    prepend_elem(OP_LIST, scalar((yyvsp[-5].opval)), (yyvsp[-1].opval)),
@@ -643,7 +644,7 @@ case 2:
     break;
 
   case 92:
-#line 616 "madly.y"
+#line 617 "madly.y"
     { (yyval.opval) = convert(OP_ENTERSUB, OPf_STACKED,
 				append_elem(OP_LIST, scalar((yyvsp[-2].opval)),
 				    newUNOP(OP_METHOD, 0, (yyvsp[0].opval))));
@@ -652,7 +653,7 @@ case 2:
     break;
 
   case 93:
-#line 622 "madly.y"
+#line 623 "madly.y"
     { (yyval.opval) = convert(OP_ENTERSUB, OPf_STACKED,
 				append_elem(OP_LIST,
 				    prepend_elem(OP_LIST, (yyvsp[-1].opval), (yyvsp[0].opval)),
@@ -661,7 +662,7 @@ case 2:
     break;
 
   case 94:
-#line 628 "madly.y"
+#line 629 "madly.y"
     { (yyval.opval) = convert(OP_ENTERSUB, OPf_STACKED,
 				append_elem(OP_LIST,
 				    prepend_elem(OP_LIST, (yyvsp[-3].opval), (yyvsp[-1].opval)),
@@ -672,14 +673,14 @@ case 2:
     break;
 
   case 95:
-#line 636 "madly.y"
+#line 637 "madly.y"
     { (yyval.opval) = convert(((yyvsp[-1].tkval))->tk_lval.ival, 0, (yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 96:
-#line 640 "madly.y"
+#line 641 "madly.y"
     { (yyval.opval) = convert(((yyvsp[-3].tkval))->tk_lval.ival, 0, (yyvsp[-1].opval));
 			  token_getmad((yyvsp[-3].tkval),(yyval.opval),'o');
 			  token_getmad((yyvsp[-2].tkval),(yyval.opval),'(');
@@ -688,13 +689,13 @@ case 2:
     break;
 
   case 97:
-#line 646 "madly.y"
+#line 647 "madly.y"
     { SvREFCNT_inc(PL_compcv);
 			  (yyvsp[0].opval) = newANONATTRSUB((yyvsp[-1].ival), 0, Nullop, (yyvsp[0].opval)); ;}
     break;
 
   case 98:
-#line 649 "madly.y"
+#line 650 "madly.y"
     { (yyval.opval) = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				 append_elem(OP_LIST,
 				   prepend_elem(OP_LIST, (yyvsp[-2].opval), (yyvsp[0].opval)), (yyvsp[-4].opval)));
@@ -702,7 +703,7 @@ case 2:
     break;
 
   case 101:
-#line 664 "madly.y"
+#line 665 "madly.y"
     { (yyval.opval) = newBINOP(OP_GELEM, 0, (yyvsp[-4].opval), scalar((yyvsp[-2].opval)));
 			    PL_expect = XOPERATOR;
 			  token_getmad((yyvsp[-3].tkval),(yyval.opval),'{');
@@ -712,7 +713,7 @@ case 2:
     break;
 
   case 102:
-#line 671 "madly.y"
+#line 672 "madly.y"
     { (yyval.opval) = newBINOP(OP_AELEM, 0, oopsAV((yyvsp[-3].opval)), scalar((yyvsp[-1].opval)));
 			  token_getmad((yyvsp[-2].tkval),(yyval.opval),'[');
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),']');
@@ -720,7 +721,7 @@ case 2:
     break;
 
   case 103:
-#line 676 "madly.y"
+#line 677 "madly.y"
     { (yyval.opval) = newBINOP(OP_AELEM, 0,
 					ref(newAVREF((yyvsp[-4].opval)),OP_RV2AV),
 					scalar((yyvsp[-1].opval)));
@@ -731,7 +732,7 @@ case 2:
     break;
 
   case 104:
-#line 684 "madly.y"
+#line 685 "madly.y"
     { (yyval.opval) = newBINOP(OP_AELEM, 0,
 					ref(newAVREF((yyvsp[-3].opval)),OP_RV2AV),
 					scalar((yyvsp[-1].opval)));
@@ -741,7 +742,7 @@ case 2:
     break;
 
   case 105:
-#line 691 "madly.y"
+#line 692 "madly.y"
     { (yyval.opval) = newBINOP(OP_HELEM, 0, oopsHV((yyvsp[-4].opval)), jmaybe((yyvsp[-2].opval)));
 			    PL_expect = XOPERATOR;
 			  token_getmad((yyvsp[-3].tkval),(yyval.opval),'{');
@@ -751,7 +752,7 @@ case 2:
     break;
 
   case 106:
-#line 698 "madly.y"
+#line 699 "madly.y"
     { (yyval.opval) = newBINOP(OP_HELEM, 0,
 					ref(newHVREF((yyvsp[-5].opval)),OP_RV2HV),
 					jmaybe((yyvsp[-2].opval)));
@@ -764,7 +765,7 @@ case 2:
     break;
 
   case 107:
-#line 708 "madly.y"
+#line 709 "madly.y"
     { (yyval.opval) = newBINOP(OP_HELEM, 0,
 					ref(newHVREF((yyvsp[-4].opval)),OP_RV2HV),
 					jmaybe((yyvsp[-2].opval)));
@@ -776,7 +777,7 @@ case 2:
     break;
 
   case 108:
-#line 717 "madly.y"
+#line 718 "madly.y"
     { (yyval.opval) = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				   newCVREF(0, scalar((yyvsp[-3].opval))));
 			  token_getmad((yyvsp[-2].tkval),(yyval.opval),'a');
@@ -786,7 +787,7 @@ case 2:
     break;
 
   case 109:
-#line 724 "madly.y"
+#line 725 "madly.y"
     { (yyval.opval) = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				   append_elem(OP_LIST, (yyvsp[-1].opval),
 				       newCVREF(0, scalar((yyvsp[-4].opval)))));
@@ -797,7 +798,7 @@ case 2:
     break;
 
   case 110:
-#line 733 "madly.y"
+#line 734 "madly.y"
     { (yyval.opval) = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				   append_elem(OP_LIST, (yyvsp[-1].opval),
 					       newCVREF(0, scalar((yyvsp[-3].opval)))));
@@ -807,7 +808,7 @@ case 2:
     break;
 
   case 111:
-#line 740 "madly.y"
+#line 741 "madly.y"
     { (yyval.opval) = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				   newCVREF(0, scalar((yyvsp[-2].opval))));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'(');
@@ -816,7 +817,7 @@ case 2:
     break;
 
   case 112:
-#line 746 "madly.y"
+#line 747 "madly.y"
     { (yyval.opval) = newSLICEOP(0, (yyvsp[-1].opval), (yyvsp[-4].opval));
 			  token_getmad((yyvsp[-5].tkval),(yyval.opval),'(');
 			  token_getmad((yyvsp[-3].tkval),(yyval.opval),')');
@@ -826,7 +827,7 @@ case 2:
     break;
 
   case 113:
-#line 753 "madly.y"
+#line 754 "madly.y"
     { (yyval.opval) = newSLICEOP(0, (yyvsp[-1].opval), Nullop);
 			  token_getmad((yyvsp[-4].tkval),(yyval.opval),'(');
 			  token_getmad((yyvsp[-3].tkval),(yyval.opval),')');
@@ -836,21 +837,21 @@ case 2:
     break;
 
   case 114:
-#line 763 "madly.y"
+#line 764 "madly.y"
     { (yyval.opval) = newASSIGNOP(OPf_STACKED, (yyvsp[-2].opval), ((yyvsp[-1].tkval))->tk_lval.ival, (yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 115:
-#line 767 "madly.y"
+#line 768 "madly.y"
     { (yyval.opval) = newBINOP(((yyvsp[-1].tkval))->tk_lval.ival, 0, scalar((yyvsp[-2].opval)), scalar((yyvsp[0].opval)));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 116:
-#line 771 "madly.y"
+#line 772 "madly.y"
     {   if (((yyvsp[-1].tkval))->tk_lval.ival != OP_REPEAT)
 				scalar((yyvsp[-2].opval));
 			    (yyval.opval) = newBINOP(((yyvsp[-1].tkval))->tk_lval.ival, 0, (yyvsp[-2].opval), scalar((yyvsp[0].opval)));
@@ -859,49 +860,49 @@ case 2:
     break;
 
   case 117:
-#line 777 "madly.y"
+#line 778 "madly.y"
     { (yyval.opval) = newBINOP(((yyvsp[-1].tkval))->tk_lval.ival, 0, scalar((yyvsp[-2].opval)), scalar((yyvsp[0].opval)));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 118:
-#line 781 "madly.y"
+#line 782 "madly.y"
     { (yyval.opval) = newBINOP(((yyvsp[-1].tkval))->tk_lval.ival, 0, scalar((yyvsp[-2].opval)), scalar((yyvsp[0].opval)));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 119:
-#line 785 "madly.y"
+#line 786 "madly.y"
     { (yyval.opval) = newBINOP(((yyvsp[-1].tkval))->tk_lval.ival, 0, scalar((yyvsp[-2].opval)), scalar((yyvsp[0].opval)));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 120:
-#line 789 "madly.y"
+#line 790 "madly.y"
     { (yyval.opval) = newBINOP(((yyvsp[-1].tkval))->tk_lval.ival, 0, scalar((yyvsp[-2].opval)), scalar((yyvsp[0].opval)));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 121:
-#line 793 "madly.y"
+#line 794 "madly.y"
     { (yyval.opval) = newBINOP(((yyvsp[-1].tkval))->tk_lval.ival, 0, scalar((yyvsp[-2].opval)), scalar((yyvsp[0].opval)));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 122:
-#line 797 "madly.y"
+#line 798 "madly.y"
     { (yyval.opval) = newBINOP(((yyvsp[-1].tkval))->tk_lval.ival, 0, scalar((yyvsp[-2].opval)), scalar((yyvsp[0].opval)));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 123:
-#line 801 "madly.y"
+#line 802 "madly.y"
     { UNOP *op;
 			  (yyval.opval) = newRANGE(((yyvsp[-1].tkval))->tk_lval.ival, scalar((yyvsp[-2].opval)), scalar((yyvsp[0].opval)));
 			  op = (UNOP*)(yyval.opval);
@@ -913,28 +914,28 @@ case 2:
     break;
 
   case 124:
-#line 810 "madly.y"
+#line 811 "madly.y"
     { (yyval.opval) = newLOGOP(OP_AND, 0, (yyvsp[-2].opval), (yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 125:
-#line 814 "madly.y"
+#line 815 "madly.y"
     { (yyval.opval) = newLOGOP(OP_OR, 0, (yyvsp[-2].opval), (yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 126:
-#line 818 "madly.y"
+#line 819 "madly.y"
     { (yyval.opval) = newLOGOP(OP_DOR, 0, (yyvsp[-2].opval), (yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 127:
-#line 822 "madly.y"
+#line 823 "madly.y"
     { (yyval.opval) = bind_match(((yyvsp[-1].tkval))->tk_lval.ival, (yyvsp[-2].opval), (yyvsp[0].opval));
 			  if ((yyval.opval)->op_type == OP_NOT)
 			      token_getmad((yyvsp[-1].tkval),((UNOP*)(yyval.opval))->op_first,'~');
@@ -944,35 +945,35 @@ case 2:
     break;
 
   case 128:
-#line 832 "madly.y"
+#line 833 "madly.y"
     { (yyval.opval) = newUNOP(OP_NEGATE, 0, scalar((yyvsp[0].opval)));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 129:
-#line 836 "madly.y"
+#line 837 "madly.y"
     { (yyval.opval) = newUNOP(OP_NULL, 0, (yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'+');
 			;}
     break;
 
   case 130:
-#line 840 "madly.y"
+#line 841 "madly.y"
     { (yyval.opval) = newUNOP(OP_NOT, 0, scalar((yyvsp[0].opval)));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 131:
-#line 844 "madly.y"
+#line 845 "madly.y"
     { (yyval.opval) = newUNOP(OP_COMPLEMENT, 0, scalar((yyvsp[0].opval)));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 132:
-#line 848 "madly.y"
+#line 849 "madly.y"
     { (yyval.opval) = newUNOP(OP_POSTINC, 0,
 					mod(scalar((yyvsp[-1].opval)), OP_POSTINC));
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),'o');
@@ -980,7 +981,7 @@ case 2:
     break;
 
   case 133:
-#line 853 "madly.y"
+#line 854 "madly.y"
     { (yyval.opval) = newUNOP(OP_POSTDEC, 0,
 					mod(scalar((yyvsp[-1].opval)), OP_POSTDEC));
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),'o');
@@ -988,7 +989,7 @@ case 2:
     break;
 
   case 134:
-#line 858 "madly.y"
+#line 859 "madly.y"
     { (yyval.opval) = newUNOP(OP_PREINC, 0,
 					mod(scalar((yyvsp[0].opval)), OP_PREINC));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
@@ -996,7 +997,7 @@ case 2:
     break;
 
   case 135:
-#line 863 "madly.y"
+#line 864 "madly.y"
     { (yyval.opval) = newUNOP(OP_PREDEC, 0,
 					mod(scalar((yyvsp[0].opval)), OP_PREDEC));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
@@ -1004,7 +1005,7 @@ case 2:
     break;
 
   case 136:
-#line 872 "madly.y"
+#line 873 "madly.y"
     { (yyval.opval) = newANONLIST((yyvsp[-1].opval));
 			  token_getmad((yyvsp[-2].tkval),(yyval.opval),'[');
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),']');
@@ -1012,7 +1013,7 @@ case 2:
     break;
 
   case 137:
-#line 877 "madly.y"
+#line 878 "madly.y"
     { (yyval.opval) = newANONLIST(Nullop);
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'[');
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),']');
@@ -1020,7 +1021,7 @@ case 2:
     break;
 
   case 138:
-#line 882 "madly.y"
+#line 883 "madly.y"
     { (yyval.opval) = newANONHASH((yyvsp[-2].opval));
 			  token_getmad((yyvsp[-3].tkval),(yyval.opval),'{');
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),';');
@@ -1029,7 +1030,7 @@ case 2:
     break;
 
   case 139:
-#line 888 "madly.y"
+#line 889 "madly.y"
     { (yyval.opval) = newANONHASH(Nullop);
 			  token_getmad((yyvsp[-2].tkval),(yyval.opval),'{');
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),';');
@@ -1038,7 +1039,7 @@ case 2:
     break;
 
   case 140:
-#line 894 "madly.y"
+#line 895 "madly.y"
     { SvREFCNT_inc(PL_compcv);
 			  (yyval.opval) = newANONATTRSUB((yyvsp[-3].ival), (yyvsp[-2].opval), (yyvsp[-1].opval), (yyvsp[0].opval));
 			  token_getmad((yyvsp[-4].tkval),(yyval.opval),'o');
@@ -1048,21 +1049,21 @@ case 2:
     break;
 
   case 141:
-#line 905 "madly.y"
+#line 906 "madly.y"
     { (yyval.opval) = dofile((yyvsp[0].opval), (yyvsp[-1].tkval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 142:
-#line 909 "madly.y"
+#line 910 "madly.y"
     { (yyval.opval) = newUNOP(OP_NULL, OPf_SPECIAL, scope((yyvsp[0].opval)));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'D');
 			;}
     break;
 
   case 143:
-#line 913 "madly.y"
+#line 914 "madly.y"
     { (yyval.opval) = newUNOP(OP_ENTERSUB,
 			    OPf_SPECIAL|OPf_STACKED,
 			    prepend_elem(OP_LIST,
@@ -1077,7 +1078,7 @@ case 2:
     break;
 
   case 144:
-#line 925 "madly.y"
+#line 926 "madly.y"
     { (yyval.opval) = newUNOP(OP_ENTERSUB,
 			    OPf_SPECIAL|OPf_STACKED,
 			    append_elem(OP_LIST,
@@ -1093,7 +1094,7 @@ case 2:
     break;
 
   case 145:
-#line 938 "madly.y"
+#line 939 "madly.y"
     { (yyval.opval) = newUNOP(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
 			    prepend_elem(OP_LIST,
 				scalar(newCVREF(0,scalar((yyvsp[-2].opval)))), Nullop)); dep();
@@ -1104,7 +1105,7 @@ case 2:
     break;
 
   case 146:
-#line 946 "madly.y"
+#line 947 "madly.y"
     { (yyval.opval) = newUNOP(OP_ENTERSUB, OPf_SPECIAL|OPf_STACKED,
 			    prepend_elem(OP_LIST,
 				(yyvsp[-1].opval),
@@ -1116,7 +1117,7 @@ case 2:
     break;
 
   case 151:
-#line 962 "madly.y"
+#line 963 "madly.y"
     { (yyval.opval) = newCONDOP(0, (yyvsp[-4].opval), (yyvsp[-2].opval), (yyvsp[0].opval));
 			  token_getmad((yyvsp[-3].tkval),(yyval.opval),'?');
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),':');
@@ -1124,26 +1125,26 @@ case 2:
     break;
 
   case 152:
-#line 967 "madly.y"
+#line 968 "madly.y"
     { (yyval.opval) = newUNOP(OP_REFGEN, 0, mod((yyvsp[0].opval),OP_REFGEN));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 153:
-#line 971 "madly.y"
+#line 972 "madly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 154:
-#line 973 "madly.y"
+#line 974 "madly.y"
     { (yyval.opval) = localize((yyvsp[0].opval),((yyvsp[-1].tkval))->tk_lval.ival);
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'d');
 			;}
     break;
 
   case 155:
-#line 977 "madly.y"
+#line 978 "madly.y"
     { (yyval.opval) = sawparens(newUNOP(OP_NULL,0,(yyvsp[-1].opval)));
 			  token_getmad((yyvsp[-2].tkval),(yyval.opval),'(');
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),')');
@@ -1151,7 +1152,7 @@ case 2:
     break;
 
   case 156:
-#line 982 "madly.y"
+#line 983 "madly.y"
     { (yyval.opval) = sawparens(newNULLLIST());
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'(');
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),')');
@@ -1159,37 +1160,37 @@ case 2:
     break;
 
   case 157:
-#line 987 "madly.y"
+#line 988 "madly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 158:
-#line 989 "madly.y"
+#line 990 "madly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 159:
-#line 991 "madly.y"
+#line 992 "madly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 160:
-#line 993 "madly.y"
+#line 994 "madly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 161:
-#line 995 "madly.y"
+#line 996 "madly.y"
     { (yyval.opval) = newUNOP(OP_AV2ARYLEN, 0, ref((yyvsp[0].opval), OP_AV2ARYLEN));;}
     break;
 
   case 162:
-#line 997 "madly.y"
+#line 998 "madly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 163:
-#line 999 "madly.y"
+#line 1000 "madly.y"
     { (yyval.opval) = prepend_elem(OP_ASLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_ASLICE, 0,
@@ -1201,7 +1202,7 @@ case 2:
     break;
 
   case 164:
-#line 1008 "madly.y"
+#line 1009 "madly.y"
     { (yyval.opval) = prepend_elem(OP_HSLICE,
 				newOP(OP_PUSHMARK, 0),
 				    newLISTOP(OP_HSLICE, 0,
@@ -1215,17 +1216,17 @@ case 2:
     break;
 
   case 165:
-#line 1019 "madly.y"
+#line 1020 "madly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 166:
-#line 1021 "madly.y"
+#line 1022 "madly.y"
     { (yyval.opval) = newUNOP(OP_ENTERSUB, 0, scalar((yyvsp[0].opval))); ;}
     break;
 
   case 167:
-#line 1023 "madly.y"
+#line 1024 "madly.y"
     { (yyval.opval) = newUNOP(OP_ENTERSUB, OPf_STACKED, scalar((yyvsp[-2].opval)));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'(');
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),')');
@@ -1233,7 +1234,7 @@ case 2:
     break;
 
   case 168:
-#line 1028 "madly.y"
+#line 1029 "madly.y"
     { OP* op;
 			  (yyval.opval) = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				append_elem(OP_LIST, (yyvsp[-1].opval), scalar((yyvsp[-3].opval))));
@@ -1247,7 +1248,7 @@ case 2:
     break;
 
   case 169:
-#line 1039 "madly.y"
+#line 1040 "madly.y"
     { (yyval.opval) = newUNOP(OP_ENTERSUB, OPf_STACKED,
 			    append_elem(OP_LIST, (yyvsp[0].opval), scalar((yyvsp[-1].opval))));
 			  token_getmad((yyvsp[-2].tkval),(yyval.opval),'o');
@@ -1255,7 +1256,7 @@ case 2:
     break;
 
   case 170:
-#line 1044 "madly.y"
+#line 1045 "madly.y"
     { (yyval.opval) = newOP(((yyvsp[0].tkval))->tk_lval.ival, OPf_SPECIAL);
 			    PL_hints |= HINT_BLOCK_SCOPE;
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),'o');
@@ -1263,65 +1264,65 @@ case 2:
     break;
 
   case 171:
-#line 1049 "madly.y"
+#line 1050 "madly.y"
     { (yyval.opval) = newLOOPEX(((yyvsp[-1].tkval))->tk_lval.ival,(yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 172:
-#line 1053 "madly.y"
+#line 1054 "madly.y"
     { (yyval.opval) = newUNOP(OP_NOT, 0, scalar((yyvsp[0].opval)));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 173:
-#line 1057 "madly.y"
+#line 1058 "madly.y"
     { (yyval.opval) = newOP(((yyvsp[0].tkval))->tk_lval.ival, 0);
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 174:
-#line 1061 "madly.y"
+#line 1062 "madly.y"
     { (yyval.opval) = newUNOP(((yyvsp[-1].tkval))->tk_lval.ival, 0, (yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 175:
-#line 1065 "madly.y"
+#line 1066 "madly.y"
     { (yyval.opval) = newUNOP(((yyvsp[-1].tkval))->tk_lval.ival, 0, (yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 176:
-#line 1069 "madly.y"
+#line 1070 "madly.y"
     { (yyval.opval) = newOP(OP_REQUIRE, (yyvsp[0].tkval) ? OPf_SPECIAL : 0); ;}
     break;
 
   case 177:
-#line 1071 "madly.y"
+#line 1072 "madly.y"
     { (yyval.opval) = newUNOP(OP_REQUIRE, (yyvsp[-1].tkval) ? OPf_SPECIAL : 0, (yyvsp[0].opval)); ;}
     break;
 
   case 178:
-#line 1073 "madly.y"
+#line 1074 "madly.y"
     { (yyval.opval) = newUNOP(OP_ENTERSUB, OPf_STACKED,
 			    append_elem(OP_LIST, (yyvsp[0].opval), scalar((yyvsp[-1].opval)))); ;}
     break;
 
   case 179:
-#line 1076 "madly.y"
+#line 1077 "madly.y"
     { (yyval.opval) = newOP(((yyvsp[0].tkval))->tk_lval.ival, 0);
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),'o');
 			;}
     break;
 
   case 180:
-#line 1080 "madly.y"
+#line 1081 "madly.y"
     { (yyval.opval) = newOP(((yyvsp[-2].tkval))->tk_lval.ival, 0);
 			  token_getmad((yyvsp[-2].tkval),(yyval.opval),'o');
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'(');
@@ -1330,13 +1331,13 @@ case 2:
     break;
 
   case 181:
-#line 1086 "madly.y"
+#line 1087 "madly.y"
     { (yyval.opval) = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				scalar((yyvsp[0].opval))); ;}
     break;
 
   case 182:
-#line 1089 "madly.y"
+#line 1090 "madly.y"
     { (yyval.opval) = newOP(((yyvsp[-2].tkval))->tk_lval.ival, OPf_SPECIAL);
 			  token_getmad((yyvsp[-2].tkval),(yyval.opval),'o');
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'(');
@@ -1345,7 +1346,7 @@ case 2:
     break;
 
   case 183:
-#line 1095 "madly.y"
+#line 1096 "madly.y"
     { (yyval.opval) = newUNOP(((yyvsp[-3].tkval))->tk_lval.ival, 0, (yyvsp[-1].opval));
 			  token_getmad((yyvsp[-3].tkval),(yyval.opval),'o');
 			  token_getmad((yyvsp[-2].tkval),(yyval.opval),'(');
@@ -1354,7 +1355,7 @@ case 2:
     break;
 
   case 184:
-#line 1101 "madly.y"
+#line 1102 "madly.y"
     { (yyval.opval) = pmruntime((yyvsp[-3].opval), (yyvsp[-1].opval), 1);
 			  token_getmad((yyvsp[-2].tkval),(yyval.opval),'(');
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),')');
@@ -1362,7 +1363,7 @@ case 2:
     break;
 
   case 187:
-#line 1111 "madly.y"
+#line 1112 "madly.y"
     { (yyval.opval) = my_attrs((yyvsp[-1].opval),(yyvsp[0].opval));
 			  token_getmad((yyvsp[-2].tkval),(yyval.opval),'d');
 			  append_madprops((yyvsp[0].opval)->op_madprop, (yyval.opval), 'a');
@@ -1371,14 +1372,14 @@ case 2:
     break;
 
   case 188:
-#line 1117 "madly.y"
+#line 1118 "madly.y"
     { (yyval.opval) = localize((yyvsp[0].opval),((yyvsp[-1].tkval))->tk_lval.ival);
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'d');
 			;}
     break;
 
   case 189:
-#line 1124 "madly.y"
+#line 1125 "madly.y"
     { (yyval.opval) = sawparens((yyvsp[-1].opval));
 			  token_getmad((yyvsp[-2].tkval),(yyval.opval),'(');
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),')');
@@ -1386,7 +1387,7 @@ case 2:
     break;
 
   case 190:
-#line 1129 "madly.y"
+#line 1130 "madly.y"
     { (yyval.opval) = sawparens(newNULLLIST());
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'(');
 			  token_getmad((yyvsp[0].tkval),(yyval.opval),')');
@@ -1394,42 +1395,42 @@ case 2:
     break;
 
   case 191:
-#line 1134 "madly.y"
+#line 1135 "madly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 192:
-#line 1136 "madly.y"
+#line 1137 "madly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 193:
-#line 1138 "madly.y"
+#line 1139 "madly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 194:
-#line 1143 "madly.y"
+#line 1144 "madly.y"
     { (yyval.opval) = Nullop; ;}
     break;
 
   case 195:
-#line 1145 "madly.y"
+#line 1146 "madly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 196:
-#line 1149 "madly.y"
+#line 1150 "madly.y"
     { (yyval.opval) = Nullop; ;}
     break;
 
   case 197:
-#line 1151 "madly.y"
+#line 1152 "madly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 
   case 198:
-#line 1153 "madly.y"
+#line 1154 "madly.y"
     { OP* op = newNULLLIST();
 			  token_getmad((yyvsp[0].tkval),op,',');
 			  (yyval.opval) = append_elem(OP_LIST, (yyvsp[-1].opval), op);
@@ -1437,69 +1438,69 @@ case 2:
     break;
 
   case 199:
-#line 1162 "madly.y"
+#line 1163 "madly.y"
     { PL_in_my = 0; (yyval.opval) = my((yyvsp[0].opval)); ;}
     break;
 
   case 200:
-#line 1166 "madly.y"
+#line 1167 "madly.y"
     { (yyval.opval) = newCVREF(((yyvsp[-1].tkval))->tk_lval.ival,(yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'&');
 			;}
     break;
 
   case 201:
-#line 1172 "madly.y"
+#line 1173 "madly.y"
     { (yyval.opval) = newSVREF((yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'$');
 			;}
     break;
 
   case 202:
-#line 1178 "madly.y"
+#line 1179 "madly.y"
     { (yyval.opval) = newAVREF((yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'@');
 			;}
     break;
 
   case 203:
-#line 1184 "madly.y"
+#line 1185 "madly.y"
     { (yyval.opval) = newHVREF((yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'%');
 			;}
     break;
 
   case 204:
-#line 1190 "madly.y"
+#line 1191 "madly.y"
     { (yyval.opval) = newAVREF((yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'l');
 			;}
     break;
 
   case 205:
-#line 1196 "madly.y"
+#line 1197 "madly.y"
     { (yyval.opval) = newGVREF(0,(yyvsp[0].opval));
 			  token_getmad((yyvsp[-1].tkval),(yyval.opval),'*');
 			;}
     break;
 
   case 206:
-#line 1203 "madly.y"
+#line 1204 "madly.y"
     { (yyval.opval) = scalar((yyvsp[0].opval)); ;}
     break;
 
   case 207:
-#line 1205 "madly.y"
+#line 1206 "madly.y"
     { (yyval.opval) = scalar((yyvsp[0].opval)); ;}
     break;
 
   case 208:
-#line 1207 "madly.y"
+#line 1208 "madly.y"
     { (yyval.opval) = scope((yyvsp[0].opval)); ;}
     break;
 
   case 209:
-#line 1210 "madly.y"
+#line 1211 "madly.y"
     { (yyval.opval) = (yyvsp[0].opval); ;}
     break;
 

@@ -2914,9 +2914,13 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	SAVESPTR(PL_curstash);
 	PL_curstash = CopSTASH(PL_curcop);
     }
+    /* XXX:ajgo do we really need to alloc an AV for begin/checkunit */
     SAVESPTR(PL_beginav);
     PL_beginav = newAV();
     SAVEFREESV(PL_beginav);
+    SAVESPTR(PL_unitcheckav);
+    PL_unitcheckav = newAV();
+    SAVEFREESV(PL_unitcheckav);
     SAVEI32(PL_error_count);
 
 #ifdef PERL_MAD
@@ -3009,6 +3013,9 @@ S_doeval(pTHX_ int gimme, OP** startop, CV* outside, U32 seq)
 	    call_sv((SV*)cv, G_DISCARD);
 	}
     }
+
+    if (PL_unitcheckav)
+	call_list(PL_scopestack_ix, PL_unitcheckav);
 
     /* compiled okay, so do it */
 

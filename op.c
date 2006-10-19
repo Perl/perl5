@@ -5342,7 +5342,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	else
 	    s = tname;
 
-	if (*s != 'B' && *s != 'E' && *s != 'C' && *s != 'I')
+	if (*s != 'B' && *s != 'E' && *s != 'C' && *s != 'I' && *s != 'U')
 	    goto done;
 
 	if (strEQ(s, "BEGIN") && !PL_error_count) {
@@ -5368,6 +5368,15 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	    DEBUG_x( dump_sub(gv) );
 	    av_unshift(PL_endav, 1);
 	    av_store(PL_endav, 0, (SV*)cv);
+	    GvCV(gv) = 0;		/* cv has been hijacked */
+	}
+	else if (strEQ(s, "UNITCHECK") && !PL_error_count) {
+	    /* It's never too late to run a unitcheck block */
+	    if (!PL_unitcheckav)
+		PL_unitcheckav = newAV();
+	    DEBUG_x( dump_sub(gv) );
+	    av_unshift(PL_unitcheckav, 1);
+	    av_store(PL_unitcheckav, 0, (SV*)cv);
 	    GvCV(gv) = 0;		/* cv has been hijacked */
 	}
 	else if (strEQ(s, "CHECK") && !PL_error_count) {

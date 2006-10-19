@@ -5007,8 +5007,8 @@ array by 1 and moving everything down.  If there are no elements in the
 array, returns the undefined value.  If ARRAY is omitted, shifts the
 C<@_> array within the lexical scope of subroutines and formats, and the
 C<@ARGV> array outside of a subroutine and also within the lexical scopes
-established by the C<eval STRING>, C<BEGIN {}>, C<INIT {}>, C<CHECK {}>
-and C<END {}> constructs.
+established by the C<eval STRING>, C<BEGIN {}>, C<INIT {}>, C<CHECK {}>,
+C<UNITCHECK {}> and C<END {}> constructs.
 
 See also C<unshift>, C<push>, and C<pop>.  C<shift> and C<unshift> do the
 same thing to the left end of an array that C<pop> and C<push> do to the
@@ -7238,8 +7238,8 @@ looking for no value (void context).
     return wantarray ? @a : "@a";
 
 C<wantarray()>'s result is unspecified in the top level of a file,
-in a C<BEGIN>, C<CHECK>, C<INIT> or C<END> block, or in a C<DESTROY>
-method.
+in a C<BEGIN>, C<UNITCHECK>, C<CHECK>, C<INIT> or C<END> block, or
+in a C<DESTROY> method.
 
 This function should have been named wantlist() instead.
 

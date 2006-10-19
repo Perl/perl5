@@ -956,12 +956,12 @@ for incredibly long examples of these.
 =head2 Debugging compile-time statements
 
 If you have compile-time executable statements (such as code within
-BEGIN and CHECK blocks or C<use> statements), these will I<not> be
-stopped by debugger, although C<require>s and INIT blocks will, and
-compile-time statements can be traced with C<AutoTrace> option set
-in C<PERLDB_OPTS>).  From your own Perl code, however, you can
-transfer control back to the debugger using the following statement,
-which is harmless if the debugger is not running:
+BEGIN, UNITCHECK and CHECK blocks or C<use> statements), these will
+I<not> be stopped by debugger, although C<require>s and INIT blocks
+will, and compile-time statements can be traced with C<AutoTrace>
+option set in C<PERLDB_OPTS>).  From your own Perl code, however, you
+can transfer control back to the debugger using the following
+statement, which is harmless if the debugger is not running:
 
     $DB::single = 1;
 
