@@ -167,6 +167,7 @@ PERL_EXPORT_C PerlIO_list_t *PerlIO_clone_list(pTHX_ PerlIO_list_t *proto, CLONE
 PERL_EXPORT_C void PerlIO_list_free(pTHX_ PerlIO_list_t *list);
 PERL_EXPORT_C void PerlIO_list_push(pTHX_ PerlIO_list_t *list, PerlIO_funcs *funcs, SV *arg);
 PERL_EXPORT_C void PerlIO_list_free(pTHX_ PerlIO_list_t *list);
+PERL_EXPORT_C void PerlIO_teardown(pTHX);
 
 /*--------------------------------------------------------------------------------------*/
 /* Generic, or stub layer functions */

@@ -3863,6 +3863,21 @@ typedef Sighandler_t Sigsave_t;
 # define RUNOPS_DEFAULT Perl_runops_standard
 #endif
 
+#ifdef USE_PERLIO
+void PerlIO_teardown(pTHX);
+# ifdef USE_THREADS
+#  define PERLIO_INIT MUTEX_INIT(&PL_perlio_mutex)
+#  define PERLIO_TERM 				\
+	STMT_START {				\
+		PerlIO_teardown(aTHX);		\
+		MUTEX_DESTROY(&PL_perlio_mutex);\
+	} STMT_END
+# else
+#  define PERLIO_INIT
+#  define PERLIO_TERM	PerlIO_teardown(aTHX)
+# endif
+#endif
+
 #ifdef MYMALLOC
 #  ifdef MUTEX_INIT_CALLS_MALLOC
 #    define MALLOC_INIT					\

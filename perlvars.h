@@ -138,3 +138,7 @@ PERLVARI(Gmy_cxt_index, int, 0)
 #if defined(USE_ITHREADS)
 PERLVAR(Ghints_mutex, perl_mutex)    /* Mutex for refcounted he refcounting */
 #endif
+
+#if defined(USE_THREADS)	/* Yes, 5.005 threads - should be removed. */
+PERLVAR(Gperlio_mutex, perl_mutex)    /* Mutex for perlio fd refcounts */
+#endif
