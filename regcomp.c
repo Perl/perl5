@@ -907,8 +907,8 @@ S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie, U32 next_alloc
                     (UV)TRIE_LIST_ITEM(state,charid).newstate
                 );
                 if (!(charid % 10)) 
-                    PerlIO_printf( Perl_debug_log, "\n%*s| ",
-                        (depth * 2) + 14,"");
+                    PerlIO_printf(Perl_debug_log, "\n%*s| ",
+                        (int)((depth * 2) + 14), "");
             }
         }
         PerlIO_printf( Perl_debug_log, "\n");

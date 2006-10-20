@@ -131,10 +131,9 @@ PP(pp_regcomp)
 	if (!re || !re->precomp || re->prelen != (I32)len ||
 	    memNE(re->precomp, t, len))
 	{
-	    regexp_engine * eng = NULL;
-	    
+	    const regexp_engine *eng = re ? re->engine : NULL;
+
 	    if (re) {
-	        eng = re->engine;
 	        ReREFCNT_dec(re);
 		PM_SETRE(pm, NULL);	/* crucial if regcomp aborts */
 	    } else if (PL_curcop->cop_hints_hash) {
@@ -143,7 +142,7 @@ PP(pp_regcomp)
                 if (ptr && SvIOK(ptr) && SvIV(ptr))
                     eng = INT2PTR(regexp_engine*,SvIV(ptr));
 	    }
-	        
+
 	    if (PL_op->op_flags & OPf_SPECIAL)
 		PL_reginterp_cnt = I32_MAX; /* Mark as safe.  */
 
