@@ -80,8 +80,8 @@ WriteMakefile(
         'XSLoader'        => 0,
 
         'ExtUtils::testlib' => 0,
-        'Hash::Util'        => 0,
-        'IO::File'          => 0,
+#        'Hash::Util'        => 0,
+#        'IO::File'          => 0,
     },
     'INSTALLDIRS'       => 'perl',
 
