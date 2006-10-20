@@ -716,6 +716,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_sharedsv_space_mutex
 		    PL_dollarzero_mutex
 		    PL_hints_mutex
+		    PL_perlio_mutex
 		    PL_regdupe
 		    Perl_dirp_dup
 		    Perl_cx_dup
@@ -1095,6 +1096,16 @@ if ($define{'USE_PERLIO'}) {
 	# PerlIO with layers - export implementation
 	emit_symbols \@layer_syms;
 	emit_symbols [qw(perlsio_binmode)];
+    }
+    if ($define{'USE_ITHREADS'}) {
+	emit_symbols [qw(
+			PL_perlio_mutex
+			)];
+    }
+    else {
+	skip_symbols [qw(
+			PL_perlio_mutex
+			)];
     }
 } else {
 	# -Uuseperlio
