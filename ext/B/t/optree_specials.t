@@ -27,7 +27,7 @@ BEGIN {
 use OptreeCheck;	# ALSO DOES @ARGV HANDLING !!!!!!
 use Config;
 
-plan tests => 7;
+plan tests => 8;
 
 require_ok("B::Concise");
 
@@ -38,7 +38,7 @@ my $out = runperl(
 
 #print "out:$out\n";
 
-my $src = q[our ($beg, $chk, $init, $end) = qq{'foo'}; BEGIN { $beg++ } CHECK { $chk++ } INIT { $init++ } END { $end++ }];
+my $src = q[our ($beg, $chk, $init, $end, $uc) = qq{'foo'}; BEGIN { $beg++ } CHECK { $chk++ } INIT { $init++ } END { $end++ } UNITCHECK {$uc++}];
 
 
 my @warnings_todo;
@@ -152,6 +152,28 @@ EOT_EOT
 # 2              <$> gvsv(*chk) s ->3
 EONT_EONT
 
+checkOptree ( name	=> 'UNITCHECK',
+	      bcopts	=> 'UNITCHECK',
+	      prog	=> $src,
+	      @open_todo,
+	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
+# UNITCHECK 1:
+# 4  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->4
+# 1        <;> nextstate(main 3 -e:4) v:{ ->2
+# 3        <1> postinc[t3] sK/1 ->4
+# -           <1> ex-rv2sv sKRM/1 ->3
+# 2              <#> gvsv[*uc] s ->3
+EOT_EOT
+# UNITCHECK 1:
+# 4  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->4
+# 1        <;> nextstate(main 3 -e:4) v:{ ->2
+# 3        <1> postinc[t2] sK/1 ->4
+# -           <1> ex-rv2sv sKRM/1 ->3
+# 2              <$> gvsv(*uc) s ->3
+EONT_EONT
+
 
 checkOptree ( name	=> 'INIT',
 	      bcopts	=> 'INIT',
@@ -177,8 +199,8 @@ EOT_EOT
 EONT_EONT
 
 
-checkOptree ( name	=> 'all of BEGIN END INIT CHECK -exec',
-	      bcopts	=> [qw/ BEGIN END INIT CHECK -exec /],
+checkOptree ( name	=> 'all of BEGIN END INIT CHECK UNITCHECK -exec',
+	      bcopts	=> [qw/ BEGIN END INIT CHECK UNITCHECK -exec /],
 	      prog	=> $src,
 	      @warnings_todo,
 	      @open_todo,
@@ -215,6 +237,11 @@ checkOptree ( name	=> 'all of BEGIN END INIT CHECK -exec',
 # p  <#> gvsv[*chk] s
 # q  <1> postinc[t3] sK/1
 # r  <1> leavesub[1 ref] K/REFC,1
+# UNITCHECK 1:
+# s  <;> nextstate(main 6 -e:1) v:{
+# t  <#> gvsv[*uc] s
+# u  <1> postinc[t3] sK/1
+# v  <1> leavesub[1 ref] K/REFC,1
 EOT_EOT
 # BEGIN 1:
 # 1  <;> nextstate(B::Concise -234 Concise.pm:328) v:*,&,{,$
@@ -248,6 +275,11 @@ EOT_EOT
 # p  <$> gvsv(*chk) s
 # q  <1> postinc[t2] sK/1
 # r  <1> leavesub[1 ref] K/REFC,1
+# UNITCHECK 1:
+# s  <;> nextstate(main 6 -e:1) v:{
+# t  <$> gvsv(*uc) s
+# u  <1> postinc[t2] sK/1
+# v  <1> leavesub[1 ref] K/REFC,1
 EONT_EONT
 
 

@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.77;
+$VERSION = 0.78;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -630,10 +630,13 @@ sub compile {
 	    print qq(BEGIN { \$/ = $fs; \$\\ = $bs; }\n);
 	}
 	my @BEGINs  = B::begin_av->isa("B::AV") ? B::begin_av->ARRAY : ();
+	my @UNITCHECKs = B::unitcheck_av->isa("B::AV")
+	    ? B::unitcheck_av->ARRAY
+	    : ();
 	my @CHECKs  = B::check_av->isa("B::AV") ? B::check_av->ARRAY : ();
 	my @INITs   = B::init_av->isa("B::AV") ? B::init_av->ARRAY : ();
 	my @ENDs    = B::end_av->isa("B::AV") ? B::end_av->ARRAY : ();
-	for my $block (@BEGINs, @CHECKs, @INITs, @ENDs) {
+	for my $block (@BEGINs, @UNITCHECKs, @CHECKs, @INITs, @ENDs) {
 	    $self->todo($block, 0);
 	}
 	$self->stash_subs();

@@ -14,7 +14,7 @@ use warnings; # uses #3 and #4, since warnings uses Carp
 
 use Exporter (); # use #5
 
-our $VERSION   = "0.69";
+our $VERSION   = "0.70";
 our @ISA       = qw(Exporter);
 our @EXPORT_OK = qw( set_style set_style_standard add_callback
 		     concise_subref concise_cv concise_main
@@ -321,6 +321,10 @@ sub compile {
 		concise_specials("CHECK", $order,
 				 B::check_av->isa("B::AV") ?
 				 B::check_av->ARRAY : ());
+	    } elsif ($objname eq "UNITCHECK") {
+		concise_specials("UNITCHECK", $order,
+				 B::unitcheck_av->isa("B::AV") ?
+				 B::unitcheck_av->ARRAY : ());
 	    } elsif ($objname eq "END") {
 		concise_specials("END", $order,
 				 B::end_av->isa("B::AV") ?
@@ -1051,8 +1055,8 @@ Arguments that don't start with a hyphen are taken to be the names of
 subroutines to print the OPs of; if no such functions are specified,
 the main body of the program (outside any subroutines, and not
 including use'd or require'd files) is rendered.  Passing C<BEGIN>,
-C<CHECK>, C<INIT>, or C<END> will cause all of the corresponding
-special blocks to be printed.
+C<UNITCHECK>, C<CHECK>, C<INIT>, or C<END> will cause all of the
+corresponding special blocks to be printed.
 
 Options affect how things are rendered (ie printed).  They're presented
 here by their visual effect, 1st being strongest.  They're grouped

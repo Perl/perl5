@@ -590,6 +590,7 @@ BOOT:
 #define B_init_av()	PL_initav
 #define B_inc_gv()	PL_incgv
 #define B_check_av()	PL_checkav_save
+#define B_unitcheck_av()	PL_unitcheckav_save
 #define B_begin_av()	PL_beginav_save
 #define B_end_av()	PL_endav
 #define B_main_root()	PL_main_root
@@ -613,6 +614,9 @@ B_init_av()
 
 B::AV
 B_check_av()
+
+B::AV
+B_unitcheck_av()
 
 B::AV
 B_begin_av()

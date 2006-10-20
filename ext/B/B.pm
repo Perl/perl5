@@ -7,7 +7,7 @@
 #
 package B;
 
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 
 use XSLoader ();
 require Exporter;
@@ -21,8 +21,8 @@ require Exporter;
 		sub_generation amagic_generation perlstring
 		walkoptree_slow walkoptree walkoptree_exec walksymtable
 		parents comppadlist sv_undef compile_stats timing_info
-		begin_av init_av check_av end_av regex_padav dowarn
-		defstash curstash warnhook diehook inc_gv
+		begin_av init_av unitcheck_av check_av end_av regex_padav
+		dowarn defstash curstash warnhook diehook inc_gv
 		);
 
 sub OPf_KIDS ();
@@ -383,6 +383,10 @@ Returns the AV object (i.e. in class B::AV) representing INIT blocks.
 =item check_av
 
 Returns the AV object (i.e. in class B::AV) representing CHECK blocks.
+
+=item unitcheck_av
+
+Returns the AV object (i.e. in class B::AV) representing UNITCHECK blocks.
 
 =item begin_av
 
