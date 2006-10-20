@@ -309,9 +309,11 @@ EOT
 	    my $redir = $^O eq 'VMS' ? '2>&1' : '';
 	    if ($ENV{PERL_VALGRIND}) {
 		my $valgrind = $ENV{VALGRIND} // 'valgrind';
-		$perl = "$valgrind --suppressions=perl.supp --leak-check=yes "
-			        . "--leak-resolution=high --show-reachable=yes "
-			        . "--num-callers=50 --log-fd=3 $perl";
+		my $vg_opts = $ENV{VG_OPTS}
+		    //  "--suppressions=perl.supp --leak-check=yes "
+			. "--leak-resolution=high --show-reachable=yes "
+			. "--num-callers=50"; 
+		$perl = "$valgrind --log-fd=3 $vg_opts $perl";
 		$redir = "3>$valgrind_log";
 	    }
 	    my $run = "$perl" . _quote_args("$testswitch $switch $utf8")
@@ -423,7 +425,14 @@ EOT
 		    warn "$0: Failed to open '$valgrind_log': $!\n";
 		}
 	    }
-	    if (@valgrind) {
+	    if ($ENV{VG_OPTS} =~ /cachegrind/) {
+		if (rename $valgrind_log, "$test.valgrind") {
+		    $valgrind++;
+		} else {
+		    warn "$0: Failed to create '$test.valgrind': $!\n";
+		}
+	    }
+	    elsif (@valgrind) {
 		my $leaks = 0;
 		my $errors = 0;
 		for my $i (0..$#valgrind) {
