@@ -861,8 +861,13 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		    TAINT_NOT;
 		    sv_setpvn(sv, s, i);
 		    PL_tainted = oldtainted;
-		    if (RX_MATCH_UTF8(rx) && (!i || is_utf8_string((U8*)s, i)))
+		    if ( (rx->reganch & ROPT_CANY_SEEN)
+			? (RX_MATCH_UTF8(rx)
+				    && (!i || is_utf8_string((U8*)s, i)))
+			: (RX_MATCH_UTF8(rx)) )
+		    {
 			SvUTF8_on(sv);
+		    }
 		    else
 			SvUTF8_off(sv);
 		    if (PL_tainting) {
