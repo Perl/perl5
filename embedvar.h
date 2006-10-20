@@ -838,6 +838,8 @@
 #define PL_Gperlio_fd_refcnt	(my_vars->Gperlio_fd_refcnt)
 #define PL_perlio_fd_refcnt_size	(my_vars->Gperlio_fd_refcnt_size)
 #define PL_Gperlio_fd_refcnt_size	(my_vars->Gperlio_fd_refcnt_size)
+#define PL_perlio_mutex		(my_vars->Gperlio_mutex)
+#define PL_Gperlio_mutex	(my_vars->Gperlio_mutex)
 #define PL_ppaddr		(my_vars->Gppaddr)
 #define PL_Gppaddr		(my_vars->Gppaddr)
 #define PL_sh_path		(my_vars->Gsh_path)
@@ -889,6 +891,7 @@
 #define PL_Gperlio_debug_fd	PL_perlio_debug_fd
 #define PL_Gperlio_fd_refcnt	PL_perlio_fd_refcnt
 #define PL_Gperlio_fd_refcnt_size	PL_perlio_fd_refcnt_size
+#define PL_Gperlio_mutex	PL_perlio_mutex
 #define PL_Gppaddr		PL_ppaddr
 #define PL_Gsh_path		PL_sh_path
 #define PL_Gsig_defaulting	PL_sig_defaulting
