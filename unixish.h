@@ -127,7 +127,8 @@
 #define Mkdir(path,mode)   mkdir((path),(mode))
 
 #ifndef PERL_SYS_INIT
-#  define PERL_SYS_INIT(c,v) MALLOC_CHECK_TAINT2(*c,*v) PERL_FPU_INIT MALLOC_INIT
+#  define PERL_SYS_INIT(c,v)						\
+	MALLOC_CHECK_TAINT2(*c,*v) PERL_FPU_INIT PERLIO_INIT; MALLOC_INIT
 #endif
 
 #ifndef PERL_SYS_TERM

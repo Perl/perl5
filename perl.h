@@ -3865,7 +3865,7 @@ typedef Sighandler_t Sigsave_t;
 
 #ifdef USE_PERLIO
 EXTERN_C void PerlIO_teardown(pTHX);
-# ifdef USE_THREADS
+# ifdef USE_ITHREADS
 #  define PERLIO_INIT MUTEX_INIT(&PL_perlio_mutex)
 #  define PERLIO_TERM 				\
 	STMT_START {				\

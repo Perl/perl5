@@ -16,7 +16,8 @@
 #ifdef DJGPP
 #  define BIT_BUCKET "nul"
 #  define OP_BINARY O_BINARY
-#  define PERL_SYS_INIT(c,v) MALLOC_CHECK_TAINT2(*c,*v) Perl_DJGPP_init(c,v)
+#  define PERL_SYS_INIT(c,v)						\
+	 MALLOC_CHECK_TAINT2(*c,*v) Perl_DJGPP_init(c,v); PERLIO_INIT
 #  define init_os_extras Perl_init_os_extras
 #  define HAS_UTIME
 #  define HAS_KILL
@@ -28,15 +29,18 @@
 #  define PERL_FS_VER_FMT	"%d_%d_%d"
 #else	/* DJGPP */
 #  ifdef WIN32
-#    define PERL_SYS_INIT(c,v)	MALLOC_CHECK_TAINT2(*c,*v) Perl_win32_init(c,v)
+#    define PERL_SYS_INIT(c,v)						\
+	MALLOC_CHECK_TAINT2(*c,*v) Perl_win32_init(c,v); PERLIO_INIT
 #    define PERL_SYS_TERM()	Perl_win32_term()
 #    define BIT_BUCKET "nul"
 #  else
 #	 ifdef NETWARE
-#      define PERL_SYS_INIT(c,v)	MALLOC_CHECK_TAINT2(*c,*v) Perl_nw5_init(c,v)
+#      define PERL_SYS_INIT(c,v)					\
+	MALLOC_CHECK_TAINT2(*c,*v) Perl_nw5_init(c,v); PERLIO_INIT
 #      define BIT_BUCKET "nwnul"
 #    else
-#      define PERL_SYS_INIT(c,v)	MALLOC_CHECK_TAINT2(*c,*v)
+#      define PERL_SYS_INIT(c,v)		\
+	MALLOC_CHECK_TAINT2(*c,*v); PERLIO_INIT
 #      define BIT_BUCKET "\\dev\\nul" /* "wanna be like, umm, Newlined, or somethin?" */
 #    endif /* NETWARE */
 #  endif
