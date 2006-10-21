@@ -61,6 +61,22 @@ if (grep { $_ eq 'PERL_CORE=1' } @ARGV) {
     push(@conditional_params, 'DEFINE' => '-DHAS_PPPORT_H');
 }
 
+my $prereqs;
+
+if (!$ENV{PERL_CORE}) {
+    my $prereqs = {
+        'strict'          => 0,
+        'warnings'        => 0,
+        'overload'        => 0,
+        'Config'          => 0,
+        'Carp'            => 0,
+        'XSLoader'        => 0,
+
+        'ExtUtils::testlib' => 0,
+        'Hash::Util'      => 0,
+        'IO::File'        => 0,
+    };
+}
 
 # Create Makefile
 WriteMakefile(
@@ -71,18 +87,7 @@ WriteMakefile(
     'PM' => {
         'threads.pm'    => '$(INST_LIBDIR)/threads.pm',
     },
-    'PREREQ_PM'         => {
-        'strict'          => 0,
-        'warnings'        => 0,
-        'overload'        => 0,
-        'Config'          => 0,
-        'Carp'            => 0,
-        'XSLoader'        => 0,
-
-        'ExtUtils::testlib' => 0,
-#        'Hash::Util'        => 0,
-#        'IO::File'          => 0,
-    },
+    'PREREQ_PM'         => $prereqs,
     'INSTALLDIRS'       => 'perl',
 
     ((ExtUtils::MakeMaker->VERSION() lt '6.25') ?
