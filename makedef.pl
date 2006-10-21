@@ -390,6 +390,7 @@ elsif ($PLATFORM eq 'aix') {
 		     Perl_sys_intern_clear
 		     Perl_sys_intern_dup
 		     Perl_sys_intern_init
+		     Perl_my_sprintf
 		     PL_cryptseen
 		     PL_opsave
 		     PL_statusvalue_vms
