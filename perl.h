@@ -3876,6 +3876,9 @@ EXTERN_C void PerlIO_teardown(pTHX);
 #  define PERLIO_INIT
 #  define PERLIO_TERM	PerlIO_teardown(aTHX)
 # endif
+#else
+#  define PERLIO_INIT
+#  define PERLIO_TERM
 #endif
 
 #ifdef MYMALLOC
