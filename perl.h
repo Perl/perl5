@@ -2565,10 +2565,10 @@ typedef struct clone_params CLONE_PARAMS;
 #    if HAS_FLOATINGPOINT_H
 #      include <floatingpoint.h>
 #    endif
-#    define PERL_FPU_INIT fpsetmask(0);
+#    define PERL_FPU_INIT fpsetmask(0)
 #  else
 #    if defined(SIGFPE) && defined(SIG_IGN) && !defined(PERL_MICRO)
-#      define PERL_FPU_INIT       PL_sigfpe_saved = (Sighandler_t) signal(SIGFPE, SIG_IGN);
+#      define PERL_FPU_INIT       PL_sigfpe_saved = (Sighandler_t) signal(SIGFPE, SIG_IGN)
 #      define PERL_FPU_PRE_EXEC   { Sigsave_t xfpe; rsignal_save(SIGFPE, PL_sigfpe_saved, &xfpe);
 #      define PERL_FPU_POST_EXEC    rsignal_restore(SIGFPE, &xfpe); }
 #    else
