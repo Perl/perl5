@@ -3049,7 +3049,7 @@ static int store_hook(
 		   failure, whereas the existing code assumes that it can
 		   safely store a tag zero. So for ptr_tables we store tag+1
 		*/
-		if ((fake_tag = ptr_table_fetch(cxt->pseen, xsv)))
+		if ((fake_tag = (char *)ptr_table_fetch(cxt->pseen, xsv)))
 			goto sv_seen;		/* Avoid moving code too far to the right */
 #else
 		if ((svh = hv_fetch(cxt->hseen, (char *) &xsv, sizeof(xsv), FALSE)))
@@ -3082,7 +3082,7 @@ static int store_hook(
 			return ret;
 
 #ifdef USE_PTR_TABLE
-		fake_tag = ptr_table_fetch(cxt->pseen, xsv);
+		fake_tag = (char *)ptr_table_fetch(cxt->pseen, xsv);
 		if (!sv)
 			CROAK(("Could not serialize item #%d from hook in %s", i, classname));
 #else
@@ -3512,7 +3512,7 @@ static int store(pTHX_ stcxt_t *cxt, SV *sv)
 	 */
 
 #ifdef USE_PTR_TABLE
-	svh = ptr_table_fetch(pseen, sv);
+	svh = (SV **)ptr_table_fetch(pseen, sv);
 #else
 	svh = hv_fetch(hseen, (char *) &sv, sizeof(sv), FALSE);
 #endif
