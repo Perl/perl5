@@ -108,11 +108,13 @@
 
 /* epocemx setenv bug workaround */
 #ifndef PERL_SYS_INIT
-#    define PERL_SYS_INIT(c,v)    MALLOC_CHECK_TAINT2(*c,*v) putenv(".dummy=foo"); putenv(".dummy"); MALLOC_INIT
+#    define PERL_SYS_INIT(c,v)						   \
+	MALLOC_CHECK_TAINT2(*c,*v) putenv(".dummy=foo"); putenv(".dummy"); \
+	PERLIO_INIT; MALLOC_INIT
 #endif
 
 #ifndef PERL_SYS_TERM
-#define PERL_SYS_TERM()		MALLOC_TERM
+#define PERL_SYS_TERM()	PERLIO_TERM; MALLOC_TERM
 #endif
 
 #define BIT_BUCKET "/dev/null"

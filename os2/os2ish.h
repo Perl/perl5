@@ -228,22 +228,26 @@ void Perl_OS2_term(void **excH, int exitstatus, int flags);
     MALLOC_CHECK_TAINT(*argcp, *argvp, *envp)	\
     _response(argcp, argvp);			\
     _wildcard(argcp, argvp);			\
-    Perl_OS2_init3(*envp, xreg, 0)
+    Perl_OS2_init3(*envp, xreg, 0);		\
+    PERLIO_INIT
 
 #  define PERL_SYS_INIT(argcp, argvp)  {	\
   { void *xreg[2];				\
     _response(argcp, argvp);			\
     _wildcard(argcp, argvp);			\
-    Perl_OS2_init3(NULL, xreg, 0)
+    Perl_OS2_init3(NULL, xreg, 0);		\
+    PERLIO_INIT
 
 #else  /* Compiling embedded Perl or Perl extension */
 
 #  define PERL_SYS_INIT3(argcp, argvp, envp)	\
   { void *xreg[2];				\
-    Perl_OS2_init3(*envp, xreg, 0)
+    Perl_OS2_init3(*envp, xreg, 0);		\
+    PERLIO_INIT
 #  define PERL_SYS_INIT(argcp, argvp)	{	\
   { void *xreg[2];				\
-    Perl_OS2_init3(NULL, xreg, 0)
+    Perl_OS2_init3(NULL, xreg, 0);		\
+    PERLIO_INIT
 #endif
 
 #define FORCE_EMX_DEINIT_EXIT		1
@@ -252,6 +256,7 @@ void Perl_OS2_term(void **excH, int exitstatus, int flags);
 
 #define PERL_SYS_TERM2(xreg,flags)					\
   Perl_OS2_term(xreg, 0, flags);					\
+  PERLIO_TERM;								\
   MALLOC_TERM
 
 #define PERL_SYS_TERM1(xreg)						\

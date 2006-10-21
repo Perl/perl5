@@ -111,11 +111,11 @@
 #define Mkdir(path,mode)   mkdir((path),(mode))
 
 #ifndef PERL_SYS_INIT
-#  define PERL_SYS_INIT(c,v)	PERL_FPU_INIT MALLOC_INIT
+#  define PERL_SYS_INIT(c,v)	PERL_FPU_INIT; PERLIO_INIT; MALLOC_INIT
 #endif
 
 #ifndef PERL_SYS_TERM
-#define PERL_SYS_TERM()		MALLOC_TERM
+#define PERL_SYS_TERM()		PERLIO_TERM; MALLOC_TERM
 #endif
 
 #define BIT_BUCKET "/dev/null"
