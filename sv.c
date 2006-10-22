@@ -10387,6 +10387,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
     long longval;
     GP *gp;
     IV iv;
+    I32 i;
     char *c = NULL;
     void (*dptr) (void*);
     void (*dxptr) (pTHX_ void*);
@@ -10394,9 +10395,9 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
     Newxz(nss, max, ANY);
 
     while (ix > 0) {
-	I32 i = POPINT(ss,ix);
-	TOPINT(nss,ix) = i;
-	switch (i) {
+	const I32 type = POPINT(ss,ix);
+	TOPINT(nss,ix) = type;
+	switch (type) {
 	case SAVEt_ITEM:			/* normal string */
         case SAVEt_SV:				/* scalar reference */
 	    sv = (SV*)POPPTR(ss,ix);
@@ -10442,7 +10443,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	case SAVEt_COP_ARYBASE:			/* call CopARYBASE_set */
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
-	    i = POPINT(ss,ix);
+	    POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
 	    break;
 	case SAVEt_IV:				/* IV reference */
