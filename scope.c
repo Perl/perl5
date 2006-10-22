@@ -268,15 +268,10 @@ Perl_save_shared_pvref(pTHX_ char **str)
 void
 Perl_save_gp(pTHX_ GV *gv, I32 empty)
 {
-    SSGROW(6);
-    SSPUSHIV((IV)SvLEN(gv));
-    SvLEN_set(gv, 0); /* forget that anything was allocated here */
-    SSPUSHIV((IV)SvCUR(gv));
-    SSPUSHPTR(SvPVX_const(gv));
-    SvPOK_off(gv);
+    SSGROW(3);
     SSPUSHPTR(SvREFCNT_inc(gv));
     SSPUSHPTR(GvGP(gv));
-    SSPUSHINT(SAVEt_GP);
+    SSPUSHINT(SAVEt_GP_NEW);
 
     if (empty) {
 	register GP *gp;
@@ -607,7 +602,8 @@ Perl_leave_scope(pTHX_ I32 base)
     if (base < -1)
 	Perl_croak(aTHX_ "panic: corrupt saved stack index");
     while (PL_savestack_ix > base) {
-	switch (SSPOPINT) {
+	const int type = SSPOPINT;
+	switch (type) {
 	case SAVEt_ITEM:			/* normal string */
 	    value = (SV*)SSPOPPTR;
 	    sv = (SV*)SSPOPPTR;
@@ -728,15 +724,23 @@ Perl_leave_scope(pTHX_ I32 base)
 	    ptr = SSPOPPTR;
 	    *(AV**)ptr = (AV*)SSPOPPTR;
 	    break;
-	case SAVEt_GP:				/* scalar reference */
+	case SAVEt_GP_OLD:			/* scalar reference */
+	case SAVEt_GP_NEW:			/* scalar reference */
 	    ptr = SSPOPPTR;
 	    gv = (GV*)SSPOPPTR;
 	    if (SvPVX_const(gv) && SvLEN(gv) > 0) {
 		Safefree(SvPVX_mutable(gv));
 	    }
-	    SvPV_set(gv, (char *)SSPOPPTR);
-	    SvCUR_set(gv, (STRLEN)SSPOPIV);
-	    SvLEN_set(gv, (STRLEN)SSPOPIV);
+	    if (type == SAVEt_GP_NEW) {
+		SvPV_set(gv, NULL);
+		SvCUR_set(gv, 0);
+		SvLEN_set(gv, 0);
+		SvPOK_off(gv);
+	    } else {
+		SvPV_set(gv, (char *)SSPOPPTR);
+		SvCUR_set(gv, (STRLEN)SSPOPIV);
+		SvLEN_set(gv, (STRLEN)SSPOPIV);
+	    }
 	    gp_free(gv);
 	    GvGP(gv) = (GP*)ptr;
 	    if (GvCVu(gv))

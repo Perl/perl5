@@ -9730,18 +9730,21 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    gv = (GV*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = gv_dup(gv, param);
 	    break;
-	case SAVEt_GP:				/* scalar reference */
+	case SAVEt_GP_OLD:			/* scalar reference */
+	case SAVEt_GP_NEW:			/* scalar reference */
 	    gp = (GP*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = gp = gp_dup(gp, param);
 	    (void)GpREFCNT_inc(gp);
 	    gv = (GV*)POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = gv_dup_inc(gv, param);
-            c = (char*)POPPTR(ss,ix);
-	    TOPPTR(nss,ix) = pv_dup(c);
-	    iv = POPIV(ss,ix);
-	    TOPIV(nss,ix) = iv;
-	    iv = POPIV(ss,ix);
-	    TOPIV(nss,ix) = iv;
+	    if (type == SAVEt_GP_OLD) {
+		c = (char*)POPPTR(ss,ix);
+		TOPPTR(nss,ix) = pv_dup(c);
+		iv = POPIV(ss,ix);
+		TOPIV(nss,ix) = iv;
+		iv = POPIV(ss,ix);
+		TOPIV(nss,ix) = iv;
+	    }
             break;
 	case SAVEt_FREESV:
 	case SAVEt_MORTALIZESV:

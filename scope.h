@@ -22,7 +22,7 @@
 #define SAVEt_PPTR		11
 #define SAVEt_NSTAB		12
 #define SAVEt_SVREF		13
-#define SAVEt_GP		14
+#define SAVEt_GP_OLD		14 /* Old style save, kept for bincompat. */
 #define SAVEt_FREESV		15
 #define SAVEt_FREEOP		16
 #define SAVEt_FREEPV		17
@@ -49,6 +49,12 @@
 #define SAVEt_BOOL		38
 #define SAVEt_SAVESWITCHSTACK	40
 #define SAVEt_RE_STATE		42
+#define SAVEt_GP_NEW		43
+
+#ifndef PERL_CORE
+/* There may just be something out there hand building save stacks.  */
+#  define SAVEt_GP	SAVEt_GP_OLD
+#endif
 
 #ifndef SCOPE_SAVES_SIGNAL_MASK
 #define SCOPE_SAVES_SIGNAL_MASK 0
