@@ -9687,7 +9687,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	case SAVEt_I8:				/* I8 reference */
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
-	    POPINT(ss,ix);
+	    i = POPINT(ss,ix);
 	    TOPINT(nss,ix) = i;
 	    break;
 	case SAVEt_IV:				/* IV reference */
@@ -9930,7 +9930,8 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		break;
 	    }
 	default:
-	    Perl_croak(aTHX_ "panic: ss_dup inconsistency");
+	    Perl_croak(aTHX_
+		       "panic: ss_dup inconsistency (%"IVdf")", (IV) type);
 	}
     }
 
