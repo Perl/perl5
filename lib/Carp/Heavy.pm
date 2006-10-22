@@ -15,10 +15,6 @@ use Carp;  our $VERSION = $Carp::VERSION;
 # these are called, they require Carp::Heavy which installs the real
 # routines.
 
-# Comments added by Andy Wardley <abw@kfs.org> 09-Apr-98, based on an
-# _almost_ complete understanding of the package.  Corrections and
-# comments are welcome.
-
 # The members of %Internal are packages that are internal to perl.
 # Carp will not report errors from within these packages if it
 # can.  The members of %CarpInternal are internal to Perl's warning
@@ -27,12 +23,6 @@ use Carp;  our $VERSION = $Carp::VERSION;
 # croak.  They replace $CarpLevel, which is deprecated.    The
 # $Max(EvalLen|(Arg(Len|Nums)) variables are used to specify how the eval
 # text and function arguments should be formatted when printed.
-
-# Comments added by Jos I. Boumans <kane@dwim.org> 11-Aug-2004
-# I can not get %CarpInternal or %Internal to work as advertised,
-# therefore leaving it out of the below documentation.
-# $CarpLevel may be decprecated according to the last comment, but
-# after 6 years, it's still around and in heavy use ;)
 
 # disable these by default, so they can live w/o require Carp
 $CarpInternal{Carp}++;
@@ -48,6 +38,11 @@ our ($CarpLevel, $MaxArgNums, $MaxEvalLen, $MaxArgLen, $Verbose);
 
 sub  longmess_real {
     # Icky backwards compatibility wrapper. :-(
+    #
+    # The story is that the original implementation hard-coded the
+    # number of call levels to go back, so calls to longmess were off
+    # by one.  Other code began calling longmess and expecting this
+    # behaviour, so the replacement has to emulate that behaviour.
     my $call_pack = caller();
     if ($Internal{$call_pack} or $CarpInternal{$call_pack}) {
       return longmess_heavy(@_);
@@ -234,6 +229,7 @@ sub short_error_loc {
 
     return 0 unless defined($caller); # What happened?
     redo if $Internal{$caller};
+    redo if $CarpInternal{$caller};
     redo if $CarpInternal{$called};
     redo if trusts($called, $caller, $cache);
     redo if trusts($caller, $called, $cache);
