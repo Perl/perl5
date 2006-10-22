@@ -64,7 +64,7 @@ if (grep { $_ eq 'PERL_CORE=1' } @ARGV) {
 my $prereqs;
 
 if (!$ENV{PERL_CORE}) {
-    my $prereqs = {
+    $prereqs = {
         'strict'          => 0,
         'warnings'        => 0,
         'overload'        => 0,
