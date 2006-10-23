@@ -5557,8 +5557,8 @@ one or more of:
    +       prefix positive number with a plus sign
    -       left-justify within the field
    0       use zeros, not spaces, to right-justify
-   #       prefix non-zero octal with "0", non-zero hex with "0x",
-           non-zero binary with "0b"
+   #       prefix non-zero octal with "0", non-zero hex with "0x"
+           or "0X", non-zero binary with "0b"
 
 For example:
 
