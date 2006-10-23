@@ -5516,6 +5516,7 @@ In addition, Perl permits the following widely-supported conversions:
    %E	like %e, but using an upper-case "E"
    %G	like %g, but with an upper-case "E" (if applicable)
    %b	an unsigned integer, in binary
+   %B	like %x, but using an upper-case "B" with the # flag
    %p	a pointer (outputs the Perl value's address in hexadecimal)
    %n	special: *stores* the number of characters output so far
         into the next variable in the parameter list
@@ -5558,7 +5559,7 @@ one or more of:
    -       left-justify within the field
    0       use zeros, not spaces, to right-justify
    #       prefix non-zero octal with "0", non-zero hex with "0x"
-           or "0X", non-zero binary with "0b"
+           or "0X", non-zero binary with "0b" or "OB"
 
 For example:
 

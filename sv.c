@@ -9039,6 +9039,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 	    base = 10;
 	    goto uns_integer;
 
+	case 'B':
 	case 'b':
 	    base = 2;
 	    goto uns_integer;
@@ -9132,7 +9133,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		    } while (uv >>= 1);
 		    if (tempalt) {
 			esignbuf[esignlen++] = '0';
-			esignbuf[esignlen++] = 'b';
+			esignbuf[esignlen++] = c;
 		    }
 		    break;
 		default:		/* it had better be ten or less */
