@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Sep 13 08:48:56 CEST 2006 [metaconfig 3.0 PL70]
+# Generated on Mon Oct 23 17:35:45 CEST 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -380,6 +380,7 @@ crypt_r_proto=''
 d_crypt_r=''
 d_csh=''
 full_csh=''
+d_ctermid=''
 ctermid_r_proto=''
 d_ctermid_r=''
 ctime_r_proto=''
@@ -6346,30 +6347,34 @@ use File::Basename;
 \$archname = "$archname";
 EOPL
 	$cat >> getverlist <<'EOPL'
+# The list found is store twice for each entry: the original name, and
+# the binary broken down version as pack "sss", so sorting is easy and
+# unambiguous. This will work for all versions that have a maximum of
+# three digit groups, separate by '.'s or '_'s. Names are extended with
+# ".0.0" to ensure at least three elements for the pack.
+#					-- H.Merijn Brand (m)'06 23-10-2006
+
 # Can't have leading @ because metaconfig interprets it as a command!
 ;@inc_version_list=();
 # XXX Redo to do opendir/readdir?
 if (-d $stem) {
     chdir($stem);
-    ;@candidates = glob("5.*");
+    ;@candidates = map {
+	[ $_, pack "sss", split m/[._]/, "$_.0.0" ] } glob("5.*");
 }
 else {
     ;@candidates = ();
 }
 
-# XXX ToDo:  These comparisons must be reworked when two-digit
-# subversions come along, so that 5.7.10 compares as greater than
-# 5.7.3!  By that time, hope that 5.6.x is sufficiently
-# widespread that we can use the built-in version vectors rather
-# than reinventing them here.  For 5.6.0, however, we must
-# assume this script will likely be run by 5.005_0x.  --AD 1/2000.
+($pversion, $aversion, $vsn5005) = map {
+    pack "sss", split m/[._]/, "$_.0.0" } $version, $api_versionstring, "5.005";
 foreach $d (@candidates) {
-    if ($d lt $version) {
-	if ($d ge $api_versionstring) {
-	    unshift(@inc_version_list, grep { -d } "$d/$archname", $d);
+    if ($d->[1] lt $pversion) {
+	if ($d->[1] ge $aversion) {
+	    unshift(@inc_version_list, grep { -d } $d->[0]."/$archname", $d->[0]);
 	}
-	elsif ($d ge "5.005") {
-	    unshift(@inc_version_list, grep { -d } $d);
+	elsif ($d->[1] ge $vsn5005) {
+	    unshift(@inc_version_list, grep { -d } $d->[0]);
 	}
     }
     else {
@@ -10985,6 +10990,10 @@ eval $setvar
 case "$full_csh" in
 '') full_csh=$csh ;;
 esac
+
+: see if ctermid exists
+set ctermid d_ctermid
+eval $inlibc
 
 : see if ctermid_r exists
 set ctermid_r d_ctermid_r
@@ -20250,6 +20259,26 @@ eval $inhdr
 set fp_class.h i_fp_class
 eval $inhdr
 
+: see if gdbm.h is available
+set gdbm.h t_gdbm
+eval $inhdr
+case "$t_gdbm" in
+$define)
+	: see if gdbm_open exists
+	set gdbm_open d_gdbm_open
+	eval $inlibc
+	case "$d_gdbm_open" in
+	$undef)
+		t_gdbm="$undef"
+		echo "We won't be including <gdbm.h>"
+		;;
+	esac
+	;;
+esac
+val="$t_gdbm"
+set i_gdbm
+eval $setvar
+
 : see if this is a ieeefp.h system
 case "$i_ieeefp" in
 '' ) set ieeefp.h i_ieeefp
@@ -20736,26 +20765,6 @@ case "$d_vfork" in
 	i_vfork="$undef"
 	;;
 esac
-
-: see if gdbm.h is available
-set gdbm.h t_gdbm
-eval $inhdr
-case "$t_gdbm" in
-$define)
-	: see if gdbm_open exists
-	set gdbm_open d_gdbm_open
-	eval $inlibc
-	case "$d_gdbm_open" in
-	$undef)
-		t_gdbm="$undef"
-		echo "We won't be including <gdbm.h>"
-		;;
-	esac
-	;;
-esac
-val="$t_gdbm"
-set i_gdbm
-eval $setvar
 
 echo " "
 echo "Looking for extensions..." >&4
@@ -21356,6 +21365,7 @@ d_cplusplus='$d_cplusplus'
 d_crypt='$d_crypt'
 d_crypt_r='$d_crypt_r'
 d_csh='$d_csh'
+d_ctermid='$d_ctermid'
 d_ctermid_r='$d_ctermid_r'
 d_ctime_r='$d_ctime_r'
 d_cuserid='$d_cuserid'

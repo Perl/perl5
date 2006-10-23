@@ -92,6 +92,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_chsize	HAS_CHSIZE		/**/
 
+/* HAS_CTERMID:
+ *	This symbol, if defined, indicates that the ctermid routine is
+ *	available to generate filename for terminal.
+ */
+#$d_ctermid HAS_CTERMID		/**/
+
 /* HAS_CUSERID:
  *	This symbol, if defined, indicates that the cuserid routine is
  *	available to get character login names.
@@ -690,6 +696,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	DBL_MIN, i.e. machine dependent floating point values.
  */
 #$i_float I_FLOAT		/**/
+
+/* I_GDBM:
+ *	This symbol, if defined, indicates that <gdbm.h> exists and should
+ *	be included.
+ */
+#$i_gdbm I_GDBM	/**/
 
 /* I_LIMITS:
  *	This symbol, if defined, indicates to the C program that it should
