@@ -2373,6 +2373,11 @@ lib/Term/Complete.pm		A command completion subroutine
 lib/Term/Complete.t		See if Term::Complete works
 lib/Term/ReadLine.pm		Stub readline library
 lib/Term/ReadLine.t		See if Term::ReadLine works
+lib/Term/UI/History.pm	Term::UI
+lib/Term/UI.pm	Term::UI
+lib/Term/UI/t/00_load.t	Term::UI tests
+lib/Term/UI/t/01_history.t	Term::UI tests
+lib/Term/UI/t/02_ui.t	Term::UI tests
 lib/Test/Builder/Module.pm	Base class for test modules
 lib/Test/Builder.pm		For writing new test libraries
 lib/Test/Builder/Tester/Color.pm	Turn on color in Test::Builder::Tester
