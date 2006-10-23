@@ -89,9 +89,26 @@ quantifiers.
 
 =back
 
+=head2 The C<_> prototype
+
+A new prototype character has been added. C<_> is equivalent to C<$> (it
+denotes a scalar), but defaults to C<$_> if the corresponding argument
+isn't supplied. Due to the optional nature of the argument, you can only
+use it at the end of a prototype, or before a semicolon.
+
 =head1 Modules and Pragmas
 
 =head2 New Core Modules
+
+=head2 Module changes
+
+=over 4
+
+=item C<base>
+
+The C<base> pragma now warns if a class tries to inherit from itself.
+
+=back
 
 =head1 Utility Changes
 
