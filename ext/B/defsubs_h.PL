@@ -4,6 +4,7 @@
 #!perl
 my ($out) = __FILE__ =~ /(^.*)\.PL/i;
 $out =~ s/_h$/.h/;
+unlink $out if -l $out;
 open(OUT,">$out") || die "Cannot open $file:$!";
 print "Extracting $out...\n";
 print OUT <<"END";
