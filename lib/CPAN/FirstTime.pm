@@ -17,9 +17,9 @@ use ExtUtils::MakeMaker ();
 use FileHandle ();
 use File::Basename ();
 use File::Path ();
-use File::Spec;
+use File::Spec ();
 use vars qw($VERSION $urllist);
-$VERSION = sprintf "%.6f", substr(q$Rev: 1039 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 1086 $,4)/1000000 + 5.4;
 
 =head1 NAME
 
@@ -296,7 +296,7 @@ Shall we use it as the general CPAN build and cache directory?
 
     my @external_progs = qw/bzip2 gzip tar unzip make
                       curl lynx wget ncftpget ncftp ftp
-                      gpg/;
+                      gpg patch/;
     my(@path) = split /$Config{'path_sep'}/, $ENV{'PATH'};
     if (!$matcher or "@external_progs" =~ /$matcher/) {
         $CPAN::Frontend->myprint($prompts{external_progs});
@@ -337,9 +337,12 @@ Shall we use it as the general CPAN build and cache directory?
                 $progcall = $Config::Config{$progname} if $Config::Config{$progname};
             }
 
-            $path ||= find_exe($progcall,[@path]);
-            $CPAN::Frontend->mywarn("Warning: $progcall not found in PATH\n") unless
-                $path; # not -e $path, because find_exe already checked that
+            $path ||= find_exe($progcall,\@path);
+            {
+                local $"=";";
+                $CPAN::Frontend->mywarn("Warning: $progcall not found in PATH[@path]\n") unless
+                    $path; # not -e $path, because find_exe already checked that
+            }
             $ans = prompt("Where is your $progname program?",$path) || $path;
             $CPAN::Config->{$progname} = $ans;
         }
@@ -347,8 +350,8 @@ Shall we use it as the general CPAN build and cache directory?
 
     if (!$matcher or 'pager' =~ /$matcher/) {
         my $path = $CPAN::Config->{'pager'} || 
-            $ENV{PAGER} || find_exe("less",[@path]) || 
-                find_exe("more",[@path]) || ($^O eq 'MacOS' ? $ENV{EDITOR} : 0 )
+            $ENV{PAGER} || find_exe("less",\@path) || 
+                find_exe("more",\@path) || ($^O eq 'MacOS' ? $ENV{EDITOR} : 0 )
                     || "more";
         $ans = prompt("What is your favorite pager program?",$path);
         $CPAN::Config->{'pager'} = $ans;
