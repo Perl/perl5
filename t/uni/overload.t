@@ -162,6 +162,7 @@ foreach my $operator ('print', 'syswrite', 'syswrite len', 'syswrite off',
 	my $u = UTF8Toggle->new("$pad\311\n$trail");
 	my $l = UTF8Toggle->new("$pad\351\n$trail", 1);
 	if ($operator eq 'print') {
+	    no warnings 'utf8';
 	    print $fh $u;
 	    print $fh $u;
 	    print $fh $u;
