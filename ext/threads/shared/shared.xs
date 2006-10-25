@@ -318,10 +318,11 @@ MGVTBL sharedsv_userlock_vtbl = {
    the shared thing.
  */
 
-extern MGVTBL sharedsv_scalar_vtbl; /* Scalars have this vtable */
-extern MGVTBL sharedsv_array_vtbl;  /* Hashes and arrays have this - like 'tie' */
-extern MGVTBL sharedsv_elem_vtbl;   /* Elements of hashes and arrays have this
-                                _AS WELL AS_ the scalar magic:
+extern MGVTBL sharedsv_scalar_vtbl;    /* Scalars have this vtable */
+extern MGVTBL sharedsv_array_vtbl;     /* Hashes and arrays have this
+                                            - like 'tie' */
+extern MGVTBL sharedsv_elem_vtbl;      /* Elements of hashes and arrays have
+                                          this _AS WELL AS_ the scalar magic:
    The sharedsv_elem_vtbl associates the element with the array/hash and
    the sharedsv_scalar_vtbl associates it with the value
  */
