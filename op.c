@@ -5453,6 +5453,7 @@ Perl_newCONSTSUB(pTHX_ HV *stash, const char *name, SV *sv)
     cv = newXS_flags(name, const_sv_xsub, file, "", XS_DYNAMIC_FILENAME);
     CvXSUBANY(cv).any_ptr = sv;
     CvCONST_on(cv);
+    Safefree(file);
 
 #ifdef USE_ITHREADS
     if (stash)
