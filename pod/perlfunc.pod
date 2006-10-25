@@ -5559,7 +5559,7 @@ one or more of:
    -       left-justify within the field
    0       use zeros, not spaces, to right-justify
    #       prefix non-zero octal with "0", non-zero hex with "0x"
-           or "0X", non-zero binary with "0b" or "OB"
+           or "0X", non-zero binary with "0b" or "0B"
 
 For example:
 
