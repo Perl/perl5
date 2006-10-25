@@ -881,6 +881,11 @@ perl_destruct(pTHXx)
     SvREFCNT_dec(PL_rsfp_filters);
     PL_rsfp_filters = NULL;
 
+    if (PL_minus_F) {
+	Safefree(PL_splitstr);
+	PL_splitstr = NULL;
+    }
+
     /* switches */
     PL_preprocess   = FALSE;
     PL_minus_n      = FALSE;
