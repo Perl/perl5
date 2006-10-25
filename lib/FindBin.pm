@@ -104,7 +104,7 @@ use File::Spec;
 %EXPORT_TAGS = (ALL => [qw($Bin $Script $RealBin $RealScript $Dir $RealDir)]);
 @ISA = qw(Exporter);
 
-$VERSION = "1.47";
+$VERSION = "1.48";
 
 sub cwd2 {
    my $cwd = getcwd();
@@ -142,24 +142,19 @@ sub init
       {
        my $dir;
        foreach $dir (File::Spec->path)
-	{
+        {
         my $scr = File::Spec->catfile($dir, $script);
-	if(-r $scr && (!$dosish || -x _))
+
+        # $script can been found via PATH but perl could have
+        # been invoked as 'perl file'. Do a dumb check to see
+        # if $script is a perl program, if not then keep $script = $0
+        #
+        # well we actually only check that it is an ASCII file
+        # we know its executable so it is probably a script
+        # of some sort.
+        if(-f $scr && -r _ && ($dosish || -x _) && -s _ && -T _)
          {
           $script = $scr;
-
-	  if (-f $0)
-           {
-	    # $script has been found via PATH but perl could have
-	    # been invoked as 'perl file'. Do a dumb check to see
-	    # if $script is a perl program, if not then $script = $0
-            #
-            # well we actually only check that it is an ASCII file
-            # we know its executable so it is probably a script
-            # of some sort.
-
-            $script = $0 unless(-T $script);
-           }
           last;
          }
        }
