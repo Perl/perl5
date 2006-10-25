@@ -5516,7 +5516,7 @@ In addition, Perl permits the following widely-supported conversions:
    %E	like %e, but using an upper-case "E"
    %G	like %g, but with an upper-case "E" (if applicable)
    %b	an unsigned integer, in binary
-   %B	like %x, but using an upper-case "B" with the # flag
+   %B	like %b, but using an upper-case "B" with the # flag
    %p	a pointer (outputs the Perl value's address in hexadecimal)
    %n	special: *stores* the number of characters output so far
         into the next variable in the parameter list
