@@ -2,7 +2,7 @@ package Attribute::Handlers;
 use 5.006;
 use Carp;
 use warnings;
-$VERSION = '0.78_03';
+$VERSION = '0.78_04';
 # $DB::single=1;
 
 my %symcache;
@@ -114,6 +114,7 @@ sub _gen_handler_AH_() {
 	return sub {
 	    _resolve_lastattr;
 	    my ($pkg, $ref, @attrs) = @_;
+	    my (undef, $filename, $linenum) = caller 2;
 	    foreach (@attrs) {
 		my ($attr, $data) = /^([a-z_]\w*)(?:[(](.*)[)])?$/is or next;
 		if ($attr eq 'ATTR') {
@@ -141,7 +142,7 @@ sub _gen_handler_AH_() {
 			my $handler = $pkg->can("_ATTR_${type}_${attr}");
 			next unless $handler;
 		        my $decl = [$pkg, $ref, $attr, $data,
-				    $raw{$handler}, $phase{$handler}];
+				    $raw{$handler}, $phase{$handler}, $filename, $linenum];
 			foreach my $gphase (@global_phases) {
 			    _apply_handler_AH_($decl,$gphase)
 				if $global_phases{$gphase} <= $global_phase;
@@ -172,7 +173,7 @@ push @UNIVERSAL::ISA, 'Attribute::Handlers::UNIVERSAL'
 
 sub _apply_handler_AH_ {
 	my ($declaration, $phase) = @_;
-	my ($pkg, $ref, $attr, $data, $raw, $handlerphase) = @$declaration;
+	my ($pkg, $ref, $attr, $data, $raw, $handlerphase, $filename, $linenum) = @$declaration;
 	return unless $handlerphase->{$phase};
 	# print STDERR "Handling $attr on $ref in $phase with [$data]\n";
 	my $type = ref $ref;
@@ -190,6 +191,8 @@ sub _apply_handler_AH_ {
 		       $attr,
 		       (@$data>1? $data : $data->[0]),
 		       $phase,
+		       $filename,
+		       $linenum,
 		      );
 	return 1;
 }
@@ -298,19 +301,20 @@ To create a handler, define it as a subroutine with the same name as
 the desired attribute, and declare the subroutine itself with the  
 attribute C<:ATTR>. For example:
 
-	package LoudDecl;
-	use Attribute::Handlers;
+    package LoudDecl;
+    use Attribute::Handlers;
 
-	sub Loud :ATTR {
-		my ($package, $symbol, $referent, $attr, $data, $phase) = @_;
-		print STDERR
-			ref($referent), " ",
-			*{$symbol}{NAME}, " ",
-			"($referent) ", "was just declared ",
-			"and ascribed the ${attr} attribute ",
-			"with data ($data)\n",
-			"in phase $phase\n";
-	}
+    sub Loud :ATTR {
+	my ($package, $symbol, $referent, $attr, $data, $phase, $filename, $linenum) = @_;
+	print STDERR
+	    ref($referent), " ",
+	    *{$symbol}{NAME}, " ",
+	    "($referent) ", "was just declared ",
+	    "and ascribed the ${attr} attribute ",
+	    "with data ($data)\n",
+	    "in phase $phase\n",
+	    "in file $filename at line $linenum\n";
+    }
 
 This creates a handler for the attribute C<:Loud> in the class LoudDecl.
 Thereafter, any subroutine declared with a C<:Loud> attribute in the class
@@ -346,7 +350,15 @@ any data associated with that attribute;
 
 =item [5]
 
-the name of the phase in which the handler is being invoked.
+the name of the phase in which the handler is being invoked;
+
+=item [6]
+
+the filename in which the handler is being invoked;
+
+=item [7]
+
+the line number in this file.
 
 =back
 

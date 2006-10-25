@@ -1382,6 +1382,7 @@ lib/Attribute/Handlers/demo/MyClass.pm	Attribute::Handlers demo
 lib/Attribute/Handlers.pm	Attribute::Handlers
 lib/Attribute/Handlers/README		Attribute::Handlers
 lib/Attribute/Handlers/t/multi.t	See if Attribute::Handlers works
+lib/Attribute/Handlers/t/linerep.t	See if Attribute::Handlers works
 lib/attributes.pm		For "sub foo : attrlist"
 lib/AutoLoader.pm		Autoloader base class
 lib/AutoLoader.t		See if AutoLoader works
