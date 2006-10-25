@@ -108,6 +108,17 @@ use it at the end of a prototype, or before a semicolon.
 
 The C<base> pragma now warns if a class tries to inherit from itself.
 
+=item C<warnings>
+
+The C<warnings> pragma doesn't load C<Carp> anymore. That means that code
+that used C<Carp> routines without having loaded it at compile time might
+need to be adjusted; typically, the following (faulty) code won't work
+anymore, and will require parentheses to be added after the function name:
+
+    use warnings;
+    require Carp;
+    Carp::confess "argh";
+
 =back
 
 =head1 Utility Changes
