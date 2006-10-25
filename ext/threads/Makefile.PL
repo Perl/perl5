@@ -58,25 +58,21 @@ if (grep { $_ eq 'PERL_CORE=1' } @ARGV) {
         die("No 'C' compiler found to build 'threads'\n");
     }
 
-    push(@conditional_params, 'DEFINE' => '-DHAS_PPPORT_H');
+    push(@conditional_params, 'DEFINE' => '-DHAS_PPPORT_H',
+                              'PREREQ_PM'         => {
+                                    'strict'            => 0,
+                                    'warnings'          => 0,
+                                    'overload'          => 0,
+                                    'Config'            => 0,
+                                    'Carp'              => 0,
+                                    'XSLoader'          => 0,
+
+                                    'ExtUtils::testlib' => 0,
+                                    'Hash::Util'        => 0,
+                                    'IO::File'          => 0,
+                              });
 }
 
-my $prereqs;
-
-if (!$ENV{PERL_CORE}) {
-    $prereqs = {
-        'strict'          => 0,
-        'warnings'        => 0,
-        'overload'        => 0,
-        'Config'          => 0,
-        'Carp'            => 0,
-        'XSLoader'        => 0,
-
-        'ExtUtils::testlib' => 0,
-        'Hash::Util'      => 0,
-        'IO::File'        => 0,
-    };
-}
 
 # Create Makefile
 WriteMakefile(
@@ -87,7 +83,6 @@ WriteMakefile(
     'PM' => {
         'threads.pm'    => '$(INST_LIBDIR)/threads.pm',
     },
-    'PREREQ_PM'         => $prereqs,
     'INSTALLDIRS'       => 'perl',
 
     ((ExtUtils::MakeMaker->VERSION() lt '6.25') ?

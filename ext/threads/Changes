@@ -1,5 +1,9 @@
 Revision history for Perl extension threads.
 
+1.45 Wed Oct 25 14:22:23 EDT 2006
+	- Makefile.PL changes for CORE
+	- Updated POD tests
+
 1.44 Wed Oct 11 08:55:50 EDT 2006
 	- Complain about bad import options
 	- Added example threads script
