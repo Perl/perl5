@@ -3523,7 +3523,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
                         Newx(PL_reg_start_tmp, PL_reg_start_tmpl, char*);
                 }               	
 
-        eval_recurse_doit: /* Share code with RECURSE below this line */                		
+        eval_recurse_doit: /* Share code with RECURSE below this line */
 		/* run the pattern returned from (??{...}) */
 		ST.cp = regcppush(0);	/* Save *all* the positions. */
 		REGCP_SET(ST.lastcp);
@@ -3534,6 +3534,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		*PL_reglastparen = 0;
 		*PL_reglastcloseparen = 0;
 		PL_reginput = locinput;
+		PL_regsize = 0;
 
 		/* XXXX This is too dramatic a measure... */
 		PL_reg_maxiter = 0;
