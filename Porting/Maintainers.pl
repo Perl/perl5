@@ -487,6 +487,13 @@ package Maintainers;
 		'CPAN'		=> 1,
 		},
 
+	'Object::Accessor' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/Object/Accessor.pm lib/Object/Accessor],
+		'CPAN'		=> 1,
+		},
+
 	'Package::Constants' =>
 		{
 		'MAINTAINER'	=> 'kane',
@@ -646,6 +653,13 @@ package Maintainers;
 		{
 		'MAINTAINER'	=> 'rra',
 		'FILES'		=> q[lib/Term/ANSIColor.pm lib/Term/ANSIColor],
+		'CPAN'		=> 1,
+		},
+
+	'Term::UI' =>
+		{
+		'MAINTAINER'	=> 'kane',
+		'FILES'		=> q[lib/Term/UI.pm lib/Term/UI],
 		'CPAN'		=> 1,
 		},
 
