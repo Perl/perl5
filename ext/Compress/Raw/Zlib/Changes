@@ -1,6 +1,16 @@
 CHANGES
 -------
 
+  2.000_14 26 October 2006
+
+      * Fixed memory leak on realloc.
+
+      * Ticket #18986 says that ExtUtils::Install 1.39 fixes the in-use
+        issue on win32/cygwin, so make the code that checks whether trying
+        to install via the cpan shell conditional on the version of
+        ExtUtils::Install.
+        http://rt.cpan.org/Ticket/Display.html?id=18986
+
   2.000_10 13 March 2006
 
       * Fixed a potential NULL pointer dereference problem in

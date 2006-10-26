@@ -27,7 +27,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $ZipError);
 
-$VERSION = '2.000_13';
+$VERSION = '2.000_14';
 $ZipError = '';
 
 @ISA = qw(Exporter IO::Compress::RawDeflate);
@@ -178,6 +178,7 @@ sub mkHeader
     }
 
 
+    # TODO - this code assumes Unix.
     my $extAttr = 0;
     $extAttr = $param->value('Mode') << 16
         if defined $param->value('Mode') ;
@@ -645,11 +646,13 @@ compressed data to files or buffer.
 
 
 
-Note that IO::Compress::Zip is not intended to be a replacement for the module
-C<Archive::Zip>.
 
-The primary aim of this module is not as an archiver, but to provide
-streaming write access to zip file files and buffers.
+
+
+The primary purpose of this module is to provide streaming write access to
+zip files and buffers. It is not a general-purpose file archiver. If that
+is what you want, check out C<Archive::Zip>.
+
 
 
 
@@ -835,6 +838,7 @@ Defaults to 0.
 =item C<< Append => 0|1 >>
 
 TODO
+
 
 
 =back
@@ -1060,6 +1064,8 @@ Note that when outputting to a file with streaming mode disabled (C<Stream>
 is 0), the output file must be seekable.
 
 The default is 1.
+
+
 
 =item C<< TextFlag => 0|1 >>
 
@@ -1511,7 +1517,7 @@ TODO
 
 =head1 SEE ALSO
 
-L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
+L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
 
 L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
 

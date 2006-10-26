@@ -9,7 +9,7 @@ require Exporter;
 
 our ($VERSION, @ISA, @EXPORT);
 
-$VERSION = '2.000_13';
+$VERSION = '2.000_14';
 
 @ISA = qw(Exporter);
 
@@ -24,6 +24,7 @@ $VERSION = '2.000_13';
 
         ZLIB_CMF_CINFO_OFFSET
         ZLIB_CMF_CINFO_BITS 
+        ZLIB_CMF_CINFO_MAX
 
         ZLIB_FLG_FCHECK_OFFSET
         ZLIB_FLG_FCHECK_BITS
@@ -54,6 +55,7 @@ use constant ZLIB_CMF_CM_DEFLATED   => 8;
 
 use constant ZLIB_CMF_CINFO_OFFSET  => 4;
 use constant ZLIB_CMF_CINFO_BITS    => 0xF ; # 0b1111;
+use constant ZLIB_CMF_CINFO_MAX     => 7;
 
 use constant ZLIB_FLG_FCHECK_OFFSET => 0;
 use constant ZLIB_FLG_FCHECK_BITS   => 0x1F ; # 0b11111;

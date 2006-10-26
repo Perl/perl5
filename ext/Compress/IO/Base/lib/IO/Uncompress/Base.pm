@@ -10,7 +10,7 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter );
 
 
-$VERSION = '2.000_13';
+$VERSION = '2.000_14';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
@@ -278,6 +278,11 @@ sub TruncatedTrailer
     return $self->TrailerError("Truncated in $_[0] Section");
 }
 
+sub postCheckParams
+{
+    return 1;
+}
+
 sub checkParams
 {
     my $self = shift ;
@@ -289,7 +294,6 @@ sub checkParams
                     'BlockSize'     => [1, 1, Parse_unsigned, 16 * 1024],
                     'AutoClose'     => [1, 1, Parse_boolean,  0],
                     'Strict'        => [1, 1, Parse_boolean,  0],
-                   #'Lax'           => [1, 1, Parse_boolean,  1],
                     'Append'        => [1, 1, Parse_boolean,  0],
                     'Prime'         => [1, 1, Parse_any,      undef],
                     'MultiStream'   => [1, 1, Parse_boolean,  0],
@@ -301,15 +305,18 @@ sub checkParams
 
                     $self->getExtraParams(),
 
-
                     #'Todo - Revert to ordinary file on end Z_STREAM_END'=> 0,
                     # ContinueAfterEof
                 } ;
 
+    $Valid->{TrailingData} = [1, 1, Parse_writable_scalar, undef]
+        if  *$self->{OneShot} ;
         
     $got->parse($Valid, @_ ) 
         or $self->croakError("${class}: $got->{Error}")  ;
 
+    $self->postCheckParams($got) 
+        or $self->croakError("${class}: " . $self->error())  ;
 
     return $got;
 }
@@ -326,6 +333,8 @@ sub _create
 
     my $inValue = shift ;
 
+    *$obj->{OneShot}           = 0 ;
+
     if (! $got)
     {
         $got = $obj->checkParams($class, undef, @_)
@@ -340,7 +349,7 @@ sub _create
     *$obj->{InNew} = 1;
 
     $obj->ckParams($got)
-        or $obj->croakError("${class}: $obj->{Error}");
+        or $obj->croakError("${class}: " . *$obj->{Error});
 
     if ($inType eq 'buffer' || $inType eq 'code') {
         *$obj->{Buffer} = $inValue ;        
@@ -351,9 +360,10 @@ sub _create
         if ($inType eq 'handle') {
             *$obj->{FH} = $inValue ;
             *$obj->{Handle} = 1 ;
+
             # Need to rewind for Scan
-            #seek(*$obj->{FH}, 0, SEEK_SET) if $got->value('Scan');
-            *$obj->{FH}->seek(0, SEEK_SET) if $got->value('Scan');
+            *$obj->{FH}->seek(0, SEEK_SET) 
+                if $got->value('Scan');
         }  
         else {    
             my $mode = '<';
@@ -478,9 +488,16 @@ sub _inf
         or return undef ;
     
     push @_, $output if $haveOut && $x->{Hash};
+
+    *$obj->{OneShot} = 1 ;
     
     my $got = $obj->checkParams($name, undef, @_)
         or return undef ;
+
+    if ($got->parsed('TrailingData'))
+    {
+        *$obj->{TrailingData} = $got->value('TrailingData');
+    }
 
     *$obj->{MultiStream} = $got->value('MultiStream');
     $got->value('MultiStream', 0);
@@ -661,6 +678,9 @@ sub _rd2
     return $z->closeError(undef)
         if $status < 0 ;
 
+    ${ *$self->{TrailingData} } = $z->trailingData()
+        if defined *$self->{TrailingData} ;
+
     $z->close() 
         or return undef ;
 
@@ -773,7 +793,6 @@ sub _raw_read
     return G_ERR
         if $status == STATUS_ERROR  ;
 
-
     my $buf_len = 0;
     if ($status == STATUS_OK) {
         my $beforeC_len = length $temp_buf;
@@ -785,10 +804,13 @@ sub _raw_read
         return $self->saveErrorString(G_ERR, *$self->{Uncomp}{Error}, *$self->{Uncomp}{ErrorNo})
             if $self->saveStatus($status) == STATUS_ERROR;
 
-        $self->postBlockChk($buffer) == STATUS_OK
+        $self->postBlockChk($buffer, $before_len) == STATUS_OK
             or return G_ERR;
 
         $self->filterUncompressed($buffer);
+
+        # TODO uncompress filter goes here    
+
 
         $buf_len = length($$buffer) - $before_len;
 
@@ -824,6 +846,8 @@ sub _raw_read
                 if *$self->{Strict};
             $self->pushBack($trailer)  ;
         }
+
+        # TODO - if want to file file pointer, do it here
 
         if (! $self->smartEof()) {
             *$self->{NewStream} = 1 ;
@@ -999,6 +1023,9 @@ sub read
     $length = length $$out_buffer 
         if length($$out_buffer) < $length ;
 
+    return 0 
+        if $length == 0 ;
+
     if ($offset) { 
         $$buffer .= "\x00" x ($offset - length($$buffer))
             if $offset > length($$buffer) ;
@@ -1023,7 +1050,14 @@ sub _getline
     if ( ! defined $/ ) {
         my $data ;
         1 while $self->read($data) > 0 ;
-        $. = ++ *$self->{LineNo} if defined($data);
+        return \$data ;
+    }
+
+    # Record Mode
+    if ( ref $/ eq 'SCALAR' && ${$/} =~ /^\d+$/ && ${$/} > 0) {
+        my $reclen = ${$/} ;
+        my $data ;
+        $self->read($data, $reclen) ;
         return \$data ;
     }
 
@@ -1034,27 +1068,35 @@ sub _getline
             if ($paragraph =~ s/^(.*?\n\n+)//s) {
                 *$self->{Pending}  = $paragraph ;
                 my $par = $1 ;
-                $. = ++ *$self->{LineNo} ;
                 return \$par ;
             }
         }
-        $. = ++ *$self->{LineNo} if defined($paragraph);
         return \$paragraph;
     }
 
-    # Line Mode
+    # $/ isn't empty, or a reference, so it's Line Mode.
     {
         my $line ;    
-        my $endl = quotemeta($/); # quote in case $/ contains RE meta chars
+        my $offset;
+        my $p = \*$self->{Pending}  ;
+
+        if (length(*$self->{Pending}) && 
+                    ($offset = index(*$self->{Pending}, $/)) >=0) {
+            my $l = substr(*$self->{Pending}, 0, $offset + length $/ );
+            substr(*$self->{Pending}, 0, $offset + length $/) = '';    
+            return \$l;
+        }
+
         while ($self->read($line) > 0 ) {
-            if ($line =~ s/^(.*?$endl)//s) {
-                *$self->{Pending} = $line ;
-                $. = ++ *$self->{LineNo} ;
-                my $l = $1 ;
-                return \$l ;
+            my $offset = index($line, $/);
+            if ($offset >= 0) {
+                my $l = substr($line, 0, $offset + length $/ );
+                substr($line, 0, $offset + length $/) = '';    
+                $$p = $line;
+                return \$l;
             }
         }
-        $. = ++ *$self->{LineNo} if defined($line);
+
         return \$line;
     }
 }
@@ -1065,6 +1107,7 @@ sub getline
     my $current_append = *$self->{AppendOutput} ;
     *$self->{AppendOutput} = 1;
     my $lineref = $self->_getline();
+    $. = ++ *$self->{LineNo} if defined $$lineref ;
     *$self->{AppendOutput} = $current_append;
     return $$lineref ;
 }
@@ -1075,7 +1118,8 @@ sub getlines
     $self->croakError(*$self->{ClassName} . 
             "::getlines: called in scalar context\n") unless wantarray;
     my($line, @lines);
-    push(@lines, $line) while defined($line = $self->getline);
+    push(@lines, $line) 
+        while defined($line = $self->getline);
     return @lines;
 }
 
@@ -1104,8 +1148,6 @@ sub ungetc
 sub trailingData
 {
     my $self = shift ;
-    #return \"" if ! defined *$self->{Trailing} ;
-    #return \*$self->{Trailing} ;
 
     if (defined *$self->{FH} || defined *$self->{InputEvent} ) {
         return *$self->{Prime} ;
@@ -1113,7 +1155,7 @@ sub trailingData
     else {
         my $buf = *$self->{Buffer} ;
         my $offset = *$self->{BufferOffset} ;
-        return substr($$buf, $offset, -1) ;
+        return substr($$buf, $offset) ;
     }
 }
 
@@ -1319,7 +1361,7 @@ purpose if to to be sub-classed by IO::Unompress modules.
 
 =head1 SEE ALSO
 
-L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
+L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
 
 L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
 

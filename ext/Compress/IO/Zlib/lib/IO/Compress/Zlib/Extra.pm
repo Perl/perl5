@@ -8,7 +8,7 @@ use bytes;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS);
 
-$VERSION = '2.000_13';
+$VERSION = '2.000_14';
 
 use IO::Compress::Gzip::Constants;
 

@@ -16,7 +16,7 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 956 + $extra ;
+    plan tests => 970 + $extra ;
 
     use_ok('IO::Uncompress::AnyUncompress', qw(anyuncompress $AnyUncompressError)) ;
 
@@ -32,6 +32,7 @@ sub run
     my $TopFuncName     = getTopFuncName($CompressClass);
 
 
+    my @MultiValues     = getMultiValues($CompressClass);
 
     foreach my $bit ($CompressClass, $UncompressClass,
                      'IO::Uncompress::AnyUncompress',
@@ -149,6 +150,29 @@ sub run
         is $a, undef, "  $TopType returned undef";
         like $$Error, "/Unmatched \\) in input fileglob/",
                 "  Unmatched ) in input fileglob";
+    }
+
+    foreach my $bit ($UncompressClass,
+                     'IO::Uncompress::AnyUncompress',
+                    )
+    {
+        my $Error = getErrorRef($bit);
+        my $Func = getTopFuncRef($bit);
+        my $TopType = getTopFuncName($bit);
+
+        {
+            my $in ;
+            my $out ;
+            my @x ;
+
+            eval { $a = $Func->(\$in, \$out, TrailingData => \"abc") ;} ;
+            like $@, mkErr("^$TopType: Parameter 'TrailingData' not writable"),
+                '  TrailingData output not writable';
+
+            eval { $a = $Func->(\$in, \$out, TrailingData => \@x) ;} ;
+            like $@, mkErr("^$TopType: Parameter 'TrailingData' not a scalar reference"),
+                '  TrailingData output not scaral reference';
+        }
     }
 
     foreach my $bit ($UncompressClass,
@@ -505,7 +529,7 @@ sub run
 
         }
 
-        foreach my $ms (1, 0)
+        foreach my $ms (@MultiValues)
         {
             {
                 title "$TopType - From Array Ref to Buffer, MultiStream $ms" ;
@@ -565,6 +589,61 @@ sub run
             }
         }
     }
+
+    foreach my $bit ($UncompressClass,
+                    #'IO::Uncompress::AnyUncompress',
+                    )
+    {
+        my $Error = getErrorRef($bit);
+        my $Func = getTopFuncRef($bit);
+        my $TopType = getTopFuncName($bit);
+        my $CompressClass = getInverse($bit);
+        my $C_Func = getTopFuncRef($CompressClass);
+
+
+        
+        my $data = "mary had a little lamb" ;
+        my $keep = $data ;
+        my $extra = "after the main event";
+
+        foreach my $fb ( qw( filehandle buffer ) )
+        {
+            title "Trailingdata with $TopType, from $fb";
+
+            my $lex = new LexFile my $name ;
+            my $input ;
+
+            my $compressed ;
+            ok &$C_Func(\$data, \$compressed), '  Compressed ok' ;
+            $compressed .= $extra;
+
+            if ($fb eq 'buffer')
+            {
+                $input = \$compressed;
+            }
+            else
+            {
+                writeFile($name, $compressed);
+
+                $input = new IO::File "<$name" ;
+            }
+
+            my $trailing;
+            my $out;
+            ok $Func->($input, \$out, TrailingData => $trailing), "  Uncompressed OK" ;
+            is $out, $keep, "  Got uncompressed data";
+
+            my $rest = '';
+            if ($fb eq 'filehandle')
+            {
+                read($input, $rest, 10000) ;
+            }
+
+            is $trailing . $rest, $extra, "  Got trailing data";
+            
+        }
+    }
+
 
 #    foreach my $bit ($CompressClass)
 #    {
@@ -809,7 +888,7 @@ sub run
                 is @copy, 0, "  got all files";
             }
 
-            foreach my $ms (0, 1)
+            foreach my $ms (@MultiValues)
             {
                 {
                     title "$TopType - From FileGlob to Buffer files [@$files], MS $ms" ;
@@ -889,8 +968,8 @@ sub run
 
         my $incumbent = "incumbent data" ;
 
-        my @opts = ();
-        @opts = (RawInflate => 1)
+        my @opts = (Strict => 1);
+        push @opts,  (RawInflate => 1)
             if $bit eq 'IO::Uncompress::AnyUncompress';
 
         for my $append (0, 1)

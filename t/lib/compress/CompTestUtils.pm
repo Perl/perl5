@@ -6,7 +6,11 @@ use strict ;
 use warnings;
 use bytes;
 
+#use lib qw(t t/compress);
+
 use Carp ;
+#use Test::More ; 
+
 
 
 sub title
@@ -216,6 +220,8 @@ sub uncompressBuffer
                     'IO::Compress::Zip::zip'                 => 'IO::Uncompress::Unzip',
                     'IO::Compress::Lzop'                     => 'IO::Uncompress::UnLzop',
                     'IO::Compress::Lzop::lzop'               => 'IO::Uncompress::UnLzop',
+                    'IO::Compress::Lzf'                      => 'IO::Uncompress::UnLzf' ,
+                    'IO::Compress::Lzf::lzf'                 => 'IO::Uncompress::UnLzf',
                     'IO::Compress::DummyComp'                => 'IO::Uncompress::DummyUncomp',
                     'IO::Compress::DummyComp::dummycomp'     => 'IO::Uncompress::DummyUncomp',
                 );
@@ -255,6 +261,10 @@ my %ErrorMap = (    'IO::Compress::Gzip'                => \$IO::Compress::Gzip:
                     'IO::Compress::Lzop::lzop'          => \$IO::Compress::Lzop::LzopError,
                     'IO::Uncompress::UnLzop'            => \$IO::Uncompress::UnLzop::UnLzopError,
                     'IO::Uncompress::UnLzop::unlzop'    => \$IO::Uncompress::UnLzop::UnLzopError,
+                    'IO::Compress::Lzf'                 => \$IO::Compress::Lzf::LzfError,
+                    'IO::Compress::Lzf::lzf'            => \$IO::Compress::Lzf::LzfError,
+                    'IO::Uncompress::UnLzf'             => \$IO::Uncompress::UnLzf::UnLzfError,
+                    'IO::Uncompress::UnLzf::unlzf'      => \$IO::Uncompress::UnLzf::UnLzfError,
 
                     'IO::Compress::DummyComp'           => \$IO::Compress::DummyComp::DummyCompError,
                     'IO::Compress::DummyComp::dummycomp'=> \$IO::Compress::DummyComp::DummyCompError,
@@ -281,6 +291,8 @@ my %TopFuncMap = (  'IO::Compress::Gzip'          => 'IO::Compress::Gzip::gzip',
                     'IO::Uncompress::Unzip'       => 'IO::Uncompress::Unzip::unzip',
                     'IO::Compress::Lzop'          => 'IO::Compress::Lzop::lzop',
                     'IO::Uncompress::UnLzop'      => 'IO::Uncompress::UnLzop::unlzop',
+                    'IO::Compress::Lzf'           => 'IO::Compress::Lzf::lzf',
+                    'IO::Uncompress::UnLzf'       => 'IO::Uncompress::UnLzf::unlzf',
                     'IO::Compress::DummyComp'     => 'IO::Compress::DummyComp::dummyuncomp',
                     'IO::Uncompress::DummyUncomp' => 'IO::Uncompress::DummyUncomp::dummyuncomp',
                  );
@@ -305,6 +317,8 @@ my %inverse  = ( 'IO::Compress::Gzip'                    => 'IO::Uncompress::Gun
                  'IO::Compress::Zip'                     => 'IO::Uncompress::Unzip',
                  'IO::Compress::Lzop::lzop'              => 'IO::Uncompress::UnLzop::unlzop',
                  'IO::Compress::Lzop'                    => 'IO::Uncompress::UnLzop',
+                 'IO::Compress::Lzf::lzf'                => 'IO::Uncompress::UnLzf::unlzf',
+                 'IO::Compress::Lzf'                     => 'IO::Uncompress::UnLzf',
                  'IO::Compress::DummyComp::dummycomp'    => 'IO::Uncompress::DummyUncomp::dummyuncomp',
                  'IO::Compress::DummyComp'               => 'IO::Uncompress::DummyUncomp',
              );
@@ -356,6 +370,8 @@ sub compressBuffer
                     'IO::Uncompress::Unzip::unzip'            => 'IO::Compress::Zip',
                     'IO::Uncompress::UnLzop'                  => 'IO::Compress::Lzop',
                     'IO::Uncompress::UnLzop::unlzop'          => 'IO::Compress::Lzop',
+                    'IO::Uncompress::UnLzp'                   => 'IO::Compress::Lzf',
+                    'IO::Uncompress::UnLzf::unlzf'            => 'IO::Compress::Lzf',
                     'IO::Uncompress::AnyInflate'              => 'IO::Compress::Gzip',
                     'IO::Uncompress::AnyInflate::anyinflate'  => 'IO::Compress::Gzip',
                     'IO::Uncompress::AnyUncompress'           => 'IO::Compress::Gzip',
@@ -374,8 +390,7 @@ sub compressBuffer
 our ($AnyUncompressError);
 BEGIN
 {
-    eval { require IO::Uncompress::AnyUncompress ;
-           import IO::Uncompress::AnyUncompress qw($AnyUncompressError) } ;
+    eval ' use IO::Uncompress::AnyUncompress qw($AnyUncompressError); ';
 }
 
 sub anyUncompress
@@ -593,6 +608,35 @@ sub dumpObj
 }
 
 
+sub getMultiValues
+{
+    my $class = shift ;
+
+    return (0,0) if $class =~ /lzf/i;
+    return (1,0);
+}
+
 package CompTestUtils;
 
 1;
+__END__
+	t/Test/Builder.pm
+	t/Test/More.pm
+	t/Test/Simple.pm
+	t/compress/CompTestUtils.pm
+	t/compress/any.pl
+	t/compress/anyunc.pl
+	t/compress/destroy.pl
+	t/compress/generic.pl
+	t/compress/merge.pl
+	t/compress/multi.pl
+	t/compress/newtied.pl
+	t/compress/oneshot.pl
+	t/compress/prime.pl
+	t/compress/tied.pl
+	t/compress/truncate.pl
+	t/compress/zlib-generic.plParsing config.in...
+Building Zlib enabled
+Auto Detect Gzip OS Code..
+Setting Gzip OS Code to 3 [Unix/Default]
+Looks Good.

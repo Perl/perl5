@@ -162,7 +162,8 @@ EOM
                         my $lines = @lines;
 
                         my $un = '';
-                        while (<$gz>) {
+                        #while (<$gz>) {
+                        while ($_ = $gz->getline()) {
                             $un .= $_;
                         }
                         is $., $lines, "    \$. is $lines";
@@ -181,7 +182,9 @@ EOM
 
                     {
                         my $un = '';
-                        1 while $gz->read($un) > 0 ;
+                        #1 while $gz->read($un) > 0 ;
+                        is $., 0, "    \$. is 0";
+                        $gz->read($un) ;
                         #print "[[$un]]\n" while $gz->read($un) > 0 ;
                         ok ! $gz->error(), "      ! error()"
                             or diag "Error is " . $gz->error() ;
@@ -190,7 +193,6 @@ EOM
                             or diag "Stream count is " . $gz->streamCount();
                         ok $un eq "", "    expected output" ;
                         is $gz->tell(), 0, "    tell is 0";
-                        is $., 0, "    \$. is 0";
                     }
 
                     is $gz->nextStream(), 0, "    nextStream ok";

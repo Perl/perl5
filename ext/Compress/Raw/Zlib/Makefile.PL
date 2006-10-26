@@ -5,6 +5,7 @@ require 5.004 ;
 
 use private::MakeUtil;
 use ExtUtils::MakeMaker 5.16 ;
+use ExtUtils::Install (); # only needed to check for version
 
 my $ZLIB_LIB ;
 my $ZLIB_INCLUDE ;
@@ -16,15 +17,20 @@ my $GZIP_OS_CODE = -1 ;
 #$WALL = ' -pedantic ' if $Config{'cc'} =~ /gcc/ ;
 #$WALL = ' -Wall -Wno-comment ' if $Config{'cc'} =~ /gcc/ ;
 
-# don't ask if MM_USE_DEFAULT is set -- enables perl core building on cygwin
-if ($^O =~ /cygwin/i and not ($ENV{PERL_MM_USE_DEFAULT} or $ENV{PERL_CORE}))
+# Ticket #18986 says that ExtUtils::Install 1.39 fixes the in-use issue
+# on win32/cygwin, so make the code below conditional on the version of
+# ExtUtils::Install.
+
+# Don't ask if MM_USE_DEFAULT is set -- enables perl core building on cygwin
+if ($^O =~ /cygwin/i and $ExtUtils::Install::VERSION < 1.39 
+        and not ($ENV{PERL_MM_USE_DEFAULT} or $ENV{PERL_CORE}))
 {
     print <<EOM ;
 
 I see you are running Cygwin.
 
-Please note that this module cannot be installed on Cygwin using the
-CPAN shell. The CPAN Shell uses Compress::Zlib internally and it is not
+Please note that this module cannot be installed on Cygwin using the CPAN
+shell. The CPAN Shell uses Compress::Raw::Zlib internally and it is not
 possible to delete an active DLL.
 
 If you are running the CPAN shell, please exit it and install this module

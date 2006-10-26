@@ -123,6 +123,7 @@ sub UpDowngrade
 
     my $upgrade ;
     my $downgrade ;
+    my $do_downgrade ;
 
     my $caller = (caller(1))[3] || '';
 
@@ -134,6 +135,12 @@ sub UpDowngrade
     {
         $upgrade = 1;
     }
+    else
+    {
+        $do_downgrade = 1
+            if $] < 5.006001 ;
+    }
+
 #    else
 #    {
 #        my $opt = shift @ARGV || '' ;
@@ -142,7 +149,8 @@ sub UpDowngrade
 #        push @ARGV, $opt unless $downgrade || $upgrade;
 #    }
 
-    if ($downgrade) {
+
+    if ($downgrade || $do_downgrade) {
         # From: use|no warnings "blah"
         # To:   local ($^W) = 1; # use|no warnings "blah"
         $warn_sub = sub {
@@ -150,7 +158,8 @@ sub UpDowngrade
                             s/^(\s*)(use\s+warnings)/${1}local (\$^W) = 1; #$2/ ;
                         };
     }
-    elsif ($] >= 5.006001 || $upgrade) {
+    #elsif ($] >= 5.006001 || $upgrade) {
+    elsif ($upgrade) {
         # From: local ($^W) = 1; # use|no warnings "blah"
         # To:   use|no warnings "blah"
         $warn_sub = sub {
@@ -158,7 +167,7 @@ sub UpDowngrade
           };
     }
 
-    if ($downgrade) {
+    if ($downgrade || $do_downgrade) {
         $our_sub = sub {
 	    if ( /^(\s*)our\s+\(\s*([^)]+\s*)\)/ ) {
                 my $indent = $1;
@@ -171,7 +180,8 @@ sub UpDowngrade
             }
           };
     }
-    elsif ($] >= 5.006000 || $upgrade) {
+    #elsif ($] >= 5.006000 || $upgrade) {
+    elsif ($upgrade) {
         $our_sub = sub {
 	    if ( /^(\s*)use\s+vars\s+qw\((.*?)\)/ ) {
                 my $indent = $1;

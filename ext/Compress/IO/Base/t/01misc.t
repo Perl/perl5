@@ -19,15 +19,10 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 69 + $extra ;
-
+    plan tests => 76 + $extra ;
 
     use_ok('IO::Compress::Base::Common');
-
-    #use_ok('Compress::Zlib::ParseParameters');
-
 }
-
 
 # Compress::Zlib::Common;
 
@@ -61,10 +56,27 @@ sub My::testParseParameters()
     like $@, mkErr("Parameter 'Fred' must be a signed int, got 'abc'"), 
             "wanted signed, got 'abc'";
 
-    my $got = ParseParameters(1, {'Fred' => [1, 1, Parse_store_ref, 0]}, Fred => 'abc') ;
-    is ${ $got->value('Fred') }, "abc", "Parse_store_ref" ;
+    eval { ParseParameters(1, {'Fred' => [1, 1, Parse_writable_scalar, 0]}, Fred => 'abc') ; };
+    like $@, mkErr("Parameter 'Fred' not writable"), 
+            "wanted writable, got readonly";
 
-    $got = ParseParameters(1, {'Fred' => [1, 1, 0x1000000, 0]}, Fred => 'abc') ;
+    my @xx;
+    eval { ParseParameters(1, {'Fred' => [1, 1, Parse_writable_scalar, 0]}, Fred => \@xx) ; };
+    like $@, mkErr("Parameter 'Fred' not a scalar reference"), 
+            "wanted scalar reference";
+
+    local *ABC;
+    eval { ParseParameters(1, {'Fred' => [1, 1, Parse_writable_scalar, 0]}, Fred => *ABC) ; };
+    like $@, mkErr("Parameter 'Fred' not a scalar"), 
+            "wanted scalar";
+
+    #eval { ParseParameters(1, {'Fred' => [1, 1, Parse_any|Parse_multiple, 0]}, Fred => 1, Fred => 2) ; };
+    #like $@, mkErr("Muliple instances of 'Fred' found"),
+        #"wanted scalar";
+
+    ok 1;
+
+    my $got = ParseParameters(1, {'Fred' => [1, 1, 0x1000000, 0]}, Fred => 'abc') ;
     is $got->value('Fred'), "abc", "other" ;
 
     $got = ParseParameters(1, {'Fred' => [0, 1, Parse_any, undef]}, Fred =>
@@ -76,6 +88,21 @@ undef) ;
 undef) ;
     ok $got->parsed('Fred'), "undef" ;
     is $got->value('Fred'), "", "empty string" ;
+
+    my $xx;
+    $got = ParseParameters(1, {'Fred' => [1, 1, Parse_writable_scalar, undef]}, Fred => $xx) ;
+
+    ok $got->parsed('Fred'), "parsed" ;
+    my $xx_ref = $got->value('Fred');
+    $$xx_ref = 77 ;
+    is $xx, 77;
+
+    $got = ParseParameters(1, {'Fred' => [1, 1, Parse_writable_scalar, undef]}, Fred => \$xx) ;
+
+    ok $got->parsed('Fred'), "parsed" ;
+    $xx_ref = $got->value('Fred');
+    $$xx_ref = 666 ;
+    is $xx, 666;
 
 }
 

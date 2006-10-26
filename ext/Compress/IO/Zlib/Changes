@@ -1,6 +1,28 @@
 CHANGES
 -------
 
+  2.000_14 26 October 2006
+
+      * IO::Uncompress::Deflate
+        Beefed up the magic signature check. Means less false positives
+        when auto-detecting the compression type.
+
+      * IO::Uncompress::UnZip
+        Tighten up the zip64 extra field processing to cope with the case
+        wheere only some of the local header fields are superceeded.
+
+      * IO::Uncompress::AnyInflate
+        Remove raw-deflate (RFC 1951) from the default list of compressors 
+        to check.
+        It can still be included if the new RawInflate parameter is
+        supplied.
+        This change was made because the only way to tell if content is 
+        raw-deflate is to attempt to uncompress it - a few false positives
+        have popped up recently, which suggests that auto-detecting raw 
+        deflate is far from perfect.
+        The equivalent change has been made to IO::Uncompress::AnyUncompress.
+        [Core patch #28445]
+
   2.000_13 20 June 2006
 
       * Preliminary support for reading zip files with zip64 members.

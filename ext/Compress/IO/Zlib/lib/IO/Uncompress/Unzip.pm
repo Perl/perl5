@@ -27,7 +27,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $UnzipError, %headerLookup);
 
-$VERSION = '2.000_13';
+$VERSION = '2.000_14';
 $UnzipError = '';
 
 @ISA    = qw(Exporter IO::Uncompress::RawInflate);
@@ -236,9 +236,10 @@ sub chkTrailer
 
         my $sig = unpack("V", $magic) ;
 
-        if ($headerLookup{$sig})
+        my $hdr;
+        if ($hdr = $headerLookup{$sig})
         {
-            if ($headerLookup{$sig}($self, $magic) != STATUS_OK ) {
+            if (&$hdr($self, $magic) != STATUS_OK ) {
                 if (*$self->{Strict}) {
                     return STATUS_ERROR ;
                 }
@@ -502,6 +503,12 @@ sub _readZipHeader($)
     return $self->HeaderError("Streamed Stored content not supported")
         if $streamingMode && $compressedMethod == 0 ;
 
+    return $self->HeaderError("Encrypted content not supported")
+        if $gpFlag & (ZIP_GP_FLAG_ENCRYPTED_MASK|ZIP_GP_FLAG_STRONG_ENCRYPTED_MASK);
+
+    return $self->HeaderError("Patch content not supported")
+        if $gpFlag & ZIP_GP_FLAG_PATCHED_MASK;
+
     *$self->{ZipData}{Streaming} = $streamingMode;
 
 
@@ -538,10 +545,28 @@ sub _readZipHeader($)
 
             my $buff = ${ $Extra{ZIP_EXTRA_ID_ZIP64()} };
 
-               $uncompressedLength   = U64::newUnpack_V64 substr($buff,  0, 8);
-               $compressedLength     = U64::newUnpack_V64 substr($buff,  8, 8);
-           #my $cheaderOffset        = U64::newUnpack_V64 substr($buff, 16, 8);
-           #my $diskNumber           = unpack ("V", substr($buff, 24, 4));
+            # TODO - This code assumes that all the fields in the Zip64
+            # extra field aren't necessarily present. The spec says that
+            # they only exist if the equivalent local headers are -1.
+            # Need to check that info-zip fills out -1 in the local header
+            # correctly.
+
+            if (! $streamingMode) {
+                my $offset = 0 ;
+
+                $uncompressedLength = U64::newUnpack_V64 substr($buff,  0, 8)
+                    if $uncompressedLength == 0xFFFF ;
+
+                $offset += 8 ;
+
+                $compressedLength = U64::newUnpack_V64 substr($buff, $offset, 8)
+                    if $compressedLength == 0xFFFF ;
+
+                $offset += 8 ;
+
+                #my $cheaderOffset = U64::newUnpack_V64 substr($buff, 16, 8);
+                #my $diskNumber = unpack ("V", substr($buff, 24, 4));
+           }
         }
     }
 
@@ -763,7 +788,6 @@ For writing zip files/buffers, see the companion module IO::Compress::Zip.
 
 
 
-
 =head1 Functional Interface
 
 A top-level function, C<unzip>, is provided to carry out
@@ -937,10 +961,40 @@ TODO
 
 =item C<< MultiStream => 0|1 >>
 
+
 If the input file/buffer contains multiple compressed data streams, this
 option will uncompress the whole lot as a single data stream.
 
 Defaults to 0.
+
+
+
+
+
+=item C<< TrailingData => $scalar >>
+
+Returns the data, if any, that is present immediately after the compressed
+data stream once uncompression is complete. 
+
+This option can be used when there is useful information immediately
+following the compressed data stream, and you don't know the length of the
+compressed data stream.
+
+If the input is a buffer, C<trailingData> will return everything from the
+end of the compressed data stream to the end of the buffer.
+
+If the input is a filehandle, C<trailingData> will return the data that is
+left in the filehandle input buffer once the end of the compressed data
+stream has been reached. You can then use the filehandle to read the rest
+of the input file. 
+
+Don't bother using C<trailingData> if the input is a filename.
+
+
+
+If you know the length of the compressed data stream before you start
+uncompressing, you can avoid having to use C<trailingData> by setting the
+C<InputLength> option.
 
 
 
@@ -1159,6 +1213,7 @@ The default for this option is off.
 
 
 
+
 =back
 
 =head2 Examples
@@ -1212,10 +1267,10 @@ Usage is
 
 Reads a single line. 
 
-This method fully supports the use of of the variable C<$/>
-(or C<$INPUT_RECORD_SEPARATOR> or C<$RS> when C<English> is in use) to
-determine what constitutes an end of line. Both paragraph mode and file
-slurp mode are supported. 
+This method fully supports the use of of the variable C<$/> (or
+C<$INPUT_RECORD_SEPARATOR> or C<$RS> when C<English> is in use) to
+determine what constitutes an end of line. Paragraph mode, record mode and
+file slurp mode are all supported. 
 
 
 =head2 getc
@@ -1395,8 +1450,8 @@ Usage is
     my $status = $z->nextStream();
 
 Skips to the next compressed data stream in the input file/buffer. If a new
-compressed data stream is found, the eof marker will be cleared, C<$.> will
-be reset to 0.
+compressed data stream is found, the eof marker will be cleared and C<$.>
+will be reset to 0.
 
 Returns 1 if a new stream was found, 0 if none was found, and -1 if an
 error was encountered.
@@ -1407,7 +1462,30 @@ Usage is
 
     my $data = $z->trailingData();
 
-Returns any data that 
+Returns the data, if any, that is present immediately after the compressed
+data stream once uncompression is complete. It only makes sense to call
+this method once the end of the compressed data stream has been
+encountered.
+
+This option can be used when there is useful information immediately
+following the compressed data stream, and you don't know the length of the
+compressed data stream.
+
+If the input is a buffer, C<trailingData> will return everything from the
+end of the compressed data stream to the end of the buffer.
+
+If the input is a filehandle, C<trailingData> will return the data that is
+left in the filehandle input buffer once the end of the compressed data
+stream has been reached. You can then use the filehandle to read the rest
+of the input file. 
+
+Don't bother using C<trailingData> if the input is a filename.
+
+
+
+If you know the length of the compressed data stream before you start
+uncompressing, you can avoid having to use C<trailingData> by setting the
+C<InputLength> option in the constructor.
 
 =head1 Importing 
 
@@ -1431,7 +1509,7 @@ Same as doing this
 
 =head1 SEE ALSO
 
-L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
+L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
 
 L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
 

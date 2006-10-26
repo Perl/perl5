@@ -1,6 +1,38 @@
 CHANGES
 -------
 
+  2.000_14 26 October 2006
+
+      * IO::Uncompress::Base
+        Added support for $/ in record mode
+
+      * IO::Uncompress::Base
+        The readline interface was substantially slower than the 1.x
+        equivalent. This has now been sorted. 
+        Thanks to Andreas J. Koenig for spotting the problem.
+
+      * IO::Uncompress::AnyUncompress
+        Added IO::Uncompress::Lzf to the list of supported uncompresors.
+
+      * IO::Uncompress::Base
+        Added TrailingData to one-shot interface.
+
+      * IO::Uncompress::AnyUncompress
+        Remove raw-deflate (RFC1951) from the default list of compressors 
+        to check.
+        It can still be included if the new RawInflate parameter is
+        supplied.
+        This change was made because the only way to tell if content is 
+        raw-deflate is to attempt to uncompress it - a few false positives
+        have popped up recently, which suggests that auto-detecting raw 
+        deflate is far from perfect.
+        The equivalent change has been made to IO::Uncompress::AnyInflate.
+        [Core patch #28445]
+
+      * Don't check that filehandles are writable. It would seem that 
+        "-w *STDOUT" on windows returns false. 
+        [Core Patch #28415]
+
   2.000_13 20 June 2006
 
       * Store compress & uncompressed sizes as 64-bit.

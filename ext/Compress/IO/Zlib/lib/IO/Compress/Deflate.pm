@@ -15,7 +15,7 @@ use IO::Compress::Base::Common qw(createSelfTiedObject);
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $DeflateError);
 
-$VERSION = '2.000_13';
+$VERSION = '2.000_14';
 $DeflateError = '';
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -248,6 +248,8 @@ data to files or buffer as defined in RFC 1950.
 
 
 
+
+
 For reading RFC 1950 files/buffers, see the companion module 
 L<IO::Uncompress::Inflate|IO::Uncompress::Inflate>.
 
@@ -422,6 +424,7 @@ Defaults to 0.
 =item C<< Append => 0|1 >>
 
 TODO
+
 
 
 =back
@@ -970,7 +973,7 @@ TODO
 
 =head1 SEE ALSO
 
-L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
+L<Compress::Zlib>, L<IO::Compress::Gzip>, L<IO::Uncompress::Gunzip>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
 
 L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
 

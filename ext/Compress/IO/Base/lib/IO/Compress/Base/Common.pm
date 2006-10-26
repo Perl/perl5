@@ -11,7 +11,7 @@ use File::GlobMapper;
 require Exporter;
 our ($VERSION, @ISA, @EXPORT, %EXPORT_TAGS);
 @ISA = qw(Exporter);
-$VERSION = '2.000_13';
+$VERSION = '2.000_14';
 
 @EXPORT = qw( isaFilehandle isaFilename whatIsInput whatIsOutput 
               isaFileGlobString cleanFileGlobString oneTarget
@@ -421,7 +421,7 @@ sub createSelfTiedObject
 $EXPORT_TAGS{Parse} = [qw( ParseParameters 
                            Parse_any Parse_unsigned Parse_signed 
                            Parse_boolean Parse_custom Parse_string
-                           Parse_store_ref
+                           Parse_multiple Parse_writable_scalar
                          )
                       ];              
 
@@ -434,7 +434,10 @@ use constant Parse_boolean  => 0x08;
 use constant Parse_string   => 0x10;
 use constant Parse_custom   => 0x12;
 
-use constant Parse_store_ref => 0x100 ;
+#use constant Parse_store_ref        => 0x100 ;
+use constant Parse_multiple         => 0x100 ;
+use constant Parse_writable         => 0x200 ;
+use constant Parse_writable_scalar  => 0x400 | Parse_writable ;
 
 use constant OFF_PARSED     => 0 ;
 use constant OFF_TYPE       => 1 ;
@@ -544,12 +547,16 @@ sub IO::Compress::Base::Parameters::parse
         $key = lc $key;
 
         if ($firstTime || ! $sticky) {
+            $x = [ $x ]
+                if $type & Parse_multiple;
+
             $got->{$key} = [0, $type, $value, $x, $first_only, $sticky] ;
         }
 
         $got->{$key}[OFF_PARSED] = 0 ;
     }
 
+    my %parsed = ();
     for my $i (0.. @entered / 2 - 1) {
         my $key = $entered[2* $i] ;
         my $value = $entered[2* $i+1] ;
@@ -564,12 +571,24 @@ sub IO::Compress::Base::Parameters::parse
                                   ! $got->{$canonkey}[OFF_FIRST_ONLY]  ))
         {
             my $type = $got->{$canonkey}[OFF_TYPE] ;
+            my $parsed = $parsed{$canonkey};
+            ++ $parsed{$canonkey};
+
+            return $self->setError("Muliple instances of '$key' found") 
+                if $parsed && $type & Parse_multiple == 0 ;
+
             my $s ;
             $self->_checkType($key, $value, $type, 1, \$s)
                 or return undef ;
-            #$value = $$value unless $type & Parse_store_ref ;
+
             $value = $$value ;
-            $got->{$canonkey} = [1, $type, $value, $s] ;
+            if ($type & Parse_multiple) {
+                $got->{$canonkey}[OFF_PARSED] = 1;
+                push @{ $got->{$canonkey}[OFF_FIXED] }, $s ;
+            }
+            else {
+                $got->{$canonkey} = [1, $type, $value, $s] ;
+            }
         }
         else
           { push (@Bad, $key) }
@@ -595,14 +614,38 @@ sub IO::Compress::Base::Parameters::_checkType
 
     #local $Carp::CarpLevel = $level ;
     #print "PARSE $type $key $value $validate $sub\n" ;
-    if ( $type & Parse_store_ref)
-    {
-        #$value = $$value
-        #    if ref ${ $value } ;
 
-        $$output = $value ;
+    if ($type & Parse_writable_scalar)
+    {
+        return $self->setError("Parameter '$key' not writable")
+            if $validate &&  readonly $$value ;
+
+        if (ref $$value) 
+        {
+            return $self->setError("Parameter '$key' not a scalar reference")
+                if $validate &&  ref $$value ne 'SCALAR' ;
+
+            $$output = $$value ;
+        }
+        else  
+        {
+            return $self->setError("Parameter '$key' not a scalar")
+                if $validate &&  ref $value ne 'SCALAR' ;
+
+            $$output = $value ;
+        }
+
         return 1;
     }
+
+#    if ($type & Parse_store_ref)
+#    {
+#        #$value = $$value
+#        #    if ref ${ $value } ;
+#
+#        $$output = $value ;
+#        return 1;
+#    }
 
     $value = $$value ;
 

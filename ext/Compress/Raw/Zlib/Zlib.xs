@@ -58,35 +58,11 @@
 #  define AT_LEAST_ZLIB_1_2_3
 #endif
 
-#if 0
+#define NEED_sv_2pvbyte
+#define NEED_sv_2pv_nolen
+#include "ppport.h"
 
-#  include "ppport.h"
-
-#else
-
-#  ifndef PERL_VERSION
-#    include "patchlevel.h"
-#    define PERL_REVISION       5
-#    define PERL_VERSION        PATCHLEVEL
-#    define PERL_SUBVERSION     SUBVERSION
-#  endif
-
-#  if PERL_REVISION == 5 && (PERL_VERSION < 4 || (PERL_VERSION == 4 && PERL_SUBVERSION <= 75 ))
-
-#      define PL_sv_undef       sv_undef
-#      define PL_na             na
-#      define PL_curcop         curcop
-#      define PL_compiling      compiling
-
-#  endif
-
-#  ifndef newSVuv
-#      define newSVuv   newSViv
-#  endif
-
-
-
-#  if PERL_REVISION == 5 && (PERL_VERSION < 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 4 ))
+#if PERL_REVISION == 5 && (PERL_VERSION < 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 4 ))
 
 #    ifdef SvPVbyte_force
 #        undef SvPVbyte_force
@@ -94,47 +70,15 @@
 
 #    define SvPVbyte_force(sv,lp) SvPV_force(sv,lp)
 
-#  endif
-
-#  ifndef SvPVbyte_nolen
-#    define SvPVbyte_nolen SvPV_nolen
-#  endif
-
-#  ifndef SvPVbyte
-#    define SvPVbyte SvPV
-#  endif
-
-#  ifndef dTHX
-#    define dTHX 
-#  endif
-
-#  ifndef SvPV_nolen
-
-#  define sv_2pv_nolen(a) my_sv_2pv_nolen(a)
-
-static char *
-my_sv_2pv_nolen(register SV *sv)
-{   
-  dTHX;
-  STRLEN n_a;
-  return sv_2pv(sv, &n_a);
-}
-
-
-/* SvPV_nolen depends on sv_2pv_nolen */
-#  define SvPV_nolen(sv) \
-          ((SvFLAGS(sv) & (SVf_POK)) == SVf_POK \
-           ? SvPVX(sv) : sv_2pv_nolen(sv))
-
-
-#  endif
-
-#  ifndef SvGETMAGIC
-#    define SvGETMAGIC(x)                  STMT_START { if (SvGMAGICAL(x)) mg_get(x); } STMT_END
-#  endif
-
 #endif
 
+#ifndef SvPVbyte_nolen
+#    define SvPVbyte_nolen SvPV_nolen
+#endif
+
+
+
+#if 0
 #  ifndef SvPVbyte_nolen
 #    define SvPVbyte_nolen SvPV_nolen
 #  endif
@@ -142,6 +86,7 @@ my_sv_2pv_nolen(register SV *sv)
 #  ifndef SvPVbyte_force
 #    define SvPVbyte_force(sv,lp) SvPV_force(sv,lp)
 #  endif
+#endif
 
 #if PERL_REVISION == 5 && (PERL_VERSION >= 8 || (PERL_VERSION == 8 && PERL_SUBVERSION < 4 ))
 #    define UTF8_AVAILABLE
@@ -160,7 +105,6 @@ typedef struct di_stream {
     uLong    adler32 ;
     z_stream stream;
     uLong     bufsize; 
-    uLong     bufinc; 
     SV *     dictionary ;
     uLong    dict_adler ;
     int      last_error ;
@@ -598,7 +542,6 @@ PostInitStream(s, flags, bufsize, windowBits)
 #endif
 {
     s->bufsize = bufsize ;
-    s->bufinc  = bufsize ;
     s->compressedBytes =
     s->uncompressedBytes =
     s->last_error = 0 ;
@@ -956,7 +899,9 @@ deflate (s, buf, output)
     uInt	increment = NO_INIT
     uInt	prefix    = NO_INIT
     int		RETVAL = 0;
+    uLong     bufinc = NO_INIT
   CODE:
+    bufinc = s->bufsize;
 
     /* If the input buffer is a reference, dereference it */
     buf = deRef(buf, "deflate") ;
@@ -1022,12 +967,12 @@ deflate (s, buf, output)
 
         if (s->stream.avail_out == 0) {
 	    /* out of space in the output buffer so make it bigger */
-            Sv_Grow(output, SvLEN(output) + s->bufinc) ;
+            Sv_Grow(output, SvLEN(output) + bufinc) ;
             cur_length += increment ;
             s->stream.next_out = (Bytef*) SvPVbyte_nolen(output) + cur_length ;
-            increment = s->bufinc ;
+            increment = bufinc ;
             s->stream.avail_out = increment;
-            s->bufinc *= 2 ;
+            bufinc *= 2 ;
         }
 
         RETVAL = deflate(&(s->stream), Z_NO_FLUSH);
@@ -1070,7 +1015,9 @@ flush(s, output, f=Z_FINISH)
     uInt	cur_length = NO_INIT
     uInt	increment = NO_INIT
     uInt	prefix    = NO_INIT
+    uLong     bufinc = NO_INIT
   CODE:
+    bufinc = s->bufsize;
   
     s->stream.avail_in = 0; /* should be zero already anyway */
   
@@ -1120,12 +1067,12 @@ flush(s, output, f=Z_FINISH)
     for (;;) {
         if (s->stream.avail_out == 0) {
 	    /* consumed all the available output, so extend it */
-            Sv_Grow(output, SvLEN(output) + s->bufinc) ;
+            Sv_Grow(output, SvLEN(output) + bufinc) ;
             cur_length += increment ;
             s->stream.next_out = (Bytef*) SvPVbyte_nolen(output) + cur_length ;
-            increment = s->bufinc ;
+            increment = bufinc ;
             s->stream.avail_out = increment;
-            s->bufinc *= 2 ;
+            bufinc *= 2 ;
         }
         RETVAL = deflate(&(s->stream), f);
     
@@ -1166,7 +1113,6 @@ _deflateParams(s, flags, level, strategy, bufsize)
 	    s->Strategy = strategy ;
         if (flags & 4) {
             s->bufsize = bufsize; 
-            s->bufinc  = bufsize; 
 	}
 	/* printf("After --  Level %d, Strategy %d, Bufsize %d\n", s->Level, s->Strategy, s->bufsize);*/
 #ifdef SETP_BYTE
@@ -1340,11 +1286,13 @@ inflate (s, buf, output, eof=FALSE)
     uInt	prefix_length = 0;
     uInt	increment = 0;
     STRLEN  stmp    = NO_INIT
+    uLong     bufinc = NO_INIT
   PREINIT:
 #ifdef UTF8_AVAILABLE    
     bool	out_utf8  = FALSE;
 #endif    
   CODE:
+    bufinc = s->bufsize;
     /* If the buffer is a reference, dereference it */
     buf = deRef(buf, "inflate") ;
 
@@ -1383,14 +1331,14 @@ inflate (s, buf, output, eof=FALSE)
     
     while (1) {
 
-        if (s->stream.avail_out == 0) {
+        if (s->stream.avail_out == 0 ) {
 	    /* out of space in the output buffer so make it bigger */
-            Sv_Grow(output, SvLEN(output) + s->bufinc) ;
+            Sv_Grow(output, SvLEN(output) + bufinc) ;
             cur_length += increment ;
             s->stream.next_out = (Bytef*) SvPVbyte_nolen(output) + cur_length ;
-            increment = s->bufinc ;
+            increment = bufinc ;
             s->stream.avail_out = increment;
-            s->bufinc *= 2 ;
+            bufinc *= 2 ; 
         }
 
         RETVAL = inflate(&(s->stream), Z_SYNC_FLUSH);
@@ -1426,12 +1374,12 @@ inflate (s, buf, output, eof=FALSE)
         s->stream.avail_in = 1;
         if (s->stream.avail_out == 0) {
 	    /* out of space in the output buffer so make it bigger */
-            Sv_Grow(output, SvLEN(output) + s->bufinc) ;
+            Sv_Grow(output, SvLEN(output) + bufinc) ;
             cur_length += increment ;
             s->stream.next_out = (Bytef*) SvPVbyte_nolen(output) + cur_length ;
-            increment = s->bufinc ;
+            increment = bufinc ;
             s->stream.avail_out = increment;
-            s->bufinc *= 2 ;
+            bufinc *= 2 ;
         }
         RETVAL = inflate(&(s->stream), Z_SYNC_FLUSH);
         s->stream.next_in = nextIn ;

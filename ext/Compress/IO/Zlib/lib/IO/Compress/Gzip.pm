@@ -27,7 +27,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $GzipError);
 
-$VERSION = '2.000_13';
+$VERSION = '2.000_14';
 $GzipError = '' ;
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -350,6 +350,8 @@ data to files or buffer as defined in RFC 1952.
 
 
 
+
+
 All the gzip headers defined in RFC 1952 can be created using
 this module.
 
@@ -541,6 +543,7 @@ Defaults to 0.
 =item C<< Append => 0|1 >>
 
 TODO
+
 
 
 =back
@@ -1285,7 +1288,7 @@ TODO
 
 =head1 SEE ALSO
 
-L<Compress::Zlib>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
+L<Compress::Zlib>, L<IO::Uncompress::Gunzip>, L<IO::Compress::Deflate>, L<IO::Uncompress::Inflate>, L<IO::Compress::RawDeflate>, L<IO::Uncompress::RawInflate>, L<IO::Compress::Bzip2>, L<IO::Uncompress::Bunzip2>, L<IO::Compress::Lzop>, L<IO::Uncompress::UnLzop>, L<IO::Compress::Lzf>, L<IO::Uncompress::UnLzf>, L<IO::Uncompress::AnyInflate>, L<IO::Uncompress::AnyUncompress>
 
 L<Compress::Zlib::FAQ|Compress::Zlib::FAQ>
 
