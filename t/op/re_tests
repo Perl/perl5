@@ -1147,3 +1147,36 @@ foo(?:aA|bB)?+b	foobBb	y	$&	foobBb
 ([^()]++|\([^()]*\))+	((abc(ade)ufh()()x	y	$&	abc(ade)ufh()()x
 round\(([^()]++)\)	_I(round(xs * sz),1)	y	$1	xs * sz
 
+(foo[1x]|bar[2x]|baz[3x])+y	foo1bar2baz3y	y	$1	baz3
+(foo[1x]|bar[2x]|baz[3x])+y	foo1bar2baz3y	y	$&	foo1bar2baz3y
+(foo[1x]|bar[2x]|baz[3x])*y	foo1bar2baz3y	y	$1	baz3
+(foo[1x]|bar[2x]|baz[3x])*y	foo1bar2baz3y	y	$&	foo1bar2baz3y
+
+([yX].|WORDS|[yX].|WORD)S	WORDS	y	$1	WORD
+(WORDS|WORLD|WORD)S	WORDS	y	$1	WORD
+([yX].|WORDS|WORD|[xY].)S	WORDS	y	$1	WORD
+(foo|fool|[zx].|money|parted)$	fool	y	$1	fool
+([zx].|foo|fool|[zq].|money|parted|[yx].)$	fool	y	$1	fool
+(foo|fool|[zx].|money|parted)$	fools	n	-	-
+([zx].|foo|fool|[qx].|money|parted|[py].)$	fools	n	-	-
+
+([yX].|WORDS|[yX].|WORD)+S	WORDS	y	$1	WORD
+(WORDS|WORLD|WORD)+S	WORDS	y	$1	WORD
+([yX].|WORDS|WORD|[xY].)+S	WORDS	y	$1	WORD
+(foo|fool|[zx].|money|parted)+$	fool	y	$1	fool
+([zx].|foo|fool|[zq].|money|parted|[yx].)+$	fool	y	$1	fool
+(foo|fool|[zx].|money|parted)+$	fools	n	-	-
+([zx].|foo|fool|[qx].|money|parted|[py].)+$	fools	n	-	-
+
+(x|y|z[QW])+(longish|loquatious|excessive|overblown[QW])+	xyzQzWlongishoverblownW	y	$1-$2	zW-overblownW
+(x|y|z[QW])*(longish|loquatious|excessive|overblown[QW])*	xyzQzWlongishoverblownW	y	$1-$2	zW-overblownW
+(x|y|z[QW]){1,5}(longish|loquatious|excessive|overblown[QW]){1,5}	xyzQzWlongishoverblownW	y	$1-$2	zW-overblownW
+
+(x|y|z[QW])++(longish|loquatious|excessive|overblown[QW])++	xyzQzWlongishoverblownW	y	$1-$2	zW-overblownW
+(x|y|z[QW])*+(longish|loquatious|excessive|overblown[QW])*+	xyzQzWlongishoverblownW	y	$1-$2	zW-overblownW
+(x|y|z[QW]){1,5}+(longish|loquatious|excessive|overblown[QW]){1,5}+	xyzQzWlongishoverblownW	y	$1-$2	zW-overblownW
+
+
+a*(?!)	aaaab	n	-	-
+a*(?FAIL)	aaaab	n	-	-
+a*(?F)	aaaab	n	-	-

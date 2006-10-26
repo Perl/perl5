@@ -227,9 +227,9 @@ typedef struct regmatch_state {
 	struct {
 	    reg_trie_accepted *accept_buff;
 	    U32		accepted; /* how many accepting states we have seen */
-	    U16         *jump;  /* negative offsets from B */
+	    U16         *jump;  /* positive offsets from me */
 	    regnode	*B;	/* node following the trie */
-	    regnode	*me;	/* only needed for debugging */
+	    regnode	*me;	/* Which node am I - needed for jump tries*/
 	} trie;
 
 	struct {

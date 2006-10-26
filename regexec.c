@@ -168,6 +168,7 @@ S_regcppush(pTHX_ I32 parenfloor)
 
 #define REGCP_OTHER_ELEMS 8
     SSGROW(paren_elems_to_push + REGCP_OTHER_ELEMS);
+    
     for (p = PL_regsize; p > parenfloor; p--) {
 /* REGCP_PARENS_ELEMS are pushed per pairs of parentheses. */
 	SSPUSHINT(PL_regendp[p]);
@@ -2763,13 +2764,8 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    	ST.accepted = 0; /* how many accepting states we have seen */
 		ST.B = next;
 		ST.jump = trie->jump;
-		
-#ifdef DEBUGGING
 		ST.me = scan;
-#endif
                 
-        	
-
 	        /*
         	   traverse the TRIE keeping track of all accepting states
         	   we transition through until we get to a failing node.
@@ -2894,10 +2890,10 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		locinput = PL_reginput;
 		nextchr = UCHARAT(locinput);
 		
-		if ( !ST.jump ) 
+		if ( !ST.jump || !ST.jump[ST.accept_buff[0].wordnum]) 
 		    scan = ST.B;
 		else
-		    scan = ST.B - ST.jump[ST.accept_buff[0].wordnum];
+		    scan = ST.me + ST.jump[ST.accept_buff[0].wordnum];
 		
 		continue; /* execute rest of RE */
 	    }
@@ -2943,9 +2939,9 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    SV ** const tmp = RX_DEBUG(reginfo->prog)
 				? av_fetch( trie->words, ST.accept_buff[ best ].wordnum - 1, 0 )
 				: NULL;
-		    regnode *nextop=!ST.jump ? 
+		    regnode *nextop=(!ST.jump || !ST.jump[ST.accept_buff[best].wordnum]) ? 
 		                    ST.B : 
-		                    ST.B - ST.jump[ST.accept_buff[best].wordnum];    
+		                    ST.me + ST.jump[ST.accept_buff[best].wordnum];    
 		    PerlIO_printf( Perl_debug_log, 
 		        "%*s  %strying alternation #%d <%s> at node #%d %s\n",
 			REPORT_CODE_OFF+depth*2, "", PL_colors[4],
@@ -2962,11 +2958,11 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 		    best = ST.accepted;
 		}
 		PL_reginput = (char *)ST.accept_buff[ best ].endpos;
-		if ( !ST.jump ) {
+		if ( !ST.jump || !ST.jump[ST.accept_buff[best].wordnum]) {
 		    PUSH_STATE_GOTO(TRIE_next, ST.B);
 		    /* NOTREACHED */
 		} else {
-		    PUSH_STATE_GOTO(TRIE_next, ST.B - ST.jump[ST.accept_buff[best].wordnum]);
+		    PUSH_STATE_GOTO(TRIE_next, ST.me + ST.jump[ST.accept_buff[best].wordnum]);
 		    /* NOTREACHED */
                 }
                 /* NOTREACHED */
@@ -3601,6 +3597,8 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    n = ARG(scan);  /* which paren pair */
 	    PL_regstartp[n] = PL_reg_start_tmp[n] - PL_bostr;
 	    PL_regendp[n] = locinput - PL_bostr;
+	    /*if (n > PL_regsize)
+		PL_regsize = n;*/
 	    if (n > (I32)*PL_reglastparen)
 		*PL_reglastparen = n;
 	    *PL_reglastcloseparen = n;
@@ -4484,7 +4482,6 @@ NULL
 
 #undef ST
 
-
 	case END:
 	    fake_end:
 	    if (cur_eval) {
@@ -4611,6 +4608,8 @@ NULL
 	    if (next == scan)
 		next = NULL;
 	    break;
+	case OPFAIL:
+	    sayNO;
 	default:
 	    PerlIO_printf(Perl_error_log, "%"UVxf" %d\n",
 			  PTR2UV(scan), OP(scan));

@@ -1174,7 +1174,7 @@ is the recommended Unicode-aware way of saying
     if ( noper_next < tail ) {                                  \
         if (!trie->jump)                                        \
             Newxz( trie->jump, word_count + 1, U16);            \
-        trie->jump[curword] = (U16)(tail - noper_next);         \
+        trie->jump[curword] = (U16)(noper_next - convert);      \
         if (!jumper)                                            \
             jumper = noper_next;                                \
         if (!nextbranch)                                        \
@@ -1225,6 +1225,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     U32 next_alloc = 0;
     regnode *jumper = NULL;
     regnode *nextbranch = NULL;
+    regnode *convert = NULL;
     /* we just use folder as a flag in utf8 */
     const U8 * const folder = ( flags == EXACTF
                        ? PL_fold
@@ -1273,6 +1274,16 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                   REG_NODE_NUM(last), REG_NODE_NUM(tail),
                   (int)depth);
     });
+   
+   /* Find the node we are going to overwrite */
+    if ( first == startbranch && OP( last ) != BRANCH ) {
+        /* whole branch chain */
+        convert = first;
+    } else {
+        /* branch sub-chain */
+        convert = NEXTOPER( first );
+    }
+        
     /*  -- First loop and Setup --
 
        We first traverse the branches and scan each word to determine if it
@@ -1770,7 +1781,6 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     );
 
     {   /* Modify the program and insert the new TRIE node*/ 
-        regnode *convert;
         U8 nodetype =(U8)(flags & 0xFF);
         char *str=NULL;
         
@@ -1788,23 +1798,22 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
            the whole branch sequence, including the first.
          */
         /* Find the node we are going to overwrite */
-        if ( first == startbranch && OP( last ) != BRANCH ) {
-            /* whole branch chain */
-            convert = first;
-            DEBUG_r({
-                const  regnode *nop = NEXTOPER( convert );
-                mjd_offset= Node_Offset((nop));
-                mjd_nodelen= Node_Length((nop));
-            });
-        } else {
+        if ( first != startbranch || OP( last ) == BRANCH ) {
             /* branch sub-chain */
-            convert = NEXTOPER( first );
             NEXT_OFF( first ) = (U16)(last - first);
             DEBUG_r({
                 mjd_offset= Node_Offset((convert));
                 mjd_nodelen= Node_Length((convert));
             });
+            /* whole branch chain */
+        } else {
+            DEBUG_r({
+                const  regnode *nop = NEXTOPER( convert );
+                mjd_offset= Node_Offset((nop));
+                mjd_nodelen= Node_Length((nop));
+            });
         }
+        
         DEBUG_OPTIMISE_r(
             PerlIO_printf(Perl_debug_log, "%*sMJD offset:%"UVuf" MJD length:%"UVuf"\n",
                 (int)depth * 2 + 2, "",
@@ -1917,7 +1926,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 	       jump[0], which is otherwise unused by the jump logic. 
 	       We use this when dumping a trie and during optimisation. */
 	    if (trie->jump) 
-	        trie->jump[0] = (U16)(tail - nextbranch);
+	        trie->jump[0] = (U16)(nextbranch - convert);
             
             /* XXXX */
             if ( !trie->states[trie->startstate].wordnum && trie->bitmap && 
@@ -2091,7 +2100,7 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
        SV * const mysv=sv_newmortal(); \
        regnode *Next = regnext(scan); \
        regprop(RExC_rx, mysv, scan); \
-       PerlIO_printf(Perl_debug_log, "%*s" str ">%3d: %s [%d]\n", \
+       PerlIO_printf(Perl_debug_log, "%*s" str ">%3d: %s (%d)\n", \
        (int)depth*2, "", REG_NODE_NUM(scan), SvPV_nolen_const(mysv),\
        Next ? (REG_NODE_NUM(Next)) : 0 ); \
    });
@@ -3483,6 +3492,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
             /* NOTE - There is similar code to this block above for handling
                BRANCH nodes on the initial study.  If you change stuff here 
                check there too. */
+            regnode *trie_node= scan;
             regnode *tail= regnext(scan);
             reg_trie_data *trie = (reg_trie_data*)RExC_rx->data->data[ ARG(scan) ];
             I32 max1 = 0, min1 = I32_MAX;
@@ -3523,8 +3533,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     
                     if (trie->jump[word]) {
                         if (!nextbranch)
-                            nextbranch = tail - trie->jump[0];
-                        scan= tail - trie->jump[word];
+                            nextbranch = trie_node + trie->jump[0];
+                        scan= trie_node + trie->jump[word];
                         /* We go from the jump point to the branch that follows
                            it. Note this means we need the vestigal unused branches
                            even though they arent otherwise used.
@@ -3855,7 +3865,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     r->paren_names = 0;
     
     if (RExC_seen & REG_SEEN_RECURSE) {
-        Newx(RExC_parens, RExC_npar,regnode *);
+        Newxz(RExC_parens, RExC_npar,regnode *);
         SAVEFREEPV(RExC_parens);
     }
 
@@ -4568,9 +4578,23 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		RExC_parse++;
 	    case '=':           /* (?=...) */
 	    case '!':           /* (?!...) */
+	        if (*RExC_parse == ')')
+	            goto do_op_fail;
 		RExC_seen_zerolen++;
 	    case ':':           /* (?:...) */
 	    case '>':           /* (?>...) */
+		break;
+            case 'F':
+                if (RExC_parse[0] == 'A' &&
+                    RExC_parse[1] == 'I' &&
+                    RExC_parse[2] == 'L')
+                    RExC_parse+=3;
+                if (*RExC_parse != ')')
+	            vFAIL("Sequence (?FAIL) or (?F) not terminated");
+	      do_op_fail:
+		ret = reg_node(pRExC_state, OPFAIL);
+	        nextchar(pRExC_state);
+	        return ret;
 		break;
 	    case '$':           /* (?$...) */
 	    case '@':           /* (?@...) */
@@ -4588,8 +4612,10 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    case 'R' :           /* (?R) */
 		if (*RExC_parse != ')')
 		    FAIL("Sequence (?R) not terminated");
-		reg_node(pRExC_state, SRECURSE);
-		break;           /* (?PARNO) */
+		ret = reg_node(pRExC_state, SRECURSE);
+		nextchar(pRExC_state);
+		return ret;
+		/*notreached*/
             { /* named and numeric backreferences */
                 I32 num;
                 char * parse_start;
@@ -8442,6 +8468,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	    DUMPUNTIL(NEXTOPER(node), next);
 	}
 	else if ( PL_regkind[(U8)op]  == TRIE ) {
+	    const regnode *this_trie = node;
 	    const char op = OP(node);
             const I32 n = ARG(node);
 	    const reg_ac_data * const ac = op>=AHOCORASICK ?
@@ -8462,18 +8489,19 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	                    PL_colors[0], PL_colors[1],
 	                    (SvUTF8(*elem_ptr) ? PERL_PV_ESCAPE_UNI : 0) |
 	                    PERL_PV_PRETTY_ELIPSES    |
-	                    PERL_PV_PRETTY_LTGT    
+	                    PERL_PV_PRETTY_LTGT
                             )
                             : "???"
                 );
                 if (trie->jump) {
-                    U16 dist= trie->jump[word_idx+1];
-                    PerlIO_printf(Perl_debug_log, "(%u)\n",(next - dist) - start);
+                    U16 dist = trie->jump[word_idx+1];
+		    PerlIO_printf(Perl_debug_log, "(%u)\n",
+			    (dist ? this_trie + dist : next) - start);
                     if (dist) {
                         if (!nextbranch)
-                            nextbranch= next - trie->jump[0];
-                        DUMPUNTIL(next - dist, nextbranch);
-                    } 
+			    nextbranch = this_trie + trie->jump[0];
+			DUMPUNTIL(this_trie + dist, nextbranch);
+                    }
                     if (nextbranch && PL_regkind[OP(nextbranch)]==BRANCH)
                         nextbranch= regnext((regnode *)nextbranch);
                 } else {

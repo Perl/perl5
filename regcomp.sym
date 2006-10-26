@@ -164,16 +164,19 @@ NREFF		NREF,    no-sv 1	Match already matched string, folded
 NREFFL		NREF,    no-sv 1	Match already matched string, folded in loc.
 
 
-#*Special conditionals 
+#*Special conditionals  (70..72)
 NGROUPP		NGROUPP,   no-sv 1	Whether the group matched.            
 RECURSEP	RECURSEP,  num 1 	Whether we are in a specific recurse.  
 DEFINEP		DEFINEP,   none 1 	Never execute directly.               
+
+#*Bactracking 
+OPFAIL		OPFAIL, none 		Same as (?!)
 
 # NEW STUFF ABOVE THIS LINE -- Please update counts below. 
 
 ################################################################################
 
-#*SPECIAL  REGOPS (70, 71)
+#*SPECIAL  REGOPS
 
 # This is not really a node, but an optimized away piece of a "long" node.
 # To simplify debugging output, we mark it as if it were a node
