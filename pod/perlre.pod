@@ -933,6 +933,15 @@ the same name, then it recurses to the leftmost.
 It is an error to refer to a name that is not declared somewhere in the
 pattern.
 
+=item C<(?FAIL)> C<(?F)>
+X<(?FAIL)> X<(?F)>
+
+This pattern matches nothing and always fails. It can be used to force the
+engine to backtrack. It is equivalent to C<(?!)>, but easier to read. In
+fact, C<(?!)> gets optimised into C<(?FAIL)> internally.
+
+It is probably useful only when combined with C<(?{})> or C<(??{})>.
+
 =item C<< (?>pattern) >>
 X<backtrack> X<backtracking> X<atomic> X<possessive>
 
