@@ -72,47 +72,47 @@ typedef struct _ithread {
 } ithread;
 
 
-/* Used by Perl interpreter for thread context switching */
 #define MY_CXT_KEY "threads::_guts" XS_VERSION
 
 typedef struct {
-    ithread *thread;
+    /* Used by Perl interpreter for thread context switching */
+    ithread *context;
 } my_cxt_t;
 
 START_MY_CXT
 
 /* Structure for 'main' thread
  * Also forms the 'base' for the doubly-linked list of threads */
-static ithread main_thread;
+STATIC ithread main_thread;
 
 /* Protects the creation and destruction of threads*/
-static perl_mutex create_destruct_mutex;
+STATIC perl_mutex create_destruct_mutex;
 
-static UV tid_counter = 1;
-static IV joinable_threads = 0;
-static IV running_threads = 0;
-static IV detached_threads = 0;
+STATIC UV tid_counter = 1;
+STATIC IV joinable_threads = 0;
+STATIC IV running_threads = 0;
+STATIC IV detached_threads = 0;
 #ifdef THREAD_CREATE_NEEDS_STACK
-static IV default_stack_size = THREAD_CREATE_NEEDS_STACK;
+STATIC IV default_stack_size = THREAD_CREATE_NEEDS_STACK;
 #else
-static IV default_stack_size = 0;
+STATIC IV default_stack_size = 0;
 #endif
-static IV page_size = 0;
+STATIC IV page_size = 0;
 
 
 /* Used by Perl interpreter for thread context switching */
-static void
+STATIC void
 S_ithread_set(pTHX_ ithread *thread)
 {
     dMY_CXT;
-    MY_CXT.thread = thread;
+    MY_CXT.context = thread;
 }
 
-static ithread *
+STATIC ithread *
 S_ithread_get(pTHX)
 {
     dMY_CXT;
-    return (MY_CXT.thread);
+    return (MY_CXT.context);
 }
 
 
@@ -120,7 +120,7 @@ S_ithread_get(pTHX)
  * structure.  This is a bit like undef on SVs, where the SV isn't freed,
  * but the PVX is.  Must be called with thread->mutex already held.
  */
-static void
+STATIC void
 S_ithread_clear(pTHX_ ithread *thread)
 {
     PerlInterpreter *interp;
@@ -148,7 +148,7 @@ S_ithread_clear(pTHX_ ithread *thread)
 
 
 /* Free an ithread structure and any attached data if its count == 0 */
-static void
+STATIC void
 S_ithread_destruct(pTHX_ ithread *thread)
 {
 #ifdef WIN32
@@ -196,7 +196,7 @@ S_ithread_destruct(pTHX_ ithread *thread)
 
 
 /* Warn if exiting with any unjoined threads */
-static int
+STATIC int
 S_exit_warning(pTHX)
 {
     int veto_cleanup;
@@ -279,8 +279,8 @@ MGVTBL ithread_vtbl = {
 
 
 /* Provided default, minimum and rational stack sizes */
-static IV
-good_stack_size(pTHX_ IV stack_size)
+STATIC IV
+S_good_stack_size(pTHX_ IV stack_size)
 {
     /* Use default stack size if no stack size specified */
     if (! stack_size) {
@@ -340,10 +340,10 @@ good_stack_size(pTHX_ IV stack_size)
  * Passed as the C level function to run in the new thread.
  */
 #ifdef WIN32
-static THREAD_RET_TYPE
+STATIC THREAD_RET_TYPE
 S_ithread_run(LPVOID arg)
 #else
-static void *
+STATIC void *
 S_ithread_run(void * arg)
 #endif
 {
@@ -490,8 +490,8 @@ S_ithread_run(void * arg)
 
 /* Type conversion helper functions */
 
-static SV *
-ithread_to_SV(pTHX_ SV *obj, ithread *thread, char *classname, bool inc)
+STATIC SV *
+S_ithread_to_SV(pTHX_ SV *obj, ithread *thread, char *classname, bool inc)
 {
     SV *sv;
     MAGIC *mg;
@@ -516,8 +516,8 @@ ithread_to_SV(pTHX_ SV *obj, ithread *thread, char *classname, bool inc)
     return (obj);
 }
 
-static ithread *
-SV_to_ithread(pTHX_ SV *sv)
+STATIC ithread *
+S_SV_to_ithread(pTHX_ SV *sv)
 {
     /* Argument is a thread */
     if (SvROK(sv)) {
@@ -532,7 +532,7 @@ SV_to_ithread(pTHX_ SV *sv)
  * Called in context of parent thread.
  * Called with create_destruct_mutex locked.  (Unlocked on error.)
  */
-static ithread *
+STATIC ithread *
 S_ithread_create(
         pTHX_ SV *init_function,
         IV        stack_size,
@@ -576,7 +576,7 @@ S_ithread_create(
     MUTEX_LOCK(&thread->mutex);
 
     thread->tid = tid_counter++;
-    thread->stack_size = good_stack_size(aTHX_ stack_size);
+    thread->stack_size = S_good_stack_size(aTHX_ stack_size);
     thread->gimme = gimme;
     thread->state = exit_opt;
 
@@ -666,9 +666,9 @@ S_ithread_create(
                                   &thread->thr);
 #else
     {
-        static pthread_attr_t attr;
-        static int attr_inited = 0;
-        static int attr_joinable = PTHREAD_CREATE_JOINABLE;
+        STATIC pthread_attr_t attr;
+        STATIC int attr_inited = 0;
+        STATIC int attr_joinable = PTHREAD_CREATE_JOINABLE;
         if (! attr_inited) {
             pthread_attr_init(&attr);
             attr_inited = 1;
@@ -878,7 +878,7 @@ ithread_create(...)
         if (! thread) {
             XSRETURN_UNDEF;     /* Mutex already unlocked */
         }
-        ST(0) = sv_2mortal(ithread_to_SV(aTHX_ Nullsv, thread, classname, FALSE));
+        ST(0) = sv_2mortal(S_ithread_to_SV(aTHX_ Nullsv, thread, classname, FALSE));
 
         /* Let thread run */
         MUTEX_UNLOCK(&thread->mutex);
@@ -936,7 +936,7 @@ ithread_list(...)
 
             /* Push object on stack if list context */
             if (list_context) {
-                XPUSHs(sv_2mortal(ithread_to_SV(aTHX_ Nullsv, thread, classname, TRUE)));
+                XPUSHs(sv_2mortal(S_ithread_to_SV(aTHX_ Nullsv, thread, classname, TRUE)));
             }
             count++;
         }
@@ -961,7 +961,7 @@ ithread_self(...)
 
         thread = S_ithread_get(aTHX);
 
-        ST(0) = sv_2mortal(ithread_to_SV(aTHX_ Nullsv, thread, classname, TRUE));
+        ST(0) = sv_2mortal(S_ithread_to_SV(aTHX_ Nullsv, thread, classname, TRUE));
         /* XSRETURN(1); - implied */
 
 
@@ -970,7 +970,7 @@ ithread_tid(...)
     PREINIT:
         ithread *thread;
     CODE:
-        thread = SV_to_ithread(aTHX_ ST(0));
+        thread = S_SV_to_ithread(aTHX_ ST(0));
         XST_mUV(0, thread->tid);
         /* XSRETURN(1); - implied */
 
@@ -995,7 +995,7 @@ ithread_join(...)
         }
 
         /* Check if the thread is joinable */
-        thread = SV_to_ithread(aTHX_ ST(0));
+        thread = S_SV_to_ithread(aTHX_ ST(0));
         join_err = (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED));
         if (join_err) {
             if (join_err & PERL_ITHR_DETACHED) {
@@ -1082,7 +1082,7 @@ ithread_detach(...)
         int cleanup;
     CODE:
         /* Check if the thread is detachable */
-        thread = SV_to_ithread(aTHX_ ST(0));
+        thread = S_SV_to_ithread(aTHX_ ST(0));
         if ((detach_err = (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)))) {
             if (detach_err & PERL_ITHR_DETACHED) {
                 Perl_croak(aTHX_ "Thread already detached");
@@ -1148,7 +1148,7 @@ ithread_kill(...)
         }
 
         /* Set the signal for the thread */
-        thread = SV_to_ithread(aTHX_ ST(0));
+        thread = S_SV_to_ithread(aTHX_ ST(0));
         MUTEX_LOCK(&thread->mutex);
         if (thread->interp) {
             dTHXa(thread->interp);
@@ -1220,7 +1220,7 @@ ithread_object(...)
                 /* Ignore if detached or joined */
                 if (! (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED))) {
                     /* Put object on stack */
-                    ST(0) = sv_2mortal(ithread_to_SV(aTHX_ Nullsv, thread, classname, TRUE));
+                    ST(0) = sv_2mortal(S_ithread_to_SV(aTHX_ Nullsv, thread, classname, TRUE));
                     have_obj = 1;
                 }
                 break;
@@ -1239,7 +1239,7 @@ ithread__handle(...);
     PREINIT:
         ithread *thread;
     CODE:
-        thread = SV_to_ithread(aTHX_ ST(0));
+        thread = S_SV_to_ithread(aTHX_ ST(0));
 #ifdef WIN32
         XST_mUV(0, PTR2UV(&thread->handle));
 #else
@@ -1278,7 +1278,7 @@ ithread_set_stack_size(...)
         }
 
         old_size = default_stack_size;
-        default_stack_size = good_stack_size(aTHX_ SvIV(ST(1)));
+        default_stack_size = S_good_stack_size(aTHX_ SvIV(ST(1)));
         XST_mIV(0, old_size);
         /* XSRETURN(1); - implied */
 
@@ -1303,7 +1303,7 @@ ithread_is_detached(...)
     PREINIT:
         ithread *thread;
     CODE:
-        thread = SV_to_ithread(aTHX_ ST(0));
+        thread = S_SV_to_ithread(aTHX_ ST(0));
         ST(0) = (thread->state & PERL_ITHR_DETACHED) ? &PL_sv_yes : &PL_sv_no;
         /* XSRETURN(1); - implied */
 
@@ -1332,7 +1332,7 @@ ithread_wantarray(...)
     PREINIT:
         ithread *thread;
     CODE:
-        thread = SV_to_ithread(aTHX_ ST(0));
+        thread = S_SV_to_ithread(aTHX_ ST(0));
         ST(0) = (thread->gimme & G_ARRAY) ? &PL_sv_yes :
                 (thread->gimme & G_VOID)  ? &PL_sv_undef
                            /* G_SCALAR */ : &PL_sv_no;
@@ -1347,7 +1347,7 @@ ithread_set_thread_exit_only(...)
         if (items != 2) {
             Perl_croak(aTHX_ "Usage: ->set_thread_exit_only(boolean)");
         }
-        thread = SV_to_ithread(aTHX_ ST(0));
+        thread = S_SV_to_ithread(aTHX_ ST(0));
         MUTEX_LOCK(&thread->mutex);
         if (SvTRUE(ST(1))) {
             thread->state |= PERL_ITHR_THREAD_EXIT_ONLY;
