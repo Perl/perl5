@@ -5258,8 +5258,9 @@ typedef struct am_table_short AMTS;
 /*
  * Boilerplate macros for initializing and accessing interpreter-local
  * data from C.  All statics in extensions should be reworked to use
- * this, if you want to make the extension thread-safe.  See ext/re/re.xs
- * for an example of the use of these macros, and perlxs.pod for more.
+ * this, if you want to make the extension thread-safe.  See
+ * ext/XS/APItest/APItest.xs for an example of the use of these macros,
+ * and perlxs.pod for more.
  *
  * Code that uses these macros is responsible for the following:
  * 1. #define MY_CXT_KEY to a unique string, e.g.
