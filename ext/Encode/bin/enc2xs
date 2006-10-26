@@ -1192,7 +1192,7 @@ Encode uses the Unicode Character Map (UCM) format for source character
 mappings.  This format is used by IBM's ICU package and was adopted
 by Nick Ing-Simmons for use with the Encode module.  Since UCM is
 more flexible than Tcl's Encoding Map and far more user-friendly,
-this is the recommended formet for Encode now.
+this is the recommended format for Encode now.
 
 A UCM file looks like this.
 
