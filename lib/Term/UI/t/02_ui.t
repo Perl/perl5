@@ -20,7 +20,7 @@ if( $ENV{PERL_CORE} ) {
     close *STDOUT;
     open *STDOUT, ">termui.$$" or diag("Could not open tempfile");
 }
-END { unlink "termui.$$" if $ENV{PERL_CORE} }
+END { close *STDOUT && unlink "termui.$$" if $ENV{PERL_CORE} }
 
 
 ### so T::RL doesn't go nuts over no console
