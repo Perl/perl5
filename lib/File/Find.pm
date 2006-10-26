@@ -56,7 +56,7 @@ C<&wanted> function on each file or subdirectory in the directory.
   finddepth(\&wanted,  @directories);
   finddepth(\%options, @directories);
 
-C<finddepth()> works just like C<find()> except that is invokes the
+C<finddepth()> works just like C<find()> except that it invokes the
 C<&wanted> function for a directory I<after> invoking it for the
 directory's contents.  It does a postorder traversal instead of a
 preorder traversal, working from the bottom of the directory tree up
