@@ -3542,6 +3542,7 @@ t/pod/nested_seqs.t		Test nested interior sequences
 t/pod/nested_seqs.xr		Expected results for nested_seqs.t
 t/pod/oneline_cmds.t		Test single paragraph ==cmds
 t/pod/oneline_cmds.xr		Expected results for oneline_cmds.t
+t/pod/p2u_data.pl		Test Pod::Usage
 t/pod/plainer.t			Test Pod::Plainer
 t/pod/pod2usage2.t		Test Pod::Usage
 t/pod/pod2usage.t		Test Pod::Usage
@@ -3556,6 +3557,7 @@ t/pod/testcmp.pl		Module to compare output against expected results
 t/pod/testp2pt.pl		Module to test Pod::PlainText for a given file
 t/pod/testpchk.pl		Module to test Pod::Checker for a given file
 t/pod/testpods/lib/Pod/Stuff.pm			Sample data for find.t
+t/pod/twice.t			Test Pod::Parser
 t/README			Instructions for regression tests
 t/run/exit.t			Test perl's exit status.
 t/run/fresh_perl.t		Tests that require a fresh perl.

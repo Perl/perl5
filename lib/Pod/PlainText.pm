@@ -303,6 +303,23 @@ sub cmd_head2 {
     }
 }
 
+# third level heading - not strictly perlpodspec compliant
+sub cmd_head3 {
+    my $self = shift;
+    local $_ = shift;
+    s/\s+$//;
+    $_ = $self->interpolate ($_, shift);
+    if ($$self{alt}) {
+        $self->output ("\n= $_ =\n");
+    } else {
+        $self->output (' ' x ($$self{indent}) . $_ . "\n");
+    }
+}
+
+# fourth level heading - not strictly perlpodspec compliant
+# just like head3
+*cmd_head4 = \&cmd_head3;
+
 # Start a list.
 sub cmd_over {
     my $self = shift;
