@@ -2,7 +2,7 @@ package Attribute::Handlers;
 use 5.006;
 use Carp;
 use warnings;
-$VERSION = '0.78_02';
+$VERSION = '0.78_03';
 # $DB::single=1;
 
 my %symcache;
@@ -291,7 +291,8 @@ and subroutines subsequently defined in that package, or in packages
 derived from that package may be given attributes with the same names as
 the attribute handler subroutines, which will then be called in one of
 the compilation phases (i.e. in a C<BEGIN>, C<CHECK>, C<INIT>, or C<END>
-block).
+block). (C<UNITCHECK> blocks don't correspond to a global compilation
+phase, so they can't be specified here.)
 
 To create a handler, define it as a subroutine with the same name as
 the desired attribute, and declare the subroutine itself with the  
