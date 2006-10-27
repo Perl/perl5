@@ -1439,8 +1439,14 @@ PerlIO_layer_from_ref(pTHX_ SV *sv)
     /*
      * For any scalar type load the handler which is bundled with perl
      */
-    if (SvTYPE(sv) < SVt_PVAV)
-	return PerlIO_find_layer(aTHX_ STR_WITH_LEN("scalar"), 1);
+    if (SvTYPE(sv) < SVt_PVAV) {
+	PerlIO_funcs *f = PerlIO_find_layer(aTHX_ STR_WITH_LEN("scalar"), 1);
+	/* This isn't supposed to happen, since PerlIO::scalar is core,
+	 * but could happen anyway in smaller installs or with PAR */
+	if (!f && ckWARN(WARN_LAYER))
+	    Perl_warner(aTHX_ packWARN(WARN_LAYER), "Unknown PerlIO layer \"scalar\"");
+	return f;
+    }
 
     /*
      * For other types allow if layer is known but don't try and load it
@@ -5014,16 +5020,9 @@ PerlIO_tmpfile(void)
 #    else	/* !HAS_MKSTEMP, fallback to stdio tmpfile(). */
      FILE * const stdio = PerlSIO_tmpfile();
 
-     if (stdio) {
-	  if ((f = PerlIO_push(aTHX_(PerlIO_allocate(aTHX)),
-                               PERLIO_FUNCS_CAST(&PerlIO_stdio),
-			       "w+", NULL))) {
-	       PerlIOStdio * const s = PerlIOSelf(f, PerlIOStdio);
+     if (stdio)
+	  f = PerlIO_fdopen(fileno(stdio), "w+");
 
-               if (s)
-                    s->stdio = stdio;
-          }
-     }
 #    endif /* else HAS_MKSTEMP */
 #endif /* else WIN32 */
      return f;
