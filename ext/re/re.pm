@@ -32,7 +32,7 @@ re - Perl pragma to alter regular expression behaviour
 
     use re qw(Debug All);          # Finer tuned debugging options.
     use re qw(Debug More);         
-    no re qw(Debug ALL);           # Turn of all re dugging in this scope
+    no re qw(Debug ALL);           # Turn of all re debugging in this scope
 
 (We use $^X in these examples because it's tainted by default.)
 
@@ -154,10 +154,10 @@ and TRIE_COMPILE.
 =item OFFSETS_DEBUG
 
 Enable debugging of offsets information. This emits copious
-amounts of trace information and doesnt mesh well with other
+amounts of trace information and doesn't mesh well with other
 debug options.
 
-Almost definately only useful to people hacking
+Almost definitely only useful to people hacking
 on the offsets part of the debug engine.
 
 =back
@@ -174,7 +174,7 @@ Enable all compile and execute options at once.
 
 =item All
 
-Enable DUMP and all execute options. Equivelent to:
+Enable DUMP and all execute options. Equivalent to:
 
   use re 'debug';
 
