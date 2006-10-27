@@ -9148,7 +9148,8 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 		if (has_precis) {
 		    if (precis > elen)
 			zeros = precis - elen;
-		    else if (precis == 0 && elen == 1 && *eptr == '0')
+		    else if (precis == 0 && elen == 1 && *eptr == '0'
+			     && !(base == 8 && alt)) /* "%#.0o" prints "0" */
 			elen = 0;
 
 		/* a precision nullifies the 0 flag. */
