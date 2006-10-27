@@ -1,5 +1,9 @@
 Revision history for Perl extension threads.
 
+1.46 Fri Oct 27 19:51:48 EST 2006
+	- Support multiple embedded Perls
+	- Document workaround for non-threadsafe modules
+
 1.45 Wed Oct 25 14:22:23 EDT 2006
 	- Makefile.PL changes for CORE
 	- Updated POD tests

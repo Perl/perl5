@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.45';
+our $VERSION = '1.46';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -133,7 +133,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.45
+This document describes threads version 1.46
 
 =head1 SYNOPSIS
 
@@ -336,10 +336,10 @@ If you add the C<stringify> import option to your C<use threads> declaration,
 then using a threads object in a string or a string context (e.g., as a hash
 key) will cause its ID to be used as the value:
 
- use threads qw(stringify);
+    use threads qw(stringify);
 
- my $thr = threads->create(...);
- print("Thread $thr started...\n");  # Prints out: Thread 1 started...
+    my $thr = threads->create(...);
+    print("Thread $thr started...\n");  # Prints out: Thread 1 started...
 
 =item threads->object($tid)
 
@@ -835,7 +835,44 @@ specified signal being used in a C<-E<gt>kill()> call.
 
 =back
 
+=head1 LIMITATIONS
+
+=over
+
+=item Using non-threadsafe modules
+
+Unfortunately, you may encounter Perl modules are not I<threadsafe>.  For
+example, they may crash the Perl interpreter during execution, or may dump
+core on termination.  Depending on the module and the requirements of your
+application, it may be possible to work around such difficulties.
+
+If the module will only be used inside a thread, you can try loading the
+module from inside the thread entry point function using C<require> (and
+C<import> if needed):
+
+    sub thr_func
+    {
+        require Unsafe::Module
+        # import Unsafe::Module ...;
+
+        ....
+    }
+
+If the module will only be used inside the I<main> thread, try modifying your
+application so that the module is loaded (again using C<require> and C<import>)
+after any threads are started, and in such a way that no other threads are
+started afterwards.
+
+If the above does not work, or is not adequate for your application, then file
+a bug report on L<http://rt.cpan.org/Public/> against the problematic module.
+
+=back
+
 =head1 BUGS
+
+Before you consider posting a bug report, please consult, and possibly post a
+message to the discussion forum to see if what you've encountered is a known
+problem.
 
 =over
 
@@ -889,10 +926,6 @@ versions of Perl contain bugs that may manifest themselves despite using the
 latest version of L<threads> from CPAN.  There is no workaround for this other
 than upgrading to the lastest version of Perl.
 
-(Before you consider posting a bug report, please consult, and possibly post a
-message to the discussion forum to see if what you've encountered is a known
-problem.)
-
 =back
 
 =head1 REQUIREMENTS
@@ -905,7 +938,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.45/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.46/threads.pm>
 
 L<threads::shared>, L<perlthrtut>
 
