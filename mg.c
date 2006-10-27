@@ -2304,11 +2304,16 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 		        accumulate |= ptr[i] ;
 		        any_fatals |= (ptr[i] & 0xAA) ;
 		    }
-		    if (!accumulate)
-	                PL_compiling.cop_warnings = pWARN_NONE;
+		    if (!accumulate) {
+		        if (!specialWARN(PL_compiling.cop_warnings))
+			    PerlMemShared_free(PL_compiling.cop_warnings);
+			PL_compiling.cop_warnings = pWARN_NONE;
+		    }
 		    /* Yuck. I can't see how to abstract this:  */
 		    else if (isWARN_on(((STRLEN *)SvPV_nolen_const(sv)) - 1,
 				       WARN_ALL) && !any_fatals) {
+			if (!specialWARN(PL_compiling.cop_warnings))
+			    PerlMemShared_free(PL_compiling.cop_warnings);
 	                PL_compiling.cop_warnings = pWARN_ALL;
 	                PL_dowarn |= G_WARN_ONCE ;
 	            }
