@@ -86,7 +86,7 @@ L<http://www.rainer-keuchel.de/wince/dirlist.html>
 Normally you only need to edit C<./win32/ce-helpers/compile.bat>
 to reflect your system and run it.
 
-File C<./wince/compile.bat> is actually a wrapper to call
+File C<./win32/ce-helpers/compile.bat> is actually a wrapper to call
 C<nmake -f makefile.ce> with appropriate parameters and it accepts extra
 parameters and forwards them to C<nmake> command as additional
 arguments. You should pass target this way.
@@ -97,7 +97,7 @@ To prepare distribution you need to do following:
 
 =item * go to C<./win32> subdirectory
 
-=item * edit file C<compile.bat>
+=item * edit file C<./win32/ce-helpers/compile.bat>
 
 =item * run 
   compile.bat

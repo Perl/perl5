@@ -747,10 +747,10 @@ $(EXTDIR)\DynaLoader\dl_win32.xs: dl_win32.xs
 	$(COPY) dl_win32.xs $(EXTDIR)\DynaLoader\dl_win32.xs
 
 MakePPPort: $(MINIPERL) $(CONFIGPM)
-	$(MINIPERL) -I..\lib ..\mkppport
+	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) ..\mkppport
 
 MakePPPort_clean:
-	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\mkppport --clean
+	-if exist $(HPERL) $(HPERL) -I..\lib ..\mkppport --clean
 
 #----------------------------------------------------------------------------------
 NOT_COMPILE_EXT =
