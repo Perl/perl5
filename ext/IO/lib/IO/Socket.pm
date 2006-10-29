@@ -23,7 +23,7 @@ require IO::Socket::UNIX if ($^O ne 'epoc' && $^O ne 'symbian');
 
 @ISA = qw(IO::Handle);
 
-$VERSION = "1.29";
+$VERSION = "1.30";
 
 @EXPORT_OK = qw(sockatmark);
 
@@ -141,6 +141,13 @@ sub connect {
     $err ? undef : $sock;
 }
 
+sub close {
+    @_ == 1 or croak 'usage: $sock->close()';
+    my $sock = shift;
+    ${*$sock}{'io_socket_peername'} = undef;
+    $sock->SUPER::close();
+}
+
 sub bind {
     @_ == 2 or croak 'usage: $sock->bind(NAME)';
     my $sock = shift;
@@ -195,9 +202,7 @@ sub sockname {
 sub peername {
     @_ == 1 or croak 'usage: $sock->peername()';
     my($sock) = @_;
-    getpeername($sock)
-      || ${*$sock}{'io_socket_peername'}
-      || undef;
+    ${*$sock}{'io_socket_peername'} ||= getpeername($sock);
 }
 
 sub connected {
@@ -239,11 +244,12 @@ sub recv {
 sub shutdown {
     @_ == 2 or croak 'usage: $sock->shutdown(HOW)';
     my($sock, $how) = @_;
+    ${*$sock}{'io_socket_peername'} = undef;
     shutdown($sock, $how);
 }
 
 sub setsockopt {
-    @_ == 4 or croak '$sock->setsockopt(LEVEL, OPTNAME)';
+    @_ == 4 or croak '$sock->setsockopt(LEVEL, OPTNAME, OPTVAL)';
     setsockopt($_[0],$_[1],$_[2],$_[3]);
 }
 

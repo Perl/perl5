@@ -10,21 +10,19 @@ BEGIN {
 use Config;
 
 BEGIN {
-    if(-d "lib" && -f "TEST") {
-	my $reason;
-	if (! $Config{'d_fork'}) {
-	    $reason = 'no fork';
-	}
-	elsif ($Config{'extensions'} !~ /\bSocket\b/) {
-	    $reason = 'Socket extension unavailable';
-	}
-	elsif ($Config{'extensions'} !~ /\bIO\b/) {
-	    $reason = 'IO extension unavailable';
-	}
-	if ($reason) {
-	    print "1..0 # Skip: $reason\n";
-	    exit 0;
-        }
+    my $reason;
+    if ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bSocket\b/) {
+	$reason = 'Socket extension unavailable';
+    }
+    elsif ($ENV{PERL_CORE} and $Config{'extensions'} !~ /\bIO\b/) {
+	$reason = 'IO extension unavailable';
+    }
+    elsif (! $Config{'d_fork'}) {
+	$reason = 'no fork';
+    }
+    if ($reason) {
+	print "1..0 # Skip: $reason\n";
+	exit 0;
     }
 }
 
