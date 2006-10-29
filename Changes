@@ -16664,7 +16664,7 @@ ____________________________________________________________________________
 ____________________________________________________________________________
 [ 26427] By: nicholas                              on 2005/12/20  20:13:12
         Log: Take care in toke.c not to convert constant subroutine reference
-             proxies into full blow PVGVs with PVCVs, and recognise them and inline
+             proxies into full blown PVGVs with PVCVs, and recognise them and inline
              their values. Adds a new function gv_const_sv(gv) to return the value
              of the constant subroutine from a GV, and adds a cv parameter to
              S_intuit_method.
