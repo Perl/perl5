@@ -427,9 +427,7 @@ PERL_CALLCONV char*	Perl_instr(pTHX_ const char* big, const char* little)
 			__attribute__warn_unused_result__
 			__attribute__pure__;
 
-PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, bool not_implicit)
-			__attribute__warn_unused_result__;
-
+PERL_CALLCONV bool	Perl_io_close(pTHX_ IO* io, bool not_implicit);
 PERL_CALLCONV OP*	Perl_invert(pTHX_ OP* cmd)
 			__attribute__warn_unused_result__;
 
