@@ -514,10 +514,7 @@ sub getRendering {
 	}
 	# set walk-output b4 compiling, which writes 'announce' line
 	walk_output(\$rendering);
-	if ($tc->{fail}) {
-	    fail("forced failure: stdout follows");
-	    walk_output(\*STDOUT);
-	}
+
 	my $opwalker = B::Concise::compile(@opts, $code);
 	die "bad BC::compile retval" unless ref $opwalker eq 'CODE';
 
@@ -662,19 +659,13 @@ sub mkCheckRex {
     }
     $tc->{wantstr} = $str;
 
-    # convert all (args) and [args] to temp forms wo bracing
-    $str =~ s/\[(.*?)\]/__CAPSQR$1__/msg;
-    $str =~ s/\((.*?)\)/__CAPRND$1__/msg;
-    $str =~ s/\((.*?)\)/__CAPRND$1__/msg; # nested () in nextstate
-    
+    # make targ args wild
+    $str =~ s/\[t\d+\]/[t\\d+]/msg;
+
     # escape bracing, etc.. manual \Q (doesnt escape '+')
     $str =~ s/([\[\]()*.\$\@\#\|{}])/\\$1/msg;
+    # $str =~ s/(?<!\\)([\[\]\(\)*.\$\@\#\|{}])/\\$1/msg;
 
-    # now replace temp forms with original, preserving reference bracing 
-    $str =~ s/__CAPSQR(.*?)__\b/\\[$1\\]/msg; # \b is important
-    $str =~ s/__CAPRND(.*?)__\b/\\($1\\)/msg;
-    $str =~ s/__CAPRND(.*?)__\b/\\($1\\)/msg; # nested () in nextstate
-    
     # treat dbstate like nextstate (no in-debugger false reports)
     $str =~ s/(?:next|db)state(\\\(.*?\\\))/(?:next|db)state(.*?)/msg;
     # widened for -terse mode
@@ -690,14 +681,9 @@ sub mkCheckRex {
     $str =~ s/leavesub \[\d\]/leavesub [\\d]/msg;	# for -terse
     #$str =~ s/(\s*)\n/\n/msg;				# trailing spaces
     
-    # these fix up pad-slot assignment args
-    if ($] < 5.009 or $tc->{cross}) {
-	$str =~ s/\[t\d+\\]/\[t\\d+\\]/msg;	# pad slot assignments
-    }
-
     croak "no reftext found for $want: $tc->{name}"
 	unless $str =~ /\w+/; # fail unless a real test
-
+    
     # $str = '.*'	if 1;	# sanity test
     # $str .= 'FAIL'	if 1;	# sanity test
 
