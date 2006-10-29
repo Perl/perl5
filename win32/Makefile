@@ -1296,6 +1296,17 @@ test-reonly : reonly utils
 	cd ..\t
 	$(PERLEXE) -I..\lib harness $(OPT) -re \bpat\b \breg \bre\b $(EXTRA)
 	cd ..\win32
+
+regen :
+	cd ..
+	regen.pl
+	cd win32
+
+regnodes :
+	cd ..
+	regcomp.pl
+	cd win32
+
 	
 test-notty : test-prep
 	set PERL_SKIP_TTY_TEST=1
