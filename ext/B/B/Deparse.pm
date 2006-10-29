@@ -1738,7 +1738,7 @@ sub pp_require {
 
 sub pp_scalar {
     my $self = shift;
-    my($op, $cv) = @_;
+    my($op, $cx) = @_;
     my $kid = $op->first;
     if (not null $kid->sibling) {
 	# XXX Was a here-doc
@@ -1756,7 +1756,7 @@ sub padval {
 
 sub anon_hash_or_list {
     my $self = shift;
-    my $op = shift;
+    my($op, $cx) = @_;
 
     my($pre, $post) = @{{"anonlist" => ["[","]"],
 			 "anonhash" => ["{","}"]}->{$op->name}};
@@ -1766,13 +1766,18 @@ sub anon_hash_or_list {
 	$expr = $self->deparse($op, 6);
 	push @exprs, $expr;
     }
+    if ($pre eq "{" and $cx < 1) {
+	# Disambiguate that it's not a block
+	$pre = "+{";
+    }
     return $pre . join(", ", @exprs) . $post;
 }
 
 sub pp_anonlist {
-    my ($self, $op) = @_;
+    my $self = shift;
+    my ($op, $cx) = @_;
     if ($op->flags & OPf_SPECIAL) {
-	return $self->anon_hash_or_list($op);
+	return $self->anon_hash_or_list($op, $cx);
     }
     warn "Unexpected op pp_" . $op->name() . " without OPf_SPECIAL";
     return 'XXX';
@@ -1787,7 +1792,7 @@ sub pp_refgen {
     if ($kid->name eq "null") {
 	$kid = $kid->first;
 	if ($kid->name eq "anonlist" || $kid->name eq "anonhash") {
-	    return $self->anon_hash_or_list($op);
+	    return $self->anon_hash_or_list($op, $cx);
 	} elsif (!null($kid->sibling) and
 		 $kid->sibling->name eq "anoncode") {
 	    return "sub " .
