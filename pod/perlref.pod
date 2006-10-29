@@ -613,16 +613,25 @@ above happens too late to be of much use.  You could address this by
 putting the whole loop of assignments within a BEGIN block, forcing it
 to occur during compilation.
 
-Access to lexicals that change over type--like those in the C<for> loop
-above--only works with closures, not general subroutines.  In the general
-case, then, named subroutines do not nest properly, although anonymous
-ones do. Thus is because named subroutines are created (and capture any
-outer lexicals) only once at compile time, whereas anonymous subroutines
-get to capture each time you execute the 'sub' operator.  If you are
-accustomed to using nested subroutines in other programming languages with
-their own private variables, you'll have to work at it a bit in Perl.  The
-intuitive coding of this type of thing incurs mysterious warnings about
-"will not stay shared".  For example, this won't work:
+Access to lexicals that change over time--like those in the C<for> loop
+above, basically aliases to elements from the surrounding lexical scopes--
+only works with anonymous subs, not with named subroutines. Generally
+said, named subroutines do not nest properly and should only be declared
+in the main package scope.
+
+This is because named subroutines are created at compile time so their
+lexical variables get assigned to the parent lexicals from the first
+execution of the parent block. If a parent scope is entered a second
+time, its lexicals are created again, while the nested subs still
+reference the old ones.
+
+Anonymous subroutines get to capture each time you execute the C<sub>
+operator, as they are created on the fly. If you are accustomed to using
+nested subroutines in other programming languages with their own private
+variables, you'll have to work at it a bit in Perl.  The intuitive coding
+of this type of thing incurs mysterious warnings about "will not stay
+shared" due to the reasons explained above. 
+For example, this won't work:
 
     sub outer {
         my $x = $_[0] + 35;
@@ -639,9 +648,9 @@ A work-around is the following:
     }
 
 Now inner() can only be called from within outer(), because of the
-temporary assignments of the closure (anonymous subroutine).  But when
-it does, it has normal access to the lexical variable $x from the scope
-of outer().
+temporary assignments of the anonymous subroutine. But when it does,
+it has normal access to the lexical variable $x from the scope of
+outer() at the time outer is invoked.
 
 This has the interesting effect of creating a function local to another
 function, something not normally supported in Perl.
