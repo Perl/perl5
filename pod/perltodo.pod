@@ -380,23 +380,6 @@ as part of exercising your skills with coverage and profiling tools you might
 want to determine what ops I<really> are the most commonly used. And in turn
 suggest evictions and promotions to achieve a better F<pp_hot.c>.
 
-=head2 Shrink struct context
-
-In F<cop.h>, we have
-
-    struct context {
-        U32		cx_type;	/* what kind of context this is */
-        union {
-    	struct block	cx_blk;
-    	struct subst	cx_subst;
-        } cx_u;
-    };
-
-There are less than 256 values for C<cx_type>, and the constituent parts
-C<struct block> and C<struct subst> both contain some C<U8> and C<U16> fields,
-so it should be possible to move them to the first word, and share space with
-a C<U8> C<cx_type>, saving 1 word.
-
 =head2 Allocate OPs from arenas
 
 Currently all new OP structures are individually malloc()ed and free()d.
