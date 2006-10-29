@@ -478,6 +478,127 @@ ever creep back to libperl.a.
 Note, of course, that this will only tell whether B<your> platform
 is using those naughty interfaces.
 
+=head2 Audit the code for destruction ordering assumptions
+
+Change 25773 notes
+
+
+=head2 Allocate OPs from arenas
+
+Currently all new OP structures are individually malloc()ed and free()d.
+All C<malloc> implementations have space overheads, and are now as fast as
+custom allocates so it would both use less memory and less CPU to allocate
+the various OP structures from arenas. The SV arena code can probably be
+re-used for this.
+
+=head2 Improve win32/wince.c
+
+Currently, numerous functions look virtually, if not completely,
+identical in both C<win32/wince.c> and C<win32/win32.c> files, which can't
+be good.
+
+=head1 Tasks that need a knowledge of XS
+
+These tasks would need C knowledge, and roughly the level of knowledge of
+the perl API that comes from writing modules that use XS to interface to
+C.
+
+=head2 shrink C<PVBM>s
+
+By removing unused elements and careful re-ordering, the structures for C<AV>s,
+C<HV>s, C<CV>s and C<GV>s have recently been shrunk considerably. C<PVIO>s
+probably aren't worth it, as typical programs don't use more than 8, and
+(at least) C<Filter::Util::Call> uses C<SvPVX>/C<SvCUR>/C<SvLEN> on a C<PVIO>,
+so it would mean code changes to modules on CPAN. C<PVBM>s might have some
+savings to win.
+
+=head2 autovivification
+
+Make all autovivification consistent w.r.t LVALUE/RVALUE and strict/no strict;
+
+This task is incremental - even a little bit of work on it will help.
+
+=head2 Unicode in Filenames
+
+chdir, chmod, chown, chroot, exec, glob, link, lstat, mkdir, open,
+opendir, qx, readdir, readlink, rename, rmdir, stat, symlink, sysopen,
+system, truncate, unlink, utime, -X.  All these could potentially accept
+Unicode filenames either as input or output (and in the case of system
+and qx Unicode in general, as input or output to/from the shell).
+Whether a filesystem - an operating system pair understands Unicode in
+filenames varies.
+
+Known combinations that have some level of understanding include
+Microsoft NTFS, Apple HFS+ (In Mac OS 9 and X) and Apple UFS (in Mac
+OS X), NFS v4 is rumored to be Unicode, and of course Plan 9.  How to
+create Unicode filenames, what forms of Unicode are accepted and used
+(UCS-2, UTF-16, UTF-8), what (if any) is the normalization form used,
+and so on, varies.  Finding the right level of interfacing to Perl
+requires some thought.  Remember that an OS does not implicate a
+filesystem.
+
+(The Windows -C command flag "wide API support" has been at least
+temporarily retired in 5.8.1, and the -C has been repurposed, see
+L<perlrun>.)
+
+=head2 Unicode in %ENV
+
+Currently the %ENV entries are always byte strings.
+
+=head2 use less 'memory'
+
+Investigate trade offs to switch out perl's choices on memory usage.
+Particularly perl should be able to give memory back.
+
+This task is incremental - even a little bit of work on it will help.
+
+=head2 Re-implement C<:unique> in a way that is actually thread-safe
+
+The old implementation made bad assumptions on several levels. A good 90%
+solution might be just to make C<:unique> work to share the string buffer
+of SvPVs. That way large constant strings can be shared between ithreads,
+such as the configuration information in F<Config>.
+
+=head2 Make tainting consistent
+
+Tainting would be easier to use if it didn't take documented shortcuts and
+allow taint to "leak" everywhere within an expression.
+
+=head2 readpipe(LIST)
+
+system() accepts a LIST syntax (and a PROGRAM LIST syntax) to avoid
+running a shell. readpipe() (the function behind qx//) could be similarly
+extended.
+
+=head2 strcat(), strcpy(), strncat(), strncpy(), sprintf(), vsprintf()
+
+Maybe create a utility that checks after each libperl.a creation that
+none of the above (nor sprintf(), vsprintf(), or *SHUDDER* gets())
+ever creep back to libperl.a.
+
+  nm libperl.a | ./miniperl -alne '$o = $F[0] if /:$/; print "$o $F[1]" if $F[0] eq "U" && $F[1] =~ /^(?:strn?c(?:at|py)|v?sprintf|gets)$/'
+
+Note, of course, that this will only tell whether B<your> platform
+is using those naughty interfaces.
+
+=head2 Audit the code for destruction ordering assumptions
+
+Change 25773 notes
+
+    /* Need to check SvMAGICAL, as during global destruction it may be that
+       AvARYLEN(av) has been freed before av, and hence the SvANY() pointer
+       is now part of the linked list of SV heads, rather than pointing to
+       the original body.  */
+    /* FIXME - audit the code for other bugs like this one.  */
+
+adding the C<SvMAGICAL> check to
+
+    if (AvARYLEN(av) && SvMAGICAL(AvARYLEN(av))) {
+        MAGIC *mg = mg_find (AvARYLEN(av), PERL_MAGIC_arylen);
+
+Go through the core and look for similar assumptions that SVs have particular
+types, as all bets are off during global destruction.
+
 =head1 Tasks that need a knowledge of the interpreter
 
 These tasks would need C knowledge, and knowledge of how the interpreter works,
