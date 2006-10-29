@@ -2060,23 +2060,33 @@ Perl_vivify_defelem(pTHX_ SV *sv)
 int
 Perl_magic_killbackrefs(pTHX_ SV *sv, MAGIC *mg)
 {
-    AV * const av = (AV*)mg->mg_obj;
-    SV ** const svp = AvARRAY(av);
-    I32 i = AvFILLp(av);
+    AV *const av = (AV*)mg->mg_obj;
+    SV **svp = AvARRAY(av);
     PERL_UNUSED_ARG(sv);
 
-    while (i >= 0) {
-	if (svp[i]) {
-	    if (!SvWEAKREF(svp[i]))
-		Perl_croak(aTHX_ "panic: magic_killbackrefs (flags=%"UVxf")",
-			   (UV)SvFLAGS(svp[i]));
-	    /* XXX Should we check that it hasn't changed? */
-	    SvRV_set(svp[i], 0);
-	    SvOK_off(svp[i]);
-	    SvWEAKREF_off(svp[i]);
-	    svp[i] = Nullsv;
+    /* Not sure why the av can get freed ahead of its sv, but somehow it does
+       in ext/B/t/bytecode.t test 15 (involving print <DATA>)  */
+    if (svp && !SvIS_FREED(av)) {
+	SV *const *const last = svp + AvFILLp(av);
+
+	while (svp <= last) {
+	    if (*svp) {
+		SV *const referrer = *svp;
+		if (SvWEAKREF(referrer)) {
+		    /* XXX Should we check that it hasn't changed? */
+		    SvRV_set(referrer, 0);
+		    SvOK_off(referrer);
+		    SvWEAKREF_off(referrer);
+		} else {
+		    Perl_croak(aTHX_
+			       "panic: magic_killbackrefs (flags=%"UVxf")",
+			       SvFLAGS(referrer));
+		}
+
+		*svp = Nullsv;
+	    }
+	    svp++;
 	}
-	i--;
     }
     SvREFCNT_dec(av); /* remove extra count added by sv_add_backref() */
     return 0;

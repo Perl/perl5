@@ -480,7 +480,7 @@ Perl_op_clear(pTHX_ OP *o)
 clear_pmop:
 	{
 	    HV * const pmstash = PmopSTASH(cPMOPo);
-	    if (pmstash && SvREFCNT(pmstash)) {
+	    if (pmstash && !SvIS_FREED(pmstash)) {
 		PMOP *pmop = HvPMROOT(pmstash);
 		PMOP *lastpmop = NULL;
 		while (pmop) {

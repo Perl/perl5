@@ -244,7 +244,7 @@ Perl_av_fetch(pTHX_ register AV *av, I32 key, I32 lval)
     }
     else if (AvREIFY(av)
 	     && (!AvARRAY(av)[key]	/* eg. @_ could have freed elts */
-		 || SvTYPE(AvARRAY(av)[key]) == SVTYPEMASK)) {
+		 || SvIS_FREED(AvARRAY(av)[key]))) {
 	AvARRAY(av)[key] = &PL_sv_undef;	/* 1/2 reify */
 	goto emptyness;
     }
