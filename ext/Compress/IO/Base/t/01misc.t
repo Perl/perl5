@@ -56,9 +56,18 @@ sub My::testParseParameters()
     like $@, mkErr("Parameter 'Fred' must be a signed int, got 'abc'"), 
             "wanted signed, got 'abc'";
 
-    eval { ParseParameters(1, {'Fred' => [1, 1, Parse_writable_scalar, 0]}, Fred => 'abc') ; };
-    like $@, mkErr("Parameter 'Fred' not writable"), 
-            "wanted writable, got readonly";
+
+    SKIP:
+    {
+        use Config;
+
+        skip 'readonly + threads', 1
+            if $Config{useithreads};
+
+        eval { ParseParameters(1, {'Fred' => [1, 1, Parse_writable_scalar, 0]}, Fred => 'abc') ; };
+        like $@, mkErr("Parameter 'Fred' not writable"), 
+                "wanted writable, got readonly";
+    }
 
     my @xx;
     eval { ParseParameters(1, {'Fred' => [1, 1, Parse_writable_scalar, 0]}, Fred => \@xx) ; };

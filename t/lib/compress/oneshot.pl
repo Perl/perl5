@@ -165,9 +165,18 @@ sub run
             my $out ;
             my @x ;
 
-            eval { $a = $Func->(\$in, \$out, TrailingData => \"abc") ;} ;
-            like $@, mkErr("^$TopType: Parameter 'TrailingData' not writable"),
-                '  TrailingData output not writable';
+            SKIP:
+            {
+                use Config;
+
+                skip 'readonly + threads', 1
+                    if $Config{useithreads};
+
+                
+                eval { $a = $Func->(\$in, \$out, TrailingData => \"abc") ;} ;
+                like $@, mkErr("^$TopType: Parameter 'TrailingData' not writable"),
+                    '  TrailingData output not writable';
+            }
 
             eval { $a = $Func->(\$in, \$out, TrailingData => \@x) ;} ;
             like $@, mkErr("^$TopType: Parameter 'TrailingData' not a scalar reference"),
