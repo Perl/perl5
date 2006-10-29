@@ -863,10 +863,17 @@ in gv.h: */
 #define SvUVX(sv) ((XPVUV*)  SvANY(sv))->xuv_uv
 #define SvNVX(sv)  ((XPVNV*)SvANY(sv))->xnv_nv
 #define SvPVX(sv)  ((XPV*)  SvANY(sv))->xpv_pv
+#ifndef PERL_POISON
 /* Given that these two are new, there can't be any existing code using them
  *  as LVALUEs  */
-#define SvPVX_mutable(sv)	(0 + SvPVX(sv))
-#define SvPVX_const(sv)	((const char*) (0 + SvPVX(sv)))
+#  define SvPVX_mutable(sv)	(0 + SvPVX(sv))
+#  define SvPVX_const(sv)	((const char*) (0 + SvPVX(sv)))
+#else
+/* Except for the poison code, which uses & to scribble over the pointer after
+   free() is called.  */
+#  define SvPVX_mutable(sv)	(SvPVX(sv))
+#  define SvPVX_const(sv)	((const char*) (SvPVX(sv)))
+#endif
 #define SvCUR(sv) ((XPV*)  SvANY(sv))->xpv_cur
 #define SvLEN(sv) ((XPV*)  SvANY(sv))->xpv_len
 #define SvEND(sv)(((XPV*)  SvANY(sv))->xpv_pv + ((XPV*)SvANY(sv))->xpv_cur)
