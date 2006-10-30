@@ -5090,16 +5090,9 @@ PerlIO_tmpfile(void)
 #    else	/* !HAS_MKSTEMP, fallback to stdio tmpfile(). */
      FILE * const stdio = PerlSIO_tmpfile();
 
-     if (stdio) {
-	  if ((f = PerlIO_push(aTHX_(PerlIO_allocate(aTHX)),
-                               PERLIO_FUNCS_CAST(&PerlIO_stdio),
-			       "w+", NULL))) {
-	       PerlIOStdio * const s = PerlIOSelf(f, PerlIOStdio);
+     if (stdio)
+	  f = PerlIO_fdopen(fileno(stdio), "w+");
 
-               if (s)
-                    s->stdio = stdio;
-          }
-     }
 #    endif /* else HAS_MKSTEMP */
 #endif /* else WIN32 */
      return f;
