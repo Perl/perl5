@@ -11,6 +11,23 @@ between 5.8.0 and 5.9.4.
 
 =head1 Incompatible Changes
 
+=head2 Removal of the bytecode compiler and of perlcc
+
+C<perlcc>, the byteloader and the supporting modules (B::C, B::CC,
+B::Bytecode, etc.) are no longer distributed with the perl sources. Those
+experimental tools have never worked reliably, and, due to the lack of
+volunteers to keep them in line with the perl interpreter developments, it
+was decided to remove them instead of shipping a broken version of those.
+The last version of those modules can be found with perl 5.9.4.
+
+However the B compiler framework stays supported in the perl core, as with
+the more useful modules it has permitted (among others, B::Deparse and
+B::Concise).
+
+=head2 Removal of the JPL
+
+The JPL (Java-Perl Linguo) has been removed from the perl sources tarball.
+
 =head1 Core Enhancements
 
 =head2 Regular expressions
@@ -47,7 +64,7 @@ nested balanced angle brackets:
 Note, users experienced with PCRE will find that the Perl implementation
 of this feature differs from the PCRE one in that it is possible to
 backtrack into a recursed pattern, whereas in PCRE the recursion is
-atomic or "possessive" in nature.
+atomic or "possessive" in nature. (Yves Orton)
 
 =item Named Capture Buffers
 
@@ -76,7 +93,7 @@ is sequential, and not "unnamed first, then named". Thus in the pattern
 
 $1 will be 'A', $2 will be 'B', $3 will be 'C' and $4 will be 'D' and not
 $1 is 'A', $2 is 'C' and $3 is 'B' and $4 is 'D' that a .NET programmer
-would expect. This is considered a feature. :-)
+would expect. This is considered a feature. :-) (Yves Orton)
 
 =item Possessive Quantifiers
 
@@ -85,7 +102,7 @@ pattern. Basically a possessive quantifier matches as much as it can and never
 gives any back. Thus it can be used to control backtracking. The syntax is 
 similar to non-greedy matching, except instead of using a '?' as the modifier
 the '+' is used. Thus C<?+>, C<*+>, C<++>, C<{min,max}+> are now legal
-quantifiers.
+quantifiers. (Yves Orton)
 
 =back
 
@@ -96,9 +113,34 @@ denotes a scalar), but defaults to C<$_> if the corresponding argument
 isn't supplied. Due to the optional nature of the argument, you can only
 use it at the end of a prototype, or before a semicolon.
 
+This has a small incompatible consequence: the prototype() function has
+been adjusted to return C<_> for some built-ins in appropriate cases (for
+example, C<prototype('CORE::rmdir')>). (Rafael Garcia-Suarez)
+
+=head2 UCD 5.0.0
+
+The copy of the Unicode Character Database included in Perl 5.9 has
+been updated to version 5.0.0.
+
 =head1 Modules and Pragmas
 
 =head2 New Core Modules
+
+=over 4
+
+=item *
+
+C<Locale::Maketext::Simple>, needed by CPANPLUS, is a simple wrapper around
+C<Locale::Maketext::Lexicon>. Note that C<Locale::Maketext::Lexicon> isn't
+included in the perl core; the behaviour of C<Locale::Maketext::Simple>
+gracefully degrades when the later isn't present.
+
+=item *
+
+C<Params::Check> implements a generic input parsing/checking mechanism. It
+is used by CPANPLUS.
+
+=back
 
 =head2 Module changes
 
@@ -129,11 +171,30 @@ anymore, and will require parentheses to be added after the function name:
 
 =head1 Installation and Configuration Improvements
 
+=head2 C++ compatibility
+
+Efforts have been made to make perl and the core XS modules compilable
+with various C++ compilers (although the situation is not perfect with
+some of the compilers on some of the platforms tested.)
+
+=head2 Ports
+
+Perl has been reported to work on MidnightBSD.
+
 =head1 Selected Bug Fixes
+
+PerlIO::scalar will now prevent writing to read-only scalars.
+
+study() never worked for UTF-8 strings, but could lead to false results.
+It's now a no-op on UTF-8 data. (Yves Orton)
 
 =head1 New or Changed Diagnostics
 
 =head1 Changed Internals
+
+The anonymous hash and array constructors now take 1 op in the optree
+instead of 3, now that pp_anonhash and pp_anonlist return a reference to
+an hash/array when the op is flagged with OPf_SPECIAL (Nicholas Clark).
 
 =head1 Known Problems
 
