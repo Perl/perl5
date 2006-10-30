@@ -18,12 +18,6 @@
 #ifndef HWND_MESSAGE
 #  define HWND_MESSAGE     ((HWND)-3)
 #endif
-/* GCC-2.95.2/Mingw32-1.1 forgot the WINAPI on CommandLineToArgvW() */
-#if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION==1)	
-#  include <shellapi.h>
-#else
-   LPWSTR* WINAPI CommandLineToArgvW(LPCWSTR lpCommandLine, int * pNumArgs);
-#endif
 #include <winnt.h>
 #include <io.h>
 #include <signal.h>
@@ -37,6 +31,13 @@
 #include <sys/stat.h>
 #include "EXTERN.h"
 #include "perl.h"
+
+/* GCC-2.95.2/Mingw32-1.1 forgot the WINAPI on CommandLineToArgvW() */
+#if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION==1)
+#  include <shellapi.h>
+#else
+EXTERN_C LPWSTR* WINAPI CommandLineToArgvW(LPCWSTR lpCommandLine, int * pNumArgs);
+#endif
 
 #define NO_XSLOCKS
 #define PERL_NO_GET_CONTEXT
@@ -66,11 +67,13 @@ int _CRT_glob = 0;
 
 #if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION==1)	
 /* Mingw32-1.1 is missing some prototypes */
+START_EXTERN_C
 FILE * _wfopen(LPCWSTR wszFileName, LPCWSTR wszMode);
 FILE * _wfdopen(int nFd, LPCWSTR wszMode);
 FILE * _freopen(LPCWSTR wszFileName, LPCWSTR wszMode, FILE * pOldStream);
 int _flushall();
 int _fcloseall();
+END_EXTERN_C
 #endif
 
 #if defined(__BORLANDC__)
@@ -4960,7 +4963,7 @@ Perl_sys_intern_init(pTHX)
     w32_num_pseudo_children	= 0;
 #  endif
     w32_timerid                 = 0;
-    w32_message_hwnd            = INVALID_HANDLE_VALUE;
+    w32_message_hwnd            = (HWND__*)INVALID_HANDLE_VALUE;
     w32_poll_count              = 0;
     for (i=0; i < SIG_SIZE; i++) {
     	w32_sighandler[i] = SIG_DFL;

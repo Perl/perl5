@@ -3375,7 +3375,7 @@ PerlIOStdio_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
     FILE * const stdio = PerlIOSelf(f, PerlIOStdio)->stdio;
     if (ptr != NULL) {
 #ifdef STDIO_PTR_LVALUE
-	PerlSIO_set_ptr(stdio, (void*)ptr); /* LHS STDCHAR* cast non-portable */
+	PerlSIO_set_ptr(stdio, ptr); /* LHS STDCHAR* cast non-portable */
 #ifdef STDIO_PTR_LVAL_SETS_CNT
 	if (PerlSIO_get_cnt(stdio) != (cnt)) {
 	    assert(PerlSIO_get_cnt(stdio) == (cnt));
