@@ -279,7 +279,7 @@ DD_dump(pTHX_ SV *val, const char *name, STRLEN namelen, SV *retval, HV *seenhv,
        *1.1 was slower, *2.0 was the same, so the first guess of 1.5 is
 	deemed to be good enough.  */
     if (SvTYPE(retval) >= SVt_PV && (SvLEN(retval) - SvCUR(retval)) < 42) {
-	sv_grow(retval, SvCUR(retval) * 1.5);
+	sv_grow(retval, SvCUR(retval) * 3 / 2);
     }
 
     realtype = SvTYPE(val);
