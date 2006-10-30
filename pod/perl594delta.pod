@@ -122,6 +122,7 @@ D. Hedden)
 C<Hash::Util::FieldHash>, by Anno Siegel, has been added. This module
 provides support for I<field hashes>: hashes that maintain an association
 of a reference with a value, in a thread-safe garbage-collected way.
+Such hashes are useful to implement inside-out objects.
 
 =item *
 
