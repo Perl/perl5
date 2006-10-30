@@ -692,8 +692,8 @@ Perl_av_shift(pTHX_ register AV *av)
 /*
 =for apidoc av_len
 
-Returns the highest index in the array.  Returns -1 if the array is
-empty.
+Returns the highest index in the array.  The number of elements in the
+array is C<av_len(av) + 1>.  Returns -1 if the array is empty.
 
 =cut
 */
@@ -708,8 +708,14 @@ Perl_av_len(pTHX_ register const AV *av)
 /*
 =for apidoc av_fill
 
-Ensure than an array has a given number of elements, equivalent to
+Set the highest index in the array to the given number, equivalent to
 Perl's C<$#array = $fill;>.
+
+The number of elements in the an array will be C<fill + 1> after
+av_fill() returns.  If the array was previously shorter then the
+additional elements appended are set to C<PL_sv_undef>.  If the array
+was longer, then the excess elements are freed.  C<av_fill(av, -1)> is
+the same as C<av_clear(av)>.
 
 =cut
 */
