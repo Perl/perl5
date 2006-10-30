@@ -270,7 +270,7 @@ sub viacode
 
   # checking the length first is slightly faster
   if (length($hex) > 5 && hex($hex) > 0x10FFFF) {
-    carp sprintf "Unicode characters only allocated up to U+10FFFF (you asked for U+%X)", $hex;
+    carp "Unicode characters only allocated up to U+10FFFF (you asked for U+$hex)";
     return;
   }
 
