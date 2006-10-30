@@ -3531,7 +3531,7 @@
 #define cl_init_zero		S_cl_init_zero
 #define cl_and			S_cl_and
 #define cl_or			S_cl_or
-#define study_chunk(a,b,c,d,e,f,g,h)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h)
+#define study_chunk(a,b,c,d,e,f,g,h,i,j,k)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
 #define add_data		S_add_data
 #endif
 #ifdef PERL_CORE

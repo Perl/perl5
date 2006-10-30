@@ -50,8 +50,8 @@
 #define	STAR                  	38	/* 0x26 Match this (simple) thing 0 or more times. */
 #define	PLUS                  	39	/* 0x27 Match this (simple) thing 1 or more times. */
 #define	CURLY                 	40	/* 0x28 Match this simple thing {n,m} times. */
-#define	CURLYN                	41	/* 0x29 Match next-after-this simple thing */
-#define	CURLYM                	42	/* 0x2a Match this medium-complex thing {n,m} times. */
+#define	CURLYN                	41	/* 0x29 Capture next-after-this simple thing */
+#define	CURLYM                	42	/* 0x2a Capture this medium-complex thing {n,m} times. */
 #define	CURLYX                	43	/* 0x2b Match this complex thing {n,m} times. */
 #define	WHILEM                	44	/* 0x2c Do curly processing and see if rest matches. */
 #define	OPEN                  	45	/* 0x2d Mark this point in input as start of */
@@ -191,7 +191,7 @@ EXTCONST U8 PL_regkind[] = {
 	TRIE,    	/* AHOCORASICK            */
 	TRIE,    	/* AHOCORASICKC           */
 	RECURSE, 	/* RECURSE                */
-	RECURSE, 	/* SRECURSE               */
+	SRECURSE,	/* SRECURSE               */
 	NREF,    	/* NREF                   */
 	NREF,    	/* NREFF                  */
 	NREF,    	/* NREFFL                 */

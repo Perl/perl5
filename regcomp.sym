@@ -98,9 +98,8 @@ STAR		STAR,   node	Match this (simple) thing 0 or more times.
 PLUS		PLUS,   node	Match this (simple) thing 1 or more times.
 
 CURLY		CURLY,  sv 2	Match this simple thing {n,m} times.
-CURLYN		CURLY,  no 2	Match next-after-this simple thing 
-#				{n,m} times, set parenths.
-CURLYM		CURLY,  no 2	Match this medium-complex thing {n,m} times.
+CURLYN		CURLY,  no 2	Capture next-after-this simple thing 
+CURLYM		CURLY,  no 2	Capture this medium-complex thing {n,m} times. 
 CURLYX		CURLY,  sv 2	Match this complex thing {n,m} times.
 
 # This terminator creates a loop structure for CURLYX
@@ -156,7 +155,7 @@ AHOCORASICKC	TRIE,   trie charclass	Same as AHOCORASICK, but with embedded charc
 
 #*Recursion (65..66) 
 RECURSE		RECURSE,   num/ofs 2L	recurse to paren arg1 at (signed) ofs arg2
-SRECURSE	RECURSE,   no   	recurse to start of pattern
+SRECURSE	SRECURSE,   no   	recurse to start of pattern
 
 #*Named references (67..69)
 NREF		NREF,    no-sv 1	Match some already matched string

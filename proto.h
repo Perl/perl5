@@ -3632,7 +3632,7 @@ STATIC void	S_cl_or(const struct RExC_state_t* state, struct regnode_charclass_c
 			__attribute__nonnull__(2)
 			__attribute__nonnull__(3);
 
-STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t* state, regnode **scanp, I32 *minlenp, I32 *deltap, regnode *last, struct scan_data_t *data, U32 flags, U32 depth)
+STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t* state, regnode **scanp, I32 *minlenp, I32 *deltap, regnode *last, struct scan_data_t *data, I32 stopparen, U8* recursed, struct regnode_charclass_class *and_withp, U32 flags, U32 depth)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3)

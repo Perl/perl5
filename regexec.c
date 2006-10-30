@@ -331,7 +331,11 @@ Perl_pregexec(pTHX_ register regexp *prog, char *stringarg, register char *stren
 	RExen without fixed substrings.  Similarly, it is assumed that
 	lengths of all the strings are no more than minlen, thus they
 	cannot come from lookahead.
-	(Or minlen should take into account lookahead.) */
+	(Or minlen should take into account lookahead.) 
+  NOTE: Some of this comment is not correct. minlen does now take account
+  of lookahead/behind. Further research is required. -- demerphq
+
+*/
 
 /* A failure to find a constant substring means that there is no need to make
    an expensive call to REx engine, thus we celebrate a failure.  Similarly,
@@ -4450,6 +4454,10 @@ NULL
 
 	curly_try_B_max:
 	    /* a successful greedy match: now try to match B */
+            if (cur_eval && cur_eval->u.eval.close_paren &&
+                cur_eval->u.eval.close_paren == ST.paren) {
+                goto fake_end;
+            }
 	    {
 		UV c = 0;
 		if (ST.c1 != CHRTEST_VOID)
@@ -4459,10 +4467,6 @@ NULL
 		/* If it could work, try it. */
 		if (ST.c1 == CHRTEST_VOID || c == (UV)ST.c1 || c == (UV)ST.c2) {
 		    CURLY_SETPAREN(ST.paren, ST.count);
-		    if (cur_eval && cur_eval->u.eval.close_paren &&
-		        cur_eval->u.eval.close_paren == ST.paren) {
-                        goto fake_end;
-                    }
 		    PUSH_STATE_GOTO(CURLY_B_max, ST.B);
 		    /* NOTREACHED */
 		}
