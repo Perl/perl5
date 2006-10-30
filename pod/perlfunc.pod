@@ -1288,13 +1288,17 @@ trapped within an eval(), $@ contains the reference.  This behavior permits
 a more elaborate exception handling implementation using objects that
 maintain arbitrary state about the nature of the exception.  Such a scheme
 is sometimes preferable to matching particular string values of $@ using
-regular expressions.  Here's an example:
+regular expressions.  Because $@ is a global variable, and eval() may be
+used within object implementations, care must be taken that analyzing the
+error object doesn't replace the reference in the global variable.  The
+easiest solution is to make a local copy of the reference before doing
+other manipulations.  Here's an example:
 
     use Scalar::Util 'blessed';
 
     eval { ... ; die Some::Module::Exception->new( FOO => "bar" ) };
-    if ($@) {
-        if (blessed($@) && $@->isa("Some::Module::Exception")) {
+    if (my $ev_err = $@) {
+        if (blessed($ev_err) && $ev_err->isa("Some::Module::Exception")) {
             # handle Some::Module::Exception
         }
         else {
