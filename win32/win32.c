@@ -4941,7 +4941,7 @@ win32_create_message_window()
     return CreateWindow("Static", "", 0, 0, 0, 0, 0, HWND_MESSAGE, 0, 0, NULL);
 }
 
-#if defined(__MINGW32__)
+#if defined(__MINGW32__) && defined(__cplusplus)
 #define CAST_HWND__(x) (HWND__*)(x)
 #else
 #define CAST_HWND__(x) x
