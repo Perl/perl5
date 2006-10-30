@@ -161,7 +161,7 @@ sub readonly_footer (*) {
     print $fh <<'_EOF_';
 =cut
 
-ex: set ro:
+ ex: set ro:
 _EOF_
 }
 
