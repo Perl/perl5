@@ -370,9 +370,13 @@ prof_mark(pTHX_ opcode ptype)
 
 	CV * const cv = db_get_cv(aTHX_ Sub);
 	GV * const gv = CvGV(cv);
-	pname = GvSTASH(gv) ? HvNAME_get(GvSTASH(gv)) : NULL;
-	pname = pname ? pname : (char *) "(null)";
-	gname = GvNAME(gv);
+	if (isGV_with_GP(gv)) {
+	    pname = GvSTASH(gv) ? HvNAME_get(GvSTASH(gv)) : NULL;
+	    pname = pname ? pname : (char *) "(null)";
+	    gname = GvNAME(gv);
+	} else {
+	    gname = pname = (char *) "(null)";
+	}
 
 	set_cv_key(aTHX_ cv, pname, gname);
 	svp = hv_fetch(g_cv_hash, SvPVX_const(g_key_hash), SvCUR(g_key_hash), TRUE);
