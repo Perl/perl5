@@ -971,6 +971,10 @@ all : .\config.h $(GLOBEXE) $(MINIPERL) $(MK2)		\
 	$(RIGHTMAKE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE)	\
 	$(X2P) MakePPPort Extensions
 
+reonly : .\config.h $(GLOBEXE) $(MINIPERL) $(MK2)		\
+	$(RIGHTMAKE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE)	\
+	$(X2P) Extensions_reonly
+
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 
 #----------------------------------------------------------------
@@ -1234,10 +1238,17 @@ MakePPPort_clean:
 
 #-------------------------------------------------------------------------------
 Extensions : buildext.pl $(PERLDEP) $(CONFIGPM)
+	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --dynamic
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --dynamic
 
+Extensions_reonly : buildext.pl $(PERLDEP) $(CONFIGPM)
+	$(XCOPY) ..\*.h $(COREDIR)\*.*
+	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --dynamic +re
+	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --dynamic +re
+
 Extensions_static : buildext.pl
+	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --static
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --static
 	$(MINIPERL) -I..\lib buildext.pl --list-static-libs > Extensions_static
@@ -1439,6 +1450,20 @@ test-prep : all utils
 
 test : $(RIGHTMAKE) test-prep
 	cd ..\t && $(PERLEXE) -I..\lib harness $(TEST_SWITCHES) $(TEST_FILES)
+
+test-reonly : reonly utils
+	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
+	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
+	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
+	cd ..\t && \
+	$(PERLEXE) -I..\lib harness $(OPT) -re \bpat\b \breg \bre\b $(EXTRA) && \
+	cd ..\win32
+
+regen :
+	cd .. && regen.pl && cd win32
+
+regnodes :
+	cd .. && regcomp.pl && cd win32
 
 test-notty : test-prep
 	set PERL_SKIP_TTY_TEST=1 && \
