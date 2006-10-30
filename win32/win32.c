@@ -4941,6 +4941,12 @@ win32_create_message_window()
     return CreateWindow("Static", "", 0, 0, 0, 0, 0, HWND_MESSAGE, 0, 0, NULL);
 }
 
+#if defined(__MINGW32__)
+#define CAST_HWND__(x) (HWND__*)(x)
+#else
+#define CAST_HWND__(x) x
+#endif
+
 void
 Perl_sys_intern_init(pTHX)
 {
@@ -4963,7 +4969,7 @@ Perl_sys_intern_init(pTHX)
     w32_num_pseudo_children	= 0;
 #  endif
     w32_timerid                 = 0;
-    w32_message_hwnd            = (HWND__*)INVALID_HANDLE_VALUE;
+    w32_message_hwnd            = CAST_HWND__(INVALID_HANDLE_VALUE);
     w32_poll_count              = 0;
     for (i=0; i < SIG_SIZE; i++) {
     	w32_sighandler[i] = SIG_DFL;
@@ -5019,7 +5025,7 @@ Perl_sys_intern_dup(pTHX_ struct interp_intern *src, struct interp_intern *dst)
     dst->pseudo_id		= 0;
     Newxz(dst->pseudo_children, 1, pseudo_child_tab);
     dst->timerid                = 0;
-    dst->message_hwnd		= INVALID_HANDLE_VALUE;
+    dst->message_hwnd		= CAST_HWND__(INVALID_HANDLE_VALUE);
     dst->poll_count             = 0;
     Copy(src->sigtable,dst->sigtable,SIG_SIZE,Sighandler_t);
 }
