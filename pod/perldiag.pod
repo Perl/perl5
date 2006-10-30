@@ -1231,7 +1231,7 @@ instead.
 
    unpack("H", "\x{2a1}")
 
-where the format expects to process a byte (a character with a value 
+where the format expects to process a byte (a character with a value
 below 256), but a higher value was provided instead. Perl uses the value
 modulus 256 instead, as if you had provided:
 
@@ -1243,8 +1243,8 @@ modulus 256 instead, as if you had provided:
 
    pack("u", "\x{1f3}b")
 
-where the format expects to process a sequence of bytes (character with a 
-value below 256), but some of the characters had a higher value. Perl 
+where the format expects to process a sequence of bytes (character with a
+value below 256), but some of the characters had a higher value. Perl
 uses the character values modulus 256 instead, as if you had provided:
 
    pack("u", "\x{f3}b")
@@ -1255,8 +1255,8 @@ uses the character values modulus 256 instead, as if you had provided:
 
    unpack("s", "\x{1f3}b")
 
-where the format expects to process a sequence of bytes (character with a 
-value below 256), but some of the characters had a higher value. Perl 
+where the format expects to process a sequence of bytes (character with a
+value below 256), but some of the characters had a higher value. Perl
 uses the character values modulus 256 instead, as if you had provided:
 
    unpack("s", "\x{f3}b")
@@ -1336,9 +1336,9 @@ L<overload>.
 
 =item Constant(%s)%s: %s in regex; marked by <-- HERE in m/%s/
 
-(F) The parser found inconsistencies while attempting to find 
-the character name specified in the C<\N{...}> escape.  Perhaps you 
-forgot to load the corresponding C<charnames> pragma?  
+(F) The parser found inconsistencies while attempting to find
+the character name specified in the C<\N{...}> escape.  Perhaps you
+forgot to load the corresponding C<charnames> pragma?
 See L<charnames>.
 
 
@@ -1585,6 +1585,14 @@ that in an eval().  See L<perlre/(?{ code })>.
 (F) A regular expression contained the C<(?{ ... })> zero-width
 assertion, but that construct is only allowed when the C<use re 'eval'>
 pragma is in effect.  See L<perlre/(?{ code })>.
+
+=item EVAL without pos change exceeded limit in regex; marked by <-- HERE in m/%s/
+
+(F) You used a pattern that nested too many EVAL calls without consuming
+any text. Restructure the pattern so that text is consumed.
+
+The <-- HERE shows in the regular expression about where the problem was
+discovered.
 
 =item Excessively long <> operator
 
@@ -1853,7 +1861,7 @@ of Perl are likely to eliminate these arbitrary limitations.
 
 (W) Named unicode character escapes (\N{...}) may return multi-char
 or zero length sequences. When such an escape is used in a character class
-its behaviour is not well defined. Check that the correct escape has 
+its behaviour is not well defined. Check that the correct escape has
 been used, and the correct charname handler is in scope.
 
 =item Illegal binary digit %s
@@ -1958,6 +1966,15 @@ also result in this warning.  See L<perlcall/G_KEEPERR>.
 (F) An error peculiar to EBCDIC.  Internally, v-strings are stored as
 Unicode code points, and encoded in EBCDIC as UTF-EBCDIC.  The UTF-EBCDIC
 encoding is limited to code points no larger than 2147483647 (0x7FFFFFFF).
+
+=item Infinite recursion in regex; marked by <-- HERE in m/%s/
+
+(F) You used a pattern that references itself without consuming any input
+text. You should check the pattern to ensure that recursive patterns
+either consume text or fail.
+
+The <-- HERE shows in the regular expression about where the problem was
+discovered.
 
 =item Insecure dependency in %s
 
@@ -3091,6 +3108,15 @@ to even) byte length.
 
 (P) The lexer got into a bad state while processing a case modifier.
 
+=item Pattern subroutine nesting without pos change exceeded limit in regex; marked by <-- HERE in m/%s/
+
+(F) You used a pattern that uses too many nested subpattern calls without
+consuming any text. Restructure the pattern so text is consumed before the
+nesting limit is exceeded.
+
+The <-- HERE shows in the regular expression about where the problem was
+discovered.
+
 =item Parentheses missing around "%s" list
 
 (W parenthesis) You said something like
@@ -3386,7 +3412,7 @@ by prepending "0" to your numbers.
 
 =item readdir() attempted on invalid dirhandle %s
 
-(W io) The dirhandle you're reading from is either closed or not really 
+(W io) The dirhandle you're reading from is either closed or not really
 a dirhandle.  Check your control flow.
 
 =item readline() on closed filehandle %s
@@ -3456,6 +3482,25 @@ a reference count of other than 1.
 not at least seven sets of capturing parentheses in the expression. If you
 wanted to have the character with value 7 inserted into the regular expression,
 prepend a zero to make the number at least two digits: C<\07>
+
+The <-- HERE shows in the regular expression about where the problem was
+discovered.
+
+=item Reference to nonexistent named group in regex; marked by <-- HERE in m/%s/
+
+(F) You used something like C<\k'NAME'> or C<< \k<NAME> >> in your regular
+expression, but there is no corresponding named capturing parentheses such
+as C<(?'NAME'...)> or C<(?<NAME>...). Check if the name has been spelled
+correctly both in the backreference and the declaration.
+
+The <-- HERE shows in the regular expression about where the problem was
+discovered.
+
+=item (?(DEFINE)....) does not allow branches in regex; marked by <-- HERE in m/%s/
+
+(F) You used something like C<(?(DEFINE)...|..)> which is illegal. The
+most likely cause of this error is that you left out a parenthesis inside
+of the C<....> part.
 
 The <-- HERE shows in the regular expression about where the problem was
 discovered.
@@ -4024,7 +4069,7 @@ See L<perlunicode/"User-Defined Character Properties">.
 
 =item Too deeply nested ()-groups
 
-(F) Your template contains ()-groups with a ridiculously deep nesting level. 
+(F) Your template contains ()-groups with a ridiculously deep nesting level.
 
 =item Too few args to syscall
 

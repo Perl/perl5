@@ -74,13 +74,13 @@
 #define	TRIEC                 	62	/* 0x3e Same as TRIE, but with embedded charclass data */
 #define	AHOCORASICK           	63	/* 0x3f Aho Corasick stclass. flags==type */
 #define	AHOCORASICKC          	64	/* 0x40 Same as AHOCORASICK, but with embedded charclass data */
-#define	RECURSE               	65	/* 0x41 recurse to paren arg1 at (signed) ofs arg2 */
-#define	SRECURSE              	66	/* 0x42 recurse to start of pattern */
+#define	GOSUB                 	65	/* 0x41 recurse to paren arg1 at (signed) ofs arg2 */
+#define	GOSTART               	66	/* 0x42 recurse to start of pattern */
 #define	NREF                  	67	/* 0x43 Match some already matched string */
 #define	NREFF                 	68	/* 0x44 Match already matched string, folded */
 #define	NREFFL                	69	/* 0x45 Match already matched string, folded in loc. */
 #define	NGROUPP               	70	/* 0x46 Whether the group matched. */
-#define	RECURSEP              	71	/* 0x47 Whether we are in a specific recurse. */
+#define	INSUBP                	71	/* 0x47 Whether we are in a specific recurse. */
 #define	DEFINEP               	72	/* 0x48 Never execute directly. */
 #define	OPFAIL                	73	/* 0x49 Same as (?!) */
 #define	OPTIMIZED             	74	/* 0x4a Placeholder for dump. */
@@ -125,113 +125,113 @@
 EXTCONST U8 PL_regkind[];
 #else
 EXTCONST U8 PL_regkind[] = {
-	END,     	/* END                    */
-	END,     	/* SUCCEED                */
-	BOL,     	/* BOL                    */
-	BOL,     	/* MBOL                   */
-	BOL,     	/* SBOL                   */
-	EOL,     	/* EOS                    */
-	EOL,     	/* EOL                    */
-	EOL,     	/* MEOL                   */
-	EOL,     	/* SEOL                   */
-	BOUND,   	/* BOUND                  */
-	BOUND,   	/* BOUNDL                 */
-	NBOUND,  	/* NBOUND                 */
-	NBOUND,  	/* NBOUNDL                */
-	GPOS,    	/* GPOS                   */
-	REG_ANY, 	/* REG_ANY                */
-	REG_ANY, 	/* SANY                   */
-	REG_ANY, 	/* CANY                   */
-	ANYOF,   	/* ANYOF                  */
-	ALNUM,   	/* ALNUM                  */
-	ALNUM,   	/* ALNUML                 */
-	NALNUM,  	/* NALNUM                 */
-	NALNUM,  	/* NALNUML                */
-	SPACE,   	/* SPACE                  */
-	SPACE,   	/* SPACEL                 */
-	NSPACE,  	/* NSPACE                 */
-	NSPACE,  	/* NSPACEL                */
-	DIGIT,   	/* DIGIT                  */
-	DIGIT,   	/* DIGITL                 */
-	NDIGIT,  	/* NDIGIT                 */
-	NDIGIT,  	/* NDIGITL                */
-	CLUMP,   	/* CLUMP                  */
-	BRANCH,  	/* BRANCH                 */
-	BACK,    	/* BACK                   */
-	EXACT,   	/* EXACT                  */
-	EXACT,   	/* EXACTF                 */
-	EXACT,   	/* EXACTFL                */
-	NOTHING, 	/* NOTHING                */
-	NOTHING, 	/* TAIL                   */
-	STAR,    	/* STAR                   */
-	PLUS,    	/* PLUS                   */
-	CURLY,   	/* CURLY                  */
-	CURLY,   	/* CURLYN                 */
-	CURLY,   	/* CURLYM                 */
-	CURLY,   	/* CURLYX                 */
-	WHILEM,  	/* WHILEM                 */
-	OPEN,    	/* OPEN                   */
-	CLOSE,   	/* CLOSE                  */
-	REF,     	/* REF                    */
-	REF,     	/* REFF                   */
-	REF,     	/* REFFL                  */
-	BRANCHJ, 	/* IFMATCH                */
-	BRANCHJ, 	/* UNLESSM                */
-	BRANCHJ, 	/* SUSPEND                */
-	BRANCHJ, 	/* IFTHEN                 */
-	GROUPP,  	/* GROUPP                 */
-	LONGJMP, 	/* LONGJMP                */
-	BRANCHJ, 	/* BRANCHJ                */
-	EVAL,    	/* EVAL                   */
-	MINMOD,  	/* MINMOD                 */
-	LOGICAL, 	/* LOGICAL                */
-	BRANCHJ, 	/* RENUM                  */
-	TRIE,    	/* TRIE                   */
-	TRIE,    	/* TRIEC                  */
-	TRIE,    	/* AHOCORASICK            */
-	TRIE,    	/* AHOCORASICKC           */
-	RECURSE, 	/* RECURSE                */
-	SRECURSE,	/* SRECURSE               */
-	NREF,    	/* NREF                   */
-	NREF,    	/* NREFF                  */
-	NREF,    	/* NREFFL                 */
-	NGROUPP, 	/* NGROUPP                */
-	RECURSEP,	/* RECURSEP               */
-	DEFINEP, 	/* DEFINEP                */
-	OPFAIL,  	/* OPFAIL                 */
-	NOTHING, 	/* OPTIMIZED              */
-	PSEUDO,  	/* PSEUDO                 */
+	END,    	/* END                    */
+	END,    	/* SUCCEED                */
+	BOL,    	/* BOL                    */
+	BOL,    	/* MBOL                   */
+	BOL,    	/* SBOL                   */
+	EOL,    	/* EOS                    */
+	EOL,    	/* EOL                    */
+	EOL,    	/* MEOL                   */
+	EOL,    	/* SEOL                   */
+	BOUND,  	/* BOUND                  */
+	BOUND,  	/* BOUNDL                 */
+	NBOUND, 	/* NBOUND                 */
+	NBOUND, 	/* NBOUNDL                */
+	GPOS,   	/* GPOS                   */
+	REG_ANY,	/* REG_ANY                */
+	REG_ANY,	/* SANY                   */
+	REG_ANY,	/* CANY                   */
+	ANYOF,  	/* ANYOF                  */
+	ALNUM,  	/* ALNUM                  */
+	ALNUM,  	/* ALNUML                 */
+	NALNUM, 	/* NALNUM                 */
+	NALNUM, 	/* NALNUML                */
+	SPACE,  	/* SPACE                  */
+	SPACE,  	/* SPACEL                 */
+	NSPACE, 	/* NSPACE                 */
+	NSPACE, 	/* NSPACEL                */
+	DIGIT,  	/* DIGIT                  */
+	DIGIT,  	/* DIGITL                 */
+	NDIGIT, 	/* NDIGIT                 */
+	NDIGIT, 	/* NDIGITL                */
+	CLUMP,  	/* CLUMP                  */
+	BRANCH, 	/* BRANCH                 */
+	BACK,   	/* BACK                   */
+	EXACT,  	/* EXACT                  */
+	EXACT,  	/* EXACTF                 */
+	EXACT,  	/* EXACTFL                */
+	NOTHING,	/* NOTHING                */
+	NOTHING,	/* TAIL                   */
+	STAR,   	/* STAR                   */
+	PLUS,   	/* PLUS                   */
+	CURLY,  	/* CURLY                  */
+	CURLY,  	/* CURLYN                 */
+	CURLY,  	/* CURLYM                 */
+	CURLY,  	/* CURLYX                 */
+	WHILEM, 	/* WHILEM                 */
+	OPEN,   	/* OPEN                   */
+	CLOSE,  	/* CLOSE                  */
+	REF,    	/* REF                    */
+	REF,    	/* REFF                   */
+	REF,    	/* REFFL                  */
+	BRANCHJ,	/* IFMATCH                */
+	BRANCHJ,	/* UNLESSM                */
+	BRANCHJ,	/* SUSPEND                */
+	BRANCHJ,	/* IFTHEN                 */
+	GROUPP, 	/* GROUPP                 */
+	LONGJMP,	/* LONGJMP                */
+	BRANCHJ,	/* BRANCHJ                */
+	EVAL,   	/* EVAL                   */
+	MINMOD, 	/* MINMOD                 */
+	LOGICAL,	/* LOGICAL                */
+	BRANCHJ,	/* RENUM                  */
+	TRIE,   	/* TRIE                   */
+	TRIE,   	/* TRIEC                  */
+	TRIE,   	/* AHOCORASICK            */
+	TRIE,   	/* AHOCORASICKC           */
+	GOSUB,  	/* GOSUB                  */
+	GOSTART,	/* GOSTART                */
+	NREF,   	/* NREF                   */
+	NREF,   	/* NREFF                  */
+	NREF,   	/* NREFFL                 */
+	NGROUPP,	/* NGROUPP                */
+	INSUBP, 	/* INSUBP                 */
+	DEFINEP,	/* DEFINEP                */
+	OPFAIL, 	/* OPFAIL                 */
+	NOTHING,	/* OPTIMIZED              */
+	PSEUDO, 	/* PSEUDO                 */
 	/* ------------ States ------------- */
-	TRIE,    	/* TRIE_next              */
-	TRIE,    	/* TRIE_next_fail         */
-	EVAL,    	/* EVAL_AB                */
-	EVAL,    	/* EVAL_AB_fail           */
-	CURLYX,  	/* CURLYX_end             */
-	CURLYX,  	/* CURLYX_end_fail        */
-	WHILEM,  	/* WHILEM_A_pre           */
-	WHILEM,  	/* WHILEM_A_pre_fail      */
-	WHILEM,  	/* WHILEM_A_min           */
-	WHILEM,  	/* WHILEM_A_min_fail      */
-	WHILEM,  	/* WHILEM_A_max           */
-	WHILEM,  	/* WHILEM_A_max_fail      */
-	WHILEM,  	/* WHILEM_B_min           */
-	WHILEM,  	/* WHILEM_B_min_fail      */
-	WHILEM,  	/* WHILEM_B_max           */
-	WHILEM,  	/* WHILEM_B_max_fail      */
-	BRANCH,  	/* BRANCH_next            */
-	BRANCH,  	/* BRANCH_next_fail       */
-	CURLYM,  	/* CURLYM_A               */
-	CURLYM,  	/* CURLYM_A_fail          */
-	CURLYM,  	/* CURLYM_B               */
-	CURLYM,  	/* CURLYM_B_fail          */
-	IFMATCH, 	/* IFMATCH_A              */
-	IFMATCH, 	/* IFMATCH_A_fail         */
-	CURLY,   	/* CURLY_B_min_known      */
-	CURLY,   	/* CURLY_B_min_known_fail */
-	CURLY,   	/* CURLY_B_min            */
-	CURLY,   	/* CURLY_B_min_fail       */
-	CURLY,   	/* CURLY_B_max            */
-	CURLY,   	/* CURLY_B_max_fail       */
+	TRIE,   	/* TRIE_next              */
+	TRIE,   	/* TRIE_next_fail         */
+	EVAL,   	/* EVAL_AB                */
+	EVAL,   	/* EVAL_AB_fail           */
+	CURLYX, 	/* CURLYX_end             */
+	CURLYX, 	/* CURLYX_end_fail        */
+	WHILEM, 	/* WHILEM_A_pre           */
+	WHILEM, 	/* WHILEM_A_pre_fail      */
+	WHILEM, 	/* WHILEM_A_min           */
+	WHILEM, 	/* WHILEM_A_min_fail      */
+	WHILEM, 	/* WHILEM_A_max           */
+	WHILEM, 	/* WHILEM_A_max_fail      */
+	WHILEM, 	/* WHILEM_B_min           */
+	WHILEM, 	/* WHILEM_B_min_fail      */
+	WHILEM, 	/* WHILEM_B_max           */
+	WHILEM, 	/* WHILEM_B_max_fail      */
+	BRANCH, 	/* BRANCH_next            */
+	BRANCH, 	/* BRANCH_next_fail       */
+	CURLYM, 	/* CURLYM_A               */
+	CURLYM, 	/* CURLYM_A_fail          */
+	CURLYM, 	/* CURLYM_B               */
+	CURLYM, 	/* CURLYM_B_fail          */
+	IFMATCH,	/* IFMATCH_A              */
+	IFMATCH,	/* IFMATCH_A_fail         */
+	CURLY,  	/* CURLY_B_min_known      */
+	CURLY,  	/* CURLY_B_min_known_fail */
+	CURLY,  	/* CURLY_B_min            */
+	CURLY,  	/* CURLY_B_min_fail       */
+	CURLY,  	/* CURLY_B_max            */
+	CURLY,  	/* CURLY_B_max_fail       */
 };
 #endif
 
@@ -304,13 +304,13 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_charclass),	/* TRIEC        */
 	EXTRA_SIZE(struct regnode_1),        	/* AHOCORASICK  */
 	EXTRA_SIZE(struct regnode_charclass),	/* AHOCORASICKC */
-	EXTRA_SIZE(struct regnode_2L),       	/* RECURSE      */
-	0,                                   	/* SRECURSE     */
+	EXTRA_SIZE(struct regnode_2L),       	/* GOSUB        */
+	0,                                   	/* GOSTART      */
 	EXTRA_SIZE(struct regnode_1),        	/* NREF         */
 	EXTRA_SIZE(struct regnode_1),        	/* NREFF        */
 	EXTRA_SIZE(struct regnode_1),        	/* NREFFL       */
 	EXTRA_SIZE(struct regnode_1),        	/* NGROUPP      */
-	EXTRA_SIZE(struct regnode_1),        	/* RECURSEP     */
+	EXTRA_SIZE(struct regnode_1),        	/* INSUBP       */
 	EXTRA_SIZE(struct regnode_1),        	/* DEFINEP      */
 	0,                                   	/* OPFAIL       */
 	0,                                   	/* OPTIMIZED    */
@@ -385,13 +385,13 @@ static const char reg_off_by_arg[] = {
 	0,	/* TRIEC        */
 	0,	/* AHOCORASICK  */
 	0,	/* AHOCORASICKC */
-	0,	/* RECURSE      */
-	0,	/* SRECURSE     */
+	0,	/* GOSUB        */
+	0,	/* GOSTART      */
 	0,	/* NREF         */
 	0,	/* NREFF        */
 	0,	/* NREFFL       */
 	0,	/* NGROUPP      */
-	0,	/* RECURSEP     */
+	0,	/* INSUBP       */
 	0,	/* DEFINEP      */
 	0,	/* OPFAIL       */
 	0,	/* OPTIMIZED    */
@@ -467,13 +467,13 @@ const char * reg_name[] = {
 	"TRIEC",                 	/* 0x3e */
 	"AHOCORASICK",           	/* 0x3f */
 	"AHOCORASICKC",          	/* 0x40 */
-	"RECURSE",               	/* 0x41 */
-	"SRECURSE",              	/* 0x42 */
+	"GOSUB",                 	/* 0x41 */
+	"GOSTART",               	/* 0x42 */
 	"NREF",                  	/* 0x43 */
 	"NREFF",                 	/* 0x44 */
 	"NREFFL",                	/* 0x45 */
 	"NGROUPP",               	/* 0x46 */
-	"RECURSEP",              	/* 0x47 */
+	"INSUBP",                	/* 0x47 */
 	"DEFINEP",               	/* 0x48 */
 	"OPFAIL",                	/* 0x49 */
 	"OPTIMIZED",             	/* 0x4a */

@@ -2565,7 +2565,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 
     bool result = 0;	    /* return value of S_regmatch */
     int depth = 0;	    /* depth of backtrack stack */
-    int nochange_depth = 0; /* depth of RECURSE recursion with nochange*/
+    int nochange_depth = 0; /* depth of GOSUB recursion with nochange*/
     regmatch_state *yes_state = NULL; /* state to pop to on success of
 							    subpattern */
     regmatch_state *cur_eval = NULL; /* most recent EVAL_AB state */
@@ -3408,21 +3408,23 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	{
 	    SV *ret;
             regexp *re;
-            regnode *startpoint;	    
-            
-        case SRECURSE:
-	case RECURSE: /*    /(...(?1))/      */
+            regnode *startpoint;
+
+	case GOSTART:
+	case GOSUB: /*    /(...(?1))/      */
             if (cur_eval && cur_eval->locinput==locinput) {
                 if (cur_eval->u.eval.close_paren == ARG(scan)) 
-                    Perl_croak(aTHX_ "Infinite recursion in RECURSE in regexp");
+                    Perl_croak(aTHX_ "Infinite recursion in regex");
                 if ( ++nochange_depth > MAX_RECURSE_EVAL_NOCHANGE_DEPTH ) 
-                    Perl_croak(aTHX_ "RECURSE without pos change exceeded limit in regexp");
+                    Perl_croak(aTHX_ 
+                        "Pattern subroutine nesting without pos change"
+                        " exceeded limit in regex");
             } else {
                 nochange_depth = 0;
-            }    
+            }
             re = rex;
             (void)ReREFCNT_inc(rex);
-            if (OP(scan)==RECURSE) {
+            if (OP(scan)==GOSUB) {
                 startpoint = scan + ARG2L(scan);
                 ST.close_paren = ARG(scan);
             } else {
@@ -3434,7 +3436,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
         case EVAL:  /*   /(?{A})B/   /(??{A})B/  and /(?(?{A})X|Y)B/   */        
             if (cur_eval && cur_eval->locinput==locinput) {
                 if ( ++nochange_depth > MAX_RECURSE_EVAL_NOCHANGE_DEPTH ) 
-                    Perl_croak(aTHX_ "EVAL without pos change exceeded limit in regexp");
+                    Perl_croak(aTHX_ "EVAL without pos change exceeded limit in regex");
             } else {
                 nochange_depth = 0;
             }    
@@ -3513,7 +3515,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
                         "Matching embedded");
 		);		
 		startpoint = re->program + 1;
-               	ST.close_paren = 0; /* only used for RECURSE */
+               	ST.close_paren = 0; /* only used for GOSUB */
                	/* borrowed from regtry */
                 if (PL_reg_start_tmpl <= re->nparens) {
                     PL_reg_start_tmpl = re->nparens*3/2 + 3;
@@ -3523,13 +3525,13 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
                         Newx(PL_reg_start_tmp, PL_reg_start_tmpl, char*);
                 }               	
 
-        eval_recurse_doit: /* Share code with RECURSE below this line */
+        eval_recurse_doit: /* Share code with GOSUB below this line */                		
 		/* run the pattern returned from (??{...}) */
 		ST.cp = regcppush(0);	/* Save *all* the positions. */
 		REGCP_SET(ST.lastcp);
 		
-		PL_regstartp = re->startp; /* essentially NOOP on RECURSE */
-		PL_regendp = re->endp;     /* essentially NOOP on RECURSE */
+		PL_regstartp = re->startp; /* essentially NOOP on GOSUB */
+		PL_regendp = re->endp;     /* essentially NOOP on GOSUB */
 		
 		*PL_reglastparen = 0;
 		*PL_reglastcloseparen = 0;
@@ -3618,7 +3620,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    /* reg_check_named_buff_matched returns 0 for no match */
 	    sw = (bool)(0 < reg_check_named_buff_matched(rex,scan));
 	    break;
-        case RECURSEP:
+        case INSUBP:
             n = ARG(scan);
             sw = (cur_eval && (!n || cur_eval->u.eval.close_paren == n));
             break;

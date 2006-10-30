@@ -3521,12 +3521,12 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    if (data)
 		*(data->last_closep) = ARG(scan);
 	}
-	else if (OP(scan) == RECURSE || OP(scan) == SRECURSE) {
+	else if (OP(scan) == GOSUB || OP(scan) == GOSTART) {
 	    /* set the pointer */
 	    I32 paren;
 	    regnode *start;
 	    regnode *end;
-	    if (OP(scan) == RECURSE) {
+	    if (OP(scan) == GOSUB) {
 	        paren = ARG(scan);
 	        RExC_recurse[ARG2L(scan)] = scan;
                 start = RExC_open_parens[paren-1];
@@ -4745,7 +4745,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    case 'R' :           /* (?R) */
 		if (*RExC_parse != ')')
 		    FAIL("Sequence (?R) not terminated");
-		ret = reg_node(pRExC_state, SRECURSE);
+		ret = reg_node(pRExC_state, GOSTART);
 		nextchar(pRExC_state);
 		return ret;
 		/*notreached*/
@@ -4772,7 +4772,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	            vFAIL("Expecting close bracket");
 			
               gen_recurse_regop:
-                ret = reganode(pRExC_state, RECURSE, num);
+                ret = reganode(pRExC_state, GOSUB, num);
                 if (!SIZE_ONLY) {
 		    if (num > (I32)RExC_rx->nparens) {
 			RExC_parse++;
@@ -4936,7 +4936,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     		            SIZE_ONLY ? REG_RSN_RETURN_NULL : REG_RSN_RETURN_DATA);
     		        parno = sv_dat ? *((I32 *)SvPVX(sv_dat)) : 0;
 		    }
-		    ret = reganode(pRExC_state,RECURSEP,parno); 
+		    ret = reganode(pRExC_state,INSUBP,parno); 
 		    goto insert_if_check_paren;
 		}
 		else if (RExC_parse[0] >= '1' && RExC_parse[0] <= '9' ) {
@@ -7938,7 +7938,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	Perl_sv_catpvf(aTHX_ sv, "[%d/%d]", o->flags & 0xf, o->flags>>4);
     else if (k == REF || k == OPEN || k == CLOSE || k == GROUPP) 
 	Perl_sv_catpvf(aTHX_ sv, "%d", (int)ARG(o));	/* Parenth number */
-    else if (k == RECURSE)
+    else if (k == GOSUB) 
 	Perl_sv_catpvf(aTHX_ sv, "%d[%+d]", (int)ARG(o),(int)ARG2L(o));	/* Paren and offset */
     else if (k == LOGICAL)
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */

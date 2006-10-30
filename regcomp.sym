@@ -153,9 +153,9 @@ TRIEC		TRIE,   trie charclass	Same as TRIE, but with embedded charclass data
 AHOCORASICK	TRIE,   trie 1	Aho Corasick stclass. flags==type
 AHOCORASICKC	TRIE,   trie charclass	Same as AHOCORASICK, but with embedded charclass data
 
-#*Recursion (65..66) 
-RECURSE		RECURSE,   num/ofs 2L	recurse to paren arg1 at (signed) ofs arg2
-SRECURSE	SRECURSE,   no   	recurse to start of pattern
+#*Regex Subroutines (65..66) 
+GOSUB		GOSUB,   num/ofs 2L	recurse to paren arg1 at (signed) ofs arg2
+GOSTART		GOSTART,   no   	recurse to start of pattern
 
 #*Named references (67..69)
 NREF		NREF,    no-sv 1	Match some already matched string
@@ -165,7 +165,7 @@ NREFFL		NREF,    no-sv 1	Match already matched string, folded in loc.
 
 #*Special conditionals  (70..72)
 NGROUPP		NGROUPP,   no-sv 1	Whether the group matched.            
-RECURSEP	RECURSEP,  num 1 	Whether we are in a specific recurse.  
+INSUBP		INSUBP,    num 1 	Whether we are in a specific recurse.  
 DEFINEP		DEFINEP,   none 1 	Never execute directly.               
 
 #*Bactracking 
