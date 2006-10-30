@@ -57,7 +57,7 @@ do_aspawn (SV *really, void **mark, void **sp)
 
     while (++mark <= sp)
         if (*mark)
-            *a++ = SvPVx(*mark, n_a);
+            *a++ = SvPVx((SV *)*mark, n_a);
         else
             *a++ = "";
     *a = Nullch;
@@ -137,7 +137,6 @@ do_spawn (char *cmd)
 }
 
 /* see also Cwd.pm */
-static
 XS(Cygwin_cwd)
 {
     dXSARGS;
@@ -156,7 +155,6 @@ XS(Cygwin_cwd)
     XSRETURN_UNDEF;
 }
 
-static
 XS(XS_Cygwin_pid_to_winpid)
 {
     dXSARGS;
@@ -175,7 +173,6 @@ XS(XS_Cygwin_pid_to_winpid)
     XSRETURN_UNDEF;
 }
 
-static
 XS(XS_Cygwin_winpid_to_pid)
 {
     dXSARGS;

@@ -2001,12 +2001,12 @@ morecore(register int bucket)
 }
 
 Free_t
-Perl_mfree(void *mp)
+Perl_mfree(Malloc_t where)
 {
         dVAR;
   	register MEM_SIZE size;
 	register union overhead *ovp;
-	char *cp = (char*)mp;
+	char *cp = (char*)where;
 #ifdef PACK_MALLOC
 	u_char bucket;
 #endif 
@@ -2324,7 +2324,7 @@ Perl_strdup(const char *s)
     MEM_SIZE l = strlen(s);
     char *s1 = (char *)Perl_malloc(l+1);
 
-    return CopyD(s, s1, (MEM_SIZE)(l+1), char);
+    return (char *)CopyD(s, s1, (MEM_SIZE)(l+1), char);
 }
 
 #ifdef PERL_CORE
@@ -2347,7 +2347,7 @@ Perl_putenv(char *a)
   if (l < sizeof(buf))
       var = buf;
   else
-      var = Perl_malloc(l + 1);
+      var = (char *)Perl_malloc(l + 1);
   Copy(a, var, l, char);
   var[l + 1] = 0;
   my_setenv(var, val+1);

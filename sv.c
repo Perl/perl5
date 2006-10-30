@@ -10434,7 +10434,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	    /* fall through */
 	case SAVEt_COMPPAD:
 	case SAVEt_NSTAB:
-	    sv = POPPTR(ss,ix);
+	    sv = (SV*) POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = sv_dup(sv, param);
 	    break;
 	case SAVEt_INT:				/* int reference */
