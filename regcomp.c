@@ -4717,6 +4717,22 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    case ':':           /* (?:...) */
 	    case '>':           /* (?>...) */
 		break;
+	    case 'C':
+		if (RExC_parse[0] == 'O' &&
+		    RExC_parse[1] == 'M' &&
+		    RExC_parse[2] == 'M' &&
+		    RExC_parse[3] == 'I' &&
+		    RExC_parse[4] == 'T' &&
+		    RExC_parse[5] == ')')
+		{
+		    RExC_parse+=5;
+		    ret = reg_node(pRExC_state, COMMIT);
+		} else {
+		    vFAIL("Sequence (?C... not terminated");
+		}
+		nextchar(pRExC_state);
+		return ret;
+		break;
             case 'F':
                 if (RExC_parse[0] == 'A' &&
                     RExC_parse[1] == 'I' &&

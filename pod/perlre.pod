@@ -1046,6 +1046,54 @@ to inside of one of these constructs. The following equivalences apply:
     PAT?+               (?>PAT?)
     PAT{min,max}+       (?>PAT{min,max})
 
+=item C<(?COMMIT)>
+X<(?COMMIT)>
+
+This zero-width pattern commits the match at the current point, preventing
+the engine from back-tracking on failure to the left of the commit point.
+Consider the pattern C<A (?COMMIT) B>, where A and B are complex patterns.
+Until the C<(?COMMIT)> is reached, A may backtrack as necessary to match.
+Once it is reached, matching continues in B, which may also backtrack as
+necessary; however, should B not match, then no further backtracking will
+take place, and the pattern will fail outright at that starting position.
+
+The following example counts all the possible matching strings in a
+pattern (without actually matching any of them).
+
+    'aaab'=~/a+b?(?{print "$&\n"; $count++})(?FAIL)/;
+    print "Count=$count\n";
+
+which produces:
+
+    aaab
+    aaa
+    aa
+    a
+    aab
+    aa
+    a
+    ab
+    a
+    Count=9
+
+If we add a C<(?COMMIT)> before the count like the following
+
+    'aaab'=~/a+b?(?COMMIT)(?{print "$&\n"; $count++})(?FAIL)/;
+    print "Count=$count\n";
+
+we prevent backtracking and find the count of the longest matching
+at each matching startpoint like so:
+
+    aaab
+    aab
+    ab
+    Count=3
+
+Any number of C<(?COMMIT)> assertions may be used in a pattern.
+
+See also C<< (?>pattern) >> and possessive quantifiers for other
+ways to control backtracking.
+
 =item C<(?(condition)yes-pattern|no-pattern)>
 X<(?()>
 

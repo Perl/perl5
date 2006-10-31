@@ -2571,6 +2571,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
     regmatch_state *cur_eval = NULL; /* most recent EVAL_AB state */
     struct regmatch_state  *cur_curlyx = NULL; /* most recent curlyx */
     U32 state_num;
+    bool no_final = 0;      /* if true then we dont backtrack on failure */
 
     /* these three flags are set by various ops to signal information to
      * the very next op. They have a useful lifetime of exactly one loop
@@ -4614,6 +4615,12 @@ NULL
 	    if (next == scan)
 		next = NULL;
 	    break;
+	case COMMIT:
+	    PUSH_STATE_GOTO(COMMIT_next,next);
+	    /* NOTREACHED */
+	case COMMIT_next_fail:
+	    no_final = 1;    
+	    /* FALLTHROUGH */	    
 	case OPFAIL:
 	    sayNO;
 	default:
@@ -4672,7 +4679,13 @@ yes:
 		PL_regmatch_slab = PL_regmatch_slab->prev;
 		st = SLAB_LAST(PL_regmatch_slab);
 	    }
-	    DEBUG_STATE_pp("pop (yes)");
+            DEBUG_STATE_r(
+	        if (no_final) {
+	            DEBUG_STATE_pp("pop (no final)");        
+	        } else {
+	            DEBUG_STATE_pp("pop (yes)");
+	        }
+	    ); 
 	    depth--;
 	}
 #else
@@ -4690,7 +4703,7 @@ yes:
 	yes_state = st->u.yes.prev_yes_state;
 	PL_regmatch_state = st;
 
-	state_num = st->resume_state;
+	state_num = st->resume_state + no_final;
 	goto reenter_switch;
     }
 
@@ -4709,6 +4722,13 @@ no:
 	);
 
 no_silent:
+    if (no_final) {
+        if (yes_state) {
+            goto yes;
+        } else {
+            goto final_exit;
+        }
+    }    
     if (depth) {
 	/* there's a previous state to backtrack to */
 	st--;

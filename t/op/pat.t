@@ -3719,8 +3719,14 @@ sub iseq($$;$) {
     ';
     ok(!$@,'lvalue $+{...} should not throw an exception');
 }
-
-
+{
+    our $count = 0;
+    'aaab'=~/a+b?(?{$count++})(?FAIL)/;
+    iseq($count,9,"expect 9 for no (?COMMIT)");
+    $count = 0;
+    'aaab'=~/a+b?(?COMMIT)(?{$count++})(?FAIL)/;
+    iseq($count,3,"expect 3 with (?COMMIT)");
+}
 # stress test CURLYX/WHILEM.
 #
 # This test includes varying levels of nesting, and according to
@@ -3860,5 +3866,5 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
     or print "# Unexpected outcome: should pass or crash perl\n";
 
 # Don't forget to update this!
-BEGIN{print "1..1287\n"};
+BEGIN{print "1..1289\n"};
 
