@@ -711,7 +711,10 @@ sub byteorder
       skip "cannot pack '$format' on this perl", 5
         if is_valid_error($@);
 
-      print "# [$value][$nat][$be][$le][$@]\n";
+      {
+        use warnings qw(NONFATAL utf8);
+        print "# [$value][$nat][$be][$le][$@]\n";
+      }
 
       SKIP: {
         skip "cannot compare native byteorder with big-/little-endian", 1
