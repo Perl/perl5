@@ -1545,7 +1545,7 @@ S_sublex_start(pTHX)
 	/* readpipe() vas overriden */
 	cSVOPx(cLISTOPx(cUNOPx(PL_lex_op)->op_first)->op_first->op_sibling)->op_sv = tokeq(PL_lex_stuff);
 	yylval.opval = PL_lex_op;
-	PL_lex_op =
+	PL_lex_op = NULL;
 	PL_lex_stuff = NULL;
 	return THING;
     }
@@ -4987,7 +4987,7 @@ Perl_yylex(pTHX)
 	    no_op("Backticks",s);
 	if (!s)
 	    missingterm(NULL);
-	readpipe_override(aTHX);
+	readpipe_override();
 	TERM(sublex_start());
 
     case '\\':
@@ -6306,7 +6306,7 @@ Perl_yylex(pTHX)
 	    s = scan_str(s,!!PL_madskills,FALSE);
 	    if (!s)
 		missingterm(NULL);
-	    readpipe_override(aTHX);
+	    readpipe_override();
 	    TERM(sublex_start());
 
 	case KEY_return:
