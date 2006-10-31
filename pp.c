@@ -387,7 +387,7 @@ PP(pp_prototype)
     SV *ret = &PL_sv_undef;
 
     if (SvPOK(TOPs) && SvCUR(TOPs) >= 7) {
-	const char * const s = SvPVX_const(TOPs);
+	const char * s = SvPVX_const(TOPs);
 	if (strnEQ(s, "CORE::", 6)) {
 	    const int code = keyword(s + 6, SvCUR(TOPs) - 6, 1);
 	    if (code < 0) {	/* Overridable. */
@@ -402,6 +402,9 @@ PP(pp_prototype)
 		if (code == -KEY_mkdir) {
 		    ret = sv_2mortal(newSVpvs("_;$"));
 		    goto set;
+		}
+		if (code == -KEY_readpipe) {
+		    s = "CORE::backtick";
 		}
 		while (i < MAXO) {	/* The slow way. */
 		    if (strEQ(s + 6, PL_op_name[i])

@@ -1541,6 +1541,14 @@ S_sublex_start(pTHX)
 	    PL_expect = XTERMORDORDOR;
 	return THING;
     }
+    else if (op_type == OP_BACKTICK && PL_lex_op) {
+	/* readpipe() vas overriden */
+	cSVOPx(cLISTOPx(cUNOPx(PL_lex_op)->op_first)->op_first->op_sibling)->op_sv = tokeq(PL_lex_stuff);
+	yylval.opval = PL_lex_op;
+	PL_lex_op =
+	PL_lex_stuff = NULL;
+	return THING;
+    }
 
     PL_sublex_info.super_state = PL_lex_state;
     PL_sublex_info.sub_inwhat = op_type;
@@ -2838,6 +2846,34 @@ S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
     }
 
     return gv_stashpv(pkgname, FALSE);
+}
+
+/*
+ * S_readpipe_override
+ * Check whether readpipe() is overriden, and generates the appropriate
+ * optree, provided sublex_start() is called afterwards.
+ */
+STATIC void
+S_readpipe_override()
+{
+    GV **gvp;
+    GV *gv_readpipe = gv_fetchpvs("readpipe", GV_NOTQUAL, SVt_PVCV);
+    yylval.ival = OP_BACKTICK;
+    if ((gv_readpipe
+		&& GvCVu(gv_readpipe) && GvIMPORTED_CV(gv_readpipe))
+	    ||
+	    ((gvp = (GV**)hv_fetchs(PL_globalstash, "readpipe", FALSE))
+	     && (gv_readpipe = *gvp) != (GV*)&PL_sv_undef
+	     && GvCVu(gv_readpipe) && GvIMPORTED_CV(gv_readpipe)))
+    {
+	PL_lex_op = (OP*)newUNOP(OP_ENTERSUB, OPf_STACKED,
+	    append_elem(OP_LIST,
+		newSVOP(OP_CONST, 0, &PL_sv_undef), /* value will be read later */
+		newCVREF(0, newGVOP(OP_GV, 0, gv_readpipe))));
+    }
+    else {
+	set_csh();
+    }
 }
 
 #ifdef PERL_MAD 
@@ -4951,8 +4987,7 @@ Perl_yylex(pTHX)
 	    no_op("Backticks",s);
 	if (!s)
 	    missingterm(NULL);
-	yylval.ival = OP_BACKTICK;
-	set_csh();
+	S_readpipe_override();
 	TERM(sublex_start());
 
     case '\\':
@@ -6271,8 +6306,7 @@ Perl_yylex(pTHX)
 	    s = scan_str(s,!!PL_madskills,FALSE);
 	    if (!s)
 		missingterm(NULL);
-	    yylval.ival = OP_BACKTICK;
-	    set_csh();
+	    S_readpipe_override();
 	    TERM(sublex_start());
 
 	case KEY_return:

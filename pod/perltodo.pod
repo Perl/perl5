@@ -528,10 +528,6 @@ its performance to be measured, and its bugs to be easily demonstrated.
 Allow to delete functions. One can already undef them, but they're still
 in the stash.
 
-=head2 Make readpipe overridable
-
-so we can override qx// as well.
-
 =head2 optional optimizer
 
 Make the peephole optimizer optional. Currently it performs two tasks as

@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 22;
+plan tests => 26;
 
 #
 # This file tries to test builtin override using CORE::GLOBAL
@@ -78,6 +78,19 @@ BEGIN { *Rgs::readline = sub (;*) { --$r }; }
     ::is( <FH>	, 13 );
     ::is( <$fh>	, 12 );
     ::is( <$pad_fh>	, 11 );
+}
+
+# Global readpipe() override
+BEGIN { *CORE::GLOBAL::readpipe = sub ($) { "$_[0] " . --$r }; }
+is( `rm`,	    "rm 10", '``' );
+is( qx/cp/,	    "cp 9", 'qx' );
+
+# Non-global readpipe() override
+BEGIN { *Rgs::readpipe = sub ($) { ++$r . " $_[0]" }; }
+{
+    package Rgs;
+    ::is( `rm`,		  "10 rm", '``' );
+    ::is( qx/cp/,	  "11 cp", 'qx' );
 }
 
 # Verify that the parsing of overriden keywords isn't messed up

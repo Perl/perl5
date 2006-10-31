@@ -174,7 +174,7 @@ read (*\$$;$)
 readdir (*)
 readline (;*)
 readlink (_)
-readpipe unknown
+readpipe ($)
 recv (*\$$$)
 redo undef
 ref (_)

@@ -1372,7 +1372,8 @@ And, as you'll have noticed from the previous example, if you override
 C<glob>, the C<< <*> >> glob operator is overridden as well.
 
 In a similar fashion, overriding the C<readline> function also overrides
-the equivalent I/O operator C<< <FILEHANDLE> >>.
+the equivalent I/O operator C<< <FILEHANDLE> >>. Also, overriding
+C<readpipe> also overrides the operators C<``> and C<qx//>.
 
 Finally, some built-ins (e.g. C<exists> or C<grep>) can't be overridden.
 
