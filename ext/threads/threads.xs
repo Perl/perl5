@@ -174,8 +174,8 @@ S_ithread_destruct(pTHX_ ithread *thread)
 
     /* Remove from circular list of threads */
     MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
-    thread->next->prev = thread->prev;
-    thread->prev->next = thread->next;
+    if (thread->next) thread->next->prev = thread->prev;
+    if (thread->prev) thread->prev->next = thread->next;
     thread->next = NULL;
     thread->prev = NULL;
     MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
