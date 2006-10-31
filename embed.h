@@ -1459,6 +1459,7 @@
 #define force_word		S_force_word
 #define tokeq			S_tokeq
 #define pending_ident		S_pending_ident
+#define readpipe_override	S_readpipe_override
 #define scan_const		S_scan_const
 #define scan_formline		S_scan_formline
 #define scan_heredoc		S_scan_heredoc
@@ -3663,6 +3664,7 @@
 #define force_word(a,b,c,d,e)	S_force_word(aTHX_ a,b,c,d,e)
 #define tokeq(a)		S_tokeq(aTHX_ a)
 #define pending_ident()		S_pending_ident(aTHX)
+#define readpipe_override()	S_readpipe_override(aTHX)
 #define scan_const(a)		S_scan_const(aTHX_ a)
 #define scan_formline(a)	S_scan_formline(aTHX_ a)
 #define scan_heredoc(a)		S_scan_heredoc(aTHX_ a)

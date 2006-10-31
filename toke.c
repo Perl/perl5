@@ -2854,7 +2854,7 @@ S_find_in_my_stash(pTHX_ const char *pkgname, I32 len)
  * optree, provided sublex_start() is called afterwards.
  */
 STATIC void
-S_readpipe_override()
+S_readpipe_override(pTHX)
 {
     GV **gvp;
     GV *gv_readpipe = gv_fetchpvs("readpipe", GV_NOTQUAL, SVt_PVCV);
@@ -4987,7 +4987,7 @@ Perl_yylex(pTHX)
 	    no_op("Backticks",s);
 	if (!s)
 	    missingterm(NULL);
-	S_readpipe_override();
+	readpipe_override(aTHX);
 	TERM(sublex_start());
 
     case '\\':
@@ -6306,7 +6306,7 @@ Perl_yylex(pTHX)
 	    s = scan_str(s,!!PL_madskills,FALSE);
 	    if (!s)
 		missingterm(NULL);
-	    S_readpipe_override();
+	    readpipe_override(aTHX);
 	    TERM(sublex_start());
 
 	case KEY_return:
