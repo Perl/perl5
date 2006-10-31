@@ -1,5 +1,9 @@
 Revision history for Perl extension threads.
 
+1.47 Mon Oct 30 16:02:53 EST 2006
+	- Fix t/thread.t crash under Win32
+	- Test multiple embedded Perl support
+
 1.46 Fri Oct 27 19:51:48 EST 2006
 	- Support multiple embedded Perls
 	- Document workaround for non-threadsafe modules

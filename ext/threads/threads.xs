@@ -237,17 +237,7 @@ int
 Perl_ithread_hook(pTHX)
 {
     dMY_POOL;
-
-    int veto_cleanup = 0;
-
-    if (aTHX == MY_POOL.main_thread.interp) {
-        veto_cleanup = S_exit_warning(aTHX);
-        if (! veto_cleanup) {
-            MUTEX_DESTROY(&MY_POOL.create_destruct_mutex);
-        }
-    }
-
-    return (veto_cleanup);
+    return ((aTHX == MY_POOL.main_thread.interp) ? S_exit_warning(aTHX) : 0);
 }
 
 
