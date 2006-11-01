@@ -13,7 +13,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyUncompressError);
 
-$VERSION = '2.000_14';
+$VERSION = '2.001';
 $AnyUncompressError = '';
 
 @ISA = qw( Exporter IO::Uncompress::Base );
@@ -237,24 +237,6 @@ IO::Uncompress::AnyUncompress - Uncompress gzip, zip, bzip2 or lzop file/buffer
 
 
 =head1 DESCRIPTION
-
-
-
-B<WARNING -- This is a Beta release>. 
-
-=over 5
-
-=item * DO NOT use in production code.
-
-=item * The documentation is incomplete in places.
-
-=item * Parts of the interface defined here are tentative.
-
-=item * Please report any problems you find.
-
-=back
-
-
 
 
 This module provides a Perl interface that allows the reading of

@@ -17,7 +17,7 @@ use IO::Uncompress::Adapter::Inflate ;
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $RawInflateError);
 
-$VERSION = '2.000_14';
+$VERSION = '2.001';
 $RawInflateError = '';
 
 @ISA    = qw( Exporter IO::Uncompress::Base );
@@ -384,24 +384,6 @@ IO::Uncompress::RawInflate - Read RFC 1951 files/buffers
 
 
 =head1 DESCRIPTION
-
-
-
-B<WARNING -- This is a Beta release>. 
-
-=over 5
-
-=item * DO NOT use in production code.
-
-=item * The documentation is incomplete in places.
-
-=item * Parts of the interface defined here are tentative.
-
-=item * Please report any problems you find.
-
-=back
-
-
 
 
 

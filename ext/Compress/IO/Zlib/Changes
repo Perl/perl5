@@ -1,6 +1,10 @@
 CHANGES
 -------
 
+  2.001 1 November 2006
+
+      * Remove beta status.
+
   2.000_14 26 October 2006
 
       * IO::Uncompress::Deflate

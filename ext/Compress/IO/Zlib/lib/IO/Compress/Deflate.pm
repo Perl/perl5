@@ -15,7 +15,7 @@ use IO::Compress::Base::Common qw(createSelfTiedObject);
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $DeflateError);
 
-$VERSION = '2.000_14';
+$VERSION = '2.001';
 $DeflateError = '';
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -217,24 +217,6 @@ IO::Compress::Deflate - Write RFC 1950 files/buffers
     
 
 =head1 DESCRIPTION
-
-
-
-B<WARNING -- This is a Beta release>. 
-
-=over 5
-
-=item * DO NOT use in production code.
-
-=item * The documentation is incomplete in places.
-
-=item * Parts of the interface defined here are tentative.
-
-=item * Please report any problems you find.
-
-=back
-
-
 
 
 This module provides a Perl interface that allows writing compressed

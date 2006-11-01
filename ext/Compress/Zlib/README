@@ -1,9 +1,9 @@
 
                              Compress::Zlib
 
-                             Version 2.000_14
+                             Version 2.001
 
-                            26th October 2006
+                             1st November 2006
 
 
        Copyright (c) 1995-2006 Paul Marquess. All rights reserved.
@@ -12,12 +12,6 @@
 
 
 
-
-                                  WARNING
-                            THIS IS BETA CODE.
-
-                      DO NOT use in production code.
-                        Please report any problems.
 
 DESCRIPTION
 -----------
