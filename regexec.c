@@ -3622,7 +3622,7 @@ S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
 	    break;
         case INSUBP:
             n = ARG(scan);
-            sw = (cur_eval && (!n || cur_eval->u.eval.close_paren == n));
+            sw = (cur_eval && (!n || cur_eval->u.eval.close_paren == (U32)n));
             break;
         case DEFINEP:
             sw = 0;
@@ -4209,7 +4209,7 @@ NULL
 	    ST.min = ARG1(scan);  /* min to match */
 	    ST.max = ARG2(scan);  /* max to match */
 	    if (cur_eval && cur_eval->u.eval.close_paren &&
-	        cur_eval->u.eval.close_paren == ST.paren) {
+	        cur_eval->u.eval.close_paren == (U32)ST.paren) {
 	        ST.min=1;
 	        ST.max=1;
 	    }
@@ -4419,7 +4419,7 @@ NULL
 		PL_reginput = locinput;
 		CURLY_SETPAREN(ST.paren, ST.count);
 		if (cur_eval && cur_eval->u.eval.close_paren && 
-		    cur_eval->u.eval.close_paren == ST.paren) {
+		    cur_eval->u.eval.close_paren == (U32)ST.paren) {
 		    goto fake_end;
 	        }
 		PUSH_STATE_GOTO(CURLY_B_min_known, ST.B);
@@ -4444,7 +4444,7 @@ NULL
 		  curly_try_B_min:
 		    CURLY_SETPAREN(ST.paren, ST.count);
 		    if (cur_eval && cur_eval->u.eval.close_paren &&
-		        cur_eval->u.eval.close_paren == ST.paren) {
+		        cur_eval->u.eval.close_paren == (U32)ST.paren) {
                         goto fake_end;
                     }
 		    PUSH_STATE_GOTO(CURLY_B_min, ST.B);
@@ -4457,7 +4457,7 @@ NULL
 	curly_try_B_max:
 	    /* a successful greedy match: now try to match B */
             if (cur_eval && cur_eval->u.eval.close_paren &&
-                cur_eval->u.eval.close_paren == ST.paren) {
+                cur_eval->u.eval.close_paren == (U32)ST.paren) {
                 goto fake_end;
             }
 	    {

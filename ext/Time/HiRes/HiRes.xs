@@ -1209,7 +1209,7 @@ clock()
 
 #endif /*  #if defined(TIME_HIRES_CLOCK) && defined(CLOCKS_PER_SEC) */
 
-IV
+void
 stat(...)
 PROTOTYPE: ;$
     PPCODE:
