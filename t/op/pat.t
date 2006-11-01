@@ -3839,6 +3839,17 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     ok(eval("qq/$targ/ =~ /$reg/"), "\\c\\ in pattern");
 }
 
+{
+    my $str='abc'; 
+    my $count=0;
+    my $mval=0;
+    my $pval=0;
+    while ($str=~/b/g) { $mval=$#-; $pval=$#+; $count++ }
+    iseq($mval,0,"\@- should be empty [RT#36046]");
+    iseq($pval,0,"\@+ should be empty [RT#36046]");
+    iseq($count,1,"should have matched once only [RT#36046]");
+}
+
 # Keep the following tests last -- they may crash perl
 
 ok(("a" x (2**15 - 10)) =~ /^()(a|bb)*$/, "Recursive stack cracker: #24274")
@@ -3849,5 +3860,5 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
     or print "# Unexpected outcome: should pass or crash perl\n";
 
 # Don't forget to update this!
-BEGIN{print "1..1284\n"};
+BEGIN{print "1..1287\n"};
 
