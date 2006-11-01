@@ -58,7 +58,7 @@ undef $/;
 
 plan tests => (scalar(@prgs)-$files);
 
-
+my $utf8_ok = exists $ENV{PERL_UNICODE} && $ENV{PERL_UNICODE} =~ m{^$|[Dio]} ? 1 : 0;
 
 for (@prgs){
     unless (/\n/)
@@ -73,6 +73,12 @@ for (@prgs){
         $switch = $&;
     }
     my($prog,$expected) = split(/\nEXPECT(?:\n|$)/, $_, 2);
+    $expected =~ s{\b
+       UTF8 \s*
+           \? \s* '(.*?)'
+            : \s* '(.*?)'
+	    }{$utf8_ok?$1:$2}gexs;
+
     my ($todo, $todo_reason);
     $todo = $prog =~ s/^#\s*TODO(.*)\n//m and $todo_reason = $1;
     if ( $prog =~ /--FILE--/) {
