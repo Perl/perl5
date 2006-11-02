@@ -8,7 +8,7 @@ use warnings;
 my @pos = qw(__DATA__ __END__ AUTOLOAD BEGIN CHECK DESTROY default defined
 	    delete do END else eval elsif exists for format foreach given grep
 	    goto glob INIT if last local m my map next no our pos print printf
-	    package prototype q qr qq qw qx redo return require s scalar sort
+	    package prototype q qr qq qw qx redo return require s say scalar sort
 	    split state study sub tr tie tied use undef UNITCHECK until untie
 	    unless when while y);
 
@@ -26,7 +26,7 @@ my @neg = qw(__FILE__ __LINE__ __PACKAGE__ and abs alarm atan2 accept bless
 	    length listen lcfirst localtime mkdir msgctl msgget msgrcv msgsnd
 	    ne not or ord oct open opendir pop push pack pipe quotemeta ref
 	    read rand recv rmdir reset rename rindex reverse readdir readlink
-	    readline readpipe rewinddir say seek send semop select semctl semget
+	    readline readpipe rewinddir seek send semop select semctl semget
 	    setpgrp seekdir setpwent setgrent setnetent setsockopt sethostent
 	    setservent setpriority setprotoent shift shmctl shmget shmread
 	    shmwrite shutdown sin sleep socket socketpair sprintf splice sqrt

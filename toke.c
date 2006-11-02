@@ -7393,7 +7393,7 @@ Perl_keyword (pTHX_ const char *name, I32 len, bool all_keywords)
             case 'a':
               if (name[2] == 'y')
               {                                   /* say        */
-                return (all_keywords || FEATURE_IS_ENABLED("say") ? -KEY_say : 0);
+                return (all_keywords || FEATURE_IS_ENABLED("say") ? KEY_say : 0);
               }
 
               goto unknown;

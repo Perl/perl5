@@ -187,7 +187,7 @@ rewinddir (*)
 rindex ($$;$)
 rmdir (_)
 s undef
-say (;*@)
+say undef
 scalar undef
 seek (*$$)
 seekdir (*$)
