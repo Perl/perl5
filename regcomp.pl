@@ -48,7 +48,7 @@ while (<DESC>) {
                     $ind++;
                     $name[$ind]="$real$suffix";
                     $type[$ind]=$type;
-                    $rest[$ind]="Regmatch state for $type";
+                    $rest[$ind]="state for $type";
                 }
             }
         }
@@ -92,13 +92,16 @@ EOP
     -$width, REGMATCH_STATE_MAX => $tot - 1
 ;
 
-$ind = 0;
-while (++$ind <= $tot) {
+
+for ($ind=1; $ind <= $lastregop ; $ind++) {
   my $oind = $ind - 1;
   printf OUT "#define\t%*s\t%d\t/* %#04x %s */\n",
     -$width, $name[$ind], $ind-1, $ind-1, $rest[$ind];
-  print OUT "\n\t/* ------------ States ------------- */\n\n"
-    if $ind == $lastregop and $lastregop != $tot;
+}
+print OUT "\t/* ------------ States ------------- */\n";
+for ( ; $ind <= $tot ; $ind++) {
+  printf OUT "#define\t%*s\t(REGNODE_MAX + %d)\t/* %s */\n",
+    -$width, $name[$ind], $ind - $lastregop, $rest[$ind];
 }
 
 print OUT <<EOP;
@@ -164,13 +167,19 @@ const char * reg_name[] = {
 EOP
 
 $ind = 0;
+my $ofs = 1;
+my $sym = "";
 while (++$ind <= $tot) {
   my $size = $longj[$ind] || 0;
 
-  printf OUT "\t%*s\t/* %#04x */\n",
-	-3-$width,qq("$name[$ind]",),$ind-1;
-  print OUT "\t/* ------------ States ------------- */\n"
-    if $ind == $lastregop and $lastregop != $tot;
+  printf OUT "\t%*s\t/* $sym%#04x */\n",
+	-3-$width,qq("$name[$ind]",), $ind - $ofs;
+  if ($ind == $lastregop and $lastregop != $tot) {
+    print OUT "\t/* ------------ States ------------- */\n";
+    $ofs = $lastregop;
+    $sym = 'REGNODE_MAX +';
+  }
+    
 }
 
 print OUT <<EOP;

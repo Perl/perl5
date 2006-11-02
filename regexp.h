@@ -202,6 +202,7 @@ typedef struct {
     char *till;
     SV *sv;
     char *ganch;
+    char *cutpoint;
 } regmatch_info;
  
 

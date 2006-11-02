@@ -3719,14 +3719,7 @@ sub iseq($$;$) {
     ';
     ok(!$@,'lvalue $+{...} should not throw an exception');
 }
-{
-    our $count = 0;
-    'aaab'=~/a+b?(?{$count++})(?FAIL)/;
-    iseq($count,9,"expect 9 for no (?COMMIT)");
-    $count = 0;
-    'aaab'=~/a+b?(?COMMIT)(?{$count++})(?FAIL)/;
-    iseq($count,3,"expect 3 with (?COMMIT)");
-}
+
 # stress test CURLYX/WHILEM.
 #
 # This test includes varying levels of nesting, and according to
@@ -3734,7 +3727,9 @@ sub iseq($$;$) {
 # CURLYX and WHILEM blocks, except those related to LONGJMP, the
 # super-linear cache and warnings. It executes about 0.5M regexes
 
-{
+if ($ENV{PERL_SKIP_PSYCHO_TEST}){
+  printf "ok %d Skip: No psycho tests\n", $test++;
+} else {    
   my $r = qr/^
   	    (?:
   		( (?:a|z+)+ )
@@ -3856,6 +3851,57 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     iseq($count,1,"should have matched once only [RT#36046]");
 }
 
+{   # Test the (?COMMIT) pattern
+    our $count = 0;
+    'aaab'=~/a+b?(?{$count++})(?FAIL)/;
+    iseq($count,9,"expect 9 for no (?COMMIT)");
+    $count = 0;
+    'aaab'=~/a+b?(?COMMIT)(?{$count++})(?FAIL)/;
+    iseq($count,3,"expect 3 with (?COMMIT)");
+    local $_='aaab';
+    $count=0;
+    1 while /.(?COMMIT)(?{$count++})(?FAIL)/g;
+    iseq($count,4,"/.(?COMMIT)/");
+    $count = 0;
+    'aaab'=~/a+b?(??{'(?COMMIT)'})(?{$count++})(?FAIL)/;
+    iseq($count,3,"expect 3 with (?COMMIT)");
+    local $_='aaab';
+    $count=0;
+    1 while /.(??{'(?COMMIT)'})(?{$count++})(?FAIL)/g;
+    iseq($count,4,"/.(?COMMIT)/");
+}
+{   # Test the (?CUT) pattern
+    our $count = 0;
+    'aaab'=~/a+b?(?CUT)(?{$count++})(?FAIL)/;
+    iseq($count,1,"expect 1 with (?CUT)");
+    local $_='aaab';
+    $count=0;
+    1 while /.(?CUT)(?{$count++})(?FAIL)/g;
+    iseq($count,4,"/.(?CUT)/");
+    $_='aaabaaab';
+    $count=0;
+    our @res=();
+    1 while /(a+b?)(?CUT)(?{$count++; push @res,$1})(?FAIL)/g;
+    iseq($count,2,"Expect 2 with (?CUT)" );
+    iseq("@res","aaab aaab","adjacent (?CUT) works as expected" );
+}
+{   # Test the (?ERROR) pattern
+    our $count = 0;
+    'aaabaaab'=~/a+b?(?ERROR)(?{$count++})(?FAIL)/;
+    iseq($count,1,"expect 1 with (?ERROR)");
+    local $_='aaab';
+    $count=0;
+    1 while /.(?ERROR)(?{$count++})(?FAIL)/g;
+    iseq($count,1,"/.(?ERROR)/");
+    $_='aaabaaab';
+    $count=0;
+    our @res=();
+    1 while /(a+b?)(?ERROR)(?{$count++; push @res,$1})(?FAIL)/g;
+    iseq($count,1,"Expect 1 with (?ERROR)" );
+    iseq("@res","aaab","adjacent (?ERROR) works as expected" );
+}
+#-------------------------------------------------------------------
+
 # Keep the following tests last -- they may crash perl
 
 ok(("a" x (2**15 - 10)) =~ /^()(a|bb)*$/, "Recursive stack cracker: #24274")
@@ -3865,6 +3911,8 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
         "Regexp /^(??{'(.)'x 100})/ crashes older perls")
     or print "# Unexpected outcome: should pass or crash perl\n";
 
+# Put new tests above the line, not here.
+
 # Don't forget to update this!
-BEGIN{print "1..1289\n"};
+BEGIN{print "1..1300\n"};
 

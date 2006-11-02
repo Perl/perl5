@@ -4717,7 +4717,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    case ':':           /* (?:...) */
 	    case '>':           /* (?>...) */
 		break;
-	    case 'C':
+            case 'C':           /* (?CUT) and (?COMMIT) */
 		if (RExC_parse[0] == 'O' &&
 		    RExC_parse[1] == 'M' &&
 		    RExC_parse[2] == 'M' &&
@@ -4727,12 +4727,34 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		{
 		    RExC_parse+=5;
 		    ret = reg_node(pRExC_state, COMMIT);
+                } else if (
+                    RExC_parse[0] == 'U' &&
+                    RExC_parse[1] == 'T' &&
+                    RExC_parse[2] == ')') 
+                {
+                    RExC_parse+=2;
+                    ret = reg_node(pRExC_state, CUT);
 		} else {
 		    vFAIL("Sequence (?C... not terminated");
 		}
 		nextchar(pRExC_state);
 		return ret;
 		break;
+            case 'E':            /* (?ERROR) */
+                if (RExC_parse[0] == 'R' &&
+                    RExC_parse[1] == 'R' &&
+                    RExC_parse[2] == 'O' &&
+                    RExC_parse[3] == 'R' &&
+                    RExC_parse[4] == ')') 
+                {
+                    RExC_parse+=4;
+                    ret = reg_node(pRExC_state, OPERROR);
+                } else {
+                    vFAIL("Sequence (?E... not terminated"); 
+                }
+	        nextchar(pRExC_state);
+	        return ret;
+                break;                
             case 'F':
                 if (RExC_parse[0] == 'A' &&
                     RExC_parse[1] == 'I' &&
@@ -8669,7 +8691,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
                         (dist ? this_trie + dist : next) - start);
                     if (dist) {
                         if (!nextbranch)
-			    nextbranch = this_trie + trie->jump[0];
+                            nextbranch= this_trie + trie->jump[0];    
 			DUMPUNTIL(this_trie + dist, nextbranch);
                     }
                     if (nextbranch && PL_regkind[OP(nextbranch)]==BRANCH)

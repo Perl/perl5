@@ -1094,6 +1094,48 @@ Any number of C<(?COMMIT)> assertions may be used in a pattern.
 See also C<< (?>pattern) >> and possessive quantifiers for other
 ways to control backtracking.
 
+=item C<(?CUT)>
+X<(?CUT)>
+
+This zero-width pattern is similar to C<(?COMMIT)>, except that on
+failure it also signifies that whatever text that was matched leading
+up to the C<(?CUT)> pattern cannot match, I<even from another
+starting point>.
+
+Compare the following to the examples in C<(?COMMIT)>, note the string
+is twice as long:
+
+    'aaabaaab'=~/a+b?(?CUT)(?{print "$&\n"; $count++})(?FAIL)/;
+    print "Count=$count\n";
+
+outputs
+
+    aaab
+    aaab
+    Count=2
+
+Once the 'aaab' at the start of the string has matched and the C<(?CUT)>
+executed the next startpoint will be where the cursor was when the
+C<(?CUT)> was executed.
+
+=item C<(?ERROR)>
+X<(?ERROR)>
+
+This zero-width pattern is similar to C<(?CUT)> except that it causes
+the match to fail outright. No attempts to match will occur again.
+
+    'aaabaaab'=~/a+b?(?ERROR)(?{print "$&\n"; $count++})(?FAIL)/;
+    print "Count=$count\n";
+
+outputs
+
+    aaab
+    Count=1
+
+In other words, once the C<(?ERROR)> has been entered and then pattern
+does not match then the regex engine will not try any further matching at
+all on the rest of the string.
+
 =item C<(?(condition)yes-pattern|no-pattern)>
 X<(?()>
 

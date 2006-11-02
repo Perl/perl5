@@ -104,6 +104,12 @@ similar to non-greedy matching, except instead of using a '?' as the modifier
 the '+' is used. Thus C<?+>, C<*+>, C<++>, C<{min,max}+> are now legal
 quantifiers. (Yves Orton)
 
+=item Backtracking control verbs
+
+The regex engine now supports a number of special purpose backtrack
+control verbs: (?COMMIT), (?CUT), (?ERROR) and (?FAIL). See L<perlre>
+for their descriptions.
+
 =back
 
 =head2 The C<_> prototype

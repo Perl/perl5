@@ -95,7 +95,7 @@ Turns on debug output related to the process of parsing the pattern.
 
 Enables output related to the optimisation phase of compilation.
 
-=item TRIE_COMPILE
+=item TRIEC
 
 Detailed info about trie compilation.
 
@@ -103,16 +103,6 @@ Detailed info about trie compilation.
 
 Dump the final program out after it is compiled and optimised.
 
-=item OFFSETS
-
-Dump offset information. This can be used to see how regops correlate
-to the pattern. Output format is
-
-   NODENUM:POSITION[LENGTH]
-
-Where 1 is the position of the first char in the string. Note that position
-can be 0, or larger than the actual length of the pattern, likewise length
-can be zero.
 
 =back
 
@@ -128,7 +118,7 @@ Turns on all execute related debug options.
 
 Turns on debugging of the main matching loop.
 
-=item TRIE_EXECUTE
+=item TRIEE
 
 Extra debugging of how tries execute.
 
@@ -146,12 +136,38 @@ Enable debugging of start point optimisations.
 
 Turns on all "extra" debugging options.
 
-=item TRIE_MORE
+=item TRIEM
 
-Enable enhanced TRIE debugging. Enhances both TRIE_EXECUTE
-and TRIE_COMPILE.
+Enable enhanced TRIE debugging. Enhances both TRIEE
+and TRIEC.
 
-=item OFFSETS_DEBUG
+=item STATE
+
+Enable debugging of states in the engine. 
+
+=item STACK
+
+Enable debugging of the recursion stack in the engine. Enabling
+or disabling this option automatically does the same for debugging
+states as well. This output from this can be quite large.
+
+=item OPTIMISEM
+
+Enable enhanced optimisation debugging and start point optimisations.
+Probably not useful except when debugging the regex engine itself.
+
+=item OFFSETS
+
+Dump offset information. This can be used to see how regops correlate
+to the pattern. Output format is
+
+   NODENUM:POSITION[LENGTH]
+
+Where 1 is the position of the first char in the string. Note that position
+can be 0, or larger than the actual length of the pattern, likewise length
+can be zero.
+
+=item OFFSETSDBG
 
 Enable debugging of offsets information. This emits copious
 amounts of trace information and doesn't mesh well with other
@@ -182,7 +198,7 @@ Enable DUMP and all execute options. Equivalent to:
 
 =item More
 
-Enable TRIE_MORE and all execute compile and execute options.
+Enable TRIEM and all execute compile and execute options.
 
 =back
 
@@ -239,6 +255,7 @@ my %flags = (
     OFFSETSDBG      => 0x040000,
     STATE           => 0x080000,
     OPTIMISEM       => 0x100000,
+    STACK           => 0x280000,
 );
 $flags{ALL} = -1;
 $flags{All} = $flags{all} = $flags{DUMP} | $flags{EXECUTE};

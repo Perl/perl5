@@ -6,8 +6,8 @@
 
 /* Regops and State definitions */
 
-#define REGNODE_MAX           	76
-#define REGMATCH_STATE_MAX    	108
+#define REGNODE_MAX           	78
+#define REGMATCH_STATE_MAX    	110
 
 #define	END                   	0	/* 0000 End of program. */
 #define	SUCCEED               	1	/* 0x01 Return from a subroutine, basically. */
@@ -84,43 +84,43 @@
 #define	DEFINEP               	72	/* 0x48 Never execute directly. */
 #define	OPFAIL                	73	/* 0x49 Same as (?!) */
 #define	COMMIT                	74	/* 0x4a Pattern fails if backtracking through this */
-#define	OPTIMIZED             	75	/* 0x4b Placeholder for dump. */
-#define	PSEUDO                	76	/* 0x4c Pseudo opcode for internal use. */
-
+#define	CUT                   	75	/* 0x4b ... and restarts at the cursor point */
+#define	OPERROR               	76	/* 0x4c Pattern fails outright if backtracking through this */
+#define	OPTIMIZED             	77	/* 0x4d Placeholder for dump. */
+#define	PSEUDO                	78	/* 0x4e Pseudo opcode for internal use. */
 	/* ------------ States ------------- */
-
-#define	TRIE_next             	77	/* 0x4d Regmatch state for TRIE */
-#define	TRIE_next_fail        	78	/* 0x4e Regmatch state for TRIE */
-#define	EVAL_AB               	79	/* 0x4f Regmatch state for EVAL */
-#define	EVAL_AB_fail          	80	/* 0x50 Regmatch state for EVAL */
-#define	CURLYX_end            	81	/* 0x51 Regmatch state for CURLYX */
-#define	CURLYX_end_fail       	82	/* 0x52 Regmatch state for CURLYX */
-#define	WHILEM_A_pre          	83	/* 0x53 Regmatch state for WHILEM */
-#define	WHILEM_A_pre_fail     	84	/* 0x54 Regmatch state for WHILEM */
-#define	WHILEM_A_min          	85	/* 0x55 Regmatch state for WHILEM */
-#define	WHILEM_A_min_fail     	86	/* 0x56 Regmatch state for WHILEM */
-#define	WHILEM_A_max          	87	/* 0x57 Regmatch state for WHILEM */
-#define	WHILEM_A_max_fail     	88	/* 0x58 Regmatch state for WHILEM */
-#define	WHILEM_B_min          	89	/* 0x59 Regmatch state for WHILEM */
-#define	WHILEM_B_min_fail     	90	/* 0x5a Regmatch state for WHILEM */
-#define	WHILEM_B_max          	91	/* 0x5b Regmatch state for WHILEM */
-#define	WHILEM_B_max_fail     	92	/* 0x5c Regmatch state for WHILEM */
-#define	BRANCH_next           	93	/* 0x5d Regmatch state for BRANCH */
-#define	BRANCH_next_fail      	94	/* 0x5e Regmatch state for BRANCH */
-#define	CURLYM_A              	95	/* 0x5f Regmatch state for CURLYM */
-#define	CURLYM_A_fail         	96	/* 0x60 Regmatch state for CURLYM */
-#define	CURLYM_B              	97	/* 0x61 Regmatch state for CURLYM */
-#define	CURLYM_B_fail         	98	/* 0x62 Regmatch state for CURLYM */
-#define	IFMATCH_A             	99	/* 0x63 Regmatch state for IFMATCH */
-#define	IFMATCH_A_fail        	100	/* 0x64 Regmatch state for IFMATCH */
-#define	CURLY_B_min_known     	101	/* 0x65 Regmatch state for CURLY */
-#define	CURLY_B_min_known_fail	102	/* 0x66 Regmatch state for CURLY */
-#define	CURLY_B_min           	103	/* 0x67 Regmatch state for CURLY */
-#define	CURLY_B_min_fail      	104	/* 0x68 Regmatch state for CURLY */
-#define	CURLY_B_max           	105	/* 0x69 Regmatch state for CURLY */
-#define	CURLY_B_max_fail      	106	/* 0x6a Regmatch state for CURLY */
-#define	COMMIT_next           	107	/* 0x6b Regmatch state for COMMIT */
-#define	COMMIT_next_fail      	108	/* 0x6c Regmatch state for COMMIT */
+#define	TRIE_next             	(REGNODE_MAX + 1)	/* state for TRIE */
+#define	TRIE_next_fail        	(REGNODE_MAX + 2)	/* state for TRIE */
+#define	EVAL_AB               	(REGNODE_MAX + 3)	/* state for EVAL */
+#define	EVAL_AB_fail          	(REGNODE_MAX + 4)	/* state for EVAL */
+#define	CURLYX_end            	(REGNODE_MAX + 5)	/* state for CURLYX */
+#define	CURLYX_end_fail       	(REGNODE_MAX + 6)	/* state for CURLYX */
+#define	WHILEM_A_pre          	(REGNODE_MAX + 7)	/* state for WHILEM */
+#define	WHILEM_A_pre_fail     	(REGNODE_MAX + 8)	/* state for WHILEM */
+#define	WHILEM_A_min          	(REGNODE_MAX + 9)	/* state for WHILEM */
+#define	WHILEM_A_min_fail     	(REGNODE_MAX + 10)	/* state for WHILEM */
+#define	WHILEM_A_max          	(REGNODE_MAX + 11)	/* state for WHILEM */
+#define	WHILEM_A_max_fail     	(REGNODE_MAX + 12)	/* state for WHILEM */
+#define	WHILEM_B_min          	(REGNODE_MAX + 13)	/* state for WHILEM */
+#define	WHILEM_B_min_fail     	(REGNODE_MAX + 14)	/* state for WHILEM */
+#define	WHILEM_B_max          	(REGNODE_MAX + 15)	/* state for WHILEM */
+#define	WHILEM_B_max_fail     	(REGNODE_MAX + 16)	/* state for WHILEM */
+#define	BRANCH_next           	(REGNODE_MAX + 17)	/* state for BRANCH */
+#define	BRANCH_next_fail      	(REGNODE_MAX + 18)	/* state for BRANCH */
+#define	CURLYM_A              	(REGNODE_MAX + 19)	/* state for CURLYM */
+#define	CURLYM_A_fail         	(REGNODE_MAX + 20)	/* state for CURLYM */
+#define	CURLYM_B              	(REGNODE_MAX + 21)	/* state for CURLYM */
+#define	CURLYM_B_fail         	(REGNODE_MAX + 22)	/* state for CURLYM */
+#define	IFMATCH_A             	(REGNODE_MAX + 23)	/* state for IFMATCH */
+#define	IFMATCH_A_fail        	(REGNODE_MAX + 24)	/* state for IFMATCH */
+#define	CURLY_B_min_known     	(REGNODE_MAX + 25)	/* state for CURLY */
+#define	CURLY_B_min_known_fail	(REGNODE_MAX + 26)	/* state for CURLY */
+#define	CURLY_B_min           	(REGNODE_MAX + 27)	/* state for CURLY */
+#define	CURLY_B_min_fail      	(REGNODE_MAX + 28)	/* state for CURLY */
+#define	CURLY_B_max           	(REGNODE_MAX + 29)	/* state for CURLY */
+#define	CURLY_B_max_fail      	(REGNODE_MAX + 30)	/* state for CURLY */
+#define	COMMIT_next           	(REGNODE_MAX + 31)	/* state for COMMIT */
+#define	COMMIT_next_fail      	(REGNODE_MAX + 32)	/* state for COMMIT */
 
 /* PL_regkind[] What type of regop or state is this. */
 
@@ -203,6 +203,8 @@ EXTCONST U8 PL_regkind[] = {
 	DEFINEP,	/* DEFINEP                */
 	OPFAIL, 	/* OPFAIL                 */
 	COMMIT, 	/* COMMIT                 */
+	COMMIT, 	/* CUT                    */
+	OPERROR,	/* OPERROR                */
 	NOTHING,	/* OPTIMIZED              */
 	PSEUDO, 	/* PSEUDO                 */
 	/* ------------ States ------------- */
@@ -320,6 +322,8 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_1),        	/* DEFINEP      */
 	0,                                   	/* OPFAIL       */
 	0,                                   	/* COMMIT       */
+	0,                                   	/* CUT          */
+	0,                                   	/* OPERROR      */
 	0,                                   	/* OPTIMIZED    */
 	0,                                   	/* PSEUDO       */
 };
@@ -402,6 +406,8 @@ static const char reg_off_by_arg[] = {
 	0,	/* DEFINEP      */
 	0,	/* OPFAIL       */
 	0,	/* COMMIT       */
+	0,	/* CUT          */
+	0,	/* OPERROR      */
 	0,	/* OPTIMIZED    */
 	0,	/* PSEUDO       */
 };
@@ -485,41 +491,43 @@ const char * reg_name[] = {
 	"DEFINEP",               	/* 0x48 */
 	"OPFAIL",                	/* 0x49 */
 	"COMMIT",                	/* 0x4a */
-	"OPTIMIZED",             	/* 0x4b */
-	"PSEUDO",                	/* 0x4c */
+	"CUT",                   	/* 0x4b */
+	"OPERROR",               	/* 0x4c */
+	"OPTIMIZED",             	/* 0x4d */
+	"PSEUDO",                	/* 0x4e */
 	/* ------------ States ------------- */
-	"TRIE_next",             	/* 0x4d */
-	"TRIE_next_fail",        	/* 0x4e */
-	"EVAL_AB",               	/* 0x4f */
-	"EVAL_AB_fail",          	/* 0x50 */
-	"CURLYX_end",            	/* 0x51 */
-	"CURLYX_end_fail",       	/* 0x52 */
-	"WHILEM_A_pre",          	/* 0x53 */
-	"WHILEM_A_pre_fail",     	/* 0x54 */
-	"WHILEM_A_min",          	/* 0x55 */
-	"WHILEM_A_min_fail",     	/* 0x56 */
-	"WHILEM_A_max",          	/* 0x57 */
-	"WHILEM_A_max_fail",     	/* 0x58 */
-	"WHILEM_B_min",          	/* 0x59 */
-	"WHILEM_B_min_fail",     	/* 0x5a */
-	"WHILEM_B_max",          	/* 0x5b */
-	"WHILEM_B_max_fail",     	/* 0x5c */
-	"BRANCH_next",           	/* 0x5d */
-	"BRANCH_next_fail",      	/* 0x5e */
-	"CURLYM_A",              	/* 0x5f */
-	"CURLYM_A_fail",         	/* 0x60 */
-	"CURLYM_B",              	/* 0x61 */
-	"CURLYM_B_fail",         	/* 0x62 */
-	"IFMATCH_A",             	/* 0x63 */
-	"IFMATCH_A_fail",        	/* 0x64 */
-	"CURLY_B_min_known",     	/* 0x65 */
-	"CURLY_B_min_known_fail",	/* 0x66 */
-	"CURLY_B_min",           	/* 0x67 */
-	"CURLY_B_min_fail",      	/* 0x68 */
-	"CURLY_B_max",           	/* 0x69 */
-	"CURLY_B_max_fail",      	/* 0x6a */
-	"COMMIT_next",           	/* 0x6b */
-	"COMMIT_next_fail",      	/* 0x6c */
+	"TRIE_next",             	/* REGNODE_MAX +0x01 */
+	"TRIE_next_fail",        	/* REGNODE_MAX +0x02 */
+	"EVAL_AB",               	/* REGNODE_MAX +0x03 */
+	"EVAL_AB_fail",          	/* REGNODE_MAX +0x04 */
+	"CURLYX_end",            	/* REGNODE_MAX +0x05 */
+	"CURLYX_end_fail",       	/* REGNODE_MAX +0x06 */
+	"WHILEM_A_pre",          	/* REGNODE_MAX +0x07 */
+	"WHILEM_A_pre_fail",     	/* REGNODE_MAX +0x08 */
+	"WHILEM_A_min",          	/* REGNODE_MAX +0x09 */
+	"WHILEM_A_min_fail",     	/* REGNODE_MAX +0x0a */
+	"WHILEM_A_max",          	/* REGNODE_MAX +0x0b */
+	"WHILEM_A_max_fail",     	/* REGNODE_MAX +0x0c */
+	"WHILEM_B_min",          	/* REGNODE_MAX +0x0d */
+	"WHILEM_B_min_fail",     	/* REGNODE_MAX +0x0e */
+	"WHILEM_B_max",          	/* REGNODE_MAX +0x0f */
+	"WHILEM_B_max_fail",     	/* REGNODE_MAX +0x10 */
+	"BRANCH_next",           	/* REGNODE_MAX +0x11 */
+	"BRANCH_next_fail",      	/* REGNODE_MAX +0x12 */
+	"CURLYM_A",              	/* REGNODE_MAX +0x13 */
+	"CURLYM_A_fail",         	/* REGNODE_MAX +0x14 */
+	"CURLYM_B",              	/* REGNODE_MAX +0x15 */
+	"CURLYM_B_fail",         	/* REGNODE_MAX +0x16 */
+	"IFMATCH_A",             	/* REGNODE_MAX +0x17 */
+	"IFMATCH_A_fail",        	/* REGNODE_MAX +0x18 */
+	"CURLY_B_min_known",     	/* REGNODE_MAX +0x19 */
+	"CURLY_B_min_known_fail",	/* REGNODE_MAX +0x1a */
+	"CURLY_B_min",           	/* REGNODE_MAX +0x1b */
+	"CURLY_B_min_fail",      	/* REGNODE_MAX +0x1c */
+	"CURLY_B_max",           	/* REGNODE_MAX +0x1d */
+	"CURLY_B_max_fail",      	/* REGNODE_MAX +0x1e */
+	"COMMIT_next",           	/* REGNODE_MAX +0x1f */
+	"COMMIT_next_fail",      	/* REGNODE_MAX +0x20 */
 };
 #endif /* DEBUGGING */
 #else

@@ -170,7 +170,9 @@ DEFINEP		DEFINEP,   none 1 	Never execute directly.
 
 #*Bactracking 
 OPFAIL		OPFAIL, none 		Same as (?!)
-COMMIT		COMMIT, node		Pattern fails if backtracking through this 
+COMMIT		COMMIT, none		Pattern fails if backtracking through this 
+CUT		COMMIT, none		... and restarts at the cursor point
+OPERROR		OPERROR,none		Pattern fails outright if backtracking through this
 
 # NEW STUFF ABOVE THIS LINE -- Please update counts below. 
 
@@ -207,4 +209,5 @@ BRANCH  	next:FAIL
 CURLYM  	A,B:FAIL	
 IFMATCH 	A:FAIL	
 CURLY   	B_min_known,B_min,B_max:FAIL	
-COMMIT   	next:FAIL    	
+COMMIT		next:FAIL
+

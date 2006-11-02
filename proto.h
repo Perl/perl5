@@ -3691,7 +3691,7 @@ STATIC U8	S_regtail_study(pTHX_ struct RExC_state_t *state, regnode *p, const re
 #endif
 
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
-STATIC I32	S_regmatch(pTHX_ const regmatch_info *reginfo, regnode *prog)
+STATIC I32	S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -3701,7 +3701,7 @@ STATIC I32	S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC I32	S_regtry(pTHX_ const regmatch_info *reginfo, char *startpos)
+STATIC I32	S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
@@ -3733,7 +3733,7 @@ STATIC U8*	S_reghopmaybe3(U8 *pos, I32 off, const U8 *lim)
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(3);
 
-STATIC char*	S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *strend, const regmatch_info *reginfo)
+STATIC char*	S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s, const char *strend, regmatch_info *reginfo)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
