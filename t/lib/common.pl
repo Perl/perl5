@@ -58,7 +58,11 @@ undef $/;
 
 plan tests => (scalar(@prgs)-$files);
 
-my $utf8_ok = exists $ENV{PERL_UNICODE} && $ENV{PERL_UNICODE} =~ m{^$|[Dio]} ? 1 : 0;
+my $utf8_ok = exists $ENV{PERL_UNICODE} && (
+    $ENV{PERL_UNICODE} =~ m{[Dio]}
+    || ($ENV{PERL_UNICODE} eq ""
+	    && ($ENV{LC_ALL} =~ /\butf-?8\b/i || $ENV{LANG} =~ /\butf-?8\b/i))
+);
 
 for (@prgs){
     unless (/\n/)
