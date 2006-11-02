@@ -5,7 +5,7 @@ BEGIN {
     @INC = '../lib';
 }
 
-print "1..92\n";
+print "1..93\n";
 
 eval 'print "ok 1\n";';
 
@@ -448,4 +448,13 @@ stderr => 1);
 
 print "not " unless $got eq "ok\n";
 print "ok $test - eval and last\n"; $test++;
+
+# eval undef should be the same as eval "" barring any warnings
+
+{
+    local $@ = "foo";
+    eval undef;
+    print "not " unless $@ eq "";
+    print "ok $test # eval unef \n"; $test++;
+}
 
