@@ -438,7 +438,7 @@ argument.
 X<cmp>
 
 Binary "~~" does a smart match between its arguments. Smart matching
-is described in L<perlsyn/"Smart Matching in Detail">.
+is described in L<perlsyn/"Smart matching in detail">.
 This operator is only available if you enable the "~~" feature:
 see L<feature> for more information.
 X<~~>
