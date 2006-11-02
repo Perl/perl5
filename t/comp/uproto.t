@@ -6,7 +6,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan(tests => 36);
+plan(tests => 38);
 
 sub f($$_) { my $x = shift; is("@_", $x) }
 
@@ -74,3 +74,15 @@ sub mymkdir (_;$) { is("@_", $expected, "mymkdir") }
 $expected = $_ = "mydir"; mymkdir();
 mymkdir($expected = "foo");
 $expected = "foo 493"; mymkdir foo => 0755;
+
+# $_ says modifiable, it's not passed by copy
+
+sub double(_) { $_[0] *= 2 }
+$_ = 21;
+double();
+is( $_, 42, '$_ is modifiable' );
+{
+    my $_ = 22;
+    double();
+    is( $_, 44, 'my $_ is modifiable' );
+}
