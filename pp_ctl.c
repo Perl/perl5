@@ -3455,8 +3455,6 @@ PP(pp_entereval)
     }
     sv = POPs;
 
-    if (!SvPV_nolen_const(sv))
-	RETPUSHUNDEF;
     TAINT_PROPER("eval");
 
     ENTER;

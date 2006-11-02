@@ -662,13 +662,11 @@ Perl_lex_start(pTHX_ SV *line)
     PL_lex_inwhat = 0;
     PL_sublex_info.sub_inwhat = 0;
     PL_linestr = line;
-    if (SvREADONLY(PL_linestr))
-	PL_linestr = sv_2mortal(newSVsv(PL_linestr));
     s = SvPV_const(PL_linestr, len);
-    if (!len || s[len-1] != ';') {
-	if (!(SvFLAGS(PL_linestr) & SVs_TEMP))
-	    PL_linestr = sv_2mortal(newSVsv(PL_linestr));
-	sv_catpvs(PL_linestr, "\n;");
+    if (SvREADONLY(PL_linestr) || !len || s[len-1] != ';') {
+	PL_linestr = sv_2mortal(len ? newSVsv(PL_linestr) : newSVpvn(s, 0));
+	if (!len || s[len-1] != ';')
+	    sv_catpvs(PL_linestr, "\n;");
     }
     SvTEMP_off(PL_linestr);
     PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = SvPVX(PL_linestr);
