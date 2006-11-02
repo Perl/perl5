@@ -4679,13 +4679,13 @@ yes:
 		PL_regmatch_slab = PL_regmatch_slab->prev;
 		st = SLAB_LAST(PL_regmatch_slab);
 	    }
-            DEBUG_STATE_r(
+            DEBUG_STATE_r({
 	        if (no_final) {
 	            DEBUG_STATE_pp("pop (no final)");        
 	        } else {
 	            DEBUG_STATE_pp("pop (yes)");
 	        }
-	    ); 
+		}); 
 	    depth--;
 	}
 #else
