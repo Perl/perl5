@@ -2119,7 +2119,7 @@ Perl_fold_constants(pTHX_ register OP *o)
     register OP *curop;
     OP *newop;
     VOL I32 type = o->op_type;
-    VOL SV *sv = NULL;
+    SV * VOL sv = NULL;
     int ret = 0;
     I32 oldscope;
     OP *old_next;
