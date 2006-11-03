@@ -19,7 +19,7 @@ use strict;
 use File::Spec;
 
 require "test.pl";
-plan(tests => 45 + 14 * $can_fork);
+plan(tests => 48 + 14 * $can_fork);
 
 my @tempfiles = ();
 
@@ -196,6 +196,27 @@ push @INC, sub {
 my $ret = "";
 $ret ||= do 'abc.pl';
 is( $ret, 'abc', 'do "abc.pl" sees return value' );
+
+pop @INC;
+
+push @INC, sub {
+    my ($cr, $filename) = @_;
+    my $module = $filename; $module =~ s,/,::,g; $module =~ s/\.pm$//;
+    open my $fh, '<', \"package $module; sub complain { warn q() }; \$::file = __FILE__;"
+	or die $!;
+    $INC{$filename} = "/custom/path/to/$filename";
+    return $fh;
+};
+
+require Publius::Vergilius::Maro;
+is( $INC{'Publius/Vergilius/Maro.pm'}, '/custom/path/to/Publius/Vergilius/Maro.pm', '%INC set correctly');
+is( our $file, '/custom/path/to/Publius/Vergilius/Maro.pm', '__FILE__ set correctly' );
+{
+    my $warning;
+    local $SIG{__WARN__} = sub { $warning = shift };
+    Publius::Vergilius::Maro::complain();
+    like( $warning, qr{something's wrong at /custom/path/to/Publius/Vergilius/Maro.pm}, 'warn() reports correct file source' );
+}
 
 pop @INC;
 
