@@ -84,7 +84,9 @@ package DynaLoader;
 #
 # Tim.Bunce@ig.co.uk, August 1994
 
-BEGIN { $VERSION = '1.07'; }
+BEGIN {
+    $VERSION = '1.08';
+}
 
 require AutoLoader;
 *AUTOLOAD = \&AutoLoader::AUTOLOAD;
