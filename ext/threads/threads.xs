@@ -174,6 +174,11 @@ S_ithread_destruct(pTHX_ ithread *thread)
 
     /* Remove from circular list of threads */
     MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
+    if ((! thread->next || ! thread->prev) && ckWARN_d(WARN_INTERNAL)) {
+        Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
+                    "Inconsistency in internal threads list found "
+                    "during destruction of thread %" UVuf, thread->tid);
+    }
     if (thread->next) thread->next->prev = thread->prev;
     if (thread->prev) thread->prev->next = thread->next;
     thread->next = NULL;
