@@ -3558,6 +3558,7 @@ t/pod/testpchk.pl		Module to test Pod::Checker for a given file
 t/pod/testpods/lib/Pod/Stuff.pm			Sample data for find.t
 t/pod/twice.t			Test Pod::Parser
 t/README			Instructions for regression tests
+t/run/cloexec.t			Test close-on-exec.
 t/run/exit.t			Test perl's exit status.
 t/run/fresh_perl.t		Tests that require a fresh perl.
 t/run/noswitch.t		Test aliasing ARGV for other switch tests
