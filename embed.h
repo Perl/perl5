@@ -1314,6 +1314,7 @@
 #define regclass		S_regclass
 #define regcurly		S_regcurly
 #define reg_node		S_reg_node
+#define reg_recode		S_reg_recode
 #define regpiece		S_regpiece
 #define reg_namedseq		S_reg_namedseq
 #define reginsert		S_reginsert
@@ -3513,6 +3514,7 @@
 #define regclass(a,b)		S_regclass(aTHX_ a,b)
 #define regcurly		S_regcurly
 #define reg_node(a,b)		S_reg_node(aTHX_ a,b)
+#define reg_recode(a,b)		S_reg_recode(aTHX_ a,b)
 #define regpiece(a,b,c)		S_regpiece(aTHX_ a,b,c)
 #define reg_namedseq(a,b)	S_reg_namedseq(aTHX_ a,b)
 #define reginsert(a,b,c,d)	S_reginsert(aTHX_ a,b,c,d)

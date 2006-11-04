@@ -2071,6 +2071,15 @@ recognized by Perl or by a user-supplied handler.  See L<attributes>.
 (W printf) Perl does not understand the given format conversion.  See
 L<perlfunc/sprintf>.
 
+=item Invalid escape in the specified encoding in regex; marked by <-- HERE in m/%s/
+
+(W regexp) The numeric escape (for example C<\xHH>) of value < 256
+didn't correspond to a single character through the conversion
+from the encoding specified by the encoding pragma.
+The escape was replaced with REPLACEMENT CHARACTER (U+FFFD) instead.
+The <-- HERE shows in the regular expression about where the
+escape was discovered.
+
 =item Invalid [] range "%s" in regex; marked by <-- HERE in m/%s/
 
 (F) The range specified in a character class had a minimum character

@@ -5782,6 +5782,39 @@ S_reg_namedseq(pTHX_ RExC_state_t *pRExC_state, UV *valuep)
 }
 
 
+/*
+ * reg_recode
+ *
+ * It returns the code point in utf8 for the value in *encp.
+ *    value: a code value in the source encoding
+ *    encp:  a pointer to an Encode object
+ *
+ * If the result from Encode is not a single character,
+ * it returns U+FFFD (Replacement character) and sets *encp to NULL.
+ */
+STATIC UV
+S_reg_recode(pTHX_ const char value, SV **encp)
+{
+    STRLEN numlen = 1;
+    SV * const sv = sv_2mortal(newSVpvn(&value, numlen));
+    const char * const s = encp && *encp ? sv_recode_to_utf8(sv, *encp)
+					 : SvPVX(sv);
+    const STRLEN newlen = SvCUR(sv);
+    UV uv = UNICODE_REPLACEMENT;
+
+    if (newlen)
+	uv = SvUTF8(sv)
+	     ? utf8n_to_uvchr((U8*)s, newlen, &numlen, UTF8_ALLOW_DEFAULT)
+	     : *(U8*)s;
+
+    if (!newlen || numlen != newlen) {
+	uv = UNICODE_REPLACEMENT;
+	if (encp)
+	    *encp = NULL;
+    }
+    return uv;
+}
+
 
 /*
  - regatom - the lowest level
@@ -6230,6 +6263,8 @@ tryagain:
 			    ender = grok_hex(p, &numlen, &flags, NULL);
 			    p += numlen;
 			}
+			if (PL_encoding && ender < 0x100)
+			    goto recode_encoding;
 			break;
 		    case 'c':
 			p++;
@@ -6248,6 +6283,17 @@ tryagain:
 			else {
 			    --p;
 			    goto loopdone;
+			}
+			if (PL_encoding && ender < 0x100)
+			    goto recode_encoding;
+			break;
+		    recode_encoding:
+			{
+			    SV* enc = PL_encoding;
+			    ender = reg_recode((const char)(U8)ender, &enc);
+			    if (!enc && SIZE_ONLY && ckWARN(WARN_REGEXP))
+				vWARN(p, "Invalid escape in the specified encoding");
+			    RExC_utf8 = 1;
 			}
 			break;
 		    case '\0':
@@ -6374,33 +6420,6 @@ tryagain:
             }
 	}
 	break;
-    }
-
-    /* If the encoding pragma is in effect recode the text of
-     * any EXACT-kind nodes. */
-    if (ret && PL_encoding && PL_regkind[OP(ret)] == EXACT) {
- 	const STRLEN oldlen = STR_LEN(ret);
- 	SV * const sv = sv_2mortal(newSVpvn(STRING(ret), oldlen));
-
-	if (RExC_utf8)
-	    SvUTF8_on(sv);
-	if (sv_utf8_downgrade(sv, TRUE)) {
-	    const char * const s = sv_recode_to_utf8(sv, PL_encoding);
-	    const STRLEN newlen = SvCUR(sv);
-
-	    if (SvUTF8(sv))
-		RExC_utf8 = 1;
-	    if (!SIZE_ONLY) {
-	        GET_RE_DEBUG_FLAGS_DECL;
-		DEBUG_COMPILE_r(PerlIO_printf(Perl_debug_log, "recode %*s to %*s\n",
-				      (int)oldlen, STRING(ret),
-				      (int)newlen, s));
-		Copy(s, STRING(ret), newlen, char);
-		STR_LEN(ret) += newlen - oldlen;
-		RExC_emit += STR_SZ(newlen) - STR_SZ(oldlen);
-	    } else
-		RExC_size += STR_SZ(newlen) - STR_SZ(oldlen);
-	}
     }
 
     return(ret);
@@ -6773,6 +6792,8 @@ parseit:
 		    value = grok_hex(RExC_parse, &numlen, &flags, NULL);
 		    RExC_parse += numlen;
 		}
+		if (PL_encoding && value < 0x100)
+		    goto recode_encoding;
 		break;
 	    case 'c':
 		value = UCHARAT(RExC_parse++);
@@ -6780,13 +6801,24 @@ parseit:
 		break;
 	    case '0': case '1': case '2': case '3': case '4':
 	    case '5': case '6': case '7': case '8': case '9':
-            {
-                I32 flags = 0;
-		numlen = 3;
-		value = grok_oct(--RExC_parse, &numlen, &flags, NULL);
-		RExC_parse += numlen;
-		break;
-            }
+		{
+		    I32 flags = 0;
+		    numlen = 3;
+		    value = grok_oct(--RExC_parse, &numlen, &flags, NULL);
+		    RExC_parse += numlen;
+		    if (PL_encoding && value < 0x100)
+			goto recode_encoding;
+		    break;
+		}
+	    recode_encoding:
+		{
+		    SV* enc = PL_encoding;
+		    value = reg_recode((const char)(U8)value, &enc);
+		    if (!enc && SIZE_ONLY && ckWARN(WARN_REGEXP))
+			vWARN(RExC_parse,
+			      "Invalid escape in the specified encoding");
+		    break;
+		}
 	    default:
 		if (!SIZE_ONLY && isALPHA(value) && ckWARN(WARN_REGEXP))
 		    vWARN2(RExC_parse,

@@ -3587,14 +3587,16 @@ t/uni/chomp.t			See if Unicode chomp works
 t/uni/chr.t			See if Unicode chr works
 t/uni/class.t			See if Unicode classes work (\p)
 t/uni/fold.t			See if Unicode folding works
+t/uni/greek.t			See if Unicode in greek works
+t/uni/latin2.t			See if Unicode in latin2 works
 t/uni/lower.t			See if Unicode casing works
 t/uni/overload.t		See if Unicode overloading works
 t/uni/sprintf.t			See if Unicode sprintf works
 t/uni/title.t			See if Unicode casing works
-t/uni/tr_7jis.t			See if Unicode tr/// works
-t/uni/tr_eucjp.t		See if Unicode tr/// works
-t/uni/tr_sjis.t			See if Unicode tr/// works
-t/uni/tr_utf8.t			See if Unicode tr/// works
+t/uni/tr_7jis.t			See if Unicode tr/// in 7jis works
+t/uni/tr_eucjp.t		See if Unicode tr/// in eucjp works
+t/uni/tr_sjis.t			See if Unicode tr/// in sjis works
+t/uni/tr_utf8.t			See if Unicode tr/// in utf8 works
 t/uni/upper.t			See if Unicode casing works
 t/uni/write.t			See if Unicode formats work
 t/win32/getosversion.t		Test if Win32::GetOSVersion() works
