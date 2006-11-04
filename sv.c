@@ -3583,7 +3583,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
 	(void)SvOK_off(dstr);
 	SvRV_set(dstr, SvREFCNT_inc(SvRV(sstr)));
-	SvFLAGS(dstr) |= sflags & (SVf_ROK|SVf_AMAGIC);
+	SvFLAGS(dstr) |= sflags & SVf_ROK;
 	assert(!(sflags & SVp_NOK));
 	assert(!(sflags & SVp_IOK));
 	assert(!(sflags & SVf_NOK));
@@ -3736,8 +3736,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    if (sflags & SVf_IVisUV)
 		SvIsUV_on(dstr);
 	}
-	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK|SVf_UTF8
-				   |SVf_AMAGIC);
+	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_NOK|SVp_NOK|SVf_UTF8);
 	{
 	    const MAGIC * const smg = SvVSTRING_mg(sstr);
 	    if (smg) {
@@ -3749,8 +3748,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     }
     else if (sflags & (SVp_IOK|SVp_NOK)) {
 	(void)SvOK_off(dstr);
-	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_IVisUV|SVf_NOK|SVp_NOK
-				   |SVf_AMAGIC);
+	SvFLAGS(dstr) |= sflags & (SVf_IOK|SVp_IOK|SVf_IVisUV|SVf_NOK|SVp_NOK);
 	if (sflags & SVp_IOK) {
 	    /* XXXX Do we want to set IsUV for IV(ROK)?  Be extra safe... */
 	    SvIV_set(dstr, SvIVX(sstr));
@@ -3770,7 +3768,6 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    SvFAKE_off(sstr);
 	    gv_efullname3(dstr, (GV *)sstr, "*");
 	    SvFLAGS(sstr) |= wasfake;
-	    SvFLAGS(dstr) |= sflags & SVf_AMAGIC;
 	}
 	else
 	    (void)SvOK_off(dstr);

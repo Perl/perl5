@@ -1723,6 +1723,12 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 		 */
 		SV* const newref = newSVsv(tmpRef);
 		SvOBJECT_on(newref);
+		/* As a bit of a source compatibility hack, SvAMAGIC() and
+		   friends dereference an RV, to behave the same was as when
+		   overloading was stored on the reference, not the referant.
+		   Hence we can't use SvAMAGIC_on()
+		*/
+		SvFLAGS(newref) |= SVf_AMAGIC;
 		SvSTASH_set(newref, (HV*)SvREFCNT_inc(SvSTASH(tmpRef)));
 		return newref;
 	     }
