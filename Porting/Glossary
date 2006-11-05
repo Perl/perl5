@@ -588,6 +588,11 @@ d_difftime (d_difftime.U):
 	This variable conditionally defines the HAS_DIFFTIME symbol, which
 	indicates to the C program that the difftime() routine is available.
 
+d_dir_dd_fd (d_dir_dd_fd.U)
+	This variable conditionally defines the HAS_DIR_DD_FD symbol, which
+	indicates that the DIR directory stream type contains a member
+	variable called dd_fd.
+
 d_dirfd (d_dirfd.U):
 	This variable conditionally defines the HAS_DIRFD constant,
 	which indicates to the C program that dirfd() is available

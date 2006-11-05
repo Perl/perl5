@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Nov  6 16:18:02 CET 2006 [metaconfig 3.0 PL70]
+# Generated on Wed Nov  8 17:31:20 CET 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -401,6 +401,7 @@ d_cuserid=''
 d_dbl_dig=''
 d_dbminitproto=''
 d_difftime=''
+d_dir_dd_fd=''
 d_dirfd=''
 d_dlerror=''
 d_dlopen=''
@@ -11248,6 +11249,42 @@ set d_dirnamlen
 eval $setvar
 $rm -f try.c
 
+: Look for DIR.dd_fd
+case "$i_dirent" in
+"$define")
+    echo "Checking to see if DIR has a dd_fd member variable" >&4
+    $cat >try.c <<EOCP
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+#include <dirent.h>
+
+int main() {
+    DIR dir;
+    dir.dd_fd = 1;
+    return 0;
+}
+EOCP
+    val=$undef
+    set try
+    if eval $compile; then
+        echo "Yes, it does."
+        val="$define"
+    else
+        echo "No, it does not."
+        val="$undef"
+    fi
+    ;;
+*)
+    echo "You don't have a <dirent.h>, so not checking for dd_fd." >&4
+    val="$undef"
+    ;;
+esac
+set d_dir_dd_fd
+eval $setvar
+$rm -f try try.*
+
 : see if this is an sysdir system
 set sys/dir.h i_sysdir
 eval $inhdr
@@ -21438,6 +21475,7 @@ d_cuserid='$d_cuserid'
 d_dbl_dig='$d_dbl_dig'
 d_dbminitproto='$d_dbminitproto'
 d_difftime='$d_difftime'
+d_dir_dd_fd='$d_dir_dd_fd'
 d_dirfd='$d_dirfd'
 d_dirnamlen='$d_dirnamlen'
 d_dlerror='$d_dlerror'
