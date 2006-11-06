@@ -1,26 +1,14 @@
 #!./perl
 
-if ( $does_gmtime = gmtime(time) ) { 
-    print "1..8\n" 
-}
-else { 
-    print "1..5\n" 
-}
+$does_gmtime = gmtime(time);
 
-
-my $test = 1;
-sub ok ($$) {
-    my($ok, $name) = @_;
-
-    # You have to do it this way or VMS will get confused.
-    print $ok ? "ok $test - $name\n" : "not ok $test - $name\n";
-
-    printf "# Failed test at line %d\n", (caller)[2] unless $ok;
-
-    $test++;
-    return $ok;
+BEGIN {
+    chdir 't' if -d 't';
+    @INC = '../lib';
+    require './test.pl';
 }
 
+plan tests => 8;
 
 ($beguser,$begsys) = times;
 
@@ -52,14 +40,23 @@ ok(localtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
    'localtime(), scalar context'
   );
 
+SKIP: {
+    # This conditional of "No tzset()" is stolen from ext/POSIX/t/time.t
+    skip "No tzset()", 1
+        if $^O eq "MacOS" || $^O eq "VMS" || $^O eq "cygwin" ||
+           $^O eq "djgpp" || $^O eq "MSWin32" || $^O eq "dos" ||
+           $^O eq "interix";
+
 # check that localtime respects changes to $ENV{TZ}
 $ENV{TZ} = "GMT-5";
 ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($beg);
 $ENV{TZ} = "GMT+5";
 ($sec,$min,$hour2,$mday,$mon,$year,$wday,$yday,$isdst) = localtime($beg);
 ok($hour != $hour2,                             'changes to $ENV{TZ} respected');
+}
 
-exit 0 unless $does_gmtime;
+SKIP: {
+    skip "No gmtime()", 3 unless $does_gmtime;
 
 ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime($beg);
 ($xsec,$foo) = localtime($now);
@@ -78,3 +75,4 @@ ok(gmtime() =~ /^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)[ ]
                /x,
    'gmtime(), scalar context'
   );
+}
