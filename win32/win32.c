@@ -133,6 +133,21 @@ _matherr(struct _exception *a)
 }
 #endif
 
+#if _MSC_VER >= 1400
+void my_invalid_parameter_handler(const wchar_t* expression,
+    const wchar_t* function, 
+    const wchar_t* file, 
+    unsigned int line, 
+    uintptr_t pReserved)
+{
+#  ifdef _DEBUG
+    wprintf(L"Invalid parameter detected in function %s."
+            L" File: %s Line: %d\n", function, file, line);
+    wprintf(L"Expression: %s\n", expression);
+#  endif
+}
+#endif
+
 int
 IsWin95(void)
 {
@@ -4859,9 +4874,19 @@ win32_ctrlhandler(DWORD dwCtrlType)
 }
 
 
+#if _MSC_VER >= 1400
+#  include <crtdbg.h>
+#endif
+
 void
 Perl_win32_init(int *argcp, char ***argvp)
 {
+#if _MSC_VER >= 1400
+    _invalid_parameter_handler oldHandler, newHandler;
+    newHandler = my_invalid_parameter_handler;
+    oldHandler = _set_invalid_parameter_handler(newHandler);
+    _CrtSetReportMode(_CRT_ASSERT, 0);
+#endif
     /* Disable floating point errors, Perl will trap the ones we
      * care about.  VC++ RTL defaults to switching these off
      * already, but the Borland RTL doesn't.  Since we don't

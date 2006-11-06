@@ -485,6 +485,7 @@ EXEOUT_FLAG	= -o
 LIBOUT_FLAG	=
 
 # NOTE: we assume that GCC uses MSVCRT.DLL
+# See comments about PERL_MSVCRT_rEADFIX in the "cl" compiler section below.
 BUILDOPT	+= -fno-strict-aliasing -DPERL_MSVCRT_READFIX
 
 .ELSE
@@ -544,6 +545,9 @@ DEFINES		+= -DWIN64 -DCONSERVATIVE
 OPTIMIZE	+= -Wp64 -fp:precise
 .ENDIF
 
+# Use the MSVCRT read() fix if the PerlCRT was not chosen. This may be not
+# necessary with recent MSVCRT's, but we use the fix anyway in case this build
+# is going to be run on a system with an old MSVCRT.
 .IF "$(USE_PERLCRT)" != "define"
 BUILDOPT	+= -DPERL_MSVCRT_READFIX
 .ENDIF

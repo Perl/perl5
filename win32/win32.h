@@ -510,6 +510,15 @@ typedef struct {
     char pipech;    /* one char buffer for handles opened on pipes */
     int lockinitflag;
     CRITICAL_SECTION lock;
+#if _MSC_VER >= 1400
+#  ifndef _SAFECRT_IMPL
+    /* Not used in the safecrt downlevel. We do not define them, so we cannot
+     * use them accidentally */
+    char textmode : 7;/* __IOINFO_TM_ANSI or __IOINFO_TM_UTF8 or __IOINFO_TM_UTF16LE */
+    char unicode : 1; /* Was the file opened as unicode? */
+    char pipech2[2];  /* 2 more peak ahead chars for UNICODE mode */
+#  endif
+#endif
 } ioinfo;
 
 
