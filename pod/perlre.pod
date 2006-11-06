@@ -933,14 +933,100 @@ the same name, then it recurses to the leftmost.
 It is an error to refer to a name that is not declared somewhere in the
 pattern.
 
-=item C<(?FAIL)> C<(?F)>
-X<(?FAIL)> X<(?F)>
+=item C<(?(condition)yes-pattern|no-pattern)>
+X<(?()>
 
-This pattern matches nothing and always fails. It can be used to force the
-engine to backtrack. It is equivalent to C<(?!)>, but easier to read. In
-fact, C<(?!)> gets optimised into C<(?FAIL)> internally.
+=item C<(?(condition)yes-pattern)>
 
-It is probably useful only when combined with C<(?{})> or C<(??{})>.
+Conditional expression.  C<(condition)> should be either an integer in
+parentheses (which is valid if the corresponding pair of parentheses
+matched), a look-ahead/look-behind/evaluate zero-width assertion, a
+name in angle brackets or single quotes (which is valid if a buffer
+with the given name matched), or the special symbol (R) (true when
+evaluated inside of recursion or eval). Additionally the R may be
+followed by a number, (which will be true when evaluated when recursing
+inside of the appropriate group), or by C<&NAME>, in which case it will
+be true only when evaluated during recursion in the named group.
+
+Here's a summary of the possible predicates:
+
+=over 4
+
+=item (1) (2) ...
+
+Checks if the numbered capturing buffer has matched something.
+
+=item (<NAME>) ('NAME')
+
+Checks if a buffer with the given name has matched something.
+
+=item (?{ CODE })
+
+Treats the code block as the condition.
+
+=item (R)
+
+Checks if the expression has been evaluated inside of recursion.
+
+=item (R1) (R2) ...
+
+Checks if the expression has been evaluated while executing directly
+inside of the n-th capture group. This check is the regex equivalent of
+
+  if ((caller(0))[3] eq 'subname') { ... }
+
+In other words, it does not check the full recursion stack.
+
+=item (R&NAME)
+
+Similar to C<(R1)>, this predicate checks to see if we're executing
+directly inside of the leftmost group with a given name (this is the same
+logic used by C<(?&NAME)> to disambiguate). It does not check the full
+stack, but only the name of the innermost active recursion.
+
+=item (DEFINE)
+
+In this case, the yes-pattern is never directly executed, and no
+no-pattern is allowed. Similar in spirit to C<(?{0})> but more efficient.
+See below for details.
+
+=back
+
+For example:
+
+    m{ ( \( )?
+       [^()]+
+       (?(1) \) )
+     }x
+
+matches a chunk of non-parentheses, possibly included in parentheses
+themselves.
+
+A special form is the C<(DEFINE)> predicate, which never executes directly
+its yes-pattern, and does not allow a no-pattern. This allows to define
+subpatterns which will be executed only by using the recursion mechanism.
+This way, you can define a set of regular expression rules that can be
+bundled into any pattern you choose.
+
+It is recommended that for this usage you put the DEFINE block at the
+end of the pattern, and that you name any subpatterns defined within it.
+
+Also, it's worth noting that patterns defined this way probably will
+not be as efficient, as the optimiser is not very clever about
+handling them.
+
+An example of how this might be used is as follows:
+
+  /(?<NAME>(&NAME_PAT))(?<ADDR>(&ADDRESS_PAT))
+   (?(DEFINE)
+     (<NAME_PAT>....)
+     (<ADRESS_PAT>....)
+   )/x
+
+Note that capture buffers matched inside of recursion are not accessible
+after the recursion returns, so the extra layer of capturing buffers are
+necessary. Thus C<$+{NAME_PAT}> would not be defined even though
+C<$+{NAME}> would be.
 
 =item C<< (?>pattern) >>
 X<backtrack> X<backtracking> X<atomic> X<possessive>
@@ -973,12 +1059,12 @@ in the rest of a regular expression.)
 Consider this pattern:
 
     m{ \(
-	  ( 
-	    [^()]+		# x+
-          | 
+          (
+            [^()]+		# x+
+          |
             \( [^()]* \)
           )+
-       \) 
+       \)
      }x
 
 That will efficiently match a nonempty group with matching parentheses
@@ -992,13 +1078,13 @@ seconds, but that each extra letter doubles this time.  This
 exponential performance will make it appear that your program has
 hung.  However, a tiny change to this pattern
 
-    m{ \( 
-	  ( 
-	    (?> [^()]+ )	# change x+ above to (?> x+ )
-          | 
+    m{ \(
+          (
+            (?> [^()]+ )	# change x+ above to (?> x+ )
+          |
             \( [^()]* \)
           )+
-       \) 
+       \)
      }x
 
 which uses C<< (?>...) >> matches exactly when the one above does (verifying
@@ -1046,13 +1132,50 @@ to inside of one of these constructs. The following equivalences apply:
     PAT?+               (?>PAT?)
     PAT{min,max}+       (?>PAT{min,max})
 
-=item C<(?COMMIT)>
-X<(?COMMIT)>
+=back
+
+=head2 Special Backtracking Control Verbs
+
+B<WARNING:> These patterns are experimental and subject to change or
+removal in a future version of perl. Their usage in production code should
+be noted to avoid problems during upgrades.
+
+These special patterns are generally of the form C<(*VERB:ARG)>. Unless
+otherwise stated the ARG argument is optional; in some cases, it is
+forbidden.
+
+Any pattern containing a special backtracking verb that allows an argument
+has the special behaviour that when executed it sets the current packages'
+C<$REGERROR> variable. In this case, the following rules apply:
+
+On failure, this variable will be set to the ARG value of the verb
+pattern, if the verb was involved in the failure of the match. If the ARG
+part of the pattern was omitted, then C<$REGERROR> will be set to TRUE.
+
+On a successful match this variable will be set to FALSE.
+
+B<NOTE:> C<$REGERROR> is not a magic variable in the same sense than
+C<$1> and most other regex related variables. It is not local to a
+scope, nor readonly but instead a volatile package variable similar to
+C<$AUTOLOAD>. Use C<local> to localize changes to it to a specific scope
+if necessary.
+
+If a pattern does not contain a special backtracking verb that allows an
+argument, then C<$REGERROR> is not touched at all.
+
+=over 4
+
+=item Verbs that take an argument
+
+=over 4
+
+=item C<(*NOMATCH)> C<(*NOMATCH:NAME)>
+X<(*NOMATCH)> X<(*NOMATCH:NAME)>
 
 This zero-width pattern commits the match at the current point, preventing
-the engine from back-tracking on failure to the left of the commit point.
-Consider the pattern C<A (?COMMIT) B>, where A and B are complex patterns.
-Until the C<(?COMMIT)> is reached, A may backtrack as necessary to match.
+the engine from backtracking on failure to the left of the this point.
+Consider the pattern C<A (*NOMATCH) B>, where A and B are complex patterns.
+Until the C<(*NOMATCH)> is reached, A may backtrack as necessary to match.
 Once it is reached, matching continues in B, which may also backtrack as
 necessary; however, should B not match, then no further backtracking will
 take place, and the pattern will fail outright at that starting position.
@@ -1060,7 +1183,7 @@ take place, and the pattern will fail outright at that starting position.
 The following example counts all the possible matching strings in a
 pattern (without actually matching any of them).
 
-    'aaab'=~/a+b?(?{print "$&\n"; $count++})(?FAIL)/;
+    'aaab' =~ /a+b?(?{print "$&\n"; $count++})(*FAIL)/;
     print "Count=$count\n";
 
 which produces:
@@ -1076,9 +1199,9 @@ which produces:
     a
     Count=9
 
-If we add a C<(?COMMIT)> before the count like the following
+If we add a C<(*NOMATCH)> before the count like the following
 
-    'aaab'=~/a+b?(?COMMIT)(?{print "$&\n"; $count++})(?FAIL)/;
+    'aaab' =~ /a+b?(*NOMATCH)(?{print "$&\n"; $count++})(*FAIL)/;
     print "Count=$count\n";
 
 we prevent backtracking and find the count of the longest matching
@@ -1089,23 +1212,47 @@ at each matching startpoint like so:
     ab
     Count=3
 
-Any number of C<(?COMMIT)> assertions may be used in a pattern.
+Any number of C<(*NOMATCH)> assertions may be used in a pattern.
 
 See also C<< (?>pattern) >> and possessive quantifiers for other
 ways to control backtracking.
 
-=item C<(?CUT)>
-X<(?CUT)>
+=item C<(*MARK)> C<(*MARK:NAME)>
+X<(*MARK)>
 
-This zero-width pattern is similar to C<(?COMMIT)>, except that on
-failure it also signifies that whatever text that was matched leading
-up to the C<(?CUT)> pattern cannot match, I<even from another
-starting point>.
+This zero-width pattern can be used to mark the point in a string
+reached when a certain part of the pattern has been successfully
+matched. This mark may be given a name. A later C<(*CUT)> pattern
+will then cut at that point if backtracked into on failure. Any
+number of (*MARK) patterns are allowed, and the NAME portion is
+optional and may be duplicated.
 
-Compare the following to the examples in C<(?COMMIT)>, note the string
+See C<*CUT> for more detail.
+
+=item C<(*CUT)> C<(*CUT:NAME)>
+X<(*CUT)>
+
+This zero-width pattern is similar to C<(*NOMATCH)>, except that on
+failure it also signifies that whatever text that was matched leading up
+to the C<(*CUT)> pattern being executed cannot be part of a match, I<even
+if started from a later point>. This effectively means that the regex
+engine moves forward to this position on failure and tries to match
+again, (assuming that there is sufficient room to match).
+
+The name of the C<(*CUT:NAME)> pattern has special significance. If a
+C<(*MARK:NAME)> was encountered while matching, then it is the position
+where that pattern was executed that is used for the "cut point" in the
+string. If no mark of that name was encountered, then the cut is done at
+the point where the C<(*CUT)> was. Similarly if no NAME is specified in
+the C<(*CUT)>, and if a C<(*MARK)> with any name (or none) is encountered,
+then that C<(*MARK)>'s cursor point will be used. If the C<(*CUT)> is not
+preceded by a C<(*MARK)>, then the cut point is where the string was when
+the C<(*CUT)> was encountered.
+
+Compare the following to the examples in C<(*NOMATCH)>, note the string
 is twice as long:
 
-    'aaabaaab'=~/a+b?(?CUT)(?{print "$&\n"; $count++})(?FAIL)/;
+    'aaabaaab' =~ /a+b?(*CUT)(?{print "$&\n"; $count++})(*FAIL)/;
     print "Count=$count\n";
 
 outputs
@@ -1114,17 +1261,17 @@ outputs
     aaab
     Count=2
 
-Once the 'aaab' at the start of the string has matched and the C<(?CUT)>
-executed the next startpoint will be where the cursor was when the
-C<(?CUT)> was executed.
+Once the 'aaab' at the start of the string has matched, and the C<(*CUT)>
+executed, the next startpoint will be where the cursor was when the
+C<(*CUT)> was executed.
 
-=item C<(?ERROR)>
-X<(?ERROR)>
+=item C<(*COMMIT)>
+X<(*COMMIT)>
 
-This zero-width pattern is similar to C<(?CUT)> except that it causes
+This zero-width pattern is similar to C<(*CUT)> except that it causes
 the match to fail outright. No attempts to match will occur again.
 
-    'aaabaaab'=~/a+b?(?ERROR)(?{print "$&\n"; $count++})(?FAIL)/;
+    'aaabaaab' =~ /a+b?(*COMMIT)(?{print "$&\n"; $count++})(*FAIL)/;
     print "Count=$count\n";
 
 outputs
@@ -1132,104 +1279,48 @@ outputs
     aaab
     Count=1
 
-In other words, once the C<(?ERROR)> has been entered and then pattern
-does not match then the regex engine will not try any further matching at
-all on the rest of the string.
-
-=item C<(?(condition)yes-pattern|no-pattern)>
-X<(?()>
-
-=item C<(?(condition)yes-pattern)>
-
-Conditional expression.  C<(condition)> should be either an integer in
-parentheses (which is valid if the corresponding pair of parentheses
-matched), a look-ahead/look-behind/evaluate zero-width assertion, a
-name in angle brackets or single quotes (which is valid if a buffer
-with the given name matched), the special symbol (R) (true when
-evaluated inside of recursion or eval). Additionally the R may be
-followed by a number, (which will be true when evaluated when recursing
-inside of the appropriate group), or by C<&NAME> in which case it will
-be true only when evaluated during recursion in the named group.
-
-Here's a summary of the possible predicates:
-
-=over 4
-
-=item (1) (2) ...
-
-Checks if the numbered capturing buffer has matched something.
-
-=item (<NAME>) ('NAME')
-
-Checks if a buffer with the given name has matched something.
-
-=item (?{ CODE })
-
-Treats the code block as the condition
-
-=item (R)
-
-Checks if the expression has been evaluated inside of recursion.
-
-=item (R1) (R2) ...
-
-Checks if the expression has been evaluated while executing directly
-inside of the n-th capture group. This check is the regex equivalent of
-
-  if ((caller(0))[3] eq 'subname') { .. }
-
-In other words, it does not check the full recursion stack.
-
-=item (R&NAME)
-
-Similar to C<(R1)>, this predicate checks to see if we're executing
-directly inside of the leftmost group with a given name (this is the same
-logic used by C<(?&NAME)> to disambiguate). It does not check the full
-stack, but only the name of the innermost active recursion.
-
-=item (DEFINE)
-
-In this case, the yes-pattern is never directly executed, and no
-no-pattern is allowed. Similar in spirit to C<(?{0})> but more efficient.
-See below for details.
+In other words, once the C<(*COMMIT)> has been entered, and if the pattern
+does not match, the regex engine will not try any further matching on the
+rest of the string.
 
 =back
 
-For example:
+=item Verbs without an argument
 
-    m{ ( \( )?
-       [^()]+
-       (?(1) \) )
-     }x
+=over 4
 
-matches a chunk of non-parentheses, possibly included in parentheses
-themselves.
+=item C<(*FAIL)> C<(*F)>
+X<(*FAIL)> X<(*F)>
 
-A special form is the C<(DEFINE)> predicate, which never executes directly
-its yes-pattern, and does not allow a no-pattern. This allows to define
-subpatterns which will be executed only by using the recursion mechanism.
-This way, you can define a set of regular expression rules that can be
-bundled into any pattern you choose.
+This pattern matches nothing and always fails. It can be used to force the
+engine to backtrack. It is equivalent to C<(?!)>, but easier to read. In
+fact, C<(?!)> gets optimised into C<(*FAIL)> internally.
 
-It is recommended that for this usage you put the DEFINE block at the
-end of the pattern, and that you name any subpatterns defined within it.
+It is probably useful only when combined with C<(?{})> or C<(??{})>.
 
-Also, it's worth noting that patterns defined this way probably will
-not be as efficient, as the optimiser is not very clever about
-handling them. YMMV.
+=item C<(*ACCEPT)>
+X<(*ACCEPT)>
 
-An example of how this might be used is as follows:
+B<WARNING:> This feature is highly experimental. It is not recommended
+for production code.
 
-  /(?<NAME>(&NAME_PAT))(?<ADDR>(&ADDRESS_PAT))
-   (?(DEFINE)
-     (<NAME_PAT>....)
-     (<ADRESS_PAT>....)
-   )/x
+This pattern matches nothing and causes the end of successful matching at
+the point at which the C<(*ACCEPT)> pattern was encountered, regardless of
+whether there is actually more to match in the string. When inside of a
+nested pattern, such as recursion or a dynamically generated subbpattern
+via C<(??{})>, only the innermost pattern is ended immediately.
 
-Note that capture buffers matched inside of recursion are not accessible
-after the recursion returns, so the extra layer of capturing buffers are
-necessary. Thus C<$+{NAME_PAT}> would not be defined even though
-C<$+{NAME}> would be.
+If the C<(*ACCEPT)> is inside of capturing buffers then the buffers are
+marked as ended at the point at which the C<(*ACCEPT)> was encountered.
+For instance:
+
+  'AB' =~ /(A (A|B(*ACCEPT)|C) D)(E)/x;
+
+will match, and C<$1> will be C<AB> and C<$2> will be C<B>, C<$3> will not
+be set. If another branch in the inner parens were matched, such as in the
+string 'ACDE', then the C<D> and C<E> would have to be matched as well.
+
+=back
 
 =back
 

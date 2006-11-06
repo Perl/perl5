@@ -2571,11 +2571,17 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
     int nochange_depth = 0; /* depth of GOSUB recursion with nochange*/
     regmatch_state *yes_state = NULL; /* state to pop to on success of
 							    subpattern */
+    /* mark_state piggy backs on the yes_state logic so that when we unwind 
+       the stack on success we can update the mark_state as we go */
+    regmatch_state *mark_state = NULL; /* last mark state we have seen */
     regmatch_state *cur_eval = NULL; /* most recent EVAL_AB state */
     struct regmatch_state  *cur_curlyx = NULL; /* most recent curlyx */
     U32 state_num;
     bool no_final = 0;
-
+    char *startpoint = PL_reginput;
+    SV *popmark = NULL;
+    SV *sv_commit = NULL;
+    int lastopen = 0;
     /* these three flags are set by various ops to signal information to
      * the very next op. They have a useful lifetime of exactly one loop
      * iteration, and are not preserved or restored by state pushes/pops
@@ -3606,6 +3612,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    PL_reg_start_tmp[n] = locinput;
 	    if (n > PL_regsize)
 		PL_regsize = n;
+            lastopen = n;
 	    break;
 	case CLOSE:
 	    n = ARG(scan);  /* which paren pair */
@@ -3620,6 +3627,32 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	        goto fake_end;
 	    }    
 	    break;
+        case ACCEPT:
+            if (ARG(scan)){
+                regnode *cursor;
+                for (cursor=scan;
+                     cursor && OP(cursor)!=END; 
+                     cursor=regnext(cursor)) 
+                {
+                    if ( OP(cursor)==CLOSE ){
+                        n = ARG(cursor);
+                        if ( n <= lastopen ) {
+                            PL_regstartp[n] = PL_reg_start_tmp[n] - PL_bostr;
+                            PL_regendp[n] = locinput - PL_bostr;
+                            /*if (n > PL_regsize)
+                            PL_regsize = n;*/
+                            if (n > (I32)*PL_reglastparen)
+                                *PL_reglastparen = n;
+                            *PL_reglastcloseparen = n;
+                            if ( n == ARG(scan) || (cur_eval && 
+                                cur_eval->u.eval.close_paren == (U32)n))
+                                break;
+                        }
+                    }
+                }
+            }
+	    goto fake_end;
+	    /*NOTREACHED*/	    
 	case GROUPP:
 	    n = ARG(scan);  /* which paren pair */
 	    sw = (bool)((I32)*PL_reglastparen >= n && PL_regendp[n] != -1);
@@ -4302,7 +4335,7 @@ NULL
 	    PL_reginput = locinput;
 	    if (minmod) {
 		minmod = 0;
-		if (ST.min && regrepeat(rex, ST.A, ST.min) < ST.min)
+		if (ST.min && regrepeat(rex, ST.A, ST.min, depth) < ST.min)
 		    sayNO;
 		ST.count = ST.min;
 		locinput = PL_reginput;
@@ -4335,7 +4368,7 @@ NULL
 
 	    }
 	    else {
-		ST.count = regrepeat(rex, ST.A, ST.max);
+		ST.count = regrepeat(rex, ST.A, ST.max, depth);
 		locinput = PL_reginput;
 		if (ST.count < ST.min)
 		    sayNO;
@@ -4421,7 +4454,7 @@ NULL
 		/* PL_reginput == oldloc now */
 		if (n) {
 		    ST.count += n;
-		    if (regrepeat(rex, ST.A, n) < n)
+		    if (regrepeat(rex, ST.A, n, depth) < n)
 			sayNO;
 		}
 		PL_reginput = locinput;
@@ -4443,7 +4476,7 @@ NULL
 	    REGCP_UNWIND(ST.cp);
 	    /* failed -- move forward one */
 	    PL_reginput = locinput;
-	    if (regrepeat(rex, ST.A, 1)) {
+	    if (regrepeat(rex, ST.A, 1, depth)) {
 		ST.count++;
 		locinput = PL_reginput;
 		if (ST.count <= ST.max || (ST.max == REG_INFTY &&
@@ -4622,17 +4655,13 @@ NULL
 	    if (next == scan)
 		next = NULL;
 	    break;
-	case OPERROR:
-	    reginfo->cutpoint=PL_regeol;
-	    goto do_commit;
-	    /* NOTREACHED */
-	case CUT:
-	    if ( locinput > reginfo->bol )
-	        reginfo->cutpoint = HOPBACKc(locinput, 1);
-	    /* FALLTHROUGH */	    
 	case COMMIT:
-	  do_commit:
+	    reginfo->cutpoint = PL_regeol;
+	    /* FALLTHROUGH */
+	case NOMATCH:
 	    PL_reginput = locinput;
+	    if (!scan->flags)
+	        sv_commit = (SV*)rex->data->data[ ARG( scan ) ];
 	    PUSH_STATE_GOTO(COMMIT_next,next);
 	    /* NOTREACHED */
 	case COMMIT_next_fail:
@@ -4640,6 +4669,71 @@ NULL
 	    /* FALLTHROUGH */	    
 	case OPFAIL:
 	    sayNO;
+	    /* NOTREACHED */
+
+#define ST st->u.mark
+        case MARKPOINT:
+            ST.prev_mark = mark_state;
+            ST.mark_name = scan->flags ? &PL_sv_yes : 
+                (SV*)rex->data->data[ ARG( scan ) ];
+            mark_state = st;
+            ST.mark_loc = PL_reginput = locinput;
+            PUSH_YES_STATE_GOTO(MARKPOINT_next,next);
+            /* NOTREACHED */
+        case MARKPOINT_next:
+            mark_state = ST.prev_mark;
+            sayYES;
+            /* NOTREACHED */
+        case MARKPOINT_next_fail:
+            if (popmark && ( popmark == &PL_sv_yes || 
+                 (ST.mark_name != &PL_sv_yes && 
+                  sv_eq(ST.mark_name,popmark)))) 
+            {
+                if (ST.mark_loc > startpoint)
+	            reginfo->cutpoint = HOPBACKc(ST.mark_loc, 1);
+                popmark = NULL; /* we found our mark */
+                sv_commit = ST.mark_name;
+
+                DEBUG_EXECUTE_r({
+                    if (sv_commit != &PL_sv_yes) 
+	                PerlIO_printf(Perl_debug_log,
+		            "%*s  %ssetting cutpoint to mark:%"SVf"...%s\n",
+		            REPORT_CODE_OFF+depth*2, "", 
+		            PL_colors[4], sv_commit, PL_colors[5]);
+                    else
+                        PerlIO_printf(Perl_debug_log,
+		            "%*s  %ssetting cutpoint to mark...%s\n",
+		            REPORT_CODE_OFF+depth*2, "", 
+		            PL_colors[4], PL_colors[5]);
+		});
+            }
+            mark_state = ST.prev_mark;
+            sayNO;
+            /* NOTREACHED */
+        case CUT:
+            ST.mark_name = scan->flags ? &PL_sv_yes : 
+                    (SV*)rex->data->data[ ARG( scan ) ];
+            if (mark_state) {
+                ST.mark_loc = NULL;
+            } else {
+                ST.mark_loc = locinput;
+            }    
+            PL_reginput = locinput;
+	    PUSH_STATE_GOTO(CUT_next,next);
+	    /* NOTREACHED */
+	case CUT_next_fail:
+	    if (ST.mark_loc) {
+	        if (ST.mark_loc > startpoint)
+	            reginfo->cutpoint = HOPBACKc(ST.mark_loc, 1);
+	        sv_commit = ST.mark_name;
+            } else {
+                popmark = ST.mark_name;	   
+            }
+            no_final = 1; 
+            sayNO;
+            /* NOTREACHED */
+#undef ST
+
 	default:
 	    PerlIO_printf(Perl_error_log, "%"UVxf" %d\n",
 			  PTR2UV(scan), OP(scan));
@@ -4716,13 +4810,13 @@ yes:
 		PL_regmatch_slab = PL_regmatch_slab->prev;
 		st = SLAB_LAST(PL_regmatch_slab);
 	    }
-            DEBUG_STATE_r({
+	    DEBUG_STATE_r({
 	        if (no_final) {
 	            DEBUG_STATE_pp("pop (no final)");        
 	        } else {
 	            DEBUG_STATE_pp("pop (yes)");
 	        }
-		}); 
+	    });
 	    depth--;
 	}
 #else
@@ -4789,7 +4883,14 @@ no_silent:
     result = 0;
 
   final_exit:
-
+    if (rex->reganch & ROPT_VERBARG_SEEN) {
+        SV *sv = get_sv("REGERROR", 1);
+        if (result) 
+            sv_commit = &PL_sv_no;
+        else if (!sv_commit) 
+            sv_commit = &PL_sv_yes;
+        sv_setsv(sv, sv_commit);
+    }
     /* restore original high-water mark */
     PL_regmatch_slab  = orig_slab;
     PL_regmatch_state = orig_state;
@@ -4817,7 +4918,7 @@ no_silent:
  * rather than incrementing count on every character.  [Er, except utf8.]]
  */
 STATIC I32
-S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max)
+S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 {
     dVAR;
     register char *scan;
@@ -5048,7 +5149,7 @@ S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max)
 	    regprop(prog, prop, p);
 	    PerlIO_printf(Perl_debug_log,
 			"%*s  %s can match %"IVdf" times out of %"IVdf"...\n",
-			REPORT_CODE_OFF+1, "", SvPVX_const(prop),(IV)c,(IV)max);
+			REPORT_CODE_OFF + depth*2, "", SvPVX_const(prop),(IV)c,(IV)max);
 	});
     });
 

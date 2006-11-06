@@ -6,8 +6,8 @@
 
 /* Regops and State definitions */
 
-#define REGNODE_MAX           	78
-#define REGMATCH_STATE_MAX    	110
+#define REGNODE_MAX           	82
+#define REGMATCH_STATE_MAX    	118
 
 #define	END                   	0	/* 0000 End of program. */
 #define	SUCCEED               	1	/* 0x01 Return from a subroutine, basically. */
@@ -82,12 +82,16 @@
 #define	NGROUPP               	70	/* 0x46 Whether the group matched. */
 #define	INSUBP                	71	/* 0x47 Whether we are in a specific recurse. */
 #define	DEFINEP               	72	/* 0x48 Never execute directly. */
-#define	OPFAIL                	73	/* 0x49 Same as (?!) */
-#define	COMMIT                	74	/* 0x4a Pattern fails if backtracking through this */
-#define	CUT                   	75	/* 0x4b ... and restarts at the cursor point */
-#define	OPERROR               	76	/* 0x4c Pattern fails outright if backtracking through this */
-#define	OPTIMIZED             	77	/* 0x4d Placeholder for dump. */
-#define	PSEUDO                	78	/* 0x4e Pseudo opcode for internal use. */
+#define	ENDLIKE               	73	/* 0x49 Used only for the type field of verbs */
+#define	OPFAIL                	74	/* 0x4a Same as (?!) */
+#define	ACCEPT                	75	/* 0x4b Accepts the current matched string. */
+#define	VERB                  	76	/* 0x4c    no-sv 1	Used only for the type field of verbs */
+#define	NOMATCH               	77	/* 0x4d Pattern fails at this startpoint if no-backtracking through this */
+#define	MARKPOINT             	78	/* 0x4e Push the current location for rollback by cut. */
+#define	CUT                   	79	/* 0x4f On failure cut the string at the mark. */
+#define	COMMIT                	80	/* 0x50 Pattern fails outright if backtracking through this */
+#define	OPTIMIZED             	81	/* 0x51 Placeholder for dump. */
+#define	PSEUDO                	82	/* 0x52 Pseudo opcode for internal use. */
 	/* ------------ States ------------- */
 #define	TRIE_next             	(REGNODE_MAX + 1)	/* state for TRIE */
 #define	TRIE_next_fail        	(REGNODE_MAX + 2)	/* state for TRIE */
@@ -121,6 +125,10 @@
 #define	CURLY_B_max_fail      	(REGNODE_MAX + 30)	/* state for CURLY */
 #define	COMMIT_next           	(REGNODE_MAX + 31)	/* state for COMMIT */
 #define	COMMIT_next_fail      	(REGNODE_MAX + 32)	/* state for COMMIT */
+#define	MARKPOINT_next        	(REGNODE_MAX + 33)	/* state for MARKPOINT */
+#define	MARKPOINT_next_fail   	(REGNODE_MAX + 34)	/* state for MARKPOINT */
+#define	CUT_next              	(REGNODE_MAX + 35)	/* state for CUT */
+#define	CUT_next_fail         	(REGNODE_MAX + 36)	/* state for CUT */
 
 /* PL_regkind[] What type of regop or state is this. */
 
@@ -128,118 +136,126 @@
 EXTCONST U8 PL_regkind[];
 #else
 EXTCONST U8 PL_regkind[] = {
-	END,    	/* END                    */
-	END,    	/* SUCCEED                */
-	BOL,    	/* BOL                    */
-	BOL,    	/* MBOL                   */
-	BOL,    	/* SBOL                   */
-	EOL,    	/* EOS                    */
-	EOL,    	/* EOL                    */
-	EOL,    	/* MEOL                   */
-	EOL,    	/* SEOL                   */
-	BOUND,  	/* BOUND                  */
-	BOUND,  	/* BOUNDL                 */
-	NBOUND, 	/* NBOUND                 */
-	NBOUND, 	/* NBOUNDL                */
-	GPOS,   	/* GPOS                   */
-	REG_ANY,	/* REG_ANY                */
-	REG_ANY,	/* SANY                   */
-	REG_ANY,	/* CANY                   */
-	ANYOF,  	/* ANYOF                  */
-	ALNUM,  	/* ALNUM                  */
-	ALNUM,  	/* ALNUML                 */
-	NALNUM, 	/* NALNUM                 */
-	NALNUM, 	/* NALNUML                */
-	SPACE,  	/* SPACE                  */
-	SPACE,  	/* SPACEL                 */
-	NSPACE, 	/* NSPACE                 */
-	NSPACE, 	/* NSPACEL                */
-	DIGIT,  	/* DIGIT                  */
-	DIGIT,  	/* DIGITL                 */
-	NDIGIT, 	/* NDIGIT                 */
-	NDIGIT, 	/* NDIGITL                */
-	CLUMP,  	/* CLUMP                  */
-	BRANCH, 	/* BRANCH                 */
-	BACK,   	/* BACK                   */
-	EXACT,  	/* EXACT                  */
-	EXACT,  	/* EXACTF                 */
-	EXACT,  	/* EXACTFL                */
-	NOTHING,	/* NOTHING                */
-	NOTHING,	/* TAIL                   */
-	STAR,   	/* STAR                   */
-	PLUS,   	/* PLUS                   */
-	CURLY,  	/* CURLY                  */
-	CURLY,  	/* CURLYN                 */
-	CURLY,  	/* CURLYM                 */
-	CURLY,  	/* CURLYX                 */
-	WHILEM, 	/* WHILEM                 */
-	OPEN,   	/* OPEN                   */
-	CLOSE,  	/* CLOSE                  */
-	REF,    	/* REF                    */
-	REF,    	/* REFF                   */
-	REF,    	/* REFFL                  */
-	BRANCHJ,	/* IFMATCH                */
-	BRANCHJ,	/* UNLESSM                */
-	BRANCHJ,	/* SUSPEND                */
-	BRANCHJ,	/* IFTHEN                 */
-	GROUPP, 	/* GROUPP                 */
-	LONGJMP,	/* LONGJMP                */
-	BRANCHJ,	/* BRANCHJ                */
-	EVAL,   	/* EVAL                   */
-	MINMOD, 	/* MINMOD                 */
-	LOGICAL,	/* LOGICAL                */
-	BRANCHJ,	/* RENUM                  */
-	TRIE,   	/* TRIE                   */
-	TRIE,   	/* TRIEC                  */
-	TRIE,   	/* AHOCORASICK            */
-	TRIE,   	/* AHOCORASICKC           */
-	GOSUB,  	/* GOSUB                  */
-	GOSTART,	/* GOSTART                */
-	NREF,   	/* NREF                   */
-	NREF,   	/* NREFF                  */
-	NREF,   	/* NREFFL                 */
-	NGROUPP,	/* NGROUPP                */
-	INSUBP, 	/* INSUBP                 */
-	DEFINEP,	/* DEFINEP                */
-	OPFAIL, 	/* OPFAIL                 */
-	COMMIT, 	/* COMMIT                 */
-	COMMIT, 	/* CUT                    */
-	OPERROR,	/* OPERROR                */
-	NOTHING,	/* OPTIMIZED              */
-	PSEUDO, 	/* PSEUDO                 */
+	END,      	/* END                    */
+	END,      	/* SUCCEED                */
+	BOL,      	/* BOL                    */
+	BOL,      	/* MBOL                   */
+	BOL,      	/* SBOL                   */
+	EOL,      	/* EOS                    */
+	EOL,      	/* EOL                    */
+	EOL,      	/* MEOL                   */
+	EOL,      	/* SEOL                   */
+	BOUND,    	/* BOUND                  */
+	BOUND,    	/* BOUNDL                 */
+	NBOUND,   	/* NBOUND                 */
+	NBOUND,   	/* NBOUNDL                */
+	GPOS,     	/* GPOS                   */
+	REG_ANY,  	/* REG_ANY                */
+	REG_ANY,  	/* SANY                   */
+	REG_ANY,  	/* CANY                   */
+	ANYOF,    	/* ANYOF                  */
+	ALNUM,    	/* ALNUM                  */
+	ALNUM,    	/* ALNUML                 */
+	NALNUM,   	/* NALNUM                 */
+	NALNUM,   	/* NALNUML                */
+	SPACE,    	/* SPACE                  */
+	SPACE,    	/* SPACEL                 */
+	NSPACE,   	/* NSPACE                 */
+	NSPACE,   	/* NSPACEL                */
+	DIGIT,    	/* DIGIT                  */
+	DIGIT,    	/* DIGITL                 */
+	NDIGIT,   	/* NDIGIT                 */
+	NDIGIT,   	/* NDIGITL                */
+	CLUMP,    	/* CLUMP                  */
+	BRANCH,   	/* BRANCH                 */
+	BACK,     	/* BACK                   */
+	EXACT,    	/* EXACT                  */
+	EXACT,    	/* EXACTF                 */
+	EXACT,    	/* EXACTFL                */
+	NOTHING,  	/* NOTHING                */
+	NOTHING,  	/* TAIL                   */
+	STAR,     	/* STAR                   */
+	PLUS,     	/* PLUS                   */
+	CURLY,    	/* CURLY                  */
+	CURLY,    	/* CURLYN                 */
+	CURLY,    	/* CURLYM                 */
+	CURLY,    	/* CURLYX                 */
+	WHILEM,   	/* WHILEM                 */
+	OPEN,     	/* OPEN                   */
+	CLOSE,    	/* CLOSE                  */
+	REF,      	/* REF                    */
+	REF,      	/* REFF                   */
+	REF,      	/* REFFL                  */
+	BRANCHJ,  	/* IFMATCH                */
+	BRANCHJ,  	/* UNLESSM                */
+	BRANCHJ,  	/* SUSPEND                */
+	BRANCHJ,  	/* IFTHEN                 */
+	GROUPP,   	/* GROUPP                 */
+	LONGJMP,  	/* LONGJMP                */
+	BRANCHJ,  	/* BRANCHJ                */
+	EVAL,     	/* EVAL                   */
+	MINMOD,   	/* MINMOD                 */
+	LOGICAL,  	/* LOGICAL                */
+	BRANCHJ,  	/* RENUM                  */
+	TRIE,     	/* TRIE                   */
+	TRIE,     	/* TRIEC                  */
+	TRIE,     	/* AHOCORASICK            */
+	TRIE,     	/* AHOCORASICKC           */
+	GOSUB,    	/* GOSUB                  */
+	GOSTART,  	/* GOSTART                */
+	NREF,     	/* NREF                   */
+	NREF,     	/* NREFF                  */
+	NREF,     	/* NREFFL                 */
+	NGROUPP,  	/* NGROUPP                */
+	INSUBP,   	/* INSUBP                 */
+	DEFINEP,  	/* DEFINEP                */
+	ENDLIKE,  	/* ENDLIKE                */
+	ENDLIKE,  	/* OPFAIL                 */
+	ENDLIKE,  	/* ACCEPT                 */
+	VERB,     	/* VERB                   */
+	VERB,     	/* NOMATCH                */
+	VERB,     	/* MARKPOINT              */
+	VERB,     	/* CUT                    */
+	VERB,     	/* COMMIT                 */
+	NOTHING,  	/* OPTIMIZED              */
+	PSEUDO,   	/* PSEUDO                 */
 	/* ------------ States ------------- */
-	TRIE,   	/* TRIE_next              */
-	TRIE,   	/* TRIE_next_fail         */
-	EVAL,   	/* EVAL_AB                */
-	EVAL,   	/* EVAL_AB_fail           */
-	CURLYX, 	/* CURLYX_end             */
-	CURLYX, 	/* CURLYX_end_fail        */
-	WHILEM, 	/* WHILEM_A_pre           */
-	WHILEM, 	/* WHILEM_A_pre_fail      */
-	WHILEM, 	/* WHILEM_A_min           */
-	WHILEM, 	/* WHILEM_A_min_fail      */
-	WHILEM, 	/* WHILEM_A_max           */
-	WHILEM, 	/* WHILEM_A_max_fail      */
-	WHILEM, 	/* WHILEM_B_min           */
-	WHILEM, 	/* WHILEM_B_min_fail      */
-	WHILEM, 	/* WHILEM_B_max           */
-	WHILEM, 	/* WHILEM_B_max_fail      */
-	BRANCH, 	/* BRANCH_next            */
-	BRANCH, 	/* BRANCH_next_fail       */
-	CURLYM, 	/* CURLYM_A               */
-	CURLYM, 	/* CURLYM_A_fail          */
-	CURLYM, 	/* CURLYM_B               */
-	CURLYM, 	/* CURLYM_B_fail          */
-	IFMATCH,	/* IFMATCH_A              */
-	IFMATCH,	/* IFMATCH_A_fail         */
-	CURLY,  	/* CURLY_B_min_known      */
-	CURLY,  	/* CURLY_B_min_known_fail */
-	CURLY,  	/* CURLY_B_min            */
-	CURLY,  	/* CURLY_B_min_fail       */
-	CURLY,  	/* CURLY_B_max            */
-	CURLY,  	/* CURLY_B_max_fail       */
-	COMMIT, 	/* COMMIT_next            */
-	COMMIT, 	/* COMMIT_next_fail       */
+	TRIE,     	/* TRIE_next              */
+	TRIE,     	/* TRIE_next_fail         */
+	EVAL,     	/* EVAL_AB                */
+	EVAL,     	/* EVAL_AB_fail           */
+	CURLYX,   	/* CURLYX_end             */
+	CURLYX,   	/* CURLYX_end_fail        */
+	WHILEM,   	/* WHILEM_A_pre           */
+	WHILEM,   	/* WHILEM_A_pre_fail      */
+	WHILEM,   	/* WHILEM_A_min           */
+	WHILEM,   	/* WHILEM_A_min_fail      */
+	WHILEM,   	/* WHILEM_A_max           */
+	WHILEM,   	/* WHILEM_A_max_fail      */
+	WHILEM,   	/* WHILEM_B_min           */
+	WHILEM,   	/* WHILEM_B_min_fail      */
+	WHILEM,   	/* WHILEM_B_max           */
+	WHILEM,   	/* WHILEM_B_max_fail      */
+	BRANCH,   	/* BRANCH_next            */
+	BRANCH,   	/* BRANCH_next_fail       */
+	CURLYM,   	/* CURLYM_A               */
+	CURLYM,   	/* CURLYM_A_fail          */
+	CURLYM,   	/* CURLYM_B               */
+	CURLYM,   	/* CURLYM_B_fail          */
+	IFMATCH,  	/* IFMATCH_A              */
+	IFMATCH,  	/* IFMATCH_A_fail         */
+	CURLY,    	/* CURLY_B_min_known      */
+	CURLY,    	/* CURLY_B_min_known_fail */
+	CURLY,    	/* CURLY_B_min            */
+	CURLY,    	/* CURLY_B_min_fail       */
+	CURLY,    	/* CURLY_B_max            */
+	CURLY,    	/* CURLY_B_max_fail       */
+	COMMIT,   	/* COMMIT_next            */
+	COMMIT,   	/* COMMIT_next_fail       */
+	MARKPOINT,	/* MARKPOINT_next         */
+	MARKPOINT,	/* MARKPOINT_next_fail    */
+	CUT,      	/* CUT_next               */
+	CUT,      	/* CUT_next_fail          */
 };
 #endif
 
@@ -320,10 +336,14 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_1),        	/* NGROUPP      */
 	EXTRA_SIZE(struct regnode_1),        	/* INSUBP       */
 	EXTRA_SIZE(struct regnode_1),        	/* DEFINEP      */
+	0,                                   	/* ENDLIKE      */
 	0,                                   	/* OPFAIL       */
-	0,                                   	/* COMMIT       */
-	0,                                   	/* CUT          */
-	0,                                   	/* OPERROR      */
+	EXTRA_SIZE(struct regnode_1),        	/* ACCEPT       */
+	0,                                   	/* VERB         */
+	EXTRA_SIZE(struct regnode_1),        	/* NOMATCH      */
+	EXTRA_SIZE(struct regnode_1),        	/* MARKPOINT    */
+	EXTRA_SIZE(struct regnode_1),        	/* CUT          */
+	EXTRA_SIZE(struct regnode_1),        	/* COMMIT       */
 	0,                                   	/* OPTIMIZED    */
 	0,                                   	/* PSEUDO       */
 };
@@ -404,10 +424,14 @@ static const char reg_off_by_arg[] = {
 	0,	/* NGROUPP      */
 	0,	/* INSUBP       */
 	0,	/* DEFINEP      */
+	0,	/* ENDLIKE      */
 	0,	/* OPFAIL       */
-	0,	/* COMMIT       */
+	0,	/* ACCEPT       */
+	0,	/* VERB         */
+	0,	/* NOMATCH      */
+	0,	/* MARKPOINT    */
 	0,	/* CUT          */
-	0,	/* OPERROR      */
+	0,	/* COMMIT       */
 	0,	/* OPTIMIZED    */
 	0,	/* PSEUDO       */
 };
@@ -489,12 +513,16 @@ const char * reg_name[] = {
 	"NGROUPP",               	/* 0x46 */
 	"INSUBP",                	/* 0x47 */
 	"DEFINEP",               	/* 0x48 */
-	"OPFAIL",                	/* 0x49 */
-	"COMMIT",                	/* 0x4a */
-	"CUT",                   	/* 0x4b */
-	"OPERROR",               	/* 0x4c */
-	"OPTIMIZED",             	/* 0x4d */
-	"PSEUDO",                	/* 0x4e */
+	"ENDLIKE",               	/* 0x49 */
+	"OPFAIL",                	/* 0x4a */
+	"ACCEPT",                	/* 0x4b */
+	"VERB",                  	/* 0x4c */
+	"NOMATCH",               	/* 0x4d */
+	"MARKPOINT",             	/* 0x4e */
+	"CUT",                   	/* 0x4f */
+	"COMMIT",                	/* 0x50 */
+	"OPTIMIZED",             	/* 0x51 */
+	"PSEUDO",                	/* 0x52 */
 	/* ------------ States ------------- */
 	"TRIE_next",             	/* REGNODE_MAX +0x01 */
 	"TRIE_next_fail",        	/* REGNODE_MAX +0x02 */
@@ -528,6 +556,10 @@ const char * reg_name[] = {
 	"CURLY_B_max_fail",      	/* REGNODE_MAX +0x1e */
 	"COMMIT_next",           	/* REGNODE_MAX +0x1f */
 	"COMMIT_next_fail",      	/* REGNODE_MAX +0x20 */
+	"MARKPOINT_next",        	/* REGNODE_MAX +0x21 */
+	"MARKPOINT_next_fail",   	/* REGNODE_MAX +0x22 */
+	"CUT_next",              	/* REGNODE_MAX +0x23 */
+	"CUT_next_fail",         	/* REGNODE_MAX +0x24 */
 };
 #endif /* DEBUGGING */
 #else

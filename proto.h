@@ -3697,7 +3697,7 @@ STATIC I32	S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 
-STATIC I32	S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max)
+STATIC I32	S_regrepeat(pTHX_ const regexp *prog, const regnode *p, I32 max, int depth)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);

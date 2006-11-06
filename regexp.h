@@ -97,7 +97,6 @@ typedef struct regexp_engine {
 #define ROPT_CANY_SEEN		0x00000800
 #define ROPT_SANY_SEEN		ROPT_CANY_SEEN /* src bckwrd cmpt */
 #define ROPT_GPOS_CHECK         (ROPT_GPOS_SEEN|ROPT_ANCH_GPOS)
-#define ROPT_RECURSE_SEEN       0x00001000
 
 /* 0xf800 of reganch is used by PMf_COMPILETIME */
 
@@ -106,6 +105,8 @@ typedef struct regexp_engine {
 #define ROPT_COPY_DONE		0x00040000	/* subbeg is a copy of the string */
 #define ROPT_TAINTED_SEEN	0x00080000
 #define ROPT_MATCH_UTF8		0x10000000 /* subbeg is utf-8 */
+#define ROPT_RECURSE_SEEN       0x20000000
+#define ROPT_VERBARG_SEEN       0x40000000
 
 #define RE_USE_INTUIT_NOML	0x00100000 /* Best to intuit before matching */
 #define RE_USE_INTUIT_ML	0x00200000
@@ -311,6 +312,14 @@ typedef struct regmatch_state {
 	    I32 logical;	/* saved copy of 'logical' var */
 	    regnode  *me; /* the IFMATCH/SUSPEND/UNLESSM node  */
 	} ifmatch; /* and SUSPEND/UNLESSM */
+	
+	struct {
+	    /* this first element must match u.yes */
+	    struct regmatch_state *prev_yes_state;
+	    struct regmatch_state *prev_mark;
+	    SV* mark_name;
+	    char *mark_loc;
+	} mark;
     } u;
 } regmatch_state;
 

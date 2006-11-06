@@ -3851,54 +3851,136 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     iseq($count,1,"should have matched once only [RT#36046]");
 }
 
-{   # Test the (?COMMIT) pattern
+{   # Test the (*NOMATCH) pattern
     our $count = 0;
-    'aaab'=~/a+b?(?{$count++})(?FAIL)/;
-    iseq($count,9,"expect 9 for no (?COMMIT)");
+    'aaab'=~/a+b?(?{$count++})(*FAIL)/;
+    iseq($count,9,"expect 9 for no (*NOMATCH)");
     $count = 0;
-    'aaab'=~/a+b?(?COMMIT)(?{$count++})(?FAIL)/;
-    iseq($count,3,"expect 3 with (?COMMIT)");
+    'aaab'=~/a+b?(*NOMATCH)(?{$count++})(*FAIL)/;
+    iseq($count,3,"expect 3 with (*NOMATCH)");
     local $_='aaab';
     $count=0;
-    1 while /.(?COMMIT)(?{$count++})(?FAIL)/g;
-    iseq($count,4,"/.(?COMMIT)/");
+    1 while /.(*NOMATCH)(?{$count++})(*FAIL)/g;
+    iseq($count,4,"/.(*NOMATCH)/");
     $count = 0;
-    'aaab'=~/a+b?(??{'(?COMMIT)'})(?{$count++})(?FAIL)/;
-    iseq($count,3,"expect 3 with (?COMMIT)");
+    'aaab'=~/a+b?(??{'(*NOMATCH)'})(?{$count++})(*FAIL)/;
+    iseq($count,3,"expect 3 with (*NOMATCH)");
     local $_='aaab';
     $count=0;
-    1 while /.(??{'(?COMMIT)'})(?{$count++})(?FAIL)/g;
-    iseq($count,4,"/.(?COMMIT)/");
+    1 while /.(??{'(*NOMATCH)'})(?{$count++})(*FAIL)/g;
+    iseq($count,4,"/.(*NOMATCH)/");
 }
-{   # Test the (?CUT) pattern
+{   # Test the (*CUT) pattern
     our $count = 0;
-    'aaab'=~/a+b?(?CUT)(?{$count++})(?FAIL)/;
-    iseq($count,1,"expect 1 with (?CUT)");
+    'aaab'=~/a+b?(*CUT)(?{$count++})(*FAIL)/;
+    iseq($count,1,"expect 1 with (*CUT)");
     local $_='aaab';
     $count=0;
-    1 while /.(?CUT)(?{$count++})(?FAIL)/g;
-    iseq($count,4,"/.(?CUT)/");
+    1 while /.(*CUT)(?{$count++})(*FAIL)/g;
+    iseq($count,4,"/.(*CUT)/");
     $_='aaabaaab';
     $count=0;
     our @res=();
-    1 while /(a+b?)(?CUT)(?{$count++; push @res,$1})(?FAIL)/g;
-    iseq($count,2,"Expect 2 with (?CUT)" );
-    iseq("@res","aaab aaab","adjacent (?CUT) works as expected" );
+    1 while /(a+b?)(*CUT)(?{$count++; push @res,$1})(*FAIL)/g;
+    iseq($count,2,"Expect 2 with (*CUT)" );
+    iseq("@res","aaab aaab","adjacent (*CUT) works as expected" );
 }
-{   # Test the (?ERROR) pattern
+{   # Test the (*CUT) pattern
     our $count = 0;
-    'aaabaaab'=~/a+b?(?ERROR)(?{$count++})(?FAIL)/;
-    iseq($count,1,"expect 1 with (?ERROR)");
+    'aaab'=~/a+b?(*MARK)(*CUT)(?{$count++})(*FAIL)/;
+    iseq($count,1,"expect 1 with (*CUT)");
     local $_='aaab';
     $count=0;
-    1 while /.(?ERROR)(?{$count++})(?FAIL)/g;
-    iseq($count,1,"/.(?ERROR)/");
+    1 while /.(*MARK)(*CUT)(?{$count++})(*FAIL)/g;
+    iseq($count,4,"/.(*CUT)/");
     $_='aaabaaab';
     $count=0;
     our @res=();
-    1 while /(a+b?)(?ERROR)(?{$count++; push @res,$1})(?FAIL)/g;
-    iseq($count,1,"Expect 1 with (?ERROR)" );
-    iseq("@res","aaab","adjacent (?ERROR) works as expected" );
+    1 while /(a+b?)(*MARK)(*CUT)(?{$count++; push @res,$1})(*FAIL)/g;
+    iseq($count,2,"Expect 2 with (*CUT)" );
+    iseq("@res","aaab aaab","adjacent (*CUT) works as expected" );
+}
+{   # Test the (*CUT) pattern
+    our $count = 0;
+    'aaab'=~/a*(*MARK:a)b?(*MARK:b)(*CUT:a)(?{$count++})(*FAIL)/;
+    iseq($count,3,"expect 3 with *MARK:a)b?(*MARK:b)(*CUT:a)");
+    local $_='aaabaaab';
+    $count=0;
+    our @res=();
+    1 while /(a*(*MARK:a)b?)(*MARK)(*CUT:a)(?{$count++; push @res,$1})(*FAIL)/g;
+    iseq($count,5,"Expect 5 with (*MARK:a)b?)(*MARK)(*CUT:a)" );
+    iseq("@res","aaab b aaab b ","adjacent (*MARK:a)b?)(*MARK)(*CUT:a) works as expected" );
+}
+{   # Test the (*COMMIT) pattern
+    our $count = 0;
+    'aaabaaab'=~/a+b?(*COMMIT)(?{$count++})(*FAIL)/;
+    iseq($count,1,"expect 1 with (*COMMIT)");
+    local $_='aaab';
+    $count=0;
+    1 while /.(*COMMIT)(?{$count++})(*FAIL)/g;
+    iseq($count,1,"/.(*COMMIT)/");
+    $_='aaabaaab';
+    $count=0;
+    our @res=();
+    1 while /(a+b?)(*COMMIT)(?{$count++; push @res,$1})(*FAIL)/g;
+    iseq($count,1,"Expect 1 with (*COMMIT)" );
+    iseq("@res","aaab","adjacent (*COMMIT) works as expected" );
+}
+{
+    # Test named commits and the $REGERROR var
+    our $REGERROR;
+    for my $name ('',':foo') 
+    {
+        for my $pat ("(*NOMATCH$name)","(*MARK$name)(*CUT)",
+                         "(*CUT$name)","(*COMMIT$name)")
+        {                         
+            for my $suffix ('(*FAIL)','') 
+            {
+                'aaaab'=~/a+b$pat$suffix/;
+                iseq(
+                    $REGERROR,
+                    ($suffix ? ($name ? 'foo' : "1") : ""),
+                    "Test $pat and \$REGERROR $suffix"
+                );
+            }
+        }
+    }      
+}    
+{
+    # Test named commits and the $REGERROR var
+    package Fnorble;
+    our $REGERROR;
+    for my $name ('',':foo') 
+    {
+        for my $pat ("(*NOMATCH$name)","(*MARK$name)(*CUT)",
+                         "(*CUT$name)","(*COMMIT$name)")
+        {                         
+            for my $suffix ('(*FAIL)','') 
+            {
+                'aaaab'=~/a+b$pat$suffix/;
+                ::iseq(
+                    $REGERROR,
+                    ($suffix ? ($name ? 'foo' : "1") : ""),
+                    "Test $pat and \$REGERROR $suffix"
+                );
+            }
+        }
+    }      
+}    
+{
+    # Test named commits and the $REGERROR var
+    our $REGERROR;
+    for $word (qw(bar baz bop)) {
+        $REGERROR="";
+        "aaaaa$word"=~/a+(?:bar(*COMMIT:bar)|baz(*COMMIT:baz)|bop(*COMMIT:bop))(*FAIL)/;
+        iseq($REGERROR,$word);
+    }    
+}
+{   #Regression test for perlbug 40684
+    my $s = "abc\ndef";
+    my $rex = qr'^abc$'m;
+    ok($s =~ m/$rex/);
+    ok($s =~ m/^abc$/m);
 }
 #-------------------------------------------------------------------
 
@@ -3914,5 +3996,5 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
 # Put new tests above the line, not here.
 
 # Don't forget to update this!
-BEGIN{print "1..1300\n"};
+BEGIN{print "1..1344\n"};
 

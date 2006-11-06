@@ -169,10 +169,16 @@ INSUBP		INSUBP,    num 1 	Whether we are in a specific recurse.
 DEFINEP		DEFINEP,   none 1 	Never execute directly.               
 
 #*Bactracking 
-OPFAIL		OPFAIL, none 		Same as (?!)
-COMMIT		COMMIT, none		Pattern fails if backtracking through this 
-CUT		COMMIT, none		... and restarts at the cursor point
-OPERROR		OPERROR,none		Pattern fails outright if backtracking through this
+ENDLIKE		ENDLIKE,   none		Used only for the type field of verbs
+OPFAIL		ENDLIKE,   none 	Same as (?!)
+ACCEPT		ENDLIKE,   parno 1 	Accepts the current matched string.
+VERB		VERB,	   no-sv 1	Used only for the type field of verbs
+NOMATCH		VERB,      no-sv 1 	Pattern fails at this startpoint if no-backtracking through this 
+MARKPOINT	VERB,      no-sv 1	Push the current location for rollback by cut.
+CUT		VERB,      no-sv 1	On failure cut the string at the mark.
+COMMIT		VERB,      no-sv 1	Pattern fails outright if backtracking through this
+
+
 
 # NEW STUFF ABOVE THIS LINE -- Please update counts below. 
 
@@ -210,4 +216,5 @@ CURLYM  	A,B:FAIL
 IFMATCH 	A:FAIL	
 CURLY   	B_min_known,B_min,B_max:FAIL	
 COMMIT		next:FAIL
-
+MARKPOINT	next:FAIL
+CUT		next:FAIL

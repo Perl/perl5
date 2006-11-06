@@ -1359,7 +1359,7 @@ Es	|U8	|regtail_study	|NN struct RExC_state_t *state|NN regnode *p|NN const regn
 
 #if defined(PERL_IN_REGEXEC_C) || defined(PERL_DECL_PROT)
 ERs	|I32	|regmatch	|NN regmatch_info *reginfo|NN regnode *prog
-ERs	|I32	|regrepeat	|NN const regexp *prog|NN const regnode *p|I32 max
+ERs	|I32	|regrepeat	|NN const regexp *prog|NN const regnode *p|I32 max|int depth
 ERs	|I32	|regtry		|NN regmatch_info *reginfo|NN char **startpos
 ERs	|bool	|reginclass	|NULLOK const regexp *prog|NN const regnode *n|NN const U8 *p|NULLOK STRLEN *lenp\
 				|bool do_utf8sv_is_utf8

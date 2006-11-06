@@ -138,7 +138,8 @@ ab|cd	abcd	y	$&	ab
 ()ef	def	y	$-[1]	1
 ()ef	def	y	$+[1]	1
 *a	-	c	-	Quantifier follows nothing
-(*)b	-	c	-	Quantifier follows nothing
+(|*)b	-	c	-	Quantifier follows nothing
+(*)b	-	c	-	Unknown verb
 $b	b	n	-	-
 a\	-	c	-	Search pattern not terminated
 a\(b	a(b	y	$&-$1	a(b-
@@ -325,7 +326,8 @@ a[-]?c	ac	y	$&	ac
 'ab|cd'i	ABCD	y	$&	AB
 '()ef'i	DEF	y	$&-$1	EF-
 '*a'i	-	c	-	Quantifier follows nothing
-'(*)b'i	-	c	-	Quantifier follows nothing
+'(|*)b'i	-	c	-	Quantifier follows nothing
+'(*)b'i	-	c	-	Unknown verb
 '$b'i	B	n	-	-
 'a\'i	-	c	-	Search pattern not terminated
 'a\(b'i	A(B	y	$&-$1	A(B-
@@ -1178,5 +1180,9 @@ round\(([^()]++)\)	_I(round(xs * sz),1)	y	$1	xs * sz
 
 
 a*(?!)	aaaab	n	-	-
-a*(?FAIL)	aaaab	n	-	-
-a*(?F)	aaaab	n	-	-
+a*(*FAIL)	aaaab	n	-	-
+a*(*F)	aaaab	n	-	-
+
+(A(A|B(*ACCEPT)|C)D)(E)	AB	y	$1	AB
+(A(A|B(*ACCEPT)|C)D)(E)	ACDE	y	$1$2$3	ACDCE
+

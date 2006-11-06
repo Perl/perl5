@@ -114,6 +114,7 @@ typedef struct RExC_state_t {
     U32		seen;
     I32		size;			/* Code size. */
     I32		npar;			/* () count. */
+    I32		nestroot;		/* root parens we are in - used by accept */
     I32		extralen;
     I32		seen_zerolen;
     I32		seen_evals;
@@ -152,6 +153,7 @@ typedef struct RExC_state_t {
 #define RExC_seen	(pRExC_state->seen)
 #define RExC_size	(pRExC_state->size)
 #define RExC_npar	(pRExC_state->npar)
+#define RExC_nestroot   (pRExC_state->nestroot)
 #define RExC_extralen	(pRExC_state->extralen)
 #define RExC_seen_zerolen	(pRExC_state->seen_zerolen)
 #define RExC_seen_evals	(pRExC_state->seen_evals)
@@ -335,7 +337,7 @@ static const scan_data_t zero_scan_data =
 #define SCF_WHILEM_VISITED_POS	0x2000
 
 #define SCF_TRIE_RESTUDY        0x4000 /* Do restudy? */
-
+#define SCF_SEEN_ACCEPT         0x8000 
 
 #define UTF (RExC_utf8 != 0)
 #define LOC ((RExC_flags & PMf_LOCALE) != 0)
@@ -2311,6 +2313,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     scan_data_t data_fake;
     SV *re_trie_maxbuff = NULL;
     regnode *first_non_open = scan;
+    I32 stopmin = I32_MAX;
     GET_RE_DEBUG_FLAGS_DECL;
 #ifdef DEBUGGING
     StructCopy(&zero_scan_data, &data_fake, scan_data_t);
@@ -2411,6 +2414,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    scan = next;
 		    if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
 			pars++;
+	            if (data_fake.flags & SCF_SEEN_ACCEPT) {
+	                if ( stopmin > minnext) 
+	                    stopmin = min + min1;
+	                flags &= ~SCF_DO_SUBSTR;
+	                if (data)
+	                    data->flags |= SCF_SEEN_ACCEPT;
+	            }
 		    if (data) {
 			if (data_fake.flags & SF_HAS_EVAL)
 			    data->flags |= SF_HAS_EVAL;
@@ -3580,10 +3590,15 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		if (data)
 		    data->flags |= SF_HAS_EVAL;
 	}
-	else if ( OP(scan)==OPFAIL ) {
+	else if ( PL_regkind[OP(scan)] == ENDLIKE ) {
 	    if (flags & SCF_DO_SUBSTR) {
 		scan_commit(pRExC_state,data,minlenp);
 		flags &= ~SCF_DO_SUBSTR;
+	    }
+	    if (data && OP(scan)==ACCEPT) {
+	        data->flags |= SCF_SEEN_ACCEPT;
+	        if (stopmin > min)
+	            stopmin = min;
 	    }
 	}
 	else if (OP(scan) == LOGICAL && scan->flags == 2) /* Embedded follows */
@@ -3666,7 +3681,13 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     
                     if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
                         pars++;
-                    
+                    if (data_fake.flags & SCF_SEEN_ACCEPT) {
+                        if ( stopmin > min + min1) 
+	                    stopmin = min + min1;
+	                flags &= ~SCF_DO_SUBSTR;
+	                if (data)
+	                    data->flags |= SCF_SEEN_ACCEPT;
+	            }
                     if (data) {
                         if (data_fake.flags & SF_HAS_EVAL)
                             data->flags |= SF_HAS_EVAL;
@@ -3758,7 +3779,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     
     DEBUG_STUDYDATA(data,depth);
     
-    return min;
+    return min < stopmin ? min : stopmin;
 }
 
 STATIC I32
@@ -3915,6 +3936,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     RExC_end = xend;
     RExC_naughty = 0;
     RExC_npar = 1;
+    RExC_nestroot = 0;
     RExC_size = 0L;
     RExC_emit = &PL_regdummy;
     RExC_whilem_seen = 0;
@@ -3951,6 +3973,11 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 	RExC_extralen = 0;
     if (RExC_whilem_seen > 15)
 	RExC_whilem_seen = 15;
+
+#ifdef DEBUGGING
+    /* Make room for a sentinel value at the end of the program */
+    RExC_size++;
+#endif
 
     /* Allocate space and zero-initialize. Note, the two step process 
        of zeroing when in debug mode, thus anything assigned has to 
@@ -4008,6 +4035,11 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     RExC_npar = 1;
     RExC_emit_start = r->program;
     RExC_emit = r->program;
+#ifdef DEBUGGING
+    /* put a sentinal on the end of the program so we can check for
+       overwrites */
+    r->program[RExC_size].type = 255;
+#endif
     /* Store the count of eval-groups for security checks: */
     RExC_emit->next_off = (RExC_seen_evals > (I32)U16_MAX) ? U16_MAX : (U16)RExC_seen_evals;
     REGC((U8)REG_MAGIC, (char*) RExC_emit++);
@@ -4415,6 +4447,8 @@ reStudy:
 	r->reganch |= ROPT_EVAL_SEEN;
     if (RExC_seen & REG_SEEN_CANY)
 	r->reganch |= ROPT_CANY_SEEN;
+    if (RExC_seen & REG_SEEN_VERBARG)
+	r->reganch |= ROPT_VERBARG_SEEN;
     if (RExC_paren_names)
         r->paren_names = (HV*)SvREFCNT_inc(RExC_paren_names);
     else
@@ -4605,6 +4639,10 @@ S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags) {
 #define REGTAIL_STUDY(x,y,z) regtail((x),(y),(z),depth+1)
 #endif
 
+/* this idea is borrowed from STR_WITH_LEN in handy.h */
+#define CHECK_WORD(s,v,l)  \
+    (((sizeof(s)-1)==(l)) && (strnEQ(start_verb, (s ""), (sizeof(s)-1))))
+
 STATIC regnode *
 S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     /* paren: Parenthesized? 0=top, 1=(, inside: changed to letter. */
@@ -4641,6 +4679,98 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 
     /* Make an OPEN node, if parenthesized. */
     if (paren) {
+        if ( *RExC_parse == '*') { /* (*VERB:ARG) */
+	    char *start_verb = RExC_parse;
+	    STRLEN verb_len = 0;
+	    char *start_arg = NULL;
+	    unsigned char op = 0;
+	    int argok = 1;
+	    int internal_argval = 0; /* internal_argval is only useful if !argok */
+	    while ( *RExC_parse && *RExC_parse != ')' ) {
+	        if ( *RExC_parse == ':' ) {
+	            start_arg = RExC_parse + 1;
+	            break;
+	        }
+	        RExC_parse++;
+	    }
+	    ++start_verb;
+	    verb_len = RExC_parse - start_verb;
+	    if ( start_arg ) {
+	        RExC_parse++;
+	        while ( *RExC_parse && *RExC_parse != ')' ) 
+	            RExC_parse++;
+	        if ( *RExC_parse != ')' ) 
+	            vFAIL("Unterminated verb pattern argument");
+	        if ( RExC_parse == start_arg )
+	            start_arg = NULL;
+	    } else {
+	        if ( *RExC_parse != ')' )
+	            vFAIL("Unterminated verb pattern");
+	    }
+	    switch ( *start_verb ) {
+            case 'A':  /* (*ACCEPT) */
+                if ( CHECK_WORD("ACCEPT",start_verb,verb_len) ) {
+		    op = ACCEPT;
+		    internal_argval = RExC_nestroot;
+		}
+		break;
+            case 'C':  /* (*COMMIT) */
+                if ( CHECK_WORD("COMMIT",start_verb,verb_len) )
+                    op = COMMIT;
+                else if ( CHECK_WORD("CUT",start_verb,verb_len) )
+                    op = CUT;
+                break;
+            case 'F':  /* (*FAIL) */
+                if ( verb_len==1 || CHECK_WORD("FAIL",start_verb,verb_len) ) {
+		    op = OPFAIL;
+		    argok = 0;
+		}
+		break;
+	    case 'M':
+	        if ( CHECK_WORD("MARK",start_verb,verb_len) )
+                    op = MARKPOINT;
+                break;
+            case 'N':  /* (*NOMATCH) */
+                if ( CHECK_WORD("NOMATCH",start_verb,verb_len) )
+                    op = NOMATCH;
+                break;
+	    }
+	    if ( ! op ) {
+	        RExC_parse++;
+	        vFAIL3("Unknown verb pattern '%.*s'",
+	            verb_len, start_verb);
+	    }
+	    if ( argok ) {
+                if ( start_arg && internal_argval ) {
+	            vFAIL3("Verb pattern '%.*s' may not have an argument",
+	                verb_len, start_verb); 
+	        } else if ( argok < 0 && !start_arg ) {
+                    vFAIL3("Verb pattern '%.*s' has a mandatory argument",
+	                verb_len, start_verb);    
+	        } else {
+	            ret = reganode(pRExC_state, op, internal_argval);
+	            if ( ! internal_argval && ! SIZE_ONLY ) {
+                        if (start_arg) {
+                            SV *sv = newSVpvn( start_arg, RExC_parse - start_arg);
+                            ARG(ret) = add_data( pRExC_state, 1, "S" );
+                            RExC_rx->data->data[ARG(ret)]=(void*)sv;
+                            ret->flags = 0;
+                        } else {
+                            ret->flags = 1; 
+                        }
+                    }	            
+	        }
+	        if (!internal_argval)
+	            RExC_seen |= REG_SEEN_VERBARG;
+	    } else if ( start_arg ) {
+	        vFAIL3("Verb pattern '%.*s' may not have an argument",
+	                verb_len, start_verb);    
+	    } else {
+	        ret = reg_node(pRExC_state, op);
+	    }
+	    nextchar(pRExC_state);
+	    return ret;
+        } else 
 	if (*RExC_parse == '?') { /* (?...) */
 	    U32 posflags = 0, negflags = 0;
 	    U32 *flagsp = &posflags;
@@ -4711,61 +4841,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		RExC_parse++;
 	    case '=':           /* (?=...) */
 	    case '!':           /* (?!...) */
-	        if (*RExC_parse == ')')
-	            goto do_op_fail;
 		RExC_seen_zerolen++;
+	        if (*RExC_parse == ')') {
+	            ret=reg_node(pRExC_state, OPFAIL);
+	            nextchar(pRExC_state);
+	            return ret;
+	        }
 	    case ':':           /* (?:...) */
 	    case '>':           /* (?>...) */
-		break;
-            case 'C':           /* (?CUT) and (?COMMIT) */
-		if (RExC_parse[0] == 'O' &&
-		    RExC_parse[1] == 'M' &&
-		    RExC_parse[2] == 'M' &&
-		    RExC_parse[3] == 'I' &&
-		    RExC_parse[4] == 'T' &&
-		    RExC_parse[5] == ')')
-		{
-		    RExC_parse+=5;
-		    ret = reg_node(pRExC_state, COMMIT);
-                } else if (
-                    RExC_parse[0] == 'U' &&
-                    RExC_parse[1] == 'T' &&
-                    RExC_parse[2] == ')') 
-                {
-                    RExC_parse+=2;
-                    ret = reg_node(pRExC_state, CUT);
-		} else {
-		    vFAIL("Sequence (?C... not terminated");
-		}
-		nextchar(pRExC_state);
-		return ret;
-		break;
-            case 'E':            /* (?ERROR) */
-                if (RExC_parse[0] == 'R' &&
-                    RExC_parse[1] == 'R' &&
-                    RExC_parse[2] == 'O' &&
-                    RExC_parse[3] == 'R' &&
-                    RExC_parse[4] == ')') 
-                {
-                    RExC_parse+=4;
-                    ret = reg_node(pRExC_state, OPERROR);
-                } else {
-                    vFAIL("Sequence (?E... not terminated"); 
-                }
-	        nextchar(pRExC_state);
-	        return ret;
-                break;                
-            case 'F':
-                if (RExC_parse[0] == 'A' &&
-                    RExC_parse[1] == 'I' &&
-                    RExC_parse[2] == 'L')
-                    RExC_parse+=3;
-                if (*RExC_parse != ')')
-	            vFAIL("Sequence (?FAIL) or (?F) not terminated");
-	      do_op_fail:
-		ret = reg_node(pRExC_state, OPFAIL);
-	        nextchar(pRExC_state);
-	        return ret;
 		break;
 	    case '$':           /* (?$...) */
 	    case '@':           /* (?@...) */
@@ -5098,12 +5181,17 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	  capturing_parens:
 	    parno = RExC_npar;
 	    RExC_npar++;
+	    
 	    ret = reganode(pRExC_state, OPEN, parno);
-	    if (!SIZE_ONLY && RExC_seen & REG_SEEN_RECURSE) {
-		DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
+	    if (!SIZE_ONLY ){
+	        if (!RExC_nestroot) 
+	            RExC_nestroot = parno;
+	        if (RExC_seen & REG_SEEN_RECURSE) {
+		    DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
 			"Setting open paren #%"IVdf" to %d\n", 
 			(IV)parno, REG_NODE_NUM(ret)));
-	        RExC_open_parens[parno-1]= ret;
+	            RExC_open_parens[parno-1]= ret;
+	        }
 	    }
             Set_Node_Length(ret, 1); /* MJD */
             Set_Node_Offset(ret, RExC_parse); /* MJD */
@@ -5175,6 +5263,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 			"Setting close paren #%"IVdf" to %d\n", 
 			(IV)parno, REG_NODE_NUM(ender)));
 	        RExC_close_parens[parno-1]= ender;
+	        if (RExC_nestroot == parno) 
+	            RExC_nestroot = 0;
 	    }	    
             Set_Node_Offset(ender,RExC_parse+1); /* MJD */
             Set_Node_Length(ender,1); /* MJD */
@@ -7505,6 +7595,11 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
 	RExC_size += 1;
 	return(ret);
     }
+#ifdef DEBUGGING
+    if (OP(RExC_emit) == 255)
+        Perl_croak(aTHX_ "panic: reg_node overrun trying to emit %s: %d ",
+            reg_name[op], OP(RExC_emit));
+#endif  
     NODE_ALIGN_FILL(ret);
     ptr = ret;
     FILL_ADVANCE_NODE(ptr, op);
@@ -7521,7 +7616,6 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
     }
 
     RExC_emit = ptr;
-
     return(ret);
 }
 
@@ -7555,7 +7649,10 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
 	*/
 	return(ret);
     }
-
+#ifdef DEBUGGING
+    if (OP(RExC_emit) == 255)
+        Perl_croak(aTHX_ "panic: reganode overwriting end of allocated program space");
+#endif 
     NODE_ALIGN_FILL(ret);
     ptr = ret;
     FILL_ADVANCE_NODE_ARG(ptr, op, arg);
@@ -7573,7 +7670,6 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
     }
             
     RExC_emit = ptr;
-
     return(ret);
 }
 
@@ -8006,11 +8102,15 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     }
     else if (k == WHILEM && o->flags)			/* Ordinal/of */
 	Perl_sv_catpvf(aTHX_ sv, "[%d/%d]", o->flags & 0xf, o->flags>>4);
-    else if (k == REF || k == OPEN || k == CLOSE || k == GROUPP) 
+    else if (k == REF || k == OPEN || k == CLOSE || k == GROUPP || OP(o)==ACCEPT) 
 	Perl_sv_catpvf(aTHX_ sv, "%d", (int)ARG(o));	/* Parenth number */
     else if (k == GOSUB) 
 	Perl_sv_catpvf(aTHX_ sv, "%d[%+d]", (int)ARG(o),(int)ARG2L(o));	/* Paren and offset */
-    else if (k == LOGICAL)
+    else if (k == VERB) {
+        if (!o->flags) 
+            Perl_sv_catpvf(aTHX_ sv, ":%"SVf, 
+                (SV*)prog->data->data[ ARG( o ) ]);
+    } else if (k == LOGICAL)
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */
     else if (k == ANYOF) {
 	int i, rangestart = -1;
@@ -8401,7 +8501,7 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 	for (i = 0; i < count; i++) {
 	    d->what[i] = r->data->what[i];
 	    switch (d->what[i]) {
-	        /* legal options are one of: sfpont
+	        /* legal options are one of: sSfpont
 	           see also regcomp.h and pregfree() */
 	    case 's':
 	    case 'S':

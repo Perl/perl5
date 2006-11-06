@@ -351,6 +351,7 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 #define REG_SEEN_SANY		REG_SEEN_CANY /* src bckwrd cmpt */
 #define REG_SEEN_RECURSE        0x00000020
 #define REG_TOP_LEVEL_BRANCHES  0x00000040
+#define REG_SEEN_VERBARG        0x00000080
 
 START_EXTERN_C
 

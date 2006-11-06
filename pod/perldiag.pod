@@ -4291,6 +4291,13 @@ category that is unknown to perl at this point.
 
 Note that if you want to enable a warnings category registered by a module
 (e.g. C<use warnings 'File::Find'>), you must have imported this module
+
+=item Unknown verb pattern '%s' in regex; marked by <-- HERE in m/%s/
+
+(F) You either made a typo or have incorrectly put a C<*> quantifier
+after an open brace in your pattern.  Check the pattern and review
+L<perlre> for details on legal verb patterns.
+
 first.
 
 =item unmatched [ in regex; marked by <-- HERE in m/%s/
@@ -4411,6 +4418,17 @@ character to get your parentheses to balance.  See L<attributes>.
 (F) An argument to unpack("w",...) was incompatible with the BER
 compressed integer format and could not be converted to an integer.
 See L<perlfunc/pack>.
+
+=item Unterminated verb pattern in regex; marked by <-- HERE in m/%s/
+
+(F) You used a pattern of the form C<(*VERB)> but did not terminate
+the pattern with a C<)>. Fix the pattern and retry.
+
+=item Unterminated verb pattern argument in regex; marked by <-- HERE in m/%s/
+
+(F) You used a pattern of the form C<(*VERB:ARG)> but did not terminate
+the pattern with a C<)>. Fix the pattern and retry.
+
 
 =item Unterminated <> operator
 
@@ -4806,6 +4824,16 @@ This problem can usually be solved by making the inner subroutine
 anonymous, using the C<sub {}> syntax.  When inner anonymous subs that
 reference variables in outer subroutines are created, they
 are automatically rebound to the current values of such variables.
+
+=item Verb pattern '%s' has a mandatory argument in regex; marked by <-- HERE in m/%s/ 
+
+(F) You used a verb pattern that requires an argument. Supply an argument
+or check that you are using the right verb.
+
+=item Verb pattern '%s' may not have an argument in regex; marked by <-- HERE in m/%s/ 
+
+(F) You used a verb pattern that is not allowed an argument. Remove the 
+argument or check that you are using the right verb.
 
 =item Version number must be a constant number
 
