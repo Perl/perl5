@@ -717,6 +717,9 @@ EOF
 	    }
 
 	    my $call = "${func}_r($v$w)";
+	    if ($func eq 'localtime') {
+		$call = "L_R_TZSET $call";
+	    }
 
             # Must make OpenBSD happy
             my $memzero = '';
