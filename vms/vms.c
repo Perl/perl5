@@ -2892,6 +2892,7 @@ pipe_exit_routine(pTHX)
       if (!info->done) {  /* We tried to be nice . . . */
         sts = sys$delprc(&info->pid,0);
         if (!(sts&1) && sts != SS$_NONEXPR) _ckvmssts_noperl(sts); 
+        info->done = 1;  /* sys$delprc is as done as we're going to get. */
       }
       _ckvmssts_noperl(sys$setast(1));
       info = info->next;
