@@ -7614,7 +7614,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
     dst = RExC_emit;
     if (RExC_open_parens) {
         int paren;
-        DEBUG_PARSE_FMT("inst"," - %d",RExC_npar);
+        DEBUG_PARSE_FMT("inst"," - %"IVdf,RExC_npar);
         for ( paren=0 ; paren < RExC_npar ; paren++ ) {
             if ( RExC_open_parens[paren] >= opnd ) {
                 DEBUG_PARSE_FMT("open"," - %d",size);
