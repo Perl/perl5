@@ -1277,13 +1277,11 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
 	    assert(SvPVX_const(sv) == 0);
 	}
 
-	/* Could put this in the else clause below, as PVMG must have SvPVX
-	   0 already (the assertion above)  */
-	SvPV_set(sv, NULL);
-
 	if (old_type >= SVt_PVMG) {
 	    SvMAGIC_set(sv, ((XPVMG*)old_body)->xmg_u.xmg_magic);
 	    SvSTASH_set(sv, ((XPVMG*)old_body)->xmg_stash);
+	} else {
+	    sv->sv_u.svu_array = NULL; /* or svu_hash  */
 	}
 	break;
 
@@ -10125,7 +10123,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		    }
 		}
 		else
-		    SvPV_set(dstr, NULL);
+		    HvARRAY((HV*)dstr) = NULL;
 		break;
 	    case SVt_PVCV:
 		if (!(param->flags & CLONEf_COPY_STACKS)) {
