@@ -10,7 +10,7 @@
 package Pod::Usage;
 
 use vars qw($VERSION);
-$VERSION = "1.33_01";  ## Current version of this package
+$VERSION = "1.35";  ## Current version of this package
 require  5.005;    ## requires this Perl version or later
 
 =head1 NAME
@@ -534,9 +534,6 @@ sub pod2usage {
     elsif ($opts{"-verbose"} >= 2 && $opts{"-verbose"} != 99) {
         $parser->select('.*');
     }
-    elsif ($opts{"-verbose"} >= 2 && $opts{"-verbose"} != 99) {
-        $parser->select('.*');
-    }
     elsif ($opts{"-verbose"} == 99) {
         $parser->select( $opts{"-sections"} );
         $opts{"-verbose"} = 1;
@@ -613,11 +610,15 @@ sub _handle_element_end {
         $$self{USAGE_SKIPPING} = 1;
         my $heading = $$self{USAGE_HEAD1};
         $heading .= '/' . $$self{USAGE_HEAD2} if defined $$self{USAGE_HEAD2};
-        for (@{ $$self{USAGE_SELECT} }) {
-            if ($heading =~ /^$_\s*$/) {
-                $$self{USAGE_SKIPPING} = 0;
-                last;
-            }
+        if (!$$self{USAGE_SELECT} || !@{ $$self{USAGE_SELECT} }) {
+           $$self{USAGE_SKIPPING} = 0;
+        } else {
+          for (@{ $$self{USAGE_SELECT} }) {
+              if ($heading =~ /^$_\s*$/) {
+                  $$self{USAGE_SKIPPING} = 0;
+                  last;
+              }
+          }
         }
 
         # Try to do some lowercasing instead of all-caps in headings, and use
