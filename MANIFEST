@@ -2427,6 +2427,7 @@ lib/Test/Simple/t/bad_plan.t	Test::Builder plan() test
 lib/Test/Simple/t/bail_out.t	Test::Builder BAIL_OUT test
 lib/Test/Simple/t/buffer.t	Test::Builder buffering test
 lib/Test/Simple/t/Builder.t	Test::Builder tests
+lib/Test/Simple/t/carp.t	Test::Builder test
 lib/Test/Simple/t/circular_data.t	Test::Simple test
 lib/Test/Simple/t/create.t	Test::Simple test
 lib/Test/Simple/t/curr_test.t	Test::Builder->curr_test tests

@@ -8,7 +8,7 @@ $^C ||= 0;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = '0.33_02';
+$VERSION = '0.33_03';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 # Make Test::Builder thread-safe for ithreads.
@@ -246,6 +246,8 @@ sub plan {
     my($self, $cmd, $arg) = @_;
 
     return unless $cmd;
+
+    local $Level = $Level + 1;
 
     if( $self->{Have_Plan} ) {
         $self->croak("You tried to plan twice");
@@ -1019,8 +1021,6 @@ or this if false
 Most useful when you can't depend on the test output order, such as
 when threads or forking is involved.
 
-Test::Harness will accept either, but avoid mixing the two styles.
-
 Defaults to on.
 
 =cut
@@ -1339,7 +1339,7 @@ point where the original test function was called (C<$tb->caller>).
 sub _message_at_caller {
     my $self = shift;
 
-    local $Level = $Level + 2;
+    local $Level = $Level + 1;
     my($pack, $file, $line) = $self->caller;
     return join("", @_) . " at $file line $line.\n";
 }
@@ -1358,7 +1358,7 @@ sub _plan_check {
     my $self = shift;
 
     unless( $self->{Have_Plan} ) {
-        local $Level = $Level + 1;
+        local $Level = $Level + 2;
         $self->croak("You tried to run a test without a plan");
     }
 }

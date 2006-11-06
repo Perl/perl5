@@ -16,7 +16,7 @@ sub _carp {
 
 
 use vars qw($VERSION @ISA @EXPORT %EXPORT_TAGS $TODO);
-$VERSION = '0.64_02';
+$VERSION = '0.64_03';
 $VERSION = eval $VERSION;    # make the alpha version come out as a number
 
 use Test::Builder::Module;
@@ -51,20 +51,20 @@ Test::More - yet another framework for writing test scripts
   require_ok( 'Some::Module' );
 
   # Various ways to say "ok"
-  ok($this eq $that, $test_name);
+  ok($got eq $expected, $test_name);
 
-  is  ($this, $that,    $test_name);
-  isnt($this, $that,    $test_name);
+  is  ($got, $exptected, $test_name);
+  isnt($got, $expected,  $test_name);
 
   # Rather than print STDERR "# here's what went wrong\n"
   diag("here's what went wrong");
 
-  like  ($this, qr/that/, $test_name);
-  unlike($this, qr/that/, $test_name);
+  like  ($got, qr/expected/, $test_name);
+  unlike($got, qr/expected/, $test_name);
 
-  cmp_ok($this, '==', $that, $test_name);
+  cmp_ok($got, '==', $expected, $test_name);
 
-  is_deeply($complex_structure1, $complex_structure2, $test_name);
+  is_deeply($got_complex_structure, $expected_complex_structure, $test_name);
 
   SKIP: {
       skip $why, $how_many unless $have_some_feature;
@@ -226,9 +226,9 @@ respectively.
 
 =item B<ok>
 
-  ok($this eq $that, $test_name);
+  ok($got eq $expected, $test_name);
 
-This simply evaluates any expression (C<$this eq $that> is just a
+This simply evaluates any expression (C<$got eq $expected> is just a
 simple example) and uses that to determine if the test succeeded or
 failed.  A true expression passes, a false one fails.  Very simple.
 
@@ -252,7 +252,7 @@ Should an ok() fail, it will produce some diagnostics:
     #   Failed test 'sufficient mucus'
     #   in foo.t at line 42.
 
-This is actually Test::Simple's ok() routine.
+This is the same as Test::Simple's ok() routine.
 
 =cut
 
@@ -267,8 +267,8 @@ sub ok ($;$) {
 
 =item B<isnt>
 
-  is  ( $this, $that, $test_name );
-  isnt( $this, $that, $test_name );
+  is  ( $got, $expected, $test_name );
+  isnt( $got, $expected, $test_name );
 
 Similar to ok(), is() and isnt() compare their two arguments
 with C<eq> and C<ne> respectively and use the result of that to
@@ -340,17 +340,17 @@ sub isnt ($$;$) {
 
 =item B<like>
 
-  like( $this, qr/that/, $test_name );
+  like( $got, qr/expected/, $test_name );
 
-Similar to ok(), like() matches $this against the regex C<qr/that/>.
+Similar to ok(), like() matches $got against the regex C<qr/expected/>.
 
 So this:
 
-    like($this, qr/that/, 'this is like that');
+    like($got, qr/expected/, 'this is like that');
 
 is similar to:
 
-    ok( $this =~ /that/, 'this is like that');
+    ok( $got =~ /expected/, 'this is like that');
 
 (Mnemonic "This is like that".)
 
@@ -359,9 +359,9 @@ regex reference (i.e. C<qr//>) or (for better compatibility with older
 perls) as a string that looks like a regex (alternative delimiters are
 currently not supported):
 
-    like( $this, '/that/', 'this is like that' );
+    like( $got, '/expected/', 'this is like that' );
 
-Regex options may be placed on the end (C<'/that/i'>).
+Regex options may be placed on the end (C<'/expected/i'>).
 
 Its advantages over ok() are similar to that of is() and isnt().  Better
 diagnostics on failure.
@@ -377,9 +377,9 @@ sub like ($$;$) {
 
 =item B<unlike>
 
-  unlike( $this, qr/that/, $test_name );
+  unlike( $got, qr/expected/, $test_name );
 
-Works exactly as like(), only it checks if $this B<does not> match the
+Works exactly as like(), only it checks if $got B<does not> match the
 given pattern.
 
 =cut
@@ -393,23 +393,23 @@ sub unlike ($$;$) {
 
 =item B<cmp_ok>
 
-  cmp_ok( $this, $op, $that, $test_name );
+  cmp_ok( $got, $op, $expected, $test_name );
 
 Halfway between ok() and is() lies cmp_ok().  This allows you to
 compare two arguments using any binary perl operator.
 
-    # ok( $this eq $that );
-    cmp_ok( $this, 'eq', $that, 'this eq that' );
+    # ok( $got eq $expected );
+    cmp_ok( $got, 'eq', $expected, 'this eq that' );
 
-    # ok( $this == $that );
-    cmp_ok( $this, '==', $that, 'this == that' );
+    # ok( $got == $expected );
+    cmp_ok( $got, '==', $expected, 'this == that' );
 
-    # ok( $this && $that );
-    cmp_ok( $this, '&&', $that, 'this && that' );
+    # ok( $got && $expected );
+    cmp_ok( $got, '&&', $expected, 'this && that' );
     ...etc...
 
-Its advantage over ok() is when the test fails you'll know what $this
-and $that were:
+Its advantage over ok() is when the test fails you'll know what $got
+and $expected were:
 
     not ok 1
     #   Failed test in foo.t at line 12.
@@ -760,9 +760,9 @@ B<NOTE> I'm not quite sure what will happen with filehandles.
 
 =item B<is_deeply>
 
-  is_deeply( $this, $that, $test_name );
+  is_deeply( $got, $expected, $test_name );
 
-Similar to is(), except that if $this and $that are references, it
+Similar to is(), except that if $got and $expected are references, it
 does a deep comparison walking each data structure to see if they are
 equivalent.  If the two structures are different, it will display the
 place where they start differing.
@@ -798,21 +798,21 @@ WARNING
 	return $tb->ok(0);
     }
 
-    my($this, $that, $name) = @_;
+    my($got, $expected, $name) = @_;
 
-    $tb->_unoverload_str(\$that, \$this);
+    $tb->_unoverload_str(\$expected, \$got);
 
     my $ok;
-    if( !ref $this and !ref $that ) {  		# neither is a reference
-        $ok = $tb->is_eq($this, $that, $name);
+    if( !ref $got and !ref $expected ) {  		# neither is a reference
+        $ok = $tb->is_eq($got, $expected, $name);
     }
-    elsif( !ref $this xor !ref $that ) {  	# one's a reference, one isn't
+    elsif( !ref $got xor !ref $expected ) {  	# one's a reference, one isn't
         $ok = $tb->ok(0, $name);
-	$tb->diag( _format_stack({ vals => [ $this, $that ] }) );
+	$tb->diag( _format_stack({ vals => [ $got, $expected ] }) );
     }
     else {			       		# both references
         local @Data_Stack = ();
-        if( _deep_check($this, $that) ) {
+        if( _deep_check($got, $expected) ) {
             $ok = $tb->ok(1, $name);
         }
         else {
@@ -1149,11 +1149,11 @@ arbitrary data structures.
 
 These functions are usually used inside an ok().
 
-    ok( eq_array(\@this, \@that) );
+    ok( eq_array(\@got, \@expected) );
 
 C<is_deeply()> can do that better and with diagnostics.  
 
-    is_deeply( \@this, \@that );
+    is_deeply( \@got, \@expected );
 
 They may be deprecated in future versions.
 
@@ -1161,7 +1161,7 @@ They may be deprecated in future versions.
 
 =item B<eq_array>
 
-  my $is_eq = eq_array(\@this, \@that);
+  my $is_eq = eq_array(\@got, \@expected);
 
 Checks if two arrays are equivalent.  This is a deep check, so
 multi-level structures are handled correctly.
@@ -1292,7 +1292,7 @@ WHOA
 
 =item B<eq_hash>
 
-  my $is_eq = eq_hash(\%this, \%that);
+  my $is_eq = eq_hash(\%got, \%expected);
 
 Determines if the two hashes contain the same keys and values.  This
 is a deep check.
@@ -1332,17 +1332,17 @@ sub _eq_hash {
 
 =item B<eq_set>
 
-  my $is_eq = eq_set(\@this, \@that);
+  my $is_eq = eq_set(\@got, \@expected);
 
 Similar to eq_array(), except the order of the elements is B<not>
 important.  This is a deep check, but the irrelevancy of order only
 applies to the top level.
 
-    ok( eq_set(\@this, \@that) );
+    ok( eq_set(\@got, \@expected) );
 
 Is better written:
 
-    is_deeply( [sort @this], [sort @that] );
+    is_deeply( [sort @got], [sort @expected] );
 
 B<NOTE> By historical accident, this is not a true set comparison.
 While the order of elements does not matter, duplicate elements do.
@@ -1537,9 +1537,9 @@ See F<http://rt.cpan.org> to report and view bugs.
 
 =head1 COPYRIGHT
 
-Copyright 2001, 2002, 2004 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
+Copyright 2001-2002, 2004-2006 by Michael G Schwern E<lt>schwern@pobox.comE<gt>.
 
-This program is free software; you can redistribute it and/or 
+This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
 
 See F<http://www.perl.com/perl/misc/Artistic.html>

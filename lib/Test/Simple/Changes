@@ -1,3 +1,14 @@
+0.64_03  Sun Nov  5 13:09:55 EST 2006
+    - Tests will no longer warn when run against an alpha version of
+      Test::Harness [rt.cpan.org #20501]
+    - Now testing our POD and POD coverage.
+    - Added a LICENSE field.
+    - Removed warning from the docs about mixing numbered and unnumbered
+      tests.  There's nothing wrong with that. [rt.cpan.org 21358]
+    - Change doc examples to talk about $got and $expected rather than
+      $this and $that to correspond better to the diagnostic output
+      [rt.cpan.org 2655]
+
 0.64_02  Sat Sep  9 12:16:56 EDT 2006
     - Last release broke Perls earlier than 5.8.
 
@@ -8,6 +19,7 @@
       users.  Not a real bug.  [rt.cpan.org 21310]
     - _print_diag() accidentally leaked into the public documentation.
       It is a private method.
+    * Added Test::Builder->carp() and croak()
     * Made most of the error messages report in the caller's context.
       [rt.cpan.org #20639]
     * Made the failure diagnostic message file and line reporting portion
