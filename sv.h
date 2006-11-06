@@ -1226,11 +1226,15 @@ the scalar's value cannot change unless written to.
 		(void) SvIV(sv); } STMT_END
 #define SvIV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
+		assert(SvTYPE(sv) != SVt_PVAV);		\
+		assert(SvTYPE(sv) != SVt_PVHV);		\
+		assert(SvTYPE(sv) != SVt_PVCV);		\
 		assert(!isGV_with_GP(sv));		\
 		(((XPVIV*)  SvANY(sv))->xiv_iv = (val)); } STMT_END
 #define SvNV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_NV || SvTYPE(sv) >= SVt_PVNV); \
 	    assert(SvTYPE(sv) != SVt_PVAV); assert(SvTYPE(sv) != SVt_PVHV); \
+	    assert(SvTYPE(sv) != SVt_PVCV); assert(SvTYPE(sv) != SVt_PVFM); \
 		assert(!isGV_with_GP(sv));		\
 		(((XPVNV*)SvANY(sv))->xnv_u.xnv_nv = (val)); } STMT_END
 #define SvPV_set(sv, val) \
@@ -1239,6 +1243,9 @@ the scalar's value cannot change unless written to.
 		((sv)->sv_u.svu_pv = (val)); } STMT_END
 #define SvUV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) == SVt_IV || SvTYPE(sv) >= SVt_PVIV); \
+		assert(SvTYPE(sv) != SVt_PVAV);		\
+		assert(SvTYPE(sv) != SVt_PVHV);		\
+		assert(SvTYPE(sv) != SVt_PVCV);		\
 		assert(!isGV_with_GP(sv));		\
 		(((XPVUV*)SvANY(sv))->xuv_uv = (val)); } STMT_END
 #define SvRV_set(sv, val) \
@@ -1253,10 +1260,14 @@ the scalar's value cannot change unless written to.
                 (((XPVMG*)  SvANY(sv))->xmg_stash = (val)); } STMT_END
 #define SvCUR_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
+		assert(SvTYPE(sv) != SVt_PVAV);		\
+		assert(SvTYPE(sv) != SVt_PVHV);		\
 		assert(!isGV_with_GP(sv));		\
 		(((XPV*)  SvANY(sv))->xpv_cur = (val)); } STMT_END
 #define SvLEN_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
+		assert(SvTYPE(sv) != SVt_PVAV);	\
+		assert(SvTYPE(sv) != SVt_PVHV);	\
 		assert(!isGV_with_GP(sv));	\
 		(((XPV*)  SvANY(sv))->xpv_len = (val)); } STMT_END
 #define SvEND_set(sv, val) \
