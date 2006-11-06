@@ -9,7 +9,7 @@
 
 package Data::Dumper;
 
-$VERSION = '2.121_10';
+$VERSION = '2.121_11';
 
 #$| = 1;
 
@@ -229,6 +229,11 @@ sub Dumpperl {
     }
     else {
       $name = "\$" . $s->{varname} . $i;
+    }
+
+    # Ensure hash iterator is reset
+    if (ref($val) eq 'HASH') {
+        keys(%$val);
     }
 
     my $valstr;

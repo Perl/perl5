@@ -16,7 +16,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 2;
+use Test::More tests => 3;
 use Data::Dumper;
 
 {
@@ -48,3 +48,14 @@ sub foo {
 foo({});
 ok(1, "[perl #38612]"); # Still no core dump? We are fine.
 
+{
+    my %h = (1,2,3,4);
+    each %h;
+
+    my $d = Data::Dumper->new([\%h]);
+    $d->Useqq(1);
+    my $txt = $d->Dump();
+    my $VAR1;
+    eval $txt;
+    is_deeply($VAR1, \%h, '[perl #40668] Reset hash iterator');
+}
