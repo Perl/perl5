@@ -320,7 +320,7 @@ struct block_sub {
 #define CLEAR_ARGARRAY(ary) \
     STMT_START {							\
 	AvMAX(ary) += AvARRAY(ary) - AvALLOC(ary);			\
-	SvPV_set(ary, (char*)AvALLOC(ary));				\
+	AvARRAY(ary) = AvALLOC(ary);					\
 	AvFILLp(ary) = -1;						\
     } STMT_END
 

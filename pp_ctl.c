@@ -2450,13 +2450,13 @@ PP(pp_goto)
 			SV **ary = AvALLOC(av);
 			if (AvARRAY(av) != ary) {
 			    AvMAX(av) += AvARRAY(av) - AvALLOC(av);
-			    SvPV_set(av, (char*)ary);
+			    AvARRAY(av) = ary;
 			}
 			if (items >= AvMAX(av) + 1) {
 			    AvMAX(av) = items - 1;
 			    Renew(ary,items+1,SV*);
 			    AvALLOC(av) = ary;
-			    SvPV_set(av, (char*)ary);
+			    AvARRAY(av) = ary;
 			}
 		    }
 		    ++mark;

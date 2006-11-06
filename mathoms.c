@@ -554,7 +554,7 @@ Perl_av_fake(pTHX_ register I32 size, register SV **strp)
     AvALLOC(av) = ary;
     Copy(strp,ary,size,SV*);
     AvREIFY_only(av);
-    SvPV_set(av, (char*)ary);
+    AvARRAY(av) = ary;
     AvFILLp(av) = size - 1;
     AvMAX(av) = size - 1;
     while (size--) {

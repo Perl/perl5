@@ -10060,7 +10060,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		    src_ary = AvARRAY((AV*)sstr);
 		    Newxz(dst_ary, AvMAX((AV*)sstr)+1, SV*);
 		    ptr_table_store(PL_ptr_table, src_ary, dst_ary);
-		    SvPV_set(dstr, (char*)dst_ary);
+		    AvARRAY((AV*)dstr) = dst_ary;
 		    AvALLOC((AV*)dstr) = dst_ary;
 		    if (AvREAL((AV*)sstr)) {
 			while (items-- > 0)
@@ -10076,7 +10076,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		    }
 		}
 		else {
-		    SvPV_set(dstr, NULL);
+		    AvARRAY((AV*)dstr)	= NULL;
 		    AvALLOC((AV*)dstr)	= (SV**)NULL;
 		}
 		break;

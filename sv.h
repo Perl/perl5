@@ -1239,6 +1239,7 @@ the scalar's value cannot change unless written to.
 		(((XPVNV*)SvANY(sv))->xnv_u.xnv_nv = (val)); } STMT_END
 #define SvPV_set(sv, val) \
 	STMT_START { assert(SvTYPE(sv) >= SVt_PV); \
+		assert(SvTYPE(sv) != SVt_PVAV);		\
 		assert(SvTYPE(sv) != SVt_PVHV);		\
 		assert(!isGV_with_GP(sv));		\
 		((sv)->sv_u.svu_pv = (val)); } STMT_END

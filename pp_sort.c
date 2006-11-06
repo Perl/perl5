@@ -1770,12 +1770,12 @@ S_sortcv_stacked(pTHX_ SV *a, SV *b)
 	SV** ary = AvALLOC(av);
 	if (AvARRAY(av) != ary) {
 	    AvMAX(av) += AvARRAY(av) - AvALLOC(av);
-	    SvPV_set(av, (char*)ary);
+	    AvARRAY(av) = ary;
 	}
 	if (AvMAX(av) < 1) {
 	    AvMAX(av) = 1;
 	    Renew(ary,2,SV*);
-	    SvPV_set(av, (char*)ary);
+	    AvARRAY(av) = ary;
 	}
     }
     AvFILLp(av) = 1;
