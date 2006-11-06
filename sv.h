@@ -1170,6 +1170,7 @@ the scalar's value cannot change unless written to.
 	    assert(SvTYPE(_svi) == SVt_NV || SvTYPE(_svi) >= SVt_PVNV);	\
 	    assert(SvTYPE(_svi) != SVt_PVAV);				\
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
+	    assert(SvTYPE(_svi) != SVt_PVCV);				\
 	    assert(SvTYPE(_svi) != SVt_PVFM);				\
 	    assert(!isGV_with_GP(_svi));				\
 	   &(((XPVNV*) SvANY(_svi))->xnv_u.xnv_nv);			\
