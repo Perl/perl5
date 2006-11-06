@@ -1226,6 +1226,10 @@ d_localtime_r (d_localtime_r.U):
 	which indicates to the C program that the localtime_r()
 	routine is available.
 
+d_localtime_r_needs_tzset (d_localtime_r.U):
+	This variable conditionally defines the LOCALTIME_R_NEEDS_TZSET
+	symbol, which makes us call tzset before localtime_r()
+
 d_locconv (d_locconv.U):
 	This variable conditionally defines HAS_LOCALECONV if localeconv() is
 	available for numeric and monetary formatting conventions.
