@@ -128,6 +128,18 @@ This has a small incompatible consequence: the prototype() function has
 been adjusted to return C<_> for some built-ins in appropriate cases (for
 example, C<prototype('CORE::rmdir')>). (Rafael Garcia-Suarez)
 
+=head2 UNITCHECK blocks
+
+C<UNITCHECK>, a new special code block has been introduced, in addition to
+C<BEGIN>, C<CHECK>, C<INIT> and C<END>.
+
+C<CHECK> and C<INIT> blocks, while useful for some specialized purposes,
+are always executed at the transition between the compilation and the
+execution of the main program, and thus are useless whenever code is
+loaded at runtime. On the other hand, C<UNITCHECK> blocks are executed
+just after the unit which defined them has been compiled. See L<perlmod>
+for more information. (Alex Gough)
+
 =head2 UCD 5.0.0
 
 The copy of the Unicode Character Database included in Perl 5.9 has
@@ -194,10 +206,17 @@ Perl has been reported to work on MidnightBSD.
 
 =head1 Selected Bug Fixes
 
-PerlIO::scalar will now prevent writing to read-only scalars.
+PerlIO::scalar will now prevent writing to read-only scalars. Moreover,
+seek() is now supported with PerlIO::scalar-based filehandles, the
+underlying string being zero-filled as needed.
 
 study() never worked for UTF-8 strings, but could lead to false results.
 It's now a no-op on UTF-8 data. (Yves Orton)
+
+The signals SIGILL, SIGBUS and SIGSEGV are now always delivered in an
+"unsafe" manner (contrary to other signals, that are deferred until the
+perl interpreter reaches a reasonably stable state; see
+L<perlipc/"Deferred Signals (Safe Signals)">).
 
 =head1 New or Changed Diagnostics
 
