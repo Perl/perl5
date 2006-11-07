@@ -3310,6 +3310,8 @@ PP(pp_index)
 PP(pp_sprintf)
 {
     dVAR; dSP; dMARK; dORIGMARK; dTARGET;
+    if (SvTAINTED(MARK[1]))
+	TAINT_PROPER("sprintf");
     do_sprintf(TARG, SP-MARK, MARK+1);
     TAINT_IF(SvTAINTED(TARG));
     SP = ORIGMARK;

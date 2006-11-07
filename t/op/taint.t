@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 251;
+plan tests => 255;
 
 $| = 1;
 
@@ -1204,3 +1204,14 @@ SKIP:
     $o->untainted;
 }
 
+{
+    # tests for tainted format in s?printf
+    eval { printf($TAINT . "# %s\n", "foo") };
+    like($@, qr/^Insecure dependency in printf/, q/printf doesn't like tainted formats/);
+    eval { printf("# %s\n", $TAINT . "foo") };
+    ok(!$@, q/printf accepts other tainted args/);
+    eval { sprintf($TAINT . "# %s\n", "foo") };
+    like($@, qr/^Insecure dependency in sprintf/, q/sprintf doesn't like tainted formats/);
+    eval { sprintf("# %s\n", $TAINT . "foo") };
+    ok(!$@, q/sprintf accepts other tainted args/);
+}
