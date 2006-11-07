@@ -2,7 +2,7 @@ package SelfLoader;
 require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(AUTOLOAD);
-$VERSION = "1.0905";
+$VERSION = "1.10";
 sub Version {$VERSION}
 $DEBUG = 0;
 
@@ -59,7 +59,7 @@ sub _load_stubs {
 
     print STDERR "SelfLoader::load_stubs($callpack)\n" if $DEBUG;
     croak("$callpack doesn't contain an __DATA__ token")
-        unless fileno($fh);
+        unless defined fileno($fh);
     $Cache{"${currpack}::<DATA"} = 1;   # indicate package is cached
 
     local($/) = "\n";
