@@ -226,8 +226,7 @@ PERL_CALLCONV OP*	Perl_convert(pTHX_ I32 optype, I32 flags, OP* o)
 
 PERL_CALLCONV PERL_CONTEXT*	Perl_create_eval_scope(pTHX_ U32 flags);
 PERL_CALLCONV void	Perl_croak(pTHX_ const char* pat, ...)
-			__attribute__noreturn__
-			__attribute__format__(__printf__,pTHX_1,pTHX_2);
+			__attribute__noreturn__;
 
 PERL_CALLCONV void	Perl_vcroak(pTHX_ const char* pat, va_list* args)
 			__attribute__noreturn__
@@ -384,9 +383,7 @@ PERL_CALLCONV void	Perl_deprecate(pTHX_ const char* s)
 PERL_CALLCONV void	Perl_deprecate_old(pTHX_ const char* s)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...)
-			__attribute__format__(__printf__,pTHX_1,pTHX_2);
-
+PERL_CALLCONV OP*	Perl_die(pTHX_ const char* pat, ...);
 PERL_CALLCONV OP*	Perl_vdie(pTHX_ const char* pat, va_list* args);
 PERL_CALLCONV OP*	Perl_die_where(pTHX_ const char* message, STRLEN msglen);
 PERL_CALLCONV void	Perl_dounwind(pTHX_ I32 cxix);

@@ -131,7 +131,7 @@ ApR	|I32	|my_chsize	|int fd|Off_t length
 pR	|OP*	|convert	|I32 optype|I32 flags|NULLOK OP* o
 pM	|PERL_CONTEXT*	|create_eval_scope|U32 flags
 : croak()'s first parm can be NULL.  Otherwise, mod_perl breaks.
-Afprd	|void	|croak		|NULLOK const char* pat|...
+Aprd	|void	|croak		|NULLOK const char* pat|...
 Apr	|void	|vcroak		|NN const char* pat|NULLOK va_list* args
 #if defined(PERL_IMPLICIT_CONTEXT)
 Afnrp	|void	|croak_nocontext|NN const char* pat|...
@@ -180,7 +180,7 @@ Ap	|char*	|delimcpy	|NN char* to|NN const char* toend|NN const char* from \
 pM	|void	|delete_eval_scope
 p	|void	|deprecate	|NN const char* s
 p	|void	|deprecate_old	|NN const char* s
-Afp	|OP*	|die		|NULLOK const char* pat|...
+Ap	|OP*	|die		|NULLOK const char* pat|...
 p	|OP*	|vdie		|NULLOK const char* pat|NULLOK va_list* args
 p	|OP*	|die_where	|NULLOK const char* message|STRLEN msglen
 Ap	|void	|dounwind	|I32 cxix
