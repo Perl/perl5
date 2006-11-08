@@ -2561,7 +2561,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
     /* cache heavy used fields of st in registers */
     register regnode *scan;
     register regnode *next;
-    register I32 n = 0;	/* general value; init to avoid compiler warning */
+    register U32 n = 0;	/* general value; init to avoid compiler warning */
     register I32 ln = 0; /* len or last;  init to avoid compiler warning */
     register char *locinput = PL_reginput;
     register I32 nextchr;   /* is always set to UCHARAT(locinput) */
