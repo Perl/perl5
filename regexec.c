@@ -218,7 +218,7 @@ STATIC char *
 S_regcppop(pTHX_ const regexp *rex)
 {
     dVAR;
-    I32 i;
+    U32 i;
     char *input;
 
     GET_RE_DEBUG_FLAGS_DECL;
@@ -272,7 +272,7 @@ S_regcppop(pTHX_ const regexp *rex)
      * building DynaLoader will fail:
      * "Error: '*' not in typemap in DynaLoader.xs, line 164"
      * --jhi */
-    for (i = *PL_reglastparen + 1; (U32)i <= rex->nparens; i++) {
+    for (i = *PL_reglastparen + 1; i <= rex->nparens; i++) {
 	if (i > PL_regsize)
 	    PL_regstartp[i] = -1;
 	PL_regendp[i] = -1;
@@ -2581,7 +2581,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
     char *startpoint = PL_reginput;
     SV *popmark = NULL;
     SV *sv_commit = NULL;
-    int lastopen = 0;
+    unsigned int lastopen = 0;
     /* these three flags are set by various ops to signal information to
      * the very next op. They have a useful lifetime of exactly one loop
      * iteration, and are not preserved or restored by state pushes/pops
@@ -3356,7 +3356,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	  do_ref:  
 	    ln = PL_regstartp[n];
 	    PL_reg_leftiter = PL_reg_maxiter;		/* Void cache */
-	    if ((I32)*PL_reglastparen < n || ln == -1)
+	    if (*PL_reglastparen < n || ln == -1)
 		sayNO;			/* Do not match unless seen CLOSEn. */
 	    if (ln == PL_regendp[n])
 		break;
@@ -3620,10 +3620,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    PL_regendp[n] = locinput - PL_bostr;
 	    /*if (n > PL_regsize)
 		PL_regsize = n;*/
-	    if (n > (I32)*PL_reglastparen)
+	    if (n > *PL_reglastparen)
 		*PL_reglastparen = n;
 	    *PL_reglastcloseparen = n;
-            if (cur_eval && cur_eval->u.eval.close_paren == (U32)n) {
+            if (cur_eval && cur_eval->u.eval.close_paren == n) {
 	        goto fake_end;
 	    }    
 	    break;
@@ -3641,11 +3641,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                             PL_regendp[n] = locinput - PL_bostr;
                             /*if (n > PL_regsize)
                             PL_regsize = n;*/
-                            if (n > (I32)*PL_reglastparen)
+                            if (n > *PL_reglastparen)
                                 *PL_reglastparen = n;
                             *PL_reglastcloseparen = n;
-                            if ( n == ARG(scan) || (cur_eval && 
-                                cur_eval->u.eval.close_paren == (U32)n))
+                            if ( n == ARG(scan) || (cur_eval &&
+                                cur_eval->u.eval.close_paren == n))
                                 break;
                         }
                     }
@@ -3655,7 +3655,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    /*NOTREACHED*/	    
 	case GROUPP:
 	    n = ARG(scan);  /* which paren pair */
-	    sw = (bool)((I32)*PL_reglastparen >= n && PL_regendp[n] != -1);
+	    sw = (bool)(*PL_reglastparen >= n && PL_regendp[n] != -1);
 	    break;
 	case NGROUPP:
 	    /* reg_check_named_buff_matched returns 0 for no match */
@@ -3663,7 +3663,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    break;
         case INSUBP:
             n = ARG(scan);
-            sw = (cur_eval && (!n || cur_eval->u.eval.close_paren == (U32)n));
+            sw = (cur_eval && (!n || cur_eval->u.eval.close_paren == n));
             break;
         case DEFINEP:
             sw = 0;
@@ -4069,10 +4069,10 @@ NULL
 
 	    /* if paren positive, emulate an OPEN/CLOSE around A */
 	    if (ST.me->flags) {
-		I32 paren = ST.me->flags;
+		U32 paren = ST.me->flags;
 		if (paren > PL_regsize)
 		    PL_regsize = paren;
-		if (paren > (I32)*PL_reglastparen)
+		if (paren > *PL_reglastparen)
 		    *PL_reglastparen = paren;
 		scan += NEXT_OFF(scan); /* Skip former OPEN. */
 	    }
@@ -4245,7 +4245,7 @@ NULL
 	    ST.paren = scan->flags;	/* Which paren to set */
 	    if (ST.paren > PL_regsize)
 		PL_regsize = ST.paren;
-	    if (ST.paren > (I32)*PL_reglastparen)
+	    if (ST.paren > *PL_reglastparen)
 		*PL_reglastparen = ST.paren;
 	    ST.min = ARG1(scan);  /* min to match */
 	    ST.max = ARG2(scan);  /* max to match */

@@ -277,7 +277,7 @@ typedef struct regmatch_state {
 	} whilem;
 
 	struct {
-	    I32 lastparen;
+	    U32 lastparen;
 	    regnode *next_branch; /* next branch node */
 	    CHECKPOINT cp;
 	} branch;
@@ -295,7 +295,7 @@ typedef struct regmatch_state {
 	} curlym;
 
 	struct {
-	    I32 paren;
+	    U32 paren;
 	    CHECKPOINT cp;
 	    I32 c1, c2;		/* case fold search */
 	    char *maxpos;	/* highest possible point in string to match */
@@ -384,7 +384,7 @@ struct re_save_state {
     I32 re_state_reg_leftiter;		/* wait until caching pos */
     char *re_state_reg_poscache;	/* cache of pos of WHILEM */
     STRLEN re_state_reg_poscache_size;	/* size of pos cache of WHILEM */
-    I32 re_state_regsize;		/* from regexec.c */
+    U32 re_state_regsize;		/* from regexec.c */
     char *re_state_reg_starttry;	/* from regexec.c */
 #ifdef PERL_OLD_COPY_ON_WRITE
     SV *re_state_nrs;			/* was placeholder: unused since 5.8.0 (5.7.2 patch #12027 for bug ID 20010815.012). Used to save rx->saved_copy */
