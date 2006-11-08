@@ -4538,22 +4538,16 @@ Subroutine references are the simplest case.  When the inclusion system
 walks through @INC and encounters a subroutine, this subroutine gets
 called with two parameters, the first being a reference to itself, and the
 second the name of the file to be included (e.g. "F<Foo/Bar.pm>").  The
-subroutine should return nothing, or a list of up to 4 values in the
+subroutine should return nothing, or a list of up to three values in the
 following order:
 
 =over
 
 =item 1
 
-A reference to a scalar, containing any initial source code to prepend to
-the file or generator output.
-
-
-=item 2
-
 A filehandle, from which the file will be read.  
 
-=item 3
+=item 2
 
 A reference to a subroutine. If there is no filehandle (previous item),
 then this subroutine is expected to generate one line of source code per
@@ -4563,7 +4557,7 @@ called to act a simple source filter, with the line as read in C<$_>.
 Again, return 1 for each valid line, and 0 after all lines have been
 returned.
 
-=item 4
+=item 3
 
 Optional state for the subroutine. The state is passed in as C<$_[1]>. A
 reference to the subroutine itself is passed in as C<$_[0]>.
