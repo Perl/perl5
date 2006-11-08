@@ -485,7 +485,7 @@ EXEOUT_FLAG	= -o
 LIBOUT_FLAG	=
 
 # NOTE: we assume that GCC uses MSVCRT.DLL
-# See comments about PERL_MSVCRT_rEADFIX in the "cl" compiler section below.
+# See comments about PERL_MSVCRT_READFIX in the "cl" compiler section below.
 BUILDOPT	+= -fno-strict-aliasing -DPERL_MSVCRT_READFIX
 
 .ELSE
@@ -545,11 +545,13 @@ DEFINES		+= -DWIN64 -DCONSERVATIVE
 OPTIMIZE	+= -Wp64 -fp:precise
 .ENDIF
 
-# Use the MSVCRT read() fix if the PerlCRT was not chosen. This may be not
-# necessary with recent MSVCRT's, but we use the fix anyway in case this build
-# is going to be run on a system with an old MSVCRT.
+# Use the MSVCRT read() fix if the PerlCRT was not chosen, but only when using
+# VC++ 6.x or earlier. Later versions use MSVCR70.dll, MSVCR71.dll, etc, which
+# do not require the fix.
+.IF "$(CCTYPE)" == "MSVC20" || "$(CCTYPE)" == "MSVC" || "$(CCTYPE)" == "MSVC60" 
 .IF "$(USE_PERLCRT)" != "define"
 BUILDOPT	+= -DPERL_MSVCRT_READFIX
+.ENDIF
 .ENDIF
 
 LIBBASEFILES	= $(CRYPT_LIB) \
