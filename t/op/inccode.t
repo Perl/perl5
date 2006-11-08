@@ -3,11 +3,14 @@
 # Tests for the coderef-in-@INC feature
 
 my $can_fork = 0;
+my $minitest = $ENV{PERL_CORE_MINITEST};
+
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib);
 }
-{
+
+if (!$minitest) {
     use Config; 
     if (PerlIO::Layer->find('perlio') && $Config{d_fork} &&
 	eval 'require POSIX; 1') {
@@ -19,7 +22,7 @@ use strict;
 use File::Spec;
 
 require "test.pl";
-plan(tests => 48 + 14 * $can_fork);
+plan(tests => 45 + !$minitest * (3 + 14 * $can_fork));
 
 my @tempfiles = ();
 
@@ -197,6 +200,16 @@ my $ret = "";
 $ret ||= do 'abc.pl';
 is( $ret, 'abc', 'do "abc.pl" sees return value' );
 
+{
+    my $filename = $^O eq 'MacOS' ? ':Foo:Foo.pm' : './Foo.pm';
+    local @INC;
+    @INC = sub { $filename = 'seen'; return undef; };
+    eval { require $filename; };
+    is( $filename, 'seen', 'the coderef sees fully-qualified pathnames' );
+}
+
+exit if $minitest;
+
 pop @INC;
 
 push @INC, sub {
@@ -219,14 +232,6 @@ is( our $file, '/custom/path/to/Publius/Vergilius/Maro.pm', '__FILE__ set correc
 }
 
 pop @INC;
-
-my $filename = $^O eq 'MacOS' ? ':Foo:Foo.pm' : './Foo.pm';
-{
-    local @INC;
-    @INC = sub { $filename = 'seen'; return undef; };
-    eval { require $filename; };
-    is( $filename, 'seen', 'the coderef sees fully-qualified pathnames' );
-}
 
 if ($can_fork) {
     require PerlIO::scalar;
