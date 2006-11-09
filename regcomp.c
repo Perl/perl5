@@ -2091,8 +2091,9 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
      */
     fail[ 0 ] = fail[ 1 ] = 0;
     DEBUG_TRIE_COMPILE_r({
-        PerlIO_printf(Perl_debug_log, "%*sStclass Failtable (%"UVuf" states): 0", 
-            (int)(depth * 2), "", numstates
+        PerlIO_printf(Perl_debug_log,
+		      "%*sStclass Failtable (%"UVuf" states): 0", 
+		      (int)(depth * 2), "", (UV)numstates
         );
         for( q_read=1; q_read<numstates; q_read++ ) {
             PerlIO_printf(Perl_debug_log, ", %"UVuf, (UV)fail[q_read]);
@@ -7710,7 +7711,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
     dst = RExC_emit;
     if (RExC_open_parens) {
         int paren;
-        DEBUG_PARSE_FMT("inst"," - %"IVdf,RExC_npar);
+        DEBUG_PARSE_FMT("inst"," - %"IVdf, (IV)RExC_npar);
         for ( paren=0 ; paren < RExC_npar ; paren++ ) {
             if ( RExC_open_parens[paren] >= opnd ) {
                 DEBUG_PARSE_FMT("open"," - %d",size);
