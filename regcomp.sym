@@ -146,21 +146,21 @@ RENUM		BRANCHJ,off 1 1	Group with independently numbered parens.
 # inline charclass data (ascii only), the 'C' store it in the structure.
 # NOTE: the relative order of the TRIE-like regops  is signifigant
 
-TRIE		TRIE,   trie 1	Match many EXACT(FL?)? at once. flags==type
-TRIEC		TRIE,   trie charclass	Same as TRIE, but with embedded charclass data
+TRIE		TRIE,     trie 1	Match many EXACT(FL?)? at once. flags==type
+TRIEC		TRIE,trie charclass	Same as TRIE, but with embedded charclass data
 
 # For start classes, contains an added fail table.
-AHOCORASICK	TRIE,   trie 1	Aho Corasick stclass. flags==type
-AHOCORASICKC	TRIE,   trie charclass	Same as AHOCORASICK, but with embedded charclass data
+AHOCORASICK	TRIE,        trie 1	Aho Corasick stclass. flags==type
+AHOCORASICKC	TRIE,trie charclass	Same as AHOCORASICK, but with embedded charclass data
 
 #*Regex Subroutines (65..66) 
-GOSUB		GOSUB,   num/ofs 2L	recurse to paren arg1 at (signed) ofs arg2
+GOSUB		GOSUB,     num/ofs 2L	recurse to paren arg1 at (signed) ofs arg2
 GOSTART		GOSTART,   no   	recurse to start of pattern
 
 #*Named references (67..69)
-NREF		NREF,    no-sv 1	Match some already matched string
-NREFF		NREF,    no-sv 1	Match already matched string, folded
-NREFFL		NREF,    no-sv 1	Match already matched string, folded in loc.
+NREF		NREF,      no-sv 1	Match some already matched string
+NREFF		NREF,      no-sv 1	Match already matched string, folded
+NREFFL		NREF,      no-sv 1	Match already matched string, folded in loc.
 
 
 #*Special conditionals  (70..72)
@@ -168,16 +168,19 @@ NGROUPP		NGROUPP,   no-sv 1	Whether the group matched.
 INSUBP		INSUBP,    num 1 	Whether we are in a specific recurse.  
 DEFINEP		DEFINEP,   none 1 	Never execute directly.               
 
-#*Bactracking 
+#*Bactracking Verbs
 ENDLIKE		ENDLIKE,   none		Used only for the type field of verbs
 OPFAIL		ENDLIKE,   none 	Same as (?!)
 ACCEPT		ENDLIKE,   parno 1 	Accepts the current matched string.
-VERB		VERB,	   no-sv 1	Used only for the type field of verbs
-NOMATCH		VERB,      no-sv 1 	Pattern fails at this startpoint if no-backtracking through this 
-MARKPOINT	VERB,      no-sv 1	Push the current location for rollback by cut.
-CUT		VERB,      no-sv 1	On failure cut the string at the mark.
-COMMIT		VERB,      no-sv 1	Pattern fails outright if backtracking through this
 
+
+#*Verbs With Arguments
+VERB		VERB,	   no-sv 1	Used only for the type field of verbs
+PRUNE		VERB,      no-sv 1 	Pattern fails at this startpoint if no-backtracking through this 
+MARKPOINT	VERB,      no-sv 1	Push the current location for rollback by cut.
+SKIP		VERB,      no-sv 1	On failure skip forward (to the mark) before retrying
+COMMIT		VERB,      no-sv 1	Pattern fails outright if backtracking through this
+CUTGROUP	VERB,      no-sv 1	On failure go to the next alternation in the group
 
 
 # NEW STUFF ABOVE THIS LINE -- Please update counts below. 
@@ -217,4 +220,5 @@ IFMATCH 	A:FAIL
 CURLY   	B_min_known,B_min,B_max:FAIL	
 COMMIT		next:FAIL
 MARKPOINT	next:FAIL
-CUT		next:FAIL
+SKIP		next:FAIL
+CUTGROUP	next:FAIL

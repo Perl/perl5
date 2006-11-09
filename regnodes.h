@@ -6,8 +6,8 @@
 
 /* Regops and State definitions */
 
-#define REGNODE_MAX           	82
-#define REGMATCH_STATE_MAX    	118
+#define REGNODE_MAX           	83
+#define REGMATCH_STATE_MAX    	121
 
 #define	END                   	0	/* 0000 End of program. */
 #define	SUCCEED               	1	/* 0x01 Return from a subroutine, basically. */
@@ -86,12 +86,13 @@
 #define	OPFAIL                	74	/* 0x4a Same as (?!) */
 #define	ACCEPT                	75	/* 0x4b Accepts the current matched string. */
 #define	VERB                  	76	/* 0x4c    no-sv 1	Used only for the type field of verbs */
-#define	NOMATCH               	77	/* 0x4d Pattern fails at this startpoint if no-backtracking through this */
+#define	PRUNE                 	77	/* 0x4d Pattern fails at this startpoint if no-backtracking through this */
 #define	MARKPOINT             	78	/* 0x4e Push the current location for rollback by cut. */
-#define	CUT                   	79	/* 0x4f On failure cut the string at the mark. */
+#define	SKIP                  	79	/* 0x4f On failure skip forward (to the mark) before retrying */
 #define	COMMIT                	80	/* 0x50 Pattern fails outright if backtracking through this */
-#define	OPTIMIZED             	81	/* 0x51 Placeholder for dump. */
-#define	PSEUDO                	82	/* 0x52 Pseudo opcode for internal use. */
+#define	CUTGROUP              	81	/* 0x51 On failure go to the next alternation in the group */
+#define	OPTIMIZED             	82	/* 0x52 Placeholder for dump. */
+#define	PSEUDO                	83	/* 0x53 Pseudo opcode for internal use. */
 	/* ------------ States ------------- */
 #define	TRIE_next             	(REGNODE_MAX + 1)	/* state for TRIE */
 #define	TRIE_next_fail        	(REGNODE_MAX + 2)	/* state for TRIE */
@@ -127,8 +128,10 @@
 #define	COMMIT_next_fail      	(REGNODE_MAX + 32)	/* state for COMMIT */
 #define	MARKPOINT_next        	(REGNODE_MAX + 33)	/* state for MARKPOINT */
 #define	MARKPOINT_next_fail   	(REGNODE_MAX + 34)	/* state for MARKPOINT */
-#define	CUT_next              	(REGNODE_MAX + 35)	/* state for CUT */
-#define	CUT_next_fail         	(REGNODE_MAX + 36)	/* state for CUT */
+#define	SKIP_next             	(REGNODE_MAX + 35)	/* state for SKIP */
+#define	SKIP_next_fail        	(REGNODE_MAX + 36)	/* state for SKIP */
+#define	CUTGROUP_next         	(REGNODE_MAX + 37)	/* state for CUTGROUP */
+#define	CUTGROUP_next_fail    	(REGNODE_MAX + 38)	/* state for CUTGROUP */
 
 /* PL_regkind[] What type of regop or state is this. */
 
@@ -213,10 +216,11 @@ EXTCONST U8 PL_regkind[] = {
 	ENDLIKE,  	/* OPFAIL                 */
 	ENDLIKE,  	/* ACCEPT                 */
 	VERB,     	/* VERB                   */
-	VERB,     	/* NOMATCH                */
+	VERB,     	/* PRUNE                  */
 	VERB,     	/* MARKPOINT              */
-	VERB,     	/* CUT                    */
+	VERB,     	/* SKIP                   */
 	VERB,     	/* COMMIT                 */
+	VERB,     	/* CUTGROUP               */
 	NOTHING,  	/* OPTIMIZED              */
 	PSEUDO,   	/* PSEUDO                 */
 	/* ------------ States ------------- */
@@ -254,8 +258,10 @@ EXTCONST U8 PL_regkind[] = {
 	COMMIT,   	/* COMMIT_next_fail       */
 	MARKPOINT,	/* MARKPOINT_next         */
 	MARKPOINT,	/* MARKPOINT_next_fail    */
-	CUT,      	/* CUT_next               */
-	CUT,      	/* CUT_next_fail          */
+	SKIP,     	/* SKIP_next              */
+	SKIP,     	/* SKIP_next_fail         */
+	CUTGROUP, 	/* CUTGROUP_next          */
+	CUTGROUP, 	/* CUTGROUP_next_fail     */
 };
 #endif
 
@@ -340,10 +346,11 @@ static const U8 regarglen[] = {
 	0,                                   	/* OPFAIL       */
 	EXTRA_SIZE(struct regnode_1),        	/* ACCEPT       */
 	0,                                   	/* VERB         */
-	EXTRA_SIZE(struct regnode_1),        	/* NOMATCH      */
+	EXTRA_SIZE(struct regnode_1),        	/* PRUNE        */
 	EXTRA_SIZE(struct regnode_1),        	/* MARKPOINT    */
-	EXTRA_SIZE(struct regnode_1),        	/* CUT          */
+	EXTRA_SIZE(struct regnode_1),        	/* SKIP         */
 	EXTRA_SIZE(struct regnode_1),        	/* COMMIT       */
+	EXTRA_SIZE(struct regnode_1),        	/* CUTGROUP     */
 	0,                                   	/* OPTIMIZED    */
 	0,                                   	/* PSEUDO       */
 };
@@ -428,10 +435,11 @@ static const char reg_off_by_arg[] = {
 	0,	/* OPFAIL       */
 	0,	/* ACCEPT       */
 	0,	/* VERB         */
-	0,	/* NOMATCH      */
+	0,	/* PRUNE        */
 	0,	/* MARKPOINT    */
-	0,	/* CUT          */
+	0,	/* SKIP         */
 	0,	/* COMMIT       */
+	0,	/* CUTGROUP     */
 	0,	/* OPTIMIZED    */
 	0,	/* PSEUDO       */
 };
@@ -517,12 +525,13 @@ const char * reg_name[] = {
 	"OPFAIL",                	/* 0x4a */
 	"ACCEPT",                	/* 0x4b */
 	"VERB",                  	/* 0x4c */
-	"NOMATCH",               	/* 0x4d */
+	"PRUNE",                 	/* 0x4d */
 	"MARKPOINT",             	/* 0x4e */
-	"CUT",                   	/* 0x4f */
+	"SKIP",                  	/* 0x4f */
 	"COMMIT",                	/* 0x50 */
-	"OPTIMIZED",             	/* 0x51 */
-	"PSEUDO",                	/* 0x52 */
+	"CUTGROUP",              	/* 0x51 */
+	"OPTIMIZED",             	/* 0x52 */
+	"PSEUDO",                	/* 0x53 */
 	/* ------------ States ------------- */
 	"TRIE_next",             	/* REGNODE_MAX +0x01 */
 	"TRIE_next_fail",        	/* REGNODE_MAX +0x02 */
@@ -558,8 +567,10 @@ const char * reg_name[] = {
 	"COMMIT_next_fail",      	/* REGNODE_MAX +0x20 */
 	"MARKPOINT_next",        	/* REGNODE_MAX +0x21 */
 	"MARKPOINT_next_fail",   	/* REGNODE_MAX +0x22 */
-	"CUT_next",              	/* REGNODE_MAX +0x23 */
-	"CUT_next_fail",         	/* REGNODE_MAX +0x24 */
+	"SKIP_next",             	/* REGNODE_MAX +0x23 */
+	"SKIP_next_fail",        	/* REGNODE_MAX +0x24 */
+	"CUTGROUP_next",         	/* REGNODE_MAX +0x25 */
+	"CUTGROUP_next_fail",    	/* REGNODE_MAX +0x26 */
 };
 #endif /* DEBUGGING */
 #else

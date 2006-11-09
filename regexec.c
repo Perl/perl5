@@ -2418,9 +2418,14 @@ regmatch(), slabs allocated since entry are freed.
     DEBUG_STATE_r({					    \
 	DUMP_EXEC_POS(locinput, scan, do_utf8);		    \
 	PerlIO_printf(Perl_debug_log,			    \
-	    "    %*s"pp" %s\n",				    \
+	    "    %*s"pp" %s%s%s%s%s\n",			    \
 	    depth*2, "",				    \
-	    reg_name[st->resume_state] );   \
+	    reg_name[st->resume_state],                     \
+	    ((st==yes_state||st==mark_state) ? "[" : ""),   \
+	    ((st==yes_state) ? "Y" : ""),                   \
+	    ((st==mark_state) ? "M" : ""),                  \
+	    ((st==yes_state||st==mark_state) ? "]" : "")    \
+	);                                                  \
     });
 
 
@@ -2574,14 +2579,20 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
     /* mark_state piggy backs on the yes_state logic so that when we unwind 
        the stack on success we can update the mark_state as we go */
     regmatch_state *mark_state = NULL; /* last mark state we have seen */
+    
     regmatch_state *cur_eval = NULL; /* most recent EVAL_AB state */
     struct regmatch_state  *cur_curlyx = NULL; /* most recent curlyx */
     U32 state_num;
-    bool no_final = 0;
+    bool no_final = 0;      /* prevent failure from backtracking? */
+    bool do_cutgroup = 0;   /* no_final only until next branch/trie entry */
     char *startpoint = PL_reginput;
-    SV *popmark = NULL;
-    SV *sv_commit = NULL;
-    unsigned int lastopen = 0;
+    SV *popmark = NULL;     /* are we looking for a mark? */
+    SV *sv_commit = NULL;   /* last mark name seen in failure */
+    SV *sv_yes_mark = NULL; /* last mark name we have seen 
+                               during a successfull match */
+    U32 lastopen = 0;       /* last open we saw */
+    bool has_cutgroup = RX_HAS_CUTGROUP(rex) ? 1 : 0;   
+    
     /* these three flags are set by various ops to signal information to
      * the very next op. They have a useful lifetime of exactly one loop
      * iteration, and are not preserved or restored by state pushes/pops
@@ -2881,9 +2892,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    }}
 
 	    /* FALL THROUGH */
-
 	case TRIE_next_fail: /* we failed - try next alterative */
-
+            if (do_cutgroup) {
+                do_cutgroup = 0;
+                no_final = 0;
+            }
 	    if ( ST.accepted == 1 ) {
 		/* only one choice left - just continue */
 		DEBUG_EXECUTE_r({
@@ -2902,23 +2915,35 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		PL_reginput = (char *)ST.accept_buff[ 0 ].endpos;
 		/* in this case we free tmps/leave before we call regmatch
 		   as we wont be using accept_buff again. */
-		FREETMPS;
-		LEAVE;
+		
 		locinput = PL_reginput;
 		nextchr = UCHARAT(locinput);
-		
-		if ( !ST.jump || !ST.jump[ST.accept_buff[0].wordnum]) 
-		    scan = ST.B;
-		else
-		    scan = ST.me + ST.jump[ST.accept_buff[0].wordnum];
+    		if ( !ST.jump || !ST.jump[ST.accept_buff[0].wordnum]) 
+    		    scan = ST.B;
+    		else
+    		    scan = ST.me + ST.jump[ST.accept_buff[0].wordnum];
+		if (!has_cutgroup) {
+		    FREETMPS;
+		    LEAVE;
+                } else {
+                    ST.accepted--;
+                    PUSH_YES_STATE_GOTO(TRIE_next, scan);
+                }
 		
 		continue; /* execute rest of RE */
 	    }
 
 	    if (!ST.accepted-- ) {
+	        DEBUG_EXECUTE_r({
+		    PerlIO_printf( Perl_debug_log,
+			"%*s  %sTRIE failed...%s\n",
+			REPORT_CODE_OFF+depth*2, "", 
+			PL_colors[4],
+			PL_colors[5] );
+		});
 		FREETMPS;
 		LEAVE;
-		sayNO;
+		sayNO_SILENT;
 	    }
 
 	    /*
@@ -2976,16 +3001,26 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		}
 		PL_reginput = (char *)ST.accept_buff[ best ].endpos;
 		if ( !ST.jump || !ST.jump[ST.accept_buff[best].wordnum]) {
-		    PUSH_STATE_GOTO(TRIE_next, ST.B);
+		    scan = ST.B;
 		    /* NOTREACHED */
 		} else {
-		    PUSH_STATE_GOTO(TRIE_next, ST.me + ST.jump[ST.accept_buff[best].wordnum]);
+		    scan = ST.me + ST.jump[ST.accept_buff[best].wordnum];
 		    /* NOTREACHED */
+                }
+                if (has_cutgroup) {
+                    PUSH_YES_STATE_GOTO(TRIE_next, scan);    
+                    /* NOTREACHED */
+                } else {
+                    PUSH_STATE_GOTO(TRIE_next, scan);
+                    /* NOTREACHED */
                 }
                 /* NOTREACHED */
 	    }
 	    /* NOTREACHED */
-
+        case TRIE_next:
+            FREETMPS;
+	    LEAVE;
+	    sayYES;
 #undef  ST
 
 	case EXACT: {
@@ -4024,19 +4059,45 @@ NULL
 
 	case BRANCH:	    /*  /(...|A|...)/ */
 	    scan = NEXTOPER(scan); /* scan now points to inner node */
-	    if (!next || (OP(next) != BRANCH && OP(next) != BRANCHJ))
+	    if ((!next || (OP(next) != BRANCH && OP(next) != BRANCHJ)) 
+	        && !has_cutgroup)
+	    {
 	    	/* last branch; skip state push and jump direct to node */
 		continue;
+            }
 	    ST.lastparen = *PL_reglastparen;
 	    ST.next_branch = next;
 	    REGCP_SET(ST.cp);
 	    PL_reginput = locinput;
 
 	    /* Now go into the branch */
-	    PUSH_STATE_GOTO(BRANCH_next, scan);
+	    if (has_cutgroup) {
+	        PUSH_YES_STATE_GOTO(BRANCH_next, scan);    
+	    } else {
+	        PUSH_STATE_GOTO(BRANCH_next, scan);
+	    }
 	    /* NOTREACHED */
-
+        case CUTGROUP:
+            PL_reginput = locinput;
+            sv_yes_mark = st->u.mark.mark_name = scan->flags ? NULL :
+                (SV*)rex->data->data[ ARG( scan ) ];
+            PUSH_STATE_GOTO(CUTGROUP_next,next);
+            /* NOTREACHED */
+        case CUTGROUP_next_fail:
+            do_cutgroup = 1;
+            no_final = 1;
+            if (st->u.mark.mark_name)
+                sv_commit = st->u.mark.mark_name;
+            sayNO;	    
+            /* NOTREACHED */
+        case BRANCH_next:
+            sayYES;
+            /* NOTREACHED */
 	case BRANCH_next_fail: /* that branch failed; try the next, if any */
+	    if (do_cutgroup) {
+	        do_cutgroup = 0;
+	        no_final = 0;
+	    }
 	    REGCP_UNWIND(ST.cp);
 	    for (n = *PL_reglastparen; n > ST.lastparen; n--)
 		PL_regendp[n] = -1;
@@ -4044,8 +4105,16 @@ NULL
 	    /*dmq: *PL_reglastcloseparen = n; */
 	    scan = ST.next_branch;
 	    /* no more branches? */
-	    if (!scan || (OP(scan) != BRANCH && OP(scan) != BRANCHJ))
-		sayNO;
+	    if (!scan || (OP(scan) != BRANCH && OP(scan) != BRANCHJ)) {
+	        DEBUG_EXECUTE_r({
+		    PerlIO_printf( Perl_debug_log,
+			"%*s  %sBRANCH failed...%s\n",
+			REPORT_CODE_OFF+depth*2, "", 
+			PL_colors[4],
+			PL_colors[5] );
+		});
+		sayNO_SILENT;
+            }
 	    continue; /* execute next BRANCH[J] op */
 	    /* NOTREACHED */
     
@@ -4658,10 +4727,10 @@ NULL
 	case COMMIT:
 	    reginfo->cutpoint = PL_regeol;
 	    /* FALLTHROUGH */
-	case NOMATCH:
+	case PRUNE:
 	    PL_reginput = locinput;
 	    if (!scan->flags)
-	        sv_commit = (SV*)rex->data->data[ ARG( scan ) ];
+	        sv_yes_mark = sv_commit = (SV*)rex->data->data[ ARG( scan ) ];
 	    PUSH_STATE_GOTO(COMMIT_next,next);
 	    /* NOTREACHED */
 	case COMMIT_next_fail:
@@ -4674,8 +4743,8 @@ NULL
 #define ST st->u.mark
         case MARKPOINT:
             ST.prev_mark = mark_state;
-            ST.mark_name = scan->flags ? &PL_sv_yes : 
-                (SV*)rex->data->data[ ARG( scan ) ];
+            ST.mark_name = sv_commit = sv_yes_mark 
+                = (SV*)rex->data->data[ ARG( scan ) ];
             mark_state = st;
             ST.mark_loc = PL_reginput = locinput;
             PUSH_YES_STATE_GOTO(MARKPOINT_next,next);
@@ -4685,9 +4754,7 @@ NULL
             sayYES;
             /* NOTREACHED */
         case MARKPOINT_next_fail:
-            if (popmark && ( popmark == &PL_sv_yes || 
-                 (ST.mark_name != &PL_sv_yes && 
-                  sv_eq(ST.mark_name,popmark)))) 
+            if (popmark && sv_eq(ST.mark_name,popmark)) 
             {
                 if (ST.mark_loc > startpoint)
 	            reginfo->cutpoint = HOPBACKc(ST.mark_loc, 1);
@@ -4695,40 +4762,58 @@ NULL
                 sv_commit = ST.mark_name;
 
                 DEBUG_EXECUTE_r({
-                    if (sv_commit != &PL_sv_yes) 
-	                PerlIO_printf(Perl_debug_log,
+                        PerlIO_printf(Perl_debug_log,
 		            "%*s  %ssetting cutpoint to mark:%"SVf"...%s\n",
 		            REPORT_CODE_OFF+depth*2, "", 
 		            PL_colors[4], sv_commit, PL_colors[5]);
-                    else
-                        PerlIO_printf(Perl_debug_log,
-		            "%*s  %ssetting cutpoint to mark...%s\n",
-		            REPORT_CODE_OFF+depth*2, "", 
-		            PL_colors[4], PL_colors[5]);
 		});
             }
             mark_state = ST.prev_mark;
+            sv_yes_mark = mark_state ? 
+                mark_state->u.mark.mark_name : NULL;
             sayNO;
             /* NOTREACHED */
-        case CUT:
-            ST.mark_name = scan->flags ? &PL_sv_yes : 
-                    (SV*)rex->data->data[ ARG( scan ) ];
-            if (mark_state) {
-                ST.mark_loc = NULL;
-            } else {
-                ST.mark_loc = locinput;
-            }    
+        case SKIP:
             PL_reginput = locinput;
-	    PUSH_STATE_GOTO(CUT_next,next);
-	    /* NOTREACHED */
-	case CUT_next_fail:
-	    if (ST.mark_loc) {
+            if (scan->flags) {
+                /* (*CUT) : if we fail we cut here*/
+                ST.mark_name = NULL;
+                ST.mark_loc = locinput;
+                PUSH_STATE_GOTO(SKIP_next,next);    
+            } else {
+                /* (*CUT:NAME) : if there is a (*MARK:NAME) fail where it was, 
+                   otherwise do nothing.  Meaning we need to scan 
+                 */
+                regmatch_state *cur = mark_state;
+                SV *find = (SV*)rex->data->data[ ARG( scan ) ];
+                
+                while (cur) {
+                    if ( sv_eq( cur->u.mark.mark_name, 
+                                find ) ) 
+                    {
+                        ST.mark_name = find;
+                        PUSH_STATE_GOTO( SKIP_next, next );
+                    }
+                    cur = cur->u.mark.prev_mark;
+                }
+            }    
+            /* Didn't find our (*MARK:NAME) so ignore this (*CUT:NAME) */
+            break;    
+	case SKIP_next_fail:
+	    if (ST.mark_name) {
+	        /* (*CUT:NAME) - Set up to search for the name as we 
+	           collapse the stack*/
+	        popmark = ST.mark_name;	   
+	    } else {
+	        /* (*CUT) - No name, we cut here.*/
 	        if (ST.mark_loc > startpoint)
 	            reginfo->cutpoint = HOPBACKc(ST.mark_loc, 1);
-	        sv_commit = ST.mark_name;
-            } else {
-                popmark = ST.mark_name;	   
-            }
+	        /* but we set sv_commit to latest mark_name if there
+	           is one so they can test to see how things lead to this
+	           cut */    
+                if (mark_state) 
+                    sv_commit=mark_state->u.mark.mark_name;	            
+            } 
             no_final = 1; 
             sayNO;
             /* NOTREACHED */
@@ -4738,10 +4823,12 @@ NULL
 	    PerlIO_printf(Perl_error_log, "%"UVxf" %d\n",
 			  PTR2UV(scan), OP(scan));
 	    Perl_croak(aTHX_ "regexp memory corruption");
-	}
+	    
+	} /* end switch */ 
 
-	scan = next;
-	continue;
+        /* switch break jumps here */
+	scan = next; /* prepare to execute the next op and ... */
+	continue;    /* ... jump back to the top, reusing st */
 	/* NOTREACHED */
 
       push_yes_state:
@@ -4834,7 +4921,10 @@ yes:
 	yes_state = st->u.yes.prev_yes_state;
 	PL_regmatch_state = st;
         
-
+        if (no_final) {
+            locinput= st->locinput;
+            nextchr = UCHARAT(locinput);
+        }
 	state_num = st->resume_state + no_final;
 	goto reenter_switch;
     }
@@ -4884,12 +4974,19 @@ no_silent:
 
   final_exit:
     if (rex->reganch & ROPT_VERBARG_SEEN) {
-        SV *sv = get_sv("REGERROR", 1);
-        if (result) 
+        SV *sv_err = get_sv("REGERROR", 1);
+        SV *sv_mrk = get_sv("REGMARK", 1);
+        if (result) {
             sv_commit = &PL_sv_no;
-        else if (!sv_commit) 
-            sv_commit = &PL_sv_yes;
-        sv_setsv(sv, sv_commit);
+            if (!sv_yes_mark) 
+                sv_yes_mark = &PL_sv_yes;
+        } else {
+            if (!sv_commit) 
+                sv_commit = &PL_sv_yes;
+            sv_yes_mark = &PL_sv_no;
+        }
+        sv_setsv(sv_err, sv_commit);
+        sv_setsv(sv_mrk, sv_yes_mark);
     }
     /* restore original high-water mark */
     PL_regmatch_slab  = orig_slab;

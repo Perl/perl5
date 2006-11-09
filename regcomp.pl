@@ -55,12 +55,9 @@ while (<DESC>) {
         
     }
 }
-my ($width,$rwidth,$twidth)=(0,0,0);
-for (1..@name) {
-    $width=length($name[$_]) if $name[$_] and $width<length($name[$_]);
-    $twidth=length($type[$_]) if $type[$_] and $twidth<length($type[$_]);
-    $rwidth=$width if $_ == $lastregop;
-}
+# use fixed width to keep the diffs between regcomp.pl recompiles
+# as small as possible.
+my ($width,$rwidth,$twidth)=(22,12,9);
 $lastregop ||= $ind;
 my $tot = $ind;
 close DESC;

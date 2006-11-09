@@ -100,15 +100,15 @@ typedef struct regexp_engine {
 #define ROPT_SANY_SEEN		ROPT_CANY_SEEN /* src bckwrd cmpt */
 #define ROPT_GPOS_CHECK         (ROPT_GPOS_SEEN|ROPT_ANCH_GPOS)
 
-/* 0xf800 of reganch is used by PMf_COMPILETIME */
+/* 0xF800 of reganch is used by PMf_COMPILETIME */
 
 #define ROPT_UTF8		0x00010000
 #define ROPT_NAUGHTY		0x00020000 /* how exponential is this pattern? */
 #define ROPT_COPY_DONE		0x00040000	/* subbeg is a copy of the string */
 #define ROPT_TAINTED_SEEN	0x00080000
 #define ROPT_MATCH_UTF8		0x10000000 /* subbeg is utf-8 */
-#define ROPT_RECURSE_SEEN       0x20000000
-#define ROPT_VERBARG_SEEN       0x40000000
+#define ROPT_VERBARG_SEEN       0x20000000
+#define ROPT_CUTGROUP_SEEN      0x40000000
 
 #define RE_USE_INTUIT_NOML	0x00100000 /* Best to intuit before matching */
 #define RE_USE_INTUIT_ML	0x00200000
@@ -124,6 +124,7 @@ typedef struct regexp_engine {
 #define REINT_AUTORITATIVE	(REINT_AUTORITATIVE_NOML|REINT_AUTORITATIVE_ML)
 #define REINT_ONCE		(REINT_ONCE_NOML|REINT_ONCE_ML)
 
+#define RX_HAS_CUTGROUP(prog) ((prog)->reganch & ROPT_CUTGROUP_SEEN)
 #define RX_MATCH_TAINTED(prog)	((prog)->reganch & ROPT_TAINTED_SEEN)
 #define RX_MATCH_TAINTED_on(prog) ((prog)->reganch |= ROPT_TAINTED_SEEN)
 #define RX_MATCH_TAINTED_off(prog) ((prog)->reganch &= ~ROPT_TAINTED_SEEN)
@@ -229,6 +230,8 @@ typedef struct regmatch_state {
 	} yes;
 
 	struct {
+	    /* this first element must match u.yes */
+	    struct regmatch_state *prev_yes_state;
 	    reg_trie_accepted *accept_buff;
 	    U32		accepted; /* how many accepting states we have seen */
 	    U16         *jump;  /* positive offsets from me */
@@ -279,6 +282,8 @@ typedef struct regmatch_state {
 	} whilem;
 
 	struct {
+	    /* this first element must match u.yes */
+	    struct regmatch_state *prev_yes_state;
 	    U32 lastparen;
 	    regnode *next_branch; /* next branch node */
 	    CHECKPOINT cp;

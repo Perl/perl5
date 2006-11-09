@@ -352,6 +352,7 @@ struct regnode_charclass_class {	/* has [[:blah:]] classes */
 #define REG_SEEN_RECURSE        0x00000020
 #define REG_TOP_LEVEL_BRANCHES  0x00000040
 #define REG_SEEN_VERBARG        0x00000080
+#define REG_SEEN_CUTGROUP       0x00000100
 
 START_EXTERN_C
 

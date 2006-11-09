@@ -3851,65 +3851,65 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     iseq($count,1,"should have matched once only [RT#36046]");
 }
 
-{   # Test the (*NOMATCH) pattern
+{   # Test the (*PRUNE) pattern
     our $count = 0;
     'aaab'=~/a+b?(?{$count++})(*FAIL)/;
-    iseq($count,9,"expect 9 for no (*NOMATCH)");
+    iseq($count,9,"expect 9 for no (*PRUNE)");
     $count = 0;
-    'aaab'=~/a+b?(*NOMATCH)(?{$count++})(*FAIL)/;
-    iseq($count,3,"expect 3 with (*NOMATCH)");
+    'aaab'=~/a+b?(*PRUNE)(?{$count++})(*FAIL)/;
+    iseq($count,3,"expect 3 with (*PRUNE)");
     local $_='aaab';
     $count=0;
-    1 while /.(*NOMATCH)(?{$count++})(*FAIL)/g;
-    iseq($count,4,"/.(*NOMATCH)/");
+    1 while /.(*PRUNE)(?{$count++})(*FAIL)/g;
+    iseq($count,4,"/.(*PRUNE)/");
     $count = 0;
-    'aaab'=~/a+b?(??{'(*NOMATCH)'})(?{$count++})(*FAIL)/;
-    iseq($count,3,"expect 3 with (*NOMATCH)");
+    'aaab'=~/a+b?(??{'(*PRUNE)'})(?{$count++})(*FAIL)/;
+    iseq($count,3,"expect 3 with (*PRUNE)");
     local $_='aaab';
     $count=0;
-    1 while /.(??{'(*NOMATCH)'})(?{$count++})(*FAIL)/g;
-    iseq($count,4,"/.(*NOMATCH)/");
+    1 while /.(??{'(*PRUNE)'})(?{$count++})(*FAIL)/g;
+    iseq($count,4,"/.(*PRUNE)/");
 }
-{   # Test the (*CUT) pattern
+{   # Test the (*SKIP) pattern
     our $count = 0;
-    'aaab'=~/a+b?(*CUT)(?{$count++})(*FAIL)/;
-    iseq($count,1,"expect 1 with (*CUT)");
+    'aaab'=~/a+b?(*SKIP)(?{$count++})(*FAIL)/;
+    iseq($count,1,"expect 1 with (*SKIP)");
     local $_='aaab';
     $count=0;
-    1 while /.(*CUT)(?{$count++})(*FAIL)/g;
-    iseq($count,4,"/.(*CUT)/");
+    1 while /.(*SKIP)(?{$count++})(*FAIL)/g;
+    iseq($count,4,"/.(*SKIP)/");
     $_='aaabaaab';
     $count=0;
     our @res=();
-    1 while /(a+b?)(*CUT)(?{$count++; push @res,$1})(*FAIL)/g;
-    iseq($count,2,"Expect 2 with (*CUT)" );
-    iseq("@res","aaab aaab","adjacent (*CUT) works as expected" );
+    1 while /(a+b?)(*SKIP)(?{$count++; push @res,$1})(*FAIL)/g;
+    iseq($count,2,"Expect 2 with (*SKIP)" );
+    iseq("@res","aaab aaab","adjacent (*SKIP) works as expected" );
 }
-{   # Test the (*CUT) pattern
+{   # Test the (*SKIP) pattern
     our $count = 0;
-    'aaab'=~/a+b?(*MARK)(*CUT)(?{$count++})(*FAIL)/;
-    iseq($count,1,"expect 1 with (*CUT)");
+    'aaab'=~/a+b?(*MARK:foo)(*SKIP)(?{$count++})(*FAIL)/;
+    iseq($count,1,"expect 1 with (*SKIP)");
     local $_='aaab';
     $count=0;
-    1 while /.(*MARK)(*CUT)(?{$count++})(*FAIL)/g;
-    iseq($count,4,"/.(*CUT)/");
+    1 while /.(*MARK:foo)(*SKIP)(?{$count++})(*FAIL)/g;
+    iseq($count,4,"/.(*SKIP)/");
     $_='aaabaaab';
     $count=0;
     our @res=();
-    1 while /(a+b?)(*MARK)(*CUT)(?{$count++; push @res,$1})(*FAIL)/g;
-    iseq($count,2,"Expect 2 with (*CUT)" );
-    iseq("@res","aaab aaab","adjacent (*CUT) works as expected" );
+    1 while /(a+b?)(*MARK:foo)(*SKIP)(?{$count++; push @res,$1})(*FAIL)/g;
+    iseq($count,2,"Expect 2 with (*SKIP)" );
+    iseq("@res","aaab aaab","adjacent (*SKIP) works as expected" );
 }
-{   # Test the (*CUT) pattern
+{   # Test the (*SKIP) pattern
     our $count = 0;
-    'aaab'=~/a*(*MARK:a)b?(*MARK:b)(*CUT:a)(?{$count++})(*FAIL)/;
-    iseq($count,3,"expect 3 with *MARK:a)b?(*MARK:b)(*CUT:a)");
+    'aaab'=~/a*(*MARK:a)b?(*MARK:b)(*SKIP:a)(?{$count++})(*FAIL)/;
+    iseq($count,3,"expect 3 with *MARK:a)b?(*MARK:b)(*SKIP:a)");
     local $_='aaabaaab';
     $count=0;
     our @res=();
-    1 while /(a*(*MARK:a)b?)(*MARK)(*CUT:a)(?{$count++; push @res,$1})(*FAIL)/g;
-    iseq($count,5,"Expect 5 with (*MARK:a)b?)(*MARK)(*CUT:a)" );
-    iseq("@res","aaab b aaab b ","adjacent (*MARK:a)b?)(*MARK)(*CUT:a) works as expected" );
+    1 while /(a*(*MARK:a)b?)(*MARK:x)(*SKIP:a)(?{$count++; push @res,$1})(*FAIL)/g;
+    iseq($count,5,"Expect 5 with (*MARK:a)b?)(*MARK:x)(*SKIP:a)" );
+    iseq("@res","aaab b aaab b ","adjacent (*MARK:a)b?)(*MARK:x)(*SKIP:a) works as expected" );
 }
 {   # Test the (*COMMIT) pattern
     our $count = 0;
@@ -3931,8 +3931,10 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     our $REGERROR;
     for my $name ('',':foo') 
     {
-        for my $pat ("(*NOMATCH$name)","(*MARK$name)(*CUT)",
-                         "(*CUT$name)","(*COMMIT$name)")
+        for my $pat ("(*PRUNE$name)",
+                     ($name? "(*MARK$name)" : "")
+                     . "(*SKIP$name)",
+                     "(*COMMIT$name)")
         {                         
             for my $suffix ('(*FAIL)','') 
             {
@@ -3952,8 +3954,10 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     our $REGERROR;
     for my $name ('',':foo') 
     {
-        for my $pat ("(*NOMATCH$name)","(*MARK$name)(*CUT)",
-                         "(*CUT$name)","(*COMMIT$name)")
+        for my $pat ("(*PRUNE$name)",
+                     ($name? "(*MARK$name)" : "")
+                     . "(*SKIP$name)",
+                     "(*COMMIT$name)")
         {                         
             for my $suffix ('(*FAIL)','') 
             {
@@ -3982,6 +3986,13 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     ok($s =~ m/$rex/);
     ok($s =~ m/^abc$/m);
 }
+{
+    #Mindnumbingly simple test of (*THEN)
+    for ("ABC","BAX") {
+        ok(/A (*THEN) X | B (*THEN) C/x,"Simple (*THEN) test");
+    }
+}    
+    
 #-------------------------------------------------------------------
 
 # Keep the following tests last -- they may crash perl
@@ -4008,5 +4019,4 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
 # Put new tests above the line, not here.
 
 # Don't forget to update this!
-BEGIN{print "1..1347\n"};
-
+BEGIN { print "1..1341\n" };

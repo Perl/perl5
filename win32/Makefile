@@ -496,6 +496,7 @@ $(o).dll:
 .rc.res:
 	$(RSC) -i.. $<
 
+	
 #
 # various targets
 
@@ -922,7 +923,14 @@ all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE) \
 	$(X2P) MakePPPort Extensions
 	@echo	Everything is up to date. '$(MAKE_BARE) test' to run test suite.
 
-reonly : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE) \
+..\regnodes.h : ..\regcomp.sym
+	cd ..
+	regcomp.pl
+	cd win32
+
+regnodes :  ..\regnodes.h
+
+reonly : regnodes .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE) \
 	$(X2P) Extensions_reonly
 	@echo	Perl and 're' are up to date.
 
@@ -1302,17 +1310,11 @@ test-reonly : reonly utils
 	$(PERLEXE) -I..\lib harness $(OPT) -re \bpat\b \breg \bre\b $(EXTRA)
 	cd ..\win32
 
-regen :
+regen : 
 	cd ..
 	regen.pl
 	cd win32
 
-regnodes :
-	cd ..
-	regcomp.pl
-	cd win32
-
-	
 test-notty : test-prep
 	set PERL_SKIP_TTY_TEST=1
 	cd ..\t

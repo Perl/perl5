@@ -2649,8 +2649,14 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                             if ( ((made == MADE_EXACT_TRIE && 
                                  startbranch == first) 
                                  || ( first_non_open == first )) && 
-                                 depth==0 ) 
+                                 depth==0 ) {
                                 flags |= SCF_TRIE_RESTUDY;
+                                if ( startbranch == first 
+                                     && scan == tail ) 
+                                {
+                                    RExC_seen &=~REG_TOP_LEVEL_BRANCHES;
+                                }
+                            }
 #endif
                         }
                     }
@@ -4062,8 +4068,14 @@ reStudy:
 
 #ifdef TRIE_STUDY_OPT
     if ( restudied ) {
+        U32 seen=RExC_seen;
         DEBUG_OPTIMISE_r(PerlIO_printf(Perl_debug_log,"Restudying\n"));
-        RExC_state=copyRExC_state;
+        
+        RExC_state = copyRExC_state;
+        if (seen & REG_TOP_LEVEL_BRANCHES) 
+            RExC_seen |= REG_TOP_LEVEL_BRANCHES;
+        else
+            RExC_seen &= ~REG_TOP_LEVEL_BRANCHES;
         if (data.last_found) {
             SvREFCNT_dec(data.longest_fixed);
 	    SvREFCNT_dec(data.longest_float);
@@ -4072,7 +4084,7 @@ reStudy:
 	StructCopy(&zero_scan_data, &data, scan_data_t);
     } else {
         StructCopy(&zero_scan_data, &data, scan_data_t);
-        copyRExC_state=RExC_state;
+        copyRExC_state = RExC_state;
     }
 #else
     StructCopy(&zero_scan_data, &data, scan_data_t);
@@ -4400,7 +4412,7 @@ reStudy:
 	struct regnode_charclass_class ch_class;
 	I32 last_close = 0;
 	
-	DEBUG_COMPILE_r(PerlIO_printf(Perl_debug_log, "\n"));
+	DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log, "\nMulti Top Level\n"));
 
 	scan = r->program + 1;
 	cl_init(pRExC_state, &ch_class);
@@ -4455,6 +4467,8 @@ reStudy:
 	r->reganch |= ROPT_CANY_SEEN;
     if (RExC_seen & REG_SEEN_VERBARG)
 	r->reganch |= ROPT_VERBARG_SEEN;
+    if (RExC_seen & REG_SEEN_CUTGROUP)
+	r->reganch |= ROPT_CUTGROUP_SEEN;
     if (RExC_paren_names)
         r->paren_names = (HV*)SvREFCNT_inc(RExC_paren_names);
     else
@@ -4713,6 +4727,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	        if ( *RExC_parse != ')' )
 	            vFAIL("Unterminated verb pattern");
 	    }
+	    
 	    switch ( *start_verb ) {
             case 'A':  /* (*ACCEPT) */
                 if ( CHECK_WORD("ACCEPT",start_verb,verb_len) ) {
@@ -4723,8 +4738,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
             case 'C':  /* (*COMMIT) */
                 if ( CHECK_WORD("COMMIT",start_verb,verb_len) )
                     op = COMMIT;
-                else if ( CHECK_WORD("CUT",start_verb,verb_len) )
-                    op = CUT;
                 break;
             case 'F':  /* (*FAIL) */
                 if ( verb_len==1 || CHECK_WORD("FAIL",start_verb,verb_len) ) {
@@ -4732,13 +4745,27 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    argok = 0;
 		}
 		break;
-	    case 'M':
-	        if ( CHECK_WORD("MARK",start_verb,verb_len) )
+            case ':':  /* (*:NAME) */
+	    case 'M':  /* (*MARK:NAME) */
+	        if ( verb_len==0 || CHECK_WORD("MARK",start_verb,verb_len) ) {
                     op = MARKPOINT;
+                    argok = -1;
+                }
                 break;
-            case 'N':  /* (*NOMATCH) */
-                if ( CHECK_WORD("NOMATCH",start_verb,verb_len) )
-                    op = NOMATCH;
+            case 'P':  /* (*PRUNE) */
+                if ( CHECK_WORD("PRUNE",start_verb,verb_len) )
+                    op = PRUNE;
+                break;
+            case 'S':   /* (*SKIP) */  
+                if ( CHECK_WORD("SKIP",start_verb,verb_len) ) 
+                    op = SKIP;
+                break;
+            case 'T':  /* (*THEN) */
+                /* [19:06] <TimToady> :: is then */
+                if ( CHECK_WORD("THEN",start_verb,verb_len) ) {
+                    op = CUTGROUP;
+                    RExC_seen |= REG_SEEN_CUTGROUP;
+                }
                 break;
 	    }
 	    if ( ! op ) {

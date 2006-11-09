@@ -112,8 +112,8 @@ quantifiers. (Yves Orton)
 =item Backtracking control verbs
 
 The regex engine now supports a number of special purpose backtrack
-control verbs: (*COMMIT), (*MARK), (*CUT), (*ERROR), (*FAIL) and
-(*ACCEPT). See L<perlre> for their descriptions. (Yves Orton)
+control verbs: (*THEN), (*PRUNE), (*MARK), (*SKIP), (*COMMIT), (*FAIL)
+and (*ACCEPT). See L<perlre> for their descriptions.
 
 =back
 
