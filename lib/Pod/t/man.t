@@ -42,6 +42,7 @@ while (<DATA>) {
 
     while (<DATA>) {
         last if $_ eq "###\n";
+        no warnings 'utf8';
         print TMP $_;
     }
     close TMP;
