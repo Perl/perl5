@@ -1017,7 +1017,12 @@ all : .\config.h $(GLOBEXE) $(MINIPERL) $(MK2)		\
 	$(RIGHTMAKE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE)	\
 	$(X2P) MakePPPort Extensions $(PERLSTATIC)
 
-reonly : .\config.h $(GLOBEXE) $(MINIPERL) $(MK2)		\
+..\regnodes.h : ..\regcomp.sym
+	cd .. && regcomp.pl && cd win32
+
+regnodes : ..\regnodes.h
+
+reonly : regnodes .\config.h $(GLOBEXE) $(MINIPERL) $(MK2)		\
 	$(RIGHTMAKE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE)	\
 	$(X2P) Extensions_reonly
 
@@ -1564,9 +1569,6 @@ test-reonly : reonly utils
 
 regen :
 	cd .. && regen.pl && cd win32
-
-regnodes :
-	cd .. && regcomp.pl && cd win32
 
 test-notty : test-prep
 	set PERL_SKIP_TTY_TEST=1 && \
