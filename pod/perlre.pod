@@ -110,7 +110,8 @@ newline at the end), and Perl does certain optimizations with the
 assumption that the string contains only one line.  Embedded newlines
 will not be matched by "^" or "$".  You may, however, wish to treat a
 string as a multi-line buffer, such that the "^" will match after any
-newline within the string, and "$" will match before any newline.  At the
+newline within the string (except if the newline is the last character in
+the string), and "$" will match before any newline.  At the
 cost of a little more overhead, you can do this by using the /m modifier
 on the pattern match operator.  (Older programs did this by setting C<$*>,
 but this practice has been removed in perl 5.9.)
