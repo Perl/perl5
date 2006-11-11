@@ -2670,7 +2670,7 @@ Perl_hv_placeholders_set(pTHX_ HV *hv, I32 ph)
     /* else we don't need to add magic to record 0 placeholders.  */
 }
 
-SV *
+STATIC SV *
 S_refcounted_he_value(pTHX_ const struct refcounted_he *he)
 {
     dVAR;

@@ -4558,8 +4558,8 @@ NULL
 		st->u.eval.prev_eval = cur_eval;
 		cur_eval = cur_eval->u.eval.prev_eval;
 		DEBUG_EXECUTE_r(
-		    PerlIO_printf(Perl_debug_log, "%*s  EVAL trying tail ... %x\n",
-				      REPORT_CODE_OFF+depth*2, "",(int)cur_eval););
+		    PerlIO_printf(Perl_debug_log, "%*s  EVAL trying tail ... %"UVxf"\n",
+				      REPORT_CODE_OFF+depth*2, "",PTR2UV(cur_eval)););
 		PUSH_YES_STATE_GOTO(EVAL_AB,
 			st->u.eval.prev_eval->u.eval.B); /* match B */
 	    }

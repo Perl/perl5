@@ -501,7 +501,7 @@ static const scan_data_t zero_scan_data =
 #define Set_Node_Offset_To_R(node,byte) STMT_START {			\
     if (! SIZE_ONLY) {							\
 	MJD_OFFSET_DEBUG(("** (%d) offset of node %d is %d.\n",		\
-		    __LINE__, (node), (int)(byte)));			\
+		    __LINE__, (int)(node), (int)(byte)));		\
 	if((node) < 0) {						\
 	    Perl_croak(aTHX_ "value of node is %d in Offset macro", (int)(node)); \
 	} else {							\
