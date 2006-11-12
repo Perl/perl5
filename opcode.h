@@ -276,23 +276,23 @@ EXTCONST char* const PL_op_name[] = {
 	"ftewrite",
 	"fteexec",
 	"ftis",
-	"fteowned",
-	"ftrowned",
-	"ftzero",
 	"ftsize",
 	"ftmtime",
 	"ftatime",
 	"ftctime",
+	"ftrowned",
+	"fteowned",
+	"ftzero",
 	"ftsock",
 	"ftchr",
 	"ftblk",
 	"ftfile",
 	"ftdir",
 	"ftpipe",
-	"ftlink",
 	"ftsuid",
 	"ftsgid",
 	"ftsvtx",
+	"ftlink",
 	"fttty",
 	"fttext",
 	"ftbinary",
@@ -339,9 +339,9 @@ EXTCONST char* const PL_op_name[] = {
 	"msgctl",
 	"msgsnd",
 	"msgrcv",
+	"semop",
 	"semget",
 	"semctl",
-	"semop",
 	"require",
 	"dofile",
 	"entereval",
@@ -645,23 +645,23 @@ EXTCONST char* const PL_op_desc[] = {
 	"-w",
 	"-x",
 	"-e",
-	"-o",
-	"-O",
-	"-z",
 	"-s",
 	"-M",
 	"-A",
 	"-C",
+	"-O",
+	"-o",
+	"-z",
 	"-S",
 	"-c",
 	"-b",
 	"-f",
 	"-d",
 	"-p",
-	"-l",
 	"-u",
 	"-g",
 	"-k",
+	"-l",
 	"-t",
 	"-T",
 	"-B",
@@ -708,9 +708,9 @@ EXTCONST char* const PL_op_desc[] = {
 	"msgctl",
 	"msgsnd",
 	"msgrcv",
+	"semop",
 	"semget",
 	"semctl",
-	"semop",
 	"require",
 	"do \"file\"",
 	"eval \"string\"",
@@ -1028,23 +1028,23 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_ftewrite */
 	MEMBER_TO_FPTR(Perl_pp_ftrread),	/* Perl_pp_fteexec */
 	MEMBER_TO_FPTR(Perl_pp_ftis),
-	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_fteowned */
-	MEMBER_TO_FPTR(Perl_pp_ftrowned),
-	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftzero */
 	MEMBER_TO_FPTR(Perl_pp_ftis),	/* Perl_pp_ftsize */
 	MEMBER_TO_FPTR(Perl_pp_ftis),	/* Perl_pp_ftmtime */
 	MEMBER_TO_FPTR(Perl_pp_ftis),	/* Perl_pp_ftatime */
 	MEMBER_TO_FPTR(Perl_pp_ftis),	/* Perl_pp_ftctime */
+	MEMBER_TO_FPTR(Perl_pp_ftrowned),
+	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_fteowned */
+	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftzero */
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftsock */
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftchr */
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftblk */
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftfile */
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftdir */
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftpipe */
-	MEMBER_TO_FPTR(Perl_pp_ftlink),
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftsuid */
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftsgid */
 	MEMBER_TO_FPTR(Perl_pp_ftrowned),	/* Perl_pp_ftsvtx */
+	MEMBER_TO_FPTR(Perl_pp_ftlink),
 	MEMBER_TO_FPTR(Perl_pp_fttty),
 	MEMBER_TO_FPTR(Perl_pp_fttext),
 	MEMBER_TO_FPTR(Perl_pp_fttext),	/* Perl_pp_ftbinary */
@@ -1091,9 +1091,9 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_semctl),	/* Perl_pp_msgctl */
 	MEMBER_TO_FPTR(Perl_pp_shmwrite),	/* Perl_pp_msgsnd */
 	MEMBER_TO_FPTR(Perl_pp_shmwrite),	/* Perl_pp_msgrcv */
+	MEMBER_TO_FPTR(Perl_pp_shmwrite),	/* Perl_pp_semop */
 	MEMBER_TO_FPTR(Perl_pp_semget),
 	MEMBER_TO_FPTR(Perl_pp_semctl),
-	MEMBER_TO_FPTR(Perl_pp_shmwrite),	/* Perl_pp_semop */
 	MEMBER_TO_FPTR(Perl_pp_require),
 	MEMBER_TO_FPTR(Perl_pp_require),	/* Perl_pp_dofile */
 	MEMBER_TO_FPTR(Perl_pp_entereval),
@@ -1407,23 +1407,23 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftewrite */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* fteexec */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftis */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* fteowned */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftrowned */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftzero */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftsize */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftmtime */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftatime */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftctime */
+	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftrowned */
+	MEMBER_TO_FPTR(Perl_ck_ftst),	/* fteowned */
+	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftzero */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftsock */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftchr */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftblk */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftfile */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftdir */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftpipe */
-	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftlink */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftsuid */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftsgid */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftsvtx */
+	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftlink */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* fttty */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* fttext */
 	MEMBER_TO_FPTR(Perl_ck_ftst),	/* ftbinary */
@@ -1470,9 +1470,9 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* msgctl */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* msgsnd */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* msgrcv */
+	MEMBER_TO_FPTR(Perl_ck_fun),	/* semop */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* semget */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* semctl */
-	MEMBER_TO_FPTR(Perl_ck_fun),	/* semop */
 	MEMBER_TO_FPTR(Perl_ck_require),	/* require */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* dofile */
 	MEMBER_TO_FPTR(Perl_ck_eval),	/* entereval */
@@ -1781,23 +1781,23 @@ EXTCONST U32 PL_opargs[] = {
 	0x0000d894,	/* ftewrite */
 	0x0000d894,	/* fteexec */
 	0x0000d894,	/* ftis */
-	0x0000d894,	/* fteowned */
-	0x0000d894,	/* ftrowned */
-	0x0000d894,	/* ftzero */
 	0x0000d89c,	/* ftsize */
 	0x0000d88c,	/* ftmtime */
 	0x0000d88c,	/* ftatime */
 	0x0000d88c,	/* ftctime */
+	0x0000d894,	/* ftrowned */
+	0x0000d894,	/* fteowned */
+	0x0000d894,	/* ftzero */
 	0x0000d894,	/* ftsock */
 	0x0000d894,	/* ftchr */
 	0x0000d894,	/* ftblk */
 	0x0000d894,	/* ftfile */
 	0x0000d894,	/* ftdir */
 	0x0000d894,	/* ftpipe */
-	0x0000d894,	/* ftlink */
 	0x0000d894,	/* ftsuid */
 	0x0000d894,	/* ftsgid */
 	0x0000d894,	/* ftsvtx */
+	0x0000d894,	/* ftlink */
 	0x0000d814,	/* fttty */
 	0x0000d894,	/* fttext */
 	0x0000d894,	/* ftbinary */
@@ -1844,9 +1844,9 @@ EXTCONST U32 PL_opargs[] = {
 	0x0022281d,	/* msgctl */
 	0x0022281d,	/* msgsnd */
 	0x2222281d,	/* msgrcv */
+	0x0002281d,	/* semop */
 	0x0022281d,	/* semget */
 	0x0222281d,	/* semctl */
-	0x0002281d,	/* semop */
 	0x000136c0,	/* require */
 	0x00002240,	/* dofile */
 	0x00003640,	/* entereval */

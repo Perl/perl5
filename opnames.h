@@ -258,23 +258,23 @@ typedef enum opcode {
 	OP_FTEWRITE,	/* 240 */
 	OP_FTEEXEC,	/* 241 */
 	OP_FTIS,	/* 242 */
-	OP_FTEOWNED,	/* 243 */
-	OP_FTROWNED,	/* 244 */
-	OP_FTZERO,	/* 245 */
-	OP_FTSIZE,	/* 246 */
-	OP_FTMTIME,	/* 247 */
-	OP_FTATIME,	/* 248 */
-	OP_FTCTIME,	/* 249 */
+	OP_FTSIZE,	/* 243 */
+	OP_FTMTIME,	/* 244 */
+	OP_FTATIME,	/* 245 */
+	OP_FTCTIME,	/* 246 */
+	OP_FTROWNED,	/* 247 */
+	OP_FTEOWNED,	/* 248 */
+	OP_FTZERO,	/* 249 */
 	OP_FTSOCK,	/* 250 */
 	OP_FTCHR,	/* 251 */
 	OP_FTBLK,	/* 252 */
 	OP_FTFILE,	/* 253 */
 	OP_FTDIR,	/* 254 */
 	OP_FTPIPE,	/* 255 */
-	OP_FTLINK,	/* 256 */
-	OP_FTSUID,	/* 257 */
-	OP_FTSGID,	/* 258 */
-	OP_FTSVTX,	/* 259 */
+	OP_FTSUID,	/* 256 */
+	OP_FTSGID,	/* 257 */
+	OP_FTSVTX,	/* 258 */
+	OP_FTLINK,	/* 259 */
 	OP_FTTTY,	/* 260 */
 	OP_FTTEXT,	/* 261 */
 	OP_FTBINARY,	/* 262 */
@@ -321,9 +321,9 @@ typedef enum opcode {
 	OP_MSGCTL,	/* 303 */
 	OP_MSGSND,	/* 304 */
 	OP_MSGRCV,	/* 305 */
-	OP_SEMGET,	/* 306 */
-	OP_SEMCTL,	/* 307 */
-	OP_SEMOP,	/* 308 */
+	OP_SEMOP,	/* 306 */
+	OP_SEMGET,	/* 307 */
+	OP_SEMCTL,	/* 308 */
 	OP_REQUIRE,	/* 309 */
 	OP_DOFILE,	/* 310 */
 	OP_ENTEREVAL,	/* 311 */

@@ -885,23 +885,23 @@ fteread		-r			ck_ftst		isu-	F-
 ftewrite	-w			ck_ftst		isu-	F-
 fteexec		-x			ck_ftst		isu-	F-
 ftis		-e			ck_ftst		isu-	F-
-fteowned	-o			ck_ftst		isu-	F-
-ftrowned	-O			ck_ftst		isu-	F-
-ftzero		-z			ck_ftst		isu-	F-
 ftsize		-s			ck_ftst		istu-	F-
 ftmtime		-M			ck_ftst		stu-	F-
 ftatime		-A			ck_ftst		stu-	F-
 ftctime		-C			ck_ftst		stu-	F-
+ftrowned	-O			ck_ftst		isu-	F-
+fteowned	-o			ck_ftst		isu-	F-
+ftzero		-z			ck_ftst		isu-	F-
 ftsock		-S			ck_ftst		isu-	F-
 ftchr		-c			ck_ftst		isu-	F-
 ftblk		-b			ck_ftst		isu-	F-
 ftfile		-f			ck_ftst		isu-	F-
 ftdir		-d			ck_ftst		isu-	F-
 ftpipe		-p			ck_ftst		isu-	F-
-ftlink		-l			ck_ftst		isu-	F-
 ftsuid		-u			ck_ftst		isu-	F-
 ftsgid		-g			ck_ftst		isu-	F-
 ftsvtx		-k			ck_ftst		isu-	F-
+ftlink		-l			ck_ftst		isu-	F-
 fttty		-t			ck_ftst		is-	F-
 fttext		-T			ck_ftst		isu-	F-
 ftbinary	-B			ck_ftst		isu-	F-
@@ -974,9 +974,9 @@ msgrcv		msgrcv			ck_fun		imst@	S S S S S
 
 # Semaphores.
 
+semop		semop			ck_fun		imst@	S S
 semget		semget			ck_fun		imst@	S S S
 semctl		semctl			ck_fun		imst@	S S S S
-semop		semop			ck_fun		imst@	S S
 
 # Eval.
 
