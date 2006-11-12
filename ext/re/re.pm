@@ -1,6 +1,6 @@
 package re;
 
-our $VERSION = 0.06_02;
+our $VERSION = 0.06_03;
 
 =head1 NAME
 
@@ -297,7 +297,8 @@ sub bits {
     my $on = shift;
     my $bits = 0;
     unless (@_) {
-	return;
+	require Carp;
+	Carp::carp("Useless use of \"re\" pragma");
     }
     foreach my $idx (0..$#_){
         my $s=$_[$idx];
