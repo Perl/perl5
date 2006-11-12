@@ -2119,8 +2119,8 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
 		  && (mg = mg_find(reginfo->sv, PERL_MAGIC_regex_global)))) {
 		/* prepare for quick setting of pos */
 #ifdef PERL_OLD_COPY_ON_WRITE
-		if (SvIsCOW(sv))
-		    sv_force_normal_flags(sv, 0);
+		if (SvIsCOW(reginfo->sv))
+		    sv_force_normal_flags(reginfo->sv, 0);
 #endif
 		mg = sv_magicext(reginfo->sv, NULL, PERL_MAGIC_regex_global,
 				 &PL_vtbl_mglob, NULL, 0);
