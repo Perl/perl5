@@ -19,12 +19,19 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 354;
+use Test::More;
 use Safe;
 
 # Read the op names and descriptions directly from opcode.pl
 my @op;
-my @opname;
+my %code;
+
+while (<DATA>) {
+    chomp;
+    die "Can't match $_" unless /^([a-z_0-9]+)\t+(.*)/;
+    $code{$1} = $2;
+}
+
 open my $fh, '<', '../opcode.pl' or die "Can't open opcode.pl: $!";
 while (<$fh>) {
     last if /^__END__/;
@@ -33,10 +40,11 @@ while (<$fh>) {
     chomp;
     next if !$_ or /^#/;
     my ($op, $opname) = split /\t+/;
-    push @op, $op;
-    push @opname, $opname;
+    push @op, [$op, $opname, $code{$op}];
 }
 close $fh;
+
+plan(tests => scalar @op);
 
 sub testop {
     my ($op, $opname, $code) = @_;
@@ -48,369 +56,371 @@ sub testop {
     like($@, qr/'\Q$opname\E' trapped by operation mask/, $op);
 }
 
-my $i = 0;
-while (<DATA>) {
-    testop $op[$i], $opname[$i], $_;
-    ++$i;
+foreach (@op) {
+    if ($_->[2]) {
+	testop @$_;
+    } else {
+	local $TODO = "No test yet for $_->[1]";
+	fail();
+    }
 }
 
-# lists op examples, in the same order than opcode.pl
 # things that begin with SKIP are skipped, for various reasons (notably
 # optree modified by the optimizer -- Safe checks are done before the
 # optimizer modifies the optree)
 
 __DATA__
-SKIP # null
-SKIP # stub
-scalar $x # scalar
-print @x # pushmark
-wantarray # wantarray
-42 # const
-SKIP (set by optimizer) $x # gvsv
-SKIP *x # gv
-*x{SCALAR} # gelem
-SKIP my $x # padsv
-SKIP my @x # padav
-SKIP my %x # padhv
-SKIP (not implemented) # padany
-SKIP split /foo/ # pushre
-*x # rv2gv
-$x # rv2sv
-$#x # av2arylen
-f() # rv2cv
-sub { } # anoncode
-prototype 'foo' # prototype
-\($x,$y) # refgen
-SKIP \$x # srefgen
-ref # ref
-bless # bless
-qx/ls/ # backtick
-<*.c> # glob
-<FH> # readline
-SKIP (set by optimizer) $x .= <F> # rcatline
-SKIP (internal) # regcmaybe
-SKIP (internal) # regcreset
-SKIP (internal) # regcomp
-/foo/ # match
-qr/foo/ # qr
-s/foo/bar/ # subst
-SKIP (set by optimizer) # substcont
-y:z:t: # trans
-$x = $y # sassign
-@x = @y # aassign
-chop @foo # chop
-chop # schop
-chomp @foo # chomp
-chomp # schomp
-defined # defined
-undef # undef
-study # study
-pos # pos
-++$i # preinc
-SKIP (set by optimizer) # i_preinc
---$i # predec
-SKIP (set by optimizer) # i_predec
-$i++ # postinc
-SKIP (set by optimizer) # i_postinc
-$i-- # postdec
-SKIP (set by optimizer) # i_postdec
-$x ** $y # pow
-$x * $y # multiply
-SKIP (set by optimizer) # i_multiply
-$x / $y # divide
-SKIP (set by optimizer) # i_divide
-$x % $y # modulo
-SKIP (set by optimizer) # i_modulo
-$x x $y # repeat
-$x + $y # add
-SKIP (set by optimizer) # i_add
-$x - $y # subtract
-SKIP (set by optimizer) # i_subtract
-$x . $y # concat
-"$x" # stringify
-$x << 1 # left_shift
-$x >> 1 # right_shift
-$x < $y # lt
-SKIP (set by optimizer) # i_lt
-$x > $y # gt
-SKIP (set by optimizer) # i_gt
-$i <= $y # le
-SKIP (set by optimizer) # i_le
-$i >= $y # ge
-SKIP (set by optimizer) # i_ge
-$x == $y # eq
-SKIP (set by optimizer) # i_eq
-$x != $y # ne
-SKIP (set by optimizer) # i_ne
-$i <=> $y # ncmp
-SKIP (set by optimizer) # i_ncmp
-$x lt $y # slt
-$x gt $y # sgt
-$x le $y # sle
-$x ge $y # sge
-$x eq $y # seq
-$x ne $y # sne
-$x cmp $y # scmp
-$x & $y # bit_and
-$x ^ $y # bit_xor
-$x | $y # bit_or
--$x # negate
-SKIP (set by optimizer) # i_negate
-!$x # not
-~$x # complement
-atan2 1 # atan2
-sin 1 # sin
-cos 1 # cos
-rand # rand
-srand # srand
-exp 1 # exp
-log 1 # log
-sqrt 1 # sqrt
-int # int
-hex # hex
-oct # oct
-abs # abs
-length # length
-substr $x, 1 # substr
-vec # vec
-index # index
-rindex # rindex
-sprintf '%s', 'foo' # sprintf
-formline # formline
-ord # ord
-chr # chr
-crypt 'foo','bar' # crypt
-ucfirst # ucfirst
-lcfirst # lcfirst
-uc # uc
-lc # lc
-quotemeta # quotemeta
-@a # rv2av
-SKIP (set by optimizer) # aelemfast
-$a[1] # aelem
-@a[1,2] # aslice
-each %h # each
-values %h # values
-keys %h # keys
-delete $h{Key} # delete
-exists $h{Key} # exists
-%h # rv2hv
-$h{kEy} # helem
-@h{kEy} # hslice
-unpack # unpack
-pack # pack
-split /foo/ # split
-join $a, @b # join
-@x = (1,2) # list
-SKIP @x[1,2] # lslice
-[1,2] # anonlist
-{ a => 1 } # anonhash
-splice @x, 1, 2, 3 # splice
-push @x, $x # push
-pop @x # pop
-shift @x # shift
-unshift @x # unshift
-sort @x # sort
-reverse @x # reverse
-grep { $_ eq 'foo' } @x # grepstart
-SKIP grep { $_ eq 'foo' } @x # grepwhile
-map $_ + 1, @foo # mapstart
-SKIP (set by optimizer) # mapwhile
-SKIP # range
-1..2 # flip
-1..2 # flop
-$x && $y # and
-$x || $y # or
-$x xor $y # xor
-$x ? 1 : 0 # cond_expr
-$x &&= $y # andassign
-$x ||= $y # orassign
-Foo->$x() # method
-f() # entersub
-sub f{} f() # leavesub
-sub f:lvalue{return $x} f() # leavesublv
-caller # caller
-warn # warn
-die # die
-reset # reset
-SKIP # lineseq
-SKIP # nextstate
-SKIP (needs debugger) # dbstate
-while(0){} # unstack
-SKIP # enter
-SKIP # leave
-SKIP # scope
-SKIP # enteriter
-SKIP # iter
-SKIP # enterloop
-SKIP # leaveloop
-return # return
-last # last
-next # next
-redo THIS # redo
-dump # dump
-goto THERE # goto
-exit 0 # exit
-open FOO # open
-close FOO # close
-pipe FOO,BAR # pipe_op
-fileno FOO # fileno
-umask 0755, 'foo' # umask
-binmode FOO # binmode
-tie # tie
-untie # untie
-tied # tied
-dbmopen # dbmopen
-dbmclose # dbmclose
-SKIP (set by optimizer) # sselect
-select FOO # select
-getc FOO # getc
-read FOO # read
-write # enterwrite
-SKIP # leavewrite
-printf # prtf
-print # print
-sysopen # sysopen
-sysseek # sysseek
-sysread # sysread
-syswrite # syswrite
-send # send
-recv # recv
-eof FOO # eof
-tell # tell
-seek FH, $pos, $whence # seek
-truncate FOO, 42 # truncate
-fcntl # fcntl
-ioctl # ioctl
-flock FOO, 1 # flock
-socket # socket
-socketpair # sockpair
-bind # bind
-connect # connect
-listen # listen
-accept # accept
-shutdown # shutdown
-getsockopt # gsockopt
-setsockopt # ssockopt
-getsockname # getsockname
-getpeername # getpeername
-lstat FOO # lstat
-stat FOO # stat
--R # ftrread
--W # ftrwrite
--X # ftrexec
--r # fteread
--w # ftewrite
--x # fteexec
--e # ftis
-SKIP -O # fteowned
-SKIP -o # ftrowned
--z # ftzero
--s # ftsize
--M # ftmtime
--A # ftatime
--C # ftctime
--S # ftsock
--c # ftchr
--b # ftblk
--f # ftfile
--d # ftdir
--p # ftpipe
--l # ftlink
--u # ftsuid
--g # ftsgid
--k # ftsvtx
--t # fttty
--T # fttext
--B # ftbinary
-chdir '/' # chdir
-chown # chown
-chroot # chroot
-unlink 'foo' # unlink
-chmod 511, 'foo' # chmod
-utime # utime
-rename 'foo', 'bar' # rename
-link 'foo', 'bar' # link
-symlink 'foo', 'bar' # symlink
-readlink 'foo' # readlink
-mkdir 'foo' # mkdir
-rmdir 'foo' # rmdir
-opendir DIR # open_dir
-readdir DIR # readdir
-telldir DIR # telldir
-seekdir DIR, $pos # seekdir
-rewinddir DIR # rewinddir
-closedir DIR # closedir
-fork # fork
-wait # wait
-waitpid # waitpid
-system # system
-exec # exec
-kill # kill
-getppid # getppid
-getpgrp # getpgrp
-setpgrp # setpgrp
-getpriority # getpriority
-setpriority # setpriority
-time # time
-times # tms
-localtime # localtime
-gmtime # gmtime
-alarm # alarm
-sleep 1 # sleep
-shmget # shmget
-shmctl # shmctl
-shmread # shmread
-shmwrite # shmwrite
-msgget # msgget
-msgctl # msgctl
-msgsnd # msgsnd
-msgrcv # msgrcv
-semget # semget
-semctl # semctl
-semop # semop
-use strict # require
-do 'file' # dofile
-eval "1+1" # entereval
-eval "1+1" # leaveeval
-SKIP eval { 1+1 } # entertry
-SKIP eval { 1+1 } # leavetry
-gethostbyname 'foo' # ghbyname
-gethostbyaddr 'foo' # ghbyaddr
-gethostent # ghostent
-getnetbyname 'foo' # gnbyname
-getnetbyaddr 'foo' # gnbyaddr
-getnetent # gnetent
-getprotobyname 'foo' # gpbyname
-getprotobynumber 42 # gpbynumber
-getprotoent # gprotoent
-getservbyname 'name', 'proto' # gsbyname
-getservbyport 'a', 'b' # gsbyport
-getservent # gservent
-sethostent # shostent
-setnetent # snetent
-setprotoent # sprotoent
-setservent # sservent
-endhostent # ehostent
-endnetent # enetent
-endprotoent # eprotoent
-endservent # eservent
-getpwnam # gpwnam
-getpwuid # gpwuid
-getpwent # gpwent
-setpwent # spwent
-endpwent # epwent
-getgrnam # ggrnam
-getgrgid # ggrgid
-getgrent # ggrent
-setgrent # sgrent
-endgrent # egrent
-getlogin # getlogin
-syscall # syscall
-SKIP # lock
-SKIP # threadsv
-SKIP # setstate
-$x->y() # method_named
-$x // $y # dor
-$x //= $y # dorassign
-SKIP (no way) # custom
+null		SKIP
+stub		SKIP
+scalar		scalar $x
+pushmark	print @x
+wantarray	wantarray
+const		42
+gvsv		SKIP (set by optimizer) $x
+gv		SKIP *x
+gelem		*x{SCALAR}
+padsv		SKIP my $x
+padav		SKIP my @x
+padhv		SKIP my %x
+padany		SKIP (not implemented)
+pushre		SKIP split /foo/
+rv2gv		*x
+rv2sv		$x
+av2arylen	$#x
+rv2cv		f()
+anoncode	sub { }
+prototype	prototype 'foo'
+refgen		\($x,$y)
+srefgen		SKIP \$x
+ref		ref
+bless		bless
+backtick	qx/ls/
+glob		<*.c>
+readline	<FH>
+rcatline	SKIP (set by optimizer) $x .= <F>
+regcmaybe	SKIP (internal)
+regcreset	SKIP (internal)
+regcomp		SKIP (internal)
+match		/foo/
+qr		qr/foo/
+subst		s/foo/bar/
+substcont	SKIP (set by optimizer)
+trans		y:z:t:
+sassign		$x = $y
+aassign		@x = @y
+chop		chop @foo
+schop		chop
+chomp		chomp @foo
+schomp		chomp
+defined		defined
+undef		undef
+study		study
+pos		pos
+preinc		++$i
+i_preinc	SKIP (set by optimizer)
+predec		--$i
+i_predec	SKIP (set by optimizer)
+postinc		$i++
+i_postinc	SKIP (set by optimizer)
+postdec		$i--
+i_postdec	SKIP (set by optimizer)
+pow		$x ** $y
+multiply	$x * $y
+i_multiply	SKIP (set by optimizer)
+divide		$x / $y
+i_divide	SKIP (set by optimizer)
+modulo		$x % $y
+i_modulo	SKIP (set by optimizer)
+repeat		$x x $y
+add		$x + $y
+i_add		SKIP (set by optimizer)
+subtract	$x - $y
+i_subtract	SKIP (set by optimizer)
+concat		$x . $y
+stringify	"$x"
+left_shift	$x << 1
+right_shift	$x >> 1
+lt		$x < $y
+i_lt		SKIP (set by optimizer)
+gt		$x > $y
+i_gt		SKIP (set by optimizer)
+le		$i <= $y
+i_le		SKIP (set by optimizer)
+ge		$i >= $y
+i_ge		SKIP (set by optimizer)
+eq		$x == $y
+i_eq		SKIP (set by optimizer)
+ne		$x != $y
+i_ne		SKIP (set by optimizer)
+ncmp		$i <=> $y
+i_ncmp		SKIP (set by optimizer)
+slt		$x lt $y
+sgt		$x gt $y
+sle		$x le $y
+sge		$x ge $y
+seq		$x eq $y
+sne		$x ne $y
+scmp		$x cmp $y
+bit_and		$x & $y
+bit_xor		$x ^ $y
+bit_or		$x | $y
+negate		-$x
+i_negate	SKIP (set by optimizer)
+not		!$x
+complement	~$x
+atan2		atan2 1
+sin		sin 1
+cos		cos 1
+rand		rand
+srand		srand
+exp		exp 1
+log		log 1
+sqrt		sqrt 1
+int		int
+hex		hex
+oct		oct
+abs		abs
+length		length
+substr		substr $x, 1
+vec		vec
+index		index
+rindex		rindex
+sprintf		sprintf '%s', 'foo'
+formline	formline
+ord		ord
+chr		chr
+crypt		crypt 'foo','bar'
+ucfirst		ucfirst
+lcfirst		lcfirst
+uc		uc
+lc		lc
+quotemeta	quotemeta
+rv2av		@a
+aelemfast	SKIP (set by optimizer)
+aelem		$a[1]
+aslice		@a[1,2]
+each		each %h
+values		values %h
+keys		keys %h
+delete		delete $h{Key}
+exists		exists $h{Key}
+rv2hv		%h
+helem		$h{kEy}
+hslice		@h{kEy}
+unpack		unpack
+pack		pack
+split		split /foo/
+join		join $a, @b
+list		@x = (1,2)
+lslice		SKIP @x[1,2]
+anonlist	[1,2]
+anonhash	{ a => 1 }
+splice		splice @x, 1, 2, 3
+push		push @x, $x
+pop		pop @x
+shift		shift @x
+unshift		unshift @x
+sort		sort @x
+reverse		reverse @x
+grepstart	grep { $_ eq 'foo' } @x
+grepwhile	SKIP grep { $_ eq 'foo' } @x
+mapstart	map $_ + 1, @foo
+mapwhile	SKIP (set by optimizer)
+range		SKIP
+flip		1..2
+flop		1..2
+and		$x && $y
+or		$x || $y
+xor		$x xor $y
+cond_expr	$x ? 1 : 0
+andassign	$x &&= $y
+orassign	$x ||= $y
+method		Foo->$x()
+entersub	f()
+leavesub	sub f{} f()
+leavesublv	sub f:lvalue{return $x} f()
+caller		caller
+warn		warn
+die		die
+reset		reset
+lineseq		SKIP
+nextstate	SKIP
+dbstate		SKIP (needs debugger)
+unstack		while(0){}
+enter		SKIP
+leave		SKIP
+scope		SKIP
+enteriter	SKIP
+iter		SKIP
+enterloop	SKIP
+leaveloop	SKIP
+return		return
+last		last
+next		next
+redo		redo THIS
+dump		dump
+goto		goto THERE
+exit		exit 0
+open		open FOO
+close		close FOO
+pipe_op		pipe FOO,BAR
+fileno		fileno FOO
+umask		umask 0755, 'foo'
+binmode		binmode FOO
+tie		tie
+untie		untie
+tied		tied
+dbmopen		dbmopen
+dbmclose	dbmclose
+sselect		SKIP (set by optimizer)
+select		select FOO
+getc		getc FOO
+read		read FOO
+enterwrite	write
+leavewrite	SKIP
+prtf		printf
+print		print
+sysopen		sysopen
+sysseek		sysseek
+sysread		sysread
+syswrite	syswrite
+send		send
+recv		recv
+eof		eof FOO
+tell		tell
+seek		seek FH, $pos, $whence
+truncate	truncate FOO, 42
+fcntl		fcntl
+ioctl		ioctl
+flock		flock FOO, 1
+socket		socket
+sockpair	socketpair
+bind		bind
+connect		connect
+listen		listen
+accept		accept
+shutdown	shutdown
+gsockopt	getsockopt
+ssockopt	setsockopt
+getsockname	getsockname
+getpeername	getpeername
+lstat		lstat FOO
+stat		stat FOO
+ftrread		-R
+ftrwrite	-W
+ftrexec		-X
+fteread		-r
+ftewrite	-w
+fteexec		-x
+ftis		-e
+fteowned	SKIP -O
+ftrowned	SKIP -o
+ftzero		-z
+ftsize		-s
+ftmtime		-M
+ftatime		-A
+ftctime		-C
+ftsock		-S
+ftchr		-c
+ftblk		-b
+ftfile		-f
+ftdir		-d
+ftpipe		-p
+ftlink		-l
+ftsuid		-u
+ftsgid		-g
+ftsvtx		-k
+fttty		-t
+fttext		-T
+ftbinary	-B
+chdir		chdir '/'
+chown		chown
+chroot		chroot
+unlink		unlink 'foo'
+chmod		chmod 511, 'foo'
+utime		utime
+rename		rename 'foo', 'bar'
+link		link 'foo', 'bar'
+symlink		symlink 'foo', 'bar'
+readlink	readlink 'foo'
+mkdir		mkdir 'foo'
+rmdir		rmdir 'foo'
+open_dir	opendir DIR
+readdir		readdir DIR
+telldir		telldir DIR
+seekdir		seekdir DIR, $pos
+rewinddir	rewinddir DIR
+closedir	closedir DIR
+fork		fork
+wait		wait
+waitpid		waitpid
+system		system
+exec		exec
+kill		kill
+getppid		getppid
+getpgrp		getpgrp
+setpgrp		setpgrp
+getpriority	getpriority
+setpriority	setpriority
+time		time
+tms		times
+localtime	localtime
+gmtime		gmtime
+alarm		alarm
+sleep		sleep 1
+shmget		shmget
+shmctl		shmctl
+shmread		shmread
+shmwrite	shmwrite
+msgget		msgget
+msgctl		msgctl
+msgsnd		msgsnd
+msgrcv		msgrcv
+semget		semget
+semctl		semctl
+semop		semop
+require		use strict
+dofile		do 'file'
+entereval	eval "1+1"
+leaveeval	eval "1+1"
+entertry	SKIP eval { 1+1 }
+leavetry	SKIP eval { 1+1 }
+ghbyname	gethostbyname 'foo'
+ghbyaddr	gethostbyaddr 'foo'
+ghostent	gethostent
+gnbyname	getnetbyname 'foo'
+gnbyaddr	getnetbyaddr 'foo'
+gnetent		getnetent
+gpbyname	getprotobyname 'foo'
+gpbynumber	getprotobynumber 42
+gprotoent	getprotoent
+gsbyname	getservbyname 'name', 'proto'
+gsbyport	getservbyport 'a', 'b'
+gservent	getservent
+shostent	sethostent
+snetent		setnetent
+sprotoent	setprotoent
+sservent	setservent
+ehostent	endhostent
+enetent		endnetent
+eprotoent	endprotoent
+eservent	endservent
+gpwnam		getpwnam
+gpwuid		getpwuid
+gpwent		getpwent
+spwent		setpwent
+epwent		endpwent
+ggrnam		getgrnam
+ggrgid		getgrgid
+ggrent		getgrent
+sgrent		setgrent
+egrent		endgrent
+getlogin	getlogin
+syscall		syscall
+lock		SKIP
+threadsv	SKIP
+setstate	SKIP
+method_named	$x->y()
+dor		$x // $y
+dorassign	$x //= $y
+custom		SKIP (no way)
