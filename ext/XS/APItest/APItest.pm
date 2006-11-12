@@ -21,6 +21,7 @@ our @EXPORT = qw( print_double print_int print_long
 		  G_KEEPERR G_NODEBUG G_METHOD
 		  exception mycroak strtab
 		  my_cxt_getint my_cxt_getsv my_cxt_setint my_cxt_setsv
+		  sv_setsv_cow_hashkey_core sv_setsv_cow_hashkey_notcore
 );
 
 # from cop.h 
@@ -34,7 +35,7 @@ sub G_KEEPERR()	{  16 }
 sub G_NODEBUG()	{  32 }
 sub G_METHOD()	{  64 }
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 bootstrap XS::APItest $VERSION;
 

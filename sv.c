@@ -3610,6 +3610,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	 * possible small lose on short strings, but a big win on long ones.
 	 * It might even be a win on short strings if SvPVX_const(dstr)
 	 * has to be allocated and SvPVX_const(sstr) has to be freed.
+	 * Likewise if we can set up COW rather than doing an actual copy, we
+	 * drop to the else clause, as the swipe code and the COW setup code
+	 * have much in common.
 	 */
 
 	/* Whichever path we take through the next code, we want this true,
@@ -3617,10 +3620,28 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	(void)SvPOK_only(dstr);
 
 	if (
-	    /* We're not already COW  */
-            ((sflags & (SVf_FAKE | SVf_READONLY)) != (SVf_FAKE | SVf_READONLY)
+	    /* If we're already COW then this clause is not true, and if COW
+	       is allowed then we drop down to the else and make dest COW 
+	       with us.  If caller hasn't said that we're allowed to COW
+	       shared hash keys then we don't do the COW setup, even if the
+	       source scalar is a shared hash key scalar.  */
+            (((flags & SV_COW_SHARED_HASH_KEYS)
+	       ? (sflags & (SVf_FAKE|SVf_READONLY)) != (SVf_FAKE|SVf_READONLY)
+	       : 1 /* If making a COW copy is forbidden then the behaviour we
+		       desire is as if the source SV isn't actually already
+		       COW, even if it is.  So we act as if the source flags
+		       are not COW, rather than actually testing them.  */
+	      )
 #ifndef PERL_OLD_COPY_ON_WRITE
-	     /* or we are, but dstr isn't a suitable target.  */
+	     /* The change that added SV_COW_SHARED_HASH_KEYS makes the logic
+		when PERL_OLD_COPY_ON_WRITE is defined a little wrong.
+		Conceptually PERL_OLD_COPY_ON_WRITE being defined should
+		override SV_COW_SHARED_HASH_KEYS, because it means "always COW"
+		but in turn, it's somewhat dead code, never expected to go
+		live, but more kept as a placeholder on how to do it better
+		in a newer implementation.  */
+	     /* If we are COW and dstr is a suitable target then we drop down
+		into the else and make dest a COW of us.  */
 	     || (SvFLAGS(dstr) & CAN_COW_MASK) != CAN_COW_FLAGS
 #endif
 	     )

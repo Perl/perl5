@@ -9,7 +9,7 @@ WriteMakefile(
     ($] >= 5.005 ?    ## Add these new keywords supported since 5.005
       (ABSTRACT_FROM => 'APItest.pm', # retrieve abstract from module
        AUTHOR     => 'Tim Jenness <t.jenness@jach.hawaii.edu>, Christian Soeller <csoelle@mph.auckland.ac.nz>, Hugo van der Sanden <hv@crypt.compulink.co.uk>') : ()),
-    'C'                 => ['exception.c'],
+    'C'                 => ['exception.c', 'core.c', 'notcore.c'],
     'OBJECT'            => '$(BASEEXT)$(OBJ_EXT) $(O_FILES)',
     'LIBS'		=> [''], # e.g., '-lm'
     'DEFINE'		=> '', # e.g., '-DHAVE_SOMETHING'

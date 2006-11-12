@@ -556,3 +556,9 @@ my_cxt_setsv(sv)
 	SvREFCNT_dec(MY_CXT.sv);
 	my_cxt_setsv_p(sv _aMY_CXT);
 	SvREFCNT_inc(sv);
+
+bool
+sv_setsv_cow_hashkey_core()
+
+bool
+sv_setsv_cow_hashkey_notcore()

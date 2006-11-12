@@ -1199,9 +1199,12 @@ ext/Unicode/Normalize/t/tie.t	Unicode::Normalize
 ext/util/make_ext		Used by Makefile to execute extension Makefiles
 ext/XS/APItest/APItest.pm	XS::APItest extension
 ext/XS/APItest/APItest.xs	XS::APItest extension
+ext/XS/APItest/core.c		Test API functions when PERL_CORE is defined
+ext/XS/APItest/core_or_not.inc	Code common to core.c and notcore.c
 ext/XS/APItest/exception.c	XS::APItest extension
 ext/XS/APItest/Makefile.PL	XS::APItest extension
 ext/XS/APItest/MANIFEST		XS::APItest extension
+ext/XS/APItest/notcore.c	Test API functions when PERL_CORE is not defined
 ext/XS/APItest/README		XS::APItest extension
 ext/XS/APItest/t/call.t		XS::APItest extension
 ext/XS/APItest/t/exception.t	XS::APItest extension
@@ -1210,6 +1213,7 @@ ext/XS/APItest/t/my_cxt.t	XS::APItest: test MY_CXT interface
 ext/XS/APItest/t/op.t		XS::APItest: tests for OP related APIs
 ext/XS/APItest/t/printf.t	XS::APItest extension
 ext/XS/APItest/t/push.t		XS::APItest extension
+ext/XS/APItest/t/svsetsv.t	Test behaviour of sv_setsv with/without PERL_CORE
 ext/XS/Typemap/Makefile.PL	XS::Typemap extension
 ext/XS/Typemap/README		XS::Typemap extension
 ext/XS/Typemap/stdio.c		XS::Typemap extension

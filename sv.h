@@ -1679,6 +1679,21 @@ Like C<sv_catsv> but doesn't process magic.
 #define SV_MUTABLE_RETURN	64
 #define SV_SMAGIC		128
 #define SV_HAS_TRAILING_NUL	256
+#define SV_COW_SHARED_HASH_KEYS	512
+
+/* The core is safe for this COW optimisation. XS code on CPAN may not be.
+   So only default to doing the COW setup if we're in the core.
+ */
+#ifdef PERL_CORE
+#  ifndef SV_DO_COW_SVSETSV
+#    define SV_DO_COW_SVSETSV	SV_COW_SHARED_HASH_KEYS
+#  endif
+#endif
+
+#ifndef SV_DO_COW_SVSETSV
+#  define SV_DO_COW_SVSETSV	0
+#endif
+
 
 #define sv_unref(sv)    	sv_unref_flags(sv, 0)
 #define sv_force_normal(sv)	sv_force_normal_flags(sv, 0)
@@ -1720,8 +1735,9 @@ Like C<sv_catsv> but doesn't process magic.
 #define sv_pvn_force_nomg(sv, lp) sv_pvn_force_flags(sv, lp, 0)
 #define sv_utf8_upgrade_nomg(sv) sv_utf8_upgrade_flags(sv, 0)
 #define sv_catpvn_nomg(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, 0)
-#define sv_setsv(dsv, ssv) sv_setsv_flags(dsv, ssv, SV_GMAGIC)
-#define sv_setsv_nomg(dsv, ssv) sv_setsv_flags(dsv, ssv, 0)
+#define sv_setsv(dsv, ssv) \
+	sv_setsv_flags(dsv, ssv, SV_GMAGIC|SV_DO_COW_SVSETSV)
+#define sv_setsv_nomg(dsv, ssv) sv_setsv_flags(dsv, ssv, SV_DO_COW_SVSETSV)
 #define sv_catsv(dsv, ssv) sv_catsv_flags(dsv, ssv, SV_GMAGIC)
 #define sv_catsv_nomg(dsv, ssv) sv_catsv_flags(dsv, ssv, 0)
 #define sv_catsv_mg(dsv, ssv) sv_catsv_flags(dsv, ssv, SV_GMAGIC|SV_SMAGIC)
@@ -1828,7 +1844,7 @@ Returns a pointer to the character buffer.
 #define SvSetSV_nosteal_and(dst,src,finally) \
 	STMT_START {					\
 	    if ((dst) != (src)) {			\
-		sv_setsv_flags(dst, src, SV_GMAGIC | SV_NOSTEAL);	\
+		sv_setsv_flags(dst, src, SV_GMAGIC | SV_NOSTEAL | SV_DO_COW_SVSETSV);	\
 		finally;				\
 	    }						\
 	} STMT_END
