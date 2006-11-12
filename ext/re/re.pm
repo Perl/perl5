@@ -1,6 +1,170 @@
 package re;
 
-our $VERSION = 0.06_03;
+# pragma for controlling the regex engine
+use strict;
+use warnings;
+
+our $VERSION     = "0.06_03";
+our @ISA         = qw(Exporter);
+our @EXPORT_OK   = qw(is_regexp regexp_pattern);
+our %EXPORT_OK = map { $_ => 1 } @EXPORT_OK;
+
+# *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***
+#
+# If you modify these values see comment below!
+
+my %bitmask = (
+    taint   => 0x00100000, # HINT_RE_TAINT
+    eval    => 0x00200000, # HINT_RE_EVAL
+);
+
+# - File::Basename contains a literal for 'taint' as a fallback.  If
+# taint is changed here, File::Basename must be updated as well.
+#
+# - ExtUtils::ParseXS uses a hardcoded 
+# BEGIN { $^H |= 0x00200000 } 
+# in it to allow re.xs to be built. So if 'eval' is changed here then
+# ExtUtils::ParseXS must be changed as well.
+#
+# *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***
+
+sub setcolor {
+ eval {				# Ignore errors
+  require Term::Cap;
+
+  my $terminal = Tgetent Term::Cap ({OSPEED => 9600}); # Avoid warning.
+  my $props = $ENV{PERL_RE_TC} || 'md,me,so,se,us,ue';
+  my @props = split /,/, $props;
+  my $colors = join "\t", map {$terminal->Tputs($_,1)} @props;
+
+  $colors =~ s/\0//g;
+  $ENV{PERL_RE_COLORS} = $colors;
+ };
+ if ($@) {
+    $ENV{PERL_RE_COLORS} ||= qq'\t\t> <\t> <\t\t';
+ }
+
+}
+
+my %flags = (
+    COMPILE         => 0x0000FF,
+    PARSE           => 0x000001,
+    OPTIMISE        => 0x000002,
+    TRIEC           => 0x000004,
+    DUMP            => 0x000008,
+
+    EXECUTE         => 0x00FF00,
+    INTUIT          => 0x000100,
+    MATCH           => 0x000200,
+    TRIEE           => 0x000400,
+
+    EXTRA           => 0xFF0000,
+    TRIEM           => 0x010000,
+    OFFSETS         => 0x020000,
+    OFFSETSDBG      => 0x040000,
+    STATE           => 0x080000,
+    OPTIMISEM       => 0x100000,
+    STACK           => 0x280000,
+);
+$flags{ALL} = -1;
+$flags{All} = $flags{all} = $flags{DUMP} | $flags{EXECUTE};
+$flags{Extra} = $flags{EXECUTE} | $flags{COMPILE};
+$flags{More} = $flags{MORE} = $flags{All} | $flags{TRIEC} | $flags{TRIEM} | $flags{STATE};
+$flags{State} = $flags{DUMP} | $flags{EXECUTE} | $flags{STATE};
+$flags{TRIE} = $flags{DUMP} | $flags{EXECUTE} | $flags{TRIEC};
+
+my $installed;
+my $installed_error;
+
+sub _do_install {
+    if ( ! defined($installed) ) {
+        require XSLoader;
+        $installed = eval { XSLoader::load('re', $VERSION) } || 0;
+        $installed_error = $@;
+    }
+}
+
+sub _load_unload {
+    my ($on)= @_;
+    if ($on) {
+        _do_install();        
+        if ( ! $installed ) {
+            die "'re' not installed!? ($installed_error)";
+	} else {
+	    # We call install() every time, as if we didn't, we wouldn't
+	    # "see" any changes to the color environment var since
+	    # the last time it was called.
+
+	    # install() returns an integer, which if casted properly
+	    # in C resolves to a structure containing the regex
+	    # hooks. Setting it to a random integer will guarantee
+	    # segfaults.
+	    $^H{regcomp} = install();
+        }
+    } else {
+        delete $^H{regcomp};
+    }
+}
+
+sub bits {
+    my $on = shift;
+    my $bits = 0;
+    unless (@_) {
+	require Carp;
+	Carp::carp("Useless use of \"re\" pragma"); 
+    }
+    foreach my $idx (0..$#_){
+        my $s=$_[$idx];
+        if ($s eq 'Debug' or $s eq 'Debugcolor') {
+            setcolor() if $s =~/color/i;
+            ${^RE_DEBUG_FLAGS} = 0 unless defined ${^RE_DEBUG_FLAGS};
+            for my $idx ($idx+1..$#_) {
+                if ($flags{$_[$idx]}) {
+                    if ($on) {
+                        ${^RE_DEBUG_FLAGS} |= $flags{$_[$idx]};
+                    } else {
+                        ${^RE_DEBUG_FLAGS} &= ~ $flags{$_[$idx]};
+                    }
+                } else {
+                    require Carp;
+                    Carp::carp("Unknown \"re\" Debug flag '$_[$idx]', possible flags: ",
+                               join(", ",sort keys %flags ) );
+                }
+            }
+            _load_unload($on ? 1 : ${^RE_DEBUG_FLAGS});
+            last;
+        } elsif ($s eq 'debug' or $s eq 'debugcolor') {
+	    setcolor() if $s =~/color/i;
+	    _load_unload($on);
+        } elsif (exists $bitmask{$s}) {
+	    $bits |= $bitmask{$s};
+	} elsif ($EXPORT_OK{$s}) {
+	    _do_install();
+	    require Exporter;
+	    re->export_to_level(2, 're', $s);
+	} else {
+	    require Carp;
+	    Carp::carp("Unknown \"re\" subpragma '$s' (known ones are: ",
+                       join(', ', map {qq('$_')} 'debug', 'debugcolor', sort keys %bitmask),
+                       ")");
+	}
+    }
+    $bits;
+}
+
+sub import {
+    shift;
+    $^H |= bits(1, @_);
+}
+
+sub unimport {
+    shift;
+    $^H &= ~ bits(0, @_);
+}
+
+1;
+
+__END__
 
 =head1 NAME
 
@@ -33,16 +197,28 @@ re - Perl pragma to alter regular expression behaviour
     use re qw(Debug All);          # Finer tuned debugging options.
     use re qw(Debug More);         
     no re qw(Debug ALL);           # Turn of all re debugging in this scope
+    
+    use re qw(is_regexp regexp_pattern); # import utility functions
+    my ($pat,$mods)=regexp_pattern(qr/foo/i);
+    if (is_regexp($obj)) { 
+        print "Got regexp: ",
+            scalar regexp_pattern($obj); # just as perl would stringify it
+    }                                    # but no hassle with blessed re's.
+        
 
 (We use $^X in these examples because it's tainted by default.)
 
 =head1 DESCRIPTION
+
+=head2 'taint' mode
 
 When C<use re 'taint'> is in effect, and a tainted string is the target
 of a regex, the regex memories (or values returned by the m// operator
 in list context) are tainted.  This feature is useful when regex operations
 on tainted data aren't meant to extract safe substrings, but to perform
 other transformations.
+
+=head2 'eval' mode
 
 When C<use re 'eval'> is in effect, a regex is allowed to contain
 C<(?{ ... })> zero-width assertions even if regular expression contains
@@ -60,6 +236,8 @@ interpolation.  Thus:
 I<is> allowed if $pat is a precompiled regular expression, even
 if $pat contains C<(?{ ... })> assertions.
 
+=head2 'debug' mode
+
 When C<use re 'debug'> is in effect, perl emits debugging messages when
 compiling and using regular expressions.  The output is the same as that
 obtained by running a C<-DDEBUGGING>-enabled perl interpreter with the
@@ -70,6 +248,14 @@ that understand termcap color sequences.  Set C<$ENV{PERL_RE_TC}> to a
 comma-separated list of C<termcap> properties to use for highlighting
 strings on/off, pre-point part on/off.
 See L<perldebug/"Debugging regular expressions"> for additional info.
+
+As of 5.9.5 the directive C<use re 'debug'> and its equivalents are
+lexically scoped, as the other directives are.  However they have both 
+compile-time and run-time effects.
+
+See L<perlmodlib/Pragmatic Modules>.
+
+=head2 'Debug' mode
 
 Similarly C<use re 'Debug'> produces debugging output, the difference
 being that it allows the fine tuning of what debugging output will be
@@ -208,141 +394,50 @@ As of 5.9.5 the directive C<use re 'debug'> and its equivalents are
 lexically scoped, as the other directives are.  However they have both 
 compile-time and run-time effects.
 
-See L<perlmodlib/Pragmatic Modules>.
+=head2 Exportable Functions
+
+As of perl 5.9.5 're' debug contains a number of utility functions that
+may be optionally exported into the callers namespace. They are listed
+below.
+
+=over 4
+
+=item is_regexp($ref)
+
+Returns true if the argument is a compiled regular expression as returned
+by C<qr//>, false if it is not. 
+
+This function will not be confused by overloading or blessing. In 
+internals terms this extracts the regexp pointer out of the 
+PERL_MAGIC_qr structure so it it cannot be fooled.
+
+=item regexp_pattern($ref)
+
+If the argument is a compiled regular expression as returned by C<qr//>
+then this function returns the pattern. 
+
+In list context it returns a two element list, the first element 
+containing the pattern and the second containing the modifiers used when 
+the pattern was compiled. 
+
+  my ($pat,$mods)=regexp_pattern($ref);
+
+In scalar context it returns the same as perl would when strigifying a 
+raw qr// with the same pattern inside.  If the argument is not a 
+compiled reference then this routine returns false but defined in scalar 
+context, and the empty list in list context. Thus the following 
+
+    if (regexp_pattern($ref) eq '(?i-xsm:foo)')
+
+will be warning free regardless of what $ref actually is.
+
+Like c<is_regexp> this function will not be confused by overloading 
+or blessing of the object.  
+
+=back
+
+=head1 SEE ALSO
+
+L<perlmodlib/Pragmatic Modules>.
 
 =cut
-
-# N.B. File::Basename contains a literal for 'taint' as a fallback.  If
-# taint is changed here, File::Basename must be updated as well.
-my %bitmask = (
-taint		=> 0x00100000, # HINT_RE_TAINT
-eval		=> 0x00200000, # HINT_RE_EVAL
-);
-
-sub setcolor {
- eval {				# Ignore errors
-  require Term::Cap;
-
-  my $terminal = Tgetent Term::Cap ({OSPEED => 9600}); # Avoid warning.
-  my $props = $ENV{PERL_RE_TC} || 'md,me,so,se,us,ue';
-  my @props = split /,/, $props;
-  my $colors = join "\t", map {$terminal->Tputs($_,1)} @props;
-
-  $colors =~ s/\0//g;
-  $ENV{PERL_RE_COLORS} = $colors;
- };
- if ($@) {
-    $ENV{PERL_RE_COLORS}||=qq'\t\t> <\t> <\t\t'
- }
-
-}
-
-my %flags = (
-    COMPILE         => 0x0000FF,
-    PARSE           => 0x000001,
-    OPTIMISE        => 0x000002,
-    TRIEC           => 0x000004,
-    DUMP            => 0x000008,
-
-    EXECUTE         => 0x00FF00,
-    INTUIT          => 0x000100,
-    MATCH           => 0x000200,
-    TRIEE           => 0x000400,
-
-    EXTRA           => 0xFF0000,
-    TRIEM           => 0x010000,
-    OFFSETS         => 0x020000,
-    OFFSETSDBG      => 0x040000,
-    STATE           => 0x080000,
-    OPTIMISEM       => 0x100000,
-    STACK           => 0x280000,
-);
-$flags{ALL} = -1;
-$flags{All} = $flags{all} = $flags{DUMP} | $flags{EXECUTE};
-$flags{Extra} = $flags{EXECUTE} | $flags{COMPILE};
-$flags{More} = $flags{MORE} = $flags{All} | $flags{TRIEC} | $flags{TRIEM} | $flags{STATE};
-$flags{State} = $flags{DUMP} | $flags{EXECUTE} | $flags{STATE};
-$flags{TRIE} = $flags{DUMP} | $flags{EXECUTE} | $flags{TRIEC};
-
-my $installed;
-my $installed_error;
-
-sub _load_unload {
-    my ($on)= @_;
-    if ($on) {
-        if ( ! defined($installed) ) {
-            require XSLoader;
-            $installed = eval { XSLoader::load('re') } || 0;
-            $installed_error = $@;
-        }
-        if ( ! $installed ) {
-            die "'re' not installed!? ($installed_error)";
-	} else {
-	    # We call install() every time, as if we didn't, we wouldn't
-	    # "see" any changes to the color environment var since
-	    # the last time it was called.
-
-	    # install() returns an integer, which if casted properly
-	    # in C resolves to a structure containing the regex
-	    # hooks. Setting it to a random integer will guarantee
-	    # segfaults.
-	    $^H{regcomp} = install();
-        }
-    } else {
-        delete $^H{regcomp};
-    }
-}
-
-sub bits {
-    my $on = shift;
-    my $bits = 0;
-    unless (@_) {
-	require Carp;
-	Carp::carp("Useless use of \"re\" pragma");
-    }
-    foreach my $idx (0..$#_){
-        my $s=$_[$idx];
-        if ($s eq 'Debug' or $s eq 'Debugcolor') {
-            setcolor() if $s =~/color/i;
-            ${^RE_DEBUG_FLAGS} = 0 unless defined ${^RE_DEBUG_FLAGS};
-            for my $idx ($idx+1..$#_) {
-                if ($flags{$_[$idx]}) {
-                    if ($on) {
-                        ${^RE_DEBUG_FLAGS} |= $flags{$_[$idx]};
-                    } else {
-                        ${^RE_DEBUG_FLAGS} &= ~ $flags{$_[$idx]};
-                    }
-                } else {
-                    require Carp;
-                    Carp::carp("Unknown \"re\" Debug flag '$_[$idx]', possible flags: ",
-                               join(", ",sort keys %flags ) );
-                }
-            }
-            _load_unload($on ? 1 : ${^RE_DEBUG_FLAGS});
-            last;
-        } elsif ($s eq 'debug' or $s eq 'debugcolor') {
-	    setcolor() if $s =~/color/i;
-	    _load_unload($on);
-        } elsif (exists $bitmask{$s}) {
-	    $bits |= $bitmask{$s};
-	} else {
-	    require Carp;
-	    Carp::carp("Unknown \"re\" subpragma '$s' (known ones are: ",
-                       join(', ', map {qq('$_')} 'debug', 'debugcolor', sort keys %bitmask),
-                       ")");
-	}
-    }
-    $bits;
-}
-
-sub import {
-    shift;
-    $^H |= bits(1, @_);
-}
-
-sub unimport {
-    shift;
-    $^H &= ~ bits(0, @_);
-}
-
-1;

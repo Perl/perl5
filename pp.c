@@ -4652,7 +4652,7 @@ PP(pp_split)
 	const int tail = (rx->reganch & RE_INTUIT_TAIL);
 	SV * const csv = CALLREG_INTUIT_STRING(rx);
 
-	len = rx->minlen;
+	len = rx->minlenret;
 	if (len == 1 && !(rx->reganch & ROPT_UTF8) && !tail) {
 	    const char c = *SvPV_nolen_const(csv);
 	    while (--limit) {

@@ -4216,8 +4216,7 @@ reStudy:
 	* it happens that c_offset_min has been invalidated, since the
 	* earlier string may buy us something the later one won't.]
 	*/
-	minlen = 0;
-
+	
 	data.longest_fixed = newSVpvs("");
 	data.longest_float = newSVpvs("");
 	data.last_found = newSVpvs("");
@@ -4230,7 +4229,7 @@ reStudy:
 	} else				/* XXXX Check for BOUND? */
 	    stclass_flag = 0;
 	data.last_closep = &last_close;
-
+        
 	minlen = study_chunk(pRExC_state, &first, &minlen, &fake, scan + RExC_size, /* Up to end */
             &data, -1, NULL, NULL,
             SCF_DO_SUBSTR | SCF_WHILEM_VISITED_POS | stclass_flag,0);
@@ -4408,9 +4407,10 @@ reStudy:
 	data.start_class = &ch_class;
 	data.last_closep = &last_close;
 
+        
 	minlen = study_chunk(pRExC_state, &scan, &minlen, &fake, scan + RExC_size,
 	    &data, -1, NULL, NULL, SCF_DO_STCLASS_AND|SCF_WHILEM_VISITED_POS,0);
-
+        
         CHECK_RESTUDY_GOTO;
 
 	r->check_substr = r->check_utf8 = r->anchored_substr = r->anchored_utf8
@@ -4437,6 +4437,11 @@ reStudy:
 
     /* Guard against an embedded (?=) or (?<=) with a longer minlen than
        the "real" pattern. */
+    DEBUG_OPTIMISE_r({ 
+	    PerlIO_printf(Perl_debug_log,"minlen: %d r->minlen:%d\n",
+		minlen, r->minlen);
+    });       
+    r->minlenret = minlen;
     if (r->minlen < minlen) 
         r->minlen = minlen;
     
@@ -8561,6 +8566,7 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
     ret->precomp        = SAVEPVN(r->precomp, r->prelen);
     ret->refcnt         = r->refcnt;
     ret->minlen         = r->minlen;
+    ret->minlenret      = r->minlenret;
     ret->prelen         = r->prelen;
     ret->nparens        = r->nparens;
     ret->lastparen      = r->lastparen;
@@ -8585,6 +8591,111 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
     return ret;
 }
 #endif    
+
+/* 
+   reg_stringify() 
+   
+   converts a regexp embedded in a MAGIC struct to its stringified form, 
+   caching the converted form in the struct and returns the cached 
+   string. 
+
+   If lp is nonnull then it is used to return the length of the 
+   resulting string
+   
+   If flags is nonnull and the returned string contains UTF8 then 
+   (flags & 1) will be true.
+   
+   If haseval is nonnull then it is used to return whether the pattern 
+   contains evals.
+   
+   Normally called via macro: 
+   
+        CALLREG_STRINGIFY(mg,0,0);
+        
+   And internally with
+   
+        CALLREG_AS_STR(mg,lp,flags,haseval)        
+    
+   See sv_2pv_flags() in sv.c for an example of internal usage.
+    
+ */
+
+char *
+Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
+    dVAR;
+    const regexp * const re = (regexp *)mg->mg_obj;
+
+    if (!mg->mg_ptr) {
+	const char *fptr = "msix";
+	char reflags[6];
+	char ch;
+	int left = 0;
+	int right = 4;
+	bool need_newline = 0;
+	U16 reganch = (U16)((re->reganch & PMf_COMPILETIME) >> 12);
+
+	while((ch = *fptr++)) {
+	    if(reganch & 1) {
+		reflags[left++] = ch;
+	    }
+	    else {
+		reflags[right--] = ch;
+	    }
+	    reganch >>= 1;
+	}
+	if(left != 4) {
+	    reflags[left] = '-';
+	    left = 5;
+	}
+
+	mg->mg_len = re->prelen + 4 + left;
+	/*
+	 * If /x was used, we have to worry about a regex ending with a
+	 * comment later being embedded within another regex. If so, we don't
+	 * want this regex's "commentization" to leak out to the right part of
+	 * the enclosing regex, we must cap it with a newline.
+	 *
+	 * So, if /x was used, we scan backwards from the end of the regex. If
+	 * we find a '#' before we find a newline, we need to add a newline
+	 * ourself. If we find a '\n' first (or if we don't find '#' or '\n'),
+	 * we don't need to add anything.  -jfriedl
+	 */
+	if (PMf_EXTENDED & re->reganch) {
+	    const char *endptr = re->precomp + re->prelen;
+	    while (endptr >= re->precomp) {
+		const char c = *(endptr--);
+		if (c == '\n')
+		    break; /* don't need another */
+		if (c == '#') {
+		    /* we end while in a comment, so we need a newline */
+		    mg->mg_len++; /* save space for it */
+		    need_newline = 1; /* note to add it */
+		    break;
+		}
+	    }
+	}
+
+	Newx(mg->mg_ptr, mg->mg_len + 1 + left, char);
+	mg->mg_ptr[0] = '(';
+	mg->mg_ptr[1] = '?';
+	Copy(reflags, mg->mg_ptr+2, left, char);
+	*(mg->mg_ptr+left+2) = ':';
+	Copy(re->precomp, mg->mg_ptr+3+left, re->prelen, char);
+	if (need_newline)
+	    mg->mg_ptr[mg->mg_len - 2] = '\n';
+	mg->mg_ptr[mg->mg_len - 1] = ')';
+	mg->mg_ptr[mg->mg_len] = 0;
+    }
+    if (haseval) 
+        *haseval = re->program[0].next_off;
+    if (flags)    
+	*flags = ((re->reganch & ROPT_UTF8) ? 1 : 0);
+    
+    if (lp)
+	*lp = mg->mg_len;
+    return mg->mg_ptr;
+}
+
 
 #ifndef PERL_IN_XSUB_RE
 /*

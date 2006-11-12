@@ -668,6 +668,7 @@ Ap	|I32	|pregexec	|NN regexp* prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \
 				|NN SV* screamer|U32 nosave
 Ap	|void	|pregfree	|NULLOK struct regexp* r
+p	|char *	|reg_stringify  |NN MAGIC *mg|NULLOK STRLEN *lp|NULLOK U32 *flags|NULLOK I32 *haseval
 #if defined(USE_ITHREADS)
 Ap	|regexp*|regdupe	|NN const regexp* r|NN CLONE_PARAMS* param
 #endif
@@ -1429,7 +1430,6 @@ s	|void	|utf8_mg_pos_cache_update|NN SV *sv|NN MAGIC **mgp \
 		|STRLEN byte|STRLEN utf8|STRLEN blen
 s	|STRLEN	|sv_pos_b2u_midway|NN const U8 *s|NN const U8 *const target \
 		|NN const U8 *end|STRLEN endu
-s	|char *	|stringify_regexp|NN SV *sv|NN MAGIC *mg|NULLOK STRLEN *lp
 sn	|char *	|F0convert	|NV nv|NN char *endbuf|NN STRLEN *len
 #  if defined(PERL_OLD_COPY_ON_WRITE)
 sM	|void	|sv_release_COW	|NN SV *sv|NN const char *pvx|STRLEN len|NN SV *after

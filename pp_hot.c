@@ -1497,11 +1497,11 @@ yup:					/* Confirmed by INTUIT */
 	rx->subbeg = (char *) truebase;
 	rx->startp[0] = s - truebase;
 	if (RX_MATCH_UTF8(rx)) {
-	    char * const t = (char*)utf8_hop((U8*)s, rx->minlen);
+	    char * const t = (char*)utf8_hop((U8*)s, rx->minlenret);
 	    rx->endp[0] = t - truebase;
 	}
 	else {
-	    rx->endp[0] = s - truebase + rx->minlen;
+	    rx->endp[0] = s - truebase + rx->minlenret;
 	}
 	rx->sublen = strend - truebase;
 	goto gotcha;
@@ -1531,11 +1531,11 @@ yup:					/* Confirmed by INTUIT */
 	rx->sublen = strend - t;
 	RX_MATCH_COPIED_on(rx);
 	off = rx->startp[0] = s - t;
-	rx->endp[0] = off + rx->minlen;
+	rx->endp[0] = off + rx->minlenret;
     }
     else {			/* startp/endp are used by @- @+. */
 	rx->startp[0] = s - truebase;
-	rx->endp[0] = s - truebase + rx->minlen;
+	rx->endp[0] = s - truebase + rx->minlenret;
     }
     rx->nparens = rx->lastparen = rx->lastcloseparen = 0;	/* used by @-, @+, and $^N */
     LEAVE_SCOPE(oldsave);
@@ -2188,7 +2188,7 @@ PP(pp_subst)
 #ifdef PERL_OLD_COPY_ON_WRITE
 	&& !is_cow
 #endif
-	&& (I32)clen <= rx->minlen && (once || !(r_flags & REXEC_COPY_STR))
+	&& (I32)clen <= rx->minlenret && (once || !(r_flags & REXEC_COPY_STR))
 	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)
 	&& (!doutf8 || SvUTF8(TARG))) {
 	if (!CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL,

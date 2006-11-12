@@ -47,7 +47,8 @@ typedef struct regexp {
         U32 *offsets;           /* offset annotations 20001228 MJD */
 	I32 sublen;		/* Length of string pointed by subbeg */
 	I32 refcnt;
-	I32 minlen;		/* mininum possible length of $& */
+	I32 minlen;		/* mininum possible length of string to match */
+	I32 minlenret;		/* mininum possible length of $& */
 	I32 prelen;		/* length of precomp */
 	U32 nparens;		/* number of parentheses */
 	U32 lastparen;		/* last paren matched */
@@ -76,6 +77,7 @@ typedef struct regexp_engine {
 			    struct re_scream_pos_data_s *data);
     SV*	    (*checkstr) (pTHX_ regexp *prog);
     void    (*free) (pTHX_ struct regexp* r);
+    char*   (*as_str)   (pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags,  I32 *haseval);
 #ifdef USE_ITHREADS
     regexp* (*dupe) (pTHX_ const regexp *r, CLONE_PARAMS *param);
 #endif    

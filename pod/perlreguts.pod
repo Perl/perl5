@@ -759,7 +759,8 @@ F<regexp.h> contains the base structure definition:
         U32 *offsets;           /* offset annotations 20001228 MJD */
         I32 sublen;             /* Length of string pointed by subbeg */
         I32 refcnt;
-        I32 minlen;             /* mininum possible length of $& */
+        I32 minlen;             /* mininum length of string to match */
+        I32 minlenret;          /* mininum possible length of $& */
         I32 prelen;             /* length of precomp */
         U32 nparens;            /* number of parentheses */
         U32 lastparen;          /* last paren matched */
@@ -838,13 +839,28 @@ that handles this is called C<find_by_class()>. Sometimes this field
 points at a regop embedded in the program, and sometimes it points at
 an independent synthetic regop that has been constructed by the optimiser.
 
-=item C<minlen>
+=item C<minlen> C<minlenret>
 
-The minimum possible length of the final matching string. This is used
-to prune the search space by not bothering to match any closer to the
-end of a string than would allow a match. For instance there is no point
-in even starting the regex engine if the minlen is 10 but the string
-is only 5 characters long. There is no way that the pattern can match.
+C<minlen> is the minimum string length required for the pattern to match. 
+This is used to prune the search space by not bothering to match any 
+closer to the end of a string than would allow a match. For instance 
+there is no point in even starting the regex engine if the minlen is 
+10 but the string is only 5 characters long. There is no way that the 
+pattern can match.
+
+C<minlenret> is the minimum length of the string that would be found
+in $& after a match. 
+
+The difference between C<minlen> and C<minlenret> can be seen in the
+following pattern:
+
+  /ns(?=\d)/
+
+where the C<minlen> would be 3 but the minlen ret would only be 2 as 
+the \d is required to match but is not actually included in the matched
+content. This distinction is particularly important as the substitution
+logic uses the C<minlenret> to tell whether it can do in-place substition
+which can result in considerable speedup.
 
 =item C<reganch>
 

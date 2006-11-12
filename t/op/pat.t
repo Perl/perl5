@@ -3993,8 +3993,20 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
         "Regexp /^(??{'(.)'x 100})/ crashes older perls")
     or print "# Unexpected outcome: should pass or crash perl\n";
 
+{
+    $_="ns1ns1ns1";
+    s/ns(?=\d)/ns_/g;
+    iseq($_,"ns_1ns_1ns_1");
+    $_="ns1";
+    s/ns(?=\d)/ns_/;
+    iseq($_,"ns_1");
+    $_="123";
+    s/(?=\d+)|(?<=\d)/!Bang!/g;
+    iseq($_,"!Bang!1!Bang!2!Bang!3!Bang!");
+}
+
 # Put new tests above the line, not here.
 
 # Don't forget to update this!
-BEGIN{print "1..1344\n"};
+BEGIN{print "1..1347\n"};
 

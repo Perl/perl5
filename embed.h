@@ -680,6 +680,9 @@
 #define regclass_swash		Perl_regclass_swash
 #define pregexec		Perl_pregexec
 #define pregfree		Perl_pregfree
+#ifdef PERL_CORE
+#define reg_stringify		Perl_reg_stringify
+#endif
 #if defined(USE_ITHREADS)
 #define regdupe			Perl_regdupe
 #endif
@@ -1429,7 +1432,6 @@
 #define sv_pos_u2b_cached	S_sv_pos_u2b_cached
 #define utf8_mg_pos_cache_update	S_utf8_mg_pos_cache_update
 #define sv_pos_b2u_midway	S_sv_pos_b2u_midway
-#define stringify_regexp	S_stringify_regexp
 #define F0convert		S_F0convert
 #endif
 #  if defined(PERL_OLD_COPY_ON_WRITE)
@@ -2887,6 +2889,9 @@
 #define regclass_swash(a,b,c,d,e)	Perl_regclass_swash(aTHX_ a,b,c,d,e)
 #define pregexec(a,b,c,d,e,f,g)	Perl_pregexec(aTHX_ a,b,c,d,e,f,g)
 #define pregfree(a)		Perl_pregfree(aTHX_ a)
+#ifdef PERL_CORE
+#define reg_stringify(a,b,c,d)	Perl_reg_stringify(aTHX_ a,b,c,d)
+#endif
 #if defined(USE_ITHREADS)
 #define regdupe(a,b)		Perl_regdupe(aTHX_ a,b)
 #endif
@@ -3632,7 +3637,6 @@
 #define sv_pos_u2b_cached(a,b,c,d,e,f,g)	S_sv_pos_u2b_cached(aTHX_ a,b,c,d,e,f,g)
 #define utf8_mg_pos_cache_update(a,b,c,d,e)	S_utf8_mg_pos_cache_update(aTHX_ a,b,c,d,e)
 #define sv_pos_b2u_midway(a,b,c,d)	S_sv_pos_b2u_midway(aTHX_ a,b,c,d)
-#define stringify_regexp(a,b,c)	S_stringify_regexp(aTHX_ a,b,c)
 #define F0convert		S_F0convert
 #endif
 #  if defined(PERL_OLD_COPY_ON_WRITE)

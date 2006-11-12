@@ -16,6 +16,7 @@
 #define Perl_pregfree           my_regfree
 #define Perl_re_intuit_string   my_re_intuit_string
 #define Perl_regdupe            my_regdupe
+#define Perl_reg_stringify      my_reg_stringify
 
 #define PERL_NO_GET_CONTEXT
 

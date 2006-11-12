@@ -398,6 +398,7 @@ EXTCONST regexp_engine PL_core_reg_engine = {
         Perl_re_intuit_start,
         Perl_re_intuit_string, 
         Perl_pregfree, 
+        Perl_reg_stringify,
 #if defined(USE_ITHREADS)        
         Perl_regdupe 
 #endif        

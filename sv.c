@@ -2542,87 +2542,6 @@ S_uiv_2buf(char *buf, IV iv, UV uv, int is_uv, char **peob)
     return ptr;
 }
 
-/* stringify_regexp(): private routine for use by sv_2pv_flags(): converts
- * a regexp to its stringified form.
- */
-
-static char *
-S_stringify_regexp(pTHX_ SV *sv, MAGIC *mg, STRLEN *lp) {
-    dVAR;
-    const regexp * const re = (regexp *)mg->mg_obj;
-
-    if (!mg->mg_ptr) {
-	const char *fptr = "msix";
-	char reflags[6];
-	char ch;
-	int left = 0;
-	int right = 4;
-	bool need_newline = 0;
-	U16 reganch = (U16)((re->reganch & PMf_COMPILETIME) >> 12);
-
-	while((ch = *fptr++)) {
-	    if(reganch & 1) {
-		reflags[left++] = ch;
-	    }
-	    else {
-		reflags[right--] = ch;
-	    }
-	    reganch >>= 1;
-	}
-	if(left != 4) {
-	    reflags[left] = '-';
-	    left = 5;
-	}
-
-	mg->mg_len = re->prelen + 4 + left;
-	/*
-	 * If /x was used, we have to worry about a regex ending with a
-	 * comment later being embedded within another regex. If so, we don't
-	 * want this regex's "commentization" to leak out to the right part of
-	 * the enclosing regex, we must cap it with a newline.
-	 *
-	 * So, if /x was used, we scan backwards from the end of the regex. If
-	 * we find a '#' before we find a newline, we need to add a newline
-	 * ourself. If we find a '\n' first (or if we don't find '#' or '\n'),
-	 * we don't need to add anything.  -jfriedl
-	 */
-	if (PMf_EXTENDED & re->reganch) {
-	    const char *endptr = re->precomp + re->prelen;
-	    while (endptr >= re->precomp) {
-		const char c = *(endptr--);
-		if (c == '\n')
-		    break; /* don't need another */
-		if (c == '#') {
-		    /* we end while in a comment, so we need a newline */
-		    mg->mg_len++; /* save space for it */
-		    need_newline = 1; /* note to add it */
-		    break;
-		}
-	    }
-	}
-
-	Newx(mg->mg_ptr, mg->mg_len + 1 + left, char);
-	mg->mg_ptr[0] = '(';
-	mg->mg_ptr[1] = '?';
-	Copy(reflags, mg->mg_ptr+2, left, char);
-	*(mg->mg_ptr+left+2) = ':';
-	Copy(re->precomp, mg->mg_ptr+3+left, re->prelen, char);
-	if (need_newline)
-	    mg->mg_ptr[mg->mg_len - 2] = '\n';
-	mg->mg_ptr[mg->mg_len - 1] = ')';
-	mg->mg_ptr[mg->mg_len] = 0;
-    }
-    PL_reginterp_cnt += re->program[0].next_off;
-    
-    if (re->reganch & ROPT_UTF8)
-	SvUTF8_on(sv);
-    else
-	SvUTF8_off(sv);
-    if (lp)
-	*lp = mg->mg_len;
-    return mg->mg_ptr;
-}
-
 /*
 =for apidoc sv_2pv_flags
 
@@ -2740,8 +2659,18 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
 			   && ((SvFLAGS(referent) &
 				(SVs_OBJECT|SVf_OK|SVs_GMG|SVs_SMG|SVs_RMG))
 			       == (SVs_OBJECT|SVs_SMG))
-			   && (mg = mg_find(referent, PERL_MAGIC_qr))) {
-		    return stringify_regexp(sv, mg, lp);
+			   && (mg = mg_find(referent, PERL_MAGIC_qr)))
+                {
+                    char *str = NULL;
+                    I32 haseval = 0;
+                    I32 flags = 0;
+                    (str) = CALLREG_AS_STR(mg,lp,&flags,&haseval);
+                    if (flags & 1)
+	                SvUTF8_on(sv);
+                    else
+	                SvUTF8_off(sv);
+                    PL_reginterp_cnt += haseval;
+		    return str;
 		} else {
 		    const char *const typestr = sv_reftype(referent, 0);
 		    const STRLEN typelen = strlen(typestr);

@@ -210,6 +210,9 @@
     CALL_FPTR((prog)->engine->checkstr)(aTHX_ (prog))
 #define CALLREGFREE(prog) \
     if(prog) CALL_FPTR((prog)->engine->free)(aTHX_ (prog))
+#define CALLREG_AS_STR(mg,lp,flags,haseval) \
+        CALL_FPTR(((regexp *)((mg)->mg_obj))->engine->as_str)(aTHX_ (mg), (lp), (flags), (haseval))
+#define CALLREG_STRINGIFY(mg,lp,flags) CALLREG_AS_STR(mg,lp,flags,0)
 #if defined(USE_ITHREADS)         
 #define CALLREGDUPE(prog,param) \
     (prog ? CALL_FPTR((prog)->engine->dupe)(aTHX_ (prog),(param)) \

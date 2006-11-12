@@ -203,7 +203,8 @@ sub process_file {
   $size = qr[,\s* (??{ $bal }) ]x; # Third arg (to setpvn)
 
   foreach my $key (keys %output_expr) {
-    use re 'eval';
+    #use re 'eval';
+    BEGIN { $^H |= 0x00200000};
 
     my ($t, $with_size, $arg, $sarg) =
       ($output_expr{$key} =~

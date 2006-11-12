@@ -1830,6 +1830,9 @@ PERL_CALLCONV I32	Perl_pregexec(pTHX_ regexp* prog, char* stringarg, char* stren
 			__attribute__nonnull__(pTHX_6);
 
 PERL_CALLCONV void	Perl_pregfree(pTHX_ struct regexp* r);
+PERL_CALLCONV char *	Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval)
+			__attribute__nonnull__(pTHX_1);
+
 #if defined(USE_ITHREADS)
 PERL_CALLCONV regexp*	Perl_regdupe(pTHX_ const regexp* r, CLONE_PARAMS* param)
 			__attribute__nonnull__(pTHX_1)
@@ -3858,10 +3861,6 @@ STATIC STRLEN	S_sv_pos_b2u_midway(pTHX_ const U8 *s, const U8 *const target, con
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
-
-STATIC char *	S_stringify_regexp(pTHX_ SV *sv, MAGIC *mg, STRLEN *lp)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
 
 STATIC char *	S_F0convert(NV nv, char *endbuf, STRLEN *len)
 			__attribute__nonnull__(2)
