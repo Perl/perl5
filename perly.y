@@ -711,6 +711,8 @@ term	:	termbinop
 			{ $$ = newOP(OP_REQUIRE, $1 ? OPf_SPECIAL : 0); }
 	|	REQUIRE term                         /* require Foo */
 			{ $$ = newUNOP(OP_REQUIRE, $1 ? OPf_SPECIAL : 0, $2); }
+	|	UNIOPSUB
+			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED, scalar($1)); }
 	|	UNIOPSUB term                        /* Sub treated as unop */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 			    append_elem(OP_LIST, $2, scalar($1))); }

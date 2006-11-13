@@ -6,7 +6,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan(tests => 38);
+plan(tests => 39);
 
 sub f($$_) { my $x = shift; is("@_", $x) }
 
@@ -55,6 +55,7 @@ g("foo");
 g($expected);
 $_ = $expected;
 g();
+g;
 undef $expected; &g; # $_ not passed
 { $expected = my $_ = "bar"; g() }
 
