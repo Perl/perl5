@@ -21,7 +21,7 @@ use vars qw(
 use vars qw($Revision);
 use strict;
 
-$VERSION = '6.31';
+$VERSION = '6.31_01';
 ($Revision) = q$Revision: 19606 $ =~ /Revision:\s+(\S+)/;
 
 @ISA = qw(Exporter);

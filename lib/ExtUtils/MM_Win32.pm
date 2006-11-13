@@ -341,6 +341,11 @@ $(INST_DYNAMIC): $(OBJECT) $(MYEXTLIB) $(BOOTSTRAP) $(INST_ARCHAUTODIR)$(DFSEP).
       push(@m,
        q{	$(LD) -out:$@ $(LDDLFLAGS) }.$ldfrom.q{ $(OTHERLDFLAGS) }
       .q{$(MYEXTLIB) $(PERL_ARCHIVE) $(LDLOADLIBS) -def:$(EXPORT_LIST)});
+      if ($Config{cc} eq 'cl' and $Config{ccversion} =~ /^(\d+)/ and $1 >= 14) {	# VC 2005 (aka VC 8) or higher
+        push(@m,
+          q{	
+	mt -nologo -manifest $@.manifest -outputresource:$@;2 && del $@.manifest});
+      }
     }
     push @m, '
 	$(CHMOD) $(PERM_RWX) $@

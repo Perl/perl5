@@ -357,6 +357,17 @@ ARCHNAME	!:= $(ARCHNAME)-thread
 DELAYLOAD	*= -DELAYLOAD:ws2_32.dll -DELAYLOAD:shell32.dll delayimp.lib
 .ENDIF
 
+# Visual C++ 2005 (VC++ 8.x) creates manifest files for EXEs and DLLs. These
+# either need copying everywhere with the binaries, or else need embedding in
+# them otherwise MSVCR80.dll won't be found. Embed them for simplicity, and
+# delete them afterwards so that they don't get installed too.
+.IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE"
+EMBED_EXE_MANI	= mt -nologo -manifest $@.manifest -outputresource:$@;1 && \
+		  del $@.manifest
+EMBED_DLL_MANI	= mt -nologo -manifest $@.manifest -outputresource:$@;2 && \
+		  del $@.manifest
+.ENDIF
+
 ARCHDIR		= ..\lib\$(ARCHNAME)
 COREDIR		= ..\lib\CORE
 AUTODIR		= ..\lib\auto
@@ -647,6 +658,7 @@ $(o).dll:
 .ELSE
 	$(LINK32) -dll -subsystem:windows -implib:$(*B).lib -def:$(*B).def \
 	    -out:$@ $(BLINK_FLAGS) $(LIBFILES) $< $(LIBPERL)
+	$(EMBED_DLL_MANI)
 .ENDIF
 
 .rc.res:
@@ -1041,6 +1053,7 @@ $(GLOBEXE) : perlglob$(o)
 .ELSE
 	$(LINK32) $(BLINK_FLAGS) $(LIBFILES) -out:$@ -subsystem:$(SUBSYS) \
 	    perlglob$(o) setargv$(o)
+	$(EMBED_EXE_MANI)
 .ENDIF
 
 perlglob$(o)  : perlglob.c
@@ -1092,6 +1105,7 @@ $(MINIPERL) : $(MINIDIR) $(MINI_OBJ) $(CRTIPMLIBS)
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ \
 	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) $(MINI_OBJ:s,\,$B,))
+	$(EMBED_EXE_MANI)
 .ENDIF
 
 $(MINIDIR) :
@@ -1159,6 +1173,7 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 	    @Extensions_static \
 	    @$(mktmp -base:0x28000000 $(BLINK_FLAGS) $(DELAYLOAD) $(LIBFILES) \
 	        $(PERLDLL_RES) $(PERLDLL_OBJ:s,\,$B,))
+	$(EMBED_DLL_MANI)
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
@@ -1198,6 +1213,7 @@ $(X2P) : $(MINIPERL) $(X2P_OBJ)
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ \
 	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) $(X2P_OBJ:s,\,$B,))
+	$(EMBED_EXE_MANI)
 .ENDIF
 
 perlmain.c : runperl.c
@@ -1218,6 +1234,7 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ -stack:0x1000000 $(BLINK_FLAGS) \
 	    $(LIBFILES) $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
+	$(EMBED_EXE_MANI)
 .ENDIF
 	copy $(PERLEXE) $(WPERLEXE)
 	$(MINIPERL) -I..\lib bin\exetype.pl $(WPERLEXE) WINDOWS

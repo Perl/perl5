@@ -358,6 +358,17 @@ ARCHNAME	= $(ARCHNAME)-thread
 DELAYLOAD	= -DELAYLOAD:ws2_32.dll -DELAYLOAD:shell32.dll delayimp.lib
 !ENDIF
 
+# Visual C++ 2005 (VC++ 8.x) creates manifest files for EXEs and DLLs. These
+# either need copying everywhere with the binaries, or else need embedding in
+# them otherwise MSVCR80.dll won't be found. Embed them for simplicity, and
+# delete them afterwards so that they don't get installed too.
+!IF "$(CCTYPE)" == "MSVC80" || "$(CCTYPE)" == "MSVC80FREE"
+EMBED_EXE_MANI	= mt -nologo -manifest $@.manifest -outputresource:$@;1 && \
+		  del $@.manifest
+EMBED_DLL_MANI	= mt -nologo -manifest $@.manifest -outputresource:$@;2 && \
+		  del $@.manifest
+!ENDIF
+
 ARCHDIR		= ..\lib\$(ARCHNAME)
 COREDIR		= ..\lib\CORE
 AUTODIR		= ..\lib\auto
@@ -492,6 +503,7 @@ o = .obj
 $(o).dll:
 	$(LINK32) -dll -subsystem:windows -implib:$(*B).lib -def:$(*B).def \
 	    -out:$@ $(LINK_FLAGS) $(LIBFILES) $< $(LIBPERL)
+	$(EMBED_DLL_MANI)
 
 .rc.res:
 	$(RSC) -i.. $<
@@ -941,6 +953,7 @@ $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
 $(GLOBEXE) : perlglob$(o)
 	$(LINK32) $(LINK_FLAGS) $(LIBFILES) -out:$@ -subsystem:$(SUBSYS) \
 	    perlglob$(o) setargv$(o)
+	$(EMBED_EXE_MANI)
 
 perlglob$(o)  : perlglob.c
 
@@ -984,6 +997,7 @@ $(MINIPERL) : $(MINIDIR) $(MINI_OBJ)
 	$(LINK32) -subsystem:console -out:$@ @<<
 	$(LINK_FLAGS) $(LIBFILES) $(MINI_OBJ)
 <<
+	$(EMBED_EXE_MANI)
 
 $(MINIDIR) :
 	if not exist "$(MINIDIR)" mkdir "$(MINIDIR)"
@@ -1019,6 +1033,7 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 	$(LINK32) -dll -def:perldll.def -base:0x28000000 -out:$@ @Extensions_static @<<
 		$(LINK_FLAGS) $(DELAYLOAD) $(LIBFILES) $(PERLDLL_OBJ) $(PERLDLL_RES)
 <<
+	$(EMBED_DLL_MANI)
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
 
 $(PERLEXE_ICO): $(MINIPERL) makeico.pl
@@ -1052,6 +1067,7 @@ $(X2P) : $(MINIPERL) $(X2P_OBJ)
 	$(LINK32) -subsystem:console -out:$@ @<<
 		$(LINK_FLAGS) $(LIBFILES) $(X2P_OBJ)
 <<
+	$(EMBED_EXE_MANI)
 
 perlmain.c : runperl.c
 	copy runperl.c perlmain.c
@@ -1062,6 +1078,7 @@ perlmain$(o) : perlmain.c
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 	$(LINK32) -subsystem:console -out:$@ -stack:0x1000000 $(LINK_FLAGS) \
 	    $(LIBFILES) $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
+	$(EMBED_EXE_MANI)
 	copy $(PERLEXE) $(WPERLEXE)
 	$(MINIPERL) -I..\lib bin\exetype.pl $(WPERLEXE) WINDOWS
 	copy splittree.pl ..
