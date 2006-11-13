@@ -31,10 +31,6 @@ TODO are completed.
 
 =item *
 
-Review smart match semantics in light of Perl 6 developments.
-
-=item *
-
 Review assertions. Review syntax to combine assertions. Assertions could take
 advantage of the lexical pragmas work. L</What hooks would assertions need?>
 
@@ -500,6 +496,11 @@ types, as all bets are off during global destruction.
 
 These tasks would need C knowledge, and knowledge of how the interpreter works,
 or a willingness to learn.
+
+=head2 Implement $value ~~ 0 .. $range
+
+It would be nice to extend the syntax of the C<~~> operator to also
+understand numeric (and maybe alphanumeric) ranges.
 
 =head2 Attach/detach debugger from running program
 
