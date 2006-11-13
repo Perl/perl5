@@ -232,10 +232,14 @@ sub write_protos {
 	    push @attrs, "__attribute__pure__";
 	}
 	if( $flags =~ /f/ ) {
-	    my $prefix = $has_context ? 'pTHX_' : '';
-	    my $args = scalar @args;
-	    push @attrs, sprintf "__attribute__format__(__printf__,%s%d,%s%d)",
-				    $prefix, $args - 1, $prefix, $args;
+	    my $prefix	= $has_context ? 'pTHX_' : '';
+	    my $args	= scalar @args;
+ 	    my $pat	= $args - 1;
+	    my $macro	= @nonnull && $nonnull[-1] == $pat  
+				? '__attribute__format__'
+				: '__attribute__format__null_ok__';
+	    push @attrs, sprintf "%s(__printf__,%s%d,%s%d)", $macro,
+				$prefix, $pat, $prefix, $args;
 	}
 	if ( @nonnull ) {
 	    my @pos = map { $has_context ? "pTHX_$_" : $_ } @nonnull;

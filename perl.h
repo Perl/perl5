@@ -3101,6 +3101,13 @@ typedef pthread_key_t	perl_key;
 #  define NORETURN_FUNCTION_END /* NOTREACHED */ return 0
 #endif
 
+/* Some OS warn on NULL format to printf */
+#ifdef PRINTF_FORMAT_NULL_OK
+#  define __attribute__format__null_ok__(x,y,z)  __attribute__format__(x,y,z)
+#else
+#  define __attribute__format__null_ok__(x,y,z)  
+#endif
+
 #ifdef HAS_BUILTIN_EXPECT
 #  define EXPECT(expr,val)                  __builtin_expect(expr,val)
 #else
