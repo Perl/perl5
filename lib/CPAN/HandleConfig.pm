@@ -2,7 +2,7 @@ package CPAN::HandleConfig;
 use strict;
 use vars qw(%can %keys $VERSION);
 
-$VERSION = sprintf "%.6f", substr(q$Rev: 1128 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 1264 $,4)/1000000 + 5.4;
 
 %can = (
         commit   => "Commit changes to disk",
@@ -18,6 +18,7 @@ $VERSION = sprintf "%.6f", substr(q$Rev: 1128 $,4)/1000000 + 5.4;
     (
      "build_cache",
      "build_dir",
+     "build_dir_reuse",
      "build_requires_install_policy",
      "bzip2",
      "cache_metadata",
@@ -65,6 +66,7 @@ $VERSION = sprintf "%.6f", substr(q$Rev: 1128 $,4)/1000000 + 5.4;
      "prefs_dir",
      "proxy_pass",
      "proxy_user",
+     "randomize_urllist",
      "scan_cache",
      "shell",
      "show_upload_date",
@@ -120,10 +122,12 @@ sub edit {
         unless (exists $keys{$o}) {
             $CPAN::Frontend->mywarn("Warning: unknown configuration variable '$o'\n");
         }
-	if ($o =~ /list$/) {
+        # one day I used randomize_urllist for a boolean, so we must
+        # list them explicitly --ak
+	if ($o =~ /^(wait_list|urllist|dontload_list)$/) {
 	    $func = shift @args;
 	    $func ||= "";
-            CPAN->debug("func[$func]") if $CPAN::DEBUG;
+            CPAN->debug("func[$func]args[@args]") if $CPAN::DEBUG;
             my $changed;
 	    # Let's avoid eval, it's easier to comprehend without.
 	    if ($func eq "push") {
@@ -139,10 +143,12 @@ sub edit {
 		unshift @{$CPAN::Config->{$o}}, @args;
                 $changed = 1;
 	    } elsif ($func eq "splice") {
-		splice @{$CPAN::Config->{$o}}, @args;
+                my $offset = shift @args || 0;
+                my $length = shift @args || 0;
+		splice @{$CPAN::Config->{$o}}, $offset, $length, @args; # may warn
                 $changed = 1;
-	    } elsif (@args) {
-		$CPAN::Config->{$o} = [@args];
+	    } elsif ($func) {
+		$CPAN::Config->{$o} = [$func, @args];
                 $changed = 1;
 	    } else {
                 $self->prettyprint($o);
@@ -185,7 +191,7 @@ sub prettyprint {
   if (ref $v) {
     my(@report);
     if (ref $v eq "ARRAY") {
-      @report = map {"\t[$_]\n"} @$v;
+      @report = map {"\t$_ \[$v->[$_]]\n"} 0..$#$v;
     } else {
       @report = map { sprintf("\t%-18s => %s\n",
                               map { "[$_]" } $_,
@@ -212,6 +218,13 @@ sub prettyprint {
 sub commit {
     my($self,@args) = @_;
     CPAN->debug("args[@args]") if $CPAN::DEBUG;
+    if ($CPAN::RUN_DEGRADED) {
+                             $CPAN::Frontend->mydie(
+                                                    "'o conf commit' disabled in ".
+                                                    "degraded mode. Maybe try\n".
+                                                    " !undef \$CPAN::RUN_DEGRADED\n"
+                                                   );
+    }
     my $configpm;
     if (@args) {
       if ($args[0] eq "args") {
@@ -308,6 +321,13 @@ sub neatvalue {
 
 sub defaults {
     my($self) = @_;
+    if ($CPAN::RUN_DEGRADED) {
+                             $CPAN::Frontend->mydie(
+                                                    "'o conf defaults' disabled in ".
+                                                    "degraded mode. Maybe try\n".
+                                                    " !undef \$CPAN::RUN_DEGRADED\n"
+                                                   );
+    }
     my $done;
     for my $config (qw(CPAN/MyConfig.pm CPAN/Config.pm)) {
         if ($INC{$config}) {
@@ -624,7 +644,7 @@ sub prefs_lookup {
 
     use strict;
     use vars qw($AUTOLOAD $VERSION);
-    $VERSION = sprintf "%.2f", substr(q$Rev: 1128 $,4)/100;
+    $VERSION = sprintf "%.2f", substr(q$Rev: 1264 $,4)/100;
 
     # formerly CPAN::HandleConfig was known as CPAN::Config
     sub AUTOLOAD {
