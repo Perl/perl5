@@ -195,16 +195,15 @@ re - Perl pragma to alter regular expression behaviour
     ...
 
     use re qw(Debug All);          # Finer tuned debugging options.
-    use re qw(Debug More);         
+    use re qw(Debug More);
     no re qw(Debug ALL);           # Turn of all re debugging in this scope
-    
+
     use re qw(is_regexp regexp_pattern); # import utility functions
     my ($pat,$mods)=regexp_pattern(qr/foo/i);
     if (is_regexp($obj)) { 
         print "Got regexp: ",
             scalar regexp_pattern($obj); # just as perl would stringify it
     }                                    # but no hassle with blessed re's.
-        
 
 (We use $^X in these examples because it's tainted by default.)
 
@@ -289,7 +288,6 @@ Detailed info about trie compilation.
 
 Dump the final program out after it is compiled and optimised.
 
-
 =back
 
 =item Execute related options
@@ -329,7 +327,7 @@ and TRIEC.
 
 =item STATE
 
-Enable debugging of states in the engine. 
+Enable debugging of states in the engine.
 
 =item STACK
 
@@ -391,13 +389,13 @@ Enable TRIEM and all execute compile and execute options.
 =back
 
 As of 5.9.5 the directive C<use re 'debug'> and its equivalents are
-lexically scoped, as the other directives are.  However they have both 
+lexically scoped, as the other directives are.  However they have both
 compile-time and run-time effects.
 
 =head2 Exportable Functions
 
 As of perl 5.9.5 're' debug contains a number of utility functions that
-may be optionally exported into the callers namespace. They are listed
+may be optionally exported into the caller's namespace. They are listed
 below.
 
 =over 4
@@ -405,34 +403,34 @@ below.
 =item is_regexp($ref)
 
 Returns true if the argument is a compiled regular expression as returned
-by C<qr//>, false if it is not. 
+by C<qr//>, false if it is not.
 
-This function will not be confused by overloading or blessing. In 
-internals terms this extracts the regexp pointer out of the 
+This function will not be confused by overloading or blessing. In
+internals terms, this extracts the regexp pointer out of the
 PERL_MAGIC_qr structure so it it cannot be fooled.
 
 =item regexp_pattern($ref)
 
-If the argument is a compiled regular expression as returned by C<qr//>
-then this function returns the pattern. 
+If the argument is a compiled regular expression as returned by C<qr//>,
+then this function returns the pattern.
 
-In list context it returns a two element list, the first element 
-containing the pattern and the second containing the modifiers used when 
-the pattern was compiled. 
+In list context it returns a two element list, the first element
+containing the pattern and the second containing the modifiers used when
+the pattern was compiled.
 
-  my ($pat,$mods)=regexp_pattern($ref);
+  my ($pat, $mods) = regexp_pattern($ref);
 
-In scalar context it returns the same as perl would when strigifying a 
-raw qr// with the same pattern inside.  If the argument is not a 
-compiled reference then this routine returns false but defined in scalar 
-context, and the empty list in list context. Thus the following 
+In scalar context it returns the same as perl would when strigifying a raw
+C<qr//> with the same pattern inside.  If the argument is not a compiled
+reference then this routine returns false but defined in scalar context,
+and the empty list in list context. Thus the following
 
     if (regexp_pattern($ref) eq '(?i-xsm:foo)')
 
 will be warning free regardless of what $ref actually is.
 
-Like c<is_regexp> this function will not be confused by overloading 
-or blessing of the object.  
+Like C<is_regexp> this function will not be confused by overloading
+or blessing of the object.
 
 =back
 
