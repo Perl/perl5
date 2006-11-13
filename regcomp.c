@@ -4915,17 +4915,54 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 }
                 goto gen_recurse_regop;
                 /* NOT REACHED */
+            case '+':
+                if (!(RExC_parse[0] >= '1' && RExC_parse[0] <= '9')) {
+                    RExC_parse++;
+                    vFAIL("Illegal pattern");
+                }
+                goto parse_recursion;
+                /* NOT REACHED*/
+            case '-': /* (?-1) */
+                if (!(RExC_parse[0] >= '1' && RExC_parse[0] <= '9')) {
+                    RExC_parse--; /* rewind to let it be handled later */
+                    goto parse_flags;
+                } 
+                /*FALLTHROUGH */
             case '1': case '2': case '3': case '4': /* (?1) */
 	    case '5': case '6': case '7': case '8': case '9':
 	        RExC_parse--;
+              parse_recursion:
 		num = atoi(RExC_parse);
   	        parse_start = RExC_parse - 1; /* MJD */
+	        if (*RExC_parse == '-')
+	            RExC_parse++;
 		while (isDIGIT(*RExC_parse))
 			RExC_parse++;
 	        if (*RExC_parse!=')') 
 	            vFAIL("Expecting close bracket");
 			
               gen_recurse_regop:
+                if ( paren == '-' ) {
+                    /*
+                    Diagram of capture buffer numbering.
+                    Top line is the normal capture buffer numbers
+                    Botton line is the negative indexing as from
+                    the X (the (?-2))
+
+                    +   1 2    3 4 5 X          6 7
+                       /(a(x)y)(a(b(c(?-2)d)e)f)(g(h))/
+                    -   5 4    3 2 1 X          x x
+
+                    */
+                    num = RExC_npar + num;
+                    if (num < 1)  {
+                        RExC_parse++;
+                        vFAIL("Reference to nonexistent group");
+                    }
+                } else if ( paren == '+' ) {
+                    num = RExC_npar + num - 1;
+                }
+
                 ret = reganode(pRExC_state, GOSUB, num);
                 if (!SIZE_ONLY) {
 		    if (num > (I32)RExC_rx->nparens) {

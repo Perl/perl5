@@ -866,9 +866,10 @@ Recursing deeper than 50 times without consuming any input string will
 result in a fatal error.  The maximum depth is compiled into perl, so
 changing it requires a custom build.
 
-=item C<(?PARNO)> C<(?R)> C<(?0)>
-X<(?PARNO)> X<(?1)> X<(?R)> X<(?0)>
+=item C<(?PARNO)> C<(?-PARNO)> C<(?+PARNO)> C<(?R)> C<(?0)>
+X<(?PARNO)> X<(?1)> X<(?R)> X<(?0)> X<(?-1)> X<(?+1)> X<(?-PARNO)> X<(?+PARNO)>
 X<regex, recursive> X<regexp, recursive> X<regular expression, recursive>
+X<regex, relative recursion>
 
 Similar to C<(??{ code })> except it does not involve compiling any code,
 instead it treats the contents of a capture buffer as an independent
@@ -879,7 +880,10 @@ outermost recursion.
 PARNO is a sequence of digits (not starting with 0) whose value reflects
 the paren-number of the capture buffer to recurse to. C<(?R)> recurses to
 the beginning of the whole pattern. C<(?0)> is an alternate syntax for
-C<(?R)>.
+C<(?R)>. If PARNO is preceded by a plus or minus sign then it is assumed
+to be relative, with negative numbers indicating preceding capture buffers
+and positive ones following. Thus C<(?-1)> refers to the most recently
+declared buffer, and C<(?+1)> indicates the next buffer to be declared.
 
 The following pattern matches a function foo() which may contain
 balanced parentheses as the argument.
@@ -918,11 +922,21 @@ fatal error.  Recursing deeper than 50 times without consuming any input
 string will also result in a fatal error.  The maximum depth is compiled
 into perl, so changing it requires a custom build.
 
+The following shows how using negative indexing can make it
+easier to embed recursive patterns inside of a C<qr//> construct
+for later use:
+
+    my $parens = qr/(\((?:[^()]++|(?-1))*+\))/;
+    if (/foo $parens \s+ + \s+ bar $parens/x) {
+       # do something here...
+    }
+
 B<Note> that this pattern does not behave the same way as the equivalent
 PCRE or Python construct of the same form. In perl you can backtrack into
 a recursed group, in PCRE and Python the recursed into group is treated
-as atomic. Also, constructs like (?i:(?1)) or (?:(?i)(?1)) do not affect
-the pattern being recursed into.
+as atomic. Also, modifiers are resolved at compile time, so constructs
+like (?i:(?1)) or (?:(?i)(?1)) do not affect how the sub-pattern will
+be processed.
 
 =item C<(?&NAME)>
 X<(?&NAME)>

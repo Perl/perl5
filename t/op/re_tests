@@ -1186,3 +1186,6 @@ a*(*F)	aaaab	n	-	-
 (A(A|B(*ACCEPT)|C)D)(E)	AB	y	$1	AB
 (A(A|B(*ACCEPT)|C)D)(E)	ACDE	y	$1$2$3	ACDCE
 
+(a)(?:(?-1)|(?+1))(b)	aab	y	$&-$1-$2	aab-a-b
+(a)(?:(?-1)|(?+1))(b)	abb	y	$&-$1-$2	abb-a-b
+(a)(?:(?-1)|(?+1))(b)	acb	n	-	-

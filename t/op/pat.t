@@ -3991,8 +3991,23 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     for ("ABC","BAX") {
         ok(/A (*THEN) X | B (*THEN) C/x,"Simple (*THEN) test");
     }
-}    
-    
+}
+
+{
+    my $parens=qr/(\((?:[^()]++|(?-1))*+\))/;
+    local $_='foo((2*3)+4-3) + bar(2*(3+4)-1*(2-3))';
+    my ($all,$one,$two)=('','','');
+    if (/foo $parens \s* \+ \s* bar $parens/x) {
+       $all=$&;
+       $one=$1;
+       $two=$2;
+    }
+    iseq($one, '((2*3)+4-3)');
+    iseq($two, '(2*(3+4)-1*(2-3))');
+    iseq($all, 'foo((2*3)+4-3) + bar(2*(3+4)-1*(2-3))');
+    iseq($all, $_);
+}
+
 #-------------------------------------------------------------------
 
 # Keep the following tests last -- they may crash perl
@@ -4019,4 +4034,4 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
 # Put new tests above the line, not here.
 
 # Don't forget to update this!
-BEGIN { print "1..1341\n" };
+BEGIN { print "1..1345\n" };
