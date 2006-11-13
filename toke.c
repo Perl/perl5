@@ -774,12 +774,13 @@ S_incline(pTHX_ char *s)
 	    gvp = (GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, FALSE);
 	    if (gvp) {
 		gv2 = *(GV**)hv_fetch(PL_defstash, tmpbuf2, tmplen2, TRUE);
-		if (!isGV(gv2))
+		if (!isGV(gv2)) {
 		    gv_init(gv2, PL_defstash, tmpbuf2, tmplen2, FALSE);
-		/* adjust ${"::_<newfilename"} to store the new file name */
-		GvSV(gv2) = newSVpvn(tmpbuf2 + 2, tmplen2 - 2);
-		GvHV(gv2) = (HV*)SvREFCNT_inc(GvHV(*gvp));
-		GvAV(gv2) = (AV*)SvREFCNT_inc(GvAV(*gvp));
+		    /* adjust ${"::_<newfilename"} to store the new file name */
+		    GvSV(gv2) = newSVpvn(tmpbuf2 + 2, tmplen2 - 2);
+		    GvHV(gv2) = (HV*)SvREFCNT_inc(GvHV(*gvp));
+		    GvAV(gv2) = (AV*)SvREFCNT_inc(GvAV(*gvp));
+		}
 	    }
 	    if (tmpbuf != smallbuf) Safefree(tmpbuf);
 	    if (tmpbuf2 != smallbuf2) Safefree(tmpbuf2);
