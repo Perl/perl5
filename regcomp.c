@@ -4437,10 +4437,10 @@ reStudy:
 
     /* Guard against an embedded (?=) or (?<=) with a longer minlen than
        the "real" pattern. */
-    DEBUG_OPTIMISE_r({ 
-	    PerlIO_printf(Perl_debug_log,"minlen: %d r->minlen:%d\n",
-		minlen, r->minlen);
-    });       
+    DEBUG_OPTIMISE_r({
+	PerlIO_printf(Perl_debug_log,"minlen: %"IVdf" r->minlen:%"IVdf"\n",
+	    minlen, r->minlen);
+    });
     r->minlenret = minlen;
     if (r->minlen < minlen) 
         r->minlen = minlen;
