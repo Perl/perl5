@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 14;
+plan tests => 15;
 
 eval { for (\2) { $_ = <FH> } };
 like($@, 'Modification of a read-only value attempted', '[perl #19566]');
@@ -83,8 +83,13 @@ fresh_perl_is('BEGIN{<>}', '',
               { switches => ['-w'], stdin => '', stderr => 1 },
               'No ARGVOUT used only once warning');
 
+my $obj = bless [];
+$obj .= <DATA>;
+like($obj, qr/main=ARRAY.*world/, 'rcatline and refs');
+
 __DATA__
 moo
 moo
  rules
  rules
+world
