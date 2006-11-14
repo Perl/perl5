@@ -18,7 +18,7 @@ my(@XSStack);	# Stack of conditionals and INCLUDEs
 my($XSS_work_idx, $cpp_next_tmp);
 
 use vars qw($VERSION);
-$VERSION = '2.16_01';
+$VERSION = '2.16_02';
 
 use vars qw(%input_expr %output_expr $ProtoUsed @InitFileCode $FH $proto_re $Overload $errors $Fallback
 	    $cplusplus $hiertype $WantPrototypes $WantVersionChk $except $WantLineNumbers
@@ -594,12 +594,12 @@ EOF
     if ($ALIAS)
       { print Q(<<"EOF") if $cond }
 #    if ($cond)
-#       Perl_croak(aTHX_ "Usage: %s($report_args)", GvNAME(CvGV(cv)));
+#       Perl_croak(aTHX_ "Usage: %s(%s)", GvNAME(CvGV(cv)), "$report_args");
 EOF
     else
       { print Q(<<"EOF") if $cond }
 #    if ($cond)
-#	Perl_croak(aTHX_ "Usage: $pname($report_args)");
+#       Perl_croak(aTHX_ "Usage: %s(%s)", "$pname", "$report_args");
 EOF
     
      # cv doesn't seem to be used, in most cases unless we go in 
