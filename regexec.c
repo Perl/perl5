@@ -2902,9 +2902,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		DEBUG_EXECUTE_r({
 		    reg_trie_data * const trie
 			= (reg_trie_data*)rex->data->data[ ARG(ST.me) ];
-		    SV ** const tmp = RX_DEBUG(reginfo->prog)
-				    ? av_fetch( trie->words, ST.accept_buff[ 0 ].wordnum-1, 0 )
-				    : NULL;
+		    SV ** const tmp = av_fetch( trie->words, 
+		        ST.accept_buff[ 0 ].wordnum-1, 0 );
 		    PerlIO_printf( Perl_debug_log,
 			"%*s  %sonly one match left: #%d <%s>%s\n",
 			REPORT_CODE_OFF+depth*2, "", PL_colors[4],
@@ -2978,9 +2977,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		DEBUG_EXECUTE_r({
 		    reg_trie_data * const trie
 			= (reg_trie_data*)rex->data->data[ ARG(ST.me) ];
-		    SV ** const tmp = RX_DEBUG(reginfo->prog)
-				? av_fetch( trie->words, ST.accept_buff[ best ].wordnum - 1, 0 )
-				: NULL;
+		    SV ** const tmp = av_fetch( trie->words, 
+		        ST.accept_buff[ best ].wordnum - 1, 0 );
 		    regnode *nextop=(!ST.jump || !ST.jump[ST.accept_buff[best].wordnum]) ? 
 		                    ST.B : 
 		                    ST.me + ST.jump[ST.accept_buff[best].wordnum];    

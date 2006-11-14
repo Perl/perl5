@@ -4483,7 +4483,6 @@ reStudy:
     Newxz(r->startp, RExC_npar, I32);
     Newxz(r->endp, RExC_npar, I32);
     
-    DEBUG_r( RX_DEBUG_on(r) );
     DEBUG_DUMP_r({
         PerlIO_printf(Perl_debug_log,"Final program:\n");
         regdump(r);
@@ -8375,8 +8374,8 @@ Perl_pregfree(pTHX_ struct regexp *r)
     DEBUG_COMPILE_r({
 	if (!PL_colorset)
 	    reginitcolors();
-	if (RX_DEBUG(r)){
-            SV *dsv= sv_newmortal();
+	{
+	    SV *dsv= sv_newmortal();
             RE_PV_QUOTED_DECL(s, (r->reganch & ROPT_UTF8),
                 dsv, r->precomp, r->prelen, 60);
             PerlIO_printf(Perl_debug_log,"%sFreeing REx:%s %s\n", 
@@ -8485,12 +8484,10 @@ Perl_pregfree(pTHX_ struct regexp *r)
                         if (trie->nextword)
                             Safefree(trie->nextword);
 #ifdef DEBUGGING
-                        if (RX_DEBUG(r)) {
-                            if (trie->words)
-                                SvREFCNT_dec((SV*)trie->words);
-                            if (trie->revcharmap)
-                                SvREFCNT_dec((SV*)trie->revcharmap);
-                        }
+                        if (trie->words)
+                            SvREFCNT_dec((SV*)trie->words);
+                        if (trie->revcharmap)
+                            SvREFCNT_dec((SV*)trie->revcharmap);
 #endif
                         Safefree(r->data->data[n]); /* do this last!!!! */
 		    }

@@ -143,10 +143,6 @@ typedef struct regexp_engine {
 
 /* Stuff that needs to be included in the plugable extension goes below here */
 
-#define RE_DEBUG_BIT            0x20000000
-#define RX_DEBUG(prog)	((prog)->reganch & RE_DEBUG_BIT)
-#define RX_DEBUG_on(prog) ((prog)->reganch |= RE_DEBUG_BIT)
-
 #ifdef PERL_OLD_COPY_ON_WRITE
 #define RX_MATCH_COPY_FREE(rx) \
 	STMT_START {if (rx->saved_copy) { \
