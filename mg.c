@@ -854,6 +854,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 		i = t1 - s1;
 		s = rx->subbeg + s1;
 		assert(rx->subbeg);
+		assert(rx->sublen >= s1);
 
 	      getrx:
 		if (i >= 0) {
