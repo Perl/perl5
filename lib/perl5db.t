@@ -27,23 +27,29 @@ sub rc {
     chmod 0644, ".perldb";
 }
 
+my $target = '../lib/perl5db/t/eval-line-bug';
+
 rc(
     qq|
-    &parse_options("NonStop=0 TTY=/dev/null LineInfo=db.out");
+    &parse_options("NonStop=0 TTY=db.out LineInfo=db.out");
     \n|,
 
     qq|
     sub afterinit {
 	push(\@DB::typeahead,
-	    "DB::print_lineinfo(\@{'main::_<perl5db/eval-line-bug'})",
 	    'b 23',
-	    'c',
+	    'n',
+	    'n',
+	    'n',
+	    'c', # line 23
+	    'n',
+	    "p \\\@{'main::_<$target'}",
 	    'q',
 	);
     }\n|,
 );
 
-runperl(switches => [ '-d' ], progfile => '../lib/perl5db/eval-line-bug');
+runperl(switches => [ '-d' ], progfile => $target);
 
 my $contents;
 {
@@ -53,12 +59,12 @@ my $contents;
     close(I);
 }
 
-like($contents, qr/factorial/,
+like($contents, qr/sub factorial/,
     'The ${main::_<filename} variable in the debugger was not destroyed'
 );
 
 # clean up.
 
 END {
-    unlink '.perldb', 'db.out';
+    unlink qw(.perldb db.out);
 }
