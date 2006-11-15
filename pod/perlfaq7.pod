@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq7 - General Perl Language Issues ($Revision: 7875 $)
+perlfaq7 - General Perl Language Issues ($Revision: 7998 $)
 
 =head1 DESCRIPTION
 
@@ -213,20 +213,21 @@ See also L<perlsec/"Laundering and Detecting Tainted Data">.
 Closures are documented in L<perlref>.
 
 I<Closure> is a computer science term with a precise but
-hard-to-explain meaning. Closures are implemented in Perl as anonymous
-subroutines with lasting references to lexical variables outside their
-own scopes.  These lexicals magically refer to the variables that were
-around when the subroutine was defined (deep binding).
+hard-to-explain meaning. Usually, closures are implemented in Perl as
+anonymous subroutines with lasting references to lexical variables
+outside their own scopes. These lexicals magically refer to the
+variables that were around when the subroutine was defined (deep 
+binding).
 
-Closures make sense in any programming language where you can have the
-return value of a function be itself a function, as you can in Perl.
-Note that some languages provide anonymous functions but are not
-capable of providing proper closures: the Python language, for
+Closures are most often used in programming languages where you can
+have the return value of a function be itself a function, as you can
+in Perl. Note that some languages provide anonymous functions but are
+not capable of providing proper closures: the Python language, for
 example.  For more information on closures, check out any textbook on
 functional programming.  Scheme is a language that not only supports
 but encourages closures.
 
-Here's a classic function-generating function:
+Here's a classic non-closure function-generating function:
 
     sub add_function_generator {
       return sub { shift() + shift() };
@@ -235,10 +236,10 @@ Here's a classic function-generating function:
     $add_sub = add_function_generator();
     $sum = $add_sub->(4,5);                # $sum is 9 now.
 
-The closure works as a I<function template> with some customization
-slots left out to be filled later.  The anonymous subroutine returned
-by add_function_generator() isn't technically a closure because it
-refers to no lexicals outside its own scope.
+The anonymous subroutine returned by add_function_generator() isn't
+technically a closure because it refers to no lexicals outside its own
+scope.  Using a closure gives you a I<function template> with some
+customization slots left out to be filled later.
 
 Contrast this with the following make_adder() function, in which the
 returned anonymous function contains a reference to a lexical variable
@@ -268,6 +269,21 @@ If the code to execute had been passed in as a string,
 C<< '$line = <STDIN>' >>, there would have been no way for the
 hypothetical timeout() function to access the lexical variable
 $line back in its caller's scope.
+
+Another use for a closure is to make a variable I<private> to a
+named subroutine, e.g. a counter that gets initialized at creation
+time of the sub and can only be modified from within the sub.
+This is sometimes used with a BEGIN block in package files to make
+sure a variable doesn't get meddled with during the lifetime of the
+package:
+
+    BEGIN {
+        my $id = 0;
+        sub next_id { ++$id }
+    }
+
+This is discussed in more detail in L<perlsub>, see the entry on
+I<Persistent Private Variables>.
 
 =head2 What is variable suicide and how can I prevent it?
 
@@ -962,9 +978,9 @@ where you expect it so you need to adjust your shebang line.
 
 =head1 REVISION
 
-Revision: $Revision: 7875 $
+Revision: $Revision: 7998 $
 
-Date: $Date: 2006-10-04 22:39:26 +0200 (mer, 04 oct 2006) $
+Date: $Date: 2006-11-01 09:56:34 +0100 (mer, 01 nov 2006) $
 
 See L<perlfaq> for source control details and availability.
 

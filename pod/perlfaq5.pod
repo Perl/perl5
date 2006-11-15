@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq5 - Files and Formats ($Revision: 7875 $)
+perlfaq5 - Files and Formats ($Revision: 8075 $)
 
 =head1 DESCRIPTION
 
@@ -801,7 +801,7 @@ then that is what you should do.
 
 If you know you are only going to use a system that does correctly
 implement appending (i.e. not Win32) then you can omit the seek() from
-the above code.
+the code in the previous answer.
 
 If you know you are only writing code to run on an OS and filesystem that
 does implement append mode correctly (a local filesystem on a modern
@@ -1265,9 +1265,9 @@ If your array contains lines, just print them:
 
 =head1 REVISION
 
-Revision: $Revision: 7875 $
+Revision: $Revision: 8075 $
 
-Date: $Date: 2006-10-04 22:39:26 +0200 (mer, 04 oct 2006) $
+Date: $Date: 2006-11-15 02:26:49 +0100 (mer, 15 nov 2006) $
 
 See L<perlfaq> for source control details and availability.
 

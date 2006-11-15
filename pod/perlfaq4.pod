@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq4 - Data Manipulation ($Revision: 7954 $)
+perlfaq4 - Data Manipulation ($Revision: 7996 $)
 
 =head1 DESCRIPTION
 
@@ -1006,9 +1006,13 @@ C<Text::Metaphone>, and C<Text::DoubleMetaphone> modules.
 
 (contributed by brian d foy)
 
-For example, I'll use a string that has two Perl scalar variables
-in it. In this example, I want to expand C<$foo> and C<$bar> to
-their variable's values.
+If you can avoid it, don't, or if you can use a templating system,
+such as C<Text::Template> or C<Template> Toolkit, do that instead.
+
+However, for the one-off simple case where I don't want to pull out a
+full templating system, I'll use a string that has two Perl scalar
+variables in it. In this example, I want to expand C<$foo> and C<$bar>
+to their variable's values.
 
 	my $foo = 'Fred';
 	my $bar = 'Barney';
@@ -1021,7 +1025,7 @@ it with its value. C<$foo>, then, turns into 'Fred', and that's finally
 what's left in the string.
 
 	$string =~ s/(\$\w+)/$1/eeg; # 'Say hello to Fred and Barney'
-	
+
 The C</e> will also silently ignore violations of strict, replacing
 undefined variable names with the empty string.
 
@@ -1035,14 +1039,14 @@ with a marker, in this case C<???> to signal that I missed something:
 	my %Replacements = (
 		foo  => 'Fred',
 		);
-		
+
 	# $string =~ s/\$(\w+)/$Replacements{$1}/g;
 	$string =~ s/\$(\w+)/
 		exists $Replacements{$1} ? $Replacements{$1} : '???'
 		/eg;
-		
+
 	print $string;
-	
+
 =head2 What's wrong with always quoting "$vars"?
 
 The problem is that those double-quotes force
@@ -2215,9 +2219,9 @@ the C<PDL> module from CPAN instead--it makes number-crunching easy.
 
 =head1 REVISION
 
-Revision: $Revision: 7954 $
+Revision: $Revision: 7996 $
 
-Date: $Date: 2006-10-16 22:07:58 +0200 (lun, 16 oct 2006) $
+Date: $Date: 2006-11-01 09:24:38 +0100 (mer, 01 nov 2006) $
 
 See L<perlfaq> for source control details and availability.
 

@@ -127,7 +127,7 @@ What are perl4, perl5, or perl6?
 
 =item *
 
-What is Ponie?
+What was Ponie?
 
 =item *
 

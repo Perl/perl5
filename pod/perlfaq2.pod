@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq2 - Obtaining and Learning about Perl ($Revision: 7861 $)
+perlfaq2 - Obtaining and Learning about Perl ($Revision: 7996 $)
 
 =head1 DESCRIPTION
 
@@ -32,6 +32,15 @@ might be based upon a less current source release of perl).
 
 =head2 How can I get a binary version of perl?
 
+For Windows, ActiveState provides a pre-built Perl for free:
+
+	http://www.activestate.com/
+
+Sunfreeware.com provides binaries for many utilities, including
+Perl, for Solaris on both Intel and SPARC hardware:
+
+	http://www.sunfreeware.com/
+
 If you don't have a C compiler because your vendor for whatever
 reasons did not include one with your system, the best thing to do is
 grab a binary version of gcc from the net and use that to compile perl
@@ -40,13 +49,13 @@ get free compilers for, not for Unix systems.
 
 Some URLs that might help you are:
 
-    http://www.cpan.org/ports/
-    http://www.perl.com/pub/language/info/software.html
+	http://www.cpan.org/ports/
+	http://www.perl.com/pub/language/info/software.html
 
-Someone looking for a perl for Win16 might look to Laszlo Molnar's djgpp
-port in http://www.cpan.org/ports/#msdos , which comes with clear
-installation instructions.  A simple installation guide for MS-DOS using
-Ilya Zakharevich's OS/2 port is available at
+Someone looking for a perl for Win16 might look to Laszlo Molnar's
+djgpp port in http://www.cpan.org/ports/#msdos , which comes with
+clear installation instructions.  A simple installation guide for
+MS-DOS using Ilya Zakharevich's OS/2 port is available at
 http://www.cs.ruu.nl/%7Epiet/perl5dos.html
 and similarly for Windows 3.1 at http://www.cs.ruu.nl/%7Epiet/perlwin3.html .
 
@@ -501,9 +510,9 @@ the I<What is CPAN?> question earlier in this document.
 
 =head1 REVISION
 
-Revision: $Revision: 7861 $
+Revision: $Revision: 7996 $
 
-Date: $Date: 2006-09-29 22:19:18 +0200 (ven, 29 sep 2006) $
+Date: $Date: 2006-11-01 09:24:38 +0100 (mer, 01 nov 2006) $
 
 See L<perlfaq> for source control details and availability.
 

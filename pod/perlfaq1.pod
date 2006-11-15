@@ -1,6 +1,6 @@
 =head1 NAME
 
-perlfaq1 - General Questions About Perl ($Revision: 7822 $)
+perlfaq1 - General Questions About Perl ($Revision: 7997 $)
 
 =head1 DESCRIPTION
 
@@ -150,20 +150,20 @@ http://dev.perl.org/perl6/ .
 
 See L<perlhist> for a history of Perl revisions.
 
-=head2 What is Ponie?
+=head2 What was Ponie?
 
 (contributed by brian d foy)
 
 Ponie stands for "Perl On the New Internal Engine", started by Arthur
 Bergman from Fotango in 2003, and subsequently run as a project of The
-Perl Foundation. Instead of using the current Perl internals, Ponie
-creates a new one that provides a translation path from Perl 5 to Perl 6
-(or anything else that targets Parrot, actually). You can also just keep
-using Perl 5 with Parrot, the virtual machine which will compile and run
-Perl 6 bytecode.
+Perl Foundation. It was abandoned in 2006
+U<http://www.nntp.perl.org/group/perl.ponie.dev/487> .
 
-You can get more information at http://www.poniecode.org/ and
-http://www.parrotcode.org .
+Instead of using the current Perl internals, Ponie aimed to create a
+new one that would provide a translation path from Perl 5 to Perl 6
+(or anything else that targets Parrot, actually). You would have been
+able  to just keep using Perl 5 with Parrot, the virtual machine which
+will compile and run Perl 6 bytecode.
 
 =head2 What is perl6?
 
@@ -390,9 +390,9 @@ You might find these links useful:
 
 =head1 REVISION
 
-Revision: $Revision: 7822 $
+Revision: $Revision: 7997 $
 
-Date: $Date: 2006-09-11 14:22:59 +0200 (lun, 11 sep 2006) $
+Date: $Date: 2006-11-01 09:29:17 +0100 (mer, 01 nov 2006) $
 
 See L<perlfaq> for source control details and availability.
 
