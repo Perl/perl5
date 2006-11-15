@@ -45,11 +45,12 @@ typedef perl_os_thread pthread_t;
 #endif
 
 /* Values for 'state' member */
-#define PERL_ITHR_JOINABLE              0
 #define PERL_ITHR_DETACHED              1
 #define PERL_ITHR_JOINED                2
 #define PERL_ITHR_FINISHED              4
 #define PERL_ITHR_THREAD_EXIT_ONLY      8
+#define PERL_ITHR_NONVIABLE             16
+#define PERL_ITHR_DESTROYED             32
 
 typedef struct _ithread {
     struct _ithread *next;      /* Next thread in the list */
@@ -133,8 +134,10 @@ S_ithread_clear(pTHX_ ithread *thread)
 {
     PerlInterpreter *interp;
 
-    assert((thread->state & PERL_ITHR_FINISHED) &&
-           (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)));
+    assert(((thread->state & PERL_ITHR_FINISHED) &&
+            (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)))
+                ||
+           (thread->state & PERL_ITHR_NONVIABLE));
 
     interp = thread->interp;
     if (interp) {
@@ -159,28 +162,40 @@ S_ithread_clear(pTHX_ ithread *thread)
 STATIC void
 S_ithread_destruct(pTHX_ ithread *thread)
 {
-    dMY_POOL;
-
+    int destroy = 0;
 #ifdef WIN32
     HANDLE handle;
 #endif
-    /* Return if thread is still being used */
+    dMY_POOL;
+
+    /* Determine if thread can be destroyed now */
+    MUTEX_LOCK(&thread->mutex);
     if (thread->count != 0) {
-        return;
+        destroy = 0;
+    } else if (thread->state & PERL_ITHR_DESTROYED) {
+        destroy = 0;
+    } else if (thread->state & PERL_ITHR_NONVIABLE) {
+        thread->state |= PERL_ITHR_DESTROYED;
+        destroy = 1;
+    } else if (! (thread->state & PERL_ITHR_FINISHED)) {
+        destroy = 0;
+    } else if (! (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED))) {
+        destroy = 0;
+    } else {
+        thread->state |= PERL_ITHR_DESTROYED;
+        destroy = 1;
     }
+    MUTEX_UNLOCK(&thread->mutex);
+    if (! destroy) return;
 
     /* Main thread (0) is immortal and should never get here */
     assert(thread->tid != 0);
 
     /* Remove from circular list of threads */
     MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
-    if ((! thread->next || ! thread->prev) && ckWARN_d(WARN_INTERNAL)) {
-        Perl_warner(aTHX_ packWARN(WARN_INTERNAL),
-                    "Inconsistency in internal threads list found "
-                    "during destruction of thread %" UVuf, thread->tid);
-    }
-    if (thread->next) thread->next->prev = thread->prev;
-    if (thread->prev) thread->prev->next = thread->next;
+    assert(thread->prev && thread->next);
+    thread->next->prev = thread->prev;
+    thread->prev->next = thread->next;
     thread->next = NULL;
     thread->prev = NULL;
     MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
@@ -214,9 +229,8 @@ S_ithread_destruct(pTHX_ ithread *thread)
 STATIC int
 S_exit_warning(pTHX)
 {
-    dMY_POOL;
-
     int veto_cleanup;
+    dMY_POOL;
 
     MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
     veto_cleanup = (MY_POOL.running_threads || MY_POOL.joinable_threads);
@@ -261,17 +275,14 @@ int
 ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
     ithread *thread = (ithread *)mg->mg_ptr;
-    int cleanup;
 
     MUTEX_LOCK(&thread->mutex);
-    cleanup = ((--thread->count == 0) &&
-               (thread->state & PERL_ITHR_FINISHED) &&
-               (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)));
+    thread->count--;
     MUTEX_UNLOCK(&thread->mutex);
 
-    if (cleanup) {
-        S_ithread_destruct(aTHX_ thread);
-    }
+    /* Try to clean up thread */
+    S_ithread_destruct(aTHX_ thread);
+
     return (0);
 }
 
@@ -372,7 +383,6 @@ S_ithread_run(void * arg)
     I32 oldscope;
     int exit_app = 0;
     int exit_code = 0;
-    int cleanup;
 
     dJMPENV;
 
@@ -465,17 +475,15 @@ S_ithread_run(void * arg)
     if (thread->state & PERL_ITHR_THREAD_EXIT_ONLY) {
         exit_app = 0;
     }
-    /* Cleanup if detached */
-    cleanup = (thread->state & PERL_ITHR_DETACHED);
-    MUTEX_UNLOCK(&thread->mutex);
 
     /* Adjust thread status counts */
-    if (cleanup) {
+    if (thread->state & PERL_ITHR_DETACHED) {
         MY_POOL.detached_threads--;
     } else {
         MY_POOL.running_threads--;
         MY_POOL.joinable_threads++;
     }
+    MUTEX_UNLOCK(&thread->mutex);
     MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
     /* Exit application if required */
@@ -497,10 +505,8 @@ S_ithread_run(void * arg)
         my_exit(exit_code);
     }
 
-    /* Clean up detached thread */
-    if (cleanup) {
-        S_ithread_destruct(aTHX_ thread);
-    }
+    /* Try to clean up thread */
+    S_ithread_destruct(aTHX_ thread);
 
 #ifdef WIN32
     return ((DWORD)0);
@@ -562,8 +568,6 @@ S_ithread_create(
         int       exit_opt,
         SV       *params)
 {
-    dMY_POOL;
-
     ithread     *thread;
     CLONE_PARAMS clone_param;
     ithread     *current_thread = S_ithread_get(aTHX);
@@ -574,8 +578,9 @@ S_ithread_create(
     int          rc_stack_size = 0;
     int          rc_thread_create = 0;
 #endif
+    dMY_POOL;
 
-    /* Allocate thread structure in context of the main threads interpreter */
+    /* Allocate thread structure in context of the main thread's interpreter */
     {
         PERL_SET_CONTEXT(MY_POOL.main_thread.interp);
         thread = (ithread *)PerlMemShared_malloc(sizeof(ithread));
@@ -758,6 +763,7 @@ S_ithread_create(
         /* Must unlock mutex for destruct call */
         MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
         sv_2mortal(params);
+        thread->state |= PERL_ITHR_NONVIABLE;
         S_ithread_destruct(aTHX_ thread);
 #ifndef WIN32
         if (ckWARN_d(WARN_THREADS)) {
@@ -908,10 +914,10 @@ ithread_create(...)
             XSRETURN_UNDEF;     /* Mutex already unlocked */
         }
         ST(0) = sv_2mortal(S_ithread_to_SV(aTHX_ Nullsv, thread, classname, FALSE));
+        MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
         /* Let thread run */
         MUTEX_UNLOCK(&thread->mutex);
-        MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
         /* XSRETURN(1); - implied */
 
@@ -1110,7 +1116,7 @@ ithread_detach(...)
     PREINIT:
         ithread *thread;
         int detach_err;
-        int cleanup;
+        int cleanup = 0;
         dMY_POOL;
     CODE:
         /* Check if the thread is detachable */
@@ -1132,21 +1138,18 @@ ithread_detach(...)
 #else
         PERL_THREAD_DETACH(thread->thr);
 #endif
-        /* Cleanup if finished */
-        cleanup = (thread->state & PERL_ITHR_FINISHED);
-        MUTEX_UNLOCK(&thread->mutex);
 
-        if (cleanup) {
+        if (thread->state & PERL_ITHR_FINISHED) {
             MY_POOL.joinable_threads--;
         } else {
             MY_POOL.running_threads--;
             MY_POOL.detached_threads++;
         }
+        MUTEX_UNLOCK(&thread->mutex);
         MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
-        if (cleanup) {
-            S_ithread_destruct(aTHX_ thread);
-        }
+        /* Try to cleanup thread */
+        S_ithread_destruct(aTHX_ thread);
 
 
 void
