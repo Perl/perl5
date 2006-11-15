@@ -2663,7 +2663,7 @@ Perl_sv_2pv_flags(pTHX_ register SV *sv, STRLEN *lp, I32 flags)
                 {
                     char *str = NULL;
                     I32 haseval = 0;
-                    I32 flags = 0;
+                    U32 flags = 0;
                     (str) = CALLREG_AS_STR(mg,lp,&flags,&haseval);
                     if (flags & 1)
 	                SvUTF8_on(sv);
