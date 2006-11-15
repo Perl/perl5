@@ -37,6 +37,10 @@ my_cxt_setsv_p(SV* sv _pMY_CXT)
 /* from exception.c */
 int exception(int);
 
+/* from core_or_not.inc */
+bool sv_setsv_cow_hashkey_core(void);
+bool sv_setsv_cow_hashkey_notcore(void);
+
 /* A routine to test hv_delayfree_ent
    (which itself is tested by testing on hv_free_ent  */
 
@@ -513,3 +517,9 @@ my_cxt_setsv(sv)
 	SvREFCNT_dec(MY_CXT.sv);
 	my_cxt_setsv_p(sv _aMY_CXT);
 	SvREFCNT_inc(sv);
+
+bool
+sv_setsv_cow_hashkey_core()
+
+bool
+sv_setsv_cow_hashkey_notcore()
