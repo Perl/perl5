@@ -10,7 +10,8 @@
 #endif
 
 bool
-CAT2(sv_setsv_cow_hashkey_, SUFFIX) (pTHX) {
+CAT2(sv_setsv_cow_hashkey_, SUFFIX) () {
+    dTHX;
     SV *source = newSVpvn_share("pie", 3, 0);
     SV *destination = newSV(0);
     bool result;
