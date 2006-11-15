@@ -17,7 +17,7 @@ CAT2(sv_setsv_cow_hashkey_, SUFFIX) (pTHX) {
 
     if(!SvREADONLY(source) && !SvFAKE(source)) {
 	SvREFCNT_dec(source);
-	croak ("Creating a shared hash key scalar failed when "
+	Perl_croak(aTHX_ "Creating a shared hash key scalar failed when "
 	       STRINGIFY(SUFFIX) " got flags %"UVxf, (UV)SvFLAGS(source));
     }
 
