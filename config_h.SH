@@ -1156,6 +1156,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* HASATTRIBUTE_FORMAT:
  *	Can we handle GCC attribute for checking printf-style formats
  */
+/* PRINTF_FORMAT_NULL_OK:
+ *	Allows __printf__ format to be null when checking printf-style
+ */
 /* HASATTRIBUTE_MALLOC:
  *	Can we handle GCC attribute for malloc-style functions.
  */
@@ -1175,6 +1178,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	Can we handle GCC attribute for warning on unused results
  */
 #$d_attribute_format HASATTRIBUTE_FORMAT	/**/
+#$d_printf_format_null PRINTF_FORMAT_NULL_OK	/**/
 #$d_attribute_noreturn HASATTRIBUTE_NORETURN	/**/
 #$d_attribute_malloc HASATTRIBUTE_MALLOC	/**/
 #$d_attribute_nonnull HASATTRIBUTE_NONNULL	/**/

@@ -1541,6 +1541,10 @@ d_PRIi64 (quadfio.U):
 	This variable conditionally defines the PERL_PRIi64 symbol, which
 	indiciates that stdio has a symbol to print 64-bit decimal numbers.
 
+d_printf_format_null:
+	This variable conditionally defines PRINTF_FORMAT_NULL_OK, which
+	indicates the C compiler allows printf-like formats to be null.
+
 d_PRIo64 (quadfio.U):
 	This variable conditionally defines the PERL_PRIo64 symbol, which
 	indiciates that stdio has a symbol to print 64-bit octal numbers.

@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Nov  8 17:31:20 CET 2006 [metaconfig 3.0 PL70]
+# Generated on Wed Nov 15 22:26:01 CET 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -366,6 +366,7 @@ d_attribute_noreturn=''
 d_attribute_pure=''
 d_attribute_unused=''
 d_attribute_warn_unused_result=''
+d_printf_format_null=''
 d_bcmp=''
 d_bcopy=''
 d_builtin_choose_expr=''
@@ -3948,9 +3949,21 @@ $startsh
 EOS
 cat <<'EOSC' >>whoa
 dflt=y
-echo " "
-echo "*** WHOA THERE!!! ***" >&4
-echo "    The $hint value for \$$var on this machine was \"$was\"!" >&4
+case "$hint" in
+    recommended)
+	case "$hintfile" in
+	'')	echo "The $hint value for \$$var on this machine was \"$was\"!" >&4
+		;;
+	*)	echo "Hmm.  Based on the hints in hints/$hintfile.sh, " >&4
+		echo "the $hint value for \$$var on this machine was \"$was\"!" >&4
+		;;
+	esac
+	;;
+    *)	echo " "
+	echo "*** WHOA THERE!!! ***" >&4
+	echo "    The $hint value for \$$var on this machine was \"$was\"!" >&4
+	;;
+esac
 rp="    Keep the $hint value?"
 . ./myread
 case "$ans" in
@@ -9974,6 +9987,50 @@ fi
 *) val="$d_attribute_format" ;;
 esac
 set d_attribute_format
+eval $setvar
+$rm -f attrib*
+
+: Look for GCC-style attribute format with null format allowed
+case "$d_printf_format_null" in
+'') case "$d_attribute_format" in
+    $define)
+	echo " "
+	echo "Checking whether your compiler allows __printf__ format to be null ..." >&4
+$cat >attrib.c <<EOCP
+#include <stdio.h>
+#$i_stdlib I_STDLIB
+#ifdef I_STDLIB
+#include <stdlib.h>
+#endif
+int null_printf (char* pat,...) __attribute__((__format__(__printf__,1,2)));
+int null_printf (char* pat,...) { return (int)pat; }
+int main () { exit(null_printf(NULL)); }
+EOCP
+	if $cc $ccflags -o attrib attrib.c >attrib.out 2>&1 ; then
+	    : run the executable in case it produces a run-time warning
+	    if $run ./attrib >>attrib.out 2>&1; then
+		if $contains 'warning' attrib.out >/dev/null 2>&1; then
+		    echo "Your C compiler doesn't allow __printf__ format to be null."
+		    val="$undef"
+		else
+		    echo "Your C compiler allows __printf__ format to be null."
+		    val="$define"
+		fi
+	    else
+	    echo "Your C compiler executable failed with __printf__ format null."
+	    val="$undef"
+	fi
+    else
+	echo "Your C compiler fails with __printf__ format null."
+	val="$undef"
+    fi
+    ;;
+    *)  val="$undef" ;;
+    esac
+;;
+*)  val="$d_printf_format_null" ;;
+esac
+set d_printf_format_null
 eval $setvar
 $rm -f attrib*
 
@@ -21668,6 +21725,7 @@ d_phostname='$d_phostname'
 d_pipe='$d_pipe'
 d_poll='$d_poll'
 d_portable='$d_portable'
+d_printf_format_null='$d_printf_format_null'
 d_procselfexe='$d_procselfexe'
 d_pthread_atfork='$d_pthread_atfork'
 d_pthread_attr_setscope='$d_pthread_attr_setscope'
