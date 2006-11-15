@@ -31,10 +31,15 @@ struct reg_substr_data;
 struct reg_data;
 
 struct regexp_engine;
+typedef struct regexp_paren_ofs {
+    I32 *startp;
+    I32 *endp;
+} regexp_paren_ofs;
 
 typedef struct regexp {
-	I32 *startp;
+        I32 *startp;
 	I32 *endp;
+        regexp_paren_ofs *swap;
 	regnode *regstclass;
         struct reg_substr_data *substrs;
 	char *precomp;		/* pre-compilation regular expression */

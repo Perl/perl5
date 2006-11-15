@@ -747,6 +747,7 @@ F<regexp.h> contains the base structure definition:
     typedef struct regexp {
         I32 *startp;
         I32 *endp;
+        regexp_paren_ofs *swap;
         regnode *regstclass;
         struct reg_substr_data *substrs;
         char *precomp;          /* pre-compilation regular expression */
@@ -802,10 +803,18 @@ These fields are used to keep track of how many paren groups could be matched
 in the pattern, which was the last open paren to be entered, and which was
 the last close paren to be entered.
 
-=item C<startp>, C<endp>
+=item C<startp>, C<endp>, C<swap>
 
 These fields store arrays that are used to hold the offsets of the begining
 and end of each capture group that has matched. -1 is used to indicate no match.
+
+C<swap> is an extra set of startp/endp stored in a C<regexp_paren_ofs>
+struct. This is used when the last successful match was from same pattern
+as the current pattern, so that a partial match doesn't overwrite the
+previous match's results. When this field is data filled the matching
+engine will swap buffers before every match attempt. If the match fails,
+then it swaps them back. If it's successful it leaves them. This field
+is populated on demand and is by default null.
 
 These are the source for @- and @+.
 

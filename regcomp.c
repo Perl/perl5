@@ -113,7 +113,8 @@ typedef struct RExC_state_t {
     I32		sawback;		/* Did we see \1, ...? */
     U32		seen;
     I32		size;			/* Code size. */
-    I32		npar;			/* () count. */
+    I32		npar;			/* Capture buffer count, (OPEN). */
+    I32		cpar;			/* Capture buffer count, (CLOSE). */
     I32		nestroot;		/* root parens we are in - used by accept */
     I32		extralen;
     I32		seen_zerolen;
@@ -153,6 +154,7 @@ typedef struct RExC_state_t {
 #define RExC_seen	(pRExC_state->seen)
 #define RExC_size	(pRExC_state->size)
 #define RExC_npar	(pRExC_state->npar)
+#define RExC_cpar	(pRExC_state->cpar)
 #define RExC_nestroot   (pRExC_state->nestroot)
 #define RExC_extralen	(pRExC_state->extralen)
 #define RExC_seen_zerolen	(pRExC_state->seen_zerolen)
@@ -3943,6 +3945,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     RExC_end = xend;
     RExC_naughty = 0;
     RExC_npar = 1;
+    RExC_cpar = 1;
     RExC_nestroot = 0;
     RExC_size = 0L;
     RExC_emit = &PL_regdummy;
@@ -4013,6 +4016,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     r->substrs = 0;			/* Useful during FAIL. */
     r->startp = 0;			/* Useful during FAIL. */
     r->endp = 0;			
+    r->swap = NULL; 
     r->paren_names = 0;
     
     if (RExC_seen & REG_SEEN_RECURSE) {
@@ -4040,6 +4044,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     RExC_end = xend;
     RExC_naughty = 0;
     RExC_npar = 1;
+    RExC_cpar = 1;
     RExC_emit_start = r->program;
     RExC_emit = r->program;
 #ifdef DEBUGGING
@@ -4482,7 +4487,8 @@ reStudy:
     }
     Newxz(r->startp, RExC_npar, I32);
     Newxz(r->endp, RExC_npar, I32);
-    
+    /* assume we don't need to swap parens around before we match */
+
     DEBUG_DUMP_r({
         PerlIO_printf(Perl_debug_log,"Final program:\n");
         regdump(r);
@@ -5326,6 +5332,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    ender = reg_node(pRExC_state, TAIL);
 	    break;
 	case 1:
+	    RExC_cpar++;
 	    ender = reganode(pRExC_state, CLOSE, parno);
 	    if (!SIZE_ONLY && RExC_seen & REG_SEEN_RECURSE) {
 		DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
@@ -6270,11 +6277,20 @@ tryagain:
 	case 'c':
 	case '0':
 	    goto defchar;
+	case 'R': 
 	case '1': case '2': case '3': case '4':
 	case '5': case '6': case '7': case '8': case '9':
 	    {
-		const I32 num = atoi(RExC_parse);
-
+		I32 num;
+		bool isrel=(*RExC_parse=='R');
+		if (isrel)
+		    RExC_parse++;
+		num = atoi(RExC_parse);
+                if (isrel) {
+                    num = RExC_cpar - num;
+                    if (num < 1)
+                        vFAIL("Reference to nonexistent or unclosed group");
+                }
 		if (num > 9 && num >= RExC_npar)
 		    goto defchar;
 		else {
@@ -6282,8 +6298,16 @@ tryagain:
 		    while (isDIGIT(*RExC_parse))
 			RExC_parse++;
 
-		    if (!SIZE_ONLY && num > (I32)RExC_rx->nparens)
-			vFAIL("Reference to nonexistent group");
+		    if (!SIZE_ONLY) {
+		        if (num > (I32)RExC_rx->nparens)
+			    vFAIL("Reference to nonexistent group");
+			/* People make this error all the time apparently.
+			   So we cant fail on it, even though we should 
+			
+			else if (num >= RExC_cpar)
+			    vFAIL("Reference to unclosed group will always match");
+			*/
+		    }
 		    RExC_sawback = 1;
 		    ret = reganode(pRExC_state,
 				   (U8)(FOLD ? (LOC ? REFFL : REFF) : REF),
@@ -6372,6 +6396,7 @@ tryagain:
 		    case 'p':
 		    case 'P':
                     case 'N':
+                    case 'R':
 			--p;
 			goto loopdone;
 		    case 'n':
@@ -8502,6 +8527,11 @@ Perl_pregfree(pTHX_ struct regexp *r)
     }
     Safefree(r->startp);
     Safefree(r->endp);
+    if (r->swap) {
+        Safefree(r->swap->startp);
+        Safefree(r->swap->endp);
+        Safefree(r->swap);
+    }
     Safefree(r);
 }
 
@@ -8544,6 +8574,14 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
     Copy(r->startp, ret->startp, npar, I32);
     Newx(ret->endp, npar, I32);
     Copy(r->startp, ret->startp, npar, I32);
+    if(r->swap) {
+        Newx(ret->swap, 1, regexp_paren_ofs);
+        /* no need to copy these */
+        Newx(ret->swap->startp, npar, I32);
+        Newx(ret->swap->endp, npar, I32);
+    } else {
+        ret->swap = NULL;
+    }
 
     Newx(ret->substrs, 1, struct reg_substr_data);
     for (s = ret->substrs->data, i = 0; i < 3; i++, s++) {

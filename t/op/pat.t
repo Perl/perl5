@@ -3216,10 +3216,10 @@ $_ = "x"; s/x/func "in multiline subst"/em;
 #$_ = "x"; /x(?{func "in regexp"})/;
 #$_ = "x"; /x(?{func "in multiline regexp"})/m;
 
-# bug #19049
+# bug RT#19049
 $_="abcdef\n";
 @x = m/./g;
-ok("abcde" eq "$`", '# TODO #19049 - global match not setting $`');
+ok("abcde" eq "$`", 'RT#19049 - global match not setting $`');
 
 ok("123\x{100}" =~ /^.*1.*23\x{100}$/, 'uft8 + multiple floating substr');
 
@@ -4011,6 +4011,24 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
 #-------------------------------------------------------------------
 
 # Keep the following tests last -- they may crash perl
+{   
+    # RT#19049 / RT#38869
+    my @list = (
+        'ab cdef', # matches regex
+        ( 'e' x 40000 ) .'ab c' # matches not, but 'ab c' matches part of it
+    );
+    my $y;
+    my $x;
+    foreach (@list) {
+        m/ab(.+)cd/i; # the ignore-case seems to be important
+        $y = $1; # use $1, which might not be from the last match!
+        $x = substr($list[0],$-[0],$+[0]-$-[0]);
+    }
+    iseq($y,' ',
+        'pattern in a loop, failure should not affect previous success');
+    iseq($x,'ab cd',
+        'pattern in a loop, failure should not affect previous success');
+}
 
 ok(("a" x (2**15 - 10)) =~ /^()(a|bb)*$/, "Recursive stack cracker: #24274")
     or print "# Unexpected outcome: should pass or crash perl\n";
@@ -4034,4 +4052,4 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
 # Put new tests above the line, not here.
 
 # Don't forget to update this!
-BEGIN { print "1..1345\n" };
+BEGIN { print "1..1347\n" };

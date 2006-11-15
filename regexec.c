@@ -1726,7 +1726,28 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	else				/* pos() not defined */
 	    reginfo.ganch = strbeg;
     }
-
+    if (PL_curpm && (PM_GETRE(PL_curpm) == prog)) {
+        I32 *t;
+        if (!prog->swap) {
+        /* We have to be careful. If the previous successful match
+           was from this regex we don't want a subsequent paritally
+           successful match to clobber the old results. 
+           So when we detect this possibility we add a swap buffer
+           to the re, and switch the buffer each match. If we fail
+           we switch it back, otherwise we leave it swapped.
+        */
+            Newxz(prog->swap, 1, regexp_paren_ofs);
+            /* no need to copy these */
+            Newxz(prog->swap->startp, prog->nparens + 1, I32);
+            Newxz(prog->swap->endp, prog->nparens + 1, I32);
+        }
+        t = prog->swap->startp;
+        prog->swap->startp = prog->startp;
+        prog->startp = t;
+        t = prog->swap->endp;
+        prog->swap->endp = prog->endp;
+        prog->endp = t;
+    }
     if (!(flags & REXEC_CHECKED) && (prog->check_substr != NULL || prog->check_utf8 != NULL)) {
 	re_scream_pos_data d;
 
@@ -2074,6 +2095,16 @@ phooey:
 			  PL_colors[4], PL_colors[5]));
     if (PL_reg_eval_set)
 	restore_pos(aTHX_ prog);
+    if (prog->swap) {
+        /* we failed :-( roll it back */
+        I32 *t;
+        t = prog->swap->startp;
+        prog->swap->startp = prog->startp;
+        prog->startp = t;
+        t = prog->swap->endp;
+        prog->swap->endp = prog->endp;
+        prog->endp = t;
+    }
     return 0;
 }
 
@@ -2195,8 +2226,8 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
      * on those tests seems to be returning null fields from matches.
      * --jhi */
 #if 1
-    sp = prog->startp;
-    ep = prog->endp;
+    sp = PL_regstartp;
+    ep = PL_regendp;
     if (prog->nparens) {
 	register I32 i;
 	for (i = prog->nparens; i > (I32)*PL_reglastparen; i--) {
@@ -2207,7 +2238,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
 #endif
     REGCP_SET(lastcp);
     if (regmatch(reginfo, prog->program + 1)) {
-	prog->endp[0] = PL_reginput - PL_bostr;
+	PL_regendp[0] = PL_reginput - PL_bostr;
 	return 1;
     }
     if (reginfo->cutpoint)

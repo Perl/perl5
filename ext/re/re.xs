@@ -19,7 +19,7 @@ extern char*	my_re_intuit_start (pTHX_ regexp *prog, SV *sv, char *strpos,
 				    char *strend, U32 flags,
 				    struct re_scream_pos_data_s *data);
 extern SV*	my_re_intuit_string (pTHX_ regexp *prog);
-extern char*	my_reg_stringify (pTHX_ MAGIC *mg, U32 *flags, STRLEN *lp, I32 *haseval);
+extern char*	my_reg_stringify (pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags,  I32 *haseval);
 
 #if defined(USE_ITHREADS)
 extern regexp*	my_regdupe (pTHX_ const regexp *r, CLONE_PARAMS *param);

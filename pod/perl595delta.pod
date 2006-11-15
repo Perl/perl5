@@ -113,7 +113,13 @@ quantifiers. (Yves Orton)
 
 The regex engine now supports a number of special purpose backtrack
 control verbs: (*THEN), (*PRUNE), (*MARK), (*SKIP), (*COMMIT), (*FAIL)
-and (*ACCEPT). See L<perlre> for their descriptions.
+and (*ACCEPT). See L<perlre> for their descriptions. (Yves Orton)
+
+=item Relative backreferences
+
+A new syntax C<\R1> ("1" being any positive decimal integer) allows
+relative backreferencing. This should make it easier to embed patterns
+that contain backreferences. (Yves Orton)
 
 =back
 

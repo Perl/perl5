@@ -3495,6 +3495,16 @@ prepend a zero to make the number at least two digits: C<\07>
 The <-- HERE shows in the regular expression about where the problem was
 discovered.
 
+=item Reference to nonexistent or unclosed group in regex; marked by <-- HERE in m/%s/
+
+(F) You used something like C<\R7> in your regular expression, but there are
+not at least seven sets of closed capturing parentheses in the expression before
+where the C<\R7> was located. It's also possible you forgot to escape the
+backslash.
+
+The <-- HERE shows in the regular expression about where the problem was
+discovered.
+
 =item Reference to nonexistent named group in regex; marked by <-- HERE in m/%s/
 
 (F) You used something like C<\k'NAME'> or C<< \k<NAME> >> in your regular

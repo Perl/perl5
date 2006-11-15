@@ -246,7 +246,9 @@ X<word> X<whitespace>
 	     so you may end up with malformed pieces of UTF-8.
 	     Unsupported in lookbehind.
     \1       Backreference to a specific group.
-	    '1' may actually be any positive integer.
+	     '1' may actually be any positive integer.
+    \R1      Relative backreference to a preceding closed group.
+	     '1' may actually be any positive integer.
     \k<name> Named backreference
     \N{name} Named unicode character, or unicode escape
     \x12     Hexadecimal escape sequence
@@ -469,7 +471,15 @@ ambiguity by interpreting \10 as a backreference only if at least 10
 left parentheses have opened before it.  Likewise \11 is a
 backreference only if at least 11 left parentheses have opened
 before it.  And so on.  \1 through \9 are always interpreted as
-backreferences.
+backreferences. 
+
+X<relative backreference>
+In Perl 5.10 it is possible to relatively address a capture buffer by
+using the C<\RNNN> notation, where C<NNN> is negative offset to a
+preceding completed capture buffer. Thus C<\R1> refers to the last
+buffer closed, C<\R2> refers to the buffer before that, and so on. Note
+especially that C</(foo)(\R1)/> refers to the capture buffer containing
+C<foo>, not to the buffer containing C<\R1>.
 
 Additionally, as of Perl 5.10 you may use named capture buffers and named
 backreferences. The notation is C<< (?<name>...) >> and C<< \k<name> >>
@@ -884,6 +894,9 @@ C<(?R)>. If PARNO is preceded by a plus or minus sign then it is assumed
 to be relative, with negative numbers indicating preceding capture buffers
 and positive ones following. Thus C<(?-1)> refers to the most recently
 declared buffer, and C<(?+1)> indicates the next buffer to be declared.
+Note that the counting for relative recursion differs from that of
+relative backreferences, in that with recursion unclosed buffers B<are>
+included.
 
 The following pattern matches a function foo() which may contain
 balanced parentheses as the argument.
