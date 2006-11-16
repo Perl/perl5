@@ -1153,7 +1153,7 @@ Extensions_reonly: buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --dynamic +re
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --dynamic +re
 
-Extensions_static : MakePPPort buildext.pl
+Extensions_static : buildext.pl $(PERLDEP) $(CONFIGPM)
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) $(EXTDIR) --static
 	$(MINIPERL) -I..\lib buildext.pl $(MAKE) $(PERLDEP) ext --static
