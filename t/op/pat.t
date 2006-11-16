@@ -3805,6 +3805,18 @@ sub iseq($$;$) {
         ok( "A${c}B" =~ /A[\0-\x{10000}]B/, "unicode range - $x");
     }
 }
+{
+    my $spaces="      ";
+    local $_=join 'bar',$spaces,$spaces;
+    our $count=0;
+    s/(?>\s+bar)(?{$count++})//g;
+    iseq($_,$spaces,"SUSPEND final string");
+    iseq($count,1,"Optimiser should have prevented more than one match");
+}
+
+# Test counter is at bottom of file. Put new tests above here.
+#-------------------------------------------------------------------
+# Keep the following tests last -- they may crash perl
 
 # [perl #45337] utf8 + "[a]a{2}" + /$.../ = panic: sv_len_utf8 cache
 
@@ -3815,5 +3827,6 @@ sub iseq($$;$) {
     ok("aaa" =~ /$s/, "#45337");
 }
 
-# Don't forget to update this!
-BEGIN{print "1..1268\n"};
+# Put new tests above the dotted line about a page above this comment
+
+BEGIN{print "1..1270\n"};
