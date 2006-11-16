@@ -4007,9 +4007,17 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     iseq($all, 'foo((2*3)+4-3) + bar(2*(3+4)-1*(2-3))');
     iseq($all, $_);
 }
+{
+    my $spaces="      ";
+    local $_=join 'bar',$spaces,$spaces;
+    our $count=0;
+    s/(?>\s+bar)(?{$count++})//g;
+    iseq($_,$spaces,"SUSPEND final string");
+    iseq($count,1,"Optimiser should have prevented more than one match");
+}
 
+# Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
-
 # Keep the following tests last -- they may crash perl
 {   
     # RT#19049 / RT#38869
@@ -4049,7 +4057,7 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
     iseq($_,"!Bang!1!Bang!2!Bang!3!Bang!");
 }
 
-# Put new tests above the line, not here.
+# Put new tests above the dotted line about a page above this comment
 
 # Don't forget to update this!
-BEGIN { print "1..1347\n" };
+BEGIN { print "1..1349\n" };
