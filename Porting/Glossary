@@ -558,6 +558,10 @@ d_csh (d_csh.U):
 	This variable conditionally defines the CSH symbol, which
 	indicates to the C program that the C-shell exists.
 
+d_ctermid (d_ctermid.U):
+	This variable conditionally defines CTERMID if ctermid() is
+	available to generate filename for terminal.
+
 d_ctermid_r (d_ctermid_r.U):
 	This variable conditionally defines the HAS_CTERMID_R symbol,
 	which indicates to the C program that the ctermid_r()
@@ -588,7 +592,7 @@ d_difftime (d_difftime.U):
 	This variable conditionally defines the HAS_DIFFTIME symbol, which
 	indicates to the C program that the difftime() routine is available.
 
-d_dir_dd_fd (d_dir_dd_fd.U)
+d_dir_dd_fd (d_dir_dd_fd.U):
 	This variable conditionally defines the HAS_DIR_DD_FD symbol, which
 	indicates that the DIR directory stream type contains a member
 	variable called dd_fd.
@@ -1541,7 +1545,7 @@ d_PRIi64 (quadfio.U):
 	This variable conditionally defines the PERL_PRIi64 symbol, which
 	indiciates that stdio has a symbol to print 64-bit decimal numbers.
 
-d_printf_format_null:
+d_printf_format_null (d_attribut.U):
 	This variable conditionally defines PRINTF_FORMAT_NULL_OK, which
 	indicates the C compiler allows printf-like formats to be null.
 
