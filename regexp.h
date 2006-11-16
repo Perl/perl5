@@ -189,8 +189,6 @@ typedef struct regexp_engine {
 
 #define FBMrf_MULTILINE	1
 
-struct re_scream_pos_data_s;
-
 /* an accepting state/position*/
 struct _reg_trie_accepted {
     U8   *endpos;
