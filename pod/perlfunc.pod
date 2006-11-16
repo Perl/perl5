@@ -870,10 +870,11 @@ X<close>
 
 =item close
 
-Closes the file or pipe associated with the file handle, returning
-true only if IO buffers are successfully flushed and closes the system
-file descriptor.  Closes the currently selected filehandle if the
-argument is omitted.
+Closes the file or pipe associated with the file handle, flushes the IO
+buffers, and closes the system file descriptor.  Returns true if those
+operations have succeeded and if no error was reported by any PerlIO
+layer.  Closes the currently selected filehandle if the argument is
+omitted.
 
 You don't have to close FILEHANDLE if you are immediately going to do
 another C<open> on it, because C<open> will close it for you.  (See
