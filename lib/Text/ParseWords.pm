@@ -133,7 +133,7 @@ sub old_shellwords {
 		Carp::carp("Unmatched single quote: $_");
 		return();
 	    }
-	    elsif (s/\A\\(.)//s) {
+	    elsif (s/\A\\(.?)//s) {
 		$snippet = $1;
 	    }
 	    elsif (s/\A([^\s\\'"]+)//) {

@@ -7,7 +7,7 @@ BEGIN {
 
 use warnings;
 use Text::ParseWords;
-use Test::More tests => 26;
+use Test::More tests => 27;
 
 @words = shellwords(qq(foo "bar quiz" zoo));
 is($words[0], 'foo');
@@ -117,3 +117,9 @@ is($result, "");
 # from parse_line, so it's behavior is more like /bin/sh
 $result = join('|', shellwords(" aa \\  \\ bb ", " \\  ", "cc dd ee\\ "));
 is($result, "aa| | bb| |cc|dd|ee ");
+
+$SIG{ALRM} = sub {die "Timeout!"};
+alarm(3);
+@words = Text::ParseWords::old_shellwords("foo\\");
+is(@words, 1);
+alarm(0);
