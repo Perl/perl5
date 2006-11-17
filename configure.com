@@ -49,6 +49,7 @@ $ builder = "MMK"
 $ use_vmsdebug_perl = "n"
 $ use64bitall = "n"
 $ use64bitint = "n"
+$ uselongdouble = "n"
 $ uselargefiles = "n"
 $ usedecterm = "n"
 $ usesitecustomize = "n"
@@ -543,8 +544,9 @@ $       THEN
 $! 17-DEC-1999 Improved to turn "[.foo.bar]baz.c_buz" into
 $! "[.foo.bar]baz_c.buz" to cover unzipped archives and put
 $! "[.foo.bar]baz.c_buz,baz_c.buz" into missing list if neither is found.
-$         basename[f$locate(".",basename),1] := _
-$         dot_ele = F$ELEMENT(dots - 1,"_",basename)
+$         dotloc = f$locate(".",basename)
+$         basename[dotloc,1] := "_"
+$         dot_ele = F$ELEMENT(dots - 1,"_",f$extract(dotloc,f$length(basename),basename))
 $         basename = -
             f$extract(0,f$length(basename)-(f$length(dot_ele)+1),basename) -
               + "." + dot_ele
@@ -2082,7 +2084,7 @@ $Include_dirs:
 $!: What should the include directory be ? (.TLB text libraries)
 $ dflt = gcclib_olb 
 $ rp = "Where are the include files you want to use? "
-$ IF f$length( rp + "[''dflt'] " ).gt.76
+$ IF f$length( rp + "[''dflt'] " ) .GT. 76
 $ THEN rp = F$FAO("!AS!/!AS",rp,"[''dflt'] ")
 $ ELSE rp = rp + "[''dflt'] "
 $ ENDIF
@@ -2475,7 +2477,7 @@ $	    IF (archname .NES. "VMS_VAX") .AND. ("''f$extract(1,3, f$getsyi(""version"
 $     	    THEN
 $       	echo ""
 $       	echo "Threaded Perl can be linked to use multiple kernel threads on your system."
-$       	echo "This feature allows multiple user threads to make use of multiple CPUs on
+$       	echo "This feature allows multiple user threads to make use of multiple CPUs on"
 $		echo "a multi-processor machine."
 $       	bool_dflt = "n"
 $		IF f$type(usekernelthreads) .nes. ""
@@ -2488,6 +2490,7 @@ $       	IF ans
 $		THEN
 $           	    thread_kernel = "MTK=MTK=1"
 $	    	    usekernelthreads = "define"
+$           	ENDIF
 $           ENDIF
 $       ENDIF
 $     ENDIF
@@ -2744,7 +2747,6 @@ $   IF xxx .EQS. "DynaLoader" THEN goto ext_loop     ! omit
 $   IF xxx .EQS. "SDBM_File/sdbm" THEN goto ext_loop ! sub extension - omit
 $   IF xxx .EQS. "Devel/PPPort/harness" THEN goto ext_loop ! sub extension - omit
 $   IF F$EXTRACT(0,7,xxx) .EQS. "Encode/" THEN goto ext_loop  ! sub extension - omit
-$   IF F$EXTRACT(0,5,xxx) .EQS. "Win32" THEN goto ext_loop  ! no Win32 API here
 $   IF xxx .EQS. "B/C" THEN goto ext_loop  ! sub extension - omit
 $   IF F$EXTRACT(0,8,line) .EQS. "vms/ext/" THEN -
       xxx = "VMS/" + F$EXTRACT(8,line_len - 20,line)
@@ -2771,6 +2773,7 @@ $ THEN
 $   dflt = dflt - "Socket"            ! optional on VMS
 $ ENDIF
 $ IF .NOT. use_threads  THEN dflt = dflt - "Thread"
+$ dflt = dflt - "Win32API/File" - "Win32CORE" - "Win32"  ! need Dave Cutler's other project
 $ dflt = F$EDIT(dflt,"TRIM,COMPRESS")
 $!
 $! Ask for their default list of extensions to build
@@ -3217,11 +3220,6 @@ $   d_quad = "define"
 $   quadtype = "long long"
 $   uquadtype = "unsigned long long"
 $   quadkind  = "QUAD_IS_LONG_LONG"
-$   d_frexpl = "define"
-$   d_isnan = "define"
-$   d_isnanl = "define"
-$   d_modfl = "define"
-$   d_modflproto = "define"
 $ ELSE
 $   d_PRId64 = "undef"
 $   d_PRIXU64 = "undef"
@@ -3238,11 +3236,26 @@ $   d_quad = "undef"
 $   quadtype = "long"
 $   uquadtype = "unsigned long"
 $   quadkind  = "QUAD_IS_LONG"
+$ ENDIF
+$!
+$ IF archname .NES. "VMS_VAX"
+$ THEN
+$   d_frexpl = "define"
+$   d_modfl = "define"
+$   d_modflproto = "define"
+$ ELSE
 $   d_frexpl = "undef"
-$   d_isnan = "undef"
-$   d_isnanl = "undef"
 $   d_modfl = "undef"
 $   d_modflproto = "undef"
+$ ENDIF
+$!
+$ IF useieee .OR. useieee .EQS. "define"
+$ THEN
+$   d_isnan = "define"
+$   d_isnanl = "define"
+$ ELSE
+$   d_isnan = "undef"
+$   d_isnanl = "undef"
 $ ENDIF
 $!
 $! Now some that we build up
@@ -5613,7 +5626,7 @@ $!
 $!	Use the same list of signals the CRTL does for recent systems, but cook our own for very old systems.
 $!	Note that the list controls what signals can be caught by name as well as what can be raised via kill().
 $!
-$       if  vms_ver .LT. "6.2"
+$       if  vms_ver .LTS. "6.2"
 $	then
 $!          since SIGBUS and SIGSEGV indistinguishable, make them the same here.
 $           sig_name="ZERO HUP INT QUIT ILL TRAP IOT EMT FPE KILL BUS SEGV SYS PIPE ALRM TERM ABRT"
@@ -5769,6 +5782,7 @@ $ WC "d_attribute_noreturn='undef'"
 $ WC "d_attribute_pure='undef'"
 $ WC "d_attribute_unused='undef'"
 $ WC "d_attribute_warn_unused_result='undef'"
+$ WC "d_printf_format_null='undef'"
 $ WC "d_bcmp='" + d_bcmp + "'"
 $ WC "d_bcopy='" + d_bcopy + "'"
 $ WC "d_bincompat3='undef'"
@@ -5791,6 +5805,7 @@ $ WC "d_copysignl='define'"
 $ WC "d_cplusplus='" + d_cplusplus + "'"
 $ WC "d_crypt='define'"
 $ WC "d_csh='undef'"
+$ WC "d_ctermid='define'"
 $ WC "d_cuserid='define'"
 $ WC "d_c99_variadic_macros='undef'"
 $ WC "d_dbl_dig='define'"
@@ -6187,6 +6202,7 @@ $ WC "i_fcntl='" + i_fcntl + "'"
 $ WC "i_float='define'"
 $ WC "i_fp='undef'"
 $ WC "i_fp_class='undef'"
+$ WC "i_gdbm='undef'"
 $ WC "i_grp='" + i_grp + "'"
 $ WC "i_ieeefp='undef'"
 $ WC "i_inttypes='" + i_inttypes + "'"
@@ -6427,6 +6443,7 @@ $ WC "stdio_cnt='((*fp)->_cnt)'"
 $ WC "stdio_ptr='((*fp)->_ptr)'"
 $ WC "stdio_stream_array=' " + "'"
 $ WC "subversion='" + subversion + "'"
+$ WC "targetarch='" + "'"
 $ WC "timetype='" + timetype + "'"
 $ WC "u16size='" + u16size + "'"
 $ WC "u16type='" + u16type + "'"
@@ -6794,14 +6811,35 @@ $   ENDIF
 $ ELSE
 $   DECTERM_REPLACE = "DECTERMLIB=DECTERMLIB="
 $ ENDIF
+$!
+$! In order not to stress the tiny command buffer on pre-7.3-2 systems,
+$! we put the following substitutions in a file and pass the file to
+$! munchconfig.
+$!
+$ open/write CONFIG extra_subs.txt
+$ WC := write CONFIG
+$ WC "''DECC_REPLACE'"
+$ WC "''DECCXX_REPLACE'"
+$ WC "''ARCH_TYPE'"
+$ WC "''GNUC_REPLACE'"
+$ WC "''SOCKET_REPLACE'"
+$ WC "''THREAD_REPLACE'"
+$ WC "''C_Compiler_Replace'"
+$ WC "''MALLOC_REPLACE'"
+$ WC "''THREAD_UPCALLS'"
+$ WC "''THREAD_KERNEL'"
+$ WC "PV=''version'"
+$ WC "FLAGS=FLAGS=''extra_flags'"
+$ WC "''LARGEFILE_REPLACE'"
+$ WC "''DECTERM_REPLACE'"
+$ close CONFIG
+$!
 $ echo4 "Extracting ''defmakefile' (with variable substitutions)"
 $ DEFINE/USER_MODE sys$output 'UUmakefile'
-$ mcr []munchconfig 'config_sh' 'Makefile_SH' "''DECC_REPLACE'" "''DECCXX_REPLACE'" "''ARCH_TYPE'" "''GNUC_REPLACE'" -
-"''SOCKET_REPLACE'" "''THREAD_REPLACE'" "''C_Compiler_Replace'" "''MALLOC_REPLACE'" -
-"''THREAD_UPCALLS'" "''THREAD_KERNEL'" "PV=''version'" "FLAGS=FLAGS=''extra_flags'" "''LARGEFILE_REPLACE'" -
-"''DECTERM_REPLACE'"
+$ mcr []munchconfig 'config_sh' 'Makefile_SH' -f extra_subs.txt
 $! Clean up after ourselves
 $ DELETE/NOLOG/NOCONFIRM []munchconfig.exe;
+$ DELETE/NOLOG/NOCONFIRM []extra_subs.txt;
 $!
 $ echo4 "Extracting make_ext.com (without variable substitutions)"
 $ Create Sys$Disk:[-]make_ext.com
@@ -6810,7 +6848,7 @@ $!++ make_ext.com
 $!   NOTE: This file is extracted as part of the VMS configuration process.
 $!   Any changes made to it directly will be lost.  If you need to make any
 $!   changes, please edit the template in Configure.Com instead.
-$    def = F$Environment("Default")
+$    mydefault = F$Environment("Default")
 $!   p1 - how to invoke miniperl (passed in from descrip.mms)
 $    p1 = F$Edit(p1,"Upcase,Compress,Trim")
 $    If F$Locate("MCR ",p1).eq.0 Then p1 = F$Extract(3,255,p1)
@@ -6868,7 +6906,7 @@ $    If redesc Then -
        miniperl "-I[''up'.lib]" Makefile.PL "INST_LIB=[''up'.lib]" "INST_ARCHLIB=[''up'.lib]"  "PERL_CORE=1"
 $    makeutil 'targ'
 $    i = i + 1
-$    Set Def &def
+$    Set Def &mydefault
 $    Goto next_ext
 $ done:
 $    sts = $Status
