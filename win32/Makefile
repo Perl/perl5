@@ -518,7 +518,6 @@ $(o).dll:
 .rc.res:
 	$(RSC) -i.. $<
 
-	
 #
 # various targets
 
@@ -957,10 +956,10 @@ all : .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE) \
 	regcomp.pl
 	cd win32
 
-regnodes :  ..\regnodes.h
+regnodes : ..\regnodes.h
 
-reonly : regnodes .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) $(PERLEXE) \
-	$(X2P) Extensions_reonly
+reonly : regnodes .\config.h $(GLOBEXE) $(MINIMOD) $(CONFIGPM) $(UNIDATAFILES) \
+	$(PERLEXE) $(X2P) Extensions_reonly
 	@echo	Perl and 're' are up to date.
 
 $(DYNALOADER)$(o) : $(DYNALOADER).c $(CORE_H) $(EXTDIR)\DynaLoader\dlutils.c
@@ -1367,7 +1366,7 @@ test-reonly : reonly utils
 	$(PERLEXE) -I..\lib harness $(OPT) -re \bpat\b \breg \bre\b $(EXTRA)
 	cd ..\win32
 
-regen : 
+regen :
 	cd ..
 	regen.pl
 	cd win32
