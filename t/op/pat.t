@@ -4063,6 +4063,24 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
 	iseq($l+1,$count,"Should be L+1 not L*(L+3)/2 (L=$l)");
     }
 }
+{
+    local $Message = "RT#18209";
+    my $text = ' word1 word2 word3 word4 word5 word6 ';
+
+    my @words = ('word1', 'word3', 'word5');
+    my $count;
+    foreach my $word (@words){
+        $text =~ s/$word\s//gi; # Leave a space to seperate words in the resultant str.
+        # The following block is not working.
+        if($&){
+            $count++;
+        }
+        # End bad block
+    }
+    iseq($count,3);
+    iseq($text,' word2 word4 word6 ');
+}
+
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
 # Keep the following tests last -- they may crash perl
@@ -4108,4 +4126,4 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
 # Put new tests above the dotted line about a page above this comment
 
 # Don't forget to update this!
-BEGIN { print "1..1363\n" };
+BEGIN { print "1..1365\n" };
