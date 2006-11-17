@@ -434,33 +434,33 @@ or blessing of the object.
 
 =item regmust($ref)
 
-If the argument is a compiled regular expression as returned by C<qr//>
-then this function returns what the optimiser consiers to be the longest 
-anchored fixed string and longest floating fixed string in the pattern. 
+If the argument is a compiled regular expression as returned by C<qr//>,
+then this function returns what the optimiser consiers to be the longest
+anchored fixed string and longest floating fixed string in the pattern.
 
-A fixed string is defined as being a string that must appear in the string
-for the pattern to match. An anchored fixed string is a fixed string that
-must appear at a particular offset from the beginning of the match. A
-floating fixed string is defined as a fixed string that can appear at
-any point in a range of positions relative to the start of the match.
+A I<fixed string> is defined as being a substring that must appear for the
+pattern to match. An I<anchored fixed string> is a fixed string that must
+appear at a particular offset from the beginning of the match. A I<floating
+fixed string> is defined as a fixed string that can appear at any point in
+a range of positions relative to the start of the match. For example,
 
-    my $qr=qr/here .* there/x;
-    my ($anchored,$floating)=regmust($qr);
+    my $qr = qr/here .* there/x;
+    my ($anchored, $floating) = regmust($qr);
     print "anchored:'$anchored'\nfloating:'$floating'\n";
-    
+
 results in
 
     anchored:'here'
     floating:'there'
 
-Because the C<here> is before the C<.*> in the pattern its position
-can be determined exactly. The C<there> however is the opposite. 
-It could appear at any point after where the anchored string could appear.
+Because the C<here> is before the C<.*> in the pattern, its position
+can be determined exactly. That's not true, however, for the C<there>;
+it could appear at any point after where the anchored string appeared.
 Perl uses both for its optimisations, prefering the longer, or, if they are
 equal, the floating.
 
 B<NOTE:> This may not necessarily be the definitive longest anchored and
-floating string. This will be what the optimiser of the Perl that you 
+floating string. This will be what the optimiser of the Perl that you
 are using thinks is the longest. If you believe that the result is wrong
 please report it via the L<perlbug> utility.
 
