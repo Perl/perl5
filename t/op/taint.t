@@ -44,6 +44,7 @@ my $Is_MSWin32  = $^O eq 'MSWin32';
 my $Is_NetWare  = $^O eq 'NetWare';
 my $Is_Dos      = $^O eq 'dos';
 my $Is_Cygwin   = $^O eq 'cygwin';
+my $Is_OpenBSD  = $^O eq 'openbsd'
 my $Invoke_Perl = $Is_VMS      ? 'MCR Sys$Disk:[]Perl.' :
                   $Is_MSWin32  ? '.\perl'               :
                   $Is_MacOS    ? ':perl'                :
@@ -1163,6 +1164,8 @@ SKIP:
 {
     SKIP: {
 	skip "fork() is not available", 3 unless $Config{'d_fork'};
+	skip "opening |- is not stable on threaded OpenBSD with taint", 3
+            if $Config{useithreads} && $Is_OpenBSD;
 
 	$ENV{'PATH'} = $TAINT;
 	local $SIG{'PIPE'} = 'IGNORE';
