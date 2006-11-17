@@ -7,7 +7,7 @@
 $| = 1;
 
 # please update note at bottom of file when you change this
-print "1..1219\n";
+print "1..1222\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3474,5 +3474,30 @@ sub iseq($$;$) {
 	iseq($l+1,$count,"Should be L+1 not L*(L+3)/2 (L=$l)");
     }
 }
+{
+    local $Message = "RT#22614";
+    local $_='ab';
+    our @len=();
+    /(.){1,}(?{push @len,0+@-})(.){1,}(?{})^/;
+    iseq("@len","2 2 2");
+}
+{
+    local $Message = "RT#18209";
+    my $text = ' word1 word2 word3 word4 word5 word6 ';
 
-# last test 1219
+    my @words = ('word1', 'word3', 'word5');
+    my $count;
+    foreach my $word (@words){
+        $text =~ s/$word\s//gi; # Leave a space to seperate words in the resultant str.
+        # The following block is not working.
+        if($&){
+            $count++;
+        }
+        # End bad block
+    }
+    iseq($count,3);
+    iseq($text,' word2 word4 word6 ');
+}
+
+
+# last test 1222
