@@ -1209,14 +1209,9 @@ $(PERLSTATICLIB): Extensions_static
 	    @$(mktmp $(subst,\,$B $(shell @type Extensions_static)) \
 	        $(PERLDLL_OBJ:s,\,$B,))
 .ELIF "$(CCTYPE)" == "GCC"
-# XXX: It would be nice if MinGW's ar accepted a temporary file, but this
-# doesn't seem to work:
-#	$(LIB32) $(LIB_FLAGS) $@ \
-#	    $(mktmp $(LKPRE) $(subst,\,$B $(shell @type Extensions_static)) \
-#	        $(PERLDLL_OBJ:s,\,$B,) $(LKPOST))
-	$(LIB32) $(LIB_FLAGS) $@ \
-	    $(subst,\,$B $(shell @type Extensions_static)) \
-	    $(PERLDLL_OBJ:s,\,$B,)
+	$(LIB32) $(LIB_FLAGS) $@ $(shell @type $(mktmp \
+	   $(subst,\,$B $(shell @type Extensions_static)) \
+	   $(PERLDLL_OBJ:s,\,$B,)))
 .ELSE
 	$(LIB32) $(LIB_FLAGS) -out:$@ @Extensions_static \
 	    @$(mktmp $(PERLDLL_OBJ:s,\,$B,))
