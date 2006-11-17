@@ -34,15 +34,22 @@ TODO are completed.
 Review assertions. Review syntax to combine assertions. Assertions could take
 advantage of the lexical pragmas work. L</What hooks would assertions need?>
 
-=item *
-
-C<encoding> should be turned into a lexical pragma (probably).
-
 =back
 
 =head2 Needed for a 5.9.6 release
 
 Stabilisation. If all goes well, this will be the equivalent of a 5.10-beta.
+
+=head2 Needed for the final 5.10.0 release
+
+=over 4
+
+=item *
+
+Review perlguts. Significant changes have occured since 5.8, and we can't
+release a new version without making sure these are covered.
+
+=back
 
 =head1 Tasks that only need Perl knowledge
 
@@ -610,32 +617,6 @@ Fix (or rewrite) the implementation of the C</(?{...})/> closures.
 
 This will allow the use of a regex from inside (?{ }), (??{ }) and
 (?(?{ })|) constructs.
-
-=head2 Add (?YES) (?NO) to regexp enigne
-
-YES/NO would allow a subpattern to be passed/failed but allow backtracking.
-Basically a more efficient (?=), (?!).
-
-demerphq has this on his todo list
-
-=head2 Add (?SUCCEED) (?FAIL) to regexp engine
-
-SUCCEED/FAIL would allow a pattern to be passed/failed but without backtracking.
-Thus you could signal that a pattern has matched or not, and return (regardless 
-that there is more pattern following).
-
-demerphq has this on his todo list
-
-=head2 Add (?CUT) (?COMMIT) to regexp engine
-
-CUT would allow a pattern to say "do not backtrack beyond here". 
-COMMIT would say match from here or don't, but don't try the pattern from
-another starting pattern.
-
-These correspond to the \v and \V that Jeffrey Friedl mentions in 
-Mastering Regular Expressions 2nd edition.
-
-demerphq has this on his todo list
 
 =head2 Add class set operations to regexp engine
 

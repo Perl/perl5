@@ -6,6 +6,7 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
+#include "re_comp.h"
 
 
 START_EXTERN_C
@@ -163,4 +164,40 @@ PPCODE:
         }    
     }
     /* NOT-REACHED */
+}
+
+
+void
+regmust(sv)
+    SV * sv
+PROTOTYPE: $
+PREINIT:
+    MAGIC *mg;
+PPCODE:
+{
+    if (SvMAGICAL(sv))
+        mg_get(sv);
+    if (SvROK(sv) &&
+        (sv = (SV*)SvRV(sv)) &&     /* assign deliberate */
+        SvTYPE(sv) == SVt_PVMG &&
+        (mg = mg_find(sv, PERL_MAGIC_qr))) /* assign deliberate */
+    {
+        SV *an = &PL_sv_no;
+        SV *fl = &PL_sv_no;
+        regexp *re = (regexp *)mg->mg_obj;
+        if (re->anchored_substr) {
+            an = newSVsv(re->anchored_substr);
+        } else if (re->anchored_utf8) {
+            an = newSVsv(re->anchored_utf8);
+        }
+        if (re->float_substr) {
+            fl = newSVsv(re->float_substr);
+        } else if (re->float_utf8) {
+            fl = newSVsv(re->float_utf8);
+        }
+        XPUSHs(an);
+        XPUSHs(fl);
+        XSRETURN(2);
+    }
+    XSRETURN_UNDEF;
 }
