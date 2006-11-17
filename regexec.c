@@ -2903,7 +2903,15 @@ S_regmatch(pTHX_ regnode *prog)
 		cc.lastloc = 0;
 		PL_reginput = locinput;
 		n = regmatch(PREVOPER(next));	/* start on the WHILEM */
-		regcpblow(cp);
+		if (PL_reg_eval_set){
+		  SV *pres= GvSV(PL_replgv);
+		  SvREFCNT_inc(pres);
+		  regcpblow(cp);
+		  sv_setsv(GvSV(PL_replgv), pres);
+		  SvREFCNT_dec(pres);
+		} else {
+		  regcpblow(cp);
+		}
 		PL_regcc = cc.oldcc;
 		saySAME(n);
 	    }

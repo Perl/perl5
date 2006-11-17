@@ -7,12 +7,13 @@
 $| = 1;
 
 # please update note at bottom of file when you change this
-print "1..1222\n";
+print "1..1231\n";
 
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
 }
+our $Message = "Line";
 
 eval 'use Config';          #  Defaults assumed if this fails
 
@@ -2037,10 +2038,11 @@ print "ok 683\n" if @a == 9 && "@a" eq "f o o \n $a $b b a r";
 my $test = 687;
 
 # Force scalar context on the patern match
-sub ok ($$) {
+sub ok ($;$) {
     my($ok, $name) = @_;
 
-    printf "%sok %d - %s\n", ($ok ? "" : "not "), $test, $name;
+    printf "%sok %d - %s\n", ($ok ? "" : "not "), $test,
+        $name||"$Message:".((caller)[2]);
 
     printf "# Failed test at line %d\n", (caller)[2] unless $ok;
 
@@ -3453,7 +3455,7 @@ sub iseq($$;$) {
     my $ok=  $got eq $expect;
         
     printf "%sok %d - %s\n", ($ok ? "" : "not "), $test,
-        ($name||$Message)."\tLine ".((caller)[2]);
+        $name||"$Message:".((caller)[2]);
 
     printf "# Failed test at line %d\n".
            "# expected: %s\n". 
@@ -3475,6 +3477,7 @@ sub iseq($$;$) {
     }
 }
 {
+    local $Message = "Relative Recursion";
     local $Message = "RT#22614";
     local $_='ab';
     our @len=();
@@ -3484,6 +3487,39 @@ sub iseq($$;$) {
 {
     local $Message = "RT#18209";
     my $text = ' word1 word2 word3 word4 word5 word6 ';
+{
+    local $Message = "RT#36909 test";
+    $^R = 'Nothing';
+    {
+        local $^R = "Bad";
+        ok('x foofoo y' =~ m{
+         (foo) # $^R correctly set
+        (?{ "last regexp code result" })
+        }x);
+        iseq($^R,'last regexp code result');
+    }
+    iseq($^R,'Nothing');
+    {
+        local $^R = "Bad";
+
+        ok('x foofoo y' =~ m{
+         (?:foo|bar)+ # $^R correctly set
+        (?{"last regexp code result"})
+        }x);
+        iseq($^R,'last regexp code result');
+    }
+    iseq($^R,'Nothing');
+
+    {
+        local $^R = "Bad";
+        ok('x foofoo y' =~ m{
+         (foo|bar)\1+ # $^R undefined
+        (?{"last regexp code result"})
+        }x);
+        iseq($^R,'last regexp code result');
+    }
+    iseq($^R,'Nothing');
+}
 
     my @words = ('word1', 'word3', 'word5');
     my $count;
@@ -3500,4 +3536,4 @@ sub iseq($$;$) {
 }
 
 
-# last test 1222
+# last test 1231
