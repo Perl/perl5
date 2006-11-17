@@ -79,6 +79,12 @@
 #define const
 #endif
 
+/* HAS_CTERMID:
+ *	This symbol, if defined, indicates that the ctermid routine is
+ *	available to generate filename for terminal.
+ */
+/*#define HAS_CTERMID		/**/
+
 /* HAS_CUSERID:
  *	This symbol, if defined, indicates that the cuserid routine is
  *	available to get character login names.
