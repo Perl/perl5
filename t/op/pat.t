@@ -4054,7 +4054,15 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     }
     iseq($^R,'Nothing');
 }
-
+{
+    local $Message="RT#22395";
+    our $count;
+    for my $l (1,10,100,1000) {
+	$count=0;
+	('a' x $l) =~ /(.*)(?{$count++})[bc]/;
+	iseq($l+1,$count,"Should be L+1 not L*(L+3)/2 (L=$l)");
+    }
+}
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
 # Keep the following tests last -- they may crash perl
@@ -4100,4 +4108,4 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
 # Put new tests above the dotted line about a page above this comment
 
 # Don't forget to update this!
-BEGIN { print "1..1358\n" };
+BEGIN { print "1..1363\n" };

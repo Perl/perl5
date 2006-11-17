@@ -4207,7 +4207,8 @@ reStudy:
 	    first = NEXTOPER(first);
 	    goto again;
 	}
-	else if (!sawopen && (OP(first) == STAR &&
+	else if ((!sawopen || !RExC_sawback) &&
+	    (OP(first) == STAR &&
 	    PL_regkind[OP(NEXTOPER(first))] == REG_ANY) &&
 	    !(r->reganch & ROPT_ANCH) )
 	{
