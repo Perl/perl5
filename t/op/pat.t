@@ -12,6 +12,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
 }
+our $Message = "Line";
 
 eval 'use Config';          #  Defaults assumed if this fails
 
@@ -2037,7 +2038,8 @@ $test = 687;
 sub ok ($;$) {
     my($ok, $name) = @_;
 
-    printf "%sok %d - %s\n", ($ok ? "" : "not "), $test, $name||'unnamed';
+    printf "%sok %d - %s\n", ($ok ? "" : "not "), $test,
+        $name||"$Message:".((caller)[2]);
 
     printf "# Failed test at line %d\n", (caller)[2] unless $ok;
 
@@ -3673,7 +3675,8 @@ sub iseq($$;$) {
         
     my $ok=  $got eq $expect;
         
-    printf "%sok %d - %s\n", ($ok ? "" : "not "), $test, $name||'unnamed';
+    printf "%sok %d - %s\n", ($ok ? "" : "not "), $test,
+        $name||"$Message:".((caller)[2]);
 
     printf "# Failed test at line %d\n".
            "# expected: %s\n". 
@@ -3973,6 +3976,7 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
 }    
 {
     # Test named commits and the $REGERROR var
+    local $Message = "\$REGERROR";
     our $REGERROR;
     for $word (qw(bar baz bop)) {
         $REGERROR="";
@@ -3981,6 +3985,7 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     }    
 }
 {   #Regression test for perlbug 40684
+    local $Message = "RT#40684 tests:";
     my $s = "abc\ndef";
     my $rex = qr'^abc$'m;
     ok($s =~ m/$rex/);
@@ -3994,6 +3999,7 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
 }
 
 {
+    local $Message = "Relative Recursion";
     my $parens=qr/(\((?:[^()]++|(?-1))*+\))/;
     local $_='foo((2*3)+4-3) + bar(2*(3+4)-1*(2-3))';
     my ($all,$one,$two)=('','','');
@@ -4014,6 +4020,39 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     s/(?>\s+bar)(?{$count++})//g;
     iseq($_,$spaces,"SUSPEND final string");
     iseq($count,1,"Optimiser should have prevented more than one match");
+}
+{
+    local $Message = "RT#36909 test";
+    $^R = 'Nothing';
+    {
+        local $^R = "Bad";
+        ok('x foofoo y' =~ m{
+         (foo) # $^R correctly set
+        (?{ "last regexp code result" })
+        }x);
+        iseq($^R,'last regexp code result');
+    }
+    iseq($^R,'Nothing');
+    {
+        local $^R = "Bad";
+
+        ok('x foofoo y' =~ m{
+         (?:foo|bar)+ # $^R correctly set
+        (?{"last regexp code result"})
+        }x);
+        iseq($^R,'last regexp code result');
+    }
+    iseq($^R,'Nothing');
+
+    {
+        local $^R = "Bad";
+        ok('x foofoo y' =~ m{
+         (foo|bar)\1+ # $^R undefined
+        (?{"last regexp code result"})
+        }x);
+        iseq($^R,'last regexp code result');
+    }
+    iseq($^R,'Nothing');
 }
 
 # Test counter is at bottom of file. Put new tests above here.
@@ -4046,6 +4085,7 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
     or print "# Unexpected outcome: should pass or crash perl\n";
 
 {
+    local $Message = "substituation with lookahead (possible segv)";
     $_="ns1ns1ns1";
     s/ns(?=\d)/ns_/g;
     iseq($_,"ns_1ns_1ns_1");
@@ -4060,4 +4100,4 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
 # Put new tests above the dotted line about a page above this comment
 
 # Don't forget to update this!
-BEGIN { print "1..1349\n" };
+BEGIN { print "1..1358\n" };

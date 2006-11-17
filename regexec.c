@@ -3867,7 +3867,15 @@ NULL
 	}
 
 	case CURLYX_end: /* just finished matching all of A*B */
-	    regcpblow(ST.cp);
+	    if (PL_reg_eval_set){
+		SV *pres= GvSV(PL_replgv);
+		SvREFCNT_inc(pres);
+		regcpblow(ST.cp);
+		sv_setsv(GvSV(PL_replgv), pres);
+		SvREFCNT_dec(pres);
+	    } else {
+		regcpblow(ST.cp);
+	    }
 	    cur_curlyx = ST.prev_curlyx;
 	    sayYES;
 	    /* NOTREACHED */

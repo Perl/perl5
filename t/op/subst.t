@@ -7,7 +7,7 @@ BEGIN {
 }
 
 require './test.pl';
-plan( tests => 133 );
+plan( tests => 134 );
 
 $x = 'foo';
 $_ = "x";
@@ -561,5 +561,14 @@ is($name, "cis", q[#22351 bug with 'e' substitution modifier]);
 
     ($c = "\x20\x00\x30\x01\x40\x1A\x50\x1F\x60") =~ s/[\x00-\x1f]//g;
     is($c, "\x20\x30\x40\x50\x60", "s/[\\x00-\\x1f]//g");
+}
+TODO:{
+    local $TODO = "RT#6006 needs resolution";
+    $TODO=$TODO;
+    $_ = "xy";
+    no warnings 'uninitialized';
+    /(((((((((x)))))))))(z)/;	# clear $10
+    s/(((((((((x)))))))))(y)/${10}/;
+    is($_,"y","RT#6006: \$_ eq '$_'");
 }
 
