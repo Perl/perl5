@@ -715,12 +715,13 @@ S_incline(pTHX_ char *s)
 	    gvp = (GV**)hv_fetch(PL_defstash, tmpbuf, tmplen, FALSE);
 	    if (gvp) {
 		gv2 = *(GV**)hv_fetch(PL_defstash, tmpbuf2, tmplen2, TRUE);
-		if (!isGV(gv2))
+		if (!isGV(gv2)) {
 		    gv_init(gv2, PL_defstash, tmpbuf2, tmplen2, FALSE);
-		/* adjust ${"::_<newfilename"} to store the new file name */
-		GvSV(gv2) = newSVpvn(tmpbuf2 + 2, tmplen2 - 2);
-		GvHV(gv2) = (HV*)SvREFCNT_inc(GvHV(*gvp));
-		GvAV(gv2) = (AV*)SvREFCNT_inc(GvAV(*gvp));
+		    /* adjust ${"::_<newfilename"} to store the new file name */
+		    GvSV(gv2) = newSVpvn(tmpbuf2 + 2, tmplen2 - 2);
+		    GvHV(gv2) = (HV*)SvREFCNT_inc(GvHV(*gvp));
+		    GvAV(gv2) = (AV*)SvREFCNT_inc(GvAV(*gvp));
+		}
 	    }
 	    if (tmpbuf != smallbuf) Safefree(tmpbuf);
 	    if (tmpbuf2 != smallbuf2) Safefree(tmpbuf2);
@@ -10105,7 +10106,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
     I32 termcode;			/* terminating char. code */
     U8 termstr[UTF8_MAXBYTES];		/* terminating string */
     STRLEN termlen;			/* length of terminating string */
-    char *last = NULL;			/* last position for nesting bracket */
+    int last_off = 0;			/* last position for nesting bracket */
 
     /* skip space before the delimiter */
     if (isSPACE(*s)) {
@@ -10187,9 +10188,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 		    else {
 			const char *t;
 			char *w;
-			if (!last)
-			    last = SvPVX(sv);
-			for (t = w = last; t < svlast; w++, t++) {
+			for (t = w = SvPVX(sv)+last_off; t < svlast; w++, t++) {
 			    /* At here, all closes are "was quoted" one,
 			       so we don't check PL_multi_close. */
 			    if (*t == '\\') {
@@ -10208,7 +10207,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 			    *w = '\0';
 			    SvCUR_set(sv, w - SvPVX_const(sv));
 			}
-			last = w;
+			last_off = w - SvPVX(sv);
 			if (--brackets <= 0)
 			    cont = FALSE;
 		    }

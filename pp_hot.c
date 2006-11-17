@@ -130,7 +130,7 @@ PP(pp_sassign)
 	    assert(SvROK(cv));
 	}
 
-	/* Can do the optimisation if right (LVAUE) is not a typeglob,
+	/* Can do the optimisation if right (LVALUE) is not a typeglob,
 	   left (RVALUE) is a reference to something, and we're in void
 	   context. */
 	if (!got_coderef && gv_type != SVt_PVGV && GIMME_V == G_VOID) {
@@ -172,6 +172,10 @@ PP(pp_sassign)
 	    LEAVE;
 	}
 
+	if (strEQ(GvNAME(right),"isa")) {
+	    GvCVGEN(right) = 0;
+	    ++PL_sub_generation;
+	}
     }
     SvSetMagicSV(right, left);
     SETs(right);
@@ -1617,8 +1621,12 @@ Perl_do_readline(pTHX)
   have_fp:
     if (gimme == G_SCALAR) {
 	sv = TARG;
-	if (SvROK(sv))
-	    sv_unref(sv);
+	if (SvROK(sv)) {
+	    if (type == OP_RCATLINE)
+		SvPV_force_nolen(sv);
+	    else
+		sv_unref(sv);
+	}
 	(void)SvUPGRADE(sv, SVt_PV);
 	tmplen = SvLEN(sv);	/* remember if already alloced */
 	if (!tmplen && !SvREADONLY(sv))

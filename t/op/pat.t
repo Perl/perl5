@@ -7,7 +7,7 @@
 $| = 1;
 
 # please update note at bottom of file when you change this
-print "1..1215\n";
+print "1..1219\n";
 
 BEGIN {
     chdir 't' if -d 't';
@@ -3444,5 +3444,35 @@ ok(("foba  ba$s" =~ qr/(foo|BaSS|bar)/i)
     ok("A@-B"  =~ /A@{-}B/x, 'interpolation of @- in /@{-}/x');
 }
 
-# last test 1215
+sub iseq($$;$) { 
+    my ( $got, $expect, $name)=@_;
+    
+    $_=defined($_) ? "'$_'" : "undef"
+        for $got, $expect;
+        
+    my $ok=  $got eq $expect;
+        
+    printf "%sok %d - %s\n", ($ok ? "" : "not "), $test,
+        ($name||$Message)."\tLine ".((caller)[2]);
 
+    printf "# Failed test at line %d\n".
+           "# expected: %s\n". 
+           "#   result: %s\n", 
+           (caller)[2], $expect, $got
+        unless $ok;
+
+    $test++;
+    return $ok;
+}   
+
+{
+    local $Message="RT#22395";
+    our $count;
+    for my $l (1,10,100,1000) {
+	$count=0;
+	('a' x $l) =~ /(.*)(?{$count++})[bc]/;
+	iseq($l+1,$count,"Should be L+1 not L*(L+3)/2 (L=$l)");
+    }
+}
+
+# last test 1219

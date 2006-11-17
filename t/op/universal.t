@@ -10,7 +10,7 @@ BEGIN {
     require "./test.pl";
 }
 
-print "1..102\n";
+print "1..103\n";
 
 $a = {};
 bless $a, "Bob";
@@ -189,3 +189,10 @@ ok ! UNIVERSAL::isa("\xff\xff\xff\0", 'HASH');
 my $x = {}; bless $x, 'X';
 ok $x->isa('UNIVERSAL');
 ok $x->isa('UNIVERSAL');
+
+package Pig;
+package Bodine;
+Bodine->isa('Pig');
+*isa = \&UNIVERSAL::isa;
+eval { isa({}, 'HASH') };
+::is($@, '', "*isa correctly found")
