@@ -4064,6 +4064,13 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     }
 }
 {
+    local $Message = "RT#22614";
+    local $_='ab';
+    our @len=();
+    /(.){1,}(?{push @len,0+@-})(.){1,}(?{})^/;
+    iseq("@len","2 2 2");
+}
+{
     local $Message = "RT#18209";
     my $text = ' word1 word2 word3 word4 word5 word6 ';
 

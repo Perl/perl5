@@ -497,9 +497,18 @@ Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
     if (PL_curpm) {
 	register const REGEXP * const rx = PM_GETRE(PL_curpm);
 	if (rx) {
-	    return mg->mg_obj
-		? rx->nparens       /* @+ */
-		: rx->lastparen;    /* @- */
+	    if (mg->mg_obj) {			/* @+ */
+		/* return the number possible */
+		return rx->nparens;
+	    } else {				/* @- */
+		I32 paren = rx->lastparen;
+
+		/* return the last filled */
+		while ( paren >= 0 &&
+		    rx->startp[paren] == -1 || rx->endp[paren] == -1)
+		paren--;
+		return (U32)paren;
+	    }
 	}
     }
 
