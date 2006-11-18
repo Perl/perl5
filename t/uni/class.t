@@ -171,7 +171,7 @@ for my $p ('gc', 'sc') {
 # test extra properties (ASCII_Hex_Digit, Bidi_Control, etc.)
 SKIP:
 {
-  skip "Can't reliably derive class names from file names", 592 if $^O eq 'VMS';
+  skip "Can't reliably derive class names from file names", 576 if $^O eq 'VMS';
 
   # On case tolerant filesystems, Cf.pl will cause a -e test for cf.pl to
   # return true. Try to work around this by reading the filenames explicitly
