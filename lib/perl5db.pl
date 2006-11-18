@@ -1317,9 +1317,21 @@ if ( defined $ENV{PERLDB_PIDS} ) {
     # We're a child. Make us a label out of the current PID structure
     # recorded in PERLDB_PIDS plus our (new) PID. Mark us as not having
     # a term yet so the parent will give us one later via resetterm().
-    $pids = "[$ENV{PERLDB_PIDS}]";
-    $ENV{PERLDB_PIDS} .= "->$$";
-    $term_pid = -1;
+
+    my $env_pids = $ENV{PERLDB_PIDS};
+    $pids = "[$env_pids]";
+
+    # Unless we are on OpenVMS, all programs under the DCL shell run under
+    # the same PID.
+
+    if (($^O eq 'VMS') && ($env_pids =~ /\b$$\b/)) {
+        $term_pid         = $$;
+    }
+    else {
+        $ENV{PERLDB_PIDS} .= "->$$";
+        $term_pid = -1;
+    }
+
 } ## end if (defined $ENV{PERLDB_PIDS...
 else {
 
