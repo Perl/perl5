@@ -4627,7 +4627,7 @@ PerlIOMmap_map(pTHX_ PerlIO *f)
 		}
 		posn = (b->posn / PL_mmap_page_size) * PL_mmap_page_size;
 		len = st.st_size - posn;
-		m->mptr = mmap(NULL, len, PROT_READ, MAP_SHARED, fd, posn);
+		m->mptr = (Mmap_t)mmap(NULL, len, PROT_READ, MAP_SHARED, fd, posn);
 		if (m->mptr && m->mptr != (Mmap_t) - 1) {
 #if 0 && defined(HAS_MADVISE) && defined(MADV_SEQUENTIAL)
 		    madvise(m->mptr, len, MADV_SEQUENTIAL);

@@ -1180,6 +1180,10 @@ EXTERN_C char *crypt(const char *, const char *);
 EXTERN_C char **environ;
 #endif
 
+#if defined(__OpenBSD__) && defined(__cplusplus)
+EXTERN_C char **environ;
+#endif
+
 #if defined(__CYGWIN__) && defined(__cplusplus)
 EXTERN_C char *crypt(const char *, const char *);
 #endif
