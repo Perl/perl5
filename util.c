@@ -2415,7 +2415,7 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 #if defined(atarist) || defined(EPOC)
 FILE *popen();
 PerlIO *
-Perl_my_popen(pTHX_ char *cmd, char *mode)
+Perl_my_popen((pTHX_ const char *cmd, const char *mode)
 {
     PERL_FLUSHALL_FOR_CHILD;
     /* Call system's popen() to get a FILE *, then import it.
@@ -2428,7 +2428,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 #if defined(DJGPP)
 FILE *djgpp_popen();
 PerlIO *
-Perl_my_popen(pTHX_ char *cmd, char *mode)
+Perl_my_popen((pTHX_ const char *cmd, const char *mode)
 {
     PERL_FLUSHALL_FOR_CHILD;
     /* Call system's popen() to get a FILE *, then import it.
