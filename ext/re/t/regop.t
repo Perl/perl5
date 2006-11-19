@@ -155,12 +155,12 @@ minlen 3
 # Final program:
 #    1: EXACT <ABC>(3)
 #    3: TRIEC-EXACT<S:4/10 W:6 L:1/1 C:24/7>[A-EGP](20)
-#       <ABCP> 
-#       <ABCG> 
-#       <ABCE> 
-#       <ABCB> 
-#       <ABCA> 
-#       <ABCD> 
+#       <P> 
+#       <G> 
+#       <E> 
+#       <B> 
+#       <A> 
+#       <D> 
 #   20: END(0)
 # anchored "ABC" at 0 (checking anchored) minlen 4 
 # Offsets: [20]
@@ -174,7 +174,7 @@ minlen 3
 #    3 <ABC> <D>               |    State:    4 Accepted:    0 Charid:  7 CP:  44 After State:    a
 #    4 <ABCD> <>               |    State:    a Accepted:    1 Charid:  6 CP:   0 After State:    0
 #                                   got 1 possible matches
-#                                   only one match left: #6 <ABCD>
+#                                   only one match left: #6 <D>
 #    4 <ABCD> <>               | 20:END(0)
 # Match successful!
 # %MATCHED%
@@ -183,7 +183,7 @@ minlen 3
 EXACT <ABC>
 TRIEC-EXACT
 [A-EGP]
-only one match left: #6 <ABCD>
+only one match left: #6 <D>
 S:4/10
 W:6
 L:1/1

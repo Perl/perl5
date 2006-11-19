@@ -2935,11 +2935,17 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 			= (reg_trie_data*)rex->data->data[ ARG(ST.me) ];
 		    SV ** const tmp = av_fetch( trie->words, 
 		        ST.accept_buff[ 0 ].wordnum-1, 0 );
+		    SV *sv= tmp ? sv_newmortal() : NULL;
+		    
 		    PerlIO_printf( Perl_debug_log,
 			"%*s  %sonly one match left: #%d <%s>%s\n",
 			REPORT_CODE_OFF+depth*2, "", PL_colors[4],
 			ST.accept_buff[ 0 ].wordnum,
-			tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr",
+			tmp ? pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), 0, 
+	                        PL_colors[0], PL_colors[1],
+	                        (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0)
+                            ) 
+			: "not compiled under -Dr",
 			PL_colors[5] );
 		});
 		PL_reginput = (char *)ST.accept_buff[ 0 ].endpos;
@@ -3013,11 +3019,16 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    regnode *nextop=(!ST.jump || !ST.jump[ST.accept_buff[best].wordnum]) ? 
 		                    ST.B : 
 		                    ST.me + ST.jump[ST.accept_buff[best].wordnum];    
+		    SV *sv= tmp ? sv_newmortal() : NULL;
+		    
 		    PerlIO_printf( Perl_debug_log, 
 		        "%*s  %strying alternation #%d <%s> at node #%d %s\n",
 			REPORT_CODE_OFF+depth*2, "", PL_colors[4],
 			ST.accept_buff[best].wordnum,
-			tmp ? SvPV_nolen_const( *tmp ) : "not compiled under -Dr", 
+			tmp ? pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), 0, 
+	                        PL_colors[0], PL_colors[1],
+	                        (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0)
+                            ) : "not compiled under -Dr", 
 			    REG_NODE_NUM(nextop),
 			PL_colors[5] );
 		});

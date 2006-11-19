@@ -1894,21 +1894,30 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                 }
                 if ( count == 1 ) {
                     SV **tmp = av_fetch( TRIE_REVCHARMAP(trie), idx, 0);
-                    const char *ch = SvPV_nolen_const( *tmp );
-                    DEBUG_OPTIMISE_r(
+                    char *ch = SvPV_nolen( *tmp );
+                    DEBUG_OPTIMISE_r({
+                        SV *sv=sv_newmortal();
                         PerlIO_printf( Perl_debug_log,
 			    "%*sPrefix State: %"UVuf" Idx:%"UVuf" Char='%s'\n",
                             (int)depth * 2 + 2, "",
-                            (UV)state, (UV)idx, ch)
-                    );
+                            (UV)state, (UV)idx, 
+                            pv_pretty(sv, SvPV_nolen_const(*tmp), SvCUR(*tmp), 6, 
+	                        PL_colors[0], PL_colors[1],
+	                        (SvUTF8(*tmp) ? PERL_PV_ESCAPE_UNI : 0) |
+	                        PERL_PV_ESCAPE_FIRSTCHAR 
+                            )
+                        );
+                    });
                     if ( state==1 ) {
                         OP( convert ) = nodetype;
                         str=STRING(convert);
                         STR_LEN(convert)=0;
                     }
-                    *str++=*ch;
-                    STR_LEN(convert)++;
-
+                    while (*ch) {
+                        *str++ = *ch++;
+                        STR_LEN(convert)++;
+                    }
+                    
 		} else {
 #ifdef DEBUGGING	    
 		    if (state>1)
@@ -1925,11 +1934,21 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                 trie->maxlen -= (state - 1);
                 DEBUG_r({
                     regnode *fix = convert;
+                    U32 word = trie->wordcount;
                     mjd_nodelen++;
                     Set_Node_Offset_Length(convert, mjd_offset, state - 1);
                     while( ++fix < n ) {
                         Set_Node_Offset_Length(fix, 0, 0);
                     }
+                    while (word--) {
+                        SV ** const tmp = av_fetch( trie->words, word, 0 );
+                        if (tmp) {
+                            if ( STR_LEN(convert) <= SvCUR(*tmp) )
+                                sv_chop(*tmp, SvPV_nolen(*tmp) + STR_LEN(convert));
+                            else
+                                sv_chop(*tmp, SvPV_nolen(*tmp) + SvCUR(*tmp));
+                        }
+                    }    
                 });
                 if (trie->maxlen) {
                     convert = n;
@@ -8983,7 +9002,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 
 	NODE_ALIGN(node);
 	op = OP(node);
-	if (op == CLOSE)
+	if (op == CLOSE || op == WHILEM)
 	    indent--;
 	next = regnext((regnode *)node);
 	
@@ -9102,8 +9121,6 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	}
 	if (op == CURLYX || op == OPEN)
 	    indent++;
-	else if (op == WHILEM)
-	    indent--;
     }
     CLEAR_OPTSTART;
 #ifdef DEBUG_DUMPUNTIL    

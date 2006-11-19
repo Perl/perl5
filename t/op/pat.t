@@ -12,7 +12,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
 }
-our $Message = "Line";
+our $Message = "Noname test";
 
 eval 'use Config';          #  Defaults assumed if this fails
 
@@ -875,9 +875,7 @@ $foo='aabbccddeeffgg';
 pos($foo)=1;
 
 $foo=~/.\G(..)/g;
-print "not " unless($1 eq 'ab');
-print "ok $test\n";
-$test++;
+iseq($1,'ab');
 
 pos($foo) += 1;
 $foo=~/.\G(..)/g;
@@ -1048,9 +1046,7 @@ $test++;
 
 @b = grep(/\w/,@a);
 @c = grep(/[\w]/,@a);
-print "not " if "@b" ne "@c";
-print "ok $test\n";
-$test++;
+iseq("@b","@c");
 
 # see if backtracking optimization works correctly
 "\n\n" =~ /\n  $ \n/x or print "not ";
@@ -2039,7 +2035,7 @@ sub ok ($;$) {
     my($ok, $name) = @_;
 
     printf "%sok %d - %s\n", ($ok ? "" : "not "), $test,
-        $name||"$Message:".((caller)[2]);
+        ($name||$Message)."\tLine ".((caller)[2]);
 
     printf "# Failed test at line %d\n", (caller)[2] unless $ok;
 
@@ -3676,7 +3672,7 @@ sub iseq($$;$) {
     my $ok=  $got eq $expect;
         
     printf "%sok %d - %s\n", ($ok ? "" : "not "), $test,
-        $name||"$Message:".((caller)[2]);
+        ($name||$Message)."\tLine ".((caller)[2]);
 
     printf "# Failed test at line %d\n".
            "# expected: %s\n". 
@@ -4088,6 +4084,16 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     iseq($text,' word2 word4 word6 ');
 }
 
+{
+    # From Message-ID: <877ixs6oa6.fsf@k75.linux.bogus>
+    my $dow_name= "nada";
+    my $parser = "(\$dow_name) = \$time_string =~ /(D\x{e9}\\ C\x{e9}adaoin|D\x{e9}\\ Sathairn|\\w+|\x{100})/";
+    my $time_string = "D\x{e9} C\x{e9}adaoin";
+    eval $parser;
+    ok(!$@,"Test Eval worked");
+    iseq($dow_name,$time_string,"UTF8 trie common prefix extraction");
+}
+
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
 # Keep the following tests last -- they may crash perl
@@ -4133,4 +4139,12 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
 # Put new tests above the dotted line about a page above this comment
 
 # Don't forget to update this!
-BEGIN { print "1..1365\n" };
+BEGIN {
+    $::TestCount = 1367;
+    print "1..$::TestCount\n";
+}
+END {
+    if ($::TestCount != $::count) {
+	warn "#\n### Got $::count test reports, but expected $::TestCount\n#\n";
+    }
+}

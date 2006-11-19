@@ -29,7 +29,7 @@ ok( $out =~ /EXACT <baz>/, "Expect 'baz'"    );
 ok( $out !~ /EXACT <bop>/, "No 'bop'"        );
 ok( $out =~ /EXACT <fip>/, "Expect 'fip'"    );
 ok( $out !~ /EXACT <fop>/, "No 'baz'"        );
-ok( $out =~ /<zil>/,       "Got 'zil'"       ); # in a TRIE so no EXACT
+ok( $out =~ /<liz>/,       "Got 'liz'"       ); # in a TRIE so no EXACT
 ok( $out =~ /<zoo>/,       "Got 'zoo'"       ); # in a TRIE so no EXACT
 ok( $out =~ /<zap>/,       "Got 'zap'"       ); # in a TRIE so no EXACT
 ok( $out =~ /Count=7\n/,   "Count is 7") 
