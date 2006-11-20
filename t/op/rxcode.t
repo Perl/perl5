@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 34;
+plan tests => 38;
 
 $^R = undef;
 like( 'a',  qr/^a(?{1})(?:b(?{2}))?/, 'a =~ ab?' );
@@ -23,10 +23,7 @@ cmp_ok( $^R, '==', 6, '..$^R after ab =~ ab' );
 $^R = undef;
 like( 'ab', qr/^a(?{7})(?:b(?{8}))?/, 'ab =~ ab?' );
 
-TODO: {
-    local $TODO = '#32840: $^R value lost in (?:...)? constructs';
-    cmp_ok( $^R, '==', 8, '..$^R after ab =~ ab?' );
-}
+cmp_ok( $^R, '==', 8, '..$^R after ab =~ ab?' );
 
 $^R = undef;
 like( 'ab', qr/^a(?{9})b?(?{10})/, 'ab =~ ab? (2)' );
@@ -34,10 +31,7 @@ cmp_ok( $^R, '==', 10, '..$^R after ab =~ ab? (2)' );
 
 $^R = undef;
 like( 'ab', qr/^(a(?{11})(?:b(?{12})))?/, 'ab =~ (ab)? (3)' );
-TODO: {
-    local $TODO = '#32840: $^R value lost in (?:...)? constructs (2)';
-    cmp_ok( $^R, '==', 12, '..$^R after ab =~ ab? (3)' );
-}
+cmp_ok( $^R, '==', 12, '..$^R after ab =~ ab? (3)' );
 
 $^R = undef;
 unlike( 'ac', qr/^a(?{13})b(?{14})/, 'ac !~ ab' );
@@ -80,3 +74,13 @@ cmp_ok( scalar(@var), '==', 0, '..nothing pushed (package)' );
 unlike( 'abc', qr/^a(?{push @var,113})b(?{push @var,114})$/, 'abc !~ ab$ (push package var)' );
 cmp_ok( scalar(@var), '==', 0, '..still nothing pushed (package)' );
 
+{
+    local $^R = undef;
+    ok( 'ac' =~ /^a(?{30})(?:b(?{31})|c(?{32}))?/, 'ac =~ a(?:b|c)?' );
+    ok( $^R == 32, '$^R == 32' );
+}
+{
+    local $^R = undef;
+    ok( 'abbb' =~ /^a(?{36})(?:b(?{37})|c(?{38}))+/, 'abbbb =~ a(?:b|c)+' );
+    ok( $^R == 37, '$^R == 37' ) or print "# \$^R=$^R\n";
+}
