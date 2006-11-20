@@ -4124,7 +4124,7 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
     or print "# Unexpected outcome: should pass or crash perl\n";
 
 {
-    local $Message = "substituation with lookahead (possible segv)";
+    local $Message = "substitution with lookahead (possible segv)";
     $_="ns1ns1ns1";
     s/ns(?=\d)/ns_/g;
     iseq($_,"ns_1ns_1ns_1");
