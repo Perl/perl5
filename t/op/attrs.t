@@ -153,9 +153,9 @@ eval_ok '
 
 # bug #15898
 eval 'our ${""} : foo = 1';
-like $@, qr/Can't declare scalar dereference in our/;
+like $@, qr/Can't declare scalar dereference in "our"/;
 eval 'my $$foo : bar = 1';
-like $@, qr/Can't declare scalar dereference in my/;
+like $@, qr/Can't declare scalar dereference in "my"/;
 
 
 my @code = qw(lvalue locked method);
