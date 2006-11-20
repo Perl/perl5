@@ -504,9 +504,9 @@ Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
 		I32 paren = rx->lastparen;
 
 		/* return the last filled */
-		while ( paren >= 0 &&
-		    rx->startp[paren] == -1 || rx->endp[paren] == -1)
-		paren--;
+		while ( paren >= 0
+			&& (rx->startp[paren] == -1 || rx->endp[paren] == -1) )
+		    paren--;
 		return (U32)paren;
 	    }
 	}
