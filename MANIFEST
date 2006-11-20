@@ -2530,6 +2530,8 @@ lib/Text/TabsWrap/t/37000.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/39548.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/belg4mit.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/fill.t	See if Text::Wrap::fill works
+lib/Text/TabsWrap/t/Jacobson.t	See if Text::Tabs is working
+lib/Text/TabsWrap/t/Jacobson2.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/Jochen.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/sep2.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/sep.t	See if Text::Tabs is working

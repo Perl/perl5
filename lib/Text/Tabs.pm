@@ -3,11 +3,11 @@ package Text::Tabs;
 
 require Exporter;
 
-@ISA = qw(Exporter);
+@ISA = (Exporter);
 @EXPORT = qw(expand unexpand $tabstop);
 
 use vars qw($VERSION $tabstop $debug);
-$VERSION = 2007.0711_01;
+$VERSION = 2007.1117;
 
 use strict;
 
@@ -126,11 +126,6 @@ Instead of the C<expand> comand, use:
 Instead of the C<unexpand -a> command, use:
 
   perl -MText::Tabs -n -e 'print unexpand $_'
-
-=head1 BUGS
-
-expand doesn't handle newlines very quickly -- do not feed it an
-entire document in one string.  Instead feed it an array of lines.
 
 =head1 LICENSE
 
