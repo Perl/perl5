@@ -1459,7 +1459,7 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
 	    SvREFCNT_dec(to_dec);
 	return 0;
     }
-    s = SvPV_force(sv,len);
+    s = SvOK(sv) ? SvPV_force(sv,len) : "IGNORE";
     if (strEQ(s,"IGNORE")) {
 	if (i) {
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS
