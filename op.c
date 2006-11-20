@@ -490,7 +490,16 @@ clear_pmop:
 STATIC void
 S_cop_free(pTHX_ COP* cop)
 {
-    Safefree(cop->cop_label);   /* FIXME: treaddead ??? */
+    if (cop->cop_label) {
+#ifdef PERL_TRACK_MEMPOOL
+	Malloc_t ptr = (Malloc_t)(cop->cop_label - sTHX);
+	struct perl_memory_debug_header *const header
+		= (struct perl_memory_debug_header *)ptr;
+	/* Only the thread that allocated us can free us. */
+	if (header->interpreter == aTHX)
+#endif
+	    Safefree(cop->cop_label);
+    }
     CopFILE_free(cop);
     CopSTASH_free(cop);
     if (! specialWARN(cop->cop_warnings))
