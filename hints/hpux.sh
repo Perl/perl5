@@ -191,11 +191,14 @@ case "$ccisgcc" in
 	echo '#include <stdio.h>\nint main(){long l;printf("%d\\n",sizeof(l));}'>try.c
 	$cc -o try $ccflags $ldflags try.c
 	if [ "`try`" = "8" ]; then
-	    cat <<EOM >&4
+	    case "$use64bitall" in
+		$define|true|[Yy]) ;;
+		*)  cat <<EOM >&4
 
 *** This version of gcc uses 64 bit longs. -Duse64bitall is
 *** implicitly set to enable continuation
 EOM
+		esac
 	    use64bitall=$define
 	    gcc_64native=yes
 	    fi
