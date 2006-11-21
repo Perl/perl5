@@ -1366,23 +1366,10 @@ Policy overrides hints -- see L</Site-wide Policy settings>.
 
 =item *** WHOA THERE!!! ***
 
-Occasionally, Configure makes a wrong guess.  For example, on SunOS
-4.1.3, Configure incorrectly concludes that tzname[] is in the
-standard C library.  The hint file is set up to correct for this.  You
-will see a message:
-
-    *** WHOA THERE!!! ***
-	The recommended value for $d_tzname on this machine was "undef"!
-	Keep the recommended value? [y]
-
-You should always keep the recommended value unless, after reading the
-relevant section of the hint file, you are sure you want to try
-overriding it.
-
-If you are re-using an old config.sh, the word "previous" will be
-used instead of "recommended".  Again, you will almost always want
-to keep the previous value, unless you have changed something on your
-system.
+If you are re-using an old config.sh, it's possible that Configure detects
+different values from the ones specified in this file.  You will almost
+always want to keep the previous value, unless you have changed something
+on your system.
 
 For example, suppose you have added libgdbm.a to your system
 and you decide to reconfigure perl to use GDBM_File.  When you run
