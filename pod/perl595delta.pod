@@ -16,6 +16,11 @@ between 5.8.0 and 5.9.4.
 When perl is run under taint mode, C<printf()> and C<sprintf()> will now
 reject any tainted format argument. (Rafael Garcia-SUarez)
 
+=head2 undef and signal handlers
+
+Undefining or deleting a signal handler via C<undef $SIG{FOO}> is now
+equivalent to setting it to C<'DEFAULT'>.
+
 =head2 Removal of the bytecode compiler and of perlcc
 
 C<perlcc>, the byteloader and the supporting modules (B::C, B::CC,
