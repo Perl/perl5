@@ -10,7 +10,7 @@ BEGIN {
     require "./test.pl";
 }
 
-plan tests => 109;
+plan tests => 110;
 
 $a = {};
 bless $a, "Bob";
@@ -216,3 +216,10 @@ ok( Bar->DOES( 'Bar' ), '... and should fall back to isa()' );
 ok( Bar->DOES( 'Foo' ), '... even when inherited' );
 ok( Baz->DOES( 'Baz' ), '... even without inheriting any other DOES()' );
 ok( ! Baz->DOES( 'Foo' ), '... returning true or false appropriately' );
+
+package Pig;
+package Bodine;
+Bodine->isa('Pig');
+*isa = \&UNIVERSAL::isa;
+eval { isa({}, 'HASH') };
+::is($@, '', "*isa correctly found")
