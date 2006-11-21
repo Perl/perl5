@@ -4746,7 +4746,7 @@ uquadtype (quadtype.U):
 use5005threads (usethreads.U):
 	This variable conditionally defines the USE_5005THREADS symbol,
 	and indicates that Perl should be built to use the 5.005-based
-	threading implementation.
+	threading implementation. Only valid up to 5.8.x.
 
 use64bitall (use64bits.U):
 	This variable conditionally defines the USE_64_BIT_ALL symbol,

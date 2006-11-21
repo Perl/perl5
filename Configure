@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Wed Nov 15 22:26:01 CET 2006 [metaconfig 3.0 PL70]
+# Generated on Tue Nov 21 16:13:46 CET 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -4049,6 +4049,62 @@ EOM
 esac
 
 	
+: get the patchlevel
+echo " "
+echo "Getting the current patchlevel..." >&4
+if $test -r $rsrc/patchlevel.h;then
+	revision=`awk '/define[ 	]+PERL_REVISION/ {print $3}' $rsrc/patchlevel.h`
+	patchlevel=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
+	subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
+	api_revision=`awk '/define[ 	]+PERL_API_REVISION/ {print $3}' $rsrc/patchlevel.h`
+	api_version=`awk '/define[ 	]+PERL_API_VERSION/ {print $3}' $rsrc/patchlevel.h`
+	api_subversion=`awk '/define[ 	]+PERL_API_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
+	perl_patchlevel=`egrep 'define PERL_PATCHNUM [0-9][0-9]|,"MAINT[0-9][0-9]*"' $rsrc/patchlevel.h|sed 's/[^0-9]//g'`
+else
+	revision=0
+	patchlevel=0
+	subversion=0
+	api_revision=0
+	api_version=0
+	api_subversion=0
+	perl_patchlevel=0
+	$echo "(You do not have patchlevel.h.  Eek.)"
+fi
+if $test -r $rsrc/.patch ; then
+	if $test "X$perl_patchlevel" = "X" || $test "`cat $rsrc/.patch`" -gt "$perl_patchlevel" ; then
+		perl_patchlevel=`cat $rsrc/.patch`
+	fi
+fi
+: Define a handy string here to avoid duplication in myconfig.SH and configpm.
+version_patchlevel_string="version $patchlevel subversion $subversion"
+case "$perl_patchlevel" in
+0|'') ;;
+*) version_patchlevel_string="$version_patchlevel_string patch $perl_patchlevel" ;;
+esac
+
+$echo "(You have $package $version_patchlevel_string.)"
+
+case "$osname" in
+dos|vms)
+	: XXX Should be a Configure test for double-dots in filenames.
+	version=`echo $revision $patchlevel $subversion | \
+		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
+	api_versionstring=`echo $api_revision $api_version $api_subversion | \
+		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
+	;;
+*)
+	version=`echo $revision $patchlevel $subversion | \
+		 $awk '{ printf "%d.%d.%d\n", $1, $2, $3 }'`
+	api_versionstring=`echo $api_revision $api_version $api_subversion | \
+		 $awk '{ printf "%d.%d.%d\n", $1, $2, $3 }'`
+	;;
+esac
+: Special case the 5.005_xx maintenance series, which used 5.005
+: without any subversion label as a subdirectory in $sitelib
+if test "${api_revision}${api_version}${api_subversion}" = "550"; then
+	api_versionstring='5.005'
+fi
+
 case "$usethreads" in
 $define|true|[yY]*)     dflt='y';;
 *)     # Catch case where user specified ithreads or 5005threads but
@@ -4085,8 +4141,9 @@ esac
 set usethreads
 eval $setvar
 
-case "$usethreads" in
-$define)
+if $test $patchlevel -lt 9; then
+    case "$usethreads" in
+    $define)
 	$cat <<EOM
 
 Since release 5.6, Perl has had two different threading implementations,
@@ -4123,14 +4180,14 @@ EOM
 	set use5005threads
 	eval $setvar
 	;;
-*)
+    *)
 	useithreads="$undef"
 	use5005threads="$undef"
 	;;
-esac
+    esac
 
-case "$useithreads$use5005threads" in
-"$define$define")
+    case "$useithreads$use5005threads" in
+    "$define$define")
 	$cat >&4 <<EOM
 
 You cannot have both the ithreads and the 5.005 threads enabled
@@ -4140,7 +4197,35 @@ much less stable than the ithreads.
 EOM
 	use5005threads="$undef"
 	;;
-esac
+    esac
+
+else
+: perl-5.9.x and later
+
+    use5005threads="$undef"
+    case "$usethreads" in
+    $define)
+	: Default to ithreads unless overridden on command line or with
+	: old config.sh
+	dflt='y'
+	case "$useithreads" in
+		$undef|false|[nN]*) dflt='n';;
+	esac
+	rp='Use the newer interpreter-based ithreads?'
+	. ./myread
+	case "$ans" in
+	y|Y)    val="$define" ;;
+	*)      val="$undef" ;;
+	esac
+	set useithreads
+	eval $setvar
+	;;
+    *)
+	useithreads="$undef"
+	;;
+    esac
+
+fi
 
 if test X"$usethreads" = "X$define" -a "X$useperlio" = "Xundef"; then
 	cat >&4 <<EOF
@@ -5981,62 +6066,6 @@ prefixit='case "$3" in
 	*) eval "$1=\"\$$2\"";;
 	esac;;
 esac'
-
-: get the patchlevel
-echo " "
-echo "Getting the current patchlevel..." >&4
-if $test -r $rsrc/patchlevel.h;then
-	revision=`awk '/define[ 	]+PERL_REVISION/ {print $3}' $rsrc/patchlevel.h`
-	patchlevel=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $rsrc/patchlevel.h`
-	subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
-	api_revision=`awk '/define[ 	]+PERL_API_REVISION/ {print $3}' $rsrc/patchlevel.h`
-	api_version=`awk '/define[ 	]+PERL_API_VERSION/ {print $3}' $rsrc/patchlevel.h`
-	api_subversion=`awk '/define[ 	]+PERL_API_SUBVERSION/ {print $3}' $rsrc/patchlevel.h`
-	perl_patchlevel=`egrep 'define PERL_PATCHNUM [0-9][0-9]|,"MAINT[0-9][0-9]*"' $rsrc/patchlevel.h|sed 's/[^0-9]//g'`
-else
-	revision=0
-	patchlevel=0
-	subversion=0
-	api_revision=0
-	api_version=0
-	api_subversion=0
-	perl_patchlevel=0
-	$echo "(You do not have patchlevel.h.  Eek.)"
-fi
-if $test -r $rsrc/.patch ; then
-	if $test "X$perl_patchlevel" = "X" || $test "`cat $rsrc/.patch`" -gt "$perl_patchlevel" ; then
-		perl_patchlevel=`cat $rsrc/.patch`
-	fi
-fi
-: Define a handy string here to avoid duplication in myconfig.SH and configpm.
-version_patchlevel_string="version $patchlevel subversion $subversion"
-case "$perl_patchlevel" in
-0|'') ;;
-*) version_patchlevel_string="$version_patchlevel_string patch $perl_patchlevel" ;;
-esac
-
-$echo "(You have $package $version_patchlevel_string.)"
-
-case "$osname" in
-dos|vms)
-	: XXX Should be a Configure test for double-dots in filenames.
-	version=`echo $revision $patchlevel $subversion | \
-		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
-	api_versionstring=`echo $api_revision $api_version $api_subversion | \
-		 $awk '{ printf "%d_%d_%d\n", $1, $2, $3 }'`
-	;;
-*)
-	version=`echo $revision $patchlevel $subversion | \
-		 $awk '{ printf "%d.%d.%d\n", $1, $2, $3 }'`
-	api_versionstring=`echo $api_revision $api_version $api_subversion | \
-		 $awk '{ printf "%d.%d.%d\n", $1, $2, $3 }'`
-	;;
-esac
-: Special case the 5.005_xx maintenance series, which used 5.005
-: without any subversion label as a subdirectory in $sitelib
-if test "${api_revision}${api_version}${api_subversion}" = "550"; then
-	api_versionstring='5.005'
-fi
 
 : determine installation style
 : For now, try to deduce it from prefix unless it is already set.

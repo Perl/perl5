@@ -1345,6 +1345,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_dbminitproto	HAS_DBMINIT_PROTO	/**/
 
+/* HAS_DIR_DD_FD:
+ *	This symbol, if defined, indicates that the the DIR* dirstream
+ *	structure contains a member variable named dd_fd.
+ */
+#$d_dir_dd_fd HAS_DIR_DD_FD		/**/
+
 /* HAS_DIRFD:
  *	This manifest constant lets the C program know that dirfd
  *	is available.
@@ -4387,6 +4393,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* USE_5005THREADS:
  *	This symbol, if defined, indicates that Perl should be built to
  *	use the 5.005-based threading implementation.
+ *	Only valid up to 5.8.x.
  */
 /* OLD_PTHREADS_API:
  *	This symbol, if defined, indicates that Perl should
@@ -4459,12 +4466,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define void int		/* is void to be avoided? */
 #define M_VOID			/* Xenix strikes again */
 #endif
-
-/* HAS_DIR_DD_FD:
- *	This symbol, if defined, indicates that the the DIR* dirstream
- *	structure contains a member variable named dd_fd.
- */
-#$d_dir_dd_fd HAS_DIR_DD_FD		/**/
 
 #endif
 !GROK!THIS!
