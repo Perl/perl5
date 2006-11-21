@@ -36,7 +36,12 @@ ok( chdir 'Big-Dummy', "chdir'd to Big-Dummy" ) ||
 
 ok( my $stdout = tie *STDOUT, 'TieOut' );
 
-{
+SKIP: {
+    use Config;
+    skip ("installman3dir is null", 1)
+	if !$Config{installman3dir} or
+	    $Config{installman3dir} !~ /\S/ or
+	    $Config{installman3dir} eq 'none';
     my $mm = WriteMakefile(
         NAME            => 'Big::Dummy',
         VERSION_FROM    => 'lib/Big/Dummy.pm',
