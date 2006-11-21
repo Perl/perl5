@@ -4143,8 +4143,3 @@ BEGIN {
     $::TestCount = 1367;
     print "1..$::TestCount\n";
 }
-END {
-    if ($::TestCount != $::count) {
-	warn "#\n### Got $::count test reports, but expected $::TestCount\n#\n";
-    }
-}
