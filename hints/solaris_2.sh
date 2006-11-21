@@ -404,13 +404,6 @@ EOM
 	if test "`arch`" = i86pc -a `uname -r` = 5.6 && \
 	   ${cc:-cc} try.c -lpthread >/dev/null 2>&1 && ./a.out; then
 	    d_sigsetjmp=$undef
-	    cat << 'EOM' >&2
-
-You will see a *** WHOA THERE!!! ***  message from Configure for
-d_sigsetjmp.  Keep the recommended value.  See hints/solaris_2.sh
-for more information.
-
-EOM
 	fi
 
 	# These prototypes should be visible since we using
