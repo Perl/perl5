@@ -161,7 +161,7 @@ The routines are called in string comparison order of KEY.
 
 The COUNT can be zero or negative, see timethis().
 
-Returns a hash of Benchmark objects, keyed by name.
+Returns a hash reference of Benchmark objects, keyed by name.
 
 =item timediff ( T1, T2 )
 
@@ -225,6 +225,8 @@ c<cmpthese> can also be passed the data structure that timethese() returns:
     cmpthese( $results );
 
 in case you want to see both sets of results.
+If the first argument is an unblessed hash reference,
+that is RESULTSHASHREF; otherwise that is COUNT.
 
 Returns a reference to an ARRAY of rows, each row is an ARRAY of cells from the
 above chart, including labels. This:
@@ -435,7 +437,7 @@ our(@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $VERSION);
 	      clearcache clearallcache disablecache enablecache);
 %EXPORT_TAGS=( all => [ @EXPORT, @EXPORT_OK ] ) ;
 
-$VERSION = 1.08;
+$VERSION = 1.09;
 
 # --- ':hireswallclock' special handling
 
@@ -881,7 +883,8 @@ USAGE
 sub cmpthese{
     my ($results, $style);
 
-    if( ref $_[0] ) {
+    # $count can be a blessed object.
+    if ( ref $_[0] eq 'HASH' ) {
         ($results, $style) = @_;
     }
     else {
