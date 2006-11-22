@@ -421,7 +421,7 @@ sub puts {
 
 sub remove {
     usage "remove(filename)" if @_ != 1;
-    CORE::unlink($_[0]);
+    (-d $_[0]) ? CORE::rmdir($_[0]) : CORE::unlink($_[0]);
 }
 
 sub rename {
