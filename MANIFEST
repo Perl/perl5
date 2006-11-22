@@ -118,7 +118,6 @@ ext/Compress/IO/Base/Makefile.PL	IO::Compress::Base
 ext/Compress/IO/Base/private/MakeUtil.pm	IO::Compress::Base
 ext/Compress/IO/Base/README	IO::Compress::Base
 ext/Compress/IO/Base/t/01misc.t	IO::Compress::Base
-ext/Compress/IO/Base/t/99pod.t	IO::Compress::Base
 ext/Compress/IO/Base/t/globmapper.t	IO::Compress::Base
 ext/Compress/IO/Zlib/Changes	IO::Compress::Zlib
 ext/Compress/IO/Zlib/examples/gzappend	IO::Compress::Zlib
@@ -203,7 +202,6 @@ ext/Compress/IO/Zlib/t/109merge-deflate.t	IO::Compress::Zlib
 ext/Compress/IO/Zlib/t/109merge-gzip.t	IO::Compress::Zlib
 ext/Compress/IO/Zlib/t/109merge-rawdeflate.t	IO::Compress::Zlib
 ext/Compress/IO/Zlib/t/109merge-zip.t	IO::Compress::Zlib
-ext/Compress/IO/Zlib/t/999pod.t	IO::Compress::Zlib
 ext/Compress/Raw/Zlib/Changes		Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/config.in		Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/examples/filtdef	Compress::Raw::Zlib
@@ -218,7 +216,6 @@ ext/Compress/Raw/Zlib/t/01version.t	Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/t/02zlib.t	Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/t/07bufsize.t	Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/t/18lvalue.t	Compress::Raw::Zlib
-ext/Compress/Raw/Zlib/t/99pod.t		Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/typemap		Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/zlib-src/adler32.c	Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/zlib-src/compress.c	Compress::Raw::Zlib
@@ -258,7 +255,6 @@ ext/Compress/Zlib/t/05examples.t	Compress::Zlib
 ext/Compress/Zlib/t/06gzsetp.t		Compress::Zlib
 ext/Compress/Zlib/t/08encoding.t	Compress::Zlib
 ext/Compress/Zlib/t/14gzopen.t		Compress::Zlib
-ext/Compress/Zlib/t/99pod.t		Compress::Zlib
 ext/Cwd/Changes			Cwd extension Changelog
 ext/Cwd/Cwd.xs			Cwd extension external subroutines
 ext/Cwd/Makefile.PL		Cwd extension makefile maker
@@ -475,8 +471,6 @@ ext/Digest/SHA/src/sha64bit.h	Digest::SHA extension
 ext/Digest/SHA/src/sha.c	Digest::SHA extension
 ext/Digest/SHA/src/sha.h	Digest::SHA extension
 ext/Digest/SHA/src/shaxtra.c	Digest::SHA extension
-ext/Digest/SHA/t/0-pod-coverage.t	See if Digest::SHA works
-ext/Digest/SHA/t/0-pod.t	See if Digest::SHA works
 ext/Digest/SHA/t/1-exist.t	See if Digest::SHA works
 ext/Digest/SHA/t/1-hello-world.t	See if Digest::SHA works
 ext/Digest/SHA/t/2-nist-sha-1.t	See if Digest::SHA works
@@ -2379,7 +2373,6 @@ lib/Term/ANSIColor/ChangeLog	Term::ANSIColor
 lib/Term/ANSIColor.pm		Perl module supporting termcap usage
 lib/Term/ANSIColor/README	Term::ANSIColor
 lib/Term/ANSIColor/t/basic.t	Tests for Term::ANSIColor
-lib/Term/ANSIColor/t/pod.t	Tests for Term::ANSIColor
 lib/termcap.pl			Perl library supporting termcap usage
 lib/Term/Cap.pm			Perl module supporting termcap usage
 lib/Term/Cap.t			See if Term::Cap works
@@ -2415,7 +2408,6 @@ lib/Test/Harness/t/harness.t	Test::Harness test
 lib/Test/Harness/t/inc_taint.t	Test::Harness test
 lib/Test/Harness/t/nonumbers.t	Test::Harness test
 lib/Test/Harness/t/ok.t		Test::Harness test
-lib/Test/Harness/t/pod.t	Test::Harness test
 lib/Test/Harness/t/point-parse.t	Test::Harness test
 lib/Test/Harness/t/point.t	Test::Harness test
 lib/Test/Harness/t/prove-globbing.t	Test::Harness::Straps test
@@ -2519,8 +2511,6 @@ lib/Text/Balanced/t/extqlk.t	See if Text::Balanced works
 lib/Text/Balanced/t/exttag.t	See if Text::Balanced works
 lib/Text/Balanced/t/extvar.t	See if Text::Balanced works
 lib/Text/Balanced/t/gentag.t	See if Text::Balanced works
-lib/Text/Balanced/t/pod-coverage.t	See if Text::Balanced works
-lib/Text/Balanced/t/pod.t	See if Text::Balanced works
 lib/Text/ParseWords.pm		Perl module to split words on arbitrary delimiter
 lib/Text/ParseWords.t		See if Text::ParseWords works
 lib/Text/ParseWords/taint.t	See if Text::ParseWords works with tainting
