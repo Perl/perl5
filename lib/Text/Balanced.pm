@@ -7,9 +7,10 @@ use strict;
 package Text::Balanced;
 
 use Exporter;
+use SelfLoader;
 use vars qw { $VERSION @ISA %EXPORT_TAGS };
 
-$VERSION = '1.98_01';
+use version; $VERSION = qv('1.99.1');
 @ISA		= qw ( Exporter );
 		     
 %EXPORT_TAGS	= ( ALL => [ qw(
@@ -36,14 +37,6 @@ sub _match_variable($$);
 sub _match_codeblock($$$$$$$);
 sub _match_quotelike($$$$);
 
-sub carp {
-  require Carp; goto &Carp::carp;
-}
-
-sub croak {
-  require Carp; goto &Carp::croak;
-}
-
 # HANDLE RETURN VALUES IN VARIOUS CONTEXTS
 
 sub _failmsg {
@@ -64,8 +57,7 @@ sub _succeed
 	$@ = undef;
 	my ($wantarray,$textref) = splice @_, 0, 2;
 	my ($extrapos, $extralen) = @_>18 ? splice(@_, -2, 2) : (0,0);
-	my ($startlen) = $_[5];
-        my $oppos = $_[6];
+	my ($startlen, $oppos) = @_[5,6];
 	my $remainderpos = $_[2];
 	if ($wantarray)
 	{
@@ -336,7 +328,7 @@ sub _match_tagged	# ($$$$$$$)
 
 	if (!defined $rdel)
 	{
-		$rdelspec = $&;
+		$rdelspec = substr($$textref, $-[0], $+[0] - $-[0]);
 		unless ($rdelspec =~ s/\A([[(<{]+)($XMLNAME).*/ quotemeta "$1\/$2". _revbracket($1) /oes)
 		{
 			_failmsg "Unable to construct closing tag to match: $rdel",
@@ -351,7 +343,8 @@ sub _match_tagged	# ($$$$$$$)
 			for (qw,~ ! ^ & * ) _ + - = } ] : " ; ' > . ? / | ',)
 				{ next if $rdel =~ /\Q$_/; $del = $_; last }
 			unless ($del) {
-				croak ("Can't interpolate right delimiter $rdel")
+				use Carp;
+				croak "Can't interpolate right delimiter $rdel"
 			}
 			eval "qq$del$rdel$del";
 		};
@@ -590,15 +583,12 @@ sub _match_codeblock($$$$$$$)
 
 
 		# NEED TO COVER MANY MORE CASES HERE!!!
-		# NB 'case' is included here, because in Switch.pm,
-		# it's followed by a term, not an op
-
 		if ($$textref =~ m#\G\s*(?!$ldel_inner)
 					( [-+*x/%^&|.]=?
 					| [!=]~
 					| =(?!>)
 					| (\*\*|&&|\|\||<<|>>)=?
-					| case|split|grep|map|return
+					| split|grep|map|return
 					| [([]
 					)#gcx)
 		{
@@ -729,7 +719,8 @@ sub _match_quotelike($$$$)	# ($textref, $prepat, $allow_raw_match)
 		       );
 	}
 
-	unless ($$textref =~ m{\G(\b(?:m|s|qq|qx|qw|q|qr|tr|y)\b(?=\s*\S)|<<)}gc)
+	unless ($$textref =~
+    m{\G(\b(?:m|s|qq|qx|qw|q|qr|tr|y)\b(?=\s*\S)|<<(?=\s*["'A-Za-z_]))}gc)
 	{
 		_failmsg q{No quotelike operator found after prefix at "} .
 			     substr($$textref, pos($$textref), 20) .
@@ -768,7 +759,7 @@ sub _match_quotelike($$$$)	# ($textref, $prepat, $allow_raw_match)
 			return;
 		}
 		$rd1pos = pos($$textref);
-		$$textref =~ m{\Q$label\E\n}gc;
+        $$textref =~ m{\Q$label\E\n}gc;
 		$ld2pos = pos($$textref);
 		return (
 			$startpos,	$oppos-$startpos,	# PREFIX
@@ -894,7 +885,8 @@ sub extract_multiple (;$$$$)	# ($text, $functions_ref, $max_fields, $ignoreunkno
 
 		unless (wantarray)
 		{
-			carp ("extract_multiple reset maximal count to 1 in scalar context")
+			use Carp;
+			carp "extract_multiple reset maximal count to 1 in scalar context"
 				if $^W && defined($_[2]) && $max > 1;
 			$max = 1
 		}
@@ -932,7 +924,10 @@ sub extract_multiple (;$$$$)	# ($text, $functions_ref, $max_fields, $ignoreunkno
 				elsif (ref($func) eq 'Text::Balanced::Extractor')
 					{ @bits = $field = $func->extract($$textref) }
 				elsif( $$textref =~ m/\G$func/gc )
-					{ @bits = $field = defined($1) ? $1 : $& }
+					{ @bits = $field = defined($1)
+                                ? $1
+                                : substr($$textref, $-[0], $+[0] - $-[0])
+                    }
 				$pref ||= "";
 				if (defined($field) && length($field))
 				{
@@ -1133,9 +1128,9 @@ The substring to be extracted must appear at the
 current C<pos> location of the string's variable
 (or at index zero, if no C<pos> position is defined).
 In other words, the C<extract_...> subroutines I<don't>
-extract the first occurrence of a substring anywhere
+extract the first occurance of a substring anywhere
 in a string (like an unanchored regex would). Rather,
-they extract an occurrence of the substring appearing
+they extract an occurance of the substring appearing
 immediately at the current matching position in the
 string (like a C<\G>-anchored regex would).
 
@@ -1401,7 +1396,7 @@ See also: C<"extract_quotelike"> and C<"extract_codeblock">.
 
 C<extract_variable> extracts any valid Perl variable or
 variable-involved expression, including scalars, arrays, hashes, array
-accesses, hash look-ups, method calls through objects, subroutine calls
+accesses, hash look-ups, method calls through objects, subroutine calles
 through subroutine references, etc.
 
 The subroutine takes up to two optional arguments:
@@ -2060,7 +2055,7 @@ If none of the extractor subroutines succeeds, then one
 character is extracted from the start of the text and the extraction
 subroutines reapplied. Characters which are thus removed are accumulated and
 eventually become the next field (unless the fourth argument is true, in which
-case they are discarded).
+case they are disgarded).
 
 For example, the following extracts substrings that are valid Perl variables:
 
