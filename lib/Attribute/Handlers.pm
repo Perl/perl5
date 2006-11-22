@@ -2,7 +2,7 @@ package Attribute::Handlers;
 use 5.006;
 use Carp;
 use warnings;
-$VERSION = '0.78_04';
+$VERSION = '0.78_05';
 # $DB::single=1;
 
 my %symcache;
@@ -100,13 +100,12 @@ sub _resolve_lastattr {
 }
 
 sub AUTOLOAD {
+	return if $AUTOLOAD =~ /::DESTROY$/;
 	my ($class) = $AUTOLOAD =~ m/(.*)::/g;
 	$AUTOLOAD =~ m/_ATTR_(.*?)_(.*)/ or
 	    croak "Can't locate class method '$AUTOLOAD' via package '$class'";
 	croak "Attribute handler '$2' doesn't handle $1 attributes";
 }
-
-sub DESTROY {}
 
 my $builtin = qr/lvalue|method|locked|unique|shared/;
 
