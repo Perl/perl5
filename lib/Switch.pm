@@ -638,23 +638,14 @@ mechanism:
         %special = ( woohoo => 1,  d'oh => 1 );
 
         while (<>) {
+	    chomp;
             switch ($_) {
-
                 case (%special) { print "homer\n"; }      # if $special{$_}
-                case /a-z/i     { print "alpha\n"; }      # if $_ =~ /a-z/i
+                case /[a-z]/i   { print "alpha\n"; }      # if $_ =~ /a-z/i
                 case [1..9]     { print "small num\n"; }  # if $_ in [1..9]
-
-                case { $_[0] >= 10 } {                    # if $_ >= 10
-                    my $age = <>;
-                    switch (sub{ $_[0] < $age } ) {
-
-                        case 20  { print "teens\n"; }     # if 20 < $age
-                        case 30  { print "twenties\n"; }  # if 30 < $age
-                        else     { print "history\n"; }
-                    }
-                }
-
+                case { $_[0] >= 10 } { print "big num\n"; } # if $_ >= 10
                 print "must be punctuation\n" case /\W/;  # if $_ ~= /\W/
+	    }
         }
 
 Note that C<switch>es can be nested within C<case> (or any other) blocks,
@@ -669,7 +660,7 @@ useful for aggregating integral cases:
         {
                 switch ($_[0]) { case 0            { return 'zero' }
                                  case [2,4,6,8]    { return 'even' }
-                                 case [1,3,4,7,9]  { return 'odd' }
+                                 case [1,3,5,7,9]  { return 'odd' }
                                  case /[A-F]/i     { return 'hex' }
                                }
         }
@@ -698,7 +689,7 @@ For example:
 
 If $val held the number C<1>, the above C<switch> block would call the
 first three C<handle_...> subroutines, jumping to the next case test
-each time it encountered a C<next>. After the thrid C<case> block
+each time it encountered a C<next>. After the third C<case> block
 was executed, control would jump to the end of the enclosing
 C<switch> block.
 
@@ -787,16 +778,18 @@ be tested against a series of conditions. For example:
 
         sub beverage {
             switch (shift) {
-
-                case sub { $_[0] < 10 }  { return 'milk' }
-                case sub { $_[0] < 20 }  { return 'coke' }
-                case sub { $_[0] < 30 }  { return 'beer' }
-                case sub { $_[0] < 40 }  { return 'wine' }
-                case sub { $_[0] < 50 }  { return 'malt' }
-                case sub { $_[0] < 60 }  { return 'Moet' }
-                else                     { return 'milk' }
+                case { $_[0] < 10 } { return 'milk' }
+                case { $_[0] < 20 } { return 'coke' }
+                case { $_[0] < 30 } { return 'beer' }
+                case { $_[0] < 40 } { return 'wine' }
+                case { $_[0] < 50 } { return 'malt' }
+                case { $_[0] < 60 } { return 'Moet' }
+                else                { return 'milk' }
             }
         }
+
+(This is equivalent to writing C<case (sub { $_[0] < 10 })>, etc.; C<$_[0]>
+is the argument to the anonymous subroutine.)
 
 The need to specify each condition as a subroutine block is tiresome. To
 overcome this, when importing Switch.pm, a special "placeholder"
@@ -806,11 +799,11 @@ higher-order function. That is, the expression:
 
         use Switch '__';
 
-        __ < 2 + __
+        __ < 2
 
 is equivalent to:
 
-        sub { $_[0] < 2 + $_[1] }
+        sub { $_[0] < 2 }
 
 With C<__>, the previous ugly case statements can be rewritten:
 
@@ -874,6 +867,6 @@ use smaller source files.
 
 =head1 COPYRIGHT
 
-    Copyright (c) 1997-2003, Damian Conway. All Rights Reserved.
+    Copyright (c) 1997-2006, Damian Conway. All Rights Reserved.
     This module is free software. It may be used, redistributed
         and/or modified under the same terms as Perl itself.
