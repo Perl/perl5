@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 
-$VERSION = '2.10_01';
+$VERSION = '2.11';
 
 
 # LOAD FILTERING MODULE...
@@ -502,26 +502,25 @@ Switch - A switch statement for Perl
 
 =head1 VERSION
 
-This document describes version 2.10 of Switch,
-released Dec 29, 2003.
+This document describes version 2.11 of Switch,
+released Nov 22, 2006.
 
 =head1 SYNOPSIS
 
-	use Switch;
+    use Switch;
 
-	switch ($val) {
-
-		case 1		{ print "number 1" }
-		case "a"	{ print "string a" }
-		case [1..10,42]	{ print "number in list" }
-		case (@array)	{ print "number in list" }
-		case /\w+/	{ print "pattern" }
-		case qr/\w+/	{ print "pattern" }
-		case (%hash)	{ print "entry in hash" }
-		case (\%hash)	{ print "entry in hash" }
-		case (\&sub)	{ print "arg to subroutine" }
-		else		{ print "previous case not true" }
-	}
+    switch ($val) {
+	case 1		{ print "number 1" }
+	case "a"	{ print "string a" }
+	case [1..10,42]	{ print "number in list" }
+	case (@array)	{ print "number in list" }
+	case /\w+/	{ print "pattern" }
+	case qr/\w+/	{ print "pattern" }
+	case (%hash)	{ print "entry in hash" }
+	case (\%hash)	{ print "entry in hash" }
+	case (\&sub)	{ print "arg to subroutine" }
+	else		{ print "previous case not true" }
+    }
 
 =head1 BACKGROUND
 
@@ -591,14 +590,11 @@ the existence of a series of keys (C<match if exists $s-E<gt>{$c}>),
 one could test for the existence of a single key in a series of hashes
 (C<match if exists $c-E<gt>{$s}>).
 
-As L<perltodo> observes, a Perl case mechanism must support all these
-"ways to do it".
-
-
 =head1 DESCRIPTION
 
 The Switch.pm module implements a generalized case mechanism that covers
-the numerous possible combinations of switch and case values described above.
+most (but not all) of the numerous possible combinations of switch and case
+values described above.
 
 The module augments the standard Perl syntax with two new control
 statements: C<switch> and C<case>. The C<switch> statement takes a
@@ -844,7 +840,7 @@ and requires both these modules to be installed.
 =head1 AUTHOR
 
 Damian Conway (damian@conway.org). The maintainer of this module is now Rafael
-Garcia-Suarez (rgarciasuarez@free.fr).
+Garcia-Suarez (rgarciasuarez@gmail.com).
 
 =head1 BUGS
 
