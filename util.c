@@ -3829,7 +3829,7 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, in
   else {
     /* Possibly buf overflowed - try again with a bigger buf */
     const int fmtlen = strlen(fmt);
-    const int bufsize = fmtlen + buflen;
+    int bufsize = fmtlen + buflen;
 
     Newx(buf, bufsize, char);
     while (buf) {
@@ -3842,7 +3842,8 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, in
 	buf = NULL;
 	break;
       }
-      Renew(buf, bufsize*2, char);
+      bufsize *= 2;
+      Renew(buf, bufsize, char);
     }
     return buf;
   }
