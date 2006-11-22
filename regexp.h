@@ -54,6 +54,7 @@ typedef struct regexp {
 	I32 refcnt;
 	I32 minlen;		/* mininum possible length of string to match */
 	I32 minlenret;		/* mininum possible length of $& */
+	U32 gofs;               /* chars left of pos that we search from */
 	I32 prelen;		/* length of precomp */
 	U32 nparens;		/* number of parentheses */
 	U32 lastparen;		/* last paren matched */
@@ -114,6 +115,7 @@ typedef struct regexp_engine {
 #define ROPT_MATCH_UTF8		0x10000000 /* subbeg is utf-8 */
 #define ROPT_VERBARG_SEEN       0x20000000
 #define ROPT_CUTGROUP_SEEN      0x40000000
+#define ROPT_GPOS_FLOAT         0x80000000
 
 #define RE_USE_INTUIT_NOML	0x00100000 /* Best to intuit before matching */
 #define RE_USE_INTUIT_ML	0x00200000

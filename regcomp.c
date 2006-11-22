@@ -370,7 +370,7 @@ static const scan_data_t zero_scan_data =
  * arg. Show regex, up to a maximum length. If it's too long, chop and add
  * "...".
  */
-#define	FAIL(msg) STMT_START {						\
+#define _FAIL(code) STMT_START {					\
     const char *ellipses = "";						\
     IV len = RExC_end - RExC_precomp;					\
 									\
@@ -381,9 +381,16 @@ static const scan_data_t zero_scan_data =
 	len = RegexLengthToShowInErrorMessages - 10;			\
 	ellipses = "...";						\
     }									\
-    Perl_croak(aTHX_ "%s in regex m/%.*s%s/",				\
-	    msg, (int)len, RExC_precomp, ellipses);			\
+    code;                                                               \
 } STMT_END
+
+#define	FAIL(msg) _FAIL(			    \
+    Perl_croak(aTHX_ "%s in regex m/%.*s%s/",	    \
+	    msg, (int)len, RExC_precomp, ellipses))
+
+#define	FAIL2(msg,arg) _FAIL(			    \
+    Perl_croak(aTHX_ msg " in regex m/%.*s%s/",	    \
+	    arg, (int)len, RExC_precomp, ellipses))
 
 /*
  * Simple_vFAIL -- like FAIL, but marks the current location in the scan
@@ -2426,6 +2433,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    }
 		    else
 			data_fake.last_closep = &fake;
+
+		    data_fake.pos_delta = delta;
 		    next = regnext(scan);
 		    scan = NEXTOPER(scan);
 		    if (code != BRANCH)
@@ -2434,7 +2443,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 			cl_init(pRExC_state, &this_class);
 			data_fake.start_class = &this_class;
 			f = SCF_DO_STCLASS_AND;
-		    }		
+		    }
 		    if (flags & SCF_WHILEM_VISITED_POS)
 			f |= SCF_WHILEM_VISITED_POS;
 
@@ -3475,6 +3484,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		}
                 else
                     data_fake.last_closep = &fake;
+		data_fake.pos_delta = delta;
                 if ( flags & SCF_DO_STCLASS && !scan->flags
                      && OP(scan) == IFMATCH ) { /* Lookahead */
                     cl_init(pRExC_state, &intrnl);
@@ -3489,10 +3499,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     last, &data_fake, stopparen, recursed, NULL, f, depth+1);
                 if (scan->flags) {
                     if (deltanext) {
-                        vFAIL("Variable length lookbehind not implemented");
+			FAIL("Variable length lookbehind not implemented");
                     }
                     else if (minnext > (I32)U8_MAX) {
-                        vFAIL2("Lookbehind longer than %"UVuf" not implemented", (UV)U8_MAX);
+			FAIL2("Lookbehind longer than %"UVuf" not implemented", (UV)U8_MAX);
                     }
                     scan->flags = (U8)minnext;
                 }
@@ -3546,6 +3556,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                 else
                     data_fake.last_closep = &fake;
                 data_fake.flags = 0;
+		data_fake.pos_delta = delta;
                 if (is_inf)
 	            data_fake.flags |= SF_IS_INF;
                 if ( flags & SCF_DO_STCLASS && !scan->flags
@@ -3563,10 +3574,10 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     last, &data_fake, stopparen, recursed, NULL, f,depth+1);
                 if (scan->flags) {
                     if (deltanext) {
-                        vFAIL("Variable length lookbehind not implemented");
+			FAIL("Variable length lookbehind not implemented");
                     }
                     else if (*minnextp > (I32)U8_MAX) {
-                        vFAIL2("Lookbehind longer than %"UVuf" not implemented", (UV)U8_MAX);
+			FAIL2("Lookbehind longer than %"UVuf" not implemented", (UV)U8_MAX);
                     }
                     scan->flags = (U8)*minnextp;
                 }
@@ -3655,6 +3666,19 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    cl_anything(pRExC_state, data->start_class);
 		flags &= ~SCF_DO_STCLASS;
 	}
+	else if (OP(scan) == GPOS) {
+	    if (!(RExC_rx->reganch & ROPT_GPOS_FLOAT) &&
+	        !(delta || is_inf || (data && data->pos_delta))) 
+	    {
+	        if (!(RExC_rx->reganch & ROPT_ANCH) && (flags & SCF_DO_SUBSTR)) 
+		    RExC_rx->reganch |= ROPT_ANCH_GPOS;
+	        if (RExC_rx->gofs < (U32)min)
+		    RExC_rx->gofs = min;
+            } else {
+                RExC_rx->reganch |= ROPT_GPOS_FLOAT;
+                RExC_rx->gofs = 0;
+            }	    
+	}
 #ifdef TRIE_STUDY_OPT
 #ifdef FULL_TRIE_STUDY
         else if (PL_regkind[OP(scan)] == TRIE) {
@@ -3691,7 +3715,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     }
                     else
                         data_fake.last_closep = &fake;
-                        
+		    data_fake.pos_delta = delta;
                     if (flags & SCF_DO_STCLASS) {
                         cl_init(pRExC_state, &this_class);
                         data_fake.start_class = &this_class;
@@ -4042,25 +4066,18 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 #ifdef DEBUGGING
     /* avoid reading uninitialized memory in DEBUGGING code in study_chunk() */
     Zero(r, sizeof(regexp) + (unsigned)RExC_size * sizeof(regnode), char);
+#else 
+    /* bulk initialize fields with 0. */
+    Zero(r, sizeof(regexp), char);        
 #endif
-    /* initialization begins here */
+
+    /* non-zero initialization begins here */
     r->engine= RE_ENGINE_PTR;
     r->refcnt = 1;
     r->prelen = xend - exp;
     r->precomp = savepvn(RExC_precomp, r->prelen);
-    r->subbeg = NULL;
-#ifdef PERL_OLD_COPY_ON_WRITE
-    r->saved_copy = NULL;
-#endif
     r->reganch = pm->op_pmflags & PMf_COMPILETIME;
     r->nparens = RExC_npar - 1;	/* set early to validate backrefs */
-    r->lastparen = 0;			/* mg.c reads this.  */
-
-    r->substrs = 0;			/* Useful during FAIL. */
-    r->startp = 0;			/* Useful during FAIL. */
-    r->endp = 0;			
-    r->swap = NULL; 
-    r->paren_names = 0;
     
     if (RExC_seen & REG_SEEN_RECURSE) {
         Newxz(RExC_open_parens, RExC_npar,regnode *);
@@ -4235,7 +4252,7 @@ reStudy:
 	else if ((!sawopen || !RExC_sawback) &&
 	    (OP(first) == STAR &&
 	    PL_regkind[OP(NEXTOPER(first))] == REG_ANY) &&
-	    !(r->reganch & ROPT_ANCH) )
+	    !(r->reganch & ROPT_ANCH) && !(RExC_seen & REG_SEEN_EVAL))
 	{
 	    /* turn .* into ^.* with an implied $*=1 */
 	    const int type =
@@ -8135,7 +8152,7 @@ Perl_regdump(pTHX_ const regexp *r)
 	PerlIO_putc(Perl_debug_log, ' ');
     }
     if (r->reganch & ROPT_GPOS_SEEN)
-	PerlIO_printf(Perl_debug_log, "GPOS ");
+	PerlIO_printf(Perl_debug_log, "GPOS:%"UVuf" ", r->gofs);
     if (r->reganch & ROPT_SKIP)
 	PerlIO_printf(Perl_debug_log, "plus ");
     if (r->reganch & ROPT_IMPLICIT)

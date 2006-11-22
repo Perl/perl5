@@ -2208,11 +2208,10 @@ an undefined value for the length. See L<perlfunc/pack>.
 to check the return value of your socket() call?  See
 L<perlfunc/listen>.
 
-=item Lookbehind longer than %d not implemented in regex; marked by <-- HERE in m/%s/
+=item Lookbehind longer than %d not implemented in regex m/%s/
 
 (F) There is currently a limit on the length of string which lookbehind can
-handle. This restriction may be eased in a future release. The <-- HERE
-shows in the regular expression about where the problem was discovered.
+handle. This restriction may be eased in a future release. 
 
 =item lstat() on filehandle %s
 
@@ -4786,11 +4785,10 @@ something else of the same name (usually a subroutine) is exported by
 that module.  It usually means you put the wrong funny character on the
 front of your variable.
 
-=item Variable length lookbehind not implemented in regex; marked by <-- HERE in m/%s/
+=item Variable length lookbehind not implemented in m/%s/
 
 (F) Lookbehind is allowed only for subexpressions whose length is fixed and
-known at compile time. The <-- HERE shows in the regular expression about
-where the problem was discovered. See L<perlre>.
+known at compile time.  See L<perlre>.
 
 =item Variable length character upgraded in print
 

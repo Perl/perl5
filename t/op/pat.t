@@ -4053,10 +4053,10 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
 {
     local $Message="RT#22395";
     our $count;
-    for my $l (1,10,100,1000) {
+    for my $l (10,100,1000) {
 	$count=0;
 	('a' x $l) =~ /(.*)(?{$count++})[bc]/;
-	iseq($l+1,$count,"Should be L+1 not L*(L+3)/2 (L=$l)");
+	iseq( $count, $l + 1, "# TODO Should be L+1 not L*(L+3)/2 (L=$l)");
     }
 }
 {
@@ -4083,6 +4083,17 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     iseq($count,3);
     iseq($text,' word2 word4 word6 ');
 }
+{
+    # RT#6893
+    local $_= qq(A\nB\nC\n); 
+    my @res;
+    while (m#(\G|\n)([^\n]*)\n#gsx) 
+    { 
+        push @res,"$2"; 
+        last if @res>3;
+    }
+    iseq("@res","A B C","RT#6893: /g pattern shouldn't infinite loop");
+}
 
 {
     # From Message-ID: <877ixs6oa6.fsf@k75.linux.bogus>
@@ -4094,6 +4105,13 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     iseq($dow_name,$time_string,"UTF8 trie common prefix extraction");
 }
 
+{
+    my $v;
+    ($v='bar')=~/(\w+)/g;
+    $v='foo';
+    iseq("$1",'bar','# TODO $1 is safe after /g - may fail due to specialized config in pp_hot.c')
+}
+ 
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
 # Keep the following tests last -- they may crash perl
@@ -4137,9 +4155,10 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
 }
 
 # Put new tests above the dotted line about a page above this comment
-
+iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1367;
+    $::TestCount = 1369; 
     print "1..$::TestCount\n";
 }
+

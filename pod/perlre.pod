@@ -443,12 +443,24 @@ It is also useful when writing C<lex>-like scanners, when you have
 several patterns that you want to match against consequent substrings
 of your string, see the previous reference.  The actual location
 where C<\G> will match can also be influenced by using C<pos()> as
-an lvalue: see L<perlfunc/pos>. Currently C<\G> is only fully
-supported when anchored to the start of the pattern; while it
-is permitted to use it elsewhere, as in C</(?<=\G..)./g>, some
-such uses (C</.\G/g>, for example) currently cause problems, and
-it is recommended that you avoid such usage for now.
+an lvalue: see L<perlfunc/pos>. Note that the rule for zero-length
+matches is modified somewhat, in that contents to the left of C<\G> is
+not counted when determining the length of the match. Thus the following
+will not match forever:
 X<\G>
+
+    $str = 'ABC';
+    pos($str) = 1;
+    while (/.\G/g) {
+        print $&;
+    }
+
+It will print 'A' and then terminate, as it considers the match to
+be zero-width, and thus will not match at the same position twice in a
+row.
+
+It is worth noting that C<\G> improperly used can result in an infinite
+loop. Take care when using patterns that include C<\G> in an alternation.
 
 =head3 Capture buffers
 

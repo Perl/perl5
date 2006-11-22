@@ -182,7 +182,6 @@ SKIP		VERB,      no-sv 1	On failure skip forward (to the mark) before retrying
 COMMIT		VERB,      no-sv 1	Pattern fails outright if backtracking through this
 CUTGROUP	VERB,      no-sv 1	On failure go to the next alternation in the group
 
-
 # NEW STUFF ABOVE THIS LINE -- Please update counts below. 
 
 ################################################################################

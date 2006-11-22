@@ -1304,6 +1304,7 @@ PP(pp_match)
     const I32 oldsave = PL_savestack_ix;
     I32 update_minmatch = 1;
     I32 had_zerolen = 0;
+    U32 gpos = 0;
 
     if (PL_op->op_flags & OPf_STACKED)
 	TARG = POPs;
@@ -1355,13 +1356,18 @@ PP(pp_match)
 		else if (rx->reganch & ROPT_ANCH_GPOS) {
 		    r_flags |= REXEC_IGNOREPOS;
 		    rx->endp[0] = rx->startp[0] = mg->mg_len;
-		}
-		minmatch = (mg->mg_flags & MGf_MINMATCH);
+		} else if (rx->reganch & ROPT_GPOS_FLOAT) 
+		    gpos = mg->mg_len;
+		else 
+		    rx->endp[0] = rx->startp[0] = mg->mg_len;
+		minmatch = (mg->mg_flags & MGf_MINMATCH) ? rx->gofs + 1 : 0;
 		update_minmatch = 0;
 	    }
 	}
     }
-    if ((!global && rx->nparens)
+    /* remove comment to get faster /g but possibly unsafe $1 vars after a
+       match. Test for the unsafe vars will fail as well*/
+    if (( /* !global &&  */ rx->nparens) 
 	    || SvTEMP(TARG) || PL_sawampersand || (pm->op_pmflags & PMf_EVAL))
 	r_flags |= REXEC_COPY_STR;
     if (SvSCREAM(TARG))
@@ -1369,8 +1375,8 @@ PP(pp_match)
 
 play_it_again:
     if (global && rx->startp[0] != -1) {
-	t = s = rx->endp[0] + truebase;
-	if ((s + rx->minlen) > strend)
+	t = s = rx->endp[0] + truebase - rx->gofs;
+	if ((s + rx->minlen) > strend || s < truebase)
 	    goto nope;
 	if (update_minmatch++)
 	    minmatch = had_zerolen;
@@ -1391,7 +1397,7 @@ play_it_again:
 	     && !SvROK(TARG))	/* Cannot trust since INTUIT cannot guess ^ */
 	    goto yup;
     }
-    if (CALLREGEXEC(rx, (char*)s, (char *)strend, (char*)truebase, minmatch, TARG, NULL, r_flags))
+    if (CALLREGEXEC(rx, (char*)s, (char *)strend, (char*)truebase, minmatch, TARG, (void*)gpos, r_flags))
     {
 	PL_curpm = pm;
 	if (dynpm->op_pmflags & PMf_ONCE)
@@ -1441,14 +1447,14 @@ play_it_again:
 		}
 		if (rx->startp[0] != -1) {
 		    mg->mg_len = rx->endp[0];
-		    if (rx->startp[0] == rx->endp[0])
+		    if (rx->startp[0] + rx->gofs == rx->endp[0])
 			mg->mg_flags |= MGf_MINMATCH;
 		    else
 			mg->mg_flags &= ~MGf_MINMATCH;
 		}
 	    }
 	    had_zerolen = (rx->startp[0] != -1
-			   && rx->startp[0] == rx->endp[0]);
+			   && rx->startp[0] + rx->gofs == rx->endp[0]);
 	    PUTBACK;			/* EVAL blocks may use stack */
 	    r_flags |= REXEC_IGNOREPOS | REXEC_NOT_FIRST;
 	    goto play_it_again;
@@ -1475,7 +1481,7 @@ play_it_again:
 	    }
 	    if (rx->startp[0] != -1) {
 		mg->mg_len = rx->endp[0];
-		if (rx->startp[0] == rx->endp[0])
+		if (rx->startp[0] + rx->gofs == rx->endp[0])
 		    mg->mg_flags |= MGf_MINMATCH;
 		else
 		    mg->mg_flags &= ~MGf_MINMATCH;

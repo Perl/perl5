@@ -1635,7 +1635,9 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 /* strend: pointer to null at end of string */
 /* strbeg: real beginning of string */
 /* minend: end of match must be >=minend after stringarg. */
-/* data: May be used for some additional optimizations. */
+/* data: May be used for some additional optimizations. 
+         Currently its only used, with a U32 cast, for transmitting 
+         the ganch offset when doing a /g match. This will change */
 /* nosave: For optimizations. */
 {
     dVAR;
@@ -1711,7 +1713,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	MAGIC *mg;
 
 	if (flags & REXEC_IGNOREPOS)	/* Means: check only at start */
-	    reginfo.ganch = startpos;
+	    reginfo.ganch = startpos + prog->gofs;
 	else if (sv && SvTYPE(sv) >= SVt_PVMG
 		  && SvMAGIC(sv)
 		  && (mg = mg_find(sv, PERL_MAGIC_regex_global))
@@ -1720,10 +1722,12 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    if (prog->reganch & ROPT_ANCH_GPOS) {
 	        if (s > reginfo.ganch)
 		    goto phooey;
-		s = reginfo.ganch;
+		s = reginfo.ganch - prog->gofs;
 	    }
 	}
-	else				/* pos() not defined */
+	else if (data) {
+	    reginfo.ganch = strbeg + (UV)data;
+	} else				/* pos() not defined */
 	    reginfo.ganch = strbeg;
     }
     if (PL_curpm && (PM_GETRE(PL_curpm) == prog)) {
@@ -1810,7 +1814,8 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
         /* the warning about reginfo.ganch being used without intialization
            is bogus -- we set it above, when prog->reganch & ROPT_GPOS_SEEN 
            and we only enter this block when the same bit is set. */
-	if (regtry(&reginfo, &reginfo.ganch))
+        char *tmp_s = reginfo.ganch - prog->gofs;
+	if (regtry(&reginfo, &tmp_s))
 	    goto got_it;
 	goto phooey;
     }
@@ -2623,6 +2628,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                                during a successfull match */
     U32 lastopen = 0;       /* last open we saw */
     bool has_cutgroup = RX_HAS_CUTGROUP(rex) ? 1 : 0;   
+               
     
     /* these three flags are set by various ops to signal information to
      * the very next op. They have a useful lifetime of exactly one loop
@@ -2643,7 +2649,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
     GET_RE_DEBUG_FLAGS_DECL;
 #endif
 
-    DEBUG_STACK_r( {    
+    DEBUG_OPTIMISE_r( {    
 	    PerlIO_printf(Perl_debug_log,"regmatch start\n");
     });
     /* on first ever call to regmatch, allocate first slab */
@@ -4688,6 +4694,7 @@ NULL
 				      (long)(locinput - PL_reg_starttry),
 				      (long)(reginfo->till - PL_reg_starttry),
 				      PL_colors[5]));
+               				      
 		sayNO_SILENT;		/* Cannot match: too short. */
 	    }
 	    PL_reginput = locinput;	/* put where regtry can find it */

@@ -11,10 +11,18 @@
 typedef OP OP_4tree;			/* Will be redefined later. */
 
 
+/* Convert branch sequences to more efficient trie ops? */
 #define PERL_ENABLE_TRIE_OPTIMISATION 1
+
+/* Be really agressive about optimising patterns with trie sequences? */
 #define PERL_ENABLE_EXTENDED_TRIE_OPTIMISATION 1
+
+/* Should the optimiser take positive assertions into account? */
 #define PERL_ENABLE_POSITIVE_ASSERTION_STUDY 1
+
+/* Not for production use: */
 #define PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS 0
+
 /* Unless the next line is uncommented it is illegal to combine lazy 
    matching with possessive matching. Frankly it doesn't make much sense 
    to allow it as X*?+ matches nothing, X+?+ matches a single char only, 

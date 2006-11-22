@@ -28,9 +28,9 @@ my @death =
 (
  '/[[=foo=]]/' => 'POSIX syntax [= =] is reserved for future extensions in regex; marked by {#} in m/[[=foo=]{#}]/',
 
- '/(?<= .*)/' =>  'Variable length lookbehind not implemented in regex; marked by {#} in m/(?<= .*){#}/',
+ '/(?<= .*)/' =>  'Variable length lookbehind not implemented in regex m/(?<= .*)/',
 
- '/(?<= x{1000})/' => 'Lookbehind longer than 255 not implemented in regex; marked by {#} in m/(?<= x{1000}){#}/',
+ '/(?<= x{1000})/' => 'Lookbehind longer than 255 not implemented in regex m/(?<= x{1000})/',
 
  '/(?@)/' => 'Sequence (?@...) not implemented in regex; marked by {#} in m/(?@{#})/',
 
