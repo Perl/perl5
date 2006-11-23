@@ -102,7 +102,8 @@
 typedef struct RExC_state_t {
     U32		flags;			/* are we folding, multilining? */
     char	*precomp;		/* uncompiled string. */
-    regexp	*rx;
+    regexp	*rx;                    /* perl core regexp structure */
+    regexp_internal	*rxi;           /* internal data for regexp object pprivate field */        
     char	*start;			/* Start of input for compile */
     char	*end;			/* End of input for compile */
     char	*parse;			/* Input-scan pointer. */
@@ -142,11 +143,12 @@ typedef struct RExC_state_t {
 #define RExC_flags	(pRExC_state->flags)
 #define RExC_precomp	(pRExC_state->precomp)
 #define RExC_rx		(pRExC_state->rx)
+#define RExC_rxi	(pRExC_state->rxi)
 #define RExC_start	(pRExC_state->start)
 #define RExC_end	(pRExC_state->end)
 #define RExC_parse	(pRExC_state->parse)
 #define RExC_whilem_seen	(pRExC_state->whilem_seen)
-#define RExC_offsets	(pRExC_state->rx->offsets) /* I am not like the others */
+#define RExC_offsets	(pRExC_state->rxi->offsets) /* I am not like the others */
 #define RExC_emit	(pRExC_state->emit)
 #define RExC_emit_start	(pRExC_state->emit_start)
 #define RExC_naughty	(pRExC_state->naughty)
@@ -1282,7 +1284,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     trie->refcount = 1;
     trie->startstate = 1;
     trie->wordcount = word_count;
-    RExC_rx->data->data[ data_slot ] = (void*)trie;
+    RExC_rxi->data->data[ data_slot ] = (void*)trie;
     Newxz( trie->charmap, 256, U16 );
     if (!(UTF && folder))
         Newxz( trie->bitmap, ANYOF_BITMAP_SIZE, char );
@@ -2047,7 +2049,7 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
    try 'g' and succeed, prodceding to match 'cdgu'.
  */
  /* add a fail transition */
-    reg_trie_data *trie=(reg_trie_data *)RExC_rx->data->data[ARG(source)];
+    reg_trie_data *trie=(reg_trie_data *)RExC_rxi->data->data[ARG(source)];
     U32 *q;
     const U32 ucharcount = trie->uniquecharcount;
     const U32 numstates = trie->statecount;
@@ -2067,7 +2069,7 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
 
     ARG_SET( stclass, data_slot );
     Newxz( aho, 1, reg_ac_data );
-    RExC_rx->data->data[ data_slot ] = (void*)aho;
+    RExC_rxi->data->data[ data_slot ] = (void*)aho;
     aho->trie=trie;
     aho->states=(reg_trie_state *)savepvn((const char*)trie->states,
         numstates * sizeof(reg_trie_state));
@@ -2727,7 +2729,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     end   = RExC_close_parens[paren-1];
                 } else {
                     paren = 0;
-                    start = RExC_rx->program + 1;
+                    start = RExC_rxi->program + 1;
                     end   = RExC_opend;
                 }
                 if (!recursed) {
@@ -3687,7 +3689,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                check there too. */
             regnode *trie_node= scan;
             regnode *tail= regnext(scan);
-            reg_trie_data *trie = (reg_trie_data*)RExC_rx->data->data[ ARG(scan) ];
+            reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG(scan) ];
             I32 max1 = 0, min1 = I32_MAX;
             struct regnode_charclass_class accum;
 
@@ -3802,7 +3804,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
         }
 #else
 	else if (PL_regkind[OP(scan)] == TRIE) {
-	    reg_trie_data *trie = (reg_trie_data*)RExC_rx->data->data[ ARG(scan) ];
+	    reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG(scan) ];
 	    U8*bang=NULL;
 	    
 	    min += trie->minlen;
@@ -3861,22 +3863,22 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 STATIC I32
 S_add_data(RExC_state_t *pRExC_state, I32 n, const char *s)
 {
-    if (RExC_rx->data) {
-	const U32 count = RExC_rx->data->count;
-	Renewc(RExC_rx->data,
-	       sizeof(*RExC_rx->data) + sizeof(void*) * (count + n - 1),
+    if (RExC_rxi->data) {
+	const U32 count = RExC_rxi->data->count;
+	Renewc(RExC_rxi->data,
+	       sizeof(*RExC_rxi->data) + sizeof(void*) * (count + n - 1),
 	       char, struct reg_data);
-	Renew(RExC_rx->data->what, count + n, U8);
-	RExC_rx->data->count += n;
+	Renew(RExC_rxi->data->what, count + n, U8);
+	RExC_rxi->data->count += n;
     }
     else {
-	Newxc(RExC_rx->data, sizeof(*RExC_rx->data) + sizeof(void*) * (n - 1),
+	Newxc(RExC_rxi->data, sizeof(*RExC_rxi->data) + sizeof(void*) * (n - 1),
 	     char, struct reg_data);
-	Newx(RExC_rx->data->what, n, U8);
-	RExC_rx->data->count = n;
+	Newx(RExC_rxi->data->what, n, U8);
+	RExC_rxi->data->count = n;
     }
-    Copy(s, RExC_rx->data->what + RExC_rx->data->count - n, n, U8);
-    return RExC_rx->data->count - n;
+    Copy(s, RExC_rxi->data->what + RExC_rxi->data->count - n, n, U8);
+    return RExC_rxi->data->count - n;
 }
 
 #ifndef PERL_IN_XSUB_RE
@@ -3972,6 +3974,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 #endif
     BEGIN_BLOCK    
     register regexp *r;
+    register regexp_internal *ri;
     regnode *scan;
     regnode *first;
     I32 flags;
@@ -4059,19 +4062,21 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     /* Allocate space and zero-initialize. Note, the two step process 
        of zeroing when in debug mode, thus anything assigned has to 
        happen after that */
-    Newxc(r, sizeof(regexp) + (unsigned)RExC_size * sizeof(regnode),
-	 char, regexp);
-    if (r == NULL)
+    Newxz(r, 1, regexp);
+    Newxc(ri, sizeof(regexp_internal) + (unsigned)RExC_size * sizeof(regnode),
+	 char, regexp_internal);
+    if ( r == NULL || ri == NULL )
 	FAIL("Regexp out of space");
 #ifdef DEBUGGING
     /* avoid reading uninitialized memory in DEBUGGING code in study_chunk() */
-    Zero(r, sizeof(regexp) + (unsigned)RExC_size * sizeof(regnode), char);
+    Zero(ri, sizeof(regexp_internal) + (unsigned)RExC_size * sizeof(regnode), char);
 #else 
-    /* bulk initialize fields with 0. */
-    Zero(r, sizeof(regexp), char);        
+    /* bulk initialize base fields with 0. */
+    Zero(ri, sizeof(regexp_internal), char);        
 #endif
 
     /* non-zero initialization begins here */
+    RXi_SET( r, ri );
     r->engine= RE_ENGINE_PTR;
     r->refcnt = 1;
     r->prelen = xend - exp;
@@ -4088,16 +4093,17 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     }
 
     /* Useful during FAIL. */
-    Newxz(r->offsets, 2*RExC_size+1, U32); /* MJD 20001228 */
-    if (r->offsets) {
-	r->offsets[0] = RExC_size;
+    Newxz(ri->offsets, 2*RExC_size+1, U32); /* MJD 20001228 */
+    if (ri->offsets) {
+	ri->offsets[0] = RExC_size;
     }
     DEBUG_OFFSETS_r(PerlIO_printf(Perl_debug_log,
                           "%s %"UVuf" bytes for offset annotations.\n",
-                          r->offsets ? "Got" : "Couldn't get",
+                          ri->offsets ? "Got" : "Couldn't get",
                           (UV)((2*RExC_size+1) * sizeof(U32))));
 
     RExC_rx = r;
+    RExC_rxi = ri;
 
     /* Second pass: emit code. */
     RExC_flags = pm->op_pmflags;	/* don't let top level (?i) bleed */
@@ -4106,17 +4112,16 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     RExC_naughty = 0;
     RExC_npar = 1;
     RExC_cpar = 1;
-    RExC_emit_start = r->program;
-    RExC_emit = r->program;
+    RExC_emit_start = ri->program;
+    RExC_emit = ri->program;
 #ifdef DEBUGGING
     /* put a sentinal on the end of the program so we can check for
        overwrites */
-    r->program[RExC_size].type = 255;
+    ri->program[RExC_size].type = 255;
 #endif
     /* Store the count of eval-groups for security checks: */
     RExC_emit->next_off = (RExC_seen_evals > (I32)U16_MAX) ? U16_MAX : (U16)RExC_seen_evals;
     REGC((U8)REG_MAGIC, (char*) RExC_emit++);
-    r->data = 0;
     if (reg(pRExC_state, 0, &flags,1) == NULL)
 	return(NULL);
 
@@ -4161,10 +4166,10 @@ reStudy:
     pm->op_pmflags = RExC_flags;
     if (UTF)
         r->extflags |= RXf_UTF8;	/* Unicode in it? */
-    r->regstclass = NULL;
+    ri->regstclass = NULL;
     if (RExC_naughty >= 10)	/* Probably an expensive pattern. */
 	r->intflags |= PREGf_NAUGHTY;
-    scan = r->program + 1;		/* First BRANCH. */
+    scan = ri->program + 1;		/* First BRANCH. */
 
     /* testing for BRANCH here tells us whether there is "must appear"
        data in the pattern. If there is then we can use it for optimisations */
@@ -4207,11 +4212,11 @@ reStudy:
 	    if (OP(first) == EXACT)
 		NOOP;	/* Empty, get anchored substr later. */
 	    else if ((OP(first) == EXACTF || OP(first) == EXACTFL))
-		r->regstclass = first;
+		ri->regstclass = first;
 	}
 #ifdef TRIE_STCLASS	
 	else if (PL_regkind[OP(first)] == TRIE &&
-	        ((reg_trie_data *)r->data->data[ ARG(first) ])->minlen>0) 
+	        ((reg_trie_data *)ri->data->data[ ARG(first) ])->minlen>0) 
 	{
 	    regnode *trie_op;
 	    /* this can happen only on restudy */
@@ -4228,14 +4233,14 @@ reStudy:
             }
             OP(trie_op)+=2;
             make_trie_failtable(pRExC_state, (regnode *)first, trie_op, 0);
-	    r->regstclass = trie_op;
+	    ri->regstclass = trie_op;
 	}
 #endif	
 	else if (strchr((const char*)PL_simple,OP(first)))
-	    r->regstclass = first;
+	    ri->regstclass = first;
 	else if (PL_regkind[OP(first)] == BOUND ||
 		 PL_regkind[OP(first)] == NBOUND)
-	    r->regstclass = first;
+	    ri->regstclass = first;
 	else if (PL_regkind[OP(first)] == BOL) {
 	    r->extflags |= (OP(first) == MBOL
 			   ? RXf_ANCH_MBOL
@@ -4302,7 +4307,7 @@ reStudy:
 	data.last_found = newSVpvs("");
 	data.longest = &(data.longest_fixed);
 	first = scan;
-	if (!r->regstclass) {
+	if (!ri->regstclass) {
 	    cl_init(pRExC_state, &ch_class);
 	    data.start_class = &ch_class;
 	    stclass_flag = SCF_DO_STCLASS_AND;
@@ -4420,9 +4425,9 @@ reStudy:
 	    SvREFCNT_dec(data.longest_fixed);
 	    longest_fixed_length = 0;
 	}
-	if (r->regstclass
-	    && (OP(r->regstclass) == REG_ANY || OP(r->regstclass) == SANY))
-	    r->regstclass = NULL;
+	if (ri->regstclass
+	    && (OP(ri->regstclass) == REG_ANY || OP(ri->regstclass) == SANY))
+	    ri->regstclass = NULL;
 	if ((!(r->anchored_substr || r->anchored_utf8) || r->anchored_offset)
 	    && stclass_flag
 	    && !(data.start_class->flags & ANYOF_EOS)
@@ -4430,12 +4435,12 @@ reStudy:
 	{
 	    const I32 n = add_data(pRExC_state, 1, "f");
 
-	    Newx(RExC_rx->data->data[n], 1,
+	    Newx(RExC_rxi->data->data[n], 1,
 		struct regnode_charclass_class);
 	    StructCopy(data.start_class,
-		       (struct regnode_charclass_class*)RExC_rx->data->data[n],
+		       (struct regnode_charclass_class*)RExC_rxi->data->data[n],
 		       struct regnode_charclass_class);
-	    r->regstclass = (regnode*)RExC_rx->data->data[n];
+	    ri->regstclass = (regnode*)RExC_rxi->data->data[n];
 	    r->intflags &= ~PREGf_SKIP;	/* Used in find_byclass(). */
 	    DEBUG_COMPILE_r({ SV *sv = sv_newmortal();
 	              regprop(r, sv, (regnode*)data.start_class);
@@ -4482,7 +4487,7 @@ reStudy:
 	
 	DEBUG_PARSE_r(PerlIO_printf(Perl_debug_log, "\nMulti Top Level\n"));
 
-	scan = r->program + 1;
+	scan = ri->program + 1;
 	cl_init(pRExC_state, &ch_class);
 	data.start_class = &ch_class;
 	data.last_closep = &last_close;
@@ -4500,12 +4505,12 @@ reStudy:
 	{
 	    const I32 n = add_data(pRExC_state, 1, "f");
 
-	    Newx(RExC_rx->data->data[n], 1,
+	    Newx(RExC_rxi->data->data[n], 1,
 		struct regnode_charclass_class);
 	    StructCopy(data.start_class,
-		       (struct regnode_charclass_class*)RExC_rx->data->data[n],
+		       (struct regnode_charclass_class*)RExC_rxi->data->data[n],
 		       struct regnode_charclass_class);
-	    r->regstclass = (regnode*)RExC_rx->data->data[n];
+	    ri->regstclass = (regnode*)RExC_rxi->data->data[n];
 	    r->intflags &= ~PREGf_SKIP;	/* Used in find_byclass(). */
 	    DEBUG_COMPILE_r({ SV* sv = sv_newmortal();
 	              regprop(r, sv, (regnode*)data.start_class);
@@ -4556,15 +4561,15 @@ reStudy:
         PerlIO_printf(Perl_debug_log,"Final program:\n");
         regdump(r);
     });
-    DEBUG_OFFSETS_r(if (r->offsets) {
-        const U32 len = r->offsets[0];
+    DEBUG_OFFSETS_r(if (ri->offsets) {
+        const U32 len = ri->offsets[0];
         U32 i;
         GET_RE_DEBUG_FLAGS_DECL;
-        PerlIO_printf(Perl_debug_log, "Offsets: [%"UVuf"]\n\t", (UV)r->offsets[0]);
+        PerlIO_printf(Perl_debug_log, "Offsets: [%"UVuf"]\n\t", (UV)ri->offsets[0]);
         for (i = 1; i <= len; i++) {
-            if (r->offsets[i*2-1] || r->offsets[i*2])
+            if (ri->offsets[i*2-1] || ri->offsets[i*2])
                 PerlIO_printf(Perl_debug_log, "%"UVuf":%"UVuf"[%"UVuf"] ",
-                (UV)i, (UV)r->offsets[i*2-1], (UV)r->offsets[i*2]);
+                (UV)i, (UV)ri->offsets[i*2-1], (UV)ri->offsets[i*2]);
             }
         PerlIO_printf(Perl_debug_log, "\n");
     });
@@ -4854,7 +4859,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                         if (start_arg) {
                             SV *sv = newSVpvn( start_arg, RExC_parse - start_arg);
                             ARG(ret) = add_data( pRExC_state, 1, "S" );
-                            RExC_rx->data->data[ARG(ret)]=(void*)sv;
+                            RExC_rxi->data->data[ARG(ret)]=(void*)sv;
                             ret->flags = 0;
                         } else {
                             ret->flags = 1; 
@@ -5100,9 +5105,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		    LEAVE;
 
 		    n = add_data(pRExC_state, 3, "nop");
-		    RExC_rx->data->data[n] = (void*)rop;
-		    RExC_rx->data->data[n+1] = (void*)sop;
-		    RExC_rx->data->data[n+2] = (void*)pad;
+		    RExC_rxi->data->data[n] = (void*)rop;
+		    RExC_rxi->data->data[n+1] = (void*)sop;
+		    RExC_rxi->data->data[n+2] = (void*)pad;
 		    SvREFCNT_dec(sv);
 		}
 		else {						/* First pass */
@@ -5163,7 +5168,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                     RExC_parse++;
 	            if (!SIZE_ONLY) {
                         num = add_data( pRExC_state, 1, "S" );
-                        RExC_rx->data->data[num]=(void*)sv_dat;
+                        RExC_rxi->data->data[num]=(void*)sv_dat;
                         SvREFCNT_inc(sv_dat);
                     }
                     ret = reganode(pRExC_state,NGROUPP,num);
@@ -6319,7 +6324,7 @@ tryagain:
                 if (!SIZE_ONLY) {
                     num = add_data( pRExC_state, 1, "S" );
                     ARG_SET(ret,num);
-                    RExC_rx->data->data[num]=(void*)sv_dat;
+                    RExC_rxi->data->data[num]=(void*)sv_dat;
                     SvREFCNT_inc(sv_dat);
                 }    
                 /* override incorrect value set in reganode MJD */
@@ -7699,7 +7704,7 @@ parseit:
 	av_store(av, 2, (SV*)unicode_alternate);
 	rv = newRV_noinc((SV*)av);
 	n = add_data(pRExC_state, 1, "s");
-	RExC_rx->data->data[n] = (void*)rv;
+	RExC_rxi->data->data[n] = (void*)rv;
 	ARG_SET(ret, n);
     }
     return ret;
@@ -8090,8 +8095,9 @@ Perl_regdump(pTHX_ const regexp *r)
     dVAR;
     SV * const sv = sv_newmortal();
     SV *dsv= sv_newmortal();
+    RXi_GET_DECL(r,ri);
 
-    (void)dumpuntil(r, r->program, r->program + 1, NULL, NULL, sv, 0, 0);
+    (void)dumpuntil(r, ri->program, ri->program + 1, NULL, NULL, sv, 0, 0);
 
     /* Header fields of interest. */
     if (r->anchored_substr) {
@@ -8137,8 +8143,8 @@ Perl_regdump(pTHX_ const regexp *r)
     if (r->check_substr || r->check_utf8)
 	PerlIO_printf(Perl_debug_log, ") ");
 
-    if (r->regstclass) {
-	regprop(r, sv, r->regstclass);
+    if (ri->regstclass) {
+	regprop(r, sv, ri->regstclass);
 	PerlIO_printf(Perl_debug_log, "stclass %s ", SvPVX_const(sv));
     }
     if (r->extflags & RXf_ANCH) {
@@ -8178,7 +8184,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 #ifdef DEBUGGING
     dVAR;
     register int k;
+    RXi_GET_DECL(prog,progi);
     GET_RE_DEBUG_FLAGS_DECL;
+    
 
     sv_setpvn(sv, "", 0);
 
@@ -8206,14 +8214,14 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	Perl_sv_catpvf(aTHX_ sv, " %s", s );
     } else if (k == TRIE) {
 	/* print the details of the trie in dumpuntil instead, as
-	 * prog->data isn't available here */
+	 * progi->data isn't available here */
         const char op = OP(o);
         const I32 n = ARG(o);
         const reg_ac_data * const ac = IS_TRIE_AC(op) ?
-               (reg_ac_data *)prog->data->data[n] :
+               (reg_ac_data *)progi->data->data[n] :
                NULL;
         const reg_trie_data * const trie = !IS_TRIE_AC(op) ?
-            (reg_trie_data*)prog->data->data[n] :
+            (reg_trie_data*)progi->data->data[n] :
             ac->trie;
         
         Perl_sv_catpvf(aTHX_ sv, "-%s",reg_name[o->flags]);
@@ -8267,7 +8275,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     else if (k == VERB) {
         if (!o->flags) 
             Perl_sv_catpvf(aTHX_ sv, ":%"SVf, 
-                (SV*)prog->data->data[ ARG( o ) ]);
+                (SV*)progi->data->data[ ARG( o ) ]);
     } else if (k == LOGICAL)
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */
     else if (k == ANYOF) {
@@ -8455,7 +8463,7 @@ void
 Perl_pregfree(pTHX_ struct regexp *r)
 {
     dVAR;
-
+    RXi_GET_DECL(r,ri);
     GET_RE_DEBUG_FLAGS_DECL;
 
     if (!r || (--r->refcnt > 0))
@@ -8475,7 +8483,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
     /* gcov results gave these as non-null 100% of the time, so there's no
        optimisation in checking them before calling Safefree  */
     Safefree(r->precomp);
-    Safefree(r->offsets);             /* 20010421 MJD */
+    Safefree(ri->offsets);             /* 20010421 MJD */
     RX_MATCH_COPY_FREE(r);
 #ifdef PERL_OLD_COPY_ON_WRITE
     if (r->saved_copy)
@@ -8494,24 +8502,24 @@ Perl_pregfree(pTHX_ struct regexp *r)
     }
     if (r->paren_names)
             SvREFCNT_dec(r->paren_names);
-    if (r->data) {
-	int n = r->data->count;
+    if (ri->data) {
+	int n = ri->data->count;
 	PAD* new_comppad = NULL;
 	PAD* old_comppad;
 	PADOFFSET refcnt;
 
 	while (--n >= 0) {
           /* If you add a ->what type here, update the comment in regcomp.h */
-	    switch (r->data->what[n]) {
+	    switch (ri->data->what[n]) {
 	    case 's':
 	    case 'S':
-		SvREFCNT_dec((SV*)r->data->data[n]);
+		SvREFCNT_dec((SV*)ri->data->data[n]);
 		break;
 	    case 'f':
-		Safefree(r->data->data[n]);
+		Safefree(ri->data->data[n]);
 		break;
 	    case 'p':
-		new_comppad = (AV*)r->data->data[n];
+		new_comppad = (AV*)ri->data->data[n];
 		break;
 	    case 'o':
 		if (new_comppad == NULL)
@@ -8521,10 +8529,10 @@ Perl_pregfree(pTHX_ struct regexp *r)
 		    (SvTYPE(new_comppad) == SVt_PVAV) ? new_comppad : NULL
 		);
 		OP_REFCNT_LOCK;
-		refcnt = OpREFCNT_dec((OP_4tree*)r->data->data[n]);
+		refcnt = OpREFCNT_dec((OP_4tree*)ri->data->data[n]);
 		OP_REFCNT_UNLOCK;
 		if (!refcnt)
-                    op_free((OP_4tree*)r->data->data[n]);
+                    op_free((OP_4tree*)ri->data->data[n]);
 
 		PAD_RESTORE_LOCAL(old_comppad);
 		SvREFCNT_dec((SV*)new_comppad);
@@ -8536,7 +8544,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
                 { /* Aho Corasick add-on structure for a trie node.
                      Used in stclass optimization only */
                     U32 refcount;
-                    reg_ac_data *aho=(reg_ac_data*)r->data->data[n];
+                    reg_ac_data *aho=(reg_ac_data*)ri->data->data[n];
                     OP_REFCNT_LOCK;
                     refcount = --aho->refcount;
                     OP_REFCNT_UNLOCK;
@@ -8545,8 +8553,8 @@ Perl_pregfree(pTHX_ struct regexp *r)
                         Safefree(aho->fail);
                         aho->trie=NULL; /* not necessary to free this as it is 
                                            handled by the 't' case */
-                        Safefree(r->data->data[n]); /* do this last!!!! */
-                        Safefree(r->regstclass);
+                        Safefree(ri->data->data[n]); /* do this last!!!! */
+                        Safefree(ri->regstclass);
                     }
                 }
                 break;
@@ -8554,7 +8562,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	        {
 	            /* trie structure. */
 	            U32 refcount;
-	            reg_trie_data *trie=(reg_trie_data*)r->data->data[n];
+	            reg_trie_data *trie=(reg_trie_data*)ri->data->data[n];
                     OP_REFCNT_LOCK;
                     refcount = --trie->refcount;
                     OP_REFCNT_UNLOCK;
@@ -8578,24 +8586,25 @@ Perl_pregfree(pTHX_ struct regexp *r)
                         if (trie->revcharmap)
                             SvREFCNT_dec((SV*)trie->revcharmap);
 #endif
-                        Safefree(r->data->data[n]); /* do this last!!!! */
+                        Safefree(ri->data->data[n]); /* do this last!!!! */
 		    }
 		}
 		break;
 	    default:
-		Perl_croak(aTHX_ "panic: regfree data code '%c'", r->data->what[n]);
+		Perl_croak(aTHX_ "panic: regfree data code '%c'", ri->data->what[n]);
 	    }
 	}
-	Safefree(r->data->what);
-	Safefree(r->data);
+	Safefree(ri->data->what);
+	Safefree(ri->data);
     }
     Safefree(r->startp);
     Safefree(r->endp);
-    if (r->swap) {
-        Safefree(r->swap->startp);
-        Safefree(r->swap->endp);
-        Safefree(r->swap);
+    if (ri->swap) {
+        Safefree(ri->swap->startp);
+        Safefree(ri->swap->endp);
+        Safefree(ri->swap);
     }
+    Safefree(ri);
     Safefree(r);
 }
 
@@ -8618,33 +8627,37 @@ regexp *
 Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 {
     dVAR;
-    REGEXP *ret;
+    regexp *ret;
+    regexp_internal *reti;
     int i, len, npar;
     struct reg_substr_datum *s;
-
+    RXi_GET_DECL(r,ri);
+    
     if (!r)
 	return (REGEXP *)NULL;
 
     if ((ret = (REGEXP *)ptr_table_fetch(PL_ptr_table, r)))
 	return ret;
 
-    len = r->offsets[0];
+    len = ri->offsets[0];
     npar = r->nparens+1;
 
-    Newxc(ret, sizeof(regexp) + (len+1)*sizeof(regnode), char, regexp);
-    Copy(r->program, ret->program, len+1, regnode);
+    Newxz(ret, 1, regexp);
+    Newxc(reti, sizeof(regexp_internal) + (len+1)*sizeof(regnode), char, regexp_internal);
+    RXi_SET(ret,reti);
+    Copy(ri->program, reti->program, len+1, regnode);
 
     Newx(ret->startp, npar, I32);
     Copy(r->startp, ret->startp, npar, I32);
     Newx(ret->endp, npar, I32);
     Copy(r->startp, ret->startp, npar, I32);
-    if(r->swap) {
-        Newx(ret->swap, 1, regexp_paren_ofs);
+    if(ri->swap) {
+        Newx(reti->swap, 1, regexp_paren_ofs);
         /* no need to copy these */
-        Newx(ret->swap->startp, npar, I32);
-        Newx(ret->swap->endp, npar, I32);
+        Newx(reti->swap->startp, npar, I32);
+        Newx(reti->swap->endp, npar, I32);
     } else {
-        ret->swap = NULL;
+        reti->swap = NULL;
     }
 
     Newx(ret->substrs, 1, struct reg_substr_data);
@@ -8656,10 +8669,10 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 	s->utf8_substr = sv_dup_inc(r->substrs->data[i].utf8_substr, param);
     }
 
-    ret->regstclass = NULL;
-    if (r->data) {
+    reti->regstclass = NULL;
+    if (ri->data) {
 	struct reg_data *d;
-        const int count = r->data->count;
+        const int count = ri->data->count;
 	int i;
 
 	Newxc(d, sizeof(struct reg_data) + count*sizeof(void *),
@@ -8668,42 +8681,42 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 
 	d->count = count;
 	for (i = 0; i < count; i++) {
-	    d->what[i] = r->data->what[i];
+	    d->what[i] = ri->data->what[i];
 	    switch (d->what[i]) {
 	        /* legal options are one of: sSfpontT
 	           see also regcomp.h and pregfree() */
 	    case 's':
 	    case 'S':
-		d->data[i] = sv_dup_inc((SV *)r->data->data[i], param);
+		d->data[i] = sv_dup_inc((SV *)ri->data->data[i], param);
 		break;
 	    case 'p':
-		d->data[i] = av_dup_inc((AV *)r->data->data[i], param);
+		d->data[i] = av_dup_inc((AV *)ri->data->data[i], param);
 		break;
 	    case 'f':
 		/* This is cheating. */
 		Newx(d->data[i], 1, struct regnode_charclass_class);
-		StructCopy(r->data->data[i], d->data[i],
+		StructCopy(ri->data->data[i], d->data[i],
 			    struct regnode_charclass_class);
-		ret->regstclass = (regnode*)d->data[i];
+		reti->regstclass = (regnode*)d->data[i];
 		break;
 	    case 'o':
 		/* Compiled op trees are readonly and in shared memory,
 		   and can thus be shared without duplication. */
 		OP_REFCNT_LOCK;
-		d->data[i] = (void*)OpREFCNT_inc((OP*)r->data->data[i]);
+		d->data[i] = (void*)OpREFCNT_inc((OP*)ri->data->data[i]);
 		OP_REFCNT_UNLOCK;
 		break;
 	    case 'n':
-		d->data[i] = r->data->data[i];
+		d->data[i] = ri->data->data[i];
 		break;
 	    case 't':
-		d->data[i] = r->data->data[i];
+		d->data[i] = ri->data->data[i];
 		OP_REFCNT_LOCK;
 		((reg_trie_data*)d->data[i])->refcount++;
 		OP_REFCNT_UNLOCK;
 		break;
 	    case 'T':
-		d->data[i] = r->data->data[i];
+		d->data[i] = ri->data->data[i];
 		OP_REFCNT_LOCK;
 		((reg_ac_data*)d->data[i])->refcount++;
 		OP_REFCNT_UNLOCK;
@@ -8711,20 +8724,20 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 		 * without duplication. We free the stclass in pregfree
 		 * when the corresponding reg_ac_data struct is freed.
 		 */
-		ret->regstclass= r->regstclass;
+		reti->regstclass= ri->regstclass;
 		break;
             default:
-		Perl_croak(aTHX_ "panic: re_dup unknown data code '%c'", r->data->what[i]);
+		Perl_croak(aTHX_ "panic: re_dup unknown data code '%c'", ri->data->what[i]);
 	    }
 	}
 
-	ret->data = d;
+	reti->data = d;
     }
     else
-	ret->data = NULL;
+	reti->data = NULL;
 
-    Newx(ret->offsets, 2*len+1, U32);
-    Copy(r->offsets, ret->offsets, 2*len+1, U32);
+    Newx(reti->offsets, 2*len+1, U32);
+    Copy(ri->offsets, reti->offsets, 2*len+1, U32);
 
     ret->precomp        = SAVEPVN(r->precomp, r->prelen);
     ret->refcnt         = r->refcnt;
@@ -8788,7 +8801,8 @@ char *
 Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
     dVAR;
     const regexp * const re = (regexp *)mg->mg_obj;
-
+    RXi_GET_DECL(re,ri);
+    
     if (!mg->mg_ptr) {
 	const char *fptr = "msix";
 	char reflags[6];
@@ -8851,7 +8865,7 @@ Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
 	mg->mg_ptr[mg->mg_len] = 0;
     }
     if (haseval) 
-        *haseval = re->program[0].next_off;
+        *haseval = ri->program[0].next_off;
     if (flags)    
 	*flags = ((re->extflags & RXf_UTF8) ? 1 : 0);
     
@@ -8871,7 +8885,7 @@ Perl_regnext(pTHX_ register regnode *p)
     dVAR;
     register I32 offset;
 
-    if (p == &PL_regdummy)
+    if (!p)
 	return(NULL);
 
     offset = (reg_off_by_arg[OP(p)] ? ARG(p) : NEXT_OFF(p));
@@ -9007,6 +9021,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
     register U8 op = PSEUDO;	/* Arbitrary non-END op. */
     register const regnode *next;
     const regnode *optstart= NULL;
+    RXi_GET_DECL(r,ri);
     GET_RE_DEBUG_FLAGS_DECL;
 
 #ifdef DEBUG_DUMPUNTIL
@@ -9072,10 +9087,10 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	    const char op = OP(node);
             const I32 n = ARG(node);
 	    const reg_ac_data * const ac = op>=AHOCORASICK ?
-               (reg_ac_data *)r->data->data[n] :
+               (reg_ac_data *)ri->data->data[n] :
                NULL;
 	    const reg_trie_data * const trie = op<AHOCORASICK ?
-	        (reg_trie_data*)r->data->data[n] :
+	        (reg_trie_data*)ri->data->data[n] :
 	        ac->trie;
 	    const regnode *nextbranch= NULL;
 	    I32 word_idx;

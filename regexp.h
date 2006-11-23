@@ -82,6 +82,10 @@ typedef struct regexp {
 	void *pprivate;         /* Data private to the regex engine which 
                                    created this object. Perl will never mess with
                                    this member at all. */
+} regexp;
+
+
+typedef struct regexp_internal {
         regexp_paren_ofs *swap; /* Swap copy of *startp / *endp */
 	U32 *offsets;           /* offset annotations 20001228 MJD 
                                    data about mapping the program to the 
@@ -93,8 +97,11 @@ typedef struct regexp {
                                    data that the regops need. Often the ARG field of
                                    a regop is an index into this structure */
 	regnode program[1];	/* Unwarranted chumminess with compiler. */
-} regexp;
+} regexp_internal;
 
+#define RXi_SET(x,y) (x)->pprivate = (void*)(y)   
+#define RXi_GET(x)   ((regexp_internal *)((x)->pprivate))
+#define RXi_GET_DECL(r,ri) regexp_internal *ri = RXi_GET(r)
 
 typedef struct re_scream_pos_data_s
 {
