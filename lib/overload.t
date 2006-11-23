@@ -47,7 +47,7 @@ sub numify { 0 + "${$_[0]}" }	# Not needed, additional overhead
 package main;
 
 $| = 1;
-use Test::More tests => 509;
+use Test::More tests => 512;
 
 
 $a = new Oscalar "087";
@@ -1252,4 +1252,37 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 
     undef $obj;
     is ($ref, undef);
+}
+
+{
+    package bit;
+    # bit operations have overloadable assignment variants too
+
+    sub new { bless \$_[1], $_[0] }
+
+    use overload
+          "&=" => sub { bit->new($_[0]->val . ' & ' . $_[1]->val) }, 
+          "^=" => sub { bit->new($_[0]->val . ' ^ ' . $_[1]->val) },
+          "|"  => sub { bit->new($_[0]->val . ' | ' . $_[1]->val) }, # |= by fallback
+          ;
+
+    sub val { ${$_[0]} }
+
+    package main;
+
+    my $a = bit->new(my $va = 'a');
+    my $b = bit->new(my $vb = 'b');
+
+    $a &= $b;
+    is($a->val, 'a & b', "overloaded &= works");
+
+    my $c = bit->new(my $vc = 'c');
+
+    $b ^= $c;
+    is($b->val, 'b ^ c', "overloaded ^= works");
+
+    my $d = bit->new(my $vd = 'd');
+
+    $c |= $d;
+    is($c->val, 'c | d', "overloaded |= (by fallback) works");
 }
