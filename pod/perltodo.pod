@@ -376,6 +376,29 @@ Currently, numerous functions look virtually, if not completely,
 identical in both C<win32/wince.c> and C<win32/win32.c> files, which can't
 be good.
 
+=head2 Use secure CRT functions when building with VC8 on Win32
+
+Visual C++ 2005 (VC++ 8.x) deprecated a number of CRT functions on the basis
+that they were "unsafe" and introduced differently named secure versions of
+them as replacements, e.g. instead of writing
+
+    FILE* f = fopen(__FILE__, "r");
+
+one should now write
+
+    FILE* f;
+    errno_t err = fopen_s(&f, __FILE__, "r"); 
+
+Currently, the warnings about these deprecations have been disabled by adding
+-D_CRT_SECURE_NO_DEPRECATE to the CFLAGS. It would be nice to remove that
+warning suppressant and actually make use of the new secure CRT functions.
+
+There is also a similar issue with POSIX CRT function names like fileno having
+been deprecated in favour of ISO C++ conformant names like _fileno. These
+warnings are also currently suppressed with the compiler option /wd4996. It
+might be nice to do as Microsoft suggest here too, although, unlike the secure
+functions issue, there is presumably little or no benefit in this case.
+
 =head1 Tasks that need a knowledge of XS
 
 These tasks would need C knowledge, and roughly the level of knowledge of
