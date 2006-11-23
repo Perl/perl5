@@ -3489,6 +3489,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
             SvGROW(dstr, len + 1);
             Copy(ptr, SvPVX(dstr), len + 1, char);
             SvCUR_set(dstr, len);
+	    SvPOK_only(dstr);
 	} else {
 	    SvOK_off(dstr);
 	}
