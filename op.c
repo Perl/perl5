@@ -498,7 +498,10 @@ S_cop_free(pTHX_ COP* cop)
 	/* Only the thread that allocated us can free us. */
 	if (header->interpreter == aTHX)
 #endif
+	{
 	    Safefree(cop->cop_label);
+	    cop->cop_label = NULL;
+	}
     }
     CopFILE_free(cop);
     CopSTASH_free(cop);
@@ -3004,6 +3007,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    bits = 8;
 
 	Safefree(cPVOPo->op_pv);
+	cPVOPo->op_pv = NULL;
 	cSVOPo->op_sv = (SV*)swash_init("utf8", "", listsv, bits, none);
 	SvREFCNT_dec(listsv);
 	SvREFCNT_dec(transv);
@@ -4800,7 +4804,7 @@ Perl_cv_undef(pTHX_ CV *cv)
 	/* for XSUBs CvFILE point directly to static memory; __FILE__ */
 	Safefree(CvFILE(cv));
     }
-    CvFILE(cv) = 0;
+    CvFILE(cv) = NULL;
 #endif
 
     if (!CvISXSUB(cv) && CvROOT(cv)) {
