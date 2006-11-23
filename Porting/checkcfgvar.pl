@@ -87,8 +87,10 @@ for my $cfg (@CFG) {
     read_file($cfg,
 	      sub {
 		  return if /^\#/ || /^\s*$/;
-		  return if $cfg eq 'configure.com' &&
-			    ! /^\$\s+WC "(\w+)='(.*)'"$/;
+		  if ($cfg eq 'configure.com') {
+		      s/\s*!.*$//; # remove trailing comments
+		      return if ! /^\$\s+WC "(\w+)='(.*)'"$/;
+		  }
 		  # foo='bar'
 		  # foo=bar
 		  # $foo='bar' # VOS 5.8.x specialty
