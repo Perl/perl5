@@ -3327,7 +3327,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	if (curop == repl
 	    && !(repl_has_vars
 		 && (!PM_GETRE(pm)
-		     || PM_GETRE(pm)->reganch & ROPT_EVAL_SEEN))) {
+		     || PM_GETRE(pm)->extflags & RXf_EVAL_SEEN))) {
 	    pm->op_pmflags |= PMf_CONST;	/* const for long enough */
 	    pm->op_pmpermflags |= PMf_CONST;	/* const for long enough */
 	    prepend_elem(o->op_type, scalar(repl), o);

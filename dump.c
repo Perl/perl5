@@ -557,9 +557,9 @@ S_pm_description(pTHX_ const PMOP *pm)
     if (pmflags & PMf_ONCE)
 	sv_catpv(desc, ",ONCE");
     if (regex && regex->check_substr) {
-	if (!(regex->reganch & ROPT_NOSCAN))
+	if (!(regex->extflags & RXf_NOSCAN))
 	    sv_catpv(desc, ",SCANFIRST");
-	if (regex->reganch & ROPT_CHECK_ALL)
+	if (regex->extflags & RXf_CHECK_ALL)
 	    sv_catpv(desc, ",ALL");
     }
     if (pmflags & PMf_SKIPWHITE)

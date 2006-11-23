@@ -342,8 +342,8 @@ static const scan_data_t zero_scan_data =
 #define SCF_SEEN_ACCEPT         0x8000 
 
 #define UTF (RExC_utf8 != 0)
-#define LOC ((RExC_flags & PMf_LOCALE) != 0)
-#define FOLD ((RExC_flags & PMf_FOLD) != 0)
+#define LOC ((RExC_flags & RXf_PMf_LOCALE) != 0)
+#define FOLD ((RExC_flags & RXf_PMf_FOLD) != 0)
 
 #define OOB_UNICODE		12345678
 #define OOB_NAMEDCLASS		-1
@@ -3667,15 +3667,15 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		flags &= ~SCF_DO_STCLASS;
 	}
 	else if (OP(scan) == GPOS) {
-	    if (!(RExC_rx->reganch & ROPT_GPOS_FLOAT) &&
+	    if (!(RExC_rx->extflags & RXf_GPOS_FLOAT) &&
 	        !(delta || is_inf || (data && data->pos_delta))) 
 	    {
-	        if (!(RExC_rx->reganch & ROPT_ANCH) && (flags & SCF_DO_SUBSTR)) 
-		    RExC_rx->reganch |= ROPT_ANCH_GPOS;
+	        if (!(RExC_rx->extflags & RXf_ANCH) && (flags & SCF_DO_SUBSTR))
+		    RExC_rx->extflags |= RXf_ANCH_GPOS;
 	        if (RExC_rx->gofs < (U32)min)
 		    RExC_rx->gofs = min;
             } else {
-                RExC_rx->reganch |= ROPT_GPOS_FLOAT;
+                RExC_rx->extflags |= RXf_GPOS_FLOAT;
                 RExC_rx->gofs = 0;
             }	    
 	}
@@ -4076,7 +4076,8 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     r->refcnt = 1;
     r->prelen = xend - exp;
     r->precomp = savepvn(RExC_precomp, r->prelen);
-    r->reganch = pm->op_pmflags & PMf_COMPILETIME;
+    r->extflags = pm->op_pmflags & RXf_PMf_COMPILETIME;
+    r->intflags = 0;
     r->nparens = RExC_npar - 1;	/* set early to validate backrefs */
     
     if (RExC_seen & REG_SEEN_RECURSE) {
@@ -4156,13 +4157,13 @@ reStudy:
 #endif    
 
     /* Dig out information for optimizations. */
-    r->reganch = pm->op_pmflags & PMf_COMPILETIME; /* Again? */
+    r->extflags = pm->op_pmflags & RXf_PMf_COMPILETIME; /* Again? */
     pm->op_pmflags = RExC_flags;
     if (UTF)
-        r->reganch |= ROPT_UTF8;	/* Unicode in it? */
+        r->extflags |= RXf_UTF8;	/* Unicode in it? */
     r->regstclass = NULL;
     if (RExC_naughty >= 10)	/* Probably an expensive pattern. */
-	r->reganch |= ROPT_NAUGHTY;
+	r->intflags |= PREGf_NAUGHTY;
     scan = r->program + 1;		/* First BRANCH. */
 
     /* testing for BRANCH here tells us whether there is "must appear"
@@ -4236,37 +4237,38 @@ reStudy:
 		 PL_regkind[OP(first)] == NBOUND)
 	    r->regstclass = first;
 	else if (PL_regkind[OP(first)] == BOL) {
-	    r->reganch |= (OP(first) == MBOL
-			   ? ROPT_ANCH_MBOL
+	    r->extflags |= (OP(first) == MBOL
+			   ? RXf_ANCH_MBOL
 			   : (OP(first) == SBOL
-			      ? ROPT_ANCH_SBOL
-			      : ROPT_ANCH_BOL));
+			      ? RXf_ANCH_SBOL
+			      : RXf_ANCH_BOL));
 	    first = NEXTOPER(first);
 	    goto again;
 	}
 	else if (OP(first) == GPOS) {
-	    r->reganch |= ROPT_ANCH_GPOS;
+	    r->extflags |= RXf_ANCH_GPOS;
 	    first = NEXTOPER(first);
 	    goto again;
 	}
 	else if ((!sawopen || !RExC_sawback) &&
 	    (OP(first) == STAR &&
 	    PL_regkind[OP(NEXTOPER(first))] == REG_ANY) &&
-	    !(r->reganch & ROPT_ANCH) && !(RExC_seen & REG_SEEN_EVAL))
+	    !(r->extflags & RXf_ANCH) && !(RExC_seen & REG_SEEN_EVAL))
 	{
 	    /* turn .* into ^.* with an implied $*=1 */
 	    const int type =
 		(OP(NEXTOPER(first)) == REG_ANY)
-		    ? ROPT_ANCH_MBOL
-		    : ROPT_ANCH_SBOL;
-	    r->reganch |= type | ROPT_IMPLICIT;
+		    ? RXf_ANCH_MBOL
+		    : RXf_ANCH_SBOL;
+	    r->extflags |= type;
+	    r->intflags |= PREGf_IMPLICIT;
 	    first = NEXTOPER(first);
 	    goto again;
 	}
 	if (sawplus && (!sawopen || !RExC_sawback)
 	    && !(RExC_seen & REG_SEEN_EVAL)) /* May examine pos and $& */
 	    /* x+ must match at the 1st pos of run of x's */
-	    r->reganch |= ROPT_SKIP;
+	    r->intflags |= PREGf_SKIP;
 
 	/* Scan is after the zeroth branch, first is atomic matcher. */
 #ifdef TRIE_STUDY_OPT
@@ -4319,8 +4321,8 @@ reStudy:
 	if ( RExC_npar == 1 && data.longest == &(data.longest_fixed)
 	     && data.last_start_min == 0 && data.last_end > 0
 	     && !RExC_seen_zerolen
-	     && (!(RExC_seen & REG_SEEN_GPOS) || (r->reganch & ROPT_ANCH_GPOS)))
-	    r->reganch |= ROPT_CHECK_ALL;
+	     && (!(RExC_seen & REG_SEEN_GPOS) || (r->extflags & RXf_ANCH_GPOS)))
+	    r->extflags |= RXf_CHECK_ALL;
 	scan_commit(pRExC_state, &data,&minlen);
 	SvREFCNT_dec(data.last_found);
 
@@ -4332,7 +4334,7 @@ reStudy:
 	if (longest_float_length
 	    || (data.flags & SF_FL_BEFORE_EOL
 		&& (!(data.flags & SF_FL_BEFORE_MEOL)
-		    || (RExC_flags & PMf_MULTILINE)))) 
+		    || (RExC_flags & RXf_PMf_MULTILINE)))) 
         {
             I32 t,ml;
 
@@ -4366,7 +4368,7 @@ reStudy:
 	    
 	    t = (data.flags & SF_FL_BEFORE_EOL /* Can't have SEOL and MULTI */
 		       && (!(data.flags & SF_FL_BEFORE_MEOL)
-			   || (RExC_flags & PMf_MULTILINE)));
+			   || (RExC_flags & RXf_PMf_MULTILINE)));
 	    fbm_compile(data.longest_float, t ? FBMcf_TAIL : 0);
 	}
 	else {
@@ -4384,7 +4386,7 @@ reStudy:
 	if (longest_fixed_length
 	    || (data.flags & SF_FIX_BEFORE_EOL /* Cannot have SEOL and MULTI */
 		&& (!(data.flags & SF_FIX_BEFORE_MEOL)
-		    || (RExC_flags & PMf_MULTILINE)))) 
+		    || (RExC_flags & RXf_PMf_MULTILINE)))) 
         {
             I32 t,ml;
 
@@ -4410,7 +4412,7 @@ reStudy:
 
 	    t = (data.flags & SF_FIX_BEFORE_EOL /* Can't have SEOL and MULTI */
 		 && (!(data.flags & SF_FIX_BEFORE_MEOL)
-		     || (RExC_flags & PMf_MULTILINE)));
+		     || (RExC_flags & RXf_PMf_MULTILINE)));
 	    fbm_compile(data.longest_fixed, t ? FBMcf_TAIL : 0);
 	}
 	else {
@@ -4434,7 +4436,7 @@ reStudy:
 		       (struct regnode_charclass_class*)RExC_rx->data->data[n],
 		       struct regnode_charclass_class);
 	    r->regstclass = (regnode*)RExC_rx->data->data[n];
-	    r->reganch &= ~ROPT_SKIP;	/* Used in find_byclass(). */
+	    r->intflags &= ~PREGf_SKIP;	/* Used in find_byclass(). */
 	    DEBUG_COMPILE_r({ SV *sv = sv_newmortal();
 	              regprop(r, sv, (regnode*)data.start_class);
 		      PerlIO_printf(Perl_debug_log,
@@ -4448,8 +4450,8 @@ reStudy:
 	    r->check_substr = r->anchored_substr;
 	    r->check_utf8 = r->anchored_utf8;
 	    r->check_offset_min = r->check_offset_max = r->anchored_offset;
-	    if (r->reganch & ROPT_ANCH_SINGLE)
-		r->reganch |= ROPT_NOSCAN;
+	    if (r->extflags & RXf_ANCH_SINGLE)
+		r->extflags |= RXf_NOSCAN;
 	}
 	else {
 	    r->check_end_shift = r->float_end_shift;
@@ -4460,10 +4462,10 @@ reStudy:
 	}
 	/* XXXX Currently intuiting is not compatible with ANCH_GPOS.
 	   This should be changed ASAP!  */
-	if ((r->check_substr || r->check_utf8) && !(r->reganch & ROPT_ANCH_GPOS)) {
-	    r->reganch |= RE_USE_INTUIT;
+	if ((r->check_substr || r->check_utf8) && !(r->extflags & RXf_ANCH_GPOS)) {
+	    r->extflags |= RXf_USE_INTUIT;
 	    if (SvTAIL(r->check_substr ? r->check_substr : r->check_utf8))
-		r->reganch |= RE_INTUIT_TAIL;
+		r->extflags |= RXf_INTUIT_TAIL;
 	}
 	/* XXX Unneeded? dmq (shouldn't as this is handled elsewhere)
 	if ( (STRLEN)minlen < longest_float_length )
@@ -4504,7 +4506,7 @@ reStudy:
 		       (struct regnode_charclass_class*)RExC_rx->data->data[n],
 		       struct regnode_charclass_class);
 	    r->regstclass = (regnode*)RExC_rx->data->data[n];
-	    r->reganch &= ~ROPT_SKIP;	/* Used in find_byclass(). */
+	    r->intflags &= ~PREGf_SKIP;	/* Used in find_byclass(). */
 	    DEBUG_COMPILE_r({ SV* sv = sv_newmortal();
 	              regprop(r, sv, (regnode*)data.start_class);
 		      PerlIO_printf(Perl_debug_log,
@@ -4524,17 +4526,17 @@ reStudy:
         r->minlen = minlen;
     
     if (RExC_seen & REG_SEEN_GPOS)
-	r->reganch |= ROPT_GPOS_SEEN;
+	r->extflags |= RXf_GPOS_SEEN;
     if (RExC_seen & REG_SEEN_LOOKBEHIND)
-	r->reganch |= ROPT_LOOKBEHIND_SEEN;
+	r->extflags |= RXf_LOOKBEHIND_SEEN;
     if (RExC_seen & REG_SEEN_EVAL)
-	r->reganch |= ROPT_EVAL_SEEN;
+	r->extflags |= RXf_EVAL_SEEN;
     if (RExC_seen & REG_SEEN_CANY)
-	r->reganch |= ROPT_CANY_SEEN;
+	r->extflags |= RXf_CANY_SEEN;
     if (RExC_seen & REG_SEEN_VERBARG)
-	r->reganch |= ROPT_VERBARG_SEEN;
+	r->intflags |= PREGf_VERBARG_SEEN;
     if (RExC_seen & REG_SEEN_CUTGROUP)
-	r->reganch |= ROPT_CUTGROUP_SEEN;
+	r->intflags |= PREGf_CUTGROUP_SEEN;
     if (RExC_paren_names)
         r->paren_names = (HV*)SvREFCNT_inc(RExC_paren_names);
     else
@@ -6070,9 +6072,9 @@ tryagain:
     case '^':
 	RExC_seen_zerolen++;
 	nextchar(pRExC_state);
-	if (RExC_flags & PMf_MULTILINE)
+	if (RExC_flags & RXf_PMf_MULTILINE)
 	    ret = reg_node(pRExC_state, MBOL);
-	else if (RExC_flags & PMf_SINGLELINE)
+	else if (RExC_flags & RXf_PMf_SINGLELINE)
 	    ret = reg_node(pRExC_state, SBOL);
 	else
 	    ret = reg_node(pRExC_state, BOL);
@@ -6082,9 +6084,9 @@ tryagain:
 	nextchar(pRExC_state);
 	if (*RExC_parse)
 	    RExC_seen_zerolen++;
-	if (RExC_flags & PMf_MULTILINE)
+	if (RExC_flags & RXf_PMf_MULTILINE)
 	    ret = reg_node(pRExC_state, MEOL);
-	else if (RExC_flags & PMf_SINGLELINE)
+	else if (RExC_flags & RXf_PMf_SINGLELINE)
 	    ret = reg_node(pRExC_state, SEOL);
 	else
 	    ret = reg_node(pRExC_state, EOL);
@@ -6092,7 +6094,7 @@ tryagain:
 	break;
     case '.':
 	nextchar(pRExC_state);
-	if (RExC_flags & PMf_SINGLELINE)
+	if (RExC_flags & RXf_PMf_SINGLELINE)
 	    ret = reg_node(pRExC_state, SANY);
 	else
 	    ret = reg_node(pRExC_state, REG_ANY);
@@ -6396,7 +6398,7 @@ tryagain:
 	break;
 
     case '#':
-	if (RExC_flags & PMf_EXTENDED) {
+	if (RExC_flags & RXf_PMf_EXTENDED) {
 	    while (RExC_parse < RExC_end && *RExC_parse != '\n')
 		RExC_parse++;
 	    if (RExC_parse < RExC_end)
@@ -6427,7 +6429,7 @@ tryagain:
 	    {
 		char * const oldp = p;
 
-		if (RExC_flags & PMf_EXTENDED)
+		if (RExC_flags & RXf_PMf_EXTENDED)
 		    p = regwhite(p, RExC_end);
 		switch (*p) {
 		case '^':
@@ -6563,7 +6565,7 @@ tryagain:
 			ender = *p++;
 		    break;
 		}
-		if (RExC_flags & PMf_EXTENDED)
+		if (RExC_flags & RXf_PMf_EXTENDED)
 		    p = regwhite(p, RExC_end);
 		if (UTF && FOLD) {
 		    /* Prime the casefolded buffer. */
@@ -7719,7 +7721,7 @@ S_nextchar(pTHX_ RExC_state_t *pRExC_state)
 	    RExC_parse++;
 	    continue;
 	}
-	if (RExC_flags & PMf_EXTENDED) {
+	if (RExC_flags & RXf_PMf_EXTENDED) {
 	    if (isSPACE(*RExC_parse)) {
 		RExC_parse++;
 		continue;
@@ -8128,9 +8130,9 @@ Perl_regdump(pTHX_ const regexp *r)
 		      (r->check_substr == r->float_substr
 		       && r->check_utf8 == r->float_utf8
 		       ? "(checking floating" : "(checking anchored"));
-    if (r->reganch & ROPT_NOSCAN)
+    if (r->extflags & RXf_NOSCAN)
 	PerlIO_printf(Perl_debug_log, " noscan");
-    if (r->reganch & ROPT_CHECK_ALL)
+    if (r->extflags & RXf_CHECK_ALL)
 	PerlIO_printf(Perl_debug_log, " isall");
     if (r->check_substr || r->check_utf8)
 	PerlIO_printf(Perl_debug_log, ") ");
@@ -8139,26 +8141,26 @@ Perl_regdump(pTHX_ const regexp *r)
 	regprop(r, sv, r->regstclass);
 	PerlIO_printf(Perl_debug_log, "stclass %s ", SvPVX_const(sv));
     }
-    if (r->reganch & ROPT_ANCH) {
+    if (r->extflags & RXf_ANCH) {
 	PerlIO_printf(Perl_debug_log, "anchored");
-	if (r->reganch & ROPT_ANCH_BOL)
+	if (r->extflags & RXf_ANCH_BOL)
 	    PerlIO_printf(Perl_debug_log, "(BOL)");
-	if (r->reganch & ROPT_ANCH_MBOL)
+	if (r->extflags & RXf_ANCH_MBOL)
 	    PerlIO_printf(Perl_debug_log, "(MBOL)");
-	if (r->reganch & ROPT_ANCH_SBOL)
+	if (r->extflags & RXf_ANCH_SBOL)
 	    PerlIO_printf(Perl_debug_log, "(SBOL)");
-	if (r->reganch & ROPT_ANCH_GPOS)
+	if (r->extflags & RXf_ANCH_GPOS)
 	    PerlIO_printf(Perl_debug_log, "(GPOS)");
 	PerlIO_putc(Perl_debug_log, ' ');
     }
-    if (r->reganch & ROPT_GPOS_SEEN)
+    if (r->extflags & RXf_GPOS_SEEN)
 	PerlIO_printf(Perl_debug_log, "GPOS:%"UVuf" ", r->gofs);
-    if (r->reganch & ROPT_SKIP)
+    if (r->intflags & PREGf_SKIP)
 	PerlIO_printf(Perl_debug_log, "plus ");
-    if (r->reganch & ROPT_IMPLICIT)
+    if (r->intflags & PREGf_IMPLICIT)
 	PerlIO_printf(Perl_debug_log, "implicit ");
     PerlIO_printf(Perl_debug_log, "minlen %ld ", (long) r->minlen);
-    if (r->reganch & ROPT_EVAL_SEEN)
+    if (r->extflags & RXf_EVAL_SEEN)
 	PerlIO_printf(Perl_debug_log, "with eval ");
     PerlIO_printf(Perl_debug_log, "\n");
 #else
@@ -8463,7 +8465,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	    reginitcolors();
 	{
 	    SV *dsv= sv_newmortal();
-            RE_PV_QUOTED_DECL(s, (r->reganch & ROPT_UTF8),
+            RE_PV_QUOTED_DECL(s, (r->extflags & RXf_UTF8),
                 dsv, r->precomp, r->prelen, 60);
             PerlIO_printf(Perl_debug_log,"%sFreeing REx:%s %s\n", 
                 PL_colors[4],PL_colors[5],s);
@@ -8668,7 +8670,7 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 	for (i = 0; i < count; i++) {
 	    d->what[i] = r->data->what[i];
 	    switch (d->what[i]) {
-	        /* legal options are one of: sSfpont
+	        /* legal options are one of: sSfpontT
 	           see also regcomp.h and pregfree() */
 	    case 's':
 	    case 'S':
@@ -8685,8 +8687,8 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 		ret->regstclass = (regnode*)d->data[i];
 		break;
 	    case 'o':
-		/* Compiled op trees are readonly, and can thus be
-		   shared without duplication. */
+		/* Compiled op trees are readonly and in shared memory,
+		   and can thus be shared without duplication. */
 		OP_REFCNT_LOCK;
 		d->data[i] = (void*)OpREFCNT_inc((OP*)r->data->data[i]);
 		OP_REFCNT_UNLOCK;
@@ -8732,7 +8734,8 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
     ret->nparens        = r->nparens;
     ret->lastparen      = r->lastparen;
     ret->lastcloseparen = r->lastcloseparen;
-    ret->reganch        = r->reganch;
+    ret->intflags       = r->intflags;
+    ret->extflags       = r->extflags;
 
     ret->sublen         = r->sublen;
 
@@ -8793,7 +8796,7 @@ Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
 	int left = 0;
 	int right = 4;
 	bool need_newline = 0;
-	U16 reganch = (U16)((re->reganch & PMf_COMPILETIME) >> 12);
+	U16 reganch = (U16)((re->extflags & RXf_PMf_COMPILETIME) >> 12);
 
 	while((ch = *fptr++)) {
 	    if(reganch & 1) {
@@ -8821,7 +8824,7 @@ Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
 	 * ourself. If we find a '\n' first (or if we don't find '#' or '\n'),
 	 * we don't need to add anything.  -jfriedl
 	 */
-	if (PMf_EXTENDED & re->reganch) {
+	if (PMf_EXTENDED & re->extflags) {
 	    const char *endptr = re->precomp + re->prelen;
 	    while (endptr >= re->precomp) {
 		const char c = *(endptr--);
@@ -8850,7 +8853,7 @@ Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
     if (haseval) 
         *haseval = re->program[0].next_off;
     if (flags)    
-	*flags = ((re->reganch & ROPT_UTF8) ? 1 : 0);
+	*flags = ((re->extflags & RXf_UTF8) ? 1 : 0);
     
     if (lp)
 	*lp = mg->mg_len;

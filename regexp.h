@@ -31,38 +31,67 @@ struct reg_substr_data;
 struct reg_data;
 
 struct regexp_engine;
+
 typedef struct regexp_paren_ofs {
     I32 *startp;
     I32 *endp;
 } regexp_paren_ofs;
 
-typedef struct regexp {
-        I32 *startp;
-	I32 *endp;
-        regexp_paren_ofs *swap;
-	regnode *regstclass;
-        struct reg_substr_data *substrs;
-	char *precomp;		/* pre-compilation regular expression */
-        struct reg_data *data;	/* Additional data. */
-	char *subbeg;		/* saved or original string 
-				   so \digit works forever. */
 #ifdef PERL_OLD_COPY_ON_WRITE
-        SV *saved_copy;         /* If non-NULL, SV which is COW from original */
+#define SV_SAVED_COPY   SV *saved_copy; /* If non-NULL, SV which is COW from original */
+#else
+#define SV_SAVED_COPY
 #endif
-        U32 *offsets;           /* offset annotations 20001228 MJD */
-	I32 sublen;		/* Length of string pointed by subbeg */
-	I32 refcnt;
+
+typedef struct regexp {
+        /* Generic details */
+	const struct regexp_engine* engine; /* what created this regexp? */
+	I32 refcnt;             /* Refcount of this regexp */
+        
+        /* The original string as passed to the compilation routine */
+	char *precomp;		/* pre-compilation regular expression */
+	I32 prelen;		/* length of precomp */
+        
+	/* Used for generic optimisations by the perl core. 
+	   All engines are expected to provide this information.  */
+	U32 extflags;           /* Flags used both externally and internally */
 	I32 minlen;		/* mininum possible length of string to match */
 	I32 minlenret;		/* mininum possible length of $& */
 	U32 gofs;               /* chars left of pos that we search from */
-	I32 prelen;		/* length of precomp */
-	U32 nparens;		/* number of parentheses */
-	U32 lastparen;		/* last paren matched */
-	U32 lastcloseparen;	/* last paren matched */
-	U32 reganch;		/* Internal use only +
-				   Tainted information used by regexec? */
-	HV *paren_names;	/* Paren names */
-	const struct regexp_engine* engine;
+	U32 nparens;		/* number of capture buffers */
+	HV *paren_names;	/* Optional hash of paren names */
+        struct reg_substr_data *substrs; /* substring data about strings that must appear
+                                   in the final match, used for optimisations */
+
+        /* Data about the last/current match. Used by the core and therefore
+           must be populated by all engines. */
+	char *subbeg;		/* saved or original string 
+				   so \digit works forever. */
+	I32 sublen;		/* Length of string pointed by subbeg */
+        I32 *startp;            /* Array of offsets from start of string (@-) */
+	I32 *endp;              /* Array of offsets from start of string (@+) */
+	
+	SV_SAVED_COPY           /* If non-NULL, SV which is COW from original */
+        U32 lastparen;		/* last open paren matched */
+	U32 lastcloseparen;	/* last close paren matched */
+	
+        /* Perl Regex Engine specific data. Other engines shouldn't need 
+           to touch this. Should be refactored out into a different structure
+           and accessed via the *pprivate field. (except intflags) */
+	U32 intflags;		/* Internal flags */
+	void *pprivate;         /* Data private to the regex engine which 
+                                   created this object. Perl will never mess with
+                                   this member at all. */
+        regexp_paren_ofs *swap; /* Swap copy of *startp / *endp */
+	U32 *offsets;           /* offset annotations 20001228 MJD 
+                                   data about mapping the program to the 
+                                   string*/
+        regnode *regstclass;    /* Optional startclass as identified or constructed
+                                   by the optimiser */
+        struct reg_data *data;	/* Additional miscellaneous data used by the program.
+                                   Used to make it easier to clone and free arbitrary
+                                   data that the regops need. Often the ARG field of
+                                   a regop is an index into this structure */
 	regnode program[1];	/* Unwarranted chumminess with compiler. */
 } regexp;
 
@@ -89,59 +118,82 @@ typedef struct regexp_engine {
 #endif    
 } regexp_engine;
 
-#define ROPT_ANCH		(ROPT_ANCH_BOL|ROPT_ANCH_MBOL|ROPT_ANCH_GPOS|ROPT_ANCH_SBOL)
-#define ROPT_ANCH_SINGLE	(ROPT_ANCH_SBOL|ROPT_ANCH_GPOS)
-#define ROPT_ANCH_BOL	 	0x00000001
-#define ROPT_ANCH_MBOL	 	0x00000002
-#define ROPT_ANCH_SBOL	 	0x00000004
-#define ROPT_ANCH_GPOS	 	0x00000008
-#define ROPT_SKIP		0x00000010
-#define ROPT_IMPLICIT		0x00000020	/* Converted .* to ^.* */
-#define ROPT_NOSCAN		0x00000040	/* Check-string always at start. */
-#define ROPT_GPOS_SEEN		0x00000080
-#define ROPT_CHECK_ALL		0x00000100
-#define ROPT_LOOKBEHIND_SEEN	0x00000200
-#define ROPT_EVAL_SEEN		0x00000400
-#define ROPT_CANY_SEEN		0x00000800
-#define ROPT_SANY_SEEN		ROPT_CANY_SEEN /* src bckwrd cmpt */
-#define ROPT_GPOS_CHECK         (ROPT_GPOS_SEEN|ROPT_ANCH_GPOS)
-
-/* 0xF800 of reganch is used by PMf_COMPILETIME */
-
-#define ROPT_UTF8		0x00010000
-#define ROPT_NAUGHTY		0x00020000 /* how exponential is this pattern? */
-#define ROPT_COPY_DONE		0x00040000	/* subbeg is a copy of the string */
-#define ROPT_TAINTED_SEEN	0x00080000
-#define ROPT_MATCH_UTF8		0x10000000 /* subbeg is utf-8 */
-#define ROPT_VERBARG_SEEN       0x20000000
-#define ROPT_CUTGROUP_SEEN      0x40000000
-#define ROPT_GPOS_FLOAT         0x80000000
-
-#define RE_USE_INTUIT_NOML	0x00100000 /* Best to intuit before matching */
-#define RE_USE_INTUIT_ML	0x00200000
-#define REINT_AUTORITATIVE_NOML	0x00400000 /* Can trust a positive answer */
-#define REINT_AUTORITATIVE_ML	0x00800000
-#define REINT_ONCE_NOML		0x01000000 /* Intuit can succed once only. */
-#define REINT_ONCE_ML		0x02000000
-#define RE_INTUIT_ONECHAR	0x04000000
-#define RE_INTUIT_TAIL		0x08000000
+/* 
+ * Flags stored in regexp->intflags 
+ * These are used only internally to the regexp engine
+ */
+#define PREGf_SKIP		0x00000001
+#define PREGf_IMPLICIT		0x00000002 /* Converted .* to ^.* */
+#define PREGf_NAUGHTY		0x00000004 /* how exponential is this pattern? */
+#define PREGf_VERBARG_SEEN      0x00000008
+#define PREGf_CUTGROUP_SEEN	0x00000010
 
 
-#define RE_USE_INTUIT		(RE_USE_INTUIT_NOML|RE_USE_INTUIT_ML)
-#define REINT_AUTORITATIVE	(REINT_AUTORITATIVE_NOML|REINT_AUTORITATIVE_ML)
-#define REINT_ONCE		(REINT_ONCE_NOML|REINT_ONCE_ML)
+/* Flags stored in regexp->extflags 
+ * These are used by code external to the regexp engine
+ */
 
-#define RX_HAS_CUTGROUP(prog) ((prog)->reganch & ROPT_CUTGROUP_SEEN)
-#define RX_MATCH_TAINTED(prog)	((prog)->reganch & ROPT_TAINTED_SEEN)
-#define RX_MATCH_TAINTED_on(prog) ((prog)->reganch |= ROPT_TAINTED_SEEN)
-#define RX_MATCH_TAINTED_off(prog) ((prog)->reganch &= ~ROPT_TAINTED_SEEN)
+/* Anchor and GPOS related stuff */
+#define RXf_ANCH_BOL    	0x00000001
+#define RXf_ANCH_MBOL   	0x00000002
+#define RXf_ANCH_SBOL   	0x00000004
+#define RXf_ANCH_GPOS   	0x00000008
+#define RXf_GPOS_SEEN   	0x00000010
+#define RXf_GPOS_FLOAT  	0x00000020
+/* five bits here */
+#define RXf_ANCH        	(RXf_ANCH_BOL|RXf_ANCH_MBOL|RXf_ANCH_GPOS|RXf_ANCH_SBOL)
+#define RXf_GPOS_CHECK          (RXf_GPOS_SEEN|RXf_ANCH_GPOS)
+#define RXf_ANCH_SINGLE         (RXf_ANCH_SBOL|RXf_ANCH_GPOS)        
+/* 
+ * 0xF800 of extflags is used by PMf_COMPILETIME 
+ * These are the regex equivelent of the PMf_xyz stuff defined 
+ * in op.h
+ */
+#define RXf_PMf_LOCALE  	0x00000800
+#define RXf_PMf_MULTILINE	0x00001000
+#define RXf_PMf_SINGLELINE	0x00002000
+#define RXf_PMf_FOLD    	0x00004000
+#define RXf_PMf_EXTENDED	0x00008000
+#define RXf_PMf_COMPILETIME	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_LOCALE|RXf_PMf_FOLD|RXf_PMf_EXTENDED)
+
+/* What we have seen */
+/* one bit here */
+#define RXf_LOOKBEHIND_SEEN	0x00020000
+#define RXf_EVAL_SEEN   	0x00040000
+#define RXf_CANY_SEEN   	0x00080000
+
+/* Special */
+#define RXf_NOSCAN      	0x00100000
+#define RXf_CHECK_ALL   	0x00200000
+
+/* UTF8 related */
+#define RXf_UTF8        	0x00400000
+#define RXf_MATCH_UTF8  	0x00800000
+
+/* Intuit related */
+#define RXf_USE_INTUIT_NOML	0x01000000
+#define RXf_USE_INTUIT_ML	0x02000000
+#define RXf_INTUIT_TAIL 	0x04000000
+/* one bit here */
+#define RXf_USE_INTUIT		(RXf_USE_INTUIT_NOML|RXf_USE_INTUIT_ML)
+
+/* Copy and tainted info */
+#define RXf_COPY_DONE   	0x10000000
+#define RXf_TAINTED_SEEN	0x20000000
+/* two bits here  */
+
+
+#define RX_HAS_CUTGROUP(prog) ((prog)->intflags & PREGf_CUTGROUP_SEEN)
+#define RX_MATCH_TAINTED(prog)	((prog)->extflags & RXf_TAINTED_SEEN)
+#define RX_MATCH_TAINTED_on(prog) ((prog)->extflags |= RXf_TAINTED_SEEN)
+#define RX_MATCH_TAINTED_off(prog) ((prog)->extflags &= ~RXf_TAINTED_SEEN)
 #define RX_MATCH_TAINTED_set(prog, t) ((t) \
 				       ? RX_MATCH_TAINTED_on(prog) \
 				       : RX_MATCH_TAINTED_off(prog))
 
-#define RX_MATCH_COPIED(prog)		((prog)->reganch & ROPT_COPY_DONE)
-#define RX_MATCH_COPIED_on(prog)	((prog)->reganch |= ROPT_COPY_DONE)
-#define RX_MATCH_COPIED_off(prog)	((prog)->reganch &= ~ROPT_COPY_DONE)
+#define RX_MATCH_COPIED(prog)		((prog)->extflags & RXf_COPY_DONE)
+#define RX_MATCH_COPIED_on(prog)	((prog)->extflags |= RXf_COPY_DONE)
+#define RX_MATCH_COPIED_off(prog)	((prog)->extflags &= ~RXf_COPY_DONE)
 #define RX_MATCH_COPIED_set(prog,t)	((t) \
 					 ? RX_MATCH_COPIED_on(prog) \
 					 : RX_MATCH_COPIED_off(prog))
@@ -167,9 +219,9 @@ typedef struct regexp_engine {
 	}} STMT_END
 #endif
 
-#define RX_MATCH_UTF8(prog)		((prog)->reganch & ROPT_MATCH_UTF8)
-#define RX_MATCH_UTF8_on(prog)		((prog)->reganch |= ROPT_MATCH_UTF8)
-#define RX_MATCH_UTF8_off(prog)		((prog)->reganch &= ~ROPT_MATCH_UTF8)
+#define RX_MATCH_UTF8(prog)		((prog)->extflags & RXf_MATCH_UTF8)
+#define RX_MATCH_UTF8_on(prog)		((prog)->extflags |= RXf_MATCH_UTF8)
+#define RX_MATCH_UTF8_off(prog)		((prog)->extflags &= ~RXf_MATCH_UTF8)
 #define RX_MATCH_UTF8_set(prog, t)	((t) \
 			? (RX_MATCH_UTF8_on(prog), (PL_reg_match_utf8 = 1)) \
 			: (RX_MATCH_UTF8_off(prog), (PL_reg_match_utf8 = 0)))

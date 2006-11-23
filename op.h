@@ -360,7 +360,9 @@ struct pmop {
 #define PMf_FOLD	0x4000		/* case insensitivity */
 #define PMf_EXTENDED	0x8000		/* chuck embedded whitespace */
 
-/* mask of bits stored in regexp->reganch */
+/* mask of bits stored in regexp->extflags
+   these all are also called RXf_PMf_xyz
+ */
 #define PMf_COMPILETIME	(PMf_MULTILINE|PMf_SINGLELINE|PMf_LOCALE|PMf_FOLD|PMf_EXTENDED)
 
 #ifdef USE_ITHREADS

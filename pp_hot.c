@@ -1351,12 +1351,12 @@ PP(pp_match)
 	if (SvTYPE(TARG) >= SVt_PVMG && SvMAGIC(TARG)) {
 	    MAGIC* const mg = mg_find(TARG, PERL_MAGIC_regex_global);
 	    if (mg && mg->mg_len >= 0) {
-		if (!(rx->reganch & ROPT_GPOS_SEEN))
+		if (!(rx->extflags & RXf_GPOS_SEEN))
 		    rx->endp[0] = rx->startp[0] = mg->mg_len;
-		else if (rx->reganch & ROPT_ANCH_GPOS) {
+		else if (rx->extflags & RXf_ANCH_GPOS) {
 		    r_flags |= REXEC_IGNOREPOS;
 		    rx->endp[0] = rx->startp[0] = mg->mg_len;
-		} else if (rx->reganch & ROPT_GPOS_FLOAT) 
+		} else if (rx->extflags & RXf_GPOS_FLOAT) 
 		    gpos = mg->mg_len;
 		else 
 		    rx->endp[0] = rx->startp[0] = mg->mg_len;
@@ -1381,18 +1381,18 @@ play_it_again:
 	if (update_minmatch++)
 	    minmatch = had_zerolen;
     }
-    if (rx->reganch & RE_USE_INTUIT &&
-	DO_UTF8(TARG) == ((rx->reganch & ROPT_UTF8) != 0)) {
+    if (rx->extflags & RXf_USE_INTUIT &&
+	DO_UTF8(TARG) == ((rx->extflags & RXf_UTF8) != 0)) {
 	/* FIXME - can PL_bostr be made const char *?  */
 	PL_bostr = (char *)truebase;
 	s = CALLREG_INTUIT_START(rx, TARG, (char *)s, (char *)strend, r_flags, NULL);
 
 	if (!s)
 	    goto nope;
-	if ( (rx->reganch & ROPT_CHECK_ALL)
+	if ( (rx->extflags & RXf_CHECK_ALL)
 	     && !PL_sawampersand
-	     && ((rx->reganch & ROPT_NOSCAN)
-		 || !((rx->reganch & RE_INTUIT_TAIL)
+	     && ((rx->extflags & RXf_NOSCAN)
+		 || !((rx->extflags & RXf_INTUIT_TAIL)
 		      && (r_flags & REXEC_SCREAM)))
 	     && !SvROK(TARG))	/* Cannot trust since INTUIT cannot guess ^ */
 	    goto yup;
@@ -2155,17 +2155,17 @@ PP(pp_subst)
 	r_flags |= REXEC_SCREAM;
 
     orig = m = s;
-    if (rx->reganch & RE_USE_INTUIT) {
+    if (rx->extflags & RXf_USE_INTUIT) {
 	PL_bostr = orig;
 	s = CALLREG_INTUIT_START(rx, TARG, s, strend, r_flags, NULL);
 
 	if (!s)
 	    goto nope;
 	/* How to do it in subst? */
-/*	if ( (rx->reganch & ROPT_CHECK_ALL)
+/*	if ( (rx->extflags & RXf_CHECK_ALL)
 	     && !PL_sawampersand
-	     && ((rx->reganch & ROPT_NOSCAN)
-		 || !((rx->reganch & RE_INTUIT_TAIL)
+	     && ((rx->extflags & RXf_NOSCAN)
+		 || !((rx->extflags & RXf_INTUIT_TAIL)
 		      && (r_flags & REXEC_SCREAM))))
 	    goto yup;
 */
@@ -2203,7 +2203,7 @@ PP(pp_subst)
 	&& !is_cow
 #endif
 	&& (I32)clen <= rx->minlenret && (once || !(r_flags & REXEC_COPY_STR))
-	&& !(rx->reganch & ROPT_LOOKBEHIND_SEEN)
+	&& !(rx->extflags & RXf_LOOKBEHIND_SEEN)
 	&& (!doutf8 || SvUTF8(TARG))) {
 	if (!CALLREGEXEC(rx, s, strend, orig, 0, TARG, NULL,
 			 r_flags | REXEC_CHECKED))

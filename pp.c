@@ -4645,15 +4645,15 @@ PP(pp_split)
 	    s = m;
 	}
     }
-    else if (do_utf8 == ((rx->reganch & ROPT_UTF8) != 0) &&
-	     (rx->reganch & RE_USE_INTUIT) && !rx->nparens
-	     && (rx->reganch & ROPT_CHECK_ALL)
-	     && !(rx->reganch & ROPT_ANCH)) {
-	const int tail = (rx->reganch & RE_INTUIT_TAIL);
+    else if (do_utf8 == ((rx->extflags & RXf_UTF8) != 0) &&
+	     (rx->extflags & RXf_USE_INTUIT) && !rx->nparens
+	     && (rx->extflags & RXf_CHECK_ALL)
+	     && !(rx->extflags & RXf_ANCH)) {
+	const int tail = (rx->extflags & RXf_INTUIT_TAIL);
 	SV * const csv = CALLREG_INTUIT_STRING(rx);
 
 	len = rx->minlenret;
-	if (len == 1 && !(rx->reganch & ROPT_UTF8) && !tail) {
+	if (len == 1 && !(rx->extflags & RXf_UTF8) && !tail) {
 	    const char c = *SvPV_nolen_const(csv);
 	    while (--limit) {
 		for (m = s; m < strend && *m != c; m++)

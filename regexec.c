@@ -371,7 +371,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     I32 ml_anch;
     register char *other_last = NULL;	/* other substr checked before this */
     char *check_at = NULL;		/* check substr found at this pos */
-    const I32 multiline = prog->reganch & PMf_MULTILINE;
+    const I32 multiline = prog->extflags & RXf_PMf_MULTILINE;
 #ifdef DEBUGGING
     const char * const i_strpos = strpos;
 #endif
@@ -380,7 +380,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 
     RX_MATCH_UTF8_set(prog,do_utf8);
 
-    if (prog->reganch & ROPT_UTF8) {
+    if (prog->extflags & RXf_UTF8) {
 	PL_reg_flags |= RF_utf8;
     }
     DEBUG_EXECUTE_r( 
@@ -412,14 +412,14 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 		"Non-utf8 string cannot match utf8 check string\n"));
 	goto fail;
     }
-    if (prog->reganch & ROPT_ANCH) {	/* Match at beg-of-str or after \n */
-	ml_anch = !( (prog->reganch & ROPT_ANCH_SINGLE)
-		     || ( (prog->reganch & ROPT_ANCH_BOL)
+    if (prog->extflags & RXf_ANCH) {	/* Match at beg-of-str or after \n */
+	ml_anch = !( (prog->extflags & RXf_ANCH_SINGLE)
+		     || ( (prog->extflags & RXf_ANCH_BOL)
 			  && !multiline ) );	/* Check after \n? */
 
 	if (!ml_anch) {
-	  if ( !(prog->reganch & (ROPT_ANCH_GPOS /* Checked by the caller */
-				  | ROPT_IMPLICIT)) /* not a real BOL */
+	  if ( !(prog->extflags & RXf_ANCH_GPOS) /* Checked by the caller */
+		&& !(prog->intflags & PREGf_IMPLICIT) /* not a real BOL */
 	       /* SvCUR is not set on references: SvRV and SvPVX_const overlap */
 	       && sv && !SvROK(sv)
 	       && (strpos != strbeg)) {
@@ -427,7 +427,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	      goto fail;
 	  }
 	  if (prog->check_offset_min == prog->check_offset_max &&
-	      !(prog->reganch & ROPT_CANY_SEEN)) {
+	      !(prog->extflags & RXf_CANY_SEEN)) {
 	    /* Substring at constant offset from beg-of-str... */
 	    I32 slen;
 
@@ -528,7 +528,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
     else {
         U8* start_point;
         U8* end_point;
-        if (prog->reganch & ROPT_CANY_SEEN) {
+        if (prog->extflags & RXf_CANY_SEEN) {
             start_point= (U8*)(s + srch_start_shift);
             end_point= (U8*)(strend - srch_end_shift);
         } else {
@@ -814,7 +814,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	if (ml_anch && sv && !SvROK(sv)	/* See prev comment on SvROK */
 	    && (strpos != strbeg) && strpos[-1] != '\n'
 	    /* May be due to an implicit anchor of m{.*foo}  */
-	    && !(prog->reganch & ROPT_IMPLICIT))
+	    && !(prog->intflags & PREGf_IMPLICIT))
 	{
 	    t = strpos;
 	    goto find_anchor;
@@ -824,7 +824,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 			(long)(strpos - i_strpos), PL_colors[0], PL_colors[1]);
 	);
       success_at_start:
-	if (!(prog->reganch & ROPT_NAUGHTY)	/* XXXX If strpos moved? */
+	if (!(prog->intflags & PREGf_NAUGHTY)	/* XXXX If strpos moved? */
 	    && (do_utf8 ? (
 		prog->check_utf8		/* Could be deleted already */
 		&& --BmUSEFUL(prog->check_utf8) < 0
@@ -847,7 +847,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    /* XXXX This is a remnant of the old implementation.  It
 	            looks wasteful, since now INTUIT can use many
 	            other heuristics. */
-	    prog->reganch &= ~RE_USE_INTUIT;
+	    prog->extflags &= ~RXf_USE_INTUIT;
 	}
 	else
 	    s = strpos;
@@ -894,7 +894,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	    }
 	    DEBUG_EXECUTE_r( PerlIO_printf(Perl_debug_log,
 				   "This position contradicts STCLASS...\n") );
-	    if ((prog->reganch & ROPT_ANCH) && !ml_anch)
+	    if ((prog->extflags & RXf_ANCH) && !ml_anch)
 		goto fail;
 	    /* Contradict one of substrings */
 	    if (prog->anchored_substr || prog->anchored_utf8) {
@@ -1126,7 +1126,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     const char *strend, regmatch_info *reginfo)
 {
 	dVAR;
-	const I32 doevery = (prog->reganch & ROPT_SKIP) == 0;
+	const I32 doevery = (prog->intflags & PREGf_SKIP) == 0;
 	char *m;
 	STRLEN ln;
 	STRLEN lnc;
@@ -1665,7 +1665,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	return 0;
     }
 
-    multiline = prog->reganch & PMf_MULTILINE;
+    multiline = prog->extflags & RXf_PMf_MULTILINE;
     reginfo.prog = prog;
 
     RX_MATCH_UTF8_set(prog, do_utf8);
@@ -1692,7 +1692,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     PL_reg_eval_set = 0;
     PL_reg_maxiter = 0;
 
-    if (prog->reganch & ROPT_UTF8)
+    if (prog->extflags & RXf_UTF8)
 	PL_reg_flags |= RF_utf8;
 
     /* Mark beginning of line for ^ and lookbehind. */
@@ -1709,7 +1709,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     /* If there is a "must appear" string, look for it. */
     s = startpos;
 
-    if (prog->reganch & ROPT_GPOS_SEEN) { /* Need to set reginfo->ganch */
+    if (prog->extflags & RXf_GPOS_SEEN) { /* Need to set reginfo->ganch */
 	MAGIC *mg;
 
 	if (flags & REXEC_IGNOREPOS)	/* Means: check only at start */
@@ -1719,7 +1719,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		  && (mg = mg_find(sv, PERL_MAGIC_regex_global))
 		  && mg->mg_len >= 0) {
 	    reginfo.ganch = strbeg + mg->mg_len;	/* Defined pos() */
-	    if (prog->reganch & ROPT_ANCH_GPOS) {
+	    if (prog->extflags & RXf_ANCH_GPOS) {
 	        if (s > reginfo.ganch)
 		    goto phooey;
 		s = reginfo.ganch - prog->gofs;
@@ -1768,11 +1768,11 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 
     /* Simplest case:  anchored match need be tried only once. */
     /*  [unless only anchor is BOL and multiline is set] */
-    if (prog->reganch & (ROPT_ANCH & ~ROPT_ANCH_GPOS)) {
+    if (prog->extflags & (RXf_ANCH & ~RXf_ANCH_GPOS)) {
 	if (s == startpos && regtry(&reginfo, &startpos))
 	    goto got_it;
-	else if (multiline || (prog->reganch & ROPT_IMPLICIT)
-		 || (prog->reganch & ROPT_ANCH_MBOL)) /* XXXX SBOL? */
+	else if (multiline || (prog->intflags & PREGf_IMPLICIT)
+		 || (prog->extflags & RXf_ANCH_MBOL)) /* XXXX SBOL? */
 	{
 	    char *end;
 
@@ -1789,7 +1789,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 		  after_try:
 		    if (s >= end)
 			goto phooey;
-		    if (prog->reganch & RE_USE_INTUIT) {
+		    if (prog->extflags & RXf_USE_INTUIT) {
 			s = re_intuit_start(prog, sv, s + 1, strend, flags, NULL);
 			if (!s)
 			    goto phooey;
@@ -1809,10 +1809,10 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    }
 	}
 	goto phooey;
-    } else if (ROPT_GPOS_CHECK == (prog->reganch & ROPT_GPOS_CHECK)) 
+    } else if (RXf_GPOS_CHECK == (prog->extflags & RXf_GPOS_CHECK)) 
     {
         /* the warning about reginfo.ganch being used without intialization
-           is bogus -- we set it above, when prog->reganch & ROPT_GPOS_SEEN 
+           is bogus -- we set it above, when prog->extflags & RXf_GPOS_SEEN 
            and we only enter this block when the same bit is set. */
         char *tmp_s = reginfo.ganch - prog->gofs;
 	if (regtry(&reginfo, &tmp_s))
@@ -1821,7 +1821,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
     }
 
     /* Messy cases:  unanchored match. */
-    if ((prog->anchored_substr || prog->anchored_utf8) && prog->reganch & ROPT_SKIP) {
+    if ((prog->anchored_substr || prog->anchored_utf8) && prog->intflags & PREGf_SKIP) {
 	/* we have /x+whatever/ */
 	/* it must be a one character string (XXXX Except UTF?) */
 	char ch;
@@ -2128,7 +2128,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startpos)
     GET_RE_DEBUG_FLAGS_DECL;
     reginfo->cutpoint=NULL;
 
-    if ((prog->reganch & ROPT_EVAL_SEEN) && !PL_reg_eval_set) {
+    if ((prog->extflags & RXf_EVAL_SEEN) && !PL_reg_eval_set) {
 	MAGIC *mg;
 
 	PL_reg_eval_set = RS_init;
@@ -2473,7 +2473,7 @@ STATIC void
 S_debug_start_match(pTHX_ const regexp *prog, const bool do_utf8, 
     const char *start, const char *end, const char *blurb)
 {
-    const bool utf8_pat= prog->reganch & ROPT_UTF8 ? 1 : 0;
+    const bool utf8_pat= prog->extflags & RXf_UTF8 ? 1 : 0;
     if (!PL_colorset)   
             reginitcolors();    
     {
@@ -3637,7 +3637,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		PL_reg_maxiter = 0;
 
 		ST.toggle_reg_flags = PL_reg_flags;
-		if (re->reganch & ROPT_UTF8)
+		if (re->extflags & RXf_UTF8)
 		    PL_reg_flags |= RF_utf8;
 		else
 		    PL_reg_flags &= ~RF_utf8;
@@ -5028,7 +5028,7 @@ no_silent:
     result = 0;
 
   final_exit:
-    if (rex->reganch & ROPT_VERBARG_SEEN) {
+    if (rex->intflags & PREGf_VERBARG_SEEN) {
         SV *sv_err = get_sv("REGERROR", 1);
         SV *sv_mrk = get_sv("REGMARK", 1);
         if (result) {

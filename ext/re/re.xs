@@ -115,17 +115,17 @@ PPCODE:
 
             char *fptr = "msix";
             char ch;
-            U16 reganch = (U16)((re->reganch & PMf_COMPILETIME) >> 12);
+            U16 match_flags = (U16)((re->extflags & PMf_COMPILETIME) >> 12);
 
             while((ch = *fptr++)) {
-                if(reganch & 1) {
+                if(match_flags & 1) {
                     reflags[left++] = ch;
                 }
-                reganch >>= 1;
+                match_flags >>= 1;
             }
 
             pattern = sv_2mortal(newSVpvn(re->precomp,re->prelen));
-            if (re->reganch & ROPT_UTF8) SvUTF8_on(pattern);
+            if (re->extflags & RXf_UTF8) SvUTF8_on(pattern);
 
             /* return the pattern and the modifiers */
             XPUSHs(pattern);
@@ -138,7 +138,7 @@ PPCODE:
             
             /* return the pattern in (?msix:..) format */
             pattern = sv_2mortal(newSVpvn(mg->mg_ptr,mg->mg_len));
-            if (re->reganch & ROPT_UTF8) 
+            if (re->extflags & RXf_UTF8) 
                 SvUTF8_on(pattern);
             XPUSHs(pattern);
             XSRETURN(1);
