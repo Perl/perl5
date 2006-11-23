@@ -978,10 +978,10 @@ ext/re/re_top.h			re extension symbol hiding header
 ext/re/re.xs			re extension external subroutines
 ext/re/t/lexical_debug.pl	generate debug output for lexical re 'debug'
 ext/re/t/lexical_debug.t	test that lexical re 'debug' works
-ext/re/t/re_funcs.t		see if exportable funcs from re.pm work
 ext/re/t/regop.pl		generate debug output for various patterns
 ext/re/t/regop.t		test RE optimizations by scraping debug output
 ext/re/t/re.t			see if re pragma works
+ext/re/t/re_funcs.t		see if exportable funcs from re.pm work
 ext/Safe/t/safe1.t		See if Safe works
 ext/Safe/t/safe2.t		See if Safe works
 ext/Safe/t/safe3.t		See if Safe works
@@ -1380,8 +1380,8 @@ lib/Attribute/Handlers/demo/Descriptions.pm	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/MyClass.pm	Attribute::Handlers demo
 lib/Attribute/Handlers.pm	Attribute::Handlers
 lib/Attribute/Handlers/README		Attribute::Handlers
-lib/Attribute/Handlers/t/linerep.t	See if Attribute::Handlers works
 lib/Attribute/Handlers/t/multi.t	See if Attribute::Handlers works
+lib/Attribute/Handlers/t/linerep.t	See if Attribute::Handlers works
 lib/attributes.pm		For "sub foo : attrlist"
 lib/AutoLoader.pm		Autoloader base class
 lib/AutoLoader.t		See if AutoLoader works
@@ -1525,7 +1525,6 @@ lib/DBM_Filter/utf8.pm		DBM Filter for UTF-8 Encoding
 lib/dbm_filter_util.pl		Utility functions used by DBM Filter tests 
 lib/DB.pm			Debugger API (draft)
 lib/DB.t			See if DB works
-lib/Devel/InnerPackage.pm	Module::Pluggable
 lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 lib/Devel/SelfStubber.t		See if Devel::SelfStubber works
 lib/diagnostics.pm		Print verbose diagnostics
@@ -2012,58 +2011,6 @@ lib/Module/Load/t/to_load/LoadMe.pl	Module::Load tests
 lib/Module/Load/t/to_load/Must/Be/Loaded.pm	Module::Load tests
 lib/Module/Load/t/to_load/TestModule.pm	Module::Load tests
 lib/Module/Load/t/to_load/ToBeLoaded	Module::Load tests
-lib/Module/Pluggable/Object.pm	Module::Pluggable
-lib/Module/Pluggable.pm	Module::Pluggable
-lib/Module/Pluggable/t/01use.t	Module::Pluggable tests
-lib/Module/Pluggable/t/02alsoworks.t	Module::Pluggable tests
-lib/Module/Pluggable/t/02works.t	Module::Pluggable tests
-lib/Module/Pluggable/t/03diffname.t	Module::Pluggable tests
-lib/Module/Pluggable/t/04acmedir_single.t	Module::Pluggable tests
-lib/Module/Pluggable/t/04acmedir.t	Module::Pluggable tests
-lib/Module/Pluggable/t/04acmepath_single.t	Module::Pluggable tests
-lib/Module/Pluggable/t/04acmepath.t	Module::Pluggable tests
-lib/Module/Pluggable/t/05postpath.t	Module::Pluggable tests
-lib/Module/Pluggable/t/06multipath.t	Module::Pluggable tests
-lib/Module/Pluggable/t/07instantiate.t	Module::Pluggable tests
-lib/Module/Pluggable/t/08nothing.t	Module::Pluggable tests
-lib/Module/Pluggable/t/09require.t	Module::Pluggable tests
-lib/Module/Pluggable/t/10innerpack_inner.t	Module::Pluggable tests
-lib/Module/Pluggable/t/10innerpack_noinner.t	Module::Pluggable tests
-lib/Module/Pluggable/t/10innerpack_override.t	Module::Pluggable tests
-lib/Module/Pluggable/t/10innerpack.t	Module::Pluggable tests
-lib/Module/Pluggable/t/11usetwice.t	Module::Pluggable tests
-lib/Module/Pluggable/t/12onlyarray.t	Module::Pluggable tests
-lib/Module/Pluggable/t/12onlyregex.t	Module::Pluggable tests
-lib/Module/Pluggable/t/12only.t	Module::Pluggable tests
-lib/Module/Pluggable/t/13exceptarray.t	Module::Pluggable tests
-lib/Module/Pluggable/t/13exceptregex.t	Module::Pluggable tests
-lib/Module/Pluggable/t/13except.t	Module::Pluggable tests
-lib/Module/Pluggable/t/14package.t	Module::Pluggable tests
-lib/Module/Pluggable/t/15topicsafe.t	Module::Pluggable tests
-lib/Module/Pluggable/t/16different_extension.t	Module::Pluggable tests
-lib/Module/Pluggable/t/17devel_inner_package.t	Module::Pluggable tests
-lib/Module/Pluggable/t/18skipped_package.t	Module::Pluggable tests
-lib/Module/Pluggable/t/19can_ok_clobber.t	Module::Pluggable tests
-lib/Module/Pluggable/t/20dodgy_files.t	Module::Pluggable tests
-lib/Module/Pluggable/t/acme/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/Acme/MyTest/Plugin/Foo.pm	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/ExtTest/Plugin/Bar.plugin	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/ExtTest/Plugin/Foo.plugin	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/ExtTest/Plugin/Quux/Foo.plugin	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/InnerTest/Plugin/Foo.pm	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/MyOtherTest/Plugin/Bar.pm	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/MyOtherTest/Plugin/Foo.pm	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/MyOtherTest/Plugin/Quux/Foo.pm	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/MyOtherTest/Plugin/Quux.pm	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/MyTest/Extend/Plugin/Bar.pm	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/MyTest/Plugin/Bar.pm	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/MyTest/Plugin/Foo.pm	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/MyTest/Plugin/Quux/Foo.pm	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/No/Middle.pm	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/OddTest/Plugin/#Dodgy.pm	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/OddTest/Plugin/Foo.pm	Module::Pluggable tests
-lib/Module/Pluggable/t/lib/TA/C/A/I.pm	Module::Pluggable tests
-lib/Module/Pluggable/t/plugins/test.plugin	Module::Pluggable tests
 lib/Net/Changes.libnet		libnet
 lib/Net/Cmd.pm			libnet
 lib/Net/Config.eg		libnet
