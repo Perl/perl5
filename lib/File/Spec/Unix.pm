@@ -43,13 +43,12 @@ sub canonpath {
     my ($self,$path) = @_;
     
     # Handle POSIX-style node names beginning with double slash (qnx, nto)
-    # Handle network path names beginning with double slash (cygwin)
     # (POSIX says: "a pathname that begins with two successive slashes
     # may be interpreted in an implementation-defined manner, although
     # more than two leading slashes shall be treated as a single slash.")
     my $node = '';
-    my $double_slashes_special = $self->isa("File::Spec::Cygwin") || $^O =~ m/^(?:qnx|nto)$/;
-    if ( $double_slashes_special && $path =~ s:^(//[^/]+)(/|\z):/:s ) {
+    my $double_slashes_special = $^O eq 'qnx' || $^O eq 'nto';
+    if ( $double_slashes_special && $path =~ s{^(//[^/]+)(?:/|\z)}{/}s ) {
       $node = $1;
     }
     # This used to be
@@ -57,12 +56,12 @@ sub canonpath {
     # but that made tests 29, 30, 35, 46, and 213 (as of #13272) to fail
     # (Mainly because trailing "" directories didn't get stripped).
     # Why would cygwin avoid collapsing multiple slashes into one? --jhi
-    $path =~ s|/+|/|g;                             # xx////xx  -> xx/xx
-    $path =~ s@(/\.)+(/|\Z(?!\n))@/@g;             # xx/././xx -> xx/xx
-    $path =~ s|^(\./)+||s unless $path eq "./";    # ./xx      -> xx
-    $path =~ s|^/(\.\./)+|/|;                      # /../../xx -> xx
+    $path =~ s|/{2,}|/|g;                            # xx////xx  -> xx/xx
+    $path =~ s{(?:/\.)+(?:/|\z)}{/}g;                # xx/././xx -> xx/xx
+    $path =~ s|^(?:\./)+||s unless $path eq "./";    # ./xx      -> xx
+    $path =~ s|^/(?:\.\./)+|/|;                      # /../../xx -> xx
     $path =~ s|^/\.\.$|/|;                         # /..       -> /
-    $path =~ s|/\Z(?!\n)|| unless $path eq "/";          # xx/       -> xx
+    $path =~ s|/\z|| unless $path eq "/";          # xx/       -> xx
     return "$node$path";
 }
 
@@ -180,7 +179,7 @@ directory. (Does not strip symlinks, only '.', '..', and equivalents.)
 
 sub no_upwards {
     my $self = shift;
-    return grep(!/^\.{1,2}\Z(?!\n)/s, @_);
+    return grep(!/^\.{1,2}\z/s, @_);
 }
 
 =item case_tolerant
@@ -260,7 +259,7 @@ sub splitpath {
         $directory = $path;
     }
     else {
-        $path =~ m|^ ( (?: .* / (?: \.\.?\Z(?!\n) )? )? ) ([^/]*) |xs;
+        $path =~ m|^ ( (?: .* / (?: \.\.?\z )? )? ) ([^/]*) |xs;
         $directory = $1;
         $file      = $2;
     }

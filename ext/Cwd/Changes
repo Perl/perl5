@@ -1,5 +1,18 @@
 Revision history for Perl distribution PathTools.
 
+ - Fixed a bug in the $ENV{PWD}-updating of Cwd::chdir() when a
+   dirhandle is passed in. [Steve Peters]
+
+ - Add perl 5.005 to the list of requirements in the
+   Build.PL/Makefile.PL/META.yml.
+
+ - Add ExtUtils::CBuilder to the list of build_requires in Build.PL.
+
+ - Improved performance of canonpath() on Unix-ish platforms - on my
+   OS X laptop it looks like it's about twice as fast. [Ruslan Zakirov]
+
+3.23 - Wed Oct 11 12:11:25 2006
+
  - Yet more Win32 fixes (sigh... seems like I'm fighting a neverending
    waterbed...).  This time, fixed file_name_is_absolute() to know
    what it's doing when the path includes a volume but a relative
