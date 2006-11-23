@@ -6,7 +6,7 @@ BEGIN {
     require './test.pl';
 }
 
-plan tests => 15;
+plan tests => 17;
 
 eval { for (\2) { $_ = <FH> } };
 like($@, 'Modification of a read-only value attempted', '[perl #19566]');
@@ -87,9 +87,21 @@ my $obj = bless [];
 $obj .= <DATA>;
 like($obj, qr/main=ARRAY.*world/, 'rcatline and refs');
 
+# bug #38631
+require Tie::Scalar;
+tie our $one, 'Tie::StdScalar', "A: ";
+tie our $two, 'Tie::StdScalar', "B: ";
+my $junk = $one;
+$one .= <DATA>;
+$two .= <DATA>;
+is( $one, "A: One\n", "rcatline works with tied scalars" );
+is( $two, "B: Two\n", "rcatline works with tied scalars" );
+
 __DATA__
 moo
 moo
  rules
  rules
 world
+One
+Two

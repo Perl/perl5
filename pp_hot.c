@@ -1650,6 +1650,8 @@ Perl_do_readline(pTHX)
   have_fp:
     if (gimme == G_SCALAR) {
 	sv = TARG;
+	if (type == OP_RCATLINE && SvGMAGICAL(sv))
+	    mg_get(sv);
 	if (SvROK(sv)) {
 	    if (type == OP_RCATLINE)
 		SvPV_force_nolen(sv);
