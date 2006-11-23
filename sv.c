@@ -3481,8 +3481,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     sflags = SvFLAGS(sstr);
 
     if (sflags & SVf_ROK) {
-	if (dtype == SVt_PVGV &&
-	    SvROK(sstr) && SvTYPE(SvRV(sstr)) == SVt_PVGV) {
+	if (dtype == SVt_PVGV && SvTYPE(SvRV(sstr)) == SVt_PVGV) {
 	    sstr = SvRV(sstr);
 	    if (sstr == dstr) {
 		if (GvIMPORTED(dstr) != GVf_IMPORTED
