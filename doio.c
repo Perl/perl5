@@ -1225,14 +1225,9 @@ Perl_do_print(pTHX_ register SV *sv, PerlIO *fp)
 	tmps = SvPV_const(sv, len);
 	if (PerlIO_isutf8(fp)) {
 	    if (!SvUTF8(sv)) {
-		const STRLEN origlen = len;
 		/* We don't modify the original scalar.  */
 		tmpbuf = bytes_to_utf8((const U8*) tmps, &len);
 		tmps = (char *) tmpbuf;
-		if (ckWARN(WARN_UTF8) && len != origlen) {
-		    Perl_warner(aTHX_ packWARN(WARN_UTF8),
-				"Variable length character upgraded in print");
-		}
 	    }
 	}
 	else if (DO_UTF8(sv)) {

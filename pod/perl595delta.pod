@@ -249,12 +249,6 @@ accordingly to the contents of that %INC entry.
 
 =head1 New or Changed Diagnostics
 
-=head2 Variable length character upgraded in print
-
-This new UTF-8 warning indicates a situation where a non-Unicode string is
-sent to a UTF-8 output layer, but given what the string contains, encoding
-problems such as double UTF-8 encoding might arise. See L<perldiag>.
-
 =head1 Changed Internals
 
 The anonymous hash and array constructors now take 1 op in the optree

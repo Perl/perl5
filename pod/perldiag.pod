@@ -4790,18 +4790,6 @@ front of your variable.
 (F) Lookbehind is allowed only for subexpressions whose length is fixed and
 known at compile time.  See L<perlre>.
 
-=item Variable length character upgraded in print
-
-(W utf8) Perl met a variable length character that is not marked with
-Unicode in the output, but the output layer (like the C<:utf8> layer) does
-not expect that. (A variable length character is defined by having
-different memory representations between the native encoding (ISO-8859-1
-or single-byte EBCDIC) and perl's Unicode encoding (UTF-8 or UTF-EBCDIC).)
-Perl assumes any strings that are not marked as Unicode to be encoded in
-the native encoding, and implicitly converts (upgrades) them into perl's
-Unicode encoding on print. If you had intended to treat them as Unicode
-strings, you might have failed to cope with them properly.
-
 =item "%s" variable %s masks earlier declaration in same %s
 
 (W misc) A "my" or "our" variable has been redeclared in the current
