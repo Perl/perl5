@@ -88,7 +88,7 @@ for my $cfg (@CFG) {
 	      sub {
 		  return if /^\#/ || /^\s*$/;
 		  if ($cfg eq 'configure.com') {
-		      s/\s*!.*$//; # remove trailing comments
+		      s/(\s*!.*|\s*)$//; # remove trailing comments or whitespace
 		      return if ! /^\$\s+WC "(\w+)='(.*)'"$/;
 		  }
 		  # foo='bar'
