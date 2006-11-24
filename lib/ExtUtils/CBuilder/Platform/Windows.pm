@@ -192,6 +192,8 @@ sub link {
 
   $spec{output}    ||= File::Spec->catfile( $spec{builddir},
                                             $spec{basename}  . '.'.$cf->{dlext}   );
+  $spec{manifest}  ||= File::Spec->catfile( $spec{builddir},
+                                            $spec{basename}  . '.'.$cf->{dlext}.'.manifest');
   $spec{implib}    ||= File::Spec->catfile( $spec{builddir},
                                             $spec{basename}  . $cf->{lib_ext} );
   $spec{explib}    ||= File::Spec->catfile( $spec{builddir},
@@ -203,10 +205,10 @@ sub link {
 
   $self->add_to_cleanup(
     grep defined,
-    @{[ @spec{qw(implib explib def_file base_file map_file)} ]}
+    @{[ @spec{qw(manifest implib explib def_file base_file map_file)} ]}
   );
 
-  foreach my $opt ( qw(output implib explib def_file map_file base_file) ) {
+  foreach my $opt ( qw(output manifest implib explib def_file map_file base_file) ) {
     $self->normalize_filespecs( \$spec{$opt} );
   }
 
@@ -227,7 +229,7 @@ sub link {
 
   $spec{output} =~ tr/'"//d;
   return wantarray
-    ? grep defined, @spec{qw[output implib explib def_file map_file base_file]}
+    ? grep defined, @spec{qw[output manifest implib explib def_file map_file base_file]}
     : $spec{output};
 }
 
@@ -338,20 +340,26 @@ sub write_compiler_script {
 
 sub format_linker_cmd {
   my ($self, %spec) = @_;
+  my $cf = $self->{config};
 
   foreach my $path ( @{$spec{libpath}} ) {
     $path = "-libpath:$path";
   }
 
-  $spec{def_file}  &&= '-def:'    . $spec{def_file};
-  $spec{output}    &&= '-out:'    . $spec{output};
-  $spec{implib}    &&= '-implib:' . $spec{implib};
-  $spec{map_file}  &&= '-map:'    . $spec{map_file};
+  my $output = $spec{output};
+
+  $spec{def_file}  &&= '-def:'      . $spec{def_file};
+  $spec{output}    &&= '-out:'      . $spec{output};
+  $spec{manifest}  &&= '-manifest ' . $spec{manifest};
+  $spec{implib}    &&= '-implib:'   . $spec{implib};
+  $spec{map_file}  &&= '-map:'      . $spec{map_file};
 
   %spec = $self->write_linker_script(%spec)
     if $spec{use_scripts};
 
-  return [ grep {defined && length} (
+  my @cmds; # Stores the series of commands needed to build the module.
+
+  push @cmds, [ grep {defined && length} (
     $spec{ld}               ,
     @{$spec{lddlflags}}     ,
     @{$spec{libpath}}       ,
@@ -365,6 +373,15 @@ sub format_linker_cmd {
     $spec{implib}           ,
     $spec{output}           ,
   ) ];
+
+  if ($cf->{cc} eq 'cl' and $cf->{ccversion} =~ /^(\d+)/ and $1 >= 14) {
+    # Embed the manifest file for VC 2005 (aka VC 8) or higher
+    push @cmds, [
+      'mt', '-nologo', $spec{manifest}, '-outputresource:' . "$output;2"
+    ];
+  }
+
+  return @cmds;
 }
 
 sub write_linker_script {
