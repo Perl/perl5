@@ -936,14 +936,9 @@ PERLDLL_OBJ	+= $(WIN32_OBJ) $(DLL_OBJ)
 SETARGV_OBJ	= setargv$(o)
 .ENDIF
 
-DYNAMIC_EXT	= Socket IO Fcntl Opcode SDBM_File POSIX attrs Thread B re \
-		Data/Dumper Devel/Peek ByteLoader Devel/DProf File/Glob \
-		Sys/Hostname Storable Filter/Util/Call Encode \
-		Digest/MD5 Digest/SHA PerlIO/scalar MIME/Base64 Time/HiRes \
-		Unicode/Normalize Math/BigInt/FastCalc Compress/Zlib Win32 \
-		Win32API/File
+# specify static extensions here
+#STATIC_EXT	= Cwd Compress/Raw/Zlib
 STATIC_EXT	= 
-NONXS_EXT	= Errno
 
 DYNALOADER	= $(EXTDIR)\DynaLoader\DynaLoader
 
@@ -1437,7 +1432,6 @@ distclean: realclean
 	-del /f $(LIBDIR)\ops.pm $(LIBDIR)\Safe.pm
 	-del /f $(LIBDIR)\SDBM_File.pm $(LIBDIR)\Socket.pm $(LIBDIR)\POSIX.pm
 	-del /f $(LIBDIR)\B.pm $(LIBDIR)\O.pm $(LIBDIR)\re.pm
-	-del /f $(LIBDIR)\ByteLoader.pm
 	-del /f $(LIBDIR)\Devel\Peek.pm $(LIBDIR)\Devel\DProf.pm
 	-del /f $(LIBDIR)\Devel\PPPort.pm
 	-del /f $(LIBDIR)\File\Glob.pm
