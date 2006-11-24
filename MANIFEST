@@ -978,10 +978,10 @@ ext/re/re_top.h			re extension symbol hiding header
 ext/re/re.xs			re extension external subroutines
 ext/re/t/lexical_debug.pl	generate debug output for lexical re 'debug'
 ext/re/t/lexical_debug.t	test that lexical re 'debug' works
+ext/re/t/re_funcs.t		see if exportable funcs from re.pm work
 ext/re/t/regop.pl		generate debug output for various patterns
 ext/re/t/regop.t		test RE optimizations by scraping debug output
 ext/re/t/re.t			see if re pragma works
-ext/re/t/re_funcs.t		see if exportable funcs from re.pm work
 ext/Safe/t/safe1.t		See if Safe works
 ext/Safe/t/safe2.t		See if Safe works
 ext/Safe/t/safe3.t		See if Safe works
@@ -1380,8 +1380,8 @@ lib/Attribute/Handlers/demo/Descriptions.pm	Attribute::Handlers demo
 lib/Attribute/Handlers/demo/MyClass.pm	Attribute::Handlers demo
 lib/Attribute/Handlers.pm	Attribute::Handlers
 lib/Attribute/Handlers/README		Attribute::Handlers
-lib/Attribute/Handlers/t/multi.t	See if Attribute::Handlers works
 lib/Attribute/Handlers/t/linerep.t	See if Attribute::Handlers works
+lib/Attribute/Handlers/t/multi.t	See if Attribute::Handlers works
 lib/attributes.pm		For "sub foo : attrlist"
 lib/AutoLoader.pm		Autoloader base class
 lib/AutoLoader.t		See if AutoLoader works
@@ -2001,6 +2001,13 @@ lib/Module/CoreList/bin/corelist	Module::CoreList
 lib/Module/CoreList.pm			Module::CoreList
 lib/Module/CoreList/t/corelist.t	Module::CoreList
 lib/Module/CoreList/t/find_modules.t	Module::CoreList
+lib/Module/Load/Conditional.pm	Module::Conditional
+lib/Module/Load/Conditional/t/01_Module_Load_Conditional.t	Module::Conditional tests
+lib/Module/Load/Conditional/t/to_load/Commented.pm	Module::Conditional tests
+lib/Module/Load/Conditional/t/to_load/LoadIt.pm	Module::Conditional tests
+lib/Module/Load/Conditional/t/to_load/LoadMe.pl	Module::Conditional tests
+lib/Module/Load/Conditional/t/to_load/Must/Be/Loaded.pm	Module::Conditional tests
+lib/Module/Load/Conditional/t/to_load/ToBeLoaded	Module::Conditional tests
 lib/Module/Loaded.pm	Module::Loaded
 lib/Module/Loaded/t/01_Module-Loaded.t	Module::Loaded tests
 lib/Module/Load.pm	Module::Load
@@ -2520,8 +2527,8 @@ lib/Text/TabsWrap/t/37000.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/39548.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/belg4mit.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/fill.t	See if Text::Wrap::fill works
-lib/Text/TabsWrap/t/Jacobson.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/Jacobson2.t	See if Text::Tabs is working
+lib/Text/TabsWrap/t/Jacobson.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/Jochen.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/sep2.t	See if Text::Tabs is working
 lib/Text/TabsWrap/t/sep.t	See if Text::Tabs is working
