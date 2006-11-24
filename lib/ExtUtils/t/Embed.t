@@ -143,6 +143,7 @@ print "# embed_test = $embed_test\n";
 $status = system($embed_test);
 print (($status? 'not ':'')."ok 9 # system returned $status\n");
 unlink($exe,"embed_test.c",$obj);
+unlink("$exe.manifest") if $cl and $Config{'ccversion'} =~ /^(\d+)/ and $1 >= 14;
 unlink("$exe$Config{exe_ext}") if $skip_exe;
 unlink("embed_test.map","embed_test.lis") if $^O eq 'VMS';
 unlink(glob("./*.dll")) if $^O eq 'cygwin';
