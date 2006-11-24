@@ -4109,7 +4109,7 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     my $v;
     ($v='bar')=~/(\w+)/g;
     $v='foo';
-    iseq("$1",'bar','# TODO $1 is safe after /g - may fail due to specialized config in pp_hot.c')
+    iseq("$1",'bar','$1 is safe after /g - may fail due to specialized config in pp_hot.c')
 }
  
 # Test counter is at bottom of file. Put new tests above here.
