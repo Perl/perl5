@@ -127,7 +127,10 @@ use_ok( 'Module::Load::Conditional' ) or diag "Module.pm not found.  Dying", die
 
 ### test 'requires' ###
 
-{   my %list = map { $_ => 1 } requires('Carp');
+SKIP:{
+    skip "Depends on \$^X, which doesn't work well when testing the Perl core", 
+        1 if $ENV{PERL_CORE};
+    my %list = map { $_ => 1 } requires('Carp');
 
     my $flag;
     $flag++ unless delete $list{'Exporter'};
