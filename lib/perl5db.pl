@@ -1721,7 +1721,7 @@ and if we can.
         if ($console) {
 
             # If we have a console, check to see if there are separate ins and
-            # outs to open. (They are assumed identiical if not.)
+            # outs to open. (They are assumed identical if not.)
 
             my ( $i, $o ) = split /,/, $console;
             $o = $i unless defined $o;
@@ -6734,6 +6734,19 @@ we go ahead and set C<$console> and C<$tty> to the file indicated.
 =cut
 
 sub TTY {
+
+    # With VMS we can get here with $term undefined, so we do not
+    # switch to this terminal.  There may be a better place to make
+    # sure that $term is defined on VMS
+    if ( @_ and ($^O eq 'VMS') and !defined($term) ) {
+	eval { require Term::ReadLine } or die $@;
+        if ( !$rl ) {
+	    $term = new Term::ReadLine::Stub 'perldb', $IN, $OUT;
+	}
+	else {
+	    $term = new Term::ReadLine 'perldb', $IN, $OUT;
+	}
+    }
     if ( @_ and $term and $term->Features->{newTTY} ) {
 
         # This terminal supports switching to a new TTY.

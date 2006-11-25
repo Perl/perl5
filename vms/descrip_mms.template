@@ -33,6 +33,7 @@
 ~MTU~
 ~FLAGS~
 ~LARGEFILE~
+~DECTERMLIB~
 
 #: >>>>> Architecture-specific options <<<<<
 .ifdef IXE
@@ -1682,7 +1683,7 @@ vms.c : [.vms]vms.c
 	Copy/Log/Noconfirm [.vms]vms.c []
 
 $(CRTL) : $(MAKEFILE)
-	@ @[.vms]genopt "$(CRTL)/Write" "|" "$(LIBS1)|$(FULLLIBS2)|$(SOCKLIB)"
+	@ @[.vms]genopt "$(CRTL)/Write" "|" "$(LIBS1)|$(FULLLIBS2)|$(SOCKLIB)|$(DECTERMLIB)"
 
 ok : $(utils)
 	$(MINIPERL) lib/perlbug.com -ok -s "(UNINSTALLED)"

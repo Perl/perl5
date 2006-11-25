@@ -17,6 +17,7 @@
 #include <chpdef.h>
 #include <clidef.h>
 #include <climsgdef.h>
+#include <dcdef.h>
 #include <descrip.h>
 #include <devdef.h>
 #include <dvidef.h>
@@ -47,6 +48,7 @@
 #include <uicdef.h>
 #include <stsdef.h>
 #include <rmsdef.h>
+#include <smgdef.h>
 #if __CRTL_VER >= 70000000 /* FIXME to earliest version */
 #include <efndef.h>
 #define NO_EFN EFN$C_ENF
@@ -88,6 +90,22 @@ int sys$getdviw
 	void * (astadr)(unsigned long),
 	void * astprm,
 	void * nullarg);
+
+#ifdef USE_VMS_DECTERM
+
+/* Routine to create a decterm for use with the Perl debugger */
+/* No headers, this information was found in the Programming Concepts Manual */
+
+int decw$term_port
+   (const struct dsc$descriptor_s * display,
+    const struct dsc$descriptor_s * setup_file,
+    const struct dsc$descriptor_s * customization,
+    struct dsc$descriptor_s * result_device_name,
+    unsigned short * result_device_name_length,
+    void * controller,
+    void * char_buffer,
+    void * char_change_buffer);
+#endif
 
 #if __CRTL_VER >= 70300000 && !defined(__VAX)
 
@@ -2759,6 +2777,8 @@ struct pipe_details
     int             in_done;        /* true when in pipe finished */
     int             out_done;
     int             err_done;
+    unsigned short  xchan;	    /* channel to debug xterm */
+    unsigned short  xchan_valid;    /* channel is assigned */
 };
 
 struct exit_control_block
@@ -3724,6 +3744,234 @@ vmspipe_tempfile(pTHX)
 }
 
 
+#ifdef USE_VMS_DECTERM
+
+static int vms_is_syscommand_xterm(void)
+{
+    const static struct dsc$descriptor_s syscommand_dsc = 
+      { 11, DSC$K_DTYPE_T, DSC$K_CLASS_S, "SYS$COMMAND" };
+
+    const static struct dsc$descriptor_s decwdisplay_dsc = 
+      { 12, DSC$K_DTYPE_T, DSC$K_CLASS_S, "DECW$DISPLAY" };
+
+    struct item_list_3 items[2];
+    unsigned short dvi_iosb[4];
+    unsigned long devchar;
+    unsigned long devclass;
+    int status;
+
+    /* Very simple check to guess if sys$command is a decterm? */
+    /* First see if the DECW$DISPLAY: device exists */
+    items[0].len = 4;
+    items[0].code = DVI$_DEVCHAR;
+    items[0].bufadr = &devchar;
+    items[0].retadr = NULL;
+    items[1].len = 0;
+    items[1].code = 0;
+
+    status = sys$getdviw
+	(NO_EFN, 0, &decwdisplay_dsc, items, dvi_iosb, NULL, NULL, NULL);
+
+    if ($VMS_STATUS_SUCCESS(status)) {
+        status = dvi_iosb[0];
+    }
+
+    if (!$VMS_STATUS_SUCCESS(status)) {
+        SETERRNO(EVMSERR, status);
+	return -1;
+    }
+
+    /* If it does, then for now assume that we are on a workstation */
+    /* Now verify that SYS$COMMAND is a terminal */
+    /* for creating the debugger DECTerm */
+
+    items[0].len = 4;
+    items[0].code = DVI$_DEVCLASS;
+    items[0].bufadr = &devclass;
+    items[0].retadr = NULL;
+    items[1].len = 0;
+    items[1].code = 0;
+
+    status = sys$getdviw
+	(NO_EFN, 0, &syscommand_dsc, items, dvi_iosb, NULL, NULL, NULL);
+
+    if ($VMS_STATUS_SUCCESS(status)) {
+        status = dvi_iosb[0];
+    }
+
+    if (!$VMS_STATUS_SUCCESS(status)) {
+        SETERRNO(EVMSERR, status);
+	return -1;
+    }
+    else {
+	if (devclass == DC$_TERM) {
+	    return 0;
+	}
+    }
+    return -1;
+}
+
+/* If we are on a DECTerm, we can pretend to fork xterms when requested */
+static PerlIO * create_forked_xterm(pTHX_ const char *cmd, const char *mode)
+{
+    int status;
+    int ret_stat;
+    char * ret_char;
+    char device_name[65];
+    unsigned short device_name_len;
+    struct dsc$descriptor_s customization_dsc;
+    struct dsc$descriptor_s device_name_dsc;
+    const char * cptr;
+    char * tptr;
+    char customization[200];
+    char title[40];
+    pInfo info = NULL;
+    char mbx1[64];
+    unsigned short p_chan;
+    int n;
+    unsigned short iosb[4];
+    struct item_list_3 items[2];
+    const char * cust_str =
+        "DECW$TERMINAL.iconName:\tPerl Dbg\nDECW$TERMINAL.title:\t%40s\n";
+    struct dsc$descriptor_s d_mbx1 = {sizeof mbx1, DSC$K_DTYPE_T,
+                                          DSC$K_CLASS_S, mbx1};
+
+    ret_char = strstr(cmd," xterm ");
+    if (ret_char == NULL)
+	return NULL;
+    cptr = ret_char + 7;
+    ret_char = strstr(cmd,"tty");
+    if (ret_char == NULL)
+	return NULL;
+    ret_char = strstr(cmd,"sleep");
+    if (ret_char == NULL)
+	return NULL;
+
+    /* Are we on a workstation? */
+    /* to do: capture the rows / columns and pass their properties */
+    ret_stat = vms_is_syscommand_xterm();
+    if (ret_stat < 0)
+	return NULL;
+
+    /* Make the title: */
+    ret_char = strstr(cptr,"-title");
+    if (ret_char != NULL) {
+	while ((*cptr != 0) && (*cptr != '\"')) {
+	    cptr++;
+	}
+	if (*cptr == '\"')
+	    cptr++;
+	n = 0;
+	while ((*cptr != 0) && (*cptr != '\"')) {
+	    title[n] = *cptr;
+	    n++;
+	    if (n == 39) {
+		title[39] == 0;
+		break;
+	    }
+	    cptr++;
+	}
+	title[n] = 0;
+    }
+    else {
+	    /* Default title */
+	    strcpy(title,"Perl Debug DECTerm");
+    }
+    sprintf(customization, cust_str, title);
+
+    customization_dsc.dsc$a_pointer = customization;
+    customization_dsc.dsc$w_length = strlen(customization);
+    customization_dsc.dsc$b_dtype = DSC$K_DTYPE_T;
+    customization_dsc.dsc$b_class = DSC$K_CLASS_S;
+
+    device_name_dsc.dsc$a_pointer = device_name;
+    device_name_dsc.dsc$w_length = sizeof device_name -1;
+    device_name_dsc.dsc$b_dtype = DSC$K_DTYPE_T;
+    device_name_dsc.dsc$b_class = DSC$K_CLASS_S;
+
+    device_name_len = 0;
+
+    /* Try to create the window */
+     status = decw$term_port
+       (NULL,
+	NULL,
+	&customization_dsc,
+	&device_name_dsc,
+	&device_name_len,
+	NULL,
+	NULL,
+	NULL);
+    if (!$VMS_STATUS_SUCCESS(status)) {
+        SETERRNO(EVMSERR, status);
+	return NULL;
+    }
+
+    device_name[device_name_len] = '\0';
+
+    /* Need to set this up to look like a pipe for cleanup */
+    n = sizeof(Info);
+    status = lib$get_vm(&n, &info);
+    if (!$VMS_STATUS_SUCCESS(status)) {
+        SETERRNO(ENOMEM, status);
+        return NULL;
+    }
+
+    info->mode = *mode;
+    info->done = FALSE;
+    info->completion = 0;
+    info->closing    = FALSE;
+    info->in         = 0;
+    info->out        = 0;
+    info->err        = 0;
+    info->fp         = Nullfp;
+    info->useFILE    = 0;
+    info->waiting    = 0;
+    info->in_done    = TRUE;
+    info->out_done   = TRUE;
+    info->err_done   = TRUE;
+
+    /* Assign a channel on this so that it will persist, and not login */
+    /* We stash this channel in the info structure for reference. */
+    /* The created xterm self destructs when the last channel is removed */
+    /* and it appears that perl5db.pl (perl debugger) does this routinely */
+    /* So leave this assigned. */
+    device_name_dsc.dsc$w_length = device_name_len;
+    status = sys$assign(&device_name_dsc,&info->xchan,0,0);
+    if (!$VMS_STATUS_SUCCESS(status)) {
+        SETERRNO(EVMSERR, status);
+	return NULL;
+    }
+    info->xchan_valid = 1;
+
+    /* Now create a mailbox to be read by the application */
+
+    create_mbx(aTHX_ &p_chan, &d_mbx1);
+
+    /* write the name of the created terminal to the mailbox */
+    status = sys$qiow(NO_EFN, p_chan, IO$_WRITEVBLK|IO$M_NOW,
+            iosb, NULL, NULL, device_name, device_name_len, 0, 0, 0, 0);
+
+    if (!$VMS_STATUS_SUCCESS(status)) {
+        SETERRNO(EVMSERR, status);
+	return NULL;
+    }
+
+    info->fp  = PerlIO_open(mbx1, mode);
+
+    /* Done with this channel */
+    sys$dassgn(p_chan);
+
+    /* If any errors, then clean up */
+    if (!info->fp) {
+       	n = sizeof(Info);
+	_ckvmssts(lib$free_vm(&n, &info));
+	return NULL;
+        }
+
+    /* All done */
+    return info->fp;
+}
+#endif
 
 static PerlIO *
 safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
@@ -3752,7 +4000,21 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
     $DESCRIPTOR(d_sym_in ,"PERL_POPEN_IN");
     $DESCRIPTOR(d_sym_out,"PERL_POPEN_OUT");
     $DESCRIPTOR(d_sym_err,"PERL_POPEN_ERR");
-                            
+
+#ifdef USE_VMS_DECTERM
+    /* Check here for Xterm create request.  This means looking for
+     * "3>&1 xterm\b" and "\btty 1>&3\b$" in the command, and that it
+     *  is possible to create an xterm.
+     */
+    if (*in_mode == 'r') {
+        PerlIO * xterm_fd;
+
+	xterm_fd = create_forked_xterm(aTHX_ cmd, in_mode);
+	if (xterm_fd != Nullfp)
+	    return xterm_fd;
+    }
+#endif
+
     if (!head_PLOC) store_pipelocs(aTHX);   /* at least TRY to use a static vmspipe file */
 
     /* once-per-program initialization...
@@ -3821,7 +4083,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
           set_errno(EVMSERR); 
       }
       set_vaxc_errno(sts);
-      if (*mode != 'n' && ckWARN(WARN_PIPE)) {
+      if (*in_mode != 'n' && ckWARN(WARN_PIPE)) {
         Perl_warner(aTHX_ packWARN(WARN_PIPE),"Can't pipe \"%*s\": %s", strlen(cmd), cmd, Strerror(errno));
       }
       *psts = sts;
@@ -3844,6 +4106,8 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
     info->in_done    = TRUE;
     info->out_done   = TRUE;
     info->err_done   = TRUE;
+    info->xchan      = 0;
+    info->xchan_valid = 0;
 
     in = PerlMem_malloc(VMS_MAXRSS);
     if (in == NULL) _ckvmssts(SS$_INSFMEM);
@@ -3872,7 +4136,7 @@ safe_popen(pTHX_ const char *cmd, const char *in_mode, int *psts)
             info->out->info = info;
         }
         if (!info->useFILE) {
-        info->fp  = PerlIO_open(mbx, mode);
+	    info->fp  = PerlIO_open(mbx, mode);
         } else {
             info->fp = (PerlIO *) freopen(mbx, mode, stdin);
             Perl_vmssetuserlnm(aTHX_ "SYS$INPUT",mbx);
@@ -4094,6 +4358,7 @@ I32 Perl_my_pclose(pTHX_ PerlIO *fp)
     pInfo info, last = NULL;
     unsigned long int retsts;
     int done, iss, n;
+    int status;
     
     for (info = open_pipes; info != NULL; last = info, info = info->next)
         if (info->fp == fp) break;
@@ -11783,6 +12048,7 @@ Perl_vms_start_glob
     Safefree(rslt);
     return fp;
 }
+
 
 #ifdef HAS_SYMLINK
 static char *

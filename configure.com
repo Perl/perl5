@@ -51,6 +51,7 @@ $ use64bitall = "n"
 $ use64bitint = "n"
 $ uselargefiles = "n"
 $ usestdstat = "n"
+$ usedecterm = "y"
 $ usesitecustomize = "n"
 $ C_Compiler_Replace = "CC="
 $ thread_upcalls = "MTU="
@@ -905,7 +906,7 @@ $   config_symbols1 ="|installprivlib|installscript|installsitearch|installsitel
 $   config_symbols2 ="|prefix|privlib|privlibexp|scriptdir|sitearch|sitearchexp|sitebin|sitelib|sitelib_stem|sitelibexp|try_cxx|use64bitall|use64bitint|"
 $   config_symbols3 ="|usecasesensitive|usedefaulttypes|usedevel|useieee|useithreads|usemultiplicity|usemymalloc|usedebugging_perl|useperlio|usesecurelog|"
 $   config_symbols4 ="|usethreads|usevmsdebug|usefaststdio|usemallocwrap|unlink_all_versions|uselargefiles|usesitecustomize|"
-$   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads"
+$   config_symbols5 ="|buildmake|builder|usethreadupcalls|usekernelthreads|usedecterm"
 $!  
 $   open/read CONFIG 'config_sh'
 $   rd_conf_loop:
@@ -2556,6 +2557,20 @@ $     d_unlink_all_versions = "define"
 $ ELSE
 $     d_unlink_all_versions = "undef"
 $ ENDIF
+$ bool_dflt = "y"
+$ IF F$TYPE(usedecterm) .NES. "" 
+$ THEN
+$       dflt = f$search("SYS$SHARE:DECW$TERMINALSHR*.EXE")
+$       IF dflt .EQS. "" THEN bool_dflt = "n"
+$ ENDIF
+$ IF .NOT. use_debugging_perl THEN bool_dflt = "n"
+$ echo ""
+$ echo "Perl can be built to support DECterms from the Perl debugger"
+$ echo ""
+$ echo "If this does not make any sense to you, just accept the default '" + bool_dflt + "'."
+$ rp = "Build with DECterm Perl debugger support, if available? [''bool_dflt'] "
+$ GOSUB myread
+$ usedecterm=ans
 $! CC Flags
 $ echo ""
 $ echo "Your compiler may want other flags.  For this question you should include"
@@ -6611,6 +6626,7 @@ $! Alas this does not help to build Fcntl
 $!   WC "#define PERL_IGNORE_FPUSIG SIGFPE"
 $ ENDIF
 $ IF kill_by_sigprc .EQS. "define" then WC "#define KILL_BY_SIGPRC"
+$ IF usedecterm .OR. usedecterm .EQS. "define" then WC "#define USE_VMS_DECTERM"
 $ IF unlink_all_versions .OR. unlink_all_versions .EQS. "define" THEN -
     WC "#define UNLINK_ALL_VERSIONS"
 $ CLOSE CONFIG
@@ -6685,11 +6701,23 @@ $   ENDIF
 $ ELSE
 $   LARGEFILE_REPLACE = "LARGEFILE="
 $ ENDIF
+$ IF usedecterm .OR. usedecterm .EQS. "define"
+$ THEN
+$   IF F$SEARCH("SYS$SHARE:DECW$TERMINALSHR12.EXE") .nes. ""
+$   THEN
+$      DECTERM_REPLACE = "DECTERMLIB=DECTERMLIB=DECW$TERMINALSHR12/SHARE"
+$   ELSE
+$      DECTERM_REPLACE = "DECTERMLIB=DECTERMLIB=DECW$TERMINALSHR/SHARE"
+$   ENDIF
+$ ELSE
+$   DECTERM_REPLACE = "DECTERMLIB=DECTERMLIB="
+$ ENDIF
 $ echo4 "Extracting ''defmakefile' (with variable substitutions)"
 $ DEFINE/USER_MODE sys$output 'UUmakefile'
 $ mcr []munchconfig 'config_sh' 'Makefile_SH' "''DECC_REPLACE'" "''DECCXX_REPLACE'" "''ARCH_TYPE'" "''GNUC_REPLACE'" -
 "''SOCKET_REPLACE'" "''THREAD_REPLACE'" "''C_Compiler_Replace'" "''MALLOC_REPLACE'" -
-"''THREAD_UPCALLS'" "''THREAD_KERNEL'" "PV=''version'" "FLAGS=FLAGS=''extra_flags'" "''LARGEFILE_REPLACE'"
+"''THREAD_UPCALLS'" "''THREAD_KERNEL'" "PV=''version'" "FLAGS=FLAGS=''extra_flags'" "''LARGEFILE_REPLACE'" -
+"''DECTERM_REPLACE'"
 $! Clean up after ourselves
 $ DELETE/NOLOG/NOCONFIRM []munchconfig.exe;
 $!
