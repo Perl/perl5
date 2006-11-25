@@ -339,7 +339,7 @@ struct IPerlStdIOInfo
 #define PerlSIO_set_cnt(f,c)		PerlIOProc_abort()
 #endif
 #if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE)
-#define PerlSIO_set_ptr(f,p)		FILE_ptr(f) = (p)
+#define PerlSIO_set_ptr(f,p)		FILE_ptr(f) = ((STDCHAR*)(p))
 #else
 #define PerlSIO_set_ptr(f,p)		PerlIOProc_abort()
 #endif

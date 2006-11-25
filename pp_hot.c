@@ -1397,7 +1397,7 @@ play_it_again:
 	     && !SvROK(TARG))	/* Cannot trust since INTUIT cannot guess ^ */
 	    goto yup;
     }
-    if (CALLREGEXEC(rx, (char*)s, (char *)strend, (char*)truebase, minmatch, TARG, (void*)gpos, r_flags))
+    if (CALLREGEXEC(rx, (char*)s, (char *)strend, (char*)truebase, minmatch, TARG, INT2PTR(void*, gpos), r_flags))
     {
 	PL_curpm = pm;
 	if (dynpm->op_pmflags & PMf_ONCE)
@@ -1447,14 +1447,14 @@ play_it_again:
 		}
 		if (rx->startp[0] != -1) {
 		    mg->mg_len = rx->endp[0];
-		    if (rx->startp[0] + rx->gofs == rx->endp[0])
+		    if (rx->startp[0] + rx->gofs == (UV)rx->endp[0])
 			mg->mg_flags |= MGf_MINMATCH;
 		    else
 			mg->mg_flags &= ~MGf_MINMATCH;
 		}
 	    }
 	    had_zerolen = (rx->startp[0] != -1
-			   && rx->startp[0] + rx->gofs == rx->endp[0]);
+			   && rx->startp[0] + rx->gofs == (UV)rx->endp[0]);
 	    PUTBACK;			/* EVAL blocks may use stack */
 	    r_flags |= REXEC_IGNOREPOS | REXEC_NOT_FIRST;
 	    goto play_it_again;
@@ -1481,7 +1481,7 @@ play_it_again:
 	    }
 	    if (rx->startp[0] != -1) {
 		mg->mg_len = rx->endp[0];
-		if (rx->startp[0] + rx->gofs == rx->endp[0])
+		if (rx->startp[0] + rx->gofs == (UV)rx->endp[0])
 		    mg->mg_flags |= MGf_MINMATCH;
 		else
 		    mg->mg_flags &= ~MGf_MINMATCH;

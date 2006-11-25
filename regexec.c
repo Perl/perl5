@@ -822,7 +822,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 	}
 	DEBUG_EXECUTE_r( if (ml_anch)
 	    PerlIO_printf(Perl_debug_log, "Position at offset %ld does not contradict /%s^%s/m...\n",
-			(long)(strpos - i_strpos), PL_colors[0], PL_colors[1]);
+			  (long)(strpos - i_strpos), PL_colors[0], PL_colors[1]);
 	);
       success_at_start:
 	if (!(prog->intflags & PREGf_NAUGHTY)	/* XXXX If strpos moved? */
@@ -879,8 +879,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
         else 
             endpos= strend;
 		    
-        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "start_shift: %"IVdf" check_at: %d s: %d endpos: %d\n",
-				      (IV)start_shift, check_at - strbeg, s - strbeg, endpos - strbeg));
+        DEBUG_EXECUTE_r(PerlIO_printf(Perl_debug_log, "start_shift: %"IVdf" check_at: %"IVdf" s: %"IVdf" endpos: %"IVdf"\n",
+				      (IV)start_shift, (IV)(check_at - strbeg), (IV)(s - strbeg), (IV)(endpos - strbeg)));
 	
 	t = s;
         s = find_byclass(prog, progi->regstclass, s, endpos, NULL);
@@ -1596,8 +1596,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                         s = (char*)leftmost;
                         DEBUG_TRIE_EXECUTE_r({
                             PerlIO_printf( 
-                                Perl_debug_log,"Matches word #%"UVxf" at position %d. Trying full pattern...\n",
-                                (UV)accepted_word, s - real_start
+                                Perl_debug_log,"Matches word #%"UVxf" at position %"IVdf". Trying full pattern...\n",
+                                (UV)accepted_word, (IV)(s - real_start)
                             );
                         });
                         if (!reginfo || regtry(reginfo, &s)) {
@@ -1728,7 +1728,7 @@ Perl_regexec_flags(pTHX_ register regexp *prog, char *stringarg, register char *
 	    }
 	}
 	else if (data) {
-	    reginfo.ganch = strbeg + (UV)data;
+	    reginfo.ganch = strbeg + PTR2UV(data);
 	} else				/* pos() not defined */
 	    reginfo.ganch = strbeg;
     }

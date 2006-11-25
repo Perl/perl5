@@ -4524,7 +4524,7 @@ reStudy:
        the "real" pattern. */
     DEBUG_OPTIMISE_r({
 	PerlIO_printf(Perl_debug_log,"minlen: %"IVdf" r->minlen:%"IVdf"\n",
-	    minlen, r->minlen);
+		      (IV)minlen, (IV)r->minlen);
     });
     r->minlenret = minlen;
     if (r->minlen < minlen) 
@@ -8046,10 +8046,10 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode *p, const regnode *val,
         SV * const mysv_val=sv_newmortal();
         DEBUG_PARSE_MSG("");
         regprop(RExC_rx, mysv_val, val);
-        PerlIO_printf(Perl_debug_log, "~ attach to %s (%d) offset to %d\n",
-            SvPV_nolen_const(mysv_val),
-            REG_NODE_NUM(val),
-            val - scan
+        PerlIO_printf(Perl_debug_log, "~ attach to %s (%"IVdf") offset to %"IVdf"\n",
+		      SvPV_nolen_const(mysv_val),
+		      (IV)REG_NODE_NUM(val),
+		      (IV)(val - scan)
         );
     });
     if (reg_off_by_arg[OP(scan)]) {
@@ -8160,12 +8160,12 @@ Perl_regdump(pTHX_ const regexp *r)
 	PerlIO_putc(Perl_debug_log, ' ');
     }
     if (r->extflags & RXf_GPOS_SEEN)
-	PerlIO_printf(Perl_debug_log, "GPOS:%"UVuf" ", r->gofs);
+	PerlIO_printf(Perl_debug_log, "GPOS:%"UVuf" ", (UV)r->gofs);
     if (r->intflags & PREGf_SKIP)
 	PerlIO_printf(Perl_debug_log, "plus ");
     if (r->intflags & PREGf_IMPLICIT)
 	PerlIO_printf(Perl_debug_log, "implicit ");
-    PerlIO_printf(Perl_debug_log, "minlen %ld ", (long) r->minlen);
+    PerlIO_printf(Perl_debug_log, "minlen %"IVdf" ", (IV)r->minlen);
     if (r->extflags & RXf_EVAL_SEEN)
 	PerlIO_printf(Perl_debug_log, "with eval ");
     PerlIO_printf(Perl_debug_log, "\n");
@@ -9006,7 +9006,7 @@ S_put_byte(pTHX_ SV *sv, int c)
 
 #define CLEAR_OPTSTART \
     if (optstart) STMT_START { \
-	    DEBUG_OPTIMISE_r(PerlIO_printf(Perl_debug_log, " (%d nodes)\n", node - optstart)); \
+	    DEBUG_OPTIMISE_r(PerlIO_printf(Perl_debug_log, " (%"IVdf" nodes)\n", (IV)(node - optstart))); \
 	    optstart=NULL; \
     } STMT_END
 
@@ -9110,8 +9110,8 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
                 );
                 if (trie->jump) {
                     U16 dist= trie->jump[word_idx+1];
-		    PerlIO_printf(Perl_debug_log, "(%u)\n",
-                        (dist ? this_trie + dist : next) - start);
+		    PerlIO_printf(Perl_debug_log, "(%"UVuf")\n",
+				  (UV)((dist ? this_trie + dist : next) - start));
                     if (dist) {
                         if (!nextbranch)
                             nextbranch= this_trie + trie->jump[0];    
@@ -9159,7 +9159,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
     }
     CLEAR_OPTSTART;
 #ifdef DEBUG_DUMPUNTIL    
-    PerlIO_printf(Perl_debug_log, "--- %d\n",indent);
+    PerlIO_printf(Perl_debug_log, "--- %d\n", (int)indent);
 #endif
     return node;
 }

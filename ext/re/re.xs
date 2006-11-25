@@ -26,7 +26,11 @@ extern char*	my_reg_stringify (pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags,  I32 *ha
 extern regexp*	my_regdupe (pTHX_ const regexp *r, CLONE_PARAMS *param);
 #endif
 
-EXTERN_C const struct regexp_engine my_reg_engine = { 
+EXTERN_C const struct regexp_engine my_reg_engine;
+
+END_EXTERN_C
+
+const struct regexp_engine my_reg_engine = { 
         my_regcomp, 
         my_regexec, 
         my_re_intuit_start, 
@@ -37,8 +41,6 @@ EXTERN_C const struct regexp_engine my_reg_engine = {
         my_regdupe 
 #endif
 };
-
-END_EXTERN_C
 
 MODULE = re	PACKAGE = re
 
