@@ -2379,8 +2379,8 @@ and "Perl_-ly" APIs, for example:
 
 The first one explicitly passes in the context, which is needed for e.g.
 threaded builds.  The second one does that implicitly; do not get them
-mixed.  If you are not passing in a aTHX_, you will need to do a dTHX as
-the first thing in the function.
+mixed.  If you are not passing in a aTHX_, you will need to do a dTHX
+(or a dVAR) as the first thing in the function.
 
 See L<perlguts/"How multiple interpreters and concurrency are supported">
 for further discussion about context.
@@ -2419,7 +2419,7 @@ the right combination of C<const>s:
 There is a way to completely hide any modifiable globals (they are all
 moved to heap), the compilation setting C<-DPERL_GLOBAL_STRUCT_PRIVATE>.
 It is not normally used, but can be used for testing, read more
-about it in L<perlhack>.
+about it in L<perlguts/"Background and PERL_IMPLICIT_CONTEXT">.
 
 =item *
 
@@ -2436,7 +2436,7 @@ Exporting your new function
 
 The new shiny result of either genuine new functionality or your
 arduous refactoring is now ready and correctly exported.  So what
-could possibly be wrong?
+could possibly go wrong?
 
 Maybe simply that your function did not need to be exported in the
 first place.  Perl has a long and not so glorious history of exporting
@@ -2467,11 +2467,17 @@ incompatibilities in your system's header files.)
 Use the Configure C<-Dgccansipedantic> flag to enable the gcc
 C<-ansi -pedantic> flags which enforce stricter ANSI rules.
 
-If using the C<gcc -Wall> note that not all the possible
-warnings are given unless you also compile with C<-O>.
+If using the C<gcc -Wall> note that not all the possible warnings
+(like C<-Wunitialized>) are given unless you also compile with C<-O>.
+
+Note that if using gcc, starting from Perl 5.9.5 the Perl core source
+code files (the ones at the top level of the source code distribution,
+but not e.g. the extensions under ext/) are automatically compiled
+with as many as possible of the C<-std=c89>, C<-ansi>, C<-pedantic>,
+and a selection of C<-W> flags (see cflags.SH).
 
 Also study L<perlport> carefully to avoid any bad assumptions
-about the operating system, filesystem, and so forth.
+about the operating system, filesystems, and so forth.
 
 You may once in a while try a "make microperl" to see whether we
 can still compile Perl with just the bare minimum of interfaces.
@@ -2529,7 +2535,7 @@ guaranteed to be B<int> or B<long>.  If you really explicitly need
 Assuming one can dereference any type of pointer for any type of data
 
   char *p = ...;
-  long pony = *p;
+  long pony = *p;    /* BAD */
 
 Many platforms, quite rightly so, will give you a core dump instead
 of a pony if the p happens not be correctly aligned.
@@ -2538,7 +2544,7 @@ of a pony if the p happens not be correctly aligned.
 
 Lvalue casts
 
-  (int)*p = ...;
+  (int)*p = ...;    /* BAD */
 
 Simply not portable.  Get your lvalue to be of the right type,
 or maybe use temporary variables, or dirty tricks with unions.
@@ -2601,7 +2607,7 @@ sizeof() of the field
 Mixing #define and #ifdef
 
   #define BURGLE(x) ... \
-  #ifdef BURGLE_OLD_STYLE
+  #ifdef BURGLE_OLD_STYLE        /* BAD */
   ... do it the old way ... \
   #else
   ... do it the new way ... \
@@ -2616,13 +2622,13 @@ Adding stuff after #endif or #else
 
   #ifdef SNOSH
   ...
-  #else !SNOSH
+  #else !SNOSH    /* BAD */
   ...
-  #endif SNOSH
+  #endif SNOSH    /* BAD */
 
-The #endif and #else cannot portably have anything after them.  If you
-want to document what is going (which is a good idea especially if the
-branches are long), use (C) comments:
+The #endif and #else cannot portably have anything non-comment after
+them.  If you want to document what is going (which is a good idea
+especially if the branches are long), use (C) comments:
 
   #ifdef SNOSH
   ...
@@ -2640,7 +2646,7 @@ Having a comma after the last element of an enum list
   enum color {
     CERULEAN,
     CHARTREUSE,
-    CINNABAR, /* Right here. */
+    CINNABAR,     /* BAD */
   };
 
 is not portable.  Leave out the last comma.
@@ -2652,7 +2658,7 @@ varies between compilers, you might need to (int).
 
 Using //-comments
 
-  // This function bamfoodles the zorklator.
+  // This function bamfoodles the zorklator.    /* BAD */
 
 That is C99 or C++.  Perl is C89.  Using the //-comments is silently
 allowed by many C compilers but cranking up the ANSI C89 strictness
@@ -2665,7 +2671,7 @@ Mixing declarations and code
   void zorklator()
   {
     int n = 3;
-    set_zorkmids(n);
+    set_zorkmids(n);    /* BAD */
     int q = 4;
 
 That is C99 or C++.  Some C compilers allow that, but you shouldn't.
@@ -2677,7 +2683,7 @@ The gcc option C<-Wdeclaration-after-statements> scans for such problems
 
 Introducing variables inside for()
 
-  for(int i = ...; ...; ...)
+  for(int i = ...; ...; ...) {    /* BAD */
 
 That is C99 or C++.  While it would indeed be awfully nice to have that
 also in C89, to limit the scope of the loop variable, alas, we cannot.
@@ -2689,22 +2695,23 @@ Mixing signed char pointers with unsigned char pointers
   int foo(char *s) { ... }
   ...
   unsigned char *t = ...; /* Or U8* t = ... */
-  foo(t);
+  foo(t);   /* BAD */
 
 While this is legal practice, it is certainly dubious, and downright
 fatal in at least one platform: for example VMS cc considers this a
-fatal error.  One cause for people often making this mistake is that
-a "naked char" and therefore dereferencing a "naked char pointer" have
-an undefined signedness: it depends on the compiler and the platform
-whether the result is signed or unsigned.  For this very same reason
-using a 'char' as an array index is bad.
+fatal error.  One cause for people often making this mistake is that a
+"naked char" and therefore dereferencing a "naked char pointer" have
+an undefined signedness: it depends on the compiler and the flags of
+the compiler and the underlying platform whether the result is signed
+or unsigned.  For this very same reason using a 'char' as an array
+index is bad.
 
 =item *
 
 Macros that have string constants and their arguments as substrings of
 the string constants
 
-  #define FOO(n) printf("number = %d\n", n)
+  #define FOO(n) printf("number = %d\n", n)    /* BAD */
   FOO(10);
 
 Pre-ANSI semantics for that was equivalent to
@@ -2721,7 +2728,7 @@ rest of the AIX compiler is very happily C89.
 Using printf formats for non-basic C types
 
    IV i = ...;
-   printf("i = %d\n", i);
+   printf("i = %d\n", i);    /* BAD */
 
 While this might by accident work in some platform (where IV happens
 to be an C<int>), in general it cannot.  IV might be something larger.
@@ -2729,7 +2736,7 @@ Even worse the situation is with more specific types (defined by Perl's
 configuration step in F<config.h>):
 
    Uid_t who = ...;
-   printf("who = %d\n", who);
+   printf("who = %d\n", who);    /* BAD */
 
 The problem here is that Uid_t might be not only not C<int>-wide
 but it might also be unsigned, in which case large uids would be
@@ -2779,9 +2786,11 @@ Perl_va_copy() if the NEED_VA_COPY is defined.
 
 Using gcc brace groups
 
-   val = ({...;...;...});
+   val = ({...;...;...});    /* BAD */
 
-While a nice extension, it's not portable.
+While a nice extension, it's not portable.  The Perl code does
+admittedly use them if available to gain some extra speed
+(essentially as a funky form of inlining), but you shouldn't.
 
 =item *
 
@@ -2797,7 +2806,7 @@ Use the macros STMT_START and STMT_END.
 
 Testing for operating systems or versions when should be testing for features
 
-  #ifdef __FOONIX__
+  #ifdef __FOONIX__    /* BAD */
   foo = quux();
   #endif
 
@@ -2811,7 +2820,7 @@ not perfect, because the below is a compile-time check):
   foo = quux();
   #endif
 
-How does the HAS_QUUX become defined where it needs to be? Well, if
+How does the HAS_QUUX become defined where it needs to be?  Well, if
 Foonix happens to be UNIXy enought to be able to run the Configure
 script, and Configure has been taught about detecting and testing
 quux(), the HAS_QUUX will be correctly defined.  In other platforms,
