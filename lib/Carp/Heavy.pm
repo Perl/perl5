@@ -224,7 +224,10 @@ sub ret_summary {
 
 
 sub short_error_loc {
-  my $cache;
+  # You have to create your (hash)ref out here, rather than defaulting it
+  # inside trusts *on a lexical*, as you want it to persist across calls.
+  # (You can default it on $_[2], but that gets messy)
+  my $cache = {};
   my $i = 1;
   my $lvl = $CarpLevel;
   {
@@ -274,7 +277,7 @@ sub str_len_trim {
 sub trusts {
     my $child = shift;
     my $parent = shift;
-    my $cache = shift || {};
+    my $cache = shift;
     my ($known, $partial) = get_status($cache, $child);
     # Figure out consequences until we have an answer
     while (@$partial and not exists $known->{$parent}) {
