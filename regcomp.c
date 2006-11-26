@@ -1204,7 +1204,7 @@ is the recommended Unicode-aware way of saying
                                                                 \
     if ( noper_next < tail ) {                                  \
         if (!trie->jump)                                        \
-            Newxz( trie->jump, word_count + 1, U16);            \
+            trie->jump = PerlMemShared_calloc( word_count + 1, sizeof(U16) ); \
         trie->jump[curword] = (U16)(noper_next - convert);      \
         if (!jumper)                                            \
             jumper = noper_next;                                \
@@ -1218,7 +1218,8 @@ is the recommended Unicode-aware way of saying
         /* we only allocate the nextword buffer when there    */\
         /* a dupe, so first time we have to do the allocation */\
         if (!trie->nextword)                                    \
-            Newxz( trie->nextword, word_count + 1, U16);        \
+            trie->nextword =					\
+		PerlMemShared_calloc( word_count + 1, sizeof(U16));	\
         while ( trie->nextword[dupe] )                          \
             dupe= trie->nextword[dupe];                         \
         trie->nextword[dupe]= curword;                          \
@@ -1280,14 +1281,14 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     PERL_UNUSED_ARG(depth);
 #endif
 
-    Newxz( trie, 1, reg_trie_data );
+    trie = PerlMemShared_calloc( 1, sizeof(reg_trie_data) );
     trie->refcount = 1;
     trie->startstate = 1;
     trie->wordcount = word_count;
     RExC_rxi->data->data[ data_slot ] = (void*)trie;
-    Newxz( trie->charmap, 256, U16 );
+    trie->charmap = PerlMemShared_calloc( 256, sizeof(U16) );
     if (!(UTF && folder))
-        Newxz( trie->bitmap, ANYOF_BITMAP_SIZE, char );
+	trie->bitmap = PerlMemShared_calloc( ANYOF_BITMAP_SIZE, 1 );
     DEBUG_r({
         trie->words = newAV();
     });
@@ -1400,7 +1401,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 		(int)TRIE_CHARCOUNT(trie), trie->uniquecharcount,
 		(int)trie->minlen, (int)trie->maxlen )
     );
-    Newxz( trie->wordlen, word_count, U32 );
+    trie->wordlen = PerlMemShared_calloc( word_count, sizeof(U32) );
 
     /*
         We now know what we are dealing with in terms of unique chars and
@@ -1442,8 +1443,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         DEBUG_TRIE_COMPILE_MORE_r( PerlIO_printf( Perl_debug_log, 
             "%*sCompiling trie using list compiler\n",
             (int)depth * 2 + 2, ""));
-
-        Newxz( trie->states, TRIE_CHARCOUNT(trie) + 2, reg_trie_state );
+	
+	trie->states = PerlMemShared_calloc( TRIE_CHARCOUNT(trie) + 2,
+					     sizeof(reg_trie_state) );
         TRIE_LIST_NEW(1);
         next_alloc = 2;
 
@@ -1507,14 +1509,16 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
         /* next alloc is the NEXT state to be allocated */
         trie->statecount = next_alloc; 
-        Renew( trie->states, next_alloc, reg_trie_state );
+        trie->states = PerlMemShared_realloc( trie->states, next_alloc
+					      * sizeof(reg_trie_state) );
 
         /* and now dump it out before we compress it */
         DEBUG_TRIE_COMPILE_MORE_r(
             dump_trie_interim_list(trie,next_alloc,depth+1)
         );
 
-        Newxz( trie->trans, transcount ,reg_trie_trans );
+        trie->trans
+	    = PerlMemShared_calloc( transcount, sizeof(reg_trie_trans) );
         {
             U32 state;
             U32 tp = 0;
@@ -1545,7 +1549,10 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                     }
                     if ( transcount < tp + maxid - minid + 1) {
                         transcount *= 2;
-                        Renew( trie->trans, transcount, reg_trie_trans );
+			trie->trans
+			    = PerlMemShared_realloc( trie->trans,
+						     transcount
+						     * sizeof(reg_trie_trans) );
                         Zero( trie->trans + (transcount / 2), transcount / 2 , reg_trie_trans );
                     }
                     base = trie->uniquecharcount + tp - minid;
@@ -1625,9 +1632,11 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             "%*sCompiling trie using table compiler\n",
             (int)depth * 2 + 2, ""));
 
-        Newxz( trie->trans, ( TRIE_CHARCOUNT(trie) + 1 ) * trie->uniquecharcount + 1,
-              reg_trie_trans );
-        Newxz( trie->states, TRIE_CHARCOUNT(trie) + 2, reg_trie_state );
+	trie->trans = PerlMemShared_calloc( ( TRIE_CHARCOUNT(trie) + 1 )
+					    * trie->uniquecharcount + 1,
+					    sizeof(reg_trie_trans) );
+        trie->states = PerlMemShared_calloc( TRIE_CHARCOUNT(trie) + 2,
+					     sizeof(reg_trie_state) );
         next_alloc = trie->uniquecharcount + 1;
 
 
@@ -1784,7 +1793,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             }
         }
         trie->lasttrans = pos + 1;
-        Renew( trie->states, laststate, reg_trie_state);
+        trie->states = PerlMemShared_realloc( trie->states, laststate
+					      * sizeof(reg_trie_state) );
         DEBUG_TRIE_COMPILE_MORE_r(
                 PerlIO_printf( Perl_debug_log,
 		    "%*sAlloc: %d Orig: %"IVdf" elements, Final:%"IVdf". Savings of %%%5.2f\n",
@@ -1804,7 +1814,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                 (UV)trie->lasttrans)
     );
     /* resize the trans array to remove unused space */
-    Renew( trie->trans, trie->lasttrans, reg_trie_trans);
+    trie->trans = PerlMemShared_realloc( trie->trans, trie->lasttrans
+					 * sizeof(reg_trie_trans) );
 
     /* and now dump out the compressed format */
     DEBUG_TRIE_COMPILE_r(
@@ -1984,7 +1995,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             {
                 OP( convert ) = TRIEC;
                 Copy(trie->bitmap, ((struct regnode_charclass *)convert)->bitmap, ANYOF_BITMAP_SIZE, char);
-                Safefree(trie->bitmap);
+                PerlMemShared_free(trie->bitmap);
                 trie->bitmap= NULL;
             } else 
                 OP( convert ) = TRIE;
@@ -2068,13 +2079,13 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
 
 
     ARG_SET( stclass, data_slot );
-    Newxz( aho, 1, reg_ac_data );
+    aho = PerlMemShared_calloc( 1, sizeof(reg_ac_data) );
     RExC_rxi->data->data[ data_slot ] = (void*)aho;
     aho->trie=trie;
-    aho->states=(reg_trie_state *)savepvn((const char*)trie->states,
-        numstates * sizeof(reg_trie_state));
+    aho->states=(reg_trie_state *)PerlMemShared_malloc( numstates * sizeof(reg_trie_state) );
+    Copy( trie->states, aho->states, numstates, reg_trie_state );
     Newxz( q, numstates, U32);
-    Newxz( aho->fail, numstates, U32 );
+    aho->fail = PerlMemShared_calloc( numstates, sizeof(U32) );
     aho->refcount = 1;
     fail = aho->fail;
     /* initialize fail[0..1] to be 1 so that we always have
@@ -4217,13 +4228,13 @@ reStudy:
 	    regnode *trie_op;
 	    /* this can happen only on restudy */
 	    if ( OP(first) == TRIE ) {
-                struct regnode_1 *trieop;
-                Newxz(trieop,1,struct regnode_1);
+                struct regnode_1 *trieop =
+		    PerlMemShared_calloc(1, sizeof(struct regnode_1));
                 StructCopy(first,trieop,struct regnode_1);
                 trie_op=(regnode *)trieop;
             } else {
-                struct regnode_charclass *trieop;
-                Newxz(trieop,1,struct regnode_charclass);
+                struct regnode_charclass *trieop =
+		    PerlMemShared_calloc(1, sizeof(struct regnode_charclass));
                 StructCopy(first,trieop,struct regnode_charclass);
                 trie_op=(regnode *)trieop;
             }
@@ -8546,12 +8557,13 @@ Perl_pregfree(pTHX_ struct regexp *r)
                     refcount = --aho->refcount;
                     OP_REFCNT_UNLOCK;
                     if ( !refcount ) {
-                        Safefree(aho->states);
-                        Safefree(aho->fail);
+                        PerlMemShared_free(aho->states);
+                        PerlMemShared_free(aho->fail);
                         aho->trie=NULL; /* not necessary to free this as it is 
                                            handled by the 't' case */
-                        Safefree(ri->data->data[n]); /* do this last!!!! */
-                        Safefree(ri->regstclass);
+			 /* do this last!!!! */
+                        PerlMemShared_free(ri->data->data[n]);
+                        PerlMemShared_free(ri->regstclass);
                     }
                 }
                 break;
@@ -8564,26 +8576,27 @@ Perl_pregfree(pTHX_ struct regexp *r)
                     refcount = --trie->refcount;
                     OP_REFCNT_UNLOCK;
                     if ( !refcount ) {
-                        Safefree(trie->charmap);
+                        PerlMemShared_free(trie->charmap);
                         if (trie->widecharmap)
                             SvREFCNT_dec((SV*)trie->widecharmap);
-                        Safefree(trie->states);
-                        Safefree(trie->trans);
+                        PerlMemShared_free(trie->states);
+                        PerlMemShared_free(trie->trans);
                         if (trie->bitmap)
-                            Safefree(trie->bitmap);
+                            PerlMemShared_free(trie->bitmap);
                         if (trie->wordlen)
-                            Safefree(trie->wordlen);
+                            PerlMemShared_free(trie->wordlen);
                         if (trie->jump)
-                            Safefree(trie->jump);
+                            PerlMemShared_free(trie->jump);
                         if (trie->nextword)
-                            Safefree(trie->nextword);
+                            PerlMemShared_free(trie->nextword);
 #ifdef DEBUGGING
                         if (trie->words)
                             SvREFCNT_dec((SV*)trie->words);
                         if (trie->revcharmap)
                             SvREFCNT_dec((SV*)trie->revcharmap);
 #endif
-                        Safefree(ri->data->data[n]); /* do this last!!!! */
+                        /* do this last!!!! */
+                        PerlMemShared_free(ri->data->data[n]);
 		    }
 		}
 		break;
