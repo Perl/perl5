@@ -55,7 +55,6 @@ sub  longmess_real {
 
 sub shortmess_real {
     # Icky backwards compatibility wrapper. :-(
-    my $call_pack = caller();
     local @CARP_NOT = caller();
     shortmess_heavy(@_);
 };
