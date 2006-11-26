@@ -41,6 +41,7 @@ package Maintainers;
 	'markm'		=> 'Mark Mielke <markm@cpan.org>',
 	'mhx'		=> 'Marcus Holland-Moritz <mhx@cpan.org>',
 	'mjd'		=> 'Mark-Jason Dominus <mjd@plover.com>',
+	'msergeant'	=> 'Matt Sergeant <msergeant@cpan.org>'.
 	'mshelor'	=> 'Mark Shelor <mshelor@cpan.org>',
 	'muir'		=> 'David Muir Sharnoff <muir@cpan.org>',
 	'neilb'		=> 'Neil Bowers <neilb@cpan.org>',
@@ -749,6 +750,13 @@ package Maintainers;
 		'FILES'		=> q[lib/Time/Local.{pm,t}],
 		'CPAN'		=> 1,
 		},
+
+        'Time::Piece' =>
+                {
+                'MAINTAINER'    => 'msergeant',
+                'FILES'         => q[ext/Time/Piece],
+                'CPAN'          => 1,
+                },
 
 	'Unicode::Collate' =>
 		{

@@ -1174,6 +1174,18 @@ ext/Time/HiRes/HiRes.xs		Time::HiRes extension
 ext/Time/HiRes/Makefile.PL	Time::HiRes extension
 ext/Time/HiRes/t/HiRes.t	Test for Time::HiRes
 ext/Time/HiRes/typemap		Time::HiRes extension
+ext/Time/Piece/Changes		Time::Piece extension
+ext/Time/Piece/Makefile.PL	Time::Piece extension
+ext/Time/Piece/Piece.pm		Time::Piece extension
+ext/Time/Piece/Piece.xs		Time::Piece extension
+ext/Time/Piece/README		Time::Piece extension
+ext/Time/Piece/Seconds.pm	Time::Piece extension
+ext/Time/Piece/t/01base.t	Test for Time::Piece
+ext/Time/Piece/t/02core.t	Test for Time::Piece
+ext/Time/Piece/t/03compare.t	Test for Time::Piece
+ext/Time/Piece/t/04mjd.t	Test for Time::Piece
+ext/Time/Piece/t/05overload.t	Test for Time::Piece
+ext/Time/Piece/t/06subclass.t	Test for Time::Piece
 ext/Unicode/Normalize/Changes	Unicode::Normalize
 ext/Unicode/Normalize/Makefile.PL	Unicode::Normalize
 ext/Unicode/Normalize/mkheader	Unicode::Normalize
