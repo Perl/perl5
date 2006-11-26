@@ -64,7 +64,12 @@ sub shortmess_real {
 
 # aliasing the whole glob rather than just the CV slot avoids 'redefined'
 # warnings, even in the presence of perl -W (as used by lib/warnings.t !)
+# However it has the potential to create infinite loops, if somehow Carp
+# is forcibly reloaded, but $INC{"Carp/Heavy.pm"} remains true.
+# Hence the extra hack of deleting the previous typeglob first.
 
+delete $Carp::{shortmess_jmp};
+delete $Carp::{longmess_jmp};
 *longmess_jmp  = *longmess_real;
 *shortmess_jmp = *shortmess_real;
 
