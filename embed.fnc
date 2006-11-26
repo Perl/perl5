@@ -1335,7 +1335,7 @@ Es	|I32	|study_chunk	|NN struct RExC_state_t* state|NN regnode **scanp \
 				|I32 stopparen|NULLOK U8* recursed \
 				|NULLOK struct regnode_charclass_class *and_withp \
 				|U32 flags|U32 depth
-EsRn	|I32	|add_data	|NN struct RExC_state_t* state|I32 n|NN const char *s
+EsRn	|U32	|add_data	|NN struct RExC_state_t* state|U32 n|NN const char *s
 rs	|void	|re_croak2	|NN const char* pat1|NN const char* pat2|...
 Es	|I32	|regpposixcc	|NN struct RExC_state_t* state|I32 value
 Es	|void	|checkposixcc	|NN struct RExC_state_t* state

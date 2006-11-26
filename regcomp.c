@@ -3860,8 +3860,8 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     return min < stopmin ? min : stopmin;
 }
 
-STATIC I32
-S_add_data(RExC_state_t *pRExC_state, I32 n, const char *s)
+STATIC U32
+S_add_data(RExC_state_t *pRExC_state, U32 n, const char *s)
 {
     if (RExC_rxi->data) {
 	const U32 count = RExC_rxi->data->count;
@@ -4433,7 +4433,7 @@ reStudy:
 	    && !(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class))
 	{
-	    const I32 n = add_data(pRExC_state, 1, "f");
+	    const U32 n = add_data(pRExC_state, 1, "f");
 
 	    Newx(RExC_rxi->data->data[n], 1,
 		struct regnode_charclass_class);
@@ -4503,7 +4503,7 @@ reStudy:
 	if (!(data.start_class->flags & ANYOF_EOS)
 	    && !cl_is_anything(data.start_class))
 	{
-	    const I32 n = add_data(pRExC_state, 1, "f");
+	    const U32 n = add_data(pRExC_state, 1, "f");
 
 	    Newx(RExC_rxi->data->data[n], 1,
 		struct regnode_charclass_class);
@@ -5070,7 +5070,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		/* FALL THROUGH */
 	    case '{':           /* (?{...}) */
 	    {
-		I32 count = 1, n = 0;
+		I32 count = 1;
+		U32 n = 0;
 		char c;
 		char *s = RExC_parse;
 
@@ -5159,7 +5160,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	        {
 	            char ch = RExC_parse[0] == '<' ? '>' : '\'';
 	            char *name_start= RExC_parse++;
-	            I32 num = 0;
+	            U32 num = 0;
 	            SV *sv_dat=reg_scan_name(pRExC_state,
 	                SIZE_ONLY ? REG_RSN_RETURN_NULL : REG_RSN_RETURN_DATA);
 	            if (RExC_parse == name_start || *RExC_parse != ch)
@@ -6305,7 +6306,7 @@ tryagain:
 	        goto defchar;
 	    } else {
 		char* name_start = (RExC_parse += 2);
-		I32 num = 0;
+		U32 num = 0;
                 SV *sv_dat = reg_scan_name(pRExC_state,
                     SIZE_ONLY ? REG_RSN_RETURN_NULL : REG_RSN_RETURN_DATA);
                 ch= (ch == '<') ? '>' : '\'';

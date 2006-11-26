@@ -3639,7 +3639,7 @@ STATIC I32	S_study_chunk(pTHX_ struct RExC_state_t* state, regnode **scanp, I32 
 			__attribute__nonnull__(pTHX_4)
 			__attribute__nonnull__(pTHX_5);
 
-STATIC I32	S_add_data(struct RExC_state_t* state, I32 n, const char *s)
+STATIC U32	S_add_data(struct RExC_state_t* state, U32 n, const char *s)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(1)
 			__attribute__nonnull__(3);
