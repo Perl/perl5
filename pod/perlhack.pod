@@ -2784,7 +2784,7 @@ Perl_va_copy() if the NEED_VA_COPY is defined.
 
 =item *
 
-Using gcc brace groups
+Using gcc statement expressions
 
    val = ({...;...;...});    /* BAD */
 

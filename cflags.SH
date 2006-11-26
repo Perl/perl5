@@ -152,7 +152,7 @@ case "$gccversion" in
     warn="`echo $warn|sed 's/-pedantic/ /'`"
     ;;
   esac
-  # Using certain features (like the gcc brace groups)
+  # Using certain features (like the gcc statemanet expressions)
   # require knowing whether -pedantic has been specified.
   case "$warn$ccflags" in
   *-pedantic*) warn="$warn -DPERL_GCC_PEDANTIC" ;;

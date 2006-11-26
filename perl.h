@@ -377,7 +377,7 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
 #  endif
 #endif
 
-/* gcc (-ansi) -pedantic doesn't allow gcc brace groups,
+/* gcc (-ansi) -pedantic doesn't allow gcc statement expressions,
  * g++ allows them but seems to have problems with them
  * (insane errors ensue). */
 #if defined(PERL_GCC_PEDANTIC) || (defined(__GNUC__) && defined(__cplusplus))
@@ -1506,9 +1506,10 @@ EXTERN_C char *crypt(const char *, const char *);
  * If we have v?snprintf() and the C99 variadic macros, we can just
  * use just the v?snprintf().  It is nice to try to trap the buffer
  * overflow, however, so if we are DEBUGGING, and we cannot use the
- * gcc brace groups, then use the function wrappers which try to trap
- * the overflow.  If we can use the gcc brace groups, we can try that
- * even with the version that uses the C99 variadic macros.
+ * gcc statement expressions, then use the function wrappers which try
+ * to trap the overflow.  If we can use the gcc statement expressions,
+ * we can try that even with the version that uses the C99 variadic
+ * macros.
  */
 
 /* Note that we do not check against snprintf()/vsnprintf() returning
