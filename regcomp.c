@@ -3863,22 +3863,18 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 STATIC U32
 S_add_data(RExC_state_t *pRExC_state, U32 n, const char *s)
 {
-    if (RExC_rxi->data) {
-	const U32 count = RExC_rxi->data->count;
-	Renewc(RExC_rxi->data,
-	       sizeof(*RExC_rxi->data) + sizeof(void*) * (count + n - 1),
-	       char, struct reg_data);
+    U32 count = RExC_rxi->data ? RExC_rxi->data->count : 0;
+
+    Renewc(RExC_rxi->data,
+	   sizeof(*RExC_rxi->data) + sizeof(void*) * (count + n - 1),
+	   char, struct reg_data);
+    if(count)
 	Renew(RExC_rxi->data->what, count + n, U8);
-	RExC_rxi->data->count += n;
-    }
-    else {
-	Newxc(RExC_rxi->data, sizeof(*RExC_rxi->data) + sizeof(void*) * (n - 1),
-	     char, struct reg_data);
+    else
 	Newx(RExC_rxi->data->what, n, U8);
-	RExC_rxi->data->count = n;
-    }
-    Copy(s, RExC_rxi->data->what + RExC_rxi->data->count - n, n, U8);
-    return RExC_rxi->data->count - n;
+    RExC_rxi->data->count = count + n;
+    Copy(s, RExC_rxi->data->what + count, n, U8);
+    return count;
 }
 
 #ifndef PERL_IN_XSUB_RE
