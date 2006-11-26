@@ -429,6 +429,7 @@ END_EXTERN_C
  *       strings resulting from casefolding the single-character entries
  *       in the character class
  *   t - trie struct
+ *   u - trie struct's widecharmap (a HV, so can't share, must dup)
  *   T - aho-trie struct
  *   S - sv for named capture lookup
  * 20010712 mjd@plover.com
@@ -520,7 +521,6 @@ struct _reg_trie_data {
     U16             uniquecharcount; /* unique chars in trie (width of trans table) */
     U32             lasttrans;       /* last valid transition element */
     U16             *charmap;        /* byte to charid lookup array */
-    HV              *widecharmap;    /* code points > 255 to charid */
     reg_trie_state  *states;         /* state data */
     reg_trie_trans  *trans;          /* array of transition elements */
     char            *bitmap;         /* stclass bitmap */

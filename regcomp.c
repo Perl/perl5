@@ -798,9 +798,9 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 
 #ifdef DEBUGGING
 /*
-   dump_trie(trie)
-   dump_trie_interim_list(trie,next_alloc)
-   dump_trie_interim_table(trie,next_alloc)
+   dump_trie(trie,widecharmap)
+   dump_trie_interim_list(trie,widecharmap,next_alloc)
+   dump_trie_interim_table(trie,widecharmap,next_alloc)
 
    These routines dump out a trie in a somewhat readable format.
    The _interim_ variants are used for debugging the interim
@@ -813,17 +813,16 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 */
 
 /*
-  dump_trie(trie)
   Dumps the final compressed table form of the trie to Perl_debug_log.
   Used for debugging make_trie().
 */
  
 STATIC void
-S_dump_trie(pTHX_ const struct _reg_trie_data *trie,U32 depth)
+S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap, U32 depth)
 {
     U32 state;
     SV *sv=sv_newmortal();
-    int colwidth= trie->widecharmap ? 6 : 4;
+    int colwidth= widecharmap ? 6 : 4;
     GET_RE_DEBUG_FLAGS_DECL;
 
 
@@ -894,18 +893,18 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie,U32 depth)
     }
 }    
 /*
-  dump_trie_interim_list(trie,next_alloc)
   Dumps a fully constructed but uncompressed trie in list form.
   List tries normally only are used for construction when the number of 
   possible chars (trie->uniquecharcount) is very high.
   Used for debugging make_trie().
 */
 STATIC void
-S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie, U32 next_alloc,U32 depth)
+S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie,
+			 HV *widecharmap, U32 next_alloc, U32 depth)
 {
     U32 state;
     SV *sv=sv_newmortal();
-    int colwidth= trie->widecharmap ? 6 : 4;
+    int colwidth= widecharmap ? 6 : 4;
     GET_RE_DEBUG_FLAGS_DECL;
     /* print out the table precompression.  */
     PerlIO_printf( Perl_debug_log, "%*sState :Word | Transition Data\n%*s%s",
@@ -947,19 +946,19 @@ S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie, U32 next_alloc
 }    
 
 /*
-  dump_trie_interim_table(trie,next_alloc)
   Dumps a fully constructed but uncompressed trie in table form.
   This is the normal DFA style state transition table, with a few 
   twists to facilitate compression later. 
   Used for debugging make_trie().
 */
 STATIC void
-S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie, U32 next_alloc, U32 depth)
+S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie,
+			  HV *widecharmap, U32 next_alloc, U32 depth)
 {
     U32 state;
     U16 charid;
     SV *sv=sv_newmortal();
-    int colwidth= trie->widecharmap ? 6 : 4;
+    int colwidth= widecharmap ? 6 : 4;
     GET_RE_DEBUG_FLAGS_DECL;
     
     /*
@@ -1249,6 +1248,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     dVAR;
     /* first pass, loop through and scan words */
     reg_trie_data *trie;
+    HV *widecharmap = NULL;
     regnode *cur;
     const U32 uniflags = UTF8_ALLOW_DEFAULT;
     STRLEN len = 0;
@@ -1267,7 +1267,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                          )
                      );
 
-    const U32 data_slot = add_data( pRExC_state, 1, "t" );
+    const U32 data_slot = add_data( pRExC_state, 2, "tu" );
     SV *re_trie_maxbuff;
 #ifndef DEBUGGING
     /* these are only used during construction but are useful during
@@ -1370,10 +1370,10 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                 }
             } else {
                 SV** svpp;
-                if ( !trie->widecharmap )
-                    trie->widecharmap = newHV();
+                if ( !widecharmap )
+                    widecharmap = newHV();
 
-                svpp = hv_fetch( trie->widecharmap, (char*)&uvc, sizeof( UV ), 1 );
+                svpp = hv_fetch( widecharmap, (char*)&uvc, sizeof( UV ), 1 );
 
                 if ( !svpp )
                     Perl_croak( aTHX_ "error creating/fetching widecharmap entry for 0x%"UVXf, uvc );
@@ -1397,7 +1397,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     DEBUG_TRIE_COMPILE_r(
         PerlIO_printf( Perl_debug_log, "%*sTRIE(%s): W:%d C:%d Uq:%d Min:%d Max:%d\n",
                 (int)depth * 2 + 2,"",
-                ( trie->widecharmap ? "UTF8" : "NATIVE" ), (int)word_count,
+                ( widecharmap ? "UTF8" : "NATIVE" ), (int)word_count,
 		(int)TRIE_CHARCOUNT(trie), trie->uniquecharcount,
 		(int)trie->minlen, (int)trie->maxlen )
     );
@@ -1469,7 +1469,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                     if ( uvc < 256 ) {
                         charid = trie->charmap[ uvc ];
 		    } else {
-                        SV** const svpp = hv_fetch( trie->widecharmap, (char*)&uvc, sizeof( UV ), 0);
+                        SV** const svpp = hv_fetch( widecharmap, (char*)&uvc, sizeof( UV ), 0);
                         if ( !svpp ) {
                             charid = 0;
                         } else {
@@ -1514,7 +1514,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
         /* and now dump it out before we compress it */
         DEBUG_TRIE_COMPILE_MORE_r(
-            dump_trie_interim_list(trie,next_alloc,depth+1)
+            dump_trie_interim_list(trie,widecharmap,next_alloc,depth+1)
         );
 
         trie->trans
@@ -1664,7 +1664,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                     if ( uvc < 256 ) {
                         charid = trie->charmap[ uvc ];
                     } else {
-                        SV* const * const svpp = hv_fetch( trie->widecharmap, (char*)&uvc, sizeof( UV ), 0);
+                        SV* const * const svpp = hv_fetch( widecharmap, (char*)&uvc, sizeof( UV ), 0);
                         charid = svpp ? (U16)SvIV(*svpp) : 0;
                     }
                     if ( charid ) {
@@ -1688,7 +1688,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
         /* and now dump it out before we compress it */
         DEBUG_TRIE_COMPILE_MORE_r(
-            dump_trie_interim_table(trie,next_alloc,depth+1)
+            dump_trie_interim_table(trie,widecharmap,next_alloc,depth+1)
         );
 
         {
@@ -1819,7 +1819,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
     /* and now dump out the compressed format */
     DEBUG_TRIE_COMPILE_r(
-        dump_trie(trie,depth+1)
+        dump_trie(trie,widecharmap,depth+1)
     );
 
     {   /* Modify the program and insert the new TRIE node*/ 
@@ -1865,7 +1865,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         /* But first we check to see if there is a common prefix we can 
            split out as an EXACT and put in front of the TRIE node.  */
         trie->startstate= 1;
-        if ( trie->bitmap && !trie->widecharmap && !trie->jump  ) {
+        if ( trie->bitmap && !widecharmap && !trie->jump  ) {
             U32 state;
             for ( state = 1 ; state < trie->statecount-1 ; state++ ) {
                 U32 ofs = 0;
@@ -2029,6 +2029,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             Set_Node_Offset_Length(convert,mjd_offset,mjd_nodelen);
         });
     } /* end node insert */
+    RExC_rxi->data->data[ data_slot + 1 ] = (void*)widecharmap;
 #ifndef DEBUGGING
     SvREFCNT_dec(TRIE_REVCHARMAP(trie));
 #endif
@@ -8521,6 +8522,7 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	    switch (ri->data->what[n]) {
 	    case 's':
 	    case 'S':
+	    case 'u':
 		SvREFCNT_dec((SV*)ri->data->data[n]);
 		break;
 	    case 'f':
@@ -8575,8 +8577,6 @@ Perl_pregfree(pTHX_ struct regexp *r)
                     OP_REFCNT_UNLOCK;
                     if ( !refcount ) {
                         PerlMemShared_free(trie->charmap);
-                        if (trie->widecharmap)
-                            SvREFCNT_dec((SV*)trie->widecharmap);
                         PerlMemShared_free(trie->states);
                         PerlMemShared_free(trie->trans);
                         if (trie->bitmap)
@@ -8691,11 +8691,12 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 	for (i = 0; i < count; i++) {
 	    d->what[i] = ri->data->what[i];
 	    switch (d->what[i]) {
-	        /* legal options are one of: sSfpontT
+	        /* legal options are one of: sSfpontTu
 	           see also regcomp.h and pregfree() */
 	    case 's':
 	    case 'S':
 	    case 'p': /* actually an AV, but the dup function is identical.  */
+	    case 'u': /* actually an HV, but the dup function is identical.  */
 		d->data[i] = sv_dup_inc((SV *)ri->data->data[i], param);
 		break;
 	    case 'f':

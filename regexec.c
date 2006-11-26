@@ -976,8 +976,8 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 
 
 
-#define REXEC_TRIE_READ_CHAR(trie_type, trie, uc, uscan, len, uvc, charid,  \
-foldlen, foldbuf, uniflags) STMT_START {                                    \
+#define REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc, uscan, len,  \
+uvc, charid, foldlen, foldbuf, uniflags) STMT_START {                       \
     switch (trie_type) {                                                    \
     case trie_utf8_fold:                                                    \
 	if ( foldlen>0 ) {                                                  \
@@ -1005,8 +1005,8 @@ foldlen, foldbuf, uniflags) STMT_START {                                    \
     }                                                                       \
     else {                                                                  \
 	charid = 0;                                                         \
-	if (trie->widecharmap) {                                            \
-	    SV** const svpp = hv_fetch(trie->widecharmap,                   \
+	if (widecharmap) {                                                  \
+	    SV** const svpp = hv_fetch(widecharmap,                         \
 			(char*)&uvc, sizeof(UV), 0);                        \
 	    if (svpp)                                                       \
 		charid = (U16)SvIV(*svpp);                                  \
@@ -1421,6 +1421,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         	    = (reg_ac_data*)progi->data->data[ ARG( c ) ];
         	reg_trie_data *trie
 		    = (reg_trie_data*)progi->data->data[ aho->trie ];
+		HV *widecharmap = (HV*) progi->data->data[ aho->trie + 1 ];
 
 		const char *last_start = strend - trie->minlen;
 #ifdef DEBUGGING
@@ -1523,8 +1524,9 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                             
                         }
                         points[pointpos++ % maxlen]= uc;
-			REXEC_TRIE_READ_CHAR(trie_type, trie, uc, uscan, len,
-			    uvc, charid, foldlen, foldbuf, uniflags);
+			REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc,
+					     uscan, len, uvc, charid, foldlen,
+					     foldbuf, uniflags);
                         DEBUG_TRIE_EXECUTE_r({
                             dump_exec_pos( (char *)uc, c, strend, real_start, 
                                 s,   do_utf8 );
@@ -2800,6 +2802,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
                 /* what trie are we using right now */
 		reg_trie_data * const trie
         	    = (reg_trie_data*)rexi->data->data[ ARG( scan ) ];
+		HV * widecharmap = (HV *)rexi->data->data[ ARG( scan ) + 1 ];
                 U32 state = trie->startstate;
 
         	if (trie->bitmap && trie_type != trie_utf8_fold &&
@@ -2895,8 +2898,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		    });
 
 		    if ( base ) {
-			REXEC_TRIE_READ_CHAR(trie_type, trie, uc, uscan, len,
-			    uvc, charid, foldlen, foldbuf, uniflags);
+			REXEC_TRIE_READ_CHAR(trie_type, trie, widecharmap, uc,
+					     uscan, len, uvc, charid, foldlen,
+					     foldbuf, uniflags);
 
 			if (charid &&
 			     (base + charid > trie->uniquecharcount )

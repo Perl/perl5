@@ -3677,13 +3677,13 @@ STATIC const regnode*	S_dumpuntil(pTHX_ const regexp *r, const regnode *start, c
 STATIC void	S_put_byte(pTHX_ SV* sv, int c)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_dump_trie(pTHX_ const struct _reg_trie_data *trie, U32 depth)
+STATIC void	S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV* widecharmap, U32 depth)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie, U32 next_alloc, U32 depth)
+STATIC void	S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie, HV* widecharmap, U32 next_alloc, U32 depth)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie, U32 next_alloc, U32 depth)
+STATIC void	S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie, HV* widecharmap, U32 next_alloc, U32 depth)
 			__attribute__nonnull__(pTHX_1);
 
 STATIC U8	S_regtail_study(pTHX_ struct RExC_state_t *state, regnode *p, const regnode *val, U32 depth)
