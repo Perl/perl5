@@ -8697,10 +8697,8 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 	           see also regcomp.h and pregfree() */
 	    case 's':
 	    case 'S':
+	    case 'p': /* actually an AV, but the dup function is identical.  */
 		d->data[i] = sv_dup_inc((SV *)ri->data->data[i], param);
-		break;
-	    case 'p':
-		d->data[i] = av_dup_inc((AV *)ri->data->data[i], param);
 		break;
 	    case 'f':
 		/* This is cheating. */
@@ -8716,14 +8714,13 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 		d->data[i] = (void*)OpREFCNT_inc((OP*)ri->data->data[i]);
 		OP_REFCNT_UNLOCK;
 		break;
+	    case 't':
+		OP_REFCNT_LOCK;
+		((reg_trie_data*)ri->data->data[i])->refcount++;
+		OP_REFCNT_UNLOCK;
+		/* Fall through */
 	    case 'n':
 		d->data[i] = ri->data->data[i];
-		break;
-	    case 't':
-		d->data[i] = ri->data->data[i];
-		OP_REFCNT_LOCK;
-		((reg_trie_data*)d->data[i])->refcount++;
-		OP_REFCNT_UNLOCK;
 		break;
 	    case 'T':
 		d->data[i] = ri->data->data[i];
