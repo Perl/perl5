@@ -549,7 +549,7 @@ struct _reg_ac_data {
     U32              refcount;
     U32              *fail;
     reg_trie_state   *states;
-    reg_trie_data    *trie;
+    U32              trie;
 };
 typedef struct _reg_ac_data reg_ac_data;
 

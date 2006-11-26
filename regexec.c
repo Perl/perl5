@@ -1419,7 +1419,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                 /* what trie are we using right now */
         	reg_ac_data *aho
         	    = (reg_ac_data*)progi->data->data[ ARG( c ) ];
-        	reg_trie_data *trie=aho->trie;
+        	reg_trie_data *trie
+		    = (reg_trie_data*)progi->data->data[ aho->trie ];
 
 		const char *last_start = strend - trie->minlen;
 #ifdef DEBUGGING

@@ -2060,7 +2060,8 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
    try 'g' and succeed, prodceding to match 'cdgu'.
  */
  /* add a fail transition */
-    reg_trie_data *trie=(reg_trie_data *)RExC_rxi->data->data[ARG(source)];
+    const U32 trie_offset = ARG(source);
+    reg_trie_data *trie=(reg_trie_data *)RExC_rxi->data->data[trie_offset];
     U32 *q;
     const U32 ucharcount = trie->uniquecharcount;
     const U32 numstates = trie->statecount;
@@ -2081,7 +2082,7 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
     ARG_SET( stclass, data_slot );
     aho = PerlMemShared_calloc( 1, sizeof(reg_ac_data) );
     RExC_rxi->data->data[ data_slot ] = (void*)aho;
-    aho->trie=trie;
+    aho->trie=trie_offset;
     aho->states=(reg_trie_state *)PerlMemShared_malloc( numstates * sizeof(reg_trie_state) );
     Copy( trie->states, aho->states, numstates, reg_trie_state );
     Newxz( q, numstates, U32);
@@ -8228,9 +8229,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
         const reg_ac_data * const ac = IS_TRIE_AC(op) ?
                (reg_ac_data *)progi->data->data[n] :
                NULL;
-        const reg_trie_data * const trie = !IS_TRIE_AC(op) ?
-            (reg_trie_data*)progi->data->data[n] :
-            ac->trie;
+        const reg_trie_data * const trie
+	    = (reg_trie_data*)progi->data->data[!IS_TRIE_AC(op) ? n : ac->trie];
         
         Perl_sv_catpvf(aTHX_ sv, "-%s",reg_name[o->flags]);
         DEBUG_TRIE_COMPILE_r(
@@ -8559,8 +8559,6 @@ Perl_pregfree(pTHX_ struct regexp *r)
                     if ( !refcount ) {
                         PerlMemShared_free(aho->states);
                         PerlMemShared_free(aho->fail);
-                        aho->trie=NULL; /* not necessary to free this as it is 
-                                           handled by the 't' case */
 			 /* do this last!!!! */
                         PerlMemShared_free(ri->data->data[n]);
                         PerlMemShared_free(ri->regstclass);
@@ -9092,9 +9090,8 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	    const reg_ac_data * const ac = op>=AHOCORASICK ?
                (reg_ac_data *)ri->data->data[n] :
                NULL;
-	    const reg_trie_data * const trie = op<AHOCORASICK ?
-	        (reg_trie_data*)ri->data->data[n] :
-	        ac->trie;
+	    const reg_trie_data * const trie =
+	        (reg_trie_data*)ri->data->data[op<AHOCORASICK ? n : ac->trie];
 	    const regnode *nextbranch= NULL;
 	    I32 word_idx;
             sv_setpvn(sv, "", 0);
