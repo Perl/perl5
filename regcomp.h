@@ -512,8 +512,11 @@ typedef struct _reg_trie_trans    reg_trie_trans;
 
 
 /* anything in here that needs to be freed later
-   should be dealt with in pregfree */
+   should be dealt with in pregfree.
+   refcount is first in both this and _reg_ac_data to allow a space
+   optimisation in Perl_regdupe.  */
 struct _reg_trie_data {
+    U32             refcount;        /* number of times this trie is referenced */
     U16             uniquecharcount; /* unique chars in trie (width of trans table) */
     U32             lasttrans;       /* last valid transition element */
     U16             *charmap;        /* byte to charid lookup array */
@@ -521,7 +524,6 @@ struct _reg_trie_data {
     reg_trie_state  *states;         /* state data */
     reg_trie_trans  *trans;          /* array of transition elements */
     char            *bitmap;         /* stclass bitmap */
-    U32             refcount;        /* number of times this trie is referenced */
     U32             startstate;      /* initial state - used for common prefix optimisation */
     STRLEN          minlen;          /* minimum length of words in trie - build/opt only? */
     STRLEN          maxlen;          /* maximum length of words in trie - build/opt only? */
@@ -541,11 +543,13 @@ struct _reg_trie_data {
 };
 typedef struct _reg_trie_data reg_trie_data;
 
+/* refcount is first in both this and _reg_trie_data to allow a space
+   optimisation in Perl_regdupe.  */
 struct _reg_ac_data {
+    U32              refcount;
     U32              *fail;
     reg_trie_state   *states;
     reg_trie_data    *trie;
-    U32              refcount;
 };
 typedef struct _reg_ac_data reg_ac_data;
 

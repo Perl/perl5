@@ -8714,6 +8714,13 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 		d->data[i] = (void*)OpREFCNT_inc((OP*)ri->data->data[i]);
 		OP_REFCNT_UNLOCK;
 		break;
+	    case 'T':
+		/* Trie stclasses are readonly and can thus be shared
+		 * without duplication. We free the stclass in pregfree
+		 * when the corresponding reg_ac_data struct is freed.
+		 */
+		reti->regstclass= ri->regstclass;
+		/* Fall through */
 	    case 't':
 		OP_REFCNT_LOCK;
 		((reg_trie_data*)ri->data->data[i])->refcount++;
@@ -8721,17 +8728,6 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 		/* Fall through */
 	    case 'n':
 		d->data[i] = ri->data->data[i];
-		break;
-	    case 'T':
-		d->data[i] = ri->data->data[i];
-		OP_REFCNT_LOCK;
-		((reg_ac_data*)d->data[i])->refcount++;
-		OP_REFCNT_UNLOCK;
-		/* Trie stclasses are readonly and can thus be shared
-		 * without duplication. We free the stclass in pregfree
-		 * when the corresponding reg_ac_data struct is freed.
-		 */
-		reti->regstclass= ri->regstclass;
 		break;
             default:
 		Perl_croak(aTHX_ "panic: re_dup unknown data code '%c'", ri->data->what[i]);
