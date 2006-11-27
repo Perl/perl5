@@ -1130,8 +1130,8 @@ $(MINIPERL) : $(MINIDIR) $(MINI_OBJ) $(CRTIPMLIBS)
 	$(LINK32) -v -mconsole -o $@ $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(MINI_OBJ:s,\,$B,) $(LIBFILES) $(LKPOST))
 .ELSE
-	$(LINK32) -subsystem:console -out:$@ \
-	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) $(MINI_OBJ:s,\,$B,))
+	$(LINK32) -subsystem:console -out:$@ $(BLINK_FLAGS) \
+	    @$(mktmp $(LIBFILES) $(MINI_OBJ:s,\,$B,))
 	$(EMBED_EXE_MANI)
 .ENDIF
 
@@ -1177,7 +1177,7 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 .IF "$(CCTYPE)" == "BORLAND"
 	$(LINK32) -Tpd -ap $(BLINK_FLAGS) \
 	    @$(mktmp c0d32$(o) $(PERLDLL_OBJ:s,\,$B,)$N \
-		$@,$N \
+		$(@:s,\,$B,),$N \
 	        $(subst,\,$B $(shell @type Extensions_static)) $(LIBFILES)$N \
 		perldll.def$N)
 	$(IMPLIB) $*.lib $@
@@ -1196,10 +1196,10 @@ $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
 	        $(subst,\,$B $(shell @type Extensions_static)) \
 	        $(LIBFILES) perl.exp $(LKPOST))
 .ELSE
-	$(LINK32) -dll -def:perldll.def -out:$@ \
+	$(LINK32) -dll -def:perldll.def -out:$@ $(BLINK_FLAGS) \
 	    @Extensions_static \
-	    @$(mktmp -base:0x28000000 $(BLINK_FLAGS) $(DELAYLOAD) $(LIBFILES) \
-	        $(PERLDLL_RES) $(PERLDLL_OBJ:s,\,$B,))
+	    @$(mktmp -base:0x28000000 $(DELAYLOAD) $(LIBFILES) \
+	        $(PERLDLL_RES:s,\,$B,) $(PERLDLL_OBJ:s,\,$B,))
 	$(EMBED_DLL_MANI)
 .ENDIF
 	$(XCOPY) $(PERLIMPLIB) $(COREDIR)
@@ -1257,8 +1257,8 @@ $(X2P) : $(MINIPERL) $(X2P_OBJ)
 	$(LINK32) -v -o $@ $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(X2P_OBJ:s,\,$B,) $(LIBFILES) $(LKPOST))
 .ELSE
-	$(LINK32) -subsystem:console -out:$@ \
-	    @$(mktmp $(BLINK_FLAGS) $(LIBFILES) $(X2P_OBJ:s,\,$B,))
+	$(LINK32) -subsystem:console -out:$@ $(BLINK_FLAGS) \
+	    @$(mktmp $(LIBFILES) $(X2P_OBJ:s,\,$B,))
 	$(EMBED_EXE_MANI)
 .ENDIF
 
@@ -1279,7 +1279,7 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
 	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ:s,\,$B,)$N \
 	    $(@:s,\,$B,),$N \
-	    $(PERLIMPLIB) $(LIBFILES)$N)
+	    $(PERLIMPLIB:s,\,$B,) $(LIBFILES)$N)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -mconsole -o $@ $(BLINK_FLAGS)  \
 	    $(PERLEXE_OBJ) $(PERLIMPLIB) $(LIBFILES)
@@ -1299,11 +1299,11 @@ $(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
 	    @$(mktmp c0x32$(o) $(PERLEXEST_OBJ:s,\,$B,)$N \
 	    $(@:s,\,$B,),$N \
 	    $(subst,\,$B $(shell @type Extensions_static)) \
-	    $(PERLSTATICLIB) $(LIBFILES)$N)
+	    $(PERLSTATICLIB:s,\,$B,) $(LIBFILES)$N)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -mconsole -o $@ $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(subst,\,$B $(shell @type Extensions_static)) \
-	        $(PERLSTATICLIB) $(LIBFILES) $(PERLEXEST_OBJ) $(LKPOST))
+	        $(PERLSTATICLIB:s,\,$B,) $(LIBFILES) $(PERLEXEST_OBJ) $(LKPOST))
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ -stack:0x1000000 $(BLINK_FLAGS) \
 	    @Extensions_static $(PERLSTATICLIB) \
