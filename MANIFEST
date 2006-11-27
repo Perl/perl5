@@ -1537,6 +1537,7 @@ lib/DBM_Filter/utf8.pm		DBM Filter for UTF-8 Encoding
 lib/dbm_filter_util.pl		Utility functions used by DBM Filter tests 
 lib/DB.pm			Debugger API (draft)
 lib/DB.t			See if DB works
+lib/Devel/InnerPackage.pm	Find inner packages
 lib/Devel/SelfStubber.pm	Generate stubs for SelfLoader.pm
 lib/Devel/SelfStubber.t		See if Devel::SelfStubber works
 lib/diagnostics.pm		Print verbose diagnostics
