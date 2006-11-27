@@ -430,6 +430,7 @@ END_EXTERN_C
  *       in the character class
  *   t - trie struct
  *   u - trie struct's widecharmap (a HV, so can't share, must dup)
+ *       also used for revcharmap and words under DEBUGGING
  *   T - aho-trie struct
  *   S - sv for named capture lookup
  * 20010712 mjd@plover.com
@@ -537,10 +538,20 @@ struct _reg_trie_data {
     U32             wordcount;       /* Build only */
 #ifdef DEBUGGING
     STRLEN          charcount;       /* Build only */
-    AV              *words;          /* Array of words contained in trie, for dumping */
-    AV              *revcharmap;     /* Map of each charid back to its character representation */
 #endif
 };
+/* There is one (3 under DEBUGGING) pointers that logically belong in this
+   structure, but are held outside as they need duplication on thread cloning,
+   whereas the rest of the structure can be read only:
+    HV              *widecharmap;    code points > 255 to charid
+#ifdef DEBUGGING
+    AV              *words;          Array of words contained in trie, for dumping
+    AV              *revcharmap;     Map of each charid back to its character representation
+#endif
+*/
+
+#define TRIE_WORDS_OFFSET 2
+
 typedef struct _reg_trie_data reg_trie_data;
 
 /* refcount is first in both this and _reg_trie_data to allow a space
@@ -577,10 +588,8 @@ typedef struct _reg_ac_data reg_ac_data;
 
 #ifdef DEBUGGING
 #define TRIE_CHARCOUNT(trie) ((trie)->charcount)
-#define TRIE_REVCHARMAP(trie) ((trie)->revcharmap)
 #else
 #define TRIE_CHARCOUNT(trie) (trie_charcount)
-#define TRIE_REVCHARMAP(trie) (trie_revcharmap)
 #endif
 
 #define RE_TRIE_MAXBUF_INIT 65536

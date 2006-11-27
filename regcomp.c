@@ -798,9 +798,9 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 
 #ifdef DEBUGGING
 /*
-   dump_trie(trie,widecharmap)
-   dump_trie_interim_list(trie,widecharmap,next_alloc)
-   dump_trie_interim_table(trie,widecharmap,next_alloc)
+   dump_trie(trie,widecharmap,revcharmap)
+   dump_trie_interim_list(trie,widecharmap,revcharmap,next_alloc)
+   dump_trie_interim_table(trie,widecharmap,revcharmap,next_alloc)
 
    These routines dump out a trie in a somewhat readable format.
    The _interim_ variants are used for debugging the interim
@@ -818,7 +818,8 @@ S_cl_or(const RExC_state_t *pRExC_state, struct regnode_charclass_class *cl, con
 */
  
 STATIC void
-S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap, U32 depth)
+S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
+	    AV *revcharmap, U32 depth)
 {
     U32 state;
     SV *sv=sv_newmortal();
@@ -831,7 +832,7 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap, U32 depth)
         "Match","Base","Ofs" );
 
     for( state = 0 ; state < trie->uniquecharcount ; state++ ) {
-	SV ** const tmp = av_fetch( trie->revcharmap, state, 0);
+	SV ** const tmp = av_fetch( revcharmap, state, 0);
         if ( tmp ) {
             PerlIO_printf( Perl_debug_log, "%*s", 
                 colwidth,
@@ -900,7 +901,8 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap, U32 depth)
 */
 STATIC void
 S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie,
-			 HV *widecharmap, U32 next_alloc, U32 depth)
+			 HV *widecharmap, AV *revcharmap, U32 next_alloc,
+			 U32 depth)
 {
     U32 state;
     SV *sv=sv_newmortal();
@@ -924,7 +926,7 @@ S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie,
             );
         }
         for( charid = 1 ; charid <= TRIE_LIST_USED( state ) ; charid++ ) {
-	    SV ** const tmp = av_fetch( trie->revcharmap, TRIE_LIST_ITEM(state,charid).forid, 0);
+	    SV ** const tmp = av_fetch( revcharmap, TRIE_LIST_ITEM(state,charid).forid, 0);
 	    if ( tmp ) {
                 PerlIO_printf( Perl_debug_log, "%*s:%3X=%4"UVXf" | ",
                     colwidth,
@@ -953,7 +955,8 @@ S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie,
 */
 STATIC void
 S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie,
-			  HV *widecharmap, U32 next_alloc, U32 depth)
+			  HV *widecharmap, AV *revcharmap, U32 next_alloc,
+			  U32 depth)
 {
     U32 state;
     U16 charid;
@@ -969,7 +972,7 @@ S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie,
     PerlIO_printf( Perl_debug_log, "%*sChar : ",(int)depth * 2 + 2,"" );
 
     for( charid = 0 ; charid < trie->uniquecharcount ; charid++ ) {
-	SV ** const tmp = av_fetch( trie->revcharmap, charid, 0);
+	SV ** const tmp = av_fetch( revcharmap, charid, 0);
         if ( tmp ) {
             PerlIO_printf( Perl_debug_log, "%*s", 
                 colwidth,
@@ -1136,7 +1139,7 @@ is the recommended Unicode-aware way of saying
 	SV *tmp = newSVpvs("");                                            \
 	if (UTF) SvUTF8_on(tmp);                                           \
 	Perl_sv_catpvf( aTHX_ tmp, "%c", (int)uvc );                       \
-	av_push( TRIE_REVCHARMAP(trie), tmp );                             \
+	av_push( revcharmap, tmp );                                        \
     } STMT_END
 
 #define TRIE_READ_CHAR STMT_START {                                           \
@@ -1196,7 +1199,7 @@ is the recommended Unicode-aware way of saying
         else                                                    \
             tmp = newSVpvn( "", 0 );                            \
         if ( UTF ) SvUTF8_on( tmp );                            \
-        av_push( trie->words, tmp );                            \
+        av_push( trie_words, tmp );                             \
     });                                                         \
                                                                 \
     curword++;                                                  \
@@ -1249,6 +1252,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     /* first pass, loop through and scan words */
     reg_trie_data *trie;
     HV *widecharmap = NULL;
+    AV *revcharmap = newAV();
     regnode *cur;
     const U32 uniflags = UTF8_ALLOW_DEFAULT;
     STRLEN len = 0;
@@ -1267,15 +1271,17 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                          )
                      );
 
-    const U32 data_slot = add_data( pRExC_state, 2, "tu" );
-    SV *re_trie_maxbuff;
-#ifndef DEBUGGING
-    /* these are only used during construction but are useful during
-     * debugging so we store them in the struct when debugging.
+#ifdef DEBUGGING
+    const U32 data_slot = add_data( pRExC_state, 4, "tuuu" );
+    AV *trie_words = NULL;
+    /* along with revcharmap, this only used during construction but both are
+     * useful during debugging so we store them in the struct when debugging.
      */
+#else
+    const U32 data_slot = add_data( pRExC_state, 2, "tu" );
     STRLEN trie_charcount=0;
-    AV *trie_revcharmap;
 #endif
+    SV *re_trie_maxbuff;
     GET_RE_DEBUG_FLAGS_DECL;
 #ifndef DEBUGGING
     PERL_UNUSED_ARG(depth);
@@ -1290,9 +1296,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     if (!(UTF && folder))
 	trie->bitmap = PerlMemShared_calloc( ANYOF_BITMAP_SIZE, 1 );
     DEBUG_r({
-        trie->words = newAV();
+        trie_words = newAV();
     });
-    TRIE_REVCHARMAP(trie) = newAV();
 
     re_trie_maxbuff = get_sv(RE_TRIE_MAXBUF_NAME, 1);
     if (!SvIOK(re_trie_maxbuff)) {
@@ -1513,8 +1518,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 					      * sizeof(reg_trie_state) );
 
         /* and now dump it out before we compress it */
-        DEBUG_TRIE_COMPILE_MORE_r(
-            dump_trie_interim_list(trie,widecharmap,next_alloc,depth+1)
+        DEBUG_TRIE_COMPILE_MORE_r(dump_trie_interim_list(trie, widecharmap,
+							 revcharmap, next_alloc,
+							 depth+1)
         );
 
         trie->trans
@@ -1687,9 +1693,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         } /* end second pass */
 
         /* and now dump it out before we compress it */
-        DEBUG_TRIE_COMPILE_MORE_r(
-            dump_trie_interim_table(trie,widecharmap,next_alloc,depth+1)
-        );
+        DEBUG_TRIE_COMPILE_MORE_r(dump_trie_interim_table(trie, widecharmap,
+							  revcharmap,
+							  next_alloc, depth+1));
 
         {
         /*
@@ -1818,9 +1824,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 					 * sizeof(reg_trie_trans) );
 
     /* and now dump out the compressed format */
-    DEBUG_TRIE_COMPILE_r(
-        dump_trie(trie,widecharmap,depth+1)
-    );
+    DEBUG_TRIE_COMPILE_r(dump_trie(trie, widecharmap, revcharmap, depth+1));
 
     {   /* Modify the program and insert the new TRIE node*/ 
         U8 nodetype =(U8)(flags & 0xFF);
@@ -1882,7 +1886,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                          trie->trans[ base + ofs - trie->uniquecharcount ].check == state )
                     {
                         if ( ++count > 1 ) {
-                            SV **tmp = av_fetch( TRIE_REVCHARMAP(trie), ofs, 0);
+                            SV **tmp = av_fetch( revcharmap, ofs, 0);
 			    const U8 *ch = (U8*)SvPV_nolen_const( *tmp );
                             if ( state == 1 ) break;
                             if ( count == 2 ) {
@@ -1893,7 +1897,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                                         (int)depth * 2 + 2, "",
                                         (UV)state));
 				if (idx >= 0) {
-				    SV ** const tmp = av_fetch( TRIE_REVCHARMAP(trie), idx, 0);
+				    SV ** const tmp = av_fetch( revcharmap, idx, 0);
 				    const U8 * const ch = (U8*)SvPV_nolen_const( *tmp );
 
                                     TRIE_BITMAP_SET(trie,*ch);
@@ -1913,7 +1917,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 		    }
                 }
                 if ( count == 1 ) {
-                    SV **tmp = av_fetch( TRIE_REVCHARMAP(trie), idx, 0);
+                    SV **tmp = av_fetch( revcharmap, idx, 0);
                     char *ch = SvPV_nolen( *tmp );
                     DEBUG_OPTIMISE_r({
                         SV *sv=sv_newmortal();
@@ -1961,7 +1965,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                         Set_Node_Offset_Length(fix, 0, 0);
                     }
                     while (word--) {
-                        SV ** const tmp = av_fetch( trie->words, word, 0 );
+                        SV ** const tmp = av_fetch( trie_words, word, 0 );
                         if (tmp) {
                             if ( STR_LEN(convert) <= SvCUR(*tmp) )
                                 sv_chop(*tmp, SvPV_nolen(*tmp) + STR_LEN(convert));
@@ -2030,8 +2034,11 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         });
     } /* end node insert */
     RExC_rxi->data->data[ data_slot + 1 ] = (void*)widecharmap;
-#ifndef DEBUGGING
-    SvREFCNT_dec(TRIE_REVCHARMAP(trie));
+#ifdef DEBUGGING
+    RExC_rxi->data->data[ data_slot + TRIE_WORDS_OFFSET ] = (void*)trie_words;
+    RExC_rxi->data->data[ data_slot + 3 ] = (void*)revcharmap;
+#else
+    SvREFCNT_dec(revcharmap);
 #endif
     return trie->jump 
            ? MADE_JUMP_TRIE 
@@ -8587,12 +8594,6 @@ Perl_pregfree(pTHX_ struct regexp *r)
                             PerlMemShared_free(trie->jump);
                         if (trie->nextword)
                             PerlMemShared_free(trie->nextword);
-#ifdef DEBUGGING
-                        if (trie->words)
-                            SvREFCNT_dec((SV*)trie->words);
-                        if (trie->revcharmap)
-                            SvREFCNT_dec((SV*)trie->revcharmap);
-#endif
                         /* do this last!!!! */
                         PerlMemShared_free(ri->data->data[n]);
 		    }
@@ -9093,11 +9094,14 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
                NULL;
 	    const reg_trie_data * const trie =
 	        (reg_trie_data*)ri->data->data[op<AHOCORASICK ? n : ac->trie];
+#ifdef DEBUGGING
+	    AV *const trie_words = (AV *) ri->data->data[n + TRIE_WORDS_OFFSET];
+#endif
 	    const regnode *nextbranch= NULL;
 	    I32 word_idx;
             sv_setpvn(sv, "", 0);
 	    for (word_idx= 0; word_idx < (I32)trie->wordcount; word_idx++) {
-		SV ** const elem_ptr = av_fetch(trie->words,word_idx,0);
+		SV ** const elem_ptr = av_fetch(trie_words,word_idx,0);
 		
                 PerlIO_printf(Perl_debug_log, "%*s%s ",
                    (int)(2*(indent+3)), "",

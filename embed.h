@@ -3550,9 +3550,9 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define dumpuntil(a,b,c,d,e,f,g,h)	S_dumpuntil(aTHX_ a,b,c,d,e,f,g,h)
 #define put_byte(a,b)		S_put_byte(aTHX_ a,b)
-#define dump_trie(a,b,c)	S_dump_trie(aTHX_ a,b,c)
-#define dump_trie_interim_list(a,b,c,d)	S_dump_trie_interim_list(aTHX_ a,b,c,d)
-#define dump_trie_interim_table(a,b,c,d)	S_dump_trie_interim_table(aTHX_ a,b,c,d)
+#define dump_trie(a,b,c,d)	S_dump_trie(aTHX_ a,b,c,d)
+#define dump_trie_interim_list(a,b,c,d,e)	S_dump_trie_interim_list(aTHX_ a,b,c,d,e)
+#define dump_trie_interim_table(a,b,c,d,e)	S_dump_trie_interim_table(aTHX_ a,b,c,d,e)
 #define regtail_study(a,b,c,d)	S_regtail_study(aTHX_ a,b,c,d)
 #endif
 #  endif
