@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.52';
+our $VERSION = '1.53';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -133,7 +133,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.52
+This document describes threads version 1.53
 
 =head1 SYNOPSIS
 
@@ -938,7 +938,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.52/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.53/threads.pm>
 
 L<threads::shared>, L<perlthrtut>
 

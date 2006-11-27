@@ -31,7 +31,7 @@ sub ok {
 
 BEGIN {
     $| = 1;
-    print("1..63\n");   ### Number of tests that will be run ###
+    print("1..31\n");   ### Number of tests that will be run ###
 };
 
 use threads;
@@ -39,22 +39,23 @@ ok(1, 1, 'Loaded');
 
 ### Start of Testing ###
 
-sub test9 {
+my $cnt = 30;
+
+sub stress_re {
     my $s = "abcd" x (1000 + $_[0]);
     my $t = '';
     while ($s =~ /(.)/g) { $t .= $1 }
-    print "not ok $_[0]\n" if $s ne $t;
-}
-my @threads;
-for (2..32) {
-    ok($_, 1, "Multiple thread test");
-    push(@threads, threads->create('test9',$_));
+    return ($s eq $t) ? 'ok' : 'not';
 }
 
-my $i = 33;
-for (@threads) {
-    $_->join;
-    ok($i++, 1, "Thread joined");
+my @threads;
+for (1..$cnt) {
+    push(@threads, threads->create('stress_re', $_));
+}
+
+for (1..$cnt) {
+    my $result = $threads[$_-1]->join;
+    ok($_+1, defined($result) && ($result eq 'ok'), "stress re - iter $_");
 }
 
 # EOF

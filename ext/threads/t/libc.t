@@ -32,15 +32,6 @@ sub ok {
 use threads;
 
 BEGIN {
-    eval {
-        require threads::shared;
-        import threads::shared;
-    };
-    if ($@ || ! $threads::shared::threads_shared) {
-        print("1..0 # Skip: threads::shared not available\n");
-        exit(0);
-    }
-
     $| = 1;
     print("1..12\n");   ### Number of tests that will be run ###
 };
@@ -57,9 +48,6 @@ for (0..$i) {
     $localtime{$_} = localtime($_);
 };
 
-my $mutex = 2;
-share($mutex);
-
 my @threads;
 for (0..$i) {
     my $thread = threads->create(sub {
@@ -72,19 +60,14 @@ for (0..$i) {
                             $error++;
                         }
                     }
-                    lock($mutex);
-                    while ($mutex != ($_ + 2)) {
-                        cond_wait($mutex);
-                    }
-                    ok($mutex, ! $error, 'localtime safe');
-                    $mutex++;
-                    cond_broadcast($mutex);
+                    return $error;
                   });
     push @threads, $thread;
 }
 
-for (@threads) {
-    $_->join();
+for (0..$i) {
+    my $result = $threads[$_]->join();
+    ok($_ + 2, defined($result) && ("$result" eq '0'), 'localtime safe');
 }
 
 # EOF

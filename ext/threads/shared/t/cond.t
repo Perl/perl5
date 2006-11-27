@@ -33,7 +33,7 @@ sub ok {
 
 BEGIN {
     $| = 1;
-    print("1..32\n");   ### Number of tests that will be run ###
+    print("1..82\n");   ### Number of tests that will be run ###
 };
 
 use threads;
@@ -142,6 +142,7 @@ $Base++;
     $Base += 4;
 }
 
+
 # test cond_signal()
 {
     my $lock : shared;
@@ -192,7 +193,6 @@ $Base++;
     $tr->join();
 
     $Base += 5;
-
 }
 
 
@@ -259,7 +259,6 @@ $Base++;
     ok(2, $$r == 33, "cond_broadcast: ref: all three threads woken");
 
     $Base += 2;
-
 }
 
 
@@ -280,7 +279,42 @@ $Base++;
     cond_broadcast($lock);
     ok(4, $warncount == 2, 'get no warning on cond_broadcast');
 
-    #$Base += 4;
+    $Base += 4;
+}
+
+
+# Stress test
+{
+    my $cnt = 50;
+
+    my $mutex = 1;
+    share($mutex);
+
+    my @threads;
+    for (1..$cnt) {
+        my $thread = threads->create(sub {
+                        my $arg = $_;
+                        my $result = 0;
+                        for (0..1000000) {
+                            $result++;
+                        }
+                        lock($mutex);
+                        while ($mutex != $_) {
+                            cond_wait($mutex);
+                        }
+                        $mutex++;
+                        cond_broadcast($mutex);
+                        return $result;
+                      });
+        push(@threads, $thread);
+    }
+
+    for (1..$cnt) {
+        my $result = $threads[$_-1]->join();
+        ok($_, defined($result) && ("$result" eq '1000001'), "stress test - iter $_");
+    }
+
+    $Base += $cnt;
 }
 
 # EOF

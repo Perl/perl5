@@ -569,7 +569,6 @@ S_ithread_create(
         SV       *params)
 {
     ithread     *thread;
-    CLONE_PARAMS clone_param;
     ithread     *current_thread = S_ithread_get(aTHX);
 
     SV         **tmps_tmp = PL_tmps_stack;
@@ -634,6 +633,8 @@ S_ithread_create(
      * context for the duration of our work for new interpreter.
      */
     {
+        CLONE_PARAMS clone_param;
+
         dTHXa(thread->interp);
 
         MY_CXT_CLONE;
@@ -644,7 +645,7 @@ S_ithread_create(
         SvREFCNT_dec(PL_endav);
         PL_endav = newAV();
 
-	clone_param.flags = 0;
+        clone_param.flags = 0;
         if (SvPOK(init_function)) {
             thread->init_function = newSV(0);
             sv_copypv(thread->init_function, init_function);
