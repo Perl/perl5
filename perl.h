@@ -2643,6 +2643,9 @@ typedef struct clone_params CLONE_PARAMS;
 #if defined __GNUC__ && !defined(__INTEL_COMPILER)
 #  if __GNUC__ >= 3 /* 3.0 -> */ /* XXX Verify this version */
 #    define HASATTRIBUTE_FORMAT
+#    if defined __MINGW32__
+#      define PRINTF_FORMAT_NULL_OK
+#    endif
 #  endif
 #  if __GNUC__ >= 3 /* 3.0 -> */
 #    define HASATTRIBUTE_MALLOC

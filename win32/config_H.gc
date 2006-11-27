@@ -1147,6 +1147,9 @@
 /* HASATTRIBUTE_FORMAT:
  *	Can we handle GCC attribute for checking printf-style formats
  */
+/* PRINTF_FORMAT_NULL_OK:
+ *	Allows __printf__ format to be null when checking printf-style
+ */
 /* HASATTRIBUTE_MALLOC:
  *	Can we handle GCC attribute for malloc-style functions.
  */
@@ -1166,6 +1169,7 @@
  *	Can we handle GCC attribute for warning on unused results
  */
 /*#define HASATTRIBUTE_FORMAT	/**/
+/*#define PRINTF_FORMAT_NULL_OK	/**/
 /*#define HASATTRIBUTE_MALLOC	/**/
 /*#define HASATTRIBUTE_NONNULL	/**/
 /*#define HASATTRIBUTE_NORETURN	/**/
