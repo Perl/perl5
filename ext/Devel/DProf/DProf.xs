@@ -187,7 +187,7 @@ dprof_times(pTHX_ struct tms *t)
     
     if (!g_frequ) {
 	if (CheckOSError(DosTmrQueryFreq(&g_frequ)))
-	    croak("DosTmrQueryFreq: %s", SvPV(perl_get_sv("!",TRUE),n_a));
+	    croak("DosTmrQueryFreq: %s", SvPV_nolen(perl_get_sv("!",TRUE)));
 	else
 	    g_frequ = g_frequ/DPROF_HZ;	/* count per tick */
 	if (CheckOSError(DosTmrQueryTime(&cnt)))
@@ -197,7 +197,7 @@ dprof_times(pTHX_ struct tms *t)
     }
 
     if (CheckOSError(DosTmrQueryTime(&cnt)))
-	    croak("DosTmrQueryTime: %s", SvPV(perl_get_sv("!",TRUE), n_a));
+	    croak("DosTmrQueryTime: %s", SvPV_nolen(perl_get_sv("!",TRUE)));
     t->tms_stime = 0;
     return (t->tms_utime = (toLongLong(cnt) - g_start_cnt)/g_frequ);
 #else		/* !OS2 */
