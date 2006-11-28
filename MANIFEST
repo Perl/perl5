@@ -1798,6 +1798,10 @@ lib/IO/Zlib/t/large.t		Tests for IO::Zlib
 lib/IO/Zlib/t/tied.t		Tests for IO::Zlib
 lib/IO/Zlib/t/uncomp1.t		Tests for IO::Zlib
 lib/IO/Zlib/t/uncomp2.t		Tests for IO::Zlib
+lib/IPC/Cmd.pm			IPC::Cmd
+lib/IPC/Cmd/t/01_IPC-Cmd.t	IPC::Cmd tests
+lib/IPC/Cmd/t/02_Interactive.t	IPC::Cmd tests
+lib/IPC/Cmd/t/src/child.pl	IPC::Cmd tests
 lib/IPC/Open2.pm		Open a two-ended pipe
 lib/IPC/Open2.t			See if IPC::Open2 works
 lib/IPC/Open3.pm		Open a three-ended pipe!
