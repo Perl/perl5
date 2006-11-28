@@ -498,7 +498,7 @@ where it has to go.
 
 package DB;
 
-use IO::Handle;
+BEGIN {eval 'use IO::Handle'};	# Needed for flush only? breaks under miniperl
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
 $VERSION = 1.28;
@@ -3427,8 +3427,10 @@ any variables we might want to address in the C<DB> package.
                 $onetimedumpDepth = undef;
             }
             elsif ( $term_pid == $$ ) {
-                STDOUT->flush();
-                STDERR->flush();
+		eval {		# May run under miniperl, when not available...
+                    STDOUT->flush();
+                    STDERR->flush();
+		};
 
                 # XXX If this is the master pid, print a newline.
                 print $OUT "\n";
