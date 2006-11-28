@@ -799,7 +799,7 @@ MODULE = Time::Piece     PACKAGE = Time::Piece
 
 PROTOTYPES: ENABLE
 
-char *
+void
 _strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
     char *        fmt
     int        sec
@@ -886,12 +886,9 @@ _strptime ( string, format )
 	char * string
 	char * format
   PREINIT:
-       char tmpbuf[128];
        struct tm mytm;
        time_t t;
        char * remainder;
-       int len;
-       int tzdiff;
   PPCODE:
        t = 0;
        mytm = *gmtime(&t);
