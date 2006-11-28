@@ -679,7 +679,7 @@ $(o).dll:
 
 .rc.res:
 .IF "$(CCTYPE)" == "GCC"
-	$(RSC) --use-temp-file -i $< -o $@
+	$(RSC) --use-temp-file -I . -I .. -O COFF -i $< -o $@
 .ELSE
 	$(RSC) -i.. $<
 .ENDIF
@@ -1279,10 +1279,11 @@ $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 	$(LINK32) -Tpe -ap $(BLINK_FLAGS) \
 	    @$(mktmp c0x32$(o) $(PERLEXE_OBJ:s,\,$B,)$N \
 	    $(@:s,\,$B,),$N \
-	    $(PERLIMPLIB:s,\,$B,) $(LIBFILES)$N)
+	    $(PERLIMPLIB:s,\,$B,) $(LIBFILES),$N \
+	    $(PERLEXE_RES:s,\,$B,)$N)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -mconsole -o $@ $(BLINK_FLAGS)  \
-	    $(PERLEXE_OBJ) $(PERLIMPLIB) $(LIBFILES)
+	    $(PERLEXE_OBJ) $(PERLEXE_RES) $(PERLIMPLIB) $(LIBFILES)
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ -stack:0x1000000 $(BLINK_FLAGS) \
 	    $(LIBFILES) $(PERLEXE_OBJ) $(SETARGV_OBJ) $(PERLIMPLIB) $(PERLEXE_RES)
@@ -1299,11 +1300,13 @@ $(PERLEXESTATIC): $(PERLSTATICLIB) $(CONFIGPM) $(PERLEXEST_OBJ) $(PERLEXE_RES)
 	    @$(mktmp c0x32$(o) $(PERLEXEST_OBJ:s,\,$B,)$N \
 	    $(@:s,\,$B,),$N \
 	    $(subst,\,$B $(shell @type Extensions_static)) \
-	    $(PERLSTATICLIB:s,\,$B,) $(LIBFILES)$N)
+	    $(PERLSTATICLIB:s,\,$B,) $(LIBFILES),$N \
+	    $(PERLEXE_RES:s,\,$B,)$N)
 .ELIF "$(CCTYPE)" == "GCC"
 	$(LINK32) -mconsole -o $@ $(BLINK_FLAGS) \
 	    $(mktmp $(LKPRE) $(subst,\,$B $(shell @type Extensions_static)) \
-	        $(PERLSTATICLIB:s,\,$B,) $(LIBFILES) $(PERLEXEST_OBJ) $(LKPOST))
+	        $(PERLSTATICLIB:s,\,$B,) $(LIBFILES) $(PERLEXEST_OBJ) \
+	        $(PERLEXE_RES:s,\,$B,) $(LKPOST))
 .ELSE
 	$(LINK32) -subsystem:console -out:$@ -stack:0x1000000 $(BLINK_FLAGS) \
 	    @Extensions_static $(PERLSTATICLIB) \
