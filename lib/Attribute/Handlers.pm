@@ -2,7 +2,9 @@ package Attribute::Handlers;
 use 5.006;
 use Carp;
 use warnings;
-$VERSION = '0.78_05';
+use strict;
+use vars qw($VERSION $AUTOLOAD);
+$VERSION = '0.78_06';
 # $DB::single=1;
 
 my %symcache;
@@ -11,7 +13,9 @@ sub findsym {
 	return $symcache{$pkg,$ref} if $symcache{$pkg,$ref};
 	$type ||= ref($ref);
 	my $found;
+	no strict 'refs';
         foreach my $sym ( values %{$pkg."::"} ) {
+	    use strict;
             return $symcache{$pkg,$ref} = \$sym
 		if *{$sym}{$type} && *{$sym}{$type} == $ref;
 	}
@@ -60,7 +64,7 @@ sub import {
 		my $args = $3||'()';
 		_usage_AH_ $class unless $attr =~ $qual_id
 		                 && $tieclass =~ $qual_id
-		                 && eval "use base $tieclass; 1";
+		                 && eval "use base q\0$tieclass\0; 1";
 	        if ($tieclass->isa('Exporter')) {
 		    local $Exporter::ExportLevel = 2;
 		    $tieclass->import(eval $args);
@@ -94,6 +98,7 @@ sub _resolve_lastattr {
 	warn "Declaration of $name attribute in package $lastattr{pkg} may clash with future reserved word\n"
 		if $^W and $name !~ /[A-Z]/;
 	foreach ( @{$validtype{$lastattr{type}}} ) {
+		no strict 'refs';
 		*{"$lastattr{pkg}::_ATTR_${_}_${name}"} = $lastattr{ref};
 	}
 	%lastattr = ();
@@ -117,6 +122,7 @@ sub _gen_handler_AH_() {
 	    foreach (@attrs) {
 		my ($attr, $data) = /^([a-z_]\w*)(?:[(](.*)[)])?$/is or next;
 		if ($attr eq 'ATTR') {
+			no strict 'refs';
 			$data ||= "ANY";
 			$raw{$ref} = $data =~ s/\s*,?\s*RAWDATA\s*,?\s*//;
 			$phase{$ref}{BEGIN} = 1
@@ -165,8 +171,11 @@ sub _gen_handler_AH_() {
 	}
 }
 
-*{"Attribute::Handlers::UNIVERSAL::MODIFY_${_}_ATTRIBUTES"} =
-       _gen_handler_AH_ foreach @{$validtype{ANY}};
+{
+    no strict 'refs';
+    *{"Attribute::Handlers::UNIVERSAL::MODIFY_${_}_ATTRIBUTES"} =
+	_gen_handler_AH_ foreach @{$validtype{ANY}};
+}
 push @UNIVERSAL::ISA, 'Attribute::Handlers::UNIVERSAL'
        unless grep /^Attribute::Handlers::UNIVERSAL$/, @UNIVERSAL::ISA;
 
