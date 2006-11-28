@@ -1,7 +1,7 @@
 #
 # Makefile to build perl on Windows NT using Microsoft NMAKE.
 # Supported compilers:
-#	Visual C++ 2.0 through 7.0 (and possibly newer versions)
+#	Visual C++ 2.0 or later
 #	MS Platform SDK 64-bit compiler and tools
 #
 # This is set up to build a perl.exe that runs off a shared library
@@ -413,7 +413,7 @@ INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT $(CRYPT_FLAG)
 LOCDEFS		= -DPERLDLL -DPERL_CORE
 SUBSYS		= console
-CXX_FLAG	= -TP -GX
+CXX_FLAG	= -TP -EHsc
 
 !IF "$(USE_PERLCRT)" != "define"
 LIBC	= msvcrt.lib

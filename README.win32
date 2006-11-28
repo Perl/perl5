@@ -42,7 +42,7 @@ system).  Currently, this port is capable of using one of the
 following compilers on the Intel x86 architecture:
 
       Borland C++           version 5.02 or later
-      Microsoft Visual C++  version 2.0 through 7.0 (and possibly later)
+      Microsoft Visual C++  version 2.0 or later
       MinGW with gcc        gcc version 2.95.2 or later
 
 The last of these is a high quality freeware compiler.  Use version
@@ -55,8 +55,7 @@ Command Line Tools" and is the same compiler that ships with the full
 "Visual C++ Toolkit 2003" or "Visual C++ 2005 Express Edition" (and also as
 part of the ".NET Framework SDK") and is the same compiler that ships with
 "Visual C++ .NET 2003 Professional" or "Visual C++ 2005 Professional"
-respectively.  Currently, Perl cannot be compiled with Visual C++ 2005 (aka
-Visual C++ 8.x).
+respectively.
 
 This port can also be built on the Intel IA64 using:
 
@@ -137,9 +136,6 @@ latter step is only essential if you want to use dmake as your default
 make for building extensions using MakeMaker.
 
 =item Microsoft Visual C++ 2005 Express Edition
-
-B<NOTE: While these instructions are in theory correct, Perl currently cannot
-be compiled with Visual C++ 2005.>
 
 This free version of Visual C++ 2005 Professional contains the same compiler
 and linker that ship with the full version, but doesn't contain everything
@@ -370,6 +366,9 @@ You may also need to comment out the C<DELAYLOAD = ...> line in the
 Makefile if you're using VC++ 6.0 without the latest service pack and
 the linker reports an internal error.
 
+If you are using VC++ 4.2 or earlier then you'll have to change the /EHsc
+option in the CXX_FLAG macro to the equivalent /GX option.
+
 If you have either the source or a library that contains des_fcrypt(),
 enable the appropriate option in the makefile.  A ready-to-use version
 of fcrypt.c, based on the version originally written by Eric Young at
@@ -410,6 +409,11 @@ spaces.  So don't do that.
 
 If you are running the tests from a emacs shell window, you may see
 failures in op/stat.t.  Run "dmake test-notty" in that case.
+
+If you're using the Microsoft Visual C++ 2005 compiler (VC++ 8) then you'll
+find that F<ext/IO/t/io_sock.t> currently produces some warnings and then
+hangs.  You will need to kill the hung perl.exe process to allow the
+remainder of the test suite to complete.
 
 If you're using the Borland compiler, you may see a failure in op/taint.t
 arising from the inability to find the Borland Runtime DLLs on the system
@@ -956,6 +960,6 @@ Win9x support was added in 5.6 (Benjamin Stuhl).
 
 Support for 64-bit Windows added in 5.8 (ActiveState Corp).
 
-Last updated: 30 September 2005
+Last updated: 28 November 2006
 
 =cut
