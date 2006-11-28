@@ -2611,15 +2611,14 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    setproctitle("%s", s);
 #   endif
 	}
-#endif
-#if defined(__hpux) && defined(PSTAT_SETCMD)
+#elif defined(__hpux) && defined(PSTAT_SETCMD)
 	if (PL_origalen != 1) {
 	     union pstun un;
 	     s = SvPV_const(sv, len);
 	     un.pst_command = (char *)s;
 	     pstat(PSTAT_SETCMD, un, len, 0, 0);
 	}
-#endif
+#else
 	if (PL_origalen > 1) {
 	    /* PL_origalen is set in perl_parse(). */
 	    s = SvPV_force(sv,len);
@@ -2644,6 +2643,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    for (i = 1; i < PL_origargc; i++)
 		PL_origargv[i] = 0;
 	}
+#endif
 	UNLOCK_DOLLARZERO_MUTEX;
 	break;
 #endif
