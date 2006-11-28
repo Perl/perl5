@@ -13,7 +13,7 @@ BEGIN {
                         $USE_IPC_RUN $USE_IPC_OPEN3 $WARN
                     ];
 
-    $VERSION        = '0.36';
+    $VERSION        = '0.36_01';
     $VERBOSE        = 0;
     $DEBUG          = 0;
     $WARN           = 1;
@@ -186,7 +186,9 @@ sub can_run {
         return MM->maybe_command($command);
 
     } else {
-        for my $dir (split /\Q$Config::Config{path_sep}\E/, $ENV{PATH}) {
+        for my $dir ((split /\Q$Config::Config{path_sep}\E/, $ENV{PATH}),
+                     File::Spec->curdir()
+        ) {
             my $abs = File::Spec->catfile($dir, $command);
             return $abs if $abs = MM->maybe_command($abs);
         }
