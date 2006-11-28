@@ -1804,7 +1804,7 @@ mktime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = 0)
 	    mytm.tm_wday = wday;
 	    mytm.tm_yday = yday;
 	    mytm.tm_isdst = isdst;
-	    RETVAL = mktime(&mytm);
+	    RETVAL = (SysRetLong) mktime(&mytm);
 	}
     OUTPUT:
 	RETVAL

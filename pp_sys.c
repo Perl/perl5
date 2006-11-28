@@ -2910,9 +2910,9 @@ PP(pp_stat)
 	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_mtime)));
 	PUSHs(sv_2mortal(newSVnv(PL_statcache.st_ctime)));
 #else
-	PUSHs(sv_2mortal(newSViv(PL_statcache.st_atime)));
-	PUSHs(sv_2mortal(newSViv(PL_statcache.st_mtime)));
-	PUSHs(sv_2mortal(newSViv(PL_statcache.st_ctime)));
+	PUSHs(sv_2mortal(newSViv((IV)PL_statcache.st_atime)));
+	PUSHs(sv_2mortal(newSViv((IV)PL_statcache.st_mtime)));
+	PUSHs(sv_2mortal(newSViv((IV)PL_statcache.st_ctime)));
 #endif
 #ifdef USE_STAT_BLOCKS
 	PUSHs(sv_2mortal(newSVuv(PL_statcache.st_blksize)));
