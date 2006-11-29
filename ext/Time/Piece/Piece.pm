@@ -22,7 +22,7 @@ our %EXPORT_TAGS = (
     ':override' => 'internal',
     );
 
-our $VERSION = '1.11_01';
+our $VERSION = '1.11_02';
 
 bootstrap Time::Piece $VERSION;
 
@@ -540,7 +540,17 @@ sub subtract {
     if (UNIVERSAL::isa($rhs, 'Time::Seconds')) {
         $rhs = $rhs->seconds;
     }
-    die "Can't subtract a date from something!" if shift;
+
+    if (shift)
+    {
+	# SWAPED is set (so someone tried an expression like NOTDATE - DATE).
+	# Imitate Perl's standard behavior and return the result as if the
+	# string $time resolves to was subtracted from NOTDATE.  This way,
+	# classes which override this one and which have a stringify function
+	# that resolves to something that looks more like a number don't need
+	# to override this function.
+	return $rhs - "$time";
+    }
     
     if (UNIVERSAL::isa($rhs, 'Time::Piece')) {
         return Time::Seconds->new($time->epoch - $rhs->epoch);

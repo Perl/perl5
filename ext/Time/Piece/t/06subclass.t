@@ -45,3 +45,22 @@ for my $method (qw(new localtime gmtime)) {
   use base qw(Time::Piece);
   # this package is identical, but will be ->isa('Time::Piece::Twin');
 }
+
+{
+  my $class = "Time::Piece::NumString";
+  my $piece = $class->strptime ("2006", "%Y");
+  is (2007 - $piece, 1,
+      "subtract attempts stringify for unrecognized objects.");
+}
+
+## Below is a package which only changes the stringify function.
+{
+  package Time::Piece::NumString;
+  use base qw(Time::Piece);
+  use overload '""' => \&_stringify;
+  sub _stringify
+  {
+    my $self = shift;
+    return $self->strftime ("%Y");
+  }
+}
