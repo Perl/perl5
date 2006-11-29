@@ -16,6 +16,7 @@ sub findsym {
 	no strict 'refs';
         foreach my $sym ( values %{$pkg."::"} ) {
 	    use strict;
+	    next unless ref ( \$sym ) eq 'GLOB';
             return $symcache{$pkg,$ref} = \$sym
 		if *{$sym}{$type} && *{$sym}{$type} == $ref;
 	}
