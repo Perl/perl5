@@ -17,7 +17,7 @@ BEGIN {
     require 'test.pl';
 }
 
-plan tests => 28;
+plan tests => 29;
 
 # Runs a separate perl interpreter with the appropriate lint options
 # turned on
@@ -67,16 +67,6 @@ runlint 'implicit-write', 's/foo/bar/', <<'RESULT';
 Implicit substitution on $_ at -e line 1
 RESULT
 
-{
-    my $res = runperl(
-        switches => ["-MB::Lint"],
-        prog     =>
-            'BEGIN{B::Lint->register_plugin(X=>[q[x]])};use O(qw[Lint x]);sub X::match{warn qq[X ok.\n]};dummy()',
-        stderr => 1,
-    );
-    like( $res, qr/X ok\./, 'Lint plugin' );
-}
-
 runlint 'implicit-read', 'for ( @ARGV ) { 1 }',
     <<'RESULT', 'implicit-read in foreach';
 Implicit use of $_ in foreach at -e line 1
@@ -88,9 +78,9 @@ runlint 'dollar-underscore', '$_ = 1', <<'RESULT';
 Use of $_ at -e line 1
 RESULT
 
-runlint 'dollar-underscore', 'foo( $_ ) for @A',      '';
-runlint 'dollar-underscore', 'map { foo( $_ ) } @A',  '';
-runlint 'dollar-underscore', 'grep { foo( $_ ) } @A', '';
+runlint 'dollar-underscore', 'sub foo {}; foo( $_ ) for @A',      '';
+runlint 'dollar-underscore', 'sub foo {}; map { foo( $_ ) } @A',  '';
+runlint 'dollar-underscore', 'sub foo {}; grep { foo( $_ ) } @A', '';
 
 runlint 'dollar-underscore', 'print',
     <<'RESULT', 'dollar-underscore in print';
@@ -132,3 +122,27 @@ runlint 'bare-subs', 'sub bare(){1}; $x=[bare=>0]; $x=$y{bare}', <<'RESULT';
 Bare sub name 'bare' interpreted as string at -e line 1
 Bare sub name 'bare' interpreted as string at -e line 1
 RESULT
+
+{
+
+    # Check for backwards-compatible plugin support. This was where
+    # preloaded mdoules would register themselves with B::Lint.
+    my $res = runperl(
+        switches => ["-MB::Lint"],
+        prog     =>
+            'BEGIN{B::Lint->register_plugin(X=>[q[x]])};use O(qw[Lint x]);sub X::match{warn qq[X ok.\n]};dummy()',
+        stderr => 1,
+    );
+    like( $res, qr/X ok\./, 'Lint legacy plugin' );
+}
+
+{
+
+    # Check for Module::Plugin support
+    my $res = runperl(
+        switches => [ '-I../ext/B/t/pluglib', '-MO=Lint,none' ],
+        prog     => 1,
+        stderr   => 1,
+    );
+    like( $res, qr/Module::Pluggable ok\./, 'Lint uses Module::Pluggable' );
+}

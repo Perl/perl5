@@ -94,6 +94,7 @@ ext/B/t/f_map.t			converted to optreeCheck()s
 ext/B/t/f_sort			optree test raw material
 ext/B/t/f_sort.t		optree test raw material
 ext/B/t/lint.t		See if B::Lint works
+ext/B/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
 ext/B/t/OptreeCheck.pm		optree comparison tool
 ext/B/t/optree_check.t		test OptreeCheck apparatus
 ext/B/t/optree_concise.t	more B::Concise tests

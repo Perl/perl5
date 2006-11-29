@@ -1,6 +1,6 @@
 package B::Lint;
 
-our $VERSION = '1.08';
+our $VERSION = '1.09';    ## no critic
 
 =head1 NAME
 
@@ -136,17 +136,18 @@ include other package names whose subs are then checked by Lint.
 
 =head1 EXTENDING LINT
 
-Lint can be extended by registering plugins.
+Lint can be extended by with plugins. Lint uses L<Module::Pluggable>
+to find available plugins. Plugins are expected but not required to
+inform Lint of which checks they are adding.
 
 The C<< B::Lint->register_plugin( MyPlugin => \@new_checks ) >> method
-adds the class C<MyPlugin> to the list of plugins. It also adds the
-list of C<@new_checks> to the list of valid checks.
+adds the list of C<@new_checks> to the list of valid checks. If your
+module wasn't loaded by L<Module::Pluggable> then your class name is
+added to the list of plugins.
 
 You must create a C<match( \%checks )> method in your plugin class or one
 of its parents. It will be called on every op as a regular method call
 with a hash ref of checks as its parameter.
-
-You may not alter the %checks hash reference.
 
 The class methods C<< B::Lint->file >> and C<< B::Lint->line >> contain
 the current filename and line number.
@@ -189,15 +190,27 @@ use B qw( walkoptree_slow
     main_root main_cv walksymtable parents
     OPpOUR_INTRO
     OPf_WANT_VOID OPf_WANT_LIST OPf_WANT OPf_STACKED SVf_POK );
+use Carp 'carp';
+
+# The current M::P doesn't know about .pmc files.
+use Module::Pluggable ( require => 1 );
+
+use List::Util 'first';
+## no critic Prototypes
+sub any (&@) { my $test = shift @_; $test->() and return 1 for @_; return 0 }
 
 BEGIN {
+
+    # Import or create some constants from B. B doesn't provide
+    # everything I need so some things like OPpCONST_BARE are defined
+    # here.
     for my $sym ( qw( begin_av check_av init_av end_av ),
         [ 'OPpCONST_BARE' => 64 ] )
     {
         my $val;
         ( $sym, $val ) = @$sym if ref $sym;
 
-        if ( grep $sym eq $_, @B::EXPORT_OK, @B::EXPORT ) {
+        if ( any { $sym eq $_ } @B::EXPORT_OK, @B::EXPORT ) {
             B->import($sym);
         }
         else {
@@ -221,24 +234,24 @@ sub curcv    {$curcv}
 my %check;
 my %implies_ok_context;
 
-BEGIN {
-    map( $implies_ok_context{$_}++,
-        qw(scalar av2arylen aelem aslice helem hslice
-            keys values hslice defined undef delete) );
-}
+map( $implies_ok_context{$_}++,
+    qw(scalar av2arylen aelem aslice helem hslice
+        keys values hslice defined undef delete) );
 
 # Lint checks turned on by default
-my @default_checks = qw(context);
+my @default_checks
+    = qw(context magic_diamond undefined_subs regexp_variables);
 
 my %valid_check;
-my %plugin_valid_check;
 
 # All valid checks
-BEGIN {
-    map( $valid_check{$_}++,
-        qw(context implicit_read implicit_write dollar_underscore
-            private_names bare_subs undefined_subs regexp_variables
-            magic_diamond ) );
+for my $check (
+    qw(context implicit_read implicit_write dollar_underscore
+    private_names bare_subs undefined_subs regexp_variables
+    magic_diamond )
+    )
+{
+    $valid_check{$check} = __PACKAGE__;
 }
 
 # Debugging options
@@ -251,7 +264,7 @@ my @extra_packages;    # Lint checks mainline code and all subs which are
 sub warning {
     my $format = ( @_ < 2 ) ? "%s" : shift @_;
     warn sprintf( "$format at %s line %d\n", @_, $file, $line );
-    return undef;
+    return undef;      ## no critic undef
 }
 
 # This gimme can't cope with context that's only determined
@@ -262,25 +275,22 @@ sub gimme {
     if ( $flags & OPf_WANT ) {
         return ( ( $flags & OPf_WANT ) == OPf_WANT_LIST ? 1 : 0 );
     }
-    return undef;
+    return undef;      ## no critic undef
 }
 
-my @plugins;
+my @plugins = __PACKAGE__->plugins;
 
 sub inside_grepmap {
 
     # A boolean function to be used while inside a B::walkoptree_slow
     # call. If we are in the EXPR part of C<grep EXPR, ...> or C<grep
     # { EXPR } ...>, this returns true.
-    for my $ancestor ( @{ parents() } ) {
-        my $name = $ancestor->name;
-
-        return 1 if $name =~ m/\A(?:grep|map)/xms;
-    }
-    return 0;
+    return any { $_->name =~ m/\A(?:grep|map)/xms } @{ parents() };
 }
 
 sub inside_foreach_modifier {
+
+    # TODO: use any()
 
     # A boolean function to be used while inside a B::walkoptree_slow
     # call. If we are in the EXPR part of C<EXPR foreach ...> this
@@ -317,7 +327,10 @@ for (
     # currently ignoring $cv->DEPTH and that might be at my peril.
 
     my ( $subname, $attr, $pad_attr ) = @$_;
-    my $target = do { no strict 'refs'; \*$subname };
+    my $target = do {    ## no critic strict
+        no strict 'refs';
+        \*$subname;
+    };
     *$target = sub {
         my ($op) = @_;
 
@@ -325,13 +338,14 @@ for (
         if ( not $op->isa('B::PADOP') ) {
             $elt = $op->$attr;
         }
-        return $elt if ref($elt) and $elt->isa('B::SV');
+        return $elt if eval { $elt->isa('B::SV') };
 
         my $ix         = $op->$pad_attr;
         my @entire_pad = $curcv->PADLIST->ARRAY;
         my @elts       = map +( $_->ARRAY )[$ix], @entire_pad;
-        ($elt)
-            = grep { ref() and $_->isa('B::SV') }
+        ($elt) = first {
+            eval { $_->isa('B::SV') } ? $_ : ();
+            }
             @elts[ 0, reverse 1 .. $#elts ];
         return $elt;
     };
@@ -603,7 +617,7 @@ UNDEFINED_SUBS: {
         my $gv      = $op->gv_harder;
         my $subname = $gv->STASH->NAME . "::" . $gv->NAME;
 
-        no strict 'refs';
+        no strict 'refs';    ## no critic strict
         if ( not exists &$subname ) {
             $subname =~ s/\Amain:://;
             warning q[Nonexistant subroutine '%s' called], $subname;
@@ -621,6 +635,9 @@ UNDEFINED_SUBS: {
 }
 
 sub B::GV::lintcv {
+
+    # Example: B::svref_2object( \ *A::Glob )->lintcv
+
     my $gv = shift @_;
     my $cv = $gv->CV;
     return unless $cv->can('lintcv');
@@ -629,6 +646,8 @@ sub B::GV::lintcv {
 }
 
 sub B::CV::lintcv {
+
+    # Example: B::svref_2object( \ &foo )->lintcv
 
     # Write to the *global* $
     $curcv = shift @_;
@@ -652,7 +671,7 @@ sub do_lint {
 
     # Do all the miscellaneous non-sub blocks.
     for my $av ( begin_av, init_av, check_av, end_av ) {
-        next unless ref($av) and $av->can('ARRAY');
+        next unless eval { $av->isa('B::AV') };
         for my $cv ( $av->ARRAY ) {
             next unless ref($cv) and $cv->FILE eq $0;
             $cv->lintcv;
@@ -709,7 +728,7 @@ OPTION:
     foreach my $opt ( @default_checks, @options ) {
         $opt =~ tr/-/_/;
         if ( $opt eq "all" ) {
-            %check = ( %valid_check, %plugin_valid_check );
+            %check = %valid_check;
         }
         elsif ( $opt eq "none" ) {
             %check = ();
@@ -721,9 +740,8 @@ OPTION:
             else {
                 $check{$opt} = 1;
             }
-            warn "No such check: $opt\n"
-                unless defined $valid_check{$opt}
-                or defined $plugin_valid_check{$opt};
+            carp "No such check: $opt"
+                unless defined $valid_check{$opt};
         }
     }
 
@@ -736,20 +754,31 @@ OPTION:
 sub register_plugin {
     my ( undef, $plugin, $new_checks ) = @_;
 
-    # Register the plugin
-    for my $check (@$new_checks) {
-        defined $check
-            or warn "Undefined value in checks.";
-        not $valid_check{$check}
-            or warn "$check is already registered as a B::Lint feature.";
-        not $plugin_valid_check{$check}
-            or warn
-            "$check is already registered as a $plugin_valid_check{$check} feature.";
+    # Allow the user to be lazy and not give us a name.
+    $plugin = caller unless defined $plugin;
 
-        $plugin_valid_check{$check} = $plugin;
+    # Register the plugin's named checks, if any.
+    for my $check ( eval {@$new_checks} ) {
+        if ( not defined $check ) {
+            carp 'Undefined value in checks.';
+            next;
+        }
+        if ( exists $valid_check{$check} ) {
+            carp
+                "$check is already registered as a $valid_check{$check} feature.";
+            next;
+        }
+
+        $valid_check{$check} = $plugin;
     }
 
-    push @plugins, $plugin;
+    # Register a non-Module::Pluggable loaded module. @plugins already
+    # contains whatever M::P found on disk. The user might load a
+    # plugin manually from some arbitrary namespace and ask for it to
+    # be registered.
+    if ( not any { $_ eq $plugin } @plugins ) {
+        push @plugins, $plugin;
+    }
 
     return;
 }
