@@ -6472,6 +6472,7 @@ tryagain:
 		    case 'P':
                     case 'N':
                     case 'R':
+                    case 'k':
 			--p;
 			goto loopdone;
 		    case 'n':

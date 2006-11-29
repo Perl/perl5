@@ -1193,3 +1193,9 @@ a*(*F)	aaaab	n	-	-
 (foo)(\R2)	foofoo	y	$1-$2	foo-foo
 (foo)(\R2)(foo)(\R2)	foofoofoofoo	y	$1-$2-$3-$4	foo-foo-foo-foo
 (([abc]+) \R1)(([abc]+) \R1)	abc abccba cba	y	$2-$4	abc-cba
+
+/(?'n'foo) \k<n>/	..foo foo..	y	$1	foo
+/(?'n'foo) \k<n>/	..foo foo..	y	$+{n}	foo
+/(?<n>foo) \k'n'/	..foo foo..	y	$1	foo
+/(?<n>foo) \k'n'/	..foo foo..	y	$+{n}	foo
+/(?<as>as) (\w+) \k<as> (\w+)/	as easy as pie	y	$1-$2-$3	as-easy-pie

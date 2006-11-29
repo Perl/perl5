@@ -376,7 +376,9 @@ EXTCONST U8 PL_varies[];
 #else
 EXTCONST U8 PL_varies[] = {
     BRANCH, BACK, STAR, PLUS, CURLY, CURLYX, REF, REFF, REFFL,
-    WHILEM, CURLYM, CURLYN, BRANCHJ, IFTHEN, SUSPEND, CLUMP, 0
+    WHILEM, CURLYM, CURLYN, BRANCHJ, IFTHEN, SUSPEND, CLUMP,
+    NREF, NREFF, NREFFL,
+    0
 };
 #endif
 
@@ -750,4 +752,5 @@ re.pm, especially to the documentation.
 #define RE_SV_TAIL(ItEm)
 
 #endif /* DEBUG RELATED DEFINES */
+
 
