@@ -1190,5 +1190,6 @@ a*(*F)	aaaab	n	-	-
 (a)(?:(?-1)|(?+1))(b)	abb	y	$1-$2	a-b
 (a)(?:(?-1)|(?+1))(b)	acb	n	-	-
 
-(foo)(\R1)	foofoo	y	$1-$2	foo-foo
-(foo)(\R1)(foo)(\R1)	foofoofoofoo	y	$1-$2-$3-$4	foo-foo-foo-foo
+(foo)(\R2)	foofoo	y	$1-$2	foo-foo
+(foo)(\R2)(foo)(\R2)	foofoofoofoo	y	$1-$2-$3-$4	foo-foo-foo-foo
+(([abc]+) \R1)(([abc]+) \R1)	abc abccba cba	y	$2-$4	abc-cba

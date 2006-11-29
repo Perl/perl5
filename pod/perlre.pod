@@ -483,15 +483,24 @@ ambiguity by interpreting \10 as a backreference only if at least 10
 left parentheses have opened before it.  Likewise \11 is a
 backreference only if at least 11 left parentheses have opened
 before it.  And so on.  \1 through \9 are always interpreted as
-backreferences. 
+backreferences.
 
 X<relative backreference>
 In Perl 5.10 it is possible to relatively address a capture buffer by
 using the C<\RNNN> notation, where C<NNN> is negative offset to a
-preceding completed capture buffer. Thus C<\R1> refers to the last
-buffer closed, C<\R2> refers to the buffer before that, and so on. Note
-especially that C</(foo)(\R1)/> refers to the capture buffer containing
-C<foo>, not to the buffer containing C<\R1>.
+preceding capture buffer. Thus C<\R1> refers to the last buffer,
+C<\R2> refers to the buffer before that. For example:
+
+        /
+         (Y)            # buffer 1
+         (              # buffer 2
+            (X)         # buffer 3
+            \R1         # backref to buffer 3
+            \R3         # backref to buffer 1
+         )
+        /x
+
+and would match the same as C</(Y) ( (X) $3 $1 )/x>.
 
 Additionally, as of Perl 5.10 you may use named capture buffers and named
 backreferences. The notation is C<< (?<name>...) >> and C<< \k<name> >>

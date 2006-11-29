@@ -4111,6 +4111,16 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     $v='foo';
     iseq("$1",'bar','$1 is safe after /g - may fail due to specialized config in pp_hot.c')
 }
+{
+    local $Message = "http://nntp.perl.org/group/perl.perl5.porters/118663";
+    my $qr_barR1 = qr/(bar)\R1/;
+    ok("foobarbarxyz" =~ $qr_barR1);
+    ok("foobarbarxyz" =~ qr/foo${qr_barR1}xyz/);
+    ok("foobarbarxyz" =~ qr/(foo)${qr_barR1}xyz/);
+    ok("foobarbarxyz" =~ qr/(foo)(bar)\R1xyz/);
+    ok("foobarbarxyz" =~ qr/(foo${qr_barR1})xyz/);
+    ok("foobarbarxyz" =~ qr/(foo(bar)\R1)xyz/);
+} 
  
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
@@ -4158,7 +4168,7 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1369; 
+    $::TestCount = 1375; 
     print "1..$::TestCount\n";
 }
 

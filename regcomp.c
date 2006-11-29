@@ -156,7 +156,6 @@ typedef struct RExC_state_t {
 #define RExC_seen	(pRExC_state->seen)
 #define RExC_size	(pRExC_state->size)
 #define RExC_npar	(pRExC_state->npar)
-#define RExC_cpar	(pRExC_state->cpar)
 #define RExC_nestroot   (pRExC_state->nestroot)
 #define RExC_extralen	(pRExC_state->extralen)
 #define RExC_seen_zerolen	(pRExC_state->seen_zerolen)
@@ -4031,7 +4030,6 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     RExC_end = xend;
     RExC_naughty = 0;
     RExC_npar = 1;
-    RExC_cpar = 1;
     RExC_nestroot = 0;
     RExC_size = 0L;
     RExC_emit = &PL_regdummy;
@@ -4127,7 +4125,6 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     RExC_end = xend;
     RExC_naughty = 0;
     RExC_npar = 1;
-    RExC_cpar = 1;
     RExC_emit_start = ri->program;
     RExC_emit = ri->program;
 #ifdef DEBUGGING
@@ -5417,7 +5414,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    ender = reg_node(pRExC_state, TAIL);
 	    break;
 	case 1:
-	    RExC_cpar++;
 	    ender = reganode(pRExC_state, CLOSE, parno);
 	    if (!SIZE_ONLY && RExC_seen & REG_SEEN_RECURSE) {
 		DEBUG_OPTIMISE_MORE_r(PerlIO_printf(Perl_debug_log,
@@ -6372,7 +6368,7 @@ tryagain:
 		    RExC_parse++;
 		num = atoi(RExC_parse);
                 if (isrel) {
-                    num = RExC_cpar - num;
+                    num = RExC_npar - num;
                     if (num < 1)
                         vFAIL("Reference to nonexistent or unclosed group");
                 }
@@ -6386,12 +6382,6 @@ tryagain:
 		    if (!SIZE_ONLY) {
 		        if (num > (I32)RExC_rx->nparens)
 			    vFAIL("Reference to nonexistent group");
-			/* People make this error all the time apparently.
-			   So we cant fail on it, even though we should 
-			
-			else if (num >= RExC_cpar)
-			    vFAIL("Reference to unclosed group will always match");
-			*/
 		    }
 		    RExC_sawback = 1;
 		    ret = reganode(pRExC_state,
