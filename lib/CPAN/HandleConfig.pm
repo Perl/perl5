@@ -2,7 +2,7 @@ package CPAN::HandleConfig;
 use strict;
 use vars qw(%can %keys $VERSION);
 
-$VERSION = sprintf "%.6f", substr(q$Rev: 1264 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 1315 $,4)/1000000 + 5.4;
 
 %can = (
         commit   => "Commit changes to disk",
@@ -85,6 +85,7 @@ $VERSION = sprintf "%.6f", substr(q$Rev: 1264 $,4)/1000000 + 5.4;
 my %prefssupport = map { $_ => 1 }
     (
      "build_requires_install_policy",
+     "check_sigs",
      "make",
      "make_install_make_command",
      "prefer_installer",
@@ -622,10 +623,17 @@ sub cpl {
 
 sub prefs_lookup {
     my($self,$distro,$what) = @_;
+
     if ($prefssupport{$what}) {
-        return $distro->prefs->{cpanconfig}{$what} || $CPAN::Config->{$what};
+        return $CPAN::Config->{$what} unless
+            $distro
+                and $distro->prefs
+                    and $distro->prefs->{cpanconfig}
+                        and defined $distro->prefs->{cpanconfig}{$what};
+        return $distro->prefs->{cpanconfig}{$what};
     } else {
-        warn "Warning: $what no yet officially supported for distroprefs, doing a normal lookup";
+        $CPAN::Frontend->mywarn("Warning: $what not yet officially ".
+                                "supported for distroprefs, doing a normal lookup");
         return $CPAN::Config->{$what};
     }
 }
@@ -644,7 +652,7 @@ sub prefs_lookup {
 
     use strict;
     use vars qw($AUTOLOAD $VERSION);
-    $VERSION = sprintf "%.2f", substr(q$Rev: 1264 $,4)/100;
+    $VERSION = sprintf "%.2f", substr(q$Rev: 1315 $,4)/100;
 
     # formerly CPAN::HandleConfig was known as CPAN::Config
     sub AUTOLOAD {
