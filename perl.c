@@ -1654,7 +1654,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     VOL bool dosearch = FALSE;
     const char *validarg = "";
     register SV *sv;
-    register char *s;
+    register char *s, c;
     const char *cddir = NULL;
 #ifdef USE_SITECUSTOMIZE
     bool minus_f = FALSE;
@@ -1682,7 +1682,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 #endif
 	s = argv[0]+1;
       reswitch:
-	switch (*s) {
+	switch ((c = *s)) {
 	case 'C':
 #ifndef PERL_STRICT_CR
 	case '\r':
@@ -1749,7 +1749,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 		argc--,argv++;
 	    }
 	    else
-		Perl_croak(aTHX_ "No code specified for -%c", *s);
+		Perl_croak(aTHX_ "No code specified for -%c", c);
 	    sv_catpvs(PL_e_script, "\n");
 	    break;
 
