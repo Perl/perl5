@@ -501,7 +501,7 @@ package DB;
 BEGIN {eval 'use IO::Handle'};	# Needed for flush only? breaks under miniperl
 
 # Debugger for Perl 5.00x; perl5db.pl patch level:
-$VERSION = 1.28;
+$VERSION = 1.29;
 
 $header = "perl5db.pl version $VERSION";
 
@@ -927,7 +927,9 @@ sub eval {
 #   + wrapped restart and enabled rerun [-n] (go back n steps) command.
 # Changes: 1.28: Oct 12, 2004 Richard Foley <richard.foley@rfi.net>
 #   + Added threads support (inc. e and E commands)
-####################################################################
+# Changes: 1.29: Nov 28, 2006 Bo Lindbergh <blgl@hagernas.com> 
+#   + Added macosx_get_fork_TTY support 
+########################################################################
 
 =head1 DEBUGGER INITIALIZATION
 
@@ -1442,29 +1444,36 @@ if ( defined $ENV{PERLDB_OPTS} ) {
 
 The last thing we do during initialization is determine which subroutine is
 to be used to obtain a new terminal when a new debugger is started. Right now,
-the debugger only handles X Windows and OS/2.
+the debugger only handles X Windows, OS/2, and Mac OS X (darwin).
 
 =cut
 
 # Set up the get_fork_TTY subroutine to be aliased to the proper routine.
 # Works if you're running an xterm or xterm-like window, or you're on
-# OS/2. This may need some expansion: for instance, this doesn't handle
-# OS X Terminal windows.
+# OS/2, or on Mac OS X. This may need some expansion.
 
-if (
-    not defined &get_fork_TTY    # no routine exists,
-    and defined $ENV{TERM}       # and we know what kind
-                                 # of terminal this is,
-    and $ENV{TERM} eq 'xterm'    # and it's an xterm,
-#   and defined $ENV{WINDOWID}   # and we know what window this is, <- wrong metric
-    and defined $ENV{DISPLAY}    # and what display it's on,
-  )
+if (not defined &get_fork_TTY)       # only if no routine exists
 {
-    *get_fork_TTY = \&xterm_get_fork_TTY;    # use the xterm version
+    if (defined $ENV{TERM}                       # If we know what kind
+                                                 # of terminal this is,
+        and $ENV{TERM} eq 'xterm'                # and it's an xterm,
+        and defined $ENV{DISPLAY}                # and what display it's on,
+      )
+    {
+        *get_fork_TTY = \&xterm_get_fork_TTY;    # use the xterm version
+    }
+    elsif ( $^O eq 'os2' ) {                     # If this is OS/2,
+        *get_fork_TTY = \&os2_get_fork_TTY;      # use the OS/2 version
+    }
+    elsif ( $^O eq 'darwin'                      # If this is Mac OS X
+            and defined $ENV{TERM_PROGRAM}       # and we're running inside
+            and $ENV{TERM_PROGRAM}
+                eq 'Apple_Terminal'              # Terminal.app
+            )
+    {
+        *get_fork_TTY = \&macosx_get_fork_TTY;   # use the Mac OS X version
+    }
 } ## end if (not defined &get_fork_TTY...
-elsif ( $^O eq 'os2' ) {                     # If this is OS/2,
-    *get_fork_TTY = \&os2_get_fork_TTY;      # use the OS/2 version
-}
 
 # untaint $^O, which may have been tainted by the last statement.
 # see bug [perl #24674]
@@ -6080,9 +6089,10 @@ is tasked with doing all the necessary operating system mojo to get a new
 TTY (and probably another window) and to direct the new debugger to read and
 write there.
 
-The debugger provides C<get_fork_TTY> functions which work for X Windows and
-OS/2. Other systems are not supported. You are encouraged to write 
-C<get_fork_TTY> functions which work for I<your> platform and contribute them.
+The debugger provides C<get_fork_TTY> functions which work for X Windows,
+OS/2, and Mac OS X. Other systems are not supported. You are encouraged
+to write C<get_fork_TTY> functions which work for I<your> platform
+and contribute them.
 
 =head3 C<xterm_get_fork_TTY>
 
@@ -6185,6 +6195,53 @@ ES
     return;
 } ## end sub os2_get_fork_TTY
 
+=head3 C<macosx_get_fork_TTY>
+
+The Mac OS X version uses AppleScript to tell Terminal.app to create
+a new window.
+
+=cut
+
+# Notes about Terminal.app's AppleScript support,
+# (aka things that might break in future OS versions).
+#
+# The "do script" command doesn't return a reference to the new window
+# it creates, but since it appears frontmost and windows are enumerated
+# front to back, we can use "first window" === "window 1".
+#
+# There's no direct accessor for the tty device name, so we fiddle
+# with the window title options until it says what we want.
+#
+# Tested and found to be functional in Mac OS X 10.3.9 and 10.4.8.
+
+sub macosx_get_fork_TTY
+{
+    my($pipe,$tty);
+
+    return unless open($pipe,'-|','/usr/bin/osascript','-e',<<'__SCRIPT__');
+tell application "Terminal"
+    do script "clear;exec sleep 100000"
+    tell first window
+        set title displays shell path to false
+        set title displays window size to false
+        set title displays file name to false
+        set title displays device name to true
+        set title displays custom title to true
+        set custom title to ""
+        copy name to thetitle
+        set custom title to "forked perl debugger"
+    end tell
+end tell
+"/dev/" & thetitle
+__SCRIPT__
+
+    $tty=readline($pipe);
+    close($pipe);
+    return unless defined($tty) && $tty =~ m(^/dev/);
+    chomp $tty;
+    return $tty;
+}
+
 =head2 C<create_IN_OUT($flags)>
 
 Create a new pair of filehandles, pointing to a new TTY. If impossible,
@@ -6233,9 +6290,10 @@ EOP
 
 EOP
         print_help(<<EOP);
-  I know how to switch the output to a different window in xterms
-  and OS/2 consoles only.  For a manual switch, put the name of the created I<TTY>
-  in B<\$DB::fork_TTY>, or define a function B<DB::get_fork_TTY()> returning this.
+  I know how to switch the output to a different window in xterms, OS/2
+  consoles, and Mac OS X Terminal.app only.  For a manual switch, put the name
+  of the created I<TTY> in B<\$DB::fork_TTY>, or define a function
+  B<DB::get_fork_TTY()> returning this.
 
   On I<UNIX>-like systems one can get the name of a I<TTY> for the given window
   by typing B<tty>, and disconnect the I<shell> from I<TTY> by B<sleep 1000000>.
