@@ -34,9 +34,10 @@ ld2: $& Makefile perlld ${src}/cygwin/ld2.in
 	@$sed s,@buildpath@,$addtopath,g <${src}/cygwin/ld2.in >ld2
 	@chmod a+x ld2
 	@echo "installing ld2 into $installbin"
-# install is included in Cygwin distributions, and we make a note of th
+# install is included in Cygwin distributions, and we make a note of the
 # requirement in the README.cygwin file. However, let's give them
 # a warning.
+	@test -d ${installbin} || mkdir -p ${installbin}
 	@/usr/bin/install -c -m 755 ld2 ${installbin}/ld2
 	@if test ! -f  ${installbin}/ld2; then \
 		echo "*************************************************" ; \
