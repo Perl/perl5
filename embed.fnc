@@ -668,9 +668,10 @@ Ap	|I32	|pregexec	|NN regexp* prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \
 				|NN SV* screamer|U32 nosave
 Ap	|void	|pregfree	|NULLOK struct regexp* r
-p	|char *	|reg_stringify  |NN MAGIC *mg|NULLOK STRLEN *lp|NULLOK U32 *flags|NULLOK I32 *haseval
+Ap	|void	|regfree_internal|NULLOK struct regexp* r
+Ap	|char *	|reg_stringify  |NN MAGIC *mg|NULLOK STRLEN *lp|NULLOK U32 *flags|NULLOK I32 *haseval
 #if defined(USE_ITHREADS)
-Ap	|regexp*|regdupe	|NN const regexp* r|NN CLONE_PARAMS* param
+Ap	|void*	|regdupe_internal|NN const regexp* r|NN CLONE_PARAMS* param
 #endif
 Ap	|regexp*|pregcomp	|NN char* exp|NN char* xend|NN PMOP* pm
 Ap	|char*	|re_intuit_start|NN regexp* prog|NULLOK SV* sv|NN char* strpos \

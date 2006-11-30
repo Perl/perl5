@@ -386,7 +386,9 @@ Perl_regdump
 Perl_regclass_swash
 Perl_pregexec
 Perl_pregfree
-Perl_regdupe
+Perl_regfree_internal
+Perl_reg_stringify
+Perl_regdupe_internal
 Perl_pregcomp
 Perl_re_intuit_start
 Perl_re_intuit_string

@@ -9472,15 +9472,6 @@ ptr_table_* functions.
 #define SAVEPVN(p,n)	((p) ? savepvn(p,n) : NULL)
 
 
-/* Duplicate a regexp. Required reading: pregcomp() and pregfree() in
-   regcomp.c. AMS 20010712 */
-
-REGEXP *
-Perl_re_dup(pTHX_ const REGEXP *r, CLONE_PARAMS *param)
-{
-    return CALLREGDUPE(r,param);
-}
-
 /* duplicate a file handle */
 
 PerlIO *
@@ -9575,7 +9566,7 @@ Perl_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS* param)
 	nmg->mg_type	= mg->mg_type;
 	nmg->mg_flags	= mg->mg_flags;
 	if (mg->mg_type == PERL_MAGIC_qr) {
-	    nmg->mg_obj	= (SV*)re_dup((REGEXP*)mg->mg_obj, param);
+	    nmg->mg_obj	= (SV*)CALLREGDUPE((REGEXP*)mg->mg_obj, param);
 	}
 	else if(mg->mg_type == PERL_MAGIC_backref) {
 	    /* The backref AV has its reference count deliberately bumped by
@@ -10935,7 +10926,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 		SvREPADTMP(regex)
 		    ? sv_dup_inc(regex, param)
 		    : SvREFCNT_inc(
-			newSViv(PTR2IV(re_dup(
+			newSViv(PTR2IV(CALLREGDUPE(
 				INT2PTR(REGEXP *, SvIVX(regex)), param))))
 		;
 	    av_push(PL_regex_padav, sv);

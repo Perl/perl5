@@ -42,46 +42,45 @@ typedef struct regexp_paren_ofs {
 #else
 #define SV_SAVED_COPY
 #endif
-
+/* this is ordered such that the most commonly used 
+   fields are at the start of the struct */
 typedef struct regexp {
-        /* Generic details */
-	const struct regexp_engine* engine; /* what created this regexp? */
-	I32 refcnt;             /* Refcount of this regexp */
-        
-        /* The original string as passed to the compilation routine */
-	char *precomp;		/* pre-compilation regular expression */
-	I32 prelen;		/* length of precomp */
-        
-	/* Used for generic optimisations by the perl core. 
-	   All engines are expected to provide this information.  */
+        /* what engine created this regexp? */
+	const struct regexp_engine* engine; 
+	
+	/* Information about the match that the perl core uses to manage things */
 	U32 extflags;           /* Flags used both externally and internally */
 	I32 minlen;		/* mininum possible length of string to match */
 	I32 minlenret;		/* mininum possible length of $& */
 	U32 gofs;               /* chars left of pos that we search from */
-	U32 nparens;		/* number of capture buffers */
-	HV *paren_names;	/* Optional hash of paren names */
-        struct reg_substr_data *substrs; /* substring data about strings that must appear
+	struct reg_substr_data *substrs; /* substring data about strings that must appear
                                    in the final match, used for optimisations */
+	U32 nparens;		/* number of capture buffers */
 
-        /* Data about the last/current match. Used by the core and therefore
-           must be populated by all engines. */
+        /* private engine specific data */
+	U32 intflags;		/* Engine Specific Internal flags */
+	void *pprivate;         /* Data private to the regex engine which 
+                                   created this object. */
+        
+        /* Data about the last/current match. These are modified during matching*/
+        U32 lastparen;		/* last open paren matched */
+	U32 lastcloseparen;	/* last close paren matched */
+        I32 *startp;            /* Array of offsets from start of string (@-) */
+	I32 *endp;              /* Array of offsets from start of string (@+) */
 	char *subbeg;		/* saved or original string 
 				   so \digit works forever. */
 	I32 sublen;		/* Length of string pointed by subbeg */
-        I32 *startp;            /* Array of offsets from start of string (@-) */
-	I32 *endp;              /* Array of offsets from start of string (@+) */
-	
 	SV_SAVED_COPY           /* If non-NULL, SV which is COW from original */
-        U32 lastparen;		/* last open paren matched */
-	U32 lastcloseparen;	/* last close paren matched */
-	
-        /* Perl Regex Engine specific data. Other engines shouldn't need 
-           to touch this. Should be refactored out into a different structure
-           and accessed via the *pprivate field. (except intflags) */
-	U32 intflags;		/* Internal flags */
-	void *pprivate;         /* Data private to the regex engine which 
-                                   created this object. Perl will never mess with
-                                   this member at all. */
+        
+        
+        /* Information about the match that isn't often used */
+	char *precomp;		/* pre-compilation regular expression */
+	I32 prelen;		/* length of precomp */
+	I32 seen_evals;         /* number of eval groups in the pattern - for security checks */ 
+        HV *paren_names;	/* Optional hash of paren names */
+        
+        /* Refcount of this regexp */
+	I32 refcnt;             /* Refcount of this regexp */
 } regexp;
 
 
@@ -119,9 +118,8 @@ typedef struct regexp_engine {
 			    struct re_scream_pos_data_s *data);
     SV*	    (*checkstr) (pTHX_ regexp *prog);
     void    (*free) (pTHX_ struct regexp* r);
-    char*   (*as_str)   (pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags,  I32 *haseval);
 #ifdef USE_ITHREADS
-    regexp* (*dupe) (pTHX_ const regexp *r, CLONE_PARAMS *param);
+    void* (*dupe) (pTHX_ const regexp *r, CLONE_PARAMS *param);
 #endif    
 } regexp_engine;
 

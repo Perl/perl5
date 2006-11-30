@@ -408,10 +408,9 @@ EXTCONST regexp_engine PL_core_reg_engine = {
         Perl_regexec_flags, 
         Perl_re_intuit_start,
         Perl_re_intuit_string, 
-        Perl_pregfree, 
-        Perl_reg_stringify,
+        Perl_regfree_internal, 
 #if defined(USE_ITHREADS)        
-        Perl_regdupe 
+        Perl_regdupe_internal
 #endif        
 };
 #endif /* DOINIT */

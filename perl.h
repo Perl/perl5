@@ -196,7 +196,7 @@
 
 #define CALLRUNOPS  CALL_FPTR(PL_runops)
 
-#define CALLREGCOMP(exp, xend, pm) Perl_pregcomp(aTHX_ exp,xend,pm)
+#define CALLREGCOMP(exp, xend, pm) Perl_pregcomp(aTHX_ (exp),(xend),(pm))
 
 #define CALLREGCOMP_ENG(prog, exp, xend, pm) \
     CALL_FPTR(((prog)->comp))(aTHX_ exp, xend, pm)
@@ -208,13 +208,22 @@
         (strend),(flags),(data))
 #define CALLREG_INTUIT_STRING(prog) \
     CALL_FPTR((prog)->engine->checkstr)(aTHX_ (prog))
-#define CALLREGFREE(prog) \
-    if(prog) CALL_FPTR((prog)->engine->free)(aTHX_ (prog))
+
 #define CALLREG_AS_STR(mg,lp,flags,haseval) \
-        CALL_FPTR(((regexp *)((mg)->mg_obj))->engine->as_str)(aTHX_ (mg), (lp), (flags), (haseval))
+        Perl_reg_stringify(aTHX_ (mg), (lp), (flags), (haseval))
 #define CALLREG_STRINGIFY(mg,lp,flags) CALLREG_AS_STR(mg,lp,flags,0)
+
+#define CALLREGFREE(prog) \
+    Perl_pregfree(aTHX_ (prog))
+
+#define CALLREGFREE_PVT(prog) \
+    if(prog) CALL_FPTR((prog)->engine->free)(aTHX_ (prog))
+
 #if defined(USE_ITHREADS)         
 #define CALLREGDUPE(prog,param) \
+    Perl_re_dup(aTHX_ (prog),(param))
+
+#define CALLREGDUPE_PVT(prog,param) \
     (prog ? CALL_FPTR((prog)->engine->dupe)(aTHX_ (prog),(param)) \
           : (REGEXP *)NULL) 
 #endif

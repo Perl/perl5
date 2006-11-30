@@ -3896,6 +3896,7 @@ S_add_data(RExC_state_t *pRExC_state, U32 n, const char *s)
     return count;
 }
 
+/*XXX: todo make this not included in a non debugging perl */
 #ifndef PERL_IN_XSUB_RE
 void
 Perl_reginitcolors(pTHX)
@@ -4133,7 +4134,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     ri->program[RExC_size].type = 255;
 #endif
     /* Store the count of eval-groups for security checks: */
-    RExC_emit->next_off = (RExC_seen_evals > (I32)U16_MAX) ? U16_MAX : (U16)RExC_seen_evals;
+    RExC_rx->seen_evals = RExC_seen_evals;
     REGC((U8)REG_MAGIC, (char*) RExC_emit++);
     if (reg(pRExC_state, 0, &flags,1) == NULL)
 	return(NULL);
@@ -8461,36 +8462,32 @@ Perl_re_intuit_string(pTHX_ regexp *prog)
 }
 
 /* 
-   pregfree - free a regexp
+   pregfree() 
    
-   See regdupe below if you change anything here. 
+   handles refcounting and freeing the perl core regexp structure. When 
+   it is necessary to actually free the structure the first thing it 
+   does is call the 'free' method of the regexp_engine associated to to 
+   the regexp, allowing the handling of the void *pprivate; member 
+   first. (This routine is not overridable by extensions, which is why 
+   the extensions free is called first.)
+   
+   See regdupe and regdupe_internal if you change anything here. 
 */
-
+#ifndef PERL_IN_XSUB_RE
 void
 Perl_pregfree(pTHX_ struct regexp *r)
 {
     dVAR;
-    RXi_GET_DECL(r,ri);
     GET_RE_DEBUG_FLAGS_DECL;
 
     if (!r || (--r->refcnt > 0))
 	return;
-    DEBUG_COMPILE_r({
-	if (!PL_colorset)
-	    reginitcolors();
-	{
-	    SV *dsv= sv_newmortal();
-            RE_PV_QUOTED_DECL(s, (r->extflags & RXf_UTF8),
-                dsv, r->precomp, r->prelen, 60);
-            PerlIO_printf(Perl_debug_log,"%sFreeing REx:%s %s\n", 
-                PL_colors[4],PL_colors[5],s);
-        }
-    });
-
+	
+    CALLREGFREE_PVT(r); /* free the private data */
+    
     /* gcov results gave these as non-null 100% of the time, so there's no
        optimisation in checking them before calling Safefree  */
     Safefree(r->precomp);
-    Safefree(ri->offsets);             /* 20010421 MJD */
     RX_MATCH_COPY_FREE(r);
 #ifdef PERL_OLD_COPY_ON_WRITE
     if (r->saved_copy)
@@ -8509,6 +8506,45 @@ Perl_pregfree(pTHX_ struct regexp *r)
     }
     if (r->paren_names)
             SvREFCNT_dec(r->paren_names);
+    
+    Safefree(r->startp);
+    Safefree(r->endp);
+    Safefree(r);
+}
+#endif
+
+/* regfree_internal() 
+
+   Free the private data in a regexp. This is overloadable by 
+   extensions. Perl takes care of the regexp structure in pregfree(), 
+   this covers the *pprivate pointer which technically perldoesnt 
+   know about, however of course we have to handle the 
+   regexp_internal structure when no extension is in use. 
+   
+   Note this is called before freeing anything in the regexp 
+   structure. 
+ */
+ 
+void
+Perl_regfree_internal(pTHX_ struct regexp *r)
+{
+    dVAR;
+    RXi_GET_DECL(r,ri);
+    GET_RE_DEBUG_FLAGS_DECL;
+    
+    DEBUG_COMPILE_r({
+	if (!PL_colorset)
+	    reginitcolors();
+	{
+	    SV *dsv= sv_newmortal();
+            RE_PV_QUOTED_DECL(s, (r->extflags & RXf_UTF8),
+                dsv, r->precomp, r->prelen, 60);
+            PerlIO_printf(Perl_debug_log,"%sFreeing REx:%s %s\n", 
+                PL_colors[4],PL_colors[5],s);
+        }
+    });
+
+    Safefree(ri->offsets);             /* 20010421 MJD */
     if (ri->data) {
 	int n = ri->data->count;
 	PAD* new_comppad = NULL;
@@ -8597,15 +8633,12 @@ Perl_pregfree(pTHX_ struct regexp *r)
 	Safefree(ri->data->what);
 	Safefree(ri->data);
     }
-    Safefree(r->startp);
-    Safefree(r->endp);
     if (ri->swap) {
         Safefree(ri->swap->startp);
         Safefree(ri->swap->endp);
         Safefree(ri->swap);
     }
     Safefree(ri);
-    Safefree(r);
 }
 
 #define sv_dup_inc(s,t)	SvREFCNT_inc(sv_dup(s,t))
@@ -8620,16 +8653,21 @@ Perl_pregfree(pTHX_ struct regexp *r)
    given regexp structure. It is a no-op when not under USE_ITHREADS. 
    (Originally this *was* re_dup() for change history see sv.c)
    
-   See pregfree() above if you change anything here. 
+   After all of the core data stored in struct regexp is duplicated
+   the regexp_engine.dupe method is used to copy any private data
+   stored in the *pprivate pointer. This allows extensions to handle
+   any duplication it needs to do.
+
+   See pregfree() and regfree_internal() if you change anything here. 
 */
 #if defined(USE_ITHREADS)
+#ifndef PERL_IN_XSUB_RE
 regexp *
-Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
+Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
 {
     dVAR;
     regexp *ret;
-    regexp_internal *reti;
-    int i, len, npar;
+    int i, npar;
     struct reg_substr_datum *s;
     RXi_GET_DECL(r,ri);
     
@@ -8639,26 +8677,13 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
     if ((ret = (REGEXP *)ptr_table_fetch(PL_ptr_table, r)))
 	return ret;
 
-    len = ri->offsets[0];
+    
     npar = r->nparens+1;
-
     Newxz(ret, 1, regexp);
-    Newxc(reti, sizeof(regexp_internal) + (len+1)*sizeof(regnode), char, regexp_internal);
-    RXi_SET(ret,reti);
-    Copy(ri->program, reti->program, len+1, regnode);
-
     Newx(ret->startp, npar, I32);
     Copy(r->startp, ret->startp, npar, I32);
     Newx(ret->endp, npar, I32);
-    Copy(r->startp, ret->startp, npar, I32);
-    if(ri->swap) {
-        Newx(reti->swap, 1, regexp_paren_ofs);
-        /* no need to copy these */
-        Newx(reti->swap->startp, npar, I32);
-        Newx(reti->swap->endp, npar, I32);
-    } else {
-        reti->swap = NULL;
-    }
+    Copy(r->endp, ret->endp, npar, I32);
 
     Newx(ret->substrs, 1, struct reg_substr_data);
     for (s = ret->substrs->data, i = 0; i < 3; i++, s++) {
@@ -8668,6 +8693,78 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 	s->substr     = sv_dup_inc(r->substrs->data[i].substr, param);
 	s->utf8_substr = sv_dup_inc(r->substrs->data[i].utf8_substr, param);
     }
+    
+
+    ret->precomp        = SAVEPVN(r->precomp, r->prelen);
+    ret->refcnt         = r->refcnt;
+    ret->minlen         = r->minlen;
+    ret->minlenret      = r->minlenret;
+    ret->prelen         = r->prelen;
+    ret->nparens        = r->nparens;
+    ret->lastparen      = r->lastparen;
+    ret->lastcloseparen = r->lastcloseparen;
+    ret->intflags       = r->intflags;
+    ret->extflags       = r->extflags;
+
+    ret->sublen         = r->sublen;
+
+    ret->engine         = r->engine;
+    
+    ret->paren_names    = hv_dup_inc(r->paren_names, param);
+
+    if (RX_MATCH_COPIED(ret))
+	ret->subbeg  = SAVEPVN(r->subbeg, r->sublen);
+    else
+	ret->subbeg = NULL;
+#ifdef PERL_OLD_COPY_ON_WRITE
+    ret->saved_copy = NULL;
+#endif
+    
+    ret->pprivate = r->pprivate;
+    RXi_SET(ret,CALLREGDUPE_PVT(ret,param));
+    
+    ptr_table_store(PL_ptr_table, r, ret);
+    return ret;
+}
+#endif /* PERL_IN_XSUB_RE */
+
+/*
+   regdupe_internal()
+   
+   This is the internal complement to regdupe() which is used to copy
+   the structure pointed to by the *pprivate pointer in the regexp.
+   This is the core version of the extension overridable cloning hook.
+   The regexp structure being duplicated will be copied by perl prior
+   to this and will be provided as the regexp *r argument, however 
+   with the /old/ structures pprivate pointer value. Thus this routine
+   may override any copying normally done by perl.
+   
+   It returns a pointer to the new regexp_internal structure.
+*/
+
+void *
+Perl_regdupe_internal(pTHX_ const regexp *r, CLONE_PARAMS *param)
+{
+    dVAR;
+    regexp_internal *reti;
+    int len, npar;
+    RXi_GET_DECL(r,ri);
+    
+    npar = r->nparens+1;
+    len = ri->offsets[0];
+    
+    Newxc(reti, sizeof(regexp_internal) + (len+1)*sizeof(regnode), char, regexp_internal);
+    Copy(ri->program, reti->program, len+1, regnode);
+    
+    if(ri->swap) {
+        Newx(reti->swap, 1, regexp_paren_ofs);
+        /* no need to copy these */
+        Newx(reti->swap->startp, npar, I32);
+        Newx(reti->swap->endp, npar, I32);
+    } else {
+        reti->swap = NULL;
+    }
+
 
     reti->regstclass = NULL;
     if (ri->data) {
@@ -8732,36 +8829,11 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 
     Newx(reti->offsets, 2*len+1, U32);
     Copy(ri->offsets, reti->offsets, 2*len+1, U32);
-
-    ret->precomp        = SAVEPVN(r->precomp, r->prelen);
-    ret->refcnt         = r->refcnt;
-    ret->minlen         = r->minlen;
-    ret->minlenret      = r->minlenret;
-    ret->prelen         = r->prelen;
-    ret->nparens        = r->nparens;
-    ret->lastparen      = r->lastparen;
-    ret->lastcloseparen = r->lastcloseparen;
-    ret->intflags       = r->intflags;
-    ret->extflags       = r->extflags;
-
-    ret->sublen         = r->sublen;
-
-    ret->engine         = r->engine;
     
-    ret->paren_names    = hv_dup_inc(r->paren_names, param);
-
-    if (RX_MATCH_COPIED(ret))
-	ret->subbeg  = SAVEPVN(r->subbeg, r->sublen);
-    else
-	ret->subbeg = NULL;
-#ifdef PERL_OLD_COPY_ON_WRITE
-    ret->saved_copy = NULL;
-#endif
-
-    ptr_table_store(PL_ptr_table, r, ret);
-    return ret;
+    return (void*)reti;
 }
-#endif    
+
+#endif    /* USE_ITHREADS */
 
 /* 
    reg_stringify() 
@@ -8774,29 +8846,28 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
    resulting string
    
    If flags is nonnull and the returned string contains UTF8 then 
-   (flags & 1) will be true.
+   (*flags & 1) will be true.
    
    If haseval is nonnull then it is used to return whether the pattern 
    contains evals.
    
    Normally called via macro: 
    
-        CALLREG_STRINGIFY(mg,0,0);
+        CALLREG_STRINGIFY(mg,&len,&utf8);
         
    And internally with
    
-        CALLREG_AS_STR(mg,lp,flags,haseval)        
+        CALLREG_AS_STR(mg,&lp,&flags,&haseval)        
     
    See sv_2pv_flags() in sv.c for an example of internal usage.
     
  */
-
+#ifndef PERL_IN_XSUB_RE
 char *
 Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
     dVAR;
     const regexp * const re = (regexp *)mg->mg_obj;
-    RXi_GET_DECL(re,ri);
-    
+
     if (!mg->mg_ptr) {
 	const char *fptr = "msix";
 	char reflags[6];
@@ -8859,7 +8930,7 @@ Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
 	mg->mg_ptr[mg->mg_len] = 0;
     }
     if (haseval) 
-        *haseval = ri->program[0].next_off;
+        *haseval = re->seen_evals;
     if (flags)    
 	*flags = ((re->extflags & RXf_UTF8) ? 1 : 0);
     
@@ -8868,8 +8939,6 @@ Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
     return mg->mg_ptr;
 }
 
-
-#ifndef PERL_IN_XSUB_RE
 /*
  - regnext - dig the "next" pointer out of a node
  */

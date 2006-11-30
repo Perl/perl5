@@ -1833,11 +1833,12 @@ PERL_CALLCONV I32	Perl_pregexec(pTHX_ regexp* prog, char* stringarg, char* stren
 			__attribute__nonnull__(pTHX_6);
 
 PERL_CALLCONV void	Perl_pregfree(pTHX_ struct regexp* r);
+PERL_CALLCONV void	Perl_regfree_internal(pTHX_ struct regexp* r);
 PERL_CALLCONV char *	Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval)
 			__attribute__nonnull__(pTHX_1);
 
 #if defined(USE_ITHREADS)
-PERL_CALLCONV regexp*	Perl_regdupe(pTHX_ const regexp* r, CLONE_PARAMS* param)
+PERL_CALLCONV void*	Perl_regdupe_internal(pTHX_ const regexp* r, CLONE_PARAMS* param)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 

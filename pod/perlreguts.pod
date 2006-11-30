@@ -12,13 +12,13 @@ author's experience, comments in the source code, other papers on the
 regex engine, feedback on the perl5-porters mail list, and no doubt other
 places as well.
 
-B<WARNING!> It should be clearly understood that this document
-represents the state of the regex engine as the author understands it at
-the time of writing. It is B<NOT> an API definition; it is purely an
-internals guide for those who want to hack the regex engine, or
+B<WARNING!> It should be clearly understood that this document represents
+the state of the regex engine as the author understands it at the time of
+writing. Unless stated otherwise it is B<NOT> an API definition; it is
+purely an internals guide for those who want to hack the regex engine, or
 understand how the regex engine works. Readers of this document are
-expected to understand perl's regex syntax and its usage in detail. If
-you want to learn about the basics of Perl's regular expressions, see
+expected to understand perl's regex syntax and its usage in detail. If you
+want to learn about the basics of Perl's regular expressions, see
 L<perlre>.
 
 =head1 OVERVIEW
@@ -740,113 +740,104 @@ tricky this can be:
     A sequence of valid UTF-8 bytes cannot be a subsequence of
     another valid sequence of UTF-8 bytes.
 
-=head2 Base Struct
 
-F<regexp.h> contains the base structure definition:
+=head2 Base Structures
+
+There are two structures used to store a compiled regular expression.
+One, the regexp structure is considered to be perl's property, and the
+other is considered to be the property of the regex engine which
+compiled the regular expression; in the case of the stock engine this
+structure is called regexp_internal.
+
+The regexp structure contains all the data that perl needs to be aware of
+to properly work with the regular expression. It includes data about
+optimisations that perl can use to determine if the regex engine should
+really be used, and various other control info that is needed to properly
+execute patterns in various contexts such as is the pattern anchored in
+some way, or what flags were used during the compile, or whether the
+program contains special constructs that perl needs to be aware of.
+
+In addition it contains two fields that are intended for the private use
+of the regex engine that compiled the pattern. These are the C<intflags>
+and pprivate members. The C<pprivate> is a void pointer to an arbitrary
+structure whose use and management is the responsibility of the compiling
+engine. perl will never modify either of these values.
+
+As mentioned earlier, in the case of the default engines, the C<pprivate>
+will be a pointer to a regexp_internal structure which holds the compiled
+program and any additional data that is private to the regex engine
+implementation.
+
+=head3 Perl Inspectable Data About Pattern
+
+F<regexp.h> contains the "public" structure definition. All regex engines
+must be able to correctly build a regexp structure.
 
     typedef struct regexp {
-        I32 *startp;
-        I32 *endp;
-        regexp_paren_ofs *swap;
-        regnode *regstclass;
-        struct reg_substr_data *substrs;
-        char *precomp;          /* pre-compilation regular expression */
-        struct reg_data *data;  /* Additional data. */
-        char *subbeg;           /* saved or original string
-                                   so \digit works forever. */
-    #ifdef PERL_OLD_COPY_ON_WRITE
-        SV *saved_copy;         /* If non-NULL, SV which is COW from original */
-    #endif
-        U32 *offsets;           /* offset annotations 20001228 MJD */
-        I32 sublen;             /* Length of string pointed by subbeg */
-        I32 refcnt;
-        I32 minlen;             /* mininum length of string to match */
-        I32 minlenret;          /* mininum possible length of $& */
-        I32 prelen;             /* length of precomp */
-        U32 nparens;            /* number of parentheses */
-        U32 lastparen;          /* last paren matched */
-        U32 lastcloseparen;     /* last paren matched */
-        U32 reganch;            /* Internal use only +
-                                   Tainted information used by regexec? */
-        HV *paren_names;        /* Paren names */
-        const struct regexp_engine* engine;
-        regnode program[1];     /* Unwarranted chumminess with compiler. */
+            /* what engine created this regexp? */
+            const struct regexp_engine* engine; 
+            
+            /* Information about the match that the perl core uses to manage things */
+            U32 extflags;           /* Flags used both externally and internally */
+            I32 minlen;             /* mininum possible length of string to match */
+            I32 minlenret;          /* mininum possible length of $& */
+            U32 gofs;               /* chars left of pos that we search from */
+            struct reg_substr_data *substrs; /* substring data about strings that must appear
+                                       in the final match, used for optimisations */
+            U32 nparens;            /* number of capture buffers */
+    
+            /* private engine specific data */
+            U32 intflags;           /* Engine Specific Internal flags */
+            void *pprivate;         /* Data private to the regex engine which 
+                                       created this object. */
+            
+            /* Data about the last/current match. These are modified during matching*/
+            U32 lastparen;          /* last open paren matched */
+            U32 lastcloseparen;     /* last close paren matched */
+            I32 *startp;            /* Array of offsets from start of string (@-) */
+            I32 *endp;              /* Array of offsets from start of string (@+) */
+            char *subbeg;           /* saved or original string 
+                                       so \digit works forever. */
+            I32 sublen;             /* Length of string pointed by subbeg */
+            SV_SAVED_COPY           /* If non-NULL, SV which is COW from original */
+            
+            
+            /* Information about the match that isn't often used */
+            char *precomp;          /* pre-compilation regular expression */
+            I32 prelen;             /* length of precomp */
+            I32 seen_evals;         /* number of eval groups in the pattern - for security checks */ 
+            HV *paren_names;        /* Optional hash of paren names */
+            
+            /* Refcount of this regexp */
+            I32 refcnt;             /* Refcount of this regexp */
     } regexp;
+
+The fields are discussed in more detail below:
 
 =over 5
 
-=item C<program>
 
-Compiled program. Inlined into the structure so the entire struct can be
-treated as a single blob.
+=item C<refcnt>
 
-=item C<data>
+The number of times the structure is referenced. When this falls to 0
+the regexp is automatically freed by a call to pregfree.
 
-This field points at a reg_data structure, which is defined as follows
+=item C<engine>
 
-    struct reg_data {
-        U32 count;
-        U8 *what;
-        void* data[1];
-    };
+This field points at a regexp_engine structure which contains pointers
+to the subroutine that are to be used for performing a match. It
+is the compiling routines responsibility to populate this field before
+returning the regexp object.
 
-This structure is used for handling data structures that the regex engine
-needs to handle specially during a clone or free operation on the compiled
-product. Each element in the data array has a corresponding element in the
-what array. During compilation regops that need special structures stored
-will add an element to each array using the add_data() routine and then store
-the index in the regop.
-
-=item C<nparens>, C<lasparen>, and C<lastcloseparen>
-
-These fields are used to keep track of how many paren groups could be matched
-in the pattern, which was the last open paren to be entered, and which was
-the last close paren to be entered.
-
-=item C<startp>, C<endp>, C<swap>
-
-These fields store arrays that are used to hold the offsets of the begining
-and end of each capture group that has matched. -1 is used to indicate no match.
-
-C<swap> is an extra set of startp/endp stored in a C<regexp_paren_ofs>
-struct. This is used when the last successful match was from same pattern
-as the current pattern, so that a partial match doesn't overwrite the
-previous match's results. When this field is data filled the matching
-engine will swap buffers before every match attempt. If the match fails,
-then it swaps them back. If it's successful it leaves them. This field
-is populated on demand and is by default null.
-
-These are the source for @- and @+.
-
-=item C<subbeg> C<sublen> C<saved_copy>
-
-These are used during execution phase for managing search and replace
-patterns.
-
-=item C<precomp> C<prelen> C<offsets>
+=item C<precomp> C<prelen> 
 
 Used for debugging purposes. C<precomp> holds a copy of the pattern
-that was compiled, offsets holds a mapping of offset in the C<program>
-to offset in the C<precomp> string. This is only used by ActiveStates
-visual regex debugger.
+that was compiled. 
 
-=item C<reg_substr_data>
+=item C<extflags>
 
-Holds information on the longest string that must occur at a fixed
-offset from the start of the pattern, and the longest string that must
-occur at a floating offset from the start of the pattern. Used to do
-Fast-Boyer-Moore searches on the string to find out if its worth using
-the regex engine at all, and if so where in the string to search.
-
-=item C<regstclass>
-
-Special regop that is used by C<re_intuit_start()> to check if a pattern
-can match at a certain position. For instance if the regex engine knows
-that the pattern must start with a 'Z' then it can scan the string until
-it finds one and then launch the regex engine from there. The routine
-that handles this is called C<find_by_class()>. Sometimes this field
-points at a regop embedded in the program, and sometimes it points at
-an independent synthetic regop that has been constructed by the optimiser.
+This is used to store various flags about the pattern, such as whether it
+contains a \G or a ^ or $ symbol.
 
 =item C<minlen> C<minlenret>
 
@@ -871,10 +862,15 @@ content. This distinction is particularly important as the substitution
 logic uses the C<minlenret> to tell whether it can do in-place substition
 which can result in considerable speedup.
 
-=item C<reganch>
+=item C<gofs>
 
-This is used to store various flags about the pattern, such as whether it
-contains a \G or a ^ or $ symbol.
+Left offset from pos() to start match at.
+
+=item C<nparens>, C<lasparen>, and C<lastcloseparen>
+
+These fields are used to keep track of how many paren groups could be matched
+in the pattern, which was the last open paren to be entered, and which was
+the last close paren to be entered.
 
 =item C<paren_names>
 
@@ -885,17 +881,102 @@ pv being an embedded array of I32.  The values may also be contained
 independently in the data array in cases where named backreferences are
 used.
 
-=item C<refcnt>
+=item C<reg_substr_data>
 
-The number of times the structure is referenced. When this falls to 0
-the regexp is automatically freed by a call to pregfree.
+Holds information on the longest string that must occur at a fixed
+offset from the start of the pattern, and the longest string that must
+occur at a floating offset from the start of the pattern. Used to do
+Fast-Boyer-Moore searches on the string to find out if its worth using
+the regex engine at all, and if so where in the string to search.
 
-=item C<engine>
+=item C<startp>, C<endp>, 
 
-This field points at a regexp_engine structure which contains pointers
-to the subroutine that are to be used for performing a match. It
-is the compiling routines responsibility to populate this field before
-returning the regexp object.
+These fields store arrays that are used to hold the offsets of the begining
+and end of each capture group that has matched. -1 is used to indicate no match.
+
+These are the source for @- and @+.
+
+=item C<subbeg> C<sublen> C<saved_copy>
+
+These are used during execution phase for managing search and replace
+patterns.
+
+=item C<seen_evals>
+
+This stores the number of eval groups in the pattern. This is used 
+for security purposes when embedding compiled regexes into larger 
+patterns.
+
+=back
+
+=head3 Engine Private Data About Pattern
+
+Additionally regexp.h contains the following "private" definition which is perl
+specific and is only of curiosity value to other engine implementations.
+
+    typedef struct regexp_internal {
+            regexp_paren_ofs *swap; /* Swap copy of *startp / *endp */
+            U32 *offsets;           /* offset annotations 20001228 MJD 
+                                       data about mapping the program to the 
+                                       string*/
+            regnode *regstclass;    /* Optional startclass as identified or constructed
+                                       by the optimiser */
+            struct reg_data *data;  /* Additional miscellaneous data used by the program.
+                                       Used to make it easier to clone and free arbitrary
+                                       data that the regops need. Often the ARG field of
+                                       a regop is an index into this structure */
+            regnode program[1];     /* Unwarranted chumminess with compiler. */
+    } regexp_internal;
+
+=over 5
+
+=item C<swap>
+
+C<swap> is an extra set of startp/endp stored in a C<regexp_paren_ofs>
+struct. This is used when the last successful match was from same pattern
+as the current pattern, so that a partial match doesn't overwrite the
+previous match's results. When this field is data filled the matching
+engine will swap buffers before every match attempt. If the match fails,
+then it swaps them back. If it's successful it leaves them. This field
+is populated on demand and is by default null.
+
+=item C<offsets>
+
+Offsets holds a mapping of offset in the C<program>
+to offset in the C<precomp> string. This is only used by ActiveStates
+visual regex debugger.
+
+=item C<regstclass>
+
+Special regop that is used by C<re_intuit_start()> to check if a pattern
+can match at a certain position. For instance if the regex engine knows
+that the pattern must start with a 'Z' then it can scan the string until
+it finds one and then launch the regex engine from there. The routine
+that handles this is called C<find_by_class()>. Sometimes this field
+points at a regop embedded in the program, and sometimes it points at
+an independent synthetic regop that has been constructed by the optimiser.
+
+=item C<data>
+
+This field points at a reg_data structure, which is defined as follows
+
+    struct reg_data {
+        U32 count;
+        U8 *what;
+        void* data[1];
+    };
+
+This structure is used for handling data structures that the regex engine
+needs to handle specially during a clone or free operation on the compiled
+product. Each element in the data array has a corresponding element in the
+what array. During compilation regops that need special structures stored
+will add an element to each array using the add_data() routine and then store
+the index in the regop.
+
+=item C<program>
+
+Compiled program. Inlined into the structure so the entire struct can be
+treated as a single blob.
 
 =back
 
@@ -907,21 +988,21 @@ a constant structure of the following format:
 
     typedef struct regexp_engine {
         regexp* (*comp) (pTHX_ char* exp, char* xend, PMOP* pm);
-        I32	(*exec) (pTHX_ regexp* prog, char* stringarg, char* strend,
-    			    char* strbeg, I32 minend, SV* screamer,
-    			    void* data, U32 flags);
+        I32     (*exec) (pTHX_ regexp* prog, char* stringarg, char* strend,
+                                char* strbeg, I32 minend, SV* screamer,
+                                void* data, U32 flags);
         char*   (*intuit) (pTHX_ regexp *prog, SV *sv, char *strpos,
-    			    char *strend, U32 flags,
-    			    struct re_scream_pos_data_s *data);
-        SV*	(*checkstr) (pTHX_ regexp *prog);
+                                char *strend, U32 flags,
+                                struct re_scream_pos_data_s *data);
+        SV*     (*checkstr) (pTHX_ regexp *prog);
         void    (*free) (pTHX_ struct regexp* r);
     #ifdef USE_ITHREADS
-        regexp* (*dupe) (pTHX_ const regexp *r, CLONE_PARAMS *param);
-    #endif
+        void* (*dupe) (pTHX_ const regexp *r, CLONE_PARAMS *param);
+    #endif    
     } regexp_engine;
 
 When a regexp is compiled its C<engine> field is then set to point at
-the appropriate structure so that when it needs to be used it can find
+the appropriate structure so that when it needs to be used Perl can find
 the right routines to do so.
 
 In order to install a new regexp handler, C<$^H{regcomp}> is set
@@ -964,7 +1045,9 @@ Execute a regexp.
 
 Find the start position where a regex match should be attempted,
 or possibly whether the regex engine should not be run because the
-pattern can't match.
+pattern can't match. This is called as appropriate by the core
+depending on the values of the extflags member of the regexp 
+structure.
 
 =item checkstr
 
@@ -977,16 +1060,28 @@ for optimising matches.
 
     void free(regexp *prog);
 
-Release any resources allocated to store this pattern.  After this
-call prog is an invalid pointer.
+Called by perl when it is freeing a regexp pattern so that the engine
+can release any resources pointed to by the C<pprivate> member of the
+regexp structure. This is only responsible for freeing private data,
+perl will handle releasing anything else contained in the regexp structure.
 
 =item dupe
 
-    regexp* dupe(const regexp *r, CLONE_PARAMS *param);
+    void* dupe(const regexp *r, CLONE_PARAMS *param);
 
 On threaded builds a regexp may need to be duplicated so that the pattern
 can be used by mutiple threads. This routine is expected to handle the
-duplication.  On unthreaded builds this field doesnt exist.
+duplication of any private data pointed to by the C<pprivate> member of
+the regexp structure.  It will be called with the preconstructed new
+regexp structure as an argument, the C<pprivate> member will point at
+the B<old> private structue, and it is this routines responsibility to
+construct a copy and return a pointer to it (which perl will then use to
+overwrite the field as passed to this routine.)
+
+This allows the engine to dupe its private data but also if necessary
+modify the final structure if it really must.
+
+On unthreaded builds this field doesn't exist.
 
 =back
 
