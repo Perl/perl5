@@ -1213,16 +1213,18 @@ void
 stat(...)
 PROTOTYPE: ;$
     PPCODE:
+	dTHX;
 	PUSHMARK(SP);
 	XPUSHs(sv_2mortal(newSVsv(items == 1 ? ST(0) : DEFSV)));
 	PUTBACK;
 	ENTER;
 	PL_laststatval = -1;
-	(void)*(PL_ppaddr[OP_STAT])(aTHX);
+	pp_stat();
 	SPAGAIN;
 	LEAVE;
 	if (PL_laststatval == 0) {
-	  /* We assume that pp_stat() left us with 13 valid stack items. */
+	  /* We assume that pp_stat() left us with 13 valid stack items,
+	   * and that the timestamps are at offsets 8, 9, and 10. */
 	  UV atime = SvUV(ST( 8));
 	  UV mtime = SvUV(ST( 9));
 	  UV ctime = SvUV(ST(10));

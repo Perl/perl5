@@ -1,5 +1,9 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.96	[2006-30-11]
+	- 1.95 broke builds for threaded Perls
+	- use main() prototype consistently in Makefile.PL
+
 1.95	[2006-29-11]
 	- integrate core change #29180: Silence VC++ compiler warnings
 	  from Steve Hay
@@ -8,7 +12,6 @@ Revision history for the Perl extension Time::HiRes.
 	- regenerate fallback/*.inc for older Perls without
           ExtUtils::Constant because of d_hires_stat, resolves
 	  [rt.cpan.org #23694] Time::HiRes fails tests on Solaris and Perl 5.6.1
-	- Make Makefile.PL more defensive against false PERL_CORE
 
 1.94	[2006-10-16]
 	- file timestamps oddities seen: the atime and mtime

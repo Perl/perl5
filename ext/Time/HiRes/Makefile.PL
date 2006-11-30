@@ -102,15 +102,6 @@ sub try_compile_and_link {
 	    $COREincdir = File::Spec->catdir($Config{'archlibexp'}, 'CORE');
 	}
 
-	if ($ENV{PERL_CORE}) {
-	    unless (-f File::Spec->catfile($COREincdir, "EXTERN.h")) {
-		die <<__EOD__;
-Your \$ENV{PERL_CORE} is $ENV{PERL_CORE} but there is no EXTERN.h in
-$COREincdir.  Cannot continue, aborting.
-__EOD__
-	    }
-	}
-
 	my $ccflags = $Config{'ccflags'} . ' ' . "-I$COREincdir";
 
 	if ($^O eq 'VMS') {
@@ -252,7 +243,7 @@ sub has_nanosleep {
 
 /* int nanosleep(const struct timespec *rqtp, struct timespec *rmtp); */
 
-int main() {
+int main _((int argc, char** argv, char** env)) {
     struct timespec ts1, ts2;
     int ret;
     ts1.tv_sec  = 0;
@@ -605,7 +596,7 @@ EOD
     if (try_compile_and_link(<<EOM)) {
 $TIME_HEADERS
 #include <sys/stat.h>
-int main() {
+int main _((int argc, char** argv, char** env)) {
     struct stat st;
     st.st_atimespec.tv_nsec = 0;
 }
@@ -625,7 +616,7 @@ EOM
     if (try_compile_and_link(<<EOM)) {
 $TIME_HEADERS
 #include <sys/stat.h>
-int main() {
+int main _((int argc, char** argv, char** env)) {
     struct stat st;
     st.st_atimensec = 0;
 }
@@ -645,7 +636,7 @@ EOM
     if (try_compile_and_link(<<EOM)) {
 $TIME_HEADERS
 #include <sys/stat.h>
-int main() {
+int main _((int argc, char** argv, char** env)) {
     struct stat st;
     st.st_atime_n = 0;
 }
@@ -665,7 +656,7 @@ EOM
     if (try_compile_and_link(<<EOM)) {
 $TIME_HEADERS
 #include <sys/stat.h>
-int main() {
+int main _((int argc, char** argv, char** env)) {
     struct stat st;
     st.st_atim.tv_nsec = 0;
 }
@@ -685,7 +676,7 @@ EOM
     if (try_compile_and_link(<<EOM)) {
 $TIME_HEADERS
 #include <sys/stat.h>
-int main() {
+int main _((int argc, char** argv, char** env)) {
     struct stat st;
     st.st_uatime = 0;
 }
@@ -844,7 +835,6 @@ NOTE: if you get an error like this (the Makefile line number may vary):
 Makefile:91: *** missing separator
 then set the environment variable LC_ALL to "C" and retry
 from scratch (re-run perl "Makefile.PL").
-(And consider upgrading your Perl.)
 EOM
         }
     }
