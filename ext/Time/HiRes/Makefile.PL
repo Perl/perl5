@@ -102,6 +102,15 @@ sub try_compile_and_link {
 	    $COREincdir = File::Spec->catdir($Config{'archlibexp'}, 'CORE');
 	}
 
+	if ($ENV{PERL_CORE}) {
+	    unless (-f File::Spec->catfile($COREincdir, "EXTERN.h")) {
+		die <<__EOD__;
+Your \$ENV{PERL_CORE} is $ENV{PERL_CORE} but there is no EXTERN.h in
+$COREincdir.  Cannot continue, aborting.
+__EOD__
+	    }
+	}
+
 	my $ccflags = $Config{'ccflags'} . ' ' . "-I$COREincdir";
 
 	if ($^O eq 'VMS') {
@@ -835,6 +844,7 @@ NOTE: if you get an error like this (the Makefile line number may vary):
 Makefile:91: *** missing separator
 then set the environment variable LC_ALL to "C" and retry
 from scratch (re-run perl "Makefile.PL").
+(And consider upgrading your Perl.)
 EOM
         }
     }

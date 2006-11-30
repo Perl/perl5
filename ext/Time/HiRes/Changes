@@ -1,5 +1,15 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.95	[2006-29-11]
+	- integrate core change #29180: Silence VC++ compiler warnings
+	  from Steve Hay
+	- do not use PL_ppaddr in stat() because that is not available
+	  in Perl 5.005_04
+	- regenerate fallback/*.inc for older Perls without
+          ExtUtils::Constant because of d_hires_stat, resolves
+	  [rt.cpan.org #23694] Time::HiRes fails tests on Solaris and Perl 5.6.1
+	- Make Makefile.PL more defensive against false PERL_CORE
+
 1.94	[2006-10-16]
 	- file timestamps oddities seen: the atime and mtime
 	  can be out of sync (modify first and read second can leave
@@ -15,7 +25,7 @@ Revision history for the Perl extension Time::HiRes.
 	- skip the stat() tests in cygwin and win32, because
 	  if run on FAT the timestamp granularity is only 2 seconds.
 	  Any good way to detect (cygwin or win32) whether we are
-	  being run on NTFS or anyplace with better timestamps?
+	  being run on NTFS or anywhere with better timestamps?
 	  Addresses [rt.cpan.org #22089] and [rt.cpan.org #22098].
 
 1.92	[2006-10-13]
@@ -50,7 +60,7 @@ Revision history for the Perl extension Time::HiRes.
 	  system and the filesystem support that kind of thing).
 
 	  Contributions for more systems (especially non-UNIX,
-	  e.g. but not limited to, Win32, VMS) gladly accepted.
+	  e.g. but not limited to: Win32, VMS, OS/2) gladly accepted.
 
 	  Thanks to H.Merijn Brand, John Peacock, and Craig
 	  Berry for brave beta testing.
