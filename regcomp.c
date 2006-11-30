@@ -556,17 +556,18 @@ static const scan_data_t zero_scan_data =
 #define EXPERIMENTAL_INPLACESCAN
 #endif
 
-#define DEBUG_STUDYDATA(data,depth)                                  \
-DEBUG_OPTIMISE_MORE_r(if(data){                                           \
+#define DEBUG_STUDYDATA(str,data,depth)                              \
+DEBUG_OPTIMISE_MORE_r(if(data){                                      \
     PerlIO_printf(Perl_debug_log,                                    \
-        "%*s"/* Len:%"IVdf"/%"IVdf" */"Pos:%"IVdf"/%"IVdf           \
-        " Flags: %"IVdf" Whilem_c: %"IVdf" Lcp: %"IVdf" ",           \
+        "%*s" str "Pos:%"IVdf"/%"IVdf                                \
+        " Flags: 0x%"UVXf" Whilem_c: %"IVdf" Lcp: %"IVdf" %s",       \
         (int)(depth)*2, "",                                          \
         (IV)((data)->pos_min),                                       \
         (IV)((data)->pos_delta),                                     \
-        (IV)((data)->flags),                                         \
+        (UV)((data)->flags),                                         \
         (IV)((data)->whilem_c),                                      \
-        (IV)((data)->last_closep ? *((data)->last_closep) : -1)      \
+        (IV)((data)->last_closep ? *((data)->last_closep) : -1),     \
+        is_inf ? "INF " : ""                                         \
     );                                                               \
     if ((data)->last_found)                                          \
         PerlIO_printf(Perl_debug_log,                                \
@@ -596,7 +597,7 @@ static void clear_re(pTHX_ void *r);
    floating substrings if needed. */
 
 STATIC void
-S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data, I32 *minlenp)
+S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data, I32 *minlenp, int is_inf)
 {
     const STRLEN l = CHR_SVLEN(data->last_found);
     const STRLEN old_l = CHR_SVLEN(*data->longest);
@@ -614,12 +615,12 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data, I32 *min
 	    data->minlen_fixed=minlenp;	
 	    data->lookbehind_fixed=0;
 	}
-	else {
+	else { /* *data->longest == data->longest_float */
 	    data->offset_float_min = l ? data->last_start_min : data->pos_min;
 	    data->offset_float_max = (l
 				      ? data->last_start_max
 				      : data->pos_min + data->pos_delta);
-	    if ((U32)data->offset_float_max > (U32)I32_MAX)
+	    if (is_inf || (U32)data->offset_float_max > (U32)I32_MAX)
 		data->offset_float_max = I32_MAX;
 	    if (data->flags & SF_BEFORE_EOL)
 		data->flags
@@ -641,7 +642,7 @@ S_scan_commit(pTHX_ const RExC_state_t *pRExC_state, scan_data_t *data, I32 *min
     }
     data->last_end = -1;
     data->flags &= ~SF_BEFORE_EOL;
-    DEBUG_STUDYDATA(data,0);
+    DEBUG_STUDYDATA("cl_anything: ",data,0);
 }
 
 /* Can match anything (initialization) */
@@ -2347,6 +2348,9 @@ typedef struct scan_frame {
     I32 stop; /* what stopparen do we use */
 } scan_frame;
 
+
+#define SCAN_COMMIT(s, data, m) scan_commit(s, data, m, is_inf)
+
 STATIC I32
 S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                         I32 *minlenp, I32 *deltap,
@@ -2392,7 +2396,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
   fake_study_recurse:
     while ( scan && OP(scan) != END && scan < last ){
 	/* Peephole optimizer: */
-	DEBUG_STUDYDATA(data,depth);
+	DEBUG_STUDYDATA("Peep:", data,depth);
 	DEBUG_PEEP("Peep",scan,depth);
         JOIN_EXACT(scan,&min,0);
 
@@ -2438,7 +2442,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		regnode * const startbranch=scan;
 		
 		if (flags & SCF_DO_SUBSTR)
-		    scan_commit(pRExC_state, data, minlenp); /* Cannot merge strings after this. */
+		    SCAN_COMMIT(pRExC_state, data, minlenp); /* Cannot merge strings after this. */
 		if (flags & SCF_DO_STCLASS)
 		    cl_init_zero(pRExC_state, &accum);
 
@@ -2760,7 +2764,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     Newx(newframe,1,scan_frame);
                 } else {
                     if (flags & SCF_DO_SUBSTR) {
-                        scan_commit(pRExC_state,data,minlenp);
+                        SCAN_COMMIT(pRExC_state,data,minlenp);
                         data->longest = &(data->longest_float);
                     }
                     is_inf = is_inf_internal = 1;
@@ -2862,7 +2866,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    /* Search for fixed substrings supports EXACT only. */
 	    if (flags & SCF_DO_SUBSTR) {
 		assert(data);
-		scan_commit(pRExC_state, data, minlenp);
+		SCAN_COMMIT(pRExC_state, data, minlenp);
 	    }
 	    if (UTF) {
 		const U8 * const s = (U8 *)STRING(scan);
@@ -2941,7 +2945,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		is_inf = is_inf_internal = 1;
 		scan = regnext(scan);
 		if (flags & SCF_DO_SUBSTR) {
-		    scan_commit(pRExC_state, data, minlenp); /* Cannot extend fixed substrings */
+		    SCAN_COMMIT(pRExC_state, data, minlenp); /* Cannot extend fixed substrings */
 		    data->longest = &(data->longest_float);
 		}
 		goto optimize_curly_tail;
@@ -2964,7 +2968,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		next_is_eval = (OP(scan) == EVAL);
 	      do_curly:
 		if (flags & SCF_DO_SUBSTR) {
-		    if (mincount == 0) scan_commit(pRExC_state,data,minlenp); /* Cannot extend fixed substrings */
+		    if (mincount == 0) SCAN_COMMIT(pRExC_state,data,minlenp); /* Cannot extend fixed substrings */
 		    pos_before = data->pos_min;
 		}
 		if (data) {
@@ -3235,7 +3239,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		    if (mincount != maxcount) {
 			 /* Cannot extend fixed substrings found inside
 			    the group.  */
-			scan_commit(pRExC_state,data,minlenp);
+			SCAN_COMMIT(pRExC_state,data,minlenp);
 			if (mincount && last_str) {
 			    SV * const sv = data->last_found;
 			    MAGIC * const mg = SvUTF8(sv) && SvMAGICAL(sv) ?
@@ -3267,7 +3271,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 		continue;
 	    default:			/* REF and CLUMP only? */
 		if (flags & SCF_DO_SUBSTR) {
-		    scan_commit(pRExC_state,data,minlenp);	/* Cannot expect anything... */
+		    SCAN_COMMIT(pRExC_state,data,minlenp);	/* Cannot expect anything... */
 		    data->longest = &(data->longest_float);
 		}
 		is_inf = is_inf_internal = 1;
@@ -3281,7 +3285,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    int value = 0;
 
 	    if (flags & SCF_DO_SUBSTR) {
-		scan_commit(pRExC_state,data,minlenp);
+		SCAN_COMMIT(pRExC_state,data,minlenp);
 		data->pos_min++;
 	    }
 	    min++;
@@ -3570,7 +3574,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     if ((flags & SCF_DO_SUBSTR) && data->last_found) {
                         f |= SCF_DO_SUBSTR;
                         if (scan->flags) 
-                            scan_commit(pRExC_state, &data_fake,minlenp);
+                            SCAN_COMMIT(pRExC_state, &data_fake,minlenp);
                         data_fake.last_found=newSVsv(data->last_found);
                     }
                 }
@@ -3621,7 +3625,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
                     if ((flags & SCF_DO_SUBSTR) && data_fake.last_found) {
                         if (RExC_rx->minlen<*minnextp)
                             RExC_rx->minlen=*minnextp;
-                        scan_commit(pRExC_state, &data_fake, minnextp);
+                        SCAN_COMMIT(pRExC_state, &data_fake, minnextp);
                         SvREFCNT_dec(data_fake.last_found);
                         
                         if ( data_fake.minlen_fixed != minlenp ) 
@@ -3667,7 +3671,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	}
 	else if ( PL_regkind[OP(scan)] == ENDLIKE ) {
 	    if (flags & SCF_DO_SUBSTR) {
-		scan_commit(pRExC_state,data,minlenp);
+		SCAN_COMMIT(pRExC_state,data,minlenp);
 		flags &= ~SCF_DO_SUBSTR;
 	    }
 	    if (data && OP(scan)==ACCEPT) {
@@ -3679,7 +3683,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	else if (OP(scan) == LOGICAL && scan->flags == 2) /* Embedded follows */
 	{
 		if (flags & SCF_DO_SUBSTR) {
-		    scan_commit(pRExC_state,data,minlenp);
+		    SCAN_COMMIT(pRExC_state,data,minlenp);
 		    data->longest = &(data->longest_float);
 		}
 		is_inf = is_inf_internal = 1;
@@ -3713,7 +3717,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
             struct regnode_charclass_class accum;
 
             if (flags & SCF_DO_SUBSTR) /* XXXX Add !SUSPEND? */
-                scan_commit(pRExC_state, data,minlenp); /* Cannot merge strings after this. */
+                SCAN_COMMIT(pRExC_state, data,minlenp); /* Cannot merge strings after this. */
             if (flags & SCF_DO_STCLASS)
                 cl_init_zero(pRExC_state, &accum);
                 
@@ -3830,7 +3834,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 	    delta += (trie->maxlen - trie->minlen);
 	    flags &= ~SCF_DO_STCLASS; /* xxx */
             if (flags & SCF_DO_SUBSTR) {
-    	        scan_commit(pRExC_state,data,minlenp);	/* Cannot expect anything... */
+    	        SCAN_COMMIT(pRExC_state,data,minlenp);	/* Cannot expect anything... */
     	        data->pos_min += trie->minlen;
     	        data->pos_delta += (trie->maxlen - trie->minlen);
 		if (trie->maxlen != trie->minlen)
@@ -3854,6 +3858,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
 
   finish:
     assert(!frame);
+    DEBUG_STUDYDATA("pre-fin:",data,depth);
 
     *scanp = scan;
     *deltap = is_inf_internal ? I32_MAX : delta;
@@ -3874,7 +3879,7 @@ S_study_chunk(pTHX_ RExC_state_t *pRExC_state, regnode **scanp,
     if (flags & SCF_TRIE_RESTUDY)
         data->flags |= 	SCF_TRIE_RESTUDY;
     
-    DEBUG_STUDYDATA(data,depth);
+    DEBUG_STUDYDATA("post-fin:",data,depth);
     
     return min < stopmin ? min : stopmin;
 }
@@ -4342,7 +4347,7 @@ reStudy:
 	     && !RExC_seen_zerolen
 	     && (!(RExC_seen & REG_SEEN_GPOS) || (r->extflags & RXf_ANCH_GPOS)))
 	    r->extflags |= RXf_CHECK_ALL;
-	scan_commit(pRExC_state, &data,&minlen);
+	scan_commit(pRExC_state, &data,&minlen,0);
 	SvREFCNT_dec(data.last_found);
 
         /* Note that code very similar to this but for anchored string 

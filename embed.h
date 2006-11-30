@@ -3528,7 +3528,7 @@
 #define join_exact(a,b,c,d,e,f)	S_join_exact(aTHX_ a,b,c,d,e,f)
 #define regwhite		S_regwhite
 #define nextchar(a)		S_nextchar(aTHX_ a)
-#define scan_commit(a,b,c)	S_scan_commit(aTHX_ a,b,c)
+#define scan_commit(a,b,c,d)	S_scan_commit(aTHX_ a,b,c,d)
 #define cl_anything		S_cl_anything
 #define cl_is_anything		S_cl_is_anything
 #define cl_init			S_cl_init

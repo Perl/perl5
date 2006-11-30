@@ -3601,7 +3601,7 @@ STATIC char*	S_regwhite(char *p, const char *e)
 STATIC char*	S_nextchar(pTHX_ struct RExC_state_t *state)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_scan_commit(pTHX_ const struct RExC_state_t* state, struct scan_data_t *data, I32 *minlenp)
+STATIC void	S_scan_commit(pTHX_ const struct RExC_state_t* state, struct scan_data_t *data, I32 *minlenp, int is_inf)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);

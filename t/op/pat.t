@@ -4121,6 +4121,39 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     ok("foobarbarxyz" =~ qr/(foo${qr_barR1})xyz/);
     ok("foobarbarxyz" =~ qr/(foo(bar)\R1)xyz/);
 } 
+{
+    local $Message = "RT#41010";
+    my @tails=('','(?(1))','(|)','()?');    
+    my @quants=('*','+');
+    my $doit=sub {
+        my $pats= shift;
+        for (@_) {
+            for my $pat (@$pats) {
+                for my $quant (@quants) {
+                    for my $tail (@tails) {
+                        my $re = "($pat$quant\$)$tail";
+                        ok(/$re/ && $1 eq $_,"'$_'=~/$re/");
+                        ok(/$re/m && $1 eq $_,"'$_'=~/$re/m");
+                    }
+                }
+            }
+       }
+    };    
+    
+    my @dpats=( 
+                '\d',
+                '[1234567890]',
+                '(1|[23]|4|[56]|[78]|[90])',
+                '(?:1|[23]|4|[56]|[78]|[90])',
+                '(1|2|3|4|5|6|7|8|9|0)',
+                '(?:1|2|3|4|5|6|7|8|9|0)',
+             );
+    my @spats=('[ ]',' ','( |\t)','(?: |\t)','[ \t]','\s');
+    my @sstrs=('  ');
+    my @dstrs=('12345');
+    $doit->(\@spats,@sstrs);
+    $doit->(\@dpats,@dstrs);
+}
  
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
@@ -4168,7 +4201,7 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1375; 
+    $::TestCount = 1567; 
     print "1..$::TestCount\n";
 }
 

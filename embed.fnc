@@ -1321,7 +1321,7 @@ Es	|SV *	|reg_scan_name	|NN struct RExC_state_t *state|U32 flags
 Es	|U32	|join_exact	|NN struct RExC_state_t *state|NN regnode *scan|NN I32 *min|U32 flags|NULLOK regnode *val|U32 depth
 EsRn	|char*	|regwhite	|NN char *p|NN const char *e
 Es	|char*	|nextchar	|NN struct RExC_state_t *state
-Es	|void	|scan_commit	|NN const struct RExC_state_t* state|NN struct scan_data_t *data|NN I32 *minlenp
+Es	|void	|scan_commit	|NN const struct RExC_state_t* state|NN struct scan_data_t *data|NN I32 *minlenp|int is_inf
 Esn	|void	|cl_anything	|NN const struct RExC_state_t* state|NN struct regnode_charclass_class *cl
 EsRn	|int	|cl_is_anything	|NN const struct regnode_charclass_class *cl
 Esn	|void	|cl_init	|NN const struct RExC_state_t* state|NN struct regnode_charclass_class *cl
