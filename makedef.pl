@@ -1113,8 +1113,15 @@ if ($define{'USE_PERLIO'}) {
 	# Skip the PerlIO layer symbols - although
 	# nothing should have exported them anyway.
 	skip_symbols \@layer_syms;
-	skip_symbols [qw(perlsio_binmode)];
-        skip_symbols [qw(PL_def_layerlist PL_known_layers PL_perlio)];
+	skip_symbols [qw(
+			perlsio_binmode
+			PL_def_layerlist
+			PL_known_layers
+			PL_perlio
+			PL_perlio_debug_fd
+			PL_perlio_fd_refcnt
+			PL_perlio_fd_refcnt_size
+			)];
 
 	# Also do NOT add abstraction symbols from $perlio_sym
 	# abstraction is done as #define to stdio
