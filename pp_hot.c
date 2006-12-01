@@ -2683,7 +2683,7 @@ PP(pp_leavesublv)
 }
 
 
-STATIC CV *
+STATIC void
 S_get_db_sub(pTHX_ SV **svp, CV *cv)
 {
     dVAR;
@@ -2714,11 +2714,6 @@ S_get_db_sub(pTHX_ SV **svp, CV *cv)
 	(void)SvIOK_on(dbsv);
 	SvIV_set(dbsv, PTR2IV(cv));	/* Do it the quickest way  */
     }
-
-    if (CvISXSUB(cv))
-	PL_curcopdb = PL_curcop;
-    cv = GvCV(PL_DBsub);
-    return cv;
 }
 
 PP(pp_entersub)
@@ -2828,7 +2823,11 @@ try_autoload:
         if (CvASSERTION(cv) && PL_DBassertion)
 	    sv_setiv(PL_DBassertion, 1);
 	
-	cv = get_db_sub(&sv, cv);
+	 get_db_sub(&sv, cv);
+	 if (CvISXSUB(cv))
+	     PL_curcopdb = PL_curcop;
+	 cv = GvCV(PL_DBsub);
+
 	if (!cv || (!CvXSUB(cv) && !CvSTART(cv)))
 	    DIE(aTHX_ "No DB::sub routine defined");
     }

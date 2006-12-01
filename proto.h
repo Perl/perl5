@@ -3465,8 +3465,7 @@ STATIC void	S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
 
-STATIC CV*	S_get_db_sub(pTHX_ SV **svp, CV *cv)
-			__attribute__warn_unused_result__
+STATIC void	S_get_db_sub(pTHX_ SV **svp, CV *cv)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2);
 

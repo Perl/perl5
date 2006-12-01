@@ -1277,7 +1277,7 @@ s	|OP*	|do_smartmatch	|NULLOK HV* seen_this|NULLOK HV* seen_other
 
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 s	|void	|do_oddball	|NN HV *hash|NN SV **relem|NN SV **firstrelem
-sR	|CV*	|get_db_sub	|NN SV **svp|NN CV *cv
+s	|void	|get_db_sub	|NN SV **svp|NN CV *cv
 sR	|SV*	|method_common	|NN SV* meth|NULLOK U32* hashp
 #endif
 
