@@ -1711,6 +1711,9 @@ lib/File/Copy.pm		Emulation of cp command
 lib/File/Copy.t			See if File::Copy works
 lib/File/DosGlob.pm		Win32 DOS-globbing module
 lib/File/DosGlob.t		See if File::DosGlob works
+lib/File/Fetch/Item.pm	File::Fetch
+lib/File/Fetch.pm	File::Fetch
+lib/File/Fetch/t/01_File-Fetch.t	File::Fetch tests
 lib/File/Find.pm		Routines to do a find
 lib/File/Find/t/find.t		See if File::Find works
 lib/File/Find/t/taint.t		See if File::Find works with taint
