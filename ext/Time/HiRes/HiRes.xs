@@ -73,6 +73,13 @@ extern "C" {
 # endif
 #endif
 
+/* PL_ppaddr is not available in Perl 5.005_04 */
+#if (PERL_VERSION < 5) || (PERL_VERSION == 5 && PERL_SUBVERSION <50)
+# ifndef PL_ppaddr
+#  define PL_ppaddr ppaddr
+# endif
+#endif 
+
 #if defined(TIME_HIRES_CLOCK_GETTIME) && defined(_STRUCT_ITIMERSPEC)
 
 /* HP-UX has CLOCK_XXX values but as enums, not as defines.
@@ -1219,7 +1226,7 @@ PROTOTYPE: ;$
 	PUTBACK;
 	ENTER;
 	PL_laststatval = -1;
-	pp_stat();
+	(void)*(PL_ppaddr[OP_STAT])(aTHX);
 	SPAGAIN;
 	LEAVE;
 	if (PL_laststatval == 0) {
