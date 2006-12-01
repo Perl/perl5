@@ -869,6 +869,34 @@ S_skipspace2(pTHX_ register char *s, SV **svp)
 }
 #endif
 
+STATIC void
+S_update_debugger_info_pv(pTHX_ const char *buf, STRLEN len)
+{
+    AV *av = CopFILEAVx(PL_curcop);
+    if (av) {
+	SV * const sv = newSV(0);
+	sv_upgrade(sv, SVt_PVMG);
+	sv_setpvn(sv, buf, len);
+	(void)SvIOK_on(sv);
+	SvIV_set(sv, 0);
+	av_store(av, (I32)CopLINE(PL_curcop), sv);
+    }
+}
+
+STATIC void
+S_update_debugger_info_sv(pTHX_ SV *orig_sv)
+{
+    AV *av = CopFILEAVx(PL_curcop);
+    if (av) {
+	SV * const sv = newSV(0);
+	sv_upgrade(sv, SVt_PVMG);
+	sv_setsv(sv, orig_sv);
+	(void)SvIOK_on(sv);
+	SvIV_set(sv, 0);
+	av_store(av, (I32)CopLINE(PL_curcop), sv);
+    }
+}
+
 /*
  * S_skipspace
  * Called to gobble the appropriate amount and type of whitespace.
@@ -1032,15 +1060,8 @@ S_skipspace(pTHX_ register char *s)
 	/* debugger active and we're not compiling the debugger code,
 	 * so store the line into the debugger's array of lines
 	 */
-	if (PERLDB_LINE && PL_curstash != PL_debstash) {
-	    SV * const sv = newSV(0);
-
-	    sv_upgrade(sv, SVt_PVMG);
-	    sv_setpvn(sv,PL_bufptr,PL_bufend-PL_bufptr);
-            (void)SvIOK_on(sv);
-            SvIV_set(sv, 0);
-	    av_store(CopFILEAVx(PL_curcop),(I32)CopLINE(PL_curcop),sv);
-	}
+	if (PERLDB_LINE && PL_curstash != PL_debstash)
+	    update_debugger_info_pv(PL_bufptr, PL_bufend - PL_bufptr);
     }
 
 #ifdef PERL_MAD
@@ -3545,15 +3566,8 @@ Perl_yylex(pTHX)
 	    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	    PL_last_lop = PL_last_uni = NULL;
-	    if (PERLDB_LINE && PL_curstash != PL_debstash) {
-		SV * const sv = newSV(0);
-
-		sv_upgrade(sv, SVt_PVMG);
-		sv_setsv(sv,PL_linestr);
-                (void)SvIOK_on(sv);
-                SvIV_set(sv, 0);
-		av_store(CopFILEAVx(PL_curcop),(I32)CopLINE(PL_curcop),sv);
-	    }
+	    if (PERLDB_LINE && PL_curstash != PL_debstash)
+		update_debugger_info_sv(PL_linestr);
 	    goto retry;
 	}
 	do {
@@ -3645,15 +3659,8 @@ Perl_yylex(pTHX)
 	    incline(s);
 	} while (PL_doextract);
 	PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = s;
-	if (PERLDB_LINE && PL_curstash != PL_debstash) {
-	    SV * const sv = newSV(0);
-
-	    sv_upgrade(sv, SVt_PVMG);
-	    sv_setsv(sv,PL_linestr);
-            (void)SvIOK_on(sv);
-            SvIV_set(sv, 0);
-	    av_store(CopFILEAVx(PL_curcop),(I32)CopLINE(PL_curcop),sv);
-	}
+	if (PERLDB_LINE && PL_curstash != PL_debstash)
+	    update_debugger_info_sv(PL_linestr);
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	PL_last_lop = PL_last_uni = NULL;
 	if (CopLINE(PL_curcop) == 1) {
@@ -11215,15 +11222,8 @@ S_scan_heredoc(pTHX_ register char *s)
 	else if (PL_bufend - PL_linestart == 1 && PL_bufend[-1] == '\r')
 	    PL_bufend[-1] = '\n';
 #endif
-	if (PERLDB_LINE && PL_curstash != PL_debstash) {
-	    SV * const sv = newSV(0);
-
-	    sv_upgrade(sv, SVt_PVMG);
-	    sv_setsv(sv,PL_linestr);
-            (void)SvIOK_on(sv);
-            SvIV_set(sv, 0);
-	    av_store(CopFILEAVx(PL_curcop), (I32)CopLINE(PL_curcop),sv);
-	}
+	if (PERLDB_LINE && PL_curstash != PL_debstash)
+	    update_debugger_info_sv(PL_linestr);
 	if (*s == term && memEQ(s,PL_tokenbuf,len)) {
 	    STRLEN off = PL_bufend - 1 - SvPVX_const(PL_linestr);
 	    *(SvPVX(PL_linestr) + off ) = ' ';
@@ -11719,15 +11719,8 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	CopLINE_inc(PL_curcop);
 
 	/* update debugger info */
-	if (PERLDB_LINE && PL_curstash != PL_debstash) {
-	    SV * const line_sv = newSV(0);
-
-	    sv_upgrade(line_sv, SVt_PVMG);
-	    sv_setsv(line_sv,PL_linestr);
-	    (void)SvIOK_on(line_sv);
-	    SvIV_set(line_sv, 0);
-	    av_store(CopFILEAVx(PL_curcop), (I32)CopLINE(PL_curcop), line_sv);
-	}
+	if (PERLDB_LINE && PL_curstash != PL_debstash)
+	    update_debugger_info_sv(PL_linestr);
 
 	/* having changed the buffer, we must update PL_bufend */
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);

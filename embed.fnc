@@ -1471,6 +1471,8 @@ sR	|char*	|scan_subst	|NN char *start
 sR	|char*	|scan_trans	|NN char *start
 s	|char*	|scan_word	|NN char *s|NN char *dest|STRLEN destlen \
 				|int allow_package|NN STRLEN *slp
+s	|void	|update_debugger_info_pv|NN const char *buf|STRLEN len
+s	|void	|update_debugger_info_sv|NN SV *orig_sv
 sR	|char*	|skipspace	|NN char *s
 sR	|char*	|swallow_bom	|NN U8 *s
 s	|void	|checkcomma	|NN const char *s|NN const char *name \

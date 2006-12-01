@@ -4002,10 +4002,13 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     CopSTASH_set(cop, PL_curstash);
 
     if (PERLDB_LINE && PL_curstash != PL_debstash) {
-	SV * const * const svp = av_fetch(CopFILEAVx(PL_curcop), (I32)CopLINE(cop), FALSE);
-	if (svp && *svp != &PL_sv_undef ) {
-	    (void)SvIOK_on(*svp);
-	    SvIV_set(*svp, PTR2IV(cop));
+	AV *av = CopFILEAVx(PL_curcop);
+	if (av) {
+	    SV * const * const svp = av_fetch(av, (I32)CopLINE(cop), FALSE);
+	    if (svp && *svp != &PL_sv_undef ) {
+		(void)SvIOK_on(*svp);
+		SvIV_set(*svp, PTR2IV(cop));
+	    }
 	}
     }
 

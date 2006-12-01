@@ -1471,6 +1471,8 @@
 #define scan_subst		S_scan_subst
 #define scan_trans		S_scan_trans
 #define scan_word		S_scan_word
+#define update_debugger_info_pv	S_update_debugger_info_pv
+#define update_debugger_info_sv	S_update_debugger_info_sv
 #define skipspace		S_skipspace
 #define swallow_bom		S_swallow_bom
 #define checkcomma		S_checkcomma
@@ -3676,6 +3678,8 @@
 #define scan_subst(a)		S_scan_subst(aTHX_ a)
 #define scan_trans(a)		S_scan_trans(aTHX_ a)
 #define scan_word(a,b,c,d,e)	S_scan_word(aTHX_ a,b,c,d,e)
+#define update_debugger_info_pv(a,b)	S_update_debugger_info_pv(aTHX_ a,b)
+#define update_debugger_info_sv(a)	S_update_debugger_info_sv(aTHX_ a)
 #define skipspace(a)		S_skipspace(aTHX_ a)
 #define swallow_bom(a)		S_swallow_bom(aTHX_ a)
 #define checkcomma(a,b,c)	S_checkcomma(aTHX_ a,b,c)

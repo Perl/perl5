@@ -3957,6 +3957,12 @@ STATIC char*	S_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_pa
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_5);
 
+STATIC void	S_update_debugger_info_pv(pTHX_ const char *buf, STRLEN len)
+			__attribute__nonnull__(pTHX_1);
+
+STATIC void	S_update_debugger_info_sv(pTHX_ SV *orig_sv)
+			__attribute__nonnull__(pTHX_1);
+
 STATIC char*	S_skipspace(pTHX_ char *s)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
