@@ -501,6 +501,21 @@ adding the C<SvMAGICAL> check to
 Go through the core and look for similar assumptions that SVs have particular
 types, as all bets are off during global destruction.
 
+=head2 Extend PerlIO and PerlIO::Scalar
+
+PerlIO::Scalar doesn't know how to truncate().  Implementing this
+would require extending the PerlIO vtable.
+
+Similarly the PerlIO vtable doesn't know about formats (write()), or
+about stat(), or chmod()/chown(), utime(), or flock().
+
+(For PerlIO::Scalar it's hard to see what e.g. mode bits or ownership
+would mean.)
+
+PerlIO doesn't do directories or symlinks, either: mkdir(), rmdir(),
+opendir(), closedir(), seekdir(), rewinddir(), glob(); symlink(),
+readlink().
+
 =head1 Tasks that need a knowledge of the interpreter
 
 These tasks would need C knowledge, and knowledge of how the interpreter works,
