@@ -8669,8 +8669,7 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
     regexp *ret;
     int i, npar;
     struct reg_substr_datum *s;
-    RXi_GET_DECL(r,ri);
-    
+
     if (!r)
 	return (REGEXP *)NULL;
 
