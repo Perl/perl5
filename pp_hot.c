@@ -2683,20 +2683,23 @@ PP(pp_leavesublv)
 }
 
 
-STATIC void
-S_get_db_sub(pTHX_ SV **svp, CV *cv)
+void
+Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 {
     dVAR;
     SV * const dbsv = GvSVn(PL_DBsub);
+    /* We do not care about using sv to call CV;
+     * it's for informational purposes only.
+     */
 
     save_item(dbsv);
     if (!PERLDB_SUB_NN) {
 	GV * const gv = CvGV(cv);
 
-	if ( (CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
+	if ( svp && ((CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
 	     || strEQ(GvNAME(gv), "END")
 	     || ((GvCV(gv) != cv) && /* Could be imported, and old sub redefined. */
-		 !( (SvTYPE(*svp) == SVt_PVGV) && (GvCV((GV*)*svp) == cv) ))) {
+		 !( (SvTYPE(*svp) == SVt_PVGV) && (GvCV((GV*)*svp) == cv) )))) {
 	    /* Use GV from the stack as a fallback. */
 	    /* GV is potentially non-unique, or contain different CV. */
 	    SV * const tmp = newRV((SV*)cv);
@@ -2823,7 +2826,7 @@ try_autoload:
         if (CvASSERTION(cv) && PL_DBassertion)
 	    sv_setiv(PL_DBassertion, 1);
 	
-	 get_db_sub(&sv, cv);
+	 Perl_get_db_sub(aTHX_ &sv, cv);
 	 if (CvISXSUB(cv))
 	     PL_curcopdb = PL_curcop;
 	 cv = GvCV(PL_DBsub);

@@ -1274,7 +1274,6 @@
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define do_oddball		S_do_oddball
-#define get_db_sub		S_get_db_sub
 #define method_common		S_method_common
 #endif
 #endif
@@ -2458,6 +2457,8 @@
 #define getenv_len(a,b)		Perl_getenv_len(aTHX_ a,b)
 #endif
 #endif
+#ifdef PERL_CORE
+#endif
 #define gp_free(a)		Perl_gp_free(aTHX_ a)
 #define gp_ref(a)		Perl_gp_ref(aTHX_ a)
 #define gv_AVadd(a)		Perl_gv_AVadd(aTHX_ a)
@@ -3477,7 +3478,6 @@
 #if defined(PERL_IN_PP_HOT_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define do_oddball(a,b,c)	S_do_oddball(aTHX_ a,b,c)
-#define get_db_sub(a,b)		S_get_db_sub(aTHX_ a,b)
 #define method_common(a,b)	S_method_common(aTHX_ a,b)
 #endif
 #endif

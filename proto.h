@@ -588,6 +588,9 @@ PERL_CALLCONV char*	Perl_getenv_len(pTHX_ const char* key, unsigned long *len)
 			__attribute__nonnull__(pTHX_2);
 
 #endif
+PERL_CALLCONV void	Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
+			__attribute__nonnull__(pTHX_2);
+
 PERL_CALLCONV void	Perl_gp_free(pTHX_ GV* gv);
 PERL_CALLCONV GP*	Perl_gp_ref(pTHX_ GP* gp);
 PERL_CALLCONV GV*	Perl_gv_AVadd(pTHX_ GV* gv)
@@ -3464,10 +3467,6 @@ STATIC void	S_do_oddball(pTHX_ HV *hash, SV **relem, SV **firstrelem)
 			__attribute__nonnull__(pTHX_1)
 			__attribute__nonnull__(pTHX_2)
 			__attribute__nonnull__(pTHX_3);
-
-STATIC void	S_get_db_sub(pTHX_ SV **svp, CV *cv)
-			__attribute__nonnull__(pTHX_1)
-			__attribute__nonnull__(pTHX_2);
 
 STATIC SV*	S_method_common(pTHX_ SV* meth, U32* hashp)
 			__attribute__warn_unused_result__

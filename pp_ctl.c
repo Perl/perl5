@@ -2475,21 +2475,7 @@ PP(pp_goto)
 		    }
 		}
 		if (PERLDB_SUB) {	/* Checking curstash breaks DProf. */
-		    /*
-		     * We do not care about using sv to call CV;
-		     * it's for informational purposes only.
-		     */
-		    SV * const sv = GvSV(PL_DBsub);
-		    save_item(sv);
-		    if (PERLDB_SUB_NN) {
-			const int type = SvTYPE(sv);
-			if (type < SVt_PVIV && type != SVt_IV)
-			    sv_upgrade(sv, SVt_PVIV);
-			(void)SvIOK_on(sv);
-			SvIV_set(sv, PTR2IV(cv)); /* Do it the quickest way */
-		    } else {
-			gv_efullname3(sv, CvGV(cv), NULL);
-		    }
+		    Perl_get_db_sub(aTHX_ NULL, cv);
 		    if (PERLDB_GOTO) {
 			CV * const gotocv = get_cv("DB::goto", FALSE);
 			if (gotocv) {
