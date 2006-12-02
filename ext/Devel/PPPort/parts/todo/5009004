@@ -1,15 +1,10 @@
 5.009004
-MULTICALL                      # E
-POP_MULTICALL                  # E
-PUSH_MULTICALL                 # E
 PerlIO_context_layers          # U
 gv_name_set                    # U
 my_vsnprintf                   # U
 newXS_flags                    # U
-pad_sv                         # U
 pv_escape                      # U
 pv_pretty                      # U
 regclass_swash                 # E (Perl_regclass_swash)
-stashpv_hvname_match           # U
 sv_does                        # U
 sv_usepvn_flags                # U

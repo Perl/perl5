@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 36 $
+##  $Revision: 37 $
 ##  $Author: mhx $
-##  $Date: 2006/05/22 00:51:01 +0200 $
+##  $Date: 2006/12/02 13:49:03 +0100 $
 ##
 ################################################################################
 ##
@@ -38,45 +38,8 @@ EXTERN_C
 STMT_START
 STMT_END
 XSRETURN
-/PL_\w+/
 
 =implementation
-
-#if { VERSION <= 5.004_05 }
-/* Replace: 1 */
-#  define PL_DBsingle               DBsingle
-#  define PL_DBsub                  DBsub
-#  define PL_Sv                     Sv
-#  define PL_compiling              compiling
-#  define PL_copline                copline
-#  define PL_curcop                 curcop
-#  define PL_curstash               curstash
-#  define PL_debstash               debstash
-#  define PL_defgv                  defgv
-#  define PL_diehook                diehook
-#  define PL_dirty                  dirty
-#  define PL_dowarn                 dowarn
-#  define PL_errgv                  errgv
-#  define PL_hexdigit               hexdigit
-#  define PL_hints                  hints
-#  define PL_na	                    na
-#  define PL_no_modify              no_modify
-#  define PL_perl_destruct_level    perl_destruct_level
-#  define PL_perldb                 perldb
-#  define PL_ppaddr                 ppaddr
-#  define PL_rsfp_filters           rsfp_filters
-#  define PL_rsfp                   rsfp
-#  define PL_stack_base             stack_base
-#  define PL_stack_sp               stack_sp
-#  define PL_stdingv                stdingv
-#  define PL_sv_arenaroot           sv_arenaroot
-#  define PL_sv_no                  sv_no
-#  define PL_sv_undef               sv_undef
-#  define PL_sv_yes                 sv_yes
-#  define PL_tainted                tainted
-#  define PL_tainting               tainting
-/* Replace: 0 */
-#endif
 
 #ifndef PERL_UNUSED_DECL
 #  ifdef HASATTRIBUTE
@@ -351,36 +314,6 @@ xsreturn(two)
 		else
 		  XSRETURN(1);
 
-SV *
-PL_sv_undef()
-	CODE:
-		RETVAL = newSVsv(&PL_sv_undef);
-	OUTPUT:
-		RETVAL
-
-SV *
-PL_sv_yes()
-	CODE:
-		RETVAL = newSVsv(&PL_sv_yes);
-	OUTPUT:
-		RETVAL
-
-SV *
-PL_sv_no()
-	CODE:
-		RETVAL = newSVsv(&PL_sv_no);
-	OUTPUT:
-		RETVAL
-
-int
-PL_na(string)
-	char *string
-	CODE:
-		PL_na = strlen(string);
-		RETVAL = PL_na;
-	OUTPUT:
-		RETVAL
-
 SV*
 boolSV(value)
 	int value
@@ -437,7 +370,7 @@ SVf(x)
 		XPUSHs(x);
 		XSRETURN(1);
 
-=tests plan => 42
+=tests plan => 38
 
 use vars qw($my_sv @my_av %my_hv);
 
@@ -448,11 +381,6 @@ ok($s[1], "te");
 ok($s[2], "");
 ok(!defined($s[3]));
 ok(!defined($s[4]));
-
-ok(!defined(&Devel::PPPort::PL_sv_undef()));
-ok(&Devel::PPPort::PL_sv_yes());
-ok(!&Devel::PPPort::PL_sv_no());
-ok(&Devel::PPPort::PL_na("abcd"), 4);
 
 ok(&Devel::PPPort::boolSV(1));
 ok(!&Devel::PPPort::boolSV(0));

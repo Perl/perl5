@@ -1,8 +1,8 @@
 ################################################################################
 ##
-##  $Revision: 4 $
+##  $Revision: 6 $
 ##  $Author: mhx $
-##  $Date: 2006/01/14 18:07:58 +0100 $
+##  $Date: 2006/12/02 14:01:23 +0100 $
 ##
 ################################################################################
 ##
@@ -17,8 +17,12 @@
 
 =provides
 
-PL_signals
+/PL_\w+/
 PERL_SIGNALS_UNSAFE_FLAG
+
+=dontwarn
+
+D_PPP_PERL_SIGNALS_INIT
 
 =implementation
 
@@ -26,8 +30,66 @@ PERL_SIGNALS_UNSAFE_FLAG
 
 #define PERL_SIGNALS_UNSAFE_FLAG 0x0001
 
-__NEED_VAR__ U32 PL_signals = PERL_SIGNALS_UNSAFE_FLAG;
+#if { VERSION < 5.8.0 }
+#  define D_PPP_PERL_SIGNALS_INIT   PERL_SIGNALS_UNSAFE_FLAG
+#else
+#  define D_PPP_PERL_SIGNALS_INIT   0
+#endif
 
+__NEED_VAR__ U32 PL_signals = D_PPP_PERL_SIGNALS_INIT;
+
+#endif
+
+/* Hint: PL_ppaddr
+ * Calling an op via PL_ppaddr requires passing a context argument
+ * for threaded builds. Since the context argument is different for
+ * 5.005 perls, you can use aTHXR (supplied by ppport.h), which will
+ * automatically be defined as the correct argument.
+ */
+
+#if { VERSION <= 5.005_04 }
+/* Replace: 1 */
+#  define PL_ppaddr                 ppaddr
+#  define PL_no_modify              no_modify
+/* Replace: 0 */
+#endif
+
+#if { VERSION <= 5.004_05 }
+/* Replace: 1 */
+#  define PL_DBsignal               DBsignal
+#  define PL_DBsingle               DBsingle
+#  define PL_DBsub                  DBsub
+#  define PL_DBtrace                DBtrace
+#  define PL_Sv                     Sv
+#  define PL_compiling              compiling
+#  define PL_copline                copline
+#  define PL_curcop                 curcop
+#  define PL_curstash               curstash
+#  define PL_debstash               debstash
+#  define PL_defgv                  defgv
+#  define PL_diehook                diehook
+#  define PL_dirty                  dirty
+#  define PL_dowarn                 dowarn
+#  define PL_errgv                  errgv
+#  define PL_hexdigit               hexdigit
+#  define PL_hints                  hints
+#  define PL_laststatval            laststatval
+#  define PL_na                     na
+#  define PL_perl_destruct_level    perl_destruct_level
+#  define PL_perldb                 perldb
+#  define PL_rsfp_filters           rsfp_filters
+#  define PL_rsfp                   rsfp
+#  define PL_stack_base             stack_base
+#  define PL_stack_sp               stack_sp
+#  define PL_statcache              statcache
+#  define PL_stdingv                stdingv
+#  define PL_sv_arenaroot           sv_arenaroot
+#  define PL_sv_no                  sv_no
+#  define PL_sv_undef               sv_undef
+#  define PL_sv_yes                 sv_yes
+#  define PL_tainted                tainted
+#  define PL_tainting               tainting
+/* Replace: 0 */
 #endif
 
 =xsinit
@@ -44,6 +106,8 @@ U32 get_PL_signals_1(void)
 extern U32 get_PL_signals_2(void);
 extern U32 get_PL_signals_3(void);
 
+#define ppp_TESTVAR(var)   STMT_START { XPUSHs(newSViv(&var != NULL)); count++; } STMT_END
+
 =xsubs
 
 int
@@ -56,7 +120,125 @@ compare_PL_signals()
 	OUTPUT:
 		RETVAL
 
-=tests plan => 1
+SV *
+PL_sv_undef()
+	CODE:
+		RETVAL = newSVsv(&PL_sv_undef);
+	OUTPUT:
+		RETVAL
+
+SV *
+PL_sv_yes()
+	CODE:
+		RETVAL = newSVsv(&PL_sv_yes);
+	OUTPUT:
+		RETVAL
+
+SV *
+PL_sv_no()
+	CODE:
+		RETVAL = newSVsv(&PL_sv_no);
+	OUTPUT:
+		RETVAL
+
+int
+PL_na(string)
+	char *string
+	CODE:
+		PL_na = strlen(string);
+		RETVAL = PL_na;
+	OUTPUT:
+		RETVAL
+
+SV *
+PL_Sv()
+	CODE:
+		PL_Sv = newSVpv("mhx", 0);
+		RETVAL = PL_Sv;
+	OUTPUT:
+		RETVAL
+
+SV *
+PL_copline()
+	CODE:
+		RETVAL = newSViv((IV) PL_copline);
+	OUTPUT:
+		RETVAL
+
+SV *
+PL_hexdigit()
+	CODE:
+		RETVAL = newSVpv(PL_hexdigit, 0);
+	OUTPUT:
+		RETVAL
+
+SV *
+PL_hints()
+	CODE:
+		RETVAL = newSViv((IV) PL_hints);
+	OUTPUT:
+		RETVAL
+
+void
+PL_ppaddr(string)
+	char *string
+	PPCODE:
+		PUSHMARK(SP);
+		XPUSHs(sv_2mortal(newSVpv(string, 0)));
+		PUTBACK;
+		ENTER;
+		(void)*(PL_ppaddr[OP_UC])(aTHXR);
+		SPAGAIN;
+		LEAVE;
+		XSRETURN(1);
+
+void
+other_variables()
+	PREINIT:
+		int count = 0;
+	PPCODE:
+		ppp_TESTVAR(PL_DBsignal);
+		ppp_TESTVAR(PL_DBsingle);
+		ppp_TESTVAR(PL_DBsub);
+		ppp_TESTVAR(PL_DBtrace);
+		ppp_TESTVAR(PL_compiling);
+		ppp_TESTVAR(PL_curcop);
+		ppp_TESTVAR(PL_curstash);
+		ppp_TESTVAR(PL_debstash);
+		ppp_TESTVAR(PL_defgv);
+		ppp_TESTVAR(PL_diehook);
+		ppp_TESTVAR(PL_dirty);
+		ppp_TESTVAR(PL_dowarn);
+		ppp_TESTVAR(PL_errgv);
+		ppp_TESTVAR(PL_laststatval);
+		ppp_TESTVAR(PL_no_modify);
+		ppp_TESTVAR(PL_perl_destruct_level);
+		ppp_TESTVAR(PL_perldb);
+		ppp_TESTVAR(PL_rsfp_filters);
+		ppp_TESTVAR(PL_rsfp);
+		ppp_TESTVAR(PL_stack_base);
+		ppp_TESTVAR(PL_stack_sp);
+		ppp_TESTVAR(PL_statcache);
+		ppp_TESTVAR(PL_stdingv);
+		ppp_TESTVAR(PL_sv_arenaroot);
+		ppp_TESTVAR(PL_tainted);
+		ppp_TESTVAR(PL_tainting);
+		XSRETURN(count);
+
+=tests plan => 36
 
 ok(Devel::PPPort::compare_PL_signals());
 
+ok(!defined(&Devel::PPPort::PL_sv_undef()));
+ok(&Devel::PPPort::PL_sv_yes());
+ok(!&Devel::PPPort::PL_sv_no());
+ok(&Devel::PPPort::PL_na("abcd"), 4);
+ok(&Devel::PPPort::PL_Sv(), "mhx");
+ok(defined &Devel::PPPort::PL_copline());
+ok(&Devel::PPPort::PL_hexdigit() =~ /^[0-9a-zA-Z]+$/);
+ok(defined &Devel::PPPort::PL_hints());
+ok(&Devel::PPPort::PL_ppaddr("mhx"), "MHX");
+
+for (&Devel::PPPort::other_variables()) {
+  ok($_ != 0);
+}

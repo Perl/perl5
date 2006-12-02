@@ -7,9 +7,9 @@
 #
 ################################################################################
 #
-#  $Revision: 13 $
+#  $Revision: 14 $
 #  $Author: mhx $
-#  $Date: 2006/07/08 16:58:56 +0200 $
+#  $Date: 2006/12/02 13:31:24 +0100 $
 #
 ################################################################################
 #
@@ -33,7 +33,7 @@ use File::Find;
 use List::Util qw(max);
 use Config;
 
-my $VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.10 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
+my $VERSION = do { my @r = '$Snapshot: /Devel-PPPort/3.10_01 $' =~ /(\d+\.\d+(?:_\d+)?)/; @r ? $r[0] : '9.99' };
 
 $| = 1;
 my %OPT = (
@@ -77,8 +77,12 @@ $SIG{__DIE__}  = sub { $rep->die(@_)  };
 runit("$^X Makefile.PL") && runit("$OPT{make} realclean")
     or $rep->die("Cannot run $^X Makefile.PL && $OPT{make} realclean\n");
 
+my $tot = @GoodPerls*@{$OPT{mmargs}};
+
+$rep->set(tests => $tot);
+
 $rep->status(sprintf("Testing %d version%s / %d configuration%s (%d combination%s)...\n",
-                     cs(@GoodPerls), cs(@{$OPT{mmargs}}), cs(@GoodPerls*@{$OPT{mmargs}})));
+                     cs(@GoodPerls), cs(@{$OPT{mmargs}}), cs($tot)));
 
 for my $perl (@GoodPerls) {
   for my $mm (@{$OPT{mmargs}}) {
@@ -240,9 +244,11 @@ sub new
 {
   my $class = shift;
   bless {
+    tests   => undef,
     color   => 1,
     verbose => 0,
     @_,
+    _cur    => 0,
     _atbol  => 1,
     _total  => 0,
     _good   => [],
@@ -277,10 +283,19 @@ sub _config
   return $self->{config} =~ /\S+/ ? " ($self->{config})" : '';
 }
 
+sub _progress
+{
+  my $self = shift;
+  return '' unless defined $self->{tests};
+  my $tlen = length $self->{tests};
+  my $text = sprintf "[%${tlen}d/%${tlen}d] ", $self->{_cur}, $self->{tests};
+  return $self->colored($text, 'bold');
+}
+
 sub _test
 {
   my $self = shift;
-  return "Testing "
+  return $self->_progress . "Testing "
          . $self->colored($self->{perl}, 'blue')
          . $self->colored($self->_config, 'green');
 }
@@ -327,6 +342,7 @@ sub set
 sub test
 {
   my $self = shift;
+  $self->{_cur}++;
   $self->_vsep($self->_testlen);
   $self->print($self->_test, $self->{verbose} ? "\n" : ' ' . $self->_dots . ' ');
   $self->_vsep($self->_testlen);
