@@ -7,8 +7,8 @@
  * 
  *    Note that this file was originally generated as an output from
  *    GNU bison version 1.875, but now the code is statically maintained
- *    and edited; the bits that are dependent on perly.y are now #included
- *    from the files perly.tab and perly.act.
+ *    and edited; the bits that are dependent on perly.y/madly.y are now
+ *    #included from the files perly.tab/madly.tab and perly.act/madly.act.
  *
  *    Here is an important copyright statement from the original, generated
  *    file:
@@ -35,7 +35,7 @@ typedef signed char yysigned_char;
 #  define YYDEBUG 0
 #endif
 
-/* contains all the parser state tables; auto-generated from perly.y */
+/* contains all the parser state tables; auto-generated from perly.y/madly.y */
 #include "perly.tab"
 
 # define YYSIZE_T size_t
@@ -93,7 +93,7 @@ do {						\
 do {								\
     if (yydebug) {						\
 	YYFPRINTF (Perl_debug_log, "%s ", Title);		\
-	yysymprint (Perl_debug_log,  Token, Value);	\
+	yysymprint (aTHX_ Perl_debug_log,  Token, Value);	\
 	YYFPRINTF (Perl_debug_log, "\n");			\
     }								\
 } while (0)
@@ -103,7 +103,7 @@ do {								\
 `--------------------------------*/
 
 static void
-yysymprint(PerlIO * const yyoutput, int yytype, const YYSTYPE * const yyvaluep)
+yysymprint(pTHX_ PerlIO * const yyoutput, int yytype, const YYSTYPE * const yyvaluep)
 {
     if (yytype < YYNTOKENS) {
 	YYFPRINTF (yyoutput, "token %s (", yytname[yytype]);
@@ -507,7 +507,7 @@ Perl_yyparse (pTHX)
     YY_REDUCE_PRINT (yyn);
     switch (yyn) {
 
-/* contains all the rule actions; auto-generated from perly.y */
+/* contains all the rule actions; auto-generated from perly.y or madly.y */
 
 #define dep() deprecate("\"do\" to call subroutines")
 #include "perly.act"
