@@ -66,10 +66,10 @@ die "$0: must be run on an ASCII system\n" unless ord 'A' == 65;
 # the test below to allow that version too. DAPM Feb 04.
 
 my $version = `$bison -V`;
-unless ($version =~ /\b(1\.875[a-z]?|2\.[01])\b/) { die <<EOF; }
+unless ($version =~ /\b(1\.875[a-z]?|2\.[013])\b/) { die <<EOF; }
 
 You have the wrong version of bison in your path; currently 1.875
-2.0 or 2.1 is required.  Try installing
+2.0, 2.1 or 2.3 is required.  Try installing
     http://ftp.gnu.org/gnu/bison/bison-2.1.tar.gz
 or similar.  Your bison identifies itself as:
 
@@ -165,6 +165,8 @@ sub extract {
 	    \#line[^\n]+\.c"
 	|
 	    \#line[^\n]+\.simple"
+	|
+	    YY_SYMBOL_PRINT
 	)
     @xms
 	or die "Can't extract actions from $tmpc_file\n";

@@ -25,6 +25,7 @@
  */
 
 
+
 /* allow stack size to grow effectively without limit */
 #define YYMAXDEPTH 10000000
 
@@ -32,6 +33,10 @@
 #define PERL_IN_PERLY_C
 #include "perl.h"
 
+typedef unsigned char yytype_uint8;
+typedef signed char yytype_int8;
+typedef unsigned short int yytype_uint16;
+typedef short int yytype_int16;
 typedef signed char yysigned_char;
 
 #ifdef DEBUGGING
