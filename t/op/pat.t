@@ -4113,13 +4113,13 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
 }
 {
     local $Message = "http://nntp.perl.org/group/perl.perl5.porters/118663";
-    my $qr_barR1 = qr/(bar)\R1/;
+    my $qr_barR1 = qr/(bar)\g-1/;
     ok("foobarbarxyz" =~ $qr_barR1);
     ok("foobarbarxyz" =~ qr/foo${qr_barR1}xyz/);
     ok("foobarbarxyz" =~ qr/(foo)${qr_barR1}xyz/);
-    ok("foobarbarxyz" =~ qr/(foo)(bar)\R1xyz/);
+    ok("foobarbarxyz" =~ qr/(foo)(bar)\g{-1}xyz/);
     ok("foobarbarxyz" =~ qr/(foo${qr_barR1})xyz/);
-    ok("foobarbarxyz" =~ qr/(foo(bar)\R1)xyz/);
+    ok("foobarbarxyz" =~ qr/(foo(bar)\g{-1})xyz/);
 } 
 {
     local $Message = "RT#41010";
@@ -4154,7 +4154,16 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     $doit->(\@spats,@sstrs);
     $doit->(\@dpats,@dstrs);
 }
- 
+{
+    local $Message = "\$REGMARK";
+    our @r=();
+    ok('foofoo' =~ /foo (*MARK:foo) (?{push @r,$REGMARK}) /x);
+    iseq("@r","foo");           
+    iseq($REGMARK,"foo");
+    ok('foofoo' !~ /foo (*MARK:foo) (*FAIL) /x);
+    ok(!$REGMARK);
+    iseq($REGERROR,'foo');
+}
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
 # Keep the following tests last -- they may crash perl
@@ -4201,7 +4210,7 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1567; 
+    $::TestCount = 1573; 
     print "1..$::TestCount\n";
 }
 

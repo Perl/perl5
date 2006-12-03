@@ -247,8 +247,9 @@ X<word> X<whitespace>
 	     Unsupported in lookbehind.
     \1       Backreference to a specific group.
 	     '1' may actually be any positive integer.
-    \R1      Relative backreference to a preceding closed group.
-	     '1' may actually be any positive integer.
+    \g1      Backreference to a specific or previous group,
+    \g{-1}   number may be negative indicating a previous buffer and may
+             optionally be wrapped in curly brackets for safer parsing.
     \k<name> Named backreference
     \N{name} Named unicode character, or unicode escape
     \x12     Hexadecimal escape sequence
@@ -485,22 +486,28 @@ backreference only if at least 11 left parentheses have opened
 before it.  And so on.  \1 through \9 are always interpreted as
 backreferences.
 
-X<relative backreference>
-In Perl 5.10 it is possible to relatively address a capture buffer by
-using the C<\RNNN> notation, where C<NNN> is negative offset to a
-preceding capture buffer. Thus C<\R1> refers to the last buffer,
-C<\R2> refers to the buffer before that. For example:
+X<\g{1}> X<\g{-1}> X<relative backreference>
+In order to provide a safer and easier way to construct patterns using
+backrefs, in Perl 5.10 the C<\g{N}> notation is provided. The curly
+brackets are optional, however omitting them is less safe as the meaning
+of the pattern can be changed by text (such as digits) following it.
+When N is a positive integer the C<\g{N}> notation is exactly equivalent
+to using normal backreferences. When N is a negative integer then it is
+a relative backreference referring to the previous N'th capturing group.
+
+Thus C<\g{-1}> refers to the last buffer, C<\g{-2}> refers to the
+buffer before that. For example:
 
         /
          (Y)            # buffer 1
          (              # buffer 2
             (X)         # buffer 3
-            \R1         # backref to buffer 3
-            \R3         # backref to buffer 1
+            \g{-1}      # backref to buffer 3
+            \g{-3}      # backref to buffer 1
          )
         /x
 
-and would match the same as C</(Y) ( (X) $3 $1 )/x>.
+and would match the same as C</(Y) ( (X) \3 \1 )/x>.
 
 Additionally, as of Perl 5.10 you may use named capture buffers and named
 backreferences. The notation is C<< (?<name>...) >> and C<< \k<name> >>
@@ -1066,10 +1073,10 @@ handling them.
 
 An example of how this might be used is as follows:
 
-  /(?<NAME>(&NAME_PAT))(?<ADDR>(&ADDRESS_PAT))
+  /(?<NAME>(?&NAME_PAT))(?<ADDR>(?&ADDRESS_PAT))
    (?(DEFINE)
-     (<NAME_PAT>....)
-     (<ADRESS_PAT>....)
+     (?<NAME_PAT>....)
+     (?<ADRESS_PAT>....)
    )/x
 
 Note that capture buffers matched inside of recursion are not accessible

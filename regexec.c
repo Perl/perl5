@@ -3561,6 +3561,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 		PAD_SAVE_LOCAL(old_comppad, (PAD*)rexi->data->data[n + 2]);
 		PL_regendp[0] = PL_reg_magic->mg_len = locinput - PL_bostr;
 
+                if (sv_yes_mark) {
+                    SV *sv_mrk = get_sv("REGMARK", 1);
+                    sv_setsv(sv_mrk, sv_yes_mark);
+                }
+
 		CALLRUNOPS(aTHX);			/* Scalar context. */
 		SPAGAIN;
 		if (SP == before)
@@ -4848,12 +4853,12 @@ NULL
         case SKIP:
             PL_reginput = locinput;
             if (scan->flags) {
-                /* (*CUT) : if we fail we cut here*/
+                /* (*SKIP) : if we fail we cut here*/
                 ST.mark_name = NULL;
                 ST.mark_loc = locinput;
                 PUSH_STATE_GOTO(SKIP_next,next);    
             } else {
-                /* (*CUT:NAME) : if there is a (*MARK:NAME) fail where it was, 
+                /* (*SKIP:NAME) : if there is a (*MARK:NAME) fail where it was, 
                    otherwise do nothing.  Meaning we need to scan 
                  */
                 regmatch_state *cur = mark_state;
@@ -4869,7 +4874,7 @@ NULL
                     cur = cur->u.mark.prev_mark;
                 }
             }    
-            /* Didn't find our (*MARK:NAME) so ignore this (*CUT:NAME) */
+            /* Didn't find our (*MARK:NAME) so ignore this (*SKIP:NAME) */
             break;    
 	case SKIP_next_fail:
 	    if (ST.mark_name) {

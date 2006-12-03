@@ -4345,6 +4345,7 @@ reStudy:
 	if ( RExC_npar == 1 && data.longest == &(data.longest_fixed)
 	     && data.last_start_min == 0 && data.last_end > 0
 	     && !RExC_seen_zerolen
+	     && !(RExC_seen & REG_SEEN_VERBARG)
 	     && (!(RExC_seen & REG_SEEN_GPOS) || (r->extflags & RXf_ANCH_GPOS)))
 	    r->extflags |= RXf_CHECK_ALL;
 	scan_commit(pRExC_state, &data,&minlen,0);
@@ -6364,27 +6365,42 @@ tryagain:
 	case 'c':
 	case '0':
 	    goto defchar;
-	case 'R': 
+	case 'g': 
 	case '1': case '2': case '3': case '4':
 	case '5': case '6': case '7': case '8': case '9':
 	    {
 		I32 num;
-		bool isrel=(*RExC_parse=='R');
-		if (isrel)
+		bool isg = *RExC_parse == 'g';
+		bool isrel = 0; 
+		bool hasbrace = 0;
+		if (isg) {
 		    RExC_parse++;
+		    if (*RExC_parse == '{') {
+		        RExC_parse++;
+		        hasbrace = 1;
+		    }
+		    if (*RExC_parse == '-') {
+		        RExC_parse++;
+		        isrel = 1;
+		    }
+		}   
 		num = atoi(RExC_parse);
                 if (isrel) {
                     num = RExC_npar - num;
                     if (num < 1)
                         vFAIL("Reference to nonexistent or unclosed group");
                 }
-		if (num > 9 && num >= RExC_npar)
+		if (!isg && num > 9 && num >= RExC_npar)
 		    goto defchar;
 		else {
 		    char * const parse_start = RExC_parse - 1; /* MJD */
 		    while (isDIGIT(*RExC_parse))
 			RExC_parse++;
-
+                    if (hasbrace) {
+                        if (*RExC_parse != '}') 
+                            vFAIL("Unterminated \\g{...} pattern");
+                        RExC_parse++;
+                    }    
 		    if (!SIZE_ONLY) {
 		        if (num > (I32)RExC_rx->nparens)
 			    vFAIL("Reference to nonexistent group");
@@ -6464,6 +6480,7 @@ tryagain:
 		    case 'C':
 		    case 'X':
 		    case 'G':
+		    case 'g':
 		    case 'Z':
 		    case 'z':
 		    case 'w':

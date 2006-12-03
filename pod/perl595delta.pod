@@ -122,8 +122,9 @@ and (*ACCEPT). See L<perlre> for their descriptions. (Yves Orton)
 
 =item Relative backreferences
 
-A new syntax C<\R1> ("1" being any positive decimal integer) allows
-relative backreferencing. This should make it easier to embed patterns
+A new syntax C<\g{N}> or C<\gN> where "N" is a decimal integer allows a
+safer form of back-reference notation as well as allowing relative
+backreferences. This should make it easier to generate and embed patterns
 that contain backreferences. (Yves Orton)
 
 =back

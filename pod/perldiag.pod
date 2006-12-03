@@ -3496,10 +3496,9 @@ discovered.
 
 =item Reference to nonexistent or unclosed group in regex; marked by <-- HERE in m/%s/
 
-(F) You used something like C<\R7> in your regular expression, but there are
+(F) You used something like C<\g{-7}> in your regular expression, but there are
 not at least seven sets of closed capturing parentheses in the expression before
-where the C<\R7> was located. It's also possible you forgot to escape the
-backslash.
+where the C<\g{-7}> was located.
 
 The <-- HERE shows in the regular expression about where the problem was
 discovered.
@@ -4438,6 +4437,10 @@ the pattern with a C<)>. Fix the pattern and retry.
 (F) You used a pattern of the form C<(*VERB:ARG)> but did not terminate
 the pattern with a C<)>. Fix the pattern and retry.
 
+=item Unterminated \g{...} pattern in regex; marked by <-- HERE in m/%s/
+
+(F) You missed a close brace on a \g{..} pattern (group reference) in
+a regular expression. Fix the pattern and retry.
 
 =item Unterminated <> operator
 
