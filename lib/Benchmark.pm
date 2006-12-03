@@ -417,6 +417,9 @@ September, 2002; by Jarkko Hietaniemi: add ':hireswallclock' special tag.
 February, 2004; by Chia-liang Kao: make cmpthese and timestr use time
 statistics for children instead of parent when the style is 'nop'.
 
+November, 2007; by Christophe Grosjean: make cmpthese and timestr compute
+time consistently with style argument, default is 'all' not 'noc' any more.
+
 =cut
 
 # evaluate something in a clean lexical environment
@@ -437,7 +440,7 @@ our(@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $VERSION);
 	      clearcache clearallcache disablecache enablecache);
 %EXPORT_TAGS=( all => [ @EXPORT, @EXPORT_OK ] ) ;
 
-$VERSION = 1.09;
+$VERSION = 1.10;
 
 # --- ':hireswallclock' special handling
 
@@ -596,14 +599,18 @@ sub timestr {
     $style = ($ct>0) ? 'all' : 'noc' if $style eq 'auto';
     my $s = "@t $style"; # default for unknown style
     my $w = $hirestime ? "%2g" : "%2d";
-    $s=sprintf("$w wallclock secs (%$f usr %$f sys + %$f cusr %$f csys = %$f CPU)",
+    $s = sprintf("$w wallclock secs (%$f usr %$f sys + %$f cusr %$f csys = %$f CPU)",
 			    $r,$pu,$ps,$cu,$cs,$tt) if $style eq 'all';
-    $s=sprintf("$w wallclock secs (%$f usr + %$f sys = %$f CPU)",
+    $s = sprintf("$w wallclock secs (%$f usr + %$f sys = %$f CPU)",
 			    $r,$pu,$ps,$pt) if $style eq 'noc';
-    $s=sprintf("$w wallclock secs (%$f cusr + %$f csys = %$f CPU)",
+    $s = sprintf("$w wallclock secs (%$f cusr + %$f csys = %$f CPU)",
 			    $r,$cu,$cs,$ct) if $style eq 'nop';
-    $s .= sprintf(" @ %$f/s (n=$n)", $n / ( $style eq 'nop' ? $cu + $cs : $pu + $ps ))
-	if $n && ($style eq 'nop' ? $cu+$cs : $pu+$ps);
+    my $elapsed = do {
+	if ($style eq 'nop') {$cu+$cs}
+	elsif ($style eq 'noc') {$pu+$ps}
+	else {$cu+$cs+$pu+$ps}
+    };
+    $s .= sprintf(" @ %$f/s (n=$n)",$n/($elapsed)) if $n && $elapsed;
     $s;
 }
 
@@ -904,8 +911,12 @@ sub cmpthese{
     for (@vals) {
 	# The epsilon fudge here is to prevent div by 0.  Since clock
 	# resolutions are much larger, it's below the noise floor.
-	my $rate = $_->[6] / (( $style eq 'nop' ? $_->[4] + $_->[5]
-						: $_->[2] + $_->[3]) + 0.000000000000001 );
+	my $elapsed = do {
+	    if ($style eq 'nop') {$_->[4]+$_->[5]}
+	    elsif ($style eq 'noc') {$_->[2]+$_->[3]}
+	    else {$_->[2]+$_->[3]+$_->[4]+$_->[5]}
+	};
+	my $rate = $_->[6]/(($elapsed)+0.000000000000001);
 	$_->[7] = $rate;
     }
 
