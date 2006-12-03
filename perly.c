@@ -17,6 +17,11 @@
  *	Bison output file, you may use that output file without
  *	restriction.  This special exception was added by the Free
  *	Software Foundation in version 1.24 of Bison.
+ *
+ * Note that this file is also #included in madly.c, to allow compilation
+ * of a second parser, Perl_madparse, that is identical to Perl_yyparse,
+ * but which includes the parser tables from madly.{tab,act} rather than
+ * perly.{tab,act}. This is controlled by the PERL_IN_MADLY_C define.
  */
 
 
@@ -36,7 +41,11 @@ typedef signed char yysigned_char;
 #endif
 
 /* contains all the parser state tables; auto-generated from perly.y/madly.y */
-#include "perly.tab"
+#ifdef PERL_IN_MADLY_C
+#  include "madly.tab"
+#else
+#  include "perly.tab"
+#endif
 
 # define YYSIZE_T size_t
 
@@ -250,7 +259,11 @@ yystpcpy (pTHX_ char *yydest, const char *yysrc)
 `----------*/
 
 int
+#ifdef PERL_IN_MADLY_C
+Perl_madparse (pTHX)
+#else
 Perl_yyparse (pTHX)
+#endif
 {
     dVAR;
     int yychar; /* The lookahead symbol.  */
@@ -305,9 +318,11 @@ Perl_yyparse (pTHX)
 	  rule.  */
     int yylen;
 
-#ifdef PERL_MAD
+#ifndef PERL_IN_MADLY_C
+#  ifdef PERL_MAD
     if (PL_madskills)
 	return madparse();
+#  endif
 #endif
 
     YYDPRINTF ((Perl_debug_log, "Starting parse\n"));
@@ -415,11 +430,14 @@ Perl_yyparse (pTHX)
     /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
     if (yychar == YYEMPTY) {
 	YYDPRINTF ((Perl_debug_log, "Reading a token: "));
-#ifdef PERL_MAD
+#ifndef PERL_IN_MADLY_C
+#  ifdef PERL_MAD
 	yychar = PL_madskills ? madlex() : yylex();
-#else
+#  else
 	yychar = yylex();
+#  endif
 #endif
+
 #  ifdef EBCDIC
 	if (yychar >= 0 && yychar < 255) {
 	    yychar = NATIVE_TO_ASCII(yychar);
@@ -510,7 +528,11 @@ Perl_yyparse (pTHX)
 /* contains all the rule actions; auto-generated from perly.y or madly.y */
 
 #define dep() deprecate("\"do\" to call subroutines")
-#include "perly.act"
+#ifdef PERL_IN_MADLY_C
+#  include "madly.act"
+#else
+#  include "perly.act"
+#endif
 
     }
 
