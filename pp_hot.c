@@ -2682,43 +2682,6 @@ PP(pp_leavesublv)
     return cx->blk_sub.retop;
 }
 
-
-void
-Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
-{
-    dVAR;
-    SV * const dbsv = GvSVn(PL_DBsub);
-    /* We do not care about using sv to call CV;
-     * it's for informational purposes only.
-     */
-
-    save_item(dbsv);
-    if (!PERLDB_SUB_NN) {
-	GV * const gv = CvGV(cv);
-
-	if ( svp && ((CvFLAGS(cv) & (CVf_ANON | CVf_CLONED))
-	     || strEQ(GvNAME(gv), "END")
-	     || ((GvCV(gv) != cv) && /* Could be imported, and old sub redefined. */
-		 !( (SvTYPE(*svp) == SVt_PVGV) && (GvCV((GV*)*svp) == cv) )))) {
-	    /* Use GV from the stack as a fallback. */
-	    /* GV is potentially non-unique, or contain different CV. */
-	    SV * const tmp = newRV((SV*)cv);
-	    sv_setsv(dbsv, tmp);
-	    SvREFCNT_dec(tmp);
-	}
-	else {
-	    gv_efullname3(dbsv, gv, NULL);
-	}
-    }
-    else {
-	const int type = SvTYPE(dbsv);
-	if (type < SVt_PVIV && type != SVt_IV)
-	    sv_upgrade(dbsv, SVt_PVIV);
-	(void)SvIOK_on(dbsv);
-	SvIV_set(dbsv, PTR2IV(cv));	/* Do it the quickest way  */
-    }
-}
-
 PP(pp_entersub)
 {
     dVAR; dSP; dPOPss;
