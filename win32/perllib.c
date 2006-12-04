@@ -248,28 +248,18 @@ RunPerl(int argc, char **argv, char **env)
 	exitstatus = perl_run(my_perl);
 #endif
     }
-    
+
     perl_destruct(my_perl);
+    perl_free(my_perl);
 #ifdef USE_ITHREADS
     if (new_perl) {
 	PERL_SET_THX(new_perl);
 	perl_destruct(new_perl);
-	PERL_SET_THX(my_perl);
-    }
-#endif
-    
-    PERL_SYS_TERM();
-    
-    perl_free(my_perl);
-    
-#ifdef USE_ITHREADS
-    if (new_perl) {
-	PERL_SET_THX(new_perl);
 	perl_free(new_perl);
     }
 #endif
 
-    
+    PERL_SYS_TERM();
 
     return (exitstatus);
 }
