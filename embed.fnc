@@ -675,6 +675,7 @@ Ap	|char *	|reg_stringify  |NN MAGIC *mg|NULLOK STRLEN *lp|NULLOK U32 *flags|NUL
 Ap	|void*	|regdupe_internal|NN const regexp* r|NN CLONE_PARAMS* param
 #endif
 Ap	|regexp*|pregcomp	|NN char* exp|NN char* xend|NN PMOP* pm
+Ap	|regexp*|re_compile	|NN char* exp|NN char* xend|NN PMOP* pm
 Ap	|char*	|re_intuit_start|NN regexp* prog|NULLOK SV* sv|NN char* strpos \
 				|NN char* strend|U32 flags \
 				|NULLOK struct re_scream_pos_data_s *data

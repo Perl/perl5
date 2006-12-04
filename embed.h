@@ -686,6 +686,7 @@
 #define regdupe_internal	Perl_regdupe_internal
 #endif
 #define pregcomp		Perl_pregcomp
+#define re_compile		Perl_re_compile
 #define re_intuit_start		Perl_re_intuit_start
 #define re_intuit_string	Perl_re_intuit_string
 #define regexec_flags		Perl_regexec_flags
@@ -2897,6 +2898,7 @@
 #define regdupe_internal(a,b)	Perl_regdupe_internal(aTHX_ a,b)
 #endif
 #define pregcomp(a,b,c)		Perl_pregcomp(aTHX_ a,b,c)
+#define re_compile(a,b,c)	Perl_re_compile(aTHX_ a,b,c)
 #define re_intuit_start(a,b,c,d,e,f)	Perl_re_intuit_start(aTHX_ a,b,c,d,e,f)
 #define re_intuit_string(a)	Perl_re_intuit_string(aTHX_ a)
 #define regexec_flags(a,b,c,d,e,f,g,h)	Perl_regexec_flags(aTHX_ a,b,c,d,e,f,g,h)

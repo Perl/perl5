@@ -3965,9 +3965,6 @@ Perl_reginitcolors(pTHX)
 extern const struct regexp_engine my_reg_engine;
 #define RE_ENGINE_PTR &my_reg_engine
 #endif
-/* these make a few things look better, to avoid indentation */
-#define BEGIN_BLOCK {
-#define END_BLOCK }
  
 regexp *
 Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
@@ -3976,7 +3973,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_r(if (!PL_colorset) reginitcolors());
 #ifndef PERL_IN_XSUB_RE
-    BEGIN_BLOCK
+    {
     /* Dispatch a request to compile a regexp to correct 
        regexp engine. */
     HV * const table = GvHV(PL_hintgv);
@@ -3991,9 +3988,15 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
             return CALLREGCOMP_ENG(eng, exp, xend, pm);
         } 
     }
-    END_BLOCK
+    }
 #endif
-    BEGIN_BLOCK    
+    return Perl_re_compile(aTHX_ exp, xend, pm);
+}
+
+regexp *
+Perl_re_compile(pTHX_ char *exp, char *xend, PMOP *pm)
+{
+    dVAR;
     register regexp *r;
     register regexp_internal *ri;
     regnode *scan;
@@ -4009,6 +4012,7 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
     int restudied= 0;
     RExC_state_t copyRExC_state;
 #endif    
+    GET_RE_DEBUG_FLAGS_DECL;
     if (exp == NULL)
 	FAIL("NULL regexp argument");
 
@@ -4594,11 +4598,9 @@ reStudy:
         PerlIO_printf(Perl_debug_log, "\n");
     });
     return(r);
-    END_BLOCK    
 }
 
 #undef CORE_ONLY_BLOCK
-#undef END_BLOCK
 #undef RE_ENGINE_PTR
 
 #ifndef PERL_IN_XSUB_RE
