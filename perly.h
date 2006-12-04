@@ -193,10 +193,13 @@ typedef union YYSTYPE
     GV *gvval;
 #ifdef PERL_IN_MADLY_C
     TOKEN* p_tkval;
-    TOKEN* tkval;
+    TOKEN* i_tkval;
 #else
     char *p_tkval;
-    I32	tkval;
+    I32	i_tkval;
+#endif
+#ifdef PERL_MAD
+    TOKEN* tkval;
 #endif
 }
 /* Line 1529 of yacc.c.  */

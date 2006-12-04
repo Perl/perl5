@@ -49,27 +49,30 @@
     GV *gvval;
 #ifdef PERL_IN_MADLY_C
     TOKEN* p_tkval;
-    TOKEN* tkval;
+    TOKEN* i_tkval;
 #else
     char *p_tkval;
-    I32	tkval;
+    I32	i_tkval;
+#endif
+#ifdef PERL_MAD
+    TOKEN* tkval;
 #endif
 }
 
-%token <tkval> '{' '}' '[' ']' '-' '+' '$' '@' '%' '*' '&' ';'
+%token <i_tkval> '{' '}' '[' ']' '-' '+' '$' '@' '%' '*' '&' ';'
 
 %token <opval> WORD METHOD FUNCMETH THING PMFUNC PRIVATEREF
 %token <opval> FUNC0SUB UNIOPSUB LSTOPSUB
 %token <p_tkval> LABEL
-%token <tkval> FORMAT SUB ANONSUB PACKAGE USE
-%token <tkval> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
-%token <tkval> GIVEN WHEN DEFAULT
-%token <tkval> LOOPEX DOTDOT
-%token <tkval> FUNC0 FUNC1 FUNC UNIOP LSTOP
-%token <tkval> RELOP EQOP MULOP ADDOP
-%token <tkval> DOLSHARP DO HASHBRACK NOAMP
-%token <tkval> LOCAL MY MYSUB REQUIRE
-%token <tkval> COLONATTR
+%token <i_tkval> FORMAT SUB ANONSUB PACKAGE USE
+%token <i_tkval> WHILE UNTIL IF UNLESS ELSE ELSIF CONTINUE FOR
+%token <i_tkval> GIVEN WHEN DEFAULT
+%token <i_tkval> LOOPEX DOTDOT
+%token <i_tkval> FUNC0 FUNC1 FUNC UNIOP LSTOP
+%token <i_tkval> RELOP EQOP MULOP ADDOP
+%token <i_tkval> DOLSHARP DO HASHBRACK NOAMP
+%token <i_tkval> LOCAL MY MYSUB REQUIRE
+%token <i_tkval> COLONATTR
 
 %type <ival> prog progstart remember mremember savescope
 %type <ival>  startsub startanonsub startformsub
@@ -88,38 +91,38 @@
 %type <opval> switch case
 %type <p_tkval> label
 
-%nonassoc <tkval> PREC_LOW
+%nonassoc <i_tkval> PREC_LOW
 %nonassoc LOOPEX
 
-%left <tkval> OROP DOROP
-%left <tkval> ANDOP
-%right <tkval> NOTOP
+%left <i_tkval> OROP DOROP
+%left <i_tkval> ANDOP
+%right <i_tkval> NOTOP
 %nonassoc LSTOP LSTOPSUB
-%left <tkval> ','
-%right <tkval> ASSIGNOP
-%right <tkval> '?' ':'
+%left <i_tkval> ','
+%right <i_tkval> ASSIGNOP
+%right <i_tkval> '?' ':'
 %nonassoc DOTDOT
-%left <tkval> OROR DORDOR
-%left <tkval> ANDAND
-%left <tkval> BITOROP
-%left <tkval> BITANDOP
+%left <i_tkval> OROR DORDOR
+%left <i_tkval> ANDAND
+%left <i_tkval> BITOROP
+%left <i_tkval> BITANDOP
 %nonassoc EQOP
 %nonassoc RELOP
 %nonassoc UNIOP UNIOPSUB
 %nonassoc REQUIRE
-%left <tkval> SHIFTOP
+%left <i_tkval> SHIFTOP
 %left ADDOP
 %left MULOP
-%left <tkval> MATCHOP
-%right <tkval> '!' '~' UMINUS REFGEN
-%right <tkval> POWOP
-%nonassoc <tkval> PREINC PREDEC POSTINC POSTDEC
-%left <tkval> ARROW
-%nonassoc <tkval> ')'
-%left <tkval> '('
+%left <i_tkval> MATCHOP
+%right <i_tkval> '!' '~' UMINUS REFGEN
+%right <i_tkval> POWOP
+%nonassoc <i_tkval> PREINC PREDEC POSTINC POSTDEC
+%left <i_tkval> ARROW
+%nonassoc <i_tkval> ')'
+%left <i_tkval> '('
 %left '[' '{'
 
-%token <tkval> PEG
+%token <i_tkval> PEG
 
 %% /* RULES */
 
@@ -1004,7 +1007,7 @@ anonymous:	'[' expr ']'
 
 /* Things called with "do" */
 termdo	:       DO term	%prec UNIOP                     /* do $filename */
-			{ $$ = dofile($2, $1);
+			{ $$ = dofile($2, IVAL($1));
 			  TOKEN_GETMAD($1,$$,'o');
 			}
 	|	DO block	%prec '('               /* do { code */
