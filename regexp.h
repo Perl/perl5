@@ -84,24 +84,6 @@ typedef struct regexp {
 } regexp;
 
 
-typedef struct regexp_internal {
-        regexp_paren_ofs *swap; /* Swap copy of *startp / *endp */
-	U32 *offsets;           /* offset annotations 20001228 MJD 
-                                   data about mapping the program to the 
-                                   string*/
-        regnode *regstclass;    /* Optional startclass as identified or constructed
-                                   by the optimiser */
-        struct reg_data *data;	/* Additional miscellaneous data used by the program.
-                                   Used to make it easier to clone and free arbitrary
-                                   data that the regops need. Often the ARG field of
-                                   a regop is an index into this structure */
-	regnode program[1];	/* Unwarranted chumminess with compiler. */
-} regexp_internal;
-
-#define RXi_SET(x,y) (x)->pprivate = (void*)(y)   
-#define RXi_GET(x)   ((regexp_internal *)((x)->pprivate))
-#define RXi_GET_DECL(r,ri) regexp_internal *ri = RXi_GET(r)
-
 typedef struct re_scream_pos_data_s
 {
     char **scream_olds;		/* match pos */
@@ -110,7 +92,6 @@ typedef struct re_scream_pos_data_s
 
 typedef struct regexp_engine {
     regexp* (*comp) (pTHX_ char* exp, char* xend, PMOP* pm);
-    regexp* (*compile) (pTHX_ char *exp, char *xend, PMOP *pm);
     I32	    (*exec) (pTHX_ regexp* prog, char* stringarg, char* strend,
 			    char* strbeg, I32 minend, SV* screamer,
 			    void* data, U32 flags);

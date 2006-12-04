@@ -92,6 +92,23 @@ typedef OP OP_4tree;			/* Will be redefined later. */
  * special test to reverse the sign of BACK pointers since the offset is
  * stored negative.]
  */
+typedef struct regexp_internal {
+        regexp_paren_ofs *swap; /* Swap copy of *startp / *endp */
+	U32 *offsets;           /* offset annotations 20001228 MJD 
+                                   data about mapping the program to the 
+                                   string*/
+        regnode *regstclass;    /* Optional startclass as identified or constructed
+                                   by the optimiser */
+        struct reg_data *data;	/* Additional miscellaneous data used by the program.
+                                   Used to make it easier to clone and free arbitrary
+                                   data that the regops need. Often the ARG field of
+                                   a regop is an index into this structure */
+	regnode program[1];	/* Unwarranted chumminess with compiler. */
+} regexp_internal;
+
+#define RXi_SET(x,y) (x)->pprivate = (void*)(y)   
+#define RXi_GET(x)   ((regexp_internal *)((x)->pprivate))
+#define RXi_GET_DECL(r,ri) regexp_internal *ri = RXi_GET(r)
 
 struct regnode_string {
     U8	str_len;
@@ -404,7 +421,6 @@ EXTCONST U8 PL_simple[] = {
 EXTCONST regexp_engine PL_core_reg_engine;
 #else /* DOINIT */
 EXTCONST regexp_engine PL_core_reg_engine = { 
-        Perl_pregcomp, 
 	Perl_re_compile,
         Perl_regexec_flags, 
         Perl_re_intuit_start,

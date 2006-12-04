@@ -3965,20 +3965,18 @@ Perl_reginitcolors(pTHX)
 extern const struct regexp_engine my_reg_engine;
 #define RE_ENGINE_PTR &my_reg_engine
 #endif
- 
+
+#ifndef PERL_IN_XSUB_RE 
 regexp *
 Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
 {
     dVAR;
-    GET_RE_DEBUG_FLAGS_DECL;
-    DEBUG_r(if (!PL_colorset) reginitcolors());
-#ifndef PERL_IN_XSUB_RE
-    {
+    HV * const table = GvHV(PL_hintgv);
     /* Dispatch a request to compile a regexp to correct 
        regexp engine. */
-    HV * const table = GvHV(PL_hintgv);
     if (table) {
         SV **ptr= hv_fetchs(table, "regcomp", FALSE);
+        GET_RE_DEBUG_FLAGS_DECL;
         if (ptr && SvIOK(*ptr) && SvIV(*ptr)) {
             const regexp_engine *eng=INT2PTR(regexp_engine*,SvIV(*ptr));
             DEBUG_COMPILE_r({
@@ -3988,10 +3986,9 @@ Perl_pregcomp(pTHX_ char *exp, char *xend, PMOP *pm)
             return CALLREGCOMP_ENG(eng, exp, xend, pm);
         } 
     }
-    }
-#endif
     return Perl_re_compile(aTHX_ exp, xend, pm);
 }
+#endif
 
 regexp *
 Perl_re_compile(pTHX_ char *exp, char *xend, PMOP *pm)
@@ -4013,6 +4010,8 @@ Perl_re_compile(pTHX_ char *exp, char *xend, PMOP *pm)
     RExC_state_t copyRExC_state;
 #endif    
     GET_RE_DEBUG_FLAGS_DECL;
+    DEBUG_r(if (!PL_colorset) reginitcolors());
+        
     if (exp == NULL)
 	FAIL("NULL regexp argument");
 

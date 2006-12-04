@@ -11,8 +11,7 @@
 
 START_EXTERN_C
 
-extern regexp*	my_regcomp (pTHX_ char* exp, char* xend, PMOP* pm);
-extern regexp*  my_re_compile(pTHX_ char *exp, char *xend, PMOP *pm);
+extern regexp*	my_re_compile (pTHX_ char* exp, char* xend, PMOP* pm);
 extern I32	my_regexec (pTHX_ regexp* prog, char* stringarg, char* strend,
 			    char* strbeg, I32 minend, SV* screamer,
 			    void* data, U32 flags);
@@ -32,8 +31,7 @@ EXTERN_C const struct regexp_engine my_reg_engine;
 END_EXTERN_C
 
 const struct regexp_engine my_reg_engine = { 
-        my_regcomp, 
-	my_re_compile,
+        my_re_compile, 
         my_regexec, 
         my_re_intuit_start, 
         my_re_intuit_string, 
