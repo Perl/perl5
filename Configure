@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Dec  4 12:24:11 CET 2006 [metaconfig 3.0 PL70]
+# Generated on Mon Dec  4 16:19:54 CET 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -20970,24 +20970,28 @@ nonxs_extensions=''
 : NOTE: recursion limit of 10 to prevent runaway in case of symlink madness
 find_extensions='
     for xxx in *; do
-       case "$xxx" in
-           DynaLoader|dynaload) ;;
-           *)
-           if $test -f $xxx/$xxx.xs; then
-               known_extensions="$known_extensions $1$xxx";
-           elif $test -f $xxx/Makefile.PL; then
-               nonxs_extensions="$nonxs_extensions $1$xxx";
-           else
-               if $test -d $xxx -a $# -lt 10; then
-                   set $1$xxx/ $*;
-                   cd "$xxx";
-                   eval $find_extensions;
-                   cd ..;
-                   shift;
-               fi;
-           fi
-           ;;
-       esac;
+	if $test "$1" = Compress/IO/ ; then
+	    nonxs_extensions="$nonxs_extensions IO/Compress/$xxx";
+	else
+	    case "$xxx" in
+		DynaLoader|dynaload) ;;
+		*)
+		if $test -f $xxx/$xxx.xs; then
+		    known_extensions="$known_extensions $1$xxx";
+		elif $test -f $xxx/Makefile.PL; then
+		    nonxs_extensions="$nonxs_extensions $1$xxx";
+		else
+		    if $test -d $xxx -a $# -lt 10; then
+			set $1$xxx/ $*;
+			cd "$xxx";
+			eval $find_extensions;
+			cd ..;
+			shift;
+		    fi;
+		fi
+		;;
+	    esac;
+	fi
     done'
 tdir=`pwd`
 cd "$rsrc/ext"
@@ -21016,12 +21020,12 @@ for xxx in $known_extensions ; do
 		esac
 		;;
 	GDBM_File|gdbm_fil)
-		case "$i_gdbm" in 
+		case "$i_gdbm" in
 		$define) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
 	I18N/Langinfo|i18n_lan)
-		case "$i_langinfo$d_nl_langinfo" in 
+		case "$i_langinfo$d_nl_langinfo" in
 		$define$define) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
@@ -21039,7 +21043,7 @@ for xxx in $known_extensions ; do
 		    ;;
 		esac
 		;;
-	ODBM_File|odbm_fil) 
+	ODBM_File|odbm_fil)
 		case "${i_dbm}${i_rpcsvcdbm}" in
 		*"${define}"*)
 		    case "$osname-$use64bitint" in
@@ -21064,7 +21068,7 @@ for xxx in $known_extensions ; do
 		esac
 		;;
 	Socket|socket)
-		case "$d_socket" in 
+		case "$d_socket" in
 		true|$define|y)
 		    case "$osname" in
 		    beos) ;; # not unless BONE
@@ -21075,7 +21079,7 @@ for xxx in $known_extensions ; do
 		;;
 	Sys/Syslog|sys/syslog)
 		: XXX syslog requires socket
-		case "$d_socket" in 
+		case "$d_socket" in
 		true|$define|y) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
@@ -21116,7 +21120,7 @@ for xxx in $known_extensions ; do
 		;;
 	IPC/SysV|ipc/sysv)
 		: XXX Do we need a useipcsysv variable here
-		case "${d_msg}${d_sem}${d_shm}" in 
+		case "${d_msg}${d_sem}${d_shm}" in
 		*"${define}"*) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
@@ -21206,11 +21210,11 @@ EOM
 		previous)
 			if test X"$dynamic_ext" != X"$avail_ext"; then
 				$cat <<EOM
-NOTICE:  Your previous config.sh list may be incorrect. 
-The extensions now available to you are 
+NOTICE:  Your previous config.sh list may be incorrect.
+The extensions now available to you are
 	${avail_ext}
 but the default list from your previous config.sh is
-	${dynamic_ext} 
+	${dynamic_ext}
 
 EOM
 			fi
@@ -21242,7 +21246,7 @@ EOM
 		shift
 		dflt="$*"
 		;;
-	*)  dflt="$static_ext" 
+	*)  dflt="$static_ext"
 		;;
 	esac
 
@@ -21258,8 +21262,8 @@ EOM
 	;;
 *)
 	$cat <<EOM
-A number of extensions are supplied with $package.  Answer "none" 
-to include no extensions. 
+A number of extensions are supplied with $package.  Answer "none"
+to include no extensions.
 Note that DynaLoader is always built and need not be mentioned here.
 
 EOM
@@ -21271,11 +21275,11 @@ EOM
 		previous)
 			if test X"$static_ext" != X"$avail_ext"; then
 				$cat <<EOM
-NOTICE:  Your previous config.sh list may be incorrect. 
-The extensions now available to you are 
+NOTICE:  Your previous config.sh list may be incorrect.
+The extensions now available to you are
 	${avail_ext}
 but the default list from your previous config.sh is
-	${static_ext} 
+	${static_ext}
 
 EOM
 			fi
@@ -21295,7 +21299,7 @@ EOM
 	esac
 	;;
 esac
-#        
+#
 # Encode is a special case.  If we are building Encode as a static
 # extension, we need to explicitly list its subextensions as well.
 # For other nested extensions, this is handled automatically by
