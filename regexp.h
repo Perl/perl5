@@ -110,6 +110,7 @@ typedef struct re_scream_pos_data_s
 
 typedef struct regexp_engine {
     regexp* (*comp) (pTHX_ char* exp, char* xend, PMOP* pm);
+    regexp* (*compile) (pTHX_ char *exp, char *xend, PMOP *pm);
     I32	    (*exec) (pTHX_ regexp* prog, char* stringarg, char* strend,
 			    char* strbeg, I32 minend, SV* screamer,
 			    void* data, U32 flags);
