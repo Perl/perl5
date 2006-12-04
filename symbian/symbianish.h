@@ -120,7 +120,7 @@
 #define Mkdir(path,mode)   mkdir((path),(mode))
 
 #ifndef PERL_SYS_TERM
-#define PERL_SYS_TERM()		HINTS_REFCNT_TERM; OP_REFCNT_TERM; MALLOC_TERM; CloseSTDLIB();
+#define PERL_SYS_TERM()		HINTS_REFCNT_TERM; OP_REFCNT_TERM; PERLIO_TERM; MALLOC_TERM; CloseSTDLIB();
 #endif
 
 #define BIT_BUCKET "NUL:"

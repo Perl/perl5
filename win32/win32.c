@@ -4902,11 +4902,10 @@ Perl_win32_init(int *argcp, char ***argvp)
 void
 Perl_win32_term(void)
 {
+    dTHX;
     HINTS_REFCNT_TERM;
     OP_REFCNT_TERM;
-    /* Can't call PERLIO_TERM here because that calls PerlMemShared_free()
-     * but we're too late for that (at least when using PERL_IMPLICIT_SYS)
-     * since we've already done perl_free(). */
+    PERLIO_TERM;
     MALLOC_TERM;
 }
 

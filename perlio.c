@@ -2412,19 +2412,19 @@ void PerlIO_teardown(pTHX) /* Call only from PERL_SYS_TERM(). */
 	}
     }
 #endif
-#ifdef USE_ITHREADS
-    MUTEX_LOCK(&PL_perlio_mutex);
-#endif
+#if !defined(WIN32) || !defined(PERL_IMPLICIT_SYS)
+    /* On Windows, under PERL_IMPLICIT_SYS, all memory allocated by
+     * PerlMemShared_...() will be freed anyways when PL_curinterp
+     * is being destroyed. */
     if (PL_perlio_fd_refcnt_size /* Assuming initial size of zero. */
         && PL_perlio_fd_refcnt) {
-	PerlMemShared_free(PL_perlio_fd_refcnt); /* Not Safefree() because was allocated with PerlMemShared_realloc(). */
+	/* Not bothering with PL_perlio_mutex since by now all the
+	 * interpreters are gone. */
+	PerlMemShared_free(PL_perlio_fd_refcnt);
 	PL_perlio_fd_refcnt = NULL;
 	PL_perlio_fd_refcnt_size = 0;
     }
-#ifdef USE_ITHREADS
-    MUTEX_UNLOCK(&PL_perlio_mutex);
 #endif
-    
 }
 
 
