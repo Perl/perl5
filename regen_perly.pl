@@ -172,6 +172,9 @@ sub extract {
 	or die "Can't extract actions from $tmpc_file\n";
     $actlines = $1;
 
+    # C<#line 188 "perlytmp.c"> gets picked up by make depend, so remove them.
+    $actlines =~ s/^#line \d+ "\Q$tmpc_file\E".*$//gm;
+
     return $actlines. "\n", $tablines. "\n";
 }
 
