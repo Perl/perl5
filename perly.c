@@ -7,8 +7,8 @@
  * 
  *    Note that this file was originally generated as an output from
  *    GNU bison version 1.875, but now the code is statically maintained
- *    and edited; the bits that are dependent on perly.y/madly.y are now
- *    #included from the files perly.tab/madly.tab and perly.act/madly.act.
+ *    and edited; the bits that are dependent on perly.y are now
+ *    #included from the files perly.tab and perly.act.
  *
  *    Here is an important copyright statement from the original, generated
  *    file:
@@ -20,8 +20,8 @@
  *
  * Note that this file is also #included in madly.c, to allow compilation
  * of a second parser, Perl_madparse, that is identical to Perl_yyparse,
- * but which includes the parser tables from madly.{tab,act} rather than
- * perly.{tab,act}. This is controlled by the PERL_IN_MADLY_C define.
+ * but which includes extra code for dumping the parse tree.
+ * This is controlled by the PERL_IN_MADLY_C define.
  */
 
 
@@ -45,12 +45,8 @@ typedef signed char yysigned_char;
 #  define YYDEBUG 0
 #endif
 
-/* contains all the parser state tables; auto-generated from perly.y/madly.y */
-#ifdef PERL_IN_MADLY_C
-#  include "madly.tab"
-#else
-#  include "perly.tab"
-#endif
+/* contains all the parser state tables; auto-generated from perly.y */
+#include "perly.tab"
 
 # define YYSIZE_T size_t
 
@@ -435,12 +431,10 @@ Perl_yyparse (pTHX)
     /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
     if (yychar == YYEMPTY) {
 	YYDPRINTF ((Perl_debug_log, "Reading a token: "));
-#ifndef PERL_IN_MADLY_C
-#  ifdef PERL_MAD
+#ifdef PERL_IN_MADLY_C
 	yychar = PL_madskills ? madlex() : yylex();
-#  else
+#else
 	yychar = yylex();
-#  endif
 #endif
 
 #  ifdef EBCDIC
@@ -530,14 +524,31 @@ Perl_yyparse (pTHX)
     YY_REDUCE_PRINT (yyn);
     switch (yyn) {
 
-/* contains all the rule actions; auto-generated from perly.y or madly.y */
 
 #define dep() deprecate("\"do\" to call subroutines")
+
 #ifdef PERL_IN_MADLY_C
-#  include "madly.act"
+#  define IVAL(i) (i)->tk_lval.ival
+#  define PVAL(p) (p)->tk_lval.pval
+#  define TOKEN_GETMAD(a,b,c) token_getmad((a),(b),(c))
+#  define TOKEN_FREE(a) token_free(a)
+#  define OP_GETMAD(a,b,c) op_getmad((a),(b),(c))
+#  define IF_MAD(a,b) (a)
+#  define DO_MAD(a) a
+#  define MAD
 #else
-#  include "perly.act"
+#  define IVAL(i) (i)
+#  define PVAL(p) (p)
+#  define TOKEN_GETMAD(a,b,c)
+#  define TOKEN_FREE(a)
+#  define OP_GETMAD(a,b,c)
+#  define IF_MAD(a,b) (b)
+#  define DO_MAD(a)
+#  undef MAD
 #endif
+
+/* contains all the rule actions; auto-generated from perly.y */
+#include "perly.act"
 
     }
 

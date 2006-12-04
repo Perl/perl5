@@ -2754,11 +2754,7 @@ lib/warnings.pm			For "use warnings"
 lib/warnings/register.pm	For "use warnings::register"
 lib/warnings.t			See if warning controls work
 locale.c			locale-specific utility functions
-madly.act			parser actions; derived from madly.y
-madly.c				parser code (NOT derived from madly.y)
-madly.h				header file for madly.c; derived from madly.y
-madly.tab			parser state tables; derived from madly.y
-madly.y				Yacc grammar for MAD
+madly.c				parser code for MAD build
 mad/nomad			Converts raw XML dump to something vaguely sane
 mad/p55				Perl 5 to Perl 5 translator - driver for nomad
 mad/P5AST.pm			Used by nomad

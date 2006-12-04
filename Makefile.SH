@@ -206,7 +206,6 @@ CLDFLAGS = $ldflags
 
 mallocsrc = $mallocsrc
 mallocobj = $mallocobj
-madlyh = $madlyh
 madlysrc = $madlysrc
 madlyobj = $madlyobj
 LNS = $lns
@@ -362,7 +361,7 @@ h1 = EXTERN.h INTERN.h XSUB.h av.h config.h cop.h cv.h dosish.h
 h2 = embed.h form.h gv.h handy.h hv.h keywords.h mg.h op.h opcode.h
 h3 = pad.h patchlevel.h perl.h perlapi.h perly.h pp.h proto.h regcomp.h
 h4 = regexp.h scope.h sv.h unixish.h util.h iperlsys.h thread.h
-h5 = utf8.h warnings.h $(madlyh)
+h5 = utf8.h warnings.h
 h = $(h1) $(h2) $(h3) $(h4) $(h5)
 
 c1 = av.c scope.c op.c doop.c doio.c dump.c gv.c hv.c mg.c reentr.c  perl.c
@@ -927,10 +926,9 @@ install.html: all installhtml
 run_byacc:
 	@echo "run_byacc is obsolete; try 'make regen_perly' instead"
 
-# this outputs perly.h, perly.act, perly.tab, madly.h, madly.act and madly.tab
+# this outputs perly.h, perly.act and perly.tab
 regen_perly:
 	perl regen_perly.pl
-	perl regen_perly.pl madly.y
 
 # We don't want to regenerate perly.c and perly.h, but they might
 # appear out-of-date after a patch is applied or a new distribution is
@@ -939,13 +937,6 @@ perly.c: perly.y
 	-@sh -c true
 
 perly.h: perly.y
-	-@sh -c true
-
-# Similary for madly.
-madly.c: madly.y
-	-@sh -c true
-
-madly.h: madly.y
 	-@sh -c true
 
 # No compat3.sym here since and including the 5.004_50.
