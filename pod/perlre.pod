@@ -1315,8 +1315,6 @@ Once the 'aaab' at the start of the string has matched, and the C<(*SKIP)>
 executed, the next startpoint will be where the cursor was when the
 C<(*SKIP)> was executed.
 
-As a shortcut C<(*MARK:NAME)> can be written C<(*:NAME)>.
-
 =item C<(*MARK:NAME)> C<(*:NAME)>
 X<(*MARK)> C<(*MARK:NAME)> C<(*:NAME)>
 
@@ -1348,6 +1346,8 @@ variable will be set to the name of the most recently executed
 C<(*MARK:NAME)>.
 
 See C<(*SKIP)> for more details.
+
+As a shortcut C<(*MARK:NAME)> can be written C<(*:NAME)>.
 
 =item C<(*THEN)> C<(*THEN:NAME)>
 
