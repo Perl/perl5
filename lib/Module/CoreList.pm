@@ -1,7 +1,7 @@
 package Module::CoreList;
 use strict;
 use vars qw/$VERSION %released %patchlevel %version %families/;
-$VERSION = '2.09';
+$VERSION = '2.09_01';
 
 =head1 NAME
 
@@ -97,7 +97,7 @@ sub first_release {
 
     my @perls = $version
         ? grep { exists $version{$_}{ $module } &&
-                        $version{$_}{ $module } >= $version } keys %version
+                        $version{$_}{ $module } ge $version } keys %version
         : grep { exists $version{$_}{ $module }             } keys %version;
 
     return unless @perls;
