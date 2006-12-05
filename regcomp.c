@@ -8707,7 +8707,7 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
     Newx(ret->endp, npar, I32);
     Copy(r->endp, ret->endp, npar, I32);
 
-    if (ret->substrs) {
+    if (r->substrs) {
         Newx(ret->substrs, 1, struct reg_substr_data);
         for (s = ret->substrs->data, i = 0; i < 3; i++, s++) {
             s->min_offset = r->substrs->data[i].min_offset;
