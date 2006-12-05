@@ -8707,15 +8707,17 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
     Newx(ret->endp, npar, I32);
     Copy(r->endp, ret->endp, npar, I32);
 
-    Newx(ret->substrs, 1, struct reg_substr_data);
-    for (s = ret->substrs->data, i = 0; i < 3; i++, s++) {
-	s->min_offset = r->substrs->data[i].min_offset;
-	s->max_offset = r->substrs->data[i].max_offset;
-	s->end_shift  = r->substrs->data[i].end_shift;
-	s->substr     = sv_dup_inc(r->substrs->data[i].substr, param);
-	s->utf8_substr = sv_dup_inc(r->substrs->data[i].utf8_substr, param);
-    }
-    
+    if (ret->substrs) {
+        Newx(ret->substrs, 1, struct reg_substr_data);
+        for (s = ret->substrs->data, i = 0; i < 3; i++, s++) {
+            s->min_offset = r->substrs->data[i].min_offset;
+            s->max_offset = r->substrs->data[i].max_offset;
+            s->end_shift  = r->substrs->data[i].end_shift;
+            s->substr     = sv_dup_inc(r->substrs->data[i].substr, param);
+            s->utf8_substr = sv_dup_inc(r->substrs->data[i].utf8_substr, param);
+        }
+    } else 
+        ret->substrs = NULL;    
 
     ret->precomp        = SAVEPVN(r->precomp, r->prelen);
     ret->refcnt         = r->refcnt;
@@ -8743,7 +8745,8 @@ Perl_re_dup(pTHX_ const regexp *r, CLONE_PARAMS *param)
 #endif
     
     ret->pprivate = r->pprivate;
-    RXi_SET(ret,CALLREGDUPE_PVT(ret,param));
+    if (ret->pprivate) 
+        RXi_SET(ret,CALLREGDUPE_PVT(ret,param));
     
     ptr_table_store(PL_ptr_table, r, ret);
     return ret;

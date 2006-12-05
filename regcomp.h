@@ -92,7 +92,17 @@ typedef OP OP_4tree;			/* Will be redefined later. */
  * special test to reverse the sign of BACK pointers since the offset is
  * stored negative.]
  */
-typedef struct regexp_internal {
+
+/* This is the stuff that used to live in regexp.h that was truly
+   private to the engine itself. It now lives here. */
+
+/* swap buffer for paren structs */
+typedef struct regexp_paren_ofs {
+    I32 *startp;
+    I32 *endp;
+} regexp_paren_ofs;
+
+ typedef struct regexp_internal {
         regexp_paren_ofs *swap; /* Swap copy of *startp / *endp */
 	U32 *offsets;           /* offset annotations 20001228 MJD 
                                    data about mapping the program to the 
@@ -109,6 +119,20 @@ typedef struct regexp_internal {
 #define RXi_SET(x,y) (x)->pprivate = (void*)(y)   
 #define RXi_GET(x)   ((regexp_internal *)((x)->pprivate))
 #define RXi_GET_DECL(r,ri) regexp_internal *ri = RXi_GET(r)
+/*
+ * Flags stored in regexp->intflags
+ * These are used only internally to the regexp engine
+ *
+ * See regexp.h for flags used externally to the regexp engine
+ */
+#define PREGf_SKIP		0x00000001
+#define PREGf_IMPLICIT		0x00000002 /* Converted .* to ^.* */
+#define PREGf_NAUGHTY		0x00000004 /* how exponential is this pattern? */
+#define PREGf_VERBARG_SEEN	0x00000008
+#define PREGf_CUTGROUP_SEEN	0x00000010
+
+
+/* this is where the old regcomp.h started */
 
 struct regnode_string {
     U8	str_len;
@@ -458,18 +482,6 @@ struct reg_data {
     U32 count;
     U8 *what;
     void* data[1];
-};
-
-struct reg_substr_datum {
-    I32 min_offset;
-    I32 max_offset;
-    SV *substr;		/* non-utf8 variant */
-    SV *utf8_substr;	/* utf8 variant */
-    I32 end_shift;
-};
-
-struct reg_substr_data {
-    struct reg_substr_datum data[3];	/* Actual array */
 };
 
 #define anchored_substr substrs->data[0].substr

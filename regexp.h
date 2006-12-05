@@ -15,8 +15,8 @@
  * not the System V one.
  */
 #ifndef PLUGGABLE_RE_EXTENSION
-/* we don't want to include this stuff if we are inside Nicholas'
- * pluggable regex engine code */
+/* we don't want to include this stuff if we are inside of
+   an external regex engine based on the core one - like re 'debug'*/
 
 struct regnode {
     U8	flags;
@@ -32,10 +32,16 @@ struct reg_data;
 
 struct regexp_engine;
 
-typedef struct regexp_paren_ofs {
-    I32 *startp;
-    I32 *endp;
-} regexp_paren_ofs;
+struct reg_substr_datum {
+    I32 min_offset;
+    I32 max_offset;
+    SV *substr;		/* non-utf8 variant */
+    SV *utf8_substr;	/* utf8 variant */
+    I32 end_shift;
+};
+struct reg_substr_data {
+    struct reg_substr_datum data[3];	/* Actual array */
+};
 
 #ifdef PERL_OLD_COPY_ON_WRITE
 #define SV_SAVED_COPY   SV *saved_copy; /* If non-NULL, SV which is COW from original */
@@ -83,13 +89,16 @@ typedef struct regexp {
 	I32 refcnt;             /* Refcount of this regexp */
 } regexp;
 
-
+/* used for high speed searches */
 typedef struct re_scream_pos_data_s
 {
     char **scream_olds;		/* match pos */
     I32 *scream_pos;		/* Internal iterator of scream. */
 } re_scream_pos_data;
 
+/* regexp_engine structure. This is the dispatch table for regexes.
+ * Any regex engine implementation must be able to build one of these.
+ */
 typedef struct regexp_engine {
     regexp* (*comp) (pTHX_ char* exp, char* xend, PMOP* pm);
     I32	    (*exec) (pTHX_ regexp* prog, char* stringarg, char* strend,
@@ -104,17 +113,6 @@ typedef struct regexp_engine {
     void* (*dupe) (pTHX_ const regexp *r, CLONE_PARAMS *param);
 #endif    
 } regexp_engine;
-
-/* 
- * Flags stored in regexp->intflags 
- * These are used only internally to the regexp engine
- */
-#define PREGf_SKIP		0x00000001
-#define PREGf_IMPLICIT		0x00000002 /* Converted .* to ^.* */
-#define PREGf_NAUGHTY		0x00000004 /* how exponential is this pattern? */
-#define PREGf_VERBARG_SEEN      0x00000008
-#define PREGf_CUTGROUP_SEEN	0x00000010
-
 
 /* Flags stored in regexp->extflags 
  * These are used by code external to the regexp engine
