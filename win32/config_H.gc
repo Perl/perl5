@@ -3290,6 +3290,12 @@
  */
 /*#define HAS_VFORK	/**/
 
+/* HAS_PSEUDOFORK:
+ *	This symbol, if defined, indicates that an emulation of the
+ *	fork routine is available.
+ */
+/*#define HAS_PSEUDOFORK	/**/
+
 /* Signal_t:
  *	This symbol's value is either "void" or "int", corresponding to the
  *	appropriate return type of a signal handler.  Thus, you can declare

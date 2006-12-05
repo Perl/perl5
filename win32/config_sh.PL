@@ -109,6 +109,10 @@ if ($opt{uselargefiles} ne 'define') {
     $opt{lseektype} = 'off_t';
 }
 
+if ($opt{useithreads} eq 'define' && $opt{ccflags} =~ / -DPERL_IMPLICIT_SYS/) {
+    $opt{d_pseudofork} = 'define';
+}
+
 while (<>) {
     s/~([\w_]+)~/$opt{$1}/g;
     if (/^([\w_]+)=(.*)$/) {
