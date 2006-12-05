@@ -3325,6 +3325,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$d_vfork HAS_VFORK	/**/
 
+/* HAS_PSEUDOFORK:
+ *	This symbol, if defined, indicates that an emulation of the
+ *	fork routine is available.
+ */
+#$d_pseudofork HAS_PSEUDOFORK	/**/
+
 /* Signal_t:
  *	This symbol's value is either "void" or "int", corresponding to the
  *	appropriate return type of a signal handler.  Thus, you can declare

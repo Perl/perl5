@@ -1572,6 +1572,10 @@ d_procselfexe (d_procselfexe.U):
 	Defined if $procselfexe is symlink to the absolute
 	pathname of the executing program.
 
+d_pseudofork (d_vfork.U):
+	This variable conditionally defines the HAS_PSEUDOFORK symbol,
+	which indicates that an emulation of the fork routine is available.
+
 d_pthread_atfork (d_pthread_atfork.U):
 	This variable conditionally defines the HAS_PTHREAD_ATFORK symbol,
 	which indicates to the C program that the pthread_atfork()

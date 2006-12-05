@@ -26,7 +26,7 @@
 
 # $Id: Head.U,v 3.0.1.9 1997/02/28 15:02:09 ram Exp $
 #
-# Generated on Mon Dec  4 19:08:33 CET 2006 [metaconfig 3.0 PL70]
+# Generated on Tue Dec  5 15:35:51 CET 2006 [metaconfig 3.0 PL70]
 # (with additional metaconfig patches by perlbug@perl.org)
 
 cat >c1$$ <<EOF
@@ -795,6 +795,7 @@ d_unsetenv=''
 d_usleep=''
 d_usleepproto=''
 d_ustat=''
+d_pseudofork=''
 d_vfork=''
 usevfork=''
 d_voidsig=''
@@ -15571,6 +15572,54 @@ $rm -f reflect
 set d_procselfexe
 eval $setvar
 
+: backward compatibility for d_hvfork
+if test X$d_hvfork != X; then
+	d_vfork="$d_hvfork"
+	d_hvfork=''
+fi
+: see if there is a vfork
+val=''
+set vfork val
+eval $inlibc
+
+d_pseudofork=$undef
+
+: Ok, but do we want to use it. vfork is reportedly unreliable in
+: perl on Solaris 2.x, and probably elsewhere.
+case "$val" in
+$define)
+	echo " "
+	case "$usevfork" in
+	false) dflt='n';;
+	*) dflt='y';;
+	esac
+	cat <<'EOM'
+
+Perl can only use a vfork() that doesn't suffer from strict
+restrictions on calling functions or modifying global data in
+the child.  For example, glibc-2.1 contains such a vfork()
+that is unsuitable.  If your system provides a proper fork()
+call, chances are that you do NOT want perl to use vfork().
+
+EOM
+	rp="Do you still want to use vfork()?"
+	. ./myread
+	case "$ans" in
+	y|Y) ;;
+	*)
+		echo "Ok, we won't use vfork()."
+		val="$undef"
+		;;
+	esac
+	;;
+esac
+set d_vfork
+eval $setvar
+case "$d_vfork" in
+$define) usevfork='true';;
+*) usevfork='false';;
+esac
+
 : see whether the pthread_atfork exists
 $cat >try.c <<EOP
 #include <pthread.h>
@@ -18078,52 +18127,6 @@ eval $hasproto
 : see if ustat exists
 set ustat d_ustat
 eval $inlibc
-
-: backward compatibility for d_hvfork
-if test X$d_hvfork != X; then
-	d_vfork="$d_hvfork"
-	d_hvfork=''
-fi
-: see if there is a vfork
-val=''
-set vfork val
-eval $inlibc
-
-: Ok, but do we want to use it. vfork is reportedly unreliable in 
-: perl on Solaris 2.x, and probably elsewhere.
-case "$val" in
-$define)
-	echo " "
-	case "$usevfork" in
-	false) dflt='n';;
-	*) dflt='y';;
-	esac
-	cat <<'EOM'
- 
-Perl can only use a vfork() that doesn't suffer from strict
-restrictions on calling functions or modifying global data in
-the child.  For example, glibc-2.1 contains such a vfork()
-that is unsuitable.  If your system provides a proper fork()
-call, chances are that you do NOT want perl to use vfork().
-
-EOM
-	rp="Do you still want to use vfork()?"
-	. ./myread
-	case "$ans" in
-	y|Y) ;;
-	*)
-		echo "Ok, we won't use vfork()."
-		val="$undef"
-		;;
-	esac
-	;;
-esac
-set d_vfork
-eval $setvar
-case "$d_vfork" in
-$define) usevfork='true';;
-*) usevfork='false';;
-esac
 
 : see if closedir exists
 set closedir d_closedir
@@ -21756,6 +21759,7 @@ d_poll='$d_poll'
 d_portable='$d_portable'
 d_printf_format_null='$d_printf_format_null'
 d_procselfexe='$d_procselfexe'
+d_pseudofork='$d_pseudofork'
 d_pthread_atfork='$d_pthread_atfork'
 d_pthread_attr_setscope='$d_pthread_attr_setscope'
 d_pthread_yield='$d_pthread_yield'
