@@ -2278,8 +2278,9 @@ S_more_refcounted_fds(pTHX_ const int new_fd) {
 
     assert (new_max > new_fd);
 
-    new_array =
-	(int*) PerlMemShared_realloc(PL_perlio_fd_refcnt, new_max * sizeof(int));
+    /* Use plain realloc() since we need this memory to be really
+     * global and visible to all the interpreters and/or threads. */
+    new_array = (int*) realloc(PL_perlio_fd_refcnt, new_max * sizeof(int));
 
     if (!new_array) {
 #ifdef USE_ITHREADS
@@ -2412,19 +2413,14 @@ void PerlIO_teardown(pTHX) /* Call only from PERL_SYS_TERM(). */
 	}
     }
 #endif
-#if !defined(WIN32) || !defined(PERL_IMPLICIT_SYS)
-    /* On Windows, under PERL_IMPLICIT_SYS, all memory allocated by
-     * PerlMemShared_...() will be freed anyways when PL_curinterp
-     * is being destroyed. */
+    /* Not bothering with PL_perlio_mutex since by now
+     * all the interpreters are gone. */
     if (PL_perlio_fd_refcnt_size /* Assuming initial size of zero. */
         && PL_perlio_fd_refcnt) {
-	/* Not bothering with PL_perlio_mutex since by now all the
-	 * interpreters are gone. */
-	PerlMemShared_free(PL_perlio_fd_refcnt);
+	free(PL_perlio_fd_refcnt); /* To match realloc() in S_more_refcounted_fds(). */
 	PL_perlio_fd_refcnt = NULL;
 	PL_perlio_fd_refcnt_size = 0;
     }
-#endif
 }
 
 
