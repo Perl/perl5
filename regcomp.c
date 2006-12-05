@@ -4753,12 +4753,11 @@ Perl_pregfree(pTHX_ struct regexp *r)
 #define SAVEPVN(p,n)	((p) ? savepvn(p,n) : NULL)
 
 /* 
-   regdupe - duplicate a regexp. 
+   re_dup - duplicate a regexp. 
    
-   This routine is called by sv.c's re_dup and is expected to clone a 
-   given regexp structure. It is a no-op when not under USE_ITHREADS. 
-   (Originally this *was* re_dup() for change history see sv.c)
-   
+   This routine is expected to clone a given regexp structure. It is not
+   compiler under USE_ITHREADS.
+
    See pregfree() above if you change anything here. 
 */
        
@@ -4767,8 +4766,7 @@ regexp *
 Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
 {
     REGEXP *ret;
-    int i, len, npar;
-    struct reg_substr_datum *s;
+    int len, npar;
 
     if (!r)
 	return (REGEXP *)NULL;
@@ -4787,13 +4785,36 @@ Perl_regdupe(pTHX_ const regexp *r, CLONE_PARAMS *param)
     Newx(ret->endp, npar, I32);
     Copy(r->startp, ret->startp, npar, I32);
 
-    Newx(ret->substrs, 1, struct reg_substr_data);
-    for (s = ret->substrs->data, i = 0; i < 3; i++, s++) {
-	s->min_offset = r->substrs->data[i].min_offset;
-	s->max_offset = r->substrs->data[i].max_offset;
-	s->substr     = sv_dup_inc(r->substrs->data[i].substr, param);
-	s->utf8_substr = sv_dup_inc(r->substrs->data[i].utf8_substr, param);
-    }
+    if (r->substrs) {
+	/* Do it this way to avoid reading from *r after the StructCopy().
+	   That way, if any of the sv_dup_inc()s dislodge *r from the L1
+	   cache, it doesn't matter.  */
+	const bool anchored = r->check_substr == r->anchored_substr;
+        Newx(ret->substrs, 1, struct reg_substr_data);
+	StructCopy(r->substrs, ret->substrs, struct reg_substr_data);
+
+	ret->anchored_substr = sv_dup_inc(ret->anchored_substr, param);
+	ret->anchored_utf8 = sv_dup_inc(ret->anchored_utf8, param);
+	ret->float_substr = sv_dup_inc(ret->float_substr, param);
+	ret->float_utf8 = sv_dup_inc(ret->float_utf8, param);
+
+	/* check_substr and check_utf8, if non-NULL, point to either their
+	   anchored or float namesakes, and don't hold a second reference.  */
+
+	if (ret->check_substr) {
+	    if (anchored) {
+		assert(r->check_utf8 == r->anchored_utf8);
+		ret->check_substr = ret->anchored_substr;
+		ret->check_utf8 = ret->anchored_utf8;
+	    } else {
+		assert(r->check_substr == r->float_substr);
+		assert(r->check_utf8 == r->float_utf8);
+		ret->check_substr = ret->float_substr;
+		ret->check_utf8 = ret->float_utf8;
+	    }
+	}
+    } else 
+        ret->substrs = NULL;    
 
     ret->regstclass = NULL;
     if (r->data) {

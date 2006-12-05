@@ -72,6 +72,11 @@ typedef OP OP_4tree;			/* Will be redefined later. */
  * stored negative.]
  */
 
+/* This is the stuff that used to live in regexp.h that was truly
+   private to the engine itself. It now lives here. */
+
+/* this is where the old regcomp.h started */
+
 struct regnode_string {
     U8	str_len;
     U8  type;
@@ -401,17 +406,6 @@ struct reg_data {
 
 /* Code in S_to_utf8_substr() and S_to_byte_substr() in regexec.c accesses
    anchored* and float* via array indexes 0 and 1.  */
-
-struct reg_substr_datum {
-    I32 min_offset;
-    I32 max_offset;
-    SV *substr;		/* non-utf8 variant */
-    SV *utf8_substr;	/* utf8 variant */
-};
-
-struct reg_substr_data {
-    struct reg_substr_datum data[3];	/* Actual array */
-};
 
 #define anchored_substr substrs->data[0].substr
 #define anchored_utf8 substrs->data[0].utf8_substr

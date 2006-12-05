@@ -15,8 +15,8 @@
  * not the System V one.
  */
 #ifndef PLUGGABLE_RE_EXTENSION
-/* we don't want to include this stuff if we are inside Nicholas'
- * pluggable regex engine code */
+/* we don't want to include this stuff if we are inside of
+   an external regex engine based on the core one - like re 'debug'*/
 
 struct regnode {
     U8	flags;
@@ -30,6 +30,15 @@ struct reg_substr_data;
 
 struct reg_data;
 
+struct reg_substr_datum {
+    I32 min_offset;
+    I32 max_offset;
+    SV *substr;		/* non-utf8 variant */
+    SV *utf8_substr;	/* utf8 variant */
+};
+struct reg_substr_data {
+    struct reg_substr_datum data[3];	/* Actual array */
+};
 typedef struct regexp {
 	I32 *startp;
 	I32 *endp;
@@ -67,9 +76,12 @@ typedef struct regexp {
 #define ROPT_EVAL_SEEN		0x00000400
 #define ROPT_CANY_SEEN		0x00000800
 #define ROPT_SANY_SEEN		ROPT_CANY_SEEN /* src bckwrd cmpt */
-
+/* used for high speed searches */
 /* 0xf800 of reganch is used by PMf_COMPILETIME */
 
+/* regexp_engine structure. This is the dispatch table for regexes.
+ * Any regex engine implementation must be able to build one of these.
+ */
 #define ROPT_UTF8		0x00010000
 #define ROPT_NAUGHTY		0x00020000 /* how exponential is this pattern? */
 #define ROPT_COPY_DONE		0x00040000	/* subbeg is a copy of the string */
