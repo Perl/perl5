@@ -109,7 +109,7 @@ if ($opt{uselargefiles} ne 'define') {
     $opt{lseektype} = 'off_t';
 }
 
-if ($opt{useithreads} eq 'define' && $opt{ccflags} =~ / -DPERL_IMPLICIT_SYS/) {
+if ($opt{useithreads} eq 'define' && $opt{ccflags} =~ /-DPERL_IMPLICIT_SYS\b/) {
     $opt{d_pseudofork} = 'define';
 }
 
