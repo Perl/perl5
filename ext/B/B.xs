@@ -563,6 +563,8 @@ typedef GV	*B__GV;
 typedef IO	*B__IO;
 
 typedef MAGIC	*B__MAGIC;
+typedef HE      *B__HE;
+typedef struct refcounted_he	*B__RHE;
 
 MODULE = B	PACKAGE = B	PREFIX = B_
 
@@ -1184,6 +1186,14 @@ COP_io(o)
 U32
 COP_hints(o)
 	B::COP	o
+
+B::RHE
+COP_hints_hash(o)
+	B::COP o
+    CODE:
+	RETVAL = o->cop_hints_hash;
+    OUTPUT:
+	RETVAL
 
 MODULE = B	PACKAGE = B::SV
 
@@ -1830,3 +1840,27 @@ HvARRAY(hv)
 		PUSHs(make_sv_object(aTHX_ sv_newmortal(), sv));
 	    }
 	}
+
+MODULE = B	PACKAGE = B::HE		PREFIX = He
+
+B::SV
+HeVAL(he)
+	B::HE he
+
+U32
+HeHASH(he)
+	B::HE he
+
+B::SV
+HeSVKEY_force(he)
+	B::HE he
+
+MODULE = B	PACKAGE = B::RHE	PREFIX = RHE_
+
+SV*
+RHE_HASH(h)
+	B::RHE h
+    CODE:
+	RETVAL = newRV( (SV*)Perl_refcounted_he_chain_2hv(h) );
+    OUTPUT:
+	RETVAL

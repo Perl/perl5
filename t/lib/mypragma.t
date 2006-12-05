@@ -22,8 +22,8 @@ is(mypragma::in_effect(), undef, "pragma not in effect yet");
 	or die $@;
 
     use mypragma;
-    is(mypragma::in_effect(), 1, "pragma is in effect within this block");
-    eval qq{is(mypragma::in_effect(), 1,
+    is(mypragma::in_effect(), 42, "pragma is in effect within this block");
+    eval qq{is(mypragma::in_effect(), 42,
 	       "pragma is in effect within this eval"); 1} or die $@;
 
     {
@@ -33,8 +33,8 @@ is(mypragma::in_effect(), undef, "pragma not in effect yet");
 	or die $@;
     }
 
-    is(mypragma::in_effect(), 1, "pragma is in effect within this block");
-    eval qq{is(mypragma::in_effect(), 1,
+    is(mypragma::in_effect(), 42, "pragma is in effect within this block");
+    eval qq{is(mypragma::in_effect(), 42,
 	       "pragma is in effect within this eval"); 1} or die $@;
 }
 is(mypragma::in_effect(), undef, "pragma no longer in effect");

@@ -30,7 +30,7 @@ use strict;
 use warnings;
 
 sub import {
-    $^H{mypragma} = 1;
+    $^H{mypragma} = 42;
 }
 
 sub unimport {
