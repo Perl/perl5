@@ -1189,16 +1189,6 @@ Perl_save_I16(pTHX_ I16 *intp)
 }
 
 void
-Perl_save_I8(pTHX_ I8 *bytep)
-{
-    dVAR;
-    SSCHECK(3);
-    SSPUSHINT(*bytep);
-    SSPUSHPTR(bytep);
-    SSPUSHINT(SAVEt_I8);
-}
-
-void
 Perl_save_iv(pTHX_ IV *ivp)
 {
     dVAR;

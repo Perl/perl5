@@ -360,6 +360,16 @@ Perl_save_bool(pTHX_ bool *boolp)
 }
 
 void
+Perl_save_I8(pTHX_ I8 *bytep)
+{
+    dVAR;
+    SSCHECK(3);
+    SSPUSHINT(*bytep);
+    SSPUSHPTR(bytep);
+    SSPUSHINT(SAVEt_I8);
+}
+
+void
 Perl_save_I32(pTHX_ I32 *intp)
 {
     dVAR;
