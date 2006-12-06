@@ -1861,6 +1861,6 @@ SV*
 RHE_HASH(h)
 	B::RHE h
     CODE:
-	RETVAL = newRV( (SV*)Perl_refcounted_he_chain_2hv(h) );
+	RETVAL = newRV( (SV*)Perl_refcounted_he_chain_2hv(aTHX_ h) );
     OUTPUT:
 	RETVAL

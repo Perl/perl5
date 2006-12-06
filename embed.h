@@ -2501,8 +2501,6 @@
 #define hv_iternext_flags(a,b)	Perl_hv_iternext_flags(aTHX_ a,b)
 #define hv_iterval(a,b)		Perl_hv_iterval(aTHX_ a,b)
 #define hv_ksplit(a,b)		Perl_hv_ksplit(aTHX_ a,b)
-#ifdef PERL_CORE
-#endif
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #endif
 #ifdef PERL_CORE

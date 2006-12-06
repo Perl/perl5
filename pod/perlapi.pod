@@ -1913,6 +1913,20 @@ Creates a new HV.  The reference count is set to 1.
 =for hackers
 Found in file hv.c
 
+=item refcounted_he_chain_2hv
+X<refcounted_he_chain_2hv>
+
+Generates an returns a C<HV *> by walking up the tree starting at the passed
+in C<struct refcounted_he *>.
+
+NOTE: this function is experimental and may change or be
+removed without notice.
+
+	HV *	refcounted_he_chain_2hv(const struct refcounted_he *c)
+
+=for hackers
+Found in file hv.c
+
 
 =back
 

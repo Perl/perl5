@@ -164,6 +164,7 @@ Perl_hv_iternext_flags
 Perl_hv_iterval
 Perl_hv_ksplit
 Perl_hv_magic
+Perl_refcounted_he_chain_2hv
 Perl_refcounted_he_fetch
 Perl_refcounted_he_new
 Perl_hv_store

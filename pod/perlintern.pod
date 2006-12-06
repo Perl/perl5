@@ -480,17 +480,6 @@ Found in file gv.c
 
 =over 8
 
-=item refcounted_he_chain_2hv
-X<refcounted_he_chain_2hv>
-
-Generates an returns a C<HV *> by walking up the tree starting at the passed
-in C<struct refcounted_he *>.
-
-	HV *	refcounted_he_chain_2hv(const struct refcounted_he *c)
-
-=for hackers
-Found in file hv.c
-
 =item refcounted_he_free
 X<refcounted_he_free>
 
