@@ -1223,17 +1223,6 @@ Perl_save_list(pTHX_ register SV **sarg, I32 maxsarg)
     }
 }
 
-void
-Perl_save_destructor(pTHX_ DESTRUCTORFUNC_NOCONTEXT_t f, void* p)
-{
-    dVAR;
-    SSCHECK(3);
-    SSPUSHDPTR(f);
-    SSPUSHPTR(p);
-    SSPUSHINT(SAVEt_DESTRUCTOR);
-}
-
-
 /*
 =for apidoc sv_usepvn_mg
 

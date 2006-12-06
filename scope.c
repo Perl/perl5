@@ -503,6 +503,16 @@ Perl_save_delete(pTHX_ HV *hv, char *key, I32 klen)
 }
 
 void
+Perl_save_destructor(pTHX_ DESTRUCTORFUNC_NOCONTEXT_t f, void* p)
+{
+    dVAR;
+    SSCHECK(3);
+    SSPUSHDPTR(f);
+    SSPUSHPTR(p);
+    SSPUSHINT(SAVEt_DESTRUCTOR);
+}
+
+void
 Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void* p)
 {
     dVAR;
