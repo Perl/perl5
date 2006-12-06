@@ -23,7 +23,7 @@ extern SV*	my_re_intuit_string (pTHX_ regexp *prog);
 
 extern void	my_regfree (pTHX_ struct regexp* r);
 #if defined(USE_ITHREADS)
-extern regexp*	my_regdupe (pTHX_ const regexp *r, CLONE_PARAMS *param);
+extern void*	my_regdupe (pTHX_ const regexp *r, CLONE_PARAMS *param);
 #endif
 
 EXTERN_C const struct regexp_engine my_reg_engine;
