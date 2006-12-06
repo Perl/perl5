@@ -21090,6 +21090,11 @@ for xxx in $known_extensions ; do
                         esac
 		esac
 		;;
+	Win32)
+		case "$osname" in
+		cygwin) avail_ext="$avail_ext $xxx" ;;
+		esac
+		;;
 	XS/APItest|xs/apitest)
 		# This is just for testing.  Skip it unless we have dynamic loading.
 

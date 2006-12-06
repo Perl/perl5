@@ -1208,6 +1208,9 @@ ext/Unicode/Normalize/t/split.t	Unicode::Normalize
 ext/Unicode/Normalize/t/test.t	Unicode::Normalize
 ext/Unicode/Normalize/t/tie.t	Unicode::Normalize
 ext/util/make_ext		Used by Makefile to execute extension Makefiles
+ext/Win32/Makefile.PL		Win32 extension makefile writer
+ext/Win32/Win32.pm		Win32 extension Perl module
+ext/Win32/Win32.xs		Win32 extension external subroutines
 ext/XS/APItest/APItest.pm	XS::APItest extension
 ext/XS/APItest/APItest.xs	XS::APItest extension
 ext/XS/APItest/core.c		Test API functions when PERL_CORE is defined
@@ -3799,9 +3802,6 @@ win32/ext/Win32API/File/README				Win32API::File extension Readme
 win32/ext/Win32API/File/t/file.t			See if Win32API::File extension works
 win32/ext/Win32API/File/t/tie.t				See if Win32API::File extension works
 win32/ext/Win32API/File/typemap				Win32API::File extension interface types
-win32/ext/Win32/Makefile.PL	Win32 extension makefile writer
-win32/ext/Win32/Win32.pm	Win32 extension Perl module
-win32/ext/Win32/Win32.xs	Win32 extension external subroutines
 win32/fcrypt.c			crypt() implementation
 win32/FindExt.pm		Scan for extensions
 win32/genmk95.pl		Perl code to generate command.com-usable makefile.95
