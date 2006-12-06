@@ -16,7 +16,7 @@ BEGIN { $| = 1; print "1..38\n"; }
 
 END { print "not ok 1\n" unless $loaded }
 
-use Time::HiRes 1.93; # Remember to bump this once in a while.
+use Time::HiRes 1.9701; # Remember to bump this once in a while.
 use Time::HiRes qw(tv_interval);
 
 $loaded = 1;
@@ -581,7 +581,7 @@ if ($have_clock) {
 	print "# clock = @clock\n";
     }
     if ($clock[0] >= 0 &&
-        $clock[1] > $clock[0] &&
+	$clock[1] > $clock[0] &&
 	$clock[2] > $clock[1] &&
 	$clock[3] > $clock[2]) {
 	print "ok 33\n";

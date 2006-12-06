@@ -66,20 +66,6 @@ extern "C" {
 #   undef ITIMER_REALPROF
 #endif
 
-/* 5.004 doesn't define PL_sv_undef */
-#ifndef ATLEASTFIVEOHOHFIVE
-# ifndef PL_sv_undef
-#  define PL_sv_undef sv_undef
-# endif
-#endif
-
-/* PL_ppaddr is not available in Perl 5.005_04 */
-#if (PERL_VERSION < 5) || (PERL_VERSION == 5 && PERL_SUBVERSION <50)
-# ifndef PL_ppaddr
-#  define PL_ppaddr ppaddr
-# endif
-#endif 
-
 #if defined(TIME_HIRES_CLOCK_GETTIME) && defined(_STRUCT_ITIMERSPEC)
 
 /* HP-UX has CLOCK_XXX values but as enums, not as defines.
@@ -727,7 +713,7 @@ myNVtime()
 static void
 hrstatns(UV atime, UV mtime, UV ctime, UV *atime_nsec, UV *mtime_nsec, UV *ctime_nsec)
 {
-  dTHX;
+  dTHXR;
   *atime_nsec = 0;
   *mtime_nsec = 0;
   *ctime_nsec = 0;
@@ -772,12 +758,12 @@ BOOT:
   MY_CXT_INIT;
 #endif
 #ifdef ATLEASTFIVEOHOHFIVE
-#ifdef HAS_GETTIMEOFDAY
+#   ifdef HAS_GETTIMEOFDAY
   {
     hv_store(PL_modglobal, "Time::NVtime", 12, newSViv(PTR2IV(myNVtime)), 0);
     hv_store(PL_modglobal, "Time::U2time", 12, newSViv(PTR2IV(myU2time)), 0);
   }
-#endif
+#   endif
 #endif
 }
 
@@ -1220,13 +1206,12 @@ void
 stat(...)
 PROTOTYPE: ;$
     PPCODE:
-	dTHX;
 	PUSHMARK(SP);
 	XPUSHs(sv_2mortal(newSVsv(items == 1 ? ST(0) : DEFSV)));
 	PUTBACK;
 	ENTER;
 	PL_laststatval = -1;
-	(void)*(PL_ppaddr[OP_STAT])(aTHX);
+	(void)*(PL_ppaddr[OP_STAT])(aTHXR);
 	SPAGAIN;
 	LEAVE;
 	if (PL_laststatval == 0) {

@@ -102,6 +102,16 @@ sub try_compile_and_link {
 	    $COREincdir = File::Spec->catdir($Config{'archlibexp'}, 'CORE');
 	}
 
+	if ($ENV{PERL_CORE}) {
+	    unless (-f File::Spec->catfile($COREincdir, "EXTERN.h")) {
+		die <<__EOD__;
+Your environment variable PERL_CORE is '$ENV{PERL_CORE}' but there
+is no EXTERN.h in $COREincdir.
+Cannot continue, aborting.
+__EOD__
+            }
+        }
+
 	my $ccflags = $Config{'ccflags'} . ' ' . "-I$COREincdir";
 
 	if ($^O eq 'VMS') {
