@@ -8,16 +8,13 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require Config; import Config;
-    $can_fork = $Config{'d_fork'}
-		|| ($^O eq 'MSWin32' && $Config{useithreads}
-		    && $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS\b/);
-
+    $can_fork = $Config{'d_fork'} || $Config{'d_pseudofork'};
 
     if ($^O eq "hpux" or $Config{'extensions'} !~ /\bSocket\b/ &&
         !(($^O eq 'VMS') && $Config{d_socket})) {
 	print "1..0\n";
 	exit 0;
-      }
+    }
 
     # Too many things in this test will hang forever if something is wrong,
     # so we need a self destruct timer. And IO can hang despite an alarm.

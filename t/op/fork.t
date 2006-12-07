@@ -6,12 +6,7 @@ BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
     require Config; import Config;
-    unless ($Config{'d_fork'}
-	    or (($^O eq 'MSWin32' || $^O eq 'NetWare') and $Config{useithreads}
-		and $Config{ccflags} =~ /-DPERL_IMPLICIT_SYS/ 
-#               and !defined $Config{'useperlio'}
-               ))
-    {
+    unless ($Config{'d_fork'} or $Config{'d_pseudofork'}) {
 	print "1..0 # Skip: no fork\n";
 	exit 0;
     }
