@@ -349,7 +349,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVpav_REAL	0x40000000	/* free old entries */
 /* PVHV */
 #define SVphv_LAZYDEL	0x40000000	/* entry in xhv_eiter must be deleted */
-/* PVBM */
+/* Not just PVBM - basically anything that can be a regular scalar */
 #define SVpbm_TAIL	0x40000000
 /* ??? */
 #define SVrepl_EVAL	0x40000000	/* Replacement part of s///e */
@@ -1059,7 +1059,15 @@ the scalar's value cannot change unless written to.
 #define SvEVALED_on(sv)		(SvFLAGS(sv) |= SVrepl_EVAL)
 #define SvEVALED_off(sv)	(SvFLAGS(sv) &= ~SVrepl_EVAL)
 
-#define SvTAIL(sv)		(SvFLAGS(sv) & SVpbm_TAIL)
+#if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  define SvTAIL(sv)	({ SV *const _svi = (SV *) (sv);		\
+			    assert(SvTYPE(_svi) != SVt_PVAV);		\
+			    assert(SvTYPE(_svi) != SVt_PVHV);		\
+			    SvFLAGS(sv) & SVpbm_TAIL;			\
+			})
+#else
+#  define SvTAIL(sv)		(SvFLAGS(sv) & SVpbm_TAIL)
+#endif
 #define SvTAIL_on(sv)		(SvFLAGS(sv) |= SVpbm_TAIL)
 #define SvTAIL_off(sv)		(SvFLAGS(sv) &= ~SVpbm_TAIL)
 
