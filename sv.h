@@ -1300,9 +1300,27 @@ the scalar's value cannot change unless written to.
 		     }							\
 		 } STMT_END
 
-#define BmRARE(sv)	((XPVBM*)  SvANY(sv))->xbm_rare
-#define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xbm_useful
-#define BmPREVIOUS(sv)	((XPVBM*)  SvANY(sv))->xbm_previous
+#if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  define BmRARE(sv)							\
+	(*({ SV *const _svi = (SV *) (sv);				\
+	    assert(SvTYPE(_svi) == SVt_PVBM);				\
+	    &(((XPVBM*) SvANY(_svi))->xbm_rare);			\
+	 }))
+#  define BmUSEFUL(sv)							\
+	(*({ SV *const _svi = (SV *) (sv);				\
+	    assert(SvTYPE(_svi) == SVt_PVBM);				\
+	    &(((XPVBM*) SvANY(_svi))->xbm_useful);			\
+	 }))
+#  define BmPREVIOUS(sv)						\
+	(*({ SV *const _svi = (SV *) (sv);				\
+	    assert(SvTYPE(_svi) == SVt_PVBM);				\
+	    &(((XPVBM*) SvANY(_svi))->xbm_previous);			\
+	 }))
+#else
+#  define BmRARE(sv)	((XPVBM*)  SvANY(sv))->xbm_rare
+#  define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xbm_useful
+#  define BmPREVIOUS(sv)	((XPVBM*)  SvANY(sv))->xbm_previous
+#endif
 
 #define FmLINES(sv)	((XPVFM*)  SvANY(sv))->xfm_lines
 
