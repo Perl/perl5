@@ -520,6 +520,15 @@ struct loop {
 #define OA_SCALARREF 7
 #define OA_OPTIONAL 8
 
+/* Op_REFCNT is a reference count at the head of each op tree: needed
+ * since the tree is shared between threads, and between cloned closure
+ * copies in the same thread. OP_REFCNT_LOCK/UNLOCK is used when modifying
+ * this count.
+ * The same mutex is used to protect the refcounts of the reg_trie_data
+ * and reg_ac_data structures, which are shared between duplicated
+ * regexes.
+ */
+
 #ifdef USE_ITHREADS
 #  define OP_REFCNT_INIT		MUTEX_INIT(&PL_op_mutex)
 #  ifdef PERL_CORE

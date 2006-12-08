@@ -10421,7 +10421,9 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 		case OP_LEAVEWRITE:
 		    TOPPTR(nss,ix) = ptr;
 		    o = (OP*)ptr;
+		    OP_REFCNT_LOCK;
 		    OpREFCNT_inc(o);
+		    OP_REFCNT_UNLOCK;
 		    break;
 		default:
 		    TOPPTR(nss,ix) = NULL;
@@ -10993,7 +10995,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* current interpreter roots */
     PL_main_cv		= cv_dup_inc(proto_perl->Imain_cv, param);
+    OP_REFCNT_LOCK;
     PL_main_root	= OpREFCNT_inc(proto_perl->Imain_root);
+    OP_REFCNT_UNLOCK;
     PL_main_start	= proto_perl->Imain_start;
     PL_eval_root	= proto_perl->Ieval_root;
     PL_eval_start	= proto_perl->Ieval_start;
