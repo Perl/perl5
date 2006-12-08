@@ -1132,7 +1132,7 @@ the scalar's value cannot change unless written to.
 #  if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 /* These get expanded inside other macros that already use a variable _sv  */
 #    define SvPVX(sv)							\
-	(*({ SV *const _svi = (SV *) sv;				\
+	(*({ SV *const _svi = (SV *) (sv);				\
 	    assert(SvTYPE(_svi) >= SVt_PV);				\
 	    assert(SvTYPE(_svi) != SVt_PVAV);				\
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
@@ -1140,7 +1140,7 @@ the scalar's value cannot change unless written to.
 	    &((_svi)->sv_u.svu_pv);					\
 	 }))
 #    define SvCUR(sv)							\
-	(*({ SV *const _svi = (SV *) sv;				\
+	(*({ SV *const _svi = (SV *) (sv);				\
 	    assert(SvTYPE(_svi) >= SVt_PV);				\
 	    assert(SvTYPE(_svi) != SVt_PVAV);				\
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
@@ -1148,7 +1148,7 @@ the scalar's value cannot change unless written to.
 	    &(((XPV*) SvANY(_svi))->xpv_cur);				\
 	 }))
 #    define SvIVX(sv)							\
-	(*({ SV *const _svi = (SV *) sv;				\
+	(*({ SV *const _svi = (SV *) (sv);				\
 	    assert(SvTYPE(_svi) == SVt_IV || SvTYPE(_svi) >= SVt_PVIV);	\
 	    assert(SvTYPE(_svi) != SVt_PVAV);				\
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
@@ -1157,7 +1157,7 @@ the scalar's value cannot change unless written to.
 	    &(((XPVIV*) SvANY(_svi))->xiv_iv);				\
 	 }))
 #    define SvUVX(sv)							\
-	(*({ SV *const _svi = (SV *) sv;				\
+	(*({ SV *const _svi = (SV *) (sv);				\
 	    assert(SvTYPE(_svi) == SVt_IV || SvTYPE(_svi) >= SVt_PVIV);	\
 	    assert(SvTYPE(_svi) != SVt_PVAV);				\
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
@@ -1166,7 +1166,7 @@ the scalar's value cannot change unless written to.
 	    &(((XPVUV*) SvANY(_svi))->xuv_uv);				\
 	 }))
 #    define SvNVX(sv)							\
-	(*({ SV *const _svi = (SV *) sv;				\
+	(*({ SV *const _svi = (SV *) (sv);				\
 	    assert(SvTYPE(_svi) == SVt_NV || SvTYPE(_svi) >= SVt_PVNV);	\
 	    assert(SvTYPE(_svi) != SVt_PVAV);				\
 	    assert(SvTYPE(_svi) != SVt_PVHV);				\
@@ -1176,14 +1176,14 @@ the scalar's value cannot change unless written to.
 	   &(((XPVNV*) SvANY(_svi))->xnv_u.xnv_nv);			\
 	 }))
 #    define SvMAGIC(sv)							\
-	(*({ SV *const _svi = (SV *) sv;				\
+	(*({ SV *const _svi = (SV *) (sv);				\
 	    assert(SvTYPE(_svi) >= SVt_PVMG);				\
 	    if(SvTYPE(_svi) == SVt_PVMG)				\
 		assert(!SvPAD_OUR(_svi));				\
 	    &(((XPVMG*) SvANY(_svi))->xmg_u.xmg_magic);			\
 	  }))
 #    define SvSTASH(sv)							\
-	(*({ SV *const _svi = (SV *) sv;				\
+	(*({ SV *const _svi = (SV *) (sv);				\
 	    assert(SvTYPE(_svi) >= SVt_PVMG);				\
 	    &(((XPVMG*) SvANY(_svi))->xmg_stash);			\
 	  }))
