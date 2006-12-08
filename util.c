@@ -754,6 +754,8 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     register const unsigned char *littleend;
     I32 found = 0;
 
+    assert(SvTYPE(littlestr) == SVt_PVBM);
+
     if (*old_posp == -1
 	? (pos = PL_screamfirst[BmRARE(littlestr)]) < 0
 	: (((pos = *old_posp), pos += PL_screamnext[pos]) == 0)) {
