@@ -490,9 +490,9 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	    mg->mg_len++;
     }
     s = (U8*)SvPV_force_mutable(sv, len);
-    SvUPGRADE(sv, SVt_PVBM);
     if (len == 0)		/* TAIL might be on a zero-length string. */
 	return;
+    SvUPGRADE(sv, SVt_PVBM);
     if (len > 2) {
 	const unsigned char *sb;
 	const U8 mlen = (len>255) ? 255 : (U8)len;
