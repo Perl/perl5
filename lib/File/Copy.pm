@@ -258,7 +258,8 @@ unless (defined &syscopy) {
 	    # preserve MPE file attributes.
 	    return system('/bin/cp', '-f', $_[0], $_[1]) == 0;
 	};
-    } elsif ($^O eq 'MSWin32') {
+    } elsif ($^O eq 'MSWin32' && defined &DynaLoader::boot_DynaLoader) {
+	# Win32::CopyFile() fill only work if we can load Win32.xs
 	*syscopy = sub {
 	    return 0 unless @_ == 2;
 	    return Win32::CopyFile(@_, 1);

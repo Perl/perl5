@@ -245,6 +245,7 @@ EXPECT
 ########
 $| = 1;
 use Cwd;
+my $cwd = cwd(); # Make sure we load Win32.pm while "../lib" still works.
 $\ = "\n";
 my $dir;
 if (fork) {

@@ -25,7 +25,7 @@ WriteMakefile(
              );
 
 sub MY::postamble {
-  if ($^O =~ /MSWin32/ && Win32::IsWin95()) {
+  if ($^O =~ /MSWin32/ && !defined($ENV{SYSTEMROOT})) {
 	if ($Config{'make'} =~ /dmake/i) {
 	    # dmake-specific
 	    return <<'EOT';

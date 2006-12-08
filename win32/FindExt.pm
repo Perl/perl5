@@ -14,9 +14,10 @@ my $ext;
 my %static;
 
 sub getcwd {
-    $ENV{'PWD'} = Win32::GetCwd();
-    $ENV{'PWD'} =~ s:\\:/:g ;
-    return $ENV{'PWD'};
+    $_ = `cd`;
+    chomp;
+    s:\\:/:g ;
+    return $ENV{'PWD'} = $_;
 }
 
 sub set_static_extensions
