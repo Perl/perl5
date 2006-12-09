@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.78;
+$VERSION = 0.79;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -2922,17 +2922,15 @@ sub is_subscriptable {
     }
 }
 
-sub elem {
+sub elem_or_slice_array_name
+{
     my $self = shift;
-    my ($op, $cx, $left, $right, $padname) = @_;
-    my($array, $idx) = ($op->first, $op->first->sibling);
-    unless ($array->name eq $padname) { # Maybe this has been fixed	
-	$array = $array->first; # skip rv2av (or ex-rv2av in _53+)
-    }
+    my ($array, $left, $padname, $allow_arrow) = @_;
+
     if ($array->name eq $padname) {
-	$array = $self->padany($array);
+	return $self->padany($array);
     } elsif (is_scope($array)) { # ${expr}[0]
-	$array = "{" . $self->deparse($array, 0) . "}";
+	return "{" . $self->deparse($array, 0) . "}";
     } elsif ($array->name eq "gv") {
 	$array = $self->gv_name($self->gv_or_padgv($array));
 	if ($array !~ /::/) {
@@ -2940,14 +2938,19 @@ sub elem {
 	    $array = $self->{curstash}.'::'.$array
 		if $self->lex_in_scope($prefix . $array);
 	}
-    } elsif (is_scalar $array) { # $x[0], $$x[0], ...
-	$array = $self->deparse($array, 24);
+	return $array;
+    } elsif (!$allow_arrow || is_scalar $array) { # $x[0], $$x[0], ...
+	return $self->deparse($array, 24);
     } else {
-	# $x[20][3]{hi} or expr->[20]
-	my $arrow = is_subscriptable($array) ? "" : "->";
-	return $self->deparse($array, 24) . $arrow .
-	    $left . $self->deparse($idx, 1) . $right;
+	return undef;
     }
+}
+
+sub elem_or_slice_single_index
+{
+    my $self = shift;
+    my ($idx) = @_;
+
     $idx = $self->deparse($idx, 1);
 
     # Outer parens in an array index will confuse perl
@@ -2978,7 +2981,28 @@ sub elem {
     #
     $idx =~ s/^([A-Za-z_]\w*)$/$1()/;
 
-    return "\$" . $array . $left . $idx . $right;
+    return $idx;
+}
+
+sub elem {
+    my $self = shift;
+    my ($op, $cx, $left, $right, $padname) = @_;
+    my($array, $idx) = ($op->first, $op->first->sibling);
+
+    $idx = $self->elem_or_slice_single_index($idx);
+
+    unless ($array->name eq $padname) { # Maybe this has been fixed	
+	$array = $array->first; # skip rv2av (or ex-rv2av in _53+)
+    }
+    if (my $array_name=$self->elem_or_slice_array_name
+	    ($array, $left, $padname, 1)) {
+	return "\$" . $array_name . $left . $idx . $right;
+    } else {
+	# $x[20][3]{hi} or expr->[20]
+	my $arrow = is_subscriptable($array) ? "" : "->";
+	return $self->deparse($array, 24) . $arrow . $left . $idx . $right;
+    }
+
 }
 
 sub pp_aelem { maybe_local(@_, elem(@_, "[", "]", "padav")) }
@@ -3010,13 +3034,7 @@ sub slice {
     $array = $last;
     $array = $array->first
 	if $array->name eq $regname or $array->name eq "null";
-    if (is_scope($array)) {
-	$array = "{" . $self->deparse($array, 0) . "}";
-    } elsif ($array->name eq $padname) {
-	$array = $self->padany($array);
-    } else {
-	$array = $self->deparse($array, 24);
-    }
+    $array = $self->elem_or_slice_array_name($array,$left,$padname,0);
     $kid = $op->first->sibling; # skip pushmark
     if ($kid->name eq "list") {
 	$kid = $kid->first->sibling; # skip list, pushmark
@@ -3025,7 +3043,7 @@ sub slice {
 	}
 	$list = join(", ", @elems);
     } else {
-	$list = $self->deparse($kid, 1);
+	$list = $self->elem_or_slice_single_index($kid);
     }
     return "\@" . $array . $left . $list . $right;
 }
@@ -4025,7 +4043,7 @@ sub pure_string {
         return 0 unless '"' eq $self->gv_name($self->gv_or_padgv($gvop));
 
 	return 0 unless ${$join_op->sibling} eq ${$op->last};
-	return 0 unless $op->last->name =~ /^(rv2|pad)av$/;
+	return 0 unless $op->last->name =~ /^(?:[ah]slice|(?:rv2|pad)av)$/;
     }
     elsif ($type eq 'concat') {
 	return $self->pure_string($op->first)
