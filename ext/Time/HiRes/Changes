@@ -1,7 +1,14 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9703	[2006-12-08]
+	- use int main(int argc, char **argv) consistently in Makefile.PL,
+	  should help with
+	  [rt.cpan.org #23868] nanosleep not detected under Mac OS 10.3.9 starting with Time::HiRes 1.96
+	- if someone still has the locale-broken Perl 5.8.0,
+	  suggest that they upgrade their Perl
+
 1.9702	[2006-12-06]
-	- restore the -DATLEASTFIVEOHOHFIVE
+	- restore the -DATLEASTFIVEOHOHFIVE, Win32 needed it still
 
 1.9701	[2006-12-04]
 	- upgrade to ppport.h 3.10_02
@@ -87,14 +94,16 @@ Revision history for the Perl extension Time::HiRes.
 
 	  Contributions for more systems (especially non-UNIX,
 	  e.g. but not limited to: Win32, VMS, OS/2) gladly accepted.
+	  (also more UNIX variants welcome: HP-UX? IRIX?)
 
 	  Thanks to H.Merijn Brand, John Peacock, and Craig
 	  Berry for brave beta testing.
 
 1.91	[2006-09-29]
 	- ualarm() in SuSE 10.1 was overflowing after ~4.2 seconds,
-	  possibly due to a glibc bug/feature, workaround by using the
-	  setitimer() implementation of ualarm() if either useconds or
+	  possibly due to a glibc bug/feature (suspected overflow at
+	  2**32 microseconds?), workaround by using the setitimer()
+	  implementation of ualarm() if either useconds or
 	  interval > 999_999 (this case seems to vary between systems:
 	  are useconds more than 999_999 for ualarm() defined or not)
 	  Added more ualarm() tests to catch various overflow points,

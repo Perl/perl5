@@ -204,7 +204,7 @@ static int foo()
     struct timeval tv;
     gettimeofday(&tv, 0);
 }
-int main _((int argc, char** argv, char** env))
+int main(int argc, char** argv)
 {
     foo();
 }
@@ -233,7 +233,7 @@ sub has_x {
 #   include <sys/time.h>
 #endif
 
-int main _((int argc, char** argv, char** env))
+int main(int argc, char** argv)
 {
 	$x;
 }
@@ -253,7 +253,7 @@ sub has_nanosleep {
 
 /* int nanosleep(const struct timespec *rqtp, struct timespec *rmtp); */
 
-int main _((int argc, char** argv, char** env)) {
+int main(int argc, char** argv) {
     struct timespec ts1, ts2;
     int ret;
     ts1.tv_sec  = 0;
@@ -276,7 +276,7 @@ sub has_include {
 #include "XSUB.h"
 
 #include <$inc>
-int main _((int argc, char** argv, char** env))
+int main(int argc, char** argv)
 {
 	return 0;
 }
@@ -293,7 +293,7 @@ sub has_clock_xxx_syscall {
 #include "perl.h"
 #include "XSUB.h"
 #include <$SYSCALL_H>
-int main _((int argc, char** argv, char** env))
+int main(int argc, char** argv)
 {
     struct timespec ts;
     /* Many Linuxes get ENOSYS even though the syscall exists. */
@@ -311,7 +311,7 @@ sub has_clock_xxx {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-int main _((int argc, char** argv, char** env))
+int main(int argc, char** argv)
 {
     struct timespec ts;
     int ret = clock_$xxx(CLOCK_REALTIME, &ts); /* Many Linuxes get ENOSYS. */
@@ -327,7 +327,7 @@ sub has_clock {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-int main _((int argc, char** argv, char** env))
+int main(int argc, char** argv)
 {
     clock_t tictoc;
     clock_t ret = clock();
@@ -342,7 +342,7 @@ sub has_clock_nanosleep {
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-int main _((int argc, char** argv, char** env))
+int main(int argc, char** argv)
 {
     int ret;
     struct timerspec ts1;
@@ -601,12 +601,14 @@ EOD
 	print "NOT found.\n";
     }
 
+    print "Looking for stat() subsecond timestamps...\n";
+
     print "Trying struct stat st_atimespec.tv_nsec...";
     my $has_stat_st_xtimespec;
     if (try_compile_and_link(<<EOM)) {
 $TIME_HEADERS
 #include <sys/stat.h>
-int main _((int argc, char** argv, char** env)) {
+int main(int argc, char** argv) {
     struct stat st;
     st.st_atimespec.tv_nsec = 0;
 }
@@ -626,7 +628,7 @@ EOM
     if (try_compile_and_link(<<EOM)) {
 $TIME_HEADERS
 #include <sys/stat.h>
-int main _((int argc, char** argv, char** env)) {
+int main(int argc, char** argv) {
     struct stat st;
     st.st_atimensec = 0;
 }
@@ -646,7 +648,7 @@ EOM
     if (try_compile_and_link(<<EOM)) {
 $TIME_HEADERS
 #include <sys/stat.h>
-int main _((int argc, char** argv, char** env)) {
+int main(int argc, char** argv) {
     struct stat st;
     st.st_atime_n = 0;
 }
@@ -666,7 +668,7 @@ EOM
     if (try_compile_and_link(<<EOM)) {
 $TIME_HEADERS
 #include <sys/stat.h>
-int main _((int argc, char** argv, char** env)) {
+int main(int argc, char** argv) {
     struct stat st;
     st.st_atim.tv_nsec = 0;
 }
@@ -686,7 +688,7 @@ EOM
     if (try_compile_and_link(<<EOM)) {
 $TIME_HEADERS
 #include <sys/stat.h>
-int main _((int argc, char** argv, char** env)) {
+int main(int argc, char** argv) {
     struct stat st;
     st.st_uatime = 0;
 }
@@ -702,7 +704,7 @@ EOM
     }
 
    if ($DEFINE =~ /-DTIME_HIRES_STAT=\d+/) {
-    print "You seem to have stat subsecond timestamps.\n";
+    print "You seem to have stat() subsecond timestamps.\n";
     print "(Your struct stat has them, but the filesystems must help.)\n";
    } else {
     print "You do not seem to have stat subsecond timestamps.\n";
@@ -845,6 +847,7 @@ NOTE: if you get an error like this (the Makefile line number may vary):
 Makefile:91: *** missing separator
 then set the environment variable LC_ALL to "C" and retry
 from scratch (re-run perl "Makefile.PL").
+(And consider upgrading your Perl.)
 EOM
         }
     }
