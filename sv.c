@@ -2159,7 +2159,11 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
     dVAR;
     if (!sv)
 	return 0;
-    if (SvGMAGICAL(sv)) {
+    if (SvGMAGICAL(sv) || SvTYPE(sv) == SVt_PVBM) {
+	/* PVBMs use the same flag bit as SVf_IVisUV, so must let them
+	   cache IVs just in case. In practice it seems that they never
+	   actually anywhere accessible by user Perl code, let alone get used
+	   in anything other than a string context.  */
 	if (flags & SV_GMAGIC)
 	    mg_get(sv);
 	if (SvIOKp(sv))
@@ -2239,7 +2243,9 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
     dVAR;
     if (!sv)
 	return 0;
-    if (SvGMAGICAL(sv)) {
+    if (SvGMAGICAL(sv) || SvTYPE(sv) == SVt_PVBM) {
+	/* PVBMs use the same flag bit as SVf_IVisUV, so must let them
+	   cache IVs just in case.  */
 	if (flags & SV_GMAGIC)
 	    mg_get(sv);
 	if (SvIOKp(sv))
@@ -2314,7 +2320,9 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     dVAR;
     if (!sv)
 	return 0.0;
-    if (SvGMAGICAL(sv)) {
+    if (SvGMAGICAL(sv) || SvTYPE(sv) == SVt_PVBM) {
+	/* PVBMs use the same flag bit as SVf_IVisUV, so must let them
+	   cache IVs just in case.  */
 	mg_get(sv);
 	if (SvNOKp(sv))
 	    return SvNVX(sv);
