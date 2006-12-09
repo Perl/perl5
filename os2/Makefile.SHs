@@ -71,7 +71,7 @@ libperl_override.lib: libperl_override.imp
 	emximp -o $@ libperl_override.imp
 
 libperl_dllmain.imp: imp_version
-	echo	'main	$(PERL_DLL_BASE)	dll_perlmain	?' >> $@
+	echo	'main	$(PERL_DLL_BASE)	dll_perlmain	?' > $@
 
 libperl_dllmain.lib: libperl_dllmain.imp
 	emximp -o $@ libperl_dllmain.imp
