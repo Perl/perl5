@@ -332,6 +332,9 @@ Perl_yyparse (pTHX)
 	  rule.  */
     int yylen;
 
+    /* keep track of which pad ops are currently using */
+    AV* comppad = PL_comppad;
+
 #ifndef PERL_IN_MADLY_C
 #  ifdef PERL_MAD
     if (PL_madskills)
@@ -573,6 +576,8 @@ Perl_yyparse (pTHX)
 
 
     *++yyvsp = yyval;
+    comppad = PL_comppad;
+
 #ifdef DEBUGGING
     *++yynsp = (const char *)(yytname [yyr1[yyn]]);
 #endif
@@ -669,9 +674,14 @@ Perl_yyparse (pTHX)
 	    /* Pop the error token.  */
 	    YYPOPSTACK;
 	    /* Pop the rest of the stack.  */
+	    PAD_RESTORE_LOCAL(comppad);
 	    while (yyss < yyssp) {
 		YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp);
-		if (yy_type_tab[yystos[*yyssp]] == toketype_opval) {
+		if (yy_type_tab[yystos[*yyssp]] == toketype_padval) {
+		    comppad = yyvsp->padval;
+		    PAD_RESTORE_LOCAL(comppad);
+		}
+		else if (yy_type_tab[yystos[*yyssp]] == toketype_opval) {
 		    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
 		    op_free(yyvsp->opval);
 		}
@@ -696,6 +706,7 @@ Perl_yyparse (pTHX)
   yyerrlab1:
     yyerrstatus = 3;	/* Each real token shifted decrements this.  */
 
+    PAD_RESTORE_LOCAL(comppad);
     for (;;) {
 	yyn = yypact[yystate];
 	if (yyn != YYPACT_NINF) {
@@ -712,7 +723,11 @@ Perl_yyparse (pTHX)
 	    YYABORT;
 
 	YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp);
-	if (yy_type_tab[yystos[*yyssp]] == toketype_opval) {
+	if (yy_type_tab[yystos[*yyssp]] == toketype_padval) {
+	    comppad = yyvsp->padval;
+	    PAD_RESTORE_LOCAL(comppad);
+	}
+	else if (yy_type_tab[yystos[*yyssp]] == toketype_opval) {
 	    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
 	    op_free(yyvsp->opval);
 	}

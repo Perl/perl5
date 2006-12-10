@@ -9,7 +9,7 @@ BEGIN {
 }
 
 BEGIN { require "./test.pl"; }
-plan( tests => 60 );
+plan( tests => 62 );
 
 eval '%@x=0;';
 like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
@@ -210,3 +210,20 @@ like( $@, qr/Assignment to both a list and a scalar/, 'Assignment to both a list
 
 eval q{ s/x/#/e };
 is( $@, '', 'comments in s///e' );
+
+# these two used to coredump because the op cleanup on parse error could
+# be to the wrong pad
+
+eval q[
+    sub { our $a= 1;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;
+	    sub { my $z
+];
+
+like($@, qr/Missing right curly/, 'nested sub syntax error' );
+
+eval q[
+    sub { my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s,$r);
+	    sub { my $z
+];
+like($@, qr/Missing right curly/, 'nested sub syntax error 2' );
+
