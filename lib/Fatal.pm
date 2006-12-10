@@ -5,7 +5,7 @@ use Carp;
 use strict;
 our($AUTOLOAD, $Debug, $VERSION);
 
-$VERSION = 1.04;
+$VERSION = 1.05;
 
 $Debug = 0 unless defined $Debug;
 
@@ -99,7 +99,8 @@ sub _make_fatal {
 	$sref = \&$sub;
 	$proto = prototype $sref;
 	$call = '&$sref';
-    } elsif ($sub eq $ini) {	# Stray user subroutine
+    } elsif ($sub eq $ini && $sub !~ /^CORE::GLOBAL::/) {
+	# Stray user subroutine
 	die "$sub is not a Perl subroutine" 
     } else {			# CORE subroutine
         $proto = eval { prototype "CORE::$name" };
