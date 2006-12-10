@@ -88,7 +88,7 @@ close CTMPFILE;
 
 my ($actlines, $tablines) = extract($clines);
 
-$tablines .= make_opval_tab($y_file, $tablines);
+$tablines .= make_type_tab($y_file, $tablines);
 
 chmod 0644, $act_file;
 open ACTFILE, ">$act_file" or die "can't open $act_file: $!\n";
@@ -178,30 +178,61 @@ sub extract {
     return $actlines. "\n", $tablines. "\n";
 }
 
-# read a .y file and extract a list of all the token names and
-# non-terminal names that are declared to be of type opval
-# then scan the string $tablines for the table yytname which gives
-# the token index of each token/non-terminal, then use this to
-# create a new table, indexed by token number, which indicates
-# whether that token is of type opval.
+# Generate a table, yy_type_tab[], that specifies for each token, what
+# type of value it holds.
 #
-# ie given
-# %token <opval> A B
-# %type  <opval> C D
+# Read the .y file and extract a list of all the token names and
+# non-terminal names; then scan the string $tablines for the table yytname,
+# which gives the token index of each token/non-terminal; then use this to
+# create yy_type_tab.
 #
-# and yytname[] = { "A" "B", "C", "D", "E", "F" };
+# ie given (in perly.y),
+#
+#   %token <opval> A
+#   %token <ival>  B
+#   %type  <pval>  C
+#   %type  <opval> D
+#
+# and (in $tablines),
+#
+#   yytname[] = { "A" "B", "C", "D", "E" };
 #
 # then return
-# static const int yy_is_opval[] = { 1, 1, 1, 1, 0, 0 }
+#
+#    typedef enum { toketype_ival, toketype_opval, toketype_pval } toketypes;
+#
+#    static const toketypes yy_type_tab[]
+#          = { toketype_opval, toketype_ival, toketype_pval,
+#                toketype_opval, toketype_ival }
+#
+# where "E" has the default type. The default type is determined
+# by the __DEFAULT__ comment  next to the appropriate union member in
+# perly.y
 
-sub make_opval_tab {
+sub make_type_tab {
     my ($y_file, $tablines) = @_;
     my %tokens;
+    my %types;
+    my $default_token;
     open my $fh, '<', $y_file or die "Can't open $y_file: $!\n";
     while (<$fh>) {
-	next unless s/^%(token|type)\s+<opval>\s+//;
-	$tokens{$_} =1 for (split ' ', $_);
+	if (/__DEFAULT__/) {
+	    m{(\w+) \s* ; \s* /\* \s* __DEFAULT__}x
+		or die "$y_file: can't parse __DEFAULT__ line: $_";
+	    die "$y_file: duplicate __DEFAULT__ line: $_"
+		    if defined $default_token;
+	    $default_token = $1;
+	    next;
+	}
+
+	next unless /^%(token|type)/;
+	s/^%(token|type)\s+<(\w+)>\s+//
+	    or die "$y_file: unparseable token/type line: $_";
+	$tokens{$_} = $2 for (split ' ', $_);
+	$types{$2} = 1;
     }
+    die "$y_file: no __DEFAULT__ token defined\n" unless $default_token;
+    $types{$default_token} = 1;
 
     $tablines =~ /^\Qstatic const char *const yytname[] =\E\n
 	    {\n
@@ -210,17 +241,29 @@ sub make_opval_tab {
 	    /xsm
 	or die "Can't extract yytname[] from table string\n";
     my $fields = $1;
-    $fields =~ s/"([^"]+)"/$tokens{$1}||0/ge;
+    $fields =~ s{"([^"]+)"}
+		{ "toketype_" .
+		    (defined $tokens{$1} ? $tokens{$1} : $default_token)
+		}ge;
+    $fields =~ s/, \s* 0 \s* $//x
+	or die "make_type_tab: couldn't delete trailing ',0'\n";
+
     return 
-	"/* which symbols are of type opval */\n" .
-	"static const int yy_is_opval[] =\n{\n" . $fields . "\n};\n";
+	  "\ntypedef enum {\n\t"
+	. join(", ", map "toketype_$_", sort keys %types)
+	. "\n} toketypes;\n\n"
+	. "/* type of each token/terminal */\n"
+	. "static const toketypes XXX;\n"
+	. "static const toketypes yy_type_tab[] =\n{\n"
+	. $fields
+	. "\n};\n";
 }
 
 
 sub my_system {
     system(@_);
     if ($? == -1) {
-	die "failed to execute comamnd '@_': $!\n";
+	die "failed to execute command '@_': $!\n";
     }
     elsif ($? & 127) {
 	die sprintf "command '@_' died with signal %d\n",

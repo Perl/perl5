@@ -157,15 +157,28 @@ yy_stack_print (pTHX_ const short *yyss, const short *yyssp, const YYSTYPE *yyvs
 	PerlIO_printf(Perl_debug_log, " %8.8s", yyns[start+i]);
     PerlIO_printf(Perl_debug_log, "\nvalue:");
     for (i=0; i < count; i++) {
-	if (yy_is_opval[yystos[yyss[start+i]]]) {
+	switch (yy_type_tab[yystos[yyss[start+i]]]) {
+	case toketype_opval:
 	    PerlIO_printf(Perl_debug_log, " %8.8s",
 		  yyvs[start+i].opval
 		    ? PL_op_name[yyvs[start+i].opval->op_type]
-		    : "NULL"
+		    : "(NULL)"
 	    );
-	}
-	else
+	    break;
+#ifndef PERL_IN_MADLY_C
+	case toketype_p_tkval:
+	    PerlIO_printf(Perl_debug_log, " %8.8s",
+		  yyvs[start+i].pval ? yyvs[start+i].pval : "(NULL)");
+	    break;
+
+	case toketype_i_tkval:
+#endif
+	case toketype_ival:
+	    PerlIO_printf(Perl_debug_log, " %8"IVdf, yyvs[start+i].ival);
+	    break;
+	default:
 	    PerlIO_printf(Perl_debug_log, " %8"UVxf, (UV)yyvs[start+i].ival);
+	}
     }
     PerlIO_printf(Perl_debug_log, "\n\n");
 }
@@ -658,7 +671,7 @@ Perl_yyparse (pTHX)
 	    /* Pop the rest of the stack.  */
 	    while (yyss < yyssp) {
 		YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp);
-		if (yy_is_opval[yystos[*yyssp]]) {
+		if (yy_type_tab[yystos[*yyssp]] == toketype_opval) {
 		    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
 		    op_free(yyvsp->opval);
 		}
@@ -699,7 +712,7 @@ Perl_yyparse (pTHX)
 	    YYABORT;
 
 	YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp);
-	if (yy_is_opval[yystos[*yyssp]]) {
+	if (yy_type_tab[yystos[*yyssp]] == toketype_opval) {
 	    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
 	    op_free(yyvsp->opval);
 	}

@@ -167,28 +167,28 @@ static const yytype_int16 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint16 yyrline[] =
 {
-       0,   130,   130,   136,   146,   150,   154,   160,   170,   174,
-     178,   179,   186,   195,   198,   199,   201,   203,   220,   239,
-     241,   243,   247,   251,   255,   259,   268,   269,   273,   284,
-     292,   303,   306,   312,   313,   320,   333,   345,   356,   366,
-     376,   412,   420,   430,   436,   437,   442,   445,   449,   454,
-     458,   462,   468,   477,   481,   483,   485,   487,   489,   494,
-     498,   504,   517,   518,   522,   534,   555,   561,   566,   571,
-     581,   582,   587,   588,   592,   602,   606,   616,   617,   626,
-     639,   638,   655,   659,   663,   667,   671,   681,   689,   693,
-     698,   705,   714,   720,   726,   734,   738,   745,   744,   755,
-     756,   760,   769,   774,   782,   789,   796,   806,   815,   822,
-     831,   838,   844,   851,   861,   865,   869,   875,   879,   883,
-     887,   891,   895,   899,   911,   915,   919,   923,   933,   937,
-     944,   948,   952,   957,   962,   967,   976,   981,   986,   992,
-     998,  1009,  1013,  1017,  1029,  1042,  1050,  1062,  1063,  1064,
-    1065,  1066,  1071,  1075,  1077,  1081,  1086,  1091,  1093,  1095,
-    1097,  1099,  1101,  1103,  1112,  1123,  1125,  1127,  1132,  1145,
-    1150,  1155,  1159,  1163,  1167,  1171,  1175,  1177,  1179,  1181,
-    1184,  1188,  1194,  1197,  1206,  1212,  1217,  1218,  1222,  1230,
-    1237,  1242,  1247,  1249,  1251,  1256,  1258,  1263,  1264,  1266,
-    1281,  1285,  1291,  1297,  1303,  1309,  1315,  1322,  1324,  1326,
-    1329
+       0,   131,   131,   137,   147,   151,   155,   161,   171,   175,
+     179,   180,   187,   196,   199,   200,   202,   204,   221,   240,
+     242,   244,   248,   252,   256,   260,   269,   270,   274,   285,
+     293,   304,   307,   313,   314,   321,   334,   346,   357,   367,
+     377,   413,   421,   431,   437,   438,   443,   446,   450,   455,
+     459,   463,   469,   478,   482,   484,   486,   488,   490,   495,
+     499,   505,   518,   519,   523,   535,   556,   562,   567,   572,
+     582,   583,   588,   589,   593,   603,   607,   617,   618,   627,
+     640,   639,   656,   660,   664,   668,   672,   682,   690,   694,
+     699,   706,   715,   721,   727,   735,   739,   746,   745,   756,
+     757,   761,   770,   775,   783,   790,   797,   807,   816,   823,
+     832,   839,   845,   852,   862,   866,   870,   876,   880,   884,
+     888,   892,   896,   900,   912,   916,   920,   924,   934,   938,
+     945,   949,   953,   958,   963,   968,   977,   982,   987,   993,
+     999,  1010,  1014,  1018,  1030,  1043,  1051,  1063,  1064,  1065,
+    1066,  1067,  1072,  1076,  1078,  1082,  1087,  1092,  1094,  1096,
+    1098,  1100,  1102,  1104,  1113,  1124,  1126,  1128,  1133,  1146,
+    1151,  1156,  1160,  1164,  1168,  1172,  1176,  1178,  1180,  1182,
+    1185,  1189,  1195,  1198,  1207,  1213,  1218,  1219,  1223,  1231,
+    1238,  1243,  1248,  1250,  1252,  1257,  1259,  1264,  1265,  1267,
+    1282,  1286,  1292,  1298,  1304,  1310,  1316,  1323,  1325,  1327,
+    1330
 };
 #endif
 
@@ -889,30 +889,35 @@ static const yytype_uint8 yystos[] =
       14,    96,    96,   105,   105,    99,    96,    88,    96,   108,
      105,     4,   112,   105,   113,    87,    87,    96,    96,   102
 };
-/* which symbols are of type opval */
-static const int yy_is_opval[] =
-{
-  0, 0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 1, 1, 1,
-  1, 1, 1, 1, 1, 1,
-  0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0,
-  0, 0, 0, 0, 0, 0, 0, 0,
-  0, 1, 0, 0, 0, 1,
-  0, 0, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 0, 1, 1, 1,
-  1, 1, 1, 0, 1, 1, 1,
-  1, 1, 1, 0, 0,
-  0, 1, 1, 1, 1,
-  1, 1, 1, 0, 1, 1, 1, 0,
-  1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1,
-  1, 1, 1, 1, 1, 1, 1, 0
 
+typedef enum {
+	toketype_i_tkval, toketype_ival, toketype_opval, toketype_p_tkval
+} toketypes;
+
+/* type of each token/terminal */
+static const toketypes XXX;
+static const toketypes yy_type_tab[] =
+{
+  toketype_ival, toketype_ival, toketype_ival, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval,
+  toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_p_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval,
+  toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval,
+  toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval,
+  toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval,
+  toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval,
+  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
+  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
+  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival,
+  toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_ival, toketype_i_tkval, toketype_ival,
+  toketype_ival, toketype_opval, toketype_ival, toketype_ival, toketype_ival, toketype_opval,
+  toketype_ival, toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_ival, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_opval, toketype_opval, toketype_p_tkval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_opval, toketype_opval, toketype_ival, toketype_ival,
+  toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_opval, toketype_opval, toketype_ival, toketype_opval, toketype_opval, toketype_opval, toketype_ival,
+  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval,
+  toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval, toketype_opval
 };

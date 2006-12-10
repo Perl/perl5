@@ -187,7 +187,8 @@
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 typedef union YYSTYPE
 {
-    I32	ival;
+    I32	ival; /* __DEFAULT__ (marker for regen_perly.pl;
+				must always be 1st union member) */
     char *pval;
     OP *opval;
     GV *gvval;
