@@ -484,6 +484,8 @@ struct reg_data {
     void* data[1];
 };
 
+/* Code in S_to_utf8_substr() and S_to_byte_substr() in regexec.c accesses
+   anchored* and float* via array indexes 0 and 1.  */
 #define anchored_substr substrs->data[0].substr
 #define anchored_utf8 substrs->data[0].utf8_substr
 #define anchored_offset substrs->data[0].min_offset

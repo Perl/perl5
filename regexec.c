@@ -5617,64 +5617,46 @@ restore_pos(pTHX_ void *arg)
 STATIC void
 S_to_utf8_substr(pTHX_ register regexp *prog)
 {
-    if (prog->float_substr && !prog->float_utf8) {
-	SV* const sv = newSVsv(prog->float_substr);
-	prog->float_utf8 = sv;
-	sv_utf8_upgrade(sv);
-	if (SvVALID(prog->float_substr))
-	    fbm_compile(sv, 0);
-	if (SvTAIL(prog->float_substr))
-	    SvTAIL_on(sv);
-	if (prog->float_substr == prog->check_substr)
-	    prog->check_utf8 = sv;
-    }
-    if (prog->anchored_substr && !prog->anchored_utf8) {
-	SV* const sv = newSVsv(prog->anchored_substr);
-	prog->anchored_utf8 = sv;
-	sv_utf8_upgrade(sv);
-	if (SvVALID(prog->anchored_substr))
-	    fbm_compile(sv, 0);
-	if (SvTAIL(prog->anchored_substr))
-	    SvTAIL_on(sv);
-	if (prog->anchored_substr == prog->check_substr)
-	    prog->check_utf8 = sv;
-    }
+    int i = 1;
+    do {
+	if (prog->substrs->data[i].substr
+	    && !prog->substrs->data[i].utf8_substr) {
+	    SV* const sv = newSVsv(prog->substrs->data[i].substr);
+	    prog->substrs->data[i].utf8_substr = sv;
+	    sv_utf8_upgrade(sv);
+	    if (SvVALID(prog->substrs->data[i].substr))
+		fbm_compile(sv, 0);
+	    if (SvTAIL(prog->substrs->data[i].substr))
+		SvTAIL_on(sv);
+	    if (prog->substrs->data[i].substr == prog->check_substr)
+		prog->check_utf8 = sv;
+	}
+    } while (i--);
 }
 
 STATIC void
 S_to_byte_substr(pTHX_ register regexp *prog)
 {
     dVAR;
-    if (prog->float_utf8 && !prog->float_substr) {
-	SV* sv = newSVsv(prog->float_utf8);
-	prog->float_substr = sv;
-	if (sv_utf8_downgrade(sv, TRUE)) {
-	    if (SvVALID(prog->float_utf8))
-		fbm_compile(sv, 0);
-	    if (SvTAIL(prog->float_utf8))
-		SvTAIL_on(sv);
-	} else {
-	    SvREFCNT_dec(sv);
-	    prog->float_substr = sv = &PL_sv_undef;
+    int i = 1;
+    do {
+	if (prog->substrs->data[i].utf8_substr
+	    && !prog->substrs->data[i].substr) {
+	    SV* sv = newSVsv(prog->substrs->data[i].utf8_substr);
+	    if (sv_utf8_downgrade(sv, TRUE)) {
+		if (SvVALID(prog->substrs->data[i].utf8_substr))
+		    fbm_compile(sv, 0);
+		if (SvTAIL(prog->substrs->data[i].utf8_substr))
+		    SvTAIL_on(sv);
+	    } else {
+		SvREFCNT_dec(sv);
+		sv = &PL_sv_undef;
+	    }
+	    prog->substrs->data[i].substr = sv;
+	    if (prog->substrs->data[i].utf8_substr == prog->check_utf8)
+		prog->check_substr = sv;
 	}
-	if (prog->float_utf8 == prog->check_utf8)
-	    prog->check_substr = sv;
-    }
-    if (prog->anchored_utf8 && !prog->anchored_substr) {
-	SV* sv = newSVsv(prog->anchored_utf8);
-	prog->anchored_substr = sv;
-	if (sv_utf8_downgrade(sv, TRUE)) {
-	    if (SvVALID(prog->anchored_utf8))
-		fbm_compile(sv, 0);
-	    if (SvTAIL(prog->anchored_utf8))
-		SvTAIL_on(sv);
-	} else {
-	    SvREFCNT_dec(sv);
-	    prog->anchored_substr = sv = &PL_sv_undef;
-	}
-	if (prog->anchored_utf8 == prog->check_utf8)
-	    prog->check_substr = sv;
-    }
+    } while (i--);
 }
 
 /*
