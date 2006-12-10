@@ -350,7 +350,7 @@ perform the upgrade if necessary.  See C<svtype>.
 /* PVHV */
 #define SVphv_LAZYDEL	0x40000000	/* entry in xhv_eiter must be deleted */
 /* Not just PVBM - basically anything that can be a regular scalar */
-#define SVpbm_TAIL	0x40000000
+#define SVpbm_VALID	0x40000000
 /* ??? */
 #define SVrepl_EVAL	0x40000000	/* Replacement part of s///e */
 
@@ -364,7 +364,7 @@ perform the upgrade if necessary.  See C<svtype>.
 /* PVFM */
 #define SVpfm_COMPILED	0x80000000	/* FORMLINE is compiled */
 /* PVBM */
-#define SVpbm_VALID	0x80000000
+#define SVpbm_TAIL	0x80000000
 /* RV upwards. However, SVf_ROK and SVp_IOK are exclusive  */
 #define SVprv_WEAKREF   0x80000000      /* Weak reference */
 
