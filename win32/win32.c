@@ -4272,7 +4272,8 @@ static void
 forward(pTHX_ const char *function)
 {
     dXSARGS;
-    Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn("Win32",5), NULL);
+    Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, newSVpvn("Win32",5), newSVnv(0.27));
+    SPAGAIN;
     PUSHMARK(SP-items);
     call_pv(function, GIMME_V);
 }

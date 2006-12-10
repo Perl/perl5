@@ -2627,6 +2627,7 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
 	 */
 	/* Ownership of both SVs is passed to load_module, which frees them. */
 	load_module(PERL_LOADMOD_NOIMPORT, newSVpvn("B::Deparse",10), newSVnv(0.61));
+        SPAGAIN;
 
 	ENTER;
 	SAVETMPS;
