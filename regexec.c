@@ -5621,6 +5621,8 @@ S_to_utf8_substr(pTHX_ register regexp *prog)
 	SV* const sv = newSVsv(prog->float_substr);
 	prog->float_utf8 = sv;
 	sv_utf8_upgrade(sv);
+	if (SvVALID(prog->float_substr))
+	    fbm_compile(sv, 0);
 	if (SvTAIL(prog->float_substr))
 	    SvTAIL_on(sv);
 	if (prog->float_substr == prog->check_substr)
@@ -5630,6 +5632,8 @@ S_to_utf8_substr(pTHX_ register regexp *prog)
 	SV* const sv = newSVsv(prog->anchored_substr);
 	prog->anchored_utf8 = sv;
 	sv_utf8_upgrade(sv);
+	if (SvVALID(prog->anchored_substr))
+	    fbm_compile(sv, 0);
 	if (SvTAIL(prog->anchored_substr))
 	    SvTAIL_on(sv);
 	if (prog->anchored_substr == prog->check_substr)
@@ -5645,6 +5649,8 @@ S_to_byte_substr(pTHX_ register regexp *prog)
 	SV* sv = newSVsv(prog->float_utf8);
 	prog->float_substr = sv;
 	if (sv_utf8_downgrade(sv, TRUE)) {
+	    if (SvVALID(prog->float_utf8))
+		fbm_compile(sv, 0);
 	    if (SvTAIL(prog->float_utf8))
 		SvTAIL_on(sv);
 	} else {
@@ -5658,6 +5664,8 @@ S_to_byte_substr(pTHX_ register regexp *prog)
 	SV* sv = newSVsv(prog->anchored_utf8);
 	prog->anchored_substr = sv;
 	if (sv_utf8_downgrade(sv, TRUE)) {
+	    if (SvVALID(prog->anchored_utf8))
+		fbm_compile(sv, 0);
 	    if (SvTAIL(prog->anchored_utf8))
 		SvTAIL_on(sv);
 	} else {
