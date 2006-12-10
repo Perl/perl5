@@ -312,7 +312,7 @@ CODE:
 {
     dVAR;
     int index;
-#if (PERL_VERSION < 8) || (PERL_VERSION == 8 && PERL_SUBVERSION <1)
+#if (PERL_VERSION < 9)
     struct op dmy_op;
     struct op *old_op = PL_op;
 
