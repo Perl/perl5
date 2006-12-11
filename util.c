@@ -455,6 +455,7 @@ Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *lit
 }
 
 #define PERL_FBM_TABLE_OFFSET 2	/* Number of bytes between EOS and table*/
+#define PERL_FBM_FLAGS_OFFSET_FROM_TABLE -1
 
 /* As a space optimization, we do not compile tables for strings of length
    0 and 1, and for strings of length 2 unless FBMcf_TAIL.  These are
@@ -504,7 +505,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	    = (unsigned char*)(SvPVX_mutable(sv) + len + PERL_FBM_TABLE_OFFSET);
 	s = table - 1 - PERL_FBM_TABLE_OFFSET;	/* last char */
 	memset((void*)table, mlen, 256);
-	table[-1] = (U8)flags;
+	table[PERL_FBM_FLAGS_OFFSET_FROM_TABLE] = (U8)flags;
 	i = 0;
 	sb = s - mlen + 1;			/* first char (maybe) */
 	while (s >= sb) {
@@ -723,7 +724,8 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	    }
 	}
       check_end:
-	if ( s == bigend && (table[-1] & FBMcf_TAIL)
+	if ( s == bigend
+	     && (table[PERL_FBM_FLAGS_OFFSET_FROM_TABLE] & FBMcf_TAIL)
 	     && memEQ((char *)(bigend - littlelen),
 		      (char *)(oldlittle - littlelen), littlelen) )
 	    return (char*)bigend - littlelen;
