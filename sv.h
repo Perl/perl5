@@ -1314,17 +1314,20 @@ the scalar's value cannot change unless written to.
 #  define BmRARE(sv)							\
 	(*({ SV *const _svi = (SV *) (sv);				\
 	    assert(SvTYPE(_svi) == SVt_PVBM);				\
+	    assert(SvVALID(_svi));					\
 	    &(((XPVBM*) SvANY(_svi))->xbm_rare);			\
 	 }))
 #  define BmUSEFUL(sv)							\
 	(*({ SV *const _svi = (SV *) (sv);				\
 	    assert(SvTYPE(_svi) == SVt_PVBM);				\
+	    assert(SvVALID(_svi));					\
 	    assert(!SvIOK(_svi));					\
 	    &(((XPVBM*) SvANY(_svi))->xiv_u.xivu_i32);			\
 	 }))
 #  define BmPREVIOUS(sv)						\
 	(*({ SV *const _svi = (SV *) (sv);				\
 	    assert(SvTYPE(_svi) == SVt_PVBM);				\
+	    assert(SvVALID(_svi));					\
 	    &(((XPVBM*) SvANY(_svi))->xbm_previous);			\
 	 }))
 #else
