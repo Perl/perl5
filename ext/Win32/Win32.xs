@@ -30,6 +30,145 @@ IsWinNT(void)
     return (g_osver.dwPlatformId == VER_PLATFORM_WIN32_NT);
 }
 
+#ifdef __CYGWIN__
+
+#define isSLASH(c) ((c) == '/' || (c) == '\\')
+#define SKIP_SLASHES(s) \
+    STMT_START {				\
+	while (*(s) && isSLASH(*(s)))		\
+	    ++(s);				\
+    } STMT_END
+#define COPY_NONSLASHES(d,s) \
+    STMT_START {				\
+	while (*(s) && !isSLASH(*(s)))		\
+	    *(d)++ = *(s)++;			\
+    } STMT_END
+
+/* Find the longname of a given path.  path is destructively modified.
+ * It should have space for at least MAX_PATH characters. */
+char *
+win32_longpath(char *path)
+{
+    WIN32_FIND_DATA fdata;
+    HANDLE fhand;
+    char tmpbuf[MAX_PATH+1];
+    char *tmpstart = tmpbuf;
+    char *start = path;
+    char sep;
+    if (!path)
+	return Nullch;
+
+    /* drive prefix */
+    if (isALPHA(path[0]) && path[1] == ':') {
+	start = path + 2;
+	*tmpstart++ = path[0];
+	*tmpstart++ = ':';
+    }
+    /* UNC prefix */
+    else if (isSLASH(path[0]) && isSLASH(path[1])) {
+	start = path + 2;
+	*tmpstart++ = path[0];
+	*tmpstart++ = path[1];
+	SKIP_SLASHES(start);
+	COPY_NONSLASHES(tmpstart,start);	/* copy machine name */
+	if (*start) {
+	    *tmpstart++ = *start++;
+	    SKIP_SLASHES(start);
+	    COPY_NONSLASHES(tmpstart,start);	/* copy share name */
+	}
+    }
+    *tmpstart = '\0';
+    while (*start) {
+	/* copy initial slash, if any */
+	if (isSLASH(*start)) {
+	    *tmpstart++ = *start++;
+	    *tmpstart = '\0';
+	    SKIP_SLASHES(start);
+	}
+
+	/* FindFirstFile() expands "." and "..", so we need to pass
+	 * those through unmolested */
+	if (*start == '.'
+	    && (!start[1] || isSLASH(start[1])
+		|| (start[1] == '.' && (!start[2] || isSLASH(start[2])))))
+	{
+	    COPY_NONSLASHES(tmpstart,start);	/* copy "." or ".." */
+	    *tmpstart = '\0';
+	    continue;
+	}
+
+	/* if this is the end, bust outta here */
+	if (!*start)
+	    break;
+
+	/* now we're at a non-slash; walk up to next slash */
+	while (*start && !isSLASH(*start))
+	    ++start;
+
+	/* stop and find full name of component */
+	sep = *start;
+	*start = '\0';
+	fhand = FindFirstFile(path,&fdata);
+	*start = sep;
+	if (fhand != INVALID_HANDLE_VALUE) {
+	    STRLEN len = strlen(fdata.cFileName);
+	    if ((STRLEN)(tmpbuf + sizeof(tmpbuf) - tmpstart) > len) {
+		strcpy(tmpstart, fdata.cFileName);
+		tmpstart += len;
+		FindClose(fhand);
+	    }
+	    else {
+		FindClose(fhand);
+		errno = ERANGE;
+		return Nullch;
+	    }
+	}
+	else {
+	    /* failed a step, just return without side effects */
+	    /*PerlIO_printf(Perl_debug_log, "Failed to find %s\n", path);*/
+	    errno = EINVAL;
+	    return Nullch;
+	}
+    }
+    strcpy(path,tmpbuf);
+    return path;
+}
+
+char*
+get_childdir(void)
+{
+    dTHX;
+    char* ptr;
+    char szfilename[MAX_PATH+1];
+
+    GetCurrentDirectoryA(MAX_PATH+1, szfilename);
+    New(0, ptr, strlen(szfilename)+1, char);
+    strcpy(ptr, szfilename);
+    return ptr;
+}
+
+void
+free_childdir(char* d)
+{
+    dTHX;
+    Safefree(d);
+}
+
+void*
+get_childenv(void)
+{
+    return NULL;
+}
+
+void
+free_childenv(void* d)
+{
+}
+
+#  define PerlDir_mapA(dir) (dir)
+
+#endif
+
 XS(w32_ExpandEnvironmentStrings)
 {
     dXSARGS;
@@ -540,37 +679,20 @@ XS(w32_GetFileVersion)
     XSRETURN(items);
 }
 
-/*
- * Extras.
- */
-
-static
+#ifdef __CYGWIN__
 XS(w32_SetChildShowWindow)
 {
+    /* This function doesn't do anything useful for cygwin.  In the
+     * MSWin32 case it modifies w32_showwindow, which is used by
+     * win32_spawnvp().  Since w32_showwindow is an internal variable
+     * inside the thread_intern structure, the MSWin32 implementation
+     * lives in win32/win32.c in the core Perl distribution.
+     */
     dXSARGS;
-    BOOL use_showwindow = w32_use_showwindow;
-    /* use "unsigned short" because Perl has redefined "WORD" */
-    unsigned short showwindow = w32_showwindow;
-
-    if (items > 1)
-	Perl_croak(aTHX_ "usage: Win32::SetChildShowWindow($showwindow)");
-
-    if (items == 0 || !SvOK(ST(0)))
-        w32_use_showwindow = FALSE;
-    else {
-        w32_use_showwindow = TRUE;
-        w32_showwindow = (unsigned short)SvIV(ST(0));
-    }
-
-    EXTEND(SP, 1);
-    if (use_showwindow)
-        ST(0) = sv_2mortal(newSViv(showwindow));
-    else
-        ST(0) = &PL_sv_undef;
-    XSRETURN(1);
+    XSRETURN_UNDEF;
 }
+#endif
 
-static
 XS(w32_GetCwd)
 {
     dXSARGS;
@@ -598,7 +720,6 @@ XS(w32_GetCwd)
     XSRETURN_UNDEF;
 }
 
-static
 XS(w32_SetCwd)
 {
     dXSARGS;
@@ -610,7 +731,6 @@ XS(w32_SetCwd)
     XSRETURN_NO;
 }
 
-static
 XS(w32_GetNextAvailDrive)
 {
     dXSARGS;
@@ -628,7 +748,6 @@ XS(w32_GetNextAvailDrive)
     XSRETURN_UNDEF;
 }
 
-static
 XS(w32_GetLastError)
 {
     dXSARGS;
@@ -636,7 +755,6 @@ XS(w32_GetLastError)
     XSRETURN_IV(GetLastError());
 }
 
-static
 XS(w32_SetLastError)
 {
     dXSARGS;
@@ -646,12 +764,11 @@ XS(w32_SetLastError)
     XSRETURN_EMPTY;
 }
 
-static
 XS(w32_LoginName)
 {
     dXSARGS;
-    char *name = w32_getlogin_buffer;
-    DWORD size = sizeof(w32_getlogin_buffer);
+    char name[128];
+    DWORD size = sizeof(name);
     EXTEND(SP,1);
     if (GetUserName(name,&size)) {
 	/* size includes NULL */
@@ -661,7 +778,6 @@ XS(w32_LoginName)
     XSRETURN_UNDEF;
 }
 
-static
 XS(w32_NodeName)
 {
     dXSARGS;
@@ -677,7 +793,6 @@ XS(w32_NodeName)
 }
 
 
-static
 XS(w32_DomainName)
 {
     dXSARGS;
@@ -741,7 +856,6 @@ XS(w32_DomainName)
     XSRETURN_UNDEF;
 }
 
-static
 XS(w32_FsType)
 {
     dXSARGS;
@@ -762,7 +876,6 @@ XS(w32_FsType)
     XSRETURN_EMPTY;
 }
 
-static
 XS(w32_GetOSVersion)
 {
     dXSARGS;
@@ -812,7 +925,6 @@ XS(w32_GetOSVersion)
     PUTBACK;
 }
 
-static
 XS(w32_IsWinNT)
 {
     dXSARGS;
@@ -820,7 +932,6 @@ XS(w32_IsWinNT)
     XSRETURN_IV(IsWinNT());
 }
 
-static
 XS(w32_IsWin95)
 {
     dXSARGS;
@@ -828,7 +939,6 @@ XS(w32_IsWin95)
     XSRETURN_IV(IsWin95());
 }
 
-static
 XS(w32_FormatMessage)
 {
     dXSARGS;
@@ -848,7 +958,6 @@ XS(w32_FormatMessage)
     XSRETURN_UNDEF;
 }
 
-static
 XS(w32_Spawn)
 {
     dXSARGS;
@@ -897,7 +1006,6 @@ XS(w32_Spawn)
     XSRETURN_IV(bSuccess);
 }
 
-static
 XS(w32_GetTickCount)
 {
     dXSARGS;
@@ -908,7 +1016,6 @@ XS(w32_GetTickCount)
     XSRETURN_NV(msec);
 }
 
-static
 XS(w32_GetShortPathName)
 {
     dXSARGS;
@@ -938,7 +1045,6 @@ XS(w32_GetShortPathName)
     XSRETURN_UNDEF;
 }
 
-static
 XS(w32_GetFullPathName)
 {
     dXSARGS;
@@ -984,7 +1090,6 @@ XS(w32_GetFullPathName)
     XSRETURN_EMPTY;
 }
 
-static
 XS(w32_GetLongPathName)
 {
     dXSARGS;
@@ -1007,7 +1112,6 @@ XS(w32_GetLongPathName)
     XSRETURN_EMPTY;
 }
 
-static
 XS(w32_Sleep)
 {
     dXSARGS;
@@ -1017,7 +1121,6 @@ XS(w32_Sleep)
     XSRETURN_YES;
 }
 
-static
 XS(w32_CopyFile)
 {
     dXSARGS;
@@ -1081,7 +1184,9 @@ XS(boot_Win32)
     newXS("Win32::GetLongPathName", w32_GetLongPathName, file);
     newXS("Win32::CopyFile", w32_CopyFile, file);
     newXS("Win32::Sleep", w32_Sleep, file);
+#ifdef __CYGWIN__
     newXS("Win32::SetChildShowWindow", w32_SetChildShowWindow, file);
+#endif
 
     XSRETURN_YES;
 }

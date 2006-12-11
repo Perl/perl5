@@ -4268,6 +4268,31 @@ win32_dynaload(const char* filename)
     return LoadLibraryExA(PerlDir_mapA(filename), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
 }
 
+XS(w32_SetChildShowWindow)
+{
+    dXSARGS;
+    BOOL use_showwindow = w32_use_showwindow;
+    /* use "unsigned short" because Perl has redefined "WORD" */
+    unsigned short showwindow = w32_showwindow;
+
+    if (items > 1)
+	Perl_croak(aTHX_ "usage: Win32::SetChildShowWindow($showwindow)");
+
+    if (items == 0 || !SvOK(ST(0)))
+        w32_use_showwindow = FALSE;
+    else {
+        w32_use_showwindow = TRUE;
+        w32_showwindow = (unsigned short)SvIV(ST(0));
+    }
+
+    EXTEND(SP, 1);
+    if (use_showwindow)
+        ST(0) = sv_2mortal(newSViv(showwindow));
+    else
+        ST(0) = &PL_sv_undef;
+    XSRETURN(1);
+}
+
 static void
 forward(pTHX_ const char *function)
 {
@@ -4299,7 +4324,12 @@ FORWARD(GetFullPathName)
 FORWARD(GetLongPathName)
 FORWARD(CopyFile)
 FORWARD(Sleep)
-FORWARD(SetChildShowWindow)
+
+/* Don't forward Win32::SetChildShowWindow().  It accesses the internal variable
+ * w32_showwindow in thread_intern and is therefore not implemented in Win32.xs.
+ */
+/* FORWARD(SetChildShowWindow) */
+
 #undef FORWARD
 
 void
