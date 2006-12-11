@@ -522,7 +522,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	}
     }
     BmRARE(sv) = s[rarest];
-    BmPREVIOUS(sv) = (U16)rarest;
+    BmPREVIOUS_set(sv, rarest);
     BmUSEFUL(sv) = 100;			/* Initial value */
     if (flags & FBMcf_TAIL)
 	SvTAIL_on(sv);

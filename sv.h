@@ -1347,6 +1347,9 @@ the scalar's value cannot change unless written to.
 #  define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xiv_u.xivu_i32
 #  define BmPREVIOUS(sv)	((XPVBM*)  SvANY(sv))->xbm_previous
 #endif
+#define BmPREVIOUS_set(sv, val)						\
+    STMT_START { assert(SvTYPE(sv) == SVt_PVBM);			\
+	(((XPVBM*)SvANY(sv))->xbm_previous = (U16)(val)); } STMT_END
 
 #define FmLINES(sv)	((XPVFM*)  SvANY(sv))->xfm_lines
 
