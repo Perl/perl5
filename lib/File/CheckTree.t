@@ -11,10 +11,15 @@ BEGIN { plan tests => 6 }
 
 use strict;
 
+BEGIN {
 # Cwd::cwd does an implicit "require Win32", but
 # the ../lib directory in @INC will no longer work once
 # we chdir() out of the "t" directory.
-use Win32;
+    if ($^O eq 'MSWin32') {
+	require Win32;
+	Win32->import();
+    }
+}
 
 use File::CheckTree;
 use File::Spec;          # used to get absolute paths
