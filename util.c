@@ -454,9 +454,6 @@ Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *lit
     return NULL;
 }
 
-#define PERL_FBM_TABLE_OFFSET 2	/* Number of bytes between EOS and table*/
-#define PERL_FBM_FLAGS_OFFSET_FROM_TABLE -1
-
 /* As a space optimization, we do not compile tables for strings of length
    0 and 1, and for strings of length 2 unless FBMcf_TAIL.  These are
    special-cased in fbm_instr().

@@ -546,7 +546,6 @@ struct xpvbm {
     HV*		xmg_stash;	/* class package */
 
     U16		xbm_previous;	/* how many characters in string before rare? */
-    U8		xbm_rare;	/* rarest character in string */
 };
 
 /* This structure must match XPVCV in cv.h */
@@ -1310,12 +1309,22 @@ the scalar's value cannot change unless written to.
 		     }							\
 		 } STMT_END
 
+
+#define PERL_FBM_TABLE_OFFSET 5	/* Number of bytes between EOS and table */
+#define PERL_FBM_FLAGS_OFFSET_FROM_TABLE -1
+#define PERL_FBM_RARE_OFFSET_FROM_TABLE -4
+
+/* SvPOKp not SvPOK in the assertion because the string can be tainted! eg
+   perl -T -e '/$^X/'
+*/
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define BmRARE(sv)							\
 	(*({ SV *const _svi = (SV *) (sv);				\
 	    assert(SvTYPE(_svi) == SVt_PVBM);				\
 	    assert(SvVALID(_svi));					\
-	    &(((XPVBM*) SvANY(_svi))->xbm_rare);			\
+	    assert(SvPOKp(_svi));					\
+	    (U8*)(SvEND(_svi)						\
+		  + PERL_FBM_TABLE_OFFSET + PERL_FBM_RARE_OFFSET_FROM_TABLE); \
 	 }))
 #  define BmUSEFUL(sv)							\
 	(*({ SV *const _svi = (SV *) (sv);				\
@@ -1331,7 +1340,10 @@ the scalar's value cannot change unless written to.
 	    &(((XPVBM*) SvANY(_svi))->xbm_previous);			\
 	 }))
 #else
-#  define BmRARE(sv)	((XPVBM*)  SvANY(sv))->xbm_rare
+#  define BmRARE(sv)							\
+    (*(U8*)(SvEND(sv)							\
+	    + PERL_FBM_TABLE_OFFSET + PERL_FBM_RARE_OFFSET_FROM_TABLE))
+
 #  define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xiv_u.xivu_i32
 #  define BmPREVIOUS(sv)	((XPVBM*)  SvANY(sv))->xbm_previous
 #endif
