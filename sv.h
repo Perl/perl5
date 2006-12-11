@@ -536,7 +536,7 @@ struct xpvbm {
 	IV	xivu_iv;	/* integer value or pv offset */
 	UV	xivu_uv;
 	void *	xivu_p1;
-	I32	xivu_i32;
+	I32	xivu_i32;	/* is this constant pattern being useful? */
 	HEK *	xivu_namehek;
     }		xiv_u;
     union {
@@ -545,7 +545,6 @@ struct xpvbm {
     } xmg_u;
     HV*		xmg_stash;	/* class package */
 
-    I32		xbm_useful;	/* is this constant pattern being useful? */
     U16		xbm_previous;	/* how many characters in string before rare? */
     U8		xbm_rare;	/* rarest character in string */
 };
@@ -1063,10 +1062,13 @@ the scalar's value cannot change unless written to.
 #  define SvTAIL(sv)	({ SV *const _svi = (SV *) (sv);		\
 			    assert(SvTYPE(_svi) != SVt_PVAV);		\
 			    assert(SvTYPE(_svi) != SVt_PVHV);		\
-			    SvFLAGS(sv) & SVpbm_TAIL;			\
+			    (SvFLAGS(sv) & (SVpbm_TAIL|SVpbm_VALID))	\
+				== (SVpbm_TAIL|SVpbm_VALID);		\
 			})
 #else
-#  define SvTAIL(sv)		(SvFLAGS(sv) & SVpbm_TAIL)
+#  define SvTAIL(sv)	    ((SvFLAGS(sv) & (SVpbm_TAIL|SVpbm_VALID))	\
+			     == (SVpbm_TAIL|SVpbm_VALID));
+
 #endif
 #define SvTAIL_on(sv)		(SvFLAGS(sv) |= SVpbm_TAIL)
 #define SvTAIL_off(sv)		(SvFLAGS(sv) &= ~SVpbm_TAIL)
@@ -1317,7 +1319,8 @@ the scalar's value cannot change unless written to.
 #  define BmUSEFUL(sv)							\
 	(*({ SV *const _svi = (SV *) (sv);				\
 	    assert(SvTYPE(_svi) == SVt_PVBM);				\
-	    &(((XPVBM*) SvANY(_svi))->xbm_useful);			\
+	    assert(!SvIOK(_svi));					\
+	    &(((XPVBM*) SvANY(_svi))->xiv_u.xivu_i32);			\
 	 }))
 #  define BmPREVIOUS(sv)						\
 	(*({ SV *const _svi = (SV *) (sv);				\
@@ -1326,7 +1329,7 @@ the scalar's value cannot change unless written to.
 	 }))
 #else
 #  define BmRARE(sv)	((XPVBM*)  SvANY(sv))->xbm_rare
-#  define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xbm_useful
+#  define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xiv_u.xivu_i32
 #  define BmPREVIOUS(sv)	((XPVBM*)  SvANY(sv))->xbm_previous
 #endif
 
