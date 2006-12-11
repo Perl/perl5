@@ -676,23 +676,6 @@ Perl_yyparse (pTHX)
     yyssp++;
     *yyssp = yystate;
     YY_STACK_PRINT (yyss, yyssp, yyvs, yyns);
-    if (yydebug && DEBUG_v_TEST)
-    {
-	/* XXX */
-	int i;
-	int start = 1;
-	int count = (int)(yyssp - yyss);
-
-	if (count > 8) {
-	    start = count - 8 + 1;
-	    count = 8;
-	}
-
-	PerlIO_printf(Perl_debug_log, "cppad:");
-	for (i=0; i < count; i++)
-	    PerlIO_printf(Perl_debug_log, " %8p", yyps[start+i]);
-	PerlIO_printf(Perl_debug_log, "\n");
-    }
     yyssp--;
 #endif
 
@@ -826,23 +809,6 @@ Perl_yyparse (pTHX)
 	yystate = *--yyssp;
 
 	YY_STACK_PRINT (yyss, yyssp, yyvs, yyns);
-	if (yydebug && DEBUG_v_TEST)
-	{
-	    /* XXX */
-	    int i;
-	    int start = 1;
-	    int count = (int)(yyssp - yyss);
-
-	    if (count > 8) {
-		start = count - 8 + 1;
-		count = 8;
-	    }
-
-	    PerlIO_printf(Perl_debug_log, "cppad:");
-	    for (i=0; i < count; i++)
-		PerlIO_printf(Perl_debug_log, " %8p", yyps[start+i]);
-	    PerlIO_printf(Perl_debug_log, "\n");
-	}
     }
 
     if (yyn == YYFINAL)
