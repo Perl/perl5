@@ -1502,8 +1502,8 @@ cpd (http://pmd.sourceforge.net/cpd.html) is part of the pmd project
 analysis of Java code, but later the cpd part of it was extended to
 parse also C and C++.
 
-Download the pmd-X.y.jar from the SourceForge site, and then run
-it on source code thusly:
+Download the pmd-bin-X.Y.zip () from the SourceForge site, extract the
+pmd-X.Y.jar from it, and then run that on source code thusly:
 
   java -cp pmd-X.Y.jar net.sourceforge.pmd.cpd.CPD --minimum-tokens 100 --files /some/where/src --language c > cpd.txt
 
