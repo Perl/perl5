@@ -510,6 +510,8 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 		table[*s] = (U8)i;
 	    s--, i++;
 	}
+    } else {
+	Sv_Grow(sv, len + PERL_FBM_TABLE_OFFSET);
     }
     sv_magic(sv, NULL, PERL_MAGIC_bm, NULL, 0);	/* deep magic */
     SvVALID_on(sv);
