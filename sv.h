@@ -1067,7 +1067,7 @@ the scalar's value cannot change unless written to.
 			})
 #else
 #  define SvTAIL(sv)	    ((SvFLAGS(sv) & (SVpbm_TAIL|SVpbm_VALID))	\
-			     == (SVpbm_TAIL|SVpbm_VALID));
+			     == (SVpbm_TAIL|SVpbm_VALID))
 
 #endif
 #define SvTAIL_on(sv)		(SvFLAGS(sv) |= SVpbm_TAIL)
