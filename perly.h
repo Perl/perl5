@@ -192,7 +192,6 @@ typedef union YYSTYPE
     char *pval;
     OP *opval;
     GV *gvval;
-    AV* padval;
 #ifdef PERL_IN_MADLY_C
     TOKEN* p_tkval;
     TOKEN* i_tkval;

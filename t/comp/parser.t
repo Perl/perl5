@@ -9,7 +9,7 @@ BEGIN {
 }
 
 BEGIN { require "./test.pl"; }
-plan( tests => 62 );
+plan( tests => 65 );
 
 eval '%@x=0;';
 like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
@@ -211,7 +211,7 @@ like( $@, qr/Assignment to both a list and a scalar/, 'Assignment to both a list
 eval q{ s/x/#/e };
 is( $@, '', 'comments in s///e' );
 
-# these two used to coredump because the op cleanup on parse error could
+# these five used to coredump because the op cleanup on parse error could
 # be to the wrong pad
 
 eval q[
@@ -226,4 +226,28 @@ eval q[
 	    sub { my $z
 ];
 like($@, qr/Missing right curly/, 'nested sub syntax error 2' );
+
+eval q[
+    sub { our $a= 1;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;$a;
+	    use DieDieDie;
+];
+
+like($@, qr/Can't locate DieDieDie.pm/, 'croak cleanup' );
+
+eval q[
+    sub { my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s,$r);
+	    use DieDieDie;
+];
+
+like($@, qr/Can't locate DieDieDie.pm/, 'croak cleanup 2' );
+
+
+eval q[
+    my @a;
+    my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s,$r);
+    @a =~ s/a/b/; # compile-time error
+    use DieDieDie;
+];
+
+like($@, qr/Can't modify/, 'croak cleanup 3' );
 

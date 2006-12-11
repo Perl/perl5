@@ -268,6 +268,48 @@ yystpcpy (pTHX_ char *yydest, const char *yysrc)
 
 #endif /* !YYERROR_VERBOSE */
 
+
+/* a snapshot of the current stack position variables for use by
+ * S_clear_yystack */
+
+typedef struct {
+    short *yyss;
+    short *yyssp;
+    YYSTYPE *yyvsp;
+    AV **yypsp;
+    int yylen;
+} yystack_positions;
+
+/* called during cleanup (via SAVEDESTRUCTOR_X) to free any items on the
+ * parse stack, thus avoiding leaks if we die  */
+
+static void
+S_clear_yystack(pTHX_ const void *p)
+{
+    yystack_positions *y = (yystack_positions*) p;
+
+    if (!y->yyss)
+	return;
+    YYDPRINTF ((Perl_debug_log, "clearing the parse stack\n"));
+    y->yyvsp -= y->yylen; /* ignore the tokens that have just been reduced */
+    y->yyssp -= y->yylen;
+    y->yypsp -= y->yylen;
+    while (y->yyssp > y->yyss) {
+	if (yy_type_tab[yystos[*y->yyssp]] == toketype_opval) {
+	    if (*y->yypsp != PL_comppad) {
+		PAD_RESTORE_LOCAL(*y->yypsp);
+	    }
+	    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
+	    op_free(y->yyvsp->opval);
+	}
+	y->yyvsp--;
+	y->yyssp--;
+	y->yypsp--;
+    }
+}
+
+
+
 /*----------.
 | yyparse.  |
 `----------*/
@@ -292,9 +334,11 @@ Perl_yyparse (pTHX)
     /* Lookahead token as an internal (translated) token number.  */
     int yytoken = 0;
 
-    /* two stacks and their tools:
+    /* three stacks and their tools:
 	  yyss: related to states,
 	  yyvs: related to semantic values,
+	  yyps: current value of PL_comppad for each state
+	  
 
 	  Refer to the stacks thru separate pointers, to allow yyoverflow
 	  to reallocate them elsewhere.  */
@@ -307,17 +351,23 @@ Perl_yyparse (pTHX)
     YYSTYPE *yyvs;
     register YYSTYPE *yyvsp;
 
-    /* for ease of re-allocation and automatic freeing, have two SVs whose
+    AV **yyps;
+    AV **yypsp;
+
+    /* for ease of re-allocation and automatic freeing, have three SVs whose
       * SvPVX points to the stacks */
-    SV *yyss_sv, *yyvs_sv;
+    SV *yyss_sv, *yyvs_sv, *yyps_sv;
+    SV *ss_save_sv;
+    yystack_positions *ss_save;
+
 
 #ifdef DEBUGGING
     /* maintain also a stack of token/rule names for debugging with -Dpv */
     const char **yyns, **yynsp;
     SV *yyns_sv;
-#  define YYPOPSTACK   (yyvsp--, yyssp--, yynsp--)
+#  define YYPOPSTACK   (yyvsp--, yyssp--, yypsp--, yynsp--)
 #else
-#  define YYPOPSTACK   (yyvsp--, yyssp--)
+#  define YYPOPSTACK   (yyvsp--, yyssp--, yypsp--)
 #endif
 
 
@@ -331,9 +381,6 @@ Perl_yyparse (pTHX)
     /* When reducing, the number of symbols on the RHS of the reduced
 	  rule.  */
     int yylen;
-
-    /* keep track of which pad ops are currently using */
-    AV* comppad = PL_comppad;
 
 #ifndef PERL_IN_MADLY_C
 #  ifdef PERL_MAD
@@ -352,13 +399,25 @@ Perl_yyparse (pTHX)
 
     yyss_sv = newSV(YYINITDEPTH * sizeof(short));
     yyvs_sv = newSV(YYINITDEPTH * sizeof(YYSTYPE));
+    yyps_sv = newSV(YYINITDEPTH * sizeof(AV*));
+    ss_save_sv = newSV(sizeof(yystack_positions));
     SAVEFREESV(yyss_sv);
     SAVEFREESV(yyvs_sv);
+    SAVEFREESV(yyps_sv);
+    SAVEFREESV(ss_save_sv);
     yyss = (short *) SvPVX(yyss_sv);
     yyvs = (YYSTYPE *) SvPVX(yyvs_sv);
+    yyps = (AV **) SvPVX(yyps_sv);
+    ss_save = (yystack_positions *) SvPVX(ss_save_sv);
+
+    ss_save->yyss = NULL; /* disarm stack cleanup */
+    /* cleanup the parse stack on premature exit */
+    SAVEDESTRUCTOR_X(S_clear_yystack, (void*) ss_save);
+
     /* note that elements zero of yyvs and yyns are not used */
     yyssp = yyss;
     yyvsp = yyvs;
+    yypsp = yyps;
 #ifdef DEBUGGING
     yyns_sv = newSV(YYINITDEPTH * sizeof(char *));
     SAVEFREESV(yyns_sv);
@@ -401,8 +460,10 @@ Perl_yyparse (pTHX)
 
 	 SvGROW(yyss_sv, yystacksize * sizeof(short));
 	 SvGROW(yyvs_sv, yystacksize * sizeof(YYSTYPE));
+	 SvGROW(yyps_sv, yystacksize * sizeof(AV*));
 	 yyss = (short *) SvPVX(yyss_sv);
 	 yyvs = (YYSTYPE *) SvPVX(yyvs_sv);
+	 yyps = (AV **) SvPVX(yyps_sv);
 #ifdef DEBUGGING
 	 SvGROW(yyns_sv, yystacksize * sizeof(char *));
 	 /* XXX This seems strange to cast char * to char ** */
@@ -411,11 +472,12 @@ Perl_yyparse (pTHX)
 	       goto yyoverflowlab;
 	 yynsp = yyns + yysize - 1;
 #endif
-	 if (!yyss || ! yyvs)
+	 if (!yyss || ! yyvs || ! yyps)
 	       goto yyoverflowlab;
 
 	 yyssp = yyss + yysize - 1;
 	 yyvsp = yyvs + yysize - 1;
+	 yypsp = yyps + yysize - 1;
 
 
 	 YYDPRINTF ((Perl_debug_log, "Stack size increased to %lu\n",
@@ -493,6 +555,7 @@ Perl_yyparse (pTHX)
 	yychar = YYEMPTY;
 
     *++yyvsp = yylval;
+    *++yypsp = PL_comppad;
 #ifdef DEBUGGING
     *++yynsp = (const char *)(yytname[yytoken]);
 #endif
@@ -538,6 +601,16 @@ Perl_yyparse (pTHX)
 
 
     YY_REDUCE_PRINT (yyn);
+
+    /* running external code may trigger a die (eg 'use nosuchmodule'):
+     * record the current stack state so that an unwind will
+     * free all the pesky OPs lounging around on the parse stack */
+    ss_save->yyss = yyss;
+    ss_save->yyssp = yyssp;
+    ss_save->yyvsp = yyvsp;
+    ss_save->yypsp = yypsp;
+    ss_save->yylen = yylen;
+
     switch (yyn) {
 
 
@@ -570,13 +643,14 @@ Perl_yyparse (pTHX)
 
     yyvsp -= yylen;
     yyssp -= yylen;
+    yypsp -= yylen;
 #ifdef DEBUGGING
     yynsp -= yylen;
 #endif
 
 
     *++yyvsp = yyval;
-    comppad = PL_comppad;
+    *++yypsp = PL_comppad;
 
 #ifdef DEBUGGING
     *++yynsp = (const char *)(yytname [yyr1[yyn]]);
@@ -602,6 +676,23 @@ Perl_yyparse (pTHX)
     yyssp++;
     *yyssp = yystate;
     YY_STACK_PRINT (yyss, yyssp, yyvs, yyns);
+    if (yydebug && DEBUG_v_TEST)
+    {
+	/* XXX */
+	int i;
+	int start = 1;
+	int count = (int)(yyssp - yyss);
+
+	if (count > 8) {
+	    start = count - 8 + 1;
+	    count = 8;
+	}
+
+	PerlIO_printf(Perl_debug_log, "cppad:");
+	for (i=0; i < count; i++)
+	    PerlIO_printf(Perl_debug_log, " %8p", yyps[start+i]);
+	PerlIO_printf(Perl_debug_log, "\n");
+    }
     yyssp--;
 #endif
 
@@ -674,15 +765,13 @@ Perl_yyparse (pTHX)
 	    /* Pop the error token.  */
 	    YYPOPSTACK;
 	    /* Pop the rest of the stack.  */
-	    PAD_RESTORE_LOCAL(comppad);
 	    while (yyss < yyssp) {
 		YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp);
-		if (yy_type_tab[yystos[*yyssp]] == toketype_padval) {
-		    comppad = yyvsp->padval;
-		    PAD_RESTORE_LOCAL(comppad);
-		}
-		else if (yy_type_tab[yystos[*yyssp]] == toketype_opval) {
+		if (yy_type_tab[yystos[*yyssp]] == toketype_opval) {
 		    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
+		    if (*yypsp != PL_comppad) {
+			PAD_RESTORE_LOCAL(*yypsp);
+		    }
 		    op_free(yyvsp->opval);
 		}
 		YYPOPSTACK;
@@ -706,7 +795,6 @@ Perl_yyparse (pTHX)
   yyerrlab1:
     yyerrstatus = 3;	/* Each real token shifted decrements this.  */
 
-    PAD_RESTORE_LOCAL(comppad);
     for (;;) {
 	yyn = yypact[yystate];
 	if (yyn != YYPACT_NINF) {
@@ -723,21 +811,38 @@ Perl_yyparse (pTHX)
 	    YYABORT;
 
 	YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp);
-	if (yy_type_tab[yystos[*yyssp]] == toketype_padval) {
-	    comppad = yyvsp->padval;
-	    PAD_RESTORE_LOCAL(comppad);
-	}
-	else if (yy_type_tab[yystos[*yyssp]] == toketype_opval) {
+	if (yy_type_tab[yystos[*yyssp]] == toketype_opval) {
 	    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
+	    if (*yypsp != PL_comppad) {
+		PAD_RESTORE_LOCAL(*yypsp);
+	    }
 	    op_free(yyvsp->opval);
 	}
 	yyvsp--;
+	yypsp--;
 #ifdef DEBUGGING
 	yynsp--;
 #endif
 	yystate = *--yyssp;
 
 	YY_STACK_PRINT (yyss, yyssp, yyvs, yyns);
+	if (yydebug && DEBUG_v_TEST)
+	{
+	    /* XXX */
+	    int i;
+	    int start = 1;
+	    int count = (int)(yyssp - yyss);
+
+	    if (count > 8) {
+		start = count - 8 + 1;
+		count = 8;
+	    }
+
+	    PerlIO_printf(Perl_debug_log, "cppad:");
+	    for (i=0; i < count; i++)
+		PerlIO_printf(Perl_debug_log, " %8p", yyps[start+i]);
+	    PerlIO_printf(Perl_debug_log, "\n");
+	}
     }
 
     if (yyn == YYFINAL)
@@ -746,6 +851,7 @@ Perl_yyparse (pTHX)
     YYDPRINTF ((Perl_debug_log, "Shifting error token, "));
 
     *++yyvsp = yylval;
+    *++yypsp = PL_comppad;
 #ifdef DEBUGGING
     *++yynsp ="<err>";
 #endif
@@ -780,6 +886,7 @@ Perl_yyparse (pTHX)
 
   yyreturn:
 
+    ss_save->yyss = NULL;	/* disarm parse stack cleanup */
     LEAVE;			/* force stack free before we return */
 
     return yyresult;

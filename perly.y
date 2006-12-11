@@ -48,7 +48,6 @@
     char *pval;
     OP *opval;
     GV *gvval;
-    AV* padval;
 #ifdef PERL_IN_MADLY_C
     TOKEN* p_tkval;
     TOKEN* i_tkval;
@@ -92,7 +91,6 @@
 %type <opval> termbinop termunop anonymous termdo
 %type <opval> switch case
 %type <p_tkval> label
-%type <padval> remempad
 
 %nonassoc <i_tkval> PREC_LOW
 %nonassoc LOOPEX
@@ -504,15 +502,15 @@ peg	:	PEG
 			}
 	;
 
-format	:	FORMAT remempad startformsub formname block
+format	:	FORMAT startformsub formname block
 			{ SvREFCNT_inc(PL_compcv);
 #ifdef MAD
-			  $$ = newFORM($3, $4, $5);
+			  $$ = newFORM($2, $3, $4);
 			  prepend_madprops($1->tk_mad, $$, 'F');
 			  $1->tk_mad = 0;
 			  token_free($1);
 #else
-			  newFORM($3, $4, $5);
+			  newFORM($2, $3, $4);
 #endif
 			}
 	;
@@ -522,40 +520,36 @@ formname:	WORD		{ $$ = $1; }
 	;
 
 /* Unimplemented "my sub foo { }" */
-mysubrout:	MYSUB remempad startsub subname proto subattrlist subbody
+mysubrout:	MYSUB startsub subname proto subattrlist subbody
 			{ SvREFCNT_inc(PL_compcv);
 #ifdef MAD
-			  $$ = newMYSUB($3, $4, $5, $6, $7);
+			  $$ = newMYSUB($2, $3, $4, $5, $6);
 			  token_getmad($1,$$,'d');
 #else
-			  newMYSUB($3, $4, $5, $6, $7);
+			  newMYSUB($2, $3, $4, $5, $6);
 #endif
 			}
 	;
 
 /* Subroutine definition */
-subrout	:	SUB remempad startsub subname proto subattrlist subbody
+subrout	:	SUB startsub subname proto subattrlist subbody
 			{ SvREFCNT_inc(PL_compcv);
 #ifdef MAD
 			  OP* o = newSVOP(OP_ANONCODE, 0,
-			    (SV*)newATTRSUB($3, $4, $5, $6, $7));
+			    (SV*)newATTRSUB($2, $3, $4, $5, $6));
 			  $$ = newOP(OP_NULL,0);
 			  op_getmad(o,$$,'&');
-			  op_getmad($4,$$,'n');
-			  op_getmad($5,$$,'s');
-			  op_getmad($6,$$,'a');
+			  op_getmad($3,$$,'n');
+			  op_getmad($4,$$,'s');
+			  op_getmad($5,$$,'a');
 			  token_getmad($1,$$,'d');
-			  append_madprops($7->op_madprop, $$, 0);
-			  $7->op_madprop = 0;
+			  append_madprops($6->op_madprop, $$, 0);
+			  $6->op_madprop = 0;
 #else
-			  newATTRSUB($3, $4, $5, $6, $7);
+			  newATTRSUB($2, $3, $4, $5, $6);
 			  $$ = Nullop;
 #endif
 			}
-	;
-
-remempad:	/* NULL */	/* remember current value of PL_comppad */
-			{ $$ = PL_comppad; }
 	;
 
 startsub:	/* NULL */	/* start a regular subroutine scope */
@@ -642,18 +636,18 @@ package :	PACKAGE WORD ';'
 			}
 	;
 
-use	:	USE remempad startsub
+use	:	USE startsub
 			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
 		    WORD WORD listexpr ';'
 			{ SvREFCNT_inc(PL_compcv);
 #ifdef MAD
-			  $$ = utilize(IVAL($1), $3, $5, $6, $7);
+			  $$ = utilize(IVAL($1), $2, $4, $5, $6);
 			  token_getmad($1,$$,'o');
-			  token_getmad($8,$$,';');
+			  token_getmad($7,$$,';');
 			  if (PL_rsfp_filters && AvFILLp(PL_rsfp_filters) >= 0)
 			      append_madprops(newMADPROP('!', MAD_PV, "", 0), $$, 0);
 #else
-			  utilize(IVAL($1), $3, $5, $6, $7);
+			  utilize(IVAL($1), $2, $4, $5, $6);
 #endif
 			}
 	;
@@ -748,13 +742,13 @@ listop	:	LSTOP indirob argexpr /* map {...} @args or print $fh @args */
 			  TOKEN_GETMAD($2,$$,'(');
 			  TOKEN_GETMAD($4,$$,')');
 			}
-	|	LSTOPSUB remempad startanonsub block /* sub f(&@); f {foo} ... */
+	|	LSTOPSUB startanonsub block /* sub f(&@);   f { foo } ... */
 			{ SvREFCNT_inc(PL_compcv);
-			  $4 = newANONATTRSUB($3, 0, Nullop, $4); }
+			  $3 = newANONATTRSUB($2, 0, Nullop, $3); }
 		    listexpr		%prec LSTOP  /* ... @bar */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				 append_elem(OP_LIST,
-				   prepend_elem(OP_LIST, $4, $6), $1));
+				   prepend_elem(OP_LIST, $3, $5), $1));
 			}
 	;
 
@@ -1002,12 +996,12 @@ anonymous:	'[' expr ']'
 			  TOKEN_GETMAD($2,$$,';');
 			  TOKEN_GETMAD($3,$$,'}');
 			}
-	|	ANONSUB remempad startanonsub proto subattrlist block %prec '('
+	|	ANONSUB startanonsub proto subattrlist block	%prec '('
 			{ SvREFCNT_inc(PL_compcv);
-			  $$ = newANONATTRSUB($3, $4, $5, $6);
+			  $$ = newANONATTRSUB($2, $3, $4, $5);
 			  TOKEN_GETMAD($1,$$,'o');
-			  OP_GETMAD($4,$$,'s');
-			  OP_GETMAD($5,$$,'a');
+			  OP_GETMAD($3,$$,'s');
+			  OP_GETMAD($4,$$,'a');
 			}
 
     ;
