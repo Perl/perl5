@@ -4,7 +4,7 @@ use strict;
 use vars qw($VERSION);
 use Carp;
 
-$VERSION = '2.11';
+$VERSION = '2.12';
 
 
 # LOAD FILTERING MODULE...
@@ -73,7 +73,7 @@ sub is_block
 }
 
 
-my $EOP = qr/\n\n|\Z/;
+my $EOP = qr/\n|\Z/;
 my $CUT = qr/\n=cut.*$EOP/;
 my $pod_or_DATA = qr/ ^=(?:head[1-4]|item) .*? $CUT
                     | ^=pod .*? $CUT
