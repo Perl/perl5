@@ -21000,7 +21000,9 @@ eval $find_extensions
 # Special case:  Add in threads/shared since it is not picked up by the
 # recursive find above (and adding in general recursive finding breaks
 # SDBM_File/sdbm).  A.D.  10/25/2001.
+# Ditto for IO/Compress/Base and IO/Compress/Zlib
 known_extensions="$known_extensions threads/shared"
+nonxs_extensions="$nonxs_extensions IO/Compress/Base IO/Compress/Zlib"
 set X $nonxs_extensions
 shift
 nonxs_extensions="$*"
