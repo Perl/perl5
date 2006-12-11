@@ -2446,9 +2446,7 @@ lib/strict.pm			For "use strict"
 lib/strict.t			See if strictures work
 lib/subs.pm			Declare overriding subs
 lib/subs.t			See if subroutine pseudo-importation works
-lib/Switch/Changes		Switch
 lib/Switch.pm			Switch for Perl
-lib/Switch/README		Switch
 lib/Switch/t/given.t		See if Perl 6 given (switch) works
 lib/Switch/t/nested.t		See if nested switch works
 lib/Switch/t/switch.t		See if Perl 5 switch works
