@@ -454,7 +454,7 @@ Perl_rninstr(pTHX_ register const char *big, const char *bigend, const char *lit
     return NULL;
 }
 
-#define FBM_TABLE_OFFSET 2	/* Number of bytes between EOS and table*/
+#define PERL_FBM_TABLE_OFFSET 2	/* Number of bytes between EOS and table*/
 
 /* As a space optimization, we do not compile tables for strings of length
    0 and 1, and for strings of length 2 unless FBMcf_TAIL.  These are
@@ -499,9 +499,10 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	const U8 mlen = (len>255) ? 255 : (U8)len;
 	register U8 *table;
 
-	Sv_Grow(sv, len + 256 + FBM_TABLE_OFFSET);
-	table = (unsigned char*)(SvPVX_mutable(sv) + len + FBM_TABLE_OFFSET);
-	s = table - 1 - FBM_TABLE_OFFSET;	/* last char */
+	Sv_Grow(sv, len + 256 + PERL_FBM_TABLE_OFFSET);
+	table
+	    = (unsigned char*)(SvPVX_mutable(sv) + len + PERL_FBM_TABLE_OFFSET);
+	s = table - 1 - PERL_FBM_TABLE_OFFSET;	/* last char */
 	memset((void*)table, mlen, 256);
 	table[-1] = (U8)flags;
 	i = 0;
@@ -686,7 +687,8 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	return NULL;
 
     {
-	register const unsigned char * const table = little + littlelen + FBM_TABLE_OFFSET;
+	register const unsigned char * const table
+	    = little + littlelen + PERL_FBM_TABLE_OFFSET;
 	register const unsigned char *oldlittle;
 
 	--littlelen;			/* Last char found by table lookup */
