@@ -544,8 +544,6 @@ struct xpvbm {
 	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
     } xmg_u;
     HV*		xmg_stash;	/* class package */
-
-    U16		xbm_previous;	/* how many characters in string before rare? */
 };
 
 /* This structure must match XPVCV in cv.h */
@@ -1312,6 +1310,8 @@ the scalar's value cannot change unless written to.
 
 #define PERL_FBM_TABLE_OFFSET 5	/* Number of bytes between EOS and table */
 #define PERL_FBM_FLAGS_OFFSET_FROM_TABLE -1
+#define PERL_FBM_PREVIOUS_L_OFFSET_FROM_TABLE -2
+#define PERL_FBM_PREVIOUS_H_OFFSET_FROM_TABLE -3
 #define PERL_FBM_RARE_OFFSET_FROM_TABLE -4
 
 /* SvPOKp not SvPOK in the assertion because the string can be tainted! eg
@@ -1319,37 +1319,56 @@ the scalar's value cannot change unless written to.
 */
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define BmRARE(sv)							\
-	(*({ SV *const _svi = (SV *) (sv);				\
-	    assert(SvTYPE(_svi) == SVt_PVBM);				\
-	    assert(SvVALID(_svi));					\
-	    assert(SvPOKp(_svi));					\
-	    (U8*)(SvEND(_svi)						\
+	(*({ SV *const uggh = (SV *) (sv);				\
+		assert(SvTYPE(uggh) == SVt_PVBM);			\
+		assert(SvVALID(uggh));					\
+		assert(SvCUR(uggh) + PERL_FBM_TABLE_OFFSET		\
+		       + PERL_FBM_RARE_OFFSET_FROM_TABLE <= SvLEN(uggh)); \
+	    assert(SvPOKp(uggh));					\
+	    (U8*)(SvEND(uggh)						\
 		  + PERL_FBM_TABLE_OFFSET + PERL_FBM_RARE_OFFSET_FROM_TABLE); \
 	 }))
 #  define BmUSEFUL(sv)							\
-	(*({ SV *const _svi = (SV *) (sv);				\
-	    assert(SvTYPE(_svi) == SVt_PVBM);				\
-	    assert(SvVALID(_svi));					\
-	    assert(!SvIOK(_svi));					\
-	    &(((XPVBM*) SvANY(_svi))->xiv_u.xivu_i32);			\
+	(*({ SV *const uggh = (SV *) (sv);				\
+	    assert(SvTYPE(uggh) == SVt_PVBM);				\
+	    assert(SvVALID(uggh));					\
+	    assert(!SvIOK(uggh));					\
+	    &(((XPVBM*) SvANY(uggh))->xiv_u.xivu_i32);			\
 	 }))
 #  define BmPREVIOUS(sv)						\
-	(*({ SV *const _svi = (SV *) (sv);				\
-	    assert(SvTYPE(_svi) == SVt_PVBM);				\
-	    assert(SvVALID(_svi));					\
-	    &(((XPVBM*) SvANY(_svi))->xbm_previous);			\
-	 }))
+	({ SV *const uggh = (SV *) (sv);				\
+	   assert(SvTYPE(uggh) == SVt_PVBM);				\
+	   assert(SvVALID(uggh));					\
+	   assert(SvPOKp(uggh));					\
+	   assert(SvCUR(uggh) + PERL_FBM_TABLE_OFFSET <= SvLEN(uggh));	\
+	   (*(U8*)(SvEND(uggh) + PERL_FBM_TABLE_OFFSET			\
+		  + PERL_FBM_PREVIOUS_H_OFFSET_FROM_TABLE) << 8)	\
+	       | (*(U8*)(SvEND(uggh) + PERL_FBM_TABLE_OFFSET		\
+			+ PERL_FBM_PREVIOUS_L_OFFSET_FROM_TABLE));	\
+	})
 #else
 #  define BmRARE(sv)							\
     (*(U8*)(SvEND(sv)							\
 	    + PERL_FBM_TABLE_OFFSET + PERL_FBM_RARE_OFFSET_FROM_TABLE))
 
 #  define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xiv_u.xivu_i32
-#  define BmPREVIOUS(sv)	((XPVBM*)  SvANY(sv))->xbm_previous
+#  define BmPREVIOUS(sv)						\
+    (*(U8*)(SvEND(sv) + PERL_FBM_TABLE_OFFSET				\
+	   + PERL_FBM_PREVIOUS_H_OFFSET_FROM_TABLE) << 8)		\
+    | (*(U8*)(SvEND(sv) + PERL_FBM_TABLE_OFFSET				\
+	     + PERL_FBM_PREVIOUS_L_OFFSET_FROM_TABLE))			\
+
 #endif
 #define BmPREVIOUS_set(sv, val)						\
     STMT_START { assert(SvTYPE(sv) == SVt_PVBM);			\
-	(((XPVBM*)SvANY(sv))->xbm_previous = (U16)(val)); } STMT_END
+	assert(SvVALID(sv));						\
+	assert(SvPOKp(sv));						\
+	assert(SvCUR(sv) + PERL_FBM_TABLE_OFFSET <= SvLEN(sv));		\
+	*(U8*)(SvEND(sv) + PERL_FBM_TABLE_OFFSET			\
+	       + PERL_FBM_PREVIOUS_H_OFFSET_FROM_TABLE) = (U8)((U32)(val)>>8); \
+	*(U8*)(SvEND(sv) + PERL_FBM_TABLE_OFFSET			\
+	       + PERL_FBM_PREVIOUS_L_OFFSET_FROM_TABLE) = (U8)(val);	\
+    } STMT_END
 
 #define FmLINES(sv)	((XPVFM*)  SvANY(sv))->xfm_lines
 
