@@ -1353,9 +1353,13 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		   (int)(PL_dumpindent*level), "", (IV)SvREFCNT(sv),
 		   (int)(PL_dumpindent*level), "");
 
-    if (flags & SVs_PADSTALE)	sv_catpv(d, "PADSTALE,");
-    if (flags & SVs_PADTMP)	sv_catpv(d, "PADTMP,");
-    if (flags & SVs_PADMY)	sv_catpv(d, "PADMY,");
+    if (!(flags & SVpad_NAME && (type == SVt_PVMG || type == SVt_PVNV))) {
+	if (flags & SVs_PADSTALE)	sv_catpv(d, "PADSTALE,");
+    }
+    if (!(flags & SVpad_NAME && type == SVt_PVMG)) {
+	if (flags & SVs_PADTMP)	sv_catpv(d, "PADTMP,");
+	if (flags & SVs_PADMY)	sv_catpv(d, "PADMY,");
+    }
     if (flags & SVs_TEMP)	sv_catpv(d, "TEMP,");
     if (flags & SVs_OBJECT)	sv_catpv(d, "OBJECT,");
     if (flags & SVs_GMG)	sv_catpv(d, "GMG,");
@@ -1412,9 +1416,6 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    if (GvASSUMECV(sv))	sv_catpv(d, "ASSUMECV,");
 	    if (GvIN_PAD(sv))   sv_catpv(d, "IN_PAD,");
 	}
-	if (SvPAD_OUR(sv))	sv_catpv(d, "OUR,");
-	if (SvPAD_STATE(sv))	sv_catpv(d, "STATE,");
-	if (SvPAD_TYPED(sv))	sv_catpv(d, "TYPED,");
 	if (isGV_with_GP(sv) && GvIMPORTED(sv)) {
 	    sv_catpv(d, "IMPORT");
 	    if (GvIMPORTED(sv) == GVf_IMPORTED)
@@ -1430,6 +1431,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	}
 	/* FALL THROUGH */
     default:
+    evaled_or_uv:
 	if (SvEVALED(sv))	sv_catpv(d, "EVALED,");
 	if (SvIsUV(sv) && !(flags & SVf_ROK))	sv_catpv(d, "IsUV,");
 	break;
@@ -1439,7 +1441,12 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	break;
     case SVt_PVMG:
 	if (SvPAD_TYPED(sv))	sv_catpv(d, "TYPED,");
+	if (SvPAD_OUR(sv))	sv_catpv(d, "OUR,");
+	if (SvPAD_STATE(sv))	sv_catpv(d, "STATE,");
 	break;
+    case SVt_PVNV:
+	if (SvPAD_STATE(sv))	sv_catpv(d, "STATE,");
+	goto evaled_or_uv;
     case SVt_PVAV:
 	break;
     }
