@@ -1337,13 +1337,16 @@ SvPV(sv)
             sv_setpvn(ST(0), NULL, 0);
         }
 
+# This used to read 257. I think that that was buggy - should have been 258.
+# (The "\0", the flags byte, and 256 for the table.  Not that anything
+# anywhere calls this method.  NWC.
 void
 SvPVBM(sv)
 	B::PV	sv
     CODE:
         ST(0) = sv_newmortal();
 	sv_setpvn(ST(0), SvPVX_const(sv),
-	    SvCUR(sv) + (SvTYPE(sv) == SVt_PVBM ? 257 : 0));
+	    SvCUR(sv) + (SvVALID(sv) ? 256 + PERL_FBM_TABLE_OFFSET : 0));
 
 
 STRLEN
@@ -1496,7 +1499,7 @@ BmTABLE(sv)
     CODE:
 	str = SvPV(sv, len);
 	/* Boyer-Moore table is just after string and its safety-margin \0 */
-	ST(0) = sv_2mortal(newSVpvn(str + len + 1, 256));
+	ST(0) = sv_2mortal(newSVpvn(str + len + PERL_FBM_TABLE_OFFSET, 256));
 
 MODULE = B	PACKAGE = B::GV		PREFIX = Gv
 
