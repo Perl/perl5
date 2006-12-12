@@ -2356,6 +2356,14 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode)
 	    PerlProc__exit(1);
 	}
 #endif	/* defined OS2 */
+
+#ifdef PERLIO_USING_CRLF
+   /* Since we circumvent IO layers when we manipulate low-level
+      filedescriptors directly, need to manually switch to the
+      default, binary, low-level mode; see PerlIOBuf_open(). */
+   PerlLIO_setmode((*mode == 'r'), O_BINARY);
+#endif 
+
 	if ((tmpgv = gv_fetchpvs("$", GV_ADD|GV_NOTQUAL, SVt_PV))) {
 	    SvREADONLY_off(GvSV(tmpgv));
 	    sv_setiv(GvSV(tmpgv), PerlProc_getpid());
