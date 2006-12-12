@@ -1613,11 +1613,7 @@ setuid perl scripts securely.\n");
 #ifndef PERL_USE_SAFE_PUTENV
 	 /* Can we grab env area too to be used as the area for $0? */
 	 if (s && PL_origenviron && !PL_use_safe_putenv) {
-	      if ((PL_origenviron[0] == s + 1
-#ifdef OS2
-		   || (PL_origenviron[0] == s + 9 && (s += 8))
-#endif 
-		  )
+	      if ((PL_origenviron[0] == s + 1)
 		  ||
 		  (aligned &&
 		   (PL_origenviron[0] >  s &&
@@ -1625,7 +1621,7 @@ setuid perl scripts securely.\n");
 		    INT2PTR(char *, PTR2UV(s + PTRSIZE) & mask)))
 		 )
 	      {
-#ifndef OS2
+#ifndef OS2		/* ENVIRON is read by the kernel too. */
 		   s = PL_origenviron[0];
 		   while (*s) s++;
 #endif

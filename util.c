@@ -2279,8 +2279,12 @@ Perl_my_popen_list(pTHX_ char *mode, int n, SV **args)
 	 PerlLIO_close(pp[0]);
     return PerlIO_fdopen(p[This], mode);
 #else
+#  ifdef OS2	/* Same, without fork()ing and all extra overhead... */
+    return my_syspopen4(aTHX_ Nullch, mode, n, args);
+#  else
     Perl_croak(aTHX_ "List form of piped open not implemented");
     return (PerlIO *) NULL;
+#  endif
 #endif
 }
 
@@ -2367,6 +2371,14 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 	    PerlProc__exit(1);
 	}
 #endif	/* defined OS2 */
+
+#ifdef PERLIO_USING_CRLF
+   /* Since we circumvent IO layers when we manipulate low-level
+      filedescriptors directly, need to manually switch to the
+      default, binary, low-level mode; see PerlIOBuf_open(). */
+   PerlLIO_setmode((*mode == 'r'), O_BINARY);
+#endif 
+
 	if ((tmpgv = gv_fetchpvs("$", GV_ADD|GV_NOTQUAL, SVt_PV))) {
 	    SvREADONLY_off(GvSV(tmpgv));
 	    sv_setiv(GvSV(tmpgv), PerlProc_getpid());
