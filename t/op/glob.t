@@ -6,7 +6,7 @@ BEGIN {
 }
 
 require 'test.pl';
-plan( tests => 12 );
+plan( tests => 15 );
 
 @oops = @ops = <op/*>;
 
@@ -85,3 +85,10 @@ SKIP: {
 }
 
 cmp_ok(scalar(@oops),'>',0,'glob globbed something');
+
+*aieee = 4;
+pass('Can assign integers to typeglobs');
+*aieee = 3.14;
+pass('Can assign floats to typeglobs');
+*aieee = 'pi';
+pass('Can assign strings to typeglobs');

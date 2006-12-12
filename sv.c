@@ -3376,6 +3376,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    case SVt_PV:
 		sv_upgrade(dstr, SVt_PVIV);
 		break;
+	    case SVt_PVGV:
+		goto end_of_first_switch;
 	    }
 	    (void)SvIOK_only(dstr);
 	    SvIV_set(dstr,  SvIVX(sstr));
@@ -3402,6 +3404,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    case SVt_PVIV:
 		sv_upgrade(dstr, SVt_PVNV);
 		break;
+	    case SVt_PVGV:
+		goto end_of_first_switch;
 	    }
 	    SvNV_set(dstr, SvNVX(sstr));
 	    (void)SvNOK_only(dstr);
@@ -3474,6 +3478,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	else
 	    SvUPGRADE(dstr, (svtype)stype);
     }
+ end_of_first_switch:
 
     /* dstr may have been upgraded.  */
     dtype = SvTYPE(dstr);
