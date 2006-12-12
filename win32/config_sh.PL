@@ -73,8 +73,13 @@ $opt{INST_VER} =~ s|~VERSION~|$opt{VERSION}|g;
 $opt{'version_patchlevel_string'} = "version $opt{PERL_VERSION} subversion $opt{PERL_SUBVERSION}";
 $opt{'version_patchlevel_string'} .= " patchlevel $opt{PERL_PATCHLEVEL}" if exists $opt{PERL_PATCHLEVEL};
 
-#$opt{'osvers'} = join '.', (Win32::GetOSVersion())[1,2];
-$opt{'osvers'} = "4.0";
+my $ver = `ver 2>nul`;
+if ($ver =~ /Version (\d+\.\d+)/) {
+    $opt{'osvers'} = $1;
+}
+else {
+    $opt{'osvers'} = '4.0';
+}
 
 if (exists $opt{cc}) {
     # cl and bcc32 version detection borrowed from Test::Smoke's configsmoke.pl
