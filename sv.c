@@ -5102,6 +5102,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
     }
     if (type >= SVt_PVMG) {
 	if ((type == SVt_PVMG || type == SVt_PVGV) && SvPAD_OUR(sv)) {
+	    assert(type != SVt_PVGV);
 	    SvREFCNT_dec(OURSTASH(sv));
 	} else if (SvMAGIC(sv))
 	    mg_free(sv);
