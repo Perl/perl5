@@ -33,12 +33,11 @@ $Config{'startperl'}
         if \$running_under_some_shell;
 !GROK!THIS!
 
+print OUT "\n# perlivp $^V\n";
+
 # In the following, perl variables are not expanded during extraction.
 
 print OUT <<'!NO!SUBS!';
-
-# perlivp V 0.02
-
 
 sub usage {
     warn "@_\n" if @_;
@@ -209,7 +208,9 @@ if (defined($Config{'extensions'})) {
             next if ($_ eq 'threads');
             next if ($_ eq 'threads/shared');
         }
-        next if ($_ eq 'Devel/DProf'); 
+	# that's a distribution name, not a module name
+	next if $_ eq 'IO/Compress/Zlib';
+        next if $_ eq 'Devel/DProf'; 
            # VMS$ perl  -e "eval ""require \""Devel/DProf.pm\"";"" print $@"
            # \NT> perl  -e "eval \"require 'Devel/DProf.pm'\"; print $@"
            # DProf: run perl with -d to use DProf.
