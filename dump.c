@@ -27,6 +27,45 @@
 #include "proto.h"
 
 
+static const char* const svtypenames[SVt_LAST] = {
+    "NULL",
+    "IV",
+    "NV",
+    "RV",
+    "PV",
+    "PVIV",
+    "PVNV",
+    "PVMG",
+    "PVBM",
+    "PVGV",
+    "PVLV",
+    "PVAV",
+    "PVHV",
+    "PVCV",
+    "PVFM",
+    "PVIO"
+};
+
+
+static const char* const svshorttypenames[SVt_LAST] = {
+    "UNDEF",
+    "IV",
+    "NV",
+    "RV",
+    "PV",
+    "PVIV",
+    "PVNV",
+    "PVMG",
+    "BM",
+    "GV",
+    "PVLV",
+    "AV",
+    "HV",
+    "CV",
+    "FM",
+    "IO"
+};
+
 #define Sequence PL_op_sequence
 
 void
@@ -331,6 +370,7 @@ Perl_sv_peek(pTHX_ SV *sv)
     dVAR;
     SV * const t = sv_newmortal();
     int unref = 0;
+    U32 type;
 
     sv_setpvn(t, "", 0);
   retry:
@@ -412,62 +452,18 @@ Perl_sv_peek(pTHX_ SV *sv)
 	sv = (SV*)SvRV(sv);
 	goto retry;
     }
-    switch (SvTYPE(sv)) {
-    default:
+    type = SvTYPE(sv);
+    if (type == SVt_PVCV) {
+	Perl_sv_catpvf(aTHX_ t, "CV(%s)", CvGV(sv) ? GvNAME(CvGV(sv)) : "");
+	goto finish;
+    } else if (type < SVt_LAST) {
+	sv_catpv(t, svshorttypenames[type]);
+
+	if (type == SVt_NULL)
+	    goto finish;
+    } else {
 	sv_catpv(t, "FREED");
 	goto finish;
-
-    case SVt_NULL:
-	sv_catpv(t, "UNDEF");
-	goto finish;
-    case SVt_IV:
-	sv_catpv(t, "IV");
-	break;
-    case SVt_NV:
-	sv_catpv(t, "NV");
-	break;
-    case SVt_RV:
-	sv_catpv(t, "RV");
-	break;
-    case SVt_PV:
-	sv_catpv(t, "PV");
-	break;
-    case SVt_PVIV:
-	sv_catpv(t, "PVIV");
-	break;
-    case SVt_PVNV:
-	sv_catpv(t, "PVNV");
-	break;
-    case SVt_PVMG:
-	sv_catpv(t, "PVMG");
-	break;
-    case SVt_PVLV:
-	sv_catpv(t, "PVLV");
-	break;
-    case SVt_PVAV:
-	sv_catpv(t, "AV");
-	break;
-    case SVt_PVHV:
-	sv_catpv(t, "HV");
-	break;
-    case SVt_PVCV:
-	if (CvGV(sv))
-	    Perl_sv_catpvf(aTHX_ t, "CV(%s)", GvNAME(CvGV(sv)));
-	else
-	    sv_catpv(t, "CV()");
-	goto finish;
-    case SVt_PVGV:
-	sv_catpv(t, "GV");
-	break;
-    case SVt_PVBM:
-	sv_catpv(t, "BM");
-	break;
-    case SVt_PVFM:
-	sv_catpv(t, "FM");
-	break;
-    case SVt_PVIO:
-	sv_catpv(t, "IO");
-	break;
     }
 
     if (SvPOKp(sv)) {
@@ -1467,57 +1463,14 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	sv->sv_debug_cloned ? " (cloned)" : "");
 #endif
     Perl_dump_indent(aTHX_ level, file, "SV = ");
-    switch (type) {
-    case SVt_NULL:
-	PerlIO_printf(file, "NULL%s\n", s);
-	SvREFCNT_dec(d);
-	return;
-    case SVt_IV:
-	PerlIO_printf(file, "IV%s\n", s);
-	break;
-    case SVt_NV:
-	PerlIO_printf(file, "NV%s\n", s);
-	break;
-    case SVt_RV:
-	PerlIO_printf(file, "RV%s\n", s);
-	break;
-    case SVt_PV:
-	PerlIO_printf(file, "PV%s\n", s);
-	break;
-    case SVt_PVIV:
-	PerlIO_printf(file, "PVIV%s\n", s);
-	break;
-    case SVt_PVNV:
-	PerlIO_printf(file, "PVNV%s\n", s);
-	break;
-    case SVt_PVBM:
-	PerlIO_printf(file, "PVBM%s\n", s);
-	break;
-    case SVt_PVMG:
-	PerlIO_printf(file, "PVMG%s\n", s);
-	break;
-    case SVt_PVLV:
-	PerlIO_printf(file, "PVLV%s\n", s);
-	break;
-    case SVt_PVAV:
-	PerlIO_printf(file, "PVAV%s\n", s);
-	break;
-    case SVt_PVHV:
-	PerlIO_printf(file, "PVHV%s\n", s);
-	break;
-    case SVt_PVCV:
-	PerlIO_printf(file, "PVCV%s\n", s);
-	break;
-    case SVt_PVGV:
-	PerlIO_printf(file, "PVGV%s\n", s);
-	break;
-    case SVt_PVFM:
-	PerlIO_printf(file, "PVFM%s\n", s);
-	break;
-    case SVt_PVIO:
-	PerlIO_printf(file, "PVIO%s\n", s);
-	break;
-    default:
+    if (type < SVt_LAST) {
+	PerlIO_printf(file, "%s%s\n", svtypenames[type], s);
+
+	if (type ==  SVt_NULL) {
+	    SvREFCNT_dec(d);
+	    return;
+	}
+    } else {
 	PerlIO_printf(file, "UNKNOWN(0x%"UVxf") %s\n", (UV)type, s);
 	SvREFCNT_dec(d);
 	return;
