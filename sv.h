@@ -1056,6 +1056,20 @@ the scalar's value cannot change unless written to.
 #define SvEVALED_off(sv)	(SvFLAGS(sv) &= ~SVrepl_EVAL)
 
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  define SvVALID(sv)		({ SV *const thwacke = (SV *) (sv);	\
+				   if (SvFLAGS(thwacke) & SVpbm_VALID)	\
+				       assert(!isGV_with_GP(thwacke));	\
+				   (SvFLAGS(thwacke) & SVpbm_VALID);	\
+				})
+#  define SvVALID_on(sv)	({ SV *const thwacke = (SV *) (sv);	\
+				   assert(!isGV_with_GP(thwacke));	\
+				   (SvFLAGS(thwacke) |= SVpbm_VALID);	\
+				})
+#  define SvVALID_off(sv)	({ SV *const thwacke = (SV *) (sv);	\
+				   assert(!isGV_with_GP(thwacke));	\
+				   (SvFLAGS(thwacke) &= ~SVpbm_VALID);	\
+				})
+
 #  define SvTAIL(sv)	({ SV *const _svi = (SV *) (sv);		\
 			    assert(SvTYPE(_svi) != SVt_PVAV);		\
 			    assert(SvTYPE(_svi) != SVt_PVHV);		\
@@ -1063,6 +1077,9 @@ the scalar's value cannot change unless written to.
 				== (SVpbm_TAIL|SVpbm_VALID);		\
 			})
 #else
+#  define SvVALID(sv)		(SvFLAGS(sv) & SVpbm_VALID)
+#  define SvVALID_on(sv)	(SvFLAGS(sv) |= SVpbm_VALID)
+#  define SvVALID_off(sv)	(SvFLAGS(sv) &= ~SVpbm_VALID)
 #  define SvTAIL(sv)	    ((SvFLAGS(sv) & (SVpbm_TAIL|SVpbm_VALID))	\
 			     == (SVpbm_TAIL|SVpbm_VALID))
 
@@ -1070,9 +1087,6 @@ the scalar's value cannot change unless written to.
 #define SvTAIL_on(sv)		(SvFLAGS(sv) |= SVpbm_TAIL)
 #define SvTAIL_off(sv)		(SvFLAGS(sv) &= ~SVpbm_TAIL)
 
-#define SvVALID(sv)		(SvFLAGS(sv) & SVpbm_VALID)
-#define SvVALID_on(sv)		(SvFLAGS(sv) |= SVpbm_VALID)
-#define SvVALID_off(sv)		(SvFLAGS(sv) &= ~SVpbm_VALID)
 
 #ifdef USE_ITHREADS
 /* The following uses the FAKE flag to show that a regex pointer is infact

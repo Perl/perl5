@@ -46,6 +46,7 @@ struct gp {
 	(*({ GV * const zzzz = (GV *) (gv);				\
 	   assert(isGV_with_GP(zzzz));					\
 	   assert(SvTYPE(zzzz) == SVt_PVGV || SvTYPE(zzzz) >= SVt_PVLV); \
+	   assert(!SvVALID(zzzz));					\
 	   &(GvXPVGV(zzzz)->xiv_u.xivu_namehek);			\
 	 }))
 #  define GvNAME_get(gv)	({ assert(GvNAME_HEK(gv)); HEK_KEY(GvNAME_HEK(gv)); })
