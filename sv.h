@@ -341,7 +341,7 @@ perform the upgrade if necessary.  See C<svtype>.
 /* PVHV */
 #define SVphv_SHAREKEYS 0x20000000	/* PVHV
 					   keys live on shared string table */
-/* PVNV, PVMG, PVGV, presumably only inside pads */
+/* PVNV, PVMG, presumably only inside pads */
 #define SVpad_NAME	0x40000000	/* This SV is a name in the PAD, so
 					   SVpad_TYPED, SVpad_OUR and
 					   SVpad_STATE apply */
@@ -1098,15 +1098,34 @@ the scalar's value cannot change unless written to.
 
 #define SvPAD_TYPED(sv) \
 	((SvFLAGS(sv) & (SVpad_NAME|SVpad_TYPED)) == (SVpad_NAME|SVpad_TYPED))
-#define SvPAD_TYPED_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_TYPED)
 
 #define SvPAD_OUR(sv)	\
 	((SvFLAGS(sv) & (SVpad_NAME|SVpad_OUR)) == (SVpad_NAME|SVpad_OUR))
-#define SvPAD_OUR_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_OUR)
 
 #define SvPAD_STATE(sv)	\
 	((SvFLAGS(sv) & (SVpad_NAME|SVpad_STATE)) == (SVpad_NAME|SVpad_STATE))
-#define SvPAD_STATE_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_STATE)
+
+#if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  define SvPAD_TYPED_on(sv)	({					\
+	    SV *const whap = (SV *) (sv);				\
+	    assert(SvTYPE(whap) == SVt_PVMG);				\
+	    (SvFLAGS(whap) |= SVpad_NAME|SVpad_TYPED);			\
+	})
+#define SvPAD_OUR_on(sv)	({					\
+	    SV *const whap = (SV *) (sv);				\
+	    assert(SvTYPE(whap) == SVt_PVMG);				\
+	    (SvFLAGS(whap) |= SVpad_NAME|SVpad_OUR);			\
+	})
+#define SvPAD_STATE_on(sv)	({					\
+	    SV *const whap = (SV *) (sv);				\
+	    assert(SvTYPE(whap) == SVt_PVNV || SvTYPE(whap) == SVt_PVMG); \
+	    (SvFLAGS(whap) |= SVpad_NAME|SVpad_STATE);			\
+	})
+#else
+#  define SvPAD_TYPED_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_TYPED)
+#  define SvPAD_OUR_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_OUR)
+#  define SvPAD_STATE_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_STATE)
+#endif
 
 #define OURSTASH(sv)	\
 	(SvPAD_OUR(sv) ? ((XPVMG*) SvANY(sv))->xmg_u.xmg_ourstash : NULL)
