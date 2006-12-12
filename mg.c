@@ -2629,20 +2629,20 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	    else {
 		/* Shorter than original, will be padded. */
-		Copy(s, PL_origargv[0], len, char);
-		PL_origargv[0][len] = 0;
 #ifdef PERL_DARWIN
-		/* Special case for darwin: see [perl #38868] */
-		memset(PL_origargv[0] + len + 1,
-		       (int)'\0', PL_origalen - len - 1);
+		/* Special case for Mac OS X: see [perl #38868] */
+		const int pad = 0;
 #else
 		/* Is the space counterintuitive?  Yes.
 		 * (You were expecting \0?)
 		 * Does it work?  Seems to.  (In Linux 2.4.20 at least.)
 		 * --jhi */
-		memset(PL_origargv[0] + len + 1,
-		       (int)' ',  PL_origalen - len - 1);
+		const int pad = ' ';
 #endif
+		Copy(s, PL_origargv[0], len, char);
+		PL_origargv[0][len] = 0;
+		memset(PL_origargv[0] + len + 1,
+		       pad,  PL_origalen - len - 1);
 	    }
 	    PL_origargv[0][PL_origalen-1] = 0;
 	    for (i = 1; i < PL_origargc; i++)
