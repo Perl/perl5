@@ -514,7 +514,7 @@ Perl_re_intuit_start(pTHX_ regexp *prog, SV *sv, char *strpos,
 
 	if (PL_screamfirst[BmRARE(check)] >= 0
 	    || ( BmRARE(check) == '\n'
-		 && (BmPREVIOUS(check) == SvCUR(check) - 1)
+		 && (BmPREVIOUS(check) == (U8)SvCUR(check) - 1)
 		 && SvTAIL(check) ))
 	    s = screaminstr(sv, check,
 			    srch_start_shift + (s - strbeg), srch_end_shift, pp, 0);

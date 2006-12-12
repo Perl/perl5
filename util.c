@@ -767,7 +767,7 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
 	: (((pos = *old_posp), pos += PL_screamnext[pos]) == 0)) {
       cant_find:
 	if ( BmRARE(littlestr) == '\n'
-	     && BmPREVIOUS(littlestr) == SvCUR(littlestr) - 1) {
+	     && BmPREVIOUS(littlestr) == (U8)SvCUR(littlestr) - 1) {
 	    little = (const unsigned char *)(SvPVX_const(littlestr));
 	    littleend = little + SvCUR(littlestr);
 	    first = *little++;

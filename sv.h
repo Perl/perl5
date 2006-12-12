@@ -1353,10 +1353,10 @@ the scalar's value cannot change unless written to.
 
 #  define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xiv_u.xivu_i32
 #  define BmPREVIOUS(sv)						\
-    (*(U8*)(SvEND(sv) + PERL_FBM_TABLE_OFFSET				\
+    ((*(U8*)(SvEND(sv) + PERL_FBM_TABLE_OFFSET				\
 	   + PERL_FBM_PREVIOUS_H_OFFSET_FROM_TABLE) << 8)		\
-    | (*(U8*)(SvEND(sv) + PERL_FBM_TABLE_OFFSET				\
-	     + PERL_FBM_PREVIOUS_L_OFFSET_FROM_TABLE))			\
+	| (*(U8*)(SvEND(sv) + PERL_FBM_TABLE_OFFSET			\
+	   + PERL_FBM_PREVIOUS_L_OFFSET_FROM_TABLE)))			\
 
 #endif
 #define BmPREVIOUS_set(sv, val)						\
