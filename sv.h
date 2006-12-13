@@ -357,7 +357,8 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVpav_REAL	0x40000000	/* free old entries */
 /* PVHV */
 #define SVphv_LAZYDEL	0x40000000	/* entry in xhv_eiter must be deleted */
-/* Not just "PVBM" (PVGV) - basically anything that can be a regular scalar */
+/* This is only set true on a PVGV when it's playing "PVBM", but is tested for
+   on any regular scalar (anything <= PVLV) */
 #define SVpbm_VALID	0x40000000
 /* ??? */
 #define SVrepl_EVAL	0x40000000	/* Replacement part of s///e */
@@ -1332,8 +1333,10 @@ the scalar's value cannot change unless written to.
 
 #define PERL_FBM_TABLE_OFFSET 5	/* Number of bytes between EOS and table */
 #define PERL_FBM_FLAGS_OFFSET_FROM_TABLE -1
+/* how many characters in string before rare? */
 #define PERL_FBM_PREVIOUS_L_OFFSET_FROM_TABLE -2
 #define PERL_FBM_PREVIOUS_H_OFFSET_FROM_TABLE -3
+/* rarest character in string */
 #define PERL_FBM_RARE_OFFSET_FROM_TABLE -4
 
 /* SvPOKp not SvPOK in the assertion because the string can be tainted! eg
