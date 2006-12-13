@@ -55,7 +55,8 @@ my @neg_time =
 # Use 3 days before the start of the epoch because with Borland on
 # Win32 it will work for -3600 _if_ your time zone is +01:00 (or
 # greater).
-my $neg_epoch_ok = defined ((localtime(-259200))[0]) ? 1 : 0;
+my $neg_epoch_ok =	# take into account systems with unsigned time too
+    (defined ((localtime(-259200))[0]) and (localtime(-259200))[5] == 69) ? 1 : 0;
 
 # use vmsish 'time' makes for oddness around the Unix epoch
 if ($^O eq 'VMS') {

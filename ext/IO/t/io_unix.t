@@ -38,6 +38,13 @@ BEGIN {
 
 $PATH = "sock-$$";
 
+if ($^O eq 'os2') {	# Can't create sockets with relative path...
+  require Cwd;
+  my $d = Cwd::cwd();
+  $d =~ s/^[a-z]://i;
+  $PATH = "$d/$PATH";
+}
+
 # Test if we can create the file within the tmp directory
 if (-e $PATH or not open(TEST, ">$PATH") and $^O ne 'os2') {
     print "1..0 # Skip: cannot open '$PATH' for write\n";

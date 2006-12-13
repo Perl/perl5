@@ -203,7 +203,7 @@ SKIP: {
     skip "has fchown", 1 if ($Config{d_fchown} || "") eq "define";
     open(my $fh, "<", "a");
     eval { chown(0, 0, $fh); };
-    like($@, qr/^The fchown function is unimplemented at/, "fchown is unimplemented");
+    like($@, qr/^The f?chown function is unimplemented at/, "fchown is unimplemented");
 }
 
 is(rename('a','b'), 1, "rename a b");

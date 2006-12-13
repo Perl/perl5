@@ -41,7 +41,7 @@ my $Curdir = File::Spec->curdir;
 my $tmpfile = 'Op_stat.tmp';
 my $tmpfile_link = $tmpfile.'2';
 
-
+chmod 0666, $tmpfile;
 1 while unlink $tmpfile;
 open(FOO, ">$tmpfile") || DIE("Can't open temp test file: $!");
 close FOO;
@@ -508,5 +508,6 @@ SKIP: {
 }
 
 END {
+    chmod 0666, $tmpfile;
     1 while unlink $tmpfile;
 }
