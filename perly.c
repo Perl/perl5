@@ -162,7 +162,7 @@ yy_stack_print (pTHX_ const short *yyss, const short *yyssp, const YYSTYPE *yyvs
 	    PerlIO_printf(Perl_debug_log, " %8.8s",
 		  yyvs[start+i].opval
 		    ? PL_op_name[yyvs[start+i].opval->op_type]
-		    : "(NULL)"
+		    : "(Nullop)"
 	    );
 	    break;
 #ifndef PERL_IN_MADLY_C
@@ -287,19 +287,77 @@ static void
 S_clear_yystack(pTHX_ const void *p)
 {
     yystack_positions *y = (yystack_positions*) p;
+    int i;
 
     if (!y->yyss)
 	return;
     YYDPRINTF ((Perl_debug_log, "clearing the parse stack\n"));
-    y->yyvsp -= y->yylen; /* ignore the tokens that have just been reduced */
-    y->yyssp -= y->yylen;
-    y->yypsp -= y->yylen;
+
+    /* Freeing ops on the stack, and the op_latefree/op_latefreed flags:
+     *
+     * When we pop tokens off the stack during error recovery, or when
+     * we pop all the tokens off the stack after a die during a shift or
+     * reduce (ie Perl_croak somewhere in yylex(), or in one of the
+     * newFOO() functions, then its possible that some of these tokens are
+     * of type opval, pointing to an OP. All these ops are orphans; each is
+     * its own miniature subtree that has not yet been attached to a
+     * larger tree. In this case, we shoould clearly free the op (making
+     * sure, for each op we free thyat we have PL_comppad pointing to the
+     * right place for freeing any SVs attached to the op in threaded
+     * builds.
+     *
+     * However, there is a particular problem if we die in newFOO called
+     * by a reducing action; e.g.
+     *
+     *    foo : bar baz boz
+     *        { $$ = newFOO($1,$2,$3) }
+     *
+     * where
+     *  OP *newFOO { .... croak .... }
+     *
+     * In this case, when we come to clean bar baz and boz off the stack,
+     * we don't know whether newFOO() has already:
+     *    * freed them
+     *    * left them as it
+     *    * attached them to part of a larger tree
+     *
+     * To get round this problem, we set the flag op_latefree on every op
+     * that gets pushed onto the parser stack. If op_free() sees this
+     * flag, it clears the op and frees any children,, but *doesn't* free
+     * the op itself; instead it sets the op_latefreed flag. This means
+     * that we can safely call op_free() multiple times on each stack op.
+     * So, when clearing the stack, we first, for each op that was being
+     * reduced, call op_free with op_latefree=1. This ensures that all ops
+     * hanging off these op are freed, but the reducing ops themselces are
+     * just undefed. Then we set op_latefreed=0 on *all* ops on the stack
+     * and free them. A little though should convince you that this
+     * two-part approach to the reducing ops should handle all three cases
+     * above safely.
+     */
+
+    /* free any reducing ops (1st pass) */
+
+    for (i=0; i< y->yylen; i++) {
+	if (yy_type_tab[yystos[y->yyssp[-i]]] == toketype_opval
+	    && y->yyvsp[-i].opval) {
+	    if (y->yypsp[-i] != PL_comppad) {
+		PAD_RESTORE_LOCAL(y->yypsp[-i]);
+	    }
+	    op_free(y->yyvsp[-i].opval);
+	}
+    }
+
+    /* now free whole the stack, including the just-reduced ops */
+
     while (y->yyssp > y->yyss) {
-	if (yy_type_tab[yystos[*y->yyssp]] == toketype_opval) {
+	if (yy_type_tab[yystos[*y->yyssp]] == toketype_opval
+	    && y->yyvsp->opval)
+	{
 	    if (*y->yypsp != PL_comppad) {
 		PAD_RESTORE_LOCAL(*y->yypsp);
 	    }
 	    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
+	    y->yyvsp->opval->op_latefree  = 0;
 	    op_free(y->yyvsp->opval);
 	}
 	y->yyvsp--;
@@ -431,8 +489,6 @@ Perl_yyparse (pTHX)
     yynerrs = 0;
     yychar = YYEMPTY;		/* Cause a token to be read.  */
 
-    YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
-
     goto yysetstate;
 
 /*------------------------------------------------------------.
@@ -445,7 +501,19 @@ Perl_yyparse (pTHX)
     yyssp++;
 
   yysetstate:
+    YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
     *yyssp = yystate;
+
+    if (yy_type_tab[yystos[yystate]] == toketype_opval && yyvsp->opval) {
+	yyvsp->opval->op_latefree  = 1;
+	yyvsp->opval->op_latefreed = 0;
+    }
+
+    ss_save->yyss = yyss;
+    ss_save->yyssp = yyssp;
+    ss_save->yyvsp = yyvsp;
+    ss_save->yypsp = yypsp;
+    ss_save->yylen = 0;
 
     if (yyss + yystacksize - 1 <= yyssp) {
 	 /* Get the current used size of the three stacks, in elements.  */
@@ -485,6 +553,12 @@ Perl_yyparse (pTHX)
 
 	 if (yyss + yystacksize - 1 <= yyssp)
 	       YYABORT;
+
+	ss_save->yyss = yyss;
+	ss_save->yyssp = yyssp;
+	ss_save->yyvsp = yyvsp;
+	ss_save->yypsp = yypsp;
+	ss_save->yylen = 0;
     }
 
     goto yybackup;
@@ -567,7 +641,6 @@ Perl_yyparse (pTHX)
 	yyerrstatus--;
 
     yystate = yyn;
-    YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
 
     goto yynewstate;
 
@@ -641,6 +714,21 @@ Perl_yyparse (pTHX)
 
     }
 
+    /* any just-reduced ops with the op_latefreed flag cleared need to be
+     * freed; the rest need the flag resetting */
+    {
+	int i;
+	for (i=0; i< yylen; i++) {
+	    if (yy_type_tab[yystos[yyssp[-i]]] == toketype_opval
+		&& yyvsp[-i].opval)
+	    {
+		yyvsp[-i].opval->op_latefree = 0;
+		if (yyvsp[-i].opval->op_latefreed)
+		    op_free(yyvsp[-i].opval);
+	    }
+	}
+    }
+
     yyvsp -= yylen;
     yyssp -= yylen;
     yypsp -= yylen;
@@ -648,14 +736,11 @@ Perl_yyparse (pTHX)
     yynsp -= yylen;
 #endif
 
-
     *++yyvsp = yyval;
     *++yypsp = PL_comppad;
-
 #ifdef DEBUGGING
     *++yynsp = (const char *)(yytname [yyr1[yyn]]);
 #endif
-
     /* Now shift the result of the reduction.  Determine what state
 	  that goes to, based on the state we popped back to and the rule
 	  number reduced by.  */
@@ -667,8 +752,6 @@ Perl_yyparse (pTHX)
 	yystate = yytable[yystate];
     else
 	yystate = yydefgoto[yyn - YYNTOKENS];
-
-    YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
 
 #ifdef DEBUGGING
     /* tmp push yystate for stack print; this is normally pushed later in
@@ -750,11 +833,14 @@ Perl_yyparse (pTHX)
 	    /* Pop the rest of the stack.  */
 	    while (yyss < yyssp) {
 		YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp);
-		if (yy_type_tab[yystos[*yyssp]] == toketype_opval) {
+		if (yy_type_tab[yystos[*yyssp]] == toketype_opval
+			&& yyvsp->opval)
+		{
 		    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
 		    if (*yypsp != PL_comppad) {
 			PAD_RESTORE_LOCAL(*yypsp);
 		    }
+		    yyvsp->opval->op_latefree  = 0;
 		    op_free(yyvsp->opval);
 		}
 		YYPOPSTACK;
@@ -794,11 +880,12 @@ Perl_yyparse (pTHX)
 	    YYABORT;
 
 	YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp);
-	if (yy_type_tab[yystos[*yyssp]] == toketype_opval) {
+	if (yy_type_tab[yystos[*yyssp]] == toketype_opval && yyvsp->opval) {
 	    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
 	    if (*yypsp != PL_comppad) {
 		PAD_RESTORE_LOCAL(*yypsp);
 	    }
+	    yyvsp->opval->op_latefree  = 0;
 	    op_free(yyvsp->opval);
 	}
 	yyvsp--;
@@ -823,7 +910,6 @@ Perl_yyparse (pTHX)
 #endif
 
     yystate = yyn;
-    YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
 
     goto yynewstate;
 

@@ -287,6 +287,11 @@ Perl_op_free(pTHX_ OP *o)
 
     if (!o || o->op_static)
 	return;
+    if (o->op_latefreed) {
+	if (o->op_latefree)
+	    return;
+	goto do_free;
+    }
 
     type = o->op_type;
     if (o->op_private & OPpREFCOUNTED) {
@@ -327,6 +332,11 @@ Perl_op_free(pTHX_ OP *o)
 	cop_free((COP*)o);
 
     op_clear(o);
+    if (o->op_latefree) {
+	o->op_latefreed = 1;
+	return;
+    }
+  do_free:
     FreeOp(o);
 #ifdef DEBUG_LEAKING_SCALARS
     if (PL_op == o)
@@ -2712,6 +2722,8 @@ Perl_newOP(pTHX_ I32 type, I32 flags)
     o->op_type = (OPCODE)type;
     o->op_ppaddr = PL_ppaddr[type];
     o->op_flags = (U8)flags;
+    o->op_latefree = 0;
+    o->op_latefreed = 0;
 
     o->op_next = o;
     o->op_private = (U8)(0 | (flags >> 8));
