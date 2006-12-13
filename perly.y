@@ -511,6 +511,7 @@ format	:	FORMAT startformsub formname block
 			  token_free($1);
 #else
 			  newFORM($2, $3, $4);
+			  $$ = Nullop;
 #endif
 			}
 	;
@@ -527,6 +528,7 @@ mysubrout:	MYSUB startsub subname proto subattrlist subbody
 			  token_getmad($1,$$,'d');
 #else
 			  newMYSUB($2, $3, $4, $5, $6);
+			  $$ = Nullop;
 #endif
 			}
 	;
@@ -632,6 +634,7 @@ package :	PACKAGE WORD ';'
 			  token_getmad($3,$$,';');
 #else
 			  package($2);
+			  $$ = Nullop;
 #endif
 			}
 	;
@@ -648,6 +651,7 @@ use	:	USE startsub
 			      append_madprops(newMADPROP('!', MAD_PV, "", 0), $$, 0);
 #else
 			  utilize(IVAL($1), $2, $4, $5, $6);
+			  $$ = Nullop;
 #endif
 			}
 	;
