@@ -1334,8 +1334,13 @@ the scalar's value cannot change unless written to.
 #define PERL_FBM_TABLE_OFFSET 5	/* Number of bytes between EOS and table */
 #define PERL_FBM_FLAGS_OFFSET_FROM_TABLE -1
 /* how many characters in string before rare? */
-#define PERL_FBM_PREVIOUS_L_OFFSET_FROM_TABLE -2
-#define PERL_FBM_PREVIOUS_H_OFFSET_FROM_TABLE -3
+#if (BYTEORDER == 0x4321) || (BYTEORDER == 0x87654321)
+#  define PERL_FBM_PREVIOUS_L_OFFSET_FROM_TABLE -2
+#  define PERL_FBM_PREVIOUS_H_OFFSET_FROM_TABLE -3
+#else
+#  define PERL_FBM_PREVIOUS_H_OFFSET_FROM_TABLE -2
+#  define PERL_FBM_PREVIOUS_L_OFFSET_FROM_TABLE -3
+#endif
 /* rarest character in string */
 #define PERL_FBM_RARE_OFFSET_FROM_TABLE -4
 
