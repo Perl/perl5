@@ -24,11 +24,16 @@ static const char* const svclassnames[] = {
     "B::IV",
     "B::NV",
     "B::RV",
+#if PERL_VERSION >= 9
+    "B::BIND",
+#endif
     "B::PV",
     "B::PVIV",
     "B::PVNV",
     "B::PVMG",
+#if PERL_VERSION <= 8
     "B::BM",
+#endif
 #if PERL_VERSION >= 9
     "B::GV",
 #endif

@@ -904,6 +904,9 @@ static const struct body_details bodies_by_type[] = {
     /* RVs are in the head now.  */
     { 0, 0, 0, SVt_RV, FALSE, NONV, NOARENA, 0 },
 
+    /* The bind placeholder pretends to be an RV for now.  */
+    { 0, 0, 0, SVt_BIND, FALSE, NONV, NOARENA, 0 },
+
     /* 8 bytes on most ILP32 with IEEE doubles */
     { sizeof(xpv_allocated),
       copy_length(XPV, xpv_len)
@@ -926,10 +929,6 @@ static const struct body_details bodies_by_type[] = {
     { sizeof(XPVMG), copy_length(XPVMG, xmg_stash), 0, SVt_PVMG, FALSE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVMG)) },
     
-    /* 36 */
-    { sizeof(XPVBM), sizeof(XPVBM), 0, SVt_PVBM, TRUE, HADNV,
-      HASARENA, FIT_ARENA(0, sizeof(XPVBM)) },
-
     /* 48 */
     { sizeof(XPVGV), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(XPVGV)) },
@@ -1293,7 +1292,6 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
 	assert(!SvNOK(sv));
     case SVt_PVIO:
     case SVt_PVFM:
-    case SVt_PVBM:
     case SVt_PVGV:
     case SVt_PVCV:
     case SVt_PVLV:
@@ -2159,8 +2157,8 @@ Perl_sv_2iv_flags(pTHX_ register SV *sv, I32 flags)
     dVAR;
     if (!sv)
 	return 0;
-    if (SvGMAGICAL(sv) || SvTYPE(sv) == SVt_PVBM) {
-	/* PVBMs use the same flag bit as SVf_IVisUV, so must let them
+    if (SvGMAGICAL(sv) || (SvTYPE(sv) == SVt_PVGV && SvVALID(sv))) {
+	/* FBMs use the same flag bit as SVf_IVisUV, so must let them
 	   cache IVs just in case. In practice it seems that they never
 	   actually anywhere accessible by user Perl code, let alone get used
 	   in anything other than a string context.  */
@@ -2243,8 +2241,8 @@ Perl_sv_2uv_flags(pTHX_ register SV *sv, I32 flags)
     dVAR;
     if (!sv)
 	return 0;
-    if (SvGMAGICAL(sv) || SvTYPE(sv) == SVt_PVBM) {
-	/* PVBMs use the same flag bit as SVf_IVisUV, so must let them
+    if (SvGMAGICAL(sv) || (SvTYPE(sv) == SVt_PVGV && SvVALID(sv))) {
+	/* FBMs use the same flag bit as SVf_IVisUV, so must let them
 	   cache IVs just in case.  */
 	if (flags & SV_GMAGIC)
 	    mg_get(sv);
@@ -2320,8 +2318,8 @@ Perl_sv_2nv(pTHX_ register SV *sv)
     dVAR;
     if (!sv)
 	return 0.0;
-    if (SvGMAGICAL(sv) || SvTYPE(sv) == SVt_PVBM) {
-	/* PVBMs use the same flag bit as SVf_IVisUV, so must let them
+    if (SvGMAGICAL(sv) || (SvTYPE(sv) == SVt_PVGV && SvVALID(sv))) {
+	/* FBMs use the same flag bit as SVf_IVisUV, so must let them
 	   cache IVs just in case.  */
 	mg_get(sv);
 	if (SvNOKp(sv))
@@ -3453,21 +3451,22 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	}
 	break;
 
+	/* case SVt_BIND: */
     case SVt_PVGV:
-	if (dtype <= SVt_PVGV) {
+	if (isGV_with_GP(sstr) && dtype <= SVt_PVGV) {
 	    glob_assign_glob(dstr, sstr, dtype);
 	    return;
 	}
+	/* SvVALID means that this PVGV is playing at being an FBM.  */
 	/*FALLTHROUGH*/
 
     case SVt_PVMG:
     case SVt_PVLV:
-    case SVt_PVBM:
 	if (SvGMAGICAL(sstr) && (flags & SV_GMAGIC)) {
 	    mg_get(sstr);
 	    if (SvTYPE(sstr) != stype) {
 		stype = SvTYPE(sstr);
-		if (stype == SVt_PVGV && dtype <= SVt_PVGV) {
+		if (isGV_with_GP(sstr) && stype == SVt_PVGV && dtype <= SVt_PVGV) {
 		    glob_assign_glob(dstr, sstr, dtype);
 		    return;
 		}
@@ -3498,7 +3497,8 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	    SvOK_off(dstr);
 	}
     } else if (sflags & SVf_ROK) {
-	if (dtype == SVt_PVGV && SvTYPE(SvRV(sstr)) == SVt_PVGV) {
+	if (isGV_with_GP(dstr) && dtype == SVt_PVGV
+	    && SvTYPE(SvRV(sstr)) == SVt_PVGV) {
 	    sstr = SvRV(sstr);
 	    if (sstr == dstr) {
 		if (GvIMPORTED(dstr) != GVf_IMPORTED
@@ -3532,7 +3532,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	assert(!(sflags & SVf_NOK));
 	assert(!(sflags & SVf_IOK));
     }
-    else if (dtype == SVt_PVGV) {
+    else if (dtype == SVt_PVGV && isGV_with_GP(dstr)) {
 	if (!(sflags & SVf_OK)) {
 	    if (ckWARN(WARN_MISC))
 		Perl_warner(aTHX_ packWARN(WARN_MISC),
@@ -5106,8 +5106,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	}
     }
     if (type >= SVt_PVMG) {
-	if ((type == SVt_PVMG || type == SVt_PVGV) && SvPAD_OUR(sv)) {
-	    assert(type != SVt_PVGV);
+	if (type == SVt_PVMG && SvPAD_OUR(sv)) {
 	    SvREFCNT_dec(OURSTASH(sv));
 	} else if (SvMAGIC(sv))
 	    mg_free(sv);
@@ -5115,6 +5114,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	    SvREFCNT_dec(SvSTASH(sv));
     }
     switch (type) {
+	/* case SVt_BIND: */
     case SVt_PVIO:
 	if (IoIFP(sv) &&
 	    IoIFP(sv) != PerlIO_stdin() &&
@@ -5129,8 +5129,6 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	Safefree(IoTOP_NAME(sv));
 	Safefree(IoFMT_NAME(sv));
 	Safefree(IoBOTTOM_NAME(sv));
-	goto freescalar;
-    case SVt_PVBM:
 	goto freescalar;
     case SVt_PVCV:
     case SVt_PVFM:
@@ -5153,14 +5151,15 @@ Perl_sv_clear(pTHX_ register SV *sv)
 	    SvREFCNT_dec(LvTARG(sv));
 	goto freescalar;
     case SVt_PVGV:
-	gp_free((GV*)sv);
-	if (GvNAME_HEK(sv)) {
-	    unshare_hek(GvNAME_HEK(sv));
-	}
+	if (isGV_with_GP(sv)) {
+	    gp_free((GV*)sv);
+	    if (GvNAME_HEK(sv))
+		unshare_hek(GvNAME_HEK(sv));
 	/* If we're in a stash, we don't own a reference to it. However it does
 	   have a back reference to us, which needs to be cleared.  */
-	if (GvSTASH(sv))
-	    sv_del_backref((SV*)GvSTASH(sv), sv);
+	if (!SvVALID(sv) && GvSTASH(sv))
+		sv_del_backref((SV*)GvSTASH(sv), sv);
+	}
     case SVt_PVMG:
     case SVt_PVNV:
     case SVt_PVIV:
@@ -7637,7 +7636,6 @@ Perl_sv_reftype(pTHX_ const SV *sv, int ob)
 	case SVt_PVIV:
 	case SVt_PVNV:
 	case SVt_PVMG:
-	case SVt_PVBM:
 				if (SvVOK(sv))
 				    return "VSTRING";
 				if (SvROK(sv))
@@ -7656,6 +7654,7 @@ Perl_sv_reftype(pTHX_ const SV *sv, int ob)
 	case SVt_PVGV:		return "GLOB";
 	case SVt_PVFM:		return "FORMAT";
 	case SVt_PVIO:		return "IO";
+	case SVt_BIND:		return "BIND";
 	default:		return "UNKNOWN";
 	}
     }
@@ -9877,6 +9876,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 	SvANY(dstr)	= &(dstr->sv_u.svu_rv);
 	Perl_rvpv_dup(aTHX_ dstr, sstr, param);
 	break;
+	/* case SVt_BIND: */
     default:
 	{
 	    /* These are all the types that need complex bodies allocating.  */
@@ -9898,7 +9898,6 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 	    case SVt_PVFM:
 	    case SVt_PVHV:
 	    case SVt_PVAV:
-	    case SVt_PVBM:
 	    case SVt_PVCV:
 	    case SVt_PVLV:
 	    case SVt_PVMG:
@@ -9955,8 +9954,6 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		break;
 	    case SVt_PVMG:
 		break;
-	    case SVt_PVBM:
-		break;
 	    case SVt_PVLV:
 		/* XXX LvTARGOFF sometimes holds PMOP* when DEBUGGING */
 		if (LvTYPE(dstr) == 't') /* for tie: unrefcnted fake (SV**) */
@@ -9967,12 +9964,15 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 		    LvTARG(dstr) = sv_dup_inc(LvTARG(dstr), param);
 		break;
 	    case SVt_PVGV:
-		if (GvNAME_HEK(dstr))
-		    GvNAME_HEK(dstr) = hek_dup(GvNAME_HEK(dstr), param);
+		if(isGV_with_GP(sstr)) {
+		    if (GvNAME_HEK(dstr))
+			GvNAME_HEK(dstr) = hek_dup(GvNAME_HEK(dstr), param);
+		}
 
 		/* Don't call sv_add_backref here as it's going to be created
 		   as part of the magic cloning of the symbol table.  */
-		GvSTASH(dstr)	= hv_dup(GvSTASH(dstr), param);
+		if(!SvVALID(dstr))
+		    GvSTASH(dstr) = hv_dup(GvSTASH(dstr), param);
 		if(isGV_with_GP(sstr)) {
 		    /* Danger Will Robinson - GvGP(dstr) isn't initialised
 		       at the point of this comment.  */

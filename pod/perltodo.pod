@@ -405,15 +405,6 @@ These tasks would need C knowledge, and roughly the level of knowledge of
 the perl API that comes from writing modules that use XS to interface to
 C.
 
-=head2 shrink C<PVBM>s
-
-By removing unused elements and careful re-ordering, the structures for C<AV>s,
-C<HV>s, C<CV>s and C<GV>s have recently been shrunk considerably. C<PVIO>s
-probably aren't worth it, as typical programs don't use more than 8, and
-(at least) C<Filter::Util::Call> uses C<SvPVX>/C<SvCUR>/C<SvLEN> on a C<PVIO>,
-so it would mean code changes to modules on CPAN. C<PVBM>s might have some
-savings to win.
-
 =head2 autovivification
 
 Make all autovivification consistent w.r.t LVALUE/RVALUE and strict/no strict;

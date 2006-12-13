@@ -2120,7 +2120,8 @@ PP(pp_subst)
 	!is_cow &&
 #endif
 	(SvREADONLY(TARG)
-	|| ( (SvTYPE(TARG) == SVt_PVGV || SvTYPE(TARG) > SVt_PVLV)
+	 || ( ((SvTYPE(TARG) == SVt_PVGV && isGV_with_GP(TARG))
+	       || SvTYPE(TARG) > SVt_PVLV)
 	     && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG)))))
 	DIE(aTHX_ PL_no_modify);
     PUTBACK;

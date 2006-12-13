@@ -3457,7 +3457,9 @@ static int sv_type(pTHX_ SV *sv)
 		if (SvRMAGICAL(sv) && (mg_find(sv, 'p')))
 			return svis_TIED_ITEM;
 		/* FALL THROUGH */
+#if PERL_VERSION < 9
 	case SVt_PVBM:
+#endif
 		if (SvRMAGICAL(sv) && (mg_find(sv, 'q')))
 			return svis_TIED;
 		return SvROK(sv) ? svis_REF : svis_SCALAR;
@@ -3471,6 +3473,9 @@ static int sv_type(pTHX_ SV *sv)
 		return svis_HASH;
 	case SVt_PVCV:
 		return svis_CODE;
+#if PERL_VERSION > 8
+	/* case SVt_BIND: */
+#endif
 	default:
 		break;
 	}

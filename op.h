@@ -460,7 +460,8 @@ struct loop {
 
 #ifdef USE_ITHREADS
 #  define	cGVOPx_gv(o)	((GV*)PAD_SVl(cPADOPx(o)->op_padix))
-#  define	IS_PADGV(v)	(v && SvTYPE(v) == SVt_PVGV && GvIN_PAD(v))
+#  define	IS_PADGV(v)	(v && SvTYPE(v) == SVt_PVGV && isGV_with_GP(v) \
+				 && GvIN_PAD(v))
 #  define	IS_PADCONST(v)	(v && SvREADONLY(v))
 #  define	cSVOPx_sv(v)	(cSVOPx(v)->op_sv \
 				 ? cSVOPx(v)->op_sv : PAD_SVl((v)->op_targ))

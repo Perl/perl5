@@ -32,11 +32,11 @@ static const char* const svtypenames[SVt_LAST] = {
     "IV",
     "NV",
     "RV",
+    "BIND",
     "PV",
     "PVIV",
     "PVNV",
     "PVMG",
-    "PVBM",
     "PVGV",
     "PVLV",
     "PVAV",
@@ -52,11 +52,11 @@ static const char* const svshorttypenames[SVt_LAST] = {
     "IV",
     "NV",
     "RV",
+    "BIND",
     "PV",
     "PVIV",
     "PVNV",
     "PVMG",
-    "BM",
     "GV",
     "PVLV",
     "AV",
@@ -1429,15 +1429,13 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 		sv_catpv(d, " ),");
 	    }
 	}
+	if (SvTAIL(sv))		sv_catpv(d, "TAIL,");
+	if (SvVALID(sv))	sv_catpv(d, "VALID,");
 	/* FALL THROUGH */
     default:
     evaled_or_uv:
 	if (SvEVALED(sv))	sv_catpv(d, "EVALED,");
 	if (SvIsUV(sv) && !(flags & SVf_ROK))	sv_catpv(d, "IsUV,");
-	break;
-    case SVt_PVBM:
-	if (SvTAIL(sv))		sv_catpv(d, "TAIL,");
-	if (SvVALID(sv))	sv_catpv(d, "VALID,");
 	break;
     case SVt_PVMG:
 	if (SvPAD_TYPED(sv))	sv_catpv(d, "TYPED,");
@@ -2341,8 +2339,8 @@ Perl_sv_xmlpeek(pTHX_ SV *sv)
     case SVt_PVGV:
 	sv_catpv(t, " GV=\"");
 	break;
-    case SVt_PVBM:
-	sv_catpv(t, " BM=\"");
+    case SVt_BIND:
+	sv_catpv(t, " BIND=\"");
 	break;
     case SVt_PVFM:
 	sv_catpv(t, " FM=\"");

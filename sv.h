@@ -48,11 +48,12 @@ typedef enum {
 	SVt_IV,		/* 1 */
 	SVt_NV,		/* 2 */
 	SVt_RV,		/* 3 */
-	SVt_PV,		/* 4 */
-	SVt_PVIV,	/* 5 */
-	SVt_PVNV,	/* 6 */
-	SVt_PVMG,	/* 7 */
-	SVt_PVBM,	/* 8 */
+	SVt_BIND,	/* 4 */
+	SVt_PV,		/* 5 */
+	SVt_PVIV,	/* 6 */
+	SVt_PVNV,	/* 7 */
+	SVt_PVMG,	/* 8 */
+	/* PVBM was here, before BIND replaced it.  */
 	SVt_PVGV,	/* 9 */
 	SVt_PVLV,	/* 10 */
 	SVt_PVAV,	/* 11 */
@@ -62,6 +63,13 @@ typedef enum {
 	SVt_PVIO,	/* 15 */
 	SVt_LAST	/* keep last in enum. used to size arrays */
 } svtype;
+
+#ifndef PERL_CORE
+/* Although Fast Boyer Moore tables are now being stored in PVGVs, for most
+   purposes eternal code wanting to consider PVBM probably needs to think of
+   PVMG instead.  */
+#  define SVt_PVBM	SVt_PVMG
+#endif
 
 /* There is collusion here with sv_clear - sv_clear exits early for SVt_NULL
    and SVt_IV, so never reaches the clause at the end that uses
@@ -349,7 +357,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVpav_REAL	0x40000000	/* free old entries */
 /* PVHV */
 #define SVphv_LAZYDEL	0x40000000	/* entry in xhv_eiter must be deleted */
-/* Not just PVBM - basically anything that can be a regular scalar */
+/* Not just "PVBM" (PVGV) - basically anything that can be a regular scalar */
 #define SVpbm_VALID	0x40000000
 /* ??? */
 #define SVrepl_EVAL	0x40000000	/* Replacement part of s///e */
@@ -363,7 +371,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVphv_HASKFLAGS	0x80000000	/* keys have flag byte after hash */
 /* PVFM */
 #define SVpfm_COMPILED	0x80000000	/* FORMLINE is compiled */
-/* PVBM */
+/* PVGV when SVpbm_VALID is true */
 #define SVpbm_TAIL	0x80000000
 /* RV upwards. However, SVf_ROK and SVp_IOK are exclusive  */
 #define SVprv_WEAKREF   0x80000000      /* Weak reference */
@@ -503,6 +511,8 @@ struct xpvlv {
 				 * y=alem/helem/iter t=tie T=tied HE */
 };
 
+/* This structure works in 3 ways - regular scalar, GV with GP, or fast
+   Boyer-Moore.  */
 struct xpvgv {
     union {
 	NV	xnv_nv;
@@ -514,7 +524,7 @@ struct xpvgv {
 	IV	xivu_iv;
 	UV	xivu_uv;
 	void *	xivu_p1;
-	I32	xivu_i32;
+	I32	xivu_i32;	/* is this constant pattern being useful? */
 	HEK *	xivu_namehek;	/* GvNAME */
     }		xiv_u;
     union {
@@ -523,27 +533,6 @@ struct xpvgv {
     } xmg_u;
     HV*		xmg_stash;	/* class package */
 
-};
-
-struct xpvbm {
-    union {
-	NV	xnv_nv;		/* numeric value, if any */
-	HV *	xgv_stash;
-    }		xnv_u;
-    STRLEN	xpv_cur;	/* length of svu_pv as a C string */
-    STRLEN	xpv_len;	/* allocated size */
-    union {
-	IV	xivu_iv;	/* integer value or pv offset */
-	UV	xivu_uv;
-	void *	xivu_p1;
-	I32	xivu_i32;	/* is this constant pattern being useful? */
-	HEK *	xivu_namehek;
-    }		xiv_u;
-    union {
-	MAGIC*	xmg_magic;	/* linked list of magicalness */
-	HV*	xmg_ourstash;	/* Stash for our (when SvPAD_OUR is true) */
-    } xmg_u;
-    HV*		xmg_stash;	/* class package */
 };
 
 /* This structure must match XPVCV in cv.h */
@@ -1353,7 +1342,7 @@ the scalar's value cannot change unless written to.
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define BmRARE(sv)							\
 	(*({ SV *const uggh = (SV *) (sv);				\
-		assert(SvTYPE(uggh) == SVt_PVBM);			\
+		assert(SvTYPE(uggh) == SVt_PVGV);			\
 		assert(SvVALID(uggh));					\
 		assert(SvCUR(uggh) + PERL_FBM_TABLE_OFFSET		\
 		       + PERL_FBM_RARE_OFFSET_FROM_TABLE <= SvLEN(uggh)); \
@@ -1363,14 +1352,14 @@ the scalar's value cannot change unless written to.
 	 }))
 #  define BmUSEFUL(sv)							\
 	(*({ SV *const uggh = (SV *) (sv);				\
-	    assert(SvTYPE(uggh) == SVt_PVBM);				\
+	    assert(SvTYPE(uggh) == SVt_PVGV);				\
 	    assert(SvVALID(uggh));					\
 	    assert(!SvIOK(uggh));					\
-	    &(((XPVBM*) SvANY(uggh))->xiv_u.xivu_i32);			\
+	    &(((XPVGV*) SvANY(uggh))->xiv_u.xivu_i32);			\
 	 }))
 #  define BmPREVIOUS(sv)						\
 	({ SV *const uggh = (SV *) (sv);				\
-	   assert(SvTYPE(uggh) == SVt_PVBM);				\
+	   assert(SvTYPE(uggh) == SVt_PVGV);				\
 	   assert(SvVALID(uggh));					\
 	   assert(SvPOKp(uggh));					\
 	   assert(SvCUR(uggh) + PERL_FBM_TABLE_OFFSET <= SvLEN(uggh));	\
@@ -1384,7 +1373,7 @@ the scalar's value cannot change unless written to.
     (*(U8*)(SvEND(sv)							\
 	    + PERL_FBM_TABLE_OFFSET + PERL_FBM_RARE_OFFSET_FROM_TABLE))
 
-#  define BmUSEFUL(sv)	((XPVBM*)  SvANY(sv))->xiv_u.xivu_i32
+#  define BmUSEFUL(sv)	((XPVGV*)  SvANY(sv))->xiv_u.xivu_i32
 #  define BmPREVIOUS(sv)						\
     ((*(U8*)(SvEND(sv) + PERL_FBM_TABLE_OFFSET				\
 	   + PERL_FBM_PREVIOUS_H_OFFSET_FROM_TABLE) << 8)		\
@@ -1393,7 +1382,7 @@ the scalar's value cannot change unless written to.
 
 #endif
 #define BmPREVIOUS_set(sv, val)						\
-    STMT_START { assert(SvTYPE(sv) == SVt_PVBM);			\
+    STMT_START { assert(SvTYPE(sv) == SVt_PVGV);			\
 	assert(SvVALID(sv));						\
 	assert(SvPOKp(sv));						\
 	assert(SvCUR(sv) + PERL_FBM_TABLE_OFFSET <= SvLEN(sv));		\

@@ -490,7 +490,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     s = (U8*)SvPV_force_mutable(sv, len);
     if (len == 0)		/* TAIL might be on a zero-length string. */
 	return;
-    SvUPGRADE(sv, SVt_PVBM);
+    SvUPGRADE(sv, SVt_PVGV);
     SvIOK_off(sv);
     if (len > 2) {
 	const unsigned char *sb;
@@ -665,7 +665,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	}
 	return NULL;
     }
-    if (SvTYPE(littlestr) != SVt_PVBM || !SvVALID(littlestr)) {
+    if (!SvVALID(littlestr)) {
 	char * const b = ninstr((char*)big,(char*)bigend,
 			 (char*)little, (char*)little + littlelen);
 
@@ -760,7 +760,8 @@ Perl_screaminstr(pTHX_ SV *bigstr, SV *littlestr, I32 start_shift, I32 end_shift
     register const unsigned char *littleend;
     I32 found = 0;
 
-    assert(SvTYPE(littlestr) == SVt_PVBM);
+    assert(SvTYPE(littlestr) == SVt_PVGV);
+    assert(SvVALID(littlestr));
 
     if (*old_posp == -1
 	? (pos = PL_screamfirst[BmRARE(littlestr)]) < 0
