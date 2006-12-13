@@ -739,7 +739,7 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 #ifdef DUMPADDR
     Perl_dump_indent(aTHX_ level, file, "ADDR = 0x%"UVxf" => 0x%"UVxf"\n", (UV)o, (UV)o->op_next);
 #endif
-    if (o->op_flags) {
+    if (o->op_flags || o->op_latefree || o->op_latefreed) {
 	SV * const tmpsv = newSVpvs("");
 	switch (o->op_flags & OPf_WANT) {
 	case OPf_WANT_VOID:
@@ -767,6 +767,10 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    sv_catpv(tmpsv, ",MOD");
 	if (o->op_flags & OPf_SPECIAL)
 	    sv_catpv(tmpsv, ",SPECIAL");
+	if (o->op_latefree)
+	    sv_catpv(tmpsv, ",LATEFREE");
+	if (o->op_latefreed)
+	    sv_catpv(tmpsv, ",LATEFREED");
 	Perl_dump_indent(aTHX_ level, file, "FLAGS = (%s)\n", SvCUR(tmpsv) ? SvPVX_const(tmpsv) + 1 : "");
 	SvREFCNT_dec(tmpsv);
     }
@@ -2389,7 +2393,7 @@ Perl_do_pmop_xmldump(pTHX_ I32 level, PerlIO *file, const PMOP *pm)
     level++;
     if (PM_GETRE(pm)) {
 	char *s = PM_GETRE(pm)->precomp;
-	SV *tmpsv = newSV(0);
+	SV *tmpsv = newSVpvn("",0);
 	SvUTF8_on(tmpsv);
 	sv_catxmlpvn(tmpsv, s, strlen(s), 1);
 	Perl_xmldump_indent(aTHX_ level, file, "pre=\"%s\"\n",
@@ -2681,7 +2685,7 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 #else
 	if (cSVOPo->op_sv) {
 	    SV *tmpsv1 = newSV(0);
-	    SV *tmpsv2 = newSV(0);
+	    SV *tmpsv2 = newSVpvn("",0);
 	    char *s;
 	    STRLEN len;
 	    SvUTF8_on(tmpsv1);

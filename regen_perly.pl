@@ -216,6 +216,10 @@ sub make_type_tab {
     my $default_token;
     open my $fh, '<', $y_file or die "Can't open $y_file: $!\n";
     while (<$fh>) {
+	if (/(\$\d+)\s*=/) {
+	    warn "$y_file:$.: dangerous assignment to $1: $_";
+	}
+
 	if (/__DEFAULT__/) {
 	    m{(\w+) \s* ; \s* /\* \s* __DEFAULT__}x
 		or die "$y_file: can't parse __DEFAULT__ line: $_";

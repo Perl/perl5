@@ -32,6 +32,10 @@
  * The main job of of this grammar is to call the various newFOO()
  * functions in op.c to build a syntax tree of OP structs.
  * It relies on the lexer in toke.c to do the tokenizing.
+ *
+ * Note: due to the way that the cleanup code works WRT to freeing ops on
+ * the parse stack, it is dangerous to assign to the $n variables within
+ * an action.
  */
 
 /*  Make the parser re-entrant. */
@@ -384,13 +388,11 @@ loop	:	label WHILE '(' remember texpr ')' mintro mblock cont
 						IVAL($2), scalar($7),
 						$12, $10, $9));
 #ifdef MAD
-			  if (!$5)
-				$5 = newOP(OP_NULL, 0);
 			  forop = newUNOP(OP_NULL, 0, append_elem(OP_LINESEQ,
 				newSTATEOP(0,
 					   (($1)->tk_lval.pval
 					   ?savepv(($1)->tk_lval.pval):Nullch),
-					   $5),
+					   ($5 ? newOP(OP_NULL, 0) : $5) ),
 				forop));
 
 			  token_getmad($2,forop,'3');
@@ -685,11 +687,12 @@ argexpr	:	argexpr ','
 			}
 	|	argexpr ',' term
 			{ 
+			  OP* term = $3;
 			  DO_MAD(
-			      $3 = newUNOP(OP_NULL, 0, $3);
-			      token_getmad($2,$3,',');
+			      term = newUNOP(OP_NULL, 0, term);
+			      token_getmad($2,term,',');
 			  )
-			  $$ = append_elem(OP_LIST, $1, $3);
+			  $$ = append_elem(OP_LIST, $1, term);
 			}
 	|	term %prec PREC_LOW
 	;
@@ -748,11 +751,11 @@ listop	:	LSTOP indirob argexpr /* map {...} @args or print $fh @args */
 			}
 	|	LSTOPSUB startanonsub block /* sub f(&@);   f { foo } ... */
 			{ SvREFCNT_inc(PL_compcv);
-			  $3 = newANONATTRSUB($2, 0, Nullop, $3); }
+			  $<opval>$ = newANONATTRSUB($2, 0, Nullop, $3); }
 		    listexpr		%prec LSTOP  /* ... @bar */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				 append_elem(OP_LIST,
-				   prepend_elem(OP_LIST, $3, $5), $1));
+				   prepend_elem(OP_LIST, $<opval>4, $5), $1));
 			}
 	;
 

@@ -11733,7 +11733,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 #ifdef PERL_MAD
 	if (PL_madskills) {
 	    char * const tstart = SvPVX(PL_linestr) + stuffstart;
-	    const int len = s - start;
+	    const int len = s - tstart;
 	    if (PL_thisstuff)
 		sv_catpvn(PL_thisstuff, tstart, len);
 	    else
