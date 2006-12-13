@@ -672,7 +672,7 @@ Perl_yyparse (pTHX)
       GCC warning that YYVAL may be used uninitialized.  */
     yyval = yyvsp[1-yylen];
 
-
+    YY_STACK_PRINT (yyss, yyssp, yyvs, yyns);
     YY_REDUCE_PRINT (yyn);
 
     /* running external code may trigger a die (eg 'use nosuchmodule'):
@@ -752,16 +752,6 @@ Perl_yyparse (pTHX)
 	yystate = yytable[yystate];
     else
 	yystate = yydefgoto[yyn - YYNTOKENS];
-
-#ifdef DEBUGGING
-    /* tmp push yystate for stack print; this is normally pushed later in
-     * yynewstate */
-    yyssp++;
-    *yyssp = yystate;
-    YY_STACK_PRINT (yyss, yyssp, yyvs, yyns);
-    yyssp--;
-#endif
-
     goto yynewstate;
 
 
