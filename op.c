@@ -277,6 +277,20 @@ Perl_allocmy(pTHX_ const char *const name)
     return off;
 }
 
+/* free the body of an op without examining its contents.
+ * Always use this rather than FreeOp directly */
+
+void
+S_op_destroy(pTHX_ OP *o)
+{
+    if (o->op_latefree) {
+	o->op_latefreed = 1;
+	return;
+    }
+    FreeOp(o);
+}
+
+
 /* Destructor */
 
 void
@@ -2044,7 +2058,7 @@ Perl_newPROG(pTHX_ OP *o)
 	if (o->op_type == OP_STUB) {
 	    PL_comppad_name = 0;
 	    PL_compcv = 0;
-	    FreeOp(o);
+	    S_op_destroy(aTHX_ o);
 	    return;
 	}
 	PL_main_root = scope(sawparens(scalarvoid(o)));
@@ -2386,7 +2400,7 @@ Perl_append_list(pTHX_ I32 type, LISTOP *first, LISTOP *last)
     last->op_madprop = 0;
 #endif
 
-    FreeOp(last);
+    S_op_destroy(aTHX_ (OP*)last);
 
     return (OP*)first;
 }
@@ -4579,7 +4593,7 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
 	LOOP *tmp;
 	NewOp(1234,tmp,1,LOOP);
 	Copy(loop,tmp,1,LISTOP);
-	FreeOp(loop);
+	S_op_destroy(aTHX_ loop);
 	loop = tmp;
     }
 #else
