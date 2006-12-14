@@ -755,7 +755,7 @@ label:
 			for (cp = buf; *cp && isupper((unsigned char)*cp); ++cp) 
                             {/*empty*/}
 			if (cp - buf) {
-				zonestr = alloca(cp - buf + 1);
+				zonestr = (char *)alloca(cp - buf + 1);
 				strncpy(zonestr, buf, cp - buf);
 				zonestr[cp - buf] = '\0';
 				tzset();
