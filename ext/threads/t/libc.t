@@ -6,37 +6,20 @@ BEGIN {
         chdir 't';
         unshift @INC, '../lib';
     }
+
+    require($ENV{PERL_CORE} ? "./test.pl" : "./t/test.pl");
+
     use Config;
     if (! $Config{'useithreads'}) {
-        print("1..0 # Skip: Perl not compiled with 'useithreads'\n");
-        exit(0);
+        skip_all(q/Perl not compiled with 'useithreads'/);
     }
+
+    plan(11);
 }
 
 use ExtUtils::testlib;
 
-sub ok {
-    my ($id, $ok, $name) = @_;
-
-    # You have to do it this way or VMS will get confused.
-    if ($ok) {
-        print("ok $id - $name\n");
-    } else {
-        print("not ok $id - $name\n");
-        printf("# Failed test at line %d\n", (caller)[2]);
-    }
-
-    return ($ok);
-}
-
-use threads;
-
-BEGIN {
-    $| = 1;
-    print("1..12\n");   ### Number of tests that will be run ###
-};
-
-ok(1, 1, 'Loaded');
+use_ok('threads');
 
 ### Start of Testing ###
 
@@ -44,30 +27,28 @@ my $i = 10;
 my $y = 20000;
 
 my %localtime;
-for (0..$i) {
+for (1..$i) {
     $localtime{$_} = localtime($_);
 };
 
 my @threads;
-for (0..$i) {
-    my $thread = threads->create(sub {
-                    my $arg = $_;
-                    my $localtime = $localtime{$arg};
-                    my $error = 0;
-                    for (0..$y) {
-                        my $lt = localtime($arg);
-                        if ($localtime ne $lt) {
-                            $error++;
+for (1..$i) {
+    $threads[$_] = threads->create(sub {
+                        my $arg = shift;
+                        my $localtime = $localtime{$arg};
+                        my $error = 0;
+                        for (1..$y) {
+                            my $lt = localtime($arg);
+                            if ($localtime ne $lt) {
+                                $error++;
+                            }
                         }
-                    }
-                    return $error;
-                  });
-    push @threads, $thread;
+                        return $error;
+                    }, $_);
 }
 
-for (0..$i) {
-    my $result = $threads[$_]->join();
-    ok($_ + 2, defined($result) && ("$result" eq '0'), 'localtime safe');
+for (1..$i) {
+    is($threads[$_]->join(), 0, 'localtime() thread-safe');
 }
 
 # EOF

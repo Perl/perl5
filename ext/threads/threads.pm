@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.53';
+our $VERSION = '1.54';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -133,7 +133,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.53
+This document describes threads version 1.54
 
 =head1 SYNOPSIS
 
@@ -153,6 +153,9 @@ This document describes threads version 1.53
 
     my $thr2 = async { foreach (@files) { ... } };
     $thr2->join();
+    if (my $err = $thr2->error()) {
+        warn("Thread error: $err\n");
+    }
 
     # Invoke thread in list context (implicit) so it can return a list
     my ($thr) = threads->create(sub { return (qw/a b c/); });
@@ -397,6 +400,12 @@ C<async> creates a thread to execute the block immediately following
 it.  This block is treated as an anonymous subroutine, and so must have a
 semi-colon after the closing brace.  Like C<threads->create()>, C<async>
 returns a I<threads> object.
+
+=item $thr->error()
+
+Threads are executed in an C<eval> context.  This method will return C<undef>
+if the thread terminates I<normally>.  Otherwise, it returns the value of
+C<$@> associated with the thread's execution status in its C<eval> context.
 
 =item $thr->_handle()
 
@@ -781,7 +790,8 @@ cause for the failure.
 =item Thread # terminated abnormally: ...
 
 A thread terminated in some manner other than just returning from its entry
-point function.  For example, the thread may have terminated using C<die>.
+point function, or by using C<threads-E<gt>exit()>.  For example, the thread
+may have terminated because of a error, or by using C<die>.
 
 =item Using minimum thread stack size of #
 
@@ -858,10 +868,10 @@ C<import> if needed):
         ....
     }
 
-If the module will only be used inside the I<main> thread, try modifying your
-application so that the module is loaded (again using C<require> and C<import>)
-after any threads are started, and in such a way that no other threads are
-started afterwards.
+If the module is needed inside the I<main> thread, try modifying your
+application so that the module is loaded (again using C<require> and
+C<import>) after any threads are started, and in such a way that no other
+threads are started afterwards.
 
 If the above does not work, or is not adequate for your application, then file
 a bug report on L<http://rt.cpan.org/Public/> against the problematic module.
@@ -918,6 +928,10 @@ Perl version and the application code, results may range from success, to
 (apparently harmless) warnings of leaked scalar, or all the way up to crashing
 of the Perl interpreter.
 
+=item Returning objects from threads
+
+Returning objects from threads does not work.
+
 =item Perl Bugs and the CPAN Version of L<threads>
 
 Support for threads extents beyond the code in this module (i.e.,
@@ -938,7 +952,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.53/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.54/threads.pm>
 
 L<threads::shared>, L<perlthrtut>
 

@@ -51,6 +51,7 @@ typedef perl_os_thread pthread_t;
 #define PERL_ITHR_THREAD_EXIT_ONLY      8
 #define PERL_ITHR_NONVIABLE             16
 #define PERL_ITHR_DESTROYED             32
+#define PERL_ITHR_DIED                  64
 
 typedef struct _ithread {
     struct _ithread *next;      /* Next thread in the list */
@@ -70,6 +71,8 @@ typedef struct _ithread {
     pthread_t thr;              /* OS's handle for the thread */
 #endif
     IV stack_size;
+    SV *err;                    /* Error from abnormally terminated thread */
+    char *err_class;            /* Error object's classname if applicable */
 } ithread;
 
 
@@ -148,6 +151,11 @@ S_ithread_clear(pTHX_ ithread *thread)
 
         SvREFCNT_dec(thread->params);
         thread->params = Nullsv;
+
+        if (thread->err) {
+            SvREFCNT_dec(thread->err);
+            thread->err = Nullsv;
+        }
 
         perl_destruct(interp);
         perl_free(interp);
@@ -381,8 +389,9 @@ S_ithread_run(void * arg)
     ithread *thread = (ithread *)arg;
     int jmp_rc = 0;
     I32 oldscope;
-    int exit_app = 0;
+    int exit_app = 0;   /* Thread terminated using 'exit' */
     int exit_code = 0;
+    int died = 0;       /* Thread terminated abnormally */
 
     dJMPENV;
 
@@ -442,22 +451,34 @@ S_ithread_run(void * arg)
         FREETMPS;
         LEAVE;
 
-        /* Check for failure */
-        if (SvTRUE(ERRSV) && ckWARN_d(WARN_THREADS)) {
-            oldscope = PL_scopestack_ix;
-            JMPENV_PUSH(jmp_rc);
-            if (jmp_rc == 0) {
-                /* Warn that thread died */
-                Perl_warn(aTHX_ "Thread %" UVuf " terminated abnormally: %" SVf, thread->tid, ERRSV);
-            } else if (jmp_rc == 2) {
-                /* Warn handler exited */
-                exit_app = 1;
-                exit_code = STATUS_CURRENT;
-                while (PL_scopestack_ix > oldscope) {
-                    LEAVE;
-                }
+        /* Check for abnormal termination */
+        if (SvTRUE(ERRSV)) {
+            died = PERL_ITHR_DIED;
+            thread->err = newSVsv(ERRSV);
+            /* If ERRSV is an object, remember the classname and then
+             * rebless into 'main' so it will survive 'cloning'
+             */
+            if (sv_isobject(thread->err)) {
+                thread->err_class = HvNAME(SvSTASH(SvRV(thread->err)));
+                sv_bless(thread->err, gv_stashpv("main", 0));
             }
-            JMPENV_POP;
+
+            if (ckWARN_d(WARN_THREADS)) {
+                oldscope = PL_scopestack_ix;
+                JMPENV_PUSH(jmp_rc);
+                if (jmp_rc == 0) {
+                    /* Warn that thread died */
+                    Perl_warn(aTHX_ "Thread %" UVuf " terminated abnormally: %" SVf, thread->tid, ERRSV);
+                } else if (jmp_rc == 2) {
+                    /* Warn handler exited */
+                    exit_app = 1;
+                    exit_code = STATUS_CURRENT;
+                    while (PL_scopestack_ix > oldscope) {
+                        LEAVE;
+                    }
+                }
+                JMPENV_POP;
+            }
         }
 
         /* Release function ref */
@@ -470,7 +491,7 @@ S_ithread_run(void * arg)
     MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
     MUTEX_LOCK(&thread->mutex);
     /* Mark as finished */
-    thread->state |= PERL_ITHR_FINISHED;
+    thread->state |= (PERL_ITHR_FINISHED | died);
     /* Clear exit flag if required */
     if (thread->state & PERL_ITHR_THREAD_EXIT_ONLY) {
         exit_app = 0;
@@ -1056,6 +1077,7 @@ ithread_join(...)
         thread->state |= PERL_ITHR_JOINED;
 
         /* Get the return value from the call_sv */
+        /* Objects do not survive this process - FIXME */
         {
             AV *params_copy;
             PerlInterpreter *other_perl;
@@ -1081,8 +1103,10 @@ ithread_join(...)
             PL_ptr_table = NULL;
         }
 
-        /* We are finished with the thread */
-        S_ithread_clear(aTHX_ thread);
+        /* If thread didn't die, then we can free its interpreter */
+        if (! (thread->state & PERL_ITHR_DIED)) {
+            S_ithread_clear(aTHX_ thread);
+        }
         MUTEX_UNLOCK(&thread->mutex);
 
         MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
@@ -1090,6 +1114,9 @@ ithread_join(...)
             MY_POOL.joinable_threads--;
         }
         MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
+
+        /* Try to cleanup thread */
+        S_ithread_destruct(aTHX_ thread);
 
         /* If no return values, then just return */
         if (! params) {
@@ -1142,7 +1169,6 @@ ithread_detach(...)
 #else
         PERL_THREAD_DETACH(thread->thr);
 #endif
-
         if (thread->state & PERL_ITHR_FINISHED) {
             MY_POOL.joinable_threads--;
         } else {
@@ -1151,6 +1177,16 @@ ithread_detach(...)
         }
         MUTEX_UNLOCK(&thread->mutex);
         MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
+
+        /* If thread is finished and didn't die,
+         * then we can free its interpreter */
+        MUTEX_LOCK(&thread->mutex);
+        if ((thread->state & PERL_ITHR_FINISHED) &&
+            ! (thread->state & PERL_ITHR_DIED))
+        {
+            S_ithread_clear(aTHX_ thread);
+        }
+        MUTEX_UNLOCK(&thread->mutex);
 
         /* Try to cleanup thread */
         S_ithread_destruct(aTHX_ thread);
@@ -1404,6 +1440,59 @@ ithread_set_thread_exit_only(...)
             thread->state &= ~PERL_ITHR_THREAD_EXIT_ONLY;
         }
         MUTEX_UNLOCK(&thread->mutex);
+
+
+void
+ithread_error(...)
+    PREINIT:
+        ithread *thread;
+        SV *err = NULL;
+    CODE:
+        /* Object method only */
+        if ((items != 1) || ! sv_isobject(ST(0))) {
+            Perl_croak(aTHX_ "Usage: $thr->err()");
+        }
+
+        thread = INT2PTR(ithread *, SvIV(SvRV(ST(0))));
+        MUTEX_LOCK(&thread->mutex);
+
+        /* If thread died, then clone the error into the calling thread */
+        if (thread->state & PERL_ITHR_DIED) {
+            PerlInterpreter *other_perl;
+            CLONE_PARAMS clone_params;
+            ithread *current_thread;
+
+            other_perl = thread->interp;
+            clone_params.stashes = newAV();
+            clone_params.flags = CLONEf_JOIN_IN;
+            PL_ptr_table = ptr_table_new();
+            current_thread = S_ithread_get(aTHX);
+            S_ithread_set(aTHX_ thread);
+            /* Ensure 'meaningful' addresses retain their meaning */
+            ptr_table_store(PL_ptr_table, &other_perl->Isv_undef, &PL_sv_undef);
+            ptr_table_store(PL_ptr_table, &other_perl->Isv_no, &PL_sv_no);
+            ptr_table_store(PL_ptr_table, &other_perl->Isv_yes, &PL_sv_yes);
+            err = sv_dup(thread->err, &clone_params);
+            S_ithread_set(aTHX_ current_thread);
+            SvREFCNT_dec(clone_params.stashes);
+            SvREFCNT_inc_void(err);
+            /* If error was an object, bless it into the correct class */
+            if (thread->err_class) {
+                sv_bless(err, gv_stashpv(thread->err_class, 1));
+            }
+            ptr_table_free(PL_ptr_table);
+            PL_ptr_table = NULL;
+        }
+
+        MUTEX_UNLOCK(&thread->mutex);
+
+        if (! err) {
+            XSRETURN_UNDEF;
+        }
+
+        ST(0) = sv_2mortal(err);
+        /* XSRETURN(1); - implied */
+
 
 #endif /* USE_ITHREADS */
 

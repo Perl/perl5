@@ -1136,6 +1136,7 @@ ext/threads/t/basic.t		ithreads
 ext/threads/t/blocks.t		Test threads in special blocks
 ext/threads/t/context.t		Explicit thread context
 ext/threads/t/end.t		Test end functions
+ext/threads/t/err.t		Test $thr->error()
 ext/threads/t/exit.t		Test exit and die in threads
 ext/threads/t/free2.t		More ithread destruction tests
 ext/threads/t/free.t		Test ithread destruction
