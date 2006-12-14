@@ -4595,7 +4595,7 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
 	LOOP *tmp;
 	NewOp(1234,tmp,1,LOOP);
 	Copy(loop,tmp,1,LISTOP);
-	S_op_destroy(aTHX_ loop);
+	S_op_destroy(aTHX_ (OP*)loop);
 	loop = tmp;
     }
 #else
