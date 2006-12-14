@@ -6212,6 +6212,11 @@ a new window.
 # There's no direct accessor for the tty device name, so we fiddle
 # with the window title options until it says what we want.
 #
+# Since "do script" is implemented by supplying the argument (plus a
+# return character) as terminal input, there's a potential race condition
+# where the debugger could beat the shell to reading the command.
+# To prevent this, we wait for the screen to clear before proceeding.
+#
 # Tested and found to be functional in Mac OS X 10.3.9 and 10.4.8.
 
 sub macosx_get_fork_TTY
@@ -6230,6 +6235,9 @@ tell application "Terminal"
         set custom title to ""
         copy name to thetitle
         set custom title to "forked perl debugger"
+        repeat while (length of first paragraph of (get contents)) > 0
+            delay 0.1
+        end repeat
     end tell
 end tell
 "/dev/" & thetitle
