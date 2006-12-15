@@ -339,8 +339,12 @@ perform the upgrade if necessary.  See C<svtype>.
 
 #define PRIVSHIFT 4	/* (SVp_?OK >> PRIVSHIFT) == SVf_?OK */
 
-#define SVf_AMAGIC	0x10000000      /* has magical overloaded methods */
-#define SVf_UTF8        0x20000000      /* SvPV is UTF-8 encoded */
+#define SVf_AMAGIC	0x10000000  /* has magical overloaded methods */
+#define SVf_UTF8        0x20000000  /* SvPV is UTF-8 encoded
+				       This is also set on RVs whose overloaded
+				       stringification is UTF-8. This might
+				       only happen as a side effect of SvPV() */
+					   
 /* Ensure this value does not clash with the GV_ADD* flags in gv.h */
 
 /* Some private flags. */
@@ -901,6 +905,8 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 /*
 =for apidoc Am|bool|SvUTF8|SV* sv
 Returns a boolean indicating whether the SV contains UTF-8 encoded data.
+Call this after SvPV() in case any call to string overloading updates the
+internal flag.
 
 =for apidoc Am|void|SvUTF8_on|SV *sv
 Turn on the UTF-8 status of an SV (the data is not changed, just the flag).
