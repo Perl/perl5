@@ -1,5 +1,11 @@
 Revision history for Perl extension threads.
 
+1.56 Fri Dec 15 12:18:47 EST 2006
+	- More fixes to test suite
+
+1.55 Fri Dec 15 11:24:46 EST 2006
+	- Fixes to test suite
+
 1.54 Thu Dec 14 14:12:30 EST 2006
 	- Added ->error() method
 

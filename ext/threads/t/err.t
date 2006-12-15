@@ -26,14 +26,14 @@ use_ok('threads');
 no warnings 'threads';
 
 # Create a thread that generates an error
-my $thr = threads->create(sub { my $x = 5/0; });
+my $thr = threads->create(sub { my $x = Foo->new(); });
 
 # Check that thread returns 'undef'
 my $result = $thr->join();
 ok(! defined($result), 'thread died');
 
 # Check error
-like($thr->error(), 'division by zero', 'thread error');
+like($thr->error(), q/Can't locate object method/, 'thread error');
 
 
 # Create a thread that 'die's with an object

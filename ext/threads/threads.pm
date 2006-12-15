@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.54';
+our $VERSION = '1.56';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -133,7 +133,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.54
+This document describes threads version 1.56
 
 =head1 SYNOPSIS
 
@@ -845,7 +845,11 @@ specified signal being used in a C<-E<gt>kill()> call.
 
 =back
 
-=head1 LIMITATIONS
+=head1 BUGS AND LIMITATIONS
+
+Before you consider posting a bug report, please consult, and possibly post a
+message to the discussion forum to see if what you've encountered is a known
+problem.
 
 =over
 
@@ -875,16 +879,6 @@ threads are started afterwards.
 
 If the above does not work, or is not adequate for your application, then file
 a bug report on L<http://rt.cpan.org/Public/> against the problematic module.
-
-=back
-
-=head1 BUGS
-
-Before you consider posting a bug report, please consult, and possibly post a
-message to the discussion forum to see if what you've encountered is a known
-problem.
-
-=over
 
 =item Parent-child threads
 
@@ -930,7 +924,10 @@ of the Perl interpreter.
 
 =item Returning objects from threads
 
-Returning objects from threads does not work.
+Returning objects from threads does not work.  Depending on the classes
+involved, you may be able to work around this by returning a serialized
+version of the object (e.g., using L<Data::Dumper> or L<Storable>), and then
+reconstituting it in the joining thread.
 
 =item Perl Bugs and the CPAN Version of L<threads>
 
@@ -952,7 +949,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.54/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.56/threads.pm>
 
 L<threads::shared>, L<perlthrtut>
 
