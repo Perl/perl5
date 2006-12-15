@@ -3513,6 +3513,7 @@ t/op/hashassign.t		See if hash assignments work
 t/op/hash.t			See if the complexity attackers are repelled
 t/op/hashwarn.t			See if warnings for bad hash assignments work
 t/op/inccode.t			See if coderefs work in @INC
+t/op/inccode-tie.t		See if tie to @INC works
 t/op/incfilter.t		See if the source filters in coderef-in-@INC work
 t/op/inc.t			See if inc/dec of integers near 32 bit limit work
 t/op/index.t			See if index works

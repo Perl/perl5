@@ -3150,6 +3150,8 @@ PP(pp_require)
 	    for (i = 0; i <= AvFILL(ar); i++) {
 		SV * const dirsv = *av_fetch(ar, i, TRUE);
 
+		if (SvTIED_mg((SV*)ar, PERL_MAGIC_tied))
+		    mg_get(dirsv);
 		if (SvROK(dirsv)) {
 		    int count;
 		    SV **svp;

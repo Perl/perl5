@@ -202,10 +202,12 @@ is( $ret, 'abc', 'do "abc.pl" sees return value' );
 
 {
     my $filename = $^O eq 'MacOS' ? ':Foo:Foo.pm' : './Foo.pm';
-    local @INC;
+    #local @INC; # local fails on tied @INC
+    my @old_INC = @INC; # because local doesn't work on tied arrays
     @INC = sub { $filename = 'seen'; return undef; };
     eval { require $filename; };
     is( $filename, 'seen', 'the coderef sees fully-qualified pathnames' );
+    @INC = @old_INC;
 }
 
 exit if $minitest;
