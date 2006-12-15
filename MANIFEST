@@ -2916,6 +2916,8 @@ os2/perlrexx.c			Support perl interpreter embedded in REXX
 os2/perlrexx.cmd		Test perl interpreter embedded in REXX
 overload.h			generated overload enum and name table
 overload.pl			generate overload.h
+pack.pl				Pack/unpack individual files to the .packed format
+packed_files.pl			Extract all .packed files mentioned in MANIFEST
 pad.c				Scratchpad functions
 pad.h				Scratchpad headers
 parser.h			parser object header

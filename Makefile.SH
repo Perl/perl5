@@ -1023,18 +1023,19 @@ printconfig:
 
 .PHONY: clean _tidy _mopup _cleaner1 _cleaner2 \
 	realclean _realcleaner clobber _clobber \
-	distclean veryclean _verycleaner
+	distclean veryclean _verycleaner \
+	cleanup_unpacked_files unpack_files
 
-clean:		_tidy _mopup
+clean:		cleanup_unpacked_files _tidy _mopup 
 
-realclean:	_realcleaner _mopup
+realclean:	cleanup_unpacked_files _realcleaner _mopup
 	@echo "Note that '$(MAKE) realclean' does not delete config.sh or Policy.sh"
 
 _clobber:
 	-@rm -f Cross/run-* Cross/to-* Cross/from-*
 	rm -f config.sh cppstdin Policy.sh extras.lst
 
-clobber:	_realcleaner _mopup _clobber
+clobber:	cleanup_unpacked_files _realcleaner _mopup _clobber
 
 distclean:	clobber
 
@@ -1157,7 +1158,7 @@ makedepend: makedepend.SH config.sh
 
 TESTFILE=TEST
 
-_test_prep:
+_test_prep: unpack_files
 	cd t && (rm -f $(PERL)$(EXE_EXT); $(LNS) ../$(PERL)$(EXE_EXT) $(PERL)$(EXE_EXT))
 
 # Architecture-neutral stuff:
@@ -1172,6 +1173,12 @@ _test_tty:
 
 _test_notty:
 	cd t && $(PERL_DEBUG) PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) $(PERL) $(TESTFILE) $(TEST_ARGS)
+
+unpack_files:
+	$(LDLIBPTH) ./miniperl$(EXE_EXT) -Ilib packed_files.pl -u
+
+cleanup_unpacked_files:
+	$(LDLIBPTH) ./miniperl$(EXE_EXT) -Ilib packed_files.pl -c
 
 # The second branch is for testing without a tty or controlling terminal,
 # see t/op/stat.t

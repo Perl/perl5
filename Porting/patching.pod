@@ -151,6 +151,25 @@ you have your changes, you would run makepatch as follows:
               -diff "diff -u" \
               perl-5.7.1@8685 perl-5.7.1@8685-withfoo
 
+=item Binary Files
+
+Since the patch(1) utility can not deal with binary files, it's important
+that you either avoid the use of binary files in your patch, generate the files
+dynamically or that you encode any binary files using the C<Porting/pack.pl>
+utility.
+
+Assuming you needed to include a C<gzip> encoded file for a module's test suite,
+you might do this as follows using the C<Porting/pack.pl> utility:
+
+    $ perl Porting/pack.pl -v -D lib/Some/Module/t/src/t.gz
+    Writing lib/Some/Module/t/src/t.gz into lib/Some/Module/t/src/t.gz.packed
+
+This will replace the C<t.gz> file with an encoded counterpart. During 
+C<make test>, before any tests are run, Perls Makefile will restore all the
+C<.packed> files mentioned in the C<MANIFEST> to their original name. This 
+means that the test suite does not need to be aware of this packing scheme and
+will not need to be altered.
+
 =item Try it yourself
 
 Just to make sure your patch "works", be sure to apply it to the Perl
