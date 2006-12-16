@@ -174,7 +174,7 @@ yy_stack_print (pTHX_ const short *yyss, const short *yyssp, const YYSTYPE *yyvs
 	case toketype_i_tkval:
 #endif
 	case toketype_ival:
-	    PerlIO_printf(Perl_debug_log, " %8"IVdf, yyvs[start+i].ival);
+	    PerlIO_printf(Perl_debug_log, " %8"IVdf, (IV)yyvs[start+i].ival);
 	    break;
 	default:
 	    PerlIO_printf(Perl_debug_log, " %8"UVxf, (UV)yyvs[start+i].ival);
