@@ -191,6 +191,7 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     const bool doproto = old_type > SVt_NULL;
     const char * const proto = (doproto && SvPOK(gv)) ? SvPVX_const(gv) : NULL;
     SV *const has_constant = doproto && SvROK(gv) ? SvRV(gv) : NULL;
+    const U32 exported_constant = has_constant ? SvPCS_IMPORTED(gv) : 0;
 
     assert (!(proto && has_constant));
 
@@ -239,6 +240,11 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	if (has_constant) {
 	    /* newCONSTSUB takes ownership of the reference from us.  */
 	    GvCV(gv) = newCONSTSUB(stash, name, has_constant);
+	    /* If this reference was a copy of another, then the subroutine
+	       must have been "imported", by a Perl space assignment to a GV
+	       from a reference to CV.  */
+	    if (exported_constant)
+		GvIMPORTED_CV_on(gv);
 	} else {
 	    /* XXX unsafe for threads if eval_owner isn't held */
 	    (void) start_subparse(0,0);	/* Create empty CV in compcv. */

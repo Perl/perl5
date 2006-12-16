@@ -294,6 +294,10 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVp_SCREAM	0x00008000  /* has been studied? */
 #define SVphv_CLONEABLE	SVp_SCREAM  /* PVHV (stashes) clone its objects */
 #define SVpgv_GP	SVp_SCREAM  /* GV has a valid GP */
+#define SVprv_PCS_IMPORTED  SVp_SCREAM  /* RV is a proxy for a constant
+				       subroutine in another package. Set the
+				       CvIMPORTED_CV_ON() if it needs to be
+				       expanded to a real GV */
 
 #define SVs_PADSTALE	0x00010000  /* lexical has gone out of scope */
 #define SVpad_STATE	0x00010000  /* pad name is a "state" var */
@@ -1012,6 +1016,11 @@ the scalar's value cannot change unless written to.
 				  == (SVf_ROK|SVprv_WEAKREF))
 #define SvWEAKREF_on(sv)	(SvFLAGS(sv) |=  (SVf_ROK|SVprv_WEAKREF))
 #define SvWEAKREF_off(sv)	(SvFLAGS(sv) &= ~(SVf_ROK|SVprv_WEAKREF))
+
+#define SvPCS_IMPORTED(sv)	((SvFLAGS(sv) & (SVf_ROK|SVprv_PCS_IMPORTED)) \
+				 == (SVf_ROK|SVprv_PCS_IMPORTED))
+#define SvPCS_IMPORTED_on(sv)	(SvFLAGS(sv) |=  (SVf_ROK|SVprv_PCS_IMPORTED))
+#define SvPCS_IMPORTED_off(sv)	(SvFLAGS(sv) &= ~(SVf_ROK|SVprv_PCS_IMPORTED))
 
 #define SvTHINKFIRST(sv)	(SvFLAGS(sv) & SVf_THINKFIRST)
 

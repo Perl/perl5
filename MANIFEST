@@ -3362,6 +3362,7 @@ t/lib/Math/BigRat/Test.pm		Math::BigRat test helper
 t/lib/mypragma.pm		An example user pragma
 t/lib/mypragma.t		Test the example user pragma
 t/lib/NoExporter.pm			Part of Test-Simple
+t/lib/proxy_constant_subs.t	Test that Proxy Constant Subs behave correctly
 t/lib/sample-tests/bailout		Test data for Test::Harness
 t/lib/sample-tests/bignum		Test data for Test::Harness
 t/lib/sample-tests/bignum_many		Test data for Test::Harness

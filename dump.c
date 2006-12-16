@@ -1385,8 +1385,12 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     if (flags & SVp_IOK)	sv_catpv(d, "pIOK,");
     if (flags & SVp_NOK)	sv_catpv(d, "pNOK,");
     if (flags & SVp_POK)	sv_catpv(d, "pPOK,");
-    if (flags & SVp_SCREAM && type != SVt_PVHV && !isGV_with_GP(sv))
+    if (flags & SVp_SCREAM && type != SVt_PVHV && !isGV_with_GP(sv)) {
+	if (SvPCS_IMPORTED(sv))
+				sv_catpv(d, "PCS_IMPORTED,");
+	else
 				sv_catpv(d, "SCREAM,");
+    }
 
     switch (type) {
     case SVt_PVCV:
