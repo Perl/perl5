@@ -4,6 +4,8 @@ specially designed to be readable as is.
 
 The following documentation is written in euc-jp encoding.
 
+=encoding euc-jp
+
 =head1 NAME
 
 perljp - 日本語 Perl ガイド
