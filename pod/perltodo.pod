@@ -611,6 +611,8 @@ will be greatly appreciated.
 
 One bit would be to write the missing code in sv.c:Perl_dirp_dup.
 
+Fix Perl_sv_dup, et al so that threads can return objects.
+
 =head2 iCOW
 
 Sarathy and Arthur have a proposal for an improved Copy On Write which
