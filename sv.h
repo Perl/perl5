@@ -292,7 +292,8 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVp_NOK		0x00002000  /* has valid non-public numeric value */
 #define SVp_POK		0x00004000  /* has valid non-public pointer value */
 #define SVp_SCREAM	0x00008000  /* has been studied? */
-#define SVphv_CLONEABLE	0x00008000  /* PVHV (stashes) clone its objects */
+#define SVphv_CLONEABLE	SVp_SCREAM  /* PVHV (stashes) clone its objects */
+#define SVpgv_GP	SVp_SCREAM  /* GV has a valid GP */
 
 #define SVs_PADSTALE	0x00010000  /* lexical has gone out of scope */
 #define SVpad_STATE	0x00010000  /* pad name is a "state" var */
@@ -335,7 +336,7 @@ perform the upgrade if necessary.  See C<svtype>.
 #define SVf_THINKFIRST	(SVf_READONLY|SVf_ROK|SVf_FAKE)
 
 #define SVf_OK		(SVf_IOK|SVf_NOK|SVf_POK|SVf_ROK| \
-			 SVp_IOK|SVp_NOK|SVp_POK|SVp_SCREAM)
+			 SVp_IOK|SVp_NOK|SVp_POK|SVpgv_GP)
 
 #define PRIVSHIFT 4	/* (SVp_?OK >> PRIVSHIFT) == SVf_?OK */
 
@@ -1974,8 +1975,23 @@ Returns a pointer to the character buffer.
 /* If I give every macro argument a different name, then there won't be bugs
    where nested macros get confused. Been there, done that.  */
 #define isGV_with_GP(pwadak) \
-	(((SvFLAGS(pwadak) & (SVp_POK|SVp_SCREAM)) == SVp_SCREAM)	\
+	(((SvFLAGS(pwadak) & (SVp_POK|SVpgv_GP)) == SVpgv_GP)	\
 	&& (SvTYPE(pwadak) == SVt_PVGV || SvTYPE(pwadak) == SVt_PVLV))
+#define isGV_with_GP_on(sv)	STMT_START {			       \
+	GV *const uggh = (GV*) sv;				       \
+	assert (SvTYPE(uggh) == SVt_PVGV || SvTYPE(uggh) == SVt_PVLV); \
+	assert (!SvPOKp(uggh));					       \
+	assert (!SvIOKp(uggh));					       \
+	(SvFLAGS(uggh) |= SVpgv_GP);				       \
+    } STMT_END
+#define isGV_with_GP_off(sv)	STMT_START {			       \
+	GV *const uggh = (GV *) sv;				       \
+	assert (SvTYPE(uggh) == SVt_PVGV || SvTYPE(uggh) == SVt_PVLV); \
+	assert (!SvPOKp(uggh));					       \
+	assert (!SvIOKp(uggh));					       \
+	(SvFLAGS(sv) &= ~SVpgv_GP);				       \
+    } STMT_END
+
 
 #define SvGROW(sv,len) (SvLEN(sv) < (len) ? sv_grow(sv,len) : SvPVX(sv))
 #define SvGROW_mutable(sv,len) \

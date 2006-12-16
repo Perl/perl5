@@ -1897,8 +1897,7 @@ Perl_magic_setglob(pTHX_ SV *sv, MAGIC *mg)
 
     if (!SvOK(sv))
 	return 0;
-    if (SvFLAGS(sv) & SVp_SCREAM
-	&& (SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVGV)) {
+    if (isGV_with_GP(sv)) {
 	/* We're actually already a typeglob, so don't need the stuff below.
 	 */
 	return 0;

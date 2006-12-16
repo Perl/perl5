@@ -305,7 +305,7 @@ do_test(17,
 	*a,
 'SV = PVGV\\($ADDR\\) at $ADDR
   REFCNT = 5
-  FLAGS = \\(SCREAM,MULTI(?:,IN_PAD)?\\)
+  FLAGS = \\(MULTI(?:,IN_PAD)?\\)
   NAME = "a"
   NAMELEN = 1
   GvSTASH = $ADDR\\t"main"

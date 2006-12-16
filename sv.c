@@ -3177,7 +3177,9 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 	    }
 	    sv_upgrade(dstr, SVt_PVGV);
 	    (void)SvOK_off(dstr);
-	    SvSCREAM_on(dstr);
+	    /* FIXME - why are we doing this, then turning it off and on again
+	       below?  */
+	    isGV_with_GP_on(dstr);
 	}
 	GvSTASH(dstr) = GvSTASH(sstr);
 	if (GvSTASH(dstr))
@@ -3193,9 +3195,9 @@ S_glob_assign_glob(pTHX_ SV *dstr, SV *sstr, const int dtype)
 #endif
 
     gp_free((GV*)dstr);
-    SvSCREAM_off(dstr);
+    isGV_with_GP_off(dstr);
     (void)SvOK_off(dstr);
-    SvSCREAM_on(dstr);
+    isGV_with_GP_on(dstr);
     GvINTRO_off(dstr);		/* one-shot flag */
     GvGP(dstr) = gp_ref(GvGP(sstr));
     if (SvTAINTED(sstr))
@@ -7946,7 +7948,7 @@ S_sv_unglob(pTHX_ SV *sv)
     if (GvNAME_HEK(sv)) {
 	unshare_hek(GvNAME_HEK(sv));
     }
-    SvSCREAM_off(sv);
+    isGV_with_GP_off(sv);
 
     /* need to keep SvANY(sv) in the right arena */
     xpvmg = new_XPVMG();

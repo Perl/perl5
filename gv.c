@@ -224,7 +224,8 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 	} else
 	    Safefree(SvPVX_mutable(gv));
     }
-    SvSCREAM_on(gv);
+    SvIOK_off(gv);
+    isGV_with_GP_on(gv);
 
     GvGP(gv) = Perl_newGP(aTHX_ gv);
     GvSTASH(gv) = stash;
@@ -234,7 +235,6 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     if (multi || doproto)              /* doproto means it _was_ mentioned */
 	GvMULTI_on(gv);
     if (doproto) {			/* Replicate part of newSUB here. */
-	SvIOK_off(gv);
 	ENTER;
 	if (has_constant) {
 	    /* newCONSTSUB takes ownership of the reference from us.  */
