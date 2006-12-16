@@ -895,7 +895,6 @@ typedef enum {
 } toketypes;
 
 /* type of each token/terminal */
-static const toketypes XXX;
 static const toketypes yy_type_tab[] =
 {
   toketype_ival, toketype_ival, toketype_ival, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval, toketype_i_tkval,

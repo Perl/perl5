@@ -257,7 +257,6 @@ sub make_type_tab {
 	. join(", ", map "toketype_$_", sort keys %types)
 	. "\n} toketypes;\n\n"
 	. "/* type of each token/terminal */\n"
-	. "static const toketypes XXX;\n"
 	. "static const toketypes yy_type_tab[] =\n{\n"
 	. $fields
 	. "\n};\n";
