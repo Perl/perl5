@@ -792,19 +792,6 @@ perl_destruct(pTHXx)
     PL_exitlist = NULL;
     PL_exitlistlen = 0;
 
-    if (destruct_level == 0){
-
-	DEBUG_P(debprofdump());
-
-#if defined(PERLIO_LAYERS)
-	/* No more IO - including error messages ! */
-	PerlIO_cleanup(aTHX);
-#endif
-
-	/* The exit() function will do everything that needs doing. */
-        return STATUS_EXIT;
-    }
-
     /* jettison our possibly duplicated environment */
     /* if PERL_USE_SAFE_PUTENV is defined environ will not have been copied
      * so we certainly shouldn't free it here
@@ -830,6 +817,22 @@ perl_destruct(pTHXx)
     }
 #endif
 #endif /* !PERL_MICRO */
+
+    if (destruct_level == 0) {
+
+	DEBUG_P(debprofdump());
+
+#if defined(PERLIO_LAYERS)
+	/* No more IO - including error messages ! */
+	PerlIO_cleanup(aTHX);
+#endif
+
+	CopFILE_free(&PL_compiling);
+	CopSTASH_free(&PL_compiling);
+
+	/* The exit() function will do everything that needs doing. */
+        return STATUS_EXIT;
+    }
 
     /* reset so print() ends up where we expect */
     setdefout(NULL);
