@@ -50,41 +50,13 @@ typedef signed char yysigned_char;
 
 # define YYSIZE_T size_t
 
-#define yyerrok		(yyerrstatus = 0)
-#define yyclearin	(yychar = YYEMPTY)
 #define YYEMPTY		(-2)
 #define YYEOF		0
+#define YYTERROR	1
 
 #define YYACCEPT	goto yyacceptlab
 #define YYABORT		goto yyabortlab
 #define YYERROR		goto yyerrlab1
-
-
-/* Like YYERROR except do call yyerror.  This remains here temporarily
-   to ease the transition to the new meaning of YYERROR, for GCC.
-   Once GCC version 2 has supplanted version 1, this can go.  */
-
-#define YYFAIL		goto yyerrlab
-
-#define YYRECOVERING()  (!!yyerrstatus)
-
-#define YYBACKUP(Token, Value)					\
-do								\
-    if (yychar == YYEMPTY && yylen == 1) {			\
-	yychar = (Token);					\
-	yylval = (Value);					\
-	yytoken = YYTRANSLATE (yychar);				\
-	YYPOPSTACK;						\
-	goto yybackup;						\
-    }								\
-    else {							\
-	yyerror ("syntax error: cannot back up");		\
-	YYERROR;						\
-    }								\
-while (0)
-
-#define YYTERROR	1
-#define YYERRCODE	256
 
 /* Enable debugging if requested.  */
 #ifdef DEBUGGING
@@ -222,52 +194,7 @@ do {					\
 
 
 /* YYINITDEPTH -- initial size of the parser's stacks.  */
-#ifndef	YYINITDEPTH
-# define YYINITDEPTH 200
-#endif
-
-
-#if YYERROR_VERBOSE
-#  ifndef yystrlen
-#    if defined (__GLIBC__) && defined (_STRING_H)
-#      define yystrlen strlen
-#    else
-/* Return the length of YYSTR.  */
-static YYSIZE_T
-yystrlen (const char *yystr)
-{
-    register const char *yys = yystr;
-
-    while (*yys++ != '\0')
-	continue;
-
-    return yys - yystr - 1;
-}
-#    endif
-#  endif
-
-#  ifndef yystpcpy
-#    if defined (__GLIBC__) && defined (_STRING_H) && defined (_GNU_SOURCE)
-#      define yystpcpy stpcpy
-#    else
-/* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
-   YYDEST.  */
-static char *
-yystpcpy (pTHX_ char *yydest, const char *yysrc)
-{
-    register char *yyd = yydest;
-    register const char *yys = yysrc;
-
-    while ((*yyd++ = *yys++) != '\0')
-	continue;
-
-    return yyd - 1;
-}
-#    endif
-#  endif
-
-#endif /* !YYERROR_VERBOSE */
-
+#define YYINITDEPTH 200
 
 /* a snapshot of the current stack position variables for use by
  * S_clear_yystack */
@@ -556,13 +483,6 @@ Perl_yyparse (pTHX)
 	ss_save->yylen = 0;
     }
 
-    goto yybackup;
-
-  /*-----------.
-  | yybackup.  |
-  `-----------*/
-  yybackup:
-
 /* Do appropriate processing given the current state.  */
 /* Read a lookahead token if we need one and don't already have one.  */
 /* yyresume: */
@@ -759,53 +679,7 @@ Perl_yyparse (pTHX)
     /* If not already recovering from an error, report this error.  */
     if (!yyerrstatus) {
 	++yynerrs;
-#if YYERROR_VERBOSE
-	yyn = yypact[yystate];
-
-	if (YYPACT_NINF < yyn && yyn < YYLAST) {
-	    YYSIZE_T yysize = 0;
-	    const int yytype = YYTRANSLATE (yychar);
-	    char *yymsg;
-	    int yyx, yycount;
-
-	    yycount = 0;
-	    /* Start YYX at -YYN if negative to avoid negative indexes in
-		  YYCHECK.  */
-	    for (yyx = yyn < 0 ? -yyn : 0;
-		      yyx < (int) (sizeof (yytname) / sizeof (char *)); yyx++)
-		if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR)
-		    yysize += yystrlen (yytname[yyx]) + 15, yycount++;
-	    yysize += yystrlen ("syntax error, unexpected ") + 1;
-	    yysize += yystrlen (yytname[yytype]);
-	    Newx(yymsg, yysize, char *);
-	    if (yymsg != 0) {
-		const char *yyp = yystpcpy (yymsg, "syntax error, unexpected ");
-		yyp = yystpcpy (yyp, yytname[yytype]);
-
-		if (yycount < 5) {
-		    yycount = 0;
-		    for (yyx = yyn < 0 ? -yyn : 0;
-			      yyx < (int) (sizeof (yytname) / sizeof (char *));
-			      yyx++)
-		    {
-			if (yycheck[yyx + yyn] == yyx && yyx != YYTERROR) {
-			    const char *yyq = ! yycount ?
-						    ", expecting " : " or ";
-			    yyp = yystpcpy (yyp, yyq);
-			    yyp = yystpcpy (yyp, yytname[yyx]);
-			    yycount++;
-			}
-		    }
-		}
-		yyerror (yymsg);
-		YYSTACK_FREE (yymsg);
-	    }
-	    else
-		yyerror ("syntax error; also virtual memory exhausted");
-	}
-	else
-#endif /* YYERROR_VERBOSE */
-	    yyerror ("syntax error");
+	yyerror ("syntax error");
     }
 
 
