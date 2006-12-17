@@ -24,11 +24,6 @@
  * This is controlled by the PERL_IN_MADLY_C define.
  */
 
-
-
-/* allow stack size to grow effectively without limit */
-#define YYMAXDEPTH 10000000
-
 #include "EXTERN.h"
 #define PERL_IN_PERLY_C
 #include "perl.h"
@@ -38,6 +33,24 @@ typedef signed char yytype_int8;
 typedef unsigned short int yytype_uint16;
 typedef short int yytype_int16;
 typedef signed char yysigned_char;
+
+typedef struct {
+    YYSTYPE val;    /* semantic value */
+    short   state;
+    AV	    *comppad; /* value of PL_comppad when this value was created */
+#ifdef DEBUGGING
+    const char  *name; /* token/rule name for -Dpv */
+#endif
+} yy_stack_frame;
+
+typedef struct {
+    int		    stack_size;
+    int		    reduce_len; /* XXX integrate with yylen ? */
+    yy_stack_frame  *ps;     /* current stack frame */
+    yy_stack_frame  stack[1]; /* will actually be as many as needed */
+} yy_parser;
+    
+
 
 #ifdef DEBUGGING
 #  define YYDEBUG 1
@@ -103,62 +116,62 @@ yysymprint(pTHX_ PerlIO * const yyoutput, int yytype, const YYSTYPE * const yyva
 
 
 /*  yy_stack_print()
- *  print the top 8 items on the parse stack.  The args have the same
- *  meanings as the local vars in yyparse() of the same name */
+ *  print the top 8 items on the parse stack.
+ */
 
 static void
-yy_stack_print (pTHX_ const short *yyss, const short *yyssp, const YYSTYPE *yyvs, const char**yyns)
+yy_stack_print (pTHX_ const yy_parser *parser)
 {
-    int i;
-    int start = 1;
-    int count = (int)(yyssp - yyss);
+    const yy_stack_frame *ps, *min;
 
-    if (count > 8) {
-	start = count - 8 + 1;
-	count = 8;
-    }
+    min = parser->ps - 8;
+    if (min <= &parser->stack[0])
+	min = &parser->stack[0] + 1;
 
     PerlIO_printf(Perl_debug_log, "\nindex:");
-    for (i=0; i < count; i++)
-	PerlIO_printf(Perl_debug_log, " %8d", start+i);
+    for (ps = min; ps <= parser->ps; ps++)
+	PerlIO_printf(Perl_debug_log, " %8d", ps - &parser->stack[0]);
+
     PerlIO_printf(Perl_debug_log, "\nstate:");
-    for (i=0; i < count; i++)
-	PerlIO_printf(Perl_debug_log, " %8d", yyss[start+i]);
+    for (ps = min; ps <= parser->ps; ps++)
+	PerlIO_printf(Perl_debug_log, " %8d", ps->state);
+
     PerlIO_printf(Perl_debug_log, "\ntoken:");
-    for (i=0; i < count; i++)
-	PerlIO_printf(Perl_debug_log, " %8.8s", yyns[start+i]);
+    for (ps = min; ps <= parser->ps; ps++)
+	PerlIO_printf(Perl_debug_log, " %8.8s", ps->name);
+
     PerlIO_printf(Perl_debug_log, "\nvalue:");
-    for (i=0; i < count; i++) {
-	switch (yy_type_tab[yystos[yyss[start+i]]]) {
+    for (ps = min; ps <= parser->ps; ps++) {
+	switch (yy_type_tab[yystos[ps->state]]) {
 	case toketype_opval:
 	    PerlIO_printf(Perl_debug_log, " %8.8s",
-		  yyvs[start+i].opval
-		    ? PL_op_name[yyvs[start+i].opval->op_type]
+		  ps->val.opval
+		    ? PL_op_name[ps->val.opval->op_type]
 		    : "(Nullop)"
 	    );
 	    break;
 #ifndef PERL_IN_MADLY_C
 	case toketype_p_tkval:
 	    PerlIO_printf(Perl_debug_log, " %8.8s",
-		  yyvs[start+i].pval ? yyvs[start+i].pval : "(NULL)");
+		  ps->val.pval ? ps->val.pval : "(NULL)");
 	    break;
 
 	case toketype_i_tkval:
 #endif
 	case toketype_ival:
-	    PerlIO_printf(Perl_debug_log, " %8"IVdf, (IV)yyvs[start+i].ival);
+	    PerlIO_printf(Perl_debug_log, " %8"IVdf, (IV)ps->val.ival);
 	    break;
 	default:
-	    PerlIO_printf(Perl_debug_log, " %8"UVxf, (UV)yyvs[start+i].ival);
+	    PerlIO_printf(Perl_debug_log, " %8"UVxf, (UV)ps->val.ival);
 	}
     }
     PerlIO_printf(Perl_debug_log, "\n\n");
 }
 
-#  define YY_STACK_PRINT(yyss, yyssp, yyvs, yyns)		\
-do {								\
-    if (yydebug && DEBUG_v_TEST)				\
-	yy_stack_print (aTHX_ (yyss), (yyssp), (yyvs), (yyns));	\
+#  define YY_STACK_PRINT(parser)	\
+do {					\
+    if (yydebug && DEBUG_v_TEST)	\
+	yy_stack_print (aTHX_ parser);	\
 } while (0)
 
 
@@ -188,7 +201,7 @@ do {					\
 #else /* !DEBUGGING */
 #  define YYDPRINTF(Args)
 #  define YYDSYMPRINTF(Title, Token, Value)
-#  define YY_STACK_PRINT(yyss, yyssp, yyvs, yyns)
+#  define YY_STACK_PRINT(parser)
 #  define YY_REDUCE_PRINT(Rule)
 #endif /* !DEBUGGING */
 
@@ -196,28 +209,19 @@ do {					\
 /* YYINITDEPTH -- initial size of the parser's stacks.  */
 #define YYINITDEPTH 200
 
-/* a snapshot of the current stack position variables for use by
- * S_clear_yystack */
-
-typedef struct {
-    short *yyss;
-    short *yyssp;
-    YYSTYPE *yyvsp;
-    AV **yypsp;
-    int yylen;
-} yystack_positions;
-
 /* called during cleanup (via SAVEDESTRUCTOR_X) to free any items on the
  * parse stack, thus avoiding leaks if we die  */
 
 static void
 S_clear_yystack(pTHX_ const void *p)
 {
-    yystack_positions *y = (yystack_positions*) p;
+    yy_parser      *parser = (yy_parser*) SvPVX((SV*)p);
+    yy_stack_frame *ps     = parser->ps;
     int i;
 
-    if (!y->yyss)
+    if (ps == &parser->stack[0])
 	return;
+
     YYDPRINTF ((Perl_debug_log, "clearing the parse stack\n"));
 
     /* Freeing ops on the stack, and the op_latefree/op_latefreed flags:
@@ -264,32 +268,30 @@ S_clear_yystack(pTHX_ const void *p)
 
     /* free any reducing ops (1st pass) */
 
-    for (i=0; i< y->yylen; i++) {
-	if (yy_type_tab[yystos[y->yyssp[-i]]] == toketype_opval
-	    && y->yyvsp[-i].opval) {
-	    if (y->yypsp[-i] != PL_comppad) {
-		PAD_RESTORE_LOCAL(y->yypsp[-i]);
+    for (i=0; i< parser->reduce_len; i++) {
+	if (yy_type_tab[yystos[ps[-i].state]] == toketype_opval
+	    && ps[-i].val.opval) {
+	    if (ps[-i].comppad != PL_comppad) {
+		PAD_RESTORE_LOCAL(ps[-i].comppad);
 	    }
-	    op_free(y->yyvsp[-i].opval);
+	    op_free(ps[-i].val.opval);
 	}
     }
 
     /* now free whole the stack, including the just-reduced ops */
 
-    while (y->yyssp > y->yyss) {
-	if (yy_type_tab[yystos[*y->yyssp]] == toketype_opval
-	    && y->yyvsp->opval)
+    while (ps > &parser->stack[0]) {
+	if (yy_type_tab[yystos[ps->state]] == toketype_opval
+	    && ps->val.opval)
 	{
-	    if (*y->yypsp != PL_comppad) {
-		PAD_RESTORE_LOCAL(*y->yypsp);
+	    if (ps->comppad != PL_comppad) {
+		PAD_RESTORE_LOCAL(ps->comppad);
 	    }
 	    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
-	    y->yyvsp->opval->op_latefree  = 0;
-	    op_free(y->yyvsp->opval);
+	    ps->val.opval->op_latefree  = 0;
+	    op_free(ps->val.opval);
 	}
-	y->yyvsp--;
-	y->yyssp--;
-	y->yypsp--;
+	ps--;
     }
 }
 
@@ -319,49 +321,16 @@ Perl_yyparse (pTHX)
     /* Lookahead token as an internal (translated) token number.  */
     int yytoken = 0;
 
-    /* three stacks and their tools:
-	  yyss: related to states,
-	  yyvs: related to semantic values,
-	  yyps: current value of PL_comppad for each state
-	  
+    SV *parser_sv;		    /* SV whose PVX holds the parser object */
+    yy_parser *parser;		    /* the parser object */
+    register yy_stack_frame  *ps;   /* current parser stack frame */
 
-	  Refer to the stacks thru separate pointers, to allow yyoverflow
-	  to reallocate them elsewhere.  */
-
-    /* The state stack.  */
-    short *yyss;
-    register short *yyssp;
-
-    /* The semantic value stack.  */
-    YYSTYPE *yyvs;
-    register YYSTYPE *yyvsp;
-
-    AV **yyps;
-    AV **yypsp;
-
-    /* for ease of re-allocation and automatic freeing, have three SVs whose
-      * SvPVX points to the stacks */
-    SV *yyss_sv, *yyvs_sv, *yyps_sv;
-    SV *ss_save_sv;
-    yystack_positions *ss_save;
-
-
-#ifdef DEBUGGING
-    /* maintain also a stack of token/rule names for debugging with -Dpv */
-    const char **yyns, **yynsp;
-    SV *yyns_sv;
-#  define YYPOPSTACK   (yyvsp--, yyssp--, yypsp--, yynsp--)
-#else
-#  define YYPOPSTACK   (yyvsp--, yyssp--, yypsp--)
-#endif
-
-
-    YYSIZE_T yystacksize = YYINITDEPTH;
+#define YYPOPSTACK   parser->ps = --ps
+#define YYPUSHSTACK  parser->ps = ++ps
 
     /* The variables used to return semantic value and location from the
 	  action routines.  */
     YYSTYPE yyval;
-
 
     /* When reducing, the number of symbols on the RHS of the reduced
 	  rule.  */
@@ -382,37 +351,20 @@ Perl_yyparse (pTHX)
     PL_yycharp = &yychar; /* so PL_yyerror() can access it */
     PL_yylvalp = &yylval; /* so various functions in toke.c can access it */
 
-    yyss_sv = newSV(YYINITDEPTH * sizeof(short));
-    yyvs_sv = newSV(YYINITDEPTH * sizeof(YYSTYPE));
-    yyps_sv = newSV(YYINITDEPTH * sizeof(AV*));
-    ss_save_sv = newSV(sizeof(yystack_positions));
-    SAVEFREESV(yyss_sv);
-    SAVEFREESV(yyvs_sv);
-    SAVEFREESV(yyps_sv);
-    SAVEFREESV(ss_save_sv);
-    yyss = (short *) SvPVX(yyss_sv);
-    yyvs = (YYSTYPE *) SvPVX(yyvs_sv);
-    yyps = (AV **) SvPVX(yyps_sv);
-    ss_save = (yystack_positions *) SvPVX(ss_save_sv);
+    parser_sv = newSV(sizeof(yy_parser)
+			+ (YYINITDEPTH-1) * sizeof(yy_stack_frame));
+    SAVEFREESV(parser_sv);
+    parser = (yy_parser*)  SvPVX(parser_sv);
+    ps = (yy_stack_frame*) &parser->stack[0];
+    parser->ps = ps;
 
-    ss_save->yyss = NULL; /* disarm stack cleanup */
+    parser->stack_size = YYINITDEPTH;
+
     /* cleanup the parse stack on premature exit */
-    SAVEDESTRUCTOR_X(S_clear_yystack, (void*) ss_save);
+    SAVEDESTRUCTOR_X(S_clear_yystack, (void*) parser_sv);
 
-    /* note that elements zero of yyvs and yyns are not used */
-    yyssp = yyss;
-    yyvsp = yyvs;
-    yypsp = yyps;
-#ifdef DEBUGGING
-    yyns_sv = newSV(YYINITDEPTH * sizeof(char *));
-    SAVEFREESV(yyns_sv);
-    /* XXX This seems strange to cast char * to char ** */
-    yyns = (const char **) SvPVX(yyns_sv);
-    yynsp = yyns;
-#endif
 
-    *yyssp = 0;
-    yyvsp->ival = 0;
+    ps->state = 0;
     yyerrstatus = 0;
     yynerrs = 0;
     yychar = YYEMPTY;		/* Cause a token to be read.  */
@@ -422,70 +374,40 @@ Perl_yyparse (pTHX)
 `------------------------------------------------------------*/
   yynewstate:
 
-    yystate = *yyssp;
+    yystate = ps->state;
 
     YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
 
-    if (yy_type_tab[yystos[yystate]] == toketype_opval && yyvsp->opval) {
-	yyvsp->opval->op_latefree  = 1;
-	yyvsp->opval->op_latefreed = 0;
+    if (yy_type_tab[yystos[yystate]] == toketype_opval && ps->val.opval) {
+	ps->val.opval->op_latefree  = 1;
+	ps->val.opval->op_latefreed = 0;
     }
 
-    ss_save->yyss = yyss;
-    ss_save->yyssp = yyssp;
-    ss_save->yyvsp = yyvsp;
-    ss_save->yypsp = yypsp;
-    ss_save->yylen = 0;
+    parser->reduce_len = 0;
 
-    if (yyss + yystacksize - 1 <= yyssp) {
-	 /* Get the current used size of the three stacks, in elements.  */
-	 const YYSIZE_T yysize = yyssp - yyss + 1;
+    {
+	size_t size = ps - &parser->stack[0] + 1;
 
-	 /* Extend the stack our own way.  */
-	 if (YYMAXDEPTH <= yystacksize)
-	       goto yyoverflowlab;
-	 yystacksize *= 2;
-	 if (YYMAXDEPTH < yystacksize)
-	       yystacksize = YYMAXDEPTH;
+	/* grow the stack? We always leave 1 spare slot,
+	 * in case of a '' -> 'foo' reduction */
 
-	 SvGROW(yyss_sv, yystacksize * sizeof(short));
-	 SvGROW(yyvs_sv, yystacksize * sizeof(YYSTYPE));
-	 SvGROW(yyps_sv, yystacksize * sizeof(AV*));
-	 yyss = (short *) SvPVX(yyss_sv);
-	 yyvs = (YYSTYPE *) SvPVX(yyvs_sv);
-	 yyps = (AV **) SvPVX(yyps_sv);
-#ifdef DEBUGGING
-	 SvGROW(yyns_sv, yystacksize * sizeof(char *));
-	 /* XXX This seems strange to cast char * to char ** */
-	 yyns = (const char **) SvPVX(yyns_sv);
-	 if (! yyns)
-	       goto yyoverflowlab;
-	 yynsp = yyns + yysize - 1;
-#endif
-	 if (!yyss || ! yyvs || ! yyps)
-	       goto yyoverflowlab;
+	if (size >= parser->stack_size - 1) {
+	    /* this will croak on insufficient memory */
+	    parser->stack_size *= 2;
+	    parser = (yy_parser*) SvGROW(parser_sv, sizeof(yy_parser)
+			    + (parser->stack_size-1) * sizeof(yy_stack_frame));
 
-	 yyssp = yyss + yysize - 1;
-	 yyvsp = yyvs + yysize - 1;
-	 yypsp = yyps + yysize - 1;
+	    /* readdress any pointers into realloced parser object */
+	    ps = parser->ps = &parser->stack[0] + size -1;
 
-
-	 YYDPRINTF ((Perl_debug_log, "Stack size increased to %lu\n",
-				   (unsigned long int) yystacksize));
-
-	 if (yyss + yystacksize - 1 <= yyssp)
-	       YYABORT;
-
-	ss_save->yyss = yyss;
-	ss_save->yyssp = yyssp;
-	ss_save->yyvsp = yyvsp;
-	ss_save->yypsp = yypsp;
-	ss_save->yylen = 0;
+	    YYDPRINTF((Perl_debug_log,
+			    "parser stack size increased to %lu frames\n",
+			    (unsigned long int)parser->stack_size));
+	}
     }
 
 /* Do appropriate processing given the current state.  */
 /* Read a lookahead token if we need one and don't already have one.  */
-/* yyresume: */
 
     /* First try to decide what to do without reference to lookahead token.  */
 
@@ -543,13 +465,13 @@ Perl_yyparse (pTHX)
     if (yychar != YYEOF)
 	yychar = YYEMPTY;
 
-    *++yyssp = yyn;
-    *++yyvsp = yylval;
-    *++yypsp = PL_comppad;
+    YYPUSHSTACK;
+    ps->state   = yyn;
+    ps->val     = yylval;
+    ps->comppad = PL_comppad;
 #ifdef DEBUGGING
-    *++yynsp = (const char *)(yytname[yytoken]);
+    ps->name    = (const char *)(yytname[yytoken]);
 #endif
-
 
     /* Count tokens shifted since error; after three, turn off error
 	  status.  */
@@ -584,19 +506,13 @@ Perl_yyparse (pTHX)
       users should not rely upon it.  Assigning to YYVAL
       unconditionally makes the parser a bit smaller, and it avoids a
       GCC warning that YYVAL may be used uninitialized.  */
-    yyval = yyvsp[1-yylen];
+    yyval = ps[1-yylen].val;
 
-    YY_STACK_PRINT (yyss, yyssp, yyvs, yyns);
+    YY_STACK_PRINT(parser);
     YY_REDUCE_PRINT (yyn);
 
-    /* running external code may trigger a die (eg 'use nosuchmodule'):
-     * record the current stack state so that an unwind will
-     * free all the pesky OPs lounging around on the parse stack */
-    ss_save->yyss = yyss;
-    ss_save->yyssp = yyssp;
-    ss_save->yyvsp = yyvsp;
-    ss_save->yypsp = yypsp;
-    ss_save->yylen = yylen;
+    /* if we croak during a reduce, this many tokens need special clean up */
+    parser->reduce_len = yylen;
 
     switch (yyn) {
 
@@ -633,41 +549,36 @@ Perl_yyparse (pTHX)
     {
 	int i;
 	for (i=0; i< yylen; i++) {
-	    if (yy_type_tab[yystos[yyssp[-i]]] == toketype_opval
-		&& yyvsp[-i].opval)
+	    if (yy_type_tab[yystos[ps[-i].state]] == toketype_opval
+		&& ps[-i].val.opval)
 	    {
-		yyvsp[-i].opval->op_latefree = 0;
-		if (yyvsp[-i].opval->op_latefreed)
-		    op_free(yyvsp[-i].opval);
+		ps[-i].val.opval->op_latefree = 0;
+		if (ps[-i].val.opval->op_latefreed)
+		    op_free(ps[-i].val.opval);
 	    }
 	}
     }
 
-    yyvsp -= yylen;
-    yyssp -= yylen;
-    yypsp -= yylen;
-#ifdef DEBUGGING
-    yynsp -= yylen;
-#endif
+    parser->ps = ps -= (yylen-1);
 
     /* Now shift the result of the reduction.  Determine what state
 	  that goes to, based on the state we popped back to and the rule
 	  number reduced by.  */
 
-    *++yyvsp = yyval;
-    *++yypsp = PL_comppad;
+    ps->val     = yyval;
+    ps->comppad = PL_comppad;
 #ifdef DEBUGGING
-    *++yynsp = (const char *)(yytname [yyr1[yyn]]);
+    ps->name    = (const char *)(yytname [yyr1[yyn]]);
 #endif
 
     yyn = yyr1[yyn];
 
-    yystate = yypgoto[yyn - YYNTOKENS] + *yyssp;
-    if (0 <= yystate && yystate <= YYLAST && yycheck[yystate] == *yyssp)
+    yystate = yypgoto[yyn - YYNTOKENS] + ps[-1].state;
+    if (0 <= yystate && yystate <= YYLAST && yycheck[yystate] == ps[-1].state)
 	yystate = yytable[yystate];
     else
 	yystate = yydefgoto[yyn - YYNTOKENS];
-    *++yyssp = yystate;
+    ps->state = yystate;
 
     goto yynewstate;
 
@@ -692,17 +603,17 @@ Perl_yyparse (pTHX)
 	    /* Pop the error token.  */
 	    YYPOPSTACK;
 	    /* Pop the rest of the stack.  */
-	    while (yyss < yyssp) {
-		YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp);
-		if (yy_type_tab[yystos[*yyssp]] == toketype_opval
-			&& yyvsp->opval)
+	    while (ps > &parser->stack[0]) {
+		YYDSYMPRINTF ("Error: popping", yystos[ps->state], &ps->val);
+		if (yy_type_tab[yystos[ps->state]] == toketype_opval
+			&& ps->val.opval)
 		{
 		    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
-		    if (*yypsp != PL_comppad) {
-			PAD_RESTORE_LOCAL(*yypsp);
+		    if (ps->comppad != PL_comppad) {
+			PAD_RESTORE_LOCAL(ps->comppad);
 		    }
-		    yyvsp->opval->op_latefree  = 0;
-		    op_free(yyvsp->opval);
+		    ps->val.opval->op_latefree  = 0;
+		    op_free(ps->val.opval);
 		}
 		YYPOPSTACK;
 	    }
@@ -737,26 +648,22 @@ Perl_yyparse (pTHX)
 	}
 
 	/* Pop the current state because it cannot handle the error token.  */
-	if (yyssp == yyss)
+	if (ps == &parser->stack[0])
 	    YYABORT;
 
-	YYDSYMPRINTF ("Error: popping", yystos[*yyssp], yyvsp);
-	if (yy_type_tab[yystos[*yyssp]] == toketype_opval && yyvsp->opval) {
+	YYDSYMPRINTF ("Error: popping", yystos[ps->state], &ps->val);
+	if (yy_type_tab[yystos[ps->state]] == toketype_opval && ps->val.opval) {
 	    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
-	    if (*yypsp != PL_comppad) {
-		PAD_RESTORE_LOCAL(*yypsp);
+	    if (ps->comppad != PL_comppad) {
+		PAD_RESTORE_LOCAL(ps->comppad);
 	    }
-	    yyvsp->opval->op_latefree  = 0;
-	    op_free(yyvsp->opval);
+	    ps->val.opval->op_latefree  = 0;
+	    op_free(ps->val.opval);
 	}
-	yyvsp--;
-	yypsp--;
-#ifdef DEBUGGING
-	yynsp--;
-#endif
-	yystate = *--yyssp;
+	YYPOPSTACK;
+	yystate = ps->state;
 
-	YY_STACK_PRINT (yyss, yyssp, yyvs, yyns);
+	YY_STACK_PRINT(parser);
     }
 
     if (yyn == YYFINAL)
@@ -764,11 +671,12 @@ Perl_yyparse (pTHX)
 
     YYDPRINTF ((Perl_debug_log, "Shifting error token, "));
 
-    *++yyssp = yyn;
-    *++yyvsp = yylval;
-    *++yypsp = PL_comppad;
+    YYPUSHSTACK;
+    ps->state   = yyn;
+    ps->val     = yylval;
+    ps->comppad = PL_comppad;
 #ifdef DEBUGGING
-    *++yynsp ="<err>";
+    ps->name    ="<err>";
 #endif
 
     goto yynewstate;
@@ -779,6 +687,7 @@ Perl_yyparse (pTHX)
   `-------------------------------------*/
   yyacceptlab:
     yyresult = 0;
+    parser->ps = &parser->stack[0]; /* disable cleanup */
     goto yyreturn;
 
   /*-----------------------------------.
@@ -788,19 +697,8 @@ Perl_yyparse (pTHX)
     yyresult = 1;
     goto yyreturn;
 
-  /*----------------------------------------------.
-  | yyoverflowlab -- parser overflow comes here.  |
-  `----------------------------------------------*/
-  yyoverflowlab:
-    yyerror ("parser stack overflow");
-    yyresult = 2;
-    /* Fall through.  */
-
   yyreturn:
-
-    ss_save->yyss = NULL;	/* disarm parse stack cleanup */
     LEAVE;			/* force stack free before we return */
-
     return yyresult;
 }
 

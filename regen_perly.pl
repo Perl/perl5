@@ -175,6 +175,11 @@ sub extract {
     # C<#line 188 "perlytmp.c"> gets picked up by make depend, so remove them.
     $actlines =~ s/^#line \d+ "\Q$tmpc_file\E".*$//gm;
 
+    # convert yyvsp[nnn] into ps[nnn].val
+
+    $actlines =~ s/yyvsp\[(.*?)\]/ps[$1].val/g
+	or die "Can't convert value stack name\n";
+
     return $actlines. "\n", $tablines. "\n";
 }
 
