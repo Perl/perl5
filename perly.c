@@ -484,25 +484,20 @@ Perl_yyparse (pTHX)
     yynsp = yyns;
 #endif
 
-    yystate = 0;
+    *yyssp = 0;
+    yyvsp->ival = 0;
     yyerrstatus = 0;
     yynerrs = 0;
     yychar = YYEMPTY;		/* Cause a token to be read.  */
-
-    goto yysetstate;
 
 /*------------------------------------------------------------.
 | yynewstate -- Push a new state, which is found in yystate.  |
 `------------------------------------------------------------*/
   yynewstate:
-    /* In all cases, when you get here, the value and location stacks
-	  have just been pushed. so pushing a state here evens the stacks.
-	  */
-    yyssp++;
 
-  yysetstate:
+    yystate = *yyssp;
+
     YYDPRINTF ((Perl_debug_log, "Entering state %d\n", yystate));
-    *yyssp = yystate;
 
     if (yy_type_tab[yystos[yystate]] == toketype_opval && yyvsp->opval) {
 	yyvsp->opval->op_latefree  = 1;
@@ -628,6 +623,7 @@ Perl_yyparse (pTHX)
     if (yychar != YYEOF)
 	yychar = YYEMPTY;
 
+    *++yyssp = yyn;
     *++yyvsp = yylval;
     *++yypsp = PL_comppad;
 #ifdef DEBUGGING
@@ -639,8 +635,6 @@ Perl_yyparse (pTHX)
 	  status.  */
     if (yyerrstatus)
 	yyerrstatus--;
-
-    yystate = yyn;
 
     goto yynewstate;
 
@@ -736,14 +730,15 @@ Perl_yyparse (pTHX)
     yynsp -= yylen;
 #endif
 
+    /* Now shift the result of the reduction.  Determine what state
+	  that goes to, based on the state we popped back to and the rule
+	  number reduced by.  */
+
     *++yyvsp = yyval;
     *++yypsp = PL_comppad;
 #ifdef DEBUGGING
     *++yynsp = (const char *)(yytname [yyr1[yyn]]);
 #endif
-    /* Now shift the result of the reduction.  Determine what state
-	  that goes to, based on the state we popped back to and the rule
-	  number reduced by.  */
 
     yyn = yyr1[yyn];
 
@@ -752,6 +747,8 @@ Perl_yyparse (pTHX)
 	yystate = yytable[yystate];
     else
 	yystate = yydefgoto[yyn - YYNTOKENS];
+    *++yyssp = yystate;
+
     goto yynewstate;
 
 
@@ -893,13 +890,12 @@ Perl_yyparse (pTHX)
 
     YYDPRINTF ((Perl_debug_log, "Shifting error token, "));
 
+    *++yyssp = yyn;
     *++yyvsp = yylval;
     *++yypsp = PL_comppad;
 #ifdef DEBUGGING
     *++yynsp ="<err>";
 #endif
-
-    yystate = yyn;
 
     goto yynewstate;
 
