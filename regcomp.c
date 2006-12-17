@@ -1206,7 +1206,7 @@ is the recommended Unicode-aware way of saying
                                                                 \
     if ( noper_next < tail ) {                                  \
         if (!trie->jump)                                        \
-            trie->jump = PerlMemShared_calloc( word_count + 1, sizeof(U16) ); \
+            trie->jump = (U16 *) PerlMemShared_calloc( word_count + 1, sizeof(U16) ); \
         trie->jump[curword] = (U16)(noper_next - convert);      \
         if (!jumper)                                            \
             jumper = noper_next;                                \
@@ -1220,7 +1220,7 @@ is the recommended Unicode-aware way of saying
         /* we only allocate the nextword buffer when there    */\
         /* a dupe, so first time we have to do the allocation */\
         if (!trie->nextword)                                    \
-            trie->nextword =					\
+            trie->nextword = (U16 *)					\
 		PerlMemShared_calloc( word_count + 1, sizeof(U16));	\
         while ( trie->nextword[dupe] )                          \
             dupe= trie->nextword[dupe];                         \
@@ -1287,14 +1287,14 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
     PERL_UNUSED_ARG(depth);
 #endif
 
-    trie = PerlMemShared_calloc( 1, sizeof(reg_trie_data) );
+    trie = (reg_trie_data *) PerlMemShared_calloc( 1, sizeof(reg_trie_data) );
     trie->refcount = 1;
     trie->startstate = 1;
     trie->wordcount = word_count;
     RExC_rxi->data->data[ data_slot ] = (void*)trie;
-    trie->charmap = PerlMemShared_calloc( 256, sizeof(U16) );
+    trie->charmap = (U16 *) PerlMemShared_calloc( 256, sizeof(U16) );
     if (!(UTF && folder))
-	trie->bitmap = PerlMemShared_calloc( ANYOF_BITMAP_SIZE, 1 );
+	trie->bitmap = (char *) PerlMemShared_calloc( ANYOF_BITMAP_SIZE, 1 );
     DEBUG_r({
         trie_words = newAV();
     });
@@ -1406,7 +1406,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 		(int)TRIE_CHARCOUNT(trie), trie->uniquecharcount,
 		(int)trie->minlen, (int)trie->maxlen )
     );
-    trie->wordlen = PerlMemShared_calloc( word_count, sizeof(U32) );
+    trie->wordlen = (U32 *) PerlMemShared_calloc( word_count, sizeof(U32) );
 
     /*
         We now know what we are dealing with in terms of unique chars and
@@ -1449,8 +1449,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             "%*sCompiling trie using list compiler\n",
             (int)depth * 2 + 2, ""));
 	
-	trie->states = PerlMemShared_calloc( TRIE_CHARCOUNT(trie) + 2,
-					     sizeof(reg_trie_state) );
+	trie->states = (reg_trie_state *)
+	    PerlMemShared_calloc( TRIE_CHARCOUNT(trie) + 2,
+				  sizeof(reg_trie_state) );
         TRIE_LIST_NEW(1);
         next_alloc = 2;
 
@@ -1514,8 +1515,10 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 
         /* next alloc is the NEXT state to be allocated */
         trie->statecount = next_alloc; 
-        trie->states = PerlMemShared_realloc( trie->states, next_alloc
-					      * sizeof(reg_trie_state) );
+        trie->states = (reg_trie_state *)
+	    PerlMemShared_realloc( trie->states,
+				   next_alloc
+				   * sizeof(reg_trie_state) );
 
         /* and now dump it out before we compress it */
         DEBUG_TRIE_COMPILE_MORE_r(dump_trie_interim_list(trie, widecharmap,
@@ -1523,8 +1526,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
 							 depth+1)
         );
 
-        trie->trans
-	    = PerlMemShared_calloc( transcount, sizeof(reg_trie_trans) );
+        trie->trans = (reg_trie_trans *)
+	    PerlMemShared_calloc( transcount, sizeof(reg_trie_trans) );
         {
             U32 state;
             U32 tp = 0;
@@ -1555,8 +1558,8 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                     }
                     if ( transcount < tp + maxid - minid + 1) {
                         transcount *= 2;
-			trie->trans
-			    = PerlMemShared_realloc( trie->trans,
+			trie->trans = (reg_trie_trans *)
+			    PerlMemShared_realloc( trie->trans,
 						     transcount
 						     * sizeof(reg_trie_trans) );
                         Zero( trie->trans + (transcount / 2), transcount / 2 , reg_trie_trans );
@@ -1638,11 +1641,13 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             "%*sCompiling trie using table compiler\n",
             (int)depth * 2 + 2, ""));
 
-	trie->trans = PerlMemShared_calloc( ( TRIE_CHARCOUNT(trie) + 1 )
-					    * trie->uniquecharcount + 1,
-					    sizeof(reg_trie_trans) );
-        trie->states = PerlMemShared_calloc( TRIE_CHARCOUNT(trie) + 2,
-					     sizeof(reg_trie_state) );
+	trie->trans = (reg_trie_trans *)
+	    PerlMemShared_calloc( ( TRIE_CHARCOUNT(trie) + 1 )
+				  * trie->uniquecharcount + 1,
+				  sizeof(reg_trie_trans) );
+        trie->states = (reg_trie_state *)
+	    PerlMemShared_calloc( TRIE_CHARCOUNT(trie) + 2,
+				  sizeof(reg_trie_state) );
         next_alloc = trie->uniquecharcount + 1;
 
 
@@ -1799,8 +1804,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
             }
         }
         trie->lasttrans = pos + 1;
-        trie->states = PerlMemShared_realloc( trie->states, laststate
-					      * sizeof(reg_trie_state) );
+        trie->states = (reg_trie_state *)
+	    PerlMemShared_realloc( trie->states, laststate
+				   * sizeof(reg_trie_state) );
         DEBUG_TRIE_COMPILE_MORE_r(
                 PerlIO_printf( Perl_debug_log,
 		    "%*sAlloc: %d Orig: %"IVdf" elements, Final:%"IVdf". Savings of %%%5.2f\n",
@@ -1820,8 +1826,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
                 (UV)trie->lasttrans)
     );
     /* resize the trans array to remove unused space */
-    trie->trans = PerlMemShared_realloc( trie->trans, trie->lasttrans
-					 * sizeof(reg_trie_trans) );
+    trie->trans = (reg_trie_trans *)
+	PerlMemShared_realloc( trie->trans, trie->lasttrans
+			       * sizeof(reg_trie_trans) );
 
     /* and now dump out the compressed format */
     DEBUG_TRIE_COMPILE_r(dump_trie(trie, widecharmap, revcharmap, depth+1));
@@ -2088,13 +2095,13 @@ S_make_trie_failtable(pTHX_ RExC_state_t *pRExC_state, regnode *source,  regnode
 
 
     ARG_SET( stclass, data_slot );
-    aho = PerlMemShared_calloc( 1, sizeof(reg_ac_data) );
+    aho = (reg_ac_data *) PerlMemShared_calloc( 1, sizeof(reg_ac_data) );
     RExC_rxi->data->data[ data_slot ] = (void*)aho;
     aho->trie=trie_offset;
     aho->states=(reg_trie_state *)PerlMemShared_malloc( numstates * sizeof(reg_trie_state) );
     Copy( trie->states, aho->states, numstates, reg_trie_state );
     Newxz( q, numstates, U32);
-    aho->fail = PerlMemShared_calloc( numstates, sizeof(U32) );
+    aho->fail = (U32 *) PerlMemShared_calloc( numstates, sizeof(U32) );
     aho->refcount = 1;
     fail = aho->fail;
     /* initialize fail[0..1] to be 1 so that we always have
@@ -4243,12 +4250,12 @@ reStudy:
 	    regnode *trie_op;
 	    /* this can happen only on restudy */
 	    if ( OP(first) == TRIE ) {
-                struct regnode_1 *trieop =
+                struct regnode_1 *trieop = (struct regnode_1 *)
 		    PerlMemShared_calloc(1, sizeof(struct regnode_1));
                 StructCopy(first,trieop,struct regnode_1);
                 trie_op=(regnode *)trieop;
             } else {
-                struct regnode_charclass *trieop =
+                struct regnode_charclass *trieop = (struct regnode_charclass *)
 		    PerlMemShared_calloc(1, sizeof(struct regnode_charclass));
                 StructCopy(first,trieop,struct regnode_charclass);
                 trie_op=(regnode *)trieop;
