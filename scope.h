@@ -219,11 +219,15 @@ Closing bracket on a callback.  See C<ENTER> and L<perlcall>.
 #  define SAVECOPSTASH_FREE(c)	SAVESHAREDPV(CopSTASHPV(c))
 #  define SAVECOPFILE(c)	SAVEPPTR(CopFILE(c))
 #  define SAVECOPFILE_FREE(c)	SAVESHAREDPV(CopFILE(c))
+#  define SAVECOPLABEL(c)	SAVEPPTR(CopLABEL(c))
+#  define SAVECOPLABEL_FREE(c)	SAVESHAREDPV(CopLABEL(c))
 #else
 #  define SAVECOPSTASH(c)	SAVESPTR(CopSTASH(c))
 #  define SAVECOPSTASH_FREE(c)	SAVECOPSTASH(c)	/* XXX not refcounted */
 #  define SAVECOPFILE(c)	SAVESPTR(CopFILEGV(c))
 #  define SAVECOPFILE_FREE(c)	SAVEGENERICSV(CopFILEGV(c))
+#  define SAVECOPLABEL(c)	SAVEPPTR(CopLABEL(c))
+#  define SAVECOPLABEL_FREE(c)	SAVEPPTR(CopLABEL(c))
 #endif
 
 #define SAVECOPLINE(c)		SAVEI32(CopLINE(c))

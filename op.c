@@ -514,19 +514,7 @@ clear_pmop:
 STATIC void
 S_cop_free(pTHX_ COP* cop)
 {
-    if (cop->cop_label) {
-#ifdef PERL_TRACK_MEMPOOL
-	Malloc_t ptr = (Malloc_t)(cop->cop_label - sTHX);
-	struct perl_memory_debug_header *const header
-		= (struct perl_memory_debug_header *)ptr;
-	/* Only the thread that allocated us can free us. */
-	if (header->interpreter == aTHX)
-#endif
-	{
-	    Safefree(cop->cop_label);
-	    cop->cop_label = NULL;
-	}
-    }
+    CopLABEL_free(cop);
     CopFILE_free(cop);
     CopSTASH_free(cop);
     if (! specialWARN(cop->cop_warnings))
@@ -4004,7 +3992,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
     cop->op_next = (OP*)cop;
 
     if (label) {
-	cop->cop_label = label;
+	CopLABEL_set(cop, label);
 	PL_hints |= HINT_BLOCK_SCOPE;
     }
     cop->cop_seq = seq;
