@@ -91,22 +91,6 @@ int sys$getdviw
 	void * astprm,
 	void * nullarg);
 
-#ifdef USE_VMS_DECTERM
-
-/* Routine to create a decterm for use with the Perl debugger */
-/* No headers, this information was found in the Programming Concepts Manual */
-
-int decw$term_port
-   (const struct dsc$descriptor_s * display,
-    const struct dsc$descriptor_s * setup_file,
-    const struct dsc$descriptor_s * customization,
-    struct dsc$descriptor_s * result_device_name,
-    unsigned short * result_device_name_length,
-    void * controller,
-    void * char_buffer,
-    void * char_change_buffer);
-#endif
-
 #if __CRTL_VER >= 70300000 && !defined(__VAX)
 
 static int set_feature_default(const char *name, int value)
@@ -160,6 +144,21 @@ return 0;
 #  define RTL_USES_UTC 1
 #endif
 
+#ifdef USE_VMS_DECTERM
+
+/* Routine to create a decterm for use with the Perl debugger */
+/* No headers, this information was found in the Programming Concepts Manual */
+
+int decw$term_port
+   (const struct dsc$descriptor_s * display,
+    const struct dsc$descriptor_s * setup_file,
+    const struct dsc$descriptor_s * customization,
+    struct dsc$descriptor_s * result_device_name,
+    unsigned short * result_device_name_length,
+    void * controller,
+    void * char_buffer,
+    void * char_change_buffer);
+#endif
 
 /* gcc's header files don't #define direct access macros
  * corresponding to VAXC's variant structs */
