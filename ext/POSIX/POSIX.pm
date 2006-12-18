@@ -1,6 +1,8 @@
 package POSIX;
+use strict;
+use warnings;
 
-our(@ISA, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD, %SIGRT) = ();
+our(@ISA, %EXPORT_TAGS, @EXPORT_OK, @EXPORT, $AUTOLOAD, %SIGRT) = ();
 
 our $VERSION = "1.12";
 
@@ -61,8 +63,6 @@ package POSIX::SigAction;
 use AutoLoader 'AUTOLOAD';
 
 package POSIX::SigRt;
-
-use strict;
 
 use AutoLoader 'AUTOLOAD';
 
