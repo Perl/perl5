@@ -255,7 +255,7 @@ package Maintainers;
 	'ExtUtils::MakeMaker' =>
 		{
 		'MAINTAINER'	=> 'mschwern',
-		'FILES'	=> q[lib/ExtUtils/{Command,Liblist,MakeMaker,Mkbootstrap,Mksymlists,MM*,MY,testlib}.pm lib/ExtUtils/{Command,Liblist,MakeMaker}
+		'FILES'	=> q[lib/ExtUtils/{Liblist,MakeMaker,Mkbootstrap,Mksymlists,MM*,MY,testlib}.pm lib/ExtUtils/{Command,Liblist,MakeMaker}
 				     lib/ExtUtils/t t/lib/MakeMaker t/lib/TieIn.pm t/lib/TieOut.pm],
 		'CPAN'		=> 1,
 		},
