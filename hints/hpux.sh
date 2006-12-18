@@ -643,8 +643,14 @@ EOM
 	    set `echo X "$libswanted "| sed -e 's/ c / pthread c /'`
 	    shift
 	    libswanted="$*"
-	    fi
 
+	    # HP-UX 11.X seems to have no easy
+	    # way of detecting these *time_r protos.
+	    d_gmtime_r_proto='define'
+	    gmtime_r_proto='REENTRANT_PROTO_S_TS'
+	    d_localtime_r_proto='define'
+	    localtime_r_proto='REENTRANT_PROTO_S_TS'
+	    fi
 	;;
     esac
 EOCBU
