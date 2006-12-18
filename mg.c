@@ -1290,6 +1290,10 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
     return 0;
 }
 
+#ifndef SIG_PENDING_DIE_COUNT
+#  define SIG_PENDING_DIE_COUNT 120
+#endif
+
 static void
 S_raise_signal(pTHX_ int sig)
 {
@@ -1297,7 +1301,9 @@ S_raise_signal(pTHX_ int sig)
     /* Set a flag to say this signal is pending */
     PL_psig_pend[sig]++;
     /* And one to say _a_ signal is pending */
-    PL_sig_pending = 1;
+    if (++PL_sig_pending >= SIG_PENDING_DIE_COUNT)
+	Perl_croak(aTHX_ "Maximal count of pending signals (%lu) exceeded",
+		(unsigned long)SIG_PENDING_DIE_COUNT);
 }
 
 Signal_t

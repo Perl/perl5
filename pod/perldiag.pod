@@ -2285,6 +2285,14 @@ rules and perl was unable to guess how to make more progress.
 (F) You tried to unpack something that didn't comply with UTF-8 encoding
 rules and perl was unable to guess how to make more progress.
 
+=item Maximal count of pending signals (%s) exceeded
+
+(F) Perl aborted due to a too important number of signals pending. This
+usually indicates that your operating system tried to deliver signals
+too fast (with a very high priority), starving the perl process from
+resources it would need to reach a point where it can process signals
+safely. (See L<perlipc/"Deferred Signals (Safe Signals)">.)
+
 =item %s matches null string many times in regex; marked by <-- HERE in m/%s/
 
 (W regexp) The pattern you've specified would be an infinite loop if the
