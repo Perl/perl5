@@ -34,47 +34,48 @@ public:
     inline char* GetCurrentDirectoryA(int dwBufSize, char *lpBuffer)
     {
 	char* ptr = dirTableA[nDefault];
-	while (dwBufSize--)
+	while (--dwBufSize)
 	{
 	    if ((*lpBuffer++ = *ptr++) == '\0')
 		break;
 	}
-	return lpBuffer;
+        *lpBuffer = '\0';
+	return /* unused */ NULL;
     };
     inline WCHAR* GetCurrentDirectoryW(int dwBufSize, WCHAR *lpBuffer)
     {
 	WCHAR* ptr = dirTableW[nDefault];
-	while (dwBufSize--)
+	while (--dwBufSize)
 	{
 	    if ((*lpBuffer++ = *ptr++) == '\0')
 		break;
 	}
-	return lpBuffer;
+        *lpBuffer = '\0';
+	return /* unused */ NULL;
     };
-
 
     DWORD CalculateEnvironmentSpace(void);
     LPSTR BuildEnvironmentSpace(LPSTR lpStr);
 
 protected:
     int SetDirA(char const *pPath, int index);
+    int SetDirW(WCHAR const *pPath, int index);
     void FromEnvA(char *pEnv, int index);
+    void FromEnvW(WCHAR *pEnv, int index);
+
     inline const char *GetDefaultDirA(void)
     {
 	return dirTableA[nDefault];
     };
-
     inline void SetDefaultDirA(char const *pPath, int index)
     {
 	SetDirA(pPath, index);
 	nDefault = index;
     };
-    int SetDirW(WCHAR const *pPath, int index);
     inline const WCHAR *GetDefaultDirW(void)
     {
 	return dirTableW[nDefault];
     };
-
     inline void SetDefaultDirW(WCHAR const *pPath, int index)
     {
 	SetDirW(pPath, index);
@@ -134,9 +135,6 @@ VDir::VDir(int bManageDir /* = 1 */)
 void VDir::Init(VDir* pDir, VMem *p)
 {
     int index;
-    DWORD driveBits;
-    int nSave;
-    char szBuffer[MAX_PATH*driveCount];
 
     pMem = p;
     if (pDir) {
@@ -146,23 +144,47 @@ void VDir::Init(VDir* pDir, VMem *p)
 	nDefault = pDir->GetDefault();
     }
     else {
-	nSave = bManageDirectory;
+	int bSave = bManageDirectory;
+	DWORD driveBits = GetLogicalDrives();
+        OSVERSIONINFO osver;
+
+        memset(&osver, 0, sizeof(osver));
+        osver.dwOSVersionInfoSize = sizeof(osver);
+        GetVersionEx(&osver);
+
 	bManageDirectory = 0;
-	driveBits = GetLogicalDrives();
-	if (GetLogicalDriveStrings(sizeof(szBuffer), szBuffer)) {
-	    char* pEnv = (char*)GetEnvironmentStrings();
-	    char* ptr = szBuffer;
-	    for (index = 0; index < driveCount; ++index) {
-		if (driveBits & (1<<index)) {
-		    ptr += SetDirA(ptr, index) + 1;
-		    FromEnvA(pEnv, index);
-		}
-	    }
-	    FreeEnvironmentStrings(pEnv);
-	}
-	SetDefaultA(".");
-	bManageDirectory = nSave;
-    }
+        if (osver.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS) {
+            char szBuffer[MAX_PATH*driveCount];
+            if (GetLogicalDriveStringsA(sizeof(szBuffer), szBuffer)) {
+                char* pEnv = (char*)GetEnvironmentStringsA();
+                char* ptr = szBuffer;
+                for (index = 0; index < driveCount; ++index) {
+                    if (driveBits & (1<<index)) {
+                        ptr += SetDirA(ptr, index) + 1;
+                        FromEnvA(pEnv, index);
+                    }
+                }
+                FreeEnvironmentStringsA(pEnv);
+            }
+            SetDefaultA(".");
+        }
+        else { /* Windows NT or later */
+            WCHAR szBuffer[MAX_PATH*driveCount];
+            if (GetLogicalDriveStringsW(sizeof(szBuffer), szBuffer)) {
+                WCHAR* pEnv = GetEnvironmentStringsW();
+                WCHAR* ptr = szBuffer;
+                for (index = 0; index < driveCount; ++index) {
+                    if (driveBits & (1<<index)) {
+                        ptr += SetDirW(ptr, index) + 1;
+                        FromEnvW(pEnv, index);
+                    }
+                }
+                FreeEnvironmentStringsW(pEnv);
+            }
+            SetDefaultW(L".");
+        }
+	bManageDirectory = bSave;
+  }
 }
 
 int VDir::SetDirA(char const *pPath, int index)
@@ -208,6 +230,18 @@ void VDir::FromEnvA(char *pEnv, int index)
 	}
 	else
 	    pEnv += strlen(pEnv)+1;
+    }
+}
+
+void VDir::FromEnvW(WCHAR *pEnv, int index)
+{   /* gets the directory for index from the environment variable. */
+    while (*pEnv != '\0') {
+	if ((pEnv[0] == '=') && (DriveIndex((char)pEnv[1]) == index)) {
+	    SetDirW(&pEnv[4], index);
+	    break;
+	}
+	else
+	    pEnv += wcslen(pEnv)+1;
     }
 }
 

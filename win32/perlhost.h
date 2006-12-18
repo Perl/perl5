@@ -21,6 +21,10 @@
 #include "vmem.h"
 #include "vdir.h"
 
+#ifndef WC_NO_BEST_FIT_CHARS
+#  define WC_NO_BEST_FIT_CHARS 0x00000400
+#endif
+
 START_EXTERN_C
 extern char *		g_win32_get_privlib(const char *pl);
 extern char *		g_win32_get_sitelib(const char *pl);
@@ -2236,20 +2240,52 @@ CPerlHost::FreeLocalEnvironmentStrings(LPSTR lpStr)
     Safefree(lpStr);
 }
 
+static char *
+get_valid_filename(pTHX_ WCHAR *widename)
+{
+    char *name;
+    BOOL use_default = FALSE;
+    size_t widelen = wcslen(widename)+1;
+    int len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, widename, widelen,
+                                  NULL, 0, NULL, NULL);
+    Newx(name, len, char);
+    WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, widename, widelen,
+                        name, len, NULL, &use_default);
+    if (use_default) {
+        WCHAR *shortname;
+        DWORD shortlen = GetShortPathNameW(widename, NULL, 0);
+        Newx(shortname, shortlen, WCHAR);
+        shortlen = GetShortPathNameW(widename, shortname, shortlen)+1;
+        len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, shortname, shortlen,
+                                  NULL, 0, NULL, NULL);
+        Renew(name, len, char);
+        WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, shortname, shortlen,
+                            name, len, NULL, NULL);
+        Safefree(shortname);
+    }
+    return name;
+}
+
 char*
 CPerlHost::GetChildDir(void)
 {
     dTHX;
-    int length;
     char* ptr;
-    Newx(ptr, MAX_PATH+1, char);
-    if(ptr) {
-	m_pvDir->GetCurrentDirectoryA(MAX_PATH+1, ptr);
-	length = strlen(ptr);
-	if (length > 3) {
-	    if ((ptr[length-1] == '\\') || (ptr[length-1] == '/'))
-		ptr[length-1] = 0;
-	}
+    size_t length;
+
+    if (IsWin95()) {
+        Newx(ptr, MAX_PATH+1, char);
+        m_pvDir->GetCurrentDirectoryA(MAX_PATH+1, ptr);
+    }
+    else {
+        WCHAR path[MAX_PATH+1];
+        m_pvDir->GetCurrentDirectoryW(MAX_PATH+1, path);
+        ptr = get_valid_filename(aTHX_ path);
+    }
+    length = strlen(ptr);
+    if (length > 3) {
+        if ((ptr[length-1] == '\\') || (ptr[length-1] == '/'))
+            ptr[length-1] = 0;
     }
     return ptr;
 }
