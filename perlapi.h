@@ -502,6 +502,8 @@ END_EXTERN_C
 #define PL_padix		(*Perl_Ipadix_ptr(aTHX))
 #undef  PL_padix_floor
 #define PL_padix_floor		(*Perl_Ipadix_floor_ptr(aTHX))
+#undef  PL_parser
+#define PL_parser		(*Perl_Iparser_ptr(aTHX))
 #undef  PL_patchlevel
 #define PL_patchlevel		(*Perl_Ipatchlevel_ptr(aTHX))
 #undef  PL_pending_ident
@@ -700,10 +702,6 @@ END_EXTERN_C
 #define PL_widesyscalls		(*Perl_Iwidesyscalls_ptr(aTHX))
 #undef  PL_xmlfp
 #define PL_xmlfp		(*Perl_Ixmlfp_ptr(aTHX))
-#undef  PL_yycharp
-#define PL_yycharp		(*Perl_Iyycharp_ptr(aTHX))
-#undef  PL_yylvalp
-#define PL_yylvalp		(*Perl_Iyylvalp_ptr(aTHX))
 #undef  PL_Sv
 #define PL_Sv			(*Perl_TSv_ptr(aTHX))
 #undef  PL_Xpv

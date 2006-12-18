@@ -2915,6 +2915,7 @@ overload.h			generated overload enum and name table
 overload.pl			generate overload.h
 pad.c				Scratchpad functions
 pad.h				Scratchpad headers
+parser.h			parser object header
 patchlevel.h			The current patch level of perl
 perlapi.c			Perl API functions
 perlapi.h			Perl API function declarations

@@ -4631,6 +4631,8 @@ Found in file sv.h
 X<SvUTF8>
 
 Returns a boolean indicating whether the SV contains UTF-8 encoded data.
+Call this after SvPV() in case any call to string overloading updates the
+internal flag.
 
 	bool	SvUTF8(SV* sv)
 

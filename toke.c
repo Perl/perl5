@@ -23,8 +23,7 @@
 #define PERL_IN_TOKE_C
 #include "perl.h"
 
-#define yychar	(*PL_yycharp)
-#define yylval	(*PL_yylvalp)
+#define yylval	(PL_parser->yylval)
 
 static const char ident_too_long[] = "Identifier too long";
 static const char commaless_variable_list[] = "comma-less variable list";
@@ -12381,6 +12380,7 @@ Perl_yyerror(pTHX_ const char *s)
     const char *context = NULL;
     int contlen = -1;
     SV *msg;
+    int yychar  = PL_parser->yychar;
 
     if (!yychar || (yychar == ';' && !PL_rsfp))
 	where = "at EOF";

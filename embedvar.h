@@ -312,6 +312,7 @@
 #define PL_pad_reset_pending	(vTHX->Ipad_reset_pending)
 #define PL_padix		(vTHX->Ipadix)
 #define PL_padix_floor		(vTHX->Ipadix_floor)
+#define PL_parser		(vTHX->Iparser)
 #define PL_patchlevel		(vTHX->Ipatchlevel)
 #define PL_pending_ident	(vTHX->Ipending_ident)
 #define PL_perl_destruct_level	(vTHX->Iperl_destruct_level)
@@ -411,8 +412,6 @@
 #define PL_warnhook		(vTHX->Iwarnhook)
 #define PL_widesyscalls		(vTHX->Iwidesyscalls)
 #define PL_xmlfp		(vTHX->Ixmlfp)
-#define PL_yycharp		(vTHX->Iyycharp)
-#define PL_yylvalp		(vTHX->Iyylvalp)
 
 #else	/* !MULTIPLICITY */
 
@@ -610,6 +609,7 @@
 #define PL_Ipad_reset_pending	PL_pad_reset_pending
 #define PL_Ipadix		PL_padix
 #define PL_Ipadix_floor		PL_padix_floor
+#define PL_Iparser		PL_parser
 #define PL_Ipatchlevel		PL_patchlevel
 #define PL_Ipending_ident	PL_pending_ident
 #define PL_Iperl_destruct_level	PL_perl_destruct_level
@@ -709,8 +709,6 @@
 #define PL_Iwarnhook		PL_warnhook
 #define PL_Iwidesyscalls	PL_widesyscalls
 #define PL_Ixmlfp		PL_xmlfp
-#define PL_Iyycharp		PL_yycharp
-#define PL_Iyylvalp		PL_yylvalp
 
 #define PL_TSv			PL_Sv
 #define PL_TXpv			PL_Xpv

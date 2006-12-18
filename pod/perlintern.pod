@@ -621,7 +621,7 @@ in PL_op->op_targ), wasting a name SV for them doesn't make sense.
 The SVs in the names AV have their PV being the name of the variable.
 NV+1..IV inclusive is a range of cop_seq numbers for which the name is
 valid.  For typed lexicals name SV is SVt_PVMG and SvSTASH points at the
-type.  For C<our> lexicals, the type is also SVt_PVGV, with the MAGIC slot
+type.  For C<our> lexicals, the type is also SVt_PVMG, with the OURSTASH slot
 pointing at the stash of the associated global (so that duplicate C<our>
 declarations in the same package can be detected).  SvCUR is sometimes
 hijacked to store the generation number during compilation.

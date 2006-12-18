@@ -34,24 +34,6 @@ typedef unsigned short int yytype_uint16;
 typedef short int yytype_int16;
 typedef signed char yysigned_char;
 
-typedef struct {
-    YYSTYPE val;    /* semantic value */
-    short   state;
-    AV	    *comppad; /* value of PL_comppad when this value was created */
-#ifdef DEBUGGING
-    const char  *name; /* token/rule name for -Dpv */
-#endif
-} yy_stack_frame;
-
-typedef struct {
-    int		    stack_size;
-    int		    reduce_len; /* XXX integrate with yylen ? */
-    yy_stack_frame  *ps;     /* current stack frame */
-    yy_stack_frame  stack[1]; /* will actually be as many as needed */
-} yy_parser;
-    
-
-
 #ifdef DEBUGGING
 #  define YYDEBUG 1
 #else
@@ -268,7 +250,7 @@ S_clear_yystack(pTHX_ const void *p)
 
     /* free any reducing ops (1st pass) */
 
-    for (i=0; i< parser->reduce_len; i++) {
+    for (i=0; i< parser->yylen; i++) {
 	if (yy_type_tab[yystos[ps[-i].state]] == toketype_opval
 	    && ps[-i].val.opval) {
 	    if (ps[-i].comppad != PL_comppad) {
@@ -309,32 +291,23 @@ Perl_yyparse (pTHX)
 #endif
 {
     dVAR;
-    int yychar; /* The lookahead symbol.  */
-    YYSTYPE yylval; /* The semantic value of the lookahead symbol.  */
-    int yynerrs; /* Number of syntax errors so far.  */
     register int yystate;
     register int yyn;
     int yyresult;
 
-    /* Number of tokens to shift before error messages enabled.  */
-    int yyerrstatus;
     /* Lookahead token as an internal (translated) token number.  */
-    int yytoken = 0;
+    int yytoken;
 
     SV *parser_sv;		    /* SV whose PVX holds the parser object */
-    yy_parser *parser;		    /* the parser object */
+    register yy_parser *parser;	    /* the parser object */
     register yy_stack_frame  *ps;   /* current parser stack frame */
 
 #define YYPOPSTACK   parser->ps = --ps
 #define YYPUSHSTACK  parser->ps = ++ps
 
     /* The variables used to return semantic value and location from the
-	  action routines.  */
+	  action routines: ie $$.  */
     YYSTYPE yyval;
-
-    /* When reducing, the number of symbols on the RHS of the reduced
-	  rule.  */
-    int yylen;
 
 #ifndef PERL_IN_MADLY_C
 #  ifdef PERL_MAD
@@ -346,15 +319,12 @@ Perl_yyparse (pTHX)
     YYDPRINTF ((Perl_debug_log, "Starting parse\n"));
 
     ENTER;			/* force stack free before we return */
-    SAVEVPTR(PL_yycharp);
-    SAVEVPTR(PL_yylvalp);
-    PL_yycharp = &yychar; /* so PL_yyerror() can access it */
-    PL_yylvalp = &yylval; /* so various functions in toke.c can access it */
+    SAVEVPTR(PL_parser);
 
     parser_sv = newSV(sizeof(yy_parser)
 			+ (YYINITDEPTH-1) * sizeof(yy_stack_frame));
     SAVEFREESV(parser_sv);
-    parser = (yy_parser*)  SvPVX(parser_sv);
+    PL_parser = parser = (yy_parser*)  SvPVX(parser_sv);
     ps = (yy_stack_frame*) &parser->stack[0];
     parser->ps = ps;
 
@@ -365,9 +335,8 @@ Perl_yyparse (pTHX)
 
 
     ps->state = 0;
-    yyerrstatus = 0;
-    yynerrs = 0;
-    yychar = YYEMPTY;		/* Cause a token to be read.  */
+    parser->yyerrstatus = 0;
+    parser->yychar = YYEMPTY;		/* Cause a token to be read.  */
 
 /*------------------------------------------------------------.
 | yynewstate -- Push a new state, which is found in yystate.  |
@@ -383,7 +352,7 @@ Perl_yyparse (pTHX)
 	ps->val.opval->op_latefreed = 0;
     }
 
-    parser->reduce_len = 0;
+    parser->yylen = 0;
 
     {
 	size_t size = ps - &parser->stack[0] + 1;
@@ -394,7 +363,8 @@ Perl_yyparse (pTHX)
 	if (size >= parser->stack_size - 1) {
 	    /* this will croak on insufficient memory */
 	    parser->stack_size *= 2;
-	    parser = (yy_parser*) SvGROW(parser_sv, sizeof(yy_parser)
+	    PL_parser = parser =
+			(yy_parser*) SvGROW(parser_sv, sizeof(yy_parser)
 			    + (parser->stack_size-1) * sizeof(yy_stack_frame));
 
 	    /* readdress any pointers into realloced parser object */
@@ -418,28 +388,28 @@ Perl_yyparse (pTHX)
     /* Not known => get a lookahead token if don't already have one.  */
 
     /* YYCHAR is either YYEMPTY or YYEOF or a valid lookahead symbol.  */
-    if (yychar == YYEMPTY) {
+    if (parser->yychar == YYEMPTY) {
 	YYDPRINTF ((Perl_debug_log, "Reading a token: "));
 #ifdef PERL_IN_MADLY_C
-	yychar = PL_madskills ? madlex() : yylex();
+	parser->yychar = PL_madskills ? madlex() : yylex();
 #else
-	yychar = yylex();
+	parser->yychar = yylex();
 #endif
 
 #  ifdef EBCDIC
-	if (yychar >= 0 && yychar < 255) {
-	    yychar = NATIVE_TO_ASCII(yychar);
+	if (parser->yychar >= 0 && parser->yychar < 255) {
+	    parser->yychar = NATIVE_TO_ASCII(parser->yychar);
 	}
 #  endif
     }
 
-    if (yychar <= YYEOF) {
-	yychar = yytoken = YYEOF;
+    if (parser->yychar <= YYEOF) {
+	parser->yychar = yytoken = YYEOF;
 	YYDPRINTF ((Perl_debug_log, "Now at end of input.\n"));
     }
     else {
-	yytoken = YYTRANSLATE (yychar);
-	YYDSYMPRINTF ("Next token is", yytoken, &yylval);
+	yytoken = YYTRANSLATE (parser->yychar);
+	YYDSYMPRINTF ("Next token is", yytoken, &parser->yylval);
     }
 
     /* If the proper action on seeing token YYTOKEN is to reduce or to
@@ -462,12 +432,12 @@ Perl_yyparse (pTHX)
     YYDPRINTF ((Perl_debug_log, "Shifting token %s, ", yytname[yytoken]));
 
     /* Discard the token being shifted unless it is eof.  */
-    if (yychar != YYEOF)
-	yychar = YYEMPTY;
+    if (parser->yychar != YYEOF)
+	parser->yychar = YYEMPTY;
 
     YYPUSHSTACK;
     ps->state   = yyn;
-    ps->val     = yylval;
+    ps->val     = parser->yylval;
     ps->comppad = PL_comppad;
 #ifdef DEBUGGING
     ps->name    = (const char *)(yytname[yytoken]);
@@ -475,8 +445,8 @@ Perl_yyparse (pTHX)
 
     /* Count tokens shifted since error; after three, turn off error
 	  status.  */
-    if (yyerrstatus)
-	yyerrstatus--;
+    if (parser->yyerrstatus)
+	parser->yyerrstatus--;
 
     goto yynewstate;
 
@@ -496,7 +466,7 @@ Perl_yyparse (pTHX)
   `-----------------------------*/
   yyreduce:
     /* yyn is the number of a rule to reduce with.  */
-    yylen = yyr2[yyn];
+    parser->yylen = yyr2[yyn];
 
     /* If YYLEN is nonzero, implement the default value of the action:
       "$$ = $1".
@@ -506,13 +476,10 @@ Perl_yyparse (pTHX)
       users should not rely upon it.  Assigning to YYVAL
       unconditionally makes the parser a bit smaller, and it avoids a
       GCC warning that YYVAL may be used uninitialized.  */
-    yyval = ps[1-yylen].val;
+    yyval = ps[1-parser->yylen].val;
 
     YY_STACK_PRINT(parser);
     YY_REDUCE_PRINT (yyn);
-
-    /* if we croak during a reduce, this many tokens need special clean up */
-    parser->reduce_len = yylen;
 
     switch (yyn) {
 
@@ -548,7 +515,7 @@ Perl_yyparse (pTHX)
      * freed; the rest need the flag resetting */
     {
 	int i;
-	for (i=0; i< yylen; i++) {
+	for (i=0; i< parser->yylen; i++) {
 	    if (yy_type_tab[yystos[ps[-i].state]] == toketype_opval
 		&& ps[-i].val.opval)
 	    {
@@ -559,7 +526,7 @@ Perl_yyparse (pTHX)
 	}
     }
 
-    parser->ps = ps -= (yylen-1);
+    parser->ps = ps -= (parser->yylen-1);
 
     /* Now shift the result of the reduction.  Determine what state
 	  that goes to, based on the state we popped back to and the rule
@@ -588,18 +555,17 @@ Perl_yyparse (pTHX)
   `------------------------------------*/
   yyerrlab:
     /* If not already recovering from an error, report this error.  */
-    if (!yyerrstatus) {
-	++yynerrs;
+    if (!parser->yyerrstatus) {
 	yyerror ("syntax error");
     }
 
 
-    if (yyerrstatus == 3) {
+    if (parser->yyerrstatus == 3) {
 	/* If just tried and failed to reuse lookahead token after an
 	      error, discard it.  */
 
 	/* Return failure if at end of input.  */
-	if (yychar == YYEOF) {
+	if (parser->yychar == YYEOF) {
 	    /* Pop the error token.  */
 	    YYPOPSTACK;
 	    /* Pop the rest of the stack.  */
@@ -620,8 +586,8 @@ Perl_yyparse (pTHX)
 	    YYABORT;
 	}
 
-	YYDSYMPRINTF ("Error: discarding", yytoken, &yylval);
-	yychar = YYEMPTY;
+	YYDSYMPRINTF ("Error: discarding", yytoken, &parser->yylval);
+	parser->yychar = YYEMPTY;
 
     }
 
@@ -634,7 +600,7 @@ Perl_yyparse (pTHX)
   | yyerrlab1 -- error raised explicitly by an action.  |
   `----------------------------------------------------*/
   yyerrlab1:
-    yyerrstatus = 3;	/* Each real token shifted decrements this.  */
+    parser->yyerrstatus = 3;	/* Each real token shifted decrements this.  */
 
     for (;;) {
 	yyn = yypact[yystate];
@@ -673,7 +639,7 @@ Perl_yyparse (pTHX)
 
     YYPUSHSTACK;
     ps->state   = yyn;
-    ps->val     = yylval;
+    ps->val     = parser->yylval;
     ps->comppad = PL_comppad;
 #ifdef DEBUGGING
     ps->name    ="<err>";

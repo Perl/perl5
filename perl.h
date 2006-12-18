@@ -3236,6 +3236,7 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #  define YYTOKENTYPE
 #endif
 #include "perly.h"
+#include "parser.h"
 
 #ifdef PERL_MAD
 struct nexttoken {
