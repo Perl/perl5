@@ -4653,6 +4653,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
     }
     if ((PL_envgv = gv_fetchpvs("ENV", GV_ADD|GV_NOTQUAL, SVt_PVHV))) {
 	HV *hv;
+	bool env_is_not_environ;
 	GvMULTI_on(PL_envgv);
 	hv = GvHVn(PL_envgv);
 	hv_magic(hv, NULL, PERL_MAGIC_env);
@@ -4665,7 +4666,8 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 	*/
 	if (!env)
 	    env = environ;
-	if (env != environ
+	env_is_not_environ = env != environ;
+	if (env_is_not_environ
 #  ifdef USE_ITHREADS
 	    && PL_curinterp == aTHX
 #  endif
@@ -4687,7 +4689,7 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 #endif
 	    sv = newSVpv(s+1, 0);
 	    (void)hv_store(hv, *env, s - *env, sv, 0);
-	    if (env != environ)
+	    if (env_is_not_environ)
 	        mg_set(sv);
 	    if (origenv != environ) {
 	      /* realloc has shifted us */
