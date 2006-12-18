@@ -2538,7 +2538,7 @@ doc_inst_perl:
 		MAP_LIBPERL "$(MAP_LIBPERL)" \
 		>> }.$self->catfile('$(DESTINSTALLARCHLIB)','perllocal.pod').q{
 
-};
+} if -f 'Makefile.PL';
 
     push @m, q{
 inst_perl: pure_inst_perl doc_inst_perl
@@ -3415,6 +3415,7 @@ sub test {
     }
     # note: 'test.pl' name is also hardcoded in init_dirscan()
     my(@m);
+    my $subdirs_test = ($self->{DIR} && @{$self->{DIR}} ? 'subdirs-test' : '');
     push(@m,"
 TEST_VERBOSE=0
 TEST_TYPE=test_\$(LINKTYPE)
@@ -3424,17 +3425,17 @@ TESTDB_SW = -d
 
 testdb :: testdb_\$(LINKTYPE)
 
-test :: \$(TEST_TYPE)
+test :: \$(TEST_TYPE) $subdirs_test
 ");
 
     foreach my $dir (@{ $self->{DIR} }) {
         my $test = $self->oneliner(sprintf <<'CODE', $dir);
 chdir '%s';  
-system '$(MAKE) test $(PASTHRU)' 
+system '$(MAKE) $(USEMAKEFILE) $(FIRST_MAKEFILE) test $(PASTHRU)' 
     if -f '$(FIRST_MAKEFILE)';
 CODE
 
-        push(@m, "\t\$(NOECHO) $test\n");
+        push(@m, "\nsubdirs-test ::\n\t\$(NOECHO) $test\n");
     }
 
     push(@m, "\t\$(NOECHO) \$(ECHO) 'No tests defined for \$(NAME) extension.'\n")

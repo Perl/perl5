@@ -2862,6 +2862,7 @@ os2/dl_os2.c			Addon for dl_open
 os2/Makefile.SHs		Shared library generation for OS/2
 os2/os2add.sym			Overriding symbols to export
 os2/os2_base.t			Additional tests for builtin methods
+os2/os2_pipe.t			Tests for pipe creation logic
 os2/os2.c			Additional code for OS/2
 os2/OS2/ExtAttr/Changes		EA access module
 os2/OS2/ExtAttr/ExtAttr.pm	EA access module
@@ -2885,6 +2886,8 @@ os2/OS2/Process/Process.xs	system() constants in a module
 os2/OS2/Process/t/os2_process_kid.t	Tests
 os2/OS2/Process/t/os2_process.t	Tests
 os2/OS2/Process/t/os2_process_text.t	Tests
+os2/OS2/Process/t/os2_atoms.t		Test for OS2::Process
+os2/OS2/Process/t/os2_clipboard.t	Test for OS2::Process
 os2/OS2/REXX/Changes		DLL access module
 os2/OS2/REXX/DLL/Changes	DLL access module
 os2/OS2/REXX/DLL/DLL.pm		DLL access module

@@ -62,6 +62,13 @@ print OUT <<'EOT' if defined &DynaLoader::mod2fname;
 
 EOT
 
+print OUT <<'EOT' if $^O eq 'os2';
+
+    # os2 static build can dynaload, but cannot dynaload Perl modules...
+    die 'Dynaloaded Perl modules are not available in this build of Perl' if $OS2::is_static;
+
+EOT
+ 
 print OUT <<'EOT';
     my $modpname = join('/',@modparts);
     my $modlibname = (caller())[1];

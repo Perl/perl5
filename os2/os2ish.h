@@ -312,7 +312,10 @@ void *sys_alloc(int size);
 #define TMPPATH1 "plXXXXXX"
 extern const char *tmppath;
 PerlIO *my_syspopen(pTHX_ char *cmd, char *mode);
-/* Cannot prototype with I32 at this point. */
+#ifdef PERL_CORE
+/* Cannot prototype with I32, SV at this point (used in x2p too). */
+PerlIO *my_syspopen4(pTHX_ char *cmd, char *mode, I32 cnt, SV** args);
+#endif
 int my_syspclose(PerlIO *f);
 FILE *my_tmpfile (void);
 char *my_tmpnam (char *);
