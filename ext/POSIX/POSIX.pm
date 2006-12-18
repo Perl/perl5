@@ -2,7 +2,7 @@ package POSIX;
 
 our(@ISA, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD, %SIGRT) = ();
 
-our $VERSION = "1.11";
+our $VERSION = "1.12";
 
 use AutoLoader;
 
@@ -64,68 +64,18 @@ package POSIX::SigRt;
 
 use strict;
 
-use Tie::Hash;
-use base qw(Tie::StdHash);
+use AutoLoader 'AUTOLOAD';
 
-use vars qw($SIGACTION_FLAGS);
+use Tie::Hash;
+
+use vars qw($SIGACTION_FLAGS $_SIGRTMIN $_SIGRTMAX $_sigrtn @ISA);
+@POSIX::SigRt::ISA = qw(Tie::StdHash);
 
 $SIGACTION_FLAGS = 0;
 
-my ($SIGRTMIN, $SIGRTMAX, $sigrtn);
-
-sub _init {
-    $SIGRTMIN = &POSIX::SIGRTMIN;
-    $SIGRTMAX = &POSIX::SIGRTMAX;
-    $sigrtn   = $SIGRTMAX - $SIGRTMIN;
-}
-
-sub _croak {
-    &_init unless defined $sigrtn;
-    die "POSIX::SigRt not available" unless defined $sigrtn && $sigrtn > 0;
-}
-
-sub _getsig {
-    &_croak;
-    my $rtsig = $_[0];
-    # Allow (SIGRT)?MIN( + n)?, a common idiom when doing these things in C.
-    $rtsig = $SIGRTMIN + ($1 || 0)
-	if $rtsig =~ /^(?:(?:SIG)?RT)?MIN(\s*\+\s*(\d+))?$/;
-    return $rtsig;
-}
-
-sub _exist {
-    my $rtsig = _getsig($_[1]);
-    my $ok    = $rtsig >= $SIGRTMIN && $rtsig <= $SIGRTMAX;
-    ($rtsig, $ok);
-}
-
-sub _check {
-    my ($rtsig, $ok) = &_exist;
-    die "No POSIX::SigRt signal $_[1] (valid range SIGRTMIN..SIGRTMAX, or $SIGRTMIN..$SIGRTMAX)"
-	unless $ok;
-    return $rtsig;
-}
-
-sub new {
-    my ($rtsig, $handler, $flags) = @_;
-    my $sigset = POSIX::SigSet->new($rtsig);
-    my $sigact = POSIX::SigAction->new($handler,
-				       $sigset,
-				       $flags);
-    POSIX::sigaction($rtsig, $sigact);
-}
-
-sub EXISTS { &_exist }
-sub FETCH  { my $rtsig = &_check;
-	     my $oa = POSIX::SigAction->new();
-	     POSIX::sigaction($rtsig, undef, $oa);
-	     return $oa->{HANDLER} }
-sub STORE  { my $rtsig = &_check; new($rtsig, $_[2], $SIGACTION_FLAGS) }
-sub DELETE { delete $SIG{ &_check } }
-sub CLEAR  { &_exist; delete @SIG{ &POSIX::SIGRTMIN .. &POSIX::SIGRTMAX } }
-sub SCALAR { &_croak; $sigrtn + 1 }
-
 tie %POSIX::SIGRT, 'POSIX::SigRt';
+
+sub DESTROY {};
 
 package POSIX;
 
@@ -1041,3 +991,57 @@ sub mask    { $_[0]->{MASK}    = $_[1] if @_ > 1; $_[0]->{MASK} };
 sub flags   { $_[0]->{FLAGS}   = $_[1] if @_ > 1; $_[0]->{FLAGS} };
 sub safe    { $_[0]->{SAFE}    = $_[1] if @_ > 1; $_[0]->{SAFE} };
 
+package POSIX::SigRt;
+
+
+sub _init {
+    $_SIGRTMIN = &POSIX::SIGRTMIN;
+    $_SIGRTMAX = &POSIX::SIGRTMAX;
+    $_sigrtn   = $_SIGRTMAX - $_SIGRTMIN;
+}
+
+sub _croak {
+    &_init unless defined $_sigrtn;
+    die "POSIX::SigRt not available" unless defined $_sigrtn && $_sigrtn > 0;
+}
+
+sub _getsig {
+    &_croak;
+    my $rtsig = $_[0];
+    # Allow (SIGRT)?MIN( + n)?, a common idiom when doing these things in C.
+    $rtsig = $_SIGRTMIN + ($1 || 0)
+	if $rtsig =~ /^(?:(?:SIG)?RT)?MIN(\s*\+\s*(\d+))?$/;
+    return $rtsig;
+}
+
+sub _exist {
+    my $rtsig = _getsig($_[1]);
+    my $ok    = $rtsig >= $_SIGRTMIN && $rtsig <= $_SIGRTMAX;
+    ($rtsig, $ok);
+}
+
+sub _check {
+    my ($rtsig, $ok) = &_exist;
+    die "No POSIX::SigRt signal $_[1] (valid range SIGRTMIN..SIGRTMAX, or $_SIGRTMIN..$_SIGRTMAX)"
+	unless $ok;
+    return $rtsig;
+}
+
+sub new {
+    my ($rtsig, $handler, $flags) = @_;
+    my $sigset = POSIX::SigSet->new($rtsig);
+    my $sigact = POSIX::SigAction->new($handler,
+				       $sigset,
+				       $flags);
+    POSIX::sigaction($rtsig, $sigact);
+}
+
+sub EXISTS { &_exist }
+sub FETCH  { my $rtsig = &_check;
+	     my $oa = POSIX::SigAction->new();
+	     POSIX::sigaction($rtsig, undef, $oa);
+	     return $oa->{HANDLER} }
+sub STORE  { my $rtsig = &_check; new($rtsig, $_[2], $SIGACTION_FLAGS) }
+sub DELETE { delete $SIG{ &_check } }
+sub CLEAR  { &_exist; delete @SIG{ &POSIX::SIGRTMIN .. &POSIX::SIGRTMAX } }
+sub SCALAR { &_croak; $_sigrtn + 1 }
