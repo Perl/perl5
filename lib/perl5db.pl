@@ -1341,7 +1341,7 @@ else {
     # child debugger, and mark us as the parent, so we'll know to set up
     # more TTY's is we have to.
     $ENV{PERLDB_PIDS} = "$$";
-    $pids             = "{pid=$$}";
+    $pids             = "[pid=$$]";
     $term_pid         = $$;
 }
 
@@ -6135,64 +6135,19 @@ XXX It behooves an OS/2 expert to write the necessary documentation for this!
 =cut
 
 # This example function resets $IN, $OUT itself
-sub os2_get_fork_TTY {
-    local $^F = 40;    # XXXX Fixme!
+my $c_pipe = 0;
+sub os2_get_fork_TTY { # A simplification of the following (and works without):
     local $\  = '';
-    my ( $in1, $out1, $in2, $out2 );
-
-    # Having -d in PERL5OPT would lead to a disaster...
-    local $ENV{PERL5OPT} = $ENV{PERL5OPT} if $ENV{PERL5OPT};
-    $ENV{PERL5OPT} =~ s/(?:^|(?<=\s))-d\b//  if $ENV{PERL5OPT};
-    $ENV{PERL5OPT} =~ s/(?:^|(?<=\s))-d\B/-/ if $ENV{PERL5OPT};
-    print $OUT "Making kid PERL5OPT->`$ENV{PERL5OPT}'.\n" if $ENV{PERL5OPT};
-    local $ENV{PERL5LIB} = $ENV{PERL5LIB} ? $ENV{PERL5LIB} : $ENV{PERLLIB};
-    $ENV{PERL5LIB} = '' unless defined $ENV{PERL5LIB};
-    $ENV{PERL5LIB} = join ';', @ini_INC, split /;/, $ENV{PERL5LIB};
     ( my $name = $0 ) =~ s,^.*[/\\],,s;
-    my @args;
-
-    if (
-            pipe $in1, $out1
-        and pipe $in2, $out2
-
-        # system P_SESSION will fail if there is another process
-        # in the same session with a "dependent" asynchronous child session.
-        and @args = (
-            $rl, fileno $in1, fileno $out2, "Daughter Perl debugger $pids $name"
-        )
-        and (
-            ( $kpid = CORE::system 4, $^X, '-we',
-                <<'ES', @args ) >= 0    # P_SESSION
-END {sleep 5 unless $loaded}
-BEGIN {open STDIN,  '</dev/con' or warn "reopen stdin: $!"}
-use OS2::Process;
-
-my ($rl, $in) = (shift, shift);        # Read from $in and pass through
-set_title pop;
-system P_NOWAIT, $^X, '-we', <<EOS or die "Cannot start a grandkid";
-  open IN, '<&=$in' or die "open <&=$in: \$!";
-  \$| = 1; print while sysread IN, \$_, 1<<16;
-EOS
-
-my $out = shift;
-open OUT, ">&=$out" or die "Cannot open &=$out for writing: $!";
-select OUT;    $| = 1;
-require Term::ReadKey if $rl;
-Term::ReadKey::ReadMode(4) if $rl; # Nodelay on kbd.  Pipe is automatically nodelay...
-print while sysread STDIN, $_, 1<<($rl ? 16 : 0);
-ES
-            or warn "system P_SESSION: $!, $^E" and 0
-        )
-        and close $in1
-        and close $out2
-      )
-    {
-        $pidprompt = '';    # Shown anyway in titlebar
-        reset_IN_OUT( $in2, $out1 );
-        $tty = '*reset*';
-        return '';          # Indicate that reset_IN_OUT is called
-    } ## end if (pipe $in1, $out1 and...
-    return;
+    my %opt = (	title => "Daughter Perl debugger $pids $name",
+		($rl ? (read_by_key => 1) : ()) );
+    require OS2::Process;
+    my ($in, $out, $pid) = eval { OS2::Process::io_term(related => 0, %opt) }
+      or return;
+    $pidprompt = '';    # Shown anyway in titlebar
+    reset_IN_OUT($in, $out);
+    $tty = '*reset*';
+    return '';          # Indicate that reset_IN_OUT is called
 } ## end sub os2_get_fork_TTY
 
 =head3 C<macosx_get_fork_TTY>
