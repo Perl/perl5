@@ -141,6 +141,23 @@ when is duplicated in F<makedef.pl>. Writing things twice is bad, m'kay.
 It would be good to teach C<embed.pl> to understand the conditional
 compilation, and hence remove the duplication, and the mistakes it has caused.
 
+=head2 use strict; and AutoLoad
+
+Currently if you write
+
+    package Whack;
+    use AutoLoader 'AUTOLOAD';
+    use strict;
+    1;
+    __END__
+    sub bloop {
+        print join (' ', No, strict, here), "!\n";
+    }
+
+then C<use strict;> isn't in force within the autoloaded subroutines. It would
+be more consistent (and less surprising) to arrange for all lexical pragmas
+in force at the __END__ block to be in force within each autoloaded subroutine.
+
 =head1 Tasks that need a little sysadmin-type knowledge
 
 Or if you prefer, tasks that you would learn from, and broaden your skills
