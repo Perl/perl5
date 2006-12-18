@@ -634,15 +634,15 @@ sub WriteEmptyMakefile {
 
     my %att = @_;
     my $self = MM->new(\%att);
-    if (-f $self->{MAKEFILE_OLD}) {
-      _unlink($self->{MAKEFILE_OLD}) or 
-        warn "unlink $self->{MAKEFILE_OLD}: $!";
+    my $new = $self->{FIRST_MAKEFILE};
+    my $old = $self->{MAKEFILE_OLD};
+    if (-f $old) {
+      _unlink($old) or warn "unlink $old: $!";
     }
-    if ( -f $self->{MAKEFILE} ) {
-        _rename($self->{MAKEFILE}, $self->{MAKEFILE_OLD}) or
-          warn "rename $self->{MAKEFILE} => $self->{MAKEFILE_OLD}: $!"
+    if ( -f $new ) {
+        _rename($new, $old) or warn "rename $new => $old: $!"
     }
-    open MF, '>'.$self->{MAKEFILE} or die "open $self->{MAKEFILE} for write: $!";
+    open MF, '>'.$new or die "open $new for write: $!";
     print MF <<'EOP';
 all:
 
@@ -655,7 +655,7 @@ makemakerdflt:
 test:
 
 EOP
-    close MF or die "close $self->{MAKEFILE} for write: $!";
+    close MF or die "close $new for write: $!";
 }
 
 sub check_manifest {
@@ -880,9 +880,10 @@ sub flush {
     my $self = shift;
     my($chunk);
     local *FH;
-    print STDOUT "Writing $self->{MAKEFILE} for $self->{NAME}\n";
+    my($finalname) = $self->{FIRST_MAKEFILE};
+    print STDOUT "Writing $finalname for $self->{NAME}\n";
 
-    unlink($self->{MAKEFILE}, "MakeMaker.tmp", $Is_VMS ? 'Descrip.MMS' : '');
+    unlink($finalname, "MakeMaker.tmp", $Is_VMS ? 'Descrip.MMS' : ());
     open(FH,">MakeMaker.tmp") or die "Unable to open MakeMaker.tmp: $!";
 
     for $chunk (@{$self->{RESULT}}) {
@@ -890,7 +891,6 @@ sub flush {
     }
 
     close FH;
-    my($finalname) = $self->{MAKEFILE};
     _rename("MakeMaker.tmp", $finalname) or
       warn "rename MakeMaker.tmp => $finalname: $!";
     chmod 0644, $finalname unless $Is_VMS;
