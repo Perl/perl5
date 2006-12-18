@@ -60,6 +60,11 @@ sub _load_stubs {
     print STDERR "SelfLoader::load_stubs($callpack)\n" if $DEBUG;
     croak("$callpack doesn't contain an __DATA__ token")
         unless defined fileno($fh);
+    # Protect: fork() shares the file pointer between the parent and the kid
+    open my $nfh, '<&', $fh or croak "reopen: $!";# dup() the fd
+    close $fh or die "close: $1";                 # autocloses, but be paranoid
+    open $fh, '<&', $nfh or croak "reopen2: $!";  # dup() the fd "back"
+    close $nfh or die "close after reopen: $1";   # autocloses, but be paranoid
     $Cache{"${currpack}::<DATA"} = 1;   # indicate package is cached
 
     local($/) = "\n";
