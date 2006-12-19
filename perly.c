@@ -106,7 +106,7 @@ yy_stack_print (pTHX_ const yy_parser *parser)
 {
     const yy_stack_frame *ps, *min;
 
-    min = parser->ps - 8;
+    min = parser->ps - 8 + 1;
     if (min <= &parser->stack[0])
 	min = &parser->stack[0] + 1;
 
