@@ -18,6 +18,9 @@
 #ifndef HWND_MESSAGE
 #  define HWND_MESSAGE     ((HWND)-3)
 #endif
+#ifndef WC_NO_BEST_FIT_CHARS
+#  define WC_NO_BEST_FIT_CHARS 0x00000400
+#endif
 #include <winnt.h>
 #include <io.h>
 #include <signal.h>
@@ -752,6 +755,10 @@ win32_opendir(const char *filename)
     char		scanname[MAX_PATH+3];
     Stat_t		sbuf;
     WIN32_FIND_DATAA	aFindData;
+    WIN32_FIND_DATAW	wFindData;
+    bool                using_wide;
+    char		buffer[MAX_PATH*2];
+    char		*ptr;
 
     len = strlen(filename);
     if (len > MAX_PATH)
@@ -779,7 +786,15 @@ win32_opendir(const char *filename)
     scanname[len] = '\0';
 
     /* do the FindFirstFile call */
-    dirp->handle = FindFirstFileA(PerlDir_mapA(scanname), &aFindData);
+    if (IsWinNT()) {
+        WCHAR wscanname[sizeof(scanname)];
+        MultiByteToWideChar(CP_ACP, 0, scanname, -1, wscanname, sizeof(wscanname)/sizeof(WCHAR));
+	dirp->handle = FindFirstFileW(PerlDir_mapW(wscanname), &wFindData);
+        using_wide = TRUE;
+    }
+    else {
+ 	dirp->handle = FindFirstFileA(PerlDir_mapA(scanname), &aFindData);
+    }
     if (dirp->handle == INVALID_HANDLE_VALUE) {
 	DWORD err = GetLastError();
 	/* FindFirstFile() fails on empty drives! */
@@ -801,16 +816,31 @@ win32_opendir(const char *filename)
 	return NULL;
     }
 
+    if (using_wide) {
+        BOOL use_default = FALSE;
+        WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS,
+                            wFindData.cFileName, -1,
+                            buffer, sizeof(buffer), NULL, &use_default);
+        if (use_default && *wFindData.cAlternateFileName) {
+            WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS,
+                                wFindData.cAlternateFileName, -1,
+                                buffer, sizeof(buffer), NULL, NULL);
+        }
+        ptr = buffer;
+    }
+    else {
+        ptr = aFindData.cFileName;
+    }
     /* now allocate the first part of the string table for
      * the filenames that we find.
      */
-    idx = strlen(aFindData.cFileName)+1;
+    idx = strlen(ptr)+1;
     if (idx < 256)
-	dirp->size = 128;
+	dirp->size = 256;
     else
 	dirp->size = idx;
     Newx(dirp->start, dirp->size, char);
-    strcpy(dirp->start, aFindData.cFileName);
+    strcpy(dirp->start, ptr);
     dirp->nfiles++;
     dirp->end = dirp->curr = dirp->start;
     dirp->end += idx;
@@ -839,16 +869,37 @@ win32_readdir(DIR *dirp)
 	dirp->curr += len + 1;
 	if (dirp->curr >= dirp->end) {
 	    dTHX;
-	    BOOL		res;
-	    WIN32_FIND_DATAA	aFindData;
+	    BOOL res;
+            WIN32_FIND_DATAA aFindData;
+	    char buffer[MAX_PATH*2];
+            char *ptr;
 
 	    /* finding the next file that matches the wildcard
 	     * (which should be all of them in this directory!).
 	     */
-            res = FindNextFileA(dirp->handle, &aFindData);
+	    if (IsWinNT()) {
+                WIN32_FIND_DATAW wFindData;
+		res = FindNextFileW(dirp->handle, &wFindData);
+		if (res) {
+                    BOOL use_default = FALSE;
+                    WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS,
+                                        wFindData.cFileName, -1,
+                                        buffer, sizeof(buffer), NULL, &use_default);
+                    if (use_default && *wFindData.cAlternateFileName) {
+                        WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS,
+                                            wFindData.cAlternateFileName, -1,
+                                            buffer, sizeof(buffer), NULL, NULL);
+                    }
+                    ptr = buffer;
+                }
+            }
+            else {
+                res = FindNextFileA(dirp->handle, &aFindData);
+                ptr = aFindData.cFileName;
+            }
 	    if (res) {
 		long endpos = dirp->end - dirp->start;
-		long newsize = endpos + strlen(aFindData.cFileName) + 1;
+		long newsize = endpos + strlen(ptr) + 1;
 		/* bump the string table size by enough for the
 		 * new name and its null terminator */
 		while (newsize > dirp->size) {
@@ -857,7 +908,7 @@ win32_readdir(DIR *dirp)
 		    Renew(dirp->start, dirp->size, char);
 		    dirp->curr = dirp->start + curpos;
 		}
-		strcpy(dirp->start + endpos, aFindData.cFileName);
+		strcpy(dirp->start + endpos, ptr);
 		dirp->end = dirp->start + newsize;
 		dirp->nfiles++;
 	    }
