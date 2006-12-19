@@ -38,6 +38,7 @@ my %NON_CONSTS = (map {($_,1)}
 
 sub AUTOLOAD {
     no strict;
+    no warnings 'uninitialized';
     if ($AUTOLOAD =~ /::(_?[a-z])/) {
 	# require AutoLoader;
 	$AutoLoader::AUTOLOAD = $AUTOLOAD;

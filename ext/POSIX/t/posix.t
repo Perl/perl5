@@ -11,7 +11,7 @@ BEGIN {
 }
 
 BEGIN { require "./test.pl"; }
-plan(tests => 65);
+plan(tests => 66);
 
 use POSIX qw(fcntl_h signal_h limits_h _exit getcwd open read strftime write
 	     errno);
@@ -271,6 +271,9 @@ ok( POSIX::isalnum(undef),'isalnum undef' );
 # those functions should stringify their arguments
 ok(!POSIX::isalpha([]),   'isalpha []' );
 ok( POSIX::isprint([]),   'isprint []' );
+
+eval { use strict; POSIX->import("S_ISBLK"); my $x = S_ISBLK };
+unlike( $@, qr/Can't use string .* as a symbol ref/, "Can import autoloaded constants" );
  
 # Check that output is not flushed by _exit. This test should be last
 # in the file, and is not counted in the total number of tests.
