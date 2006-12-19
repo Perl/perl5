@@ -37,6 +37,7 @@ my %NON_CONSTS = (map {($_,1)}
                      WIFEXITED WIFSIGNALED WIFSTOPPED WSTOPSIG WTERMSIG));
 
 sub AUTOLOAD {
+    no strict;
     if ($AUTOLOAD =~ /::(_?[a-z])/) {
 	# require AutoLoader;
 	$AutoLoader::AUTOLOAD = $AUTOLOAD;
