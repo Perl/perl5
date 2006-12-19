@@ -205,11 +205,11 @@ void
 recursive_lock_release(pTHX_ recursive_lock_t *lock)
 {
     MUTEX_LOCK(&lock->mutex);
-    if (lock->owner != aTHX) {
-        MUTEX_UNLOCK(&lock->mutex);
-    } else if (--lock->locks == 0) {
-        lock->owner = NULL;
-        COND_SIGNAL(&lock->cond);
+    if (lock->owner == aTHX) {
+        if (--lock->locks == 0) {
+            lock->owner = NULL;
+            COND_SIGNAL(&lock->cond);
+        }
     }
     MUTEX_UNLOCK(&lock->mutex);
 }
@@ -370,13 +370,9 @@ S_get_userlock(pTHX_ SV* ssv, bool create)
 }
 
 
-=for apidoc sharedsv_find
-
-Given a private side SV tries to find if the SV has a shared backend,
-by looking for the magic.
-
-=cut
-
+/* Given a private side SV tries to find if the SV has a shared backend,
+ * by looking for the magic.
+ */
 SV *
 Perl_sharedsv_find(pTHX_ SV *sv)
 {
@@ -1044,11 +1040,8 @@ MGVTBL sharedsv_array_vtbl = {
 #endif
 };
 
-=for apidoc sharedsv_unlock
 
-Recursively unlocks a shared sv.
-
-=cut
+/* Recursively unlocks a shared sv. */
 
 void
 Perl_sharedsv_unlock(pTHX_ SV *ssv)
@@ -1058,13 +1051,10 @@ Perl_sharedsv_unlock(pTHX_ SV *ssv)
     recursive_lock_release(aTHX_ &ul->lock);
 }
 
-=for apidoc sharedsv_lock
 
-Recursive locks on a sharedsv.
-Locks are dynamically scoped at the level of the first lock.
-
-=cut
-
+/* Recursive locks on a sharedsv.
+ * Locks are dynamically scoped at the level of the first lock.
+ */
 void
 Perl_sharedsv_lock(pTHX_ SV *ssv)
 {
@@ -1090,13 +1080,8 @@ Perl_sharedsv_locksv(pTHX_ SV *sv)
     Perl_sharedsv_lock(aTHX_ ssv);
 }
 
-=head1 Shared SV Functions
 
-=for apidoc sharedsv_init
-
-Saves a space for keeping SVs wider than an interpreter.
-
-=cut
+/* Saves a space for keeping SVs wider than an interpreter. */
 
 void
 Perl_sharedsv_init(pTHX)
@@ -1367,17 +1352,18 @@ cond_wait(SV *ref_cond, SV *ref_lock = 0)
         }
         if (ul->lock.owner != aTHX)
             croak("You need a lock before you can cond_wait");
+
         /* Stealing the members of the lock object worries me - NI-S */
         MUTEX_LOCK(&ul->lock.mutex);
         ul->lock.owner = NULL;
         locks = ul->lock.locks;
         ul->lock.locks = 0;
 
-        /* Since we are releasing the lock here we need to tell other
-         * people that is ok to go ahead and use it */
+        /* Since we are releasing the lock here, we need to tell other
+         * people that it is ok to go ahead and use it */
         COND_SIGNAL(&ul->lock.cond);
         COND_WAIT(user_condition, &ul->lock.mutex);
-        while(ul->lock.owner != NULL) {
+        while (ul->lock.owner != NULL) {
             /* OK -- must reacquire the lock */
             COND_WAIT(&ul->lock.cond, &ul->lock.mutex);
         }
@@ -1423,8 +1409,8 @@ cond_timedwait(SV *ref_cond, double abs, SV *ref_lock = 0)
         ul->lock.owner = NULL;
         locks = ul->lock.locks;
         ul->lock.locks = 0;
-        /* Since we are releasing the lock here we need to tell other
-         * people that is ok to go ahead and use it */
+        /* Since we are releasing the lock here, we need to tell other
+         * people that it is ok to go ahead and use it */
         COND_SIGNAL(&ul->lock.cond);
         RETVAL = Perl_sharedsv_cond_timedwait(user_condition, &ul->lock.mutex, abs);
         while (ul->lock.owner != NULL) {

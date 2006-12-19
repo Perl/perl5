@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.05';
+our $VERSION = '1.06';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -73,7 +73,7 @@ threads::shared - Perl extension for sharing data structures between threads
 
 =head1 VERSION
 
-This document describes threads::shared version 1.05
+This document describes threads::shared version 1.06
 
 =head1 SYNOPSIS
 
@@ -262,7 +262,7 @@ signaling before another thread has entered cond_wait().
 
 C<cond_signal> will normally generate a warning if you attempt to use it on an
 unlocked variable. On the rare occasions where doing this may be sensible, you
-can skip the warning with:
+can suppress the warning with:
 
   { no warnings 'threads'; cond_signal($foo); }
 
@@ -368,7 +368,7 @@ L<threads::shared> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads-shared>
 
 Annotated POD for L<threads::shared>:
-L<http://annocpan.org/~JDHEDDEN/threads-shared-1.05/shared.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-shared-1.06/shared.pm>
 
 L<threads>, L<perlthrtut>
 

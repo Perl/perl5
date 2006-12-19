@@ -292,25 +292,24 @@ $Base++;
 
     my @threads;
     for (1..$cnt) {
-        my $thread = threads->create(sub {
-                        my $arg = $_;
-                        my $result = 0;
-                        for (0..1000000) {
-                            $result++;
-                        }
-                        lock($mutex);
-                        while ($mutex != $_) {
-                            cond_wait($mutex);
-                        }
-                        $mutex++;
-                        cond_broadcast($mutex);
-                        return $result;
-                      });
-        push(@threads, $thread);
+        $threads[$_] = threads->create(sub {
+                            my $arg = shift;
+                            my $result = 0;
+                            for (0..1000000) {
+                                $result++;
+                            }
+                            lock($mutex);
+                            while ($mutex != $arg) {
+                                cond_wait($mutex);
+                            }
+                            $mutex++;
+                            cond_broadcast($mutex);
+                            return $result;
+                      }, $_);
     }
 
     for (1..$cnt) {
-        my $result = $threads[$_-1]->join();
+        my $result = $threads[$_]->join();
         ok($_, defined($result) && ("$result" eq '1000001'), "stress test - iter $_");
     }
 
