@@ -22,8 +22,33 @@
 #  define WC_NO_BEST_FIT_CHARS 0x00000400
 #endif
 #include <winnt.h>
+#include <tlhelp32.h>
 #include <io.h>
 #include <signal.h>
+
+#define SystemProcessesAndThreadsInformation 5
+
+/* Inline some definitions from the DDK */
+typedef struct {
+    USHORT	    Length;
+    USHORT	    MaximumLength;
+    PWSTR	    Buffer;
+}   UNICODE_STRING;
+
+typedef struct {
+    ULONG           NextEntryDelta;
+    ULONG	    ThreadCount;
+    ULONG	    Reserved1[6];
+    LARGE_INTEGER   CreateTime;
+    LARGE_INTEGER   UserTime;
+    LARGE_INTEGER   KernelTime;
+    UNICODE_STRING  ProcessName;
+    LONG	    BasePriority;
+    ULONG	    ProcessId;
+    ULONG	    InheritedFromProcessId;
+    /* Remainder of the structure depends on the Windows version,
+     * but we don't need those additional fields anyways... */
+}   SYSTEM_PROCESSES;
 
 /* #include "config.h" */
 
@@ -123,6 +148,11 @@ char	w32_module_name[MAX_PATH+1];
 END_EXTERN_C
 
 static OSVERSIONINFO g_osver = {0, 0, 0, 0, 0, ""};
+
+static HANDLE (WINAPI *pfnCreateToolhelp32Snapshot)(DWORD, DWORD) = NULL;
+static BOOL   (WINAPI *pfnProcess32First)(HANDLE, PROCESSENTRY32*) = NULL;
+static BOOL   (WINAPI *pfnProcess32Next)(HANDLE, PROCESSENTRY32*) = NULL;
+static LONG   (WINAPI *pfnZwQuerySystemInformation)(UINT, PVOID, ULONG, PULONG);
 
 #ifdef __BORLANDC__
 /* Silence STDERR grumblings from Borland's math library. */
@@ -1107,13 +1137,148 @@ remove_dead_pseudo_process(long child)
 }
 #endif
 
+static int
+terminate_process(DWORD pid, HANDLE process_handle, int sig)
+{
+    switch(sig) {
+    case 0:
+        /* "Does process exist?" use of kill */
+        return 1;
+    case 2:
+        if (GenerateConsoleCtrlEvent(CTRL_C_EVENT, pid))
+            return 1;
+        break;
+    case SIGBREAK:
+    case SIGTERM:
+        if (GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, pid))
+            return 1;
+        break;
+    default: /* For now be backwards compatible with perl 5.6 */
+    case 9:
+        /* Note that we will only be able to kill processes owned by the
+         * current process owner, even when we are running as an administrator.
+         * To kill processes of other owners we would need to set the
+         * 'SeDebugPrivilege' privilege before obtaining the process handle.
+         */
+        if (TerminateProcess(process_handle, sig))
+            return 1;
+        break;
+    }
+    return 0;
+}
+
+/* Traverse process tree using ToolHelp functions */
+static int
+kill_process_tree_toolhelp(DWORD pid, int sig)
+{
+    HANDLE process_handle;
+    HANDLE snapshot_handle;
+    int killed = 0;
+
+    process_handle = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
+    if (process_handle == INVALID_HANDLE_VALUE)
+        return 0;
+
+    killed += terminate_process(pid, process_handle, sig);
+
+    snapshot_handle = pfnCreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snapshot_handle != INVALID_HANDLE_VALUE) {
+        PROCESSENTRY32 entry;
+
+        entry.dwSize = sizeof(entry);
+        if (pfnProcess32First(snapshot_handle, &entry)) {
+            do {
+                if (entry.th32ParentProcessID == pid)
+                    killed += kill_process_tree_toolhelp(entry.th32ProcessID, sig);
+                entry.dwSize = sizeof(entry);
+            }
+            while (pfnProcess32Next(snapshot_handle, &entry));
+        }
+        CloseHandle(snapshot_handle);
+    }
+    CloseHandle(process_handle);
+    return killed;
+}
+
+/* Traverse process tree using undocumented system information structures.
+ * This is only necessary on Windows NT, which lacks the ToolHelp functions.
+ */
+static int
+kill_process_tree_sysinfo(SYSTEM_PROCESSES *process_info, DWORD pid, int sig)
+{
+    HANDLE process_handle;
+    SYSTEM_PROCESSES *p = process_info;
+    int killed = 0;
+
+    process_handle = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
+    if (process_handle == INVALID_HANDLE_VALUE)
+        return 0;
+
+    killed += terminate_process(pid, process_handle, sig);
+
+    while (1) {
+        if (p->InheritedFromProcessId == (DWORD)pid)
+            killed += kill_process_tree_sysinfo(process_info, p->ProcessId, sig);
+
+        if (p->NextEntryDelta == 0)
+            break;
+
+        p = (SYSTEM_PROCESSES*)((char*)p + p->NextEntryDelta);
+    }
+
+    CloseHandle(process_handle);
+    return killed;
+}
+
+int
+killpg(int pid, int sig)
+{
+    /* Use "documented" method whenever available */
+    if (pfnCreateToolhelp32Snapshot && pfnProcess32First && pfnProcess32Next) {
+        return kill_process_tree_toolhelp((DWORD)pid, sig);
+    }
+
+    /* Fall back to undocumented Windows internals on Windows NT */
+    if (pfnZwQuerySystemInformation) {
+        dTHX;
+        char *buffer;
+        DWORD size = 0;
+
+        pfnZwQuerySystemInformation(SystemProcessesAndThreadsInformation, NULL, 0, &size);
+        Newx(buffer, size, char);
+
+        if (pfnZwQuerySystemInformation(SystemProcessesAndThreadsInformation, buffer, size, NULL) >= 0) {
+            int killed = kill_process_tree_sysinfo((SYSTEM_PROCESSES*)buffer, (DWORD)pid, sig);
+            Safefree(buffer);
+            return killed;
+        }
+    }
+    return 0;
+}
+
+static int
+my_kill(int pid, int sig)
+{
+    int retval = 0;
+    HANDLE process_handle;
+
+    if (sig < 0)
+        return killpg(pid, -sig);
+
+    process_handle = OpenProcess(PROCESS_TERMINATE, FALSE, pid);
+    if (process_handle != INVALID_HANDLE_VALUE) {
+        retval = terminate_process(pid, process_handle, sig);
+        CloseHandle(process_handle);
+    }
+    return retval;
+}
+
 DllExport int
 win32_kill(int pid, int sig)
 {
     dTHX;
     HANDLE hProcess;
     long child;
-    int retval;
 #ifdef USE_ITHREADS
     if (pid < 0) {
 	/* it is a pseudo-forked child */
@@ -1168,58 +1333,19 @@ win32_kill(int pid, int sig)
     {
 	child = find_pid(pid);
 	if (child >= 0) {
-            hProcess = w32_child_handles[child];
-	    switch(sig) {
-	    case 0:
-		/* "Does process exist?" use of kill */
-		return 0;
-	    case 2:
-		if (GenerateConsoleCtrlEvent(CTRL_C_EVENT,pid))
-		    return 0;
-		break;
-            case SIGBREAK:
-            case SIGTERM:
-                if (GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT,pid))
-                    return 0;
-                break;
-	    default: /* For now be backwards compatible with perl5.6 */
-	    case 9:
-	        if (TerminateProcess(hProcess, sig)) {
-		    remove_dead_process(child);
-		    return 0;
-	    	}
-		break;
+            if (my_kill(pid, sig)) {
+                DWORD exitcode = 0;
+                if (GetExitCodeProcess(w32_child_handles[child], &exitcode) &&
+                    exitcode != STILL_ACTIVE)
+                {
+                    remove_dead_process(child);
+                }
+                return 0;
             }
 	}
 	else {
 alien_process:
-            retval = -1;
-	    hProcess = OpenProcess(PROCESS_ALL_ACCESS, TRUE,
-				   (IsWin95() ? -pid : pid));
-	    if (hProcess) {
-		switch(sig) {
-		case 0:
-		    /* "Does process exist?" use of kill */
-		    retval = 0;
-                    break;
-		case 2:
-		    if (GenerateConsoleCtrlEvent(CTRL_C_EVENT,pid))
-			retval = 0;
-		    break;
-                case SIGBREAK:
-                case SIGTERM:
-                    if (GenerateConsoleCtrlEvent(CTRL_BREAK_EVENT,pid))
-                       retval = 0;
-                    break;
-		default: /* For now be backwards compatible with perl5.6 */
-                case 9:
-		    if (TerminateProcess(hProcess, sig))
-			retval = 0;
-                    break;
-		}
-	    }
-            CloseHandle(hProcess);
-            if (retval == 0)
+            if (my_kill((IsWin95() ? -pid : pid), sig))
                 return 0;
 	}
     }
@@ -4490,6 +4616,8 @@ win32_ctrlhandler(DWORD dwCtrlType)
 void
 Perl_win32_init(int *argcp, char ***argvp)
 {
+    HMODULE module;
+
 #if _MSC_VER >= 1400
     _invalid_parameter_handler oldHandler, newHandler;
     newHandler = my_invalid_parameter_handler;
@@ -4506,6 +4634,18 @@ Perl_win32_init(int *argcp, char ***argvp)
     _control87(MCW_EM, MCW_EM);
 #endif
     MALLOC_INIT;
+
+    module = GetModuleHandle("ntdll.dll");
+    if (module) {
+        *(FARPROC*)&pfnZwQuerySystemInformation = GetProcAddress(module, "ZwQuerySystemInformation");
+    }
+
+    module = GetModuleHandle("kernel32.dll");
+    if (module) {
+        *(FARPROC*)&pfnCreateToolhelp32Snapshot = GetProcAddress(module, "CreateToolhelp32Snapshot");
+        *(FARPROC*)&pfnProcess32First           = GetProcAddress(module, "Process32First");
+        *(FARPROC*)&pfnProcess32Next            = GetProcAddress(module, "Process32Next");
+    }
 }
 
 void

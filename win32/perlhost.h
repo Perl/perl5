@@ -1611,9 +1611,7 @@ PerlProcKill(struct IPerlProc* piPerl, int pid, int sig)
 int
 PerlProcKillpg(struct IPerlProc* piPerl, int pid, int sig)
 {
-    dTHX;
-    Perl_croak(aTHX_ "killpg not implemented!\n");
-    return 0;
+    return win32_kill(pid, -sig);
 }
 
 int
