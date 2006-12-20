@@ -47,6 +47,7 @@ typedef perl_os_thread pthread_t;
 /* Values for 'state' member */
 #define PERL_ITHR_DETACHED              1
 #define PERL_ITHR_JOINED                2
+#define PERL_ITHR_UNCALLABLE            (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)
 #define PERL_ITHR_FINISHED              4
 #define PERL_ITHR_THREAD_EXIT_ONLY      8
 #define PERL_ITHR_NONVIABLE             16
@@ -138,7 +139,7 @@ S_ithread_clear(pTHX_ ithread *thread)
     PerlInterpreter *interp;
 
     assert(((thread->state & PERL_ITHR_FINISHED) &&
-            (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)))
+            (thread->state & PERL_ITHR_UNCALLABLE))
                 ||
            (thread->state & PERL_ITHR_NONVIABLE));
 
@@ -187,7 +188,7 @@ S_ithread_destruct(pTHX_ ithread *thread)
         destroy = 1;
     } else if (! (thread->state & PERL_ITHR_FINISHED)) {
         destroy = 0;
-    } else if (! (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED))) {
+    } else if (! (thread->state & PERL_ITHR_UNCALLABLE)) {
         destroy = 0;
     } else {
         thread->state |= PERL_ITHR_DESTROYED;
@@ -847,8 +848,10 @@ ithread_create(...)
             /* $thr->create() */
             classname = HvNAME(SvSTASH(SvRV(ST(0))));
             thread = INT2PTR(ithread *, SvIV(SvRV(ST(0))));
+            MUTEX_LOCK(&thread->mutex);
             stack_size = thread->stack_size;
             exit_opt = thread->state & PERL_ITHR_THREAD_EXIT_ONLY;
+            MUTEX_UNLOCK(&thread->mutex);
         } else {
             /* threads->create() */
             classname = (char *)SvPV_nolen(ST(0));
@@ -952,6 +955,7 @@ ithread_list(...)
         int list_context;
         IV count = 0;
         int want_running = 0;
+        int state;
         dMY_POOL;
     PPCODE:
         /* Class method only */
@@ -974,19 +978,23 @@ ithread_list(...)
              thread != &MY_POOL.main_thread;
              thread = thread->next)
         {
+            MUTEX_LOCK(&thread->mutex);
+            state = thread->state;
+            MUTEX_UNLOCK(&thread->mutex);
+
             /* Ignore detached or joined threads */
-            if (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)) {
+            if (state & PERL_ITHR_UNCALLABLE) {
                 continue;
             }
 
             /* Filter per parameter */
             if (items > 1) {
                 if (want_running) {
-                    if (thread->state & PERL_ITHR_FINISHED) {
+                    if (state & PERL_ITHR_FINISHED) {
                         continue;   /* Not running */
                     }
                 } else {
-                    if (! (thread->state & PERL_ITHR_FINISHED)) {
+                    if (! (state & PERL_ITHR_FINISHED)) {
                         continue;   /* Still running - not joinable yet */
                     }
                 }
@@ -1038,6 +1046,7 @@ void
 ithread_join(...)
     PREINIT:
         ithread *thread;
+        ithread *current_thread;
         int join_err;
         AV *params;
         int len;
@@ -1045,6 +1054,7 @@ ithread_join(...)
 #ifdef WIN32
         DWORD waitcode;
 #else
+        int rc_join;
         void *retval;
 #endif
         dMY_POOL;
@@ -1054,42 +1064,56 @@ ithread_join(...)
             Perl_croak(aTHX_ "Usage: $thr->join()");
         }
 
-        /* Check if the thread is joinable */
+        /* Check if the thread is joinable and not ourselves */
         thread = S_SV_to_ithread(aTHX_ ST(0));
-        join_err = (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED));
-        if (join_err) {
-            if (join_err & PERL_ITHR_DETACHED) {
-                Perl_croak(aTHX_ "Cannot join a detached thread");
-            } else {
-                Perl_croak(aTHX_ "Thread already joined");
-            }
+        current_thread = S_ithread_get(aTHX);
+
+        MUTEX_LOCK(&thread->mutex);
+        if ((join_err = (thread->state & PERL_ITHR_UNCALLABLE))) {
+            MUTEX_UNLOCK(&thread->mutex);
+            Perl_croak(aTHX_ (join_err & PERL_ITHR_DETACHED)
+                                ? "Cannot join a detached thread"
+                                : "Thread already joined");
+        } else if (thread->tid == current_thread->tid) {
+            MUTEX_UNLOCK(&thread->mutex);
+            Perl_croak(aTHX_ "Cannot join self");
         }
+
+        /* Mark as joined */
+        thread->state |= PERL_ITHR_JOINED;
+        MUTEX_UNLOCK(&thread->mutex);
+
+        MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
+        MY_POOL.joinable_threads--;
+        MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
         /* Join the thread */
 #ifdef WIN32
-        waitcode = WaitForSingleObject(thread->handle, INFINITE);
+        if (WaitForSingleObject(thread->handle, INFINITE) != WAIT_OBJECT_0) {
+            /* Timeout/abandonment unexpected here; check $^E */
+            Perl_croak(aTHX_ "PANIC: underlying join failed");
+        };
 #else
-        pthread_join(thread->thr, &retval);
+        if ((rc_join = pthread_join(thread->thr, &retval)) != 0) {
+            /* In progress/deadlock/unknown unexpected here; check $! */
+            errno = rc_join;
+            Perl_croak(aTHX_ "PANIC: underlying join failed");
+        };
 #endif
 
         MUTEX_LOCK(&thread->mutex);
-        /* Mark as joined */
-        thread->state |= PERL_ITHR_JOINED;
-
         /* Get the return value from the call_sv */
         /* Objects do not survive this process - FIXME */
         {
             AV *params_copy;
             PerlInterpreter *other_perl;
             CLONE_PARAMS clone_params;
-            ithread *current_thread;
 
             params_copy = (AV *)SvRV(thread->params);
             other_perl = thread->interp;
             clone_params.stashes = newAV();
             clone_params.flags = CLONEf_JOIN_IN;
             PL_ptr_table = ptr_table_new();
-            current_thread = S_ithread_get(aTHX);
             S_ithread_set(aTHX_ thread);
             /* Ensure 'meaningful' addresses retain their meaning */
             ptr_table_store(PL_ptr_table, &other_perl->Isv_undef, &PL_sv_undef);
@@ -1108,12 +1132,6 @@ ithread_join(...)
             S_ithread_clear(aTHX_ thread);
         }
         MUTEX_UNLOCK(&thread->mutex);
-
-        MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
-        if (! (thread->state & PERL_ITHR_DETACHED)) {
-            MY_POOL.joinable_threads--;
-        }
-        MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
         /* Try to cleanup thread */
         S_ithread_destruct(aTHX_ thread);
@@ -1150,33 +1168,33 @@ ithread_detach(...)
     CODE:
         PERL_UNUSED_VAR(items);
 
-        /* Check if the thread is detachable */
-        thread = S_SV_to_ithread(aTHX_ ST(0));
-        if ((detach_err = (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)))) {
-            if (detach_err & PERL_ITHR_DETACHED) {
-                Perl_croak(aTHX_ "Thread already detached");
-            } else {
-                Perl_croak(aTHX_ "Cannot detach a joined thread");
-            }
-        }
-
         /* Detach the thread */
+        thread = S_SV_to_ithread(aTHX_ ST(0));
         MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
         MUTEX_LOCK(&thread->mutex);
-        thread->state |= PERL_ITHR_DETACHED;
+        if (! (detach_err = (thread->state & PERL_ITHR_UNCALLABLE))) {
+            /* Thread is detachable */
+            thread->state |= PERL_ITHR_DETACHED;
 #ifdef WIN32
-        /* Windows has no 'detach thread' function */
+            /* Windows has no 'detach thread' function */
 #else
-        PERL_THREAD_DETACH(thread->thr);
+            PERL_THREAD_DETACH(thread->thr);
 #endif
-        if (thread->state & PERL_ITHR_FINISHED) {
-            MY_POOL.joinable_threads--;
-        } else {
-            MY_POOL.running_threads--;
-            MY_POOL.detached_threads++;
+            if (thread->state & PERL_ITHR_FINISHED) {
+                MY_POOL.joinable_threads--;
+            } else {
+                MY_POOL.running_threads--;
+                MY_POOL.detached_threads++;
+            }
         }
         MUTEX_UNLOCK(&thread->mutex);
         MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
+
+        if (detach_err) {
+            Perl_croak(aTHX_ (detach_err & PERL_ITHR_DETACHED)
+                                ? "Thread already detached"
+                                : "Cannot detach a joined thread");
+        }
 
         /* If thread is finished and didn't die,
          * then we can free its interpreter */
@@ -1272,6 +1290,7 @@ ithread_object(...)
         char *classname;
         UV tid;
         ithread *thread;
+        int state;
         int have_obj = 0;
         dMY_POOL;
     CODE:
@@ -1297,7 +1316,10 @@ ithread_object(...)
             /* Look for TID */
             if (thread->tid == tid) {
                 /* Ignore if detached or joined */
-                if (! (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED))) {
+                MUTEX_LOCK(&thread->mutex);
+                state = thread->state;
+                MUTEX_UNLOCK(&thread->mutex);
+                if (! (state & PERL_ITHR_UNCALLABLE)) {
                     /* Put object on stack */
                     ST(0) = sv_2mortal(S_ithread_to_SV(aTHX_ Nullsv, thread, classname, TRUE));
                     have_obj = 1;
@@ -1377,7 +1399,9 @@ ithread_is_running(...)
         }
 
         thread = INT2PTR(ithread *, SvIV(SvRV(ST(0))));
+        MUTEX_LOCK(&thread->mutex);
         ST(0) = (thread->state & PERL_ITHR_FINISHED) ? &PL_sv_no : &PL_sv_yes;
+        MUTEX_UNLOCK(&thread->mutex);
         /* XSRETURN(1); - implied */
 
 
@@ -1388,7 +1412,9 @@ ithread_is_detached(...)
     CODE:
         PERL_UNUSED_VAR(items);
         thread = S_SV_to_ithread(aTHX_ ST(0));
+        MUTEX_LOCK(&thread->mutex);
         ST(0) = (thread->state & PERL_ITHR_DETACHED) ? &PL_sv_yes : &PL_sv_no;
+        MUTEX_UNLOCK(&thread->mutex);
         /* XSRETURN(1); - implied */
 
 
@@ -1405,7 +1431,7 @@ ithread_is_joinable(...)
         thread = INT2PTR(ithread *, SvIV(SvRV(ST(0))));
         MUTEX_LOCK(&thread->mutex);
         ST(0) = ((thread->state & PERL_ITHR_FINISHED) &&
-                 ! (thread->state & (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)))
+                 ! (thread->state & PERL_ITHR_UNCALLABLE))
             ? &PL_sv_yes : &PL_sv_no;
         MUTEX_UNLOCK(&thread->mutex);
         /* XSRETURN(1); - implied */

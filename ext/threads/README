@@ -1,4 +1,4 @@
-threads version 1.56
+threads version 1.57
 ====================
 
 This module exposes interpreter threads to the Perl level.

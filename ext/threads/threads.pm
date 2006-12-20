@@ -5,7 +5,7 @@ use 5.008;
 use strict;
 use warnings;
 
-our $VERSION = '1.56';
+our $VERSION = '1.57';
 my $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -133,7 +133,7 @@ threads - Perl interpreter-based threads
 
 =head1 VERSION
 
-This document describes threads version 1.56
+This document describes threads version 1.57
 
 =head1 SYNOPSIS
 
@@ -373,7 +373,7 @@ list of all non-joined, non-detached I<threads> objects.  In a scalar context,
 returns a count of the same.
 
 With a I<true> argument (using C<threads::running>), returns a list of all
-non-detached I<threads> objects that are still running.
+non-joined, non-detached I<threads> objects that are still running.
 
 With a I<false> argument (using C<threads::joinable>), returns a list of all
 non-joined, non-detached I<threads> objects that have finished running (i.e.,
@@ -949,7 +949,7 @@ L<threads> Discussion Forum on CPAN:
 L<http://www.cpanforum.com/dist/threads>
 
 Annotated POD for L<threads>:
-L<http://annocpan.org/~JDHEDDEN/threads-1.56/threads.pm>
+L<http://annocpan.org/~JDHEDDEN/threads-1.57/threads.pm>
 
 L<threads::shared>, L<perlthrtut>
 

@@ -28,7 +28,7 @@ BEGIN {
     }
 
     $| = 1;
-    print("1..17\n");   ### Number of tests that will be run ###
+    print("1..20\n");   ### Number of tests that will be run ###
 };
 
 my $TEST;
@@ -179,6 +179,53 @@ if ($^O eq 'linux') {
     use IO::File;
     # This coredumped between #20930 and #21000
     $_->join for map threads->create(sub{ok($_, "stress newCONSTSUB")}), 1..2;
+}
+
+{
+    my $go : shared = 0;
+
+    my $t = threads->create( sub {
+        lock($go);
+        cond_wait($go) until $go;
+    }); 
+
+    my $joiner = threads->create(sub { $_[0]->join }, $t);
+
+    threads->yield();
+    sleep 1;
+    eval { $t->join; };
+    ok(($@ =~ /^Thread already joined at/)?1:0, "Join pending join");
+
+    { lock($go); $go = 1; cond_signal($go); }
+    $joiner->join;
+}
+
+{
+    my $go : shared = 0;
+    my $t = threads->create( sub {
+        eval { threads->self->join; };
+        ok(($@ =~ /^Cannot join self/), "Join self");
+        lock($go); $go = 1; cond_signal($go);
+    });
+
+    { lock ($go); cond_wait($go) until $go; }
+    $t->join;
+}
+
+{
+    my $go : shared = 0;
+    my $t = threads->create( sub {
+        lock($go);  cond_wait($go) until $go;
+    });
+    my $joiner = threads->create(sub { $_[0]->join; }, $t);
+
+    threads->yield();
+    sleep 1;
+    eval { $t->detach };
+    ok(($@ =~ /^Cannot detach a joined thread at/)?1:0, "Detach pending join");
+
+    { lock($go); $go = 1; cond_signal($go); }
+    $joiner->join;
 }
 
 # EOF

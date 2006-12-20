@@ -28,7 +28,7 @@ BEGIN {
     }
 
     $| = 1;
-    print("1..53\n");   ### Number of tests that will be run ###
+    print("1..59\n");   ### Number of tests that will be run ###
 };
 
 my $TEST;
@@ -180,11 +180,87 @@ ok($thr->is_detached(),   'thread detached');
 ok(! $thr->is_joinable(), 'thread not joinable');
 ok(threads->list(threads::joinable) == 0, 'thread joinable list');
 
-threads->create(sub {
-    ok(! threads->is_detached(), 'thread not detached');
-    ok(threads->list(threads::running) == 1, 'thread running list');
-    ok(threads->list(threads::joinable) == 0, 'thread joinable list');
-    ok(threads->list(threads::all) == 1, 'thread list');
-})->join();
+{
+    my $go : shared = 0;
+    my $t = threads->create( sub {
+        ok(! threads->is_detached(), 'thread not detached');
+        ok(threads->list(threads::running) == 1, 'thread running list');
+        ok(threads->list(threads::joinable) == 0, 'thread joinable list');
+        ok(threads->list(threads::all) == 1, 'thread list');
+        lock($go); $go = 1; cond_signal($go);
+    });
+
+    { lock ($go); cond_wait($go) until $go; }
+    $t->join;
+}
+
+{
+    my $rdy :shared = 0;
+    sub thr_ready
+    {
+        lock($rdy);
+        $rdy++;
+        cond_signal($rdy);
+    }
+
+    my $go :shared = 0;
+    sub thr_wait
+    {
+        lock($go);
+        cond_wait($go) until $go;
+    }
+
+    my $done :shared = 0;
+    sub thr_done
+    {
+        lock($done);
+        $done++;
+        cond_signal($done);
+    }
+
+    my $thr_routine = sub { thr_ready(); thr_wait(); thr_done(); };
+
+    # Create 8 threads:
+    #  3 running, blocking on $go
+    #  2 running, blocking on $go, join pending
+    #  2 running, blocking on join of above
+    #  1 finished, unjoined
+
+    for (1..3) { threads->create($thr_routine); }
+
+    foreach my $t (map {threads->create($thr_routine)} 1..2) {
+        threads->create(sub { thr_ready(); $_[0]->join; thr_done(); }, $t);
+    }
+    threads->create(sub { thr_ready(); thr_done(); });
+    {
+        lock($done);
+        cond_wait($done) until ($done == 1);
+    }
+    {
+        lock($rdy);
+        cond_wait($rdy) until ($rdy == 8);
+    }
+    threads->yield();
+    sleep(1);
+
+    ok(threads->list(threads::running) == 5, 'thread running list');
+    ok(threads->list(threads::joinable) == 1, 'thread joinable list');
+    ok(threads->list(threads::all) == 6, 'thread all list');
+
+    { lock($go); $go = 1; cond_broadcast($go); }
+    {
+        lock($done);
+        cond_wait($done) until ($done == 8);
+    }
+    threads->yield();
+    sleep(1);
+
+    ok(threads->list(threads::running) == 0, 'thread running list');
+    # Two awaiting join() have completed
+    ok(threads->list(threads::joinable) == 6, 'thread joinable list');
+    ok(threads->list(threads::all) == 6, 'thread all list');
+
+    for (threads->list) { $_->join; }
+}
 
 # EOF

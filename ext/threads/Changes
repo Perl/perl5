@@ -1,5 +1,12 @@
 Revision history for Perl extension threads.
 
+1.57 Wed Dec 20 13:10:26 EST 2006
+	- Fixes courtesy of Michael J. Pomraning
+	    Eliminates self joins.
+	    Eliminates multiple, simultaneous joins on a thread.
+	    Protects thread->state variable with mutexes.
+	    Checks that OS join call is successful.
+
 1.56 Fri Dec 15 12:18:47 EST 2006
 	- More fixes to test suite
 
