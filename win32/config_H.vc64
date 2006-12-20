@@ -221,7 +221,7 @@
  *	to kill process groups.  If unavailable, you probably should use kill
  *	with a negative process number.
  */
-/*#define HAS_KILLPG	/**/
+#define HAS_KILLPG	/**/
 
 /* HAS_LINK:
  *	This symbol, if defined, indicates that the link routine is
