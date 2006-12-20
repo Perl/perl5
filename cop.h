@@ -187,20 +187,17 @@ struct cop {
 #  define CopSTASH_set(c,hv)	CopSTASHPV_set(c, (hv) ? HvNAME_get(hv) : NULL)
 #  define CopSTASH_eq(c,hv)	((hv) && stashpv_hvname_match(c,hv))
 #  define CopLABEL(c)		((c)->cop_label)
-/* Don't free the original label here, it will be freed by the parser */
-#  ifdef NETWARE
-#    define CopLABEL_set(c,pv)	(CopLABEL(c) = ((pv) ? savepv(pv) : NULL))
-#  else
-#    define CopLABEL_set(c,pv)	(CopLABEL(c) = savesharedpv(pv))
-#  endif
+#  define CopLABEL_set(c,pv)	(CopLABEL(c) = (pv))
 #  ifdef NETWARE
 #    define CopSTASH_free(c) SAVECOPSTASH_FREE(c)
 #    define CopFILE_free(c) SAVECOPFILE_FREE(c)
 #    define CopLABEL_free(c) SAVECOPLABEL_FREE(c)
+#    define CopLABEL_alloc(pv)	((pv)?savepv(pv):NULL)
 #  else
 #    define CopSTASH_free(c)	PerlMemShared_free(CopSTASHPV(c))
 #    define CopFILE_free(c)	(PerlMemShared_free(CopFILE(c)),(CopFILE(c) = NULL))
 #    define CopLABEL_free(c)	(PerlMemShared_free(CopLABEL(c)),(CopLABEL(c) = NULL))
+#    define CopLABEL_alloc(pv)	((pv)?savesharedpv(pv):NULL)
 #  endif
 #else
 #  define CopFILEGV(c)		((c)->cop_filegv)
@@ -221,10 +218,11 @@ struct cop {
    /* cop_stash is not refcounted */
 #  define CopSTASHPV_set(c,pv)	CopSTASH_set((c), gv_stashpv(pv,GV_ADD))
 #  define CopSTASH_eq(c,hv)	(CopSTASH(c) == (hv))
+#  define CopLABEL_alloc(pv)	((pv)?savepv(pv):NULL)
 #  define CopLABEL_set(c,pv)	(CopLABEL(c) = (pv))
 #  define CopSTASH_free(c)	
 #  define CopFILE_free(c)	(SvREFCNT_dec(CopFILEGV(c)),(CopFILEGV(c) = NULL))
-#  define CopLABEL_free(c)	
+#  define CopLABEL_free(c)	(Safefree(CopLABEL(c)),(CopLABEL(c) = NULL))
 
 #endif /* USE_ITHREADS */
 

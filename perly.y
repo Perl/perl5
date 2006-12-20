@@ -390,8 +390,7 @@ loop	:	label WHILE '(' remember texpr ')' mintro mblock cont
 #ifdef MAD
 			  forop = newUNOP(OP_NULL, 0, append_elem(OP_LINESEQ,
 				newSTATEOP(0,
-					   (($1)->tk_lval.pval
-					   ?savepv(($1)->tk_lval.pval):Nullch),
+					   CopLABEL_alloc(($1)->tk_lval.pval),
 					   ($5 ? newOP(OP_NULL, 0) : $5) ),
 				forop));
 
@@ -404,8 +403,7 @@ loop	:	label WHILE '(' remember texpr ')' mintro mblock cont
 #else
 			  if ($5) {
 				forop = append_elem(OP_LINESEQ,
-                                        newSTATEOP(0, ($1?savepv($1):Nullch),
-						   $5),
+                                        newSTATEOP(0, CopLABEL_alloc($1), $5),
 					forop);
 			  }
 

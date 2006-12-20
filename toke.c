@@ -5093,7 +5093,7 @@ Perl_yylex(pTHX)
 	if (!tmp && PL_expect == XSTATE
 	      && d < PL_bufend && *d == ':' && *(d + 1) != ':') {
 	    s = d + 1;
-	    yylval.pval = savepv(PL_tokenbuf);
+	    yylval.pval = CopLABEL_alloc(PL_tokenbuf);
 	    CLINE;
 	    TOKEN(LABEL);
 	}
