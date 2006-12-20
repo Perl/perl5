@@ -1175,10 +1175,10 @@ _test_notty:
 	cd t && $(PERL_DEBUG) PERL_SKIP_TTY_TEST=1 $(LDLIBPTH) $(PERL) $(TESTFILE) $(TEST_ARGS)
 
 unpack_files:
-	$(LDLIBPTH) ./miniperl$(EXE_EXT) -Ilib packed_files.pl -u
+	$(LDLIBPTH) ./miniperl$(EXE_EXT) -Ilib uupacktool.pl -u -m
 
 cleanup_unpacked_files:
-	$(LDLIBPTH) ./miniperl$(EXE_EXT) -Ilib packed_files.pl -c
+	$(LDLIBPTH) ./miniperl$(EXE_EXT) -Ilib uupacktool.pl -c
 
 # The second branch is for testing without a tty or controlling terminal,
 # see t/op/stat.t

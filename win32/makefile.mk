@@ -1224,8 +1224,8 @@ $(PERLSTATICLIB): Extensions_static
 .ENDIF
 	$(XCOPY) $(PERLSTATICLIB) $(COREDIR)
 
-$(PERLEXE_ICO): $(MINIPERL) makeico.pl
-	$(MINIPERL) makeico.pl > $@
+$(PERLEXE_ICO): $(MINIPERL) ..\uupacktool.pl $(PERLEXE_ICO).packd
+	$(MINIPERL) -I..\lib ..\uupacktool.pl -u $(PERLEXE_ICO).packd $(PERLEXE_ICO)
 
 $(PERLEXE_RES): perlexe.rc $(PERLEXE_ICO)
 
@@ -1537,7 +1537,13 @@ minitest : $(MINIPERL) $(GLOBEXE) $(CONFIGPM) $(UNIDATAFILES) utils
 	cd ..\t && \
 	$(MINIPERL) -I..\lib harness base/*.t comp/*.t cmd/*.t io/*.t op/*.t pragma/*.t
 
-test-prep : all utils
+unpack_files:
+	$(MINIPERL) -I..\lib ..\uupacktool.pl -u -d .. -m
+
+cleanup_unpacked_files:
+	$(MINIPERL) -I..\lib ..\uupacktool.pl -c -d .. -m
+	
+test-prep : all utils unpack_files
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 .IF "$(CCTYPE)" == "BORLAND"
@@ -1604,9 +1610,13 @@ _clean :
 	-@erase *.tds
 	-@erase Extensions_static
 
-clean : Extensions_clean _clean
 
-realclean : Extensions_realclean MakePPPort_clean _clean
+
+_preclean : cleanup_unpacked_files
+	
+clean : _preclean Extensions_clean _clean
+
+realclean : _preclean Extensions_realclean MakePPPort_clean _clean
 
 # Handy way to run perlbug -ok without having to install and run the
 # installed perlbug. We don't re-run the tests here - we trust the user.

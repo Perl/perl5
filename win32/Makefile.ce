@@ -933,7 +933,7 @@ zip:
 	$(HPERL) -I..\lib -MCross=$(CROSS_NAME) ce-helpers\makedist.pl --distdir=dist-$(CROSS_NAME) --cross-name=$(CROSS_NAME) --zip
 
 perl.ico:
-	$(HPERL) makeico.pl perl.ico
+	$(HPERL) -I..\lib ..\uupacktool.pl -u perlexe.ico.packd perl.ico
 
 hostminiperl: ..\miniperl.exe
 
