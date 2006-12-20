@@ -187,10 +187,11 @@ struct cop {
 #  define CopSTASH_set(c,hv)	CopSTASHPV_set(c, (hv) ? HvNAME_get(hv) : NULL)
 #  define CopSTASH_eq(c,hv)	((hv) && stashpv_hvname_match(c,hv))
 #  define CopLABEL(c)		((c)->cop_label)
+/* Don't free the original label here, it will be freed by the parser */
 #  ifdef NETWARE
-#    define CopLABEL_set(c,pv)	((CopLABEL(c) = ((pv) ? savepv(pv) : NULL)), Safefree(pv), ((pv) = NULL))
+#    define CopLABEL_set(c,pv)	(CopLABEL(c) = ((pv) ? savepv(pv) : NULL))
 #  else
-#    define CopLABEL_set(c,pv)	((CopLABEL(c) = savesharedpv(pv)), Safefree(pv), ((pv) = NULL))
+#    define CopLABEL_set(c,pv)	(CopLABEL(c) = savesharedpv(pv))
 #  endif
 #  ifdef NETWARE
 #    define CopSTASH_free(c) SAVECOPSTASH_FREE(c)
