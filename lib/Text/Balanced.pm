@@ -10,7 +10,7 @@ use Exporter;
 use SelfLoader;
 use vars qw { $VERSION @ISA %EXPORT_TAGS };
 
-use version; $VERSION = qv('1.99.1_1');
+use version; $VERSION = qv('2.0.0');
 @ISA		= qw ( Exporter );
 		     
 %EXPORT_TAGS	= ( ALL => [ qw(
@@ -793,13 +793,15 @@ sub _match_quotelike($$$$)	# ($textref, $prepat, $allow_raw_match)
 		$rdel1 =~ tr/[({</])}>/;
 		defined(_match_bracketed($textref,"",$ldel1,"","",$rdel1))
 		|| do { pos $$textref = $startpos; return };
+        $ld2pos = pos($$textref);
+        $rd1pos = $ld2pos-1;
 	}
 	else
 	{
-		$$textref =~ /$ldel1[^\\$ldel1]*(\\.[^\\$ldel1]*)*$ldel1/gcs
+		$$textref =~ /\G$ldel1[^\\$ldel1]*(\\.[^\\$ldel1]*)*$ldel1/gcs
 		|| do { pos $$textref = $startpos; return };
+        $ld2pos = $rd1pos = pos($$textref)-1;
 	}
-	$ld2pos = $rd1pos = pos($$textref)-1;
 
 	my $second_arg = $op =~ /s|tr|y/ ? 1 : 0;
 	if ($second_arg)

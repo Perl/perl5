@@ -23,7 +23,7 @@ $count=2;
 use vars qw( $DEBUG );
 #$DEBUG=1;
 sub debug { print "\t>>>",@_ if $ENV{DEBUG} }
-sub esc   { my $x = shift; $x =~ s/\n/\\n/gs; $x }
+sub esc   { my $x = shift||'<undef>'; $x =~ s/\n/\\n/gs; $x }
 
 ######################### End of black magic.
 

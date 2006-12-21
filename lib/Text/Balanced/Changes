@@ -331,3 +331,12 @@ Revision history for Perl extension Text::Balanced.
 
 1.99.1  Thu Nov 16 09:29:14 2006
 
+    - Included dependency on version.pm (thanks Andy)
+
+
+
+2.0.0  Wed Dec 20 10:50:24 2006
+
+    - Added patches from bleadperl version (thanks Rafael!)
+
+    - Fixed bug in second bracketed delimiters (thanks David)
