@@ -731,16 +731,9 @@ would parse the expression
 as though the argument to C<given> were an element of the hash
 C<%foo>, interpreting the braces as hash-element syntax.
 
-The table of smart matches is not identical to that proposed
-by the Perl 6 specification Synopsis 4. Some of the differences
-are simply a consequence of Perl 5's different data model, while
-other changes have been made to address problems with the Perl 6
-proposal. For example, the Perl 6 specification implies that
-C<$string ~~ qr/regex/> would test string equality, rather than
-doing a regular expression match. On the other hand, informal
-examples elsewhere make it clear that a regular expression
-match is the intended behaviour. Thus the Synopsis 4 smart
-match specification cannot yet be regarded as definitive.
+The table of smart matches is not identical to that proposed by the
+Perl 6 specification, mainly due to the differences between Perl 6's
+and Perl 5's data models.
 
 In Perl 6, C<when()> will always do an implicit smart match
 with its argument, whilst it is convenient in Perl 5 to
