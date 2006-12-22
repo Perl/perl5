@@ -1442,7 +1442,8 @@ Perl_gp_free(pTHX_ GV *gv)
         return;
     }
 
-    unshare_hek(gp->gp_file_hek);
+    if (gp->gp_file_hek)
+	unshare_hek(gp->gp_file_hek);
     SvREFCNT_dec(gp->gp_sv);
     SvREFCNT_dec(gp->gp_av);
     /* FIXME - another reference loop GV -> symtab -> GV ?
