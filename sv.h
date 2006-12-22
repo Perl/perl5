@@ -1987,17 +1987,15 @@ Returns a pointer to the character buffer.
 	(((SvFLAGS(pwadak) & (SVp_POK|SVpgv_GP)) == SVpgv_GP)	\
 	&& (SvTYPE(pwadak) == SVt_PVGV || SvTYPE(pwadak) == SVt_PVLV))
 #define isGV_with_GP_on(sv)	STMT_START {			       \
-	GV *const uggh = (GV*) sv;				       \
-	assert (SvTYPE(uggh) == SVt_PVGV || SvTYPE(uggh) == SVt_PVLV); \
-	assert (!SvPOKp(uggh));					       \
-	assert (!SvIOKp(uggh));					       \
-	(SvFLAGS(uggh) |= SVpgv_GP);				       \
+	assert (SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVLV); \
+	assert (!SvPOKp(sv));					       \
+	assert (!SvIOKp(sv));					       \
+	(SvFLAGS(sv) |= SVpgv_GP);				       \
     } STMT_END
 #define isGV_with_GP_off(sv)	STMT_START {			       \
-	GV *const uggh = (GV *) sv;				       \
-	assert (SvTYPE(uggh) == SVt_PVGV || SvTYPE(uggh) == SVt_PVLV); \
-	assert (!SvPOKp(uggh));					       \
-	assert (!SvIOKp(uggh));					       \
+	assert (SvTYPE(sv) == SVt_PVGV || SvTYPE(sv) == SVt_PVLV); \
+	assert (!SvPOKp(sv));					       \
+	assert (!SvIOKp(sv));					       \
 	(SvFLAGS(sv) &= ~SVpgv_GP);				       \
     } STMT_END
 
