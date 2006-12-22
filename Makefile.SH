@@ -817,7 +817,7 @@ preplibrary: miniperl$(EXE_EXT) $(CONFIGPM) lib/lib.pm $(PREPLIBRARY_LIBPERL)
 
 .PHONY: makeppport
 makeppport: miniperl$(EXE_EXT) $(CONFIGPM)
-	$(LDLIBPTH) ./miniperl -Ilib mkppport
+	$(LDLIBPTH) ./miniperl$(EXE_EXT) -Ilib mkppport
 
 lib/Config.pod: config.sh miniperl$(EXE_EXT) configpm Porting/Glossary
 	$(LDLIBPTH) ./miniperl -Ilib configpm --heavy=lib/Config_heavy.pl lib/Config.pm
@@ -1077,7 +1077,7 @@ _cleaner1:
 	-@for x in $(DYNALOADER) $(dynamic_ext) $(static_ext) $(nonxs_ext) ; do \
 	$(LDLIBPTH) sh ext/util/make_ext $(CLEAN) $$x MAKE=$(MAKE) ; \
 	done
-	$(LDLIBPTH) ./miniperl -Ilib mkppport --clean
+	-@test ! -f ./miniperl$(EXE_EXT) || $(LDLIBPTH) ./miniperl$(EXE_EXT) -Ilib mkppport --clean
 
 # Some systems do not support "?", so keep these files separate.
 _cleaner2:
@@ -1178,7 +1178,7 @@ unpack_files:
 	$(LDLIBPTH) ./miniperl$(EXE_EXT) -Ilib uupacktool.pl -u -m
 
 cleanup_unpacked_files:
-	$(LDLIBPTH) ./miniperl$(EXE_EXT) -Ilib uupacktool.pl -c
+	-@test ! -f ./miniperl$(EXE_EXT) || $(LDLIBPTH) ./miniperl$(EXE_EXT) -Ilib uupacktool.pl -c
 
 # The second branch is for testing without a tty or controlling terminal,
 # see t/op/stat.t
