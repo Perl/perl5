@@ -3313,7 +3313,8 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	else {
 	    OP *lastop = NULL;
 	    for (curop = LINKLIST(repl); curop!=repl; curop = LINKLIST(curop)) {
-		if (PL_opargs[curop->op_type] & OA_DANGEROUS) {
+		if (curop->op_type == OP_SCOPE
+			|| (PL_opargs[curop->op_type] & OA_DANGEROUS)) {
 		    if (curop->op_type == OP_GV) {
 			GV * const gv = cGVOPx_gv(curop);
 			repl_has_vars = 1;
@@ -3332,9 +3333,8 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 		    else if (curop->op_type == OP_PADSV ||
 			     curop->op_type == OP_PADAV ||
 			     curop->op_type == OP_PADHV ||
-			     curop->op_type == OP_PADANY ||
-			     curop->op_type == OP_SCOPE /* ${10} */
-			     ) {
+			     curop->op_type == OP_PADANY)
+		    {
 			repl_has_vars = 1;
 		    }
 		    else if (curop->op_type == OP_PUSHRE)
@@ -3346,8 +3346,9 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	    }
 	}
 	if (curop == repl
-	    && !repl_has_vars
-	    && (PM_GETRE(pm) && !PM_GETRE(pm)->extflags & RXf_EVAL_SEEN))
+	    && !(repl_has_vars
+		 && (!PM_GETRE(pm)
+		     || PM_GETRE(pm)->extflags & RXf_EVAL_SEEN)))
 	{
 	    pm->op_pmflags |= PMf_CONST;	/* const for long enough */
 	    pm->op_pmpermflags |= PMf_CONST;	/* const for long enough */
