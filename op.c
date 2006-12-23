@@ -3314,6 +3314,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, bool isreg)
 	    OP *lastop = NULL;
 	    for (curop = LINKLIST(repl); curop!=repl; curop = LINKLIST(curop)) {
 		if (curop->op_type == OP_SCOPE
+			|| curop->op_type == OP_LEAVE
 			|| (PL_opargs[curop->op_type] & OA_DANGEROUS)) {
 		    if (curop->op_type == OP_GV) {
 			GV * const gv = cGVOPx_gv(curop);
