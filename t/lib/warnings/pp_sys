@@ -197,6 +197,14 @@ EXPECT
 Filehandle STDIN opened only for input at - line 3.
 ########
 # pp_sys.c [pp_send]
+use warnings 'io' ;
+syswrite STDIN, "fred";
+no warnings 'io' ;
+syswrite STDIN, "fred";
+EXPECT
+Filehandle STDIN opened only for input at - line 3.
+########
+# pp_sys.c [pp_send]
 use warnings 'closed' ;
 close STDIN; 
 syswrite STDIN, "fred", 1;

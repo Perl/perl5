@@ -1829,10 +1829,14 @@ PP(pp_send)
 
     SETERRNO(0,0);
     io = GvIO(gv);
-    if (!io || !IoIFP(io)) {
+    if (!io || !IoIFP(io) || IoTYPE(io) == IoTYPE_RDONLY) {
 	retval = -1;
-	if (ckWARN(WARN_CLOSED))
-	    report_evil_fh(gv, io, PL_op->op_type);
+	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED)) {
+	    if (io && IoIFP(io))
+		report_evil_fh(gv, io, OP_phoney_INPUT_ONLY);
+	    else
+		report_evil_fh(gv, io, PL_op->op_type);
+	}
 	SETERRNO(EBADF,RMS_IFI);
 	goto say_undef;
     }
