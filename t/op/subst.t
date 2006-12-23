@@ -1,4 +1,4 @@
-#!./perl -wT
+#!./perl -w
 
 BEGIN {
     chdir 't' if -d 't';
@@ -563,11 +563,14 @@ is($name, "cis", q[#22351 bug with 'e' substitution modifier]);
     is($c, "\x20\x30\x40\x50\x60", "s/[\\x00-\\x1f]//g");
 }
 {
+    {
+    local our $TODO = ${^TAINT} ? "doesn't work with taint mode" : 0;
     $_ = "xy";
     no warnings 'uninitialized';
     /(((((((((x)))))))))(z)/;	# clear $10
     s/(((((((((x)))))))))(y)/${10}/;
     is($_,"y","RT#6006: \$_ eq '$_'");
+    }
     $_ = "xr";
     s/(((((((((x)))))))))(r)/fooba${10}/;
     is($_,"foobar","RT#6006: \$_ eq '$_'");

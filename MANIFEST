@@ -3589,6 +3589,7 @@ t/op/sub_lval.t			See if lvalue subroutines work
 t/op/subst_amp.t		See if $&-related substitution works
 t/op/substr.t			See if substr works
 t/op/subst.t			See if substitution works
+t/op/substT.t			See if substitution works with -T
 t/op/subst_wamp.t		See if substitution works with $& present
 t/op/sub.t			See if subroutines work
 t/op/switch.t			See if switches (given/when) work
