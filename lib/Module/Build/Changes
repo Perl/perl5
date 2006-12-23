@@ -1,5 +1,64 @@
 Revision history for Perl extension Module::Build.
 
+ - On some systems (haven't identified the actual problem yet)
+   $ENV{PERL5LIB} can grow to enormous enough sizes that we can't
+   launch any more subprocesses because the environment table is full.
+   This is the now-infamous "Couldn't run Build.PL: Argument list too
+   long" error.  Now we detect such situations and trim the directory
+   list to only include directories that actually exist, listed only
+   once each.  Not the ideal solution, but it should work.
+
+ - Silence a warning in M::B::ModuleInfo that happens when the author
+   is using the "$VERSION = eval $VERSION" idiom.
+
+ - When running the 'testcover' action, do "cover --delete" if any of
+   the test files have changed (we already did so if any of the code
+   under test has changed). [Suggested by Chris Dolan, RT #23584]
+
+ - Fixed a broken link in the documentation about PREFIX. [Spotted by
+   David Steinbrunner]
+
+ - Changes to do_system() & friends on VMS to get system calls working
+   much better there. [Craig Berry]
+
+ - Added the "pardist" target which creates a PAR binary distribution
+   akin to a PPM distribution. [Steffen Mueller]
+
+ - Added the Interix platform as a Unix variant. [Stephen Hartland]
+
+ - Improved the error message we emit when a distribution contains XS
+   files but the user has no C compiler. [Suggested by Andreas Koenig]
+
+0.2805_01  Thu Sep  7 21:57:29 CDT 2006
+
+ - Because of a weird behavior of YAML::Node, any distribution that
+   used version.pm objects to define their versions was generating the
+   wrong syntax for the versions in their META.yml file.  They will
+   now appear as strings like v3.42.1 or similar, including the
+   leading v.
+
+ - Upgraded to version 0.67 of version.pm. [John Peacock]
+
+ - Added a contrib/ directory with a bash completion function for M::B
+   actions and switches. [Julian Mehnle]
+
+ - When we eval() the embedded version.pm code we will now die() if
+   the eval() was unsuccessful, rather than continuing blindly on and
+   dying mysteriously later.
+
+ - Added a 'retest' action that lets users run the current regression
+   tests on a previously-installed version of a distribution.
+
+ * Instead of storing an entire dump of the Config.pm hash in the
+   _build/ directory upon startup, we now just store any overrides the
+   user or author has specified.  Note that if you were doing anything
+   you weren't supposed to be doing, like poking around in the
+   internals of $buld->{config}, your code might break, so I've put
+   the asterisk of incompatibility on this one just to cover my
+   tuchus.  [Idea originally by Randy Sims]
+
+ - Made copying files via copy_if_modified() a little less chatty.
+
 0.2805  Sat Jul 29 22:01:24 CDT 2006
 
  - We now embed a copy of version.pm right in the

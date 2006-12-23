@@ -239,7 +239,7 @@ L<Module::Build> for the docs.
 
 =head1 AUTHOR
 
-Ken Williams <ken@cpan.org>, Randy W. Sims <RandyS@ThePierianSpring.org>
+Ken Williams <kwilliams@cpan.org>, Randy W. Sims <RandyS@ThePierianSpring.org>
 
 =head1 SEE ALSO
 

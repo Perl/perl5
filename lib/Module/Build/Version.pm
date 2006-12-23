@@ -25,9 +25,9 @@ if ($@) { # can't locate version files, use our own
 
     # but we eval them in reverse order since version depends on
     # version::vpp to already exist
-    eval $vpp;
+    eval $vpp; die $@ if $@;
     $INC{'version/vpp.pm'} = 'inside Module::Build::Version';
-    eval $version;
+    eval $version; die $@ if $@;
     $INC{'version.pm'} = 'inside Module::Build::Version';
 }
 
@@ -94,7 +94,7 @@ use strict;
 
 use Scalar::Util;
 use vars qw ($VERSION @ISA @REGEXS);
-$VERSION = 0.661;
+$VERSION = 0.67;
 
 push @REGEXS, qr/
 	^v?	# optional leading 'v'
@@ -132,6 +132,12 @@ sub new
 		# must be a v-string
 		$value = $tvalue;
 	    }
+	}
+
+	# exponential notation
+	if ( $value =~ /\d+e-?\d+/ ) {
+	    $value = sprintf("%.9f",$value);
+	    $value =~ s/(0+)$//;
 	}
 	
 	# This is not very efficient, but it is morally equivalent
@@ -453,11 +459,6 @@ sub is_alpha {
 sub qv {
     my ($value) = @_;
 
-    if ( $value =~ /\d+e-?\d+/ ) { # exponential notation
-	$value = sprintf("%.9f",$value);
-	$value =~ s/(0+)//;
-    }
-
     my $eval = eval 'Scalar::Util::isvstring($value)';
     if ( !$@ and $eval ) {
 	$value = sprintf("v%vd",$value);
@@ -499,10 +500,6 @@ sub _verify {
 	}
 
 	if ( defined $req ) {
-	    if ( $req =~ /\d+e-?\d+/ ) { # exponential notation
-		$req = sprintf("%.9f",$req);
-		$req =~ s/(0+)$//;
-	    }
 	    unless ( defined $version ) {
 		my $msg =  "$class does not define ".
 			   "\$$class\::VERSION--version check failed";

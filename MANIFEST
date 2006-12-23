@@ -1978,6 +1978,7 @@ lib/Module/Build/Authoring.pod	Module::Build
 lib/Module/Build/Base.pm	Module::Build
 lib/Module/Build/Changes	Module::Build
 lib/Module/Build/Compat.pm	Module::Build
+lib/Module/Build/Config.pm	Module::Build
 lib/Module/Build/ConfigData.pm	Module::Build
 lib/Module/Build/Cookbook.pm	Module::Build
 lib/Module/Build/ModuleInfo.pm	Module::Build

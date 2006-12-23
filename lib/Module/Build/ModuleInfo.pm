@@ -163,6 +163,12 @@ sub _parse_file {
   my $fh = IO::File->new( $filename )
     or die( "Can't open '$filename': $!" );
 
+  $self->_parse_fh($fh);
+}
+
+sub _parse_fh {
+  my ($self, $fh) = @_;
+
   my( $in_pod, $seen_end, $need_vers ) = ( 0, 0, 0 );
   my( @pkgs, %vers, %pod, @pod );
   my $pkg = 'main';
@@ -215,14 +221,16 @@ sub _parse_file {
 	push( @pkgs, $vers_pkg ) unless grep( $vers_pkg eq $_, @pkgs );
 	$need_vers = 0 if $vers_pkg eq $pkg;
 
-	my $v =
-	  $self->_evaluate_version_line( $vers_sig, $vers_fullname, $line );
 	unless ( defined $vers{$vers_pkg} && length $vers{$vers_pkg} ) {
-	  $vers{$vers_pkg} = $v;
+	  $vers{$vers_pkg} = 
+	    $self->_evaluate_version_line( $vers_sig, $vers_fullname, $line );
 	} else {
-	  warn <<"EOM";
-Package '$vers_pkg' already declared with version '$vers{$vers_pkg}'
-ignoring new version '$v'.
+	  # Warn unless the user is using the "$VERSION = eval
+	  # $VERSION" idiom (though there are probably other idioms
+	  # that we should watch out for...)
+	  warn <<"EOM" unless $line =~ /=\s*eval/;
+Package '$vers_pkg' already declared with version '$vers{$vers_pkg}',
+ignoring subsequent declaration.
 EOM
 	}
 
@@ -416,12 +424,12 @@ Can be called as either an object or a class method.
 
 =head1 AUTHOR
 
-Ken Williams <ken@cpan.org>, Randy W. Sims <RandyS@ThePierianSpring.org>
+Ken Williams <kwilliams@cpan.org>, Randy W. Sims <RandyS@ThePierianSpring.org>
 
 
 =head1 COPYRIGHT
 
-Copyright (c) 2001-2005 Ken Williams.  All rights reserved.
+Copyright (c) 2001-2006 Ken Williams.  All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

@@ -274,7 +274,7 @@ perl(1), L<Module::Build>(3), L<Module::Build::API>(3),
 L<Module::Build::Cookbook>(3), L<ExtUtils::MakeMaker>(3), L<YAML>(3)
 
 F<META.yml> Specification:
-L<http://module-build.sourceforge.net/META-spec-v1.2.html>
+L<http://module-build.sourceforge.net/META-spec-current.html>
 
 L<http://www.dsmit.com/cons/>
 

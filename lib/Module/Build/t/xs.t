@@ -65,10 +65,12 @@ is $@, '';
   eval {$mb->dispatch('clean')};
   is $@, '';
 
-  $mb->create_build_script;
-  ok -e 'Build';
 
-  eval {$mb->run_perl_script('Build')};
+  $mb->create_build_script;
+  my $script = $mb->build_script;
+  ok -e $script;
+
+  eval {$mb->run_perl_script($script)};
   is $@, '';
 }
 
@@ -85,9 +87,10 @@ SKIP: {
   skip( "skipping a Unixish-only tests", 1 )
       unless $mb->os_type eq 'Unix';
 
-  local $mb->{config}{ld} = "FOO=BAR $mb->{config}{ld}";
+  $mb->{config}->push(ld => "FOO=BAR ".$mb->config('ld'));
   eval {$mb->dispatch('build')};
   is $@, '';
+  $mb->{config}->pop('ld');
 }
 
 eval {$mb->dispatch('realclean')};

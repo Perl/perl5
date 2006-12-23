@@ -22,19 +22,17 @@ the general docs.
 
 =over 4
 
-=item new
+=item _set_defaults
 
 Change $self->{build_script} to 'Build.com' so @Build works.
 
 =cut
 
-sub new {
-    my $class = shift;
-    my $self = $class->SUPER::new(@_);
+sub _set_defaults {
+    my $self = shift;
+    $self->SUPER::_set_defaults(@_);
 
     $self->{properties}{build_script} = 'Build.com';
-
-    return $self;
 }
 
 
@@ -100,7 +98,7 @@ sub _prefixify {
     }
     else {
         my($path_vol, $path_dirs) = File::Spec->splitpath( $path );
-	my $vms_prefix = $self->config->{vms_prefix};
+	my $vms_prefix = $self->config('vms_prefix');
         if( $path_vol eq $vms_prefix.':' ) {
             $self->log_verbose("  $vms_prefix: seen\n");
 
@@ -118,26 +116,98 @@ sub _prefixify {
     return $path;
 }
 
+=item _quote_args
+
+Command-line arguments (but not the command itself) must be quoted
+to ensure case preservation.
+
+=cut
 
 sub _quote_args {
   # Returns a string that can become [part of] a command line with
-  # proper quoting so that the subprocess sees this same list of args.
+  # proper quoting so that the subprocess sees this same list of args,
+  # or if we get a single arg that is an array reference, quote the
+  # elements of it and return the reference.
   my ($self, @args) = @_;
+  my $got_arrayref = (scalar(@args) == 1 
+                      && UNIVERSAL::isa($args[0], 'ARRAY')) 
+                   ? 1 
+                   : 0;
 
-  my $return_args = '';
-  for (@args) {
-    $return_args .= q( ").$_.q(") if !/^\"/ && length($_) > 0;
-  }
-  return $return_args;
+  map { $_ = q(").$_.q(") if !/^\"/ && length($_) > 0 }
+     ($got_arrayref ? @{$args[0]} 
+                    : @args
+     );
+
+  return $got_arrayref ? $args[0] 
+                       : join(' ', @args);
 }
 
+=item have_forkpipe
+
+There is no native fork(), so some constructs depending on it are not
+available.
+
+=cut
+
 sub have_forkpipe { 0 }
+
+=item _backticks
+
+Override to ensure that we quote the arguments but not the command.
+
+=cut
+
+sub _backticks {
+  # The command must not be quoted but the arguments to it must be.
+  my ($self, @cmd) = @_;
+  my $cmd = shift @cmd;
+  my $args = $self->_quote_args(@cmd);
+  return `$cmd $args`;
+}
+
+=item do_system
+
+Override to ensure that we quote the arguments but not the command.
+
+=cut
+
+sub do_system {
+  # The command must not be quoted but the arguments to it must be.
+  my ($self, @cmd) = @_;
+  $self->log_info("@cmd\n");
+  my $cmd = shift @cmd;
+  my $args = $self->_quote_args(@cmd);
+  return !system("$cmd $args");
+}
+
+=item _infer_xs_spec
+
+Inherit the standard version but tweak the library file name to be 
+something Dynaloader can find.
+
+=cut
+
+sub _infer_xs_spec {
+  my $self = shift;
+  my $file = shift;
+
+  my $spec = $self->SUPER::_infer_xs_spec($file);
+
+  # Need to create with the same name as DynaLoader will load with.
+  if (defined &DynaLoader::mod2fname) {
+    my $file = DynaLoader::mod2fname([$$spec{base_name}]);
+    $$spec{lib_file} = File::Spec->catfile($$spec{archdir}, "$file.$self->{config}->{dlext}");
+  }
+
+  return $spec;
+}
 
 =back
 
 =head1 AUTHOR
 
-Michael G Schwern <schwern@pobox.com>, Ken Williams <ken@cpan.org>
+Michael G Schwern <schwern@pobox.com>, Ken Williams <kwilliams@cpan.org>
 
 =head1 SEE ALSO
 

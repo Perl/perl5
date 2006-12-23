@@ -173,12 +173,12 @@ L<http://aspn.activestate.com/ASPN/Downloads/ActivePerl/PPM/>
 
 =head1 AUTHOR
 
-Dave Rolsky <autarch@urth.org>, Ken Williams <ken@cpan.org>
+Dave Rolsky <autarch@urth.org>, Ken Williams <kwilliams@cpan.org>
 
 
 =head1 COPYRIGHT
 
-Copyright (c) 2001-2005 Ken Williams.  All rights reserved.
+Copyright (c) 2001-2006 Ken Williams.  All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

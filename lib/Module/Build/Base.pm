@@ -17,6 +17,7 @@ use Text::ParseWords ();
 
 use Module::Build::ModuleInfo;
 use Module::Build::Notes;
+use Module::Build::Config;
 
 
 #################### Constructors ###########################
@@ -113,7 +114,7 @@ sub _construct {
 
   my $self = bless {
 		    args => {%$args},
-		    config => {%Config, %$config},
+		    config => Module::Build::Config->new(values => $config),
 		    properties => {
 				   base_dir        => $package->cwd,
 				   mb_version      => $Module::Build::VERSION,
@@ -123,7 +124,7 @@ sub _construct {
 		   }, $package;
 
   $self->_set_defaults;
-  my ($p, $c, $ph) = ($self->{properties}, $self->{config}, $self->{phash});
+  my ($p, $ph) = ($self->{properties}, $self->{phash});
 
   foreach (qw(notes config_data features runtime_params cleanup auto_features)) {
     my $file = File::Spec->catfile($self->config_dir, $_);
@@ -184,62 +185,62 @@ sub log_warn {
 
 sub _set_install_paths {
   my $self = shift;
-  my $c = $self->config;
+  my $c = $self->{config};
   my $p = $self->{properties};
 
-  my @libstyle = $c->{installstyle} ?
-      File::Spec->splitdir($c->{installstyle}) : qw(lib perl5);
-  my $arch     = $c->{archname};
-  my $version  = $c->{version};
+  my @libstyle = $c->get('installstyle') ?
+      File::Spec->splitdir($c->get('installstyle')) : qw(lib perl5);
+  my $arch     = $c->get('archname');
+  my $version  = $c->get('version');
 
-  my $bindoc  = $c->{installman1dir} || undef;
-  my $libdoc  = $c->{installman3dir} || undef;
+  my $bindoc  = $c->get('installman1dir') || undef;
+  my $libdoc  = $c->get('installman3dir') || undef;
 
-  my $binhtml = $c->{installhtml1dir} || $c->{installhtmldir} || undef;
-  my $libhtml = $c->{installhtml3dir} || $c->{installhtmldir} || undef;
+  my $binhtml = $c->get('installhtml1dir') || $c->get('installhtmldir') || undef;
+  my $libhtml = $c->get('installhtml3dir') || $c->get('installhtmldir') || undef;
 
   $p->{install_sets} =
     {
      core   => {
-		lib     => $c->{installprivlib},
-		arch    => $c->{installarchlib},
-		bin     => $c->{installbin},
-		script  => $c->{installscript},
+		lib     => $c->get('installprivlib'),
+		arch    => $c->get('installarchlib'),
+		bin     => $c->get('installbin'),
+		script  => $c->get('installscript'),
 		bindoc  => $bindoc,
 		libdoc  => $libdoc,
 		binhtml => $binhtml,
 		libhtml => $libhtml,
 	       },
      site   => {
-		lib     => $c->{installsitelib},
-		arch    => $c->{installsitearch},
-		bin     => $c->{installsitebin} || $c->{installbin},
-		script  => $c->{installsitescript} ||
-		           $c->{installsitebin} || $c->{installscript},
-		bindoc  => $c->{installsiteman1dir} || $bindoc,
-		libdoc  => $c->{installsiteman3dir} || $libdoc,
-		binhtml => $c->{installsitehtml1dir} || $binhtml,
-		libhtml => $c->{installsitehtml3dir} || $libhtml,
+		lib     => $c->get('installsitelib'),
+		arch    => $c->get('installsitearch'),
+		bin     => $c->get('installsitebin') || $c->get('installbin'),
+		script  => $c->get('installsitescript') ||
+		           $c->get('installsitebin') || $c->get('installscript'),
+		bindoc  => $c->get('installsiteman1dir') || $bindoc,
+		libdoc  => $c->get('installsiteman3dir') || $libdoc,
+		binhtml => $c->get('installsitehtml1dir') || $binhtml,
+		libhtml => $c->get('installsitehtml3dir') || $libhtml,
 	       },
      vendor => {
-		lib     => $c->{installvendorlib},
-		arch    => $c->{installvendorarch},
-		bin     => $c->{installvendorbin} || $c->{installbin},
-		script  => $c->{installvendorscript} ||
-		           $c->{installvendorbin} || $c->{installscript},
-		bindoc  => $c->{installvendorman1dir} || $bindoc,
-		libdoc  => $c->{installvendorman3dir} || $libdoc,
-		binhtml => $c->{installvendorhtml1dir} || $binhtml,
-		libhtml => $c->{installvendorhtml3dir} || $libhtml,
+		lib     => $c->get('installvendorlib'),
+		arch    => $c->get('installvendorarch'),
+		bin     => $c->get('installvendorbin') || $c->get('installbin'),
+		script  => $c->get('installvendorscript') ||
+		           $c->get('installvendorbin') || $c->get('installscript'),
+		bindoc  => $c->get('installvendorman1dir') || $bindoc,
+		libdoc  => $c->get('installvendorman3dir') || $libdoc,
+		binhtml => $c->get('installvendorhtml1dir') || $binhtml,
+		libhtml => $c->get('installvendorhtml3dir') || $libhtml,
 	       },
     };
 
   $p->{original_prefix} =
     {
-     core   => $c->{installprefixexp} || $c->{installprefix} ||
-               $c->{prefixexp}        || $c->{prefix} || '',
-     site   => $c->{siteprefixexp},
-     vendor => $c->{usevendorprefix} ? $c->{vendorprefixexp} : '',
+     core   => $c->get('installprefixexp') || $c->get('installprefix') ||
+               $c->get('prefixexp')        || $c->get('prefix') || '',
+     site   => $c->get('siteprefixexp'),
+     vendor => $c->get('usevendorprefix') ? $c->get('vendorprefixexp') : '',
     };
   $p->{original_prefix}{site} ||= $p->{original_prefix}{core};
 
@@ -346,7 +347,7 @@ sub _backticks {
   my ($self, @cmd) = @_;
   if ($self->have_forkpipe) {
     local *FH;
-    my $pid = open FH, "-|";
+    my $pid = open *FH, "-|";
     if ($pid) {
       return wantarray ? <FH> : join '', <FH>;
     } else {
@@ -394,7 +395,7 @@ sub _perl_is_same {
 # invoking the wrong perl.
 sub find_perl_interpreter {
   my $proto = shift;
-  my $c     = ref($proto) ? $proto->config : \%Config::Config;
+  my $c     = ref($proto) ? $proto->{config} : 'Module::Build::Config';
 
   my $perl  = $^X;
   my $perl_basename = File::Basename::basename($perl);
@@ -433,7 +434,7 @@ sub find_perl_interpreter {
     # PATH. We do not want to do either if we are running from an
     # uninstalled perl in a perl source tree.
 
-    push( @potential_perls, $c->{perlpath} );
+    push( @potential_perls, $c->get('perlpath') );
 
     push( @potential_perls,
           map File::Spec->catfile($_, $perl_basename), File::Spec->path() );
@@ -442,7 +443,7 @@ sub find_perl_interpreter {
   # Now that we've enumerated the potential perls, it's time to test
   # them to see if any of them match our configuration, returning the
   # absolute path of the first successful match.
-  my $exe = $c->{exe_ext};
+  my $exe = $c->get('exe_ext');
   foreach my $thisperl ( @potential_perls ) {
 
     if ($proto->os_type eq 'VMS') {
@@ -683,7 +684,7 @@ sub ACTION_config_data {
 	if ( $type eq 'HASH' ) {
           *{"$class\::$property"} = sub {
 	    my $self = shift;
-	    my $x = ( $property eq 'config' ) ? $self : $self->{properties};
+	    my $x = $self->{properties};
 	    return $x->{$property} unless @_;
 
 	    if ( defined($_[0]) && !ref($_[0]) ) {
@@ -759,6 +760,7 @@ __PACKAGE__->add_property(recurse_into => []);
 __PACKAGE__->add_property(use_rcfile => 1);
 __PACKAGE__->add_property(create_packlist => 1);
 __PACKAGE__->add_property(allow_mb_mismatch => 0);
+__PACKAGE__->add_property(config => undef);
 
 {
   my $Is_ActivePerl = eval {require ActivePerl::DocTools};
@@ -774,7 +776,6 @@ __PACKAGE__->add_property(allow_mb_mismatch => 0);
 }
 
 __PACKAGE__->add_property($_ => {}) for qw(
-  config
   get_options
   install_base_relpaths
   install_path
@@ -824,6 +825,17 @@ __PACKAGE__->add_property($_) for qw(
   xs_files
 );
 
+sub config {
+  my $self = shift;
+  my $c = ref($self) ? $self->{config} : 'Module::Build::Config';
+  return $c->all_config unless @_;
+
+  my $key = shift;
+  return $c->get($key) unless @_;
+
+  my $val = shift;
+  return $c->set($key => $val);
+}
 
 sub mb_parents {
     # Code borrowed from Class::ISA.
@@ -1000,7 +1012,9 @@ sub read_config {
   my $fh = IO::File->new($file) or die "Can't read '$file': $!";
   my $ref = eval do {local $/; <$fh>};
   die if $@;
-  ($self->{args}, $self->{config}, $self->{properties}) = @$ref;
+  my $c;
+  ($self->{args}, $c, $self->{properties}) = @$ref;
+  $self->{config} = Module::Build::Config->new(values => $c);
   close $fh;
 }
 
@@ -1026,7 +1040,7 @@ sub write_config {
   
   my @items = @{ $self->prereq_action_types };
   $self->_write_data('prereqs', { map { $_, $self->$_() } @items });
-  $self->_write_data('build_params', [$self->{args}, $self->{config}, $self->{properties}]);
+  $self->_write_data('build_params', [$self->{args}, $self->{config}->values_set, $self->{properties}]);
 
   # Set a new magic number and write it to a file
   $self->_write_data('magicnum', $self->magic_number(int rand 1_000_000));
@@ -1127,7 +1141,8 @@ sub check_prereq {
   my $xs_files = $self->find_xs_files;
   if (keys %$xs_files && !$self->_mb_feature('C_support')) {
     $self->log_warn("Warning: this distribution contains XS files, ".
-		    "but Module::Build is not configured with C_support");
+		    "but Module::Build is not configured with C_support.  ".
+		    "Please install ExtUtils::CBuilder to enable C_support.\n");
   }
 
   # Check to see if there are any prereqs to check
@@ -1269,7 +1284,7 @@ sub make_executable {
   my $self = shift;
   foreach (@_) {
     my $current_mode = (stat $_)[2];
-    chmod $current_mode | 0111, $_;
+    chmod $current_mode | oct(111), $_;
   }
 }
 
@@ -1618,7 +1633,7 @@ sub read_args {
   $args{ARGV} = \@argv;
 
   # Hashify these parameters
-  for ($self->hash_properties) {
+  for ($self->hash_properties, 'config') {
     next unless exists $args{$_};
     my %hash;
     $args{$_} ||= [];
@@ -1664,9 +1679,7 @@ sub read_args {
 sub _detildefy {
     my $arg = shift;
 
-    my($new_arg) = glob($arg) if $arg =~ /^~/;
-
-    return defined($new_arg) ? $new_arg : $arg;
+    return $arg =~ /^~/ ? (glob $arg)[0] : $arg;
 }
 
 
@@ -1794,15 +1807,19 @@ sub merge_args {
   while (my ($key, $val) = each %args) {
     $self->{phash}{runtime_params}->access( $key => $val )
       if $self->valid_property($key);
-    my $add_to = ( $key eq 'config' ? $self->{config}
-                  : $additive{$key} ? $self->{properties}{$key}
-		  : $self->valid_property($key) ? $self->{properties}
-		  : $self->{args});
 
-    if ($additive{$key}) {
-      $add_to->{$_} = $val->{$_} foreach keys %$val;
+    if ($key eq 'config') {
+      $self->config($_ => $val->{$_}) foreach keys %$val;
     } else {
-      $add_to->{$key} = $val;
+      my $add_to = ( $additive{$key} ? $self->{properties}{$key}
+		     : $self->valid_property($key) ? $self->{properties}
+		     : $self->{args});
+
+      if ($additive{$key}) {
+	$add_to->{$_} = $val->{$_} foreach keys %$val;
+      } else {
+	$add_to->{$key} = $val;
+      }
     }
   }
 }
@@ -1983,13 +2000,45 @@ sub _action_listing {
   return $out;
 }
 
+sub ACTION_retest {
+  my ($self) = @_;
+  
+  # Protect others against our @INC changes
+  local @INC = @INC;
+
+  # Filter out nonsensical @INC entries - some versions of
+  # Test::Harness will really explode the number of entries here
+  @INC = grep {ref() || -d} @INC if @INC > 100;
+
+  $self->do_tests;
+}
+
+
 sub ACTION_test {
   my ($self) = @_;
   my $p = $self->{properties};
-  require Test::Harness;
   
   $self->depends_on('code');
   
+  # Protect others against our @INC changes
+  local @INC = @INC;
+
+  # Make sure we test the module in blib/
+  unshift @INC, (File::Spec->catdir($p->{base_dir}, $self->blib, 'lib'),
+		 File::Spec->catdir($p->{base_dir}, $self->blib, 'arch'));
+
+  # Filter out nonsensical @INC entries - some versions of
+  # Test::Harness will really explode the number of entries here
+  @INC = grep {ref() || -d} @INC if @INC > 100;
+
+  $self->do_tests;
+}
+
+sub do_tests {
+  my $self = shift;
+  my $p = $self->{properties};
+  require Test::Harness;
+
   # Do everything in our power to work with all versions of Test::Harness
   my @harness_switches = $p->{debugger} ? qw(-w -d) : ();
   local $Test::Harness::switches    = join ' ', grep defined, $Test::Harness::switches, @harness_switches;
@@ -2005,15 +2054,6 @@ sub ACTION_test {
 	 $ENV{TEST_VERBOSE},
          $ENV{HARNESS_VERBOSE}) = ($p->{verbose} || 0) x 4;
 
-  # Make sure we test the module in blib/
-  local @INC = (File::Spec->catdir($p->{base_dir}, $self->blib, 'lib'),
-		File::Spec->catdir($p->{base_dir}, $self->blib, 'arch'),
-		@INC);
-
-  # Filter out nonsensical @INC entries - some versions of
-  # Test::Harness will really explode the number of entries here
-  @INC = grep {ref() || -d} @INC if @INC > 100;
-  
   my $tests = $self->find_test_files;
 
   if (@$tests) {
@@ -2071,7 +2111,8 @@ sub ACTION_testcover {
     my $cover_files = $self->rscan_dir('cover_db', sub {-f $_ and not /\.html$/});
     
     $self->do_system(qw(cover -delete))
-      unless $self->up_to_date($pm_files, $cover_files);
+      unless $self->up_to_date($pm_files,         $cover_files)
+	  && $self->up_to_date($self->test_files, $cover_files);
   }
 
   local $Test::Harness::switches    = 
@@ -2269,9 +2310,9 @@ sub localize_dir_path {
 
 sub fix_shebang_line { # Adapted from fixin() in ExtUtils::MM_Unix 1.35
   my ($self, @files) = @_;
-  my $c = $self->config;
+  my $c = ref($self) ? $self->{config} : 'Module::Build::Config';
   
-  my ($does_shbang) = $c->{sharpbang} =~ /^\s*\#\!/;
+  my ($does_shbang) = $c->get('sharpbang') =~ /^\s*\#\!/;
   for my $file (@files) {
     my $FIXIN = IO::File->new($file) or die "Can't process '$file': $!";
     local $/ = "\n";
@@ -2284,7 +2325,7 @@ sub fix_shebang_line { # Adapted from fixin() in ExtUtils::MM_Unix 1.35
     
     $self->log_verbose("Changing sharpbang in $file to $interpreter");
     my $shb = '';
-    $shb .= "$c->{sharpbang}$interpreter $arg\n" if $does_shbang;
+    $shb .= $c->get('sharpbang')."$interpreter $arg\n" if $does_shbang;
     
     # I'm not smart enough to know the ramifications of changing the
     # embedded newlines here to \n, so I leave 'em in.
@@ -2312,7 +2353,7 @@ eval 'exec $interpreter $arg -S \$0 \${1+"\$\@"}'
     unlink "$file.bak"
       or $self->log_warn("Couldn't clean up $file.bak, leaving it there");
     
-    $self->do_system($c->{eunicefix}, $file) if $c->{eunicefix} ne ':';
+    $self->do_system($c->get('eunicefix'), $file) if $c->get('eunicefix') ne ':';
   }
 }
 
@@ -2398,7 +2439,7 @@ sub manify_bin_pods {
   return unless keys %$files;
 
   my $mandir = File::Spec->catdir( $self->blib, 'bindoc' );
-  File::Path::mkpath( $mandir, 0, 0777 );
+  File::Path::mkpath( $mandir, 0, oct(777) );
 
   require Pod::Man;
   foreach my $file (keys %$files) {
@@ -2422,7 +2463,7 @@ sub manify_lib_pods {
   return unless keys %$files;
 
   my $mandir = File::Spec->catdir( $self->blib, 'libdoc' );
-  File::Path::mkpath( $mandir, 0, 0777 );
+  File::Path::mkpath( $mandir, 0, oct(777) );
 
   require Pod::Man;
   while (my ($file, $relfile) = each %$files) {
@@ -2508,7 +2549,7 @@ sub htmlify_pods {
   return unless %$pods;  # nothing to do
 
   unless ( -d $htmldir ) {
-    File::Path::mkpath($htmldir, 0, 0755)
+    File::Path::mkpath($htmldir, 0, oct(755))
       or die "Couldn't mkdir $htmldir: $!";
   }
 
@@ -2535,7 +2576,7 @@ sub htmlify_pods {
     next if $self->up_to_date($infile, $outfile);
 
     unless ( -d $fulldir ){
-      File::Path::mkpath($fulldir, 0, 0755)
+      File::Path::mkpath($fulldir, 0, oct(755))
         or die "Couldn't mkdir $fulldir: $!";
     }
 
@@ -2754,6 +2795,26 @@ sub ACTION_ppmdist {
   $self->delete_filetree( $ppm );
 }
 
+sub ACTION_pardist {
+  my ($self) = @_;
+
+  # Need PAR::Dist
+  if ( not eval { require PAR::Dist; PAR::Dist->VERSION(0.17) } ) {
+    $self->log_warn(
+      "In order to create .par distributions, you need to\n"
+      . "install PAR::Dist first."
+    );
+    return();
+  }
+  
+  $self->depends_on( 'build' );
+
+  return PAR::Dist::blib_to_par(
+    name => $self->dist_name,
+    version => $self->dist_version,
+  );
+}
+
 sub ACTION_dist {
   my ($self) = @_;
   
@@ -2793,7 +2854,7 @@ sub _add_to_manifest {
     or return;
 
   my $mode = (stat $manifest)[2];
-  chmod($mode | 0222, $manifest) or die "Can't make $manifest writable: $!";
+  chmod($mode | oct(222), $manifest) or die "Can't make $manifest writable: $!";
   
   my $fh = IO::File->new("< $manifest") or die "Can't read $manifest: $!";
   my $last_line = (<$fh>)[-1] || "\n";
@@ -3384,9 +3445,9 @@ sub find_dist_packages {
     }
   }
 
-  # Stringify versions
-  for (grep exists $_->{version}, values %prime) {
-    $_->{version} = $_->{version}->stringify;
+  # Stringify versions.  Can't use exists() here because of bug in YAML::Node.
+  for (grep defined $_->{version}, values %prime) {
+    $_->{version} = '' . $_->{version};
   }
 
   return \%prime;
@@ -3802,10 +3863,10 @@ sub compile_xs {
     }
     @typemaps = map {+'-typemap', $_} @typemaps;
 
-    my $cf = $self->config;
+    my $cf = $self->{config};
     my $perl = $self->{properties}{perl};
     
-    my @command = ($perl, "-I$cf->{installarchlib}", "-I$cf->{installprivlib}", $xsubpp, '-noprototypes',
+    my @command = ($perl, "-I".$cf->get('installarchlib'), "-I".$cf->get('installprivlib'), $xsubpp, '-noprototypes',
 		   @typemaps, $file);
     
     $self->log_info("@command\n");
@@ -3839,12 +3900,10 @@ sub run_perl_command {
   # this before documenting.
   my ($self, $args) = @_;
   $args = [ $self->split_like_shell($args) ] unless ref($args);
-  $args = [ split(/\s+/, $self->_quote_args($args)) ] if $self->os_type eq 'VMS';
   my $perl = ref($self) ? $self->perl : $self->find_perl_interpreter;
 
   # Make sure our local additions to @INC are propagated to the subprocess
-  my $c = ref $self ? $self->config : \%Config::Config;
-  local $ENV{PERL5LIB} = join $c->{path_sep}, $self->_added_to_INC;
+  local $ENV{PERL5LIB} = join $self->config('path_sep'), $self->_added_to_INC;
 
   return $self->do_system($perl, @$args);
 }
@@ -3880,20 +3939,19 @@ sub _infer_xs_spec {
   $spec{bs_file} = File::Spec->catfile($spec{archdir}, "${file_base}.bs");
 
   $spec{lib_file} = File::Spec->catfile($spec{archdir},
-					"${file_base}.$cf->{dlext}");
+					"${file_base}.".$cf->get('dlext'));
 
   $spec{c_file} = File::Spec->catfile( $spec{src_dir},
 				       "${file_base}.c" );
 
   $spec{obj_file} = File::Spec->catfile( $spec{src_dir},
-					 "${file_base}$cf->{obj_ext}" );
+					 "${file_base}".$cf->get('obj_ext') );
 
   return \%spec;
 }
 
 sub process_xs {
   my ($self, $file) = @_;
-  my $cf = $self->config; # For convenience
 
   my $spec = $self->_infer_xs_spec($file);
 
@@ -3913,7 +3971,7 @@ sub process_xs {
 		   defines => {VERSION => qq{"$v"}, XS_VERSION => qq{"$v"}});
 
   # archdir
-  File::Path::mkpath($spec->{archdir}, 0, 0777) unless -d $spec->{archdir};
+  File::Path::mkpath($spec->{archdir}, 0, oct(777)) unless -d $spec->{archdir};
 
   # .xs -> .bs
   $self->add_to_cleanup($spec->{bs_file});
@@ -3932,6 +3990,16 @@ sub process_xs {
 sub do_system {
   my ($self, @cmd) = @_;
   $self->log_info("@cmd\n");
+
+  # Some systems proliferate huge PERL5LIBs, try to ameliorate:
+  my %seen;
+  my $sep = $self->config('path_sep');
+  local $ENV{PERL5LIB} = 
+    ( length($ENV{PERL5LIB}) < 500
+      ? $ENV{PERL5LIB}
+      : join $sep, grep { ! $seen{$_}++ and -d $_ } split($sep, $ENV{PERL5LIB})
+    );
+
   my $status = system(@cmd);
   if ($status and $! =~ /Argument list too long/i) {
     my $env_entries = '';
@@ -3968,15 +4036,18 @@ sub copy_if_modified {
   
   return if $self->up_to_date($file, $to_path); # Already fresh
 
-  $self->delete_filetree($to_path); # delete destination if exists
+  {
+    local $self->{properties}{quiet} = 1;
+    $self->delete_filetree($to_path); # delete destination if exists
+  }
 
   # Create parent directories
-  File::Path::mkpath(File::Basename::dirname($to_path), 0, 0777);
+  File::Path::mkpath(File::Basename::dirname($to_path), 0, oct(777));
   
-  $self->log_info("$file -> $to_path\n") if $args{verbose};
+  $self->log_info("Copying $file -> $to_path\n") if $args{verbose};
   File::Copy::copy($file, $to_path) or die "Can't copy('$file', '$to_path'): $!";
   # mode is read-only + (executable if source is executable)
-  my $mode = 0444 | ( $self->is_executable($file) ? 0111 : 0 );
+  my $mode = oct(444) | ( $self->is_executable($file) ? oct(111) : 0 );
   chmod( $mode, $to_path );
 
   return $to_path;
@@ -4052,11 +4123,11 @@ Please see the C<Module::Build> documentation for more details.
 
 =head1 AUTHOR
 
-Ken Williams <ken@cpan.org>
+Ken Williams <kwilliams@cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2001-2005 Ken Williams.  All rights reserved.
+Copyright (c) 2001-2006 Ken Williams.  All rights reserved.
 
 This library is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

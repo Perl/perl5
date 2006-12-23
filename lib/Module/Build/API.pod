@@ -715,6 +715,7 @@ C<*.t> in the F<t/> subdirectory.  If the C<recursive_test_files>
 property is true, then the C<t/> directory will be scanned recursively
 for C<*.t> files.
 
+
 =item xs_files
 
 [version 0.19]
@@ -920,14 +921,24 @@ exotic stuff will likely cause problems.
 In the future, the guts of this method might be replaced with a call
 out to C<version.pm>.
 
-=item config()
+=item config($key)
+
+=item config($key, $value)
+
+=item config() [deprecated]
 
 [version 0.22]
 
-Returns a hash reference containing the C<Config.pm> hash, including
-any changes the author or user has specified.  This is a reference to
-the actual internal hash we use, so you probably shouldn't modify
-stuff there.
+With a single argument C<$key>, returns the value associated with that
+key in the C<Config.pm> hash, including any changes the author or user
+has specified.  
+
+With C<$key> and C<$value> arguments, sets the value for future
+callers of C<config($key)>.
+
+With no arguments, returns a hash reference containing all such
+key-value pairs.  This usage is deprecated, though, because it's a
+resource hog and violates encapsulation.
 
 =item config_data($name)
 
@@ -1548,8 +1559,6 @@ accessor methods for the following properties:
 
 =item c_source()
 
-=item config()
-
 =item config_dir()
 
 =item conflicts()
@@ -1648,6 +1657,6 @@ perl(1), L<Module::Build>(3), L<Module::Build::Authoring>(3),
 L<Module::Build::Cookbook>(3), L<ExtUtils::MakeMaker>(3), L<YAML>(3)
 
 F<META.yml> Specification:
-L<http://module-build.sourceforge.net/META-spec-v1.2.html>
+L<http://module-build.sourceforge.net/META-spec-current.html>
 
 =cut
