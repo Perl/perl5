@@ -250,6 +250,7 @@ X<word> X<whitespace>
     \g1      Backreference to a specific or previous group,
     \g{-1}   number may be negative indicating a previous buffer and may
              optionally be wrapped in curly brackets for safer parsing.
+    \g{name} Named backreference
     \k<name> Named backreference
     \N{name} Named unicode character, or unicode escape
     \x12     Hexadecimal escape sequence
@@ -486,7 +487,7 @@ backreference only if at least 11 left parentheses have opened
 before it.  And so on.  \1 through \9 are always interpreted as
 backreferences.
 
-X<\g{1}> X<\g{-1}> X<relative backreference>
+X<\g{1}> X<\g{-1}> X<\g{name}> X<relative backreference> X<named backreference>
 In order to provide a safer and easier way to construct patterns using
 backrefs, in Perl 5.10 the C<\g{N}> notation is provided. The curly
 brackets are optional, however omitting them is less safe as the meaning
@@ -494,6 +495,8 @@ of the pattern can be changed by text (such as digits) following it.
 When N is a positive integer the C<\g{N}> notation is exactly equivalent
 to using normal backreferences. When N is a negative integer then it is
 a relative backreference referring to the previous N'th capturing group.
+When the bracket form is used and N is not an integer, it is treated as a
+reference to a named buffer.
 
 Thus C<\g{-1}> refers to the last buffer, C<\g{-2}> refers to the
 buffer before that. For example:
@@ -510,11 +513,12 @@ buffer before that. For example:
 and would match the same as C</(Y) ( (X) \3 \1 )/x>.
 
 Additionally, as of Perl 5.10 you may use named capture buffers and named
-backreferences. The notation is C<< (?<name>...) >> and C<< \k<name> >>
-(you may also use single quotes instead of angle brackets to quote the
-name). The only difference with named capture buffers and unnamed ones is
+backreferences. The notation is C<< (?<name>...) >> to declare and C<< \k<name> >>
+to reference. You may also use single quotes instead of angle brackets to quote the
+name; and you may use the bracketed C<< \g{name} >> back reference syntax.
+The only difference between named capture buffers and unnamed ones is
 that multiple buffers may have the same name and that the contents of
-named capture buffers is available via the C<%+> hash. When multiple
+named capture buffers are available via the C<%+> hash. When multiple
 groups share the same name C<$+{name}> and C<< \k<name> >> refer to the
 leftmost defined group, thus it's possible to do things with named capture
 buffers that would otherwise require C<(??{})> code to accomplish. Named
@@ -751,12 +755,20 @@ pattern
 $+{foo} will be the same as $2, and $3 will contain 'z' instead of
 the opposite which is what a .NET regex hacker might expect.
 
-Currently NAME is restricted to word chars only. In other words, it
-must match C</^\w+$/>.
+Currently NAME is restricted to simple identifiers only.
+In other words, it must match C</^[_A-Za-z][_A-Za-z0-9]*\z/> or
+its Unicode extension (see L<utf8>),
+though it isn't extended by the locale (see L<perllocale>).
 
-=item C<< \k<name> >>
+B<NOTE:> In order to make things easier for programmers with experience
+with the Python or PCRE regex engines the pattern C<< (?P<NAME>pattern) >>
+maybe be used instead of C<< (?<NAME>pattern) >>; however this form does not
+support the use of single quotes as a delimiter for the name. This is
+only available in Perl 5.10 or later.
 
-=item C<< \k'name' >>
+=item C<< \k<NAME> >>
+
+=item C<< \k'NAME' >>
 
 Named backreference. Similar to numeric backreferences, except that
 the group is designated by name and not number. If multiple groups
@@ -767,6 +779,10 @@ It is an error to refer to a name not defined by a C<(?<NAME>)>
 earlier in the pattern.
 
 Both forms are equivalent.
+
+B<NOTE:> In order to make things easier for programmers with experience
+with the Python or PCRE regex engines the pattern C<< (?P=NAME) >>
+maybe be used instead of C<< \k<NAME> >> in Perl 5.10 or later.
 
 =item C<(?{ code })>
 X<(?{})> X<regex, code in> X<regexp, code in> X<regular expression, code in>
@@ -988,6 +1004,10 @@ the same name, then it recurses to the leftmost.
 
 It is an error to refer to a name that is not declared somewhere in the
 pattern.
+
+B<NOTE:> In order to make things easier for programmers with experience
+with the Python or PCRE regex engines the pattern C<< (?P>NAME) >>
+maybe be used instead of C<< (?&NAME) >> as of Perl 5.10.
 
 =item C<(?(condition)yes-pattern|no-pattern)>
 X<(?()>
@@ -1979,6 +1999,28 @@ part of this regular expression needs to be converted explicitly
     chomp $re;
     $re = customre::convert $re;
     /\Y|$re\Y|/;
+
+=head1 PCRE/Python Support
+
+As of Perl 5.10 Perl supports several Python/PCRE specific extensions
+to the regex syntax. While Perl programmers are encouraged to use the
+Perl specific syntax, the following are legal in Perl 5.10:
+
+=over 4
+
+=item C<< (?P<NAME>pattern) >>
+
+Define a named capture buffer. Equivalent to C<< (?<NAME>pattern) >>.
+
+=item C<< (?P=NAME) >>
+
+Backreference to a named capture buffer. Equivalent to C<< \g{NAME} >>.
+
+=item C<< (?P>NAME) >>
+
+Subroutine call to a named capture buffer. Equivalent to C<< (?&NAME) >>.
+
+=back 4
 
 =head1 BUGS
 

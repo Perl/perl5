@@ -103,10 +103,14 @@ typedef struct regexp_paren_ofs {
 } regexp_paren_ofs;
 
  typedef struct regexp_internal {
-        regexp_paren_ofs *swap; /* Swap copy of *startp / *endp */
+#ifdef DEBUGGING
+        int name_list_idx;	/* Optional data index of an array of paren names */
+#endif
+
 	U32 *offsets;           /* offset annotations 20001228 MJD 
                                    data about mapping the program to the 
                                    string*/
+        regexp_paren_ofs *swap; /* Swap copy of *startp / *endp */                                   
         regnode *regstclass;    /* Optional startclass as identified or constructed
                                    by the optimiser */
         struct reg_data *data;	/* Additional miscellaneous data used by the program.

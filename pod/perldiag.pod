@@ -3683,6 +3683,11 @@ where the problem was discovered. See L<perlre>.
 <-- HERE shows in the regular expression about where the problem was
 discovered.  See L<perlre>.
 
+=item Sequence \\%s... not terminated in regex; marked by <-- HERE in m/%s/
+
+(F) The regular expression expects a mandatory argument following the escape
+sequence and this has been omitted or incorrectly written.
+
 =item Sequence (?#... not terminated in regex; marked by <-- HERE in m/%s/
 
 (F) A regular expression comment must be terminated by a closing

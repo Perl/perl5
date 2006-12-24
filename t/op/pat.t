@@ -3663,6 +3663,32 @@ SKIP:{
     $s=~s/(?'digits'\d+)\k'digits'/$+{digits}/;
     ok($s eq '123456','Named capture (single quotes) s///');    
 }
+
+{
+    if (ord("A") == 193) {
+	for (1..10) {
+	    print "ok $test # Skip: in EBCDIC";
+	    $test++;
+	}
+    } else {
+	use utf8;
+	# ñ = U+00F1 (n-tilde)
+	# ̧ = U+0327 (cedilla)
+	# ² = U+00B2 (superscript two)
+
+	ok("..foo foo.." =~ /(?'ñ'foo) \k<ñ>/, 'Named capture UTF');
+	ok($+{ñ} eq 'foo', 'Named capture UTF');
+	ok("..bar bar.." =~ /(?<_ñ>bar) \k'_ñ'/, 'Named capture UTF');
+	ok($+{_ñ} eq 'bar', 'Named capture UTF');
+	ok("..abc abc.." =~ /(?'ç'abc) \k'ç'/, 'Named capture UTF');
+	ok($+{ç} eq 'abc', 'Named capture UTF');
+	ok("..xyz xyz.." =~ /(?'ņ̃'xyz) \k'ņ̃'/, 'Named capture UTF');
+	ok($+{ņ̃} eq 'xyz', 'Named capture UTF');
+	ok("..456 456.." =~ /(?<a²>456) \k'a²'/, 'Named capture UTF');
+	ok($+{a²} eq '456', 'Named capture UTF');
+    }
+}
+
 sub iseq($$;$) { 
     my ( $got, $expect, $name)=@_;
     
@@ -4193,6 +4219,9 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
         "Regexp /^(??{'(.)'x 100})/ crashes older perls")
     or print "# Unexpected outcome: should pass or crash perl\n";
 
+eval '/\k/';
+ok($@=~/\QSequence \k... not terminated in regex;\E/);
+
 {
     local $Message = "substitution with lookahead (possible segv)";
     $_="ns1ns1ns1";
@@ -4210,7 +4239,7 @@ ok((q(a)x 100) =~ /^(??{'(.)'x 100})/,
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1573; 
+    $::TestCount = 1584; 
     print "1..$::TestCount\n";
 }
 

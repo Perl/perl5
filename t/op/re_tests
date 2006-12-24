@@ -1029,6 +1029,15 @@ X(?<=foo.)[YZ]	..XfooXY..	y	pos	8
 (?<n>foo|bar|baz)(?<m>[ew]+)	snofooewa	y	$+{m}	ew
 (?<n>foo)|(?<n>bar)|(?<n>baz)	snofooewa	y	$+{n}	foo
 (?<n>foo)(??{ $+{n} })	snofooefoofoowaa	y	$+{n}	foo
+(?P<n>foo|bar|baz)	snofooewa	y	$1	foo
+(?P<n>foo|bar|baz)	snofooewa	y	$+{n}	foo
+(?P<n>foo|bar|baz)(?P<m>[ew]+)	snofooewa	y	$+{n}	foo
+(?P<n>foo|bar|baz)(?P<m>[ew]+)	snofooewa	y	$+{m}	ew
+(?P<n>foo)|(?P<n>bar)|(?P<n>baz)	snofooewa	y	$+{n}	foo
+(?P<n>foo)(??{ $+{n} })	snofooefoofoowaa	y	$+{n}	foo
+(?P<=n>foo|bar|baz)	snofooewa	c	-	Sequence (?P<=...) not recognized
+(?P<!n>foo|bar|baz)	snofooewa	c	-	Sequence (?P<!...) not recognized
+(?PX<n>foo|bar|baz)	snofooewa	c	-	Sequence (?PX<...) not recognized
 /(?'n'foo|bar|baz)/	snofooewa	y	$1	foo
 /(?'n'foo|bar|baz)/	snofooewa	y	$+{n}	foo
 /(?'n'foo|bar|baz)(?'m'[ew]+)/	snofooewa	y	$+{n}	foo
@@ -1179,7 +1188,6 @@ round\(([^()]++)\)	_I(round(xs * sz),1)	y	$1	xs * sz
 (x|y|z[QW])*+(longish|loquatious|excessive|overblown[QW])*+	xyzQzWlongishoverblownW	y	$1-$2	zW-overblownW
 (x|y|z[QW]){1,5}+(longish|loquatious|excessive|overblown[QW]){1,5}+	xyzQzWlongishoverblownW	y	$1-$2	zW-overblownW
 
-
 a*(?!)	aaaab	n	-	-
 a*(*FAIL)	aaaab	n	-	-
 a*(*F)	aaaab	n	-	-
@@ -1196,9 +1204,64 @@ a*(*F)	aaaab	n	-	-
 (([abc]+) \g-1)(([abc]+) \g{-1})	abc abccba cba	y	$2-$4	abc-cba
 (a)(b)(c)\g1\g2\g3	abcabc	y	$1$2$3	abc
 
-
+# \k<n> preceded by a literal
 /(?'n'foo) \k<n>/	..foo foo..	y	$1	foo
 /(?'n'foo) \k<n>/	..foo foo..	y	$+{n}	foo
 /(?<n>foo) \k'n'/	..foo foo..	y	$1	foo
 /(?<n>foo) \k'n'/	..foo foo..	y	$+{n}	foo
+/(?'a1'foo) \k'a1'/	..foo foo..	y	$+{a1}	foo
+/(?<a1>foo) \k<a1>/	..foo foo..	y	$+{a1}	foo
+/(?'_'foo) \k'_'/	..foo foo..	y	$+{_}	foo
+/(?<_>foo) \k<_>/	..foo foo..	y	$+{_}	foo
+/(?'_0_'foo) \k'_0_'/	..foo foo..	y	$+{_0_}	foo
+/(?<_0_>foo) \k<_0_>/	..foo foo..	y	$+{_0_}	foo
+/(?'0'foo) bar/	..foo bar..	c	-	Sequence (?'
+/(?<0>foo) bar/	..foo bar..	c	-	Sequence (?<
+/(?'12'foo) bar/	..foo bar..	c	-	Sequence (?'
+/(?<12>foo) bar/	..foo bar..	c	-	Sequence (?<
+/(?'1a'foo) bar/	..foo bar..	c	-	Sequence (?'
+/(?<1a>foo) bar/	..foo bar..	c	-	Sequence (?<
+/(?''foo) bar/	..foo bar..	c	-	Sequence (?''
+/(?<>foo) bar/	..foo bar..	c	-	Sequence (?<>
+/foo \k'n'/	foo foo	c	-	Reference to nonexistent named group
+/foo \k<n>/	foo foo	c	-	Reference to nonexistent named group
+/foo \k'a1'/	foo foo	c	-	Reference to nonexistent named group
+/foo \k<a1>/	foo foo	c	-	Reference to nonexistent named group
+/foo \k'_'/	foo foo	c	-	Reference to nonexistent named group
+/foo \k<_>/	foo foo	c	-	Reference to nonexistent named group
+/foo \k'_0_'/	foo foo	c	-	Reference to nonexistent named group
+/foo \k<_0_>/	foo foo	c	-	Reference to nonexistent named group
+/foo \k'0'/	foo foo	c	-	Sequence \\k'
+/foo \k<0>/	foo foo	c	-	Sequence \\k<
+/foo \k'12'/	foo foo	c	-	Sequence \\k'
+/foo \k<12>/	foo foo	c	-	Sequence \\k<
+/foo \k'1a'/	foo foo	c	-	Sequence \\k'
+/foo \k<1a>/	foo foo	c	-	Sequence \\k<
+/foo \k''/	foo foo	c	-	Sequence \\k'
+/foo \k<>/	foo foo	c	-	Sequence \\k<
 /(?<as>as) (\w+) \k<as> (\w+)/	as easy as pie	y	$1-$2-$3	as-easy-pie
+
+# \g{...} with a name as the argument 
+/(?'n'foo) \g{n}/	..foo foo..	y	$1	foo
+/(?'n'foo) \g{n}/	..foo foo..	y	$+{n}	foo
+/(?<n>foo) \g{n}/	..foo foo..	y	$1	foo
+/(?<n>foo) \g{n}/	..foo foo..	y	$+{n}	foo
+/(?<as>as) (\w+) \g{as} (\w+)/	as easy as pie	y	$1-$2-$3	as-easy-pie
+
+# Python style named capture buffer stuff
+/(?P<n>foo)(?P=n)/	..foofoo..	y	$1	foo
+/(?P<n>foo)(?P=n)/	..foofoo..	y	$+{n}	foo
+/(?:(?P<n>foo)|(?P<n>bar))(?P=n)/	..barbar..	y	$+{n}	bar
+/^(?P<PAL>(?P<CHAR>.)((?P>PAL)|.?)(?P=CHAR))$/	madamimadam	y	$&	madamimadam
+/^(?P<PAL>(?P<CHAR>.)((?P>PAL)|.?)(?P=CHAR))$/	madamiamadam	n	-	-
+/(?P<n>foo) (?P=n)/	..foo foo..	y	$1	foo
+/(?P<n>foo) (?P=n)/	..foo foo..	y	$+{n}	foo
+/(?P<as>as) (\w+) (?P=as) (\w+)/	as easy as pie	y	$1-$2-$3	as-easy-pie
+
+#check that non identifiers as names are treated as the appropriate lookaround
+(?<=bar>)foo	bar>foo	y	$&	foo
+(?<!bar>)foo	bar>foo	n	-	-
+(?<=bar>ABC)foo	bar>ABCfoo	y	$&	foo
+(?<!bar>ABC)foo	bar>ABCfoo	n	-	-
+(?<bar>)foo	bar>ABCfoo	y	$&	foo
+(?<bar>ABC)foo	bar>ABCfoo	y	$&	ABCfoo
