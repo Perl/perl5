@@ -6396,7 +6396,6 @@ tryagain:
 		U32 num = 0;
                 SV *sv_dat = reg_scan_name(pRExC_state,
                     SIZE_ONLY ? REG_RSN_RETURN_NULL : REG_RSN_RETURN_DATA);
-                char sch = ch;                        
                 ch= (ch == '<') ? '>' : (ch == '{') ? '}' : '\'';
                 if (RExC_parse == name_start || *RExC_parse != ch)
                     vFAIL2("Sequence %.3s... not terminated",parse_start);
@@ -8387,7 +8386,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
             I32 n;
             if (name) {
                 for ( n=0; n<SvIVX(sv_dat); n++ ) {
-                    Perl_sv_catpvf(aTHX_ sv, "%s%d",( n ? "," : "" ),nums[n]);
+                    Perl_sv_catpvf(aTHX_ sv, "%s%"IVdf, ( n ? "," : "" ), nums[n]);
                 }
                 Perl_sv_catpvf(aTHX_ sv, " '%"SVf"'", *name );
             }
