@@ -3665,27 +3665,28 @@ SKIP:{
 }
 
 {
-    if (ord("A") == 193) {
-	for (1..10) {
-	    print "ok $test # Skip: in EBCDIC";
-	    $test++;
-	}
-    } else {
-	use utf8;
-	# ñ = U+00F1 (n-tilde)
-	# ̧ = U+0327 (cedilla)
-	# ² = U+00B2 (superscript two)
-
-	ok("..foo foo.." =~ /(?'ñ'foo) \k<ñ>/, 'Named capture UTF');
-	ok($+{ñ} eq 'foo', 'Named capture UTF');
-	ok("..bar bar.." =~ /(?<_ñ>bar) \k'_ñ'/, 'Named capture UTF');
-	ok($+{_ñ} eq 'bar', 'Named capture UTF');
-	ok("..abc abc.." =~ /(?'ç'abc) \k'ç'/, 'Named capture UTF');
-	ok($+{ç} eq 'abc', 'Named capture UTF');
-	ok("..xyz xyz.." =~ /(?'ņ̃'xyz) \k'ņ̃'/, 'Named capture UTF');
-	ok($+{ņ̃} eq 'xyz', 'Named capture UTF');
-	ok("..456 456.." =~ /(?<a²>456) \k'a²'/, 'Named capture UTF');
-	ok($+{a²} eq '456', 'Named capture UTF');
+    my @ary = (
+	pack('U', 0x00F1),            # n-tilde
+	'_'.pack('U', 0x00F1),        # _ + n-tilde
+	'c'.pack('U', 0x0327),        # c + cedilla
+	pack('U*', 0x00F1, 0x0327),   # n-tilde + cedilla
+	'a'.pack('U', 0x00B2),        # a + superscript two
+	pack('U', 0x0391),            # ALPHA
+	pack('U', 0x0391).'2',        # ALPHA + 2
+	pack('U', 0x0391).'_',        # ALPHA + _
+    );
+    for my $uni (@ary) {
+	my ($r1, $c1, $r2, $c2) = eval qq{
+	    use utf8;
+	    scalar("..foo foo.." =~ /(?'${uni}'foo) \\k'${uni}'/),
+		\$+{${uni}},
+	    scalar("..bar bar.." =~ /(?<${uni}>bar) \\k<${uni}>/),
+		\$+{${uni}};
+	};
+	ok($r1,                         "Named capture UTF (?'')");
+	ok(defined $c1 && $c1 eq 'foo', "Named capture UTF \%+");
+	ok($r2,                         "Named capture UTF (?<>)");
+	ok(defined $c2 && $c2 eq 'bar', "Named capture UTF \%+");
     }
 }
 
@@ -4239,7 +4240,7 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1584; 
+    $::TestCount = 1606;
     print "1..$::TestCount\n";
 }
 
