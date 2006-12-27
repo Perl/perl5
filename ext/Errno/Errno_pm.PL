@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.09_01";
+our $VERSION = "1.10";
 
 my %err = ();
 my %wsa = ();
