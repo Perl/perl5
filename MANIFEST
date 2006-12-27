@@ -1514,6 +1514,9 @@ lib/CPAN/bin/cpan		easily interact with CPAN from the command line
 lib/CPAN/Debug.pm		helper package for CPAN.pm
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 lib/CPAN/HandleConfig.pm	helper package for CPAN.pm
+lib/CPAN/Kwalify.pm		helper package for CPAN.pm
+lib/CPAN/Kwalify/distroprefs.dd		helper file for validating config files 
+lib/CPAN/Kwalify/distroprefs.yml	helper file for validating config files
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
 lib/CPAN/PAUSE2003.pub		CPAN public key
 lib/CPAN/PAUSE2005.pub		CPAN public key

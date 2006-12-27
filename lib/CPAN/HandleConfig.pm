@@ -2,7 +2,7 @@ package CPAN::HandleConfig;
 use strict;
 use vars qw(%can %keys $VERSION);
 
-$VERSION = sprintf "%.6f", substr(q$Rev: 1315 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 1379 $,4)/1000000 + 5.4;
 
 %can = (
         commit   => "Commit changes to disk",
@@ -76,6 +76,7 @@ $VERSION = sprintf "%.6f", substr(q$Rev: 1315 $,4)/1000000 + 5.4;
      "test_report",
      "unzip",
      "urllist",
+     "use_sqlite",
      "username",
      "wait_list",
      "wget",
@@ -333,7 +334,7 @@ sub defaults {
     for my $config (qw(CPAN/MyConfig.pm CPAN/Config.pm)) {
         if ($INC{$config}) {
             CPAN->debug("INC{'$config'}[$INC{$config}]") if $CPAN::DEBUG;
-            CPAN::Shell->reload_this($config,{force => 1});
+            CPAN::Shell->_reload_this($config,{reloforce => 1});
             $CPAN::Frontend->myprint("'$INC{$config}' reread\n");
             last;
         }
@@ -652,7 +653,7 @@ sub prefs_lookup {
 
     use strict;
     use vars qw($AUTOLOAD $VERSION);
-    $VERSION = sprintf "%.2f", substr(q$Rev: 1315 $,4)/100;
+    $VERSION = sprintf "%.2f", substr(q$Rev: 1379 $,4)/100;
 
     # formerly CPAN::HandleConfig was known as CPAN::Config
     sub AUTOLOAD {

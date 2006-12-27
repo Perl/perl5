@@ -2,7 +2,7 @@ package CPAN::Version;
 
 use strict;
 use vars qw($VERSION);
-$VERSION = sprintf "%.6f", substr(q$Rev: 950 $,4)/1000000 + 5.4;
+$VERSION = sprintf "%.6f", substr(q$Rev: 1387 $,4)/1000000 + 5.4;
 
 # CPAN::Version::vcmp courtesy Jost Krieger
 sub vcmp {
@@ -19,7 +19,7 @@ sub vcmp {
   for ($l,$r) {
       next unless tr/.// > 1;
       s/^v?/v/;
-      1 while s/\.0+(\d)/.$1/;
+      1 while s/\.0+(\d)/.$1/; # remove leading zeroes per group
   }
   CPAN->debug("l[$l] r[$r]") if $CPAN::DEBUG;
   if ($l=~/^v/ <=> $r=~/^v/) {
@@ -29,16 +29,23 @@ sub vcmp {
       }
   }
   CPAN->debug("l[$l] r[$r]") if $CPAN::DEBUG;
+  my $lvstring = "v0";
+  my $rvstring = "v0";
+  if ($] >= 5.006
+      && $l =~ /^v/
+      && $r =~ /^v/) {
+    $lvstring = $self->vstring($l);
+    $rvstring = $self->vstring($r);
+    CPAN->debug(sprintf "lv[%vd] rv[%vd]", $lvstring, $rvstring) if $CPAN::DEBUG;
+  }
 
   return (
-          ($l ne "undef") <=> ($r ne "undef") ||
-          (
-           $] >= 5.006 &&
-           $l =~ /^v/ &&
-           $r =~ /^v/ &&
-           $self->vstring($l) cmp $self->vstring($r)
-          ) ||
-          $l <=> $r ||
+          ($l ne "undef") <=> ($r ne "undef")
+          ||
+          $lvstring cmp $rvstring
+          ||
+          $l <=> $r
+          ||
           $l cmp $r
          );
 }
