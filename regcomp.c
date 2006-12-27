@@ -3549,6 +3549,39 @@ S_checkposixcc(pTHX_ RExC_state_t *pRExC_state)
     }
 }
 
+
+#define _C_C_T_(NAME,TEST,WORD)                         \
+ANYOF_##NAME:                                           \
+    if (LOC)                                            \
+	ANYOF_CLASS_SET(ret, ANYOF_##NAME);             \
+    else {                                              \
+	for (value = 0; value < 256; value++)           \
+	    if (TEST)                                   \
+		ANYOF_BITMAP_SET(ret, value);           \
+    }                                                   \
+    yesno = '+';                                        \
+    what = WORD;                                        \
+    break;                                              \
+case ANYOF_N##NAME:                                     \
+    if (LOC)                                            \
+	ANYOF_CLASS_SET(ret, ANYOF_N##NAME);            \
+    else {                                              \
+	for (value = 0; value < 256; value++)           \
+	    if (!TEST)                                  \
+		ANYOF_BITMAP_SET(ret, value);           \
+    }                                                   \
+    yesno = '!';                                        \
+    what = WORD;                                        \
+    break
+
+
+/*
+   parse a class specification and produce either an ANYOF node that
+   matches the pattern or if the pattern matches a single char only and
+   that char is < 256 and we are case insensitive then we produce an 
+   EXACT node instead.
+*/
+
 STATIC regnode *
 S_regclass(pTHX_ RExC_state_t *pRExC_state)
 {
@@ -3767,6 +3800,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		range = 0; /* this was not a true range */
 	    }
 
+
+    
 	    if (!SIZE_ONLY) {
 		const char *what = NULL;
 		char yesno = 0;
@@ -3778,72 +3813,19 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		 * A similar issue a little earlier when switching on value.
 		 * --jhi */
 		switch ((I32)namedclass) {
-		case ANYOF_ALNUM:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_ALNUM);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (isALNUM(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '+';
-		    what = "Word";	
-		    break;
-		case ANYOF_NALNUM:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_NALNUM);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (!isALNUM(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '!';
-		    what = "Word";
-		    break;
-		case ANYOF_ALNUMC:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_ALNUMC);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (isALNUMC(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '+';
-		    what = "Alnum";
-		    break;
-		case ANYOF_NALNUMC:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_NALNUMC);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (!isALNUMC(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '!';
-		    what = "Alnum";
-		    break;
-		case ANYOF_ALPHA:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_ALPHA);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (isALPHA(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '+';
-		    what = "Alpha";
-		    break;
-		case ANYOF_NALPHA:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_NALPHA);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (!isALPHA(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '!';
-		    what = "Alpha";
-		    break;
+		case _C_C_T_(ALNUM, isALNUM(value), "Word");
+		case _C_C_T_(ALNUMC, isALNUMC(value), "Alnum");
+		case _C_C_T_(ALPHA, isALPHA(value), "Alpha");
+		case _C_C_T_(BLANK, isBLANK(value), "Blank");
+		case _C_C_T_(CNTRL, isCNTRL(value), "Cntrl");
+		case _C_C_T_(GRAPH, isGRAPH(value), "Graph");
+		case _C_C_T_(LOWER, isLOWER(value), "Lower");
+		case _C_C_T_(PRINT, isPRINT(value), "Print");
+		case _C_C_T_(PSXSPC, isPSXSPC(value), "Space");
+		case _C_C_T_(PUNCT, isPUNCT(value), "Punct");
+		case _C_C_T_(SPACE, isSPACE(value), "SpacePerl");
+		case _C_C_T_(UPPER, isUPPER(value), "Upper");
+		case _C_C_T_(XDIGIT, isXDIGIT(value), "XDigit");
 		case ANYOF_ASCII:
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_ASCII);
@@ -3877,51 +3859,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		    }
 		    yesno = '!';
 		    what = "ASCII";
-		    break;
-		case ANYOF_BLANK:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_BLANK);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (isBLANK(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '+';
-		    what = "Blank";
-		    break;
-		case ANYOF_NBLANK:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_NBLANK);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (!isBLANK(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '!';
-		    what = "Blank";
-		    break;
-		case ANYOF_CNTRL:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_CNTRL);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (isCNTRL(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '+';
-		    what = "Cntrl";
-		    break;
-		case ANYOF_NCNTRL:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_NCNTRL);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (!isCNTRL(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '!';
-		    what = "Cntrl";
-		    break;
+		    break;		
 		case ANYOF_DIGIT:
 		    if (LOC)
 			ANYOF_CLASS_SET(ret, ANYOF_DIGIT);
@@ -3945,183 +3883,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 		    }
 		    yesno = '!';
 		    what = "Digit";
-		    break;
-		case ANYOF_GRAPH:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_GRAPH);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (isGRAPH(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '+';
-		    what = "Graph";
-		    break;
-		case ANYOF_NGRAPH:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_NGRAPH);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (!isGRAPH(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '!';
-		    what = "Graph";
-		    break;
-		case ANYOF_LOWER:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_LOWER);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (isLOWER(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '+';
-		    what = "Lower";
-		    break;
-		case ANYOF_NLOWER:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_NLOWER);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (!isLOWER(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '!';
-		    what = "Lower";
-		    break;
-		case ANYOF_PRINT:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_PRINT);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (isPRINT(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '+';
-		    what = "Print";
-		    break;
-		case ANYOF_NPRINT:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_NPRINT);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (!isPRINT(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '!';
-		    what = "Print";
-		    break;
-		case ANYOF_PSXSPC:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_PSXSPC);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (isPSXSPC(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '+';
-		    what = "Space";
-		    break;
-		case ANYOF_NPSXSPC:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_NPSXSPC);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (!isPSXSPC(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '!';
-		    what = "Space";
-		    break;
-		case ANYOF_PUNCT:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_PUNCT);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (isPUNCT(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '+';
-		    what = "Punct";
-		    break;
-		case ANYOF_NPUNCT:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_NPUNCT);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (!isPUNCT(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '!';
-		    what = "Punct";
-		    break;
-		case ANYOF_SPACE:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_SPACE);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (isSPACE(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '+';
-		    what = "SpacePerl";
-		    break;
-		case ANYOF_NSPACE:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_NSPACE);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (!isSPACE(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '!';
-		    what = "SpacePerl";
-		    break;
-		case ANYOF_UPPER:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_UPPER);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (isUPPER(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '+';
-		    what = "Upper";
-		    break;
-		case ANYOF_NUPPER:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_NUPPER);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (!isUPPER(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '!';
-		    what = "Upper";
-		    break;
-		case ANYOF_XDIGIT:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_XDIGIT);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (isXDIGIT(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '+';
-		    what = "XDigit";
-		    break;
-		case ANYOF_NXDIGIT:
-		    if (LOC)
-			ANYOF_CLASS_SET(ret, ANYOF_NXDIGIT);
-		    else {
-			for (value = 0; value < 256; value++)
-			    if (!isXDIGIT(value))
-				ANYOF_BITMAP_SET(ret, value);
-		    }
-		    yesno = '!';
-		    what = "XDigit";
-		    break;
+		    break;		
 		case ANYOF_MAX:
 		    /* this is to handle \p and \P */
 		    break;
@@ -4340,6 +4102,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state)
 
     return ret;
 }
+#undef _C_C_T_
+
 
 STATIC char*
 S_nextchar(pTHX_ RExC_state_t *pRExC_state)
