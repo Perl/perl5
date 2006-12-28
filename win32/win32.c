@@ -194,21 +194,48 @@ IsWinNT(void)
 EXTERN_C void
 set_w32_module_name(void)
 {
+    /* this function may be called at DLL_PROCESS_ATTACH time */
     char* ptr;
-    GetModuleFileName((HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
-				? GetModuleHandle(NULL)
-				: w32_perldll_handle),
-		      w32_module_name, sizeof(w32_module_name));
+    HMODULE module = (HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
+                               ? GetModuleHandle(NULL)
+                               : w32_perldll_handle);
 
-    /* remove \\?\ prefix */
-    if (memcmp(w32_module_name, "\\\\?\\", 4) == 0)
-        memmove(w32_module_name, w32_module_name+4, strlen(w32_module_name+4)+1);
+    OSVERSIONINFO osver; /* g_osver may not yet be initialized */
+    osver.dwOSVersionInfoSize = sizeof(osver);
+    GetVersionEx(&osver);
 
-    /* try to get full path to binary (which may be mangled when perl is
-     * run from a 16-bit app) */
-    /*PerlIO_printf(Perl_debug_log, "Before %s\n", w32_module_name);*/
-    (void)win32_longpath(w32_module_name);
-    /*PerlIO_printf(Perl_debug_log, "After  %s\n", w32_module_name);*/
+    if (osver.dwPlatformId == VER_PLATFORM_WIN32_NT) {
+        WCHAR modulename[MAX_PATH];
+        WCHAR fullname[MAX_PATH];
+        char *ansi;
+
+        GetModuleFileNameW(module, modulename, sizeof(modulename)/sizeof(WCHAR));
+
+        /* Make sure we get an absolute pathname in case the module was loaded
+         * explicitly by LoadLibrary() with a relative path. */
+        GetFullPathNameW(modulename, sizeof(fullname)/sizeof(WCHAR), fullname, NULL);
+
+        /* remove \\?\ prefix */
+        if (memcmp(fullname, L"\\\\?\\", 4*sizeof(WCHAR)) == 0)
+            memmove(fullname, fullname+4, (wcslen(fullname+4)+1)*sizeof(WCHAR));
+
+        ansi = win32_ansipath(fullname);
+        my_strlcpy(w32_module_name, ansi, sizeof(w32_module_name));
+        win32_free(ansi);
+    }
+    else {
+        GetModuleFileName(module, w32_module_name, sizeof(w32_module_name));
+
+        /* remove \\?\ prefix */
+        if (memcmp(w32_module_name, "\\\\?\\", 4) == 0)
+            memmove(w32_module_name, w32_module_name+4, strlen(w32_module_name+4)+1);
+
+        /* try to get full path to binary (which may be mangled when perl is
+         * run from a 16-bit app) */
+        /*PerlIO_printf(Perl_debug_log, "Before %s\n", w32_module_name);*/
+        win32_longpath(w32_module_name);
+        /*PerlIO_printf(Perl_debug_log, "After  %s\n", w32_module_name);*/
+    }
 
     /* normalize to forward slashes */
     ptr = w32_module_name;
@@ -1584,6 +1611,67 @@ win32_longpath(char *path)
     }
     strcpy(path,tmpbuf);
     return path;
+}
+
+static void
+out_of_memory()
+{
+    dTHX;
+    /* Can't use PerlIO to write as it allocates memory */
+    PerlLIO_write(PerlIO_fileno(Perl_error_log),
+                  PL_no_mem, strlen(PL_no_mem));
+    my_exit(1);
+}
+
+/* The win32_ansipath() function takes a Unicode filename and converts it
+ * into the current Windows codepage. If some characters cannot be mapped,
+ * then it will convert the short name instead.
+ *
+ * The buffer to the ansi pathname must be freed with win32_free() when it
+ * it no longer needed.
+ *
+ * The argument to win32_ansipath() must exist before this function is
+ * called; otherwise there is no way to determine the short path name.
+ *
+ * Ideas for future refinement:
+ * - Only convert those segments of the path that are not in the current
+ *   codepage, but leave the other segments in their long form.
+ * - If the resulting name is longer than MAX_PATH, start converting
+ *   additional path segments into short names until the full name
+ *   is shorter than MAX_PATH.  Shorten the filename part last!
+ */
+DllExport char *
+win32_ansipath(const WCHAR *widename)
+{
+    char *name;
+    BOOL use_default = FALSE;
+    size_t widelen = wcslen(widename)+1;
+    int len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, widename, widelen,
+                                  NULL, 0, NULL, NULL);
+    name = win32_malloc(len);
+    if (!name)
+        out_of_memory();
+
+    WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, widename, widelen,
+                        name, len, NULL, &use_default);
+    if (use_default) {
+        WCHAR *shortname;
+        DWORD shortlen = GetShortPathNameW(widename, NULL, 0);
+        shortname = win32_malloc(shortlen*sizeof(WCHAR));
+        if (!shortname)
+            out_of_memory();
+        shortlen = GetShortPathNameW(widename, shortname, shortlen)+1;
+
+        len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, shortname, shortlen,
+                                  NULL, 0, NULL, NULL);
+        name = win32_realloc(name, len);
+        if (!name)
+            out_of_memory();
+        WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, shortname, shortlen,
+                            name, len, NULL, NULL);
+        win32_free(shortname);
+    }
+    return name;
 }
 
 DllExport char *

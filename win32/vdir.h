@@ -261,13 +261,13 @@ void VDir::SetDefaultA(char const *pDefault)
 int VDir::SetDirW(WCHAR const *pPath, int index)
 {
     WCHAR chr, *ptr;
-    char szBuffer[MAX_PATH+1];
     int length = 0;
     if (index < driveCount && pPath != NULL) {
 	length = wcslen(pPath);
 	pMem->Free(dirTableW[index]);
 	ptr = dirTableW[index] = (WCHAR*)pMem->Malloc((length+2)*2);
 	if (ptr != NULL) {
+            char *ansi;
 	    wcscpy(ptr, pPath);
 	    ptr += length-1;
 	    chr = *ptr++;
@@ -275,13 +275,14 @@ int VDir::SetDirW(WCHAR const *pPath, int index)
 		*ptr++ = '\\';
 		*ptr = '\0';
 	    }
-	    WideCharToMultiByte(CP_ACP, 0, dirTableW[index], -1, szBuffer, sizeof(szBuffer), NULL, NULL);
-	    length = strlen(szBuffer);
+            ansi = win32_ansipath(dirTableW[index]);
+	    length = strlen(ansi);
 	    pMem->Free(dirTableA[index]);
 	    dirTableA[index] = (char*)pMem->Malloc(length+1);
 	    if (dirTableA[index] != NULL) {
-		strcpy(dirTableA[index], szBuffer);
+		strcpy(dirTableA[index], ansi);
 	    }
+            win32_free(ansi);
 	}
     }
 

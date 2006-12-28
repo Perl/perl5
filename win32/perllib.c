@@ -207,17 +207,24 @@ RunPerl(int argc, char **argv, char **env)
 {
     int exitstatus;
     PerlInterpreter *my_perl, *new_perl = NULL;
-
-#ifndef __BORLANDC__
-    /* XXX this _may_ be a problem on some compilers (e.g. Borland) that
-     * want to free() argv after main() returns.  As luck would have it,
-     * Borland's CRT does the right thing to argv[0] already. */
+    OSVERSIONINFO osver;
     char szModuleName[MAX_PATH];
+    char *arg0 = argv[0];
+    char *ansi = NULL;
 
-    Win_GetModuleFileName(NULL, szModuleName, sizeof(szModuleName));
-    (void)win32_longpath(szModuleName);
-    argv[0] = szModuleName;
-#endif
+    osver.dwOSVersionInfoSize = sizeof(osver);
+    GetVersionEx(&osver);
+
+    if (osver.dwPlatformId == VER_PLATFORM_WIN32_NT) {
+        WCHAR widename[MAX_PATH];
+        GetModuleFileNameW(NULL, widename, sizeof(widename)/sizeof(WCHAR));
+        argv[0] = ansi = win32_ansipath(widename);
+    }
+    else {
+        Win_GetModuleFileName(NULL, szModuleName, sizeof(szModuleName));
+        (void)win32_longpath(szModuleName);
+        argv[0] = szModuleName;
+    }
 
 #ifdef PERL_GLOBAL_STRUCT
 #define PERLVAR(var,type) /**/
@@ -258,6 +265,11 @@ RunPerl(int argc, char **argv, char **env)
 	perl_free(new_perl);
     }
 #endif
+
+    /* At least the Borland RTL wants to free argv[] after main() returns. */
+    argv[0] = arg0;
+    if (ansi)
+        win32_free(ansi);
 
     PERL_SYS_TERM();
 
