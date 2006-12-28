@@ -492,6 +492,8 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	return;
     SvUPGRADE(sv, SVt_PVGV);
     SvIOK_off(sv);
+    SvNOK_off(sv);
+    SvVALID_on(sv);
     if (len > 2) {
 	const unsigned char *sb;
 	const U8 mlen = (len>255) ? 255 : (U8)len;
@@ -502,7 +504,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	    = (unsigned char*)(SvPVX_mutable(sv) + len + PERL_FBM_TABLE_OFFSET);
 	s = table - 1 - PERL_FBM_TABLE_OFFSET;	/* last char */
 	memset((void*)table, mlen, 256);
-	table[PERL_FBM_FLAGS_OFFSET_FROM_TABLE] = (U8)flags;
+	BmFLAGS(sv) = (U8)flags;
 	i = 0;
 	sb = s - mlen + 1;			/* first char (maybe) */
 	while (s >= sb) {
@@ -514,7 +516,6 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
 	Sv_Grow(sv, len + PERL_FBM_TABLE_OFFSET);
     }
     sv_magic(sv, NULL, PERL_MAGIC_bm, NULL, 0);	/* deep magic */
-    SvVALID_on(sv);
 
     s = (const unsigned char*)(SvPVX_const(sv));	/* deeper magic */
     for (i = 0; i < len; i++) {
@@ -528,8 +529,8 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     BmUSEFUL(sv) = 100;			/* Initial value */
     if (flags & FBMcf_TAIL)
 	SvTAIL_on(sv);
-    DEBUG_r(PerlIO_printf(Perl_debug_log, "rarest char %c at %d\n",
-			  BmRARE(sv),BmPREVIOUS(sv)));
+    DEBUG_r(PerlIO_printf(Perl_debug_log, "rarest char %c at %lu\n",
+			  BmRARE(sv),(unsigned long)BmPREVIOUS(sv)));
 }
 
 /* If SvTAIL(littlestr), it has a fake '\n' at end. */
@@ -724,7 +725,7 @@ Perl_fbm_instr(pTHX_ unsigned char *big, register unsigned char *bigend, SV *lit
 	}
       check_end:
 	if ( s == bigend
-	     && (table[PERL_FBM_FLAGS_OFFSET_FROM_TABLE] & FBMcf_TAIL)
+	     && (BmFLAGS(littlestr) & FBMcf_TAIL)
 	     && memEQ((char *)(bigend - littlelen),
 		      (char *)(oldlittle - littlelen), littlelen) )
 	    return (char*)bigend - littlelen;

@@ -393,6 +393,11 @@ struct xpv {
 	    U32	xlow;
 	    U32	xhigh;
 	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
+	struct {
+	    U32 xbm_previous;	/* how many characters in string before rare? */
+	    U8	xbm_flags;
+	    U8	xbm_rare;	/* rarest character in string */
+	}	xbm_s;		/* fields from PVBM */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
@@ -415,6 +420,11 @@ struct xpviv {
 	    U32	xlow;
 	    U32	xhigh;
 	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
+	struct {
+	    U32 xbm_previous;	/* how many characters in string before rare? */
+	    U8	xbm_flags;
+	    U8	xbm_rare;	/* rarest character in string */
+	}	xbm_s;		/* fields from PVBM */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
@@ -453,6 +463,11 @@ struct xpvuv {
 	    U32	xlow;
 	    U32	xhigh;
 	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
+	struct {
+	    U32 xbm_previous;	/* how many characters in string before rare? */
+	    U8	xbm_flags;
+	    U8	xbm_rare;	/* rarest character in string */
+	}	xbm_s;		/* fields from PVBM */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
@@ -474,6 +489,11 @@ struct xpvnv {
 	    U32	xlow;
 	    U32	xhigh;
 	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
+	struct {
+	    U32 xbm_previous;	/* how many characters in string before rare? */
+	    U8	xbm_flags;
+	    U8	xbm_rare;	/* rarest character in string */
+	}	xbm_s;		/* fields from PVBM */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
@@ -495,6 +515,11 @@ struct xpvmg {
 	    U32	xlow;
 	    U32	xhigh;
 	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
+	struct {
+	    U32 xbm_previous;	/* how many characters in string before rare? */
+	    U8	xbm_flags;
+	    U8	xbm_rare;	/* rarest character in string */
+	}	xbm_s;		/* fields from PVBM */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
@@ -520,6 +545,11 @@ struct xpvlv {
 	    U32	xlow;
 	    U32	xhigh;
 	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
+	struct {
+	    U32 xbm_previous;	/* how many characters in string before rare? */
+	    U8	xbm_flags;
+	    U8	xbm_rare;	/* rarest character in string */
+	}	xbm_s;		/* fields from PVBM */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
@@ -553,6 +583,11 @@ struct xpvgv {
 	    U32	xlow;
 	    U32	xhigh;
 	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
+	struct {
+	    U32 xbm_previous;	/* how many characters in string before rare? */
+	    U8	xbm_flags;
+	    U8	xbm_rare;	/* rarest character in string */
+	}	xbm_s;		/* fields from PVBM */
     }		xnv_u;
     STRLEN	xpv_cur;	/* xgv_flags */
     STRLEN	xpv_len;	/* 0 */
@@ -583,6 +618,11 @@ struct xpvfm {
 	    U32	xlow;
 	    U32	xhigh;
 	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
+	struct {
+	    U32 xbm_previous;	/* how many characters in string before rare? */
+	    U8	xbm_flags;
+	    U8	xbm_rare;	/* rarest character in string */
+	}	xbm_s;		/* fields from PVBM */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
@@ -663,6 +703,11 @@ struct xpvio {
 	    U32	xlow;
 	    U32	xhigh;
 	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
+	struct {
+	    U32 xbm_previous;	/* how many characters in string before rare? */
+	    U8	xbm_flags;
+	    U8	xbm_rare;	/* rarest character in string */
+	}	xbm_s;		/* fields from PVBM */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
@@ -1381,32 +1426,23 @@ the scalar's value cannot change unless written to.
 		 } STMT_END
 
 
-#define PERL_FBM_TABLE_OFFSET 5	/* Number of bytes between EOS and table */
-#define PERL_FBM_FLAGS_OFFSET_FROM_TABLE -1
-/* how many characters in string before rare? */
-#if (BYTEORDER == 0x4321) || (BYTEORDER == 0x87654321)
-#  define PERL_FBM_PREVIOUS_L_OFFSET_FROM_TABLE -2
-#  define PERL_FBM_PREVIOUS_H_OFFSET_FROM_TABLE -3
-#else
-#  define PERL_FBM_PREVIOUS_H_OFFSET_FROM_TABLE -2
-#  define PERL_FBM_PREVIOUS_L_OFFSET_FROM_TABLE -3
-#endif
-/* rarest character in string */
-#define PERL_FBM_RARE_OFFSET_FROM_TABLE -4
+#define PERL_FBM_TABLE_OFFSET 1	/* Number of bytes between EOS and table */
 
 /* SvPOKp not SvPOK in the assertion because the string can be tainted! eg
    perl -T -e '/$^X/'
 */
 #if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  define BmFLAGS(sv)							\
+	(*({ SV *const uggh = (SV *) (sv);				\
+		assert(SvTYPE(uggh) == SVt_PVGV);			\
+		assert(SvVALID(uggh));					\
+	    &(((XPVGV*) SvANY(uggh))->xnv_u.xbm_s.xbm_flags);		\
+	 }))
 #  define BmRARE(sv)							\
 	(*({ SV *const uggh = (SV *) (sv);				\
 		assert(SvTYPE(uggh) == SVt_PVGV);			\
 		assert(SvVALID(uggh));					\
-		assert(SvCUR(uggh) + PERL_FBM_TABLE_OFFSET		\
-		       + PERL_FBM_RARE_OFFSET_FROM_TABLE <= SvLEN(uggh)); \
-	    assert(SvPOKp(uggh));					\
-	    (U8*)(SvEND(uggh)						\
-		  + PERL_FBM_TABLE_OFFSET + PERL_FBM_RARE_OFFSET_FROM_TABLE); \
+	    &(((XPVGV*) SvANY(uggh))->xnv_u.xbm_s.xbm_rare);		\
 	 }))
 #  define BmUSEFUL(sv)							\
 	(*({ SV *const uggh = (SV *) (sv);				\
@@ -1416,39 +1452,20 @@ the scalar's value cannot change unless written to.
 	    &(((XPVGV*) SvANY(uggh))->xiv_u.xivu_i32);			\
 	 }))
 #  define BmPREVIOUS(sv)						\
-	({ SV *const uggh = (SV *) (sv);				\
-	   assert(SvTYPE(uggh) == SVt_PVGV);				\
-	   assert(SvVALID(uggh));					\
-	   assert(SvPOKp(uggh));					\
-	   assert(SvCUR(uggh) + PERL_FBM_TABLE_OFFSET <= SvLEN(uggh));	\
-	   (*(U8*)(SvEND(uggh) + PERL_FBM_TABLE_OFFSET			\
-		  + PERL_FBM_PREVIOUS_H_OFFSET_FROM_TABLE) << 8)	\
-	       | (*(U8*)(SvEND(uggh) + PERL_FBM_TABLE_OFFSET		\
-			+ PERL_FBM_PREVIOUS_L_OFFSET_FROM_TABLE));	\
-	})
+	(*({ SV *const uggh = (SV *) (sv);				\
+		assert(SvTYPE(uggh) == SVt_PVGV);			\
+		assert(SvVALID(uggh));					\
+	    &(((XPVGV*) SvANY(uggh))->xnv_u.xbm_s.xbm_previous);	\
+	 }))
 #else
-#  define BmRARE(sv)							\
-    (*(U8*)(SvEND(sv)							\
-	    + PERL_FBM_TABLE_OFFSET + PERL_FBM_RARE_OFFSET_FROM_TABLE))
-
-#  define BmUSEFUL(sv)	((XPVGV*)  SvANY(sv))->xiv_u.xivu_i32
-#  define BmPREVIOUS(sv)						\
-    ((*(U8*)(SvEND(sv) + PERL_FBM_TABLE_OFFSET				\
-	   + PERL_FBM_PREVIOUS_H_OFFSET_FROM_TABLE) << 8)		\
-	| (*(U8*)(SvEND(sv) + PERL_FBM_TABLE_OFFSET			\
-	   + PERL_FBM_PREVIOUS_L_OFFSET_FROM_TABLE)))			\
+#  define BmFLAGS(sv)		((XPVGV*) SvANY(sv))->xnv_u.xbm_s.xbm_flags
+#  define BmRARE(sv)		((XPVGV*) SvANY(sv))->xnv_u.xbm_s.xbm_rare
+#  define BmUSEFUL(sv)		((XPVGV*) SvANY(sv))->xiv_u.xivu_i32
+#  define BmPREVIOUS(sv)	((XPVGV*) SvANY(sv))->xnv_u.xbm_s.xbm_previous
 
 #endif
 #define BmPREVIOUS_set(sv, val)						\
-    STMT_START { assert(SvTYPE(sv) == SVt_PVGV);			\
-	assert(SvVALID(sv));						\
-	assert(SvPOKp(sv));						\
-	assert(SvCUR(sv) + PERL_FBM_TABLE_OFFSET <= SvLEN(sv));		\
-	*(U8*)(SvEND(sv) + PERL_FBM_TABLE_OFFSET			\
-	       + PERL_FBM_PREVIOUS_H_OFFSET_FROM_TABLE) = (U8)((U32)(val)>>8); \
-	*(U8*)(SvEND(sv) + PERL_FBM_TABLE_OFFSET			\
-	       + PERL_FBM_PREVIOUS_L_OFFSET_FROM_TABLE) = (U8)(val);	\
-    } STMT_END
+    STMT_START { BmPREVIOUS(sv) = val; } STMT_END
 
 #define FmLINES(sv)	((XPVFM*)  SvANY(sv))->xfm_lines
 
