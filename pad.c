@@ -112,7 +112,7 @@ to be generated in evals, such as
 #include "keywords.h"
 
 
-#define PAD_MAX 999999999
+#define PAD_MAX IV_MAX
 
 #ifdef PERL_MAD
 void pad_peg(const char* s) {
