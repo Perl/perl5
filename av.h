@@ -12,6 +12,10 @@ struct xpvav {
     union {
 	NV	xnv_nv;		/* numeric value, if any */
 	HV *	xgv_stash;
+	struct {
+	    U32	xlow;
+	    U32	xhigh;
+	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
     }		xnv_u;
     SSize_t	xav_fill;       /* Index of last element present */
     SSize_t	xav_max;        /* max index for which array has space */

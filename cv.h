@@ -14,6 +14,10 @@ struct xpvcv {
     union {
 	NV	xnv_nv;		/* numeric value, if any */
 	HV *	xgv_stash;
+	struct {
+	    U32	xlow;
+	    U32	xhigh;
+	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of xp_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */

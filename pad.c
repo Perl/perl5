@@ -72,19 +72,19 @@ but only by their index allocated at compile time (which is usually
 in PL_op->op_targ), wasting a name SV for them doesn't make sense.
 
 The SVs in the names AV have their PV being the name of the variable.
-NV+1..IV inclusive is a range of cop_seq numbers for which the name is
-valid.  For typed lexicals name SV is SVt_PVMG and SvSTASH points at the
-type.  For C<our> lexicals, the type is also SVt_PVMG, with the OURSTASH slot
-pointing at the stash of the associated global (so that duplicate C<our>
-declarations in the same package can be detected).  SvCUR is sometimes
-hijacked to store the generation number during compilation.
+xlow+1..xhigh inclusive in the NV union is a range of cop_seq numbers for
+which the name is valid.  For typed lexicals name SV is SVt_PVMG and SvSTASH
+points at the type.  For C<our> lexicals, the type is also SVt_PVMG, with the
+OURSTASH slot pointing at the stash of the associated global (so that
+duplicate C<our> declarations in the same package can be detected).  SvCUR is
+sometimes hijacked to store the generation number during compilation.
 
 If SvFAKE is set on the name SV, then that slot in the frame AV is
 a REFCNT'ed reference to a lexical from "outside". In this case,
-the name SV does not use NVX and IVX to store a cop_seq range, since it is
-in scope throughout. Instead IVX stores some flags containing info about
+the name SV does not use xlow and xhigh to store a cop_seq range, since it is
+in scope throughout. Instead xhigh stores some flags containing info about
 the real lexical (is it declared in an anon, and is it capable of being
-instantiated multiple times?), and for fake ANONs, NVX contains the index
+instantiated multiple times?), and for fake ANONs, xlow contains the index
 within the parent's pad where the lexical's value is stored, to make
 cloning quicker.
 
@@ -111,11 +111,15 @@ to be generated in evals, such as
 #include "perl.h"
 #include "keywords.h"
 
-#define COP_SEQ_RANGE_LOW_set(sv,val)		SvNV_set(sv, (NV)val)
-#define COP_SEQ_RANGE_HIGH_set(sv,val)		SvUV_set(sv, val)
+#define COP_SEQ_RANGE_LOW_set(sv,val)		\
+  STMT_START { ((XPVNV*)SvANY(sv))->xnv_u.xpad_cop_seq.xlow = (val); } STMT_END
+#define COP_SEQ_RANGE_HIGH_set(sv,val)		\
+  STMT_START { ((XPVNV*)SvANY(sv))->xnv_u.xpad_cop_seq.xhigh = (val); } STMT_END
 
-#define PARENT_PAD_INDEX_set(sv,val)		SvNV_set(sv, (NV)val)
-#define PARENT_FAKELEX_FLAGS_set(sv,val)	SvUV_set(sv, val)
+#define PARENT_PAD_INDEX_set(sv,val)		\
+  STMT_START { ((XPVNV*)SvANY(sv))->xnv_u.xpad_cop_seq.xlow = (val); } STMT_END
+#define PARENT_FAKELEX_FLAGS_set(sv,val)	\
+  STMT_START { ((XPVNV*)SvANY(sv))->xnv_u.xpad_cop_seq.xhigh = (val); } STMT_END
 
 #define PAD_MAX IV_MAX
 
@@ -659,7 +663,7 @@ associated with the IVX field of a fake namesv.
 
 Note that pad_findlex() is recursive; it recurses up the chain of CVs,
 then comes back down, adding fake entries as it goes. It has to be this way
-because fake namesvs in anon protoypes have to store in NVX the index into
+because fake namesvs in anon protoypes have to store in xlow the index into
 the parent pad.
 
 =cut

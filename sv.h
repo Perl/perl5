@@ -389,6 +389,10 @@ struct xpv {
     union {
 	NV	xnv_nv;		/* numeric value, if any */
 	HV *	xgv_stash;
+	struct {
+	    U32	xlow;
+	    U32	xhigh;
+	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
@@ -407,6 +411,10 @@ struct xpviv {
     union {
 	NV	xnv_nv;		/* numeric value, if any */
 	HV *	xgv_stash;
+	struct {
+	    U32	xlow;
+	    U32	xhigh;
+	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
@@ -441,6 +449,10 @@ struct xpvuv {
     union {
 	NV	xnv_nv;		/* numeric value, if any */
 	HV *	xgv_stash;
+	struct {
+	    U32	xlow;
+	    U32	xhigh;
+	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
@@ -458,6 +470,10 @@ struct xpvnv {
     union {
 	NV	xnv_nv;		/* numeric value, if any */
 	HV *	xgv_stash;
+	struct {
+	    U32	xlow;
+	    U32	xhigh;
+	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
@@ -475,6 +491,10 @@ struct xpvmg {
     union {
 	NV	xnv_nv;		/* numeric value, if any */
 	HV *	xgv_stash;
+	struct {
+	    U32	xlow;
+	    U32	xhigh;
+	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
@@ -496,6 +516,10 @@ struct xpvlv {
     union {
 	NV	xnv_nv;		/* numeric value, if any */
 	HV *	xgv_stash;
+	struct {
+	    U32	xlow;
+	    U32	xhigh;
+	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
@@ -525,6 +549,10 @@ struct xpvgv {
     union {
 	NV	xnv_nv;
 	HV *	xgv_stash;	/* The stash of this GV */
+	struct {
+	    U32	xlow;
+	    U32	xhigh;
+	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
     }		xnv_u;
     STRLEN	xpv_cur;	/* xgv_flags */
     STRLEN	xpv_len;	/* 0 */
@@ -551,6 +579,10 @@ struct xpvfm {
     union {
 	NV	xnv_nv;		/* numeric value, if any */
 	HV *	xgv_stash;
+	struct {
+	    U32	xlow;
+	    U32	xhigh;
+	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
@@ -627,6 +659,10 @@ struct xpvio {
     union {
 	NV	xnv_nv;		/* numeric value, if any */
 	HV *	xgv_stash;
+	struct {
+	    U32	xlow;
+	    U32	xhigh;
+	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
     }		xnv_u;
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */

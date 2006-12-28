@@ -33,12 +33,61 @@ typedef U64TYPE PADOFFSET;
 
 /* B.xs needs these for the benefit of B::Deparse */ 
 /* Low range end is exclusive (valid from the cop seq after this one) */
-#define COP_SEQ_RANGE_LOW(sv)			U_32(SvNVX(sv))
 /* High range end is inclusive (valid up to this cop seq) */
-#define COP_SEQ_RANGE_HIGH(sv)			U_32(SvUVX(sv))
 
-#define PARENT_PAD_INDEX(sv)			U_32(SvNVX(sv))
-#define PARENT_FAKELEX_FLAGS(sv)		U_32(SvUVX(sv))
+#if defined (DEBUGGING) && defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
+#  define COP_SEQ_RANGE_LOW(sv)						\
+	(({ SV *const _svi = (SV *) (sv);				\
+	  assert(SvTYPE(_svi) == SVt_NV || SvTYPE(_svi) >= SVt_PVNV);	\
+	  assert(SvTYPE(_svi) != SVt_PVAV);				\
+	  assert(SvTYPE(_svi) != SVt_PVHV);				\
+	  assert(SvTYPE(_svi) != SVt_PVCV);				\
+	  assert(SvTYPE(_svi) != SVt_PVFM);				\
+	  assert(!isGV_with_GP(_svi));					\
+	  ((XPVNV*) SvANY(_svi))->xnv_u.xpad_cop_seq.xlow;		\
+	 }))
+#  define COP_SEQ_RANGE_HIGH(sv)					\
+	(({ SV *const _svi = (SV *) (sv);				\
+	  assert(SvTYPE(_svi) == SVt_NV || SvTYPE(_svi) >= SVt_PVNV);	\
+	  assert(SvTYPE(_svi) != SVt_PVAV);				\
+	  assert(SvTYPE(_svi) != SVt_PVHV);				\
+	  assert(SvTYPE(_svi) != SVt_PVCV);				\
+	  assert(SvTYPE(_svi) != SVt_PVFM);				\
+	  assert(!isGV_with_GP(_svi));					\
+	  ((XPVNV*) SvANY(_svi))->xnv_u.xpad_cop_seq.xhigh;		\
+	 }))
+#  define PARENT_PAD_INDEX(sv)						\
+	(({ SV *const _svi = (SV *) (sv);				\
+	  assert(SvTYPE(_svi) == SVt_NV || SvTYPE(_svi) >= SVt_PVNV);	\
+	  assert(SvTYPE(_svi) != SVt_PVAV);				\
+	  assert(SvTYPE(_svi) != SVt_PVHV);				\
+	  assert(SvTYPE(_svi) != SVt_PVCV);				\
+	  assert(SvTYPE(_svi) != SVt_PVFM);				\
+	  assert(!isGV_with_GP(_svi));					\
+	  ((XPVNV*) SvANY(_svi))->xnv_u.xpad_cop_seq.xlow;		\
+	 }))
+#  define PARENT_FAKELEX_FLAGS(sv)					\
+	(({ SV *const _svi = (SV *) (sv);				\
+	  assert(SvTYPE(_svi) == SVt_NV || SvTYPE(_svi) >= SVt_PVNV);	\
+	  assert(SvTYPE(_svi) != SVt_PVAV);				\
+	  assert(SvTYPE(_svi) != SVt_PVHV);				\
+	  assert(SvTYPE(_svi) != SVt_PVCV);				\
+	  assert(SvTYPE(_svi) != SVt_PVFM);				\
+	  assert(!isGV_with_GP(_svi));					\
+	  ((XPVNV*) SvANY(_svi))->xnv_u.xpad_cop_seq.xhigh;		\
+	 }))
+#else
+#  define COP_SEQ_RANGE_LOW(sv)		\
+	(0 + (((XPVNV*) SvANY(sv))->xnv_u.xpad_cop_seq.xlow))
+#  define COP_SEQ_RANGE_HIGH(sv)	\
+	(0 + (((XPVNV*) SvANY(sv))->xnv_u.xpad_cop_seq.xhigh))
+
+
+#  define PARENT_PAD_INDEX(sv)		\
+	(0 + (((XPVNV*) SvANY(sv))->xnv_u.xpad_cop_seq.xlow))
+#  define PARENT_FAKELEX_FLAGS(sv)	\
+	(0 + (((XPVNV*) SvANY(sv))->xnv_u.xpad_cop_seq.xhigh))
+#endif
 
 /* flags for the pad_new() function */
 

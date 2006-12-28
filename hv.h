@@ -52,6 +52,10 @@ struct xpvhv {
     union {
 	NV	xnv_nv;		/* numeric value, if any */
 	HV *	xgv_stash;
+	struct {
+	    U32	xlow;
+	    U32	xhigh;
+	}	xpad_cop_seq;	/* used by pad.c for cop_sequence */
     }		xnv_u;
     STRLEN	xhv_fill;	/* how full xhv_array currently is */
     STRLEN	xhv_max;	/* subscript of last element of xhv_array */
