@@ -4526,8 +4526,14 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
 	}
 	else
 	    Perl_croak(aTHX_ "Can't use %s for loop variable", PL_op_desc[sv->op_type]);
-	if (padoff && strEQ(PAD_COMPNAME_PV(padoff), "$_"))
-	    iterpflags |= OPpITER_DEF;
+	if (padoff) {
+	    SV *const namesv = PAD_COMPNAME_SV(padoff);
+	    STRLEN len;
+	    const char *const name = SvPV_const(namesv, len);
+
+	    if (len == 2 && name[0] == '$' && name[1] == '_')
+		iterpflags |= OPpITER_DEF;
+	}
     }
     else {
         const PADOFFSET offset = pad_findmy("$_");
@@ -6447,13 +6453,9 @@ Perl_ck_fun(pTHX_ OP *o)
 			     */
 			    priv = OPpDEREF;
 			    if (kid->op_type == OP_PADSV) {
-				name = PAD_COMPNAME_PV(kid->op_targ);
-				/* SvCUR of a pad namesv can't be trusted
-				 * (see PL_generation), so calc its length
-				 * manually */
-				if (name)
-				    len = strlen(name);
-
+				SV *const namesv
+				    = PAD_COMPNAME_SV(kid->op_targ);
+				name = SvPV_const(namesv, len);
 			    }
 			    else if (kid->op_type == OP_RV2SV
 				     && kUNOP->op_first->op_type == OP_GV)

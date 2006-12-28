@@ -11691,8 +11691,7 @@ S_varname(pTHX_ GV *gv, const char gvtype, PADOFFSET targ,
 	    return NULL;
 	av = (AV*)(*av_fetch(CvPADLIST(cv), 0, FALSE));
 	sv = *av_fetch(av, targ, FALSE);
-	/* SvLEN in a pad name is not to be trusted */
-	sv_setpv(name, SvPV_nolen_const(sv));
+	sv_setpvn(name, SvPV_nolen_const(sv), SvCUR(sv));
     }
 
     if (subscript_type == FUV_SUBSCRIPT_HASH) {
