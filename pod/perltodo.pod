@@ -455,6 +455,11 @@ L<perlrun>.)
 
 Currently the %ENV entries are always byte strings.
 
+=head2 Unicode and glob()
+
+Currently glob patterns and filenames returned from File::Glob::glob()
+are always byte strings.
+
 =head2 use less 'memory'
 
 Investigate trade offs to switch out perl's choices on memory usage.
