@@ -28,7 +28,7 @@ our %EXPORT_TAGS =
 # use #6
 use B qw(class ppname main_start main_root main_cv cstring svref_2object
 	 SVf_IOK SVf_NOK SVf_POK SVf_IVisUV SVf_FAKE OPf_KIDS OPf_SPECIAL
-	 CVf_ANON);
+	 CVf_ANON PAD_FAKELEX_ANON PAD_FAKELEX_MULTI);
 
 my %style =
   ("terse" =>
@@ -731,8 +731,10 @@ sub concise_op {
 		    # These changes relate to the jumbo closure fix.
 		    # See changes 19939 and 20005
 		    my $fake = '';
-		    $fake .= 'a' if $padname->PARENT_FAKELEX_FLAGS & 1; # PAD_FAKELEX_ANON
-		    $fake .= 'm' if $padname->PARENT_FAKELEX_FLAGS & 2; # PAD_FAKELEX_MULTI
+		    $fake .= 'a'
+		   	if $padname->PARENT_FAKELEX_FLAGS & PAD_FAKELEX_ANON;
+		    $fake .= 'm'
+		   	if $padname->PARENT_FAKELEX_FLAGS & PAD_FAKELEX_MULTI;
 		    $fake .= ':' . $padname->PARENT_PAD_INDEX
 			if $curcv->CvFLAGS & CVf_ANON;
 		    $h{targarglife} = "$h{targarg}:FAKE:$fake";

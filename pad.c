@@ -669,11 +669,6 @@ the parent pad.
 =cut
 */
 
-/* Flags set in the SvIVX field of FAKE namesvs */
-
-#define PAD_FAKELEX_ANON   1 /* the lex is declared in an ANON, or ... */
-#define PAD_FAKELEX_MULTI  2 /* the lex can be instantiated multiple times */
-
 /* the CV has finished being compiled. This is not a sufficient test for
  * all CVs (eg XSUBs), but suffices for the CVs found in a lexical chain */
 #define CvCOMPILED(cv)	CvROOT(cv)
