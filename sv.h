@@ -1464,8 +1464,6 @@ the scalar's value cannot change unless written to.
 #  define BmPREVIOUS(sv)	((XPVGV*) SvANY(sv))->xnv_u.xbm_s.xbm_previous
 
 #endif
-#define BmPREVIOUS_set(sv, val)						\
-    STMT_START { BmPREVIOUS(sv) = val; } STMT_END
 
 #define FmLINES(sv)	((XPVFM*)  SvANY(sv))->xfm_lines
 
