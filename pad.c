@@ -111,6 +111,11 @@ to be generated in evals, such as
 #include "perl.h"
 #include "keywords.h"
 
+#define COP_SEQ_RANGE_LOW_set(sv,val)		SvNV_set(sv, (NV)val)
+#define COP_SEQ_RANGE_HIGH_set(sv,val)		SvUV_set(sv, val)
+
+#define PARENT_PAD_INDEX_set(sv,val)		SvNV_set(sv, (NV)val)
+#define PARENT_FAKELEX_FLAGS_set(sv,val)	SvUV_set(sv, val)
 
 #define PAD_MAX IV_MAX
 
@@ -368,8 +373,8 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
     }
     else {
 	/* not yet introduced */
-	SvNV_set(namesv, (NV)PAD_MAX);	/* min */
-	SvIV_set(namesv, 0);		/* max */
+	COP_SEQ_RANGE_LOW_set(namesv, PAD_MAX);	/* min */
+	COP_SEQ_RANGE_HIGH_set(namesv, 0);		/* max */
 
 	if (!PL_min_intro_pending)
 	    PL_min_intro_pending = offset;
@@ -482,8 +487,9 @@ Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type)
     pad_peg("add_anon");
     sv_upgrade(name, SVt_PVNV);
     sv_setpvn(name, "&", 1);
-    SvIV_set(name, -1);
-    SvNV_set(name, 1);
+    /* Are these two actually ever read? */
+    COP_SEQ_RANGE_HIGH_set(name, ~0);
+    COP_SEQ_RANGE_LOW_set(name, 1);
     ix = pad_alloc(op_type, SVs_PADMY);
     av_store(PL_comppad_name, ix, name);
     /* XXX DAPM use PL_curpad[] ? */
@@ -537,7 +543,7 @@ Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
 	if (sv
 	    && sv != &PL_sv_undef
 	    && !SvFAKE(sv)
-	    && (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
+	    && (COP_SEQ_RANGE_HIGH(sv) == PAD_MAX || COP_SEQ_RANGE_HIGH(sv) == 0)
 	    && strEQ(name, SvPVX_const(sv)))
 	{
 	    if (is_our && (SvPAD_OUR(sv)))
@@ -546,7 +552,7 @@ Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
 		"\"%s\" variable %s masks earlier declaration in same %s",
 		(is_our ? "our" : PL_in_my == KEY_my ? "my" : "state"),
 		name,
-		(SvIVX(sv) == PAD_MAX ? "scope" : "statement"));
+		(COP_SEQ_RANGE_HIGH(sv) == PAD_MAX ? "scope" : "statement"));
 	    --off;
 	    break;
 	}
@@ -558,7 +564,7 @@ Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
 	    if (sv
 		&& sv != &PL_sv_undef
 		&& !SvFAKE(sv)
-		&& (SvIVX(sv) == PAD_MAX || SvIVX(sv) == 0)
+		&& (COP_SEQ_RANGE_HIGH(sv) == PAD_MAX || COP_SEQ_RANGE_HIGH(sv) == 0)
 		&& OURSTASH(sv) == ourstash
 		&& strEQ(name, SvPVX_const(sv)))
 	    {
@@ -614,7 +620,7 @@ Perl_pad_findmy(pTHX_ const char *name)
 	    && !SvFAKE(namesv)
 	    && (SvPAD_OUR(namesv))
 	    && strEQ(SvPVX_const(namesv), name)
-	    && U_32(SvNVX(namesv)) == PAD_MAX /* min */
+	    && COP_SEQ_RANGE_LOW(namesv) == PAD_MAX /* min */
 	)
 	    return offset;
     }
@@ -702,8 +708,8 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 	    {
 		if (SvFAKE(namesv))
 		    fake_offset = offset; /* in case we don't find a real one */
-		else if (  seq >  U_32(SvNVX(namesv))	/* min */
-			&& seq <= (U32)SvIVX(namesv))	/* max */
+		else if (  seq >  COP_SEQ_RANGE_LOW(namesv)	/* min */
+			&& seq <= COP_SEQ_RANGE_HIGH(namesv))	/* max */
 		    break;
 	    }
 	}
@@ -726,18 +732,19 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 				? PAD_FAKELEX_MULTI : 0;
 
 		DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-		    "Pad findlex cv=0x%"UVxf" matched: offset=%ld (%ld,%ld)\n",
-		    PTR2UV(cv), (long)offset, (long)U_32(SvNVX(*out_name_sv)),
-		    (long)SvIVX(*out_name_sv)));
+		    "Pad findlex cv=0x%"UVxf" matched: offset=%ld (%lu,%lu)\n",
+		    PTR2UV(cv), (long)offset,
+		    (unsigned long)COP_SEQ_RANGE_LOW(*out_name_sv),
+		    (unsigned long)COP_SEQ_RANGE_HIGH(*out_name_sv)));
 	    }
 	    else { /* fake match */
 		offset = fake_offset;
 		*out_name_sv = name_svp[offset]; /* return the namesv */
-		*out_flags = SvIVX(*out_name_sv);
+		*out_flags = PARENT_FAKELEX_FLAGS(*out_name_sv);
 		DEBUG_Xv(PerlIO_printf(Perl_debug_log,
 		    "Pad findlex cv=0x%"UVxf" matched: offset=%ld flags=0x%lx index=%lu\n",
 		    PTR2UV(cv), (long)offset, (unsigned long)*out_flags,
-			(unsigned long)SvNVX(*out_name_sv) 
+		    (unsigned long) PARENT_PAD_INDEX(*out_name_sv) 
 		));
 	    }
 
@@ -855,15 +862,15 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 	);
 
 	new_namesv = AvARRAY(PL_comppad_name)[new_offset];
-	SvIV_set(new_namesv, *out_flags);
+	PARENT_FAKELEX_FLAGS_set(new_namesv, *out_flags);
 
-	SvNV_set(new_namesv, (NV)0);
+	PARENT_PAD_INDEX_set(new_namesv, 0);
 	if (SvPAD_OUR(new_namesv)) {
 	    NOOP;   /* do nothing */
 	}
 	else if (CvLATE(cv)) {
 	    /* delayed creation - just note the offset within parent pad */
-	    SvNV_set(new_namesv, (NV)offset);
+	    PARENT_PAD_INDEX_set(new_namesv, offset);
 	    CvCLONE_on(cv);
 	}
 	else {
@@ -874,7 +881,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 		PTR2UV(cv), PTR2UV(*new_capturep), (long)new_offset));
 	}
 	*out_name_sv = new_namesv;
-	*out_flags = SvIVX(new_namesv);
+	*out_flags = PARENT_FAKELEX_FLAGS(new_namesv);
 
 	PL_comppad_name = ocomppad_name;
 	PL_comppad = ocomppad;
@@ -994,13 +1001,14 @@ Perl_intro_my(pTHX)
     for (i = PL_min_intro_pending; i <= PL_max_intro_pending; i++) {
 	SV * const sv = svp[i];
 
-	if (sv && sv != &PL_sv_undef && !SvFAKE(sv) && !SvIVX(sv)) {
-	    SvIV_set(sv, PAD_MAX);	/* Don't know scope end yet. */
-	    SvNV_set(sv, (NV)PL_cop_seqmax);
+	if (sv && sv != &PL_sv_undef && !SvFAKE(sv) && !COP_SEQ_RANGE_HIGH(sv)) {
+	    COP_SEQ_RANGE_HIGH_set(sv, PAD_MAX);	/* Don't know scope end yet. */
+	    COP_SEQ_RANGE_LOW_set(sv, PL_cop_seqmax);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-		"Pad intromy: %ld \"%s\", (%ld,%ld)\n",
+		"Pad intromy: %ld \"%s\", (%lu,%lu)\n",
 		(long)i, SvPVX_const(sv),
-		(long)U_32(SvNVX(sv)), (long)SvIVX(sv))
+		(unsigned long)COP_SEQ_RANGE_LOW(sv),
+		(unsigned long)COP_SEQ_RANGE_HIGH(sv))
 	    );
 	}
     }
@@ -1044,12 +1052,13 @@ Perl_pad_leavemy(pTHX)
     /* "Deintroduce" my variables that are leaving with this scope. */
     for (off = AvFILLp(PL_comppad_name); off > PL_comppad_name_fill; off--) {
 	const SV * const sv = svp[off];
-	if (sv && sv != &PL_sv_undef && !SvFAKE(sv) && SvIVX(sv) == PAD_MAX) {
-	    SvIV_set(sv, PL_cop_seqmax);
+	if (sv && sv != &PL_sv_undef && !SvFAKE(sv) && COP_SEQ_RANGE_HIGH(sv) == PAD_MAX) {
+	    COP_SEQ_RANGE_HIGH_set(sv, PL_cop_seqmax);
 	    DEBUG_Xv(PerlIO_printf(Perl_debug_log,
-		"Pad leavemy: %ld \"%s\", (%ld,%ld)\n",
+		"Pad leavemy: %ld \"%s\", (%lu,%lu)\n",
 		(long)off, SvPVX_const(sv),
-		(long)U_32(SvNVX(sv)), (long)SvIVX(sv))
+		(unsigned long)COP_SEQ_RANGE_LOW(sv),
+		(unsigned long)COP_SEQ_RANGE_HIGH(sv))
 	    );
 	}
     }
@@ -1336,18 +1345,18 @@ Perl_do_dump_pad(pTHX_ I32 level, PerlIO *file, PADLIST *padlist, int full)
 		    PTR2UV(ppad[ix]),
 		    (unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
 		    SvPVX_const(namesv),
-		    (unsigned long)SvIVX(namesv),
-		    (unsigned long)SvNVX(namesv)
+		    (unsigned long)PARENT_FAKELEX_FLAGS(namesv),
+		    (unsigned long)PARENT_PAD_INDEX(namesv)
 
 		);
 	    else
 		Perl_dump_indent(aTHX_ level+1, file,
-		    "%2d. 0x%"UVxf"<%lu> (%ld,%ld) \"%s\"\n",
+		    "%2d. 0x%"UVxf"<%lu> (%lu,%lu) \"%s\"\n",
 		    (int) ix,
 		    PTR2UV(ppad[ix]),
 		    (unsigned long) (ppad[ix] ? SvREFCNT(ppad[ix]) : 0),
-		    (long)U_32(SvNVX(namesv)),
-		    (long)SvIVX(namesv),
+		    (unsigned long)COP_SEQ_RANGE_LOW(namesv),
+		    (unsigned long)COP_SEQ_RANGE_HIGH(namesv),
 		    SvPVX_const(namesv)
 		);
 	}
@@ -1489,7 +1498,7 @@ Perl_cv_clone(pTHX_ CV *proto)
 	SV *sv = NULL;
 	if (namesv && namesv != &PL_sv_undef) { /* lexical */
 	    if (SvFAKE(namesv)) {   /* lexical from outside? */
-		sv = outpad[(I32)SvNVX(namesv)];
+		sv = outpad[PARENT_PAD_INDEX(namesv)];
 		assert(sv);
 		/* formats may have an inactive parent */
 		if (SvTYPE(proto) == SVt_PVFM && SvPADSTALE(sv)) {

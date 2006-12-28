@@ -1294,6 +1294,22 @@ NV
 SvNVX(sv)
 	B::NV	sv
 
+U32
+COP_SEQ_RANGE_LOW(sv)
+	B::NV	sv
+
+U32
+COP_SEQ_RANGE_HIGH(sv)
+	B::NV	sv
+
+U32
+PARENT_PAD_INDEX(sv)
+	B::NV	sv
+
+U32
+PARENT_FAKELEX_FLAGS(sv)
+	B::NV	sv
+
 MODULE = B	PACKAGE = B::RV		PREFIX = Sv
 
 B::SV

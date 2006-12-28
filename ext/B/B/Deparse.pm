@@ -20,7 +20,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          CVf_METHOD CVf_LOCKED CVf_LVALUE CVf_ASSERTION
 	 PMf_KEEP PMf_GLOBAL PMf_CONTINUE PMf_EVAL PMf_ONCE PMf_SKIPWHITE
 	 PMf_MULTILINE PMf_SINGLELINE PMf_FOLD PMf_EXTENDED);
-$VERSION = 0.79;
+$VERSION = 0.80;
 use strict;
 use vars qw/$AUTOLOAD/;
 use warnings ();
@@ -1300,7 +1300,7 @@ sub populate_curcvlex {
 	    my ($seq_st, $seq_en) =
 		($ns[$i]->FLAGS & SVf_FAKE)
 		    ? (0, 999999)
-		    : ($ns[$i]->NVX, $ns[$i]->IVX);
+		    : ($ns[$i]->COP_SEQ_RANGE_LOW, $ns[$i]->COP_SEQ_RANGE_HIGH);
 
 	    push @{$self->{'curcvlex'}{$name}}, [$seq_st, $seq_en];
 	}
@@ -1318,8 +1318,8 @@ sub find_scope {
 
     for (my $o=$op->first; $$o; $o=$o->sibling) {
 	if ($o->name =~ /^pad.v$/ && $o->private & OPpLVAL_INTRO) {
-	    my $s = int($self->padname_sv($o->targ)->NVX);
-	    my $e = $self->padname_sv($o->targ)->IVX;
+	    my $s = int($self->padname_sv($o->targ)->COP_SEQ_RANGE_LOW);
+	    my $e = $self->padname_sv($o->targ)->COP_SEQ_RANGE_HIGH;
 	    $scope_st = $s if !defined($scope_st) || $s < $scope_st;
 	    $scope_en = $e if !defined($scope_en) || $e > $scope_en;
 	}
