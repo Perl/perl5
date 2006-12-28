@@ -276,11 +276,11 @@ Assumes the slot entry is a valid C<our> lexical.
 
 =for apidoc m|STRLEN|PAD_COMPNAME_GEN|PADOFFSET po
 The generation number of the name at offset C<po> in the current
-compiling pad (lvalue). Note that C<SvCUR> is hijacked for this purpose.
+compiling pad (lvalue). Note that C<SvUVX> is hijacked for this purpose.
 
 =for apidoc m|STRLEN|PAD_COMPNAME_GEN_set|PADOFFSET po|int gen
 Sets the generation number of the name at offset C<po> in the current
-ling pad (lvalue) to C<gen>.  Note that C<SvCUR_set> is hijacked for this purpose.
+ling pad (lvalue) to C<gen>.  Note that C<SvUV_set> is hijacked for this purpose.
 
 =cut
 
@@ -296,9 +296,9 @@ ling pad (lvalue) to C<gen>.  Note that C<SvCUR_set> is hijacked for this purpos
 #define PAD_COMPNAME_OURSTASH(po) \
     (OURSTASH(*av_fetch(PL_comppad_name, (po), FALSE)))
 
-#define PAD_COMPNAME_GEN(po) SvCUR(AvARRAY(PL_comppad_name)[po])
+#define PAD_COMPNAME_GEN(po) ((STRLEN)SvUVX(AvARRAY(PL_comppad_name)[po]))
 
-#define PAD_COMPNAME_GEN_set(po, gen) SvCUR_set(AvARRAY(PL_comppad_name)[po], gen)
+#define PAD_COMPNAME_GEN_set(po, gen) SvUV_set(AvARRAY(PL_comppad_name)[po], (UV)(gen))
 
 
 /*

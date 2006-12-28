@@ -76,7 +76,7 @@ xlow+1..xhigh inclusive in the NV union is a range of cop_seq numbers for
 which the name is valid.  For typed lexicals name SV is SVt_PVMG and SvSTASH
 points at the type.  For C<our> lexicals, the type is also SVt_PVMG, with the
 OURSTASH slot pointing at the stash of the associated global (so that
-duplicate C<our> declarations in the same package can be detected).  SvCUR is
+duplicate C<our> declarations in the same package can be detected).  SvUVX is
 sometimes hijacked to store the generation number during compilation.
 
 If SvFAKE is set on the name SV, then that slot in the frame AV is
@@ -417,8 +417,6 @@ for a slot which has no name and no active value.
 /* And flag whether the incoming name is UTF8 or 8 bit?
    Could do this either with the +ve/-ve hack of the HV code, or expanding
    the flag bits. Either way, this makes proper Unicode safe pad support.
-   Also could change the sv structure to make the NV a union with 2 U32s,
-   so that SvCUR() could stop being overloaded in pad SVs.
    NWC
 */
 

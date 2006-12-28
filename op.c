@@ -3818,7 +3818,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 	 * that value, we know we've got commonality.  We could use a
 	 * single bit marker, but then we'd have to make 2 passes, first
 	 * to clear the flag, then to test and set it.  To find somewhere
-	 * to store these values, evil chicanery is done with SvCUR().
+	 * to store these values, evil chicanery is done with SvUVX().
 	 */
 
 	{
