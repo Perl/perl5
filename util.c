@@ -478,7 +478,7 @@ Perl_fbm_compile(pTHX_ SV *sv, U32 flags)
     register const U8 *s;
     register U32 i;
     STRLEN len;
-    I32 rarest = 0;
+    U32 rarest = 0;
     U32 frequency = 256;
 
     if (flags & FBMcf_TAIL) {
