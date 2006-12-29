@@ -121,7 +121,7 @@ to be generated in evals, such as
 #define PARENT_FAKELEX_FLAGS_set(sv,val)	\
   STMT_START { ((XPVNV*)SvANY(sv))->xnv_u.xpad_cop_seq.xhigh = (val); } STMT_END
 
-#define PAD_MAX IV_MAX
+#define PAD_MAX I32_MAX
 
 #ifdef PERL_MAD
 void pad_peg(const char* s) {
