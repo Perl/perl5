@@ -206,33 +206,36 @@ S_clear_yystack(pTHX_ const void *p)
 
     YYDPRINTF ((Perl_debug_log, "clearing the parse stack\n"));
 
-    /* Freeing ops on the stack, and the op_latefree/op_latefreed flags:
+    /* Freeing ops on the stack, and the op_latefree / op_latefreed /
+     * op_attached flags:
      *
      * When we pop tokens off the stack during error recovery, or when
      * we pop all the tokens off the stack after a die during a shift or
-     * reduce (ie Perl_croak somewhere in yylex(), or in one of the
-     * newFOO() functions, then its possible that some of these tokens are
+     * reduce (i.e. Perl_croak somewhere in yylex() or in one of the
+     * newFOO() functions), then it's possible that some of these tokens are
      * of type opval, pointing to an OP. All these ops are orphans; each is
      * its own miniature subtree that has not yet been attached to a
-     * larger tree. In this case, we shoould clearly free the op (making
-     * sure, for each op we free thyat we have PL_comppad pointing to the
+     * larger tree. In this case, we should clearly free the op (making
+     * sure, for each op we free that we have PL_comppad pointing to the
      * right place for freeing any SVs attached to the op in threaded
      * builds.
      *
-     * However, there is a particular problem if we die in newFOO called
+     * However, there is a particular problem if we die in newFOO() called
      * by a reducing action; e.g.
      *
      *    foo : bar baz boz
      *        { $$ = newFOO($1,$2,$3) }
      *
      * where
-     *  OP *newFOO { .... croak .... }
+     *  OP *newFOO { ....; if (...) croak; .... }
      *
      * In this case, when we come to clean bar baz and boz off the stack,
      * we don't know whether newFOO() has already:
      *    * freed them
-     *    * left them as it
+     *    * left them as is
      *    * attached them to part of a larger tree
+     *    * attached them to PL_compcv
+     *    * attached them to PL_compcv then freed it (as in BEGIN {die } )
      *
      * To get round this problem, we set the flag op_latefree on every op
      * that gets pushed onto the parser stack. If op_free() sees this
@@ -243,20 +246,39 @@ S_clear_yystack(pTHX_ const void *p)
      * reduced, call op_free with op_latefree=1. This ensures that all ops
      * hanging off these op are freed, but the reducing ops themselces are
      * just undefed. Then we set op_latefreed=0 on *all* ops on the stack
-     * and free them. A little though should convince you that this
-     * two-part approach to the reducing ops should handle all three cases
-     * above safely.
+     * and free them. A little thought should convince you that this
+     * two-part approach to the reducing ops should handle the first three
+     * cases above safely.
+     *
+     * In the case of attaching to PL_compcv (currently just newATTRSUB
+     * does this), then  we set the op_attached flag on the op that has
+     * been so attached, then avoid doing the final op_free during
+     * cleanup, on the assumption that it will happen (or has already
+     * happened) when PL_compcv is freed.
+     *
+     * Note this is fairly fragile mechanism. A more robust approach
+     * would be to use two of these flag bits as 2-bit reference count
+     * field for each op, indicating whether it is pointed to from:
+     *   * a parent op
+     *   * the parser stack
+     *   * a CV
+     * but this would involve reworking all code (core and external) that
+     * manipulate op trees.
      */
 
-    /* free any reducing ops (1st pass) */
+    /* clear any reducing ops (1st pass) */
 
     for (i=0; i< parser->yylen; i++) {
 	if (yy_type_tab[yystos[ps[-i].state]] == toketype_opval
 	    && ps[-i].val.opval) {
-	    if (ps[-i].comppad != PL_comppad) {
-		PAD_RESTORE_LOCAL(ps[-i].comppad);
+	    if ( ! (ps[-i].val.opval->op_attached
+		    && !ps[-i].val.opval->op_latefreed))
+	    {
+		if (ps[-i].comppad != PL_comppad) {
+		    PAD_RESTORE_LOCAL(ps[-i].comppad);
+		}
+		op_free(ps[-i].val.opval);
 	    }
-	    op_free(ps[-i].val.opval);
 	}
     }
 
@@ -271,7 +293,8 @@ S_clear_yystack(pTHX_ const void *p)
 	    }
 	    YYDPRINTF ((Perl_debug_log, "(freeing op)\n"));
 	    ps->val.opval->op_latefree  = 0;
-	    op_free(ps->val.opval);
+	    if (!(ps->val.opval->op_attached && !ps->val.opval->op_latefreed))
+		op_free(ps->val.opval);
 	}
 	ps--;
     }

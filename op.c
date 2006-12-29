@@ -2726,6 +2726,7 @@ Perl_newOP(pTHX_ I32 type, I32 flags)
     o->op_flags = (U8)flags;
     o->op_latefree = 0;
     o->op_latefreed = 0;
+    o->op_attached = 0;
 
     o->op_next = o;
     o->op_private = (U8)(0 | (flags >> 8));
@@ -5323,6 +5324,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
     if (CvLVALUE(cv)) {
 	CvROOT(cv) = newUNOP(OP_LEAVESUBLV, 0,
 			     mod(scalarseq(block), OP_LEAVESUBLV));
+	block->op_attached = 1;
     }
     else {
 	/* This makes sub {}; work as expected.  */
@@ -5335,6 +5337,8 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 #endif
 	    block = newblock;
 	}
+	else
+	    block->op_attached = 1;
 	CvROOT(cv) = newUNOP(OP_LEAVESUB, 0, scalarseq(block));
     }
     CvROOT(cv)->op_private |= OPpREFCOUNTED;

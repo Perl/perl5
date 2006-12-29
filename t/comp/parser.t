@@ -9,7 +9,7 @@ BEGIN {
 }
 
 BEGIN { require "./test.pl"; }
-plan( tests => 65 );
+plan( tests => 72 );
 
 eval '%@x=0;';
 like( $@, qr/^Can't modify hash dereference in repeat \(x\)/, '%@x=0' );
@@ -251,3 +251,27 @@ eval q[
 
 like($@, qr/Can't modify/, 'croak cleanup 3' );
 
+# these might leak, or have duplicate frees, depending on the bugginess of
+# the parser stack 'fail in reduce' cleanup code. They're here mainly as
+# something to be run under valgrind, with PERL_DESTRUCT_LEVEL=1.
+
+eval q[ BEGIN { } ] for 1..10;
+is($@, "", 'BEGIN 1' );
+
+eval q[ BEGIN { my $x; $x = 1 } ] for 1..10;
+is($@, "", 'BEGIN 2' );
+
+eval q[ BEGIN { \&foo1 } ] for 1..10;
+is($@, "", 'BEGIN 3' );
+
+eval q[ sub foo2 { } ] for 1..10;
+is($@, "", 'BEGIN 4' );
+
+eval q[ sub foo3 { my $x; $x=1 } ] for 1..10;
+is($@, "", 'BEGIN 5' );
+
+eval q[ BEGIN { die } ] for 1..10;
+like($@, qr/BEGIN failed--compilation aborted/, 'BEGIN 6' );
+
+eval q[ BEGIN {\&foo4; die } ] for 1..10;
+like($@, qr/BEGIN failed--compilation aborted/, 'BEGIN 7' );

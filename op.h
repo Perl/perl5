@@ -22,11 +22,17 @@
  *	op_static	Whether or not the op is statically defined.
  *			This flag is used by the B::C compiler backend
  *			and indicates that the op should not be freed.
+ *
+ *			See the comments in S_clear_yystack() for more
+ *			details on the following three flags:
+
  *	op_latefree	tell op_free() to clear this op (and free any kids)
  *			but not yet deallocate the struct. This means that
  *			the op may be safely op_free()d multiple times
  *	op_latefreed	an op_latefree op has been op_free()d
- *	op_spare	three spare bits!
+ *	op_attached	this op (sub)tree has been attached to a CV
+ *
+ *	op_spare	two spare bits!
  *	op_flags	Flags common to all operations.  See OPf_* below.
  *	op_private	Flags peculiar to a particular operation (BUT,
  *			by default, set to the number of children until
@@ -60,7 +66,8 @@
     unsigned	op_static:1;		\
     unsigned	op_latefree:1;		\
     unsigned	op_latefreed:1;		\
-    unsigned	op_spare:3;		\
+    unsigned	op_attached:1;		\
+    unsigned	op_spare:2;		\
     U8		op_flags;		\
     U8		op_private;
 #endif
