@@ -4624,11 +4624,15 @@ reStudy:
 
 #ifndef PERL_IN_XSUB_RE
 SV*
-Perl_reg_named_buff_sv(pTHX_ SV* namesv)
+Perl_reg_named_buff_get(pTHX_ SV* namesv, const REGEXP * const from_re, U32 flags)
 {
-    I32 parno = 0; /* no match */
-    if (PL_curpm) {
-        const REGEXP * const rx = PM_GETRE(PL_curpm);
+    AV *retarray = NULL;
+    SV *ret;
+    if (flags & 1) 
+        retarray=newAV();
+    
+    if (from_re || PL_curpm) {
+        const REGEXP * const rx = from_re ? from_re : PM_GETRE(PL_curpm);
         if (rx && rx->paren_names) {            
             HE *he_str = hv_fetch_ent( rx->paren_names, namesv, 0, 0 );
             if (he_str) {
@@ -4639,22 +4643,97 @@ Perl_reg_named_buff_sv(pTHX_ SV* namesv)
                     if ((I32)(rx->lastparen) >= nums[i] &&
                         rx->endp[nums[i]] != -1) 
                     {
-                        parno = nums[i];
-                        break;
+                        ret = reg_numbered_buff_get(nums[i],rx,NULL,0);
+                        if (!retarray) 
+                            return ret;
+                    } else {
+                        ret = newSVsv(&PL_sv_undef);
+                    }
+                    if (retarray) {
+                        SvREFCNT_inc(ret); 
+                        av_push(retarray, ret);
                     }
                 }
+                if (retarray)
+                    return (SV*)retarray;
             }
         }
     }
-    if ( !parno ) {
-        return 0;
-    } else {
-        GV *gv_paren;
-        SV *sv= sv_newmortal();
-        Perl_sv_setpvf(aTHX_ sv, "%"IVdf,(IV)parno);
-        gv_paren= Perl_gv_fetchsv(aTHX_ sv, GV_ADD, SVt_PVGV);
-        return GvSVn(gv_paren);
+    return NULL;
+}
+
+SV*
+Perl_reg_numbered_buff_get(pTHX_ I32 paren, const REGEXP * const rx, SV* usesv, U32 flags)
+{
+    char *s = NULL;
+    I32 i;
+    I32 s1, t1;
+    SV *sv = usesv ? usesv : newSVpvs("");
+        
+    if (paren == -2 && (s = rx->subbeg) && rx->startp[0] != -1) {
+        /* $` */
+	i = rx->startp[0];
     }
+    else 
+    if (paren == -1 && rx->subbeg && rx->endp[0] != -1) {
+        /* $' */
+	s = rx->subbeg + rx->endp[0];
+	i = rx->sublen - rx->endp[0];
+    } 
+    else
+    if ( 0 <= paren && paren <= (I32)rx->nparens &&
+        (s1 = rx->startp[paren]) != -1 &&
+        (t1 = rx->endp[paren]) != -1)
+    {
+        /* $& $1 ... */
+        i = t1 - s1;
+        s = rx->subbeg + s1;
+    }
+      
+    if (s) {        
+        assert(rx->subbeg);
+        assert(rx->sublen >= (s - rx->subbeg) + i );
+            
+        if (i >= 0) {
+            const int oldtainted = PL_tainted;
+            TAINT_NOT;
+            sv_setpvn(sv, s, i);
+            PL_tainted = oldtainted;
+            if ( (rx->extflags & RXf_CANY_SEEN)
+                ? (RX_MATCH_UTF8(rx)
+                            && (!i || is_utf8_string((U8*)s, i)))
+                : (RX_MATCH_UTF8(rx)) )
+            {
+                SvUTF8_on(sv);
+            }
+            else
+                SvUTF8_off(sv);
+            if (PL_tainting) {
+                if (RX_MATCH_TAINTED(rx)) {
+                    if (SvTYPE(sv) >= SVt_PVMG) {
+                        MAGIC* const mg = SvMAGIC(sv);
+                        MAGIC* mgt;
+                        PL_tainted = 1;
+                        SvMAGIC_set(sv, mg->mg_moremagic);
+                        SvTAINT(sv);
+                        if ((mgt = SvMAGIC(sv))) {
+                            mg->mg_moremagic = mgt;
+                            SvMAGIC_set(sv, mg);
+                        }
+                    } else {
+                        PL_tainted = 1;
+                        SvTAINT(sv);
+                    }
+                } else 
+                    SvTAINTED_off(sv);
+            }
+        } else {
+            sv_setsv(sv,&PL_sv_undef);
+        }
+    } else {
+        sv_setsv(sv,&PL_sv_undef);
+    }
+    return sv;
 }
 #endif
 

@@ -1873,8 +1873,11 @@ PERL_CALLCONV regnode*	Perl_regnext(pTHX_ regnode* p)
 			__attribute__warn_unused_result__
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV SV*	Perl_reg_named_buff_sv(pTHX_ SV* namesv)
+PERL_CALLCONV SV*	Perl_reg_named_buff_get(pTHX_ SV* namesv, const REGEXP * const from_re, U32 flags)
 			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV SV*	Perl_reg_numbered_buff_get(pTHX_ I32 paren, const REGEXP * const rx, SV* usesv, U32 flags)
+			__attribute__nonnull__(pTHX_2);
 
 PERL_CALLCONV void	Perl_regprop(pTHX_ const regexp *prog, SV* sv, const regnode* o)
 			__attribute__nonnull__(pTHX_2)
@@ -2953,8 +2956,11 @@ STATIC I32	S_do_trans_complex_utf8(pTHX_ SV * const sv)
 STATIC void	S_gv_init_sv(pTHX_ GV *gv, I32 sv_type)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC void	S_require_errno(pTHX_ GV *gv)
-			__attribute__nonnull__(pTHX_1);
+STATIC HV*	S_require_tie_mod(pTHX_ GV *gv, const char *varpv, SV* namesv, const char *methpv, const U32 flags)
+			__attribute__nonnull__(pTHX_1)
+			__attribute__nonnull__(pTHX_2)
+			__attribute__nonnull__(pTHX_3)
+			__attribute__nonnull__(pTHX_4);
 
 #endif
 

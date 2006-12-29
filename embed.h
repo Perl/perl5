@@ -692,7 +692,8 @@
 #define regexec_flags		Perl_regexec_flags
 #define regnext			Perl_regnext
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define reg_named_buff_sv	Perl_reg_named_buff_sv
+#define reg_named_buff_get	Perl_reg_named_buff_get
+#define reg_numbered_buff_get	Perl_reg_numbered_buff_get
 #define regprop			Perl_regprop
 #endif
 #define repeatcpy		Perl_repeatcpy
@@ -1098,7 +1099,7 @@
 #if defined(PERL_IN_GV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define gv_init_sv		S_gv_init_sv
-#define require_errno		S_require_errno
+#define require_tie_mod		S_require_tie_mod
 #endif
 #endif
 #if defined(PERL_IN_HV_C) || defined(PERL_DECL_PROT)
@@ -2904,7 +2905,8 @@
 #define regexec_flags(a,b,c,d,e,f,g,h)	Perl_regexec_flags(aTHX_ a,b,c,d,e,f,g,h)
 #define regnext(a)		Perl_regnext(aTHX_ a)
 #if defined(PERL_CORE) || defined(PERL_EXT)
-#define reg_named_buff_sv(a)	Perl_reg_named_buff_sv(aTHX_ a)
+#define reg_named_buff_get(a,b,c)	Perl_reg_named_buff_get(aTHX_ a,b,c)
+#define reg_numbered_buff_get(a,b,c,d)	Perl_reg_numbered_buff_get(aTHX_ a,b,c,d)
 #define regprop(a,b,c)		Perl_regprop(aTHX_ a,b,c)
 #endif
 #define repeatcpy(a,b,c,d)	Perl_repeatcpy(aTHX_ a,b,c,d)
@@ -3301,7 +3303,7 @@
 #if defined(PERL_IN_GV_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
 #define gv_init_sv(a,b)		S_gv_init_sv(aTHX_ a,b)
-#define require_errno(a)	S_require_errno(aTHX_ a)
+#define require_tie_mod(a,b,c,d,e)	S_require_tie_mod(aTHX_ a,b,c,d,e)
 #endif
 #endif
 #ifdef PERL_CORE

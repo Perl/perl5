@@ -684,7 +684,8 @@ Ap	|I32	|regexec_flags	|NN regexp* prog|NN char* stringarg \
 				|NN char* strend|NN char* strbeg|I32 minend \
 				|NN SV* screamer|NULLOK void* data|U32 flags
 ApR	|regnode*|regnext	|NN regnode* p
-Ep	|SV*|reg_named_buff_sv	|NN SV* namesv
+EXp	|SV*|reg_named_buff_get	|NN SV* namesv|NULLOK const REGEXP * const from_re|U32 flags
+EXp	|SV*|reg_numbered_buff_get|I32 paren|NN const REGEXP * const rx|NULLOK SV* usesv|U32 flags
 Ep	|void	|regprop	|NULLOK const regexp *prog|NN SV* sv|NN const regnode* o
 Ap	|void	|repeatcpy	|NN char* to|NN const char* from|I32 len|I32 count
 ApP	|char*	|rninstr	|NN const char* big|NN const char* bigend \
@@ -1100,7 +1101,8 @@ sR	|I32	|do_trans_complex_utf8	|NN SV * const sv
 
 #if defined(PERL_IN_GV_C) || defined(PERL_DECL_PROT)
 s	|void	|gv_init_sv	|NN GV *gv|I32 sv_type
-s	|void	|require_errno	|NN GV *gv
+s	|HV*	|require_tie_mod|NN GV *gv|NN const char *varpv|NN SV* namesv \
+				|NN const char *methpv|const U32 flags
 #endif
 
 : #if defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) || defined(PERL_DECL_PROT)

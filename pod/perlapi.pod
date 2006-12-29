@@ -824,6 +824,10 @@ sequence. Thus the output will either be a single char,
 an octal escape sequence, a special escape like C<\n> or a 3 or 
 more digit hex value. 
 
+If PERL_PV_ESCAPE_RE is set then the escape char used will be a '%' and
+not a '\\'. This is because regexes very often contain backslashed
+sequences, whereas '%' is not a particularly common character in patterns.
+
 Returns a pointer to the escaped text as held by dsv.
 
 NOTE: the perl_ form of this function is deprecated.

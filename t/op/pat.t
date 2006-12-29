@@ -3745,7 +3745,24 @@ sub iseq($$;$) {
     ';
     ok(!$@,'lvalue $+{...} should not throw an exception');
 }
-
+{
+    my $s='foo bar baz';
+    my @res;
+    if ('1234'=~/(?<A>1)(?<B>2)(?<A>3)(?<B>4)/) {
+        foreach my $name (sort keys(%-)) {
+            my $ary = $-{$name};
+            foreach my $idx (0..$#$ary) {
+                push @res,"$name:$idx:$ary->[$idx]";
+            }
+        }
+    }
+    my @expect=qw(A:0:1 A:1:3 B:0:2 B:1:4);
+    iseq("@res","@expect","Check %-");
+    eval'
+        print for $-{this_key_doesnt_exist};
+    ';
+    ok(!$@,'lvalue $-{...} should not throw an exception');
+}
 # stress test CURLYX/WHILEM.
 #
 # This test includes varying levels of nesting, and according to
@@ -4240,7 +4257,7 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1606;
+    $::TestCount = 1608;
     print "1..$::TestCount\n";
 }
 

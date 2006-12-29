@@ -1434,8 +1434,7 @@ Perl_do_kv(pTHX)
 	    RETURN;
 	}
 
-	if (! SvTIED_mg((SV*)keys, PERL_MAGIC_tied) 
-	    && ! SvTIED_mg((SV*)keys, PERL_MAGIC_regdata_names))
+	if (! SvTIED_mg((SV*)keys, PERL_MAGIC_tied) )
 	{
 	    i = HvKEYS(keys);
 	}

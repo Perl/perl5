@@ -3654,8 +3654,6 @@ Gid_t getegid (void);
 #define PERL_MAGIC_overload_elem  'a' /* %OVERLOAD hash element */
 #define PERL_MAGIC_overload_table 'c' /* Holds overload table (AMT) on stash */
 #define PERL_MAGIC_bm		  'B' /* Boyer-Moore (fast string search) */
-#define PERL_MAGIC_regdata_names  '+' /* Regex named capture buffer hash 
-					(%+ support) */
 #define PERL_MAGIC_regdata	  'D' /* Regex match position data
 					(@+ and @- vars) */
 #define PERL_MAGIC_regdatum	  'd' /* Regex match position data element */
@@ -5711,10 +5709,11 @@ extern void moncontrol(int);
 #define PERL_PV_ESCAPE_ALL	    0x1000
 #define PERL_PV_ESCAPE_NOBACKSLASH  0x2000
 #define PERL_PV_ESCAPE_NOCLEAR      0x4000
+#define PERL_PV_ESCAPE_RE           0x8000
 
 /* used by pv_display in dump.c*/
 #define PERL_PV_PRETTY_DUMP  PERL_PV_PRETTY_ELIPSES|PERL_PV_PRETTY_QUOTE
-#define PERL_PV_PRETTY_REGPROP PERL_PV_PRETTY_ELIPSES|PERL_PV_PRETTY_LTGT
+#define PERL_PV_PRETTY_REGPROP PERL_PV_PRETTY_ELIPSES|PERL_PV_PRETTY_LTGT|PERL_PV_ESCAPE_RE
 
 /*
 

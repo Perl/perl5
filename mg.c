@@ -672,7 +672,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     dVAR;
     register I32 paren;
     register char *s = NULL;
-    register I32 i;
     register REGEXP *rx;
     const char * const remaining = mg->mg_ptr + 1;
     const char nextchar = *remaining;
@@ -851,90 +850,46 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    I32 s1, t1;
-
 	    /*
 	     * Pre-threads, this was paren = atoi(GvENAME((GV*)mg->mg_obj));
 	     * XXX Does the new way break anything?
 	     */
 	    paren = atoi(mg->mg_ptr); /* $& is in [0] */
-	  getparen:
-	    if (paren <= (I32)rx->nparens &&
-		(s1 = rx->startp[paren]) != -1 &&
-		(t1 = rx->endp[paren]) != -1)
-	    {
-		i = t1 - s1;
-		s = rx->subbeg + s1;
-		assert(rx->subbeg);
-		assert(rx->sublen >= s1);
-
-	      getrx:
-		if (i >= 0) {
-		    const int oldtainted = PL_tainted;
-		    TAINT_NOT;
-		    sv_setpvn(sv, s, i);
-		    PL_tainted = oldtainted;
-		    if ( (rx->extflags & RXf_CANY_SEEN)
-			? (RX_MATCH_UTF8(rx)
-				    && (!i || is_utf8_string((U8*)s, i)))
-			: (RX_MATCH_UTF8(rx)) )
-		    {
-			SvUTF8_on(sv);
-		    }
-		    else
-			SvUTF8_off(sv);
-		    if (PL_tainting) {
-			if (RX_MATCH_TAINTED(rx)) {
-			    MAGIC* const mg = SvMAGIC(sv);
-			    MAGIC* mgt;
-			    PL_tainted = 1;
-			    SvMAGIC_set(sv, mg->mg_moremagic);
-			    SvTAINT(sv);
-			    if ((mgt = SvMAGIC(sv))) {
-				mg->mg_moremagic = mgt;
-				SvMAGIC_set(sv, mg);
-			    }
-			} else
-			    SvTAINTED_off(sv);
-		    }
-		    break;
-		}
-	    }
+	    reg_numbered_buff_get( paren, rx, sv, 0);
+	    break;
 	}
 	sv_setsv(sv,&PL_sv_undef);
 	break;
     case '+':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    paren = rx->lastparen;
-	    if (paren)
-		goto getparen;
+	    if (rx->lastparen) {
+	        reg_numbered_buff_get( rx->lastparen, rx, sv, 0);
+	        break;
+	    }
 	}
 	sv_setsv(sv,&PL_sv_undef);
 	break;
     case '\016':		/* ^N */
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    paren = rx->lastcloseparen;
-	    if (paren)
-		goto getparen;
+	    if (rx->lastcloseparen) {
+	        reg_numbered_buff_get( rx->lastcloseparen, rx, sv, 0);
+	        break;
+	    }
+
 	}
 	sv_setsv(sv,&PL_sv_undef);
 	break;
     case '`':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    if ((s = rx->subbeg) && rx->startp[0] != -1) {
-		i = rx->startp[0];
-		goto getrx;
-	    }
+	  reg_numbered_buff_get( -2, rx, sv, 0);
+	  break;
 	}
 	sv_setsv(sv,&PL_sv_undef);
 	break;
     case '\'':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    if (rx->subbeg && rx->endp[0] != -1) {
-		s = rx->subbeg + rx->endp[0];
-		i = rx->sublen - rx->endp[0];
-		goto getrx;
-	    }
+	  reg_numbered_buff_get( -1, rx, sv, 0);
+	  break;
 	}
 	sv_setsv(sv,&PL_sv_undef);
 	break;

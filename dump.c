@@ -192,6 +192,10 @@ sequence. Thus the output will either be a single char,
 an octal escape sequence, a special escape like C<\n> or a 3 or 
 more digit hex value. 
 
+If PERL_PV_ESCAPE_RE is set then the escape char used will be a '%' and
+not a '\\'. This is because regexes very often contain backslashed
+sequences, whereas '%' is not a particularly common character in patterns.
+
 Returns a pointer to the escaped text as held by dsv.
 
 =cut
@@ -203,14 +207,16 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
                 const STRLEN count, const STRLEN max, 
                 STRLEN * const escaped, const U32 flags ) 
 {
-    char dq = (flags & PERL_PV_ESCAPE_QUOTE) ? '"' : '\\';
-    char octbuf[PV_ESCAPE_OCTBUFSIZE] = "\\123456789ABCDF";
+    char esc = (flags & PERL_PV_ESCAPE_RE) ? '%' : '\\';
+    char dq = (flags & PERL_PV_ESCAPE_QUOTE) ? '"' : esc;
+    char octbuf[PV_ESCAPE_OCTBUFSIZE] = "%123456789ABCDF";
     STRLEN wrote = 0;    /* chars written so far */
     STRLEN chsize = 0;   /* size of data to be written */
     STRLEN readsize = 1; /* size of data just read */
     bool isuni= flags & PERL_PV_ESCAPE_UNI ? 1 : 0; /* is this unicode */
     const char *pv  = str;
     const char *end = pv + count; /* end of string */
+    octbuf[0] = esc;
 
     if (!flags & PERL_PV_ESCAPE_NOCLEAR) 
 	    sv_setpvn(dsv, "", 0);
@@ -228,42 +234,49 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
                                       "%"UVxf, u);
             else
                 chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE, 
-                                      "\\x{%"UVxf"}", u);
+                                      "%cx{%"UVxf"}", esc, u);
         } else if (flags & PERL_PV_ESCAPE_NOBACKSLASH) {
             chsize = 1;            
         } else {         
-            if ( (c == dq) || (c == '\\') || !isPRINT(c) ) {
-	    chsize = 2;
+            if ( (c == dq) || (c == esc) || !isPRINT(c) ) {
+	        chsize = 2;
                 switch (c) {
-		case '\\' : octbuf[1] = '\\'; break;
+                
+		case '\\' : /* fallthrough */
+		case '%'  : if ( c == esc )  {
+		                octbuf[1] = esc;  
+		            } else {
+		                chsize = 1;
+		            }
+		            break;
 		case '\v' : octbuf[1] = 'v';  break;
 		case '\t' : octbuf[1] = 't';  break;
 		case '\r' : octbuf[1] = 'r';  break;
 		case '\n' : octbuf[1] = 'n';  break;
 		case '\f' : octbuf[1] = 'f';  break;
-                    case '"'  : 
+                case '"'  : 
                         if ( dq == '"' ) 
 				octbuf[1] = '"';
                         else 
                             chsize = 1;
-				break;
+                        break;
 		default:
                         if ( (pv < end) && isDIGIT((U8)*(pv+readsize)) )
                             chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE, 
-                                                  "\\%03o", c);
-			    else
+                                                  "%c%03o", esc, c);
+			else
                             chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE, 
-                                                  "\\%o", c);
+                                                  "%c%o", esc, c);
                 }
             } else {
-                chsize=1;
+                chsize = 1;
             }
-	    }
-	    if ( max && (wrote + chsize > max) ) {
-		break;
+	}
+	if ( max && (wrote + chsize > max) ) {
+	    break;
         } else if (chsize > 1) {
-		sv_catpvn(dsv, octbuf, chsize);
-		wrote += chsize;
+            sv_catpvn(dsv, octbuf, chsize);
+            wrote += chsize;
 	} else {
             Perl_sv_catpvf( aTHX_ dsv, "%c", c);
 	    wrote++;
@@ -308,7 +321,7 @@ Perl_pv_pretty( pTHX_ SV *dsv, char const * const str, const STRLEN count,
   const STRLEN max, char const * const start_color, char const * const end_color, 
   const U32 flags ) 
 {
-    U8 dq = (flags & PERL_PV_PRETTY_QUOTE) ? '"' : '\\';
+    U8 dq = (flags & PERL_PV_PRETTY_QUOTE) ? '"' : '%';
     STRLEN escaped;
     
     if ( dq == '"' )
@@ -1129,7 +1142,6 @@ static const struct { const char type; const char *name; } magic_names[] = {
 	{ PERL_MAGIC_sv,             "sv(\\0)" },
 	{ PERL_MAGIC_arylen,         "arylen(#)" },
 	{ PERL_MAGIC_rhash,          "rhash(%)" },
-	{ PERL_MAGIC_regdata_names,  "regdata_names(+)" },
 	{ PERL_MAGIC_pos,            "pos(.)" },
 	{ PERL_MAGIC_symtab,         "symtab(:)" },
 	{ PERL_MAGIC_backref,        "backref(<)" },

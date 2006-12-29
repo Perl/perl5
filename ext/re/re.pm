@@ -4,9 +4,11 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.07";
+our $VERSION     = "0.08";
 our @ISA         = qw(Exporter);
-our @EXPORT_OK   = qw(is_regexp regexp_pattern regmust);
+our @EXPORT_OK   = qw(is_regexp regexp_pattern regmust 
+                      regname regnames 
+                      regnames_count regnames_iterinit regnames_iternext);
 our %EXPORT_OK = map { $_ => 1 } @EXPORT_OK;
 
 # *** WARNING *** WARNING *** WARNING *** WARNING *** WARNING ***
@@ -463,6 +465,46 @@ B<NOTE:> This may not necessarily be the definitive longest anchored and
 floating string. This will be what the optimiser of the Perl that you
 are using thinks is the longest. If you believe that the result is wrong
 please report it via the L<perlbug> utility.
+
+=item regname($name,$qr,$all)
+
+Returns the contents of a named buffer. If $qr is missing, or is not the
+result of a qr// then returns the result of the last successful match. If
+$all is true then returns an array ref containing one entry per buffer,
+otherwise returns the first defined buffer.
+
+=item regnames($qr,$all)
+
+Returns a list of all of the named buffers defined in a pattern. If 
+$all is true then it returns all names defined, if not returns only 
+names which were involved in the last successful match. If $qr is omitted
+or is not the result of a qr// then returns the details for the last
+successful match.
+
+=item regnames_iterinit($qr)
+
+Initializes the internal hash iterator associated to a regexps named capture
+buffers. If $qr is omitted resets the iterator associated with the regexp used 
+in the last successful match.
+
+=item regnames_iternext($qr,$all)
+
+Gets the next key from the hash associated with a regexp. If $qr
+is omitted resets the iterator associated with the regexp used in the 
+last successful match. If $all is true returns the keys of all of the 
+distinct named buffers in the pattern, if not returns only those names
+used in the last successful match.
+
+=item regnames_count($qr)
+
+Returns the number of distinct names defined in the regexp $qr. If
+$qr is omitted or not a regexp returns the count of names in the 
+last successful match. 
+
+B<Note:> that this result is always the actual  number of distinct 
+named buffers defined, it may not actually match that which is 
+returned by C<regnames()> and related routines when those routines 
+have not been called with the $all parameter set..
 
 =back
 

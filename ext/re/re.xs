@@ -41,6 +41,25 @@ const struct regexp_engine my_reg_engine = {
 #endif
 };
 
+regexp *
+get_re_arg( pTHX_ SV *sv, U32 flags, MAGIC **mgp) {
+    MAGIC *mg;
+    if (sv) {
+        if (SvMAGICAL(sv))
+            mg_get(sv);
+        if (SvROK(sv) &&
+            (sv = (SV*)SvRV(sv)) &&     /* assign deliberate */
+            SvTYPE(sv) == SVt_PVMG &&
+            (mg = mg_find(sv, PERL_MAGIC_qr))) /* assign deliberate */
+        {        
+            if (mgp) *mgp = mg;
+            return (regexp *)mg->mg_obj;       
+        }
+    }    
+    if (mgp) *mgp = NULL;
+    return ((flags && PL_curpm) ? PM_GETRE(PL_curpm) : NULL);
+}
+
 MODULE = re	PACKAGE = re
 
 void
@@ -55,16 +74,9 @@ void
 is_regexp(sv)
     SV * sv
 PROTOTYPE: $
-PREINIT:
-    MAGIC *mg;
 PPCODE:
 {
-    if (SvMAGICAL(sv))  
-        mg_get(sv);
-    if (SvROK(sv) && 
-        (sv = (SV*)SvRV(sv)) &&     /* assign deliberate */
-        SvTYPE(sv) == SVt_PVMG && 
-        (mg = mg_find(sv, PERL_MAGIC_qr))) /* assign deliberate */
+    if ( get_re_arg( aTHX_ sv, 0, NULL ) ) 
     {
         XSRETURN_YES;
     } else {
@@ -79,6 +91,7 @@ regexp_pattern(sv)
 PROTOTYPE: $
 PREINIT:
     MAGIC *mg;
+    regexp *re;
 PPCODE:
 {
     /*
@@ -92,17 +105,10 @@ PPCODE:
        on the object. 
     */
 
-    if (SvMAGICAL(sv))  
-        mg_get(sv);
-    if (SvROK(sv) && 
-        (sv = (SV*)SvRV(sv)) &&     /* assign deliberate */
-        SvTYPE(sv) == SVt_PVMG && 
-        (mg = mg_find(sv, PERL_MAGIC_qr))) /* assign deliberate */
+    if ( re = get_re_arg( aTHX_ sv, 0, &mg) ) /* assign deliberate */
     {
-    
         /* Housten, we have a regex! */
         SV *pattern;
-        regexp *re = (regexp *)mg->mg_obj;
         STRLEN patlen = 0;
         STRLEN left = 0;
         char reflags[6];
@@ -173,19 +179,13 @@ regmust(sv)
     SV * sv
 PROTOTYPE: $
 PREINIT:
-    MAGIC *mg;
+    regexp *re;
 PPCODE:
 {
-    if (SvMAGICAL(sv))
-        mg_get(sv);
-    if (SvROK(sv) &&
-        (sv = (SV*)SvRV(sv)) &&     /* assign deliberate */
-        SvTYPE(sv) == SVt_PVMG &&
-        (mg = mg_find(sv, PERL_MAGIC_qr))) /* assign deliberate */
+    if ( re = get_re_arg( aTHX_ sv, 0, 0) ) /* assign deliberate */
     {
         SV *an = &PL_sv_no;
         SV *fl = &PL_sv_no;
-        regexp *re = (regexp *)mg->mg_obj;
         if (re->anchored_substr) {
             an = newSVsv(re->anchored_substr);
         } else if (re->anchored_utf8) {
@@ -201,4 +201,152 @@ PPCODE:
         XSRETURN(2);
     }
     XSRETURN_UNDEF;
+}
+
+void
+regname(sv, qr = NULL, all = NULL)
+    SV * sv
+    SV * qr
+    SV * all
+PROTOTYPE: ;$$$
+PREINIT:
+    regexp *re = NULL;
+    SV *bufs = NULL;
+PPCODE:
+{
+    re = get_re_arg( aTHX_ qr, 1, NULL);
+    if (SvPOK(sv) && re && re->paren_names) {
+        bufs = Perl_reg_named_buff_get(aTHX_ sv, re ,all && SvTRUE(all));
+        if (bufs) {
+            if (all && SvTRUE(all))
+                XPUSHs(newRV(bufs));
+            else
+                XPUSHs(SvREFCNT_inc(bufs));
+            XSRETURN(1);
+        }
+    }
+    XSRETURN_UNDEF;
+}        
+    
+void
+regnames(sv = NULL, all = NULL)
+    SV *sv
+    SV *all
+PROTOTYPE: ;$$
+PREINIT:
+    regexp *re = NULL;
+    IV count = 0;
+PPCODE:
+{
+    re = get_re_arg( aTHX_  sv, 1, NULL );
+    if (re && re->paren_names) {
+        HV *hv= re->paren_names;
+        (void)hv_iterinit(hv);
+        while (1) {
+            HE *temphe = hv_iternext_flags(hv,0);
+            if (temphe) {
+                IV i;
+                IV parno = 0;
+                SV* sv_dat = HeVAL(temphe);
+                I32 *nums = (I32*)SvPVX(sv_dat);
+                for ( i = 0; i < SvIVX(sv_dat); i++ ) {
+                    if ((I32)(re->lastcloseparen) >= nums[i] &&
+                        re->startp[nums[i]] != -1 &&
+                        re->endp[nums[i]] != -1)
+                    {
+                        parno = nums[i];
+                        break;
+                    }
+                }
+                if (parno || (all && SvTRUE(all))) {
+                    STRLEN len;
+                    char *pv = HePV(temphe, len);
+                    if ( GIMME_V == G_ARRAY ) 
+                        XPUSHs(newSVpvn(pv,len));
+                    count++;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+    if ( GIMME_V == G_ARRAY ) 
+        XSRETURN(count);
+    else 
+        XSRETURN_UNDEF;
+}    
+
+void
+regnames_iterinit(sv = NULL)
+    SV * sv
+PROTOTYPE: ;$
+PREINIT:
+    regexp *re = NULL;
+PPCODE:
+{
+    re = get_re_arg( aTHX_  sv, 1, NULL );
+    if (re && re->paren_names) {
+        (void)hv_iterinit(re->paren_names);
+        XPUSHs(newSViv(HvTOTALKEYS(re->paren_names)));
+    } else {
+        XSRETURN_UNDEF;
+    }  
+}
+
+void
+regnames_iternext(sv = NULL, all = NULL)
+    SV *sv
+    SV *all
+PROTOTYPE: ;$$
+PREINIT:
+    regexp *re;
+PPCODE:
+{
+    re = get_re_arg( aTHX_  sv, 1, NULL ); 
+    if (re && re->paren_names) {
+        HV *hv= re->paren_names;
+        while (1) {
+            HE *temphe = hv_iternext_flags(hv,0);
+            if (temphe) {
+                IV i;
+                IV parno = 0;
+                SV* sv_dat = HeVAL(temphe);
+                I32 *nums = (I32*)SvPVX(sv_dat);
+                for ( i = 0; i < SvIVX(sv_dat); i++ ) {
+                    if ((I32)(re->lastcloseparen) >= nums[i] &&
+                        re->startp[nums[i]] != -1 &&
+                        re->endp[nums[i]] != -1)
+                    {
+                        parno = nums[i];
+                        break;
+                    }
+                }
+                if (parno || (all && SvTRUE(all))) {
+                    STRLEN len;
+                    char *pv = HePV(temphe, len);
+                    XPUSHs(newSVpvn(pv,len));
+                    XSRETURN(1);    
+                }
+            } else {
+                break;
+            }
+        }
+    }
+    XSRETURN_UNDEF;
+}    
+
+void
+regnames_count(sv = NULL)
+    SV * sv
+PROTOTYPE: ;$
+PREINIT:
+    regexp *re = NULL;
+PPCODE:
+{
+    re = get_re_arg( aTHX_  sv, 1, NULL );
+    if (re && re->paren_names) {
+        XPUSHs(newSViv(HvTOTALKEYS(re->paren_names)));
+    } else {
+        XSRETURN_UNDEF;
+    }  
 }

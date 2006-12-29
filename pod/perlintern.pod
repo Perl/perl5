@@ -622,7 +622,7 @@ The SVs in the names AV have their PV being the name of the variable.
 xlow+1..xhigh inclusive in the NV union is a range of cop_seq numbers for
 which the name is valid.  For typed lexicals name SV is SVt_PVMG and SvSTASH
 points at the type.  For C<our> lexicals, the type is also SVt_PVMG, with the
-OURSTASH slot pointing at the stash of the associated global (so that
+SvOURSTASH slot pointing at the stash of the associated global (so that
 duplicate C<our> declarations in the same package can be detected).  SvUVX is
 sometimes hijacked to store the generation number during compilation.
 
@@ -714,7 +714,7 @@ offset.
 If C<typestash> is valid, the name is for a typed lexical; set the
 name's stash to that value.
 If C<ourstash> is valid, it's an our lexical, set the name's
-OURSTASH to that value
+SvOURSTASH to that value
 
 If fake, it means we're cloning an existing entry
 

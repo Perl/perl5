@@ -324,6 +324,15 @@ C<$+{foo}> is equivalent to C<$1> after the following match:
 
   'foo'=~/(?<foo>foo)/;
 
+The underlying behaviour of %+ is provided by the L<re::Tie::Hash::NamedCapture>
+module.
+
+B<Note:> As C<%-> and C<%+> are tied views into a common internal hash
+associated with the last successful regular expression. Therefore mixing
+iterative access to them via C<each> may have unpredictable results.
+Likewise, if the last successful match changes then the results may be
+surprising.
+
 =item HANDLE->input_line_number(EXPR)
 
 =item $INPUT_LINE_NUMBER
@@ -578,6 +587,40 @@ After a match against some variable $var:
 =item C<$3> is the same as C<substr($var, $-[3], $+[3] - $-[3])>
 
 =back
+
+=item %-
+X<%->
+
+Similar to %+, this variable allows access to the named capture
+buffers that were defined in the last successful match. It returns
+a reference to an array containing one value per buffer of a given
+name in the pattern.
+
+    if ('1234'=~/(?<A>1)(?<B>2)(?<A>3)(?<B>4)/) {
+        foreach my $name (sort keys(%-)) {
+            my $ary = $-{$name};
+            foreach my $idx (0..$#$ary) {
+                print "\$-{$name}[$idx] : ",
+                      (defined($ary->[$idx]) ? "'$ary->[$idx]'" : "undef"),
+                      "\n";
+            }
+        }
+    }
+
+would print out:
+
+    $-{A}[0] : '1'
+    $-{A}[1] : '3'
+    $-{B}[0] : '2'
+    $-{B}[1] : '4'
+
+The behaviour of %- is implemented via the L<re::Tie::Hash::NamedCapture> module.
+
+Note that C<%-> and C<%+> are tied views into a common internal hash
+associated with the last successful regular expression. Therefore mixing
+iterative access to them via C<each> may have unpredictable results.
+Likewise, if the last successful match changes then the results may be
+surprising.
 
 =item HANDLE->format_name(EXPR)
 
