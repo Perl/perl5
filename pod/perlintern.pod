@@ -142,7 +142,7 @@ Found in file pad.h
 X<PAD_COMPNAME_GEN>
 
 The generation number of the name at offset C<po> in the current
-compiling pad (lvalue). Note that C<SvCUR> is hijacked for this purpose.
+compiling pad (lvalue). Note that C<SvUVX> is hijacked for this purpose.
 
 	STRLEN	PAD_COMPNAME_GEN(PADOFFSET po)
 
@@ -153,7 +153,7 @@ Found in file pad.h
 X<PAD_COMPNAME_GEN_set>
 
 Sets the generation number of the name at offset C<po> in the current
-ling pad (lvalue) to C<gen>.  Note that C<SvCUR_set> is hijacked for this purpose.
+ling pad (lvalue) to C<gen>.  Note that C<SvUV_set> is hijacked for this purpose.
 
 	STRLEN	PAD_COMPNAME_GEN_set(PADOFFSET po, int gen)
 
@@ -619,19 +619,19 @@ but only by their index allocated at compile time (which is usually
 in PL_op->op_targ), wasting a name SV for them doesn't make sense.
 
 The SVs in the names AV have their PV being the name of the variable.
-NV+1..IV inclusive is a range of cop_seq numbers for which the name is
-valid.  For typed lexicals name SV is SVt_PVMG and SvSTASH points at the
-type.  For C<our> lexicals, the type is also SVt_PVMG, with the OURSTASH slot
-pointing at the stash of the associated global (so that duplicate C<our>
-declarations in the same package can be detected).  SvCUR is sometimes
-hijacked to store the generation number during compilation.
+xlow+1..xhigh inclusive in the NV union is a range of cop_seq numbers for
+which the name is valid.  For typed lexicals name SV is SVt_PVMG and SvSTASH
+points at the type.  For C<our> lexicals, the type is also SVt_PVMG, with the
+OURSTASH slot pointing at the stash of the associated global (so that
+duplicate C<our> declarations in the same package can be detected).  SvUVX is
+sometimes hijacked to store the generation number during compilation.
 
 If SvFAKE is set on the name SV, then that slot in the frame AV is
 a REFCNT'ed reference to a lexical from "outside". In this case,
-the name SV does not use NVX and IVX to store a cop_seq range, since it is
-in scope throughout. Instead IVX stores some flags containing info about
+the name SV does not use xlow and xhigh to store a cop_seq range, since it is
+in scope throughout. Instead xhigh stores some flags containing info about
 the real lexical (is it declared in an anon, and is it capable of being
-instantiated multiple times?), and for fake ANONs, NVX contains the index
+instantiated multiple times?), and for fake ANONs, xlow contains the index
 within the parent's pad where the lexical's value is stored, to make
 cloning quicker.
 
@@ -776,7 +776,7 @@ associated with the IVX field of a fake namesv.
 
 Note that pad_findlex() is recursive; it recurses up the chain of CVs,
 then comes back down, adding fake entries as it goes. It has to be this way
-because fake namesvs in anon protoypes have to store in NVX the index into
+because fake namesvs in anon protoypes have to store in xlow the index into
 the parent pad.
 
 	PADOFFSET	pad_findlex(const char *name, const CV* cv, U32 seq, int warn, SV** out_capture, SV** out_name_sv, int *out_flags)
