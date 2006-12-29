@@ -10,7 +10,7 @@ our (@ISA, $VERSION, @EXPORT_OK, %EXPORT_TAGS);
 @ISA    = qw(Exporter );
 
 
-$VERSION = '2.001';
+$VERSION = '2.002';
 
 use constant G_EOF => 0 ;
 use constant G_ERR => -1 ;
@@ -921,17 +921,28 @@ sub gotoNextStream
     *$self->{CompSize}->reset();
 
     my $magic = $self->ckMagic();
+    #*$self->{EndStream} = 0 ;
 
     if ( ! $magic) {
-        *$self->{EndStream} = 1 ;
-        return 0;
+        if (! *$self->{Transparent} )
+        {
+            *$self->{EndStream} = 1 ;
+            return 0;
+        }
+
+        $self->clearError();
+        *$self->{Type} = 'plain';
+        *$self->{Plain} = 1;
+        $self->pushBack(*$self->{HeaderPending})  ;
     }
+    else
+    {
+        *$self->{Info} = $self->readHeader($magic);
 
-    *$self->{Info} = $self->readHeader($magic);
-
-    if ( ! defined *$self->{Info} ) {
-        *$self->{EndStream} = 1 ;
-        return -1;
+        if ( ! defined *$self->{Info} ) {
+            *$self->{EndStream} = 1 ;
+            return -1;
+        }
     }
 
     push @{ *$self->{InfoList} }, *$self->{Info} ;
@@ -1011,20 +1022,23 @@ sub read
 
     # Need to jump through more hoops - either length or offset 
     # or both are specified.
-    my $out_buffer = \*$self->{Pending} ;
+    my $out_buffer = *$self->{Pending} ;
 
-    while (! *$self->{EndStream} && length($$out_buffer) < $length)
+    while (! *$self->{EndStream} && length($out_buffer) < $length)
     {
-        my $buf_len = $self->_raw_read($out_buffer);
+        my $buf_len = $self->_raw_read(\$out_buffer);
         return $buf_len 
             if $buf_len < 0 ;
     }
 
-    $length = length $$out_buffer 
-        if length($$out_buffer) < $length ;
+    $length = length $out_buffer 
+        if length($out_buffer) < $length ;
 
     return 0 
         if $length == 0 ;
+
+    *$self->{Pending} = $out_buffer;
+    $out_buffer = \*$self->{Pending} ;
 
     if ($offset) { 
         $$buffer .= "\x00" x ($offset - length($$buffer))

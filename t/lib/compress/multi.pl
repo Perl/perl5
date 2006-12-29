@@ -129,7 +129,7 @@ EOM
                     ok $gz->close(), "    close() ok"
                         or diag "errno $!\n" ;
 
-                    is $gz->streamCount(), $i +1, "    streamCount ok"
+                    is $gz->streamCount(), $i +1, "    streamCount ok " .  ($i +1)
                         or diag "Stream count is " . $gz->streamCount();
                     ok $un eq join('', @buffs), "    expected output" ;
 

@@ -616,6 +616,13 @@ sub getMultiValues
     return (1,0);
 }
 
+
+sub gotScalarUtilXS
+{
+    eval ' use Scalar::Util "dualvar" ';
+    return $@ ? 0 : 1 ;
+}
+
 package CompTestUtils;
 
 1;

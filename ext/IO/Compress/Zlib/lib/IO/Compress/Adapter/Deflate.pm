@@ -9,7 +9,7 @@ use IO::Compress::Base::Common qw(:Status);
 use Compress::Raw::Zlib qw(Z_OK Z_FINISH MAX_WBITS) ;
 our ($VERSION);
 
-$VERSION = '2.001';
+$VERSION = '2.002';
 
 sub mkCompObject
 {

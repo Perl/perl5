@@ -20,7 +20,7 @@ use bytes;
 our (@ISA, $VERSION, $got_encode);
 #@ISA    = qw(Exporter IO::File);
 
-$VERSION = '2.001';
+$VERSION = '2.002';
 
 #Can't locate object method "SWASHNEW" via package "utf8" (perhaps you forgot to load "utf8"?) at .../ext/Compress-Zlib/Gzip/blib/lib/Compress/Zlib/Common.pm line 16.
 
@@ -565,7 +565,6 @@ sub DESTROY
     my $self = shift ;
     $self->close() ;
 
-
     # TODO - memory leak with 5.8.0 - this isn't called until 
     #        global destruction
     #
@@ -791,7 +790,7 @@ sub close
         # This delete can set $! in older Perls, so reset the errno
         $! = 0 ;
     }
-  
+
     return 1;
 }
 

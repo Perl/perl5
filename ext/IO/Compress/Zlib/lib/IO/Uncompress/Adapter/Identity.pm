@@ -8,7 +8,7 @@ use IO::Compress::Base::Common qw(:Status);
 
 our ($VERSION);
 
-$VERSION = '2.001';
+$VERSION = '2.002';
 
 use Compress::Raw::Zlib ();
 

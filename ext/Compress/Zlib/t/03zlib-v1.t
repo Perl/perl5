@@ -23,10 +23,10 @@ BEGIN
 
     my $count = 0 ;
     if ($] < 5.005) {
-        $count = 353 ;
+        $count = 383 ;
     }
     else {
-        $count = 364 ;
+        $count = 394 ;
     }
 
 
@@ -494,7 +494,7 @@ EOM
 {
     title "Check all bytes can be handled";
 
-    my $lex = "\r\n" . new LexFile my $name ;
+    my $lex = new LexFile my $name ;
     my $data = join '', map { chr } 0x00 .. 0xFF;
     $data .= "\r\nabd\r\n";
 
@@ -801,10 +801,10 @@ EOM
     ok $@ =~ /^gzopen: file parameter is not a filehandle or filename at/
 	or print "# $@\n" ;
 
-    my $x = Symbol::gensym() ;
-    eval { gzopen($x, 0) ; }  ;
-    ok $@ =~ /^gzopen: file parameter is not a filehandle or filename at/
-	or print "# $@\n" ;
+#    my $x = Symbol::gensym() ;
+#    eval { gzopen($x, 0) ; }  ;
+#    ok $@ =~ /^gzopen: file parameter is not a filehandle or filename at/
+#	or print "# $@\n" ;
 
 }
 
@@ -1090,5 +1090,74 @@ EOM
 }
 
 
+sub slurp
+{
+    my $name = shift ;
 
+    my $input;
+    my $fil = gzopen($name, "rb") ;
+    ok $fil , "opened $name";
+    cmp_ok $fil->gzread($input, 50000), ">", 0, "read more than zero bytes";
+    ok ! $fil->gzclose(), "closed ok";
 
+    return $input;
+}
+
+sub trickle
+{
+    my $name = shift ;
+
+    my $got;
+    my $input;
+    $fil = gzopen($name, "rb") ;
+    ok $fil, "opened ok";
+    while ($fil->gzread($input, 50000) > 0)
+    {
+        $got .= $input;
+        $input = '';
+    }
+    ok ! $fil->gzclose(), "closed ok";
+
+    return $got;
+
+    return $input;
+}
+
+{
+
+    title "Append & MultiStream Tests";
+    # rt.24041
+
+    my $lex = new LexFile my $name ;
+    my $data1 = "the is the first";
+    my $data2 = "and this is the second";
+    my $trailing = "some trailing data";
+
+    my $fil;
+
+    title "One file";
+    $fil = gzopen($name, "wb") ;
+    ok $fil, "opened first file"; 
+    is $fil->gzwrite($data1), length $data1, "write data1" ;
+    ok ! $fil->gzclose(), "Closed";
+
+    is slurp($name), $data1, "got expected data from slurp";
+    is trickle($name), $data1, "got expected data from trickle";
+
+    title "Two files";
+    $fil = gzopen($name, "ab") ;
+    ok $fil, "opened second file"; 
+    is $fil->gzwrite($data2), length $data2, "write data2" ;
+    ok ! $fil->gzclose(), "Closed";
+
+    is slurp($name), $data1 . $data2, "got expected data from slurp";
+    is trickle($name), $data1 . $data2, "got expected data from trickle";
+
+    title "Trailing Data";
+    open F, ">>$name";
+    print F $trailing;
+    close F;
+
+    is slurp($name), $data1 . $data2 . $trailing, "got expected data from slurp" ;
+    is trickle($name), $data1 . $data2 . $trailing, "got expected data from trickle" ;
+}

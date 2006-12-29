@@ -11,7 +11,7 @@ use File::GlobMapper;
 require Exporter;
 our ($VERSION, @ISA, @EXPORT, %EXPORT_TAGS);
 @ISA = qw(Exporter);
-$VERSION = '2.001';
+$VERSION = '2.002';
 
 @EXPORT = qw( isaFilehandle isaFilename whatIsInput whatIsOutput 
               isaFileGlobString cleanFileGlobString oneTarget
@@ -71,8 +71,10 @@ sub isaFilehandle($)
 {
     use utf8; # Pragma needed to keep Perl 5.6.0 happy
     return (defined $_[0] and 
-             (UNIVERSAL::isa($_[0],'GLOB') or UNIVERSAL::isa(\$_[0],'GLOB')) 
-                 and defined fileno($_[0])  )
+             (UNIVERSAL::isa($_[0],'GLOB') or 
+              UNIVERSAL::isa($_[0],'IO::Handle') or
+              UNIVERSAL::isa(\$_[0],'GLOB')) 
+          )
 }
 
 sub isaFilename($)

@@ -18,7 +18,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, $AUTOLOAD);
 
-$VERSION = '2.001';
+$VERSION = '2.002';
 $XS_VERSION = $VERSION; 
 $VERSION = eval $VERSION;
 
@@ -120,12 +120,14 @@ sub gzopen($$)
     $defOpts{Level}    = $1               if $mode =~ /(\d)/;
     $defOpts{Strategy} = Z_FILTERED()     if $mode =~ /f/i;
     $defOpts{Strategy} = Z_HUFFMAN_ONLY() if $mode =~ /h/i;
+    $defOpts{Append}   = 1                if $mode =~ /a/i;
 
     my $infDef = $writing ? 'deflate' : 'inflate';
     my @params = () ;
 
     croak "gzopen: file parameter is not a filehandle or filename"
-        unless isaFilehandle $file || isaFilename $file ;
+        unless isaFilehandle $file || isaFilename $file  || 
+               (ref $file && ref $file eq 'SCALAR');
 
     return undef unless $mode =~ /[rwa]/i ;
 
@@ -141,6 +143,7 @@ sub gzopen($$)
                                          Transparent => 1,
                                          Append => 0, 
                                          AutoClose => 1, 
+                                         MultiStream => 1,
                                          Strict => 0) 
             or $Compress::Zlib::gzerrno = $IO::Uncompress::Gunzip::GunzipError;
     }
@@ -640,16 +643,19 @@ The C<Compress::Zlib> module can be split into two general areas of
 functionality, namely a simple read/write interface to I<gzip> files
 and a low-level in-memory compression/decompression interface.
 
-Each of these areas will be discussed separately below.
+Each of these areas will be discussed in the following sections.
 
 =head2 Notes for users of Compress::Zlib version 1
 
-Version 2 of this module is a total rewrite. The net result of this is that
-C<Compress::Zlib> does not now access the zlib library directly.
+The main change in C<Compress::Zlib> version 2.x is that it does not now
+interface directly to the zlib library. Instead it uses the
+C<IO::Compress::Gzip> and C<IO::Uncompress::Gunzip> modules for
+reading/writing gzip files, and the C<Compress::Raw::Zlib> module for some
+low-level zlib access. 
 
-It now uses the C<IO::Compress::Gzip> and C<IO::Uncompress::Gunzip> modules
-for reading/writing gzip files, and the C<Compress::Raw::Zlib> module for
-low-level zlib access.
+The interface provided by version 2 should be 100% backward compatible with
+version 1. If you find a difference in the expected behaviour please
+contact the author (See L</AUTHOR>). See L<GZIP INTERFACE> 
 
 If you are writing new code, your first port of call should be to use one
 these new modules.
@@ -660,7 +666,7 @@ A number of functions are supplied in I<zlib> for reading and writing
 I<gzip> files that conform to RFC 1952. This module provides an interface
 to most of them. 
 
-If you are upgrading from C<Compress::Zlib> 1.x, the following
+If you have previously used C<Compress::Zlib> 1.x, the following
 enhancements/changes have been made to the C<gzopen> interface:
 
 =over 5
@@ -717,16 +723,19 @@ This function opens either the I<gzip> file C<$filename> for reading or
 writing or attaches to the opened filehandle, C<$filehandle>. 
 It returns an object on success and C<undef> on failure.
 
-When writing a gzip file this interface will always create the smallest
+When writing a gzip file this interface will I<always> create the smallest
 possible gzip header (exactly 10 bytes). If you want greater control over
-the information stored in the gzip header (like the original filename or a
-comment) use L<IO::Compress::Gzip|IO::Compress::Gzip> instead.
+what gets stored in the gzip header (like the original filename or a
+comment) use L<IO::Compress::Gzip|IO::Compress::Gzip> instead. Similarly if
+you want to read the contents of the gzip header use
+L<IO::Uncompress::Gunzip|IO::Uncompress::Gunzip>.
 
 The second parameter, C<$mode>, is used to specify whether the file is
 opened for reading or writing and to optionally specify a compression
 level and compression strategy when writing. The format of the C<$mode>
 parameter is similar to the mode parameter to the 'C' function C<fopen>,
-so "rb" is used to open for reading and "wb" for writing.
+so "rb" is used to open for reading, "wb" for writing and "ab" for
+appending (writing at the end of the file).
 
 To specify a compression level when writing, append a digit between 0
 and 9 to the mode string -- 0 means no compression and 9 means maximum
@@ -743,7 +752,6 @@ level 4 and run-length encoding.
 
 Refer to the I<zlib> documentation for the exact format of the C<$mode>
 parameter.
-
 
 =item B<$bytesread = $gz-E<gt>gzread($buffer [, $size]) ;>
 

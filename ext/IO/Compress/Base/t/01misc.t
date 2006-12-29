@@ -19,10 +19,17 @@ BEGIN {
     $extra = 1
         if eval { require Test::NoWarnings ;  import Test::NoWarnings; 1 };
 
-    plan tests => 76 + $extra ;
+    plan tests => 78 + $extra ;
 
+    use_ok('Scalar::Util');
     use_ok('IO::Compress::Base::Common');
 }
+
+
+ok gotScalarUtilXS(), "Got XS Version of Scalar::Util"
+    or diag <<EOM;
+You don't have the XS version of Scalar::Util
+EOM
 
 # Compress::Zlib::Common;
 

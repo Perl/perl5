@@ -1,6 +1,17 @@
 CHANGES
 -------
 
+  2.002 29 December 2006
+
+      * Documentation updates.
+
+      * Added IO::Handle to the ISA test in isaFilehandle
+
+      * Add an explicit use_ok test for Scalar::Util in the test harness.
+        The error message reported by 01misc implied the problem was
+        somewhere else.
+        Also explictly check that 'dualvar' is available.
+
   2.001 1 November 2006
 
       * Remove beta status.

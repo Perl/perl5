@@ -8,7 +8,7 @@ use IO::Compress::Base::Common qw(:Status);
 use Compress::Raw::Zlib qw(Z_OK Z_DATA_ERROR Z_STREAM_END Z_FINISH MAX_WBITS);
 
 our ($VERSION);
-$VERSION = '2.001';
+$VERSION = '2.002';
 
 
 

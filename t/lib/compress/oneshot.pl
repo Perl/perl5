@@ -95,14 +95,24 @@ sub run
         like $@, mkErr("^$TopType: input and output buffer are identical"),
             '  Input and Output buffer are the same';
             
-        my $lex = new LexFile my $out_file ;
-        open OUT, ">$out_file" ;
-        eval { $a = $Func->(\*OUT, \*OUT) ;} ;
-        like $@, mkErr("^$TopType: input and output handle are identical"),
-            '  Input and Output handle are the same';
-            
-        close OUT;
-        is -s $out_file, 0, "  File zero length" ;
+        SKIP:
+        {
+            # Threaded 5.6.x seems to have a problem comparing filehandles.
+            use Config;
+
+            skip 'Cannot compare filehandles with threaded $]', 2
+                if $] >= 5.006  && $] < 5.007 && $Config{useithreads};
+
+            my $lex = new LexFile my $out_file ;
+            open OUT, ">$out_file" ;
+            eval { $a = $Func->(\*OUT, \*OUT) ;} ;
+            like $@, mkErr("^$TopType: input and output handle are identical"),
+                '  Input and Output handle are the same';
+                
+            close OUT;
+            is -s $out_file, 0, "  File zero length" ;
+        }
+
         {
             my %x = () ;
             my $object = bless \%x, "someClass" ;

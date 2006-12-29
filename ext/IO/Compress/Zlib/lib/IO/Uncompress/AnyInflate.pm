@@ -21,7 +21,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyInflateError);
 
-$VERSION = '2.001';
+$VERSION = '2.002';
 $AnyInflateError = '';
 
 @ISA = qw( Exporter IO::Uncompress::Base );
@@ -568,8 +568,12 @@ option.
 
 =item C<< Transparent => 0|1 >>
 
-If this option is set and the input file or buffer is not compressed data,
+If this option is set and the input file/buffer is not compressed data,
 the module will allow reading of it anyway.
+
+In addition, if the input file/buffer does contain compressed data and
+there is non-compressed data immediately following it, setting this option
+will make this module treat the whole file/bufffer as a single data stream.
 
 This option defaults to 1.
 

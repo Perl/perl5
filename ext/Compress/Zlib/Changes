@@ -1,6 +1,15 @@
 CHANGES
 -------
 
+  2.002 29 December 2006
+
+      * Documentation updates.
+
+      * Fix append mode with gzopen.
+        rt-cpan.org 24041
+
+      * Allow gzopen to read from and write to a scalar reference.
+
   2.001 1 November 2006
 
       * Remove beta status.
