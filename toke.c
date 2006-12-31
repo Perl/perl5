@@ -668,6 +668,10 @@ Perl_lex_start(pTHX_ SV *line)
 	    sv_catpvs(PL_linestr, "\n;");
     }
     SvTEMP_off(PL_linestr);
+    /* PL_linestr needs to survive until end of scope, not just the next
+       FREETMPS. See changes 17505 and 17546 which fixed the symptoms only.  */
+    SvREFCNT_inc_simple_void_NN(PL_linestr);
+    SAVEFREESV(PL_linestr);
     PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = SvPVX(PL_linestr);
     PL_bufend = PL_bufptr + SvCUR(PL_linestr);
     PL_last_lop = PL_last_uni = NULL;

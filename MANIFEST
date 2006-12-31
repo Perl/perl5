@@ -3599,6 +3599,7 @@ t/op/switch.t			See if switches (given/when) work
 t/op/sysio.t			See if sysread and syswrite work
 t/op/taint.t			See if tainting works
 t/op/threads.t			Misc. tests for perl features with threads
+t/op/threads_create.pl		Ancillary file for t/op/threads.t
 t/op/tiearray.t			See if tie for arrays works
 t/op/tiehandle.t		See if tie for handles works
 t/op/tie.t			See if tie/untie functions work
