@@ -599,17 +599,17 @@ Perl_lex_start(pTHX_ SV *line)
 	}
 	SAVEI32(PL_lasttoke);
     }
-    if (PL_madskills) {
-	SAVESPTR(PL_thistoken);
-	SAVESPTR(PL_thiswhite);
-	SAVESPTR(PL_nextwhite);
-	SAVESPTR(PL_thisopen);
-	SAVESPTR(PL_thisclose);
-	SAVESPTR(PL_thisstuff);
-	SAVEVPTR(PL_thismad);
-	SAVEI32(PL_realtokenstart);
-	SAVEI32(PL_faketokens);
-    }
+    SAVESPTR(PL_endwhite);
+    SAVESPTR(PL_thistoken);
+    SAVESPTR(PL_thiswhite);
+    SAVESPTR(PL_nextwhite);
+    SAVESPTR(PL_thisopen);
+    SAVESPTR(PL_thisclose);
+    SAVESPTR(PL_thisstuff);
+    SAVEVPTR(PL_thismad);
+    SAVEI32(PL_realtokenstart);
+    SAVEI32(PL_faketokens);
+    SAVESPTR(PL_skipwhite);
     SAVEI32(PL_curforce);
 #else
     if (PL_lex_state == LEX_KNOWNEXT) {
@@ -636,9 +636,20 @@ Perl_lex_start(pTHX_ SV *line)
     SAVESPTR(PL_lex_stuff);
     SAVEI32(PL_lex_defer);
     SAVEI32(PL_sublex_info.sub_inwhat);
+    SAVEI32(PL_sublex_info.super_state);
+    SAVEVPTR(PL_sublex_info.sub_op);
+    SAVEPPTR(PL_sublex_info.super_bufptr);
+    SAVEPPTR(PL_sublex_info.super_bufend);
     SAVESPTR(PL_lex_repl);
     SAVEINT(PL_expect);
     SAVEINT(PL_lex_expect);
+    SAVEI32(PL_lex_formbrack);
+    SAVEVPTR(PL_lex_op);
+    SAVEI32(PL_multi_close);
+    SAVEI32(PL_multi_open);
+    SAVEI32(PL_multi_start);
+    SAVEI8(PL_pending_ident);
+    SAVEBOOL(PL_preambled);
 
     PL_lex_state = LEX_NORMAL;
     PL_lex_defer = 0;
@@ -655,11 +666,35 @@ Perl_lex_start(pTHX_ SV *line)
     PL_lex_inpat = 0;
 #ifdef PERL_MAD
     PL_lasttoke = 0;
+    PL_endwhite = NULL;
+    PL_faketokens = 0;
+    PL_nextwhite = NULL;
+    PL_realtokenstart = 0;
+    PL_skipwhite = NULL;
+    PL_thisclose = NULL;
+    PL_thisopen = NULL;
+    PL_thisstuff = NULL;
+    PL_thistoken = NULL;
+    PL_thiswhite = NULL;
+    PL_thismad = NULL;
 #else
     PL_nexttoke = 0;
 #endif
     PL_lex_inwhat = 0;
     PL_sublex_info.sub_inwhat = 0;
+    PL_sublex_info.super_state = 0;
+    PL_sublex_info.sub_op = NULL;
+    PL_sublex_info.super_bufptr = NULL;
+    PL_sublex_info.super_bufend = NULL;
+    PL_lex_expect = 0;
+    PL_lex_formbrack = 0;
+    PL_lex_op = NULL;
+    PL_multi_close = 0;
+    PL_multi_open = 0;
+    PL_multi_start = 0;
+    PL_pending_ident = '\0';
+    PL_preambled = FALSE;
+
     if (line) {
 	s = SvPV_const(line, len);
     } else {
@@ -1279,11 +1314,12 @@ S_newSV_maybe_utf8(pTHX_ const char *start, STRLEN len)
  * S_force_word
  * When the lexer knows the next thing is a word (for instance, it has
  * just seen -> and it knows that the next char is a word char, then
- * it calls S_force_word to stick the next word into the PL_next lookahead.
+ * it calls S_force_word to stick the next word into the PL_nexttoke/val
+ * lookahead.
  *
  * Arguments:
  *   char *start : buffer position (must be within PL_linestr)
- *   int token   : PL_next will be this type of bare word (e.g., METHOD,WORD)
+ *   int token   : PL_next* will be this type of bare word (e.g., METHOD,WORD)
  *   int check_keyword : if true, Perl checks to make sure the word isn't
  *       a keyword (do this if the word is a label, e.g. goto FOO)
  *   int allow_pack : if true, : characters will also be allowed (require,
