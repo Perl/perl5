@@ -45,10 +45,10 @@ Type flag for code refs.  See C<svtype>.
 
 typedef enum {
 	SVt_NULL,	/* 0 */
-	SVt_IV,		/* 1 */
-	SVt_NV,		/* 2 */
-	SVt_RV,		/* 3 */
-	SVt_BIND,	/* 4 */
+	SVt_BIND,	/* 1 */
+	SVt_IV,		/* 2 */
+	SVt_NV,		/* 3 */
+	SVt_RV,		/* 4 */
 	SVt_PV,		/* 5 */
 	SVt_PVIV,	/* 6 */
 	SVt_PVNV,	/* 7 */
@@ -942,7 +942,9 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 #define assert_not_glob(sv)	
 #endif
 
-#define SvOK(sv)		(SvFLAGS(sv) & SVf_OK)
+#define SvOK(sv)		((SvTYPE(sv) == SVt_BIND)		\
+				 ? (SvFLAGS(SvRV(sv)) & SVf_OK)		\
+				 : (SvFLAGS(sv) & SVf_OK))
 #define SvOK_off(sv)		(assert_not_ROK(sv) assert_not_glob(sv)	\
 				 SvFLAGS(sv) &=	~(SVf_OK|		\
 						  SVf_IVisUV|SVf_UTF8),	\

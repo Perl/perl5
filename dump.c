@@ -29,10 +29,10 @@
 
 static const char* const svtypenames[SVt_LAST] = {
     "NULL",
+    "BIND",
     "IV",
     "NV",
     "RV",
-    "BIND",
     "PV",
     "PVIV",
     "PVNV",
@@ -49,10 +49,10 @@ static const char* const svtypenames[SVt_LAST] = {
 
 static const char* const svshorttypenames[SVt_LAST] = {
     "UNDEF",
+    "BIND",
     "IV",
     "NV",
     "RV",
-    "BIND",
     "PV",
     "PVIV",
     "PVNV",

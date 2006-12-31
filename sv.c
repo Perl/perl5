@@ -887,6 +887,11 @@ static const struct body_details bodies_by_type[] = {
     { sizeof(HE), 0, 0, SVt_NULL,
       FALSE, NONV, NOARENA, FIT_ARENA(0, sizeof(HE)) },
 
+    /* The bind placeholder pretends to be an RV for now.
+       Also it's marked as "can't upgrade" top stop anyone using it before it's
+       implemented.  */
+    { 0, 0, 0, SVt_BIND, TRUE, NONV, NOARENA, 0 },
+
     /* IVs are in the head, so the allocation size is 0.
        However, the slot is overloaded for PTEs.  */
     { sizeof(struct ptr_tbl_ent), /* This is used for PTEs.  */
@@ -903,9 +908,6 @@ static const struct body_details bodies_by_type[] = {
 
     /* RVs are in the head now.  */
     { 0, 0, 0, SVt_RV, FALSE, NONV, NOARENA, 0 },
-
-    /* The bind placeholder pretends to be an RV for now.  */
-    { 0, 0, 0, SVt_BIND, FALSE, NONV, NOARENA, 0 },
 
     /* 8 bytes on most ILP32 with IEEE doubles */
     { sizeof(xpv_allocated),
