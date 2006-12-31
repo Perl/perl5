@@ -5065,7 +5065,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		/*notreached*/
             { /* named and numeric backreferences */
                 I32 num;
-                char * parse_start;
+                char * parse_start = NULL;
             case '&':            /* (?&NAME) */
                 parse_start = RExC_parse - 1;
               named_recursion:
@@ -8144,7 +8144,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
             I32 n;
             if (name) {
                 for ( n=0; n<SvIVX(sv_dat); n++ ) {
-                    Perl_sv_catpvf(aTHX_ sv, "%s%"IVdf, ( n ? "," : "" ), nums[n]);
+                    Perl_sv_catpvf(aTHX_ sv, "%s%"IVdf,
+				   (n ? "," : ""), (IV)nums[n]);
                 }
                 Perl_sv_catpvf(aTHX_ sv, " '%"SVf"'", *name );
             }

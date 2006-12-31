@@ -319,7 +319,7 @@ Perl_yyparse (pTHX)
     int yyresult;
 
     /* Lookahead token as an internal (translated) token number.  */
-    int yytoken;
+    int yytoken = 0;
 
     SV *parser_sv;		    /* SV whose PVX holds the parser object */
     register yy_parser *parser;	    /* the parser object */
