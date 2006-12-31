@@ -3377,7 +3377,7 @@ PP(pp_require)
 
     ENTER;
     SAVETMPS;
-    lex_start(sv_2mortal(newSVpvs("")));
+    lex_start(NULL);
     SAVEGENERICSV(PL_rsfp_filters);
     PL_rsfp_filters = NULL;
 

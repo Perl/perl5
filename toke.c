@@ -660,10 +660,16 @@ Perl_lex_start(pTHX_ SV *line)
 #endif
     PL_lex_inwhat = 0;
     PL_sublex_info.sub_inwhat = 0;
-    s = SvPV_const(line, len);
-    if (SvREADONLY(line) || !len || s[len-1] != ';') {
-	PL_linestr = len ? newSVsv(line) : newSVpvn(s, 0);
-	if (!len || s[len-1] != ';')
+    if (line) {
+	s = SvPV_const(line, len);
+    } else {
+	len = 0;
+    }
+    if (!len) {
+	PL_linestr = newSVpvs("\n;");
+    } else if (SvREADONLY(line) || s[len-1] != ';') {
+	PL_linestr = newSVsv(line);
+	if (s[len-1] != ';')
 	    sv_catpvs(PL_linestr, "\n;");
     } else {
 	SvTEMP_off(line);

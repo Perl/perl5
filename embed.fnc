@@ -399,7 +399,7 @@ p	|OP*	|jmaybe		|NN OP* arg
 pP	|I32	|keyword	|NN const char* d|I32 len|bool all_keywords
 Ap	|void	|leave_scope	|I32 base
 p	|void	|lex_end
-p	|void	|lex_start	|NN SV* line
+p	|void	|lex_start	|NULLOK SV* line
 Ap	|void	|op_null	|NN OP* o
 p	|void	|op_clear	|NN OP* o
 Ap	|void	|op_refcnt_lock
