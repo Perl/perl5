@@ -956,6 +956,7 @@ p	|void	|write_to_stderr|NN const char* message|int msglen
 p	|int	|yyerror	|NN const char* s
 p	|int	|yylex
 p	|int	|yyparse
+p	|void	|parser_free	|NN const yy_parser *
 p	|int	|yywarn		|NN const char* s
 #if defined(MYMALLOC)
 Ap	|void	|dump_mstats	|NN char* s

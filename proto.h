@@ -2597,6 +2597,9 @@ PERL_CALLCONV int	Perl_yyerror(pTHX_ const char* s)
 
 PERL_CALLCONV int	Perl_yylex(pTHX);
 PERL_CALLCONV int	Perl_yyparse(pTHX);
+PERL_CALLCONV void	Perl_parser_free(pTHX_ const yy_parser *)
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV int	Perl_yywarn(pTHX_ const char* s)
 			__attribute__nonnull__(pTHX_1);
 

@@ -25,6 +25,9 @@
 
 #define yylval	(PL_parser->yylval)
 
+/* YYINITDEPTH -- initial size of the parser's stacks.  */
+#define YYINITDEPTH 200
+
 static const char ident_too_long[] = "Identifier too long";
 static const char commaless_variable_list[] = "comma-less variable list";
 
@@ -580,6 +583,23 @@ Perl_lex_start(pTHX_ SV *line)
     dVAR;
     const char *s;
     STRLEN len;
+    yy_parser *parser;
+
+    /* create and initialise a parser */
+
+    Newx(parser, 1, yy_parser);
+    parser->old_parser = PL_parser;
+    PL_parser = parser;
+
+    Newx(parser->stack, YYINITDEPTH, yy_stack_frame);
+    parser->ps = parser->stack;
+    parser->stack_size = YYINITDEPTH;
+
+    parser->stack->state = 0;
+    parser->yyerrstatus = 0;
+    parser->yychar = YYEMPTY;		/* Cause a token to be read.  */
+
+    /* initialise lexer state */
 
     SAVEI32(PL_lex_dojoin);
     SAVEI32(PL_lex_brackets);

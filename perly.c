@@ -45,7 +45,6 @@ typedef signed char yysigned_char;
 
 # define YYSIZE_T size_t
 
-#define YYEMPTY		(-2)
 #define YYEOF		0
 #define YYTERROR	1
 
@@ -187,9 +186,6 @@ do {					\
 #  define YY_REDUCE_PRINT(Rule)
 #endif /* !DEBUGGING */
 
-/* YYINITDEPTH -- initial size of the parser's stacks.  */
-#define YYINITDEPTH 200
-
 /* called during cleanup (via SAVEDESTRUCTOR_X) to free any items on the
  * parse stack, thus avoiding leaks if we die  */
 
@@ -300,8 +296,8 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
 
 /* delete a parser object */
 
-static void
-S_parser_free(pTHX_  const yy_parser *parser)
+void
+Perl_parser_free(pTHX_  const yy_parser *parser)
 {
     S_clear_yystack(aTHX_ parser);
     Safefree(parser->stack);
@@ -334,7 +330,7 @@ Perl_yyparse (pTHX)
 #define YYPOPSTACK   parser->ps = --ps
 #define YYPUSHSTACK  parser->ps = ++ps
 
-    /* The variables used to return semantic value and location from the
+    /* The variable used to return semantic value and location from the
 	  action routines: ie $$.  */
     YYSTYPE yyval;
 
@@ -347,22 +343,11 @@ Perl_yyparse (pTHX)
 
     YYDPRINTF ((Perl_debug_log, "Starting parse\n"));
 
-    Newx(parser, 1, yy_parser);
-    parser->old_parser = PL_parser;
-    PL_parser = parser;
-
-    Newx(ps, YYINITDEPTH, yy_stack_frame);
-    parser->stack = ps;
-    parser->ps = ps;
-    parser->stack_size = YYINITDEPTH;
+    parser = PL_parser;
+    ps = parser->ps;
 
     ENTER;  /* force parser free before we return */
-    SAVEDESTRUCTOR_X(S_parser_free, (void*) parser);
-
-
-    ps->state = 0;
-    parser->yyerrstatus = 0;
-    parser->yychar = YYEMPTY;		/* Cause a token to be read.  */
+    SAVEDESTRUCTOR_X(Perl_parser_free, (void*) parser);
 
 /*------------------------------------------------------------.
 | yynewstate -- Push a new state, which is found in yystate.  |
