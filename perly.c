@@ -107,12 +107,12 @@ yy_stack_print (pTHX_ const yy_parser *parser)
     const yy_stack_frame *ps, *min;
 
     min = parser->ps - 8 + 1;
-    if (min <= &parser->stack[0])
-	min = &parser->stack[0] + 1;
+    if (min <= parser->stack)
+	min = parser->stack + 1;
 
     PerlIO_printf(Perl_debug_log, "\nindex:");
     for (ps = min; ps <= parser->ps; ps++)
-	PerlIO_printf(Perl_debug_log, " %8d", ps - &parser->stack[0]);
+	PerlIO_printf(Perl_debug_log, " %8d", ps - parser->stack);
 
     PerlIO_printf(Perl_debug_log, "\nstate:");
     for (ps = min; ps <= parser->ps; ps++)
@@ -187,7 +187,6 @@ do {					\
 #  define YY_REDUCE_PRINT(Rule)
 #endif /* !DEBUGGING */
 
-
 /* YYINITDEPTH -- initial size of the parser's stacks.  */
 #define YYINITDEPTH 200
 
@@ -195,13 +194,12 @@ do {					\
  * parse stack, thus avoiding leaks if we die  */
 
 static void
-S_clear_yystack(pTHX_ const void *p)
+S_clear_yystack(pTHX_  const yy_parser *parser)
 {
-    yy_parser      *parser = (yy_parser*) SvPVX((SV*)p);
     yy_stack_frame *ps     = parser->ps;
     int i;
 
-    if (ps == &parser->stack[0])
+    if (ps == parser->stack)
 	return;
 
     YYDPRINTF ((Perl_debug_log, "clearing the parse stack\n"));
@@ -284,7 +282,7 @@ S_clear_yystack(pTHX_ const void *p)
 
     /* now free whole the stack, including the just-reduced ops */
 
-    while (ps > &parser->stack[0]) {
+    while (ps > parser->stack) {
 	if (yy_type_tab[yystos[ps->state]] == toketype_opval
 	    && ps->val.opval)
 	{
@@ -300,6 +298,15 @@ S_clear_yystack(pTHX_ const void *p)
     }
 }
 
+/* delete a parser object */
+
+static void
+S_parser_free(pTHX_  const yy_parser *parser)
+{
+    S_clear_yystack(aTHX_ parser);
+    Safefree(parser->stack);
+    PL_parser = parser->old_parser;
+}
 
 
 /*----------.
@@ -321,7 +328,6 @@ Perl_yyparse (pTHX)
     /* Lookahead token as an internal (translated) token number.  */
     int yytoken = 0;
 
-    SV *parser_sv;		    /* SV whose PVX holds the parser object */
     register yy_parser *parser;	    /* the parser object */
     register yy_stack_frame  *ps;   /* current parser stack frame */
 
@@ -341,20 +347,17 @@ Perl_yyparse (pTHX)
 
     YYDPRINTF ((Perl_debug_log, "Starting parse\n"));
 
-    ENTER;			/* force stack free before we return */
-    SAVEVPTR(PL_parser);
+    Newx(parser, 1, yy_parser);
+    parser->old_parser = PL_parser;
+    PL_parser = parser;
 
-    parser_sv = newSV(sizeof(yy_parser)
-			+ (YYINITDEPTH-1) * sizeof(yy_stack_frame));
-    SAVEFREESV(parser_sv);
-    PL_parser = parser = (yy_parser*)  SvPVX(parser_sv);
-    ps = (yy_stack_frame*) &parser->stack[0];
+    Newx(ps, YYINITDEPTH, yy_stack_frame);
+    parser->stack = ps;
     parser->ps = ps;
-
     parser->stack_size = YYINITDEPTH;
 
-    /* cleanup the parse stack on premature exit */
-    SAVEDESTRUCTOR_X(S_clear_yystack, (void*) parser_sv);
+    ENTER;  /* force parser free before we return */
+    SAVEDESTRUCTOR_X(S_parser_free, (void*) parser);
 
 
     ps->state = 0;
@@ -378,7 +381,7 @@ Perl_yyparse (pTHX)
     parser->yylen = 0;
 
     {
-	size_t size = ps - &parser->stack[0] + 1;
+	size_t size = ps - parser->stack + 1;
 
 	/* grow the stack? We always leave 1 spare slot,
 	 * in case of a '' -> 'foo' reduction */
@@ -386,12 +389,8 @@ Perl_yyparse (pTHX)
 	if (size >= parser->stack_size - 1) {
 	    /* this will croak on insufficient memory */
 	    parser->stack_size *= 2;
-	    PL_parser = parser =
-			(yy_parser*) SvGROW(parser_sv, sizeof(yy_parser)
-			    + (parser->stack_size-1) * sizeof(yy_stack_frame));
-
-	    /* readdress any pointers into realloced parser object */
-	    ps = parser->ps = &parser->stack[0] + size -1;
+	    Renew(parser->stack, parser->stack_size, yy_stack_frame);
+	    ps = parser->ps = parser->stack + size -1;
 
 	    YYDPRINTF((Perl_debug_log,
 			    "parser stack size increased to %lu frames\n",
@@ -592,7 +591,7 @@ Perl_yyparse (pTHX)
 	    /* Pop the error token.  */
 	    YYPOPSTACK;
 	    /* Pop the rest of the stack.  */
-	    while (ps > &parser->stack[0]) {
+	    while (ps > parser->stack) {
 		YYDSYMPRINTF ("Error: popping", yystos[ps->state], &ps->val);
 		if (yy_type_tab[yystos[ps->state]] == toketype_opval
 			&& ps->val.opval)
@@ -637,7 +636,7 @@ Perl_yyparse (pTHX)
 	}
 
 	/* Pop the current state because it cannot handle the error token.  */
-	if (ps == &parser->stack[0])
+	if (ps == parser->stack)
 	    YYABORT;
 
 	YYDSYMPRINTF ("Error: popping", yystos[ps->state], &ps->val);
@@ -676,7 +675,7 @@ Perl_yyparse (pTHX)
   `-------------------------------------*/
   yyacceptlab:
     yyresult = 0;
-    parser->ps = &parser->stack[0]; /* disable cleanup */
+    parser->ps = parser->stack; /* disable cleanup */
     goto yyreturn;
 
   /*-----------------------------------.
@@ -687,7 +686,7 @@ Perl_yyparse (pTHX)
     goto yyreturn;
 
   yyreturn:
-    LEAVE;			/* force stack free before we return */
+    LEAVE;			/* force parser free before we return */
     return yyresult;
 }
 

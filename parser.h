@@ -18,7 +18,8 @@ typedef struct {
 #endif
 } yy_stack_frame;
 
-typedef struct {
+typedef struct yy_parser {
+    struct yy_parser *old_parser; /* previous value of PL_parser */
     int		    yychar;	/* The lookahead symbol.  */
     YYSTYPE	    yylval;	/* value of lookahead symbol, set by yylex() */
 
@@ -27,8 +28,8 @@ typedef struct {
 
     int		    stack_size;
     int		    yylen;	/* length of active reduction */
+    yy_stack_frame  *stack;	/* base of stack */
     yy_stack_frame  *ps;	/* current stack frame */
-    yy_stack_frame  stack[1];	/* will actually be as many as needed */
 } yy_parser;
     
 
