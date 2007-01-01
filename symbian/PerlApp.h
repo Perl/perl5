@@ -73,9 +73,9 @@ class CPerlAppAppUi : public CPerlUiAppUi
 class CPerlAppAppView : public CPerlUiAppView
 {
   public:
-#if defined(__SERIES80__) || defined(__UIQ__)
+#if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__)
     void HandleCommandL(TInt aCommand);
-#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
+#endif /* #if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__) */
 };
 
 #endif // __PerlApp_h__

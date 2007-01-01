@@ -13,14 +13,14 @@
 # endif
 #endif /* #ifdef __SERIES60__ */
 
-#ifdef __SERIES80__
+#if defined(__SERIES80__) || defined(__SERIES90__)
 # include <eikon.hrh>
 # include <cknflash.h>
 # include <ckndgopn.h>
 # include <ckndgfob.h>
 # include <eiklabel.h>
 # include <cknconf.h>
-#endif /* #ifdef __SERIES80__ */
+#endif /* #if defined(__SERIES80__) || defined(__SERIES90__) */
 
 #ifdef __UIQ__
 # include <qikon.hrh>
@@ -42,9 +42,9 @@
 #include "PerlUi.hrh"
 #include "PerlUi.rsg"
 
-#ifdef __SERIES80__
+#if defined(__SERIES80__) || defined(__SERIES90__)
 #include "Eikon.rsg"
-#endif /* #ifdef __SERIES80__ */
+#endif /* #if defined(__SERIES80__) || defined(__SERIES90__) */
 
 #include "EXTERN.h"
 #include "perl.h"
@@ -74,9 +74,9 @@ EXPORT_C TBool CPerlUi::OkCancelDialogL(TDesC& aMessage)
     dlg->SetTextL(aMessage);
     return dlg->RunDlgLD() == EAknSoftkeyOk;
 #endif /* #ifdef __SERIES60__ */
-#ifdef __SERIES80__
+#if defined(__SERIES80__) || defined(__SERIES90__)
     return CCknConfirmationDialog::RunDlgWithDefaultIconLD(aMessage, R_EIK_BUTTONS_CANCEL_OK);
-#endif /* #ifdef __SERIES80__ */
+#endif /* #if defined(__SERIES80__) || defined(__SERIES90__) */
 #ifdef __UIQ__
     CEikDialog* dlg = new (ELeave) CEikDialog();
     return dlg->ExecuteLD(R_PERLUI_OK_CANCEL_DIALOG) == EEikBidOk;
@@ -92,9 +92,9 @@ EXPORT_C TBool CPerlUi::YesNoDialogL(TDesC& aMessage)
     dlg->SetTextL(aMessage);
     return dlg->RunDlgLD() == EAknSoftkeyOk;
 #endif /* #ifdef __SERIES60__ */
-#ifdef __SERIES80__
+#if defined(__SERIES80__) || defined(__SERIES90__)
     return CCknConfirmationDialog::RunDlgWithDefaultIconLD(aMessage, R_EIK_BUTTONS_NO_YES);
-#endif /* #ifdef __SERIES80__ */
+#endif /* #if defined(__SERIES80__) || defined(__SERIES90__) */
 #ifdef __UIQ__
     CEikDialog* dlg = new (ELeave) CEikDialog();
     return dlg->ExecuteLD(R_PERLUI_YES_NO_DIALOG) == EEikBidOk;
@@ -107,9 +107,9 @@ EXPORT_C void CPerlUi::InformationNoteL(TDesC& aMessage)
     CAknInformationNote* note = new (ELeave) CAknInformationNote;
     note->ExecuteLD(aMessage);
 #endif /* #ifdef __SERIES60__ */
-#if defined(__SERIES80__) || defined(__UIQ__)
+#if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__)
     CEikonEnv::Static()->InfoMsg(aMessage);
-#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
+#endif /* #if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__) */
 }
 
 EXPORT_C TInt CPerlUi::WarningNoteL(TDesC& aMessage)
@@ -118,13 +118,13 @@ EXPORT_C TInt CPerlUi::WarningNoteL(TDesC& aMessage)
     CAknWarningNote* note = new (ELeave) CAknWarningNote;
     return note->ExecuteLD(aMessage);
 #endif /* #ifdef __SERIES60__ */
-#if defined(__SERIES80__) || defined(__UIQ__)
+#if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__)
     CEikonEnv::Static()->AlertWin(aMessage);
     return ETrue;
-#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
+#endif /* #if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__) */
 }
 
-#if defined(__SERIES80__) || defined(__UIQ__)
+#if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__)
 
 CPerlUiTextQueryDialog::CPerlUiTextQueryDialog(HBufC*& aBuffer) :
   iData(aBuffer)
@@ -147,7 +147,7 @@ void CPerlUiTextQueryDialog::PreLayoutDynInitL()
 /* TODO: OfferKeyEventL() so that newline can be seen as 'OK'.
  * Or a hotkey for the button? */
 
-#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
+#endif /* #if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__) */
 
 EXPORT_C TBool CPerlUi::TextQueryDialogL(const TDesC& aTitle, const TDesC& aPrompt, TDes& aData, const TInt aMaxLength)
 {
@@ -158,7 +158,7 @@ EXPORT_C TBool CPerlUi::TextQueryDialogL(const TDesC& aTitle, const TDesC& aProm
     dlg->SetMaxLength(aMaxLength);
     return dlg->ExecuteLD(R_PERLUI_TEXT_QUERY_DIALOG);
 #endif /* #ifdef __SERIES60__ */
-#if defined(__SERIES80__) || defined(__UIQ__)
+#if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__)
     HBufC* data = NULL;
     CPerlUiTextQueryDialog* dlg =
       new (ELeave) CPerlUiTextQueryDialog(data);
@@ -170,7 +170,7 @@ EXPORT_C TBool CPerlUi::TextQueryDialogL(const TDesC& aTitle, const TDesC& aProm
         return ETrue;
     }
     return EFalse;
-#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
+#endif /* #if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__) */
 }
 
 EXPORT_C TBool CPerlUi::FileQueryDialogL(TDes& aFilename)
@@ -179,7 +179,7 @@ EXPORT_C TBool CPerlUi::FileQueryDialogL(TDes& aFilename)
   return AknCommonDialogs::RunSelectDlgLD(aFilename,
                                           R_PERLUI_FILE_SELECTION_DIALOG);
 #endif /* #ifdef __SERIES60__ */
-#ifdef __SERIES80__
+#if defined(__SERIES80__) || defined(__SERIES90__)
   if (CCknOpenFileDialog::RunDlgLD(aFilename,
                                     CCknFileListDialogBase::EShowAllDrives
                                    |CCknFileListDialogBase::EShowSystemFilesAndFolders
@@ -194,7 +194,7 @@ EXPORT_C TBool CPerlUi::FileQueryDialogL(TDes& aFilename)
       CEikonEnv::Static()->InfoMsg(_L("File not found"));
   }
   return EFalse;
-#endif /* #ifdef __SERIES80__ */
+#endif /* #if defined(__SERIES80__) || defined(__SERIES90__) */
 #ifdef __UIQ__
   return EFalse; // No filesystem access in UIQ 2.x!
 #endif /* #ifdef __UIQ__ */
@@ -218,7 +218,7 @@ EXPORT_C void CPerlUiAppUi::HandleCommandL(TInt aCommand)
 
 #endif /* #ifdef __SERIES60__ */
 
-#if defined(__SERIES80__) || defined(__UIQ__)
+#if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__)
 
 EXPORT_C void CPerlUiAppView::HandleCommandL(TInt aCommand, CPerlUiAppUi* aAppUi) {
     aAppUi->DoHandleCommandL(aCommand);
@@ -236,7 +236,7 @@ EXPORT_C void CPerlUiAppUi::HandleCommandL(TInt aCommand) {
     }
 }
 
-#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
+#endif /* #if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__) */
 
 CPerlUiAppView* CPerlUiAppView::NewL(const TRect& aRect)
 {

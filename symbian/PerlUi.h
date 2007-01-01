@@ -11,14 +11,14 @@
 # include <akndoc.h>
 #endif /* #ifdef __SERIES60__ */
 
-#ifdef __SERIES80__
+#if defined(__SERIES80__) || defined(__SERIES90__)
 # include <eikapp.h>
 # include <eikappui.h>
 # include <eikdoc.h>
 # include <eikbctrl.h>
 # include <eikgted.h>
 # include <eikdialg.h>
-#endif /* #ifdef __SERIES60__ */
+#endif /* #if defined(__SERIES80__) || defined(__SERIES90__) */
 
 #ifdef __UIQ__
 # include <qikapplication.h>
@@ -38,13 +38,13 @@
 # define CgPerlUiAppView     CCoeControl
 #endif /* #ifdef __SERIES60__ */
 
-#ifdef __SERIES80__
+#if defined(__SERIES80__) || defined(__SERIES90__)
 # define CgPerlUiDocument    CEikDocument
 # define CgPerlUiApplication CEikApplication
 # define CgPerlUiAppUi       CEikAppUi
 # define CgPerlUiNoteDialog  CCknFlashingDialog
 # define CgPerlUiAppView     CEikBorderedControl
-#endif /* #ifdef __SERIES60__ */
+#endif /* #if defined(__SERIES80__) || defined(__SERIES90__) */
 
 #ifdef __UIQ__
 # define CgPerlUiDocument    CEikDocument
@@ -80,14 +80,14 @@ class CPerlUiAppView : public CgPerlUiAppView
     static CPerlUiAppView* NewLC(const TRect& aRect);
     ~CPerlUiAppView();
     void Draw(const TRect& aRect) const;
-#if defined(__SERIES80__) || defined(__UIQ__)
+#if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__)
     IMPORT_C void HandleCommandL(TInt aCommand, CPerlUiAppUi* aAppUi);
-#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
+#endif /* #if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__) */
   private:
     void ConstructL(const TRect& aRect);
 };
 
-#if defined(__SERIES80__) || defined(__UIQ__)
+#if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__)
 
 class CPerlUiTextQueryDialog : public CEikDialog
 {
@@ -104,7 +104,7 @@ class CPerlUiTextQueryDialog : public CEikDialog
     TBool OkToExitL(TInt aKeycode);
 };
 
-#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
+#endif /* #if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__) */
 
 class CPerlUi : public CgPerlUiAppUi
 {

@@ -5521,13 +5521,14 @@ Perl_my_clearenv(pTHX)
 
 #ifdef PERL_IMPLICIT_CONTEXT
 
-/* implements the MY_CXT_INIT macro. The first time a module is loaded,
+/* Implements the MY_CXT_INIT macro. The first time a module is loaded,
 the global PL_my_cxt_index is incremented, and that value is assigned to
 that module's static my_cxt_index (who's address is passed as an arg).
 Then, for each interpreter this function is called for, it makes sure a
 void* slot is available to hang the static data off, by allocating or
 extending the interpreter's PL_my_cxt_list array */
 
+#ifndef PERL_GLOBAL_STRUCT_PRIVATE
 void *
 Perl_my_cxt_init(pTHX_ int *index, size_t size)
 {
@@ -5558,7 +5559,70 @@ Perl_my_cxt_init(pTHX_ int *index, size_t size)
     Zero(p, size, char);
     return p;
 }
-#endif
+
+#else /* #ifndef PERL_GLOBAL_STRUCT_PRIVATE */
+
+int
+Perl_my_cxt_index(pTHX_ const char *my_cxt_key)
+{
+    dVAR;
+    int index;
+
+    for (index = 0; index < PL_my_cxt_index; index++) {
+	const char *key = PL_my_cxt_keys[index];
+	/* try direct pointer compare first - there are chances to success,
+	 * and it's much faster.
+	 */
+	if ((key == my_cxt_key) || strEQ(key, my_cxt_key))
+	    return index;
+    }
+    return -1;
+}
+
+void *
+Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
+{
+    dVAR;
+    void *p;
+    int index;
+
+    index = Perl_my_cxt_index(aTHX_ my_cxt_key);
+    if (index == -1) {
+	/* this module hasn't been allocated an index yet */
+	MUTEX_LOCK(&PL_my_ctx_mutex);
+	index = PL_my_cxt_index++;
+	MUTEX_UNLOCK(&PL_my_ctx_mutex);
+    }
+
+    /* make sure the array is big enough */
+    if (PL_my_cxt_size <= index) {
+	int old_size = PL_my_cxt_size;
+	int i;
+	if (PL_my_cxt_size) {
+	    while (PL_my_cxt_size <= index)
+		PL_my_cxt_size *= 2;
+	    Renew(PL_my_cxt_list, PL_my_cxt_size, void *);
+	    Renew(PL_my_cxt_keys, PL_my_cxt_size, const char *);
+	}
+	else {
+	    PL_my_cxt_size = 16;
+	    Newx(PL_my_cxt_list, PL_my_cxt_size, void *);
+	    Newx(PL_my_cxt_keys, PL_my_cxt_size, const char *);
+	}
+	for (i = old_size; i < PL_my_cxt_size; i++) {
+	    PL_my_cxt_keys[i] = 0;
+	    PL_my_cxt_list[i] = 0;
+	}
+    }
+    PL_my_cxt_keys[index] = my_cxt_key;
+    /* newSV() allocates one more than needed */
+    p = (void*)SvPVX(newSV(size-1));
+    PL_my_cxt_list[index] = p;
+    Zero(p, size, char);
+    return p;
+}
+#endif /* #ifndef PERL_GLOBAL_STRUCT_PRIVATE */
+#endif /* PERL_IMPLICIT_CONTEXT */
 
 #ifndef HAS_STRLCAT
 Size_t

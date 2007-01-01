@@ -1788,6 +1788,9 @@
 #define my_clearenv		Perl_my_clearenv
 #endif
 #ifdef PERL_IMPLICIT_CONTEXT
+#ifdef PERL_GLOBAL_STRUCT_PRIVATE
+#else
+#endif
 #endif
 #ifndef HAS_STRLCAT
 #endif
@@ -4000,6 +4003,9 @@
 #define my_clearenv()		Perl_my_clearenv(aTHX)
 #endif
 #ifdef PERL_IMPLICIT_CONTEXT
+#ifdef PERL_GLOBAL_STRUCT_PRIVATE
+#else
+#endif
 #endif
 #ifndef HAS_STRLCAT
 #endif

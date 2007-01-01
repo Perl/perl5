@@ -28,6 +28,9 @@ if ($ENV{PATH} =~ m!\\Symbian\\(.+?)\\(.+?)\\Epoc32\\gcc\\bin!i) {
     } elsif ($SDK_NAME =~ m!S80_DP2_0_SDK!) {
 	$SDK_VARIANT = 'S80';
 	$SDK_VERSION = $ENV{S80SDK} = '2.0';
+    } elsif ($SDK_NAME =~ m!Nokia_7710_SDK!) {
+	$SDK_VARIANT = 'S90';
+	$SDK_VERSION = $ENV{S90SDK} = '1.1';
     }
 } elsif ($ENV{PATH} =~ m!\\Symbian\\UIQ_(\d)(\d)\\Epoc32\\gcc\\bin!i) {
     $SDK_NAME    = 'UIQ';
@@ -45,7 +48,7 @@ if ($ENV{PATH} =~ m!\\Symbian\\(.+?)\\(.+?)\\Epoc32\\gcc\\bin!i) {
 if (open(GCC, "gcc -v 2>&1 |")) {
    while (<GCC>) {
      # print;
-     if (/Reading specs from ((?:C:)?\\Symbian.+?)\\Epoc32\\/i) {
+     if (/Reading specs from (.+?)\\Epoc32\\/i) {
        $SYMBIAN_ROOT = $1;
        # The S60SDK tells the Series 60 SDK version.
        if ($ENV{S60SDK}) {

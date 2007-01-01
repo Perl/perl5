@@ -31,6 +31,7 @@ my $WIN = $ENV{WIN} ; # 'wins', 'winscw' (from sdk.pl)
 my $ARM = 'thumb';    # 'thumb', 'armv5'
 my $S60SDK = $ENV{S60SDK}; # qw(1.2 2.0 2.1 2.6) (from sdk.pl)
 my $S80SDK = $ENV{S80SDK}; # qw(2.0) (from sdk.pl)
+my $S90SDK = $ENV{S90SDK}; # qw(1.1) (from sdk.pl)
 my $UIQSDK = $ENV{UIQSDK}; # qw(2.0 2.1) (from sdk.pl)
 
 my $UREL = $ENV{UREL}; # from sdk.pl
@@ -40,7 +41,7 @@ my $UARM = $ENV{UARM}; # from sdk.pl
 die "$0: SDK not recognized\n"
   if !defined($SYMBIAN_VERSION) ||
      !defined($SDK_VERSION) ||
-     (!defined($S60SDK) && !defined($S80SDK) && !defined($UIQSDK));
+     (!defined($S60SDK) && !defined($S80SDK) && !defined($S90SDK) && !defined($UIQSDK));
 
 die "$0: does not know which Windows compiler to use\n"
     unless defined $WIN;
@@ -86,6 +87,9 @@ __EOF__
 	    print $fh "MACRO\t__SERIES80_1X__\n" if $S80SDK =~ /^1\./;
 	    print $fh "MACRO\t__SERIES80_2X__\n" if $S80SDK =~ /^2\./;
 	}
+        if ($SDK_VARIANT eq 'S90') {
+	    print $fh "MACRO\t__SERIES90__\n";
+	}
         if ($SDK_VARIANT eq 'UIQ') {
 	    print $fh "MACRO\t__UIQ__\n";
 	    print $fh "MACRO\t__UIQ_1X__\n" if $UIQSDK =~ /^1\./;
@@ -95,6 +99,7 @@ __EOF__
         @c = map  { glob } qw(*.c);       # Find the .c files.
         @c = map  { lc } @c;              # Lowercase the names.
         @c = grep { !/malloc\.c/ } @c;    # Use the system malloc.
+        @c = grep { !/madly\.c/ } @c;     # mad is undef.
         @c = grep { !/main\.c/ } @c;      # main.c must be explicit.
         push @c, map { lc } @x;
         @c = map { s:^\.\./::; $_ } @c;    # Remove the leading ../
@@ -124,7 +129,7 @@ LIBRARY		hal.lib
 LIBRARY		estor.lib
 __EOF__
         }
-	if ($SDK_VARIANT =~ /^S[68]0$/) {
+	if ($SDK_VARIANT =~ /^S[689]0$/) {
             print $fh <<__EOF__;
 LIBRARY		commonengine.lib
 __EOF__
@@ -135,7 +140,7 @@ LIBRARY		avkon.lib
 LIBRARY		commondialogs.lib 
 __EOF__
         }
-	if (defined $S80SDK) {
+	if ((defined $S80SDK) or (defined $S90SDK)) {
 	    print $fh <<__EOF__;
 LIBRARY		eikctl.lib
 LIBRARY		eikcoctl.lib
@@ -211,6 +216,7 @@ sub load_config_sh {
                 my ( $var, $val ) = ( $1, $2 );
                 $val =~ s/x.y.z/$R_V_SV/gi;
                 $val =~ s/thumb/$ARM/gi;
+		$val = "C:$val" if (defined($S90SDK) and ($val =~ /^(\/|\\\\)system[\/\\]/i));
                 $val = "'$SYMBIAN_VERSION'" if $var eq 'osvers';
                 $val = "'$SDK_VERSION'"     if $var eq 'sdkvers';
                 $config{$var} = $val;
@@ -265,7 +271,7 @@ __EOF__
 sub create_DynaLoader_cpp {
     print "\text\\DynaLoader\\DynaLoader.cpp\n";
     system(
-q[perl -Ilib lib\ExtUtils\xsubpp ext\DynaLoader\dl_symbian.xs >ext\DynaLoader\DynaLoader.cpp]
+q[xsubpp ext\DynaLoader\dl_symbian.xs >ext\DynaLoader\DynaLoader.cpp]
       ) == 0
       or die "$0: creating DynaLoader.cpp failed: $!\n";
     push @unclean, 'ext\DynaLoader\DynaLoader.cpp';
@@ -282,6 +288,10 @@ sub create_symbian_port_h {
 	}
         if ($SDK_VARIANT eq 'S80') {
 	    $S80SDK =~ /^(\d+)\.(\d+)$/;
+	    ($sdkmajor, $sdkminor) = ($1, $2);
+	}
+        if ($SDK_VARIANT eq 'S90') {
+	    $S90SDK =~ /^(\d+)\.(\d+)$/;
 	    ($sdkmajor, $sdkminor) = ($1, $2);
 	}
         if ($SDK_VARIANT eq 'UIQ') {
@@ -315,7 +325,7 @@ __EOF__
 sub create_perlmain_c {
     print "\tperlmain.c\n";
     system(
-q[perl -ne "print qq[    char *file = __FILE__;\n] if /dXSUB_SYS/;print;print qq[    newXS(\"DynaLoader::boot_DynaLoader\", boot_DynaLoader, file);\n] if /dXSUB_SYS/;print qq[EXTERN_C void boot_DynaLoader (pTHX_ CV* cv);\n] if /Do not delete this line/" miniperlmain.c > perlmain.c]
+q[perl -ne "print qq[    char *file = __FILE__;\n] if /dXSUB_SYS/;print unless /PERL_UNUSED_CONTEXT/;print qq[    newXS(\"DynaLoader::boot_DynaLoader\", boot_DynaLoader, file);\n] if /dXSUB_SYS/;print qq[EXTERN_C void boot_DynaLoader (pTHX_ CV* cv);\n] if /Do not delete this line/" miniperlmain.c > perlmain.c]
       ) == 0
       or die "$0: Creating perlmain.c failed: $!\n";
     push @unclean, 'perlmain.c';
@@ -329,16 +339,18 @@ sub create_PerlApp_pkg {
 qq[;Supports Series 60 v0.9\n(0x101F6F88), 0, 0, 0, {"Series60ProductID"}\n] :
             defined $S80SDK ?
 qq[;Supports Series 80 v2.0\n(0x101F8ED2), 0, 0, 0, {"Series80ProductID"}\n] :
+            defined $S90SDK ?
+qq[;Supports Series 90 v1.1\n(0x101FBE05), 0, 0, 0, {"Series90ProductID"}\n] :
             defined $UIQSDK && $SDK_VERSION =~  /^(\d)\.(\d)$/ ?
 qq[;Supports UIQ v2.1\n(0x101F617B), $1, $2, 0, {"UIQ21ProductID"}\n] :
             ";Supports Series NN";
 	my $APPS = $UREL;
-	if (($SDK_VARIANT eq 'S60' && $SDK_VERSION ne '1.2' || $WIN eq 'winscw') || defined $S80SDK) { # Do only if not in S60 1.2 VC.
+	if (($SDK_VARIANT eq 'S60' && $SDK_VERSION ne '1.2' || $WIN eq 'winscw') || defined $S80SDK || defined $S90SDK) { # Do only if not in S60 1.2 VC.
 	    $APPS =~ s!\\epoc32\\release\\(.+)\\$UARM$!\\epoc32\\data\\z\\system\\apps\\PerlApp!i;
 	}
 	# TODO: in S60 3.0 there will be no more recognizers.
 	my $mdl = qq["$UREL\\PerlRecog.mdl"-"!:\\system\\recogs\\PerlRecog.mdl";];
-	my $AIF = $SDK_VARIANT =~ /^S[68]0/ ? qq["$APPS\\PerlApp.aif"-"!:\\system\\apps\\PerlApp\\PerlApp.aif"] : "";
+	my $AIF = $SDK_VARIANT =~ /^S[689]0/ ? qq["$APPS\\PerlApp.aif"-"!:\\system\\apps\\PerlApp\\PerlApp.aif"] : "";
         print PERLAPP_PKG <<__EOF__;
 ; !!!!!!   DO NOT EDIT THIS FILE   !!!!!!
 ; This file is built by symbian\\config.pl.
@@ -365,7 +377,11 @@ __EOF__
         if ( open( DEMOS, "perl symbian\\demo_pl list |" ) ) {
             while (<DEMOS>) {
                 chomp;
-                print PERLAPP_PKG qq["$_"-"!:\\Perl\\$_"\n];
+		if (defined $S90SDK) {
+                    print PERLAPP_PKG qq["$_"-"!:\\Mydocs\\Perl\\$_"\n];
+		} else {
+                    print PERLAPP_PKG qq["$_"-"!:\\Perl\\$_"\n];
+	        }
             }
             close(DEMOS);
         }
@@ -438,6 +454,15 @@ LIBRARY		eikdlg.lib
 LIBRARY		ckndlg.lib
 __EOF__
     }
+    if (defined $S90SDK) {
+        push @MACRO, '__SERIES90__';
+	push @LIB, <<__EOF__;
+LIBRARY		eikctl.lib
+LIBRARY		eikcoctl.lib
+LIBRARY		eikdlg.lib
+LIBRARY		ckndlg.lib
+__EOF__
+    }
     if (defined $UIQSDK) {
         push @MACRO, '__UIQ__';
         push @MACRO, '__UIQ_1X__' if $UIQSDK =~ /^1\./;
@@ -488,7 +513,7 @@ MACRO             $macro
 __EOF__
         }
     }
-    if ($SDK_VARIANT =~ /^S[68]0$/) {
+    if ($SDK_VARIANT =~ /^S[689]0$/) {
         print PERLAPP_MMP <<__EOF__;
 AIF               PerlApp.aif . PerlAppAif.rss 
 __EOF__
@@ -641,7 +666,17 @@ XSBOPT	= --win=\$(WIN) --arm=\$(ARM)
 
 lib\\Config.pm:
 	copy symbian\\config.sh config.sh
+__EOF__
+    if (defined $S90SDK) {
+        print MAKEFILE <<__EOF__;
+	perl -pi.bak -e "s:x\\.y\\.z+:$R_V_SV:g; s!='(\\\\\\\\system)!='C:\\1!" config.sh
+__EOF__
+    } else {
+        print MAKEFILE <<__EOF__;
 	perl -pi.bak -e "s:x\\.y\\.z+:$R_V_SV:g" config.sh
+__EOF__
+    };
+    print MAKEFILE <<__EOF__;
 	perl \$(XLIB) configpm --cross=symbian
 	copy xlib\\symbian\\Config.pm lib\\Config.pm
 	perl -pi.bak -e "s:x\\.y\\.z:$R_V_SV:g" lib\\Config.pm
@@ -682,7 +717,7 @@ perl${VERSION}lib.sis perllib.sis:	\$(PM)
 perl${VERSION}ext.sis perlext.sis:	perldll_arm buildext_sis
 	perl symbian\\makesis.pl perl${VERSION}ext
 
-EXT = 	Compress::Zlib Cwd Data::Dumper Devel::Peek Digest::MD5 Errno Fcntl File::Glob Filter::Util::Call IO List::Util MIME::Base64 PerlIO::scalar PerlIO::via SDBM_File Socket Storable Time::HiRes XSLoader attrs
+EXT = 	Compress::Raw::Zlib Cwd Data::Dumper Devel::Peek Digest::MD5 Errno Fcntl File::Glob Filter::Util::Call IO List::Util MIME::Base64 PerlIO::scalar PerlIO::via SDBM_File Socket Storable Time::HiRes XSLoader attrs
 
 buildext: perldll symbian\\xsbuild.pl lib\\Config.pm
 	perl \$(XLIB) symbian\\xsbuild.pl \$(XSBOPT) \$(EXT)

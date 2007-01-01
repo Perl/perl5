@@ -2996,6 +2996,7 @@ and C<refcounted_he_free> iterates onto the parent node.
 
 void
 Perl_refcounted_he_free(pTHX_ struct refcounted_he *he) {
+    dVAR;
     PERL_UNUSED_CONTEXT;
 
     while (he) {

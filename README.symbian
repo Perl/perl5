@@ -32,9 +32,9 @@ mainly as demonstrations.
 
     These instructions have been tested under various Nokia Series 60
     Symbian SDKs (1.2 to 2.6, 2.8 should also work, 1.2 compiles but
-    does not work), and Series 80 2.0.  You can get the SDKs from
-    Forum Nokia (http://www.forum.nokia.com/).  A very rough port
-    ("it compiles") to UIQ 2.1 has also been made.
+    does not work), Series 80 2.0, and Nokia 7710 (Series 90) SDK.
+    You can get the SDKs from Forum Nokia (http://www.forum.nokia.com/).
+    A very rough port ("it compiles") to UIQ 2.0 has also been made.
 
     A prerequisite for any of the SDKs is to install ActivePerl
     from ActiveState, http://www.activestate.com/Products/ActivePerl/
@@ -43,7 +43,7 @@ mainly as demonstrations.
     the Metrowerks CodeWarrior installed (2.8 and 3.0 were used in testing)
     or the Microsoft Visual C++ 6.0 installed (SP3 minimum, SP5 recommended).
 
-    Note that for example the Serie s60 2.0 VC SDK installation talks
+    Note that for example the Series 60 2.0 VC SDK installation talks
     about ActivePerl build 518, which does no more (as of mid-2005) exist
     at the ActiveState website.  The ActivePerl 5.8.4 build 810 was
     used successfully for compiling Perl on Symbian.  The 5.6.x ActivePerls
@@ -85,9 +85,8 @@ mainly as demonstrations.
     the VC6 makefiles and workspaces.  "make vc6" will compile for the VC6,
     and "make cw" for the CodeWarrior.
 
-    The following Series 60, Series 80, and UIQ SDK and compiler
-    configurations and Nokia phones that were tested at some point in time
-    (+ = compiled and PerlApp run, - = not),
+    The following SDK and compiler configurations and Nokia phones were
+    tested at some point in time (+ = compiled and PerlApp run, - = not),
     both for Perl 5.8.x and 5.9.x:
 
         SDK     | VC | CW |
@@ -96,15 +95,16 @@ mainly as demonstrations.
         S60 2.0 | +  | +  | 6600
         S60 2.1 | -  | +  | 6670
         S60 2.6 | +  | +  | 6630    
-        S60 2.8 | -  | +  | (not tested in device)
+        S60 2.8 | -  | +  | (not tested in a device)
         S80 2.6 | -  | +  | 9300
-        UIQ 2.0 | -  | +  | (not tested in device)
+        S90 1.1 | +  | -  | 7710
+        UIQ 2.0 | -  | +  | (not tested in a device)
 
+    (*) Compiles but does not work, unfortunately.
 
     If you are using the 'make' directly, it is the GNU make from the SDKs,
     and it will invoke the right make commands for the Windows emulator
     build and the Arm target builds ('thumb' by default) as necessary.
-    (*) Compiles but does not work, unfortunately.
 
     The build scripts assume the 'absolute style' SDK installs under C:,
     the 'subst style' will not work.
@@ -283,7 +283,7 @@ backslashes in doublequoted strings.
 The Perl DLL is installed in \System\Libs\.  The Perl libraries and
 extension DLLs are installed in \System\Libs\Perl\X.Y.Z\.  The PerlApp
 is installed in \System\Apps\, and the SIS also installs a couple of
-demo scripts in \Perl\.
+demo scripts in \Perl\ (C:\Mydocs\Perl\ on Nokia 7710).
 
 Note that the Symbian filesystem is very picky: it strongly prefers
 the \ instead of the /.
@@ -396,6 +396,15 @@ We maintain the binary incompatibility.
 
   - Perl 5.9.3 (patch level 26052)
   - adding a sample Symbian extension
+
+We maintain the binary incompatibility.
+
+0.4.1: December 2006
+
+  - Perl 5.9.4 (patch level 29622)
+  - added extensions: Compress/Raw/Zlib, Digest/SHA,
+    Hash/Util, Math/BigInt/FastCalc, Text/Soundex, Time/Piece
+  - port to S90 1.1 by Alexander Smishlajev
 
 We maintain the binary incompatibility.
 

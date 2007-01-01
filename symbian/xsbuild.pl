@@ -101,17 +101,17 @@ die "$0: Symbian version undefined\n" unless defined $SymbianVersion;
 
 $SymbianVersion =~ s:/:\\:g;
 
-die "$0: Symbian version '$SymbianVersion' not found\n"
-  unless -d "\\Symbian\\$SymbianVersion";
+#die "$0: Symbian version '$SymbianVersion' not found\n"
+#  unless -d "\\Symbian\\$SymbianVersion";
 
 die "$0: Perl version undefined\n" unless defined $PerlVersion;
 
+$PERLSDK = "$SYMBIAN_ROOT\\Perl\\$PerlVersion";
+
 die "$0: Perl version '$PerlVersion' not found\n"
-  if !$CoreBuild && !-d "\\Symbian\\Perl\\$PerlVersion";
+  if !$CoreBuild && !-d $PERLSDK;
 
 print "Configuring with Symbian $SymbianVersion and Perl $PerlVersion...\n";
-
-$PERLSDK = "\\Symbian\\Perl\\$PerlVersion";
 
 $R_V_SV = $PerlVersion;
 
@@ -164,6 +164,7 @@ sub run_PL {
     }
     my $cmd;
     if ($CoreBuild) {
+	$ENV{PERL_CORE} = 1;
         # Problem: the Config.pm we have in $BUILDROOT\\lib carries the
         # version number of the Perl we are building, while the Perl
         # we are running might have some other version.  Solution:
@@ -268,6 +269,10 @@ sub write_mmp {
     if ($SDK_VARIANT eq 'S80') {
       push @{ $CONF{MACRO} }, '__SERIES80__'
 	unless grep { $_ eq '__SERIES80__' } @{ $CONF{MACRO} };
+    }
+    if ($SDK_VARIANT eq 'S90') {
+      push @{ $CONF{MACRO} }, '__SERIES90__'
+	unless grep { $_ eq '__SERIES90__' } @{ $CONF{MACRO} };
     }
     if ($SDK_VARIANT eq 'UIQ') {
       push @{ $CONF{MACRO} }, '__UIQ__'
@@ -472,14 +477,14 @@ sub xsconfig {
         }
     }
     if ( my @c = glob("*.c *.cpp */*.c */*.cpp") ) {
-	@c = grep { ! m:^zlib-src/: } @c if $ext eq 'ext\Compress\Zlib';
+	@c = grep { ! m:^zlib-src/: } @c if $ext eq 'ext\Compress\Raw\Zlib';
         for my $c (@c) {
             $c =~ s:/:\\:g;
             $src{$c}++;
         }
     }
     if ( my @h = glob("*.h */*.h") ) {
-        @h = grep { ! m:^zlib-src/: } @h if $ext eq 'ext\Compress\Zlib';
+        @h = grep { ! m:^zlib-src/: } @h if $ext eq 'ext\Compress\Raw\Zlib';
         for my $h (@h) {
             $h =~ s:/:\\:g;
             $h = dirname($h);
@@ -685,7 +690,7 @@ __EOF__
 
 sub update_cwd {
     $CWD = getcwd();
-    $CWD =~ s!^[CD]:!!i;
+    $CWD =~ s!^[A-Z]:!!i;
     $CWD =~ s!/!\\!g;
 }
 
@@ -901,7 +906,7 @@ __EOF__
                       or die "$0: make distclean failed\n";
                 }
             }
-	    if ( $ext eq "ext\\Compress\\Zlib" ) {
+	    if ( $ext eq "ext\\Compress\\Raw\\Zlib" ) {
 		my @bak;
 		find( sub { push @bak, $File::Find::name if /\.bak$/ }, "." );
 		unlink(@bak) if @bak;

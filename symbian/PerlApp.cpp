@@ -77,7 +77,7 @@ TUid CPerlAppApplication::AppDllUid() const
     return KPerlAppUid;
 }
 
-enum TPerlAppPanic 
+enum TPerlAppPanic
 {
     EPerlAppCommandUnknown = 1
 };
@@ -115,12 +115,12 @@ static TBool IsInInbox(TFileName aFileName)
 
 static TBool IsPerlModule(TParsePtrC aParsed)
 {
-    return aParsed.Ext().CompareF(_L(".pm")) == 0; 
+    return aParsed.Ext().CompareF(_L(".pm")) == 0;
 }
 
 static TBool IsPerlScript(TParsePtrC aParsed)
 {
-    return aParsed.Ext().CompareF(_L(".pl")) == 0; 
+    return aParsed.Ext().CompareF(_L(".pl")) == 0;
 }
 
 static void CopyFromInboxL(RFs aFs, const TFileName& aSrc, const TFileName& aDst)
@@ -182,7 +182,7 @@ static TBool FindPerlPackageName(TPeekBuffer aPeekBuffer, TInt aOff, TFileName& 
                         isALPHA(aPeekBuffer[j])) {
                         while (j < n &&
                                isALNUM(aPeekBuffer[j]) &&
-                               i < m) 
+                               i < m)
                             aFn[i++] = aPeekBuffer[j++];
                     }
                 }
@@ -238,7 +238,7 @@ static TBool InstallStuffL(const TFileName &aSrc, TParse aDrive, TParse aFile, T
 {
     TFileName aDst;
     TPtrC drive  = aDrive.Drive();
-    TPtrC namext = aFile.NameAndExt(); 
+    TPtrC namext = aFile.NameAndExt();
 
     aDst.Format(_L("%S%S%S"), &drive, &KScriptPrefix, &namext);
     if (!IsPerlScript(aDst) && !LooksLikePerlL(aPeekBuffer)) {
@@ -266,7 +266,7 @@ static TBool RunStuffL(const TFileName& aScriptName, TPeekBuffer aPeekBuffer)
 
         if (isModule)
             message.Format(_L("Really run module %S?"), &aScriptName);
-        else 
+        else
             message.Format(_L("Run %S?"), &aScriptName);
         if (CPerlUi::YesNoDialogL(message))
             DoRunScriptL(aScriptName);
@@ -435,9 +435,9 @@ void CPerlAppAppUi::DoHandleCommandL(TInt aCommand) {
 #ifdef __SERIES60__
             _LIT(prompt, "Oneliner:");
 #endif /* #ifdef __SERIES60__ */
-#if defined(__SERIES80__) || defined(__UIQ__)
+#if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__)
             _LIT(prompt, "Code:"); // The title has "Oneliner" already.
-#endif /* #if defined(__SERIES80__) || defined(__UIQ__) */
+#endif /* #if defined(__SERIES80__) || defined(__SERIES90__) || defined(__UIQ__) */
             CPerlAppAppUi* cAppUi =
               static_cast<CPerlAppAppUi*>(CEikonEnv::Static()->EikAppUi());
             if (CPerlUi::TextQueryDialogL(_L("Oneliner"),
@@ -450,16 +450,26 @@ void CPerlAppAppUi::DoHandleCommandL(TInt aCommand) {
                 CnvUtfConverter::ConvertFromUnicodeToUtf8(utf8,
                                                           cAppUi->iOneLiner);
                 CPerlBase* perl = CPerlBase::NewInterpreterLC();
-                int argc = 3;
-                char **argv = (char**) malloc(argc * sizeof(char *));
+#ifdef __SERIES90__
+		int argc = 5;
+#else
+		int argc = 3;
+#endif
+		char **argv = (char**) malloc(argc * sizeof(char *));
                 User::LeaveIfNull(argv);
 
                 TCleanupItem argvCleanupItem = TCleanupItem(free, argv);
                 CleanupStack::PushL(argvCleanupItem);
                 argv[0] = (char *) "perl";
                 argv[1] = (char *) "-le";
+#ifdef __SERIES90__
+                argv[2] = (char *) "unshift @INC, 'C:/Mydocs';";
+                argv[3] = (char *) "-e";
+                argv[4] = (char *) utf8.PtrZ();
+#else
                 argv[2] = (char *) utf8.PtrZ();
-                perl->ParseAndRun(argc, argv);
+#endif
+		perl->ParseAndRun(argc, argv);
                 CleanupStack::PopAndDestroy(2, perl);
             }
         }
@@ -497,7 +507,7 @@ void CPerlAppAppUi::DoHandleCommandL(TInt aCommand) {
     }
 }
 
-CApaDocument* CPerlAppApplication::CreateDocumentL() 
+CApaDocument* CPerlAppApplication::CreateDocumentL()
 {
     CPerlAppDocument* cDoc = new (ELeave) CPerlAppDocument(*this);
     return cDoc;
@@ -524,7 +534,7 @@ CFileStore* CPerlAppDocument::OpenFileL(TBool aDoOpen, const TDesC& aFileName, R
 
 #endif // #ifndef PerlAppMinimal
 
-EXPORT_C CApaApplication* NewApplication() 
+EXPORT_C CApaApplication* NewApplication()
 {
     return new CPerlAppApplication;
 }

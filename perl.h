@@ -2066,6 +2066,12 @@ int isnan(double d);
 #   endif
 #endif
 
+#if defined(_MSC_VER) && (_MSC_VER >= 1300) && (_MSC_VER < 1400) && (WINVER < 0x0500)
+/* VC7 or 7.1, building with pre-VC7 runtime libraries. */
+long _ftol( double ); /* Defined by VC6 C libs. */
+long _ftol2( double dblSource ) { return _ftol( dblSource ); }
+#endif
+
 /* The default is to use Perl's own atof() implementation (in numeric.c).
  * Usually that is the one to use but for some platforms (e.g. UNICOS)
  * it is however best to use the native implementation of atof.
@@ -5311,6 +5317,39 @@ typedef struct am_table_short AMTS;
 
 #if defined(PERL_IMPLICIT_CONTEXT)
 
+#ifdef PERL_GLOBAL_STRUCT_PRIVATE
+
+/* This must appear in all extensions that define a my_cxt_t structure,
+ * right after the definition (i.e. at file scope).  The non-threads
+ * case below uses it to declare the data as static. */
+#define START_MY_CXT
+#define MY_CXT_INDEX Perl_my_cxt_index(aTHX_ MY_CXT_KEY)
+
+/* Creates and zeroes the per-interpreter data.
+ * (We allocate my_cxtp in a Perl SV so that it will be released when
+ * the interpreter goes away.) */
+#define MY_CXT_INIT \
+	my_cxt_t *my_cxtp = \
+	    (my_cxt_t*)Perl_my_cxt_init(aTHX_ MY_CXT_KEY, sizeof(my_cxt_t))
+#define MY_CXT_INIT_INTERP(my_perl) \
+	my_cxt_t *my_cxtp = \
+	    (my_cxt_t*)Perl_my_cxt_init(my_perl, MY_CXT_KEY, sizeof(my_cxt_t))
+
+/* This declaration should be used within all functions that use the
+ * interpreter-local data. */
+#define dMY_CXT	\
+	my_cxt_t *my_cxtp = (my_cxt_t *)PL_my_cxt_list[MY_CXT_INDEX]
+#define dMY_CXT_INTERP(my_perl)	\
+	my_cxt_t *my_cxtp = (my_cxt_t *)(my_perl)->Imy_cxt_list[MY_CXT_INDEX]
+
+/* Clones the per-interpreter data. */
+#define MY_CXT_CLONE \
+	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
+	Copy(PL_my_cxt_list[MY_CXT_INDEX], my_cxtp, 1, my_cxt_t);\
+	PL_my_cxt_list[MY_CXT_INDEX] = my_cxtp				\
+
+#else /* #ifdef PERL_GLOBAL_STRUCT_PRIVATE */
+
 /* This must appear in all extensions that define a my_cxt_t structure,
  * right after the definition (i.e. at file scope).  The non-threads
  * case below uses it to declare the data as static. */
@@ -5338,6 +5377,8 @@ typedef struct am_table_short AMTS;
 	my_cxt_t *my_cxtp = (my_cxt_t*)SvPVX(newSV(sizeof(my_cxt_t)-1));\
 	Copy(PL_my_cxt_list[my_cxt_index], my_cxtp, 1, my_cxt_t);\
 	PL_my_cxt_list[my_cxt_index] = my_cxtp				\
+
+#endif /* #ifdef PERL_GLOBAL_STRUCT_PRIVATE */
 
 /* This macro must be used to access members of the my_cxt_t structure.
  * e.g. MYCXT.some_data */

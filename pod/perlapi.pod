@@ -5503,7 +5503,7 @@ to contain an C<SV*> and is stored as-is with its REFCNT incremented.
 
 (This is now used as a subroutine by C<sv_magic>.)
 
-	MAGIC *	sv_magicext(SV* sv, SV* obj, int how, MGVTBL *vtbl, const char* name, I32 namlen)
+	MAGIC *	sv_magicext(SV* sv, SV* obj, int how, const MGVTBL *vtbl, const char* name, I32 namlen)
 
 =for hackers
 Found in file sv.c

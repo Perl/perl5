@@ -4358,7 +4358,7 @@ to contain an C<SV*> and is stored as-is with its REFCNT incremented.
 =cut
 */
 MAGIC *	
-Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
+Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, const MGVTBL *vtable,
 		 const char* name, I32 namlen)
 {
     dVAR;
@@ -4420,7 +4420,7 @@ Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtable,
 	else
 	    mg->mg_ptr = (char *) name;
     }
-    mg->mg_virtual = vtable;
+    mg->mg_virtual = (MGVTBL *) vtable;
 
     mg_magical(sv);
     if (SvGMAGICAL(sv))
@@ -4447,7 +4447,7 @@ void
 Perl_sv_magic(pTHX_ register SV *sv, SV *obj, int how, const char *name, I32 namlen)
 {
     dVAR;
-    MGVTBL *vtable;
+    const MGVTBL *vtable;
     MAGIC* mg;
 
 #ifdef PERL_OLD_COPY_ON_WRITE
@@ -10298,6 +10298,7 @@ Perl_any_dup(pTHX_ void *v, const PerlInterpreter *proto_perl)
 ANY *
 Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 {
+    dVAR;
     ANY * const ss	= proto_perl->Tsavestack;
     const I32 max	= proto_perl->Tsavestack_max;
     I32 ix		= proto_perl->Tsavestack_ix;
@@ -11042,9 +11043,17 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     if (PL_my_cxt_size) {
 	Newx(PL_my_cxt_list, PL_my_cxt_size, void *);
 	Copy(proto_perl->Imy_cxt_list, PL_my_cxt_list, PL_my_cxt_size, void *);
+#ifdef PERL_GLOBAL_STRUCT_PRIVATE
+	Newx(PL_my_cxt_keys, PL_my_cxt_size, char *);
+	Copy(proto_perl->Imy_cxt_keys, PL_my_cxt_keys, PL_my_cxt_size, char *);
+#endif
     }
-    else
+    else {
 	PL_my_cxt_list	= (void**)NULL;
+#ifdef PERL_GLOBAL_STRUCT_PRIVATE
+	PL_my_cxt_keys	= (void**)NULL;
+#endif
+    }
     PL_modglobal	= hv_dup_inc(proto_perl->Imodglobal, param);
     PL_custom_op_names  = hv_dup_inc(proto_perl->Icustom_op_names,param);
     PL_custom_op_descs  = hv_dup_inc(proto_perl->Icustom_op_descs,param);

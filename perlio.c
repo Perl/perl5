@@ -2399,7 +2399,7 @@ PerlIO_cleanup(pTHX)
 
 void PerlIO_teardown(pTHX) /* Call only from PERL_SYS_TERM(). */
 {
-    
+    dVAR;
 #ifdef DEBUGGING
     {
 	/* By now all filehandles should have been closed, so any
@@ -2422,8 +2422,6 @@ void PerlIO_teardown(pTHX) /* Call only from PERL_SYS_TERM(). */
 	PL_perlio_fd_refcnt_size = 0;
     }
 }
-
-
 
 /*--------------------------------------------------------------------------------------*/
 /*

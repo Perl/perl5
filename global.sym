@@ -727,6 +727,7 @@ Perl_my_sprintf
 Perl_my_snprintf
 Perl_my_vsnprintf
 Perl_my_cxt_init
+Perl_my_cxt_index
 Perl_my_strlcat
 Perl_my_strlcpy
 # ex: set ro:

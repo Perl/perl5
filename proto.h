@@ -2263,7 +2263,7 @@ PERL_CALLCONV STRLEN	Perl_sv_len_utf8(pTHX_ SV* sv);
 PERL_CALLCONV void	Perl_sv_magic(pTHX_ SV* sv, SV* obj, int how, const char* name, I32 namlen)
 			__attribute__nonnull__(pTHX_1);
 
-PERL_CALLCONV MAGIC *	Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, MGVTBL *vtbl, const char* name, I32 namlen)
+PERL_CALLCONV MAGIC *	Perl_sv_magicext(pTHX_ SV* sv, SV* obj, int how, const MGVTBL *vtbl, const char* name, I32 namlen)
 			__attribute__nonnull__(pTHX_1);
 
 PERL_CALLCONV SV*	Perl_sv_mortalcopy(pTHX_ SV* oldsv)
@@ -4447,9 +4447,18 @@ PERL_CALLCONV int	Perl_my_vsnprintf(char *buffer, const Size_t len, const char *
 PERL_CALLCONV void	Perl_my_clearenv(pTHX);
 
 #ifdef PERL_IMPLICIT_CONTEXT
+#ifdef PERL_GLOBAL_STRUCT_PRIVATE
+PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ const char *my_cxt_key, size_t size)
+			__attribute__nonnull__(pTHX_1);
+
+PERL_CALLCONV int	Perl_my_cxt_index(pTHX_ const char *my_cxt_key)
+			__attribute__nonnull__(pTHX_1);
+
+#else
 PERL_CALLCONV void*	Perl_my_cxt_init(pTHX_ int *index, size_t size)
 			__attribute__nonnull__(pTHX_1);
 
+#endif
 #endif
 
 #ifndef HAS_STRLCAT

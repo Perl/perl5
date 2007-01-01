@@ -242,7 +242,9 @@ static MGVTBL not_defined_vtbl = {
 
 EXPLODE
 
+#ifndef SYMBIAN
 static HV *${c_subname}_missing = NULL;
+#endif
 
 DONT
 
@@ -318,8 +320,10 @@ EOBOOT
 					      'symbol_table',
 					      $add_symbol_subname);
     }
-    print $xs_fh "\n", $explosives ? "" : <<"EOBOOT";
+    print $xs_fh $explosives ? "\n" : <<"EOBOOT";
+#ifndef SYMBIAN
 	${c_subname}_missing = newHV();
+#endif
 EOBOOT
 
     print $xs_fh <<"EOBOOT";
@@ -372,11 +376,12 @@ EXPLODE
 		CvXSUB(cv) = NULL;
 		CvXSUBANY(cv).any_ptr = NULL;
 	    }
-
+#ifndef SYMBIAN
 	    if (!hv_store(${c_subname}_missing, value_for_notfound->name,
 			  value_for_notfound->namelen, &PL_sv_yes, 0))
 		Perl_croak($athx "Couldn't add key '%s' to missing_hash",
 			   value_for_notfound->name);
+#endif
 DONT
 
     print $xs_fh <<"EOBOOT";
@@ -456,6 +461,9 @@ $xs_subname(sv)
 	SV *		sv;
         const char *	s = SvPV(sv, len);
     PPCODE:
+#ifdef SYMBIAN
+	sv = newSVpvf("%"SVf" is not a valid $package_sprintf_safe macro", sv);
+#else
 	if (hv_exists(${c_subname}_missing, s, SvUTF8(sv) ? -(I32)len : (I32)len)) {
 	    sv = newSVpvf("Your vendor has not defined $package_sprintf_safe macro %" SVf
 			  ", used", sv);
@@ -463,7 +471,8 @@ $xs_subname(sv)
 	    sv = newSVpvf("%"SVf" is not a valid $package_sprintf_safe macro",
 			  sv);
 	}
-        PUSHs(sv_2mortal(sv));
+#endif
+	PUSHs(sv_2mortal(sv));
 DONT
 
 }

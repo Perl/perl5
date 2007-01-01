@@ -833,7 +833,7 @@ Apd	|STRLEN	|sv_len		|NULLOK SV* sv
 Apd	|STRLEN	|sv_len_utf8	|NULLOK SV* sv
 Apd	|void	|sv_magic	|NN SV* sv|NULLOK SV* obj|int how|NULLOK const char* name \
 				|I32 namlen
-Apd	|MAGIC *|sv_magicext	|NN SV* sv|NULLOK SV* obj|int how|NULLOK MGVTBL *vtbl \
+Apd	|MAGIC *|sv_magicext	|NN SV* sv|NULLOK SV* obj|int how|NULLOK const MGVTBL *vtbl \
 				|NULLOK const char* name|I32 namlen
 ApdaR	|SV*	|sv_mortalcopy	|NULLOK SV* oldsv
 ApdR	|SV*	|sv_newmortal
@@ -1749,7 +1749,12 @@ Apnod	|int	|my_vsnprintf	|NN char *buffer|const Size_t len|NN const char *format
 px	|void	|my_clearenv
 
 #ifdef PERL_IMPLICIT_CONTEXT
+#ifdef PERL_GLOBAL_STRUCT_PRIVATE
+Apo	|void*	|my_cxt_init	|NN const char *my_cxt_key|size_t size
+Apo	|int	|my_cxt_index	|NN const char *my_cxt_key
+#else
 Apo	|void*	|my_cxt_init	|NN int *index|size_t size
+#endif
 #endif
 
 #ifndef HAS_STRLCAT

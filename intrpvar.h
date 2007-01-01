@@ -545,6 +545,9 @@ PERLVARI(Idumper_fd, int, -1)
 #ifdef PERL_IMPLICIT_CONTEXT
 PERLVARI(Imy_cxt_size, int, 0)		/* size of PL_my_cxt_list */
 PERLVARI(Imy_cxt_list, void **, NULL) /* per-module array of MY_CXT pointers */
+#ifdef PERL_GLOBAL_STRUCT_PRIVATE
+PERLVARI(Imy_cxt_keys, const char **, NULL) /* per-module array of pointers to MY_CXT_KEY constants */
+#endif
 #endif
 
 #ifdef PERL_TRACK_MEMPOOL

@@ -1843,7 +1843,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
     SSize_t pos;
     STRLEN len;
     STRLEN ulen = 0;
-    MAGIC *found;
+    MAGIC* found;
 
     PERL_UNUSED_ARG(mg);
 
@@ -1859,7 +1859,7 @@ Perl_magic_setpos(pTHX_ SV *sv, MAGIC *mg)
         sv_force_normal_flags(lsv, 0);
 #endif
 	found = sv_magicext(lsv, NULL, PERL_MAGIC_regex_global, &PL_vtbl_mglob,
-			 NULL, 0);
+			    NULL, 0);
     }
     else if (!SvOK(sv)) {
 	found->mg_len = -1;

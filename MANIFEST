@@ -3225,6 +3225,7 @@ symbian/PerlUi.h		Symbian Perl UI class header
 symbian/PerlUi.hrh		Symbian Perl UI class resource header
 symbian/PerlUiS60.rss		Symbian app launcher resource definition
 symbian/PerlUiS80.rss		Symbian app launcher resource definition
+symbian/PerlUiS90.rss		Symbian app launcher resource definition
 symbian/PerlUiUIQ.rss		Symbian app launcher resource definition
 symbian/PerlUtil.cpp		Symbian Perl utility class
 symbian/PerlUtil.h		Symbian Perl utility class header
