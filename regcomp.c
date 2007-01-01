@@ -5065,7 +5065,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 		/*notreached*/
             { /* named and numeric backreferences */
                 I32 num;
-                char * parse_start = NULL;
             case '&':            /* (?&NAME) */
                 parse_start = RExC_parse - 1;
               named_recursion:
