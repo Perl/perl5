@@ -1620,7 +1620,7 @@ Perl_swash_init(pTHX_ const char* pkg, const char* name, SV *listsv, I32 minbits
     if (!SvROK(retval) || SvTYPE(SvRV(retval)) != SVt_PVHV) {
         if (SvPOK(retval))
 	    Perl_croak(aTHX_ "Can't find Unicode property definition \"%"SVf"\"",
-		       (void*)retval);
+		       SVfARG(retval));
 	Perl_croak(aTHX_ "SWASHNEW didn't return an HV ref");
     }
     return retval;

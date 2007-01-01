@@ -214,7 +214,7 @@ S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
     if (flags & HVhek_UTF8) {
 	SvUTF8_on(sv);
     }
-    Perl_croak(aTHX_ msg, (void*)sv);
+    Perl_croak(aTHX_ msg, SVfARG(sv));
 }
 
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot

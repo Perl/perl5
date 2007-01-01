@@ -394,7 +394,7 @@ Perl_gv_fetchmeth(pTHX_ HV *stash, const char *name, STRLEN len, I32 level)
 	    if (!basestash) {
 		if (ckWARN(WARN_MISC))
 		    Perl_warner(aTHX_ packWARN(WARN_MISC), "Can't locate package %"SVf" for @%s::ISA",
-			(void*)sv, hvname);
+			SVfARG(sv), hvname);
 		continue;
 	    }
 	    gv = gv_fetchmeth(basestash, name, len,
@@ -1903,7 +1903,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 	if (amtp && amtp->fallback >= AMGfallYES) {
 	  DEBUG_o( Perl_deb(aTHX_ "%s", SvPVX_const(msg)) );
 	} else {
-	  Perl_croak(aTHX_ "%"SVf, (void*)msg);
+	  Perl_croak(aTHX_ "%"SVf, SVfARG(msg));
 	}
 	return NULL;
       }

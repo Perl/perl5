@@ -4035,7 +4035,7 @@ PP(pp_hslice)
 
         if (lval) {
             if (!svp || *svp == &PL_sv_undef) {
-                DIE(aTHX_ PL_no_helem_sv, (void*)keysv);
+                DIE(aTHX_ PL_no_helem_sv, SVfARG(keysv));
             }
             if (localizing) {
 		if (HvNAME_get(hv) && isGV(*svp))

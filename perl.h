@@ -3047,6 +3047,8 @@ typedef pthread_key_t	perl_key;
 #  define SVf256 SVf_(256)
 #endif
 
+#define SVfARG(p) ((void*)(p))
+
 #ifndef vdNUMBER
 #  define vdNUMBER 1
 #endif

@@ -301,9 +301,9 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 		_sv = new_version(_sv);				\
 	    if ( vcmp(_sv,xssv) )					\
 		Perl_croak(aTHX_ "%s object version %"SVf" does not match %s%s%s%s %"SVf,\
-		      module, (void*)vstringify(xssv),			\
+		      module, SVfARG(vstringify(xssv)),			\
 		      vn ? "$" : "", vn ? module : "", vn ? "::" : "",	\
-		      vn ? vn : "bootstrap parameter", (void*)vstringify(_sv));\
+		      vn ? vn : "bootstrap parameter", SVfARG(vstringify(_sv)));\
 	}                                                               \
     } STMT_END
 #else

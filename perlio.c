@@ -819,7 +819,8 @@ perlio_mg_set(pTHX_ SV *sv, MAGIC *mg)
 	IO * const io = GvIOn((GV *) SvRV(sv));
 	PerlIO * const ifp = IoIFP(io);
 	PerlIO * const ofp = IoOFP(io);
-	Perl_warn(aTHX_ "set %" SVf " %p %p %p", (void*)sv, (void*)io, (void*)ifp, (void*)ofp);
+	Perl_warn(aTHX_ "set %" SVf " %p %p %p",
+		  SVfARG(sv), (void*)io, (void*)ifp, (void*)ofp);
     }
     return 0;
 }
@@ -831,7 +832,8 @@ perlio_mg_get(pTHX_ SV *sv, MAGIC *mg)
 	IO * const io = GvIOn((GV *) SvRV(sv));
 	PerlIO * const ifp = IoIFP(io);
 	PerlIO * const ofp = IoOFP(io);
-	Perl_warn(aTHX_ "get %" SVf " %p %p %p", (void*)sv, (void*)io, (void*)ifp, (void*)ofp);
+	Perl_warn(aTHX_ "get %" SVf " %p %p %p",
+		  SVfARG(sv), (void*)io, (void*)ifp, (void*)ofp);
     }
     return 0;
 }
@@ -839,14 +841,14 @@ perlio_mg_get(pTHX_ SV *sv, MAGIC *mg)
 static int
 perlio_mg_clear(pTHX_ SV *sv, MAGIC *mg)
 {
-    Perl_warn(aTHX_ "clear %" SVf, (void*)sv);
+    Perl_warn(aTHX_ "clear %" SVf, SVfARG(sv));
     return 0;
 }
 
 static int
 perlio_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
-    Perl_warn(aTHX_ "free %" SVf, (void*)sv);
+    Perl_warn(aTHX_ "free %" SVf, SVfARG(sv));
     return 0;
 }
 
@@ -871,7 +873,7 @@ XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
     mg = mg_find(sv, PERL_MAGIC_ext);
     mg->mg_virtual = &perlio_vtab;
     mg_magical(sv);
-    Perl_warn(aTHX_ "attrib %" SVf, (void*)sv);
+    Perl_warn(aTHX_ "attrib %" SVf, SVfARG(sv));
     for (i = 2; i < items; i++) {
 	STRLEN len;
 	const char * const name = SvPV_const(ST(i), len);

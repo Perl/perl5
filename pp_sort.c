@@ -1525,7 +1525,7 @@ PP(pp_sort)
 		    SV *tmpstr = sv_newmortal();
 		    gv_efullname3(tmpstr, gv, NULL);
 		    DIE(aTHX_ "Undefined sort subroutine \"%"SVf"\" called",
-			(void*)tmpstr);
+			SVfARG(tmpstr));
 		}
 		else {
 		    DIE(aTHX_ "Undefined subroutine in sort");

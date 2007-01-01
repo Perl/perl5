@@ -3339,7 +3339,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 
     if (SvIS_FREED(dstr)) {
 	Perl_croak(aTHX_ "panic: attempt to copy value %" SVf
-		   " to a freed scalar %p", (void*)sstr, (void*)dstr);
+		   " to a freed scalar %p", SVfARG(sstr), (void *)dstr);
     }
     SV_CHECK_THINKFIRST_COW_DROP(dstr);
     if (!sstr)
@@ -5386,7 +5386,7 @@ Perl_sv_len_utf8(pTHX_ register SV *sv)
 			PL_utf8cache = 0;
 			Perl_croak(aTHX_ "panic: sv_len_utf8 cache %"UVuf
 				   " real %"UVuf" for %"SVf,
-				   (UV) ulen, (UV) real, (void*)sv);
+				   (UV) ulen, (UV) real, SVfARG(sv));
 		    }
 		}
 	    }
@@ -5544,7 +5544,7 @@ S_sv_pos_u2b_cached(pTHX_ SV *sv, MAGIC **mgp, const U8 *const start,
 		PL_utf8cache = 0;
 		Perl_croak(aTHX_ "panic: sv_pos_u2b_cache cache %"UVuf
 			   " real %"UVuf" for %"SVf,
-			   (UV) boffset, (UV) real_boffset, (void*)sv);
+			   (UV) boffset, (UV) real_boffset, SVfARG(sv));
 	    }
 	}
 	boffset = real_boffset;
@@ -5666,7 +5666,7 @@ S_utf8_mg_pos_cache_update(pTHX_ SV *sv, MAGIC **mgp, STRLEN byte, STRLEN utf8,
 	    SAVEI8(PL_utf8cache);
 	    PL_utf8cache = 0;
 	    Perl_croak(aTHX_ "panic: utf8_mg_pos_cache_update cache %"UVuf
-		       " real %"UVuf" for %"SVf, (UV) utf8, (UV) realutf8, (void*)sv);
+		       " real %"UVuf" for %"SVf, (UV) utf8, (UV) realutf8, SVfARG(sv));
 	}
     }
 
@@ -5889,7 +5889,7 @@ Perl_sv_pos_b2u(pTHX_ register SV* sv, I32* offsetp)
 		PL_utf8cache = 0;
 		Perl_croak(aTHX_ "panic: sv_pos_b2u cache %"UVuf
 			   " real %"UVuf" for %"SVf,
-			   (UV) len, (UV) real_len, (void*)sv);
+			   (UV) len, (UV) real_len, SVfARG(sv));
 	    }
 	}
 	len = real_len;
@@ -7383,7 +7383,7 @@ Perl_sv_2io(pTHX_ SV *sv)
 	else
 	    io = 0;
 	if (!io)
-	    Perl_croak(aTHX_ "Bad filehandle: %"SVf, (void*)sv);
+	    Perl_croak(aTHX_ "Bad filehandle: %"SVf, SVfARG(sv));
 	break;
     }
     return io;
@@ -7475,7 +7475,7 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	    LEAVE;
 	    if (!GvCVu(gv))
 		Perl_croak(aTHX_ "Unable to create sub named \"%"SVf"\"",
-			   (void*)sv);
+			   SVfARG(sv));
 	}
 	return GvCVu(gv);
     }
@@ -9344,7 +9344,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 				       (UV)c & 0xFF);
 		} else
 		    sv_catpvs(msg, "end of string");
-		Perl_warner(aTHX_ packWARN(WARN_PRINTF), "%"SVf, (void*)msg); /* yes, this is reentrant */
+		Perl_warner(aTHX_ packWARN(WARN_PRINTF), "%"SVf, SVfARG(msg)); /* yes, this is reentrant */
 	    }
 
 	    /* output mangled stuff ... */

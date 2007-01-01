@@ -1838,7 +1838,7 @@ PP(pp_helem)
 	    SV* lv;
 	    SV* key2;
 	    if (!defer) {
-		DIE(aTHX_ PL_no_helem_sv, (void*)keysv);
+		DIE(aTHX_ PL_no_helem_sv, SVfARG(keysv));
 	    }
 	    lv = sv_newmortal();
 	    sv_upgrade(lv, SVt_PVLV);
@@ -2777,7 +2777,7 @@ try_autoload:
 	    else {
 		sub_name = sv_newmortal();
 		gv_efullname3(sub_name, gv, NULL);
-		DIE(aTHX_ "Undefined subroutine &%"SVf" called", (void*)sub_name);
+		DIE(aTHX_ "Undefined subroutine &%"SVf" called", SVfARG(sub_name));
 	    }
 	}
 	if (!cv)
@@ -2921,7 +2921,7 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
 	SV* const tmpstr = sv_newmortal();
 	gv_efullname3(tmpstr, CvGV(cv), NULL);
 	Perl_warner(aTHX_ packWARN(WARN_RECURSION), "Deep recursion on subroutine \"%"SVf"\"",
-		    (void*)tmpstr);
+		    SVfARG(tmpstr));
     }
 }
 
@@ -2939,7 +2939,7 @@ PP(pp_aelem)
     if (SvROK(elemsv) && !SvGAMAGIC(elemsv) && ckWARN(WARN_MISC))
 	Perl_warner(aTHX_ packWARN(WARN_MISC),
 		    "Use of reference \"%"SVf"\" as array index",
-		    (void*)elemsv);
+		    SVfARG(elemsv));
     if (elem > 0)
 	elem -= CopARYBASE_get(PL_curcop);
     if (SvTYPE(av) != SVt_PVAV)

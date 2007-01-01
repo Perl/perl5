@@ -1466,7 +1466,7 @@ Perl_qerror(pTHX_ SV *err)
     else if (PL_errors)
 	sv_catsv(PL_errors, err);
     else
-	Perl_warn(aTHX_ "%"SVf, (void*)err);
+	Perl_warn(aTHX_ "%"SVf, SVfARG(err));
     ++PL_error_count;
 }
 
@@ -2028,7 +2028,7 @@ PP(pp_return)
 	    /* Unassume the success we assumed earlier. */
 	    SV * const nsv = cx->blk_eval.old_namesv;
 	    (void)hv_delete(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv), G_DISCARD);
-	    DIE(aTHX_ "%"SVf" did not return a true value", (void*)nsv);
+	    DIE(aTHX_ "%"SVf" did not return a true value", SVfARG(nsv));
 	}
 	break;
     case CXt_FORMAT:
@@ -2336,7 +2336,7 @@ PP(pp_goto)
 			goto retry;
 		    tmpstr = sv_newmortal();
 		    gv_efullname3(tmpstr, gv, NULL);
-		    DIE(aTHX_ "Goto undefined subroutine &%"SVf"",(void*)tmpstr);
+		    DIE(aTHX_ "Goto undefined subroutine &%"SVf"", SVfARG(tmpstr));
 		}
 		DIE(aTHX_ "Goto undefined subroutine");
 	    }
@@ -3097,12 +3097,12 @@ PP(pp_require)
 	if (cUNOP->op_first->op_type == OP_CONST && cUNOP->op_first->op_private & OPpCONST_NOVER) {
 	    if ( vcmp(sv,PL_patchlevel) <= 0 )
 		DIE(aTHX_ "Perls since %"SVf" too modern--this is %"SVf", stopped",
-		    (void*)vnormal(sv), (void*)vnormal(PL_patchlevel));
+		    SVfARG(vnormal(sv)), SVfARG(vnormal(PL_patchlevel)));
 	}
 	else {
 	    if ( vcmp(sv,PL_patchlevel) > 0 )
 		DIE(aTHX_ "Perl %"SVf" required--this is only %"SVf", stopped",
-		    (void*)vnormal(sv), (void*)vnormal(PL_patchlevel));
+		    SVfARG(vnormal(sv)), SVfARG(vnormal(PL_patchlevel)));
 	}
 
 	    RETPUSHYES;
@@ -3574,7 +3574,7 @@ PP(pp_leaveeval)
 	/* Unassume the success we assumed earlier. */
 	SV * const nsv = cx->blk_eval.old_namesv;
 	(void)hv_delete(GvHVn(PL_incgv), SvPVX_const(nsv), SvCUR(nsv), G_DISCARD);
-	retop = Perl_die(aTHX_ "%"SVf" did not return a true value", (void*)nsv);
+	retop = Perl_die(aTHX_ "%"SVf" did not return a true value", SVfARG(nsv));
 	/* die_where() did LEAVE, or we won't be here */
     }
     else {
