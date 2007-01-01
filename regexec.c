@@ -4842,7 +4842,7 @@ NULL
                         PerlIO_printf(Perl_debug_log,
 		            "%*s  %ssetting cutpoint to mark:%"SVf"...%s\n",
 		            REPORT_CODE_OFF+depth*2, "", 
-		            PL_colors[4], sv_commit, PL_colors[5]);
+		            PL_colors[4], (void*)sv_commit, PL_colors[5]);
 		});
             }
             mark_state = ST.prev_mark;

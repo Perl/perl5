@@ -2039,7 +2039,7 @@ Perl_vivify_defelem(pTHX_ SV *sv)
         if (he)
             value = HeVAL(he);
 	if (!value || value == &PL_sv_undef)
-	    Perl_croak(aTHX_ PL_no_helem_sv, mg->mg_obj);
+	    Perl_croak(aTHX_ PL_no_helem_sv, (void*)mg->mg_obj);
     }
     else {
 	AV* const av = (AV*)LvTARG(sv);

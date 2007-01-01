@@ -704,7 +704,7 @@ Perl_get_arena(pTHX_ int arena_size)
     Newxz(adesc->arena, arena_size, char);
     adesc->size = arena_size;
     DEBUG_m(PerlIO_printf(Perl_debug_log, "arena %d added: %p size %d\n", 
-			  curr, adesc->arena, arena_size));
+			  curr, (void*)adesc->arena, arena_size));
 
     return adesc->arena;
 }
@@ -1069,7 +1069,7 @@ S_more_bodies (pTHX_ svtype sv_type)
     /* computed count doesnt reflect the 1st slot reservation */
     DEBUG_m(PerlIO_printf(Perl_debug_log,
 			  "arena %p end %p arena-size %d type %d size %d ct %d\n",
-			  start, end,
+			  (void*)start, (void*)end,
 			  (int)bdp->arena_size, sv_type, (int)body_size,
 			  (int)bdp->arena_size / (int)body_size));
 
@@ -3339,14 +3339,14 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 
     if (SvIS_FREED(dstr)) {
 	Perl_croak(aTHX_ "panic: attempt to copy value %" SVf
-		   " to a freed scalar %p", sstr, dstr);
+		   " to a freed scalar %p", (void*)sstr, (void*)dstr);
     }
     SV_CHECK_THINKFIRST_COW_DROP(dstr);
     if (!sstr)
 	sstr = &PL_sv_undef;
     if (SvIS_FREED(sstr)) {
-	Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p to %p", sstr,
-		   dstr);
+	Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p to %p",
+		   (void*)sstr, (void*)dstr);
     }
     stype = SvTYPE(sstr);
     dtype = SvTYPE(dstr);
@@ -3778,7 +3778,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dstr, SV *sstr)
 
     if (DEBUG_C_TEST) {
 	PerlIO_printf(Perl_debug_log, "Fast copy on write: %p -> %p\n",
-		      sstr, dstr);
+		      (void*)sstr, (void*)dstr);
 	sv_dump(sstr);
 	if (dstr)
 		    sv_dump(dstr);
@@ -8411,7 +8411,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
     }
     if (args && patlen == 3 && pat[0] == '%' &&
 		pat[1] == '-' && pat[2] == 'p') {
-	argsv = va_arg(*args, SV*);
+	argsv = (SV*)va_arg(*args, void*);
 	sv_catsv(sv, argsv);
 	return;
     }
@@ -8567,7 +8567,7 @@ Perl_sv_vcatpvfn(pTHX_ SV *sv, const char *pat, STRLEN patlen, va_list *args, SV
 			precis = n;
 			has_precis = TRUE;
 		    }
-		    argsv = va_arg(*args, SV*);
+		    argsv = (SV*)va_arg(*args, void*);
 		    eptr = SvPVx_const(argsv, elen);
 		    if (DO_UTF8(argsv))
 			is_utf8 = TRUE;
@@ -9934,7 +9934,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 #ifdef DEBUGGING
     if (SvANY(sstr) && PL_watch_pvx && SvPVX_const(sstr) == PL_watch_pvx)
 	PerlIO_printf(Perl_debug_log, "watch at %p hit, found string \"%s\"\n",
-		      PL_watch_pvx, SvPVX_const(sstr));
+		      (void*)PL_watch_pvx, SvPVX_const(sstr));
 #endif
 
     /* don't clone objects whose class has asked us not to */

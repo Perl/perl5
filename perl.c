@@ -1202,7 +1202,7 @@ perl_destruct(pTHXx)
 			" flags=0x%"UVxf
 			" refcnt=%"UVuf pTHX__FORMAT "\n"
 			"\tallocated at %s:%d %s %s%s\n",
-			sv, sv->sv_flags, sv->sv_refcnt pTHX__VALUE,
+			(void*)sv, sv->sv_flags, sv->sv_refcnt pTHX__VALUE,
 			sv->sv_debug_file ? sv->sv_debug_file : "(unknown)",
 			sv->sv_debug_line,
 			sv->sv_debug_inpad ? "for" : "by",
@@ -3280,7 +3280,7 @@ Perl_moreswitches(pTHX_ char *s)
 /* Adjust verbose output as in the perl that ships with the DG/UX OS from EMC */
 	PerlIO_printf(PerlIO_stdout(),
 		Perl_form(aTHX_ "\nThis is perl, %"SVf"\n",
-		    vstringify(PL_patchlevel)));
+		    (void*)vstringify(PL_patchlevel)));
 	PerlIO_printf(PerlIO_stdout(),
 			Perl_form(aTHX_ "        built under %s at %s %s\n",
 					OSNAME, __DATE__, __TIME__));
@@ -5216,7 +5216,7 @@ Perl_my_exit(pTHX_ U32 status)
 {
     dVAR;
     DEBUG_S(PerlIO_printf(Perl_debug_log, "my_exit: thread %p, status %lu\n",
-			  thr, (unsigned long) status));
+			  (void*)thr, (unsigned long) status));
     switch (status) {
     case 0:
 	STATUS_ALL_SUCCESS;

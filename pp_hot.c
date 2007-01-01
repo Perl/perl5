@@ -1523,7 +1523,7 @@ yup:					/* Confirmed by INTUIT */
 	    if (DEBUG_C_TEST) {
 		PerlIO_printf(Perl_debug_log,
 			      "Copy on write: pp_match $& capture, type %d, truebase=%p, t=%p, difference %d\n",
-			      (int) SvTYPE(TARG), truebase, t,
+			      (int) SvTYPE(TARG), (void*)truebase, (void*)t,
 			      (int)(t-truebase));
 	    }
 	    rx->saved_copy = sv_setsv_cow(rx->saved_copy, TARG);
@@ -1838,7 +1838,7 @@ PP(pp_helem)
 	    SV* lv;
 	    SV* key2;
 	    if (!defer) {
-		DIE(aTHX_ PL_no_helem_sv, keysv);
+		DIE(aTHX_ PL_no_helem_sv, (void*)keysv);
 	    }
 	    lv = sv_newmortal();
 	    sv_upgrade(lv, SVt_PVLV);
@@ -2865,7 +2865,7 @@ try_autoload:
 	    sub_crush_depth(cv);
 #if 0
 	DEBUG_S(PerlIO_printf(Perl_debug_log,
-			      "%p entersub returning %p\n", thr, CvSTART(cv)));
+			      "%p entersub returning %p\n", (void*)thr, (void*)CvSTART(cv)));
 #endif
 	RETURNOP(CvSTART(cv));
     }

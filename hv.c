@@ -214,7 +214,7 @@ S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
     if (flags & HVhek_UTF8) {
 	SvUTF8_on(sv);
     }
-    Perl_croak(aTHX_ msg, sv);
+    Perl_croak(aTHX_ msg, (void*)sv);
 }
 
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot
@@ -1144,7 +1144,7 @@ S_hsplit(pTHX_ HV *hv)
     int was_shared;
 
     /*PerlIO_printf(PerlIO_stderr(), "hsplit called for %p which had %d\n",
-      hv, (int) oldsize);*/
+      (void*)hv, (int) oldsize);*/
 
     if (HvPLACEHOLDERS_get(hv) && !SvREADONLY(hv)) {
       /* Can make this clear any placeholders first for non-restricted hashes,
@@ -1240,7 +1240,7 @@ S_hsplit(pTHX_ HV *hv)
     }
 
     /* Awooga. Awooga. Pathological data.  */
-    /*PerlIO_printf(PerlIO_stderr(), "%p %d of %d with %d/%d buckets\n", hv,
+    /*PerlIO_printf(PerlIO_stderr(), "%p %d of %d with %d/%d buckets\n", (void*)hv,
       longest_chain, HvTOTALKEYS(hv), HvFILL(hv),  1+HvMAX(hv));*/
 
     ++newsize;
@@ -2181,7 +2181,7 @@ Perl_hv_iternext_flags(pTHX_ HV *hv, I32 flags)
     }
 
     /*if (HvREHASH(hv) && entry && !HeKREHASH(entry))
-      PerlIO_printf(PerlIO_stderr(), "Awooga %p %p\n", hv, entry);*/
+      PerlIO_printf(PerlIO_stderr(), "Awooga %p %p\n", (void*)hv, (void*)entry);*/
 
     iter->xhv_eiter = entry; /* HvEITER(hv) = entry */
     return entry;

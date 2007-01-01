@@ -819,7 +819,7 @@ perlio_mg_set(pTHX_ SV *sv, MAGIC *mg)
 	IO * const io = GvIOn((GV *) SvRV(sv));
 	PerlIO * const ifp = IoIFP(io);
 	PerlIO * const ofp = IoOFP(io);
-	Perl_warn(aTHX_ "set %" SVf " %p %p %p", sv, io, ifp, ofp);
+	Perl_warn(aTHX_ "set %" SVf " %p %p %p", (void*)sv, (void*)io, (void*)ifp, (void*)ofp);
     }
     return 0;
 }
@@ -831,7 +831,7 @@ perlio_mg_get(pTHX_ SV *sv, MAGIC *mg)
 	IO * const io = GvIOn((GV *) SvRV(sv));
 	PerlIO * const ifp = IoIFP(io);
 	PerlIO * const ofp = IoOFP(io);
-	Perl_warn(aTHX_ "get %" SVf " %p %p %p", sv, io, ifp, ofp);
+	Perl_warn(aTHX_ "get %" SVf " %p %p %p", (void*)sv, (void*)io, (void*)ifp, (void*)ofp);
     }
     return 0;
 }
@@ -839,14 +839,14 @@ perlio_mg_get(pTHX_ SV *sv, MAGIC *mg)
 static int
 perlio_mg_clear(pTHX_ SV *sv, MAGIC *mg)
 {
-    Perl_warn(aTHX_ "clear %" SVf, sv);
+    Perl_warn(aTHX_ "clear %" SVf, (void*)sv);
     return 0;
 }
 
 static int
 perlio_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
-    Perl_warn(aTHX_ "free %" SVf, sv);
+    Perl_warn(aTHX_ "free %" SVf, (void*)sv);
     return 0;
 }
 
@@ -871,7 +871,7 @@ XS(XS_io_MODIFY_SCALAR_ATTRIBUTES)
     mg = mg_find(sv, PERL_MAGIC_ext);
     mg->mg_virtual = &perlio_vtab;
     mg_magical(sv);
-    Perl_warn(aTHX_ "attrib %" SVf, sv);
+    Perl_warn(aTHX_ "attrib %" SVf, (void*)sv);
     for (i = 2; i < items; i++) {
 	STRLEN len;
 	const char * const name = SvPV_const(ST(i), len);
@@ -2063,7 +2063,7 @@ PerlIOBase_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
     }
 #if 0
     PerlIO_debug("PerlIOBase_pushed f=%p %s %s fl=%08" UVxf " (%s)\n",
-		 f, PerlIOBase(f)->tab->name, (omode) ? omode : "(Null)",
+		 (void*)f, PerlIOBase(f)->tab->name, (omode) ? omode : "(Null)",
 		 l->flags, PerlIO_modestr(f, temp));
 #endif
     return 0;
@@ -4258,7 +4258,7 @@ PerlIOCrlf_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab)
     code = PerlIOBuf_pushed(aTHX_ f, mode, arg, tab);
 #if 0
     PerlIO_debug("PerlIOCrlf_pushed f=%p %s %s fl=%08" UVxf "\n",
-		 f, PerlIOBase(f)->tab->name, (mode) ? mode : "(Null)",
+		 (void*)f, PerlIOBase(f)->tab->name, (mode) ? mode : "(Null)",
 		 PerlIOBase(f)->flags);
 #endif
     {
@@ -4444,8 +4444,8 @@ PerlIOCrlf_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
 
 	if (ptr != chk ) {
 	    Perl_croak(aTHX_ "ptr wrong %p != %p fl=%08" UVxf
-		       " nl=%p e=%p for %d", ptr, chk, flags, c->nl,
-		       b->end, cnt);
+		       " nl=%p e=%p for %d", (void*)ptr, (void*)chk,
+		       flags, c->nl, b->end, cnt);
 	}
 #endif
     }

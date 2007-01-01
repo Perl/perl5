@@ -8211,7 +8211,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	    AV *list= (AV *)progi->data->data[progi->name_list_idx];
 	    SV **name= av_fetch(list, ARG(o), 0 );
 	    if (name)
-	        Perl_sv_catpvf(aTHX_ sv, " '%"SVf"'", *name);
+	        Perl_sv_catpvf(aTHX_ sv, " '%"SVf"'", (void*)*name);
         }	    
     } else if (k == NREF) {
         if ( prog->paren_names ) {
@@ -8225,7 +8225,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
                     Perl_sv_catpvf(aTHX_ sv, "%s%"IVdf,
 				   (n ? "," : ""), (IV)nums[n]);
                 }
-                Perl_sv_catpvf(aTHX_ sv, " '%"SVf"'", *name );
+                Perl_sv_catpvf(aTHX_ sv, " '%"SVf"'", (void*)*name );
             }
         }
     } else if (k == GOSUB) 
@@ -8233,7 +8233,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     else if (k == VERB) {
         if (!o->flags) 
             Perl_sv_catpvf(aTHX_ sv, ":%"SVf, 
-                (SV*)progi->data->data[ ARG( o ) ]);
+                (void*)(SV*)progi->data->data[ ARG( o ) ]);
     } else if (k == LOGICAL)
 	Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);	/* 2: embedded, otherwise 1 */
     else if (k == ANYOF) {

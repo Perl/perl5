@@ -642,7 +642,8 @@ Perl_leave_scope(pTHX_ I32 base)
 	    sv = *(SV**)ptr;
 	    DEBUG_S(PerlIO_printf(Perl_debug_log,
 				  "restore svref: %p %p:%s -> %p:%s\n",
-				  ptr, sv, SvPEEK(sv), value, SvPEEK(value)));
+				  (void*)ptr, (void*)sv, SvPEEK(sv),
+				  (void*)value, SvPEEK(value)));
 	    *(SV**)ptr = value;
 	    SvREFCNT_dec(sv);
 	    PL_localizing = 2;
