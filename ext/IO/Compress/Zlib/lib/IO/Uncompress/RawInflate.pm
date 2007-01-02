@@ -5,11 +5,11 @@ use strict ;
 use warnings;
 use bytes;
 
-use Compress::Raw::Zlib ;
-use IO::Compress::Base::Common qw(:Status createSelfTiedObject);
+use Compress::Raw::Zlib  2.003 ;
+use IO::Compress::Base::Common  2.003 qw(:Status createSelfTiedObject);
 
-use IO::Uncompress::Base ;
-use IO::Uncompress::Adapter::Inflate ;
+use IO::Uncompress::Base  2.003 ;
+use IO::Uncompress::Adapter::Inflate  2.003 ;
 
 
 
@@ -17,7 +17,7 @@ use IO::Uncompress::Adapter::Inflate ;
 require Exporter ;
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $RawInflateError);
 
-$VERSION = '2.002';
+$VERSION = '2.003';
 $RawInflateError = '';
 
 @ISA    = qw( Exporter IO::Uncompress::Base );
@@ -1145,7 +1145,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2007 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

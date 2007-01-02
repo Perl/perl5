@@ -4,16 +4,16 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common qw(createSelfTiedObject);
+use IO::Compress::Base::Common 2.003 qw(createSelfTiedObject);
 
-use IO::Uncompress::Base ;
+use IO::Uncompress::Base 2.003 ;
 
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyUncompressError);
 
-$VERSION = '2.002';
+$VERSION = '2.003';
 $AnyUncompressError = '';
 
 @ISA = qw( Exporter IO::Uncompress::Base );
@@ -27,18 +27,18 @@ Exporter::export_ok_tags('all');
 
 BEGIN
 {
-   eval ' use IO::Uncompress::Adapter::Inflate ';
-   eval ' use IO::Uncompress::Adapter::Bunzip2 ';
-   eval ' use IO::Uncompress::Adapter::LZO ';
-   eval ' use IO::Uncompress::Adapter::Lzf ';
+   eval ' use IO::Uncompress::Adapter::Inflate 2.003 ;';
+   eval ' use IO::Uncompress::Adapter::Bunzip2 2.003 ;';
+   eval ' use IO::Uncompress::Adapter::LZO 2.003 ;';
+   eval ' use IO::Uncompress::Adapter::Lzf 2.003 ;';
 
-   eval ' use IO::Uncompress::Bunzip2 ';
-   eval ' use IO::Uncompress::UnLzop ';
-   eval ' use IO::Uncompress::Gunzip ';
-   eval ' use IO::Uncompress::Inflate ';
-   eval ' use IO::Uncompress::RawInflate ';
-   eval ' use IO::Uncompress::Unzip ';
-   eval ' use IO::Uncompress::UnLzf ';
+   eval ' use IO::Uncompress::Bunzip2 2.003 ;';
+   eval ' use IO::Uncompress::UnLzop 2.003 ;';
+   eval ' use IO::Uncompress::Gunzip 2.003 ;';
+   eval ' use IO::Uncompress::Inflate 2.003 ;';
+   eval ' use IO::Uncompress::RawInflate 2.003 ;';
+   eval ' use IO::Uncompress::Unzip 2.003 ;';
+   eval ' use IO::Uncompress::UnLzf 2.003 ;';
 }
 
 sub new
@@ -56,7 +56,7 @@ sub anyuncompress
 
 sub getExtraParams
 {
-    use IO::Compress::Base::Common qw(:Parse);
+    use IO::Compress::Base::Common 2.003 qw(:Parse);
     return ( 'RawInflate' => [1, 1, Parse_boolean,  0] ) ;
 }
 
@@ -1023,7 +1023,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2007 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.

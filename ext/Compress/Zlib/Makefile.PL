@@ -3,6 +3,8 @@
 use strict ;
 require 5.004 ;
 
+$::VERSION = '2.003' ;
+
 use private::MakeUtil;
 use ExtUtils::MakeMaker 5.16 ;
 
@@ -21,13 +23,13 @@ WriteMakefile(
     (
       $ENV{SKIP_FOR_CORE}
         ? (MAN3PODS    => {})
-	    : (PREREQ_PM   => { 'Compress::Raw::Zlib'           => 0,
-		                    'IO::Compress::Base'            => 0,
-		                    'IO::Compress::Base::Common'    => 0,
-		                    'IO::Uncompress::Base'          => 0,
-		                    'IO::Compress::Gzip'            => 0,
-		                    'IO::Compress::Gzip::Constants' => 0,
-		                    'IO::Uncompress::Gunzip'        => 0,
+	    : (PREREQ_PM   => { 'Compress::Raw::Zlib'           => $::VERSION,
+		                    'IO::Compress::Base'            => $::VERSION,
+		                    'IO::Compress::Base::Common'    => $::VERSION,
+		                    'IO::Uncompress::Base'          => $::VERSION,
+		                    'IO::Compress::Gzip'            => $::VERSION,
+		                    'IO::Compress::Gzip::Constants' => $::VERSION,
+		                    'IO::Uncompress::Gunzip'        => $::VERSION,
 		                    'Scalar::Util'                  => 0,
                           }
 	      )

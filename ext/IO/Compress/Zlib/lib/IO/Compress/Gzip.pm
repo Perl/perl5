@@ -8,12 +8,12 @@ use warnings;
 use bytes;
 
 
-use IO::Compress::RawDeflate;
+use IO::Compress::RawDeflate 2.003 ;
 
-use Compress::Raw::Zlib ;
-use IO::Compress::Base::Common qw(:Status :Parse createSelfTiedObject);
-use IO::Compress::Gzip::Constants;
-use IO::Compress::Zlib::Extra;
+use Compress::Raw::Zlib  2.003 ;
+use IO::Compress::Base::Common  2.003 qw(:Status :Parse createSelfTiedObject);
+use IO::Compress::Gzip::Constants 2.003 ;
+use IO::Compress::Zlib::Extra 2.003 ;
 
 BEGIN
 {
@@ -27,7 +27,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $GzipError);
 
-$VERSION = '2.002';
+$VERSION = '2.003';
 $GzipError = '' ;
 
 @ISA    = qw(Exporter IO::Compress::RawDeflate);
@@ -1307,7 +1307,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2006 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2007 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
