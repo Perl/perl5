@@ -1178,7 +1178,9 @@ Perl_sv_upgrade(pTHX_ register SV *sv, svtype new_type)
 
        (In fact, GP ends up pointing at a previous GP structure, because the
        principle cause of the padding in XPVMG getting garbage is a copy of
-       sizeof(XPVMG) bytes from a XPVGV structure in sv_unglob)
+       sizeof(XPVMG) bytes from a XPVGV structure in sv_unglob. Right now
+       this happens to be moot because XPVGV has been re-ordered, with GP
+       no longer after STASH)
 
        So we are careful and work out the size of used parts of all the
        structures.  */
