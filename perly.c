@@ -195,7 +195,7 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
     yy_stack_frame *ps     = parser->ps;
     int i;
 
-    if (ps == parser->stack)
+    if (!parser->stack || ps == parser->stack)
 	return;
 
     YYDPRINTF ((Perl_debug_log, "clearing the parse stack\n"));

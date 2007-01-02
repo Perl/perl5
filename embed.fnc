@@ -957,6 +957,7 @@ p	|int	|yyerror	|NN const char* s
 p	|int	|yylex
 p	|int	|yyparse
 p	|void	|parser_free	|NN const yy_parser *
+p	|yy_parser*|parser_dup	|NN const yy_parser *proto|NN CLONE_PARAMS* param
 p	|int	|yywarn		|NN const char* s
 #if defined(MYMALLOC)
 Ap	|void	|dump_mstats	|NN char* s

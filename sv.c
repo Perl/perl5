@@ -9479,6 +9479,70 @@ ptr_table_* functions.
 #define SAVEPV(p)	((p) ? savepv(p) : NULL)
 #define SAVEPVN(p,n)	((p) ? savepvn(p,n) : NULL)
 
+/* clone a parser */
+
+yy_parser *
+Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
+{
+    yy_parser *parser;
+
+    if (!proto)
+	return NULL;
+
+    Newxz(parser, 1, yy_parser);
+
+    parser->yyerrstatus = 0;
+    parser->yychar = YYEMPTY;		/* Cause a token to be read.  */
+
+    /* XXX these not yet duped */
+    parser->old_parser = NULL;
+    parser->stack = NULL;
+    parser->ps = NULL;
+    parser->stack_size = 0;
+    /* XXX parser->stack->state = 0; */
+
+    /* XXX eventually, just Copy() most of the parser struct ? */
+
+    parser->lex_brackets = proto->lex_brackets;
+    parser->lex_casemods = proto->lex_casemods;
+    parser->lex_brackstack = savepvn(proto->lex_brackstack,
+		    (proto->lex_brackets < 120 ? 120 : proto->lex_brackets));
+    parser->lex_casestack = savepvn(proto->lex_casestack,
+		    (proto->lex_casemods < 12 ? 12 : proto->lex_casemods));
+    parser->lex_defer	= proto->lex_defer;
+    parser->lex_dojoin	= proto->lex_dojoin;
+    parser->lex_expect	= proto->lex_expect;
+    parser->lex_formbrack = proto->lex_formbrack;
+    parser->lex_inpat	= proto->lex_inpat;
+    parser->lex_inwhat	= proto->lex_inwhat;
+    parser->lex_op	= proto->lex_op;
+    parser->lex_repl	= sv_dup_inc(proto->lex_repl, param);
+    parser->lex_starts	= proto->lex_starts;
+    parser->lex_stuff	= sv_dup_inc(proto->lex_stuff, param);
+    parser->multi_close	= proto->multi_close;
+    parser->multi_open	= proto->multi_open;
+    parser->multi_start	= proto->multi_start;
+    parser->pending_ident = proto->pending_ident;
+    parser->preambled	= proto->preambled;
+    parser->sublex_info	= proto->sublex_info; /* XXX not quite right */
+
+#ifdef PERL_MAD
+    parser->endwhite	= proto->endwhite;
+    parser->faketokens	= proto->faketokens;
+    parser->lasttoke	= proto->lasttoke;
+    parser->nextwhite	= proto->nextwhite;
+    parser->realtokenstart = proto->realtokenstart;
+    parser->skipwhite	= proto->skipwhite;
+    parser->thisclose	= proto->thisclose;
+    parser->thismad	= proto->thismad;
+    parser->thisopen	= proto->thisopen;
+    parser->thisstuff	= proto->thisstuff;
+    parser->thistoken	= proto->thistoken;
+    parser->thiswhite	= proto->thiswhite;
+#endif
+    return parser;
+}
+
 
 /* duplicate a file handle */
 
@@ -11022,7 +11086,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_Argv		= NULL;
     PL_Cmd		= NULL;
     PL_gensym		= proto_perl->Igensym;
-    PL_preambled	= proto_perl->Ipreambled;
     PL_preambleav	= av_dup_inc(proto_perl->Ipreambleav, param);
     PL_laststatval	= proto_perl->Ilaststatval;
     PL_laststype	= proto_perl->Ilaststype;
@@ -11102,38 +11165,12 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_cshname		= proto_perl->Icshname; /* XXX never deallocated */
 #endif
 
+    PL_parser		= parser_dup(proto_perl->Iparser, param);
+
     PL_lex_state	= proto_perl->Ilex_state;
-    PL_lex_defer	= proto_perl->Ilex_defer;
-    PL_lex_expect	= proto_perl->Ilex_expect;
-    PL_lex_formbrack	= proto_perl->Ilex_formbrack;
-    PL_lex_dojoin	= proto_perl->Ilex_dojoin;
-    PL_lex_starts	= proto_perl->Ilex_starts;
-    PL_lex_stuff	= sv_dup_inc(proto_perl->Ilex_stuff, param);
-    PL_lex_repl		= sv_dup_inc(proto_perl->Ilex_repl, param);
-    PL_lex_op		= proto_perl->Ilex_op;
-    PL_lex_inpat	= proto_perl->Ilex_inpat;
-    PL_lex_inwhat	= proto_perl->Ilex_inwhat;
-    PL_lex_brackets	= proto_perl->Ilex_brackets;
-    i = (PL_lex_brackets < 120 ? 120 : PL_lex_brackets);
-    PL_lex_brackstack	= SAVEPVN(proto_perl->Ilex_brackstack,i);
-    PL_lex_casemods	= proto_perl->Ilex_casemods;
-    i = (PL_lex_casemods < 12 ? 12 : PL_lex_casemods);
-    PL_lex_casestack	= SAVEPVN(proto_perl->Ilex_casestack,i);
 
 #ifdef PERL_MAD
     Copy(proto_perl->Inexttoke, PL_nexttoke, 5, NEXTTOKE);
-    PL_lasttoke		= proto_perl->Ilasttoke;
-    PL_realtokenstart	= proto_perl->Irealtokenstart;
-    PL_faketokens	= proto_perl->Ifaketokens;
-    PL_thismad		= proto_perl->Ithismad;
-    PL_thistoken	= proto_perl->Ithistoken;
-    PL_thisopen		= proto_perl->Ithisopen;
-    PL_thisstuff	= proto_perl->Ithisstuff;
-    PL_thisclose	= proto_perl->Ithisclose;
-    PL_thiswhite	= proto_perl->Ithiswhite;
-    PL_nextwhite	= proto_perl->Inextwhite;
-    PL_skipwhite	= proto_perl->Iskipwhite;
-    PL_endwhite		= proto_perl->Iendwhite;
     PL_curforce		= proto_perl->Icurforce;
 #else
     Copy(proto_perl->Inextval, PL_nextval, 5, YYSTYPE);
@@ -11151,15 +11188,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     i = proto_perl->Ilinestart - SvPVX_const(proto_perl->Ilinestr);
     PL_linestart	= SvPVX(PL_linestr) + (i < 0 ? 0 : i);
     PL_bufend		= SvPVX(PL_linestr) + SvCUR(PL_linestr);
-    PL_pending_ident	= proto_perl->Ipending_ident;
-    PL_sublex_info	= proto_perl->Isublex_info;	/* XXX not quite right */
 
     PL_expect		= proto_perl->Iexpect;
 
-    PL_multi_start	= proto_perl->Imulti_start;
     PL_multi_end	= proto_perl->Imulti_end;
-    PL_multi_open	= proto_perl->Imulti_open;
-    PL_multi_close	= proto_perl->Imulti_close;
 
     PL_error_count	= proto_perl->Ierror_count;
     PL_subline		= proto_perl->Isubline;

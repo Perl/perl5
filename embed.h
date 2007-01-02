@@ -977,6 +977,7 @@
 #define yylex			Perl_yylex
 #define yyparse			Perl_yyparse
 #define parser_free		Perl_parser_free
+#define parser_dup		Perl_parser_dup
 #define yywarn			Perl_yywarn
 #endif
 #if defined(MYMALLOC)
@@ -3185,6 +3186,7 @@
 #define yylex()			Perl_yylex(aTHX)
 #define yyparse()		Perl_yyparse(aTHX)
 #define parser_free(a)		Perl_parser_free(aTHX_ a)
+#define parser_dup(a,b)		Perl_parser_dup(aTHX_ a,b)
 #define yywarn(a)		Perl_yywarn(aTHX_ a)
 #endif
 #if defined(MYMALLOC)

@@ -173,7 +173,6 @@ PERLVAR(Ioldname,	char *)		/* what to preserve mode on */
 PERLVAR(IArgv,		char **)	/* stuff to free from do_aexec, vfork safe */
 PERLVAR(ICmd,		char *)		/* stuff to free from do_aexec, vfork safe */
 PERLVARI(Igensym,	I32,	0)	/* next symbol for getsym() to define */
-PERLVAR(Ipreambled,	bool)
 PERLVAR(Ipreambleav,	AV *)
 PERLVARI(Ilaststatval,	int,	-1)
 PERLVARI(Ilaststype,	I32,	OP_STAT)
@@ -227,8 +226,6 @@ PERLVARI(Iin_clean_objs,bool,    FALSE)	/* from sv.c */
 PERLVARI(Iin_clean_all,	bool,    FALSE)	/* from sv.c */
 
 PERLVAR(Ilinestart,	char *)		/* beg. of most recently read line */
-PERLVAR(Ipending_ident,	char)		/* pending identifier lookup */
-PERLVAR(Isublex_info,	SUBLEXINFO)	/* from toke.c */
 
 PERLVAR(Iuid,		Uid_t)		/* current real user id */
 PERLVAR(Ieuid,		Uid_t)		/* current effective user id */
@@ -282,36 +279,10 @@ PERLVARI(Icshlen,	I32,	0)
 #endif
 
 PERLVAR(Ilex_state,	U32)		/* next token is determined */
-PERLVAR(Ilex_defer,	U32)		/* state after determined token */
-PERLVAR(Ilex_expect,	int)		/* expect after determined token */
-PERLVAR(Ilex_brackets,	I32)		/* bracket count */
-PERLVAR(Ilex_formbrack,	I32)		/* bracket count at outer format level */
-PERLVAR(Ilex_casemods,	I32)		/* casemod count */
-PERLVAR(Ilex_dojoin,	I32)		/* doing an array interpolation */
-PERLVAR(Ilex_starts,	I32)		/* how many interps done on level */
-PERLVAR(Ilex_stuff,	SV *)		/* runtime pattern from m// or s/// */
-PERLVAR(Ilex_repl,	SV *)		/* runtime replacement from s/// */
-PERLVAR(Ilex_op,	OP *)		/* extra info to pass back on op */
-PERLVAR(Ilex_inpat,	OP *)		/* in pattern $) and $| are special */
-PERLVAR(Ilex_inwhat,	I32)		/* what kind of quoting are we in */
-PERLVAR(Ilex_brackstack,char *)		/* what kind of brackets to pop */
-PERLVAR(Ilex_casestack,	char *)		/* what kind of case mods in effect */
 
 /* What we know when we're in LEX_KNOWNEXT state. */
 #ifdef PERL_MAD
 PERLVARA(Inexttoke,5,	NEXTTOKE)	/* value of next token, if any */
-PERLVAR(Ilasttoke,	I32)
-PERLVAR(Irealtokenstart,I32)
-PERLVAR(Ifaketokens,	I32)
-PERLVAR(Ithismad,	MADPROP *)
-PERLVAR(Ithistoken,	SV *)
-PERLVAR(Ithisopen,	SV *)
-PERLVAR(Ithisstuff,	SV *)
-PERLVAR(Ithisclose,	SV *)
-PERLVAR(Ithiswhite,	SV *)
-PERLVAR(Inextwhite,	SV *)
-PERLVAR(Iskipwhite,	SV *)
-PERLVAR(Iendwhite,	SV *)
 PERLVAR(Icurforce,	I32)
 #else
 PERLVARA(Inextval,5,	YYSTYPE)	/* value of next token, if any */
@@ -326,10 +297,7 @@ PERLVAR(Ioldoldbufptr,	char *)
 PERLVAR(Ibufend,	char *)
 PERLVARI(Iexpect,int,	XSTATE)		/* how to interpret ambiguous tokens */
 
-PERLVAR(Imulti_start,	I32)		/* 1st line of multi-line string */
 PERLVAR(Imulti_end,	I32)		/* last line of multi-line string */
-PERLVAR(Imulti_open,	I32)		/* delimiter of said string */
-PERLVAR(Imulti_close,	I32)		/* delimiter of said string */
 
 PERLVAR(Ierror_count,	I32)		/* how many errors so far, max 10 */
 PERLVAR(Isubline,	I32)		/* line this subroutine began on */

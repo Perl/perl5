@@ -268,8 +268,6 @@ END_EXTERN_C
 #define PL_encoding		(*Perl_Iencoding_ptr(aTHX))
 #undef  PL_endav
 #define PL_endav		(*Perl_Iendav_ptr(aTHX))
-#undef  PL_endwhite
-#define PL_endwhite		(*Perl_Iendwhite_ptr(aTHX))
 #undef  PL_envgv
 #define PL_envgv		(*Perl_Ienvgv_ptr(aTHX))
 #undef  PL_errgv
@@ -292,8 +290,6 @@ END_EXTERN_C
 #define PL_exitlistlen		(*Perl_Iexitlistlen_ptr(aTHX))
 #undef  PL_expect
 #define PL_expect		(*Perl_Iexpect_ptr(aTHX))
-#undef  PL_faketokens
-#define PL_faketokens		(*Perl_Ifaketokens_ptr(aTHX))
 #undef  PL_fdpid
 #define PL_fdpid		(*Perl_Ifdpid_ptr(aTHX))
 #undef  PL_filemode
@@ -360,38 +356,8 @@ END_EXTERN_C
 #define PL_laststatval		(*Perl_Ilaststatval_ptr(aTHX))
 #undef  PL_laststype
 #define PL_laststype		(*Perl_Ilaststype_ptr(aTHX))
-#undef  PL_lasttoke
-#define PL_lasttoke		(*Perl_Ilasttoke_ptr(aTHX))
-#undef  PL_lex_brackets
-#define PL_lex_brackets		(*Perl_Ilex_brackets_ptr(aTHX))
-#undef  PL_lex_brackstack
-#define PL_lex_brackstack	(*Perl_Ilex_brackstack_ptr(aTHX))
-#undef  PL_lex_casemods
-#define PL_lex_casemods		(*Perl_Ilex_casemods_ptr(aTHX))
-#undef  PL_lex_casestack
-#define PL_lex_casestack	(*Perl_Ilex_casestack_ptr(aTHX))
-#undef  PL_lex_defer
-#define PL_lex_defer		(*Perl_Ilex_defer_ptr(aTHX))
-#undef  PL_lex_dojoin
-#define PL_lex_dojoin		(*Perl_Ilex_dojoin_ptr(aTHX))
-#undef  PL_lex_expect
-#define PL_lex_expect		(*Perl_Ilex_expect_ptr(aTHX))
-#undef  PL_lex_formbrack
-#define PL_lex_formbrack	(*Perl_Ilex_formbrack_ptr(aTHX))
-#undef  PL_lex_inpat
-#define PL_lex_inpat		(*Perl_Ilex_inpat_ptr(aTHX))
-#undef  PL_lex_inwhat
-#define PL_lex_inwhat		(*Perl_Ilex_inwhat_ptr(aTHX))
-#undef  PL_lex_op
-#define PL_lex_op		(*Perl_Ilex_op_ptr(aTHX))
-#undef  PL_lex_repl
-#define PL_lex_repl		(*Perl_Ilex_repl_ptr(aTHX))
-#undef  PL_lex_starts
-#define PL_lex_starts		(*Perl_Ilex_starts_ptr(aTHX))
 #undef  PL_lex_state
 #define PL_lex_state		(*Perl_Ilex_state_ptr(aTHX))
-#undef  PL_lex_stuff
-#define PL_lex_stuff		(*Perl_Ilex_stuff_ptr(aTHX))
 #undef  PL_lineary
 #define PL_lineary		(*Perl_Ilineary_ptr(aTHX))
 #undef  PL_linestart
@@ -438,14 +404,8 @@ END_EXTERN_C
 #define PL_minus_p		(*Perl_Iminus_p_ptr(aTHX))
 #undef  PL_modglobal
 #define PL_modglobal		(*Perl_Imodglobal_ptr(aTHX))
-#undef  PL_multi_close
-#define PL_multi_close		(*Perl_Imulti_close_ptr(aTHX))
 #undef  PL_multi_end
 #define PL_multi_end		(*Perl_Imulti_end_ptr(aTHX))
-#undef  PL_multi_open
-#define PL_multi_open		(*Perl_Imulti_open_ptr(aTHX))
-#undef  PL_multi_start
-#define PL_multi_start		(*Perl_Imulti_start_ptr(aTHX))
 #undef  PL_my_cxt_keys
 #define PL_my_cxt_keys		(*Perl_Imy_cxt_keys_ptr(aTHX))
 #undef  PL_my_cxt_list
@@ -458,8 +418,6 @@ END_EXTERN_C
 #define PL_nexttype		(*Perl_Inexttype_ptr(aTHX))
 #undef  PL_nextval
 #define PL_nextval		(*Perl_Inextval_ptr(aTHX))
-#undef  PL_nextwhite
-#define PL_nextwhite		(*Perl_Inextwhite_ptr(aTHX))
 #undef  PL_nice_chunk
 #define PL_nice_chunk		(*Perl_Inice_chunk_ptr(aTHX))
 #undef  PL_nice_chunk_size
@@ -508,8 +466,6 @@ END_EXTERN_C
 #define PL_parser		(*Perl_Iparser_ptr(aTHX))
 #undef  PL_patchlevel
 #define PL_patchlevel		(*Perl_Ipatchlevel_ptr(aTHX))
-#undef  PL_pending_ident
-#define PL_pending_ident	(*Perl_Ipending_ident_ptr(aTHX))
 #undef  PL_perl_destruct_level
 #define PL_perl_destruct_level	(*Perl_Iperl_destruct_level_ptr(aTHX))
 #undef  PL_perldb
@@ -522,8 +478,6 @@ END_EXTERN_C
 #define PL_ppid			(*Perl_Ippid_ptr(aTHX))
 #undef  PL_preambleav
 #define PL_preambleav		(*Perl_Ipreambleav_ptr(aTHX))
-#undef  PL_preambled
-#define PL_preambled		(*Perl_Ipreambled_ptr(aTHX))
 #undef  PL_preprocess
 #define PL_preprocess		(*Perl_Ipreprocess_ptr(aTHX))
 #undef  PL_profiledata
@@ -536,8 +490,6 @@ END_EXTERN_C
 #define PL_psig_ptr		(*Perl_Ipsig_ptr_ptr(aTHX))
 #undef  PL_ptr_table
 #define PL_ptr_table		(*Perl_Iptr_table_ptr(aTHX))
-#undef  PL_realtokenstart
-#define PL_realtokenstart	(*Perl_Irealtokenstart_ptr(aTHX))
 #undef  PL_reentrant_buffer
 #define PL_reentrant_buffer	(*Perl_Ireentrant_buffer_ptr(aTHX))
 #undef  PL_reentrant_retint
@@ -574,8 +526,6 @@ END_EXTERN_C
 #define PL_sighandlerp		(*Perl_Isighandlerp_ptr(aTHX))
 #undef  PL_signals
 #define PL_signals		(*Perl_Isignals_ptr(aTHX))
-#undef  PL_skipwhite
-#define PL_skipwhite		(*Perl_Iskipwhite_ptr(aTHX))
 #undef  PL_sort_RealCmp
 #define PL_sort_RealCmp		(*Perl_Isort_RealCmp_ptr(aTHX))
 #undef  PL_splitstr
@@ -598,8 +548,6 @@ END_EXTERN_C
 #define PL_strtab		(*Perl_Istrtab_ptr(aTHX))
 #undef  PL_sub_generation
 #define PL_sub_generation	(*Perl_Isub_generation_ptr(aTHX))
-#undef  PL_sublex_info
-#define PL_sublex_info		(*Perl_Isublex_info_ptr(aTHX))
 #undef  PL_subline
 #define PL_subline		(*Perl_Isubline_ptr(aTHX))
 #undef  PL_subname
@@ -624,18 +572,6 @@ END_EXTERN_C
 #define PL_taint_warn		(*Perl_Itaint_warn_ptr(aTHX))
 #undef  PL_tainting
 #define PL_tainting		(*Perl_Itainting_ptr(aTHX))
-#undef  PL_thisclose
-#define PL_thisclose		(*Perl_Ithisclose_ptr(aTHX))
-#undef  PL_thismad
-#define PL_thismad		(*Perl_Ithismad_ptr(aTHX))
-#undef  PL_thisopen
-#define PL_thisopen		(*Perl_Ithisopen_ptr(aTHX))
-#undef  PL_thisstuff
-#define PL_thisstuff		(*Perl_Ithisstuff_ptr(aTHX))
-#undef  PL_thistoken
-#define PL_thistoken		(*Perl_Ithistoken_ptr(aTHX))
-#undef  PL_thiswhite
-#define PL_thiswhite		(*Perl_Ithiswhite_ptr(aTHX))
 #undef  PL_threadhook
 #define PL_threadhook		(*Perl_Ithreadhook_ptr(aTHX))
 #undef  PL_tokenbuf

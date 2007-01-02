@@ -3242,7 +3242,6 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #  define YYTOKENTYPE
 #endif
 #include "perly.h"
-#include "parser.h"
 
 #ifdef PERL_MAD
 struct nexttoken {
@@ -3278,6 +3277,8 @@ struct _sublex_info {
     char *super_bufptr;	/* PL_bufptr that was */
     char *super_bufend;	/* PL_bufend that was */
 };
+
+#include "parser.h"
 
 typedef struct magic_state MGS;	/* struct magic_state defined in mg.c */
 

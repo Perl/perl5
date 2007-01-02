@@ -28,6 +28,44 @@
 /* YYINITDEPTH -- initial size of the parser's stacks.  */
 #define YYINITDEPTH 200
 
+/* XXX temporary backwards compatibility */
+#define PL_lex_brackets		(PL_parser->lex_brackets)
+#define PL_lex_brackstack	(PL_parser->lex_brackstack)
+#define PL_lex_casemods		(PL_parser->lex_casemods)
+#define PL_lex_casestack        (PL_parser->lex_casestack)
+#define PL_lex_defer		(PL_parser->lex_defer)
+#define PL_lex_dojoin		(PL_parser->lex_dojoin)
+#define PL_lex_expect		(PL_parser->lex_expect)
+#define PL_lex_formbrack        (PL_parser->lex_formbrack)
+#define PL_lex_inpat		(PL_parser->lex_inpat)
+#define PL_lex_inwhat		(PL_parser->lex_inwhat)
+#define PL_lex_op		(PL_parser->lex_op)
+#define PL_lex_repl		(PL_parser->lex_repl)
+#define PL_lex_starts		(PL_parser->lex_starts)
+#define PL_lex_stuff		(PL_parser->lex_stuff)
+#define PL_multi_start		(PL_parser->multi_start)
+#define PL_multi_open		(PL_parser->multi_open)
+#define PL_multi_close		(PL_parser->multi_close)
+#define PL_pending_ident        (PL_parser->pending_ident)
+#define PL_preambled		(PL_parser->preambled)
+#define PL_sublex_info		(PL_parser->sublex_info)
+
+#ifdef PERL_MAD
+#  define PL_endwhite		(PL_parser->endwhite)
+#  define PL_faketokens		(PL_parser->faketokens)
+#  define PL_lasttoke		(PL_parser->lasttoke)
+#  define PL_nextwhite		(PL_parser->nextwhite)
+#  define PL_realtokenstart	(PL_parser->realtokenstart)
+#  define PL_skipwhite		(PL_parser->skipwhite)
+#  define PL_thisclose		(PL_parser->thisclose)
+#  define PL_thismad		(PL_parser->thismad)
+#  define PL_thisopen		(PL_parser->thisopen)
+#  define PL_thisstuff		(PL_parser->thisstuff)
+#  define PL_thistoken		(PL_parser->thistoken)
+#  define PL_thiswhite		(PL_parser->thiswhite)
+#endif
+
+
 static const char ident_too_long[] = "Identifier too long";
 static const char commaless_variable_list[] = "comma-less variable list";
 
@@ -571,6 +609,8 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
 }
 #endif
 
+
+
 /*
  * Perl_lex_start
  * Initialize variables.  Uses the Perl save_stack to save its state (for
@@ -587,7 +627,7 @@ Perl_lex_start(pTHX_ SV *line)
 
     /* create and initialise a parser */
 
-    Newx(parser, 1, yy_parser);
+    Newxz(parser, 1, yy_parser);
     parser->old_parser = PL_parser;
     PL_parser = parser;
 
@@ -601,35 +641,19 @@ Perl_lex_start(pTHX_ SV *line)
 
     /* initialise lexer state */
 
-    SAVEI32(PL_lex_dojoin);
     SAVEI32(PL_lex_brackets);
     SAVEI32(PL_lex_casemods);
-    SAVEI32(PL_lex_starts);
     SAVEI32(PL_lex_state);
-    SAVEVPTR(PL_lex_inpat);
-    SAVEI32(PL_lex_inwhat);
 #ifdef PERL_MAD
     if (PL_lex_state == LEX_KNOWNEXT) {
-	I32 toke = PL_lasttoke;
+	I32 toke = parser->old_parser->lasttoke;
  	while (--toke >= 0) {
 	    SAVEI32(PL_nexttoke[toke].next_type);
 	    SAVEVPTR(PL_nexttoke[toke].next_val);
 	    if (PL_madskills)
 		SAVEVPTR(PL_nexttoke[toke].next_mad);
 	}
-	SAVEI32(PL_lasttoke);
     }
-    SAVESPTR(PL_endwhite);
-    SAVESPTR(PL_thistoken);
-    SAVESPTR(PL_thiswhite);
-    SAVESPTR(PL_nextwhite);
-    SAVESPTR(PL_thisopen);
-    SAVESPTR(PL_thisclose);
-    SAVESPTR(PL_thisstuff);
-    SAVEVPTR(PL_thismad);
-    SAVEI32(PL_realtokenstart);
-    SAVEI32(PL_faketokens);
-    SAVESPTR(PL_skipwhite);
     SAVEI32(PL_curforce);
 #else
     if (PL_lex_state == LEX_KNOWNEXT) {
@@ -650,70 +674,17 @@ Perl_lex_start(pTHX_ SV *line)
     SAVEPPTR(PL_last_uni);
     SAVEPPTR(PL_linestart);
     SAVESPTR(PL_linestr);
-    SAVEGENERICPV(PL_lex_brackstack);
-    SAVEGENERICPV(PL_lex_casestack);
     SAVEDESTRUCTOR_X(restore_rsfp, PL_rsfp);
-    SAVESPTR(PL_lex_stuff);
-    SAVEI32(PL_lex_defer);
-    SAVEI32(PL_sublex_info.sub_inwhat);
-    SAVEI32(PL_sublex_info.super_state);
-    SAVEVPTR(PL_sublex_info.sub_op);
-    SAVEPPTR(PL_sublex_info.super_bufptr);
-    SAVEPPTR(PL_sublex_info.super_bufend);
-    SAVESPTR(PL_lex_repl);
     SAVEINT(PL_expect);
-    SAVEINT(PL_lex_expect);
-    SAVEI32(PL_lex_formbrack);
-    SAVEVPTR(PL_lex_op);
-    SAVEI32(PL_multi_close);
-    SAVEI32(PL_multi_open);
-    SAVEI32(PL_multi_start);
-    SAVEI8(PL_pending_ident);
-    SAVEBOOL(PL_preambled);
 
     PL_lex_state = LEX_NORMAL;
-    PL_lex_defer = 0;
     PL_expect = XSTATE;
-    PL_lex_brackets = 0;
-    Newx(PL_lex_brackstack, 120, char);
-    Newx(PL_lex_casestack, 12, char);
-    PL_lex_casemods = 0;
-    *PL_lex_casestack = '\0';
-    PL_lex_dojoin = 0;
-    PL_lex_starts = 0;
-    PL_lex_stuff = NULL;
-    PL_lex_repl = NULL;
-    PL_lex_inpat = 0;
-#ifdef PERL_MAD
-    PL_lasttoke = 0;
-    PL_endwhite = NULL;
-    PL_faketokens = 0;
-    PL_nextwhite = NULL;
-    PL_realtokenstart = 0;
-    PL_skipwhite = NULL;
-    PL_thisclose = NULL;
-    PL_thisopen = NULL;
-    PL_thisstuff = NULL;
-    PL_thistoken = NULL;
-    PL_thiswhite = NULL;
-    PL_thismad = NULL;
-#else
+    Newx(parser->lex_brackstack, 120, char);
+    Newx(parser->lex_casestack, 12, char);
+    *parser->lex_casestack = '\0';
+#ifndef PERL_MAD
     PL_nexttoke = 0;
 #endif
-    PL_lex_inwhat = 0;
-    PL_sublex_info.sub_inwhat = 0;
-    PL_sublex_info.super_state = 0;
-    PL_sublex_info.sub_op = NULL;
-    PL_sublex_info.super_bufptr = NULL;
-    PL_sublex_info.super_bufend = NULL;
-    PL_lex_expect = 0;
-    PL_lex_formbrack = 0;
-    PL_lex_op = NULL;
-    PL_multi_close = 0;
-    PL_multi_open = 0;
-    PL_multi_start = 0;
-    PL_pending_ident = '\0';
-    PL_preambled = FALSE;
 
     if (line) {
 	s = SvPV_const(line, len);
