@@ -3922,7 +3922,6 @@ STATIC char*	S_force_word(pTHX_ char *start, int token, int check_keyword, int a
 STATIC SV*	S_tokeq(pTHX_ SV *sv)
 			__attribute__nonnull__(pTHX_1);
 
-STATIC int	S_pending_ident(pTHX);
 STATIC void	S_readpipe_override(pTHX);
 STATIC char*	S_scan_const(pTHX_ char *start)
 			__attribute__warn_unused_result__

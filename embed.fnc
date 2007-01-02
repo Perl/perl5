@@ -1461,7 +1461,6 @@ s	|char*	|force_version	|NN char *start|int guessing
 s	|char*	|force_word	|NN char *start|int token|int check_keyword \
 				|int allow_pack|int allow_tick
 s	|SV*	|tokeq		|NN SV *sv
-s	|int	|pending_ident
 s	|void	|readpipe_override|
 sR	|char*	|scan_const	|NN char *start
 sR	|char*	|scan_formline	|NN char *s

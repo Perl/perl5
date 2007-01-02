@@ -65,6 +65,8 @@
 #  define PL_thiswhite		(PL_parser->thiswhite)
 #endif
 
+static int
+S_pending_ident(pTHX);
 
 static const char ident_too_long[] = "Identifier too long";
 static const char commaless_variable_list[] = "comma-less variable list";
