@@ -3489,7 +3489,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
     dtype = SvTYPE(dstr);
     sflags = SvFLAGS(sstr);
 
-    if (dtype == SVt_PVCV) {
+    if (dtype == SVt_PVCV || dtype == SVt_PVFM) {
 	/* Assigning to a subroutine sets the prototype.  */
 	if (SvOK(sstr)) {
 	    STRLEN len;
@@ -3499,9 +3499,16 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
             Copy(ptr, SvPVX(dstr), len + 1, char);
             SvCUR_set(dstr, len);
 	    SvPOK_only(dstr);
+	    SvFLAGS(dstr) |= sflags & SVf_UTF8;
 	} else {
 	    SvOK_off(dstr);
 	}
+    } else if (dtype == SVt_PVAV || dtype == SVt_PVHV) {
+	const char * const type = sv_reftype(dstr,0);
+	if (PL_op)
+	    Perl_croak(aTHX_ "Cannot copy to %s in %s", type, OP_NAME(PL_op));
+	else
+	    Perl_croak(aTHX_ "Cannot copy to %s", type);
     } else if (sflags & SVf_ROK) {
 	if (isGV_with_GP(dstr) && dtype == SVt_PVGV
 	    && SvTYPE(SvRV(sstr)) == SVt_PVGV) {
