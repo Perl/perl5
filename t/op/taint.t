@@ -17,7 +17,7 @@ use Config;
 use File::Spec::Functions;
 
 BEGIN { require './test.pl'; }
-plan tests => 255;
+plan tests => 257;
 
 $| = 1;
 
@@ -1217,4 +1217,16 @@ SKIP:
     like($@, qr/^Insecure dependency in sprintf/, q/sprintf doesn't like tainted formats/);
     eval { sprintf("# %s\n", $TAINT . "foo") };
     ok(!$@, q/sprintf accepts other tainted args/);
+}
+
+{
+    # 40708
+    my $n  = 7e9;
+    8e9 - $n;
+
+    my $val = $n;
+    is ($val, '7000000000', 'Assignment to untainted variable');
+    $val = $TAINT;
+    $val = $n;
+    is ($val, '7000000000', 'Assignment to tainted variable');
 }
