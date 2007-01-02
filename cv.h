@@ -124,7 +124,8 @@ Returns the stash of the CV.
 #define CvFILEGV(sv)	(gv_fetchfile(CvFILE(sv)))
 #if defined(__GNUC__) && !defined(PERL_GCC_BRACE_GROUPS_FORBIDDEN)
 #  define CvDEPTH(sv) (*({const CV *_cv = (CV *)sv; \
-			  assert(SvTYPE(_cv) == SVt_PVCV); \
+			  assert(SvTYPE(_cv) == SVt_PVCV ||	 \
+				 SvTYPE(_cv) == SVt_PVFM);	 \
 			  &((XPVCV*)SvANY(_cv))->xiv_u.xivu_i32; \
 			}))
 #else
