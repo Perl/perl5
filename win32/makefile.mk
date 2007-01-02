@@ -1541,7 +1541,7 @@ unpack_files:
 	$(MINIPERL) -I..\lib ..\uupacktool.pl -u -d .. -m
 
 cleanup_unpacked_files:
-	$(MINIPERL) -I..\lib ..\uupacktool.pl -c -d .. -m
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\uupacktool.pl -c -d .. -m
 	
 test-prep : all utils unpack_files
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)

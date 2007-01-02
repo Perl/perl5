@@ -1220,7 +1220,7 @@ unpack_files:
 	$(MINIPERL) -I..\lib ..\uupacktool.pl -u -d .. -m
 
 cleanup_unpacked_files:
-	$(MINIPERL) -I..\lib ..\uupacktool.pl -c -d .. -m
+	-if exist $(MINIPERL) $(MINIPERL) -I..\lib ..\uupacktool.pl -c -d .. -m
 
 test-reonly : reonly utils
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
