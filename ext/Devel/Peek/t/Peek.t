@@ -14,7 +14,7 @@ BEGIN { require "./test.pl"; }
 
 use Devel::Peek;
 
-plan(23);
+plan(24);
 
 our $DEBUG = 0;
 open(SAVERR, ">&STDERR") or die "Can't dup STDERR: $!";
@@ -503,3 +503,13 @@ do_test(23,
     OUTSIDE_SEQ = 0
     PADLIST = 0x0
     OUTSIDE = 0x0 \\(null\\)');	
+
+# isUV should show on PVMG
+do_test(24,
+	do { my $v = $1; $v = ~0; $v },
+'SV = PVMG\\($ADDR\\) at $ADDR
+  REFCNT = 1
+  FLAGS = \\(IOK,pIOK,IsUV\\)
+  UV = \d+
+  NV = 0
+  PV = 0');
