@@ -80,9 +80,6 @@ struct xpvhv {
 
 #define xhv_keys xiv_u.xivu_iv
 
-#if 0
-typedef struct xpvhv xpvhv_allocated;
-#else
 typedef struct {
     STRLEN	xhv_fill;	/* how full xhv_array currently is */
     STRLEN	xhv_max;	/* subscript of last element of xhv_array */
@@ -99,7 +96,6 @@ typedef struct {
     } xmg_u;
     HV*		xmg_stash;	/* class package */
 } xpvhv_allocated;
-#endif
 
 /* hash a key */
 /* FYI: This is the "One-at-a-Time" algorithm by Bob Jenkins

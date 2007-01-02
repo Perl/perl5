@@ -403,14 +403,10 @@ struct xpv {
     STRLEN	xpv_len;	/* allocated size */
 };
 
-#if 0
-typedef struct xpv xpv_allocated;
-#else
 typedef struct {
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
 } xpv_allocated;
-#endif
 
 struct xpviv {
     union {
@@ -437,9 +433,6 @@ struct xpviv {
     }		xiv_u;
 };
 
-#if 0
-typedef struct xpviv xpviv_allocated;
-#else
 typedef struct {
     STRLEN	xpv_cur;	/* length of svu_pv as a C string */
     STRLEN	xpv_len;	/* allocated size */
@@ -451,7 +444,6 @@ typedef struct {
 	HEK *	xivu_namehek;
     }		xiv_u;
 } xpviv_allocated;
-#endif
 
 #define xiv_iv xiv_u.xivu_iv
 

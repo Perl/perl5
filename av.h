@@ -38,9 +38,6 @@ struct xpvav {
     HV*		xmg_stash;	/* class package */
 };
 
-#if 0
-typedef struct xpvav xpvav_allocated;
-#else
 typedef struct {
     SSize_t	xav_fill;       /* Index of last element present */
     SSize_t	xav_max;        /* max index for which array has space */
@@ -57,7 +54,6 @@ typedef struct {
     } xmg_u;
     HV*		xmg_stash;	/* class package */
 } xpvav_allocated;
-#endif
 
 /* SV**	xav_alloc; */
 #define xav_alloc xiv_u.xivu_p1
