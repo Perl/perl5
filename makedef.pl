@@ -761,6 +761,7 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 		    PL_my_cxt_index
 		    PL_my_cxt_list
 		    PL_my_cxt_size
+		    PL_my_cxt_keys
 		    Perl_croak_nocontext
 		    Perl_die_nocontext
 		    Perl_deb_nocontext
@@ -775,6 +776,7 @@ unless ($define{'PERL_IMPLICIT_CONTEXT'}) {
 		    Perl_sv_catpvf_mg_nocontext
 		    Perl_sv_setpvf_mg_nocontext
 		    Perl_my_cxt_init
+		    Perl_my_cxt_index
 		    )];
 }
 
