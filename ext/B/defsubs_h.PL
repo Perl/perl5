@@ -47,11 +47,13 @@ foreach my $const (qw(
 		      SVs_SMG
 		      SVt_PVGV
 		      SVt_PVHV
+		      PAD_FAKELEX_ANON
+		      PAD_FAKELEX_MULTI
 		      ))
  {
   doconst($const);
  }
-foreach my $file (qw(op.h cop.h pad.h))
+foreach my $file (qw(op.h cop.h))
  {
   my $path = $^O eq 'MacOS' ? ":::$file" : "../../$file";
   open(OPH,"$path") || die "Cannot open $path:$!";
