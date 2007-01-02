@@ -296,6 +296,7 @@ S_clear_yystack(pTHX_  const yy_parser *parser)
 
 /* delete a parser object */
 
+#ifndef PERL_IN_MADLY_C
 void
 Perl_parser_free(pTHX_  const yy_parser *parser)
 {
@@ -303,7 +304,7 @@ Perl_parser_free(pTHX_  const yy_parser *parser)
     Safefree(parser->stack);
     PL_parser = parser->old_parser;
 }
-
+#endif
 
 /*----------.
 | yyparse.  |
