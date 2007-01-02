@@ -885,6 +885,13 @@ if ($define{'PERL_MAD'}) {
 		    )];
 }
 
+unless ($define{'PERL_GLOBAL_STRUCT_PRIVATE'}) {
+    skip_symbols [qw(
+		    PL_my_cxt_keys
+		    Perl_my_cxt_index
+		    )];
+}
+
 unless ($define{'d_mmap'}) {
     skip_symbols [qw(
 		    PL_mmap_page_size
