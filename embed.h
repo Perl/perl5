@@ -1056,12 +1056,14 @@
 #define mg_dup			Perl_mg_dup
 #define sv_dup			Perl_sv_dup
 #define rvpv_dup		Perl_rvpv_dup
+#endif
 #define ptr_table_new		Perl_ptr_table_new
 #define ptr_table_fetch		Perl_ptr_table_fetch
 #define ptr_table_store		Perl_ptr_table_store
 #define ptr_table_split		Perl_ptr_table_split
 #define ptr_table_clear		Perl_ptr_table_clear
 #define ptr_table_free		Perl_ptr_table_free
+#if defined(USE_ITHREADS)
 #  if defined(HAVE_INTERP_INTERN)
 #define sys_intern_dup		Perl_sys_intern_dup
 #  endif
@@ -1446,12 +1448,8 @@
 #define sv_2iuv_common		S_sv_2iuv_common
 #define glob_assign_glob	S_glob_assign_glob
 #define glob_assign_ref		S_glob_assign_ref
-#endif
-#  if defined(USE_ITHREADS)
-#ifdef PERL_CORE
 #define ptr_table_find		S_ptr_table_find
 #endif
-#  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE
@@ -3261,12 +3259,14 @@
 #define mg_dup(a,b)		Perl_mg_dup(aTHX_ a,b)
 #define sv_dup(a,b)		Perl_sv_dup(aTHX_ a,b)
 #define rvpv_dup(a,b,c)		Perl_rvpv_dup(aTHX_ a,b,c)
+#endif
 #define ptr_table_new()		Perl_ptr_table_new(aTHX)
 #define ptr_table_fetch(a,b)	Perl_ptr_table_fetch(aTHX_ a,b)
 #define ptr_table_store(a,b,c)	Perl_ptr_table_store(aTHX_ a,b,c)
 #define ptr_table_split(a)	Perl_ptr_table_split(aTHX_ a)
 #define ptr_table_clear(a)	Perl_ptr_table_clear(aTHX_ a)
 #define ptr_table_free(a)	Perl_ptr_table_free(aTHX_ a)
+#if defined(USE_ITHREADS)
 #  if defined(HAVE_INTERP_INTERN)
 #define sys_intern_dup(a,b)	Perl_sys_intern_dup(aTHX_ a,b)
 #  endif
@@ -3656,12 +3656,8 @@
 #define sv_2iuv_common(a)	S_sv_2iuv_common(aTHX_ a)
 #define glob_assign_glob(a,b,c)	S_glob_assign_glob(aTHX_ a,b,c)
 #define glob_assign_ref(a,b)	S_glob_assign_ref(aTHX_ a,b)
-#endif
-#  if defined(USE_ITHREADS)
-#ifdef PERL_CORE
 #define ptr_table_find		S_ptr_table_find
 #endif
-#  endif
 #endif
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)
 #ifdef PERL_CORE

@@ -392,9 +392,7 @@ PERLVAR(ISock,		struct IPerlSock*)
 PERLVAR(IProc,		struct IPerlProc*)
 #endif
 
-#if defined(USE_ITHREADS)
 PERLVAR(Iptr_table,	PTR_TBL_t*)
-#endif
 PERLVARI(Ibeginav_save, AV*, NULL)	/* save BEGIN{}s when compiling */
 
 PERLVAR(Ibody_arenas, void*) /* pointer to list of body-arenas */

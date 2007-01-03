@@ -1054,12 +1054,14 @@ ApR	|GP*	|gp_dup		|NULLOK GP* gp|NN CLONE_PARAMS* param
 ApR	|MAGIC*	|mg_dup		|NULLOK MAGIC* mg|NN CLONE_PARAMS* param
 ApR	|SV*	|sv_dup		|NULLOK const SV* sstr|NN CLONE_PARAMS* param
 Ap	|void	|rvpv_dup	|NN SV* dstr|NN const SV *sstr|NN CLONE_PARAMS* param
+#endif
 Apa	|PTR_TBL_t*|ptr_table_new
 ApR	|void*	|ptr_table_fetch|NN PTR_TBL_t *tbl|NN const void *sv
 Ap	|void	|ptr_table_store|NN PTR_TBL_t *tbl|NULLOK const void *oldsv|NN void *newsv
 Ap	|void	|ptr_table_split|NN PTR_TBL_t *tbl
 Ap	|void	|ptr_table_clear|NULLOK PTR_TBL_t *tbl
 Ap	|void	|ptr_table_free|NULLOK PTR_TBL_t *tbl
+#if defined(USE_ITHREADS)
 #  if defined(HAVE_INTERP_INTERN)
 Ap	|void	|sys_intern_dup	|NN struct interp_intern* src|NN struct interp_intern* dst
 #  endif
@@ -1449,9 +1451,7 @@ s	|void *	|more_bodies	|svtype sv_type
 s	|bool	|sv_2iuv_common	|NN SV *sv
 s	|void	|glob_assign_glob|NN SV *dstr|NN SV *sstr|const int dtype
 s	|void	|glob_assign_ref|NN SV *dstr|NN SV *sstr
-#  if defined(USE_ITHREADS)
 sRn	|PTR_TBL_ENT_t *|ptr_table_find|NN PTR_TBL_t *tbl|NN const void *sv
-#  endif
 #endif
 
 #if defined(PERL_IN_TOKE_C) || defined(PERL_DECL_PROT)

@@ -707,9 +707,6 @@ unless ($define{'USE_ITHREADS'}) {
 
 unless ($define{'USE_ITHREADS'}) {
     skip_symbols [qw(
-		    PL_ptr_table
-		    PL_pte_root
-		    PL_pte_arenaroot
 		    PL_op_mutex
 		    PL_regex_pad
 		    PL_regex_padav
@@ -733,14 +730,6 @@ unless ($define{'USE_ITHREADS'}) {
 		    Perl_rvpv_dup
 		    Perl_hek_dup
 		    Perl_sys_intern_dup
-		    Perl_ptr_table_clear
-		    Perl_ptr_table_fetch
-		    Perl_ptr_table_free
-		    Perl_ptr_table_new
-		    Perl_ptr_table_clear
-		    Perl_ptr_table_free
-		    Perl_ptr_table_split
-		    Perl_ptr_table_store
 		    perl_clone
 		    perl_clone_using
 		    Perl_sharedsv_find
