@@ -16,7 +16,7 @@ BEGIN { $| = 1; print "1..38\n"; }
 
 END { print "not ok 1\n" unless $loaded }
 
-use Time::HiRes 1.9701; # Remember to bump this once in a while.
+use Time::HiRes 1.9704; # Remember to bump this once in a while.
 use Time::HiRes qw(tv_interval);
 
 $loaded = 1;
@@ -228,9 +228,10 @@ unless ($have_gettimeofday) {
      $n++;
  }
  # $s should be, at worst, equal to $n
- # (time() may be rounding down, up, or closest)
- ok 14, abs($s) / $n <= 1.0, "Time::HiRes::time() not close to time()";
- print "# s = $s, n = $n, s/n = ", $s/$n, "\n";
+ # (time() may be rounding down, up, or closest),
+ # but allow 10% of slop.
+ ok 14, abs($s) / $n <= 1.10, "Time::HiRes::time() not close to time()";
+ print "# s = $s, n = $n, s/n = ", abs($s)/$n, "\n";
 }
 
 my $has_ualarm = $Config{d_ualarm};

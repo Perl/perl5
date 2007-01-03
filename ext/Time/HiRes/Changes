@@ -1,5 +1,11 @@
 Revision history for the Perl extension Time::HiRes.
 
+1.9704	[2007-01-01]
+	- allow 10% of slop in test #14 (testing difference between
+	  CORE::time() and Time::HiRes::time()), there seem to be often
+	  transient failures from Perl smoke builds on this test
+	- small pod tweaks
+
 1.9703	[2006-12-08]
 	- use int main(int argc, char **argv) consistently in Makefile.PL,
 	  should help with

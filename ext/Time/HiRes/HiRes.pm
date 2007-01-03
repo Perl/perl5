@@ -23,7 +23,7 @@ require DynaLoader;
 		 stat
 		);
 	
-$VERSION = '1.9703';
+$VERSION = '1.9704';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -108,11 +108,13 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
   alarm ($floating_seconds);
   alarm ($floating_seconds, $floating_interval);
 
-  use Time::HiRes qw( setitimer getitimer
-		      ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF ITIMER_REALPROF );
+  use Time::HiRes qw( setitimer getitimer );
 
   setitimer ($which, $floating_seconds, $floating_interval );
   getitimer ($which);
+
+  use Time::HiRes qw( clock_gettime clock_getres clock_nanosleep
+		      ITIMER_REAL ITIMER_VIRTUAL ITIMER_PROF ITIMER_REALPROF );
 
   $realtime   = clock_gettime(CLOCK_REALTIME);
   $resolution = clock_getres(CLOCK_REALTIME);
@@ -121,6 +123,8 @@ Time::HiRes - High resolution alarm, sleep, gettimeofday, interval timers
   clock_nanosleep(CLOCK_REALTIME, time() + 10, TIMER_ABSTIME);
 
   my $ticktock = clock();
+
+  use Time::HiRes qw( stat );
 
   my @stat = stat("file");
   my @stat = stat(FH);
@@ -158,6 +162,14 @@ If you are using C<nanosleep> for something else than mixing sleeping
 with signals, give some thought to whether Perl is the tool you should
 be using for work requiring nanosecond accuracies.
 
+Remember that unless you are working on a I<hard realtime> system,
+any clocks and timers will be imprecise, especially so if you are working
+in a pre-emptive multiuser system.  Understand the difference between
+I<wallclock time> and process time (in UNIX-like systems the sum of
+I<user> and I<system> times).  Any attempt to sleep for X seconds will
+most probably end up sleeping B<more> than that, but don't be surpised
+if you end up sleeping slightly B<less>.
+
 The following functions can be imported from this module.
 No functions are exported by default.
 
@@ -172,9 +184,9 @@ seconds like C<Time::HiRes::time()> (see below).
 =item usleep ( $useconds )
 
 Sleeps for the number of microseconds (millionths of a second)
-specified.  Returns the number of microseconds actually slept.  Can
-sleep for more than one second, unlike the C<usleep> system call. Can
-also sleep for zero seconds, which often works like a I<thread yield>.
+specified.  Returns the number of microseconds actually slept.
+Can sleep for more than one second, unlike the C<usleep> system call.
+Can also sleep for zero seconds, which often works like a I<thread yield>.
 See also C<Time::HiRes::usleep()>, C<Time::HiRes::sleep()>, and
 C<Time::HiRes::clock_nanosleep()>.
 
@@ -185,8 +197,8 @@ Do not expect usleep() to be exact down to one microsecond.
 Sleeps for the number of nanoseconds (1e9ths of a second) specified.
 Returns the number of nanoseconds actually slept (accurate only to
 microseconds, the nearest thousand of them).  Can sleep for more than
-one second.  Can also sleep for zero seconds, which often works like a
-I<thread yield>.  See also C<Time::HiRes::sleep()>,
+one second.  Can also sleep for zero seconds, which often works like
+a I<thread yield>.  See also C<Time::HiRes::sleep()>,
 C<Time::HiRes::usleep()>, and C<Time::HiRes::clock_nanosleep()>.
 
 Do not expect nanosleep() to be exact down to one nanosecond.
@@ -196,6 +208,8 @@ Getting even accuracy of one thousand nanoseconds is good.
 
 Issues a C<ualarm> call; the C<$interval_useconds> is optional and
 will be zero if unspecified, resulting in C<alarm>-like behaviour.
+
+ualarm(0) will cancel an outstanding ualarm().
 
 Note that the interaction between alarms and sleeps is unspecified.
 
@@ -261,7 +275,7 @@ Note that the interaction between alarms and sleeps is unspecified.
 
 =item setitimer ( $which, $floating_seconds [, $interval_floating_seconds ] )
 
-Start up an interval timer: after a certain time, a signal arrives,
+Start up an interval timer: after a certain time, a signal ($which) arrives,
 and more signals may keep arriving at certain intervals.  To disable
 an "itimer", use C<$floating_seconds> of zero.  If the
 C<$interval_floating_seconds> is set to zero (or unspecified), the
@@ -275,7 +289,7 @@ In scalar context, the remaining time in the timer is returned.
 
 In list context, both the remaining time and the interval are returned.
 
-There are usually three or four interval timers available: the
+There are usually three or four interval timers (signals) available: the
 C<$which> can be C<ITIMER_REAL>, C<ITIMER_VIRTUAL>, C<ITIMER_PROF>, or
 C<ITIMER_REALPROF>.  Note that which ones are available depends: true
 UNIX platforms usually have the first three, but (for example) Win32
@@ -300,7 +314,8 @@ delivered when the timer expires.  C<SIGPROF> can interrupt system calls.
 
 The semantics of interval timers for multithreaded programs are
 system-specific, and some systems may support additional interval
-timers.  See your C<setitimer()> documentation.
+timers.  For example, it is unspecified which thread gets the signals.
+See your C<setitimer()> documentation.
 
 =item getitimer ( $which )
 
@@ -385,11 +400,21 @@ granularity is B<two> seconds).
 A zero return value of &Time::HiRes::d_hires_stat means that
 Time::HiRes::stat is a no-op passthrough for CORE::stat(),
 and therefore the timestamps will stay integers.  The same
-will happen if the filesystem does not do subsecond timestamps,
+thing will happen if the filesystem does not do subsecond timestamps,
 even if the &Time::HiRes::d_hires_stat is non-zero.
 
 In any case do not expect nanosecond resolution, or even a microsecond
-resolution.
+resolution.  Also note that the modify/access timestamps might have
+different resolutions, and that they need not be synchronized, e.g.
+if the operations are
+
+    write
+    stat # t1
+    read
+    stat # t2
+
+the access time stamp from t2 need not be greater-than the modify
+time stamp from t1: it may be equal or I<less>.
 
 =back
 
@@ -402,6 +427,8 @@ resolution.
 
   # signal alarm in 2.5s & every .1s thereafter
   ualarm(2_500_000, 100_000);
+  # cancel that ualarm
+  ualarm(0);
 
   # get seconds and microseconds since the epoch
   ($s, $usec) = gettimeofday();
@@ -521,8 +548,9 @@ might help in this (in case your system supports CLOCK_MONOTONIC).
 
 Perl modules L<BSD::Resource>, L<Time::TAI64>.
 
-Your system documentation for C<clock_gettime>, C<clock_settime>,
-C<gettimeofday>, C<getitimer>, C<setitimer>, C<ualarm>.
+Your system documentation for C<clock>, C<clock_gettime>,
+C<clock_getres>, C<clock_nanosleep>, C<clock_settime>, C<getitimer>,
+C<gettimeofday>, C<setitimer>, C<sleep>, C<stat>, C<ualarm>.
 
 =head1 AUTHORS
 
@@ -535,7 +563,7 @@ G. Aas <gisle@aas.no>
 
 Copyright (c) 1996-2002 Douglas E. Wegscheid.  All rights reserved.
 
-Copyright (c) 2002, 2003, 2004, 2005, 2006 Jarkko Hietaniemi.  All rights reserved.
+Copyright (c) 2002, 2003, 2004, 2005, 2006, 2007 Jarkko Hietaniemi.  All rights reserved.
 
 This program is free software; you can redistribute it and/or modify
 it under the same terms as Perl itself.
