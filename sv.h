@@ -1206,9 +1206,9 @@ the scalar's value cannot change unless written to.
 #  define SvPAD_STATE_on(sv)	(SvFLAGS(sv) |= SVpad_NAME|SVpad_STATE)
 #endif
 
-#define OURSTASH(sv)	\
+#define SvOURSTASH(sv)	\
 	(SvPAD_OUR(sv) ? ((XPVMG*) SvANY(sv))->xmg_u.xmg_ourstash : NULL)
-#define OURSTASH_set(sv, st)					\
+#define SvOURSTASH_set(sv, st)					\
         STMT_START {						\
 	    assert(SvTYPE(sv) == SVt_PVMG);			\
 	    ((XPVMG*) SvANY(sv))->xmg_u.xmg_ourstash = st;	\

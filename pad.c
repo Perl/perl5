@@ -75,7 +75,7 @@ The SVs in the names AV have their PV being the name of the variable.
 xlow+1..xhigh inclusive in the NV union is a range of cop_seq numbers for
 which the name is valid.  For typed lexicals name SV is SVt_PVMG and SvSTASH
 points at the type.  For C<our> lexicals, the type is also SVt_PVMG, with the
-OURSTASH slot pointing at the stash of the associated global (so that
+SvOURSTASH slot pointing at the stash of the associated global (so that
 duplicate C<our> declarations in the same package can be detected).  SvUVX is
 sometimes hijacked to store the generation number during compilation.
 
@@ -335,7 +335,7 @@ offset.
 If C<typestash> is valid, the name is for a typed lexical; set the
 name's stash to that value.
 If C<ourstash> is valid, it's an our lexical, set the name's
-OURSTASH to that value
+SvOURSTASH to that value
 
 If fake, it means we're cloning an existing entry
 
@@ -362,7 +362,7 @@ Perl_pad_add_name(pTHX_ const char *name, HV* typestash, HV* ourstash, bool fake
     }
     if (ourstash) {
 	SvPAD_OUR_on(namesv);
-	OURSTASH_set(namesv, ourstash);
+	SvOURSTASH_set(namesv, ourstash);
 	SvREFCNT_inc_simple_void_NN(ourstash);
     }
     else if (state) {
@@ -567,7 +567,7 @@ Perl_pad_check_dup(pTHX_ const char *name, bool is_our, const HV *ourstash)
 		&& sv != &PL_sv_undef
 		&& !SvFAKE(sv)
 		&& (COP_SEQ_RANGE_HIGH(sv) == PAD_MAX || COP_SEQ_RANGE_HIGH(sv) == 0)
-		&& OURSTASH(sv) == ourstash
+		&& SvOURSTASH(sv) == ourstash
 		&& strEQ(name, SvPVX_const(sv)))
 	    {
 		Perl_warner(aTHX_ packWARN(WARN_MISC),
@@ -853,7 +853,7 @@ S_pad_findlex(pTHX_ const char *name, const CV* cv, U32 seq, int warn,
 	    SvPVX_const(*out_name_sv),
 	    SvPAD_TYPED(*out_name_sv)
 		    ? SvSTASH(*out_name_sv) : NULL,
-	    OURSTASH(*out_name_sv),
+	    SvOURSTASH(*out_name_sv),
 	    1,  /* fake */
 	    0   /* not a state variable */
 	);

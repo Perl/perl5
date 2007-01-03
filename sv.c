@@ -5120,7 +5120,7 @@ Perl_sv_clear(pTHX_ register SV *sv)
     }
     if (type >= SVt_PVMG) {
 	if (type == SVt_PVMG && SvPAD_OUR(sv)) {
-	    SvREFCNT_dec(OURSTASH(sv));
+	    SvREFCNT_dec(SvOURSTASH(sv));
 	} else if (SvMAGIC(sv))
 	    mg_free(sv);
 	if (type == SVt_PVMG && SvPAD_TYPED(sv))
@@ -10024,7 +10024,7 @@ Perl_sv_dup(pTHX_ const SV *sstr, CLONE_PARAMS* param)
 	       FIXME - instrument and check that assumption  */
 	    if (sv_type >= SVt_PVMG) {
 		if ((sv_type == SVt_PVMG) && SvPAD_OUR(dstr)) {
-		    OURSTASH_set(dstr, hv_dup_inc(OURSTASH(dstr), param));
+		    SvOURSTASH_set(dstr, hv_dup_inc(SvOURSTASH(dstr), param));
 		} else if (SvMAGIC(dstr))
 		    SvMAGIC_set(dstr, mg_dup(SvMAGIC(dstr), param));
 		if (SvSTASH(dstr))
