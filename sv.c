@@ -9498,7 +9498,14 @@ Perl_parser_dup(pTHX_ const yy_parser *proto, CLONE_PARAMS* param)
     if (!proto)
 	return NULL;
 
+    /* look for it in the table first */
+    parser = (yy_parser *)ptr_table_fetch(PL_ptr_table, proto);
+    if (parser)
+	return parser;
+
+    /* create anew and remember what it is */
     Newxz(parser, 1, yy_parser);
+    ptr_table_store(PL_ptr_table, proto, parser);
 
     parser->yyerrstatus = 0;
     parser->yychar = YYEMPTY;		/* Cause a token to be read.  */
@@ -10669,6 +10676,10 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
 	case SAVEt_COMPILE_WARNINGS:
 	    ptr = POPPTR(ss,ix);
 	    TOPPTR(nss,ix) = DUP_WARNINGS((STRLEN*)ptr);
+	    break;
+	case SAVEt_PARSER:
+	    ptr = POPPTR(ss,ix);
+	    TOPPTR(nss,ix) = parser_dup(ptr, param);
 	    break;
 	default:
 	    Perl_croak(aTHX_

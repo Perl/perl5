@@ -348,7 +348,7 @@ Perl_yyparse (pTHX)
     ps = parser->ps;
 
     ENTER;  /* force parser free before we return */
-    SAVEDESTRUCTOR_X(Perl_parser_free, (void*) parser);
+    SAVEPARSER(parser);
 
 /*------------------------------------------------------------.
 | yynewstate -- Push a new state, which is found in yystate.  |

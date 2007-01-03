@@ -1023,6 +1023,10 @@ Perl_leave_scope(pTHX_ I32 base)
 		Copy(state, &PL_reg_state, 1, struct re_save_state);
 	    }
 	    break;
+	case SAVEt_PARSER:
+	    ptr = SSPOPPTR;
+	    parser_free((yy_parser *) ptr);
+	    break;
 	default:
 	    Perl_croak(aTHX_ "panic: leave_scope inconsistency");
 	}
