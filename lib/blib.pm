@@ -47,7 +47,7 @@ sub import
 {
  my $package = shift;
  my $dir;
- if ($^O eq "MSWin32") {
+ if ($^O eq "MSWin32" && -f "Win32.xs") {
      # We don't use getcwd() on Windows because it will internally
      # call Win32::GetCwd(), which will get the Win32 module loaded.
      # That means that it would not be possible to run `make test`
