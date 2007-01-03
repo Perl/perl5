@@ -1510,9 +1510,14 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 #endif
 	PerlIO_putc(file, '\n');
     }
-    if ((type >= SVt_PVNV && type != SVt_PVAV && type != SVt_PVHV
-	 && type != SVt_PVCV && type != SVt_PVFM && !isGV_with_GP(sv))
-	|| type == SVt_NV) {
+    if ((type == SVt_PVNV || type == SVt_PVMG) && SvFLAGS(sv) & SVpad_NAME) {
+	Perl_dump_indent(aTHX_ level, file, "  COP_LOW = %"UVuf"\n",
+			 (UV) COP_SEQ_RANGE_LOW(sv));
+	Perl_dump_indent(aTHX_ level, file, "  COP_HIGH = %"UVuf"\n",
+			 (UV) COP_SEQ_RANGE_HIGH(sv));
+    } else if ((type >= SVt_PVNV && type != SVt_PVAV && type != SVt_PVHV
+		&& type != SVt_PVCV && type != SVt_PVFM && !isGV_with_GP(sv))
+	       || type == SVt_NV) {
 	STORE_NUMERIC_LOCAL_SET_STANDARD();
 	/* %Vg doesn't work? --jhi */
 #ifdef USE_LONG_DOUBLE
@@ -1547,8 +1552,13 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 	    Perl_dump_indent(aTHX_ level, file, "  PV = 0\n");
     }
     if (type >= SVt_PVMG) {
-	if (SvMAGIC(sv))
-            do_magic_dump(level, file, SvMAGIC(sv), nest, maxnest, dumpops, pvlim);
+	if (type == SVt_PVMG && SvPAD_OUR(sv)) {
+	    if (OURSTASH(sv))
+		do_hv_dump(level, file, "  OURSTASH", OURSTASH(sv));
+	} else {
+	    if (SvMAGIC(sv))
+		do_magic_dump(level, file, SvMAGIC(sv), nest, maxnest, dumpops, pvlim);
+	}
 	if (SvSTASH(sv))
 	    do_hv_dump(level, file, "  STASH", SvSTASH(sv));
     }
