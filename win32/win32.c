@@ -4781,6 +4781,100 @@ win32_signal(int sig, Sighandler_t subcode)
 
 #ifdef HAVE_INTERP_INTERN
 
+static void
+ansify_path(void)
+{
+    OSVERSIONINFO osver; /* g_osver may not yet be initialized */
+    size_t len;
+    char *ansi_path;
+    WCHAR *wide_path;
+    WCHAR *wide_dir;
+
+    /* there is no Unicode environment on Windows 9X */
+    osver.dwOSVersionInfoSize = sizeof(osver);
+    GetVersionEx(&osver);
+    if (osver.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
+        return;
+
+    /* fetch Unicode version of PATH */
+    len = 2000;
+    wide_path = win32_malloc(len*sizeof(WCHAR));
+    while (wide_path) {
+        size_t newlen = GetEnvironmentVariableW(L"PATH", wide_path, len);
+        if (newlen < len)
+            break;
+        len = newlen;
+        wide_path = win32_realloc(wide_path, len*sizeof(WCHAR));
+    }
+    if (!wide_path)
+        return;
+
+    /* convert to ANSI pathnames */
+    wide_dir = wide_path;
+    ansi_path = NULL;
+    while (wide_dir) {
+        WCHAR *sep = wcschr(wide_dir, ';');
+        char *ansi_dir;
+        size_t ansi_len;
+        size_t wide_len;
+
+        if (sep)
+            *sep++ = '\0';
+
+        /* remove quotes around pathname */
+        if (*wide_dir == '"')
+            ++wide_dir;
+        wide_len = wcslen(wide_dir);
+        if (wide_len && wide_dir[wide_len-1] == '"')
+            wide_dir[wide_len-1] = '\0';
+
+        /* append ansi_dir to ansi_path */
+        ansi_dir = win32_ansipath(wide_dir);
+        ansi_len = strlen(ansi_dir);
+        if (ansi_path) {
+            size_t newlen = len + 1 + ansi_len;
+            ansi_path = win32_realloc(ansi_path, newlen+1);
+            if (!ansi_path)
+                break;
+            ansi_path[len] = ';';
+            memcpy(ansi_path+len+1, ansi_dir, ansi_len+1);
+            len = newlen;
+        }
+        else {
+            len = ansi_len;
+            ansi_path = win32_malloc(5+len+1);
+            if (!ansi_path)
+                break;
+            memcpy(ansi_path, "PATH=", 5);
+            memcpy(ansi_path+5, ansi_dir, len+1);
+            len += 5;
+        }
+        win32_free(ansi_dir);
+        wide_dir = sep;
+    }
+
+    if (ansi_path) {
+        /* Update C RTL environ array.  This will only have full effect if
+         * perl_parse() is later called with `environ` as the `env` argument.
+         * Otherwise S_init_postdump_symbols() will overwrite PATH again.
+         *
+         * We do have to ansify() the PATH before Perl has been fully
+         * initialized because S_find_script() uses the PATH when perl
+         * is being invoked with the -S option.  This happens before %ENV
+         * is initialized in S_init_postdump_symbols().
+         *
+         * XXX Is this a bug? Should S_find_script() use the environment
+         * XXX passed in the `env` arg to parse_perl()?
+         */
+        putenv(ansi_path);
+        /* Keep system environment in sync because S_init_postdump_symbols()
+         * will not call mg_set() if it initializes %ENV from `environ`.
+         */
+        SetEnvironmentVariableA("PATH", ansi_path+5);
+        win32_free(ansi_path);
+    }
+    win32_free(wide_path);
+}
 
 static void
 win32_csighandler(int sig)
@@ -4853,6 +4947,8 @@ Perl_sys_intern_init(pTHX)
 	/* Push our handler on top */
 	SetConsoleCtrlHandler(win32_ctrlhandler,TRUE);
     }
+
+    ansify_path();
 }
 
 void

@@ -211,6 +211,7 @@ RunPerl(int argc, char **argv, char **env)
     char szModuleName[MAX_PATH];
     char *arg0 = argv[0];
     char *ansi = NULL;
+    bool use_environ = (env == environ);
 
     osver.dwOSVersionInfoSize = sizeof(osver);
     GetVersionEx(&osver);
@@ -244,6 +245,16 @@ RunPerl(int argc, char **argv, char **env)
 	return (1);
     perl_construct(my_perl);
     PL_perl_destruct_level = 0;
+
+    /* PERL_SYS_INIT() may update the environment, e.g. via ansify_path().
+     * This may reallocate the RTL environment block. Therefore we need
+     * to make sure that `env` continues to have the same value as `environ`
+     * if we have been called this way.  If we have been called with any
+     * other value for `env` then all environment munging by PERL_SYS_INIT()
+     * will be lost again.
+     */
+    if (use_environ)
+        env = environ;
 
     exitstatus = perl_parse(my_perl, xs_init, argc, argv, env);
     if (!exitstatus) {
