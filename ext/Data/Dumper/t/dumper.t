@@ -1174,18 +1174,30 @@ TEST q(Data::Dumper->new(\@strings_ns)->Dump), 'Strings NV,PV';
 TEST q(Data::Dumper->new(\@strings_ni)->Dump), 'Strings NV,IV';
 TEST q(Data::Dumper->new(\@strings_nis)->Dump), 'Strings NV,IV,PV';
 if ($XS) {
+ my $nv_preserves_uv = defined $Config{d_nv_preserves_uv};
+ my $nv_preserves_uv_4bits = $Config{nv_preserves_uv_bits} >= 4;
   $WANT=$WANT_XS_N;
   TEST q(Data::Dumper->new(\@numbers)->Dumpxs), 'XS Numbers';
   TEST q(Data::Dumper->new(\@numbers_s)->Dumpxs), 'XS Numbers PV';
+ if ($nv_preserves_uv || $nv_preserves_uv_4bits) {
   $WANT=$WANT_XS_I;
   TEST q(Data::Dumper->new(\@numbers_i)->Dumpxs), 'XS Numbers IV';
   TEST q(Data::Dumper->new(\@numbers_is)->Dumpxs), 'XS Numbers IV,PV';
+ } else {
+  SKIP_TEST "NV does not preserve 4bits";
+  SKIP_TEST "NV does not preserve 4bits";
+ }
   $WANT=$WANT_XS_N;
   TEST q(Data::Dumper->new(\@numbers_n)->Dumpxs), 'XS Numbers NV';
   TEST q(Data::Dumper->new(\@numbers_ns)->Dumpxs), 'XS Numbers NV,PV';
+ if ($nv_preserves_uv || $nv_preserves_uv_4bits) {
   $WANT=$WANT_XS_I;
   TEST q(Data::Dumper->new(\@numbers_ni)->Dumpxs), 'XS Numbers NV,IV';
   TEST q(Data::Dumper->new(\@numbers_nis)->Dumpxs), 'XS Numbers NV,IV,PV';
+ } else {
+  SKIP_TEST "NV does not preserve 4bits";
+  SKIP_TEST "NV does not preserve 4bits";
+ }
 
   $WANT=$WANT_XS_S;
   TEST q(Data::Dumper->new(\@strings)->Dumpxs), 'XS Strings';
@@ -1194,9 +1206,14 @@ if ($XS) {
   $WANT=$WANT_PL_S;
   TEST q(Data::Dumper->new(\@strings_i)->Dumpxs), 'XS Strings IV';
   TEST q(Data::Dumper->new(\@strings_is)->Dumpxs), 'XS Strings IV,PV';
+ if ($nv_preserves_uv || $nv_preserves_uv_4bits) {
   $WANT=$WANT_XS_S;
   TEST q(Data::Dumper->new(\@strings_n)->Dumpxs), 'XS Strings NV';
   TEST q(Data::Dumper->new(\@strings_ns)->Dumpxs), 'XS Strings NV,PV';
+ } else {
+  SKIP_TEST "NV does not preserve 4bits";
+  SKIP_TEST "NV does not preserve 4bits";
+ }
   # This one used to really mess up. New code actually emulates the .pm code
   $WANT=$WANT_PL_S;
   TEST q(Data::Dumper->new(\@strings_ni)->Dumpxs), 'XS Strings NV,IV';

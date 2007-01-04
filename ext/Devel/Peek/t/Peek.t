@@ -125,7 +125,7 @@ do_test( 7,
 'SV = PVNV\\($ADDR\\) at $ADDR
   REFCNT = 1
   FLAGS = \\(NOK,pNOK\\)
-  IV = 0
+  IV = \d+
   NV = 789\\.(?:1(?:000+\d+)?|0999+\d+)
   PV = $ADDR "789"\\\0
   CUR = 3
