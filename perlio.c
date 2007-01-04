@@ -645,9 +645,13 @@ PerlIO_clone_list(pTHX_ PerlIO_list_t *proto, CLONE_PARAMS *param)
 	int i;
 	list = PerlIO_list_alloc(aTHX);
 	for (i=0; i < proto->cur; i++) {
-	    SV *arg = NULL;
-	    if (proto->array[i].arg)
-		arg = PerlIO_sv_dup(aTHX_ proto->array[i].arg,param);
+	    SV *arg = proto->array[i].arg;
+#ifdef sv_dup
+	    if (arg && param)
+		arg = sv_dup(arg, param);
+#else
+	    PERL_UNUSED_ARG(param);
+#endif
 	    PerlIO_list_push(aTHX_ list, proto->array[i].funcs, arg);
 	}
     }
@@ -1015,10 +1019,13 @@ PerlIO_parse_layers(pTHX_ PerlIO_list_t *av, const char *names)
 		    PerlIO_funcs * const layer =
 			PerlIO_find_layer(aTHX_ s, llen, 1);
 		    if (layer) {
+			SV *arg = NULL;
+			if (as)
+			    arg = newSVpvn(as, alen);
 			PerlIO_list_push(aTHX_ av, layer,
-					 (as) ? newSVpvn(as,
-							 alen) :
-					 &PL_sv_undef);
+					 (arg) ? arg : &PL_sv_undef);
+			if (arg)
+			    SvREFCNT_dec(arg);
 		    }
 		    else {
 			if (ckWARN(WARN_LAYER))
@@ -1493,12 +1500,7 @@ PerlIO_resolve_layers(pTHX_ const char *layers,
     if (layers && *layers) {
 	PerlIO_list_t *av;
 	if (incdef) {
-	    IV i;
-	    av = PerlIO_list_alloc(aTHX);
-	    for (i = 0; i < def->cur; i++) {
-		PerlIO_list_push(aTHX_ av, def->array[i].funcs,
-				 def->array[i].arg);
-	    }
+	    av = PerlIO_clone_list(aTHX_ def, NULL);
 	}
 	else {
 	    av = def;
@@ -1543,10 +1545,13 @@ PerlIO_openn(pTHX_ const char *layers, const char *mode, int fd,
 	    PerlIOl *l = *f;
 	    layera = PerlIO_list_alloc(aTHX);
 	    while (l) {
-		SV * const arg = (l->tab->Getarg)
-			? (*l->tab->Getarg) (aTHX_ &l, NULL, 0)
-			: &PL_sv_undef;
-		PerlIO_list_push(aTHX_ layera, l->tab, arg);
+		SV *arg = NULL;
+		if (l->tab->Getarg)
+		    arg = (*l->tab->Getarg) (aTHX_ &l, NULL, 0);
+		PerlIO_list_push(aTHX_ layera, l->tab,
+				 (arg) ? arg : &PL_sv_undef);
+		if (arg)
+		    SvREFCNT_dec(arg);
 		l = *PerlIONext(&l);
 	    }
 	}
@@ -2220,7 +2225,9 @@ PerlIO_sv_dup(pTHX_ SV *arg, CLONE_PARAMS *param)
 	return NULL;
 #ifdef sv_dup
     if (param) {
-	return sv_dup(arg, param);
+	arg = sv_dup(arg, param);
+	SvREFCNT_inc_simple_void_NN(arg);
+	return arg;
     }
     else {
 	return newSVsv(arg);
@@ -2244,19 +2251,15 @@ PerlIOBase_dup(pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags)
     }
     if (f) {
 	PerlIO_funcs * const self = PerlIOBase(o)->tab;
-	SV *arg;
+	SV *arg = NULL;
 	char buf[8];
 	PerlIO_debug("PerlIOBase_dup %s f=%p o=%p param=%p\n",
 		     self->name, (void*)f, (void*)o, (void*)param);
 	if (self->Getarg)
 	    arg = (*self->Getarg)(aTHX_ o, param, flags);
-	else {
-	    arg = NULL;
-	}
 	f = PerlIO_push(aTHX_ f, self, PerlIO_modestr(o,buf), arg);
-	if (arg) {
+	if (arg)
 	    SvREFCNT_dec(arg);
-	}
     }
     return f;
 }
