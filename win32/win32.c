@@ -1616,11 +1616,14 @@ win32_longpath(char *path)
 static void
 out_of_memory()
 {
-    dTHX;
-    /* Can't use PerlIO to write as it allocates memory */
-    PerlLIO_write(PerlIO_fileno(Perl_error_log),
-                  PL_no_mem, strlen(PL_no_mem));
-    my_exit(1);
+    if (PL_curinterp) {
+        dTHX;
+        /* Can't use PerlIO to write as it allocates memory */
+        PerlLIO_write(PerlIO_fileno(Perl_error_log),
+                      PL_no_mem, strlen(PL_no_mem));
+        my_exit(1);
+    }
+    exit(1);
 }
 
 /* The win32_ansipath() function takes a Unicode filename and converts it
@@ -1655,21 +1658,22 @@ win32_ansipath(const WCHAR *widename)
     WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, widename, widelen,
                         name, len, NULL, &use_default);
     if (use_default) {
-        WCHAR *shortname;
         DWORD shortlen = GetShortPathNameW(widename, NULL, 0);
-        shortname = win32_malloc(shortlen*sizeof(WCHAR));
-        if (!shortname)
-            out_of_memory();
-        shortlen = GetShortPathNameW(widename, shortname, shortlen)+1;
+        if (shortlen) {
+            WCHAR *shortname = win32_malloc(shortlen*sizeof(WCHAR));
+            if (!shortname)
+                out_of_memory();
+            shortlen = GetShortPathNameW(widename, shortname, shortlen)+1;
 
-        len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, shortname, shortlen,
-                                  NULL, 0, NULL, NULL);
-        name = win32_realloc(name, len);
-        if (!name)
-            out_of_memory();
-        WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, shortname, shortlen,
-                            name, len, NULL, NULL);
-        win32_free(shortname);
+            len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, shortname, shortlen,
+                                      NULL, 0, NULL, NULL);
+            name = win32_realloc(name, len);
+            if (!name)
+                out_of_memory();
+            WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, shortname, shortlen,
+                                name, len, NULL, NULL);
+            win32_free(shortname);
+        }
     }
     return name;
 }
