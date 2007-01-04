@@ -5657,6 +5657,12 @@ Perl_my_strlcpy(char *dst, const char *src, Size_t size)
 }
 #endif
 
+#if defined(_MSC_VER) && (_MSC_VER >= 1300) && (_MSC_VER < 1400) && (WINVER < 0x0500)
+/* VC7 or 7.1, building with pre-VC7 runtime libraries. */
+long _ftol( double ); /* Defined by VC6 C libs. */
+long _ftol2( double dblSource ) { return _ftol( dblSource ); }
+#endif
+
 void
 Perl_get_db_sub(pTHX_ SV **svp, CV *cv)
 {

@@ -2066,12 +2066,6 @@ int isnan(double d);
 #   endif
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1300) && (_MSC_VER < 1400) && (WINVER < 0x0500)
-/* VC7 or 7.1, building with pre-VC7 runtime libraries. */
-long _ftol( double ); /* Defined by VC6 C libs. */
-long _ftol2( double dblSource ) { return _ftol( dblSource ); }
-#endif
-
 /* The default is to use Perl's own atof() implementation (in numeric.c).
  * Usually that is the one to use but for some platforms (e.g. UNICOS)
  * it is however best to use the native implementation of atof.
