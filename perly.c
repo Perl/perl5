@@ -302,7 +302,10 @@ Perl_parser_free(pTHX_  const yy_parser *parser)
 {
     S_clear_yystack(aTHX_ parser);
     Safefree(parser->stack);
+    Safefree(parser->lex_brackstack);
+    Safefree(parser->lex_casestack);
     PL_parser = parser->old_parser;
+    Safefree(parser);
 }
 #endif
 

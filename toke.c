@@ -643,8 +643,6 @@ Perl_lex_start(pTHX_ SV *line)
 
     /* initialise lexer state */
 
-    SAVEI32(PL_lex_brackets);
-    SAVEI32(PL_lex_casemods);
     SAVEI32(PL_lex_state);
 #ifdef PERL_MAD
     if (PL_lex_state == LEX_KNOWNEXT) {
