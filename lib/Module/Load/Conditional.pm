@@ -15,7 +15,7 @@ BEGIN {
                         $FIND_VERSION $ERROR $CHECK_INC_HASH];
     use Exporter;
     @ISA            = qw[Exporter];
-    $VERSION        = '0.12';
+    $VERSION        = '0.14';
     $VERBOSE        = 0;
     $FIND_VERSION   = 1;
     $CHECK_INC_HASH = 0;
@@ -228,8 +228,17 @@ sub check_install {
             ### user wants us to find the version from files
             if( $FIND_VERSION ) {
                 
+                my $in_pod = 0;
                 while (local $_ = <$fh> ) {
     
+                    ### stolen from EU::MM_Unix->parse_version to address
+                    ### #24062: "Problem with CPANPLUS 0.076 misidentifying
+                    ### versions after installing Text::NSP 1.03" where a 
+                    ### VERSION mentioned in the POD was found before
+                    ### the real $VERSION declaration.
+                    $in_pod = /^=(?!cut)/ ? 1 : /^=cut/ ? 0 : $in_pod;
+                    next if $in_pod;
+                    
                     ### skip commented out lines, they won't eval to anything.
                     next if /^\s*#/;
         
@@ -522,10 +531,8 @@ Jos Boumans E<lt>kane@cpan.orgE<gt>.
 
 =head1 COPYRIGHT
 
-This module is
-copyright (c) 2002 Jos Boumans E<lt>kane@cpan.orgE<gt>.
-All rights reserved.
+This module is copyright (c) 2002-2007 Jos Boumans 
+E<lt>kane@cpan.orgE<gt>. All rights reserved.
 
-This library is free software;
-you may redistribute and/or modify it under the same
-terms as Perl itself.
+This library is free software; you may redistribute and/or modify 
+it under the same terms as Perl itself.

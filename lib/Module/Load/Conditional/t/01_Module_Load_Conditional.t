@@ -16,7 +16,7 @@ use strict;
 use lib qw[../lib to_load];
 use File::Spec ();
 
-use Test::More tests => 20;
+use Test::More tests => 23;
 
 ### case 1 ###
 use_ok( 'Module::Load::Conditional' ) or diag "Module.pm not found.  Dying", die;
@@ -78,7 +78,14 @@ use_ok( 'Module::Load::Conditional' ) or diag "Module.pm not found.  Dying", die
 
 }
 
-### test $FILE_VERSION
+### test finding a version of a module that mentions $VERSION in pod
+{   my $rv = check_install( module => 'InPod' );
+    ok( $rv,                        'Testing $VERSION in POD' );
+    ok( $rv->{version},             "   Version found" );
+    is( $rv->{version}, 2,          "   Version is correct" );
+}
+
+### test $FIND_VERSION
 {   local $Module::Load::Conditional::FIND_VERSION = 0;
     local $Module::Load::Conditional::FIND_VERSION = 0;
     
@@ -126,19 +133,17 @@ use_ok( 'Module::Load::Conditional' ) or diag "Module.pm not found.  Dying", die
 
 
 ### test 'requires' ###
-
 SKIP:{
     skip "Depends on \$^X, which doesn't work well when testing the Perl core", 
         1 if $ENV{PERL_CORE};
-    my %list = map { $_ => 1 } requires('Carp');
 
+    my %list = map { $_ => 1 } requires('Carp');
+    
     my $flag;
     $flag++ unless delete $list{'Exporter'};
 
     ok( !$flag, q[Detecting requirements] );
 }
-
-
 
 ### test using the %INC lookup for check_install
 {   local $Module::Load::Conditional::CHECK_INC_HASH = 1;

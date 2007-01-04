@@ -94,7 +94,6 @@ ext/B/t/f_map.t			converted to optreeCheck()s
 ext/B/t/f_sort			optree test raw material
 ext/B/t/f_sort.t		optree test raw material
 ext/B/t/lint.t		See if B::Lint works
-ext/B/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
 ext/B/t/OptreeCheck.pm		optree comparison tool
 ext/B/t/optree_check.t		test OptreeCheck apparatus
 ext/B/t/optree_concise.t	more B::Concise tests
@@ -105,105 +104,12 @@ ext/B/t/optree_sort.t		inplace sort optimization regression
 ext/B/t/optree_specials.t	BEGIN, END, etc code
 ext/B/t/optree_varinit.t	my,our,local var init optimization
 ext/B/t/o.t		See if O works
+ext/B/t/pluglib/B/Lint/Plugin/Test.pm	See if B::Lint works
+ext/B/t/pragma.t	See if user pragmas work.
 ext/B/t/showlex.t	See if B::ShowLex works
 ext/B/t/terse.t		See if B::Terse works
 ext/B/t/xref.t		See if B::Xref works
-ext/B/t/pragma.t	See if user pragmas work.
 ext/B/typemap			Compiler backend interface types
-ext/IO/Compress/Base/Changes	IO::Compress::Base
-ext/IO/Compress/Base/lib/File/GlobMapper.pm	IO::Compress::Base
-ext/IO/Compress/Base/lib/IO/Compress/Base/Common.pm	IO::Compress::Base
-ext/IO/Compress/Base/lib/IO/Compress/Base.pm	IO::Compress::Base
-ext/IO/Compress/Base/lib/IO/Uncompress/AnyUncompress.pm	IO::Compress::Base
-ext/IO/Compress/Base/lib/IO/Uncompress/Base.pm	IO::Compress::Base
-ext/IO/Compress/Base/Makefile.PL	IO::Compress::Base
-ext/IO/Compress/Base/private/MakeUtil.pm	IO::Compress::Base
-ext/IO/Compress/Base/README	IO::Compress::Base
-ext/IO/Compress/Base/t/01misc.t	IO::Compress::Base
-ext/IO/Compress/Base/t/globmapper.t	IO::Compress::Base
-ext/IO/Compress/Zlib/Changes	IO::Compress::Zlib
-ext/IO/Compress/Zlib/examples/gzappend	IO::Compress::Zlib
-ext/IO/Compress/Zlib/examples/gzcat	IO::Compress::Zlib
-ext/IO/Compress/Zlib/examples/gzgrep	IO::Compress::Zlib
-ext/IO/Compress/Zlib/examples/gzstream	IO::Compress::Zlib
-ext/IO/Compress/Zlib/examples/unzip	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Compress/Adapter/Deflate.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Compress/Adapter/Identity.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Compress/Deflate.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Compress/Gzip/Constants.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Compress/Gzip.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Compress/RawDeflate.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Compress/Zip/Constants.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Compress/Zip.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Compress/Zlib/Constants.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Compress/Zlib/Extra.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Uncompress/Adapter/Identity.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Uncompress/Adapter/Inflate.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Uncompress/AnyInflate.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Uncompress/Gunzip.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Uncompress/Inflate.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Uncompress/RawInflate.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/lib/IO/Uncompress/Unzip.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/Makefile.PL	IO::Compress::Zlib
-ext/IO/Compress/Zlib/private/MakeUtil.pm	IO::Compress::Zlib
-ext/IO/Compress/Zlib/README	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/001zlib-generic-deflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/001zlib-generic-gzip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/001zlib-generic-rawdeflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/001zlib-generic-zip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/002any-deflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/002any-gzip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/002any-rawdeflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/002any-transparent.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/002any-zip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/004gziphdr.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/005defhdr.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/010examples.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/020isize.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/050interop-gzip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/100generic-deflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/100generic-gzip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/100generic-rawdeflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/100generic-zip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/101truncate-deflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/101truncate-gzip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/101truncate-rawdeflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/101truncate-zip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/102tied-deflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/102tied-gzip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/102tied-rawdeflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/102tied-zip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/103newtied-deflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/103newtied-gzip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/103newtied-rawdeflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/103newtied-zip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/104destroy-deflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/104destroy-gzip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/104destroy-rawdeflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/104destroy-zip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/105oneshot-deflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/105oneshot-gzip-only.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/105oneshot-gzip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/105oneshot-rawdeflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/105oneshot-zip-only.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/105oneshot-zip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/106prime-deflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/106prime-gzip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/106prime-rawdeflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/106prime-zip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/107multi-deflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/107multi-gzip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/107multi-rawdeflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/107multi-zip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/108anyunc-deflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/108anyunc-gzip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/108anyunc-rawdeflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/108anyunc-transparent.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/108anyunc-zip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/109merge-deflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/109merge-gzip.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/109merge-rawdeflate.t	IO::Compress::Zlib
-ext/IO/Compress/Zlib/t/109merge-zip.t	IO::Compress::Zlib
 ext/Compress/Raw/Zlib/Changes		Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/config.in		Compress::Raw::Zlib
 ext/Compress/Raw/Zlib/examples/filtdef	Compress::Raw::Zlib
@@ -788,6 +694,100 @@ ext/I18N/Langinfo/Langinfo.xs	I18N::Langinfo
 ext/I18N/Langinfo/Makefile.PL	I18N::Langinfo
 ext/I18N/Langinfo/t/Langinfo.t	See whether I18N::Langinfo works
 ext/IO/ChangeLog		IO perl module change log
+ext/IO/Compress/Base/Changes	IO::Compress::Base
+ext/IO/Compress/Base/lib/File/GlobMapper.pm	IO::Compress::Base
+ext/IO/Compress/Base/lib/IO/Compress/Base/Common.pm	IO::Compress::Base
+ext/IO/Compress/Base/lib/IO/Compress/Base.pm	IO::Compress::Base
+ext/IO/Compress/Base/lib/IO/Uncompress/AnyUncompress.pm	IO::Compress::Base
+ext/IO/Compress/Base/lib/IO/Uncompress/Base.pm	IO::Compress::Base
+ext/IO/Compress/Base/Makefile.PL	IO::Compress::Base
+ext/IO/Compress/Base/private/MakeUtil.pm	IO::Compress::Base
+ext/IO/Compress/Base/README	IO::Compress::Base
+ext/IO/Compress/Base/t/01misc.t	IO::Compress::Base
+ext/IO/Compress/Base/t/globmapper.t	IO::Compress::Base
+ext/IO/Compress/Zlib/Changes	IO::Compress::Zlib
+ext/IO/Compress/Zlib/examples/gzappend	IO::Compress::Zlib
+ext/IO/Compress/Zlib/examples/gzcat	IO::Compress::Zlib
+ext/IO/Compress/Zlib/examples/gzgrep	IO::Compress::Zlib
+ext/IO/Compress/Zlib/examples/gzstream	IO::Compress::Zlib
+ext/IO/Compress/Zlib/examples/unzip	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Compress/Adapter/Deflate.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Compress/Adapter/Identity.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Compress/Deflate.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Compress/Gzip/Constants.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Compress/Gzip.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Compress/RawDeflate.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Compress/Zip/Constants.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Compress/Zip.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Compress/Zlib/Constants.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Compress/Zlib/Extra.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Uncompress/Adapter/Identity.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Uncompress/Adapter/Inflate.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Uncompress/AnyInflate.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Uncompress/Gunzip.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Uncompress/Inflate.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Uncompress/RawInflate.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/lib/IO/Uncompress/Unzip.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/Makefile.PL	IO::Compress::Zlib
+ext/IO/Compress/Zlib/private/MakeUtil.pm	IO::Compress::Zlib
+ext/IO/Compress/Zlib/README	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/001zlib-generic-deflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/001zlib-generic-gzip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/001zlib-generic-rawdeflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/001zlib-generic-zip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/002any-deflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/002any-gzip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/002any-rawdeflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/002any-transparent.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/002any-zip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/004gziphdr.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/005defhdr.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/010examples.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/020isize.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/050interop-gzip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/100generic-deflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/100generic-gzip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/100generic-rawdeflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/100generic-zip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/101truncate-deflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/101truncate-gzip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/101truncate-rawdeflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/101truncate-zip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/102tied-deflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/102tied-gzip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/102tied-rawdeflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/102tied-zip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/103newtied-deflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/103newtied-gzip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/103newtied-rawdeflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/103newtied-zip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/104destroy-deflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/104destroy-gzip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/104destroy-rawdeflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/104destroy-zip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/105oneshot-deflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/105oneshot-gzip-only.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/105oneshot-gzip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/105oneshot-rawdeflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/105oneshot-zip-only.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/105oneshot-zip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/106prime-deflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/106prime-gzip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/106prime-rawdeflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/106prime-zip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/107multi-deflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/107multi-gzip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/107multi-rawdeflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/107multi-zip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/108anyunc-deflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/108anyunc-gzip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/108anyunc-rawdeflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/108anyunc-transparent.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/108anyunc-zip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/109merge-deflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/109merge-gzip.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/109merge-rawdeflate.t	IO::Compress::Zlib
+ext/IO/Compress/Zlib/t/109merge-zip.t	IO::Compress::Zlib
 ext/IO/hints/sco.pl		Hint for IO for named architecture
 ext/IO/IO.pm			Top-level interface to IO::* classes
 ext/IO/IO.xs			IO extension external subroutines
@@ -1515,9 +1515,9 @@ lib/CPAN/bin/cpan		easily interact with CPAN from the command line
 lib/CPAN/Debug.pm		helper package for CPAN.pm
 lib/CPAN/FirstTime.pm		Utility for creating CPAN config files
 lib/CPAN/HandleConfig.pm	helper package for CPAN.pm
-lib/CPAN/Kwalify.pm		helper package for CPAN.pm
 lib/CPAN/Kwalify/distroprefs.dd		helper file for validating config files 
 lib/CPAN/Kwalify/distroprefs.yml	helper file for validating config files
+lib/CPAN/Kwalify.pm		helper package for CPAN.pm
 lib/CPAN/Nox.pm			Runs CPAN while avoiding compiled extensions
 lib/CPAN/PAUSE2003.pub		CPAN public key
 lib/CPAN/PAUSE2005.pub		CPAN public key
@@ -1982,8 +1982,8 @@ lib/Module/Build/Authoring.pod	Module::Build
 lib/Module/Build/Base.pm	Module::Build
 lib/Module/Build/Changes	Module::Build
 lib/Module/Build/Compat.pm	Module::Build
-lib/Module/Build/Config.pm	Module::Build
 lib/Module/Build/ConfigData.pm	Module::Build
+lib/Module/Build/Config.pm	Module::Build
 lib/Module/Build/Cookbook.pm	Module::Build
 lib/Module/Build/ModuleInfo.pm	Module::Build
 lib/Module/Build/Notes.pm	Module::Build
@@ -2038,6 +2038,7 @@ lib/Module/CoreList/t/find_modules.t	Module::CoreList
 lib/Module/Load/Conditional.pm	Module::Conditional
 lib/Module/Load/Conditional/t/01_Module_Load_Conditional.t	Module::Conditional tests
 lib/Module/Load/Conditional/t/to_load/Commented.pm	Module::Conditional tests
+lib/Module/Load/Conditional/t/to_load/InPod.pm	Module::Load::Conditional tests
 lib/Module/Load/Conditional/t/to_load/LoadIt.pm	Module::Conditional tests
 lib/Module/Load/Conditional/t/to_load/LoadMe.pl	Module::Conditional tests
 lib/Module/Load/Conditional/t/to_load/Must/Be/Loaded.pm	Module::Conditional tests
@@ -2867,7 +2868,6 @@ os2/dl_os2.c			Addon for dl_open
 os2/Makefile.SHs		Shared library generation for OS/2
 os2/os2add.sym			Overriding symbols to export
 os2/os2_base.t			Additional tests for builtin methods
-os2/os2_pipe.t			Tests for pipe creation logic
 os2/os2.c			Additional code for OS/2
 os2/OS2/ExtAttr/Changes		EA access module
 os2/OS2/ExtAttr/ExtAttr.pm	EA access module
@@ -2878,6 +2878,7 @@ os2/OS2/ExtAttr/myea.h		EA access module
 os2/OS2/ExtAttr/t/os2_ea.t	EA access module
 os2/OS2/ExtAttr/typemap		EA access module
 os2/os2ish.h			Header for OS/2
+os2/os2_pipe.t			Tests for pipe creation logic
 os2/OS2/PrfDB/Changes		System database access module
 os2/OS2/PrfDB/Makefile.PL	System database access module
 os2/OS2/PrfDB/MANIFEST		System database access module
@@ -2888,11 +2889,11 @@ os2/OS2/Process/Makefile.PL	system() constants in a module
 os2/OS2/Process/MANIFEST	system() constants in a module
 os2/OS2/Process/Process.pm	system() constants in a module
 os2/OS2/Process/Process.xs	system() constants in a module
+os2/OS2/Process/t/os2_atoms.t		Test for OS2::Process
+os2/OS2/Process/t/os2_clipboard.t	Test for OS2::Process
 os2/OS2/Process/t/os2_process_kid.t	Tests
 os2/OS2/Process/t/os2_process.t	Tests
 os2/OS2/Process/t/os2_process_text.t	Tests
-os2/OS2/Process/t/os2_atoms.t		Test for OS2::Process
-os2/OS2/Process/t/os2_clipboard.t	Test for OS2::Process
 os2/OS2/REXX/Changes		DLL access module
 os2/OS2/REXX/DLL/Changes	DLL access module
 os2/OS2/REXX/DLL/DLL.pm		DLL access module
@@ -2921,7 +2922,6 @@ os2/perlrexx.c			Support perl interpreter embedded in REXX
 os2/perlrexx.cmd		Test perl interpreter embedded in REXX
 overload.h			generated overload enum and name table
 overload.pl			generate overload.h
-uupacktool.pl			Pack/unpack files to the .packed format
 pad.c				Scratchpad functions
 pad.h				Scratchpad headers
 parser.h			parser object header
@@ -3600,8 +3600,8 @@ t/op/sub.t			See if subroutines work
 t/op/switch.t			See if switches (given/when) work
 t/op/sysio.t			See if sysread and syswrite work
 t/op/taint.t			See if tainting works
-t/op/threads.t			Misc. tests for perl features with threads
 t/op/threads_create.pl		Ancillary file for t/op/threads.t
+t/op/threads.t			Misc. tests for perl features with threads
 t/op/tiearray.t			See if tie for arrays works
 t/op/tiehandle.t		See if tie for handles works
 t/op/tie.t			See if tie/untie functions work
@@ -3736,6 +3736,7 @@ utils/splain.PL			Stand-alone version of diagnostics.pm
 utils/xsubpp.PL			External subroutine preprocessor
 uts/sprintf_wrap.c		sprintf wrapper for UTS
 uts/strtol_wrap.c		strtol wrapper for UTS
+uupacktool.pl			Pack/unpack files to the .packed format
 vmesa/Makefile			VM/ESA Makefile
 vmesa/vmesa.c			VM/ESA-specific C code for Perl core
 vmesa/vmesaish.h		VM/ESA-specific C header for Perl core
@@ -3826,8 +3827,8 @@ win32/include/sys/socket.h	Win32 port
 win32/Makefile			Win32 makefile for NMAKE (Visual C++ build)
 win32/Makefile.ce		WinCE port
 win32/makefile.mk		Win32 makefile for DMAKE (BC++, VC++ builds)
-win32/perlexe.ico.packd		uupacktool.pl packed perlexe.ico image file, 'packd' ext is deliberate!
 win32/mdelete.bat		multifile delete
+win32/perlexe.ico.packd		uupacktool.pl packed perlexe.ico image file, 'packd' ext is deliberate!
 win32/perlexe.rc		associated perl binary with icon
 win32/perlglob.c		Win32 port
 win32/perlhost.h		Perl "host" implementation
