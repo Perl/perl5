@@ -137,10 +137,10 @@ PerlIOVia_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 	    s->obj = SvREFCNT_inc(arg);
 	    s->stash = gv_stashpvn(pkg, pkglen, FALSE);
 	    if (!s->stash) {
+		SvREFCNT_dec(s->obj);
 		s->obj =
 		    newSVpvn(Perl_form(aTHX_ "PerlIO::via::%s", pkg),
 			     pkglen + 13);
-		SvREFCNT_dec(arg);
 		s->stash = gv_stashpvn(SvPVX_const(s->obj), pkglen + 13, FALSE);
 	    }
 	    if (s->stash) {
@@ -156,8 +156,8 @@ PerlIOVia_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 				     modesv, Nullsv);
 		if (result) {
 		    if (sv_isobject(result)) {
+			SvREFCNT_dec(s->obj);
 			s->obj = SvREFCNT_inc(result);
-			SvREFCNT_dec(arg);
 		    }
 		    else if (SvIV(result) != 0)
 			return SvIV(result);
