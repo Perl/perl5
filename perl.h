@@ -4887,18 +4887,6 @@ MGVTBL_SET(
 );
 
 MGVTBL_SET(
-    PL_vtbl_regdata_names,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL
-);
-
-MGVTBL_SET(
     PL_vtbl_regdata,
     NULL,
     NULL,

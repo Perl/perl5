@@ -391,7 +391,6 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #  define VTBL_uvar		&PL_vtbl_uvar
 #  define VTBL_defelem		&PL_vtbl_defelem
 #  define VTBL_regexp		&PL_vtbl_regexp
-#  define VTBL_regdata_names	&PL_vtbl_regdata_names
 #  define VTBL_regdata		&PL_vtbl_regdata
 #  define VTBL_regdatum		&PL_vtbl_regdatum
 #  ifdef USE_LOCALE_COLLATE
