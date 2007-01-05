@@ -1094,7 +1094,7 @@ _cleaner2:
 	rm -f h2ph.man pstruct
 	rm -rf .config
 	rm -f preload
-	rm -rf lib/Encode lib/Compress lib/Hash
+	rm -rf lib/Encode lib/Compress lib/Hash lib/re
 	rm -rf lib/IO/Compress lib/IO/Uncompress
 	rm -f lib/ExtUtils/ParseXS/t/XSTest.c
 	rm -f lib/ExtUtils/ParseXS/t/XSTest$(OBJ_EXT)
