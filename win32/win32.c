@@ -1304,7 +1304,6 @@ DllExport int
 win32_kill(int pid, int sig)
 {
     dTHX;
-    HANDLE hProcess;
     long child;
 #ifdef USE_ITHREADS
     if (pid < 0) {
@@ -1312,7 +1311,7 @@ win32_kill(int pid, int sig)
 	child = find_pseudo_pid(-pid);
 	if (child >= 0) {
             HWND hwnd = w32_pseudo_child_message_hwnds[child];
-	    hProcess = w32_pseudo_child_handles[child];
+	    HANDLE hProcess = w32_pseudo_child_handles[child];
 	    switch (sig) {
 	    case 0:
 		/* "Does process exist?" use of kill */

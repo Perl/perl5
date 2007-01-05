@@ -375,7 +375,7 @@ Perl_yyparse (pTHX)
 	/* grow the stack? We always leave 1 spare slot,
 	 * in case of a '' -> 'foo' reduction */
 
-	if (size >= parser->stack_size - 1) {
+	if (size >= (size_t)parser->stack_size - 1) {
 	    /* this will croak on insufficient memory */
 	    parser->stack_size *= 2;
 	    Renew(parser->stack, parser->stack_size, yy_stack_frame);
