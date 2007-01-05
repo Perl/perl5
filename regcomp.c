@@ -4666,7 +4666,7 @@ SV*
 Perl_reg_numbered_buff_get(pTHX_ I32 paren, const REGEXP * const rx, SV* usesv, U32 flags)
 {
     char *s = NULL;
-    I32 i;
+    I32 i = 0;
     I32 s1, t1;
     SV *sv = usesv ? usesv : newSVpvs("");
         
