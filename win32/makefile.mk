@@ -1464,6 +1464,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\IO\Uncompress rmdir /s /q $(LIBDIR)\IO\Uncompress
 	-if exist $(LIBDIR)\List rmdir /s /q $(LIBDIR)\List
 	-if exist $(LIBDIR)\MIME rmdir /s /q $(LIBDIR)\MIME
+	-if exist $(LIBDIR)\re rmdir /s /q $(LIBDIR)\re
 	-if exist $(LIBDIR)\Scalar rmdir /s /q $(LIBDIR)\Scalar
 	-if exist $(LIBDIR)\Sys rmdir /s /q $(LIBDIR)\Sys
 	-if exist $(LIBDIR)\threads rmdir /s /q $(LIBDIR)\threads
