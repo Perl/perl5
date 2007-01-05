@@ -2061,7 +2061,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
     }
 #endif
 
-    if (PL_taint_warn && PL_dowarn != G_WARN_ALL_OFF) {
+    if (PL_taint_warn && !(PL_dowarn & (G_WARN_ALL_OFF | G_WARN_ALL_ON | G_WARN_ON))) {
         PL_compiling.cop_warnings
 	    = Perl_new_warnings_bitfield(aTHX_ NULL, WARN_TAINTstring, WARNsize);
     }
@@ -3376,8 +3376,14 @@ this system using \"man perl\" or \"perldoc perl\".  If you have access to the\n
 Internet, point your browser at http://www.perl.org/, the Perl Home Page.\n\n");
 	my_exit(0);
     case 'w':
-	if (! (PL_dowarn & G_WARN_ALL_MASK))
+	if (! (PL_dowarn & G_WARN_ALL_MASK)) {
 	    PL_dowarn |= G_WARN_ON;
+	    if (PL_taint_warn) {
+		if (!specialWARN(PL_compiling.cop_warnings))
+		    PerlMemShared_free(PL_compiling.cop_warnings);
+		PL_compiling.cop_warnings = pWARN_STD;
+	    }
+	}
 	s++;
 	return s;
     case 'W':
