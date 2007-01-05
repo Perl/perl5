@@ -1,7 +1,7 @@
 /*    regexp.h
  *
  *    Copyright (C) 1993, 1994, 1996, 1997, 1999, 2000, 2001, 2003,
- *    by Larry Wall and others
+ *    2005, 2006 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.

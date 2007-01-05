@@ -1,6 +1,6 @@
 /*    util.h
  *
- *    Copyright (C) 1991, 1992, 1993, 1999, 2001, 2002,
+ *    Copyright (C) 1991, 1992, 1993, 1999, 2001, 2002, 2003, 2004, 2005
  *    by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
