@@ -1728,12 +1728,6 @@ typedef UVTYPE UV;
 #define DBL_DIG	15   /* A guess that works lots of places */
 #endif
 #endif
-#ifdef I_FLOAT
-#include <float.h>
-#endif
-#ifndef HAS_DBL_DIG
-#define DBL_DIG	15   /* A guess that works lots of places */
-#endif
 
 #ifdef OVR_LDBL_DIG
 /* Use an overridden LDBL_DIG */
