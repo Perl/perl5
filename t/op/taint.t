@@ -155,22 +155,6 @@ my $TEST = catfile(curdir(), 'TEST');
     delete @ENV{@MoreEnv};
     $ENV{TERM} = 'dumb';
 
-    if ($Is_Cygwin && ! -f 'cygwin1.dll') {
-	system("/usr/bin/cp /usr/bin/cygwin1.dll .") &&
-	    die "$0: failed to cp cygwin1.dll: $!\n";
-	eval q{
-	    END { unlink "cygwin1.dll" }
-	};
-    }
-
-    if ($Is_Cygwin && ! -f 'cygcrypt-0.dll' && -f '/usr/bin/cygcrypt-0.dll') {
-	system("/usr/bin/cp /usr/bin/cygcrypt-0.dll .") &&
-	    die "$0: failed to cp cygcrypt-0.dll: $!\n";
-	eval q{
-	    END { unlink "cygcrypt-0.dll" }
-	};
-    }
-
     test eval { `$echo 1` } eq "1\n";
 
     SKIP: {

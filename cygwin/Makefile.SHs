@@ -206,4 +206,12 @@ distdir: miniperl
 	./miniperl '-MExtUtils::Manifest' \
 	-e "ExtUtils::Manifest::manicopy(ExtUtils::Manifest::maniread(),'$(DIST_DIRECTORY)')"
 
+cygwin1.dll: /bin/cygwin1.dll
+	cp /bin/cygwin1.dll .
+
+cygcrypt-0.dll: /bin/cygcrypt-0.dll
+	cp /bin/cygcrypt-0.dll .
+
+test_prep: cygwin1.dll cygcrypt-0.dll
+
 !NO!SUBS!
