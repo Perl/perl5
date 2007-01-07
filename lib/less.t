@@ -1,4 +1,4 @@
-#!./perl 
+#!./perl -w
 
 BEGIN {
     chdir 't' if -d 't';
@@ -7,7 +7,7 @@ BEGIN {
 
 use Test::More tests => 6;
 
-use_ok( 'less' );
+BEGIN { use_ok( 'less' ) }
 
 is_deeply([less->of], [], 'more please');
 use less;
