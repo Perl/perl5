@@ -191,6 +191,9 @@ IsWinNT(void)
     return (g_osver.dwPlatformId == VER_PLATFORM_WIN32_NT);
 }
 
+DllExport char *
+win32_ansipath(const WCHAR *widename);
+
 EXTERN_C void
 set_w32_module_name(void)
 {
