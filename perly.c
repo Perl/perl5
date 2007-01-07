@@ -111,7 +111,7 @@ yy_stack_print (pTHX_ const yy_parser *parser)
 
     PerlIO_printf(Perl_debug_log, "\nindex:");
     for (ps = min; ps <= parser->ps; ps++)
-	PerlIO_printf(Perl_debug_log, " %8d", ps - parser->stack);
+	PerlIO_printf(Perl_debug_log, " %8d", (int)(ps - parser->stack));
 
     PerlIO_printf(Perl_debug_log, "\nstate:");
     for (ps = min; ps <= parser->ps; ps++)
