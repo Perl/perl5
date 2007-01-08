@@ -3078,9 +3078,11 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    }
 	    else if (j >= (I32)rlen)
 		j = rlen - 1;
-	    else
-		cPVOPo->op_pv = (char*)PerlMemShared_realloc(tbl,
+	    else {
+		tbl = PerlMemShared_realloc(tbl,
 					(0x101+rlen-j) * sizeof(short));
+		cPVOPo->op_pv = (char*)tbl;
+	    }
 	    tbl[0x100] = (short)(rlen - j);
 	    for (i=0; i < (I32)rlen - j; i++)
 		tbl[0x101+i] = r[j+i];
