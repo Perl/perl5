@@ -8154,7 +8154,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
 	/* print the details of the trie in dumpuntil instead, as
 	 * progi->data isn't available here */
         const char op = OP(o);
-        const I32 n = ARG(o);
+        const U32 n = ARG(o);
         const reg_ac_data * const ac = IS_TRIE_AC(op) ?
                (reg_ac_data *)progi->data->data[n] :
                NULL;
@@ -9098,7 +9098,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
 	else if ( PL_regkind[(U8)op]  == TRIE ) {
 	    const regnode *this_trie = node;
 	    const char op = OP(node);
-            const I32 n = ARG(node);
+            const U32 n = ARG(node);
 	    const reg_ac_data * const ac = op>=AHOCORASICK ?
                (reg_ac_data *)ri->data->data[n] :
                NULL;
