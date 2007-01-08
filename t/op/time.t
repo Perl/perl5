@@ -19,6 +19,7 @@ while (($now = time) == $beg) { sleep 1 }
 ok($now > $beg && $now - $beg < 10,             'very basic time test');
 
 for ($i = 0; $i < 1_000_000; $i++) {
+    for my $j (1..100) {}; # burn some user cycles
     ($nowuser, $nowsys) = times;
     $i = 2_000_000 if $nowuser > $beguser && ( $nowsys >= $begsys ||
                                             (!$nowsys && !$begsys));
