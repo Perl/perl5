@@ -8,7 +8,7 @@ tie @INC, 'Tie::StdArray';
 @INC = @orig_INC;
 for my $file ('./op/inccode.t', './t/op/inccode.t', ':op:inccode.t') {
     if (-r $file) {
-	do $file;
+	do $file or die $@;
 	exit;
     }
 }

@@ -9,9 +9,9 @@ use lib "symbian";
 print "Configuring...\n";
 print "Configuring with: Perl version $] ($^X)\n";
 
-do "sanity.pl";
+do "sanity.pl" or die $@;
 
-my %VERSION = %{ do "version.pl" };
+my %VERSION = %{ do "version.pl" or die $@ };
 
 printf "Configuring for:  Perl version $VERSION{REVISION}.%03d%03d\n",
   $VERSION{VERSION}, $VERSION{SUBVERSION};
@@ -20,8 +20,8 @@ my $VERSION = "$VERSION{REVISION}$VERSION{VERSION}$VERSION{SUBVERSION}";
 my $R_V_SV  = "$VERSION{REVISION}.$VERSION{VERSION}.$VERSION{SUBVERSION}";
 
 my ($SYMBIAN_ROOT, $SYMBIAN_VERSION, $SDK_NAME, $SDK_VARIANT, $SDK_VERSION) =
-    @{ do "sdk.pl" };
-my %PORT = %{ do "port.pl" };
+    @{ do "sdk.pl" or die $@ };
+my %PORT = %{ do "port.pl" or die $@ };
 
 if ($SYMBIAN_ROOT eq 'C:\Symbian\Series60_1_2_CW') {
     ( $SYMBIAN_VERSION, $SDK_VERSION ) = qw(6.1 1.2);
@@ -48,7 +48,7 @@ die "$0: does not know which Windows compiler to use\n"
 
 print "Symbian $SYMBIAN_VERSION SDK $SDK_VARIANT $SDK_VERSION ($WIN) installed at $SYMBIAN_ROOT\n";
 
-my $CWD = do "cwd.pl";
+my $CWD = do "cwd.pl" or die $@;
 print "Build directory $CWD\n";
 
 die "$0: '+' in cwd does not work with Series 60 SDK 1.2\n"

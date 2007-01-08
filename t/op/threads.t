@@ -111,5 +111,5 @@ EOI
 # http://www.nntp.perl.org/group/perl.perl5.porters/63123
 fresh_perl_is(<<'EOI', 'ok', { }, 'Ensure PL_linestr can be cloned');
 use threads;
-print do 'op/threads_create.pl';
+print do 'op/threads_create.pl' || die $@;
 EOI

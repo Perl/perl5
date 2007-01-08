@@ -157,9 +157,9 @@ my $x = "ok $i\n";
 write_file("bleah.do", <<EOT);
 \$x = "not ok $i\\n";
 EOT
-do "bleah.do";
+do "bleah.do" or die $@;
 dofile();
-sub dofile { do "bleah.do"; };
+sub dofile { do "bleah.do" or die $@; };
 print $x;
 
 # Test that scalar context is forced for require

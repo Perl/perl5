@@ -6,7 +6,7 @@ use Getopt::Long;
 use File::Basename;
 use Cwd;
 
-do "sanity.pl";
+do "sanity.pl" or die $@;
 
 my $CoreBuild = -d "ext" && -f "perl.h" && -d "symbian" && -f "perl.c";
 
@@ -64,13 +64,13 @@ my ($SYMBIAN_ROOT, $SYMBIAN_VERSION, $SDK_NAME, $SDK_VARIANT, $SDK_VERSION);
 
 if ($CoreBuild) {
     unshift @INC, "symbian";
-    do "sanity.pl";
-    my %VERSION = %{ do "version.pl" };
+    do "sanity.pl" or die $@;
+    my %VERSION = %{ do "version.pl" or die $@ };
     ($SYMBIAN_ROOT, $SYMBIAN_VERSION, $SDK_NAME, $SDK_VARIANT, $SDK_VERSION) =
-      @{ do "sdk.pl" };
+      @{ do "sdk.pl" or die $@ };
     $VERSION = "$VERSION{REVISION}$VERSION{VERSION}$VERSION{SUBVERSION}";
     $R_V_SV  = "$VERSION{REVISION}.$VERSION{VERSION}.$VERSION{SUBVERSION}";
-    $BUILDROOT    = do "cwd.pl";
+    $BUILDROOT    = do "cwd.pl" or die $@;
     $PerlVersion    = $R_V_SV;
 }
 

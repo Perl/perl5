@@ -5,16 +5,16 @@
 use strict;
 use lib "symbian";
 
-do "sanity.pl";
+do "sanity.pl" or die $@;
 
-my %VERSION = %{ do "version.pl" };
+my %VERSION = %{ do "version.pl" or die $@ };
 my $VERSION = "$VERSION{REVISION}$VERSION{VERSION}$VERSION{SUBVERSION}";
 my $R_V_SV  = "$VERSION{REVISION}.$VERSION{VERSION}.$VERSION{SUBVERSION}";
 
 my ($SYMBIAN_ROOT, $SYMBIAN_VERSION, $SDK_NAME, $SDK_VARIANT, $SDK_VERSION) =
-    @{ do "sdk.pl" };
-my $UID  = do "uid.pl";
-my %PORT = %{ do "port.pl" };
+    @{ do "sdk.pl" or die $@ };
+my $UID  = do "uid.pl" or die $@;
+my %PORT = %{ do "port.pl" or die $@ };
 
 my $ARM = 'thumb'; # TODO
 my $S60SDK = $ENV{S60SDK}; # from sdk.pl

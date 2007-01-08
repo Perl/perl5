@@ -4,7 +4,7 @@ $qr = 1;
 $qr_embed = 1;
 for $file ('./op/regexp.t', './t/op/regexp.t', ':op:regexp.t') {
     if (-r $file) {
-	do $file;
+	do $file or die $@;
 	exit;
     }
 }
