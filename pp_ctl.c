@@ -3389,10 +3389,6 @@ PP(pp_require)
         PL_compiling.cop_warnings = pWARN_ALL ;
     else if (PL_dowarn & G_WARN_ALL_OFF)
         PL_compiling.cop_warnings = pWARN_NONE ;
-    else if (PL_taint_warn && !(PL_dowarn & G_WARN_ON)) {
-        PL_compiling.cop_warnings
-	    = Perl_new_warnings_bitfield(aTHX_ NULL, WARN_TAINTstring, WARNsize);
-    }
     else
         PL_compiling.cop_warnings = pWARN_STD ;
 

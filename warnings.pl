@@ -319,9 +319,6 @@ print WARN tab(5, '#define WARNsize'),	"$warn_size\n" ;
 #print WARN tab(5, '#define WARN_ALLstring'), '"', ('\377' x $warn_size) , "\"\n" ;
 print WARN tab(5, '#define WARN_ALLstring'), '"', ('\125' x $warn_size) , "\"\n" ;
 print WARN tab(5, '#define WARN_NONEstring'), '"', ('\0' x $warn_size) , "\"\n" ;
-my $WARN_TAINTstring = mkOct($warn_size, map $_ * 2, @{ $list{'taint'} });
-
-print WARN tab(5, '#define WARN_TAINTstring'), qq["$WARN_TAINTstring"\n] ;
 
 print WARN <<'EOM';
 

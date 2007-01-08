@@ -61,7 +61,7 @@ Perl_taint_proper(pTHX_ const char *f, const char *s)
         else
 	    ug = " while running with -T switch";
 	if (PL_unsafe || PL_taint_warn) {
-            if(ckWARN(WARN_TAINT))
+            if(ckWARN_d(WARN_TAINT))
                 Perl_warner(aTHX_ packWARN(WARN_TAINT), f, s, ug);
         }
         else {
