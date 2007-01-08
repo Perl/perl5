@@ -442,7 +442,7 @@ Perl_op_clear(pTHX_ OP *o)
 	    cSVOPo->op_sv = NULL;
 	}
 	else {
-	    Safefree(cPVOPo->op_pv);
+	    PerlMemShared_free(cPVOPo->op_pv);
 	    cPVOPo->op_pv = NULL;
 	}
 	break;
@@ -3026,7 +3026,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	else
 	    bits = 8;
 
-	Safefree(cPVOPo->op_pv);
+	PerlMemShared_free(cPVOPo->op_pv);
 	cPVOPo->op_pv = NULL;
 	cSVOPo->op_sv = (SV*)swash_init("utf8", "", listsv, bits, none);
 	SvREFCNT_dec(listsv);
@@ -3083,7 +3083,8 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 	    else if (j >= (I32)rlen)
 		j = rlen - 1;
 	    else
-		cPVOPo->op_pv = (char*)Renew(tbl, 0x101+rlen-j, short);
+		cPVOPo->op_pv = (char*)PerlMemShared_realloc(tbl,
+					(0x101+rlen-j) * sizeof(short));
 	    tbl[0x100] = (short)(rlen - j);
 	    for (i=0; i < (I32)rlen - j; i++)
 		tbl[0x101+i] = r[j+i];
@@ -4622,7 +4623,7 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 	if (label->op_type == OP_STUB && (label->op_flags & OPf_PARENS))
 	    o = newOP(type, OPf_SPECIAL);
 	else {
-	    o = newPVOP(type, 0, savepv(label->op_type == OP_CONST
+	    o = newPVOP(type, 0, savesharedpv(label->op_type == OP_CONST
 					? SvPVx_nolen_const(((SVOP*)label)->op_sv)
 					: ""));
 	}
