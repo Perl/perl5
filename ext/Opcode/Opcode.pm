@@ -439,7 +439,7 @@ beyond the scope of the compartment.
 
 These ops are related to multi-threading.
 
-    lock threadsv
+    lock
 
 =item :default
 

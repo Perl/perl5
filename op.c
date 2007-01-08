@@ -1551,10 +1551,6 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 	}
 	break;
 
-    case OP_THREADSV:
-	o->op_flags |= OPf_MOD;		/* XXX ??? */
-	break;
-
     case OP_RV2AV:
     case OP_RV2HV:
 	if (set_op_ref)
@@ -4515,17 +4511,6 @@ Perl_newFOROP(pTHX_ I32 flags, char *label, line_t forline, OP *sv, OP *expr, OP
 	    }
 	    sv = NULL;
 	}
-	else if (sv->op_type == OP_THREADSV) { /* per-thread variable */
-	    padoff = sv->op_targ;
-	    if (PL_madskills)
-		madsv = sv;
-	    else {
-		sv->op_targ = 0;
-		iterflags |= OPf_SPECIAL;
-		op_free(sv);
-	    }
-	    sv = NULL;
-	}
 	else
 	    Perl_croak(aTHX_ "Can't use %s for loop variable", PL_op_desc[sv->op_type]);
 	if (padoff) {
@@ -5871,10 +5856,6 @@ Perl_newSVREF(pTHX_ OP *o)
     if (o->op_type == OP_PADANY) {
 	o->op_type = OP_PADSV;
 	o->op_ppaddr = PL_ppaddr[OP_PADSV];
-	return o;
-    }
-    else if (o->op_type == OP_THREADSV && !(o->op_flags & OPpDONE_SVREF)) {
-	o->op_flags |= OPpDONE_SVREF;
 	return o;
     }
     return newUNOP(OP_RV2SV, 0, scalar(o));
@@ -7530,8 +7511,7 @@ Perl_ck_subr(pTHX_ OP *o)
 		    if (o3->op_type == OP_RV2SV ||
 			o3->op_type == OP_PADSV ||
 			o3->op_type == OP_HELEM ||
-			o3->op_type == OP_AELEM ||
-			o3->op_type == OP_THREADSV)
+			o3->op_type == OP_AELEM)
 			 goto wrapref;
 		    if (!contextclass)
 			bad_type(arg, "scalar", gv_ename(namegv), o3);

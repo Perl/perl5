@@ -2,8 +2,8 @@
  *
  *    opcode.h
  *
- *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, 2004, 2005, 2006 by Larry Wall and others
+ *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+ *    2001, 2002, 2003, 2004, 2005, 2006, 2007 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -381,7 +381,6 @@ EXTCONST char* const PL_op_name[] = {
 	"getlogin",
 	"syscall",
 	"lock",
-	"threadsv",
 	"setstate",
 	"method_named",
 	"dor",
@@ -750,7 +749,6 @@ EXTCONST char* const PL_op_desc[] = {
 	"getlogin",
 	"syscall",
 	"lock",
-	"per-thread value",
 	"set statement info",
 	"method with known name",
 	"defined or (//)",
@@ -1133,7 +1131,6 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_pp_getlogin),
 	MEMBER_TO_FPTR(Perl_pp_syscall),
 	MEMBER_TO_FPTR(Perl_pp_lock),
-	MEMBER_TO_FPTR(Perl_unimplemented_op),	/* Perl_pp_threadsv */
 	MEMBER_TO_FPTR(Perl_pp_setstate),
 	MEMBER_TO_FPTR(Perl_pp_method_named),
 	MEMBER_TO_FPTR(Perl_pp_defined),	/* Perl_pp_dor */
@@ -1512,7 +1509,6 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* getlogin */
 	MEMBER_TO_FPTR(Perl_ck_fun),	/* syscall */
 	MEMBER_TO_FPTR(Perl_ck_rfun),	/* lock */
-	MEMBER_TO_FPTR(Perl_ck_null),	/* threadsv */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* setstate */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* method_named */
 	MEMBER_TO_FPTR(Perl_ck_null),	/* dor */
@@ -1886,7 +1882,6 @@ EXTCONST U32 PL_opargs[] = {
 	0x0000000c,	/* getlogin */
 	0x0004281d,	/* syscall */
 	0x0000f604,	/* lock */
-	0x00000044,	/* threadsv */
 	0x00001404,	/* setstate */
 	0x00000c40,	/* method_named */
 	0x00000600,	/* dor */

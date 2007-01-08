@@ -3,7 +3,7 @@
  *    opnames.h
  *
  *    Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
- *    by Larry Wall and others
+ *    2007 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -363,24 +363,23 @@ typedef enum opcode {
 	OP_GETLOGIN,	/* 345 */
 	OP_SYSCALL,	/* 346 */
 	OP_LOCK,	/* 347 */
-	OP_THREADSV,	/* 348 */
-	OP_SETSTATE,	/* 349 */
-	OP_METHOD_NAMED,/* 350 */
-	OP_DOR,		/* 351 */
-	OP_DORASSIGN,	/* 352 */
-	OP_ENTERGIVEN,	/* 353 */
-	OP_LEAVEGIVEN,	/* 354 */
-	OP_ENTERWHEN,	/* 355 */
-	OP_LEAVEWHEN,	/* 356 */
-	OP_BREAK,	/* 357 */
-	OP_CONTINUE,	/* 358 */
-	OP_SMARTMATCH,	/* 359 */
-	OP_SAY,		/* 360 */
-	OP_CUSTOM,	/* 361 */
+	OP_SETSTATE,	/* 348 */
+	OP_METHOD_NAMED,/* 349 */
+	OP_DOR,		/* 350 */
+	OP_DORASSIGN,	/* 351 */
+	OP_ENTERGIVEN,	/* 352 */
+	OP_LEAVEGIVEN,	/* 353 */
+	OP_ENTERWHEN,	/* 354 */
+	OP_LEAVEWHEN,	/* 355 */
+	OP_BREAK,	/* 356 */
+	OP_CONTINUE,	/* 357 */
+	OP_SMARTMATCH,	/* 358 */
+	OP_SAY,		/* 359 */
+	OP_CUSTOM,	/* 360 */
 	OP_max		
 } opcode;
 
-#define MAXO 362
+#define MAXO 361
 #define OP_phoney_INPUT_ONLY -1
 #define OP_phoney_OUTPUT_ONLY -2
 

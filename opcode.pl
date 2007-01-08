@@ -40,7 +40,7 @@ my %alias;
 # Format is "this function" => "does these op names"
 my @raw_alias = (
 		 Perl_do_kv => [qw( keys values )],
-		 Perl_unimplemented_op => [qw(padany threadsv mapstart)],
+		 Perl_unimplemented_op => [qw(padany mapstart)],
 		 # All the ops with a body of { return NORMAL; }
 		 Perl_pp_null => [qw(scalar regcmaybe lineseq scope)],
 
@@ -1028,7 +1028,6 @@ syscall		syscall			ck_fun		imst@	S L
 
 # For multi-threading
 lock		lock			ck_rfun		s%	R
-threadsv	per-thread value	ck_null		ds0
 
 # Control (contd.)
 setstate	set statement info	ck_null		s;

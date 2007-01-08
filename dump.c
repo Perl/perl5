@@ -923,10 +923,6 @@ Perl_do_op_dump(pTHX_ I32 level, PerlIO *file, const OP *o)
 	    if (o->op_private & OPpSORT_REVERSE)
 		sv_catpv(tmpsv, ",REVERSE");
 	}
-	else if (optype == OP_THREADSV) {
-	    if (o->op_private & OPpDONE_SVREF)
-		sv_catpv(tmpsv, ",SVREF");
-	}
 	else if (optype == OP_OPEN || optype == OP_BACKTICK) {
 	    if (o->op_private & OPpOPEN_IN_RAW)
 		sv_catpv(tmpsv, ",IN_RAW");
@@ -2663,10 +2659,6 @@ Perl_do_op_xmldump(pTHX_ I32 level, PerlIO *file, const OP *o)
 		sv_catpv(tmpsv, ",INTEGER");
 	    if (o->op_private & OPpSORT_REVERSE)
 		sv_catpv(tmpsv, ",REVERSE");
-	}
-	else if (o->op_type == OP_THREADSV) {
-	    if (o->op_private & OPpDONE_SVREF)
-		sv_catpv(tmpsv, ",SVREF");
 	}
 	else if (o->op_type == OP_OPEN || o->op_type == OP_BACKTICK) {
 	    if (o->op_private & OPpOPEN_IN_RAW)
