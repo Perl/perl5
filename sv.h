@@ -759,35 +759,35 @@ struct xpvio {
 /* The following macros define implementation-independent predicates on SVs. */
 
 /*
-=for apidoc Am|bool|SvNIOK|SV* sv
-Returns a boolean indicating whether the SV contains a number, integer or
+=for apidoc Am|U32|SvNIOK|SV* sv
+Returns a U32 value indicating whether the SV contains a number, integer or
 double.
 
-=for apidoc Am|bool|SvNIOKp|SV* sv
-Returns a boolean indicating whether the SV contains a number, integer or
+=for apidoc Am|U32|SvNIOKp|SV* sv
+Returns a U32 value indicating whether the SV contains a number, integer or
 double.  Checks the B<private> setting.  Use C<SvNIOK>.
 
 =for apidoc Am|void|SvNIOK_off|SV* sv
 Unsets the NV/IV status of an SV.
 
-=for apidoc Am|bool|SvOK|SV* sv
-Returns a boolean indicating whether the value is an SV. It also tells
+=for apidoc Am|U32|SvOK|SV* sv
+Returns a U32 value indicating whether the value is an SV. It also tells
 whether the value is defined or not.
 
-=for apidoc Am|bool|SvIOKp|SV* sv
-Returns a boolean indicating whether the SV contains an integer.  Checks
+=for apidoc Am|U32|SvIOKp|SV* sv
+Returns a U32 value indicating whether the SV contains an integer.  Checks
 the B<private> setting.  Use C<SvIOK>.
 
-=for apidoc Am|bool|SvNOKp|SV* sv
-Returns a boolean indicating whether the SV contains a double.  Checks the
+=for apidoc Am|U32|SvNOKp|SV* sv
+Returns a U32 value indicating whether the SV contains a double.  Checks the
 B<private> setting.  Use C<SvNOK>.
 
-=for apidoc Am|bool|SvPOKp|SV* sv
-Returns a boolean indicating whether the SV contains a character string.
+=for apidoc Am|U32|SvPOKp|SV* sv
+Returns a U32 value indicating whether the SV contains a character string.
 Checks the B<private> setting.  Use C<SvPOK>.
 
-=for apidoc Am|bool|SvIOK|SV* sv
-Returns a boolean indicating whether the SV contains an integer.
+=for apidoc Am|U32|SvIOK|SV* sv
+Returns a U32 value indicating whether the SV contains an integer.
 
 =for apidoc Am|void|SvIOK_on|SV* sv
 Tells an SV that it is an integer.
@@ -804,14 +804,14 @@ Tells and SV that it is an unsigned integer and disables all other OK bits.
 =for apidoc Am|bool|SvIOK_UV|SV* sv
 Returns a boolean indicating whether the SV contains an unsigned integer.
 
-=for apidoc Am|void|SvUOK|SV* sv
+=for apidoc Am|bool|SvUOK|SV* sv
 Returns a boolean indicating whether the SV contains an unsigned integer.
 
 =for apidoc Am|bool|SvIOK_notUV|SV* sv
 Returns a boolean indicating whether the SV contains a signed integer.
 
-=for apidoc Am|bool|SvNOK|SV* sv
-Returns a boolean indicating whether the SV contains a double.
+=for apidoc Am|U32|SvNOK|SV* sv
+Returns a U32 value indicating whether the SV contains a double.
 
 =for apidoc Am|void|SvNOK_on|SV* sv
 Tells an SV that it is a double.
@@ -822,8 +822,8 @@ Unsets the NV status of an SV.
 =for apidoc Am|void|SvNOK_only|SV* sv
 Tells an SV that it is a double and disables all other OK bits.
 
-=for apidoc Am|bool|SvPOK|SV* sv
-Returns a boolean indicating whether the SV contains a character
+=for apidoc Am|U32|SvPOK|SV* sv
+Returns a U32 value indicating whether the SV contains a character
 string.
 
 =for apidoc Am|void|SvPOK_on|SV* sv
@@ -839,13 +839,13 @@ Will also turn off the UTF-8 status.
 =for apidoc Am|bool|SvVOK|SV* sv
 Returns a boolean indicating whether the SV contains a v-string.
 
-=for apidoc Am|bool|SvOOK|SV* sv
-Returns a boolean indicating whether the SvIVX is a valid offset value for
+=for apidoc Am|U32|SvOOK|SV* sv
+Returns a U32 indicating whether the SvIVX is a valid offset value for
 the SvPVX.  This hack is used internally to speed up removal of characters
 from the beginning of a SvPV.  When SvOOK is true, then the start of the
 allocated string buffer is really (SvPVX - SvIVX).
 
-=for apidoc Am|bool|SvROK|SV* sv
+=for apidoc Am|U32|SvROK|SV* sv
 Tests if the SV is an RV.
 
 =for apidoc Am|void|SvROK_on|SV* sv
@@ -983,8 +983,8 @@ Set the actual length of the string which is in the SV.  See C<SvIV_set>.
 				    SvFLAGS(sv) |= (SVf_NOK|SVp_NOK))
 
 /*
-=for apidoc Am|bool|SvUTF8|SV* sv
-Returns a boolean indicating whether the SV contains UTF-8 encoded data.
+=for apidoc Am|U32|SvUTF8|SV* sv
+Returns a U32 value indicating whether the SV contains UTF-8 encoded data.
 Call this after SvPV() in case any call to string overloading updates the
 internal flag.
 

@@ -3756,9 +3756,9 @@ Found in file sv.h
 =item SvIOK
 X<SvIOK>
 
-Returns a boolean indicating whether the SV contains an integer.
+Returns a U32 value indicating whether the SV contains an integer.
 
-	bool	SvIOK(SV* sv)
+	U32	SvIOK(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -3766,10 +3766,10 @@ Found in file sv.h
 =item SvIOKp
 X<SvIOKp>
 
-Returns a boolean indicating whether the SV contains an integer.  Checks
+Returns a U32 value indicating whether the SV contains an integer.  Checks
 the B<private> setting.  Use C<SvIOK>.
 
-	bool	SvIOKp(SV* sv)
+	U32	SvIOKp(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -3947,10 +3947,10 @@ Found in file sv.h
 =item SvNIOK
 X<SvNIOK>
 
-Returns a boolean indicating whether the SV contains a number, integer or
+Returns a U32 value indicating whether the SV contains a number, integer or
 double.
 
-	bool	SvNIOK(SV* sv)
+	U32	SvNIOK(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -3958,10 +3958,10 @@ Found in file sv.h
 =item SvNIOKp
 X<SvNIOKp>
 
-Returns a boolean indicating whether the SV contains a number, integer or
+Returns a U32 value indicating whether the SV contains a number, integer or
 double.  Checks the B<private> setting.  Use C<SvNIOK>.
 
-	bool	SvNIOKp(SV* sv)
+	U32	SvNIOKp(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -3979,9 +3979,9 @@ Found in file sv.h
 =item SvNOK
 X<SvNOK>
 
-Returns a boolean indicating whether the SV contains a double.
+Returns a U32 value indicating whether the SV contains a double.
 
-	bool	SvNOK(SV* sv)
+	U32	SvNOK(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -3989,10 +3989,10 @@ Found in file sv.h
 =item SvNOKp
 X<SvNOKp>
 
-Returns a boolean indicating whether the SV contains a double.  Checks the
+Returns a U32 value indicating whether the SV contains a double.  Checks the
 B<private> setting.  Use C<SvNOK>.
 
-	bool	SvNOKp(SV* sv)
+	U32	SvNOKp(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -4073,10 +4073,10 @@ Found in file sv.h
 =item SvOK
 X<SvOK>
 
-Returns a boolean indicating whether the value is an SV. It also tells
+Returns a U32 value indicating whether the value is an SV. It also tells
 whether the value is defined or not.
 
-	bool	SvOK(SV* sv)
+	U32	SvOK(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -4084,12 +4084,12 @@ Found in file sv.h
 =item SvOOK
 X<SvOOK>
 
-Returns a boolean indicating whether the SvIVX is a valid offset value for
+Returns a U32 indicating whether the SvIVX is a valid offset value for
 the SvPVX.  This hack is used internally to speed up removal of characters
 from the beginning of a SvPV.  When SvOOK is true, then the start of the
 allocated string buffer is really (SvPVX - SvIVX).
 
-	bool	SvOOK(SV* sv)
+	U32	SvOOK(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -4097,10 +4097,10 @@ Found in file sv.h
 =item SvPOK
 X<SvPOK>
 
-Returns a boolean indicating whether the SV contains a character
+Returns a U32 value indicating whether the SV contains a character
 string.
 
-	bool	SvPOK(SV* sv)
+	U32	SvPOK(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -4108,10 +4108,10 @@ Found in file sv.h
 =item SvPOKp
 X<SvPOKp>
 
-Returns a boolean indicating whether the SV contains a character string.
+Returns a U32 value indicating whether the SV contains a character string.
 Checks the B<private> setting.  Use C<SvPOK>.
 
-	bool	SvPOKp(SV* sv)
+	U32	SvPOKp(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -4478,7 +4478,7 @@ X<SvROK>
 
 Tests if the SV is an RV.
 
-	bool	SvROK(SV* sv)
+	U32	SvROK(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -4615,7 +4615,7 @@ X<SvUOK>
 
 Returns a boolean indicating whether the SV contains an unsigned integer.
 
-	void	SvUOK(SV* sv)
+	bool	SvUOK(SV* sv)
 
 =for hackers
 Found in file sv.h
@@ -4634,11 +4634,11 @@ Found in file sv.h
 =item SvUTF8
 X<SvUTF8>
 
-Returns a boolean indicating whether the SV contains UTF-8 encoded data.
+Returns a U32 value indicating whether the SV contains UTF-8 encoded data.
 Call this after SvPV() in case any call to string overloading updates the
 internal flag.
 
-	bool	SvUTF8(SV* sv)
+	U32	SvUTF8(SV* sv)
 
 =for hackers
 Found in file sv.h
