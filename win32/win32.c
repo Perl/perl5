@@ -4704,95 +4704,16 @@ win32_ctrlhandler(DWORD dwCtrlType)
 #  include <crtdbg.h>
 #endif
 
-void
-Perl_win32_init(int *argcp, char ***argvp)
-{
-    HMODULE module;
-
-#if _MSC_VER >= 1400
-    _invalid_parameter_handler oldHandler, newHandler;
-    newHandler = my_invalid_parameter_handler;
-    oldHandler = _set_invalid_parameter_handler(newHandler);
-    _CrtSetReportMode(_CRT_ASSERT, 0);
-#endif
-    /* Disable floating point errors, Perl will trap the ones we
-     * care about.  VC++ RTL defaults to switching these off
-     * already, but the Borland RTL doesn't.  Since we don't
-     * want to be at the vendor's whim on the default, we set
-     * it explicitly here.
-     */
-#if !defined(_ALPHA_) && !defined(__GNUC__)
-    _control87(MCW_EM, MCW_EM);
-#endif
-    MALLOC_INIT;
-
-    module = GetModuleHandle("ntdll.dll");
-    if (module) {
-        *(FARPROC*)&pfnZwQuerySystemInformation = GetProcAddress(module, "ZwQuerySystemInformation");
-    }
-
-    module = GetModuleHandle("kernel32.dll");
-    if (module) {
-        *(FARPROC*)&pfnCreateToolhelp32Snapshot = GetProcAddress(module, "CreateToolhelp32Snapshot");
-        *(FARPROC*)&pfnProcess32First           = GetProcAddress(module, "Process32First");
-        *(FARPROC*)&pfnProcess32Next            = GetProcAddress(module, "Process32Next");
-    }
-}
-
-void
-Perl_win32_term(void)
-{
-    dTHX;
-    HINTS_REFCNT_TERM;
-    OP_REFCNT_TERM;
-    PERLIO_TERM;
-    MALLOC_TERM;
-}
-
-void
-win32_get_child_IO(child_IO_table* ptbl)
-{
-    ptbl->childStdIn	= GetStdHandle(STD_INPUT_HANDLE);
-    ptbl->childStdOut	= GetStdHandle(STD_OUTPUT_HANDLE);
-    ptbl->childStdErr	= GetStdHandle(STD_ERROR_HANDLE);
-}
-
-Sighandler_t
-win32_signal(int sig, Sighandler_t subcode)
-{
-    dTHX;
-    if (sig < SIG_SIZE) {
-	int save_errno = errno;
-	Sighandler_t result = signal(sig, subcode);
-	if (result == SIG_ERR) {
-	    result = w32_sighandler[sig];
-	    errno = save_errno;
-	}
-	w32_sighandler[sig] = subcode;
-	return result;
-    }
-    else {
-	errno = EINVAL;
-	return SIG_ERR;
-    }
-}
-
-
-#ifdef HAVE_INTERP_INTERN
-
 static void
 ansify_path(void)
 {
-    OSVERSIONINFO osver; /* g_osver may not yet be initialized */
     size_t len;
     char *ansi_path;
     WCHAR *wide_path;
     WCHAR *wide_dir;
 
     /* there is no Unicode environment on Windows 9X */
-    osver.dwOSVersionInfoSize = sizeof(osver);
-    GetVersionEx(&osver);
-    if (osver.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
+    if (IsWin95())
         return;
 
     /* fetch Unicode version of PATH */
@@ -4870,10 +4791,97 @@ ansify_path(void)
          * will not call mg_set() if it initializes %ENV from `environ`.
          */
         SetEnvironmentVariableA("PATH", ansi_path+5);
-        win32_free(ansi_path);
+        /* We are intentionally leaking the ansi_path string here because
+         * the Borland runtime library puts it directly into the environ
+         * array.  The Microsoft runtime library seems to make a copy,
+         * but will leak the copy should it be replaced again later.
+         * Since this code is only called once during PERL_SYS_INIT this
+         * shouldn't really matter.
+         */
     }
     win32_free(wide_path);
 }
+
+void
+Perl_win32_init(int *argcp, char ***argvp)
+{
+    HMODULE module;
+
+#if _MSC_VER >= 1400
+    _invalid_parameter_handler oldHandler, newHandler;
+    newHandler = my_invalid_parameter_handler;
+    oldHandler = _set_invalid_parameter_handler(newHandler);
+    _CrtSetReportMode(_CRT_ASSERT, 0);
+#endif
+    /* Disable floating point errors, Perl will trap the ones we
+     * care about.  VC++ RTL defaults to switching these off
+     * already, but the Borland RTL doesn't.  Since we don't
+     * want to be at the vendor's whim on the default, we set
+     * it explicitly here.
+     */
+#if !defined(_ALPHA_) && !defined(__GNUC__)
+    _control87(MCW_EM, MCW_EM);
+#endif
+    MALLOC_INIT;
+
+    module = GetModuleHandle("ntdll.dll");
+    if (module) {
+        *(FARPROC*)&pfnZwQuerySystemInformation = GetProcAddress(module, "ZwQuerySystemInformation");
+    }
+
+    module = GetModuleHandle("kernel32.dll");
+    if (module) {
+        *(FARPROC*)&pfnCreateToolhelp32Snapshot = GetProcAddress(module, "CreateToolhelp32Snapshot");
+        *(FARPROC*)&pfnProcess32First           = GetProcAddress(module, "Process32First");
+        *(FARPROC*)&pfnProcess32Next            = GetProcAddress(module, "Process32Next");
+    }
+
+    g_osver.dwOSVersionInfoSize = sizeof(g_osver);
+    GetVersionEx(&g_osver);
+
+    ansify_path();
+}
+
+void
+Perl_win32_term(void)
+{
+    dTHX;
+    HINTS_REFCNT_TERM;
+    OP_REFCNT_TERM;
+    PERLIO_TERM;
+    MALLOC_TERM;
+}
+
+void
+win32_get_child_IO(child_IO_table* ptbl)
+{
+    ptbl->childStdIn	= GetStdHandle(STD_INPUT_HANDLE);
+    ptbl->childStdOut	= GetStdHandle(STD_OUTPUT_HANDLE);
+    ptbl->childStdErr	= GetStdHandle(STD_ERROR_HANDLE);
+}
+
+Sighandler_t
+win32_signal(int sig, Sighandler_t subcode)
+{
+    dTHX;
+    if (sig < SIG_SIZE) {
+	int save_errno = errno;
+	Sighandler_t result = signal(sig, subcode);
+	if (result == SIG_ERR) {
+	    result = w32_sighandler[sig];
+	    errno = save_errno;
+	}
+	w32_sighandler[sig] = subcode;
+	return result;
+    }
+    else {
+	errno = EINVAL;
+	return SIG_ERR;
+    }
+}
+
+
+#ifdef HAVE_INTERP_INTERN
 
 static void
 win32_csighandler(int sig)
@@ -4913,11 +4921,6 @@ Perl_sys_intern_init(pTHX)
 {
     int i;
 
-    if (g_osver.dwOSVersionInfoSize == 0) {
-        g_osver.dwOSVersionInfoSize = sizeof(g_osver);
-        GetVersionEx(&g_osver);
-    }
-
     w32_perlshell_tokens	= Nullch;
     w32_perlshell_vec		= (char**)NULL;
     w32_perlshell_items		= 0;
@@ -4946,8 +4949,6 @@ Perl_sys_intern_init(pTHX)
 	/* Push our handler on top */
 	SetConsoleCtrlHandler(win32_ctrlhandler,TRUE);
     }
-
-    ansify_path();
 }
 
 void
