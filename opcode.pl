@@ -222,7 +222,17 @@ END
 
 for (@ops) {
     $_ eq "custom" and next;
-    if (my $name = $alias{$_}) {
+    if ($_ eq threadsv) {
+	# Big threadsv special case
+	my $name = $alias{$_};
+	print <<"EOT";
+#ifdef USE_5005THREADS
+\tMEMBER_TO_FPTR(Perl_pp_$_),
+#else
+\tMEMBER_TO_FPTR($name),\t/* Perl_pp_$_ */
+#endif
+EOT
+    } elsif (my $name = $alias{$_}) {
 	print "\tMEMBER_TO_FPTR($name),\t/* Perl_pp_$_ */\n";
     }
     else {

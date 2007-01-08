@@ -2,8 +2,8 @@
  *
  *    opcode.h
  *
- *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, 2004, 2005, 2006 by Larry Wall and others
+ *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+ *    2001, 2002, 2003, 2004, 2005, 2006, 2007 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -19,6 +19,7 @@
 #define Perl_pp_i_postdec Perl_pp_postdec
 
 PERL_PPDEF(Perl_unimplemented_op)
+
 
 START_EXTERN_C
 
@@ -1103,7 +1104,11 @@ EXT OP * (CPERLscope(*PL_ppaddr)[])(pTHX) = {
 	MEMBER_TO_FPTR(Perl_pp_getlogin),
 	MEMBER_TO_FPTR(Perl_pp_syscall),
 	MEMBER_TO_FPTR(Perl_pp_lock),
+#ifdef USE_5005THREADS
+	MEMBER_TO_FPTR(Perl_pp_threadsv),
+#else
 	MEMBER_TO_FPTR(Perl_unimplemented_op),	/* Perl_pp_threadsv */
+#endif
 	MEMBER_TO_FPTR(Perl_pp_setstate),
 	MEMBER_TO_FPTR(Perl_pp_method_named),
 };
