@@ -1,3 +1,4 @@
+#./perl -w
 #
 # Create the export list for perl.
 #
@@ -7,9 +8,11 @@
 #
 # reads global.sym, pp.sym, perlvars.h, intrpvar.h, thrdvar.h, config.h
 # On OS/2 reads miniperl.map and the previous version of perl5.def as well
+use strict;
 
-my $PLATFORM;
-my $CCTYPE;
+use vars qw($PLATFORM $CCTYPE $FILETYPE $CONFIG_ARGS $ARCHNAME $PATCHLEVEL);
+
+my (%define, %ordinal);
 
 while (@ARGV) {
     my $flag = shift;
@@ -155,7 +158,7 @@ my $sym_ord = 0;
 print STDERR "Defines: (" . join(' ', sort keys %define) . ")\n";
 
 if ($PLATFORM =~ /^win(?:32|ce)$/) {
-    ($dll = ($define{PERL_DLL} || "perl59")) =~ s/\.dll$//i;
+    (my $dll = ($define{PERL_DLL} || "perl59")) =~ s/\.dll$//i;
     print "LIBRARY $dll\n";
     print "DESCRIPTION 'Perl interpreter'\n";
     print "EXPORTS\n";
@@ -179,11 +182,11 @@ elsif ($PLATFORM eq 'os2') {
       }
       $sym_ord < $_ and $sym_ord = $_ for values %ordinal; # Take the max
     }
-    ($v = $]) =~ s/(\d\.\d\d\d)(\d\d)$/$1_$2/;
+    (my $v = $]) =~ s/(\d\.\d\d\d)(\d\d)$/$1_$2/;
     $v .= '-thread' if $ARCHNAME =~ /-thread/;
-    ($dll = $define{PERL_DLL}) =~ s/\.dll$//i;
+    (my $dll = $define{PERL_DLL}) =~ s/\.dll$//i;
     $v .= "\@$PATCHLEVEL" if $PATCHLEVEL;
-    $d = "DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter, configured as $CONFIG_ARGS'";
+    my $d = "DESCRIPTION '\@#perl5-porters\@perl.org:$v#\@ Perl interpreter, configured as $CONFIG_ARGS'";
     $d = substr($d, 0, 249) . "...'" if length $d > 253;
     print <<"---EOP---";
 LIBRARY '$dll' INITINSTANCE TERMINSTANCE
@@ -195,9 +198,9 @@ EXPORTS
 ---EOP---
 }
 elsif ($PLATFORM eq 'aix') {
-    $OSVER = `uname -v`;
+    my $OSVER = `uname -v`;
     chop $OSVER;
-    $OSREL = `uname -r`;
+    my $OSREL = `uname -r`;
     chop $OSREL;
     if ($OSVER > 4 || ($OSVER == 4 && $OSREL >= 3)) {
 	print "#! ..\n";
@@ -1355,6 +1358,7 @@ if ($PLATFORM =~ /^win(?:32|ce)$/) {
     }
 }
 elsif ($PLATFORM eq 'os2') {
+    my (%mapped, @missing);
     open MAP, 'miniperl.map' or die 'Cannot read miniperl.map';
     /^\s*[\da-f:]+\s+(\w+)/i and $mapped{$1}++ foreach <MAP>;
     close MAP or die 'Cannot close miniperl.map';
