@@ -145,10 +145,19 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 #else
     GvSV(gv) = NEWSV(72,0);
 #endif
-    GvLINE(gv) = CopLINE(PL_curcop);
-    /* XXX Ideally this cast would be replaced with a change to const char*
-       in the struct.  */
-    GvFILE(gv) = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : (char *) "";
+    if (PL_curcop) {
+	/* We can get in the messy situation of the COP that PL_curcop pointed
+	   to getting freed, and as part of the same free overloading decides
+	   to look for DESTROY, which gets us in here, needing to *create* a
+	   GV.  */
+	GvLINE(gv) = CopLINE(PL_curcop);
+	/* XXX Ideally this cast would be replaced with a change to const char*
+	   in the struct.  */
+	GvFILE(gv) = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : (char *) "";
+    } else {
+	GvLINE(gv) = 0;
+	GvFILE(gv) = (char *) "";
+    }
     GvCVGEN(gv) = 0;
     GvEGV(gv) = gv;
     sv_magic((SV*)gv, (SV*)gv, PERL_MAGIC_glob, NULL, 0);

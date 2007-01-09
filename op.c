@@ -542,6 +542,8 @@ S_cop_free(pTHX_ COP* cop)
 	SvREFCNT_dec(cop->cop_io);
 #endif
     }
+    if (PL_curcop == cop)
+	PL_curcop = NULL;
 }
 
 void
