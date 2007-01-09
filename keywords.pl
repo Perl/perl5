@@ -1,4 +1,5 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
+use strict;
 
 require 'regen_lib.pl';
 safer_unlink ("keywords.h");
@@ -25,12 +26,12 @@ EOM
 
 # Read & print data.
 
-$keynum = 0;
+my $keynum = 0;
 while (<DATA>) {
     chop;
     next unless $_;
     next if /^#/;
-    ($keyword) = split;
+    my ($keyword) = split;
     print &tab(5, "#define KEY_$keyword"), $keynum++, "\n";
 }
 
@@ -40,7 +41,7 @@ close KW or die "Error closing keywords.h: $!";
 
 ###########################################################################
 sub tab {
-    local($l, $t) = @_;
+    my ($l, $t) = @_;
     $t .= "\t" x ($l - (length($t) + 1) / 8);
     $t;
 }
