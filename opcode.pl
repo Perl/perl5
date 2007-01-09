@@ -1,11 +1,13 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
+use strict;
+
 BEGIN {
     # Get function prototypes
     require 'regen_lib.pl';
 }
 
-$opcode_new = 'opcode.h-new';
-$opname_new = 'opnames.h-new';
+my $opcode_new = 'opcode.h-new';
+my $opname_new = 'opnames.h-new';
 open(OC, ">$opcode_new") || die "Can't create $opcode_new: $!\n";
 binmode OC;
 open(ON, ">$opname_new") || die "Can't create $opname_new: $!\n";
@@ -14,11 +16,15 @@ select OC;
 
 # Read data.
 
+my %seen;
+my (@ops, %desc, %check, %ckname, %flags, %args);
+
 while (<DATA>) {
     chop;
     next unless $_;
     next if /^#/;
-    ($key, $desc, $check, $flags, $args) = split(/\t+/, $_, 5);
+    my ($key, $desc, $check, $flags, $args) = split(/\t+/, $_, 5);
+    $args = '' unless defined $args;
 
     warn qq[Description "$desc" duplicates $seen{$desc}\n] if $seen{$desc};
     die qq[Opcode "$key" duplicates $seen{$key}\n] if $seen{$key};
@@ -92,7 +98,6 @@ while (my ($func, $names) = splice @raw_alias, 0, 2) {
 
 # Emit defines.
 
-$i = 0;
 print <<"END";
 /* -*- buffer-read-only: t -*-
  *
@@ -140,6 +145,7 @@ print ON <<"END";
 typedef enum opcode {
 END
 
+my $i = 0;
 for (@ops) {
     print ON "\t", &tab(3,"OP_\U$_,"), "/* ", $i++, " */\n";
 }
@@ -292,17 +298,17 @@ EXTCONST U32 PL_opargs[];
 EXTCONST U32 PL_opargs[] = {
 END
 
-%argnum = (
-    S,	1,		# scalar
-    L,	2,		# list
-    A,	3,		# array value
-    H,	4,		# hash value
-    C,	5,		# code value
-    F,	6,		# file value
-    R,	7,		# scalar reference
+my %argnum = (
+    'S',  1,		# scalar
+    'L',  2,		# list
+    'A',  3,		# array value
+    'H',  4,		# hash value
+    'C',  5,		# code value
+    'F',  6,		# file value
+    'R',  7,		# scalar reference
 );
 
-%opclass = (
+my %opclass = (
     '0',  0,		# baseop
     '1',  1,		# unop
     '2',  2,		# binop
@@ -323,8 +329,8 @@ my %OP_IS_SOCKET;
 my %OP_IS_FILETEST;
 
 for (@ops) {
-    $argsum = 0;
-    $flags = $flags{$_};
+    my $argsum = 0;
+    my $flags = $flags{$_};
     $argsum |= 1 if $flags =~ /m/;		# needs stack mark
     $argsum |= 2 if $flags =~ /f/;		# fold constants
     $argsum |= 4 if $flags =~ /s/;		# always produces scalar
@@ -336,13 +342,13 @@ for (@ops) {
     $argsum |= 128 if $flags =~ /u/;		# defaults to $_
     $flags =~ /([\W\d_])/ or die qq[Opcode "$_" has no class indicator];
     $argsum |= $opclass{$1} << 9;
-    $mul = 0x2000;				# 2 ^ OASHIFT
-    for $arg (split(' ',$args{$_})) {
+    my $mul = 0x2000;				# 2 ^ OASHIFT
+    for my $arg (split(' ',$args{$_})) {
 	if ($arg =~ /^F/) {
            $OP_IS_SOCKET{$_}   = 1 if $arg =~ s/s//;
            $OP_IS_FILETEST{$_} = 1 if $arg =~ s/-//;
         }
-	$argnum = ($arg =~ s/\?//) ? 8 : 0;
+	my $argnum = ($arg =~ s/\?//) ? 8 : 0;
         die "op = $_, arg = $arg\n" unless length($arg) == 1;
 	$argnum += $argnum{$arg};
 	warn "# Conflicting bit 32 for '$_'.\n"
@@ -389,8 +395,8 @@ foreach ('opcode.h', 'opnames.h') {
 safer_rename $opcode_new, 'opcode.h';
 safer_rename $opname_new, 'opnames.h';
 
-$pp_proto_new = 'pp_proto.h-new';
-$pp_sym_new  = 'pp.sym-new';
+my $pp_proto_new = 'pp_proto.h-new';
+my $pp_sym_new  = 'pp.sym-new';
 
 open PP, ">$pp_proto_new" or die "Error creating $pp_proto_new: $!";
 binmode PP;
@@ -451,7 +457,7 @@ END {
 
 ###########################################################################
 sub tab {
-    local($l, $t) = @_;
+    my ($l, $t) = @_;
     $t .= "\t" x ($l - (length($t) + 1) / 8);
     $t;
 }
