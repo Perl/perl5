@@ -15,7 +15,7 @@ BEGIN {
     $is_epoc = $^O eq 'epoc';
     $is_vms = $^O eq 'VMS';
     $is_macos = $^O eq 'MacOS';
-    $VERSION = '5.61';
+    $VERSION = '5.62';
 }
 
 AUTOLOAD {
@@ -89,9 +89,11 @@ sub find_filename {
 	if (defined($filename = $INC{"$pkg.pm"})) {
 	    if ($is_macos) {
 		$pkg =~ tr#/#:#;
-		$filename =~ s#^(.*)$pkg\.pm\z#$1auto:$pkg:$func.al#s;
+		$filename = undef
+		  unless $filename =~ s#^(.*)$pkg\.pm\z#$1auto:$pkg:$func.al#s;
 	    } else {
-		$filename =~ s#^(.*)$pkg\.pm\z#$1auto/$pkg/$func.al#s;
+		$filename = undef
+		  unless $filename =~ s#^(.*)$pkg\.pm\z#$1auto/$pkg/$func.al#s;
 	    }
 
 	    # if the file exists, then make sure that it is a
