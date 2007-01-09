@@ -266,8 +266,16 @@ C<$a> minus the largest multiple of C<$b> that is not greater than
 C<$a>.  If C<$b> is negative, then C<$a % $b> is C<$a> minus the
 smallest multiple of C<$b> that is not less than C<$a> (i.e. the
 result will be less than or equal to zero).  If the operands
-C<$a> and C<$b> are floting point values, only the integer portion
-of C<$a> and C<$b> will be used in the operation.
+C<$a> and C<$b> are floating point values and the absolute value of
+C<$b> (that is C<abs($b)>) is less than C<(UV_MAX + 1)>, only
+the integer portion of C<$a> and C<$b> will be used in the operation
+(Note: here C<UV_MAX> means the maximum of the unsigned integer type).
+If the absolute value of the right operand (C<abs($b)>) is greater than
+or equal to C<(UV_MAX + 1)>, "%" computes the floating-point remainder
+C<$r> in the equation C<($r = $a - $i*$b)> where C<$i> is a certain
+integer that makes C<$r> should have the same sign as the right operand
+C<$b> (B<not> as the left operand C<$a> like C function C<fmod()>)
+and the absolute value less than that of C<$b>.
 Note that when C<use integer> is in scope, "%" gives you direct access
 to the modulus operator as implemented by your C compiler.  This
 operator is not as well defined for negative operands, but it will
