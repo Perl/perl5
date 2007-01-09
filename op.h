@@ -367,15 +367,17 @@ struct pmop {
 #define PMf_GLOBAL	0x0100		/* pattern had a g modifier */
 #define PMf_CONTINUE	0x0200		/* don't reset pos() if //g fails */
 #define PMf_EVAL	0x0400		/* evaluating replacement as expr */
+
+/* The following flags have exact equivalents in regcomp.h with the prefix RXf_
+ * which are stored in the regexp->extflags member.
+ */
 #define PMf_LOCALE	0x0800		/* use locale for character types */
 #define PMf_MULTILINE	0x1000		/* assume multiple lines */
 #define PMf_SINGLELINE	0x2000		/* assume single line */
 #define PMf_FOLD	0x4000		/* case insensitivity */
 #define PMf_EXTENDED	0x8000		/* chuck embedded whitespace */
 
-/* mask of bits stored in regexp->extflags
-   these all are also called RXf_PMf_xyz
- */
+/* mask of bits that need to be transfered to re->extflags */
 #define PMf_COMPILETIME	(PMf_MULTILINE|PMf_SINGLELINE|PMf_LOCALE|PMf_FOLD|PMf_EXTENDED)
 
 #ifdef USE_ITHREADS

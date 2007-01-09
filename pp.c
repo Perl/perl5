@@ -4629,7 +4629,7 @@ PP(pp_split)
 		++s;
 	}
     }
-    else if (rx->precomp[0] == '^' && rx->precomp[1] == '\0') {
+    else if (rx->extflags & RXf_START_ONLY) {
 	while (--limit) {
 	    for (m = s; m < strend && *m != '\n'; m++)
 		;

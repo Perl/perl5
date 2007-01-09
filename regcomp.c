@@ -4582,6 +4582,11 @@ reStudy:
         r->paren_names = (HV*)SvREFCNT_inc(RExC_paren_names);
     else
         r->paren_names = NULL;
+    if (r->prelen == 3 && strEQ("\\s+", r->precomp))
+	r->extflags |= RXf_WHITE;
+    else if (r->prelen == 1 && r->precomp[0] == '^')
+        r->extflags |= RXf_START_ONLY;
+
 #ifdef DEBUGGING
     if (RExC_paren_names) {
         ri->name_list_idx = add_data( pRExC_state, 1, "p" );

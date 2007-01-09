@@ -177,7 +177,7 @@ PP(pp_regcomp)
 
     if (!PM_GETRE(pm)->prelen && PL_curpm)
 	pm = PL_curpm;
-    else if (strEQ("\\s+", PM_GETRE(pm)->precomp))
+    else if (PM_GETRE(pm)->extflags & RXf_WHITE)
 	pm->op_pmflags |= PMf_WHITE;
     else
 	pm->op_pmflags &= ~PMf_WHITE;

@@ -116,6 +116,10 @@ typedef struct regexp_engine {
 
 /* Flags stored in regexp->extflags 
  * These are used by code external to the regexp engine
+ *
+ * Note that flags starting with RXf_PMf_ have exact equivalents
+ * stored in op_pmflags and which are defined in op.h, they are defined
+ * numerically here only for clarity.
  */
 
 /* Anchor and GPOS related stuff */
@@ -125,20 +129,22 @@ typedef struct regexp_engine {
 #define RXf_ANCH_GPOS   	0x00000008
 #define RXf_GPOS_SEEN   	0x00000010
 #define RXf_GPOS_FLOAT  	0x00000020
-/* five bits here */
+/* two bits here */
 #define RXf_ANCH        	(RXf_ANCH_BOL|RXf_ANCH_MBOL|RXf_ANCH_GPOS|RXf_ANCH_SBOL)
 #define RXf_GPOS_CHECK          (RXf_GPOS_SEEN|RXf_ANCH_GPOS)
-#define RXf_ANCH_SINGLE         (RXf_ANCH_SBOL|RXf_ANCH_GPOS)        
-/* 
- * 0xF800 of extflags is used by PMf_COMPILETIME 
- * These are the regex equivelent of the PMf_xyz stuff defined 
- * in op.h
- */
-#define RXf_PMf_LOCALE  	0x00000800
-#define RXf_PMf_MULTILINE	0x00001000
-#define RXf_PMf_SINGLELINE	0x00002000
-#define RXf_PMf_FOLD    	0x00004000
-#define RXf_PMf_EXTENDED	0x00008000
+#define RXf_ANCH_SINGLE         (RXf_ANCH_SBOL|RXf_ANCH_GPOS)
+
+/* Flags indicating special patterns */
+#define RXf_START_ONLY		0x00000200 /* Pattern is /^/ */
+#define RXf_WHITE		0x00000400 /* Pattern is /\s+/ */
+
+/* 0xF800 of extflags is used by (RXf_)PMf_COMPILETIME */
+#define RXf_PMf_LOCALE  	0x00000800 /* use locale */
+#define RXf_PMf_MULTILINE	0x00001000 /* /m         */
+#define RXf_PMf_SINGLELINE	0x00002000 /* /s         */
+#define RXf_PMf_FOLD    	0x00004000 /* /i         */
+#define RXf_PMf_EXTENDED	0x00008000 /* /x         */
+/* these flags are transfered from the PMOP->op_pmflags member during compilation */
 #define RXf_PMf_COMPILETIME	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_LOCALE|RXf_PMf_FOLD|RXf_PMf_EXTENDED)
 
 /* What we have seen */
