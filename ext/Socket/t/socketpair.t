@@ -15,13 +15,15 @@ BEGIN {
 	print "1..0\n";
 	exit 0;
     }
+}
+
+{
+    # This was in the BEGIN block, but since Test::More 0.47 added support to
+    # detect forking, we don't need to fork before Test::More initialises.
 
     # Too many things in this test will hang forever if something is wrong,
     # so we need a self destruct timer. And IO can hang despite an alarm.
 
-    # This is convoluted, but we must fork before Test::More, else child's
-    # Test::More thinks that it ran no tests, and prints a message to that
-    # effect
     if( $can_fork) {
       my $parent = $$;
       $child = fork;
