@@ -161,7 +161,8 @@ GP *
 Perl_newGP(pTHX_ GV *const gv)
 {
     GP *gp;
-    const char *const file = CopFILE(PL_curcop) ? CopFILE(PL_curcop) : "";
+    const char *const file
+	= (PL_curcop && CopFILE(PL_curcop)) ? CopFILE(PL_curcop) : "";
     STRLEN len = strlen(file);
     U32 hash;
 
@@ -173,7 +174,7 @@ Perl_newGP(pTHX_ GV *const gv)
     gp->gv_sv = newSV(0);
 #endif
 
-    gp->gp_line = CopLINE(PL_curcop);
+    gp->gp_line = PL_curcop ? CopLINE(PL_curcop) : 0;
     /* XXX Ideally this cast would be replaced with a change to const char*
        in the struct.  */
     gp->gp_file_hek = share_hek(file, len, hash);
