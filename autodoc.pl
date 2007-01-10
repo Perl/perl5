@@ -8,6 +8,7 @@ BEGIN {
   require 'regen_lib.pl';
 }
 
+use strict;
 
 #
 # See database of global and static function prototypes in embed.fnc
@@ -218,7 +219,7 @@ for (sort keys %docfuncs) {
     warn "Unable to place $_!\n";
 }
 
-readonly_header(DOC);
+readonly_header(\*DOC);
 
 print DOC <<'_EOB_';
 =head1 NAME
@@ -277,7 +278,7 @@ perlguts(1), perlxs(1), perlxstut(1), perlintern(1)
 
 _EOE_
 
-readonly_footer(DOC);
+readonly_footer(\*DOC);
 
 close(DOC) or die "Error closing pod/perlapi.pod: $!";
 
@@ -285,7 +286,7 @@ safer_unlink "pod/perlintern.pod";
 open(GUTS, ">pod/perlintern.pod") or
 		die "Unable to create pod/perlintern.pod: $!\n";
 binmode GUTS;
-readonly_header(GUTS);
+readonly_header(\*GUTS);
 print GUTS <<'END';
 =head1 NAME
 
@@ -324,6 +325,6 @@ document their functions.
 perlguts(1), perlapi(1)
 
 END
-readonly_footer(GUTS);
+readonly_footer(\*GUTS);
 
 close GUTS or die "Error closing pod/perlintern.pod: $!";
