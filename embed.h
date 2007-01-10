@@ -2223,7 +2223,6 @@
 #define pp_syswrite		Perl_pp_syswrite
 #define pp_tell			Perl_pp_tell
 #define pp_telldir		Perl_pp_telldir
-#define pp_threadsv		Perl_pp_threadsv
 #define pp_tie			Perl_pp_tie
 #define pp_tied			Perl_pp_tied
 #define pp_time			Perl_pp_time
@@ -4436,7 +4435,6 @@
 #define pp_syswrite()		Perl_pp_syswrite(aTHX)
 #define pp_tell()		Perl_pp_tell(aTHX)
 #define pp_telldir()		Perl_pp_telldir(aTHX)
-#define pp_threadsv()		Perl_pp_threadsv(aTHX)
 #define pp_tie()		Perl_pp_tie(aTHX)
 #define pp_tied()		Perl_pp_tied(aTHX)
 #define pp_time()		Perl_pp_time(aTHX)
