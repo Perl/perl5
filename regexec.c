@@ -126,12 +126,27 @@
     OP(rn) == OPEN || OP(rn) == CLOSE || OP(rn) == EVAL || \
     OP(rn) == SUSPEND || OP(rn) == IFMATCH || \
     OP(rn) == PLUS || OP(rn) == MINMOD || \
+    OP(rn) == KEEPS || (PL_regkind[OP(rn)] == VERB) || \
     (PL_regkind[OP(rn)] == CURLY && ARG1(rn) > 0) \
 )
+#define IS_EXACT(rn) (PL_regkind[OP(rn)] == EXACT)
 
-#define HAS_TEXT(rn) ( \
-    PL_regkind[OP(rn)] == EXACT || PL_regkind[OP(rn)] == REF \
-)
+#define HAS_TEXT(rn) ( IS_EXACT(rn) || PL_regkind[OP(rn)] == REF )
+
+#if 0 
+/* Currently these are only used when PL_regkind[OP(rn)] == EXACT so
+   we don't need this definition. */
+#define IS_TEXT(rn)   ( OP(rn)==EXACT   || OP(rn)==REF   || OP(rn)==NREF   )
+#define IS_TEXTF(rn)  ( OP(rn)==EXACTF  || OP(rn)==REFF  || OP(rn)==NREFF  )
+#define IS_TEXTFL(rn) ( OP(rn)==EXACTFL || OP(rn)==REFFL || OP(rn)==NREFFL )
+
+#else
+/* ... so we use this as its faster. */
+#define IS_TEXT(rn)   ( OP(rn)==EXACT   )
+#define IS_TEXTF(rn)  ( OP(rn)==EXACTF  )
+#define IS_TEXTFL(rn) ( OP(rn)==EXACTFL )
+
+#endif
 
 /*
   Search for mandatory following text node; for lookahead, the text must
@@ -2726,6 +2741,19 @@ S_regmatch(pTHX_ regmatch_info *reginfo, regnode *prog)
 	    if (locinput == reginfo->ganch)
 		break;
 	    sayNO;
+
+	case KEEPS:
+	    /* update the startpoint */
+	    st->u.keeper.val = PL_regstartp[0];
+	    PL_reginput = locinput;
+	    PL_regstartp[0] = locinput - PL_bostr;
+	    PUSH_STATE_GOTO(KEEPS_next, next);
+	    /*NOT-REACHED*/
+	case KEEPS_next_fail:
+	    /* rollback the start point change */
+	    PL_regstartp[0] = st->u.keeper.val;
+	    sayNO_SILENT;
+	    /*NOT-REACHED*/
 	case EOL:
 		goto seol;
 	case MEOL:
@@ -4292,14 +4320,23 @@ NULL
 		    regnode *text_node = ST.B;
 		    if (! HAS_TEXT(text_node))
 			FIND_NEXT_IMPT(text_node);
-		    if (HAS_TEXT(text_node)
-			&& PL_regkind[OP(text_node)] != REF)
+	            /* this used to be 
+	                
+	                (HAS_TEXT(text_node) && PL_regkind[OP(text_node)] == EXACT)
+	                
+	            	But the former is redundant in light of the latter.
+	            	
+	            	if this changes back then the macro for 
+	            	IS_TEXT and friends need to change.
+	             */
+		    if (PL_regkind[OP(text_node)] == EXACT)
 		    {
+		        
 			ST.c1 = (U8)*STRING(text_node);
 			ST.c2 =
-			    (OP(text_node) == EXACTF || OP(text_node) == REFF)
+			    (IS_TEXTF(text_node))
 			    ? PL_fold[ST.c1]
-			    : (OP(text_node) == EXACTFL || OP(text_node) == REFFL)
+			    : (IS_TEXTFL(text_node))
 				? PL_fold_locale[ST.c1]
 				: ST.c1;
 		    }
@@ -4427,22 +4464,28 @@ NULL
 		if (! HAS_TEXT(text_node))
 		    ST.c1 = ST.c2 = CHRTEST_VOID;
 		else {
-		    if (PL_regkind[OP(text_node)] == REF) {
+		    if ( PL_regkind[OP(text_node)] != EXACT ) {
 			ST.c1 = ST.c2 = CHRTEST_VOID;
 			goto assume_ok_easy;
 		    }
 		    else
 			s = (U8*)STRING(text_node);
-
+                    
+                    /*  Currently we only get here when 
+                        
+                        PL_rekind[OP(text_node)] == EXACT
+                    
+                        if this changes back then the macro for IS_TEXT and 
+                        friends need to change. */
 		    if (!UTF) {
 			ST.c2 = ST.c1 = *s;
-			if (OP(text_node) == EXACTF || OP(text_node) == REFF)
+			if (IS_TEXTF(text_node))
 			    ST.c2 = PL_fold[ST.c1];
-			else if (OP(text_node) == EXACTFL || OP(text_node) == REFFL)
+			else if (IS_TEXTFL(text_node))
 			    ST.c2 = PL_fold_locale[ST.c1];
 		    }
 		    else { /* UTF */
-			if (OP(text_node) == EXACTF || OP(text_node) == REFF) {
+			if (IS_TEXTF(text_node)) {
 			     STRLEN ulen1, ulen2;
 			     U8 tmpbuf1[UTF8_MAXBYTES_CASE+1];
 			     U8 tmpbuf2[UTF8_MAXBYTES_CASE+1];

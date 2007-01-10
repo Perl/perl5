@@ -6,8 +6,8 @@
 
 /* Regops and State definitions */
 
-#define REGNODE_MAX           	83
-#define REGMATCH_STATE_MAX    	121
+#define REGNODE_MAX           	84
+#define REGMATCH_STATE_MAX    	124
 
 #define	END                   	0	/* 0000 End of program. */
 #define	SUCCEED               	1	/* 0x01 Return from a subroutine, basically. */
@@ -91,8 +91,9 @@
 #define	SKIP                  	79	/* 0x4f On failure skip forward (to the mark) before retrying */
 #define	COMMIT                	80	/* 0x50 Pattern fails outright if backtracking through this */
 #define	CUTGROUP              	81	/* 0x51 On failure go to the next alternation in the group */
-#define	OPTIMIZED             	82	/* 0x52 Placeholder for dump. */
-#define	PSEUDO                	83	/* 0x53 Pseudo opcode for internal use. */
+#define	KEEPS                 	82	/* 0x52 $& begins here. */
+#define	OPTIMIZED             	83	/* 0x53 Placeholder for dump. */
+#define	PSEUDO                	84	/* 0x54 Pseudo opcode for internal use. */
 	/* ------------ States ------------- */
 #define	TRIE_next             	(REGNODE_MAX + 1)	/* state for TRIE */
 #define	TRIE_next_fail        	(REGNODE_MAX + 2)	/* state for TRIE */
@@ -132,6 +133,8 @@
 #define	SKIP_next_fail        	(REGNODE_MAX + 36)	/* state for SKIP */
 #define	CUTGROUP_next         	(REGNODE_MAX + 37)	/* state for CUTGROUP */
 #define	CUTGROUP_next_fail    	(REGNODE_MAX + 38)	/* state for CUTGROUP */
+#define	KEEPS_next            	(REGNODE_MAX + 39)	/* state for KEEPS */
+#define	KEEPS_next_fail       	(REGNODE_MAX + 40)	/* state for KEEPS */
 
 /* PL_regkind[] What type of regop or state is this. */
 
@@ -206,9 +209,9 @@ EXTCONST U8 PL_regkind[] = {
 	TRIE,     	/* AHOCORASICKC           */
 	GOSUB,    	/* GOSUB                  */
 	GOSTART,  	/* GOSTART                */
-	NREF,     	/* NREF                   */
-	NREF,     	/* NREFF                  */
-	NREF,     	/* NREFFL                 */
+	REF,      	/* NREF                   */
+	REF,      	/* NREFF                  */
+	REF,      	/* NREFFL                 */
 	NGROUPP,  	/* NGROUPP                */
 	INSUBP,   	/* INSUBP                 */
 	DEFINEP,  	/* DEFINEP                */
@@ -221,6 +224,7 @@ EXTCONST U8 PL_regkind[] = {
 	VERB,     	/* SKIP                   */
 	VERB,     	/* COMMIT                 */
 	VERB,     	/* CUTGROUP               */
+	KEEPS,    	/* KEEPS                  */
 	NOTHING,  	/* OPTIMIZED              */
 	PSEUDO,   	/* PSEUDO                 */
 	/* ------------ States ------------- */
@@ -262,6 +266,8 @@ EXTCONST U8 PL_regkind[] = {
 	SKIP,     	/* SKIP_next_fail         */
 	CUTGROUP, 	/* CUTGROUP_next          */
 	CUTGROUP, 	/* CUTGROUP_next_fail     */
+	KEEPS,    	/* KEEPS_next             */
+	KEEPS,    	/* KEEPS_next_fail        */
 };
 #endif
 
@@ -351,6 +357,7 @@ static const U8 regarglen[] = {
 	EXTRA_SIZE(struct regnode_1),        	/* SKIP         */
 	EXTRA_SIZE(struct regnode_1),        	/* COMMIT       */
 	EXTRA_SIZE(struct regnode_1),        	/* CUTGROUP     */
+	0,                                   	/* KEEPS        */
 	0,                                   	/* OPTIMIZED    */
 	0,                                   	/* PSEUDO       */
 };
@@ -440,6 +447,7 @@ static const char reg_off_by_arg[] = {
 	0,	/* SKIP         */
 	0,	/* COMMIT       */
 	0,	/* CUTGROUP     */
+	0,	/* KEEPS        */
 	0,	/* OPTIMIZED    */
 	0,	/* PSEUDO       */
 };
@@ -530,8 +538,9 @@ const char * reg_name[] = {
 	"SKIP",                  	/* 0x4f */
 	"COMMIT",                	/* 0x50 */
 	"CUTGROUP",              	/* 0x51 */
-	"OPTIMIZED",             	/* 0x52 */
-	"PSEUDO",                	/* 0x53 */
+	"KEEPS",                 	/* 0x52 */
+	"OPTIMIZED",             	/* 0x53 */
+	"PSEUDO",                	/* 0x54 */
 	/* ------------ States ------------- */
 	"TRIE_next",             	/* REGNODE_MAX +0x01 */
 	"TRIE_next_fail",        	/* REGNODE_MAX +0x02 */
@@ -571,6 +580,8 @@ const char * reg_name[] = {
 	"SKIP_next_fail",        	/* REGNODE_MAX +0x24 */
 	"CUTGROUP_next",         	/* REGNODE_MAX +0x25 */
 	"CUTGROUP_next_fail",    	/* REGNODE_MAX +0x26 */
+	"KEEPS_next",            	/* REGNODE_MAX +0x27 */
+	"KEEPS_next_fail",       	/* REGNODE_MAX +0x28 */
 };
 #endif /* DEBUGGING */
 #else

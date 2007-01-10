@@ -371,6 +371,10 @@ typedef struct regmatch_state {
 	    SV* mark_name;
 	    char *mark_loc;
 	} mark;
+	
+	struct {
+	    int val;
+	} keeper;
     } u;
 } regmatch_state;
 

@@ -255,6 +255,9 @@ X<word> X<whitespace>
     \N{name} Named unicode character, or unicode escape
     \x12     Hexadecimal escape sequence
     \x{1234} Long hexadecimal escape sequence
+    \K       Keep the stuff left of the \K, don't include it in $&
+    \v       Shortcut for (*PRUNE)
+    \V       Shortcut for (*SKIP)
 
 A C<\w> matches a single alphanumeric character (an alphabetic
 character, or a decimal digit) or C<_>, not a whole word.  Use C<\w+>
@@ -690,6 +693,17 @@ is equivalent to the more verbose
 
     /(?:(?s-i)more.*than).*million/i
 
+=item Look-Around Assertions
+X<look-around assertion> X<lookaround assertion> X<look-around> X<lookaround>
+
+Look-around assertions are zero width patterns which match a specific
+pattern without including it in C<$&>. Positive assertions match when
+their subpattern matches, negative assertions match when their subpattern
+fails. Look-behind matches text up to the current match position,
+look-ahead matches text following the current match position.
+
+=over 4
+
 =item C<(?=pattern)>
 X<(?=)> X<look-ahead, positive> X<lookahead, positive>
 
@@ -716,12 +730,29 @@ Sometimes it's still easier just to say:
 
 For look-behind see below.
 
-=item C<(?<=pattern)>
-X<(?<=)> X<look-behind, positive> X<lookbehind, positive>
+=item C<(?<=pattern)> C<\K>
+X<(?<=)> X<look-behind, positive> X<lookbehind, positive> X<\K>
 
 A zero-width positive look-behind assertion.  For example, C</(?<=\t)\w+/>
 matches a word that follows a tab, without including the tab in C<$&>.
 Works only for fixed-width look-behind.
+
+There is a special form of this construct, called C<\K>, which causes the
+regex engine to "keep" everything it had matched prior to the C<\K> and
+not include it in C<$&>. This effectively provides variable length
+look-behind. The use of C<\K> inside of another look-around assertion
+is allowed, but the behaviour is currently not well defined.
+
+For various reasons C<\K> may be signifigantly more efficient than the
+equivalent C<< (?<=...) >> construct, and it is especially useful in
+situations where you want to efficiently remove something following
+something else in a string. For instance
+
+  s/(foo)bar/$1/g;
+
+can be rewritten as the much more efficient
+
+  s/foo\Kbar//g;
 
 =item C<(?<!pattern)>
 X<(?<!)> X<look-behind, negative> X<lookbehind, negative>
@@ -729,6 +760,8 @@ X<(?<!)> X<look-behind, negative> X<lookbehind, negative>
 A zero-width negative look-behind assertion.  For example C</(?<!bar)foo/>
 matches any occurrence of "foo" that does not follow "bar".  Works
 only for fixed-width look-behind.
+
+=back
 
 =item C<(?'NAME'pattern)>
 
@@ -761,7 +794,7 @@ its Unicode extension (see L<utf8>),
 though it isn't extended by the locale (see L<perllocale>).
 
 B<NOTE:> In order to make things easier for programmers with experience
-with the Python or PCRE regex engines the pattern C<< (?P<NAME>pattern) >>
+with the Python or PCRE regex engines the pattern C<< (?PE<lt>NAMEE<gt>pattern) >>
 maybe be used instead of C<< (?<NAME>pattern) >>; however this form does not
 support the use of single quotes as a delimiter for the name. This is
 only available in Perl 5.10 or later.
@@ -1251,7 +1284,7 @@ argument, then C<$REGERROR> and C<$REGMARK> are not touched at all.
 =over 4
 
 =item C<(*PRUNE)> C<(*PRUNE:NAME)>
-X<(*PRUNE)> X<(*PRUNE:NAME)>
+X<(*PRUNE)> X<(*PRUNE:NAME)> X<\v>
 
 This zero-width pattern prunes the backtracking tree at the current point
 when backtracked into on failure. Consider the pattern C<A (*PRUNE) B>,
@@ -1260,6 +1293,8 @@ A may backtrack as necessary to match. Once it is reached, matching
 continues in B, which may also backtrack as necessary; however, should B
 not match, then no further backtracking will take place, and the pattern
 will fail outright at the current starting position.
+
+As a shortcut, X<\v> is exactly equivalent to C<(*PRUNE)>.
 
 The following example counts all the possible matching strings in a
 pattern (without actually matching any of them).
@@ -1311,6 +1346,8 @@ to the C<(*SKIP)> pattern being executed cannot be part of I<any> match
 of this pattern. This effectively means that the regex engine "skips" forward
 to this position on failure and tries to match again, (assuming that
 there is sufficient room to match).
+
+As a shortcut X<\V> is exactly equivalent to C<(*SKIP)>.
 
 The name of the C<(*SKIP:NAME)> pattern has special significance. If a
 C<(*MARK:NAME)> was encountered while matching, then it is that position
@@ -2008,7 +2045,7 @@ Perl specific syntax, the following are legal in Perl 5.10:
 
 =over 4
 
-=item C<< (?P<NAME>pattern) >>
+=item C<< (?PE<lt>NAMEE<gt>pattern) >>
 
 Define a named capture buffer. Equivalent to C<< (?<NAME>pattern) >>.
 
@@ -2020,7 +2057,7 @@ Backreference to a named capture buffer. Equivalent to C<< \g{NAME} >>.
 
 Subroutine call to a named capture buffer. Equivalent to C<< (?&NAME) >>.
 
-=back 4
+=back
 
 =head1 BUGS
 

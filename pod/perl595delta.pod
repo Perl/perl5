@@ -107,9 +107,9 @@ would expect. This is considered a feature. :-) (Yves Orton)
 
 =item Possessive Quantifiers
 
-Perl now supports the "possessive quantifier" syntax of the "atomic match" 
+Perl now supports the "possessive quantifier" syntax of the "atomic match"
 pattern. Basically a possessive quantifier matches as much as it can and never
-gives any back. Thus it can be used to control backtracking. The syntax is 
+gives any back. Thus it can be used to control backtracking. The syntax is
 similar to non-greedy matching, except instead of using a '?' as the modifier
 the '+' is used. Thus C<?+>, C<*+>, C<++>, C<{min,max}+> are now legal
 quantifiers. (Yves Orton)
@@ -128,6 +128,21 @@ backreferences. This should make it easier to generate and embed patterns
 that contain backreferences. (Yves Orton)
 
 =back
+
+=item Regexp::Keep internalized
+
+The functionality of Jeff Pinyan's module Regexp::Keep has been added to
+the core. You can now use in regular expressions the special escape C<\K>
+as a way to do something like floating length positive lookbehind. It is
+also useful in substitutions like:
+
+  s/(foo)bar/$1/g
+
+that can now be converted to
+
+  s/foo\Kbar//g
+
+which is much more efficient.
 
 =head2 The C<_> prototype
 

@@ -158,9 +158,9 @@ GOSUB		GOSUB,     num/ofs 2L	recurse to paren arg1 at (signed) ofs arg2
 GOSTART		GOSTART,   no   	recurse to start of pattern
 
 #*Named references (67..69)
-NREF		NREF,      no-sv 1	Match some already matched string
-NREFF		NREF,      no-sv 1	Match already matched string, folded
-NREFFL		NREF,      no-sv 1	Match already matched string, folded in loc.
+NREF		REF,       no-sv 1	Match some already matched string
+NREFF		REF,       no-sv 1	Match already matched string, folded
+NREFFL		REF,       no-sv 1	Match already matched string, folded in loc.
 
 
 #*Special conditionals  (70..72)
@@ -181,6 +181,9 @@ MARKPOINT	VERB,      no-sv 1	Push the current location for rollback by cut.
 SKIP		VERB,      no-sv 1	On failure skip forward (to the mark) before retrying
 COMMIT		VERB,      no-sv 1	Pattern fails outright if backtracking through this
 CUTGROUP	VERB,      no-sv 1	On failure go to the next alternation in the group
+
+#*Control what to keep in $&.
+KEEPS		KEEPS,  no	$& begins here.
 
 # NEW STUFF ABOVE THIS LINE -- Please update counts below. 
 
@@ -221,3 +224,4 @@ COMMIT		next:FAIL
 MARKPOINT	next:FAIL
 SKIP		next:FAIL
 CUTGROUP	next:FAIL
+KEEPS		next:FAIL

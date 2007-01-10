@@ -3913,6 +3913,25 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     1 while /.(??{'(*PRUNE)'})(?{$count++})(*FAIL)/g;
     iseq($count,4,"/.(*PRUNE)/");
 }
+{   # Test the \v form of the (*PRUNE) pattern
+    our $count = 0;
+    'aaab'=~/a+b?(?{$count++})(*FAIL)/;
+    iseq($count,9,"expect 9 for no \\v");
+    $count = 0;
+    'aaab'=~/a+b?\v(?{$count++})(*FAIL)/;
+    iseq($count,3,"expect 3 with \\v");
+    local $_='aaab';
+    $count=0;
+    1 while /.\v(?{$count++})(*FAIL)/g;
+    iseq($count,4,"/.\\v/");
+    $count = 0;
+    'aaab'=~/a+b?(??{'\v'})(?{$count++})(*FAIL)/;
+    iseq($count,3,"expect 3 with \\v");
+    local $_='aaab';
+    $count=0;
+    1 while /.(??{'\v'})(?{$count++})(*FAIL)/g;
+    iseq($count,4,"/.\\v/");
+}
 {   # Test the (*SKIP) pattern
     our $count = 0;
     'aaab'=~/a+b?(*SKIP)(?{$count++})(*FAIL)/;
@@ -3927,6 +3946,21 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     1 while /(a+b?)(*SKIP)(?{$count++; push @res,$1})(*FAIL)/g;
     iseq($count,2,"Expect 2 with (*SKIP)" );
     iseq("@res","aaab aaab","adjacent (*SKIP) works as expected" );
+}
+{   # Test the \V form of the (*SKIP) pattern
+    our $count = 0;
+    'aaab'=~/a+b?\V(?{$count++})(*FAIL)/;
+    iseq($count,1,"expect 1 with \\V");
+    local $_='aaab';
+    $count=0;
+    1 while /.\V(?{$count++})(*FAIL)/g;
+    iseq($count,4,"/.\\V/");
+    $_='aaabaaab';
+    $count=0;
+    our @res=();
+    1 while /(a+b?)\V(?{$count++; push @res,$1})(*FAIL)/g;
+    iseq($count,2,"Expect 2 with \\V" );
+    iseq("@res","aaab aaab","adjacent \\V works as expected" );
 }
 {   # Test the (*SKIP) pattern
     our $count = 0;
@@ -4208,6 +4242,22 @@ for my $c ("z", "\0", "!", chr(254), chr(256)) {
     ok(!$REGMARK);
     iseq($REGERROR,'foo');
 }
+{
+    my $x;
+    $x = "abc.def.ghi.jkl";
+    $x =~ s/.*\K\..*//;
+    ok($x eq "abc.def.ghi");
+    
+    $x = "one two three four";
+    $x =~ s/o+ \Kthree//g;
+    ok($x eq "one two  four");
+    
+    $x = "abcde";
+    $x =~ s/(.)\K/$1/g;
+    ok($x eq "aabbccddee");
+}
+
+
 # Test counter is at bottom of file. Put new tests above here.
 #-------------------------------------------------------------------
 # Keep the following tests last -- they may crash perl
@@ -4257,7 +4307,7 @@ ok($@=~/\QSequence \k... not terminated in regex;\E/);
 iseq(0+$::test,$::TestCount,"Got the right number of tests!");
 # Don't forget to update this!
 BEGIN {
-    $::TestCount = 1608;
+    $::TestCount = 1620;
     print "1..$::TestCount\n";
 }
 

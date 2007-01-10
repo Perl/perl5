@@ -6223,15 +6223,26 @@ S_reg_recode(pTHX_ const char value, SV **encp)
 
 /*
  - regatom - the lowest level
- *
- * Optimization:  gobbles an entire sequence of ordinary characters so that
- * it can turn them into a single node, which is smaller to store and
- * faster to run.  Backslashed characters are exceptions, each becoming a
- * separate node; the code is simpler that way and it's not worth fixing.
- *
- * [Yes, it is worth fixing, some scripts can run twice the speed.]
- * [It looks like its ok, as in S_study_chunk we merge adjacent EXACT nodes]
- */
+
+   Try to identify anything special at the start of the pattern. If there
+   is, then handle it as required. This may involve generating a single regop,
+   such as for an assertion; or it may involve recursing, such as to
+   handle a () structure.
+
+   If the string doesn't start with something special then we gobble up
+   as much literal text as we can.
+
+   Once we have been able to handle whatever type of thing started the
+   sequence, we return.
+
+   Note: we have to be careful with escapes, as they can be both literal
+   and special, and in the case of \10 and friends can either, depending
+   on context. Specifically there are two seperate switches for handling
+   escape sequences, with the one for handling literal escapes requiring
+   a dummy entry for all of the special escapes that are actually handled
+   by the other.
+*/
+
 STATIC regnode *
 S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 {
@@ -6242,6 +6253,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     GET_RE_DEBUG_FLAGS_DECL;
     DEBUG_PARSE("atom");
     *flagp = WORST;		/* Tentatively. */
+
 
 tryagain:
     switch (*RExC_parse) {
@@ -6329,99 +6341,103 @@ tryagain:
 	vFAIL("Quantifier follows nothing");
 	break;
     case '\\':
+	/* Special Escapes
+
+	   This switch handles escape sequences that resolve to some kind
+	   of special regop and not to literal text. Escape sequnces that
+	   resolve to literal text are handled below in the switch marked
+	   "Literal Escapes".
+
+	   Every entry in this switch *must* have a corresponding entry
+	   in the literal escape switch. However, the opposite is not
+	   required, as the default for this switch is to jump to the
+	   literal text handling code.
+	*/
 	switch (*++RExC_parse) {
+	/* Special Escapes */
 	case 'A':
 	    RExC_seen_zerolen++;
 	    ret = reg_node(pRExC_state, SBOL);
 	    *flagp |= SIMPLE;
-	    nextchar(pRExC_state);
-            Set_Node_Length(ret, 2); /* MJD */
-	    break;
+	    goto finish_meta_pat;
 	case 'G':
 	    ret = reg_node(pRExC_state, GPOS);
 	    RExC_seen |= REG_SEEN_GPOS;
 	    *flagp |= SIMPLE;
-	    nextchar(pRExC_state);
-            Set_Node_Length(ret, 2); /* MJD */
-	    break;
+	    goto finish_meta_pat;
+	case 'K':
+	    RExC_seen_zerolen++;
+	    ret = reg_node(pRExC_state, KEEPS);
+	    *flagp |= SIMPLE;
+	    goto finish_meta_pat;
 	case 'Z':
 	    ret = reg_node(pRExC_state, SEOL);
 	    *flagp |= SIMPLE;
 	    RExC_seen_zerolen++;		/* Do not optimize RE away */
-	    nextchar(pRExC_state);
-	    break;
+	    goto finish_meta_pat;
 	case 'z':
 	    ret = reg_node(pRExC_state, EOS);
 	    *flagp |= SIMPLE;
 	    RExC_seen_zerolen++;		/* Do not optimize RE away */
-	    nextchar(pRExC_state);
-            Set_Node_Length(ret, 2); /* MJD */
-	    break;
+	    goto finish_meta_pat;
 	case 'C':
 	    ret = reg_node(pRExC_state, CANY);
 	    RExC_seen |= REG_SEEN_CANY;
 	    *flagp |= HASWIDTH|SIMPLE;
-	    nextchar(pRExC_state);
-            Set_Node_Length(ret, 2); /* MJD */
-	    break;
+	    goto finish_meta_pat;
 	case 'X':
 	    ret = reg_node(pRExC_state, CLUMP);
 	    *flagp |= HASWIDTH;
-	    nextchar(pRExC_state);
-            Set_Node_Length(ret, 2); /* MJD */
-	    break;
+	    goto finish_meta_pat;
 	case 'w':
 	    ret = reg_node(pRExC_state, (U8)(LOC ? ALNUML     : ALNUM));
 	    *flagp |= HASWIDTH|SIMPLE;
-	    nextchar(pRExC_state);
-            Set_Node_Length(ret, 2); /* MJD */
-	    break;
+	    goto finish_meta_pat;
 	case 'W':
 	    ret = reg_node(pRExC_state, (U8)(LOC ? NALNUML    : NALNUM));
 	    *flagp |= HASWIDTH|SIMPLE;
-	    nextchar(pRExC_state);
-            Set_Node_Length(ret, 2); /* MJD */
-	    break;
+	    goto finish_meta_pat;
 	case 'b':
 	    RExC_seen_zerolen++;
 	    RExC_seen |= REG_SEEN_LOOKBEHIND;
 	    ret = reg_node(pRExC_state, (U8)(LOC ? BOUNDL     : BOUND));
 	    *flagp |= SIMPLE;
-	    nextchar(pRExC_state);
-            Set_Node_Length(ret, 2); /* MJD */
-	    break;
+	    goto finish_meta_pat;
 	case 'B':
 	    RExC_seen_zerolen++;
 	    RExC_seen |= REG_SEEN_LOOKBEHIND;
 	    ret = reg_node(pRExC_state, (U8)(LOC ? NBOUNDL    : NBOUND));
 	    *flagp |= SIMPLE;
-	    nextchar(pRExC_state);
-            Set_Node_Length(ret, 2); /* MJD */
-	    break;
+	    goto finish_meta_pat;
 	case 's':
 	    ret = reg_node(pRExC_state, (U8)(LOC ? SPACEL     : SPACE));
 	    *flagp |= HASWIDTH|SIMPLE;
-	    nextchar(pRExC_state);
-            Set_Node_Length(ret, 2); /* MJD */
-	    break;
+	    goto finish_meta_pat;
 	case 'S':
 	    ret = reg_node(pRExC_state, (U8)(LOC ? NSPACEL    : NSPACE));
 	    *flagp |= HASWIDTH|SIMPLE;
-	    nextchar(pRExC_state);
-            Set_Node_Length(ret, 2); /* MJD */
-	    break;
+	    goto finish_meta_pat;
 	case 'd':
 	    ret = reg_node(pRExC_state, DIGIT);
 	    *flagp |= HASWIDTH|SIMPLE;
-	    nextchar(pRExC_state);
-            Set_Node_Length(ret, 2); /* MJD */
-	    break;
+	    goto finish_meta_pat;
 	case 'D':
 	    ret = reg_node(pRExC_state, NDIGIT);
 	    *flagp |= HASWIDTH|SIMPLE;
+	    goto finish_meta_pat;
+	case 'v':
+	    ret = reganode(pRExC_state, PRUNE, 0);
+	    ret->flags = 1;
+	    *flagp |= SIMPLE;
+	    goto finish_meta_pat;
+	case 'V':
+	    ret = reganode(pRExC_state, SKIP, 0);
+	    ret->flags = 1;
+	    *flagp |= SIMPLE;
+         finish_meta_pat:	    
 	    nextchar(pRExC_state);
             Set_Node_Length(ret, 2); /* MJD */
-	    break;
+	    break;	    
 	case 'p':
 	case 'P':
 	    {	
@@ -6503,16 +6519,6 @@ tryagain:
             }
             break;
 	}
-	case 'n':
-	case 'r':
-	case 't':
-	case 'f':
-	case 'e':
-	case 'a':
-	case 'x':
-	case 'c':
-	case '0':
-	    goto defchar;
 	case 'g': 
 	case '1': case '2': case '3': case '4':
 	case '5': case '6': case '7': case '8': case '9':
@@ -6629,29 +6635,40 @@ tryagain:
 		case '|':
 		    goto loopdone;
 		case '\\':
+		    /* Literal Escapes Switch
+
+		       This switch is meant to handle escape sequences that
+		       resolve to a literal character.
+
+		       Every escape sequence that represents something
+		       else, like an assertion or a char class, is handled
+		       in the switch marked 'Special Escapes' above in this
+		       routine, but also has an entry here as anything that
+		       isn't explicitly mentioned here will be treated as
+		       an unescaped equivalent literal.
+		    */
+
 		    switch (*++p) {
-		    case 'A':
-		    case 'C':
-		    case 'X':
-		    case 'G':
-		    case 'g':
-		    case 'Z':
-		    case 'z':
-		    case 'w':
-		    case 'W':
-		    case 'b':
-		    case 'B':
-		    case 's':
-		    case 'S':
-		    case 'd':
-		    case 'D':
-		    case 'p':
-		    case 'P':
-                    case 'N':
-                    case 'R':
-                    case 'k':
+		    /* These are all the special escapes. */
+		    case 'A':             /* Start assertion */
+		    case 'b': case 'B':   /* Word-boundary assertion*/
+		    case 'C':             /* Single char !DANGEROUS! */
+		    case 'd': case 'D':   /* digit class */
+		    case 'g': case 'G':   /* generic-backref, pos assertion */
+		    case 'k': case 'K':   /* named backref, keep marker */
+		    case 'N':             /* named char sequence */
+		    case 'p': case 'P':   /* unicode property */
+		    case 's': case 'S':   /* space class */
+		    case 'v': case 'V':   /* (*PRUNE) and (*SKIP) */
+		    case 'w': case 'W':   /* word class */
+		    case 'X':             /* eXtended Unicode "combining character sequence" */
+		    case 'z': case 'Z':   /* End of line/string assertion */
 			--p;
 			goto loopdone;
+
+	            /* Anything after here is an escape that resolves to a
+	               literal. (Except digits, which may or may not)
+	             */
 		    case 'n':
 			ender = '\n';
 			p++;
@@ -8213,26 +8230,27 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o)
     else if (k == REF || k == OPEN || k == CLOSE || k == GROUPP || OP(o)==ACCEPT) {
 	Perl_sv_catpvf(aTHX_ sv, "%d", (int)ARG(o));	/* Parenth number */
 	if ( prog->paren_names ) {
-	    AV *list= (AV *)progi->data->data[progi->name_list_idx];
-	    SV **name= av_fetch(list, ARG(o), 0 );
-	    if (name)
-	        Perl_sv_catpvf(aTHX_ sv, " '%"SVf"'", SVfARG(*name));
-        }	    
-    } else if (k == NREF) {
-        if ( prog->paren_names ) {
-            AV *list= (AV *)progi->data->data[ progi->name_list_idx ];
-            SV *sv_dat=(SV*)progi->data->data[ ARG( o ) ];
-            I32 *nums=(I32*)SvPVX(sv_dat);
-            SV **name= av_fetch(list, nums[0], 0 );
-            I32 n;
-            if (name) {
-                for ( n=0; n<SvIVX(sv_dat); n++ ) {
-                    Perl_sv_catpvf(aTHX_ sv, "%s%"IVdf,
-				   (n ? "," : ""), (IV)nums[n]);
+            if ( k != REF || OP(o) < NREF) {	    
+	        AV *list= (AV *)progi->data->data[progi->name_list_idx];
+	        SV **name= av_fetch(list, ARG(o), 0 );
+	        if (name)
+	            Perl_sv_catpvf(aTHX_ sv, " '%"SVf"'", SVfARG(*name));
+            }	    
+            else {
+                AV *list= (AV *)progi->data->data[ progi->name_list_idx ];
+                SV *sv_dat=(SV*)progi->data->data[ ARG( o ) ];
+                I32 *nums=(I32*)SvPVX(sv_dat);
+                SV **name= av_fetch(list, nums[0], 0 );
+                I32 n;
+                if (name) {
+                    for ( n=0; n<SvIVX(sv_dat); n++ ) {
+                        Perl_sv_catpvf(aTHX_ sv, "%s%"IVdf,
+			   	    (n ? "," : ""), (IV)nums[n]);
+                    }
+                    Perl_sv_catpvf(aTHX_ sv, " '%"SVf"'", SVfARG(*name));
                 }
-                Perl_sv_catpvf(aTHX_ sv, " '%"SVf"'", SVfARG(*name));
             }
-        }
+        }            
     } else if (k == GOSUB) 
 	Perl_sv_catpvf(aTHX_ sv, "%d[%+d]", (int)ARG(o),(int)ARG2L(o));	/* Paren and offset */
     else if (k == VERB) {
