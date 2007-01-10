@@ -7256,8 +7256,8 @@ This function should have been named wantlist() instead.
 =item warn LIST
 X<warn> X<warning> X<STDERR>
 
-Produces a message on STDERR just like C<die>, but doesn't exit or throw
-an exception.
+Prints the value of LIST to STDERR.  If the last element of LIST does
+not end in a newline, appends the same text as C<die> does.
 
 If LIST is empty and C<$@> already contains a value (typically from a
 previous eval) that value is used after appending C<"\t...caught">
