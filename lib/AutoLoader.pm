@@ -102,7 +102,7 @@ sub find_filename {
 	    # (and failing) to find the 'lib/auto/foo/bar.al' because it
 	    # looked for 'lib/lib/auto/foo/bar.al', given @INC = ('lib').
 
-	    if (-r $filename) {
+	    if (defined $filename and -r $filename) {
 		unless ($filename =~ m|^/|s) {
 		    if ($is_dosish) {
 			unless ($filename =~ m{^([a-z]:)?[\\/]}is) {
