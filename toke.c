@@ -906,27 +906,16 @@ S_skipspace2(pTHX_ register char *s, SV **svp)
 #endif
 
 STATIC void
-S_update_debugger_info_pv(pTHX_ const char *buf, STRLEN len)
+S_update_debugger_info(pTHX_ SV *orig_sv, const char *buf, STRLEN len)
 {
     AV *av = CopFILEAVx(PL_curcop);
     if (av) {
 	SV * const sv = newSV(0);
 	sv_upgrade(sv, SVt_PVMG);
-	sv_setpvn(sv, buf, len);
-	(void)SvIOK_on(sv);
-	SvIV_set(sv, 0);
-	av_store(av, (I32)CopLINE(PL_curcop), sv);
-    }
-}
-
-STATIC void
-S_update_debugger_info_sv(pTHX_ SV *orig_sv)
-{
-    AV *av = CopFILEAVx(PL_curcop);
-    if (av) {
-	SV * const sv = newSV(0);
-	sv_upgrade(sv, SVt_PVMG);
-	sv_setsv(sv, orig_sv);
+	if (orig_sv)
+	    sv_setsv(sv, orig_sv);
+	else
+	    sv_setpvn(sv, buf, len);
 	(void)SvIOK_on(sv);
 	SvIV_set(sv, 0);
 	av_store(av, (I32)CopLINE(PL_curcop), sv);
@@ -1097,7 +1086,7 @@ S_skipspace(pTHX_ register char *s)
 	 * so store the line into the debugger's array of lines
 	 */
 	if (PERLDB_LINE && PL_curstash != PL_debstash)
-	    update_debugger_info_pv(PL_bufptr, PL_bufend - PL_bufptr);
+	    update_debugger_info(NULL, PL_bufptr, PL_bufend - PL_bufptr);
     }
 
 #ifdef PERL_MAD
@@ -3604,7 +3593,7 @@ Perl_yylex(pTHX)
 	    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	    PL_last_lop = PL_last_uni = NULL;
 	    if (PERLDB_LINE && PL_curstash != PL_debstash)
-		update_debugger_info_sv(PL_linestr);
+		update_debugger_info(PL_linestr, NULL, 0);
 	    goto retry;
 	}
 	do {
@@ -3697,7 +3686,7 @@ Perl_yylex(pTHX)
 	} while (PL_doextract);
 	PL_oldoldbufptr = PL_oldbufptr = PL_bufptr = PL_linestart = s;
 	if (PERLDB_LINE && PL_curstash != PL_debstash)
-	    update_debugger_info_sv(PL_linestr);
+	    update_debugger_info(PL_linestr, NULL, 0);
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	PL_last_lop = PL_last_uni = NULL;
 	if (CopLINE(PL_curcop) == 1) {
@@ -11260,7 +11249,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	    PL_bufend[-1] = '\n';
 #endif
 	if (PERLDB_LINE && PL_curstash != PL_debstash)
-	    update_debugger_info_sv(PL_linestr);
+	    update_debugger_info(PL_linestr, NULL, 0);
 	if (*s == term && memEQ(s,PL_tokenbuf,len)) {
 	    STRLEN off = PL_bufend - 1 - SvPVX_const(PL_linestr);
 	    *(SvPVX(PL_linestr) + off ) = ' ';
@@ -11757,7 +11746,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 
 	/* update debugger info */
 	if (PERLDB_LINE && PL_curstash != PL_debstash)
-	    update_debugger_info_sv(PL_linestr);
+	    update_debugger_info(PL_linestr, NULL, 0);
 
 	/* having changed the buffer, we must update PL_bufend */
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
