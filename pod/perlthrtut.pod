@@ -117,7 +117,7 @@ step back a bit and think about what you want to do and how Perl can
 do it.
 
 However, it is important to remember that Perl threads cannot magically
-do things unless your operating systems threads allows it. So if your
+do things unless your operating system's threads allows it. So if your
 system blocks the entire process on C<sleep()>, Perl usually will, as well.
 
 B<Perl Threads Are Different.>
@@ -621,7 +621,7 @@ threads to have the I<lock> at any one time.
 =head2 Basic semaphores
 
 Semaphores have two methods, C<down()> and C<up()>: C<down()> decrements the resource
-count, while up increments it. Calls to C<down()> will block if the
+count, while up() increments it. Calls to C<down()> will block if the
 semaphore's current count would decrement below zero.  This program
 gives a quick demonstration:
 
@@ -695,7 +695,7 @@ C<$semaphore->down(1)>.
 
 The question, of course, is why would you do something like this? Why
 create a semaphore with a starting count that's not one, or why
-decrement/increment it by more than one? The answer is resource
+decrement or increment it by more than one? The answer is resource
 availability.  Many resources that you want to manage access for can be
 safely used by more than one thread at once.
 
@@ -868,14 +868,14 @@ number is, it's a number that's only evenly divisible by itself and 1.)
 The bulk of the work is done by the C<check_num()> subroutine, which
 takes a reference to its input queue and a prime number that it's
 responsible for.  After pulling in the input queue and the prime that
-the subroutine's checking (line 20), we create a new queue (line 22)
+the subroutine is checking (line 20), we create a new queue (line 22)
 and reserve a scalar for the thread that we're likely to create later
 (line 21).
 
 The while loop from lines 23 to line 31 grabs a scalar off the input
 queue and checks against the prime this thread is responsible
-for.  Line 24 checks to see if there's a remainder when we modulo the
-number to be checked against our prime.  If there is one, the number
+for.  Line 24 checks to see if there's a remainder when we divide the
+number to be checked by our prime.  If there is one, the number
 must not be evenly divisible by our prime, so we need to either pass
 it on to the next thread if we've created one (line 26) or create a
 new thread if we haven't.
@@ -999,7 +999,7 @@ the root directory of all the threads changes, and no thread can
 undo it (as opposed to C<chdir()>).
 
 Further examples of process-scope changes include C<umask()> and
-changing uids/gids.
+changing uids and gids.
 
 Thinking of mixing C<fork()> and threads?  Please lie down and wait
 until the feeling passes.  Be aware that the semantics of C<fork()> vary
