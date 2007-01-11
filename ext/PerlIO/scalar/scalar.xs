@@ -108,6 +108,10 @@ PerlIOScalar_seek(pTHX_ PerlIO * f, Off_t offset, int whence)
 	Zero(SvPVX(s->var) + oldcur, newlen - oldcur, char);
 	/* No SvCUR_set(), though.  This is just a seek, not a write. */
     }
+    else if (!SvPVX(s->var)) {
+	/* ensure there's always a character buffer */
+	(void)SvGROW(s->var,1);
+    }
     SvPOK_on(s->var);
     return 0;
 }
