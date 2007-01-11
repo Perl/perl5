@@ -2728,7 +2728,7 @@ PERL_CALLCONV void	Perl_do_gvgv_dump(pTHX_ I32 level, PerlIO *file, const char *
 
 PERL_CALLCONV void	Perl_do_hv_dump(pTHX_ I32 level, PerlIO *file, const char *name, HV *sv)
 			__attribute__nonnull__(pTHX_2)
-			__attribute__nonnull__(pTHX_4);
+			__attribute__nonnull__(pTHX_3);
 
 PERL_CALLCONV void	Perl_do_magic_dump(pTHX_ I32 level, PerlIO *file, const MAGIC *mg, I32 nest, I32 maxnest, bool dumpops, STRLEN pvlim)
 			__attribute__nonnull__(pTHX_2)
