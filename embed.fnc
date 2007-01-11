@@ -1005,9 +1005,11 @@ Apd     |char*  |pv_pretty      |NN SV *dsv|NN char const * const str\
 Afp	|void	|dump_indent	|I32 level|NN PerlIO *file|NN const char* pat|...
 Ap	|void	|dump_vindent	|I32 level|NN PerlIO *file|NN const char* pat \
 				|NULLOK va_list *args
-Ap	|void	|do_gv_dump	|I32 level|NN PerlIO *file|NN const char *name|NN GV *sv
-Ap	|void	|do_gvgv_dump	|I32 level|NN PerlIO *file|NN const char *name|NN GV *sv
-Ap	|void	|do_hv_dump	|I32 level|NN PerlIO *file|NN const char *name|NN HV *sv
+Ap	|void	|do_gv_dump	|I32 level|NN PerlIO *file|NN const char *name\
+				|NULLOK GV *sv
+Ap	|void	|do_gvgv_dump	|I32 level|NN PerlIO *file|NN const char *name\
+				|NULLOK GV *sv
+Ap	|void	|do_hv_dump	|I32 level|NN PerlIO *file|NULLOK const char *name|NN HV *sv
 Ap	|void	|do_magic_dump	|I32 level|NN PerlIO *file|NN const MAGIC *mg|I32 nest \
 				|I32 maxnest|bool dumpops|STRLEN pvlim
 Ap	|void	|do_op_dump	|I32 level|NN PerlIO *file|NULLOK const OP *o
