@@ -3674,7 +3674,7 @@ Perl_yylex(pTHX)
 		if (PL_madskills)
 		    sv_catsv(PL_thiswhite, PL_linestr);
 #endif
-		if (*s == '=' && strnEQ(s, "=cut", 4)) {
+		if (*s == '=' && strnEQ(s, "=cut", 4) && !isALPHA(s[4])) {
 		    sv_setpvn(PL_linestr, "", 0);
 		    PL_oldoldbufptr = PL_oldbufptr = s = PL_linestart = SvPVX(PL_linestr);
 		    PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
