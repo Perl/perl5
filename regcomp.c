@@ -4674,6 +4674,7 @@ Perl_reg_numbered_buff_get(pTHX_ I32 paren, const REGEXP * const rx, SV* usesv, 
     I32 i = 0;
     I32 s1, t1;
     SV *sv = usesv ? usesv : newSVpvs("");
+    PERL_UNUSED_ARG(flags);
         
     if (paren == -2 && (s = rx->subbeg) && rx->startp[0] != -1) {
         /* $` */
