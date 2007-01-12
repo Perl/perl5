@@ -438,8 +438,15 @@ Perl_op_clear(pTHX_ OP *o)
 	/* FALL THROUGH */
     case OP_TRANS:
 	if (o->op_private & (OPpTRANS_FROM_UTF|OPpTRANS_TO_UTF)) {
+#ifdef USE_ITHREADS
+	    if (cPADOPo->op_padix > 0) {
+		pad_swipe(cPADOPo->op_padix, TRUE);
+		cPADOPo->op_padix = 0;
+	    }
+#else
 	    SvREFCNT_dec(cSVOPo->op_sv);
 	    cSVOPo->op_sv = NULL;
+#endif
 	}
 	else {
 	    PerlMemShared_free(cPVOPo->op_pv);
@@ -2829,6 +2836,7 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
     const I32 complement = o->op_private & OPpTRANS_COMPLEMENT;
     const I32 squash     = o->op_private & OPpTRANS_SQUASH;
     I32 del              = o->op_private & OPpTRANS_DELETE;
+    SV* swash;
     PL_hints |= HINT_BLOCK_SCOPE;
 
     if (SvUTF8(tstr))
@@ -3024,12 +3032,21 @@ Perl_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
 
 	PerlMemShared_free(cPVOPo->op_pv);
 	cPVOPo->op_pv = NULL;
-	cSVOPo->op_sv = (SV*)swash_init("utf8", "", listsv, bits, none);
+
+	swash = (SV*)swash_init("utf8", "", listsv, bits, none);
+#ifdef USE_ITHREADS
+	cPADOPo->op_padix = pad_alloc(OP_TRANS, SVs_PADTMP);
+	SvREFCNT_dec(PAD_SVl(cPADOPo->op_padix));
+	PAD_SETSV(cPADOPo->op_padix, swash);
+	SvPADTMP_on(swash);
+#else
+	cSVOPo->op_sv = swash;
+#endif
 	SvREFCNT_dec(listsv);
 	SvREFCNT_dec(transv);
 
 	if (!del && havefinal && rlen)
-	    (void)hv_store((HV*)SvRV((cSVOPo->op_sv)), "FINAL", 5,
+	    (void)hv_store((HV*)SvRV(swash), "FINAL", 5,
 			   newSVuv((UV)final), 0);
 
 	if (grows)

@@ -307,7 +307,12 @@ S_do_trans_simple_utf8(pTHX_ SV * const sv)
     const I32 grows = PL_op->op_private & OPpTRANS_GROWS;
     STRLEN len;
 
-    SV* const  rv = (SV*)cSVOP->op_sv;
+    SV* const  rv =
+#ifdef USE_ITHREADS
+		    PAD_SVl(cPADOP->op_padix);
+#else
+		    (SV*)cSVOP->op_sv;
+#endif
     HV* const  hv = (HV*)SvRV(rv);
     SV* const * svp = hv_fetchs(hv, "NONE", FALSE);
     const UV none = svp ? SvUV(*svp) : 0x7fffffff;
@@ -403,7 +408,12 @@ S_do_trans_count_utf8(pTHX_ SV * const sv)
     I32 matches = 0;
     STRLEN len;
 
-    SV* const rv = (SV*)cSVOP->op_sv;
+    SV* const  rv =
+#ifdef USE_ITHREADS
+		    PAD_SVl(cPADOP->op_padix);
+#else
+		    (SV*)cSVOP->op_sv;
+#endif
     HV* const hv = (HV*)SvRV(rv);
     SV* const * const svp = hv_fetchs(hv, "NONE", FALSE);
     const UV none = svp ? SvUV(*svp) : 0x7fffffff;
@@ -447,7 +457,12 @@ S_do_trans_complex_utf8(pTHX_ SV * const sv)
     const I32 squash   = PL_op->op_private & OPpTRANS_SQUASH;
     const I32 del      = PL_op->op_private & OPpTRANS_DELETE;
     const I32 grows    = PL_op->op_private & OPpTRANS_GROWS;
-    SV * const rv = (SV*)cSVOP->op_sv;
+    SV* const  rv =
+#ifdef USE_ITHREADS
+		    PAD_SVl(cPADOP->op_padix);
+#else
+		    (SV*)cSVOP->op_sv;
+#endif
     HV * const hv = (HV*)SvRV(rv);
     SV * const *svp = hv_fetchs(hv, "NONE", FALSE);
     const UV none = svp ? SvUV(*svp) : 0x7fffffff;
