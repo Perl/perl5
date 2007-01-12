@@ -1056,9 +1056,7 @@
 #define mg_dup			Perl_mg_dup
 #define sv_dup			Perl_sv_dup
 #define rvpv_dup		Perl_rvpv_dup
-#ifdef PERL_CORE
 #define parser_dup		Perl_parser_dup
-#endif
 #endif
 #define ptr_table_new		Perl_ptr_table_new
 #define ptr_table_fetch		Perl_ptr_table_fetch
@@ -3260,9 +3258,7 @@
 #define mg_dup(a,b)		Perl_mg_dup(aTHX_ a,b)
 #define sv_dup(a,b)		Perl_sv_dup(aTHX_ a,b)
 #define rvpv_dup(a,b,c)		Perl_rvpv_dup(aTHX_ a,b,c)
-#ifdef PERL_CORE
 #define parser_dup(a,b)		Perl_parser_dup(aTHX_ a,b)
-#endif
 #endif
 #define ptr_table_new()		Perl_ptr_table_new(aTHX)
 #define ptr_table_fetch(a,b)	Perl_ptr_table_fetch(aTHX_ a,b)

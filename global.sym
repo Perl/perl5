@@ -655,6 +655,7 @@ Perl_gp_dup
 Perl_mg_dup
 Perl_sv_dup
 Perl_rvpv_dup
+Perl_parser_dup
 Perl_ptr_table_new
 Perl_ptr_table_fetch
 Perl_ptr_table_store
