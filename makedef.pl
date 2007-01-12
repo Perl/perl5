@@ -8,6 +8,8 @@
 #
 # reads global.sym, pp.sym, perlvars.h, intrpvar.h, thrdvar.h, config.h
 # On OS/2 reads miniperl.map and the previous version of perl5.def as well
+
+BEGIN { unshift @INC, "lib" }
 use strict;
 
 use vars qw($PLATFORM $CCTYPE $FILETYPE $CONFIG_ARGS $ARCHNAME $PATCHLEVEL);
