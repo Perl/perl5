@@ -125,7 +125,15 @@ EOFCODE
 	}
 	else {
 	    if (!$match || $got ne $expect) {
- 		print "not ok $. ($study) $input => `$got', match=$match\n$code\n";
+	        eval { require Data::Dumper };
+		if ($@) {
+		    print "not ok $. ($study) $input => `$got', match=$match\n$code\n";
+		}
+		else { # better diagnostics
+		    my $s = Data::Dumper->new([$subject],['subject'])->Useqq(1)->Dump;
+		    my $g = Data::Dumper->new([$got],['got'])->Useqq(1)->Dump;
+		    print "not ok $. ($study) $input => `$got', match=$match\n$s\n$g\n$code\n";
+		}
 		next TEST;
 	    }
 	}

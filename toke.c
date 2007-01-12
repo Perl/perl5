@@ -10763,20 +10763,16 @@ void
 Perl_pmflag(pTHX_ U32* pmfl, int ch)
 {
     PERL_UNUSED_CONTEXT;
-    if (ch == 'i')
-	*pmfl |= PMf_FOLD;
-    else if (ch == 'g')
-	*pmfl |= PMf_GLOBAL;
-    else if (ch == 'c')
-	*pmfl |= PMf_CONTINUE;
-    else if (ch == 'o')
-	*pmfl |= PMf_KEEP;
-    else if (ch == 'm')
-	*pmfl |= PMf_MULTILINE;
-    else if (ch == 's')
-	*pmfl |= PMf_SINGLELINE;
-    else if (ch == 'x')
-	*pmfl |= PMf_EXTENDED;
+    if (ch<256) {
+        char c = (char)ch;
+        switch (c) {
+            CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl);
+            case 'g': *pmfl |= PMf_GLOBAL; break;
+            case 'c': *pmfl |= PMf_CONTINUE; break;
+            case 'o': *pmfl |= PMf_KEEP; break;
+            case 'k': *pmfl |= PMf_KEEPCOPY; break;
+        }
+    }
 }
 
 STATIC char *
@@ -10786,7 +10782,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
     PMOP *pm;
     char *s = scan_str(start,!!PL_madskills,FALSE);
     const char * const valid_flags =
-	(const char *)((type == OP_QR) ? "iomsx" : "iogcmsx");
+	(const char *)((type == OP_QR) ? "iomsxk" : "iogcmsxk");
 #ifdef PERL_MAD
     char *modstart;
 #endif
@@ -10887,7 +10883,7 @@ S_scan_subst(pTHX_ char *start)
 	    s++;
 	    es++;
 	}
-	else if (strchr("iogcmsx", *s))
+	else if (strchr("iogcmsxk", *s))
 	    pmflag(&pm->op_pmflags,*s++);
 	else
 	    break;

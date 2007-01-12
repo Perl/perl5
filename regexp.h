@@ -144,11 +144,18 @@ typedef struct regexp_engine {
 #define RXf_PMf_SINGLELINE	0x00002000 /* /s         */
 #define RXf_PMf_FOLD    	0x00004000 /* /i         */
 #define RXf_PMf_EXTENDED	0x00008000 /* /x         */
+#define RXf_PMf_KEEPCOPY	0x00010000 /* /k         */
 /* these flags are transfered from the PMOP->op_pmflags member during compilation */
-#define RXf_PMf_COMPILETIME	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_LOCALE|RXf_PMf_FOLD|RXf_PMf_EXTENDED)
+#define RXf_PMf_STD_PMMOD	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED)
+#define RXf_PMf_COMPILETIME	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_LOCALE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_KEEPCOPY)
+
+#define CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl)              \
+        case 'i': *(pmfl) |= RXf_PMf_FOLD;       break;   \
+        case 'm': *(pmfl) |= RXf_PMf_MULTILINE;  break;   \
+        case 's': *(pmfl) |= RXf_PMf_SINGLELINE; break;   \
+        case 'x': *(pmfl) |= RXf_PMf_EXTENDED;   break
 
 /* What we have seen */
-/* one bit here */
 #define RXf_LOOKBEHIND_SEEN	0x00020000
 #define RXf_EVAL_SEEN   	0x00040000
 #define RXf_CANY_SEEN   	0x00080000
@@ -448,6 +455,7 @@ struct re_save_state {
 
 #define SAVESTACK_ALLOC_FOR_RE_SAVE_STATE \
 	(1 + ((sizeof(struct re_save_state) - 1) / sizeof(*PL_savestack)))
+
 /*
  * Local variables:
  * c-indentation-style: bsd

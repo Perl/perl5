@@ -586,6 +586,15 @@ already paid the price.  As of 5.005, C<$&> is not so costly as the
 other two.
 X<$&> X<$`> X<$'>
 
+As a workaround for this problem, Perl 5.10 introduces C<${^PREMATCH}>,
+C<${^MATCH}> and C<${^POSTMATCH}>, which are equivalent to C<$`>, C<$&>
+and C<$'>, B<except> that they are only guaranteed to be defined after a
+successful match that was executed with the C</k> (keep-copy) modifier.
+The use of these variables incurs no global performance penalty, unlike
+their punctuation char equivalents, however at the trade-off that you
+have to tell perl when you want to use them.
+X</k> X<k modifier>
+
 Backslashed metacharacters in Perl are alphanumeric, such as C<\b>,
 C<\w>, C<\n>.  Unlike some other regular expression languages, there
 are no backslashed symbols that aren't alphanumeric.  So anything
@@ -639,7 +648,7 @@ whitespace formatting, a simple C<#> will suffice.  Note that Perl closes
 the comment as soon as it sees a C<)>, so there is no way to put a literal
 C<)> in the comment.
 
-=item C<(?imsx-imsx)>
+=item C<(?kimsx-imsx)>
 X<(?)>
 
 One or more embedded pattern-match modifiers, to be turned on (or
@@ -666,6 +675,11 @@ These modifiers are restored at the end of the enclosing group. For example,
 will match a repeated (I<including the case>!) word C<blah> in any
 case, assuming C<x> modifier, and no C<i> modifier outside this
 group.
+
+Note that the C<k> modifier is special in that it can only be enabled,
+not disabled, and that its presence anywhere in a pattern has a global
+effect. Thus C<(?-k)> and C<(?-k:...)> are meaningless and will warn
+when executed under C<use warnings>.
 
 =item C<(?:pattern)>
 X<(?:)>

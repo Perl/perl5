@@ -779,8 +779,14 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    }
 	}
 	break;
-    case '\020':		/* ^P */
-	sv_setiv(sv, (IV)PL_perldb);
+    case '\020':		
+	if (nextchar == '\0') {       /* ^P */
+	    sv_setiv(sv, (IV)PL_perldb);
+	} else if (strEQ(remaining, "REMATCH")) { /* $^PREMATCH */
+	    goto do_prematch_fetch;
+	} else if (strEQ(remaining, "OSTMATCH")) { /* $^POSTMATCH */
+	    goto do_postmatch_fetch;
+	}
 	break;
     case '\023':		/* ^S */
 	if (nextchar == '\0') {
@@ -847,18 +853,21 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	    SvPOK_only(sv);
 	}
 	break;
+    case '\015': /* $^MATCH */
+	if (strEQ(remaining, "ATCH")) {
     case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9': case '&':
-	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
-	    /*
-	     * Pre-threads, this was paren = atoi(GvENAME((GV*)mg->mg_obj));
-	     * XXX Does the new way break anything?
-	     */
-	    paren = atoi(mg->mg_ptr); /* $& is in [0] */
-	    reg_numbered_buff_get( paren, rx, sv, 0);
-	    break;
+	    if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
+		/*
+		 * Pre-threads, this was paren = atoi(GvENAME((GV*)mg->mg_obj));
+		 * XXX Does the new way break anything?
+		 */
+		paren = atoi(mg->mg_ptr); /* $& is in [0] */
+		reg_numbered_buff_get( paren, rx, sv, 0);
+		break;
+	    }
+	    sv_setsv(sv,&PL_sv_undef);
 	}
-	sv_setsv(sv,&PL_sv_undef);
 	break;
     case '+':
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
@@ -880,6 +889,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setsv(sv,&PL_sv_undef);
 	break;
     case '`':
+      do_prematch_fetch:
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	  reg_numbered_buff_get( -2, rx, sv, 0);
 	  break;
@@ -887,6 +897,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 	sv_setsv(sv,&PL_sv_undef);
 	break;
     case '\'':
+      do_postmatch_fetch:
 	if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
 	  reg_numbered_buff_get( -1, rx, sv, 0);
 	  break;

@@ -172,6 +172,7 @@ typedef struct RExC_state_t {
 #define RExC_recurse	(pRExC_state->recurse)
 #define RExC_recurse_count	(pRExC_state->recurse_count)
 
+
 #define	ISMULT1(c)	((c) == '*' || (c) == '+' || (c) == '?')
 #define	ISMULT2(s)	((*s) == '*' || (*s) == '+' || (*s) == '?' || \
 	((*s) == '{' && regcurly(s)))
@@ -4592,8 +4593,8 @@ reStudy:
         ri->name_list_idx = add_data( pRExC_state, 1, "p" );
         ri->data->data[ri->name_list_idx] = (void*)SvREFCNT_inc(RExC_paren_name_list);
     } else
-        ri->name_list_idx = 0;
 #endif
+        ri->name_list_idx = 0;
 
     if (RExC_recurse_count) {
         for ( ; RExC_recurse_count ; RExC_recurse_count-- ) {
@@ -4676,12 +4677,18 @@ Perl_reg_numbered_buff_get(pTHX_ I32 paren, const REGEXP * const rx, SV* usesv, 
     SV *sv = usesv ? usesv : newSVpvs("");
     PERL_UNUSED_ARG(flags);
         
-    if (paren == -2 && (s = rx->subbeg) && rx->startp[0] != -1) {
+    if (!rx->subbeg) {
+        sv_setsv(sv,&PL_sv_undef);
+        return sv;
+    } 
+    else               
+    if (paren == -2 && rx->startp[0] != -1) {
         /* $` */
 	i = rx->startp[0];
+	s = rx->subbeg;
     }
     else 
-    if (paren == -1 && rx->subbeg && rx->endp[0] != -1) {
+    if (paren == -1 && rx->endp[0] != -1) {
         /* $' */
 	s = rx->subbeg + rx->endp[0];
 	i = rx->sublen - rx->endp[0];
@@ -4694,47 +4701,43 @@ Perl_reg_numbered_buff_get(pTHX_ I32 paren, const REGEXP * const rx, SV* usesv, 
         /* $& $1 ... */
         i = t1 - s1;
         s = rx->subbeg + s1;
-    }
-      
-    if (s) {        
-        assert(rx->subbeg);
-        assert(rx->sublen >= (s - rx->subbeg) + i );
-            
-        if (i >= 0) {
-            const int oldtainted = PL_tainted;
-            TAINT_NOT;
-            sv_setpvn(sv, s, i);
-            PL_tainted = oldtainted;
-            if ( (rx->extflags & RXf_CANY_SEEN)
-                ? (RX_MATCH_UTF8(rx)
-                            && (!i || is_utf8_string((U8*)s, i)))
-                : (RX_MATCH_UTF8(rx)) )
-            {
-                SvUTF8_on(sv);
-            }
-            else
-                SvUTF8_off(sv);
-            if (PL_tainting) {
-                if (RX_MATCH_TAINTED(rx)) {
-                    if (SvTYPE(sv) >= SVt_PVMG) {
-                        MAGIC* const mg = SvMAGIC(sv);
-                        MAGIC* mgt;
-                        PL_tainted = 1;
-                        SvMAGIC_set(sv, mg->mg_moremagic);
-                        SvTAINT(sv);
-                        if ((mgt = SvMAGIC(sv))) {
-                            mg->mg_moremagic = mgt;
-                            SvMAGIC_set(sv, mg);
-                        }
-                    } else {
-                        PL_tainted = 1;
-                        SvTAINT(sv);
+    } else {
+        sv_setsv(sv,&PL_sv_undef);
+        return sv;
+    }          
+    assert(rx->sublen >= (s - rx->subbeg) + i );
+    if (i >= 0) {
+        const int oldtainted = PL_tainted;
+        TAINT_NOT;
+        sv_setpvn(sv, s, i);
+        PL_tainted = oldtainted;
+        if ( (rx->extflags & RXf_CANY_SEEN)
+            ? (RX_MATCH_UTF8(rx)
+                        && (!i || is_utf8_string((U8*)s, i)))
+            : (RX_MATCH_UTF8(rx)) )
+        {
+            SvUTF8_on(sv);
+        }
+        else
+            SvUTF8_off(sv);
+        if (PL_tainting) {
+            if (RX_MATCH_TAINTED(rx)) {
+                if (SvTYPE(sv) >= SVt_PVMG) {
+                    MAGIC* const mg = SvMAGIC(sv);
+                    MAGIC* mgt;
+                    PL_tainted = 1;
+                    SvMAGIC_set(sv, mg->mg_moremagic);
+                    SvTAINT(sv);
+                    if ((mgt = SvMAGIC(sv))) {
+                        mg->mg_moremagic = mgt;
+                        SvMAGIC_set(sv, mg);
                     }
-                } else 
-                    SvTAINTED_off(sv);
-            }
-        } else {
-            sv_setsv(sv,&PL_sv_undef);
+                } else {
+                    PL_tainted = 1;
+                    SvTAINT(sv);
+                }
+            } else 
+                SvTAINTED_off(sv);
         }
     } else {
         sv_setsv(sv,&PL_sv_undef);
@@ -5006,8 +5009,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 	    return ret;
         } else 
 	if (*RExC_parse == '?') { /* (?...) */
-	    U32 posflags = 0, negflags = 0;
-	    U32 *flagsp = &posflags;
 	    bool is_logical = 0;
 	    const char * const seqstart = RExC_parse;
 
@@ -5431,13 +5432,20 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
                 vFAIL("Sequence (? incomplete");
                 break;
 	    default:
-		--RExC_parse;
-	      parse_flags:      /* (?i) */
-		while (*RExC_parse && strchr("iogcmsx", *RExC_parse)) {
+	        --RExC_parse;
+	        parse_flags:      /* (?i) */  
+	    {
+                U32 posflags = 0, negflags = 0;
+	        U32 *flagsp = &posflags;
+
+		while (*RExC_parse) {
+		    /* && strchr("iogcmsx", *RExC_parse) */
 		    /* (?g), (?gc) and (?o) are useless here
 		       and must be globally applied -- japhy */
-
-		    if (*RExC_parse == 'o' || *RExC_parse == 'g') {
+                    switch (*RExC_parse) {
+	            CASE_STD_PMMOD_FLAGS_PARSE_SET(flagsp);
+                    case 'o':
+                    case 'g':
 			if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
 			    const I32 wflagbit = *RExC_parse == 'o' ? WASTED_O : WASTED_G;
 			    if (! (wastedflags & wflagbit) ) {
@@ -5452,8 +5460,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 				);
 			    }
 			}
-		    }
-		    else if (*RExC_parse == 'c') {
+			break;
+		        
+		    case 'c':
 			if (SIZE_ONLY && ckWARN(WARN_REGEXP)) {
 			    if (! (wastedflags & WASTED_C) ) {
 				wastedflags |= WASTED_GC;
@@ -5465,33 +5474,45 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
 				);
 			    }
 			}
-		    }
-		    else { pmflag(flagsp, *RExC_parse); }
-
+			break;
+	            case 'k':
+                        if (flagsp == &negflags) {
+                            if (SIZE_ONLY && ckWARN(WARN_REGEXP))
+                                vWARN(RExC_parse + 1,"Useless use of (?-k)");
+                        } else {
+                            *flagsp |= RXf_PMf_KEEPCOPY;
+                        }
+	                break;
+                    case '-':
+                        if (flagsp == &negflags)
+                            goto unknown;
+			flagsp = &negflags;
+		        wastedflags = 0;  /* reset so (?g-c) warns twice */
+		        break;
+                    case ':':
+		        paren = ':';
+		        /*FALLTHROUGH*/
+                    case ')':
+                        RExC_flags |= posflags;
+                        RExC_flags &= ~negflags;
+                        nextchar(pRExC_state);
+		        if (paren != ':') {
+		            *flagp = TRYAGAIN;
+		            return NULL;
+		        } else {
+                            ret = NULL;
+		            goto parse_rest;
+		        }
+		        /*NOTREACHED*/
+                    default:
+                    unknown:
+		        RExC_parse++;
+		        vFAIL3("Sequence (%.*s...) not recognized", RExC_parse-seqstart, seqstart);
+		        /*NOTREACHED*/
+                    }                           
 		    ++RExC_parse;
 		}
-		if (*RExC_parse == '-') {
-		    flagsp = &negflags;
-		    wastedflags = 0;  /* reset so (?g-c) warns twice */
-		    ++RExC_parse;
-		    goto parse_flags;
-		}
-		RExC_flags |= posflags;
-		RExC_flags &= ~negflags;
-		if (*RExC_parse == ':') {
-		    RExC_parse++;
-		    paren = ':';
-		    break;
-		}		
-	      unknown:
-		if (*RExC_parse != ')') {
-		    RExC_parse++;
-		    vFAIL3("Sequence (%.*s...) not recognized", RExC_parse-seqstart, seqstart);
-		}
-		nextchar(pRExC_state);
-		*flagp = TRYAGAIN;
-		return NULL;
-	    }
+	    }} /* one for the default block, one for the switch */
 	}
 	else {                  /* (...) */
 	  capturing_parens:
@@ -5516,7 +5537,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp,U32 depth)
     }
     else                        /* ! paren */
 	ret = NULL;
-
+   
+   parse_rest:
     /* Pick up the branches, linking them together. */
     parse_start = RExC_parse;   /* MJD */
     br = regbranch(pRExC_state, &flags, 1,depth+1);
@@ -8803,6 +8825,8 @@ Perl_regdupe_internal(pTHX_ const regexp *r, CLONE_PARAMS *param)
     else
 	reti->data = NULL;
 
+    reti->name_list_idx = ri->name_list_idx;
+
     Newx(reti->offsets, 2*len+1, U32);
     Copy(ri->offsets, reti->offsets, 2*len+1, U32);
     
@@ -8846,13 +8870,16 @@ Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
 
     if (!mg->mg_ptr) {
 	const char *fptr = "msix";
-	char reflags[6];
+	char reflags[7];
 	char ch;
-	int left = 0;
-	int right = 4;
-	bool need_newline = 0;
-	U16 reganch = (U16)((re->extflags & RXf_PMf_COMPILETIME) >> 12);
-
+	bool hask = ((re->extflags & RXf_PMf_KEEPCOPY) == RXf_PMf_KEEPCOPY);
+	bool hasm = ((re->extflags & RXf_PMf_STD_PMMOD) != RXf_PMf_STD_PMMOD);
+        U16 reganch = (U16)((re->extflags & RXf_PMf_STD_PMMOD) >> 12);
+        bool need_newline = 0;
+        int left = 0;
+	int right = 4 + hask;
+        if (hask) 
+            reflags[left++]='k';
 	while((ch = *fptr++)) {
 	    if(reganch & 1) {
 		reflags[left++] = ch;
@@ -8862,11 +8889,11 @@ Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
 	    }
 	    reganch >>= 1;
 	}
-	if(left != 4) {
+	if(hasm) {
 	    reflags[left] = '-';
-	    left = 5;
+	    left = 5 + hask;
 	}
-
+        /* printf("[%*.7s]\n",left,reflags); */
 	mg->mg_len = re->prelen + 4 + left;
 	/*
 	 * If /x was used, we have to worry about a regex ending with a

@@ -103,10 +103,7 @@ typedef struct regexp_paren_ofs {
 } regexp_paren_ofs;
 
  typedef struct regexp_internal {
-#ifdef DEBUGGING
         int name_list_idx;	/* Optional data index of an array of paren names */
-#endif
-
 	U32 *offsets;           /* offset annotations 20001228 MJD 
                                    data about mapping the program to the 
                                    string*/

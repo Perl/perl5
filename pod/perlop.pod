@@ -1067,7 +1067,7 @@ X<m> X<operator, match>
 X<regexp, options> X<regexp> X<regex, options> X<regex>
 X</c> X</i> X</m> X</o> X</s> X</x>
 
-=item /PATTERN/cgimosx
+=item /PATTERN/cgimosxk
 
 Searches a string for a pattern match, and in scalar context returns
 true if it succeeds, false if it fails.  If no string is specified
@@ -1080,13 +1080,15 @@ is in effect.
 
 Options are:
 
-    c	Do not reset search position on a failed match when /g is in effect.
-    g	Match globally, i.e., find all occurrences.
     i	Do case-insensitive pattern matching.
     m	Treat string as multiple lines.
-    o	Compile pattern only once.
     s	Treat string as single line.
     x	Use extended regular expressions.
+    g	Match globally, i.e., find all occurrences.
+    c	Do not reset search position on a failed match when /g is in effect.
+    o	Compile pattern only once.
+    k	Keep a copy of the matched string so that ${^MATCH} and friends
+	will be defined.
 
 If "/" is the delimiter then the initial C<m> is optional.  With the C<m>
 you can use any pair of non-alphanumeric, non-whitespace characters
@@ -1449,7 +1451,7 @@ put comments into a multi-line C<qw>-string.  For this reason, the
 C<use warnings> pragma and the B<-w> switch (that is, the C<$^W> variable)
 produces warnings if the STRING contains the "," or the "#" character.
 
-=item s/PATTERN/REPLACEMENT/egimosx
+=item s/PATTERN/REPLACEMENT/egimosxk
 X<substitute> X<substitution> X<replace> X<regexp, replace>
 X<regexp, substitute> X</e> X</g> X</i> X</m> X</o> X</s> X</x>
 
@@ -1475,13 +1477,16 @@ when C<use locale> is in effect.
 
 Options are:
 
-    e	Evaluate the right side as an expression.
-    g	Replace globally, i.e., all occurrences.
     i	Do case-insensitive pattern matching.
     m	Treat string as multiple lines.
-    o	Compile pattern only once.
     s	Treat string as single line.
     x	Use extended regular expressions.
+    g	Replace globally, i.e., all occurrences.
+    o	Compile pattern only once.
+    k	Keep a copy of the original string so ${^MATCH} and friends
+	will be defined.
+    e	Evaluate the right side as an expression.
+
 
 Any non-alphanumeric, non-whitespace delimiter may replace the
 slashes.  If single quotes are used, no interpretation is done on the

@@ -371,14 +371,15 @@ struct pmop {
 /* The following flags have exact equivalents in regcomp.h with the prefix RXf_
  * which are stored in the regexp->extflags member.
  */
-#define PMf_LOCALE	0x0800		/* use locale for character types */
-#define PMf_MULTILINE	0x1000		/* assume multiple lines */
-#define PMf_SINGLELINE	0x2000		/* assume single line */
-#define PMf_FOLD	0x4000		/* case insensitivity */
-#define PMf_EXTENDED	0x8000		/* chuck embedded whitespace */
+#define PMf_LOCALE	0x00800		/* use locale for character types */
+#define PMf_MULTILINE	0x01000		/* assume multiple lines */
+#define PMf_SINGLELINE	0x02000		/* assume single line */
+#define PMf_FOLD	0x04000		/* case insensitivity */
+#define PMf_EXTENDED	0x08000		/* chuck embedded whitespace */
+#define PMf_KEEPCOPY	0x10000		/* copy the string when matching */
 
 /* mask of bits that need to be transfered to re->extflags */
-#define PMf_COMPILETIME	(PMf_MULTILINE|PMf_SINGLELINE|PMf_LOCALE|PMf_FOLD|PMf_EXTENDED)
+#define PMf_COMPILETIME	(PMf_MULTILINE|PMf_SINGLELINE|PMf_LOCALE|PMf_FOLD|PMf_EXTENDED|PMf_KEEPCOPY)
 
 #ifdef USE_ITHREADS
 

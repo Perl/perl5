@@ -1368,7 +1368,8 @@ PP(pp_match)
     /* remove comment to get faster /g but possibly unsafe $1 vars after a
        match. Test for the unsafe vars will fail as well*/
     if (( /* !global &&  */ rx->nparens) 
-	    || SvTEMP(TARG) || PL_sawampersand || (pm->op_pmflags & PMf_EVAL))
+	    || SvTEMP(TARG) || PL_sawampersand ||
+	    (pm->op_pmflags & (PMf_EVAL|PMf_KEEPCOPY)))
 	r_flags |= REXEC_COPY_STR;
     if (SvSCREAM(TARG))
 	r_flags |= REXEC_SCREAM;
@@ -1391,6 +1392,7 @@ play_it_again:
 	    goto nope;
 	if ( (rx->extflags & RXf_CHECK_ALL)
 	     && !PL_sawampersand
+	     && !(pm->op_pmflags & PMf_KEEPCOPY)
 	     && ((rx->extflags & RXf_NOSCAN)
 		 || !((rx->extflags & RXf_INTUIT_TAIL)
 		      && (r_flags & REXEC_SCREAM)))
@@ -1516,7 +1518,7 @@ yup:					/* Confirmed by INTUIT */
 	rx->sublen = strend - truebase;
 	goto gotcha;
     }
-    if (PL_sawampersand) {
+    if (PL_sawampersand || pm->op_pmflags & PMf_KEEPCOPY) {
 	I32 off;
 #ifdef PERL_OLD_COPY_ON_WRITE
 	if (SvIsCOW(TARG) || (SvFLAGS(TARG) & CAN_COW_MASK) == CAN_COW_FLAGS) {
@@ -1547,6 +1549,8 @@ yup:					/* Confirmed by INTUIT */
 	rx->startp[0] = s - truebase;
 	rx->endp[0] = s - truebase + rx->minlenret;
     }
+    /* including rx->nparens in the below code seems highly suspicious.
+       -dmq */
     rx->nparens = rx->lastparen = rx->lastcloseparen = 0;	/* used by @-, @+, and $^N */
     LEAVE_SCOPE(oldsave);
     RETPUSHYES;
@@ -2152,7 +2156,7 @@ PP(pp_subst)
 	rx = PM_GETRE(pm);
     }
     r_flags = (rx->nparens || SvTEMP(TARG) || PL_sawampersand
-	    || (pm->op_pmflags & PMf_EVAL))
+	    || (pm->op_pmflags & (PMf_EVAL|PMf_KEEPCOPY)) )
 	       ? REXEC_COPY_STR : 0;
     if (SvSCREAM(TARG))
 	r_flags |= REXEC_SCREAM;
@@ -2167,6 +2171,7 @@ PP(pp_subst)
 	/* How to do it in subst? */
 /*	if ( (rx->extflags & RXf_CHECK_ALL)
 	     && !PL_sawampersand
+	     && !(pm->op_pmflags & PMf_KEEPCOPY)
 	     && ((rx->extflags & RXf_NOSCAN)
 		 || !((rx->extflags & RXf_INTUIT_TAIL)
 		      && (r_flags & REXEC_SCREAM))))

@@ -1109,10 +1109,16 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		if (strEQ(name2, "NCODING"))
 		    goto magicalize;
 		break;
+            case '\015':        /* $^MATCH */
+                if (strEQ(name2, "ATCH"))
+		    goto ro_magicalize;
 	    case '\017':	/* $^OPEN */
 		if (strEQ(name2, "PEN"))
 		    goto magicalize;
 		break;
+	    case '\020':        /* $^PREMATCH  $^POSTMATCH */
+	        if (strEQ(name2, "REMATCH") || strEQ(name2, "OSTMATCH"))
+		    goto ro_magicalize;  
 	    case '\024':	/* ${^TAINT} */
 		if (strEQ(name2, "AINT"))
 		    goto ro_magicalize;
