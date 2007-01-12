@@ -45,14 +45,15 @@ typedef perl_os_thread pthread_t;
 #endif
 
 /* Values for 'state' member */
-#define PERL_ITHR_DETACHED              1
-#define PERL_ITHR_JOINED                2
-#define PERL_ITHR_UNCALLABLE            (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)
-#define PERL_ITHR_FINISHED              4
-#define PERL_ITHR_THREAD_EXIT_ONLY      8
-#define PERL_ITHR_NONVIABLE             16
-#define PERL_ITHR_DESTROYED             32
-#define PERL_ITHR_DIED                  64
+#define PERL_ITHR_DETACHED           1 /* thread has been detached */
+#define PERL_ITHR_JOINED             2 /* thread has been joined */
+#define PERL_ITHR_FINISHED           4 /* thread has finished execution */
+#define PERL_ITHR_THREAD_EXIT_ONLY   8 /* exit() only exits current thread */
+#define PERL_ITHR_NONVIABLE         16 /* thread creation failed */
+#define PERL_ITHR_DIED              32 /* thread finished by dying */
+
+#define PERL_ITHR_UNCALLABLE  (PERL_ITHR_DETACHED|PERL_ITHR_JOINED)
+
 
 typedef struct _ithread {
     struct _ithread *next;      /* Next thread in the list */
@@ -60,7 +61,7 @@ typedef struct _ithread {
     PerlInterpreter *interp;    /* The threads interpreter */
     UV tid;                     /* Threads module's thread id */
     perl_mutex mutex;           /* Mutex for updating things in this struct */
-    int count;                  /* How many SVs have a reference to us */
+    int count;                  /* reference count. See S_ithread_create */
     int state;                  /* Detached, joined, finished, etc. */
     int gimme;                  /* Context of create */
     SV *init_function;          /* Code to run */
@@ -167,35 +168,28 @@ S_ithread_clear(pTHX_ ithread *thread)
 }
 
 
-/* Free an ithread structure and any attached data if its count == 0 */
+/* Decrement the refcount of an ithread, and if it reaches zero, free it.
+ * Must be called with the mutex held.
+ * On return, mutex is released (or destroyed) */
+
 STATIC void
-S_ithread_destruct(pTHX_ ithread *thread)
+S_ithread_free(pTHX_ ithread *thread)
 {
-    int destroy = 0;
 #ifdef WIN32
     HANDLE handle;
 #endif
     dMY_POOL;
 
-    /* Determine if thread can be destroyed now */
-    MUTEX_LOCK(&thread->mutex);
-    if (thread->count != 0) {
-        destroy = 0;
-    } else if (thread->state & PERL_ITHR_DESTROYED) {
-        destroy = 0;
-    } else if (thread->state & PERL_ITHR_NONVIABLE) {
-        thread->state |= PERL_ITHR_DESTROYED;
-        destroy = 1;
-    } else if (! (thread->state & PERL_ITHR_FINISHED)) {
-        destroy = 0;
-    } else if (! (thread->state & PERL_ITHR_UNCALLABLE)) {
-        destroy = 0;
-    } else {
-        thread->state |= PERL_ITHR_DESTROYED;
-        destroy = 1;
+    if (! (thread->state & PERL_ITHR_NONVIABLE)) {
+        assert(thread->count > 0);
+        if (--thread->count > 0) {
+            MUTEX_UNLOCK(&thread->mutex);
+            return;
+        }
+        assert((thread->state & PERL_ITHR_FINISHED)
+            && (thread->state & PERL_ITHR_UNCALLABLE));
     }
     MUTEX_UNLOCK(&thread->mutex);
-    if (! destroy) return;
 
     /* Main thread (0) is immortal and should never get here */
     assert(thread->tid != 0);
@@ -232,6 +226,17 @@ S_ithread_destruct(pTHX_ ithread *thread)
     aTHX = MY_POOL.main_thread.interp;
     PerlMemShared_free(thread);
 }
+
+
+
+static void
+S_ithread_count_inc(pTHX_ ithread *thread)
+{
+    MUTEX_LOCK(&thread->mutex);
+    thread->count++;
+    MUTEX_UNLOCK(&thread->mutex);
+}
+
 
 
 /* Warn if exiting with any unjoined threads */
@@ -284,24 +289,16 @@ int
 ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
     ithread *thread = (ithread *)mg->mg_ptr;
-
     MUTEX_LOCK(&thread->mutex);
-    thread->count--;
-    MUTEX_UNLOCK(&thread->mutex);
-
-    /* Try to clean up thread */
-    S_ithread_destruct(aTHX_ thread);
-
+    S_ithread_free(aTHX_ thread); /* releases MUTEX */
     return (0);
 }
+
 
 int
 ithread_mg_dup(pTHX_ MAGIC *mg, CLONE_PARAMS *param)
 {
-    ithread *thread = (ithread *)mg->mg_ptr;
-    MUTEX_LOCK(&thread->mutex);
-    thread->count++;
-    MUTEX_UNLOCK(&thread->mutex);
+    S_ithread_count_inc(aTHX_ (ithread *)mg->mg_ptr);
     return (0);
 }
 
@@ -527,8 +524,8 @@ S_ithread_run(void * arg)
         my_exit(exit_code);
     }
 
-    /* Try to clean up thread */
-    S_ithread_destruct(aTHX_ thread);
+    MUTEX_LOCK(&thread->mutex);
+    S_ithread_free(aTHX_ thread); /* releases MUTEX */
 
 #ifdef WIN32
     return ((DWORD)0);
@@ -546,12 +543,8 @@ S_ithread_to_SV(pTHX_ SV *obj, ithread *thread, char *classname, bool inc)
     SV *sv;
     MAGIC *mg;
 
-    /* If incrementing thread ref count, then call within mutex lock */
-    if (inc) {
-        MUTEX_LOCK(&thread->mutex);
-        thread->count++;
-        MUTEX_UNLOCK(&thread->mutex);
-    }
+    if (inc)
+        S_ithread_count_inc(aTHX_ thread);
 
     if (! obj) {
         obj = newSV(0);
@@ -620,10 +613,15 @@ S_ithread_create(
     MY_POOL.main_thread.prev = thread;
     thread->prev->next = thread;
 
-    /* Set count to 1 immediately in case thread exits before
-     * we return to caller!
+    /* 1 ref to be held by the local var 'thread' in S_ithread_run()
+     * 1 ref to be held by the threads object that we assume we will
+     *       be embedded in upon our return
+     * 1 ref to be the responsibility of join/detach, so we don't get freed
+             until join/detach, even if no thread objects remain. This
+             allows the following to work:
+        	 { threads->new(sub{...}); } threads->object(1)->join;
      */
-    thread->count = 1;
+    thread->count = 3;
 
     /* Block new thread until ->create() call finishes */
     MUTEX_INIT(&thread->mutex);
@@ -787,7 +785,7 @@ S_ithread_create(
         MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
         sv_2mortal(params);
         thread->state |= PERL_ITHR_NONVIABLE;
-        S_ithread_destruct(aTHX_ thread);
+        S_ithread_free(aTHX_ thread); /* releases MUTEX */
 #ifndef WIN32
         if (ckWARN_d(WARN_THREADS)) {
             if (rc_stack_size) {
@@ -1131,10 +1129,7 @@ ithread_join(...)
         if (! (thread->state & PERL_ITHR_DIED)) {
             S_ithread_clear(aTHX_ thread);
         }
-        MUTEX_UNLOCK(&thread->mutex);
-
-        /* Try to cleanup thread */
-        S_ithread_destruct(aTHX_ thread);
+        S_ithread_free(aTHX_ thread); /* releases MUTEX */
 
         /* If no return values, then just return */
         if (! params) {
@@ -1204,10 +1199,8 @@ ithread_detach(...)
         {
             S_ithread_clear(aTHX_ thread);
         }
-        MUTEX_UNLOCK(&thread->mutex);
+        S_ithread_free(aTHX_ thread); /* releases MUTEX */
 
-        /* Try to cleanup thread */
-        S_ithread_destruct(aTHX_ thread);
 
 
 void
