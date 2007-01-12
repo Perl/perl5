@@ -2962,7 +2962,7 @@ Perl_hv_assert(pTHX_ HV *hv)
 	    withflags++;
 	    if (HeKWASUTF8(entry)) {
 		PerlIO_printf(Perl_debug_log,
-			    "hash key has both WASUFT8 and UTF8: '%.*s'\n",
+			    "hash key has both WASUTF8 and UTF8: '%.*s'\n",
 			    (int) HeKLEN(entry),  HeKEY(entry));
 		bad = 1;
 	    }
