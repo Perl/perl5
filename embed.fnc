@@ -958,7 +958,6 @@ p	|int	|yyerror	|NN const char* s
 p	|int	|yylex
 p	|int	|yyparse
 p	|void	|parser_free	|NN const yy_parser *
-p	|yy_parser*|parser_dup	|NN const yy_parser *proto|NN CLONE_PARAMS* param
 p	|int	|yywarn		|NN const char* s
 #if defined(MYMALLOC)
 Ap	|void	|dump_mstats	|NN char* s
@@ -1058,6 +1057,7 @@ ApR	|GP*	|gp_dup		|NULLOK GP* gp|NN CLONE_PARAMS* param
 ApR	|MAGIC*	|mg_dup		|NULLOK MAGIC* mg|NN CLONE_PARAMS* param
 ApR	|SV*	|sv_dup		|NULLOK const SV* sstr|NN CLONE_PARAMS* param
 Ap	|void	|rvpv_dup	|NN SV* dstr|NN const SV *sstr|NN CLONE_PARAMS* param
+p	|yy_parser*|parser_dup	|NN const yy_parser *proto|NN CLONE_PARAMS* param
 #endif
 Apa	|PTR_TBL_t*|ptr_table_new
 ApR	|void*	|ptr_table_fetch|NN PTR_TBL_t *tbl|NN const void *sv

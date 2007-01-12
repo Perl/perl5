@@ -719,6 +719,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_hints_mutex
 		    PL_perlio_mutex
 		    PL_regdupe
+		    Perl_parser_dup
 		    Perl_dirp_dup
 		    Perl_cx_dup
 		    Perl_si_dup
