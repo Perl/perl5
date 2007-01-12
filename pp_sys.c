@@ -707,8 +707,12 @@ PP(pp_umask)
     Mode_t anum;
 
     if (MAXARG < 1) {
-	anum = PerlLIO_umask(0);
-	(void)PerlLIO_umask(anum);
+	anum = PerlLIO_umask(022);
+	/* setting it to 022 between the two calls to umask avoids
+	 * to have a window where the umask is set to 0 -- meaning
+	 * that another thread could create world-writeable files. */
+	if (anum != 022)
+	    (void)PerlLIO_umask(anum);
     }
     else
 	anum = PerlLIO_umask(POPi);
