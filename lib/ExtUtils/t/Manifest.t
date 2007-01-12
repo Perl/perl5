@@ -13,12 +13,13 @@ chdir 't';
 
 use strict;
 
-use Test::More tests => 49;
+use Test::More tests => 66;
 use Cwd;
 
 use File::Spec;
 use File::Path;
 use File::Find;
+use Config;
 
 my $Is_VMS = $^O eq 'VMS';
 
@@ -70,6 +71,12 @@ rmtree('mantest');
 ok( mkdir( 'mantest', 0777 ), 'make mantest directory' );
 ok( chdir( 'mantest' ), 'chdir() to mantest' );
 ok( add_file('foo'), 'add a temporary file' );
+
+# This ensures the -x check for manicopy means something
+# Some platforms don't have chmod or an executable bit, in which case
+# this call will do nothing or fail, but on the platforms where chmod()
+# works, we test the executable bit is copied
+chmod( 0744, 'foo') if $Config{'chmod'};
 
 # there shouldn't be a MANIFEST there
 my ($res, $warn) = catch_warning( \&mkmanifest );
@@ -211,6 +218,40 @@ is( $files->{wibble}, '',    'maniadd() with undef comment' );
 is( $files->{yarrow}, 'hock','          with comment' );
 is( $files->{foobar}, '',    '          preserved old entries' );
 
+# test including an external manifest.skip file in MANIFEST.SKIP
+{
+    maniadd({ foo => undef , albatross => undef,
+              'mymanifest.skip' => undef, 'mydefault.skip' => undef});
+    add_file('mymanifest.skip' => "^foo\n");
+    add_file('mydefault.skip'  => "^my\n");
+    $ExtUtils::Manifest::DEFAULT_MSKIP =
+         File::Spec->catfile($cwd, qw(mantest mydefault.skip));
+    my $skip = File::Spec->catfile($cwd, qw(mantest mymanifest.skip));
+    add_file('MANIFEST.SKIP' =>
+             "albatross\n#!include $skip\n#!include_default");
+    my ($res, $warn) = catch_warning( \&skipcheck );
+    for (qw(albatross foo foobar mymanifest.skip mydefault.skip)) {
+        like( $warn, qr/Skipping \b$_\b/,
+              "Skipping $_" );
+    }
+    ($res, $warn) = catch_warning( \&mkmanifest );
+    for (qw(albatross foo foobar mymanifest.skip mydefault.skip)) {
+        like( $warn, qr/Removed from MANIFEST: \b$_\b/,
+              "Removed $_ from MANIFEST" );
+    }
+    my $files = maniread;
+    ok( ! exists $files->{albatross}, 'albatross excluded via MANIFEST.SKIP' );
+    ok( exists $files->{yarrow},      'yarrow included in MANIFEST' );
+    ok( exists $files->{bar},         'bar included in MANIFEST' );
+    ok( ! exists $files->{foobar},    'foobar excluded via mymanifest.skip' );
+    ok( ! exists $files->{foo},       'foo excluded via mymanifest.skip' );
+    ok( ! exists $files->{'mymanifest.skip'},
+        'mymanifest.skip excluded via mydefault.skip' );
+    ok( ! exists $files->{'mydefault.skip'},
+        'mydefault.skip excluded via mydefault.skip' );
+    $Files{"$_.bak"}++ for (qw(MANIFEST MANIFEST.SKIP));
+}
+
 add_file('MANIFEST'   => 'Makefile.PL');
 maniadd({ foo  => 'bar' });
 $files = maniread;
@@ -221,8 +262,8 @@ my %expect = ( 'makefile.pl' => '',
              );
 is_deeply( $files, \%expect, 'maniadd() vs MANIFEST without trailing newline');
 
-add_file('MANIFEST'   => 'Makefile.PL');
-maniadd({ foo => 'bar' });
+#add_file('MANIFEST'   => 'Makefile.PL');
+#maniadd({ foo => 'bar' });
 
 SKIP: {
     chmod( 0400, 'MANIFEST' );

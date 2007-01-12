@@ -13,7 +13,7 @@ use vars qw($VERSION @ISA @EXPORT_OK
           $Is_MacOS $Is_VMS 
           $Debug $Verbose $Quiet $MANIFEST $DEFAULT_MSKIP);
 
-$VERSION = '1.49';
+$VERSION = '1.51';
 @ISA=('Exporter');
 @EXPORT_OK = qw(mkmanifest
                 manicheck  filecheck  fullcheck  skipcheck
@@ -308,7 +308,7 @@ sub maniread {
     my $read = {};
     local *M;
     unless (open M, $mfile){
-        warn "$mfile: $!";
+        warn "Problem opening $mfile: $!";
         return $read;
     }
     local $_;
@@ -346,7 +346,8 @@ sub maniread {
 sub _maniskip {
     my @skip ;
     my $mfile = "$MANIFEST.SKIP";
-    local(*M,$_);
+    _check_mskip_directives($mfile) if -f $mfile;
+    local(*M, $_);
     open M, $mfile or open M, $DEFAULT_MSKIP or return sub {0};
     while (<M>){
 	chomp;
@@ -365,6 +366,75 @@ sub _maniskip {
     my $regex = join '|', map "(?:$_)", @skip;
 
     return sub { $_[0] =~ qr{$opts$regex} };
+}
+
+# checks for the special directives
+#   #!include_default
+#   #!include /path/to/some/manifest.skip
+# in a custom MANIFEST.SKIP for, for including
+# the content of, respectively, the default MANIFEST.SKIP
+# and an external manifest.skip file
+sub _check_mskip_directives {
+    my $mfile = shift;
+    local (*M, $_);
+    my @lines = ();
+    my $flag = 0;
+    unless (open M, $mfile) {
+        warn "Problem opening $mfile: $!";
+        return;
+    }
+    while (<M>) {
+        if (/^#!include_default\s*$/) {
+	    if (my @default = _include_mskip_file()) {
+	        push @lines, @default;
+		warn "Debug: Including default MANIFEST.SKIP\n" if $Debug;
+		$flag++;
+	    }
+	    next;
+        }
+	if (/^#!include\s+(.*)\s*$/) {
+	    my $external_file = $1;
+	    if (my @external = _include_mskip_file($external_file)) {
+	        push @lines, @external;
+		warn "Debug: Including external $external_file\n" if $Debug;
+		$flag++;
+	    }
+            next;
+        }
+        push @lines, $_;
+    }
+    close M;
+    return unless $flag;
+    rename $mfile, "$mfile.bak";
+    warn "Debug: Saving original $mfile as $mfile.bak\n" if $Debug;
+    unless (open M, ">$mfile") {
+        warn "Problem opening $mfile: $!";
+        return;
+    }
+    print M $_ for (@lines);
+    close M;
+    return;
+}
+
+# returns an array containing the lines of an external
+# manifest.skip file, if given, or $DEFAULT_MSKIP
+sub _include_mskip_file {
+    my $mskip = shift || $DEFAULT_MSKIP;
+    unless (-f $mskip) {
+        warn qq{Included file "$mskip" not found - skipping};
+        return;
+    }
+    local (*M, $_);
+    unless (open M, $mskip) {
+        warn "Problem opening $mskip: $!";
+        return;
+    }
+    my @lines = ();
+    push @lines, "\n#!start included $mskip\n";
+    push @lines, $_ while <M>;
+    close M;
+    push @lines, "#!end included $mskip\n\n";
+    return @lines;
 }
 
 =item manicopy
@@ -452,7 +522,7 @@ sub cp {
 
     copy($srcFile,$dstFile);
     utime $access, $mod + ($Is_VMS ? 1 : 0), $dstFile;
-    _manicopy_chmod($dstFile);
+    _manicopy_chmod($srcFile, $dstFile);
 }
 
 
@@ -461,7 +531,7 @@ sub ln {
     return &cp if $Is_VMS or ($^O eq 'MSWin32' and Win32::IsWin95());
     link($srcFile, $dstFile);
 
-    unless( _manicopy_chmod($dstFile) ) {
+    unless( _manicopy_chmod($srcFile, $dstFile) ) {
         unlink $dstFile;
         return;
     }
@@ -472,10 +542,10 @@ sub ln {
 # 2) Let everyone read it.
 # 3) If the owner can execute it, everyone can.
 sub _manicopy_chmod {
-    my($file) = shift;
+    my($srcFile, $dstFile) = @_;
 
-    my $perm = 0444 | (stat $file)[2] & 0700;
-    chmod( $perm | ( $perm & 0100 ? 0111 : 0 ), $file );
+    my $perm = 0444 | (stat $srcFile)[2] & 0700;
+    chmod( $perm | ( $perm & 0100 ? 0111 : 0 ), $dstFile );
 }
 
 # Files that are often modified in the distdir.  Don't hard link them.
@@ -635,6 +705,26 @@ If no MANIFEST.SKIP file is found, a default set of skips will be
 used, similar to the example above.  If you want nothing skipped,
 simply make an empty MANIFEST.SKIP file.
 
+In one's own MANIFEST.SKIP file, certain directives
+can be used to include the contents of other MANIFEST.SKIP
+files. At present two such directives are recognized.
+
+=over 4
+
+=item #!include_default
+
+This inserts the contents of the default MANIFEST.SKIP file
+
+=item #!include /Path/to/another/manifest.skip
+
+This inserts the contents of the specified external file
+
+=back
+
+The included contents will be inserted into the MANIFEST.SKIP
+file in between I<#!start included /path/to/manifest.skip>
+and I<#!end included /path/to/manifest.skip> markers.
+The original MANIFEST.SKIP is saved as MANIFEST.SKIP.bak.
 
 =head2 EXPORT_OK
 
