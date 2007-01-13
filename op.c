@@ -4234,9 +4234,11 @@ L<perlsub/"Constant Functions">.
 SV *
 Perl_cv_const_sv(pTHX_ CV *cv)
 {
-    if (!cv || !CvCONST(cv))
-	return Nullsv;
-    return (SV*)CvXSUBANY(cv).any_ptr;
+    if (!cv)
+	return NULL;
+    if (!(SvTYPE(cv) == SVt_PVCV || SvTYPE(cv) == SVt_PVFM))
+	return NULL;
+    return CvCONST(cv) ? (SV*)CvXSUBANY(cv).any_ptr : NULL;
 }
 
 SV *

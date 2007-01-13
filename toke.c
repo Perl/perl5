@@ -2430,12 +2430,8 @@ Perl_yylex(pTHX)
 {
     register char *s = PL_bufptr;
     register char *d;
-    register I32 tmp;
     STRLEN len;
-    GV *gv = Nullgv;
-    GV **gvp = 0;
     bool bof = FALSE;
-    I32 orig_keyword = 0;
 
     DEBUG_T( {
 	SV* tmp = newSVpvn("", 0);
@@ -2507,6 +2503,7 @@ Perl_yylex(pTHX)
 		return yylex();
 	    }
 	    else {
+		I32 tmp;
 	        if (strnEQ(s, "L\\u", 3) || strnEQ(s, "U\\l", 3))
 		    tmp = *s, *s = s[2], s[2] = (char)tmp;	/* misordered... */
 		if ((*s == 'L' || *s == 'U') &&
@@ -3054,6 +3051,7 @@ Perl_yylex(pTHX)
     case '-':
 	if (s[1] && isALPHA(s[1]) && !isALNUM(s[2])) {
 	    I32 ftst = 0;
+	    char tmp;
 
 	    s++;
 	    PL_bufptr = s;
@@ -3124,49 +3122,53 @@ Perl_yylex(pTHX)
 		s = --PL_bufptr;
 	    }
 	}
-	tmp = *s++;
-	if (*s == tmp) {
-	    s++;
-	    if (PL_expect == XOPERATOR)
-		TERM(POSTDEC);
-	    else
-		OPERATOR(PREDEC);
-	}
-	else if (*s == '>') {
-	    s++;
-	    s = skipspace(s);
-	    if (isIDFIRST_lazy_if(s,UTF)) {
-		s = force_word(s,METHOD,FALSE,TRUE,FALSE);
-		TOKEN(ARROW);
+	{
+	    const char tmp = *s++;
+	    if (*s == tmp) {
+		s++;
+		if (PL_expect == XOPERATOR)
+		    TERM(POSTDEC);
+		else
+		    OPERATOR(PREDEC);
 	    }
-	    else if (*s == '$')
-		OPERATOR(ARROW);
-	    else
-		TERM(ARROW);
-	}
-	if (PL_expect == XOPERATOR)
-	    Aop(OP_SUBTRACT);
-	else {
-	    if (isSPACE(*s) || !isSPACE(*PL_bufptr))
-		check_uni();
-	    OPERATOR('-');		/* unary minus */
+	    else if (*s == '>') {
+		s++;
+		s = skipspace(s);
+		if (isIDFIRST_lazy_if(s,UTF)) {
+		    s = force_word(s,METHOD,FALSE,TRUE,FALSE);
+		    TOKEN(ARROW);
+		}
+		else if (*s == '$')
+		    OPERATOR(ARROW);
+		else
+		    TERM(ARROW);
+	    }
+	    if (PL_expect == XOPERATOR)
+		Aop(OP_SUBTRACT);
+	    else {
+		if (isSPACE(*s) || !isSPACE(*PL_bufptr))
+		    check_uni();
+		OPERATOR('-');		/* unary minus */
+	    }
 	}
 
     case '+':
-	tmp = *s++;
-	if (*s == tmp) {
-	    s++;
+	{
+	    const char tmp = *s++;
+	    if (*s == tmp) {
+		s++;
+		if (PL_expect == XOPERATOR)
+		    TERM(POSTINC);
+		else
+		    OPERATOR(PREINC);
+	    }
 	    if (PL_expect == XOPERATOR)
-		TERM(POSTINC);
-	    else
-		OPERATOR(PREINC);
-	}
-	if (PL_expect == XOPERATOR)
-	    Aop(OP_ADD);
-	else {
-	    if (isSPACE(*s) || !isSPACE(*PL_bufptr))
-		check_uni();
-	    OPERATOR('+');
+		Aop(OP_ADD);
+	    else {
+		if (isSPACE(*s) || !isSPACE(*PL_bufptr))
+		    check_uni();
+		OPERATOR('+');
+	    }
 	}
 
     case '*':
@@ -3206,12 +3208,14 @@ Perl_yylex(pTHX)
 	/* FALL THROUGH */
     case '~':
     case ',':
-	tmp = *s++;
-	OPERATOR(tmp);
+	{
+	    const char tmp = *s++;
+	    OPERATOR(tmp);
+	}
     case ':':
 	if (s[1] == ':') {
 	    len = 0;
-	    goto just_a_word;
+	    goto just_a_word_zero_gv;
 	}
 	s++;
 	switch (PL_expect) {
@@ -3230,6 +3234,7 @@ Perl_yylex(pTHX)
 	    s = skipspace(s);
 	    attrs = Nullop;
 	    while (isIDFIRST_lazy_if(s,UTF)) {
+		I32 tmp;
 		d = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
 		if (isLOWER(*s) && (tmp = keyword(PL_tokenbuf, len))) {
 		    if (tmp < 0) tmp = -tmp;
@@ -3308,24 +3313,30 @@ Perl_yylex(pTHX)
 		else if (s == d)
 		    break;	/* require real whitespace or :'s */
 	    }
-	    tmp = (PL_expect == XOPERATOR ? '=' : '{'); /*'}(' for vi */
-	    if (*s != ';' && *s != '}' && *s != tmp && (tmp != '=' || *s != ')')) {
-		const char q = ((*s == '\'') ? '"' : '\'');
-		/* If here for an expression, and parsed no attrs, back off. */
-		if (tmp == '=' && !attrs) {
-		    s = PL_bufptr;
-		    break;
+	    {
+		const char tmp
+		    = (PL_expect == XOPERATOR ? '=' : '{'); /*'}(' for vi */
+		if (*s != ';' && *s != '}' && *s != tmp
+		    && (tmp != '=' || *s != ')')) {
+		    const char q = ((*s == '\'') ? '"' : '\'');
+		    /* If here for an expression, and parsed no attrs, back
+		       off. */
+		    if (tmp == '=' && !attrs) {
+			s = PL_bufptr;
+			break;
+		    }
+		    /* MUST advance bufptr here to avoid bogus "at end of line"
+		       context messages from yyerror().
+		    */
+		    PL_bufptr = s;
+		    yyerror( *s
+			     ? Perl_form(aTHX_ "Invalid separator character "
+					 "%c%c%c in attribute list", q, *s, q)
+			     : "Unterminated attribute list" );
+		    if (attrs)
+			op_free(attrs);
+		    OPERATOR(':');
 		}
-		/* MUST advance bufptr here to avoid bogus "at end of line"
-		   context messages from yyerror().
-		 */
-		PL_bufptr = s;
-		yyerror( *s
-		    ? Perl_form(aTHX_ "Invalid separator character %c%c%c in attribute list", q, *s, q)
-		    : "Unterminated attribute list" );
-		if (attrs)
-		    op_free(attrs);
-		OPERATOR(':');
 	    }
 	got_attrs:
 	    if (attrs) {
@@ -3345,14 +3356,18 @@ Perl_yylex(pTHX)
 	TOKEN('(');
     case ';':
 	CLINE;
-	tmp = *s++;
-	OPERATOR(tmp);
+	{
+	    const char tmp = *s++;
+	    OPERATOR(tmp);
+	}
     case ')':
-	tmp = *s++;
-	s = skipspace(s);
-	if (*s == '{')
-	    PREBLOCK(tmp);
-	TERM(tmp);
+	{
+	    const char tmp = *s++;
+	    s = skipspace(s);
+	    if (*s == '{')
+		PREBLOCK(tmp);
+	    TERM(tmp);
+	}
     case ']':
 	s++;
 	if (PL_lex_brackets <= 0)
@@ -3560,8 +3575,7 @@ Perl_yylex(pTHX)
 	TOKEN(';');
     case '&':
 	s++;
-	tmp = *s++;
-	if (tmp == '&')
+	if (*s++ == '&')
 	    AOPERATOR(ANDAND);
 	s--;
 	if (PL_expect == XOPERATOR) {
@@ -3587,47 +3601,50 @@ Perl_yylex(pTHX)
 
     case '|':
 	s++;
-	tmp = *s++;
-	if (tmp == '|')
+	if (*s++ == '|')
 	    AOPERATOR(OROR);
 	s--;
 	BOop(OP_BIT_OR);
     case '=':
 	s++;
-	tmp = *s++;
-	if (tmp == '=')
-	    Eop(OP_EQ);
-	if (tmp == '>')
-	    OPERATOR(',');
-	if (tmp == '~')
-	    PMop(OP_MATCH);
-	if (tmp && isSPACE(*s) && ckWARN(WARN_SYNTAX) && strchr("+-*/%.^&|<",tmp))
-	    Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Reversed %c= operator",(int)tmp);
-	s--;
-	if (PL_expect == XSTATE && isALPHA(tmp) &&
-		(s == PL_linestart+1 || s[-2] == '\n') )
 	{
-	    if (PL_in_eval && !PL_rsfp) {
-		d = PL_bufend;
-		while (s < d) {
-		    if (*s++ == '\n') {
-			incline(s);
-			if (strnEQ(s,"=cut",4)) {
-			    s = strchr(s,'\n');
-			    if (s)
-				s++;
-			    else
-				s = d;
-			    incline(s);
-			    goto retry;
+	    const char tmp = *s++;
+	    if (tmp == '=')
+		Eop(OP_EQ);
+	    if (tmp == '>')
+		OPERATOR(',');
+	    if (tmp == '~')
+		PMop(OP_MATCH);
+	    if (tmp && isSPACE(*s) && ckWARN(WARN_SYNTAX)
+		&& strchr("+-*/%.^&|<",tmp))
+		Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+			    "Reversed %c= operator",(int)tmp);
+	    s--;
+	    if (PL_expect == XSTATE && isALPHA(tmp) &&
+		(s == PL_linestart+1 || s[-2] == '\n') )
+		{
+		    if (PL_in_eval && !PL_rsfp) {
+			d = PL_bufend;
+			while (s < d) {
+			    if (*s++ == '\n') {
+				incline(s);
+				if (strnEQ(s,"=cut",4)) {
+				    s = strchr(s,'\n');
+				    if (s)
+					s++;
+				    else
+					s = d;
+				    incline(s);
+				    goto retry;
+				}
+			    }
 			}
+			goto retry;
 		    }
+		    s = PL_bufend;
+		    PL_doextract = TRUE;
+		    goto retry;
 		}
-		goto retry;
-	    }
-	    s = PL_bufend;
-	    PL_doextract = TRUE;
-	    goto retry;
 	}
 	if (PL_lex_brackets < PL_lex_formbrack) {
 	    const char *t;
@@ -3646,11 +3663,13 @@ Perl_yylex(pTHX)
 	OPERATOR(ASSIGNOP);
     case '!':
 	s++;
-	tmp = *s++;
-	if (tmp == '=')
-	    Eop(OP_NE);
-	if (tmp == '~')
-	    PMop(OP_NOT);
+	{
+	    const char tmp = *s++;
+	    if (tmp == '=')
+		Eop(OP_NE);
+	    if (tmp == '~')
+		PMop(OP_NOT);
+	}
 	s--;
 	OPERATOR('!');
     case '<':
@@ -3664,25 +3683,29 @@ Perl_yylex(pTHX)
 	    TERM(sublex_start());
 	}
 	s++;
-	tmp = *s++;
-	if (tmp == '<')
-	    SHop(OP_LEFT_SHIFT);
-	if (tmp == '=') {
-	    tmp = *s++;
-	    if (tmp == '>')
-		Eop(OP_NCMP);
-	    s--;
-	    Rop(OP_LE);
+	{
+	    char tmp = *s++;
+	    if (tmp == '<')
+		SHop(OP_LEFT_SHIFT);
+	    if (tmp == '=') {
+		tmp = *s++;
+		if (tmp == '>')
+		    Eop(OP_NCMP);
+		s--;
+		Rop(OP_LE);
+	    }
 	}
 	s--;
 	Rop(OP_LT);
     case '>':
 	s++;
-	tmp = *s++;
-	if (tmp == '>')
-	    SHop(OP_RIGHT_SHIFT);
-	if (tmp == '=')
-	    Rop(OP_GE);
+	{
+	    const char tmp = *s++;
+	    if (tmp == '>')
+		SHop(OP_RIGHT_SHIFT);
+	    if (tmp == '=')
+		Rop(OP_GE);
+	}
 	s--;
 	Rop(OP_GT);
 
@@ -3730,90 +3753,97 @@ Perl_yylex(pTHX)
 	}
 
 	d = s;
-	tmp = (I32)*s;
-	if (PL_lex_state == LEX_NORMAL)
-	    s = skipspace(s);
+	{
+	    const char tmp = *s;
+	    if (PL_lex_state == LEX_NORMAL)
+		s = skipspace(s);
 
-	if ((PL_expect != XREF || PL_oldoldbufptr == PL_last_lop) && intuit_more(s)) {
-	    if (*s == '[') {
-		PL_tokenbuf[0] = '@';
-		if (ckWARN(WARN_SYNTAX)) {
-		    char *t;
-		    for(t = s + 1;
-			isSPACE(*t) || isALNUM_lazy_if(t,UTF) || *t == '$';
-			t++) ;
-		    if (*t++ == ',') {
-			PL_bufptr = skipspace(PL_bufptr);
-			while (t < PL_bufend && *t != ']')
-			    t++;
-			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-				"Multidimensional syntax %.*s not supported",
-			     	(t - PL_bufptr) + 1, PL_bufptr);
-		    }
-		}
-	    }
-	    else if (*s == '{') {
-		char *t;
-		PL_tokenbuf[0] = '%';
-		if (strEQ(PL_tokenbuf+1, "SIG")  && ckWARN(WARN_SYNTAX)
-		    && (t = strchr(s, '}')) && (t = strchr(t, '=')))
-		{
-		    char tmpbuf[sizeof PL_tokenbuf];
-		    for (t++; isSPACE(*t); t++) ;
-		    if (isIDFIRST_lazy_if(t,UTF)) {
-		        STRLEN len;
-			t = scan_word(t, tmpbuf, sizeof tmpbuf, TRUE, &len);
-		        for (; isSPACE(*t); t++) ;
-			if (*t == ';' && get_cv(tmpbuf, FALSE))
+	    if ((PL_expect != XREF || PL_oldoldbufptr == PL_last_lop)
+		&& intuit_more(s)) {
+		if (*s == '[') {
+		    PL_tokenbuf[0] = '@';
+		    if (ckWARN(WARN_SYNTAX)) {
+			char *t;
+			for(t = s + 1;
+			    isSPACE(*t) || isALNUM_lazy_if(t,UTF) || *t == '$';
+			    t++) ;
+			if (*t++ == ',') {
+			    PL_bufptr = skipspace(PL_bufptr);
+			    while (t < PL_bufend && *t != ']')
+				t++;
 			    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-				"You need to quote \"%s\"", tmpbuf);
+					"Multidimensional syntax %.*s not supported",
+					(t - PL_bufptr) + 1, PL_bufptr);
+			}
 		    }
 		}
+		else if (*s == '{') {
+		    char *t;
+		    PL_tokenbuf[0] = '%';
+		    if (strEQ(PL_tokenbuf+1, "SIG")  && ckWARN(WARN_SYNTAX)
+			&& (t = strchr(s, '}')) && (t = strchr(t, '=')))
+			{
+			    char tmpbuf[sizeof PL_tokenbuf];
+			    for (t++; isSPACE(*t); t++) ;
+			    if (isIDFIRST_lazy_if(t,UTF)) {
+				STRLEN len;
+				t = scan_word(t, tmpbuf, sizeof tmpbuf, TRUE,
+					      &len);
+				for (; isSPACE(*t); t++) ;
+				if (*t == ';' && get_cv(tmpbuf, FALSE))
+				    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
+						"You need to quote \"%s\"",
+						tmpbuf);
+			    }
+			}
+		}
 	    }
-	}
 
-	PL_expect = XOPERATOR;
-	if (PL_lex_state == LEX_NORMAL && isSPACE((char)tmp)) {
-	    const bool islop = (PL_last_lop == PL_oldoldbufptr);
-	    if (!islop || PL_last_lop_op == OP_GREPSTART)
-		PL_expect = XOPERATOR;
-	    else if (strchr("$@\"'`q", *s))
-		PL_expect = XTERM;		/* e.g. print $fh "foo" */
-	    else if (strchr("&*<%", *s) && isIDFIRST_lazy_if(s+1,UTF))
-		PL_expect = XTERM;		/* e.g. print $fh &sub */
-	    else if (isIDFIRST_lazy_if(s,UTF)) {
-		char tmpbuf[sizeof PL_tokenbuf];
-		scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
-		if ((tmp = keyword(tmpbuf, len))) {
-		    /* binary operators exclude handle interpretations */
-		    switch (tmp) {
-		    case -KEY_x:
-		    case -KEY_eq:
-		    case -KEY_ne:
-		    case -KEY_gt:
-		    case -KEY_lt:
-		    case -KEY_ge:
-		    case -KEY_le:
-		    case -KEY_cmp:
-			break;
-		    default:
-			PL_expect = XTERM;	/* e.g. print $fh length() */
-			break;
+	    PL_expect = XOPERATOR;
+	    if (PL_lex_state == LEX_NORMAL && isSPACE((char)tmp)) {
+		const bool islop = (PL_last_lop == PL_oldoldbufptr);
+		if (!islop || PL_last_lop_op == OP_GREPSTART)
+		    PL_expect = XOPERATOR;
+		else if (strchr("$@\"'`q", *s))
+		    PL_expect = XTERM;		/* e.g. print $fh "foo" */
+		else if (strchr("&*<%", *s) && isIDFIRST_lazy_if(s+1,UTF))
+		    PL_expect = XTERM;		/* e.g. print $fh &sub */
+		else if (isIDFIRST_lazy_if(s,UTF)) {
+		    char tmpbuf[sizeof PL_tokenbuf];
+		    int t2;
+		    scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len);
+		    if ((t2 = keyword(tmpbuf, len))) {
+			/* binary operators exclude handle interpretations */
+			switch (t2) {
+			case -KEY_x:
+			case -KEY_eq:
+			case -KEY_ne:
+			case -KEY_gt:
+			case -KEY_lt:
+			case -KEY_ge:
+			case -KEY_le:
+			case -KEY_cmp:
+			    break;
+			default:
+			    PL_expect = XTERM;	/* e.g. print $fh length() */
+			    break;
+			}
+		    }
+		    else {
+			PL_expect = XTERM;	/* e.g. print $fh subr() */
 		    }
 		}
-		else {
-		    PL_expect = XTERM;		/* e.g. print $fh subr() */
-		}
+		else if (isDIGIT(*s))
+		    PL_expect = XTERM;		/* e.g. print $fh 3 */
+		else if (*s == '.' && isDIGIT(s[1]))
+		    PL_expect = XTERM;		/* e.g. print $fh .3 */
+		else if ((*s == '?' || *s == '-' || *s == '+')
+			 && !isSPACE(s[1]) && s[1] != '=')
+		    PL_expect = XTERM;		/* e.g. print $fh -1 */
+		else if (*s == '<' && s[1] == '<' && !isSPACE(s[2])
+			 && s[2] != '=')
+		    PL_expect = XTERM;		/* print $fh <<"EOF" */
 	    }
-	    else if (isDIGIT(*s))
-		PL_expect = XTERM;		/* e.g. print $fh 3 */
-	    else if (*s == '.' && isDIGIT(s[1]))
-		PL_expect = XTERM;		/* e.g. print $fh .3 */
-	    else if ((*s == '?' || *s == '-' || *s == '+')
-		     && !isSPACE(s[1]) && s[1] != '=')
-		PL_expect = XTERM;		/* e.g. print $fh -1 */
-	    else if (*s == '<' && s[1] == '<' && !isSPACE(s[2]) && s[2] != '=')
-		PL_expect = XTERM;		/* print $fh <<"EOF" */
 	}
 	PL_pending_ident = '$';
 	TOKEN('$');
@@ -3863,10 +3893,12 @@ Perl_yylex(pTHX)
 	    s = scan_pat(s,OP_MATCH);
 	    TERM(sublex_start());
 	}
-	tmp = *s++;
-	if (tmp == '/')
-	    Mop(OP_DIVIDE);
-	OPERATOR(tmp);
+	{
+	    char tmp = *s++;
+	    if (tmp == '/')
+		Mop(OP_DIVIDE);
+	    OPERATOR(tmp);
+	}
 
     case '.':
 	if (PL_lex_formbrack && PL_lex_brackets == PL_lex_formbrack
@@ -3882,7 +3914,7 @@ Perl_yylex(pTHX)
 	    goto rightbracket;
 	}
 	if (PL_expect == XOPERATOR || !isDIGIT(s[1])) {
-	    tmp = *s++;
+	    char tmp = *s++;
 	    if (*s == tmp) {
 		s++;
 		if (*s == tmp) {
@@ -4027,9 +4059,10 @@ Perl_yylex(pTHX)
     case 'z': case 'Z':
 
       keylookup: {
-	orig_keyword = 0;
-	gv = Nullgv;
-	gvp = 0;
+	I32 tmp;
+	I32 orig_keyword = 0;
+	GV *gv = Nullgv;
+	GV **gvp = 0;
 
 	PL_bufptr = s;
 	s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
@@ -4122,10 +4155,20 @@ Perl_yylex(pTHX)
 	switch (tmp) {
 
 	default:			/* not a keyword */
+	    /* Trade off - by using this evil construction we can pull the
+	       variable gv into the block labelled keylookup. If not, then
+	       we have to give it function scope so that the goto from the
+	       earlier ':' case doesn't bypass the initialisation.  */
+	    if (0) {
+	    just_a_word_zero_gv:
+		gv = NULL;
+		gvp = NULL;
+	    }
 	  just_a_word: {
 		SV *sv;
 		int pkgname = 0;
 		const char lastchar = (PL_bufptr == PL_oldoldbufptr ? 0 : PL_bufptr[-1]);
+		CV *cv;
 
 		/* Get the rest if it looks like a package qualifier */
 
@@ -4201,6 +4244,20 @@ Perl_yylex(pTHX)
 		if (len)
 		    goto safe_bareword;
 
+		/* Do the explicit type check so that we don't need to force
+		   the initialisation of the symbol table to have a real GV.
+		   Beware - gv may not really be a PVGV, cv may not really be
+		   a PVCV, (because of the space optimisations that gv_init
+		   understands) But they're true if for this symbol there is
+		   respectively a typeglob and a subroutine.
+		*/
+		cv = gv ? ((SvTYPE(gv) == SVt_PVGV)
+		    /* Real typeglob, so get the real subroutine: */
+			   ? GvCVu(gv)
+		    /* A proxy for a subroutine in this package? */
+			   : SvOK(gv) ? (CV *) gv : NULL)
+		    : NULL;
+
 		/* See if it's the indirect object for a list operator. */
 
 		if (PL_oldoldbufptr &&
@@ -4225,7 +4282,7 @@ Perl_yylex(pTHX)
 		    /* (But it's an indir obj regardless for sort.) */
 
 		    if ( !immediate_paren && (PL_last_lop_op == OP_SORT ||
-                         ((!gv || !GvCVu(gv)) &&
+                         ((!gv || !cv) &&
                         (PL_last_lop_op != OP_MAPSTART &&
 			 PL_last_lop_op != OP_GREPSTART))))
 		    {
@@ -4249,9 +4306,9 @@ Perl_yylex(pTHX)
 		/* If followed by a paren, it's certainly a subroutine. */
 		if (*s == '(') {
 		    CLINE;
-		    if (gv && GvCVu(gv)) {
+		    if (cv) {
 			for (d = s + 1; SPACE_OR_TAB(*d); d++) ;
-			if (*d == ')' && (sv = cv_const_sv(GvCV(gv)))) {
+			if (*d == ')' && (sv = cv_const_sv(cv))) {
 			    s = d + 1;
 			    goto its_constant;
 			}
@@ -4280,14 +4337,12 @@ Perl_yylex(pTHX)
 
 		/* Not a method, so call it a subroutine (if defined) */
 
-		if (gv && GvCVu(gv)) {
-		    CV* cv;
+		if (cv) {
 		    if (lastchar == '-' && ckWARN_d(WARN_AMBIGUOUS))
 			Perl_warner(aTHX_ packWARN(WARN_AMBIGUOUS),
 				"Ambiguous use of -%s resolved as -&%s()",
 				PL_tokenbuf, PL_tokenbuf);
 		    /* Check for a constant sub */
-		    cv = GvCV(gv);
 		    if ((sv = cv_const_sv(cv))) {
 		  its_constant:
 			SvREFCNT_dec(((SVOP*)yylval.opval)->op_sv);
