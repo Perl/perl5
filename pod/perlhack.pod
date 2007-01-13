@@ -2915,6 +2915,10 @@ errors within eval or require, seeing C<S_doeval> in the call stack
 is a good sign of these.  Fixing these leaks is non-trivial,
 unfortunately, but they must be fixed eventually.
 
+B<NOTE 4>: L<DynaLoader> will not clean up after itself completely
+unless Perl is built with the Configure option
+C<-Accflags=-DDL_UNLOAD_ALL_AT_EXIT>.
+
 =head2 Rational Software's Purify
 
 Purify is a commercial tool that is helpful in identifying
