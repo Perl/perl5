@@ -830,7 +830,7 @@ S_skipspace(pTHX_ register char *s)
 	    sv_setpvn(sv,PL_bufptr,PL_bufend-PL_bufptr);
             (void)SvIOK_on(sv);
             SvIV_set(sv, 0);
-	    av_store(CopFILEAV(PL_curcop),(I32)CopLINE(PL_curcop),sv);
+	    av_store(CopFILEAVx(PL_curcop),(I32)CopLINE(PL_curcop),sv);
 	}
     }
 }
@@ -2725,7 +2725,7 @@ Perl_yylex(pTHX)
 		sv_setsv(sv,PL_linestr);
                 (void)SvIOK_on(sv);
                 SvIV_set(sv, 0);
-		av_store(CopFILEAV(PL_curcop),(I32)CopLINE(PL_curcop),sv);
+		av_store(CopFILEAVx(PL_curcop),(I32)CopLINE(PL_curcop),sv);
 	    }
 	    goto retry;
 	}
@@ -2812,7 +2812,7 @@ Perl_yylex(pTHX)
 	    sv_setsv(sv,PL_linestr);
             (void)SvIOK_on(sv);
             SvIV_set(sv, 0);
-	    av_store(CopFILEAV(PL_curcop),(I32)CopLINE(PL_curcop),sv);
+	    av_store(CopFILEAVx(PL_curcop),(I32)CopLINE(PL_curcop),sv);
 	}
 	PL_bufend = SvPVX(PL_linestr) + SvCUR(PL_linestr);
 	PL_last_lop = PL_last_uni = NULL;
@@ -3764,7 +3764,7 @@ Perl_yylex(pTHX)
 				t++;
 			    Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 					"Multidimensional syntax %.*s not supported",
-					(t - PL_bufptr) + 1, PL_bufptr);
+				    (int)((t - PL_bufptr) + 1), PL_bufptr);
 			}
 		    }
 		}
@@ -3864,7 +3864,8 @@ Perl_yylex(pTHX)
 			PL_bufptr = skipspace(PL_bufptr);
 			Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
 			    "Scalar value %.*s better written as $%.*s",
-			    t-PL_bufptr, PL_bufptr, t-PL_bufptr-1, PL_bufptr+1);
+			    (int)(t-PL_bufptr), PL_bufptr,
+			    (int)(t-PL_bufptr-1), PL_bufptr+1);
 		    }
 		}
 	    }
@@ -9686,7 +9687,7 @@ S_scan_heredoc(pTHX_ register char *s)
 	    sv_setsv(sv,PL_linestr);
             (void)SvIOK_on(sv);
             SvIV_set(sv, 0);
-	    av_store(CopFILEAV(PL_curcop), (I32)CopLINE(PL_curcop),sv);
+	    av_store(CopFILEAVx(PL_curcop), (I32)CopLINE(PL_curcop),sv);
 	}
 	if (*s == term && memEQ(s,PL_tokenbuf,len)) {
 	    STRLEN off = PL_bufend - 1 - SvPVX_const(PL_linestr);
@@ -10158,7 +10159,7 @@ S_scan_str(pTHX_ char *start, int keep_quoted, int keep_delims)
 	    sv_setsv(sv,PL_linestr);
             (void)SvIOK_on(sv);
             SvIV_set(sv, 0);
-	    av_store(CopFILEAV(PL_curcop), (I32)CopLINE(PL_curcop), sv);
+	    av_store(CopFILEAVx(PL_curcop), (I32)CopLINE(PL_curcop), sv);
 	}
 
 	/* having changed the buffer, we must update PL_bufend */
