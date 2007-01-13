@@ -2040,9 +2040,8 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 {
     register XPVHV* xhv;
     register HE *entry;
-    register HE **oentry;
-    I32 found = 0;
     const int flags_masked = flags & HVhek_MASK;
+    const U32 hindex = hash & (I32) HvMAX(PL_strtab);
 
     /* what follows is the moral equivalent of:
 
@@ -2055,9 +2054,9 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
     xhv = (XPVHV*)SvANY(PL_strtab);
     /* assert(xhv_array != 0) */
     LOCK_STRTAB_MUTEX;
-    /* oentry = &(HvARRAY(hv))[hash & (I32) HvMAX(hv)]; */
-    oentry = &((HE**)xhv->xhv_array)[hash & (I32) xhv->xhv_max];
-    for (entry = *oentry; entry; entry = HeNEXT(entry)) {
+    /* entry = HvARRAY(hv)[hindex]; */
+    entry = ((HE**)xhv->xhv_array)[hindex];
+    for (;entry; entry = HeNEXT(entry)) {
 	if (HeHASH(entry) != hash)		/* strings can't be equal */
 	    continue;
 	if (HeKLEN(entry) != len)
@@ -2066,21 +2065,22 @@ S_share_hek_flags(pTHX_ const char *str, I32 len, register U32 hash, int flags)
 	    continue;
 	if (HeKFLAGS(entry) != flags_masked)
 	    continue;
-	found = 1;
 	break;
     }
-    if (!found) {
+
+    if (!entry) {
 	/* What used to be head of the list.
 	   If this is NULL, then we're the first entry for this slot, which
 	   means we need to increate fill.  */
-	const HE *old_first = *oentry;
+	HE **const head = &((HE**)xhv->xhv_array)[hindex];
+	HE *const next = *head;
 	entry = new_HE();
 	HeKEY_hek(entry) = save_hek_flags(str, len, hash, flags_masked);
 	HeVAL(entry) = Nullsv;
-	HeNEXT(entry) = *oentry;
-	*oentry = entry;
+	HeNEXT(entry) = next;
+	*head = entry;
 	xhv->xhv_keys++; /* HvKEYS(hv)++ */
-	if (!old_first) {			/* initial entry? */
+	if (!next) {			/* initial entry? */
 	    xhv->xhv_fill++; /* HvFILL(hv)++ */
 	} else if (xhv->xhv_keys > (IV)xhv->xhv_max /* HvKEYS(hv) > HvMAX(hv) */) {
 		hsplit(PL_strtab);
