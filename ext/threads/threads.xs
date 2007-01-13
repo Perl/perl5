@@ -102,6 +102,7 @@ typedef struct {
     IV joinable_threads;
     IV running_threads;
     IV detached_threads;
+    IV total_threads;
     IV default_stack_size;
     IV page_size;
 } my_pool_t;
@@ -201,6 +202,11 @@ S_ithread_free(pTHX_ ithread *thread)
     thread->prev->next = thread->next;
     thread->next = NULL;
     thread->prev = NULL;
+
+    /* after decrementing this thread count and unlocking the MUTEX, this
+     * thread must not make any further use of MY_POOL, as it may be freed
+     */
+    MY_POOL.total_threads--;
     MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
     /* Thread is now disowned */
@@ -243,14 +249,15 @@ S_ithread_count_inc(pTHX_ ithread *thread)
 STATIC int
 S_exit_warning(pTHX)
 {
-    int veto_cleanup;
+    int veto_cleanup, warn;
     dMY_POOL;
 
     MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
-    veto_cleanup = (MY_POOL.running_threads || MY_POOL.joinable_threads);
+    veto_cleanup = (MY_POOL.total_threads > 0);
+    warn         = (MY_POOL.running_threads || MY_POOL.joinable_threads);
     MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
-    if (veto_cleanup) {
+    if (warn) {
         if (ckWARN_d(WARN_THREADS)) {
             Perl_warn(aTHX_ "Perl exited with active threads:\n\t%"
                             IVdf " running and unjoined\n\t%"
@@ -612,6 +619,7 @@ S_ithread_create(
     thread->prev = MY_POOL.main_thread.prev;
     MY_POOL.main_thread.prev = thread;
     thread->prev->next = thread;
+    MY_POOL.total_threads++;
 
     /* 1 ref to be held by the local var 'thread' in S_ithread_run()
      * 1 ref to be held by the threads object that we assume we will
