@@ -1697,11 +1697,11 @@ STATIC void
 S_hfreeentries(pTHX_ HV *hv)
 {
     /* This is the array that we're going to restore  */
-    HE **orig_array;
+    HE **const orig_array = HvARRAY(hv);
     HEK *name;
     int attempts = 100;
 
-    if (!HvARRAY(hv))
+    if (!orig_array)
 	return;
 
     if (SvOOK(hv)) {
@@ -1715,7 +1715,6 @@ S_hfreeentries(pTHX_ HV *hv)
 	name = NULL;
     }
 
-    orig_array = HvARRAY(hv);
     /* orig_array remains unchanged throughout the loop. If after freeing all
        the entries it turns out that one of the little blighters has triggered
        an action that has caused HvARRAY to be re-allocated, then we set
