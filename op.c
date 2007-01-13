@@ -1087,6 +1087,10 @@ Perl_mod(pTHX_ OP *o, I32 type)
 	if ((type == OP_UNDEF || type == OP_REFGEN) &&
 	    !(o->op_flags & OPf_STACKED)) {
 	    o->op_type = OP_RV2CV;		/* entersub => rv2cv */
+	    /* The default is to set op_private to the number of children,
+	       which for a UNOP such as RV2CV is always 1. And w're using
+	       the bit for a flag in RV2CV, so we need it clear.  */
+	    o->op_private &= ~1;
 	    o->op_ppaddr = PL_ppaddr[OP_RV2CV];
 	    assert(cUNOPo->op_first->op_type == OP_NULL);
 	    op_null(((LISTOP*)cUNOPo->op_first)->op_first);/* disable pushmark */
@@ -1132,6 +1136,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
                         newop->op_next = (OP*)newop;
 			kid->op_sibling = (OP*)newop;
 			newop->op_private |= OPpLVAL_INTRO;
+			newop->op_private &= ~1;
 			break;
 		    }
 
@@ -1166,6 +1171,7 @@ Perl_mod(pTHX_ OP *o, I32 type)
 		    okid->op_targ = 0;
 		    okid->op_ppaddr = PL_ppaddr[OP_RV2CV];
 		    okid->op_private |= OPpLVAL_INTRO;
+		    okid->op_private &= ~1;
 		    break;
 		}
 
@@ -1471,6 +1477,7 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
 	    assert(cUNOPo->op_first->op_type == OP_NULL);
 	    op_null(((LISTOP*)cUNOPo->op_first)->op_first);	/* disable pushmark */
 	    o->op_flags |= OPf_SPECIAL;
+	    o->op_private &= ~1;
 	}
 	break;
 
@@ -5243,6 +5250,9 @@ Perl_ck_rvconst(pTHX_ register OP *o)
     SVOP * const kid = (SVOP*)cUNOPo->op_first;
 
     o->op_private |= (PL_hints & HINT_STRICT_REFS);
+    if (o->op_type == OP_RV2CV)
+	o->op_private &= ~1;
+
     if (kid->op_type == OP_CONST) {
 	int iscv;
 	GV *gv;
@@ -7121,6 +7131,59 @@ Perl_peep(pTHX_ register OP *o)
 	    
 	    break;
 	}
+
+	case OP_SASSIGN: {
+	    OP *rv2gv;
+	    UNOP *refgen, *rv2cv;
+	    LISTOP *exlist;
+
+	    /* I do not understand this, but if o->op_opt isn't set to 1,
+	       various tests in ext/B/t/bytecode.t fail with no readily
+	       apparent cause.  */
+	    /* Converted from op_opt to op_seq for 5.8.x.  */
+
+	    o->op_seq = PL_op_seqmax++;
+
+
+	    if ((o->op_flags && OPf_WANT) != OPf_WANT_VOID)
+		break;
+
+	    if ((o->op_private & ~OPpASSIGN_BACKWARDS) != 2)
+		break;
+
+	    rv2gv = ((BINOP *)o)->op_last;
+	    if (!rv2gv || rv2gv->op_type != OP_RV2GV)
+		break;
+
+	    refgen = (UNOP *)((BINOP *)o)->op_first;
+
+	    if (!refgen || refgen->op_type != OP_REFGEN)
+		break;
+
+	    exlist = (LISTOP *)refgen->op_first;
+	    if (!exlist || exlist->op_type != OP_NULL
+		|| exlist->op_targ != OP_LIST)
+		break;
+
+	    if (exlist->op_first->op_type != OP_PUSHMARK)
+		break;
+
+	    rv2cv = (UNOP*)exlist->op_last;
+
+	    if (rv2cv->op_type != OP_RV2CV)
+		break;
+
+	    assert ((rv2gv->op_private & OPpDONT_INIT_GV) == 0);
+	    assert ((o->op_private & OPpASSIGN_CV_TO_GV) == 0);
+	    assert ((rv2cv->op_private & OPpMAY_RETURN_CONSTANT) == 0);
+
+	    o->op_private |= OPpASSIGN_CV_TO_GV;
+	    rv2gv->op_private |= OPpDONT_INIT_GV;
+	    rv2cv->op_private |= OPpMAY_RETURN_CONSTANT;
+
+	    break;
+	}
+
 	
 	default:
 	    o->op_seq = PL_op_seqmax++;

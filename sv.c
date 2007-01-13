@@ -3132,7 +3132,18 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 			    {
  				/* Redefining a sub - warning is mandatory if
  				   it was a const and its value changed. */
- 				if (ckWARN(WARN_REDEFINE)
+				if (CvCONST(cv)	&& CvCONST((CV*)sref)
+				    && cv_const_sv(cv)
+				    == cv_const_sv((CV*)sref)) {
+				    /* They are 2 constant subroutines
+				       generated from the same constant.
+				       This probably means that they are
+				       really the "same" proxy subroutine
+				       instantiated in 2 places. Most likely
+				       this is when a constant is exported
+				       twice.  Don't warn.  */
+				}
+				else if (ckWARN(WARN_REDEFINE)
  				    || (CvCONST(cv)
  					&& (!CvCONST((CV*)sref)
  					    || sv_cmp(cv_const_sv(cv),
@@ -6638,6 +6649,11 @@ Perl_sv_2cv(pTHX_ SV *sv, HV **st, GV **gvp, I32 lref)
 	if (!gv) {
 	    *st = NULL;
 	    return Nullcv;
+	}
+	/* Some flags to gv_fetchsv mean don't really create the GV  */
+	if (SvTYPE(gv) != SVt_PVGV) {
+	    *st = NULL;
+	    return NULL;
 	}
 	*st = GvESTASH(gv);
     fix_gv:
