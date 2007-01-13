@@ -135,7 +135,6 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     where = (Malloc_t)((char*)where-sTHX);
     size += sTHX;
     if (*(tTHX*)where != aTHX) {
-	/* int *nowhere = NULL; *nowhere = 0; */
         Perl_croak_nocontext("panic: realloc from wrong pool");
     }
 #endif
@@ -176,7 +175,6 @@ Perl_safesysfree(Malloc_t where)
 #ifdef PERL_TRACK_MEMPOOL
         where = (Malloc_t)((char*)where-sTHX);
         if (*(tTHX*)where != aTHX) {
-	    /* int *nowhere = NULL; *nowhere = 0; */
             Perl_croak_nocontext("panic: free from wrong pool");
 	}
 #endif

@@ -3073,7 +3073,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dstr, register SV *sstr, I32 flags)
 	if (dtype >= SVt_PV) {
 	    if (dtype == SVt_PVGV) {
 		SV * const sref = SvREFCNT_inc(SvRV(sstr));
-		SV *dref = 0;
+		SV *dref = NULL;
 		const int intro = GvINTRO(dstr);
 
 #ifdef GV_UNIQUE_CHECK
@@ -5736,7 +5736,7 @@ thats_really_all_folks:
     {
        /*The big, slow, and stupid way. */
 #ifdef USE_HEAP_INSTEAD_OF_STACK	/* Even slower way. */
-	STDCHAR *buf = 0;
+	STDCHAR *buf = NULL;
 	Newx(buf, 8192, STDCHAR);
 	assert(buf);
 #else

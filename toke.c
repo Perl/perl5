@@ -4052,8 +4052,8 @@ Perl_yylex(pTHX)
       keylookup: {
 	I32 tmp;
 	I32 orig_keyword = 0;
-	GV *gv = Nullgv;
-	GV **gvp = 0;
+	GV *gv = NULL;
+	GV **gvp = NULL;
 
 	PL_bufptr = s;
 	s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len);
@@ -4095,8 +4095,8 @@ Perl_yylex(pTHX)
 	}
 
 	if (tmp < 0) {			/* second-class keyword? */
-	    GV *ogv = Nullgv;	/* override (winner) */
-	    GV *hgv = Nullgv;	/* hidden (loser) */
+	    GV *ogv = NULL;	/* override (winner) */
+	    GV *hgv = NULL;	/* hidden (loser) */
 	    if (PL_expect != XOPERATOR && (*s != ':' || s[1] != ':')) {
 		CV *cv;
 		if ((gv = gv_fetchpv(PL_tokenbuf, 0, SVt_PVCV)) &&
@@ -10226,7 +10226,7 @@ Perl_scan_num(pTHX_ char *start, YYSTYPE* lvalp)
     NV nv;				/* number read, as a double */
     SV *sv = NULL;			/* place to put the converted number */
     bool floatit;			/* boolean: int or float? */
-    const char *lastub = 0;		/* position of last underbar */
+    const char *lastub = NULL;		/* position of last underbar */
     static char const number_too_long[] = "Number too long";
 
     /* We use the first character to decide what type of number this is */
