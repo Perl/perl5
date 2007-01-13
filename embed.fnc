@@ -161,6 +161,7 @@ Afnp	|int	|printf_nocontext|NN const char* fmt|...
 #endif
 p	|void	|cv_ckproto	|NN CV* cv|NULLOK GV* gv|NULLOK char* p
 pd	|CV*	|cv_clone	|NN CV* proto
+ApdR	|SV*	|gv_const_sv	|NN GV* gv
 ApdR	|SV*	|cv_const_sv	|NULLOK CV* cv
 pR	|SV*	|op_const_sv	|NULLOK OP* o|NULLOK CV* cv
 Apd	|void	|cv_undef	|NN CV* cv
@@ -1334,7 +1335,7 @@ sR	|char*	|swallow_bom	|NN U8 *s
 s	|void	|checkcomma	|NN char *s|NN const char *name|NN const char *what
 s	|void	|force_ident	|NN const char *s|int kind
 s	|void	|incline	|NN char *s
-s	|int	|intuit_method	|NN char *s|NULLOK GV *gv
+s	|int	|intuit_method	|NN char *s|NULLOK GV *gv|NULLOK CV *cv
 s	|int	|intuit_more	|NN char *s
 s	|I32	|lop		|I32 f|int x|NN char *s
 rs	|void	|missingterm	|NULLOK char *s

@@ -122,12 +122,49 @@ Perl_gv_fetchfile(pTHX_ const char *name)
     return gv;
 }
 
+/*
+=for apidoc gv_const_sv
+
+If C<gv> is a typeglob whose subroutine entry is a constant sub eligible for
+inlining, or C<gv> is a placeholder reference that would be promoted to such
+a typeglob, then returns the value returned by the sub.  Otherwise, returns
+NULL.
+
+=cut
+*/
+
+SV *
+Perl_gv_const_sv(pTHX_ GV *gv)
+{
+    if (SvTYPE(gv) == SVt_PVGV)
+	return cv_const_sv(GvCVu(gv));
+    return SvROK(gv) ? SvRV(gv) : NULL;
+}
+
 void
 Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
 {
     register GP *gp;
     const bool doproto = SvTYPE(gv) > SVt_NULL;
     const char * const proto = (doproto && SvPOK(gv)) ? SvPVX_const(gv) : NULL;
+    SV *const has_constant = doproto && SvROK(gv) ? SvRV(gv) : NULL;
+
+    assert (!(proto && has_constant));
+
+    if (has_constant) {
+	/* The constant has to be a simple scalar type.  */
+	switch (SvTYPE(has_constant)) {
+	case SVt_PVAV:
+	case SVt_PVHV:
+	case SVt_PVCV:
+	case SVt_PVFM:
+	case SVt_PVIO:
+            Perl_croak(aTHX_ "Cannot convert a reference to %s to typeglob",
+		       sv_reftype(has_constant, 0));
+	}
+	SvRV_set(gv, NULL);
+	SvROK_off(gv);
+    }
 
     sv_upgrade((SV*)gv, SVt_PVGV);
     if (SvLEN(gv)) {
@@ -169,9 +206,14 @@ Perl_gv_init(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len, int multi)
     if (doproto) {			/* Replicate part of newSUB here. */
 	SvIOK_off(gv);
 	ENTER;
-	/* XXX unsafe for threads if eval_owner isn't held */
-	(void) start_subparse(0,0);	/* Create empty CV in compcv. */
-	GvCV(gv) = PL_compcv;
+	if (has_constant) {
+	    /* newCONSTSUB takes ownership of the reference from us.  */
+	    GvCV(gv) = newCONSTSUB(stash, name, has_constant);
+	} else {
+	    /* XXX unsafe for threads if eval_owner isn't held */
+	    (void) start_subparse(0,0);	/* Create empty CV in compcv. */
+	    GvCV(gv) = PL_compcv;
+	}
 	LEAVE;
 
 	PL_sub_generation++;
@@ -718,7 +760,8 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     I32 len;
     register const char *name_cursor;
     HV *stash = 0;
-    I32 add = flags & ~SVf_UTF8;
+    const I32 no_init = flags & (GV_NOADD_NOINIT | GV_NOINIT);
+    const I32 add = flags & ~SVf_UTF8 & ~ GV_NOADD_NOINIT;
     const char *const name_end = nambeg + full_len;
     const char *const name_em1 = name_end - 1;
 
@@ -895,7 +938,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
 		require_errno(gv);
 	}
 	return gv;
-    } else if (add & GV_NOINIT) {
+    } else if (no_init) {
 	return gv;
     }
 

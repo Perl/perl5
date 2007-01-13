@@ -206,6 +206,10 @@ PERL_CALLCONV int	Perl_printf_nocontext(const char* fmt, ...)
 #endif
 PERL_CALLCONV void	Perl_cv_ckproto(pTHX_ CV* cv, GV* gv, char* p);
 PERL_CALLCONV CV*	Perl_cv_clone(pTHX_ CV* proto);
+PERL_CALLCONV SV*	Perl_gv_const_sv(pTHX_ GV* gv)
+			__attribute__warn_unused_result__
+			__attribute__nonnull__(pTHX_1);
+
 PERL_CALLCONV SV*	Perl_cv_const_sv(pTHX_ CV* cv)
 			__attribute__warn_unused_result__;
 
@@ -1973,7 +1977,7 @@ STATIC char*	S_swallow_bom(pTHX_ U8 *s)
 STATIC void	S_checkcomma(pTHX_ char *s, const char *name, const char *what);
 STATIC void	S_force_ident(pTHX_ const char *s, int kind);
 STATIC void	S_incline(pTHX_ char *s);
-STATIC int	S_intuit_method(pTHX_ char *s, GV *gv);
+STATIC int	S_intuit_method(pTHX_ char *s, GV *gv, CV *cv);
 STATIC int	S_intuit_more(pTHX_ char *s);
 STATIC I32	S_lop(pTHX_ I32 f, int x, char *s);
 STATIC void	S_missingterm(pTHX_ char *s)

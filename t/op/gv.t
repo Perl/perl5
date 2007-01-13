@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 
 require './test.pl';
-plan( tests => 63 );
+plan( tests => 100 );
 
 # type coersion on assignment
 $foo = 'foo';
@@ -231,6 +231,50 @@ is($j[0], 1);
 	"PERL_DONT_CREATE_GVSV shouldn't affect thingy syntax under strict");
 }
 
+
+# Possibly not the correct test file for these tests.
+# There are certain space optimisations implemented via promotion rules to
+# GVs
+
+ok(!exists $::{oonk}, "no symbols of any sort to start with");
+
+# A string in place of the typeglob is promoted to the function prototype
+$::{oonk} = "pie";
+my $proto = eval 'prototype \&oonk';
+die if $@;
+is ($proto, "pie", "String is promoted to prototype");
+
+
+# A reference to a value is used to generate a constant subroutine
+foreach my $value (3, "Perl rules", \42, qr/whatever/, [1,2,3], {1=>2},
+		   \*STDIN, \&ok, \undef, *STDOUT) {
+    delete $::{oonk};
+    $::{oonk} = \$value;
+    $proto = eval 'prototype \&oonk';
+    die if $@;
+    is ($proto, '', "Prototype for a constant subroutine is empty");
+
+    my $got = eval 'oonk';
+    die if $@;
+    is (ref $got, ref $value, "Correct type of value (" . ref($value) . ")");
+    is ($got, $value, "Value is correctly set");
+}
+
+format =
+.
+
+foreach my $value ([1,2,3], {1=>2}, *STDOUT{IO}, \&ok, *STDOUT{FORMAT}) {
+    # *STDOUT{IO} returns a reference to a PVIO. As it's blessed, ref returns
+    # IO::Handle, which isn't what we want.
+    my $type = $value;
+    $type =~ s/.*=//;
+    $type =~ s/\(.*//;
+    delete $::{oonk};
+    $::{oonk} = $value;
+    $proto = eval 'prototype \&oonk';
+    like ($@, qr/^Cannot convert a reference to $type to typeglob/,
+	  "Cannot upgrade ref-to-$type to typeglob");
+}
 __END__
 Perl
 Rules
