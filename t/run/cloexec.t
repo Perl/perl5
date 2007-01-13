@@ -146,7 +146,7 @@ cmp_ok( $parentfd1, '<=', $^F, "parent open fd=$parentfd1 (\$^F=$^F)" );
 test_inherited($parentfd1);
 close FHPARENT1 or die "close '$tmpfile1': $!";
 
-# ... and test that you cannot inherit fd = $^F+1.
+# ... and test that you cannot inherit fd = $^F+n.
 open FHPARENT1, "<$tmpfile1" or die "open '$tmpfile1': $!";
 open FHPARENT2, "<$tmpfile2" or die "open '$tmpfile2': $!";
 $parentfd2 = fileno FHPARENT2;
@@ -157,7 +157,7 @@ close FHPARENT2 or die "close '$tmpfile2': $!";
 close FHPARENT1 or die "close '$tmpfile1': $!";
 
 # ... and now you can inherit after incrementing.
-++$^F;
+$^F = $parentfd2;
 open FHPARENT2, "<$tmpfile2" or die "open '$tmpfile2': $!";
 open FHPARENT1, "<$tmpfile1" or die "open '$tmpfile1': $!";
 $parentfd1 = fileno FHPARENT1;
