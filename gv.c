@@ -73,8 +73,21 @@ Perl_gv_HVadd(pTHX_ register GV *gv)
 GV *
 Perl_gv_IOadd(pTHX_ register GV *gv)
 {
-    if (!gv || SvTYPE((SV*)gv) != SVt_PVGV)
-	Perl_croak(aTHX_ "Bad symbol for filehandle");
+    if (!gv || SvTYPE((SV*)gv) != SVt_PVGV) {
+
+        /*
+         * if it walks like a dirhandle, then let's assume that
+         * this is a dirhandle.
+         */
+        const char *fh = PL_op->op_type == OP_READDIR ||
+                         PL_op->op_type ==  OP_TELLDIR ||
+                         PL_op->op_type ==  OP_SEEKDIR ||
+                         PL_op->op_type ==  OP_REWINDDIR ||
+                         PL_op->op_type ==  OP_CLOSEDIR ?
+                         "dirhandle" : "filehandle";
+        Perl_croak(aTHX_ "Bad symbol for %s", fh);
+    }
+
     if (!GvIOp(gv)) {
 #ifdef GV_UNIQUE_CHECK
         if (GvUNIQUE(gv)) {

@@ -367,6 +367,12 @@ by setting environment variable C<PERL_BADFREE> to 1.
 (P) An internal request asked to add an array entry to something that
 wasn't a symbol table entry.
 
+=item Bad symbol for dirhandle
+
+(P) An internal request asked to add a dirhandle entry to something
+that wasn't a symbol table entry.
+
+
 =item Bad symbol for filehandle
 
 (P) An internal request asked to add a filehandle entry to something
@@ -1218,6 +1224,11 @@ uses the character values modulus 256 instead, as if you had provided:
 =item close() on unopened filehandle %s
 
 (W unopened) You tried to close a filehandle that was never opened.
+
+=item closedir() attempted on invalid dirhandle %s
+
+(W io) The dirhandle you tried to close is either closed or not really
+a dirhandle.  Check your control flow.
 
 =item Code missing after '/'
 
@@ -3259,6 +3270,11 @@ are outside the range which can be represented by integers internally.
 One possible workaround is to force Perl to use magical string increment
 by prepending "0" to your numbers.
 
+=item readdir() attempted on invalid dirhandle %s
+
+(W io) The dirhandle you're reading from is either closed or not really 
+a dirhandle.  Check your control flow.
+
 =item readline() on closed filehandle %s
 
 (W closed) The filehandle you're reading from got itself closed sometime
@@ -3351,6 +3367,11 @@ terminates. You might use ^# instead.  See L<perlform>.
 (W syntax) You wrote your assignment operator backwards.  The = must
 always comes last, to avoid ambiguity with subsequent unary operators.
 
+=item rewinddir() attempted on invalid dirhandle %s
+
+(W io) The dirhandle you tried to do a rewinddir() on is either closed or not
+really a dirhandle.  Check your control flow.
+
 =item Runaway format
 
 (F) Your format contained the ~~ repeat-until-blank sequence, but it
@@ -3426,6 +3447,11 @@ the conditional expression, i.e. C<(foo) ? 0 : 1>.
 
 (W unopened) You tried to use the seek() or sysseek() function on a
 filehandle that was either never opened or has since been closed.
+
+=item seekdir() attempted on invalid dirhandle %s
+
+(W io) The dirhandle you are doing a seekdir() on is either closed or not
+really a dirhandle.  Check your control flow.
 
 =item select not implemented
 
@@ -3772,6 +3798,11 @@ for Perl to reach.  Perl is doing you a favor by refusing.
 
 (W unopened) You tried to use the tell() function on a filehandle that
 was either never opened or has since been closed.
+
+=item telldir() attempted on invalid dirhandle %s
+
+(W io) The dirhandle you tried to telldir() is either closed or not really
+a dirhandle.  Check your control flow.
 
 =item That use of $[ is unsupported
 
