@@ -8869,7 +8869,7 @@ Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
     const regexp * const re = (regexp *)mg->mg_obj;
 
     if (!mg->mg_ptr) {
-	const char *fptr = "msix";
+	const char *fptr = STD_PAT_MODS;        /*"msix"*/
 	char reflags[7];
 	char ch;
 	bool hask = ((re->extflags & RXf_PMf_KEEPCOPY) == RXf_PMf_KEEPCOPY);
@@ -8879,7 +8879,7 @@ Perl_reg_stringify(pTHX_ MAGIC *mg, STRLEN *lp, U32 *flags, I32 *haseval ) {
         int left = 0;
 	int right = 4 + hask;
         if (hask) 
-            reflags[left++]='k';
+            reflags[left++] = KEEPCOPY_PAT_MOD; /*'k'*/
 	while((ch = *fptr++)) {
 	    if(reganch & 1) {
 		reflags[left++] = ch;

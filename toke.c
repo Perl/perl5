@@ -10767,10 +10767,10 @@ Perl_pmflag(pTHX_ U32* pmfl, int ch)
         char c = (char)ch;
         switch (c) {
             CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl);
-            case 'g': *pmfl |= PMf_GLOBAL; break;
-            case 'c': *pmfl |= PMf_CONTINUE; break;
-            case 'o': *pmfl |= PMf_KEEP; break;
-            case 'k': *pmfl |= PMf_KEEPCOPY; break;
+            case GLOBAL_PAT_MOD:    *pmfl |= PMf_GLOBAL; break;
+            case CONTINUE_PAT_MOD:  *pmfl |= PMf_CONTINUE; break;
+            case ONCE_PAT_MOD:      *pmfl |= PMf_KEEP; break;
+            case KEEPCOPY_PAT_MOD:  *pmfl |= PMf_KEEPCOPY; break;
         }
     }
 }
@@ -10782,7 +10782,7 @@ S_scan_pat(pTHX_ char *start, I32 type)
     PMOP *pm;
     char *s = scan_str(start,!!PL_madskills,FALSE);
     const char * const valid_flags =
-	(const char *)((type == OP_QR) ? "iomsxk" : "iogcmsxk");
+	(const char *)((type == OP_QR) ? QR_PAT_MODS : M_PAT_MODS);
 #ifdef PERL_MAD
     char *modstart;
 #endif
@@ -10815,7 +10815,8 @@ S_scan_pat(pTHX_ char *start, I32 type)
     if ((pm->op_pmflags & PMf_CONTINUE) && !(pm->op_pmflags & PMf_GLOBAL)
 	    && ckWARN(WARN_REGEXP))
     {
-        Perl_warner(aTHX_ packWARN(WARN_REGEXP), "Use of /c modifier is meaningless without /g" );
+        Perl_warner(aTHX_ packWARN(WARN_REGEXP), 
+            "Use of /c modifier is meaningless without /g" );
     }
 
     pm->op_pmpermflags = pm->op_pmflags;
@@ -10879,11 +10880,11 @@ S_scan_subst(pTHX_ char *start)
 #endif
 
     while (*s) {
-	if (*s == 'e') {
+	if (*s == EXEC_PAT_MOD) {
 	    s++;
 	    es++;
 	}
-	else if (strchr("iogcmsxk", *s))
+	else if (strchr(S_PAT_MODS, *s))
 	    pmflag(&pm->op_pmflags,*s++);
 	else
 	    break;

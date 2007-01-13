@@ -149,11 +149,11 @@ typedef struct regexp_engine {
 #define RXf_PMf_STD_PMMOD	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED)
 #define RXf_PMf_COMPILETIME	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_LOCALE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_KEEPCOPY)
 
-#define CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl)              \
-        case 'i': *(pmfl) |= RXf_PMf_FOLD;       break;   \
-        case 'm': *(pmfl) |= RXf_PMf_MULTILINE;  break;   \
-        case 's': *(pmfl) |= RXf_PMf_SINGLELINE; break;   \
-        case 'x': *(pmfl) |= RXf_PMf_EXTENDED;   break
+#define CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl)                        \
+    case IGNORE_PAT_MOD:    *(pmfl) |= RXf_PMf_FOLD;       break;   \
+    case MULTILINE_PAT_MOD: *(pmfl) |= RXf_PMf_MULTILINE;  break;   \
+    case SINGLE_PAT_MOD:    *(pmfl) |= RXf_PMf_SINGLELINE; break;   \
+    case XTENDED_PAT_MOD:   *(pmfl) |= RXf_PMf_EXTENDED;   break
 
 /* What we have seen */
 #define RXf_LOOKBEHIND_SEEN	0x00020000

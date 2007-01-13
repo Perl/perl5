@@ -228,6 +228,33 @@
           : (REGEXP *)NULL) 
 #endif
 
+
+/* chars and strings used as regex pattern modifiers 
+ * Singlular is a 'c'har, plural is a "string" 
+ */
+#define EXEC_PAT_MOD         'e'
+#define KEEPCOPY_PAT_MOD     'k'
+#define ONCE_PAT_MOD         'o'
+#define GLOBAL_PAT_MOD       'g'
+#define CONTINUE_PAT_MOD     'c'
+#define MULTILINE_PAT_MOD    'm'
+#define SINGLE_PAT_MOD       's'
+#define IGNORE_PAT_MOD       'i'
+#define XTENDED_PAT_MOD      'x'
+
+#define ONCE_PAT_MODS        "o"
+#define KEEPCOPY_PAT_MODS    "k"
+#define EXEC_PAT_MODS        "e"
+#define LOOP_PAT_MODS        "gc"
+
+#define STD_PAT_MODS        "msix"
+
+#define EXT_PAT_MODS    ONCE_PAT_MODS   KEEPCOPY_PAT_MODS
+#define QR_PAT_MODS     STD_PAT_MODS    EXT_PAT_MODS 
+#define M_PAT_MODS      QR_PAT_MODS     LOOP_PAT_MODS
+#define S_PAT_MODS      M_PAT_MODS      EXEC_PAT_MODS
+
+
 /*
  * Because of backward compatibility reasons the PERL_UNUSED_DECL
  * cannot be changed from postfix to PERL_UNUSED_DECL(x).  Sigh.
