@@ -1531,12 +1531,9 @@ Perl_hv_clear_placeholders(pTHX_ HV *hv)
 	/* Loop down the linked list heads  */
 	bool first = 1;
 	HE **oentry = &(HvARRAY(hv))[i];
-	HE *entry = *oentry;
+	HE *entry;
 
-	if (!entry)
-	    continue;
-
-	for (; entry; entry = *oentry) {
+	while ((entry = *oentry)) {
 	    if (HeVAL(entry) == &PL_sv_placeholder) {
 		*oentry = HeNEXT(entry);
 		if (first && !*oentry)
@@ -1569,16 +1566,13 @@ STATIC void
 S_hfreeentries(pTHX_ HV *hv)
 {
     register HE **array;
-    register HE *entry;
-    I32 riter;
-    I32 max;
+    I32 i;
 
 
     if (!HvARRAY(hv))
 	return;
 
-    riter = 0;
-    max = HvMAX(hv);
+    i = HvMAX(hv);
     array = HvARRAY(hv);
     /* make everyone else think the array is empty, so that the destructors
      * called for freed entries can't recusively mess with us */
@@ -1586,19 +1580,17 @@ S_hfreeentries(pTHX_ HV *hv)
     HvFILL(hv) = 0;
     ((XPVHV*) SvANY(hv))->xhv_keys = 0;
 
-    entry = array[0];
-    for (;;) {
-	if (entry) {
+    do {
+	/* Loop down the linked list heads  */
+	HE *entry = array[i];
+
+	while (entry) {
 	    register HE * const oentry = entry;
 	    entry = HeNEXT(entry);
 	    hv_free_ent(hv, oentry);
 	}
-	if (!entry) {
-	    if (++riter > max)
-		break;
-	    entry = array[riter];
-	}
-    }
+    } while (--i >= 0);
+
     HvARRAY(hv) = array;
     (void)hv_iterinit(hv);
 }
