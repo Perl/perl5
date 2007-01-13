@@ -595,7 +595,8 @@ PP(pp_gelem)
 	    break;
 	case 'P':
 	    if (strEQ(second_letter, "ACKAGE")) {
-		const char *const name = HvNAME_get(GvSTASH(gv));
+		const HV * const stash = GvSTASH(gv);
+		const char *const name = stash ? HvNAME_get(stash) : NULL;
 		sv = newSVpv(name ? name : "__ANON__", 0);
 	    }
 	    break;
