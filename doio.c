@@ -1394,7 +1394,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 #else
     if (sp > mark) {
 	char **a;
-	const char *tmps = Nullch;
+	const char *tmps = NULL;
 	Newx(PL_Argv, sp - mark + 1, char*);
 	a = PL_Argv;
 
@@ -1404,7 +1404,7 @@ Perl_do_aexec5(pTHX_ SV *really, register SV **mark, register SV **sp,
 	    else
 		*a++ = "";
 	}
-	*a = Nullch;
+	*a = NULL;
 	if (really)
 	    tmps = SvPV_nolen_const(really);
 	if ((!really && *PL_Argv[0] != '/') ||
@@ -1554,7 +1554,7 @@ Perl_do_exec3(pTHX_ char *incmd, int fd, int do_report)
 	if (*s)
 	    *s++ = '\0';
     }
-    *a = Nullch;
+    *a = NULL;
     if (PL_Argv[0]) {
 	PERL_FPU_PRE_EXEC
 	PerlProc_execvp(PL_Argv[0],PL_Argv);
@@ -1563,15 +1563,13 @@ Perl_do_exec3(pTHX_ char *incmd, int fd, int do_report)
 	    do_execfree();
 	    goto doshell;
 	}
-	{
-	    if (ckWARN(WARN_EXEC))
-		Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
-		    PL_Argv[0], Strerror(errno));
-	    if (do_report) {
-		const int e = errno;
-		PerlLIO_write(fd, (void*)&e, sizeof(int));
-		PerlLIO_close(fd);
-	    }
+	if (ckWARN(WARN_EXEC))
+	    Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
+		PL_Argv[0], Strerror(errno));
+	if (do_report) {
+	    const int e = errno;
+	    PerlLIO_write(fd, (const void*)&e, sizeof(int));
+	    PerlLIO_close(fd);
 	}
     }
     do_execfree();

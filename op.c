@@ -209,10 +209,11 @@ PADOFFSET
 Perl_allocmy(pTHX_ char *name)
 {
     PADOFFSET off;
+    const bool is_our = (PL_in_my == KEY_our);
 
     /* complain about "my $_" etc etc */
     if (*name &&
-	!(PL_in_my == KEY_our ||
+	!(is_our ||
 	  isALPHA(name[1]) ||
 	  (USE_UTF8_IN_NAMES && UTF8_IS_START(name[1])) ||
 	  (name[1] == '_' && name[2])))
@@ -244,22 +245,19 @@ Perl_allocmy(pTHX_ char *name)
 	yyerror(Perl_form(aTHX_ "Can't use global %s in \"my\"",name));
     }
     /* check for duplicate declaration */
-    pad_check_dup(name,
-		(bool)(PL_in_my == KEY_our),
-		(PL_curstash ? PL_curstash : PL_defstash)
-    );
+    pad_check_dup(name, is_our, (PL_curstash ? PL_curstash : PL_defstash));
 
     if (PL_in_my_stash && *name != '$') {
 	yyerror(Perl_form(aTHX_
 		    "Can't declare class for non-scalar %s in \"%s\"",
-		     name, PL_in_my == KEY_our ? "our" : "my"));
+		     name, is_our ? "our" : "my"));
     }
 
     /* allocate a spare slot and store the name in that slot */
 
     off = pad_add_name(name,
 		    PL_in_my_stash,
-		    (PL_in_my == KEY_our 
+		    (is_our
 			? (PL_curstash ? PL_curstash : PL_defstash)
 			: NULL
 		    ),
@@ -576,19 +574,25 @@ Perl_op_refcnt_unlock(pTHX)
 OP *
 Perl_linklist(pTHX_ OP *o)
 {
+    OP *first;
 
     if (o->op_next)
 	return o->op_next;
 
     /* establish postfix order */
-    if (cUNOPo->op_first) {
+    first = cUNOPo->op_first;
+    if (first) {
         register OP *kid;
-	o->op_next = LINKLIST(cUNOPo->op_first);
-	for (kid = cUNOPo->op_first; kid; kid = kid->op_sibling) {
-	    if (kid->op_sibling)
+	o->op_next = LINKLIST(first);
+	kid = first;
+	for (;;) {
+	    if (kid->op_sibling) {
 		kid->op_next = LINKLIST(kid->op_sibling);
-	    else
+		kid = kid->op_sibling;
+	    } else {
 		kid->op_next = o;
+		break;
+	    }
 	}
     }
     else
@@ -844,9 +848,10 @@ Perl_scalarvoid(pTHX_ OP *o)
                      built upon these three nroff macros being used in
                      void context. The pink camel has the details in
                      the script wrapman near page 319. */
-		    if (strnEQ(SvPVX_const(sv), "di", 2) ||
-			strnEQ(SvPVX_const(sv), "ds", 2) ||
-			strnEQ(SvPVX_const(sv), "ig", 2))
+		    const char * const maybe_macro = SvPVX_const(sv);
+		    if (strnEQ(maybe_macro, "di", 2) ||
+			strnEQ(maybe_macro, "ds", 2) ||
+			strnEQ(maybe_macro, "ig", 2))
 			    useless = 0;
 		}
 	    }
@@ -1603,13 +1608,12 @@ S_apply_attrs(pTHX_ HV *stash, SV *target, OP *attrs, bool for_my)
 	    ; 		/* already in %INC */
 	else
 	    Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT,
-			     newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1),
-			     Nullsv);
+			     newSVpvs(ATTRSMODULE), NULL);
     }
     else {
 	Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
-			 newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1),
-			 Nullsv,
+			 newSVpvs(ATTRSMODULE),
+			 NULL,
 			 prepend_elem(OP_LIST,
 				      newSVOP(OP_CONST, 0, stashsv),
 				      prepend_elem(OP_LIST,
@@ -1637,7 +1641,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
     apply_attrs(stash, PAD_SV(target->op_targ), attrs, TRUE);
 
     /* Need package name for method call. */
-    pack = newSVOP(OP_CONST, 0, newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1));
+    pack = newSVOP(OP_CONST, 0, newSVpvs(ATTRSMODULE));
 
     /* Build up the real arg-list. */
     if (stash)
@@ -1704,7 +1708,7 @@ Perl_apply_attrs_string(pTHX_ char *stashpv, CV *cv,
     }
 
     Perl_load_module(aTHX_ PERL_LOADMOD_IMPORT_OPS,
-                     newSVpvn(ATTRSMODULE, sizeof(ATTRSMODULE)-1),
+		     newSVpvs(ATTRSMODULE),
                      NULL, prepend_elem(OP_LIST,
 				  newSVOP(OP_CONST, 0, newSVpv(stashpv,0)),
 				  prepend_elem(OP_LIST,
@@ -2062,12 +2066,12 @@ OP *
 Perl_jmaybe(pTHX_ OP *o)
 {
     if (o->op_type == OP_LIST) {
-	OP *o2;
 #ifdef USE_5005THREADS
-	o2 = newOP(OP_THREADSV, 0);
+	OP * const o2 = newOP(OP_THREADSV, 0);
 	o2->op_targ = find_threadsv(";");
 #else
-	o2 = newSVREF(newGVOP(OP_GV, 0, gv_fetchpv(";", GV_ADD, SVt_PV))),
+	OP * const o2
+	    = newSVREF(newGVOP(OP_GV, 0, gv_fetchpv(";", GV_ADD, SVt_PV)));
 #endif /* USE_5005THREADS */
 	o = convert(OP_JOIN, 0, prepend_elem(OP_LIST, o2, o));
     }
@@ -2858,7 +2862,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 
     if (expr->op_type == OP_CONST) {
 	STRLEN plen;
-	SV *pat = ((SVOP*)expr)->op_sv;
+	SV * const pat = ((SVOP*)expr)->op_sv;
 	const char *p = SvPV_const(pat, plen);
 	if ((o->op_flags & OPf_SPECIAL) && (*p == ' ' && p[1] == '\0')) {
 	    U32 was_readonly = SvREADONLY(pat);
@@ -2921,7 +2925,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
     if (repl) {
 	OP *curop;
 	if (pm->op_pmflags & PMf_EVAL) {
-	    curop = 0;
+	    curop = NULL;
 	    if (CopLINE(PL_curcop) < (line_t)PL_multi_end)
 		CopLINE_set(PL_curcop, (line_t)PL_multi_end);
 	}
@@ -2947,7 +2951,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl)
 		    }
 #else
 		    if (curop->op_type == OP_GV) {
-			GV *gv = cGVOPx_gv(curop);
+			GV * const gv = cGVOPx_gv(curop);
 			repl_has_vars = 1;
 			if (strchr("&`'123456789+-\016\022", *GvENAME(gv)))
 			    break;

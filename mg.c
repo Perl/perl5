@@ -1006,13 +1006,13 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '(':
 	sv_setiv(sv, (IV)PL_gid);
 #ifdef HAS_GETGROUPS
-	Perl_sv_setpvf(aTHX_ sv, "%"Gid_t_f, (long unsigned int)PL_gid);
+	Perl_sv_setpvf(aTHX_ sv, "%"Gid_t_f, PL_gid);
 #endif
 	goto add_groups;
     case ')':
 	sv_setiv(sv, (IV)PL_egid);
 #ifdef HAS_GETGROUPS
-	Perl_sv_setpvf(aTHX_ sv, "%"Gid_t_f, (long unsigned int)PL_egid);
+	Perl_sv_setpvf(aTHX_ sv, "%"Gid_t_f, PL_egid);
 #endif
       add_groups:
 #ifdef HAS_GETGROUPS
@@ -1023,7 +1023,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             num_groups = getgroups(num_groups, gary);
 	    while (--num_groups >= 0)
 		Perl_sv_catpvf(aTHX_ sv, " %"Gid_t_f,
-                    (long unsigned int)gary[num_groups]);
+			       gary[num_groups]);
             Safefree(gary);
 	}
 #endif
@@ -1274,7 +1274,7 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
     		PL_psig_name[i]=0;
     	    }
     	    if(PL_psig_ptr[i]) {
-                SV *to_dec=PL_psig_ptr[i];
+		SV * const to_dec=PL_psig_ptr[i];
     		PL_psig_ptr[i]=0;
 		LEAVE;
     		SvREFCNT_dec(to_dec);
@@ -1946,12 +1946,11 @@ Perl_magic_getvec(pTHX_ SV *sv, MAGIC *mg)
     SV * const lsv = LvTARG(sv);
     PERL_UNUSED_ARG(mg);
 
-    if (!lsv) {
+    if (lsv)
+	sv_setuv(sv, do_vecget(lsv, LvTARGOFF(sv), LvTARGLEN(sv)));
+    else
 	SvOK_off(sv);
-	return 0;
-    }
 
-    sv_setuv(sv, do_vecget(lsv, LvTARGOFF(sv), LvTARGLEN(sv)));
     return 0;
 }
 
