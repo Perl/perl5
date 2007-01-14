@@ -775,9 +775,16 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     HV *stash = NULL;
     const I32 no_init = flags & (GV_NOADD_NOINIT | GV_NOINIT);
     const I32 no_expand = flags & GV_NOEXPAND;
-    const I32 add = flags & ~SVf_UTF8 & ~GV_NOADD_NOINIT & ~GV_NOEXPAND;
+    const I32 add =
+	flags & ~SVf_UTF8 & ~GV_NOADD_NOINIT & ~GV_NOEXPAND & ~GV_NOTQUAL;
     const char *const name_end = nambeg + full_len;
     const char *const name_em1 = name_end - 1;
+
+    if (flags & GV_NOTQUAL) {
+	/* Caller promised that there is no stash, so we can skip the check. */
+	len = full_len;
+	goto no_stash;
+    }
 
     if (full_len > 2 && *name == '*' && isALPHA(name[1])) {
 	/* accidental stringify on a GV? */
@@ -840,6 +847,7 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     /* No stash in name, so see how we can default */
 
     if (!stash) {
+    no_stash:
 	if (len && isIDFIRST_lazy(name)) {
 	    bool global = FALSE;
 
@@ -1280,10 +1288,10 @@ Perl_newIO(pTHX)
     SvOBJECT_on(io);
     /* Clear the stashcache because a new IO could overrule a package name */
     hv_clear(PL_stashcache);
-    iogv = gv_fetchpvn_flags("FileHandle::", 12, 0, SVt_PVHV);
+    iogv = gv_fetchpvs("FileHandle::", 0, SVt_PVHV);
     /* unless exists($main::{FileHandle}) and defined(%main::FileHandle::) */
     if (!(iogv && GvHV(iogv) && HvARRAY(GvHV(iogv))))
-      iogv = gv_fetchpvn_flags("IO::Handle::", 12, TRUE, SVt_PVHV);
+      iogv = gv_fetchpvs("IO::Handle::", GV_ADD, SVt_PVHV);
     SvSTASH_set(io, (HV*)SvREFCNT_inc(GvHV(iogv)));
     return io;
 }

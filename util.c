@@ -2229,7 +2229,7 @@ Perl_my_popen(pTHX_ char *cmd, char *mode)
 	    PerlProc__exit(1);
 	}
 #endif	/* defined OS2 */
-	if ((tmpgv = gv_fetchpv("$",TRUE, SVt_PV))) {
+	if ((tmpgv = gv_fetchpvs("$", GV_ADD|GV_NOTQUAL, SVt_PV))) {
 	    SvREADONLY_off(GvSV(tmpgv));
 	    sv_setiv(GvSV(tmpgv), PerlProc_getpid());
 	    SvREADONLY_on(GvSV(tmpgv));
