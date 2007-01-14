@@ -285,7 +285,7 @@ Perl_find_threadsv(pTHX_ const char *name)
     if (svp)
 	MUTEX_UNLOCK(&thr->mutex);
     else {
-	SV *sv = NEWSV(0, 0);
+	SV *sv = newSV(0);
 	av_store(thr->threadsv, key, sv);
 	thr->threadsvp = AvARRAY(thr->threadsv);
 	MUTEX_UNLOCK(&thr->mutex);
@@ -4590,7 +4590,7 @@ Perl_newATTRSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 	const char * const tname = (name ? name : aname);
 
 	if (PERLDB_SUBLINE && PL_curstash != PL_debstash) {
-	    SV * const sv = NEWSV(0,0);
+	    SV * const sv = newSV(0);
 	    SV * const tmpstr = sv_newmortal();
 	    GV * const db_postponed = gv_fetchpv("DB::postponed", GV_ADDMULTI, SVt_PVHV);
 	    HV *hv;
@@ -4769,7 +4769,7 @@ Perl_newXS(pTHX_ char *name, XSUBADDR_t subaddr, char *filename)
     if (cv)				/* must reuse cv if autoloaded */
 	cv_undef(cv);
     else {
-	cv = (CV*)NEWSV(1105,0);
+	cv = (CV*)newSV(0);
 	sv_upgrade((SV *)cv, SVt_PVCV);
 	if (name) {
 	    GvCV(gv) = cv;

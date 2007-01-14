@@ -280,7 +280,7 @@ perl_construct(pTHXx)
 
 	PL_curcop = &PL_compiling;	/* needed by ckWARN, right away */
 
-	PL_linestr = NEWSV(65,79);
+	PL_linestr = newSV(79);
 	sv_upgrade(PL_linestr,SVt_PVIV);
 
 	if (!SvREADONLY(&PL_sv_undef)) {
@@ -331,7 +331,7 @@ perl_construct(pTHXx)
 
     {
 	U8 *s;
-	PL_patchlevel = NEWSV(0,4);
+	PL_patchlevel = newSV(4);
 	(void)SvUPGRADE(PL_patchlevel, SVt_PVNV);
 	if (PERL_REVISION > 127 || PERL_VERSION > 127 || PERL_SUBVERSION > 127)
 	    SvGROW(PL_patchlevel, UTF8_MAXLEN*3+1);
@@ -2168,7 +2168,7 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
     }
 
-    PL_main_cv = PL_compcv = (CV*)NEWSV(1104,0);
+    PL_main_cv = PL_compcv = (CV*)newSV(0);
     sv_upgrade((SV *)PL_compcv, SVt_PVCV);
     CvUNIQUE_on(PL_compcv);
 
@@ -3702,7 +3702,7 @@ S_open_script(pTHX_ const char *scriptname, bool dosearch, SV *sv)
     else if (PL_preprocess) {
 	const char * const cpp_cfg = CPPSTDIN;
 	SV * const cpp = newSVpvs("");
-	SV * const cmd = NEWSV(0,0);
+	SV * const cmd = newSV(0);
 
 	if (cpp_cfg[0] == 0) /* PERL_MICRO? */
 	     Perl_croak(aTHX_ "Can't run with cpp -P with CPPSTDIN undefined");
@@ -4629,7 +4629,7 @@ S_init_predump_symbols(pTHX)
     GvMULTI_on(tmpgv);
     GvIOp(tmpgv) = (IO*)SvREFCNT_inc_simple(io);
 
-    PL_statname = NEWSV(66,0);		/* last filename we did stat on */
+    PL_statname = newSV(0);		/* last filename we did stat on */
 
     Safefree(PL_osname);
     PL_osname = savepv(OSNAME);
@@ -4679,10 +4679,10 @@ S_init_postdump_symbols(pTHX_ register int argc, register char **argv, register 
 {
     GV* tmpgv;
 
-    PL_toptarget = NEWSV(0,0);
+    PL_toptarget = newSV(0);
     sv_upgrade(PL_toptarget, SVt_PVFM);
     sv_setpvn(PL_toptarget, "", 0);
-    PL_bodytarget = NEWSV(0,0);
+    PL_bodytarget = newSV(0);
     sv_upgrade(PL_bodytarget, SVt_PVFM);
     sv_setpvn(PL_bodytarget, "", 0);
     PL_formtarget = PL_bodytarget;
@@ -4814,7 +4814,7 @@ S_init_perllib(pTHX)
 #ifdef MACOS_TRADITIONAL
     {
 	Stat_t tmpstatbuf;
-    	SV * privdir = NEWSV(55, 0);
+    	SV * privdir = newSV(0);
 	char * macperl = PerlEnv_getenv("MACPERL");
 	
 	if (!macperl)
@@ -4919,7 +4919,7 @@ S_incpush_if_exists(pTHX_ SV *dir)
     if (PerlLIO_stat(SvPVX_const(dir), &tmpstatbuf) >= 0 &&
 	S_ISDIR(tmpstatbuf.st_mode)) {
 	av_push(GvAVn(PL_incgv), dir);
-	dir = NEWSV(0,0);
+	dir = newSV(0);
     }
     return dir;
 }
@@ -4935,12 +4935,12 @@ S_incpush(pTHX_ const char *dir, bool addsubdirs, bool addoldvers, bool usesep,
 	return;
 
     if (addsubdirs || addoldvers) {
-	subdir = NEWSV(0,0);
+	subdir = newSV(0);
     }
 
     /* Break at all separators */
     while (p && *p) {
-	SV *libdir = NEWSV(55,0);
+	SV *libdir = newSV(0);
         const char *s;
 
 	/* skip any consecutive separators */
@@ -5198,10 +5198,10 @@ S_init_main_thread(pTHX)
      * because sv_setpvn does SvTAINT and the taint
      * fields thread selfness being set.
      */
-    PL_toptarget = NEWSV(0,0);
+    PL_toptarget = newSV(0);
     sv_upgrade(PL_toptarget, SVt_PVFM);
     sv_setpvn(PL_toptarget, "", 0);
-    PL_bodytarget = NEWSV(0,0);
+    PL_bodytarget = newSV(0);
     sv_upgrade(PL_bodytarget, SVt_PVFM);
     sv_setpvn(PL_bodytarget, "", 0);
     PL_formtarget = PL_bodytarget;

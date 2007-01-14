@@ -2307,7 +2307,7 @@ Moving it away shrinks pp_hot.c; shrinking pp_hot.c helps speed perl up.
 PerlIO *
 Perl_start_glob (pTHX_ SV *tmpglob, IO *io)
 {
-    SV * const tmpcmd = NEWSV(55, 0);
+    SV * const tmpcmd = newSV(0);
     PerlIO *fp;
     ENTER;
     SAVEFREESV(tmpcmd);

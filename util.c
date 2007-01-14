@@ -3292,7 +3292,7 @@ Perl_new_struct_thread(pTHX_ struct perl_thread *t)
     PL_in_eval = EVAL_NULL;	/* ~(EVAL_INEVAL|EVAL_WARNONLY|EVAL_KEEPERR|EVAL_INREQUIRE) */
     PL_restartop = 0;
 
-    PL_statname = NEWSV(66,0);
+    PL_statname = newSV(0);
     PL_errors = newSVpvn("", 0);
     PL_maxscream = -1;
     PL_regcompp = MEMBER_TO_FPTR(Perl_pregcomp);

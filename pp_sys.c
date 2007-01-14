@@ -352,7 +352,7 @@ PP(pp_backtick)
 	}
 	else {
 	    for (;;) {
-		SV * const sv = NEWSV(56, 79);
+		SV * const sv = newSV(79);
 		if (sv_gets(sv, fp, 0) == NULL) {
 		    SvREFCNT_dec(sv);
 		    break;
@@ -1451,7 +1451,7 @@ PP(pp_prtf)
 	RETURN;
     }
 
-    sv = NEWSV(0,0);
+    sv = newSV(0);
     if (!(io = GvIO(gv))) {
 	if (ckWARN2(WARN_UNOPENED,WARN_CLOSED))
 	    report_evil_fh(gv, io, PL_op->op_type);
@@ -2619,7 +2619,7 @@ PP(pp_ssockopt)
 #ifdef HAS_SOCKET
     dSP;
     const int optype = PL_op->op_type;
-    SV * const sv = (optype == OP_GSOCKOPT) ? sv_2mortal(NEWSV(22, 257)) : POPs;
+    SV * const sv = (optype == OP_GSOCKOPT) ? sv_2mortal(newSV(257)) : POPs;
     const unsigned int optname = (unsigned int) POPi;
     const unsigned int lvl = (unsigned int) POPi;
     GV * const gv = (GV*)POPs;
@@ -2705,7 +2705,7 @@ PP(pp_getpeername)
     if (!io || !IoIFP(io))
 	goto nuts;
 
-    sv = sv_2mortal(NEWSV(22, 257));
+    sv = sv_2mortal(newSV(257));
     (void)SvPOK_only(sv);
     len = 256;
     SvCUR_set(sv, len);

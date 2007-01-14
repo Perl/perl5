@@ -332,7 +332,7 @@ PADOFFSET
 Perl_pad_add_name(pTHX_ char *name, HV* typestash, HV* ourstash, bool fake)
 {
     const PADOFFSET offset = pad_alloc(OP_PADSV, SVs_PADMY);
-    SV* const namesv = NEWSV(1102, 0);
+    SV* const namesv = newSV(0);
 
     ASSERT_CURPAD_ACTIVE("pad_add_name");
 
@@ -462,7 +462,7 @@ PADOFFSET
 Perl_pad_add_anon(pTHX_ SV* sv, OPCODE op_type)
 {
     PADOFFSET ix;
-    SV* const name = NEWSV(1106, 0);
+    SV* const name = newSV(0);
     sv_upgrade(name, SVt_PVNV);
     sv_setpvn(name, "&", 1);
     SvIV_set(name, -1);
@@ -1027,7 +1027,7 @@ Perl_pad_swipe(pTHX_ PADOFFSET po, bool refadjust)
     /* if pad tmps aren't shared between ops, then there's no need to
      * create a new tmp when an existing op is freed */
 #ifdef USE_BROKEN_PAD_RESET
-    PL_curpad[po] = NEWSV(1107,0);
+    PL_curpad[po] = newSV(0);
     SvPADTMP_on(PL_curpad[po]);
 #else
     PL_curpad[po] = &PL_sv_undef;
@@ -1347,7 +1347,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
     ENTER;
     SAVESPTR(PL_compcv);
 
-    cv = PL_compcv = (CV*)NEWSV(1104, 0);
+    cv = PL_compcv = (CV*)newSV(0);
     sv_upgrade((SV *)cv, SvTYPE(proto));
     CvFLAGS(cv) = CvFLAGS(proto) & ~(CVf_CLONE|CVf_WEAKOUTSIDE);
     CvCLONED_on(cv);
@@ -1407,7 +1407,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 		else if (*name == '%')
 		    sv = (SV*)newHV();
 		else
-		    sv = NEWSV(0, 0);
+		    sv = newSV(0);
 		if (!SvPADBUSY(sv))
 		    SvPADMY_on(sv);
 		PL_curpad[ix] = sv;
@@ -1417,7 +1417,7 @@ S_cv_clone2(pTHX_ CV *proto, CV *outside)
 	    PL_curpad[ix] = SvREFCNT_inc_NN(ppad[ix]);
 	}
 	else {
-	    SV* sv = NEWSV(0, 0);
+	    SV* sv = newSV(0);
 	    SvPADTMP_on(sv);
 	    PL_curpad[ix] = sv;
 	}
@@ -1532,7 +1532,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth, int has_args)
 		    else if (sigil == '%')
 			sv = (SV*)newHV();
 		    else
-			sv = NEWSV(0, 0);
+			sv = newSV(0);
 		    av_store(newpad, ix, sv);
 		    SvPADMY_on(sv);
 		}
@@ -1542,7 +1542,7 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth, int has_args)
 	    }
 	    else {
 		/* save temporaries on recursion? */
-		SV *sv = NEWSV(0, 0);
+		SV * const sv = newSV(0);
 		av_store(newpad, ix, sv);
 		SvPADTMP_on(sv);
 	    }

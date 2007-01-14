@@ -430,7 +430,7 @@ been wrapped here):
 
  I32 match(SV *string, char *pattern)
  {
-     SV *command = NEWSV(1099, 0), *retval;
+     SV *command = newSV(0), *retval;
      STRLEN n_a;
 
      sv_setpvf(command, "my $string = '%s'; $string =~ %s",
@@ -452,7 +452,7 @@ been wrapped here):
 
  I32 substitute(SV **string, char *pattern)
  {
-     SV *command = NEWSV(1099, 0), *retval;
+     SV *command = newSV(0), *retval;
      STRLEN n_a;
 
      sv_setpvf(command, "$string = '%s'; ($string =~ %s)",
@@ -475,7 +475,7 @@ been wrapped here):
 
  I32 matches(SV *string, char *pattern, AV **match_list)
  {
-     SV *command = NEWSV(1099, 0);
+     SV *command = newSV(0);
      I32 num_matches;
      STRLEN n_a;
 
@@ -505,7 +505,7 @@ been wrapped here):
      perl_parse(my_perl, NULL, 3, embedding, NULL);
      PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
 
-     text = NEWSV(1099,0);
+     text = newSV(0);
      sv_setpv(text, "When he is at a convenience store and the "
 	"bill comes to some amount like 76 cents, Maynard is "
 	"aware that there is something he *should* do, something "
