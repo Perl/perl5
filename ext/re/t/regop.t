@@ -256,3 +256,4 @@ Got 108 bytes for offset annotations.
 Offsets: [13]
 1:1[3] 3:4[0]
 %MATCHED%        
+Freeing REx: "[q]"

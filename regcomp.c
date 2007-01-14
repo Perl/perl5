@@ -151,7 +151,9 @@ typedef struct RExC_state_t {
 #define RExC_end	(pRExC_state->end)
 #define RExC_parse	(pRExC_state->parse)
 #define RExC_whilem_seen	(pRExC_state->whilem_seen)
-#define RExC_offsets	(pRExC_state->rxi->offsets) /* I am not like the others */
+#ifdef RE_TRACK_PATTERN_OFFSETS
+#define RExC_offsets	(pRExC_state->rxi->u.offsets) /* I am not like the others */
+#endif
 #define RExC_emit	(pRExC_state->emit)
 #define RExC_emit_start	(pRExC_state->emit_start)
 #define RExC_naughty	(pRExC_state->naughty)
@@ -511,7 +513,21 @@ static const scan_data_t zero_scan_data =
  * Element 0 holds the number n.
  * Position is 1 indexed.
  */
-
+#ifndef RE_TRACK_PATTERN_OFFSETS
+#define Set_Node_Offset_To_R(node,byte)
+#define Set_Node_Offset(node,byte)
+#define Set_Cur_Node_Offset
+#define Set_Node_Length_To_R(node,len)
+#define Set_Node_Length(node,len)
+#define Set_Node_Cur_Length(node)
+#define Node_Offset(n) 
+#define Node_Length(n) 
+#define Set_Node_Offset_Length(node,offset,len)
+#define ProgLen(ri) ri->u.proglen
+#define SetProgLen(ri,x) ri->u.proglen = x
+#else
+#define ProgLen(ri) ri->u.offsets[0]
+#define SetProgLen(ri,x) ri->u.offsets[0] = x
 #define Set_Node_Offset_To_R(node,byte) STMT_START {			\
     if (! SIZE_ONLY) {							\
 	MJD_OFFSET_DEBUG(("** (%d) offset of node %d is %d.\n",		\
@@ -554,11 +570,11 @@ static const scan_data_t zero_scan_data =
     Set_Node_Offset_To_R((node)-RExC_emit_start, (offset));	\
     Set_Node_Length_To_R((node)-RExC_emit_start, (len));	\
 } STMT_END
-
+#endif
 
 #if PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS
 #define EXPERIMENTAL_INPLACESCAN
-#endif
+#endif /*RE_TRACK_PATTERN_OFFSETS*/
 
 #define DEBUG_STUDYDATA(str,data,depth)                              \
 DEBUG_OPTIMISE_MORE_r(if(data){                                      \
@@ -1843,9 +1859,12 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         
 #ifdef DEBUGGING
         regnode *optimize = NULL;
+#ifdef RE_TRACK_PATTERN_OFFSETS
+
         U32 mjd_offset = 0;
         U32 mjd_nodelen = 0;
-#endif
+#endif /* RE_TRACK_PATTERN_OFFSETS */
+#endif /* DEBUGGING */
         /*
            This means we convert either the first branch or the first Exact,
            depending on whether the thing following (in 'last') is a branch
@@ -1858,25 +1877,28 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch, regnode *firs
         if ( first != startbranch || OP( last ) == BRANCH ) {
             /* branch sub-chain */
             NEXT_OFF( first ) = (U16)(last - first);
+#ifdef RE_TRACK_PATTERN_OFFSETS
             DEBUG_r({
                 mjd_offset= Node_Offset((convert));
                 mjd_nodelen= Node_Length((convert));
             });
+#endif
             /* whole branch chain */
-        } else {
+        }
+#ifdef RE_TRACK_PATTERN_OFFSETS
+        else {
             DEBUG_r({
                 const  regnode *nop = NEXTOPER( convert );
                 mjd_offset= Node_Offset((nop));
                 mjd_nodelen= Node_Length((nop));
             });
         }
-        
         DEBUG_OPTIMISE_r(
             PerlIO_printf(Perl_debug_log, "%*sMJD offset:%"UVuf" MJD length:%"UVuf"\n",
                 (int)depth * 2 + 2, "",
                 (UV)mjd_offset, (UV)mjd_nodelen)
         );
-
+#endif
         /* But first we check to see if there is a common prefix we can 
            split out as an EXACT and put in front of the TRIE node.  */
         trie->startstate= 1;
@@ -4130,15 +4152,14 @@ Perl_re_compile(pTHX_ char *exp, char *xend, PMOP *pm)
     }
 
     /* Useful during FAIL. */
-    Newxz(ri->offsets, 2*RExC_size+1, U32); /* MJD 20001228 */
-    if (ri->offsets) {
-	ri->offsets[0] = RExC_size;
-    }
+#ifdef RE_TRACK_PATTERN_OFFSETS
+    Newxz(ri->u.offsets, 2*RExC_size+1, U32); /* MJD 20001228 */
     DEBUG_OFFSETS_r(PerlIO_printf(Perl_debug_log,
                           "%s %"UVuf" bytes for offset annotations.\n",
-                          ri->offsets ? "Got" : "Couldn't get",
+                          ri->u.offsets ? "Got" : "Couldn't get",
                           (UV)((2*RExC_size+1) * sizeof(U32))));
-
+#endif
+    SetProgLen(ri,RExC_size);
     RExC_rx = r;
     RExC_rxi = ri;
 
@@ -4610,18 +4631,20 @@ reStudy:
         PerlIO_printf(Perl_debug_log,"Final program:\n");
         regdump(r);
     });
-    DEBUG_OFFSETS_r(if (ri->offsets) {
-        const U32 len = ri->offsets[0];
+#ifdef RE_TRACK_PATTERN_OFFSETS
+    DEBUG_OFFSETS_r(if (ri->u.offsets) {
+        const U32 len = ri->u.offsets[0];
         U32 i;
         GET_RE_DEBUG_FLAGS_DECL;
-        PerlIO_printf(Perl_debug_log, "Offsets: [%"UVuf"]\n\t", (UV)ri->offsets[0]);
+        PerlIO_printf(Perl_debug_log, "Offsets: [%"UVuf"]\n\t", (UV)ri->u.offsets[0]);
         for (i = 1; i <= len; i++) {
-            if (ri->offsets[i*2-1] || ri->offsets[i*2])
+            if (ri->u.offsets[i*2-1] || ri->u.offsets[i*2])
                 PerlIO_printf(Perl_debug_log, "%"UVuf":%"UVuf"[%"UVuf"] ",
-                (UV)i, (UV)ri->offsets[i*2-1], (UV)ri->offsets[i*2]);
+                (UV)i, (UV)ri->u.offsets[i*2-1], (UV)ri->u.offsets[i*2]);
             }
         PerlIO_printf(Perl_debug_log, "\n");
     });
+#endif
     return(r);
 }
 
@@ -7748,6 +7771,7 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
     NODE_ALIGN_FILL(ret);
     ptr = ret;
     FILL_ADVANCE_NODE(ptr, op);
+#ifdef RE_TRACK_PATTERN_OFFSETS
     if (RExC_offsets) {         /* MJD */
 	MJD_OFFSET_DEBUG(("%s:%d: (op %s) %s %"UVuf" (len %"UVuf") (max %"UVuf").\n", 
               "reg_node", __LINE__, 
@@ -7759,7 +7783,7 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op)
               (UV)RExC_offsets[0])); 
 	Set_Node_Offset(RExC_emit, RExC_parse + (op == END));
     }
-
+#endif
     RExC_emit = ptr;
     return(ret);
 }
@@ -7801,6 +7825,7 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
     NODE_ALIGN_FILL(ret);
     ptr = ret;
     FILL_ADVANCE_NODE_ARG(ptr, op, arg);
+#ifdef RE_TRACK_PATTERN_OFFSETS
     if (RExC_offsets) {         /* MJD */
 	MJD_OFFSET_DEBUG(("%s(%d): (op %s) %s %"UVuf" <- %"UVuf" (max %"UVuf").\n", 
               "reganode",
@@ -7813,7 +7838,7 @@ S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg)
               (UV)RExC_offsets[0])); 
 	Set_Cur_Node_Offset;
     }
-            
+#endif            
     RExC_emit = ptr;
     return(ret);
 }
@@ -7874,6 +7899,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
 
     while (src > opnd) {
 	StructCopy(--src, --dst, regnode);
+#ifdef RE_TRACK_PATTERN_OFFSETS
         if (RExC_offsets) {     /* MJD 20010112 */
 	    MJD_OFFSET_DEBUG(("%s(%d): (op %s) %s copy %"UVuf" -> %"UVuf" (max %"UVuf").\n",
                   "reg_insert",
@@ -7887,10 +7913,12 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
 	    Set_Node_Offset_To_R(dst-RExC_emit_start, Node_Offset(src));
 	    Set_Node_Length_To_R(dst-RExC_emit_start, Node_Length(src));
         }
+#endif
     }
     
 
     place = opnd;		/* Op node, where operand used to be. */
+#ifdef RE_TRACK_PATTERN_OFFSETS
     if (RExC_offsets) {         /* MJD */
 	MJD_OFFSET_DEBUG(("%s(%d): (op %s) %s %"UVuf" <- %"UVuf" (max %"UVuf").\n", 
               "reginsert",
@@ -7904,6 +7932,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, U8 op, regnode *opnd, U32 depth)
 	Set_Node_Offset(place, RExC_parse);
 	Set_Node_Length(place, 1);
     }
+#endif    
     src = NEXTOPER(place);
     FILL_ADVANCE_NODE(place, op);
     Zero(src, offset, regnode);
@@ -8539,8 +8568,10 @@ Perl_regfree_internal(pTHX_ struct regexp *r)
                 PL_colors[4],PL_colors[5],s);
         }
     });
-
-    Safefree(ri->offsets);             /* 20010421 MJD */
+#ifdef RE_TRACK_PATTERN_OFFSETS
+    if (ri->u.offsets)
+        Safefree(ri->u.offsets);             /* 20010421 MJD */
+#endif
     if (ri->data) {
 	int n = ri->data->count;
 	PAD* new_comppad = NULL;
@@ -8749,7 +8780,7 @@ Perl_regdupe_internal(pTHX_ const regexp *r, CLONE_PARAMS *param)
     RXi_GET_DECL(r,ri);
     
     npar = r->nparens+1;
-    len = ri->offsets[0];
+    len = ProgLen(ri);
     
     Newxc(reti, sizeof(regexp_internal) + (len+1)*sizeof(regnode), char, regexp_internal);
     Copy(ri->program, reti->program, len+1, regnode);
@@ -8827,9 +8858,15 @@ Perl_regdupe_internal(pTHX_ const regexp *r, CLONE_PARAMS *param)
 
     reti->name_list_idx = ri->name_list_idx;
 
-    Newx(reti->offsets, 2*len+1, U32);
-    Copy(ri->offsets, reti->offsets, 2*len+1, U32);
-    
+#ifdef RE_TRACK_PATTERN_OFFSETS
+    if (ri->u.offsets) {
+        Newx(reti->u.offsets, 2*len+1, U32);
+        Copy(ri->u.offsets, reti->u.offsets, 2*len+1, U32);
+    }
+#else
+    SetProgLen(reti,len);
+#endif
+
     return (void*)reti;
 }
 

@@ -23,6 +23,11 @@ typedef OP OP_4tree;			/* Will be redefined later. */
 /* Not for production use: */
 #define PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS 0
 
+/* Activate offsets code - set to if 1 to enable */
+#ifdef DEBUGGING
+#define RE_TRACK_PATTERN_OFFSETS
+#endif
+
 /* Unless the next line is uncommented it is illegal to combine lazy 
    matching with possessive matching. Frankly it doesn't make much sense 
    to allow it as X*?+ matches nothing, X+?+ matches a single char only, 
@@ -104,9 +109,15 @@ typedef struct regexp_paren_ofs {
 
  typedef struct regexp_internal {
         int name_list_idx;	/* Optional data index of an array of paren names */
-	U32 *offsets;           /* offset annotations 20001228 MJD 
-                                   data about mapping the program to the 
-                                   string*/
+        union {
+	    U32 *offsets;           /* offset annotations 20001228 MJD
+                                       data about mapping the program to the
+                                       string -
+                                       offsets[0] is proglen when this is used
+                                       */
+            U32 proglen;
+        } u;
+
         regexp_paren_ofs *swap; /* Swap copy of *startp / *endp */                                   
         regnode *regstclass;    /* Optional startclass as identified or constructed
                                    by the optimiser */
