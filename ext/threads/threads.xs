@@ -221,10 +221,6 @@ S_ithread_free(pTHX_ ithread *thread)
     }
 #endif
 
-    /* Call PerlMemShared_free() in the context of the "first" interpreter
-     * per http://www.nntp.perl.org/group/perl.perl5.porters/110772
-     */
-    aTHX = MY_POOL.main_thread.interp;
     PerlMemShared_free(thread);
 
     /* total_threads >= 1 is used to veto cleanup by the main thread,
@@ -538,6 +534,12 @@ S_ithread_run(void * arg)
 
         my_exit(exit_code);
     }
+
+    /* at this point the interpreter may have been freed, so call
+     * free in the context of of the 'main' interpreter. That can't have
+     * been freed, due to the veto_cleanup mechanism */
+
+    aTHX = MY_POOL.main_thread.interp;
 
     MUTEX_LOCK(&thread->mutex);
     S_ithread_free(aTHX_ thread); /* releases MUTEX */
