@@ -1963,8 +1963,9 @@ Perl_ingroup(pTHX_ Gid_t testgid, Uid_t effective)
         Safefree(gary);
         return rc;
     }
-#endif
+#else
     return FALSE;
+#endif
 #endif
 }
 

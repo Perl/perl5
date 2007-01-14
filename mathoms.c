@@ -1204,6 +1204,13 @@ Perl_unpack_str(pTHX_ char *pat, char *patend, char *s, char *strbeg,
 
     return unpackstring(pat, patend, s, strend, flags);
 }
+
+/* Whilst this should really be STATIC, it was not in 5.8.7, hence something
+   may have linked against it.  */
+void
+S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8)
+{
+}
 #endif /* NO_MATHOMS */
 
 /*

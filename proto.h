@@ -1994,7 +1994,7 @@ STATIC char*	S_stdize_locale(pTHX_ char* locs);
 STATIC COP*	S_closest_cop(pTHX_ COP *cop, const OP *o);
 STATIC SV*	S_mess_alloc(pTHX);
 PERL_CALLCONV const char *	vdie_croak_common(pTHX_ const char *pat, va_list *args, STRLEN *msglen, I32* utf8);
-PERL_CALLCONV void	vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8);
+STATIC bool	S_vdie_common(pTHX_ const char *message, STRLEN msglen, I32 utf8, bool warn);
 STATIC char *	S_write_no_mem(pTHX)
 			__attribute__noreturn__;
 

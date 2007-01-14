@@ -1374,7 +1374,8 @@ s	|COP*	|closest_cop	|NN COP *cop|NULLOK const OP *o
 s	|SV*	|mess_alloc
 xo	|const char *|vdie_croak_common|NULLOK const char *pat|NULLOK va_list *args \
 				|NULLOK STRLEN *msglen|NULLOK I32* utf8
-xo	|void	|vdie_common	|NULLOK const char *message|STRLEN msglen|I32 utf8
+s	|bool	|vdie_common	|NULLOK const char *message|STRLEN msglen\
+				|I32 utf8|bool warn
 sr	|char *	|write_no_mem
 #endif
 

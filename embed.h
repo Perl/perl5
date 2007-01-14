@@ -1418,6 +1418,7 @@
 #define mess_alloc		S_mess_alloc
 #endif
 #ifdef PERL_CORE
+#define vdie_common		S_vdie_common
 #define write_no_mem		S_write_no_mem
 #endif
 #endif
@@ -3476,6 +3477,7 @@
 #ifdef PERL_CORE
 #define closest_cop(a,b)	S_closest_cop(aTHX_ a,b)
 #define mess_alloc()		S_mess_alloc(aTHX)
+#define vdie_common(a,b,c,d)	S_vdie_common(aTHX_ a,b,c,d)
 #define write_no_mem()		S_write_no_mem(aTHX)
 #endif
 #endif

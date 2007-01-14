@@ -2950,15 +2950,15 @@ Perl_yylex(pTHX)
 		}
 #endif
 		if (d) {
-		    const U32 oldpdb = PL_perldb;
-		    const bool oldn = PL_minus_n;
-		    const bool oldp = PL_minus_p;
-
 		    while (*d && !isSPACE(*d)) d++;
 		    while (SPACE_OR_TAB(*d)) d++;
 
 		    if (*d++ == '-') {
 			const bool switches_done = PL_doswitches;
+			const U32 oldpdb = PL_perldb;
+			const bool oldn = PL_minus_n;
+			const bool oldp = PL_minus_p;
+
 			do {
 			    if (*d == 'M' || *d == 'm') {
 				const char * const m = d;
@@ -4155,6 +4155,7 @@ Perl_yylex(pTHX)
 	    just_a_word_zero_gv:
 		gv = NULL;
 		gvp = NULL;
+		orig_keyword = 0;
 	    }
 	  just_a_word: {
 		SV *sv;
