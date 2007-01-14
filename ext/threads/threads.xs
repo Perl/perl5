@@ -202,11 +202,6 @@ S_ithread_free(pTHX_ ithread *thread)
     thread->prev->next = thread->next;
     thread->next = NULL;
     thread->prev = NULL;
-
-    /* after decrementing this thread count and unlocking the MUTEX, this
-     * thread must not make any further use of MY_POOL, as it may be freed
-     */
-    MY_POOL.total_threads--;
     MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
     /* Thread is now disowned */
@@ -231,6 +226,16 @@ S_ithread_free(pTHX_ ithread *thread)
      */
     aTHX = MY_POOL.main_thread.interp;
     PerlMemShared_free(thread);
+
+    /* total_threads >= 1 is used to veto cleanup by the main thread,
+     * should it happen to exit while other threads still exist.
+     * Decrement this as the very last thing in the thread's existence,
+     * otherwise MY_POOL and global state such as PL_op_mutex may get
+     * freed while we're still using it
+     */
+    MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
+    MY_POOL.total_threads--;
+    MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 }
 
 
@@ -272,7 +277,10 @@ S_exit_warning(pTHX)
     return (veto_cleanup);
 }
 
-/* Called on exit from main thread */
+/* Called from perl_destruct() in each thread. If it's the main thread,
+ * stop it from freeing everything if there are other threads still
+ * running */
+
 int
 Perl_ithread_hook(pTHX)
 {
