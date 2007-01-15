@@ -132,7 +132,11 @@
 #endif
 
 #ifndef PERL_SYS_TERM
-#  define PERL_SYS_TERM()		HINTS_REFCNT_TERM; OP_REFCNT_TERM; PERLIO_TERM; MALLOC_TERM
+#  define PERL_SYS_TERM() \
+    if (!PL_veto_cleanup) { \
+	HINTS_REFCNT_TERM; OP_REFCNT_TERM; PERLIO_TERM; MALLOC_TERM; \
+    }
+
 #endif
 
 #define BIT_BUCKET "/dev/null"

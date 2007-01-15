@@ -146,3 +146,8 @@ PERLVAR(Ghints_mutex, perl_mutex)    /* Mutex for refcounted he refcounting */
 #if defined(USE_ITHREADS)
 PERLVAR(Gperlio_mutex, perl_mutex)    /* Mutex for perlio fd refcounts */
 #endif
+
+/* this is currently set without MUTEX protection, so keep it a type which
+ * can be set atomically (ie not a bit field) */
+PERLVARI(Gveto_cleanup,	int, FALSE)	/* exit without cleanup */
+

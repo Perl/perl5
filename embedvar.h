@@ -800,6 +800,8 @@
 #define PL_Gtimesbase		(my_vars->Gtimesbase)
 #define PL_use_safe_putenv	(my_vars->Guse_safe_putenv)
 #define PL_Guse_safe_putenv	(my_vars->Guse_safe_putenv)
+#define PL_veto_cleanup		(my_vars->Gveto_cleanup)
+#define PL_Gveto_cleanup	(my_vars->Gveto_cleanup)
 #define PL_watch_pvx		(my_vars->Gwatch_pvx)
 #define PL_Gwatch_pvx		(my_vars->Gwatch_pvx)
 
@@ -840,6 +842,7 @@
 #define PL_Gthr_key		PL_thr_key
 #define PL_Gtimesbase		PL_timesbase
 #define PL_Guse_safe_putenv	PL_use_safe_putenv
+#define PL_Gveto_cleanup	PL_veto_cleanup
 #define PL_Gwatch_pvx		PL_watch_pvx
 
 #endif /* PERL_GLOBAL_STRUCT */

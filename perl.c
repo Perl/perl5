@@ -580,6 +580,7 @@ perl_destruct(pTHXx)
 
     if (CALL_FPTR(PL_threadhook)(aTHX)) {
         /* Threads hook has vetoed further cleanup */
+	PL_veto_cleanup = TRUE;
         return STATUS_EXIT;
     }
 
@@ -1325,6 +1326,9 @@ Releases a Perl interpreter.  See L<perlembed>.
 void
 perl_free(pTHXx)
 {
+    if (PL_veto_cleanup)
+	return;
+
 #ifdef PERL_TRACK_MEMPOOL
     {
 	/*
@@ -1381,7 +1385,7 @@ __attribute__((destructor))
 perl_fini(void)
 {
     dVAR;
-    if (PL_curinterp)
+    if (PL_curinterp  && !PL_veto_cleanup)
 	FREE_THREAD_KEY;
 }
 

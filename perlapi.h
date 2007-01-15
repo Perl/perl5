@@ -864,6 +864,8 @@ END_EXTERN_C
 #define PL_timesbase		(*Perl_Gtimesbase_ptr(NULL))
 #undef  PL_use_safe_putenv
 #define PL_use_safe_putenv	(*Perl_Guse_safe_putenv_ptr(NULL))
+#undef  PL_veto_cleanup
+#define PL_veto_cleanup		(*Perl_Gveto_cleanup_ptr(NULL))
 #undef  PL_watch_pvx
 #define PL_watch_pvx		(*Perl_Gwatch_pvx_ptr(NULL))
 
